@@ -1,4 +1,4 @@
-/*             DOS specific routines
+/*	       DOS specific routines
 
  */
 
@@ -6,13 +6,13 @@
 #include <dos.h>
 #include "htstring.h"
 
-/* PUBLIC                                                       HTDOS_wwwName()
-**              CONVERTS DOS Name into WWW Name
+/* PUBLIC							HTDOS_wwwName()
+**		CONVERTS DOS Name into WWW Name
 ** ON ENTRY:
-**      dosname         DOS file specification (NO NODE)
+**	dosname 	DOS file specification (NO NODE)
 **
 ** ON EXIT:
-**	returns 	www file specification
+**	returns 	WWW file specification
 **
 */
 char * HTDOS_wwwName (char *dosname)
@@ -43,24 +43,24 @@ char * HTDOS_wwwName (char *dosname)
 }
 
 
-/* PUBLIC                                                       HTDOS_name()
-**              CONVERTS WWW name into a DOS name
+/* PUBLIC							HTDOS_name()
+**		CONVERTS WWW name into a DOS name
 ** ON ENTRY:
-**	fn		WWW file name
+**	wwwname 	WWW file name
 **
 ** ON EXIT:
-**      returns         dos file specification
+**	returns 	DOS file specification
 **
 ** Bug(?):	Returns pointer to input string, which is modified
 */
-char * HTDOS_name(char *dosname)	{
-
+char * HTDOS_name(char *wwwname)
+{
 	static char cp_url[1024];
 	int joe;
 
 	memset(cp_url, 0, 1023);
 /*	strset(cp_url,0); */
-	sprintf(cp_url, "%s",dosname);
+	sprintf(cp_url, "%s",wwwname);
 
 	for(joe = 0; cp_url[joe] != '\0'; joe++)	{
 		if(cp_url[joe] == '/')	{
@@ -82,15 +82,15 @@ char * HTDOS_name(char *dosname)	{
 		printf("\n\n%s = i%\n\n",cp_url,strlen(cp_url));
 		sleep(5);
 #endif
-      strcpy(dosname, cp_url);
-      return(dosname); /* return(cp_url); */
+      strcpy(wwwname, cp_url);
+      return(wwwname); /* return(cp_url); */
 	} else {
 #if 0
 		printf("\n\n%s = %i\n\n",cp_url+1,strlen(cp_url));
 		sleep(5);
 #endif
-		strcpy(dosname, cp_url+1);
-      return(dosname); /* return(cp_url+1);  */
+		strcpy(wwwname, cp_url+1);
+      return(wwwname); /* return(cp_url+1);  */
 	}
 }
 

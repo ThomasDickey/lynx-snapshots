@@ -23,9 +23,9 @@ INSTALL_PROGRAM	= @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
 
 ##this is the name of the directory the lynx source code is in.
-##(e.g. lynx2-7-2, not the full path)
-lynxdir= lynx2-7-2
-lynxname= lynx2-7-2
+##(e.g. lynx2-8, not the full path)
+lynxdir= lynx2-8
+lynxname= lynx2-8
 
 ## Where you want lynx installed
 bindir= @bindir@
@@ -87,8 +87,8 @@ WWWINC= WWW/Library/Implementation
 
 # !!!!!!!!!!!!! NCURSES Support (For color version of Lynx). !!!!!!!!!!!!!!
 # If you need ncurses, the latest version can always be found
-# in ftp://ftp.clark.net/pub/dickey/ncurses/  (4.1)
-# or ftp://ftp.netcom.com/pub/zm/zmbenhal/ncurses/ (1.9.9g)
+# in ftp://ftp.clark.net/pub/dickey/ncurses/
+# or ftp://ftp.gnu.org/pub/gnu/
 
 # Also be sure to check out the compilation symbols in userdefs.h
 # before building Lynx!

@@ -7,6 +7,14 @@ platforms see also INSTALLATION, for some changes for auto-configure and
 simple curses color see also README.configure).  Note that the 2.7 -> 2.7.1
 changes are included here. - KW]
 
+1998-02-28
+* create new PRCS revision (2.8pre) for pre-release testing of Lynx 2.8
+* remove RELEASE_STATEMENT, merging it into CHANGES as per HN's
+  recommendation - TD
+* comments/minor changes to HTDOS.c, HTDOS.h, LYUtils.c - LP
+* document recent fix for RAW_DOS_KEY_HACK in lynx.cfg - DK
+* rename CHANGES.new to docs/CHANGES2.8 - TD
+* undo last minor change to UPPER8 - LP
 1998-02-27
 * add RELEASE_STATEMENT file. - TD
 * modify slang configuration to add fake 'scrollok()' - JED
@@ -16,21 +24,21 @@ changes are included here. - KW]
 * comment-out entries in cp1252_uni.tbl which correspond to nonprinting
   control-characters - LP
 * add logic in SGML.c to correspond with 2.7.2 logic for codes used by
-  MicroSoft FrontPage. - LP
+  Microsoft FrontPage. - LP
 * remove unneeded code for nbsp, ensp, emsp, thinsp and shy from handle_entity()
   in SGML.c - LP
 * ifdef UPPER8 function with EXP_8BIT_TOUPPER, make this the default for DJGPP,
   add configure option --enable-8bit-toupper to allow testing.  - TD
-* case-insensitive search and 8bit letters: 
-  It was realized that information about upper/lower mapping got from TOUPPER
-  which depends on locale in its 8bit and usually fails on non-UNIX systems. 
-  We introduce UPPER8 and strcasecomp8 to implement 8-bit aware
-  case-independent search using one simple assumption:  8bit upper/lower case
-  letters have their "7bit approximation" images (in def7_uni.tbl) matched
-  matched case-insensitively (7bit).  The cost of this assumption is that
-  several differently accented letters may be interpreted as equal but this is
-  negligible if the search string is more than one character long. 
-  (LYStrings.c, also HTString.c and LYMainLoop.c).  - LP & TD
+* case-insensitive search and 8bit letters:  It was realized that
+  information about upper/lower mapping got from TOUPPER which depends on
+  locale in its 8bit and usually fails on non-UNIX systems.  We introduce
+  UPPER8 and strcasecomp8 to implement 8-bit aware case-independent search
+  using one simple assumption:  8bit upper/lower case letters have their
+  "7bit approximation" images in def7_uni.tbl matched case-insensitively
+  (7bit).  The cost of this assumption is that several differently accented
+  letters may be interpreted as equal but this is negligible if the search
+  string is more than one character long.  (LYStrings.c, also HTString.c
+  and LYMainLoop.c).  - LP & TD
 * add SunOS 4.x-specific ifdef to quiet redefinition warnings for sys/ioctl.h
   vs sys/termios.h - TD
 * convert usage/options messages into arrays to simplify maintenance. - TD

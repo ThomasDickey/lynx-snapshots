@@ -1843,7 +1843,7 @@ top1:
 		if ((code == 1) ||
 		    (code > 129 && code < 156)) {
 		    /*
-		    **	Assume these are MicroSoft code points,
+		    **	Assume these are Microsoft code points,
 		    **	inflicted on us by FrontPage. - FM
 		    **
 		    **	MS FrontPage uses syntax like &#153; in 128-159 range

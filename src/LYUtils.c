@@ -3048,7 +3048,6 @@ PUBLIC void change_sug_filename ARGS1(
 	char *, 	fname)
 {
     char *temp, *cp, *cp1, *end;
-    size_t len;
 #ifdef VMS
     char *dot;
     int j, k;
@@ -3068,8 +3067,7 @@ PUBLIC void change_sug_filename ARGS1(
      *	Rename any temporary files.
      */
     temp = (char *)calloc(1, (strlen(lynx_temp_space) + 60));
-#ifdef FNAMES_8_3
-#ifdef DOSPATH
+#if defined(FNAMES_8_3) && defined(DOSPATH)
     cp = HTDOS_wwwName(lynx_temp_space);
 #else
     cp = lynx_temp_space;
@@ -3079,17 +3077,9 @@ PUBLIC void change_sug_filename ARGS1(
     } else {
 	sprintf(temp, "file://localhost/%s%d", cp, (int)getpid());
     }
-#else  /* FNAMES_8_3 */
-    if (*lynx_temp_space == '/') {
-	sprintf(temp, "file://localhost%sL%d", lynx_temp_space, (int)getpid());
-    } else {
-	sprintf(temp, "file://localhost/%sL%d", lynx_temp_space, (int)getpid());
-    }
-#endif	/* FNAMES_8_3 */
-    len = strlen(temp);
-    if (!strncmp(fname, temp, len)) {
+    if (!strncmp(fname, temp, strlen(temp))) {
 	cp = strrchr(fname, '.');
-	if (strlen(cp) > (len - 4))
+	if (strlen(cp) > (strlen(temp) - 4))
 	    cp = NULL;
 	strcpy(temp, (cp ? cp : ""));
 	strcpy(fname, "temp");
@@ -3882,7 +3872,7 @@ PUBLIC void LYConvertToURL ARGS1(
 		*cp_url = '\0';
 #endif
     }
-#endif
+#endif /* DOSPATH */
 
     *AllocatedString = NULL;  /* so StrAllocCopy doesn't free it */
     StrAllocCopy(*AllocatedString,"file://localhost");

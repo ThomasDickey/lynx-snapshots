@@ -1,34 +1,32 @@
-/*             DOS specific routines
-
- */
+/*             DOS specific routines            */
 
 #ifndef HTDOS_H
 #define HTDOS_H
 
+
 /* PUBLIC                                                       HTDOS_wwwName()
 **              CONVERTS DOS Name into WWW Name
 ** ON ENTRY:
-**      dosname         DOS file specification (NO NODE)
+**	dosname		DOS file specification (NO NODE)
 **
 ** ON EXIT:
-**	returns 	www file specification
+**	returns		WWW file specification
 **
 */
 char * HTDOS_wwwName (char * dosname);
 
+
 /* PUBLIC                                                       HTDOS_name()
 **              CONVERTS WWW name into a DOS name
 ** ON ENTRY:
-**	fn		WWW file name
+**	wwwname		WWW file name
 **
 ** ON EXIT:
-**      returns         dos file specification
+**	returns		DOS file specification
 **
 ** Bug:	Returns pointer to static -- non-reentrant
 */
-char * HTDOS_name (char * fn);
+char * HTDOS_name (char * wwwname);
 
-#endif /* not HTDOS_H */
-/*
 
-	End of file HTDOS.h.  */
+#endif /*  HTDOS_H */

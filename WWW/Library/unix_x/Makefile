@@ -7,7 +7,7 @@
 #
 
 ###########################################################################
-# Makefile generated from "Imake.tmpl" and </tmp/IIf.a00214>
+# Makefile generated from "Imake.tmpl" and </tmp/IIf.a02602>
 # $XConsortium: Imake.tmpl,v 1.77 89/12/18 17:01:37 jim Exp $
 #
 # Platform-specific parameters may be set in the appropriate .cf
@@ -27,23 +27,25 @@
 # platform-specific configuration parameters - edit sun.cf to change
 
 # platform:  $XConsortium: sun.cf,v 1.38 89/12/23 16:10:10 jim Exp $
-# operating system:  SunOS 4.0.3
+# operating system:  SunOS 4.1.1
 
 ###########################################################################
 # site-specific configuration parameters - edit site.def to change
 
+# site:  $XConsortium: site.def,v 1.21 89/12/06 11:46:50 jim Exp $
+
             SHELL = /bin/sh
 
-              TOP = .
-      CURRENT_DIR = .
+              TOP = ../../../.
+      CURRENT_DIR = ./../Library/unix_x
 
-               AR = ar clq
+               AR = ar cq
   BOOTSTRAPCFLAGS =
-               CC = cc
+               CC = gcc -DNOSTDHDRS -fstrength-reduce -fpcc-struct-return -fwritable-strings -traditional
 
          COMPRESS = compress
               CPP = /lib/cpp $(STD_CPP_DEFINES)
-    PREPROCESSCMD = cc -E $(STD_CPP_DEFINES)
+    PREPROCESSCMD = gcc -DNOSTDHDRS -fstrength-reduce -fpcc-struct-return -fwritable-strings -traditional -E $(STD_CPP_DEFINES)
           INSTALL = install
                LD = ld
              LINT = lint
@@ -183,8 +185,8 @@
      MKFONTDIRSRC = $(FONTSRC)/mkfontdir
      EXTENSIONSRC = $(TOP)/extensions
 
-  DEPEXTENSIONLIB =
-     EXTENSIONLIB = -lXext
+  DEPEXTENSIONLIB = $(USRLIBDIR)/libXext.a
+     EXTENSIONLIB =  -lXext
 
           DEPXLIB = $(DEPEXTENSIONLIB)
              XLIB = $(EXTENSIONLIB) -lX11
@@ -228,7 +230,7 @@
 
 TK_WWW_SOURCE_PATH=/a/dxcern/userd/tbl/hypertext/WWW/TkWWW/Tcl
 
-TK_WWW_INSTALL_PATH=/a/dxcern/userd/tbl/hypertext/WWW/TkWWW/$(WWW_MACH)
+TK_WWW_INSTALL_PATH=/a/dxcern/userd/tbl/hypertext/WWW/TkWWW/$WWW_MACH
 
 TK_WWW_HOME_PAGE=http://www.w3.org/default.html
 TK_WWW_START_PAGE=$(TK_WWW_HOME_PAGE)
@@ -285,6 +287,7 @@ CFLAGS2 = $(CFLAGS) -I$(CMN)
 CERNLIBBIN = $(WWW)/bin
 
 COMMON = $(LOB)/HTParse.o $(LOB)/HTAccess.o $(LOB)/HTTP.o \
+	$(LOB)/HTBTree.o \
 	$(LOB)/HTFile.o	$(LOB)/HTFTP.o $(LOB)/HTTCP.o \
 	$(LOB)/SGML.o $(LOB)/HTMLDTD.o $(LOB)/HTChunk.o \
 	$(LOB)/HTPlain.o $(LOB)/HTWriter.o $(LOB)/HTFWriter.o \
@@ -295,7 +298,8 @@ COMMON = $(LOB)/HTParse.o $(LOB)/HTAccess.o $(LOB)/HTTP.o \
 	$(LOB)/HTHistory.o $(LOB)/HTNews.o $(LOB)/HTGopher.o \
 	$(LOB)/HTTelnet.o  $(LOB)/HTWSRC.o $(HTWAIS)
 
-CFILES = $(CMN)HTParse.c $(CMN)HTAccess.c $(CMN)HTTP.c $(CMN)HTFile.c \
+CFILES = $(CMN)HTParse.c $(CMN)HTAccess.c $(CMN)HTTP.c $(CMN)HTBTree.c \
+	$(CMN)HTFile.c \
 	$(CMN)HTFTP.c   $(CMN)HTTCP.c     $(CMN)SGML.c	\
 	$(CMN)HTMLDTD.c \
 	$(CMN)HTPlain.c	$(CMN)HTWriter.c  $(CMN)HTFWriter.c $(CMN)HTMLGen.c	\
@@ -305,7 +309,8 @@ CFILES = $(CMN)HTParse.c $(CMN)HTAccess.c $(CMN)HTTP.c $(CMN)HTFile.c \
 	$(CMN)HTNews.c  $(CMN)HTGopher.c $(CMN)HTTelnet.c \
 	$(CMN)HTWAIS.c  $(CMN)HTWSRC.c
 
-HFILES = $(CMN)HTParse.h $(CMN)HTAccess.h $(CMN)HTTP.h $(CMN)HTFile.h \
+HFILES = $(CMN)HTParse.h $(CMN)HTAccess.h $(CMN)HTTP.h $(CMN)HTBTree.h \
+	$(CMN)HTFile.h \
 	$(CMN)HTFTP.h $(CMN)HTTCP.h \
 	$(CMN)SGML.h $(CMN)HTML.h $(CMN)HTMLDTD.h $(CMN)HTChunk.h \
 	$(CMN)HTPlain.h		$(CMN)HTWriter.h \
@@ -434,6 +439,9 @@ $(LOB)/HTTP.o : $(OE) $(CMN)HTTP.c $(CMN)HTUtils.h
 $(LOB)/HTTCP.o : $(OE) $(CMN)HTTCP.c $(CMN)HTUtils.h
 	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTTCP.c
 
+$(LOB)/HTBTree.o : $(OE) $(CMN)HTBTree.c $(CMN)HTUtils.h
+	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTBTree.c
+
 $(LOB)/HTFile.o : $(OE) $(CMN)HTFile.c $(CMN)HTUtils.h
 	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTFile.c
 
@@ -464,12 +472,6 @@ Makefile::
 tags::
 	$(TAGS) -w *.[ch]
 	$(TAGS) -xw *.[ch] > TAGS
-
-saber:
-	#load $(ALLDEFINES) $(SRCS)
-
-osaber:
-	#load $(ALLDEFINES) $(OBJS)
 
 ###########################################################################
 # empty rules for directories that do not have SUBDIRS - do not edit
