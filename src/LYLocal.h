@@ -33,7 +33,7 @@
 #endif /* !S_ISUID */
 
 /* Special return code for LYMainLoop.c */
-#define PERMIT_FORM_RESULT 2
+#define PERMIT_FORM_RESULT (-99)
 
 extern BOOLEAN local_create PARAMS((document *doc));
 extern BOOLEAN local_modify PARAMS((document *doc, char **newpath));
@@ -56,7 +56,6 @@ extern BOOLEAN is_a_file PARAMS((char *testname));
 */
 extern void tagflag PARAMS((int flag, int cur)); 
 extern void showtags PARAMS((HTList *tag));
-extern char * strip_trailing_slash PARAMS((char * dirname));
 extern int local_dired PARAMS((document *doc));
 extern int dired_options PARAMS ((document *doc, char ** newfile));
 

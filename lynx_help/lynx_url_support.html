@@ -43,6 +43,12 @@ absolute URL, using the rules described in <em>RFC1808</em>:
 >ftp://ds.internic.net/rfc/rfc1808.txt</a>  
 </ul>
 
+and in subsequent drafts of the <em>IETF</em>:
+<ul plain>
+<li><a href="http://www.ics.uci.edu/pub/ietf/uri/"
+>Uniform Resource Identifiers (URI) Working Group</a>
+</ul>
+
 <p>When entering a URL on the command line to be used as the
 <em>startfile</em>, or at the prompt for a '<em>g</em>'oto entry, a
 partial host field can be used and the scheme field can be omitted if
@@ -63,7 +69,7 @@ DCL into a valid URL, e.g., <em>[]</em> will be expanded to
 <em>file://localhost/current/default/directory</em>.  These expansions
 are <em>SOLELY</em> for <em>startfile</em> or '<em>g</em>'oto entries!
 Any partial or relative URLs within HTML documents are resolved
-according to the rules specified in RFC1808.
+according to the rules specified in RFC1808 and subsequent IETF drafts.
 <HR WIDTH="100%">
 
 <H2><a name="http">The <em>http</em> and <em>https</em> URLs:</a></H2>
@@ -348,11 +354,28 @@ in any HTML specifications or drafts, and should be considered a Lynxism
 until/unless it is.  Some clients use a SUBJECT attribute for this purpose
 in FORM tags, and Lynx recognizes that as a synonym for TITLE.
 
+<p>Lynx also will process any <em>cc=someone@host</em> and/or
+<em>body=Blah</em> fields in <em>?searchpart</em> tack-ons to mailto
+URLs.  The <em>cc</em> values can be single addresses, or comma- or
+semi-colon-separated lists of addresses.  All addresses, and any
+<em>body</em> values, will be offered for approval by the user before
+proceding with a mailing, and any other name=value pairs in the
+<em>?searchpart</em> will be ignored.  Also, if the mailto URL is the
+ACTION for a FORM, any <em>body</em> in a <em>?searchpart</em> tack-on
+will be ignored, because the body of the mailing must be constructed
+solely from the the FORM's content.  Lynx expects multiple name=value
+pairs in a <em>?searchpart</em> tack-on to be separated by ampersands,
+as in the original Netscape implementation, and in an equally ill-advised
+IETF draft of that implementation (<a
+href="ftp://ftp.isi.edu/internet-drafts/draft-hoffman-mailto-url-00.txt"
+>draft-hoffman-mailto-url-00.txt</a>).  These should be represented as
+entities (<em>&amp;amp;</em>) in the HTML markup.
+
 <p>If <em>ENCTYPE="text/plain"</em> is specified for a FORM with a mailto
-ACTION, Lynx will not hex escape the name=value pairs, and will use physical
-newlines instead of '<em>&amp;</em>' or '<em>;</em>' to separate the pairs,
-so that the content will be readable directly.  Otherwise, Lynx will mail
-the content with the default:<BR>
+ACTION, Lynx will not hex escape the name=value pairs of the FORM's content,
+and will use physical newlines instead of '<em>&amp;</em>' or '<em>;</em>'
+to separate the pairs, so that the content will be readable directly.
+Otherwise, Lynx will mail the content with the default:<BR>
 <tab indent="12"
 ><em>ENCTYPE="application/x-www-form-urlencoded"</em> <tab id="enc">('<em
 >&amp;</em>' separates pairs)<BR>

@@ -11,40 +11,51 @@
 #include "LYexit.h"
 #include "LYLeaks.h"
 
+#define FREE(x) if (x) {free(x); x = NULL;}
+
 #ifdef VMS
 BOOLEAN HadVMSInterrupt = FALSE;
 #endif /* VMS */
 
 /*
- * Interrupt handler.  Stop curses and exit gracefully.
+ *  Interrupt handler.  Stop curses and exit gracefully.
  */
-PUBLIC void cleanup_sig ARGS1(int,sig)
+PUBLIC void cleanup_sig ARGS1(
+	int,		sig)
 {
 
 #ifdef IGNORE_CTRL_C
-	if(sig == SIGINT)	{
-            /* Need to rearm the signal */
-	    signal(SIGINT, cleanup_sig);
-	    sigint = TRUE;
-	    return;
-	}
+    if (sig == SIGINT)	{
+    /*
+     *  Need to rearm the signal.
+     */
+    signal(SIGINT, cleanup_sig);
+    sigint = TRUE;
+    return;
+    }
 #endif /* IGNORE_CTRL_C */
 
 #ifdef VMS
     if (!dump_output_immediately) {
         int c;
 
-	/* Reassert the AST  */
+	/*
+	 *  Reassert the AST.
+	 */
 	(void) signal(SIGINT, cleanup_sig);
 	HadVMSInterrupt = TRUE;
 	if (!LYCursesON)
 	    return;
 
-        /* Refresh screen to get rid of "cancel" message, then query */
+        /*
+	 *  Refresh screen to get rid of "cancel" message, then query.
+	 */
 	clearok(curscr, TRUE);
 	refresh();
 
-	/* Ask if exit is intended */
+	/*
+	 *  Ask if exit is intended.
+	 */
 	_statusline(REALLY_EXIT);
 	c = LYgetch();
 #ifdef QUIT_DEFAULT_YES
@@ -56,10 +67,15 @@ PUBLIC void cleanup_sig ARGS1(int,sig)
     }
 #endif /* VMS */
 
-    /* ignore further interrupts */     /*  mhc: 11/2/91 */
+    /*
+     *  Ignore further interrupts. - mhc: 11/2/91
+     */
     (void) signal(SIGHUP, SIG_IGN);
 
-#ifdef VMS  /* use ttclose() from cleanup() for VMS if not dumping */
+#ifdef VMS 
+    /*
+     *  Use ttclose() from cleanup() for VMS if not dumping.
+     */
     if (dump_output_immediately)
 #else /* Unix: */
     (void) signal(SIGINT, SIG_IGN);
@@ -67,17 +83,23 @@ PUBLIC void cleanup_sig ARGS1(int,sig)
 
     (void) signal(SIGTERM, SIG_IGN);
 
+    if (traversal)
+        dump_traversal_history();
+
     if (sig != SIGHUP) {
-	if (!dump_output_immediately)
-	    cleanup(); /* <==also calls cleanup_files() */
-	printf("\nExiting via interrupt: %d\n", sig);
-	fflush(stdout);
+	if (!dump_output_immediately) {
+	    /*
+	     *  cleanup() also calls cleanup_files().
+	     */
+	    cleanup();
+	}
+	if (sig != 0) {
+	    printf("\r\nExiting via interrupt: %d\r\n", sig);
+	    fflush(stdout);
+	}
     } else {
 	cleanup_files();
     }
-
-    if (traversal)
-        dump_traversal_history();
 
     (void) signal(SIGHUP, SIG_DFL);
     (void) signal(SIGTERM, SIG_DFL);
@@ -86,33 +108,38 @@ PUBLIC void cleanup_sig ARGS1(int,sig)
 #endif /* !VMS */
 #ifdef SIGTSTP
     if (no_suspend)
-	(void) signal(SIGTSTP,SIG_DFL);
+	(void) signal(SIGTSTP, SIG_DFL);
 #endif /* SIGTSTP */
-    exit(0);
+    if (sig != 0) {
+        exit(0);
+    }
 }
 
 /*
- * called by Interrupt handler or at quit time.  
- * Erases the temporary files that lynx created
- * temporary files are removed by tempname 
- * which created them
+ *  Called by Interrupt handler or at quit time.  
+ *  Erases the temporary files that lynx created
+ *  temporary files are removed by tempname 
+ *  which created them.
  */
 PUBLIC void cleanup_files NOARGS
 {
-    char filename[120];
+    char filename[256];
 
-	tempname(filename, REMOVE_FILES);
-	
+    tempname(filename, REMOVE_FILES);
+    FREE(lynx_temp_space);
 }
 
 PUBLIC void cleanup NOARGS
 {
+    int i;
 #ifdef VMS
     extern BOOLEAN DidCleanup;
 #endif /* VMS */
 
-    /* cleanup signals - just in case */
-    /* ignore further interrupts */     /*  mhc: 11/2/91 */
+    /*
+     *  Cleanup signals - just in case.
+     *  Ignore further interrupts. - mhc: 11/2/91
+     */
     (void) signal (SIGHUP, SIG_IGN);
     (void) signal (SIGTERM, SIG_IGN);
 
@@ -132,11 +159,18 @@ PUBLIC void cleanup NOARGS
         stop_curses();
     }
     cleanup_files();
+    for (i = 0; i < nhist; i++) {
+        FREE(history[i].title);
+        FREE(history[i].address);
+        FREE(history[i].post_data);
+        FREE(history[i].post_content_type);
+	FREE(history[i].bookmark);
+    }
+    nhist = 0;
 #ifdef VMS
     ttclose();
     DidCleanup = TRUE;
 #endif /* VMS */
 
-   fflush(stdout);
+    fflush(stdout);
 }
-

@@ -47,8 +47,9 @@ they will be outlined in this file.
     Directory browsing has been implemented for VMS, but there are no
     plans to port additional DIRED support, because Lynx must handle files
     as streams, and this precludes "serious" Directory/File Management on
-    VMS.  Use a jumps file link to C SWING (sources or executables are
-    available from ftp://narnia.memst.edu).
+    VMS.  Use a jumps file link to CSwing (sources or executables are
+    available from ftp://narnia.memst.edu), or define CSWING_PATH in
+    userdefs.h or lynx.cfg to invoke CSwing via the DIRED_MENU command.
 
     If one switches between K)eypad "Numbers act as arrows" versus "Links
     are numbered" in the 'o'ptions menu when the current document is a

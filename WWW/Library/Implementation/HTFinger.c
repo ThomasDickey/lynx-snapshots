@@ -402,7 +402,7 @@ PUBLIC int HTLoadFinger ARGS4(
 	HTProgress ("Connection interrupted.");
 	FREE(str);
 	FREE(command);
-	return HT_INTERRUPTED;
+	return HT_NOT_LOADED;
     }
     if (status < 0) {
         NETCLOSE(s);

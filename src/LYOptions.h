@@ -3,6 +3,7 @@
 #define LYOPTIONS_H
 
 extern void options NOPARAMS;
+extern void edit_bookmarks NOPARAMS;
 
 /* values for options */
 #define L_EDITOR	 2

@@ -35,31 +35,27 @@ PRIVATE int boolean_choice PARAMS((int status, int line,
 
 #define MAXCHOICES 10
 
-PRIVATE void option_statusline ARGS1(char *,text)
+PRIVATE void option_statusline ARGS1(
+	char *,		text)
 {
-    char buffer[256];
-
-    if (!text || text == NULL)
+    /*
+     *  Make sure we have a pointer to a string.
+     */
+    if (text == NULL)
         return;
 
-        /* don't print statusline messages if dumping to stdout
-         */
+    /*
+     *  Don't print statusline messages if dumping to stdout.
+     */
     if (dump_output_immediately)
         return;
 
-    /* make sure text is not longer than COLS */
-    LYstrncpy(buffer, text, LYcols-1);
-
-    move(LYlines-1, 0);
-
-    clrtoeol();
-    if (text != NULL && *buffer) {
-        start_reverse();
-        addstr(buffer);
-        stop_reverse();
-    }
-
-    refresh();
+    /*
+     *  Use _statusline() set to output on the bottom line. - FM
+     */
+    LYStatusLine = (LYlines - 1);
+    _statusline(text);
+    LYStatusLine = -1;
 }
 
 PUBLIC void options NOARGS
@@ -108,119 +104,129 @@ PUBLIC void options NOARGS
     signal(SIGINT, terminate_options);
 
 draw_options:
+    /*
+     *  NOTE that printw() should be avoided for strings that
+     *  might have non-ASCII or multibyte/CJK characters. - FM
+     */
     response = 0;
     clear(); 
     move(0, 5);
     if (bold_H1 || bold_headers)
         start_bold();
-    printw("         Options Menu (%s Version %s)",
-    	   			   LYNX_NAME, LYNX_VERSION);
+    addstr("         Options Menu (");
+    addstr(LYNX_NAME);
+    addstr(" Version ");
+    addstr(LYNX_VERSION);
+    addch(')');
     if (bold_H1 || bold_headers)
         stop_bold();
     move(L_EDITOR, 5);  
-    printw("E)ditor                      : %s",
-    		((editor && *editor) ? editor : "NONE"));
+    addstr("E)ditor                      : ");
+    addstr((editor && *editor) ? editor : "NONE");
 
-    move(L_DISPLAY, 5);  
-    printw("D)ISPLAY variable            : %s",
-    		((display && *display) ? display : "NONE"));
-
-    move(L_MAIL_ADDRESS, 5);  
-    printw("P)ersonal mail address       : %s",
-    		((personal_mail_address && *personal_mail_address) ?
-					     personal_mail_address : "NONE"));
+    move(L_DISPLAY, 5);
+    addstr("D)ISPLAY variable            : ");
+    addstr((display && *display) ? display : "NONE");
 
     move(L_HOME, 5);
-    printw("mu(L)ti-bookmarks: %s",
-		(LYMultiBookmarks ? (LYMBMAdvanced ?
-                                     "ADVANCED" : "STANDARD") : "OFF"));
+    addstr("mu(L)ti-bookmarks: ");
+    addstr((LYMultiBookmarks ?
+    	      (LYMBMAdvanced ? "ADVANCED"
+	      		     : "STANDARD")
+			     : "OFF"));
     move(L_HOME, B_BOOK);
     if (LYMultiBookmarks) {
-        printw("review/edit B)ookmarks files");
+        addstr("review/edit B)ookmarks files");
     } else {
-        printw("B)ookmark file: %s",
-    		((bookmark_page && *bookmark_page) ? bookmark_page : "NONE"));
+        addstr("B)ookmark file: ");
+	addstr((bookmark_page && *bookmark_page) ? bookmark_page : "NONE");
     }
 
     move(L_FTPSTYPE, 5);
-    printw("F)TP sort criteria           : %s",(HTfileSortMethod==FILE_BY_NAME ?
-					"By Filename" :
-					  (HTfileSortMethod==FILE_BY_SIZE ?
-					    "By Size" : 
-					      (HTfileSortMethod==FILE_BY_TYPE ?
-						"By Type" : "By Date"))));
+    addstr("F)TP sort criteria           : ");
+    addstr((HTfileSortMethod==FILE_BY_NAME ? "By Filename" :
+	   (HTfileSortMethod==FILE_BY_SIZE ? "By Size" : 
+	   (HTfileSortMethod==FILE_BY_TYPE ? "By Type" :
+	   				     "By Date"))));
+
+    move(L_MAIL_ADDRESS, 5);
+    addstr("P)ersonal mail address       : ");
+    addstr((personal_mail_address && *personal_mail_address) ?
+    				       personal_mail_address : "NONE");
+
     move(L_SSEARCH, 5); 
-    printw("S)earching type              : %s",(case_sensitive ?
-				        "CASE SENSITIVE" : "CASE INSENSITIVE"));
+    addstr("S)earching type              : ");
+    addstr(case_sensitive ? "CASE SENSITIVE" : "CASE INSENSITIVE");
 
     move(L_CHARSET, 5);
-    printw("display (C)haracter set      : %s", 
-    					LYchar_set_names[current_char_set]);
+    addstr("display (C)haracter set      : "); 
+    addstr(LYchar_set_names[current_char_set]);
     
     move(L_RAWMODE, 5);
-    printw("Raw 8-bit or CJK m(O)de      : %s", (LYRawMode ? "ON" : "OFF"));
+    addstr("Raw 8-bit or CJK m(O)de      : ");
+    addstr(LYRawMode ? "ON" : "OFF");
 
     move(L_LANGUAGE, 5);
-    printw("preferred document lan(G)uage: %s",
-    		((language && *language) ? language : "NONE"));
+    addstr("preferred document lan(G)uage: ");
+    addstr((language && *language) ? language : "NONE");
 
     move(L_PREF_CHARSET, 5);
-    printw("preferred document c(H)arset : %s",
-    		((pref_charset && *pref_charset) ? pref_charset : "NONE"));
+    addstr("preferred document c(H)arset : ");
+    addstr((pref_charset && *pref_charset) ? pref_charset : "NONE");
 
     move(L_BOOL_A, B_VIKEYS);
-    printw("V)I keys: %s", (vi_keys ? "ON" : "OFF"));
+    addstr("V)I keys: ");
+    addstr(vi_keys ? "ON" : "OFF");
     
     move(L_BOOL_A, B_EMACSKEYS);
-    printw("e(M)acs keys: %s", (emacs_keys ? "ON" : "OFF"));
+    addstr("e(M)acs keys: ");
+    addstr(emacs_keys ? "ON" : "OFF");
     
     move(L_BOOL_A, B_SHOW_DOTFILES);
-    printw("sho(W) dot files: %s",
-    			((!no_dotfiles && show_dotfiles) ? "ON" : "OFF"));
+    addstr("sho(W) dot files: ");
+    addstr((!no_dotfiles && show_dotfiles) ? "ON" : "OFF");
 
     move(L_SELECT_POPUPS, 5);
-    printw("popups for selec(T) fields   : %s",
-    			(LYSelectPopups ? "ON" : "OFF"));
+    addstr("popups for selec(T) fields   : ");
+    addstr(LYSelectPopups ? "ON" : "OFF");
 
     move(L_KEYPAD, 5); 
-    printw("K)eypad mode                 : %s", 
-			   		  (keypad_mode == NUMBERS_AS_ARROWS ? 
-					   "Numbers act as arrows" : 
-				           "Links are numbered"));
+    addstr("K)eypad mode                 : "); 
+    addstr((keypad_mode == NUMBERS_AS_ARROWS) ? "Numbers act as arrows" : 
+						"Links are numbered");
 
     move(L_LINEED, 5);
-    printw("li(N)e edit style            : %s",
-    					   LYLineeditNames[current_lineedit]);
+    addstr("li(N)e edit style            : ");
+    addstr(LYLineeditNames[current_lineedit]);
 
 #ifdef DIRED_SUPPORT
     move(L_DIRED, 5);
-    printw("l(I)st directory style       : %s",
-                     (dir_list_style == FILES_FIRST ? "Files first          " :
-		     (dir_list_style == MIXED_STYLE ? "Mixed style          " : 
-                                                      "Directories first    ")));
+    addstr("l(I)st directory style       : ");
+    addstr((dir_list_style == FILES_FIRST) ? "Files first          " :
+	  ((dir_list_style == MIXED_STYLE) ? "Mixed style          " : 
+					     "Directories first    "));
 #endif /* DIRED_SUPPORT */
 
     move(L_USER_MODE, 5);
-    printw("U)ser mode                   : %s",
-			(user_mode == NOVICE_MODE ? "Novice" : 
-			(user_mode == INTERMEDIATE_MODE ? "Intermediate" :
-							     "Advanced")));
+    addstr("U)ser mode                   : ");
+    addstr(  (user_mode == NOVICE_MODE) ? "Novice" : 
+      ((user_mode == INTERMEDIATE_MODE) ? "Intermediate" :
+					  "Advanced"));
 
     move(L_USER_AGENT, 5);
-    printw("user (A)gent                 : %s",
-    		((LYUserAgent && *LYUserAgent) ? LYUserAgent : "NONE"));
-
+    addstr("user (A)gent                 : ");
+    addstr((LYUserAgent && *LYUserAgent) ? LYUserAgent : "NONE");
 
 #ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
     move(L_EXEC, 5);
-    printw("local e(X)ecution links      : ");
+    addstr("local e(X)ecution links      : ");
 #ifndef NEVER_ALLOW_REMOTE_EXEC
-    addstr((local_exec ? "ALWAYS ON" :
-                    (local_exec_on_local_files ? "FOR LOCAL FILES ONLY" :
-                                                              "ALWAYS OFF")));
+    addstr(		  local_exec ? "ALWAYS ON" :
+          (local_exec_on_local_files ? "FOR LOCAL FILES ONLY" :
+				       "ALWAYS OFF"));
 #else
     addstr(local_exec_on_local_files ? "FOR LOCAL FILES ONLY" :
-                                                              "ALWAYS OFF");
+				       "ALWAYS OFF");
 #endif /* NEVER_ALLOW_REMOTE_EXEC */
 #endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
 
@@ -422,10 +428,11 @@ draw_options:
 			move(L_HOME, B_BOOK);
 			clrtoeol();
     			if (LYMultiBookmarks) {
-    			    printw("review/edit B)ookmarks files");
+    			    addstr("review/edit B)ookmarks files");
     			} else {
-			    printw("B)ookmark file: %s",
-    		((bookmark_page && *bookmark_page) ? bookmark_page : "NONE"));
+			    addstr("B)ookmark file: ");
+			    addstr((bookmark_page && *bookmark_page) ?
+			    			       bookmark_page : "NONE");
     			}
 			response = ' ';
 			break;
@@ -459,11 +466,19 @@ draw_options:
 			        ch == -1 || *display_option == '\0') {
 			        addstr((bookmark_page && *bookmark_page) ?
 						    bookmark_page : "NONE");
+			    } else if (!LYPathOffHomeOK(display_option,
+						    sizeof(display_option))) {
+			        addstr((bookmark_page && *bookmark_page) ?
+						    bookmark_page : "NONE");
+				clrtoeol();
+				option_statusline(USE_PATH_OFF_HOME);
+				response = ' ';
+				break;
 			    } else {
 			        StrAllocCopy(bookmark_page, display_option);
 				StrAllocCopy(MBM_A_subbookmark[0],
 					     bookmark_page);
-				addstr(display_option);
+				addstr(bookmark_page);
 			    }
 			    clrtoeol();
 			    option_statusline(VALUE_ACCEPTED);
@@ -930,10 +945,10 @@ draw_options:
     signal(SIGINT, cleanup_sig);
 }
 
-/* take a boolean status and prompt the user for a new status
- * and return it
+/*
+ *  Take a boolean status,prompt the user for a new status,
+ *  and return it.
  */
-
 PRIVATE int boolean_choice ARGS4(
 	int,		status,
 	int,		line,
@@ -987,7 +1002,8 @@ PRIVATE int boolean_choice ARGS4(
     }
 }
 
-PRIVATE void terminate_options ARGS1(int,sig)
+PRIVATE void terminate_options ARGS1(
+	int,		sig)
 {
     term_options=TRUE;
     /* Reassert the AST */
@@ -1011,6 +1027,7 @@ PUBLIC void edit_bookmarks NOARGS
 #define	MULTI_OFFSET 8
     int a; /* misc counter */
     char MBM_tmp_line[256]; /* buffer for LYgetstr */
+    char ehead_buffer[265];
     
     /*
      *  We need (MBM_V_MAXFILES + MULTI_OFFSET) lines to display
@@ -1022,15 +1039,21 @@ PUBLIC void edit_bookmarks NOARGS
     signal(SIGINT, terminate_options);
 
 draw_bookmark_list:
+    /*
+     *  Display menu of bookmarks.  NOTE that we avoid printw()'s
+     *  to increase the chances that any non-ASCII or multibyte/CJK
+     *  characters will be handled properly. - FM
+     */
     clear(); 
     move(0, 5);
     if (bold_H1 || bold_headers)
         start_bold();
-    if (LYlines < (MBM_V_MAXFILES + MULTI_OFFSET))
-	printw("Editing Bookmark DESCRIPTION and FILEPATH (%d of 2)",
-		MBM_current);
-    else
-        printw("         Editing Bookmark DESCRIPTION and FILEPATH");
+    if (LYlines < (MBM_V_MAXFILES + MULTI_OFFSET)) {
+        sprintf(ehead_buffer, MULTIBOOKMARKS_EHEAD_MASK, MBM_current);
+	addstr(ehead_buffer);
+    } else {
+        addstr(MULTIBOOKMARKS_EHEAD);
+    }
     if (bold_H1 || bold_headers)
         stop_bold();
 
@@ -1038,20 +1061,28 @@ draw_bookmark_list:
 	for (a = ((MBM_V_MAXFILES/2 + 1) * (MBM_current - 1));
                       a <= ((float)MBM_V_MAXFILES/2 * MBM_current); a++) {
 	    move((3 + a) - ((MBM_V_MAXFILES/2 + 1)*(MBM_current - 1)), 5);
-	    printw("%c : %s", (a + 'A'),
-		   (!MBM_A_subdescript[a] ? "" : MBM_A_subdescript[a]));
+	    addch((unsigned char)(a + 'A'));
+	    addstr(" : ");
+	    if (MBM_A_subdescript[a])
+	        addstr(MBM_A_subdescript[a]);
 	    move((3 + a) - ((MBM_V_MAXFILES/2 + 1)*(MBM_current - 1)), 35);
-	    printw("| %s",
-		   (!MBM_A_subbookmark[a] ? "" : MBM_A_subbookmark[a]));
+	    addstr("| ");
+	    if (MBM_A_subbookmark[a]) {
+	        addstr(MBM_A_subbookmark[a]);
+	    }
         }
     } else {
 	for (a = 0; a <= MBM_V_MAXFILES; a++) {
 	    move(3 + a, 5);
-	    printw("%c : %s", (a + 'A'),
-		   (!MBM_A_subdescript[a] ? "" : MBM_A_subdescript[a]));
+	    addch((unsigned char)(a + 'A'));
+	    addstr(" : ");
+	    if (MBM_A_subdescript[a])
+	        addstr(MBM_A_subdescript[a]);
 	    move(3 + a, 35);
-	    printw("| %s",
-		   (!MBM_A_subbookmark[a] ? "" : MBM_A_subbookmark[a]));
+	    addstr("| ");
+	    if (MBM_A_subbookmark[a]) {
+	        addstr(MBM_A_subbookmark[a]);
+	    }
 	}
     }
 
@@ -1059,10 +1090,19 @@ draw_bookmark_list:
      *  Only needed when we have 2 screens.
      */
     if (LYlines < MBM_V_MAXFILES + MULTI_OFFSET) {
-       move((LYlines - 4), 0);
-       start_reverse();
-       addstr(MULTIBOOKMARKS_MOVE);
-       stop_reverse();
+        move((LYlines - 4), 0);
+	addstr("'");
+	standout();
+	addstr("[");
+	standend();
+	addstr("' ");
+	addstr(PREVIOUS);
+	addstr(", '");
+	standout();
+	addstr("]");
+	standend();
+	addstr("' ");
+	addstr(NEXT_SCREEN);
     }
 
     move((LYlines - 3), 0);
@@ -1089,7 +1129,7 @@ draw_bookmark_list:
 
 	move((LYlines - 2), 0);
 	start_reverse();
-	addstr("Letter: ");
+	addstr(MULTIBOOKMARKS_LETTER);
 	stop_reverse();
 
 	refresh();
@@ -1200,9 +1240,10 @@ draw_bookmark_list:
 			     5);
 		    else
     			move((3 + a), 5);
-    		    printw("%c : %s", (a + 'A'),
-    			   (!MBM_A_subdescript[a] ?
-			       		"" : MBM_A_subdescript[a]));
+		    addch((unsigned char)(a + 'A'));
+		    addstr(" : ");
+    		    if (MBM_A_subdescript[a])
+			addstr(MBM_A_subdescript[a]);
 		    clrtoeol();
 	   	    refresh();
 		}
@@ -1212,7 +1253,7 @@ draw_bookmark_list:
 		    	 35);
 		else
     		    move((3 + a), 35);
-    		printw("| ");
+    		addstr("| ");
 
 		standout();
 		strcpy(MBM_tmp_line,
@@ -1226,6 +1267,10 @@ draw_bookmark_list:
 		        StrAllocCopy(MBM_A_subbookmark[a], bookmark_page);
 		    else
 		        FREE(MBM_A_subbookmark[a]);
+		} else if (!LYPathOffHomeOK(MBM_tmp_line,
+					    sizeof(MBM_tmp_line))) {
+			LYMBM_statusline(USE_PATH_OFF_HOME);
+			sleep(AlertSecs);
 		} else {
 		    StrAllocCopy(MBM_A_subbookmark[a], MBM_tmp_line);
 		    if (a == 0) {
@@ -1237,8 +1282,9 @@ draw_bookmark_list:
 		    	 35);
 		else
     		    move((3 + a), 35);
-    		printw("| %s", (!MBM_A_subbookmark[a] ?
-						   "" : MBM_A_subbookmark[a]));
+		addstr("| ");
+    		if (MBM_A_subbookmark[a])
+		    addstr(MBM_A_subbookmark[a]);
 	   	clrtoeol();
 		move(LYlines-1, 0);
 		clrtoeol();

@@ -64,13 +64,14 @@ extern BOOLEAN scan_for_buried_news_references;
 extern BOOLEAN LYListNewsNumbers;
 extern BOOLEAN LYListNewsDates;
 extern HTCJKlang HTCJK;
+extern int interrupted_in_htgetcharacter;
 
 /*
 **  Module-wide variables.
 */
-PUBLIC  char * HTNewsHost=NULL;
-PRIVATE char * NewsHost=NULL;
-PRIVATE char * NewsHREF=NULL;
+PUBLIC  char * HTNewsHost = NULL;
+PRIVATE char * NewsHost = NULL;
+PRIVATE char * NewsHREF = NULL;
 PRIVATE int s;					/* Socket for NewsHost */
 PRIVATE char response_text[LINE_LENGTH+1];	/* Last response */
 /* PRIVATE HText *	HT;	*/		/* the new hypertext */
@@ -115,9 +116,9 @@ PUBLIC void HTSetNewsHost ARGS1(CONST char *, value)
 PRIVATE BOOL initialized = NO;
 PRIVATE BOOL initialize NOARGS
 {
-
-/*   Get name of Host
-*/
+    /*
+    **  Get name of Host.
+    */
 #ifdef NeXTStep
     if ((HTNewsHost = NXGetDefaultValue("WorldWideWeb","NewsHost"))==0)
         if ((HTNewsHost = NXGetDefaultValue("News","NewsHost")) == 0)
@@ -164,6 +165,7 @@ PRIVATE int response ARGS1(CONST char *,command)
     int result;    
     char * p = response_text;
     char ch;
+
     if (command) {
         int status;
 	int length = strlen(command);
@@ -189,21 +191,37 @@ PRIVATE int response ARGS1(CONST char *,command)
 	    return status;
 	} /* if bad status */
     } /* if command to be sent */
-    
-    for(;;) {  
+
+    for (;;) {
 	if (((*p++ = NEXT_CHAR) == LF) ||
 	    (p == &response_text[LINE_LENGTH])) {
-	    *p++ = '\0';			/* Terminate the string */
-	    if (TRACE) fprintf(stderr, "NNTP Response: %s\n", response_text);
+	    *--p = '\0';			/* Terminate the string */
+	    if (TRACE)
+	        fprintf(stderr, "NNTP Response: %s\n", response_text);
 	    sscanf(response_text, "%d", &result);
-	    return result;	    
+	    return result;
 	} /* if end of line */
-	
+
 	if ((ch = *(p-1)) == (char)EOF) {
-	    if (TRACE) fprintf(stderr,
-	    	"HTNews: EOF on read, closing socket %d\n", s);
+	    *(p-1) = '\0';
+	    if (TRACE) {
+		if (interrupted_in_htgetcharacter) {
+		    fprintf(stderr,
+			    "HTNews: Interrupted on read, closing socket %d\n",
+		   	    s);
+		} else {
+		    fprintf(stderr,
+			    "HTNews: EOF on read, closing socket %d\n",
+		   	    s);
+		}
+	    }
 	    NEWS_NETCLOSE(s);	/* End of file, close socket */
-	    return s = -1;	/* End of file on response */
+	    s = -1;
+	    if (interrupted_in_htgetcharacter) {
+	        interrupted_in_htgetcharacter = 0;
+		return(HT_INTERRUPTED);
+	    }
+	    return((int)EOF);	/* End of file on response */
 	}
     } /* Loop over characters */
 }
@@ -311,7 +329,9 @@ PRIVATE char * author_address ARGS1(char *,email)
 	return HTStrip(s);
     }
 
-    /* Default to the first word */
+    /*
+    **  Default to the first word.
+    */
     s = address;
     while (isspace((unsigned char)*s))
         s++; /* find first non-space */
@@ -370,7 +390,7 @@ PRIVATE void start_list ARGS1(int, seqnum)
     char SeqNum[20];
     int i;
    
-    for (i=0; i < HTML_OL_ATTRIBUTES; i++)
+    for (i = 0; i < HTML_OL_ATTRIBUTES; i++)
         present[i] = (i == HTML_OL_SEQNUM || i == HTML_OL_START);
     sprintf(SeqNum, "%d", seqnum);
     ((CONST char **)value)[HTML_OL_SEQNUM] = SeqNum;
@@ -457,7 +477,6 @@ PRIVATE void abort_socket NOARGS
     PUTS("Network Error: connection lost");
     PUTC('\n');
     s = -1;		/* End of file on response */
-    return;
 }
 
 /*	Read in an Article					read_article
@@ -471,10 +490,9 @@ PRIVATE void abort_socket NOARGS
 ** On entry,
 **	s	Global socket number is OK
 **	HT	Global hypertext object is ready for appending text
-*/       
-PRIVATE void read_article NOARGS
+*/ 
+PRIVATE int read_article NOARGS
 {
-
     char line[LINE_LENGTH+1];
     char *full_line = NULL;
     char *subject=NULL;				/* Subject string	    */
@@ -492,15 +510,25 @@ PRIVATE void read_article NOARGS
     /*
     **  Read in the HEADer of the article.
     **
-    **  The header fields are either ignored, or formatted and put into the
-    **  Text.
+    **  The header fields are either ignored,
+    **  or formatted and put into the text.
     */
     if (!diagnostic) {
 	while (!done) {
 	    char ch = *p++ = NEXT_CHAR;
 	    if (ch == (char)EOF) {
-		abort_socket();	/* End of file, close socket */
-	    	return;		/* End of file on response */
+	        if (interrupted_in_htgetcharacter) {
+		    interrupted_in_htgetcharacter = 0;
+		    if (TRACE)
+		        fprintf(stderr,
+			   "HTNews: Interrupted on read, closing socket %d\n",
+				s);
+		    NEWS_NETCLOSE(s);
+		    s = -1;
+		    return(HT_INTERRUPTED);
+		}
+		abort_socket();		/* End of file, close socket */
+	    	return(HT_LOADED);	/* End of file on response */
 	    }
 	    if ((ch == LF) || (p == &line[LINE_LENGTH])) {
 		*--p = '\0';			/* Terminate the string */
@@ -542,7 +570,8 @@ PRIVATE void read_article NOARGS
 		    StrAllocCopy(date, HTStrip(strchr(full_line,':')+1));
 
 		} else if (match(full_line, "ORGANIZATION:")) {
-		    StrAllocCopy(organization, HTStrip(strchr(full_line,':')+1));
+		    StrAllocCopy(organization,
+		    		 HTStrip(strchr(full_line,':')+1));
 		    if (HTCJK == JAPANESE) {
 		        HTmmdecode(organization, organization);
 			HTrjis(organization, organization);
@@ -586,7 +615,9 @@ PRIVATE void read_article NOARGS
 	    PUTS("No Subject");
 	END(HTML_TITLE);
 	PUTC('\n');
-	/* put in the owner as a link rel. */
+	/*
+	**  Put in the owner as a link rel.
+	*/
 	if (from || replyto) {
 	    char *temp=NULL;
 	    StrAllocCopy(temp, replyto ? replyto : from);
@@ -711,18 +742,37 @@ PRIVATE void read_article NOARGS
 	FREE(href);
     }
 
-    /*
-    **  Read in the BODY of the Article.
-    */
-    START(HTML_PRE);
+    if (diagnostic) {
+        /*
+	**  Read in the HEAD and BODY of the Article
+	**  as XMP formatted text. - FM
+	*/
+	START(HTML_XMP);
+    } else {
+        /*
+	**  Read in the BODY of the Article
+	**  as PRE formatted text. - FM
+	*/
+	START(HTML_PRE);
+    }
     PUTC('\n');
 
     p = line;
     while (!done) {
 	char ch = *p++ = NEXT_CHAR;
 	if (ch == (char)EOF) {
+	    if (interrupted_in_htgetcharacter) {
+		interrupted_in_htgetcharacter = 0;
+		if (TRACE)
+		    fprintf(stderr,
+			  "HTNews: Interrupted on read, closing socket %d\n",
+			    s);
+		NEWS_NETCLOSE(s);
+		s = -1;
+		return(HT_INTERRUPTED);
+	    }
 	    abort_socket();	/* End of file, close socket */
-	    return;		/* End of file on response */
+	    return(HT_LOADED);	/* End of file on response */
 	}
 	if ((ch == LF) || (p == &line[LINE_LENGTH])) {
 	    *p++ = '\0';			/* Terminate the string */
@@ -736,24 +786,24 @@ PRIVATE void read_article NOARGS
 		    PUTS(&line[1]);	/* Ignore first dot */
 		}
 	    } else {
-
 	        if (diagnostic || !scan_for_buried_news_references) {
-
-/*	All lines are passed as unmodified source. - FM
-*/
+		    /*
+		    **  All lines are passed as unmodified source. - FM
+		    */
 	            PUTS(line);
-
 	        } else {
-
-/*	Normal lines are scanned for buried references to other articles.
-**	Unfortunately, it could pick up mail addresses as well!  It also
-**	can corrupt uuencoded messages!  So we don't do this when fetching
-**	articles as WWW_SOURCE or when downloading (diagnostic is TRUE) or
-**	if the client has set scan_for_buried_news_references to FALSE.
-**	Otherwise, we convert all "<...@...>" strings preceded by "rticle "
-**	to "news:...@..." links, and any strings that look like URLs to
-**	links. - FM
-*/
+		    /*
+		    **  Normal lines are scanned for buried references
+		    **  to other articles.  Unfortunately, it could pick
+		    **  up mail addresses as well!  It also can corrupt
+		    **  uuencoded messages!  So we don't do this when
+		    **  fetching articles as WWW_SOURCE or when downloading
+		    **  (diagnostic is TRUE) or if the client has set
+		    **  scan_for_buried_news_references to FALSE.
+		    **  Otherwise, we convert all "<...@...>" strings
+		    **  preceded by "rticle " to "news:...@..." links,
+		    **  and any strings that look like URLs to links. - FM
+		    */
 		    char *l = line;
 		    char *p;
 
@@ -829,20 +879,23 @@ PRIVATE void read_article NOARGS
 	} /* if end of line */
     } /* Loop over characters */
     
-    END(HTML_PRE);
+    if (diagnostic)
+	END(HTML_XMP);
+    else
+	END(HTML_PRE);
     PUTC('\n');
+    return(HT_LOADED);
 }
 
 /*	Read in a List of Newsgroups
 **	----------------------------
 **
-**	Note the termination condition of a single dot on a line by itself.
-**	RFC 977 specifies that the line "folding" of RFC850 is not used, so we
-**	do not handle it here.
+**  Note the termination condition of a single dot on a line by itself.
+**  RFC 977 specifies that the line "folding" of RFC850 is not used,
+**  so we do not handle it here.
 */        
-PRIVATE void read_list ARGS1(char *, arg)
+PRIVATE int read_list ARGS1(char *, arg)
 {
-
     char line[LINE_LENGTH+1];
     char *p;
     BOOL done = NO;
@@ -853,8 +906,8 @@ PRIVATE void read_list ARGS1(char *, arg)
     int len = 0;
     
     /*
-     * Support head or tail matches for groups to list. - FM
-     */
+    **  Support head or tail matches for groups to list. - FM
+    */
     if (arg && strlen(arg) > 1) {
         if (*arg == '*') {
             tail = YES;
@@ -873,8 +926,8 @@ PRIVATE void read_list ARGS1(char *, arg)
     /*
     **  Read in the HEADer of the article.
     **
-    **  The header fields are either ignored, or formatted and put into the
-    **  Text.
+    **  The header fields are either ignored,
+    **  or formatted and put into the text.
     */
     START(HTML_HEAD);
     PUTC('\n');
@@ -894,9 +947,19 @@ PRIVATE void read_list ARGS1(char *, arg)
     while (!done) {
 	char ch = *p++ = NEXT_CHAR;
 	if (ch == (char)EOF) {
+	    if (interrupted_in_htgetcharacter) {
+		interrupted_in_htgetcharacter = 0;
+		if (TRACE)
+		    fprintf(stderr,
+			  "HTNews: Interrupted on read, closing socket %d\n",
+			    s);
+		NEWS_NETCLOSE(s);
+		s = -1;
+		return(HT_INTERRUPTED);
+	    }
 	    abort_socket();	/* End of file, close socket */
 	    FREE(pattern);
-	    return;		/* End of file on response */
+	    return(HT_LOADED);	/* End of file on response */
 	}
 	if ((ch == LF) || (p == &line[LINE_LENGTH])) {
 	    *p++ = '\0';			/* Terminate the string */
@@ -957,16 +1020,17 @@ PRIVATE void read_list ARGS1(char *, arg)
     END(HTML_DLC);
     PUTC('\n');
     FREE(pattern);
-    return;
+    return(HT_LOADED);
 }
 
 /*	Read in a Newsgroup
 **	-------------------
-**	Unfortunately, we have to ask for each article one by one if we
-**	want more than one field.
+**
+**  Unfortunately, we have to ask for each article one by one if we
+**  want more than one field.
 **
 */
-PRIVATE void read_group ARGS3(
+PRIVATE int read_group ARGS3(
   CONST char *,groupName,
   int,first_required,
   int,last_required)
@@ -1001,7 +1065,7 @@ PRIVATE void read_group ARGS3(
         fprintf(stderr,
     		"Newsgroup status=%d, count=%d, (%d-%d) required:(%d-%d)\n",
 		status, count, first, last, first_required, last_required);
-    if (last ==0 ) {
+    if (last == 0) {
         PUTS("\nNo articles in this group.\n");
 	goto add_post;
     }
@@ -1045,7 +1109,8 @@ PRIVATE void read_group ARGS3(
 	    before = first;
 	else
 	    before = first_required-HTNewsChunkSize;
-    	sprintf(buffer, "%s/%d-%d", groupName, before, first_required-1);
+    	sprintf(buffer, "%s%s/%d-%d", NewsHREF, groupName,
+				      before, first_required-1);
 	if (TRACE)
 	    fprintf(stderr, "    Block before is %s\n", buffer);
 	PUTC('(');
@@ -1069,13 +1134,22 @@ PRIVATE void read_group ARGS3(
         sprintf(buffer, "XHDR Message-ID %d-%d%c%c", first, last, CR, LF);
 	status = response(buffer);
 	if (status == 221) {
-
 	    p = line;
 	    while (!done) {
 		char ch = *p++ = NEXT_CHAR;
 		if (ch == (char)EOF) {
+		    if (interrupted_in_htgetcharacter) {
+		        interrupted_in_htgetcharacter = 0;
+			if (TRACE)
+			    fprintf(stderr,
+			   "HTNews: Interrupted on read, closing socket %d\n",
+				    s);
+			NEWS_NETCLOSE(s);
+			s = -1;
+			return(HT_INTERRUPTED);
+		    }
 		    abort_socket();	/* End of file, close socket */
-		    return;		/* End of file on response */
+		    return(HT_LOADED);	/* End of file on response */
 		}
 		if ((ch == '\n') || (p == &line[LINE_LENGTH])) {
 		    *p++ = '\0';		/* Terminate the string */
@@ -1089,9 +1163,10 @@ PRIVATE void read_group ARGS3(
 			    	/* Ignore strange line */
 			}
 		    } else {
-	
-	/*	Normal lines are scanned for references to articles.
-	*/
+			/*
+			**  Normal lines are scanned for
+			**  references to articles.
+			*/
 			char * space = strchr(line, ' ');
 			if (space++)
 			    write_anchor(space, space);
@@ -1122,46 +1197,62 @@ PRIVATE void read_group ARGS3(
 	else
 	    START(HTML_UL);
 	for (art = first_required; art <= last_required; art++) {
-    
 /*#define OVERLAP*/
 #ifdef OVERLAP
-/* With this code we try to keep the server running flat out by queuing just
-** one extra command ahead of time. We assume (1) that the server won't abort
-** if it gets input during output, and (2) that TCP buffering is enough for the
-** two commands. Both these assumptions seem very reasonable. However, we HAVE
-** had a hangup with a loaded server.
-*/
+	    /*
+	    **  With this code we try to keep the server running flat out
+	    **  by queuing just one extra command ahead of time.
+	    **  We assume (1) that the server won't abort if it gets input
+	    **  during output, and (2) that TCP buffering is enough for the
+	    **  two commands.  Both these assumptions seem very reasonable.
+	    **  However, we HAVE had a hangup with a loaded server.
+	    */
 	    if (art == first_required) {
 		if (art == last_required) {		/* Only one */
-			sprintf(buffer,
-				"HEAD %d%c%c", art, CR, LF);
-			status = response(buffer);
-		    } else {				/* First of many */
-			sprintf(buffer, "HEAD %d%c%cHEAD %d%c%c",
-				art, CR, LF, art+1, CR, LF);
-			status = response(buffer);
-		    }
-	    } else if (art == last_required) {		/* Last of many */
-		    status = response(NULL);
-	    } else {					/* Middle of many */
-		    sprintf(buffer, "HEAD %d%c%c", art+1, CR, LF);
+		    sprintf(buffer, "HEAD %d%c%c",
+		    		    art, CR, LF);
 		    status = response(buffer);
+		} else {				/* First of many */
+		    sprintf(buffer, "HEAD %d%c%cHEAD %d%c%c",
+				    art, CR, LF, art+1, CR, LF);
+			status = response(buffer);
+		}
+	    } else if (art == last_required) {		/* Last of many */
+		status = response(NULL);
+	    } else {					/* Middle of many */
+		sprintf(buffer, "HEAD %d%c%c", art+1, CR, LF);
+		status = response(buffer);
 	    }
-	    
 #else	/* NOT OVERLAP: */
 	    sprintf(buffer, "HEAD %d%c%c", art, CR, LF);
 	    status = response(buffer);
 #endif	/* OVERLAP */
-
+	    /*
+	    **  Check for a good response (221) for the HEAD request,
+	    **  and if so, parse it.  Otherwise, indicate the error
+	    **  so that the number of listings corresponds to what's
+	    **  claimed for the range, and if we are listing numbers
+	    **  via an ordered list, they stay in synchrony with the
+	    **  article numbers. - FM
+	    */
 	    if (status == 221) {	/* Head follows - parse it:*/
-    
 		p = line;				/* Write pointer */
 		done = NO;
 		while( !done ) {
 		    char ch = *p++ = NEXT_CHAR;
 		    if (ch == (char)EOF) {
-			abort_socket();	/* End of file, close socket */
-			return;		/* End of file on response */
+			if (interrupted_in_htgetcharacter) {
+			    interrupted_in_htgetcharacter = 0;
+			    if (TRACE)
+				fprintf(stderr,
+			   "HTNews: Interrupted on read, closing socket %d\n",
+					s);
+			    NEWS_NETCLOSE(s);
+			    s = -1;
+			    return(HT_INTERRUPTED);
+			}
+			abort_socket();		/* End of file, close socket */
+			return(HT_LOADED);	/* End of file on response */
 		    }
 		    if ((ch == LF) ||
 		        (p == &line[LINE_LENGTH])) {
@@ -1245,12 +1336,34 @@ PRIVATE void read_group ARGS3(
 		    PUTS(buffer);
 		    FREE(date);
 		}
-		
-    
-/*	 indicate progress!   @@@@@@
-*/
-    
-	    } /* If good response */
+		/*
+		**  Indicate progress!   @@@@@@
+		*/
+	    } else if (status == HT_INTERRUPTED) {
+		interrupted_in_htgetcharacter = 0;
+		if (TRACE)
+		    fprintf(stderr,
+			  "HTNews: Interrupted on read, closing socket %d\n",
+			    s);
+		NEWS_NETCLOSE(s);
+		s = -1;
+		return(HT_INTERRUPTED);
+	    } else {
+	        /*
+		**  Use the response text on error. - FM
+		*/
+		PUTC('\n');
+		START(HTML_LI);
+		START(HTML_I);
+		if (LYListNewsNumbers)
+		    strcpy(buffer, "Status:");
+		else
+		    sprintf(buffer, "Status (ARTICLE %d):", art);
+		PUTS(buffer);
+		END(HTML_I);
+		PUTC(' ');
+		PUTS(response_text);
+	    } /* Handle response to HEAD request */
 	} /* Loop over article */	    
     } /* If read headers */
     PUTC('\n');
@@ -1296,10 +1409,11 @@ add_post:
 	START(HTML_HR);
     }
     PUTC('\n');
+    return(HT_LOADED);
 }
 
-/*		Load by name					HTLoadNews
-**		============
+/*	Load by name.						HTLoadNews
+**	=============
 */
 PUBLIC int HTLoadNews ARGS4(
 	CONST char *,		arg,
@@ -1312,9 +1426,9 @@ PUBLIC int HTLoadNews ARGS4(
     char groupName[GROUP_NAME_LENGTH];	/* Just the group name */
     int status;				/* tcp return */
     int retries;			/* A count of how hard we have tried */ 
-    BOOL group_wanted;			/* Flag: group was asked for, not article */
-    BOOL list_wanted;			/* Flag: group was asked for, not article */
-    int first, last;			/* First and last articles asked for */
+    BOOL group_wanted;		/* Flag: group was asked for, not article */
+    BOOL list_wanted;		/* Flag: list was asked for, not article */
+    int first, last;		/* First and last articles asked for */
     char *cp;
     char *ListArg = NULL;
 
@@ -1330,121 +1444,146 @@ PUBLIC int HTLoadNews ARGS4(
 	return -1;	/* FAIL */
     
     FREE(NewsHREF);
+    command[0] = '\0';
+    command[259] = '\0';
+    proxycmd[0] = '\0';
+    proxycmd[259] = '\0';
 
     {
         CONST char * p1 = arg;
 
-    /*
-    **  We will ask for the document, omitting the host name & anchor.
-    **
-    **  Syntax of address is
-    **  	xxx@yyy			Article
-    **  	<xxx@yyy>		Same article
-    **  	xxxxx			News group (no "@")
-    **  	group/n1-n2		Articles n1 to n2 in group
-    */
+	/*
+	**  We will ask for the document, omitting the host name & anchor.
+	**
+	**  Syntax of address is
+	**  	xxx@yyy			Article
+	**  	<xxx@yyy>		Same article
+	**  	xxxxx			News group (no "@")
+	**  	group/n1-n2		Articles n1 to n2 in group
+	*/
 	group_wanted = (strchr(arg, '@') == NULL) && (strchr(arg, '*') == NULL);
 	list_wanted  = (strchr(arg, '@') == NULL) && (strchr(arg, '*') != NULL);
 
 	/* p1 = HTParse(arg, "", PARSE_PATH | PARSE_PUNCTUATION); */
 	/*
-	 *  Don't use HTParse because news: access doesn't follow traditional
-	 *  rules. For instance, if the article reference contains a '#',
-	 *  the rest of it is lost -- JFG 10/7/92, from a bug report
-	 */
- 	if (!strncasecomp (arg, "nntp://", 7)) {
-	  if (!(cp = strchr(arg+7, '/')) || *(cp+1) == '\0') {
-	      p1 = "*";
-	      group_wanted = FALSE;
-	      list_wanted = TRUE;
-	  } else {
-	      p1 = (cp+1);
-	  }
-	  if (!(cp = HTParse(arg, "", PARSE_HOST)) || *cp == '\0') {
-	      if (s >= 0 && NewsHost && strcasecomp(NewsHost, HTNewsHost)) {
-	          NEWS_NETCLOSE(s);
-		  s = -1;
-	      }
-	      StrAllocCopy(NewsHost, HTNewsHost);
-	  } else {
-	      if (s >= 0 && NewsHost && strcasecomp(NewsHost, cp)) {
-	          NEWS_NETCLOSE(s);
-		  s = -1;
-	      }
-	      StrAllocCopy(NewsHost, cp);
-	  }
-	  FREE(cp);
-	  sprintf(command, "nntp://%.250s/", NewsHost);
-	  StrAllocCopy(NewsHREF, command);
+	**  Don't use HTParse because news: access doesn't follow traditional
+	**  rules. For instance, if the article reference contains a '#',
+	**  the rest of it is lost -- JFG 10/7/92, from a bug report
+	*/
+ 	if (!strncasecomp (arg, "nntp:", 5)) {
+	    if (((*(arg + 5) == '\0') ||
+	         (!strcmp((arg + 5), "/") ||
+		  !strcmp((arg + 5), "//") ||
+		  !strcmp((arg + 5), "///"))) ||
+		((!strncmp((arg + 5), "//", 2)) &&
+	         (!(cp = strchr((arg + 7), '/')) || *(cp + 1) == '\0'))) {
+		p1 = "*";
+		group_wanted = FALSE;
+		list_wanted = TRUE;
+	    } else if (*(arg + 5) != '/') {
+	        p1 = (arg + 5);
+	    } else if (*(arg + 5) == '/' && *(arg + 6) != '/') {
+	        p1 = (arg + 6);
+	    } else {
+		p1 = (cp + 1);
+	    }
+	    if (!(cp = HTParse(arg, "", PARSE_HOST)) || *cp == '\0') {
+		if (s >= 0 && NewsHost && strcasecomp(NewsHost, HTNewsHost)) {
+		    NEWS_NETCLOSE(s);
+		    s = -1;
+		}
+		StrAllocCopy(NewsHost, HTNewsHost);
+	    } else {
+		if (s >= 0 && NewsHost && strcasecomp(NewsHost, cp)) {
+		    NEWS_NETCLOSE(s);
+		    s = -1;
+		}
+		StrAllocCopy(NewsHost, cp);
+	    }
+	    FREE(cp);
+	    sprintf(command, "nntp://%.251s/", NewsHost);
+	    StrAllocCopy(NewsHREF, command);
 	}
 	else if (!strncasecomp(arg, "snews:", 6)) {
-	  HTAlert("This client does not contain support for SNEWS URLs.");
-	  return HT_NO_DATA;
+	    HTAlert("This client does not contain support for SNEWS URLs.");
+	    return HT_NOT_LOADED;
 	}
- 	else if (!strncasecomp (arg, "news://", 7)) {
-	  if (!(cp = strchr(arg+7, '/')) || *(cp+1) == '\0') {
-	      p1 = "*";
-	      group_wanted = FALSE;
-	      list_wanted = TRUE;
-	  } else {
-	      p1 = (cp+1);
-	  }
-	  if (!(cp = HTParse(arg, "", PARSE_HOST)) || *cp == '\0') {
-	      if (s >= 0 && NewsHost && strcasecomp(NewsHost, HTNewsHost)) {
-	          NEWS_NETCLOSE(s);
-		  s = -1;
-	      }
-	      StrAllocCopy(NewsHost, HTNewsHost);
-	  } else {
-	      if (s >= 0 && NewsHost && strcasecomp(NewsHost, cp)) {
-	          NEWS_NETCLOSE(s);
-		  s = -1;
-	      }
-	      StrAllocCopy(NewsHost, cp);
-	  }
-	  FREE(cp);
-	  sprintf(command, "news://%.250s/", NewsHost);
-	  StrAllocCopy(NewsHREF, command);
+ 	else if (!strncasecomp (arg, "news:/", 6)) {
+	    if (((*(arg + 6) == '\0') ||
+	    	 !strcmp((arg + 6), "/") ||
+		 !strcmp((arg + 6), "//")) ||
+	        ((*(arg + 6) == '/') &&
+		 (!(cp = strchr((arg + 7), '/')) || *(cp + 1) == '\0'))) {
+		p1 = "*";
+		group_wanted = FALSE;
+		list_wanted = TRUE;
+	    } else if (*(arg + 6) != '/') {
+	        p1 = (arg + 6);
+	    } else {
+		p1 = (cp + 1);
+	    }
+	    if (!(cp = HTParse(arg, "", PARSE_HOST)) || *cp == '\0') {
+		if (s >= 0 && NewsHost && strcasecomp(NewsHost, HTNewsHost)) {
+		    NEWS_NETCLOSE(s);
+		    s = -1;
+		}
+		StrAllocCopy(NewsHost, HTNewsHost);
+	    } else {
+		if (s >= 0 && NewsHost && strcasecomp(NewsHost, cp)) {
+		    NEWS_NETCLOSE(s);
+		    s = -1;
+		}
+		StrAllocCopy(NewsHost, cp);
+	    }
+	    FREE(cp);
+	    sprintf(command, "news://%.251s/", NewsHost);
+	    StrAllocCopy(NewsHREF, command);
 	} else {
-	  p1 = arg + 5;  /* Skip "news:" prefix */
-	  if (s >= 0 && NewsHost && strcasecomp(NewsHost, HTNewsHost)) {
-	      NEWS_NETCLOSE(s);
-	      s = -1;
-	  }
-	  StrAllocCopy(NewsHost, HTNewsHost);
-	  StrAllocCopy(NewsHREF, "news:");
+	    p1 = (arg + 5);  /* Skip "news:" prefix */
+	    if (*p1 == '\0') {
+		p1 = "*";
+		group_wanted = FALSE;
+		list_wanted = TRUE;
+	    }
+	    if (s >= 0 && NewsHost && strcasecomp(NewsHost, HTNewsHost)) {
+		NEWS_NETCLOSE(s);
+		s = -1;
+	    }
+	    StrAllocCopy(NewsHost, HTNewsHost);
+	    StrAllocCopy(NewsHREF, "news:");
 	}
 
 	/*
-	 *  Set up any proxy for snews URLs that returns NNTP
-	 *  responses for Lynx to convert to HTML, instead of
-	 *  doing the conversion itself. - TZ & FM
-	 */
-	proxycmd[0] = '\0';
- 	if (!strncasecomp (p1, "snews://", 8)) {
-	  if ((cp = strchr((p1+8), '/')) != NULL)
-	    *cp = '\0';
-	  sprintf(command, "%.258s/", p1);
-	  StrAllocCopy(NewsHREF, command);
-	  sprintf(proxycmd, "GET %.250s%c%c%c%c", p1, CR, LF, CR, LF);
-	  if ((cp == NULL) || *(cp+1) == '\0') {
-	      p1 = "*";
-	      group_wanted = FALSE;
-	      list_wanted = TRUE;
-	  } else {
-	      p1 = (cp+1);
-	  }
-	  if (cp != NULL)
-	      *cp = '/';
-	  if (TRACE)
-	      fprintf(stderr,
-	      	      "HTNews: Proxy command is '%.*s'\n",
-		      (strlen(proxycmd) - 4), proxycmd);
+	**  Set up any proxy for snews URLs that returns NNTP
+	**  responses for Lynx to convert to HTML, instead of
+	**  doing the conversion itself. - TZ & FM
+	*/
+ 	if (!strncasecomp (p1, "snews:", 6)) {
+	    if ((cp = HTParse(p1, "", PARSE_HOST)) != NULL && *cp != '\0')
+		sprintf(command, "snews://%.250s", cp);
+	    else
+		sprintf(command, "snews://%.250s", NewsHost);
+	    command[258] = '\0';
+	    FREE(cp);
+	    sprintf(proxycmd, "GET %.251s%c%c%c%c", command, CR, LF, CR, LF);
+	    if (TRACE)
+		fprintf(stderr,
+	      		"HTNews: Proxy command is '%.*s'\n",
+			(strlen(proxycmd) - 4), proxycmd);
+	    strcat(command, "/");
+	    StrAllocCopy(NewsHREF, command);
+	    if (!(cp = strrchr((p1 + 6), '/')) || *(cp + 1) == '\0') {
+	        p1 = "*";
+	        group_wanted = FALSE;
+	        list_wanted = TRUE;
+	    } else {
+	        p1 = (cp + 1);
+	    }
 	}
 
 	/*
-	 *  Set up command for a listing or article request. - FM
-	 */
+	**  Set up command for a listing or article request. - FM
+	*/
 	if (list_wanted) {
 	    strcpy(command, "LIST NEWSGROUPS");
 	} else if (group_wanted) {
@@ -1460,14 +1599,14 @@ PUBLIC int HTLoadNews ARGS4(
 		if ((first > 0) && (isdigit(*(slash+1))) &&
 		    (strchr(slash+1, '-') == NULL || first == last)) {
 		    /*
-		     *  We got a number greater than 0, which will be
-		     *  loaded as first, and either no range or the
-		     *  range computes to zero, so make last negative,
-		     *  as a flag to select the group and then fetch
-		     *  an article by number (first) instead of by
-		     *  messageID. - FM
-		     */
-		     last = -1;
+		    **  We got a number greater than 0, which will be
+		    **  loaded as first, and either no range or the
+		    **  range computes to zero, so make last negative,
+		    **  as a flag to select the group and then fetch
+		    **  an article by number (first) instead of by
+		    **  messageID. - FM
+		    */
+		    last = -1;
 		}
 	    } else {
 		strcpy(groupName, p1);
@@ -1485,8 +1624,8 @@ PUBLIC int HTLoadNews ARGS4(
         {
 	    char * p = command + strlen(command);
 	    /*
-	     *  Teminate command with CRLF, as in RFC 977.
-	     */
+	    **  Teminate command with CRLF, as in RFC 977.
+	    */
 	    *p++ = CR;		/* Macros to be correct on Mac */
 	    *p++ = LF;
 	    *p++ = 0;
@@ -1501,23 +1640,23 @@ PUBLIC int HTLoadNews ARGS4(
     }
 
     /*
-     *  Make a hypertext object with an anchor list.
-     */
+    **  Make a hypertext object with an anchor list.
+    */
     node_anchor = anAnchor;
     target = HTML_new(anAnchor, format_out, stream);
     targetClass = *target->isa;	/* Copy routine entry points */
 
     /*
-     *  Now, let's get a stream setup up from the NewsHost.
-     */       
+    **  Now, let's get a stream setup up from the NewsHost.
+    */       
     for (retries = 0; retries < 2; retries++) {
         if (s < 0) {
 	    /* CONNECTING to news host */
-            char url[1024];
-	    if (!strncmp(arg, "news:", 5))
-                sprintf (url, "lose://%s/", NewsHost);
+            char url[260];
+	    if (!strcmp(NewsHREF, "news:"))
+                sprintf (url, "lose://%.251s/", NewsHost);
 	    else
-                strcpy (url, arg);
+                sprintf (url, "%.259s", NewsHREF);
             if (TRACE)
                 fprintf (stderr, "News: doing HTDoConnect on '%s'\n", url);
 
@@ -1526,19 +1665,17 @@ PUBLIC int HTLoadNews ARGS4(
 	    status = HTDoConnect (url, "NNTP", NEWS_PORT, &s);
             if (status == HT_INTERRUPTED) {
                 /*
-		 *  Interrupt cleanly.
-		 */
+		**  Interrupt cleanly.
+		*/
 		if (TRACE)
-                    fprintf(stderr,
-                         "News: Interrupted on connect; recovering cleanly.\n");
-                _HTProgress("Connection interrupted.");
-
+		    fprintf(stderr,
+		     "HTNews: Interrupted on connect; recovering cleanly.\n");
+		_HTProgress("Connection interrupted.");
 		(*targetClass._abort)(target, NULL);
-  
 		FREE(NewsHost);
 		FREE(NewsHREF);
 		FREE(ListArg);
-                return HT_INTERRUPTED;
+                return HT_NOT_LOADED;
             }
 	    if (status < 0) {
 		char message[256];
@@ -1566,35 +1703,40 @@ PUBLIC int HTLoadNews ARGS4(
 			     "HTNews: Proxy command returned status '%d'.\n",
 				status);
 		}
-		if ((response(NULL) / 100) != 2) {
+		if (((status = response(NULL)) / 100) != 2) {
 			char message[BIG];
 			NEWS_NETCLOSE(s);
 			s = -1;
+			if (status == HT_INTERRUPTED) {
+			    _HTProgress("Connection interrupted.");
+			    (*targetClass._abort)(target, NULL);
+			    FREE(NewsHost);
+			    FREE(NewsHREF);
+			    FREE(ListArg);
+			    return(HT_NOT_LOADED);
+			}
 			if (retries < 1)
 			    continue;
 			sprintf(message, 
 		  "Can't read news info. News host %.20s responded: %.200s",
 		  		NewsHost, response_text);
-			FREE(NewsHost);
-			FREE(NewsHREF);
-			FREE(ListArg);
 		        return HTLoadError(stream, 500, message);
 		}
 	    }
 	} /* If needed opening */
 	
         /*
-	 *  Ensure reader mode, but don't bother checking the
-	 *  status for anything but HT_INERRUPTED, because if
-	 *  if the reader mode command is not needed, the server
-	 *  probably return a 500, which is irrelevant at this
-	 *  point. - FM
-	 */
+	**  Ensure reader mode, but don't bother checking the
+	**  status for anything but HT_INERRUPTED, because if
+	**  if the reader mode command is not needed, the server
+	**  probably return a 500, which is irrelevant at this
+	**  point. - FM
+	*/
 	{
 	    char buffer[20];
 	    sprintf(buffer, "mode reader%c%c", CR, LF);
 	    if ((status = response(buffer)) == HT_INTERRUPTED) {
-                _HTProgress("Connection interrupted.");
+		_HTProgress("Connection interrupted.");
 		break;
 	    }
 	}
@@ -1619,47 +1761,48 @@ Send_NNTP_command:
 	    NEWS_NETCLOSE(s);
 	    s = -1;
 	    /*
-	     *  Message might be a leftover "Timeout-disconnected",
-	     *  so try again if retries is not exhausted.
-	     */
+	    **  Message might be a leftover "Timeout-disconnected",
+	    **  so try again if retries is not exhausted.
+	    */
 	    continue;
 	}
   
 	/*
-	 *  Load a group, article, etc
-	 */
+	**  Load a group, article, etc
+	*/
 	if (list_wanted) {
 	    _HTProgress("Reading list of available newsgroups.");
-	    read_list(ListArg);
+	    status = read_list(ListArg);
 	} else if (group_wanted) {
 	    if (last < 0) {
 	        /*
-		 *  We got one article number rather than a range
-		 *  following the slash which followed the group
-		 *  name, or the range was zero, so now that we
-		 *  have selected that group, load ARTICLE and the
-		 *  the number (first) as the command and go back
-		 *  to send it and check the response. - FM
-		 */
+		**  We got one article number rather than a range
+		**  following the slash which followed the group
+		**  name, or the range was zero, so now that we
+		**  have selected that group, load ARTICLE and the
+		**  the number (first) as the command and go back
+		**  to send it and check the response. - FM
+		*/
 		sprintf(command, "ARTICLE %d%c%c", first, CR, LF);
 		group_wanted = FALSE;
 		retries = 2;
 		goto Send_NNTP_command;
 	    }
 	    _HTProgress("Reading list of articles in newsgroup.");
-	    read_group(groupName, first, last);
+	    status = read_group(groupName, first, last);
         } else {
 	    _HTProgress("Reading news article.");
-	    read_article();
+	    status = read_article();
 	}
-
+	if (status == HT_INTERRUPTED) {
+	    _HTProgress("Connection interrupted.");
+	    status = HT_LOADED;
+	}
 	(*targetClass._free)(target);
 	FREE(NewsHREF);
 	FREE(ListArg);
-	return HT_LOADED;
-	
+	return status;
     } /* Retry loop */
-    
     
     /* HTAlert("Sorry, could not load requested news."); */
         
@@ -1669,7 +1812,7 @@ Send_NNTP_command:
     (*targetClass._abort)(target, NULL);
     FREE(NewsHREF);
     FREE(ListArg);
-    return HT_NO_DATA;
+    return HT_NOT_LOADED;
 }
 
 #ifdef GLOBALDEF_IS_MACRO

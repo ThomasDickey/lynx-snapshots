@@ -173,6 +173,7 @@ $ cc LYCgi
 $ cc LYCharSets
 $ cc LYCharUtils
 $ cc LYClean
+$ cc LYCookie
 $ cc LYCurses
 $ cc LYDownload
 $ cc LYEdit
@@ -215,6 +216,7 @@ LYCgi.obj, -
 LYCharSets.obj, -
 LYCharUtils.obj, -
 LYClean.obj, -
+LYCookie.obj, -
 LYCurses.obj, -
 LYDownload.obj, -
 LYEdit.obj, -

@@ -37,6 +37,8 @@
 #define NO_CANCEL "Excellent!!!"
 #define OPERATION_DONE "Done!"
 #define BAD_REQUEST "Bad request!"
+#define PREVIOUS "previous"
+#define NEXT_SCREEN "next screen"
 #define HELP \
  "Commands: Use arrow keys to move, '?' for help, 'q' to quit, '<-' to go back."
 #define MOREHELP \
@@ -90,6 +92,7 @@
  "(NORMAL LINK)   Use right-arrow or <return> to activate."
 #define LINK_NOT_FOUND "The resource requested is not available at this time."
 #define WWW_WAIT_MESSAGE "Getting %s"
+#define WWW_SKIP_MESSAGE "Skipping %s"
 #define ADVANCED_URL_MESSAGE "URL: %s"
 #define WWW_FAIL_MESSAGE "Unable to access WWW file!!!"
 #define WWW_INDEX_MESSAGE "This is a searchable index.  Use %s to search."
@@ -132,6 +135,7 @@
 #define ERROR_SPAWNING_EDITOR \
  "Error spawning editor, check your editor definition in the options menu"
 #define SEND_COMMENT_PROMPT "Send this comment? (y/n) "
+#define SEND_MESSAGE_PROMPT "Send this message? (y/n) "
 #define SENDING_YOUR_MSG "Sending your message..."
 #define FILE_ACTIONS_DISALLOWED "file: ACTIONs are disallowed!"
 #define FILE_SERVED_LINKS_DISALLOWED \
@@ -149,6 +153,7 @@
 #define DOWNLOAD_DISABLED "The 'd'ownload command is currently disabled."
 #define NO_DOWNLOAD_INPUT "You cannot download a input field."
 #define NO_DOWNLOAD_MAILTO_ACTION "Form has a mailto action!  Cannot download."
+#define NO_DOWNLOAD_COOKIES "You cannot download cookies."
 #define NO_DOWNLOAD_PRINT_OP "You cannot download a printing option."
 #define NO_DOWNLOAD_UPLOAD_OP "You cannot download an upload option."
 #define NO_DOWNLOAD_PERMIT_OP "You cannot download an permit option."
@@ -210,6 +215,7 @@
  "Bookmark files cannot be traversed (only http URLs)."
 #define BOOKMARKS_NOT_OPEN \
  "Unable to open bookmark file, use 'a' to save a link first"
+#define BOOKMARKS_NOLINKS "There are no links in this bookmark file!"
 #define BOOK_D_L_OR_CANCEL \
  "Save D)ocument or L)ink to bookmark file or C)ancel? (d,l,c): "
 #define BOOK_D_OR_CANCEL "Save D)ocument to bookmark file or C)ancel? (d,c): "
@@ -365,6 +371,8 @@
  "Executable link rejected due to malformed request."
 #define BADCHAR_IN_EXEC_LINK \
  "Executable link rejected due to `%c' character."
+#define RELPATH_IN_EXEC_LINK \
+ "Executable link rejected due to relative path string ('../')."
 #define BADLOCPATH_IN_EXEC_LINK \
  "Executable link rejected due to location or path."
 #define MAIL_DISABLED "Mail access is disabled!"
@@ -457,15 +465,95 @@
 #define	PROCEED_GET_CANCEL "P)roceed, use G)ET or C)ancel "
 #define	ADVANCED_POST_REDIRECT \
  "Redirection of POST content. P)roceed, see U)RL, use G)ET or C)ancel"
+#define CONFIRM_POST_RESUBMISSION \
+ "Document from Form with POST content.  Resubmit?"
+#define WILL_NOT_RELOAD_DOC "Document will not be reloaded!"
 #define	LOCATION_HEADER "Location: "
 #define STRING_NOT_FOUND "'%s' not found!"
 #define MULTIBOOKMARKS_DEFAULT "Default Bookmark File"
-#define MULTIBOOKMARKS_SAVE "Select destination or ^G to Cancel: "
 #define MULTIBOOKMARKS_SMALL "Screen too small! (8x35 min)"
-#define MULTIBOOKMARKS_MOVE "'[' previous, ']' next screen"
+#define MULTIBOOKMARKS_SAVE "Select destination or ^G to Cancel: "
+#define MULTIBOOKMARKS_SELECT \
+ "Select subbookmark, '=' for menu, or ^G to cancel: "
 #define MULTIBOOKMARKS_SELF \
  "Reproduce L)ink in this bookmark file or C)ancel? (l,c): "
 #define MULTIBOOKMARKS_DISALLOWED "Multiple bookmark support is not available."
+#define MULTIBOOKMARKS_SHEAD_MASK " Select Bookmark (screen %d of %d)"
+#define MULTIBOOKMARKS_SHEAD "       Select Bookmark"
+#define MULTIBOOKMARKS_EHEAD_MASK \
+ "Editing Bookmark DESCRIPTION and FILEPATH (%d of 2)"
+#define MULTIBOOKMARKS_EHEAD \
+ "         Editing Bookmark DESCRIPTION and FILEPATH"
+#define MULTIBOOKMARKS_LETTER "Letter: "
+#ifdef VMS
+#define USE_PATH_OFF_HOME \
+ "Use a filepath off your login directory in SHELL syntax!"
+#else
+#define USE_PATH_OFF_HOME "Use a filepath off your home directory!"
+#endif /* VMS */
+#define MAXLINKS_REACHED \
+ "Maximum links per page exceeded!  Use half-page or two-line scrolling."
+#define MAXHIST_REACHED \
+ "History List maximum reached!  Document not pushed."
+#define VISITED_LINKS_EMPTY "No previously visited links available!" 
+#define MEMORY_EXHAUSTED_ABORT "Memory exhausted!  Program aborted!"
+#define DFM_NOT_AVAILABLE "Directory/File Manager not available"
+#define BASE_NOT_ABSOLUTE "HREF in BASE tag is not an absolute URL."
+#define LOCATION_NOT_ABSOLUTE "Location URL is not absolute."
+#define REFRESH_URL_NOT_ABSOLUTE "Refresh URL is not absolute."
+#define SENDING_MESSAGE_WITH_BODY_TO \
+ "You are sending a message with body to:\n  "
+#define SENDING_COMMENT_TO "You are sending a comment to:\n  "
+#define CTRL_G_TO_CANCEL_SEND \
+ "\n\nUse Ctrl-G to cancel if you do not want to send a message\n"
+#define ENTER_NAME_OR_BLANK \
+ "\n Please enter your name, or leave it blank to remain anonymous\n"
+#define ENTER_MAIL_ADDRESS_OR_OTHER \
+ "\n Please enter a mail address or some other\n"
+#define MEANS_TO_CONTACT_FOR_RESPONSE \
+ " means to contact you, if you desire a response.\n"
+#define ENTER_SUBJECT_LINE "\n Please enter a subject line.\n"
+#define ENTER_ADDRESS_FOR_CC \
+ "\n Enter a mail address for a CC of your message.\n"
+#define BLANK_FOR_NO_COPY " (Leave blank if you don't want a copy.)\n"
+#define REVIEW_MESSAGE_BODY "\n Please review the message body:\n\n"
+#define RETURN_TO_CONTINUE "\nPress RETURN to continue: "
+#define CTRL_U_TO_ERASE " Use Control-U to erase the default.\n"
+#define ENTER_MESSAGE_BELOW "\n Please enter your message below."
+#define ENTER_PERIOD_WHEN_DONE_A \
+ "\n When you are done, press enter and put a single period (.)"
+#define ENTER_PERIOD_WHEN_DONE_B \
+ "\n on a line and press enter again."
+#define ADVANCED_COOKIE_CONFIRMATION \
+ "%s cookie: %.*s=%.*s  Allow? (Y/N/Always/neVer)"
+#define ALLOWING_COOKIE "Allowing this cookie."
+#define REJECTING_COOKIE "Rejecting this cookie."
+#define COOKIE_JAR_IS_EMPTY "The Cookie Jar is empty."
+#define COOKIE_JAR_TITLE "Lynx Cookie Jar"
+#define REACHED_COOKIE_JAR_PAGE "You have reached the Lynx Cookie Jar Page"
+#define ACTIVATE_TO_GOBBLE \
+ "Activate links to gobble up cookies or entire domains,"
+#define OR_CHANGE_ALLOW "or to change a domain's 'allow' setting."
+#define COOKIES_NEVER_ALLOWED "(Cookies never allowed.)"
+#define COOKIES_ALWAYS_ALLOWED "(Cookies always allowed.)"
+#define COOKIES_ALLOWED_VIA_PROMPT "(Cookies allowed via prompt.)"
+#define NO_NAME "(No name.)"
+#define NO_VALUE "(No value.)"
+#define END_OF_SESSION "(End of session.)"
+#define DELETE_COOKIE_CONFIRMATION "Delete this cookie?"
+#define COOKIE_EATEN "The cookie has been eaten!"
+#define DELETE_EMPTY_DOMAIN_CONFIRMATION "Delete this empty domain?"
+#define DOMAIN_EATEN "The domain has been eaten!"
+#define DELETE_COOKIES_SET_ALLOW_OR_CANCEL \
+ "D)elete domain's cookies, set allow A)lways/P)rompt/neV)er, or C)ancel? "
+#define DELETE_DOMAIN_SET_ALLOW_OR_CANCEL \
+ "D)elete domain, set allow A)lways/P)rompt/neV)er, or C)ancel? "
+#define DOMAIN_COOKIES_EATEN "All cookies in the domain have been eaten!"
+#define ALWAYS_ALLOWING_COOKIES "'A'lways allowing from domain '%s'."
+#define NEVER_ALLOWING_COOKIES "ne'V'er allowing from domain '%s'."
+#define PROMTING_TO_ALLOW_COOKIES "'P'rompting to allow from domain '%s'."
+#define DELETE_ALL_COOKIES_IN_DOMAIN "Delete all cookies in this domain?"
+#define ALL_COOKIES_EATEN "All of the cookies in the jar have been eaten!"
 
 #ifdef DIRED_SUPPORT
 #define DIRED_NOVICELINE \

@@ -89,6 +89,8 @@ typedef struct _FormInfo {
 #define F_RANGE_TYPE      10
 #define F_FILE_TYPE       11
 #define F_TEXT_SUBMIT_TYPE 12
+#define F_IMAGE_SUBMIT_TYPE 13
+#define F_KEYGEN_TYPE     14
 
 #define WWW_FORM_LINK_TYPE  1
 #define WWW_LINK_TYPE   2

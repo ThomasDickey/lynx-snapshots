@@ -73,7 +73,9 @@ PUBLIC  HTList * sug_filenames = NULL;		/* Suggested filenames   */
 /*
  * highlight (or unhighlight) a given link
  */
-PUBLIC void highlight ARGS2(int,flag, int,cur)
+PUBLIC void highlight ARGS2(
+	int,		flag,
+	int,		cur)
 {
     char buffer[200];
     int i;
@@ -109,7 +111,8 @@ PUBLIC void highlight ARGS2(int,flag, int,cur)
 	    int avail_space = (LYcols-links[cur].lx)-1;
 
 	    LYstrncpy(buffer,
-	    	      links[cur].hightext, 
+	    	      (links[cur].hightext ?
+		       links[cur].hightext : ""), 
 		      (avail_space > links[cur].form->size ? 
 				      links[cur].form->size : avail_space));
 	    addstr(buffer);  
@@ -123,7 +126,10 @@ PUBLIC void highlight ARGS2(int,flag, int,cur)
 	    /* copy into the buffer only what will fit within the
 	     * width of the screen
 	     */
-	    LYstrncpy(buffer,links[cur].hightext, LYcols-links[cur].lx-1);
+	    LYstrncpy(buffer,
+	    	      (links[cur].hightext ?
+		       links[cur].hightext : ""),
+		      LYcols-links[cur].lx-1);
 	    addstr(buffer);  
 	}
 
@@ -151,7 +157,7 @@ PUBLIC void highlight ARGS2(int,flag, int,cur)
 	        start_bold();
 	    }
 
-	    for (i=0; (tmp[0] = links[cur].hightext2[i]) != '\0' &&
+	    for (i = 0; (tmp[0] = links[cur].hightext2[i]) != '\0' &&
 	    	      i+links[cur].hightext2_offset < LYcols; i++) {
 		if (!IsSpecialAttrChar(links[cur].hightext2[i])) {
 		    /* For CJK strings, by Masanobu Kimura */
@@ -193,7 +199,8 @@ PUBLIC void highlight ARGS2(int,flag, int,cur)
  * free_and_clear will free a pointer if it is non-zero and
  * then set it to zero
  */
-PUBLIC void free_and_clear ARGS1(char **,pointer)
+PUBLIC void free_and_clear ARGS1(
+	char **,	pointer)
 {
     if (*pointer) {
 	free(*pointer);
@@ -205,7 +212,8 @@ PUBLIC void free_and_clear ARGS1(char **,pointer)
 /*
  * Collapse (REMOVE) all spaces in the string. 
  */
-PUBLIC void collapse_spaces ARGS1(char *,string)
+PUBLIC void collapse_spaces ARGS1(
+	char *,		string)
 {
     int i=0;
     int j=0;
@@ -214,7 +222,7 @@ PUBLIC void collapse_spaces ARGS1(char *,string)
         return;
 
     for (; string[i] != '\0'; i++) 
-	if (!isspace(string[i])) 
+	if (!isspace((unsigned char)string[i])) 
 	    string[j++] = string[i];
 
     string[j] = '\0';  /* terminate */
@@ -226,7 +234,8 @@ PUBLIC void collapse_spaces ARGS1(char *,string)
  * (ignore newlines if the preceding character is a space) and convert
  * tabs to single spaces (but don't ignore any explicit tabs or spaces).
  */
-PUBLIC void convert_to_spaces ARGS1(char *,string)
+PUBLIC void convert_to_spaces ARGS1(
+	char *,		string)
 {
     char *s = string;
     char *ns = string;
@@ -263,11 +272,26 @@ PUBLIC void convert_to_spaces ARGS1(char *,string)
 }
 
 /*
+ *  Strip trailing slashes from directory paths.
+ */
+PUBLIC char * strip_trailing_slash ARGS1(
+	char *,		dirname)
+{
+    int i;
+
+    i = strlen(dirname) - 1;
+    while (i >= 0 && dirname[i] == '/')
+        dirname[i--] = '\0';
+    return(dirname);
+}
+
+/*
  * display (or hide) the status line
  */
 BOOLEAN mustshow = FALSE;
 
-PUBLIC void statusline ARGS1(char *,text)
+PUBLIC void statusline ARGS1(
+	char *,		text)
 {
     char buffer[256];
     unsigned char *temp = NULL;
@@ -303,7 +327,7 @@ PUBLIC void statusline ARGS1(char *,text)
     if ((buffer[0] != '\0') &&
         (LYHaveCJKCharacterSet)) {
         /*
-	 *  Translate or filter any escape sequences.
+	 *  Translate or filter any escape sequences. - FM
 	 */
 	if ((temp = (unsigned char *)calloc(1, strlen(text) + 1)) == NULL)
 	    outofmem(__FILE__, "statusline");
@@ -321,7 +345,7 @@ PUBLIC void statusline ARGS1(char *,text)
 	}
 
         /*
-	 *  Deal with any newlines or tabs in the string.
+	 *  Deal with any newlines or tabs in the string. - FM
 	 */
 	convert_to_spaces((char *)temp);
 
@@ -356,26 +380,34 @@ PUBLIC void statusline ARGS1(char *,text)
 	}
 	buffer[len] = '\0';
         /*
-	 *  Deal with any newlines or tabs in the string.
+	 *  Deal with any newlines or tabs in the string. - FM
 	 */
 	convert_to_spaces(buffer);
     }
 
     /*
-     *  Move to the statusline window and output the text highlighted.
+     *  Move to the desired statusline window and
+     *  output the text highlighted. - FM
      */
-    if (user_mode == NOVICE_MODE)
-        move(LYlines-3,0);
-    else
-        move(LYlines-1,0);
+    if (LYStatusLine >= 0) {
+        if (LYStatusLine < LYlines-1) {
+	    move(LYStatusLine, 0);
+	} else {
+	    move(LYlines-1, 0);
+	}
+    } else if (user_mode == NOVICE_MODE) {
+        move(LYlines-3, 0);
+    } else {
+        move(LYlines-1, 0);
+    }
     clrtoeol();
     if (text != NULL) {
 	start_reverse();
 	addstr(buffer);
 	stop_reverse();
     }
-
     refresh();
+
     return;
 }
 
@@ -400,7 +432,8 @@ PUBLIC void toggle_novice_line NOARGS
 	return;
 }
 
-PUBLIC void noviceline ARGS1(int,more)
+PUBLIC void noviceline ARGS1(
+	int,		more)
 {
 
     if (dump_output_immediately)
@@ -534,10 +567,11 @@ PUBLIC int HTCheckForInterrupt NOARGS
  * A file URL for a remote host is an obsolete ftp URL.
  * Return YES only if we're certain it's a local file. - FM
  */
-PUBLIC BOOLEAN LYisLocalFile ARGS1(char *,filename)
+PUBLIC BOOLEAN LYisLocalFile ARGS1(
+	char *,		filename)
 {
-    char *host=NULL;
-    char *access=NULL;
+    char *host = NULL;
+    char *access = NULL;
     char *cp;
 
     if (!filename)
@@ -576,9 +610,10 @@ PUBLIC BOOLEAN LYisLocalFile ARGS1(char *,filename)
  * Utility for checking URLs with a host field.
  * Return YES only if we're certain it's the local host. - FM
  */
-PUBLIC BOOLEAN LYisLocalHost ARGS1(char *,filename)
+PUBLIC BOOLEAN LYisLocalHost ARGS1(
+	char *,		filename)
 {
-    char *host=NULL;
+    char *host = NULL;
     char *cp;
 
     if (!filename)
@@ -590,7 +625,7 @@ PUBLIC BOOLEAN LYisLocalHost ARGS1(char *,filename)
 	return NO;
     }
 
-    if ((cp=strchr(host, ':')) != NULL)
+    if ((cp = strchr(host, ':')) != NULL)
         *cp = '\0';
 
 #ifdef VMS
@@ -632,7 +667,8 @@ PUBLIC void LYLocalhostAliases_free NOARGS
 /* 
  * Utility for listing hosts to be treated as local aliases. - FM
  */
-PUBLIC void LYAddLocalhostAlias ARGS1(char *, alias)
+PUBLIC void LYAddLocalhostAlias ARGS1(
+	char *,		alias)
 {
     char *LocalAlias;
 
@@ -656,9 +692,10 @@ PUBLIC void LYAddLocalhostAlias ARGS1(char *, alias)
  * Utility for checking URLs with a host field.
  * Return YES only if we've listed the host as a local alias. - FM
  */
-PUBLIC BOOLEAN LYisLocalAlias ARGS1(char *,filename)
+PUBLIC BOOLEAN LYisLocalAlias ARGS1(
+	char *,		filename)
 {
-    char *host=NULL;
+    char *host = NULL;
     char *alias;
     char *cp;
     HTList *cur = localhost_aliases;
@@ -672,7 +709,7 @@ PUBLIC BOOLEAN LYisLocalAlias ARGS1(char *,filename)
 	return NO;
     }
 
-    if ((cp=strchr(host, ':')) != NULL)
+    if ((cp = strchr(host, ':')) != NULL)
         *cp = '\0';
 
     while (NULL != (alias = (char *)HTList_nextObject(cur))) {
@@ -701,8 +738,10 @@ PUBLIC BOOLEAN LYisLocalAlias ARGS1(char *,filename)
 **  it returns UNKNOWN_URL_TYPE.  Otherwise, it returns
 **  0 (not a URL). - FM
 */
-PUBLIC int LYCheckForProxyURL ARGS1(char *, filename) {
-    char *cp=filename;
+PUBLIC int LYCheckForProxyURL ARGS1(
+	char *,		filename)
+{
+    char *cp = filename;
     char *cp1;
     char *cp2 = NULL;
 
@@ -713,14 +752,14 @@ PUBLIC int LYCheckForProxyURL ARGS1(char *, filename) {
         return(0);
 
     /* kill beginning spaces */
-    while (isspace(*cp))
+    while (isspace((unsigned char)*cp))
         cp++;
 
     /*
      * Check for a colon, and if present,
      * see if we have proxying set up.
      */
-    if ((cp1=strchr((cp+1), ':')) != NULL) {
+    if ((cp1 = strchr((cp+1), ':')) != NULL) {
 	*cp1 = '\0';
 	StrAllocCopy(cp2, cp);
 	*cp1 = ':';
@@ -731,8 +770,8 @@ PUBLIC int LYCheckForProxyURL ARGS1(char *, filename) {
 	}
 	FREE(cp2);
 	cp1++;
-	if (isdigit(*cp1)) {
-	    while (*cp1 && isdigit(*cp1))
+	if (isdigit((unsigned char)*cp1)) {
+	    while (*cp1 && isdigit((unsigned char)*cp1))
 	        cp1++;
 	    if (*cp1 && *cp1 != '/')
 	        return(UNKNOWN_URL_TYPE);
@@ -754,7 +793,8 @@ PUBLIC int LYCheckForProxyURL ARGS1(char *, filename) {
 **  Chains to LYCheckForProxyURL() if a colon
 **  is present but the type is not recognized.
 */
-PUBLIC int is_url ARGS1(char *,filename)
+PUBLIC int is_url ARGS1(
+	char *,		filename)
 {
     char *cp = filename;
     char *cp1;
@@ -775,7 +815,7 @@ PUBLIC int is_url ARGS1(char *,filename)
     /*
      *  Kill beginning spaces.
      */
-    while (isspace(*cp))
+    while (isspace((unsigned char)*cp))
         cp++;
 
     if (!strncasecomp(cp, "news:", 5)) {
@@ -784,6 +824,13 @@ PUBLIC int is_url ARGS1(char *,filename)
 	        cp[i] = TOLOWER(cp[i]);
 	}
 	return(NEWS_URL_TYPE);
+
+    } else if (!strncasecomp(cp, "nntp:", 5)) {
+        if (strncmp(cp, "nntp", 4)) {
+	    for (i = 0; i < 4; i++)
+	        cp[i] = TOLOWER(cp[i]);
+	}
+	return(NNTP_URL_TYPE);
 
     } else if (!strncasecomp(cp, "snews:", 6)) {
         if (strncmp(cp, "snews", 5)) {
@@ -798,6 +845,19 @@ PUBLIC int is_url ARGS1(char *,filename)
 	        cp[i] = TOLOWER(cp[i]);
 	}
 	return(MAILTO_URL_TYPE);
+
+    } else if (!strncasecomp(cp, "file:", 5)) {
+        if (strncmp(cp, "file", 4)) {
+	    for (i = 0; i < 4; i++)
+	        cp[i] = TOLOWER(cp[i]);
+	}
+        if (LYisLocalFile(cp)) {
+	    return(FILE_URL_TYPE);
+	} else if (cp[5] == '/' && cp[6] == '/') {
+	    return(FTP_URL_TYPE);
+	} else {
+	    return(0);
+	}
 
     } else if (!strncasecomp(cp, "data:", 5)) {
         if (strncmp(cp, "data", 4)) {
@@ -920,9 +980,19 @@ PUBLIC int is_url ARGS1(char *,filename)
 	}
 	return(LYNXIMGMAP_URL_TYPE);
 
-    } else if (strstr((cp+3), ":/") == NULL) {  
+    } else if (!strncasecomp(cp, "LYNXCOOKIE:", 11)) {
 	/*
-	 *  If it doesn't contain ":/", and it's not one of the
+	 *  Special Internal Lynx type.
+	 */
+	if (strncmp(cp, "LYNXCOOKIE", 10)) {
+	    for (i = 0; i < 10; i++)
+	        cp[i] = TOUPPER(cp[i]);
+	}
+	return(LYNXCOOKIE_URL_TYPE);
+
+    } else if (strstr((cp+3), "://") == NULL) {  
+	/*
+	 *  If it doesn't contain "://", and it's not one of the
 	 *  the above, it can't be a URL with a scheme we know,
 	 *  so check if it's an unknown scheme for which proxying
 	 *  has been set up. - FM
@@ -942,25 +1012,6 @@ PUBLIC int is_url ARGS1(char *,filename)
 	        cp[i] = TOLOWER(cp[i]);
 	}
 	return(HTTP_URL_TYPE);
-
-    } else if (!strncasecomp(cp, "file:", 5)) {
-        if (strncmp(cp, "file", 4)) {
-	    for (i = 0; i < 4; i++)
-	        cp[i] = TOLOWER(cp[i]);
-	}
-        /*
-	 *  We won't expend the overhead here of
-	 *  determining whether it's really an
-	 *  ftp URL unless we are restricting
-	 *  ftp access, in which case getfile()
-	 *  needs to know in order to issue an
-	 *  appropriate statusline message and
-	 *  and return NULLFILE.
-	 */
-        if ((ftp_ok) || LYisLocalFile(cp))
-	    return(FILE_URL_TYPE);
-	else
-	    return(FTP_URL_TYPE);
 
     } else if (!strncasecomp(cp, "gopher:", 7)) {
         if (strncmp(cp, "gopher", 6)) {
@@ -1017,13 +1068,6 @@ PUBLIC int is_url ARGS1(char *,filename)
 	}
 	return(RLOGIN_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "nntp:", 5)) {
-        if (strncmp(cp, "nntp", 4)) {
-	    for (i = 0; i < 4; i++)
-	        cp[i] = TOLOWER(cp[i]);
-	}
-	return(NNTP_URL_TYPE);
-
     } else if (!strncasecomp(cp, "cso:", 4)) {
         if (strncmp(cp, "cso", 3)) {
 	    for (i = 0; i < 3; i++)
@@ -1064,7 +1108,8 @@ PUBLIC int is_url ARGS1(char *,filename)
 /*
  *  Remove backslashes from any string.
  */
-PUBLIC void remove_backslashes ARGS1(char *,buf)
+PUBLIC void remove_backslashes ARGS1(
+	char *,		buf)
 {
     char *cp;
 
@@ -1090,7 +1135,8 @@ PUBLIC void remove_backslashes ARGS1(char *,buf)
  *  string using single quotes, escaping the real single quotes
  *  with double quotes. This may be gross but it seems to work.
  */
-PUBLIC char * quote_pathname ARGS1(char *, pathname)
+PUBLIC char * quote_pathname ARGS1(
+	char *,		pathname)
 {
     int i, n = 0;
     char * result;
@@ -1137,7 +1183,7 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
     int n;
     FILE *fp;
     struct utmp me;
-    char *cp, *mytty=NULL;
+    char *cp, *mytty = NULL;
     char *ttyname();
 
     if ((cp=ttyname(0)))
@@ -1190,8 +1236,19 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
 #endif /* HAVE_TERMIO_H */
 #endif /* HAVE_TERMIOS_H */
 
-PUBLIC void size_change ARGS1(int,sig)
+PUBLIC void size_change ARGS1(
+	int,		sig)
 {
+#ifdef USE_SLANG
+    SLtt_get_screen_size();
+    LYlines = SLtt_Screen_Rows;
+    LYcols  = SLtt_Screen_Cols;
+    if (sig == 0)
+        /*
+	 *  Called from start_curses().
+	 */
+	return;
+#else /* Curses: */
 #ifndef NO_SIZECHANGE
 #ifdef TIOCGSIZE
     struct ttysize win;
@@ -1204,11 +1261,7 @@ PUBLIC void size_change ARGS1(int,sig)
 #ifdef TIOCGSIZE
     if (ioctl(0, TIOCGSIZE, &win) == 0) {
         if (win.ts_lines != 0) {
-#ifdef USE_SLANG
-	    LYlines = win.ts_lines;
-#else
 	    LYlines = win.ts_lines - 1;
-#endif /* USE_SLANG */
 	}
 	if (win.ts_cols != 0) {
 	    LYcols = win.ts_cols;
@@ -1218,11 +1271,7 @@ PUBLIC void size_change ARGS1(int,sig)
 #ifdef TIOCGWINSZ
     if (ioctl(0, TIOCGWINSZ, &win) == 0) {
         if (win.ws_row != 0) {
-#ifdef USE_SLANG
-	    LYlines = win.ws_row;
-#else
 	    LYlines = win.ws_row - 1;
-#endif /* USE_SLANG */
 	}
 	if (win.ws_col != 0) {
 	    LYcols = win.ws_col;
@@ -1236,12 +1285,6 @@ PUBLIC void size_change ARGS1(int,sig)
         LYlines = 24;
     if (LYcols <= 0)
         LYcols = 80;
-
-#ifdef USE_SLANG
-    SLtt_Screen_Rows = LYlines; 
-    SLtt_Screen_Cols = LYcols;
-    if (sig == 0)
-        return;	/* called from start_curses */
 #endif /* USE_SLANG */
 
     recent_sizechange = TRUE; 
@@ -1275,7 +1318,8 @@ PUBLIC void HTSugFilenames_free NOARGS
  *  Utility for listing suggested filenames, making any
  *  repeated filenanmes the most current in the list. - FM
  */
-PUBLIC void HTAddSugFilename ARGS1(char *, fname)
+PUBLIC void HTAddSugFilename ARGS1(
+	char *,		fname)
 {
     char *new;
     char *old;
@@ -1312,7 +1356,8 @@ PUBLIC void HTAddSugFilename ARGS1(char *, fname)
  *  CHANGE_SUG_FILENAME -- Foteos Macrides 29-Dec-1993
  *	Upgraded for use with Lynx2.2 - FM 17-Jan-1994
  */
-PUBLIC void change_sug_filename ARGS1(char *,fname)
+PUBLIC void change_sug_filename ARGS1(
+	char *,		fname)
 {
      char *temp, *cp, *cp1, *end;
      int len;
@@ -1525,10 +1570,11 @@ PUBLIC void change_sug_filename ARGS1(char *,fname)
 /*
  *	To create standard temporary file names
  */
-PUBLIC void tempname ARGS2(char *,namebuffer, int,action)
+PUBLIC void tempname ARGS2(
+	char *,		namebuffer,
+	int,		action)
 {
 	static int counter = 0;
-
 
 	if (action == REMOVE_FILES) { /* REMOVE ALL FILES */ 
 	    for (; counter > 0; counter--) {
@@ -1552,7 +1598,8 @@ PUBLIC void tempname ARGS2(char *,namebuffer, int,action)
 /*
  *  Convert 4, 6, 2, 8 to left, right, down, up, etc.
  */
-PUBLIC int number2arrows ARGS1(int,number)
+PUBLIC int number2arrows ARGS1(
+	int,		number)
 {
       switch(number) {
             case '1':
@@ -1671,7 +1718,8 @@ PRIVATE BOOLEAN *restrict_flag[] = {
 #endif /* DIRED_SUPPORT */
        (BOOLEAN *) 0  };
 
-PUBLIC void parse_restrictions ARGS1(char *,s)
+PUBLIC void parse_restrictions ARGS1(
+	char *,		s)
 {
       char *p;
       char *word;
@@ -1729,7 +1777,7 @@ PUBLIC void parse_restrictions ARGS1(char *,s)
 
       p = s;
       while (*p) {
-          while (isspace(*p))
+          while (isspace((unsigned char)*p))
               p++;
           if (*p == '\0')
               break;
@@ -1797,7 +1845,10 @@ PUBLIC int LYCheckMail NOARGS
         }
         user[userlen] = '\0';
         while (user[0] &&
-	       isspace(user[--userlen])) /* suck up trailing spaces */
+	       /*
+	        *  Suck up trailing spaces.
+	        */
+	       isspace((unsigned char)user[--userlen]))
             user[userlen] = '\0';
     }
 
@@ -1881,14 +1932,56 @@ PUBLIC int LYCheckMail NOARGS
 #endif /* VMS */
 
 /*
+**  This function ensures that an href will be
+**  converted to a fully resolved, absolute URL,
+**  with guessing of the host or expansions of
+**  lead tildes via LYConvertToURL() if needed,
+**  and tweaking/simplifying via HTParse().  It
+**  is used for LynxHome, startfile, homepage,
+**  an 'g'oto entries, after they have been
+**  passed to LYFillLocalFileURL(). - FM
+*/
+PUBLIC void LYEnsureAbsoluteURL ARGS2(
+	char **,	href,
+	char *,		name)
+{
+    char *temp = NULL;
+
+    if (!(*href && *(*href)))
+        return;
+
+    /*
+     *  If it is not a URL then make it one.
+     */
+    if (!strcasecomp(*href, "news:")) {
+        StrAllocCat(*href, "*");
+    } else if (!strcasecomp(*href, "nntp:") ||
+    	       !strcasecomp(*href, "snews:")) {
+        StrAllocCat(*href, "/*");
+    }
+    if (!is_url(*href)) {
+	if (TRACE)
+	    fprintf(stderr, "%s%s'%s' is not a URL\n",
+	    	    (name ? name : ""), (name ? " " : ""), *href);
+        LYConvertToURL(href);
+    }
+    if ((temp = HTParse(*href, "", PARSE_ALL)) != NULL && *temp != '\0')
+        StrAllocCopy(*href, temp);
+    FREE(temp);
+}
+
+/*
  *  Rewrite and reallocate a previously allocated string
  *  as a file URL if the string resolves to a file or
  *  directory on the local system, otherwise as an
  *  http URL. - FM
  */
-PUBLIC void LYConvertToURL ARGS1(char **, AllocatedString)
+PUBLIC void LYConvertToURL ARGS1(
+	char **,	AllocatedString)
 {
     char *old_string = *AllocatedString;
+    char *temp = NULL;
+    char *cp = NULL;
 
     if (!old_string || *old_string == '\0')
         return;
@@ -1897,11 +1990,12 @@ PUBLIC void LYConvertToURL ARGS1(char **, AllocatedString)
     StrAllocCopy(*AllocatedString,"file://localhost");
 
     if (*old_string != '/') {
+	char *fragment = NULL;
 #ifdef VMS
 	/*
 	 *  Not a SHELL pathspec.  Get the full VMS spec and convert it.
 	 */
-	char *cp, *cur_dir=NULL;
+	char *cur_dir = NULL;
 	static char url_file[256], file_name[256], dir_name[256];
 	unsigned long context = 0;
 	$DESCRIPTOR(url_file_dsc, url_file);
@@ -1909,14 +2003,25 @@ PUBLIC void LYConvertToURL ARGS1(char **, AllocatedString)
 	if (*old_string == '~') {
 	    /*
 	     *  On VMS, we'll accept '~' on the command line as
-	     *  $HOME, and assume the rest of the path, if any,
-	     *  has SHELL syntax.
+	     *  Home_Dir(), and assume the rest of the path, if
+	     *  any, has SHELL syntax.
 	     */
-	    StrAllocCat(*AllocatedString, HTVMS_wwwName(getenv("HOME")));
-	    if (old_string[1])
-		StrAllocCat(*AllocatedString, (old_string+1));
+	    StrAllocCat(*AllocatedString, HTVMS_wwwName((char *)Home_Dir()));
+	    if ((cp = strchr(old_string, '/')) != NULL) {
+	        /*
+		 *  Append rest of path, if present, skipping "user" if
+		 *  "~user" was entered, simplifying, and eliminating
+		 *  any residual relative elements. - FM
+		 */
+		StrAllocCopy(temp, cp);
+		LYTrimRelFromAbsPath(temp);
+		StrAllocCat(*AllocatedString, temp);
+		FREE(temp);
+	    }
 	    goto have_VMS_URL;
 	} else {
+	    if ((fragment = strchr(old_string, '#')) != NULL)
+	        *fragment = '\0';
 	    strcpy(url_file, old_string);
 	}
 	url_file_dsc.dsc$w_length = (short) strlen(url_file);
@@ -1925,15 +2030,20 @@ PUBLIC void LYConvertToURL ARGS1(char **, AllocatedString)
 	    /*
 	     *  We found the file.  Convert to a URL pathspec.
 	     */
-	    if ((cp=strchr(file_name, ';')) != NULL) {
+	    if ((cp = strchr(file_name, ';')) != NULL) {
 		*cp = '\0';
 	    }
 	    for (cp = file_name; *cp; cp++) {
 		*cp = TOLOWER(*cp);
 	    }
 	    StrAllocCat(*AllocatedString, HTVMS_wwwName(file_name));
-	    if ((cp=strchr(old_string, ';')) != NULL) {
+	    if ((cp = strchr(old_string, ';')) != NULL) {
 		StrAllocCat(*AllocatedString, cp);
+	    }
+	    if (fragment != NULL) {
+	        *fragment = '#';
+	        StrAllocCat(*AllocatedString, fragment);
+		fragment = NULL;
 	    }
 	} else if ((NULL != getcwd(dir_name, 255, 0)) &&
 		   0 == chdir(old_string)) {
@@ -1941,20 +2051,31 @@ PUBLIC void LYConvertToURL ARGS1(char **, AllocatedString)
 	     * Probably a directory.  Try converting that.
 	     */
 	    StrAllocCopy(cur_dir, dir_name);
+	    if (fragment != NULL) {
+	        *fragment = '#';
+	    }
 	    if (NULL != getcwd(dir_name, 255, 0)) {
 		/*
 		 * Yup, we got it!
 		 */
+		for (cp = dir_name; *cp; cp++) {
+		    *cp = TOLOWER(*cp);
+		}
 		StrAllocCat(*AllocatedString, dir_name);
+		if (fragment != NULL) {
+		    StrAllocCat(*AllocatedString, fragment);
+		    fragment = NULL;
+		}
 	    } else {
 		/*
 		 *  Nope.  Assume it's an http URL with
 		 *  the "http://" defaulted, if we can't
 		 *  rule out a bad VMS path.
 		 */
+		fragment = NULL;
 		if (strchr(old_string, '[') ||
-		    ((cp=strchr(old_string, ':')) != NULL &&
-		     !isdigit(cp[1])) ||
+		    ((cp = strchr(old_string, ':')) != NULL &&
+		     !isdigit((unsigned char)cp[1])) ||
 		    !LYExpandHostForURL((char **)&old_string,
 		    			URLDomainPrefixes,
 					URLDomainSuffixes)) {
@@ -1990,9 +2111,13 @@ PUBLIC void LYConvertToURL ARGS1(char **, AllocatedString)
 	     *  with the "http://" defaulted, if we can't
 	     *  rule out a bad VMS path.
 	     */
+	    if (fragment != NULL) {
+	        *fragment = '#';
+		fragment = NULL;
+	    }
 	    if (strchr(old_string, '[') ||
-		((cp=strchr(old_string, ':')) != NULL &&
-		 !isdigit(cp[1])) ||
+		((cp = strchr(old_string, ':')) != NULL &&
+		 !isdigit((unsigned char)cp[1])) ||
 		!LYExpandHostForURL((char **)&old_string,
 		    		    URLDomainPrefixes,
 				    URLDomainSuffixes)) {
@@ -2031,11 +2156,19 @@ have_VMS_URL:
 #else /* Unix: */
 	if (*old_string == '~') {
 	    /*
-	     * On Unix, covert '~' to $HOME.
+	     *  On Unix, covert '~' to Home_Dir().
 	     */
-	    StrAllocCat(*AllocatedString, getenv("HOME"));
-	    if (old_string[1]) {
-		StrAllocCat(*AllocatedString, (old_string+1));
+	    StrAllocCat(*AllocatedString, Home_Dir());
+	    if ((cp = strchr(old_string, '/')) != NULL) {
+	        /*
+		 *  Append rest of path, if present, skipping "user" if
+		 *  "~user" was entered, simplifying, and eliminating
+		 *  any residual relative elements. - FM
+		 */
+		StrAllocCopy(temp, cp);
+		LYTrimRelFromAbsPath(temp);
+		StrAllocCat(*AllocatedString, temp);
+		FREE(temp);
 	    }
 	    if (TRACE) {
 		fprintf(stderr, "Converted '%s' to '%s'\n",
@@ -2046,22 +2179,64 @@ have_VMS_URL:
 	     *  Create a full path to the current default directory.
 	     */
 	    char curdir[DIRNAMESIZE];
-	    char *temp=NULL;
 	    struct stat st;
-	    FILE *fptemp=NULL;
+	    FILE *fptemp = NULL;
+	    BOOL is_local = FALSE;
 #ifdef NO_GETCWD
 	    getwd (curdir);
 #else
 	    getcwd (curdir, DIRNAMESIZE);
 #endif /* NO_GETCWD */
+	    /*
+	     *  Concatenate and simplify, trimming any
+	     *  residual relative elements. - FM
+	     */
 	    StrAllocCopy(temp, curdir);
 	    StrAllocCat(temp, "/");
 	    StrAllocCat(temp, old_string);
+	    LYTrimRelFromAbsPath(temp);
 	    if (TRACE) {
 		fprintf(stderr, "Converted '%s' to '%s'\n", old_string, temp);
 	    }
-	    if ((stat(temp, &st) < 0) &&
-		!(fptemp=fopen(temp, "r"))) {
+	    if ((stat(temp, &st) > -1) ||
+	        (fptemp = fopen(temp, "r")) != NULL) {
+		/*
+		 *  It is a subdirectory or file on the local system.
+		 */
+		StrAllocCat(*AllocatedString, temp);
+		if (TRACE) {
+		    fprintf(stderr, "Converted '%s' to '%s'\n",
+				    old_string, *AllocatedString);
+		}
+		is_local = TRUE;
+	    } else {
+	        if ((fragment = strchr(temp, '#')) != NULL)
+	            *fragment = '\0';
+		StrAllocCopy(cp, temp);
+		HTUnEscape(cp);
+		if ((stat(cp, &st) > -1) ||
+		    (fptemp = fopen(cp, "r")) != NULL) {
+		    /*
+		     *  It is a subdirectory of file on the local system
+		     *  with escaped characters and/or a fragment to be
+		     *  appended to the URL. - FM
+		     */
+		    *fragment = '#';
+		    fragment = NULL;
+		    StrAllocCat(*AllocatedString, temp);
+		    if (TRACE) {
+		        fprintf(stderr, "Converted '%s' to '%s'\n",
+					old_string, *AllocatedString);
+		    }
+		    is_local = TRUE;
+		}
+		FREE(cp);
+		if (fragment != NULL) {
+		    *fragment = '#';
+		    fragment = NULL;
+		}
+	    }
+	    if (is_local == FALSE) {
 		/*
 		 *  It's not an accessible subdirectory or file on the
 		 *  local system, so assume it's a URL request and guess
@@ -2085,15 +2260,6 @@ have_VMS_URL:
 		if (TRACE) {
 		    fprintf(stderr, "Trying: '%s'\n", *AllocatedString);
 		}
-	    } else {
-		/*
-		 *  It is a subdirectory or file on the local system.
-		 */
-		StrAllocCat(*AllocatedString, temp);
-		if (TRACE) {
-		    fprintf(stderr, "Converted '%s' to '%s'\n",
-				    old_string, *AllocatedString);
-		}
 	    }
 	    FREE(temp);
 	    if (fptemp) {
@@ -2103,17 +2269,56 @@ have_VMS_URL:
 #endif /* VMS */
     } else { 
 	/*
-	 *  Path begins with a slash.  Use it as is.
+	 *  Path begins with a slash.  Simplify and use it.
 	 */
-	StrAllocCat(*AllocatedString, old_string);
+	if (old_string[1] == '\0') {
+	    /*
+	     *  Request for root.  Respect it on Unix, but
+	     *  on VMS we treat that as a listing of the
+	     *  login directory. - FM
+	     */
+#ifdef VMS
+	    StrAllocCat(*AllocatedString, HTVMS_wwwName((char *)Home_Dir()));
+#else
+	    StrAllocCat(*AllocatedString, "/");
+#endif /* VMS */
+	} else if (old_string[1] == '~') {
+	    /*
+	     *  Has a Home_Dir() reference.  Handle it
+	     *  as if there weren't a lead slash. - FM
+	     */
+#ifdef VMS
+	    StrAllocCat(*AllocatedString, HTVMS_wwwName((char *)Home_Dir()));
+#else
+	    StrAllocCat(*AllocatedString, Home_Dir());
+#endif /* VMS */
+	    if ((cp = strchr((old_string + 1), '/')) != NULL) {
+	        /*
+		 *  Append rest of path, if present, skipping "user" if
+		 *  "~user" was entered, simplifying, and eliminating
+		 *  any residual relative elements. - FM
+		 */
+		StrAllocCopy(temp, cp);
+		LYTrimRelFromAbsPath(temp);
+		StrAllocCat(*AllocatedString, temp);
+		FREE(temp);
+	    }
+	} else {
+	    /*
+	     *  Normal absolute path.  Simplify, trim any
+	     *  residual relative elements, and append it. - FM
+	     */
+	    StrAllocCopy(temp, old_string);
+	    LYTrimRelFromAbsPath(temp);
+	    StrAllocCat(*AllocatedString, temp);
+	    FREE(temp);
+	}
 	if (TRACE) {
 	    fprintf(stderr, "Converted '%s' to '%s'\n",
 			    old_string, *AllocatedString);
 	}
     }
-    if (old_string) {
-	FREE(old_string);
-    }
+    FREE(old_string);
     if (TRACE) {
 	/* Pause so we can read the messages before invoking curses */
 	sleep(AlertSecs);
@@ -2146,17 +2351,29 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
     char DomainPrefix[80], *StartP, *EndP;
     char DomainSuffix[80], *StartS, *EndS;
     char *Str = NULL, *StrColon = NULL, *MsgStr = NULL;
-    char *Host = NULL, *HostColon = NULL;
+    char *Host = NULL, *HostColon = NULL, *host = NULL;
     char *Path = NULL;
+    char *Fragment = NULL;
     struct hostent  *phost;
     BOOLEAN GotHost = FALSE;
+    BOOLEAN Startup = (helpfilepath == NULL);
 
     /*
-     *  If we were passed a NULL or zero-length string, or if it
-     *  begins with a slash, don't continue pointlessly. - FM
+     *  If it's a NULL or zero-length string,
+     *  or if it begins with a slash or hash,
+     *  don't continue pointlessly. - FM
      */
-    if (!(*AllocatedString) ||
-        *AllocatedString[0] == '\0' || *AllocatedString[0] == '/') {
+    if (!(*AllocatedString) || *AllocatedString[0] == '\0' ||
+        *AllocatedString[0] == '/' || *AllocatedString[0] == '#') {
+        return GotHost;
+    }
+
+    /*
+     *  If it's a partial or relative path,
+     *  don't continue pointlessly. - FM
+     */
+    if (!strncmp(*AllocatedString, "..", 2) ||
+        !strncmp(*AllocatedString, "./", 2)) {
         return GotHost;
     }
 
@@ -2168,7 +2385,18 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
      */
     StrAllocCopy(Str, *AllocatedString);
     if ((Path = strchr(Str, '/')) != NULL) {
+        /*
+	 *  Have a path.  Any fragment should
+	 *  already be included in Path. - FM
+	 */
         *Path = '\0';
+    } else if ((Fragment = strchr(Str, '#')) != NULL) {
+        /*
+	 *  No path, so check for a fragment and
+	 *  trim that, to be restored after filling
+	 *  in the Host[:port] field. - FM
+	 */
+        *Fragment = '\0';
     }
 
     /*
@@ -2177,7 +2405,8 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
      *  information so we can restore the port field after
      *  filling in the host field. - FM
      */
-    if ((StrColon = strrchr(Str, ':')) != NULL && isdigit(StrColon[1])) {
+    if ((StrColon = strrchr(Str, ':')) != NULL &&
+        isdigit((unsigned char)StrColon[1])) {
         if (StrColon == Str) {
 	    FREE(Str);
 	    return GotHost;
@@ -2189,14 +2418,19 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
      *  Do a DNS test on the potential host field
      *  as presently trimmed. - FM
      */
+    StrAllocCopy(host, Str);
+    HTUnEscape(host);
     if (LYCursesON) {
         StrAllocCopy(MsgStr, "Looking up ");
-	StrAllocCat(MsgStr, Str);
+	StrAllocCat(MsgStr, host);
 	StrAllocCat(MsgStr, " first.");
 	HTProgress(MsgStr);
+    } else if (Startup && !dump_output_immediately) {
+	fprintf(stdout, "Looking up '%s' first.\n", host);
     }
-    if ((phost = gethostbyname(Str)) != NULL) {
+    if ((phost = gethostbyname(host)) != NULL) {
         GotHost = TRUE;
+	FREE(host);
         FREE(Str);
         FREE(MsgStr);
 	return GotHost;
@@ -2209,6 +2443,25 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
     */
     StartP = ((prefix_list && Str[strlen(Str)-1] != '.') ?
     					     prefix_list : "");
+    /*
+    **  If we have a prefix, but the allocated string is
+    **  one of the common host prefixes, make our prefix
+    **  a zero-length string. - FM
+    */
+    if (*StartP && *StartP != '.') {
+        if (!strncasecomp(*AllocatedString, "www.", 4) ||
+	    !strncasecomp(*AllocatedString, "ftp.", 4) ||
+	    !strncasecomp(*AllocatedString, "gopher.", 7) ||
+	    !strncasecomp(*AllocatedString, "wais.", 5) ||
+	    !strncasecomp(*AllocatedString, "cso.", 4) ||
+	    !strncasecomp(*AllocatedString, "ns.", 3) ||
+	    !strncasecomp(*AllocatedString, "ph.", 3) ||
+	    !strncasecomp(*AllocatedString, "finger.", 7) ||
+	    !strncasecomp(*AllocatedString, "news.", 5) ||
+	    !strncasecomp(*AllocatedString, "nntp.", 5)) {
+	    StartP = "";
+	}
+    }
     while ((*StartP) && (WHITE(*StartP) || *StartP == ',')) {
         StartP++;	/* Skip whitespace and separators */
     }
@@ -2249,16 +2502,20 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	    }
 	    StrAllocCat(Host, DomainSuffix);
 	    if ((HostColon = strrchr(Host, ':')) != NULL &&
-	        isdigit(HostColon[1])) {
+	        isdigit((unsigned char)HostColon[1])) {
 		*HostColon = '\0';
 	    }
+	    StrAllocCopy(host, Host);
+	    HTUnEscape(host);
 	    if (LYCursesON) {
  	        StrAllocCopy(MsgStr, "Looking up ");
- 		StrAllocCat(MsgStr, Host);
+ 		StrAllocCat(MsgStr, host);
  		StrAllocCat(MsgStr, ", guessing...");
  		HTProgress(MsgStr);
+	    } else if (Startup && !dump_output_immediately) {
+	        fprintf(stdout, "Looking up '%s', guessing...\n", host);
 	    }
-	    GotHost = ((phost = gethostbyname(Host)) != NULL);
+	    GotHost = ((phost = gethostbyname(host)) != NULL);
 	    if (HostColon != NULL) {
 	        *HostColon = ':';
 	    }
@@ -2270,11 +2527,12 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 		    if (TRACE) {
 			fprintf(stderr,
 	 "*** LYExpandHostForURL interrupted while %s failed to resolve\n",
-				Host);
+				host);
 			    }
 		    FREE(Str);
 		    FREE(MsgStr);
 		    FREE(Host);
+		    FREE(host);
 		    return FALSE; /* We didn't find a valid name. */
 		}
 
@@ -2323,6 +2581,10 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
         if (Path) {
 	    *Path = '/';
 	    StrAllocCat(Host, Path);
+	} else if (Fragment) {
+	    StrAllocCat(Host, "/");
+	    *Fragment = '#';
+	    StrAllocCat(Host, Fragment);
 	}
 	StrAllocCopy(*AllocatedString, Host);
     }
@@ -2333,6 +2595,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
     FREE(Str);
     FREE(MsgStr);
     FREE(Host);
+    FREE(host);
     return GotHost;
 }
 
@@ -2442,6 +2705,83 @@ PUBLIC BOOLEAN LYAddSchemeForURL ARGS2(
 }
 
 /*
+ *  This function expects an absolute Unix or VMS SHELL path
+ *  spec as an allocated string, simplifies it, and trims out
+ *  any residual relative elements.  It also checks whether
+ *  the path had a terminal slash, and if it didn't, makes
+ *  sure that the simplified path doesn't either.  If it's
+ *  a directory, our convention is to exclude "Up to parent"
+ *  links when a terminal slash is present. - FM
+ */
+PUBLIC void LYTrimRelFromAbsPath ARGS1(
+	char *,		path)
+{
+    char *cp;
+    int i;
+    BOOL TerminalSlash;
+
+    /*
+     *  Make sure we have a pointer to an absolute path. - FM
+     */
+    if (path == NULL || *path != '/')
+        return;
+
+    /*
+     *  Check whether the path has a terminal slash. - FM
+     */
+    TerminalSlash = (path[(strlen(path) - 1)] == '/');
+
+    /*
+     *  Simplify the path and then do any necessary trimming. - FM
+     */
+    HTSimplify(path);
+    cp = path;
+    while (cp[1] == '.') {
+	if (cp[2] == '\0') {
+	    /*
+	     *  Eliminate trailing dot. - FM
+	     */
+	    cp[1] = '\0';
+	} else if (cp[2] == '/') {
+	    /*
+	     *  Skip over the "/." of a "/./". - FM
+	     */
+	    cp += 2;
+	} else if (cp[2] == '.' && cp[3] == '\0') {
+	    /*
+	     *  Eliminate trailing dotdot. - FM
+	     */
+	    cp[1] = '\0';
+	} else if (cp[2] == '.' && cp[3] == '/') {
+	    /*
+	     *  Skip over the "/.." of a "/../". - FM
+	     */
+	    cp += 3;
+	} else {
+	    /*
+	     *  Done trimming. - FM
+	     */
+	    break;
+	}
+    }
+
+    /*
+     *  Load any shifts into path, and eliminate any
+     *  terminal slash created by HTSimplify() or our
+     *  walk, but not present originally. - FM
+     */
+    if (cp > path) {
+        for (i = 0; cp[i] != '\0'; i++)
+	    path[i] = cp[i];
+	path[i] = '\0';
+    }
+    if (TerminalSlash == FALSE &&
+        path[(strlen(path) - 1)] == '/') {
+        path[(strlen(path) - 1)] = '\0';
+    }
+}
+
+/*
  *  Example Client-Side Include interface.
  *
  *  This is called from SGML.c and simply returns markup for reporting
@@ -2478,7 +2818,9 @@ PUBLIC void LYDoCSI ARGS3(
  *  Define_VMSLogical -- Fote Macrides 04-Apr-1995
  *	Define VMS logicals in the process table.
  */
-PUBLIC void Define_VMSLogical ARGS2(char *, LogicalName, char *, LogicalValue)
+PUBLIC void Define_VMSLogical ARGS2(
+	char *,		LogicalName,
+	char *,		LogicalValue)
 {
     $DESCRIPTOR(lname, "");
     $DESCRIPTOR(lvalue, "");
@@ -2532,6 +2874,513 @@ PUBLIC CONST char * Home_Dir NOARGS
     return homedir;
 }
 
+/*
+ *  This function checks the acceptability of file paths that
+ *  are intended to be off the home directory.  The file path
+ *  should be passed in fbuffer, together with the size of the
+ *  buffer.  The function simplifies the file path, and if it
+ *  is acceptible, loads it into fbuffer and returns TRUE.
+ *  Otherwise, it does not modify fbuffer and returns FALSE.
+ *  If a subdirectory is present and the path does not begin
+ *  with "./", that is prefixed to make the situation clear. - FM
+ */
+PUBLIC BOOLEAN LYPathOffHomeOK ARGS2(
+	char *,		fbuffer,
+	int,		fbuffer_size)
+{
+    char *file = NULL;
+    char *cp, *cp1;
+
+    /*
+     *  Make sure we have an fbuffer and a string in it. - FM
+     */
+    if (!fbuffer || fbuffer_size < 2 || fbuffer[0] == '\0') {
+	return(FALSE);
+    }
+    StrAllocCopy(file, fbuffer);
+    cp = file;
+
+    /*
+     *  Check for an inappropriate reference to the
+     *  home directory, and correct it if we can. - FM
+     */
+#ifdef VMS
+    if (!strncasecomp(cp, "sys$login", 9)) {
+        if (*(cp + 9) == '\0') {
+	    /*
+	     *  Reject "sys$login". - FM
+	     */
+	    FREE(file);
+	    return(FALSE);
+	}
+	if (*(cp + 9) == ':') {
+	    cp += 10;
+	    if (*cp == '\0') {
+	        /*
+		 *  Reject "sys$login:".  Otherwise, we have
+		 *  converted "sys$login:file" to "file", or
+		 *  have left a strange path for VMS as it
+		 *  was originally. - FM
+		 */
+	        FREE(file);
+		return(FALSE);
+	    }
+	}
+    }
+#endif /* VMS */
+    if (*cp == '~') {
+        if (*(cp + 1) == '/') {
+	    if (*(cp + 2) != '\0') {
+	        if ((cp1 = strchr((cp + 2), '/')) != NULL) {
+	            /*
+		     *  Convert "~/subdir(s)/file"
+		     *  to "./subdir(s)/file". - FM
+		     */
+		    *cp = '.';
+		} else {
+	            /*
+		     *  Convert "~/file" to "file". - FM
+		     */
+		    cp += 2;
+		}
+	    } else {
+	        /*
+		 *  Reject "~/". - FM
+		 */
+	        FREE(file);
+		return(FALSE);
+	    }
+	} else if ((*(cp + 1) != '\0') &&
+		   (cp1 = strchr((cp + 1), '/')) != NULL) {
+	    cp = (cp1 - 1) ;
+	    if (*(cp + 2) != '\0') {
+	        if ((cp1 = strchr((cp + 2), '/')) != NULL) {
+		    /*
+		     *  Convert "~user/subdir(s)/file" to
+		     *  "./subdir(s)/file".  If user is someone
+		     *  else, we covered a spoof.  Otherwise, 
+		     *  we simplified. - FM
+		     */
+		    *cp = '.';
+		} else {
+		    /*
+		     *  Convert "~user/file" to "file". - FM
+		     */
+		    cp += 2;
+		}
+	    } else {
+	        /*
+		 *  Reject "~user/". - FM
+		 */
+	        FREE(file);
+		return(FALSE);
+	    }
+	} else {
+	    /*
+	     *  Reject "~user". - FM
+	     */
+	    FREE(file);
+	    return(FALSE);
+	}
+    }
+
+#ifdef VMS
+    /*
+     *  Check for VMS path specs, and reject if still present. - FM
+     */
+    if (strchr(cp, ':') != NULL || strchr(cp, ']') != NULL) {
+        FREE(file);
+	return(FALSE);
+    }
+#endif /* VMS */
+
+    /*
+     *  Check for a URL or absolute path, and reject if present. - FM
+     */
+    if (is_url(cp) || *cp == '/') {
+        FREE(file);
+	return(FALSE);
+    }
+
+    /*
+     *  Simplify it. - FM
+     */
+    HTSimplify(cp);
+
+    /*
+     *  Check if it has a pointless "./". - FM
+     */
+    if (!strncmp(cp, "./", 2)) {
+        if ((cp1 = strchr((cp + 2), '/')) == NULL) {
+	    cp += 2;
+	}
+    }
+
+    /*
+     *  Check for spoofing. - FM
+     */
+    if (*cp == '\0' || *cp == '/' || cp[(strlen(cp) - 1)] == '/' ||
+        strstr(cp, "..") != NULL || !strcmp(cp, ".")) {
+        FREE(file);
+	return(FALSE);
+    }
+
+    /*
+     *  Load what we have at this point into fbuffer,
+     *  trimming if too long, and claim it's OK. - FM
+     */
+    if (fbuffer_size > 3 && strncmp(cp, "./", 2) && strchr(cp, '/')) {
+        /*
+	 *  We have a subdirectory and no lead "./", so
+	 *  prefix it to make the situation clear. - FM
+	 */
+        strcpy(fbuffer, "./");
+	if (strlen(cp) > (fbuffer_size - 3))
+	    cp[(fbuffer_size - 3)] = '\0';
+        strcat(fbuffer, cp);
+    } else {
+        if (strlen(cp) > (fbuffer_size - 1))
+	    cp[(fbuffer_size - 1)] = '\0';
+	strcpy(fbuffer, cp);
+    }
+    FREE(file);
+    return(TRUE);
+}
+
+/*
+ *  This function appends fname to the home path and returns
+ *  the full path and filename.  The fname string can be just
+ *  a filename (e.g., "lynx_bookmarks.html"), or include a
+ *  subirectory off the home directory, in which case fname
+ *  should begin with "./" (e.g., ./BM/lynx_bookmarks.html)
+ *  Use LYPathOffHomeOK() to check and/or fix up fname before
+ *  calling this function.  On VMS, the resultant full path
+ *  and filename are converted to VMS syntax. - FM
+ */
+PUBLIC void LYAddPathToHome ARGS3(
+	char *,		fbuffer,
+	int,		fbuffer_size,
+	char *,		fname)
+{
+    char *home = NULL;
+    char *file = fname;
+    int len;
+
+    /*
+     *  Make sure we have a buffer. - FM
+     */
+    if (!fbuffer)
+        return;
+    if (fbuffer_size < 2) {
+        fbuffer[0] = '\0';
+	return;
+    }
+    fbuffer[(fbuffer_size - 1)] = '\0';
+
+    /*
+     *  Make sure we have a file name. - FM
+     */
+    if (!file)
+        file = "";
+
+    /*
+     *  Set up home string and length. - FM
+     */
+    StrAllocCopy(home, Home_Dir());
+    if (!(home && *home))
+	/*
+	 *  Home_Dir() has a bug if this ever happens. - FM
+	 */
+#ifdef VMS
+        StrAllocCopy(home, "Error:");
+#else
+	StrAllocCopy(home, "/error");
+#endif /* VMS */
+    len = fbuffer_size - (strlen(home) + 1);
+    if (len <= 0) {
+        /*
+	 *  Buffer is smaller than or only big enough for the home path.
+	 *  Load what fits of the home path and return.  This will fail,
+	 *  but we need something in the buffer. - FM
+	 */
+        LYstrncpy(fbuffer, home, (fbuffer_size - 1));
+	FREE(home);
+	return;
+    }
+
+#ifdef VMS
+    /*
+     *  Check whether we have a subdirectory path or just a filename. - FM
+     */
+    if (!strncmp(file, "./", 2)) {
+        /*
+	 *  We have a subdirectory path. - FM
+	 */
+	if (home[strlen(home)-1] == ']') {
+	    /*
+	     *  We got the home directory, so convert it to
+	     *  SHELL syntax and append subdirectory path,
+	     *  then convert that to VMS syntax. - FM
+	     */
+	    char *temp = (char *)calloc(1,
+	    				(strlen(home) + strlen(file) + 10));
+	    sprintf(temp, "%s%s", HTVMS_wwwName(home), (file + 1));
+	    sprintf(fbuffer, "%.*s",
+	    	    (fbuffer_size - 1), HTVMS_name("", temp));
+	    FREE(temp);
+	} else {
+	    /*
+	     *  This will fail, but we need something in the buffer. - FM
+	     */
+	    sprintf(fbuffer, "%s%.*s", home, len, file);
+	}
+    } else {
+        /*
+	 *  We have a file in the home directory. - FM
+	 */
+	sprintf(fbuffer, "%s%.*s", home, len, file);
+    }
+#else
+    /*
+     *  Check whether we have a subdirectory path or just a filename. - FM
+     */
+    sprintf(fbuffer, "%s/%.*s", home, len,
+		     (strncmp(file, "./", 2) ? file : (file + 2)));
+#endif /* VMS */
+    FREE(home);
+}
+
+/*
+ *  This function takes a string in the format
+ *	"Mon, 01-Jan-96 13:45:35 GMT" or
+ *	"Mon,  1 Jan 1996 13:45:35 GMT""
+ *  as an argument, and returns its conversion to clock format
+ *  (seconds since 00:00:00 Jan 1 1970), or 0 if the string
+ *  doesn't match the expected pattern.  It also returns 0
+ *  if the time is in the past.  It is intended for handling
+ *  'expires' strings homologously to 'max-age' strings, for
+ *  which 0 is the minimum, and greater values are handled
+ *  as '[max-age seconds] + time(NULL)'. - FM
+ */
+PUBLIC time_t LYmktime ARGS1(
+	char *,		string)
+{
+    char *s;
+    time_t now, clock;
+    int day, month, year, hour, minutes, seconds;
+    char *start;
+    char temp[8];
+
+    /*
+     *  Make sure we have a string to parse. - FM
+     */
+    if (!(string && *string))
+        return(0);
+    s = string;
+    if (TRACE)
+        fprintf(stderr, "LYmktime: Parsing '%s'\n", s);
+         
+    /*
+     *  Skip the "Day, " field. - FM
+     */
+    while (*s != '\0' && *s != ',')
+        s++;
+    if (*s == '\0')
+        return(0);
+    s++;
+    while (*s != '\0' && isspace((unsigned char)*s))
+        s++;
+    if (*s == '\0' || !isdigit((unsigned char)*s))
+        return(0);
+
+    /*
+     *  Get the numeric day and convert to an integer. - FM
+     */
+    start = s;
+    while (*s != '\0' && isdigit((unsigned char)*s))
+       s++;
+    if (*s == '\0' || (s - start) > 2)
+        return(0);
+    LYstrncpy(temp, start, (int)(s - start));
+    day = atoi(temp);
+    if (day < 1 || day > 31)
+        return(0);
+
+    /*
+     *  Get the month string and convert to an integer. - FM
+     */
+    while (*s != '\0' && !isalpha((unsigned char)*s))
+        s++;
+    if (*s == '\0')
+        return(0);
+    start = s;
+    while (*s != '\0' && isalpha((unsigned char)*s))
+        s++;
+    if (*s == '\0' || (s - start) < 3 || (s - start) > 9)
+        return(0);
+    LYstrncpy(temp, start, 3);
+    switch (TOUPPER(temp[0])) {
+        case 'A':
+	    if (!strcasecomp(temp, "Apr")) {
+	        month = 4;
+	    } else if (!strcasecomp(temp, "Aug")) {
+	        month = 8;
+	    } else {
+	        return(0);
+	    }
+	    break;
+	case 'D':
+	    if (!strcasecomp(temp, "Dec")) {
+	        month = 12;
+	    } else {
+	        return(0);
+	    }
+	    break;
+	case 'F':
+	    if (!strcasecomp(temp, "Feb")) {
+	        month = 2;
+	    } else {
+	        return(0);
+	    }
+	    break;
+	case 'J':
+	    if (!strcasecomp(temp, "Jan")) {
+	        month = 1;
+	    } else if (!strcasecomp(temp, "Jun")) {
+	        month = 6;
+	    } else if (!strcasecomp(temp, "Jul")) {
+	        month = 7;
+	    } else {
+	        return(0);
+	    }
+	    break;
+	case 'M':
+	    if (!strcasecomp(temp, "Mar")) {
+	        month = 3;
+	    } else if (!strcasecomp(temp, "May")) {
+	        month = 5;
+	    } else {
+	        return(0);
+	    }
+	    break;
+	case 'N':
+	    if (!strcasecomp(temp, "Nov")) {
+	        month = 11;
+	    } else {
+	        return(0);
+	    }
+	    break;
+	case 'O':
+	    if (!strcasecomp(temp, "Oct")) {
+	        month = 10;
+	    } else {
+	        return(0);
+	    }
+	    break;
+	case 'S':
+	    if (!strcasecomp(temp, "Sep")) {
+	        month = 9;
+	    } else {
+	        return(0);
+	    }
+	    break;
+	default:
+	    return(0);
+    }
+
+    /*
+     *  Get the numeric year string and convert to an integer. - FM
+     */
+    while (*s != '\0' && !isdigit((unsigned char)*s))
+        s++;
+    if (*s == '\0')
+        return(0);
+    start = s;
+    while (*s != '\0' && isdigit((unsigned char)*s))
+        s++;
+    if (*s == '\0')
+        return(0);
+    if ((s - start) == 4) {
+        LYstrncpy(temp, start, 4);
+    } else if ((s - start) == 2) {
+    	now = time(NULL);
+	LYstrncpy(temp, ((char *)ctime(&now) + 20), 2);
+	strncat(temp, start, 2);
+	temp[4] = '\0'; 
+    } else {
+        return(0);
+    }
+    year = atoi(temp);
+    
+    /*
+     *  Get the numeric hour string and convert to an integer. - FM
+     */
+    while (*s != '\0' && !isdigit((unsigned char)*s))
+        s++;
+    if (*s == '\0')
+        return(0);
+    start = s;
+    while (*s != '\0' && isdigit((unsigned char)*s))
+        s++;
+    if (*s != ':' || (s - start) > 2)
+        return(0);
+    LYstrncpy(temp, start, (int)(s - start));
+    hour = atoi(temp);
+
+    /*
+     *  Get the numeric minutes string and convert to an integer. - FM
+     */
+    while (*s != '\0' && !isdigit((unsigned char)*s))
+        s++;
+    if (*s == '\0')
+        return(0);
+    start = s;
+    while (*s != '\0' && isdigit((unsigned char)*s))
+        s++;
+    if (*s != ':' || (s - start) > 2)
+        return(0);
+    LYstrncpy(temp, start, (int)(s - start));
+    minutes = atoi(temp);
+
+    /*
+     *  Get the numeric seconds string and convert to an integer. - FM
+     */
+    while (*s != '\0' && !isdigit((unsigned char)*s))
+        s++;
+    if (*s == '\0')
+        return(0);
+    start = s;
+    while (*s != '\0' && isdigit((unsigned char)*s))
+        s++;
+    if (*s == '\0' || (s - start) > 2)
+        return(0);
+    LYstrncpy(temp, start, (int)(s - start));
+    seconds = atoi(temp);
+
+    /*
+     *  Convert to clock format (seconds since 00:00:00 Jan 1 1970),
+     *  but then zero it if it's in the past.  - FM
+     */
+    month -= 3;
+    if (month < 0) {
+         month += 12;
+	 year--;
+    }
+    day += (year - 1968)*1461/4;
+    day += ((((month*153) + 2)/5) - 672);
+    clock = (time_t)((day * 60 * 60 * 24) +
+    		     (hour * 60 * 60) +
+    		     (minutes * 60) +
+		     seconds);
+    if (clock <= time(NULL))
+        clock = (time_t)0;
+    if (TRACE && clock > 0)
+        fprintf(stderr,
+		"LYmktime: clock=%i, ctime=%s", clock, ctime(&clock));
+
+    return(clock);
+}
+
 #ifdef NO_PUTENV
 /* no putenv on the next so we use this code instead!
  */
@@ -2581,9 +3430,8 @@ extern int errno;
 extern char **environ;
 
 /* Put STRING, which is of the form "NAME=VALUE", in  the environment.  */
-int
-putenv (string)
-     const char *string;
+PUBLIC int putenv ARGS1(
+	CONST char *,	string)
 {
   char *name_end = index (string, '=');
   register size_t size;
@@ -2633,76 +3481,3 @@ putenv (string)
   return 0;
 }
 #endif /* NO_PUTENV */
-
-#ifdef VMS
-/*
- *  This function appends fname to the home path and returns
- *  the full path and filename in VMS syntax.  The fname
- *  string can be just a filename, or include a subirectory
- *  off the home directory, in which chase fname should
- *  with "./" (e.g., ./BM/lynx_bookmarks.html). - FM
- */
-PUBLIC void LYVMS_HomePathAndFilename ARGS3(
-	char *,		fbuffer,
-	int,		fbuffer_size,
-	char *,		fname)
-{
-    char *home = NULL;
-    char *temp = NULL;
-    int len;
-
-    /*
-     *  Make sure we have a buffer and string. - FM
-     */
-    if (!fbuffer)
-        return;
-    if (!(fname && *fname) || fbuffer_size < 1) {
-        fbuffer[0] = '\0';
-	return;
-    }
-
-    /*
-     *  Set up home string and length. - FM
-     */
-    StrAllocCopy(home, Home_Dir());
-    if (!(home && *home))
-        StrAllocCopy(home, "Error:");
-    len = fbuffer_size - strlen(home) - 1;
-    if (len < 0) {
-        len = 0;
-	home[fbuffer_size] = '\0';
-    }
-
-    /*
-     *  Check whether we have a subdirectory path or just a filename. - FM
-     */
-    if (!strncmp(fname, "./", 2)) {
-        /*
-	 *  We have a subdirectory path. - FM
-	 */
-	if (home[strlen(home)-1] == ']') {
-	    /*
-	     *  We got the home directory, so convert it to
-	     *  SHELL syntax and append subdirectory path,
-	     *  then convert that to VMS syntax. - FM
-	     */
-	    temp = (char *)calloc(1, (strlen(home) + strlen(fname) + 10));
-	    sprintf(temp, "%s%s", HTVMS_wwwName(home), (fname + 1));
-	    sprintf(fbuffer, "%.*s",
-	    	    (fbuffer_size - 1), HTVMS_name("", temp));
-	    FREE(temp);
-	} else {
-	    /*
-	     *  This will fail, but we need something in the buffer. - FM
-	     */
-	    sprintf(fbuffer,"%s%.*s", home, len, fname);
-	}
-    } else {
-        /*
-	 *  We have a file in the home directory. - FM
-	 */
-	sprintf(fbuffer,"%s%.*s", home, len, fname);
-    }
-    FREE(home);
-}
-#endif /* VMS */

@@ -59,6 +59,7 @@ PUBLIC void HTFormatInit NOARGS
   							    1.0, 3.0, 0.0, 0);
   HTSetPresentation("image/gif",        XLOADIMAGE_COMMAND, 1.0, 3.0, 0.0, 0);
   HTSetPresentation("image/x-xbm",      XLOADIMAGE_COMMAND, 1.0, 3.0, 0.0, 0);
+  HTSetPresentation("image/x-xbitmap",  XLOADIMAGE_COMMAND, 1.0, 3.0, 0.0, 0);
   HTSetPresentation("image/x-png",      XLOADIMAGE_COMMAND, 1.0, 3.0, 0.0, 0);
   HTSetPresentation("image/x-rgb",      XLOADIMAGE_COMMAND, 1.0, 3.0, 0.0, 0);
   HTSetPresentation("image/x-tiff",     XLOADIMAGE_COMMAND, 1.0, 3.0, 0.0, 0);
@@ -397,7 +398,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(FILE *,fp, struct MailcapEntry *,mc)
 		/* ExceptionalNewline(mc->contenttype, atoi(eq)); */
 	    } else if (eq && !strcmp(arg, "q")) {
 	        mc->quality = atof(eq);
-		if (mc->quality < 0.001)
+		if (mc->quality > 0.000 && mc->quality < 0.001)
 		    mc->quality = 0.001;
 	    } else if (eq && !strcmp(arg, "mxb")) {
 	        mc->maxbytes = atol(eq);
@@ -490,6 +491,7 @@ PRIVATE int PassesTest ARGS1(struct MailcapEntry *,mc)
      *  Save overhead of system() calls by faking these. - FM
      */
     if (0 == strcasecomp(mc->testcommand, "test -n \"$DISPLAY\"")) {
+        FREE(mc->testcommand);
         if (TRACE)
 	    fprintf(stderr,"Testing for XWINDOWS environment.\n");
     	if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0') {
@@ -503,6 +505,7 @@ PRIVATE int PassesTest ARGS1(struct MailcapEntry *,mc)
 	}
     }
     if (0 == strcasecomp(mc->testcommand, "test -z \"$DISPLAY\"")) {
+        FREE(mc->testcommand);
         if (TRACE)
 	    fprintf(stderr,"Testing for NON_XWINDOWS environment.\n");
     	if (!((cp = getenv(DISPLAY)) != NULL && *cp != '\0')) {
@@ -520,6 +523,7 @@ PRIVATE int PassesTest ARGS1(struct MailcapEntry *,mc)
      *  Why do anything but return success for this one! - FM
      */
     if (0 == strcasecomp(mc->testcommand, "test -n \"$LYNX_VERSION\"")){
+        FREE(mc->testcommand);
         if (TRACE) {
 	    fprintf(stderr,"Testing for LYNX environment.\n");
 	    fprintf(stderr,"[HTInit] Test passed!\n");
@@ -530,6 +534,7 @@ PRIVATE int PassesTest ARGS1(struct MailcapEntry *,mc)
      *  ... or failure for this one! - FM
      */
     if (0 == strcasecomp(mc->testcommand, "test -z \"$LYNX_VERSION\"")) {
+        FREE(mc->testcommand);
         if (TRACE) {
 	    fprintf(stderr,"Testing for non-LYNX environment.\n");
 	    fprintf(stderr,"[HTInit] Test failed!\n");

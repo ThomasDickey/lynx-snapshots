@@ -44,6 +44,10 @@ extern char *no_proxy_putenv_cmd;
 extern char *list_format;
 #endif /* !VMS */
 
+#ifdef VMS
+extern char *LYCSwingPath;
+#endif /* VMS */
+
 #ifdef DIRED_SUPPORT
 extern BOOLEAN lynx_edit_mode;
 extern BOOLEAN no_dired_support;
@@ -88,7 +92,7 @@ extern char star_string[MAX_LINE + 1]; /* from GridText.c */
 extern BOOLEAN LYShowCursor;   /* show the cursor or hide it */
 extern BOOLEAN LYCursesON;  /* start_curses()->TRUE, stop_curses()->FALSE */
 extern BOOLEAN LYUserSpecifiedURL;  /* URL from a goto or document? */
-extern BOOLEAN LYJumpFileURL;   /* URL from the jump file shorcuts? */
+extern BOOLEAN LYJumpFileURL;   /* URL from the jump file shortcuts? */
 extern BOOLEAN jump_buffer;     /* TRUE if offering default shortcut */
 extern BOOLEAN goto_buffer;     /* TRUE if offering default goto URL */
 extern char *LYRequestTitle;    /* newdoc.title in calls to getfile() */
@@ -101,13 +105,14 @@ extern char *unchecked_box;  /* form boxes */
 extern char *checked_radio;  /* form radio buttons */
 extern char *unchecked_radio;  /* form radio buttons */
 extern char *empty_string;
+extern char *LynxHome;
 extern char *startfile;
 extern char *helpfile;
 extern char *helpfilepath;
 extern char *aboutfilepath;
 extern char *lynxjumpfile;
 extern char *lynxlistfile;
-extern char *lynxbookfile;
+extern char *lynxlinksfile;
 extern char *display;
 extern char *language;
 extern char *pref_charset; /* Lynx's preferred character set - MM */
@@ -256,5 +261,8 @@ extern BOOLEAN LYUseDefSelPop;		/* Command line -popup toggle    */
 extern int LYMultiBookmarks;    	/* Multi bookmark support on?	 */
 extern BOOLEAN LYMBMBlocked;		/* Force MBM support off?	 */
 extern BOOLEAN LYMBMAdvanced;		/* MBM statusline for ADVANCED?	 */
+extern int LYStatusLine;		/* Line for statusline() or -1   */
+extern BOOLEAN LYCollapseBRs;		/* Collapse serial BRs?		 */
+extern BOOLEAN LYSetCookies;		/* Process Set-Cookie headers?	 */
 
 #endif /* LYGLOBALDEFS_H */

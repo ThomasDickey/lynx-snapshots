@@ -1,0 +1,41 @@
+Lynx2-6FM:
+==========
+
+	This archive contains the Lynx source set with bug fixes and
+enhancements incorporated by Fote Macrides since the release of Lynx2-6
+on September 2, 1996.  Read the CHANGES file for a description of the
+modifications through the date of this archive.  Thereafter, check the
+CHANGES file in:
+
+	  http://www.wfbr.edu/dir/lynx
+or:	gopher://gopher.wfbr.edu/11/_fileserv/_lynx
+
+for any further bug fixes or enhancements.
+
+	This distribution contains all the files for building Lynx with
+all flavors of Unix and on VMS with VAXC, DECC or GNUC on VAXen or AXPen,
+and the associated documentation and example files.
+
+	Links to ftp mirrors, and to support materials for Lynx, are
+maintained in the:
+			 "Lynx links"
+	<URL:http://www.crl.com/~subir/lynx.html>
+
+	Lynx is a hypertext browser with full World Wide Web capabilities.
+It is distributed under the GNU General Public License without restrictions
+on usage or redistribution, and is supported by the Lynx user community.
+The Lynx copyright statement and GNU GPL are included in the about_lynx
+subdirectory of the distribution.
+
+	Report bugs and contribute patches to:
+	
+	lynx-dev@sig.net
+
+	PLEASE use the lynx-dev list, NOT private email to the developers,
+for questions or discussion about Lynx, or for contributions of patches.
+Patches should use the context diff format (diff -c).
+
+	Do NOT expect a reply if you use private email instead of the
+lynx-dev@sig.net list.
+
+				Fote

@@ -25,6 +25,7 @@
 #include "LYGlobalDefs.h"
 #include "LYUtils.h"
 #include "LYStrings.h"
+#include "LYCharUtils.h"
 #include "LYStructs.h"
 #include "LYGetFile.h"
 #include "LYHistory.h"
@@ -105,6 +106,9 @@ struct dired_menu {
 #if defined(OK_TAR) && defined(OK_GZIP) && !defined(ARCHIVE_ONLY)
 { DE_FILE,     ".tar.gz", "Expand",
    "(current selection)", "LYNXDIRED://UNTAR_GZ%p",		NULL },
+
+{ DE_FILE,        ".tgz", "Expand",
+   "(current selection)", "LYNXDIRED://UNTAR_GZ%p",		NULL },
 #endif /* OK_TAR && OK_GZIP && !ARCHIVE_ONLY */
 
 #ifndef ARCHIVE_ONLY
@@ -161,6 +165,9 @@ struct dired_menu {
 { DE_TAG,	      "", "Remove all tagged files and directories.",
 		      "", "LYNXDIRED://REMOVE_TAGGED",		NULL },
 
+{ DE_TAG,	      "", "Untag all tagged files and directories.",
+		      "", "LYNXDIRED://CLEAR_TAGGED",		NULL },
+
 { 0,		    NULL, NULL,
 		    NULL, NULL,					NULL }
 };
@@ -214,7 +221,7 @@ PRIVATE BOOLEAN remove_tagged NOARGS
 	    sprintf(tmpbuf, "remove %s", testpath);
 	    if (my_spawn(RM_PATH, args, tmpbuf) <= 0) {
 		FREE(testpath);
-		return count;
+		return ((count == 0) ? -1 : count);
 	    }
 	    ++count;
 	 }
@@ -379,8 +386,11 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 	       args[1] = srcpath;
 	       args[2] = savepath;
 	       args[3] = (char *) 0;
-	       if (my_spawn(MV_PATH, args, tmpbuf) <= 0)
+	       if (my_spawn(MV_PATH, args, tmpbuf) <= 0) {
+		  if (count == 0)
+		      count = -1;
 		  break;
+	       }
 	       ++count;
 	    }
 	    FREE(srcpath);
@@ -466,7 +476,7 @@ PRIVATE BOOLEAN modify_name ARGS1(
 	       args[2] = newpath;
 	       args[3] = (char *) 0;
 	       if (my_spawn(MV_PATH, args, tmpbuf) <= 0)
-		  return 0;
+		  return (-1);
 	       return 1; 
 	    }
 	 } else if ((dir_info.st_mode & S_IFMT) == S_IFDIR) {
@@ -587,7 +597,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	 args[2] = newpath;
 	 args[3] = (char *) 0;
 	 if (my_spawn(MV_PATH, args, tmpbuf) <= 0)
-	    return 0;
+	    return (-1);
 	 return 1;
       } else {
 	 _statusline("Destination has different owner! Request denied. ");
@@ -719,7 +729,7 @@ PRIVATE BOOLEAN create_file ARGS1(
 	 args[1] = testpath;
 	 args[2] = (char *) 0;
 	 if (my_spawn(TOUCH_PATH, args, tmpbuf) <= 0)
-	    return 0;
+	    return (-1);
 	 return 1;
       } else if ((dir_info.st_mode & S_IFMT) == S_IFDIR) {
 	 _statusline(
@@ -782,7 +792,7 @@ PRIVATE BOOLEAN create_directory ARGS1(
 	 args[1] = testpath;
 	 args[2] = (char *) 0;
 	 if (my_spawn(MKDIR_PATH, args, tmpbuf) <= 0)
-	    return 0;
+	    return (-1);
 	 return 1;
       } else if ((dir_info.st_mode & S_IFMT) == S_IFDIR) {
 	 _statusline(
@@ -888,7 +898,7 @@ PRIVATE BOOLEAN remove_single ARGS1(
       args[2] = testpath;
       args[3] = (char *) 0;
       if (my_spawn(RM_PATH, args, tmpbuf) <= 0)
-	  return 0;
+	  return (-1);
       return 1;
    }
    return 0;
@@ -1178,7 +1188,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	args[2] = destpath;
 	args[3] = (char *) 0;
 	if (my_spawn(CHMOD_PATH, args, tmpbuf) <= 0) {
-	    return 0;
+	    return (-1);
 	}
 	++LYforce_no_cache;         /* Force update of dired listing */
 	return 1;
@@ -1259,16 +1269,6 @@ PUBLIC void showtags ARGS1(
    }
 }
 
-PUBLIC char * strip_trailing_slash ARGS1(
-	char *,		dirname)
-{
-   int i;
-
-   i = strlen(dirname) - 1;
-   while (i && dirname[i] == '/') dirname[i--] = '\0';
-   return dirname;
-}
-
 /*
 **  Perform file management operations for LYNXDIRED URL's.
 **  Attempt to be consistent.  These are (pseudo) URLs - i.e. they should
@@ -1301,9 +1301,11 @@ PUBLIC int local_dired ARGS1(
     */
    tp = NULL;
    if (!strncmp(line,"LYNXDIRED://NEW_FILE",20)) {
-      if (create_file(&line[20])) ++LYforce_no_cache;
+      if (create_file(&line[20]) > 0)
+          ++LYforce_no_cache;
    } else if (!strncmp(line,"LYNXDIRED://NEW_FOLDER",22)) {
-      if (create_directory(&line[22])) ++LYforce_no_cache;
+      if (create_directory(&line[22]) > 0)
+          ++LYforce_no_cache;
    } else if (!strncmp(line,"LYNXDIRED://INSTALL_SRC",23)) {
       local_install(NULL, &line[23], &tp);
       StrAllocCopy(doc->address, tp);
@@ -1313,11 +1315,14 @@ PUBLIC int local_dired ARGS1(
       local_install(&line[24], NULL, &tp);
       LYpop(doc);
    } else if (!strncmp(line,"LYNXDIRED://MODIFY_NAME",23)) {
-      if (modify_name(&line[23])) ++LYforce_no_cache;
+      if (modify_name(&line[23]) > 0)
+          ++LYforce_no_cache;
    } else if (!strncmp(line,"LYNXDIRED://MODIFY_LOCATION",27)) {
-      if (modify_location(&line[27])) ++LYforce_no_cache;
+      if (modify_location(&line[27]) > 0)
+          ++LYforce_no_cache;
    } else if (!strncmp(line,"LYNXDIRED://MOVE_TAGGED",23)) {
-      if (modify_tagged(&line_url[23])) ++LYforce_no_cache;
+      if (modify_tagged(&line_url[23]) > 0)
+          ++LYforce_no_cache;
 #ifdef OK_PERMIT
    } else if (!strncmp(line,"LYNXDIRED://PERMIT_SRC",22)) {
       permit_location(NULL, &line[22], &tp);
@@ -1329,9 +1334,12 @@ PUBLIC int local_dired ARGS1(
        permit_location(&line_url[27], NULL, &tp);
 #endif /* OK_PERMIT */
    } else if (!strncmp(line,"LYNXDIRED://REMOVE_SINGLE",25)) {
-      if (remove_single(&line[25])) ++LYforce_no_cache;
+      if (remove_single(&line[25]) > 0)
+          ++LYforce_no_cache;
    } else if (!strncmp(line,"LYNXDIRED://REMOVE_TAGGED",25)) {
       if (remove_tagged()) ++LYforce_no_cache;
+   } else if (!strncmp(line,"LYNXDIRED://CLEAR_TAGGED",24)) {
+      clear_tags();
    } else if (!strncmp(line,"LYNXDIRED://UPLOAD",18)) {
       /*
        *  They're written by LYUpload_options() HTUnEscaped,
@@ -1549,11 +1557,11 @@ PUBLIC int dired_options ARGS2(
 	 cp += 5;
        strcpy(path,cp);
        StrAllocCopy(path_url,cp);
-       if (path_url[strlen(path_url)-1] == '/')
+       if (*path_url && path_url[1] && path_url[strlen(path_url)-1] == '/')
 	   path_url[strlen(path_url)-1] = '\0';
        HTUnEscape(path);
-       if (path[strlen(path)-1] == '/')
-	  path[strlen(path)-1] = '\0';
+       if (*path && path[1] && path[strlen(path)-1] == '/')
+	   path[strlen(path)-1] = '\0';
 
        if (lstat(path,&dir_info) == -1 && stat(path,&dir_info) == -1) {
 	  sprintf(tmpbuf,"Unable to get status of %s ",path);
@@ -1588,8 +1596,35 @@ PUBLIC int dired_options ARGS2(
           fprintf(fp0,"Current selection is %s <p>\n",path);
        else
           fprintf(fp0,"Nothing currently selected. <p>\n");
-    else 
-       fprintf(fp0,"Current selection is all tagged items. <p>\n");
+    else {    /* write out number of tagged items, and names of first
+	      few of them relative to current (in the DIRED sense) directory */
+	int n = HTList_count(tagged);
+	char * cp1 = NULL;
+	char * cd = NULL;
+	int i, m;
+#define NUM_TAGS_TO_WRITE 10
+	fprintf(fp0,"Current selection is %d tagged item%s",
+		n, (n==1 ? ":" : "s:"));
+	StrAllocCopy(cd, doc->address);
+	HTUnEscapeSome(cd, "/");
+	if (*cd && cd[strlen(cd)-1] != '/')
+	    StrAllocCat(cd, "/");
+	m = (n < NUM_TAGS_TO_WRITE) ? n : NUM_TAGS_TO_WRITE;
+	for (i=1; i <= m; i++) {
+		cp1 = HTRelative(HTList_objectAt(tagged, i-1),
+		             (*cd ? cd : "file://localhost"));
+		HTUnEscape(cp1);
+		LYEntify(&cp1, TRUE); /* _should_ do this everywhere... */
+		fprintf(fp0,"%s <br>\n &nbsp;&nbsp;&nbsp;%s",
+			(i==1 ? "" : " ,"), cp1);
+		FREE(cp1);
+	}
+        if (n > m) {
+	    fprintf(fp0," , ...");
+	}
+	fprintf(fp0, " <p>\n");
+	FREE(cd);
+    }
 
     /*
      * if menu_head is NULL then use defaults and link them together now
@@ -1674,7 +1709,7 @@ PRIVATE int my_spawn ARGS3(
 	waitpid(pid, &wstatus, 0); /* wait for child */
 #endif /* NeXT || AIX4 || sony_news */
 	if (WEXITSTATUS(wstatus) != 0 ||
-	    WTERMSIG(wstatus) != 0)  { /* error return */
+	    WTERMSIG(wstatus) > 0)  { /* error return */
 	    sprintf(tmpbuf, "Probable failure to %s due to system error!",
 		    msg);
 	    rc = 0;
@@ -1805,7 +1840,7 @@ PUBLIC BOOLEAN local_install ARGS3(
    if (HTList_isEmpty(tagged)) {
          args[1] = savepath;
 	 if (my_spawn(INSTALL_PATH, args, tmpbuf) <= 0)
-	     return count;
+	     return (-1);
 	 count++;
    } else {
        char * name;
@@ -1815,7 +1850,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 	       args[1] = name + 16;
 
 	   if (my_spawn(INSTALL_PATH, args, tmpbuf) <= 0)
-	       return count;
+	       return ((count == 0) ? -1 : count);
 	   count++;
        }	
        clear_tags();

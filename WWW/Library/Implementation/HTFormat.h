@@ -277,6 +277,7 @@ HTCopy:  Copy a socket to a stream
    
  */
 extern int HTCopy PARAMS((
+	HTParentAnchor *	anchor,
         int                     file_number,
 	void*			handle,
         HTStream*               sink));
@@ -304,6 +305,7 @@ HTCopyNoCR: Copy a socket to a stream, stripping CR characters.
  */
 
 extern void HTCopyNoCR PARAMS((
+	HTParentAnchor *	anchor,
         int                     file_number,
         HTStream*               sink));
 

@@ -91,6 +91,9 @@ lynx.cfg.
 .B -child
 exit on left-arrow in startfile, and disable save to disk.
 .TP
+.B -cookies
+toggles handling of Set-Cookie headers.
+.TP
 .B -crawl
 with -traversal, output each page to a file.
 with -dump, format output as with -traversal, but to stdout.
@@ -112,7 +115,7 @@ EDITOR. (vi, ed, emacs, etc.)
 enable emacs-like key movement.
 .TP
 .B -enable_scrollback
-toggle compatibility with comm programs' scrollback keys
+toggles compatibility with comm programs' scrollback keys
 (may be incompatible with some curses packages).
 .TP
 .B -error_file\fR=\fIFILE
@@ -188,6 +191,9 @@ disable the link list feature in dumps.
 .TP
 .B -nolog
 disable mailing of error messages to document owners.
+.TP
+.B -nopause
+disable forced pauses for statusline messages.
 .TP
 .B -noprint
 disable print functions.
@@ -365,9 +371,10 @@ require .www_browsable files to browse directories.
 .B -show_cursor
 If enabled the cursor will not be hidden in the right hand
 corner but will instead be positioned at the start of the
-currently selected link. show cursor is the default for systems
-without FANCY_CURSES capabilities, and the default
-configuration can be changed in userdefs.h.
+currently selected link.  Show cursor is the default for
+systems without FANCY_CURSES capabilities.  The default
+configuration can be changed in userdefs.h or lynx.cfg.
+The command line switch toggles the default.
 .TP
 .B -source
 works the same as dump but outputs HTML source instead of

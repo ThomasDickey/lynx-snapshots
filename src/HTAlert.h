@@ -82,12 +82,35 @@ extern void HTPromptUsernameAndPassword PARAMS((
 	char **		password));
 
 
-/*      Confirm redirection of POST		HTConfirmPostRedirect()
+/*	Confirm a cookie operation.			HTConfirmCookie()
+**	---------------------------
 **
-** On entry,
+**  On entry,
+**	server			is the server sending the Set-Cookie.
+**	domain			is the domain of the cookie.
+**	path			is the path of the cookie.
+**	name			is the name of the cookie.
+**	value			is the value of the cookie.
+**
+**  On exit,
+**	Returns FALSE on cancel,
+**		TRUE if the cookie should be set.
+*/
+extern BOOL HTConfirmCookie PARAMS((
+	void *		dp,
+	CONST char *	server,
+	CONST char *	domain,
+	CONST char *	path,
+	CONST char *	name,
+	CONST char *	value));
+
+
+/*      Confirm redirection of POST.		HTConfirmPostRedirect()
+**	----------------------------
+**  On entry,
 **      redirecting_url             is the Location.
 **
-** On exit,
+**  On exit,
 **      Returns 0 on cancel,
 **	  1 for redirect of POST with content,
 **	303 for redirect as GET without content

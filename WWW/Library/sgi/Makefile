@@ -9,7 +9,7 @@ WWW_MACH = sgi
 #  invoke it.
 ASIS_MACH = sgi/iris-3.5
 
-CFLAGS = -DDEBUG -O
+CFLAGS = -DDEBUG -O -cckr
 CC = cc
 LFLAGS =
 

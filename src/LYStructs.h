@@ -30,10 +30,11 @@ typedef struct _document {
    char * address;
    char * post_data;
    char * post_content_type;
-   int    link;
-   int    line;
+   BOOL   safe;
    BOOL   isHEAD;
    char * bookmark;
+   int    link;
+   int    line;
 } document;
 
 #ifndef HTFORMS_H
@@ -45,11 +46,17 @@ typedef struct _histstruct {
     char * address;
     char * post_data;
     char * post_content_type;
+    BOOL   safe;
+    char * bookmark;
+    BOOL   isHEAD;
     int    link;
     int    page;
-    BOOL   isHEAD;
-    char * bookmark;
 } histstruct;
+
+typedef struct _VisitedLink {
+    char * title;
+    char * address;
+} VisitedLink;
 
 extern histstruct history[MAXHIST];
 extern int nhist;

@@ -669,10 +669,12 @@ PRIVATE int get_connection ARGS1(
                     "HTFTP: Unable to connect to remote host for `%s'.\n",
                     arg);
         }
-      if (status == HT_INTERRUPTED)
+      if (status == HT_INTERRUPTED) {
         _HTProgress ("Connection interrupted.");
-      else
+	status = HT_NOT_LOADED;
+      } else {
         HTAlert("Unable to connect to FTP host.");
+      }
       if (con->socket != -1)
         {
           NETCLOSE(con->socket);
@@ -1385,7 +1387,19 @@ PRIVATE void parse_vms_dir_entry ARGS2(
         for (i = 0; entry_info->filename[i]; i++)
 	    entry_info->filename[i] = TOLOWER(entry_info->filename[i]);
     } else {
-        i = strlen(entry_info->filename);
+        i = ((strstr(entry_info->filename, "READ") - entry_info->filename) + 4);
+	if (!strncmp((char *)&entry_info->filename[i], "ME", 2)) {
+	    i += 2;
+	    while (entry_info->filename[i] && entry_info->filename[i] != '.') {
+	        i++;
+	    }
+	} else if (!strncmp((char *)&entry_info->filename[i], ".ME", 3)) {
+	    i = strlen(entry_info->filename);
+	} else {
+	    i = 0;
+	}
+        for (; entry_info->filename[i]; i++)
+	    entry_info->filename[i] = TOLOWER(entry_info->filename[i]);
     }
 
     /** Uppercase terminal .z's or _z's. **/
@@ -2276,14 +2290,31 @@ PRIVATE int read_directory ARGS4(
     HTStructuredClass targetClass;
     char *filename = HTParse(address, "", PARSE_PATH + PARSE_PUNCTUATION);
     EntryInfo *entry_info;
-    BOOLEAN first=TRUE;
+    BOOLEAN first = TRUE;
     char string_buffer[64];
-    char *lastpath=NULL;/* prefix for link, either "" (for root) or xxx  */
+    char *lastpath = NULL;/* prefix for link, either "" (for root) or xxx  */
+    BOOL need_parent_link = FALSE;
+    BOOL tildeIsTop = FALSE;
 
     targetClass = *(target->isa);
 
     _HTProgress ("Receiving FTP directory.");
-    HTDirTitles(target, (HTAnchor*)parent);
+
+    /*
+    **  Check whether we always want the home
+    **  directory treated as Welcome. - FM
+    */
+    if (server_type == VMS_SERVER)
+        tildeIsTop = TRUE;
+
+    /*
+    **  This should always come back FALSE, since the
+    **  flag is set only for local directory listings
+    **  if LONG_LIST was defined on compilation, but
+    **  we could someday set up an equivalent listing
+    **  for Unix ftp servers. - FM
+    */
+    need_parent_link = HTDirTitles(target, (HTAnchor*)parent, tildeIsTop);
   
     data_read_pointer = data_write_pointer = data_buffer;
 
@@ -2709,10 +2740,14 @@ PUBLIC int HTFTPLoad ARGS4(
 			} else {
 			    StrAllocCat(fn, (cp+1));
 			}
+			cp = NULL;
 		    }
 		    FREE(fname);
 		    fname = filename = fn;
 		}
+	    }
+	    if (cp) {
+	        *cp = '/';
 	    }
 	}
 	if (strlen(filename) > 3) {
@@ -2952,7 +2987,8 @@ PUBLIC int HTFTPLoad ARGS4(
 #endif /* MAINTAIN_CONNECTION */
 
 	    /** If we want the VMS account's top directory, list it now **/
-	    if ((included_device && 0==strcmp(filename, "000000")) ||
+	    if (!(strcmp(filename, "/~")) ||
+	        (included_device && 0==strcmp(filename, "000000")) ||
 	        (strlen(filename) == 1 && *filename == '/')) {
 		isDirectory = YES;
 		sprintf(command, "LIST%c%c", CR, LF);
@@ -2969,12 +3005,14 @@ PUBLIC int HTFTPLoad ARGS4(
 		goto listen;
 	    }
 	    /** Otherwise, go to appropriate directory and doctor filename **/
+	    if (!strncmp(filename, "/~", 2))
+	        filename += 2;
 	    if (!included_device &&
-	        (cp=strchr(filename, '/')) != NULL &&
-	        (cp1=strrchr(cp, '/')) != NULL && cp != cp1) {
+	        (cp = strchr(filename, '/')) != NULL &&
+	        (cp1 = strrchr(cp, '/')) != NULL && cp != cp1) {
 		sprintf(command, "CWD [.%s", cp+1);
 		sprintf(command+(cp1-cp)+5, "]%c%c", CR, LF);
-		while ((cp2=strrchr(command, '/')) != NULL)
+		while ((cp2 = strrchr(command, '/')) != NULL)
 		    *cp2 = '.';
 		status = response(command);
 		if (status != 2) {

@@ -102,6 +102,7 @@ struct _HTParentAnchor {
   BOOL          underway;       /* Document about to be attached to it */
   BOOL		isISMAPScript;	/* Script for clickable image map */
   BOOL		isHEAD;		/* Document is headers from a HEAD request */
+  BOOL		safe;			/* Safe */
   char *	FileCache;	/* Path to a disk-cached copy */
   char *	SugFname;	/* Suggested filename */
   char *	cache_control;	/* Cache-Control */
@@ -113,6 +114,7 @@ struct _HTParentAnchor {
   char *	content_disposition;	/* Content-Dispositon */
   char *	content_location;	/* Content-Location */
   char *	content_md5;		/* Content-MD5 */
+  int		content_length;		/* Content-Length */
   char *	date;			/* Date */
   char *	expires;		/* Expires */
   char *	last_modified;		/* Last-Modified */
@@ -129,17 +131,17 @@ typedef struct {
   char *        tag;            /* Address of this anchor relative to parent */
 } HTChildAnchor;
 
-
-/* DocAddress structure is used for loading an absolute anchor with all
- * needed information including posting data and post content type.
- */
-
+/*
+**  DocAddress structure is used for loading an absolute anchor with all
+**  needed information including posting data and post content type.
+*/
 typedef struct _DocAddress {
     char * address;
     char * post_data;
     char * post_content_type;
     char * bookmark;
     BOOL   isHEAD;
+    BOOL   safe;
 } DocAddress;
 
 /*      Create new or find old sub-anchor
@@ -148,12 +150,9 @@ typedef struct _DocAddress {
 **      This one is for a new anchor being edited into an existing
 **      document. The parent anchor must already exist.
 */
-
-extern HTChildAnchor * HTAnchor_findChild
-  PARAMS(
-     (HTParentAnchor *parent,
-      CONST char *tag)
-  );
+extern HTChildAnchor * HTAnchor_findChild PARAMS((
+	HTParentAnchor *	parent,
+	CONST char *		tag));
 
 /*      Create or find a child anchor with a possible link
 **      --------------------------------------------------
@@ -162,14 +161,11 @@ extern HTChildAnchor * HTAnchor_findChild
 **      a name, and possibly a link to a _relatively_ named anchor.
 **      (Code originally in ParseHTML.h)
 */
-extern HTChildAnchor * HTAnchor_findChildAndLink
-  PARAMS((
-      HTParentAnchor * parent,  /* May not be 0 */
-      CONST char * tag,         /* May be "" or 0 */
-      CONST char * href,        /* May be "" or 0 */
-      HTLinkType * ltype        /* May be 0 */
-  ));
-
+extern HTChildAnchor * HTAnchor_findChildAndLink PARAMS((
+      HTParentAnchor * parent,	/* May not be 0 */
+      CONST char * tag,		/* May be "" or 0 */
+      CONST char * href,	/* May be "" or 0 */
+      HTLinkType * ltype));	/* May be 0 */
 
 /*      Create new or find old named anchor
 **      -----------------------------------
@@ -179,9 +175,8 @@ extern HTChildAnchor * HTAnchor_findChildAndLink
 **      Note: You are not guaranteed a new anchor -- you might get an old one,
 **      like with fonts.
 */
-
-extern HTAnchor * HTAnchor_findAddress PARAMS((CONST DocAddress * address));
-
+extern HTAnchor * HTAnchor_findAddress PARAMS((
+	CONST DocAddress *	address));
 
 /*      Delete an anchor and possibly related things (auto garbage collection)
 **      --------------------------------------------
@@ -192,12 +187,8 @@ extern HTAnchor * HTAnchor_findAddress PARAMS((CONST DocAddress * address));
 **      We also try to delete the targets whose documents are not loaded.
 **      If this anchor's source list is empty, we delete it and its children.
 */
-
-extern BOOL HTAnchor_delete
-  PARAMS(
-     (HTParentAnchor *me)
-     );
-
+extern BOOL HTAnchor_delete PARAMS((
+	HTParentAnchor *	me));
 
 /*              Move an anchor to the head of the list of its siblings
 **              ------------------------------------------------------
@@ -205,204 +196,179 @@ extern BOOL HTAnchor_delete
 **      This is to ensure that an anchor which might have already existed
 **      is put in the correct order as we load the document.
 */
-
-extern void HTAnchor_makeLastChild
-  PARAMS(
-     (HTChildAnchor *me)
-     );
+extern void HTAnchor_makeLastChild PARAMS((
+	HTChildAnchor *		me));
 
 /*      Data access functions
 **      ---------------------
 */
+extern HTParentAnchor * HTAnchor_parent PARAMS((
+	HTAnchor *		me));
 
-extern HTParentAnchor * HTAnchor_parent
-  PARAMS(
-     (HTAnchor *me)
-     );
+extern void HTAnchor_setDocument PARAMS((
+	HTParentAnchor *	me,
+	HyperDoc *		doc));
 
-extern void HTAnchor_setDocument
-  PARAMS(
-     (HTParentAnchor *me, HyperDoc *doc)
-     );
+extern HyperDoc * HTAnchor_document PARAMS((
+	HTParentAnchor *	me));
 
-extern HyperDoc * HTAnchor_document
-  PARAMS(
-     (HTParentAnchor *me)
-     );
 /* We don't want code to change an address after anchor creation... yet ?
-extern void HTAnchor_setAddress
-  PARAMS(
-     (HTAnchor *me, char *addr)
-     );
+extern void HTAnchor_setAddress PARAMS((
+	HTAnchor *		me,
+	char *			addr));
 */
 
 /*      Returns the full URI of the anchor, child or parent
 **      as a malloc'd string to be freed by the caller.
 */
-extern char * HTAnchor_address
-  PARAMS(
-     (HTAnchor *me)
-     );
+extern char * HTAnchor_address PARAMS((
+	HTAnchor *		me));
 
-extern void HTAnchor_setFormat
-  PARAMS(
-     (HTParentAnchor *me, HTFormat form)
-     );
+extern void HTAnchor_setFormat PARAMS((
+	HTParentAnchor *	me,
+	HTFormat		form));
 
-extern HTFormat HTAnchor_format
-  PARAMS(
-     (HTParentAnchor *me)
-     );
+extern HTFormat HTAnchor_format PARAMS((
+	HTParentAnchor *	me));
 
-extern void HTAnchor_setIndex
-  PARAMS(
-     (HTParentAnchor *me, char * address)
-     );
+extern void HTAnchor_setIndex PARAMS((
+	HTParentAnchor *	me,
+	char *		address));
 
-extern void HTAnchor_setPrompt
-  PARAMS(
-     (HTParentAnchor *me, char * prompt)
-     );
+extern void HTAnchor_setPrompt PARAMS((
+	HTParentAnchor *	me,
+	char *			prompt));
 
-extern BOOL HTAnchor_isIndex
-  PARAMS(
-     (HTParentAnchor *me)
-     );
+extern BOOL HTAnchor_isIndex PARAMS((
+	HTParentAnchor *	me));
 
-extern BOOL HTAnchor_hasChildren
-  PARAMS(
-     (HTParentAnchor *me)
-     );
+extern BOOL HTAnchor_hasChildren PARAMS((
+	HTParentAnchor *	me));
 
 /*      Title handling.
 */
-extern CONST char * HTAnchor_title
-  PARAMS(
-     (HTParentAnchor *me)
-     );
+extern CONST char * HTAnchor_title PARAMS((
+	HTParentAnchor *	me));
 
-extern void HTAnchor_setTitle
-  PARAMS(
-     (HTParentAnchor *me, CONST char * title)
-     );
+extern void HTAnchor_setTitle PARAMS((
+	HTParentAnchor *	me,
+	CONST char *		title));
 
-extern void HTAnchor_appendTitle
-  PARAMS(
-     (HTParentAnchor *me, CONST char * title)
-     );
+extern void HTAnchor_appendTitle PARAMS((
+	HTParentAnchor *	me,
+	CONST char *		title));
 
 /*	Bookmark handling.
 */
-extern CONST char * HTAnchor_bookmark
-  PARAMS(
-	(HTParentAnchor * me)
-	);
+extern CONST char * HTAnchor_bookmark PARAMS((
+	HTParentAnchor *	me));
 
-extern void HTAnchor_setBookmark
-  PARAMS(
-	(HTParentAnchor *me, CONST char * bookmark)
-	);
+extern void HTAnchor_setBookmark PARAMS((
+	HTParentAnchor *	me,
+	CONST char *		bookmark));
 
 /*      Owner handling.
 */
-extern CONST char * HTAnchor_owner
-  PARAMS(
-     (HTParentAnchor *me)
-     );
+extern CONST char * HTAnchor_owner PARAMS((
+	HTParentAnchor *	me));
 
-extern void HTAnchor_setOwner
-  PARAMS(
-     (HTParentAnchor *me, CONST char * owner)
-     );
+extern void HTAnchor_setOwner PARAMS((
+	HTParentAnchor *	me,
+	CONST char *		owner));
 
 /*      TITLE handling in LINKs with REV="made" or REV="owner". - FM
 */
-extern CONST char * HTAnchor_RevTitle
-  PARAMS(
-     (HTParentAnchor *me)
-     );
+extern CONST char * HTAnchor_RevTitle PARAMS((
+	HTParentAnchor *	me));
 
-extern void HTAnchor_setRevTitle
-  PARAMS(
-     (HTParentAnchor *me, CONST char * title)
-     );
+extern void HTAnchor_setRevTitle PARAMS((
+	HTParentAnchor *	me,
+	CONST char *		title));
 
 /*	Suggested filename handling. - FM
 **	(will be loaded if we had a Content-disposition
 **	 header with file; filename=name.suffix)
 */
-extern CONST char * HTAnchor_SugFname
-  PARAMS(
-     (HTParentAnchor *me)
-     );
+extern CONST char * HTAnchor_SugFname PARAMS((
+	HTParentAnchor *	me));
 
 /*	Last-Modified header handling. - FM
 */
-extern CONST char * HTAnchor_last_modified
-  PARAMS(
-     (HTParentAnchor *me)
-     );
+extern CONST char * HTAnchor_last_modified PARAMS((
+	HTParentAnchor *	me));
 
 /*	Date header handling. - FM
 */
-extern CONST char * HTAnchor_date
-  PARAMS(
-     (HTParentAnchor *me)
-     );
+extern CONST char * HTAnchor_date PARAMS((
+	HTParentAnchor *	me));
 
 /*	Server header handling. - FM
 */
-extern CONST char * HTAnchor_server
-  PARAMS(
-     (HTParentAnchor *me)
-     );
+extern CONST char * HTAnchor_server PARAMS((
+	HTParentAnchor *	me));
+
+/*	Safe header handling. - FM
+*/
+extern BOOL HTAnchor_safe PARAMS((
+	HTParentAnchor *	me));
+
+/*	Content-Base header handling. - FM
+*/
+extern CONST char * HTAnchor_content_base PARAMS((
+	HTParentAnchor *	me));
+
+/*	Content-Location header handling. - FM
+*/
+extern CONST char * HTAnchor_content_location PARAMS((
+	HTParentAnchor *	me));
 
 /*      Link this Anchor to another given one
 **      -------------------------------------
 */
-
-extern BOOL HTAnchor_link
-  PARAMS(
-     (HTAnchor *source, HTAnchor *destination, HTLinkType *type)
-     );
+extern BOOL HTAnchor_link PARAMS((
+	HTAnchor *		source,
+	HTAnchor *		destination,
+	HTLinkType *		type));
 
 /*      Manipulation of links
 **      ---------------------
 */
+extern HTAnchor * HTAnchor_followMainLink PARAMS((
+	HTAnchor *		me));
 
-extern HTAnchor * HTAnchor_followMainLink
-  PARAMS(
-     (HTAnchor *me)
-     );
+extern HTAnchor * HTAnchor_followTypedLink PARAMS((
+	HTAnchor *		me,
+	HTLinkType *		type));
 
-extern HTAnchor * HTAnchor_followTypedLink
-  PARAMS(
-     (HTAnchor *me, HTLinkType *type)
-     );
-
-extern BOOL HTAnchor_makeMainLink
-  PARAMS(
-     (HTAnchor *me, HTLink *movingLink)
-     );
+extern BOOL HTAnchor_makeMainLink PARAMS((
+	HTAnchor *		me,
+	HTLink *		movingLink));
 
 /*      Read and write methods
 **      ----------------------
 */
-extern HTList * HTAnchor_methods PARAMS((HTParentAnchor *me));
+extern HTList * HTAnchor_methods PARAMS((
+	HTParentAnchor *	me));
 
 /*      Protocol
 **      --------
 */
-extern void * HTAnchor_protocol PARAMS((HTParentAnchor * me));
-extern void HTAnchor_setProtocol PARAMS((HTParentAnchor * me,
-                                        void* protocol));
+extern void * HTAnchor_protocol PARAMS((
+	HTParentAnchor *	me));
+
+extern void HTAnchor_setProtocol PARAMS((
+	HTParentAnchor *	me,
+	void *			protocol));
 
 /*      Physical address
 **      ----------------
 */
-extern char * HTAnchor_physical PARAMS((HTParentAnchor * me));
-extern void HTAnchor_setPhysical PARAMS((HTParentAnchor * me,
-                                        char * protocol));
+extern char * HTAnchor_physical PARAMS((
+	HTParentAnchor *	me));
+
+extern void HTAnchor_setPhysical PARAMS((
+	HTParentAnchor *	me,
+	char *			protocol));
 
 #endif /* HTANCHOR_H */
 

@@ -30,7 +30,7 @@ char keymap[] = {
 LYK_ABORT,          LYK_END,        LYK_NEXT_PAGE,     0,
 /* ^D */            /* ^E */        /* ^F */       /* ^G */
 
-LYK_HISTORY,      LYK_NEXT_LINK,    LYK_ACTIVATE,      0,
+LYK_HISTORY,      LYK_NEXT_LINK,    LYK_ACTIVATE,  LYK_COOKIE_JAR,
 /* bs */            /* ht */        /* nl */       /* ^K */
 
 LYK_REFRESH,      LYK_ACTIVATE,     LYK_DOWN_TWO,      0,
@@ -82,11 +82,11 @@ LYK_RAW_TOGGLE,  LYK_ADD_BOOKMARK, LYK_PREV_PAGE,   LYK_COMMENT,
 LYK_DOWNLOAD,        LYK_EDIT,             
 /* D */              /* E */         
 
-#ifdef DIRED_SUPPORT
+#if defined(DIRED_SUPPORT) || defined(VMS)
 LYK_DIRED_MENU,
 #else
 0,          
-#endif /* DIRED_SUPPORT */
+#endif /* DIRED_SUPPORT || VMS */
 /* F */        
 
 LYK_GOTO,
@@ -108,7 +108,7 @@ LYK_TAG_LINK,
 #endif /* DIRED_SUPPORT */
 /* T */
 
- 	          LYK_PREV_DOC,   LYK_VIEW_BOOKMARK,   0,
+ 	          LYK_PREV_DOC,    LYK_VLINKS,         0,
                      /* U */         /* V */        /* W */
 
 #ifdef NOT_USED
@@ -127,11 +127,11 @@ LYK_MINIMAL,   LYK_ADD_BOOKMARK,  LYK_PREV_PAGE,    LYK_COMMENT,
 LYK_DOWNLOAD,        LYK_EDIT,             
 /* d */              /* e */         
 
-#ifdef DIRED_SUPPORT
+#if defined(DIRED_SUPPORT) || defined(VMS)
 LYK_DIRED_MENU,
 #else
 0,          
-#endif /* DIRED_SUPPORT */
+#endif /* DIRED_SUPPORT || VMS */
 /* f */        
 
 LYK_GOTO,
@@ -436,6 +436,7 @@ PRIVATE struct rmap revmap[] = {
 { "ADD_BOOKMARK",	"add to your personal bookmark list" },
 { "DEL_BOOKMARK",	"delete from your personal bookmark list" },
 { "VIEW_BOOKMARK",	"view your personal bookmark list" },
+{ "VLINKS",		"list links visited during the current Lynx session" },
 { "SHELL",		"escape from the browser to the system" },
 { "DOWNLOAD",		"download the current link to your computer" },
 { "TRACE_TOGGLE",	"toggle tracing of browser operations" },
@@ -446,21 +447,26 @@ PRIVATE struct rmap revmap[] = {
 { "TOGGLE_HELP",	"show other commands in the novice help menu" },
 { "JUMP",		"go directly to a target document or action" },
 { "KEYMAP",		"display the current key map" },
-{ "LIST",		"list references (links) in the current document" },
+{ "LIST",		"list the references (links) in the current document" },
 { "TOOLBAR",		"go to Toolbar or Banner in the current document" },
 { "HISTORICAL",		"toggle historical vs. valid/minimal comment parsing" },
 { "MINIMAL",		"toggle minimal vs. valid comment parsing" },
 { "SOFT_DQUOTES",	"toggle valid vs. soft double-quote parsing" },
 { "RAW_TOGGLE",		"toggle raw 8-bit translations or CJK mode ON or OFF" },
+{ "COOKIE_JAR",		"Examine the Cookie Jar" },
+#ifdef VMS
+{ "DIRED_MENU",		"invoke File/Directory Manager, if available" },
+#else
 #ifdef DIRED_SUPPORT
+{ "DIRED_MENU",		"display a full menu of file operations" },
 { "CREATE",		"create a new file or directory" },
 { "REMOVE",		"remove a file or directory" },
 { "MODIFY",		"modify the name or location of a file or directory" },
 { "TAG_LINK",		"tag a file or directory for later action" },
-{ "DIRED_MENU",		"display a full menu of file operations" },
 { "UPLOAD",		"upload from your computer to the current directory" },
 { "INSTALL",		"install file or tagged files into a system area" },
 #endif /* DIRED_SUPPORT */
+#endif /* VMS */
 #ifdef NOT_USED
 { "VERSION",		"report version of lynx"},
 { "FORM_UP",		"toggle a checkbox" },
@@ -512,9 +518,6 @@ PRIVATE char *pretty ARGS1 (int, c)
 	return buf;
 }
 
-
-#define KEYTITLE "Current Key Map"
-
 PRIVATE void print_binding ARGS3(HTStream *, target, char *, buf, int, i)
 {
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
@@ -556,11 +559,12 @@ PRIVATE int LYLoadKeymap ARGS4 (
 	return(HT_NOT_LOADED);
     }
 
-    sprintf(buf, "<head>\n<title>%s</title>\n</head>\n<body>\n", KEYTITLE);
+    sprintf(buf, "<head>\n<title>%s</title>\n</head>\n<body>\n",
+    		  CURRENT_KEYMAP_TITLE);
     (*target->isa->put_block)(target, buf, strlen(buf));
 	
     sprintf(buf, "<h1>%s (%s Version %s)</h1>\n<pre>",
-		 KEYTITLE, LYNX_NAME, LYNX_VERSION);
+		 CURRENT_KEYMAP_TITLE, LYNX_NAME, LYNX_VERSION);
     (*target->isa->put_block)(target, buf, strlen(buf));
 
     for (i = 'a'+1; i <= 'z'+1; i++) {

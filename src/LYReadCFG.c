@@ -41,7 +41,7 @@ PUBLIC BOOLEAN LYUseNoviceLineTwo=TRUE;
 PRIVATE int is_true ARGS1(
 	char *,	string)
 {
-    if(!strncasecomp(string,"TRUE",4))
+    if (!strncasecomp(string,"TRUE",4))
 	return(TRUE);
     else
 	return(FALSE);
@@ -153,7 +153,7 @@ PRIVATE void add_item_to_list ARGS2(
 	 *  Process name field
 	 */
         cur_item->name = (char *)calloc((colon-buffer+1),sizeof(char));
-	if(cur_item->name == NULL)
+	if (cur_item->name == NULL)
 	    perror("Out of memory in read_cfg");
 	LYstrncpy(cur_item->name, buffer, (int)(colon-buffer));	
 	remove_backslashes(cur_item->name);
@@ -242,8 +242,8 @@ PRIVATE void add_printer_to_list ARGS2(
         /*
 	 *  Process name field.
 	 */
-        cur_item->name = (char *)calloc((colon-buffer+1),sizeof(char));
-	if(cur_item->name == NULL)
+        cur_item->name = (char *)calloc((colon-buffer+1), sizeof(char));
+	if (cur_item->name == NULL)
 	    perror("Out of memory in read_cfg");
         LYstrncpy(cur_item->name, buffer, (int)(colon-buffer));	
         remove_backslashes(cur_item->name);
@@ -385,12 +385,12 @@ PUBLIC void read_cfg ARGS1(
      *  Locate and open the file.
      */
     if (!cfg_filename || strlen(cfg_filename) == 0) {
-	if(TRACE)
+	if (TRACE)
 	    fprintf(stderr,"No filename following -cfg switch!\n");
 	return;
     }
-    if((fp = fopen(cfg_filename,"r")) == NULL) {
-	if(TRACE)
+    if ((fp = fopen(cfg_filename,"r")) == NULL) {
+	if (TRACE)
 	    fprintf(stderr,"lynx.cfg file not found as %s\n",cfg_filename);
 	return;
     }
@@ -403,7 +403,7 @@ PUBLIC void read_cfg ARGS1(
 	/*
 	 *  Strip off \n at the end.
 	 */
-	if((line_feed = (char *)strchr(buffer,'\n')) != NULL)
+	if ((line_feed = (char *)strchr(buffer, '\n')) != NULL)
 	    *line_feed = '\0';
 	
 	/*
@@ -424,7 +424,504 @@ PUBLIC void read_cfg ARGS1(
         /*
 	 * Process the string buffer.
 	 */
-        if (!strncasecomp(buffer,"SUFFIX:",7)) {
+	switch (TOUPPER(buffer[0])) {
+
+	case 'A':
+	if (!strncasecomp(buffer, "ALERTSECS:", 10)) {
+	    strcpy(temp, buffer+10);
+	    for (i = 0; temp[i]; i++) {
+		if (!isdigit(temp[i])) {
+		    temp[i] = '\0';
+		    break;
+		}
+	    }
+	    if (temp[0])
+		AlertSecs = atoi(temp);
+
+	} else if (!strncasecomp(buffer, "ALWAYS_RESUBMIT_POSTS:", 22)) {
+	    LYresubmit_posts = is_true(buffer+22);
+
+#ifdef EXEC_LINKS
+	} else if (!strncasecomp(buffer, "ALWAYS_TRUSTED_EXEC:", 20)) {
+	    add_trusted(&buffer[20], ALWAYS_EXEC_PATH); /* Add exec path */
+#endif /* EXEC_LINKS */
+	}
+	break;
+
+	case 'B':
+	if (!strncasecomp(buffer, "BLOCK_MULTI_BOOKMARKS:", 22)) {
+	    LYMBMBlocked = is_true(buffer+22);
+
+	} else if (!strncasecomp(buffer, "BOLD_H1:", 8)) {
+	    bold_H1 = is_true(buffer+8);
+
+	} else if (!strncasecomp(buffer, "BOLD_HEADERS:", 13)) {
+	    bold_headers = is_true(buffer+13);
+
+	} else if (!strncasecomp(buffer, "BOLD_NAME_ANCHORS:", 18)) {
+	    bold_name_anchors = is_true(buffer+18);
+	}
+	break;
+
+	case 'C':
+	if (!strncasecomp(buffer, "CASE_SENSITIVE_ALWAYS_ON:", 25)) {
+	     case_sensitive = is_true(buffer+25);
+
+	} else if (!strncasecomp(buffer, "CHARACTER_SET:", 14)) {
+	    for (i = 0; LYchar_set_names[i]; i++) {
+		if (!strncmp(buffer+14,
+			     LYchar_set_names[i], strlen(buffer+14))) {
+		    current_char_set=i;
+		    HTMLSetRawModeDefault(i);
+		    break;
+		}
+	    }
+
+	} else if (!strncasecomp(buffer, "CHECKMAIL:", 10)) {
+	    check_mail = is_true(buffer+10);
+
+	} else if (!strncasecomp(buffer, "COLLAPSE_BR_TAGS:", 17)) {
+		LYCollapseBRs = is_true(buffer+17);
+
+#ifdef USE_SLANG
+	} else if (!strncasecomp(buffer, "COLOR:", 6)) {
+		parse_color(buffer + 6);
+#endif /* USE_SLANG */
+
+	} else if (!strncasecomp(buffer, "cso_proxy:", 10)) {
+	    if (getenv("cso_proxy") == NULL) {
+#ifdef VMS
+		strcpy(temp, "cso_proxy");
+		Define_VMSLogical(temp, (char *)&buffer[10]);
+#else
+		strcpy(temp, "cso_proxy=");
+		StrAllocCopy(cso_proxy_putenv_cmd, temp);
+		StrAllocCat(cso_proxy_putenv_cmd, (char *)&buffer[10]);
+		putenv(cso_proxy_putenv_cmd);
+#endif /* VMS */
+	    }
+
+#ifdef VMS
+	} else if (!strncasecomp(buffer, "CSWING_PATH:", 12)) {
+	    StrAllocCopy(LYCSwingPath, buffer+12);
+#endif /* VMS */
+	}
+	break;
+
+	case 'D':
+	if (!strncasecomp(buffer, "DEFAULT_BOOKMARK_FILE:", 22)) {
+	    StrAllocCopy(bookmark_page, buffer+22);
+	    StrAllocCopy(BookmarkPage, bookmark_page);
+	    StrAllocCopy(MBM_A_subbookmark[0], bookmark_page);
+	    StrAllocCopy(MBM_A_subdescript[0], MULTIBOOKMARKS_DEFAULT);
+
+	} else if (!strncasecomp(buffer, "DEFAULT_CACHE_SIZE:", 19)) {
+		HTCacheSize = atoi(buffer+19);
+
+	} else if (!system_editor &&
+		   !strncasecomp(buffer, "DEFAULT_EDITOR:", 15)) {
+	    StrAllocCopy(editor, buffer+15);
+
+	} else if (!strncasecomp(buffer, "DEFAULT_INDEX_FILE:", 19)) {
+	    StrAllocCopy(indexfile, buffer+19);
+
+	} else if (!strncasecomp(buffer,
+			"DEFAULT_KEYPAD_MODE_IS_NUMBERS_AS_ARROWS:", 41)) {
+	    if (is_true(buffer+41))
+		keypad_mode = NUMBERS_AS_ARROWS;
+	    else
+		keypad_mode = LINKS_ARE_NUMBERED;
+
+	} else if (!strncasecomp(buffer, "DEFAULT_USER_MODE:", 18)) {
+	    if (!strncasecomp(buffer+18, "NOVICE", 5))
+		user_mode = NOVICE_MODE;
+	    else if (!strncasecomp(buffer+18, "INTER", 5))
+		user_mode = INTERMEDIATE_MODE;
+	    else if (!strncasecomp(buffer+18, "ADVANCE", 7))
+		user_mode = ADVANCED_MODE;
+
+#if defined(VMS) && defined(VAXC) && !defined(__DECC)
+	} else if (!strncasecomp(buffer, 
+				 "DEFAULT_VIRTUAL_MEMORY_SIZE:", 28)) {
+		HTVirtualMemorySize = atoi(buffer+28);
+#endif /* VMS && VAXC && !__DECC */
+
+#ifdef DIRED_SUPPORT
+	} else if (!strncasecomp(buffer, "DIRED_MENU:", 11)) {
+	    add_menu_item(&buffer[11]);
+#endif /* DIRED_SUPPORT */
+
+	} else if (!strncasecomp(buffer, "DOWNLOADER:", 11)) {
+	    add_item_to_list(&buffer[11], &downloaders);
+	}
+	break;
+
+	case 'E':
+	if (!strncasecomp(buffer, "EMACS_KEYS_ALWAYS_ON:", 21)) {
+	    emacs_keys = is_true(buffer+21);
+
+	} else if (!strncasecomp(buffer, "ENABLE_SCROLLBACK:", 18)) {
+	    enable_scrollback = is_true(buffer+18);
+	}
+	break;
+
+	case 'F':
+	if (!strncasecomp(buffer, "finger_proxy:", 13)) {
+	    if (getenv("finger_proxy") == NULL) {
+#ifdef VMS
+		strcpy(temp, "finger_proxy");
+		Define_VMSLogical(temp, (char *)&buffer[13]);
+#else
+		strcpy(temp, "finger_proxy=");
+		StrAllocCopy(finger_proxy_putenv_cmd, temp);
+		StrAllocCat(finger_proxy_putenv_cmd, (char *)&buffer[13]);
+		putenv(finger_proxy_putenv_cmd);
+#endif /* VMS */
+	    }
+
+	} else if (!strncasecomp(buffer, "ftp_proxy:", 10)) {
+	    if (getenv("ftp_proxy") == NULL) {
+#ifdef VMS
+		strcpy(temp, "ftp_proxy");
+		Define_VMSLogical(temp, (char *)&buffer[10]);
+#else
+		strcpy(temp, "ftp_proxy=");
+		StrAllocCopy(ftp_proxy_putenv_cmd, temp);
+		StrAllocCat(ftp_proxy_putenv_cmd, (char *)&buffer[10]);
+		putenv(ftp_proxy_putenv_cmd);
+#endif /* VMS */
+	    }
+	}
+	break;
+
+	case 'G':
+	if (!strncasecomp(buffer, "GLOBAL_EXTENSION_MAP:", 21)) {
+	    StrAllocCopy(global_extension_map, buffer+21);
+
+	} else if (!strncasecomp(buffer, "GLOBAL_MAILCAP:", 15)) {
+	    StrAllocCopy(global_type_map, buffer+15);
+
+	} else if (!strncasecomp(buffer, "gopher_proxy:", 13)) {
+	    if (getenv("gopher_proxy") == NULL) {
+#ifdef VMS
+		strcpy(temp, "gopher_proxy");
+		Define_VMSLogical(temp, (char *)&buffer[13]);
+#else
+		strcpy(temp, "gopher_proxy=");
+		StrAllocCopy(gopher_proxy_putenv_cmd, temp);
+		StrAllocCat(gopher_proxy_putenv_cmd, (char *)&buffer[13]);
+		putenv(gopher_proxy_putenv_cmd);
+#endif /* VMS */
+	    }
+
+	} else if (!strncasecomp(buffer, "GOTOBUFFER:", 11)) {
+	    goto_buffer = is_true(buffer+11);
+	}
+	break;
+
+	case 'H':
+	if (!strncasecomp(buffer, "HELPFILE:", 9)) {
+	    StrAllocCopy(helpfile, buffer+9);
+
+	} else if (!strncasecomp(buffer, "HISTORICAL_COMMENTS:", 20)) {
+	    historical_comments = is_true(buffer+20);
+
+	} else if (!strncasecomp(buffer, "http_proxy:", 11)) {
+	    if (getenv("http_proxy") == NULL) {
+#ifdef VMS
+		strcpy(temp, "http_proxy");
+		Define_VMSLogical(temp, (char *)&buffer[11]);
+#else
+		strcpy(temp, "http_proxy=");
+		StrAllocCopy(http_proxy_putenv_cmd, temp);
+		StrAllocCat(http_proxy_putenv_cmd, (char *)&buffer[11]);
+		putenv(http_proxy_putenv_cmd);
+#endif /* VMS */
+	    }
+
+	} else if (!strncasecomp(buffer, "https_proxy:", 12)) {
+	    if (getenv("https_proxy") == NULL) {
+#ifdef VMS
+		strcpy(temp, "https_proxy");
+		Define_VMSLogical(temp, (char *)&buffer[12]);
+#else
+		strcpy(temp, "https_proxy=");
+		StrAllocCopy(https_proxy_putenv_cmd, temp);
+		StrAllocCat(https_proxy_putenv_cmd, (char *)&buffer[12]);
+		putenv(https_proxy_putenv_cmd);
+#endif /* VMS */
+	    }
+	}
+	break;
+
+	case 'I':
+	if (!strncasecomp(buffer, "INEWS:", 6)) {
+	    StrAllocCopy(inews_path, buffer+6);
+	    if (*inews_path == '\0' || !strcasecomp(inews_path, "none"))
+		no_newspost = TRUE;
+	    else
+		no_newspost = FALSE;
+
+	} else if (!strncasecomp(buffer, "INFOSECS:", 9)) {
+	    strcpy(temp, buffer+9);
+	    for (i = 0; temp[i]; i++) {
+		if (!isdigit(temp[i])) {
+		    temp[i] = '\0';
+		    break;
+		}
+	    }
+	    if (temp[0])
+		InfoSecs = atoi(temp);
+	}
+	break;
+
+	case 'J':
+	if (!strncasecomp(buffer, "JUMP_PROMPT:", 12)) {
+	    StrAllocCopy(jumpprompt, buffer+12);
+
+	} else if (!strncasecomp(buffer, "JUMPBUFFER:", 11)) {
+	    jump_buffer = is_true(buffer+11);
+
+	} else if (!strncasecomp(buffer, "JUMPFILE:", 9)) {
+	    if (!LYJumpInit(buffer)) {
+		if (TRACE)
+		    fprintf(stderr, "Failed to register %s\n", buffer);
+	    }
+	}
+	break;
+
+	case 'K':
+        if (!strncasecomp(buffer, "KEYMAP:", 7)) {
+            char *key;
+            char *func;
+  
+            key = buffer + 7;
+            if ((func = strchr(key, ':')) != NULL)	{
+                *func++ = '\0';
+		/* Allow comments on the ends of key remapping lines. - DT */
+            	if (!remap(key, strtok(func, " \t\n#")))
+                    fprintf(stderr,
+		    	    "key remapping of %s to %s failed\n",key,func);
+		else if (!strcmp("TOGGLE_HELP", strtok(func, " \t\n#")))
+		    LYUseNoviceLineTwo = FALSE;
+	    }
+	}
+	break;
+
+	case 'L':
+	if (!strncasecomp(buffer, "LIST_NEWS_NUMBERS:", 18)) {
+		LYListNewsNumbers = is_true(buffer+18);
+
+	} else if (!strncasecomp(buffer, "LIST_NEWS_DATES:", 16)) {
+		LYListNewsDates = is_true(buffer+16);
+
+#ifndef VMS
+	} else if (!strncasecomp(buffer, "LIST_FORMAT:", 12)) {
+	    StrAllocCopy(list_format, buffer+12);
+#endif /* !VMS */
+
+	} else if (!strncasecomp(buffer, "LOCALHOST_ALIAS:", 16)) {
+	    LYAddLocalhostAlias(buffer+16);
+
+	} else if (!strncasecomp(buffer, "LOCAL_DOMAIN:", 13)) {
+	    StrAllocCopy(LYLocalDomain, buffer+13);
+
+#if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
+	} else if (!strncasecomp(buffer,
+			 "LOCAL_EXECUTION_LINKS_ALWAYS_ON:", 32)) {
+	    local_exec = is_true(buffer+32);
+
+	} else if (!strncasecomp(buffer,
+			 "LOCAL_EXECUTION_LINKS_ON_BUT_NOT_REMOTE:", 40)) {
+	    local_exec_on_local_files = is_true(buffer+40);
+#endif /* defined(EXEC_LINKS) || defined(EXEC_SCRIPTS) */
+
+#ifdef LYNXCGI_LINKS
+	} else if (!strncasecomp(buffer, "LYNXCGI_ENVIRONMENT:", 20)) {
+	    add_lynxcgi_environment(buffer+20);
+#endif /* LYNXCGI_LINKS */
+
+	} else if (!strncasecomp(buffer, "LYNX_HOST_NAME:", 15)) {
+	    StrAllocCopy(LYHostName, buffer+15);
+	}
+	break;
+
+	case 'M':
+	if (!strncasecomp(buffer, "MAIL_SYSTEM_ERROR_LOGGING:", 26)) {
+	    error_logging = is_true(buffer+26);
+
+#ifdef VMS
+	} else if (!strncasecomp(buffer, "MAIL_ADRS:", 10)) {
+	    StrAllocCopy(mail_adrs, buffer+10);
+#endif /* VMS */
+
+	} else if (!strncasecomp(buffer, "MAKE_LINKS_FOR_ALL_IMAGES:", 26)) {
+	    clickable_images = is_true(buffer+26);
+
+	} else if (!strncasecomp(buffer,
+				 "MAKE_PSEUDO_ALTS_FOR_INLINES:", 29)) {
+	    pseudo_inline_alts = is_true(buffer+29);
+
+	} else if (!strncasecomp(buffer, "MESSAGESECS:", 12)) {
+	    strcpy(temp, buffer+12);
+	    for (i = 0; temp[i]; i++) {
+		if (!isdigit(temp[i])) {
+		    temp[i] = '\0';
+		    break;
+		}
+	    }
+	    if (temp[0])
+		MessageSecs = atoi(temp);
+
+	} else if (!strncasecomp(buffer, "MINIMAL_COMMENTS:", 17)) {
+	    minimal_comments = is_true(buffer+17);
+
+	} else if (!strncasecomp(buffer, "MULTI_BOOKMARK_SUPPORT:", 23)) {
+	    LYMultiBookmarks = is_true(buffer+23);
+	}
+	break;
+
+	case 'N':
+	if (!strncasecomp(buffer, "NEWS_CHUNK_SIZE:", 16)) {
+		HTNewsChunkSize = atoi(buffer+16);
+		/*
+		 * If the new HTNewsChunkSize exceeds the maximum,
+		 * increase HTNewsMaxChunk to this size. - FM
+		 */
+		if (HTNewsChunkSize > HTNewsMaxChunk) {
+		    HTNewsMaxChunk = HTNewsChunkSize; 
+		}
+
+	} else if (!strncasecomp(buffer, "NEWS_MAX_CHUNK:", 15)) {
+		HTNewsMaxChunk = atoi(buffer+15);
+		/*
+		 * If HTNewsChunkSize exceeds the new maximum,
+		 * reduce HTNewsChunkSize to this maximum. - FM
+		 */
+		if (HTNewsChunkSize > HTNewsMaxChunk) {
+		    HTNewsChunkSize = HTNewsMaxChunk;
+		}
+
+	} else if (!strncasecomp(buffer, "news_proxy:", 11)) {
+	    if (getenv("news_proxy") == NULL) {
+#ifdef VMS
+		strcpy(temp, "news_proxy");
+		Define_VMSLogical(temp, (char *)&buffer[11]);
+#else
+		strcpy(temp, "news_proxy=");
+		StrAllocCopy(news_proxy_putenv_cmd, temp);
+		StrAllocCat(news_proxy_putenv_cmd, (char *)&buffer[11]);
+		putenv(news_proxy_putenv_cmd);
+#endif /* VMS */
+	    }
+
+	} else if (!strncasecomp(buffer, "nntp_proxy:", 11)) {
+	    if (getenv("nntp_proxy") == NULL) {
+#ifdef VMS
+		strcpy(temp, "nntp_proxy");
+		Define_VMSLogical(temp, (char *)&buffer[11]);
+#else
+		strcpy(temp, "nntp_proxy=");
+		StrAllocCopy(nntp_proxy_putenv_cmd, temp);
+		StrAllocCat(nntp_proxy_putenv_cmd, (char *)&buffer[11]);
+		putenv(nntp_proxy_putenv_cmd);
+#endif /* VMS */
+	    }
+
+	} else if (!strncasecomp(buffer, "NNTPSERVER:", 11)) {
+	    if (getenv("NNTPSERVER") == NULL) {
+#ifdef VMS
+		strcpy(temp, "NNTPSERVER");
+		Define_VMSLogical(temp, (char *)&buffer[11]);
+#else
+		strcpy(temp, "NNTPSERVER=");
+		StrAllocCopy(NNTPSERVER_putenv_cmd, temp);
+		StrAllocCat(NNTPSERVER_putenv_cmd, (char *)&buffer[11]);
+		putenv(NNTPSERVER_putenv_cmd);
+#endif /* VMS */
+	    }
+
+	} else if (!strncasecomp(buffer, "NO_DOT_FILES:", 13)) {
+	    no_dotfiles = is_true(buffer+13);
+
+	} else if (!strncasecomp(buffer, "NO_FILE_REFERER:", 16)) {
+	    no_filereferer = is_true(buffer+16);
+
+	} else if (!strncasecomp(buffer, "NO_FROM_HEADER:", 15)) {
+	    LYNoFromHeader = is_true(buffer+15);
+
+	} else if (!strncasecomp(buffer, "no_proxy:", 9)) {
+	    if (getenv("no_proxy") == NULL) {
+#ifdef VMS
+		strcpy(temp, "no_proxy");
+		Define_VMSLogical(temp, (char *)&buffer[9]);
+#else
+		strcpy(temp, "no_proxy=");
+		StrAllocCopy(no_proxy_putenv_cmd, temp);
+		StrAllocCat(no_proxy_putenv_cmd, (char *)&buffer[9]);
+		putenv(no_proxy_putenv_cmd);
+#endif /* VMS */
+	    }
+
+	} else if (!strncasecomp(buffer, "NO_REFERER_HEADER:", 18)) {
+	    LYNoRefererHeader = is_true(buffer+18);
+	}
+	break;
+
+	case 'P':
+	if (!strncasecomp(buffer, "PERSONAL_MAILCAP:", 17)) {
+            StrAllocCopy(personal_type_map, buffer+17);
+
+        } else if (!strncasecomp(buffer, "PERSONAL_EXTENSION_MAP:", 23)) {
+            StrAllocCopy(personal_extension_map, buffer+23);
+
+	} else if (!strncasecomp(buffer, "PREFERRED_CHARSET:", 18)) {
+	    StrAllocCopy(pref_charset, buffer+18);
+
+	} else if (!strncasecomp(buffer, "PREFERRED_LANGUAGE:", 19)) {
+	    StrAllocCopy(language, buffer+19);
+
+	} else if (!strncasecomp(buffer, "PRINTER:", 8)) {
+	    add_printer_to_list(&buffer[8], &printers);
+	}
+	break;
+
+	case 'S':
+	if (!strncasecomp(buffer, "SAVE_SPACE:", 11)) {
+	    StrAllocCopy(lynx_save_space, buffer+11);
+
+	} else if (!strncasecomp(buffer, "SCAN_FOR_BURIED_NEWS_REFS:", 26)) {
+	    scan_for_buried_news_references = is_true(buffer+26);
+
+	} else if (!strncasecomp(buffer, "SET_COOKIES:", 12)) {
+	    LYSetCookies = is_true(buffer+12);
+
+	} else if (!strncasecomp(buffer, "SHOW_CURSOR:", 12)) {
+	    LYShowCursor = is_true(buffer+12);
+
+	} else if (!strncasecomp(buffer, "snews_proxy:", 12)) {
+	    if (getenv("snews_proxy") == NULL) {
+#ifdef VMS
+		strcpy(temp, "snews_proxy");
+		Define_VMSLogical(temp, (char *)&buffer[12]);
+#else
+		strcpy(temp, "snews_proxy=");
+		StrAllocCopy(snews_proxy_putenv_cmd, temp);
+		StrAllocCat(snews_proxy_putenv_cmd, (char *)&buffer[12]);
+		putenv(snews_proxy_putenv_cmd);
+#endif /* VMS */
+	    }
+
+	} else if (!strncasecomp(buffer, "SOFT_DQUOTES:", 13)) {
+	    soft_dquotes = is_true(buffer+13);
+
+	} else if (!strncasecomp(buffer, "STARTFILE:", 10)) {
+	    StrAllocCopy(startfile, buffer+10);
+
+	} else if (!strncasecomp(buffer, "SUBSTITUTE_UNDERSCORES:", 23)) {
+	    use_underscore = is_true(buffer+23);
+
+        } else if (!strncasecomp(buffer, "SUFFIX:", 7)) {
 	    char *extention;
 	    char *mime_type;
 
@@ -449,7 +946,56 @@ PUBLIC void read_cfg ARGS1(
 		}
 	    }
 
-        } else if (!strncasecomp(buffer,"VIEWER:",7)) {
+ 	} else if (!strncasecomp(buffer, "SYSTEM_EDITOR:", 14)) {
+	    StrAllocCopy(editor, buffer+14);
+ 	    system_editor = TRUE;
+
+	} else if (!strncasecomp(buffer, "SYSTEM_MAIL:", 12)) {
+	    StrAllocCopy(system_mail, buffer+12);
+	}
+	break;
+
+	case 'T':
+#ifdef EXEC_LINKS
+	if (!strncasecomp(buffer, "TRUSTED_EXEC:", 13)) {
+	    add_trusted(&buffer[13], EXEC_PATH); /* Add exec path */
+	}
+#endif /* EXEC_LINKS */
+
+#ifdef LYNXCGI_LINKS
+	if (!strncasecomp(buffer, "TRUSTED_LYNXCGI:", 16)) {
+	    add_trusted(&buffer[16], CGI_PATH); /* Add CGI path */
+	}
+#endif /* LYNXCGI_LINKS */
+	break;
+
+	case 'U':
+	if (!strncasecomp(buffer, "URL_DOMAIN_PREFIXES:", 20)) {
+	    StrAllocCopy(URLDomainPrefixes, buffer+20);
+
+	} else if (!strncasecomp(buffer, "URL_DOMAIN_SUFFIXES:", 20)) {
+	    StrAllocCopy(URLDomainSuffixes, buffer+20);
+
+#ifdef DIRED_SUPPORT
+	} else if (!strncasecomp(buffer, "UPLOADER:", 9)) {
+	    add_item_to_list(&buffer[9], &uploaders);
+#endif /* DIRED_SUPPORT */
+
+#ifdef VMS
+	} else if (!strncasecomp(buffer, "USE_FIXED_RECORDS:", 18)) {
+	    UseFixedRecords = is_true(buffer+18);
+#endif /* VMS */
+
+	} else if (!strncasecomp(buffer, "USE_SELECT_POPUPS:", 18)) {
+		LYSelectPopups = is_true(buffer+18);
+	}
+	break;
+
+	case 'V':
+	if (!strncasecomp(buffer, "VI_KEYS_ALWAYS_ON:", 18)) {
+	    vi_keys = is_true(buffer+18);
+
+        } else if (!strncasecomp(buffer, "VIEWER:", 7)) {
 	    char *mime_type;
 	    char *viewer;
 	    char *environment;
@@ -493,320 +1039,12 @@ PUBLIC void read_cfg ARGS1(
 		    }
 		}
 	    }
+	}
+	break;
 
-        } else if(!strncasecomp(buffer,"KEYMAP:",7)) {
-            char *key;
-            char *func;
-  
-            key = buffer + 7;
-            if ((func = strchr(key, ':')) != NULL)	{
-                *func++ = '\0';
-		/* Allow comments on the ends of key remapping lines. - DT */
-            	if (!remap(key, strtok(func, " \t\n#")))
-                    fprintf(stderr,
-		    	    "key remapping of %s to %s failed\n",key,func);
-		else if (!strcmp("TOGGLE_HELP", strtok(func, " \t\n#")))
-		    LYUseNoviceLineTwo = FALSE;
-	    }
-
-	} else if(!strncasecomp(buffer,"GLOBAL_MAILCAP:",15)) {
-
-	    StrAllocCopy(global_type_map, buffer+15);
-
-	} else if(!strncasecomp(buffer,"GLOBAL_EXTENSION_MAP:",21)) {
-
-	    StrAllocCopy(global_extension_map, buffer+21);
-
-	} else if(!strncasecomp(buffer,"PERSONAL_MAILCAP:",17)) {
-
-            StrAllocCopy(personal_type_map, buffer+17);
-
-        } else if(!strncasecomp(buffer,"PERSONAL_EXTENSION_MAP:",23)) {
-
-            StrAllocCopy(personal_extension_map, buffer+23);
-
-	} else if(!strncasecomp(buffer,"CHARACTER_SET:",14)) {
-	    for(i = 0; LYchar_set_names[i]; i++)
-		if(!strncmp(buffer+14,LYchar_set_names[i],strlen(buffer+14)))
-		{
-		    current_char_set=i;
-		    HTMLSetRawModeDefault(i);
-		    break;
-		}
-
-	} else if(!strncasecomp(buffer,"STARTFILE:",10)) {
-
-	    StrAllocCopy(startfile, buffer+10);
-
-	} else if(!strncasecomp(buffer,"HELPFILE:",9)) {
-
-	    StrAllocCopy(helpfile, buffer+9);
-
-	} else if(!strncasecomp(buffer,"DEFAULT_INDEX_FILE:",19)) {
-	    StrAllocCopy(indexfile, buffer+19);
-
-#if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
-	} else if(!strncasecomp(buffer,
-				    "LOCAL_EXECUTION_LINKS_ALWAYS_ON:",32)) {
-	    local_exec = is_true(buffer+32);
-
-	} else if(!strncasecomp(buffer,
-			    "LOCAL_EXECUTION_LINKS_ON_BUT_NOT_REMOTE:",40)) {
-	    local_exec_on_local_files = is_true(buffer+40);
-#endif /* defined(EXEC_LINKS) || defined(EXEC_SCRIPTS) */
-
-	} else if(!strncasecomp(buffer,"MAIL_SYSTEM_ERROR_LOGGING:",26)) {
-	    error_logging = is_true(buffer+26);
-
-	} else if(!strncasecomp(buffer,"CHECKMAIL:",10)) {
-	    check_mail = is_true(buffer+10);
-
-#ifdef VMS
-	} else if(!strncasecomp(buffer,"USE_FIXED_RECORDS:",18)) {
-	    UseFixedRecords = is_true(buffer+18);
-#endif /* VMS */
-
-	} else if(!strncasecomp(buffer,"VI_KEYS_ALWAYS_ON:",18)) {
-	    vi_keys = is_true(buffer+18);
-
-	} else if(!strncasecomp(buffer,"EMACS_KEYS_ALWAYS_ON:",21)) {
-	    emacs_keys = is_true(buffer+21);
-
-	} else if(!strncasecomp(buffer,
-			"DEFAULT_KEYPAD_MODE_IS_NUMBERS_AS_ARROWS:",41)) {
-	    if(is_true(buffer+41))
-		keypad_mode = NUMBERS_AS_ARROWS;
-	    else
-		keypad_mode = LINKS_ARE_NUMBERED;
-
-	} else if(!strncasecomp(buffer,"CASE_SENSITIVE_ALWAYS_ON:",25)) {
-	     case_sensitive = is_true(buffer+25);
-
-	} else if(!strncasecomp(buffer,"DEFAULT_USER_MODE:",18)) {
-		if(!strncasecomp(buffer+18,"NOVICE",5))
-		   user_mode = NOVICE_MODE;
-		else if(!strncasecomp(buffer+18,"INTER",5))
-		   user_mode = INTERMEDIATE_MODE;
-		else if(!strncasecomp(buffer+18,"ADVANCE",7))
-		   user_mode = ADVANCED_MODE;
-
-	} else if(!strncasecomp(buffer,"DEFAULT_BOOKMARK_FILE:",22)) {
-		StrAllocCopy(bookmark_page, buffer+22);
-		StrAllocCopy(BookmarkPage, bookmark_page);
-		StrAllocCopy(MBM_A_subbookmark[0], bookmark_page);
-		StrAllocCopy(MBM_A_subdescript[0], MULTIBOOKMARKS_DEFAULT);
-
-	} else if(!strncasecomp(buffer,"MULTI_BOOKMARK_SUPPORT:",23)) {
-		LYMultiBookmarks = is_true(buffer+23);
-
-	} else if(!strncasecomp(buffer,"BLOCK_MULTI_BOOKMARKS:",22)) {
-		LYMBMBlocked = is_true(buffer+22);
-
-	} else if(!strncasecomp(buffer,"ADVANCED_MULTI_BOOKMARKS:",25)) {
-		LYMBMAdvanced = is_true(buffer+25);
-
-	} else if(!system_editor && 
-		  !strncasecomp(buffer,"DEFAULT_EDITOR:",15)) {
-		StrAllocCopy(editor,buffer+15);
-
-	} else if(!strncasecomp(buffer,"GOTOBUFFER:",11)) {
-		goto_buffer = is_true(buffer+11);
-
-	} else if(!strncasecomp(buffer,"JUMPFILE:",9)) {
-		if (!LYJumpInit(buffer)) {
-		    if (TRACE)
-		        fprintf(stderr, "Failed to register %s\n", buffer);
-		}
-
-	} else if(!strncasecomp(buffer,"JUMP_PROMPT:",12)) {
-		StrAllocCopy(jumpprompt,buffer+12);
-
-	} else if(!strncasecomp(buffer,"JUMPBUFFER:",11)) {
-		jump_buffer = is_true(buffer+11);
-
-	} else if(!strncasecomp(buffer,"NO_DOT_FILES:",13)) {
-	    no_dotfiles = is_true(buffer+13);
-
-	} else if(!strncasecomp(buffer,"NO_FROM_HEADER:",15)) {
-	    LYNoFromHeader = is_true(buffer+15);
-
-	} else if(!strncasecomp(buffer,"NO_REFERER_HEADER:",18)) {
-	    LYNoRefererHeader = is_true(buffer+18);
-
-	} else if(!strncasecomp(buffer,"NO_FILE_REFERER:",16)) {
-	    no_filereferer = is_true(buffer+16);
-
-	} else if(!strncasecomp(buffer,"MAKE_LINKS_FOR_ALL_IMAGES:",26)) {
-	    clickable_images = is_true(buffer+26);
-
-	} else if(!strncasecomp(buffer,"MAKE_PSEUDO_ALTS_FOR_INLINES:",29)) {
-	    pseudo_inline_alts = is_true(buffer+29);
-
-	} else if(!strncasecomp(buffer,"BOLD_HEADERS:",13)) {
-		bold_headers = is_true(buffer+13);
-
-	} else if(!strncasecomp(buffer,"BOLD_H1:",8)) {
-		bold_H1 = is_true(buffer+8);
-
-	} else if(!strncasecomp(buffer,"BOLD_NAME_ANCHORS:",18)) {
-		bold_name_anchors = is_true(buffer+18);
-
- 	} else if(!strncasecomp(buffer,"SYSTEM_EDITOR:",14)) {
-		StrAllocCopy(editor,buffer+14);
- 		system_editor = TRUE;
-
-	} else if(!strncasecomp(buffer,"PREFERRED_LANGUAGE:",19)) {
-		StrAllocCopy(language,buffer+19);
-
-	} else if(!strncasecomp(buffer,"PREFERRED_CHARSET:",18)) {
-		StrAllocCopy(pref_charset,buffer+18);
-
-	} else if(!strncasecomp(buffer,"URL_DOMAIN_PREFIXES:",20)) {
-		StrAllocCopy(URLDomainPrefixes, buffer+20);
-
-	} else if(!strncasecomp(buffer,"URL_DOMAIN_SUFFIXES:",20)) {
-		StrAllocCopy(URLDomainSuffixes, buffer+20);
-
-	} else if(!strncasecomp(buffer,"INEWS:",6)) {
-		StrAllocCopy(inews_path,buffer+6);
-		if (*inews_path == '\0' || !strcasecomp(inews_path,"none"))
-		    no_newspost = TRUE;
-		else
-		    no_newspost = FALSE;
-
-	} else if(!strncasecomp(buffer,"SYSTEM_MAIL:",12)) {
-		StrAllocCopy(system_mail,buffer+12);
-
-#ifdef VMS
-	} else if(!strncasecomp(buffer,"MAIL_ADRS:",10)) {
-		StrAllocCopy(mail_adrs,buffer+10);
-#endif /* VMS */
-
-	} else if(!strncasecomp(buffer,"PRINTER:",8)) {
-	        add_printer_to_list (&buffer[8],&printers);
-
-	} else if(!strncasecomp(buffer,"DOWNLOADER:",11)) {
-	        add_item_to_list(&buffer[11],&downloaders);
-
-	} else if(!strncasecomp(buffer,"NNTPSERVER:",11)) {
-	    if(getenv("NNTPSERVER") == NULL) {
-#ifdef VMS
-		strcpy(temp, "NNTPSERVER");
-		Define_VMSLogical(temp, (char *)&buffer[11]);
-#else
-		strcpy(temp, "NNTPSERVER=");
-		StrAllocCopy(NNTPSERVER_putenv_cmd, temp);
-		StrAllocCat(NNTPSERVER_putenv_cmd, (char *)&buffer[11]);
-		putenv(NNTPSERVER_putenv_cmd);
-#endif /* VMS */
-	    }
-
-	} else if(!strncasecomp(buffer,"http_proxy:",11)) {
-	    if(getenv("http_proxy") == NULL) {
-#ifdef VMS
-		strcpy(temp, "http_proxy");
-		Define_VMSLogical(temp, (char *)&buffer[11]);
-#else
-		strcpy(temp, "http_proxy=");
-		StrAllocCopy(http_proxy_putenv_cmd, temp);
-		StrAllocCat(http_proxy_putenv_cmd, (char *)&buffer[11]);
-		putenv(http_proxy_putenv_cmd);
-#endif /* VMS */
-	    }
-
-	} else if(!strncasecomp(buffer,"https_proxy:",12)) {
-	    if(getenv("https_proxy") == NULL) {
-#ifdef VMS
-		strcpy(temp, "https_proxy");
-		Define_VMSLogical(temp, (char *)&buffer[12]);
-#else
-		strcpy(temp, "https_proxy=");
-		StrAllocCopy(https_proxy_putenv_cmd, temp);
-		StrAllocCat(https_proxy_putenv_cmd, (char *)&buffer[12]);
-		putenv(https_proxy_putenv_cmd);
-#endif /* VMS */
-	    }
-
-	} else if(!strncasecomp(buffer,"ftp_proxy:",10)) {
-	    if(getenv("ftp_proxy") == NULL) {
-#ifdef VMS
-		strcpy(temp, "ftp_proxy");
-		Define_VMSLogical(temp, (char *)&buffer[10]);
-#else
-		strcpy(temp, "ftp_proxy=");
-		StrAllocCopy(ftp_proxy_putenv_cmd, temp);
-		StrAllocCat(ftp_proxy_putenv_cmd, (char *)&buffer[10]);
-		putenv(ftp_proxy_putenv_cmd);
-#endif /* VMS */
-	    }
-
-	} else if(!strncasecomp(buffer,"gopher_proxy:",13)) {
-	    if(getenv("gopher_proxy") == NULL) {
-#ifdef VMS
-		strcpy(temp, "gopher_proxy");
-		Define_VMSLogical(temp, (char *)&buffer[13]);
-#else
-		strcpy(temp, "gopher_proxy=");
-		StrAllocCopy(gopher_proxy_putenv_cmd, temp);
-		StrAllocCat(gopher_proxy_putenv_cmd, (char *)&buffer[13]);
-		putenv(gopher_proxy_putenv_cmd);
-#endif /* VMS */
-	    }
-
-	} else if(!strncasecomp(buffer,"cso_proxy:",10)) {
-	    if(getenv("cso_proxy") == NULL) {
-#ifdef VMS
-		strcpy(temp, "cso_proxy");
-		Define_VMSLogical(temp, (char *)&buffer[10]);
-#else
-		strcpy(temp, "cso_proxy=");
-		StrAllocCopy(cso_proxy_putenv_cmd, temp);
-		StrAllocCat(cso_proxy_putenv_cmd, (char *)&buffer[10]);
-		putenv(cso_proxy_putenv_cmd);
-#endif /* VMS */
-	    }
-
-	} else if(!strncasecomp(buffer,"news_proxy:",11)) {
-	    if(getenv("news_proxy") == NULL) {
-#ifdef VMS
-		strcpy(temp, "news_proxy");
-		Define_VMSLogical(temp, (char *)&buffer[11]);
-#else
-		strcpy(temp, "news_proxy=");
-		StrAllocCopy(news_proxy_putenv_cmd, temp);
-		StrAllocCat(news_proxy_putenv_cmd, (char *)&buffer[11]);
-		putenv(news_proxy_putenv_cmd);
-#endif /* VMS */
-	    }
-
-	} else if(!strncasecomp(buffer,"snews_proxy:",12)) {
-	    if(getenv("snews_proxy") == NULL) {
-#ifdef VMS
-		strcpy(temp, "snews_proxy");
-		Define_VMSLogical(temp, (char *)&buffer[12]);
-#else
-		strcpy(temp, "snews_proxy=");
-		StrAllocCopy(snews_proxy_putenv_cmd, temp);
-		StrAllocCat(snews_proxy_putenv_cmd, (char *)&buffer[12]);
-		putenv(snews_proxy_putenv_cmd);
-#endif /* VMS */
-	    }
-
-	} else if(!strncasecomp(buffer,"nntp_proxy:",11)) {
-	    if(getenv("nntp_proxy") == NULL) {
-#ifdef VMS
-		strcpy(temp, "nntp_proxy");
-		Define_VMSLogical(temp, (char *)&buffer[11]);
-#else
-		strcpy(temp, "nntp_proxy=");
-		StrAllocCopy(nntp_proxy_putenv_cmd, temp);
-		StrAllocCat(nntp_proxy_putenv_cmd, (char *)&buffer[11]);
-		putenv(nntp_proxy_putenv_cmd);
-#endif /* VMS */
-	    }
-
-	} else if(!strncasecomp(buffer,"wais_proxy:",11)) {
-	    if(getenv("wais_proxy") == NULL) {
+	case 'W':
+	if (!strncasecomp(buffer, "wais_proxy:", 11)) {
+	    if (getenv("wais_proxy") == NULL) {
 #ifdef VMS
 		strcpy(temp, "wais_proxy");
 		Define_VMSLogical(temp, (char *)&buffer[11]);
@@ -817,186 +1055,29 @@ PUBLIC void read_cfg ARGS1(
 		putenv(wais_proxy_putenv_cmd);
 #endif /* VMS */
 	    }
+	}
+	break;
 
-	} else if(!strncasecomp(buffer,"finger_proxy:",13)) {
-	    if(getenv("finger_proxy") == NULL) {
-#ifdef VMS
-		strcpy(temp, "finger_proxy");
-		Define_VMSLogical(temp, (char *)&buffer[13]);
-#else
-		strcpy(temp, "finger_proxy=");
-		StrAllocCopy(finger_proxy_putenv_cmd, temp);
-		StrAllocCat(finger_proxy_putenv_cmd, (char *)&buffer[13]);
-		putenv(finger_proxy_putenv_cmd);
-#endif /* VMS */
-	    }
+	default:
+	break;
 
-	} else if(!strncasecomp(buffer,"no_proxy:",9)) {
-	    if(getenv("no_proxy") == NULL) {
-#ifdef VMS
-		strcpy(temp, "no_proxy");
-		Define_VMSLogical(temp, (char *)&buffer[9]);
-#else
-		strcpy(temp, "no_proxy=");
-		StrAllocCopy(no_proxy_putenv_cmd, temp);
-		StrAllocCat(no_proxy_putenv_cmd, (char *)&buffer[9]);
-		putenv(no_proxy_putenv_cmd);
-#endif /* VMS */
-	    }
-
-#ifdef EXEC_LINKS
-	} else if(!strncasecomp(buffer,"TRUSTED_EXEC:",13)) {
-		add_trusted(&buffer[13], EXEC_PATH); /* Add exec path */
-
-	} else if(!strncasecomp(buffer,"ALWAYS_TRUSTED_EXEC:",20)) {
-		add_trusted(&buffer[20], ALWAYS_EXEC_PATH); /* Add exec path */
-#endif /* EXEC_LINKS */
-
-#ifdef LYNXCGI_LINKS
-	} else if(!strncasecomp(buffer,"TRUSTED_LYNXCGI:",16)) {
-		add_trusted(&buffer[16], CGI_PATH); /* Add CGI path */
-
-	} else if(!strncasecomp(buffer,"LYNXCGI_ENVIRONMENT:",20)) {
-		add_lynxcgi_environment(buffer+20);
-#endif /* LYNXCGI_LINKS */
-
-#ifdef DIRED_SUPPORT
-	} else if(!strncasecomp(buffer,"UPLOADER:",9)) {
-	        add_item_to_list(&buffer[9],&uploaders);
-
-	} else if(!strncasecomp(buffer,"DIRED_MENU:",11)) {
-	        add_menu_item(&buffer[11]);
-#endif /* DIRED_SUPPORT */
-
-	} else if(!strncasecomp(buffer,"LYNX_HOST_NAME:",15)) {
-		StrAllocCopy(LYHostName,buffer+15);
-
-	} else if(!strncasecomp(buffer,"LOCALHOST_ALIAS:",16)) {
-	        LYAddLocalhostAlias(buffer+16);
-
-	} else if(!strncasecomp(buffer,"LOCAL_DOMAIN:",13)) {
-		StrAllocCopy(LYLocalDomain,buffer+13);
-
-	} else if(!strncasecomp(buffer,"SUBSTITUTE_UNDERSCORES:",23)) {
-		use_underscore = is_true(buffer+23);
-
-	} else if(!strncasecomp(buffer,"HISTORICAL_COMMENTS:",20)) {
-		historical_comments = is_true(buffer+20);
-
-	} else if(!strncasecomp(buffer,"MINIMAL_COMMENTS:",17)) {
-		minimal_comments = is_true(buffer+17);
-
-	} else if(!strncasecomp(buffer,"SOFT_DQUOTES:",13)) {
-		soft_dquotes = is_true(buffer+13);
-
-	} else if(!strncasecomp(buffer,"ENABLE_SCROLLBACK:",18)) {
-		enable_scrollback = is_true(buffer+18);
-
-	} else if(!strncasecomp(buffer,"SCAN_FOR_BURIED_NEWS_REFS:",26)) {
-		scan_for_buried_news_references = is_true(buffer+26);
-
-	} else if(!strncasecomp(buffer,"INFOSECS:",9)) {
-		strcpy(temp, buffer+9);
-		for (i = 0; temp[i]; i++) {
-		    if (!isdigit(temp[i])) {
-		        temp[i] = '\0';
-			break;
-		    }
-		}
-		if (temp[0])
-		    InfoSecs = atoi(temp);
-
-	} else if(!strncasecomp(buffer,"MESSAGESECS:",12)) {
-		strcpy(temp, buffer+12);
-		for (i = 0; temp[i]; i++) {
-		    if (!isdigit(temp[i])) {
-		        temp[i] = '\0';
-			break;
-		    }
-		}
-		if (temp[0])
-		    MessageSecs = atoi(temp);
-
-	} else if(!strncasecomp(buffer,"ALERTSECS:",10)) {
-		strcpy(temp, buffer+10);
-		for (i = 0; temp[i]; i++) {
-		    if (!isdigit(temp[i])) {
-		        temp[i] = '\0';
-			break;
-		    }
-		}
-		if (temp[0])
-		    AlertSecs = atoi(temp);
-
-#ifndef VMS
-	} else if(!strncasecomp(buffer,"LIST_FORMAT:",12)) {
-		StrAllocCopy(list_format, buffer+12);
-#endif /* !VMS */
-
-	} else if(!strncasecomp(buffer,"ALWAYS_RESUBMIT_POSTS:",22)) {
-		LYresubmit_posts = is_true(buffer+22);
-
-	} else if(!strncasecomp(buffer,"SAVE_SPACE:",11)) {
-		StrAllocCopy(lynx_save_space, buffer+11);
-
-#ifdef USE_SLANG
-	} else if (!strncasecomp(buffer, "COLOR:", 6)) {
-		parse_color(buffer + 6);
-#endif /* USE_SLANG */
-
-	} else if (!strncasecomp(buffer, "LIST_NEWS_NUMBERS:", 18)) {
-		LYListNewsNumbers = is_true(buffer+18);
-
-	} else if (!strncasecomp(buffer, "LIST_NEWS_DATES:", 16)) {
-		LYListNewsDates = is_true(buffer+16);
-
-	} else if (!strncasecomp(buffer, "NEWS_CHUNK_SIZE:", 16)) {
-		HTNewsChunkSize = atoi(buffer+16);
-		/*
-		 * If the new HTNewsChunkSize exceeds the maximum,
-		 * increase HTNewsMaxChunk to this size. - FM
-		 */
-		if (HTNewsChunkSize > HTNewsMaxChunk) {
-		    HTNewsMaxChunk = HTNewsChunkSize; 
-		}
-
-	} else if (!strncasecomp(buffer, "NEWS_MAX_CHUNK:", 15)) {
-		HTNewsMaxChunk = atoi(buffer+15);
-		/*
-		 * If HTNewsChunkSize exceeds the new maximum,
-		 * reduce HTNewsChunkSize to this maximum. - FM
-		 */
-		if (HTNewsChunkSize > HTNewsMaxChunk) {
-		    HTNewsChunkSize = HTNewsMaxChunk;
-		}
-
-	} else if(!strncasecomp(buffer,"USE_SELECT_POPUPS:",17)) {
-		LYSelectPopups = is_true(buffer+17);
-
-#if defined(VMS) && defined(VAXC) && !defined(__DECC)
-	} else if (!strncasecomp(buffer, "DEFAULT_VIRTUAL_MEMORY_SIZE:", 28)) {
-		HTVirtualMemorySize = atoi(buffer+28);
-#endif /* VMS && VAXC && !__DECC */
-
-	} else if (!strncasecomp(buffer, "DEFAULT_CACHE_SIZE:", 19)) {
-		HTCacheSize = atoi(buffer+19);
-
-        }  /* end of Huge if */
+        }  /* end of Huge switch */
     } /* end of while */
     fclose(fp);
 
     /*
-     * If any DOWNLOADER: commands have always_enabled set (:TRUE),
-     * make override_no_download TRUE, so that other restriction
-     * settings will not block presentation of a download menu
-     * with those always_enabled options still available. - FM
+     *  If any DOWNLOADER: commands have always_enabled set (:TRUE),
+     *  make override_no_download TRUE, so that other restriction
+     *  settings will not block presentation of a download menu
+     *  with those always_enabled options still available. - FM
      */
     if (downloaders != NULL) {
     	int count;
 	lynx_html_item_type *cur_download;
 
-        for(count=0, cur_download=downloaders; cur_download != NULL; 
-			    cur_download = cur_download->next, count++) {
+        for (count = 0, cur_download = downloaders;
+	     cur_download != NULL; 
+	     cur_download = cur_download->next, count++) {
 	    if (cur_download->always_enabled) {
 	        override_no_download = TRUE;
 		break;

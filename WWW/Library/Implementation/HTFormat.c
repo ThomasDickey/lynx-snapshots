@@ -22,8 +22,6 @@ PUBLIC float HTMaxSecs = 1e10;		/* No effective limit */
 PUBLIC float HTMaxLength = 1e10;	/* No effective limit */
 PUBLIC long int HTMaxBytes  = 0;	/* No effective limit */
 
-PUBLIC int loading_length= -1;
-
 #ifdef unix
 #ifdef NeXT
 #define PRESENT_POSTSCRIPT "open %s; /bin/rm -f %s\n"
@@ -469,7 +467,8 @@ PUBLIC float HTStackValue ARGS4(
 **   when the format is textual.
 **
 */
-PUBLIC int HTCopy ARGS3(
+PUBLIC int HTCopy ARGS4(
+	HTParentAnchor *,	anchor,
 	int,			file_number,
 	void*,			handle,
 	HTStream*,		sink)
@@ -478,19 +477,11 @@ PUBLIC int HTCopy ARGS3(
     char line[256];
     int bytes = 0;
     int rv = 0;
-    char * msg;
 
-    if (loading_length == -1)
-        msg = "Read %d bytes of data.";
-    else
-        /* We have a loading_length. */
-        msg = "Read %d of %d bytes of data.";
-
-    
     /*  Push the data down the stream
     */
     targetClass = *(sink->isa);	/* Copy pointers to procedures */
-    
+
     /*	Push binary from socket down sink
     **
     **  This operation could be put into a main event loop
@@ -569,7 +560,11 @@ PUBLIC int HTCopy ARGS3(
 	(*targetClass.put_block)(sink, input_buffer, status);
 
 	bytes += status;
-	sprintf(line, msg, bytes, loading_length);
+	if (anchor && anchor->content_length > 0)
+	    sprintf(line, "Read %d of %d bytes of data.",
+	    		  bytes, anchor->content_length);
+	else
+	    sprintf(line, "Read %d bytes of data.", bytes);
 	HTProgress(line);
 
     } /* next bufferload */
@@ -579,9 +574,7 @@ PUBLIC int HTCopy ARGS3(
     rv = HT_LOADED;
 
 finished:
-    loading_length = -1;
     return(rv);
-	
 }
 
 /*	Push data from a file pointer down a stream
@@ -632,7 +625,8 @@ PUBLIC void HTFileCopy ARGS2(
 **   when the format is textual.
 **
 */
-PUBLIC void HTCopyNoCR ARGS2(
+PUBLIC void HTCopyNoCR ARGS3(
+	HTParentAnchor *,	anchor,
 	int,			file_number,
 	HTStream*,		sink)
 {
@@ -698,7 +692,7 @@ PUBLIC int HTParseSocket ARGS5(
     ** Push the data, don't worry about CRLF we can strip them later.
     */
     targetClass = *(stream->isa);	/* Copy pointers to procedures */
-    rv = HTCopy(file_number, NULL, stream);
+    rv = HTCopy(anchor, file_number, NULL, stream);
     if (rv != -1 && rv != HT_INTERRUPTED)
         (*targetClass._free)(stream);
     

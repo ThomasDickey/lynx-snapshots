@@ -138,7 +138,6 @@ static CONST char* entities[] = {
 **	Lists must be in alphatbetical order by attribute name
 **	The tag elements contain the number of attributes
 */
-
 static attr a_attr[] = {			/* Anchor attributes */
 	{ "ACCESSKEY" },
 	{ "CLASS" },
@@ -525,6 +524,7 @@ static attr img_attr[] = {			/* IMG attributes */
 static attr input_attr[] = {			/* INPUT attributes */
 	{ "ACCEPT" },
 	{ "ALIGN" },
+	{ "ALT" },
 	{ "CHECKED" },
 	{ "CLASS" },
 	{ "CLEAR" },
@@ -564,6 +564,17 @@ static attr isindex_attr[] = {			/* ISINDEX attributes */
 	{ "PROMPT" },	/* HTML 3.0 attribute for prompt string. - FM */
 	{ 0 }	/* Terminate list */
 };	
+
+static attr keygen_attr[] = {			/* KEYGEN attributes */
+	{ "CHALLENGE" },
+	{ "CLASS" },
+	{ "DIR" },
+	{ "ID" },
+	{ "LANG" },
+	{ "NAME" },
+	{ "STYLE" },
+	{ 0 }	/* Terminate list */
+};
 
 static attr label_attr[] = {			/* LABEL attributes */
 	{ "ACCESSKEY" },
@@ -996,6 +1007,7 @@ static HTTag tags[HTML_ELEMENTS] = {
     { "INS"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED },
     { "ISINDEX" , isindex_attr,	HTML_ISINDEX_ATTRIBUTES,SGML_EMPTY },
     { "KBD"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED },
+    { "KEYGEN"	, keygen_attr,	HTML_KEYGEN_ATTRIBUTES,	SGML_EMPTY },
     { "LABEL"	, label_attr,	HTML_LABEL_ATTRIBUTES,	SGML_MIXED },
     { "LH"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY },
     { "LI"	, list_attr,	HTML_LI_ATTRIBUTES,	SGML_EMPTY },
@@ -1048,7 +1060,6 @@ static HTTag tags[HTML_ELEMENTS] = {
     { "XMP"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL },
 };
 
-
 PUBLIC CONST SGML_dtd HTML_dtd = {
 	tags,
 	HTML_ELEMENTS,
@@ -1056,7 +1067,10 @@ PUBLIC CONST SGML_dtd HTML_dtd = {
 	sizeof(entities)/sizeof(char**)
 };
 
-/*	Utility Routine: useful for people building HTML objects */
+
+/*
+**	Utility Routine:  Useful for people building HTML objects.
+*/
 
 /*	Start anchor element
 **	--------------------
@@ -1070,19 +1084,19 @@ struct _HTStructured {
 	/* ... */
 };
 
-PUBLIC void HTStartAnchor ARGS3(HTStructured *, obj,
-		CONST char *,  name,
-		CONST char *,  href)
+PUBLIC void HTStartAnchor ARGS3(
+	HTStructured *,		obj,
+	CONST char *,		name,
+	CONST char *,		href)
 {
     BOOL		present[HTML_A_ATTRIBUTES];
     CONST char * 	value[HTML_A_ATTRIBUTES];
-    
-    {
-    	int i;
-    	for(i=0; i<HTML_A_ATTRIBUTES; i++)
-	    present[i] = NO;
-    }
-    if (name) {
+    int i;
+
+    for (i = 0; i < HTML_A_ATTRIBUTES; i++)
+	 present[i] = NO;
+
+    if (name && *name) {
     	present[HTML_A_NAME] = YES;
 	value[HTML_A_NAME] = (CONST char *)name;
     }
@@ -1090,24 +1104,23 @@ PUBLIC void HTStartAnchor ARGS3(HTStructured *, obj,
         present[HTML_A_HREF] = YES;
         value[HTML_A_HREF] = (CONST char *)href;
     }
-    
-    (*obj->isa->start_element)(obj, HTML_A , present, value, 0);
 
+    (*obj->isa->start_element)(obj, HTML_A, present, value, 0);
 }
 
-PUBLIC void HTStartIsIndex ARGS3(HTStructured *, obj,
-		CONST char *,  prompt,
-		CONST char *,  href)
+PUBLIC void HTStartIsIndex ARGS3(
+	HTStructured *,		obj,
+	CONST char *,		prompt,
+	CONST char *,		href)
 {
     BOOL		present[HTML_ISINDEX_ATTRIBUTES];
     CONST char * 	value[HTML_ISINDEX_ATTRIBUTES];
-    
-    {
-    	int i;
-    	for(i=0; i<HTML_ISINDEX_ATTRIBUTES; i++)
-	    present[i] = NO;
-    }
-    if (prompt) {
+    int i;
+
+    for (i = 0; i < HTML_ISINDEX_ATTRIBUTES; i++)
+	present[i] = NO;
+
+    if (prompt && *prompt) {
     	present[HTML_ISINDEX_PROMPT] = YES;
 	value[HTML_ISINDEX_PROMPT] = (CONST char *)prompt;
     }
@@ -1115,8 +1128,6 @@ PUBLIC void HTStartIsIndex ARGS3(HTStructured *, obj,
         present[HTML_ISINDEX_HREF] = YES;
         value[HTML_ISINDEX_HREF] = (CONST char *)href;
     }
-    
+
     (*obj->isa->start_element)(obj, HTML_ISINDEX , present, value, 0);
-
 }
-

@@ -77,6 +77,16 @@ extern void HTList_appendObject PARAMS((
 	void *		newObject));
 
 
+/*	Insert an object into the list at a specified position.
+**      If position is 0, this places the object at the head of the list
+**      and is equivalent to HTList_addObject().
+*/
+extern void HTList_insertObjectAt PARAMS((
+	HTList *	me,
+	void *		newObject,
+	int		pos));
+
+
 /*	Remove specified object from list.
 */
 extern BOOL HTList_removeObject PARAMS((

@@ -25,12 +25,13 @@ extern char *LYchar_set_names[];
 extern BOOL HTPassEightBitRaw;
 extern HTCJKlang HTCJK;
 
+extern void LYSetCookie PARAMS((CONST char *header, CONST char *address));
+extern time_t LYmktime PARAMS((char *string));
+
 
 /*		MIME Object
 **		-----------
 */
-
-extern int loading_length;	/* from HTFormat.c (for HTCopy) */
 
 typedef enum _MIME_state {
 	MIME_TRANSPARENT,	/* put straight through to target ASAP! */
@@ -77,6 +78,8 @@ typedef enum _MIME_state {
 	miPUBLIC,
 	miRETRY_AFTER,
 	miS,
+	miSA,
+	miSAFE,
 	miSE,
 	miSERVER,
 	miSET_COOKIE,
@@ -123,7 +126,6 @@ struct _HTStream {
 	
 	HTFormat		encoding;	/* Content-Transfer-Encoding */
 	char *			compression_encoding;
-	int			content_length;
 	HTFormat		format;		/* Content-Type */
 	HTStream *		target;		/* While writing out */
 	HTStreamClass		targetClass;
@@ -131,6 +133,31 @@ struct _HTStream {
 	HTAtom *		targetRep;	/* Converting into? */
 };
 
+/*
+**  This function if for trimming off any paired
+**  open- and close-double quotes from header values.
+**  It does not parse the string for embedded quotes,
+**  and will not modify the string unless both the
+**  first and last characters are double-quotes. - FM
+*/
+PRIVATE void HTMIME_TrimDoubleQuotes ARGS1(
+	char *,		value)
+{
+    int i;
+    char *cp = value;
+
+    if (!(cp && *cp) || *cp != '\"')
+        return;
+
+    i = strlen(cp);
+    if (cp[(i - 1)] != '\"')
+        return;
+    else
+        cp[(i - 1)] = '\0';
+
+    for (i = 0; value[i]; i++)
+        value[i] = cp[(i +1)]; 
+}
 
 /*_________________________________________________________________________
 **
@@ -144,8 +171,9 @@ struct _HTStream {
 **	syntax errors.  It ignores field names it does not understand,
 **	and resynchronises on line beginnings.
 */
-
-PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
+PRIVATE void HTMIME_put_character ARGS2(
+	HTStream *,	me,
+	char,		c)
 {
     int i, j;
 
@@ -304,7 +332,7 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 	    {
 	        me->net_ascii = NO;
 		if (strchr(HTAtom_name(me->format), ';') != NULL) {
-		    char *cp = NULL, *cp1, *cp2;
+		    char *cp = NULL, *cp1, *cp2, *cp3;
 
 		    if (TRACE)
 		        fprintf(stderr,
@@ -315,14 +343,17 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		    **  Note that the Content-Type value was converted
 		    **  to lower case when we loaded into me->format,
 		    **  but there may have been a mixed or upper-case
-		    **  atom, so we'll force lower-casing again. - FM
+		    **  atom, so we'll force lower-casing again.  We
+		    **  also stripped spaces and double-quotes, but
+		    **  we'll make sure they're still gone from any
+		    **  charset parameter we check. - FM
 		    */
 		    for (i = 0; cp[i]; i++)
 		        cp[i] = TOLOWER(cp[i]);
 		    if ((cp1=strchr(cp, ';')) != NULL) {
 		        if ((cp2=strstr(cp1, "charset")) != NULL) {
 			    cp2 += 7;
-			    while (*cp2 == ' ' || *cp2 == '=')
+			    while (*cp2 == ' ' || *cp2 == '=' || *cp2 == '\"')
 			        cp2++;
 			    if (!strncmp(cp2, "us-ascii", 8) ||
 			        !strncmp(cp2, "iso-8859-1", 10)) {
@@ -799,8 +830,15 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 	} /* switch on character */
 	break;
 
-    case miS:				/* Check for 'e' */
+    case miS:				/* Check for 'a; or 'e' */
         switch (c) {
+	case 'a':
+	case 'A':
+	    me->state = miSAFE;
+	    if (TRACE)
+	        fprintf(stderr, "HTMIME: Was S, found A, state now SAFE'\n");
+	    break;
+
 	case 'e':
 	case 'E':
 	    me->state = miSE;
@@ -812,7 +850,7 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 	    if (TRACE)
 	        fprintf(stderr,
 		   "HTMIME: Bad character `%c' found where `%s' expected\n",
-		        c, "'e'");
+		        c, "'a' or 'e'");
 	    goto bad_field_name;
 	    break;
 
@@ -1187,6 +1225,7 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
     case miPROXY_AUTHENTICATE:
     case miPUBLIC:
     case miRETRY_AFTER:
+    case miSAFE:
     case miSERVER:
     case miSET_COOKIE:
     case miTITLE:
@@ -1199,7 +1238,8 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
     case miWWW_AUTHENTICATE:
         me->field = me->state;		/* remember it */
 	me->state = miSKIP_GET_VALUE;
-				/* Fall through! */
+	/* Fall through! */
+
     case miSKIP_GET_VALUE:
     	if (c == '\n') {
 	   me->fold_state = me->state;
@@ -1207,7 +1247,10 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 	   break;
 	}
 	if (WHITE(c))
-	    break;	/* Skip white space */
+	    /*
+	    **  Skip white space.
+	    */
+	    break;
 	
 	me->value_pointer = me->value;
 	me->state = miGET_VALUE;   
@@ -1219,33 +1262,41 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 	    *me->value_pointer = '\0';
 	    cp = (me->value_pointer - 1);
 	    while ((cp >= me->value) && *cp == 32)
-	        *cp = '\0';	/* Trim trailing spaces. - FM */
+		/*
+		**  Trim trailing spaces.
+		*/
+	        *cp = '\0';
 	    switch (me->field) {
 	    case miACCEPT_RANGES:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Accept-Ranges: '%s'\n",
 			    me->value);
                 break;
 	    case miAGE:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Age: '%s'\n",
 			    me->value);
                 break;
 	    case miALLOW:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Allow: '%s'\n",
 			    me->value);
                 break;
 	    case miALTERNATES:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Alternates: '%s'\n",
 			    me->value);
                 break;
 	    case miCACHE_CONTROL:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Cache-Control: '%s'\n",
@@ -1261,22 +1312,60 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		/*
 		 *  Check whether to set no_cache for the anchor. - FM
 		 */
-		if (!strcmp(me->value, "no-cache"))
-		    me->anchor->no_cache = TRUE;
+		{
+		    char *cp, *cp0 = me->value;
+
+		    while ((cp = strstr(cp0, "no-cache")) != NULL) {
+		        cp += 8;
+		        while (*cp != '\0' && WHITE(*cp))
+			    cp++;
+			if (*cp == '\0' || *cp == ';') {
+			    me->anchor->no_cache = TRUE;
+			    break;
+			}
+			cp0 = cp;
+		    }
+		    if (me->anchor->no_cache == TRUE)
+		        break;
+		    cp0 = me->value;
+		    while ((cp = strstr(cp0, "max-age")) != NULL) {
+		        cp += 7;
+		        while (*cp != '\0' && WHITE(*cp))
+			    cp++;
+			if (*cp == '=') {
+			    cp++;
+			    while (*cp != '\0' && WHITE(*cp))
+			        cp++;
+			    if (isdigit((unsigned char)*cp)) {
+			        cp0 = cp;
+				while (isdigit((unsigned char)*cp))
+				    cp++;
+			        if (*cp0 == '0' && cp == (cp0 + 1)) {
+			            me->anchor->no_cache = TRUE;
+				    break;
+				}
+			    }
+			}
+			cp0 = cp;
+		    }
+		}
                 break;
 	    case miCOOKIE:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Cookie: '%s'\n",
 			    me->value);
                 break;
 	    case miCONNECTION:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Connection: '%s'\n",
 			    me->value);
                 break;
 	    case miCONTENT_BASE:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Content-Base: '%s'\n",
@@ -1289,6 +1378,7 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		StrAllocCopy(me->anchor->content_base, me->value);
                 break;
 	    case miCONTENT_DISPOSITION:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Content-Disposition: '%s'\n",
@@ -1306,26 +1396,42 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		cp = me->anchor->content_disposition;
 		while (*cp != '\0' && strncasecomp(cp, "file;", 5))
 		    cp++;
-		if (*cp != '\0') {
-		    cp += 5;
-		    while (*cp != '\0' && WHITE(*cp))
-		        cp++;
-		    if (*cp != '\0') {
-		        while (*cp != '\0' && strncasecomp(cp, "filename=", 9))
-			    cp++;
-			if (*cp != '\0') {
-			    StrAllocCopy(me->anchor->SugFname, (cp + 9));
-			    cp = me->anchor->SugFname;
-			    while (*cp != '\0' && !WHITE(*cp))
-				cp++;
-			    *cp = '\0';
-			    if (*me->anchor->SugFname == '\0')
-			        FREE(me->anchor->SugFname);
-			}
+		if (*cp == '\0')
+		    break;
+		cp += 5;
+		while (*cp != '\0' && WHITE(*cp))
+		    cp++;
+		if (*cp == '\0')
+		    break;
+		while (*cp != '\0' && strncasecomp(cp, "filename", 8))
+		    cp++;
+		if (*cp == '\0')
+		    break;
+		cp += 8;
+		while (*cp == ' ' || *cp == '=')
+		    cp++;
+		if (*cp == '\0')
+		    break;
+		StrAllocCopy(me->anchor->SugFname, cp);
+		if (*me->anchor->SugFname == '\"') {
+		    if ((cp = strchr((me->anchor->SugFname + 1),
+		    		     '\"')) != NULL) {
+			*(cp + 1) = '\0';
+			HTMIME_TrimDoubleQuotes(me->anchor->SugFname);
+		    } else {
+			FREE(me->anchor->SugFname);
+			break;
 		    }
 		}
+		cp = me->anchor->SugFname;
+		while (*cp != '\0' && !WHITE(*cp))
+		    cp++;
+		*cp = '\0';
+		if (*me->anchor->SugFname == '\0')
+		    FREE(me->anchor->SugFname);
                 break;
             case miCONTENT_ENCODING:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
                        "HTMIME: PICKED UP Content-Encoding: '%s'\n",
@@ -1358,12 +1464,14 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		}
 		break;
 	    case miCONTENT_FEATURES:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Content-Base: '%s'\n",
 			    me->value);
                 break;
 	    case miCONTENT_LANGUAGE:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Content-Language: '%s'\n",
@@ -1378,6 +1486,7 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		StrAllocCopy(me->anchor->content_language, me->value);
                 break;
 	    case miCONTENT_LENGTH:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
                             "HTMIME: PICKED UP Content-Length: '%s'\n",
@@ -1387,17 +1496,16 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		/*
 		**  Convert to integer and indicate in anchor. - FM
 		*/
-                me->content_length = atoi(me->value);
-                /*
-		**  This is TEMPORARY.
-		*/
-                loading_length = me->content_length;
+                me->anchor->content_length = atoi(me->value);
+		if (me->anchor->content_length < 0)
+		    me->anchor->content_length = 0;
                 if (TRACE)
                     fprintf(stderr,
                             "        Converted to integer: '%d'\n",
-                            me->content_length);
+                            me->anchor->content_length);
                 break;
 	    case miCONTENT_LOCATION:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Content-Location: '%s'\n",
@@ -1410,6 +1518,7 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		StrAllocCopy(me->anchor->content_location, me->value);
                 break;
 	    case miCONTENT_MD5:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Content-MD5: '%s'\n",
@@ -1422,12 +1531,14 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		StrAllocCopy(me->anchor->content_md5, me->value);
                 break;
 	    case miCONTENT_RANGE:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Content-Range: '%s'\n",
 			    me->value);
                 break;
 	    case miCONTENT_TRANSFER_ENCODING:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 			"HTMIME: PICKED UP Content-Transfer-Encoding: '%s'\n",
@@ -1443,6 +1554,7 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 	        me->encoding = HTAtom_for(me->value);
 		break;
 	    case miCONTENT_TYPE:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Content-Type: '%s'\n",
@@ -1450,11 +1562,11 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		if (!(me->value && *me->value))
 		    break;
 		/*
-		**  Force the Content-Type value to all
-		**  lower case and strip spaces. - FM
+		**  Force the Content-Type value to all lower case
+		**  and strip spaces and double-quotes. - FM
 		*/
 		for (i = 0, j = 0; me->value[i]; i++) {
-		    if (me->value[i] != ' ') {
+		    if (me->value[i] != ' ' && me->value[i] != '\"') {
 		        me->value[j++] = TOLOWER(me->value[i]);
 		    }
 		}
@@ -1462,6 +1574,7 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 	        me->format = HTAtom_for(me->value);
 		break;
 	    case miDATE:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Date: '%s'\n",
@@ -1474,12 +1587,14 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		StrAllocCopy(me->anchor->date, me->value);
                 break;
 	    case miETAG:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP ETag: '%s'\n",
 			    me->value);
                 break;
 	    case miEXPIRES:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Expires: '%s'\n",
@@ -1490,14 +1605,22 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		**  Indicate in anchor. - FM
 		*/
 		StrAllocCopy(me->anchor->expires, me->value);
+		/*
+		**  Check whether to set no_cache for the anchor. - FM
+		*/
+		if ((me->value[0] == '0' && me->value[1] == '\0') ||
+		    LYmktime(me->value) <= 0)
+		    me->anchor->no_cache = TRUE;
                 break;
 	    case miKEEP_ALIVE:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Keep-Alive: '%s'\n",
 			    me->value);
                 break;
 	    case miLAST_MODIFIED:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Last-Modified: '%s'\n",
@@ -1510,18 +1633,21 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		StrAllocCopy(me->anchor->last_modified, me->value);
                 break;
 	    case miLINK:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Link: '%s'\n",
 			    me->value);
                 break;
 	    case miLOCATION:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Location: '%s'\n",
 			    me->value);
                 break;
 	    case miPRAGMA:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
                             "HTMIME: PICKED UP Pragma: '%s'\n",
@@ -1535,24 +1661,44 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		    me->anchor->no_cache = TRUE;
                 break;
 	    case miPROXY_AUTHENTICATE:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Proxy-Authenticate: '%s'\n",
 			    me->value);
                 break;
 	    case miPUBLIC:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Public: '%s'\n",
 			    me->value);
                 break;
 	    case miRETRY_AFTER:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Retry-After: '%s'\n",
 			    me->value);
                 break;
+	    case miSAFE:
+	        HTMIME_TrimDoubleQuotes(me->value);
+                if (TRACE)
+                    fprintf(stderr,
+                            "HTMIME: PICKED UP Safe: '%s'\n",
+			    me->value);
+		if (!(me->value && *me->value))
+		    break;
+		/*
+		**  Indicate in anchor if "YES" or "TRUE". - FM
+		*/
+		if (!strcasecomp(me->value, "YES") ||
+		    !strcasecomp(me->value, "TRUE")) {
+		    me->anchor->safe = TRUE;
+		}
+                break;
 	    case miSERVER:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
                             "HTMIME: PICKED UP Server: '%s'\n",
@@ -1565,54 +1711,64 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		StrAllocCopy(me->anchor->server, me->value);
                 break;
 	    case miSET_COOKIE:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
                             "HTMIME: PICKED UP Set-Cookie: '%s'\n",
 			    me->value);
+		LYSetCookie(me->value, me->anchor->address);
                 break;
 	    case miTITLE:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
                             "HTMIME: PICKED UP Title: '%s'\n",
 			    me->value);
                 break;
 	    case miTRANSFER_ENCODING:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
                             "HTMIME: PICKED UP Transfer-Encoding: '%s'\n",
 			    me->value);
                 break;
 	    case miUPGRADE:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
                             "HTMIME: PICKED UP Upgrade: '%s'\n",
 			    me->value);
                 break;
 	    case miURI:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
                             "HTMIME: PICKED UP URI: '%s'\n",
 			    me->value);
                 break;
 	    case miVARY:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
                             "HTMIME: PICKED UP Vary: '%s'\n",
 			    me->value);
                 break;
 	    case miVIA:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
                             "HTMIME: PICKED UP Via: '%s'\n",
 			    me->value);
                 break;
 	    case miWARNING:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
                             "HTMIME: PICKED UP Warning: '%s'\n",
 			    me->value);
                 break;
 	    case miWWW_AUTHENTICATE:
+	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
                             "HTMIME: PICKED UP WWW-Authenticate: '%s'\n",
@@ -1660,7 +1816,9 @@ bad_field_name:				/* Ignore it */
 **
 **	Strings must be smaller than this buffer size.
 */
-PRIVATE void HTMIME_put_string ARGS2(HTStream *, me, CONST char*, s)
+PRIVATE void HTMIME_put_string ARGS2(
+	HTStream *,	me,
+	CONST char *,	s)
 {
     CONST char * p;
 
@@ -1680,7 +1838,10 @@ PRIVATE void HTMIME_put_string ARGS2(HTStream *, me, CONST char*, s)
 /*	Buffer write.  Buffers can (and should!) be big.
 **	------------
 */
-PRIVATE void HTMIME_write ARGS3(HTStream *, me, CONST char*, s, int, l)
+PRIVATE void HTMIME_write ARGS3(
+	HTStream *,	me,
+	CONST char *,	s,
+	int,		l)
 {
     CONST char * p;
 
@@ -1701,7 +1862,8 @@ PRIVATE void HTMIME_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 **	-------------------
 **
 */
-PRIVATE void HTMIME_free ARGS1(HTStream *, me)
+PRIVATE void HTMIME_free ARGS1(
+	HTStream *,	me)
 {
     if (me->target)
         (*me->targetClass._free)(me->target);
@@ -1711,7 +1873,9 @@ PRIVATE void HTMIME_free ARGS1(HTStream *, me)
 /*	End writing
 */
 
-PRIVATE void HTMIME_abort ARGS2(HTStream *, me, HTError, e)
+PRIVATE void HTMIME_abort ARGS2(
+	HTStream *,	me,
+	HTError,	e)
 {
     if (me->target)
         (*me->targetClass._abort)(me->target, e);
@@ -1750,6 +1914,7 @@ PUBLIC HTStream* HTMIMEConvert ARGS3(
     me->isa	=	&HTMIME;       
     me->sink	=	sink;
     me->anchor	=	anchor;
+    me->anchor->safe = FALSE;
     me->anchor->no_cache = FALSE;
     FREE(me->anchor->cache_control);
     FREE(me->anchor->SugFname);
@@ -1760,6 +1925,7 @@ PUBLIC HTStream* HTMIMEConvert ARGS3(
     FREE(me->anchor->content_disposition);
     FREE(me->anchor->content_location);
     FREE(me->anchor->content_md5);
+    me->anchor->content_length = 0;
     FREE(me->anchor->date);
     FREE(me->anchor->expires);
     FREE(me->anchor->last_modified);

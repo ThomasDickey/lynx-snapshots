@@ -296,14 +296,19 @@ PUBLIC int LYLoadCGI ARGS4(
 		char post_len[32];
 		int argv_cnt = 3; /* name, one arg and terminator */
 		char **cur_argv = NULL;
+		char buf[BUFSIZ];
 
 		/* Set up output pipe */
 		close(fd2[0]);
 		dup2(fd2[1], fileno(stdout)); /* Should check success code */
 		dup2(fd2[1], fileno(stderr));
 		close(fd2[1]);
-		
-		
+
+		sprintf(buf, "HTTP_ACCEPT_LANGUAGE=%.*s",
+			     (sizeof(buf) - 22), language);
+		buf[(sizeof(buf) - 1)] = '\0';
+		add_environment_value(buf);
+
 		if (anAnchor->post_data) { /* post script, read stdin */
 		    close(fd1[1]);
 		    dup2(fd1[0], fileno(stdin));

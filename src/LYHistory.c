@@ -2,11 +2,14 @@
 #include "tcp.h"
 #include "HTAlert.h"
 #include "HText.h"
+#include "LYGlobalDefs.h"
 #include "LYUtils.h"
 #include "LYHistory.h"
 #include "LYPrint.h"
 #include "LYDownload.h"
-#include "LYGlobalDefs.h"
+#include "LYKeymap.h"
+#include "LYList.h"
+#include "LYShowInfo.h"
 #include "LYSignal.h"
 #include "LYStrings.h"
 #include "LYCharUtils.h"
@@ -21,49 +24,178 @@
  
 #define FREE(x) if (x) {free(x); x = NULL;}
 
+PUBLIC  HTList * Visited_Links = NULL;  /* List of safe popped docs. */
+
+/* 
+ *  Utility for freeing the list of visited links. - FM
+ */
+PRIVATE void Visited_Links_free NOARGS
+{
+    VisitedLink *vl;
+    HTList *cur = Visited_Links;
+
+    if (!cur)
+        return;
+
+    while (NULL != (vl = (VisitedLink *)HTList_nextObject(cur))) {
+	FREE(vl->address);
+	FREE(vl->title);
+	FREE(vl);
+    }
+    HTList_delete(Visited_Links);
+    Visited_Links = NULL;
+    return;
+}
+
+/* 
+ *  Utility for listing visited links, making any repeated
+ *  links the most current in the list. - FM
+ */
+PUBLIC void LYAddVisitedLink ARGS1(
+	document *,	doc)
+{
+    VisitedLink *new;
+    VisitedLink *old;
+    HTList *cur;
+
+    if (!(doc->address && *doc->address))
+        return;
+
+    /*
+     *  Exclude POST or HEAD replies, and bookmark, menu
+     *  or list files. - FM
+     */
+    if (doc->post_data || doc->isHEAD || doc->bookmark ||
+	!strcmp((doc->title ? doc->title : ""), HISTORY_PAGE_TITLE) ||
+	!strcmp((doc->title ? doc->title : ""), PRINT_OPTIONS_TITLE) ||
+	!strcmp((doc->title ? doc->title : ""), DOWNLOAD_OPTIONS_TITLE) ||
+#ifdef DIRED_SUPPORT
+	!strcmp((doc->title ? doc->title : ""), DIRED_MENU_TITLE) ||
+	!strcmp((doc->title ? doc->title : ""), UPLOAD_OPTIONS_TITLE) ||
+	!strcmp((doc->title ? doc->title : ""), PERMIT_OPTIONS_TITLE) ||
+#endif /* DIRED_SUPPORT */
+	!strcmp((doc->title ? doc->title : ""), CURRENT_KEYMAP_TITLE) ||
+	!strcmp((doc->title ? doc->title : ""), LIST_PAGE_TITLE) ||
+	!strcmp((doc->title ? doc->title : ""), SHOWINFO_TITLE) ||
+	!strcmp((doc->title ? doc->title : ""), COOKIE_JAR_TITLE) ||
+	!strcmp((doc->title ? doc->title : ""), VISITED_LINKS_TITLE)) {
+	return;
+    }
+
+    if ((new = (VisitedLink *)calloc(1, sizeof(*new))) == NULL)
+    	outofmem(__FILE__, "HTAddVisitedLink");
+    StrAllocCopy(new->address, doc->address);
+    StrAllocCopy(new->title, (doc->title ? doc->title : "(no title)"));
+
+    if (!Visited_Links) {
+        Visited_Links = HTList_new();
+	atexit(Visited_Links_free);
+	HTList_addObject(Visited_Links, new);
+	return;
+    }
+
+    cur = Visited_Links;
+    while (NULL != (old = (VisitedLink *)HTList_nextObject(cur))) {
+	if (!strcmp((old->address ? old->address : ""),
+		    (new->address ? new->address : "")) &&
+	    !strcmp((old->title ? new->title : ""),
+	    	    (new->title ? new->title : ""))) {
+	    FREE(old->address);
+	    FREE(old->title);
+	    HTList_removeObject(Visited_Links, old);
+	    FREE(old);
+	    break;
+	}
+    }
+    HTList_addObject(Visited_Links, new);
+
+    return;
+}
+
 /*
  *  Push the current filename, link and line number onto the history list.
  */
-PUBLIC void LYpush ARGS1(document *,doc)
+PUBLIC void LYpush ARGS2(
+	document *,	doc,
+	BOOLEAN,	force_push)
 {
-
-    if( *doc->address == '\0')  /* dont push null file names */
+    /*
+     *  Don't push NULL file names.
+     */
+    if (*doc->address == '\0')
 	return;
 
-    /* don't push the history, download, or printer lists */
-    if(!strcmp(doc->title, HISTORY_PAGE_TITLE) ||
-		!strcmp(doc->title, PRINT_OPTIONS_TITLE) ||
-		!strcmp(doc->title, DOWNLOAD_OPTIONS_TITLE) ) {
-	if (!LYforce_no_cache)
-	    LYoverride_no_cache = TRUE;
-	return;
-    }
+    /*
+     *  Check whether this is a document we
+     *  don't push unless forced. - FM
+     */
+    if (!force_push) {
+	/*
+	 *  Don't push the history, printer, or download lists.
+	 */
+	if (!strcmp(doc->title, HISTORY_PAGE_TITLE) ||
+	    !strcmp(doc->title, PRINT_OPTIONS_TITLE) ||
+	    !strcmp(doc->title, DOWNLOAD_OPTIONS_TITLE)) {
+	    if (!LYforce_no_cache)
+		LYoverride_no_cache = TRUE;
+	    return;
+	}
 
 #ifdef DIRED_SUPPORT
-    if(!strcmp(doc->title, DIRED_MENU_TITLE) ||
-		!strcmp(doc->title, UPLOAD_OPTIONS_TITLE) ||
-                !strcmp(doc->title, PERMIT_OPTIONS_TITLE)) {
-	if (!LYforce_no_cache)
-	    LYoverride_no_cache = TRUE;
-	return;
-    }
+	/*
+	 *  Don't push DIRED menu, upload or permit lists.
+	 */
+	if (!strcmp(doc->title, DIRED_MENU_TITLE) ||
+	    !strcmp(doc->title, UPLOAD_OPTIONS_TITLE) ||
+	    !strcmp(doc->title, PERMIT_OPTIONS_TITLE)) {
+	    if (!LYforce_no_cache)
+		LYoverride_no_cache = TRUE;
+	    return;
+	}
 #endif /* DIRED_SUPPORT */
-
-    if(nhist>1 && STREQ(history[nhist-1].address, doc->address) &&
-       !strcmp(history[nhist-1].post_data ? history[nhist-1].post_data : "",
-               doc->post_data ? doc->post_data : "") &&
-	       history[nhist-1].isHEAD == doc->isHEAD) 
-        return;  /* file is identical to one before it don't push it */
-
-    if(nhist>2 && STREQ(history[nhist-2].address, doc->address) &&
-       !strcmp(history[nhist-2].post_data ? history[nhist-2].post_data : "",
-               doc->post_data ? doc->post_data : "") &&
-	       history[nhist-2].isHEAD == doc->isHEAD) {
-	  nhist--; /* pop one off the stack */
-          return;  /* file is identical to one two before it don't push it */
     }
 
-    if (nhist<MAXHIST)  {
+    /*
+     *  If file is identical to one before it, don't push it.
+     */
+    if (nhist> 1 &&
+        STREQ(history[nhist-1].address, doc->address) &&
+        !strcmp(history[nhist-1].post_data ?
+		history[nhist-1].post_data : "",
+                doc->post_data ?
+		doc->post_data : "") &&
+        !strcmp(history[nhist-1].bookmark ?
+		history[nhist-1].bookmark : "",
+                doc->bookmark ?
+		doc->bookmark : "") &&
+	history[nhist-1].isHEAD == doc->isHEAD) 
+        return;
+
+    /*
+     *  If file is identical to one two before it, don't push it.
+     */
+    if (nhist > 2 &&
+        STREQ(history[nhist-2].address, doc->address) &&
+        !strcmp(history[nhist-2].post_data ?
+		history[nhist-2].post_data : "",
+                doc->post_data ?
+		doc->post_data : "") &&
+        !strcmp(history[nhist-2].bookmark ?
+		history[nhist-2].bookmark : "",
+                doc->bookmark ?
+		doc->bookmark : "") &&
+	history[nhist-2].isHEAD == doc->isHEAD) {
+	/*
+	 *  Pop one off the stack.
+	 */
+	nhist--;
+        return;
+    }
+
+    /*
+     *  OK, push it if we have stack space.
+     */
+    if (nhist < MAXHIST)  {
 	history[nhist].link = doc->link;
 	history[nhist].page = doc->line;
 	history[nhist].title = NULL;
@@ -77,40 +209,53 @@ PUBLIC void LYpush ARGS1(document *,doc)
 	history[nhist].bookmark = NULL;
 	StrAllocCopy(history[nhist].bookmark, doc->bookmark);
 	history[nhist].isHEAD = doc->isHEAD;
+	history[nhist].safe = doc->safe;
 	nhist++;
-
-        if(TRACE)
-    	    fprintf(stderr,"\nLYpush: address:%s\n        title:%s\n",
-						doc->address,doc->title);
+   	if (TRACE) {
+    	    fprintf(stderr,
+		    "\nLYpush: address:%s\n        title:%s\n",
+		    doc->address, doc->title);
+	}
+    } else {
+        if (LYCursesON) {
+	    _statusline(MAXHIST_REACHED);
+	    sleep(AlertSecs);
+	} 
+        if (TRACE) {
+    	    fprintf(stderr,
+     "\nLYpush: MAXHIST reached for:\n        address:%s\n        title:%s\n",
+		    doc->address, doc->title);
+	}
     }
 }
 
 /*
  *  Pop the previous filename, link and line number from the history list.
  */
-PUBLIC void LYpop ARGS1(document *,doc)
+PUBLIC void LYpop ARGS1(
+	document *,	doc)
 {
- 
-    if (nhist>0) {
+    if (nhist > 0) {
 	nhist--;
 	doc->link = history[nhist].link;
 	doc->line = history[nhist].page;
 	FREE(doc->title);
-	doc->title = history[nhist].title;    /* will be freed later */
+	doc->title = history[nhist].title;	 /* will be freed later */
 	FREE(doc->address);
-	doc->address = history[nhist].address;  /* will be freed later */
+	doc->address = history[nhist].address;   /* will be freed later */
 	FREE(doc->post_data);
 	doc->post_data = history[nhist].post_data;
 	FREE(doc->post_content_type);
 	doc->post_content_type = history[nhist].post_content_type;
 	FREE(doc->bookmark);
-	doc->bookmark = history[nhist].bookmark;
+	doc->bookmark = history[nhist].bookmark; /* will be freed later */
 	doc->isHEAD = history[nhist].isHEAD;
-
-        if(TRACE)
-	    fprintf(stderr,"LYpop: address:%s\n     title:%s\n",
-						doc->address,doc->title);
-
+	doc->safe = history[nhist].safe;
+        if (TRACE) {
+	    fprintf(stderr,
+	    	    "LYpop: address:%s\n     title:%s\n",
+		    doc->address, doc->title);
+	}
     }
 }
 
@@ -119,7 +264,9 @@ PUBLIC void LYpop ARGS1(document *,doc)
  *  list but don't actually remove the entry, just return it.
  *  (This procedure is badly named :)
  */
-PUBLIC void LYpop_num ARGS2(int,number, document *,doc)
+PUBLIC void LYpop_num ARGS2(
+	int,		number,
+	document *,	doc)
 {
     if (number >= 0 && nhist >= number) {
 	doc->link = history[number].link;
@@ -130,14 +277,15 @@ PUBLIC void LYpop_num ARGS2(int,number, document *,doc)
 	StrAllocCopy(doc->post_content_type, history[number].post_content_type);
 	StrAllocCopy(doc->bookmark, history[number].bookmark);
 	doc->isHEAD = history[number].isHEAD;
+	doc->safe = history[number].safe;
     }
 }
 
 /*
  *  This procedure outputs the history buffer into a temporary file.
- *  
  */
-PUBLIC int showhistory ARGS1(char **,newfile)
+PUBLIC int showhistory ARGS1(
+	char **,	newfile)
 {
     static char tempfile[256];
     static BOOLEAN first = TRUE;
@@ -155,7 +303,7 @@ PUBLIC int showhistory ARGS1(char **,newfile)
 #endif /* VMS */
     }
 
-    if ((fp0 = fopen(tempfile,"w")) == NULL) {
+    if ((fp0 = fopen(tempfile, "w")) == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
@@ -181,7 +329,7 @@ PUBLIC int showhistory ARGS1(char **,newfile)
     for (x = nhist-1; x >= 0; x--) {
 	/*
 	 *  The number of the document in the hist stack,
-	 *  its name in a link, and its address. - FM
+	 *  its title in a link, and its address. - FM
 	 */
 	if (history[x].title != NULL) {
 	    StrAllocCopy(Title, history[x].title);
@@ -210,53 +358,155 @@ PUBLIC int showhistory ARGS1(char **,newfile)
 }
 
 /* 
- *  This is a kludge to make the history page seem like any other type of
- *  file since more info is needed than can be provided by the normal link
- *  structure.  I saved out the history number to a special URL.  The info
- *  looks like:  LYNXHIST:#
+ *  This function makes the history page seem like any other type of
+ *  file since more info is needed than can be provided by the normal
+ *  link structure.  We saved out the history number to a special URL.
+ *  The info looks like:  LYNXHIST:#
  */
-PUBLIC void historytarget ARGS1(document *,newdoc)
+PUBLIC BOOLEAN historytarget ARGS1(
+	document *,	newdoc)
 {
     int number, c;
     DocAddress WWWDoc;
+    HTParentAnchor *tmpanchor;
+    HText *text;
 
     if ((!newdoc || !newdoc->address) ||
         strlen(newdoc->address) < 10 || !isdigit(*(newdoc->address+9)))
-	return;
+	return(FALSE);
 
     if ((number = atoi(newdoc->address+9)) > nhist || number < 0)
-        return;
+        return(FALSE);
 
     LYpop_num(number, newdoc);
 
     /*
-     *  If we have POST content, aren't forcing no_cache,
-     *  and still have the text cached, ask the user whether
-     *  to resubmit the form. - FM
+     *  If we have POST content, and have LYresubmit_posts set
+     *  or have no_cache set or do not still have the text cached,
+     *  ask the user whether to resubmit the form. - FM
      */
-    if (newdoc->post_data != NULL && LYforce_no_cache == FALSE) {
-        if (LYresubmit_posts == TRUE) {
+    if (newdoc->post_data != NULL) {
+	WWWDoc.address = newdoc->address;
+        WWWDoc.post_data = newdoc->post_data;
+        WWWDoc.post_content_type = newdoc->post_content_type;
+        WWWDoc.bookmark = newdoc->bookmark;
+	WWWDoc.isHEAD = newdoc->isHEAD;
+	WWWDoc.safe = newdoc->safe;
+	tmpanchor = HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
+	text = (HText *)HTAnchor_document(tmpanchor);
+        if (((LYresubmit_posts == TRUE) ||
+	     (LYforce_no_cache == TRUE &&
+	      LYoverride_no_cache == FALSE) ||
+	     text == NULL) &&
+	    HTConfirm(CONFIRM_POST_RESUBMISSION) == TRUE) {
+	    LYforce_no_cache == TRUE;
 	    LYoverride_no_cache = FALSE;
+	} else if (text != NULL) {
+	    LYforce_no_cache == FALSE;
+	    LYoverride_no_cache = TRUE;
 	} else {
-	    WWWDoc.address = newdoc->address;
-            WWWDoc.post_data = newdoc->post_data;
-            WWWDoc.post_content_type = newdoc->post_content_type;
-            WWWDoc.bookmark = newdoc->bookmark;
-	    WWWDoc.isHEAD = newdoc->isHEAD;
-	    if ((HText *)HTAnchor_document(
-				HTAnchor_parent(HTAnchor_findAddress(&WWWDoc))
-					  )) {
-		LYoverride_no_cache = TRUE;
-		_statusline(
-		   "Document from Form with POST content.  Resubmit? (y/n) ");
-		c = LYgetch();
-		if (TOUPPER(c) == 'Y') {
-		    LYoverride_no_cache = FALSE;
-		}
-	    }
+	    _statusline(CANCELLED);
+	    sleep(InfoSecs);
+	    return(FALSE);
 	}
     }
 
     if (number != 0)
 	StrAllocCat(newdoc->title," (From History)");
+    return(TRUE);
+}
+
+/*
+ *  This procedure outputs the Visited Links
+ *  list into a temporary file. - FM
+ */
+PUBLIC int LYShowVisitedLinks ARGS1(
+	char **,	newfile)
+{
+    static char tempfile[256];
+    static BOOLEAN first = TRUE;
+    static char vl_filename[256];
+    char *Title = NULL;
+    char *Address = NULL;
+    int x;
+    FILE *fp0;
+    VisitedLink *vl;
+    HTList *cur = Visited_Links;
+
+    if (!cur)
+        return(-1);
+
+    if (first) {
+	tempname(tempfile, NEW_FILE);
+	first = FALSE;
+#ifdef VMS
+    } else {
+	remove(tempfile);  /* Remove duplicates on VMS. */
+#endif /* VMS */
+    }
+
+    if ((fp0 = fopen(tempfile, "w")) == NULL) {
+	HTAlert(CANNOT_OPEN_TEMP);
+	return(-1);
+    }
+
+    /*
+     *  Make the file a URL now.
+     */
+#ifdef VMS
+    sprintf(vl_filename,"file://localhost/%s", tempfile);
+#else
+    sprintf(vl_filename,"file://localhost%s", tempfile);
+#endif /* VMS */
+    StrAllocCopy(*newfile, vl_filename);
+    LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
+    LYforce_no_cache = TRUE;	/* force this file to be new */
+
+    fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
+		 VISITED_LINKS_TITLE);
+
+    fprintf(fp0, "<h1>You have reached the Visited Links Page</h1>\n");
+    fprintf(fp0, "<h2>%s Version %s</h2>\n<pre>", LYNX_NAME, LYNX_VERSION);
+    fprintf(fp0, 
+  "<em>You visited (POSTs, bookmark, menu and list files excluded):</em>\n");
+    x = HTList_count(Visited_Links);
+    while (NULL != (vl = (VisitedLink *)HTList_nextObject(cur))) {
+	/*
+	 *  The number of the document (most recent highest),
+	 *  its title in a link, and its address. - FM
+	 */
+	x--;
+	if (vl->title != NULL && *vl->title != '\0') {
+	    StrAllocCopy(Title, vl->title);
+	    LYEntify(&Title, TRUE);
+	} else {
+	    StrAllocCopy(Title , "(no title)");
+	}
+	if (vl->address != NULL && *vl->address != '\0') {
+	    StrAllocCopy(Address, vl->address);
+	    LYEntify(&Address, FALSE);
+	    fprintf(fp0,
+		    "%s<em>%d</em>. <tab id=t%d><a href=\"%s\">%s</a>\n",
+		    (x > 99 ? "" : x < 9 ? "  " : " "),
+		    x, x, Address, Title);
+	} else {
+	    fprintf(fp0,
+		    "%s<em>%d</em>. <tab id=t%d><em>%s</em>\n",
+		    (x > 99 ? "" : x < 9 ? "  " : " "),
+		    x, x, Title);
+	}
+	if (Address != NULL) {
+	    StrAllocCopy(Address, vl->address);
+	    LYEntify(&Address, TRUE);
+	}
+	fprintf(fp0, "<tab to=t%d>%s\n", x,
+		     ((Address != NULL) ? Address : "(no address)"));
+    }
+
+    fprintf(fp0,"</pre>\n</body>\n");
+
+    fclose(fp0);
+    FREE(Title);
+    FREE(Address);
+    return(0);
 }
