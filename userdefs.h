@@ -88,10 +88,6 @@
 #define LYNX_CFG_FILE "Lynx_Dir:lynx.cfg"
 #endif /* LYNX_CFG_FILE */
 
-#ifndef LYNX_LSS_FILE
-#define LYNX_LSS_FILE "Lynx_Dir:lynx.lss"
-#endif /* LYNX_LSS_FILE */
-
 
 /**************************
  * The EXTENSION_MAP file allows you to map file suffix's to 
@@ -139,6 +135,7 @@
  * be required.
  */
 #define SYSTEM_MAIL "mail"
+#define SYSTEM_MAIL_FLAGS ""
 
 /*************************
  * below is the argument for an sprintf command that will add
@@ -199,6 +196,25 @@
  */
 /*#define NO_ANONYMOUS_EMAIL TRUE */
 
+/**************************
+ * LYNX_LSS_FILE is the location and name of the default lynx
+ * character style sheet file.  It is sought and processed at
+ * startup of Lynx only if experimental character style code
+ * has been compiled in, otherwise it will be ignored.  Note
+ * that use of the character style option is, to say it again,
+ * experimental and unsupported, and without other documentation
+ * than a sample lynx.lss file, and likely won't work at all on VMS.
+ * You also can define the location and name of this file
+ * via environment variables "LYNX_CFG" or "lynx_lss"
+ * which will override the "LYNX_CFG_FILE" definition here.
+ * You can use '~' in either or both definitions to refer to
+ * the user's home directorty.  The -lss command line switch
+ * will override these definitions.
+ */
+#ifndef LYNX_LSS_FILE
+#define LYNX_LSS_FILE "Lynx_Dir:lynx.lss"
+#endif /* LYNX_LSS_FILE */
+
 /*******************************************************************
  * Things you must change  UNIX specific
  *  Section 1b). 
@@ -240,10 +256,6 @@
 #define LYNX_CFG_FILE "/usr/local/lib/lynx.cfg"
 #endif /* DOSPATH */
 #endif /* LYNX_CFG_FILE */
-
-#ifndef LYNX_LSS_FILE
-#define LYNX_LSS_FILE "/usr/local/lib/lynx.lss"
-#endif /* LYNX_LSS_FILE */
 
 /**************************
  * The EXTENSION_MAP file allows you to map file suffix's to 
@@ -387,6 +399,25 @@
  *  line switch.
  */
 #define NO_FORCED_CORE_DUMP	FALSE
+
+/**************************
+ * LYNX_LSS_FILE is the location and name of the default lynx
+ * character style sheet file.  It is sought and processed at
+ * startup of Lynx only if experimental character style code
+ * has been compiled in, otherwise it will be ignored.  Note
+ * that use of the character style option is, to say it again,
+ * experimental and unsupported, and without other documentation
+ * than a sample lynx.lss file.
+ * You also can define the location and name of this file
+ * via environment variables "LYNX_LSS" or "lynx_lss"
+ * which will override the "LYNX_LSS_FILE" definition here.
+ * You can use '~' in either or both definitions to refer to
+ * the user's home directorty.  The -lss command line switch
+ * will override these definitions.
+ */
+#ifndef LYNX_LSS_FILE
+#define LYNX_LSS_FILE "/usr/local/lib/lynx.lss"
+#endif /* LYNX_LSS_FILE */
 
 #endif /* VMS OR UNIX */
 
@@ -603,20 +634,20 @@
  *   Taipei (Big5)			big5
  *   7 bit approximations		us-ascii
  *   Transparent			x-transparent
- *   ISO Latin 3			iso-8859-3
- *   ISO Latin 4			iso-8859-4
- *   ISO Latin 5 Cyrillic		iso-8859-5
- *   ISO Latin 6 Arabic			iso-8859-6
- *   ISO Latin 7 Greek			iso-8859-7
- *   ISO Latin 8 Hebrew			iso-8859-8
- *   ISO Latin 9 (Latin 5)		iso-8859-9
- *   ISO Latin 10			iso-8859-10
  *   PC Latin2 CP 852			cp852
  *   DosCyrillic (cp866)		cp866
+ *   MS Windows CP 1252			iso-8859-1-windows-3.1-latin-1
  *   MS Windows CP 1250			windows-1250
  *   WinCyrillic (cp1251)		windows-1251
- *   MS Windows CP 1252			iso-8859-1-windows-3.1-latin-1
  *   Vietnamese (VISCII)		viscii
+ *   ISO Latin 3			iso-8859-3
+ *   ISO Latin 4			iso-8859-4
+ *   ISO 8859-5 Cyrillic		iso-8859-5
+ *   ISO 8859-6 Arabic			iso-8859-6
+ *   ISO 8859-7 Greek			iso-8859-7
+ *   ISO 8859-8 Hebrew			iso-8859-8
+ *   ISO 8859-9 (Latin 5)		iso-8859-9
+ *   ISO 8859-10			iso-8859-10
  *   UNICODE UTF 8			unicode-1-1-utf-8
  *   RFC 1345 w/o Intro			mnemonic+ascii+0
  *   RFC 1345 Mnemonic			mnemonic
@@ -1301,6 +1332,16 @@
 
 #define MAXCHARSETS 40		/* max character sets supported */
 #define MAXCHARSETSP 41		/* always one more than MAXCHARSETS */
+
+#ifdef __DJGPP__
+#define FNAMES_8_3
+#endif
+
+#ifdef FNAMES_8_3
+#define HTML_SUFFIX ".htm"
+#else
+#define HTML_SUFFIX ".html"
+#endif
 
 #ifdef VMS
 /*

@@ -105,7 +105,7 @@ PRIVATE char	line[2048];	/* For building strings to display */
 
 #define PUTC(c) (*target->isa->put_character)(target, c)
 #define PUTS(s) (*target->isa->put_string)(target, s)
-#define START(e) (*target->isa->start_element)(target, e, 0, 0, 0)
+#define START(e) (*target->isa->start_element)(target, e, 0, 0, -1, 0)
 #define END(e) (*target->isa->end_element)(target, e, 0)
 #define MAYBE_END(e) if (HTML_dtd.tags[e].contents != SGML_EMPTY) \
                         (*target->isa->end_element)(target, e, 0)

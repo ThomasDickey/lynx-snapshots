@@ -21,6 +21,10 @@
 /* Explicit system-configure */
 #ifdef VMS
 #define NO_SIZECHANGE
+#define NO_UNISTD_H
+#define EXP_CHARTRANS
+#define NO_KEYPAD
+#define NO_UTMP
 #endif
 
 /* FIXME: these will be removed after completing auto-configure script */

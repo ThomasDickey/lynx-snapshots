@@ -152,6 +152,7 @@ extern BOOLEAN LYresubmit_posts;
 extern BOOLEAN user_mode; /* novice or advanced */
 extern BOOLEAN is_www_index;
 extern BOOLEAN dump_output_immediately;
+extern int dump_output_width;
 extern BOOLEAN lynx_mode;
 extern BOOLEAN bold_headers;
 extern BOOLEAN bold_H1;

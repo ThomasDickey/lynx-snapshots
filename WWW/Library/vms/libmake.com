@@ -137,7 +137,6 @@ $ cc [-.Implementation]HTMLDTD.c
 $ cc [-.Implementation]HTChunk.c
 $ cc [-.Implementation]HTPlain.c
 $ cc [-.Implementation]HTWriter.c
-$ cc [-.Implementation]HTFWriter.c
 $ cc [-.Implementation]HTMLGen.c
 $ cc [-.Implementation]HTAtom.c
 $ cc [-.Implementation]HTAnchor.c
@@ -146,7 +145,6 @@ $ cc [-.Implementation]HTList.c
 $ cc [-.Implementation]HTAlert.c
 $ cc [-.Implementation]HTRules.c
 $ cc [-.Implementation]HTFormat.c
-$ cc [-.Implementation]HTInit.c
 $ cc [-.Implementation]HTMIME.c
 $ cc [-.Implementation]HTHistory.c
 $ cc [-.Implementation]HTNews.c

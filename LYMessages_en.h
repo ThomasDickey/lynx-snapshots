@@ -466,6 +466,7 @@
  "Screen height must be at least 23 lines for the Options menu!"
 #define OPTION_SCREEN_NEEDS_22 \
  "Screen height must be at least 22 lines for the Options menu!"
+#define NEED_ADVANCED_USER_MODE "That key requires Advanced User mode."
 #define COMMAND_PROMPT "Command: "
 #define SELECT_SEGMENT "Select "
 #define CAP_LETT_SEGMENT "capital letter"

@@ -711,7 +711,7 @@ long status;
 #include "HTML.h"
 #define PUTC(c) (*targetClass.put_character)(target, c)
 #define PUTS(s) (*targetClass.put_string)(target, s)
-#define START(e) (*targetClass.start_element)(target, e, 0, 0, 0)
+#define START(e) (*targetClass.start_element)(target, e, 0, 0, -1, 0)
 #define END(e) (*targetClass.end_element)(target, e, 0)
 #define FREE_TARGET (*targetClass._free)(target)
 #define ABORT_TARGET (*targetClass._free)(target)
@@ -1098,15 +1098,18 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 	    entry_info->display = TRUE;
 
 	    /* Get the type */
-	    format = HTFileFormat(dirbuf->d_name, &encoding);
-	    if(!strncmp(HTAtom_name(format), "application",11)) 
-	      {
-		   cp = HTAtom_name(format) + 12;
-		   if(!strncmp(cp,"x-", 2))
+	    format = HTFileFormat(dirbuf->d_name, &encoding,
+				  (CONST char **)&cp);
+	    if (!cp) {
+		if(!strncmp(HTAtom_name(format), "application",11)) 
+		{
+		    cp = HTAtom_name(format) + 12;
+		    if(!strncmp(cp,"x-", 2))
 			cp += 2;
-	      }
-	    else
-		cp = HTAtom_name(format);
+		}
+		else
+		    cp = HTAtom_name(format);
+	    }
 	    StrAllocCopy(entry_info->type, cp);
 
 	    StrAllocCopy(entry_info->filename, dirbuf->d_name);

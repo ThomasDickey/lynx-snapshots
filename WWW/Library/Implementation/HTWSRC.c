@@ -37,7 +37,7 @@ struct _HTStructured {
 
 #define PUTC(c) (*me->target->isa->put_character)(me->target, c)
 #define PUTS(s) (*me->target->isa->put_string)(me->target, s)
-#define START(e) (*me->target->isa->start_element)(me->target, e, 0, 0, 0)
+#define START(e) (*me->target->isa->start_element)(me->target, e, 0, 0, -1, 0)
 #define END(e) (*me->target->isa->end_element)(me->target, e, 0)
 #define MAYBE_END(e) if (HTML_dtd.tags[e].contents != SGML_EMPTY) \
                         (*me->target->isa->end_element)(me->target, e, 0)

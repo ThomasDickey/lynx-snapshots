@@ -78,7 +78,7 @@ this switch.
 .TP
 .B -base
 prepend a request URL comment and BASE tag to text/html
-outputs for -source or -mime_header dumps.
+outputs for -source dumps.
 .TP
 .B -blink
 forces high intensity bg colors for color mode, if available
@@ -272,6 +272,10 @@ popup windows or as lists of radio buttons.
 .TP
 .B -post_data
 send form data from stdin using POST method and dump results.
+.TP
+.B -preparsed
+show HTML source preparsed and reformatted when used with -source
+or in source view.
 .TP
 .B -print
 enable print functions. (default)
@@ -468,6 +472,9 @@ print version information.
 .TP
 .B -vikeys
 enable vi-like key movement.
+.TP
+.B -width\fR=\fINUMBER
+number of columns for formatting of dumps, default is 80.
 .SH COMMANDS
 o Use \fBUp arrow\fR and \fBDown arrow\fR to scroll through hypertext links.
 .br

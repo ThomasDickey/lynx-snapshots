@@ -536,7 +536,15 @@ PUBLIC int save_rc NOPARAMS
     /*
      *  Header.
      */
-    fprintf(fp, "# Lynx User Defaults File\n\n");
+    fprintf(fp, "# Lynx User Defaults File\n#\n\
+# This file contains options saved from the Lynx Options Screen (normally\n\
+# with the '>' key).  There is normally no need to edit this file manually,\n\
+# since the defaults here can be controlled from the Options Screen, and the\n\
+# next time options are saved from the Options Screen this file will be\n\
+# completely rewritten.  You have been warned...\n\
+# If you are looking for the general configuration file - it is normally\n\
+# called lynx.cfg, and it has different content and a different format.\n\
+# It is not this file.\n\n");
 
     /*
      *  File editor

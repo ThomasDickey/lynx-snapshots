@@ -654,7 +654,8 @@ Try_Redirected_URL:
 			    cp1 += 2;
 			    StrAllocCopy(temp, doc->address);
 #ifdef DOSPATH
-			StrAllocCat(temp, HTDOS_wwwName((char *)Home_Dir()));
+			    StrAllocCat(temp, "/");
+			    StrAllocCat(temp, HTDOS_wwwName((char *)Home_Dir()));
 #else
 #ifdef VMS
 			    StrAllocCat(temp, 
@@ -1252,10 +1253,12 @@ PUBLIC BOOLEAN exec_ok ARGS3(
      *  Security: reject on strange character.
      */
     for (cp = link; *cp != '\0'; cp++) {
-	if (!isalnum(*cp) && *cp != '_' && *cp != '-' &&
-	   *cp != ' ' && *cp != ':' && *cp != '.' &&
-	   *cp != '/' && *cp != '@' && *cp != '~' &&
-	   *cp != '$' && *cp != '\t') {
+	if (!isalnum(*cp) &&
+	    *cp != '_' && *cp != '-' && *cp != ' ' &&
+	    *cp != ':' && *cp != '.' && *cp != '/' &&
+	    *cp != '@' && *cp != '~' && *cp != '$' &&
+	    *cp != '&' && *cp != '+' && *cp != '=' &&
+	    *cp != '\t') {
 	    char buf[128];
 	    
 	    sprintf(buf,

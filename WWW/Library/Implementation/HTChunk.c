@@ -79,6 +79,74 @@ PUBLIC void HTChunkEnsure ARGS2 (HTChunk *,ch, int,needed)
         outofmem(__FILE__, "HTChunkEnsure");
 }
 
+#ifdef EXP_CHARTRANS
+
+#define PUTC(code) ch->data[ch->size++] = (char)(code)
+#define PUTC2(code) ch->data[ch->size++] = (char)(0x80|(0x3f &(code)))
+
+PUBLIC void HTChunkPutUtf8Char ARGS2 (HTChunk *,ch, UCode_t,code)
+{
+    int utflen;
+    if (code < 128)
+	utflen = 1;
+    else if   (code <     0x800L) {
+	utflen = 2;
+    } else if (code <   0x10000L) {
+	utflen = 3;
+    } else if (code <  0x200000L) {
+	utflen = 4;
+    } else if (code < 0x4000000L) {
+	utflen = 5;
+    } else if (code<=0x7fffffffL) {
+	utflen = 6;
+    } else
+	utflen = 0;
+
+    if (ch->size + utflen > ch->allocated) {
+	int growby = (ch->growby >= utflen) ? ch->growby : utflen;
+	ch->allocated = ch->allocated + growby;
+        ch->data = ch->data ? (char *)realloc(ch->data, ch->allocated)
+			    : (char *)calloc(1, ch->allocated);
+      if (!ch->data)
+          outofmem(__FILE__, "HTChunkPutUtf8Char");
+    }
+
+    switch(utflen) {
+    case 0:
+	return;
+    case 1:
+	ch->data[ch->size++] = (char)code;
+	return;
+    case 2:
+	PUTC(0xc0 | (code>>6));
+	break;
+    case 3:
+	PUTC(0xe0 | (code>>12));
+	break;
+    case 4:
+	PUTC(0xf0 | (code>>18));
+	break;
+    case 5:
+	PUTC(0xf8 | (code>>24));
+	break;
+    case 6:
+	PUTC(0xfc | (code>>30));
+    }
+    switch(utflen) {
+    case 6:
+	PUTC2(code>>24);
+    case 5:
+	PUTC2(code>>18);
+    case 4:
+	PUTC2(code>>12);
+    case 3:
+	PUTC2(code>>6);
+    case 2:
+	PUTC2(code);
+    }
+}
+
+#endif /* EXP_CHARTRANS */
 
 /*	Terminate a chunk
 **	-----------------

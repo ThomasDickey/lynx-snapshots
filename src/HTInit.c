@@ -699,8 +699,8 @@ PUBLIC void HTFileInit NOARGS
     HTSetSuffix("_gz",		"application/GNU Compressed", "binary", 1.0);
     HTSetSuffix(".gz",		"application/GNU Compressed", "binary", 1.0);
 
-    HTSetSuffix(".tar.gz",	"application/GNU Compr. Tar", "binary", 1.0);
-    HTSetSuffix(".tgz",		"application/GNU Compr. Tar", "binary", 1.0);
+    HTSetSuffix5(".tar.gz",	"application/x-tar", "binary", "GNU Compr. Tar", 1.0);
+    HTSetSuffix5(".tgz",	"application/x-tar", "gzip", "GNU Compr. Tar", 1.0);
 
     HTSetSuffix(".src",		"application/x-WAIS-source", "8bit", 1.0);
     HTSetSuffix(".wsrc",	"application/x-WAIS-source", "8bit", 1.0);
@@ -714,9 +714,9 @@ PUBLIC void HTFileInit NOARGS
     HTSetSuffix(".o",		"application/x-Prog. Object", "binary", 1.0);
     HTSetSuffix(".a",		"application/x-Prog. Library", "binary", 1.0);
 
-    HTSetSuffix(".oda",		"application/ODA", "binary", 1.0);
+    HTSetSuffix5(".oda",	"application/oda", "binary", "ODA", 1.0);
 
-    HTSetSuffix(".pdf",		"application/PDF", "binary", 1.0);
+    HTSetSuffix5(".pdf",	"application/pdf", "binary", "PDF", 1.0);
 
     HTSetSuffix(".eps",		"application/Postscript", "8bit", 1.0);
     HTSetSuffix(".ai",		"application/Postscript", "8bit", 1.0);
@@ -792,7 +792,7 @@ PUBLIC void HTFileInit NOARGS
     HTSetSuffix(".sv4cpio",	"application/x-sv4cpio", "binary", 1.0);
     HTSetSuffix(".sv4crc",	"application/x-sv4crc", "binary", 1.0);
 
-    HTSetSuffix(".tar",		"application/x-Tar File", "binary", 1.0);
+    HTSetSuffix5(".tar",	"application/x-tar", "binary", "Tar File", 1.0);
     HTSetSuffix(".ustar",	"application/x-ustar", "binary", 1.0);
 
     HTSetSuffix(".snd",		"audio/basic", "binary", 1.0);
@@ -849,12 +849,12 @@ PUBLIC void HTFileInit NOARGS
     HTSetSuffix(".text",	"text/plain", "8bit", 1.0);
     HTSetSuffix(".txt",		"text/plain", "8bit", 1.0);
 
-    HTSetSuffix(".htm",		"text/html", "8bit", 1.0);
     HTSetSuffix(".html3",	"text/html", "8bit", 1.0);
     HTSetSuffix(".ht3",		"text/html", "8bit", 1.0);
     HTSetSuffix(".phtml",	"text/html", "8bit", 1.0);
     HTSetSuffix(".shtml",	"text/html", "8bit", 1.0);
     HTSetSuffix(".htmlx",	"text/html", "8bit", 1.0);
+    HTSetSuffix(".htm",		"text/html", "8bit", 1.0);
     HTSetSuffix(".html",	"text/html", "8bit", 1.0);
 
     /* These should override the default extensions as necessary. */

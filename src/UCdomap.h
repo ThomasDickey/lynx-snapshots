@@ -30,29 +30,27 @@ extern void UC_Charset_Setup PARAMS((
 	int			nnuni,
 	struct unimapdesc_str	replacedesc,
 	int			lowest_eight,
-			     int UC_rawuni));
+	int			UC_rawuni));
 
 char *UC_GNsetMIMEnames[4] =
            {"iso-8859-1","x-dec-graphics","cp437","x-transparent"};
 int UC_GNhandles[4] = {-1, -1, -1, -1};
 
 struct UC_charset {
-  CONST char *MIMEname;
-  CONST char *LYNXname;
-  u8* unicount;
-  u16* unitable;
-  int num_uni;
-  struct unimapdesc_str replacedesc;
-  int uc_status;
-  int LYhndl;
-  int GN;
-  int lowest_eight;
-  int enc;
+	CONST char *MIMEname;
+	CONST char *LYNXname;
+	u8* unicount;
+	u16* unitable;
+	int num_uni;
+	struct unimapdesc_str replacedesc;
+	int uc_status;
+	int LYhndl;
+	int GN;
+	int lowest_eight;
+	int enc;
 };
 
-PUBLIC struct UC_charset UCInfo[MAXCHARSETS];
-
-PUBLIC int UCNumCharsets;
+extern int UCNumCharsets;
 
 extern void UCInit NOARGS;
 

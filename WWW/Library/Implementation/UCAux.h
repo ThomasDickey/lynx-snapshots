@@ -4,6 +4,7 @@
 extern BOOL UCCanUniTranslateFrom PARAMS((int from));
 extern BOOL UCCanTranslateUniTo PARAMS((int to));
 extern BOOL UCCanTranslateFromTo PARAMS((int from, int to));
+extern BOOL UCNeedNotTranslate PARAMS((int from, int to));
 
 struct _UCTransParams
 {

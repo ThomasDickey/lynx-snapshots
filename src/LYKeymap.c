@@ -488,7 +488,7 @@ PRIVATE struct rmap revmap[] = {
 };
 
 PRIVATE char *funckey[] = {
-  "Up  Arrow",
+  "Up Arrow",
   "Down Arrow",
   "Right Arrow",
   "Left Arrow",
@@ -588,7 +588,9 @@ PRIVATE int LYLoadKeymap ARGS4 (
 	}
     }
     for (i = 1; i < sizeof(keymap); i++) {
-	/* LYK_PIPE not implemented yet */
+	/*
+	 *  LYK_PIPE not implemented yet.
+	 */
 	if ((i > 127 || i <= ' ' || !isalpha(i-1)) &&
 	    strcmp(revmap[(unsigned char)keymap[i]].name, "PIPE")) {
 	    print_binding(target, buf, i);

@@ -520,16 +520,52 @@ char prevailing_class[TEMPSTRINGSIZE];
     int hcode;
 #endif
 
+#ifdef EXP_CHARTRANS
+/* #define ATTR_CS_IN (me->T.output_utf8 ? me->UCLYhndl : 0) */
+#define ATTR_CS_IN me->tag_charset
+
+#define TRANSLATE_AND_UNESCAPE_ENTITIES(s, p, h) \
+	LYUCFullyTranslateString(s, ATTR_CS_IN, current_char_set, YES, p, h, st_HTML)
+
+#define TRANSLATE_AND_UNESCAPE_ENTITIES4(s, cs_to, p, h) \
+	LYUCFullyTranslateString(s, ATTR_CS_IN, cs_to, YES, p, h, st_HTML)
+
+#define TRANSLATE_AND_UNESCAPE_ENTITIES5(s,cs_from,cs_to,p,h) \
+	LYUCFullyTranslateString(s, cs_from, cs_to, YES, p, h, st_HTML)
+
+#define TRANSLATE_AND_UNESCAPE_ENTITIES6(s,cs_from,cs_to,spcls,p,h) \
+	LYUCFullyTranslateString(s, cs_from, cs_to, spcls, p, h, st_HTML)
+
+/*
+ *  Strings from attributes which should be converted to some kind
+ *  of "standard" representation (character encoding), was Latin-1,
+ *  esp. URLs (incl. #fragments) and HTML NAME and ID stuff.
+ */
+#define TRANSLATE_AND_UNESCAPE_TO_STD(s) \
+	LYUCFullyTranslateString(s, ATTR_CS_IN, ATTR_CS_IN, NO, NO, YES, st_URL)
+#define UNESCAPE_FIELDNAME_TO_STD(s) \
+	LYUCFullyTranslateString(s, ATTR_CS_IN, ATTR_CS_IN, NO, NO, YES, st_HTML)
+
+#else  /* !EXP_CHARTRANS */
+
+#define ATTR_CS_IN 0
+
+#define TRANSLATE_AND_UNESCAPE_TO_STD(s) \
+    			LYUnEscapeToLatinOne(s, TRUE) /* for now */
+#define UNESCAPE_FIELDNAME_TO_STD(s) ; /* no-op */
+#endif  /* !EXP_CHARTRANS */
+
 #define CHECK_ID(code) LYCheckForID(me, present, value, (int)code)
 
 /*	Start Element
 **	-------------
 */
-PRIVATE void HTML_start_element ARGS5(
+PRIVATE void HTML_start_element ARGS6(
 	HTStructured *, 	me,
 	int,			element_number,
 	CONST BOOL*,	 	present,
 	CONST char **,		value,
+	int,			tag_charset,
 	char **,		include)
 {
     char *alt_string = NULL;
@@ -537,6 +573,7 @@ PRIVATE void HTML_start_element ARGS5(
     char *href = NULL;
     char *map_href = NULL;
     char *title = NULL;
+    char *I_value = NULL, *I_name = NULL;
     char *temp = NULL;
 #ifdef EXP_CHARTRANS
     int dest_char_set  = -1;
@@ -556,6 +593,13 @@ PRIVATE void HTML_start_element ARGS5(
 	    return;
 	}
     }
+
+#ifdef EXP_CHARTRANS
+    if (tag_charset < 0)
+	me->tag_charset = me->UCLYhndl;
+    else
+	me->tag_charset = tag_charset;
+#endif
 
 /* this should be done differently */
 #if defined(USE_COLOR_STYLE)
@@ -805,6 +849,9 @@ PRIVATE void HTML_start_element ARGS5(
 		        value[HTML_LINK_TITLE] &&
 			*value[HTML_LINK_TITLE] != '\0') {
 			StrAllocCopy(title, value[HTML_LINK_TITLE]);
+#ifdef EXP_CHARTRANS
+			TRANSLATE_AND_UNESCAPE_ENTITIES(&title, TRUE, FALSE);
+#else  /* !EXP_CHARTRANS */
 			if (current_char_set)
 			    LYExpandString(&title);
 			/*
@@ -812,6 +859,7 @@ PRIVATE void HTML_start_element ARGS5(
 			 *  or decimal escaping. - FM
 			 */
 			LYUnEscapeEntities(title, TRUE, FALSE);
+#endif  /* !EXP_CHARTRANS */
 			LYTrimHead(title);
 			LYTrimTail(title);
 			if (*title != '\0')
@@ -962,12 +1010,16 @@ PRIVATE void HTML_start_element ARGS5(
 	    if (present && present[HTML_LINK_TITLE] &&
 		value[HTML_LINK_TITLE] && *value[HTML_LINK_TITLE] != '\0') {
 		StrAllocCopy(title, value[HTML_LINK_TITLE]);
+#ifdef EXP_CHARTRANS
+		TRANSLATE_AND_UNESCAPE_ENTITIES(&title, TRUE, FALSE);
+#else  /* !EXP_CHARTRANS */
 		if (current_char_set)
 		    LYExpandString(&title);
 		/*
 		 *  Convert any HTML entities or decimal escaping. - FM
 		 */
 		LYUnEscapeEntities(title, TRUE, FALSE);
+#endif  /* !EXP_CHARTRANS */
 		LYTrimHead(title);
 		LYTrimTail(title);
 	    }
@@ -1003,6 +1055,19 @@ PRIVATE void HTML_start_element ARGS5(
 		if (!HTAnchor_title(dest))
 		    HTAnchor_setTitle(dest, title);
 		dest = NULL;
+#ifdef EXP_CHARTRANS
+	        if (present[HTML_A_CHARSET] &&
+		    value[HTML_A_CHARSET] && *value[HTML_A_CHARSET] != '\0') {
+		    dest_char_set = UCGetLYhndl_byMIME(value[HTML_A_CHARSET]);
+		    if (dest_char_set < 0)
+		        dest_char_set = UCLYhndl_for_unrec;
+		}
+		if (dest && dest_char_set >= 0)
+		    HTAnchor_setUCInfoStage(dest, dest_char_set,
+					    UCT_STAGE_PARSER,
+					    UCT_SETBY_LINK);
+		dest_char_set = -1;
+#endif /* EXP_CHARTRANS */
 	    }
 	    UPDATE_STYLE;
 	    if (!HText_hasToolbar(me->text) &&
@@ -1107,12 +1172,16 @@ PRIVATE void HTML_start_element ARGS5(
 	    present[HTML_ISINDEX_PROMPT] &&
 	    value[HTML_ISINDEX_PROMPT] && *value[HTML_ISINDEX_PROMPT]) {
 	    StrAllocCopy(temp, value[HTML_ISINDEX_PROMPT]);
+#ifdef EXP_CHARTRANS
+	    TRANSLATE_AND_UNESCAPE_ENTITIES(&temp, TRUE, FALSE);
+#else  /* !EXP_CHARTRANS */
 	    if (current_char_set)
 		LYExpandString(&temp);
 	    /*
 	     *  Convert any HTML entities or decimal escaping. - FM
 	     */
 	    LYUnEscapeEntities(temp, TRUE, FALSE);
+#endif  /* !EXP_CHARTRANS */
 	    LYTrimHead(temp);
 	    LYTrimTail(temp);
 	    if (*temp != '\0') {
@@ -1174,12 +1243,16 @@ PRIVATE void HTML_start_element ARGS5(
 	if (present && present[HTML_FRAME_NAME] &&
 	    value[HTML_FRAME_NAME] && *value[HTML_FRAME_NAME]) {
 	    StrAllocCopy(id_string, value[HTML_FRAME_NAME]);
+#ifdef EXP_CHARTRANS
+		TRANSLATE_AND_UNESCAPE_ENTITIES(&id_string, TRUE, FALSE);
+#else  /* !EXP_CHARTRANS */
 	    if (current_char_set)
 		LYExpandString(&id_string);
 	    /*
 	     *  Convert any HTML entities or decimal escaping. - FM
 	     */
 	    LYUnEscapeEntities(id_string, TRUE, FALSE);
+#endif  /* !EXP_CHARTRANS */
 	    LYTrimHead(id_string);
 	    LYTrimTail(id_string);
 	}
@@ -1255,12 +1328,16 @@ PRIVATE void HTML_start_element ARGS5(
 	if (present && present[HTML_IFRAME_NAME] &&
 	    value[HTML_IFRAME_NAME] && *value[HTML_IFRAME_NAME]) {
 	    StrAllocCopy(id_string, value[HTML_IFRAME_NAME]);
+#ifdef EXP_CHARTRANS
+	    TRANSLATE_AND_UNESCAPE_ENTITIES(&id_string, TRUE, FALSE);
+#else  /* !EXP_CHARTRANS */
 	    if (current_char_set)
 		LYExpandString(&id_string);
 	    /*
 	     *  Convert any HTML entities or decimal escaping. - FM
 	     */
 	    LYUnEscapeEntities(id_string, TRUE, FALSE);
+#endif  /* !EXP_CHARTRANS */
 	    LYTrimHead(id_string);
 	    LYTrimTail(id_string);
 	}
@@ -1733,7 +1810,7 @@ PRIVATE void HTML_start_element ARGS5(
 		 *  TO has priority over INDENT if both are present. - FM
 		 */
 		StrAllocCopy(temp, value[HTML_TAB_TO]);
-		LYUnEscapeToLatinOne(&temp, TRUE);
+		TRANSLATE_AND_UNESCAPE_TO_STD(&temp);
 		if (*temp) {
 		    target = HText_getTabIDColumn(me->text, temp);
 		}
@@ -1772,7 +1849,7 @@ PRIVATE void HTML_start_element ARGS5(
 	if (present[HTML_TAB_ID] &&
 	    value[HTML_TAB_ID] && *value[HTML_TAB_ID]) {
 	    StrAllocCopy(temp, value[HTML_TAB_ID]);
-	    LYUnEscapeToLatinOne(&temp, TRUE);
+	    TRANSLATE_AND_UNESCAPE_TO_STD(&temp);
 	    if (*temp)
 	        HText_setTabID(me->text, temp);
 	    FREE(temp);
@@ -2443,7 +2520,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    StrAllocCopy(id_string, value[HTML_A_NAME]);
 	}
 	if (id_string) {
-	    LYUnEscapeToLatinOne(&id_string, TRUE);
+	    TRANSLATE_AND_UNESCAPE_TO_STD(&id_string);
 	    if (*id_string == '\0') {
 		FREE(id_string);
 	    }
@@ -2543,12 +2620,16 @@ PRIVATE void HTML_start_element ARGS5(
 	    if (present[HTML_A_TITLE] &&
 	        value[HTML_A_TITLE] && *value[HTML_A_TITLE] != '\0') {
 		StrAllocCopy(title, value[HTML_A_TITLE]);
+#ifdef EXP_CHARTRANS
+		TRANSLATE_AND_UNESCAPE_ENTITIES(&title, TRUE, FALSE);
+#else  /* !EXP_CHARTRANS */
 		if (current_char_set)
 		    LYExpandString(&title);
 		/*
 		 *  Convert any HTML entities or decimal escaping. - FM
 		 */
 		LYUnEscapeEntities(title, TRUE, FALSE);
+#endif  /* !EXP_CHARTRANS */
 		LYTrimHead(title);
 		LYTrimTail(title);
 		if (*title == '\0') {
@@ -2580,7 +2661,7 @@ PRIVATE void HTML_start_element ARGS5(
 		if (dest && dest_char_set >= 0)
 		    HTAnchor_setUCInfoStage(dest, dest_char_set,
 					    UCT_STAGE_PARSER,
-					    UCT_SETBY_DEFAULT);
+					    UCT_SETBY_LINK);
 		dest_char_set = -1;
 #endif /* EXP_CHARTRANS */
 	    dest = NULL;
@@ -2727,12 +2808,16 @@ PRIVATE void HTML_start_element ARGS5(
 	if (present && present[HTML_IMG_TITLE] &&
 	    value[HTML_IMG_TITLE] && *value[HTML_IMG_TITLE]) {
 	    StrAllocCopy(title, value[HTML_IMG_TITLE]);
+#ifdef EXP_CHARTRANS
+		TRANSLATE_AND_UNESCAPE_ENTITIES(&title, TRUE, FALSE);
+#else  /* !EXP_CHARTRANS */
 	    if (current_char_set)
 		LYExpandString(&title);
 	    /*
 	     *  Convert any HTML entities or decimal escaping. - FM
 	     */
 	    LYUnEscapeEntities(title, TRUE, FALSE);
+#endif  /* !EXP_CHARTRANS */
 	    LYTrimHead(title);
 	    LYTrimTail(title);
 	    if (*title == '\0') {
@@ -2751,6 +2836,10 @@ PRIVATE void HTML_start_element ARGS5(
 	     ((clickable_images || map_href) &&
 	      *value[HTML_IMG_ALT] != '\0'))) {
 	    StrAllocCopy(alt_string, value[HTML_IMG_ALT]);
+#ifdef EXP_CHARTRANS
+	    TRANSLATE_AND_UNESCAPE_ENTITIES(&alt_string,
+						   me->UsePlainSpace, me->HiddenValue);
+#else  /* !EXP_CHARTRANS */
 	    if (current_char_set)
 	        LYExpandString(&alt_string);
 	    /*
@@ -2758,6 +2847,7 @@ PRIVATE void HTML_start_element ARGS5(
 	     */
 	    LYUnEscapeEntities(alt_string,
 	    		       me->UsePlainSpace, me->HiddenValue);
+#endif  /* !EXP_CHARTRANS */
 	    /*
 	     *  If it's all spaces and we are making SRC or
 	     *  USEMAP links, treat it as zero-length. - FM
@@ -2825,7 +2915,7 @@ PRIVATE void HTML_start_element ARGS5(
 	if (present && present[HTML_IMG_ID] &&
 	    value[HTML_IMG_ID] && *value[HTML_IMG_ID]) {
 	    StrAllocCopy(id_string, value[HTML_IMG_ID]);
-	    LYUnEscapeToLatinOne(&id_string, TRUE);
+	    TRANSLATE_AND_UNESCAPE_TO_STD(&id_string);
 	    if (*id_string == '\0') {
 	        FREE(id_string);
 	    }
@@ -3119,7 +3209,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    StrAllocCopy(id_string, value[HTML_MAP_ID]);
 	}
 	if (id_string) {
-	    LYUnEscapeToLatinOne(&id_string, TRUE);
+	    TRANSLATE_AND_UNESCAPE_TO_STD(&id_string);
 	    if (*id_string == '\0') {
 	        FREE(id_string);
 	    }
@@ -3146,12 +3236,16 @@ PRIVATE void HTML_start_element ARGS5(
 	    if (present && present[HTML_MAP_TITLE] &&
 	        value[HTML_MAP_TITLE] && *value[HTML_MAP_TITLE] != '\0') {
 	        StrAllocCopy(title, value[HTML_MAP_TITLE]);
+#ifdef EXP_CHARTRANS
+		TRANSLATE_AND_UNESCAPE_ENTITIES(&title, TRUE, FALSE);
+#else  /* !EXP_CHARTRANS */
 		if (current_char_set)
 		    LYExpandString(&title);
 		/*
 		 *  Convert any HTML entities or decimal escaping. - FM
 		 */
 		LYUnEscapeEntities(title, TRUE, FALSE);
+#endif  /* !EXP_CHARTRANS */
 		LYTrimHead(title);
 		LYTrimTail(title);
 		if (*title == '\0') {
@@ -3225,6 +3319,10 @@ PRIVATE void HTML_start_element ARGS5(
 	        StrAllocCopy(alt_string, value[HTML_AREA_TITLE]);
 	    }
 	    if (alt_string != NULL) {
+#ifdef EXP_CHARTRANS
+		TRANSLATE_AND_UNESCAPE_ENTITIES(&alt_string,
+						       me->UsePlainSpace, me->HiddenValue);
+#else  /* !EXP_CHARTRANS */
 		if (current_char_set)
 	            LYExpandString(&alt_string);
 		/*
@@ -3232,6 +3330,7 @@ PRIVATE void HTML_start_element ARGS5(
 		 */
 		LYUnEscapeEntities(alt_string,
 				   me->UsePlainSpace, me->HiddenValue);
+#endif  /* !EXP_CHARTRANS */
 		/*
 		 *  Make sure it's not just space(s). - FM
 		 */
@@ -3365,7 +3464,7 @@ PRIVATE void HTML_start_element ARGS5(
 		if (present[HTML_OBJECT_USEMAP] &&
 		    value[HTML_OBJECT_USEMAP] && *value[HTML_OBJECT_USEMAP]) {
 		    StrAllocCopy(me->object_usemap, value[HTML_OBJECT_USEMAP]);
-		    LYUnEscapeToLatinOne(&me->object_usemap, TRUE);
+		    TRANSLATE_AND_UNESCAPE_TO_STD(&me->object_usemap);
 		    if (*me->object_usemap == '\0') {
 		        FREE(me->object_usemap);
 		    }
@@ -3373,7 +3472,7 @@ PRIVATE void HTML_start_element ARGS5(
 		if (present[HTML_OBJECT_ID] &&
 		    value[HTML_OBJECT_ID] && *value[HTML_OBJECT_ID]) {
 		    StrAllocCopy(me->object_id, value[HTML_OBJECT_ID]);
-		    LYUnEscapeToLatinOne(&me->object_id, TRUE);
+		    TRANSLATE_AND_UNESCAPE_TO_STD(&me->object_id);
 		    if (*me->object_id == '\0') {
 		        FREE(me->object_id);
 		    }
@@ -3381,9 +3480,13 @@ PRIVATE void HTML_start_element ARGS5(
 		if (present[HTML_OBJECT_TITLE] &&
 		    value[HTML_OBJECT_TITLE] && *value[HTML_OBJECT_TITLE]) {
 		    StrAllocCopy(me->object_title, value[HTML_OBJECT_TITLE]);
+#ifdef EXP_CHARTRANS
+		TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_title, TRUE, FALSE);
+#else  /* !EXP_CHARTRANS */
 		    if (current_char_set)
 		        LYExpandString(&me->object_title);
 		    LYUnEscapeEntities(me->object_title, TRUE, FALSE);
+#endif  /* !EXP_CHARTRANS */
 		    LYTrimHead(me->object_title);
 		    LYTrimTail(me->object_title);
 		    if (me->object_title == '\0') {
@@ -3393,7 +3496,7 @@ PRIVATE void HTML_start_element ARGS5(
 		if (present[HTML_OBJECT_DATA] &&
 		    value[HTML_OBJECT_DATA] && *value[HTML_OBJECT_DATA]) {
 		    StrAllocCopy(me->object_data, value[HTML_OBJECT_DATA]);
-		    LYUnEscapeToLatinOne(&me->object_data, TRUE);
+		    TRANSLATE_AND_UNESCAPE_TO_STD(&me->object_data);
 		    if (*me->object_data == '\0') {
 		        FREE(me->object_data);
 		    }
@@ -3401,9 +3504,13 @@ PRIVATE void HTML_start_element ARGS5(
 		if (present[HTML_OBJECT_TYPE] &&
 		    value[HTML_OBJECT_TYPE] && *value[HTML_OBJECT_TYPE]) {
 		    StrAllocCopy(me->object_type, value[HTML_OBJECT_TYPE]);
+#ifdef EXP_CHARTRANS
+		    TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_type, TRUE, FALSE);
+#else  /* !EXP_CHARTRANS */
 		    if (current_char_set)
 		        LYExpandString(&me->object_type);
 		    LYUnEscapeEntities(me->object_type, TRUE, FALSE);
+#endif  /* !EXP_CHARTRANS */
 		    LYTrimHead(me->object_type);
 		    LYTrimTail(me->object_type);
 		    if (me->object_type == '\0') {
@@ -3415,9 +3522,13 @@ PRIVATE void HTML_start_element ARGS5(
 		    *value[HTML_OBJECT_CLASSID]) {
 		    StrAllocCopy(me->object_classid,
 		    		 value[HTML_OBJECT_CLASSID]);
+#ifdef EXP_CHARTRANS
+		    TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_classid, TRUE, FALSE);
+#else  /* !EXP_CHARTRANS */
 		    if (current_char_set)
 		        LYExpandString(&me->object_classid);
 		    LYUnEscapeEntities(me->object_classid, TRUE, FALSE);
+#endif  /* !EXP_CHARTRANS */
 		    LYTrimHead(me->object_classid);
 		    LYTrimTail(me->object_classid);
 		    if (me->object_classid == '\0') {
@@ -3429,7 +3540,7 @@ PRIVATE void HTML_start_element ARGS5(
 		    *value[HTML_OBJECT_CODEBASE]) {
 		    StrAllocCopy(me->object_codebase,
 		    		 value[HTML_OBJECT_CODEBASE]);
-		    LYUnEscapeToLatinOne(&me->object_codebase, TRUE);
+		    TRANSLATE_AND_UNESCAPE_TO_STD(&me->object_codebase);
 		    if (*me->object_codebase == '\0') {
 		        FREE(me->object_codebase);
 		    }
@@ -3439,9 +3550,13 @@ PRIVATE void HTML_start_element ARGS5(
 		    *value[HTML_OBJECT_CODETYPE]) {
 		    StrAllocCopy(me->object_codetype,
 		    		 value[HTML_OBJECT_CODETYPE]);
+#ifdef EXP_CHARTRANS
+		    TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_codetype, TRUE, FALSE);
+#else  /* !EXP_CHARTRANS */
 		    if (current_char_set)
 		        LYExpandString(&me->object_codetype);
 		    LYUnEscapeEntities(me->object_codetype, TRUE, FALSE);
+#endif  /* !EXP_CHARTRANS */
 		    LYTrimHead(me->object_codetype);
 		    LYTrimTail(me->object_codetype);
 		    if (me->object_codetype == '\0') {
@@ -3451,9 +3566,13 @@ PRIVATE void HTML_start_element ARGS5(
 		if (present[HTML_OBJECT_NAME] &&
 		    value[HTML_OBJECT_NAME] && *value[HTML_OBJECT_NAME]) {
 		    StrAllocCopy(me->object_name, value[HTML_OBJECT_NAME]);
+#ifdef EXP_CHARTRANS
+		    TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_name, TRUE, FALSE);
+#else  /* !EXP_CHARTRANS */
 		    if (current_char_set)
 		        LYExpandString(&me->object_name);
 		    LYUnEscapeEntities(me->object_name, TRUE, FALSE);
+#endif  /* !EXP_CHARTRANS */
 		    LYTrimHead(me->object_name);
 		    LYTrimTail(me->object_name);
 		    if (me->object_name == '\0') {
@@ -3544,7 +3663,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    StrAllocCopy(id_string, value[HTML_APPLET_NAME]);
 	}
 	if (id_string) {
-	    LYUnEscapeToLatinOne(&id_string, TRUE);
+	    TRANSLATE_AND_UNESCAPE_TO_STD(&id_string);
 	    LYHandleID(me, id_string);
 	    FREE(id_string);
 	}
@@ -3558,6 +3677,10 @@ PRIVATE void HTML_start_element ARGS5(
 	    (!clickable_images ||
 	     (clickable_images && *value[HTML_APPLET_ALT] != '\0'))) {
 	    StrAllocCopy(alt_string, value[HTML_APPLET_ALT]);
+#ifdef EXP_CHARTRANS
+	    TRANSLATE_AND_UNESCAPE_ENTITIES(&alt_string,
+						   me->UsePlainSpace, me->HiddenValue);
+#else  /* !EXP_CHARTRANS */
 	    if (current_char_set)
 	        LYExpandString(&alt_string);
 	    /*
@@ -3565,6 +3688,7 @@ PRIVATE void HTML_start_element ARGS5(
 	     */
 	    LYUnEscapeEntities(alt_string,
 	    		       me->UsePlainSpace, me->HiddenValue);
+#endif  /* !EXP_CHARTRANS */
 	    /*
 	     *  If it's all spaces and we are making sources links,
 	     *  treat it as zero-length. - FM
@@ -3599,7 +3723,7 @@ PRIVATE void HTML_start_element ARGS5(
 	        value[HTML_APPLET_CODEBASE] && *value[HTML_APPLET_CODEBASE]) {
 	        StrAllocCopy(base, value[HTML_APPLET_CODEBASE]);
 		collapse_spaces(base);
-		LYUnEscapeToLatinOne(&base, TRUE);
+		TRANSLATE_AND_UNESCAPE_TO_STD(&base);
 		/*
 		 *  Force it to be a directory. - FM
 		 */
@@ -3767,7 +3891,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    StrAllocCopy(id_string, value[HTML_EMBED_NAME]);
 	}
 	if (id_string) {
-	    LYUnEscapeToLatinOne(&id_string, TRUE);
+	    TRANSLATE_AND_UNESCAPE_TO_STD(&id_string);
 	    LYHandleID(me, id_string);
 	    FREE(id_string);
 	}
@@ -3782,6 +3906,10 @@ PRIVATE void HTML_start_element ARGS5(
 	    (!clickable_images ||
 	     (clickable_images && *value[HTML_EMBED_ALT] != '\0'))) {
 	    StrAllocCopy(alt_string, value[HTML_EMBED_ALT]);
+#ifdef EXP_CHARTRANS
+	    TRANSLATE_AND_UNESCAPE_ENTITIES(&alt_string,
+						   me->UsePlainSpace, me->HiddenValue);
+#else  /* !EXP_CHARTRANS */
 	    if (current_char_set)
 	        LYExpandString(&alt_string);
 	    /*
@@ -3789,6 +3917,7 @@ PRIVATE void HTML_start_element ARGS5(
 	     */
 	    LYUnEscapeEntities(alt_string,
 	    		       me->UsePlainSpace, me->HiddenValue);
+#endif  /* !EXP_CHARTRANS */
 	    /*
 	     *  If it's all spaces and we are making sources links,
 	     *  treat it as zero-length. - FM
@@ -3948,14 +4077,16 @@ PRIVATE void HTML_start_element ARGS5(
 	    char * action = NULL;
 	    char * method = NULL;
 	    char * enctype = NULL;
+	    CONST char * accept_cs = NULL;
+	    
 	    HTChildAnchor * source;
 	    HTAnchor *link_dest;
 
 	    if (!me->text)
 	        UPDATE_STYLE;
 	    /*
-	     *  FORM was declared SGML_EMPTY in HTMLDTD.c, and
-	     *  SGML_character() in SGML.c checks for a FORM end
+	     *  FORM may have been declared SGML_EMPTY in HTMLDTD.c, and
+	     *  SGML_character() in SGML.c may check for a FORM end
 	     *  tag to call HTML_end_element() directly (with a
 	     *  check in that to bypass decrementing of the HTML
 	     *  parser's stack), so if we have an open FORM, close
@@ -3975,6 +4106,10 @@ PRIVATE void HTML_start_element ARGS5(
 	     */
 	    me->inFORM = TRUE;
 
+	    if (present && present[HTML_FORM_ACCEPT_CHARSET]) {
+	    	accept_cs = value[HTML_FORM_ACCEPT_CHARSET] ?
+		    	    value[HTML_FORM_ACCEPT_CHARSET] : "UNKNOWN";
+	    }
 	    if (present && present[HTML_FORM_ACTION] &&
 	        value[HTML_FORM_ACTION])  {
 	        /*
@@ -4062,12 +4197,16 @@ PRIVATE void HTML_start_element ARGS5(
 		    StrAllocCopy(title, value[HTML_FORM_SUBJECT]);
 		}
 		if (title != NULL && *title != '\0') {
+#ifdef EXP_CHARTRANS
+		    TRANSLATE_AND_UNESCAPE_ENTITIES(&title, TRUE, FALSE);
+#else  /* !EXP_CHARTRANS */
 		    if (current_char_set)
 		        LYExpandString(&title);
 		    /*
 		     *  Convert any HTML entities or decimal escaping. - FM
 		     */
 		    LYUnEscapeEntities(title, TRUE, FALSE);
+#endif  /* !EXP_CHARTRANS */
 		    LYTrimHead(title);
 		    LYTrimTail(title);
 		    if (*title == '\0') {
@@ -4076,11 +4215,12 @@ PRIVATE void HTML_start_element ARGS5(
 		}
 	    }
 
-	    HText_beginForm(action, method, enctype, title);
+	    HText_beginForm(action, method, enctype, title, accept_cs);
 
 	    FREE(action);
 	    FREE(method);
 	    FREE(enctype);
+	    FREE(title);
 	    FREE(title);
 	}
 	CHECK_ID(HTML_FORM_ID);
@@ -4121,6 +4261,9 @@ PRIVATE void HTML_start_element ARGS5(
 	    I.lang=NULL; I.max=NULL; I.maxlength=NULL; I.md=NULL;
 	    I.min=NULL; I.name=NULL; I.size=NULL; I.src=NULL;
 	    I.type=NULL; I.value=NULL; I.width=NULL;
+	    I.accept_cs = NULL;
+	    I.name_cs = ATTR_CS_IN;
+	    I.value_cs = ATTR_CS_IN;
 
 	    UPDATE_STYLE;
 	    if ((present && present[HTML_BUTTON_TYPE] &&
@@ -4144,7 +4287,7 @@ PRIVATE void HTML_start_element ARGS5(
 	     */
 	    if (!me->inFORM) {
 	        if (TRACE) {
-		    fprintf(stderr, "HTML: BUTTON tag not within FORM tag\n");
+		    fprintf(stderr, "HTML: ***** BUTTON tag not within FORM element *****\n");
 		} else if (!me->inBadHTML) {
 	            _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -4177,10 +4320,16 @@ PRIVATE void HTML_start_element ARGS5(
 	    }
 	    HTML_put_character(me, '(');
 
-	    if (present && present[HTML_BUTTON_NAME] && value[HTML_BUTTON_NAME])
-		I.name = value[HTML_BUTTON_NAME];
-	    else
+	    if (!(present && present[HTML_BUTTON_NAME] &&
+		  value[HTML_BUTTON_NAME])) {
 	        I.name = "";
+	    } else if (strchr(value[HTML_BUTTON_NAME], '&') == NULL) {
+		I.name = value[HTML_BUTTON_NAME];
+	    } else {
+		StrAllocCopy(I_name, value[HTML_BUTTON_NAME]);
+		UNESCAPE_FIELDNAME_TO_STD(&I_name);
+		I.name = I_name;
+	    }
 
 	    if (present && present[HTML_BUTTON_VALUE] &&
 	        value[HTML_BUTTON_VALUE] && *value[HTML_BUTTON_VALUE]) {
@@ -4189,13 +4338,19 @@ PRIVATE void HTML_start_element ARGS5(
 		 */
 		int len;
 
+		StrAllocCopy(I_value, value[HTML_BUTTON_VALUE]);
 		me->UsePlainSpace = TRUE;
+#ifdef EXP_CHARTRANS
+		TRANSLATE_AND_UNESCAPE_ENTITIES(&I_value, TRUE, me->HiddenValue);
+#else  /* !EXP_CHARTRANS */
 		if (current_char_set) {
-		    LYExpandString((char **)&value[HTML_BUTTON_VALUE]);
+		    LYExpandString(&I_value);
 		}
-	        LYUnEscapeEntities((char *)value[HTML_BUTTON_VALUE],
+	        LYUnEscapeEntities(I_value,
 				   me->UsePlainSpace, me->HiddenValue);
-		I.value = (char *)value[HTML_BUTTON_VALUE];
+#endif /* EXP_CHARTRANS */
+		me->UsePlainSpace = FALSE;
+		I.value = I_value;
 		/*
 		 *  Convert any newlines or tabs to spaces,
 		 *  and trim any lead or trailing spaces. - FM
@@ -4206,7 +4361,6 @@ PRIVATE void HTML_start_element ARGS5(
 		len = strlen(I.value) - 1;
 		while (len > 0 && I.value[len] == ' ')
 		    I.value[len--] = '\0';
-		me->UsePlainSpace = FALSE;
 	    }
 		
 	    if (present && present[HTML_BUTTON_DISABLED])
@@ -4284,6 +4438,8 @@ PRIVATE void HTML_start_element ARGS5(
 		HTML_put_character(me, ' ');
 		me->in_word = NO;
 	    }
+	    FREE(I_value);
+	    FREE(I_name);
 	}
 	break;
 
@@ -4301,6 +4457,9 @@ PRIVATE void HTML_start_element ARGS5(
 	    I.lang=NULL; I.max=NULL; I.maxlength=NULL; I.md=NULL;
 	    I.min=NULL; I.name=NULL; I.size=NULL; I.src=NULL;
 	    I.type=NULL; I.value=NULL; I.width=NULL;
+	    I.accept_cs = NULL;
+	    I.name_cs = ATTR_CS_IN;
+	    I.value_cs = ATTR_CS_IN;
 
 	    UPDATE_STYLE;
 
@@ -4379,7 +4538,7 @@ PRIVATE void HTML_start_element ARGS5(
 	     */
 	    if (!me->inFORM) {
 	        if (TRACE) {
-		    fprintf(stderr, "HTML: INPUT tag not within FORM tag\n");
+		    fprintf(stderr, "HTML: ***** INPUT tag not within FORM element *****\n");
 		} else if (!me->inBadHTML) {
 	            _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -4398,7 +4557,7 @@ PRIVATE void HTML_start_element ARGS5(
 	     */
 	    if (me->inTEXTAREA) {
 	        if (TRACE) {
-		    fprintf(stderr, "HTML: Missing TEXTAREA end tag.\n");
+		    fprintf(stderr, "HTML: ***** Missing TEXTAREA end tag. *****\n");
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -4409,10 +4568,16 @@ PRIVATE void HTML_start_element ARGS5(
 	    /*
 	     *  Handle the INPUT as for a FORM. - FM
 	     */
-	    if (present && present[HTML_INPUT_NAME] && value[HTML_INPUT_NAME])
-		I.name = value[HTML_INPUT_NAME];
-	    else
+	    if (!(present && present[HTML_INPUT_NAME] &&
+		  value[HTML_INPUT_NAME])) {
 	        I.name = "";
+	    } else if (strchr(value[HTML_INPUT_NAME], '&') == NULL) {
+		I.name = value[HTML_INPUT_NAME];
+	    } else {
+		StrAllocCopy(I_name, value[HTML_INPUT_NAME]);
+		UNESCAPE_FIELDNAME_TO_STD(&I_name);
+		I.name = I_name;
+	    }
 	    if ((present && present[HTML_INPUT_ALT] &&
 		 value[HTML_INPUT_ALT] && *value[HTML_INPUT_ALT] &&
 		 I.type && !strcasecomp(I.type, "image")) &&
@@ -4422,7 +4587,7 @@ PRIVATE void HTML_start_element ARGS5(
 		 *  This is a TYPE="image" using an ALT rather than
 		 *  VALUE attribute to indicate the link string for
 		 *  text clients or GUIs with image loading off, so
-		 *  set the flag to use that at if it were a VALUE
+		 *  set the flag to use that as if it were a VALUE
 		 *  attribute. - FM
 		 */
 		UseALTasVALUE = TRUE;
@@ -4508,17 +4673,27 @@ PRIVATE void HTML_start_element ARGS5(
 			 !strcasecomp(I.type, "image") ||
 			 !strcasecomp(I.type, "reset"))
 		    me->UsePlainSpace = TRUE;
+		StrAllocCopy(I_value,
+			     ((UseALTasVALUE == TRUE) ?
+				value[HTML_INPUT_ALT] :
+				value[HTML_INPUT_VALUE]));
+#ifdef EXP_CHARTRANS
+		if (me->UsePlainSpace && !me->HiddenValue) {
+		    I.value_cs = current_char_set;
+		}
+		TRANSLATE_AND_UNESCAPE_ENTITIES6(
+		    &I_value,
+		    ATTR_CS_IN,
+		    I.value_cs,
+		    (me->UsePlainSpace && !me->HiddenValue),
+		    me->UsePlainSpace, me->HiddenValue);
+#else  /* !EXP_CHARTRANS */
 		if (current_char_set && me->UsePlainSpace)
-		    LYExpandString(((UseALTasVALUE == TRUE) ?
-			    (char **)&value[HTML_INPUT_ALT] :
-			    (char **)&value[HTML_INPUT_VALUE]));
-	        LYUnEscapeEntities(((UseALTasVALUE == TRUE) ?
-			      (char *)value[HTML_INPUT_ALT] :
-			      (char *)value[HTML_INPUT_VALUE]),
+		    LYExpandString(&I_value);
+	        LYUnEscapeEntities(I_value,
 				   me->UsePlainSpace, me->HiddenValue);
-		I.value = ((UseALTasVALUE == TRUE) ?
-		     (char *)value[HTML_INPUT_ALT] :
-		     (char *)value[HTML_INPUT_VALUE]);
+#endif  /* !EXP_CHARTRANS */
+		I.value = I_value;
 		if (me->UsePlainSpace == TRUE) {
 		    /*
 		     *  Convert any newlines or tabs to spaces,
@@ -4549,7 +4724,8 @@ PRIVATE void HTML_start_element ARGS5(
 		 *  "Submit" value.  If we didn't put up a link, then
 		 *  HText_beginInput() will use "[IMAGE]-Submit". - FM
 		 */
-		I.value = "Submit";
+		StrAllocCopy(I_value, "Submit");
+		I.value = I_value;
 	    }
 	    if (present && present[HTML_INPUT_CHECKED])
 		I.checked = YES;
@@ -4562,6 +4738,10 @@ PRIVATE void HTML_start_element ARGS5(
 	    if (present && present[HTML_INPUT_DISABLED])
 		I.disabled = YES;
 
+	    if (present && present[HTML_INPUT_ACCEPT_CHARSET]) { /* Not yet used. */
+		I.accept_cs = value[HTML_INPUT_ACCEPT_CHARSET] ?
+		    	      value[HTML_INPUT_ACCEPT_CHARSET] : "UNKNOWN";
+	    }
 	    if (present && present[HTML_INPUT_ALIGN] && /* Not yet used. */
 	        value[HTML_INPUT_ALIGN] && *value[HTML_INPUT_ALIGN])
 		I.align = value[HTML_INPUT_ALIGN];
@@ -4712,6 +4892,8 @@ PRIVATE void HTML_start_element ARGS5(
 		}
 	    }
 	    HText_setIgnoreExcess(me->text, FALSE);
+	    FREE(I_value);
+	    FREE(I_name);
 	}
 	break;
 
@@ -4722,7 +4904,7 @@ PRIVATE void HTML_start_element ARGS5(
 	if (!me->inFORM) {
 	    if (TRACE) {
 		fprintf(stderr,
-			"HTML: TEXTAREA start tag not within FORM tag\n");
+			"HTML: ***** TEXTAREA start tag not within FORM element *****\n");
 	    } else if (!me->inBadHTML) {
 	        _statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -4744,10 +4926,23 @@ PRIVATE void HTML_start_element ARGS5(
 	 */
         HTChunkClear(&me->textarea);
 	if (present && present[HTML_TEXTAREA_NAME] &&
-	    value[HTML_TEXTAREA_NAME])  
+	    value[HTML_TEXTAREA_NAME]) {
 	    StrAllocCopy(me->textarea_name, value[HTML_TEXTAREA_NAME]);
-	else
+	    me->textarea_name_cs = ATTR_CS_IN;
+	    if (strchr(value[HTML_TEXTAREA_NAME], '&') != NULL) {
+		UNESCAPE_FIELDNAME_TO_STD(&me->textarea_name);
+	    }
+	} else {
 	    StrAllocCopy(me->textarea_name, "");
+	}
+
+	if (present && present[HTML_TEXTAREA_ACCEPT_CHARSET] &&
+	    value[HTML_TEXTAREA_ACCEPT_CHARSET]) {
+	    StrAllocCopy(me->textarea_accept_cs, value[HTML_TEXTAREA_ACCEPT_CHARSET]);
+	    TRANSLATE_AND_UNESCAPE_TO_STD(&me->textarea_accept_cs);
+	} else {
+	    FREE(me->textarea_accept_cs);
+	}
 
 	if (present && present[HTML_TEXTAREA_COLS] &&
 	    value[HTML_TEXTAREA_COLS] &&
@@ -4771,7 +4966,7 @@ PRIVATE void HTML_start_element ARGS5(
 	if (present && present[HTML_TEXTAREA_ID]
 	    && value[HTML_TEXTAREA_ID] && *value[HTML_TEXTAREA_ID]) {
 	    StrAllocCopy(id_string, value[HTML_TEXTAREA_ID]);
-	    LYUnEscapeToLatinOne(&id_string, TRUE);
+	    TRANSLATE_AND_UNESCAPE_TO_STD(&id_string);
 	    if ((id_string != '\0') &&
 	        (ID_A = HTAnchor_findChildAndLink(
 				me->node_anchor,	/* Parent */
@@ -4799,7 +4994,7 @@ PRIVATE void HTML_start_element ARGS5(
 	if (me->inSELECT) {
 	    if (TRACE) {
 		fprintf(stderr,
-		   "HTML: Embedded SELECT start end. Faking SELECT end tag.\n");
+		   "HTML: ***** SELECT start tag in SELECT element. Faking SELECT end tag. *****\n");
 	    } else if (!me->inBadHTML) {
 		_statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -4824,7 +5019,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    if (!me->inFORM) {
 	        if (TRACE) {
 		    fprintf(stderr,
-			    "HTML: SELECT start tag not within FORM tag\n");
+			    "HTML: ***** SELECT start tag not within FORM element *****\n");
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -4842,7 +5037,7 @@ PRIVATE void HTML_start_element ARGS5(
 	     */
 	    if (me->inTEXTAREA) {
 	        if (TRACE) {
-		    fprintf(stderr, "HTML: Missing TEXTAREA end tag\n");
+		    fprintf(stderr, "HTML: ***** Missing TEXTAREA end tag *****\n");
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -4857,11 +5052,15 @@ PRIVATE void HTML_start_element ARGS5(
 
 	    if (!me->text)
 	        UPDATE_STYLE;
-	    if (present && present[HTML_SELECT_NAME] &&
-	        value[HTML_SELECT_NAME] && *value[HTML_SELECT_NAME])  
-		StrAllocCopy(name, value[HTML_SELECT_NAME]);
-	    else
+	    if (!(present && present[HTML_SELECT_NAME] &&
+		  value[HTML_SELECT_NAME]  && *value[HTML_SELECT_NAME])) {
 	        StrAllocCopy(name, "");
+	    } else if (strchr(value[HTML_SELECT_NAME], '&') == NULL) {
+		StrAllocCopy(name, value[HTML_SELECT_NAME]);
+	    } else {
+		StrAllocCopy(name, value[HTML_SELECT_NAME]);
+		UNESCAPE_FIELDNAME_TO_STD(&name);
+	    }
 	    if (present && present[HTML_SELECT_MULTIPLE])  
 		multiple=YES;
 	    if (present && present[HTML_SELECT_DISABLED])  
@@ -4911,7 +5110,7 @@ PRIVATE void HTML_start_element ARGS5(
 
 	    CHECK_ID(HTML_SELECT_ID);
 
-	    HText_beginSelect(name, multiple, size);
+	    HText_beginSelect(name, ATTR_CS_IN, multiple, size);
 	    FREE(name);
 	    FREE(size);
 
@@ -4932,7 +5131,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    if (!me->inSELECT) {
 	        if (TRACE) {
 		    fprintf(stderr,
-			    "HTML: OPTION tag not within SELECT tag\n");
+			    "HTML: ***** OPTION tag not within SELECT element *****\n");
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -4960,7 +5159,9 @@ PRIVATE void HTML_start_element ARGS5(
 					 me->option.data,
 					 me->LastOptionValue,
 				         MIDDLE_ORDER,
-					 me->LastOptionChecked);
+					 me->LastOptionChecked,
+					 me->UCLYhndl,
+					 ATTR_CS_IN);
 	    }
 
 	    /*
@@ -4993,6 +5194,9 @@ PRIVATE void HTML_start_element ARGS5(
 		I.lang=NULL; I.max=NULL; I.maxlength=NULL; I.md=NULL;
 		I.min=NULL; I.name=NULL; I.size=NULL; I.src=NULL;
 		I.type=NULL; I.value=NULL; I.width=NULL;
+		I.accept_cs = NULL;
+		I.name_cs = -1;
+		I.value_cs = current_char_set;
 
 	        I.type = "OPTION";
     
@@ -5011,12 +5215,22 @@ PRIVATE void HTML_start_element ARGS5(
 		    BOOLEAN CurrentUseDefaultRawMode = LYUseDefaultRawMode;
 		    HTCJKlang CurrentHTCJK = HTCJK;
 
+		    StrAllocCopy(I_value, value[HTML_OPTION_VALUE]);
+		    me->HiddenValue = TRUE;
+#ifdef EXP_CHARTRANS
+		    TRANSLATE_AND_UNESCAPE_ENTITIES6(&I_value,
+						       ATTR_CS_IN,
+						       ATTR_CS_IN,
+							NO,
+						       me->UsePlainSpace, me->HiddenValue);
+		    I.value_cs = ATTR_CS_IN;
+#else  /* !EXP_CHARTRANS */
 		    if (CurrentCharSet) {
 		        current_char_set = 0;	/* Default ISO-Latin1 */
 			LYUseDefaultRawMode = TRUE;
 			HTMLSetCharacterHandling(current_char_set);
 		    }
-	            LYUnEscapeEntities((char *)value[HTML_OPTION_VALUE],
+	            LYUnEscapeEntities(I_value,
 		    		       me->UsePlainSpace, me->HiddenValue);
 		    if (CurrentCharSet) {
 		        current_char_set = CurrentCharSet;
@@ -5025,8 +5239,10 @@ PRIVATE void HTML_start_element ARGS5(
 			HTPassEightBitRaw = CurrentEightBitRaw;
 			HTCJK = CurrentHTCJK;
 		    }
+#endif  /* !EXP_CHARTRANS */
+		    me->HiddenValue = FALSE;
 
-		    I.value = (char *)value[HTML_OPTION_VALUE];
+		    I.value = I_value;
 		}
 
 	        if (me->select_disabled ||
@@ -5089,10 +5305,45 @@ PRIVATE void HTML_start_element ARGS5(
 
 
 	    if (present && present[HTML_OPTION_VALUE] &&
-	        value[HTML_OPTION_VALUE])
-	        StrAllocCopy(me->LastOptionValue, value[HTML_OPTION_VALUE]);
-	    else
+	        value[HTML_OPTION_VALUE]) {
+		if (!I_value) {
+	            /*
+		     *  Convert any HTML entities or decimal escaping. - FM
+		     */
+		    int CurrentCharSet = current_char_set;
+		    BOOL CurrentEightBitRaw = HTPassEightBitRaw;
+		    BOOLEAN CurrentUseDefaultRawMode = LYUseDefaultRawMode;
+		    HTCJKlang CurrentHTCJK = HTCJK;
+
+		    StrAllocCopy(I_value, value[HTML_OPTION_VALUE]);
+		    me->HiddenValue = TRUE;
+#ifdef EXP_CHARTRANS
+		    TRANSLATE_AND_UNESCAPE_ENTITIES6(&I_value,
+						       ATTR_CS_IN,
+						       ATTR_CS_IN,
+							NO,
+						       me->UsePlainSpace, me->HiddenValue);
+#else  /* !EXP_CHARTRANS */
+		    if (CurrentCharSet) {
+		        current_char_set = 0;	/* Default ISO-Latin1 */
+			LYUseDefaultRawMode = TRUE;
+			HTMLSetCharacterHandling(current_char_set);
+		    }
+	            LYUnEscapeEntities(I_value, me->UsePlainSpace, me->HiddenValue);
+		    if (CurrentCharSet) {
+		        current_char_set = CurrentCharSet;
+			LYUseDefaultRawMode = CurrentUseDefaultRawMode;
+			HTMLSetCharacterHandling(current_char_set);
+			HTPassEightBitRaw = CurrentEightBitRaw;
+			HTCJK = CurrentHTCJK;
+		    }
+#endif  /* !EXP_CHARTRANS */
+		    me->HiddenValue = FALSE;
+		}
+	        StrAllocCopy(me->LastOptionValue, I_value);
+	    } else {
 	        StrAllocCopy(me->LastOptionValue, me->option.data);
+	    }
 
 	    /*
 	     *  If this is a popup option, print its option
@@ -5112,6 +5363,7 @@ PRIVATE void HTML_start_element ARGS5(
 		    }
 		}
 	    }
+	    FREE(I_value);
 	}
 	break;
 
@@ -5466,7 +5718,7 @@ PRIVATE void HTML_end_element ARGS3(
      */
     if (me->inTEXTAREA && element_number != HTML_TEXTAREA)
         if (TRACE) {
-	    fprintf(stderr, "HTML: Missing TEXTAREA end tag\n");
+	    fprintf(stderr, "HTML: ***** Missing TEXTAREA end tag *****\n");
 	} else if (!me->inBadHTML) {
 	    _statusline(BAD_HTML_USE_TRACE);
 	    me->inBadHTML = TRUE;
@@ -5484,7 +5736,12 @@ PRIVATE void HTML_end_element ARGS3(
 	if (me->inA || me->inSELECT || me->inTEXTAREA)
 	    if (TRACE) {
 	        fprintf(stderr,
-			"HTML: Something not closed before HTML close-tag\n");
+			"HTML: ***** %s%s%s%s%s not closed before HTML end tag\n",
+			me->inSELECT ? "SELECT" : "",
+			(me->inSELECT && me->inTEXTAREA) ? ", " : "",
+			me->inTEXTAREA ? "TEXTAREA" : "",
+			((me->inSELECT || me->inTEXTAREA) && me->inA) ? ", " : "",
+			me->inA ? "A" : "");
 	    } else if (!me->inBadHTML) {
 	        _statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -5584,7 +5841,12 @@ PRIVATE void HTML_end_element ARGS3(
 	if (me->inA || me->inSELECT || me->inTEXTAREA)
 	    if (TRACE) {
 	        fprintf(stderr,
-			"HTML: Something not closed before BODY close-tag\n");
+			"HTML: ***** %s%s%s%s%s not closed before BODY end tag *****\n",
+			me->inSELECT ? "SELECT" : "",
+			(me->inSELECT && me->inTEXTAREA) ? ", " : "",
+			me->inTEXTAREA ? "TEXTAREA" : "",
+			((me->inSELECT || me->inTEXTAREA) && me->inA) ? ", " : "",
+			me->inA ? "A" : "");
 	    } else if (!me->inBadHTML) {
 	        _statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -5671,7 +5933,6 @@ PRIVATE void HTML_end_element ARGS3(
 	    me->inUnderline = TRUE;
 	}
 	break;
-
 
     case HTML_P:
 	UPDATE_STYLE;
@@ -6036,7 +6297,7 @@ PRIVATE void HTML_end_element ARGS3(
 		 */
 		if (TRACE) {
 		    fprintf(stderr,
-      "HTML: Unmatched OBJECT start and end tags.  Discarding content:\n%s\n",
+      "HTML: ***** Unmatched OBJECT start and end tags. ***** Discarding content:\n%s\n",
 			    me->object.data);
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
@@ -6114,7 +6375,7 @@ PRIVATE void HTML_end_element ARGS3(
 		} else {
 		    if (TRACE) {
 			fprintf(stderr,
-	"HTML: Unmatched OBJECT start and end tags.  Discarding content.\n");
+	"HTML: ***** Unmatched OBJECT start and end tags. ***** Discarding content.\n");
 			goto End_Object;
 		    } else if (!me->inBadHTML) {
 		        _statusline(BAD_HTML_USE_TRACE);
@@ -6318,7 +6579,7 @@ End_Object:
 	 */
 	if (!me->inFORM) {
 	    if (TRACE) {
-		fprintf(stderr, "HTML: Unmatched FORM end tag\n");
+		fprintf(stderr, "HTML: ***** Unmatched FORM end tag *****\n");
 	    } else if (!me->inBadHTML) {
 	        _statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -6340,7 +6601,7 @@ End_Object:
 	if (me->inSELECT) {
 	    if (TRACE) {
 		fprintf(stderr,
-		   "HTML: Open SELECT at FORM end. Faking SELECT end tag.\n");
+		   "HTML: ***** Open SELECT at FORM end. Faking SELECT end tag. *****\n");
 	    } else if (!me->inBadHTML) {
 		_statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -6401,7 +6662,7 @@ End_Object:
 	     */
 	    if (!me->inTEXTAREA) {
 	        if (TRACE) {
-		    fprintf(stderr, "HTML: Unmatched TEXTAREA end tag\n");
+		    fprintf(stderr, "HTML: ***** Unmatched TEXTAREA end tag *****\n");
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -6423,6 +6684,7 @@ End_Object:
 	    I.lang=NULL; I.max=NULL; I.maxlength=NULL; I.md=NULL;
 	    I.min=NULL; I.name=NULL; I.size=NULL; I.src=NULL;
 	    I.type=NULL; I.value=NULL; I.width=NULL;
+	    I.value_cs = current_char_set;
 
             UPDATE_STYLE;
             /*
@@ -6443,21 +6705,40 @@ End_Object:
 	    I.type = "textarea";
 	    I.size = me->textarea_cols;
 	    I.name = me->textarea_name;
+	    I.name_cs = me->textarea_name_cs;
+	    I.accept_cs = me->textarea_accept_cs;
+	    me->textarea_accept_cs = NULL;
 	    I.disabled = me->textarea_disabled;
 	    I.id = me->textarea_id;
 
 	    me->UsePlainSpace = TRUE;
+
+#ifndef EXP_CHARTRANS
 	    if (current_char_set)
 	        LYExpandString(&me->textarea.data);
+#else
+	    TRANSLATE_AND_UNESCAPE_ENTITIES5(&me->textarea.data,
+						    me->UCLYhndl,
+						    current_char_set,
+						    me->UsePlainSpace, me->HiddenValue);
+#define CHUNK_TRANSLATED 1
+#endif
 
 	    if ((cp = strtok(me->textarea.data, "\n")) != NULL) {
 		StrAllocCopy(temp, cp);
+#if ! CHUNK_TRANSLATED
 		LYUnEscapeEntities(temp,
 				   me->UsePlainSpace, me->HiddenValue);
+#endif
 	    } else {
 		FREE(temp);
 	    }
 	    for (i = 0; i < me->textarea_rows; i++) {
+		int j;
+		for (j = 0; temp && temp[j]; j++) {
+		    if (temp[j] == '\r')
+			temp[j] = (temp[j+1] ? ' ' : '\0');
+		}
 		I.value = temp;
                 chars = HText_beginInput(me->text, me->inUnderline, &I);
 	        for (; chars > 0; chars--)
@@ -6466,9 +6747,11 @@ End_Object:
 		if (cp) {
 		    if ((cp = strtok(NULL, "\n")) != NULL) {
 			StrAllocCopy(temp, cp);
+#if ! CHUNK_TRANSLATED
 			LYUnEscapeEntities(temp,
 					   me->UsePlainSpace,
 					   me->HiddenValue);
+#endif
 		    } else {
 			FREE(temp);
 		    }
@@ -6479,7 +6762,11 @@ End_Object:
 	     *  Check for more data lines than the rows attribute.
    	     */
 	    while (cp) {
-		StrAllocCopy(temp, cp);
+		int j;
+		for (j = 0; temp && temp[j]; j++) {
+		    if (temp[j] == '\r')
+			temp[j] = (temp[j+1] ? ' ' : '\0');
+		}
 		I.value = temp;
 		chars = HText_beginInput(me->text, me->inUnderline, &I);
 		for (chars = atoi(me->textarea_cols); chars > 0; chars--)
@@ -6487,9 +6774,11 @@ End_Object:
 		HText_appendCharacter(me->text, '\r');
 		if ((cp = strtok(NULL, "\n")) != NULL) {
 		    StrAllocCopy(temp, cp);
+#if ! CHUNK_TRANSLATED
 		    LYUnEscapeEntities(temp,
 				       me->UsePlainSpace,
 				       me->HiddenValue);
+#endif
 		} else {
 		    FREE(temp);
 		}
@@ -6500,6 +6789,7 @@ End_Object:
 
 	    HTChunkClear(&me->textarea);
 	    FREE(me->textarea_name);
+            me->textarea_name_cs = -1;
 	    FREE(me->textarea_cols);
 	    FREE(me->textarea_id);
 	    break;
@@ -6516,7 +6806,7 @@ End_Object:
 	     */
 	    if (!me->inSELECT) {
 	        if (TRACE) {
-		    fprintf(stderr, "HTML: Unmatched SELECT end tag\n");
+		    fprintf(stderr, "HTML: ***** Unmatched SELECT end tag *****\n");
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -6541,7 +6831,7 @@ End_Object:
 	    if (!me->inFORM) {
 	        if (TRACE) {
 		    fprintf(stderr,
-			    "HTML: SELECT end tag not within FORM tag\n");
+			    "HTML: ***** SELECT end tag not within FORM element *****\n");
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -6566,7 +6856,9 @@ End_Object:
 	    				   me->option.data,
 					   me->LastOptionValue,
 					   LAST_ORDER,
-					   me->LastOptionChecked);
+					   me->LastOptionChecked,
+					   me->UCLYhndl,
+					   ATTR_CS_IN);
 	    FREE(me->LastOptionValue);
 
 	    me->LastOptionChecked = FALSE;
@@ -6856,9 +7148,9 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	if (!dump_output_immediately &&
 	    HText_sourceAnchors(me->text) < 1 &&
 	    HText_HiddenLinkCount(me->text) > 0) {
-	    HTML_start_element(me, HTML_P, 0, 0, (char **)&include);
+	    HTML_start_element(me, HTML_P, 0, 0, -1, (char **)&include);
 	    HTML_put_character(me, '[');
-	    HTML_start_element(me, HTML_EM, 0, 0, (char **)&include);
+	    HTML_start_element(me, HTML_EM, 0, 0, -1, (char **)&include);
 	    HTML_put_string(me,
 		"Document has only hidden links. Use the 'l'ist command.");
 	    HTML_end_element(me, HTML_EM, (char **)&include);
@@ -6946,6 +7238,7 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
     FREE(me->base_href);
     FREE(me->map_address);
     FREE(me->textarea_name);
+    FREE(me->textarea_accept_cs);
     FREE(me->textarea_cols);
     FREE(me->textarea_id);
     FREE(me->LastOptionValue);
@@ -7130,6 +7423,8 @@ PUBLIC HTStructured* HTML_new ARGS3(
     me->textarea.allocated = 0;
     me->textarea.data = NULL;
     me->textarea_name = NULL;
+    me->textarea_name_cs = -1;
+    me->textarea_accept_cs = NULL;
     me->textarea_cols = NULL;
     me->textarea_rows = 4;
     me->textarea_disabled = NO;

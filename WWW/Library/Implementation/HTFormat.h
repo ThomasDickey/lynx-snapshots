@@ -125,6 +125,19 @@ typedef HTAtom* HTEncoding;
  */
 #define WWW_ENC_COMPRESS        HTAtom_for("compress")
 
+/*
+   Does a string designate a real encoding, or is it just
+   a "dummy" as for example 7bit, 8bit, and binary?
+  */
+#define IsUnityEncStr(senc) \
+        ((senc)==NULL || *(senc)=='\0' || !strcmp(senc,"identity") ||\
+        !strcmp(senc,"8bit") || !strcmp(senc,"binary") || !strcmp(senc,"7bit"))
+
+#define IsUnityEnc(enc) \
+        ((enc)==NULL || (enc)==HTAtom_for("identity") ||\
+        (enc)==WWW_ENC_8BIT || (enc)==WWW_ENC_BINARY || (enc)==WWW_ENC_7BIT)
+
+
 #include "HTAnchor.h"
 
 /*

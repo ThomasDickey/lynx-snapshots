@@ -90,19 +90,31 @@ extern void HTDirEntry PARAMS((
 **  representation	is MIME-style content-type
 **
 **  encoding		is MIME-style content-transfer-encoding
-**			(8bit, 7bit, etc)
+**			(8bit, 7bit, etc) or HTTP-style content-encoding
+**			(gzip, compress etc.)
 **
 **  quality		an a priori judgement of the quality of such files
 **			(0.0..1.0)
 **
-**  Example:   HTSetSuffix(".ps", "application/postscript", "8bit", 1.0);
+**  HTSetSuffix5 has one more parameter for a short description of the type
+**  which is otherwise derived from the representation:
+**
+**  desc		is a short textual description, or NULL
+**
+**  Examples:   HTSetSuffix(".ps", "application/postscript", "8bit", 1.0);
+**  Examples:   HTSetSuffix(".psz", "application/postscript", "gzip", 1.0);
+**  A MIME type could also indicate a non-trivial encoding on its own
+**  ("application/x-compressed-tar"), but in that case don't use enconding
+**  to also indicate it but use "binary" etc.
 */
-extern void HTSetSuffix PARAMS((
+extern void HTSetSuffix5 PARAMS((
         CONST char *    suffix,
         CONST char *    representation,
         CONST char *    encoding,
+        CONST char *    desc,
         float           quality));
-        
+
+#define HTSetSuffix(suff,rep,enc,q) HTSetSuffix5(suff, rep, enc, NULL, q)
 
 /*
 **  HTFileFormat: Get Representation and Encoding from file name.
@@ -115,7 +127,8 @@ extern void HTSetSuffix PARAMS((
 */
 extern HTFormat HTFileFormat PARAMS((
 	CONST char *		filename,
-	HTAtom **		pEncoding));
+	HTAtom **		pEncoding,
+	CONST char **		pDesc));
 
 /*
 **  HTCharsetFormat: Revise the file format in relation to the Lynx charset.
@@ -155,6 +168,7 @@ extern BOOL HTEditable PARAMS((CONST char * filename));
 **  ON ENTRY,
 **
 **  rep			is the atomized MIME style representation
+**  enc			is an encoding (8bit, binary, gzip, compress,..)
 **
 **  ON EXIT,
 **
@@ -162,7 +176,8 @@ extern BOOL HTEditable PARAMS((CONST char * filename));
 **			been found, else NULL.
 */
 extern CONST char * HTFileSuffix PARAMS((
-                HTAtom* rep));
+                HTAtom* rep,
+                CONST char* enc));
 
 /*
 **  The Protocols

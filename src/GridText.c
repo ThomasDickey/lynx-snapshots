@@ -32,9 +32,11 @@
 #include "LYMail.h"
 #include "LYList.h"
 #include "LYCharSets.h"
+#include "LYCharUtils.h"	/* LYUCTranslateBack... */
 #ifdef EXP_CHARTRANS
 #include "UCDefs.h"
 #include "UCAux.h"
+#include "UCMap.h"
 #ifdef EXP_CHARTRANS_AUTOSWITCH
 #include "UCAuto.h"
 #endif /* EXP_CHARTRANS_AUTOSWITCH */
@@ -95,6 +97,7 @@ PUBLIC char * HTAppVersion = LYNX_VERSION;	/* Application version */
 PUBLIC int HTFormNumber = 0;
 PUBLIC int HTFormFields = 0;
 PUBLIC char * HTCurSelectGroup = NULL;		/* Form select group name */
+PRIVATE int HTCurSelectGroupCharset = -1;	/* ... and name's charset */
 PUBLIC int HTCurSelectGroupType = F_RADIO_TYPE;	/* Group type */
 PUBLIC char * HTCurSelectGroupSize = NULL;	/* Length of select */
 PRIVATE char * HTCurSelectedOptionValue = NULL;	/* Select choice */
@@ -2282,7 +2285,13 @@ check_IgnoreExcess:
 		 */
 		new_line(text);  
 	}
+    } else if ((int)line->size >= (int)(MAX_LINE-1)) {
+	/*
+	 *  Never overrun memory if LYcols is set to a large value - kw
+	 */
+	new_line(text);
     }
+
 
     /*
      *  Insert normal characters.
@@ -5512,13 +5521,15 @@ PRIVATE int HTFormMethod;
 PRIVATE char * HTFormAction = NULL;
 PRIVATE char * HTFormEnctype = NULL;
 PRIVATE char * HTFormTitle = NULL;
+PRIVATE char * HTFormAcceptCharset = NULL; /* !!! NEED TO DO SOMETHING WITH IT */
 PRIVATE BOOLEAN HTFormDisabled = FALSE;
 
-PUBLIC void HText_beginForm ARGS4(
+PUBLIC void HText_beginForm ARGS5(
 	char *,		action,
 	char *,		method,
 	char *,		enctype,
-	char *,		title)
+	char *,		title,
+	CONST char *,	accept_cs)
 {
     HTFormMethod = URL_GET_METHOD;
     HTFormNumber++;
@@ -5545,6 +5556,12 @@ PUBLIC void HText_beginForm ARGS4(
 	    HTFormMethod = URL_POST_METHOD;
 
     /*
+     *  Check the ACCEPT_CHARSET. - kw
+     */
+    if (accept_cs != NULL)
+	StrAllocCopy(HTFormAcceptCharset, accept_cs);
+
+    /*
      *  Check the ENCTYPE. - FM
      */
     if ((enctype != NULL) && *enctype) {
@@ -5566,12 +5583,14 @@ PUBLIC void HText_beginForm ARGS4(
 
     if (TRACE)
 	fprintf(stderr,
-		"BeginForm: action:%s Method:%d%s%s%s%s\n",
+		"BeginForm: action:%s Method:%d%s%s%s%s%s%s\n",
 		HTFormAction, HTFormMethod,
 		(HTFormTitle ? " Title:" : ""),
 		(HTFormTitle ? HTFormTitle : ""),
 		(HTFormEnctype ? " Enctype:" : ""),
-		(HTFormEnctype ? HTFormEnctype : ""));
+		(HTFormEnctype ? HTFormEnctype : ""),
+		(HTFormAcceptCharset ? " Accept-charset:" : ""),
+		(HTFormAcceptCharset ? HTFormAcceptCharset : ""));
 }
 
 PUBLIC void HText_endForm ARGS1(
@@ -5617,12 +5636,14 @@ PUBLIC void HText_endForm ARGS1(
     FREE(HTFormAction);
     FREE(HTFormEnctype);
     FREE(HTFormTitle);
+    FREE(HTFormAcceptCharset);
     HTFormFields = 0;
     HTFormDisabled = FALSE;
 }
 
-PUBLIC void HText_beginSelect ARGS3(
+PUBLIC void HText_beginSelect ARGS4(
 	char *,		name,
+	int,		name_cs,
 	BOOLEAN,	multiple,
 	char *,		size)
 {
@@ -5630,6 +5651,7 @@ PUBLIC void HText_beginSelect ARGS3(
     *  Save the group name.
     */
    StrAllocCopy(HTCurSelectGroup, name);
+   HTCurSelectGroupCharset = name_cs;
 
    /*
     *  If multiple then all options are actually checkboxes.
@@ -5647,13 +5669,20 @@ PUBLIC void HText_beginSelect ARGS3(
      */
     StrAllocCopy(HTCurSelectGroupSize, size);
 
-   if (TRACE)
+    if (TRACE) {
        fprintf(stderr,"HText_beginSelect: name=%s type=%d size=%s\n",
 	       ((HTCurSelectGroup == NULL) ? 
 	       			  "<NULL>" : HTCurSelectGroup),
 		HTCurSelectGroupType,
 	       ((HTCurSelectGroupSize == NULL) ? 
 	       			      "<NULL>" : HTCurSelectGroupSize));
+#ifdef EXP_CHARTRANS
+	fprintf(stderr,"HText_beginSelect: name_cs=%d \"%s\"\n",
+		HTCurSelectGroupCharset,
+		(HTCurSelectGroupCharset >= 0 ?
+		 LYCharSet_UC[HTCurSelectGroupCharset].MIMEname : "<UNKNOWN>"));
+#endif
+    }
 } 
 
 /*
@@ -5740,20 +5769,28 @@ PRIVATE char * HText_skipOptionNumPrefix ARGS1(
 **  tag so we have to do it now.  Assume that the last anchor
 **  was the previous options tag.
 */
-PUBLIC char * HText_setLastOptionValue ARGS5(
+PUBLIC char * HText_setLastOptionValue ARGS7(
 	HText *,	text,
 	char *,		value,
 	char*,		submit_value,
 	int,		order,
-	BOOLEAN,	checked)
+	BOOLEAN,	checked,
+	int,		val_cs,
+	int,		submit_val_cs)
 {
     char *cp, *cp1;
+    char *ret_Value = NULL;
     unsigned char *tmp = NULL;
     int number = 0, i, j;
 
     if (!(text && text->last_anchor &&
-    	  text->last_anchor->link_type == INPUT_ANCHOR))
+    	  text->last_anchor->link_type == INPUT_ANCHOR)) {
+	if (TRACE)
+	    fprintf(stderr,
+		    "HText_setLastOptionValue: invalid call!  value:%s!\n",
+		    (value ? value : "<NULL>"));
 	return NULL;
+    }
 
     if (TRACE)
 	fprintf(stderr,
@@ -5801,6 +5838,7 @@ PUBLIC char * HText_setLastOptionValue ARGS5(
 
     if (HTCurSelectGroupType == F_CHECKBOX_TYPE) {
         StrAllocCopy(text->last_anchor->input_field->value, cp);
+	text->last_anchor->input_field->value_cs = val_cs;
         /*
 	 *  Put the text on the screen as well.
 	 */
@@ -5809,6 +5847,8 @@ PUBLIC char * HText_setLastOptionValue ARGS5(
     } else if (LYSelectPopups == FALSE) {
         StrAllocCopy(text->last_anchor->input_field->value,
 		     (submit_value ? submit_value : cp));
+	text->last_anchor->input_field->value_cs = (submit_value ?
+						    submit_val_cs : val_cs);
         /*
 	 *  Put the text on the screen as well.
 	 */
@@ -5868,8 +5908,10 @@ PUBLIC char * HText_setLastOptionValue ARGS5(
 	        (tmp = (unsigned char *)calloc(1, strlen(cp)+1))) {
 		if (kanji_code == EUC) {
 		    TO_EUC((unsigned char *)cp, tmp);
+		    val_cs = current_char_set;
 		} else if (kanji_code == SJIS) {
 		    TO_SJIS((unsigned char *)cp, tmp);
+		    val_cs = current_char_set;
 		} else {
 		    for (i = 0, j = 0; cp[i]; i++) {
 		        if (cp[i] != '\033') {
@@ -5886,6 +5928,7 @@ PUBLIC char * HText_setLastOptionValue ARGS5(
 	StrAllocCopy(new_ptr->cp_submit_value,
 		     (submit_value ? submit_value :
 		      HText_skipOptionNumPrefix(new_ptr->name)));
+	new_ptr->value_cs = (submit_value ? submit_val_cs : val_cs);
 
 	if (first_option) {
 	    StrAllocCopy(HTCurSelectedOptionValue, new_ptr->name);
@@ -5898,6 +5941,8 @@ PUBLIC char * HText_setLastOptionValue ARGS5(
 		text->last_anchor->input_field->select_list->cp_submit_value;
 	    text->last_anchor->input_field->orig_submit_value = 
 		text->last_anchor->input_field->select_list->cp_submit_value;
+	    text->last_anchor->input_field->value_cs = 
+		new_ptr->value_cs;
 	} else {
 	    int newlen = strlen(new_ptr->name);
 	    int curlen = strlen(HTCurSelectedOptionValue);
@@ -5923,6 +5968,8 @@ PUBLIC char * HText_setLastOptionValue ARGS5(
 	    			   new_ptr->cp_submit_value;
 	    text->last_anchor->input_field->orig_submit_value =
 	    			   new_ptr->cp_submit_value;
+	    text->last_anchor->input_field->value_cs = 
+		new_ptr->value_cs;
 	    StrAllocCopy(HTCurSelectedOptionValue, new_ptr->name);
 	    if (newlen > curlen)
 		StrAllocCat(HTCurSelectedOptionValue,
@@ -5938,15 +5985,34 @@ PUBLIC char * HText_setLastOptionValue ARGS5(
 	     */
 	    text->last_anchor->input_field->size =
 	    			strlen(HTCurSelectedOptionValue); 
-	    return(HTCurSelectedOptionValue);
-	} else 
-	   return(NULL);
+	    ret_Value = HTCurSelectedOptionValue;
+	}
     }
 
-    if (TRACE)
-	fprintf(stderr,"HText_setLastOptionValue: value=%s\n", value);
-
-    return(NULL);
+    if (TRACE) {
+	fprintf(stderr,"HText_setLastOptionValue:%s value=%s",
+		(order == LAST_ORDER) ? " LAST_ORDER" : "",
+		value);
+#ifdef EXP_CHARTRANS
+	fprintf(stderr,"            val_cs=%d \"%s\"",
+			val_cs,
+			(val_cs >= 0 ?
+			 LYCharSet_UC[val_cs].MIMEname : "<UNKNOWN>"));
+	if (submit_value) {
+	    fprintf(stderr, " (submit_val_cs %d \"%s\") submit_value%s=%s\n",
+		    submit_val_cs,
+		    (submit_val_cs >= 0 ?
+		     LYCharSet_UC[submit_val_cs].MIMEname : "<UNKNOWN>"),
+		    (HTCurSelectGroupType == F_CHECKBOX_TYPE) ?
+		                                  "(ignored)" : "",
+		    submit_value);
+	}
+	else {
+	    fprintf(stderr,"\n");
+	}
+#endif
+    }
+    return(ret_Value);
 }
 
 /*
@@ -5989,6 +6055,7 @@ PUBLIC int HText_beginInput ARGS3(
  	HTCurSelectGroupType == F_RADIO_TYPE && LYSelectPopups == FALSE) {
 	I->type = "RADIO";
 	I->name = HTCurSelectGroup;
+	I->name_cs = HTCurSelectGroupCharset;
     }
     if (I->name && I->type && !strcasecomp(I->type, "radio")) {
         if (!text->last_anchor) {
@@ -6057,8 +6124,10 @@ PUBLIC int HText_beginInput ARGS3(
 	if ((tmp = (unsigned char *)calloc(1, (strlen(IValue) + 1)))) {
 	    if (kanji_code == EUC) {
 		TO_EUC((unsigned char *)IValue, tmp);
+		I->value_cs = current_char_set;
 	    } else if (kanji_code == SJIS) {
 		TO_SJIS((unsigned char *)IValue, tmp);
+		I->value_cs = current_char_set;
 	    } else {
 		for (i = 0, j = 0; IValue[i]; i++) {
 		    if (IValue[i] != '\033') {
@@ -6083,6 +6152,7 @@ PUBLIC int HText_beginInput ARGS3(
 	else
 	    I->type = "CHECKBOX";
 	I->name = HTCurSelectGroup;
+	I->name_cs = HTCurSelectGroupCharset;
 
 	/*
 	 *  The option's size parameter actually gives the length and not
@@ -6174,6 +6244,7 @@ PUBLIC int HText_beginInput ARGS3(
      */
     if (I->name != NULL) {
         StrAllocCopy(f->name,I->name);
+	f->name_cs = I->name_cs;
     } else {
 	if (f->type == F_RESET_TYPE ||
 	    f->type == F_SUBMIT_TYPE ||
@@ -6216,6 +6287,7 @@ PUBLIC int HText_beginInput ARGS3(
 	} else {
 	    StrAllocCopy(f->value, IValue);
 	}
+	f->value_cs = I->value_cs;
     } else if (f->type != F_OPTION_LIST_TYPE) {
 	StrAllocCopy(f->value, "");
     }
@@ -6371,12 +6443,29 @@ PUBLIC int HText_beginInput ARGS3(
      */
     text->last_anchor = a;
 
-    if (TRACE)
+    if (TRACE) {
 	fprintf(stderr,"Input link: name=%s\nvalue=%s\nsize=%d\n",
 		 	f->name,
 			((f->value != NULL) ? f->value : ""),
 			f->size);
-
+#ifdef EXP_CHARTRANS
+	fprintf(stderr,"Input link: name_cs=%d \"%s\" (from %d \"%s\")\n",
+			f->name_cs,
+			(f->name_cs >= 0 ?
+			 LYCharSet_UC[f->name_cs].MIMEname : "<UNKNOWN>"),
+			I->name_cs,
+			(I->name_cs >= 0 ?
+			 LYCharSet_UC[I->name_cs].MIMEname : "<UNKNOWN>"));
+	fprintf(stderr,"            value_cs=%d \"%s\" (from %d \"%s\")\n",
+			f->value_cs,
+			(f->value_cs >= 0 ?
+			 LYCharSet_UC[f->value_cs].MIMEname : "<UNKNOWN>"),
+			I->value_cs,
+			(I->value_cs >= 0 ?
+			 LYCharSet_UC[I->value_cs].MIMEname : "<UNKNOWN>"));
+#endif
+    }
+	
     /*
      *  Return the SIZE of the input field.
      */
@@ -6393,16 +6482,30 @@ PUBLIC void HText_SubmitForm ARGS4(
     TextAnchor *anchor_ptr;
     int form_number = submit_item->number;
     FormInfo *form_ptr;
-    int len, i;
+    int len;
     char *query = NULL;
     char *escaped1 = NULL, *escaped2 = NULL;
     int first_one = 1;
     char *last_textarea_name = NULL;
+    int textarea_lineno = 0;
     char *previous_blanks = NULL;
     BOOLEAN PlainText = FALSE;
     BOOLEAN SemiColon = FALSE;
     char *Boundary = NULL;
     char *MultipartContentType = NULL;
+    int target_cs = -1;
+    CONST char *target_csname = NULL;
+    char *name_used;
+#ifdef EXP_CHARTRANS
+    BOOL form_has_8bit = NO, form_has_special = NO;
+    BOOL field_has_8bit = NO, field_has_special = NO;
+    BOOL name_has_8bit = NO, name_has_special = NO;
+    BOOL success;
+    BOOL had_chartrans_warning = NO;
+    char *val_used;
+    char *copied_val_used = NULL;
+    char *copied_name_used = NULL;
+#endif
 
     if (!HTMainText)
         return;
@@ -6455,15 +6558,44 @@ PUBLIC void HText_SubmitForm ARGS4(
 	Boundary = "xnyLAaB03X";
     }
 
+#ifdef EXP_CHARTRANS
+    if (HTMainText->node_anchor->charset &&
+	*HTMainText->node_anchor->charset) {
+	target_cs = UCGetLYhndl_byMIME(HTMainText->node_anchor->charset);
+	if (target_cs >= 0) {
+	    target_csname = HTMainText->node_anchor->charset;
+	} else {
+	    target_cs = UCLYhndl_for_unspec;
+	    if (target_cs >= 0)
+		target_csname = LYCharSet_UC[target_cs].MIMEname;
+	}
+    }
+    if (target_cs < 0) {
+	target_cs = UCLYhndl_for_unspec;
+    }
+#else  /* EXP_CHARTRANS */
+    target_cs = LYRawMode ? current_char_set : 0;
+    target_csname = HTMainText->node_anchor->charset;
+#endif  /* EXP_CHARTRANS */
+
     /*
      *  Go through list of anchors and get size first.
+     */
+    /*
+     *  also get a "max." charset parameter - kw
      */
     anchor_ptr = HTMainText->first_anchor;
     while (anchor_ptr) {
         if (anchor_ptr->link_type == INPUT_ANCHOR) {
    	    if (anchor_ptr->input_field->number == form_number) {
 
+		char *p;
+		char * val;
 	        form_ptr = anchor_ptr->input_field;
+		val = form_ptr->cp_submit_value != NULL ?
+			            form_ptr->cp_submit_value : form_ptr->value;
+		field_has_8bit = NO;
+		field_has_special = NO;
 	
 	        len += (strlen(form_ptr->name) + (Boundary ? 100 : 10));
 		/*
@@ -6474,7 +6606,42 @@ PUBLIC void HText_SubmitForm ARGS4(
 		} else {
 	            len += (strlen(form_ptr->value) + 10);
 		}
-	        len += 32; /* plus and ampersand + safty net */
+	        len += 32; /* plus and ampersand + safety net */
+
+#ifdef EXP_CHARTRANS
+		for (p = val; p && *p && !field_has_8bit; p++)
+		    if ((*p == HT_NON_BREAK_SPACE) ||
+			(*p == HT_EM_SPACE) ||
+			(*p == LY_SOFT_HYPHEN)) {
+			field_has_special = YES;
+		    } else if ((*p & 0x80) != 0) {
+			field_has_8bit = YES;
+		    }
+		for (p = form_ptr->name; p && *p && !field_has_8bit; p++)
+		    field_has_8bit = ((*p & 0x80) != 0);
+		if (field_has_8bit)
+		    form_has_8bit = YES;
+		if (field_has_special)
+		    form_has_special = YES;
+		if (!field_has_8bit && !field_has_special) {
+		    /* already ok */
+		} else if (target_cs < 0) {
+		    /* already confused */
+		} else if (!field_has_8bit &&
+		    (LYCharSet_UC[target_cs].enc == UCT_ENC_8859 ||
+		     (LYCharSet_UC[target_cs].like8859 & UCT_R_8859SPECL))) {
+		    /* those specials will be trivial */
+		} else if (UCNeedNotTranslate(form_ptr->value_cs, target_cs)) {
+		    /* already ok */
+		} else if (UCCanTranslateFromTo(form_ptr->value_cs, target_cs)) {
+		    /* also ok */
+		} else if (UCCanTranslateFromTo(target_cs, form_ptr->value_cs)) {
+		    target_cs = form_ptr->value_cs; 	/* try this */
+		    target_csname = NULL; /* will be set after loop */
+		} else {
+		    target_cs = -1; /* don't know what to do */
+		}
+#endif /* EXP_CHARTRANS */
 
 	    } else if (anchor_ptr->input_field->number > form_number) {
 	        break;
@@ -6487,6 +6654,17 @@ PUBLIC void HText_SubmitForm ARGS4(
 	anchor_ptr = anchor_ptr->next;
     }
 
+#ifdef EXP_CHARTRANS
+    if (target_csname == NULL && target_cs >= 0) {
+	if (form_has_8bit) {
+	    target_csname = LYCharSet_UC[target_cs].MIMEname;
+	} else if (form_has_special) {
+	    target_csname = LYCharSet_UC[target_cs].MIMEname;
+	} else {
+	    target_csname = "us-ascii";
+	}
+    }
+#endif
     /*
      *  Get query ready.
      */
@@ -6529,6 +6707,8 @@ PUBLIC void HText_SubmitForm ARGS4(
 			 "application/x-www-form-urlencoded");
 	}
 
+
+#ifndef EXP_CHARTRANS
 	/*
 	 *  Append the exended charset info if known, and it is not
 	 *  ISO-8859-1 or US-ASCII.  We'll assume the user has the
@@ -6563,9 +6743,90 @@ PUBLIC void HText_SubmitForm ARGS4(
 		sprintf(MultipartContentType,
 			"\r\nContent-Type: text/plain; charset=%s",
 			HTMainText->node_anchor->charset);
+		ct_charset_startpos = strchr(MultipartContentType, ';');
 	    }
 	}
+#else  /* EXP_CHARTRANS */
+	if (target_cs >= 0 && (form_has_8bit || form_has_special)) {
+	    if (Boundary == NULL) {
+		if (target_csname &&
+		    (strcasecomp(target_csname, "iso-8859-1") ||
+		     (HTMainText->node_anchor->charset != NULL &&
+		      strcasecomp(HTMainText->node_anchor->charset,
+				  "iso-8859-1")))) {
+		    StrAllocCat(doc->post_content_type, "; charset=");
+		    StrAllocCat(doc->post_content_type, target_csname);
+		}
+	    }
+	}
+#endif  /* EXP_CHARTRANS */
     }
+
+
+#if 0				/* 000000 */
+    {
+	if (HTMainText->node_anchor->charset != NULL &&
+	    *HTMainText->node_anchor->charset != '\0') {
+#ifdef EXP_CHARTRANS
+	    /*
+	     *  For now, don't send charset if we may have translated.
+	     *  Although this is when it would be most needed (unless
+	     *  we translate back to the server's charset, which is
+	     *  currently not done).  But currently there aren't many
+	     *  servers or scripts which understand it anyway, so at
+	     *  least we try not to lie. - kw
+	     */
+#if 0
+	    if (!UCNeedNotTranslate(current_char_set,
+				    UCGetLYhndl_byMIME(
+					HTMainText->node_anchor->charset)));
+#endif
+	    if (target_cs < 0) {
+		/*  Do nothing */
+	    } else
+#endif
+	    if (Boundary == NULL &&
+#ifdef EXP_CHARTRANS
+		form_has_8bit &&
+		target_cs >= 0 &&
+#endif
+	        (strcasecomp(HTMainText->node_anchor->charset, "iso-8859-1") ||
+		 strcasecomp(target_csname, "iso-8859-1"))) {
+		StrAllocCat(doc->post_content_type, "; charset=");
+		StrAllocCat(doc->post_content_type,
+			    HTMainText->node_anchor->charset);
+	    } else
+	    if (Boundary == NULL &&
+#ifdef EXP_CHARTRANS
+		target_cs >= 0 &&
+#endif
+	        strcasecomp(HTMainText->node_anchor->charset, "iso-8859-1") &&
+		strcasecomp(HTMainText->node_anchor->charset, "us-ascii")) {
+		StrAllocCat(doc->post_content_type, "; charset=");
+		StrAllocCat(doc->post_content_type,
+			    HTMainText->node_anchor->charset);
+	    } else if (Boundary != NULL) {
+	        MultipartContentType = (char *)calloc(1,
+			     (40 + strlen(HTMainText->node_anchor->charset)));
+		if (query == NULL)
+		    outofmem(__FILE__, "HText_SubmitForm");
+		sprintf(MultipartContentType,
+			"\r\nContent-Type: text/plain; charset=%s",
+			HTMainText->node_anchor->charset);
+		ct_charset_startpos = strchr(MultipartContentType, ';');
+	    }
+	}
+#ifdef EXP_CHARTRANS
+    } else if (Boundary == NULL &&
+	       form_has_8bit &&
+	       target_cs >= 0 &&
+	       strcasecomp(target_csname, "iso-8859-1")) {
+	StrAllocCat(doc->post_content_type, "; charset=");
+	StrAllocCat(doc->post_content_type,
+		    HTMainText->node_anchor->charset);
+#endif /* EXP_CHARTRANS */
+    }
+#endif /* 000000 */
 
     /*
      *  Reset anchor->ptr.
@@ -6577,17 +6838,263 @@ PUBLIC void HText_SubmitForm ARGS4(
     while (anchor_ptr) {
         if (anchor_ptr->link_type == INPUT_ANCHOR) {
 	    if (anchor_ptr->input_field->number == form_number) {
-
+		char *p;
+		int out_cs;
+		CONST char * out_csname;
                 form_ptr = anchor_ptr->input_field;
 
-                switch(form_ptr->type) {
+		if (form_ptr->type != F_TEXTAREA_TYPE)
+		    textarea_lineno = 0;
 
+                switch(form_ptr->type) {
 	        case F_RESET_TYPE:
 		    break;
-
 	        case F_SUBMIT_TYPE:
 	        case F_TEXT_SUBMIT_TYPE:
 	        case F_IMAGE_SUBMIT_TYPE:
+		    if (!(form_ptr->name && *form_ptr->name != '\0' &&
+			  !strcmp(form_ptr->name, link_name))) {
+			if (TRACE) {
+			    fprintf(stderr,
+				    "SubmitForm: skipping submit field with ");
+			    fprintf(stderr,
+				    "name \"%s\" for link_name \"%s\", %s.",
+				    form_ptr->name ? form_ptr->name : "???",
+				    link_name ? link_name : "???",
+				    (form_ptr->name && *form_ptr->name) ?
+				    "not current link" : "no field name");
+			}
+			break;
+		    }
+		    if (!(form_ptr->type == F_TEXT_SUBMIT_TYPE ||
+			(form_ptr->value && *form_ptr->value != '\0' &&
+			 !strcmp(form_ptr->value, link_value)))) {
+			if (TRACE) {
+			    fprintf(stderr,
+				    "SubmitForm: skipping submit field with ");
+			    fprintf(stderr,
+				    "name \"%s\" for link_name \"%s\", %s!",
+				    form_ptr->name ? form_ptr->name : "???",
+				    link_name ? link_name : "???",
+				    "values are different");
+			}
+			break;
+		    }
+		    /*  fall through  */
+	        case F_RADIO_TYPE:
+                case F_CHECKBOX_TYPE:
+		case F_TEXTAREA_TYPE:
+                case F_PASSWORD_TYPE:
+	        case F_TEXT_TYPE:
+		case F_OPTION_LIST_TYPE:
+		case F_HIDDEN_TYPE:
+#ifdef EXP_CHARTRANS
+		    /*
+		     *  Charset-translate value now, because we need
+		     *  to know the charset parameter for multipart
+		     *  bodyparts. - kw
+		     */
+		    if (form_ptr->cp_submit_value != NULL) {
+			val_used = form_ptr->cp_submit_value;
+		    } else {
+			val_used = form_ptr->value;
+		    }
+
+		    field_has_8bit = NO;
+		    field_has_special = NO;
+		    for (p = val_used; p && *p && !field_has_8bit; p++) {
+			if ((*p == HT_NON_BREAK_SPACE) ||
+			    (*p == HT_EM_SPACE) ||
+			    (*p == LY_SOFT_HYPHEN)) {
+			    field_has_special = YES;
+			} else if ((*p & 0x80) != 0) {
+			    field_has_8bit = YES;
+			}
+		    }
+
+		    if (field_has_8bit || field_has_special) {
+			/*  We should translate back. */
+			StrAllocCopy(copied_val_used, val_used);
+			success = LYUCTranslateBackFormData(&copied_val_used,
+							form_ptr->value_cs,
+							target_cs, PlainText);
+			if (TRACE) {
+			    fprintf(stderr,
+				    "SubmitForm: field \"%s\" %d %s -> %d %s %s\n",
+				    form_ptr->name ? form_ptr->name : "",
+				    form_ptr->value_cs,
+				    form_ptr->value_cs >= 0 ?
+				    LYCharSet_UC[form_ptr->value_cs].MIMEname :
+				    				          "???",
+				    target_cs,
+				    target_csname ? target_csname : "???",
+				    success ? "OK" : "FAILED");
+			}
+			if (success) {
+			    val_used = copied_val_used;
+			}
+			if (Boundary) {
+			    if (!success) {
+				StrAllocCopy(MultipartContentType, "");
+				target_csname = NULL;
+			    } else {
+				if (!target_csname)
+				    target_csname = LYCharSet_UC[target_cs].MIMEname;
+				StrAllocCopy(MultipartContentType,
+					     "\r\nContent-Type: text/plain; charset=");
+				StrAllocCat(MultipartContentType, target_csname);
+			    }
+			}
+		    } else {  /* We can use the value directly. */
+			if (TRACE) {
+			    fprintf(stderr,
+				    "SubmitForm: field \"%s\" %d %s OK\n",
+				    form_ptr->name ? form_ptr->name : "",
+				    target_cs,
+				    target_csname ? target_csname : "???");
+			}
+			copied_val_used = NULL;
+			success = YES;
+		    }
+		    if (!success) {
+			if (!had_chartrans_warning) {
+			    had_chartrans_warning = YES;
+			    _user_message(
+				"Cannot convert form data to charset %s!",
+				target_csname ? target_csname : "UNKNOWN");
+			    sleep(AlertSecs);
+			}
+			out_cs = form_ptr->value_cs;
+			out_csname = LYCharSet_UC[out_cs].MIMEname;
+		    } else {
+			out_cs = target_cs;
+		    }
+		    if (Boundary) {
+			if (!success && form_ptr->value_cs < 0) {
+			    /*  This is weird. */
+			    StrAllocCopy(MultipartContentType,
+					 "\r\nContent-Type: text/plain; charset=");
+			    StrAllocCat(MultipartContentType, "UNKNOWN-8BIT");
+			} else if (!success) {
+			    target_csname = LYCharSet_UC[form_ptr->value_cs].MIMEname;
+			    StrAllocCopy(MultipartContentType,
+					 "\r\nContent-Type: text/plain; charset=");
+			    StrAllocCat(MultipartContentType, target_csname);
+			    target_csname = NULL;
+			} else {
+			    if (!target_csname) {
+				target_csname = LYCharSet_UC[target_cs].MIMEname;
+			    }
+			    StrAllocCopy(MultipartContentType,
+					 "\r\nContent-Type: text/plain; charset=");
+			    StrAllocCat(MultipartContentType, target_csname);
+			}
+		    }
+
+		    /*
+		     *  Charset-translate name now, because we need
+		     *  to know the charset parameter for multipart
+		     *  bodyparts. - kw
+		     */
+		    if (form_ptr->type == F_TEXTAREA_TYPE) {
+			textarea_lineno++;
+			if (textarea_lineno > 1 &&
+			    last_textarea_name && form_ptr->name &&
+			    !strcmp(last_textarea_name, form_ptr->name)) {
+			    break;
+			}
+		    }
+		    name_used = (form_ptr->name ?
+				 form_ptr->name : "");
+
+		    name_has_8bit = NO;
+		    name_has_special = NO;
+		    for (p = name_used; p && *p && !name_has_8bit; p++) {
+			if ((*p == HT_NON_BREAK_SPACE) ||
+			    (*p == HT_EM_SPACE) ||
+			    (*p == LY_SOFT_HYPHEN)) {
+			    name_has_special = YES;
+			} else if ((*p & 0x80) != 0) {
+			    name_has_8bit = YES;
+			}
+		    }
+
+		    if (name_has_8bit || name_has_special) {
+			/*  We should translate back. */
+			StrAllocCopy(copied_name_used, name_used);
+			success = LYUCTranslateBackFormData(&copied_name_used,
+							form_ptr->name_cs,
+							target_cs, PlainText);
+			if (TRACE) {
+			    fprintf(stderr,
+				    "SubmitForm: name \"%s\" %d %s -> %d %s %s\n",
+				    form_ptr->name ? form_ptr->name : "",
+				    form_ptr->name_cs,
+				    form_ptr->name_cs >= 0 ?
+				    LYCharSet_UC[form_ptr->name_cs].MIMEname :
+				    				          "???",
+				    target_cs,
+				    target_csname ? target_csname : "???",
+				    success ? "OK" : "FAILED");
+			}
+			if (success) {
+			    name_used = copied_name_used;
+			}
+			if (Boundary) {
+			    if (!success) {
+				StrAllocCopy(MultipartContentType, "");
+				target_csname = NULL;
+			    } else {
+				if (!target_csname)
+				    target_csname = LYCharSet_UC[target_cs].MIMEname;
+				StrAllocCopy(MultipartContentType,
+					     "\r\nContent-Type: text/plain; charset=");
+				StrAllocCat(MultipartContentType, target_csname);
+			    }
+			}
+		    } else {  /* We can use the name directly. */
+			if (TRACE) {
+			    fprintf(stderr,
+				    "SubmitForm: name \"%s\" %d %s OK\n",
+				    form_ptr->name ? form_ptr->name : "",
+				    target_cs,
+				    target_csname ? target_csname : "???");
+			}
+			success = YES;
+			if (Boundary) {
+			    StrAllocCopy(copied_name_used, name_used);
+			}
+		    }
+		    if (!success) {
+			if (!had_chartrans_warning) {
+			    had_chartrans_warning = YES;
+			    _user_message(
+				"Cannot convert form name to charset %s!",
+				target_csname ? target_csname : "UNKNOWN");
+			    sleep(AlertSecs);
+			}
+		    }
+		    if (Boundary) {
+			HTMake822Word(&copied_name_used);
+			name_used = copied_name_used;
+		    }
+
+#endif /* EXP_CHARTRANS */
+		    break;
+		default:
+		    if (TRACE)
+			fprintf(stderr, "SubmitForm: What type is %d?\n",
+				form_ptr->type);
+		}
+
+		switch(form_ptr->type) {
+
+		case F_RESET_TYPE:
+		    break;
+
+		case F_SUBMIT_TYPE:
+		case F_TEXT_SUBMIT_TYPE:
+		case F_IMAGE_SUBMIT_TYPE:
 		    /*
 		     *  If it has a non-zero length name (e.g., because
 		     *  it's IMAGE_SUBMIT_TYPE to be handled homologously
@@ -6598,58 +7105,59 @@ PUBLIC void HText_SubmitForm ARGS4(
 		     *  name.y=0 pairs for IMAGE_SUBMIT_TYPE. - FM
 		     */
 		    if ((form_ptr->name && *form_ptr->name != '\0' &&
-		        !strcmp(form_ptr->name, link_name)) &&
+			!strcmp(form_ptr->name, link_name)) &&
 		       (form_ptr->type == F_TEXT_SUBMIT_TYPE ||
-		        (form_ptr->value && *form_ptr->value != '\0' &&
-		         !strcmp(form_ptr->value, link_value)))) {
-		        if (first_one) {
+			(form_ptr->value && *form_ptr->value != '\0' &&
+			 !strcmp(form_ptr->value, link_value)))) {
+			int cdisp_name_startpos;
+			if (first_one) {
 			    if (Boundary) {
-			        sprintf(&query[strlen(query)],
+				sprintf(&query[strlen(query)],
 					"--%s\r\n", Boundary);
 			    }
-                            first_one=FALSE;
-                        } else {
+			    first_one=FALSE;
+			} else {
 			    if (PlainText) {
-			        strcat(query, "\n");
+				strcat(query, "\n");
 			    } else if (SemiColon) {
-			        strcat(query, ";");
+				strcat(query, ";");
 			    } else if (Boundary) {
-			        sprintf(&query[strlen(query)],
+				sprintf(&query[strlen(query)],
 					"\r\n--%s\r\n", Boundary);
 			    } else {
-                                strcat(query, "&");
+				strcat(query, "&");
 			    }
 			}
 
 			if (PlainText) {
-			    StrAllocCopy(escaped1, (form_ptr->name ?
-			    			    form_ptr->name : ""));
+			    StrAllocCopy(escaped1, name_used);
 			} else if (Boundary) {
 			    StrAllocCopy(escaped1,
-			    	    "Content-Disposition: form-data; name=");
-			    StrAllocCat(escaped1, (form_ptr->name ?
-			    			    form_ptr->name : ""));
+				    "Content-Disposition: form-data; name=");
+			    cdisp_name_startpos = strlen(escaped1);
+			    StrAllocCat(escaped1, name_used);
 			    if (MultipartContentType)
-			        StrAllocCat(escaped1, MultipartContentType);
+				StrAllocCat(escaped1, MultipartContentType);
 			    StrAllocCat(escaped1, "\r\n\r\n");
 			} else {
-		            escaped1 = HTEscapeSP(form_ptr->name,URL_XALPHAS);
+			    escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
 			}
 
-		        /*
-		         *  Be sure to actually look at
+#ifndef EXP_CHARTRANS
+			/*
+			 *  Be sure to actually look at
 			 *  the option submit value.
-		         */
-		        if (form_ptr->cp_submit_value != NULL) {
+			 */
+			if (form_ptr->cp_submit_value != NULL) {
 			    for (i = 0; form_ptr->cp_submit_value[i]; i++) {
-			        if (form_ptr->cp_submit_value[i] ==
+				if (form_ptr->cp_submit_value[i] ==
 					HT_NON_BREAK_SPACE ||
 				    form_ptr->cp_submit_value[i] ==
-				    	HT_EM_SPACE) {
+					HT_EM_SPACE) {
 				    if (PlainText) {
-				        form_ptr->cp_submit_value[i] = ' ';
+					form_ptr->cp_submit_value[i] = ' ';
 				    } else {
-				        form_ptr->cp_submit_value[i] = 160;
+					form_ptr->cp_submit_value[i] = 160;
 				    }
 				} else if (form_ptr->cp_submit_value[i] ==
 					LY_SOFT_HYPHEN) {
@@ -6657,23 +7165,23 @@ PUBLIC void HText_SubmitForm ARGS4(
 				}
 			    }
 			    if (PlainText || Boundary) {
-			        StrAllocCopy(escaped2,
+				StrAllocCopy(escaped2,
 					     (form_ptr->cp_submit_value ?
 					      form_ptr->cp_submit_value : ""));
 			    } else {
-		    	        escaped2 = HTEscapeSP(form_ptr->cp_submit_value,
+				escaped2 = HTEscapeSP(form_ptr->cp_submit_value,
 						      URL_XALPHAS);
 			    }
-		        } else {
+			} else {
 			    for (i = 0; form_ptr->value[i]; i++) {
-			        if (form_ptr->value[i] ==
+				if (form_ptr->value[i] ==
 					HT_NON_BREAK_SPACE ||
 				    form_ptr->value[i] ==
-				    	HT_EM_SPACE) {
+					HT_EM_SPACE) {
 				    if (PlainText) {
-				        form_ptr->value[i] = ' ';
+					form_ptr->value[i] = ' ';
 				    } else {
-				        form_ptr->value[i] = 160;
+					form_ptr->value[i] = 160;
 				    }
 				} else if (form_ptr->value[i] ==
 					LY_SOFT_HYPHEN) {
@@ -6681,13 +7189,22 @@ PUBLIC void HText_SubmitForm ARGS4(
 				}
 			    }
 			    if (PlainText || Boundary) {
-			        StrAllocCopy(escaped2, (form_ptr->value ?
+				StrAllocCopy(escaped2, (form_ptr->value ?
 							form_ptr->value : ""));
 			    } else {
-			        escaped2 = HTEscapeSP(form_ptr->value,
+				escaped2 = HTEscapeSP(form_ptr->value,
 						      URL_XALPHAS);
 			    }
-		        }
+			}
+#else /* EXP_CHARTRANS */
+			if (PlainText || Boundary) {
+			    StrAllocCopy(escaped2,
+					 (val_used ?
+					  val_used : ""));
+			} else {
+			    escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
+			}
+#endif /* EXP_CHARTRANS */
 
 			if (form_ptr->type == F_IMAGE_SUBMIT_TYPE) {
 			    /*
@@ -6696,14 +7213,14 @@ PUBLIC void HText_SubmitForm ARGS4(
 			     *  typically returns the image's default. - FM
 			     */
 			    if (Boundary) {
-			        escaped1[(strlen(escaped1) - 4)] = '\0';
-			        sprintf(&query[strlen(query)],
+				escaped1[cdisp_name_startpos] = '\0';
+				sprintf(&query[strlen(query)],
 				    "%s.x\r\n\r\n0\r\n--%s\r\n%s.y\r\n\r\n0",
 					escaped1,
 					Boundary,
 					escaped1);
 			    } else {
-			        sprintf(&query[strlen(query)],
+				sprintf(&query[strlen(query)],
 					"%s.x=0%s%s.y=0%s",
 					escaped1,
 					(PlainText ?
@@ -6711,7 +7228,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 							    ";" : "&")),
 					escaped1,
 					((PlainText && *escaped1) ?
-				    			     "\n" : ""));
+							     "\n" : ""));
 			    }
 			} else {
 			    /*
@@ -6722,83 +7239,86 @@ PUBLIC void HText_SubmitForm ARGS4(
 				    "%s%s%s%s%s",
 				    escaped1,
 				    (Boundary ?
-				    	   "" : "="),
+					   "" : "="),
 				    (PlainText ?
-				          "\n" : ""),
+					  "\n" : ""),
 				    escaped2,
 				    ((PlainText && *escaped2) ?
-				    			 "\n" : ""));
+							 "\n" : ""));
 			}
-		        FREE(escaped1);
-		        FREE(escaped2);
+			FREE(escaped1);
+			FREE(escaped2);
 		    }
-		    break;
+#ifdef EXP_CHARTRANS
+    		    FREE(copied_name_used);
+    		    FREE(copied_val_used);
+#endif
+    		    break;
 
-	        case F_RADIO_TYPE:
-                case F_CHECKBOX_TYPE:
+		case F_RADIO_TYPE:
+		case F_CHECKBOX_TYPE:
 		    /*
 		     *  Only add if selected.
 		     */
 		    if (form_ptr->num_value) {
-	                if (first_one) {
+			if (first_one) {
 			    if (Boundary) {
-			        sprintf(&query[strlen(query)],
+				sprintf(&query[strlen(query)],
 					"--%s\r\n", Boundary);
 			    }
-		            first_one=FALSE;
-	                } else {
+			    first_one=FALSE;
+			} else {
 			    if (PlainText) {
-			        strcat(query, "\n");
+				strcat(query, "\n");
 			    } else if (SemiColon) {
-			        strcat(query, ";");
+				strcat(query, ";");
 			    } else if (Boundary) {
-			        sprintf(&query[strlen(query)],
+				sprintf(&query[strlen(query)],
 					"\r\n--%s\r\n", Boundary);
 			    } else {
-		                strcat(query, "&");
+				strcat(query, "&");
 			    }
 			}
 
 			if (PlainText) {
-			    StrAllocCopy(escaped1, (form_ptr->name ?
-			    			    form_ptr->name : ""));
+			    StrAllocCopy(escaped1, name_used);
 			} else if (Boundary) {
 			    StrAllocCopy(escaped1,
-			    	     "Content-Disposition: form-data; name=");
+				     "Content-Disposition: form-data; name=");
 			    StrAllocCat(escaped1,
-				        (form_ptr->name ?
-			    		 form_ptr->name : ""));
+					name_used);
 			    if (MultipartContentType)
-			        StrAllocCat(escaped1, MultipartContentType);
+				StrAllocCat(escaped1, MultipartContentType);
 			    StrAllocCat(escaped1, "\r\n\r\n");
 			} else {
-		            escaped1 = HTEscapeSP(form_ptr->name, URL_XALPHAS);
+			    escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
 			}
+#ifndef EXP_CHARTRANS
 			/*
 			 *  Be sure to use the submit option value.
 			 */
 			if (form_ptr->cp_submit_value != NULL) {
 			    for (i = 0; form_ptr->cp_submit_value[i]; i++) {
-			        if (form_ptr->cp_submit_value[i] ==
+				if (form_ptr->cp_submit_value[i] ==
 					HT_NON_BREAK_SPACE ||
 				    form_ptr->cp_submit_value[i] ==
-				    	HT_EM_SPACE) {
+					HT_EM_SPACE) {
 				    if (PlainText) {
-				        form_ptr->cp_submit_value[i] = ' ';
+					form_ptr->cp_submit_value[i] = ' ';
 				    } else {
-				        form_ptr->cp_submit_value[i] = 160;
+					form_ptr->cp_submit_value[i] = 160;
 				    }
 				 } else if (form_ptr->cp_submit_value[i] ==
-				    	LY_SOFT_HYPHEN) {
+					LY_SOFT_HYPHEN) {
 				    form_ptr->cp_submit_value[i] = 173;
 				 }
 			    }
 			    if (PlainText || Boundary) {
-			        StrAllocCopy(escaped2,
+				StrAllocCopy(escaped2,
 					     (form_ptr->cp_submit_value ?
 					      form_ptr->cp_submit_value : ""));
 			    } else {
-			        escaped2 = HTEscapeSP(form_ptr->cp_submit_value,
+				escaped2 = HTEscapeSP(form_ptr->cp_submit_value,
 						      URL_XALPHAS);
 			    }
 			} else {
@@ -6806,28 +7326,37 @@ PUBLIC void HText_SubmitForm ARGS4(
 				if (form_ptr->value[i] ==
 					HT_NON_BREAK_SPACE ||
 				    form_ptr->value[i] ==
-				    	HT_EM_SPACE) {
+					HT_EM_SPACE) {
 				    if (PlainText) {
-				        form_ptr->value[i] = ' ';
+					form_ptr->value[i] = ' ';
 				    } else {
-				        form_ptr->value[i] = 160;
+					form_ptr->value[i] = 160;
 				    }
 				} else if (form_ptr->value[i] ==
-				    	LY_SOFT_HYPHEN) {
+					LY_SOFT_HYPHEN) {
 				    form_ptr->value[i] = 173;
 
 				}
 			    }
 			    if (PlainText || Boundary) {
-			        StrAllocCopy(escaped2, (form_ptr->value ?
+				StrAllocCopy(escaped2, (form_ptr->value ?
 							form_ptr->value : ""));
 			    } else {
-		                escaped2 = HTEscapeSP(form_ptr->value,
+				escaped2 = HTEscapeSP(form_ptr->value,
 						      URL_XALPHAS);
 			    }
 			}
+#else /* EXP_CHARTRANS */
+			if (PlainText || Boundary) {
+			    StrAllocCopy(escaped2,
+					 (val_used ?
+					  val_used : ""));
+			} else {
+			    escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
+			}
+#endif /* EXP_CHARTRANS */
 
-                        sprintf(&query[strlen(query)],
+			sprintf(&query[strlen(query)],
 				"%s%s%s%s%s",
 				escaped1,
 				(Boundary ?
@@ -6837,72 +7366,89 @@ PUBLIC void HText_SubmitForm ARGS4(
 				escaped2,
 				((PlainText && *escaped2) ?
 						     "\n" : ""));
-		        FREE(escaped1);
-		        FREE(escaped2);
+			FREE(escaped1);
+			FREE(escaped2);
 		    }
+#ifdef EXP_CHARTRANS
+    		    FREE(copied_name_used);
+    		    FREE(copied_val_used);
+#endif
 		    break;
-		
+
 		case F_TEXTAREA_TYPE:
+#ifndef EXP_CHARTRANS
 		    for (i = 0; form_ptr->value[i]; i++) {
 			if (form_ptr->value[i] == HT_NON_BREAK_SPACE ||
 			    form_ptr->value[i] == HT_EM_SPACE) {
 			    if (PlainText) {
-			        form_ptr->value[i] = ' ';
+				form_ptr->value[i] = ' ';
 			    } else {
-			        form_ptr->value[i] = 160;
+				form_ptr->value[i] = 160;
 			    }
 			} else if (form_ptr->value[i] == LY_SOFT_HYPHEN) {
 			    form_ptr->value[i] = 173;
 			}
 		    }
 		    if (PlainText || Boundary) {
-		        StrAllocCopy(escaped2, (form_ptr->value ? 
+			StrAllocCopy(escaped2, (form_ptr->value ? 
 						form_ptr->value : ""));
 		    } else {
-                        escaped2 = HTEscapeSP(form_ptr->value, URL_XALPHAS);
+			escaped2 = HTEscapeSP(form_ptr->value, URL_XALPHAS);
 		    }
+#else /* EXP_CHARTRANS */
+		    if (PlainText || Boundary) {
+			StrAllocCopy(escaped2,
+				     (val_used ?
+				      val_used : ""));
+		    } else {
+			escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
+		    }
+#endif /* EXP_CHARTRANS */
 
 		    if (!last_textarea_name || 
 			strcmp(last_textarea_name, form_ptr->name)) {
+			textarea_lineno = 1;
 			/*
 			 *  Names are different so this is the first
 			 *  textarea or a different one from any before
 			 *  it.
 			 */
-			FREE(previous_blanks);
-		        if (first_one) {
+			if (Boundary) {
+			    StrAllocCopy(previous_blanks, "\r\n");
+			} else {
+			    FREE(previous_blanks);
+			}
+			if (first_one) {
 			    if (Boundary) {
-			        sprintf(&query[strlen(query)],
+				sprintf(&query[strlen(query)],
 					"--%s\r\n", Boundary);
 			    }
-                            first_one=FALSE;
-                        } else {
+			    first_one=FALSE;
+			} else {
 			    if (PlainText) {
-			        strcat(query, "\n");
+				strcat(query, "\n");
 			    } else if (SemiColon) {
-			        strcat(query, ";");
+				strcat(query, ";");
 			    } else if (Boundary) {
-			        sprintf(&query[strlen(query)],
+				sprintf(&query[strlen(query)],
 					"\r\n--%s\r\n", Boundary);
 			    } else {
-                                strcat(query, "&");
+				strcat(query, "&");
 			    }
 			}
 			if (PlainText) {
-			    StrAllocCopy(escaped1, (form_ptr->name ?
-			    			    form_ptr->name : ""));
+			    StrAllocCopy(escaped1, name_used);
 			} else if (Boundary) {
 			    StrAllocCopy(escaped1,
-			    	    "Content-Disposition: form-data; name=");
-			    StrAllocCat(escaped1, (form_ptr->name ?
-			    			    form_ptr->name : ""));
+				    "Content-Disposition: form-data; name=");
+			    StrAllocCat(escaped1, name_used);
 			    if (MultipartContentType)
-			        StrAllocCat(escaped1, MultipartContentType);
+				StrAllocCat(escaped1, MultipartContentType);
 			    StrAllocCat(escaped1, "\r\n\r\n");
 			} else {
-                            escaped1 = HTEscapeSP(form_ptr->name, URL_XALPHAS);
+			    escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
 			}
-                        sprintf(&query[strlen(query)],
+			sprintf(&query[strlen(query)],
 				"%s%s%s%s%s",
 				escaped1,
 				(Boundary ?
@@ -6912,7 +7458,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 				escaped2,
 				((PlainText && *escaped2) ?
 						     "\n" : ""));
-                        FREE(escaped1);
+			FREE(escaped1);
 			last_textarea_name = form_ptr->name;
 		    } else {
 			/*
@@ -6925,74 +7471,76 @@ PUBLIC void HText_SubmitForm ARGS4(
 				FREE(previous_blanks);
 			    }
 			    if (PlainText) {
-			        sprintf(&query[strlen(query)], "%s\n",
+				sprintf(&query[strlen(query)], "%s\n",
 							       escaped2);
 			    } else if (Boundary) {
-			        sprintf(&query[strlen(query)], "%s\r\n",
+				sprintf(&query[strlen(query)], "%s\r\n",
 							       escaped2);
 			    } else {
-			        sprintf(&query[strlen(query)], "%%0a%s",
+				sprintf(&query[strlen(query)], "%%0a%s",
 							       escaped2);
 			    }
 			} else {
 			    if (PlainText) {
-			        StrAllocCat(previous_blanks, "\n");
+				StrAllocCat(previous_blanks, "\n");
 			    } else if (Boundary) {
-			        StrAllocCat(previous_blanks, "\r\n");
+				StrAllocCat(previous_blanks, "\r\n");
 			    } else {
-			        StrAllocCat(previous_blanks, "%0a");
+				StrAllocCat(previous_blanks, "%0a");
 			    }
 			}
 		    }
-                    FREE(escaped2);
-                    break;
+		    FREE(escaped2);
+#ifdef EXP_CHARTRANS
+    		    FREE(copied_val_used);
+#endif
+		    break;
 
-                case F_PASSWORD_TYPE:
-	        case F_TEXT_TYPE:
+		case F_PASSWORD_TYPE:
+		case F_TEXT_TYPE:
 		case F_OPTION_LIST_TYPE:
 		case F_HIDDEN_TYPE:
-	            if (first_one) {
+		    if (first_one) {
 			if (Boundary) {
 			    sprintf(&query[strlen(query)],
 				    "--%s\r\n", Boundary);
 			}
-		        first_one=FALSE;
-	            } else {
-		        if (PlainText) {
+			first_one=FALSE;
+		    } else {
+			if (PlainText) {
 			    strcat(query, "\n");
 			} else if (SemiColon) {
 			    strcat(query, ";");
 			} else if (Boundary) {
 			    sprintf(&query[strlen(query)],
-			    	    "\r\n--%s\r\n", Boundary);
+				    "\r\n--%s\r\n", Boundary);
 			} else {
-		            strcat(query, "&");
+			    strcat(query, "&");
 			}
 		    }
-    
+
 		    if (PlainText) {
-		       StrAllocCopy(escaped1, (form_ptr->name ?
-		       			       form_ptr->name : ""));
+		       StrAllocCopy(escaped1, name_used);
 		    } else if (Boundary) {
 			StrAllocCopy(escaped1,
-			    	    "Content-Disposition: form-data; name=");
-			StrAllocCat(escaped1, (form_ptr->name ?
-			    		       form_ptr->name : ""));
+				    "Content-Disposition: form-data; name=");
+			StrAllocCat(escaped1, name_used);
 			if (MultipartContentType)
 			    StrAllocCat(escaped1, MultipartContentType);
 			StrAllocCat(escaped1, "\r\n\r\n");
 		    } else {
-		        escaped1 = HTEscapeSP(form_ptr->name, URL_XALPHAS);
+			escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
 		    }
 
+#ifndef EXP_CHARTRANS
 		    /*
 		     *	Be sure to actually look at the option submit value.
 		     */
 		    if (form_ptr->cp_submit_value != NULL) {
 			for (i = 0; form_ptr->cp_submit_value[i]; i++) {
 			    if (form_ptr->cp_submit_value[i] ==
-			    		HT_NON_BREAK_SPACE ||
-			        form_ptr->cp_submit_value[i] ==
+					HT_NON_BREAK_SPACE ||
+				form_ptr->cp_submit_value[i] ==
 					HT_EM_SPACE) {
 				if (PlainText) {
 				    form_ptr->cp_submit_value[i] = ' ';
@@ -7006,17 +7554,17 @@ PUBLIC void HText_SubmitForm ARGS4(
 			}
 			if (PlainText || Boundary) {
 			    StrAllocCopy(escaped2,
-			    		 (form_ptr->cp_submit_value ?
+					 (form_ptr->cp_submit_value ?
 					  form_ptr->cp_submit_value : ""));
 			} else {
-		    	    escaped2 = HTEscapeSP(form_ptr->cp_submit_value,
-					          URL_XALPHAS);
+			    escaped2 = HTEscapeSP(form_ptr->cp_submit_value,
+						  URL_XALPHAS);
 			}
 		    } else {
 			for (i = 0; form_ptr->value[i]; i++) {
 			    if (form_ptr->value[i] ==
-			    		HT_NON_BREAK_SPACE ||
-			        form_ptr->value[i] ==
+					HT_NON_BREAK_SPACE ||
+				form_ptr->value[i] ==
 					HT_EM_SPACE) {
 				if (PlainText) {
 				    form_ptr->value[i] = ' ';
@@ -7030,25 +7578,38 @@ PUBLIC void HText_SubmitForm ARGS4(
 			}
 			if (PlainText || Boundary) {
 			    StrAllocCopy(escaped2, (form_ptr->value ?
-			    			    form_ptr->value : ""));
+						    form_ptr->value : ""));
 			} else {
 			    escaped2 = HTEscapeSP(form_ptr->value,
-			    			  URL_XALPHAS);
+						  URL_XALPHAS);
 			}
 		    }
+#else /* EXP_CHARTRANS */
+		    if (PlainText || Boundary) {
+			StrAllocCopy(escaped2,
+				     (val_used ?
+				      val_used : ""));
+		    } else {
+			escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
+		    }
+#endif /* EXP_CHARTRANS */
 
-                    sprintf(&query[strlen(query)],
-		    	    "%s%s%s%s%s",
+		    sprintf(&query[strlen(query)],
+			    "%s%s%s%s%s",
 			    escaped1,
 			    (Boundary ?
-			    	   "" : "="),
+				   "" : "="),
 			    (PlainText ?
 				  "\n" : ""),
 			    escaped2,
 			    ((PlainText && *escaped2) ?
-		    				 "\n" : ""));
+						 "\n" : ""));
 		    FREE(escaped1);
 		    FREE(escaped2);
+#ifdef EXP_CHARTRANS
+    		    FREE(copied_name_used);
+    		    FREE(copied_val_used);
+#endif
 		    break;
 	        }
 	    } else if (anchor_ptr->input_field->number > form_number) {
@@ -7061,6 +7622,9 @@ PUBLIC void HText_SubmitForm ARGS4(
 
 	anchor_ptr = anchor_ptr->next;
     }
+#ifdef EXP_CHARTRANS
+	FREE(copied_name_used);
+#endif
     if (Boundary) {
         sprintf(&query[strlen(query)], "\r\n--%s--\r\n", Boundary);
     }
@@ -7269,6 +7833,7 @@ PRIVATE void free_all_texts NOARGS
     FREE(HTFormAction);
     FREE(HTFormEnctype);
     FREE(HTFormTitle);
+    FREE(HTFormAcceptCharset);
 
     return;
 }

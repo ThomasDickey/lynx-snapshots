@@ -46,7 +46,7 @@
 
 #define PUTC(c) (*targetClass.put_character)(target, c)
 #define PUTS(s) (*targetClass.put_string)(target, s)
-#define START(e) (*targetClass.start_element)(target, e, 0, 0, 0)
+#define START(e) (*targetClass.start_element)(target, e, 0, 0, -1, 0)
 #define END(e) (*targetClass.end_element)(target, e, 0)
 #define FREE_TARGET (*targetClass._free)(target)
 #define NEXT_CHAR HTGetCharacter() 
@@ -91,7 +91,7 @@ PRIVATE void start_anchor ARGS1(CONST char *,  href)
     }
     ((CONST char **)value)[HTML_A_HREF] = href;
     (*targetClass.start_element)(target, HTML_A, present,
-    				 (CONST char **)value, 0);
+    				 (CONST char **)value, -1, 0);
 
 }
 

@@ -2286,7 +2286,6 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
     }
 
 #ifdef EXP_CHARTRANS
-    if (LYCharSet_UC[i].enc != UCT_ENC_CJK) {
 
 	    if (LYRawMode) {
 		UCLYhndl_for_unspec = i;
@@ -2294,12 +2293,14 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 		int chndl = 0;
 		if (UCAssume_MIMEcharset)
 		    chndl = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
-		if (chndl != i)
-		    UCLYhndl_for_unspec = chndl < 0 ? 0 : chndl;
-		else
+		if (chndl != i && chndl >= 0 &&
+		    (LYCharSet_UC[i].enc != UCT_ENC_CJK ||
+		     LYCharSet_UC[chndl].enc != UCT_ENC_CJK)) {
+		    UCLYhndl_for_unspec = chndl;
+		} else {
 		    UCLYhndl_for_unspec = 0;
+		}
 	    }
-    }
 #endif /* EXP_CHARTRANS */
 
 #ifdef USE_SLANG

@@ -7,13 +7,19 @@ extern char *strstr();
 #endif /* __STRICT_BSD__ */
 
 extern int get_mouse_link NOPARAMS;
-extern char * LYstrncpy PARAMS((char *dst, CONST char *src, int n));
+extern char * LYstrncpy PARAMS((
+	char *		dst,
+	CONST char *	src,
+	int		n));
 extern int LYgetch NOPARAMS;
-extern int LYgetstr PARAMS((char *inputline, int hidden,
-			    int bufsize, int recall));
-extern char * LYstrstr PARAMS((char *chptr, char *tarptr));
-extern char * LYno_attr_char_strstr PARAMS((char *chptr, char *tarptr));
-extern char * LYno_attr_char_case_strstr PARAMS((char *chptr, char *tarptr));
+extern int LYgetstr PARAMS((
+	char *		inputline,
+	int		hidden,
+	int		bufsize,
+	int		recall));
+extern char * LYstrstr PARAMS((
+	char *		chptr,
+	char *		tarptr));
 
 extern char * LYno_attr_mbcs_strstr PARAMS((
 	char *		chptr,
@@ -42,9 +48,21 @@ extern char * LYmbcsstrncpy PARAMS((
 #define LYmbcsstrncpy(dest,src,n,n_glyphs,enc) LYstrncpy(dest, src, n)
 #endif
 
-extern char * SNACopy PARAMS((char **dest, CONST char *src, int n));
-extern char * SNACat PARAMS((char **dest, CONST char *src, int n));
+extern char * LYno_attr_char_strstr PARAMS((
+	char *		chptr,
+	char *		tarptr));
+extern char * LYno_attr_char_case_strstr PARAMS((
+	char *		chptr,
+	char *		tarptr));
 
+extern char * SNACopy PARAMS((
+	char **		dest,
+	CONST char *	src,
+	int		n));
+extern char * SNACat PARAMS((
+	char **		dest,
+	CONST char *	src,
+	int		n));
 #define StrnAllocCopy(dest, src, n)  SNACopy (&(dest), src, n)
 #define StrnAllocCat(dest, src, n)   SNACat  (&(dest), src, n)
 
@@ -123,11 +141,18 @@ typedef struct _EditFieldData {
 
 #define LYE_AIX   (LYE_UPPER +1)  /* Hex 97		   */
 
-extern void LYSetupEdit   PARAMS((EditFieldData *edit, char *old, int maxstr,
-				  int maxdsp));
-extern void LYRefreshEdit PARAMS((EditFieldData *edit));
-extern int  LYEdit1       PARAMS((EditFieldData *edit, int ch,
-				  int action, BOOL maxMessage));
+extern void LYSetupEdit PARAMS((
+	EditFieldData *	edit,
+	char *		old,
+	int		maxstr,
+	int		maxdsp));
+extern void LYRefreshEdit PARAMS((
+	EditFieldData *	edit));
+extern int LYEdit1 PARAMS((
+	EditFieldData *	edit,
+	int		ch,
+	int		action,
+	BOOL		maxMessage));
 
 
 extern int current_lineedit;

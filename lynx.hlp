@@ -53,7 +53,7 @@
 
   -base
        prepend a request URL comment and BASE tag to text/html
-       outputs for -source or -mime_header dumps.
+       outputs for -source dumps.
 
   -blink
        forces high intensity bg colors for color mode, if available
@@ -242,6 +242,10 @@
   -post_data
        send form data from stdin using POST method and dump results.
 
+  -preparsed
+       show HTML source preparsed and reformatted when used with -source
+       or in source view.
+
   -print
        enable print functions. (default)
 
@@ -401,6 +405,9 @@
 
   -vikeys
        enable vi-like key movement.
+
+  -width=NUMBER
+       number of columns for formatting of dumps, default is 80.
 
 2 COMMANDS
  o Use Up arrow and Down arrow to scroll through hypertext links.

@@ -34,6 +34,7 @@ extern CONST char * LYchar_set_names[];
 extern CONST char **LYCharSets[];
 #ifdef EXP_CHARTRANS
 extern int LYlowest_eightbit[];
+extern BOOLEAN LYRawMode;
 #endif /* EXP_CHARTRANS */
 extern CONST char * HTMLGetEntityName PARAMS((int i));
 extern BOOL HTPassEightBitRaw;
@@ -361,16 +362,6 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	*/
 	} else if (unsign_c == 173) {
 	    continue;
-#ifdef EXP_CHARTRANS
-	} else if (me->T.strip_raw_char_in &&
-		   (unsigned char)*p >= 0xc0 &&
-		   (unsigned char)*p < 255) {
-	    /*
-	    **  KOI special: strip high bit, gives
-	    **  (somewhat) readable ASCII.
-	    */
-	    HText_appendCharacter(me->text, (char)(*p & 0x7f));
-#endif /* EXP_CHARTRANS */
 	/*
 	**  If we get to here, pass the displayable ASCII characters. - FM
 	*/
@@ -419,9 +410,22 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    HText_appendText(me->text, me->utf_buf);
 	    me->utf_buf_p = me->utf_buf;
 	    *(me->utf_buf_p) = '\0';
+	} else if (me->T.strip_raw_char_in &&
+		   (unsigned char)*p >= 0xc0 &&
+		   (unsigned char)*p < 255) {
+	    /*
+	    **  KOI special: strip high bit, gives
+	    **  (somewhat) readable ASCII.
+	    */
+	    HText_appendCharacter(me->text, (char)(*p & 0x7f));
 	} else if (me->T.trans_from_uni && unsign_c > 255) {
-	    sprintf(replace_buf, "U%.2lx", unsign_c);
-	    HText_appendText(me->text, replace_buf);
+	    if (PASSHI8BIT && PASSHICTRL && LYRawMode &&
+		(unsigned char)*p >= LYlowest_eightbit[me->htext_char_set]) {
+		HText_appendCharacter(me->text, *p);
+	    } else {
+		sprintf(replace_buf, "U%.2lx", unsign_c);
+		HText_appendText(me->text, replace_buf);
+	    }
 #endif /* EXP_CHARTRANS */
 
 	/*
@@ -493,6 +497,12 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		    me->utf_buf_p = me->utf_buf;
 		    *(me->utf_buf_p) = '\0';
 
+		} else if (LYRawMode &&
+			   me->in_char_set != me->htext_char_set &&
+			   (PASSHI8BIT || PASSHICTRL) &&
+			   (unsigned char)c_p >=
+			             LYlowest_eightbit[me->htext_char_set]) {
+		    HText_appendCharacter(me->text, c_p);
 		} else if (me->T.trans_from_uni && unsign_c >= 127) {
 		    sprintf(replace_buf,"U%.2lx",unsign_c);
 		    HText_appendText(me->text, replace_buf);

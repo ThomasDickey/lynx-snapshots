@@ -993,7 +993,7 @@ try_again:
 			 */
 			HTAtom *encoding;
 
-			if (HTFileFormat(temp, &encoding) != WWW_HTML) {
+			if (HTFileFormat(temp, &encoding, NULL) != WWW_HTML) {
 			    HTSetSuffix(temp, "text/html", "8bit", 1.0);
 			}
 		    }
@@ -3649,12 +3649,12 @@ check_goto_URL:
 	        if (nlinks > 0) {
 		    cp = links[curdoc.link].lname;
 		    if (is_url(cp) == FILE_URL_TYPE) {
-		        if (!strncmp(tp, "file://localhost", 16)) {
+		        if (!strncmp(cp, "file://localhost", 16)) {
 			    /*
 			     *  This is the only case that should occur. - kw
 			     */
 			    StrAllocCopy(tp, cp + 16);
-		        } else if (!strncmp(tp, "file:", 5)) {
+		        } else if (!strncmp(cp, "file:", 5)) {
 			    StrAllocCopy(tp, cp + 5);
 		        } else {
 			    StrAllocCopy(tp, cp);

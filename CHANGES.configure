@@ -1,3 +1,7 @@
+97-09-19
+--------
+* minor ifdef/declaration fixes required to build on IRIX 6.2,
+  SunOS (K&R) and VAX C. - TD
 97-09-17
 --------
 * merge symbols 'has_color' and 'lynx_has_color' to simplify ifdef's,

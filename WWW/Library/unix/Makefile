@@ -8,7 +8,7 @@ WWW_MACH = unix
 ASIS_MACH = hardware/os
 
 
-CFLAGS =  -O -DDEBUG
+CFLAGS =  -g -DDEBUG
 LFLAGS =
 CC = cc
 

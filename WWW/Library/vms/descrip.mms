@@ -176,9 +176,9 @@ CC = gcc
 !	HTVMSUtils.h, ufc-crypt.h, patchlevel.h
 
 MODULES = HTParse, HTAccess, HTTP, HTFile, HTBTree, HTFTP, HTTCP, HTString, -
-	SGML, HTMLDTD, HTChunk, HTPlain, HTWriter, HTFWriter, HTMLGen, -
+	SGML, HTMLDTD, HTChunk, HTPlain, HTWriter, HTMLGen, -
 	HTAtom, HTAnchor, HTStyle, HTList, HTAlert, HTRules, HTFormat, -
-	HTInit, HTMIME, HTHistory, HTNews, HTGopher, HTTelnet, HTFinger, -
+	HTMIME, HTHistory, HTNews, HTGopher, HTTelnet, HTFinger, -
 	HTWSRC, HTAAUtil, HTAABrow, HTAAServ, HTAAFile, HTPasswd, HTGroup, -
 	HTACL, HTAuth, HTAAProt, HTAssoc, HTLex, HTUU, HTVMSUtils, getpass, -
 	getline, crypt, crypt_util, HTWAIS, HTVMS_WaisUI, HTVMS_WaisProt
@@ -218,11 +218,9 @@ clean :
 !HTMLDTD.obj :	HTMLDTD.c HTMLDTD.h SGML.h
 !HTPlain.obj :	HTPlain.c HTPlain.h HTStream.h
 !HTWriter.obj :	HTWriter.c HTWriter.h HTStream.h
-!HTFWriter.obj :	HTFWriter.c HTFWriter.h HTStream.h
 !HTMLGen.obj :	HTMLGen.c HTMLGen.h HTUtils.h HTMLDTD.h
 !HTAlert.obj :	HTAlert.c HTAlert.h HTUtils.h Version.make
 !HTRules.obj :	HTRules.c HTRules.h HTUtils.h Version.make
-!HTInit.obj :	HTInit.c HTInit.h HTUtils.h HTList.h
 !HTMIME.obj :	HTMIME.c HTMIME.h HTUtils.h HTList.h
 !HTTelnet.obj :	HTTelnet.c HTTelnet.h HTUtils.h
 !HTWAIS.obj :	HTWAIS.c HTWAIS.h HTUtils.h HTList.h
