@@ -3400,10 +3400,11 @@ PRIVATE PostPair * break_data ARGS1(
  * pointer.  MRC
  *
  * By changing the certain options value (like preferred language or
- * fake browser name) we need to inform the remote server and reload (uncache)
- * the document which was active just before the Options menu was invoked.
- * Another values (like display_char_set or assume_char_set) used by lynx
- * initial rendering stages and can be changed only after reloading :-(
+ * fake browser name) we need to inform the remote server and reload 
+ * (uncache on a proxy) the document which was active just before 
+ * the Options menu was invoked.  Another values (like display_char_set 
+ * or assume_char_set) used by lynx initial rendering stages 
+ * and can only be changed after reloading :-( 
  * So we introduce boolean flag 'need_reload' (currently dummy).
  *
  * Options are processed in order according to gen_options(), we should not
@@ -3612,21 +3613,12 @@ PUBLIC int postoptions ARGS1(
 
 	/* Display Character Set: SELECT */
 	if (!strcmp(data[i].tag, display_char_set_string)) {
-	    int newval;
-
-	    newval = atoi(data[i].value);
-	    if (newval != current_char_set) {
-		current_char_set = newval;
-	    }
+           current_char_set = atoi(data[i].value); 
 	}
 
 	/* Raw Mode: ON/OFF */
 	if (!strcmp(data[i].tag, raw_mode_string)) {
-	    BOOLEAN newmode = GetOptValues(bool_values, data[i].value);
-
-	    if (newmode != LYRawMode) {
-		LYRawMode = newmode;
-	    }
+           LYRawMode = GetOptValues(bool_values, data[i].value); 
 	}
 
 	/*

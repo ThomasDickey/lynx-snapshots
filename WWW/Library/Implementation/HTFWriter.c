@@ -248,7 +248,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     
     /* Save the file under a suitably suffixed name */
     
-    suffix = HTFileSuffix(pres->rep);
+    suffix = HTFileSuffix(pres->rep, anchor->content_encoding);
 
     fnam = (char *)malloc (L_tmpnam + 16 + strlen(suffix));
     tmpnam (fnam);
@@ -326,7 +326,7 @@ PUBLIC HTStream* HTSaveLocally ARGS3(
     
     /* Save the file under a suitably suffixed name */
     
-    suffix = HTFileSuffix(pres->rep);
+    suffix = HTFileSuffix(pres->rep, anchor->content_encoding);
 
     fnam = (char *)malloc (L_tmpnam + 16 + strlen(suffix));
     tmpnam (fnam);

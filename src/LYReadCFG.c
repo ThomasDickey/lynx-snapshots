@@ -912,6 +912,9 @@ static Config_Type Config_Table [] =
      PARSE_SET("partial", CONF_BOOL, display_partial),
      PARSE_INT("partial_thres", CONF_INT, partial_threshold),
 #endif
+#ifdef EXP_PERSISTENT_COOKIES
+     PARSE_SET("persistent_cookies", CONF_BOOL, persistent_cookies),
+#endif /* EXP_PERSISTENT_COOKIES */
      PARSE_STR("personal_mailcap", CONF_STR, personal_type_map),
      PARSE_STR("personal_extension_map", CONF_STR, personal_extension_map),
      PARSE_STR("preferred_charset", CONF_STR, pref_charset),
@@ -938,6 +941,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN("system_editor", CONF_FUN, system_editor_fun),
      PARSE_STR("system_mail", CONF_STR, system_mail),
      PARSE_STR("system_mail_flags", CONF_STR, system_mail_flags),
+     PARSE_SET("tagsoup", CONF_BOOL, New_DTD),
 #ifdef EXEC_LINKS
      PARSE_DEF("trusted_exec", CONF_ADD_TRUSTED, EXEC_PATH),
 #endif
@@ -1163,13 +1167,17 @@ PUBLIC void read_cfg ARGS4(
 
 	case CONF_INCLUDE:
 	    /* include another file */
+#ifndef NO_CONFIG_INFO
 	    if (fp0 != 0) {
 		fprintf(fp0, "%s:%s\n\n", name, value);
 		fprintf(fp0, "    #&lt;begin  %s&gt;\n", value);
 	    }
+#endif
 	    read_cfg (value, cfg_filename, nesting_level + 1, fp0);
+#ifndef NO_CONFIG_INFO
 	    if (fp0 != 0)
 		fprintf(fp0, "    #&lt;end of %s&gt;\n\n", value);
+#endif
 	    break;
 
 	case CONF_ADD_ITEM:

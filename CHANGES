@@ -1,6 +1,28 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-10-24 (2.8.1rel.1)
+* reorganize lynx_help_main.html - PW
+* minor change to WWW/.../tcp.h to eliminate redefinition warning by DEC C - TD
+* move checking for command-line "-head" and related options before curses
+  initialization so that program exits with correct terminal settings
+  (report by LV, fix by BL).
+* correct uninitialized index into id_append in makeuctb, which causes problems
+  with def7_uni.tbl (analysis by LP)
+* add TAGSOUP flag to lynx.cfg to set initial state of Tag Soup vs SortaSGML
+  (request by LP) - TD
+* add PERSISTENT_COOKIES flag to lynx.cfg to allow disabling the persistent
+  cookies feature in a Lynx executable (request by BJP) - TD
+* modify read_cfg so that it does not display included-file information when
+  NO_CONFIG_INFO is defined (reported by LP) - TD
+* minor/cosmetic fixes for comments and documentation - LP
+* revised patch for nsl-fork, which does not rely on WNOWAIT definition - BL
+* include termio.h in LYCurses.c only #ifdef TERMIO_AND_CURSES (Philippe 
+  De Muyter <phdm@macqel.be>) 
+* modify cfg_defs.sh to work when the 'set' command emits double-quotes
+  (pg@sweng.stortek.com)
+* update obsolete copy of HTFWriter.c to add content-encoding for HTFileSuffix
+  (reported by David Helder <dhelder@umich.edu) - TD
 1998-10-17 (2.8.1pre.11)
 * add dependency on cfg_defs.h to src/makefile.in for LYShowInfo.o 
   (pg@sweng.stortek.com)
@@ -11,14 +33,14 @@ Changes since Lynx 2.8 release
   correctly for any LYRawMode value by synchronizing gen_options() and
   postoptions() via rawmode memory - LP
 * correct ifdef'ing in LYShowInfo.c for non-Unix platforms - LP
-* modify waitpid logic in nsl-fork support to handle a case where the child
-  process exits without reporting anything (reported by Serge Munhoven) - BL
+* modify nsl_fork logic to handle a case where child exits successfully 
+  right after parent's select timed out (reported by Serge Munhoven) - BL 
 * small updates to lynx_help files and other documentation (BJP, PW, LV).
 * add #define's for later work to simplify configuring the maximum number
   of cookies (suggested by BJP) - TD
-* flush output in makeuctb, to fix build problems on systems that do not
-  implement POSIX 'exit()' call -- including Digital Unix 4.0 (reported by
-  Serge Munhoven <munhoven@mema.ucl.ac.be>) - TD
+* flush output in makeuctb, as possible fix for build problems on systems that
+  do not implement POSIX 'exit()' call (reported by Serge Munhoven
+  <munhoven@mema.ucl.ac.be> and Jan Hlavacek <lahvak@math.ohio-state.edu>) - TD
 * put GOTOBUFFER, JUMPBUFFER and QUIT_DEFAULT_YES back the way they used to be
   (majority decision) - TD
 1998-10-14 (2.8.1pre.10)

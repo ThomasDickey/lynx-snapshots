@@ -3849,7 +3849,7 @@ if (!LYUseFormsOptions) {
 		 */
 		HTuncache_current_document();
 	    }
-#endif /* NO_OPTION_FORMS */
+#endif /* !NO_OPTION_FORMS */ 
 	    break;
 
 	case LYK_INDEX_SEARCH: /* search for a user string */

@@ -187,7 +187,8 @@ PUBLIC void cleanup NOARGS
      * handle two processes writing to the cookie file needs to be worked
      * out as well.
      */
-    LYStoreCookies (LYCookieFile);
+    if (persistent_cookies)
+	LYStoreCookies (LYCookieFile);
 #endif
 
     cleanup_files();

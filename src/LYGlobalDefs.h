@@ -320,6 +320,7 @@ extern BOOLEAN LYAcceptAllCookies;      /* accept ALL cookies?           */
 extern char *LYCookieAcceptDomains;     /* domains to accept all cookies */
 extern char *LYCookieRejectDomains;     /* domains to reject all cookies */
 #ifdef EXP_PERSISTENT_COOKIES
+extern BOOLEAN persistent_cookies;
 extern char *LYCookieFile;              /* file to store cookies in      */
 #endif /* EXP_PERSISTENT_COOKIES */
 extern char *XLoadImageCommand;		/* Default image viewer for X	 */

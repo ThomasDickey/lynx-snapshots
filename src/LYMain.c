@@ -342,6 +342,7 @@ PUBLIC BOOLEAN LYAcceptAllCookies = ACCEPT_ALL_COOKIES; /* take all cookies? */
 PUBLIC char *LYCookieAcceptDomains = NULL; /* domains to accept all cookies */
 PUBLIC char *LYCookieRejectDomains = NULL; /* domains to reject all cookies */
 #ifdef EXP_PERSISTENT_COOKIES
+BOOLEAN persistent_cookies = TRUE;
 PUBLIC char *LYCookieFile = NULL;          /* default cookie file */
 #endif /* EXP_PERSISTENT_COOKIES */
 PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
@@ -514,6 +515,23 @@ PRIVATE void LYStdinArgs_free NOARGS
     HTList_delete(LYStdinArgs);
     LYStdinArgs = NULL;
     return;
+}
+
+PRIVATE void exit_immediately ARGS1(
+	int,		code)
+{
+#ifndef NOSIGHUP
+    (void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
+    (void) signal(SIGTERM, SIG_DFL);
+#ifndef VMS
+    (void) signal(SIGINT, SIG_DFL);
+#endif /* !VMS */
+#ifdef SIGTSTP
+    if (no_suspend)
+	(void) signal(SIGTSTP, SIG_DFL);
+#endif /* SIGTSTP */
+    exit(code);
 }
 
 /*
@@ -1488,20 +1506,22 @@ PUBLIC int main ARGS2(
      *	Sod it, this looks like a reasonable place to load the
      *	cookies file, probably.  - RP
      */
-    if(LYCookieFile == NULL) {
-	LYAddPathToHome(LYCookieFile = malloc(LY_MAXPATH), LY_MAXPATH, COOKIE_FILE);
-    } else {
-	if ((cp = strchr(LYCookieFile, '~'))) {
-	    temp = NULL;
-	    *(cp++) = '\0';
-	    StrAllocCopy(temp, cp);
-	    LYTrimPathSep(temp);
-	    StrAllocCopy(LYCookieFile, wwwName(Home_Dir()));
-	    StrAllocCat(LYCookieFile, temp);
-	    FREE(temp);
+    if (persistent_cookies) {
+	if(LYCookieFile == NULL) {
+	    LYAddPathToHome(LYCookieFile = malloc(LY_MAXPATH), LY_MAXPATH, COOKIE_FILE);
+	} else {
+	    if ((cp = strchr(LYCookieFile, '~'))) {
+		temp = NULL;
+		*(cp++) = '\0';
+		StrAllocCopy(temp, cp);
+		LYTrimPathSep(temp);
+		StrAllocCopy(LYCookieFile, wwwName(Home_Dir()));
+		StrAllocCat(LYCookieFile, temp);
+		FREE(temp);
+	    }
 	}
+	LYLoadCookies(LYCookieFile);
     }
-    LYLoadCookies(LYCookieFile);
 #endif
 
 #ifdef SIGTSTP
@@ -1511,6 +1531,36 @@ PUBLIC int main ARGS2(
     if (no_suspend)
 	(void) signal(SIGTSTP,SIG_IGN);
 #endif /* SIGTSTP */
+
+    /*
+     *	Check for a valid HEAD request. - FM
+     */
+    if (HEAD_request && LYCanDoHEAD(startfile) != TRUE) {
+	fprintf(stderr,
+ "The '-head' switch is for http HEAD requests and cannot be used for\n'%s'.\n",
+		startfile);
+	exit_immediately(-1);
+    }
+
+    /*
+     *	Check for a valid MIME headers request. - FM
+     */
+    if (keep_mime_headers && LYCanDoHEAD(startfile) != TRUE) {
+	fprintf(stderr,
+ "The '-mime_header' switch is for http URLs and cannot be used for\n'%s'.\n",
+		startfile);
+	exit_immediately(-1);
+    }
+
+    /*
+     *	Check for a valid traversal request. - FM
+     */
+    if (traversal && strncmp(startfile, "http", 4)) {
+	fprintf(stderr,
+ "The '-traversal' switch is for http URLs and cannot be used for\n'%s'.\n",
+		startfile);
+	exit_immediately(-1);
+    }
 
     /*
      *  Finish setting up for an INTERACTIVE session.
@@ -1574,69 +1624,6 @@ PUBLIC int main ARGS2(
     }
 
     /*
-     *	Check for a valid HEAD request. - FM
-     */
-    if (HEAD_request && LYCanDoHEAD(startfile) != TRUE) {
-	fprintf(stderr,
- "The '-head' switch is for http HEAD requests and cannot be used for\n'%s'.\n",
-		startfile);
-#ifndef NOSIGHUP
-	(void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-	(void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-	(void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-	if (no_suspend)
-	  (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-	exit(-1);
-    }
-
-    /*
-     *	Check for a valid MIME headers request. - FM
-     */
-    if (keep_mime_headers && LYCanDoHEAD(startfile) != TRUE) {
-	fprintf(stderr,
- "The '-mime_header' switch is for http URLs and cannot be used for\n'%s'.\n",
-		startfile);
-#ifndef NOSIGHUP
-	(void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-	(void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-	(void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-	if (no_suspend)
-	  (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-	exit(-1);
-    }
-
-    /*
-     *	Check for a valid traversal request. - FM
-     */
-    if (traversal && strncmp(startfile, "http", 4)) {
-	fprintf(stderr,
- "The '-traversal' switch is for http URLs and cannot be used for\n'%s'.\n",
-		startfile);
-#ifndef NOSIGHUP
-	(void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-	(void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-	(void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-	if (no_suspend)
-	  (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-	exit(-1);
-    }
-
-    /*
      *	Set up our help and about file base paths. - FM
      */
     StrAllocCopy(helpfilepath, helpfile);
@@ -1687,17 +1674,7 @@ PUBLIC int main ARGS2(
 	    (keypad_mode == LINKS_ARE_NUMBERED ||
 	     keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED))
 	    printlist(stdout,FALSE);
-#ifndef NOSIGHUP
-	(void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-	(void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-	(void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-	if (no_suspend)
-	  (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
+	exit_immediately(status);
     } else {
 	/*
 	 *  Start an INTERACTIVE session. - FM
@@ -1708,9 +1685,9 @@ PUBLIC int main ARGS2(
 	ena_csi((LYlowest_eightbit[current_char_set] > 155));
 	status = mainloop();
 	cleanup();
+	exit(status);
     }
 
-    exit(status);
     return(status);	/* though redundant, for compiler-warnings */
 }
 

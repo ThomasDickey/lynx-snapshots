@@ -660,8 +660,8 @@ PUBLIC int main ARGS2(
 	     p++, i++) {
 	    id_append[i+1] = isalnum(*p) ? *p : '_';
 	}
+	id_append[i+1] = '\0';
     }
-    id_append[i+1] = '\0';
     fprintf(stderr, " (%s).\n", id_append);
 
     printf("\
