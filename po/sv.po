@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.6-dev8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-12-30 06:03-0500\n"
+"POT-Creation-Date: 2005-01-02 09:33-0500\n"
 "PO-Revision-Date: 2004-11-27 12:30+0100\n"
 "Last-Translator: Peter Karlsson <peter@softwolves.pp.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"
@@ -2788,7 +2788,7 @@ msgstr "Dokument med POST-data hittades ej i cache. Skicka in igen?"
 msgid "Loading failed, use a previous copy."
 msgstr "Hämtningen misslyckades, använder tidigare exemplar."
 
-#: WWW/Library/Implementation/HTAccess.c:1045 src/GridText.c:8358
+#: WWW/Library/Implementation/HTAccess.c:1045 src/GridText.c:8351
 msgid "Loading incomplete."
 msgstr "Hämtning ej komplett."
 
@@ -2811,7 +2811,7 @@ msgstr "**** HTAccess: Returnerad status var: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1085 src/LYMainLoop.c:7673
+#: WWW/Library/Implementation/HTAccess.c:1085 src/LYMainLoop.c:7669
 msgid "Can't Access"
 msgstr "Kan inte komma åt"
 
@@ -2819,20 +2819,20 @@ msgstr "Kan inte komma åt"
 msgid "Unable to access document."
 msgstr "Kan inte komma åt dokument."
 
-#: WWW/Library/Implementation/HTFTP.c:780
+#: WWW/Library/Implementation/HTFTP.c:823
 #, c-format
 msgid "Enter password for user %s@%s:"
 msgstr "Ange lösenord för användar-id %s@%s:"
 
-#: WWW/Library/Implementation/HTFTP.c:808
+#: WWW/Library/Implementation/HTFTP.c:851
 msgid "Unable to connect to FTP host."
 msgstr "Kan inte ansluta till ftp-värd."
 
-#: WWW/Library/Implementation/HTFTP.c:1074
+#: WWW/Library/Implementation/HTFTP.c:1117
 msgid "close master socket"
 msgstr "stängd huvuduttag (master socket)"
 
-#: WWW/Library/Implementation/HTFTP.c:1135
+#: WWW/Library/Implementation/HTFTP.c:1178
 msgid "socket for master socket"
 msgstr "uttag (socket) för huvuduttag"
 
@@ -2840,24 +2840,24 @@ msgstr "uttag (socket) för huvuduttag"
 #. * It's a symbolic link, does the user care about knowing if it is
 #. * symbolic?  I think so since it might be a directory.
 #.
-#: WWW/Library/Implementation/HTFTP.c:1658 WWW/Library/Implementation/HTFTP.c:2275
+#: WWW/Library/Implementation/HTFTP.c:1701 WWW/Library/Implementation/HTFTP.c:2318
 msgid "Symbolic Link"
 msgstr "Symbolisk länk"
 
-#: WWW/Library/Implementation/HTFTP.c:2632
+#: WWW/Library/Implementation/HTFTP.c:2675
 msgid "Receiving FTP directory."
 msgstr "Hämtar ftp-katalog."
 
-#: WWW/Library/Implementation/HTFTP.c:2768
+#: WWW/Library/Implementation/HTFTP.c:2811
 #, c-format
 msgid "Transferred %d bytes (%5d)"
 msgstr "Överförde %d byte (%5d)"
 
-#: WWW/Library/Implementation/HTFTP.c:3115
+#: WWW/Library/Implementation/HTFTP.c:3158
 msgid "connect for data"
 msgstr "ansluter för data"
 
-#: WWW/Library/Implementation/HTFTP.c:3779
+#: WWW/Library/Implementation/HTFTP.c:3822
 msgid "Receiving FTP file."
 msgstr "Hämtar ftp-fil."
 
@@ -3065,23 +3065,23 @@ msgstr "Läsning från uttag misslyckades 180.000 gånger."
 msgid "Address contains a username: %s"
 msgstr "Adress innehåller användar-id: %s"
 
-#: WWW/Library/Implementation/HTTP.c:533
+#: WWW/Library/Implementation/HTTP.c:534
 msgid "This client does not contain support for HTTPS URLs."
 msgstr "Denna klient innehåller inte stöd för HTTPS-adresser."
 
-#: WWW/Library/Implementation/HTTP.c:558
+#: WWW/Library/Implementation/HTTP.c:559
 msgid "Unable to connect to remote host."
 msgstr "Kan inte ansluta till värd."
 
-#: WWW/Library/Implementation/HTTP.c:580
+#: WWW/Library/Implementation/HTTP.c:581
 msgid "Retrying connection without TLS."
 msgstr "Gör nytt försök; ansluter utan TLS."
 
-#: WWW/Library/Implementation/HTTP.c:623
+#: WWW/Library/Implementation/HTTP.c:624
 msgid "SSL error:Can't find common name in certificate-Continue?"
 msgstr "SSL-fel:Hittar inte vanligt namn i certifikat-Fortsätta?"
 
-#: WWW/Library/Implementation/HTTP.c:640
+#: WWW/Library/Implementation/HTTP.c:641
 #, c-format
 msgid "SSL error:host(%s)!=cert(%s)-Continue?"
 msgstr "SSL-fel:värd(%s)!=cert(%s)-Fortsätta?"
@@ -3089,24 +3089,24 @@ msgstr "SSL-fel:värd(%s)!=cert(%s)-Fortsätta?"
 # %d = SSL_get_cipher_bits(handle,NULL)
 # %s = SSL_get_cipher_version(handle)
 # %s = SSL_get_cipher(handle)
-#: WWW/Library/Implementation/HTTP.c:652
+#: WWW/Library/Implementation/HTTP.c:653
 #, c-format
 msgid "Secure %d-bit %s (%s) HTTP connection"
 msgstr "Säker %d-bitars HTTP-anslutning med %s (%s)"
 
-#: WWW/Library/Implementation/HTTP.c:1122
+#: WWW/Library/Implementation/HTTP.c:1123
 msgid "Sending HTTP request."
 msgstr "Sänder HTTP-fråga."
 
-#: WWW/Library/Implementation/HTTP.c:1161
+#: WWW/Library/Implementation/HTTP.c:1162
 msgid "Unexpected network write error; connection aborted."
 msgstr "Oväntat skrivfel på nätverket; uppkopplingen avbröts."
 
-#: WWW/Library/Implementation/HTTP.c:1167
+#: WWW/Library/Implementation/HTTP.c:1168
 msgid "HTTP request sent; waiting for response."
 msgstr "HTTP-fråga sänd; väntar på svar."
 
-#: WWW/Library/Implementation/HTTP.c:1235
+#: WWW/Library/Implementation/HTTP.c:1236
 msgid "Unexpected network read error; connection aborted."
 msgstr "Oväntat läsfel på nätverket; uppkopplingen avbröts."
 
@@ -3119,7 +3119,7 @@ msgstr "Oväntat läsfel på nätverket; uppkopplingen avbröts."
 #. * line and possibly other headers, so we'll deal with them by
 #. * showing the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1429
+#: WWW/Library/Implementation/HTTP.c:1430
 msgid "Got unexpected Informational Status."
 msgstr "Fick oväntad informationsstatus."
 
@@ -3129,7 +3129,7 @@ msgstr "Fick oväntad informationsstatus."
 #. * content.  We'll instruct the user to do that, and
 #. * restore the current document.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1463
+#: WWW/Library/Implementation/HTTP.c:1464
 msgid "Request fulfilled.  Reset Content."
 msgstr "Frågan slutförd. Nollställ innehåll."
 
@@ -3139,27 +3139,27 @@ msgstr "Frågan slutförd. Nollställ innehåll."
 #. * status is inappropriate.  We'll deal with it by showing
 #. * the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1580
+#: WWW/Library/Implementation/HTTP.c:1581
 msgid "Got unexpected 304 Not Modified status."
 msgstr "Fick oväntad \"ej modifierad\"-(304)-status."
 
-#: WWW/Library/Implementation/HTTP.c:1643
+#: WWW/Library/Implementation/HTTP.c:1644
 msgid "Redirection of POST content requires user approval."
 msgstr "Omdirigering av POST-innehåll kräver användarens samtycke."
 
-#: WWW/Library/Implementation/HTTP.c:1658
+#: WWW/Library/Implementation/HTTP.c:1659
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr "Har POST-innehåll. Behandlar permanent omdirigering som temporär.\n"
 
-#: WWW/Library/Implementation/HTTP.c:1700
+#: WWW/Library/Implementation/HTTP.c:1701
 msgid "Retrying with access authorization information."
 msgstr "Försöker igen med auktoriseringsinformation."
 
-#: WWW/Library/Implementation/HTTP.c:1712
+#: WWW/Library/Implementation/HTTP.c:1713
 msgid "Show the 401 message body?"
 msgstr "Visa kroppen för 401-meddelandet?"
 
-#: WWW/Library/Implementation/HTTP.c:1755
+#: WWW/Library/Implementation/HTTP.c:1756
 msgid "Show the 407 message body?"
 msgstr "Via kroppen för 407-meddelandet?"
 
@@ -3167,7 +3167,7 @@ msgstr "Via kroppen för 407-meddelandet?"
 #. * Bad or unknown server_status number.  Take a chance and hope
 #. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1855
+#: WWW/Library/Implementation/HTTP.c:1856
 msgid "Unknown status reply from server!"
 msgstr "Okänt statussvar från server!"
 
@@ -3355,106 +3355,106 @@ msgstr "Ansvarig"
 msgid "Host"
 msgstr "Värd"
 
-#: src/GridText.c:700
+#: src/GridText.c:710
 msgid "Memory exhausted, display interrupted!"
 msgstr "Minnet slut, visning avbruten!"
 
-#: src/GridText.c:705
+#: src/GridText.c:715
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr "Minnet slut, avbryter överföring!"
 
-#: src/GridText.c:3588
+#: src/GridText.c:3590
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr " *** MINNET SLUT ***"
 
-#: src/GridText.c:6002 src/GridText.c:6009 src/LYList.c:248
+#: src/GridText.c:6004 src/GridText.c:6011 src/LYList.c:248
 msgid "unknown field or link"
 msgstr "okänt fält eller länk"
 
-#: src/GridText.c:6018
+#: src/GridText.c:6020
 msgid "text entry field"
 msgstr "textinmatningsfält"
 
-#: src/GridText.c:6021
+#: src/GridText.c:6023
 msgid "password entry field"
 msgstr "lösenordsinmatningsfält"
 
-#: src/GridText.c:6024
+#: src/GridText.c:6026
 msgid "checkbox"
 msgstr "kryssruta"
 
-#: src/GridText.c:6027
+#: src/GridText.c:6029
 msgid "radio button"
 msgstr "radioknapp"
 
-#: src/GridText.c:6030
+#: src/GridText.c:6032
 msgid "submit button"
 msgstr "sändknapp"
 
-#: src/GridText.c:6033
+#: src/GridText.c:6035
 msgid "reset button"
 msgstr "nollställningsknapp"
 
-#: src/GridText.c:6036
+#: src/GridText.c:6038
 msgid "popup menu"
 msgstr "popup-meny"
 
-#: src/GridText.c:6039
+#: src/GridText.c:6041
 msgid "hidden form field"
 msgstr "dolt formulärfält"
 
-#: src/GridText.c:6042
+#: src/GridText.c:6044
 msgid "text entry area"
 msgstr "textinmatningsområde"
 
-#: src/GridText.c:6045
+#: src/GridText.c:6047
 msgid "range entry field"
 msgstr "områdesinmatningsfält"
 
-#: src/GridText.c:6048
+#: src/GridText.c:6050
 msgid "file entry field"
 msgstr "filinmatningsfält"
 
-#: src/GridText.c:6051
+#: src/GridText.c:6053
 msgid "text-submit field"
 msgstr "textsändfält"
 
-#: src/GridText.c:6054
+#: src/GridText.c:6056
 msgid "image-submit button"
 msgstr "bildsändfält"
 
-#: src/GridText.c:6057
+#: src/GridText.c:6059
 msgid "keygen field"
 msgstr "nyckelgenerering misslyckades"
 
-#: src/GridText.c:6060
+#: src/GridText.c:6062
 msgid "unknown form field"
 msgstr "okänt formulärfält"
 
-#: src/GridText.c:10077
+#: src/GridText.c:10074
 msgid "Can't open file for uploading"
 msgstr "Kan inte öppna fil för sändning"
 
-#: src/GridText.c:11229
+#: src/GridText.c:11227
 #, c-format
 msgid "Submitting %s"
 msgstr "Skickar %s"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12377
+#: src/GridText.c:12375
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr "Hängning upptäckt: TextAnchor-struktur förstörd - föreslår avbrott!"
 
 #. don't show previous state
-#: src/GridText.c:12582
+#: src/GridText.c:12580
 msgid "Wrap lines to fit displayed area?"
 msgstr "Ombryt rader så att de passar i visat fält?"
 
-#: src/GridText.c:12634
+#: src/GridText.c:12632
 msgid "Very long lines have been wrapped!"
 msgstr "Mycket långa rader har ombrutits!"
 
-#: src/GridText.c:13075
+#: src/GridText.c:13073
 msgid "Very long lines have been truncated!"
 msgstr "mycket långa rader har trunkerats!"
 
@@ -3544,31 +3544,31 @@ msgstr "nej"
 msgid "Y/N/A/V"
 msgstr "J/N/A/L"
 
-#: src/HTML.c:5915
+#: src/HTML.c:5914
 msgid "Description:"
 msgstr "Beskrivning:"
 
-#: src/HTML.c:5920
+#: src/HTML.c:5919
 msgid "(none)"
 msgstr "(ingen)"
 
-#: src/HTML.c:5924
+#: src/HTML.c:5923
 msgid "Filepath:"
 msgstr "Sökväg:"
 
-#: src/HTML.c:5930
+#: src/HTML.c:5929
 msgid "(unknown)"
 msgstr "(okänd)"
 
-#: src/HTML.c:7374
+#: src/HTML.c:7373
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr "Dokumentet innehåller endast dolda länkar. Använd \"l\"istkommandot."
 
-#: src/HTML.c:7867
+#: src/HTML.c:7870
 msgid "Source cache error - disk full?"
 msgstr "Källkodscachefel - disk full?"
 
-#: src/HTML.c:7880
+#: src/HTML.c:7883
 msgid "Source cache error - not enough memory!"
 msgstr "Källkodscachefel - minnet slut!"
 
@@ -3677,27 +3677,27 @@ msgstr "\"cookie_domain_flag_set\"-fel, avbryter programmet"
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr "Terminalinitiering misslyckades - okänd terminaltyp?"
 
-#: src/LYCurses.c:1442
+#: src/LYCurses.c:1443
 msgid "Terminal ="
 msgstr "Terminal ="
 
-#: src/LYCurses.c:1446
+#: src/LYCurses.c:1447
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "Du måste använda en vt100-, -200-, etc. -terminal med detta program."
 
-#: src/LYCurses.c:1495
+#: src/LYCurses.c:1496
 msgid "Your Terminal type is unknown!"
 msgstr "Din terminaltyp är okänd!"
 
-#: src/LYCurses.c:1496
+#: src/LYCurses.c:1497
 msgid "Enter a terminal type:"
 msgstr "Ange en terminaltyp:"
 
-#: src/LYCurses.c:1510
+#: src/LYCurses.c:1511
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "TERMINALTYP SATT TILL"
 
-#: src/LYCurses.c:2087
+#: src/LYCurses.c:2088
 #, c-format
 msgid ""
 "\n"
@@ -3706,7 +3706,7 @@ msgstr ""
 "\n"
 "Ett fatalt fel har uppstått i %s ver. %s\n"
 
-#: src/LYCurses.c:2090
+#: src/LYCurses.c:2091
 #, c-format
 msgid ""
 "\n"
@@ -3736,39 +3736,39 @@ msgstr "Redigeringsprogrammet gav felstatus %s"
 msgid "reason unknown."
 msgstr "okänd anledning."
 
-#: src/LYDownload.c:502
+#: src/LYDownload.c:503
 msgid "Downloaded link:"
 msgstr "Hämtad länk:"
 
-#: src/LYDownload.c:507
+#: src/LYDownload.c:508
 msgid "Suggested file name:"
 msgstr "Föreslaget filnamn:"
 
-#: src/LYDownload.c:512
+#: src/LYDownload.c:513
 msgid "Standard download options:"
 msgstr "Fördefinierade hämtalternativ:"
 
-#: src/LYDownload.c:513
+#: src/LYDownload.c:514
 msgid "Download options:"
 msgstr "Hämtalternativ:"
 
-#: src/LYDownload.c:529
+#: src/LYDownload.c:530
 msgid "Save to disk"
 msgstr "Spara på disk"
 
-#: src/LYDownload.c:543
+#: src/LYDownload.c:544
 msgid "View temporary file"
 msgstr "Visa temporär fil"
 
-#: src/LYDownload.c:550
+#: src/LYDownload.c:551
 msgid "Save to disk disabled."
 msgstr "\"Spara på disk\" deaktiverad."
 
-#: src/LYDownload.c:554 src/LYPrint.c:1319
+#: src/LYDownload.c:555 src/LYPrint.c:1319
 msgid "Local additions:"
 msgstr "Lokala tillägg:"
 
-#: src/LYDownload.c:565 src/LYUpload.c:211
+#: src/LYDownload.c:566 src/LYUpload.c:211
 #, c-format
 msgid "No Name Given"
 msgstr "Inget namn har angetts"
@@ -4184,19 +4184,19 @@ msgstr "Detta meddelande automatgenererades av"
 msgid "No system mailer configured"
 msgstr "E-postprogram inte konfigurerat i systemet"
 
-#: src/LYMain.c:999
+#: src/LYMain.c:998
 msgid "No Winsock found, sorry."
 msgstr "Ingen Winsock hittades, ursäkta."
 
-#: src/LYMain.c:1194
+#: src/LYMain.c:1193
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "Du MÅSTE ange ett giltigt TMP- eller TEMP-område!"
 
-#: src/LYMain.c:1247 src/LYMainLoop.c:4979
+#: src/LYMain.c:1246 src/LYMainLoop.c:4977
 msgid "No such directory"
 msgstr "Katalogen finns ej"
 
-#: src/LYMain.c:1452
+#: src/LYMain.c:1453
 #, c-format
 msgid ""
 "\n"
@@ -4207,7 +4207,7 @@ msgstr ""
 "Konfigurationsfil %s ej tillgänglig.\n"
 "\n"
 
-#: src/LYMain.c:1462
+#: src/LYMain.c:1463
 #, c-format
 msgid ""
 "\n"
@@ -4218,7 +4218,7 @@ msgstr ""
 "Lynxteckenuppsättningar ej deklarerade.\n"
 "\n"
 
-#: src/LYMain.c:1491
+#: src/LYMain.c:1492
 #, c-format
 msgid ""
 "\n"
@@ -4229,7 +4229,7 @@ msgstr ""
 "Lynxredigeringskarta ej deklarerad.\n"
 "\n"
 
-#: src/LYMain.c:1517
+#: src/LYMain.c:1518
 #, c-format
 msgid ""
 "\n"
@@ -4240,7 +4240,7 @@ msgstr ""
 "Lynxfil %s ej tillgänglig.\n"
 "\n"
 
-#: src/LYMain.c:1758
+#: src/LYMain.c:1761
 msgid "Warning:"
 msgstr "Varning:"
 
@@ -4285,115 +4285,115 @@ msgstr "ANVÄNDNING: %s [flaggor] [fil]\n"
 msgid "Options are:\n"
 msgstr "Flaggorna är:\n"
 
-#: src/LYMain.c:4243
+#: src/LYMain.c:4242
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Okänd flagga: %s\n"
 
-#: src/LYMainLoop.c:567
+#: src/LYMainLoop.c:572
 #, c-format
 msgid "Internal error: Invalid mouse link %d!"
 msgstr "Internt fel: Ogiltig muslänk %d!"
 
-#: src/LYMainLoop.c:684 src/LYMainLoop.c:5001
+#: src/LYMainLoop.c:689 src/LYMainLoop.c:4999
 msgid "A URL specified by the user"
 msgstr "En adress angiven av användaren"
 
-#: src/LYMainLoop.c:1140
+#: src/LYMainLoop.c:1145
 msgid "Enctype multipart/form-data not yet supported!  Cannot submit."
 msgstr "Kodningen multiport/form-data stöds inte ännu! Kan inte skicka."
 
 #.
 #. * Make a name for this help file.
 #.
-#: src/LYMainLoop.c:3042
+#: src/LYMainLoop.c:3047
 msgid "Help Screen"
 msgstr "Hjälpskärm"
 
-#: src/LYMainLoop.c:3163
+#: src/LYMainLoop.c:3168
 msgid "System Index"
 msgstr "Systemindex"
 
-#: src/LYMainLoop.c:3523 src/LYMainLoop.c:5221
+#: src/LYMainLoop.c:3528 src/LYMainLoop.c:5223
 msgid "Entry into main screen"
 msgstr "Ingång till huvudskärm"
 
-#: src/LYMainLoop.c:3793
+#: src/LYMainLoop.c:3791
 msgid "No next document present"
 msgstr "Det finns inget nästa dokument"
 
-#: src/LYMainLoop.c:4091
+#: src/LYMainLoop.c:4089
 msgid "charset for this document specified explicitly, sorry..."
 msgstr "teckenuppsättning för detta dokumentet explicit deklarerat, ursäkta..."
 
-#: src/LYMainLoop.c:4955
+#: src/LYMainLoop.c:4953
 msgid "cd to:"
 msgstr "byt katalog till:"
 
-#: src/LYMainLoop.c:4982
+#: src/LYMainLoop.c:4980
 msgid "A component of path is not a directory"
 msgstr "En del av sökvägen är inte en katalog"
 
-#: src/LYMainLoop.c:4985
+#: src/LYMainLoop.c:4983
 msgid "failed to change directory"
 msgstr "lyckades inte byta katalog"
 
-#: src/LYMainLoop.c:6143
+#: src/LYMainLoop.c:6144
 msgid "Reparsing document under current settings..."
 msgstr "Tolkar om dokumentet med aktuella inställningar..."
 
-#: src/LYMainLoop.c:6429
+#: src/LYMainLoop.c:6433
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Fatalt fel - kunde inte öppna utdatafil %s\n"
 
 # Kollas!
-#: src/LYMainLoop.c:6773
+#: src/LYMainLoop.c:6777
 msgid "TABLE center enable."
 msgstr "Tabellcentrering aktiverad."
 
 # Kollas!
-#: src/LYMainLoop.c:6776
+#: src/LYMainLoop.c:6780
 msgid "TABLE center disable."
 msgstr "Tabellcentrering inaktiverad."
 
-#: src/LYMainLoop.c:6853
+#: src/LYMainLoop.c:6857
 msgid "Current URL is empty."
 msgstr "Nuvarande adress är tom."
 
-#: src/LYMainLoop.c:6855 src/LYUtils.c:1693
+#: src/LYMainLoop.c:6859 src/LYUtils.c:1702
 msgid "Copy to clipboard failed."
 msgstr "Misslyckades kopiera till urklipp."
 
-#: src/LYMainLoop.c:6857
+#: src/LYMainLoop.c:6861
 msgid "Document URL put to clipboard."
 msgstr "Dokumentadress lagd i urklipp."
 
-#: src/LYMainLoop.c:6859
+#: src/LYMainLoop.c:6863
 msgid "Link URL put to clipboard."
 msgstr "Länkadress lagd i urklipp."
 
-#: src/LYMainLoop.c:6886
+#: src/LYMainLoop.c:6890
 msgid "No URL in the clipboard."
 msgstr "Ingen adress i urklipp."
 
-#: src/LYMainLoop.c:7558 src/LYMainLoop.c:7728
+#: src/LYMainLoop.c:7554 src/LYMainLoop.c:7724
 msgid "-index-"
 msgstr "-index-"
 
-#: src/LYMainLoop.c:7668
+#: src/LYMainLoop.c:7664
 msgid "lynx: Can't access startfile"
 msgstr "lynx: Kan inte komma åt startfil"
 
-#: src/LYMainLoop.c:7680
+#: src/LYMainLoop.c:7676
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: Startfilen hittades inte eller är varken text/html eller text/plain"
 
-#: src/LYMainLoop.c:7681
+#: src/LYMainLoop.c:7677
 msgid "      Exiting..."
 msgstr "      Avslutar..."
 
-#: src/LYMainLoop.c:7722
+#: src/LYMainLoop.c:7718
 msgid "-more-"
 msgstr "-mer-"
 
@@ -5330,11 +5330,11 @@ msgstr "Åtgärd:"
 msgid "(Form field)"
 msgstr "(Formulärfält)"
 
-#: src/LYShowInfo.c:450
+#: src/LYShowInfo.c:448
 msgid "No Links on the current page"
 msgstr "Ingen länk på aktuell sida"
 
-#: src/LYShowInfo.c:455
+#: src/LYShowInfo.c:453
 msgid "Server Headers:"
 msgstr "Serverhuvuden:"
 
@@ -5387,33 +5387,33 @@ msgstr "Skicka till:"
 msgid "Upload options:"
 msgstr "Insändningsalternativ:"
 
-#: src/LYUtils.c:1695
+#: src/LYUtils.c:1704
 msgid "Download document URL put to clipboard."
 msgstr "Adress till hämtat dokument lagt i urklipp."
 
-#: src/LYUtils.c:2465
+#: src/LYUtils.c:2481
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "Oväntat åtkomstprotokoll för denna adresstyp."
 
-#: src/LYUtils.c:3283
+#: src/LYUtils.c:3289
 msgid "Too many tempfiles"
 msgstr "För många temporärfiler"
 
-#: src/LYUtils.c:3587
+#: src/LYUtils.c:3593
 msgid "unknown restriction"
 msgstr "okänd begränsning"
 
-#: src/LYUtils.c:3617
+#: src/LYUtils.c:3623
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "Inga begränsningar satta.\n"
 
-#: src/LYUtils.c:3620
+#: src/LYUtils.c:3626
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "Satta begränsningar:\n"
 
-#: src/LYUtils.c:5002
+#: src/LYUtils.c:5010
 msgid "Cannot find HOME directory"
 msgstr "Hittar inte hemkatalogen (HOME)"
 

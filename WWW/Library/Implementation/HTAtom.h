@@ -23,16 +23,32 @@
 
 #include <HTList.h>
 
-typedef struct _HTAtom HTAtom;
+#ifdef __cplusplus
+extern "C" {
+#endif
+    typedef struct _HTAtom HTAtom;
 
-struct _HTAtom {
-    HTAtom *next;
-    char *name;
-};				/* struct _HTAtom */
+    struct _HTAtom {
+	HTAtom *next;
+	char *name;
+    };				/* struct _HTAtom */
 
-extern HTAtom *HTAtom_for(const char *string);
-extern HTList *HTAtom_templateMatches(const char *templ);
+    extern HTAtom *HTAtom_for(const char *string);
+    extern HTList *HTAtom_templateMatches(const char *templ);
 
 #define HTAtom_name(a) ((a)->name)
 
-#endif /* HTATOM_H */
+/*
+
+The HTFormat type
+
+   We use the HTAtom object for holding representations.  This allows faster manipulation
+   (comparison and copying) that if we stayed with strings.
+
+ */
+    typedef HTAtom *HTFormat;
+
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTATOM_H */

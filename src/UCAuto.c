@@ -225,11 +225,12 @@ void UCChangeTerminalCodepage(int newcs,
 	    LYCloseTempFP(fp1);
 	    LYCloseTempFP(fp2);
 	    if ((nlen = strlen(old_font)) + 1 < LY_MAXPATH &&
-		(rp = realloc(old_font, nlen + 1)))
-		old_font = rp;
+		(rp = typeRealloc(char, old_font, nlen + 1)))
+		  old_font = rp;
+
 	    if ((nlen = strlen(old_umap)) + 1 < LY_MAXPATH &&
-		(rp = realloc(old_umap, nlen + 1)))
-		old_umap = rp;
+		(rp = typeRealloc(char, old_umap, nlen + 1)))
+		  old_umap = rp;
 	} else {
 	    if (fp1)
 		LYRemoveTemp(old_font);

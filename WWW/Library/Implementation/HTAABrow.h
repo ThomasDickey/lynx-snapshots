@@ -33,6 +33,9 @@
 
 #include <HTAAUtil.h>		/* Common parts of AA */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
 
 Routines for Browser Side Recording of AA Info
@@ -49,30 +52,27 @@ Routines for Browser Side Recording of AA Info
       HTAA_shouldRetryWithAuth() determines whether to retry the request with AA or with a
       new AA (in case username or password was misspelled).
 
- */
-
-/* PUBLIC                                               HTAA_composeAuth()
- *
- *      COMPOSE THE ENTIRE AUTHORIZATION HEADER LINE IF WE
- *      ALREADY KNOW, THAT THE HOST MIGHT REQUIRE AUTHORIZATION
- *
- * ON ENTRY:
- *      hostname        is the hostname of the server.
- *      portnumber      is the portnumber in which the server runs.
- *      docname         is the pathname of the document (as in URL)
- *
- * ON EXIT:
- *      returns NULL, if no authorization seems to be needed, or
- *              if it is the entire Authorization: line, e.g.
- *
- *                 "Authorization: basic username:password"
- *
- *              As usual, this string is automatically freed.
- */
-extern char *HTAA_composeAuth(const char *hostname,
-			      const int portnumber,
-			      const char *docname,
-			      BOOL IsProxy);
+ *//* PUBLIC                                               HTAA_composeAuth()
+   *
+   *      COMPOSE THE ENTIRE AUTHORIZATION HEADER LINE IF WE
+   *      ALREADY KNOW, THAT THE HOST MIGHT REQUIRE AUTHORIZATION
+   *
+   * ON ENTRY:
+   *      hostname        is the hostname of the server.
+   *      portnumber      is the portnumber in which the server runs.
+   *      docname         is the pathname of the document (as in URL)
+   *
+   * ON EXIT:
+   *      returns NULL, if no authorization seems to be needed, or
+   *              if it is the entire Authorization: line, e.g.
+   *
+   *                 "Authorization: basic username:password"
+   *
+   *              As usual, this string is automatically freed.
+ */ extern char *HTAA_composeAuth(const char *hostname,
+				  const int portnumber,
+				  const char *docname,
+				  BOOL IsProxy);
 
 /* BROWSER PUBLIC                               HTAA_shouldRetryWithAuth()
  *
@@ -101,16 +101,16 @@ extern char *HTAA_composeAuth(const char *hostname,
  *                                field (in function HTAA_composeAuth()).
  *                      NO, otherwise.
  */
-extern BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
-				     int length,
-				     int soc,
-				     BOOL IsProxy);
+    extern BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
+					 int length,
+					 int soc,
+					 BOOL IsProxy);
 
 /*
  *  Function to allow clearing of all Authorization info
  *  via a browser command. - FM
  */
-extern void HTClearHTTPAuthInfo(void);
+    extern void HTClearHTTPAuthInfo(void);
 
 /*
 
@@ -123,8 +123,11 @@ Enabling Gateway httpds to Forward Authorization
 
  */
 
-extern void HTAAForwardAuth_set(const char *scheme_name,
-				const char *scheme_specifics);
-extern void HTAAForwardAuth_reset(void);
+    extern void HTAAForwardAuth_set(const char *scheme_name,
+				    const char *scheme_specifics);
+    extern void HTAAForwardAuth_reset(void);
 
-#endif /* NOT HTAABROW_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* NOT HTAABROW_H */

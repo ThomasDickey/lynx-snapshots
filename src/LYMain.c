@@ -23,6 +23,7 @@
 #include <LYReadCFG.h>
 #include <LYrcFile.h>
 #include <LYKeymap.h>
+#include <HTForms.h>
 #include <LYList.h>
 #include <LYJump.h>
 #include <LYMainLoop.h>
@@ -601,6 +602,10 @@ static HTList *LYStdinArgs = NULL;
 #define EXTENDED_STARTFILE_RECALL 1
 #endif
 
+#if EXTENDED_STARTFILE_RECALL
+static char *nonoption = 0;
+#endif
+
 #ifndef OPTNAME_ALLOW_DASHES
 /* if set, then will allow dashes and underscores to be used interchangeable
    in commandline option's names - VH */
@@ -740,8 +745,10 @@ static void free_lynx_globals(void)
     FREE(proxyauth_info[0]);
     FREE(proxyauth_info[1]);
     FREE(lynxjumpfile);
+    FREE(ftp_lasthost);
     FREE(startrealm);
     FREE(personal_mail_address);
+    FREE(anonftp_password);
     FREE(URLDomainPrefixes);
     FREE(URLDomainSuffixes);
     FREE(XLoadImageCommand);
@@ -754,11 +761,13 @@ static void free_lynx_globals(void)
 #endif
     FREE(UCAssume_MIMEcharset);
     LYUIPages_free();
-    for (i = 0; i < nlinks; i++) {
-	FREE(links[i].lname);
-    }
+    LYFreeHilites(0, nlinks);
     nlinks = 0;
-    HTList_delete(LYcommandList());
+    LYFreeStringList(LYcommandList());
+    HTInitProgramPaths();
+#if EXTENDED_STARTFILE_RECALL
+    FREE(nonoption);
+#endif
 
     return;
 }
@@ -769,18 +778,8 @@ static void free_lynx_globals(void)
  */
 static void LYStdinArgs_free(void)
 {
-    char *argument;
-    HTList *cur = LYStdinArgs;
-
-    if (cur == NULL)
-	return;
-
-    while (NULL != (argument = (char *) HTList_nextObject(cur))) {
-	FREE(argument);
-    }
-    HTList_delete(LYStdinArgs);
+    LYFreeStringList(LYStdinArgs);
     LYStdinArgs = NULL;
-    return;
 }
 
 void reset_signals(void)
@@ -980,7 +979,7 @@ int main(int argc,
 
 #ifndef DISABLE_FTP
     /* malloc a sizeof(char) so 1st strcmp() won't dump in HTLoadFile() */
-    ftp_lasthost = calloc(1, sizeof(char));
+    ftp_lasthost = typecalloc(char);
 #endif
 
 #ifdef EXP_CHARSET_CHOICE
@@ -1386,7 +1385,9 @@ int main(int argc,
      */
     if ((cp = LYGetEnv("LYNX_TRACE_FILE")) == 0)
 	cp = TRACE_FILE;
-    LYAddPathToHome(LYTraceLogPath = malloc(LY_MAXPATH), LY_MAXPATH, cp);
+    LYTraceLogPath = typeMallocn(char, LY_MAXPATH);
+
+    LYAddPathToHome(LYTraceLogPath, LY_MAXPATH, cp);
 
     LYOpenTraceLog();
 
@@ -1674,7 +1675,9 @@ int main(int argc,
      */
     if (persistent_cookies) {
 	if (LYCookieFile == NULL) {
-	    LYAddPathToHome(LYCookieFile = malloc(LY_MAXPATH), LY_MAXPATH, COOKIE_FILE);
+	    LYCookieFile = typeMallocn(char, LY_MAXPATH);
+
+	    LYAddPathToHome(LYCookieFile, LY_MAXPATH, COOKIE_FILE);
 	} else {
 	    tildeExpand(&LYCookieFile, FALSE);
 	}
@@ -2141,9 +2144,6 @@ int main(int argc,
 	cleanup();
 #if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
 	if (!isendwin()) {
-	    extern int saved_scrsize_x;
-	    extern int saved_scrsize_y;
-
 	    if ((saved_scrsize_x != 0) && (saved_scrsize_y != 0)) {
 		resize_term(saved_scrsize_y, saved_scrsize_x);
 	    }
@@ -4066,7 +4066,6 @@ static BOOL parse_arg(char **argv,
     char *arg_name;
 
 #if EXTENDED_STARTFILE_RECALL
-    static char *nonoption = 0;
     static BOOLEAN no_options_further = FALSE;	/* set to TRUE after '--' argument */
 #endif
 

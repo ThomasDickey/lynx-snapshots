@@ -566,7 +566,7 @@ typedef enum {
 
 #define VA_INTGR(type) ival = va_arg((*ap), type)
 #define VA_FLOAT(type) fval = va_arg((*ap), type)
-#define VA_POINT(type) pval = (void *)va_arg((*ap), type)
+#define VA_POINT(type) pval = (char *)va_arg((*ap), type)
 
 #define NUM_WIDTH 10		/* allow for width substituted for "*" in "%*s" */
 		/* also number of chars assumed to be needed in addition

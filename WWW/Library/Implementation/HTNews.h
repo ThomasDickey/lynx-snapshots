@@ -13,42 +13,48 @@
 #include <HTAccess.h>
 #include <HTAnchor.h>
 
-extern int HTNewsChunkSize;
-extern int HTNewsMaxChunk;
+#ifdef __cplusplus
+extern "C" {
+#endif
+    extern int HTNewsChunkSize;
+    extern int HTNewsMaxChunk;
 
 #ifdef GLOBALREF_IS_MACRO
-extern GLOBALREF (HTProtocol, HTNews);
-extern GLOBALREF (HTProtocol, HTNNTP);
-extern GLOBALREF (HTProtocol, HTNewsPost);
-extern GLOBALREF (HTProtocol, HTNewsReply);
-extern GLOBALREF (HTProtocol, HTSNews);
-extern GLOBALREF (HTProtocol, HTSNewsPost);
-extern GLOBALREF (HTProtocol, HTSNewsReply);
+    extern GLOBALREF (HTProtocol, HTNews);
+    extern GLOBALREF (HTProtocol, HTNNTP);
+    extern GLOBALREF (HTProtocol, HTNewsPost);
+    extern GLOBALREF (HTProtocol, HTNewsReply);
+    extern GLOBALREF (HTProtocol, HTSNews);
+    extern GLOBALREF (HTProtocol, HTSNewsPost);
+    extern GLOBALREF (HTProtocol, HTSNewsReply);
 
 #else
-GLOBALREF HTProtocol HTNews;
-GLOBALREF HTProtocol HTNNTP;
-GLOBALREF HTProtocol HTNewsPost;
-GLOBALREF HTProtocol HTNewsReply;
-GLOBALREF HTProtocol HTSNews;
-GLOBALREF HTProtocol HTSNewsPost;
-GLOBALREF HTProtocol HTSNewsReply;
-#endif /* GLOBALREF_IS_MACRO */
+    GLOBALREF HTProtocol HTNews;
+    GLOBALREF HTProtocol HTNNTP;
+    GLOBALREF HTProtocol HTNewsPost;
+    GLOBALREF HTProtocol HTNewsReply;
+    GLOBALREF HTProtocol HTSNews;
+    GLOBALREF HTProtocol HTSNewsPost;
+    GLOBALREF HTProtocol HTSNewsReply;
+#endif				/* GLOBALREF_IS_MACRO */
 
-extern void HTSetNewsHost(const char *value);
-extern const char *HTGetNewsHost(void);
-extern char *HTNewsHost;
+    extern void HTSetNewsHost(const char *value);
+    extern const char *HTGetNewsHost(void);
+    extern char *HTNewsHost;
 
-extern void HTClearNNTPAuthInfo(void);
+    extern void HTClearNNTPAuthInfo(void);
 
 #ifdef USE_SSL
-extern SSL_CTX *ssl_ctx;
+    extern SSL_CTX *ssl_ctx;
 
-extern int HTNewsProxyConnect(int sock,
-			      const char *url,
-			      HTParentAnchor *anAnchor,
-			      HTFormat format_out,
-			      HTStream *sink);
+    extern int HTNewsProxyConnect(int sock,
+				  const char *url,
+				  HTParentAnchor *anAnchor,
+				  HTFormat format_out,
+				  HTStream *sink);
 #endif
 
-#endif /* HTNEWS_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTNEWS_H */

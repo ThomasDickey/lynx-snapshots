@@ -12,14 +12,17 @@
 #include <HTUtils.h>
 #endif
 
-void log_write(char *);
+#ifdef __cplusplus
+extern "C" {
+#endif
+    void log_write(char *);
 
 /*
  *	Routines originally from Panic.h -- FM
  *
  *----------------------------------------------------------------------*/
 
-void panic(char *format,...);
+    void panic(char *format,...);
 
 /*----------------------------------------------------------------------*/
 
@@ -32,35 +35,35 @@ void panic(char *format,...);
 
 #ifndef boolean
 #define boolean unsigned long
-#endif /* boolean */
+#endif				/* boolean */
 
 #ifndef true
 #define true	(boolean)1L
-#endif /* true */
+#endif				/* true */
 
 #ifndef false
 #define false	(boolean)0L	/* used to be (!true), but broke
 				   some compilers */
-#endif /* false */
+#endif				/* false */
 
 #ifndef TRUE
 #define TRUE	true
-#endif /* TRUE */
+#endif				/* TRUE */
 
 #ifndef FALSE
 #define FALSE	false
-#endif /* FALSE */
+#endif				/* FALSE */
 
 /*----------------------------------------------------------------------*/
 /* functions */
 
 /* enhanced memory handling functions - don't call them directly, use the
    macros below */
-void fs_checkPtr(void *ptr);
-void *fs_malloc(size_t size);
-void *fs_realloc(void *ptr, size_t size);
-void fs_free(void *ptr);
-char *fs_strncat(char *dst, char *src, size_t maxToAdd, size_t maxTotal);
+    void fs_checkPtr(void *ptr);
+    void *fs_malloc(size_t size);
+    void *fs_realloc(void *ptr, size_t size);
+    void fs_free(void *ptr);
+    char *fs_strncat(char *dst, char *src, size_t maxToAdd, size_t maxTotal);
 
 /* macros for memory functions.  call these in your program.  */
 #define s_checkPtr(ptr)		fs_checkPtr(ptr)
@@ -69,13 +72,13 @@ char *fs_strncat(char *dst, char *src, size_t maxToAdd, size_t maxTotal);
 #define s_free(ptr)		{ fs_free((char*)ptr); ptr = NULL; }
 #define s_strncat(dst,src,maxToAdd,maxTotal)	fs_strncat((dst),(src),(maxToAdd),(maxTotal))
 
-char *s_strdup(char *s);
+    char *s_strdup(char *s);
 
 #define IS_DELIMITER	1
 #define	NOT_DELIMITER	!IS_DELIMITER
 
-char char_downcase(unsigned long ch);
-char *string_downcase(char *word);
+    char char_downcase(unsigned long ch);
+    char *string_downcase(char *word);
 
 /*----------------------------------------------------------------------*/
 
@@ -89,7 +92,7 @@ char *string_downcase(char *word);
 /* bytes to leave for the header size info */
 #define HEADER_LEN	(size_t)2
 
-typedef long pdu_type;
+    typedef long pdu_type;
 
 #define	initAPDU			(pdu_type)20
 #define	initResponseAPDU		(pdu_type)21
@@ -104,14 +107,14 @@ typedef long pdu_type;
 #define	resourceControlAPDU		(pdu_type)30
 #define	resourceControlResponseAPDU	(pdu_type)31
 
-typedef struct any {		/* an any is a non-ascii string of characters */
-    unsigned long size;
-    char *bytes;
-} any;
+    typedef struct any {	/* an any is a non-ascii string of characters */
+	unsigned long size;
+	char *bytes;
+    } any;
 
-typedef any bit_map;		/* a bit_map is a group of packed bits */
+    typedef any bit_map;	/* a bit_map is a group of packed bits */
 
-typedef unsigned long data_tag;
+    typedef unsigned long data_tag;
 
 #define DT_PDUType			(data_tag)1
 #define	DT_ReferenceID			(data_tag)2
@@ -200,11 +203,11 @@ typedef unsigned long data_tag;
 
 #define DIAGNOSTIC_CODE_SIZE	(size_t)3
 
-typedef struct diagnosticRecord {
-    boolean SURROGATE;
-    char DIAG[DIAGNOSTIC_CODE_SIZE];
-    char *ADDINFO;
-} diagnosticRecord;
+    typedef struct diagnosticRecord {
+	boolean SURROGATE;
+	char DIAG[DIAGNOSTIC_CODE_SIZE];
+	char *ADDINFO;
+    } diagnosticRecord;
 
 #define D_PermanentSystemError	       "S1"
 #define D_TemporarySystemError         "S2"
@@ -248,7 +251,7 @@ typedef struct diagnosticRecord {
 
 /* for internal error handling */
 
-extern char *readErrorPosition;	/* pos where buf stoped making sense */
+    extern char *readErrorPosition;	/* pos where buf stoped making sense */
 
 /* the following are macros so that they can return OUT of the function
    which calls them
@@ -274,71 +277,71 @@ extern char *readErrorPosition;	/* pos where buf stoped making sense */
 
 /*----------------------------------------------------------------------*/
 
-diagnosticRecord *makeDiag(boolean surrogate, char *code, char *addInfo);
-void freeDiag(diagnosticRecord * diag);
-char *writeDiag(diagnosticRecord * diag, char *buffer, long *len);
-char *readDiag(diagnosticRecord ** diag, char *buffer);
+    diagnosticRecord *makeDiag(boolean surrogate, char *code, char *addInfo);
+    void freeDiag(diagnosticRecord * diag);
+    char *writeDiag(diagnosticRecord * diag, char *buffer, long *len);
+    char *readDiag(diagnosticRecord ** diag, char *buffer);
 
-char *writeCompressedInteger(unsigned long num, char *buf, long *len);
-char *readCompressedInteger(unsigned long *num, char *buf);
-char *writeCompressedIntWithPadding(unsigned long num, unsigned long size,
-				    char *buffer, long *len);
-unsigned long writtenCompressedIntSize(unsigned long num);
+    char *writeCompressedInteger(unsigned long num, char *buf, long *len);
+    char *readCompressedInteger(unsigned long *num, char *buf);
+    char *writeCompressedIntWithPadding(unsigned long num, unsigned long size,
+					char *buffer, long *len);
+    unsigned long writtenCompressedIntSize(unsigned long num);
 
-char *writeTag(data_tag tag, char *buf, long *len);
-char *readTag(data_tag *tag, char *buf);
-data_tag peekTag(char *buf);
-unsigned long writtenTagSize(data_tag tag);
+    char *writeTag(data_tag tag, char *buf, long *len);
+    char *readTag(data_tag *tag, char *buf);
+    data_tag peekTag(char *buf);
+    unsigned long writtenTagSize(data_tag tag);
 
-any *makeAny(unsigned long size, char *data);
-void freeAny(any *a);
-any *duplicateAny(any *a);
-char *writeAny(any *a, data_tag tag, char *buffer, long *len);
-char *readAny(any **anAny, char *buffer);
-unsigned long writtenAnySize(data_tag tag, any *a);
+    any *makeAny(unsigned long size, char *data);
+    void freeAny(any *a);
+    any *duplicateAny(any *a);
+    char *writeAny(any *a, data_tag tag, char *buffer, long *len);
+    char *readAny(any **anAny, char *buffer);
+    unsigned long writtenAnySize(data_tag tag, any *a);
 
-any *stringToAny(char *s);
-char *anyToString(any *a);
-unsigned long writtenStringSize(data_tag tag, char *s);
+    any *stringToAny(char *s);
+    char *anyToString(any *a);
+    unsigned long writtenStringSize(data_tag tag, char *s);
 
-any *longToAny(long Num);
-long anyToLong(any *a);
+    any *longToAny(long Num);
+    long anyToLong(any *a);
 
-char *writeString(char *s, data_tag tag, char *buffer, long *len);
-char *readString(char **s, char *buffer);
+    char *writeString(char *s, data_tag tag, char *buffer, long *len);
+    char *readString(char **s, char *buffer);
 
-bit_map *makeBitMap(unsigned long numBits,...);
+    bit_map *makeBitMap(unsigned long numBits,...);
 
-void freeBitMap(bit_map *bm);
-boolean bitAtPos(unsigned long pos, bit_map *bm);
-char *writeBitMap(bit_map *bm, data_tag tag, char *buffer, long *len);
-char *readBitMap(bit_map **bm, char *buffer);
+    void freeBitMap(bit_map *bm);
+    boolean bitAtPos(unsigned long pos, bit_map *bm);
+    char *writeBitMap(bit_map *bm, data_tag tag, char *buffer, long *len);
+    char *readBitMap(bit_map **bm, char *buffer);
 
-char *writeByte(unsigned long byte, char *buf, long *len);
-char *readByte(unsigned char *byte, char *buf);
+    char *writeByte(unsigned long byte, char *buf, long *len);
+    char *readByte(unsigned char *byte, char *buf);
 
-char *writeBoolean(boolean flag, char *buf, long *len);
-char *readBoolean(boolean *flag, char *buf);
+    char *writeBoolean(boolean flag, char *buf, long *len);
+    char *readBoolean(boolean *flag, char *buf);
 
-char *writePDUType(pdu_type pduType, char *buf, long *len);
-char *readPDUType(pdu_type *pduType, char *buf);
-pdu_type peekPDUType(char *buf);
+    char *writePDUType(pdu_type pduType, char *buf, long *len);
+    char *readPDUType(pdu_type *pduType, char *buf);
+    pdu_type peekPDUType(char *buf);
 
-char *writeBinaryInteger(long num, unsigned long size,
-			 char *buf, long *len);
-char *readBinaryInteger(long *num, unsigned long size, char *buf);
-unsigned long writtenCompressedBinIntSize(long num);
+    char *writeBinaryInteger(long num, unsigned long size,
+			     char *buf, long *len);
+    char *readBinaryInteger(long *num, unsigned long size, char *buf);
+    unsigned long writtenCompressedBinIntSize(long num);
 
-char *writeNum(long num, data_tag tag, char *buffer, long *len);
-char *readNum(long *num, char *buffer);
-unsigned long writtenNumSize(data_tag tag, long num);
+    char *writeNum(long num, data_tag tag, char *buffer, long *len);
+    char *readNum(long *num, char *buffer);
+    unsigned long writtenNumSize(data_tag tag, long num);
 
-void doList(void **list, void (*func) (void *));
+    void doList(void **list, void (*func) (void *));
 
-char *writeProtocolVersion(char *buf, long *len);
-char *defaultImplementationID(void);
-char *defaultImplementationName(void);
-char *defaultImplementationVersion(void);
+    char *writeProtocolVersion(char *buf, long *len);
+    char *defaultImplementationID(void);
+    char *defaultImplementationName(void);
+    char *defaultImplementationVersion(void);
 
 /*----------------------------------------------------------------------*/
 
@@ -362,62 +365,62 @@ char *defaultImplementationVersion(void);
 #define QT_BooleanQuery	"1"	/* standard boolean query */
 
 /* general attribute code - use in place of any attribute */
-#define IGNORE	"ig"
+#define IGNORE			"ig"
 
 /* use value codes */
-#define	UV_ISBN	"ub"
-#define	CORPORATE_NAME	"uc"
-#define	ISSN	"us"
-#define	PERSONAL_NAME	"up"
-#define	SUBJECT	"uj"
-#define	TITLE	"ut"
-#define	GEOGRAPHIC_NAME	"ug"
-#define	CODEN	"ud"
+#define	UV_ISBN			"ub"
+#define	CORPORATE_NAME		"uc"
+#define	ISSN			"us"
+#define	PERSONAL_NAME		"up"
+#define	SUBJECT			"uj"
+#define	TITLE			"ut"
+#define	GEOGRAPHIC_NAME		"ug"
+#define	CODEN			"ud"
 #define	SUBJECT_SUBDIVISION	"ue"
-#define	SERIES_TITLE	"uf"
+#define	SERIES_TITLE		"uf"
 #define	MICROFORM_GENERATION	"uh"
 #define	PLACE_OF_PUBLICATION	"ui"
-#define	NUC_CODE	"uk"
-#define	LANGUAGE	"ul"
+#define	NUC_CODE		"uk"
+#define	LANGUAGE		"ul"
 #define	COMBINATION_OF_USE_VALUES	"um"
 #define	SYSTEM_CONTROL_NUMBER	"un"
-#define	DATE	"uo"
+#define	DATE			"uo"
 #define	LC_CONTROL_NUMBER	"ur"
 #define	MUSIC_PUBLISHERS_NUMBER	"uu"
 #define	GOVERNMENT_DOCUMENTS_NUMBER	"uv"
 #define	SUBJECT_CLASSIFICATION	"uw"
-#define	RECORD_TYPE	"uy"
+#define	RECORD_TYPE		"uy"
 
 /* relation value codes */
-#define	EQUAL	"re"
-#define	GREATER_THAN	"rg"
+#define	EQUAL			"re"
+#define	GREATER_THAN		"rg"
 #define	GREATER_THAN_OR_EQUAL	"ro"
-#define	LESS_THAN	"rl"
+#define	LESS_THAN		"rl"
 #define	LESS_THAN_OR_EQUAL	"rp"
-#define	NOT_EQUAL	"rn"
+#define	NOT_EQUAL		"rn"
 
 /* position value codes */
-#define	FIRST_IN_FIELD	"pf"
+#define	FIRST_IN_FIELD		"pf"
 #define	FIRST_IN_SUBFIELD	"ps"
 #define	FIRST_IN_A_SUBFIELD	"pa"
 #define	FIRST_IN_NOT_A_SUBFIELD	"pt"
 #define	ANY_POSITION_IN_FIELD	"py"
 
 /* structure value codes */
-#define	PHRASE	"sp"
-#define	WORD	"sw"
-#define	KEY	"sk"
-#define	WORD_LIST	"sl"
+#define	PHRASE			"sp"
+#define	WORD			"sw"
+#define	KEY			"sk"
+#define	WORD_LIST		"sl"
 
 /* truncation value codes */
-#define	NO_TRUNCATION	"tn"
+#define	NO_TRUNCATION		"tn"
 #define	RIGHT_TRUNCATION	"tr"
 #define	PROC_NUM_INCLUDED_IN_SEARCH_ARG	"ti"
 
 /* completeness value codes */
 #define	INCOMPLETE_SUBFIELD	"ci"
 #define	COMPLETE_SUBFIELD	"cs"
-#define	COMPLETEFIELD	"cf"
+#define	COMPLETEFIELD		"cf"
 
 /* operator codes */
 #define AND	"a"
@@ -427,40 +430,40 @@ char *defaultImplementationVersion(void);
 /* term types */
 #define TT_Attribute		1
 #define	TT_ResultSetID		2
-#define	TT_Operator			3
+#define	TT_Operator		3
 
 #define ATTRIBUTE_SIZE		3
 #define OPERATOR_SIZE		2
 
-typedef struct query_term {
-    /* type */
-    long TermType;
-    /* for term */
-    char Use[ATTRIBUTE_SIZE];
-    char Relation[ATTRIBUTE_SIZE];
-    char Position[ATTRIBUTE_SIZE];
-    char Structure[ATTRIBUTE_SIZE];
-    char Truncation[ATTRIBUTE_SIZE];
-    char Completeness[ATTRIBUTE_SIZE];
-    any *Term;
-    /* for result set */
-    any *ResultSetID;
-    /* for operator */
-    char Operator[OPERATOR_SIZE];
-} query_term;
+    typedef struct query_term {
+	/* type */
+	long TermType;
+	/* for term */
+	char Use[ATTRIBUTE_SIZE];
+	char Relation[ATTRIBUTE_SIZE];
+	char Position[ATTRIBUTE_SIZE];
+	char Structure[ATTRIBUTE_SIZE];
+	char Truncation[ATTRIBUTE_SIZE];
+	char Completeness[ATTRIBUTE_SIZE];
+	any *Term;
+	/* for result set */
+	any *ResultSetID;
+	/* for operator */
+	char Operator[OPERATOR_SIZE];
+    } query_term;
 
 /*----------------------------------------------------------------------*/
 /* functions */
 
-query_term *makeAttributeTerm(char *use, char *relation, char *position, char *structure,
-			      char *truncation, char *completeness, any *term);
-query_term *makeResultSetTerm(any *resultSet);
-query_term *makeOperatorTerm(char *operatorCode);
-void freeTerm(void *qt);
-char *writeQueryTerm(query_term *qt, char *buffer, long *len);
-char *readQueryTerm(query_term **qt, char *buffer);
-any *writeQuery(query_term **terms);
-query_term **readQuery(any *info);
+    query_term *makeAttributeTerm(char *use, char *relation, char *position, char *structure,
+				  char *truncation, char *completeness, any *term);
+    query_term *makeResultSetTerm(any *resultSet);
+    query_term *makeOperatorTerm(char *operatorCode);
+    void freeTerm(void *qt);
+    char *writeQueryTerm(query_term *qt, char *buffer, long *len);
+    char *readQueryTerm(query_term **qt, char *buffer);
+    any *writeQuery(query_term **terms);
+    query_term **readQuery(any *info);
 
 /*----------------------------------------------------------------------*/
 
@@ -469,22 +472,22 @@ query_term **readQuery(any *info);
  *
  *----------------------------------------------------------------------*/
 
-char *generate_retrieval_apdu(char *buff,
-			      long *buff_len,
-			      any *docID,
-			      long chunk_type,
-			      long start_line, long end_line,
-			      char *type,
-			      char *database_name);
+    char *generate_retrieval_apdu(char *buff,
+				  long *buff_len,
+				  any *docID,
+				  long chunk_type,
+				  long start_line, long end_line,
+				  char *type,
+				  char *database_name);
 
-long interpret_message(char *request_message,
-		       long request_length,
-		       char *response_message,
-		       long response_buffer_length,	/* length of the buffer (modified) */
-		       long connection,
-		       boolean verbose);
+    long interpret_message(char *request_message,
+			   long request_length,
+			   char *response_message,
+			   long response_buffer_length,		/* length of the buffer (modified) */
+			   long connection,
+			   boolean verbose);
 
-char *trim_junk(char *headline);
+    char *trim_junk(char *headline);
 
 /*
  *	Routines originally from ZProt.c -- FM
@@ -493,163 +496,169 @@ char *trim_junk(char *headline);
 
 /* APDU types */
 
-typedef struct InitAPDU {
-    pdu_type PDUType;
-    boolean willSearch, willPresent, willDelete;
-    boolean supportAccessControl, supportResourceControl;
-    long PreferredMessageSize;
-    long MaximumRecordSize;
-    char *IDAuthentication;
-    char *ImplementationID;
-    char *ImplementationName;
-    char *ImplementationVersion;
-    any *ReferenceID;
-    void *UserInformationField;
-} InitAPDU;
+    typedef struct InitAPDU {
+	pdu_type PDUType;
+	boolean willSearch, willPresent, willDelete;
+	boolean supportAccessControl, supportResourceControl;
+	long PreferredMessageSize;
+	long MaximumRecordSize;
+	char *IDAuthentication;
+	char *ImplementationID;
+	char *ImplementationName;
+	char *ImplementationVersion;
+	any *ReferenceID;
+	void *UserInformationField;
+    } InitAPDU;
 
-typedef struct InitResponseAPDU {
-    pdu_type PDUType;
-    boolean Result;
-    boolean willSearch, willPresent, willDelete;
-    boolean supportAccessControl, supportResourceControl;
-    long PreferredMessageSize;
-    long MaximumRecordSize;
-    char *IDAuthentication;
-    char *ImplementationID;
-    char *ImplementationName;
-    char *ImplementationVersion;
-    any *ReferenceID;
-    void *UserInformationField;
-} InitResponseAPDU;
+    typedef struct InitResponseAPDU {
+	pdu_type PDUType;
+	boolean Result;
+	boolean willSearch, willPresent, willDelete;
+	boolean supportAccessControl, supportResourceControl;
+	long PreferredMessageSize;
+	long MaximumRecordSize;
+	char *IDAuthentication;
+	char *ImplementationID;
+	char *ImplementationName;
+	char *ImplementationVersion;
+	any *ReferenceID;
+	void *UserInformationField;
+    } InitResponseAPDU;
 
-typedef struct SearchAPDU {
-    pdu_type PDUType;
-    long SmallSetUpperBound;
-    long LargeSetLowerBound;
-    long MediumSetPresentNumber;
-    boolean ReplaceIndicator;
-    char *ResultSetName;
-    char **DatabaseNames;
-    char *QueryType;
-    char **ElementSetNames;
-    any *ReferenceID;
-    void *Query;
-} SearchAPDU;
+    typedef struct SearchAPDU {
+	pdu_type PDUType;
+	long SmallSetUpperBound;
+	long LargeSetLowerBound;
+	long MediumSetPresentNumber;
+	boolean ReplaceIndicator;
+	char *ResultSetName;
+	char **DatabaseNames;
+	char *QueryType;
+	char **ElementSetNames;
+	any *ReferenceID;
+	void *Query;
+    } SearchAPDU;
 
-typedef struct SearchResponseAPDU {
-    pdu_type PDUType;
-    long SearchStatus;
-    long ResultCount;
-    long NumberOfRecordsReturned;
-    long NextResultSetPosition;
-    long ResultSetStatus;
-    long PresentStatus;
-    any *ReferenceID;
-    void *DatabaseDiagnosticRecords;
-} SearchResponseAPDU;
+    typedef struct SearchResponseAPDU {
+	pdu_type PDUType;
+	long SearchStatus;
+	long ResultCount;
+	long NumberOfRecordsReturned;
+	long NextResultSetPosition;
+	long ResultSetStatus;
+	long PresentStatus;
+	any *ReferenceID;
+	void *DatabaseDiagnosticRecords;
+    } SearchResponseAPDU;
 
-typedef struct PresentAPDU {
-    pdu_type PDUType;
-    long NumberOfRecordsRequested;
-    long ResultSetStartPosition;
-    char *ResultSetID;
-    char *ElementSetNames;
-    any *ReferenceID;
-    void *PresentInfo;
-} PresentAPDU;
+    typedef struct PresentAPDU {
+	pdu_type PDUType;
+	long NumberOfRecordsRequested;
+	long ResultSetStartPosition;
+	char *ResultSetID;
+	char *ElementSetNames;
+	any *ReferenceID;
+	void *PresentInfo;
+    } PresentAPDU;
 
-typedef struct PresentResponseAPDU {
-    pdu_type PDUType;
-    boolean PresentStatus;
-    long NumberOfRecordsReturned;
-    long NextResultSetPosition;
-    any *ReferenceID;
-    void *DatabaseDiagnosticRecords;
-} PresentResponseAPDU;
+    typedef struct PresentResponseAPDU {
+	pdu_type PDUType;
+	boolean PresentStatus;
+	long NumberOfRecordsReturned;
+	long NextResultSetPosition;
+	any *ReferenceID;
+	void *DatabaseDiagnosticRecords;
+    } PresentResponseAPDU;
 
 /*----------------------------------------------------------------------*/
 /* Functions */
 
-InitAPDU *makeInitAPDU(boolean search, boolean present, boolean deleteIt,
-		       boolean accessControl, boolean resourceControl, long prefMsgSize,
-		       long maxMsgSize,
-		       char *auth,
-		       char *id,
-		       char *name,
-		       char *version,
-		       any *refID,
-		       void *userInfo);
-void freeInitAPDU(InitAPDU * init);
-char *writeInitAPDU(InitAPDU * init, char *buffer, long *len);
-char *readInitAPDU(InitAPDU ** init, char *buffer);
+    InitAPDU *makeInitAPDU(boolean search, boolean present, boolean deleteIt,
+			   boolean accessControl, boolean resourceControl, long prefMsgSize,
+			   long maxMsgSize,
+			   char *auth,
+			   char *id,
+			   char *name,
+			   char *version,
+			   any *refID,
+			   void *userInfo);
+    void freeInitAPDU(InitAPDU * init);
+    char *writeInitAPDU(InitAPDU * init, char *buffer, long *len);
+    char *readInitAPDU(InitAPDU ** init, char *buffer);
 
-InitResponseAPDU *makeInitResponseAPDU(boolean result,
-				       boolean search,
-				       boolean present,
-				       boolean deleteIt,
-				       boolean accessControl,
-				       boolean resourceControl,
-				       long prefMsgSize,
-				       long maxMsgSize,
-				       char *auth,
-				       char *id,
-				       char *name,
-				       char *version,
-				       any *refID,
-				       void *userInfo);
-void freeInitResponseAPDU(InitResponseAPDU *init);
-char *writeInitResponseAPDU(InitResponseAPDU *init, char *buffer, long *len);
-char *readInitResponseAPDU(InitResponseAPDU **init, char *buffer);
-InitResponseAPDU *replyToInitAPDU(InitAPDU * init, boolean result, void *userInfo);
+    InitResponseAPDU *makeInitResponseAPDU(boolean result,
+					   boolean search,
+					   boolean present,
+					   boolean deleteIt,
+					   boolean accessControl,
+					   boolean resourceControl,
+					   long prefMsgSize,
+					   long maxMsgSize,
+					   char *auth,
+					   char *id,
+					   char *name,
+					   char *version,
+					   any *refID,
+					   void *userInfo);
+    void freeInitResponseAPDU(InitResponseAPDU *init);
+    char *writeInitResponseAPDU(InitResponseAPDU *init, char *buffer, long *len);
+    char *readInitResponseAPDU(InitResponseAPDU **init, char *buffer);
+    InitResponseAPDU *replyToInitAPDU(InitAPDU * init, boolean result, void *userInfo);
 
-SearchAPDU *makeSearchAPDU(long small, long large, long medium,
-			   boolean replace, char *name, char **databases,
-			   char *type, char **elements, any *refID, void *queryInfo);
-void freeSearchAPDU(SearchAPDU *query);
-char *writeSearchAPDU(SearchAPDU *query, char *buffer, long *len);
-char *readSearchAPDU(SearchAPDU **query, char *buffer);
+    SearchAPDU *makeSearchAPDU(long small, long large, long medium,
+			       boolean replace, char *name, char **databases,
+			       char *type, char **elements, any *refID, void *queryInfo);
+    void freeSearchAPDU(SearchAPDU *query);
+    char *writeSearchAPDU(SearchAPDU *query, char *buffer, long *len);
+    char *readSearchAPDU(SearchAPDU **query, char *buffer);
 
-SearchResponseAPDU *makeSearchResponseAPDU(long result, long count,
-					   long recordsReturned, long nextPos,
-					   long resultStatus, long presentStatus,
-					   any *refID, void *records);
-void freeSearchResponseAPDU(SearchResponseAPDU *queryResponse);
-char *writeSearchResponseAPDU(SearchResponseAPDU *queryResponse, char *buffer, long *len);
-char *readSearchResponseAPDU(SearchResponseAPDU **queryResponse, char *buffer);
+    SearchResponseAPDU *makeSearchResponseAPDU(long result, long count,
+					       long recordsReturned, long nextPos,
+					       long resultStatus, long presentStatus,
+					       any *refID, void *records);
+    void freeSearchResponseAPDU(SearchResponseAPDU *queryResponse);
+    char *writeSearchResponseAPDU(SearchResponseAPDU *queryResponse, char
+				  *buffer, long *len);
+    char *readSearchResponseAPDU(SearchResponseAPDU **queryResponse, char *buffer);
 
-PresentAPDU *makePresentAPDU(long recsReq, long startPos,
-			     char *resultID, any *refID, void *info);
-void freePresentAPDU(PresentAPDU * present);
-char *writePresentAPDU(PresentAPDU * present, char *buffer, long *len);
-char *readPresentAPDU(PresentAPDU ** present, char *buffer);
+    PresentAPDU *makePresentAPDU(long recsReq, long startPos,
+				 char *resultID, any *refID, void *info);
+    void freePresentAPDU(PresentAPDU * present);
+    char *writePresentAPDU(PresentAPDU * present, char *buffer, long *len);
+    char *readPresentAPDU(PresentAPDU ** present, char *buffer);
 
-PresentResponseAPDU *makePresentResponseAPDU(boolean status, long recsRet,
-					     long nextPos, any *refID,
-					     void *records);
-void freePresentResponseAPDU(PresentResponseAPDU * present);
-char *writePresentResponseAPDU(PresentResponseAPDU * present, char *buffer, long *len);
-char *readPresentResponseAPDU(PresentResponseAPDU ** present, char *buffer);
+    PresentResponseAPDU *makePresentResponseAPDU(boolean status, long recsRet,
+						 long nextPos, any *refID,
+						 void *records);
+    void freePresentResponseAPDU(PresentResponseAPDU * present);
+    char *writePresentResponseAPDU(PresentResponseAPDU * present, char
+				   *buffer, long *len);
+    char *readPresentResponseAPDU(PresentResponseAPDU ** present, char *buffer);
 
 /*----------------------------------------------------------------------*/
 /* user extension hooks: */
 
-extern char *writeInitInfo(InitAPDU * init, char *buffer, long *len);
-extern char *readInitInfo(void **info, char *buffer);
+    extern char *writeInitInfo(InitAPDU * init, char *buffer, long *len);
+    extern char *readInitInfo(void **info, char *buffer);
 
-extern char *writeInitResponseInfo(InitResponseAPDU *init, char *buffer, long *len);
-extern char *readInitResponseInfo(void **info, char *buffer);
+    extern char *writeInitResponseInfo(InitResponseAPDU *init, char *buffer, long *len);
+    extern char *readInitResponseInfo(void **info, char *buffer);
 
-extern char *writeSearchInfo(SearchAPDU *query, char *buffer, long *len);
-extern char *readSearchInfo(void **info, char *buffer);
+    extern char *writeSearchInfo(SearchAPDU *query, char *buffer, long *len);
+    extern char *readSearchInfo(void **info, char *buffer);
 
-extern char *writeSearchResponseInfo(SearchResponseAPDU *query, char *buffer, long *len);
-extern char *readSearchResponseInfo(void **info, char *buffer);
+    extern char *writeSearchResponseInfo(SearchResponseAPDU *query, char
+					 *buffer, long *len);
+    extern char *readSearchResponseInfo(void **info, char *buffer);
 
-extern char *writePresentInfo(PresentAPDU * present, char *buffer, long *len);
-extern char *readPresentInfo(void **info, char *buffer);
+    extern char *writePresentInfo(PresentAPDU * present, char *buffer, long *len);
+    extern char *readPresentInfo(void **info, char *buffer);
 
-extern char *writePresentResponseInfo(PresentResponseAPDU * present, char
-				      *buffer, long *len);
-extern char *readPresentResponseInfo(void **info, char *buffer);
+    extern char *writePresentResponseInfo(PresentResponseAPDU * present, char
+					  *buffer, long *len);
+    extern char *readPresentResponseInfo(void **info, char *buffer);
 
-#endif /* HTVMSWAIS_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTVMSWAIS_H */

@@ -57,6 +57,9 @@
 #include <HTUtils.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
  *	Constant defines
  */
@@ -65,49 +68,47 @@
 #define LEAKAGE_SINK "sys$login:Lynx.leaks"
 #else
 #define LEAKAGE_SINK "Lynx.leaks"
-#endif /* VMS */
-
+#endif				/* VMS */
 /*
  * Data structures
- */
-typedef struct SourceLocation_tag {
-    /*
-     * The file name and line number of where an event took place.
-     */
-    const char *cp_FileName;
-    short ssi_LineNumber;
-} SourceLocation;
+ */ typedef struct SourceLocation_tag {
+	/*
+	 * The file name and line number of where an event took place.
+	 */
+	const char *cp_FileName;
+	short ssi_LineNumber;
+    } SourceLocation;
 
-typedef struct AllocationList_tag {
-    /*
-     * A singly linked list.
-     */
-    struct AllocationList_tag *ALp_Next;
+    typedef struct AllocationList_tag {
+	/*
+	 * A singly linked list.
+	 */
+	struct AllocationList_tag *ALp_Next;
 
-    /*
-     * Count the number of mallocs.
-     */
-    long st_Sequence;
+	/*
+	 * Count the number of mallocs.
+	 */
+	long st_Sequence;
 
-    /*
-     * The memory pointer allocated.  If set to NULL, then an invalid request
-     * was made.  The invalid pointer also.
-     */
-    void *vp_Alloced;
-    void *vp_BadRequest;
+	/*
+	 * The memory pointer allocated.  If set to NULL, then an invalid request
+	 * was made.  The invalid pointer also.
+	 */
+	void *vp_Alloced;
+	void *vp_BadRequest;
 
-    /*
-     * The size in bytes of the allocated memory.
-     */
-    size_t st_Bytes;
+	/*
+	 * The size in bytes of the allocated memory.
+	 */
+	size_t st_Bytes;
 
-    /*
-     * The source location of specific event (calloc, malloc, free).  realloc
-     * kept separate since will track last realloc on pointer.
-     */
-    SourceLocation SL_memory;
-    SourceLocation SL_realloc;
-} AllocationList;
+	/*
+	 * The source location of specific event (calloc, malloc, free).  realloc
+	 * kept separate since will track last realloc on pointer.
+	 */
+	SourceLocation SL_memory;
+	SourceLocation SL_realloc;
+    } AllocationList;
 
 /*
  *  Global variable declarations
@@ -126,24 +127,24 @@ typedef struct AllocationList_tag {
  */
 #ifdef malloc
 #undef malloc
-#endif /* malloc */
+#endif				/* malloc */
 #define malloc(st_bytes) LYLeakMalloc(st_bytes, __FILE__, __LINE__)
 
 #ifdef calloc
 #undef calloc
-#endif /* calloc */
+#endif				/* calloc */
 #define calloc(st_number, st_bytes) LYLeakCalloc(st_number, st_bytes, \
 	__FILE__, __LINE__)
 
 #ifdef realloc
 #undef realloc
-#endif /* realloc */
+#endif				/* realloc */
 #define realloc(vp_alloced, st_newbytes) LYLeakRealloc(vp_alloced, \
 	st_newbytes, __FILE__, __LINE__)
 
 #ifdef free
 #undef free
-#endif /* free */
+#endif				/* free */
 #define free(vp_alloced) LYLeakFree(vp_alloced, __FILE__, __LINE__)
 
 /*
@@ -152,12 +153,12 @@ typedef struct AllocationList_tag {
  */
 #ifdef StrAllocCopy
 #undef StrAllocCopy
-#endif /* StrAllocCopy */
+#endif				/* StrAllocCopy */
 #define StrAllocCopy(dest, src) LYLeakSACopy(&(dest), src, __FILE__, __LINE__)
 
 #ifdef StrAllocCat
 #undef StrAllocCat
-#endif /* StrAllocCat */
+#endif				/* StrAllocCat */
 #define StrAllocCat(dest, src)  LYLeakSACat(&(dest), src, __FILE__, __LINE__)
 
 #define mark_malloced(a,size) LYLeak_mark_malloced(a,size, __FILE__, __LINE__)
@@ -166,22 +167,22 @@ typedef struct AllocationList_tag {
 
 #ifdef HTSprintf0
 #undef HTSprintf0
-#endif /* HTSprintf0 */
+#endif				/* HTSprintf0 */
 #define HTSprintf0 (Get_htsprintf0_fn(__FILE__,__LINE__))
 
 #ifdef HTSprintf
 #undef HTSprintf
-#endif /* HTSprintf */
+#endif				/* HTSprintf */
 #define HTSprintf (Get_htsprintf_fn(__FILE__,__LINE__))
 
-#endif /* LY_FIND_LEAKS_EXTENDED and not NO_EXTENDED_MEMORY_TRACKING */
+#endif				/* LY_FIND_LEAKS_EXTENDED and not NO_EXTENDED_MEMORY_TRACKING */
 
-#else /* LY_FIND_LEAKS && !NO_MEMORY_TRACKING */
+#else				/* LY_FIND_LEAKS && !NO_MEMORY_TRACKING */
 
 #define mark_malloced(a,size)	/* no-op */
 #define LYLeakSequence() (-1)
 
-#endif /* LY_FIND_LEAKS && !NO_MEMORY_TRACKING */
+#endif				/* LY_FIND_LEAKS && !NO_MEMORY_TRACKING */
 
 #if defined(LY_FIND_LEAKS)
 #define PUBLIC_IF_FIND_LEAKS	/* nothing */
@@ -194,46 +195,49 @@ typedef struct AllocationList_tag {
  * See the appropriate source file for usage.
  */
 #ifndef LYLeakSequence
-extern long LYLeakSequence(void);
+    extern long LYLeakSequence(void);
 #endif
-extern void LYLeaks(void);
+    extern void LYLeaks(void);
 
 #ifdef LY_FIND_LEAKS_EXTENDED
-extern AllocationList *LYLeak_mark_malloced(void *vp_alloced,
-					    size_t st_bytes,
-					    const char *cp_File,
-					    const short ssi_Line);
-#endif /* LY_FIND_LEAKS_EXTENDED */
-extern void *LYLeakMalloc(size_t st_bytes, const char *cp_File,
-			  const short ssi_Line);
-extern void *LYLeakCalloc(size_t st_number, size_t st_bytes, const char *cp_File,
-			  const short ssi_Line);
-extern void *LYLeakRealloc(void *vp_alloced,
-			   size_t st_newbytes,
+    extern AllocationList *LYLeak_mark_malloced(void *vp_alloced,
+						size_t st_bytes,
+						const char *cp_File,
+						const short ssi_Line);
+#endif				/* LY_FIND_LEAKS_EXTENDED */
+    extern void *LYLeakMalloc(size_t st_bytes, const char *cp_File,
+			      const short ssi_Line);
+    extern void *LYLeakCalloc(size_t st_number, size_t st_bytes, const char *cp_File,
+			      const short ssi_Line);
+    extern void *LYLeakRealloc(void *vp_alloced,
+			       size_t st_newbytes,
+			       const char *cp_File,
+			       const short ssi_Line);
+    extern void LYLeakFree(void *vp_alloced,
 			   const char *cp_File,
 			   const short ssi_Line);
-extern void LYLeakFree(void *vp_alloced,
-		       const char *cp_File,
-		       const short ssi_Line);
-extern char *LYLeakSACopy(char **dest,
-			  const char *src,
-			  const char *cp_File,
-			  const short ssi_Line);
-extern char *LYLeakSACat(char **dest,
-			 const char *src,
-			 const char *cp_File,
-			 const short ssi_Line);
+    extern char *LYLeakSACopy(char **dest,
+			      const char *src,
+			      const char *cp_File,
+			      const short ssi_Line);
+    extern char *LYLeakSACat(char **dest,
+			     const char *src,
+			     const char *cp_File,
+			     const short ssi_Line);
 
 #ifdef LY_FIND_LEAKS_EXTENDED
 /*
  * Trick to get tracking of var arg functions without relying on var arg
  * preprocessor macros:
  */
-typedef char *HTSprintflike(char **, const char *,...);
-extern HTSprintflike *Get_htsprintf_fn(const char *cp_File,
-				       const short ssi_Line);
-extern HTSprintflike *Get_htsprintf0_fn(const char *cp_File,
-					const short ssi_Line);
-#endif /* LY_FIND_LEAKS_EXTENDED */
+    typedef char *HTSprintflike(char **, const char *,...);
+    extern HTSprintflike *Get_htsprintf_fn(const char *cp_File,
+					   const short ssi_Line);
+    extern HTSprintflike *Get_htsprintf0_fn(const char *cp_File,
+					    const short ssi_Line);
+#endif				/* LY_FIND_LEAKS_EXTENDED */
 
-#endif /* __LYLEAKS_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* __LYLEAKS_H */

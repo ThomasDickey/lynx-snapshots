@@ -158,7 +158,8 @@ BOOL textsearch(DocInfo *cur_doc, char *prev_target,
     static char prev_target_buffer[512];	/* Search string buffer */
     static BOOL first = TRUE;
     char *cp;
-    int ch = 0, recall;
+    int ch = 0;
+    RecallType recall;
     int QueryTotal;
     int QueryNum;
     BOOLEAN FirstRecall = TRUE;

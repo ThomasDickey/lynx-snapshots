@@ -33,14 +33,7 @@ void LYJumpTable_free(void)
 	FREE(cur->file);
 	FREE(cur->shortcut);
 	if (cur->history) {
-	    char *shortcut;
-	    HTList *current = cur->history;
-
-	    while (NULL != (shortcut = (char *) HTList_nextObject(current))) {
-		FREE(shortcut);
-	    };
-
-	    HTList_delete(cur->history);
+	    LYFreeStringList(cur->history);
 	    cur->history = NULL;
 	}
 	FREE(cur->table);
@@ -58,23 +51,23 @@ void LYJumpTable_free(void)
  */
 void LYAddJumpShortcut(HTList *historyp, char *shortcut)
 {
-    char *new = NULL;
+    char *tmp = NULL;
     char *old;
     HTList *cur = historyp;
 
     if (!historyp || isEmpty(shortcut))
 	return;
 
-    StrAllocCopy(new, shortcut);
+    StrAllocCopy(tmp, shortcut);
 
     while (NULL != (old = (char *) HTList_nextObject(cur))) {
-	if (!strcmp(old, new)) {
+	if (!strcmp(old, tmp)) {
 	    HTList_removeObject(historyp, old);
 	    FREE(old);
 	    break;
 	}
     }
-    HTList_addObject(historyp, new);
+    HTList_addObject(historyp, tmp);
 
     return;
 }
@@ -185,7 +178,8 @@ char *LYJump(int key)
     static char buf[124];
     char *bp, *cp;
     struct JumpTable *jtp;
-    int ch, recall;
+    int ch;
+    RecallType recall;
     int ShortcutTotal;
     int ShortcutNum;
     BOOLEAN FirstShortcutRecall = TRUE;

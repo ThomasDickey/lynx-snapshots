@@ -7,31 +7,34 @@
 
 #include <HTList.h>
 
-typedef HTList GroupDefList;
-typedef HTList ItemList;
+#ifdef __cplusplus
+extern "C" {
+#endif
+    typedef HTList GroupDefList;
+    typedef HTList ItemList;
 
-typedef struct {
-    char *group_name;
-    ItemList *item_list;
-} GroupDef;
+    typedef struct {
+	char *group_name;
+	ItemList *item_list;
+    } GroupDef;
 
 /*
  * Access Authorization failure reasons
  */
-typedef enum {
-    HTAA_OK,			/* 200 OK                               */
-    HTAA_OK_GATEWAY,		/* 200 OK, acting as a gateway          */
-    HTAA_NO_AUTH,		/* 401 Unauthorized, not authenticated  */
-    HTAA_NOT_MEMBER,		/* 401 Unauthorized, not authorized     */
-    HTAA_IP_MASK,		/* 403 Forbidden by IP mask             */
-    HTAA_BY_RULE,		/* 403 Forbidden by rule                */
-    HTAA_NO_ACL,		/* 403 Forbidden, ACL non-existent      */
-    HTAA_NO_ENTRY,		/* 403 Forbidden, no ACL entry          */
-    HTAA_SETUP_ERROR,		/* 403 Forbidden, server setup error    */
-    HTAA_DOTDOT,		/* 403 Forbidden, URL with /../ illegal */
-    HTAA_HTBIN,			/* 403 Forbidden, /htbin not enabled    */
-    HTAA_NOT_FOUND		/* 404 Not found, or read protected     */
-} HTAAFailReasonType;
+    typedef enum {
+	HTAA_OK,		/* 200 OK                               */
+	HTAA_OK_GATEWAY,	/* 200 OK, acting as a gateway          */
+	HTAA_NO_AUTH,		/* 401 Unauthorized, not authenticated  */
+	HTAA_NOT_MEMBER,	/* 401 Unauthorized, not authorized     */
+	HTAA_IP_MASK,		/* 403 Forbidden by IP mask             */
+	HTAA_BY_RULE,		/* 403 Forbidden by rule                */
+	HTAA_NO_ACL,		/* 403 Forbidden, ACL non-existent      */
+	HTAA_NO_ENTRY,		/* 403 Forbidden, no ACL entry          */
+	HTAA_SETUP_ERROR,	/* 403 Forbidden, server setup error    */
+	HTAA_DOTDOT,		/* 403 Forbidden, URL with /../ illegal */
+	HTAA_HTBIN,		/* 403 Forbidden, /htbin not enabled    */
+	HTAA_NOT_FOUND		/* 404 Not found, or read protected     */
+    } HTAAFailReasonType;
 
 /*
 
@@ -98,7 +101,7 @@ Group definition grammar
 
  */
 
-extern GroupDef *HTAA_parseGroupDef(FILE *fp);
+    extern GroupDef *HTAA_parseGroupDef(FILE *fp);
 
 /*
 
@@ -109,8 +112,8 @@ Fill in Pointers to referenced Group Definitions in a Group Definition
 
  */
 
-extern void HTAA_resolveGroupReferences(GroupDef *group_def,
-					GroupDefList *group_def_list);
+    extern void HTAA_resolveGroupReferences(GroupDef *group_def,
+					    GroupDefList *group_def_list);
 
 /*
 
@@ -121,7 +124,7 @@ Read Group File (and do caching)
 
  */
 
-extern GroupDefList *HTAA_readGroupFile(const char *filename);
+    extern GroupDefList *HTAA_readGroupFile(const char *filename);
 
 /*
 
@@ -132,7 +135,7 @@ Delete Group Definition
 
  */
 
-extern void GroupDef_delete(GroupDef *group_def);
+    extern void GroupDef_delete(GroupDef *group_def);
 
 /*
 
@@ -140,7 +143,7 @@ Print Out Group Definition (for trace purposes)
 
  */
 
-extern void HTAA_printGroupDef(GroupDef *group_def);
+    extern void HTAA_printGroupDef(GroupDef *group_def);
 
 /*
 
@@ -168,9 +171,12 @@ Does a User Belong to a Given Set of Groups
  *                      to the group.
  *                      HTAA_OK if both IP address and user are ok.
  */
-extern HTAAFailReasonType HTAA_userAndInetInGroup(GroupDef *group,
-						  char *username,
-						  char *ip_number,
-						  char *ip_name);
+    extern HTAAFailReasonType HTAA_userAndInetInGroup(GroupDef *group,
+						      char *username,
+						      char *ip_number,
+						      char *ip_name);
 
-#endif /* not HTGROUP_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* not HTGROUP_H */

@@ -807,7 +807,8 @@ static const u8 dfont_unicount%s[%d] = \n\
 	fprintf(chdr, "\nstatic const u16 dfont_unitable%s[%d] = \n{\n\t",
 		id_append, nuni);
     } else {
-	fprintf(chdr, "\nstatic const u16 dfont_unitable%s[1]; /* dummy */\n", id_append);
+	fprintf(chdr,
+		"\nstatic const u16 dfont_unitable%s[1] = {0}; /* dummy */\n", id_append);
     }
 
     fp0 = 0;

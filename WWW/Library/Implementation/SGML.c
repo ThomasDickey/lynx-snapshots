@@ -26,6 +26,7 @@
 #include <UCAux.h>
 
 #include <HTChunk.h>
+#include <HTUtils.h>
 
 #include <LYCharSets.h>
 #include <LYCharVals.h>		/* S/390 -- gil -- 0635 */
@@ -901,7 +902,7 @@ static void handle_sgmlatt(HTStream *context)
  * Convenience macros - tags (elements) are identified sometimes by an int or
  * enum value ('TAGNUM'), sometimes by a pointer to HTTag ('TAGP').  - kw
  */
-#define TAGNUM_OF_TAGP(t) (t - context->dtd->tags)
+#define TAGNUM_OF_TAGP(t) (HTMLElement) (t - context->dtd->tags)
 #define TAGP_OF_TAGNUM(e) (context->dtd->tags + e)
 
 /*
@@ -916,7 +917,7 @@ static void handle_sgmlatt(HTStream *context)
 #define ALT_TAGNUM(e) ((e == HTML_OBJECT) ? HTML_ALT_OBJECT : e)
 
 /* return 'TAGNUM' of the normal mode for 'TAGNUM' e which may be alt. */
-#define NORMAL_TAGNUM(e) (((int)(e) >= HTML_ELEMENTS) ? HTML_OBJECT : e)
+#define NORMAL_TAGNUM(e) (((int)(e) >= HTML_ELEMENTS) ? HTML_OBJECT : (HTMLElement)e)
 
 /* More convenience stuff. - kw */
 #define ALT_TAGP_OF_TAGNUM(e) TAGP_OF_TAGNUM(ALT_TAGNUM(e))
@@ -4909,7 +4910,8 @@ void TO_SJIS(const unsigned char *arg,
 {
     unsigned char *euc;
 
-    euc = malloc(strlen((const char *) arg) + 1);
+    euc = typeMallocn(unsigned char, strlen((const char *) arg) + 1);
+
 #ifdef CJK_EX
     if (!euc)
 	outofmem(__FILE__, "TO_SJIS");
@@ -4931,7 +4933,7 @@ void TO_JIS(const unsigned char *arg,
 	jis[0] = 0;
 	return;
     }
-    euc = malloc(strlen((const char *) arg) + 1);
+    euc = typeMallocn(unsigned char, strlen((const char *)arg) + 1);
 #ifdef CJK_EX
     if (!euc)
 	outofmem(__FILE__, "TO_JIS");

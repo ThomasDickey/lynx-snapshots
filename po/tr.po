@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx-2.8.6-dev8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-12-30 06:03-0500\n"
+"POT-Creation-Date: 2005-01-02 09:33-0500\n"
 "PO-Revision-Date: 2004-11-19 22:25+0200\n"
 "Last-Translator: Eyüp Hakan Duran <hakan_duran@hotmail.com>\n"
 "Language-Team: Turkish <gnu-tr-u12a@lists.sourceforge.net>\n"
@@ -2790,7 +2790,7 @@ msgstr "Önbellekte POST içerikli belge bulunmadý.  Yeniden gönderilsin mi?"
 msgid "Loading failed, use a previous copy."
 msgstr "Yükleme baþarýsýz, önceki bir kopyayý kullanýn."
 
-#: WWW/Library/Implementation/HTAccess.c:1045 src/GridText.c:8358
+#: WWW/Library/Implementation/HTAccess.c:1045 src/GridText.c:8351
 msgid "Loading incomplete."
 msgstr "Yükleme tamamlanmadý."
 
@@ -2813,7 +2813,7 @@ msgstr "**** HTAccess: Dönen durum: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1085 src/LYMainLoop.c:7673
+#: WWW/Library/Implementation/HTAccess.c:1085 src/LYMainLoop.c:7669
 msgid "Can't Access"
 msgstr "Eriþilemiyor"
 
@@ -2821,20 +2821,20 @@ msgstr "Eriþilemiyor"
 msgid "Unable to access document."
 msgstr "Belgeye eriþilemiyor."
 
-#: WWW/Library/Implementation/HTFTP.c:780
+#: WWW/Library/Implementation/HTFTP.c:823
 #, c-format
 msgid "Enter password for user %s@%s:"
 msgstr "%s@%s kullanýcýsý için parola giriniz:"
 
-#: WWW/Library/Implementation/HTFTP.c:808
+#: WWW/Library/Implementation/HTFTP.c:851
 msgid "Unable to connect to FTP host."
 msgstr "FTP makinasýna baðlanýlamadý."
 
-#: WWW/Library/Implementation/HTFTP.c:1074
+#: WWW/Library/Implementation/HTFTP.c:1117
 msgid "close master socket"
 msgstr "ana soketi kapatýnýz"
 
-#: WWW/Library/Implementation/HTFTP.c:1135
+#: WWW/Library/Implementation/HTFTP.c:1178
 msgid "socket for master socket"
 msgstr "ana soket için soket"
 
@@ -2842,24 +2842,24 @@ msgstr "ana soket için soket"
 #. * It's a symbolic link, does the user care about knowing if it is
 #. * symbolic?  I think so since it might be a directory.
 #.
-#: WWW/Library/Implementation/HTFTP.c:1658 WWW/Library/Implementation/HTFTP.c:2275
+#: WWW/Library/Implementation/HTFTP.c:1701 WWW/Library/Implementation/HTFTP.c:2318
 msgid "Symbolic Link"
 msgstr "Simgesel Link"
 
-#: WWW/Library/Implementation/HTFTP.c:2632
+#: WWW/Library/Implementation/HTFTP.c:2675
 msgid "Receiving FTP directory."
 msgstr "FTP dizini alýnýyor."
 
-#: WWW/Library/Implementation/HTFTP.c:2768
+#: WWW/Library/Implementation/HTFTP.c:2811
 #, c-format
 msgid "Transferred %d bytes (%5d)"
 msgstr "%d bayt aktarýldý (%5d)"
 
-#: WWW/Library/Implementation/HTFTP.c:3115
+#: WWW/Library/Implementation/HTFTP.c:3158
 msgid "connect for data"
 msgstr "veri için baðlan"
 
-#: WWW/Library/Implementation/HTFTP.c:3779
+#: WWW/Library/Implementation/HTFTP.c:3822
 msgid "Receiving FTP file."
 msgstr "FTP dosyasý alýnýyor"
 
@@ -3067,45 +3067,45 @@ msgstr "Soket okunmasý 180,000 kez baþarýsýz."
 msgid "Address contains a username: %s"
 msgstr "Adres bir kullanýcý adý içeriyor: %s"
 
-#: WWW/Library/Implementation/HTTP.c:533
+#: WWW/Library/Implementation/HTTP.c:534
 msgid "This client does not contain support for HTTPS URLs."
 msgstr "Bu istemci HTTPS URL'ler için destek içermiyor."
 
-#: WWW/Library/Implementation/HTTP.c:558
+#: WWW/Library/Implementation/HTTP.c:559
 msgid "Unable to connect to remote host."
 msgstr "Karþý makinaya baðlanýlamadý."
 
-#: WWW/Library/Implementation/HTTP.c:580
+#: WWW/Library/Implementation/HTTP.c:581
 msgid "Retrying connection without TLS."
 msgstr "Baðlantý, TLS'siz tekrar deneniyor."
 
-#: WWW/Library/Implementation/HTTP.c:623
+#: WWW/Library/Implementation/HTTP.c:624
 msgid "SSL error:Can't find common name in certificate-Continue?"
 msgstr "SSL hatasý:sertifikada ortak ad bulunamadý-Devam?"
 
-#: WWW/Library/Implementation/HTTP.c:640
+#: WWW/Library/Implementation/HTTP.c:641
 #, c-format
 msgid "SSL error:host(%s)!=cert(%s)-Continue?"
 msgstr "SSL hatasý:makina(%s)!=sert(%s)-Devam edilsin mi?"
 
-#: WWW/Library/Implementation/HTTP.c:652
+#: WWW/Library/Implementation/HTTP.c:653
 #, c-format
 msgid "Secure %d-bit %s (%s) HTTP connection"
 msgstr "Güvenli %d-bit %s (%s) HTTP baðlantýsý"
 
-#: WWW/Library/Implementation/HTTP.c:1122
+#: WWW/Library/Implementation/HTTP.c:1123
 msgid "Sending HTTP request."
 msgstr "HTTP istemi gönderiliyor."
 
-#: WWW/Library/Implementation/HTTP.c:1161
+#: WWW/Library/Implementation/HTTP.c:1162
 msgid "Unexpected network write error; connection aborted."
 msgstr "Umulmadýk aða yazma hatasý; baðlantý yarýda kesildi."
 
-#: WWW/Library/Implementation/HTTP.c:1167
+#: WWW/Library/Implementation/HTTP.c:1168
 msgid "HTTP request sent; waiting for response."
 msgstr "HTTP istemi gönderildi; yanýt bekleniyor."
 
-#: WWW/Library/Implementation/HTTP.c:1235
+#: WWW/Library/Implementation/HTTP.c:1236
 msgid "Unexpected network read error; connection aborted."
 msgstr "Umulmadýk aða yazma hatasý; baðlantý yarýda kesildi."
 
@@ -3118,7 +3118,7 @@ msgstr "Umulmadýk aða yazma hatasý; baðlantý yarýda kesildi."
 #. * line and possibly other headers, so we'll deal with them by
 #. * showing the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1429
+#: WWW/Library/Implementation/HTTP.c:1430
 msgid "Got unexpected Informational Status."
 msgstr "Umulmadýk Bilgisel Durum alýndý."
 
@@ -3128,7 +3128,7 @@ msgstr "Umulmadýk Bilgisel Durum alýndý."
 #. * content.  We'll instruct the user to do that, and
 #. * restore the current document.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1463
+#: WWW/Library/Implementation/HTTP.c:1464
 msgid "Request fulfilled.  Reset Content."
 msgstr "Ýstem karþýlandý.  Ýçeriði temizle."
 
@@ -3138,27 +3138,27 @@ msgstr "Ýstem karþýlandý.  Ýçeriði temizle."
 #. * status is inappropriate.  We'll deal with it by showing
 #. * the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1580
+#: WWW/Library/Implementation/HTTP.c:1581
 msgid "Got unexpected 304 Not Modified status."
 msgstr "Umulmadýk 304 Deðiþtirilmedi durumu alýndý."
 
-#: WWW/Library/Implementation/HTTP.c:1643
+#: WWW/Library/Implementation/HTTP.c:1644
 msgid "Redirection of POST content requires user approval."
 msgstr "POST içeriðinin yeniden yönlendirilmesi kullanýcý onayý gerektirir."
 
-#: WWW/Library/Implementation/HTTP.c:1658
+#: WWW/Library/Implementation/HTTP.c:1659
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr "POST içeriði mevcut.  Kalýcý Yeniden Yönlendirmeye Geçici muamelesi yapýlýyor.\n"
 
-#: WWW/Library/Implementation/HTTP.c:1700
+#: WWW/Library/Implementation/HTTP.c:1701
 msgid "Retrying with access authorization information."
 msgstr "Eriþim yetkilendirme bilgisiyle yeniden deneniyor."
 
-#: WWW/Library/Implementation/HTTP.c:1712
+#: WWW/Library/Implementation/HTTP.c:1713
 msgid "Show the 401 message body?"
 msgstr "401 mesaj gövdesi gösterilsin mi?"
 
-#: WWW/Library/Implementation/HTTP.c:1755
+#: WWW/Library/Implementation/HTTP.c:1756
 msgid "Show the 407 message body?"
 msgstr "407 mesaj gövdesi gösterilsin mi?"
 
@@ -3166,7 +3166,7 @@ msgstr "407 mesaj gövdesi gösterilsin mi?"
 #. * Bad or unknown server_status number.  Take a chance and hope
 #. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1855
+#: WWW/Library/Implementation/HTTP.c:1856
 msgid "Unknown status reply from server!"
 msgstr "Sunucudan bilinmeyen durum yanýtý!"
 
@@ -3354,106 +3354,106 @@ msgstr "Yönetici"
 msgid "Host"
 msgstr "Bilgisayar"
 
-#: src/GridText.c:700
+#: src/GridText.c:710
 msgid "Memory exhausted, display interrupted!"
 msgstr "Bellek tükendi, görüntü kesildi!"
 
-#: src/GridText.c:705
+#: src/GridText.c:715
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr "Bellek tükendi, aktarým kesilecek!"
 
-#: src/GridText.c:3588
+#: src/GridText.c:3590
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr " *** BELLEK TÜKENDÝ ***"
 
-#: src/GridText.c:6002 src/GridText.c:6009 src/LYList.c:248
+#: src/GridText.c:6004 src/GridText.c:6011 src/LYList.c:248
 msgid "unknown field or link"
 msgstr "bilinmeyen alan ya da link"
 
-#: src/GridText.c:6018
+#: src/GridText.c:6020
 msgid "text entry field"
 msgstr "metin giriþ alaný"
 
-#: src/GridText.c:6021
+#: src/GridText.c:6023
 msgid "password entry field"
 msgstr "parola giriþ alaný"
 
-#: src/GridText.c:6024
+#: src/GridText.c:6026
 msgid "checkbox"
 msgstr "onay kutusu"
 
-#: src/GridText.c:6027
+#: src/GridText.c:6029
 msgid "radio button"
 msgstr "radyo düðmesi"
 
-#: src/GridText.c:6030
+#: src/GridText.c:6032
 msgid "submit button"
 msgstr "gönderme düðmesi"
 
-#: src/GridText.c:6033
+#: src/GridText.c:6035
 msgid "reset button"
 msgstr "temizleme düðmesi"
 
-#: src/GridText.c:6036
+#: src/GridText.c:6038
 msgid "popup menu"
 msgstr "açýlýr menü"
 
-#: src/GridText.c:6039
+#: src/GridText.c:6041
 msgid "hidden form field"
 msgstr "gizli form alaný"
 
-#: src/GridText.c:6042
+#: src/GridText.c:6044
 msgid "text entry area"
 msgstr "metin giriþ alaný"
 
-#: src/GridText.c:6045
+#: src/GridText.c:6047
 msgid "range entry field"
 msgstr "erim giriþ alaný"
 
-#: src/GridText.c:6048
+#: src/GridText.c:6050
 msgid "file entry field"
 msgstr "dosya giriþ alaný"
 
-#: src/GridText.c:6051
+#: src/GridText.c:6053
 msgid "text-submit field"
 msgstr "metin-gönderme alaný"
 
-#: src/GridText.c:6054
+#: src/GridText.c:6056
 msgid "image-submit button"
 msgstr "resim-gönderme alaný"
 
-#: src/GridText.c:6057
+#: src/GridText.c:6059
 msgid "keygen field"
 msgstr "keygen alaný"
 
-#: src/GridText.c:6060
+#: src/GridText.c:6062
 msgid "unknown form field"
 msgstr "bilinmeyen form alaný"
 
-#: src/GridText.c:10077
+#: src/GridText.c:10074
 msgid "Can't open file for uploading"
 msgstr "Yüklemek için dosya açýlamýyor."
 
-#: src/GridText.c:11229
+#: src/GridText.c:11227
 #, c-format
 msgid "Submitting %s"
 msgstr "%s gönderiliyor"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12377
+#: src/GridText.c:12375
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr "Takýlma Saptandý: TextAnchor struct bozuk - sonlandýrmanýz önerilir!"
 
 #. don't show previous state
-#: src/GridText.c:12582
+#: src/GridText.c:12580
 msgid "Wrap lines to fit displayed area?"
 msgstr "Görüntülenen alana sýðmak üzere satýrlar sarmalansýn mý?"
 
-#: src/GridText.c:12634
+#: src/GridText.c:12632
 msgid "Very long lines have been wrapped!"
 msgstr "Çok uzun satýrlar sarmalandý!"
 
-#: src/GridText.c:13075
+#: src/GridText.c:13073
 msgid "Very long lines have been truncated!"
 msgstr "Çok uzun satýrlarýn sonundan kýrpýldý!"
 
@@ -3543,31 +3543,31 @@ msgstr "hayýr"
 msgid "Y/N/A/V"
 msgstr "(E/H/Daima/Asla)"
 
-#: src/HTML.c:5915
+#: src/HTML.c:5914
 msgid "Description:"
 msgstr "Açýklama:"
 
-#: src/HTML.c:5920
+#: src/HTML.c:5919
 msgid "(none)"
 msgstr "(hiçbiri)"
 
-#: src/HTML.c:5924
+#: src/HTML.c:5923
 msgid "Filepath:"
 msgstr "Dosya yolu:"
 
-#: src/HTML.c:5930
+#: src/HTML.c:5929
 msgid "(unknown)"
 msgstr "(bilinmiyor)"
 
-#: src/HTML.c:7374
+#: src/HTML.c:7373
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr "Belgede yalnýzca gizli linkler var.  Listele(l) komutunu kullanýnýz."
 
-#: src/HTML.c:7867
+#: src/HTML.c:7870
 msgid "Source cache error - disk full?"
 msgstr "Kaynak önbellek hatasý - disk tamamen dolu mu?"
 
-#: src/HTML.c:7880
+#: src/HTML.c:7883
 msgid "Source cache error - not enough memory!"
 msgstr "Kaynak önbellek hatasý - bellek yetersiz!"
 
@@ -3675,27 +3675,27 @@ msgstr "cookie_domain_flag_set hatasý, program yarýda kesiliyor"
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr "Uçbirim ön deðer atamasý baþarýsýz - bilinmeyen uçbirim türü?"
 
-#: src/LYCurses.c:1442
+#: src/LYCurses.c:1443
 msgid "Terminal ="
 msgstr "Uçbirim ="
 
-#: src/LYCurses.c:1446
+#: src/LYCurses.c:1447
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "Bu programla bir vt100, 200 vb. uçbirim kullanmalýsýnýz."
 
-#: src/LYCurses.c:1495
+#: src/LYCurses.c:1496
 msgid "Your Terminal type is unknown!"
 msgstr "Uçbirim türünüz bilinmiyor!"
 
-#: src/LYCurses.c:1496
+#: src/LYCurses.c:1497
 msgid "Enter a terminal type:"
 msgstr "Bir uçbirim türü giriniz:"
 
-#: src/LYCurses.c:1510
+#: src/LYCurses.c:1511
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "UÇBÝRÝM TÜRÜ AYARI"
 
-#: src/LYCurses.c:2087
+#: src/LYCurses.c:2088
 #, c-format
 msgid ""
 "\n"
@@ -3704,7 +3704,7 @@ msgstr ""
 "\n"
 "%2$s Sür. %1$s'de ölümcül bir hata oluþtu\n"
 
-#: src/LYCurses.c:2090
+#: src/LYCurses.c:2091
 #, c-format
 msgid ""
 "\n"
@@ -3734,39 +3734,39 @@ msgstr "Düzenleyici %s hata durumuyla döndü."
 msgid "reason unknown."
 msgstr "neden bilinmiyor."
 
-#: src/LYDownload.c:502
+#: src/LYDownload.c:503
 msgid "Downloaded link:"
 msgstr "Ýndirilmiþ link:"
 
-#: src/LYDownload.c:507
+#: src/LYDownload.c:508
 msgid "Suggested file name:"
 msgstr "Önerilen dosya adý:"
 
-#: src/LYDownload.c:512
+#: src/LYDownload.c:513
 msgid "Standard download options:"
 msgstr "Standart indirme seçenekleri:"
 
-#: src/LYDownload.c:513
+#: src/LYDownload.c:514
 msgid "Download options:"
 msgstr "Ýndirme seçenekleri:"
 
-#: src/LYDownload.c:529
+#: src/LYDownload.c:530
 msgid "Save to disk"
 msgstr "Diske kaydet"
 
-#: src/LYDownload.c:543
+#: src/LYDownload.c:544
 msgid "View temporary file"
 msgstr "Geçici dosyayý görüntüle"
 
-#: src/LYDownload.c:550
+#: src/LYDownload.c:551
 msgid "Save to disk disabled."
 msgstr "Diske kaydetme devre dýþý..."
 
-#: src/LYDownload.c:554 src/LYPrint.c:1319
+#: src/LYDownload.c:555 src/LYPrint.c:1319
 msgid "Local additions:"
 msgstr "Yerel eklentiler:"
 
-#: src/LYDownload.c:565 src/LYUpload.c:211
+#: src/LYDownload.c:566 src/LYUpload.c:211
 #, c-format
 msgid "No Name Given"
 msgstr "Ýsim Verilmemiþ"
@@ -4182,19 +4182,19 @@ msgstr "Bu mesajý otomatik olarak oluþturan"
 msgid "No system mailer configured"
 msgstr "Ayarlanmýþ sistem postacýsý yok"
 
-#: src/LYMain.c:999
+#: src/LYMain.c:998
 msgid "No Winsock found, sorry."
 msgstr "Winsock bulunamadý, üzgünüm."
 
-#: src/LYMain.c:1194
+#: src/LYMain.c:1193
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "Geçerli bir TMP ya da TEMP alaný tanýmlamalýsýnýz!"
 
-#: src/LYMain.c:1247 src/LYMainLoop.c:4979
+#: src/LYMain.c:1246 src/LYMainLoop.c:4977
 msgid "No such directory"
 msgstr "Böyle bir dizin yok"
 
-#: src/LYMain.c:1452
+#: src/LYMain.c:1453
 #, c-format
 msgid ""
 "\n"
@@ -4205,7 +4205,7 @@ msgstr ""
 "Ayarlama dosyasý %s temin edilemiyor.\n"
 "\n"
 
-#: src/LYMain.c:1462
+#: src/LYMain.c:1463
 #, c-format
 msgid ""
 "\n"
@@ -4216,7 +4216,7 @@ msgstr ""
 "Lynx karakter kümeleri bildirilmemiþ.\n"
 "\n"
 
-#: src/LYMain.c:1491
+#: src/LYMain.c:1492
 #, c-format
 msgid ""
 "\n"
@@ -4227,7 +4227,7 @@ msgstr ""
 "Lynx düzenleme eþlemi bildirilmemiþ.\n"
 "\n"
 
-#: src/LYMain.c:1517
+#: src/LYMain.c:1518
 #, c-format
 msgid ""
 "\n"
@@ -4238,7 +4238,7 @@ msgstr ""
 "Lynx dosyasý %s temin edilemiyor.\n"
 "\n"
 
-#: src/LYMain.c:1758
+#: src/LYMain.c:1761
 msgid "Warning:"
 msgstr "Uyarý:"
 
@@ -4283,113 +4283,113 @@ msgstr "KULLANIM: %s [seçenekler] [dosya]\n"
 msgid "Options are:\n"
 msgstr "Seçenekler:\n"
 
-#: src/LYMain.c:4243
+#: src/LYMain.c:4242
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Geçersiz Seçenek: %s\n"
 
-#: src/LYMainLoop.c:567
+#: src/LYMainLoop.c:572
 #, c-format
 msgid "Internal error: Invalid mouse link %d!"
 msgstr "Dahili hata: Geçersiz fare linki %d!"
 
-#: src/LYMainLoop.c:684 src/LYMainLoop.c:5001
+#: src/LYMainLoop.c:689 src/LYMainLoop.c:4999
 msgid "A URL specified by the user"
 msgstr "Kullanýcý tarafýndan belirtilmiþ bir URL"
 
-#: src/LYMainLoop.c:1140
+#: src/LYMainLoop.c:1145
 msgid "Enctype multipart/form-data not yet supported!  Cannot submit."
 msgstr "Enctip çok parçalý/form verisi henüz desteklenmiyor!  Gönderilemez."
 
 #.
 #. * Make a name for this help file.
 #.
-#: src/LYMainLoop.c:3042
+#: src/LYMainLoop.c:3047
 msgid "Help Screen"
 msgstr "Yardým Ekraný"
 
-#: src/LYMainLoop.c:3163
+#: src/LYMainLoop.c:3168
 msgid "System Index"
 msgstr "Sistem Ýndeksi"
 
-#: src/LYMainLoop.c:3523 src/LYMainLoop.c:5221
+#: src/LYMainLoop.c:3528 src/LYMainLoop.c:5223
 msgid "Entry into main screen"
 msgstr "Ana ekrana giriþ"
 
-#: src/LYMainLoop.c:3793
+#: src/LYMainLoop.c:3791
 msgid "No next document present"
 msgstr "Sonrasýnda baþka belge yok"
 
-#: src/LYMainLoop.c:4091
+#: src/LYMainLoop.c:4089
 msgid "charset for this document specified explicitly, sorry..."
 msgstr "bu belge için karakterkümesi özgün þekilde belirtilmiþtir, üzgünüm..."
 
-#: src/LYMainLoop.c:4955
+#: src/LYMainLoop.c:4953
 msgid "cd to:"
 msgstr "hangi dizine cd:"
 
-#: src/LYMainLoop.c:4982
+#: src/LYMainLoop.c:4980
 msgid "A component of path is not a directory"
 msgstr "Yolun bileþenlerinden biri dizin deðildir"
 
-#: src/LYMainLoop.c:4985
+#: src/LYMainLoop.c:4983
 msgid "failed to change directory"
 msgstr "dizin deðiþtirme baþarýsýz"
 
-#: src/LYMainLoop.c:6143
+#: src/LYMainLoop.c:6144
 msgid "Reparsing document under current settings..."
 msgstr "Mevcut ayarlarla belge yeniden ayrýþtýrýlýyor..."
 
-#: src/LYMainLoop.c:6429
+#: src/LYMainLoop.c:6433
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Ölümcül hata - çýktý dosyasý %s açýlamýyor\n"
 
-#: src/LYMainLoop.c:6773
+#: src/LYMainLoop.c:6777
 msgid "TABLE center enable."
 msgstr "TABLO ortala(mayý) etkinleþtir."
 
-#: src/LYMainLoop.c:6776
+#: src/LYMainLoop.c:6780
 msgid "TABLE center disable."
 msgstr "TABLO ortala(mayý) devre dýþý býrak."
 
-#: src/LYMainLoop.c:6853
+#: src/LYMainLoop.c:6857
 msgid "Current URL is empty."
 msgstr "Mevcut URL boþ."
 
-#: src/LYMainLoop.c:6855 src/LYUtils.c:1693
+#: src/LYMainLoop.c:6859 src/LYUtils.c:1702
 msgid "Copy to clipboard failed."
 msgstr "Panoya kopyalama baþarýsýz."
 
-#: src/LYMainLoop.c:6857
+#: src/LYMainLoop.c:6861
 msgid "Document URL put to clipboard."
 msgstr "Belge URL'sini panoya koy."
 
-#: src/LYMainLoop.c:6859
+#: src/LYMainLoop.c:6863
 msgid "Link URL put to clipboard."
 msgstr "Link URL'sini panoya koy."
 
-#: src/LYMainLoop.c:6886
+#: src/LYMainLoop.c:6890
 msgid "No URL in the clipboard."
 msgstr "Panoda URL yok."
 
-#: src/LYMainLoop.c:7558 src/LYMainLoop.c:7728
+#: src/LYMainLoop.c:7554 src/LYMainLoop.c:7724
 msgid "-index-"
 msgstr "-indeks-"
 
-#: src/LYMainLoop.c:7668
+#: src/LYMainLoop.c:7664
 msgid "lynx: Can't access startfile"
 msgstr "lynx: baþlat dosyasýna (startfile) eriþilemiyor"
 
-#: src/LYMainLoop.c:7680
+#: src/LYMainLoop.c:7676
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: Baþlat dosyasý bulunamýyor ya da html-metin ya da salt-metin deðil"
 
-#: src/LYMainLoop.c:7681
+#: src/LYMainLoop.c:7677
 msgid "      Exiting..."
 msgstr "      Kapanýyor..."
 
-#: src/LYMainLoop.c:7722
+#: src/LYMainLoop.c:7718
 msgid "-more-"
 msgstr "-devam-"
 
@@ -5325,11 +5325,11 @@ msgstr "Eylem:"
 msgid "(Form field)"
 msgstr "(Form alaný)"
 
-#: src/LYShowInfo.c:450
+#: src/LYShowInfo.c:448
 msgid "No Links on the current page"
 msgstr "Mevcut sayfada link yok"
 
-#: src/LYShowInfo.c:455
+#: src/LYShowInfo.c:453
 msgid "Server Headers:"
 msgstr "Sunucu Baþlýklarý:"
 
@@ -5382,33 +5382,33 @@ msgstr "Yüklenecek yer:"
 msgid "Upload options:"
 msgstr "Yükleme seçenekleri:"
 
-#: src/LYUtils.c:1695
+#: src/LYUtils.c:1704
 msgid "Download document URL put to clipboard."
 msgstr "Belge indirme URL'sini panoya koy."
 
-#: src/LYUtils.c:2465
+#: src/LYUtils.c:2481
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "Bu URL þemasý için umulmadýk eriþim protokolü."
 
-#: src/LYUtils.c:3283
+#: src/LYUtils.c:3289
 msgid "Too many tempfiles"
 msgstr "Çok sayýda geçici dosya"
 
-#: src/LYUtils.c:3587
+#: src/LYUtils.c:3593
 msgid "unknown restriction"
 msgstr "bilinmeyen kýsýtlama"
 
-#: src/LYUtils.c:3617
+#: src/LYUtils.c:3623
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "Hiçbir kýsýtlama kurulmamýþ.\n"
 
-#: src/LYUtils.c:3620
+#: src/LYUtils.c:3626
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "Kurulmuþ kýsýtlamalar:\n"
 
-#: src/LYUtils.c:5002
+#: src/LYUtils.c:5010
 msgid "Cannot find HOME directory"
 msgstr "EV dizini bulunamýyor"
 

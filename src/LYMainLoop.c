@@ -531,9 +531,14 @@ static BOOL set_curdoc_link(int nextlink)
 static void goto_line(int nextline)
 {
     int n;
+    int old_link = newdoc.link;
 
+    newdoc.link = 0;
     for (n = 0; n < nlinks; ++n) {
 	if (nextline == links[n].anchor_line_num + 1) {
+	    CTRACE((tfp, "top_of_screen %d\n", HText_getTopOfScreen() + 1));
+	    CTRACE((tfp, "goto_line(%d) -> link %d -> %d\n", nextline,
+		    old_link, n));
 	    newdoc.link = n;
 	    break;
 	}
@@ -705,7 +710,7 @@ static BOOL do_check_recall(int ch,
 			    char **old_user_input,
 			    int URLTotal,
 			    int *URLNum,
-			    int recall,
+			    RecallType recall,
 			    BOOLEAN *FirstURLRecall)
 {
     char *cp;
@@ -2829,7 +2834,7 @@ static void handle_LYK_FIRST_LINK(void)
 static BOOLEAN handle_LYK_GOTO(int *ch,
 			       char *user_input_buffer,
 			       char **old_user_input,
-			       int *recall,
+			       RecallType * recall,
 			       int *URLTotal,
 			       int *URLNum,
 			       BOOLEAN *FirstURLRecall,
@@ -3355,7 +3360,7 @@ static void handle_LYK_INSTALL(void)
 static BOOLEAN handle_LYK_JUMP(int c,
 			       char *user_input_buffer,
 			       char **old_user_input GCC_UNUSED,
-			       int *recall GCC_UNUSED,
+			       RecallType * recall GCC_UNUSED,
 			       BOOLEAN *FirstURLRecall GCC_UNUSED,
 			       int *URLNum GCC_UNUSED,
 			       int *URLTotal GCC_UNUSED,
@@ -3631,12 +3636,9 @@ static BOOLEAN handle_LYK_OPTIONS(int *cmd,
 	char *CurrentNegoLanguage = NULL;
 	char *CurrentNegoCharset = NULL;
 
-	StrAllocCopy(CurrentUserAgent, (LYUserAgent ?
-					LYUserAgent : ""));
-	StrAllocCopy(CurrentNegoLanguage, (language ?
-					   language : ""));
-	StrAllocCopy(CurrentNegoCharset, (pref_charset ?
-					  pref_charset : ""));
+	StrAllocCopy(CurrentUserAgent, NonNull(LYUserAgent));
+	StrAllocCopy(CurrentNegoLanguage, NonNull(language));
+	StrAllocCopy(CurrentNegoCharset, NonNull(pref_charset));
 
 	LYoptions(); /** do the old-style options stuff **/
 
@@ -3653,12 +3655,9 @@ static BOOLEAN handle_LYK_OPTIONS(int *cmd,
 	    verbose_img_flag != verbose_img ||
 	    LYUseDefaultRawMode_flag != LYUseDefaultRawMode ||
 	    LYSelectPopups_flag != LYSelectPopups ||
-	    ((strcmp(CurrentUserAgent, (LYUserAgent ?
-					LYUserAgent : "")) ||
-	      strcmp(CurrentNegoLanguage, (language ?
-					   language : "")) ||
-	      strcmp(CurrentNegoCharset, (pref_charset ?
-					  pref_charset : ""))) &&
+	    ((strcmp(CurrentUserAgent, NonNull(LYUserAgent)) ||
+	      strcmp(CurrentNegoLanguage, NonNull(language)) ||
+	      strcmp(CurrentNegoCharset, NonNull(pref_charset))) &&
 	     (!strncmp(curdoc.address, "http", 4) ||
 	      isLYNXCGI(curdoc.address)))) {
 
@@ -3678,8 +3677,7 @@ static BOOLEAN handle_LYK_OPTIONS(int *cmd,
 		HTInfoMsg(WILL_NOT_RELOAD_DOC);
 	    } else {
 		copy_address(&newdoc, &curdoc);
-		if (((strcmp(CurrentUserAgent, (LYUserAgent ?
-						LYUserAgent : "")) ||
+		if (((strcmp(CurrentUserAgent, NonNull(LYUserAgent)) ||
 		      strcmp(CurrentNegoLanguage, NonNull(language)) ||
 		      strcmp(CurrentNegoCharset, NonNull(pref_charset))) &&
 		     (strncmp(curdoc.address, "http", 4) == 0 ||
@@ -4956,7 +4954,7 @@ void handle_LYK_CHDIR(void)
     /* some people may prefer automatic clearing of the previous user input,
        here, to do this, just uncomment next line - VH */
     /* buf[0]='\0'; */
-    if (LYgetstr(buf, VISIBLE, sizeof(buf) - 1, 0) < 0 || !*buf) {
+    if (LYgetstr(buf, VISIBLE, sizeof(buf) - 1, NORECALL) < 0 || !*buf) {
 	HTInfoMsg(CANCELLED);
 	return;
     }
@@ -5140,7 +5138,10 @@ int mainloop(void)
 #define	BUFF_MAX	1024
     char sjis_buff[BUFF_MAX];
 #endif
-    int c = 0, real_c = 0, old_c = 0, pending_form_c = -1;
+    int c = 0;
+    int real_c = 0;
+    int old_c = 0;
+    int pending_form_c = -1;
     int cmd = LYK_DO_NOTHING, real_cmd = LYK_DO_NOTHING;
     int getresult;
     int arrowup = FALSE, show_help = FALSE;
@@ -5159,7 +5160,8 @@ int mainloop(void)
     char cfile[128];
     FILE *cfp;
     char *cp;
-    int ch, recall;
+    int ch;
+    RecallType recall;
     int URLTotal;
     int URLNum;
     BOOLEAN FirstURLRecall = TRUE;
@@ -5840,8 +5842,7 @@ int mainloop(void)
 		if (newdoc.address && curdoc.address &&
 		    isLYNXDOWNLOAD(newdoc.address)) {
 		    copy_address(&newdoc, &curdoc);
-		    StrAllocCopy(newdoc.title, (curdoc.title ?
-						curdoc.title : ""));
+		    StrAllocCopy(newdoc.title, NonNull(curdoc.title));
 		    StrAllocCopy(newdoc.bookmark, curdoc.bookmark);
 		    newdoc.line = curdoc.line;
 		    newdoc.link = curdoc.link;
@@ -6187,7 +6188,8 @@ int mainloop(void)
 	     * If more equals TRUE, then there is more info below this page.
 	     */
 	    more = HText_canScrollDown();
-	    goto_line(Newline);
+	    if (newdoc.link < 0)
+		goto_line(Newline);
 	    curdoc.line = Newline = HText_getTopOfScreen() + 1;
 
 	    if (curdoc.title == NULL) {
@@ -6240,6 +6242,8 @@ int mainloop(void)
 	    newdoc.line = 1;
 	    newdoc.link = 0;
 	    curdoc.line = Newline;	/* set */
+	} else if (newdoc.link < 0) {
+	    newdoc.link = 0;	/* ...just in case getfile set this */
 	}
 
 	/*
@@ -7458,16 +7462,8 @@ static int are_phys_different(DocInfo *doc1, DocInfo *doc2)
 #ifdef LY_FIND_LEAKS
 static void HTGotoURLs_free(void)
 {
-    char *url;
-    HTList *cur = Goto_URLs;
-
-    if (cur != 0) {
-	while (NULL != (url = (char *) HTList_nextObject(cur))) {
-	    FREE(url);
-	}
-	HTList_delete(Goto_URLs);
-	Goto_URLs = NULL;
-    }
+    LYFreeStringList(Goto_URLs);
+    Goto_URLs = NULL;
 }
 #endif
 
@@ -7779,7 +7775,5 @@ static void status_link(char *curlink_name,
 
 const char *LYDownLoadAddress(void)
 {
-    const char *s = newdoc.address ? newdoc.address : "";
-
-    return s;
+    return NonNull(newdoc.address);
 }

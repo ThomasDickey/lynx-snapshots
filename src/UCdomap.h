@@ -11,6 +11,9 @@
 
 #include <UCkd.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
  * [old comments:  - KW ]
  * consolemap.h
@@ -21,42 +24,40 @@
 #define GRAF_MAP 1
 #define IBMPC_MAP 2
 #define USER_MAP 3
-
 /*
  * Some conventions I try to follow (loosely):
  *	[a-z]* only internal, names from linux driver code.
  *	UC_* to be only known internally.
  *	UC[A-Z]* to be exported to other parts of Lynx. -KW
- */
-extern void UC_Charset_Setup(const char *UC_MIMEcharset,
-			     const char *UC_LYNXcharset,
-			     const u8 * unicount,
-			     const u16 * unitable,
-			     int nnuni,
-			     struct unimapdesc_str replacedesc,
-			     int lowest_eight,
-			     int UC_rawuni,
-			     int codepage);
+ */ extern void UC_Charset_Setup(const char *UC_MIMEcharset,
+				 const char *UC_LYNXcharset,
+				 const u8 * unicount,
+				 const u16 * unitable,
+				 int nnuni,
+				 struct unimapdesc_str replacedesc,
+				 int lowest_eight,
+				 int UC_rawuni,
+				 int codepage);
 
-struct UC_charset {
-    const char *MIMEname;
-    const char *LYNXname;
-    const u8 *unicount;
-    const u16 *unitable;
-    int num_uni;
-    struct unimapdesc_str replacedesc;
-    int uc_status;
-    int LYhndl;
-    int GN;
-    int lowest_eight;
-    int enc;
-    int codepage;		/* codepage number, used by OS/2 font-switching code */
-};
+    struct UC_charset {
+	const char *MIMEname;
+	const char *LYNXname;
+	const u8 *unicount;
+	const u16 *unitable;
+	int num_uni;
+	struct unimapdesc_str replacedesc;
+	int uc_status;
+	int LYhndl;
+	int GN;
+	int lowest_eight;
+	int enc;
+	int codepage;		/* codepage number, used by OS/2 font-switching code */
+    };
 
-extern int UCNumCharsets;
-extern int UCInitialized;
+    extern int UCNumCharsets;
+    extern int UCInitialized;
 
-extern void UCInit(void);
+    extern void UCInit(void);
 
 /*
  * INSTRUCTIONS for adding new character sets which do not have Unicode tables.
@@ -69,12 +70,12 @@ extern void UCInit(void);
  * when changing ucmaketbl.c, see also UC_Charset_Setup() above for details.
  */
 
-  /*
-   * There is no strict correlation for the next five, since the transfer
-   * charset gets decoded into Display Char Set by the CJK code (separate from
-   * Unicode mechanism).  For now we use the MIME name that describes what is
-   * output to the terminal.  - KW
-   */
+    /*
+     * There is no strict correlation for the next five, since the transfer
+     * charset gets decoded into Display Char Set by the CJK code (separate from
+     * Unicode mechanism).  For now we use the MIME name that describes what is
+     * output to the terminal.  - KW
+     */
 
 /*----------------------------------------------------------------------------*/
 
@@ -143,9 +144,9 @@ extern void UCInit(void);
 
 /*----------------------------------------------------------------------------*/
 
-  /*
-   * Placeholder for non-translation mode.  - FM
-   */
+    /*
+     * Placeholder for non-translation mode.  - FM
+     */
 
 #ifndef NO_CHARSET_x_transparent
 #define NO_CHARSET_x_transparent !ALL_CHARSETS
@@ -171,4 +172,7 @@ extern void UCInit(void);
        0, 128,UCT_ENC_UTF8,-4)
 #endif
 
-#endif /* UCDOMAP_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* UCDOMAP_H */

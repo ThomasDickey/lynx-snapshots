@@ -411,6 +411,7 @@ static int HTLoadHTTP(const char *arg,
 		      HTFormat format_out,
 		      HTStream *sink)
 {
+    static char *empty = "";
     int s;			/* Socket number for returned data */
     const char *url = arg;	/* The URL which get_physical() returned */
     bstring *command = NULL;	/* The whole command */
@@ -1402,7 +1403,7 @@ static int HTLoadHTTP(const char *arg,
 	     * anything else) when !eol.  Otherwise, set the value of length to
 	     * what we have beyond eol (i.e., beyond the status line).  - FM
 	     */
-	    start_of_data = eol ? eol + 1 : "";
+	    start_of_data = eol ? eol + 1 : empty;
 	    length = eol ? length - (start_of_data - line_buffer) : 0;
 
 	    /*

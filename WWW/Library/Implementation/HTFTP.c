@@ -102,6 +102,49 @@ typedef struct _connection {
 */
 #include <HTML.h>
 
+/*
+ * socklen_t is the standard, but there are many pre-standard variants.
+ * This ifdef works around a few of those cases.
+ *
+ * Information was obtained from header files on these platforms:
+ *	AIX 4.3.2, 5.1
+ *	HPUX 10.20, 11.00, 11.11
+ *	IRIX64 6.5
+ *	Tru64 4.0G, 4.0D, 5.1
+ */
+#if defined(SYS_IRIX64)
+	/* IRIX64 6.5 socket.h may use socklen_t if SGI_SOURCE is not defined */
+#  if _NO_XOPEN4 && _NO_XOPEN5
+#    define LY_SOCKLEN socklen_t
+#  elif _ABIAPI
+#    define LY_SOCKLEN int
+#  elif _XOPEN5
+#    if (_MIPS_SIM != _ABIO32)
+#      define LY_SOCKLEN socklen_t
+#    else
+#      define LY_SOCKLEN int
+#    endif
+#  else
+#    define LY_SOCKLEN size_t
+#  endif
+#elif defined(SYS_HPUX)
+#  if defined(_XOPEN_SOURCE_EXTENDED) && defined(SO_PROTOTYPE)
+#    define LY_SOCKLEN socklen_t
+#  else	/* HPUX 10.20, etc. */
+#    define LY_SOCKLEN int
+#  endif
+#elif defined(SYS_TRU64)
+#  if defined(_POSIX_PII_SOCKET)
+#    define LY_SOCKLEN socklen_t
+#  elif defined(_XOPEN_SOURCE_EXTENDED)
+#    define LY_SOCKLEN size_t
+#  else
+#    define LY_SOCKLEN int
+#  endif
+#else
+#  define LY_SOCKLEN socklen_t
+#endif
+
 #define PUTC(c)      (*targetClass.put_character) (target, c)
 #define PUTS(s)      (*targetClass.put_string)    (target, s)
 #define START(e)     (*targetClass.start_element) (target, e, 0, 0, -1, 0)
@@ -1096,7 +1139,7 @@ static int get_listen_socket(void)
     struct sockaddr_storage soc_address;	/* Binary network address */
     struct sockaddr_in *soc_in = (struct sockaddr_in *) &soc_address;
     int af;
-    int slen;
+    LY_SOCKLEN slen;
 
 #else
     struct sockaddr_in soc_address;	/* Binary network address */
@@ -1203,18 +1246,18 @@ static int get_listen_socket(void)
 #else
     {
 	int status;
-	int address_length = sizeof(soc_address);
+	LY_SOCKLEN address_length = sizeof(soc_address);
 
 #ifdef SOCKS
 	if (socks_flag)
 	    status = Rgetsockname(control->socket,
 				  (struct sockaddr *) &soc_address,
-				  (void *) &address_length);
+				  &address_length);
 	else
 #endif /* SOCKS */
 	    status = getsockname(control->socket,
 				 (struct sockaddr *) &soc_address,
-				 (void *) &address_length);
+				 &address_length);
 	if (status < 0)
 	    return HTInetStatus("getsockname");
 #ifdef INET6
@@ -1257,12 +1300,12 @@ static int get_listen_socket(void)
 	if (socks_flag)
 	    status = Rgetsockname(new_socket,
 				  (struct sockaddr *) &soc_address,
-				  (void *) &address_length);
+				  &address_length);
 	else
 #endif /* SOCKS */
 	    status = getsockname(new_socket,
 				 (struct sockaddr *) &soc_address,
-				 (void *) &address_length);
+				 &address_length);
 	if (status < 0)
 	    return HTInetStatus("getsockname");
     }
@@ -2935,7 +2978,7 @@ static int setup_connection(const char *name,
 			    HTParentAnchor *anchor)
 {
     int retry;			/* How many times tried? */
-    int status;
+    int status = HT_NO_CONNECTION;
 
     CTRACE((tfp, "setup_connection(%s)\n", name));
 
@@ -3038,7 +3081,7 @@ static int setup_connection(const char *name,
 	    } else if (strcmp(p, "EPSV") == 0) {
 		char c0, c1, c2, c3;
 		struct sockaddr_storage ss;
-		int sslen;
+		LY_SOCKLEN sslen;
 
 		/*
 		 * EPSV bla (|||port|)
@@ -3672,18 +3715,18 @@ int HTFTPLoad(const char *name,
 #else
 	struct sockaddr_in soc_address;
 #endif /* INET6 */
-	int soc_addrlen = sizeof(soc_address);
+	LY_SOCKLEN soc_addrlen = sizeof(soc_address);
 
 #ifdef SOCKS
 	if (socks_flag)
 	    status = Raccept(master_socket,
 			     (struct sockaddr *) &soc_address,
-			     (void *) &soc_addrlen);
+			     &soc_addrlen);
 	else
 #endif /* SOCKS */
 	    status = accept(master_socket,
 			    (struct sockaddr *) &soc_address,
-			    (void *) &soc_addrlen);
+			    &soc_addrlen);
 	if (status < 0) {
 	    init_help_message_cache();	/* to free memory */
 	    return HTInetStatus("accept");

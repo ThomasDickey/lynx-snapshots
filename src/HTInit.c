@@ -236,7 +236,8 @@ static char *GetCommand(char *s, char **t)
 
     s = LYSkipBlanks(s);
     /* marca -- added + 1 for error case -- oct 24, 1993. */
-    s2 = malloc(strlen(s) * 2 + 1);	/* absolute max, if all % signs */
+    s2 = typeMallocn(char, strlen(s) * 2 + 1);	/* absolute max, if all % signs */
+
     if (!s2)
 	ExitWithError(MEMORY_EXHAUSTED_ABORT);
 
@@ -345,7 +346,8 @@ static int ProcessMailcapEntry(FILE *fp, struct MailcapEntry *mc, AcceptMedia me
 	need = len + strlen(rawentry) + 1;
 	if (need > rawentryalloc) {
 	    rawentryalloc += (2000 + need);
-	    rawentry = realloc(rawentry, rawentryalloc);
+	    rawentry = typeRealloc(char, rawentry, rawentryalloc);
+
 	    if (!rawentry)
 		ExitWithError(MEMORY_EXHAUSTED_ABORT);
 	}

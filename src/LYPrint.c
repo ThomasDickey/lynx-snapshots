@@ -178,7 +178,7 @@ static int RecallFilename(char *filename,
 {
     int ch;
     char *cp;
-    int recall;
+    RecallType recall;
 
     /*
      * Set up the sug_filenames recall buffer.

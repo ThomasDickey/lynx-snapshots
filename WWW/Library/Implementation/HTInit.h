@@ -18,11 +18,17 @@
 #include <HTUtils.h>
 #endif
 
-extern void HTFormatInit(void);
-extern void HTPreparsedFormatInit(void);
-extern void HTFileInit(void);
-extern int LYTestMailcapCommand(const char *testcommand, const char *params);
-extern BOOL LYMailcapUsesPctS(const char *controlstring);
-extern char *LYMakeMailcapCommand(const char *command, const char *params, const char *filename);
+#ifdef __cplusplus
+extern "C" {
+#endif
+    extern void HTFormatInit(void);
+    extern void HTPreparsedFormatInit(void);
+    extern void HTFileInit(void);
+    extern int LYTestMailcapCommand(const char *testcommand, const char *params);
+    extern BOOL LYMailcapUsesPctS(const char *controlstring);
+    extern char *LYMakeMailcapCommand(const char *command, const char *params, const char *filename);
 
-#endif /* HTINIT_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTINIT_H */

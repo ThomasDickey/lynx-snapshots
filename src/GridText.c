@@ -388,6 +388,38 @@ typedef struct {
     int column;			/* Zero-based column value */
 } HTTabID;
 
+typedef enum {
+    S_text,
+    S_esc,
+    S_dollar,
+    S_paren,
+    S_nonascii_text,
+    S_dollar_paren,
+    S_jisx0201_text
+} eGridState;			/* Escape sequence? */
+
+#ifdef USE_TH_JP_AUTO_DETECT
+typedef enum {			/* Detected Kanji code */
+    DET_SJIS,
+    DET_EUC,
+    DET_NOTYET,
+    DET_MIXED
+} eDetectedKCode;
+
+typedef enum {
+    SJIS_state_neutral,
+    SJIS_state_in_kanji,
+    SJIS_state_has_bad_code
+} eSJIS_status;
+
+typedef enum {
+    EUC_state_neutral,
+    EUC_state_in_kanji,
+    EUC_state_in_kana,
+    EUC_state_has_bad_code
+} eEUC_status;
+#endif
+
 /*	Notes on struct _Htext:
  *	next_line is valid if stale is false.
  *	top_of_screen line means the line at the top of the screen
@@ -436,33 +468,11 @@ struct _HText {
     HTkcode kcode;		/* Kanji code? */
     HTkcode specified_kcode;	/* Specified Kanji code */
 #ifdef USE_TH_JP_AUTO_DETECT
-    enum _detected_kcode {
-	DET_SJIS,
-	DET_EUC,
-	DET_NOTYET,
-	DET_MIXED
-    } detected_kcode;		/* Detected Kanji code */
-    enum _SJIS_status {
-	SJIS_state_neutral,
-	SJIS_state_in_kanji,
-	SJIS_state_has_bad_code
-    } SJIS_status;
-    enum _EUC_status {
-	EUC_state_neutral,
-	EUC_state_in_kanji,
-	EUC_state_in_kana,
-	EUC_state_has_bad_code
-    } EUC_status;
+    eDetectedKCode detected_kcode;
+    eSJIS_status SJIS_status;
+    eEUC_status EUC_status;
 #endif
-    enum grid_state {
-	S_text,
-	S_esc,
-	S_dollar,
-	S_paren,
-	S_nonascii_text,
-	S_dollar_paren,
-	S_jisx0201_text
-    } state;			/* Escape sequence? */
+    eGridState state;		/* Escape sequence? */
     int kanji_buf;		/* Lead multibyte */
     int in_sjis;		/* SJIS flag */
     int halted;			/* emergency halt */
@@ -1173,13 +1183,13 @@ HText *HText_new(HTParentAnchor *anchor)
 HText *HText_new2(HTParentAnchor *anchor,
 		  HTStream *stream)
 {
-    HText *this = HText_new(anchor);
+    HText *result = HText_new(anchor);
 
     if (stream) {
-	this->target = stream;
-	this->targetClass = *stream->isa;	/* copy action procedures */
+	result->target = stream;
+	result->targetClass = *stream->isa;	/* copy action procedures */
     }
-    return this;
+    return result;
 }
 
 /*	Free Entire Text
@@ -1236,12 +1246,7 @@ void HText_free(HText *self)
      * Free the hidden links list.  -FM
      */
     if (self->hidden_links) {
-	char *href = NULL;
-	HTList *cur = self->hidden_links;
-
-	while (NULL != (href = (char *) HTList_nextObject(cur)))
-	    FREE(href);
-	HTList_delete(self->hidden_links);
+	LYFreeStringList(self->hidden_links);
 	self->hidden_links = NULL;
     }
 
@@ -2382,10 +2387,7 @@ static void display_page(HText *text, int line_number,
      * Free any un-reallocated links[] entries
      * from the previous page draw.  -FM
      */
-    for (i = nlinks; i < last_nlinks; i++) {
-	LYSetHilite(i, NULL);
-	FREE(links[i].lname);
-    }
+    LYFreeHilites(nlinks, last_nlinks);
     last_nlinks = nlinks;
 
     /*
@@ -3594,7 +3596,7 @@ void HText_appendCharacter(HText *text, int ch)
     if ((HTCJK == JAPANESE) && (text->detected_kcode != DET_MIXED) &&
 	(text->specified_kcode != SJIS) && (text->specified_kcode != EUC)) {
 	unsigned char c;
-	enum _detected_kcode save_d_kcode;
+	eDetectedKCode save_d_kcode;
 
 	c = UCH(ch);
 	save_d_kcode = text->detected_kcode;
@@ -4171,7 +4173,7 @@ void HText_appendCharacter(HText *text, int ch)
 	    (text->T.output_utf8 &&
 	     target_cu + UTF_XLEN(ch) >= LYcols_cu(text))) {
 	    int saved_kanji_buf;
-	    int saved_state;
+	    eGridState saved_state;
 
 	    new_line(text);
 	    line = text->last_line;
@@ -5967,7 +5969,7 @@ HTParentAnchor *HText_nodeAnchor(HText *text)
 HTChildAnchor *HText_childNextNumber(int number, void **prev)
 {
     /* Sorry, TextAnchor is not declared outside this file, use a cast. */
-    TextAnchor *a = *prev;
+    TextAnchor *a = (TextAnchor *) *prev;
 
     if (!HTMainText || number <= 0)
 	return (HTChildAnchor *) 0;	/* Fail */
@@ -7337,18 +7339,8 @@ HTAnchor *HText_linkSelTo(HText *me GCC_UNUSED,
  */
 void HTSearchQueries_free(void)
 {
-    char *query;
-    HTList *cur = search_queries;
-
-    if (!cur)
-	return;
-
-    while (NULL != (query = (char *) HTList_nextObject(cur))) {
-	FREE(query);
-    }
-    HTList_delete(search_queries);
+    LYFreeStringList(search_queries);
     search_queries = NULL;
-    return;
 }
 
 /*
@@ -7391,7 +7383,8 @@ void HTAddSearchQuery(char *query)
 int do_www_search(DocInfo *doc)
 {
     char searchstring[256], temp[256], *cp, *tmpaddress = NULL;
-    int ch, recall;
+    int ch;
+    RecallType recall;
     int QueryTotal;
     int QueryNum;
     BOOLEAN PreviousSearch = FALSE;
@@ -8866,8 +8859,12 @@ static void HText_AddHiddenLink(HText *text, TextAnchor *textanchor)
      */
     if ((dest = HTAnchor_followLink(textanchor->anchor)) &&
 	(text->hiddenlinkflag != HIDDENLINKS_IGNORE ||
-	 HTList_isEmpty(text->hidden_links)))
-	HTList_appendObject(text->hidden_links, HTAnchor_address(dest));
+	 HTList_isEmpty(text->hidden_links))) {
+	char *cp_freeme = NULL;
+
+	HTList_appendObject(text->hidden_links, cp_freeme = HTAnchor_address(dest));
+	FREE(cp_freeme);
+    }
 
     return;
 }
@@ -9281,7 +9278,7 @@ char *HText_setLastOptionValue(HText *text, char *value,
 	/*
 	 * Deal with newlines or tabs.
 	 */
-	convert_to_spaces(value, FALSE);
+	LYReduceBlanks(value);
 
 	if (!op_ptr) {
 	    /*
@@ -10380,7 +10377,8 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc, char *link_name,
     if (!HTMainText)
 	return 0;
 
-    thisform = HTList_objectAt(HTMainText->forms, form_number - 1);
+    thisform = (PerFormInfo *) HTList_objectAt(HTMainText->forms, form_number
+					       - 1);
     /*  Sanity check */
     if (!thisform) {
 	CTRACE((tfp, "SubmitForm: form %d not in HTMainText's list!\n",
@@ -11526,7 +11524,7 @@ BOOL HText_hasUTF8OutputSet(HText *text)
 void HText_setKcode(HText *text, const char *charset,
 		    LYUCcharset *p_in)
 {
-    BOOL explicit;
+    BOOL charset_explicit;
 
     if (!text)
 	return;
@@ -11537,7 +11535,7 @@ void HText_setKcode(HText *text, const char *charset,
     if (!charset && !p_in) {
 	return;
     }
-    explicit = charset ? TRUE : FALSE;
+    charset_explicit = charset ? TRUE : FALSE;
     /*
      * If no explicit charset string, use the implied one.  - kw
      */
@@ -11563,11 +11561,11 @@ void HText_setKcode(HText *text, const char *charset,
      * is specified explicitely, otherwise text->kcode would cause
      * mishandling Japanese strings.  -- TH
      */
-    if (explicit && (!strcmp(charset, "shift_jis") ||
-		     !strcmp(charset, "x-sjis") ||	/* 1997/11/28 (Fri) 18:11:33 */
-		     !strcmp(charset, "x-shift-jis"))) {
+    if (charset_explicit && (!strcmp(charset, "shift_jis") ||
+			     !strcmp(charset, "x-sjis") ||	/* 1997/11/28 (Fri) 18:11:33 */
+			     !strcmp(charset, "x-shift-jis"))) {
 	text->kcode = SJIS;
-    } else if (explicit
+    } else if (charset_explicit
 #ifdef EXP_JAPANESEUTF8_SUPPORT
 	       && strcmp(charset, "utf-8")
 #endif
@@ -11601,7 +11599,7 @@ void HText_setKcode(HText *text, const char *charset,
 	}
     }
 
-    if (explicit
+    if (charset_explicit
 #ifdef EXP_JAPANESEUTF8_SUPPORT
 	&& strcmp(charset, "utf-8")
 #endif

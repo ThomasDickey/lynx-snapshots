@@ -93,7 +93,7 @@ static void trace_history(const char *tag)
  */
 void LYAddVisitedLink(DocInfo *doc)
 {
-    VisitedLink *new;
+    VisitedLink *tmp;
     HTList *cur;
     const char *title = (doc->title ? doc->title : NO_TITLE);
 
@@ -152,36 +152,36 @@ void LYAddVisitedLink(DocInfo *doc)
     }
 
     cur = Visited_Links;
-    while (NULL != (new = (VisitedLink *) HTList_nextObject(cur))) {
-	if (!strcmp(NonNull(new->address),
+    while (NULL != (tmp = (VisitedLink *) HTList_nextObject(cur))) {
+	if (!strcmp(NonNull(tmp->address),
 		    NonNull(doc->address))) {
-	    PrevVisitedLink = PrevActiveVisitedLink = new;
+	    PrevVisitedLink = PrevActiveVisitedLink = tmp;
 	    /* Already visited.  Update the last-visited info. */
-	    if (new->next_latest == &Latest_last)	/* optimization */
+	    if (tmp->next_latest == &Latest_last)	/* optimization */
 		return;
 
 	    /* Remove from "latest" chain */
-	    new->prev_latest->next_latest = new->next_latest;
-	    new->next_latest->prev_latest = new->prev_latest;
+	    tmp->prev_latest->next_latest = tmp->next_latest;
+	    tmp->next_latest->prev_latest = tmp->prev_latest;
 
 	    /* Insert at the end of the "latest" chain */
-	    Latest_last.prev_latest->next_latest = new;
-	    new->prev_latest = Latest_last.prev_latest;
-	    new->next_latest = &Latest_last;
-	    Latest_last.prev_latest = new;
+	    Latest_last.prev_latest->next_latest = tmp;
+	    tmp->prev_latest = Latest_last.prev_latest;
+	    tmp->next_latest = &Latest_last;
+	    Latest_last.prev_latest = tmp;
 	    return;
 	}
     }
 
-    if ((new = typecalloc(VisitedLink)) == NULL)
+    if ((tmp = typecalloc(VisitedLink)) == NULL)
 	outofmem(__FILE__, "LYAddVisitedLink");
-    StrAllocCopy(new->address, doc->address);
-    LYformTitle(&(new->title), title);
+    StrAllocCopy(tmp->address, doc->address);
+    LYformTitle(&(tmp->title), title);
 
     /* First-visited chain */
-    HTList_appendObject(Visited_Links, new);	/* At end */
-    new->prev_first = Last_by_first;
-    Last_by_first = new;
+    HTList_appendObject(Visited_Links, tmp);	/* At end */
+    tmp->prev_first = Last_by_first;
+    Last_by_first = tmp;
 
     /* Tree structure */
     if (PrevVisitedLink) {
@@ -194,27 +194,27 @@ void LYAddVisitedLink(DocInfo *doc)
 	    a = b, b = b->next_tree;
 
 	if (!b)			/* a == Latest_tree */
-	    Latest_tree = new;
-	new->next_tree = a->next_tree;
-	a->next_tree = new;
+	    Latest_tree = tmp;
+	tmp->next_tree = a->next_tree;
+	a->next_tree = tmp;
 
-	new->level = PrevVisitedLink->level + 1;
+	tmp->level = PrevVisitedLink->level + 1;
     } else {
 	if (Latest_tree)
-	    Latest_tree->next_tree = new;
-	new->level = 0;
-	new->next_tree = NULL;
-	Latest_tree = new;
+	    Latest_tree->next_tree = tmp;
+	tmp->level = 0;
+	tmp->next_tree = NULL;
+	Latest_tree = tmp;
     }
-    PrevVisitedLink = PrevActiveVisitedLink = new;
+    PrevVisitedLink = PrevActiveVisitedLink = tmp;
     if (!First_tree)
-	First_tree = new;
+	First_tree = tmp;
 
     /* "latest" chain */
-    Latest_last.prev_latest->next_latest = new;
-    new->prev_latest = Latest_last.prev_latest;
-    new->next_latest = &Latest_last;
-    Latest_last.prev_latest = new;
+    Latest_last.prev_latest->next_latest = tmp;
+    tmp->prev_latest = Latest_last.prev_latest;
+    tmp->next_latest = &Latest_last;
+    Latest_last.prev_latest = tmp;
 
     return;
 }
@@ -334,7 +334,7 @@ static int are_identical(HistInfo * doc, DocInfo *doc1)
 
 void LYAllocHistory(int entries)
 {
-    CTRACE((tfp, "FIXME LYAllocHistory %d vs %d\n", entries, size_history));
+    CTRACE((tfp, "LYAllocHistory %d vs %d\n", entries, size_history));
     if (entries + 1 >= size_history) {
 	unsigned want;
 	int save = size_history;
@@ -349,11 +349,11 @@ void LYAllocHistory(int entries)
 	if (history == 0)
 	    outofmem(__FILE__, "LYAllocHistory");
 	while (save < size_history) {
-	    CTRACE((tfp, "FIXME ...LYAllocHistory clearing %d\n", save));
+	    CTRACE((tfp, "...LYAllocHistory clearing %d\n", save));
 	    memset(&history[save++], 0, sizeof(history[0]));
 	}
     }
-    CTRACE((tfp, "FIXME ...LYAllocHistory %d vs %d\n", entries, size_history));
+    CTRACE((tfp, "...LYAllocHistory %d vs %d\n", entries, size_history));
 }
 
 /*

@@ -15,151 +15,149 @@
 #include <SGML.h>
 #include <HTFont.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
  *  Valid name chars for tag parsing.
  */
 #define IsNmStart(c) (isalpha(UCH(c)))
 #define IsNmChar(c) (isalnum(UCH(c)) || \
 		      c == '_' || c=='-' || c == '.' || c==':')
-
 #define ReallyEmptyTagNum(e) ((HTML_dtd.tags[e].contents == SGML_EMPTY) && \
 			      !(HTML_dtd.tags[e].flags & Tgf_nreie))
 #define ReallyEmptyTag(t) ((t->contents == SGML_EMPTY) && \
 			   !(t->flags & Tgf_nreie))
-
 /*
 
 Element Numbers
 
- */
-
-/*
+ *//*
 
    Must Match all tables by element!
    These include tables in HTMLDTD.c and code in HTML.c.
 
- */
-typedef enum {
-    HTML_A,
-    HTML_ABBREV,
-    HTML_ACRONYM,
-    HTML_ADDRESS,
-    HTML_APPLET,
-    HTML_AREA,
-    HTML_AU,
-    HTML_AUTHOR,
-    HTML_B,
-    HTML_BANNER,
-    HTML_BASE,
-    HTML_BASEFONT,
-    HTML_BDO,
-    HTML_BGSOUND,
-    HTML_BIG,
-    HTML_BLINK,
-    HTML_BLOCKQUOTE,
-    HTML_BODY,
-    HTML_BODYTEXT,
-    HTML_BQ,
-    HTML_BR,
-    HTML_BUTTON,
-    HTML_CAPTION,
-    HTML_CENTER,
-    HTML_CITE,
-    HTML_CODE,
-    HTML_COL,
-    HTML_COLGROUP,
-    HTML_COMMENT,
-    HTML_CREDIT,
-    HTML_DD,
-    HTML_DEL,
-    HTML_DFN,
-    HTML_DIR,
-    HTML_DIV,
-    HTML_DL,
-    HTML_DLC,
-    HTML_DT,
-    HTML_EM,
-    HTML_EMBED,
-    HTML_FIELDSET,
-    HTML_FIG,
-    HTML_FN,
-    HTML_FONT,
-    HTML_FORM,
-    HTML_FRAME,
-    HTML_FRAMESET,
-    HTML_H1,
-    HTML_H2,
-    HTML_H3,
-    HTML_H4,
-    HTML_H5,
-    HTML_H6,
-    HTML_HEAD,
-    HTML_HR,
-    HTML_HTML,
-    HTML_HY,
-    HTML_I,
-    HTML_IFRAME,
-    HTML_IMG,
-    HTML_INPUT,
-    HTML_INS,
-    HTML_ISINDEX,
-    HTML_KBD,
-    HTML_KEYGEN,
-    HTML_LABEL,
-    HTML_LEGEND,
-    HTML_LH,
-    HTML_LI,
-    HTML_LINK,
-    HTML_LISTING,
-    HTML_MAP,
-    HTML_MARQUEE,
-    HTML_MATH,
-    HTML_MENU,
-    HTML_META,
-    HTML_NEXTID,
-    HTML_NOFRAMES,
-    HTML_NOTE,
-    HTML_OBJECT,
-    HTML_OL,
-    HTML_OPTION,
-    HTML_OVERLAY,
-    HTML_P,
-    HTML_PARAM,
-    HTML_PLAINTEXT,
-    HTML_PRE,
-    HTML_Q,
-    HTML_S,
-    HTML_SAMP,
-    HTML_SCRIPT,
-    HTML_SELECT,
-    HTML_SHY,
-    HTML_SMALL,
-    HTML_SPAN,
-    HTML_SPOT,
-    HTML_STRIKE,
-    HTML_STRONG,
-    HTML_STYLE,
-    HTML_SUB,
-    HTML_SUP,
-    HTML_TAB,
-    HTML_TABLE,
-    HTML_TBODY,
-    HTML_TD,
-    HTML_TEXTAREA,
-    HTML_TEXTFLOW,
-    HTML_TFOOT,
-    HTML_TH,
-    HTML_THEAD,
-    HTML_TITLE,
-    HTML_TR,
-    HTML_TT,
-    HTML_U,
-    HTML_UL,
-    HTML_VAR,
-    HTML_WBR,
-    HTML_XMP,
-    HTML_ALT_OBJECT
-} HTMLElement;
+ */ typedef enum {
+	HTML_A,
+	HTML_ABBREV,
+	HTML_ACRONYM,
+	HTML_ADDRESS,
+	HTML_APPLET,
+	HTML_AREA,
+	HTML_AU,
+	HTML_AUTHOR,
+	HTML_B,
+	HTML_BANNER,
+	HTML_BASE,
+	HTML_BASEFONT,
+	HTML_BDO,
+	HTML_BGSOUND,
+	HTML_BIG,
+	HTML_BLINK,
+	HTML_BLOCKQUOTE,
+	HTML_BODY,
+	HTML_BODYTEXT,
+	HTML_BQ,
+	HTML_BR,
+	HTML_BUTTON,
+	HTML_CAPTION,
+	HTML_CENTER,
+	HTML_CITE,
+	HTML_CODE,
+	HTML_COL,
+	HTML_COLGROUP,
+	HTML_COMMENT,
+	HTML_CREDIT,
+	HTML_DD,
+	HTML_DEL,
+	HTML_DFN,
+	HTML_DIR,
+	HTML_DIV,
+	HTML_DL,
+	HTML_DLC,
+	HTML_DT,
+	HTML_EM,
+	HTML_EMBED,
+	HTML_FIELDSET,
+	HTML_FIG,
+	HTML_FN,
+	HTML_FONT,
+	HTML_FORM,
+	HTML_FRAME,
+	HTML_FRAMESET,
+	HTML_H1,
+	HTML_H2,
+	HTML_H3,
+	HTML_H4,
+	HTML_H5,
+	HTML_H6,
+	HTML_HEAD,
+	HTML_HR,
+	HTML_HTML,
+	HTML_HY,
+	HTML_I,
+	HTML_IFRAME,
+	HTML_IMG,
+	HTML_INPUT,
+	HTML_INS,
+	HTML_ISINDEX,
+	HTML_KBD,
+	HTML_KEYGEN,
+	HTML_LABEL,
+	HTML_LEGEND,
+	HTML_LH,
+	HTML_LI,
+	HTML_LINK,
+	HTML_LISTING,
+	HTML_MAP,
+	HTML_MARQUEE,
+	HTML_MATH,
+	HTML_MENU,
+	HTML_META,
+	HTML_NEXTID,
+	HTML_NOFRAMES,
+	HTML_NOTE,
+	HTML_OBJECT,
+	HTML_OL,
+	HTML_OPTION,
+	HTML_OVERLAY,
+	HTML_P,
+	HTML_PARAM,
+	HTML_PLAINTEXT,
+	HTML_PRE,
+	HTML_Q,
+	HTML_S,
+	HTML_SAMP,
+	HTML_SCRIPT,
+	HTML_SELECT,
+	HTML_SHY,
+	HTML_SMALL,
+	HTML_SPAN,
+	HTML_SPOT,
+	HTML_STRIKE,
+	HTML_STRONG,
+	HTML_STYLE,
+	HTML_SUB,
+	HTML_SUP,
+	HTML_TAB,
+	HTML_TABLE,
+	HTML_TBODY,
+	HTML_TD,
+	HTML_TEXTAREA,
+	HTML_TEXTFLOW,
+	HTML_TFOOT,
+	HTML_TH,
+	HTML_THEAD,
+	HTML_TITLE,
+	HTML_TR,
+	HTML_TT,
+	HTML_U,
+	HTML_UL,
+	HTML_VAR,
+	HTML_WBR,
+	HTML_XMP,
+	HTML_ALT_OBJECT
+    } HTMLElement;
 
 /* Notes: HTML.c uses a different extension of the HTML_ELEMENTS space
           privately, see HTNestedList.h. */
@@ -979,12 +977,12 @@ Attribute numbers
 #define HTMLA_AUXCLASS 8	/* attribute, the value of which also designates
 				   a class name */
 #endif
-extern const SGML_dtd HTML_dtd;
+    extern const SGML_dtd HTML_dtd;
 
-extern void HTSwitchDTD(int new_flag);
+    extern void HTSwitchDTD(int new_flag);
 
-extern HTTag HTTag_unrecognized;
-extern HTTag HTTag_mixedObject;
+    extern HTTag HTTag_unrecognized;
+    extern HTTag HTTag_mixedObject;
 
 /*
 
@@ -1001,13 +999,13 @@ Start anchor element
    to be omitted.
 
  */
-extern void HTStartAnchor(HTStructured * targetstream, const char *name,
-			  const char *href);
+    extern void HTStartAnchor(HTStructured * targetstream, const char *name,
+			      const char *href);
 
-extern void HTStartAnchor5(HTStructured * targetstream, const char *name,
-			   const char *href,
-			   const char *linktype,
-			   int tag_charset);
+    extern void HTStartAnchor5(HTStructured * targetstream, const char *name,
+			       const char *href,
+			       const char *linktype,
+			       int tag_charset);
 
 /*
 
@@ -1024,7 +1022,10 @@ Start IsIndex element - FM
    to be omitted.
 
  */
-extern void HTStartIsIndex(HTStructured * targetstream, const char *prompt,
-			   const char *href);
+    extern void HTStartIsIndex(HTStructured * targetstream, const char *prompt,
+			       const char *href);
 
-#endif /* HTMLDTD_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTMLDTD_H */

@@ -552,7 +552,7 @@ void HTFilterPresentations(void)
 	s = HTAtom_name(p->rep);
 
 	p->get_accept = FALSE;
-	if (LYAcceptMedia & p->accept_opt
+	if ((LYAcceptMedia & p->accept_opt) != 0
 	    && p->rep_out == WWW_PRESENT
 	    && p->rep != WWW_SOURCE
 	    && strcasecomp(s, "www/mime")

@@ -291,7 +291,7 @@ void save_bookmark_link(const char *address,
 	} else {
 	    LYstrncpy(string_buffer, title, sizeof(string_buffer) - 1);
 	}
-	convert_to_spaces(string_buffer, FALSE);
+	LYReduceBlanks(string_buffer);
 	LYMBM_statusline(TITLE_PROMPT);
 	LYgetstr(string_buffer, VISIBLE, sizeof(string_buffer), NORECALL);
 	if (*string_buffer == '\0') {

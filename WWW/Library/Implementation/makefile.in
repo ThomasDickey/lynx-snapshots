@@ -176,6 +176,9 @@ clean :
 	rm -f core *.core *.leaks *.[oi] *.bak tags TAGS
 	rm -f $(LOB)/*$o
 
+tags:
+	ctags *.[ch]
+
 #			Common code
 #			-----------
 

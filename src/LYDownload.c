@@ -34,7 +34,8 @@ void LYDownload(char *line)
     char command[LY_MAXPATH];
     char *cp;
     lynx_list_item_type *download_command = 0;
-    int ch, recall;
+    int ch;
+    RecallType recall;
     int FnameTotal;
     int FnameNum;
     BOOLEAN FirstRecall = TRUE;

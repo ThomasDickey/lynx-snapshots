@@ -696,6 +696,8 @@ typedef unsigned short mode_t;
 #define DECL_SYS_ERRLIST 1
 #endif
 
+#define socklen_t int		/* used for default LY_SOCKLEN definition */
+
 #endif /* !HAVE_CONFIG_H */
 
 #ifdef HAVE_LIBINTL_H

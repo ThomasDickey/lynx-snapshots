@@ -17,17 +17,23 @@ Preamble
 #include <HTStream.h>
 #include <HTAtom.h>
 #include <HTList.h>
+#include <HTAnchor.h>
 
-/*
+#ifdef USE_SOURCE_CACHE
+#include <HTChunk.h>
+#endif
 
-The HTFormat type
+#ifdef USE_BZLIB
+#include <bzlib.h>
+#endif
 
-   We use the HTAtom object for holding representations.  This allows faster manipulation
-   (comparison and copying) that if we stayed with strings.
+#ifdef USE_ZLIB
+#include <zlib.h>
+#endif
 
- */
-typedef HTAtom *HTFormat;
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
 
    These macros (which used to be constants) define some basic internally
@@ -38,10 +44,8 @@ typedef HTAtom *HTFormat;
    useful for diagnostics, and for users who want to see the original, whatever
    it is.
 
- */
-			/* Internal ones */
-/* #define WWW_SOURCE HTAtom_for("www/source") *//* Whatever it was originally */
-extern HTAtom *WWW_SOURCE;	/* calculated once, heavy used */
+																	 *//* Internal ones *//* #define WWW_SOURCE HTAtom_for("www/source") *//* Whatever it was originally */ extern HTAtom *WWW_SOURCE;
+    /* calculated once, heavy used */
 
 /*
 
@@ -107,36 +111,24 @@ extern HTAtom *WWW_SOURCE;	/* calculated once, heavy used */
 #define WWW_HTML        HTAtom_for("text/html")
 #define WWW_BINARY      HTAtom_for("application/octet-stream")
 
-/*
-
-   We must include the following file after defining HTFormat, to which it
-   makes reference.
-
-The HTEncoding type
-
- */
-typedef HTAtom *HTEncoding;
+    typedef HTAtom *HTEncoding;
 
 /*
-
-   The following are values for the MIME types:
-
+ * The following are values for the MIME types:
  */
 #define WWW_ENC_7BIT            HTAtom_for("7bit")
 #define WWW_ENC_8BIT            HTAtom_for("8bit")
 #define WWW_ENC_BINARY          HTAtom_for("binary")
 
 /*
-
-   We also add
-
+ * We also add
  */
 #define WWW_ENC_COMPRESS        HTAtom_for("compress")
 
 /*
-   Does a string designate a real encoding, or is it just
-   a "dummy" as for example 7bit, 8bit, and binary?
-  */
+ * Does a string designate a real encoding, or is it just
+ * a "dummy" as for example 7bit, 8bit, and binary?
+ */
 #define IsUnityEncStr(senc) \
         ((senc)==NULL || *(senc)=='\0' || !strcmp(senc,"identity") ||\
         !strcmp(senc,"8bit") || !strcmp(senc,"binary") || !strcmp(senc,"7bit"))
@@ -144,8 +136,6 @@ typedef HTAtom *HTEncoding;
 #define IsUnityEnc(enc) \
         ((enc)==NULL || (enc)==HTAtom_for("identity") ||\
         (enc)==WWW_ENC_8BIT || (enc)==WWW_ENC_BINARY || (enc)==WWW_ENC_7BIT)
-
-#include <HTAnchor.h>
 
 /*
 
@@ -158,25 +148,25 @@ The HTPresentation and HTConverter types
    one.  See the initialisation module for a list of conversion routines.
 
  */
-typedef struct _HTPresentation HTPresentation;
+    typedef struct _HTPresentation HTPresentation;
 
-typedef HTStream *HTConverter (HTPresentation *pres,
-			       HTParentAnchor *anchor,
-			       HTStream *sink);
+    typedef HTStream *HTConverter (HTPresentation *pres,
+				   HTParentAnchor *anchor,
+				   HTStream *sink);
 
-struct _HTPresentation {
-    HTAtom *rep;		/* representation name atomized */
-    HTAtom *rep_out;		/* resulting representation */
-    HTConverter *converter;	/* routine to gen the stream stack */
-    char *command;		/* MIME-format command string */
-    char *testcommand;		/* MIME-format test string */
-    float quality;		/* Between 0 (bad) and 1 (good) */
-    float secs;
-    float secs_per_byte;
-    long int maxbytes;
-    BOOL get_accept;		/* list in "Accept:" for GET */
-    int accept_opt;		/* matches against LYAcceptMedia */
-};
+    struct _HTPresentation {
+	HTAtom *rep;		/* representation name atomized */
+	HTAtom *rep_out;	/* resulting representation */
+	HTConverter *converter;	/* routine to gen the stream stack */
+	char *command;		/* MIME-format command string */
+	char *testcommand;	/* MIME-format test string */
+	float quality;		/* Between 0 (bad) and 1 (good) */
+	float secs;
+	float secs_per_byte;
+	long int maxbytes;
+	BOOL get_accept;	/* list in "Accept:" for GET */
+	int accept_opt;		/* matches against LYAcceptMedia */
+    };
 
 /*
 
@@ -184,48 +174,48 @@ struct _HTPresentation {
    modules which want to know the set of formats supported.  for example.
 
  */
-extern HTList *HTPresentations;
+    extern HTList *HTPresentations;
 
 /*
 
    The default presentation is used when no other is appropriate
 
  */
-extern HTPresentation *default_presentation;
+    extern HTPresentation *default_presentation;
 
 /*
  * Options used for "Accept:" string
  */
-typedef enum {
-    /* make the components powers of two so we can add them */
-    mediaINT = 1		/* internal types predefined in HTInit.c */
-    ,mediaEXT = 2		/* external types predefined in HTInit.c */
-    ,mediaCFG = 4		/* types, e.g., viewers, from lynx.cfg */
-    ,mediaUSR = 8		/* user's mime-types, etc. */
-    ,mediaSYS = 16		/* system's mime-types, etc. */
-    /* these are useful flavors for the options menu */
-    ,mediaOpt1 = mediaINT
-    ,mediaOpt2 = mediaINT + mediaCFG
-    ,mediaOpt3 = mediaINT + mediaCFG + mediaUSR
-    ,mediaOpt4 = mediaINT + mediaCFG + mediaUSR + mediaSYS
-    /* this is the flavor from pre-2.8.6 */
-    ,mediaALL = mediaINT + mediaEXT + mediaCFG + mediaUSR + mediaSYS
-} AcceptMedia;
+    typedef enum {
+	/* make the components powers of two so we can add them */
+	mediaINT = 1		/* internal types predefined in HTInit.c */
+	,mediaEXT = 2		/* external types predefined in HTInit.c */
+	,mediaCFG = 4		/* types, e.g., viewers, from lynx.cfg */
+	,mediaUSR = 8		/* user's mime-types, etc. */
+	,mediaSYS = 16		/* system's mime-types, etc. */
+	/* these are useful flavors for the options menu */
+	,mediaOpt1 = mediaINT
+	,mediaOpt2 = mediaINT + mediaCFG
+	,mediaOpt3 = mediaINT + mediaCFG + mediaUSR
+	,mediaOpt4 = mediaINT + mediaCFG + mediaUSR + mediaSYS
+	/* this is the flavor from pre-2.8.6 */
+	,mediaALL = mediaINT + mediaEXT + mediaCFG + mediaUSR + mediaSYS
+    } AcceptMedia;
 
 /*
  * Options used for "Accept-Encoding:" string
  */
-typedef enum {
-    encodingNONE = 0
-    ,encodingGZIP = 1
-    ,encodingDEFLATE = 2
-    ,encodingCOMPRESS = 4
-    ,encodingBZIP2 = 8
-    ,encodingALL = (encodingGZIP
-		    + encodingDEFLATE
-		    + encodingCOMPRESS
-		    + encodingBZIP2)
-} AcceptEncoding;
+    typedef enum {
+	encodingNONE = 0
+	,encodingGZIP = 1
+	,encodingDEFLATE = 2
+	,encodingCOMPRESS = 4
+	,encodingBZIP2 = 8
+	,encodingALL = (encodingGZIP
+			+ encodingDEFLATE
+			+ encodingCOMPRESS
+			+ encodingBZIP2)
+    } AcceptEncoding;
 
 /*
 
@@ -249,15 +239,15 @@ HTSetPresentation: Register a system command to present a format
   media                   Used in filtering presentation types for "Accept:"
 
  */
-extern void HTSetPresentation(const char *representation,
-			      const char *command,
-			      const char *testcommand,
-			      double quality,
-			      double secs,
-			      double secs_per_byte,
-			      long int maxbytes,
-			      AcceptMedia media
-);
+    extern void HTSetPresentation(const char *representation,
+				  const char *command,
+				  const char *testcommand,
+				  double quality,
+				  double secs,
+				  double secs_per_byte,
+				  long int maxbytes,
+				  AcceptMedia media
+    );
 
 /*
 
@@ -273,15 +263,15 @@ HTSetConversion:   Register a converstion routine
 
  */
 
-extern void HTSetConversion(const char *rep_in,
-			    const char *rep_out,
-			    HTConverter *converter,
-			    float quality,
-			    float secs,
-			    float secs_per_byte,
-			    long int maxbytes,
-			    AcceptMedia media
-);
+    extern void HTSetConversion(const char *rep_in,
+				const char *rep_out,
+				HTConverter *converter,
+				float quality,
+				float secs,
+				float secs_per_byte,
+				long int maxbytes,
+				AcceptMedia media
+    );
 
 /*
 
@@ -295,10 +285,10 @@ HTStreamStack:   Create a stack of streams
    load information into the anchor object which represents them.
 
  */
-extern HTStream *HTStreamStack(HTFormat format_in,
-			       HTFormat format_out,
-			       HTStream *stream_out,
-			       HTParentAnchor *anchor);
+    extern HTStream *HTStreamStack(HTFormat format_in,
+				   HTFormat format_out,
+				   HTStream *stream_out,
+				   HTParentAnchor *anchor);
 
 /*
 HTReorderPresentation: put presentation near head of list
@@ -307,14 +297,14 @@ HTReorderPresentation: put presentation near head of list
     start of the HTPresentations list.  - kw
     */
 
-extern void HTReorderPresentation(HTFormat format_in,
-				  HTFormat format_out);
+    extern void HTReorderPresentation(HTFormat format_in,
+				      HTFormat format_out);
 
 /*
  * Setup 'get_accept' flag to denote presentations that are not redundant,
  * and will be listed in "Accept:" header.
  */
-extern void HTFilterPresentations(void);
+    extern void HTFilterPresentations(void);
 
 /*
 
@@ -334,10 +324,10 @@ HTStackValue: Find the cost of a filter stack
   length                  The number of bytes expected in the input format
 
  */
-extern float HTStackValue(HTFormat format_in,
-			  HTFormat rep_out,
-			  float initial_value,
-			  long int length);
+    extern float HTStackValue(HTFormat format_in,
+			      HTFormat rep_out,
+			      float initial_value,
+			      long int length);
 
 #define NO_VALUE_FOUND  -1e20	/* returned if none found */
 
@@ -348,9 +338,9 @@ extern float HTStackValue(HTFormat format_in,
  *   This is a traverse call for HText_pageDispaly() - it works!.
  *
  */
-extern void HTDisplayPartial(void);
+    extern void HTDisplayPartial(void);
 
-extern void HTFinishDisplayPartial(void);
+    extern void HTFinishDisplayPartial(void);
 
 /*
 
@@ -360,10 +350,10 @@ HTCopy:  Copy a socket to a stream
    one which has been generated by HTStreamStack.
 
  */
-extern int HTCopy(HTParentAnchor *anchor,
-		  int file_number,
-		  void *handle,
-		  HTStream *sink);
+    extern int HTCopy(HTParentAnchor *anchor,
+		      int file_number,
+		      void *handle,
+		      HTStream *sink);
 
 /*
 
@@ -374,11 +364,10 @@ HTFileCopy:  Copy a file to a stream
    HTParseFile
 
  */
-extern int HTFileCopy(FILE *fp,
-		      HTStream *sink);
+    extern int HTFileCopy(FILE *fp,
+			  HTStream *sink);
 
 #ifdef USE_SOURCE_CACHE
-#include <HTChunk.h>
 /*
 
 HTMemCopy:  Copy a memory chunk to a stream
@@ -388,8 +377,8 @@ HTMemCopy:  Copy a memory chunk to a stream
    HTParseMem
 
  */
-extern int HTMemCopy(HTChunk *chunk,
-		     HTStream *sink);
+    extern int HTMemCopy(HTChunk *chunk,
+			 HTStream *sink);
 #endif
 
 /*
@@ -400,9 +389,9 @@ HTCopyNoCR: Copy a socket to a stream, stripping CR characters.
 
  */
 
-extern void HTCopyNoCR(HTParentAnchor *anchor,
-		       int file_number,
-		       HTStream *sink);
+    extern void HTCopyNoCR(HTParentAnchor *anchor,
+			   int file_number,
+			   HTStream *sink);
 
 /*
 
@@ -414,15 +403,15 @@ Clear input buffer and set file number
    small implementations.
 
  */
-extern void HTInitInput(int file_number);
+    extern void HTInitInput(int file_number);
 
 /*
 
 Get next character from buffer
 
  */
-extern int interrupted_in_htgetcharacter;
-extern int HTGetCharacter(void);
+    extern int interrupted_in_htgetcharacter;
+    extern int HTGetCharacter(void);
 
 /*
 
@@ -433,11 +422,11 @@ HTParseSocket: Parse a socket given its format
    <0 if not.
 
  */
-extern int HTParseSocket(HTFormat format_in,
-			 HTFormat format_out,
-			 HTParentAnchor *anchor,
-			 int file_number,
-			 HTStream *sink);
+    extern int HTParseSocket(HTFormat format_in,
+			     HTFormat format_out,
+			     HTParentAnchor *anchor,
+			     int file_number,
+			     HTStream *sink);
 
 /*
 
@@ -448,11 +437,11 @@ HTParseFile: Parse a File through a file pointer
    return HT_PARTIAL_CONTENT, HT_NO_DATA, or other <0 for failure.
 
  */
-extern int HTParseFile(HTFormat format_in,
-		       HTFormat format_out,
-		       HTParentAnchor *anchor,
-		       FILE *fp,
-		       HTStream *sink);
+    extern int HTParseFile(HTFormat format_in,
+			   HTFormat format_out,
+			   HTParentAnchor *anchor,
+			   FILE *fp,
+			   HTStream *sink);
 
 #ifdef USE_SOURCE_CACHE
 /*
@@ -464,15 +453,14 @@ HTParseMem: Parse a document in memory
    return <0 for failure.
 
  */
-extern int HTParseMem(HTFormat format_in,
-		      HTFormat format_out,
-		      HTParentAnchor *anchor,
-		      HTChunk *chunk,
-		      HTStream *sink);
+    extern int HTParseMem(HTFormat format_in,
+			  HTFormat format_out,
+			  HTParentAnchor *anchor,
+			  HTChunk *chunk,
+			  HTStream *sink);
 #endif
 
 #ifdef USE_ZLIB
-#include <zlib.h>
 /*
 HTParseGzFile: Parse a gzip'ed File through a file pointer
 
@@ -480,11 +468,11 @@ HTParseGzFile: Parse a gzip'ed File through a file pointer
    HTStreamStack and HTGzFileCopy.  Returns HT_LOADED if successful, can also
    return HT_PARTIAL_CONTENT, HT_NO_DATA, or other <0 for failure.
  */
-extern int HTParseGzFile(HTFormat format_in,
-			 HTFormat format_out,
-			 HTParentAnchor *anchor,
-			 gzFile gzfp,
-			 HTStream *sink);
+    extern int HTParseGzFile(HTFormat format_in,
+			     HTFormat format_out,
+			     HTParentAnchor *anchor,
+			     gzFile gzfp,
+			     HTStream *sink);
 
 /*
 HTParseZzFile: Parse a deflate'd File through a file pointer
@@ -493,16 +481,15 @@ HTParseZzFile: Parse a deflate'd File through a file pointer
    HTStreamStack and HTZzFileCopy.  Returns HT_LOADED if successful, can also
    return HT_PARTIAL_CONTENT, HT_NO_DATA, or other <0 for failure.
  */
-extern int HTParseZzFile(HTFormat format_in,
-			 HTFormat format_out,
-			 HTParentAnchor *anchor,
-			 FILE *zzfp,
-			 HTStream *sink);
+    extern int HTParseZzFile(HTFormat format_in,
+			     HTFormat format_out,
+			     HTParentAnchor *anchor,
+			     FILE *zzfp,
+			     HTStream *sink);
 
-#endif /* USE_ZLIB */
+#endif				/* USE_ZLIB */
 
 #ifdef USE_BZLIB
-#include <bzlib.h>
 /*
 HTParseBzFile: Parse a bzip2'ed File through a file pointer
 
@@ -510,13 +497,13 @@ HTParseBzFile: Parse a bzip2'ed File through a file pointer
    HTStreamStack and HTGzFileCopy.  Returns HT_LOADED if successful, can also
    return HT_PARTIAL_CONTENT, HT_NO_DATA, or other <0 for failure.
  */
-extern int HTParseBzFile(HTFormat format_in,
-			 HTFormat format_out,
-			 HTParentAnchor *anchor,
-			 BZFILE * bzfp,
-			 HTStream *sink);
+    extern int HTParseBzFile(HTFormat format_in,
+			     HTFormat format_out,
+			     HTParentAnchor *anchor,
+			     BZFILE * bzfp,
+			     HTStream *sink);
 
-#endif /* USE_BZLIB */
+#endif				/* USE_BZLIB */
 
 /*
 
@@ -528,7 +515,7 @@ HTNetToText: Convert Net ASCII to local representation
    creating it.
 
  */
-extern HTStream *HTNetToText(HTStream *sink);
+    extern HTStream *HTNetToText(HTStream *sink);
 
 /*
 
@@ -542,13 +529,16 @@ HTFormatInit: Set up default presentations and conversions
    defaults as well.
 
  */
-extern void HTFormatInit(void);
+    extern void HTFormatInit(void);
 
 /*
 
 Epilogue
 
  */
-extern BOOL HTOutputSource;	/* Flag: shortcut parser */
+    extern BOOL HTOutputSource;	/* Flag: shortcut parser */
 
-#endif /* HTFORMAT_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTFORMAT_H */

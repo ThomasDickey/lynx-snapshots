@@ -205,7 +205,7 @@ BOOL HTAAMethod_inList(HTAAMethod method, HTList *list)
  *	 sometimes so hard...)
  *
  * ON ENTRY:
- *	template	is a template string to match the file name
+ *	ctemplate	is a template string to match the file name
  *			against, may contain a single wildcard
  *			character * which matches zero or more
  *			arbitrary characters.
@@ -216,10 +216,10 @@ BOOL HTAAMethod_inList(HTAAMethod method, HTList *list)
  *	returns		YES, if filename matches the template.
  *			NO, otherwise.
  */
-BOOL HTAA_templateMatch(const char *template,
+BOOL HTAA_templateMatch(const char *ctemplate,
 			const char *filename)
 {
-    const char *p = template;
+    const char *p = ctemplate;
     const char *q = filename;
     int m;
 
@@ -266,10 +266,10 @@ BOOL HTAA_templateMatch(const char *template,
  *	returns		YES, if filename matches the template.
  *			NO, otherwise.
  */
-BOOL HTAA_templateCaseMatch(const char *template,
+BOOL HTAA_templateCaseMatch(const char *ctemplate,
 			    const char *filename)
 {
-    const char *p = template;
+    const char *p = ctemplate;
     const char *q = filename;
     int m;
 
@@ -315,25 +315,25 @@ BOOL HTAA_templateCaseMatch(const char *template,
  */
 char *HTAA_makeProtectionTemplate(const char *docname)
 {
-    char *template = NULL;
+    char *ctemplate = NULL;
     char *slash = NULL;
 
     if (docname) {
-	StrAllocCopy(template, docname);
-	slash = strrchr(template, '/');
+	StrAllocCopy(ctemplate, docname);
+	slash = strrchr(ctemplate, '/');
 	if (slash)
 	    slash++;
 	else
-	    slash = template;
+	    slash = ctemplate;
 	*slash = '\0';
-	StrAllocCat(template, "*");
+	StrAllocCat(ctemplate, "*");
     } else
-	StrAllocCopy(template, "*");
+	StrAllocCopy(ctemplate, "*");
 
     CTRACE((tfp, "make_template: made template `%s' for file `%s'\n",
-	    template, docname));
+	    ctemplate, docname));
 
-    return template;
+    return ctemplate;
 }
 
 /*

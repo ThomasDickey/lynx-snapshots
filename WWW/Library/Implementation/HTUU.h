@@ -16,12 +16,18 @@
 #include <HTUtils.h>
 #endif
 
-extern int HTUU_encode(unsigned char *bufin,
-		       unsigned int nbytes,
-		       char *bufcoded);
+#ifdef __cplusplus
+extern "C" {
+#endif
+    extern int HTUU_encode(unsigned char *bufin,
+			   unsigned int nbytes,
+			   char *bufcoded);
 
-extern int HTUU_decode(char *bufcoded,
-		       unsigned char *bufplain,
-		       int outbufsize);
+    extern int HTUU_decode(char *bufcoded,
+			   unsigned char *bufplain,
+			   int outbufsize);
 
-#endif /* HTUU_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTUU_H */

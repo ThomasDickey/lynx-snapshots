@@ -109,7 +109,7 @@ typedef struct _CSOfield_info {	/* For form-based CSO gateway - FM */
     int defreturn;
     int explicit_return;
     int reserved;
-    int public;
+    int gpublic;
     char name_buf[16];		/* Avoid malloc if we can */
     char desc_buf[32];		/* Avoid malloc if we can */
     char attr_buf[80];		/* Avoid malloc if we can */
@@ -773,7 +773,7 @@ static void interpret_cso_key(const char *key,
 	     * 'Query' fields, public and lookup attributes.
 	     */
 	    for (; fld; fld = fld->next)
-		if (fld->public && (fld->lookup == 1))
+		if (fld->gpublic && (fld->lookup == 1))
 		    break;
 	    break;
 	case 1:
@@ -789,7 +789,7 @@ static void interpret_cso_key(const char *key,
 	     * 'Return' fields, public only.
 	     */
 	    for (; fld; fld = fld->next)
-		if (fld->public)
+		if (fld->gpublic)
 		    break;
 	    break;
 	case 3:
@@ -867,7 +867,7 @@ static int parse_cso_field_info(CSOfield_info *blk)
      * Initialize all fields to default values.
      */
     blk->indexed = blk->lookup = blk->reserved = blk->max_size = blk->url = 0;
-    blk->defreturn = blk->explicit_return = blk->public = 0;
+    blk->defreturn = blk->explicit_return = blk->gpublic = 0;
 
     /*
      * Search for keywords in info string and set values.  Attributes are
@@ -880,7 +880,7 @@ static int parse_cso_field_info(CSOfield_info *blk)
     if (strstr(info, "default "))
 	blk->defreturn = 1;
     if (strstr(info, "public "))
-	blk->public = 1;
+	blk->gpublic = 1;
     if (strstr(info, "lookup "))
 	blk->lookup = 1;
     if (strstr(info, "url ")) {
@@ -908,7 +908,7 @@ static int parse_cso_fields(char *buf,
     int i, code = 0, prev_code;
     size_t alen;
     char *indx, *name;
-    CSOfield_info *last, *new;
+    CSOfield_info *last, *newf;
 
     last = CSOfields = (CSOfield_info *) 0;
     prev_code = -2555;
@@ -1008,43 +1008,43 @@ static int parse_cso_fields(char *buf,
 			 * Initialize new block, append to end of list to
 			 * preserve order.
 			 */
-			new = typecalloc(CSOfield_info);
+			newf = typecalloc(CSOfield_info);
 
-			if (!new) {
+			if (!newf) {
 			    outofmem(__FILE__, "HTLoadCSO");
 			}
 			if (last)
-			    last->next = new;
+			    last->next = newf;
 			else
-			    CSOfields = new;
-			last = new;
+			    CSOfields = newf;
+			last = newf;
 
-			new->next = (CSOfield_info *) 0;
-			new->name = new->name_buf;
+			newf->next = (CSOfield_info *) 0;
+			newf->name = newf->name_buf;
 			alen = strlen(name) + 1;
-			if (alen > sizeof(new->name_buf)) {
-			    if (!(new->name = (char *) malloc(alen))) {
+			if (alen > sizeof(newf->name_buf)) {
+			    if (!(newf->name = (char *) malloc(alen))) {
 				outofmem(__FILE__, "HTLoadCSO");
 			    }
 			}
-			strcpy(new->name, name);
+			strcpy(newf->name, name);
 
-			new->attributes = new->attr_buf;
+			newf->attributes = newf->attr_buf;
 			alen = strlen((char *) &p[i]) + 2;
-			if (alen > sizeof(new->attr_buf)) {
-			    if (!(new->attributes = (char *) malloc(alen))) {
+			if (alen > sizeof(newf->attr_buf)) {
+			    if (!(newf->attributes = (char *) malloc(alen))) {
 				outofmem(__FILE__, "HTLoadCSO");
 			    }
 			}
-			strcpy(new->attributes, (char *) &p[i]);
-			strcpy((char *) &new->attributes[alen - 2], " ");
-			new->description = new->desc_buf;
-			new->desc_buf[0] = '\0';
-			new->id = atoi(indx);
+			strcpy(newf->attributes, (char *) &p[i]);
+			strcpy((char *) &newf->attributes[alen - 2], " ");
+			newf->description = newf->desc_buf;
+			newf->desc_buf[0] = '\0';
+			newf->id = atoi(indx);
 			/*
 			 * Scan for keywords.
 			 */
-			parse_cso_field_info(new);
+			parse_cso_field_info(newf);
 		    }
 		    prev_code = code;
 		} else
@@ -1077,7 +1077,7 @@ static int generate_cso_form(char *host,
     const char *key;
     const char *line;
     CSOformgen_context ctx;
-    static const char *template[] =
+    static const char *ctemplate[] =
     {
 	"<HTML>\n<HEAD>\n<TITLE>CSO/PH Query Form for $(HOST)</TITLE>\n</HEAD>\n<BODY>",
 	"<H2><I>CSO/PH Query Form</I> for <EM>$(HOST)</EM></H2>",
@@ -1119,12 +1119,12 @@ static int generate_cso_form(char *host,
     out = 0;
     buf[out] = '\0';
     for (i = full_flag ? /***1***/ 0 : 0;
-	 template[i];
+	 ctemplate[i];
 	 i++) {
 	/*
 	 * Search the current string for substitution, flagged by $(
 	 */
-	for (line = template[i], j = 0; line[j]; j++) {
+	for (line = ctemplate[i], j = 0; line[j]; j++) {
 	    if ((line[j] == '$') && (line[j + 1] == '(')) {
 		/*
 		 * Command detected, flush output buffer and find closing ')'
@@ -1143,7 +1143,7 @@ static int generate_cso_form(char *host,
 		interpret_cso_key(key, buf, &length, &ctx, Target);
 		i = ctx.cur_line;
 		j = ctx.cur_off;
-		line = template[i];
+		line = ctemplate[i];
 		out = length;
 
 		if (ctx.seek) {
@@ -1153,15 +1153,15 @@ static int generate_cso_form(char *host,
 		     */
 		    int slen = strlen(ctx.seek);
 
-		    for (; template[i]; i++) {
-			for (line = template[i]; line[j]; j++) {
+		    for (; ctemplate[i]; i++) {
+			for (line = ctemplate[i]; line[j]; j++) {
 			    if (line[j] == '$')
 				if (0 == strncmp(ctx.seek, &line[j], slen)) {
 				    if (j == 0)
-					j = strlen(template[--i]) - 1;
+					j = strlen(ctemplate[--i]) - 1;
 				    else
 					--j;
-				    line = template[i];
+				    line = ctemplate[i];
 				    ctx.seek = (char *) 0;
 				    break;
 				}

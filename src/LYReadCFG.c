@@ -426,10 +426,10 @@ static Config_Enum tbl_abort_source_cache[] = {
 #define PARSE_FUN(n,v)   {n, CONF_FUN,         UNION_FUN(v), 0}
 #define PARSE_REQ(n,v)   {n, CONF_INCLUDE,     UNION_FUN(v), 0}
 #define PARSE_DEF(n,v)   {n, CONF_ADD_TRUSTED, UNION_DEF(v), 0}
-#define PARSE_NIL        {NULL,0,              UNION_DEF(0), 0}
+#define PARSE_NIL        {NULL, CONF_NIL,      UNION_DEF(0), 0}
 
 typedef enum {
-    CONF_UNSPECIFIED = 0
+    CONF_NIL = 0
     ,CONF_BOOL			/* BOOLEAN type */
     ,CONF_FUN
     ,CONF_TIME
@@ -1150,7 +1150,7 @@ static int psrcspec_fun(char *s)
 		s, e + 1));
 	return 0;
     }
-    parse_html_src_spec(found, e + 1, s);
+    parse_html_src_spec((HTlexeme) found, e + 1, s);
     return 0;
 }
 
@@ -1747,7 +1747,7 @@ void LYSetConfigValue(char *name,
 
     case CONF_PRG:
 	if (StrAllocCopy(temp, value))
-	    HTSetProgramPath(q->def_value, temp);
+	    HTSetProgramPath((ProgramPaths) (q->def_value), temp);
 	break;
 
     default:
@@ -1878,7 +1878,7 @@ static void do_read_cfg(const char *cfg_filename,
 
 	q = ParseUnionOf(tbl);
 	switch ((fp0 != 0 && tbl->type != CONF_INCLUDE)
-		? CONF_UNSPECIFIED
+		? CONF_NIL
 		: tbl->type) {
 	case CONF_BOOL:
 	case CONF_FUN:

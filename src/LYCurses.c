@@ -525,11 +525,11 @@ void wcurses_css(WINDOW * win, char *name,
 
 	CTRACE2(TRACE_STYLE, (tfp, "CSSTRIM:trying to set [%s] style - ", name));
 	if (tmpHash == NOSTYLE) {
-	    char *class = strrchr(name, '.');
+	    char *pclass = strrchr(name, '.');
 
-	    CTRACE2(TRACE_STYLE, (tfp, "undefined, trimming at %p\n", class));
-	    if (class)
-		*class = '\0';
+	    CTRACE2(TRACE_STYLE, (tfp, "undefined, trimming at %p\n", pclass));
+	    if (pclass)
+		*pclass = '\0';
 	    else
 		try_again = 0;
 	} else {
@@ -1397,6 +1397,11 @@ void stop_curses(void)
 }
 
 #ifdef VMS
+
+#ifdef USE_SLANG
+extern void longname(char *, char *);
+#endif /* USE_SLANG */
+
 /*
  * Check terminal type, start curses & setup terminal.
  */
@@ -1405,10 +1410,6 @@ BOOLEAN setup(char *terminal)
     int c;
     int status;
     char *dummy = 0, *cp, term[81];
-
-#ifdef USE_SLANG
-    extern void longname();
-#endif /* USE_SLANG */
 
     /*
      * If the display was not set by a command line option then see if it is

@@ -277,7 +277,7 @@ static HTList *whichRecall(RecallType recall)
  */
 static void LYRemoveFromCloset(HTList *list)
 {
-    char *data = HTList_removeFirstObject(list);
+    void *data = HTList_removeFirstObject(list);
 
     if (data != 0)
 	FREE(data);
@@ -305,7 +305,7 @@ static char *LYFindInCloset(RecallType recall, char *base)
     unsigned len = strlen(base);
 
     while (!HTList_isEmpty(list)) {
-	data = HTList_nextObject(list);
+	data = (char *) HTList_nextObject(list);
 	if (!strncmp(base, data, len))
 	    return (data);
     }
@@ -3724,7 +3724,7 @@ static char **sortedList(HTList *list, BOOL ignorecase)
 	outofmem(__FILE__, "sortedList");
 
     while (!HTList_isEmpty(list))
-	result[j++] = HTList_nextObject(list);
+	result[j++] = (char *) HTList_nextObject(list);
 
     if (count > 1) {
 	qsort((char *) result, count, sizeof(*result),
@@ -3879,7 +3879,8 @@ int LYhandlePopupList(int cur_choice,
     static char prev_target_buffer[MAX_LINE];	/* Next search buffer */
     static BOOL first = TRUE;
     char *cp;
-    int ch = 0, recall;
+    int ch = 0;
+    RecallType recall;
     int QueryTotal;
     int QueryNum;
     BOOLEAN FirstRecall = TRUE;

@@ -32,38 +32,37 @@
 
 #include <HTList.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
  * Numeric constants
  */
 #define MAX_USERNAME_LEN        16	/* @@ Longest allowed username    */
 #define MAX_PASSWORD_LEN        3*13	/* @@ Longest allowed password    */
-					/* (encrypted, so really only 3*8) */
+    /* (encrypted, so really only 3*8) */
 #define MAX_METHODNAME_LEN      12	/* @@ Longest allowed method name */
 #define MAX_FIELDNAME_LEN       16	/* @@ Longest field name in       */
-					/* protection setup file          */
+    /* protection setup file          */
 #define MAX_PATHNAME_LEN        80	/* @@ Longest passwd/group file   */
-					/* pathname to allow               */
+/* pathname to allow               *//*
 
-/*
+   Datatype definitions
 
-Datatype definitions
-
-  HTAASCHEME
+   HTAASCHEME
 
    The enumeration HTAAScheme represents the possible authentication schemes used by the
    WWW Access Authorization.
 
- */
-
-typedef enum {
-    HTAA_UNKNOWN,
-    HTAA_NONE,
-    HTAA_BASIC,
-    HTAA_PUBKEY,
-    HTAA_KERBEROS_V4,
-    HTAA_KERBEROS_V5,
-    HTAA_MAX_SCHEMES		/* THIS MUST ALWAYS BE LAST! Number of schemes */
-} HTAAScheme;
+ */ typedef enum {
+	HTAA_UNKNOWN,
+	HTAA_NONE,
+	HTAA_BASIC,
+	HTAA_PUBKEY,
+	HTAA_KERBEROS_V4,
+	HTAA_KERBEROS_V5,
+	HTAA_MAX_SCHEMES	/* THIS MUST ALWAYS BE LAST! Number of schemes */
+    } HTAAScheme;
 
 /*
 
@@ -71,11 +70,11 @@ typedef enum {
 
  */
 
-typedef enum {
-    METHOD_UNKNOWN,
-    METHOD_GET,
-    METHOD_PUT
-} HTAAMethod;
+    typedef enum {
+	METHOD_UNKNOWN,
+	METHOD_GET,
+	METHOD_PUT
+    } HTAAMethod;
 
 /*
 
@@ -91,7 +90,7 @@ Authentication Schemes
  * ON EXIT:
  *      returns         the enumerated constant for that scheme.
  */
-extern HTAAScheme HTAAScheme_enum(const char *name);
+    extern HTAAScheme HTAAScheme_enum(const char *name);
 
 /* PUBLIC                                               HTAAScheme_name()
  *                      GET THE NAME OF A GIVEN SCHEME
@@ -103,7 +102,7 @@ extern HTAAScheme HTAAScheme_enum(const char *name);
  *      returns         the name of the scheme, i.e.
  *                      "none", "basic", "pubkey", ...
  */
-extern const char *HTAAScheme_name(HTAAScheme scheme);
+    extern const char *HTAAScheme_name(HTAAScheme scheme);
 
 /*
 
@@ -120,7 +119,7 @@ Methods
  *      returns         HTAAMethod enumerated value corresponding
  *                      to the given name.
  */
-extern HTAAMethod HTAAMethod_enum(const char *name);
+    extern HTAAMethod HTAAMethod_enum(const char *name);
 
 /* PUBLIC                                               HTAAMethod_name()
  *                      GET THE NAME OF A GIVEN METHOD
@@ -132,7 +131,7 @@ extern HTAAMethod HTAAMethod_enum(const char *name);
  *      returns         the name of the scheme, i.e.
  *                      "GET", "PUT", ...
  */
-extern const char *HTAAMethod_name(HTAAMethod method);
+    extern const char *HTAAMethod_name(HTAAMethod method);
 
 /* PUBLIC                                               HTAAMethod_inList()
  *              IS A METHOD IN A LIST OF METHOD NAMES
@@ -144,7 +143,7 @@ extern const char *HTAAMethod_name(HTAAMethod method);
  *      returns         YES, if method was found.
  *                      NO, if not found.
  */
-extern BOOL HTAAMethod_inList(HTAAMethod method, HTList *list);
+    extern BOOL HTAAMethod_inList(HTAAMethod method, HTList *list);
 
 /*
 
@@ -163,7 +162,7 @@ Match Template Against Filename
  *       sometimes so hard...)
  *
  * ON ENTRY:
- *      template        is a template string to match the file name
+ *      ctemplate       is a template string to match the file name
  *                      against, may contain a single wildcard
  *                      character * which matches zero or more
  *                      arbitrary characters.
@@ -174,8 +173,8 @@ Match Template Against Filename
  *      returns         YES, if filename matches the template.
  *                      NO, otherwise.
  */
-extern BOOL HTAA_templateMatch(const char *template,
-			       const char *filename);
+    extern BOOL HTAA_templateMatch(const char *ctemplate,
+				   const char *filename);
 
 /* PUBLIC                                               HTAA_templateCaseMatch()
  *              STRING COMPARISON FUNCTION FOR FILE NAMES
@@ -188,7 +187,7 @@ extern BOOL HTAA_templateMatch(const char *template,
  *      change the HTAA_templateMatch routine for VMS.
  *
  * ON ENTRY:
- *      template        is a template string to match the file name
+ *      ctemplate       is a template string to match the file name
  *                      against, may contain a single wildcard
  *                      character * which matches zero or more
  *                      arbitrary characters.
@@ -199,8 +198,8 @@ extern BOOL HTAA_templateMatch(const char *template,
  *      returns         YES, if filename matches the template.
  *                      NO, otherwise.
  */
-extern BOOL HTAA_templateCaseMatch(const char *template,
-				   const char *filename);
+    extern BOOL HTAA_templateCaseMatch(const char *ctemplate,
+				       const char *filename);
 
 /* PUBLIC                                       HTAA_makeProtectionTemplate()
  *              CREATE A PROTECTION TEMPLATE FOR THE FILES
@@ -221,7 +220,7 @@ extern BOOL HTAA_templateCaseMatch(const char *template,
  *                              being a comment marker here,
  *                              there really isn't any space.
  */
-extern char *HTAA_makeProtectionTemplate(const char *docname);
+    extern char *HTAA_makeProtectionTemplate(const char *docname);
 
 /*
 
@@ -255,7 +254,7 @@ MIME Argument List Parser
  *              the number of order number of that item. E.g.
  *              "1" for the first, etc.
  */
-extern HTList *HTAA_parseArgList(char *str);
+    extern HTList *HTAA_parseArgList(char *str);
 
 /*
 
@@ -282,9 +281,9 @@ Header Line Reader
  *                      will use this buffer first and then
  *                      proceed to read from socket.
  */
-extern void HTAA_setupReader(char *start_of_headers,
-			     int length,
-			     int soc);
+    extern void HTAA_setupReader(char *start_of_headers,
+				 int length,
+				 int soc);
 
 /* PUBLIC                                               HTAA_getUnfoldedLine()
  *              READ AN UNFOLDED HEADER LINE FROM SOCKET
@@ -307,6 +306,9 @@ extern void HTAA_setupReader(char *start_of_headers,
  *      Field-Name: Blaa-Blaa This-Is-A-Continuation-Line Here-Is_Another
  *
  */
-extern char *HTAA_getUnfoldedLine(void);
+    extern char *HTAA_getUnfoldedLine(void);
 
-#endif /* NOT HTAAUTIL_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* NOT HTAAUTIL_H */

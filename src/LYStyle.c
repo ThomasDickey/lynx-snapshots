@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.58 Thu, 30 Dec 2004 04:11:59 -0800 dickey @
+ * @Id: LYStyle.c 1.59 Sun, 02 Jan 2005 15:35:21 -0800 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -441,7 +441,7 @@ void parse_userstyles(void)
     if (HTList_isEmpty(cur)) {
 	initialise_default_stylesheet();
     } else {
-	while ((name = HTList_nextObject(cur)) != NULL) {
+	while ((name = (char *) HTList_nextObject(cur)) != NULL) {
 	    CTRACE2(TRACE_STYLE, (tfp, "LSS:%s\n",
 				  (name
 				   ? name
@@ -499,11 +499,7 @@ static void HStyle_addStyle(char *buffer)
 
 void style_deleteStyleList(void)
 {
-    char *name;
-
-    while ((name = HTList_removeLastObject(lss_styles)) != NULL)
-	FREE(name);
-    HTList_delete(lss_styles);
+    LYFreeStringList(lss_styles);
     lss_styles = NULL;
 }
 
