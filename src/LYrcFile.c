@@ -855,10 +855,10 @@ PUBLIC int save_rc NOPARAMS
      * Partial display threshold
      */
     fprintf(fp, "\
-# partial_thres specifies the number of lines Lynx should download and render
-# before we redraw the screen in Partial Display logic
-# e.g. partial_thres=2
-# would have Lynx redraw every 2 lines that it renders
+# partial_thres specifies the number of lines Lynx should download and render\n\
+# before we redraw the screen in Partial Display logic\n\
+# e.g. partial_thres=2\n\
+# would have Lynx redraw every 2 lines that it renders\n\
 # partial_thres=-1 would use the entire screensize\n");
     fprintf(fp, "partial_thres=%d\n\n", partial_threshold);
 #endif /* DISP_PARTIAL */

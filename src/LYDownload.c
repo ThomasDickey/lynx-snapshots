@@ -358,16 +358,20 @@ check_recall:
 	}
 	chmod(buffer, HIDE_CHMOD);
 #else /* Unix: */
+
+#if !( defined(__EMX__) || defined(__DJGPP__) )
 	/*
 	 *  Prevent spoofing of the shell.
 	 */
-#ifndef __EMX__
 	cp = quote_pathname(file);
 	cp1 = quote_pathname(buffer);
 	sprintf(command, "%s %s %s", COPY_PATH, cp, cp1);
 	FREE(cp);
 	FREE(cp1);
 #else
+	/* DJGPP: no " or space possible in 8+3 dos filenames.     */
+	/* (but EMX probably allows spaces which should be quoted, */
+	/* like Win32 LFN does...)                                 */
 	sprintf(command, "%s %s %s", COPY_PATH, file, buffer);
 #endif /* __EMX__ */
 	CTRACE(tfp, "command: %s\n", command);

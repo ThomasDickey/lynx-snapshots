@@ -291,9 +291,7 @@ PUBLIC void save_bookmark_link ARGS2(
      *	Create the bookmark file, if it doesn't exist already,
      *	Otherwise, open the pre-existing bookmark file. - FM
      */
-#if defined(__DJGPP__) || defined(_WINDOWS)
-	_fmode = O_TEXT;
-#endif /* __DJGPP__  or _WINDOWS */
+    SetDefaultMode(O_TEXT);
     if (first_time) {
 	/*
 	 *  Seek it in the home path. - FM
@@ -355,9 +353,7 @@ Note: if you edit this file manually\n\
     }
     fclose(fp);
 
-#if defined(__DJGPP__) || defined(_WINDOWS)
-    _fmode = O_BINARY;
-#endif /* __DJGPP__ or _WINDOWS */
+    SetDefaultMode(O_BINARY);
     /*
      *	If this is a cached bookmark file, set nocache for
      *	it so we'll see the new bookmark link when that

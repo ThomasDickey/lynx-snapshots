@@ -93,7 +93,7 @@ PUBLIC int LYUpload ARGS1(
 	 *  Commands have the form "command %s [etc]"
 	 *  where %s is the filename.
 	 */
-	_statusline("Enter a filename: ");
+	_statusline(FILENAME_PROMPT);
 retry:
 	*tmpbuf = '\0';
 	if (LYgetstr(tmpbuf, VISIBLE, sizeof(tmpbuf), NORECALL) < 0)
@@ -129,9 +129,9 @@ retry:
 	    fclose(fp);
 
 #ifdef VMS
-	    _statusline("File exists. Create higher version? (y/n)");
+	    _statusline(FILE_EXISTS_HPROMPT);
 #else
-	    _statusline("File exists. Overwrite? (y/n)");
+	    _statusline(FILE_EXISTS_OPROMPT);
 #endif /* VMS */
 	    c = 0;
 	    while (TOUPPER(c) != 'Y' && TOUPPER(c) != 'N' && c != 7 && c != 3)
@@ -148,7 +148,7 @@ retry:
 	    }
 
 	    if (TOUPPER(c) == 'N') {
-		_statusline("Enter a filename: ");
+		_statusline(NEW_FILENAME_PROMPT);
 		goto retry;
 	    }
 	}
@@ -156,15 +156,18 @@ retry:
 	/*
 	 *  See if we can write to it.
 	 */
+	CTRACE(tfp, "LYUpload: filename is %s", buffer);
+
 	if ((fp = fopen(buffer, "w")) != NULL) {
 	    fclose(fp);
 	    remove(buffer);
 	} else {
-	    _statusline("Cannot write to file. Enter a new filename: ");
+	    HTAlert(CANNOT_WRITE_TO_FILE);
+	    _statusline(NEW_FILENAME_PROMPT);
 	    goto retry;
 	}
 
-#if defined (VMS) || defined (__EMX__)
+#if defined (VMS) || defined (__EMX__) || defined(__DJGPP__)
 	sprintf(tmpbuf, upload_command->command, buffer, "", "", "", "", "");
 #else
 	cp = quote_pathname(buffer); /* to prevent spoofing of the shell */
