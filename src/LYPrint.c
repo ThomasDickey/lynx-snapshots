@@ -59,8 +59,8 @@
  *
  * incorporate the idea of "lpansi" directly into LYPrint.c - HN
  */
-#define LPANSI    3
-#define MAIL      4
+#define LPANSI	  3
+#define MAIL	  4
 #define PRINTER   5
 
 #ifdef VMS
@@ -71,7 +71,6 @@ PUBLIC int printfile ARGS1(
 	document *,	newdoc)
 {
     static char tempfile[256];
-    static BOOLEAN first = TRUE;
     char buffer[LINESIZE];
     char filename[LINESIZE];
     char user_response[256];
@@ -609,44 +608,19 @@ PUBLIC int printfile ARGS1(
 		    strcpy(user_response, filename);
 		}
 
-		if (first) {
-		    tempname(tempfile, NEW_FILE);
-		    if (isPMDF) {
-			tempname(hdrfile, NEW_FILE);
-			if ((len = strlen(hdrfile)) > 4) {
-			    len -= 5;
-			    if (!strcasecomp((hdrfile + len), ".html")) {
-				hdrfile[len] = '\0';
-				strcat(hdrfile, ".txt");
-			    }
-			}
-		    }
-		    first = FALSE;
-		} else {
-		    remove(tempfile);	/* remove duplicates */
-		}
-		if (HTisDocumentSource()) {
-		    if ((len = strlen(tempfile)) > 3) {
-			len -= 4;
-			if (!strcasecomp((tempfile + len), ".txt")) {
-			    tempfile[len] = '\0';
-			    strcat(tempfile, ".html");
-			}
-		    }
-		} else if ((len = strlen(tempfile)) > 4) {
-		    len -= 5;
-		    if (!strcasecomp((tempfile + len), ".html")) {
-			tempfile[len] = '\0';
-			strcat(tempfile, ".txt");
-		    }
-		}
-		if ((outfile_fp = LYNewTxtFile(tempfile)) == NULL) {
+		LYRemoveTemp(tempfile);
+		outfile_fp = LYOpenTemp(tempfile,
+					(HTisDocumentSource())
+						? HTML_SUFFIX
+						: ".txt",
+					"w");
+		if (outfile_fp == NULL) {
 		    HTAlert(UNABLE_TO_OPEN_TEMPFILE);
 		    break;
 		}
 
 		if (isPMDF) {
-		    if ((hfd = LYNewTxtFile(hdrfile)) == NULL) {
+		    if ((hfd = LYOpenTemp(hdrfile, ".txt", "w")) == NULL) {
 			HTAlert(UNABLE_TO_OPEN_TEMPFILE);
 			break;
 		    }
@@ -715,7 +689,7 @@ PUBLIC int printfile ARGS1(
 		print_wwwfile_to_fd(outfile_fp, 0);
 		if (keypad_mode)
 		    printlist(outfile_fp, FALSE);
-		fclose(outfile_fp);
+		LYCloseTempFP(outfile_fp);
 
 		if (isPMDF) {
 		    /*
@@ -723,7 +697,7 @@ PUBLIC int printfile ARGS1(
 		     *	header file and close it. - FM
 		     */
 		    fprintf(hfd, "Subject: %.70s\n\n", sug_filename);
-		    fclose(hfd);
+		    LYCloseTempFP(hfd);
 		    /*
 		     *	Now set up the command. - FM
 		     */
@@ -756,29 +730,21 @@ PUBLIC int printfile ARGS1(
 		fflush(stdout);
 		sleep(AlertSecs);
 		start_curses();
-		if (isPMDF) {
-		    /*
-		     *	Delete the header file. - FM
-		     */
-		    remove(hdrfile);
-		}
-#else /* Unix: */
-		sprintf(buffer, "%s %s", system_mail, system_mail_flags);
+		if (isPMDF)
+		    LYRemoveTemp(hdrfile);
+#else /* Unix or DOS */
 
 #ifdef DOSPATH
-		sprintf(tempfile, "%s%s", lynx_temp_space, "temp_mail.txt");
-		if ((outfile_fp = LYNewTxtFile(tempfile)) == NULL) {
-			_statusline(MAIL_REQUEST_FAILED);
-			sleep(AlertSecs);
-			return;
-		}
+		outfile_fp = LYOpenTemp(tempfile, ".txt", "w");
 #else
-		if ((outfile_fp = popen(buffer, "w")) == NULL) {
-			_statusline(MAIL_REQUEST_FAILED);
-			sleep(AlertSecs);
-			break;
-		}
+		sprintf(buffer, "%s %s", system_mail, system_mail_flags);
+		outfile_fp = popen(buffer, "w");
 #endif
+		if (outfile_fp == NULL) {
+		    _statusline(MAIL_REQUEST_FAILED);
+		    sleep(AlertSecs);
+		    break;
+		}
 
 		/*
 		 *  Determine which mail headers should be sent.
@@ -884,13 +850,13 @@ PUBLIC int printfile ARGS1(
 
 #ifdef DOSPATH
 		sprintf(buffer, "%s -t \"%s\" -F %s", system_mail, user_response, tempfile);
-		fclose(outfile_fp);	/* Close the tmpfile. */
+		LYCloseTempFP(outfile_fp);	/* Close the tmpfile. */
 		stop_curses();
 		printf("Sending \n\n$ %s\n\nPlease wait...", buffer);
 		system(buffer);
 		sleep(MessageSecs);
 		start_curses();
-		remove(tempfile);	/* Delete the tmpfile. */
+		LYRemoveTemp(tempfile); /* Delete the tmpfile. */
 #else
 		pclose(outfile_fp);
 #endif
@@ -1012,28 +978,13 @@ PUBLIC int printfile ARGS1(
 		    }
 		}
 
-		if (first) {
-		    tempname(tempfile, NEW_FILE);
-		    first = FALSE;
-		} else {
-		    remove(tempfile);	/* Remove previous tempfile. */
-		}
-		if (((cp = strrchr(tempfile, '.')) != NULL) &&
-#ifdef VMS
-		    NULL == strchr(cp, ']') &&
-#endif /* VMS */
-		    NULL == strchr(cp, '/')) {
-		    if (HTisDocumentSource() &&
-			strcasecomp(cp, HTML_SUFFIX)) {
-			*cp = '\0';
-			strcat(tempfile, HTML_SUFFIX);
-		    } else if (!HTisDocumentSource() &&
-			       strcasecomp(cp, ".txt")) {
-			*cp = '\0';
-			strcat(tempfile, ".txt");
-		    }
-		}
-		if ((outfile_fp = LYNewTxtFile(tempfile)) == NULL) {
+		LYRemoveTemp(tempfile);
+		outfile_fp = LYOpenTemp(tempfile,
+					(HTisDocumentSource())
+						? HTML_SUFFIX
+						: ".txt",
+					"w");
+		if (outfile_fp == NULL) {
 		    HTAlert(FILE_ALLOC_FAILED);
 		    break;
 		}
@@ -1273,7 +1224,6 @@ PUBLIC int printfile ARGS1(
 #endif /* !VMS */
 		sleep(MessageSecs);
 		start_curses();
-		/* don't remove(tempfile); */
     } /* end switch */
 
     FREE(link_info);
@@ -1317,7 +1267,6 @@ PUBLIC int print_options ARGS2(
 	int,		lines_in_file)
 {
     static char tempfile[256];
-    static BOOLEAN first = TRUE;
     static char print_filename[256];
     char buffer[LINESIZE];
     int count;
@@ -1327,24 +1276,13 @@ PUBLIC int print_options ARGS2(
 
     pages = lines_in_file/66 + 1;
 
-    if (first) {
-	tempname(tempfile, NEW_FILE);
-#if defined (VMS) || defined (DOSPATH) || defined (__EMX__)
-	sprintf(print_filename, "file://localhost/%s", tempfile);
-#else
-	sprintf(print_filename, "file://localhost%s", tempfile);
-#endif /* VMS */
-	first = FALSE;
-#ifdef VMS
-    } else {
-	remove(tempfile);   /* Remove duplicates on VMS. */
-#endif /* !VMS */
-    }
-
-    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
+    LYRemoveTemp(tempfile);
+    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
 	HTAlert(UNABLE_TO_OPEN_PRINTOP_FILE);
 	return(-1);
     }
+
+    LYLocalFileToURL(print_filename, tempfile);
 
     StrAllocCopy(*newfile, print_filename);
     LYforce_no_cache = TRUE;
@@ -1395,7 +1333,7 @@ PUBLIC int print_options ARGS2(
 	fprintf(fp0, "</a>\n");
     }
     fprintf(fp0, "</pre>\n</body>\n");
-    fclose(fp0);
+    LYCloseTempFP(fp0);
 
     LYforce_no_cache = TRUE;
     return(0);

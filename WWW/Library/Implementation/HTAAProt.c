@@ -179,7 +179,7 @@ PUBLIC int HTAA_getGid NOARGS
 		CTRACE(tfp, "%s(%s) returned (%s:%s:%d:...)\n",
 			    "HTAA_getGid: getgrgid",
 			    current_prot->gid_name,
-			    gr->gr_name, (int) gr->gr_passwd, (int) gr->gr_gid);
+			    gr->gr_name, gr->gr_passwd, (int) gr->gr_gid);
 #endif
 		return gr->gr_gid;
 	    }
@@ -190,7 +190,7 @@ PUBLIC int HTAA_getGid NOARGS
 		CTRACE(tfp, "%s(\"%s\") returned (%s:%s:%d:...)\n",
 			    "HTAA_getGid: getgrnam",
 			    current_prot->gid_name,
-			    gr->gr_name, (int) gr->gr_passwd, (int) gr->gr_gid);
+			    gr->gr_name, gr->gr_passwd, (int) gr->gr_gid);
 #endif
 		return gr->gr_gid;
 	    }

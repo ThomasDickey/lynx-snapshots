@@ -608,26 +608,11 @@ PUBLIC int LYdownload_options ARGS2(
 	char *, 	data_file)
 {
     static char tempfile[256];
-    static BOOLEAN first = TRUE;
     static char download_filename[256];
     char *sug_filename = NULL;
     FILE *fp0;
     lynx_html_item_type *cur_download;
     int count;
-
-    if (first) {
-	tempname(tempfile, NEW_FILE);
-	first = FALSE;
-#if defined (VMS) || defined (DOSPATH) || defined (__EMX__)
-        sprintf(download_filename, "file://localhost/%s", tempfile);
-#else
-        sprintf(download_filename, "file://localhost%s", tempfile);
-#endif /* VMS */
-#ifdef VMS
-    } else {
-	remove(tempfile);   /* Remove duplicates on VMS. */
-#endif /* VMS */
-    }
 
     /*
      *	Get a suggested filename.
@@ -635,10 +620,12 @@ PUBLIC int LYdownload_options ARGS2(
     StrAllocCopy(sug_filename, *newfile);
     change_sug_filename(sug_filename);
 
-    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
+    LYRemoveTemp(tempfile);
+    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
+    LYLocalFileToURL(download_filename, tempfile);
 
     LYstrncpy(LYValidDownloadFile,
 	      data_file,
@@ -690,7 +677,7 @@ No other download methods have been defined yet.  You may define\n\
 an unlimited number of download methods using the lynx.cfg file.\n");
     }
     fprintf(fp0, "</pre>\n</body>\n");
-    fclose(fp0);
+    LYCloseTempFP(fp0);
 
     /*
      *	Free off temp copy.

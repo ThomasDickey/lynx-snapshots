@@ -68,8 +68,7 @@ PUBLIC char *LYNewsPost ARGS2(
      *  Open a temporary file for the headers
      *  and message body. - FM
      */
-    tempname(my_tempfile, NEW_FILE);
-    if ((fd = LYNewTxtFile(my_tempfile)) == NULL) {
+    if ((fd = LYOpenTemp(my_tempfile, HTML_SUFFIX, "w")) == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(postfile);
     }
@@ -81,16 +80,9 @@ PUBLIC char *LYNewsPost ARGS2(
     CJKfile[0] = '\0';
     if (!strncmp(LYchar_set_names[current_char_set], "Japanese (EUC)", 14) ||
 	!strncmp(LYchar_set_names[current_char_set], "Japanese (SJIS)", 15)) {
-	tempname(CJKfile, NEW_FILE);
-	if ((fc = LYNewTxtFile(CJKfile)) == NULL) {
+	if ((fc = LYOpenTemp(CJKfile, HTML_SUFFIX, "w")) == NULL) {
 	    HTAlert(CANNOT_OPEN_TEMP);
-	    fclose(fd);
-#ifdef VMS
-	    while (remove(my_tempfile) == 0)
-		; /* loop through all versions */
-#else
-	    remove(my_tempfile);
-#endif /* VMS */
+	    LYRemoveTemp(my_tempfile);
 	    return(postfile);
 	}
     }
@@ -134,8 +126,8 @@ PUBLIC char *LYNewsPost ARGS2(
 	term_message) {
         _statusline(NEWS_POST_CANCELLED);
 	sleep(InfoSecs);
-	fclose(fd);		 /* Close the temp file. */
-	scrollok(stdscr, FALSE); /* Stop scrolling.	 */
+	LYCloseTempFP(fd);		/* Close the temp file.	*/
+	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
 	goto cleanup;
     }
     fprintf(fd, "%s\n", user_input);
@@ -164,8 +156,8 @@ PUBLIC char *LYNewsPost ARGS2(
 	term_message) {
         _statusline(NEWS_POST_CANCELLED);
         sleep(InfoSecs);
-        fclose(fd);		 /* Close the temp file. */
-	scrollok(stdscr, FALSE); /* Stop scrolling.	 */
+        LYCloseTempFP(fd);		/* Close the temp file. */
+	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
         goto cleanup;
     }
     fprintf(fd,"%s\n",user_input);
@@ -200,8 +192,8 @@ PUBLIC char *LYNewsPost ARGS2(
 	term_message) {
         _statusline(NEWS_POST_CANCELLED);
         sleep(InfoSecs);
-        fclose(fd);		 /* Close the temp file. */
-	scrollok(stdscr, FALSE); /* Stop scrolling.	 */
+        LYCloseTempFP(fd);		/* Close the temp file. */
+	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
         goto cleanup;
     }
     fprintf(fd, "%s\n", user_input);
@@ -239,8 +231,8 @@ PUBLIC char *LYNewsPost ARGS2(
 		 */
 	        print_wwwfile_to_fd(fd, 1);
 	}
-	fclose(fd);		 /* Close the temp file. */
-	scrollok(stdscr, FALSE); /* Stop scrolling.	 */
+	LYCloseTempFP(fd);		/* Close the temp file. */
+	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
 	if (term_message || c == 7 || c == 3)
 	    goto cleanup;
 
@@ -275,7 +267,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	    term_message) {
 	    _statusline(NEWS_POST_CANCELLED);
 	    sleep(InfoSecs);
-	    fclose(fd);			/* Close the temp file.	*/
+	    LYCloseTempFP(fd);		/* Close the temp file.	*/
 	    scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
 	    goto cleanup;
 	}
@@ -287,14 +279,14 @@ PUBLIC char *LYNewsPost ARGS2(
 	       		 sizeof(user_input), NORECALL) < 0) {
 	        _statusline(NEWS_POST_CANCELLED);
 	        sleep(InfoSecs);
-	        fclose(fd);		 /* Close the temp file. */
-		scrollok(stdscr, FALSE); /* Stop scrolling.	 */
+	        LYCloseTempFP(fd);		/* Close the temp file. */
+		scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
 	        goto cleanup;
 	    }
  	}
 	fprintf(fd, "\n");
-	fclose(fd);		 /* Close the temp file. */
-	scrollok(stdscr, FALSE); /* Stop scrolling.	 */
+	LYCloseTempFP(fd);		/* Close the temp file. */
+	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
     }
 
     /*
@@ -322,7 +314,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	       !term_message && c != 7   && c != 3)
 	    c = LYgetch();
 	if (TOUPPER(c) == 'Y') {
-	    if ((fd = fopen(my_tempfile, "a")) != NULL) {
+	    if ((fd = LYAppendToTxtFile (my_tempfile)) != NULL) {
 	        fputs("-- \n", fd);
 	        while (fgets(user_input, sizeof(user_input), fp) != NULL) {
 		    fputs(user_input, fd);
@@ -348,16 +340,10 @@ PUBLIC char *LYNewsPost ARGS2(
 		       (unsigned char *)CJKinput);
 		fputs(CJKinput, fc);
 	    }
-	    fclose(fc);
+	    LYCloseTempFP(fc);
 	    StrAllocCopy(postfile, CJKfile);
 	    fclose(fd);
-#ifdef VMS
-	    while (remove(my_tempfile) == 0)
-		; /* loop through all versions */
-#else
-	    remove(my_tempfile);
-#endif /* VMS */
-	    fd = fc;
+	    LYRemoveTemp(my_tempfile);
 	    strcpy(my_tempfile, CJKfile);
 	    CJKfile[0] = '\0';
 	} else {
@@ -391,23 +377,9 @@ cleanup:
     signal(SIGINT, cleanup_sig);
 #endif /* !VMS */
     term_message = FALSE;
-    if (!postfile) {
-#ifdef VMS
-        while (remove(my_tempfile) == 0)
-	    ; /* loop through all versions */
-#else
-	remove(my_tempfile);
-#endif /* VMS */
-    }
-    if (CJKfile[0] != '\0') {
-#ifdef VMS
-	fclose(fc);
-        while (remove(CJKfile) == 0)
-	    ; /* loop through all versions */
-#else
-	remove(CJKfile);
-#endif /* VMS */
-    }
+    if (!postfile)
+	LYRemoveTemp(my_tempfile);
+    LYRemoveTemp(CJKfile);
     FREE(NewsGroups);
 
     return(postfile);

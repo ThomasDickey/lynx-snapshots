@@ -32,11 +32,11 @@ PUBLIC void HTAlert ARGS1(
 	CONST char *,	Msg)
 {
     if (TRACE) {
-        fprintf(stderr, "\nAlert!: %s", Msg);
-	fflush(stderr);
+        fprintf(tfp, "\nAlert!: %s", Msg);
+	fflush(tfp);
         _user_message("Alert!: %s", Msg);
-        fprintf(stderr, "\n\n");
-	fflush(stderr);
+        fprintf(tfp, "\n\n");
+	fflush(tfp);
     } else
         _user_message("Alert!: %s", Msg);
 

@@ -1577,6 +1577,20 @@ PRIVATE char *hex = "0123456789ABCDEF";
 **		 if string translated or translation unnecessary,
 **	    NULL otherwise
 **		 (in which case something probably went wrong.)
+**
+**
+**  In general, this somehow ugly function (KW)
+**  cover three functions from v.2.7.2 (FM):
+**		    extern void LYExpandString PARAMS((
+**		       HTStructured *	       me,
+**		       char **		       str));
+**		    extern void LYUnEscapeEntities PARAMS((
+**		       HTStructured *	       me,
+**		       char **		       str));
+**		    extern void LYUnEscapeToLatinOne PARAMS((
+**		       HTStructured *	       me,
+**		       char **		       str,
+**		       BOOLEAN		       isURL));
 */
 
 PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
@@ -2384,6 +2398,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		if (code >= 127 ||
 		    (code < 32 && (code != 9 && code != 10 && code != 0))) {
 		    state = S_put_urlstring;
+		    break;
 		}
 	    }
 	    REPLACE_STRING(replace_buf);

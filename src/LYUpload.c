@@ -226,30 +226,14 @@ PUBLIC int LYUpload_options ARGS2(
 	char *, 	directory)
 {
     static char tempfile[256];
-    static BOOLEAN first = TRUE;
     FILE *fp0;
     lynx_html_item_type *cur_upload;
     int count;
     static char curloc[256];
     char *cp;
 
-    if (first) {
-	/*
-	 *  Get an unused tempfile name. - FM
-	 */
-	tempname(tempfile, NEW_FILE);
-#ifdef VMS
-    } else {
-	remove(tempfile);   /* Remove duplicates on VMS. */
-#endif /* VMS */
-    }
-
-    /*
-     *	Open the tempfile for writing and set it's
-     *	protection in case this wasn't done via an
-     *	external umask. - FM
-     */
-    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
+    LYRemoveTemp(tempfile);
+    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
@@ -268,17 +252,7 @@ PUBLIC int LYUpload_options ARGS2(
 	curloc[strlen(curloc) - 1] = '\0';
 #endif /* VMS */
 
-    if (first) {
-	/*
-	 *  Make the tempfile a URL.
-	 */
-#if defined (VMS) || defined (DOSPATH) || defined (__EMX__)
-	sprintf(LYUploadFileURL, "file://localhost/%s", tempfile);
-#else
-	sprintf(LYUploadFileURL, "file://localhost%s", tempfile);
-#endif /* VMS */
-	first = FALSE;
-    }
+    LYLocalFileToURL(LYUploadFileURL, tempfile);
     StrAllocCopy(*newfile, LYUploadFileURL);
 
     fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
@@ -307,7 +281,7 @@ an unlimited number of upload methods using the lynx.cfg file.\n");
 
     }
     fprintf(fp0, "</pre>\n</body>\n");
-    fclose(fp0);
+    LYCloseTempFP(fp0);
 
     LYforce_no_cache = TRUE;
 

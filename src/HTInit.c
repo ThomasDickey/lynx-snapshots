@@ -412,8 +412,8 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 	    }
 
 	}
-      FREE(mallocd_string);
-      s = t;
+	FREE(mallocd_string);
+	s = t;
     }
 
 assign_presentation:
@@ -550,7 +550,9 @@ PRIVATE int PassesTest ARGS1(
     /*
      *  Build the command and execute it.
      */
-    tempname(TmpFileName, NEW_FILE);
+    if (LYOpenTemp(TmpFileName, HTML_SUFFIX, "w") == 0)
+	ExitWithError(CANNOT_OPEN_TEMP);
+    LYCloseTemp(TmpFileName);
     cmd = (char *)malloc(1024);
     if (!cmd)
 	ExitWithError("Out of memory");
@@ -561,6 +563,7 @@ PRIVATE int PassesTest ARGS1(
     CTRACE(tfp, "PassesTest: Executing test command: %s\n", cmd);
     result = system(cmd);
     FREE(cmd);
+    LYRemoveTemp(TmpFileName);
 
     /*
      *  Free the test command as well since

@@ -2396,9 +2396,9 @@ PUBLIC int LYCheckForProxyURL ARGS1(
  * matches (and return true in that case).
  */
 static BOOLEAN compare_type ARGS3(
-	char *,		tst,
-	char *,		cmp,
-	size_t,		len)
+	char *, 	tst,
+	char *, 	cmp,
+	size_t, 	len)
 {
     if (!strncasecomp(tst, cmp, len)) {
 	if (strncmp(tst, cmp, len)) {
@@ -2818,9 +2818,9 @@ PUBLIC void size_change ARGS1(
     int old_cols = LYcols;
 
 #ifdef USE_SLANG
-#if defined(VMS) || defined(UNIX) 
+#if defined(VMS) || defined(UNIX)
     SLtt_get_screen_size();
-#endif /* VMS || UNIX */ 
+#endif /* VMS || UNIX */
     LYlines = SLtt_Screen_Rows;
     LYcols  = SLtt_Screen_Cols;
 #ifdef SLANG_MBCS_HACK
@@ -3222,119 +3222,38 @@ PUBLIC void change_sug_filename ARGS1(
 }
 
 /*
- * Construct a name for 'tempname()'
+ * Construct a temporary-filename
  */
 PRIVATE char *fmt_tempname ARGS3(
-	char *,		result,
+	char *, 	result,
 	unsigned,	counter,
-	char *,		suffix)
+	CONST char *,	suffix)
 {
-    sprintf(result,
+    char *leaf;
+    strcpy(result, lynx_temp_space);
+    leaf = result + strlen(result);
 #ifdef FNAMES_8_3
-	"%s%u%u%s",
+    /*
+     * The 'lynx_temp_space' string ends with a '/' or '\\', so we only have to
+     * limit the length of the leaf.  As received (e.g., from HTCompressed),
+     * the suffix may contain more than a ".htm", e.g., "-txt.gz", so we trim
+     * off from the filename portion to make room.
+     */
+    sprintf(leaf, "%u%u", counter, (unsigned)getpid());
+    if (strlen(leaf) > 8)
+	leaf[8] = 0;
+    if (strlen(suffix) > 4 || *suffix != '.') {
+	CONST char *tail = strchr(suffix, '.');
+	if (tail == 0)
+	    tail = suffix + strlen(suffix);
+	leaf[8 - (tail - suffix)] = 0;
+    }
+    strcat(leaf, suffix);
 #else
-	"%sL%u-%uTMP%s",
+    sprintf(leaf, "L%u-%uTMP%s", (unsigned)getpid(), counter, suffix);
 #endif
-	lynx_temp_space, (unsigned)getpid(), counter, suffix);
     CTRACE(tfp, "-> '%s'\n", result);
     return result;
-}
-
-/*
- * 'tempname()' requires that the resulting file does not exist.  Test this
- * by trying to open it.
- */
-PRIVATE BOOLEAN bad_tempname ARGS3(
-	char *,		result,
-	unsigned,	counter,
-	char *,		suffix)
-{
-    FILE *fp;
-
-    if ((fp = fopen(fmt_tempname(result, counter, suffix), "r")) != 0) {
-	fclose(fp);
-	CTRACE(tfp, "tempname: file '%s' already exists!\n", result);
-	return TRUE;
-    }
-
-    return FALSE;
-}
-
-/*
- *  To create standard temporary file names.
- */
-PUBLIC void tempname ARGS2(
-	char *, 	namebuffer,
-	int,		action)
-{
-    static unsigned counter = 0;
-#ifdef FNAMES_8_3
-    unsigned LYMaxTempCount = 1000; /* Arbitrary limit.  Make it configurable? */
-#else
-    unsigned LYMaxTempCount = 10000; /* Arbitrary limit.  Make it configurable? */
-#endif /* FNAMES_8_3 */
-
-    if (action == REMOVE_FILES) {
-	/*
-	 *  Remove all temporary files with .txt or .html suffixes. - FM
-	 */
-	CTRACE(tfp, "tempname REMOVE_FILES (%d)\n", counter);
-	for (; counter != 0; counter--) {
-	    remove(fmt_tempname(namebuffer, counter-1, ".txt"));
-	    remove(fmt_tempname(namebuffer, counter-1, HTML_SUFFIX));
-	}
-    } else {
-	/*
-	 *  Load a tentative temporary file name into namebuffer. - FM
-	 */
-	CTRACE(tfp, "tempname NEW_FILE (%d)\n", counter);
-	while (counter < LYMaxTempCount) {
-	    /*
-	     *	Create names with .txt, then .bin, then
-	     *	.html suffixes, and check for their prior
-	     *	existence.  If any already exist, someone
-	     *	might be trying to spoof us, so increment
-	     *	the count and try again.  Otherwise, return
-	     *	with the name which has the .html suffix
-	     *	loaded in namebuffer. - FM
-	     *
-	     *	Some systems may use .htm instead of .html.  This
-	     *	should be done consistently by always using HTML_SUFFIX
-	     *	where filenames are generated for new local files. - kw
-	     */
-	    if (bad_tempname(namebuffer, counter, ".txt")
-	     || bad_tempname(namebuffer, counter, ".bin")
-	     || bad_tempname(namebuffer, counter, HTML_SUFFIX)) {
-		continue;
-	    }
-	    /*
-	     *	Return to the calling function, with the tentative
-	     *	temporary file name loaded in namebuffer.  Note that
-	     *	if the calling function will use a suffix other than
-	     *	.txt, .bin, or .html, it similarly should do tests for
-	     *	a spoof.  The file name can be reused if it is written
-	     *	to on receipt of this name, and thereafter accessed
-	     *	for reading.  Note that if writing to a file is to
-	     *	be followed by reading it, as is the usual case for
-	     *	Lynx, the spoof attempt will be apparent, and the user
-	     *	can take appropriate action. - FM
-	     */
-	    counter++;
-	    return;
-	}
-	/*
-	 *  The tempfile maximum count has been reached.
-	 *  Issue a message and exit. - FM
-	 */
-	_statusline(MAX_TEMPCOUNT_REACHED);
-	sleep(AlertSecs);
-	exit(-1);
-    }
-
-    /*
-     *	We were called for a clean up, and have done it. - FM
-     */
-    return;
 }
 
 /*
@@ -5519,3 +5438,244 @@ PUBLIC void LYRelaxFilePermissions ARGS1(CONST char *, name)
     }
 }
 #endif
+
+/*
+ * Check if the given anchor has an associated file-cache.
+ */
+PUBLIC BOOLEAN LYCachedTemp ARGS2(
+	char *, 	result,
+	char *, 	cached)
+{
+    FILE *fp;
+
+    if (cached) {
+	strcpy(result, cached);
+	FREE(cached);
+	if ((fp = fopen(result, "r")) != NULL) {
+	    fclose(fp);
+	    remove(result);
+	}
+	return TRUE;
+    }
+    return FALSE;
+}
+
+/*
+ * Maintain a list of all of the temp-files we create so that we can remove
+ * them during the cleanup.
+ */
+typedef struct _LYTemp {
+    struct _LYTemp *next;
+    char *name;
+    FILE *file;
+} LY_TEMP;
+
+static LY_TEMP *ly_temp;
+
+/*
+ * Open a temp-file, ensuring that it is unique, and not readable by other
+ * users.
+ *
+ * The mode can be one of: "w", "a", "wb".
+ */
+PUBLIC FILE *LYOpenTemp ARGS3(
+	char *, 	result,
+	CONST char *,	suffix,
+	CONST char *,	mode)
+{
+    FILE *fp = 0;
+    BOOL txt = TRUE;
+    BOOL wrt = 'r';
+    LY_TEMP *p;
+    static unsigned counter;
+
+    CTRACE(tfp, "LYOpenTemp(,%s,%s)\n", suffix, mode);
+    while (*mode != '\0') {
+	switch (*mode++) {
+	case 'w':	wrt = 'w';	break;
+	case 'a':	wrt = 'a';	break;
+	case 'b':	txt = FALSE;	break;
+	default:
+		CTRACE(tfp, "%s @%d: BUG\n", __FILE__, __LINE__);
+		return fp;
+	}
+    }
+
+    do {
+	(void) fmt_tempname(result, counter++, suffix);
+	if (txt) {
+	    switch (wrt) {
+	    case 'w':
+		fp = LYNewTxtFile (result);
+		break;
+	    case 'a':
+		fp = LYAppendToTxtFile (result);
+		break;
+	    }
+	} else {
+	    fp = LYNewBinFile (result);
+	}
+    } while (fp == 0);
+
+    if ((p = (LY_TEMP *)calloc(1, sizeof(LY_TEMP))) != 0) {
+	p->next = ly_temp;
+	StrAllocCopy((p->name), result);
+	p->file = fp;
+	ly_temp = p;
+    }
+
+    CTRACE(tfp, "... LYOpenTemp(%s)\n", result);
+    return fp;
+}
+
+/*
+ * Reopen a temporary file
+ */
+PUBLIC FILE *LYReopenTemp ARGS1(
+	char *, 	name)
+{
+    LY_TEMP *p;
+    FILE *fp;
+
+    LYCloseTemp(name);
+    for (p = ly_temp; p != 0; p = p->next) {
+	if (!strcmp(p->name, name)) {
+	    fp = p->file = LYAppendToTxtFile (name);
+	    break;
+	}
+    }
+    return fp;
+}
+
+/*
+ * Special case of LYOpenTemp, used for manipulating bookmark file, i.e., with
+ * renaming.
+ */
+PUBLIC FILE *LYOpenScratch ARGS2(
+	char *, 	result,
+	CONST char *,	prefix)
+{
+    FILE *fp;
+    LY_TEMP *p;
+
+    sprintf(result, "%s-%u.%s", prefix, getpid(), HTML_SUFFIX);
+    if ((fp = LYNewTxtFile (result)) != 0) {
+	if ((p = (LY_TEMP *)calloc(1, sizeof(LY_TEMP))) != 0) {
+	    p->next = ly_temp;
+	    StrAllocCopy((p->name), result);
+	    p->file = fp;
+	    ly_temp = p;
+	}
+    }
+    CTRACE(tfp, "LYOpenScratch(%s)\n", result);
+    return fp;
+}
+
+/*
+ * Close a temp-file, given its name
+ */
+PUBLIC void LYCloseTemp ARGS1(
+	char *, name)
+{
+    LY_TEMP *p;
+
+    CTRACE(tfp, "LYCloseTemp(%s)\n", name);
+    for (p = ly_temp; p != 0; p = p->next) {
+	if (!strcmp(name, p->name)) {
+	    CTRACE(tfp, "...LYCloseTemp(%s)%s\n", name,
+		(p->file != 0) ? ", closed" : "");
+	    if (p->file != 0) {
+		fclose(p->file);
+		p->file = 0;
+	    }
+	    break;
+	}
+    }
+}
+
+/*
+ * Close a temp-file, given its file-pointer
+ */
+PUBLIC void LYCloseTempFP ARGS1(
+	FILE *, fp)
+{
+    LY_TEMP *p;
+
+    CTRACE(tfp, "LYCloseTempFP\n");
+    for (p = ly_temp; p != 0; p = p->next) {
+	if (p->file == fp) {
+	    fclose(p->file);
+	    p->file = 0;
+	    break;
+	}
+    }
+}
+
+/*
+ * Close a temp-file, removing it.
+ */
+PUBLIC void LYRemoveTemp ARGS1(
+	char *, name)
+{
+    LY_TEMP *p, *q;
+    int code;
+
+    if (name != 0 && *name != 0) {
+	CTRACE(tfp, "LYRemoveTemp(%s)\n", name);
+	for (p = ly_temp, q = 0; p != 0; q = p, p = p->next) {
+	    if (!strcmp(name, p->name)) {
+		if (q != 0) {
+		    q->next = p->next;
+		} else {
+		    ly_temp = p->next;
+		}
+#ifdef VMS
+		while (remove(name) == 0)
+		    ;
+#else
+		code = remove(name);
+#endif
+		CTRACE(tfp, "...LYRemoveTemp done(%d)%s\n", code,
+		       (p->file != 0) ? ", closed" : "");
+		if (p->file != 0)
+		    fclose(p->file);
+		free(p->name);
+		free(p);
+		break;
+	    }
+	}
+    }
+}
+
+/*
+ * Remove all of the temp-files.  Note that this assumes that they are closed,
+ * since some systems will not allow us to remove a file which is open.
+ */
+PUBLIC void LYCleanupTemp NOARGS
+{
+    while (ly_temp != 0) {
+	LYRemoveTemp(ly_temp->name);
+    }
+}
+
+/*
+ * Convert a local filename to a URL
+ */
+PUBLIC void LYLocalFileToURL ARGS2(
+	char *, 	target,
+	char *, 	source)
+{
+#ifdef DOSPATH
+    sprintf(target, "file://localhost/%s", HTDOS_wwwName(source));
+#else
+#ifdef VMS
+    sprintf(target, "file://localhost%s", HTVMS_wwwName(source));
+#else
+#ifdef __EMX__
+    sprintf(target, "file://localhost/%s", source);
+#else
+    sprintf(target, "file://localhost%s", source);
+#endif /* __EMX__ */
+#endif /* VMS */
+#endif /* DOSPATH */
+}

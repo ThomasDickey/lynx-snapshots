@@ -117,39 +117,11 @@ success:
 	is_mosaic_hotlist = TRUE;
 	fclose(fp);
 	newname = convert_mosaic_bookmark_file(filename_buffer);
-#ifdef DOSPATH
-	sprintf(URL_buffer, "file://localhost/%s",
-		HTDOS_wwwName((char *)newname));
-#else
-#ifdef VMS
-	sprintf(URL_buffer,"file://localhost%s",
-		HTVMS_wwwName((char *)newname));
-#else
-#ifdef __EMX__
-	sprintf(URL_buffer,"file://localhost/%s", newname);
-#else
-	sprintf(URL_buffer,"file://localhost%s", newname);
-#endif /* __EMX__ */
-#endif /* VMS */
-#endif /* DOSPATH */
+	LYLocalFileToURL(URL_buffer, newname);
     } else {
 	fclose(fp);
 	is_mosaic_hotlist = FALSE;
-#ifdef DOSPATH
-	sprintf(URL_buffer,"file://localhost/%s",
-		HTDOS_wwwName((char *)filename_buffer));
-#else
-#ifdef VMS
-	sprintf(URL_buffer,"file://localhost%s",
-		HTVMS_wwwName((char *)filename_buffer));
-#else
-#ifdef __EMX__
-	sprintf(URL_buffer,"file://localhost/%s", filename_buffer);
-#else
-	sprintf(URL_buffer,"file://localhost%s", filename_buffer);
-#endif /* __EMX__ */
-#endif /* VMS */
-#endif /* DOSPATH */
+	LYLocalFileToURL(URL_buffer, filename_buffer);
     }
 
     StrAllocCopy(*URL, URL_buffer);
@@ -165,22 +137,13 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
 	char *, 	filename_buffer)
 {
     static char newfile[256];
-    static BOOLEAN first = TRUE;
     FILE *fp, *nfp;
     char buf[BUFSIZ];
     int line = -2;
     char *endline;
 
-    if (first) {
-	tempname(newfile, NEW_FILE);
-	first = FALSE;
-#ifdef VMS
-    } else {
-	remove(newfile);   /* Remove duplicates on VMS. */
-#endif /* VMS */
-    }
-
-    if ((nfp = fopen(newfile, "w")) == NULL) {
+    LYRemoveTemp(newfile);
+    if ((nfp = LYOpenTemp(newfile, HTML_SUFFIX, "w")) == NULL) {
 	LYMBM_statusline(NO_TEMP_FOR_HOTLIST);
 	sleep(AlertSecs);
 	return ("");
@@ -213,7 +176,7 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
 	/* else - ignore the line (this gets rid of first two lines) */
 	line++;
     }
-    fclose(nfp);
+    LYCloseTempFP(nfp);
     fclose(fp);
     return(newfile);
 }
@@ -463,18 +426,9 @@ PUBLIC void remove_bookmark_link ARGS2(
 	return;
     }
 
-#ifdef VMS
-    sprintf(newfile, "%s-%d", filename_buffer, getpid());
-#else
-    tempname(newfile, NEW_FILE);
-#endif /* VMS */
-    if ((nfp = LYNewTxtFile(newfile)) == NULL) {
+    if ((nfp = LYOpenScratch(newfile, filename_buffer)) == 0) {
 	fclose(fp);
-#ifdef VMS
 	_statusline(BOOKSCRA_OPEN_FAILED_FOR_DEL);
-#else
-	_statusline(BOOKTEMP_OPEN_FAILED_FOR_DEL);
-#endif /* VMS */
 	sleep(AlertSecs);
 	return;
     }
@@ -485,10 +439,8 @@ PUBLIC void remove_bookmark_link ARGS2(
      */
     if (stat(filename_buffer, &stat_buf) == 0) {
 	mode = ((stat_buf.st_mode & 0777) | 0600); /* make it writable */
-	(void) fclose(nfp);
-	nfp = NULL;
 	(void) chmod(newfile, mode);
-	if ((nfp = fopen(newfile, "a")) == NULL) {
+	if ((nfp = LYReopenTemp(newfile)) == NULL) {
 	    (void) fclose(fp);
 	    _statusline(BOOKTEMP_REOPEN_FAIL_FOR_DEL);
 	    sleep(AlertSecs);
@@ -542,7 +494,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 
     fclose(fp);
     fp = NULL;
-    fclose(nfp);
+    LYCloseTempFP(nfp);
     nfp = NULL;
 #ifdef DOSPATH
     remove(filename_buffer);
@@ -555,7 +507,7 @@ PUBLIC void remove_bookmark_link ARGS2(
      *	it is writable by the current process.
      *	Changed to copy  1998-04-26 -- gil
      */
-    {   char buffer[3072];
+    {	char buffer[3072];
 
 	sprintf(buffer, "%s %s %s && %s %s",
 	    COPY_PATH, newfile, filename_buffer,
@@ -620,11 +572,10 @@ PUBLIC void remove_bookmark_link ARGS2(
 failure:
     _statusline(BOOKMARK_DEL_FAILED);
     sleep(AlertSecs);
-    if (nfp != NULL)
-	fclose(nfp);
+    LYCloseTempFP(nfp);
     if (fp != NULL)
 	fclose(fp);
-    remove(newfile);
+    LYRemoveTemp(newfile);
 }
 
 /*

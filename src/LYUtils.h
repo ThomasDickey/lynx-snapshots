@@ -32,7 +32,6 @@ extern void size_change PARAMS((int sig));
 extern void HTSugFilenames_free NOPARAMS;
 extern void HTAddSugFilename PARAMS((char *fname));
 extern void change_sug_filename PARAMS((char *fname));
-extern void tempname PARAMS((char *namebuffer, int action));
 extern int number2arrows PARAMS((int number));
 extern void parse_restrictions PARAMS((char *s));
 extern void checkmail NOPARAMS;
@@ -58,12 +57,22 @@ extern time_t LYmktime PARAMS((char *string, BOOL absolute));
 extern int putenv PARAMS((CONST char *string));
 #endif /* HAVE_PUTENV */
 
-FILE *LYNewBinFile PARAMS((char * name));
-FILE *LYNewTxtFile PARAMS((char * name));
-FILE *LYAppendToTxtFile PARAMS((char * name));
+extern FILE *LYNewBinFile PARAMS((char * name));
+extern FILE *LYNewTxtFile PARAMS((char * name));
+extern FILE *LYAppendToTxtFile PARAMS((char * name));
 #ifdef UNIX
 extern void LYRelaxFilePermissions PARAMS((CONST char * name));
 #endif
+extern BOOLEAN LYCachedTemp PARAMS((char *result, char *cached));
+extern FILE *LYOpenTemp PARAMS((char *result, CONST char *suffix, CONST char *mode));
+extern FILE *LYReopenTemp PARAMS((char *name));
+extern FILE *LYOpenScratch PARAMS((char *result, CONST char *prefix));
+extern void LYCloseTemp PARAMS((char *name));
+extern void LYCloseTempFP PARAMS((FILE *fp));
+extern void LYRemoveTemp PARAMS((char *name));
+extern void LYCleanupTemp NOPARAMS;
+extern void LYLocalFileToURL PARAMS((char *target, char *source));
+
 /*
  *  Whether or not the status line must be shown.
  */
@@ -123,12 +132,6 @@ extern BOOLEAN mustshow;
  *  For change_sug_filename().
  */
 extern HTList *sug_filenames;
-
-/*
- *  For tempname().
- */
-#define NEW_FILE     0
-#define REMOVE_FILES 1
 
 /*
  *  Miscellaneous.

@@ -966,7 +966,7 @@ PRIVATE BOOLEAN remove_single ARGS1(
     char *args[5];
 
     /*
-     *	lstat() first in case its a symbolic link.
+     *	lstat() first in case it's a symbolic link.
      */
     if (lstat(testpath, &dir_info) == -1 &&
 	stat(testpath, &dir_info) == -1) {
@@ -1122,7 +1122,6 @@ PRIVATE BOOLEAN permit_location ARGS3(
     return(0);
 #else
     static char tempfile[256] = "\0";
-    static BOOLEAN first = TRUE;
     char *cp;
     char tmpbuf[LINESIZE];
     struct stat dir_info;
@@ -1161,32 +1160,18 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	    user_filename = (cp + 1);
 	}
 
-	if (first) {
-	    /*
-	     *	Get an unused tempfile name. - FM
-	     */
-	    tempname(tempfile, NEW_FILE);
-	}
-
-	/*
-	 *  Open the tempfile for writing and set its
-	 *  protection in case this wasn't done via an
-	 *  external umask. - FM
-	 */
-	if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
+	LYRemoveTemp(tempfile);
+	if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
 	    _statusline("Unable to open permit options file");
 	    sleep(AlertSecs);
 	    return(0);
 	}
 
-	if (first) {
-	    /*
-	     *	Make the tempfile a URL.
-	     */
-	    strcpy(LYPermitFileURL, "file://localhost");
-	    strcat(LYPermitFileURL, tempfile);
-	    first = FALSE;
-	}
+	/*
+	 * Make the tempfile a URL.
+	 */
+	strcpy(LYPermitFileURL, "file://localhost");
+	strcat(LYPermitFileURL, tempfile);
 	StrAllocCopy(*newpath, LYPermitFileURL);
 
 	grp = getgrgid(dir_info.st_gid);
@@ -1267,7 +1252,7 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 		(dir_info.st_mode & S_IFMT) == S_IFDIR ? "directory" : "file",
 		user_filename);
 	fprintf(fp0, "</Body></Html>");
-	fclose(fp0);
+	LYCloseTempFP(fp0);
 
 	LYforce_no_cache = TRUE;
 	return(PERMIT_FORM_RESULT);	 /* Special flag for LYMainLoop */
@@ -1695,7 +1680,6 @@ PUBLIC int dired_options ARGS2(
 	char **,	newfile)
 {
     static char tempfile[256];
-    static BOOLEAN first = TRUE;
     char path[512], dir[512]; /* much too large */
     char tmpbuf[LINESIZE];
     lynx_html_item_type *nxt;
@@ -1714,33 +1698,18 @@ PUBLIC int dired_options ARGS2(
     struct dired_menu *mp;
     char buf[2048];
 
-
-    if (first) {
-	/*
-	 *  Get an unused tempfile name. - FM
-	 */
-	tempname(tempfile, NEW_FILE);
-    }
-
-    /*
-     *	Open the tempfile for writing and set its
-     *	protection in case this wasn't done via an
-     *	external umask. - FM
-     */
-    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
+    LYRemoveTemp(tempfile);
+    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
 	_statusline("Unable to open file management menu file.");
 	sleep(AlertSecs);
 	return(0);
     }
 
-    if (first) {
-	/*
-	 *  Make the tempfile a URL.
-	 */
-	strcpy(LYDiredFileURL, "file://localhost");
-	strcat(LYDiredFileURL, tempfile);
-	first = FALSE;
-    }
+    /*
+     *  Make the tempfile a URL.
+     */
+    strcpy(LYDiredFileURL, "file://localhost");
+    strcat(LYDiredFileURL, tempfile);
     StrAllocCopy(*newfile, LYDiredFileURL);
 
     cp = doc->address;
@@ -1776,6 +1745,7 @@ PUBLIC int dired_options ARGS2(
 	    sprintf(tmpbuf, "Unable to get status of '%s'.", path);
 	    _statusline(tmpbuf);
 	    sleep(AlertSecs);
+	    LYCloseTempFP(fp0);
 	    FREE(dir_url);
 	    FREE(path_url);
 	    return 0;
@@ -1887,7 +1857,7 @@ PUBLIC int dired_options ARGS2(
     }
 
     fprintf(fp0, "</body>\n");
-    fclose(fp0);
+    LYCloseTempFP(fp0);
 
     FREE(dir_url);
     FREE(path_url);

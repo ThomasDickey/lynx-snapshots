@@ -134,15 +134,11 @@ PUBLIC void cleanup_sig ARGS1(
 
 /*
  *  Called by Interrupt handler or at quit time.
- *  Erases the temporary files that lynx created
- *  temporary files are removed by tempname
- *  which created them.
+ *  Erases the temporary files that lynx created.
  */
 PUBLIC void cleanup_files NOARGS
 {
-    char filename[256];
-
-    tempname(filename, REMOVE_FILES);
+    LYCleanupTemp();
     FREE(lynx_temp_space);
 }
 
