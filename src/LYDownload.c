@@ -658,6 +658,7 @@ PUBLIC int LYdownload_options ARGS2(
      *	Free off temp copy.
      */
     FREE(sug_filename);
+    FREE(downloaded_url);
 
     return(0);
 }

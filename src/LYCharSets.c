@@ -373,59 +373,59 @@ PUBLIC CONST char * LYchar_set_names[MAXCHARSETS + 1]={
  *  Will be automatically modified (and extended) by charset translations
  *  which are loaded using the chartrans mechanism.
  *  Most important piece of info to put here is a MIME charset name.
- *  Used for chartrans.
+ *  Used for chartrans (see UCDefs.h).
  *  The order of LYCharSets and LYCharSet_UC MUST be the same.
  *
  *  Note that most of the charsets added by the new mechanism in src/chrtrans
- *  don't show up here at all.	They don't have to.
+ *  don't show up here at all.  They don't have to.
  */
 PUBLIC LYUCcharset LYCharSet_UC[MAXCHARSETS]=
 {
   /*
    *  Zero position placeholder and HTMLGetEntityUCValue() reference. - FM
    */
-  {-1,"iso-8859-1",	UCT_ENC_8BIT,
-			UCT_REP_IS_LAT1,
-			UCT_CP_IS_LAT1, 	UCT_R_LAT1,UCT_R_LAT1},
+  {-1,"iso-8859-1",    UCT_ENC_8BIT,0,
+                       UCT_REP_IS_LAT1,
+                       UCT_CP_IS_LAT1,         UCT_R_LAT1,UCT_R_LAT1},
 
   /*
    *  Placeholders for Unicode tables. - FM
    */
-  {-1,"cp850",		UCT_ENC_8BIT,
-			UCT_REP_SUPERSETOF_LAT1,
-			0,			UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"windows-1252", 	UCT_ENC_8BIT,
-			UCT_REP_SUPERSETOF_LAT1,
-			0,			UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"cp437",		UCT_ENC_8BIT,0,0,	UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"dec-mcs",	UCT_ENC_8BIT,0,0,	UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"macintosh",	UCT_ENC_8BIT,0,0,	UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"next",		UCT_ENC_8BIT,0,0,	UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"cp850",         UCT_ENC_8BIT,0,
+                       UCT_REP_SUPERSETOF_LAT1,
+                       0,                      UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"windows-1252",  UCT_ENC_8BIT,0,
+                       UCT_REP_SUPERSETOF_LAT1,
+                       0,                      UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"cp437",         UCT_ENC_8BIT,0,0,0,     UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"dec-mcs",       UCT_ENC_8BIT,0,0,0,     UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"macintosh",     UCT_ENC_8BIT,0,0,0,     UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"next",          UCT_ENC_8BIT,0,0,0,     UCT_R_8BIT,UCT_R_ASCII},
 
   /*
    *  There is no strict correlation for the next five, since the transfer
    *  charset gets decoded into Display Char Set by the CJK code (separate
-   *  from Unicode mechanism).	For now we use the MIME name that describes
+   *  from Unicode mechanism).  For now we use the MIME name that describes
    *  what is output to the terminal. - KW
    */
-  {-1,"euc-cn", 	UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"euc-jp", 	UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"shift_jis",	UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"euc-kr", 	UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"big5",		UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"euc-cn",        UCT_ENC_CJK,0,0,0,      UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"euc-jp",        UCT_ENC_CJK,0,0,0,      UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"shift_jis",     UCT_ENC_CJK,0,0,0,      UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"euc-kr",        UCT_ENC_CJK,0,0,0,      UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"big5",          UCT_ENC_CJK,0,0,0,      UCT_R_8BIT,UCT_R_ASCII},
 
   /*
    *  Placeholders for Unicode tables. - FM
    */
-  {-1,"viscii", 	UCT_ENC_8BIT_C0,0,0,	UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"us-ascii",	UCT_ENC_7BIT,
-			UCT_REP_SUBSETOF_LAT1,
-			UCT_CP_SUBSETOF_LAT1,	UCT_R_ASCII,UCT_R_ASCII},
+  {-1,"viscii",        UCT_ENC_8BIT_C0,0,0,0,  UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"us-ascii",      UCT_ENC_7BIT,0,
+                       UCT_REP_SUBSETOF_LAT1,
+                       UCT_CP_SUBSETOF_LAT1,   UCT_R_ASCII,UCT_R_ASCII},
 
   /*
    *  Placeholder for non-translation mode. - FM
    */
-  {-1,"x-transparent",	UCT_ENC_8BIT,0,0,	UCT_R_8BIT,UCT_R_ASCII}
+  {-1,"x-transparent", UCT_ENC_8BIT,0,0,0,     UCT_R_8BIT,UCT_R_ASCII}
 
 };
 

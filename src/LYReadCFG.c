@@ -7,6 +7,7 @@
 #include <LYStructs.h>
 #include <LYGlobalDefs.h>
 #include <LYCharSets.h>
+#include <LYCharUtils.h>
 #include <LYKeymap.h>
 #include <LYJump.h>
 #include <LYGetFile.h>
@@ -972,6 +973,8 @@ static Config_Type Config_Table [] =
      {0}
 };
 
+PRIVATE char *local_url = NULL;
+
 /*
  * Free memory allocated in 'read_cfg()'
  */
@@ -996,6 +999,7 @@ PUBLIC void free_lynx_cfg NOARGS
 	    break;
 	}
     }
+    FREE(local_url);
 }
 
 /*
@@ -1194,8 +1198,17 @@ PUBLIC void read_cfg ARGS4(
 	    break;
 #endif
 	default:
-	    if (fp0 != 0)
-		fprintf(fp0, "%s:%s\n", name, value);
+	    if (fp0 != 0) {
+		if (strchr(value, '&') || strchr(value, '<')) {
+		    char *cp1 = NULL;
+		    StrAllocCopy(cp1, value);
+		    LYEntify(&cp1, TRUE);
+		    fprintf(fp0, "%s:%s\n", name, cp1);
+		    FREE(cp1);
+		} else {
+		    fprintf(fp0, "%s:%s\n", name, value);
+		}
+	    }
 	    break;
 	}
     }
@@ -1241,7 +1254,6 @@ PUBLIC void read_cfg ARGS4(
  */
 PUBLIC char *lynx_cfg_infopage NOARGS
 {
-    static char *local_url;
     char tempfile[LY_MAXPATH];
     char *temp = 0;
     FILE *fp0;

@@ -92,7 +92,7 @@
 #endif /* LYNX_CFG_FILE */
 
 /**************************
- * The EXTENSION_MAP file allows you to map file suffix's to
+ * The EXTENSION_MAP file allows you to map file suffixes to
  * mime types.
  * These global and personal files override anything in
  * lynx.cfg or src/HTInit.c
@@ -275,7 +275,7 @@
 #endif /* HAVE_CONFIG_H */
 
 /**************************
- * The EXTENSION_MAP file allows you to map file suffix's to
+ * The EXTENSION_MAP file allows you to map file suffixes to
  * mime types.
  * These global and personal files override anything in
  * lynx.cfg or src/HTInit.c
@@ -330,7 +330,7 @@
  */
 
 /**************************
- * A place to put temporary files, it's almost always in "/tmp/"
+ * A place to put temporary files, it is almost always in "/tmp/"
  * for UNIX systems.  If you include "$USER" in the definition
  * (e.g., "/tmp/$USER"), Lynx will replace the "$USER" with the
  * username of the account which invoked the Lynx image.  Such
@@ -1132,7 +1132,7 @@
  * to be treated as TRUE via -restrictions=dotfiles (or -anonymous, which sets
  * this and most other restrictions).
  *
- * If it's FALSE at startup of Lynx, the user can regulate it via the
+ * If it is FALSE at startup of Lynx, the user can regulate it via the
  * 'o'ptions menu, and may save the preference in the RC file.
  */
 #define NO_DOT_FILES    TRUE  /* disallow access to dot files */
@@ -1216,12 +1216,12 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.2dev.4"
+#define LYNX_VERSION "2.8.2dev.5"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Wed, 18 Nov 1998 12:23:55 -0700"
+#define LYNX_DATE "Sat, 21 Nov 1998 09:32:10 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1998"

@@ -221,7 +221,9 @@ distclean: clean
 	-cd src && $(MAKE) $@
 	-cd src/chrtrans && $(MAKE) $@
 	@INTLDIR_MAKE@cd intl && $(MAKE) $@
+	@MSG_DIR_MAKE@-rmdir intl
 	@MSG_DIR_MAKE@cd po && $(MAKE) $@
+	@MSG_DIR_MAKE@-rmdir po
 	-rm -f *~ *.bak *.sav
 	-rm -f WWW/Library/unix/makefile src/makefile src/chrtrans/makefile
 	@SRCDIR_CLEAN@-find . -type f -name '*.rej' -exec -rm -f {} \;

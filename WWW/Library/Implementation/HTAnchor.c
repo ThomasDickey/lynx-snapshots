@@ -68,6 +68,8 @@ PRIVATE HTParentAnchor * HTParentAnchor_new NOARGS
 {
     HTParentAnchor *newAnchor =
        (HTParentAnchor *)calloc(1, sizeof(HTParentAnchor));  /* zero-filled */
+    if (newAnchor == NULL)
+	outofmem(__FILE__, "HTParentAnchor_new");
     newAnchor->parent = newAnchor;
     newAnchor->bookmark = NULL; 	/* Bookmark filename. - FM */
     newAnchor->isISMAPScript = FALSE;	/* Lynx appends ?0,0 if TRUE. - FM */
@@ -194,6 +196,8 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
     }
 
     child = HTChildAnchor_new();
+    if (child == NULL)
+	outofmem(__FILE__, "HTChildAnchor_new");
     CTRACE(tfp, "new Anchor %p named `%s' is child of %p\n",
 		(void *)child,
 		tag ? tag : (CONST char *)"",
@@ -245,6 +249,29 @@ PUBLIC HTChildAnchor * HTAnchor_findChildAndLink ARGS4(
 	parsed_doc.safe = FALSE;
 	dest = HTAnchor_findAddress(&parsed_doc);
 
+#define DUPLICATE_ANCHOR_NAME_WORKAROUND
+
+#ifdef DUPLICATE_ANCHOR_NAME_WORKAROUND
+	if (tag && *tag) {
+	    HTAnchor *testdest1;
+	    int nlinks;
+	    testdest1 = child->mainLink.dest;
+	    if (testdest1) {
+		nlinks = 1 + HTList_count(child->links);
+		CTRACE(tfp,
+		       "*** Duplicate ChildAnchor %p named `%s' with %d links",
+		       child, tag, nlinks);
+		if (dest == testdest1 && ltype == child->mainLink.type) {
+		    CTRACE(tfp,", same dest %p and type, keeping it\n",
+			   testdest1);
+		} else {
+		    CTRACE(tfp,", different dest %p, creating unnamed child\n",
+			   testdest1);
+		    child = HTAnchor_findChild(parent, 0);
+		}
+	    }
+	}
+#endif
 	HTAnchor_link((HTAnchor *)child, dest, ltype);
 	FREE(parsed_doc.address);
 	FREE(relative_to);

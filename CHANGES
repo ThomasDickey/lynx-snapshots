@@ -1,6 +1,74 @@
 Changes since Lynx 2.8.1 release
 ================================================================================
 
+1998-11-21 (2.8.2dev.5)
+* modify HTLoadFile() to make compressed files work with OS/2 EMX and
+  LYSystem() to convert forward slashes in pathnames to backslashes, also for
+  EMX (patches by Ilya Zakharevich).
+* documentation nits (aprostrophes) in lynx.cfg and userdefs.h - LV
+* fix inconsistent newlines in po/it.po (report by Irving_Wolfe@Wolfe.net) - TD
+* modify config.guess, added Intergraph 2430 CLIX machines (reported by Alex
+  Matulich <matuli_a@marlin.navsea.navy.mil>) - TD
+* minor fix in LYCharSets.c according to recent changes in UCDefs.h introduced
+  by IBM OS/2 codepage number - LP
+* modify configure script to work with --enable-nls built into a subdirectory
+  of the source tree (reported by PG) - TD
+* disable regeneration of intl/po2tbl.sed and po/POTFILES if --disable-nls
+  configure option is specified - TD
+* add configure test for stdarg.h vs varargs.h - TD
+* fixes to work with SunOS K&R compiler - TD
+* don't trim trailing and leading spaces from unformatted text lines in some
+  cases (split_line in GridText.c).  Prevents corruption of some uuencoded
+  files when they are displayed and then 'P'rinted (although 'D'ownload should
+  be used instead) - KW
+* some changes in HText_appendCharacter (GridText.c).  Splitting of long SOURCE
+  lines now works with color styles - KW
+* workaround for multiple anchors in the same (invalid) HTML document with the
+  same NAME and different destinations (HTAnchor.c) - KW
+* check for 'z'ap while constructing local directory listings (non-VMS only, in
+  HTFile.c) - KW
+* added a couple outofmem checks (HTAnchor.c).  Minor TRACE message change in
+  GridText.c for -tlog / USE_TRACE_LOG disabled - KW
+* when adding bookmark entries, don't accept a title string which appears to
+  consist only of blank characters (LYBookmark.c).  When rendering a bookmark
+  file, use hiddenlinks=merge counting, so that numbers after entries with
+  empty titles don't get out of whack (GridText.c).  This should prevent 'R'
+  from removing the wrong bookmark entry - KW
+* prevent generation of some unnecessary temp files when constructing mailcap
+  file test commands (HTInit.c) - KW
+* include LYLeaks.h in UCdomap.c for memory leak detection - KW
+* fixed various memory leaks (UCdomap.c, LYShowInfo.c, LYReadCFG.c, LYMain.c,
+  LYDownload.c, LYBookmark.c, HTML.c, DefaultStyle.c) - KW
+* escape '&' and '<' in HTML generated to display current lynx.cfg option
+  values (LYReadCFG.c) - KW
+* revert logic in split_line.  Emphasis highlighting that should extend over
+  several lines was being lost at line breaks (GridText.c).  (IsSpecialAttrChar
+  probably shouldn't return true for LY_SOFT_NEWLINE since in most places it
+  tests whether to skip a character position, but as long as this special char
+  is only used in SOURCE mode it cannot mess up any anchor positions so it
+  should be ok.  - KW
+* correct character counting in SOURCE display continuation lines.  A
+  highlighted search target would be shown shifted left by one character
+  position because the LY_SOFT_NEWLINE special was displayed as '+' but not
+  counted (GridText.c) - KW
+* prevent generation of invalid/unparseable comments if
+  UCSaveBookmarksInUnicode is in effect, other minor changes in
+  LYBookmark.c - KW
+* correction for color styles in HText_appendCharacter (GridText.c).  At some
+  point a memmove was replaced by a for loop, but source and destination were
+  reversed and the counter was wrong - KW
+* modify HTSprintf/HTSprintf0 to use a more generic approach to varargs by
+  using only va_alist in the parameter list - TD
+* correct html expression in LYShowInfo.c of dev.3 which did not allow the temp
+  file with the lynx.cfg settings to be accessed from the Configuration
+  Definitions page (patch by Ismael Cordeiro).
+* correct "Exiting" message format in cleanup_sig(), which had unexpanded %d
+  (reported by BJP) - TD
+* add to config.hin the definitions set by AM_GNU_GETTEXT macro (PG pointed
+  out that this also sets 'inline', needed for GNU gettext) - TD
+* modify MakeNewTitle() to check for null pointer, fixing core dump with
+  verbose images when value[src_type] is null (reported by John Bley
+  <jbb6@acpub.duke.edu> for 2.8.1rel.2) - TD
 1998-11-18 (2.8.2dev.4)
 * change default for configure option of NLS (gettext) to disabled until we
   finish porting it to implementations other than GNU gettext.  Also,
@@ -15,15 +83,15 @@ Changes since Lynx 2.8.1 release
   function, which is described as "delete next character", but was in fact
   performing identically to ^D (LYE_DELC) "delete current character".  Added a
   function called LYE_DELEL, which does the expected thing, and deletes
-  from the current cursor position, to the EOL. 
+  from the current cursor position, to the EOL.
   New bindings:
-    ^B = LYE_BACK   cursor backwards 
-    ^F = LYE_FORW   cursor forwards 
-    ^K = LYE_DELEOL delete to end-of-line 
-    ^T = LYE_DELNW  delete next word 
-    ^X = LYE_DELPW  delete previous word 
+    ^B = LYE_BACK   cursor backwards
+    ^F = LYE_FORW   cursor forwards
+    ^K = LYE_DELEOL delete to end-of-line
+    ^T = LYE_DELNW  delete next word
+    ^X = LYE_DELPW  delete previous word
     ^^ = LYE_UPPER  upper case line (not active when kbd-layout binding is)
-    ^_ = LYE_LOWER  lower case line 
+    ^_ = LYE_LOWER  lower case line
   (Kim DeVaughn <kimdv@best.com>).
 * modify to show address to submit to on the statusline when in advanced user
   mode.  Also fixes one small typo in LYMainLoop.c.  (suggested by
@@ -35,14 +103,14 @@ Changes since Lynx 2.8.1 release
 * change some character constants from '\hex' and '\octal' form to decimal,
   to pursuade compilers that upper-128 compares are legal - TD
 * ifdef'd KEYBOARD_LAYOUT with EXP_KEYBOARD_LAYOUT, add configure option
-  --enable-kbd-layout.  Note that control/Y is used as a process suspend
-  character on some platforms (VMS and Solaris) - TD
+  --enable-kbd-layout - TD
 * implement EXP_CHARTRANS_AUTOSWITCH for OS/2 EMX (Sergey Svishchev).
 * add 'a' response when printing a file to allow append rather than overwrite
   (Sergey Svishchev).
 * add KEYBOARD_LAYOUT to lynx.cfg, to support character-translation on input,
   add missing line editing style selection to Options form.  This is enabled
-  and disabled by the line edit control/Y (Sergey Svishchev <svs@ropnet.ru>).
+  and disabled by the line edit control/uparrow (Sergey Svishchev
+  <svs@ropnet.ru>).
 * use exit_immediately() to reduce some signal-function clutter - LP
 * correct dependency in src/makefile.in for cfg_defs.h (Masashi Fujita
   <objectx@bandit.co.jp>)
@@ -51,8 +119,8 @@ Changes since Lynx 2.8.1 release
 * misc documentation updates for the gettext/internationalization - LP
 * rename po/makefile.in.in to po/makefile.inn, and modify distclean rule to
   remove the remaining generated files - TD
-* add preliminary changes from: pg@sweng.stortek.com to support port to OS/390,
-  some ifdef'd with __MVS__, some with EBCDIC and NOT_ASCII.
++ add preliminary changes from PG (pg@sweng.stortek.com) to support port to
+  OS/390, some ifdef'd with __MVS__, some with EBCDIC and NOT_ASCII.
 * modify LYCookies.c to accept cookies with no value, in case the site resets a
   cookie by nulling out the value (reported by Larry Virden) - BJP
 * modify cookie parsing to ignore comment lines beginning with a '#' (reported

@@ -398,7 +398,7 @@ PRIVATE void handle_entity ARGS2(
 	char,		term)
 {
     UCode_t code;
-    long uck;
+    long uck = -1;
     CONST char *p;
     CONST char *s = context->string->data;
 
@@ -481,7 +481,7 @@ PRIVATE void handle_entity ARGS2(
     /*
     **	If entity string not found, display as text.
     */
-    CTRACE(tfp, "SGML: Unknown entity '%s' %d %d\n", s, code, uck); /* S/390 -- gil -- 0695 */
+    CTRACE(tfp, "SGML: Unknown entity '%s' %ld %ld\n", s, (long)code, uck); /* S/390 -- gil -- 0695 */
     PUTC('&');
     for (p = s; *p; p++) {
 	PUTC(*p);
@@ -3325,7 +3325,7 @@ PUBLIC void JISx0201TO0208_SJIS ARGS3(
 {
     unsigned char SJCODE[2];
 
-    JISx0201TO0208_EUC('\216', I, OHI, OLO);
+    JISx0201TO0208_EUC(216, I, OHI, OLO);
     JIS_TO_SJIS1(*OHI&0x7F, *OLO&0x7F, SJCODE);
     *OHI = SJCODE[0];
     *OLO = SJCODE[1];

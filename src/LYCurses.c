@@ -344,7 +344,7 @@ PUBLIC void curses_w_style ARGS3(
 		    CTRACE(tfp,"........... %s (0x%x) %s\r\n",
 				"attribute cache FULL, dropping last",
 				last_styles[last_ptr],
-				"in LynxChangStyle(curses_w_style)");
+				"in LynxChangeStyle(curses_w_style)");
 		    last_ptr--;
 		}
 		last_styles[last_ptr++] = getattrs(stdscr);
@@ -750,16 +750,7 @@ PUBLIC void start_curses NOARGS
 	if (initscr() == NULL) {  /* start curses */
 	    fprintf(tfp, "%s\n",
 		gettext("Terminal initialisation failed - unknown terminal type?"));
-#ifndef NOSIGHUP
-	    (void) signal(SIGHUP, SIG_DFL);
-#endif /* !NOSIGHUP */
-	    (void) signal(SIGTERM, SIG_DFL);
-	    (void) signal(SIGINT, SIG_DFL);
-#ifdef SIGTSTP
-	    if (no_suspend)
-		(void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-	    exit (-1);
+	    exit_immediately (-1);
 	}
 #if defined(SIGWINCH) && defined(NCURSES_VERSION)
 	size_change(0);

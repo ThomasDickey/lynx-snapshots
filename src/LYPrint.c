@@ -447,7 +447,7 @@ PUBLIC int printfile ARGS1(
 		if ((outfile_fp = (TOUPPER(c) == 'A'
 			? LYAppendToTxtFile(buffer)
 			: LYNewTxtFile(buffer))) == NULL) {
-		    CTRACE(tfp, "LYPrint: error is %s\n", strerror(errno));
+		    CTRACE(tfp, "LYPrint: errno is %d\n", errno);
 		    HTAlert(CANNOT_WRITE_TO_FILE);
 		    _statusline(NEW_FILENAME_PROMPT);
 		    FirstRecall = TRUE;

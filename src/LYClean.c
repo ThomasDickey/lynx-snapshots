@@ -106,7 +106,7 @@ PUBLIC void cleanup_sig ARGS1(
 	}
 	if (sig != 0) {
 	    printf("\n\n%s %d\n\n",
-		   gettext("\n\nExiting via interrupt: %d\n\n"),
+		   gettext("Exiting via interrupt:"),
 		   sig);
 	    fflush(stdout);
 	}

@@ -69,9 +69,11 @@ PUBLIC void mailform ARGS4(
     int len, i, ch;
 #if defined(VMS) || defined(DOSPATH)
     char my_tmpfile[256];
-    char *address_ptr1, *address_ptr2;
     char *command = NULL;
+#ifdef VMS
+    char *address_ptr1, *address_ptr2;
     BOOLEAN first = TRUE;
+#endif
     BOOLEAN isPMDF = FALSE;
     char hdrfile[256];
     FILE *hfd;
@@ -595,9 +597,11 @@ PUBLIC void mailmsg ARGS4(
     char cmd[512], *cp, *cp0, *cp1;
 #if defined(VMS) || defined(DOSPATH)
     char my_tmpfile[256];
-    char *address_ptr1, *address_ptr2;
     char *command = NULL;
+#ifdef VMS
+    char *address_ptr1, *address_ptr2;
     BOOLEAN first = TRUE;
+#endif
     BOOLEAN isPMDF = FALSE;
     char hdrfile[256];
     FILE *hfd;
@@ -831,18 +835,7 @@ PUBLIC void mailmsg ARGS4(
 	if ((ofp = LYAppendToTxtFile(TRAVERSE_ERRORS)) == NULL) {
 	    if ((ofp = LYNewTxtFile(TRAVERSE_ERRORS)) == NULL) {
 		perror(NOOPEN_TRAV_ERR_FILE);
-#ifndef NOSIGHUP
-		(void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-		(void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-		(void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-		if (no_suspend)
-		    (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-		exit(-1);
+		exit_immediately(-1);
 	    }
 	}
 

@@ -32,6 +32,11 @@
 #define NO_FILIO_H
 #endif
 
+#if defined(__STDC__) || defined(VMS)
+#define ANSI_VARARGS
+#define HAVE_STDARGS_H
+#endif
+
 /* FIXME: these will be removed after completing auto-configure script */
 
 /* Accommodate pre-autoconf Makefile */
@@ -318,19 +323,19 @@ Sucess (>=0) and failure (<0) codes
 #define HT_BAD_EOF      -12             /* Premature EOF */
 
 #ifndef va_arg
-#if defined(__STDC__) || defined(VMS)
-#include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
+# if HAVE_STDARG_H
+#  include <stdarg.h>
+# else
+#  if HAVE_VARARGS_H
+#   include <varargs.h>
+#  endif
+# endif
 #endif
 
-#if defined(__STDC__) || defined(VMS)
+#if ANSI_VARARGS
 #define LYva_start(ap,format) va_start(ap,format)
-#define USE_STDARG_H 1
 #else
 #define LYva_start(ap,format) va_start(ap)
-#define USE_STDARG_H 0
 #endif
 
 /*

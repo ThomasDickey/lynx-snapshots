@@ -78,14 +78,14 @@ struct _HTStream {
     /* .... */
 };
 
-PRIVATE HTStyleSheet * styleSheet;	/* Application-wide */
+PRIVATE HTStyleSheet * styleSheet = NULL;	/* Application-wide */
 
 /*	Module-wide style cache
 */
 PRIVATE HTStyle *styles[HTML_ELEMENTS+31]; /* adding 24 nested list styles  */
 					   /* and 3 header alignment styles */
 					   /* and 3 div alignment styles    */
-PRIVATE HTStyle *default_style;
+PRIVATE HTStyle *default_style = NULL;
 
 PUBLIC char *LYToolbarName = "LynxPseudoToolbar";
 
@@ -108,7 +108,7 @@ PRIVATE void HTML_end_element PARAMS((HTStructured *me,
 
 PRIVATE char* MakeNewTitle PARAMS((CONST char ** value, int src_type));
 PRIVATE char* MakeNewImageValue PARAMS((CONST char ** value));
-PRIVATE char* MakeNewMapValue PARAMS((const char ** value, const char* mapstr));
+PRIVATE char* MakeNewMapValue PARAMS((CONST char ** value, CONST char* mapstr));
 
 /*	Set an internal flag that the next call to a stack-affecting method
 **	is only internal and the stack manipulation should be skipped. - kw
@@ -655,13 +655,13 @@ PRIVATE void HTML_start_element ARGS6(
 	UPDATE_STYLE;
     }
 
-    CTRACE(tfp, "me->tag_charset: %d -> ", me->tag_charset); 
+    CTRACE(tfp, "me->tag_charset: %d -> ", me->tag_charset);
     if (tag_charset < 0)
 	me->tag_charset = me->UCLYhndl;
     else
 	me->tag_charset = tag_charset;
-    CTRACE(tfp, "%d (me->UCLYhndl: %d, tag_charset: %d)\n",  
-	me->tag_charset, me->UCLYhndl, tag_charset); 
+    CTRACE(tfp, "%d (me->UCLYhndl: %d, tag_charset: %d)\n",
+	me->tag_charset, me->UCLYhndl, tag_charset);
 
 /* this should be done differently */
 #if defined(USE_COLOR_STYLE)
@@ -2737,10 +2737,12 @@ PRIVATE void HTML_start_element ARGS6(
 		if (*alt_string == '\0') {
 		    if (map_href) {
 			StrAllocCopy(alt_string, (title ? title :
-				     MakeNewMapValue(value,"USEMAP")));
+				     (temp = MakeNewMapValue(value,"USEMAP"))));
+			FREE(temp);
 		    } else if (dest_ismap) {
 			StrAllocCopy(alt_string, (title ? title :
-				     MakeNewMapValue(value,"ISMAP")));
+				     (temp = MakeNewMapValue(value,"ISMAP"))));
+			FREE(temp);
 
 		    } else if (me->inA == TRUE && dest) {
 			StrAllocCopy(alt_string, (title ?
@@ -2760,12 +2762,14 @@ PRIVATE void HTML_start_element ARGS6(
 
 	} else if (map_href) {
 	    StrAllocCopy(alt_string, (title ? title :
-				      MakeNewMapValue(value,"USEMAP")));
+				      (temp = MakeNewMapValue(value,"USEMAP"))));
+	    FREE(temp);
 
 	} else if ((dest_ismap == TRUE) ||
 		   (me->inA && present && present[HTML_IMG_ISMAP])) {
 	    StrAllocCopy(alt_string, (title ? title :
-				      MakeNewMapValue(value,"ISMAP")));
+				      (temp = MakeNewMapValue(value,"ISMAP"))));
+	    FREE(temp);
 
 	} else if (me->inA == TRUE && dest) {
 	    StrAllocCopy(alt_string, (title ?
@@ -2784,7 +2788,8 @@ PRIVATE void HTML_start_element ARGS6(
 					  title : ""));
 	}
 	if (*alt_string == '\0' && map_href) {
-	    StrAllocCopy(alt_string, MakeNewMapValue(value,"USEMAP"));
+	    StrAllocCopy(alt_string, (temp = MakeNewMapValue(value,"USEMAP")));
+	    FREE(temp);
 	}
 
 	CTRACE(tfp, "HTML IMG: USEMAP=%d ISMAP=%d ANCHOR=%d PARA=%d\n",
@@ -2846,7 +2851,8 @@ PRIVATE void HTML_start_element ARGS6(
 		    if (dest_ismap) {
 			HTML_put_character(me, ' ');
 			me->in_word = NO;
-			HTML_put_string(me, MakeNewMapValue(value,"ISMAP"));
+			HTML_put_string(me, (temp = MakeNewMapValue(value,"ISMAP")));
+			FREE(temp);
 		    } else if (dest) {
 			HTML_put_character(me, ' ');
 			me->in_word = NO;
@@ -2902,6 +2908,7 @@ PRIVATE void HTML_start_element ARGS6(
 		HText_endAnchor(me->text, me->CurrentANum);
 		me->CurrentANum = 0;
 		HTML_put_character(me, '-');
+		FREE(newtitle);
 		StrAllocCopy(alt_string,
 			     ((present &&
 			       present[HTML_IMG_ISOBJECT]) ?
@@ -2958,6 +2965,7 @@ PRIVATE void HTML_start_element ARGS6(
 		HText_endAnchor(me->text, me->CurrentANum);
 		me->CurrentANum = 0;
 		HTML_put_character(me, '-');
+		FREE(newtitle);
 		StrAllocCopy(alt_string,
 			     ((present &&
 			       present[HTML_IMG_ISOBJECT]) ?
@@ -3014,7 +3022,8 @@ PRIVATE void HTML_start_element ARGS6(
 		if (dest_ismap) {
 		    HTML_put_character(me, ' ');/* space char may be ignored */
 		    me->in_word = NO;
-		    HTML_put_string(me, MakeNewMapValue(value,"ISMAP"));
+		    HTML_put_string(me, (temp = MakeNewMapValue(value,"ISMAP")));
+		    FREE(temp);
 		} else if (dest) {
 		    HTML_put_character(me, ' ');/* space char may be ignored */
 		    me->in_word = NO;
@@ -4400,7 +4409,7 @@ PRIVATE void HTML_start_element ARGS6(
 		 *  We have a TYPE="image" with a non-zero-length SRC
 		 *  attribute and want clickable images.  Make the
 		 *  SRC's value a link if it's still not zero-length
-		 *  legitiimizing it. - FM
+		 *  legitimizing it. - FM
 		 */
 		url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 		if (*href) {
@@ -4438,6 +4447,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    if (me->inBoldH == FALSE)
 			HText_appendCharacter(me->text, LY_BOLD_START_CHAR);
 		    HTML_put_string(me, VERBOSE_IMG(value,HTML_INPUT_SRC,"[IMAGE]"));
+		    FREE(newtitle);
 		    if (me->inBoldH == FALSE)
 			HText_appendCharacter(me->text, LY_BOLD_END_CHAR);
 		    HText_endAnchor(me->text, 0);
@@ -4689,6 +4699,7 @@ PRIVATE void HTML_start_element ARGS6(
 		}
 	    }
 	    HText_setIgnoreExcess(me->text, FALSE);
+	    FREE(ImageSrc);
 	    FREE(I_value);
 	    FREE(I_name);
 	}
@@ -7460,7 +7471,10 @@ PRIVATE char * MakeNewTitle ARGS2(CONST char **, value, int, src_type)
     char *newtitle = NULL;
 
     StrAllocCopy(newtitle, "[");
-    ptr = strrchr(value[src_type], '/');
+    if (value != 0 && value[src_type] != 0)
+	ptr = strrchr(value[src_type], '/');
+    else
+	ptr = 0;
     if (!ptr) {
 	StrAllocCat(newtitle, value[src_type]);
     } else {
@@ -7486,7 +7500,7 @@ PRIVATE char * MakeNewImageValue ARGS1(CONST char **, value)
     return newtitle;
 }
 
-PRIVATE char * MakeNewMapValue ARGS2(const char **, value, const char*, mapstr)
+PRIVATE char * MakeNewMapValue ARGS2(CONST char **, value, CONST char*, mapstr)
 {
     char *ptr;
     char *newtitle = NULL;

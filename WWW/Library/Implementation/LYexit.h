@@ -47,6 +47,7 @@
 /*
  *	Function declarations
  */
+extern void exit_immediately PARAMS((int status));  /* in LYMain.c */
 extern void LYexit PARAMS((int status));
 #ifdef __STDC__
 extern int LYatexit(void (*function)(void));

@@ -69,12 +69,18 @@
  gettext("(Radio Button)   Use right-arrow or <return> to toggle.")
 #define FORM_LINK_RADIO_UNM_MSG \
  gettext("UNMODIFIABLE form radio button.  Use UP or DOWN arrows or tab to move off.")
+#define FORM_LINK_SUBMIT_PREFIX \
+ gettext("Submit ('x' for no cache) to ")
+#define FORM_LINK_RESUBMIT_PREFIX \
+ gettext("Submit to ")
 #define FORM_LINK_SUBMIT_MESSAGE \
  gettext("(Form submit button) Use right-arrow or <return> to submit ('x' for no cache).")
 #define FORM_LINK_RESUBMIT_MESSAGE \
  gettext("(Form submit button) Use right-arrow or <return> to submit.")
 #define FORM_LINK_SUBMIT_DIS_MSG \
  gettext("DISABLED form submit button.  Use UP or DOWN arrows or tab to move off.")
+#define FORM_LINK_SUBMIT_MAILTO_PREFIX \
+ gettext("Submit mailto form to ")
 #define FORM_LINK_SUBMIT_MAILTO_MSG \
  gettext("(mailto form submit button) Use right-arrow or <return> to submit.")
 #define FORM_LINK_SUBMIT_MAILTO_DIS_MSG \

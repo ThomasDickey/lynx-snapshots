@@ -53,14 +53,14 @@ extern char * HTNextField PARAMS ((char** pstr));
 extern char * HTNextTok PARAMS((char ** pstr,
 		      CONST char * delims, CONST char * bracks, char * found));
 
-#if USE_STDARG_H
+#if ANSI_VARARGS
 extern char * HTSprintf PARAMS((char ** pstr, CONST char * fmt, ...))
 			GCC_PRINTFLIKE(2,3);
 extern char * HTSprintf0 PARAMS((char ** pstr, CONST char * fmt, ...))
 			 GCC_PRINTFLIKE(2,3);
 #else
-extern char * HTSprintf PARAMS((char ** pstr, CONST char * fmt, va_alist));
-extern char * HTSprintf0 PARAMS((char ** pstr, CONST char * fmt, va_alist));
+extern char * HTSprintf () GCC_PRINTFLIKE(2,3);
+extern char * HTSprintf0 () GCC_PRINTFLIKE(2,3);
 #endif
 
 #endif /* HTSTRING_H */

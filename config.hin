@@ -3,6 +3,7 @@
 #define LYNX_CFG_H 1
 
 #undef ALT_CHAR_SET		/* CF_ALT_CHAR_SET */
+#undef ANSI_VARARGS		/* CF_VARARGS */
 #undef ARCHIVE_ONLY		/* CF_ARG_DISABLE(dired-archive) */
 #undef CHMOD_PATH		/* CF_PATH_PROG(chmod) */
 #undef COLOR_CURSES		/* defined by CF_COLOR_CURSES */
@@ -30,11 +31,14 @@
 #undef GCC_UNUSED		/* CF_GCC_ATTRIBUTES */
 #undef GETGROUPS_T		/* AC_TYPE_GETGROUPS */
 #undef GZIP_PATH		/* CF_PATH_PROG(gzip) */
+#undef HAVE_ALLOCA		/* defined by AM_GNU_GETTEXT */
+#undef HAVE_ALLOCA_H		/* defined by AM_GNU_GETTEXT */
+#undef HAVE_ARGZ_H		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_CATGETS		/* defined if you want to use non-GNU catgets */
 #undef HAVE_CBREAK
 #undef HAVE_CURSESX_H
 #undef HAVE_CUSERID
-#undef HAVE_DCGETTEXT
+#undef HAVE_DCGETTEXT		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_DEFINE_KEY
 #undef HAVE_DIRENT_H		/* defined by AC_HEADER_DIRENT */
 #undef HAVE_FCNTL_H		/* have <fcntl.h> */
@@ -49,12 +53,21 @@
 #undef HAVE_LIMITS_H
 #undef HAVE_LOCALE_H
 #undef HAVE_LSTAT		/* defined by CF_FUNC_LSTAT */
+#undef HAVE_MALLOC_H		/* defined by AM_GNU_GETTEXT */
+#undef HAVE_MMAP		/* defined by AM_GNU_GETTEXT */
+#undef HAVE_MUNMAP		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_NCURSES_H		/* defined if we include <ncurses.h> */
+#undef HAVE_NL_TYPES_H		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_PUTENV
 #undef HAVE_READDIR
+#undef HAVE_SETENV		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_SETLOCALE
 #undef HAVE_SIZECHANGE		/* defined by CF_SIZECHANGE */
+#undef HAVE_STDARG_H		/* CF_VARARGS */
 #undef HAVE_STDLIB_H
+#undef HAVE_STPCPY		/* defined by AM_GNU_GETTEXT */
+#undef HAVE_STRCASECMP		/* defined by AM_GNU_GETTEXT */
+#undef HAVE_STRCHR		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_STRERROR
 #undef HAVE_STRING_H
 #undef HAVE_SYS_DIR_H		/* defined by AC_HEADER_DIRENT */
@@ -62,6 +75,7 @@
 #undef HAVE_SYS_FILIO_H		/* have <sys/filio.h> */
 #undef HAVE_SYS_IOCTL_H		/* have <sys/ioctl.h> */
 #undef HAVE_SYS_NDIR_H		/* defined by AC_HEADER_DIRENT */
+#undef HAVE_SYS_PARAM_H		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_SYS_WAIT_H		/* have <sys/wait.h> */
 #undef HAVE_TERMIOS_H		/* have <termios.h> */
 #undef HAVE_TERMIO_H		/* have <termio.h> */
@@ -70,8 +84,13 @@
 #undef HAVE_UNISTD_H		/* have <unistd.h> */
 #undef HAVE_USE_DEFAULT_COLORS	/* ncurses extension */
 #undef HAVE_UTMP
+#undef HAVE_VALUES_H		/* defined by AM_GNU_GETTEXT */
+#undef HAVE_VARARGS_H		/* CF_VARARGS */
 #undef HAVE_WAITPID
 #undef HAVE_WBORDER
+#undef HAVE___ARGZ_COUNT	/* defined by AM_GNU_GETTEXT */
+#undef HAVE___ARGZ_NEXT		/* defined by AM_GNU_GETTEXT */
+#undef HAVE___ARGZ_STRINGIFY	/* defined by AM_GNU_GETTEXT */
 #undef IGNORE_CTRL_C		/* FIXME: make tests? */
 #undef INSTALL_ARGS		/* CF_PATH_PROG(install) */
 #undef INSTALL_PATH		/* CF_PATH_PROG(install) */
@@ -137,7 +156,9 @@
 #undef ZIP_PATH			/* CF_PATH_PROG(zip) */
 #undef _ALL_SOURCE		/* AC_AIX */
 #undef const			/* defined by AC_C_CONST */
+#undef inline			/* defined by AC_C_INLINE */
 #undef mode_t			/* defined by AC_TYPE_MODE_T */
+#undef off_t			/* defined by AC_TYPE_OFF_T */
 #undef pid_t			/* defined by AC_TYPE_PID_T */
 #undef uid_t			/* defined by AC_TYPE_UID_T */
 #undef vfork			/* defined by AC_FUNC_FORK */

@@ -72,18 +72,20 @@ __argz_count __argz_stringify __argz_next])
    dnl Determine which catalog format we have (if any is needed)
    dnl For now we know about two different formats:
    dnl   Linux libc-5 and the normal X/Open format
-   test -d intl || mkdir intl
-   if test "$CATOBJEXT" = ".cat"; then
-     AC_CHECK_HEADER(linux/version.h, msgformat=linux, msgformat=xopen)
+   if test "$USE_NLS" = "yes"; then
+     test -d intl || mkdir intl
+     if test "$CATOBJEXT" = ".cat"; then
+       AC_CHECK_HEADER(linux/version.h, msgformat=linux, msgformat=xopen)
 
-     dnl Transform the SED scripts while copying because some dumb SEDs
-     dnl cannot handle comments.
-     sed -e '/^#/d' $srcdir/intl/$msgformat-msg.sed > intl/po2msg.sed
+       dnl Transform the SED scripts while copying because some dumb SEDs
+       dnl cannot handle comments.
+       sed -e '/^#/d' $srcdir/intl/$msgformat-msg.sed > intl/po2msg.sed
+     fi
+     dnl po2tbl.sed is always needed.
+     rm -f intl/po2tbl.sed
+     sed -e '/^#.*[^\\]$/d' -e '/^#$/d' \
+       $srcdir/intl/po2tbl.sed.in > intl/po2tbl.sed
    fi
-   dnl po2tbl.sed is always needed.
-   rm -f intl/po2tbl.sed
-   sed -e '/^#.*[^\\]$/d' -e '/^#$/d' \
-     $srcdir/intl/po2tbl.sed.in > intl/po2tbl.sed
 
    dnl In the intl/makefile.in we have a special dependency which only
    dnl makes sense for gettext.  We comment this out for non-gettext
@@ -117,7 +119,6 @@ __argz_count __argz_stringify __argz_next])
 
    dnl Generate list of files to be processed by xgettext which will
    dnl be included in po/makefile.
-   test -d po || mkdir po
    if test "x$srcdir" != "x."; then
      if test "x`echo $srcdir | sed 's@/.*@@'`" = "x"; then
        posrcprefix="$srcdir/"
@@ -127,11 +128,13 @@ __argz_count __argz_stringify __argz_next])
    else
      posrcprefix="../"
    fi
-   rm -f po/POTFILES
-   sed -e "/^#/d" -e "/^\$/d" -e "s,.*,	$posrcprefix& \\\\," -e "\$s/\(.*\) \\\\/\1/" \
-	< $srcdir/po/POTFILES.in > po/POTFILES
-  ])
-
+   if test "$USE_NLS" = "yes"; then
+     test -d po || mkdir po
+     rm -f po/POTFILES
+     sed -e "/^#/d" -e "/^\$/d" -e "s,.*,	$posrcprefix& \\\\," -e "\$s/\(.*\) \\\\/\1/" \
+	  < $srcdir/po/POTFILES.in > po/POTFILES
+   fi
+])dnl
 dnl ---------------------------------------------------------------------------
 dnl
 dnl Check whether LC_MESSAGES is available in <locale.h>.
@@ -2019,6 +2022,30 @@ AC_MSG_RESULT($cf_cv_have_utmp)
 test $cf_cv_have_utmp != no && AC_DEFINE(HAVE_UTMP)
 test $cf_cv_have_utmp = utmpx && AC_DEFINE(UTMPX_FOR_UTMP)
 ])
+dnl ---------------------------------------------------------------------------
+dnl Check for ANSI stdarg.h vs varargs.h.  Note that some systems include
+dnl <varargs.h> within <stdarg.h>.
+AC_DEFUN([CF_VARARGS],
+[
+AC_CHECK_HEADERS(stdarg.h varargs.h)
+AC_MSG_CHECKING(for standard varargs)
+AC_CACHE_VAL(cf_cv_ansi_varargs,[
+	AC_TRY_COMPILE([
+#if HAVE_STDARG_H
+#include <stdarg.h>
+#else
+#if HAVE_VARARGS_H
+#include <varargs.h>
+#endif
+#endif
+		],
+		[return 0;} int foo(char *fmt,...){va_list args;va_start(args,fmt);va_end(args)],
+		[cf_cv_ansi_varargs=yes],
+		[cf_cv_ansi_varargs=no])
+	])
+AC_MSG_RESULT($cf_cv_ansi_varargs)
+test $cf_cv_ansi_varargs = yes && AC_DEFINE(ANSI_VARARGS)
+])dnl
 dnl ---------------------------------------------------------------------------
 dnl Use AC_VERBOSE w/o the warnings
 AC_DEFUN([CF_VERBOSE],

@@ -75,7 +75,7 @@ PUBLIC BOOLEAN UseFixedRecords = USE_FIXED_RECORDS;
 #endif /* VMS */
 
 #ifndef VMS
-PUBLIC char *lynx_version_putenv_command = NULL;
+PRIVATE char *lynx_version_putenv_command = NULL;
 PUBLIC char *list_format = NULL;	/* LONG_LIST formatting mask */
 #ifdef SYSLOG_REQUESTED_URLS
 PUBLIC char *syslog_txt = NULL; 	/* syslog arb text for session */
@@ -461,6 +461,9 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(LynxSigFile);
     FREE(system_mail);
     FREE(system_mail_flags);
+#ifdef EXP_PERSISTENT_COOKIES
+    FREE(LYCookieFile);
+#endif
     FREE(LYUserAgent);
     FREE(LYUserAgentDefault);
     FREE(LYHostName);
@@ -482,14 +485,23 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(lynxjumpfile);
     FREE(startrealm);
     FREE(personal_mail_address);
+    FREE(UC_TEMPcharset);
     FREE(URLDomainPrefixes);
     FREE(URLDomainSuffixes);
     FREE(XLoadImageCommand);
     FREE(LYTraceLogPath);
+    FREE(lynx_cfg_file);
 #if defined(USE_HASH)
     FREE(lynx_lss_file);
 #endif
     FREE(UCAssume_MIMEcharset);
+    {
+	char *p = LYlist_temp_url();
+	if (p && *p) {
+	    *p = '\0';
+	    FREE(p);
+	}
+    }
     for (i = 0; i < nlinks; i++) {
 	FREE(links[i].lname);
     }

@@ -411,6 +411,7 @@ AC_CHECK_HEADERS( \
 )
 CF_TERMIO_AND_TERMIOS
 CF_FUNC_WAIT
+CF_VARARGS
 AC_TYPE_GETGROUPS
 AC_TYPE_PID_T
 AC_TYPE_UID_T
@@ -792,7 +793,8 @@ AC_OUTPUT(
 	if test "$USE_NLS" = yes ; then
 		echo creating po/makefile
 		rm -f	po/temp$$
-		sed	-e '$s/\\//' po/POTFILES >po/temp$$
+		sed	-e 's@^.*LYMessages.c@../LYMessages.c@' \
+			-e '$s/\\//' po/POTFILES >po/temp$$
 		sed	-e "/POTFILES =/r po/temp$$" \
 			po/makefile.in > po/makefile
 		rm -f	po/temp$$
