@@ -305,14 +305,34 @@ try_again:
 	  StrAllocCat(command, line);
       }
 
+#if 0
       /*
       **  Promote 300 (Multiple Choices) replies, if supported,
       **  over 406 (Not Acceptable) replies. - FM
+      **
+      **  This used to be done in versions 2.7 and 2.8*, but violates
+      **  the specs for transparent content negotiation and has the
+      **  effect that servers supporting those specs will send 300
+      **  (Multiple Choices) instead of a normal response (e.g. 200 OK),
+      **  since they will assume that the client wants to make the
+      **  choice.  It is not clear whether there are any servers or sites
+      **  for which sending this header really improves anything.
+      **
+      **  If there ever is a need to send "Negotiate: trans" and really
+      **  mean it, we should send "Negotiate: trans,trans" or similar,
+      **  since that is semantically equivalent and some servers may
+      **  ignore "Negotiate: trans" as a special case when it comes from
+      **  Lynx (to work around the old faulty behavior). - kw
+      **
+      **  References:
+      **  RFC 2295 (see also RFC 2296), and mail to lynx-dev and
+      **  new-httpd@apache.org from Koen Holtman, Jan 1999.
       */
       if (!do_post) {
 	  sprintf(line, "Negotiate: trans%c%c", CR, LF);
 	  StrAllocCat(command, line);
       }
+#endif /* 0 */
 
       /*
       **  When reloading give no-cache pragma to proxy server to make

@@ -58,11 +58,12 @@ struct _HTStream
 PRIVATE char **env = NULL;  /* Environment variables */
 PRIVATE int envc_size = 0;  /* Slots in environment array */
 PRIVATE int envc = 0;	    /* Slots used so far */
+PRIVATE HTList *alloced = NULL;
 #ifdef LYNXCGI_LINKS
-PRIVATE char *user_agent;
-PRIVATE char *server_software;
-PRIVATE char *accept_language;
-PRIVATE char *post_len;
+PRIVATE char *user_agent = NULL;
+PRIVATE char *server_software = NULL;
+PRIVATE char *accept_language = NULL;
+PRIVATE char *post_len = NULL;
 #endif /* LYNXCGI_LINKS */
 
 PRIVATE void add_environment_value PARAMS((char *env_value));
@@ -80,6 +81,29 @@ PRIVATE char *LYStrerror ARGS1(int, code)
 }
 #endif /* HAVE_STRERROR */
 
+PRIVATE void free_alloced_lynxcgi NOARGS
+{
+    void *ptr;
+    while ((ptr = HTList_removeLastObject(alloced)) != NULL) {
+	FREE(ptr);
+    }
+    FREE(alloced);
+#ifdef LYNXCGI_LINKS
+    FREE(user_agent);
+    FREE(server_software);
+#endif
+}
+
+PRIVATE void remember_alloced ARGS1(
+    void *,		ptr)
+{
+    if (!alloced) {
+	alloced = HTList_new();
+	atexit(free_alloced_lynxcgi);
+    }
+    HTList_addObject(alloced, ptr);
+}
+
 /*
  * Simple routine for expanding the environment array and adding a value to
  * it
@@ -89,13 +113,15 @@ PRIVATE void add_environment_value ARGS1(
 {
     if (envc == envc_size) {   /* Need some more slots */
 	envc_size += 10;
-	if (env)
+	if (env) {
 	    env = (char **)realloc(env,
 				   sizeof(env[0]) * (envc_size + 2));
 						/* + terminator and base 0 */
-	else
+	} else {
 	    env = (char **)malloc(sizeof(env[0]) * (envc_size + 2));
 						/* + terminator and base 0 */
+	    remember_alloced(env);
+	}
 	if (env == NULL) {
 	    outofmem(__FILE__, "LYCgi");
 	}
@@ -127,6 +153,7 @@ PUBLIC void add_lynxcgi_environment ARGS1(
 	strcat(add_value, "=");
 	strcat(add_value, env_value);
 	add_environment_value(add_value);
+	remember_alloced(add_value);
     }
 }
 
@@ -464,10 +491,12 @@ PRIVATE int LYLoadCGI ARGS4(
 		dup2(fd2[1], fileno(stderr));
 		close(fd2[1]);
 
+		if (language && *language) {
 		HTSprintf0(&accept_language, "HTTP_ACCEPT_LANGUAGE=%s", language);
 		add_environment_value(accept_language);
+		}
 
-		if (pref_charset) {
+		if (pref_charset && *pref_charset) {
 		    cp = NULL;
 		    StrAllocCopy(cp, "HTTP_ACCEPT_CHARSET=");
 		    StrAllocCat(cp, pref_charset);

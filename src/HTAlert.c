@@ -30,9 +30,32 @@ PUBLIC void HTAlert ARGS1(
 {
     CTRACE(tfp, "\nAlert!: %s\n\n", Msg);
     CTRACE_FLUSH(tfp);
-    _user_message("Alert!: %s", Msg);
+    _user_message(ALERT_FORMAT, Msg);
 
     sleep(AlertSecs);
+}
+
+PUBLIC void HTAlwaysAlert ARGS2(
+	CONST char *,	extra_prefix,
+	CONST char *,	Msg)
+{
+    if (!dump_output_immediately && LYCursesON) {
+	HTAlert(Msg);
+    } else {
+	if (extra_prefix) {
+	    fprintf(((TRACE) ? stdout : stderr),
+		    "%s %s!\n",
+		    extra_prefix, Msg);
+	} else {
+	    fprintf(((TRACE) ? stdout : stderr),
+		    ALERT_FORMAT,
+		    (Msg == 0) ? "" : Msg);
+	}
+	fflush(stdout);
+	sleep(AlertSecs);
+	CTRACE(tfp, "\nAlert!: %s\n\n", Msg);
+	CTRACE_FLUSH(tfp);
+    }
 }
 
 /*	Issue an informational message.			HTInfoMsg()

@@ -592,7 +592,7 @@ dnl in the first test, but most compilers will oblige with an error in the
 dnl second test.
 dnl
 dnl CF_CHECK_FUNCDECL(INCLUDES, FUNCTION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
-AC_DEFUN(CF_CHECK_FUNCDECL,
+AC_DEFUN([CF_CHECK_FUNCDECL],
 [
 AC_MSG_CHECKING([for $2 declaration])
 AC_CACHE_VAL(ac_cv_func_decl_$2,
@@ -621,7 +621,7 @@ dnl Check if functions are declared by including a set of include files.
 dnl and define DECL_XXX if not.
 dnl
 dnl CF_CHECK_FUNCDECLS(INCLUDES, FUNCTION... [, ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
-AC_DEFUN(CF_CHECK_FUNCDECLS,
+AC_DEFUN([CF_CHECK_FUNCDECLS],
 [for ac_func in $2
 do
 CF_CHECK_FUNCDECL([$1], $ac_func,
@@ -682,7 +682,7 @@ hpux10.*)
 		])])
 	;;
 linux*) # Suse Linux does not follow /usr/lib convention
-	$1="[$]$1 /lib"
+	LIBS="$LIBS -L/lib"
 	;;
 esac
 
@@ -823,7 +823,7 @@ AC_SUBST(ECHO_CC)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check whether character set is EBCDIC.
-AC_DEFUN(CF_EBCDIC,[
+AC_DEFUN([CF_EBCDIC],[
 AC_MSG_CHECKING(if character set is EBCDIC)
 AC_CACHE_VAL(cf_cv_ebcdic,[
 	AC_TRY_COMPILE([ ],
@@ -915,7 +915,7 @@ if test $cf_cv_have_lib_$1 = no ; then
 fi
 case $host_os in #(vi
 linux*) # Suse Linux does not follow /usr/lib convention
-	$1="[$]$1 /lib"
+	LIBS="$LIBS -L/lib"
 	;;
 esac
 ])dnl
@@ -1199,6 +1199,7 @@ else
 	if test "$cf_cv_lib_inet_addr" != no ; then
 	    LIBS="$LIBS $cf_cv_lib_inet_addr"
 	else
+	    LIBS="$cf_save_LIBS"
 	    AC_MSG_WARN(Unable to find library for inet_addr function)
 	fi
     fi
@@ -1573,6 +1574,22 @@ fi
 ])
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl Check if we use the messages included with this program
+AC_DEFUN([CF_OUR_MESSAGES],
+[
+use_our_messages=no
+if test -d $srcdir/po ; then
+AC_MSG_CHECKING(if we should use included message-library)
+	AC_ARG_ENABLE(included-msgs,
+	[  --enable-included-msgs  use included messages, for i18n support],
+	[use_our_messages=$enableval],
+	[use_our_messages=yes])
+fi
+AC_MSG_RESULT($use_our_messages)
+test $use_our_messages = yes && USE_OUR_MESSAGES=
+AC_SUBST(USE_OUR_MESSAGES)
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Check for a given program, defining corresponding symbol.
 dnl	$1 = environment variable, which is suffixed by "_PATH" in the #define.
 dnl	$2 = program name to find.
@@ -1936,8 +1953,8 @@ dnl ---------------------------------------------------------------------------
 dnl Look for termcap libraries, or the equivalent in terminfo.
 AC_DEFUN([CF_TERMCAP_LIBS],
 [
-AC_CACHE_VAL(cf_cv_lib_termcap,[
-cf_cv_lib_termcap=none
+AC_CACHE_VAL(cf_cv_termlib,[
+cf_cv_termlib=none
 AC_TRY_LINK([],[char *x=(char*)tgoto("",0,0)],
 [AC_TRY_LINK([],[int x=tigetstr("")],
 	[cf_cv_termlib=terminfo],
@@ -1952,25 +1969,25 @@ if test "$1" = ncurses; then
 fi
 ])
 # HP-UX 9.x terminfo has setupterm, but no tigetstr.
-if test "$termlib" = none; then
-	AC_CHECK_LIB(termlib, tigetstr, [LIBS="$LIBS -ltermlib" cf_cv_lib_termcap=terminfo])
+if test "$cf_cv_termlib" = none; then
+	AC_CHECK_LIB(termlib, tigetstr, [LIBS="$LIBS -ltermlib" cf_cv_termlib=terminfo])
 fi
-if test "$cf_cv_lib_termcap" = none; then
-	AC_CHECK_LIB(termlib, tgoto, [LIBS="$LIBS -ltermlib" cf_cv_lib_termcap=termcap])
+if test "$cf_cv_termlib" = none; then
+	AC_CHECK_LIB(termlib, tgoto, [LIBS="$LIBS -ltermlib" cf_cv_termlib=termcap])
 fi
-if test "$cf_cv_lib_termcap" = none; then
+if test "$cf_cv_termlib" = none; then
 	# allow curses library for broken AIX system.
-	AC_CHECK_LIB(curses, initscr, [LIBS="$LIBS -lcurses" cf_cv_lib_termcap=termcap])
-	AC_CHECK_LIB(termcap, tgoto, [LIBS="$LIBS -ltermcap" cf_cv_lib_termcap=termcap])
+	AC_CHECK_LIB(curses, initscr, [LIBS="$LIBS -lcurses" cf_cv_termlib=termcap])
+	AC_CHECK_LIB(termcap, tgoto, [LIBS="$LIBS -ltermcap" cf_cv_termlib=termcap])
 fi
-if test "$cf_cv_lib_termcap" = none; then
-	AC_CHECK_LIB(termcap, tgoto, [LIBS="$LIBS -ltermcap" cf_cv_lib_termcap=termcap])
+if test "$cf_cv_termlib" = none; then
+	AC_CHECK_LIB(termcap, tgoto, [LIBS="$LIBS -ltermcap" cf_cv_termlib=termcap])
 fi
-if test "$cf_cv_lib_termcap" = none; then
-	AC_CHECK_LIB(ncurses, tgoto, [LIBS="$LIBS -lncurses" cf_cv_lib_termcap=ncurses])
+if test "$cf_cv_termlib" = none; then
+	AC_CHECK_LIB(ncurses, tgoto, [LIBS="$LIBS -lncurses" cf_cv_termlib=ncurses])
 fi
 ])
-if test "$cf_cv_lib_termcap" = none; then
+if test "$cf_cv_termlib" = none; then
 	AC_ERROR([Can't find -ltermlib, -lcurses, or -ltermcap])
 fi
 ])])dnl

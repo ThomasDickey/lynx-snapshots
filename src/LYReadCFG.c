@@ -1,4 +1,8 @@
+#ifndef NO_RULES
+#include <HTRules.h>
+#else
 #include <HTUtils.h>
+#endif
 #include <HTFile.h>
 #include <UCMap.h>
 
@@ -708,6 +712,41 @@ static int news_posting_fun ARGS1(
     return 0;
 }
 
+#ifndef NO_RULES
+static int cern_rulesfile_fun ARGS1(
+	char *, 	value)
+{
+    char *rulesfile1 = NULL;
+    char *rulesfile2 = NULL;
+    if (HTLoadRules(value) >= 0) {
+	return 0;
+    }
+    StrAllocCopy(rulesfile1, value);
+    LYTrimLeading(value);
+    LYTrimTrailing(value);
+    if (!strncmp(value, "~/", 2)) {
+	StrAllocCopy(rulesfile2, Home_Dir());
+	StrAllocCat(rulesfile2, value+1);
+    }
+    else {
+	StrAllocCopy(rulesfile2, value);
+    }
+    if (strcmp(rulesfile1, rulesfile2) &&
+	HTLoadRules(rulesfile2) >= 0) {
+	FREE(rulesfile1);
+	FREE(rulesfile2);
+	return 0;
+    }
+    fprintf(stderr,
+	    gettext(
+		"Lynx: cannot start, CERN rules file %s is not available\n"
+		),
+	    (rulesfile2 && *rulesfile2) ? rulesfile2 : gettext("(no name)"));
+    exit_immediately(69);	/* EX_UNAVAILABLE in sysexits.h */
+    return 0;			/* though redundant, for compiler-warnings */
+}
+#endif /* NO_RULES */
+
 static int printer_fun ARGS1(
 	char *, 	value)
 {
@@ -929,6 +968,10 @@ static Config_Type Config_Table [] =
      PARSE_SET("prepend_charset_to_source", CONF_BOOL, LYPrependCharsetToSource),
      PARSE_FUN("printer", CONF_FUN, printer_fun),
      PARSE_SET("quit_default_yes", CONF_BOOL, LYQuitDefaultYes),
+#ifndef NO_RULES
+     PARSE_STR("rule", CONF_FUN, HTSetConfiguration),
+     PARSE_STR("rulesfile", CONF_FUN, cern_rulesfile_fun),
+#endif /* NO_RULES */
      PARSE_STR("save_space", CONF_STR, lynx_save_space),
      PARSE_SET("scan_for_buried_news_refs", CONF_BOOL, scan_for_buried_news_references),
      PARSE_SET("seek_frag_area_in_cur", CONF_BOOL, LYSeekFragAREAinCur),

@@ -25,6 +25,7 @@
 #include <HTTP.h>
 #include <HTFile.h>
 
+#include <HTTCP.h>
 #include <HText.h>
 
 #include <HTAccess.h>
@@ -88,6 +89,18 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	if (!hostname || *hostname == '\0') {
 	    CTRACE(tfp, "HTTelnet: No host specified!\n");
 	    return HT_NO_DATA;
+	} else if (!valid_hostname(hostname)) {
+	    char *prefix = NULL;
+	    char *line = NULL;
+	    CTRACE(tfp, "HTTelnet: Invalid hostname %s!\n", host);
+	    HTSprintf0(&prefix,
+		       gettext("remote %s session:"), acc_method);
+	    HTSprintf0(&line,
+		       gettext("Invalid hostname %s"), host);
+	    HTAlwaysAlert(prefix, line);
+	    FREE(prefix);
+	    FREE(line);
+	    return HT_NO_DATA;
 	}
 
 	if (user) {
@@ -131,6 +144,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	    printf("When you are connected, log in as:  %s\n", user);
 	if (password && login_protocol != rlogin)
 	    printf("                  The password is:  %s\n", password);
+	fflush(stdout);
 
 /*
  *	NeXTSTEP is the implied version of the NeXT operating system.

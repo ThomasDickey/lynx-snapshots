@@ -465,6 +465,12 @@ PUBLIC char * LYLeakSACopy ARGS4(
 	CONST char *,	cp_File,
 	CONST short,	ssi_Line)
 {
+    if (src != NULL && src == *dest) {
+	CTRACE(tfp,
+	       "LYLeakSACopy: *dest equals src, contains \"%s\"\n",
+	       src);
+	return *dest;
+    }
     if (*dest) {
 	LYLeakFree(*dest, cp_File, ssi_Line);
 	*dest = NULL;
@@ -490,6 +496,12 @@ PUBLIC char * LYLeakSACat ARGS4(
 	CONST short,	ssi_Line)
 {
     if (src && *src) {
+	if (src == *dest) {
+	    CTRACE(tfp,
+		   "LYLeakSACat:  *dest equals src, contains \"%s\"\n",
+		   src);
+	    return *dest;
+	}
 	if (*dest) {
 	    int length = strlen(*dest);
 	    *dest = (char *)LYLeakRealloc(*dest,

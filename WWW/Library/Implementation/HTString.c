@@ -368,6 +368,9 @@ typedef enum { Flags, Width, Prec, Type, Format } PRINTF;
 #define VA_POINT(type) pval = (void *)va_arg((*ap), type)
 
 #define NUM_WIDTH 10	/* allow for width substituted for "*" in "%*s" */
+		/* also number of chars assumed to be needed in addition
+		   to a given precision in floating point formats */
+
 #define GROW_EXPR(n) (((n) * 3) / 2)
 #define GROW_SIZE 256
 
@@ -397,6 +400,7 @@ PRIVATE char * StrAllocVsprintf ARGS4(
 	dst_ptr = HTAlloc(dst_ptr, have = GROW_SIZE + need);
     } else {
 	have = strlen(dst_ptr) + 1;
+	need += dst_len;
 	if (have < need)
 	    dst_ptr = HTAlloc(dst_ptr, have = GROW_SIZE + need);
     }
@@ -482,17 +486,13 @@ PRIVATE char * StrAllocVsprintf ARGS4(
 			break;
 		    case 'c':
 			VA_INTGR(int);
-			used = 'i';
+			used = 'c';
 			break;
 		    case 's':
 			VA_POINT(char *);
 			if (prec < 0)
 			    prec = strlen(pval);
-			if (prec > (int)tmp_len) {
-			    tmp_len = GROW_EXPR(tmp_len + prec);
-			    tmp_ptr = HTAlloc(tmp_ptr, tmp_len);
-			}
-			used = 'p';
+			used = 's';
 			break;
 		    case 'p':
 			VA_POINT(void *);
@@ -511,12 +511,36 @@ PRIVATE char * StrAllocVsprintf ARGS4(
 		    state = Prec;
 		} else if (*fmt == '%') {
 		    done = TRUE;
-		    used = 'p';
+		    used = '%';
 		}
 	    }
 	    fmt_ptr[f] = '\0';
+
+	    if (prec > 0) {
+		switch (used) {
+		case 'f':
+		    if (width < prec + NUM_WIDTH)
+			width = prec + NUM_WIDTH;
+		case 'i':
+		case 'p':
+		    if (width < prec + 2)
+			width = prec + 2; /* leading sign/space/zero, "0x" */
+		case 'c':
+		case '%':
+		    break;
+		default:
+		    if (width < prec)
+			width = prec;
+		}
+	    }
+	    if (width >= (int)tmp_len) {
+		tmp_len = GROW_EXPR(tmp_len + width);
+		tmp_ptr = HTAlloc(tmp_ptr, tmp_len);
+	    }
+
 	    switch (used) {
 	    case 'i':
+	    case 'c':
 		sprintf(tmp_ptr, fmt_ptr, ival);
 		break;
 	    case 'f':
@@ -533,6 +557,9 @@ PRIVATE char * StrAllocVsprintf ARGS4(
 	    strcpy(dst_ptr + dst_len, tmp_ptr);
 	    dst_len += strlen(tmp_ptr);
 	} else {
+	    if ((dst_len + 2) >= have) {
+		dst_ptr = HTAlloc(dst_ptr, (have += GROW_SIZE));
+	    }
 	    dst_ptr[dst_len++] = *fmt++;
 	}
     }
@@ -597,8 +624,6 @@ PUBLIC char * HTSprintf0 (va_alist)
 	char **		pstr = va_arg(ap, char **);
 	CONST char *	fmt  = va_arg(ap, CONST char *);
 #endif
-	if (pstr != 0)
-	    *pstr = 0;
 	result = StrAllocVsprintf(pstr, 0, fmt, &ap);
     }
     va_end(ap);
@@ -710,15 +735,9 @@ PUBLIC void HTAddXpand ARGS4(
     int,		number,
     CONST char *,	parameter)
 {
-    if (*parameter != '$') {
-	HTAddParam (result, command, number, parameter);
-    } else if (number > 0) {
+    if (number > 0) {
 	CONST char *last = HTAfterCommandArg(command, number - 1);
 	CONST char *next = last;
-
-	parameter = getenv(parameter+1);
-	if (parameter == 0)
-	    parameter = "";
 
 	if (number <= 1) {
 	    FREE(*result);

@@ -164,6 +164,10 @@
 #define SENDING_YOUR_MSG gettext("Sending your message...")
 #define SENDING_COMMENT gettext("Sending your comment:")
 
+/* textarea */
+#define NOT_IN_TEXTAREA gettext("Not in a TEXTAREA; cannot use external editor.")
+
+
 #define FILE_ACTIONS_DISALLOWED gettext("file: ACTIONs are disallowed!")
 #define FILE_SERVED_LINKS_DISALLOWED \
  gettext("file: URLs via served links are disallowed!")

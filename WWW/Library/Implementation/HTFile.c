@@ -17,7 +17,7 @@
 **	15 Nov 93 (MD)	Moved HTVMSname to HTVMSUTILS.C
 **	27 Dec 93 (FM)	FTP now works with VMS hosts.
 **			FTP path must be Unix-style and cannot include
-**			 the device or top directory.
+**			the device or top directory.
 */
 
 #include <HTUtils.h>
@@ -151,26 +151,35 @@ int exists(char *filename)
 PRIVATE void free_suffixes NOPARAMS;
 
 #ifdef LONG_LIST
-PRIVATE char *FormatStr ARGS2(
+PRIVATE char *FormatStr ARGS3(
+    char **,	bufp,
     char *,	start,
     char *,	entry)
 {
     char fmt[512];
-    char *buf = 0;
-    sprintf(fmt, "%%%.*ss", (int) sizeof(fmt) - 3, start);
-    HTSprintf0(&buf, fmt, entry);
-    return buf;
+    if (*start) {
+	sprintf(fmt, "%%%.*ss", (int) sizeof(fmt) - 3, start);
+	HTSprintf0(bufp, fmt, entry);
+    } else {
+	HTSprintf0(bufp, "%s", entry);
+    }
+    return *bufp;
 }
 
-PRIVATE char *FormatNum ARGS2(
+PRIVATE char *FormatNum ARGS3(
+    char **,	bufp,
     char *,	start,
     int,	entry)
 {
     char fmt[512];
-    char *buf = 0;
-    sprintf(fmt, "%%%.*sd", (int) sizeof(fmt) - 3, start);
-    HTSprintf0(&buf, fmt, entry);
-    return buf;
+    if (*start) {
+	sprintf(fmt, "%%%.*sd", (int) sizeof(fmt) - 3, start);
+	HTSprintf0(bufp, fmt, entry);
+    } else {
+	sprintf(fmt, "%d", entry);
+	StrAllocCat(*bufp, fmt);
+    }
+    return *bufp;
 }
 
 PRIVATE void LYListFmtParse ARGS5(
@@ -205,7 +214,7 @@ PRIVATE void LYListFmtParse ARGS5(
 		"r-T", "r-t", "rwT", "rwt", 0 };
 #define PTBIT(a, s)  (s) ? ptbits[(a) & 0x7] : pbits[(a) & 0x7]
 #else
-#define PTBIT(a, s)  (a, 0, 0)
+#define PTBIT(a, s)  PBIT(a, 0, 0)
 #endif
 
 	if (lstat(file, &st) < 0)
@@ -234,19 +243,21 @@ PRIVATE void LYListFmtParse ARGS5(
 		if (s == end)
 			break;
 		start = ++s;
-		while (isdigit(*s) || *s == '.' || *s == '-')
+		while (isdigit(*s) || *s == '.' || *s == '-' || *s == ' ' ||
+		    *s == '#' || *s == '+' || *s == '\'')
 			s++;
 		c = *s; 	/* the format char. or \0 */
 		*s = '\0';
 
 		switch (c) {
 		case '\0':
-			break;
+		        PUTS(start);
+			continue;
 
 		case 'A':
 		case 'a':	/* anchor */
 			HTDirEntry(target, tail, entry);
-			buf = FormatStr(start, entry);
+			FormatStr(&buf, start, entry);
 			PUTS(buf);
 			END(HTML_A);
 			*buf = '\0';
@@ -274,21 +285,21 @@ PRIVATE void LYListFmtParse ARGS5(
 				*/
 				sprintf(tmp, "%.7s %.4s ", datestr + 4,
 					datestr + 20);
-			buf = FormatStr(start, tmp);
+			FormatStr(&buf, start, tmp);
 			break;
 
 		case 's':	/* size in bytes */
-			buf = FormatNum(start, st.st_size);
+			FormatNum(&buf, start, st.st_size);
 			break;
 
 		case 'K':	/* size in Kilobytes but not for directories */
 			if (S_ISDIR(st.st_mode)) {
-				buf = FormatStr(start, "");
+				FormatStr(&buf, start, "");
 				break;
 			}
 			/* FALL THROUGH */
 		case 'k':	/* size in Kilobytes */
-			buf = FormatNum(start, (st.st_size+1023)/1024);
+			FormatNum(&buf, start, (st.st_size+1023)/1024);
 			StrAllocCat(buf, "K");
 			break;
 
@@ -319,29 +330,33 @@ PRIVATE void LYListFmtParse ARGS5(
 				PBIT(st.st_mode, 6, st.st_mode & S_ISUID),
 				PBIT(st.st_mode, 3, st.st_mode & S_ISGID),
 				PTBIT(st.st_mode,   st.st_mode & S_ISVTX));
-			buf = FormatStr(start, tmp);
+			FormatStr(&buf, start, tmp);
 			break;
 
 		case 'o':	/* owner */
 			name = HTAA_UidToName (st.st_uid);
 			if (*name) {
-				buf = FormatStr(start, name);
+				FormatStr(&buf, start, name);
 			} else {
-				buf = FormatNum(start, st.st_uid);
+				FormatNum(&buf, start, st.st_uid);
 			}
 			break;
 
 		case 'g':	/* group */
 			name = HTAA_GidToName(st.st_gid);
 			if (*name) {
-				buf = FormatStr(start, name);
+				FormatStr(&buf, start, name);
 			} else {
-				buf = FormatNum(start, st.st_gid);
+				FormatNum(&buf, start, st.st_gid);
 			}
 			break;
 
 		case 'l':	/* link count */
-			buf = FormatNum(start, st.st_nlink);
+			FormatNum(&buf, start, st.st_nlink);
+			break;
+
+		case '%':	/* literal % with flags/width */
+			FormatStr(&buf, start, "%");
 			break;
 
 		default:
@@ -349,11 +364,12 @@ PRIVATE void LYListFmtParse ARGS5(
 			"Unknown format character `%c' in list format\n", c);
 			break;
 		}
-		PUTS(buf);
-		FREE(buf);
+		if (buf)
+		    PUTS(buf);
 
 		s++;
 	}
+	FREE(buf);
 	END(HTML_PRE);
 	PUTS("\n");
 	FREE(str);

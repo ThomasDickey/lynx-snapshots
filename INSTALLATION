@@ -225,6 +225,11 @@ II. Compile instructions -- UNIX
   	Use this option to control whether full utility pathnames are used.
 	By default, configure substitutes full pathnames.
 
+  --disable-included-msgs
+	Do not use included messages, for i18n support.  If NLS support is
+	requested, the configure script will otherwise use the messages in the
+	./po subdirectory.
+
   --disable-long-list			(prevent defining LONG_LIST)
   	Use this option to disable long "ls -l" directory listings.
 

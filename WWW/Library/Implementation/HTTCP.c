@@ -309,6 +309,52 @@ PUBLIC CONST char * HTInetString ARGS1(
 }
 #endif /* !DECNET */
 
+/*	Check whether string is a valid Internet hostname - kw
+**	-------------------------------------------------
+**
+**  Checks whether
+**  - contains only valid chars for domain names (actually, the
+**    restrictions are somewhat relaxed),
+**  - no leading dots or empty segments,
+**  - max. length of dot-separated segment <= 63 (RFC 1034,1035),
+**  - total length <= 254 (if it ends with dot) or 253 (otherwise)
+**     [an interpretation of RFC 1034,1035, although RFC 1123
+**      suggests 255 as limit - kw].
+**
+**  Note: user (before '@') and port (after ':') components from
+**      host part of URL should be already stripped (if appropriate)
+**      from the input string.
+**
+**  On exit,
+**	returns 1 if valid, otherwise 0.
+*/
+PUBLIC BOOL valid_hostname ARGS1(
+	CONST char *,	name)
+{
+    int i=1, iseg = 0;
+    CONST char *cp = name;
+    if (!(name && *name))
+	return NO;
+    for (; (*cp && i <= 253); cp++, i++) {
+	if (*cp == '.') {
+	    if (iseg == 0) {
+		return NO;
+	    } else {
+		iseg = 0;
+		continue;
+	    }
+	} else if (++iseg > 63) {
+		return NO;
+	}
+	if (!isalnum((unsigned char)*cp) &&
+	    *cp != '-' && *cp != '_' &&
+	    *cp != '$' && *cp != '+') {
+	    return NO;
+	}
+    }
+    return (*cp == '\0' || (*cp == '.' && iseg != 0 && cp[1] == '\0'));
+}
+
 #ifdef NSL_FORK
 /*
 **  Function to allow us to be killed with a normal signal (not
@@ -440,6 +486,13 @@ PUBLIC int HTParseInet ARGS2(
 	FREE(host);
 #endif /* _WINDOWS_NSL */
     } else {		    /* Alphanumeric node name: */
+	if (!valid_hostname(host)) {
+#ifndef _WINDOWS_NSL
+	    FREE(host);
+#endif /* _WINDOWS_NSL */
+	    return HT_NOT_ACCEPTABLE; /* only HTDoConnect checks this. */
+	}
+
 #ifdef MVS	/* Outstanding problem with crash in MVS gethostbyname */
 	CTRACE(tfp, "HTParseInet: Calling gethostbyname(%s)\n", host);
 #endif /* MVS */
@@ -878,16 +931,22 @@ PUBLIC int HTDoConnect ARGS4(
     }
     FREE(p1);
 
-    line = (char *)calloc(1, (strlen(host) + strlen(protocol) + 128));
-    if (line == NULL)
-	outofmem(__FILE__, "HTDoConnect");
-    sprintf (line, gettext("Looking up %s."), host);
+    HTSprintf0 (&line, gettext("Looking up %s."), host);
     _HTProgress (line);
     status = HTParseInet(soc_in, host);
     if (status) {
 	if (status != HT_INTERRUPTED) {
-	    sprintf (line, gettext("Unable to locate remote host %s."), host);
-	    _HTProgress(line);
+	    if (status == HT_NOT_ACCEPTABLE) {
+		/*  Not HTProgress, so warning won't be overwritten
+		 *  immediately; but not HTAlert, because typically
+		 *  there will be other alerts from the callers. - kw
+		 */
+		HTUserMsg2(gettext("Invalid hostname %s"), host);
+	    } else {
+		HTSprintf0 (&line,
+			 gettext("Unable to locate remote host %s."), host);
+		_HTProgress(line);
+	    }
 	    status = HT_NO_DATA;
 	}
 	FREE(host);
@@ -895,9 +954,10 @@ PUBLIC int HTDoConnect ARGS4(
 	return status;
     }
 
-    sprintf (line, gettext("Making %s connection to %s."), protocol, host);
+    HTSprintf0 (&line, gettext("Making %s connection to %s."), protocol, host);
     _HTProgress (line);
     FREE(host);
+    FREE(line);
 
     /*
     **	Now, let's get a socket set up from the server for the data.
@@ -905,7 +965,6 @@ PUBLIC int HTDoConnect ARGS4(
     *s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (*s == -1) {
 	HTAlert(gettext("socket failed."));
-	FREE(line);
 	return HT_NO_DATA;
     }
 
@@ -979,7 +1038,6 @@ PUBLIC int HTDoConnect ARGS4(
 	    */
 	    if (tries++ >= 180000) {
 		HTAlert(gettext("Connection failed for 180,000 tries."));
-		FREE(line);
 		return HT_NO_DATA;
 	    }
 
@@ -1118,7 +1176,6 @@ PUBLIC int HTDoConnect ARGS4(
 #endif /* !NO_IOCTL || USE_FCNTL */
 #endif /* !DOSPATH */
 
-    FREE(line);
     return status;
 }
 

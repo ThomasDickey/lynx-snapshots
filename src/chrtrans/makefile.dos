@@ -95,6 +95,7 @@ cp866_uni.h:		cp866_uni.tbl		makeuctb.exe
 cp869_uni.h:		cp869_uni.tbl		makeuctb.exe
 def7_uni.h:		def7_uni.tbl		makeuctb.exe
 dmcs_uni.h:		dmcs_uni.tbl		makeuctb.exe
+hp_uni.h:               hp_uni.tbl              makeuctb.exe 
 iso01_uni.h:		iso01_uni.tbl		makeuctb.exe
 iso02_uni.h:		iso02_uni.tbl		makeuctb.exe
 iso03_uni.h:		iso03_uni.tbl		makeuctb.exe

@@ -8687,3 +8687,305 @@ PUBLIC BOOL HText_AreDifferent ARGS2(
      */
     return(FALSE);
 }
+
+/*
+ *  Transfer the initial contents of a TEXTAREA to a temp file, invoke the
+ *  user's editor on that file, then transfer the contents of the resultant
+ *  edited file back into the TEXTAREA (expanding the size of the area, if
+ *  required).   KED  01/26/99
+ */
+PUBLIC void HText_ExtEditForm ARGS1(
+            struct link *, form_link)
+{
+    struct stat stat_info;
+
+    char       *ed_temp;
+    FILE       *fp;
+
+    TextAnchor *anchor_ptr;
+    TextAnchor *start_anchor = NULL;
+    TextAnchor *end_anchor  = NULL;
+    BOOLEAN	firstanchor = TRUE;
+    int 	orig_cnt    = 0;
+    int 	line_cnt    = 1;
+
+    FormInfo   *form	 = form_link->form;
+    char       *areaname = form->name;
+    int 	form_num = form->number;
+
+    HTLine     *htline;
+
+    TextAnchor *a = 0;
+    FormInfo   *f = 0;
+    HTLine     *l = 0;
+
+    char       *ebuf;
+    char       *tbuf = NULL;
+    char       *line;
+    char       *cp;
+    char       *p;
+    int 	len;
+    int 	i;
+    int 	n;
+    size_t	size;
+
+    ed_temp = (char *)malloc(LY_MAXPATH);
+    if ((fp = LYOpenTemp (ed_temp, "", "w")) == 0) {
+	FREE(ed_temp);
+	return;
+    }
+
+    /*
+     *	Begin at the beginning, to find 1st anchor in the TEXTAREA, then
+     *	write all of its lines (anchors) out to the edit temp file.
+     *
+     *	[Finding the TEXTAREA we're actually *in* with these attributes
+     *	 isn't foolproof.  The form_num isn't unique to a given TEXTAREA,
+     *	 and there *could* be TEXTAREA's with the same "name".	If that
+     *	 should ever be true, we'll actually get the data from the *1st*
+     *	 TEXTAREA in the page that matches.  We should probably assign
+     *	 a unique id to each TEXTAREA in a page, and match on that, to
+     *	 avoid this (potential) problem.
+     *
+     *	 Since the odds of "false matches" *actually* happening in real
+     *	 life seem rather small though, we'll hold off doing this, for a
+     *	 rainy day ...]
+     */
+    anchor_ptr = HTMainText->first_anchor;
+
+    while (anchor_ptr) {
+
+	if ((anchor_ptr->link_type	     == INPUT_ANCHOR)    &&
+	    (anchor_ptr->input_field->type   == F_TEXTAREA_TYPE) &&
+	    (anchor_ptr->input_field->number == form_num)	 &&
+	    !strcmp (anchor_ptr->input_field->name, areaname))   {
+
+	    if (firstanchor) {
+		firstanchor = FALSE;
+		start_anchor = anchor_ptr;
+	    }
+	    orig_cnt++;
+
+	    /*
+	     * Write the anchor's text to the temp edit file.
+	     */
+	    fputs (anchor_ptr->input_field->value, fp);
+	    fputc ('\n', fp);
+
+	 } else {
+
+	    if (!firstanchor)
+		break;
+	 }
+	 anchor_ptr = anchor_ptr->next;
+    }
+    fclose (fp);
+
+    /*
+     *	Go edit the TEXTAREA temp file.
+     */
+    HTSprintf0 (&tbuf, "%s %s", editor, ed_temp);
+
+    LYSystem (tbuf);
+
+#ifdef UNIX
+    /*
+     *  Delete backup file, if that's your style.
+     */
+    HTSprintf0 (&tbuf, "%s~", ed_temp);
+    if (stat (tbuf, &stat_info) == 0)
+       remove (tbuf);
+#endif
+    free (tbuf);
+
+    /*
+     *	Read back the edited temp file, whacking off any trailing whitespace.
+     */
+    if (stat (ed_temp, &stat_info) < 0
+     || !S_ISREG(stat_info.st_mode)
+     || (size = stat_info.st_size) == 0) {
+	size = 0;
+	ebuf = malloc(1);
+    } else {
+	ebuf = (char *) calloc (size + 1, (sizeof(char)));
+
+	fp = fopen (ed_temp, "r");
+	size = fread (ebuf, 1, size, fp);
+	fclose (fp);
+    }
+    if (ebuf == 0)
+	outofmem(__FILE__, "HText_ExtEditForm");
+
+    /*
+     *	Nuke any blank lines from the end of the edited data.
+     */
+    while ((size != 0) && isspace(ebuf[size-1]))
+	ebuf[--size] = '\0';
+
+    /*
+     *	Copy each line from the temp file into the corresponding anchor
+     *	struct, removing any trailing whitespace.  Add new lines to the
+     *	TEXTAREA if needed.  (Always leave the user with a blank line at
+     *	the end of the TEXTAREA.)
+     */
+    if ((line = (char *) malloc (MAX_LINE)) == 0)
+	outofmem(__FILE__, "HText_ExtEditForm");
+
+    anchor_ptr = start_anchor;
+    len = 0;
+    p = ebuf;
+
+    while ((line_cnt <= orig_cnt) || (*p) || ((len != 0) && (*p == '\0'))) {
+
+	if ((cp = strchr (p, '\n')) != 0)
+	   len = cp - p;
+	else
+	   len = strlen (p);
+
+	strncpy(line, "\0", MAX_LINE);
+	strncpy(line, p, len);
+
+	cp = p;
+
+	/*
+	 *  Whack off trailing whitespace from the line.
+	 *
+	 *  [maybe use isspace() here instead, too (portable ?)]
+	 */
+	for (size = MAX_LINE, p = line + size - 1; size != 0; p--, size--) {
+	    if (isspace(*p))
+		*p = '\0';
+	    else
+		break;
+	}
+
+	/*
+	 *  If there are more lines in the edit buffer than were in the
+	 *  original TEXTAREA, we need to add some new lines, continuing
+	 *  until the edit buffer is empty.
+	 *
+	 *  [cloning structs should me moved to a seperate fn(), or three]
+	 */
+	if (line_cnt > orig_cnt) {
+
+	   /*
+	    *  Find line in the text that matches ending anchorline of
+	    *  the TEXTAREA.
+	    */
+	   for (htline = HTMainText->last_line->next, i = 0;
+		i != end_anchor->line_num;
+		htline = htline->next, i++);
+
+	   /*
+	    *  Clone and initialize the structs needed to add a new
+	    *  TEXTAREA anchor.
+	    */
+	   if ((a = (TextAnchor *) calloc (1, sizeof(*a))) == 0
+	    || (f = (FormInfo   *) calloc (1, sizeof(*f))) == 0
+	    || (l = (HTLine     *) calloc (1, LINE_SIZE(MAX_LINE))) == 0)
+		outofmem(__FILE__, "HText_ExtEditForm");
+
+	   /*  Init all the fields in the new anchor.  */
+	   a->next	       = end_anchor->next;
+	   a->number	       = end_anchor->number;
+	   a->start	       = end_anchor->start +
+				 end_anchor->input_field->size + 1;
+	   a->line_pos	       = end_anchor->line_pos;
+	   a->extent	       = end_anchor->extent;
+	   a->line_num	       = end_anchor->line_num + 1;
+	   StrAllocCopy (a->hightext, end_anchor->hightext);
+	   StrAllocCopy (a->hightext2, end_anchor->hightext2);
+	   a->hightext2offset  = end_anchor->hightext2offset;
+	   a->link_type	       = end_anchor->link_type;
+	   a->input_field      = f;
+	   a->show_anchor      = end_anchor->show_anchor;
+	   a->inUnderline      = end_anchor->inUnderline;
+	   a->anchor	       = end_anchor->anchor;
+
+	   /*  Just the (seemingly) relevant fields in the FormInfo.	*/
+	   StrAllocCopy (f->name, end_anchor->input_field->name);
+	   f->number	       = end_anchor->input_field->number;
+	   f->type	       = end_anchor->input_field->type;
+	   StrAllocCopy (f->orig_value, end_anchor->input_field->orig_value);
+	   f->size	       = end_anchor->input_field->size;
+	   f->maxlength        = end_anchor->input_field->maxlength;
+	   f->no_cache         = end_anchor->input_field->no_cache;
+
+	   /*  Init all the fields in the new HTLine (but see the #if).  */
+	   l->next	       = htline->next;
+	   l->prev	       = htline;
+	   l->offset	       = htline->offset;
+	   l->size	       = htline->size;
+	   l->split_after      = htline->split_after;
+	   l->bullet	       = htline->bullet;
+#if defined(USE_COLOR_STYLE)
+	   /* dup styles[] if needed [no need in TEXTAREA (?); leave 0's] */
+	   l->numstyles        = htline->numstyles;
+#endif
+	   for (i = 0; htline->data[i] != '\0'; i++)
+	       l->data[i] = htline->data[i];
+	   l->data[i] = '\0';
+
+	   /*
+	    *  Link in the new TextAnchor and make it current; link in
+	    *  the new HTLine.
+	    */
+	   end_anchor->next = a;
+	   anchor_ptr = a;
+
+	   htline->next->prev = l;
+	   htline->next = l;
+	   htline = l;
+	}
+
+	/*
+	 *  Finally copy the new line from the edit buffer into the anchor.
+	 */
+	StrAllocCopy(anchor_ptr->input_field->value, line);
+
+	/*
+	 *  And do the next line, for the next anchor ...
+	 */
+	p = cp + len;
+	if (*p) p++;
+
+	end_anchor = anchor_ptr;
+	anchor_ptr = anchor_ptr->next;
+
+	line_cnt++;
+    }
+
+
+    /*
+     *	If new anchors were added, we need to ripple the new line numbers
+     *	(and char counts ?) thru the subsequent anchors.  Also update the
+     *	HText counts.
+     *
+     *	[dunno if the char counts really need to be done, or if we're using
+     *	 the proper values ... seems OK though ...]
+     */
+    if ((n = (line_cnt - 1) - orig_cnt) > 0) {
+        i = (end_anchor->input_field->size + 1) * n;
+
+        while (anchor_ptr) {
+	    anchor_ptr->line_num  += n;
+	    anchor_ptr->start	  += i;
+	    anchor_ptr 	           = anchor_ptr->next;
+        }
+        HTMainText->Lines += n;
+        HTMainText->chars += i;
+    }
+
+    /*** MOVE the cursor to some logical place ... 1st/only blank line in
+     ***	  the textarea seems most reasonable; lacking that, the end
+     ***	  line of the textarea; lacking that ... the 1st line of the
+     ***	  textarea; else leave it where it is (as we now do).
+     ***/
+
+    free (line);
+    free (ebuf);
+    LYRemoveTemp (ed_temp);
+    free (ed_temp);
+
+    return;
+}

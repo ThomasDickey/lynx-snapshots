@@ -607,6 +607,7 @@ PRIVATE struct rmap revmap[] = {
 { "SWITCH_DTD",		"switch between two ways of parsing HTML" },
 { "ELGOTO",		"edit the current link's URL or ACTION and go to it" },
 { "CHANGE_LINK",	"force reset of the current link on the page" },
+{ "EDITTEXTAREA",	"use defined external editor to edit the text area" },
 #ifdef USE_EXTERNALS
 { "EXTERN",		"run external program with url" },
 #endif
@@ -701,10 +702,12 @@ PRIVATE void print_binding ARGS2(HTStream *, target, int, i)
     if (prev_lynx_edit_mode && !no_dired_support &&
         (buf = format_binding(key_override, i)) != 0) {
 	(*target->isa->put_block)(target, buf, strlen(buf));
+	FREE(buf);
     } else
 #endif /* DIRED_SUPPORT && OK_OVERRIDE */
     if ((buf = format_binding(keymap, i)) != 0) {
 	(*target->isa->put_block)(target, buf, strlen(buf));
+	FREE(buf);
     }
 }
 

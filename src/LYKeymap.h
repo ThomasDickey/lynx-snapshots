@@ -105,15 +105,16 @@ extern unsigned short key_override[];
 #define       LYK_SWITCH_DTD    72
 #define       LYK_ELGOTO        73
 #define       LYK_CHANGE_LINK   74
+#define	      LYK_EDIT_TEXTAREA 75
 
 #ifdef USE_EXTERNALS
-#define       LYK_EXTERN        75
+#define       LYK_EXTERN        76
 #if defined(VMS) || defined(DIRED_SUPPORT)
-#define       LYK_DIRED_MENU    76
+#define       LYK_DIRED_MENU    77
 #endif /* VMS || DIRED_SUPPORT */
 #else  /* USE_EXTERNALS */
 #if defined(VMS) || defined(DIRED_SUPPORT)
-#define       LYK_DIRED_MENU    75
+#define       LYK_DIRED_MENU    76
 #endif /* VMS || DIRED_SUPPORT */
 #endif /* !defined(USE_EXTERNALS) */
 
