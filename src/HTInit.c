@@ -116,6 +116,7 @@ void HTFormatInit(void)
     SET_INTERNL("application/html", "text/plain", HTMLToPlain, 0.5);
     SET_INTERNL("application/html", "www/present", HTMLPresent, 2.0);
     SET_INTERNL("application/xhtml+xml", "www/present", HTMLPresent, 2.0);
+    SET_INTERNL("application/xml", "www/present", HTMLPresent, 2.0);
     SET_INTERNL("application/html", "www/source", HTPlainPresent, 1.0);
     SET_INTERNL("application/x-wais-source", "www/source", HTPlainPresent, 1.0);
     SET_INTERNL("application/x-wais-source", "www/present", HTWSRCConvert, 2.0);
@@ -148,6 +149,7 @@ void HTFormatInit(void)
     SET_INTERNL("text/html", "text/x-c", HTMLToC, 0.5);
     SET_INTERNL("text/html", "text/plain", HTMLToPlain, 0.5);
     SET_INTERNL("text/html", "www/present", HTMLPresent, 1.0);
+    SET_INTERNL("text/xml", "www/present", HTMLPresent, 2.0);
 
     /*
      * These should override the default types as necessary.
