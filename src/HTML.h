@@ -69,6 +69,7 @@ struct _HTStructured {
     char *			object_codetype;
     char *			object_name;
     HTChunk			option;		/* Grow by 128 */
+    BOOL			first_option;	/* First OPTION in SELECT? */
     char *			LastOptionValue;
     BOOL			LastOptionChecked;
     BOOL			select_disabled;
@@ -111,6 +112,8 @@ struct _HTStructured {
     BOOL			in_word;  /* Have just had a non-white char */
     stack_element 	stack[MAX_NESTING];
     stack_element 	*sp;		/* Style stack pointer */
+    BOOL		stack_overrun;	/* Was MAX_NESTING exceeded? */
+    int			skip_stack; /* flag to skip next style stack operation */
 
     /*
     **  Track if we are in an anchor, paragraph, address, base, etc.
@@ -119,6 +122,7 @@ struct _HTStructured {
     BOOL		inAPPLET;
     BOOL		inAPPLETwithP;
     BOOL		inBadBASE;
+    BOOL		inBadHREF;
     BOOL		inBadHTML;
     BOOL		inBASE;
     BOOL		inBoldA;
@@ -127,6 +131,7 @@ struct _HTStructured {
     BOOL		inCREDIT;
     BOOL		inFIG;
     BOOL		inFIGwithP;
+    BOOL		inFONT;
     BOOL		inFORM;
     BOOL		inLABEL;
     BOOL		inP;
@@ -158,6 +163,8 @@ extern void HTML_put_string PARAMS((HTStructured *me, CONST char *s));
 extern void HTML_write PARAMS((HTStructured *me, CONST char *s, int l));
 extern int HTML_put_entity PARAMS((HTStructured *me, int entity_number));
 #endif /* Lynx_HTML_Handler */
+
+extern void strtolower PARAMS((char* i));
 
 /*				P U B L I C
 */

@@ -64,6 +64,12 @@ PRIVATE void call_setfont ARGS3(char *,font, char *,fnsuffix, char *,umap)
     }
     
     if (*T_setfont_cmd) {
+    
+            if (TRACE) {
+                        fprintf(stderr, "Executing setfont: '%s'\n", 
+                        T_setfont_cmd);
+                        }
+                                
 	system(T_setfont_cmd);
     }
 }

@@ -34,18 +34,31 @@
 **			Clear:  we only get addresses.
 */
 
+static char list_filename[256] = "\0";
+
+PUBLIC char * LYlist_temp_url NOARGS
+{
+    return list_filename;
+}
+
 PUBLIC int showlist ARGS2(char **, newfile, BOOLEAN, titles)
 {
     int cnt;
-    int refs;
+    int refs, hidden_links;
     static char tempfile[256];
     static BOOLEAN first = TRUE;
-    static char list_filename[256];
     FILE *fp0;
     char *Address = NULL, *Title = NULL, *cp = NULL;
 
     refs = HText_sourceAnchors(HTMainText);
-    if (refs <= 0) {
+    hidden_links = HText_HiddenLinkCount(HTMainText);
+    if (refs <= 0 && hidden_links > 0 &&
+	LYHiddenLinks != HIDDENLINKS_SEPARATE) {
+	_statusline(NO_VISIBLE_REFS_FROM_DOC);
+	sleep(MessageSecs);
+	return(-1);
+    }
+    if (refs <= 0 && hidden_links <= 0) {
 	_statusline(NO_REFS_FROM_DOC);
 	sleep(MessageSecs);
 	return(-1);
@@ -60,7 +73,7 @@ PUBLIC int showlist ARGS2(char **, newfile, BOOLEAN, titles)
 #endif /* VMS */
     }
 
-    if ((fp0 = fopen(tempfile,"w")) == NULL) {
+    if ((fp0 = fopen(tempfile, "w")) == NULL) {
 	_statusline(CANNOT_OPEN_TEMP);
 	sleep(MessageSecs);
 	return(-1);
@@ -75,34 +88,53 @@ PUBLIC int showlist ARGS2(char **, newfile, BOOLEAN, titles)
     sprintf(list_filename, "file://localhost%s", tempfile);
 #endif /* VMS */
     StrAllocCopy(*newfile, list_filename);
-    LYforce_HTML_mode=TRUE; /* force this file to be HTML */
-    LYforce_no_cache=TRUE; /* force this file to be new */
+    LYforce_HTML_mode = TRUE; /* force this file to be HTML */
+    LYforce_no_cache = TRUE; /* force this file to be new */
 
-    fprintf(fp0,"<head>\n<title>%s</title>\n</head>\n<body>\n",
-						LIST_PAGE_TITLE);
 
-    fprintf(fp0,"<h1>You have reached the List Page</h1>\n");
-    fprintf(fp0,"<h2>%s Version %s</h2>\n", LYNX_NAME, LYNX_VERSION);
+    fprintf(fp0, "<head>\n");
+#ifdef EXP_CHARTRANS
+    add_META_charset_to_fd(fp0, -1);
+#endif
+    fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
+		 LIST_PAGE_TITLE);
+
+    fprintf(fp0, "<h1>You have reached the List Page</h1>\n");
+    fprintf(fp0, "<h2>%s Version %s</h2>\n", LYNX_NAME, LYNX_VERSION);
 
     fprintf(fp0, "  References in this document:<p>\n");
     fprintf(fp0, "<%s compact>\n", (keypad_mode == LINKS_ARE_NUMBERED) ?
     				   "ul" : "ol");
+    if (hidden_links > 0) {
+        fprintf(fp0, "<lh><em>Visible links:</em>\n");
+	if (LYHiddenLinks == HIDDENLINKS_IGNORE)
+	    hidden_links = 0;
+    }
     for (cnt=1; cnt<=refs; cnt++) {
-	HTAnchor *dest = HTAnchor_followMainLink((HTAnchor *)
-						 HText_childNumber(cnt));
+	HTChildAnchor *child = HText_childNumber(cnt);
+	HTAnchor *dest_intl = HTAnchor_followTypedLink((HTAnchor *)child,
+						       LINK_INTERNAL);
+	HTAnchor *dest = dest_intl ?
+	    dest_intl : HTAnchor_followMainLink((HTAnchor *)child);
 	HTParentAnchor *parent = HTAnchor_parent(dest);
 	char *address =  HTAnchor_address(dest);
 	CONST char *title = titles ? HTAnchor_title(parent) : NULL;
 
 	StrAllocCopy(Address, address);
 	FREE(address);
-	LYEntify(&Address, FALSE);
-	if (title) {
+	LYEntify(&Address, TRUE);
+	if (title && *title) {
 	    StrAllocCopy(Title, title);
-	    LYEntify(&Title, TRUE);
+	    if (*Title)
+		LYEntify(&Title, TRUE);
+	    else
+		FREE(Title);
 	    cp = strchr(Address, '#');
 	}
-        fprintf(fp0, "<li><a href=\"%s\">%s%s%s%s</a>\n", Address,
+
+        fprintf(fp0, "<li><a href=\"%s\"%s>%s%s%s%s%s</a>\n", Address,
+		        dest_intl ? " TYPE=\"internal link\"" : "", 
+		        dest_intl ? "(internal) " : "", 
 			((HTAnchor*)parent != dest) && Title ? "in " : "",
 			(char *)(Title ? Title : Address),
 			(Title && cp) ? " - " : "",
@@ -110,6 +142,28 @@ PUBLIC int showlist ARGS2(char **, newfile, BOOLEAN, titles)
 
 	FREE(Address);
 	FREE(Title);
+    }
+
+    if (hidden_links > 0) {
+        if (refs > 0)
+	    fprintf(fp0, "\n</%s>\n\n<p>\n",
+	    		 (keypad_mode == LINKS_ARE_NUMBERED) ?
+							"ul" : "ol");
+        fprintf(fp0, "<%s compact>\n", (keypad_mode == LINKS_ARE_NUMBERED) ?
+    				       "ul" : "ol continue");
+        fprintf(fp0, "<lh><em>Hidden links:</em>\n");
+    }
+
+    for (cnt = 0; cnt < hidden_links; cnt++) {
+	StrAllocCopy(Address, HText_HiddenLinkAt(HTMainText, cnt));
+	LYEntify(&Address, FALSE);
+	if (!(Address && *Address)) {
+	    FREE(Address);
+	    continue;
+	}
+        fprintf(fp0, "<li><a href=\"%s\">%s</a>\n", Address, Address);
+
+	FREE(Address);
     }
 
     fprintf(fp0,"\n</%s>\n</body>\n", (keypad_mode == LINKS_ARE_NUMBERED) ?
@@ -130,28 +184,57 @@ PUBLIC int showlist ARGS2(char **, newfile, BOOLEAN, titles)
 **			Clear:  we only get addresses.
 */
 
-PUBLIC void printlist ARGS2(FILE *, fp, BOOLEAN, titles)
+PUBLIC void printlist ARGS2(
+	FILE *,		fp,
+	BOOLEAN,	titles)
 {
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
 #endif /* VMS */
     int cnt;
-    int refs;
+    int refs, hidden_links;
+    char *address = NULL;
+
     refs = HText_sourceAnchors(HTMainText);
-    if (refs <= 0) {
+    if (refs <= 0 && LYHiddenLinks != HIDDENLINKS_SEPARATE)
+        return;
+    hidden_links = HText_HiddenLinkCount(HTMainText);
+    if (refs <= 0 && hidden_links <= 0) {
         return;
     } else {
 	fprintf(fp, "\n%s\n\n", "References");
-	for (cnt=1; cnt<=refs; cnt++) {
+	if (hidden_links > 0) {
+	    fprintf(fp, "   Visible links:\n");
+	    if (LYHiddenLinks == HIDDENLINKS_IGNORE)
+		hidden_links = 0;
+	}
+	for (cnt = 1; cnt <= refs; cnt++) {
 	    HTAnchor *dest =
 		HTAnchor_followMainLink((HTAnchor *)
 					HText_childNumber(cnt));
 	    HTParentAnchor * parent = HTAnchor_parent(dest);
-	    char * address =  HTAnchor_address(dest);
 	    CONST char * title = titles ? HTAnchor_title(parent) : NULL;
+
+	    address =  HTAnchor_address(dest);
 	    fprintf(fp, "%4d. %s%s\n", cnt,
-		    ((HTAnchor*)parent!=dest) && title ? "in " : "",
+		    ((HTAnchor*)parent != dest) && title ? "in " : "",
 		    (char *)(title ? title : address));
+	    FREE(address);
+#ifdef VMS
+	    if (HadVMSInterrupt)
+	        break;
+#endif /* VMS */
+	}
+
+	if (hidden_links > 0)
+	    fprintf(fp, "%s   Hidden links:\n", ((refs > 0) ? "\n" : ""));
+	for (cnt = 0; cnt < hidden_links; cnt++) {
+	    StrAllocCopy(address, HText_HiddenLinkAt(HTMainText, cnt));
+	    if (!(address && *address)) {
+		FREE(address);
+		continue;
+	    }
+	    fprintf(fp, "%4d. %s\n", ((cnt + 1) + refs), address);
 	    FREE(address);
 #ifdef VMS
 	    if (HadVMSInterrupt)

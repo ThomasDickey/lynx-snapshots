@@ -503,6 +503,11 @@ static u8 dfont_unicount%s[%d] = \n\
         printf(", ");
     }
 
+  /* If lowest_eightbit is anything else but 999, this can't be 7-bit
+   * only. */
+  if (lowest_eight != 999 && !RawUni)
+    RawUni = UCT_ENC_8BIT;
+
   if (nuni)
     printf("\nstatic u16 dfont_unitable%s[%d] = \n{\n\t", id_append, nuni);
   else

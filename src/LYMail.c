@@ -11,6 +11,10 @@
 #include "LYGlobalDefs.h"
 #include "HTParse.h"
 #include "LYMail.h"
+#ifdef EXP_CHARTRANS
+#include "LYCharSets.h"  /* to get current charset for mail header */
+extern BOOLEAN LYHaveCJKCharacterSet;
+#endif
 
 #include "LYLeaks.h"
 
@@ -712,6 +716,28 @@ PUBLIC void reply_by_mail ARGS3(
 #ifndef DOSPATH
     sprintf(buf,"To: %s\n", address);
     StrAllocCopy(header, buf);
+#endif
+
+#ifdef EXP_CHARTRANS
+    /*
+     *  Put the Mime-Version, Content-Type and
+     *  Content-Transfer-Encoding in the header.
+     *  This assumes that the same character set is used
+     *  for composing the mail which is currently selected
+     *  as display character set...
+     *  Don't send a charset if we have a CJK character set
+     *  selected, since it may not be appropriate for mail...
+     *  Also don't use an inofficial "x-" charset. - kw
+     */
+    StrAllocCat(header, "Mime-Version: 1.0\n");
+    if (!LYHaveCJKCharacterSet &&
+	strncasecomp(LYCharSet_UC[current_char_set].MIMEname, "x-", 2)
+	!= 0) {
+	sprintf(buf,"Content-Type: text/plain; charset=%s\n",
+		LYCharSet_UC[current_char_set].MIMEname);
+	StrAllocCat(header, buf);
+    }
+    StrAllocCat(header, "Content-Transfer-Encoding: 8bit\n");
 #endif
     /*
      *  Put the X-URL and X-Mailer lines in the header.

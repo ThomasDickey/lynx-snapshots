@@ -629,7 +629,9 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
    <dt>Keypad as arrows or numbered links
 	<dd>This option gives the choice between navigating with the arrow
 	    keys or having every link numbered so that the links may be
-	    selected by numbers as well as using the arrow keys.
+	    selected by numbers as well as using the arrow keys.  See the
+	    <a href="keystroke_commands/follow_help.html"
+	    >Follow link (or goto link or page) number:</a> help for more information.
 
    <dt>Line edit style
    	<dd>This option allows you to set alternate key bindings for the
@@ -795,10 +797,35 @@ viewing or '<em>l</em>' to save the link that is currently selected on
 the page.  Selecting '<em>c</em>' will cancel without saving anything to
 your bookmark file.
 
+<p>A bookmark file will be created in conjunction with acting on the
+'<em>a</em>'dd command if it does not already exist.  Otherwise, the link
+will be added to the bottom of the pre-existing bookmark file.  You must
+have created a bookmark file via the '<em>a</em>'dd command before you
+can view it.
+
 <p>Use the '<em>v</em>' command to view the list of bookmarks you have
 saved.  While viewing the bookmark list you may select a bookmark as you
-would any other link.  You can remove a link from the bookmark list by
-pressing the '<em>r</em>' key when positioned on that link.
+would any other link.
+
+<p>You can remove a link from the bookmark list by pressing the
+'<em>r</em>' key when positioned on that link.  You also can use a
+standard text editor (e.g., via the '<em>e</em>'dit command while viewing
+a bookmark file, if an external editor has been defined via the <em>Options
+menu</em>) to delete or re-order links in the bookmark file, or to modify
+a link name by editing the content of the <em>A</em>nchor element for the
+link, but you should not change the format within the line for the link,
+consisting of an <em>LI</em> element followed by the <em>A</em>nchor
+element, nor cause the line to become wrapped to a second line.   You
+similarly can change the link destination by editing the double-quoted
+value for the <em>HREF</em> attribute in the <em>A</em>nchor start tag,
+but you should not otherwise change the spacing within the start tag, nor
+add other attributes.  You can add a new link while editing by copying
+an existing line for a link, to ensure the proper format, and then
+modifying its <em>HREF</em> value and <em>A</em>nchor content, but you
+should not add any other HTML markup to the bookmark file.  If the format
+and spacing (other than the <em>A</em>nchor content or <em>HREF</em> value)
+within lines is changed or other HTML markup is added, the '<em>a</em>'dd
+and '<em>r</em>'emove commands may not work properly.
 
 <p>When multi-bookmarks (see <a href="#12">Options Menu</a>) is OFF,
 you will always view or add links to the default bookmark file.  When
@@ -882,14 +909,14 @@ commands.
    <dt><em>^A</em>
   	<dd><em>Control-A</em> jumps you to the beginning of the current
 	    document.  It is a synonym for the Keypad <em>Home</em> key, and
-	    can be used when <em>Links are numbered</em> mode is on.  The
+	    can be used also when <em>Links are numbered</em> mode is on.  The
 	    <em>Find</em> Function key also is a synonym, and ideally the
 	    latter has been mapped to the Function key labeled <em>Home</em>
 	    if you are using an IBM Enhanced Keyboard.
    <dt><em>^E</em>
   	<dd><em>Control-E</em> jumps you to the end of the current document.
 	    It is a synonym for the Keypad <em>End</em> key, and can be used
-	    when <em>Links are numbered</em> mode is on.  The <em>Select</em>
+	    also when <em>Links are numbered</em> mode is on.  The <em>Select</em>
 	    Function key also is a synonym, and ideally the latter has been
 	    mapped to the Function key labeled <em>End</em> if you are using
 	    an IBM Enhanced Keyboard.
@@ -963,14 +990,28 @@ commands.
 	    number of lines in the file, URL, title, owner, and type are
 	    shown.
    <dt><em>^T</em>
-  	<dd><em>Control-T</em> toggles trace mode on and off.  This is useful
-	    for diagnosing bad html.  If you get a <em>Bad HTML</em>
+  	<dd><em>Control-T</em> toggles Lynx trace mode on and off.  This is
+	    useful for diagnosing bad html.  If you get a <em>Bad HTML</em>
 	    statusline message when loading a document, enter
 	    <em>Control-T</em> and then <em>Control-R</em> to reload the
 	    document in trace mode.  You also can submit the document for
 	    validation via links in the online help menu.  If you are able
 	    to diagnose the problem, send a message about it to the
 	    document's author.
+   <dt><em>;</em>
+  	<dd>The <em>;</em> command shows the <em>Lynx Trace Log</em>
+	    (<em>lynx.trace</em> in the home directory) if one has been
+	    started for the current session.  If a log has not been started,
+	    any trace and other stderr messages will be sent to the screen
+	    (and will disturb the normal display) unless the system supports
+	    piping and that was used to redirect stderr messages to a file.
+	    The log is started when Lynx trace mode is turned on via the
+	    <em>-trace</em> command line switch, or via the
+	    <em>Control-T</em> toggle, if Lynx has been compiled to log
+	    the trace and other stderr messages.  If not, ability to
+	    create a log can be toggled on with the <em>-tlog</em> switch.
+	    Note that this ability is disabled in anonymous or validation
+	    accounts.
    <dt><em>*</em>
   	<dd>The '<em>*</em>' command toggles image_links mode on and off.
 	    When on, links will be created for all images, including inlines.
@@ -1009,6 +1050,11 @@ commands.
 	    '<em>z</em>' key at any time during a connect or transfer process
 	    and the process will be halted.  If any data was transferred
 	    before the interrupt, it will be displayed.
+   <dt><em>numbers</em>
+	<dd>Lynx offers other, advanced navigation features when numbers
+	    are used to invoke the <a
+	    href="keystroke_commands/follow_help.html"
+	    >Follow link (or goto link or page) number:</a> prompt.
 	    [<A HREF="#TOC">ToC</A>]
 </dl>
 
@@ -1123,7 +1169,7 @@ resubmitted, even if the content has not changed, when you activate the
 <em>POST</em> as the METHOD if the document returned by the form has links
 which you activated, and then you go back via the PREV_DOC
 (<em>left-arrow</em>) command or via the <a
-href="keystroke_commands/history_help.html">History Page</em>.  Lynx can be
+href="keystroke_commands/history_help.html">History Page</a>.  Lynx can be
 compiled so that it resubmits the form in those cases as well, and the default
 can be changed via <em>lynx.cfg</em>, and toggled via the
 <em>-resubmit_posts</em> command line switch.
@@ -1546,12 +1592,18 @@ Lynx session are cached, so that they need not be retrieved repeatedly
 when referenced in different documents.
 
 <p>If the IMG element also indicates a <em>server-side-image-map</em>
-via an ISMAP attribute, Lynx will create a link for that as well, rather
-than ignoring it, and will submit a 0,0 coordinate pair if that link is
-activated.  However, the <em>client-side-image-map</em> is much more
-useful for a client such as Lynx, because all of the URLs associated
-with the image map can be accessed, and their nature indicated via ALT
-attributes.
+via an ISMAP attribute, Lynx normally will create a link for that as well,
+using an <em>[ISMAP]</em> pseudo-ALT (followed by a hyphen to indicate its
+association with the <em>client-side-image-map</em>) rather than ignoring
+it, and will submit a 0,0 coordinate pair if that link is activated.
+Although, the <em>client-side-image-map</em> may be more useful for a
+client such as Lynx, because all of the URLs associated with the image
+map can be accessed, and their nature indicated via ALT attributes,
+Lynx-friendly sites can map 0,0 such that the server returns a
+for-text-client document homologous to the content of FIG elements (see
+below).  Inclusion of such a link for submissions to the server can be
+disabled by default via the configuration file (lynx.cfg), and the
+default can be toggled via the <em>-ismap</em> command line switch.
 
 <p>Lynx also recognizes the <a
 href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
@@ -1788,6 +1840,9 @@ where
 		    <code>URL</code> for the '<em>m</em>'ain menu command.
              <dt><code>-image_links</code>
     		<dd>toggles inclusion of links for all images.
+             <dt><code>-ismap</code>
+    		<dd>toggles inclusion of ISMAP links when client-side
+		    MAPs are present.
              <dt><code>-index=URL</code>
     		<dd>set the default index file to the specified <em>URL</em>
              <dt><code>-link=NUMBER</code>
@@ -1879,8 +1934,8 @@ where
        		<dt>dired_support
         		<dd>disallow local file management.
        		<dt>disk_save 
-        		<dd>disallow saving binary files to disk in the 
-			    download menu.
+        		<dd>disallow saving to disk in the download and print
+			    menus.
 		<dt>download
 			<dd>disallow downloaders in the download menu.
        		<dt>editor  
@@ -1975,8 +2030,24 @@ where
     		    (This may be useful for remote execution, when, for
 		    example, Lynx connects to a remote TCP/IP port that starts
 		    a script that, in turn, starts another Lynx process.)
+             <dt><code>-tlog</code>
+    		<dd>toggles use of a <em>Lynx Trace Log</em> for the current
+		    session.  The log is named <em>lynx.trace</em> and is
+		    created in the home directory when Lynx trace mode is
+		    turned on via the <em>-trace</em> command line switch
+		    (see below), or via the TOGGLE_TRACE (<em>Control-T</em>)
+		    keystroke command.  Once a log is started for the session,
+		    all trace and other stderr messages are written to the
+		    log.  The contents of the log can be examined during
+		    the session via the TRACE_LOG (normally, '<em>;</em>')
+		    keystroke command.
              <dt><code>-trace</code>
-    		<dd>turns on WWW trace mode.
+    		<dd>turns on Lynx trace mode.  If a Lynx Trace Log
+		    (<em>lynx.trace</em> in the home directory) has
+		    been started for the current session, all trace and
+		    other stderr messages are written to that log, and
+		    can be examined during the session via the TRACE_LOG
+		    (normally, '<em>;</em>') command.
              <dt><code>-traversal</code>
     		<dd>traverse all http links derived from startfile.  When
 		    used with <em>-crawl</em>, each link that begins with the

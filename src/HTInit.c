@@ -278,7 +278,9 @@ PRIVATE char *Cleanse ARGS1(char *,s)
 
 PRIVATE int ProcessMailcapEntry ARGS2(FILE *,fp, struct MailcapEntry *,mc)
 {
-    int i, j, rawentryalloc = 2000, len;
+    int i, j;
+    size_t rawentryalloc = 2000;
+    size_t len;
     char *rawentry, *s, *t, *LineBuf;
 
     LineBuf = malloc(LINE_BUF_SIZE);
@@ -815,7 +817,7 @@ PUBLIC void HTFileInit NOARGS
     HTSetSuffix(".xwd",		"image/x-xwindowdump", "binary", 1.0);
 
     HTSetSuffix(".rtx",		"text/richtext", "8bit", 1.0);
-    HTSetSuffix(".tsv",		"text/tab-separated-values", "8-bit", 1.0);
+    HTSetSuffix(".tsv",		"text/tab-separated-values", "8bit", 1.0);
     HTSetSuffix(".etx",		"text/x-setext", "8bit", 1.0);
 
     HTSetSuffix(".mpg",		"video/mpeg", "binary", 1.0);

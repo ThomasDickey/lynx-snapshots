@@ -59,9 +59,10 @@ PUBLIC void cleanup_sig ARGS1(
 	_statusline(REALLY_EXIT);
 	c = LYgetch();
 #ifdef QUIT_DEFAULT_YES
-	if(TOUPPER(c) == 'N')
+	if (TOUPPER(c) == 'N' ||
+	    c == 7)
 #else
-	if(TOUPPER(c) != 'Y')
+	if (TOUPPER(c) != 'Y')
 #endif /* QUIT_DEFAULT_YES */
 	    return;
     }
@@ -109,7 +110,7 @@ PUBLIC void cleanup_sig ARGS1(
 #endif /* NOSIGHUP */
 
 #ifndef NOSIGHUP
-	 (void) signal(SIGHUP, SIG_IGN);
+	 (void) signal(SIGHUP, SIG_DFL);
 #endif /* NOSIGHUP */
     (void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
@@ -162,9 +163,7 @@ PUBLIC void cleanup NOARGS
         move(LYlines-1, 0);
         clrtoeol();
 
-        stop_bold();
-        stop_underline();
-        stop_reverse();
+        lynx_stop_all_colors ();
         refresh();
 
         stop_curses();
@@ -184,4 +183,8 @@ PUBLIC void cleanup NOARGS
 #endif /* VMS */
 
     fflush(stdout);
+    fflush(stderr);
+    if (LYTraceLogFP != NULL) {
+        fclose(LYTraceLogFP);
+    }
 }

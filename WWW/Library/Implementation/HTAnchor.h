@@ -98,6 +98,9 @@ struct _HTParentAnchor {
   char *        title;          /* Title of document */
   char *        owner;          /* Owner of document */
   char *        RevTitle;       /* TITLE in REV="made" or REV="owner" LINK */
+#ifdef USEHASH
+  char *	style;
+#endif
 
   HTList*       methods;        /* Methods available as HTAtoms */
   void *        protocol;       /* Protocol object */
@@ -149,6 +152,15 @@ typedef struct _DocAddress {
     BOOL   isHEAD;
     BOOL   safe;
 } DocAddress;
+
+/* "internal" means "within the same document, with certainty".
+   It includes a space so it cannot conflict with any (valid) "TYPE"
+   attributes on A elements. [According to which DTD, anyway??] - kw */
+
+#define LINK_INTERNAL HTAtom_for("internal link")
+
+extern int HASH_FUNCTION PARAMS((
+	CONST char * 	cp_address));
 
 /*      Create new or find old sub-anchor
 **      ---------------------------------
@@ -248,8 +260,20 @@ extern void HTAnchor_setPrompt PARAMS((
 extern BOOL HTAnchor_isIndex PARAMS((
 	HTParentAnchor *	me));
 
+extern BOOL HTAnchor_isISMAPScript PARAMS((
+	HTAnchor *		me));
+
 extern BOOL HTAnchor_hasChildren PARAMS((
 	HTParentAnchor *	me));
+
+#if defined(USEHASH)
+extern CONST char * HTAnchor_style PARAMS((
+	HTParentAnchor *	me));
+
+extern void HTAnchor_setStyle PARAMS((
+	HTParentAnchor *	me,
+	CONST char *		style));
+#endif
 
 /*      Title handling.
 */

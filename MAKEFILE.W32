@@ -22,10 +22,10 @@ TASM32  = Tasm32
 # Options
 #
 IDE_LFLAGS32 =  -LD:\BC45\LIB
-LLATC32_lynxdexe =  -LCURSES;D:\BC45\LIB -Tpe -ap -c -wdpl -wdup
-RLATC32_lynxdexe =  -w32 -k
+LLATC32_lynxdexe =  -LCURSES;D:\BC45\LIB -wdpl -wdup -Tpe -ap -c
+RLATC32_lynxdexe =  -k -w32
 BLATC32_lynxdexe = 
-CNIEAT_lynxdexe = -I.\;CURSES;SRC;WWW\LIBRARY\IMPLEMENTATION;D:\BC45\INCLUDE;SRC\CHRTRANS -DNO_UNISTD_H;_WINDOWS;NCURSES;FANCY_CURSES;XMOSAIC_HACK;ACCESS_AUTH;NO_UTMP;NO_CUSERID;NO_TTYTYPE;NOSIGHUP;DOSPATH;NOUSERS;EXP_CHARTRANS
+CNIEAT_lynxdexe = -I.\;CURSES;SRC;WWW\LIBRARY\IMPLEMENTATION;D:\BC45\INCLUDE;SRC\CHRTRANS -DNO_UNISTD_H;_WINDOWS;XMOSAIC_HACK;ACCESS_AUTH;NO_UTMP;NO_CUSERID;NO_TTYTYPE;NOSIGHUP;DOSPATH;NOUSERS;EXP_CHARTRANS;NCURSES;FANCY_CURSES;COLOR_CURSES;HAVE_KEYPAD;VC="2.14FM";NCURSES_VERSION
 LNIEAT_lynxdexe = -x
 LEAT_lynxdexe = $(LLATC32_lynxdexe)
 REAT_lynxdexe = $(RLATC32_lynxdexe)
@@ -35,7 +35,7 @@ LLATW16_cursesbpdcursesdlib =
 RLATW16_cursesbpdcursesdlib = 
 BLATW16_cursesbpdcursesdlib = 
 CEAT_cursesbpdcursesdlib = $(CEAT_lynxdexe) $(CLATW16_cursesbpdcursesdlib)
-CNIEAT_cursesbpdcursesdlib = -I.\;CURSES;SRC;WWW\LIBRARY\IMPLEMENTATION;D:\BC45\INCLUDE;SRC\CHRTRANS -DNO_UNISTD_H;_WINDOWS;NCURSES;FANCY_CURSES;XMOSAIC_HACK;ACCESS_AUTH;NO_UTMP;NO_CUSERID;NO_TTYTYPE;NOSIGHUP;DOSPATH;NOUSERS;EXP_CHARTRANS
+CNIEAT_cursesbpdcursesdlib = -I.\;CURSES;SRC;WWW\LIBRARY\IMPLEMENTATION;D:\BC45\INCLUDE;SRC\CHRTRANS -DNO_UNISTD_H;_WINDOWS;XMOSAIC_HACK;ACCESS_AUTH;NO_UTMP;NO_CUSERID;NO_TTYTYPE;NOSIGHUP;DOSPATH;NOUSERS;EXP_CHARTRANS;NCURSES;FANCY_CURSES;COLOR_CURSES;HAVE_KEYPAD;VC="2.14FM";NCURSES_VERSION
 LNIEAT_cursesbpdcursesdlib = -x
 LEAT_cursesbpdcursesdlib = $(LEAT_lynxdexe) $(LLATW16_cursesbpdcursesdlib)
 REAT_cursesbpdcursesdlib = $(REAT_lynxdexe) $(RLATW16_cursesbpdcursesdlib)
@@ -51,6 +51,8 @@ lynx : BccW32.cfg $(Dep_lynx)
   echo MakeNode 
 
 Dep_lynxdexe = \
+   OBJ\htdos.obj\
+   curses\pdcurses.lib\
    OBJ\ucauto.obj\
    OBJ\ucaux.obj\
    OBJ\ucdomap.obj\
@@ -135,13 +137,13 @@ Dep_lynxdexe = \
    OBJ\lystring.obj\
    OBJ\lytraver.obj\
    OBJ\lyupload.obj\
-   OBJ\lyutils.obj\
-   curses\pdcurses.lib
+   OBJ\lyutils.obj
 
 lynx.exe : $(Dep_lynxdexe)
   $(TLINK32) @&&|
  /v $(IDE_LFLAGS32) $(LEAT_lynxdexe) $(LNIEAT_lynxdexe) +
 D:\BC45\LIB\c0x32.obj+
+OBJ\htdos.obj+
 OBJ\ucauto.obj+
 OBJ\ucaux.obj+
 OBJ\ucdomap.obj+
@@ -233,6 +235,11 @@ D:\BC45\LIB\bidsf.lib+
 D:\BC45\LIB\import32.lib+
 D:\BC45\LIB\cw32.lib
 
+|
+
+OBJ\htdos.obj :  www\library\implemen\htdos.c
+  $(BCC32) -P- -c @&&|
+ $(CEAT_lynxdexe) $(CNIEAT_lynxdexe) -o$@ www\library\implemen\htdos.c
 |
 
 OBJ\ucauto.obj :  src\ucauto.c
@@ -697,12 +704,12 @@ BccW32.cfg :
 -w-inl
 -w-lin
 -w-lvc
--w-pia
+-wpia
 -w-def
 -w-nod
 -w-pro
 -w-rvl
--w-ccc
+-wccc
 -w-aus
 -w-par
 -w-rch
@@ -710,7 +717,6 @@ BccW32.cfg :
 -w-ill
 -w-ias
 -w-msg
--WC
 -Ot
 -d-
 -K
@@ -721,9 +727,11 @@ BccW32.cfg :
 -wcln
 -wsig
 -wucp
--g200
+-g255
 -H-
 -v-
+-WC
+-wamb
 | $@
 
 

@@ -78,6 +78,14 @@ WWWINC= WWW/Library/Implementation
 #SLANGLIB = -L../../slang/src/$(ARCH)objs#  location of libslang.a
 #SLANGRRLIB = -R../../slang/src/$(ARCH)objs# for solaris
 
+# !!!!!!!!!!! Support for Character Styles !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# Comment out the following lines if you do *not* want to activate
+# Rob Partington's Character Style color support code (which may currently
+# only work with ncurses, not other curses or the slang library).
+# Or modify and experiment...  -kw
+RP_LYDEFS = -I../../../src -DUSE_COLOR_STYLE -DUSEHASH
+RP_DEFS = -DUSE_COLOR_STYLE -DUNPAINT_CACHE -DTEST -DUSEHASH
+
 # !!!!!!!!!!! Lynx Local Directory Listing Formats !!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Lynx supports "ls -l" format for local directory listings on Unix if the
 # LONG_LIST compilation symbol is defined, and includes links to the parent
@@ -269,10 +277,10 @@ DIR_DEFS = $(DIRED_SUPPORT) $(DIRED_ARCHIVE) $(DIRED_TAR) $(DIRED_ZIP) $(DIRED_G
 #SITE_LIBS= # Your libraries here (remove the "#")
 
 # Set SITE_LYDEFS to one or more of the defines for the WWW Library:
-SITE_LYDEFS = $(DIR_LYDEFS) -DEXP_CHARTRANS # Your defines here
+SITE_LYDEFS = $(DIR_LYDEFS) $(RP_LYDEFS) -DEXP_CHARTRANS # Your defines here
 
 # Set SITE_DEFS to one or more of the defines for lynx below:
-SITE_DEFS = $(DIR_DEFS) -DEXP_CHARTRANS # Your defines here
+SITE_DEFS = $(DIR_DEFS) $(RP_DEFS) -DEXP_CHARTRANS -DNSL_FORK -DLYNXCGI_LINKS -DUSE_EXTERNALS # Your defines here
 
 # if you are compiling on a previously unsupported system, modify
 # this generic entry!!
@@ -695,6 +703,41 @@ solaris2:
 		$(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		WWWLIB="../WWW/Library/solaris2/libwww.a"
 
+solaris2-ncurses:
+	cd WWW/Library/solaris2; $(MAKE) CC="cc" LYFLAGS="$(SITE_LYDEFS) -g"
+	cd src; $(MAKE) all CC="gcc" MCFLAGS="-g -DFANCY_CURSES \
+		-DNCURSES -DUNIX -DSVR4 -DSOLARIS2 \
+		-DUTMPX_FOR_UTMP -DUSE_DIRENT -DLOCALE -DHAVE_TERMIOS_H \
+		-I../$(WWWINC) $(SITE_DEFS)" \
+		LIBS="-L/usr/ccs/lib -R/usr/ccs/lib -lncurses -lnsl -lsocket \
+		$(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
+		WWWLIB="../WWW/Library/solaris2/libwww.a" \
+		STYLE=LYStyle
+
+solaris2-ncurses-develop:
+	cd WWW/Library/solaris2; $(MAKE) CC="gcc" LYFLAGS="$(SITE_LYDEFS) -g -I../../../src -DUSE_COLOR_STYLE -DUSEHASH"
+	cd src; $(MAKE) all CC="gcc" MCFLAGS="-g -DFANCY_CURSES \
+		-DUNPAINT_CACHE  -DTEST -DUSE_COLOR_STYLE \
+		-DUSEHASH" \
+		-DNCURSES -DUNIX -DSVR4 -DSOLARIS2 \
+		-DUTMPX_FOR_UTMP -DUSE_DIRENT -DLOCALE -DHAVE_TERMIOS_H \
+		-I../$(WWWINC) $(SITE_DEFS)" \
+		LIBS="-L/usr/ccs/lib -R/usr/ccs/lib -lncurses -lnsl -lsocket \
+		$(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
+		WWWLIB="../WWW/Library/solaris2/libwww.a" \
+		STYLE=LYStyle
+
+solaris2-ncurses-NHE:
+	cd WWW/Library/solaris2; $(MAKE) CC="gcc" LYFLAGS="$(SITE_LYDEFS)"
+	cd src; $(MAKE) all CC="gcc" MCFLAGS="-O4 -s -DUSE_COLOR_STYLE -DFANCY_CURSES \
+		-DNCURSES -DUNIX -DSVR4 -DSOLARIS2 -DCURS_PERFORMANCE \
+		-DUTMPX_FOR_UTMP -DUSE_DIRENT -DLOCALE -DHAVE_TERMIOS_H \
+		-I../$(WWWINC) $(SITE_DEFS)" \
+		LIBS="-L/usr/ccs/lib -R/usr/ccs/lib -lncurses -lnsl -lsocket \
+		-lresolv" \
+		WWWLIB="../WWW/Library/solaris2/libwww.a" \
+		STYLE=NCStyle
+
 # Solaris 2 using Sun's unbundled C compiler
 # define RESOLVLIB (above) for the "LIBS" entry if needed
 # Solaris2 doesn't have or need ranlib. (ignore the error message about that :)
@@ -807,6 +850,26 @@ linux-slang:
 		LIBS="$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		WWWLIB="../WWW/Library/unix/libwww.a" \
 		SLANGLIB="$(SLANGLIB) -lslang -lm" SLANGINC="$(SLANGINC)"
+
+develop:
+	cd WWW/Library/unix; $(MAKE) LYFLAGS="-DLINUX $(SITE_LYDEFS) -I../../../src -DUSE_COLOR_STYLE -DUSEHASH"
+	cd src; $(MAKE) all CC="gcc" \
+		MCFLAGS="-O -DUNPAINT_CACHE -DUNIX -DLINUX -DNCURSES \
+		-DFANCY_CURSES -DNO_KEYPAD -DNO_TTYTYPE -DTEST -DUSE_COLOR_STYLE \
+		-I/usr/include/ncurses -I../$(WWWINC) $(SITE_DEFS) -DUSEHASH" \
+		LIBS="-lncurses $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
+		WWWLIB="../WWW/Library/unix/libwww.a" \
+		STYLE=LYStyle
+
+linux-style:
+	cd WWW/Library/unix; $(MAKE) LYFLAGS="-DLINUX $(SITE_LYDEFS) -I../../../src -DUSEHASH -DUSE_COLOR_STYLE"
+	cd src; $(MAKE) all CC="gcc" \
+		MCFLAGS="-O -DUNPAINT_CACHE -DUNIX -DLINUX -DNCURSES \
+		-DFANCY_CURSES -DNO_KEYPAD -DNO_TTYTYPE -DTEST -DUSE_COLOR_STYLE \
+		-I/usr/include/ncurses -I../$(WWWINC) $(SITE_DEFS) -DUSEHASH" \
+		LIBS="-lncurses $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
+		WWWLIB="../WWW/Library/unix/libwww.a" \
+		STYLE=LYStyle
 
 ##Various AIX environments
 aix:

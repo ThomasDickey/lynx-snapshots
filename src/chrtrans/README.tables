@@ -45,8 +45,10 @@ if in doubt, check the last lines of the corresponding ...uni.h file.]
 c) To let make automatically notice when you have changed one of the
    table files, and automatically regenerate the *uni.h file(s), 
 you also have to add any new tables to both src/Makefile *and*
-src/chrtrans/Makefile.  (That may be inconvenient, but I didn't want to
-depend on features than not all makes may have.)  Note that for recompiling
-Lynx, a `make clean' should not be necessary if you have *only* made 
+src/chrtrans/Makefile.  Or, for auto-config, the equivalent files
+named makefile.in before running ./configure, or makefile after running
+./configure.  (That may be inconvenient, but I didn't want to depend
+on features than not all makes may have.)  Note that for recompiling
+Lynx, a `make clean' should not be necessary if you have *only* made
 changes to the files in src/chrtrans.
 

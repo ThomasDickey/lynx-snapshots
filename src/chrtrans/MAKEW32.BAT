@@ -22,4 +22,3 @@ makeuctb rfc_suni.tbl > rfc_suni.h
 makeuctb def7_uni.tbl > def7_uni.h
 makeuctb koi8r_uni.tbl > koi8r_uni.h
 
-

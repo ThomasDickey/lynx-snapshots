@@ -3,6 +3,7 @@
 ** Modified:
 ** 27 Jan 1994  PDM  Added Ari Luotonen's Fix for Reload when using proxy
 **                   servers.
+** 28 Apr 1997  AJL,FM Do Proxy Authorisation.
 */
 
 #include "HTUtils.h"
@@ -50,6 +51,7 @@ extern BOOL LYNoFromHeader;	/* Never send From header? */
 extern BOOL LYSetCookies;	/* Act on Set-Cookie headers? */
 
 extern BOOL using_proxy;	/* Are we using an HTTP gateway? */
+PUBLIC BOOL auth_proxy = NO;	/* Generate a proxy authentication. - AJL */
 PUBLIC BOOL reloading = FALSE;	/* Reloading => send no-cache pragma to proxy */
 PUBLIC char * redirecting_url = NULL;	    /* Location: value. */
 PUBLIC BOOL permanent_redirection = FALSE;  /* Got 301 status? */
@@ -391,37 +393,94 @@ try_again:
 	}
 
 	/*
-	**  Add 'Cookie:' header, if applicable.
+	**  Add Authorization, Proxy-Authorization,
+	**  and/or Cookie headers, if applicable.
 	*/
 	if (using_proxy) {
 	    /*
-	    **  If it's not an HTTP or HTTPS document being proxied,
-	    **  forget about cookies.
+	    **  If we are using a proxy, first determine if
+	    **  we should include an Authorization header
+	    **  and/or Cookie header for the ultimate target
+	    **  of this request. - FM & AJL
+	    */
+	    char *host2 = NULL, *path2 = NULL;
+	    int port2 = (strncmp(docname, "https", 5) ?
+					   HTTP_PORT : HTTPS_PORT);
+	    host2 = HTParse(docname, "", PARSE_HOST);
+	    path2 = HTParse(docname, "", PARSE_PATH|PARSE_PUNCTUATION);
+	    if (host2) {
+		if ((colon = strchr(host2, ':')) != NULL) {
+		    /* Use non-default port number */
+		    *colon = '\0';
+		    colon++;
+		    port2 = atoi(colon);
+		}
+	    }
+	    /*
+	    **  This composeAuth() does file access, i.e., for
+	    **  the ultimate target of the request. - AJL
+	    */
+	    auth_proxy = NO;
+	    if ((auth = HTAA_composeAuth(host2, port2, path2)) != NULL &&
+		*auth != '\0') {
+		/*
+		**  If auth is not NULL nor zero-length, it's
+		**  an Authorization header to be included. - FM
+		*/ 
+		sprintf(line, "%s%c%c", auth, CR, LF);
+		StrAllocCat(command, line);
+		if (TRACE)
+		    fprintf(stderr, "HTTP: Sending authorization: %s\n", auth);
+	    } else if (auth && *auth == '\0') {
+		/*
+		**  If auth is a zero-length string, the user either
+		**  cancelled or goofed at the username and password
+		**  prompt. - FM
+		*/
+		if (!(traversal || dump_output_immediately) &&
+			HTConfirm(
+			    "Proceed without a username and password?")) {
+		    show_401 = TRUE;
+		} else {
+		    if (traversal || dump_output_immediately)
+			HTAlert(
+			    "Can't proceed without a username and password.");
+		    FREE(command);
+		    FREE(hostname);
+		    FREE(docname);
+		    FREE(host2);
+		    FREE(path2);
+		    status = HT_NOT_LOADED;
+		    goto done;
+		}
+	    } else {
+		if (TRACE)
+		    fprintf(stderr,
+		    	    "HTTP: Not sending authorization (yet)\n");
+	    }
+	    /*
+	    **  Add 'Cookie:' header, if it's HTTP or HTTPS
+	    **  document being proxied.
 	    */
 	    if (!strncmp(docname, "http", 4)) {
-		char *host2 = NULL, *path2 = NULL;
-		int port = (strncmp(docname, "https", 5) ?
-					       HTTP_PORT : HTTPS_PORT);
-
-		host2 = HTParse(docname, "", PARSE_HOST);
-		path2 = HTParse(docname, "", PARSE_PATH|PARSE_PUNCTUATION);
-		if (host2) {
-		    if ((colon = strchr(host2, ':')) != NULL) {
-		        /*
-			**  Use non-default port number.
-			*/
-		        *colon = '\0';
-			colon++;
-			port = atoi(colon);
-		    }
-		}
-		cookie = LYCookie(host2, path2, port, secure);
-		FREE(host2);
-		FREE(path2);
+		cookie = LYCookie(host2, path2, port2, secure);
 	    }
+	    FREE(host2);
+	    FREE(path2);
+	    /*
+	    **  The next composeAuth() will be for the proxy. - AJL
+	    */
+	    auth_proxy = YES;
 	} else {
+	    /*
+	    **  Add cookie for a non-proxied request. - FM
+	    */
 	    cookie = LYCookie(hostname, abspath, portnumber, secure);
+	    auth_proxy = NO;
 	}
+	/*
+	**  If we do have a cookie set, add it to the request buffer. - FM
+	*/
 	if (cookie != NULL) {
 	    if (*cookie != '\0') {
 	        StrAllocCat(command, "Cookie: ");
@@ -434,16 +493,29 @@ try_again:
 	}
 	FREE(abspath);
 
-        if ((auth = HTAA_composeAuth(hostname, portnumber, docname)) != NULL &&
+	/*
+	**  If we are using a proxy, auth_proxy should be YES, and
+	**  we check here whether we want a Proxy-Authorization header
+	**  for it.  If we are not using a proxy, auth_proxy should
+	**  still be NO, and we check here for whether we want an
+	**  Authorization header. - FM & AJL
+	*/
+        if ((auth = HTAA_composeAuth(hostname,
+				     portnumber, docname)) != NULL &&
 	    *auth != '\0') {
 	    /*
 	    **  If auth is not NULL nor zero-length, it's
-	    **  an Authorization header to be included. - FM
+	    **  an Authorization or Proxy-Authorization
+	    **  header to be included. - FM
 	    */ 
             sprintf(line, "%s%c%c", auth, CR, LF);
             StrAllocCat(command, line);
 	    if (TRACE)
-                fprintf(stderr, "HTTP: Sending authorization: %s\n", auth);
+                fprintf(stderr,
+			(using_proxy ?
+			 "HTTP: Sending proxy authorization: %s\n" :
+			 "HTTP: Sending authorization: %s\n"),
+			auth);
 	} else if (auth && *auth == '\0') {
 	    /*
 	    **  If auth is a zero-length string, the user either
@@ -464,7 +536,10 @@ try_again:
 	    }
         } else {
 	    if (TRACE)
-                fprintf(stderr, "HTTP: Not sending authorization (yet)\n");
+                fprintf(stderr,
+			(using_proxy ?
+			 "HTTP: Not sending proxy authorization (yet).\n" :
+			 "HTTP: Not sending authorization (yet).\n"));
         }
         FREE(hostname);
         FREE(docname);
@@ -1229,6 +1304,7 @@ Cookie_continuation:
 		 *  to show the 401 body or restore the current
 		 *  document. - FM
 		 */
+		auth_proxy = NO;
 		if (show_401)
 		    break;
 		if (HTAA_shouldRetryWithAuth(start_of_data, length,
@@ -1271,17 +1347,55 @@ Cookie_continuation:
 
 	      case 407:
 	        /*
-		 *  Proxy Authentication Required.  We'll handle
-		 *  Proxy-Authenticate headers and retry with a
-		 *  Proxy-Authorization header, someday, but for
-		 *  now, apologized to the user and restore the
-		 *  current document. - FM
+		 *  Authorization for proxy server required.
+		 *  If we are not in fact using a proxy, or
+		 *  show_401 is set, proceed to showing the
+		 *  407 body.  Otherwise, if we can set up
+		 *  authorization based on the Proxy-Authenticate
+		 *  header, and the user provides a username and
+		 *  password, try again.  Otherwise, check whether
+		 *  to show the 401 body or restore the current
+		 *  document. - FM & AJL
 		 */
-	        HTAlert(
-		 "Proxy Authentication Required.  Sorry, not yet supported.");
-                HTTP_NETCLOSE(s, handle);
-	        status = HT_NO_DATA;
-	        goto done;
+		if (!using_proxy || show_401)
+		    break;
+		auth_proxy = YES;
+		if (HTAA_shouldRetryWithAuth(start_of_data, length,
+					     (void *)handle, s)) {
+ 		    extern char *authentication_info[2];
+
+                    HTTP_NETCLOSE(s, handle);
+                    if (dump_output_immediately && !authentication_info[0]) {
+                        fprintf(stderr,
+		      		"HTTP: Proxy authorization required.\n");
+                        fprintf(stderr,
+		      		"       Use the -auth=id:pw parameter.\n");
+                        status = HT_NO_DATA;
+                        goto clean_up;
+                    }
+
+                    if (TRACE) 
+                        fprintf(stderr, "%s %d %s\n",
+                              "HTTP: close socket", s,
+                              "to retry with Proxy Authorization");
+
+                    _HTProgress (
+		    	"Retrying with proxy authorization information.");
+		    FREE(line_buffer);
+		    FREE(line_kept_clean);
+                    goto try_again;
+                    break;
+		} else if (!(traversal || dump_output_immediately) &&
+		           HTConfirm("Show the 407 message body?")) {
+		    break;
+                } else {
+		    if (traversal || dump_output_immediately)
+		        HTAlert(
+	"Can't retry with proxy authorization!  Contact the server's WebMaster.");
+		    HTTP_NETCLOSE(s, handle);
+                    status = -1;
+                    goto clean_up;
+		}
 		break;
 
 	      case 408:

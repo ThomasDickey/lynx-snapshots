@@ -1,6 +1,7 @@
 #include "HTUtils.h"
 #include "tcp.h"
 #include "LYCurses.h"
+#include "LYStyle.h"
 #include "LYUtils.h"
 #include "LYGlobalDefs.h"
 #include "LYSignal.h"
@@ -31,6 +32,12 @@ extern int _NOSHARE(LINES);
 extern int _NOSHARE(COLS);
 #endif /* VMS && __GNUC__ */
 
+#ifdef USE_COLOR_STYLE
+#include "AttrList.h"
+#include "LYHash.h"
+int has_color = 0;
+#endif
+
 /*
  *  These are routines to start and stop curses and to cleanup
  *  the screen at the end.
@@ -39,7 +46,7 @@ extern int _NOSHARE(COLS);
 PRIVATE int dumbterm PARAMS((char *terminal));
 BOOLEAN LYCursesON = FALSE;
 
-#if defined(USE_SLANG) || defined(COLOR_CURSES)
+#if USE_COLOR_TABLE || USE_SLANG
 PRIVATE int Current_Attr;
 #endif
 
@@ -60,6 +67,12 @@ PUBLIC void LY_SLrefresh NOARGS
     SLsmg_refresh();
 
     return;
+}
+
+PUBLIC void LY_SLclear NOARGS
+{
+    SLsmg_gotorc (0, 0);
+    SLsmg_erase_eos ();
 }
 
 #ifdef VMS
@@ -111,13 +124,16 @@ PUBLIC void lynx_setup_colors NOARGS
     SLtt_set_mono(7, NULL, SLTT_ULINE_MASK | SLTT_BOLD_MASK | SLTT_REV_MASK);
 }
 
+
+
 PRIVATE void sl_suspend ARGS1(
 	int,		sig)
 {
-#ifndef VMS
 #ifdef SIGSTOP
+#ifndef VMS
     int r, c;
-
+   
+    lynx_enable_mouse (0);
     if (sig == SIGTSTP)
         SLsmg_suspend_smg();
     SLang_reset_tty();
@@ -142,14 +158,191 @@ PRIVATE void sl_suspend ARGS1(
     if ((r != SLtt_Screen_Rows) || (c != SLtt_Screen_Cols)) {
 	recent_sizechange = TRUE;
     }
-#endif /* SIGSTOP */
+    lynx_enable_mouse (1);
 #endif /* !VMS */
+#endif /* SIGSTOP */
    return;
 }
 #endif /* USE_SLANG */
 
+#if defined(USE_COLOR_STYLE) || defined(SLCS)
+PRIVATE int last_styles[128];
+PRIVATE int last_ptr=0;
+#endif
 
-#ifdef COLOR_CURSES
+#if defined(USE_COLOR_STYLE)
+/* Ok, explanation of the USE_COLOR_STYLE styles.  The basic styles (ie non
+ * HTML) are set the same as the SLANG version for ease of programming.  The
+ * other styles are simply the HTML enum from HTMLDTD.h + 16.
+ */
+PUBLIC HTCharStyle displayStyles[DSTYLE_ELEMENTS];
+
+/*
+ * set a style's attributes - RP
+ */
+PUBLIC void setStyle ARGS4(int,style,int,color,int,cattr,int,mono)
+{
+	displayStyles[style].color=color;
+	displayStyles[style].cattr=cattr;
+	displayStyles[style].mono=mono;
+}
+
+PUBLIC void setHashStyle ARGS5(int,style,int,color,int,cattr,int,mono,char*,element)
+{
+        bucket* ds=&hashStyles[style];
+        if (TRACE)
+                fprintf(stderr, "CSS(SET): <%s> hash=%d, ca=%d, ma=%d\n", element, style, color, mono);
+        ds->color=color;
+        ds->cattr=cattr;
+        ds->mono=mono;
+        ds->code=style;
+        ds->name=malloc(sizeof(char)*(strlen(element)+2));
+        strcpy(ds->name, element);
+}
+
+/*
+ * set the curses attributes to be color or mono - RP
+ */
+PRIVATE int LYAttrset ARGS3(WINDOW*,win,int,color,int,mono)
+{
+	if (TRACE)
+		fprintf(stderr, "CSS:LYAttrset (%d, %d)\n", color, mono);
+	if (has_color && color > -1)
+	{
+		wattrset(win,color);
+#if 0
+		//wbkgdset(win,color);
+#endif
+		return color;
+	}
+	if (mono > -1)
+	{
+		wattrset(win,mono);
+#if 0
+		//wbkgdset(win,mono);
+#endif
+		return mono;
+	}
+	wattrset(win,A_NORMAL);
+#if 0
+	//wbkgdset(win,A_NORMAL);
+#endif
+	return A_NORMAL;
+}
+
+PUBLIC void curses_w_style ARGS4(WINDOW*,win,int,style,int,dir,int,previous)
+{
+	int YP,XP;
+	bucket* ds=&hashStyles[style];
+
+	if (!ds->name)
+	{
+		if (TRACE)
+		fprintf(stderr, "CSS.CS:Style %d not configured\n",style);
+		return;
+	}
+	if (TRACE)
+		fprintf(stderr, "CSS.CS:<%s%s> (%d)\n",(dir?"":"/"),ds->name,ds->code);
+
+	getyx (win, YP, XP);
+
+	if (style == s_normal && dir)
+	{
+		wattrset(win,A_NORMAL);
+		if (win==stdscr) cached_styles[YP][XP]=s_normal;
+		return;
+	}
+
+	switch (dir)
+	{
+		/* ABS_OFF is the same as STACK_OFF for the moment */
+	case STACK_OFF:
+		if (last_ptr)
+			LYAttrset(win,last_styles[--last_ptr],-1);
+		else
+			LYAttrset(win,A_NORMAL,-1);
+		return;
+
+	case STACK_ON: /* remember the current attributes */
+#ifndef _NCURSES_H
+		last_styles[last_ptr++] = getattrs(stdscr);
+#else
+		last_styles[last_ptr++] = attr_get();
+#endif
+		/* don't cache style changes for active links */
+		if (style != s_alink)
+		{
+			if (TRACE)
+				fprintf(stderr, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP);
+			if (win==stdscr) cached_styles[YP][XP]=style;
+			LYAttrset(win, ds->color, ds->mono);
+		}
+		else
+		{
+			LYAttrset(win, ds->color, ds->mono);
+		}
+		return;
+
+	case ABS_ON: /* change without remembering the previous style */
+		/* don't cache style changes for active links */
+		if (style != s_alink)
+		{
+			if (TRACE)
+				fprintf(stderr, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP);
+			if (win==stdscr) cached_styles[YP][XP]=style;
+			LYAttrset(win, ds->color, ds->mono);
+		}
+		else
+		{
+			LYAttrset(win, ds->color, ds->mono);
+		}
+		return;
+	}
+}
+
+/*
+ * wrapper function to set on-screen styles - RP
+ */
+PUBLIC void wcurses_css ARGS3(WINDOW *,win,char*,name,int,dir)
+{
+	int try_again=1;
+	while (try_again)
+	{
+		int tmpHash=hash_code(name);
+		if (TRACE)
+			fprintf(stderr, "CSSTRIM:trying to set [%s] style - ", name);
+		if (tmpHash==NOSTYLE) {
+			char *class=strrchr(name, '.');
+			if (TRACE) fprintf(stderr, "undefined, trimming at %p\n", class);
+			if (class)	*class='\0';
+			else 		try_again=0;
+		} else {
+			if (TRACE) fprintf(stderr, "ok (%d)\n", hash_code(name));
+			curses_w_style(win, hash_code(name), dir, 0);
+			try_again=0;
+		}
+	}
+}
+
+PUBLIC void curses_css ARGS2(char *,name,int,dir)
+{
+	wcurses_css(stdscr, name, dir);
+}
+
+PUBLIC void curses_style ARGS3(int,style,int,dir,int,previous)
+{
+        curses_w_style(stdscr, style, dir, previous);
+}
+
+#if UNUSED
+void attribute ARGS2(int,style,int,dir)
+{
+        curses_style(style, dir, 0);
+}
+#endif
+#endif /* USE_COLOR_STYLE */
+
+#if USE_COLOR_TABLE && defined(COLOR_CURSES)
 /*
  * This block of code is designed to produce the same color effects using SVr4
  * curses as the slang library's implementation in this module.  That maps the
@@ -346,9 +539,9 @@ PUBLIC void lynx_setup_colors NOARGS
     for (n = 0; n < 8; n++)
 	lynx_map_color(n);
 }
-#endif /* COLOR_CURSES */
+#endif /* USE_COLOR_TABLE */
 
-#if defined (DJGPP) && !defined (SLANG)
+#if defined (DJGPP) && !defined (USE_SLANG)
 /*
  * Sorry about making a completely new function,
  * but the real one is messy! WB
@@ -368,11 +561,17 @@ PUBLIC void start_curses NOARGS
 		  fflush(stdout);
                   lynx_init_colors();
                   lynx_called_initscr = TRUE;
+
+ /* Inform pdcurses that we're interested in knowing when mouse
+    buttons are clicked.  Maybe someday pdcurses will support it.
+ */
+	 if (LYUseMouse)
+	      lynx_enable_mouse (1);
+
 	 } else sock_init();
 
 	 LYCursesON = TRUE;
 	 clear();
-
 }
 #else
 PUBLIC void start_curses NOARGS
@@ -420,10 +619,13 @@ PUBLIC void start_curses NOARGS
    SLtty_set_suspend_state(1);
 #endif /* _WINDOWS */
 #ifdef SIGTSTP
-    signal(SIGTSTP, sl_suspend);
+   if (!no_suspend)
+       signal(SIGTSTP, sl_suspend);
 #endif /* SIGTSTP */
     signal(SIGINT, cleanup_sig);
 #endif /* !VMS */
+
+   lynx_enable_mouse (1);
 
 #else /* Using curses: */
 
@@ -455,15 +657,21 @@ PUBLIC void start_curses NOARGS
 #endif /* SIGTSTP */
 	    exit (-1);
 	}
+#ifdef USE_COLOR_STYLE
+	has_color = has_colors();
+	if (has_color)
+		start_color();
+	parse_userstyles();	
+#endif
         first_time = FALSE;
-#if defined(COLOR_CURSES)
+#if USE_COLOR_TABLE
 	lynx_init_colors();
 	lynx_called_initscr = TRUE;
 #endif /* USE_SLANG */
     }
 #endif /* VMS */
 
-    /* nonl();   *//* seems to slow things down */
+    /* nonl();   */ /* seems to slow things down */
 
 #ifdef VMS
     crmode();
@@ -483,25 +691,49 @@ PUBLIC void start_curses NOARGS
     keypad(stdscr,TRUE);
 #endif /* HAVE_KEYPAD */
 
-#ifdef NCURSES_MOUSE_VERSION
- /* Inform ncurses that we're interested in knowing when mouse
-    button 1 is clicked */
-    if (LYUseMouse)
-      mousemask(BUTTON1_CLICKED, NULL);
-#endif /* NCURSES_MOUSE_VERSION */
+   lynx_enable_mouse (1);
 
     fflush(stdin);
     fflush(stdout);
+    fflush(stderr);
 #endif /* USE_SLANG */
 
 #ifdef _WINDOWS
-	 clear();
+    clear();
 #endif
 
     LYCursesON = TRUE;
 }
-#endif /* defined (DJGPP) && !defined (SLANG) */
+#endif /* defined (DJGPP) && !defined (USE_SLANG) */
 
+PUBLIC void lynx_enable_mouse ARGS1(int,state)
+{
+   if (LYUseMouse == 0) 
+     return;
+
+#ifdef USE_SLANG_MOUSE
+   SLtt_set_mouse_mode (state, 0);
+   SLtt_flush_output ();
+#else
+#ifdef NCURSES_MOUSE_VERSION
+     /* Inform ncurses that we're interested in knowing when mouse
+      button 1 is clicked */
+#ifndef _WINDOWS
+   if (state)
+     mousemask(BUTTON1_CLICKED, NULL);
+   else
+     mousemask(0, NULL);
+#else
+   if (state) mouse_set(BUTTON1_CLICKED && BUTTON2_CLICKED && BUTTON3_CLICKED);
+#endif /* _WINDOWS */
+#endif /* NCURSES_MOUSE_VERSION */
+
+#if defined(DJGPP) && !defined(USE_SLANG)
+     if (state)
+       mouse_set(BUTTON1_CLICKED | BUTTON2_CLICKED | BUTTON3_CLICKED);
+#endif
+#endif				       /* NOT USE_SLANG_MOUSE */
+}
 
 PUBLIC void stop_curses NOARGS
 {
@@ -509,7 +741,7 @@ PUBLIC void stop_curses NOARGS
 #ifdef DJGPP
 		  sock_exit();
 #endif
-#if defined (DOSPATH) && !defined (SLANG)
+#if defined (DOSPATH) && !defined (USE_SLANG)
 	 clrscr();
 /*
 		  clear();
@@ -522,18 +754,21 @@ PUBLIC void stop_curses NOARGS
      *	05-28-94 Lynx 2-3-1 Garrett Arch Blythe
      */
     if(LYCursesON == TRUE)	{
-#ifdef NCURSES_MOUSE_VERSION
-        mousemask(0, NULL);
-#endif
-    	endwin();	/* stop curses */
+         lynx_enable_mouse (0);
+         endwin();	/* stop curses */
     }
 
     fflush(stdout);
 #endif /* DJGPP */
+    fflush(stderr);
 
     LYCursesON = FALSE;
 
 #ifndef VMS
+#ifdef SIGTSTP
+   if (!no_suspend)
+       signal(SIGTSTP, SIG_DFL);
+#endif /* SIGTSTP */
     signal(SIGINT, SIG_DFL);
 #endif /* !VMS */
 }
@@ -818,8 +1053,10 @@ PUBLIC void VMSexit NOARGS
 	    fprintf(stderr,
 "TRACEBACK if it can be captured, and any other relevant information.\n");
 
-            fprintf(stderr,"\nPress RETURN to clean up: ");
-	    (void) getchar();
+	    if (LYTraceLogFP == NULL) {
+		fprintf(stderr,"\nPress RETURN to clean up: ");
+		(void) getchar();
+	    }
 	} else if (LYCursesON) {
 	    _statusline(MEMORY_EXHAUSTED_ABORT);
 	    sleep(AlertSecs);
@@ -829,6 +1066,7 @@ PUBLIC void VMSexit NOARGS
     if (LYOutOfMemory == TRUE) {
 	printf("\r\n%s\r\n\r\n", MEMORY_EXHAUSTED_ABORT);
 	fflush(stdout);
+	fflush(stderr);
     }
 }
 
@@ -1202,3 +1440,140 @@ PUBLIC void VMSbox ARGS3(
 }
 #endif /* !USE_SLANG */
 #endif /* VMS */
+
+
+
+PUBLIC void lynx_start_underline_color NOARGS
+{
+   start_underline ();
+}
+
+PUBLIC void lynx_stop_underline_color NOARGS
+{
+   stop_underline ();
+}
+
+PUBLIC void lynx_start_bold_color NOARGS
+{
+   start_bold ();
+}
+
+PUBLIC void lynx_stop_bold_color NOARGS
+{
+   stop_bold ();
+}
+
+PUBLIC void lynx_start_title_color NOARGS
+{
+}
+
+PUBLIC void lynx_stop_title_color NOARGS
+{
+}
+
+PUBLIC void lynx_start_link_color ARGS1(int, flag)
+{
+    if (flag) {
+	/* makes some terminals work wrong because
+	 * they can't handle two attributes at the 
+	 * same time
+	 */
+	/* start_bold();  */
+	start_reverse();
+#if defined(USE_SLANG) || defined(FANCY_CURSES)
+	start_underline ();
+#endif /* USE_SLANG */
+     } else {
+	start_bold();
+     }
+}
+
+PUBLIC void lynx_stop_link_color ARGS1(int, flag)
+{
+#ifdef USE_COLOR_STYLE
+    LynxChangeStyle(flag == ON ? s_alink : s_a, ABS_OFF, 0);
+#else
+    if (flag) {
+	stop_reverse();
+#if defined(USE_SLANG) || defined(FANCY_CURSES)
+	stop_underline ();
+#endif /* USE_SLANG */
+    } else
+	stop_bold();
+#endif
+}
+
+
+PUBLIC void lynx_stop_target_color NOARGS
+{
+   stop_underline();
+   stop_reverse();
+   stop_bold();
+}
+
+PUBLIC void lynx_start_target_color NOARGS
+{
+   start_bold();
+   start_reverse();
+   start_underline();
+}
+
+
+PUBLIC void lynx_start_status_color NOARGS
+{
+#if USE_COLOR_TABLE && defined(COLOR_CURSES)
+   lynx_set_color (2);
+#else
+   start_reverse ();
+#endif
+}
+
+PUBLIC void lynx_stop_status_color NOARGS
+{
+#if USE_COLOR_TABLE && defined(COLOR_CURSES)
+   lynx_set_color (0);
+#else
+   stop_reverse ();
+#endif
+}
+
+PUBLIC void lynx_start_h1_color NOARGS
+{
+   if (bold_H1 || bold_headers)
+     start_bold();
+}
+
+PUBLIC void lynx_stop_h1_color NOARGS
+{
+   if (bold_H1 || bold_headers)
+     stop_bold();
+}
+
+PUBLIC void lynx_start_prompt_color NOARGS
+{
+   start_reverse ();
+}
+
+PUBLIC void lynx_stop_prompt_color NOARGS
+{
+   stop_reverse ();
+}
+
+PUBLIC void lynx_start_radio_color NOARGS
+{
+   start_bold ();
+}
+
+PUBLIC void lynx_stop_radio_color NOARGS
+{
+   stop_bold ();
+}
+
+PUBLIC void lynx_stop_all_colors NOARGS
+{
+   stop_underline ();
+   stop_reverse ();
+   stop_bold ();
+}
+   
+	

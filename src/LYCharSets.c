@@ -2176,6 +2176,34 @@ PUBLIC int current_char_set = 0;		/* Index for tranaslation */
  */
 PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 {
+#ifdef EXP_CHARTRANS
+    if (LYCharSet_UC[i].enc != UCT_ENC_CJK) {
+	int chndl = 0;
+	if (UCAssume_MIMEcharset)
+	    chndl = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
+	HTCJK = NOCJK;
+	kanji_code = NOKANJI;
+	if (i == (chndl < 0 ? 0 : chndl))
+	    LYRawMode = LYUseDefaultRawMode ? TRUE : FALSE;
+	else
+	    LYRawMode = LYUseDefaultRawMode ? FALSE : TRUE;
+	if (LYRawMode)
+	    HTPassEightBitRaw = (LYlowest_eightbit[i] <= 160);
+	else
+	    HTPassEightBitRaw = FALSE;
+
+	HTPassEightBitNum =
+	    ((LYCharSet_UC[i].codepoints & UCT_CP_SUPERSETOF_LAT1) ||
+		(LYCharSet_UC[i].like8859 & UCT_R_HIGH8BIT));
+	
+	if (LYRawMode || i == chndl)
+	    HTPassHighCtrlRaw = (LYlowest_eightbit[i] <= 130);
+	else
+	    HTPassHighCtrlRaw = FALSE;
+
+	HTPassHighCtrlNum = FALSE;
+    } else
+#endif
     if (!strncmp(LYchar_set_names[i], "ISO Latin 1", 11)) {
 	HTCJK = NOCJK;
 	kanji_code = NOKANJI;
@@ -2258,7 +2286,7 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 		int chndl = 0;
 		if (UCAssume_MIMEcharset)
 		    chndl = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
-		if (chndl != i || chndl != UCLYhndl_for_unspec)
+		if (chndl != i)
 		    UCLYhndl_for_unspec = chndl < 0 ? 0 : chndl;
 		else
 		    UCLYhndl_for_unspec = 0;
@@ -2303,6 +2331,17 @@ PUBLIC void HTMLSetRawModeDefault ARGS1(int,i)
  */
 PUBLIC void HTMLSetUseDefaultRawMode ARGS2(int,i, BOOLEAN,modeflag)
 {
+#ifdef EXP_CHARTRANS
+    if (LYCharSet_UC[i].enc != UCT_ENC_CJK) {
+	int chndl = 0;
+	if (UCAssume_MIMEcharset)
+	    chndl = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
+	if (i == chndl)
+	    LYUseDefaultRawMode = modeflag;
+	else
+	    LYUseDefaultRawMode = (!modeflag);
+    } else
+#endif /* EXP_CHARTRANS */
     if (!strncmp(LYchar_set_names[i], "ISO Latin 1", 11) ||
     	!strncmp(LYchar_set_names[i], "Chinese", 7) ||
 	!strncmp(LYchar_set_names[i], "Japanese (EUC)", 14) ||

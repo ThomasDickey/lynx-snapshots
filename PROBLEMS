@@ -20,10 +20,12 @@ they will be outlined in this file.
     other than localhost if Lynx has been built without the resolv
     library and needed it, or with it and shouldn't have been.
     Unfortunately, there's no way to check in the Makefile whether
-    -lresolve should be included in the LIBS="" list.  What's necessary
+    -lresolv should be included in the LIBS="" list.  What's necessary
     depends on how that Sun is configured.  To get the build right for
     your SUN 3 or 4 OS, if you didn't have RESOLVLIB defined in the
-    Makefile define it and build Lynx again, or vice versa.
+    Makefile define it and build Lynx again, or vice versa.  Also, if
+    you have upgraded to the bind-8.1 or later library, you should try
+    changing -lresolv to -lbind.
 
     The Sun `shelltool' and `cmdtool' terminals are stupid by default.  
     In order to get bold text to appear differently than inverse video, 

@@ -48,6 +48,12 @@
 
 #include "LYLeaks.h"
 
+#ifdef USE_COLOR_STYLE
+#include "AttrList.h"
+#include "LYHash.h"
+#include "LYStyle.h"
+#endif
+
 #ifdef SVR4_BSDSELECT
 extern int BSDselect PARAMS((int nfds, fd_set * readfds, fd_set * writefds,
 	 		     fd_set * exceptfds, struct timeval * timeout));
@@ -105,20 +111,28 @@ PUBLIC void highlight ARGS2(
         cur = 0;
 
     if (nlinks > 0) {
+#ifdef USE_COLOR_STYLE
+#define LXP (links[cur].lx)
+#define LYP (links[cur].ly)
+#endif
 	move(links[cur].ly, links[cur].lx);
+#ifndef USE_COLOR_STYLE
+	lynx_start_link_color (flag == ON);
+#else
 	if (flag == ON) { 
-	    /* makes some terminals work wrong because
-	     * they can't handle two attributes at the 
-	     * same time
-	     */
-	    /* start_bold();  */
-	    start_reverse();
-#if defined(USE_SLANG) || defined(FANCY_CURSES)
-	    start_underline ();
-#endif /* USE_SLANG */
+	    LynxChangeStyle(s_alink, ABS_ON, 0);
 	} else {
-	    start_bold();
+		/* the logic is flawed here - no provision is made for links that
+		** aren't coloured as [s_a] by default - rjp
+		*/
+	    if (cached_styles[LYP][LXP]) {
+		LynxChangeStyle(cached_styles[LYP][LXP], ABS_ON, 0);
+	    }
+	    else {
+		LynxChangeStyle(s_a, ABS_ON, 0);
+	    }
 	}
+#endif
 
 	if (links[cur].type == WWW_FORM_LINK_TYPE) {
 	    int len;
@@ -156,55 +170,37 @@ PUBLIC void highlight ARGS2(
 
 	/* display a second line as well */
 	if (links[cur].hightext2 && links[cur].ly < display_lines) {
-	    if (flag == ON) {
-	        stop_reverse();
-#if defined(USE_SLANG) || defined(FANCY_CURSES)
-		stop_underline ();
-#endif /* USE_SLANG */
-	    } else {
-	        stop_bold();
-	    }
+	    lynx_stop_link_color (flag == ON);
 
 	    addch('\n');
 	    for (i=0; i < links[cur].hightext2_offset; i++)
-	        addch(' ');
+		addch(' ');
 
-	    if (flag == ON) {
-	        start_reverse();
-#if defined(USE_SLANG) || defined(FANCY_CURSES)
-		start_underline ();
-#endif /* USE_SLANG */
-	    } else {
-	        start_bold();
-	    }
+#ifndef USE_COLOR_STYLE
+	    lynx_start_link_color (flag == ON);
+#else
+	    LynxChangeStyle(flag == ON ? s_alink : s_a, ABS_ON, 0);
+#endif
 
 	    for (i = 0; (tmp[0] = links[cur].hightext2[i]) != '\0' &&
-	    	      i+links[cur].hightext2_offset < LYcols; i++) {
+		      i+links[cur].hightext2_offset < LYcols; i++) {
 		if (!IsSpecialAttrChar(links[cur].hightext2[i])) {
 		    /* For CJK strings, by Masanobu Kimura */
 		    if (HTCJK != NOCJK && !isascii(tmp[0])) {
-		        tmp[1] = links[cur].hightext2[++i];
+			tmp[1] = links[cur].hightext2[++i];
 			addstr(tmp);
 			tmp[1] = '\0';
 		    } else {
-		        addstr(tmp);
+			addstr(tmp);
 		    }
 		 }
 	    }
 	}
-
-	if (flag == ON) {
-	    stop_reverse();
-#if defined(USE_SLANG) || defined(FANCY_CURSES)
-	    stop_underline ();
-#endif /* USE_SLANG */
-	} else {
-	    stop_bold();
-	}
+	lynx_stop_link_color (flag == ON);
 
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
 	if (!LYShowCursor)
-	    move(LYlines-1, LYcols-1);  /* get cursor out of the way */
+	    move(LYlines-1, LYcols-1);	/* get cursor out of the way */
 	else
 #endif /* FANCY CURSES || USE_SLANG */
 	    /* never hide the cursor if there's no FANCY CURSES or SLANG */
@@ -349,7 +345,7 @@ PUBLIC void statusline ARGS1(
      *  make sure text is not longer than the statusline window. - FM
      */
     max_length = ((LYcols - 2) < 256) ? (LYcols - 2) : 255;
-    if ((buffer[0] != '\0') &&
+    if ((text[0] != '\0') &&
         (LYHaveCJKCharacterSet)) {
         /*
 	 *  Translate or filter any escape sequences. - FM
@@ -427,14 +423,21 @@ PUBLIC void statusline ARGS1(
     }
     clrtoeol();
     if (text != NULL) {
-#ifdef COLOR_CURSES
-	lynx_set_color(2);
-	addstr(buffer);
-	lynx_set_color(0);
+#ifndef USE_COLOR_STYLE
+	lynx_start_status_color ();
+	addstr (buffer);
+	lynx_stop_status_color ();
 #else
-	start_reverse();
-	addstr(buffer);
-	stop_reverse();
+	/* draw the status bar in the STATUS style */
+	{
+		int a=(strncmp(buffer, "Alert", 5) || !hashStyles[s_alert].name ? s_status : s_alert);
+		LynxChangeStyle (a, ABS_ON, 1);
+		addstr(buffer);
+		wbkgdset(stdscr, hashStyles[a].color);
+		clrtoeol();
+		wbkgdset(stdscr, hashStyles[s_normal].color);
+		LynxChangeStyle (a, ABS_OFF, 0);
+	}
 #endif
     }
     refresh();
@@ -471,7 +474,7 @@ PUBLIC void noviceline ARGS1(
 	return;
 
     move(LYlines-2,0);
-    stop_reverse();
+    /* stop_reverse(); */
     clrtoeol();
     addstr(NOVICE_LINE_ONE);
     clrtoeol();
@@ -555,7 +558,11 @@ PUBLIC int HTCheckForInterrupt NOARGS
         ret = select(FD_SETSIZE, (void *)&readfds, NULL, NULL,
 	  	     &socket_timeout);
 
-    /** No keystroke was entered **/
+    /** Suspended? **/
+    if ((ret == -1) && (errno == EINTR))
+	 return((int)FALSE); 
+
+    /** No keystroke was entered? **/
     if (!FD_ISSET(0,&readfds))
 	 return((int)FALSE); 
 #endif /* USE_SLANG */
@@ -1201,7 +1208,7 @@ PUBLIC void remove_backslashes ARGS1(
 PUBLIC char * quote_pathname ARGS1(
 	char *,		pathname)
 {
-    int i, n = 0;
+    size_t i, n = 0;
     char * result;
 
     for (i=0; i < strlen(pathname); ++i)
@@ -1422,7 +1429,7 @@ PUBLIC void change_sug_filename ARGS1(
 	char *,		fname)
 {
      char *temp, *cp, *cp1, *end;
-     int len;
+     size_t len;
 #ifdef VMS
      char *dot;
      int j,k;
@@ -1636,25 +1643,100 @@ PUBLIC void tempname ARGS2(
 	char *,		namebuffer,
 	int,		action)
 {
-	static int counter = 0;
+    static int counter = 0;
+    FILE *fp = NULL;
+    int LYMaxTempCount = 10000; /* Arbitrary limit.  Make it configurable? */
 
-	if (action == REMOVE_FILES) { /* REMOVE ALL FILES */ 
-	    for (; counter > 0; counter--) {
-	        sprintf(namebuffer, "%sL%d%uTMP.txt", lynx_temp_space,
-						      (int)getpid(), counter-1);
-		remove(namebuffer);
-	        sprintf(namebuffer, "%sL%d%uTMP.html", lynx_temp_space,
-						       (int)getpid(), counter-1);
-		remove(namebuffer);
-	    }
-	} else /* add a file */ {
-	/*
-	 * 	Create name
-	 */
-	    sprintf(namebuffer, "%sL%d%uTMP.html", lynx_temp_space,
-	    					   (int)getpid(), counter++);
+    if (action == REMOVE_FILES) {
+        /*
+	 *  Remove all temporary files with .txt or .html suffixes. - FM
+	 */ 
+	for (; counter > 0; counter--) {
+	    sprintf(namebuffer,
+	    	    "%sL%d%uTMP.txt",
+		    lynx_temp_space, (int)getpid(), counter-1);
+	    remove(namebuffer);
+	    sprintf(namebuffer,
+	    	    "%sL%d%uTMP.html",
+		    lynx_temp_space, (int)getpid(), counter-1);
+	    remove(namebuffer);
 	}
-	return;
+    } else {
+        /*
+	 *  Load a tentative temporary file name into namebuffer. - FM
+	 */
+	while (counter < LYMaxTempCount) {
+	    /*
+	     *  Create names with .txt, then .bin, then
+	     *  .html suffixes, and check for their prior
+	     *  existence.  If any already exist, someone
+	     *  might be trying to spoof us, so increment
+	     *  the count and try again.  Otherwise, return
+	     *  with the name which has the .html suffix
+	     *  loaded in namebuffer. - FM
+	     */
+	    sprintf(namebuffer,
+		    "%sL%d%uTMP.txt",
+		    lynx_temp_space, (int)getpid(), counter);
+	    if ((fp = fopen(namebuffer, "r")) != NULL) {
+		fclose(fp);
+		if (TRACE)
+		    fprintf(stderr,
+		    	    "tempname: file '%s' already exits!\n",
+			    namebuffer);
+		counter++;
+		continue;
+	    }
+	    sprintf(namebuffer,
+		    "%sL%d%uTMP.bin",
+		    lynx_temp_space, (int)getpid(), counter);
+	    if ((fp = fopen(namebuffer, "r")) != NULL) {
+		fclose(fp);
+		if (TRACE)
+		    fprintf(stderr,
+		    	    "tempname: file '%s' already exits!\n",
+			    namebuffer);
+		counter++;
+		continue;
+	    }
+	    sprintf(namebuffer,
+		    "%sL%d%uTMP.html",
+		    lynx_temp_space, (int)getpid(), counter++);
+	    if ((fp = fopen(namebuffer, "r")) != NULL) {
+		fclose(fp);
+		if (TRACE)
+		    fprintf(stderr,
+		    	    "tempname: file '%s' already exits!\n",
+			    namebuffer);
+		continue;
+	    }
+	    /*
+	     *  Return to the calling function, with the tentative
+	     *  temporary file name loaded in namebuffer.  Note that
+	     *  if the calling function will use a suffix other than
+	     *  .txt, .bin, or .html, it similarly should do tests for
+	     *  a spoof.  The file name can be reused if it is written
+	     *  to on receipt of this name, and thereafter accessed
+	     *  for reading.  Note that if writing to a file is to
+	     *  be followed by reading it, as it the usual case for
+	     *  Lynx, the spoof attempt will be apparent, and the user
+	     *  can take appropriate action. - FM
+	     */
+	    return;
+	}
+	/*
+	 *  The tempfile maximum count has been reached.
+	 *  Issue a message and exit. - FM
+	 */
+	_statusline(MAX_TEMPCOUNT_REACHED);
+	sleep(AlertSecs);
+	exit(-1);
+    }
+
+    /*
+     *  We were called for a clean up, and have done it. - FM
+     */
+    return;
 }
 
 /*
@@ -1736,6 +1818,9 @@ PRIVATE char *restrict_name[] = {
        "change_exec_perms",
 #endif /* OK_PERMIT */
 #endif /* DIRED_SUPPORT */
+#ifdef USE_EXTERNALS
+       "externals" ,
+#endif
        (char *) 0     };
 
 	/* restrict_name and restrict_flag structure order
@@ -1778,6 +1863,9 @@ PRIVATE BOOLEAN *restrict_flag[] = {
        &no_change_exec_perms,
 #endif /* OK_PERMIT */
 #endif /* DIRED_SUPPORT */
+#ifdef USE_EXTERNALS
+       &no_externals ,
+#endif
        (BOOLEAN *) 0  };
 
 PUBLIC void parse_restrictions ARGS1(
@@ -2049,7 +2137,7 @@ PUBLIC void LYConvertToURL ARGS1(
         return;
 
 #ifdef DOSPATH
-{
+    {
 	 char *cp_url = *AllocatedString;
 	 for(; *cp_url != '\0'; cp_url++)
 		if(*cp_url == '\\') *cp_url = '/';
@@ -2060,7 +2148,7 @@ PUBLIC void LYConvertToURL ARGS1(
 	 if(strlen(old_string) > 3 && *cp_url == '/')
 		*cp_url = '\0';
 #endif
-}
+    }
 #endif
 
 	 *AllocatedString = NULL;  /* so StrAllocCopy doesn't free it */
@@ -2310,7 +2398,9 @@ have_VMS_URL:
 		/*
 		 *  It is a subdirectory or file on the local system.
 		 */
-		StrAllocCat(*AllocatedString, temp);
+		cp = HTEscape(temp, URL_PATH);
+		StrAllocCat(*AllocatedString, cp);
+		FREE(cp);
 		if (TRACE) {
 		    fprintf(stderr, "Converted '%s' to '%s'\n",
 				    old_string, *AllocatedString);
@@ -2377,6 +2467,8 @@ have_VMS_URL:
 	}
 #endif /* VMS */
     } else { 
+	struct stat st;
+	FILE *fptemp = NULL;
 	/*
 	 *  Path begins with a slash.  Simplify and use it.
 	 */
@@ -2391,6 +2483,27 @@ have_VMS_URL:
 #else
 	    StrAllocCat(*AllocatedString, "/");
 #endif /* VMS */
+	} else if ((stat(old_string, &st) > -1) ||
+		   (fptemp = fopen(old_string, "r")) != NULL) {
+	    /*
+	     *  It is an absolute directory or file
+	     *  on the local system. - kw
+	     */
+	    StrAllocCopy(temp, old_string);
+	    LYTrimRelFromAbsPath(temp);
+	    if (TRACE) {
+		fprintf(stderr, "Converted '%s' to '%s'\n", old_string, temp);
+	    }
+	    cp = HTEscape(temp, URL_PATH);
+	    StrAllocCat(*AllocatedString, cp);
+	    FREE(cp);
+	    FREE(temp);
+	    if (fptemp)
+		fclose(fptemp);
+	    if (TRACE) {
+		fprintf(stderr, "Converted '%s' to '%s'\n",
+			old_string, *AllocatedString);
+	    }
 	} else if (old_string[1] == '~') {
 	    /*
 	     *  Has a Home_Dir() reference.  Handle it
@@ -3500,7 +3613,7 @@ PUBLIC time_t LYmktime ARGS1(
         clock2 = (time_t)0;
     if (TRACE && clock2 > 0)
         fprintf(stderr,
-		"LYmktime: clock=%i, ctime=%s", clock2, ctime(&clock2));
+		"LYmktime: clock=%ld, ctime=%s", (long) clock2, ctime(&clock2));
 
     return(clock2);
 }

@@ -284,7 +284,7 @@ PRIVATE HTStyle HTStylePreformatted = {
 	&HTStyleExample,  	"Preformatted", "PRE",
 	HT_FONT, 1.0, HT_BLACK,		0, 0,
 	0, 0, 0, HT_LEFT,		1, 0,	tabs_8,
-	NO, YES, 0, 0,			0
+	NO, NO, 0, 0,			0
 };	
 
 PRIVATE HTStyle HTStyleListing = {

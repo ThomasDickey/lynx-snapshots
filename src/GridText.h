@@ -57,6 +57,7 @@ extern void HText_scrollDown PARAMS((HText * text));	/* One page */
 extern void HText_scrollTop PARAMS((HText * text));
 extern void HText_scrollBottom PARAMS((HText * text));
 extern void HText_pageDisplay PARAMS((int line_num, char *target));
+extern BOOL HText_pageHasPrevTarget NOPARAMS;
 
 extern int HText_LinksInLines PARAMS((HText *text, int line_num, int Lines));
 
@@ -75,16 +76,25 @@ extern char * HText_getServer NOPARAMS;
 extern char * HText_getOwner NOPARAMS;
 extern char * HText_getContentBase NOPARAMS;
 extern char * HText_getContentLocation NOPARAMS;
+#ifdef USEHASH
+extern char * HText_getStyle NOPARAMS;
+#endif
 extern void HText_setMainTextOwner PARAMS((CONST char * owner));
 extern char * HText_getRevTitle NOPARAMS;
 extern void print_wwwfile_to_fd PARAMS((FILE * fp, int is_reply));
 extern BOOL HText_select PARAMS((HText *text));
 extern BOOL HText_POSTReplyLoaded PARAMS((document *doc));
 extern BOOL HTFindPoundSelector PARAMS((char *selector));
-extern int HTGetLinkInfo PARAMS((int number, char **hightext, char **lname));
+extern int HTGetLinkInfo PARAMS((
+	int		number,
+	int *		go_line,
+	int *		linknum,
+	char **		hightext,
+	char **		lname));
 extern int HTisDocumentSource NOPARAMS;
 extern void HTuncache_current_document NOPARAMS;
 extern int HText_getTopOfScreen NOPARAMS;
+extern int HText_getLines PARAMS((HText * text));
 extern int HText_getNumOfLines NOPARAMS;
 extern int do_www_search PARAMS((document *doc));
 extern char * HTLoadedDocumentURL NOPARAMS;
@@ -93,6 +103,7 @@ extern char * HTLoadedDocumentTitle NOPARAMS;
 extern BOOLEAN HTLoadedDocumentIsHEAD NOPARAMS;
 extern BOOLEAN HTLoadedDocumentIsSafe NOPARAMS;
 extern char * HTLoadedDocumentCharset NOPARAMS;
+extern BOOL HTLoadedDocumentEightbit NOPARAMS;
 extern void HText_setNodeAnchorBookmark PARAMS((CONST char *bookmark));
 extern char * HTLoadedDocumentBookmark NOPARAMS;
 extern int HText_LastLineSize PARAMS((HText *me));
@@ -103,28 +114,32 @@ extern int HText_getCurrentColumn PARAMS((HText *text));
 extern int HText_getMaximumColumn PARAMS((HText *text));
 extern void HText_setTabID PARAMS((HText *text, CONST char *name));
 extern int HText_getTabIDColumn PARAMS((HText *text, CONST char *name));
+extern int HText_HiddenLinkCount PARAMS((HText *text));
+extern char * HText_HiddenLinkAt PARAMS((HText *text, int number));
 
 /* forms stuff */
-extern void HText_beginForm PARAMS((char *action,
-				    char *method,
-				    char *enctype,
-				    char *title));
+extern void HText_beginForm PARAMS((
+	char *		action,
+	char *		method,
+	char *		enctype,
+	char *		title));
 extern void HText_endForm PARAMS((HText *text));
 extern void HText_beginSelect PARAMS((char *name, BOOLEAN multiple, char *len));
-extern char * HText_setLastOptionValue PARAMS((HText *text, char *value,
-						char *submit_value,
-						int order, BOOLEAN checked));
+extern char * HText_setLastOptionValue PARAMS((
+	HText *		text,
+	char *		value,
+	char *		submit_value,
+	int 		order,
+	BOOLEAN		checked));
 extern int HText_beginInput PARAMS((HText *text, InputFieldData *I));
-extern void HText_SubmitForm PARAMS((FormInfo *submit_item, document *doc,
-				     char *link_name, char *link_value));
+extern void HText_SubmitForm PARAMS((
+	FormInfo *	submit_item,
+	document *	doc,
+	char *		link_name,
+	char *		link_value));
 extern void HText_DisableCurrentForm NOPARAMS;
 extern void HText_ResetForm PARAMS((FormInfo *form));
 extern void HText_activateRadioButton PARAMS((FormInfo *form));
-
-#ifdef CURSES
-extern int HText_getTopOfScreen NOPARAMS;
-extern int HText_getLines PARAMS((HText * text));
-#endif /* CURSES */
 
 extern HTList * search_queries; /* Previous isindex and whereis queries */
 extern void HTSearchQueries_free NOPARAMS;
@@ -134,10 +149,12 @@ extern void user_message PARAMS((char * message, char * argument));
 
 #define _user_message(msg, arg)	mustshow = TRUE, user_message(msg, arg)
 
-extern void www_user_search PARAMS((int start_line, char *target));
+extern void www_user_search PARAMS((int start_line, document *doc, char *target));
 
-extern void print_crawl_to_fd PARAMS((FILE * fp, char * thelink,
-				      char * thetitle));
+extern void print_crawl_to_fd PARAMS((
+	FILE *		fp,
+	char *		thelink,
+	char *		thetitle));
 extern char * stub_HTAnchor_address PARAMS((HTAnchor *me));
 
 extern void HText_setToolbar PARAMS((HText *text));
@@ -147,5 +164,11 @@ extern void HText_setNoCache PARAMS((HText *text));
 extern BOOL HText_hasNoCacheSet PARAMS((HText *text));
 
 extern void HText_setKcode PARAMS((HText *text, CONST char *charset));
+
+extern void HText_setBreakPoint PARAMS((HText *text));
+
+extern BOOL HText_AreDifferent PARAMS((
+	HTParentAnchor *	anchor,
+	CONST char *		full_address));
 
 #endif /* LYGRIDTEXT_H */

@@ -43,7 +43,7 @@ LYK_UP_TWO,             0,          LYK_RELOAD,        0,
 LYK_TRACE_TOGGLE,       0,          LYK_VERSION,   LYK_REFRESH,
 /* ^T */            /* ^U */        /* ^V */       /* ^W */
 #endif /* NOT_USED */
-LYK_TRACE_TOGGLE,       0,              0,         LYK_REFRESH,
+LYK_TRACE_TOGGLE,       0,        LYK_SWITCH_DTD,  LYK_REFRESH,
 /* ^T */            /* ^U */        /* ^V */       /* ^W */
 
 0,                      0,              0,             0,
@@ -61,16 +61,21 @@ LYK_NEXT_PAGE,       LYK_SHELL,  LYK_SOFT_DQUOTES,  LYK_TOOLBAR,
 LYK_UP_HALF,      LYK_DOWN_HALF, LYK_IMAGE_TOGGLE,  LYK_NEXT_PAGE,
 /* ( */              /* ) */         /* * */        /* + */
 
+#ifndef USE_EXTERNALS
 LYK_NEXT_PAGE,    LYK_PREV_PAGE,        0,          LYK_WHEREIS,
 /* , */              /* - */         /* . */        /* / */
+#else
+LYK_NEXT_PAGE,    LYK_PREV_PAGE, LYK_EXTERN,        LYK_WHEREIS,
+/* , */              /* - */         /* . */        /* / */
+#endif
 
-0,                   LYK_1,          LYK_2,         LYK_3,
+LYK_F_LINK_NUM,      LYK_1,          LYK_2,         LYK_3,
 /* 0 */              /* 1 */         /* 2 */        /* 3 */
 
 LYK_4,               LYK_5,          LYK_6,         LYK_7,
 /* 4 */              /* 5 */         /* 6 */        /* 7 */
 
-LYK_8,               LYK_9,             0,             0,
+LYK_8,               LYK_9,             0,          LYK_TRACE_LOG,
 /* 8 */              /* 9 */         /* : */        /* ; */
 
 LYK_UP_LINK,         LYK_INFO,     LYK_DOWN_LINK,   LYK_HELP,
@@ -166,7 +171,7 @@ LYK_NOCACHE,            0,          LYK_INTERRUPT,     0,
 LYK_PIPE,               0,              0,          LYK_HISTORY,
 /* | */               /* } */         /* ~ */       /* del */
 
-/* 80..99 (illegal ISO-8859-1) 8-bit characters. */
+/* 80..9F (illegal ISO-8859-1) 8-bit characters. */
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
@@ -267,17 +272,17 @@ char override[] = {
     0,                 0,         LYK_TAG_LINK,      0,
 /* , */             /* - */         /* . */       /* / */
 
-   0,                 0,               0,            0,
-/* 0 */             /* 1 */        /* 2 */        /* 3 */
+   0,                  0,              0,            0,
+/* 0 */             /* 1 */         /* 2 */       /* 3 */
 
-   0,                 0,               0,            0,
-/* 4 */             /* 5 */        /* 6 */        /* 7 */
+   0,                  0,              0,            0,
+/* 4 */             /* 5 */         /* 6 */       /* 7 */
 
-   0,                 0,              0,             0,
-/* 8 */             /* 9 */        /* : */        /* ; */
+   0,                  0,              0,             0,
+/* 8 */             /* 9 */         /* : */        /* ; */
 
-   0,                 0,              0,             0,
-/* < */             /* = */        /* > */        /* ? */
+   0,                  0,              0,             0,
+/* < */             /* = */         /* > */        /* ? */
 
    0,                  0,              0,         LYK_CREATE,
 /* @ */             /* A */         /* B */        /* C */
@@ -327,7 +332,7 @@ LYK_TAG_LINK,      LYK_UPLOAD,         0,             0,
    0,                   0,             0,              0,
 /* | */              /* } */         /* ~ */       /* del */
 
-/* 80..99 (illegal ISO-8859-1) 8-bit characters. */
+/* 80..9F (illegal ISO-8859-1) 8-bit characters. */
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
@@ -441,6 +446,7 @@ PRIVATE struct rmap revmap[] = {
 { "SHELL",		"escape from the browser to the system" },
 { "DOWNLOAD",		"download the current link to your computer" },
 { "TRACE_TOGGLE",	"toggle tracing of browser operations" },
+{ "TRACE_LOG",		"view trace log if started in the current session" },
 { "IMAGE_TOGGLE",	"toggle handling of all images as links" },
 { "INLINE_TOGGLE",	"toggle pseudo-ALTs for inlines with no ALT string" },
 { "HEAD",		"send a HEAD request for the current document or link" },
@@ -454,7 +460,12 @@ PRIVATE struct rmap revmap[] = {
 { "MINIMAL",		"toggle minimal vs. valid comment parsing" },
 { "SOFT_DQUOTES",	"toggle valid vs. soft double-quote parsing" },
 { "RAW_TOGGLE",		"toggle raw 8-bit translations or CJK mode ON or OFF" },
-{ "COOKIE_JAR",		"Examine the Cookie Jar" },
+{ "COOKIE_JAR",		"examine the Cookie Jar" },
+{ "F_LINK_NUM",		"invoke the 'Follow link (or page) number:' prompt" },
+{ "SWITCH_DTD",		"switch between old and new parsing of HTML" },
+#ifdef USE_EXTERNALS
+{ "EXTERN",		"run external program with url" },
+#endif
 #ifdef VMS
 { "DIRED_MENU",		"invoke File/Directory Manager, if available" },
 #else
@@ -559,6 +570,7 @@ PRIVATE int LYLoadKeymap ARGS4 (
 	HTAlert(buf);
 	return(HT_NOT_LOADED);
     }
+    anAnchor->no_cache = TRUE;
 
     sprintf(buf, "<head>\n<title>%s</title>\n</head>\n<body>\n",
     		  CURRENT_KEYMAP_TITLE);
@@ -698,52 +710,59 @@ static BOOLEAN did_number_keys;
 
 PUBLIC void set_numbers_as_arrows NOARGS
 {
-      saved_number_keys[0] = keymap['4'+1];
-      keymap['4'+1] = LYK_PREV_DOC;
-      saved_number_keys[1] = keymap['2'+1];
-      keymap['2'+1] = LYK_NEXT_LINK;
-      saved_number_keys[2] = keymap['8'+1];
-      keymap['8'+1] = LYK_PREV_LINK;
-      saved_number_keys[3] = keymap['6'+1];
-      keymap['6'+1] = LYK_ACTIVATE;
-      saved_number_keys[4] = keymap['7'+1];
-      keymap['7'+1] = LYK_HOME;
-      saved_number_keys[5] = keymap['1'+1];
-      keymap['1'+1] = LYK_END;
-      saved_number_keys[6] = keymap['9'+1];
-      keymap['9'+1] = LYK_PREV_PAGE;
-      saved_number_keys[7] = keymap['3'+1];
-      keymap['3'+1] = LYK_NEXT_PAGE;
+    /*
+     *  Map numbers to functions as labeled on the
+     *  IBM Enhanced keypad, and save their original
+     *  mapping for reset_numbers_as_arrows(). - FM
+     */
+    saved_number_keys[0] = keymap['4'+1];
+    keymap['4'+1] = LYK_PREV_DOC;
+    saved_number_keys[1] = keymap['2'+1];
+    keymap['2'+1] = LYK_NEXT_LINK;
+    saved_number_keys[2] = keymap['8'+1];
+    keymap['8'+1] = LYK_PREV_LINK;
+    saved_number_keys[3] = keymap['6'+1];
+    keymap['6'+1] = LYK_ACTIVATE;
+    saved_number_keys[4] = keymap['7'+1];
+    keymap['7'+1] = LYK_HOME;
+    saved_number_keys[5] = keymap['1'+1];
+    keymap['1'+1] = LYK_END;
+    saved_number_keys[6] = keymap['9'+1];
+    keymap['9'+1] = LYK_PREV_PAGE;
+    saved_number_keys[7] = keymap['3'+1];
+    keymap['3'+1] = LYK_NEXT_PAGE;
 
-	/* disable the 5 */
-      saved_number_keys[8] = keymap['5'+1];
-      keymap['5'+1] = LYK_DO_NOTHING;
+    /*
+     *  Disable the 5.
+     */
+    saved_number_keys[8] = keymap['5'+1];
+    keymap['5'+1] = LYK_DO_NOTHING;
 
-      did_number_keys = TRUE;
+    did_number_keys = TRUE;
 }
 
 PUBLIC void reset_numbers_as_arrows NOARGS
 {
-      if (!did_number_keys)
-              return;
+    if (!did_number_keys)
+	return;
 
-      keymap['4'+1] = saved_number_keys[0];
-      keymap['2'+1] = saved_number_keys[1];
-      keymap['8'+1] = saved_number_keys[2];
-      keymap['6'+1] = saved_number_keys[3];
-      keymap['7'+1] = saved_number_keys[4];
-      keymap['1'+1] = saved_number_keys[5];
-      keymap['9'+1] = saved_number_keys[6];
-      keymap['3'+1] = saved_number_keys[7];
-      keymap['5'+1] = saved_number_keys[8];
+    keymap['4'+1] = saved_number_keys[0];
+    keymap['2'+1] = saved_number_keys[1];
+    keymap['8'+1] = saved_number_keys[2];
+    keymap['6'+1] = saved_number_keys[3];
+    keymap['7'+1] = saved_number_keys[4];
+    keymap['1'+1] = saved_number_keys[5];
+    keymap['9'+1] = saved_number_keys[6];
+    keymap['3'+1] = saved_number_keys[7];
+    keymap['5'+1] = saved_number_keys[8];
 
-      did_number_keys = FALSE;
+    did_number_keys = FALSE;
 }
 
 PUBLIC char *key_for_func ARGS1 (int,func)
 {
 	static char buf[512];
-	int i;
+	size_t i;
 
 	buf[0] = '\0';
 	for (i = 1; i < sizeof(keymap); i++) {

@@ -1591,6 +1591,7 @@ PRIVATE void parse_ms_windows_dir_entry ARGS2(
  *      Format the name, date, and size from a WINDOWS_NT LIST line into
  *      the EntryInfo structure (assumes Chameleon NEWT format). - FM
  */
+#ifdef NOTDEFINED
 PRIVATE void parse_windows_nt_dir_entry ARGS2(
 	char *,		line,
 	EntryInfo *,	entry_info)
@@ -1708,6 +1709,7 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
 			entry_info->size);
     return;
 } /* parse_windows_nt_dir_entry */
+#endif /* NOTDEFINED */
 
 /*
  * parse_cms_dir_entry() --

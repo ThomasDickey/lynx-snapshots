@@ -104,7 +104,7 @@
        forces the first document to be interpreted as HTML.
 
   -from
-       toggle transmissions of From headers.
+       toggles transmissions of From headers.
 
   -ftp 
        disable ftp access.
@@ -129,6 +129,10 @@
 
   -index=URL
        set the default index file to the specified URL.
+
+  -ismap
+       toggles inclusion of ISMAP links when client-side
+       MAPs are present.
 
   -link=NUMBER
        starting count for lnk#.dat files produced by -crawl.
@@ -236,8 +240,8 @@
 
        dired_support - disallow local file management.
 
-       disk_save - disallow saving binary files to disk in the download
-           menu.
+       disk_save - disallow saving to disk in the download and print
+           menus.
 
        download - disallow downloaders in the download menu.
 
@@ -331,6 +335,9 @@
        useful for remote execution, when, for example, Lynx connects to a
        remote TCP/IP port that starts a script that, in turn, starts another
        Lynx process.)
+
+  -tlog
+       toggles use of a Lynx Trace Log for the current session.
 
   -trace
        turns on WWW trace mode.

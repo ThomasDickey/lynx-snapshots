@@ -35,9 +35,9 @@
 #include "LYUtils.h"
 #include "LYMap.h"
 #include "LYBookmark.h"
+#include "LYCurses.h"
 
 #ifdef VMS
-#include "LYCurses.h"
 #include "HTVMSUtils.h"
 #endif /* VMS */
 #ifdef DOSPATH
@@ -207,16 +207,6 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		while (*p && (unsigned char)*p < 127 &&
 		       isdigit((unsigned char)*p))
 		    p++;
-		/*
-		**  Make sure we had a valid terminator. - FM
-		*/
-		if ((unsigned char)*p >= 127 ||
-		    isalnum((unsigned char)*p)) {
-		    *q++ = '&';
-		    *q++ = '#';
-		    p = cp;
-		    continue;
-		}
 		/*
 		**  Save the terminator and isolate the digit(s). - FM
 		*/
@@ -681,10 +671,10 @@ PUBLIC void LYUnEscapeToLatinOne ARGS2(
 	    */
 	    if (*p == '#' && len > 2 &&
 	        (unsigned char)*(p+1) < 127 &&
-		isalnum((unsigned char)*(p+1))) {
+		isdigit((unsigned char)*(p+1))) {
 		cp = ++p;
 		while (*p && (unsigned char)*p < 127 &&
-		       isalnum((unsigned char)*p))
+		       isdigit((unsigned char)*p))
 		    p++;
 		cpe = *p;
 		if (*p)
@@ -1000,6 +990,7 @@ PUBLIC void LYEntify ARGS2(
 	}
     }
     StrAllocCopy(*str, cp);
+    FREE(cp);
 }
 
 /*
@@ -1609,6 +1600,53 @@ PUBLIC void html_get_chartrans_info ARGS1(HTStructured *, me)
     }
     me->UCI = HTAnchor_getUCInfoStage(me->node_anchor,UCT_STAGE_STRUCTURED);
 }
+
+/*
+**  This function writes a line with a META tag to an open file,
+**  which will specify a charset parameter to use when the file is
+**  read back in.  It is meant for temporary HTML files used by the
+**  various special pages which may show titles of documents.  When those
+**  files are created, the title strings normally have been translated and
+**  expanded to the display character set, so we have to make sure the
+**  don't get translated again.
+**  If the user has changed the display character set during the lifetime
+**  of the Lynx session (or, more exactly, during the time the title
+**  strings to be written were generated), the may now have different
+**  character encodings and there is currently no way to get it all right.
+**  To change this, we would have to add a variable for each string which
+**  keeps track of its character encoding...
+**  But at least we can try to ensure that reading the file after future
+**  display character set changes will give reasonable output.
+**
+**  The META tag is not written if the display character set (passed as
+**  disp_chndl) already corresponds to the charset assumption that
+**  would be made when the file is read. -kw
+*/
+PUBLIC void add_META_charset_to_fd ARGS2(
+    FILE *,	fp,
+    int,	disp_chndl
+    )
+{
+    if (disp_chndl == -1)	/* -1 means use current_char_set */
+	disp_chndl = current_char_set;
+    if (fp == NULL || disp_chndl < 0)
+	return;			/* should not happen */
+    if (UCLYhndl_HTFile_for_unspec == disp_chndl)
+	return;			/* not need to do, so we don't */
+    if (LYCharSet_UC[disp_chndl].enc == UCT_ENC_7BIT)
+	return;			/* There shouldn't be any 8-bit characters
+				 in this case. */
+    /*
+     * In other cases we don't know because UCLYhndl_for_unspec may
+     * change during the lifetime of the file (by toggling raw mode
+     * or changing the display character set), so proceed.
+     */
+
+    fprintf(fp,"<META %s content=\"text/html;charset=%s\">\n",
+	    "http-equiv=\"content-type\"",
+	    LYCharSet_UC[disp_chndl].MIMEname);
+}
+
 #endif /* EXP_CHARTRANS */
 
 /*
@@ -1622,7 +1660,7 @@ PUBLIC void LYHandleMETA ARGS4(
 {
     char *http_equiv = NULL, *name = NULL, *content = NULL;
     char *href = NULL, *id_string = NULL, *temp = NULL;
-    char *cp, *cp0, *cp1 = 0;
+    char *cp, *cp0, *cp1 = NULL;
     int url_type = 0, i;
 
     if (!me || !present)
@@ -1692,8 +1730,8 @@ PUBLIC void LYHandleMETA ARGS4(
      * Check for a no-cache Pragma
      * or Cache-Control directive. - FM
      */
-    if (!strcasecomp((http_equiv ? http_equiv : name), "Pragma") ||
-        !strcasecomp((http_equiv ? http_equiv : name), "Cache-Control")) {
+    if (!strcasecomp((http_equiv ? http_equiv : ""), "Pragma") ||
+        !strcasecomp((http_equiv ? http_equiv : ""), "Cache-Control")) {
 	LYUnEscapeToLatinOne(&content, FALSE);
 	LYTrimHead(content);
 	LYTrimTail(content);
@@ -1710,7 +1748,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	 *  should. - FM
 	 */
 	if ((!me->node_anchor->cache_control) &&
-	    !strcasecomp((http_equiv ? http_equiv : name), "Cache-Control")) {
+	    !strcasecomp((http_equiv ? http_equiv : ""), "Cache-Control")) {
 	    for (i = 0; content[i]; i++)
 		 content[i] = TOLOWER(content[i]);
 	    StrAllocCopy(me->node_anchor->cache_control, content);
@@ -1757,9 +1795,9 @@ PUBLIC void LYHandleMETA ARGS4(
     /*
      * Check for an Expires directive. - FM
      */
-    } else if (!strcasecomp((http_equiv ? http_equiv : name), "Expires")) {
+    } else if (!strcasecomp((http_equiv ? http_equiv : ""), "Expires")) {
 	/*
-	 *  If we didn't get a Expires MIME header,
+	 *  If we didn't get an Expires MIME header,
 	 *  store it in the anchor element, and if we
 	 *  haven't yet set no_cache, check whether we
 	 *  should. - FM
@@ -1782,7 +1820,7 @@ PUBLIC void LYHandleMETA ARGS4(
      *  the charset via a server's header. - AAC & FM
      */
     } else if (!(me->node_anchor->charset && *me->node_anchor->charset) && 
-	       !strcasecomp((http_equiv ? http_equiv : name), "Content-Type")) {
+	       !strcasecomp((http_equiv ? http_equiv : ""), "Content-Type")) {
 	LYUnEscapeToLatinOne(&content, FALSE);
 	LYTrimHead(content);
 	LYTrimTail(content);
@@ -1958,7 +1996,7 @@ PUBLIC void LYHandleMETA ARGS4(
     /*
      *  Check for a Refresh directive. - FM
      */
-    } else if (!strcasecomp((http_equiv ? http_equiv : name), "Refresh")) {
+    } else if (!strcasecomp((http_equiv ? http_equiv : ""), "Refresh")) {
 	char *Seconds = NULL;
 
 	/*
@@ -1971,9 +2009,9 @@ PUBLIC void LYHandleMETA ARGS4(
 	    cp1 = cp;
 	    while (*cp1 && isdigit(*cp1))
 		cp1++;
-	    *cp1 = '\0';
+	    if (*cp1)
+		*cp1++ = '\0';
 	    StrAllocCopy(Seconds, cp);
-	    cp1++;
 	}
 	if (Seconds) {
 	    /*
@@ -1999,7 +2037,8 @@ PUBLIC void LYHandleMETA ARGS4(
 		/*
 		 *  We found a URL field, so check it out. - FM
 		 */
-		if (!(url_type = LYLegitimizeHREF(me, (char**)&href, TRUE))) {
+		if (!(url_type = LYLegitimizeHREF(me, (char**)&href,
+						  TRUE, FALSE))) {
 		    /*
 		     *  The specs require a complete URL,
 		     *  but this is a Netscapism, so don't
@@ -2087,7 +2126,7 @@ PUBLIC void LYHandleMETA ARGS4(
      */
     } else if (!(me->node_anchor->SugFname && *me->node_anchor->SugFname) &&
     	       !strcasecomp((http_equiv ?
-    			     http_equiv : name), "Content-Disposition")) {
+	       		     http_equiv : ""), "Content-Disposition")) {
 	cp = content;
 	while (*cp != '\0' && strncasecomp(cp, "file;", 5))
 	    cp++;
@@ -2112,7 +2151,7 @@ PUBLIC void LYHandleMETA ARGS4(
     /*
      *  Check for a Set-Cookie directive. - AK
      */
-    } else if (!strcasecomp((http_equiv ? http_equiv : name), "Set-Cookie")) {
+    } else if (!strcasecomp((http_equiv ? http_equiv : ""), "Set-Cookie")) {
 	/*
 	 *  We're using the Request-URI as the second argument,
 	 *  regardless of whether a Content-Base header or BASE
@@ -2137,10 +2176,11 @@ free_META_copies:
 **  are to be treated as partial or absolute
 **  URLs. - FM
 */
-PUBLIC int LYLegitimizeHREF ARGS3(
+PUBLIC int LYLegitimizeHREF ARGS4(
 	HTStructured *, 	me,
 	char **,		href,
-	BOOL,			force_slash)
+	BOOL,			force_slash,
+	BOOL,			strip_dots)
 {
     int url_type = 0;
 
@@ -2173,13 +2213,68 @@ PUBLIC int LYLegitimizeHREF ARGS3(
 		 "file:", 5)) {
         /*
 	 *  The Fielding RFC/ID for resolving partial HREFs says
-	 *  that a slash should be on the end or the preceding
+	 *  that a slash should be on the end of the preceding
 	 *  symbolic element for "." and "..", but all tested
 	 *  browsers only do that for an explicit "./" or "../",
 	 *  so we'll respect the RFC/ID only if force_slash was
 	 *  TRUE and it's not a file URL. - FM
 	 */
 	StrAllocCat(*href, "/");
+    }
+    if ((!url_type && LYStripDotDotURLs && strip_dots && *(*href) == '.') &&
+	 !strncasecomp((me->inBASE ?
+		     me->base_href : me->node_anchor->address),
+		       "http", 4)) {
+	/*
+	 *  We will be resolving a partial reference versus an http
+	 *  or https URL, and it has lead dots, which are retained
+	 *  when resolving, in compliance with the URL specs, but
+	 *  the request would fail if the first element of the
+	 *  resultant path is two dots, because no http or https
+	 *  server accepts such paths, so if that's the case, and
+	 *  strip_dots is TRUE, we'll strip that element now, but
+	 *  issue a message about this as "immediate feedback",
+	 *  such that the bad partial reference might get corrected
+	 *  by the document provider.  Note that if the second and
+	 *  further symbolic elements also contain(s) only dots,
+	 *  those will still be retained, and the resolved URL may
+	 *  still fail, but it should, IMHO, if the partial reference
+	 *  is that much out of compliance with the URL specs. - FM
+	 */
+        int i = 0, j = 0;
+	char *temp = NULL, *str = "";
+
+	if (((temp = HTParse((me->inBASE ?
+			  me->base_href : me->node_anchor->address),
+			     "", PARSE_PATH + PARSE_PUNCTUATION)) == NULL) ||
+	    *temp == '\0' ||
+	    strchr(&temp[1], '/') == NULL) {
+	    FREE(temp);
+	    temp = *href;
+	    if ((me->inBASE ?
+	   me->base_href[4] : me->node_anchor->address[4]) == 's')
+	        str = "s";
+	    while (temp[j] == '.')
+		j++;
+	    if ((j == 2) && (temp[j] == '/' || temp[j] == '\0')) {
+		if (TRACE) {
+		    fprintf(stderr,
+			 "LYLegitimizeHREF: Bad value '%s' for http%s URL.\n",
+			   *href, str);
+		    fprintf(stderr,
+			   "                  Stripping lead dots.\n");
+		} else if (!me->inBadHREF) {
+		    _statusline(BAD_PARTIAL_REFERENCE);
+		    me->inBadHREF = TRUE;
+		    sleep(AlertSecs);
+		}
+		while (temp[j] != '\0')
+		    temp[i++] = temp[j++];
+		temp[i] = '\0';
+	    }
+	    temp = NULL;
+	}
+	FREE(temp);
     }
     return(url_type); 
 }
@@ -2316,7 +2411,7 @@ PUBLIC void LYHandleID ARGS2(
 				me->node_anchor,	/* Parent */
 				id,			/* Tag */
 				NULL,			/* Addresss */
-				(void *)0)) != 0) {	/* Type */
+				(void *)0)) != NULL) {	/* Type */
 	HText_beginAnchor(me->text, ID_A);
 	HText_endAnchor(me->text);
     }

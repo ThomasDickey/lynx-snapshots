@@ -39,6 +39,8 @@ struct _HTStructured {
 #define PUTS(s) (*me->target->isa->put_string)(me->target, s)
 #define START(e) (*me->target->isa->start_element)(me->target, e, 0, 0, 0)
 #define END(e) (*me->target->isa->end_element)(me->target, e, 0)
+#define MAYBE_END(e) if (HTML_dtd.tags[e].contents != SGML_EMPTY) \
+                        (*me->target->isa->end_element)(me->target, e, 0)
 
 
 /*	Here are the parameters which can be specified in a  source file
@@ -329,6 +331,7 @@ PRIVATE void WSRC_gen_html ARGS2(HTStream *, me, BOOL, source_file)
     if (source_file) {
 	START(HTML_DT);
 	PUTS("Access links");
+	MAYBE_END(HTML_DT);
 	START(HTML_DD);
 	if (me->par_value[PAR_IP_NAME] &&
 	    me->par_value[PAR_DATABASE_NAME]) {
@@ -365,20 +368,25 @@ PRIVATE void WSRC_gen_html ARGS2(HTStream *, me, BOOL, source_file)
 	    give_parameter(me, PAR_IP_NAME);
 	    give_parameter(me, PAR_DATABASE_NAME);
 	}
+	MAYBE_END(HTML_DD);
     
     } /* end if source_file */
     
     if (me->par_value[PAR_MAINTAINER]) {
 	START(HTML_DT);
 	PUTS("Maintainer");
+	MAYBE_END(HTML_DT);
 	START(HTML_DD);
 	PUTS(me->par_value[PAR_MAINTAINER]);
+	MAYBE_END(HTML_DD);
     }
     if (me->par_value[PAR_IP_NAME]) {
     	START(HTML_DT);
     	PUTS("Host");
+	MAYBE_END(HTML_DT);
     	START(HTML_DD);
     	PUTS(me->par_value[PAR_IP_NAME]);
+	MAYBE_END(HTML_DD);
     }
 
     END(HTML_DL);

@@ -22,6 +22,10 @@
 #ifdef DOSPATH
 #include "HTDOS.h"
 #endif
+#ifdef EXP_CHARTRANS
+#include "LYCharSets.h"  /* to get current charset for mail header */
+extern BOOLEAN LYHaveCJKCharacterSet;
+#endif
 
 #include "LYLeaks.h"
 
@@ -61,7 +65,7 @@ PUBLIC int printfile ARGS1(document *,newdoc)
     int pages = 0;
     int type = 0, c, len;
     FILE *outfile_fp;
-    char *cp;
+    char *cp = NULL;
     lynx_printer_item_type *cur_printer;
     char *sug_filename = NULL;
     char *link_info = NULL;
@@ -74,6 +78,8 @@ PUBLIC int printfile ARGS1(document *,newdoc)
     char *content_base = NULL, *content_location = NULL;
     HTFormat format;
     HTAtom *encoding;
+    BOOL use_mime, use_cte, use_type;
+    char *disp_charset;
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
 #endif /* VMS */
@@ -134,6 +140,27 @@ PUBLIC int printfile ARGS1(document *,newdoc)
         StrAllocCopy(sug_filename, HText_getSugFname()); /* must be freed */
     else
         StrAllocCopy(sug_filename, newdoc->address); /* must be freed */
+    /*
+     *  Strip any gzip or compress suffix, if present. - FM
+     */
+    cp = NULL;
+    if (strlen(sug_filename) > 3) {
+        cp = (char *)&sug_filename[(strlen(sug_filename) - 3)];
+        if ((*cp == '.' || *cp == '-' || *cp == '_') &&
+	    !strcasecomp((cp + 1), "gz")) {
+	    *cp = '\0';
+	} else {
+	    cp = NULL;
+	}
+    }
+    if ((cp == NULL) && strlen(sug_filename) > 2) {
+        cp = (char *)&sug_filename[(strlen(sug_filename) - 2)];
+        if ((*cp == '.' || *cp == '-' || *cp == '_') &&
+	    !strcasecomp((cp + 1), "Z")) {
+	    *cp = '\0';
+	}
+    }
+    cp = NULL;
 
     /*
      *  Get the number of lines in the file.
@@ -523,17 +550,47 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 			break;
 		}
 #endif
+		
+		/*
+		 *  Determine which mail headers should be sent.
+		 *  Send Content-Transfer-Encoding only if the document
+		 *  has 8-bit characters.  Send a charset parameter only
+		 *  if the document has 8-bit characters and we we seem
+		 *  to have a valid charset.  Also use Content-Type
+		 *  and MIME-Version headers only if needed.  - kw
+		 */
+		use_cte = HTLoadedDocumentEightbit();
+#ifdef EXP_CHARTRANS
+		disp_charset = LYCharSet_UC[current_char_set].MIMEname;
+		/*
+		 *  Don't send a charset if we have a CJK character set
+		 *  selected, since it may not be appropriate for mail...
+		 *  Also don't use an inofficial "x-" charset. - kw
+		 */
+		if (!use_cte || LYHaveCJKCharacterSet ||
+		    strncasecomp(disp_charset, "x-", 2) == 0)
+		    disp_charset = NULL;
+#else
+		disp_charset = HTLoadedDocumentCharset();
+#endif /* EXP_CHARTRANS */
+		use_type =  (disp_charset || HTisDocumentSource());
+		use_mime = (use_cte || use_type);
+
+		if (use_mime) {
+		    fprintf(outfile_fp, "Mime-Version: 1.0\n");
+		    if (use_cte)
+			fprintf(outfile_fp, "Content-Transfer-Encoding: 8bit\n");
+		}
+
 		if (HTisDocumentSource()) {
 		    /*
 		     *  Add Content-Type, Content-Location, and
 		     *  Content-Base headers for HTML source. - FM
-		     *  Also add Mime-Version header. - HM
 		     */
-		    fprintf(outfile_fp, "Mime-Version: 1.0\n");
 		    fprintf(outfile_fp, "Content-Type: text/html");
-		    if (HTLoadedDocumentCharset() != NULL) {
+		    if (disp_charset != NULL) {
 		        fprintf(outfile_fp, "; charset=%s\n",
-					    HTLoadedDocumentCharset());
+					    disp_charset);
 		    } else {
 		        fprintf(outfile_fp, "\n");
 		    }
@@ -541,6 +598,17 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 		    			content_base);
 		    fprintf(outfile_fp, "Content-Location: %s\n",
 		    			content_location);
+		} else {
+		    /*
+                     * Add Content-Type: text/plain if we have 8-bit
+		     * characters and a valid charset for non-source
+		     * documents. - kw
+                     */
+		    if (disp_charset != NULL) {
+			fprintf(outfile_fp,
+				"Content-Type: text/plain; charset=%s\n",
+				disp_charset);
+		    }
 		}
 		fprintf(outfile_fp, "X-URL: %s\n", newdoc->address);
 		fprintf(outfile_fp, "To: %s\nSubject:%s\n\n",
@@ -983,16 +1051,18 @@ PUBLIC int print_options ARGS2(char **,newfile, int,lines_in_file)
     	    lines_in_file, pages, (pages > 1 ? "s" : ""));
     fputs(buffer,fp0);
 
-    if (no_print || child_lynx || no_mail)
+    if (no_print || no_disk_save || child_lynx || no_mail)
 	fputs("Some print functions have been disabled!!!<br>\n", fp0);
 
     fputs("You have the following print choices.<br>\n", fp0);
     fputs("Please select one:<br>\n<pre>\n", fp0);
 
-    if (child_lynx == FALSE && no_print == FALSE)
+    if (child_lynx == FALSE && no_disk_save == FALSE && no_print == FALSE)
         fprintf(fp0,
    "   <a href=\"LYNXPRINT://LOCAL_FILE/lines=%d\">Save to a local file</a>\n",
 	 	lines_in_file);
+    else
+	fprintf(fp0,"   Save to disk disabled.\n");
     if (child_lynx == FALSE && no_mail == FALSE)
          fprintf(fp0,
    "   <a href=\"LYNXPRINT://MAIL_FILE/lines=%d\">Mail the file</a>\n",

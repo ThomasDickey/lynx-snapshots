@@ -61,8 +61,58 @@ AC_DEFINE(UNIX)
 AC_C_CONST
 
 case $host_os in
+aix4*)
+	CFLAGS="$CFLAGS -DAIX4 -D_BSD=44" 
+	LIBS="$LIBS -lbsd"
+	;;
+aix*)
+	LIBS="$LIBS -lbsd"
+	;;
+apollo*)
+	CFLAGS="$CFLAGS -D_BUILTINS -W0,-opt,4"
+	;;
+bsdi*)
+	CFLAGS="$CFLAGS -DBSDI" 
+	;;
+convex*)
+	CFLAGS="$CFLAGS -D__STDC__ -Dunix"
+	;;
+dgux*)
+	CFLAGS="$CFLAGS -DDGUX" 
+	;;
+hpux*)
+	CFLAGS="$CFLAGS -DSNAKE" 
+	;;
+isc*)
+	# -DPOSIX_JC is necessary, else LYBookmark.c never finds out what a mode_t is.
+	CFLAGS="$CFLAGS -DISC -DPOSIX_JC"
+	LIBS="$LIBS -linet -lnsl_s -lcposix"
+	;;
+irix*)
+	CFLAGS="$CFLAGS -cckr" 
+	;;
 linux*)
 	CFLAGS="$CFLAGS -DLINUX" 
+	;;
+next*)
+	CFLAGS="$CFLAGS -DNEXT -DXMOSAIC_HACK"
+	;;
+openbsd*)
+	LIBS="$LIBS -lcompat"
+	;;
+osf*)
+	# Increase the maximum size of functions that will be optimized.
+	test -z "$GCC" && CFLAGS="$CFLAGS -O -Olimit 4000"
+	CFLAGS="$CFLAGS -DDSYS5"
+	;;
+svr4)
+	CFLAGS="$CFLAGS -DSVR4_BSDSELECT -DSVR4"
+	;;
+sunos3*)
+	CFLAGS="$CFLAGS -DSUN"
+	;;
+sunos4*)
+	CFLAGS="$CFLAGS -DSUN -DSUN4"
 	;;
 ultrix*)
 	# Increase the maximum size of functions that will be optimized.
@@ -123,6 +173,7 @@ AC_CHECK_HEADERS( \
 	sys/fcntl.h \
 	sys/filio.h \
 	sys/ioctl.h \
+	sys/param.h \
 	sys/time.h \
 	termio.h \
 	termios.h \
@@ -146,15 +197,19 @@ dnl --------------------------------------------------------------------------
 dnl Checks for external-data
 dnl --------------------------------------------------------------------------
 
+CF_BOOL_DEFS
 CF_ERRNO
-CF_SYS_ERRLIST
 CF_LOCALE
+CF_NGROUPS
+CF_SYS_ERRLIST
 CF_UTMP
 
 ### These tests must be run after establishing the curses library.
 if test $cf_cv_screen != slang ; then
 	CF_ALT_CHAR_SET
 	CF_FANCY_CURSES
+	CF_NCURSES_VERSION
+	CF_NCURSES_BROKEN
 	CF_COLOR_CURSES
 	CF_SIZECHANGE
 	CF_TTYTYPE
@@ -167,6 +222,36 @@ fi
 dnl --------------------------------------------------------------------------
 dnl Miscellaneous options that don't need to test system features
 dnl --------------------------------------------------------------------------
+
+AC_MSG_CHECKING(if color-style code should be used)
+AC_CACHE_VAL(cf_cv_color_style,[
+AC_ARG_WITH(color-style,
+[  --with-color-style=XXX  enable color style (types are ncurses, slang)],
+	[cf_cv_color_style=$withval],
+	[cf_cv_color_style=no])])
+
+if test $cf_cv_color_style != no ; then
+	if test .$cf_cv_color_curses != .yes ; then
+		AC_ERROR(Configuration does not support color-styles)
+	fi
+	AC_DEFINE(USEHASH)
+	AC_DEFINE(UNPAINT_CACHE)
+	AC_DEFINE(LINKEDSTYLES)
+fi
+
+case $cf_cv_color_style in
+no)
+	AC_MSG_RESULT(no)
+	;;
+slang)
+	AC_DEFINE(SLCS)
+	AC_MSG_RESULT(slang-style)
+	;;
+*)
+	AC_DEFINE(USE_COLOR_STYLE)
+	AC_MSG_RESULT(curses-style)
+	;;
+esac
 
 AC_MSG_CHECKING(if parent-directory references are permitted)
 AC_CACHE_VAL(cf_cv_parent_dir,[

@@ -14,6 +14,11 @@
 
 #include "LYLeaks.h"
 
+#ifdef USE_COLOR_STYLE
+#include "AttrList.h"
+#include "LYHash.h"
+#endif
+
 #ifdef ALT_CHAR_SET
 #define BOXVERT 0   /* use alt char set for popup window vertical borders */
 #define BOXHORI 0   /* use alt char set for popup window vertical borders */
@@ -76,7 +81,7 @@ PUBLIC int change_form_link ARGS6(struct link *, form_link, int, mode,
 		dummy = popup_options(form->num_value, form->select_list,
 				form_link->ly, form_link->lx, form->size,
 				form->size_l, form->disabled);
-	        c = 12;  /* CTRL-R for repaint */
+	        c = 12;  /* CTRL-L for repaint */
 	        break;
 	    }
 	    form->num_value = popup_options(form->num_value, form->select_list,
@@ -91,7 +96,12 @@ PUBLIC int change_form_link ARGS6(struct link *, form_link, int, mode,
 		form->value = opt_ptr->name;   /* set the name */
 		form->cp_submit_value = opt_ptr->cp_submit_value; /* set the value */
 	    }
-	    c = 12;  /* CTRL-R for repaint */
+#if defined(FANCY_CURSES) || defined(USE_SLANG)
+	    if (!enable_scrollback)
+		c = DO_NOTHING;
+	    else
+#endif
+		c = 12;  /* CTRL-L for repaint */
 	    break;
 
 	case F_RADIO_TYPE:
@@ -109,7 +119,7 @@ PUBLIC int change_form_link ARGS6(struct link *, form_link, int, mode,
 		/* run though list of the links on the screen and
 		 * unselect any that are selected. :) 
 		 */
-		start_bold();
+		lynx_start_radio_color ();
 		for (i = 0; i < nlinks; i++)
 		   if (links[i].type == WWW_FORM_LINK_TYPE &&
 		       links[i].form->type == F_RADIO_TYPE &&
@@ -122,7 +132,7 @@ PUBLIC int change_form_link ARGS6(struct link *, form_link, int, mode,
 			addstr(unchecked_radio);
 			links[i].hightext = unchecked_radio;
 		     }
-		stop_bold();
+		lynx_stop_radio_color ();
 		/* will unselect other button and select this one */
 		HText_activateRadioButton(form);
 		/* now highlight this one */
@@ -175,9 +185,11 @@ PUBLIC int change_form_link ARGS6(struct link *, form_link, int, mode,
 		}
 		if (form->submit_method == URL_MAIL_METHOD)
 		    *refresh_screen = TRUE;
-		else
+		else {
 	            /* returns new document URL */
 	            newdoc->link = 0;
+		    newdoc->internal_link = FALSE;
+		}
 		c = DO_NOTHING;
 		break;
 	    } else {
@@ -197,9 +209,11 @@ PUBLIC int change_form_link ARGS6(struct link *, form_link, int, mode,
 	    HText_SubmitForm(form, newdoc, link_name, link_value);
 	    if (form->submit_method == URL_MAIL_METHOD)
                 *refresh_screen = TRUE;
-	    else
+	    else {
 	        /* returns new document URL */
 	        newdoc->link = 0;
+		newdoc->internal_link = FALSE;
+	    }
 	    break;
 
     }
@@ -535,7 +549,9 @@ PRIVATE int popup_options ARGS7(
 #define getbkgd(w) wgetbkgd(w)	/* workaround pre-1.9.9g bug */
 #endif
     LYsubwindow(form_window);
+#ifdef getbkgd			/* not defined in ncurses 1.8.7 */
     wbkgd(form_window, getbkgd(stdscr));
+#endif
 #endif
 #else
     SLsmg_fill_region (top, lx - 1, bottom - top, width + 4, ' ');
@@ -577,7 +593,13 @@ redraw:
 #ifdef VMS
     VMSbox(form_window, (bottom - top), (width + 4));
 #else
+#ifdef CSS
+    wcurses_css(form_window, "frame", ABS_ON);
     box(form_window, BOXVERT, BOXHORI);
+    wcurses_css(form_window, "frame", ABS_OFF);
+#else
+    box(form_window, BOXVERT, BOXHORI);
+#endif
 #endif /* VMS */
     wrefresh(form_window);
 #else
@@ -623,12 +645,15 @@ redraw:
 #endif /* !USE_SLANG  */
 
         c = LYgetch();
-	cmd = keymap[c+1];
+	if (c == 3 || c == 7)	/* Control-C or Control-G */
+	    cmd = LYK_QUIT;
+	else
+	    cmd = keymap[c+1];
 #ifdef VMS
-	  if (HadVMSInterrupt) {
-	      HadVMSInterrupt = FALSE;
-	      cmd = 7;
-	  }
+	if (HadVMSInterrupt) {
+	    HadVMSInterrupt = FALSE;
+	    cmd = LYK_QUIT;
+	}
 #endif /* VMS */
 
         switch(cmd) {
@@ -821,6 +846,28 @@ redraw:
 		break;
 
 	    case LYK_NEXT:
+		if (recall && *prev_target_buffer == '\0') {
+		    /*
+		     *  We got a 'n'ext command with no prior query
+		     *  specified within the popup window.  See if
+		     *  one was entered when the popup was retracted,
+		     *  and if so, assume that's what's wanted.  Note
+		     *  that it will become the default within popups,
+		     *  unless another is entered within a popup.  If
+		     *  the within popup default is to be changed at
+		     *  that point, use WHEREIS ('/') and enter it,
+		     *  or the up- or down-arrow keys to seek any of
+		     *  the previously entered queries, regardless of
+		     *  whether they were entered within or outside
+		     *  of a popup window. - FM
+		     */
+		    if ((cp = (char *)HTList_objectAt(search_queries,
+	    					      0)) != NULL) {
+			strcpy(prev_target_buffer, cp);
+			QueryNum = 0;
+			FirstRecall = FALSE;
+		    }
+		}
 	        strcpy(prev_target, prev_target_buffer);
 	    case LYK_WHEREIS:
 	        if (*prev_target == '\0' ) {
@@ -1064,8 +1111,6 @@ restore_popup_statusline:
 	    case LYK_QUIT:
 	    case LYK_ABORT:
 	    case LYK_PREV_DOC:
-	    case 7:	/* Control-G */
-	    case 3:	/* Control-C */
 		cur_selection = orig_selection;
 		cmd = LYK_ACTIVATE; /* to exit */
 		break;

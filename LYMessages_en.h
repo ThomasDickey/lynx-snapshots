@@ -248,6 +248,8 @@
 #define SOFT_DOUBLE_QUOTE_OFF "Soft double-quote parsing OFF!"
 #define ALREADY_AT_END "You are already at the end of this document."
 #define ALREADY_AT_BEGIN "You are already at the beginning of this document."
+#define ALREADY_AT_PAGE "You are already at page %d of this document."
+#define LINK_ALREADY_CURRENT "Link number %d already is current."
 #define ALREADY_AT_FIRST "You are already at the first document"
 #define NO_LINKS_ABOVE "There are no links above this line of the document."
 #define NO_LINKS_BELOW "There are no links below this line of the document."
@@ -323,7 +325,7 @@
 #define PRINT_DISABLED "The 'p'rint command is currently disabled."
 #define NO_TOOLBAR "Document has no Toolbar links or Banner."
 #define NOOPEN_TRAV_ERR_FILE "Unable to open traversal errors output file"
-#define FOLLOW_LINK_NUMBER "Follow link number: "
+#define FOLLOW_LINK_NUMBER "Follow link (or goto link or page) number: "
 #define BAD_HTML_USE_TRACE "** Bad HTML!!  Use -trace to diagnose. **"
 #define CANNOT_OPEN_TEMP "Can't open temporary file!"
 #define CANNOT_OPEN_OUTPUT "Can't open output file!  Cancelling!"
@@ -387,6 +389,7 @@
 #define RLOGIN_DISABLED "Rlogin access is disabled!"
 #define FTP_DISABLED "Ftp access is disabled!"
 #define NO_REFS_FROM_DOC "There are no references from this document."
+#define NO_VISIBLE_REFS_FROM_DOC "There are only hidden links from this document."
 #ifdef VMS
 #define CANNOT_OPEN_COMFILE "Unable to open command file."
 #endif /* VMS */
@@ -436,9 +439,9 @@
 #define TO_SAVE_SEGMENT " to save,"
 #define OR_SEGMENT " or "
 #define TO_RETURN_SEGMENT " to return to Lynx."
-#define ACCEPT_DATA "Hit return to accept entered data."
+#define ACCEPT_DATA "Hit RETURN to accept entered data."
 #define ACCEPT_DATA_OR_DEFAULT \
-"Hit return to accept entered data.  Delete data to invoke the default."
+"Hit RETURN to accept entered data.  Delete data to invoke the default."
 #define VALUE_ACCEPTED "Value accepted!"
 #define VALUE_ACCEPTED_WARNING_X \
  "Value accepted! -- WARNING: Lynx is configured for XWINDOWS!"
@@ -460,7 +463,7 @@
 #define R_TO_RETURN_TO_LYNX " 'r' to return to Lynx "
 #define SAVE_OR_R_TO_RETURN_TO_LYNX " '>' to save, or 'r' to return to Lynx "
 #define ANY_KEY_CHANGE_RET_ACCEPT \
- "Hit any key to change value; RETURN to accept: "
+ "Hit any key to change value; RETURN to accept."
 #define ERROR_UNCOMPRESSING_TEMP "Error uncompressing temporary file!"
 #define UNSUPPORTED_URL_SCHEME "Unsupported URL scheme!"
 #define UNSUPPORTED_DATA_URL "Unsupported data: URL!  Use SHOWINFO, for now."
@@ -560,11 +563,22 @@
 #define ALL_COOKIES_EATEN "All of the cookies in the jar have been eaten!"
 #define PORT_NINETEEN_INVALID "Port 19 not permitted in URLs."
 #define PORT_TWENTYFIVE_INVALID "Port 25 not permitted in URLs."
+#define HTML_STACK_OVERRUN "Maximum nesting of HTML elements exceeded."
+#define BAD_PARTIAL_REFERENCE "Bad partial reference! Stripping lead dots."
+#define TRACELOG_OPEN_FAILED "Trace Log open failed.  Trace off!."
+#define LYNX_TRACELOG_TITLE "Lynx Trace Log"
+#define NO_TRACELOG_STARTED "No trace log has been started for this session."
+#define MAX_TEMPCOUNT_REACHED \
+ "The maximum temporary file count has been reached!"
 
 #ifdef DIRED_SUPPORT
 #define DIRED_NOVICELINE \
  "  C)reate  D)ownload  E)dit  F)ull menu  M)odify  R)emove  T)ag  U)pload     \n"
 #define CURRENT_LINK_STATUS_FAILED "Failed to obtain status of current link!"
 #endif /* DIRED_SUPPORT */
+
+#ifdef USE_EXTERNALS
+#define EXTERNALS_DISABLED "External support is currently disabled."
+#endif /* USE_EXTERNALS */
 
 #endif /* LYMESSAGES_EN_H */

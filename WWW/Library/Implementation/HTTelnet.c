@@ -33,9 +33,9 @@
 #include "HTAlert.h"
 #if !defined (VMS) && !defined (_WINDOWS)
 #include "../../../userdefs.h"  /* for TELNET_COMMAND and RLOGIN_COMMAND */
-#endif /* not VMS or _WINDOWS */
+#endif /* not VMS */
 
-#ifdef _WINDOWS /* ../../.. doesn't work for me WB */
+#ifdef _WINDOWS /* ../../.. doesn't work for me */
 #include "userdefs.h"  /* for TELNET_COMMAND and RLOGIN_COMMAND */
 #endif
 

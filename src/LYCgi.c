@@ -309,6 +309,13 @@ PRIVATE int LYLoadCGI ARGS4(
 		buf[(sizeof(buf) - 1)] = '\0';
 		add_environment_value(buf);
 
+		if (pref_charset) {
+		    sprintf(buf, "HTTP_ACCEPT_CHARSET=%.*s",
+			    (sizeof(buf) - 21), pref_charset);
+		    buf[(sizeof(buf) - 1)] = '\0';
+		    add_environment_value(buf);
+		}
+
 		if (anAnchor->post_data) { /* post script, read stdin */
 		    close(fd1[1]);
 		    dup2(fd1[0], fileno(stdin));

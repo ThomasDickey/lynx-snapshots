@@ -1,3 +1,12 @@
+1997-04-22
+----------
+* refined check for slang libraries/headers by checking if $CFLAGS has been
+  set so that slang.h is in the search path - TD
+* add check to allow use of broken ncurses 1.9.9e's color - TD
+* add check for NGROUPS, TRUE, FALSE macro definitions - TD
+* remove top-level makefile.in targets that can be combined with the generic
+  target (more work required on the remaining ones) - TD.
+
 1997-04-15
 ----------
 * refined logic of SVr4 curses color support to test the no_color_video

@@ -78,7 +78,8 @@ PUBLIC void LYAddVisitedLink ARGS1(
 	!strcmp((doc->title ? doc->title : ""), LIST_PAGE_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), SHOWINFO_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), COOKIE_JAR_TITLE) ||
-	!strcmp((doc->title ? doc->title : ""), VISITED_LINKS_TITLE)) {
+	!strcmp((doc->title ? doc->title : ""), VISITED_LINKS_TITLE) ||
+	!strcmp((doc->title ? doc->title : ""), LYNX_TRACELOG_TITLE)) {
 	return;
     }
 
@@ -168,9 +169,21 @@ PUBLIC void LYpush ARGS2(
 		history[nhist-1].bookmark : "",
                 doc->bookmark ?
 		doc->bookmark : "") &&
-	history[nhist-1].isHEAD == doc->isHEAD) 
-        return;
+	history[nhist-1].isHEAD == doc->isHEAD) {
+	if (history[nhist-1].internal_link == doc->internal_link) {
+	    /* But it is nice to have the last position remembered!
+	       - kw */
+	    history[nhist].link = doc->link;
+	    history[nhist].page = doc->line;
+ 	    return;
+	}
+    }
 
+#ifdef NOT_USED
+    /* The following segment not used any more - What's it good for,
+       anyway??  Doing a pop when a push is requested is confusing,
+       also to the user.  Moreover, the way it was done seems to cause
+       a memory leak. - kw */
     /*
      *  If file is identical to one two before it, don't push it.
      */
@@ -191,6 +204,7 @@ PUBLIC void LYpush ARGS2(
 	nhist--;
         return;
     }
+#endif	/* NOT_USED */
 
     /*
      *  OK, push it if we have stack space.
@@ -210,9 +224,101 @@ PUBLIC void LYpush ARGS2(
 	StrAllocCopy(history[nhist].bookmark, doc->bookmark);
 	history[nhist].isHEAD = doc->isHEAD;
 	history[nhist].safe = doc->safe;
+
+	history[nhist].internal_link = FALSE; /* by default */
+	history[nhist].intern_seq_start = -1; /* by default */
+	if (doc->internal_link) {
+ 	    /* Now some tricky stuff: if the caller thinks that the doc
+	       to push was the result of following an internal
+	       (fragment) link, we check whether we believe it.
+	       It is only accepted as valid if the immediately preceding
+	       item on the history stack is actually the same document
+	       except for fragment and location info.  I.e. the Parent
+	       Anchors are the same.
+	       Also of course this requires that this is not the first
+	       history item. - kw */
+	    if (nhist > 0) {
+		DocAddress WWWDoc;
+		HTParentAnchor *thisparent, *thatparent = NULL;
+		WWWDoc.address = doc->address;
+		WWWDoc.post_data = doc->post_data;
+		WWWDoc.post_content_type = doc->post_content_type;
+		WWWDoc.bookmark = doc->bookmark;
+		WWWDoc.isHEAD = doc->isHEAD;
+		WWWDoc.safe = doc->safe;
+		thisparent =
+		    HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
+		/* Now find the ParentAnchor for the previous history
+		** item - kw
+		*/
+		if (thisparent) {
+		    /* If the last-pushed item is a LYNXIMGMAP but THIS one
+		    ** isn't, compare the physical URLs instead. - kw
+		    */
+		    if (0==strncmp(history[nhist-1].address,"LYNXIMGMAP:",11) &&
+			0!=strncmp(doc->address,"LYNXIMGMAP:",11)) {
+			WWWDoc.address = history[nhist-1].address + 11;
+		    /*
+		    ** If THIS item is a LYNXIMGMAP but the last-pushed one
+		    ** isn't, fake it by using THIS item's address for
+		    ** thatparent... - kw
+		    */
+		    } else if ((0==strncmp(doc->address,"LYNXIMGMAP:",11) &&
+		       0!=strncmp(history[nhist-1].address,"LYNXIMGMAP:",11))) {
+			char *temp = NULL;
+			StrAllocCopy(temp, "LYNXIMGMAP:");
+			StrAllocCat(temp, doc->address+11);
+			WWWDoc.address = temp;
+			WWWDoc.post_content_type = history[nhist-1].post_content_type;
+			WWWDoc.bookmark = history[nhist-1].bookmark;
+			WWWDoc.isHEAD = history[nhist-1].isHEAD;
+			WWWDoc.safe = history[nhist-1].safe;
+			thatparent =
+			    HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
+			FREE(temp);
+		    } else {
+			WWWDoc.address = history[nhist-1].address;
+		    }
+		    if (!thatparent) { /* if not yet done */
+			WWWDoc.post_data = history[nhist-1].post_data;
+			WWWDoc.post_content_type = history[nhist-1].post_content_type;
+			WWWDoc.bookmark = history[nhist-1].bookmark;
+			WWWDoc.isHEAD = history[nhist-1].isHEAD;
+			WWWDoc.safe = history[nhist-1].safe;
+			thatparent =
+			    HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
+		    }
+		/* In addition to equality of the ParentAnchors, require
+		** that IF we have a HTMainText (i.e. it wasn't just
+		** HTuncache'd by mainloop), THEN it has to be consistent
+		** with what we are trying to push.
+		**   This may be overkill... - kw
+		*/
+		    if (thatparent == thisparent &&
+			(!HTMainText || HTMainAnchor == thisparent)
+			) {
+			history[nhist].internal_link = TRUE;
+			history[nhist].intern_seq_start =
+			    history[nhist-1].intern_seq_start >= 0 ?
+			    history[nhist-1].intern_seq_start : nhist-1;
+			if (TRACE) {
+			    fprintf(stderr,
+				"\nLYpush: pushed as internal link, OK\n");
+			}
+		    }
+		}
+	    }
+	    if (!history[nhist].internal_link) {
+		if (TRACE) {
+		    fprintf(stderr,
+			    "\nLYpush: push as internal link requested, %s\n",
+			    "but didn't check out!");
+		}
+	    }
+	}
 	nhist++;
-   	if (TRACE) {
-    	    fprintf(stderr,
+	if (TRACE) {
+	    fprintf(stderr,
 		    "\nLYpush: address:%s\n        title:%s\n",
 		    doc->address, doc->title);
 	}
@@ -251,6 +357,7 @@ PUBLIC void LYpop ARGS1(
 	doc->bookmark = history[nhist].bookmark; /* will be freed later */
 	doc->isHEAD = history[nhist].isHEAD;
 	doc->safe = history[nhist].safe;
+	doc->internal_link = history[nhist].internal_link;
         if (TRACE) {
 	    fprintf(stderr,
 	    	    "LYpop: address:%s\n     title:%s\n",
@@ -278,6 +385,7 @@ PUBLIC void LYpop_num ARGS2(
 	StrAllocCopy(doc->bookmark, history[number].bookmark);
 	doc->isHEAD = history[number].isHEAD;
 	doc->safe = history[number].safe;
+	doc->internal_link = history[number].internal_link; /* ?? */
     }
 }
 
@@ -320,7 +428,11 @@ PUBLIC int showhistory ARGS1(
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
     LYforce_no_cache = TRUE;	/* force this file to be new */
 
-    fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
+    fprintf(fp0, "<head>\n");
+#ifdef EXP_CHARTRANS
+    add_META_charset_to_fd(fp0, -1);
+#endif
+    fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 HISTORY_PAGE_TITLE);
 
     fprintf(fp0, "<h1>You have reached the History Page</h1>\n");
@@ -339,13 +451,19 @@ PUBLIC int showhistory ARGS1(
 	}
 	fprintf(fp0,
 		"%s<em>%d</em>. <tab id=t%d><a href=\"LYNXHIST:%d\">%s</a>\n",
-		(x > 99 ? "" : x < 9 ? "  " : " "),  
+		(x > 99 ? "" : x < 10 ? "  " : " "),  
 		x, x, x, Title);
 	if (history[x].address != NULL) {
 	    StrAllocCopy(Title, history[x].address);
 	    LYEntify(&Title, TRUE);
 	} else {
 	    StrAllocCopy(Title, "(no address)");
+	}
+	if (history[x].internal_link) {
+	    if (history[x].intern_seq_start == history[nhist-1].intern_seq_start)
+		StrAllocCat(Title, " (internal)");
+	    else
+		StrAllocCat(Title, " (was internal)");
 	}
 	fprintf(fp0, "<tab to=t%d>%s\n", x, Title);
     }
@@ -356,6 +474,8 @@ PUBLIC int showhistory ARGS1(
     FREE(Title);
     return(0);
 }
+
+extern BOOL reloading;
 
 /* 
  *  This function makes the history page seem like any other type of
@@ -370,6 +490,7 @@ PUBLIC BOOLEAN historytarget ARGS1(
     DocAddress WWWDoc;
     HTParentAnchor *tmpanchor;
     HText *text;
+    BOOLEAN treat_as_intern = FALSE;
 
     if ((!newdoc || !newdoc->address) ||
         strlen(newdoc->address) < 10 || !isdigit(*(newdoc->address+9)))
@@ -379,7 +500,14 @@ PUBLIC BOOLEAN historytarget ARGS1(
         return(FALSE);
 
     LYpop_num(number, newdoc);
-
+    if (newdoc->internal_link &&
+	history[number].intern_seq_start == history[nhist-1].intern_seq_start) {
+	LYforce_no_cache = FALSE;
+	LYoverride_no_cache = TRUE;
+	treat_as_intern = TRUE;
+    } else {
+	newdoc->internal_link = FALSE;
+    }
     /*
      *  If we have POST content, and have LYresubmit_posts set
      *  or have no_cache set or do not still have the text cached,
@@ -394,9 +522,10 @@ PUBLIC BOOLEAN historytarget ARGS1(
 	WWWDoc.safe = newdoc->safe;
 	tmpanchor = HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
 	text = (HText *)HTAnchor_document(tmpanchor);
-        if (((LYresubmit_posts == TRUE) ||
-	     (LYforce_no_cache == TRUE &&
-	      LYoverride_no_cache == FALSE) ||
+        if (((((LYresubmit_posts == TRUE) ||
+	       (LYforce_no_cache == TRUE &&
+		LYoverride_no_cache == FALSE)) &&
+	      !(treat_as_intern && !reloading)) ||
 	     text == NULL) &&
 	    HTConfirm(CONFIRM_POST_RESUBMISSION) == TRUE) {
 	    LYforce_no_cache = TRUE;
@@ -462,7 +591,11 @@ PUBLIC int LYShowVisitedLinks ARGS1(
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
     LYforce_no_cache = TRUE;	/* force this file to be new */
 
-    fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
+    fprintf(fp0, "<head>\n");
+#ifdef EXP_CHARTRANS
+    add_META_charset_to_fd(fp0, -1);
+#endif
+    fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 VISITED_LINKS_TITLE);
 
     fprintf(fp0, "<h1>You have reached the Visited Links Page</h1>\n");
@@ -487,12 +620,12 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 	    LYEntify(&Address, FALSE);
 	    fprintf(fp0,
 		    "%s<em>%d</em>. <tab id=t%d><a href=\"%s\">%s</a>\n",
-		    (x > 99 ? "" : x < 9 ? "  " : " "),
+		    (x > 99 ? "" : x < 10 ? "  " : " "),
 		    x, x, Address, Title);
 	} else {
 	    fprintf(fp0,
 		    "%s<em>%d</em>. <tab id=t%d><em>%s</em>\n",
-		    (x > 99 ? "" : x < 9 ? "  " : " "),
+		    (x > 99 ? "" : x < 10 ? "  " : " "),
 		    x, x, Title);
 	}
 	if (Address != NULL) {

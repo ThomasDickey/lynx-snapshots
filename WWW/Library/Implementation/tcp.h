@@ -65,6 +65,8 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #define STDIO_H
 #endif /* !STDIO_H */
 
+#include <sys/types.h>
+
 #if HAVE_DIRENT_H
 # include <dirent.h>
 # define D_NAMLEN(dirent) strlen((dirent)->d_name)
@@ -610,6 +612,28 @@ Defaults
 #endif /* !__hpux */
 #include <netdb.h>
 #endif  /* TCP includes */
+
+/*
+
+ROUGH ESTIMATE OF MAX PATH LENGTH
+
+*/
+#ifndef HT_MAX_PATH
+#ifdef MAXPATHLEN
+#define HT_MAX_PATH MAXPATHLEN
+#else
+#ifdef PATH_MAX
+#define HT_MAX_PATH PATH_MAX
+#else
+#define HT_MAX_PATH 1024                        /* Any better ideas? */
+#endif
+#endif
+#endif /* HT_MAX_PATH */
+
+#if HT_MAX_PATH < 256
+#undef HT_MAX_PATH
+#define HT_MAX_PATH 256
+#endif
 
 /*
   MACROS FOR MANIPULATING MASKS FOR SELECT()

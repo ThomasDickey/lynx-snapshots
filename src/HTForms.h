@@ -76,6 +76,7 @@ typedef struct _FormInfo {
 
 #define HYPERTEXT_ANCHOR 1
 #define INPUT_ANCHOR     2   /* forms mode input fields */
+#define INTERNAL_LINK_ANCHOR 5	/* 1+4, can be used as bitflag... - kw */
 
 #define F_TEXT_TYPE	   1
 #define F_PASSWORD_TYPE    2
@@ -94,6 +95,9 @@ typedef struct _FormInfo {
 
 #define WWW_FORM_LINK_TYPE  1
 #define WWW_LINK_TYPE   2
+#define WWW_INTERN_LINK_TYPE   6 /* can be used as a bitflag... - kw */
+#define LINK_LINE_FOUND	8	/* used in follow_link_number - kw */
+
 /* #define different lynx modes */
 #define NORMAL_LYNX_MODE 1
 #define FORMS_LYNX_MODE  2

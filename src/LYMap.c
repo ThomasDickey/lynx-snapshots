@@ -32,45 +32,47 @@
 
 extern BOOL reloading;    /* For Flushing Cache on Proxy Server */
 
-typedef struct _MapElement {
+typedef struct _LYMapElement {
    char * address;
    char * title;
-} MapElement;
+   BOOL   intern_flag;
+} LYMapElement;
 
-typedef struct _ImageMap {
+typedef struct _LYImageMap {
    char * address;
    char * title;
    HTList * elements;
-} ImageMap;
+} LYImageMap;
 
 struct _HTStream 
 {
   HTStreamClass * isa;
 };
 
-PUBLIC HTList * LynxMaps = NULL;
+PRIVATE HTList * LynxMaps = NULL;
+
 PUBLIC BOOL LYMapsOnly = FALSE;
 
 /* 
- * Utility for freeing the list of MAPs. - FM
+ *  Utility for freeing the list of MAPs. - FM
  */
 PRIVATE void LYLynxMaps_free NOARGS
 {
-    ImageMap *map;
-    MapElement *element;
+    LYImageMap *map;
+    LYMapElement *element;
     HTList *cur = LynxMaps;
     HTList *current;
 
     if (!cur)
         return;
 
-    while (NULL != (map = (ImageMap *)HTList_nextObject(cur))) {
+    while (NULL != (map = (LYImageMap *)HTList_nextObject(cur))) {
         FREE(map->address);
 	FREE(map->title);
 	if (map->elements) {
 	    current = map->elements;
 	    while (NULL !=
-	    	   (element = (MapElement *)HTList_nextObject(current))) {
+	    	   (element = (LYMapElement *)HTList_nextObject(current))) {
 	        FREE(element->address);
 		FREE(element->title);
 		FREE(element);
@@ -86,14 +88,21 @@ PRIVATE void LYLynxMaps_free NOARGS
 }
 
 /* 
- * Utility for creating an ImageMap list (LynxMaps), if it doesn't
- * exist already, and adding ImageMap entry structures. - FM
+ *  Utility for creating an LYImageMap list (LynxMaps), if it doesn't
+ *  exist already, adding LYImageMap entry structures if needed, and
+ *  removing any LYMapElements in a pre-existing LYImageMap entry so that
+ *  it will have only those from AREA tags for the current analysis of
+ *  MAP element content. - FM
  */
-PUBLIC BOOL LYAddImageMap ARGS2(char *, address, char *, title)
+PUBLIC BOOL LYAddImageMap ARGS2(
+	char *,		address,
+	char *,		title)
 {
-    ImageMap *new = NULL;
-    ImageMap *old;
+    LYImageMap *new = NULL;
+    LYImageMap *old = NULL;
     HTList *cur = NULL;
+    HTList *curele = NULL;
+    LYMapElement *ele = NULL;
 
     if (!(address && *address))
         return FALSE;
@@ -103,14 +112,28 @@ PUBLIC BOOL LYAddImageMap ARGS2(char *, address, char *, title)
 	atexit(LYLynxMaps_free);
     } else {
         cur = LynxMaps;
-	while (NULL != (old = (ImageMap *)HTList_nextObject(cur))) {
+	while (NULL != (old = (LYImageMap *)HTList_nextObject(cur))) {
 	    if (!strcmp(old->address, address)) {
-		return TRUE;
+		FREE(old->address);
+		FREE(old->title);
+		if (old->elements) {
+		    curele = old->elements;
+		    while (NULL !=
+		    	   (ele = (LYMapElement *)HTList_nextObject(curele))) {
+		        FREE(ele->address);
+			FREE(ele->title);
+			FREE(ele);
+		    }
+		    HTList_delete(old->elements);
+		    old->elements = NULL;
+		}
+		break;
 	    }
 	}
     }
 
-    new = (ImageMap *)calloc(1, sizeof(ImageMap));
+    new = (old != NULL) ?
+		    old : (LYImageMap *)calloc(1, sizeof(LYImageMap));
     if (new == NULL) {
 	perror("Out of memory in LYAddImageMap");
 	return FALSE;
@@ -118,18 +141,23 @@ PUBLIC BOOL LYAddImageMap ARGS2(char *, address, char *, title)
     StrAllocCopy(new->address, address);
     if (title && *title)
         StrAllocCopy(new->title, title);
-    HTList_addObject(LynxMaps, new);
+    if (new != old)
+        HTList_addObject(LynxMaps, new);
     return TRUE;
 }
 
 /* 
- * Utility for adding MapElements to ImageMaps
+ * Utility for adding LYMapElements to LYImageMaps
  * in the LynxMaps list. - FM
  */
-PUBLIC BOOL LYAddMapElement ARGS3(char *,map, char *,address, char *, title)
+PUBLIC BOOL LYAddMapElement ARGS4(
+	char *,		map,
+	char *,		address,
+	char *,		title,
+				  BOOL,	intern_flag)
 {
-    MapElement *new = NULL;
-    ImageMap *theMap = NULL;
+    LYMapElement *new = NULL;
+    LYImageMap *theMap = NULL;
     HTList *cur = NULL;
 
     if (!(map && *map && address && *address))
@@ -139,7 +167,7 @@ PUBLIC BOOL LYAddMapElement ARGS3(char *,map, char *,address, char *, title)
         LYAddImageMap(map, NULL);
 
     cur = LynxMaps;
-    while (NULL != (theMap = (ImageMap *)HTList_nextObject(cur))) {
+    while (NULL != (theMap = (LYImageMap *)HTList_nextObject(cur))) {
         if (!strcmp(theMap->address, map)) {
 	    break;
 	}
@@ -149,7 +177,7 @@ PUBLIC BOOL LYAddMapElement ARGS3(char *,map, char *,address, char *, title)
     if (!theMap->elements)
         theMap->elements = HTList_new();
     cur = theMap->elements;
-    while (NULL != (new = (MapElement *)HTList_nextObject(cur))) {
+    while (NULL != (new = (LYMapElement *)HTList_nextObject(cur))) {
         if (!strcmp(new->address, address)) {
 	    FREE(new->address);
 	    FREE(new->title);
@@ -159,7 +187,7 @@ PUBLIC BOOL LYAddMapElement ARGS3(char *,map, char *,address, char *, title)
 	}
     }
 
-    new = (MapElement *)calloc(1, sizeof(MapElement));
+    new = (LYMapElement *)calloc(1, sizeof(LYMapElement));
     if (new == NULL) {
 	perror("Out of memory in LYAddMapElement");
 	return FALSE;
@@ -169,9 +197,35 @@ PUBLIC BOOL LYAddMapElement ARGS3(char *,map, char *,address, char *, title)
         StrAllocCopy(new->title, title);
     else
         StrAllocCopy(new->title, address);
+    new->intern_flag = intern_flag;
     HTList_appendObject(theMap->elements, new);
     return TRUE;
 }
+
+/*
+ *  Utility for checking whether an LYImageMap entry
+ *  with a given address already exists in the LynxMaps
+ *  structure. - FM
+ */
+#if UNUSED
+PUBLIC BOOL LYHaveImageMap ARGS1(
+	char *,		address)
+{
+    LYImageMap *Map;
+    HTList *cur = LynxMaps;
+
+    if (!(cur && address && *address != '\0'))
+        return FALSE;
+
+    while (NULL != (Map = (LYImageMap *)HTList_nextObject(cur))) {
+	if (!strcmp(Map->address, address)) {
+	    return TRUE;
+	}
+    }
+
+    return FALSE;
+}
+#endif
 
 /* 	LYLoadIMGmap - F.Macrides (macrides@sci.wfeb.edu)
 **	------------
@@ -188,8 +242,8 @@ PRIVATE int LYLoadIMGmap ARGS4 (
     HTFormat format_in = WWW_HTML;
     HTStream *target = NULL;
     char buf[1024];
-    MapElement *new = NULL;
-    ImageMap *theMap = NULL;
+    LYMapElement *new = NULL;
+    LYImageMap *theMap = NULL;
     char *MapTitle = NULL;
     char *MapAddress = NULL;
     HTList *cur = NULL;
@@ -239,7 +293,7 @@ PRIVATE int LYLoadIMGmap ARGS4 (
     }
 
     cur = LynxMaps;
-    while (NULL != (theMap = (ImageMap *)HTList_nextObject(cur))) {
+    while (NULL != (theMap = (LYImageMap *)HTList_nextObject(cur))) {
         if (!strcmp(theMap->address, address)) {
 	    break;
 	}
@@ -268,7 +322,7 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	HTOutputFormat = old_format_out;
 	LYMapsOnly = FALSE;
 	cur = LynxMaps;
-	while (NULL != (theMap = (ImageMap *)HTList_nextObject(cur))) {
+	while (NULL != (theMap = (LYImageMap *)HTList_nextObject(cur))) {
 	    if (!strcmp(theMap->address, address)) {
 		break;
 	    }
@@ -278,6 +332,8 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	    return(HT_NOT_LOADED);
 	}
     }
+
+    anAnchor->no_cache = TRUE;
 
     target = HTStreamStack(format_in, 
 			   format_out,
@@ -321,15 +377,19 @@ PRIVATE int LYLoadIMGmap ARGS4 (
     				   "ul" : "ol");
     (*target->isa->put_block)(target, buf, strlen(buf));
     cur = theMap->elements;
-    while (NULL != (new=(MapElement *)HTList_nextObject(cur))) {
+    while (NULL != (new=(LYMapElement *)HTList_nextObject(cur))) {
         StrAllocCopy(MapAddress, new->address);
 	LYEntify(&MapAddress, FALSE);
-        sprintf(buf, "<li><a href=\"%s\"\n", MapAddress);
-	(*target->isa->put_block)(target, buf, strlen(buf));
+	(*target->isa->put_block)(target, "<li><a href=\"", 13);
+	(*target->isa->put_block)(target, MapAddress, strlen(MapAddress));
+	if (new->intern_flag)
+	    (*target->isa->put_block)(target, "\" TYPE=\"internal link\"\n>",24);
+	else
+	    (*target->isa->put_block)(target, "\"\n>", 3);
         StrAllocCopy(MapTitle, new->title);
 	LYEntify(&MapTitle, TRUE);
-	sprintf(buf, ">%s</a>\n", MapTitle);
-	(*target->isa->put_block)(target, buf, strlen(buf));
+	(*target->isa->put_block)(target, MapTitle, strlen(MapTitle));
+	(*target->isa->put_block)(target, "</a>\n", 5);
     }
     sprintf(buf,"</%s>\n</body>\n", (keypad_mode == LINKS_ARE_NUMBERED) ?
     				      "ul" : "ol");
