@@ -1,4 +1,4 @@
-/*		Configuration-specific Initialialization	HTInit.c
+/*		Configuration-specific Initialization		HTInit.c
 **		----------------------------------------
 */
 
@@ -7,7 +7,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 
 /* Implements:
 */
@@ -31,8 +30,6 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 #ifdef VMS
 #define DISPLAY "DECW$DISPLAY"
@@ -658,7 +655,7 @@ PUBLIC void HTFileInit NOARGS
 
 #ifdef EXEC_SCRIPTS
     /*
-     *  define these extentions for exec scripts.
+     *  define these extensions for exec scripts.
      */
 #ifndef VMS
     /* for csh exec links */

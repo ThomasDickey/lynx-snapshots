@@ -1,6 +1,6 @@
 1 LYNX
  NAME
- lynx - a general purpose distributed information browser for the World 
+ lynx - a general purpose distributed information browser for the World
  Wide Web
 
 2 SYNOPSIS
@@ -23,7 +23,7 @@
  addition, Lynx can be used to build systems isolated within a single LAN.
 
 2 OPTIONS
- At start up, Lynx will load any local file or remote URL specified at 
+ At start up, Lynx will load any local file or remote URL specified at
  the command line.  For help with URLs, press "?" or "h" while running
  Lynx.  Then follow the link titled, "Help on URLs."
 
@@ -33,6 +33,9 @@
        very long command line that can be associated with the
        -get_data or -post_data arguments (see below).  Encase it
        in double-quotes ("-").
+
+  -accept_all_cookies
+       accept all cookies.
 
   -anonymous
        used to specify the anonymous account.
@@ -108,9 +111,6 @@
        following way:
            lynx -dump http://www.crl.com/~subir/lynx.html
 
-  -eat_all_cookies
-       accept all cookies.
-
   -editor=EDITOR
        enable edit mode using the specified EDITOR. (vi, ed, emacs, etc.)
 
@@ -136,7 +136,7 @@
   -from
        toggles transmissions of From headers.
 
-  -ftp 
+  -ftp
        disable ftp access.
 
   -get_data
@@ -232,6 +232,9 @@
 
   -number_links
        force numbering of links.
+
+  -partial
+       display partial pages while downloading.
 
   -pauth=ID:PASSWD
        set authorization ID and password for a protected proxy
@@ -409,8 +412,12 @@
        accept only http URLs (for validation).  Complete security
        restrictions also are implemented.
 
+  -verbose
+       taggles [LINK], [IMAGE] and [INLINE] comments
+       with filenames of these images.
+
   -version
-       print version information
+       print version information.
 
   -vikeys
        enable vi-like key movement.
@@ -444,10 +451,10 @@
  Lynx has incorporated code from a variety of sources along the way.
  The earliest versions of Lynx included code from Earl Fogel of Computing
  Services at the University of Saskatchewan, who implemented HYPERREZ
- in the Unix environment.  HYPERREZ was developed by Niel Larson of 
+ in the Unix environment.  HYPERREZ was developed by Niel Larson of
  Think.com and served as the model for the early versions of Lynx.
  Those versions also incorporated libraries from the Unix Gopher clients
- developed at the University of Minnesota, and the later versions of 
+ developed at the University of Minnesota, and the later versions of
  Lynx rely on the WWW client library code developed by Tim Berners-Lee
  and the WWW community.  Also a special thanks to Foteos Macrides who
  ported much of Lynx to VMS and did or organized most of its development
@@ -462,7 +469,7 @@
  Academic Computing Services
  University of Kansas
  Lawrence, Kansas 66047
- 
+
  Foteos Macrides
  Worcester Foundation for Biomedical Research
  Shrewsbury, Massachusetts 01545

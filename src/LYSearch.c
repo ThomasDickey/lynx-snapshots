@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <LYUtils.h>
 #include <LYStrings.h>
 #include <LYSearch.h>
@@ -8,8 +7,6 @@
 #include <LYSignal.h>
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
  *  Search for the target string inside of the links

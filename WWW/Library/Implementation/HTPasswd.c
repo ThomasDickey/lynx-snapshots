@@ -15,10 +15,8 @@
 **
 */
 
-
 #include <HTUtils.h>
-#include <tcp.h>	/* FROMASCII()		*/
-#include <string.h>
+
 #include <HTAAUtil.h>	/* Common parts of AA	*/
 #include <HTAAFile.h>	/* File routines	*/
 #include <HTAAServ.h>	/* Server routines	*/

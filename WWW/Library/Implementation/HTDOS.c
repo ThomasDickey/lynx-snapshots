@@ -2,9 +2,7 @@
 
  */
 
-#include <mem.h>
-#include <dos.h>
-
+#include <HTUtils.h>
 
 /* PUBLIC							HTDOS_wwwName()
 **		CONVERTS DOS Name into WWW Name

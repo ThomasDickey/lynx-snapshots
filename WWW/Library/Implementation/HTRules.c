@@ -18,11 +18,11 @@
 **
 */
 
+#include <HTUtils.h>
+
 /* (c) CERN WorldWideWeb project 1990,91. See Copyright.html for details */
 #include <HTRules.h>
 
-#include <HTUtils.h>
-#include <tcp.h>
 #include <HTFile.h>
 #include <HTAAServ.h>	/* Access Authorization */
 
@@ -284,7 +284,6 @@ char * HTTranslate(required)
 		CTRACE(tfp, "HTRule: *** FAIL `%s'\n",
 			    current);
 		return (char *)0;
-
 	} /* if tail matches ... switch operation */
 
     } /* loop over rules */

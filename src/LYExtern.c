@@ -15,17 +15,14 @@
  See lynx.cfg for other info.
 */
 
-#include <tcp.h>
-#include <LYGlobalDefs.h>
 #include <LYUtils.h>
+#include <LYGlobalDefs.h>
 #include <LYExtern.h>
 #include <LYCurses.h>
 
 #include <LYLeaks.h>
 
 #ifdef USE_EXTERNALS
-#define FREE(x) if (x) {free(x); x = NULL;}
-
 void run_external ARGS1(char *, c)
 {
 	char command[1024];

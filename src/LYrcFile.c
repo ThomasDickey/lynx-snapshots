@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
 #include <LYrcFile.h>
@@ -427,22 +426,50 @@ PUBLIC void read_rc NOPARAMS
 #endif /* DIRED_SUPPORT */
 
 	/*
-	 * eat all cookies? i think it should work user-by-user.
-	 *  -BJP
+	 *  Accept cookies from all domains?
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "eat_all_cookies")) != NULL &&
+	} else if ((cp = LYstrstr(line_buffer, "accept_all_cookies")) != NULL &&
 		   cp-line_buffer < number_sign) {
 	    if((cp2 = (char *)strchr(cp,'=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
 		cp++; /* get rid of spaces */
 	    if (LYstrstr(cp,"TRUE") != NULL) {
-		LYEatAllCookies = TRUE;
+		LYAcceptAllCookies = TRUE;
 	    } else {
-		LYEatAllCookies = FALSE;
+		LYAcceptAllCookies = FALSE;
 	    }
-	/* BJP */
 
+#ifdef THIS_DOESNT_WORK_YET_DONT_USE_IT
+
+	/*
+	 * Accept all cookies from certain domains?
+	 */
+	} else if ((cp = LYstrstr(line_buffer, "cookie_accept_domains"))
+		!= NULL && cp-line_buffer < number_sign) {
+	    if((cp2 = (char *)strchr(cp,'=')) != NULL)
+		cp = cp2 + 1;
+	    while (isspace(*cp))
+		cp++; /* get rid of spaces */
+	    if (LYstrstr(cp,NULL) != NULL) {
+/*		   cookie_add_acceptlist(cp); */
+	    }
+
+
+	/*
+	 * Reject all cookies from certain domains?
+	 */
+	} else if ((cp = LYstrstr(line_buffer, "cookie_reject_domains"))
+		!= NULL && cp-line_buffer < number_sign) {
+	    if((cp2 = (char *)strchr(cp,'=')) != NULL)
+		cp = cp2 + 1;
+	    while (isspace(*cp))
+		cp++; /* get rid of spaces */
+	    if (LYstrstr(cp,NULL) != NULL) {
+/*		   cookie_add_rejectlist(cp); */
+	    }
+
+#endif
 
 	/*
 	 *  User mode.

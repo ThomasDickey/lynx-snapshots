@@ -24,7 +24,6 @@
 */ 
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTTP.h>
 #include <HTParse.h>
 #include <HTTCP.h>
@@ -41,7 +40,6 @@
 #include <LYGetFile.h>
 #include <LYBookmark.h>
 #include <GridText.h>
-#include <ctype.h>
 #include <LYCgi.h>
 #include <LYSignal.h>
 #include <LYLocal.h>

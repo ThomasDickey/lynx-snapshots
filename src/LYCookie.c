@@ -22,7 +22,7 @@
       * Hex escaping isn't considered at all.  Any semi-colons, commas,
 	or spaces actually in cookie names or values (i.e., not serving
 	as punctuation for the overall Set-Cookie value) should be hex
-	escaped if not quoted, but presumeably the server is expecting
+	escaped if not quoted, but presumably the server is expecting
 	them to be hex escaped in our Cookie request header as well, so
 	in theory we need not unescape them.  We'll see how this works
 	out in practice.
@@ -40,12 +40,11 @@
 	of use.
       * If a cookie has the secure flag set, we presently treat only SSL
 	connections as secure.	This may need to be expanded for other
-	secure communication protocols that become standarized.
+	secure communication protocols that become standardized.
       * Cookies could be optionally stored in a file from session to session.
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTAccess.h>
 #include <HTParse.h>
 #include <HTAlert.h>
@@ -64,8 +63,6 @@
 #include <LYCookie.h>
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
 **  The first level of the cookie list is a list indexed by the domain
@@ -2017,7 +2014,7 @@ PRIVATE int LYHandleCookies ARGS4 (
     extern BOOLEAN HadVMSInterrupt;
 #endif /* VMS */
 
-#ifdef EXP_PERSISTENT_COOKIES 
+#ifdef EXP_PERSISTENT_COOKIES
     /* rjp - this can go here for now */
     LYStoreCookies ("j");
 #endif
@@ -2212,11 +2209,11 @@ Delete_all_cookies_in_domain:
 
 			    case 'P':
 				/*
-				 *  Set to prompt for cookie acceptence
+				 *  Set to prompt for cookie acceptance
 				 *  from this domain. - FM
 				 */
 				de->bv = QUERY_USER;
-				_user_message(PROMTING_TO_ALLOW_COOKIES,
+				_user_message(PROMPTING_TO_ALLOW_COOKIES,
 					      de->domain);
 				sleep(MessageSecs);
 				return(HT_NO_DATA);
@@ -2433,6 +2430,100 @@ Delete_all_cookies_in_domain:
      */
     (*target->isa->_free)(target);
     return(HT_LOADED);
+}
+
+/* cookie_add_acceptlist
+ *   is passed a comma delimited string of domains (with leading '.')
+ *   to add to the "always accept" list for cookies.
+ */
+
+PUBLIC void cookie_add_acceptlist ARGS1(
+	char *,		acceptdomains)
+{
+    domain_entry *de = NULL;
+    char **domain1 = 0;
+    char **origstr = 0;
+
+    if (domain_list == NULL) {
+	atexit(LYCookieJar_free);
+	domain_list = HTList_new();
+	total_cookies = 0;
+    }
+
+    *origstr = (char *)acceptdomains;
+
+    for(; (*domain1 = LYstrsep(origstr, ",")) != NULL;) {
+	if(**domain1 != '\0') {
+	    de = (domain_entry *)calloc(1, sizeof(domain_entry));
+
+	    if (de == NULL)
+		    outofmem(__FILE__, "cookie_accept_domains");
+
+	    de->bv = ACCEPT_ALWAYS;
+
+	    StrAllocCopy(de->domain, *domain1);
+	    HTList_addObject(domain_list, de);
+	}
+    }
+
+    /* then one last one, cos that's how LYstrsep() works */
+
+    de = (domain_entry *)calloc(1, sizeof(domain_entry));
+
+    if (de == NULL)
+	    outofmem(__FILE__, "cookie_accept_domains");
+
+    de->bv = ACCEPT_ALWAYS;
+
+    StrAllocCopy(de->domain, *origstr);
+    HTList_addObject(domain_list, de);
+}
+
+/* cookie_add_rejectlist
+ *   is passed a comma delimited string of domains (with leading '.')
+ *   to add to the "always reject" list for cookies.
+ */
+
+PUBLIC void cookie_add_rejectlist ARGS1(
+	char *,		rejectdomains)
+{
+    domain_entry *de = NULL;
+    char **domain1 = 0;
+    char **origstr = 0;
+
+    if (domain_list == NULL) {
+	atexit(LYCookieJar_free);
+	domain_list = HTList_new();
+	total_cookies = 0;
+    }
+
+    *origstr = rejectdomains;
+
+    for(; (*domain1 = LYstrsep(origstr, ",")) != NULL;) {
+	if(**domain1 != '\0') {
+	    de = (domain_entry *)calloc(1, sizeof(domain_entry));
+
+	    if (de == NULL)
+		    outofmem(__FILE__, "cookie_reject_domains");
+
+	    de->bv = REJECT_ALWAYS;
+
+	    StrAllocCopy(de->domain, *domain1);
+	    HTList_addObject(domain_list, de);
+	}
+    }
+
+    /* then one last one, cos that's how LYstrsep() works */
+
+    de = (domain_entry *)calloc(1, sizeof(domain_entry));
+
+    if (de == NULL)
+	    outofmem(__FILE__, "cookie_reject_domains");
+
+    de->bv = REJECT_ALWAYS;
+
+    StrAllocCopy(de->domain, *origstr);
+    HTList_addObject(domain_list, de);
 }
 
 #ifdef GLOBALDEF_IS_MACRO

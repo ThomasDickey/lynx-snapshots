@@ -14,7 +14,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTFormat.h>
 #include <HTStream.h>
 #include <UCDefs.h>
@@ -377,7 +376,7 @@ PUBLIC char * HTVMS_name ARGS2(
 */
 PUBLIC int HTStat ARGS2(
 	CONST char *, filename, 
-	stat_t *, info)
+	struct stat *, info)
 {
    /* 
       the following stuff does not work in VMS with a normal stat...
@@ -472,9 +471,6 @@ char Name[256];
    Result = stat(Name,info);
    return(Result);
 }
-
-/*** "dirent.h" ***/
-/* #include <types.h>	already in tcp.h */
 
 #ifndef	_POSIX_SOURCE
 #define	d_ino	d_fileno	/* compatability */
@@ -1107,7 +1103,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 	    StrAllocCopy(entry_info->type, cp);
 
 	    StrAllocCopy(entry_info->filename, dirbuf->d_name);
-	    if ((file_info.st_mode & S_IFMT) == S_IFDIR) {
+	    if (S_ISDIR(file_info.st_mode)) {
 	        /* strip .DIR part... */
                 char *dot;
                 dot = strstr(entry_info->filename, ".DIR");
@@ -1157,7 +1153,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 	    }
 
 	    /* Get the size */
-	    if ((file_info.st_mode & S_IFMT) != S_IFDIR)
+	    if (!S_ISDIR(file_info.st_mode))
 	        entry_info->size = (unsigned int)file_info.st_size;
 	    else
 	        entry_info->size = 0;

@@ -2,6 +2,8 @@
 #ifndef UCMAP_H
 #define UCMAP_H
 
+#include <HTUtils.h>
+
 typedef long UCode_t;
 
 extern int UCTransUniChar PARAMS((
@@ -42,7 +44,5 @@ extern int UCLYhndl_HTFile_for_unspec;
 extern int UCLYhndl_HTFile_for_unrec;
 
 #define UCTRANS_NOTFOUND (-4)
-
-#define HT_CANNOT_TRANSLATE -4	/* could go into HTUtils.h */
 
 #endif /* UCMAP_H */

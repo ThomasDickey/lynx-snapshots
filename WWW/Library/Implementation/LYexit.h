@@ -19,7 +19,6 @@
 /*
  *	Required includes
  */
-#include <stdlib.h>
 #include <HTUtils.h>
 
 /*

@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTAlert.h>
 #include <LYUtils.h>
 #include <LYStrings.h>
@@ -14,8 +13,6 @@
 #ifdef VMS
 #include <fab.h>
 #endif /* VMS */
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 struct JumpTable *JThead = NULL;
 

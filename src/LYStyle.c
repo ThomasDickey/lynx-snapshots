@@ -1,10 +1,9 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.18 Thu, 23 Apr 1998 06:35:21 -0600 dickey @
+ * @Id: LYStyle.c 1.19 Thu, 06 Aug 1998 06:28:22 -0600 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
-#include <tcp.h>
 #include <LYSignal.h>
 #include <LYGlobalDefs.h>
 
@@ -49,9 +48,6 @@ PUBLIC int	s_alink  = NOSTYLE, s_a     = NOSTYLE, s_status = NOSTYLE,
 /* start somewhere safe */
 PRIVATE int colorPairs = 0;
 PRIVATE int last_fA = COLOR_WHITE, last_bA = COLOR_BLACK;
-
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /* icky parsing of the style options */
 PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*,element)

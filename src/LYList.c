@@ -6,7 +6,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <LYUtils.h>
 #include <GridText.h>
 #include <LYList.h>
@@ -21,8 +20,6 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*	showlist - F.Macrides (macrides@sci.wfeb.edu)
 **	--------
@@ -164,8 +161,8 @@ PUBLIC int showlist ARGS2(
 	    /*
 	     *	Set flag to note that we had at least one internal link,
 	     *	if the document from which we are generating the list
-	     *	has assosiated POST data; after an extra check that the
-	     *	link destination really has hthe same POST data so that
+	     *	has associated POST data; after an extra check that the
+	     *	link destination really has the same POST data so that
 	     *	we can believe it is an internal link.
 	     */
 	    intern_w_post = TRUE;
@@ -226,7 +223,7 @@ PUBLIC int showlist ARGS2(
      *	Make necessary changes to newdoc before returning to caller.
      *	If the intern_w_post flag is set, we keep the POST data in
      *	newdoc that have been passed in.  They should be the same as
-     *	in the loaded locument for which we generated the list.
+     *	in the loaded document for which we generated the list.
      *	In that case the file we have written will be associated with
      *	the same POST data when it is loaded after we are done here,
      *	so that following one of the links we have marked as "internal
@@ -289,7 +286,7 @@ PUBLIC void printlist ARGS2(
 	    if (child == 0) {
 		/*
 		 *  child should not be 0 unless form field numbering is on
-		 *  and cnt is the number of a form intput field.
+		 *  and cnt is the number of a form input field.
 		 *  HText_FormDescNumber() will set desc to a description
 		 *  of what type of input field this is.  We'll create a
 		 *  within-document link to ensure that the link numbers on

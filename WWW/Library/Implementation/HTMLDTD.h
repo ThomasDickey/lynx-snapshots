@@ -12,9 +12,6 @@
 #ifndef HTMLDTD_H
 #define HTMLDTD_H
 
-#ifndef HTUTILS_H
-#include <HTUtils.h>
-#endif /* HTUTILS_H */
 #include <SGML.h>
 
 /*

@@ -1,6 +1,7 @@
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
+#include <HTUtils.h>
 #include <userdefs.h>
 
 /*

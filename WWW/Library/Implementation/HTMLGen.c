@@ -13,7 +13,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 
 #define BUFFER_SIZE    200	/* Line buffer attempts to make neat breaks */
 #define MAX_CLEANNESS	20
@@ -28,8 +27,6 @@
 #include <HTFormat.h>
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 #define PUTC(c) (*me->targetClass.put_character)(me->target, c)
 /* #define PUTS(s) (*me->targetClass.put_string)(me->target, s) */

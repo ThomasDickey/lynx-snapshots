@@ -3,6 +3,8 @@
 #ifndef UCDEFS_H
 #define UCDEFS_H
 
+#include <HTUtils.h>
+
 typedef struct _LYUCcharset {
     int UChndl;
     CONST char * MIMEname;

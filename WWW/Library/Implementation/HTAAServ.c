@@ -43,8 +43,6 @@
 
 #include <HTUtils.h>
 
-#include <string.h>		/* strchr() */
-
 #include <HTString.h>
 #include <HTAccess.h>		/* HTSecure			*/
 #include <HTFile.h>		/* HTLocalName			*/

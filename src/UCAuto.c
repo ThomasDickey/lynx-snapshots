@@ -15,7 +15,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 
 #include <UCMap.h>
 #include <UCDefs.h>
@@ -105,7 +104,7 @@ PRIVATE int nonempty_file ARGS1(
     struct stat sb;
 
     return (stat(p, &sb) == 0 &&
-	    (sb.st_mode & S_IFMT) == S_IFREG &&
+	    S_ISREG(sb.st_mode) &&
 	    (sb.st_size != 0));
 }
 

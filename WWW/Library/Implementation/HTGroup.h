@@ -5,9 +5,6 @@
 #ifndef HTGROUP_H
 #define HTGROUP_H
 
-#ifndef HTUTILS_H
-#include <HTUtils.h>
-#endif /* HTUTILS_H */
 #include <HTList.h>
 
 #ifdef SHORT_NAMES

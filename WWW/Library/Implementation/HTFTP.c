@@ -76,7 +76,6 @@ BUGS:	@@@	Limit connection cache size!
 #endif
 
 #include <HTUtils.h>
-#include <tcp.h>
 
 #include <HTAlert.h>
 
@@ -139,8 +138,6 @@ struct _HTStructured {
 	CONST HTStructuredClass *	isa;
 	/* ... */
 };
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*	Global Variables
 **	---------------------

@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTAccess.h>
 #include <HTParse.h>
 #include <HTList.h>
@@ -83,8 +82,6 @@ PRIVATE int sametext ARGS2(
     return TRUE;
 }
 #endif /* FASTTAB */
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 PUBLIC	HTList * Goto_URLs = NULL;  /* List of Goto URLs */
 
@@ -234,7 +231,9 @@ int mainloop NOARGS
     char *temp = NULL;
     BOOLEAN ForcePush = FALSE;
     BOOLEAN override_LYresubmit_posts = FALSE;
+#ifdef EXP_FORMS_OPTIONS
     BOOLEAN was_in_options = FALSE;
+#endif
     unsigned int len;
     int i;
 
@@ -382,11 +381,12 @@ try_again:
 		     *	under case NORMAL.  - FM
 		     */
 #ifndef EXP_FORMS_OPTIONS
-		    if (strncmp(newdoc.address, "LYNXDOWNLOAD:", 13)) {
+		    if (strncmp(newdoc.address, "LYNXDOWNLOAD:", 13))
 #else /* EXP_FORMS_OPTIONS */
 		    if (strncmp(newdoc.address, "LYNXDOWNLOAD:", 13) &&
-			strncmp(newdoc.address, "LYNXOPTIONS:", 12)) {
+			strncmp(newdoc.address, "LYNXOPTIONS:", 12))
 #endif /* EXP_FORMS_OPTIONS */
+		    {
 			LYpush(&curdoc, ForcePush);
 		    }
 		} else if (!newdoc.address) {
@@ -3818,7 +3818,7 @@ check_goto_URL:
 	    c = dir_list_style;
 #endif /* DIRED_SUPPORT */
 #ifndef EXP_FORMS_OPTIONS
-	    options(); /* do the options stuff */
+	    LYoptions(); /* do the options stuff */
 
 	    if (keypad_mode_flag != keypad_mode ||
 		(user_mode_flag != user_mode &&
@@ -4302,7 +4302,7 @@ check_goto_URL:
 			    _statusline(NO_STATUS);
 			    sleep(AlertSecs);
 			} else {
-			    if (((dir_info.st_mode) & S_IFMT) == S_IFREG) {
+			    if (S_ISREG(dir_info.st_mode)) {
 				StrAllocCopy(tp, cp);
 				HTUnEscapeSome(tp, "/");
 				if (edit_current_file(tp,
@@ -4616,7 +4616,7 @@ check_goto_URL:
 		} else {
 		    char *VMSdir = NULL;
 
-		    if (((stat_info.st_mode) & S_IFMT) == S_IFDIR) {
+		    if (S_ISDIR(stat_info.st_mode)) {
 			/*
 			 *  We're viewing a local directory.  Make
 			 *  that the CSwing argument. - FM

@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTFTP.h>
 #include <HTML.h>
 #include <LYCurses.h>
@@ -22,18 +21,17 @@
 
 #include <LYLeaks.h>
 
-#define FREE(x) if (x) {free(x); x = NULL;}
-
 #ifdef VMS
 #define DISPLAY "DECW$DISPLAY"
 #else
 #define DISPLAY "DISPLAY"
 #endif /* VMS */
 
-#define COL_OPTION_VALUES 36  /* display column where option values start */
-
 BOOLEAN term_options;
+
 PRIVATE void terminate_options	PARAMS((int sig));
+
+#ifndef EXP_FORMS_OPTIONS
 PRIVATE int boolean_choice PARAMS((
 	int		status,
 	int		line,
@@ -46,8 +44,11 @@ PRIVATE int popup_choice PARAMS((
 	char ** 	choices,
 	int		i_length,
 	int		disabled));
+#endif /* EXP_FORMS_OPTIONS */
 
 #define MAXCHOICES 10
+
+#define COL_OPTION_VALUES 36  /* display column where option values start */
 
 #define L_Bool_A (use_assume_charset ? L_BOOL_A + 1 : L_BOOL_A)
 #define L_Bool_B (use_assume_charset ? L_BOOL_B + 1 : L_BOOL_B)
@@ -84,6 +85,7 @@ PRIVATE void option_statusline ARGS1(
     LYStatusLine = -1;
 }
 
+#ifndef EXP_FORMS_OPTIONS
 PRIVATE void option_user_message ARGS2(
 	CONST char *,		message,
 	char *, 		argument)
@@ -108,7 +110,7 @@ PRIVATE void option_user_message ARGS2(
     LYStatusLine = -1;
 }
 
-PUBLIC void options NOARGS
+PUBLIC void LYoptions NOARGS
 {
 #ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
     int itmp;
@@ -300,7 +302,7 @@ draw_options:
     } else {
 	switch (LYChosenShowColor) {
 	case SHOW_COLOR_NEVER:
-                addstr("NEVER     ");
+		addstr("NEVER	  ");
 		break;
 	case SHOW_COLOR_OFF:
 		addstr("OFF");
@@ -830,9 +832,9 @@ draw_options:
 		    }
 
 		    /*
-		 *  Set the raw 8-bit or CJK mode defaults and
-		 *  character set if changed. - FM
-		 */
+		     *  Set the raw 8-bit or CJK mode defaults and
+		     *  character set if changed. - FM
+		     */
 		    if (CurrentAssumeCharSet != UCLYhndl_for_unspec ||
 			UCLYhndl_for_unspec != curval) {
 			if (UCLYhndl_for_unspec != CurrentAssumeCharSet) {
@@ -841,7 +843,7 @@ draw_options:
 			}
 			LYRawMode = (UCLYhndl_for_unspec == current_char_set);
 			HTMLSetUseDefaultRawMode(current_char_set, LYRawMode);
-			HTMLUseCharacterSet(current_char_set);
+			HTMLSetCharacterHandling(current_char_set);
 			CurrentAssumeCharSet = UCLYhndl_for_unspec;
 			CurrentAssumeLocalCharSet = UCLYhndl_HTFile_for_unspec;
 			CurrentRawMode = LYRawMode;
@@ -1754,6 +1756,7 @@ PRIVATE int boolean_choice ARGS4(
 	}
     }
 }
+#endif /* EXP_FORMS_OPTIONS */
 
 PRIVATE void terminate_options ARGS1(
 	int,		sig GCC_UNUSED)
@@ -2060,6 +2063,7 @@ draw_bookmark_list:
     signal(SIGINT, cleanup_sig);
 }
 
+#ifndef EXP_FORMS_OPTIONS
 /*
 **  This function prompts for a choice or page number.
 **  If a 'g' or 'p' suffix is included, that will be
@@ -3106,6 +3110,8 @@ restore_popup_statusline:
     }
 }
 
+#else /* EXP_FORMS_OPTIONS */
+
 /*
  * I'm paranoid about mistyping strings.  Also, this way they get combined
  * so we don't have to worry about the intelligence of the compiler.
@@ -3141,9 +3147,9 @@ static char * search_type_string = "search_type";
 static char * search_case_insensitive_string = "case_insensitive";
 static char * search_case_sensitive_string = "case_sensitive";
 
-static char * prefered_doc_lang_string = "prefered_doc_lang";
+static char * preferred_doc_lang_string = "preferred_doc_lang";
 
-static char * prefered_doc_char_string = "prefered_doc_char";
+static char * preferred_doc_char_string = "preferred_doc_char";
 
 static char * assume_char_set_string = "assume_char_set";
 
@@ -3240,6 +3246,13 @@ PRIVATE struct post_pair * break_data ARGS1(
  * Handle options from the pseudo-post.  I think we really only need
  * post_data here, but bring along everything just in case.  It's only a
  * pointer.  MRC
+ *
+ * By changing the certain options value (like preferred language or
+ * fake browser name) we need to inform the remote server and reload (uncache)
+ * the document which was active just before the Options menu was invoked.
+ * Another values (like display_char_set or assume_char_set) used by lynx
+ * initial rendering stages and can be changed only after reloading :-(
+ * So we introduce boolean flag 'need_reload' (currently dummy).
  */
 
 PUBLIC int postoptions ARGS1(
@@ -3248,6 +3261,7 @@ PUBLIC int postoptions ARGS1(
     struct post_pair *data;
     int i;
     BOOLEAN save_all = FALSE;
+    BOOLEAN need_reload = FALSE;
 
     data = break_data(newdoc->post_data);
 
@@ -3321,19 +3335,33 @@ PUBLIC int postoptions ARGS1(
 	}
 
 	/*
-	 * prefered_doc_lang
+	 * preferred_doc_lang
 	 */
-	if (!strcmp(data[i].tag, prefered_doc_lang_string)) {
+	if (!strcmp(data[i].tag, preferred_doc_lang_string)) {
 	    FREE(language);
 	    StrAllocCopy(language, data[i].value);
 	}
 
 	/*
-	 * prefered_doc_char
+	 * preferred_doc_char
 	 */
-	if (!strcmp(data[i].tag, prefered_doc_lang_string)) {
+	if (!strcmp(data[i].tag, preferred_doc_char_string)) {
 	    FREE(pref_charset);
 	    StrAllocCopy(pref_charset, data[i].value);
+	}
+
+	/*
+	 * raw_mode
+	 */
+	if (!strcmp(data[i].tag, raw_mode_string)) {
+	    BOOLEAN newmode;
+	    newmode = (!strcmp(data[i].value, on_string));
+	    if (newmode != LYRawMode) {
+		LYRawMode = newmode;
+		HTMLSetUseDefaultRawMode(current_char_set, LYRawMode);
+		HTMLSetCharacterHandling(current_char_set);
+		need_reload = TRUE;
+	    }
 	}
 
 	/*
@@ -3360,15 +3388,12 @@ PUBLIC int postoptions ARGS1(
 		StrAllocCopy(UCAssume_MIMEcharset, data[i].value);
 		LYRawMode = (UCLYhndl_for_unspec == current_char_set);
 		HTMLSetUseDefaultRawMode(current_char_set, LYRawMode);
-		HTMLUseCharacterSet(current_char_set);
+		HTMLSetCharacterHandling(current_char_set);
 	    }
 	}
 
 	/*
 	 * display_char_set
-	 */
-	/*
-	 * FIXME: This needs validation.  - MRC
 	 */
 	if (!strcmp(data[i].tag, display_char_set_string)) {
 	    int newval;
@@ -3383,6 +3408,7 @@ PUBLIC int postoptions ARGS1(
 		HTMLSetRawModeDefault(current_char_set);
 		LYUseDefaultRawMode = TRUE;
 		HTMLUseCharacterSet(current_char_set);
+		need_reload = TRUE;
 	    }
 	}
 
@@ -3400,19 +3426,6 @@ PUBLIC int postoptions ARGS1(
 		LYShowColor = SHOW_COLOR_ALWAYS;
 	    }
 	    LYChosenShowColor = LYShowColor;
-	}
-
-	/*
-	 * raw_mode
-	 */
-	if (!strcmp(data[i].tag, raw_mode_string)) {
-	    BOOLEAN newmode;
-	    newmode = (!strcmp(data[i].value, on_string));
-	    if (newmode != LYRawMode) {
-		LYRawMode = newmode;
-		HTMLSetUseDefaultRawMode(current_char_set, LYRawMode);
-		HTMLSetCharacterHandling(current_char_set);
-	    }
 	}
 
 	/*
@@ -3535,6 +3548,9 @@ PUBLIC int postoptions ARGS1(
 	    HTAlert(OPTIONS_NOT_SAVED);
 	}
     }
+    if (need_reload == TRUE)  {
+        /* FIXME: currently dummy */
+    }
     return(NULLFILE);
 }
 
@@ -3545,6 +3561,10 @@ PUBLIC int postoptions ARGS1(
  * Basic Strategy:  For each option, throw up the appropriate type of
  * control, giving defaults as appropriate.  If nothing else, we're
  * probably going to test every control there is.  MRC
+ *
+ * Each option from this form will be processed whether it was changed or not.
+ * The order may be important for some fields (like RawMode)
+ * unless we add a special flag in postoptions()
  */
 PUBLIC int gen_options ARGS1(
 	char **,	newfile)
@@ -3567,10 +3587,10 @@ PUBLIC int gen_options ARGS1(
     StrAllocCopy(*newfile, print_filename);
     LYforce_no_cache = TRUE;
 
-    fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
+    fprintf(fp0, "<html><head>\n<title>%s</title>\n</head>\n<body>\n",
 	    OPTIONS_TITLE);
 
-    fprintf(fp0,"<h1>Options Menu (%s Version %s)</h1><pre>\n",
+    fprintf(fp0,"<h1>Options Menu (%s Version %s)</h1>\n",
 	    LYNX_NAME, LYNX_VERSION);
 
     /*
@@ -3586,6 +3606,18 @@ PUBLIC int gen_options ARGS1(
     StrAllocCopy(secure_value, "FIXMEtest=the&encoding");
     fprintf(fp0,"<input name=\"%s\" type=\"hidden\" value=\"%s\">\n",
 	    secure_string, secure_value);
+
+    /*
+     * visible preformated text begins here
+     */
+    fprintf(fp0,"<pre>\n\n");
+
+    /*
+     * save/reset
+     */
+    fprintf(fp0,"<input type=\"submit\" value=\"Accept Changes\">");
+    fprintf(fp0," <input type=\"reset\" value=\"Reset\">");
+    fprintf(fp0," Use the back key to cancel changes.\n\n");
 
     /*
      * editor
@@ -3645,22 +3677,49 @@ PUBLIC int gen_options ARGS1(
     fprintf(fp0,"</select>\n");
 
     /*
-     * prefered_doc_lang
+     * preferred_doc_lang
      */
-    fprintf(fp0,"<%s>Prefered document language</%s> ", label_string,
+    fprintf(fp0,"<%s>Preferred document language</%s> ", label_string,
 	    label_string);
     fprintf(fp0,"<input type=\"text\" name=\"%s\" value=\"%s\">\n",
-	    prefered_doc_lang_string,
+	    preferred_doc_lang_string,
 	    (language && language[0])?language:empty_string);
 
     /*
-     * prefered_doc_char
+     * preferred_doc_char
      */
-    fprintf(fp0,"<%s>Prefered document character set</%s> ", label_string,
+    fprintf(fp0,"<%s>Preferred document character set</%s> ", label_string,
 	    label_string);
     fprintf(fp0,"<input type=\"text\" name=\"%s\" value=\"%s\">\n",
-	    prefered_doc_char_string,
+	    preferred_doc_char_string,
 	    (pref_charset && pref_charset[0])?pref_charset:empty_string);
+
+    /*
+     * display_char_set
+     */
+    fprintf(fp0,"<%s>Display character set:</%s> ", label_string,
+	   label_string);
+    fprintf(fp0,"<select name=\"%s\">\n", display_char_set_string);
+    for (i = 0; LYchar_set_names[i]; i++) {
+        fprintf(fp0,"<option %s value=\"%d\">%s</options>\n",
+	        (i==current_char_set)?selected_string:empty_string,
+		i, LYchar_set_names[i]);
+    }
+    fprintf(fp0,"</select>\n");
+
+    /*
+     * raw_mode
+     */
+    fprintf(fp0,"<%s>Raw 8-bit or CJK mode:</%s> ", label_string,
+	   label_string);
+    fprintf(fp0,"<select name=\"%s\">\n", raw_mode_string);
+    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+	   (LYRawMode)?empty_string:selected_string,
+	   off_string, off_string);
+    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+	   (LYRawMode)?selected_string:empty_string,
+	   on_string, on_string);
+    fprintf(fp0,"</select>\n");
 
     /*
      * assume_char_set
@@ -3690,33 +3749,6 @@ PUBLIC int gen_options ARGS1(
 	}
 	fprintf(fp0,"</select>\n");
     }
-
-    /*
-     * display_char_set
-     */
-    fprintf(fp0,"<%s>Display character set:</%s> ", label_string,
-	    label_string);
-    fprintf(fp0,"<select name=\"%s\">\n", display_char_set_string);
-    for (i = 0; LYchar_set_names[i]; i++) {
-	fprintf(fp0,"<option %s value=\"%d\">%s</options>\n",
-		(i==current_char_set)?selected_string:empty_string,
-		i, LYchar_set_names[i]);
-    }
-    fprintf(fp0,"</select>\n");
-
-    /*
-     * raw_mode
-     */
-    fprintf(fp0,"<%s>Raw 8-bit or CJK mode:</%s> ", label_string,
-	    label_string);
-    fprintf(fp0,"<select name=\"%s\">\n", raw_mode_string);
-    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
-	    (LYRawMode)?empty_string:selected_string,
-	    off_string, off_string);
-    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
-	    (LYRawMode)?selected_string:empty_string,
-	    on_string, on_string);
-    fprintf(fp0,"</select>\n");
 
     /*
      * show_color
@@ -3868,7 +3900,7 @@ PUBLIC int gen_options ARGS1(
     /*
      * dired_sort
      */
-    fprintf(fp0,"<%s>User Mode:</%s> ", label_string, label_string);
+    fprintf(fp0,"<%s>Local directory sort criteria:</%s> ", label_string, label_string); 
     fprintf(fp0,"<select name=\"%s\">\n", dired_sort_string);
     fprintf(fp0,"<option %s value=\"%s\">Directories first</option>\n",
 	    (dir_list_style==0)?selected_string:empty_string,
@@ -3902,21 +3934,27 @@ PUBLIC int gen_options ARGS1(
      * save options
      */
     if (!no_option_save) {
-        fprintf(fp0,"<%s>Save options to disk: </%s> ", label_string,
+	fprintf(fp0,"<%s>Save options to disk: </%s> ", label_string,
 		label_string);
-        fprintf(fp0,"<input type=\"checkbox\" name=\"%s\">\n",
+	fprintf(fp0,"<input type=\"checkbox\" name=\"%s\">\n",
 		save_options_string);
     }
 
     /*
      * save/reset
      */
-    fprintf(fp0,"<p>Use the back key to cancel changes.\n");
+    fprintf(fp0,"\n"); 
     fprintf(fp0,"<input type=\"submit\" value=\"Accept Changes\">");
-    fprintf(fp0," <input type=\"reset\" value=\"Reset\">\n");
-    fprintf(fp0,"</p>");
+    fprintf(fp0," <input type=\"reset\" value=\"Reset\">"); 
+    fprintf(fp0," Use the back key to cancel changes.\n"); 
+ 
+    /* 
+     * close HTML 
+     */ 
+    fprintf(fp0,"</pre>\n"); 
     fprintf(fp0,"</body>\n");
 
     fclose(fp0);
     return(0);
 }
+#endif /* EXP_FORMS_OPTIONS */

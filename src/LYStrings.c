@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTCJK.h>
 #include <LYCurses.h>
 #include <LYUtils.h>
@@ -20,11 +19,7 @@
 #include <keys.h>
 #endif /* DJGPP_KEYHANDLER */
 
-#include <ctype.h>
-
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 extern BOOL HTPassHighCtrlRaw;
 extern HTCJKlang HTCJK;
@@ -572,7 +567,7 @@ re_read:
 #ifndef USE_SLANG
     clearerr(stdin); /* needed here for ultrix and SOCKETSHR, but why? - FM */
 #endif /* !USE_SLANG */
-#if !defined(USE_SLANG) || defined(VMS)
+#if !defined(USE_SLANG) || defined(VMS) || defined(DJGPP_KEYHANDLER)
     c = GetChar();
 #else
     if (LYCursesON) {
@@ -825,7 +820,7 @@ re_read:
 	   c = 127;		   /* backspace key (delete, not Ctrl-H) */
 	   break;
 #endif /* KEY_BACKSPACE */
-#if defined(KEY_F) && !defined(__DJGPP__)
+#if defined(KEY_F) && !defined(__DJGPP__) && !defined(_WINDOWS)
 	case KEY_F(1):
 	   c = F1;		   /* VTxxx Help */
 	   break;
@@ -894,7 +889,7 @@ re_read:
 		    c = set_clicked_link(Mouse_status.x, Mouse_status.y);
 		}
 	      }
-#endif /* _WINDOWS */
+#endif /* DOSPATH */
 	  }
 	  break;
 #endif /* NCURSES_MOUSE_VERSION */
@@ -902,11 +897,11 @@ re_read:
     }
 #endif /* HAVE_KEYPAD */
 
-#ifdef __DJGPP__
+#if (defined(__DJGPP__) || defined(_WINDOWS))
     if (c > 659)
 #else
     if (c > DO_NOTHING)
-#endif /* __DJGPP__ */
+#endif /* __DJGPP__ || _WINDOWS */
     {
 	/*
 	 *  Don't return raw values for KEYPAD symbols which we may have
@@ -1458,13 +1453,24 @@ PUBLIC char *LYstrsep ARGS2(
 	char **,	stringp,
 	CONST char *,	delim)
 {
-    char *tmp, *out = 0;
+    char *tmp, *out;
+
+    if (!stringp || !*stringp)		/* nothing to do? */
+	return 0;			/* then don't fall on our faces */
+
+    if (!**stringp) {			/* empty string: */
+	*stringp = 0;			/* let caller see he's done; */
+	return 0;			/* no tokens in an empty string */
+    }
+
+    out = *stringp;			/* save the start of the string */
     tmp = strpbrk(*stringp, delim);
     if (tmp) {
-	out = *stringp;		/* save the start of the string */
-	*tmp = '\0';		/* terminate the substring with \0 */
-	*stringp = ++tmp;	/* point at the terminator */
+	*tmp = '\0';			/* terminate the substring with \0 */
+	*stringp = ++tmp;		/* point at the next substring */
     }
+    else *stringp = 0;			/* this was the last substring: */
+					/* let caller see he's done */
     return out;
 }
 

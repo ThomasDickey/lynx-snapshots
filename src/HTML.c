@@ -14,7 +14,6 @@
 #define DICKEY_TEST
 
 #include <HTUtils.h>
-#include <tcp.h>
 
 #define Lynx_HTML_Handler
 #include <HTChunk.h>
@@ -64,8 +63,6 @@ char Style_className[16384];
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 #define STACKLEVEL(me) ((me->stack + MAX_NESTING - 1) - me->sp)
 

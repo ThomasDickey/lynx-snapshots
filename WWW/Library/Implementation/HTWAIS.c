@@ -49,7 +49,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTParse.h>
 #include <HTAccess.h>		/* We implement a protocol */
 #include <HTML.h>		/* The object we will generate */
@@ -77,8 +76,6 @@
 **			--------
 */
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 #define DIRECTORY "/cnidr.org:210/directory-of-servers"
 /* #define DIRECTORY "/quake.think.com:210/directory-of-servers" */

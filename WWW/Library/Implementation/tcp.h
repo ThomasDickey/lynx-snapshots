@@ -29,10 +29,6 @@
 #ifndef TCP_H
 #define TCP_H
 
-#ifndef HTUTILS_H
-#include <HTUtils.h>
-#endif /* !HTUTILS_H */
-
 /*
 
 Default values
@@ -97,10 +93,11 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 # endif
 #endif
 
-#ifdef _AIX
+#if defined(_AIX) && !defined(AIX)
 #define AIX
 #endif /* _AIX */
-#ifdef AIX
+
+#if defined(AIX) && !defined(unix)
 #define unix
 #endif /* AIX */
 
@@ -525,8 +522,16 @@ typedef unsigned short mode_t;
 typedef int pid_t;
 #endif /* !pid_t */
 
+#ifndef S_ISLNK
+#define S_ISLNK(m)	(((m) & S_IFMT) == S_IFLNK)
+#endif /* S_ISLNK */
+
+#ifndef S_ISDIR
+#define S_ISDIR(m)	(((m) & S_IFMT) == S_IFDIR)
+#endif /* S_ISDIR */
+
 #ifndef S_ISREG
-#define S_ISREG(m) (((m) & 0170000) == 0100000)
+#define S_ISREG(m)	(((m) & S_IFMT) == S_IFREG)
 #endif /* S_ISREG */
 
 #ifndef WEXITSTATUS

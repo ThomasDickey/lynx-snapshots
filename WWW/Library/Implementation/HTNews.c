@@ -7,7 +7,6 @@
 */
 
 #include <HTUtils.h>		/* Coding convention macros */
-#include <tcp.h>
 
 /* Implements:
 */
@@ -16,8 +15,6 @@
 #include <HTCJK.h>
 #include <HTMIME.h>
 #include <HTTCP.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /* this define should be in HTFont.h :( */
 #define HT_NON_BREAK_SPACE ((char)1)   /* For now */
@@ -38,8 +35,6 @@ PUBLIC int HTNewsMaxChunk = 40; /* Largest number of articles in one window */
 #define NEWS_NETWRITE  NETWRITE
 #define NEWS_NETCLOSE  NETCLOSE
 #define NEXT_CHAR HTGetCharacter()
-
-#include <ctype.h>
 
 #include <HTML.h>
 #include <HTParse.h>

@@ -1367,7 +1367,8 @@ AC_MSG_CHECKING(if the socks library uses socks4 prefix)
 AC_TRY_LINK([
 #include <socks.h>],[
 	Rinit((char *)0)],
-	[cf_use_socks4=yes],
+	[AC_DEFINE(USE_SOCKS4_PREFIX)
+	 cf_use_socks4=yes],
 	[AC_TRY_LINK([#include <socks.h>],
 		[SOCKSinit((char *)0)],
 		[cf_use_socks4=no],

@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <LYGlobalDefs.h>
 #include <LYUtils.h>
 #include <LYSignal.h>

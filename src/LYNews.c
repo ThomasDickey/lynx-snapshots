@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTParse.h>
 #include <HTAccess.h>
 #include <HTCJK.h>
@@ -20,8 +19,6 @@
 #include <LYGlobalDefs.h>
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
 **  Global variable for async i/o.

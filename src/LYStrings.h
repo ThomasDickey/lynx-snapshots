@@ -1,8 +1,7 @@
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
 
-#include <string.h>
-
+#include <HTUtils.h>
 
 /*  UPPER8(ch1,ch2) is an extension of (TOUPPER(ch1) - TOUPPER(ch2))  */
 extern int UPPER8  PARAMS((

@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTFile.h>
 #include <UCMap.h>
 
@@ -15,6 +14,7 @@
 #include <LYCurses.h>
 #include <LYSignal.h>
 #include <LYBookmark.h>
+#include <LYCookie.h>
 #include <LYReadCFG.h>
 
 #ifdef DIRED_SUPPORT
@@ -23,8 +23,6 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 extern int HTNewsMaxChunk;  /* Max news articles before chunking (HTNews.c) */
 extern int HTNewsChunkSize; /* Number of news articles per chunk (HTNews.c) */
@@ -787,6 +785,7 @@ static int viewer_fun ARGS1(
 
 static Config_Type Config_Table [] =
 {
+     PARSE_SET("accept_all_cookies", CONF_BOOL, LYAcceptAllCookies),
      PARSE_INT("alertsecs", CONF_INT, AlertSecs),
      PARSE_SET("always_resubmit_posts", CONF_BOOL, LYresubmit_posts),
 #ifdef EXEC_LINKS
@@ -806,6 +805,8 @@ static Config_Type Config_Table [] =
 #ifdef USE_COLOR_TABLE
      PARSE_FUN("color", CONF_FUN, color_fun),
 #endif
+     PARSE_STR("cookie_accept_domains", CONF_STR, LYCookieAcceptDomains),
+     PARSE_STR("cookie_reject_domains", CONF_STR, LYCookieRejectDomains),
      PARSE_ENV("cso_proxy", CONF_ENV, 0 ),
 #ifdef VMS
      PARSE_STR("CSWING_PATH", CONF_STR, LYCSwingPath),
@@ -823,7 +824,6 @@ static Config_Type Config_Table [] =
      PARSE_FUN("dired_menu", CONF_FUN, dired_menu_fun),
 #endif
      PARSE_ADD("downloader", CONF_ADD_ITEM, downloaders),
-     PARSE_SET("eat_all_cookies", CONF_BOOL, LYEatAllCookies),
      PARSE_SET("emacs_keys_always_on", CONF_BOOL, emacs_keys),
      PARSE_SET("enable_scrollback", CONF_BOOL, enable_scrollback),
 #ifdef USE_EXTERNALS
@@ -1162,5 +1162,19 @@ PUBLIC void read_cfg ARGS3(
 	    }
 	    cur_download = cur_download->next;
 	}
+    }
+
+    /*
+     * If any COOKIE_{ACCEPT,REJECT}_DOMAINS have been defined,
+     * process them. These are comma delimited lists of
+     * domains, with leading '.'. - BJP
+     */
+
+    if (LYCookieAcceptDomains != NULL) {
+	cookie_add_acceptlist(LYCookieAcceptDomains);
+    }
+
+    if (LYCookieRejectDomains != NULL) {
+        cookie_add_rejectlist(LYCookieRejectDomains);
     }
 }

@@ -9,7 +9,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <LYCurses.h>
 #include <HTFWriter.h>
 #include <HTSaveToFile.h>
@@ -57,9 +56,6 @@ PUBLIC HTStream* HTSaveToFile PARAMS((
 	HTPresentation *       pres,
 	HTParentAnchor *       anchor,
 	HTStream *	       sink));
-
-#define FREE(x) if (x) {free(x); x = NULL;}
-
 
 /*	Stream Object
 **	-------------
@@ -301,7 +297,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			 *  (or even the same!).  We can skip this
 			 *  needless duplication by using the
 			 *  viewer_command which has already been
-			 *  determind when the HTCompressed stream was
+			 *  determined when the HTCompressed stream was
 			 *  created. - kw
 			 */
 			FREE(me->end_command);
@@ -869,7 +865,7 @@ PUBLIC HTStream* HTCompressed ARGS3(
     FILE *fp = NULL;
 
     /*
-     *	Deal with any inappropriate invokations of this function,
+     *	Deal with any inappropriate invocations of this function,
      *	or a download request, in which case we won't bother to
      *	uncompress the file. - FM
      */
@@ -1162,7 +1158,7 @@ PUBLIC unsigned long LYVMS_FixedLengthRecords ARGS1(char *, filename)
     /* RMS supplies a user-mode channel (see FAB$L_FOP FAB$V_UFO doc) */
     channel = (unsigned short) fab.fab$l_stv;
 
-    /* set up ACP interface strutures */
+    /* set up ACP interface structures */
     /* file information block, passed by descriptor; it's okay to start with
        an empty FIB after RMS has accessed the file for us */
     fib_dsc.len = sizeof fib;

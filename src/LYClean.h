@@ -1,6 +1,8 @@
 #ifndef LYCLEAN_H
 #define LYCLEAN_H
 
+#include <HTUtils.h>
+
 #ifdef VMS
 extern BOOLEAN HadVMSInterrupt;
 #endif

@@ -1,6 +1,8 @@
-
 #ifndef UCDOMAP_H
 #define UCDOMAP_H
+
+#include <HTUtils.h>
+#include <UCkd.h>
 
 /*
  *  [old comments: - KW ]

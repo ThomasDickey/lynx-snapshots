@@ -10,13 +10,9 @@
 #define NO_MEMORY_TRACKING
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <LYexit.h>
 #include <LYLeaks.h>
 #include <LYUtils.h>
-#include <ctype.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 PRIVATE AllocationList *ALp_RunTimeAllocations = NULL;
 

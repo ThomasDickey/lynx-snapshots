@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTCJK.h>
 #include <HTTP.h>
 #include <HTAlert.h>
@@ -13,6 +12,9 @@
 #include <LYGlobalDefs.h>
 #include <LYKeymap.h>
 #include <LYSignal.h>
+#ifdef DJGPP_KEYHANDLER
+#include <keys.h>
+#endif /* DJGPP_KEYHANDLER */
 
 #include <LYLeaks.h>
 
@@ -381,6 +383,20 @@ again:
 	if (keymap[ch + 1] == LYK_REFRESH)
 	    break;
 	switch (ch) {
+#ifdef DJGPP_KEYHANDLER
+	    case K_Down:
+	    case K_EDown:
+	    case K_Up:
+	    case K_EUp:
+	    case K_PageUp:
+	    case K_EPageUp:
+	    case K_PageDown:
+	    case K_EPageDown:
+	    case K_Home:
+	    case K_EHome:
+	    case K_End:
+	    case K_EEnd:
+#else
 	    case DNARROW:
 	    case UPARROW:
 	    case PGUP:
@@ -391,13 +407,19 @@ again:
 	    case FIND_KEY:
 	    case SELECT_KEY:
 #endif /* NOTDEFINED */
+#endif /* DJGPP_KEYHANDLER */
 		goto breakfor;
 
 	    /*
 	     *  Left arrrow in column 0 deserves special treatment here,
 	     *  else you can get trapped in a form without submit button!
 	     */
+#ifdef DJGPP_KEYHANDLER
+	    case K_Left:
+	    case K_ELeft:
+#else
 	    case LTARROW:
+#endif /* DJGPP_KEYHANDLER */
 		if (MyEdit.pos == 0) {
 		    int c = 'Y';    /* Go back immediately if no changes */
 		    if (strcmp(MyEdit.buffer, value)) {

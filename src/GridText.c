@@ -3,7 +3,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTString.h>
 #include <HTFont.h>
 #include <HTAccess.h>
@@ -16,7 +15,6 @@
 #include <UCAux.h>
 
 #include <assert.h>
-#include <ctype.h>
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
 #include <syslog.h>
@@ -71,8 +69,6 @@ struct _HTStream {                      /* only know it as object */
 #define TITLE_LINES  1
 #define IS_UTF_EXTRA(ch) (text->T.output_utf8 && \
 			  ((unsigned char)(ch)&0xc0) == 0x80)
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 extern BOOL HTPassHighCtrlRaw;
 extern HTkcode kanji_code;

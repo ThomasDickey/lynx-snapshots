@@ -14,7 +14,6 @@
 */
 
 #include <HTUtils.h>
-#include <string.h>
 #include <HTPasswd.h>	/* Password file routines	*/
 #include <HTAssoc.h>
 #include <HTAuth.h>	/* Implemented here		*/

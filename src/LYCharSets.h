@@ -1,6 +1,8 @@
-
 #ifndef LYCHARSETS_H
 #define LYCHARSETS_H
+
+#include <HTUtils.h>
+#include <UCDefs.h>
 
 #ifndef UCMAP_H
 #include <UCMap.h>

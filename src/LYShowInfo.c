@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTParse.h>
 #include <HTAlert.h>
 #include <HTTP.h>
@@ -21,8 +20,6 @@
 #include <time.h>
 #include <LYLocal.h>
 #endif /* DIRED_SUPPORT */
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
  *  Showinfo prints a page of info about the current file and the link
@@ -109,14 +106,14 @@ PUBLIC int showinfo ARGS4(
 	    sleep(AlertSecs);
 	} else {
 	    char modes[80];
-	    if (((dir_info.st_mode) & S_IFMT) == S_IFDIR) {
+	    if (S_ISDIR(dir_info.st_mode)) {
 		fprintf(fp0,
 		 "\nDirectory that you have currently selected\n\n");
-	    } else if (((dir_info.st_mode) & S_IFMT) == S_IFREG) {
+	    } else if (S_ISREG(dir_info.st_mode)) {
 		fprintf(fp0,
 		      "\nFile that you have currently selected\n\n");
 #ifdef S_IFLNK
-	    } else if (((dir_info.st_mode) & S_IFMT) == S_IFLNK) {
+	    } else if (S_ISLNK(dir_info.st_mode)) {
 		fprintf(fp0,
 	     "\nSymbolic link that you have currently selected\n\n");
 #endif
@@ -126,7 +123,7 @@ PUBLIC int showinfo ARGS4(
 	    }
 	    fprintf(fp0,"       <em>Full name:</em>  %s\n", temp);
 #ifdef S_IFLNK
-	    if (((dir_info.st_mode) & S_IFMT) == S_IFLNK) {
+	    if (S_ISLNK(dir_info.st_mode)) {
 		char buf[1025];
 		int buf_size;
 
@@ -144,7 +141,7 @@ PUBLIC int showinfo ARGS4(
 	    grp = getgrgid(dir_info.st_gid);
 	    if (grp && grp->gr_name)
 		fprintf(fp0, "      <em>Group name:</em>  %s\n", grp->gr_name);
-	    if (((dir_info.st_mode) & S_IFMT) == S_IFREG) {
+	    if (S_ISREG(dir_info.st_mode)) {
 		sprintf(temp, "       <em>File size:</em>  %ld (bytes)\n",
 			      (long)dir_info.st_size);
 		fprintf(fp0, "%s", temp);
@@ -171,7 +168,7 @@ PUBLIC int showinfo ARGS4(
 	    if ((dir_info.st_mode & S_IWUSR))
 		strcat(modes, ", write");
 	    if ((dir_info.st_mode & S_IXUSR)) {
-		if (((dir_info.st_mode) & S_IFMT) == S_IFDIR)
+		if (S_ISDIR(dir_info.st_mode))
 		    strcat(modes, ", search");
 		else {
 		    strcat(modes, ", execute");
@@ -190,7 +187,7 @@ PUBLIC int showinfo ARGS4(
 	    if ((dir_info.st_mode & S_IWGRP))
 		strcat(modes, ", write");
 	    if ((dir_info.st_mode & S_IXGRP)) {
-		if (((dir_info.st_mode) & S_IFMT) == S_IFDIR)
+		if (S_ISDIR(dir_info.st_mode))
 		    strcat(modes, ", search");
 		else {
 		    strcat(modes, ", execute");
@@ -209,7 +206,7 @@ PUBLIC int showinfo ARGS4(
 	    if ((dir_info.st_mode & S_IWOTH))
 		strcat(modes, ", write");
 	    if ((dir_info.st_mode & S_IXOTH)) {
-		if (((dir_info.st_mode) & S_IFMT) == S_IFDIR)
+		if (S_ISDIR(dir_info.st_mode))
 		    strcat(modes, ", search");
 		else {
 		    strcat(modes, ", execute");

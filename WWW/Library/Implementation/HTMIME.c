@@ -23,8 +23,6 @@
 #include <LYStrings.h>
 #include <LYLeaks.h>
 
-#define FREE(x) if (x) {free(x); x = NULL;}
-
 extern CONST char *LYchar_set_names[];
 extern BOOLEAN LYRawMode;
 extern BOOL HTPassEightBitRaw;

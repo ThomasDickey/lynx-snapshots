@@ -16,7 +16,6 @@
 */
 
 #include <HTUtils.h>		/* Coding convention macros */
-#include <tcp.h>
 #include <HTAlert.h>
 #include <HTParse.h>
 #include <HTTCP.h>
@@ -61,13 +60,9 @@
 #define GOPHER_PLUS_SOUND	'<'
 #define GOPHER_PLUS_PDF 	'P'
 
-#include <ctype.h>
-
 #include <HTParse.h>
 #include <HTFormat.h>
 #include <HTTCP.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
 **  Hypertext object building machinery.

@@ -26,7 +26,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTAlert.h>
 #include <HTML.h>
 #include <HTParse.h>
@@ -39,8 +38,6 @@
 
 #define FINGER_PORT 79		/* See rfc742 */
 #define BIG 1024		/* Bug */
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 #define PUTC(c) (*targetClass.put_character)(target, c)
 #define PUTS(s) (*targetClass.put_string)(target, s)

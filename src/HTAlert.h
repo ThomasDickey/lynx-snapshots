@@ -8,10 +8,7 @@
 #ifndef HTALERT_H
 #define HTALERT_H 1
 
-#ifndef HTUTILS_H
 #include <HTUtils.h>
-#endif /* HTUTILS_H */
-#include <tcp.h>
 
 /*      Display a message and get the input
 **

@@ -11,7 +11,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTAccess.h>
 
 /* Implements:
@@ -51,8 +50,6 @@ PUBLIC long int HTMaxBytes  = 0;	/* No effective limit */
 #include <GridText.h>
 #include <LYGlobalDefs.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 PUBLIC	BOOL HTOutputSource = NO;	/* Flag: shortcut parser to stdout */
 /* extern  BOOL interactive; LJM */

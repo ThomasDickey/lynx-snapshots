@@ -8,9 +8,6 @@
 #ifndef HTFWRITE_H
 #define HTFWRITE_H
 
-#ifndef HTUTILS_H
-#include <HTUtils.h>
-#endif /* HTUTILS_H */
 #include <HTStream.h>
 #include <HTFormat.h>
 

@@ -1,6 +1,9 @@
 #ifndef LYCOOKIES_H
 #define LYCOOKIES_H
 
+#include <HTUtils.h>
+#include <HTList.h>
+
 extern void LYSetCookie PARAMS((
 	CONST char *	SetCookie,
 	CONST char *	SetCookie2,
@@ -12,6 +15,10 @@ extern char *LYCookie PARAMS((
 	BOOL		secure));
 extern void LYLoadCookies PARAMS((
 	CONST char * 	cookie_file));
+extern void cookie_add_acceptlist PARAMS((
+	char *		acceptdomains));
+extern void cookie_add_rejectlist PARAMS((
+	char *		rejectdomains));
 
 typedef enum {ACCEPT_ALWAYS, REJECT_ALWAYS, QUERY_USER, FROM_FILE} behaviour;
 
