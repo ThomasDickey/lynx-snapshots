@@ -41,6 +41,10 @@ extern int UCGetLYhndl_byMIME PARAMS((
 extern int safeUCGetLYhndl_byMIME PARAMS((
 	CONST char *	p)); /* returns LATIN1 if name not recognized */
 
+#ifdef EXP_LOCALE_CHARSET
+extern void LYFindLocaleCharset NOPARAMS;
+#endif
+
 extern int UCLYhndl_for_unspec;
 extern int UCLYhndl_for_unrec;
 extern int UCLYhndl_HTFile_for_unspec;

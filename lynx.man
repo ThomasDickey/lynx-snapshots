@@ -826,6 +826,12 @@ variables of the form PROTOCOL_proxy (literally: http_proxy, ftp_proxy,
 gopher_proxy, etc), to "http://some.server.dom:port/".
 See \fBLynx Users Guide\fR for additional details and examples.
 .TP 20
+.B SSL_CERT_DIR
+Set to the directory containing trusted certificates.
+.TP 20
+.B SSL_CERT_FILE
+Set to the full path and filename for your file of trusted certificates.
+.TP 20
 .B WWW_access_GATEWAY
 \fILynx\fR still supports use of gateway servers, with the servers specified
 via "WWW_access_GATEWAY" variables (where "access" is lower case and can be

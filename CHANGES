@@ -1,10 +1,45 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2004-01-24 (2.8.5pre.3)
+* update documentation's version numbers for release -TD
+* modify configure check for libbz2 to allow for older headers which do not
+  include <stdio.h> -TD
+* add configure option --enable-locale-charset, which adds configure settings
+  and an option-menu checkbox telling lynx if it should use the function call
+  nl_langinfo(CODESET) to find the display character set rather than rely on
+  the user to set it via lynx.cfg or the options menu (discussion with Andreas
+  Metzler) -TD
+* remove intl subdirectory (gettext-0.10.35), since some of the ".po" files
+  have been modified to rely upon gettext 0.11.x.  Modified configure script
+  macro to report this properly -TD 
+* add SSL_CERT_DIR, SSL_CERT_FILE to lynx.man (suggested by Stef Caunter) -TD
+* documentation updates for DJGPP -DK, LP, FLWM
+* update address for Free Software Foundation in COPYHEADER and COPYING
+  (Atsuhito Kohda).
+* change CF_CHECK_IPV6 to warn rather than error-out if a working getaddrinfo()
+  function cannot be found.  The previous behavior would warn on Linux and
+  error-out on other systems (report by RobertM) -TD
+* localized displayed strings used for popups in options menu -TD
+* add SHOW_KB_NAME to allow user to decide whether to display "KB" or "Kib"
+  or even "Kilobytes" for the progress message (discussion on lynx-dev) -TD
+* correct form generated to select Visited Links page in LYHistory.c to match
+  the values used in LYOptions.c with new function LYMenuVisitedLinks, and
+  corrected ifdef to ensure that menu is generated when the forms-based option
+  menu is configured (report by TH) -TD
+* modify configure check for ranlib to use AC_CHECK_TOOL, since AC_PROG_RANLIB
+  does not do proper cross-compiling checks.  This actually applies to autoconf
+  2.5x -- autoconf 2.13 does less in that area -TD
+* update config.guess (2004-01-05) and config.sub (2004-01-05).
+* ensure that freeaddrinfo() is only called if lynx has initialized its
+  parameter, fixes a core-dump on IRIX6.5 -TD
+* change remaining references for lynx.browser.org to lynx.isc.org (reported by
+  Frederic L W Meunier) -TD
+
 2004-01-19 (2.8.5pre.2)
 * update URLs in docs/README.ssl (Stef Caunter, DK).
 * use http://search.lycos.com rather than the messy http://www.lycos.com -DK
-* update some URLs in lynx_help (Frederic L W Meunier)
+* update some URLs in lynx_help -FLWM (Frederic L W Meunier)
 * remove a few unnecessary #include's (reported by Frederic L W Meunier) -TD
 * fix some compiler warnings with casts -PG
 * add docs/ directory to "make install-doc" rule.  If the help-files are

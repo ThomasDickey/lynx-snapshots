@@ -15,6 +15,7 @@
 #include <LYStrings.h>
 #include <LYCharUtils.h>
 #include <LYCharSets.h>
+#include <LYrcFile.h>
 #ifdef DISP_PARTIAL
 #include <LYMainLoop.h>
 #endif
@@ -818,23 +819,13 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 
     BeginInternalPage(fp0, VISITED_LINKS_TITLE, VISITED_LINKS_HELP);
 
+#ifndef NO_OPTION_FORMS
     fprintf(fp0, "<form action=\"%s\" method=\"post\">\n", STR_LYNXOPTIONS);
-    fprintf(fp0, "<select name=\"visited_pages_type\">\n");
-    fprintf(fp0, " <option value=\"first_visited\" %s>Sort By First Visited\n",
-		 (Visited_Links_As == VISITED_LINKS_AS_FIRST_V ? "selected" : ""));
-    fprintf(fp0, " <option value=\"first_visited_reversed\" %s>Reverse Sort By First Visited\n",
-		 (Visited_Links_As == (VISITED_LINKS_AS_FIRST_V|VISITED_LINKS_REVERSE) ? "selected" : ""));
-    fprintf(fp0, " <option value=\"visit_tree\" %s>View As Visit Tree\n",
-		 (Visited_Links_As == VISITED_LINKS_AS_TREE ? "selected" : ""));
-    fprintf(fp0, " <option value=\"last_visited\" %s>Sort By Last Visited\n",
-		 (Visited_Links_As == VISITED_LINKS_AS_LATEST ? "selected" : ""));
-    fprintf(fp0, " <option value=\"last_visited_reversed\" %s>Reverse Sort By Last Visited\n",
-		 (Visited_Links_As == (VISITED_LINKS_AS_LATEST|VISITED_LINKS_REVERSE)
-		   ? "selected" : ""));
-    fprintf(fp0, "</select>\n");
+    LYMenuVisitedLinks (fp0, FALSE);
     fprintf(fp0, "<input type=\"submit\" value=\"Accept Changes\">\n");
     fprintf(fp0, "</form>\n");
     fprintf(fp0, "<P>\n");
+#endif
 
     fprintf(fp0, "<pre>\n");
     fprintf(fp0, "<em>%s</em>\n",

@@ -4204,10 +4204,10 @@ msgstr "使用 GNU General Public License 發佈。\n"
 
 #: src/LYMain.c:3170
 msgid ""
-"See http://lynx.browser.org/ and the online help for more information.\n"
+"See http://lynx.isc.org/ and the online help for more information.\n"
 "\n"
 msgstr ""
-"若需要更多資料，請瀏覽 http://lynx.browser.org/ 及網上的說明文件。\n"
+"若需要更多資料，請瀏覽 http://lynx.isc.org/ 及網上的說明文件。\n"
 "\n"
 
 #: src/LYMain.c:3919

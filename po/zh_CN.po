@@ -4153,7 +4153,7 @@ msgstr ""
 
 #: src/LYMain.c:3170
 msgid ""
-"See http://lynx.browser.org/ and the online help for more information.\n"
+"See http://lynx.isc.org/ and the online help for more information.\n"
 "\n"
 msgstr ""
 

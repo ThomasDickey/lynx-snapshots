@@ -3,7 +3,7 @@
 # Volodymyr M. Lisivka <lvm@mystery.lviv.net>, 2003
 # Dmytro O. Redchuk <dor@kiev-online.net>, 2001-2002
 # Olexander Kunytsa <kunia@snark.ukma.kiev.ua>, 2000-2001
-# @Id: uk.po 1.3 Wed, 07 Jan 2004 18:03:09 -0800 dickey @
+# @Id: uk.po 1.4 Sat, 24 Jan 2004 17:51:04 -0800 dickey @
 #
 msgid ""
 msgstr ""
@@ -4359,10 +4359,10 @@ msgstr "Розповсюджу╓ться зг╕дно з GNU General Public License.\n"
 
 #: src/LYMain.c:3170
 msgid ""
-"See http://lynx.browser.org/ and the online help for more information.\n"
+"See http://lynx.isc.org/ and the online help for more information.\n"
 "\n"
 msgstr ""
-"Див http://lynx.browser.org/ та онлайн-допомогу, щоб взнати б╕льше.\n"
+"Див http://lynx.isc.org/ та онлайн-допомогу, щоб взнати б╕льше.\n"
 "\n"
 
 #: src/LYMain.c:3919

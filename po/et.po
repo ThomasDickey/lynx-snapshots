@@ -4253,10 +4253,10 @@ msgstr "Levitatakse GNU üldise avaliku litsensiga.\n"
 
 #: src/LYMain.c:3170
 msgid ""
-"See http://lynx.browser.org/ and the online help for more information.\n"
+"See http://lynx.isc.org/ and the online help for more information.\n"
 "\n"
 msgstr ""
-"Abi ja muud infot leiate aadressil http://lynx.browser.org/.\n"
+"Abi ja muud infot leiate aadressil http://lynx.isc.org/.\n"
 "\n"
 
 #: src/LYMain.c:3919

@@ -223,6 +223,7 @@ extern BOOLEAN verbose_img;	/* display filenames of images?     */
 extern BOOLEAN vi_keys;		/* TRUE to turn on vi-like key movement */
 extern char *LYRequestReferer;	/* Referer, may be set in getfile() */
 extern char *LYRequestTitle;	/* newdoc.title in calls to getfile() */
+extern char *LYTransferName;	/* abbreviation for Kilobytes */
 extern char *LynxHome;
 extern char *LynxSigFile;	/* Signature file, in or off home */
 extern char *checked_box;	/* form boxes */
@@ -497,6 +498,10 @@ extern int LYNoZapKey;  /* 0: off (do 'z' checking), 1: full, 2: initially */
 #ifdef EXP_JUSTIFY_ELTS
 extern BOOL ok_justify;
 extern int justify_max_void_percent;
+#endif
+
+#ifdef EXP_LOCALE_CHARSET
+extern BOOLEAN LYLocaleCharset;
 #endif
 
 #ifndef NO_DUMP_WITH_BACKSPACES

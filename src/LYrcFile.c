@@ -399,6 +399,9 @@ the following control characters are used for moving and deleting:\n\
 \n\
 Current lineedit modes are:\n\
 ")),
+#ifdef EXP_LOCALE_CHARSET
+    MAYBE_SET(RC_LOCALE_CHARSET,      LYLocaleCharset,        MSG_ENABLE_LYNXRC),
+#endif
     MAYBE_SET(RC_MAKE_PSEUDO_ALTS_FOR_INLINES, pseudo_inline_alts, MSG_ENABLE_LYNXRC),
     MAYBE_SET(RC_MAKE_LINKS_FOR_ALL_IMAGES, clickable_images, MSG_ENABLE_LYNXRC),
     PARSE_MBM(RC_MULTI_BOOKMARK, N_("\

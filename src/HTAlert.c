@@ -140,22 +140,31 @@ PUBLIC void HTProgress ARGS1(
     LYSleepDebug();
 }
 
-PRIVATE char *sprint_bytes ARGS3(
-	char *,		s,
-	long,		n,
-	char *, 	was_units)
+PUBLIC CONST char *HTProgressUnits ARGS1(
+	int,		rate)
 {
-    static long kb_units = 1024;
-    static char *bunits;
-    static char *kbunits;
-    char *u;
+    static CONST char *bunits = 0;
+    static CONST char *kbunits = 0;
 
     if (!bunits) {
 	bunits = gettext("bytes");
-	kbunits = gettext("KB");
+	kbunits = gettext(LYTransferName);
     }
+    return ((rate == rateKB)
+#ifdef USE_READPROGRESS
+    	    || (rate == rateEtaKB)
+#endif
+	    ) ? kbunits : bunits;
+}
 
-    u = kbunits;
+PRIVATE CONST char *sprint_bytes ARGS3(
+	char *,		s,
+	long,		n,
+	CONST char *, 	was_units)
+{
+    static long kb_units = 1024;
+    CONST char *u = HTProgressUnits(LYTransferRate);
+
     if ( (LYTransferRate == rateKB || LYTransferRate == rateEtaKB_maybe)
 	 && (n >= 10 * kb_units) )
 	sprintf(s, "%ld", n/kb_units);
@@ -164,7 +173,6 @@ PRIVATE char *sprint_bytes ARGS3(
 	sprintf(s, "%.2g", ((double)n)/kb_units);
     else {
 	sprintf(s, "%ld", n);
-	u = bunits;
     }
 
     if (!was_units || was_units != u)
@@ -200,7 +208,7 @@ PUBLIC void HTReadProgress ARGS2(
     static char *line = NULL;
     char bytesp[80], totalp[80], transferp[80];
     int renew = 0;
-    char *was_units;
+    CONST char *was_units;
 
 #ifdef HAVE_GETTIMEOFDAY
     struct timeval tv;

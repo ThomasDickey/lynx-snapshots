@@ -39,6 +39,7 @@
 #undef EXP_CHARTRANS_AUTOSWITCH	/* CF_ARG_ENABLE(font-switch) */
 #undef EXP_JUSTIFY_ELTS		/* CF_ARG_ENABLE(justify-elts) */
 #undef EXP_KEYBOARD_LAYOUT	/* CF_ARG_ENABLE(kbd-layout) */
+#undef EXP_LOCALE_CHARSET	/* CF_ARG_ENABLE(locale-charset) */
 #undef EXP_LIBJS		/* CF_ARG_ENABLE(libjs) */
 #undef EXP_NESTED_TABLES	/* CF_ARG_ENABLE(nested-tables) */
 #undef FANCY_CURSES		/* CF_FANCY_CURSES */
@@ -78,6 +79,7 @@
 #undef HAVE_INET_ATON		/* CF_INET_ADDR */
 #undef HAVE_JCURSES_H
 #undef HAVE_KEYPAD
+#undef HAVE_LANGINFO_CODESET	/* AM_LANGINFO_CODESET */
 #undef HAVE_LC_MESSAGES		/* locale messages */
 #undef HAVE_LIBDBMALLOC		/* --with-dbmalloc */
 #undef HAVE_LIBDMALLOC		/* --with-dmalloc */

@@ -53,13 +53,13 @@ MCFLAGS = \
  $(SSLINC) \
  -I./chrtrans \
  -I../WWW/Library/Implementation \
- -I/djgpp/pdcur24 \
+ -I/djgpp/pdcur26 \
  -I/djgpp/watt32/inc \
  -I/djgpp/watt32/inc/sys
 
 WWWLIB = \
  ../WWW/Library/djgpp/libwww.a \
- /djgpp/pdcur24/lib/pdcurses.a
+ /djgpp/pdcur26/lib/pdcurses.a
 
 LIBS= -L/djgpp/watt32/lib -lwatt -lz -lwmemu
 

@@ -1524,7 +1524,7 @@ PUBLIC int HTDoConnect ARGS4(
     char *at_sign = NULL;
     char *host = NULL;
 #ifdef INET6
-    struct addrinfo *res, *res0;
+    struct addrinfo *res = 0, *res0 = 0;
 #else
     struct sockaddr_in soc_address;
     struct sockaddr_in *soc_in = &soc_address;
@@ -1703,7 +1703,8 @@ PUBLIC int HTDoConnect ARGS4(
 		HTAlert(gettext("Connection failed (too many retries)."));
 #ifdef INET6
 		FREE(line);
-		freeaddrinfo(res0);
+		if (res0)
+		    freeaddrinfo(res0);
 #endif /* INET6 */
 		return HT_NO_DATA;
 	    }
@@ -1900,7 +1901,8 @@ PUBLIC int HTDoConnect ARGS4(
 
 #ifdef INET6
     FREE(line);
-    freeaddrinfo(res0);
+    if (res0)
+	freeaddrinfo(res0);
 #endif /* INET6 */
     return status;
 }

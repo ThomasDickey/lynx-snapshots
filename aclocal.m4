@@ -4,7 +4,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2004/1/11
+dnl Updated: 2004/1/24
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13, patched
 dnl by Tom Dickey.  See your local GNU archives, and this URL:
@@ -279,7 +279,7 @@ fi
 AC_SUBST($1)dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl AM_WITH_NLS version: 15 updated: 2002/11/09 16:19:53
+dnl AM_WITH_NLS version: 17 updated: 2004/01/23 19:52:21
 dnl -----------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
@@ -435,6 +435,9 @@ return (int) gettext ("")]ifelse([$2], need-ngettext, [ + (int) ngettext ("", ""
       fi
 
       if test "$nls_cv_use_gnu_gettext" = "yes"; then
+        if test ! -d $srcdir/intl ; then
+	  AC_MSG_ERROR(no NLS library is packaged with this application)
+	fi
         dnl Mark actions used to generate GNU NLS library.
         INTLOBJS="\$(GETTOBJS)"
         AM_PATH_PROG_WITH_TEST(MSGFMT, msgfmt,
@@ -531,6 +534,7 @@ return (int) gettext ("")]ifelse([$2], need-ngettext, [ + (int) ngettext ("", ""
     dnl files or have a broken "make" program, hence the plural.c rule will
     dnl sometimes fire. To avoid an error, defines BISON to ":" if it is not
     dnl present or too old.
+    if test "$nls_cv_use_gnu_gettext" = "yes"; then
     AC_CHECK_PROGS([INTLBISON], [bison])
     if test -z "$INTLBISON"; then
       ac_verc_fail=yes
@@ -550,6 +554,7 @@ changequote([,])dnl
     fi
     if test $ac_verc_fail = yes; then
       INTLBISON=:
+    fi
     fi
 
     dnl These rules are solely for the distribution goal.  While doing this
@@ -1067,7 +1072,7 @@ CF_CHECK_FUNCDECL([$1], $ac_func,
 done
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CHECK_IPV6 version: 2 updated: 2000/04/13 21:38:04
+dnl CF_CHECK_IPV6 version: 3 updated: 2004/01/22 17:38:22
 dnl -------------
 dnl Check for IPV6 configuration.
 AC_DEFUN([CF_CHECK_IPV6],[
@@ -1078,7 +1083,7 @@ CF_FUNC_GETADDRINFO
 
 if test "$cf_cv_getaddrinfo" != "yes"; then
 	if test "$cf_cv_ipv6type" != "linux"; then
-		AC_MSG_ERROR(
+		AC_MSG_WARN(
 [You must get working getaddrinfo() function,
 or you can specify "--disable-ipv6"])
 	else
@@ -3493,6 +3498,24 @@ test -d /usr && {
 }
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_SUBST version: 2 updated: 1997/09/06 23:41:28
+dnl --------
+dnl	Shorthand macro for substituting things that the user may override
+dnl	with an environment variable.
+dnl
+dnl	$1 = long/descriptive name
+dnl	$2 = environment variable
+dnl	$3 = default value
+AC_DEFUN([CF_SUBST],
+[AC_CACHE_VAL(cf_cv_subst_$2,[
+AC_MSG_CHECKING(for $1 (symbol $2))
+test -z "[$]$2" && $2=$3
+AC_MSG_RESULT([$]$2)
+AC_SUBST($2)
+cf_cv_subst_$2=[$]$2])
+$2=${cf_cv_subst_$2}
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl CF_SYSTEM_MAIL_FLAGS version: 3 updated: 1998/11/18 14:45:34
 dnl --------------------
 AC_DEFUN([CF_SYSTEM_MAIL_FLAGS],
@@ -4043,7 +4066,7 @@ fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_WITH_BZLIB version: 1 updated: 2003/10/05 17:36:00
+dnl CF_WITH_BZLIB version: 2 updated: 2004/01/24 17:45:25
 dnl -------------
 dnl Check for libbz2 aka "bzlib"
 AC_DEFUN([CF_WITH_BZLIB],[
@@ -4061,8 +4084,9 @@ do
 	CF_VERBOSE(... tested $cf_incdir)
 done
 ])
-CF_FIND_LIBRARY(bz2,bz2,
-	[#include <bzlib.h>],
+CF_FIND_LIBRARY(bz2,bz2, [
+#include <stdio.h>
+#include <bzlib.h>],
 	[BZ2_bzopen("name","mode")],
 	BZ2_bzopen)
 ])dnl

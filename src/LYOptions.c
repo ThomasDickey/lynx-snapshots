@@ -2100,13 +2100,13 @@ typedef struct {
 
 static CONST char selected_string[] = "selected";
 static CONST char disabled_string[] = "disabled";
-static CONST char on_string[]	    = "ON";
-static CONST char off_string[]	    = "OFF";
-static CONST char never_string[]    = "NEVER";
-static CONST char always_string[]   = "ALWAYS";
+static CONST char on_string[]	    = N_("ON");
+static CONST char off_string[]	    = N_("OFF");
+static CONST char never_string[]    = N_("NEVER");
+static CONST char always_string[]   = N_("ALWAYS");
 static OptValues bool_values[] = {
-	{ FALSE,	     "OFF",		  "OFF"		},
-	{ TRUE,		     "ON",		  "ON"		},
+	{ FALSE,	     N_("OFF"),		  "OFF"		},
+	{ TRUE,		     N_("ON"),		  "ON"		},
 	{ 0, 0, 0 }};
 
 static char * secure_string		= "secure";
@@ -2117,9 +2117,9 @@ static char * save_options_string	= "save_options";
  * Personal Preferences
  */
 static char * cookies_string		= RC_SET_COOKIES;
-static char * cookies_ignore_all_string = "ignore";
-static char * cookies_up_to_user_string = "ask user";
-static char * cookies_accept_all_string = "accept all";
+static char * cookies_ignore_all_string = N_("ignore");
+static char * cookies_up_to_user_string = N_("ask user");
+static char * cookies_accept_all_string = N_("accept all");
 static char * x_display_string		= RC_DISPLAY;
 static char * editor_string		= RC_FILE_EDITOR;
 static char * emacs_keys_string		= RC_EMACS_KEYS;
@@ -2130,10 +2130,10 @@ static char * emacs_keys_string		= RC_EMACS_KEYS;
 #define EXEC_NEVER  0
 static char * exec_links_string		= RC_RUN_ALL_EXECUTION_LINKS;
 static OptValues exec_links_values[]	= {
-	{ EXEC_NEVER,	"ALWAYS OFF",		"ALWAYS OFF" },
-	{ EXEC_LOCAL,	"FOR LOCAL FILES ONLY",	"FOR LOCAL FILES ONLY" },
+	{ EXEC_NEVER,	N_("ALWAYS OFF"),		"ALWAYS OFF" },
+	{ EXEC_LOCAL,	N_("FOR LOCAL FILES ONLY"),	"FOR LOCAL FILES ONLY" },
 #ifndef NEVER_ALLOW_REMOTE_EXEC
-	{ EXEC_ALWAYS,	"ALWAYS ON",		"ALWAYS ON" },
+	{ EXEC_ALWAYS,	N_("ALWAYS ON"),		"ALWAYS ON" },
 #endif
 	{ 0, 0, 0 }};
 #endif /* ENABLE_OPTS_CHANGE_EXEC */
@@ -2143,21 +2143,23 @@ static char * kblayout_string		= RC_KBLAYOUT;
 #endif
 static char * keypad_mode_string	= RC_KEYPAD_MODE;
 static OptValues keypad_mode_values[]	= {
-	{ NUMBERS_AS_ARROWS,  "Numbers act as arrows", "number_arrows" },
-	{ LINKS_ARE_NUMBERED, "Links are numbered",    "links_numbered" },
+	{ NUMBERS_AS_ARROWS,  N_("Numbers act as arrows"),
+			      "number_arrows" },
+	{ LINKS_ARE_NUMBERED, N_("Links are numbered"),
+			      "links_numbered" },
 	{ LINKS_AND_FIELDS_ARE_NUMBERED,
-			      "Links and form fields are numbered",
+			      N_("Links and form fields are numbered"),
 			      "links_and_forms" },
 	{ FIELDS_ARE_NUMBERED,
-			      "Form fields are numbered",
+			      N_("Form fields are numbered"),
 			      "forms_numbered" },
 	{ 0, 0, 0 }};
 static char * lineedit_mode_string	= RC_LINEEDIT_MODE;
 static char * mail_address_string	= RC_PERSONAL_MAIL_ADDRESS;
 static char * search_type_string	= RC_CASE_SENSITIVE_SEARCHING;
 static OptValues search_type_values[] = {
-	{ FALSE,	    "Case insensitive",  "case_insensitive" },
-	{ TRUE,		    "Case sensitive",	 "case_sensitive" },
+	{ FALSE,	    N_("Case insensitive"),  "case_insensitive" },
+	{ TRUE,		    N_("Case sensitive"),	 "case_sensitive" },
 	{ 0, 0, 0 }};
 
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
@@ -2176,9 +2178,9 @@ static char * show_cursor_string	= RC_SHOW_CURSOR;
 static char * show_scrollbar_string	= RC_SCROLLBAR;
 #endif
 
-static CONST char prompt_dft_string[]	= "prompt normally";
-static CONST char prompt_yes_string[]	= "force yes-response";
-static CONST char prompt_no_string[]	= "force no-response";
+static CONST char prompt_dft_string[]	= N_("prompt normally");
+static CONST char prompt_yes_string[]	= N_("force yes-response");
+static CONST char prompt_no_string[]	= N_("force no-response");
 static OptValues prompt_values[] = {
 	{ FORCE_PROMPT_DFT,	prompt_dft_string, prompt_dft_string },
 	{ FORCE_PROMPT_YES,	prompt_yes_string, prompt_yes_string },
@@ -2193,22 +2195,22 @@ static char * ssl_prompt_string		= RC_FORCE_SSL_PROMPT;
 
 static char * user_mode_string		= RC_USER_MODE;
 static OptValues user_mode_values[] = {
-	{ NOVICE_MODE,		"Novice",	"Novice" },
-	{ INTERMEDIATE_MODE,	"Intermediate", "Intermediate" },
-	{ ADVANCED_MODE,	"Advanced",	"Advanced" },
+	{ NOVICE_MODE,		N_("Novice"),			"Novice" },
+	{ INTERMEDIATE_MODE,	N_("Intermediate"),		"Intermediate" },
+	{ ADVANCED_MODE,	N_("Advanced"),			"Advanced" },
 	{ 0, 0, 0 }};
 
 static char * vi_keys_string		= RC_VI_KEYS;
 
 static char * visited_links_string	= RC_VISITED_LINKS;
 static OptValues visited_links_values[] = {
-	{ VISITED_LINKS_AS_FIRST_V, "By First Visit",	"first_visited" },
+	{ VISITED_LINKS_AS_FIRST_V, N_("By First Visit"),	"first_visited" },
 	{ VISITED_LINKS_AS_FIRST_V | VISITED_LINKS_REVERSE,
-		    "By First Visit Reversed",	"first_visited_reversed" },
-	{ VISITED_LINKS_AS_TREE,    "As Visit Tree",	"visit_tree" },
-	{ VISITED_LINKS_AS_LATEST,  "By Last Visit",	"last_visited" },
+		    N_("By First Visit Reversed"),		"first_visited_reversed" },
+	{ VISITED_LINKS_AS_TREE,    N_("As Visit Tree"),	"visit_tree" },
+	{ VISITED_LINKS_AS_LATEST,  N_("By Last Visit"),	"last_visited" },
 	{ VISITED_LINKS_AS_LATEST | VISITED_LINKS_REVERSE,
-		    "By Last Visit Reversed",	"last_visited_reversed" },
+		    N_("By Last Visit Reversed"),		"last_visited_reversed" },
 	{ 0, 0, 0 }};
 
 /*
@@ -2217,20 +2219,21 @@ static OptValues visited_links_values[] = {
 static char * DTD_recovery_string      = RC_TAGSOUP;
 static OptValues DTD_type_values[] = {
 	/* Old_DTD variable */
-	{ TRUE,		    "relaxed (TagSoup mode)",	 "tagsoup" },
-	{ FALSE,	    "strict (SortaSGML mode)",	 "sortasgml" },
+	{ TRUE,		    N_("relaxed (TagSoup mode)"),	 "tagsoup" },
+	{ FALSE,	    N_("strict (SortaSGML mode)"),	 "sortasgml" },
 	{ 0, 0, 0 }};
 
 static char * select_popups_string     = RC_SELECT_POPUPS;
 static char * images_string            = "images";
-static char * images_ignore_all_string = "ignore";
-static char * images_use_label_string  = "as labels";
-static char * images_use_links_string  = "as links";
+static char * images_ignore_all_string = N_("ignore");
+static char * images_use_label_string  = N_("as labels");
+static char * images_use_links_string  = N_("as links");
+
 static char * verbose_images_string    = RC_VERBOSE_IMAGES;
 static OptValues verbose_images_type_values[] = {
 	/* verbose_img variable */
-	{ FALSE,	    "OFF",		 "OFF" },
-	{ TRUE,		    "show filename",	 "ON" },
+	{ FALSE,	    N_("OFF"),		 	"OFF" },
+	{ TRUE,		    N_("show filename"),	 "ON" },
 	{ 0, 0, 0 }};
 
 /*
@@ -2238,9 +2241,9 @@ static OptValues verbose_images_type_values[] = {
  */
 static char * mbm_string		= RC_MULTI_BOOKMARK;
 static OptValues mbm_values[] = {
-	{ MBM_OFF,		"OFF",			"OFF" },
-	{ MBM_STANDARD,		"STANDARD",		"STANDARD" },
-	{ MBM_ADVANCED,		"ADVANCED",		"ADVANCED" },
+	{ MBM_OFF,		N_("OFF"),		"OFF" },
+	{ MBM_STANDARD,		N_("STANDARD"),		"STANDARD" },
+	{ MBM_ADVANCED,		N_("ADVANCED"),		"ADVANCED" },
 	{ 0, 0, 0 }};
 
 static char * single_bookmark_string	= RC_BOOKMARK_FILE;
@@ -2252,6 +2255,10 @@ static char * assume_char_set_string	= RC_ASSUME_CHARSET;
 static char * display_char_set_string	= RC_CHARACTER_SET;
 static char * raw_mode_string		= RC_RAW_MODE;
 
+#ifdef EXP_LOCALE_CHARSET
+static char * locale_charset_string	= RC_LOCALE_CHARSET;
+#endif
+
 /*
  * File Management Options
  */
@@ -2260,21 +2267,21 @@ static char * show_dotfiles_string	= RC_SHOW_DOTFILES;
 #ifdef DIRED_SUPPORT
 static char * dired_list_string		= RC_DIR_LIST_STYLE;
 static OptValues dired_list_values[] = {
-	{ DIRS_FIRST,		"Directories first",	"dired_dir" },
-	{ FILES_FIRST,		"Files first",		"dired_files" },
-	{ MIXED_STYLE,		"Mixed style",		"dired_mixed" },
+	{ DIRS_FIRST,		N_("Directories first"),	"dired_dir" },
+	{ FILES_FIRST,		N_("Files first"),		"dired_files" },
+	{ MIXED_STYLE,		N_("Mixed style"),		"dired_mixed" },
 	{ 0, 0, 0 }};
 #ifdef LONG_LIST
 static char * dired_sort_string		= RC_DIR_LIST_ORDER;
 static OptValues dired_sort_values[] = {
-	{ ORDER_BY_NAME,	"By name",		"dired_by_name" },
-	{ ORDER_BY_TYPE,	"By type",		"dired_by_type" },
-	{ ORDER_BY_SIZE,	"By size",		"dired_by_size" },
-	{ ORDER_BY_DATE,	"By date",		"dired_by_date" },
-	{ ORDER_BY_MODE,	"By mode",		"dired_by_mode" },
+	{ ORDER_BY_NAME,	N_("By Name"),		"dired_by_name" },
+	{ ORDER_BY_TYPE,	N_("By Type"),		"dired_by_type" },
+	{ ORDER_BY_SIZE,	N_("By Size"),		"dired_by_size" },
+	{ ORDER_BY_DATE,	N_("By Date"),		"dired_by_date" },
+	{ ORDER_BY_MODE,	N_("By Mode"),		"dired_by_mode" },
 #ifndef NO_GROUPS
-	{ ORDER_BY_USER,	"By user",		"dired_by_user" },
-	{ ORDER_BY_GROUP,	"By group",		"dired_by_group" },
+	{ ORDER_BY_USER,	N_("By User"),		"dired_by_user" },
+	{ ORDER_BY_GROUP,	N_("By Group"),		"dired_by_group" },
 #endif
 	{ 0, 0, 0 }};
 #endif /* LONG_LIST */
@@ -2282,22 +2289,24 @@ static OptValues dired_sort_values[] = {
 
 static char * ftp_sort_string		= RC_FILE_SORTING_METHOD;
 static OptValues ftp_sort_values[] = {
-	{ FILE_BY_NAME,		"By Name",		"ftp_by_name" },
-	{ FILE_BY_TYPE,		"By Type",		"ftp_by_type" },
-	{ FILE_BY_SIZE,		"By Size",		"ftp_by_size" },
-	{ FILE_BY_DATE,		"By Date",		"ftp_by_date" },
+	{ FILE_BY_NAME,		N_("By Name"),		"ftp_by_name" },
+	{ FILE_BY_TYPE,		N_("By Type"),		"ftp_by_type" },
+	{ FILE_BY_SIZE,		N_("By Size"),		"ftp_by_size" },
+	{ FILE_BY_DATE,		N_("By Date"),		"ftp_by_date" },
 	{ 0, 0, 0 }};
 
+#ifdef USE_READPROGRESS
 static char * show_rate_string		= RC_SHOW_KB_RATE;
 static OptValues rate_values[] = {
-	{ rateOFF,		"Do not show rate",	"rate_off" },
-	{ rateBYTES,		"Show Bytes/sec rate",	"rate_bytes" },
-	{ rateKB,		"Show KB/sec rate",	"rate_kb" },
+	{ rateOFF,		N_("Do not show rate"),	"rate_off" },
+	{ rateBYTES,		N_("Show %s/sec rate"),	"rate_bytes" },
+	{ rateKB,		N_("Show %s/sec rate"), "rate_kb" },
 #ifdef USE_READPROGRESS
-	{ rateEtaBYTES,		"Show Bytes/sec, ETA",	"rate_eta_bytes" },
-	{ rateEtaKB,		"Show KB/sec, ETA",	"rate_eta_kb" },
+	{ rateEtaBYTES,		N_("Show %s/sec, ETA"),	"rate_eta_bytes" },
+	{ rateEtaKB,		N_("Show %s/sec, ETA"), "rate_eta_kb" },
 #endif
 	{ 0, 0, 0 }};
+#endif /* USE_READPROGRESS */
 
 /*
  * Headers transferred to remote server
@@ -2312,7 +2321,7 @@ static char * user_agent_string		= RC_USERAGENT;
 		(int) Size, Name, Value, disable_all?disabled_string:disable)
 
 #define PutOption(fp, flag, html, name) \
-	fprintf(fp,"<option value=\"%s\" %s>%s\n", html, SELECTED(flag), name)
+	fprintf(fp,"<option value=\"%s\" %s>%s\n", html, SELECTED(flag), gettext(name))
 
 #define BeginSelect(fp, text) \
 	fprintf(fp,"<select name=\"%s\" %s>\n", text, disable_all?disabled_string:"")
@@ -2817,6 +2826,14 @@ PUBLIC int postoptions ARGS1(
 	    }
 	}
 
+#ifdef EXP_LOCALE_CHARSET
+	/* Use locale-based character set: ON/OFF */
+	if (!strcmp(data[i].tag, locale_charset_string)
+	 && GetOptValues(bool_values, data[i].value, &code)) {
+	    LYLocaleCharset = (BOOL) code;
+	}
+#endif
+
 	/* Display Character Set: SELECT */
 	if (!strcmp(data[i].tag, display_char_set_string)) {
 	    int newval = atoi(data[i].value);
@@ -2859,11 +2876,13 @@ PUBLIC int postoptions ARGS1(
 	    show_dotfiles = (BOOL) code;
 	}
 
+#ifdef USE_READPROGRESS
 	/* Show Transfer Rate: enumerated value */
 	if (!strcmp(data[i].tag, show_rate_string)
 	 && GetOptValues(rate_values, data[i].value, &code)) {
 	    LYTransferRate = code;
 	}
+#endif /* USE_READPROGRESS */
 
 	/* Preferred Document Character Set: INPUT */
 	if (!strcmp(data[i].tag, preferred_doc_char_string)) {
@@ -2903,9 +2922,12 @@ PUBLIC int postoptions ARGS1(
     /*
      * Process the flags:
      */
-     if ( display_char_set_old != current_char_set ||
-	       raw_mode_old != LYRawMode ||
-	       assume_char_set_changed ) {
+#ifdef EXP_LOCALE_CHARSET
+    LYFindLocaleCharset();
+#endif
+    if ( display_char_set_old != current_char_set ||
+	 raw_mode_old != LYRawMode ||
+	 assume_char_set_changed ) {
 	/*
 	 * charset settings: the order is essential here.
 	 */
@@ -2935,8 +2957,7 @@ PUBLIC int postoptions ARGS1(
 	    HTMLSetCharacterHandling(current_char_set);
 	}
 	need_reload = TRUE;
-     } /* end of charset settings */
-
+    } /* end of charset settings */
 
     /*
      * FIXME: Golly gee, we need to write all of this out now, don't we?
@@ -3097,6 +3118,8 @@ PRIVATE char *NewSecureValue NOARGS
     return "?";
 }
 
+#define LABEL_LEN 33
+
 /*
  * Note: the 'value' we are passing here is a local copy of the "same" string
  * as is used in LYrcFile.c to index the savable options.
@@ -3107,13 +3130,13 @@ PRIVATE void PutLabel ARGS3(
 	char *,		value)
 {
     if (will_save_rc(value) && !no_option_save) {
-	fprintf(fp, "  %-33s: ", name);
+	fprintf(fp, "  %-*s: ", LABEL_LEN, name);
     } else {
 	int l = strlen(name);
 	fprintf(fp, "  %s", name);
 	fprintf(fp, "%s%-*s: ",
-		(l < 30) ? " " : "",
-		(l < 30) ? 32 - l : 3, "(!)");
+		(l < (LABEL_LEN-3)) ? " " : "",
+		(l < (LABEL_LEN-3)) ? (LABEL_LEN-1) - l : 3, "(!)");
     }
 }
 
@@ -3164,6 +3187,19 @@ PRIVATE char *will_save_images NOARGS
 	NULL
     };
     return check_if_write_lynxrc(table);
+}
+
+/*
+ * The visited-links menu is used from the visited-links page as well as the
+ * options page.
+ */
+PUBLIC void LYMenuVisitedLinks ARGS2(
+	FILE *,		fp0,
+	int,		disable_all)
+{
+    BeginSelect(fp0, visited_links_string);
+    PutOptValues(fp0, Visited_Links_As, visited_links_values);
+    EndSelect(fp0);
 }
 
 /*
@@ -3360,9 +3396,19 @@ PRIVATE int gen_options ARGS1(
     fprintf(fp0,"\n  <em>%s</em>\n", gettext("Display and Character Set"));
     /*****************************************************************/
 
+#ifdef EXP_LOCALE_CHARSET
+    /* Use locale-based character set: ON/OFF */
+    PutLabel(fp0, gettext("Use locale-based character set"), locale_charset_string);
+    BeginSelect(fp0, locale_charset_string);
+    PutOptValues(fp0, LYLocaleCharset, bool_values);
+    EndSelect(fp0);
+#else
+#define LYLocaleCharset FALSE
+#endif
+
     /* Display Character Set: SELECT */
     PutLabel(fp0, gettext("Display character set"), display_char_set_string);
-    BeginSelect(fp0, display_char_set_string);
+    MaybeSelect(fp0, LYLocaleCharset, display_char_set_string);
     for (i = 0; LYchar_set_names[i]; i++) {
 	char temp[10];
 	size_t len = strlen(LYchar_set_names[i]);
@@ -3585,10 +3631,20 @@ PRIVATE int gen_options ARGS1(
 #endif /* ENABLE_OPTS_CHANGE_EXEC */
 
 #ifdef USE_READPROGRESS
-    /* Local Directory Sort: SELECT */
+    /* Show transfer rate: SELECT */
     PutLabel(fp0, gettext("Show transfer rate"), show_rate_string);
     BeginSelect(fp0, show_rate_string);
-    PutOptValues(fp0, LYTransferRate, rate_values);
+    for (i = 0; rate_values[i].LongName != 0; ++i) {
+	char *message = NULL;
+	HTSprintf0(&message,
+		   rate_values[i].LongName,
+		   HTProgressUnits(rate_values[i].value));
+	PutOption(fp0,
+		  LYTransferRate == rate_values[i].value,
+		  rate_values[i].HtmlName,
+		  message);
+        FREE(message);
+    }
     EndSelect(fp0);
 #endif /* USE_READPROGRESS */
 
@@ -3619,9 +3675,7 @@ PRIVATE int gen_options ARGS1(
 
     /* Visited Pages: SELECT */
     PutLabel(fp0, gettext("Visited Pages"), visited_links_string);
-    BeginSelect(fp0, visited_links_string);
-    PutOptValues(fp0, Visited_Links_As, visited_links_values);
-    EndSelect(fp0);
+    LYMenuVisitedLinks(fp0, disable_all);
 
     if (!no_lynxcfg_info) {
 	fprintf(fp0, "\n  %s<a href=\"%s\">lynx.cfg</a>.\n",

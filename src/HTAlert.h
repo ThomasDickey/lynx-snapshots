@@ -40,6 +40,7 @@ extern void HTUserMsg2 PARAMS((CONST char * Msg, CONST char * Arg));
 **      On entry,
 **              The input is a list of parameters for printf.
 */
+extern CONST char *HTProgressUnits PARAMS((int kilobytes));
 extern void HTProgress PARAMS((CONST char * Msg));
 extern void HTReadProgress PARAMS((long bytes, long total));
 #define _HTProgress(msg)	mustshow = TRUE, HTProgress(msg)

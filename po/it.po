@@ -4331,10 +4331,10 @@ msgstr "Distribuito nell'ambito della licenza pubblica GNU\n"
 
 #: src/LYMain.c:3170
 msgid ""
-"See http://lynx.browser.org/ and the online help for more information.\n"
+"See http://lynx.isc.org/ and the online help for more information.\n"
 "\n"
 msgstr ""
-"Vedere http://lynx.browser.org/ e l'aiuto in linea per ulteriori informazioni.\n"
+"Vedere http://lynx.isc.org/ e l'aiuto in linea per ulteriori informazioni.\n"
 "\n"
 
 #: src/LYMain.c:3919
