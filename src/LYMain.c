@@ -49,11 +49,11 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
-#ifdef FNAMES_8_3 
+#ifdef FNAMES_8_3
 #define COOKIE_FILE "cookies"
-#else 
+#else
 #define COOKIE_FILE ".lynx_cookies"
-#endif /* FNAMES_8_3 */ 
+#endif /* FNAMES_8_3 */
 
 /* ahhhhhhhhhh!! Global variables :-< */
 #ifdef SOCKS
@@ -517,7 +517,7 @@ PRIVATE void LYStdinArgs_free NOARGS
     return;
 }
 
-PRIVATE void exit_immediately ARGS1(
+PUBLIC void exit_immediately ARGS1(
 	int,		code)
 {
 #ifndef NOSIGHUP
@@ -2482,8 +2482,8 @@ static int version_fun ARGS3(
     SetOutputMode( O_TEXT );
 
     printf("\n");
-    printf(gettext("\n%s Version %s (%.*s)\n"), 
-	  LYNX_NAME, LYNX_VERSION, 
+    printf(gettext("\n%s Version %s (%.*s)\n"),
+	  LYNX_NAME, LYNX_VERSION,
 	  LYNX_DATE_LEN,
 	  LYNX_RELEASE ? LYNX_RELEASE_DATE : &LYNX_DATE[LYNX_DATE_OFF]
 	  );

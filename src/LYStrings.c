@@ -21,6 +21,7 @@
 
 #include <LYLeaks.h>
 
+extern unsigned short *LYKbLayout;
 extern BOOL HTPassHighCtrlRaw;
 extern HTCJKlang HTCJK;
 
@@ -576,7 +577,7 @@ PRIVATE int map_string_to_keysym ARGS2(char*, str, int*,keysym)
 
 /*
  * Starting at a nonblank character, skip over a token, counting quoted and
- * escaped characters. 
+ * escaped characters.
  */
 PRIVATE char *skip_keysym ARGS1(char *, parse)
 {
@@ -876,18 +877,7 @@ re_read:
 #endif /* USE_GETCHAR */
 
 	cleanup();
-#ifndef NOSIGHUP
-	(void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-	(void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-	(void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-	if (no_suspend)
-	  (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-	exit(0);
+	exit_immediately(0);
     }
 #endif /* USE_SLANG */
 
@@ -1411,10 +1401,13 @@ PUBLIC int LYEdit1 ARGS4(
 	int,		action,
 	BOOL,		maxMessage)
 {   /* returns 0    character processed
-     *	       ch   otherwise
+     *         ch   otherwise
      */
     int i;
     int length;
+#ifdef EXP_KEYBOARD_LAYOUT
+    static int map_active = 0;
+#endif
 
     if (MaxLen <= 0)
 	return(0); /* Be defensive */
@@ -1423,6 +1416,14 @@ PUBLIC int LYEdit1 ARGS4(
     StrLen = length;
 
     switch (action) {
+#ifdef EXP_KEYBOARD_LAYOUT
+    case LYE_SWMAP:
+	/*
+	 *  Turn input character mapping on or off.
+	 */
+	map_active = ~map_active;
+	break;
+#endif
     case LYE_AIX:
 	/*
 	 *  Hex 97.
@@ -1433,6 +1434,11 @@ PUBLIC int LYEdit1 ARGS4(
 	 if (HTCJK == NOCJK && LYlowest_eightbit[current_char_set] > 0x97)
 	     return(ch);
     case LYE_CHAR:
+#ifdef EXP_KEYBOARD_LAYOUT
+	if (map_active && ch < 128 && LYKbLayouts[current_layout][ch])
+	    ch = UCTransUniChar((long) LYKbLayouts[current_layout][ch],
+		current_char_set);
+#endif
 	/*
 	 *  ch is printable or ISO-8859-1 escape character.
 	 */
@@ -1514,14 +1520,28 @@ PUBLIC int LYEdit1 ARGS4(
 	}
 	break;
 
+    case LYE_DELEL:
+	/*
+	 *  Delete from current cursor position thru EOL.
+	 */
+	{
+	    int pos0 = Pos;
+	    LYEdit1(edit, 0, LYE_EOL, FALSE);
+	    pos0 = Pos - pos0;
+	    while (pos0--)
+		LYEdit1(edit, 0, LYE_DELP, FALSE);
+	}
+	break;
+
     case LYE_DELN:
 	/*
-	 *  Delete next character
+	 *  Delete next character (I-beam style cursor), or current
+	 *  character (box/underline style cursor).
 	 */
 	if (Pos >= length)
 	    break;
 	Pos++;
-	/* fall through */
+	/* fall through - DO NOT RELOCATE the LYE_DELN case wrt LYE_DELP */
 
     case LYE_DELP:
 	/*
@@ -1530,18 +1550,6 @@ PUBLIC int LYEdit1 ARGS4(
 	if (length == 0 || Pos == 0)
 	    break;
 	Pos--;
-	for (i = Pos; i < length; i++)
-	    Buf[i] = Buf[i+1];
-	i--;
-	Buf[i] = 0;
-	break;
-
-    case LYE_DELC:
-	/*
-	 *  Delete current character.
-	 */
-	if (length == 0 || Pos == length)
-	    break;
 	for (i = Pos; i < length; i++)
 	    Buf[i] = Buf[i+1];
 	i--;
@@ -1600,11 +1608,11 @@ PUBLIC void LYRefreshEdit ARGS1(
     edit->strlen = length;
 /*
  *  Now we have:
- *		  .--DspWdth---.
- *	+---------+=============+-----------+
- *	|	  |M	       M|	    |	(M=margin)
- *	+---------+=============+-----------+
- *	0	  DspStart		     length
+ *                .--DspWdth---.
+ *      +---------+=============+-----------+
+ *      |         |M           M|           |   (M=margin)
+ *      +---------+=============+-----------+
+ *      0         DspStart                   length
  *
  *  Insertion point can be anywhere between 0 and stringlength.
  *  Figure out new display starting point.
@@ -1872,7 +1880,7 @@ PUBLIC char * LYno_attr_char_case_strstr ARGS2(
  *			       LY_UNDERLINE_END_CHAR
  *			       LY_BOLD_START_CHAR
  *			       LY_BOLD_END_CHAR
- *				LY_SOFT_HYPHEN
+ *			       LY_SOFT_HYPHEN
  *			       if present in chptr.
  *  It is a case sensitive search.
  */

@@ -35,8 +35,8 @@
 # include <sys/mman.h>
 #endif
 
-#include "gettext.h"
-#include "gettextP.h"
+#include <gettext.h>
+#include <gettextP.h>
 
 /* @@ end of prolog @@ */
 

@@ -18,7 +18,7 @@
 #ifndef _GETTEXTP_H
 #define _GETTEXTP_H
 
-#include "loadinfo.h"
+#include <loadinfo.h>
 
 /* @@ end of prolog @@ */
 

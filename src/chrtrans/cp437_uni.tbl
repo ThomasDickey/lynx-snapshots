@@ -8,6 +8,9 @@ Mcp437
 #Name as a Display Charset (used on Options screen)
 OIBM PC US codepage (cp437)
 
+#Codepage number
+C437
+
 #
 #    Name:     cp437_DOSLatinUS to Unicode table
 #    Unicode version: 2.0

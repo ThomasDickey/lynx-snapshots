@@ -10,6 +10,9 @@ Mcp850
 #Name as a Display Charset (used on Options screen)
 OWestern (cp850)
 
+#Codepage number
+C850
+
 #
 #    Name:     cp850_DOSLatin1 to Unicode table
 #    Unicode version: 2.0

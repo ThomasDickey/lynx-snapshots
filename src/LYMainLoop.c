@@ -602,18 +602,7 @@ try_again:
 			if ((ofp = LYAppendToTxtFile(TRAVERSE_ERRORS)) == NULL) {
 			    if ((ofp = LYNewTxtFile(TRAVERSE_ERRORS)) == NULL) {
 				perror(NOOPEN_TRAV_ERR_FILE);
-#ifndef NOSIGHUP
-				(void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-				(void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-				(void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-				if (no_suspend)
-				    (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-				exit(-1);
+				exit_immediately(-1);
 			    }
 			}
 			fprintf(ofp, "%s %s\tin %s\n",
@@ -649,18 +638,7 @@ try_again:
 			}
 
 			if (!dump_output_immediately) {
-#ifndef NOSIGHUP
-			    (void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-			    (void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-			    (void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-			    if (no_suspend)
-				(void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-			    exit(-1);
+			    exit_immediately(-1);
 			}
 			return(-1);
 		    }
@@ -753,18 +731,7 @@ try_again:
 			       SetOutputMode( O_BINARY );
 			   }
 			   if (!dump_output_immediately) {
-#ifndef NOSIGHUP
-				(void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-				(void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-				(void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-				if (no_suspend)
-				    (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-			       exit(-1);
+			       exit_immediately(-1);
 			   }
 			   return(-1);
 		       }
@@ -1033,7 +1000,7 @@ try_again:
 
 	    /*
 	     *	Set the remaining document elements and add to
-	     *	the visitied links list. - FM
+	     *	the visited links list. - FM
 	     */
 	    if (ownerS_address != NULL) {
 		if (HTOutputFormat == WWW_SOURCE && !HText_getOwner())
@@ -1397,12 +1364,39 @@ try_again:
 			    if (no_mail) {
 				statusline(FORM_LINK_SUBMIT_MAILTO_DIS_MSG);
 			    } else {
-				statusline(FORM_LINK_SUBMIT_MAILTO_MSG);
+				if(user_mode == ADVANCED_MODE) {
+				    char *submit_str = NULL;
+
+				    StrAllocCopy(submit_str, FORM_LINK_SUBMIT_MAILTO_PREFIX);
+				    StrAllocCat(submit_str, links[curdoc.link].form->submit_action);
+				    statusline(submit_str);
+				    FREE(submit_str);
+				} else {
+				    statusline(FORM_LINK_SUBMIT_MAILTO_MSG);
+				}
 			    }
 			} else if (links[curdoc.link].form->no_cache) {
-			    statusline(FORM_LINK_RESUBMIT_MESSAGE);
+			    if(user_mode == ADVANCED_MODE) {
+				char *submit_str = NULL;
+
+				StrAllocCopy(submit_str, FORM_LINK_RESUBMIT_PREFIX);
+				StrAllocCat(submit_str, links[curdoc.link].form->submit_action);
+				statusline(submit_str);
+				FREE(submit_str);
+			    } else {
+				statusline(FORM_LINK_RESUBMIT_MESSAGE);
+			    }
 			} else {
-			    statusline(FORM_LINK_SUBMIT_MESSAGE);
+			    if(user_mode == ADVANCED_MODE) {
+				char *submit_str = NULL;
+
+				StrAllocCopy(submit_str, FORM_LINK_SUBMIT_PREFIX);
+				StrAllocCat(submit_str, links[curdoc.link].form->submit_action);
+				statusline(submit_str);
+				FREE(submit_str);
+			    } else {
+				statusline(FORM_LINK_SUBMIT_MESSAGE);
+			    }
 			}
 			break;
 		    case F_RESET_TYPE:
@@ -1515,18 +1509,7 @@ try_again:
 			printf(
 			gettext("Fatal error - could not open output file %s\n"),cfile);
 		    if (!dump_output_immediately) {
-#ifndef NOSIGHUP
-			(void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-			(void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-			(void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-			if (no_suspend)
-			    (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-			exit(-1);
+			exit_immediately(-1);
 		    }
 		    return(-1);
 		}
@@ -1642,18 +1625,7 @@ new_keyboard_input:
 			    (nhist <= 0 )) {
 			    if (!dump_output_immediately) {
 				cleanup();
-#ifndef NOSIGHUP
-				(void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-				(void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-				(void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-				if (no_suspend)
-				    (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-				exit(-1);
+				exit_immediately(-1);
 			    }
 			    return(-1);
 			}
@@ -1681,18 +1653,7 @@ new_keyboard_input:
 			(nhist <= 0 )) {
 			if (!dump_output_immediately) {
 			    cleanup();
-#ifndef NOSIGHUP
-			    (void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-			    (void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-			    (void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-			    if (no_suspend)
-				(void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-			    exit(-1);
+			    exit_immediately(-1);
 			}
 			return(-1);
 		    }
@@ -2061,7 +2022,7 @@ new_cmd:  /*
 		historical_comments = TRUE;
 	    if (minimal_comments) {
 		HTAlert(historical_comments ?
-		        HISTORICAL_ON_MINIMAL_OFF : HISTORICAL_OFF_MINIMAL_ON);
+			HISTORICAL_ON_MINIMAL_OFF : HISTORICAL_OFF_MINIMAL_ON);
 	    } else {
 		HTAlert(historical_comments ?
 			HISTORICAL_ON_VALID_OFF : HISTORICAL_OFF_VALID_ON);
@@ -2097,7 +2058,7 @@ new_cmd:  /*
 			MINIMAL_ON_IN_EFFECT : MINIMAL_OFF_VALID_ON);
 	    } else {
 		HTAlert(minimal_comments ?
-		        MINIMAL_ON_BUT_HISTORICAL : MINIMAL_OFF_HISTORICAL_ON);
+			MINIMAL_ON_BUT_HISTORICAL : MINIMAL_OFF_HISTORICAL_ON);
 	    }
 	    break;
 
@@ -3848,7 +3809,7 @@ if (!LYUseFormsOptions) {
 		 */
 		HTuncache_current_document();
 	    }
-#endif /* !NO_OPTION_FORMS */ 
+#endif /* !NO_OPTION_FORMS */
 	    break;
 
 	case LYK_INDEX_SEARCH: /* search for a user string */

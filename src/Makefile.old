@@ -45,11 +45,12 @@ LYReadCFG.o: ../userdefs.h
 HTFWriter.o: ../userdefs.h
 LYGetFile.o: ../userdefs.h
 LYOptions.o: ../userdefs.h
-LYReadCFG.o: ../userdefs.h
 LYrcFile.o: ../userdefs.h
 LYMail.o: ../userdefs.h
 LYUtils.o: ../userdefs.h
 HTInit.o: ../userdefs.h
+LYKeymap.o: ../userdefs.h
+LYShowInfo.o: ../userdefs.h
 LYTraversal.o: ../userdefs.h
 LYMail.o: ../userdefs.h
 LYCharSets.o: ../userdefs.h

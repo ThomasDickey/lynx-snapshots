@@ -4,6 +4,9 @@ Miso-8859-9
 #Name as a Display Charset (used on Options screen)
 OTurkish (ISO-8859-9)
  
+#Codepage number
+C920
+
 #
 #	Name:             ISO 8859-9 (1989) to Unicode
 #	Unicode version:  1.1

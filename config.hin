@@ -21,7 +21,9 @@
 #undef ENABLE_NLS		/* defined if NLS is requested */
 #undef EXEC_LINKS		/* CF_ARG_ENABLE(exec-links) */
 #undef EXEC_SCRIPTS		/* CF_ARG_ENABLE(exec-scripts) */
+#undef EXP_ALT_BINDINGS		/* AC_ARG_ENABLE(alt-bindings) */
 #undef EXP_CHARTRANS_AUTOSWITCH	/* AC_ARG_ENABLE(font-switch) */
+#undef EXP_KEYBOARD_LAYOUT	/* AC_ARG_ENABLE(kbd-layout) */
 #undef EXP_PERSISTENT_COOKIES	/* AC_ARG_ENABLE(persistent-cookies) */
 #undef FANCY_CURSES		/* defined by CF_FANCY_CURSES */
 #undef GCC_PRINTF		/* CF_GCC_ATTRIBUTES */

@@ -4,6 +4,9 @@ Mcp852
 #Name as a Display Charset (used on Options screen)
 OEastern European (cp852)
 
+#Codepage number
+C852
+
 #
 #    Name:     cp852_DOSLatin2 to Unicode table
 #    Unicode version: 2.0

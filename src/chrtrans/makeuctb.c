@@ -91,7 +91,7 @@ PRIVATE int getunicode ARGS1(
 
     while (*p == ' ' || *p == '\t')
 	p++;
-	
+
     if (*p == '-') {
 	return -2;
     } else if (*p != 'U' || p[1] != '+' ||
@@ -115,6 +115,8 @@ char *tblname;
 
 PRIVATE int RawOrEnc = 0;
 PRIVATE int Raw_found = 0;		/* whether explicit R directive found */
+PRIVATE int CodePage = 0;
+PRIVATE int CodePage_found = 0;		/* whether explicit C directive found */
 
 PRIVATE void addpair_str ARGS2(
 	char *,		str,
@@ -380,6 +382,24 @@ PUBLIC int main ARGS2(
 		}
 		this_LYNXcharset[i] = '\0';
 		continue;
+
+	    /*
+	     *  Codepage number.  Three or four digit code.
+	     */
+	    case 'C':
+		if (p[1] == 'o' || p[1] == 'O') {
+		    buffer[sizeof(buffer) - 1] = '\0';
+		    if (!strncasecomp(p, "CodePage", 8)) {
+			p += 8;
+		    }
+		}
+		p++;
+		while (*p == ' ' || *p == '\t') {
+	  	    p++;
+		}
+		CodePage = strtol(p,0,10);
+		CodePage_found = 1;
+		continue;
 	}
 
 	if (*p == 'U') {
@@ -456,7 +476,7 @@ PUBLIC int main ARGS2(
 		for (ch = *(++p); (ch = *p) != '\0'; p++, p1++) {
 		    if ((unsigned char)ch < 32 || ch == '\\' || ch == '\"' ||
 			(unsigned char)ch >= 127) {
-			sprintf(p1, "\\%.3o", (unsigned char)ch); 
+			sprintf(p1, "\\%.3o", (unsigned char)ch);
 #ifdef NOTDEFINED
 			fprintf(stderr, "%s\n", tbuf);
 #endif /* NOTDEFINED */
@@ -608,7 +628,7 @@ PUBLIC int main ARGS2(
      *  Okay, we hit EOF, now output tables.
      */
     fclose(ctbl);
-  
+
 
     /*
      *  Compute total size of Unicode list.
@@ -731,7 +751,7 @@ static struct unipair_str repl_map%s[%d] = \n\
 	printf("\n\
 /* static struct unipair_str repl_map%s[]; */\n", id_append);
     }
-    
+
     for (i = 0; i < themap_str.entry_ct; i++) {
 	printf("{0x%x,\"%s\"}",
 	       themap_str.entries[i].unicode,
@@ -761,9 +781,9 @@ static struct unimapdesc_str dfont_replacedesc%s = {0,NULL,",id_append);
     printf("#define UC_CHARSET_SETUP%s UC_Charset_Setup(\
 \"%s\",\\\n\"%s\",\\\n\
 dfont_unicount%s,dfont_unitable%s,%d,\\\n\
-dfont_replacedesc%s,%d,%d)\n",
+dfont_replacedesc%s,%d,%d,%d)\n",
 id_append, this_MIMEcharset, this_LYNXcharset,
-id_append, id_append, nuni, id_append, lowest_eight, RawOrEnc);
+id_append, id_append, nuni, id_append, lowest_eight, RawOrEnc, CodePage);
 
     done(EX_OK);
 }

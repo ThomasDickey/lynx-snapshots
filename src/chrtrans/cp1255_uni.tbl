@@ -4,6 +4,9 @@ Mwindows-1255
 #Name as a Display Charset (used on Options screen).
 OHebrew (windows-1255)
 
+#Codepage number
+C1255
+
 #
 #    Name:     cp1255 to Unicode table
 #    Unicode version: 2.0

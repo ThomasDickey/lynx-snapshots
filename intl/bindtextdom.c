@@ -41,10 +41,10 @@ void free ();
 #ifdef _LIBC
 # include <libintl.h>
 #else
-# include "libgettext.h"
+# include <libgettext.h>
 #endif
-#include "gettext.h"
-#include "gettextP.h"
+#include <gettext.h>
+#include <gettextP.h>
 
 /* @@ end of prolog @@ */
 

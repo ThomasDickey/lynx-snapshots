@@ -375,7 +375,7 @@ PRIVATE char * StrAllocVsprintf ARGS4(
 {
     size_t tmp_len = GROW_SIZE;
     size_t have, need;
-    char *tmp_ptr;
+    char *tmp_ptr = 0;
     char *fmt_ptr;
     char *dst_ptr = *pstr;
 

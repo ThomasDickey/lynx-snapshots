@@ -17,18 +17,7 @@ PUBLIC BOOLEAN lookup ARGS1(char *,target)
     if ((ifp = fopen(TRAVERSE_FILE,"r")) == NULL) {
         if ((ifp = LYNewTxtFile(TRAVERSE_FILE)) == NULL) {
             perror(CANNOT_OPEN_TRAV_FILE);
-#ifndef NOSIGHUP
-	    (void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-	    (void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-	    (void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-	    if (no_suspend)
-	        (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-            exit(-1);
+	    exit_immediately(-1);
 	} else {
             fclose(ifp);
             return(FALSE);
@@ -55,18 +44,7 @@ PUBLIC void add_to_table ARGS1(char *,target)
 
     if ((ifp = LYAppendToTxtFile(TRAVERSE_FILE)) == NULL) {
 	perror(CANNOT_OPEN_TRAV_FILE);
-#ifndef NOSIGHUP
-	(void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-	(void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-	(void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-	if (no_suspend)
-	    (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-	exit(-1);
+	exit_immediately(-1);
     }
 
     fprintf(ifp,"%s\n",target);
@@ -81,18 +59,7 @@ PUBLIC void add_to_traverse_list ARGS2(char *,fname, char *,prev_link_name)
 
     if ((ifp = LYAppendToTxtFile(TRAVERSE_FOUND_FILE)) == NULL) {
 	perror(CANNOT_OPEN_TRAF_FILE);
-#ifndef NOSIGHUP
-	(void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-	(void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-	(void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-	if (no_suspend)
-	    (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-	exit(-1);
+	exit_immediately(-1);
     }
 
     fprintf(ifp,"%s\t%s\n",fname, prev_link_name);
@@ -131,18 +98,7 @@ PUBLIC void add_to_reject_list ARGS1(char *,target)
 
     if ((ifp = LYAppendToTxtFile(TRAVERSE_REJECT_FILE)) == NULL) {
 	perror(CANNOT_OPEN_REJ_FILE);
-#ifndef NOSIGHUP
-	(void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-	(void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-	(void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-	if (no_suspend)
-	    (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-	exit(-1);
+	exit_immediately(-1);
     }
 
     fprintf(ifp,"%s\n",target);

@@ -4,6 +4,9 @@ Mwindows-1256
 #Name as a Display Charset (used on Options screen).
 OArabic (windows-1256)
 
+#Codepage number
+C1256
+
 #
 #    Name:     cp1256 to Unicode table
 #    Unicode version: 2.0

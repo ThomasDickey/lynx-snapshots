@@ -75,14 +75,14 @@ void free ();
 # include <unistd.h>
 #endif
 
-#include "gettext.h"
-#include "gettextP.h"
+#include <gettext.h>
+#include <gettextP.h>
 #ifdef _LIBC
 # include <libintl.h>
 #else
-# include "libgettext.h"
+# include <libgettext.h>
 #endif
-#include "hash-string.h"
+#include <hash-string.h>
 
 /* @@ end of prolog @@ */
 

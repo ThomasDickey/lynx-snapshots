@@ -40,23 +40,24 @@ lint:
 clean:
 	rm -f lynx.exe core *.[ob]
 
-LYMain.o: ../userdefs.h
-LYMainLoop.o: LYMainLoop.c ../userdefs.h
-LYReadCFG.o: LYReadCFG.c ../userdefs.h
-HTFWriter.o: HTFWriter.c ../userdefs.h
-LYGetFile.o: LYGetFile.c ../userdefs.h
-LYOptions.o: LYOptions.c ../userdefs.h
-LYReadCFG.o: LYReadCFG.c ../userdefs.h
-LYTraversal.o: LYTraversal.c ../userdefs.h
-LYCharSets.o: LYCharSets.c ../userdefs.h
-LYShowInfo.o: LYShowInfo.c ../userdefs.h
-LYStrings.o: LYStrings.c ../userdefs.h
-LYBookmark.o: LYBookmark.c ../userdefs.h
-LYHistory.o: LYHistory.c ../userdefs.h
-LYDownload.o: LYDownload.c ../userdefs.h
-DefaultStyle.o: DefaultStyle.c ../userdefs.h
-LYEditmap.o: LYEditmap.c ../userdefs.h
-LYCharUtils.o: LYCharUtils.c ../userdefs.h
-LYExtern.o: LYExtern.c ../userdefs.h
-LYUtils.o: LYUtils.c ../userdefs.h
-LYCookie.o: ../userdefs.h
+DefaultStyle.o:	../userdefs.h
+HTFWriter.o:	../userdefs.h
+LYBookmark.o:	../userdefs.h
+LYCharSets.o:	../userdefs.h
+LYCharUtils.o:	../userdefs.h
+LYCookie.o:	../userdefs.h
+LYDownload.o:	../userdefs.h
+LYEditmap.o:	../userdefs.h
+LYExtern.o:	../userdefs.h
+LYGetFile.o:	../userdefs.h
+LYHistory.o:	../userdefs.h
+LYKeymap.o:	../userdefs.h
+LYMain.o:	../userdefs.h
+LYMainLoop.o:	../userdefs.h
+LYOptions.o:	../userdefs.h
+LYReadCFG.o:	../userdefs.h
+LYReadCFG.o:	../userdefs.h
+LYShowInfo.o:	../userdefs.h
+LYStrings.o:	../userdefs.h
+LYTraversal.o:	../userdefs.h
+LYUtils.o:	../userdefs.h

@@ -330,7 +330,16 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	int,		newcs,
 	LYUCcharset *,	p)
 {
+#ifdef __EMX__
+    int res = 0;
+
+    if (p->codepage) {
+	res = VioSetCp(0, p->codepage, 0);
+	CTRACE(tfp, "UCChangeTerminalCodepage: VioSetCp(%d) returned %d\n", p->codepage, res);
+    }
+#else
     CTRACE(tfp, "UCChangeTerminalCodepage: Called, but not implemented!");
+#endif
 }
 #endif /* LINUX */
 
