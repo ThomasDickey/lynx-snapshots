@@ -359,6 +359,7 @@ PUBLIC BOOLEAN LYSeekFragAREAinCur = TRUE;
 
 PUBLIC BOOLEAN LYStripDotDotURLs = TRUE;	/* Try to fix ../ in some URLs? */
 PUBLIC BOOLEAN LYForceSSLCookiesSecure = FALSE;
+PUBLIC BOOLEAN LYNoCc = FALSE;
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
 #ifdef DECLARE_WAIS_LOGFILES
@@ -379,6 +380,7 @@ PRIVATE HTList *LYStdinArgs = NULL;
 
 PRIVATE void parse_arg PARAMS((char **arg, int *i, int argc));
 #ifndef VMS
+PUBLIC BOOLEAN LYNoCore = NO_FORCED_CORE_DUMP;
 PRIVATE void FatalProblem PARAMS((int sig));
 #endif /* !VMS */
 
@@ -1894,6 +1896,14 @@ PRIVATE void parse_arg ARGS3(
 	else
 	    LYSetCookies = TRUE;
 
+#ifndef VMS
+    } else if (strncmp(argv[0], "-core", 5) == 0) {
+        if (LYNoCore)
+	    LYNoCore = FALSE;
+	else
+	    LYNoCore = TRUE;
+#endif /* !VMS */
+
     } else {
         goto Output_Error_and_Help_List;
     }
@@ -2186,6 +2196,9 @@ PRIVATE void parse_arg ARGS3(
 
     } else if (strncmp(argv[0], "-nobrowse", 9) == 0) {
 	HTDirAccess = HT_DIR_FORBID;
+
+    } else if (strncmp(argv[0], "-nocc", 5) == 0) {
+	LYNoCc = TRUE;
 
     } else if (strncmp(argv[0], "-nocolor", 8) == 0) {
 	LYShowColor = SHOW_COLOR_NEVER;
@@ -2606,6 +2619,9 @@ Output_Help_List:
     printf("    -blink           force high intensity bg colors in color mode\n");
 #endif /* USE_SLANG */
     printf("    -cookies         toggles handling of Set-Cookie headers\n");
+#ifndef VMS
+    printf("    -core            toggles forced core dumps on fatal errors\n");
+#endif /* !VMS */
     printf("    -crawl           with -traversal, output each page to a file\n");
     printf("                     with -dump, format output as with -traversal, but to stdout\n");
     printf("    -display=DISPLAY set the display variable for X execed programs\n");
@@ -2649,6 +2665,7 @@ Output_Help_List:
     printf("    -newschunksize=NUMBER  number of articles in chunked news listings\n");
     printf("    -newsmaxchunk=NUMBER   maximum news articles in listings before chunking\n");
     printf("    -nobrowse        disable directory browsing\n");
+    printf("    -nocc            disable Cc: prompts for self copies of mailings\n");
     printf("    -nofilereferer   disable transmissions of Referer headers for file URLs\n");
     printf("    -nolist          disable the link list feature in dumps\n");
     printf("    -nolog           disable mailing of error messages to document owners\n");
@@ -2771,8 +2788,11 @@ Do NOT mail the core file if one was generated.\r\n");
 Lynx now exiting with signal:  %d\r\n\r\n", sig);
 
 	/*
-	 *  Exit and dump core.
+	 *  Exit and possibly dump core.
 	 */
+	if (LYNoCore) {
+	    exit(-1);
+	}
 	abort();
 
     } else {

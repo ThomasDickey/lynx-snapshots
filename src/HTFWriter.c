@@ -180,7 +180,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		    /*
 		     *  Tell user what's happening. - FM
 		     */
-                    _HTProgress(me->end_command);
+		    _HTProgress(me->end_command);
 		}
 		/*
 		 *  Uncompress it. - FM
@@ -235,6 +235,12 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		     *  Now have HTLoadFile() handle the uncompressed
 		     *  file as if it were the original reply. - FM
 		     */
+		    if (!dump_output_immediately) {
+			/*
+			 *  Tell user what's happening. - FM
+			 */
+			_user_message(WWW_USING_MESSAGE, addr);
+		    }
 		    status = HTLoadFile(addr,
 			    		me->anchor,
 			    		me->output_format,

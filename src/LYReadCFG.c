@@ -987,6 +987,11 @@ PUBLIC void read_cfg ARGS1(
 	} else if (!strncasecomp(buffer, "NO_FILE_REFERER:", 16)) {
 	    no_filereferer = is_true(buffer+16);
 
+#ifndef VMS
+	} else if (!strncasecomp(buffer, "NO_FORCED_CORE_DUMP:", 20)) {
+	    LYNoCore = is_true(buffer+20);
+#endif /* !VMS */
+
 	} else if (!strncasecomp(buffer, "NO_FROM_HEADER:", 15)) {
 	    LYNoFromHeader = is_true(buffer+15);
 

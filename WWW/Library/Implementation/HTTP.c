@@ -485,7 +485,23 @@ try_again:
 	**  If we do have a cookie set, add it to the request buffer. - FM
 	*/
 	if (cookie != NULL) {
+	    if (*cookie != '$') {
+	        /*
+		**  It's a historical cookie, so signal to the
+		**  server that we support modern cookies. - FM
+		*/
+		StrAllocCat(command, "Cookie2: $Version=\"1\"");
+		StrAllocCat(command, crlf);
+	        if (TRACE)
+	            fprintf(stderr,
+			    "HTTP: Sending Cookie2: $Version =\"1\"\n");
+	    }
 	    if (*cookie != '\0') {
+	        /*
+		**  It's not a zero-length string, so add the header.
+		**  Note that any folding of long strings has been
+		**  done already in LYCookie.c. - FM
+		*/
 	        StrAllocCat(command, "Cookie: ");
 	        StrAllocCat(command, cookie);
 		StrAllocCat(command, crlf);

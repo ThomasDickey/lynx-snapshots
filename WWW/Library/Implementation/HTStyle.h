@@ -67,7 +67,7 @@ typedef struct _color {
 } HTColor;
 #else
 
-typedef float HTCoord;
+typedef int HTCoord;		/* changed from float to int - kw */
 
 typedef struct _HTParagraphStyle {
     HTCoord     left_indent;            /* @@@@ junk! etc etc*/

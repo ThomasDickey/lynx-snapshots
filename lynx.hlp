@@ -187,6 +187,11 @@
   -nobrowse
        disable directory browsing.
 
+  -nocc
+       disable Cc: prompts for self copies of mailings.  Note
+       that this does not disable any CCs which are incorporated
+       within a mailto URL or form ACTION.
+
   -nocolor
        force color mode off, overriding terminal capabilities and any
        -color flags, COLORTERM variable, and saved .lynxrc settings.

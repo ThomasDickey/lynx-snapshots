@@ -932,8 +932,25 @@ PRIVATE void display_page ARGS3(
     
     for (i = 0, line = text->last_line->next;		/* Find line */
     	 i < line_number && (line != text->last_line);
-         i++, line = line->next) 			/* Loop */
+         i++, line = line->next) {			/* Loop */
+#ifndef VMS
+	if (!LYNoCore) {
+	    assert(line->next != NULL);
+	} else if (line->next == NULL) {
+	    if (enable_scrollback) {
+		addch('*');
+		refresh();
+		clear();
+	    }
+	    addstr("\n\nError drawing page!\nBad HText structure!\n");
+	    refresh();
+	    nlinks = 0;  /* set number of links to 0 */
+	    return;
+	}
+#else
 	assert(line->next != NULL);
+#endif /* !VMS */
+    }
 
 #ifdef EXP_CHARTRANS
     if (LYlowest_eightbit[current_char_set] <= 255 &&
@@ -997,7 +1014,23 @@ PRIVATE void display_page ARGS3(
 	    /*
 	     *  Verify and display each line.
 	     */
+#ifndef VMS
+	    if (!LYNoCore) {
+		assert(line != NULL);
+	    } else if (line == NULL) {
+		if (enable_scrollback) {
+		    addch('*');
+		    refresh();
+		    clear();
+		}
+		addstr("\n\nError drawing page!\nBad HText structure!\n");
+		refresh();
+		nlinks = 0;  /* set number of links to 0 */
+		return;
+	    }
+#else
 	    assert(line != NULL);
+#endif /* !VMS */
 	    display_line(line, text);
 
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
@@ -1466,6 +1499,8 @@ PRIVATE void split_line ARGS2(
     int ctrl_chars_on_previous_line = 0;
     char * cp;
     HTLine * line = (HTLine *)calloc(1, LINE_SIZE(MAX_LINE));
+    if (line == NULL)
+        outofmem(__FILE__, "split_line");
 
     ctrl_chars_on_this_line = 0; /*reset since we are going to a new line*/
     text->LastChar = ' ';
@@ -1473,8 +1508,6 @@ PRIVATE void split_line ARGS2(
     if (TRACE)
 	fprintf(stderr,"GridText: split_line called\n");
     
-    if (line == NULL)
-        outofmem(__FILE__, "split_line");
     text->Lines++;
     
     previous->next->prev = line;
@@ -2459,7 +2492,7 @@ PUBLIC void HText_endAnchor ARGS2(
      *  without needing to close any anchor with an HREF
      *  within which that link might be embedded. - FM
      */
-    if (number <= 0 || text->last_anchor->number == number) {
+    if (number <= 0 || number == text->last_anchor->number) {
 	a = text->last_anchor;
     } else {
         for (a = text->first_anchor; a; a = a->next) {

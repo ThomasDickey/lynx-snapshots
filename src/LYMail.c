@@ -145,8 +145,7 @@ PUBLIC void mailform ARGS4(
     }
 
     /*
-     *  Allow user to edit the default Subject
-     *   and enter a cc to self. - FM
+     *  Allow user to edit the default Subject - FM
      */
     if (subject[0] == '\0') {
         if (mailto_subject && *mailto_subject) {
@@ -167,18 +166,25 @@ PUBLIC void mailform ARGS4(
 	FREE(address);
 	return;
     }
-    sprintf(self,"%.79s", (personal_mail_address ? 
-			   personal_mail_address : ""));
-    self[79] = '\0';
-    _statusline("Cc: ");
-    if ((ch = LYgetstr(self, VISIBLE, sizeof(self), NORECALL)) < 0) {
-	/*
-	 * User cancelled via ^G. - FM
-	 */
-	_statusline(FORM_MAILTO_CANCELLED);
-	sleep(InfoSecs);
-	FREE(address);
-	return;
+
+    /*
+     *  Allow user to specify a self copy via a CC:
+     *  entry, if permitted. - FM
+     */
+    if (!LYNoCc) {
+	sprintf(self,"%.79s", (personal_mail_address ? 
+			       personal_mail_address : ""));
+	self[79] = '\0';
+	_statusline("Cc: ");
+	if ((ch = LYgetstr(self, VISIBLE, sizeof(self), NORECALL)) < 0) {
+	    /*
+	     * User cancelled via ^G. - FM
+	     */
+	    _statusline(FORM_MAILTO_CANCELLED);
+	    sleep(InfoSecs);
+	    FREE(address);
+	    return;
+	}
     }
 
 #if defined(VMS) || defined(DOSPATH)
@@ -901,26 +907,31 @@ PUBLIC void reply_by_mail ARGS3(
 #endif /* VMS */
 
     /*
-     *  Offer a CC line.
+     *  Offer a CC line, if permitted. - FM
      */
-    addstr(ENTER_ADDRESS_FOR_CC);
-    if (personal_mail_address)
-	addstr(CTRL_U_TO_ERASE);
-    addstr(BLANK_FOR_NO_COPY);
-    addstr("Cc: ");
-    /* Add the mail address if there is one. */
-    sprintf(user_input,"%s", (personal_mail_address ? 
-			      personal_mail_address : ""));
-    if (LYgetstr(user_input, VISIBLE, sizeof(user_input), NORECALL) < 0 ||
-	term_letter) {
+    user_input[0] = '\0';
+    if (!LYNoCc) {
+	addstr(ENTER_ADDRESS_FOR_CC);
+	if (personal_mail_address)
+	    addstr(CTRL_U_TO_ERASE);
+	addstr(BLANK_FOR_NO_COPY);
+	addstr("Cc: ");
+	/*
+	 *  Add the mail address if there is one.
+	 */
+	sprintf(user_input,"%s", (personal_mail_address ? 
+				  personal_mail_address : ""));
+	if (LYgetstr(user_input, VISIBLE, sizeof(user_input), NORECALL) < 0 ||
+	    term_letter) {
+	    addstr("\n");
+	    _statusline(COMMENT_REQUEST_CANCELLED);
+	    sleep(InfoSecs);
+	    fclose(fd);			/* Close the tmpfile. */
+	    scrollok(stdscr,FALSE);	/* Stop scrolling.    */
+	    goto cleanup;
+	}
 	addstr("\n");
-	_statusline(COMMENT_REQUEST_CANCELLED);
-	sleep(InfoSecs);
-	fclose(fd);		/* Close the tmpfile. */
-	scrollok(stdscr,FALSE);	/* Stop scrolling.    */
-	goto cleanup;
     }
-    addstr("\n");
     remove_tildes(user_input);
 #if defined (VMS) || defined (DOSPATH)
     if (*user_input) {

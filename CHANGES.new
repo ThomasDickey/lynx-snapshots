@@ -10,12 +10,59 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+1997-08-04
+* Fixed header parsing in HTMIME.c so that "Safe:" is recognized. - KW
+* Changed confirmation prompts for HEAD (']') commands acting on a POST
+  document, to reflect the fact that the POST request body will not
+  actually be submitted in a HEAD request. - KW
+* Reset LYCancelDownload to FALSE at top of getfile(), to prevent delayed
+  effect which can otherwise occur. - KW
+* Block URLs with port numbers outside the range of valid numbers in
+  getfile(). - KW
+1997-08-03
+* Changed the NSL_FORK code in HTTCP.c so that the gethostbyname() call
+  is retried without forking if the child process exits without returning
+  enough data.  Also added trace output, to show whether something
+  unusual has happened to the child process. - KW
+* Changed the typedef for HTCoord in HTStyle.h from float to int, for
+  significant speedup of rendering on machines without floating-point
+  hardware. - KW
+1997-08-01
+* Fixed typos in LYCookie.c. - FM
+1997-07-31
+* Mods of the cookie handling based on the latest pre-draft.  Add a
+  Cookie2: $Version="1" header in any requests that use historical
+  cookies in the Cookie: request header, so that modern servers will
+  use Set-Cookie2 headers with modern cookies in their subsequent
+  replies.  Limit the scheme for commentURLs to http or https, not
+  just to network servers (e.g., gopher is now barred too).  Include
+  a $Port attribute in modern Cookie request headers if it was set
+  via a server's reply header.  The pre-draft indicates intention
+  to drop the requirement to combine Set-Cookie2 and Set-Cookie
+  headers if both types were received.  We're still combining them,
+  but based on bona fide one-to-one correspondence checks (which were
+  not specified in the earlier draft), so that's OK, and we'll get
+  rid of that needless overhead if the current pre-draft holds up
+  and becomes an official IETF draft. - FM
+* Added a -nocc command line switch for disabling the Cc: prompt
+  for self copies of mailings.  Note that this does not disable
+  any CCs that have been incorporated within a mailto URL or form
+  ACTION. - FM
+* Added a NO_FORCED_CORE_DUMP compilation (userdefs.h) and configuration
+  (lynx.cfg) symbol, normally set FALSE, which if changed to TRUE will
+  block forced core dumps on Unix via abort() calls on fatal errors or
+  assert() calls on potentially fatal error checks.  Also added a -core
+  command line switch for toggling the default. - FM
+* Updated the documentation and 'h'elp concerning the new symbol and
+  switches. - FM
 1997-07-30
 * Added workaround for curses with broken handling of 8-bit acs characters
   (which may be used for drawing of popup boxes) to LYCurses.h.  This fixes
   box characters and attributes/colors for solaris curses used with linux
   console as terminal.  Currently it is not automatically enabled or
   configured, but can be enabled by -DBROKEN_CURSES_8BIT_ACS. - KW
+* Mod in HTFWriter.c to change the statusline appropriately when an
+  uncompression has completed. - FM
 * Fixed code in LYOptions.c for the case when NEVER_ALLOW_REMOTE_EXEC was
   not defined and ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS was defined. - KW
 1997-07-28

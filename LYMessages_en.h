@@ -97,6 +97,9 @@
 #define LINK_NOT_FOUND "The resource requested is not available at this time."
 #define WWW_WAIT_MESSAGE "Getting %s"
 #define WWW_SKIP_MESSAGE "Skipping %s"
+#define WWW_USING_MESSAGE "Using %s"
+#define WWW_ILLEGAL_URL_MESSAGE "Illegal URL: %s"
+#define WWW_BAD_ADDR_MESSAGE "Badly formed address %s"
 #define ADVANCED_URL_MESSAGE "URL: %s"
 #define WWW_FAIL_MESSAGE "Unable to access WWW file!!!"
 #define WWW_INDEX_MESSAGE "This is a searchable index.  Use %s to search."
@@ -504,6 +507,10 @@
  "Redirection of POST content. P)roceed, see U)RL, use G)ET or C)ancel"
 #define CONFIRM_POST_RESUBMISSION \
  "Document from Form with POST content.  Resubmit?"
+#define CONFIRM_POST_DOC_HEAD \
+ "Document from POST action, HEAD may not be understood.  Proceed?"
+#define CONFIRM_POST_LINK_HEAD \
+ "Form submit action is POST, HEAD may not be understood.  Proceed?"
 #define WILL_NOT_RELOAD_DOC "Document will not be reloaded!"
 #define	LOCATION_HEADER "Location: "
 #define STRING_NOT_FOUND "'%s' not found!"
@@ -591,6 +598,7 @@
 #define PROMTING_TO_ALLOW_COOKIES "'P'rompting to allow from domain '%s'."
 #define DELETE_ALL_COOKIES_IN_DOMAIN "Delete all cookies in this domain?"
 #define ALL_COOKIES_EATEN "All of the cookies in the jar have been eaten!"
+#define PORT_INVALID "URL contains an invalid port number."
 #define PORT_NINETEEN_INVALID "Port 19 not permitted in URLs."
 #define PORT_TWENTYFIVE_INVALID "Port 25 not permitted in URLs."
 #define HTML_STACK_OVERRUN "Maximum nesting of HTML elements exceeded."

@@ -86,7 +86,6 @@ typedef enum _MIME_state {
 	miPUBLIC,
 	miRETRY_AFTER,
 	miS,
-	miSA,
 	miSAFE,
 	miSE,
 	miSERVER,
@@ -977,9 +976,11 @@ PRIVATE void HTMIME_put_character ARGS2(
         switch (c) {
 	case 'a':
 	case 'A':
-	    me->state = miSAFE;
+	    me->check_pointer = "fe:";
+	    me->if_ok = miSAFE;
+	    me->state = miCHECK;
 	    if (TRACE)
-	        fprintf(stderr, "HTMIME: Was S, found A, state now SAFE'\n");
+	        fprintf(stderr, "HTMIME: Was S, found A, checking for 'fe:'\n");
 	    break;
 
 	case 'e':

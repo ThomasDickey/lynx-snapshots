@@ -295,7 +295,7 @@ PUBLIC int showinfo ARGS4(
     fprintf(fp0, "<dt>&nbsp;&nbsp;&nbsp;&nbsp;<em>mode:</em> %s%s%s\n",
 		 (lynx_mode == FORMS_LYNX_MODE ?
 				  "forms mode" : "normal"),
-		 ((lynx_mode == FORMS_LYNX_MODE && doc->safe) ? ", safe" : ""),
+		 (doc->safe ? ", safe" : ""),
 		 (doc->internal_link ? ", internal link" : "")
 	    );
 

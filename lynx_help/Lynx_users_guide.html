@@ -1884,6 +1884,8 @@ where
 		       in .lynxrc on startup is overridden by this flag.
              <dt><code>-cookies</code>
     		<dd>toggles handling of Set-Cookie headers.
+             <dt><code>-core</code>
+    		<dd>toggles forced core dumps on fatal errors. (Unix only)
              <dt><code>-crawl</code>
     		<dd>with <em>-traversal</em>, output each page to a file.<br>
     		    with <em>-dump</em>, format output as with
@@ -1965,6 +1967,10 @@ where
     		<dd>maximum news articles in listings before chunking.
              <dt><code>-nobrowse</code>
     		<dd>disable directory browsing.
+             <dt><code>-nocc</code>
+    		<dd>disable Cc: prompts for self copies of mailings.  Note
+		    that this does not disable any CCs which are incorporated
+		    within a mailto URL or form ACTION.
              <dt><code>-nocolor</code>
     		<dd>force color mode off, overriding terminal capabilities and any
 	       <em>-color</em> flags, <em>COLORTERM</em> variable, and saved .lynxrc settings.

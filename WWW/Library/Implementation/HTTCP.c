@@ -417,7 +417,8 @@ PUBLIC int HTParseInet ARGS2(
 	    /*
 	    **  Pipe, child pid, and status buffers.
 	    */
-	    int pfd[2], fpid, cstat, cst1;
+	    pid_t fpid, waitret = (pid_t)0;
+	    int pfd[2], cstat, cst1 = 0;
 
 	    pipe(pfd);
 
@@ -454,8 +455,9 @@ PUBLIC int HTParseInet ARGS2(
 		/*
 		**  Exit if child exited.
 		*/
-		if (waitpid(fpid, &cst1, WNOHANG) > 0)
+		if ((waitret = waitpid(fpid, &cst1, WNOHANG)) > 0) {
 		    break;
+		}
 		/*
 		**  Abort if interrupt key pressed.
 		*/
@@ -473,19 +475,56 @@ PUBLIC int HTParseInet ARGS2(
 		*/
 		sleep(1);
 	    }
-	    waitpid(fpid, &cst1, WNOHANG);
+	    if (waitret <= 0)
+		waitret = waitpid(fpid, &cst1, WNOHANG);
+	    if (TRACE) {
+		if (WIFEXITED(cst1)) {
+		    fprintf(stderr,
+			    "NSL_FORK: Child %d exited, status 0x%x.\n",
+			    (int)waitret, cst1);
+		} else if (WIFSIGNALED(cst1)) {
+		    fprintf(stderr,
+			    "NSL_FORK: Child %d got signal, status 0x%x!\n",
+			    (int)waitret, cst1);
+#ifdef WCOREDUMP
+		    if (WCOREDUMP(cst1)) {
+		    fprintf(stderr,
+			    "NSL_FORK: Child %d dumped core!\n",(int)waitret);
+		    }
+#endif
+		} else if (WIFSTOPPED(cst1)) {
+		    fprintf(stderr,
+			    "NSL_FORK: Child %d is stopped, status 0x%x!\n",
+			    (int)waitret, cst1);
+		}
+	    }
 	    /*
 	    **  Read as much as we can - should be the address.
 	    */
 	    IOCTL(pfd[0], FIONREAD, &cstat);
-	    if (cstat < 4)
+	    if (cstat < 4) {
+		if (TRACE)
+		    fprintf(stderr, 
+			    "NSL_FORK: Child returns only %d bytes, \
+trying again without forking...\n", cstat);
+		phost = gethostbyname(host);	/* See netdb.h */
+		if (!phost) {
+		    if (TRACE)
+			fprintf(stderr, 
+				"HTParseInet: Can't find internet node name `%s'.\n",host);
+		    memset((void *)&sin->sin_addr, 0, sizeof(sin->sin_addr));
+		} else {
+		    memcpy((void *)&sin->sin_addr, phost->h_addr, phost->h_length);
+		}
+#if 0		
 	        cstat = read(pfd[0], (void *)&sin->sin_addr , 4);
-	    else
+#endif
+	    } else {
 	        cstat = read(pfd[0], (void *)&sin->sin_addr , cstat);
+	    }
 	    close(pfd[0]);
 	    close(pfd[1]);
 	}
-
 	if (sin->sin_addr.s_addr == 0) {
 	    if (TRACE)
 	        fprintf(stderr, 

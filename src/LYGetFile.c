@@ -47,6 +47,7 @@
 
 PRIVATE int fix_http_urls PARAMS((document *doc));
 extern char * WWW_Download_File;
+extern char LYCancelDownload;
 #ifdef VMS
 extern BOOLEAN LYDidRename;
 #endif /* VMS */
@@ -94,6 +95,16 @@ PUBLIC BOOLEAN getfile ARGS1(
 	char *temp = NULL;
 	DocAddress WWWDoc;  /* a WWW absolute doc address struct */
 
+	/*
+	 *  Reset LYCancelDownload to prevent unwanted delayed effect. - KW
+	 */
+	if (LYCancelDownload) {
+	    if (TRACE)
+		fprintf(stderr,
+			"getfile:    resetting LYCancelDownload to FALSE\n");
+	    LYCancelDownload = FALSE;
+	}
+
 Try_Redirected_URL:
 	/*
 	 *  Load the WWWDoc struct in case we need to use it.
@@ -131,10 +142,15 @@ Try_Redirected_URL:
 	    if ((cp1 = strchr(temp, '@')) == NULL)
 	        cp1 = temp;
 	    if ((cp = strrchr(cp1, ':')) != NULL) {
-	        int value;
+	        long int value;
 
 		cp++;
-	        if (sscanf(cp, "%d", &value) == 1) {
+	        if (sscanf(cp, "%ld", &value) == 1) {
+		    if (value > 65535 || value < 0) {
+			HTAlert(PORT_INVALID);
+			FREE(temp);
+			return(NULLFILE); 
+		    }
 		    if (value == 19) {
 			HTAlert(PORT_NINETEEN_INVALID);
 			FREE(temp);
@@ -767,7 +783,7 @@ Try_Redirected_URL:
 				 */
 				HTAlert(ILLEGAL_REDIRECTION_URL);
 				if (LYCursesON) {
-				    _user_message("Illegal URL: %s",
+				    _user_message(WWW_ILLEGAL_URL_MESSAGE,
 				    		  use_this_url_instead);
 				    sleep(AlertSecs);
 				} else {
@@ -780,7 +796,8 @@ Try_Redirected_URL:
 			    }
 			    if (TRACE)
 			        sleep(MessageSecs);
-			    _user_message("Using %s", use_this_url_instead);
+			    _user_message(WWW_USING_MESSAGE,
+			    		  use_this_url_instead);
 			    sleep(InfoSecs);
 			    if (TRACE)
 			        fprintf(stderr, "\n");
@@ -909,7 +926,7 @@ Try_Redirected_URL:
 	  } else {
 	      if (TRACE)
 	          sleep(MessageSecs);
-	      _user_message("Badly formed address %s",doc->address);
+	      _user_message(WWW_BAD_ADDR_MESSAGE, doc->address);
 	      if (TRACE)
 	          fprintf(stderr,"\n");
 	      sleep(MessageSecs);
