@@ -122,6 +122,9 @@ in .lynxrc on startup is overridden by this flag.
 .B -cookies
 toggles handling of Set-Cookie headers.
 .TP
+.B -core
+toggles forced core dumps on fatal errors.
+.TP
 .B -crawl
 with -traversal, output each page to a file.
 with -dump, format output as with -traversal, but to stdout.
@@ -214,6 +217,11 @@ maximum news articles in listings before chunking.
 .TP
 .B -nobrowse
 disable directory browsing.
+.TP
+.B -nocc
+disable Cc: prompts for self copies of mailings.  Note
+that this does not disable any CCs which are incorporated
+within a mailto URL or form ACTION.
 .TP
 .B -nocolor
 force color mode off, overriding terminal capabilities and any

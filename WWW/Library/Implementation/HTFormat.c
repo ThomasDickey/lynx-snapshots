@@ -13,6 +13,7 @@
 
 #include "HTUtils.h"
 #include "tcp.h"
+#include "HTAccess.h"
 
 /* Implements:
 */
@@ -589,9 +590,9 @@ PUBLIC int HTFileCopy ARGS2(
 	FILE *,			fp,
 	HTStream*,		sink)
 {
-    HTStreamClass targetClass;
+    HTStreamClass targetClass;    
     char line[256];
-    int bytes = 0, nreads = 0, nprogr = 0;
+    int status, bytes = 0, nreads = 0, nprogr = 0;
     int rv = HT_OK;
     
     /*  Push the data down the stream
@@ -601,9 +602,8 @@ PUBLIC int HTFileCopy ARGS2(
     /*	Push binary from socket down sink
     */
     for (;;) {
-	int status = fread(input_buffer, 1, INPUT_BUFFER_SIZE, fp);
-	nreads ++;
-
+	status = fread(input_buffer, 1, INPUT_BUFFER_SIZE, fp);
+	nreads++;
 	if (status == 0) { /* EOF or error */
 	    if (ferror(fp) == 0) {
 		rv = HT_LOADED;
@@ -613,7 +613,11 @@ PUBLIC int HTFileCopy ARGS2(
 	        fprintf(stderr,
 			"HTFormat: Read error, read returns %d\n",
 			ferror(fp));
-	    rv = HT_PARTIAL_CONTENT;
+	    if (bytes) {
+		rv = HT_PARTIAL_CONTENT;
+	    } else {
+		rv = -1;
+	    }
 	    break;
 	}
 	(*targetClass.put_block)(sink, input_buffer, status);
@@ -621,27 +625,28 @@ PUBLIC int HTFileCopy ARGS2(
 	bytes += status;
 	if (nreads >= 100) {
 	    /*
-	     *  Show progres messages for local files, and check for
-	     *  user interruption.
-	     *  Start doing so only after a certain number of reads
-	     *  have been done, and don't update it on every read -
-	     *  normally reading in a local file should be speedy.
-	     */
+	    **  Show progress messages for local files, and check for
+	    **  user interruption.  Start doing so only after a certain
+	    **  number of reads have been done, and don't update it on
+	    **  every read (normally reading in a local file should be
+	    **  speedy). - KW
+	    */
 	    if (nprogr == 0) {
-	        if (bytes < 1024000) {
+		if (bytes < 1024000) {
 		    sprintf(line, "Read %d bytes of data.", bytes);
 		} else {
 		    sprintf(line, "Read %d KB of data. %s",
-			    bytes/1024,
+				  bytes/1024,
 		    "(Press 'z' if you want to abort loading.)");
 		}
 		HTProgress(line);
 		if (HTCheckForInterrupt()) {
 		    _HTProgress ("Data transfer interrupted.");
-		    if (bytes)
+		    if (bytes) {
 			rv = HT_INTERRUPTED;
-		    else
-			rv = HT_PARTIAL_CONTENT;
+		    } else {
+			rv = -1;
+		    }
 		    break;
 		}
 		nprogr++;
@@ -788,14 +793,18 @@ PUBLIC int HTParseFile ARGS5(
     */
     targetClass = *(stream->isa);	/* Copy pointers to procedures */
     rv = HTFileCopy(fp, stream);
-    if (rv == -1 || rv == HT_INTERRUPTED)
+    if (rv == -1 || rv == HT_INTERRUPTED) {
         (*targetClass._abort)(stream, NULL);
-    else
+    } else {
 	(*targetClass._free)(stream);
+    }
 
-    if (rv == HT_INTERRUPTED || (rv > 0 && rv != HT_LOADED))
+    if (rv == -1)
+	return HT_NO_DATA;
+    else if (rv == HT_INTERRUPTED || (rv > 0 && rv != HT_LOADED))
 	return HT_PARTIAL_CONTENT;
-    return HT_LOADED;
+    else
+	return HT_LOADED;
 }
 
 /*	Converter stream: Network Telnet to internal character text

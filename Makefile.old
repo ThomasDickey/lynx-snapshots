@@ -785,18 +785,20 @@ solaris2-slangcc:
 		SLANGINC="$(SLANGINC)"
   
 osf:
-	cd WWW/Library/osf; $(MAKE) LYFLAGS="-Olimit 2000 $(SITE_LYDEFS)"
+	cd WWW/Library/osf; $(MAKE) LYFLAGS="-Olimit 2000 -DNSL_FORK \
+		$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -Olimit 4000 -DUNIX \
-		-DFANCY_CURSES $(ADDFLAGS) \
+		-DFANCY_CURSES -DNO_TTYTYPE $(ADDFLAGS) \
 		-I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lcurses -ltermcap \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		WWWLIB="../WWW/Library/osf/libwww.a"
 
 osf-slang:
-	cd WWW/Library/osf; $(MAKE) LYFLAGS="-Olimit 2000 $(SITE_LYDEFS)"
+	cd WWW/Library/osf; $(MAKE) LYFLAGS="-Olimit 2000 -DNSL_FORK \
+		$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -Olimit 4000 -DUNIX \
-		-DUSE_SLANG $(ADDFLAGS) \
+		-DUSE_SLANG -DNO_TTYTYPE $(ADDFLAGS) \
 		-I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lcurses -ltermcap \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \

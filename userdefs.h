@@ -374,6 +374,16 @@
  */
 #define LIST_FORMAT "    %p %4l %-8.8o %-8.8g %7s %-12.12d %a"
 
+/*
+ *  If NO_FORCED_CORE_DUMP is set to TRUE, Lynx will not force
+ *  core dumps via abort() calls on fatal errors or assert()
+ *  calls to check potentially fatal errors.  The default defined
+ *  here can be changed in lynx.cfg, and the compilation or
+ *  configuration default can be toggled via the -core command
+ *  line switch.
+ */
+#define NO_FORCED_CORE_DUMP	FALSE
+
 #endif /* VMS OR UNIX */
 
 /*************************************************************
@@ -1250,7 +1260,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.45"
+#define LYNX_VERSION "2.7.1ac-0.46"
 
 /****************************************************************
  * The LYMessages_en.h header defines default, English strings

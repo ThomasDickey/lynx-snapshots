@@ -4643,7 +4643,7 @@ check_add_bookmark_to_self:
 			 */
 			if ((curdoc.post_data != NULL &&
 			     curdoc.safe != TRUE) &&
-			    HTConfirm(CONFIRM_POST_RESUBMISSION) == FALSE) {
+			    HTConfirm(CONFIRM_POST_DOC_HEAD) == FALSE) {
 			    _statusline(CANCELLED);
 			    sleep(InfoSecs);
 			    break;
@@ -4653,6 +4653,8 @@ check_add_bookmark_to_self:
 			if (HTLoadedDocumentIsHEAD()) {
 	            	    HTuncache_current_document();
 			    FREE(curdoc.address);
+			} else {
+			    StrAllocCat(newdoc.title, " - HEAD");
 			}
 		    }
 		    break;
@@ -4673,9 +4675,15 @@ check_add_bookmark_to_self:
 								 "http", 4)) {
 			_statusline(FORM_ACTION_NOT_HTTP_URL);
 			sleep(MessageSecs);
+		    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
+		    	       links[curdoc.link].form->submit_method == URL_POST_METHOD &&
+			       HTConfirm(CONFIRM_POST_LINK_HEAD) == FALSE) {
+			_statusline(CANCELLED);
+			sleep(InfoSecs);
 		    } else {
 			HEAD_request = TRUE;
 			LYforce_no_cache = TRUE;
+			StrAllocCat(newdoc.title, " - HEAD");
 			cmd = LYK_ACTIVATE;
 			goto new_cmd;
 		    }
@@ -4689,12 +4697,11 @@ check_add_bookmark_to_self:
 		 */
 		if ((curdoc.post_data != NULL &&
 		     curdoc.safe != TRUE) &&
-		    HTConfirm(CONFIRM_POST_RESUBMISSION) == FALSE) {
+		    HTConfirm(CONFIRM_POST_DOC_HEAD) == FALSE) {
 		    _statusline(CANCELLED);
 		    sleep(InfoSecs);
 		    break;
-		} 
-	        if (nlinks > 0) {
+		} else if (nlinks > 0) {
 		    _statusline(HEAD_D_OR_CANCEL);
 	            c = LYgetch();
 		} else {
@@ -4710,6 +4717,8 @@ check_add_bookmark_to_self:
 			if (HTLoadedDocumentIsHEAD()) {
 	            	    HTuncache_current_document();
 			    FREE(curdoc.address);
+			} else {
+			    StrAllocCat(newdoc.title, " - HEAD");
 			}
 		    }
 		}

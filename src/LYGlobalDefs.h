@@ -318,5 +318,10 @@ extern BOOLEAN LYSeekFragMAPinCur;
 extern BOOLEAN LYSeekFragAREAinCur;
 extern BOOLEAN LYStripDotDotURLs;	/* Try to fix ../ in some URLs?  */
 extern BOOLEAN LYForceSSLCookiesSecure;
+extern BOOLEAN LYNoCc;
+
+#ifndef VMS
+extern BOOLEAN LYNoCore;
+#endif /* !VMS */
 
 #endif /* LYGLOBALDEFS_H */

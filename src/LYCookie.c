@@ -611,9 +611,9 @@ PRIVATE char * scan_cookie_sublist ARGS6(
  	    len += (strlen(co->name) + strlen(co->value) + 1);
 	    /*
 	     *  For Version 1 (or greater) cookies, add
-	     *  $PATH and/or $DOMAIN attributes for the
-	     *  cookie if they were specified via a server
-	     *  reply header. - FM
+	     *  $PATH, $PORT and/or $DOMAIN attributes for
+	     *  the cookie if they were specified via a
+	     *  server reply header. - FM
 	     */
 	    if (co->version > 0) {
 		if (co->path && (co->flags & COOKIE_FLAG_PATH_SET)) {
@@ -623,7 +623,16 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 		    StrAllocCat(header, "; $Path=\"");
 		    StrAllocCat(header, co->path);
 		    StrAllocCat(header, "\"");
-		    len != (strlen(co->path) + 8);
+		    len += (strlen(co->path) + 10);
+		}
+		if (co->PortList && isdigit((unsigned char)*co->PortList)) {
+		    /*
+		     *  Append the port attribute. - FM
+		     */
+		    StrAllocCat(header, "; $Port=\"");
+		    StrAllocCat(header, co->PortList);
+		    StrAllocCat(header, "\"");
+		    len += (strlen(co->PortList) + 10);
 		}
 		if (co->domain && (co->flags & COOKIE_FLAG_DOMAIN_SET)) {
 		    /*
@@ -632,7 +641,7 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 		    StrAllocCat(header, "; $Domain=\"");
 		    StrAllocCat(header, co->domain);
 		    StrAllocCat(header, "\"");
-		    len != (strlen(co->domain) + 10);
+		    len += (strlen(co->domain) + 12);
 		}
 	    }
 	}
@@ -672,15 +681,22 @@ PRIVATE void LYProcessSetCookies ARGS6(
     }
 
     /*
-     *  If we have both Set-Cookie and Set-Cookie2 headers,
-     *  and must combine them because the Set-Cookie2 headers
-     *  are not required to have complete cookies if Set-Cookie
-     *  headers are present.  So set up a list for the cookies
-     *  we process out of the header(s).  Note that if more than
-     *  one instance of a valued attribute for the same cookie
-     *  is encountered, the value for the first instance is
-     *  retained, with preference to that in a Set-Cookie2
-     *  header.  We only accept up to 50 cookies from either
+     *  If we have both Set-Cookie and Set-Cookie2 headers.
+     *  process the Set-Cookie2 header, then the Set-Cookie
+     *  header.  The most current draft has abandoned the
+     *  the earlier requirement to combine them, but we'll
+     *  keep doing that for now, until we're sure that holds
+     *  up, since we never replace anything that was in the
+     *  Set-Cookie2 headers with it's equivalent in the
+     *  Set-Cookie header.  If we have only a Set-Cookie2
+     *  or only a Set-Cookie header, that's what we use.  So
+     *  set up a list for the cookies we process out of the
+     *  header(s).  Note that if more than one instance of a
+     *  valued attribute for the same cookie is encountered,
+     *  even within the same header, the value for the first
+     *  instance is retained, with consequent preference to
+     *  that in a Set-Cookie2 header, since that was processed
+     *  first.  We only accept up to 50 cookies from either
      *  header, and only if a cookie's values do not exceed
      *  the 4096 byte limit on overall size. - FM
      */
@@ -688,7 +704,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 
     /*
      *  First process the Set-Cookie2 header, if present, adding
-     *  each cookie to the CombinedCoookies list. - FM
+     *  each cookie to the CombinedCookies list. - FM
      */
     p = (SetCookie2 ? SetCookie2 : "");
     while (NumCookies <= 50 && *p) {
@@ -712,7 +728,11 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	 *  Check for an '=' delimiter, or an 'expires' name followed
 	 *  by white, since Netscape's bogus parser doesn't require
 	 *  an '=' delimiter, and 'expires' attributes are being
-	 *  encountered without them. - FM
+	 *  encountered without them.  These shouldn't be in a
+	 *  Set-Cookie2 header, but we'll assume it's an expires
+	 *  attribute rather a cookie with that name, since the
+	 *  attribute mistake rather than name mistake seems more
+	 *  likely to be made by providers. - FM
 	 */
 	if (*p == '=' ||
 	     !strncasecomp(attr_start, "Expires", 7)) {
@@ -1393,11 +1413,13 @@ PRIVATE void LYProcessSetCookies ARGS6(
 						     address,
 						     PARSE_ALL);
 		    /*
-		     *  Accept only URLs for servers. - FM
+		     *  Accept only URLs for servers.  The most
+		     *  recent draft says just http, so the others
+		     *  are commented out here. - FM
 		     */
 		    if ((url_type = is_url(cur_cookie->commentURL)) &&
 		        (url_type == HTTP_URL_TYPE ||
-		    	 url_type == HTTPS_URL_TYPE ||
+		    	 url_type == HTTPS_URL_TYPE/* ||
 			 url_type == FTP_URL_TYPE ||
 			 url_type == GOPHER_URL_TYPE ||
 			 url_type == HTML_GOPHER_URL_TYPE ||
@@ -1407,7 +1429,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 			 url_type == SNEWS_URL_TYPE ||
 			 url_type == WAIS_URL_TYPE ||
 			 url_type == CSO_URL_TYPE ||
-			 url_type == FINGER_URL_TYPE)) {
+			 url_type == FINGER_URL_TYPE */)) {
 		        length += strlen(cur_cookie->commentURL);
 		    } else {
 			FREE(cur_cookie->commentURL);
@@ -1570,7 +1592,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 				(cur_cookie->flags & COOKIE_FLAG_PATH_SET)) {
 				StrAllocCopy(co->path, cur_cookie->path);
 				co->pathlen = cur_cookie->pathlen;
-				co->flags |= COOKIE_FLAG_DOMAIN_SET;
+				co->flags |= COOKIE_FLAG_PATH_SET;
 			    }
 			    /*
 			     *  If the Set-Cookie2 header didn't include
@@ -1711,7 +1733,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		    (cur_cookie->flags & COOKIE_FLAG_PATH_SET)) {
 		    StrAllocCopy(co->path, cur_cookie->path);
 		    co->pathlen = cur_cookie->pathlen;
-		    co->flags |= COOKIE_FLAG_DOMAIN_SET;
+		    co->flags |= COOKIE_FLAG_PATH_SET;
 		}
 		/*
 		 *  If the Set-Cookie2 header didn't include

@@ -446,6 +446,8 @@ PRIVATE void do_readme ARGS2(HTStructured *, target, CONST char *, localname)
     FILE * fp;
     char * readme_file_name = 
 	malloc(strlen(localname)+ 1 + strlen(HT_DIR_README_FILE) + 1);
+    if (readme_file_name == NULL)
+        outofmem(__FILE__, "do_readme");
     strcpy(readme_file_name, localname);
     strcat(readme_file_name, "/");
     strcat(readme_file_name, HT_DIR_README_FILE);
@@ -1413,6 +1415,7 @@ PUBLIC int HTLoadFile ARGS4(
     char * nodename = NULL;
     char * newname = NULL;	/* Simplified name of file */
     HTAtom * encoding;		/* @@ not used yet */
+    int status;
 #ifdef VMS
     struct stat stat_info;
 #else
@@ -1489,6 +1492,8 @@ PUBLIC int HTLoadFile ARGS4(
 		char * enable_file_name = 
 		    malloc(strlen(filename)+ 1 +
 		    strlen(HT_DIR_ENABLE_FILE) + 1);
+		if (enable_file_name == NULL)
+		    outofmem(__FILE__, "HTLoadFile");
 		strcpy(enable_file_name, filename);
 		strcat(enable_file_name, "/");
 		strcat(enable_file_name, HT_DIR_ENABLE_FILE);
@@ -1593,7 +1598,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    FREE(nodename);
 	    status = HTParseFile(format, format_out, anchor, fp, sink);
 	    fclose(fp);
-            return status;
+	    return status;
         }  /* If successfull open */
 	FREE(filename);
     }
@@ -1756,6 +1761,8 @@ forget_multi:
 		    char * enable_file_name = 
 			malloc(strlen(localname)+ 1 +
 				      strlen(HT_DIR_ENABLE_FILE) + 1);
+		    if (enable_file_name == NULL)
+			outofmem(__FILE__, "HTLoadFile");
 		    strcpy(enable_file_name, localname);
 		    strcat(enable_file_name, "/");
 		    strcat(enable_file_name, HT_DIR_ENABLE_FILE);
