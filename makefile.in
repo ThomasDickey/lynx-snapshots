@@ -242,7 +242,7 @@ install-bin: $(bindir)
 	-mv -f $(bindir)/lynx$x $(bindir)/lynx.old
 	$(INSTALL_PROGRAM) lynx$x $(bindir)/
 
-install-man : $(mandir) 
+install-man : $(mandir)
 	$(INSTALL_DATA) $(srcdir)/lynx.man $(mandir)/lynx.1
 
 install-help : $(helpdir)

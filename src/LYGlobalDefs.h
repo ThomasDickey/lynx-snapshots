@@ -285,6 +285,7 @@ extern BOOLEAN LYMBMAdvanced;		/* MBM statusline for ADVANCED?	 */
 extern int LYStatusLine;		/* Line for statusline() or -1   */
 extern BOOLEAN LYCollapseBRs;		/* Collapse serial BRs?		 */
 extern BOOLEAN LYSetCookies;		/* Process Set-Cookie headers?	 */
+extern BOOLEAN LYEatAllCookies;         /* accept ALL cookies?          */
 extern char *XLoadImageCommand;		/* Default image viewer for X	 */
 #ifdef USE_EXTERNALS
 extern BOOLEAN no_externals; /* don't allow the use of externals */

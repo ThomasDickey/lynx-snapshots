@@ -1,6 +1,30 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-07-31 (2.8.1dev.19)
+* modify OpenHiddenFile so that it can overwrite files owned by the real
+  user if the O_EXCL open fails because the file already exists - TD
+* add experimental forms-based options screen (patch by Mike Castle), ifdef'd
+  with EXP_FORMS_OPTIONS and configured with --enable-forms-options.
+* add option -eat_all_cookies and corresponding config variable
+  EAT_ALL_COOKIES (Brian J Pardy <posterkid@psnw.com>).
+* correct spurious 'Content' string versus newline after X-URL in LYMain.c
+  (Bela Lubkin and Larry Virden).
+* updated versions of config.guess and config.sub based on automake 1.3 - TD
+* updated experimental persistent-cookie support based on RP's patch:  Replaced
+  the call to strsep with a home-rolled one for those people who don't have it. 
+  (Reported by Bela Lubkin, Mon, 27 Jul 1998 16:51:14 -0700 on the mailing
+  list.) Bela's modification to make some character arrays static is also
+  included.
+* nits/spelling in LYPrint.c, LYUtils.c (reported by Mike Castle).
+* changed LYGetFile.c to build lynx2.8.1dev.18 with SLANG and the
+  DJGPP_KEYHANDLER for DOS - DK
+* fix a couple of places where the return-value of calloc was not checked
+  (reported by Mike Castle <dalgoda@ix.netcom.com>) - TD
+* correct typo in command-line parsing of -lss option (reported by Chris
+  Kottaridis <chrisk@BSDI.COM>)
+* define _AIX if needed for socks5 (request by Brian Hauber) - TD
+* improved configure test for getgroups array type - TD
 1998-07-24 (2.8.1dev.18)
 * improved test for socks5, to account for special cases on AIX (reported by
   Brian Hauber) - TD

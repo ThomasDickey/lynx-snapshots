@@ -2433,7 +2433,7 @@ static BOOLEAN compare_type ARGS3(
 /*
 **  Must recognize a URL and return the type.
 **  If recognized, based on a case-insensitive
-**  analyis of the scheme field, ensures that
+**  analysis of the scheme field, ensures that
 **  the scheme field has the expected case.
 **
 **  Returns 0 (not a URL) for a NULL argument,
@@ -2539,7 +2539,7 @@ PUBLIC int is_url ARGS1(
     } else if (compare_type(cp, "lynxprog:", 9)) {
 	/*
 	 *  Special External Lynx type to handle execution
-	 *  of commans, sriptis or programs with do not
+	 *  of commands, scripts or programs with do not
 	 *  require a pause to read screen upon completion.
 	 */
 	return(LYNXPROG_URL_TYPE);
@@ -2555,6 +2555,12 @@ PUBLIC int is_url ARGS1(
 	 *  Special Internal Lynx type.
 	 */
 	return(LYNXPRINT_URL_TYPE);
+
+    } else if (compare_type(cp, "LYNXOPTIONS:", 12)) {
+	/*
+	 *  Special Internal Lynx type.
+	 */
+	return(LYNXOPTIONS_URL_TYPE);
 
     } else if (compare_type(cp, "LYNXDOWNLOAD:", 13)) {
 	/*
@@ -2926,7 +2932,7 @@ PUBLIC void HTSugFilenames_free NOARGS
 
 /*
  *  Utility for listing suggested filenames, making any
- *  repeated filenanmes the most current in the list. - FM
+ *  repeated filenames the most current in the list. - FM
  */
 PUBLIC void HTAddSugFilename ARGS1(
 	char *, 	fname)
@@ -3104,7 +3110,7 @@ PUBLIC void change_sug_filename ARGS1(
 
     /*
      *	Trim any trailing or leading
-     *	underscrores or dashes.
+     *	underscores or dashes.
      */
     cp = fname + (strlen(fname)) - 1;
     while (*cp == '_' || *cp == '-') {
@@ -3200,7 +3206,7 @@ PUBLIC void change_sug_filename ARGS1(
 	/*
 	 *  No period, so put one on the end, or after
 	 *  the 39th character, trimming trailing dashes
-	 *  or underscrores.
+	 *  or underscores.
 	 */
 	if (strlen(fname) > 39) {
 	    fname[39] = '\0';
@@ -4126,7 +4132,7 @@ have_VMS_URL:
  *  and returns TRUE, otherwise it does not modify the string and
  *  returns FALSE.  It first tries the element as is, then, if the
  *  element does not end with a dot, it adds prefixes from the
- *  (comma separated) prefix list arguement, and, if the element
+ *  (comma separated) prefix list argument, and, if the element
  *  does not begin with a dot, suffixes from the (comma separated)
  *  suffix list arguments (e.g., www.host.com, then www.host,edu,
  *  then www.host.net, then www.host.org).  The remaining path, if
@@ -4745,7 +4751,7 @@ PUBLIC CONST char * Home_Dir NOARGS
  *  are intended to be off the home directory.	The file path
  *  should be passed in fbuffer, together with the size of the
  *  buffer.  The function simplifies the file path, and if it
- *  is acceptible, loads it into fbuffer and returns TRUE.
+ *  is acceptable, loads it into fbuffer and returns TRUE.
  *  Otherwise, it does not modify fbuffer and returns FALSE.
  *  If a subdirectory is present and the path does not begin
  *  with "./", that is prefixed to make the situation clear. - FM
@@ -5052,7 +5058,7 @@ PUBLIC time_t LYmktime ARGS2(
 
     /*
      *	Skip any lead alphabetic "Day, " field and
-     *	seek a numberic day field. - FM
+     *	seek a numeric day field. - FM
      */
     while (*s != '\0' && !isdigit((unsigned char)*s))
 	s++;
@@ -5395,10 +5401,17 @@ PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
      * that no one has an existing file or link that they happen to own.
      */
     if (*mode == 'w') {
+	struct stat sb;
 	int fd = open(name, O_CREAT|O_EXCL|O_WRONLY, HIDE_CHMOD);
 	if (fd >= 0) {
 	    fp = fdopen(fd, mode);
 	}
+	else if (errno == EEXIST
+	 && stat(name, &sb) == 0
+	 && sb.st_uid == getuid()
+	 && chmod(name, HIDE_CHMOD) == 0
+	 && (fd = open(name, O_TRUNC|O_WRONLY, HIDE_CHMOD)) >= 0)
+	    fp = fdopen(fd, mode);
     }
     else
 #endif
@@ -5460,7 +5473,7 @@ PUBLIC FILE *LYAppendToTxtFile ARGS1(char *, name)
 
 #ifdef UNIX
 /*
- *  Restore normal permisions to a copy of a file that we have created
+ *  Restore normal permissions to a copy of a file that we have created
  *  with temp file restricted permissions.  The normal umask should
  *  apply for user files. - kw
  */

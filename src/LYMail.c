@@ -1252,7 +1252,7 @@ PUBLIC void reply_by_mail ARGS3(
         StrAllocCat(header, "mailto:");
         StrAllocCat(header, address);
     }
-    StrAllocCat(header, buf);
+    StrAllocCat(header, "\n");
     sprintf(buf, "X-Mailer: Lynx, Version %s\n", LYNX_VERSION);
     StrAllocCat(header, buf);
 #endif /* VMS */

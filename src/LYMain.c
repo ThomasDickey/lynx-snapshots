@@ -81,23 +81,7 @@ PUBLIC BOOLEAN UseFixedRecords = USE_FIXED_RECORDS;
 
 #ifndef VMS
 PUBLIC char *lynx_version_putenv_command = NULL;
-PUBLIC char *NNTPSERVER_putenv_cmd = NULL;   /* lynx.cfg defined NNTPSERVER */
-PUBLIC char *http_proxy_putenv_cmd = NULL;   /* lynx.cfg defined http_proxy */
-PUBLIC char *https_proxy_putenv_cmd = NULL;  /* lynx.cfg defined https_proxy */
-PUBLIC char *ftp_proxy_putenv_cmd = NULL;    /* lynx.cfg defined ftp_proxy */
-PUBLIC char *gopher_proxy_putenv_cmd = NULL; /* lynx.cfg defined gopher_proxy */
-PUBLIC char *cso_proxy_putenv_cmd = NULL;    /* lynx.cfg defined cso_proxy */
-PUBLIC char *news_proxy_putenv_cmd = NULL;   /* lynx.cfg defined news_proxy */
-PUBLIC char *newspost_proxy_putenv_cmd = NULL;
-PUBLIC char *newsreply_proxy_putenv_cmd = NULL;
-PUBLIC char *snews_proxy_putenv_cmd = NULL;  /* lynx.cfg defined snews_proxy */
-PUBLIC char *snewspost_proxy_putenv_cmd = NULL;
-PUBLIC char *snewsreply_proxy_putenv_cmd = NULL;
-PUBLIC char *nntp_proxy_putenv_cmd = NULL;   /* lynx.cfg defined nntp_proxy */
-PUBLIC char *wais_proxy_putenv_cmd = NULL;   /* lynx.cfg defined wais_proxy */
-PUBLIC char *finger_proxy_putenv_cmd = NULL; /* lynx.cfg defined finger_proxy */
-PUBLIC char *no_proxy_putenv_cmd = NULL;     /* lynx.cfg defined no_proxy */
-PUBLIC char *list_format=NULL;		/* LONG_LIST formatting mask */
+PUBLIC char *list_format = NULL;	/* LONG_LIST formatting mask */
 #ifdef SYSLOG_REQUESTED_URLS
 PUBLIC char *syslog_txt = NULL; 	/* syslog arb text for session */
 #endif /* SYSLOG_REQUESTED_URLS */
@@ -352,6 +336,7 @@ PUBLIC BOOLEAN LYMBMAdvanced = TRUE;
 PUBLIC int LYStatusLine = -1;		 /* Line for statusline() if > -1 */
 PUBLIC BOOLEAN LYCollapseBRs = COLLAPSE_BR_TAGS;  /* Collapse serial BRs? */
 PUBLIC BOOLEAN LYSetCookies = SET_COOKIES; /* Process Set-Cookie headers? */
+PUBLIC BOOLEAN LYEatAllCookies = EAT_ALL_COOKIES; /* take all cookies?    */
 PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 PUBLIC BOOLEAN LYNoISMAPifUSEMAP = FALSE; /* Omit ISMAP link if MAP present? */
 PUBLIC int LYHiddenLinks = HIDDENLINKS_SEPARATE; /* Show hidden links? */
@@ -925,7 +910,7 @@ PUBLIC int main ARGS2(
 		    cp = LYSkipNonBlanks(buf);
 		    cp = LYSkipBlanks(cp);
 		    if (*cp)
-			StrAllocCopy(lynx_cfg_file, cp);
+			StrAllocCopy(lynx_lss_file, cp);
 		}
 		CTRACE(tfp, "LYMain found -lss flag, lss file is %s\n",
 			lynx_lss_file ? lynx_lss_file : "<NONE>");
@@ -1525,14 +1510,14 @@ PUBLIC int main ARGS2(
      */
     HTMLUseCharacterSet(current_char_set);
 
-#ifdef EXP_PERSISTENT_COOKIES 
-    /* 
-     *	Sod it, this looks like a reasonable place to load the 
-     *	cookies file, probably.  - RP 
-     */ 
-    LYLoadCookies("cookies"); /* add command line options! */ 
+#ifdef EXP_PERSISTENT_COOKIES
+    /*
+     *	Sod it, this looks like a reasonable place to load the
+     *	cookies file, probably.  - RP
+     */
+    LYLoadCookies("cookies"); /* add command line options! */
 #endif
-	 
+
     /*
      *	If startfile is a file URL and the host is defaulted,
      *	force in "//localhost", and if it's not an absolute URL,
@@ -2623,6 +2608,10 @@ with -dump, format output as with -traversal, but to stdout"
       "dump",		FUNCTION_ARG,		dump_output_fun,
       "dump the first file to stdout and exit"
    ),
+   PARSE_SET(
+      "eat_all_cookies", SET_ARG,		&LYEatAllCookies,
+      "accepts all cookies"
+   ),
    PARSE_FUN(
       "editor", 	NEED_FUNCTION_ARG,	editor_fun,
       "=EDITOR\nenable edit mode with specified editor"
@@ -2725,7 +2714,7 @@ keys (may be incompatible with some curses packages)"
 #if defined(USE_HASH)
    PARSE_STR(
       "lss",		IGNORE_ARG|NEED_NEXT_ARG,	0,
-      "=FILENAME\nspecifies a lynx.css file other than the default"
+      "=FILENAME\nspecifies a lynx.lss file other than the default"
    ),
 #endif
    PARSE_FUN(

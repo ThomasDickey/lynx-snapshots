@@ -139,6 +139,9 @@ specified on the command line to standard out.
 This can be used in the following way:
 lynx -dump http://www.crl.com/~subir/lynx.html.
 .TP
+.B -eat_all_cookies
+accept all cookies.
+.TP
 .B -editor\fR=\fIEDITOR
 enable edit mode using the specified
 EDITOR. (vi, ed, emacs, etc.)

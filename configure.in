@@ -24,6 +24,9 @@ CF_MAKE_INCLUDE
 AC_PROG_INSTALL
 AC_CHECK_PROGS(LINT, lint alint lclint tdlint, [])
 
+AC_AIX
+AC_ISC_POSIX
+
 dnl --------------------------------------------------------------------------
 dnl Debug/development/test
 dnl --------------------------------------------------------------------------
@@ -279,24 +282,30 @@ dnl --------------------------------------------------------------------------
 
 ### Look for network libraries first, since some functions (such as gethostname)
 ### are used in a lot of places.
-AC_MSG_CHECKING(if you want socks5 library)
-AC_CACHE_VAL(cf_cv_use_libsocks5,[
+AC_CACHE_CHECK(if you want socks library,cf_cv_use_libsocks,[
+AC_ARG_WITH(socks,
+	[  --with-socks[=path]     link with socks library if available],
+	[cf_cv_use_libsocks=$withval],
+	[cf_cv_use_libsocks=no])
+])
+
+AC_CACHE_CHECK(if you want socks5 library,cf_cv_use_libsocks5,[
 AC_ARG_WITH(socks5,
-	[  --with-socks5           link with socks5 if available],
-	[cf_cv_use_libsocks5=yes],
+	[  --with-socks5[=path]    link with socks5 library if available],
+	[cf_cv_use_libsocks5=$withval],
 	[cf_cv_use_libsocks5=no])
 ])
-AC_MSG_RESULT($cf_cv_use_libsocks5)
 
-if test $cf_cv_use_libsocks5 = yes ; then
-	CF_SOCKS5
+if test "x$cf_cv_use_libsocks" != xno ; then
+	CF_SOCKS($cf_cv_use_libsocks)
+elif test "x$cf_cv_use_libsocks5" != xno ; then
+	CF_SOCKS5($cf_cv_use_libsocks5)
 else
 	CF_NETLIBS
 fi
 
-AC_MSG_CHECKING(for screen type)
 dnl This has to be cached, since there's a lot of interdependent tests.
-AC_CACHE_VAL(cf_cv_screen,[
+AC_CACHE_CHECK(for screen type, cf_cv_screen,[
 AC_ARG_WITH(screen,
 [  --with-screen=XXX       select screen type
                           (XXX is curses (default), ncurses or slang)],
@@ -309,7 +318,6 @@ curses|ncurses|slang)
 	;;
 esac],
 	[cf_cv_screen=curses])])
-AC_MSG_RESULT($cf_cv_screen)
 
 if test $cf_cv_screen != ncurses ; then
 	if eval "test \"`echo '$''{'cf_cv_ncurses_header'+set}'`\" != set"; then
@@ -366,6 +374,7 @@ AC_CHECK_HEADERS( \
 )
 CF_TERMIO_AND_TERMIOS
 CF_FUNC_WAIT
+AC_TYPE_GETGROUPS
 AC_TYPE_PID_T
 AC_TYPE_UID_T
 AC_TYPE_MODE_T
@@ -403,7 +412,6 @@ dnl --------------------------------------------------------------------------
 
 CF_BOOL_DEFS
 CF_ERRNO
-CF_GETGROUPS
 CF_LOCALE
 CF_NGROUPS
 CF_SYS_ERRLIST
@@ -440,6 +448,14 @@ CF_ARG_ENABLE(8bit-toupper,
 	[use_8bit_toupper=no])
 AC_MSG_RESULT($use_8bit_toupper)
 test $use_8bit_toupper != no && AC_DEFINE(EXP_8BIT_TOUPPER)
+
+AC_MSG_CHECKING(if experimental forms-based options screen should be used)
+CF_ARG_ENABLE(forms-options,
+[  --enable-forms-options  use experimental forms-based options],
+	[use_forms_options=$enableval],
+	[use_forms_options=no])
+AC_MSG_RESULT($use_forms_options)
+test $use_forms_options != no && AC_DEFINE(EXP_FORMS_OPTIONS)
 
 AC_MSG_CHECKING(if experimental persistent-cookie logic should be used)
 CF_ARG_ENABLE(persistent-cookies,

@@ -30,7 +30,7 @@
 
 /*
  *  printfile prints out the current file minus the links and targets
- *  to a veriaty of places
+ *  to a verity of places
  */
 
 /* it parses an incoming link that looks like
@@ -764,7 +764,7 @@ PUBLIC int printfile ARGS1(
 		/*
 		 *  Don't send a charset if we have a CJK character set
 		 *  selected, since it may not be appropriate for mail...
-		 *  Also don't use an inofficial "x-" charset. - kw
+		 *  Also don't use an unofficial "x-" charset. - kw
 		 */
 		if (!use_cte || LYHaveCJKCharacterSet ||
 		    strncasecomp(disp_charset, "x-", 2) == 0) {
@@ -1285,7 +1285,6 @@ PUBLIC int print_options ARGS2(
     LYLocalFileToURL(print_filename, tempfile);
 
     StrAllocCopy(*newfile, print_filename);
-    LYforce_no_cache = TRUE;
 
     fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
 		 PRINT_OPTIONS_TITLE);

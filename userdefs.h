@@ -818,6 +818,15 @@
  */
 #define SET_COOKIES TRUE
 
+/******************************* 
+ * If EAT_ALL_COOKIES is set TRUE, and SET_COOKIES is TRUE, lynx will accept 
+ * all cookies. 
+ * 
+ * The default defined here can be changed in lynx.cfg, and .lynxrc, or 
+ * specified with the -eat_all_cookies command line switch. 
+ */ 
+#define EAT_ALL_COOKIES FALSE 
+ 
 
 /****************************************************************
  *   Section 2.   Things that you probably want to change or review
@@ -1202,7 +1211,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.1dev.18"
+#define LYNX_VERSION "2.8.1dev.19"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */

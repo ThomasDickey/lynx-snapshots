@@ -5,6 +5,8 @@ extern BOOLEAN term_options;
 
 extern void options NOPARAMS;
 extern void edit_bookmarks NOPARAMS;
+extern int postoptions PARAMS((document *newdoc));
+extern int gen_options PARAMS((char **newfile));
 
 /*
  *  Values for the options menu. - FM
@@ -48,7 +50,7 @@ extern void edit_bookmarks NOPARAMS;
 #define B_SHOW_CURSOR	44
 #define C_SHOW_CURSOR	62
 
-#define L_KEYPAD	14 
+#define L_KEYPAD	14
 #define L_LINEED	15
 
 #ifdef DIRED_SUPPORT
@@ -61,5 +63,7 @@ extern void edit_bookmarks NOPARAMS;
 #define L_USER_AGENT	17
 #define L_EXEC		18
 #endif /* DIRED_SUPPORT */
+
+#define OPTIONS_TITLE "Lynx Options Configuration"
 
 #endif /* LYOPTIONS_H */

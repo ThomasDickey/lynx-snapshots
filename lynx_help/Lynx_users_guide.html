@@ -1780,6 +1780,9 @@ This support can be disabled by default via the SET_COOKIES symbol in the
 compilation (<em>userdefs.h</em>) and/or run time (<em>lynx.cfg</em>)
 configuration files, and that default setting can be toggled via the
 <em>-cookies</em> command line switch.
+The SET_COOKIES symbol can be further modified by the EAT_ALL_COOKIES mode.
+If EAT_ALL_COOKIES is set TRUE, and SET_COOKIES is TRUE, Lynx will accept 
+all cookies. 
 
 <p>When cookie support is enabled, <em>Set-Cookie</em> MIME headers
 received from an http server invoke confirmation prompts with possible
@@ -1928,6 +1931,8 @@ where
 		    or one specified on the command line to standard out.
 		    This can be used in the following way:<br>
 		    <em>lynx -dump http://www.w3.org/</em>
+	     <dt><code>-eat_all_cookies</code>
+		<dd>accept all cookies.
 	     <dt><code>-editor=EDITOR</code>
 		<dd>enable edit mode using the specified
 		    <em>EDITOR</em>. (vi, ed, emacs, etc.)

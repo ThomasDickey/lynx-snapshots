@@ -100,8 +100,8 @@ typedef struct _HTSuffix {
 #endif /* NGROUPS_MAX */
 #endif /* NGROUPS */
 
-#ifndef TYPE_GETGROUPS
-#define TYPE_GETGROUPS int
+#ifndef GETGROUPS_T
+#define GETGROUPS_T int
 #endif
 
 #include <HTML.h>		/* For directory object building */
@@ -1087,7 +1087,7 @@ PUBLIC BOOL HTEditable ARGS1(
 #ifdef NO_GROUPS
     return NO;		/* Safe answer till we find the correct algorithm */
 #else
-    TYPE_GETGROUPS groups[NGROUPS];
+    GETGROUPS_T groups[NGROUPS];
     uid_t	myUid;
     int 	ngroups;			/* The number of groups  */
     struct stat fileStatus;

@@ -108,6 +108,9 @@
        following way:
            lynx -dump http://www.crl.com/~subir/lynx.html
 
+  -eat_all_cookies
+       accept all cookies.
+
   -editor=EDITOR
        enable edit mode using the specified EDITOR. (vi, ed, emacs, etc.)
 

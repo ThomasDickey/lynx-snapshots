@@ -169,3 +169,13 @@ PRIVATE void LYCompleteExit NOPARAMS
 	callstack[topOfStack]();
     }
 }
+
+PUBLIC void outofmem ARGS2(
+	CONST char *,	fname,
+	CONST char *,	func)
+{
+    fprintf(stderr,
+	"\r\n\r\n\r\n%s %s: out of memory.  Aborting...\r\n", fname, func);
+    LYOutOfMemory = TRUE;
+    LYexit(-1);
+}

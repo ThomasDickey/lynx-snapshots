@@ -923,7 +923,6 @@ PUBLIC int HTParseGzFile ARGS5(
 
     if (!stream) {
 	char buffer[1024];	/* @@@@@@@@ */
-	extern char LYCancelDownload;
 	HTCloseGzFile(gzfp);
 	if (LYCancelDownload) {
 	    LYCancelDownload = FALSE;
