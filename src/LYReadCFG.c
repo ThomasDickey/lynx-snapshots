@@ -1371,12 +1371,15 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_SET(RC_LIST_NEWS_DATES,      LYListNewsDates),
      PARSE_SET(RC_LIST_NEWS_NUMBERS,    LYListNewsNumbers),
 #endif
+#ifdef EXP_LOCALE_CHARSET
+     PARSE_SET(RC_LOCALE_CHARSET,       LYLocaleCharset),
+#endif
      PARSE_STR(RC_LOCAL_DOMAIN,         LYLocalDomain),
+     PARSE_FUN(RC_LOCALHOST_ALIAS,      localhost_alias_fun),
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
      PARSE_SET(RC_LOCAL_EXECUTION_LINKS_ALWAYS, local_exec),
      PARSE_SET(RC_LOCAL_EXECUTION_LINKS_LOCAL, local_exec_on_local_files),
 #endif
-     PARSE_FUN(RC_LOCALHOST_ALIAS,      localhost_alias_fun),
      PARSE_STR(RC_LYNX_HOST_NAME,       LYHostName),
      PARSE_FUN(RC_LYNX_SIG_FILE,        lynx_sig_file_fun),
 #ifdef LYNXCGI_LINKS
@@ -1465,6 +1468,7 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_SET(RC_SEEK_FRAG_MAP_IN_CUR, LYSeekFragMAPinCur),
      PARSE_SET(RC_SET_COOKIES,          LYSetCookies),
      PARSE_SET(RC_SHOW_CURSOR,          LYShowCursor),
+     PARSE_STR(RC_SHOW_KB_NAME,         LYTransferName),
      PARSE_ENU(RC_SHOW_KB_RATE,         LYTransferRate, tbl_transfer_rate),
      PARSE_Env(RC_SNEWS_PROXY,          0),
      PARSE_Env(RC_SNEWSPOST_PROXY,      0),

@@ -4254,10 +4254,10 @@ msgstr "GNU Genel Kamu Lisansý altýnda daðýtýlmaktadýr.\n"
 
 #: src/LYMain.c:3170
 msgid ""
-"See http://lynx.browser.org/ and the online help for more information.\n"
+"See http://lynx.isc.org/ and the online help for more information.\n"
 "\n"
 msgstr ""
-"Daha fazla bilgi için http://lynx.browser.org/ ve çevrim içi yardýma bakýnýz.\n"
+"Daha fazla bilgi için http://lynx.isc.org/ ve çevrim içi yardýma bakýnýz.\n"
 "\n"
 
 #: src/LYMain.c:3919

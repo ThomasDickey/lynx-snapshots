@@ -426,6 +426,10 @@ II. Compile instructions -- UNIX
   	Disabled by default; used for ifdef'ing JavaScript interface.
 	Currently dummy: no JavaScript support implemented in Lynx yet.
 
+  --enable-locale-charset		(define EXP_LOCALE_CHARSET)
+  	Use nl_langinfo(CODESET) to determine initial value for display
+	charset, overrides character_set value in .lynxrc file.
+
   --enable-nested-tables
 	Extends TRST to format nested tables, as well as be smarter about
 	<BR> and <P> tags in table cells.
@@ -487,8 +491,10 @@ II. Compile instructions -- UNIX
 	is /usr/local/gnutls.
 
   --with-included-gettext
-	use the GNU gettext library included here (default).  See
-	"--enable-nls".
+	not supported in this package.  The configure script uses macros which
+	are bundled together with more useful features.
+
+	See the "--enable-nls" option.
 
   --with-libiconv-prefix=DIR
 	search for libiconv in DIR/include and DIR/lib
@@ -841,66 +847,151 @@ V. Compile instructions -- 386 DOS
 
     In addition to the files in the Lynx distribution, you will need a curses
     package and a TCP package.  You can use PDCurses (available at
-    "http://www.lightlink.com/hessling/") and the DJGPP port of WATTCP.  The
+    "http://pdcurses.sourceforge.net/") and the DJGPP port of WATTCP.  The
     updated version of WATTCP is known as WATT-32, and is available at
     "http://www.bgnett.no/~giva/".  You can also use slang (available at
-    "ftp://space.mit.edu/pub/davis/slang") as your screen library.  You must
-    compile these before you go any further.  If you wish to use PDCurses 2.4,
+    "http://www.s-lang.org/") as your screen library.  You must
+    compile these before you go any further.  If you wish to use PDCurses 2.6,
     you need to first apply the following patch:
 
-    --- dos/pdckbd.c.ori	Sun Dec 26 23:15:04 1999
-    +++ dos/pdckbd.c	Fri Mar  3 00:20:14 2000
-    @@ -336,7 +336,7 @@
-     	||  (scan == 0x4e && ascii == 0x2b)  /* Plus */
-     	||  (scan == 0xe0 && ascii == 0x2f)) /* Slash */
-     		return ((int) ((ascii & 0x0f) | 0xf0) << 8);
-    -	if (ascii == 0x00 || ascii == 0xe0)
-    +	if (ascii == 0x00 || (ascii == 0xe0 && scan != 0x00))
-     		return ((int) (scan << 8));
-     	return ((int) (ascii));
-     }
-    @@ -496,7 +496,7 @@
-     		_watch_breaks();
-     #else
-     # ifdef GO32
-    -	(void*)signal(SIGINT,(setting ? SIG_DFL : SIG_IGN));
-    +/*	(void*)signal(SIGINT,(setting ? SIG_DFL : SIG_IGN)); */
-     /*	__djgpp_set_ctrl_c(setting);*/
-     	setcbrk(setting);
-     # else
+--- dos/gccdos.mak.ori	2002-01-11 20:11:18.000000000 -0800
++++ dos/gccdos.mak	2003-12-13 21:29:28.000000000 -0800
+@@ -40,11 +40,11 @@
+ 	CFLAGS  = -c -g -Wall -DPDCDEBUG
+ 	LDFLAGS = -g
+ else
+-	CFLAGS  = -c -O -Wall
++	CFLAGS  = -c -O2 -Wall
+ 	LDFLAGS =
+ endif
+ 
+-CPPFLAGS	= -I$(PDCURSES_HOME) -I$(CCINCDIR) -D_NAIVE_DOS_REGS
++CPPFLAGS	= -I$(PDCURSES_HOME) -I$(CCINCDIR) -D_NAIVE_DOS_REGS -DHAVE_STRING_H
+ 
+ CCFLAGS		= $(CFLAGS) $(CPPFLAGS)
+ 
+@@ -64,10 +64,10 @@
+ all:	$(PDCLIBS) $(DEMOS)
+ 
+ clean:
+ 	-del *.o
+-	-del curses.lib
+-	-del panel.lib
++	-del pdcurses.a
++	-del panel.a
+ 
+ demos:	$(DEMOS)
+ 
+@@ -287,33 +287,27 @@
+ #------------------------------------------------------------------------
+ 
+ firework.exe:	firework.o $(LIBCURSES)
+-	$(LINK) $(LDFLAGS) -o firework firework.o $(LIBCURSES)
+-	$(COFF2EXE) firework
++	$(LINK) $(LDFLAGS) -o firework.exe firework.o $(LIBCURSES)
+ 	strip $@
+ 
+ newdemo.exe:	newdemo.o $(LIBCURSES)
+-	$(LINK) $(LDFLAGS) -o newdemo newdemo.o $(LIBCURSES)
+-	$(COFF2EXE) newdemo
++	$(LINK) $(LDFLAGS) -o newdemo.exe newdemo.o $(LIBCURSES)
+ 	strip $@
+ 
+ ptest.exe:	ptest.o $(LIBCURSES) $(LIBPANEL)
+-	$(LINK) $(LDFLAGS) -o ptest ptest.o $(LIBCURSES) $(LIBPANEL)
+-	$(COFF2EXE) ptest
++	$(LINK) $(LDFLAGS) -o ptest.exe ptest.o $(LIBCURSES) $(LIBPANEL)
+ 	strip $@
+ 
+ testcurs.exe:	testcurs.o $(LIBCURSES)
+-	$(LINK) $(LDFLAGS) -o testcurs testcurs.o $(LIBCURSES)
+-	$(COFF2EXE) testcurs
++	$(LINK) $(LDFLAGS) -o testcurs.exe testcurs.o $(LIBCURSES)
+ 	strip $@
+ 
+ tuidemo.exe:	tuidemo.o tui.o $(LIBCURSES)
+-	$(LINK) $(LDFLAGS) -o tuidemo tuidemo.o tui.o $(LIBCURSES)
+-	$(COFF2EXE) tuidemo
++	$(LINK) $(LDFLAGS) -o tuidemo.exe tuidemo.o tui.o $(LIBCURSES)
+ 	strip $@
+ 
+ xmas.exe:	xmas.o $(LIBCURSES)
+-	$(LINK) $(LDFLAGS) -o xmas xmas.o $(LIBCURSES)
+-	$(COFF2EXE) xmas
++	$(LINK) $(LDFLAGS) -o xmas.exe xmas.o $(LIBCURSES)
+ 	strip $@
+ 
+ 
+--- dos/pdckbd.c.ori	2002-09-01 00:13:30.000000000 -0800
++++ dos/pdckbd.c	2004-01-19 20:30:02.000000000 -0800
+@@ -362,7 +362,7 @@
+ 		return ((int) (0xb8 << 8));
+ 	if (ascii == 0xe0 && scan == 0x53 && pdc_key_modifiers & PDC_KEY_MODIFIER_SHIFT) /* Shift Del */
+ 		return ((int) (0xb9 << 8));
+-	if (ascii == 0x00 || ascii == 0xe0)
++	if (ascii == 0x00 || (ascii == 0xe0 && scan != 0x00))
+ 		return ((int) (scan << 8));
+ 	return ((int) (ascii));
+ }
+@@ -522,7 +522,7 @@
+ 		_watch_breaks();
+ #else
+ # ifdef GO32
+-	(void*)signal(SIGINT,(setting ? SIG_DFL : SIG_IGN));
++/*	(void*)signal(SIGINT,(setting ? SIG_DFL : SIG_IGN)); */
+ /*	__djgpp_set_ctrl_c(setting);*/
+ 	setcbrk(setting);
+ # else
+--- pdcurses/kernel.c.ori	2002-11-27 03:24:32.000000000 -0800
++++ pdcurses/kernel.c	2003-12-13 21:22:38.000000000 -0800
+@@ -27,6 +27,10 @@
+ #include <memory.h>
+ #endif
+ 
++#ifdef HAVE_STRING_H
++#include <string.h>
++#endif
++
+ #ifdef UNIX
+ #include <defs.h>
+ #include <term.h>
+--- pdcurses/pdcutil.c.ori	2001-01-10 00:27:22.000000000 -0800
++++ pdcurses/pdcutil.c	2003-12-13 21:24:58.000000000 -0800
+@@ -49,7 +49,7 @@
+ #  include <limits.h>
+ #endif
+ 
+-#ifdef STDC_HEADERS
++#if defined(STDC_HEADERS) || defined(HAVE_STRING_H)
+ #  include <string.h>
+ #endif
+ 
+--- pdcurses/pdcwin.c.ori	2002-05-25 17:13:32.000000000 -0800
++++ pdcurses/pdcwin.c	2003-12-13 21:26:02.000000000 -0800
+@@ -27,6 +27,10 @@
+ # include <memory.h>
+ #endif
+ 
++#ifdef HAVE_STRING_H
++#include <string.h>
++#endif
++
+ #ifndef HAVE_MEMMOVE
+ # define memmove PDC_memmove
+ #endif
 
     If you wish to compile with SSL enabled, you need to get and
-    compile openssl. The DJGPP port has been successfully compiled with
-    openssl-0.9.6b. After obtaining the source file, unpack it with
-    DJTARX, then apply the patch for DOS before compiling. This will
-    create a file "install.djgpp" which gives further details. The patch
-    can be obtained from the openssl-dev archives at:
-    "http://www.mail-archive.com/openssl-dev@openssl.org/msg09104/096b.pch.gz"
+    compile OpenSSL. The DJGPP port has been successfully compiled with
+    the 0.9.7 stable series of OpenSSL. DJGPP can compile OpenSSL from
+    the standard source distribution (http://www.openssl.org/). See the file "INSTALL.DJGPP" in
+    the OpenSSL distribution.
 
-    In order for lynx to be able to break out of a stuck nameserver
-    lookup or connection attempt, you should compile with -DIGNORE_CTRL_C
-    and apply the following patch to WATT-32.
-
-    --- watt32-2.1dev.rel.5/src/pc_cbrk.c.ori	Mon Jun 19 16:08:06 2000
-    +++ watt32-2.1dev.rel.5/src/pc_cbrk.c	Sun Nov 18 11:18:50 2001
-    @@ -74,6 +74,11 @@
-          longjmp (sig_jmp, 1);
-     }
-
-    +void sig_handler_watt (int sig)
-    +{
-    +   sig_handler (sig);
-    +}
-    +
-     /*
-      * want_brk = 0: no ^Break checking
-      * want_brk = 1: normal ^Break checks
 
     If you have trouble applying the patches, try using the "patch" program,
-    ("ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/pat253b.zip").
+    ("http://www.delorie.com/pub/djgpp/current/v2gnu/pat253b.zip").
     To read the Unix man style documentation, use, for example, "less"
-    ("ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/lss358b.zip").
-    Compile or place your compiled PDCurses library in /djgpp/pdcur24, and
+    ("http://www.delorie.com/pub/djgpp/current/v2gnu/lss374b.zip").
+    Compile or place your compiled PDCurses library in /djgpp/pdcur26, and
     compile or place your compiled WATT-32 library in /djgpp/watt32.  If
     using the SLANG library, put libslang.a in your DJGPP/lib directory and put
     slang.h and slcurses.h in your DJGPP/include directory, or in the
@@ -946,14 +1037,15 @@ V. Compile instructions -- 386 DOS
     "slip8250  0x60 6 3 0x2F8" so that it uses COM2 and IRQ 3, in order to
     avoid an IRQ conflict with a mouse or some other device.  Another packet
     driver is slipper.exe, which is available from many sites, including
-    "ftp://jazz.trumpet.com.au/slipper".  To remove it from memory use
+    "ftp://ftp.trumpet.com.au/slipper".  To remove it from memory use
     termin.com (usage "termin 0x60"), available in the CRYNWR package.  To
     connect over a dialup PPP connection you need dosppp or klos' pppshare.
     (Find at:
-    "http://mvmpc9.ciw.uni-karlsruhe.de/c:/user/toni/dosppp/dosppp06.zip",
-    "http://personal.redestb.es/tonilop/dosppp/dosppp06.zip", or
+    "http://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/net/dosppp/dosppp06.zip"
+    "http://www.ncf.carleton.ca/ncf/pda/computer/dos/net/dosppp06.zip"
+    "http://mvmpc200.ciw.uni-karlsruhe.de/~mvmpc9/user/TONI/dosppp/dosppp06.zip"
     "ftp://ftp.oldskool.org/pub/tvdog/internet/dosppp06.zip";
-    "http://www.klos.com/get.pppshare.html")
+    "ftp://ftp.klos.com/pub/demo/pppshare.exe")
 
     File access looks like this:
 
@@ -999,8 +1091,8 @@ V. Compile instructions -- 386 DOS
     instead of the SLANG keyhandler unless you define "NO_DJ_KEYHANDLER".
 
     #!/bin/sh
-    CFLAGS="-O2 -DIGNORE_CTRL_C -I/djgpp/pdcur24 -I/djgpp/watt32/inc" \
-    LIBS="-L/djgpp/pdcur24/lib -L/djgpp/watt32/lib -liconv" \
+    CFLAGS="-O2 -I/djgpp/pdcur26 -I/djgpp/watt32/inc" \
+    LIBS="-L/djgpp/pdcur26/lib -L/djgpp/watt32/lib -liconv" \
     ./configure --prefix=d:/djgpp/lynx-rel/lynx-cnf \
     --with-screen=curses \
     --disable-full-paths \
@@ -1008,22 +1100,20 @@ V. Compile instructions -- 386 DOS
     --enable-change-exec \
     --enable-cgi-links \
     --enable-charset-choice \
-    --enable-default-colors \
+    --enable-color-style \
     --enable-exec-links \
     --enable-externs \
     --enable-file-upload \
-    --enable-nls \
-    --enable-prettysrc \
-    --enable-read-eta \
-    --enable-source-cache \
     --enable-nested-tables \
+    --enable-nls \
     --libdir=d:/djgpp/lynx-rel/lynx-cnf \
+    --with-bzlib \
     --with-zlib \
     --with-ssl
 
 -- 1997/9/29 - D. Kaufman <dkaufman@rahul.net>
 -- 1997/10/3 - B. Schiavo <Wschiavo@concentric.net>
--- Last update - 2001/12/19
+-- Last update - 2004/01/19
 
 
 VI. General installation instructions
@@ -1083,10 +1173,15 @@ VII. Setting environment variables before running Lynx (optional)
     TEMP or TMP  Bookmarks are kept here with no HOME.  Temp files here.
     USER         Set to your login name (optional)
     LYNX_CFG     Set to the full path and filename for lynx.cfg
+    LYNX_LSS     Set to the full path and filename for lynx.lss
     LYNX_SAVE_SPACE  The (modifiable) location for downloaded file storage.
+    SSL_CERT_FILE Set to the full path and filename for your file of trusted
+                  certificates
 
     386 version only:
     WATTCP.CFG   Set to the full path for the WATTCP.CFG directory
+    RL_CLCOPY_CMD Command to copy a URL to a "clipboard" file
+    RL_PASTE_CMD  Command to go to a URL in your "clipboard" file
 
     Define these in your batch file for running Lynx.  For example, if your
     application line is "D:\win32\lynx.bat", lynx.bat for Win32 may look like:

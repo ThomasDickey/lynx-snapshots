@@ -4,7 +4,7 @@ dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ask PRCS to plug-in the project-version for the configure-script.
-dnl $Format: AC_REVISION($ProjectVersion: 2.8.5pre.2 $\""$)
+dnl $Format: AC_REVISION($ProjectVersion: 2.8.5pre.3 $\""$)
 AC_REVISION(none)
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
@@ -59,10 +59,13 @@ esac
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_LN_S
-AC_PROG_RANLIB
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 AC_CHECK_PROGS(LINT, lint alint lclint tdlint, [])
+
+AC_CHECK_TOOL(RANLIB, ranlib, ':')
+AC_CHECK_TOOL(AR, ar, ar)
+CF_SUBST(archiver options,AR_OPTS,rv)
 
 AC_AIX
 AC_ISC_POSIX
@@ -754,6 +757,14 @@ dnl 	[use_libjs=$enableval],
 dnl 	[use_libjs=no])
 dnl AC_MSG_RESULT($use_libjs)
 dnl test $use_libjs != no && AC_DEFINE(EXP_LIBJS)
+
+AC_MSG_CHECKING(if experimental locale-charset selection logic should be used)
+CF_ARG_ENABLE(locale-charset,
+[  --enable-locale-charset use experimental locale-charset selection logic],
+	[use_locale_charset=$enableval],
+	[use_locale_charset=yes])
+AC_MSG_RESULT($use_locale_charset)
+test $use_locale_charset != no && AC_DEFINE(EXP_LOCALE_CHARSET)
 
 AC_MSG_CHECKING(if experimental nested-table logic should be used)
 CF_ARG_ENABLE(nested-tables,

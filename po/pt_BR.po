@@ -4259,10 +4259,10 @@ msgstr "Distribuido pela GNU General Public License.\n"
 
 #: src/LYMain.c:3170
 msgid ""
-"See http://lynx.browser.org/ and the online help for more information.\n"
+"See http://lynx.isc.org/ and the online help for more information.\n"
 "\n"
 msgstr ""
-"Veja http://lynx.browser.org/ e o help on-line para mais informações.\n"
+"Veja http://lynx.isc.org/ e o help on-line para mais informações.\n"
 "\n"
 
 #: src/LYMain.c:3919

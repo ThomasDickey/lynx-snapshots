@@ -294,7 +294,7 @@ install-doc : $(DOCDIR) $(HELPDIR)
 	(cd $(srcdir) && tar cf - C[HO]* PROBLEMS README docs samples test ) | \
 			       ( cd $(DOCDIR) && chmod -R u+w . && tar xf - )
 	$(SHELL) -c 'if test "$(COMPRESS_PROG)" != "" ; then \
-		(cd $(DOCDIR) && $(COMPRESS_PROG) -f docs/CHANGES*.* docs/*.announce ) \
+		(cd $(DOCDIR) && $(COMPRESS_PROG) -f docs/CHANGES*.[0-9] docs/*.announce ) \
 	fi'
 	$(SHELL) -c 'for name in COPYING COPYHEADER; do \
 		cd $(HELPDIR) && rm -f $$name ;\

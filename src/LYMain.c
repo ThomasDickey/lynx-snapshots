@@ -465,6 +465,7 @@ PUBLIC BOOLEAN nested_tables =
 
 PUBLIC BOOLEAN LYShowTransferRate = TRUE;
 PUBLIC int LYTransferRate = rateKB;
+PUBLIC char * LYTransferName = NULL;
 
 PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 PUBLIC BOOLEAN LYNoISMAPifUSEMAP = FALSE; /* Omit ISMAP link if MAP present? */
@@ -501,6 +502,10 @@ PUBLIC int connect_timeout = 18000; /*=180000*0.1 - used in HTDoConnect.*/
 #ifdef EXP_JUSTIFY_ELTS
 PUBLIC BOOL ok_justify = TRUE;
 PUBLIC int justify_max_void_percent = 35;
+#endif
+
+#ifdef EXP_LOCALE_CHARSET
+PUBLIC BOOLEAN LYLocaleCharset = FALSE;
 #endif
 
 #ifndef NO_DUMP_WITH_BACKSPACES
@@ -708,6 +713,7 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(URLDomainSuffixes);
     FREE(XLoadImageCommand);
     FREE(lynx_temp_space);
+    FREE(LYTransferName);
     FREE(LYTraceLogPath);
     FREE(lynx_cfg_file);
 #if defined(USE_COLOR_STYLE)
@@ -1110,6 +1116,7 @@ PUBLIC int main ARGS2(
     MessageSecs	= SECS2Secs(MESSAGESECS);
     ReplaySecs	= SECS2Secs(REPLAYSECS);
 
+    StrAllocCopy(LYTransferName, "KiB");
     StrAllocCopy(helpfile, HELPFILE);
     StrAllocCopy(startfile, STARTFILE);
     LYEscapeStartfile(&startfile);
@@ -1554,6 +1561,10 @@ PUBLIC int main ARGS2(
      *	Process the RC file.
      */
     read_rc(NULL);
+
+#ifdef EXP_LOCALE_CHARSET
+    LYFindLocaleCharset();
+#endif
 
     /*
      * Get WWW_HOME environment variable if it exists.
@@ -3167,7 +3178,7 @@ PRIVATE int version_fun ARGS1(
 	  ));
     printf(gettext("Distributed under the GNU General Public License.\n"));
     printf(gettext(
-	  "See http://lynx.browser.org/ and the online help for more information.\n\n"
+	  "See http://lynx.isc.org/ and the online help for more information.\n\n"
 	  ));
 #ifdef USE_SSL
     printf("See http://www.moxienet.com/lynx/ for information about SSL for Lynx.\n");

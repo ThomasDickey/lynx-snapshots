@@ -4255,10 +4255,10 @@ msgstr "Распространяется в рамках Универсальной Общественной Лицензии GNU.\n"
 
 #: src/LYMain.c:3170
 msgid ""
-"See http://lynx.browser.org/ and the online help for more information.\n"
+"See http://lynx.isc.org/ and the online help for more information.\n"
 "\n"
 msgstr ""
-"См. http://lynx.browser.org/ и помощь для дополнительной информации.\n"
+"См. http://lynx.isc.org/ и помощь для дополнительной информации.\n"
 "\n"
 
 #: src/LYMain.c:3919

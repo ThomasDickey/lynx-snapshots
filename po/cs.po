@@ -4255,10 +4255,10 @@ msgstr "Roz¹iøován podle podmínek Obecné veøejné licence GNU.\n"
 
 #: src/LYMain.c:3170
 msgid ""
-"See http://lynx.browser.org/ and the online help for more information.\n"
+"See http://lynx.isc.org/ and the online help for more information.\n"
 "\n"
 msgstr ""
-"Podrobnìj¹í informace získáte na http://lynx.browser.org a z nápovìdy k programu.\n"
+"Podrobnìj¹í informace získáte na http://lynx.isc.org/ a z nápovìdy k programu.\n"
 "\n"
 
 #: src/LYMain.c:3919

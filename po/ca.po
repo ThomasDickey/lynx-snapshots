@@ -4243,10 +4243,10 @@ msgstr "Distribuït sota la Llicència Pública General.\n"
 
 #: src/LYMain.c:3170
 msgid ""
-"See http://lynx.browser.org/ and the online help for more information.\n"
+"See http://lynx.isc.org/ and the online help for more information.\n"
 "\n"
 msgstr ""
-"Vegeu http://lynx.browser.org/ i l'ajuda en línia per a més informació.\n"
+"Vegeu http://lynx.isc.org/ i l'ajuda en línia per a més informació.\n"
 "\n"
 
 #: src/LYMain.c:3919

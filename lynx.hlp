@@ -815,6 +815,12 @@
                            Lynx   Users   Guide   for  additional
                            details and examples.
 
+       SSL_CERT_DIR        Set  to   the   directory   containing
+                           trusted certificates.
+
+       SSL_CERT_FILE       Set  to the full path and filename for
+                           your file of trusted certificates.
+
        WWW_access_GATEWAY  Lynx still  supports  use  of  gateway
                            servers,  with  the  servers specified
                            via   "WWW_access_GATEWAY"   variables

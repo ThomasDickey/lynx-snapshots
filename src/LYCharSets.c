@@ -378,8 +378,6 @@ PUBLIC LYUCcharset LYCharSet_UC[MAXCHARSETS]=
                        UCT_REP_SUBSETOF_LAT1,
                        UCT_CP_SUBSETOF_LAT1,   UCT_R_ASCII,UCT_R_ASCII},
 
-/*  {-1,"iso-8859-15",   UCT_ENC_8BIT,0,0,0,     UCT_R_8BIT,UCT_R_ASCII}, */
-
 };
 
 /*
@@ -709,6 +707,8 @@ PUBLIC int UCGetLYhndl_byAnyName ARGS1 (char *, value)
 
     LYTrimTrailing(value);
     if (value == NULL) return -1;
+
+    CTRACE((tfp, "UCGetLYhndl_byAnyName(%s)\n", value));
 
     /* search by name */
     for (i = 0; (i < MAXCHARSETS && LYchar_set_names[i]); i++) {

@@ -4255,10 +4255,10 @@ msgstr "GNU 一般公有使用許諾契約書の下で配布されています。\n"
 
 #: src/LYMain.c:3170
 msgid ""
-"See http://lynx.browser.org/ and the online help for more information.\n"
+"See http://lynx.isc.org/ and the online help for more information.\n"
 "\n"
 msgstr ""
-"詳しくは http://lynx.browser.org/ とオンラインヘルプをご覧ください。\n"
+"詳しくは http://lynx.isc.org/ とオンラインヘルプをご覧ください。\n"
 "\n"
 
 #: src/LYMain.c:3919

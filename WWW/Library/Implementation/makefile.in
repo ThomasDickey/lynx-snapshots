@@ -167,7 +167,7 @@ depend :
 #  On SGI, ranlib is unnecessary and does not exist so we ignore errors
 # for that step
 $(LOB)/libwww.a : $(COMMON)
-	ar r $(LOB)/libwww.a $(COMMON)
+	@AR@ @AR_OPTS@ $(LOB)/libwww.a $(COMMON)
 	-$(RANLIB) $(LOB)/libwww.a
 
 #	Clean up everything generatable except final products

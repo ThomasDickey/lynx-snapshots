@@ -1,13 +1,13 @@
 <!DOCTYPE html PUBLIC "-//IETF//DTD HTML 3.0//EN">
 <html>
 <head>
-<title>Lynx Users Guide v2.8.4</title>
+<title>Lynx Users Guide v2.8.5</title>
 <link rev="made" href="mailto:lynx-dev@sig.net">
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 
 <body>
-<h1>Lynx Users Guide v2.8.4</h1>
+<h1>Lynx Users Guide v2.8.5</h1>
 
 Lynx is a fully-featured <em>World Wide Web</em> (<em>WWW</em>) client
 for users running cursor-addressable, character-cell display devices (e.g.,
@@ -517,6 +517,7 @@ HREF="keystrokes/option_help.html">HELP!</A>
   Keyboard layout                  : [YAWERTY Cyrillic, for DEC LK201 kbd]
 
   Display and Character Sets
+  Use locale-based character set(!): [OFF]
   Display character set            : [Cyrillic (ISO-8859-5)..........]
   Assumed document character set(!): [iso-8859-1......]
   Raw 8-bit (!)                    : [OFF]
@@ -541,6 +542,7 @@ HREF="keystrokes/option_help.html">HELP!</A>
   FTP sort criteria                : [By Name]
   Local directory sort criteria    : [Mixed style......]
   Local directory sort order       : [By name..........]
+  Show transfer rate               : [Show KiB/sec, ETA]
   Show dot files                   : [ON.]
   Execution links                  : [FOR LOCAL FILES ONLY]
 
@@ -560,7 +562,7 @@ and is accessed by setting FORMS_OPTIONS to TRUE in
 <A HREF="#lynx.cfg">lynx.cfg</A>.
 <pre>
 
-             Options Menu (Lynx Version 2.8.4rel.1)
+             Options Menu (Lynx Version 2.8.5rel.1)
 
      (E)ditor                     : emacs
      (D)ISPLAY variable           : aixtest.cc.ukans.edu:0.0
@@ -706,6 +708,12 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
             of preference explicit by using q factors as defined by the
             HTTP protocol, for servers which understand it, for example:
             iso-8859-5,&nbsp;utf-8;q=0.8
+
+   <dt>Use locale-based character set
+        <dd>This option allows you to request lynx to obtain a MIME name
+            from the operating system which corresponds to your locale
+            setting.  If successful, it overrides the normal setting of
+            the display character set.
 
    <dt>Display Character set
         <dd>This option allows you to set up the default character set for
@@ -917,7 +925,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
         <dd>The header string which Lynx sends to HTTP servers to indicate the
             User-Agent is displayed here.  Changes may be disallowed via
             the <em>-restrictions</em> switch.  Otherwise, the header can be
-            changed temporarily to a string such as <em>L_y_n_x/2.8.4</em>
+            changed temporarily to a string such as <em>L_y_n_x/2.8.5</em>
             for access to sites which discriminate against Lynx based on
             checks for the presence of &quot;Lynx&quot; in the header.  If
             the User-Agent header has been changed, it can
@@ -2445,9 +2453,9 @@ where
                     listings.
              <dt><code>-find_leaks</code>
                 <dd>toggles the memory leak checking off.
-		    Normally this
-		    is not compiled-into your executable, but when it is,
-		    it can be disabled for a session.
+                    Normally this
+                    is not compiled-into your executable, but when it is,
+                    it can be disabled for a session.
              <dt><code>-force_empty_hrefless_a</code>
                 <dd>force HREF-less 'A' elements to be empty (close them as soon as they are seen).
              <dt><code>-force_html</code>
@@ -2787,7 +2795,7 @@ where
              <dt><code>-show_rate</code>
                 <dd>If enabled the transfer rate is shown in bytes/second.  If
                     disabled, no transfer rate is shown.  Use lynx.cfg or the
-                    options menu to select KB/second and/or ETA.
+                    options menu to select KiB/second and/or ETA.
              <dt><code>-soft_dquotes</code>
                 <dd>toggles emulation of the old Netscape and Mosaic bug which
                     treated '<em>&gt;</em>' as a co-terminator for
@@ -3017,6 +3025,7 @@ The 2.8 development set was released as v2.8.1 in October 1998.<br>
 The 2.8.1 development set was released as v2.8.2 in June 1999.<br>
 The 2.8.2 development set was released as v2.8.3 in April 2000.<br>
 The 2.8.3 development set was released as v2.8.4 in July 2001.<br>
+The 2.8.4 development set was released as v2.8.5 in January 2004.<br>
 
 <p>Since early 1997, the Lynx code has expanded into autoconfigure and
 PC versions.  The branching of the Lynx source base from a single

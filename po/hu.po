@@ -4253,9 +4253,9 @@ msgstr "A GNU Általános Nyilvános Licensz szerint kiadva.\n"
 
 #: src/LYMain.c:3170
 msgid ""
-"See http://lynx.browser.org/ and the online help for more information.\n"
+"See http://lynx.isc.org/ and the online help for more information.\n"
 "\n"
-msgstr "Nézze meg a súgót és a http://lynx.browser.org/-ot, ahol segítséget kaphat.\n"
+msgstr "Nézze meg a súgót és a http://lynx.isc.org/-ot, ahol segítséget kaphat.\n"
 
 #: src/LYMain.c:3919
 #, c-format

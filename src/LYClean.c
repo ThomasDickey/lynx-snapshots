@@ -37,7 +37,7 @@ PUBLIC void cleanup_sig ARGS1(
 #ifdef DJGPP
 	if (wathndlcbrk) {
 	    sig_handler_watt(sig);	/* Use WATT-32 signal handler */
-	}				/* Requires patch to WATT-32 */
+	}
 #endif /* DJGPP */
 	signal(SIGINT, cleanup_sig);
 	sigint = TRUE;
