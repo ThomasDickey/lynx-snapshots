@@ -546,11 +546,11 @@ VI. General installation instructions
     build, be certain to do a "make clean" (or "make distclean" for those
     using auto-configure) before attempting to compile again.
 
-    If something doesn't work, or you can't get it to compile at all, or
-    you can't figure out what one of the defines means, read the PROBLEMS
-    file and *.announce files in the docs subdirectory.  The docs/CHANGES*
-    files record the complete history of Lynx development and are an
-    invaluable resource for understanding how Lynx should perform.
+    If something doesn't work, or you can't get Lynx to even compile, or you
+    don't understand what one of the defines means, read the PROBLEMS file,
+    and the README.defines and *.announce files in the docs subdirectory.
+    The docs/CHANGES* files record the entire development history of Lynx
+    and are an invaluable resource for understanding how Lynx should perform.
 
     If you still have difficulties, send an email message to the Lynx-Dev
     mailing list (see the README file).  Try to include pertinent information
@@ -703,4 +703,4 @@ VIII. Acknowledgment
    Thanks to the many volunteers who offered suggestions for making this
    installation manual as accurate and complete as possible.
 
--- 1997/11/14 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
+-- 1997/11/18 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>

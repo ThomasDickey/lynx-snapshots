@@ -31,9 +31,12 @@ GLOBALREF HTProtocol HTSNewsPost;
 GLOBALREF HTProtocol HTSNewsReply;
 #endif /* GLOBALREF_IS_MACRO */
 
-extern void HTSetNewsHost PARAMS((CONST char *value));
+extern void HTSetNewsHost PARAMS((
+	CONST char *	value));
 extern CONST char * HTGetNewsHost NOPARAMS;
 extern char * HTNewsHost;
+
+extern void HTClearNNTPAuthInfo NOPARAMS;
 
 #endif /* HTNEWS_H */
 

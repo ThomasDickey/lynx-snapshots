@@ -205,10 +205,14 @@ draw_options:
      *  might have non-ASCII or multibyte/CJK characters. - FM
      */
     response = 0;
+#ifdef FANCY_CURSES
     if (enable_scrollback)
 	clear();
     else
 	erase();
+#else
+    clear();
+#endif
     move(0, 5);
 
     lynx_start_h1_color ();
@@ -1795,10 +1799,14 @@ draw_bookmark_list:
      *  to increase the chances that any non-ASCII or multibyte/CJK
      *  characters will be handled properly. - FM
      */
+#ifdef FANCY_CURSES
     if (enable_scrollback)
 	clear();
     else
 	erase();
+#else
+    clear();
+#endif
     move(0, 5);
 
     lynx_start_h1_color ();

@@ -88,6 +88,13 @@
 		requiring pairs of two successive dashes to delimit
 		comments within the angle-brackets.
 
+       _      - Clears all authorization info for the current session.  Can
+                be used when leaving one's terminal without ending the Lynx
+                session, to guard against someone else retrieving protected
+                documents with previously entered username/password info.
+                Note that any protected documents that are still in cache
+                can still be accessed.
+
        `      -	Toggles minimal or valid comment parsing. When minimal, any
        		two successive dashes followed by a close-angle-bracket will
 		be treated as a comment terminator, emulating the parsing bug

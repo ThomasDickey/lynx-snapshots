@@ -35,7 +35,7 @@ mandir= @mandir@/man1
 ## Where you want the lynx.cfg file installed
 libdir= @libdir@
 
-installbin= @INSTALL_PROGRAM@ -c -s -m 755
+installbin= @INSTALL_PROGRAM@ -s -m 755
 installdoc= @INSTALL_DATA@
 
 ##set the relative location of the WWW library Implementation directory,
@@ -199,8 +199,8 @@ distclean: clean
 	-cd src/chrtrans && $(MAKE) $@
 	-rm -f *~ *.bak *.sav
 	-rm -f WWW/Library/unix/makefile src/makefile src/chrtrans/makefile
-	-rmdir WWW/Library/unix && rmdir WWW/Library && rmdir WWW
-	-rmdir src/chrtrans && rmdir src
+	@SRCDIR_CLEAN@-rmdir WWW/Library/unix && rmdir WWW/Library && rmdir WWW
+	@SRCDIR_CLEAN@-rmdir src/chrtrans && rmdir src
 	-rm -f makefile lynx_cfg.h config.status config.log config.cache
 	-rm -f lynx
 

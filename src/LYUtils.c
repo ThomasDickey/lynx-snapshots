@@ -347,8 +347,7 @@ PUBLIC void highlight ARGS3(
 		    }
 		}
 		if (utf_extra) {
-		    strncpy(&tmp[1], &data[itmp+1], utf_extra);
-		    tmp[utf_extra+1] = '\0';
+		    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 		    itmp += utf_extra;
 		    /*
 		     *  Start emphasis immediately if we are
@@ -445,8 +444,7 @@ PUBLIC void highlight ARGS3(
 			}
 		    }
 		    if (utf_extra) {
-			strncpy(&tmp[1], &data[itmp+1], utf_extra);
-			tmp[(utf_extra + 1)] = '\0';
+			LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 			itmp += utf_extra;
 			/*
 			 *  Make sure we don't restore emphasis to
@@ -625,8 +623,7 @@ highlight_hit_within_hightext:
 		}
 	    }
 	    if (utf_extra) {
-		strncpy(&tmp[1], &data[itmp+1], utf_extra);
-		tmp[utf_extra+1] = '\0';
+		LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 		itmp += utf_extra;
 		/*
 		 *  Start emphasis immediately if we are making
@@ -729,8 +726,7 @@ highlight_hit_within_hightext:
 		    }
 		}
 		if (utf_extra) {
-		    strncpy(&tmp[1], &data[itmp+1], utf_extra);
-		    tmp[utf_extra+1] = '\0';
+		    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 		    itmp += utf_extra;
 		    /*
 		     *  Make sure we don't restore emphasis to
@@ -898,8 +894,7 @@ highlight_hit_within_hightext:
 			    }
 			}
 			if (utf_extra) {
-			    strncpy(&tmp[1], &data[itmp+1], utf_extra);
-			    tmp[(utf_extra + 1)] = '\0';
+			    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 			    itmp += utf_extra;
 			    /*
 			     *  Make sure we don't restore emphasis to
@@ -1082,8 +1077,7 @@ highlight_search_hightext2:
 		    }
 		}
 		if (utf_extra) {
-		    strncpy(&tmp[1], &data[itmp+1], utf_extra);
-		    tmp[utf_extra+1] = '\0';
+		    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 		    itmp += utf_extra;
 		    /*
 		     *  Start emphasis immediately if we are
@@ -1180,8 +1174,7 @@ highlight_search_hightext2:
 			}
 		    }
 		    if (utf_extra) {
-			strncpy(&tmp[1], &data[itmp+1], utf_extra);
-			tmp[(utf_extra + 1)] = '\0';
+			LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 			itmp += utf_extra;
 			/*
 			 *  Make sure we don't restore emphasis to
@@ -1267,7 +1260,6 @@ highlight_search_hightext2:
 					      (offset - Offset),
 					      utf_flag);
 		}
-		data = (Data + (offset - Offset));
 		if ((case_sensitive ?
 		     (cp = LYno_attr_mbcs_strstr(data,
 						 target,
@@ -1360,8 +1352,7 @@ highlight_hit_within_hightext2:
 		}
 	    }
 	    if (utf_extra) {
-		strncpy(&tmp[1], &data[itmp+1], utf_extra);
-		tmp[utf_extra+1] = '\0';
+		LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 		itmp += utf_extra;
 		/*
 		 *  Start emphasis immediately if we are making
@@ -1464,8 +1455,7 @@ highlight_hit_within_hightext2:
 		    }
 		}
 		if (utf_extra) {
-		    strncpy(&tmp[1], &data[itmp+1], utf_extra);
-		    tmp[utf_extra+1] = '\0';
+		    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 		    itmp += utf_extra;
 		    /*
 		     *  Make sure we don't restore emphasis to
@@ -1633,8 +1623,7 @@ highlight_hit_within_hightext2:
 			    }
 			}
 			if (utf_extra) {
-			    strncpy(&tmp[1], &data[itmp+1], utf_extra);
-			    tmp[(utf_extra + 1)] = '\0';
+			    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 			    itmp += utf_extra;
 			    /*
 			     *  Make sure we don't restore emphasis to
@@ -3421,7 +3410,7 @@ PUBLIC void tempname ARGS2(
 		fclose(fp);
 		if (TRACE)
 		    fprintf(stderr,
-		    	    "tempname: file '%s' already exits!\n",
+		    	    "tempname: file '%s' already exists!\n",
 			    namebuffer);
 		counter++;
 		continue;
@@ -3439,7 +3428,7 @@ PUBLIC void tempname ARGS2(
 		fclose(fp);
 		if (TRACE)
 		    fprintf(stderr,
-		    	    "tempname: file '%s' already exits!\n",
+		    	    "tempname: file '%s' already exists!\n",
 			    namebuffer);
 		counter++;
 		continue;
@@ -3457,7 +3446,7 @@ PUBLIC void tempname ARGS2(
 		fclose(fp);
 		if (TRACE)
 		    fprintf(stderr,
-		    	    "tempname: file '%s' already exits!\n",
+		    	    "tempname: file '%s' already exists!\n",
 			    namebuffer);
 		continue;
 	    }

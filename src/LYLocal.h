@@ -7,8 +7,10 @@
 #include <types.h>
 #include <stat.h>
 #else
+#if 0 /* already included in tcp.h */
 #include <sys/types.h>
 #include <sys/stat.h>
+#endif
 #endif /* VMS */
 
 #ifndef S_IRWXU 

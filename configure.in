@@ -47,7 +47,7 @@ CF_ARG_ENABLE(debug,
 AC_MSG_RESULT($with_debug)
 if test "$with_debug" = "yes" ; then
 	case $host_os in
-	ultrix*|osf4.*)
+	ultrix*|osf[34].*)
 		CF_STRIP_O_OPT(CFLAGS)
 		if test -z "$GCC" ; then
 			CFLAGS="$CFLAGS -g3"
@@ -288,6 +288,7 @@ dnl --------------------------------------------------------------------------
 AC_HEADER_STDC
 AC_HEADER_TIME
 AC_HEADER_DIRENT
+dnl Don't check for sys/wait.h here since it is covered by another test.
 AC_CHECK_HEADERS( \
 	fcntl.h \
 	limits.h \
@@ -303,6 +304,7 @@ AC_CHECK_HEADERS( \
 )
 CF_TERMIO_AND_TERMIOS
 CF_FUNC_WAIT
+AC_TYPE_MODE_T
 
 dnl --------------------------------------------------------------------------
 dnl Checks for library units
@@ -313,10 +315,18 @@ CF_REMOVE_BROKEN
 AC_CHECK_FUNCS( \
 	cuserid \
 	getcwd \
+	getgroups \
 	putenv \
 	readdir \
 	waitpid \
 )
+AC_REPLACE_FUNCS( \
+	mktime \
+	strstr \
+)
+
+CF_CHECK_FUNCDECLS([#include <string.h>], strstr)
+CF_CHECK_FUNCDECLS([#include <grp.h>], getgrgid getgrnam)
 
 dnl --------------------------------------------------------------------------
 dnl Checks for external-data
@@ -491,11 +501,15 @@ AC_MSG_RESULT($enableval)
 ### Finally, build config.h and the makefiles
 CFLAGS="$CFLAGS $EXTRA_CFLAGS"
 srcdir="$srcdir"
+SRCDIR_CLEAN="#"
 if test -n "$srcdir" ; then
 	echo srcdir is $srcdir
 	$srcdir/mkdirs.sh WWW/Library/unix
 	$srcdir/mkdirs.sh src/chrtrans
+	test "$srcdir" != "." && SRCDIR_CLEAN=""
 fi
+
+AC_SUBST(SRCDIR_CLEAN)
 AC_OUTPUT(
 	makefile \
 	WWW/Library/unix/makefile \

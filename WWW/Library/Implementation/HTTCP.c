@@ -346,15 +346,15 @@ PUBLIC int HTParseInet ARGS2(
         if (port[0] >= '0' && port[0] <= '9') {
 #ifdef unix
 	    sin->sin_port = htons(atol(port));
-#else /* VMS */
+#else /* VMS: */
 #ifdef DECNET
-	    sin->sdn_objnum = (unsigned char) (strtol(port, (char**)0 , 10));
+	    sin->sdn_objnum = (unsigned char)(strtol(port, (char**)0, 10));
 #else
-	    sin->sin_port = htons((unsigned short) strtol(port,(char**)0,10));
+	    sin->sin_port = htons((unsigned short)strtol(port,(char**)0,10));
 #endif /* Decnet */
 #endif /* Unix vs. VMS */
-	} else {
 #ifdef SUPPRESS		/* 1. crashes!?!.  2. Not recommended */
+	} else {
 	    struct servent * serv = getservbyname(port, (char*)0);
 	    if (serv) {
 		sin->sin_port = serv->s_port;
@@ -371,25 +371,27 @@ PUBLIC int HTParseInet ARGS2(
     **  it's probably worth waiting until the Phase transition from IV to V.
     */
     sin->sdn_nam.n_len = min(DN_MAXNAML, strlen(host));  /* <=6 in phase 4 */
-    strncpy (sin->sdn_nam.n_name, host, sin->sdn_nam.n_len + 1);
+    strncpy(sin->sdn_nam.n_name, host, sin->sdn_nam.n_len + 1);
     if (TRACE) {
         fprintf(stderr,  
 		"DECnet: Parsed address as object number %d on host %.6s...\n",
 		sin->sdn_objnum, host);
     }
-#else  /* parse Internet host */
+#else  /* parse Internet host: */
 
     if (*host >= '0' && *host <= '9') {   /* Test for numeric node address: */
 	char *strptr = host;
 	while (*strptr) {
-	    if (*strptr == '.')
+	    if (*strptr == '.') {
 		dotcount_ip++;
-	    else if (!isdigit(*strptr))
+	    } else if (!isdigit(*strptr)) {
 		break;
+	    }
 	    strptr++;
 	}
-	if (*strptr)		/* found non-numeric, assume domain name */
+	if (*strptr) {		/* found non-numeric, assume domain name */
 	    dotcount_ip = 0;
+	}
     }
 
     /*
@@ -733,7 +735,7 @@ PUBLIC int HTDoConnect ARGS4(
     }
     FREE(p1);
 
-    line = (char *)malloc(strlen(host) + strlen(protocol) + 128);
+    line = (char *)calloc(1, (strlen(host) + strlen(protocol) + 128));
     if (line == NULL)
 	outofmem(__FILE__, "HTDoConnect");
     sprintf (line, "Looking up %s.", host);

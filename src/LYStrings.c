@@ -155,7 +155,7 @@ PUBLIC char * LYmbcsstrncpy ARGS5(char *,dst, CONST char *,src, int,n_bytes,
 /*
  *  LYmbcs_skip_glyphs() skips a given number of display positions
  *  in a string and returns the resulting pointer.  It takes account
- *  of UTF-8 encoded characters. - kw
+ *  of UTF-8 encoded characters. - KW
  */
 PUBLIC char * LYmbcs_skip_glyphs ARGS3(
 	char *,		data,
@@ -172,7 +172,7 @@ PUBLIC char * LYmbcs_skip_glyphs ARGS3(
     if (!utf_flag)
 	return (data + n_glyphs);
 
-    while(*data) {
+    while (*data) {
 	if (IS_NEW_GLYPH(*data)) {
 	    if (i_glyphs++ >= n_glyphs) {
 		return data;
@@ -1086,7 +1086,7 @@ again:
 	    return(-1);
             break;
 
-	case LYE_LINKN:
+	case LYE_LKCMD:
 	    /*
 	     *  Used only in form_getstr() for invoking
 	     *  the LYK_F_LINK_NUM prompt when in form

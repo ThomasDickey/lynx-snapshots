@@ -2,9 +2,6 @@
 #define LYSTRINGS_H
 
 #include <string.h>
-#ifdef __STRICT_BSD__
-extern char *strstr();
-#endif /* __STRICT_BSD__ */
 
 extern int get_mouse_link NOPARAMS;
 extern char * LYstrncpy PARAMS((
@@ -22,6 +19,19 @@ extern char * LYstrstr PARAMS((
 	char *		chptr,
 	char *		tarptr));
 
+extern char * LYmbcsstrncpy PARAMS((
+	char *		dst,
+	CONST char *	src,
+	int		n_bytes,
+	int		n_glyphs,
+	int		enc));
+extern char * LYmbcs_skip_glyphs PARAMS((
+	char *		data,
+	int		n_glyphs,
+	BOOL		utf_flag));
+extern int LYmbcsstrlen PARAMS((
+	char *		str,
+	BOOL		utf_flag));
 extern char * LYno_attr_mbcs_strstr PARAMS((
 	char *		chptr,
 	char *		tarptr,
@@ -34,24 +44,6 @@ extern char * LYno_attr_mbcs_case_strstr PARAMS((
 	BOOL		utf_flag,
 	int *		nstartp,
 	int *		nendp));
-#ifdef EXP_CHARTRANS
-extern int LYmbcsstrlen PARAMS((
-	char *		str,
-	BOOL		utf_flag));
-extern char * LYmbcs_skip_glyphs PARAMS((
-	char *		data,
-	int		n_glyphs,
-	BOOL		utf_flag));
-extern char * LYmbcsstrncpy PARAMS((
-	char *		dst,
-	CONST char *	src,
-	int		n_bytes,
-	int		n_glyphs,
-	int		enc));
-#else
-#define LYmbcsstrlen(str,utf_flag) strlen(str)
-#define LYmbcsstrncpy(dest,src,n,n_glyphs,enc) LYstrncpy(dest, src, n)
-#endif
 
 extern char * LYno_attr_char_strstr PARAMS((
 	char *		chptr,
@@ -144,9 +136,9 @@ typedef struct _EditFieldData {
 #define LYE_LOWER (LYE_BACKW +1)  /* Lower case the line   */
 #define LYE_UPPER (LYE_LOWER +1)  /* Upper case the line   */
 
-#define LYE_LINKN (LYE_UPPER +1)  /* Invoke F_LINK_NUM	   */
+#define LYE_LKCMD (LYE_UPPER +1)  /* Invoke command prompt */
 
-#define LYE_AIX   (LYE_LINKN +1)  /* Hex 97		   */
+#define LYE_AIX   (LYE_LKCMD +1)  /* Hex 97		   */
 
 extern void LYSetupEdit PARAMS((
 	EditFieldData *	edit,

@@ -2135,6 +2135,131 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    }
 		    continue;
 		}
+		    if ((code == 1) ||
+			(code > 129 && code < 156)) {
+			/*
+			**  Assume these are MicroSoft code points,
+			**  inflicted on us by FrontPage. - FM
+	  		*/
+			switch (code) {
+			    case 1:
+			        /*
+				**  WHITE SMILING FACE
+				*/
+				code = 0x263a;
+				break;
+			    case 130:
+				/*
+				**  SINGLE LOW-9 QUOTATION MARK (sbquo)
+				*/
+				code = 0x201a;
+				break;
+			    case 132:
+				/*
+				**  DOUBLE LOW-9 QUOTATION MARK (bdquo)
+				*/
+				code = 0x201e;
+				break;
+			    case 133:
+				/*
+				**  HORIZONTAL ELLIPSIS (hellip)
+				*/
+				code = 0x2026;
+				break;
+			    case 134:
+				/*
+				**  DAGGER (dagger)
+				*/
+				code = 0x2020;
+				break;
+			    case 135:
+				/*
+				**  DOUBLE DAGGER (Dagger)
+				*/
+				code = 0x2021;
+				break;
+			    case 137:
+				/*
+				**  PER MILLE SIGN (permil)
+				*/
+				code = 0x2030;
+				break;
+			    case 139:
+				/*
+				**  SINGLE LEFT-POINTING ANGLE QUOTATION MARK
+				**  (lsaquo)
+				*/
+				code = 0x2039;
+				break;
+			    case 145:
+				/*
+				**  LEFT SINGLE QUOTATION MARK (lsquo)
+				*/
+				code = 0x2018;
+				break;
+			    case 146:
+				/*
+				**  RIGHT SINGLE QUOTATION MARK (rsquo)
+				*/
+				code = 0x2019;
+				break;
+			    case 147:
+				/*
+				**  LEFT DOUBLE QUOTATION MARK (ldquo)
+				*/
+				code = 0x201c;
+				break;
+			    case 148:
+				/*
+				**  RIGHT DOUBLE QUOTATION MARK (rdquo)
+				*/
+				code = 0x201d;
+				break;
+			    case 149:
+				/*
+				**  BULLET (bull)
+				*/
+				code = 0x2022;
+				break;
+			    case 150:
+				/*
+				**  EN DASH (ndash)
+				*/
+				code = 0x2013;
+				break;
+			    case 151:
+				/*
+				**  EM DASH (mdash)
+				*/
+				code = 0x2014;
+				break;
+			    case 152:
+				/*
+				**  SMALL TILDE (tilde)
+				*/
+				code = 0x02dc;
+				break;
+			    case 153:
+				/*
+				**  TRADE MARK SIGN (trade)
+				*/
+				code = 0x2122;
+				break;
+			    case 155:
+				/*
+				**  SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
+				**  (rsaquo)
+				*/
+				code = 0x203a;
+				break;
+			    default:
+				/*
+				**  Do not attempt a conversion
+				**  to valid Unicode values.
+				*/
+				break;
+			}
+		    }
 		/*
 		    **  For 173 (shy), use that value if it's
 		    **  a hidden INPUT, otherwise ignore it
@@ -2155,6 +2280,20 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    }
 		    continue;
 		}
+		    /*
+		    **  For 8211 (ndash or endash), and 8212
+		    **  (mdash or emdash), use an ASCII hyphen
+		    **  ('-'). - FM
+		    */
+		    if (code == 8211 ||
+		        code == 8212) {
+			HTChunkPutc(s, '-');
+			if (cpe != ';' && cpe != '\0') {
+			    p--;
+			    *p = cpe;
+			}
+			continue;
+		    }
 		/*
 		**  Seek a translation from the chartrans tables.
 		*/
@@ -2289,6 +2428,40 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    }
 		    continue;
 		    /*
+		    **  Ignore (8204) zwnj, if we get to here. - FM
+ 		    */
+		} else if (code == 8204) {
+			if (TRACE) {
+			    fprintf(stderr,
+				    "LYUnEscapeEntities: Ignoring '%s%s;'.\n",
+				    (isHex ? "&#x" : "&#"),
+				    cp);
+			}
+			if (cpe != ';' && cpe != '\0') {
+			    p--;
+			    *p = cpe;
+			}
+			continue;
+		    } else
+		    /*
+		    **  Ignore 8205 (zwj),
+		    **  8206 (lrm), and 8207 (rln), if we get to here. - FM
+		    */
+		    if (code == 8205 ||
+			code == 8206 ||
+			code == 8207) {
+			if (TRACE) {
+			    fprintf(stderr,
+				    "LYUnEscapeEntities: Ignoring '%s%s'.\n",
+				    (isHex ? "&#x" : "&#"),
+				    cp);
+			}
+			if (cpe != ';' && cpe != '\0') {
+			    p--;
+			    *p = cpe;
+			}
+			continue;
+		    /*
 		    **  Show the numeric entity if the value:
 		    **  (1) Is greater than 255 and unhandled Unicode.
 		    */
@@ -2397,6 +2570,77 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    cp++;
 		cpe = *cp;
 		*cp = '\0';
+
+		/*
+		**  For 160 (nbsp), use an ASCII space (32) if
+		**  plain_space or hidden is TRUE, otherwise use
+		**  the Lynx special character. - FM
+		*/
+		if (!strcmp(p, "nbsp")) {
+		    if (hidden || plain_space) {
+			HTChunkPutc(s, ' ');
+		    } else {
+			HTChunkPutc(s, HT_NON_BREAK_SPACE);
+		    }
+		    *cp = cpe;
+		    if (*cp != ';')
+			p = cp;
+		    else
+			p = (cp+1);
+		    continue;
+		}
+		/*
+		**  For 173 (shy), skip it if plain_space or hidden is
+		**  TRUE, otherwise use the Lynx special character. - FM
+		*/
+		if (!strcmp(p, "shy")) {
+		    if (!(plain_space || hidden)) {
+			HTChunkPutc(s, LY_SOFT_HYPHEN);
+		    }
+		    *cp = cpe;
+		    if (*cp != ';')
+			p = cp;
+		    else
+			p = (cp+1);
+		    continue;
+		}
+		/*
+		**  For 8194 (ensp), 8195 (emsp), and 8201
+		**  (thinsp), use an ASCII space (32) if
+		**  hidden or plain_space is TRUE, otherwise
+		**  use the Lynx special character. - FM
+		*/
+		if (!strcmp(p, "ensp") || !strcmp(p, "emsp") ||
+		    !strcmp(p, "thinsp")) {
+		    if (hidden || plain_space) {
+			HTChunkPutc(s, ' ');
+		    } else {
+			HTChunkPutc(s, HT_EM_SPACE);
+		    }
+		    *cp = cpe;
+		    if (*cp != ';')
+			p = cp;
+		    else
+			p = (cp+1);
+		    continue;
+		}
+		/*
+		**  For 8211 (ndash or endash), and 8212
+		**  (mdash or emdash), use an ASCII space
+		**  (32). - FM
+		*/
+		if (!strcmp(p, "ndash") ||
+		    !strcmp(p, "endash") ||
+		    !strcmp(p, "mdash") ||
+		    !strcmp(p, "emdash")) {
+		    HTChunkPutc(s, '-');
+		    *cp = cpe;
+		    if (*cp != ';')
+			p = cp;
+		    else
+			p = (cp+1);
+		    continue;
+		}
 		for (low = 0, high = HTML_dtd.number_of_entities;
 		     high > low ;
 		     diff < 0 ? (low = i+1) : (high = i)) {
@@ -2675,6 +2919,57 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 				    p = (cp+1);
 				break;
 			    }
+		    if ((chk && uck == -4) &&
+			(uck = UCTransUniCharStr(replace_buf,
+						 60, code,
+					      UCGetLYhndl_byMIME("us-ascii"),
+						 0) >= 0)) {
+			/*
+			**  Got a replacement string (yippey). - FM
+			*/
+			HTChunkPuts(s, replace_buf);
+			*cp = cpe;
+			if (*cp != ';')
+			    p = cp;
+			else
+			    p = (cp+1);
+			continue;
+		    }
+		    /*
+		    **  Ignore (8204) zwnj, if we get to here. - FM
+ 		    */
+		    if (!strcmp(p, "zwnj")) {
+			if (TRACE) {
+			    fprintf(stderr,
+				    "LYUnEscapeEntities: Ignoring '%s'.\n",
+				    p);
+			}
+			*cp = cpe;
+			if (*cp != ';')
+			    p = cp;
+			else
+			    p = (cp+1);
+			continue;
+		    }
+		    /*
+		    **  Ignore 8205 (zwj),
+		    **  8206 (lrm), and 8207 (rln), if we get to here. - FM
+		    */
+		    if (!strcmp(p, "zwj") ||
+			!strcmp(p, "lrm") ||
+			!strcmp(p, "rlm")) {
+			if (TRACE) {
+			    fprintf(stderr,
+				    "LYUnEscapeEntities: Ignoring '%s'.\n",
+				    p);
+			}
+			*cp = cpe;
+			if (*cp != ';')
+			    p = cp;
+			else
+			    p = (cp+1);
+			continue;
+		    }
 			    /*
 			    **  Seek a translation from the chartrans tables.
 			    */
@@ -3889,7 +4184,7 @@ PUBLIC void LYHandleSELECT ARGS5(
 	if (!me->inFORM) {
 	    if (TRACE) {
 		fprintf(stderr,
-			"HTML: ***** SELECT start tag not within FORM element *****\n");
+			"Bad HTML: SELECT start tag not within FORM element *****\n");
 	    } else if (!me->inBadHTML) {
 		_statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -3912,7 +4207,7 @@ PUBLIC void LYHandleSELECT ARGS5(
 	 */
 	if (me->inTEXTAREA) {
 	    if (TRACE) {
-		fprintf(stderr, "HTML: ***** Missing TEXTAREA end tag *****\n");
+		fprintf(stderr, "Bad HTML: Missing TEXTAREA end tag *****\n");
 	    } else if (!me->inBadHTML) {
 		_statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -3998,7 +4293,7 @@ PUBLIC void LYHandleSELECT ARGS5(
 	 */
 	if (!me->inSELECT) {
 	    if (TRACE) {
-		fprintf(stderr, "HTML: ***** Unmatched SELECT end tag *****\n");
+		fprintf(stderr, "Bad HTML: Unmatched SELECT end tag *****\n");
 	    } else if (!me->inBadHTML) {
 		_statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;

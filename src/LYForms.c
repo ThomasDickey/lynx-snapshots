@@ -358,10 +358,15 @@ again:
 	action = EditBinding(ch);
 	if (action == LYE_ENTER)
 	    break;
-	if (action == LYE_LINKN) {
-	    if ((ch = LYReverseKeymap(LYK_F_LINK_NUM)) <= 0) {
-		ch = DO_NOTHING;
+	if (action == LYE_LKCMD) {
+	    _statusline(ENTER_LYNX_COMMAND);
+	    ch = LYgetch();
+#ifdef VMS
+	    if (HadVMSInterrupt) {
+		HadVMSInterrupt = FALSE;
+		ch = 7;
 	    }
+#endif /* VMS */
 	    break;
 	}
 	if (action == LYE_AIX &&

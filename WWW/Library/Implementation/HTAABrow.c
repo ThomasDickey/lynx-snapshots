@@ -1283,3 +1283,27 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS5(
     /* Never reached */
 }
 
+/*
+**  This function clears all authorization information by
+**  invoking the free_HTAAGlobals() function, which normally
+**  is invoked at exit.  It allows a browser command to do
+**  this at any time, for example, if the user is leaving
+**  the terminal for a period of time, but does not want
+**  to end the current session.  - FM
+*/
+PUBLIC void HTClearHTTPAuthInfo NOARGS
+{
+    /*
+    **  Need code to check cached documents against the
+    **  protention templates, and do something to ensure
+    **  that any protected documents no longer can be
+    **  accessed without a new retrieval. - FM
+    */
+
+    /*
+    **  Now free all of the authorization info, and
+    **  reset the free_HTAAGlobalsSet flag. - FM
+    */
+    free_HTAAGlobals();
+    free_HTAAGlobalsSet = FALSE;
+}

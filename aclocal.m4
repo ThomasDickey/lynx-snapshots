@@ -1,9 +1,10 @@
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@clark.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
+dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 1997/8/28
+dnl Updated: 1997/11/23
 dnl
 dnl ---------------------------------------------------------------------------
 dnl ---------------------------------------------------------------------------
@@ -134,6 +135,42 @@ if test "$cf_cv_bool_defs" = no ; then
 	AC_DEFINE(TRUE,(1))
 	AC_DEFINE(FALSE,(0))
 fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Check if a function is declared by including a set of include files.
+dnl Invoke the corresponding actions according to whether it is found or not.
+dnl CF_CHECK_FUNCDECL(INCLUDES, FUNCTION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
+AC_DEFUN(CF_CHECK_FUNCDECL,
+[AC_MSG_CHECKING([for $2 declaration])
+AC_CACHE_VAL(ac_cv_func_decl_$2,
+[AC_TRY_COMPILE([$1],
+[#ifndef ${ac_func}
+int	(*p)() = ${ac_func};
+#endif],
+eval "ac_cv_func_decl_$2=yes", eval "ac_cv_func_decl_$2=no")])dnl
+if eval "test \"`echo '$ac_cv_func_'decl_$2`\" = yes"; then
+  AC_MSG_RESULT(yes)
+  ifelse([$3], , :, [$3])
+else
+  AC_MSG_RESULT(no)
+ifelse([$4], , , [$4
+])dnl
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Check if functions are declared by including a set of include files.
+dnl and define DECL_XXX if not.
+dnl
+dnl CF_CHECK_FUNCDECLS(INCLUDES, FUNCTION... [, ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
+AC_DEFUN(CF_CHECK_FUNCDECLS,
+[for ac_func in $2
+do
+CF_CHECK_FUNCDECL([$1], $ac_func,
+[$3],
+[
+  CF_UPPER(ac_tr_func,DECL_$ac_func)
+  AC_DEFINE_UNQUOTED($ac_tr_func) $4])dnl
+done
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check if curses supports color.  (Note that while SVr3 curses supports
@@ -923,7 +960,7 @@ AC_TRY_LINK(
 	])
 ])
 AC_MSG_RESULT($cf_cv_baddef_remove)
-test "$cf_cv_baddef_remove" = yes && AC_DEFINE(NEED_REMOVE)
+test "$cf_cv_baddef_remove" != no && AC_DEFINE(NEED_REMOVE)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check for definitions & structures needed for window size-changing
@@ -1169,15 +1206,16 @@ AC_DEFUN([CF_UNION_WAIT],
 AC_REQUIRE([CF_WAIT_HEADERS])
 AC_MSG_CHECKING([for union wait])
 AC_CACHE_VAL(cf_cv_type_unionwait,[
-	AC_TRY_COMPILE($cf_wait_headers,
+	AC_TRY_LINK($cf_wait_headers,
 	[int x;
 	 int y = WEXITSTATUS(x);
 	 int z = WTERMSIG(x);
+	 wait(&x);
 	],
 	[cf_cv_type_unionwait=no
 	 echo compiles ok w/o union wait 1>&AC_FD_CC
 	],[
-	AC_TRY_COMPILE($cf_wait_headers,
+	AC_TRY_LINK($cf_wait_headers,
 	[union wait x;
 #ifdef WEXITSTATUS
 	 int y = WEXITSTATUS(x);
@@ -1185,6 +1223,7 @@ AC_CACHE_VAL(cf_cv_type_unionwait,[
 #ifdef WTERMSIG
 	 int z = WTERMSIG(x);
 #endif
+	 wait(&x);
 	],
 	[cf_cv_type_unionwait=yes
 	 echo compiles ok with union wait and possibly macros too 1>&AC_FD_CC

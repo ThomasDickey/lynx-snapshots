@@ -1577,8 +1577,8 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 		   isdigit((unsigned char)UC_MIMEcharset[5])) {
 	    char tmp[16];
 	    /*
-	     *  For "cpNNNN", try "windows-NNNN"
-	     *  if not yet found. - kw
+	     *  For "cp1NNN", try "windows-1NNN"
+	     *  if not yet found. - KW
 	     */
 	    sprintf(tmp, "windows-%s", UC_MIMEcharset + 2);
 	    return UCGetLYhndl_byMIME(tmp);

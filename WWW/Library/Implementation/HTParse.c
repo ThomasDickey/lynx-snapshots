@@ -174,7 +174,7 @@ PRIVATE void scan ARGS2(
 **      wanted          A mask for the bits which are wanted.
 **
 ** On exit,
-**	returns		A pointer to a malloc'd string which MUST BE FREED
+**	returns		A pointer to a calloc'd string which MUST BE FREED
 */
 PUBLIC char * HTParse ARGS3(
 	CONST char *,	aName,
@@ -198,10 +198,10 @@ PUBLIC char * HTParse ARGS3(
     **  Allocate the output string.
     */
     len = strlen(aName) + strlen(relatedName) + 10;
-    result = (char *)malloc(len);	/* Lots of space: more than enough */
-    if (result == NULL)
+    result = (char *)calloc(1, len);	/* Lots of space: more than enough */
+    if (result == NULL) {
         outofmem(__FILE__, "HTParse");
-    result[0] = '\0';		/* Clear string  */
+    }
 
     /*
     **  Make working copies of the input strings to cut up.
@@ -449,8 +449,30 @@ PUBLIC void HTSimplify ARGS1(
     if (filename == NULL)
 	return;
 
-    if ((filename[0] && filename[1]) && strchr(filename, '/') != NULL) {
+    if (!(filename[0] && filename[1]) ||
+	filename[0] == '?' || filename[1] == '?' || filename[2] == '?')
+	return;
+
+    if (strchr(filename, '/') != NULL) {
         for (p = (filename + 2); *p; p++) {
+	    if (*p == '?') {
+	        /*
+		**  We're still treating a ?searchpart as part of
+		**  the path in HTParse() and scan(), but if we
+		**  encounter a '?' here, assume it's the delimiter
+		**  and break.  We also could check for a parameter
+		**  delimiter (';') here, but the current Fielding
+		**  draft (wisely or ill-advisedly :) says that it
+		**  should be ignored and collapsing be allowed in
+		**  it's value).  The only defined parameter at
+		**  present is ;type=[A, I, or D] for ftp URLs, so
+		**  if there's a "/..", "/../", "/./", or terminal
+		**  '.' following the ';', it must be due to the
+		**  ';' being an unescaped path character and not
+		**  actually a parameter delimiter. - FM
+		*/
+		break;
+	    }
 	    if (*p == '/') {
 		if ((p[1] == '.') && (p[2] == '.') &&
 		    (p[3] == '/' || p[3] == '\0')) {
@@ -489,7 +511,7 @@ PUBLIC void HTSimplify ARGS1(
 		    }
 		} else if (p[1] == '.' && p[2] == '/') {
 		    /*
-		    **  Handle "./" by removing the characters.
+		    **  Handle "/." by removing the characters.
 		    */
 		    q = p;
 		    q1 = (p + 2);
@@ -502,6 +524,48 @@ PUBLIC void HTSimplify ARGS1(
 		    **  Handle terminal "." by removing the character.
 		    */
 		    p[1] = '\0';
+		}
+	    }
+	}
+	if (p >= filename + 2 && *p == '?' && *(p-1)  == '.') {
+	    if (*(p-2) == '/') {
+		/*
+		**  Handle "/.?" by removing the dot.
+		*/
+		q = p - 1;
+		q1 = p;
+		while (*q1 != '\0')
+		    *q++ = *q1++;
+		*q = '\0';
+	    } else if (*(p-2) == '.' &&
+		       p >= filename + 4 && *(p-3) == '/' &&
+		       (*(p-4) != '/' ||
+			(p > filename + 4 && *(p-5) != ':'))) {
+		    /*
+		    **  Handle "xxx/..?"
+		    */
+		for (q = (p - 4); (q > filename) && (*q != '/'); q--)
+			/*
+			**  Back up to previous slash or beginning of string.
+			*/
+		    ;
+		if (*q == '/') {
+		    if (q > filename && *(q-1) == '/' &&
+			!(q > filename + 1 && *(q-1) != ':'))
+			return;
+		    q++;
+		}
+		if (strncmp(q, "../", 3) && strncmp(q, "./", 2)) {
+			/*
+			**  Not after "//" at beginning of string or
+			**  after "://", and xxx is not ".." or ".",
+			**  so remove the "xxx/..".
+			*/
+		    q1 = p;
+		    p = q;
+		    while (*q1 != '\0')
+			*p++ = *q1++;
+		    *p = '\0';		/* terminate */
 		}
 	    }
 	}
@@ -563,7 +627,7 @@ PUBLIC char * HTRelative ARGS2(
         for (; *q && (*q != '#'); q++)
 	    if (*q == '/')
 	        levels++;
-	result = (char *)malloc(3*levels + strlen(last_slash) + 1);
+	result = (char *)calloc(1, (3*levels + strlen(last_slash) + 1));
         if (result == NULL)
 	    outofmem(__FILE__, "HTRelative");
 	result[0] = '\0';
@@ -585,7 +649,7 @@ PUBLIC char * HTRelative ARGS2(
 **	It returns a string which has these characters
 **	represented by a '%' character followed by two hex digits.
 **
-**	Unlike HTUnEscape(), this routine returns a malloced string.
+**	Unlike HTUnEscape(), this routine returns a calloced string.
 */
 PRIVATE CONST unsigned char isAcceptable[96] =
 
@@ -615,7 +679,7 @@ PUBLIC char * HTEscape ARGS2(
     for (p = str; *p; p++)
         if (!ACCEPTABLE((unsigned char)TOASCII(*p)))
 	    unacceptable++;
-    result = (char *) malloc(p-str + unacceptable+ unacceptable + 1);
+    result = (char *)calloc(1, (p-str + unacceptable + unacceptable + 1));
     if (result == NULL)
         outofmem(__FILE__, "HTEscape");
     for (q = result, p = str; *p; p++) {
@@ -640,7 +704,7 @@ PUBLIC char * HTEscape ARGS2(
 **	represented by a '%' character followed by two hex digits,
 **	except that spaces are converted to '+' instead of %2B.
 **
-**	Unlike HTUnEscape(), this routine returns a malloced string.
+**	Unlike HTUnEscape(), this routine returns a calloced string.
 */
 PUBLIC char * HTEscapeSP ARGS2(
 	CONST char *,	str,
@@ -653,7 +717,7 @@ PUBLIC char * HTEscapeSP ARGS2(
     for (p = str; *p; p++)
         if (!(*p == ' ' || ACCEPTABLE((unsigned char)TOASCII(*p))))
 	    unacceptable++;
-    result = (char *) malloc(p-str + unacceptable+ unacceptable + 1);
+    result = (char *)calloc(1, (p-str + unacceptable + unacceptable + 1));
     if (result == NULL)
         outofmem(__FILE__, "HTEscape");
     for (q = result, p = str; *p; p++) {
@@ -800,7 +864,7 @@ PUBLIC void HTMake822Word ARGS1(
     }
     if (!added)
 	return;
-    result = (char *) malloc(p-(*str) + added + 1);
+    result = (char *)calloc(1, (p-(*str) + added + 1));
     if (result == NULL)
         outofmem(__FILE__, "HTMake822Word");
     result[0] = '"';

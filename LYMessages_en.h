@@ -95,6 +95,7 @@
 #define NORMAL_LINK_MESSAGE \
  "(NORMAL LINK)   Use right-arrow or <return> to activate."
 #define LINK_NOT_FOUND "The resource requested is not available at this time."
+#define ENTER_LYNX_COMMAND "Enter Lynx keystroke command: "
 #define WWW_WAIT_MESSAGE "Getting %s"
 #define WWW_SKIP_MESSAGE "Skipping %s"
 #define WWW_USING_MESSAGE "Using %s"
@@ -400,6 +401,8 @@
 #define PASSWORD_PROMPT "Password: "
 #define USERNAME_PASSWORD_REQUIRED "lynx: Username and Password required!!!"
 #define PASSWORD_REQUIRED "lynx: Password required!!!"
+#define CLEAR_ALL_AUTH_INFO "Clear all authorization info for this session?"
+#define AUTH_INFO_CLEARED "Authorization info cleared."
 #define CGI_DISABLED "cgi support has been disabled by system administrator."
 #define CGI_NOT_COMPILED \
  "Lynxcgi capabilities are not compiled into this version."

@@ -690,7 +690,8 @@ try_again:
                 if (TRACE)
                     fprintf (stderr, "HTTP: Interrupted initial read.\n");
                 _HTProgress ("Connection interrupted.");
-                status = HT_INTERRUPTED;
+                HTTP_NETCLOSE(s, handle);
+		status = HT_NO_DATA;
                 goto clean_up;
             } else if  (status < 0 &&
 			(SOCKET_ERRNO == ENOTCONN ||
