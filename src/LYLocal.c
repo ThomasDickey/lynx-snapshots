@@ -29,6 +29,7 @@
 */
 
 #include <HTUtils.h>
+#include <HTAAProt.h>
 #include <HTFile.h>
 #include <HTAlert.h>
 #include <HTParse.h>
@@ -48,7 +49,6 @@
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#include <grp.h>
 #endif /*_WINDOWS */
 #endif /* VMS */
 
@@ -1067,7 +1067,6 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	FILE *fp0;
 	char local_src[LY_MAXPATH];
 	char * user_filename;
-	struct group * grp;
 	char * group_name;
 
 	cp = HTfullURL_toFile(strip_trailing_slash(srcpath));
@@ -1095,13 +1094,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	LYLocalFileToURL(newpath, tempfile);
 	strcpy(LYPermitFileURL, *newpath);
 
-	grp = getgrgid(dir_info.st_gid);
-	if (grp == NULL) {
-	    group_name = "";
-	} else {
-	    group_name = grp->gr_name;
-	}
-
+	group_name = HTAA_GidToName (dir_info.st_gid);
 	LYstrncpy(LYValidPermitFile,
 		  local_src,
 		  (sizeof(LYValidPermitFile) - 1));

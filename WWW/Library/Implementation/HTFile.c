@@ -38,13 +38,6 @@
 #include <stat.h>
 #endif /* VMS */
 
-#ifndef VMS
-#ifdef LONG_LIST
-#include <pwd.h>
-#include <grp.h>
-#endif /* LONG_LIST */
-#endif /* !VMS */
-
 #ifdef USE_ZLIB
 #include <GridText.h>
 #endif
@@ -59,6 +52,7 @@
 #endif /* !DECNET */
 #include <HTAnchor.h>
 #include <HTAtom.h>
+#include <HTAAProt.h>
 #include <HTWriter.h>
 #include <HTFWriter.h>
 #include <HTInit.h>
@@ -173,8 +167,7 @@ PRIVATE void LYListFmtParse ARGS5(
 	char buf[512];
 	char fmt[512];
 	char type;
-	struct passwd *p;
-	struct group *g;
+	char *name;
 	time_t now;
 	char *datestr;
 	int len;
@@ -308,10 +301,10 @@ PRIVATE void LYListFmtParse ARGS5(
 
 		case 'o':	/* owner */
 			sprintf(fmt, "%%%ss", start);
-			p = getpwuid(st.st_uid);
-			if (p) {
+			name = HTAA_UidToName (st.st_uid);
+			if (*name) {
 				sprintf(fmt, "%%%ss", start);
-				sprintf(buf, fmt, p->pw_name);
+				sprintf(buf, fmt, name);
 			} else {
 
 				sprintf(fmt, "%%%sd", start);
@@ -320,10 +313,10 @@ PRIVATE void LYListFmtParse ARGS5(
 			break;
 
 		case 'g':	/* group */
-			g = getgrgid(st.st_gid);
-			if (g) {
+			name = HTAA_GidToName(st.st_gid);
+			if (*name) {
 				sprintf(fmt, "%%%ss", start);
-				sprintf(buf, fmt, g->gr_name);
+				sprintf(buf, fmt, name);
 			} else {
 				sprintf(fmt, "%%%sd", start);
 				sprintf(buf, fmt, st.st_gid);
@@ -1545,14 +1538,15 @@ PUBLIC int HTLoadFile ARGS4(
 	**  If the file wasn't VMS syntax, then perhaps it is Ultrix.
 	*/
 	if (!fp) {
-	    char ultrixname[INFINITY];
+	    char * ultrixname = 0;
 	    CTRACE(tfp, "HTLoadFile: Can't open as %s\n", vmsname);
-	    sprintf(ultrixname, "%s::\"%s\"", nodename, filename);
+	    HTSprintf0(&ultrixname, "%s::\"%s\"", nodename, filename);
 	    fp = fopen(ultrixname, "r", "shr=put", "shr=upd");
 	    if (!fp) {
 		CTRACE(tfp, "HTLoadFile: Can't open as %s\n",
 			    ultrixname);
 	    }
+	    FREE(ultrixname);
 	}
 	if (fp) {
 	    int len;

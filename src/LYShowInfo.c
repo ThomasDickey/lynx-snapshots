@@ -17,8 +17,7 @@
 #include <LYLeaks.h>
 
 #ifdef DIRED_SUPPORT
-#include <pwd.h>
-#include <grp.h>
+#include <HTAAProt.h>
 #include <time.h>
 #include <LYLocal.h>
 #endif /* DIRED_SUPPORT */
@@ -26,7 +25,10 @@
 #if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
 #define HAVE_CFG_DEFS_H
 
-#define PutDefs(table, N) fprintf(fp0, "%-35s %s\n", table[N].name, table[N].value)
+#define PutDefs(table, N) \
+	fprintf(fp0, "%-35s %s\n", \
+		     table[N].name, \
+		     (table[N].value != 0) ? table[N].value : "")
 
 /*
  *  Compile-time definitions info, returns local url
@@ -88,13 +90,12 @@ PUBLIC int showinfo ARGS4(
     int url_type;
     FILE *fp0;
     char *Address = NULL, *Title = NULL;
+    char *name;
     CONST char *cp;
 
 #ifdef DIRED_SUPPORT
     char temp[LY_MAXPATH];
     struct stat dir_info;
-    struct passwd *pw;
-    struct group *grp;
 #endif /* DIRED_SUPPORT */
 
     LYRemoveTemp(tempfile);
@@ -198,12 +199,12 @@ PUBLIC int showinfo ARGS4(
 		fprintf(fp0, "  <em>%s</em>  %s\n", gettext("Points to file:"), buf);
 	    }
 #endif
-	    pw = getpwuid(dir_info.st_uid);
-	    if (pw)
-		fprintf(fp0, "   <em>%s</em>  %s\n", gettext("Name of owner"), pw->pw_name);
-	    grp = getgrgid(dir_info.st_gid);
-	    if (grp && grp->gr_name)
-		fprintf(fp0, "      <em>%s</em>  %s\n", gettext("Group name:"), grp->gr_name);
+	    name = HTAA_UidToName(dir_info.st_uid);
+	    if (*name)
+		fprintf(fp0, "   <em>%s</em>  %s\n", gettext("Name of owner"), name);
+	    name = HTAA_GidToName (dir_info.st_gid);
+	    if (*name)
+		fprintf(fp0, "      <em>%s</em>  %s\n", gettext("Group name:"), name);
 	    if (S_ISREG(dir_info.st_mode)) {
 		fprintf(fp0, "       <em>%s</em>  %ld (bytes)\n",
 			gettext("File size:"), (long)dir_info.st_size);

@@ -226,8 +226,8 @@ distclean: clean
 	@MSG_DIR_MAKE@-rmdir po
 	-rm -f *~ *.bak *.sav
 	-rm -f WWW/Library/unix/makefile src/makefile src/chrtrans/makefile
-	@SRCDIR_CLEAN@-find . -type f -name '*.rej' -exec -rm -f {} \;
-	@SRCDIR_CLEAN@-find . -type f -name '*.orig' -exec -rm -f {} \;
+	@SRCDIR_CLEAN@-find . -type f -name '*.rej' -exec rm -f {} \;
+	@SRCDIR_CLEAN@-find . -type f -name '*.orig' -exec rm -f {} \;
 	@SRCDIR_CLEAN@-rmdir WWW/Library/unix && rmdir WWW/Library && rmdir WWW
 	@SRCDIR_CLEAN@-rmdir src/chrtrans && rmdir src
 	-rm -f makefile lynx_cfg.h config.status config.log config.cache
@@ -265,6 +265,9 @@ install: lynx$x install-bin install-man install-cfg @INSTALL_LSS@
 	@echo "Use $(MAKE) install-help to install the help-files"
 	@echo "Use $(MAKE) install-doc to install extra documentation files"
 	@echo
+
+install-full: install install-help install-doc
+	@echo Full installation complete.
 
 install-bin: $(bindir)
 	-mv -f $(bindir)/lynx$x $(bindir)/lynx.old

@@ -1050,6 +1050,11 @@ re_read:
 	case KEY_C3:		   /* lower right of keypad */
 	   c = PGDOWN;
 	   break;
+#ifdef KEY_ENTER
+	case KEY_ENTER:		   /* enter/return	*/
+	   c = '\n';
+	   break;
+#endif /* KEY_END */
 #ifdef KEY_END
 	case KEY_END:		   /* end key		001 */
 	   c = END_KEY;

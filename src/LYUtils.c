@@ -2038,6 +2038,27 @@ PUBLIC void LYFakeZap ARGS1(
 
 }
 
+PRIVATE int DontCheck NOARGS
+{
+    static time_t last;
+    time_t next;
+
+    /** Curses or slang setup was not invoked **/
+    if (dump_output_immediately)
+	return(TRUE);
+
+    /*
+     * Avoid checking interrupts more than one per second, since it is a slow
+     * and expensive operation - TD
+     */
+    next = time((time_t*)0);
+    if (next == last)
+	return (TRUE);
+
+    last = next;
+    return FALSE;
+}
+
 PUBLIC int HTCheckForInterrupt NOARGS
 {
     int c;
@@ -2057,7 +2078,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
     }
 
     /** Curses or slang setup was not invoked **/
-    if (dump_output_immediately)
+    if (DontCheck())
 	return((int)FALSE);
 
 #ifdef USE_SLANG
@@ -2118,7 +2139,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
     }
 
     /** Curses or slang setup was not invoked **/
-    if (dump_output_immediately)
+    if (DontCheck())
 	  return((int)FALSE);
 
     /** Control-C or Control-Y and a 'N'o reply to exit query **/
@@ -4257,7 +4278,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	FREE(MsgStr);
 	return GotHost;
 #ifndef DJGPP
-    } else if (LYCursesON && ((hoststat == HT_INTERRUPTED) || HTCheckForInterrupt())) {
+    } else if (LYCursesON && (hoststat == HT_INTERRUPTED)) {
 #else /* DJGPP */
     } else if (LYCursesON && HTCheckForInterrupt()) {
 #endif /* DJGPP */
@@ -4369,7 +4390,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 		 *  Give the user chance to interrupt lookup cycles. - KW
 		 */
 #ifndef DJGPP
-		if (LYCursesON && ((hoststat == HT_INTERRUPTED) || HTCheckForInterrupt()))
+		if (LYCursesON && (hoststat == HT_INTERRUPTED))
 #else /* DJGPP */
 		if (LYCursesON && HTCheckForInterrupt())
 #endif /* DJGPP */
