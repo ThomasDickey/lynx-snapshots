@@ -1386,6 +1386,7 @@ top1:
 	    (!context->element_stack ||
 	     (context->element_stack->tag  &&
 	      (context->element_stack->tag->contents == SGML_MIXED ||
+	       context->element_stack->tag->contents == SGML_ELEMENT ||
 	       context->element_stack->tag->contents == SGML_PCDATA ||
 	       context->element_stack->tag->contents == SGML_RCDATA)))) {
 	    /*

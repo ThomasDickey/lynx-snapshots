@@ -61,6 +61,17 @@ void LynxClearScreenCache NOARGS
 	for (j=0;j<CACHEW;j++)
 	    cached_styles[i][j]=s_a;
 }
+#endif
+#ifdef USE_COLOR_STYLE
+PRIVATE void LynxResetScreenCache NOARGS
+{
+    int i,j;
+
+    for (i=1; (i<CACHEH && i <= display_lines); i++) {
+	for (j=0;j<CACHEW;j++)
+	    cached_styles[i][j]=0;
+    }
+}
 #endif /* USE_COLOR_STYLE */
 
 struct _HTStream {			/* only know it as object */
@@ -183,6 +194,10 @@ struct _HText {
 	BOOL			in_line_1;		/* of paragraph */
 	BOOL			stale;			/* Must refresh */
 	BOOL			page_has_target; /* has target on screen */
+#ifdef DISP_PARTIAL
+	int			first_lineno_last_disp_partial;
+	int			last_lineno_last_disp_partial;
+#endif
 
 	HTkcode 		kcode;			/* Kanji code? */
 	enum grid_state       { S_text, S_esc, S_dollar, S_paren,
@@ -539,6 +554,15 @@ PUBLIC HText *	HText_new ARGS1(
      */
     if (display_partial)
 	 NumOfLines_partial = 0;  /* enable HTDisplayPartial() */
+
+    /*
+     *  These two fields should only be set to valid line numbers
+     *  by calls of display_page during partial displaying.  This
+     *  is just so that the FIRST display_page AFTER that can avoid
+     *  repainting the same lines on the screen. - kw
+     */
+    self->first_lineno_last_disp_partial =
+	self->last_lineno_last_disp_partial = -1;
 #endif
 
     CTRACE(tfp, "GridText: start HText_new\n");
@@ -589,7 +613,7 @@ PUBLIC void HText_free ARGS1(
 	    }
 	}
 	if (l == self->last_line) {	/* empty */
-	    l = NULL;
+	    l = self->last_line = NULL;
 	    break;
 	}
     };
@@ -1053,6 +1077,9 @@ PRIVATE void display_page ARGS3(
     HTAnchor *link_dest_intl = NULL;
     static int last_nlinks = 0;
     static int charset_last_displayed = -1;
+#ifdef DISP_PARTIAL
+    int last_disp_partial = -1;
+#endif
 
     lynx_mode = NORMAL_LYNX_MODE;
 
@@ -1072,6 +1099,14 @@ PRIVATE void display_page ARGS3(
 	nlinks = 0;  /* set number of links to 0 */
 	return;
     }
+
+#ifdef DISP_PARTIAL
+    if (display_partial || recent_sizechange || text->stale) {
+	/*  Reset them, will be set near end if all is okay. - kw */
+	text->first_lineno_last_disp_partial =
+	    text->last_lineno_last_disp_partial = -1;
+    }
+#endif /* DISP_PARTIAL */
 
     tmp[0] = tmp[1] = tmp[2] = '\0';
     text->page_has_target = NO;
@@ -1143,6 +1178,10 @@ PRIVATE void display_page ARGS3(
 	clear();
     }
 
+#ifdef USE_COLOR_STYLE
+    LynxResetScreenCache();
+#endif
+
     text->top_of_screen = line_number;
     display_title(text);  /* will move cursor to top of screen */
     display_flag=TRUE;
@@ -1176,6 +1215,14 @@ PRIVATE void display_page ARGS3(
 #else
 	    assert(line != NULL);
 #endif /* !VMS */
+
+#ifdef DISP_PARTIAL
+	    if (!display_partial &&
+		line_number == text->first_lineno_last_disp_partial &&
+		i + line_number <= text->last_lineno_last_disp_partial)
+		move((i + 2), 0);
+	    else
+#endif
 	    display_line(line, text);
 
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
@@ -1357,6 +1404,15 @@ PRIVATE void display_page ARGS3(
 		}
 		break;
 	    }
+#ifdef DISP_PARTIAL
+	    if (display_partial) {
+		/*
+		 *  Remember as fully shown during last partial display,
+		 *  if it was not the last text line. - kw
+		 */
+		last_disp_partial = i + line_number;
+	    }
+#endif /* DISP_PARTIAL */
 	    display_flag = TRUE;
 	    line = line->next;
 	} /* end of "Verify and display each line." loop */
@@ -1549,6 +1605,18 @@ PRIVATE void display_page ARGS3(
 	 */
 	addstr("\n     Document is empty");
     }
+
+#ifdef DISP_PARTIAL
+    if (display_partial && display_flag &&
+	last_disp_partial >= text->top_of_screen &&
+	!recent_sizechange) {	/*  really remember them if ok - kw  */
+	text->first_lineno_last_disp_partial = text->top_of_screen;
+	text->last_lineno_last_disp_partial = last_disp_partial;
+    } else {
+	text->first_lineno_last_disp_partial =
+	    text->last_lineno_last_disp_partial = -1;
+    }
+#endif /* DISP_PARTIAL */
 
     if (HTCJK != NOCJK || text->T.output_utf8) {
 	/*
@@ -2748,8 +2816,12 @@ PUBLIC int HText_beginAnchor ARGS3(
     if ((a->number > 0) &&
 	(keypad_mode == LINKS_ARE_NUMBERED ||
 	 keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED)) {
+	char saved_lastchar = text->LastChar;
+	int saved_linenum = text->Lines;
 	sprintf(marker,"[%d]", a->number);
 	HText_appendText(text, marker);
+	if (saved_linenum && text->Lines && saved_lastchar != ' ')
+	    text->LastChar = ']'; /* if marker not after space caused split */
 	a->start = text->chars + text->last_line->size;
 	a->line_num = text->Lines;
 	a->line_pos = text->last_line->size;
@@ -2818,6 +2890,7 @@ PUBLIC void HText_endAnchor ARGS2(
 		   HTAnchor_followMainLink((HTAnchor *)a->anchor)))));
 	HTLine *last = text->last_line;
 	HTLine *prev = text->last_line->prev;
+	HTLine *start = last;
 	int CurBlankExtent = 0;
 	int BlankExtent = 0;
 
@@ -2877,7 +2950,13 @@ PUBLIC void HText_endAnchor ARGS2(
 	 *  immediately preceding line also has only
 	 *  white and special characters. - FM
 	 */
-	while (i == 0 && a->extent > CurBlankExtent) {
+	while (i == 0 &&
+	       (a->extent > CurBlankExtent ||
+		(a->extent == CurBlankExtent &&
+		 prev != text->last_line &&
+		 (prev->size == 0 ||
+		  prev->data[prev->size - 1] == ']')))) {
+	    start = prev;
 	    j = prev->size - a->extent + CurBlankExtent;
 	    if (j < 0) {
 		/*
@@ -2902,7 +2981,11 @@ PUBLIC void HText_endAnchor ARGS2(
 		j++;
 	    }
 	    if (i == 0) {
-		if (a->extent > (CurBlankExtent + prev->size)) {
+		if (a->extent > (CurBlankExtent + prev->size) ||
+		    (a->extent == CurBlankExtent + prev->size &&
+		     prev->prev != text->last_line &&
+		     (prev->prev->size == 0 ||
+		      prev->prev->data[prev->prev->size - 1] == ']'))) {
 		    /*
 		     *  This line has only white and special
 		     *  characters, so treat its entire extent
@@ -2931,6 +3014,11 @@ PUBLIC void HText_endAnchor ARGS2(
 	     */
 	    a->show_anchor = NO;
 
+	    CTRACE(tfp,
+		   "HText_endAnchor: hidden (line,start,pos,ext,BlankExtent):(%d,%d,%d,%d,%d)",
+		   a->line_num,a->start,a->line_pos,a->extent,
+		   BlankExtent);
+
 	    /*
 	     *  If links are numbered, then try to get rid of the
 	     *  numbered bracket and adjust the anchor count. - FM
@@ -2944,7 +3032,6 @@ PUBLIC void HText_endAnchor ARGS2(
 	     * possibly caused by HTML errors. - kw
 	     */
 	    if (remove_numbers_on_empty) {
-		HTLine *start;
 		int NumSize = 0;
 		TextAnchor *anc;
 
@@ -2953,18 +3040,16 @@ PUBLIC void HText_endAnchor ARGS2(
 		 *  or to the beginning of the line on which the
 		 *  anchor start. - FM
 		 */
-		if (prev == last->prev) {
+		if (start == last) {
 		    /*
 		     *  The anchor starts on the last line. - FM
 		     */
-		    start = last;
 		    j = (last->size - a->extent - 1);
 		} else {
 		    /*
 		     *  The anchor starts on a previous line. - FM
 		     */
-		    start = prev;
-		    prev = prev->prev;
+		    prev = start->prev;
 		    j = (start->size - a->extent + CurBlankExtent - 1);
 		}
 		if (j < 0)
@@ -2997,6 +3082,12 @@ PUBLIC void HText_endAnchor ARGS2(
 			 *  on this line. - FM
 			 */
 			NumSize++;
+			if (start==last && (int)text->permissible_split > j) {
+			    if ((int)text->permissible_split - NumSize < j)
+				text->permissible_split = j;
+			    else
+				text->permissible_split -= NumSize;
+			}
 			k = j + NumSize;
 			while (k < start->size)
 			    start->data[j++] = start->data[k++];
@@ -3004,7 +3095,10 @@ PUBLIC void HText_endAnchor ARGS2(
 			    text->chars -= NumSize;
 			for (anc = a; anc; anc = anc->next) {
 			    anc->start -= NumSize;
+			    if (anc->line_num == a->line_num &&
+				anc->line_pos >= NumSize) {
 			    anc->line_pos -= NumSize;
+			    }
 			}
 			start->size = j;
 			start->data[j++] = '\0';
@@ -3034,7 +3128,7 @@ PUBLIC void HText_endAnchor ARGS2(
 			    NumSize++;
 			    l = (i - j);
 			    while (i < prev->size)
-				start->data[j++] = start->data[i++];
+				prev->data[j++] = prev->data[i++];
 			    text->chars -= l;
 			    for (anc = a; anc; anc = anc->next) {
 				anc->start -= l;
@@ -3042,7 +3136,13 @@ PUBLIC void HText_endAnchor ARGS2(
 			    prev->size = j;
 			    prev->data[j] = '\0';
 			    while (j < i)
-				start->data[j++] = '\0';
+				prev->data[j++] = '\0';
+			    if (start == last && text->permissible_split > 0) {
+				if ((int)text->permissible_split < k)
+				    text->permissible_split = 0;
+				else
+				    text->permissible_split -= k;
+			    }
 			    j = 0;
 			    i = k;
 			    while (k < start->size)
@@ -3051,7 +3151,10 @@ PUBLIC void HText_endAnchor ARGS2(
 				text->chars -= i;
 			    for (anc = a; anc; anc = anc->next) {
 				anc->start -= i;
-				anc->line_pos -= i;
+				if (anc->line_num == a->line_num &&
+				    anc->line_pos >= i) {
+				    anc->line_pos -= i;
+				}
 			    }
 			    start->size = j;
 			    start->data[j++] = '\0';
@@ -3078,7 +3181,7 @@ PUBLIC void HText_endAnchor ARGS2(
 		    if (j < 0)
 			j = 0;
 		    i = (j + 1);
-		    if ((j > 2) &&
+		    if ((j >= 2) &&
 			(prev->data[j] == ']' &&
 			 isdigit((unsigned char)prev->data[j - 1]))) {
 			j--;
@@ -3110,7 +3213,7 @@ PUBLIC void HText_endAnchor ARGS2(
 			    prev->size = j;
 			    prev->data[j++] = '\0';
 			    while (j < k)
-				start->data[j++] = '\0';
+				prev->data[j++] = '\0';
 			} else {
 			    /*
 			     *  Shucks!  We didn't find the
@@ -3140,6 +3243,12 @@ PUBLIC void HText_endAnchor ARGS2(
 	     *  as a link. - FM
 	     */
 	    a->show_anchor = YES;
+	    if (BlankExtent) {
+		CTRACE(tfp,
+		   "HText_endAnchor: blanks (line,start,pos,ext,BlankExtent):(%d,%d,%d,%d,%d)",
+		   a->line_num,a->start,a->line_pos,a->extent,
+		   BlankExtent);
+	    }
 	}
 	if (a->show_anchor == NO) {
 	    /*
@@ -3164,6 +3273,13 @@ PUBLIC void HText_endAnchor ARGS2(
 	     */
 	    a->extent -= ((BlankExtent < a->extent) ?
 					BlankExtent : 0);
+	}
+	if (BlankExtent || a->extent <= 0 || a->number <= 0) {
+	    CTRACE(tfp,
+		   "->[%d](%d,%d,%d,%d,%d)\n",
+		   a->number,
+		   a->line_num,a->start,a->line_pos,a->extent,
+		   BlankExtent);
 	}
     } else {
 	/*
@@ -3274,7 +3390,7 @@ PUBLIC void HText_endAppend ARGS1(
      *  Fix up the anchor structure values and
      *  create the hightext strings. - FM
      */
-    HText_trimHightext(text, FALSE);
+    HText_trimHightext(text, TRUE);
 }
 
 
@@ -3286,25 +3402,37 @@ PUBLIC void HText_endAppend ARGS1(
 **  `Forms input' fields cannot be displayed properly without this function
 **  to be invoked (detected in display_partial mode).
 **
-**  (BOOLEAN value allow us to disable annoying repeated trace messages
-**  for display_partial mode).
+**  If final is set, this is the final fixup; if not set, we don't have
+**  to do everything because there should be another call later.
+**
+**  BEFORE this function has treated a TextAnchor, its line_pos and
+**  extent fields are counting bytes in the HTLine data, including
+**  invisible special attribute chars and counting UTF-8 multibyte
+**  characters as multiple bytes.
+**  AFTER the adjustment, the anchor line_pos (and hightext2offset
+**  if applicable) fields indicate x positions in terms of displayed
+**  character cells, and the extent field apparently is unimportant;
+**  the anchor text has been copied to the hightext (and possibly
+**  hightext2) fields (which should be NULL up to this point), with
+**  special attribute chars removed.
+**  This needs to be done so that display_page finds the anchors in the
+**  form it expects when it sets the links[] elements.
 */
 PUBLIC void HText_trimHightext ARGS2(
 	HText *,	text,
-	BOOLEAN,	disable_trace)
+	BOOLEAN,	final)
 {
     int cur_line, cur_char, cur_shift;
     TextAnchor *anchor_ptr;
+    TextAnchor *prev_a = NULL;
     HTLine *line_ptr;
     unsigned char ch;
 
     if (!text)
 	return;
 
-    CTRACE(tfp,"Gridtext: Entering HText_trimHightext\n");
-
-    if (disable_trace)
-    CTRACE(tfp,"HText_trimHightext: trace disabled in display_partial mode\n");
+    CTRACE(tfp,"Gridtext: Entering HText_trimHightext %s\n",
+	       final ? "(final)" : "(partial)");
 
     /*
      *  Get the first line.
@@ -3312,37 +3440,71 @@ PUBLIC void HText_trimHightext ARGS2(
     line_ptr = text->last_line->next;
     cur_char = line_ptr->size;
     cur_line = 0;
-    cur_shift = 0;
 
     /*
      *  Fix up the anchor structure values and
      *  create the hightext strings. - FM
      */
     for (anchor_ptr = text->first_anchor;
-	 anchor_ptr; anchor_ptr=anchor_ptr->next) {
+	anchor_ptr;
+	prev_a = anchor_ptr, anchor_ptr=anchor_ptr->next) {
 re_parse:
 	/*
 	 *  Find the right line.
 	 */
-	for (; anchor_ptr->start >= cur_char;
+       for (; anchor_ptr->start > cur_char;
 	       line_ptr = line_ptr->next,
 	       cur_char += line_ptr->size+1,
 	       cur_line++) {
 	    ; /* null body */
 	}
+
+	if (!final) {
+	    /*
+	     *  If this is not the final call, stop when we have reached
+	     *  the last line, or the very end of preceding line.
+	     *  The last line is probably still not finished. - kw
+	     */
+	    if (cur_line >= text->Lines)
+	        break;
+	    if (anchor_ptr->start >= text->chars - 1)
+	        break;
+	    /*
+	     *  Also skip this anchor if it looks like HText_endAnchor
+	     *  is not yet done with it. - kw
+	     */
+	    if (!anchor_ptr->extent && anchor_ptr->number &&
+		(anchor_ptr->link_type & HYPERTEXT_ANCHOR) &&
+		!anchor_ptr->show_anchor &&
+		anchor_ptr->number == text->last_anchor_number)
+		continue;
+	}
+
+	/*
+	 *  If hightext has already been set, then we must have already
+	 *  done the trimming & adjusting for this anchor, so avoid
+	 *  doing it a second time. - kw
+	 */
+	if (anchor_ptr->hightext)
+	    continue;
+
 	if (anchor_ptr->start == cur_char) {
 	    anchor_ptr->line_pos = line_ptr->size;
 	} else {
 	    anchor_ptr->line_pos = anchor_ptr->start -
 				   (cur_char - line_ptr->size);
 	}
-	if (anchor_ptr->line_pos < 0)
+	if (anchor_ptr->line_pos < 0) {
+	    anchor_ptr->start -= anchor_ptr->line_pos;
 	    anchor_ptr->line_pos = 0;
+	    anchor_ptr->line_num = cur_line;
+	}
+	CTRACE(tfp,
+	       "Gridtext: Anchor found on line:%d col:%d [%d] ext:%d\n",
+	       cur_line, anchor_ptr->line_pos,
+	       anchor_ptr->number, anchor_ptr->extent);
 
-	if (!disable_trace)
-	CTRACE(tfp, "Gridtext: Anchor found on line:%d col:%d\n",
-			    cur_line, anchor_ptr->line_pos);
-
+	cur_shift = 0;
 	/*
 	 *  Strip off any spaces or SpecialAttrChars at the beginning,
 	 *  if they exist, but only on HYPERTEXT_ANCHORS.
@@ -3360,22 +3522,29 @@ re_parse:
 	if (anchor_ptr->extent < 0) {
 	    anchor_ptr->extent = 0;
 	}
+	anchor_ptr->start += cur_shift;
 
-	if (!disable_trace)
 	CTRACE(tfp, "anchor text: '%s'\n",
 					   line_ptr->data);
 	/*
 	 *  If the link begins with an end of line and we have more
 	 *  lines, then start the highlighting on the next line. - FM
+	 *  But if an empty anchor is at the end of line and empty,
+	 *  keep it where it is, unless the previous anchor in the list
+	 *  (if any) already starts later. - kw
 	 */
-	if ((unsigned)anchor_ptr->line_pos >= strlen(line_ptr->data) &&
-	    cur_line < text->Lines) {
-	    anchor_ptr->start += (cur_shift + 1);
-	    cur_shift = 0;
-	    CTRACE(tfp, "found anchor at end of line\n");
-	    goto re_parse;
+	if ((unsigned)anchor_ptr->line_pos >= strlen(line_ptr->data)) {
+	    if (cur_line < text->Lines &&
+		(anchor_ptr->extent ||
+		 anchor_ptr->line_pos != (int)line_ptr->size ||
+		 (prev_a && prev_a->start > anchor_ptr->start))) {
+		anchor_ptr->start++;
+		CTRACE(tfp, "found anchor at end of line\n");
+		goto re_parse;
+	    } else {
+		CTRACE(tfp, "found anchor at end of line, leaving it there\n");
+	    }
 	}
-	cur_shift = 0;
 
 	/*
 	 *  Copy the link name into the data structure.
@@ -3395,6 +3564,13 @@ re_parse:
 	 */
 	if ((unsigned)anchor_ptr->extent > strlen(anchor_ptr->hightext)) {
 	    HTLine *line_ptr2 = line_ptr->next;
+
+	    if (!final) {
+		if (cur_line + 1 >= text->Lines) {
+		    FREE(anchor_ptr->hightext); /* bail out */
+		    break;
+		}
+	    }
 	    /*
 	     *  Double check that we have a line pointer,
 	     *  and if so, copy into hightext2.
@@ -3439,9 +3615,9 @@ re_parse:
 	anchor_ptr->line_pos += line_ptr->offset;
 	anchor_ptr->line_num  = cur_line;
 
-	if (!disable_trace)
-	CTRACE(tfp, "GridText:     add link on line %d col %d in HText_trimHightext\n",
-		    cur_line, anchor_ptr->line_pos);
+	CTRACE(tfp, "GridText:     add link on line %d col %d [%d] %s\n",
+	       cur_line, anchor_ptr->line_pos,
+	       anchor_ptr->number, "in HText_trimHightext");
 
 	/*
 	 *  If this is the last anchor, we're done!
@@ -4101,11 +4277,11 @@ PUBLIC void HText_pageDisplay ARGS2(
 	**  So we start HText_trimHightext() to forget this side effect.
 	**  This function was split-out from HText_endAppend().
 	**  It may not be the best solution but it works. - LP
-	**  (TRUE =  to disable annoying repeated trace messages)
 	**
-	**  Side effect is reported from multiply call of HText_trimHightext.
+	**  (FALSE =  indicate that we are in partial mode)
+	**  Multiple calls of HText_trimHightext works without problem now.
 	*/
-	HText_trimHightext(HTMainText, TRUE);
+	HText_trimHightext(HTMainText, FALSE);
     }
     detected_forms_input_partial = FALSE;
 #endif
@@ -6216,6 +6392,14 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	new_ptr->name = NULL;
 	new_ptr->cp_submit_value = NULL;
 	new_ptr->next = NULL;
+	/*
+	 *  Find first non-space again, convert_to_spaces above may have
+	 *  changed the string. - kw
+	 */
+	cp = value;
+	while (isspace((unsigned char)*cp) ||
+	       IsSpecialAttrChar((unsigned char)*cp))
+	    cp++;
 	for (i = 0, j = 0; cp[i]; i++) {
 	    if (cp[i] == HT_NON_BREAK_SPACE ||
 		cp[i] == HT_EM_SPACE) {
@@ -8019,6 +8203,8 @@ PRIVATE void free_all_texts NOARGS
      */
     while (loaded_texts && !HTList_isEmpty(loaded_texts)) {
 	if ((cur = (HText *)HTList_removeLastObject(loaded_texts)) != NULL) {
+	    if (cur->node_anchor && cur->node_anchor->underway)
+		cur->node_anchor->underway = FALSE;
 	    HText_free(cur);
 	}
     }

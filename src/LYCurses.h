@@ -2,7 +2,6 @@
 #define LYCURSES_H
 
 #include <HTUtils.h>
-#include <userdefs.h>
 
 /*
  * The simple color scheme maps the 8 combinations of bold/underline/reverse
@@ -27,9 +26,6 @@
 #if defined(UNIX) && !defined(unix)
 #define unix
 #endif /* UNIX && !unix */
-#ifdef va_start
-#undef va_start	 /* not used, undef to avoid warnings on some systems */
-#endif /* va_start */
 #include <slang.h>
 
 #else /* Using curses: */
@@ -218,6 +214,9 @@ extern unsigned int Lynx_Color_Flags;
 /*
  *  Map some curses functions to slang functions.
  */
+#ifndef WINDOW
+#define WINDOW void
+#endif
 #define stdscr NULL
 #ifdef SLANG_MBCS_HACK
 extern int PHYSICAL_SLtt_Screen_Cols;

@@ -2837,7 +2837,7 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
 #endif /* LINUX */
 
     } else {
-	CTRACE(tfp,"Could not get ttyname or open UTMP file");
+	CTRACE(tfp,"Could not get ttyname or open UTMP file %s\n", UTMP_FILE);
     }
 
     return(FALSE);
@@ -5511,6 +5511,7 @@ PRIVATE BOOL IsOurFile ARGS1(char *, name)
 PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
 {
     FILE *fp = 0;
+    struct stat data;
 
 #if defined(O_CREAT) && defined(O_EXCL) /* we have fcntl.h or kindred? */
     /*
@@ -5532,10 +5533,12 @@ PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
     }
     else
 #endif
-    if (*mode == 'a'
-     && IsOurFile(name)
-     && chmod(name, HIDE_CHMOD) == 0)
-	fp = fopen(name, mode);
+    if (*mode == 'a') {
+	if (IsOurFile(name)
+	 && chmod(name, HIDE_CHMOD) == 0)
+	    fp = fopen(name, mode);
+	else if (lstat(name, &data) != 0)
+	    fp = OpenHiddenFile(name, "w");
     /*
      * This is less stringent, but reasonably portable.  For new files, the
      * umask will suffice; however if the file already exists we'll change
@@ -5545,7 +5548,7 @@ PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
      *
      * This won't work properly if the user is root, since the chmod succeeds.
      */
-    else if (*mode != 'a') {
+    } else if (*mode != 'a') {
 	int save = umask(HIDE_UMASK);
 	if (chmod(name, HIDE_CHMOD) == 0 || errno == ENOENT)
 	    fp = fopen(name, mode);

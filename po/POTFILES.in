@@ -5,15 +5,12 @@
 
 LYMessages.c
 WWW/Library/Implementation/HTAABrow.c
-WWW/Library/Implementation/HTAAProt.c
 WWW/Library/Implementation/HTAccess.c
 WWW/Library/Implementation/HTFTP.c
-WWW/Library/Implementation/HTFWriter.c
 WWW/Library/Implementation/HTFile.c
 WWW/Library/Implementation/HTFinger.c
 WWW/Library/Implementation/HTFormat.c
 WWW/Library/Implementation/HTGopher.c
-WWW/Library/Implementation/HTMIME.c
 WWW/Library/Implementation/HTNews.c
 WWW/Library/Implementation/HTRules.c
 WWW/Library/Implementation/HTStyle.c
@@ -24,7 +21,6 @@ WWW/Library/Implementation/HTWAIS.c
 WWW/Library/Implementation/HTWSRC.c
 src/GridText.c
 src/HTAlert.c
-src/HTFWriter.c
 src/HTML.c
 src/LYBookmark.c
 src/LYCgi.c
@@ -41,7 +37,6 @@ src/LYLocal.c
 src/LYMail.c
 src/LYMain.c
 src/LYMainLoop.c
-src/LYMap.c
 src/LYNews.c
 src/LYOptions.c
 src/LYPrint.c

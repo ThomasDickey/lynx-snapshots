@@ -14,7 +14,7 @@ extern char *LYCookie PARAMS((
 	int		port,
 	BOOL		secure));
 extern void LYStoreCookies PARAMS((
-	CONST char *	cookie_file));
+	char *		cookie_file));
 extern void LYLoadCookies PARAMS((
 	char * 		cookie_file));
 extern void cookie_add_acceptlist PARAMS((

@@ -701,7 +701,7 @@ PRIVATE int get_connection ARGS2(
 			arg);
 	}
 	if (status == HT_INTERRUPTED) {
-	    _HTProgress (gettext("Connection interrupted."));
+	    _HTProgress (CONNECTION_INTERRUPTED);
 	    status = HT_NOT_LOADED;
 	} else {
 	    HTAlert(gettext("Unable to connect to FTP host."));
@@ -733,7 +733,7 @@ PRIVATE int get_connection ARGS2(
 
     if (status == HT_INTERRUPTED) {
 	CTRACE (tfp, "HTFTP: Interrupted at beginning of login.\n");
-	_HTProgress (gettext("Connection interrupted."));
+	_HTProgress (CONNECTION_INTERRUPTED);
 	NETCLOSE(control->socket);
 	control->socket = -1;
 	return HT_INTERRUPTED;
@@ -771,7 +771,7 @@ PRIVATE int get_connection ARGS2(
 	FREE(command);
 	if (status == HT_INTERRUPTED) {
 	    CTRACE (tfp, "HTFTP: Interrupted while sending username.\n");
-	    _HTProgress (gettext("Connection interrupted."));
+	    _HTProgress (CONNECTION_INTERRUPTED);
 	    NETCLOSE(control->socket);
 	    control->socket = -1;
 	    return HT_INTERRUPTED;
@@ -835,7 +835,7 @@ PRIVATE int get_connection ARGS2(
 	if (status == HT_INTERRUPTED) {
 	    CTRACE (tfp,
 		       "HTFTP: Interrupted while sending password.\n");
-	    _HTProgress (gettext("Connection interrupted."));
+	    _HTProgress (CONNECTION_INTERRUPTED);
 	    NETCLOSE(control->socket);
 	    control->socket = -1;
 	    return HT_INTERRUPTED;
@@ -849,7 +849,7 @@ PRIVATE int get_connection ARGS2(
 	status = response(temp);
 	if (status == HT_INTERRUPTED) {
 	    CTRACE (tfp, "HTFTP: Interrupted while sending password.\n");
-	    _HTProgress (gettext("Connection interrupted."));
+	    _HTProgress (CONNECTION_INTERRUPTED);
 	    NETCLOSE(control->socket);
 	    control->socket = -1;
 	    return HT_INTERRUPTED;
@@ -2531,7 +2531,7 @@ unload_btree:
     if (WasInterrupted || HTCheckForInterrupt()) {
 	if (server_type != CMS_SERVER)
 	    response(NIL);
-	_HTProgress(gettext("Data transfer interrupted."));
+	_HTProgress(TRANSFER_INTERRUPTED);
 	return HT_LOADED;
     }
     if (server_type != CMS_SERVER)
@@ -2594,7 +2594,7 @@ PUBLIC int HTFTPLoad ARGS4(
 	    status = response(port_command);
 	    if (status == HT_INTERRUPTED) {
 		CTRACE (tfp, "HTFTP: Interrupted in response (port_command)\n");
-		_HTProgress (gettext("Connection interrupted."));
+		_HTProgress (CONNECTION_INTERRUPTED);
 		NETCLOSE (control->socket);
 		control->socket = -1;
 		close_master_socket ();
@@ -3231,7 +3231,7 @@ listen:
 	rv = HTParseSocket(format, format_out, anchor, data_soc, sink);
 
 	if (rv == HT_INTERRUPTED)
-	     _HTProgress(gettext("Data transfer interrupted."));
+	     _HTProgress(TRANSFER_INTERRUPTED);
 
 	HTInitInput(control->socket);
 	/* Reset buffering to control connection DD 921208 */

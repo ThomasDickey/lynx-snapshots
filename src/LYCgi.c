@@ -21,7 +21,7 @@
 **
 **      Should try and parse for a HTTP 1.1 header in case we are "calling" a
 **      nph- script.
-*/ 
+*/
 
 #include <HTUtils.h>
 #include <HTTP.h>
@@ -50,7 +50,7 @@
 #include <sys/wait.h>
 #endif
 
-struct _HTStream 
+struct _HTStream
 {
   HTStreamClass * isa;
 };
@@ -90,7 +90,7 @@ PRIVATE void add_environment_value ARGS1(
     env[envc++] = env_value;
     env[envc] = NULL;      /* Make sure it is always properly terminated */
 }
-    
+
 /*
  * Add the value of an existing environment variable to those passed on to the
  * lynxcgi script.
@@ -184,7 +184,7 @@ PRIVATE int LYLoadCGI ARGS4(
 
 	if (statrv < 0) {
 	    /* Did not find PATH_INFO data */
-	    if (TRACE) 
+	    if (TRACE)
 		perror("LYNXCGI: stat() of pgm_buff failed");
 	} else {
 	    /* Found PATH_INFO data. Strip it off of pgm and into path_info. */
@@ -229,7 +229,7 @@ PRIVATE int LYLoadCGI ARGS4(
 	    status = -4;
 	    return(status);
 	}
-	    
+
 	LYLocalFileToURL (&new_arg, orig_pgm);
 
 	CTRACE(tfp, "%s is not an executable file, passing the buck.\n", arg);
@@ -301,15 +301,15 @@ PRIVATE int LYLoadCGI ARGS4(
 	    /* Show output as plain text */
 	    format_in = WWW_PLAINTEXT;
 	} else {
-	    
+
 	    /* Decode full HTTP response */
 	    format_in = HTAtom_for("www/mime");
 	}
-		
+
 	target = HTStreamStack(format_in,
 			       format_out,
 			       sink, anAnchor);
-		
+
 	if (!target || target == NULL) {
 	    sprintf(buf, CANNOT_CONVERT_I_TO_O,
 		    HTAtom_name(format_in), HTAtom_name(format_out));
@@ -322,7 +322,7 @@ PRIVATE int LYLoadCGI ARGS4(
 		perror("LYNXCGI: pipe() failed");
 	    }
 	    status = -3;
-	    
+
 	} else if (pipe(fd2) < 0) {
 	    HTAlert(CONNECT_SET_FAILED);
 	    if (TRACE) {
@@ -331,30 +331,30 @@ PRIVATE int LYLoadCGI ARGS4(
 	    close(fd1[0]);
 	    close(fd1[1]);
 	    status = -3;
-	    
-	} else {	
+
+	} else {
 	    static BOOL first_time = TRUE;      /* One time setup flag */
 
 	    if (first_time) {	/* Set up static environment variables */
 		first_time = FALSE;	/* Only once */
-		
+
 		add_environment_value("REMOTE_HOST=localhost");
 		add_environment_value("REMOTE_ADDR=127.0.0.1");
-		
+
 		sprintf(user_agent, "HTTP_USER_AGENT=%s/%s libwww/%s",
 			LYNX_NAME, LYNX_VERSION, HTLibraryVersion);
 		add_environment_value(user_agent);
-		
+
 		sprintf(server_software, "SERVER_SOFTWARE=%s/%s",
 			LYNX_NAME, LYNX_VERSION);
 		add_environment_value(server_software);
 	    }
-	    
+
 	    if ((pid = fork()) > 0) { /* The good, */
 		int chars, total_chars;
-		
+
 		close(fd2[1]);
-		
+
 		if (anAnchor->post_data) {
 		    int written, remaining, total_written = 0;
 		    close(fd1[0]);
@@ -363,7 +363,7 @@ PRIVATE int LYLoadCGI ARGS4(
 		    CTRACE(tfp, "LYNXCGI: Doing post, content-type '%s'\n",
 				anAnchor->post_content_type);
 		    CTRACE(tfp, "LYNXCGI: Writing:\n%s----------------------------------\n",
-				anAnchor->post_data);			
+				anAnchor->post_data);
 		    remaining = strlen(anAnchor->post_data);
 		    while ((written = write(fd1[1],
 					    anAnchor->post_data + total_written,
@@ -395,11 +395,11 @@ PRIVATE int LYLoadCGI ARGS4(
 		    }
 		    close(fd1[1]);
 		}
-		
+
 		HTReadProgress(total_chars = 0, 0);
 		while((chars = read(fd2[0], buf, sizeof(buf))) > 0) {
 		    HTReadProgress(total_chars += chars, 0);
-		    CTRACE(tfp, "LYNXCGI: Rx: %.*s\n", chars, buf);  
+		    CTRACE(tfp, "LYNXCGI: Rx: %.*s\n", chars, buf);
 		    (*target->isa->put_block)(target, buf, chars);
 		}
 #if !HAVE_WAITPID
@@ -420,7 +420,7 @@ PRIVATE int LYLoadCGI ARGS4(
 #endif /* !HAVE_WAITPID */
 		close(fd2[0]);
 		status = HT_LOADED;
-		
+
 	    } else if (pid == 0) { /* The Bad, */
 		char **argv = NULL;
 		char post_len[32];
@@ -474,7 +474,7 @@ PRIVATE int LYLoadCGI ARGS4(
 		    }
 		}
 
-		/* 
+		/*
 		 * Set up argument line, mainly for <index> scripts
 		 */
 		if (pgm_args != NULL) {
@@ -490,7 +490,7 @@ PRIVATE int LYLoadCGI ARGS4(
 		    outofmem(__FILE__, "LYCgi");
 		}
 		cur_argv = argv + 1;		/* For argv[0] */
-		if (pgm_args != NULL) {		
+		if (pgm_args != NULL) {
 		    char *cr;
 
 		    /* Data for a get/search form */
@@ -499,7 +499,7 @@ PRIVATE int LYLoadCGI ARGS4(
 		    } else if (!anAnchor->isHEAD) {
 			add_environment_value("REQUEST_METHOD=GET");
 		    }
-		    
+
 		    cp = NULL;
 		    StrAllocCopy(cp, "QUERY_STRING=");
 		    StrAllocCat(cp, pgm_args);
@@ -514,7 +514,7 @@ PRIVATE int LYLoadCGI ARGS4(
 			if (*cp == '\0') {
 			    *(cur_argv++) = HTUnEscape(cr);
 			    break;
-			    
+
 			} else if (*cp == '+') {
 			    *cp++ = '\0';
 			    *(cur_argv++) = HTUnEscape(cr);
@@ -523,10 +523,10 @@ PRIVATE int LYLoadCGI ARGS4(
 			cp++;
 		    }
 		}
-		*cur_argv = NULL;	/* Terminate argv */		
+		*cur_argv = NULL;	/* Terminate argv */
 		argv[0] = pgm;
 
-		/* Begin WebSter Mods  -jkt */                
+		/* Begin WebSter Mods  -jkt */
 		if (LYCgiDocumentRoot != NULL) {
 		    /* Add DOCUMENT_ROOT to env */
 		    cp = NULL;
@@ -559,7 +559,7 @@ PRIVATE int LYLoadCGI ARGS4(
 		if (TRACE) {
 		    perror("LYNXCGI: execve failed");
 		}
-		
+
 	    } else {	/* and the Ugly */
 		HTAlert(CONNECT_FAILED);
 		if (TRACE) {
@@ -585,13 +585,13 @@ PRIVATE int LYLoadCGI ARGS4(
 	HTStream *target;
 	char buf[256];
 
-	target = HTStreamStack(WWW_HTML, 
+	target = HTStreamStack(WWW_HTML,
 			       format_out,
 			       sink, anAnchor);
 
 	sprintf(buf, "<head>\n<title>%s</title>\n</head>\n<body>\n", gettext("Good Advice"));
 	(*target->isa->put_block)(target, buf, strlen(buf));
-	
+
 	sprintf(buf, "<h1>%s</h1>\n", gettext("Good Advice"));
 	(*target->isa->put_block)(target, buf, strlen(buf));
 
@@ -605,8 +605,8 @@ PRIVATE int LYLoadCGI ARGS4(
 	sprintf(buf, ">%s</a>.\n", gettext("this link"));
 	(*target->isa->put_block)(target, buf, strlen(buf));
 
-	sprintf(buf,
-		gettext("<p>It provides <b>state of the art</b> CGI script support.\n"));
+	sprintf(buf, "<p>%s\n",
+              gettext("It provides state of the art CGI script support.\n"));
 	(*target->isa->put_block)(target, buf, strlen(buf));
 
 	sprintf(buf,"</body>\n");

@@ -694,7 +694,7 @@ PUBLIC int main ARGS2(
  *\n\
  */\n\
 \n\
-static u8 dfont_unicount%s[%d] = \n\
+static CONST u8 dfont_unicount%s[%d] = \n\
 {\n\t", argv[0], argv[1], id_append, fontlen);
 
     for (i = 0; i < fontlen; i++) {
@@ -720,10 +720,10 @@ static u8 dfont_unicount%s[%d] = \n\
     }
 
     if (nuni) {
-	printf("\nstatic u16 dfont_unitable%s[%d] = \n{\n\t",
+	printf("\nstatic CONST u16 dfont_unitable%s[%d] = \n{\n\t",
 	       id_append, nuni);
     } else {
-	printf("\nstatic u16 dfont_unitable%s[1]; /* dummy */\n", id_append);
+	printf("\nstatic CONST u16 dfont_unitable%s[1]; /* dummy */\n", id_append);
     }
 
     fp0 = 0;
@@ -766,11 +766,11 @@ static struct unipair_str repl_map%s[%d] = \n\
     }
     if (themap_str.entry_ct) {
 	printf("\n\
-static struct unimapdesc_str dfont_replacedesc%s = {%d,repl_map%s,",
+static CONST struct unimapdesc_str dfont_replacedesc%s = {%d,repl_map%s,",
 id_append, themap_str.entry_ct, id_append);
     } else {
 	printf("\n\
-static struct unimapdesc_str dfont_replacedesc%s = {0,NULL,",id_append);
+static CONST struct unimapdesc_str dfont_replacedesc%s = {0,NULL,",id_append);
     }
     printf("%d,%d};\n",
     this_isDefaultMap ? 1 : 0,

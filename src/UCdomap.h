@@ -24,8 +24,8 @@
 extern void UC_Charset_Setup PARAMS((
 	CONST char *		UC_MIMEcharset,
 	CONST char *		UC_LYNXcharset,
-	u8 *			unicount,
-	u16 *			unitable,
+	CONST u8 *		unicount,
+	CONST u16 *		unitable,
 	int			nnuni,
 	struct unimapdesc_str	replacedesc,
 	int			lowest_eight,
@@ -40,8 +40,8 @@ int UC_GNhandles[4] = {-1, -1, -1, -1};
 struct UC_charset {
 	CONST char *MIMEname;
 	CONST char *LYNXname;
-	u8* unicount;
-	u16* unitable;
+	CONST u8* unicount;
+	CONST u16* unitable;
 	int num_uni;
 	struct unimapdesc_str replacedesc;
 	int uc_status;

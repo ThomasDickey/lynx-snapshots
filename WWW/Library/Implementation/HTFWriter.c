@@ -238,7 +238,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     HTStream* me;
     
     if (HTClientHost) {
-        HTAlert(gettext("Can't save data to file -- please run WWW locally"));
+        HTAlert(CANNOT_SAVE_REMOTE);
 	return HTBlackHole();
     }
     
@@ -256,7 +256,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     
     me->fp = fopen (fnam, "w");
     if (!me->fp) {
-	HTAlert(gettext("Can't open temporary file!"));
+	HTAlert(CANNOT_OPEN_TEMP);
         FREE(fnam);
 	FREE(me);
 	return NULL;
@@ -313,7 +313,7 @@ PUBLIC HTStream* HTSaveLocally ARGS3(
     HTStream* me;
     
     if (HTClientHost) {
-        HTAlert(gettext("Can't save data to file -- please run WWW locally"));
+        HTAlert(CANNOT_SAVE_REMOTE);
 	return HTBlackHole();
     }
     
@@ -333,13 +333,13 @@ PUBLIC HTStream* HTSaveLocally ARGS3(
     if (suffix) strcat(fnam, suffix);
     
     /*	Save Panel */
-    answer = HTPrompt(gettext("Give name of file to save in", fnam));
+    answer = HTPrompt(GIVE_FILENAME, fnam);
     
     FREE(fnam);
     
     me->fp = fopen (answer, "w");
     if (!me->fp) {
-	HTAlert(gettext("Can't open local file to write into."));
+	HTAlert(CANNOT_OPEN_OUTPUT);
         FREE(answer);
 	FREE(me);
 	return NULL;

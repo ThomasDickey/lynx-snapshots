@@ -24,9 +24,9 @@ Step 1. (define compile-time variables -- See the userdefs.h file.)
     you may set them at run-time if you wish.  If you compile using auto-
     configure, you would not absolutely need to edit "userdefs.h".  Check
     LYMessages_en.h for tailoring the Lynx statusline prompts, messages and
-    warnings to the requirements of your site.  The strings in LYMessages_en.h
-    may be translated into a language of your choice.  If you rename the file,
-    be sure to change the definition in "userdefs.h".
+    warnings to the requirements of your site.  Lynx implements Native
+    Language Support.  Read "ABOUT-NLS" if you are interested in building an
+    international version of Lynx.
 
 Step 2. (define run-time variables -- See the lynx.cfg file for details.)
     Set up local printers, downloaders, assumed character set, key mapping,
@@ -62,10 +62,10 @@ Step 4. (optional -- news for UNIX and VMS)
 
 Step 5. (optional -- UNIX only)
     To add direct WAIS support, get the freeWAIS distribution from
-    "ftp://ftp.cnidr.org/pub/NIDR.tools/freewais", and compile it.  The compile
-    process will create the libraries you will need, wais.a and client.a.  Edit
-    the Makefile in the top level directory and add the library locations under
-    the DIRECT WAIS ACCESS heading.  Edit the Makefile for the WWW Library in
+    "ftp://ftp.cnidr.org/pub/NIDR.tools/freewais", and compile it.  The
+    compile process will create the libraries you will need, wais.a and
+    client.a.  Edit the generated makefile in the top level directory and
+    add the library locations under the DIRECT WAIS ACCESS heading.  Edit
     "WWW/Library/Implementation/CommonMakefile" to point to the include
     directory for the freewais distribution.  Precompiled libraries are
     available for many platforms if you don't wish to compile one yourself.
@@ -137,6 +137,7 @@ II. Compile instructions -- UNIX
 	OS/2 EMX 0.9b (ncurses) 	SCO (cc w/ curses)
 	Solaris 2.5 & 2.6 (cc & gcc w/ curses, ncurses & slang)
 	SunOS 4.1 (cc w/ curses, gcc w/ ncurses & slang)
+	OS390 and BS2000.
 
     NOTES:
 

@@ -1294,7 +1294,7 @@ PUBLIC int main ARGS2(
      *	Set up default foreground and background colors.
      */
     lynx_setup_colors();
-#endif /* USE_SLANG */
+#endif /* USE_COLOR_TABLE */
 
     /*
      *	Set the compilation default signature file. - FM

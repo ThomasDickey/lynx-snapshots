@@ -302,6 +302,7 @@ PRIVATE void free_adult_table NOARGS
 	    adult_table[i_counter] = HTAp_freeme->next;
 	    if (HTAp_freeme->object) {
 		parent = (HTParentAnchor *)HTAp_freeme->object;
+		parent->underway = FALSE;
 		HTAnchor_delete(parent);
 	    }
 	    FREE(HTAp_freeme);
@@ -447,6 +448,14 @@ PRIVATE void deleteLinks ARGS1(
 	HTParentAnchor *parent = me->mainLink.dest->parent;
 
 	/*
+	 *  Set the mainLink pointer to zero NOW.  If we don't,
+	 *  and we get somehow called recursively again for this
+	 *  same old me during the HTAnchor_delete below, weird
+	 *  things can occasionally happen. - kw
+	 */
+	 me->mainLink.dest = NULL;
+
+	/*
 	 *  Remove me from the parent's sources so that the
 	 *  parent knows one less anchor is it's dest.
 	 */
@@ -478,7 +487,6 @@ PRIVATE void deleteLinks ARGS1(
 	 *  Leave the HTAtom pointed to by type up to other code to
 	 *  handle (reusable, near static).
 	 */
-	me->mainLink.dest = NULL;
 	me->mainLink.type = NULL;
     }
 
@@ -571,6 +579,12 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
     }
 
     /*
+     *  Mark ourselves busy, so that recursive calls of this function
+     *  on this HTParentAnchor will not free it from under our feet. - kw
+     */
+    me->underway = TRUE;
+
+    /*
      *	Recursively try to delete destination anchors of this parent.
      *	In any event, this will tell all destination anchors that we
      *	no longer consider them a destination.
@@ -596,6 +610,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
 		}
 	    }
 	}
+	me->underway = FALSE;
 
 	/*
 	 *  Can't delete parent, still have sources.
@@ -619,6 +634,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
 	    }
 	}
     }
+    me->underway = FALSE;
 
     /*
      *	Delete our empty list of children.

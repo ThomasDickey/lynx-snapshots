@@ -263,7 +263,7 @@ PRIVATE int form_getstr ARGS1(
     int max_length;
     int startcol, startline;
     BOOL HaveMaxlength = FALSE;
-    int action;
+    int action, repeat, non_first = 0;
 
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;	/* Flag from cleanup_sig() AST */
@@ -288,7 +288,7 @@ PRIVATE int form_getstr ARGS1(
 		   form->maxlength < sizeof(MyEdit.buffer)) ?
 					    form->maxlength :
 					    (sizeof(MyEdit.buffer) - 1));
-    if (strlen(form->value) > max_length) {
+    if (strlen(form->value) > (size_t)max_length) {
 	/*
 	 *  We can't fit the entire value into the editing buffer,
 	 *  so enter as much of the tail as fits. - FM
@@ -337,14 +337,38 @@ PRIVATE int form_getstr ARGS1(
      */
     for (;;) {
 again:
-	ch = LYgetch();
+	repeat = -1;
+	get_mouse_link();		/* Reset mouse_link. */
+	/* Try to set position basing on the last mouse event */
+	if (!non_first++)
+	    peek_mouse_levent();
+
+	ch = LYgetch_for(FOR_INPUT);
 #ifdef VMS
 	if (HadVMSInterrupt) {
 	    HadVMSInterrupt = FALSE;
 	    ch = 7;
 	}
 #endif /* VMS */
+#  ifdef NCURSES_MOUSE_VERSION
+	if (ch == MOUSE_KEY) {		/* Need to process ourselves */
+	    MEVENT	event;
+	    int curx, cury;
 
+	    getmouse(&event);
+	    LYGetYX(cury, curx);
+	    if (event.y == cury) {
+		repeat = event.x - curx;
+		if (repeat < 0) {
+		    ch = LTARROW;
+		    repeat = - repeat;
+		} else
+		    ch = RTARROW;
+	    }
+	}
+#  endif	/* defined NCURSES_MOUSE_VERSION */
+	if (peek_mouse_link() != -1)
+	    break;
 	/*
 	 *  Filter out global navigation keys that should not be passed
 	 *  to line editor, and LYK_REFRESH.
@@ -393,7 +417,7 @@ again:
 	     *  else you can get trapped in a form without submit button!
 	     */
 	    case LTARROW:
-		if (MyEdit.pos == 0) {
+		if (MyEdit.pos == 0 && repeat == -1) {
 		    int c = 'Y';    /* Go back immediately if no changes */
 		    if (strcmp(MyEdit.buffer, value)) {
 			_statusline(PREV_DOC_QUERY);
@@ -416,7 +440,10 @@ again:
 		/*
 		 *  Make sure the statusline uses editmode help.
 		 */
-		LYLineEdit(&MyEdit, ch, TRUE);
+		if (repeat < 0)
+		    repeat = 1;
+		while (repeat--)
+		    LYLineEdit(&MyEdit, ch, TRUE);
 		if (MyEdit.strlen >= max_length) {
 		    HaveMaxlength = TRUE;
 		} else if (HaveMaxlength &&
@@ -824,11 +851,19 @@ redraw:
 	wrefresh(form_window);
 #endif /* USE_SLANG  */
 
-	c = LYgetch();
-	if (c == 3 || c == 7)	/* Control-C or Control-G */
+	c = LYgetch_for(FOR_CHOICE);
+	if (c == 3 || c == 7) {	/* Control-C or Control-G */
 	    cmd = LYK_QUIT;
-	else
+#ifndef USE_SLANG
+	} else if (c == MOUSE_KEY) {
+	    if ((cmd = fancy_mouse(form_window, i + 1 + window_offset, &cur_selection)) < 0)
+		goto redraw;
+	    if  (cmd == LYK_ACTIVATE)
+		break;
+#endif
+	} else {
 	    cmd = keymap[c+1];
+	}
 #ifdef VMS
 	if (HadVMSInterrupt) {
 	    HadVMSInterrupt = FALSE;

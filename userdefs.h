@@ -1201,9 +1201,9 @@
  * program execution.  See the comments in LYMessages_en.h for
  * information on translating or customizing them for your site.
  */
-#ifndef HTTELNET_H
-#include "LYMessages_en.h"
-#endif /* !HTTELNET_H */
+#ifndef LYMESSAGES_EN_H
+#include <LYMessages_en.h>
+#endif /* !LYMESSAGES_EN_H */
 
 
 /****************************************************************
@@ -1216,12 +1216,12 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.2dev.7"
+#define LYNX_VERSION "2.8.2dev.8"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Mon, 23 Nov 1998 03:46:03 -0700"
+#define LYNX_DATE "Thu, 03 Dec 1998 11:28:20 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1998"

@@ -67,14 +67,10 @@ PRIVATE rule * rule_tail = 0;	/* Pointer to last on list */
 **	returns 	0 if success, -1 if error.
 */
 
-#ifdef __STDC__
-PUBLIC int HTAddRule (HTRuleOp op, const char * pattern, const char * equiv)
-#else
-int HTAddRule(op, pattern, equiv)
-    HTRuleOp	op;
-    char *	pattern;
-    char *	equiv;
-#endif
+PUBLIC int HTAddRule ARGS3(
+    HTRuleOp,		op,
+    CONST char *,	pattern,
+    CONST char *,	equiv)
 { /* BYTE_ADDRESSING removed and memory check - AS - 1 Sep 93 */
     rule *	temp;
     char *	pPattern;
@@ -129,11 +125,7 @@ int HTAddRule(op, pattern, equiv)
 ** See also
 **	HTAddRule()
 */
-#ifdef __STDC__
-int HTClearRules(void)
-#else
-int HTClearRules()
-#endif
+int HTClearRules NOARGS
 {
     while (rules) {
 	rule * temp = rules;
@@ -169,12 +161,8 @@ int HTClearRules()
 **			protected, and so it knows how to handle it.
 **								-- AL
 */
-#ifdef __STDC__
-char * HTTranslate(const char * required)
-#else
-char * HTTranslate(required)
-	char * required;
-#endif
+char * HTTranslate ARGS1(
+    CONST char *,	required)
 {
     rule * r;
     char *current = NULL;
@@ -299,7 +287,8 @@ char * HTTranslate(required)
 **
 ** returns	0 OK, < 0 syntax error.
 */
-PUBLIC int  HTSetConfiguration ARGS1(CONST char *, config)
+PUBLIC int  HTSetConfiguration ARGS1(
+    CONST char *,	config)
 {
     HTRuleOp op;
     char * line = NULL;
@@ -392,7 +381,8 @@ PUBLIC int  HTSetConfiguration ARGS1(CONST char *, config)
 **	The strings may not contain spaces.
 */
 
-int HTLoadRules ARGS1(CONST char *, filename)
+int HTLoadRules ARGS1(
+    CONST char *,	filename)
 {
     FILE * fp = fopen(filename, "r");
     char line[LINE_LENGTH+1];

@@ -454,7 +454,6 @@ PUBLIC int HTParseInet ARGS2(
 	    struct timeval timeout;
 	    int dns_patience = 30; /* how many seconds will we wait for DNS? */
 	    int child_exited = 0;
-	    int ok_to_select_stdin = -1;
 
 	    /*
 	    **  Reap any children that have terminated since last time
@@ -539,16 +538,7 @@ PUBLIC int HTParseInet ARGS2(
 		**  selectable!  /dev/null isn't, on some systems, which
 		**  makes some useful Lynx invocations fail.  -BL
 		*/
-		if (ok_to_select_stdin == -1) {
-		    timeout.tv_sec = 0;
-		    timeout.tv_usec = 0;
-		    FD_SET(0, &readfds);    /* stdin -BL */
-		    selret = select(1, &readfds, NULL, NULL, &timeout);
-		    if (selret >= 0) ok_to_select_stdin = 1;
-		    else ok_to_select_stdin = 0;
-		    FD_ZERO(&readfds);
-		}
-		if (ok_to_select_stdin) FD_SET(0, &readfds);
+		if (isatty(fileno(stdin))) FD_SET(fileno(stdin), &readfds); 
 #endif /* USE_SLANG */
 		timeout.tv_sec = 1;
 		timeout.tv_usec = 0;

@@ -838,7 +838,7 @@ PUBLIC int printfile ARGS1(
 		sprintf(buffer, "%s -t \"%s\" -F %s", system_mail, user_response, tempfile);
 		LYCloseTempFP(outfile_fp);	/* Close the tmpfile. */
 		stop_curses();
-		printf("%s\n\n$ %s\n\n%s", gettext("Sending"), buffer, gettext("Please wait..."));
+		printf("%s\n\n$ %s\n\n%s", gettext("Sending"), buffer, PLEASE_WAIT);
 		LYSystem(buffer);
 		sleep(MessageSecs);
 		start_curses();
@@ -1320,8 +1320,10 @@ PUBLIC int print_options ARGS3(
     if (no_print || no_disk_save || child_lynx || no_mail)
 	fprintf(fp0, "   <em>%s</em>\n", gettext("Some print functions have been disabled!"));
 
-    fprintf(fp0, "\n%s %s\n", gettext("options:"),
-	    (user_mode == NOVICE_MODE) ? gettext("Standard print") : gettext("Print"));
+    fprintf(fp0, "\n%s\n",
+	    (user_mode == NOVICE_MODE)
+	    ? gettext("Standard print options:")
+	    : gettext("Print options:"));
 
     if (child_lynx == FALSE && no_disk_save == FALSE && no_print == FALSE) {
 	fprintf(fp0,

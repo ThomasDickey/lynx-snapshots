@@ -144,11 +144,11 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
 	return ("");  /* should always open */
 
     fprintf(nfp,"<head>\n<title>%s</title>\n</head>\n",MOSAIC_BOOKMARK_TITLE);
-    fprintf(nfp,gettext("\
+    fprintf(nfp, "%s\n\n<p>\n<ol>\n", gettext("\
      This file is an HTML representation of the X Mosaic hotlist file.\n\
      Outdated or invalid links may be removed by using the\n\
      remove bookmark command, it is usually the 'R' key but may have\n\
-     been remapped by you or your system administrator.\n\n<p>\n<ol>\n"));
+     been remapped by you or your system administrator."));
 
     while (fgets(buf, sizeof(buf), fp) != NULL) {
 	if(line >= 0) {
@@ -740,7 +740,7 @@ draw_bookmark_choices:
 	addstr(MULTIBOOKMARKS_SHEAD);
     }
 
-   lynx_stop_h1_color ();
+    lynx_stop_h1_color ();
 
     MBM_tmp_count = 0;
     for (c = MBM_from; c <= MBM_to; c++) {
@@ -903,7 +903,7 @@ PRIVATE  BOOLEAN havevisible ARGS1(CONST char *, Title)
 	unicode = UCTransToUni(*p, current_char_set);
 	if (unicode > 32 && unicode < 127)
 	    return(TRUE);
-	if (c <= 32 || (c >= 127 && c <= 160) || c == 0xad)
+	if (unicode <= 32 || unicode == 0xa0 || unicode == 0xad)
 	    continue;
 	if (unicode >= 0x2000 && unicode < 0x200f)
 	    continue;
@@ -955,7 +955,7 @@ PRIVATE  char* title_convert8bit ARGS1(CONST char *, Title)
     char *ncr     = NULL;
     char *buf = NULL;
     int charset_in  = current_char_set;
-    int charset_out = -1;
+    int charset_out = UCGetLYhndl_byMIME("us-ascii");
 
     for ( ; *p; p++) {
 	LYstrncpy(q, p, 1);
@@ -963,24 +963,21 @@ PRIVATE  char* title_convert8bit ARGS1(CONST char *, Title)
 	    StrAllocCat(comment, q);
 	    StrAllocCat(ncr, q);
 	} else {
-	int uck;
-	long unicode;
-	char replace_buf [10], replace_buf2 [10];
+	    int uck;
+	    long unicode;
+	    char replace_buf [10], replace_buf2 [10];
 
-	if (charset_out < 0)
-	    charset_out = UCGetLYhndl_byMIME("us-ascii");
+	    uck = UCTransCharStr(replace_buf, sizeof(replace_buf), *q,
+				  charset_in, charset_out, YES);
+	    if (uck >0)
+		StrAllocCat(comment, replace_buf);
 
-	uck = UCTransCharStr(replace_buf, sizeof(replace_buf), *q,
-			      charset_in, charset_out, YES);
-	if (uck >0)
-	StrAllocCat(comment, replace_buf);
+	    unicode = UCTransToUni( *q, charset_in);
 
-	unicode = UCTransToUni( *q, charset_in);
-
-	StrAllocCat(ncr, "&#");
-	sprintf(replace_buf2, "%ld", unicode);
-	StrAllocCat(ncr, replace_buf2);
-	StrAllocCat(ncr, ";");
+	    StrAllocCat(ncr, "&#");
+	    sprintf(replace_buf2, "%ld", unicode);
+	    StrAllocCat(ncr, replace_buf2);
+	    StrAllocCat(ncr, ";");
 	}
     }
 

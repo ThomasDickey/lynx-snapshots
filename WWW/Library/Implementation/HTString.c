@@ -233,8 +233,8 @@ PUBLIC char * HTNextField ARGS1(
 */
 PUBLIC char * HTNextTok ARGS4(
 	char **,	pstr,
-	const char *,	delims,
-	const char *,	bracks,
+	CONST char *,	delims,
+	CONST char *,	bracks,
 	char *, 	found)
 {
     char * p = *pstr;

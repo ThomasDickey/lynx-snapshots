@@ -432,4 +432,6 @@ extern FILE *TraceFP NOPARAMS;
 
 #define SHORTENED_RBIND	/* FIXME: do this in configure-script */
 
+#include <userdefs.h>
+
 #endif /* HTUTILS_H */

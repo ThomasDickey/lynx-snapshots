@@ -130,12 +130,12 @@ PRIVATE int HTLoadHTTP ARGS4 (
 
   if (!url) {
       status = -3;
-      _HTProgress (gettext("Bad request."));
+      _HTProgress (BAD_REQUEST);
       goto done;
   }
   if (!*url) {
       status = -2;
-      _HTProgress (gettext("Bad request."));
+      _HTProgress (BAD_REQUEST);
       goto done;
   }
 
@@ -173,7 +173,7 @@ try_again:
       **  Interrupt cleanly.
       */
        CTRACE (tfp, "HTTP: Interrupted on connect; recovering cleanly.\n");
-       _HTProgress (gettext("Connection interrupted."));
+       _HTProgress (CONNECTION_INTERRUPTED);
        status = HT_NOT_LOADED;
        goto done;
    }
@@ -655,7 +655,7 @@ try_again:
 	     */
 	    if (status == HT_INTERRUPTED) {
 		CTRACE (tfp, "HTTP: Interrupted initial read.\n");
-		_HTProgress (gettext("Connection interrupted."));
+		_HTProgress (CONNECTION_INTERRUPTED);
 		HTTP_NETCLOSE(s, handle);
 		status = HT_NO_DATA;
 		goto clean_up;
@@ -1093,7 +1093,7 @@ try_again:
 		   *  Impatient user. - FM
 		   */
 		  CTRACE (tfp, "HTTP: Interrupted followup read.\n");
-		  _HTProgress (gettext("Connection interrupted."));
+		  _HTProgress (CONNECTION_INTERRUPTED);
 		  status = HT_INTERRUPTED;
 		  goto clean_up;
 	      }
@@ -1685,7 +1685,7 @@ Cookie2_continuation:
       char buffer[1024];	/* @@@@@@@@ */
 
       HTTP_NETCLOSE(s, handle);
-      sprintf(buffer, gettext("Sorry, no known way of converting %s to %s."),
+      sprintf(buffer, CANNOT_CONVERT_I_TO_O,
 	      HTAtom_name(format_in), HTAtom_name(format_out));
       _HTProgress (buffer);
       status = -1;

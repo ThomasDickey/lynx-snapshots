@@ -1168,7 +1168,7 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(
 	    */
 	    HTAASetup_updateSpecifics(proxy_setup, scheme_specifics);
 
-	    if (NO == HTConfirm(gettext("Authorization failed.  Retry?"))) {
+	    if (NO == HTConfirm(AUTH_FAILED_PROMPT)) {
 		proxy_setup = NULL;
 		return NO;
 	    } else {
@@ -1227,7 +1227,7 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(
 	*/
 	HTAASetup_updateSpecifics(current_setup, scheme_specifics);
 
-	if (NO == HTConfirm(gettext("Authorization failed.  Retry?"))) {
+	if (NO == HTConfirm(AUTH_FAILED_PROMPT)) {
 	    current_setup = NULL;
 	    return NO;
 	} else {

@@ -1,7 +1,7 @@
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
 
-#include <HTUtils.h>
+#include <LYCurses.h>
 
 /*  UPPER8(ch1,ch2) is an extension of (TOUPPER(ch1) - TOUPPER(ch2))  */
 extern int UPPER8  PARAMS((
@@ -9,12 +9,18 @@ extern int UPPER8  PARAMS((
 	int		ch2));
 
 extern int get_mouse_link NOPARAMS;
+extern int peek_mouse_link NOPARAMS;
+extern int peek_mouse_levent NOPARAMS;
+extern int fancy_mouse PARAMS((WINDOW *win, int row, int *position));
+
 extern char * LYstrncpy PARAMS((
 	char *		dst,
 	CONST char *	src,
 	int		n));
 extern void ena_csi PARAMS((BOOLEAN flag));
 extern int LYgetch NOPARAMS;
+extern int LYgetch_for PARAMS((
+	int		code));
 extern int LYgetstr PARAMS((
 	char *		inputline,
 	int		hidden,
@@ -84,7 +90,12 @@ extern char * SNACat PARAMS((
 #define SELECT_KEY	267	/* 0x10B */
 #define INSERT_KEY	268	/* 0x10C */
 #define REMOVE_KEY	269	/* 0x10D */
-#define DO_NOTHING	270	/* 0x10E */
+#define MOUSE_KEY	270	/* 0x10E */
+#define DO_NOTHING	271	/* 0x10F */
+
+#  define FOR_PANEL	0
+#  define FOR_CHOICE	1
+#  define FOR_INPUT	2
 
 #define VISIBLE  0
 #define HIDDEN   1

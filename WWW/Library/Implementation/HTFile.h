@@ -50,7 +50,7 @@ extern char * HTnameOfFile_WWW PARAMS((CONST char * name, BOOL WWW_prefix, BOOL 
 /*
 **  Make a WWW name from a full local path name
 */
-extern char * WWW_nameOfFile PARAMS((const char * name));
+extern char * WWW_nameOfFile PARAMS((CONST char * name));
 
 /*
 **  Generate the name of a cache file

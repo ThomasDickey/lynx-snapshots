@@ -300,8 +300,7 @@ PRIVATE void HTAA_parseProtFile ARGS2(HTAAProt *, prot,
 			    fprintf(tfp,
 				    "HTAA_parseProtFile: Mask group:\n");
 			    HTAA_printGroupDef(prot->mask_group);
-			} else fprintf(tfp, "HTAA_parseProtFile: %s\n",
-				       gettext("Mask group syntax error"));
+			} else fprintf(tfp, "HTAA_parseProtFile: Mask group syntax error\n");
 		    }
 		} /* if "Mask" */
 
@@ -609,6 +608,7 @@ PRIVATE void save_uid_info ARGS2(char *, name, int, user)
 */
 PUBLIC char * HTAA_UidToName ARGS1(int, uid)
 {
+#ifndef NOUSERS
     struct passwd *pw;
     HTList *me = known_pwd;
 
@@ -627,6 +627,7 @@ PUBLIC char * HTAA_UidToName ARGS1(int, uid)
 	save_uid_info(pw->pw_name, pw->pw_uid);
 	return pw->pw_name;
     }
+#endif
     return "";
 }
 
@@ -640,6 +641,7 @@ PUBLIC char * HTAA_UidToName ARGS1(int, uid)
 */
 PUBLIC int HTAA_NameToUid ARGS1(char *, name)
 {
+#ifndef NOUSERS
     struct passwd *pw;
     HTList *me = known_pwd;
 
@@ -657,6 +659,7 @@ PUBLIC int HTAA_NameToUid ARGS1(char *, name)
 	save_uid_info(pw->pw_name, pw->pw_uid);
 	return pw->pw_uid;
     }
+#endif
     return NONESUCH;
 }
 
@@ -670,6 +673,7 @@ PUBLIC int HTAA_NameToUid ARGS1(char *, name)
 */
 PUBLIC char * HTAA_GidToName ARGS1(int, gid)
 {
+#ifndef NOUSERS
     struct group *gr;
     HTList *me = known_grp;
 
@@ -688,6 +692,7 @@ PUBLIC char * HTAA_GidToName ARGS1(int, gid)
 	save_gid_info(gr->gr_name, gr->gr_gid);
 	return gr->gr_name;
     }
+#endif
     return "";
 }
 
@@ -701,6 +706,7 @@ PUBLIC char * HTAA_GidToName ARGS1(int, gid)
 */
 PUBLIC int HTAA_NameToGid ARGS1(char *, name)
 {
+#ifndef NOUSERS
     struct group *gr;
     HTList *me = known_grp;
 
@@ -718,5 +724,6 @@ PUBLIC int HTAA_NameToGid ARGS1(char *, name)
 	save_gid_info(gr->gr_name, gr->gr_gid);
 	return gr->gr_gid;
     }
+#endif
     return NONESUCH;
 }

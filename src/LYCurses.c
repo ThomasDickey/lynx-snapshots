@@ -754,6 +754,7 @@ PUBLIC void start_curses NOARGS
 	}
 #if defined(SIGWINCH) && defined(NCURSES_VERSION)
 	size_change(0);
+	recent_sizechange = FALSE; /* prevent mainloop drawing 1st doc twice */
 #endif /* SIGWINCH */
 #if defined(USE_KEYMAPS) && defined(NCURSES_VERSION)
 	if (-1 == lynx_initialize_keymaps ())
@@ -873,10 +874,22 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
     }
 #else
     /* Inform ncurses that we're interested in knowing when mouse
-     * button 1 is clicked */
-    if (state)
-	mousemask(BUTTON1_CLICKED | BUTTON3_CLICKED, NULL);
-    else
+     * button 1 is clicked.  We cannot just specify
+     * BUTTON1_CLICKED | BUTTON3_CLICKED, since ncurses will try hard
+     * to translate other events to single-clicks.
+     * Compensate for small value of maxclick in ncurses.  */
+    if (state) {
+	static was = 0;
+
+	if (!was) {
+	    int old = mouseinterval(-1);
+
+	    was++;
+	    if (old < 200)		/* Default 166 */
+		mouseinterval(300);
+	}
+	mousemask(ALL_MOUSE_EVENTS, NULL);
+    } else
 	mousemask(0, NULL);
 #endif /* __BORLANDC__ and __PDCURSES__ */
 #endif /* NCURSES_MOUSE_VERSION */

@@ -1240,7 +1240,7 @@ PRIVATE int generate_cso_report ARGS2(
 	if (interrupted_in_htgetcharacter) {
 	    buf[0] = '\0';
 	    CTRACE(tfp, "HTLoadCSO: Interrupted in HTGetCharacter, apparently.\n");
-	    _HTProgress (gettext("Connection interrupted."));
+	    _HTProgress (CONNECTION_INTERRUPTED);
 	    goto end_CSOreport;
 	}
 
@@ -1492,7 +1492,7 @@ PRIVATE int HTLoadCSO ARGS4(
 	**  Interrupt cleanly.
 	*/
 	CTRACE(tfp, "HTLoadCSO: Interrupted on connect; recovering cleanly.\n");
-	_HTProgress (gettext("Connection interrupted."));
+	_HTProgress (CONNECTION_INTERRUPTED);
 	return HT_NOT_LOADED;
     }
     if (status < 0) {
@@ -1524,7 +1524,7 @@ PRIVATE int HTLoadCSO ARGS4(
     if (status) {
 	NETCLOSE(s);
 	if (status == HT_INTERRUPTED) {
-	    _HTProgress (gettext("Connection interrupted."));
+	    _HTProgress (CONNECTION_INTERRUPTED);
 	} else if (buf[0] != '\0') {
 	    HTAlert(buf);
 	} else {
@@ -1540,7 +1540,7 @@ PRIVATE int HTLoadCSO ARGS4(
 	if (!temp) {
 	    outofmem(__FILE__, "HTLoadCSO");
 	}
-	sprintf(temp, gettext("Sorry, no known way of converting %s to %s."),
+	sprintf(temp, CANNOT_CONVERT_I_TO_O,
 		HTAtom_name(format_in), HTAtom_name(format_out));
 	HTAlert(temp);
 	FREE(temp);
@@ -1853,7 +1853,7 @@ PRIVATE int HTLoadGopher ARGS4(
 	**  Interrupt cleanly.
 	*/
 	CTRACE(tfp, "HTGopher: Interrupted on connect; recovering cleanly.\n");
-	_HTProgress (gettext("Connection interrupted."));
+	_HTProgress (CONNECTION_INTERRUPTED);
 	FREE(command);
 	return HT_NOT_LOADED;
     }

@@ -27,6 +27,8 @@
 #define REALLY_EXIT_Y gettext("Really exit from Lynx? [Y] ")
 #define REALLY_EXIT_N gettext("Really exit from Lynx? [N] ")
 #endif /* VMS */
+#define CONNECTION_INTERRUPTED gettext("Connection interrupted.")
+#define TRANSFER_INTERRUPTED gettext("Data transfer interrupted.")
 #define CANCELLED gettext("Cancelled!!!")
 #define CANCELLING gettext("Cancelling!")
 #define NO_CANCEL gettext("Excellent!!!")
@@ -387,6 +389,8 @@
 #define BAD_OPTION_NUM_ENTERED gettext("You have entered an invalid option number.")
 #define BAD_CHOICE_NUM_ENTERED gettext("You have entered an invalid choice number.")
 #define BAD_HTML_USE_TRACE gettext("** Bad HTML!!  Use -trace to diagnose. **")
+#define GIVE_FILENAME gettext("Give name of file to save in")
+#define CANNOT_SAVE_REMOTE gettext("Can't save data to file -- please run WWW locally")
 #define CANNOT_OPEN_TEMP gettext("Can't open temporary file!")
 #define CANNOT_OPEN_OUTPUT gettext("Can't open output file!  Cancelling!")
 #define EXECUTION_DISABLED gettext("Execution is disabled.")
@@ -427,6 +431,7 @@
 #define PASSWORD_REQUIRED gettext("lynx: Password required!!!")
 #define CLEAR_ALL_AUTH_INFO gettext("Clear all authorization info for this session?")
 #define AUTH_INFO_CLEARED gettext("Authorization info cleared.")
+#define AUTH_FAILED_PROMPT gettext("Authorization failed.  Retry?")
 #define CGI_DISABLED gettext("cgi support has been disabled by system administrator.")
 #define CGI_NOT_COMPILED \
  gettext("Lynxcgi capabilities are not compiled into this version.")
@@ -489,6 +494,7 @@
 #define PRINTING_FILE gettext("Printing file.  Please wait...")
 #define MAIL_ADDRESS_PROMPT gettext("Please enter a valid internet mail address: ")
 #define PRINTER_MISCONF_ERROR gettext("ERROR! - printer is misconfigured!")
+#define FAILED_MAP_POST_REQUEST gettext("Image map from POST response not available!")
 #define MISDIRECTED_MAP_REQUEST gettext("Misdirected client-side image MAP request!")
 #define MAP_NOT_ACCESSIBLE gettext("Client-side image MAP is not accessible!")
 #define MAPS_NOT_AVAILABLE gettext("No client-side image MAPs are available!")
@@ -502,6 +508,7 @@
  gettext("Screen height must be at least 22 lines for the Options menu!")
 #endif /* !NO_OPTION_MENU */
 #define NEED_ADVANCED_USER_MODE gettext("That key requires Advanced User mode.")
+#define CONTENT_TYPE_MSG gettext("Content-type: %s")
 #define COMMAND_PROMPT gettext("Command: ")
 #define VERSION_SEGMENT gettext(" Version ")
 #define FIRST_SEGMENT gettext(" first.")
@@ -568,6 +575,7 @@
 #define CONFIRM_POST_LINK_HEAD \
  gettext("Form submit action is POST, HEAD may not be understood.  Proceed?")
 #define CONFIRM_PROCEED gettext("Proceed (%s)?")
+#define CANNOT_POST gettext("Cannot POST to this host.")
 #define DISCARDING_POST_DATA gettext("Discarding POST data...")
 #define WILL_NOT_RELOAD_DOC gettext("Document will not be reloaded!")
 #define	LOCATION_HEADER gettext("Location: ")

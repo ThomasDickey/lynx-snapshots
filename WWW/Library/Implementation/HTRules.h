@@ -1,17 +1,19 @@
-/*                                                           Configuration Manager for libwww
-                                  CONFIGURATION MANAGER
-                                             
-   Author Tim Berners-Lee/CERN. Public domain. Please mail changes to timbl@info.cern.ch.
-   
-   The configuration information loaded includes tables (file suffixes, presentation
-   methods) in other modules.  The most likely routines needed by developers will be:
-   
-  HTSetConfiguration      to load configuration information.
-                         
-  HTLoadRules             to load a whole file of configuration information
-                         
-  HTTranslate             to translate a URL using the rule table.
-                         
+/*                                             Configuration Manager for libwww
+ *                            CONFIGURATION MANAGER
+ *                                              
+ * Author Tim Berners-Lee/CERN.  Public domain.  Please mail changes to
+ * timbl@info.cern.ch.
+ *    
+ * The configuration information loaded includes tables (file suffixes,
+ * presentation methods) in other modules.  The most likely routines needed by
+ * developers will be:
+ *    
+ * HTSetConfiguration	to load configuration information.
+ *                          
+ * HTLoadRules		to load a whole file of configuration information
+ *                          
+ * HTTranslate		to translate a URL using the rule table.
+ *                          
  */
 #ifndef HTRULE_H
 #define HTRULE_H
@@ -66,7 +68,7 @@ HTAddRule:  Add rule to the list
    large.
    
  */
-extern int HTAddRule PARAMS((HTRuleOp op, const char * pattern, const char * equiv));
+extern int HTAddRule PARAMS((HTRuleOp op, CONST char * pattern, CONST char * equiv));
 
 
 /*
@@ -82,12 +84,7 @@ HTClearRules: Clear all rules
                          
  */
 
-#ifdef __STDC__
-extern int HTClearRules(void);
-#else
-extern int HTClearRules();
-#endif
-
+extern int HTClearRules PARAMS((void));
 
 /*
 
@@ -108,12 +105,7 @@ HTTranslate: Translate by rules
                          a copy of the original.
                          
  */
-#ifdef __STDC__
-extern char * HTTranslate(const char * required);
-#else
-extern char * HTTranslate();
-#endif
-
+extern char * HTTranslate PARAMS((CONST char * required));
 
 /*
 
@@ -147,17 +139,10 @@ HtLoadRules:  Load the rules from a file
                          
  */
 
-#ifdef __STDC__
-extern int HTLoadRules(const char * filename);
-#else
-extern int HTLoadRules();
-#endif
+extern int HTLoadRules PARAMS((CONST char * filename));
 /*
 
  */
 
 
 #endif /* HTUtils.h */
-/*
-
-   end */

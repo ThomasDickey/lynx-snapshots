@@ -99,7 +99,7 @@ LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 
-/* 100..10E function key definitions in LYStrings.h */
+/* 100..10F function key definitions in LYStrings.h */
 LYE_NOP,        LYE_NOP,        LYE_FORW,       LYE_BACK,
 /* UPARROW      DNARROW         RTARROW         LTARROW     */
 
@@ -110,7 +110,7 @@ LYE_NOP,        LYE_TAB,        LYE_BOL,        LYE_EOL,
 /* F1           Do key          Find key        Select key  */
 
 LYE_NOP,        LYE_DELP,       LYE_NOP,        LYE_NOP,
-/* Insert key   Remove key      DO_NOTHING      ...         */
+/* Insert key   Remove key      MOUSE_KEY       DO_NOTHING         */
 };
 
 /*
