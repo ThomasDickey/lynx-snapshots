@@ -992,7 +992,7 @@ PRIVATE int HTLoadExtensionsConfigFile ARGS1(
 	    HTGetWord(w, l, ' ', '\t');
 	    if (w[0] && (w[0] != ' ')) {
 		char *ext = (char *)malloc(sizeof(char) * (strlen(w)+1+1));
-	        if (!ct)
+	        if (!ext)
 	            outofmem(__FILE__, "HTLoadExtensionsConfigFile");
 
 		sprintf(ext, ".%s", w);

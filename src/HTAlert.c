@@ -96,18 +96,20 @@ PUBLIC void HTReadProgress ARGS2(
     static long kb_units = 1024;
     static time_t first, last;
     static long bytes_last;
-    long transfer_rate, divisor;
+    static long transfer_rate = 0;
+    long divisor;
     char line[80];
     time_t now = time((time_t *)0);  /* once per second */
-    char *units = "bytes";
+    static char *units = "bytes";
 
     if (bytes == 0) {
 	first = last = now;
 	bytes_last = bytes;
     } else if ((bytes > 0) &&
 	       (now != first))
-	       /* 1 sec delay for transfer_rate calculation :-( */ {
-	transfer_rate = (bytes) / (now - first);   /* bytes/sec */
+		/* 1 sec delay for transfer_rate calculation :-( */ {
+	if (transfer_rate <= 0)    /* the very first time */
+	    transfer_rate = (bytes) / (now - first);   /* bytes/sec */
 
 	/* optimal refresh time: every 0.2 sec */
 	if ((bytes - bytes_last) > (transfer_rate / 5)) {
@@ -117,7 +119,9 @@ PUBLIC void HTReadProgress ARGS2(
 	    if (now != last) {
 		last = now;
 		bytes_last = bytes;
+		transfer_rate = (bytes_last) / (last - first); /* more accurate here */
 	    }
+
 	    units = gettext("bytes");
 	    divisor = 1;
 	    if (LYshow_kb_rate
@@ -449,7 +453,7 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 	    return FALSE;
     }
     space_free = (((LYcols - 1)
-               - strlen(ADVANCED_COOKIE_CONFIRMATION))
+	       - strlen(ADVANCED_COOKIE_CONFIRMATION))
 	       - strlen(server));
     if (space_free < 0)
 	space_free = 0;

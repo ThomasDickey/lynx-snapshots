@@ -262,7 +262,7 @@ PUBLIC int HTLoadFinger ARGS4(
     CTRACE(tfp, "HTFinger: Looking for %s\n", (arg ? arg : "NULL"));
   
     if (!(arg && *arg)) {
-        HTAlert(gettext("Could not load data."));
+        HTAlert(COULD_NOT_LOAD_DATA);
 	return HT_NOT_LOADED;			/* Ignore if no name */
     }
   
@@ -292,7 +292,7 @@ PUBLIC int HTLoadFinger ARGS4(
 	HTUnEscape(slash);
 	if (IsGopherURL) {
 	    if (*slash != '0') {
-	        HTAlert(gettext("Could not load data."));
+	        HTAlert(COULD_NOT_LOAD_DATA);
 		return HT_NOT_LOADED;	/* FAIL */
 	    }
 	    *slash++ = '\0';
@@ -300,7 +300,7 @@ PUBLIC int HTLoadFinger ARGS4(
     }
     if ((at_sign = strchr(sitename, '@')) != NULL) {
         if (IsGopherURL) {
-            HTAlert(gettext("Could not load data."));
+            HTAlert(COULD_NOT_LOAD_DATA);
 	    return HT_NOT_LOADED;	/* FAIL */
 	}
         *at_sign++ = '\0';
@@ -329,29 +329,25 @@ PUBLIC int HTLoadFinger ARGS4(
 
     /* Load the string for making a connection/
     */
-    str = (char *)calloc(1, (strlen(sitename) + 10));
-    if (str == NULL)
-        outofmem(__FILE__, "HTLoadFinger");
-    sprintf(str, "lose://%s/", sitename);
+    str = 0;
+    HTSprintf0(&str, "lose://%s/", sitename);
     
     /* Load the command for the finger server.
     */
-    command = (char *)calloc(1, (strlen(username) + 10));
-    if (command == NULL)
-        outofmem(__FILE__, "HTLoadFinger");
+    command = 0;
     if (at_sign && slash) {
         if (*slash == 'w' || *slash == 'W') {
-	    sprintf(command, "/w %s%c%c", username, CR, LF);
+	    HTSprintf0(&command, "/w %s%c%c", username, CR, LF);
 	} else {
-	    sprintf(command, "%s%c%c", username, CR, LF);
+	    HTSprintf0(&command, "%s%c%c", username, CR, LF);
 	}
     } else if (at_sign) {
-	sprintf(command, "%s%c%c", username, CR, LF);
+	HTSprintf0(&command, "%s%c%c", username, CR, LF);
     } else if (*username == '/') {
         if ((slash = strchr((username+1), '/')) != NULL) {
 	    *slash = ' ';
 	}
-	sprintf(command, "%s%c%c", username, CR, LF);
+	HTSprintf0(&command, "%s%c%c", username, CR, LF);
     } else if ((*username == 'w' || *username == 'W') &&
     	       *(username+1) == '/') {
 	if (*username+2 != '\0') {
@@ -359,19 +355,19 @@ PUBLIC int HTLoadFinger ARGS4(
 	} else {
 	    *(username+1) = '\0';
 	}
-	sprintf(command, "/%s%c%c", username, CR, LF);
+	HTSprintf0(&command, "/%s%c%c", username, CR, LF);
     } else if ((*username == 'w' || *username == 'W') &&
     	       *(username+1) == '\0') {
-	sprintf(command, "/%s%c%c", username, CR, LF);
+	HTSprintf0(&command, "/%s%c%c", username, CR, LF);
     } else if ((slash = strchr(username, '/')) != NULL) {
 	*slash++ = '\0';
 	if (*slash == 'w' || *slash == 'W') {
-	    sprintf(command, "/w %s%c%c", username, CR, LF);
+	    HTSprintf0(&command, "/w %s%c%c", username, CR, LF);
 	} else {
-	    sprintf(command, "%s%c%c", username, CR, LF);
+	    HTSprintf0(&command, "%s%c%c", username, CR, LF);
 	}
     } else {
-	sprintf(command, "%s%c%c", username, CR, LF);
+	HTSprintf0(&command, "%s%c%c", username, CR, LF);
     }
   } /* scope of p1 */
   

@@ -305,9 +305,9 @@ install-help : $(helpdir)
 	(cd $(helpdir) && rm -rf *)
 	@echo Constructing sed-script
 	@ECHO_CC@sed	-e '/^#/d' -e '/^$$/d' \
-		-e 's%\(.*\)=\(.*\@.*\)%s=@\1@=\2=g%' \
-		-e 's%\(.*\)=\(http:.*\)%s=@\1@=\2=g%' \
-		-e 's%\(.*\)=\(ftp:.*\)%s=@\1@=\2=g%' \
+		-e 's%\(.*\)=\(.*\@.*\)$$%s=@\1@=\2=g%' \
+		-e 's%\(.*\)=\(http:.*\)$$%s=@\1@=\2=g%' \
+		-e 's%\(.*\)=\(ftp:.*\)$$%s=@\1@=\2=g%' \
 		-e 's%\(.*\)=\(.*\.html\)$$%s=@\1@=\2$(COMPRESS_EXT)=g%' \
 		$(srcdir)/lynx_help/help_files.txt | $(FIX_SED) > \
 		$(helpdir)/help_files.sed

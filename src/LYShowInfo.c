@@ -338,7 +338,7 @@ PUBLIC int showinfo ARGS4(
 	StrAllocCopy(Address, owner_address);
 	LYEntify(&Address, TRUE);
     } else {
-	StrAllocCopy(Address, gettext("None"));
+	StrAllocCopy(Address, NO_NOTHING);
     }
     fprintf(fp0, "<dt><em>%s</em> %s\n", gettext("Owner(s):"), Address);
 

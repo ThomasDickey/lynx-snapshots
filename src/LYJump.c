@@ -62,7 +62,7 @@ PUBLIC void LYAddJumpShortcut ARGS2(HTList *, historyp, char *,shortcut)
 	return;
 
     if ((new = (char *)calloc(1, (strlen(shortcut) + 1))) == NULL)
-	outofmem(__FILE__, "HTAddJumpShortcut");
+	outofmem(__FILE__, "LYAddJumpShortcut");
     strcpy(new, shortcut);
 
     while (NULL != (old = (char *)HTList_nextObject(cur))) {
@@ -87,8 +87,7 @@ PUBLIC BOOL LYJumpInit ARGS1 (char *, config)
      */
     jtp = (struct JumpTable *) calloc(1, sizeof(*jtp));
     if (jtp == NULL) {
-	perror(gettext("Out of memory in LYJumpInit"));
-	return FALSE;
+	outofmem(__FILE__, "LYJumpInit");
     }
 
     /*
@@ -146,8 +145,7 @@ PUBLIC BOOL LYJumpInit ARGS1 (char *, config)
 	    StrAllocCopy(jumpfile, JThead->file);
 	jtp = (struct JumpTable *) calloc(1, sizeof(*jtp));
 	if (jtp == NULL) {
-	    perror(gettext("Out of memory in LYJumpInit"));
-	    return FALSE;
+	    outofmem(__FILE__, "LYJumpInit");
 	}
 	StrAllocCopy(jtp->file, JThead->file);
     }

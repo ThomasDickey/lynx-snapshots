@@ -27,6 +27,9 @@
 # LIBDIR	Directory for installed library
 #______________________________________________________________________
 
+#  If this env var is set to something else Some makes will use that instead
+SHELL = /bin/sh
+
 RANLIB	= ranlib
 
 #	.h files are distributed but originally are made from the

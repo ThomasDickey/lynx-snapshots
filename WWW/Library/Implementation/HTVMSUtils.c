@@ -905,13 +905,13 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 	 0==strncmp((cp+1), "000000", 6)) ||
         (dp=HTVMSopendir(pathname)) == NULL) {
         FREE(pathname);
-    	return HTLoadError(sink, 403, gettext("Could not access directory."));
+    	return HTLoadError(sink, 403, COULD_NOT_ACCESS_DIR);
     }
 
     /*
      *  Set up the output stream.
      */
-    _HTProgress (gettext("Building directory listing..."));
+    _HTProgress (BUILDING_DIR_LIST);
     if (UCLYhndl_HTFile_for_unspec >= 0) {
 	HTAnchor_setUCInfoStage(anchor,
 				UCLYhndl_HTFile_for_unspec,

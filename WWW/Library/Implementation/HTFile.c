@@ -151,6 +151,28 @@ int exists(char *filename)
 PRIVATE void free_suffixes NOPARAMS;
 
 #ifdef LONG_LIST
+PRIVATE char *FormatStr ARGS2(
+    char *,	start,
+    char *,	entry)
+{
+    char fmt[512];
+    char *buf = 0;
+    sprintf(fmt, "%%%.*ss", (int) sizeof(fmt) - 3, start);
+    HTSprintf0(&buf, fmt, entry);
+    return buf;
+}
+
+PRIVATE char *FormatNum ARGS2(
+    char *,	start,
+    int,	entry)
+{
+    char fmt[512];
+    char *buf = 0;
+    sprintf(fmt, "%%%.*sd", (int) sizeof(fmt) - 3, start);
+    HTSprintf0(&buf, fmt, entry);
+    return buf;
+}
+
 PRIVATE void LYListFmtParse ARGS5(
 	char *, 	fmtstr,
 	char *, 	file,
@@ -164,8 +186,8 @@ PRIVATE void LYListFmtParse ARGS5(
 	char *start;
 	char *str = NULL;
 	struct stat st;
-	char buf[512];
-	char fmt[512];
+	char *buf = NULL;
+	char tmp[LY_MAXPATH];
 	char type;
 	char *name;
 	time_t now;
@@ -216,7 +238,6 @@ PRIVATE void LYListFmtParse ARGS5(
 			s++;
 		c = *s; 	/* the format char. or \0 */
 		*s = '\0';
-		buf[0] = '\0';
 
 		switch (c) {
 		case '\0':
@@ -225,19 +246,18 @@ PRIVATE void LYListFmtParse ARGS5(
 		case 'A':
 		case 'a':	/* anchor */
 			HTDirEntry(target, tail, entry);
-			sprintf(fmt, "%%%ss", start);
-			sprintf(buf, fmt, entry);
+			buf = FormatStr(start, entry);
 			PUTS(buf);
 			END(HTML_A);
+			*buf = '\0';
 #ifdef S_IFLNK
 			if (c != 'A' && S_ISLNK(st.st_mode) &&
-			    (len = readlink(file, buf, sizeof(buf))) >= 0) {
+			    (len = readlink(file, tmp, sizeof(tmp))) >= 0) {
 				PUTS(" -> ");
-				buf[len] = '\0';
-				PUTS(buf);
+				tmp[len] = '\0';
+				PUTS(tmp);
 			}
 #endif
-			*buf = '\0';
 			break;
 
 		case 'd':	/* date */
@@ -247,32 +267,29 @@ PRIVATE void LYListFmtParse ARGS5(
 				/*
 				**  MMM DD HH:MM
 				*/
-				sprintf(buf, "%.12s", datestr + 4);
+				sprintf(tmp, "%.12s", datestr + 4);
 			else
 				/*
 				**  MMM DD  YYYY
 				*/
-				sprintf(buf, "%.7s %.4s ", datestr + 4,
-				  datestr + 20);
-			sprintf(fmt, "%%%ss", start);
-			sprintf(buf, fmt, buf);
+				sprintf(tmp, "%.7s %.4s ", datestr + 4,
+					datestr + 20);
+			buf = FormatStr(start, tmp);
 			break;
 
 		case 's':	/* size in bytes */
-			sprintf(fmt, "%%%sd", start);
-			sprintf(buf, fmt, st.st_size);
+			buf = FormatNum(start, st.st_size);
 			break;
 
 		case 'K':	/* size in Kilobytes but not for directories */
 			if (S_ISDIR(st.st_mode)) {
-				sprintf(fmt, "%%%ss ", start);
-				sprintf(buf, fmt, "");
+				buf = FormatStr(start, "");
 				break;
 			}
 			/* FALL THROUGH */
 		case 'k':	/* size in Kilobytes */
-			sprintf(fmt, "%%%sdK", start);
-			sprintf(buf, fmt, (st.st_size+1023)/1024);
+			buf = FormatNum(start, (st.st_size+1023)/1024);
+			StrAllocCat(buf, "K");
 			break;
 
 		case 'p':	/* unix-style permission bits */
@@ -298,41 +315,33 @@ PRIVATE void LYListFmtParse ARGS5(
 #endif /* S_IFSOCK */
 			default: type = '?'; break;
 			}
-			sprintf(buf, "%c%s%s%s", type,
-			  PBIT(st.st_mode, 6, st.st_mode & S_ISUID),
-			  PBIT(st.st_mode, 3, st.st_mode & S_ISGID),
-			  PTBIT(st.st_mode,   st.st_mode & S_ISVTX));
-			sprintf(fmt, "%%%ss", start);
-			sprintf(buf, fmt, buf);
+			sprintf(tmp, "%c%s%s%s", type,
+				PBIT(st.st_mode, 6, st.st_mode & S_ISUID),
+				PBIT(st.st_mode, 3, st.st_mode & S_ISGID),
+				PTBIT(st.st_mode,   st.st_mode & S_ISVTX));
+			buf = FormatStr(start, tmp);
 			break;
 
 		case 'o':	/* owner */
-			sprintf(fmt, "%%%ss", start);
 			name = HTAA_UidToName (st.st_uid);
 			if (*name) {
-				sprintf(fmt, "%%%ss", start);
-				sprintf(buf, fmt, name);
+				buf = FormatStr(start, name);
 			} else {
-
-				sprintf(fmt, "%%%sd", start);
-				sprintf(buf, fmt, st.st_uid);
+				buf = FormatNum(start, st.st_uid);
 			}
 			break;
 
 		case 'g':	/* group */
 			name = HTAA_GidToName(st.st_gid);
 			if (*name) {
-				sprintf(fmt, "%%%ss", start);
-				sprintf(buf, fmt, name);
+				buf = FormatStr(start, name);
 			} else {
-				sprintf(fmt, "%%%sd", start);
-				sprintf(buf, fmt, st.st_gid);
+				buf = FormatNum(start, st.st_gid);
 			}
 			break;
 
 		case 'l':	/* link count */
-			sprintf(fmt, "%%%sd", start);
-			sprintf(buf, fmt, st.st_nlink);
+			buf = FormatNum(start, st.st_nlink);
 			break;
 
 		default:
@@ -341,6 +350,7 @@ PRIVATE void LYListFmtParse ARGS5(
 			break;
 		}
 		PUTS(buf);
+		FREE(buf);
 
 		s++;
 	}
@@ -525,14 +535,10 @@ PUBLIC char * HTCacheFileName ARGS1(
     char * acc_method = HTParse(name, "", PARSE_ACCESS);
     char * host = HTParse(name, "", PARSE_HOST);
     char * path = HTParse(name, "", PARSE_PATH+PARSE_PUNCTUATION);
+    char * result = NULL;
 
-    char * result;
-    result = (char *)malloc(
-	    strlen(HTCacheRoot)+strlen(acc_method)
-	    +strlen(host)+strlen(path)+6+1);
-    if (result == NULL)
-	outofmem(__FILE__, "HTCacheFileName");
-    sprintf(result, "%s/WWW/%s/%s%s", HTCacheRoot, acc_method, host, path);
+    HTSprintf0(&result, "%s/WWW/%s/%s%s", HTCacheRoot, acc_method, host, path);
+
     FREE(path);
     FREE(acc_method);
     FREE(host);
@@ -596,11 +602,7 @@ PUBLIC char * HTnameOfFile_WWW ARGS3(
 #endif /* __EMX__ */
 #endif /* DOSPATH */
 	} else if (WWW_prefix) {
-	    result = (char *)malloc(
-				strlen("/Net/")+strlen(host)+strlen(path)+1);
-	    if (result == NULL)
-		outofmem(__FILE__, "HTLocalName");
-	    sprintf(result, "%s%s%s", "/Net/", host, path);
+	    HTSprintf0(&result, "%s%s%s", "/Net/", host, path);
 	    CTRACE(tfp, "Node `%s' means file `%s'\n", name, result);
 	} else {
 	    StrAllocCopy(result, path);
@@ -615,11 +617,7 @@ PUBLIC char * HTnameOfFile_WWW ARGS3(
 	if ((home = getenv("HOME")) == 0)
 	    home = "/tmp";
 #endif /* VMS */
-	result = (char *)malloc(
-		strlen(home)+strlen(acc_method)+strlen(host)+strlen(path)+6+1);
-	if (result == NULL)
-	    outofmem(__FILE__, "HTLocalName");
-	sprintf(result, "%s/WWW/%s/%s%s", home, acc_method, host, path);
+	HTSprintf0(&result, "%s/WWW/%s/%s%s", home, acc_method, host, path);
     } else {
 	StrAllocCopy(result, path);
     }
@@ -642,25 +640,16 @@ PUBLIC char * HTnameOfFile_WWW ARGS3(
 PUBLIC char * WWW_nameOfFile ARGS1(
 	CONST char *,	name)
 {
-    char * result;
+    char * result = NULL;
 #ifdef NeXT
     if (0 == strncmp("/private/Net/", name, 13)) {
-	result = (char *)malloc(7+strlen(name+13)+1);
-	if (result == NULL)
-	    outofmem(__FILE__, "WWW_nameOfFile");
-	sprintf(result, "file://%s", name+13);
+	HTSprintf0(&result, "file://%s", name+13);
     } else
 #endif /* NeXT */
     if (0 == strncmp(HTMountRoot, name, 5)) {
-	result = (char *)malloc(7+strlen(name+5)+1);
-	if (result == NULL)
-	    outofmem(__FILE__, "WWW_nameOfFile");
-	sprintf(result, "file://%s", name+5);
+	HTSprintf0(&result, "file://%s", name+5);
     } else {
-	result = (char *)malloc(7+strlen(HTHostName())+strlen(name)+1);
-	if (result == NULL)
-	    outofmem(__FILE__, "WWW_nameOfFile");
-	sprintf(result, "file://%s%s", HTHostName(), name);
+	HTSprintf0(&result, "file://%s%s", HTHostName(), name);
     }
     CTRACE(tfp, "File `%s'\n\tmeans node `%s'\n", name, result);
     return result;
@@ -1155,10 +1144,8 @@ PUBLIC void HTDirEntry ARGS3(
 	/*
 	**  If empty tail, gives absolute ref below.
 	*/
-	relative = (char*)malloc(strlen(tail) + strlen(escaped)+2);
-	if (relative == NULL)
-	    outofmem(__FILE__, "HTDirEntry");
-	sprintf(relative, "%s%s%s",
+	relative = 0;
+	HTSprintf0(&relative, "%s%s%s",
 			   tail,
 			   (*escaped != '\0' ? "/" : ""),
 			   escaped);
@@ -1248,8 +1235,8 @@ PUBLIC BOOL HTDirTitles ARGS3(
       START(HTML_HEAD);
       PUTS("\n");
       START(HTML_TITLE);
-      PUTS(*printable ? printable : gettext("Welcome"));
-      PUTS(gettext(" directory"));
+      PUTS(*printable ? printable : WELCOME_MSG);
+      PUTS(SEGMENT_DIRECTORY);
       END(HTML_TITLE);
       PUTS("\n");
       END(HTML_HEAD);
@@ -1257,13 +1244,13 @@ PUBLIC BOOL HTDirTitles ARGS3(
 
 #ifdef DIRED_SUPPORT
       START(HTML_H2);
-      PUTS(*printable ? gettext("Current directory is ") : "");
-      PUTS(*printable ? printable : gettext("Welcome"));
+      PUTS(*printable ? SEGMENT_CURRENT_DIR : "");
+      PUTS(*printable ? printable : WELCOME_MSG);
       END(HTML_H2);
       PUTS("\n");
 #else
       START(HTML_H1);
-      PUTS(*printable ? printable : gettext("Welcome"));
+      PUTS(*printable ? printable : WELCOME_MSG);
       END(HTML_H1);
       PUTS("\n");
 #endif /* DIRED_SUPPORT */
@@ -1300,10 +1287,8 @@ PUBLIC BOOL HTDirTitles ARGS3(
 	    return(need_parent_link);
 	}
 
-	relative = (char*) malloc(strlen(current) + 4);
-	if (relative == NULL)
-	    outofmem(__FILE__, "HTDirTitles");
-	sprintf(relative, "%s/..", current);
+	relative = 0;
+	HTSprintf0(&relative, "%s/..", current);
 
 #ifdef DOSPATH
 	if (local_link)
@@ -1373,7 +1358,7 @@ PUBLIC BOOL HTDirTitles ARGS3(
 	HTStartAnchor(target, "", relative);
 	FREE(relative);
 
-	PUTS(gettext("Up to "));
+	PUTS(SEGMENT_UP_TO);
 	if (parent) {
 	    if ((0 == strcmp(current,".")) ||
 		(0 == strcmp(current,".."))) {
@@ -1504,8 +1489,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    if (HTDirAccess == HT_DIR_FORBID) {
 		FREE(filename);
 		FREE(nodename);
-		return HTLoadError(sink, 403,
-				   gettext("Directory browsing is not allowed."));
+		return HTLoadError(sink, 403, DISALLOWED_DIR_SCAN);
 	    }
 
 	    if (HTDirAccess == HT_DIR_SELECTIVE) {
@@ -1520,8 +1504,7 @@ PUBLIC int HTLoadFile ARGS4(
 		if (HTStat(enable_file_name, &stat_info) == -1) {
 		    FREE(filename);
 		    FREE(nodename);
-		    return HTLoadError(sink, 403,
-				       gettext("Selective access is not enabled for this directory"));
+		    return HTLoadError(sink, 403, DISALLOWED_SELECTIVE_ACCESS);
 		}
 	    }
 
@@ -1681,7 +1664,7 @@ PUBLIC int HTLoadFile ARGS4(
 		} else {
 		    status = HTLoadError(NULL,
 					 -(HT_ERROR),
-					 gettext("Could not open file for decompression!"));
+					 FAILED_OPEN_COMPRESSED_FILE);
 		}
 	    } else
 #endif /* USE_ZLIB */
@@ -1745,8 +1728,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    if (forget_multi || !dp) {
 		FREE(localname);
 		FREE(nodename);
-		return HTLoadError(sink, 500,
-				   gettext("Multiformat: directory scan failed."));
+		return HTLoadError(sink, 500, FAILED_DIR_SCAN);
 	    }
 
 	    while ((dirbuf = readdir(dp)) != NULL) {
@@ -1835,8 +1817,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    } else {			/* If not found suitable file */
 		FREE(localname);
 		FREE(nodename);
-		return HTLoadError(sink, 403,	/* List formats? */
-				   gettext("Could not find suitable representation for transmission."));
+		return HTLoadError(sink, 403, FAILED_NO_REPRESENTATION);
 	    }
 	    /*NOTREACHED*/
 	} /* if multi suffix */
@@ -1891,8 +1872,7 @@ PUBLIC int HTLoadFile ARGS4(
 		if (HTDirAccess == HT_DIR_FORBID) {
 		    FREE(localname);
 		    FREE(nodename);
-		    return HTLoadError(sink, 403,
-				       gettext("Directory browsing is not allowed."));
+		    return HTLoadError(sink, 403, DISALLOWED_DIR_SCAN);
 		}
 
 
@@ -1908,8 +1888,7 @@ PUBLIC int HTLoadFile ARGS4(
 		    if (stat(enable_file_name, &file_info) != 0) {
 			FREE(localname);
 			FREE(nodename);
-			return HTLoadError(sink, 403,
-					   gettext("Selective access is not enabled for this directory"));
+			return HTLoadError(sink, 403, DISALLOWED_SELECTIVE_ACCESS);
 		    }
 		}
 
@@ -1917,8 +1896,7 @@ PUBLIC int HTLoadFile ARGS4(
 		if (!dp) {
 		    FREE(localname);
 		    FREE(nodename);
-		    return HTLoadError(sink, 403,
-				       gettext("This directory is not readable."));
+		    return HTLoadError(sink, 403, FAILED_DIR_UNREADABLE);
 		}
 
 		/*
@@ -2016,9 +1994,6 @@ PUBLIC int HTLoadFile ARGS4(
 			      (no_dotfiles || !show_dotfiles))))
 			    continue;
 
-			dirname = (char *)malloc(strlen(dirbuf->d_name) + 4);
-			if (dirname == NULL)
-			    outofmem(__FILE__, "HTLoadFile");
 			StrAllocCopy(tmpfilename, localname);
 			if (strcmp(localname, "/"))
 			    /*
@@ -2030,29 +2005,26 @@ PUBLIC int HTLoadFile ARGS4(
 			stat(tmpfilename, &file_info);
 			if (S_ISDIR(file_info.st_mode))
 #ifndef DIRED_SUPPORT
-			    sprintf((char *)dirname, "D%s",dirbuf->d_name);
+			    HTSprintf0(&dirname, "D%s",dirbuf->d_name);
 			else
-			    sprintf((char *)dirname, "F%s",dirbuf->d_name);
+			    HTSprintf0(&dirname, "F%s",dirbuf->d_name);
 			    /* D & F to have first directories, then files */
 #else
 			{
 			    if (dir_list_style == MIXED_STYLE)
-				sprintf((char *)dirname,
-					" %s/", dirbuf->d_name);
+				HTSprintf0(&dirname, " %s/", dirbuf->d_name);
 			    else if (!strcmp(dirbuf->d_name, ".."))
-				sprintf((char *)dirname,
-					"A%s", dirbuf->d_name);
+				HTSprintf0(&dirname, "A%s", dirbuf->d_name);
 			    else
-				sprintf((char *)dirname,
-					"D%s", dirbuf->d_name);
+				HTSprintf0(&dirname, "D%s", dirbuf->d_name);
 			}
 			else if (dir_list_style == MIXED_STYLE)
-			    sprintf((char *)dirname, " %s", dirbuf->d_name);
+			    HTSprintf0(&dirname, " %s", dirbuf->d_name);
 			else if (dir_list_style == FILES_FIRST)
-			    sprintf((char *)dirname, "C%s", dirbuf->d_name);
+			    HTSprintf0(&dirname, "C%s", dirbuf->d_name);
 			    /* C & D to have first files, then directories */
 			else
-			    sprintf((char *)dirname, "F%s", dirbuf->d_name);
+			    HTSprintf0(&dirname, "F%s", dirbuf->d_name);
 #endif /* !DIRED_SUPPORT */
 			/*
 			**  Sort dirname in the tree bt.
@@ -2125,8 +2097,8 @@ PUBLIC int HTLoadFile ARGS4(
 				    if (dir_list_style != MIXED_STYLE) {
 				       START(HTML_EM);
 				       PUTS(state == 'D'
-				          ? gettext("Subdirectories:")
-					  : gettext("Files:"));
+				          ? LABEL_SUBDIRECTORIES
+					  : LABEL_FILES);
 				       END(HTML_EM);
 				    }
 				    END(HTML_H2);
@@ -2147,8 +2119,8 @@ PUBLIC int HTLoadFile ARGS4(
 				    START(HTML_H2);
 				    START(HTML_EM);
 				    PUTS(state == 'D'
-				        ? gettext("Subdirectories:")
-					: gettext("Files:"));
+				        ? LABEL_SUBDIRECTORIES
+					: LABEL_FILES);
 				    END(HTML_EM);
 				    END(HTML_H2);
 #ifndef LONG_LIST
@@ -2335,7 +2307,7 @@ PUBLIC int HTLoadFile ARGS4(
 		    } else {
 			status = HTLoadError(NULL,
 					     -(HT_ERROR),
-					     gettext("Could not open file for decompression!"));
+					     FAILED_OPEN_COMPRESSED_FILE);
 		    }
 		} else
 #endif /* USE_ZLIB */
@@ -2384,7 +2356,7 @@ PUBLIC int HTLoadFile ARGS4(
     {
 	CTRACE(tfp, "Can't open `%s', errno=%d\n", addr, SOCKET_ERRNO);
 
-	return HTLoadError(sink, 403, gettext("Can't access requested file."));
+	return HTLoadError(sink, 403, FAILED_FILE_UNREADABLE);
     }
 }
 

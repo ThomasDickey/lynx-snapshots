@@ -507,6 +507,28 @@ PRIVATE int response ARGS1(
     return result/100;
 }
 
+PRIVATE int send_cmd_1 ARGS1(char *, verb)
+{
+    char command[80];
+
+    sprintf(command, "%.*s%c%c", (int) sizeof(command)-4, verb, CR, LF);
+    return response (command);
+}
+
+PRIVATE int send_cmd_2 ARGS2(char *, verb, char *, param)
+{
+    char *command = 0;
+    int status;
+
+    HTSprintf0(&command, "%s %s%c%c", verb, param, CR, LF);
+    status = response (command);
+    FREE(command);
+
+    return status;
+}
+
+#define send_cwd(path) send_cmd_2("CWD", path)
+
 /*
  *  This function should try to set the macintosh server into binary mode.
  *  Some servers need an additional letter after the MACB command.
@@ -601,7 +623,7 @@ PRIVATE int get_connection ARGS2(
 	HTParentAnchor *,	anchor)
 {
     int status;
-    char * command;
+    char * command = 0;
     connection * con;
     char * username = NULL;
     char * password = NULL;
@@ -664,9 +686,9 @@ PRIVATE int get_connection ARGS2(
 	     *	away in a primitive fashion.
 	     */
 	    if (!password) {
-		char tmp[256];
+		char *tmp = NULL;
 
-		sprintf(tmp, "%s@%s", username, p1);
+		HTSprintf0(&tmp, "%s@%s", username, p1);
 		/*
 		 *  If the user@host is not equal to the last time through
 		 *  or user_entered_password has no data then we need
@@ -677,13 +699,14 @@ PRIVATE int get_connection ARGS2(
 		    !user_entered_password) {
 
 		    StrAllocCopy(last_username_and_host, tmp);
-		    sprintf(tmp, gettext("Enter password for user %s@%s:"),
-				  username, p1);
+		    HTSprintf0(&tmp, gettext("Enter password for user %s@%s:"),
+				     username, p1);
 		    FREE(user_entered_password);
-		    user_entered_password = (char *)HTPromptPassword(tmp);
+		    user_entered_password = HTPromptPassword(tmp);
 
 		} /* else we already know the password */
 		password = user_entered_password;
+		FREE(tmp);
 	    }
 	}
 
@@ -756,19 +779,10 @@ PRIVATE int get_connection ARGS2(
 	}
 	StrAllocCopy(anchor->server, cp);
 
-	if (username && *username) {
-	    command = (char*)malloc(10+strlen(username)+2+1);
-	    if (command == NULL)
-		outofmem(__FILE__, "get_connection");
-	    sprintf(command, "USER %s%c%c", username, CR, LF);
-	} else {
-	    command = (char*)malloc(24);
-	    if (command == NULL)
-		outofmem(__FILE__, "get_connection");
-	    sprintf(command, "USER anonymous%c%c", CR, LF);
-	}
-	status = response(command);
-	FREE(command);
+	status = send_cmd_2("USER", (username && *username)
+			    ? username
+			    : "anonymous");
+
 	if (status == HT_INTERRUPTED) {
 	    CTRACE (tfp, "HTFTP: Interrupted while sending username.\n");
 	    _HTProgress (CONNECTION_INTERRUPTED);
@@ -782,10 +796,7 @@ PRIVATE int get_connection ARGS2(
 	    /*
 	     * We have non-zero length password, so send it. - FM
 	     */
-	    command = (char*)malloc(10+strlen(password)+2+1);
-	    if (command == NULL)
-		outofmem(__FILE__, "get_connection");
-	    sprintf(command, "PASS %s%c%c", password, CR, LF);
+	    HTSprintf0(&command, "PASS %s%c%c", password, CR, LF);
 	} else {
 	    /*
 	     * Create and send a mail address as the password. - FM
@@ -824,10 +835,7 @@ PRIVATE int get_connection ARGS2(
 	    if (!(host) || strchr(host, '.') == NULL)
 		host = "";
 
-	    command = (char*)malloc(10+strlen(user)+1+strlen(host)+2+1);
-	    if (command == NULL)
-		outofmem(__FILE__, "get_connection");
-	    sprintf(command, "PASS %s@%s%c%c", user, host, CR, LF);
+	    HTSprintf0(&command, "PASS %s@%s%c%c", user, host, CR, LF);
 	    FREE(user);
 	}
 	status = response(command);
@@ -844,9 +852,7 @@ PRIVATE int get_connection ARGS2(
     FREE(username);
 
     if (status == 3) {
-	char temp[80];
-	sprintf(temp, "ACCT noaccount%c%c", CR, LF);
-	status = response(temp);
+	status = send_cmd_1("ACCT noaccount");
 	if (status == HT_INTERRUPTED) {
 	    CTRACE (tfp, "HTFTP: Interrupted while sending password.\n");
 	    _HTProgress (CONNECTION_INTERRUPTED);
@@ -1198,7 +1204,7 @@ PRIVATE void set_years_and_date NOARGS
     }
     i++;
     sprintf(month, "%s%d", (i < 10 ? "0" : ""), i);
-    sprintf(date, "9999%s%s", month, day);
+    sprintf(date, "9999%.2s%.2s", month, day);
     TheDate = atoi(date);
     strcpy(ThisYear, (char *)ctime(&NowTime)+20);
     ThisYear[4] = '\0';
@@ -1422,12 +1428,12 @@ PRIVATE void parse_vms_dir_entry ARGS2(
 	i = strlen(entry_info->filename);
     } else {
 	i = ((strstr(entry_info->filename, "READ") - entry_info->filename) + 4);
-	if (!strncmp((char *)&entry_info->filename[i], "ME", 2)) {
+	if (!strncmp(&entry_info->filename[i], "ME", 2)) {
 	    i += 2;
 	    while (entry_info->filename[i] && entry_info->filename[i] != '.') {
 		i++;
 	    }
-	} else if (!strncmp((char *)&entry_info->filename[i], ".ME", 3)) {
+	} else if (!strncmp(&entry_info->filename[i], ".ME", 3)) {
 	    i = strlen(entry_info->filename);
 	} else {
 	    i = 0;
@@ -1681,9 +1687,9 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
 	if (strcmp((ThisYear+2), cp)) {
 	    /* Not this year, so show the year */
 	    if (atoi(cp) < 70) {
-		sprintf((char *)&date[6], "  20%s", cp);
+		sprintf(&date[6], "  20%s", cp);
 	    } else {
-		sprintf((char *)&date[6], "  19%s", cp);
+		sprintf(&date[6], "  19%s", cp);
 	    }
 	} else {
 	    /* Is this year, so show the time */
@@ -1692,7 +1698,7 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
 	    if (*(cpd+5) == 'P' || *(cpd+5) == 'p')
 		i += 12;
 	    *(cpd+5) = '\0';
-	    sprintf((char*)&date[6], " %s%d:%s",
+	    sprintf(&date[6], " %s%d:%s",
 				     (i < 10 ? "0" : ""), i, (cpd+3));
 	}
 	StrAllocCopy(entry_info->date, date);
@@ -1839,15 +1845,15 @@ PRIVATE void parse_cms_dir_entry ARGS2(
 	    if (strcmp((ThisYear+2), cpd)) {
 		/* Not this year, so show the year. */
 		if (atoi(cpd) < 70) {
-		    sprintf((char *)&date[6], "  20%s", cpd);
+		    sprintf(&date[6], "  20%s", cpd);
 		} else {
-		    sprintf((char *)&date[6], "  19%s", cpd);
+		    sprintf(&date[6], "  19%s", cpd);
 		}
 	    } else {
 		/* Is this year, so show the time. */
 		*(cps+2) = '\0';	/* Hour */
 		i = atoi(cps);
-		sprintf((char*)&date[6], " %s%d:%s",
+		sprintf(&date[6], " %s%d:%s",
 				     (i < 10 ? "0" : ""), i, (cps+3));
 	    }
 	    StrAllocCopy(entry_info->date, date);
@@ -2193,12 +2199,12 @@ PRIVATE int compare_EntryInfo_structs ARGS2(
 		*/
 		if (entry1->date[9] == ':') {
 		    strcpy(date1, "9999");
-		    strcpy(time1, (char *)&entry1->date[7]);
+		    strcpy(time1, &entry1->date[7]);
 		    if (time1[0] == ' ') {
 			 time1[0] = '0';
 		    }
 		} else {
-		    strcpy(date1, (char *)&entry1->date[8]);
+		    strcpy(date1, &entry1->date[8]);
 		    strcpy(time1, "00:00");
 		}
 		strncpy(month, entry1->date, 3);
@@ -2211,7 +2217,7 @@ PRIVATE int compare_EntryInfo_structs ARGS2(
 		i++;
 		sprintf(month, "%s%d", (i < 10 ? "0" : ""), i);
 		strcat(date1, month);
-		strncat(date1, (char *)&entry1->date[4], 2);
+		strncat(date1, &entry1->date[4], 2);
 		date1[8] = '\0';
 		if (date1[6] == ' ' || date1[6] == HT_NON_BREAK_SPACE) {
 		    date1[6] = '0';
@@ -2224,12 +2230,12 @@ PRIVATE int compare_EntryInfo_structs ARGS2(
 		strcat(date1, time1);
 		    if (entry2->date[9] == ':') {
 			strcpy(date2, "9999");
-			strcpy(time2, (char *)&entry2->date[7]);
+			strcpy(time2, &entry2->date[7]);
 			if (time2[0] == ' ') {
 			    time2[0] = '0';
 			}
 		    } else {
-			strcpy(date2, (char *)&entry2->date[8]);
+			strcpy(date2, &entry2->date[8]);
 			strcpy(time2, "00:00");
 		    }
 		strncpy(month, entry2->date, 3);
@@ -2242,7 +2248,7 @@ PRIVATE int compare_EntryInfo_structs ARGS2(
 		i++;
 		sprintf(month, "%s%d", (i < 10 ? "0" : ""), i);
 		strcat(date2, month);
-		strncat(date2, (char *)&entry2->date[4], 2);
+		strncat(date2, &entry2->date[4], 2);
 		date2[8] = '\0';
 		if (date2[6] == ' ' || date2[6] == HT_NON_BREAK_SPACE) {
 		    date2[6] = '0';
@@ -2423,7 +2429,7 @@ AgainForMultiNet:
 
 	    BytesReceived += chunk->size;
 	    if (BytesReceived > BytesReported + 1024) {
-		sprintf(NumBytes,gettext("Transferred %d bytes"),BytesReceived);
+		sprintf(NumBytes, TRANSFERRED_X_BYTES, BytesReceived);
 		HTProgress(NumBytes);
 		BytesReported = BytesReceived;
 	    }
@@ -2504,7 +2510,7 @@ unload_btree:
 		    else
 			sprintf(string_buffer, "  %dKb",
 						entry_info->size/1024);
-			  PUTS(string_buffer);
+		    PUTS(string_buffer);
 		}
 
 		PUTC('\n'); /* end of this entry */
@@ -2617,8 +2623,7 @@ PUBLIC int HTFTPLoad ARGS4(
 	    int status;
 	    data_soc = status;
 
-	    sprintf(command, "PASV%c%c", CR, LF);
-	    status = response(command);
+	    status = send_cmd_1("PASV");
 	    if (status != 2) {
 		if (status < 0)
 		    continue;		/* retry or Bad return */
@@ -2644,7 +2649,7 @@ PUBLIC int HTFTPLoad ARGS4(
 /*	Open connection for data:
 */
 	    sprintf(command,
-	    "ftp://%d.%d.%d.%d:%d/",h0,h1,h2,h3,passive_port);
+		    "ftp://%d.%d.%d.%d:%d/",h0,h1,h2,h3,passive_port);
 	    status = HTDoConnect(name, "FTP", passive_port, &data_soc);
 
 	    if (status < 0) {
@@ -2732,11 +2737,9 @@ PUBLIC int HTFTPLoad ARGS4(
 	    if ((cp2 = strchr((filename+1), '/')) != NULL) {
 		*cp2 = '\0';
 	    }
-	    sprintf(command, "PWD%c%c", CR, LF);
-	    status = response(command);
+	    status = send_cmd_1("PWD");
 	    if (status == 2 && response_text[5] == '/') {
-		sprintf(command, "CWD %s%c%c", (filename+1), CR, LF);
-		status = response(command);
+		status = send_cwd(filename+1);
 		if (status == 2) {
 		    StrAllocCopy(fn, (filename+1));
 		    if (cp2) {
@@ -2813,8 +2816,7 @@ PUBLIC int HTFTPLoad ARGS4(
 	    **	Act on our setting if not already set. - FM
 	    */
 	    char * mode = binary ? "I" : "A";
-	    sprintf(command, "TYPE %s%c%c", mode, CR, LF);
-	    status = response(command);
+	    status = send_cmd_2("TYPE", mode);
 	    if (status != 2) {
 		init_help_message_cache();  /* to free memory */
 		return ((status < 0) ? status : -status);
@@ -2858,13 +2860,12 @@ PUBLIC int HTFTPLoad ARGS4(
 		    filename[i] = '\0';
 		    CTRACE(tfp, "HTFTP: Filename '%s'\n", filename);
 		    *cp1 = '\0';
-		    sprintf(command, "CWD %s%c%c", cp, CR, LF);
-		    status = response (command);
+		    status = send_cwd(cp);
 		    if (status != 2) {
+			char *dotslash = 0;
 			if ((cp1=strchr(cp, '[')) != NULL) {
 			    *cp1++ = '\0';
-			    sprintf(command, "CWD %s%c%c", cp, CR, LF);
-			    status = response (command);
+			    status = send_cwd(cp);
 			    if (status != 2) {
 				FREE(fname);
 				init_help_message_cache(); /* to free memory */
@@ -2872,8 +2873,9 @@ PUBLIC int HTFTPLoad ARGS4(
 				control->socket = -1;
 				return ((status < 0) ? status : -status);
 			    }
-			    sprintf(command, "CWD [.%s%c%c", cp1, CR, LF);
-			    status = response (command);
+			    HTSprintf0(&dotslash, "[.%s", cp1);
+			    status = send_cwd(dotslash);
+			    FREE(dotslash);
 			    if (status != 2) {
 				FREE(fname);
 				init_help_message_cache(); /* to free memory */
@@ -2902,17 +2904,14 @@ PUBLIC int HTFTPLoad ARGS4(
 			strcat(cp, "[");
 			strcat(cp, filename);
 			strcat(cp, "]");
-			sprintf(command, "CWD %s%c%c", cp, CR, LF);
-			status = response (command);
+			status = send_cwd(cp);
 			if (status != 2) {
 			    *cp1 = '\0';
 			    strcat(cp, "[000000]");
-			    sprintf(command, "CWD %s%c%c", cp, CR, LF);
-			    status = response (command);
+			    status = send_cwd(cp);
 			    if (status != 2) {
 				*cp1 = '\0';
-				sprintf(command, "CWD %s%c%c", cp, CR, LF);
-				status = response (command);
+				status = send_cwd(cp);
 				if (status != 2) {
 				    FREE(fname);
 				    init_help_message_cache();
@@ -2927,12 +2926,10 @@ PUBLIC int HTFTPLoad ARGS4(
 			}
 		    }
 		} else if (0==strcmp(cp, (filename+1))) {
-		    sprintf(command, "CWD %s%c%c", cp, CR, LF);
-		    status = response (command);
+		    status = send_cwd(cp);
 		    if (status != 2) {
 			strcat(cp, ":");
-			sprintf(command, "CWD %s%c%c", cp, CR, LF);
-			status = response (command);
+			status = send_cwd(cp);
 			if (status != 2) {
 			    FREE(fname);
 			    init_help_message_cache();	/* to free memory */
@@ -2952,8 +2949,7 @@ PUBLIC int HTFTPLoad ARGS4(
 #ifdef MAINTAIN_CONNECTION /* Don't need this if always new connection - F.M. */
 	    if (!included_device) {
 		/** Get the current default VMS device:[directory] **/
-		sprintf(command, "PWD%c%c", CR, LF);
-		status = response (command);
+		status = send_cmd_1("PWD");
 		if (status != 2) {
 		    FREE(fname);
 		    init_help_message_cache();	/* to free memory */
@@ -2964,12 +2960,21 @@ PUBLIC int HTFTPLoad ARGS4(
 		/** Go to the VMS account's top directory **/
 		if ((cp=strchr(response_text, '[')) != NULL &&
 		    (cp1=strrchr(response_text, ']')) != NULL) {
-		    sprintf(command, "CWD %s", cp);
-		    if ((cp2=strchr(cp, '.')) != NULL && cp2 < cp1)
-			sprintf(command+(cp2-cp)+4, "]%c%c", CR, LF);
-		    else
-			sprintf(command+(cp1-cp)+4, "]%c%c", CR, LF);
-		    status = response (command);
+		    char *tmp = 0;
+		    unsigned len = 4;
+
+		    StrAllocCopy(tmp, cp);
+		    if ((cp2=strchr(cp, '.')) != NULL && cp2 < cp1) {
+			len += (cp2 - cp);
+		    } else {
+			len += (cp1 - cp);
+		    }
+		    tmp[len] = 0;
+		    StrAllocCat(tmp, "]");
+
+		    status = send_cwd(tmp);
+		    FREE(tmp);
+
 		    if (status != 2) {
 			FREE(fname);
 			init_help_message_cache();  /* to free memory */
@@ -2986,8 +2991,7 @@ PUBLIC int HTFTPLoad ARGS4(
 		(included_device && 0==strcmp(filename, "000000")) ||
 		(strlen(filename) == 1 && *filename == '/')) {
 		isDirectory = YES;
-		sprintf(command, "LIST%c%c", CR, LF);
-		status = response (command);
+		status = send_cmd_1("LIST");
 		FREE(fname);
 		if (status != 1) {
 		    /* Action not started */
@@ -3005,11 +3009,17 @@ PUBLIC int HTFTPLoad ARGS4(
 	    if (!included_device &&
 		(cp = strchr(filename, '/')) != NULL &&
 		(cp1 = strrchr(cp, '/')) != NULL && cp != cp1) {
-		sprintf(command, "CWD [.%s", cp+1);
-		sprintf(command+(cp1-cp)+5, "]%c%c", CR, LF);
+		char *tmp = 0;
+
+		StrAllocCopy(tmp, cp+1);
+		strcpy(tmp + (cp1-cp) + 5, "]");
+
 		while ((cp2 = strrchr(command, '/')) != NULL)
 		    *cp2 = '.';
-		status = response(command);
+
+		status = send_cwd(tmp);
+		FREE(tmp);
+
 		if (status != 2) {
 		    FREE(fname);
 		    init_help_message_cache();	/* to free memory */
@@ -3039,8 +3049,7 @@ PUBLIC int HTFTPLoad ARGS4(
 		(0 == strncasecomp(filename+1, "anonymou.", 9) &&
 		 strchr(filename+1, '/') == NULL)) {
 		if (filename[1] != '\0') {
-		    sprintf(command, "CWD %s%c%c", (filename+1), CR, LF);
-		    status = response(command);
+		    status = send_cwd(filename+1);
 		    if (status != 2) {
 			/* Action not started */
 			init_help_message_cache();  /* to free memory */
@@ -3051,10 +3060,9 @@ PUBLIC int HTFTPLoad ARGS4(
 		}
 		isDirectory = YES;
 		if (use_list)
-		    sprintf(command, "LIST%c%c", CR, LF);
+		    status = send_cmd_1("LIST");
 		else
-		    sprintf(command, "NLST%c%c", CR, LF);
-		status = response (command);
+		    status = send_cmd_1("NLST");
 		FREE(fname);
 		if (status != 1) {
 		    /* Action not started */
@@ -3071,16 +3079,14 @@ PUBLIC int HTFTPLoad ARGS4(
 	    /** Otherwise, go to appropriate directory and adjust filename **/
 	    while ((cp = strchr(filename, '/')) != NULL) {
 		*cp++ = '\0';
-		sprintf(command, "CWD %s%c%c", filename, CR, LF);
-		status = response(command);
+		status = send_cwd(filename);
 		if (status == 2) {
 		    if (*cp == '\0') {
 			isDirectory = YES;
 			if (use_list)
-			    sprintf(command, "LIST%c%c", CR, LF);
+			    status = send_cmd_1("LIST");
 			else
-			    sprintf(command, "NLST%c%c", CR, LF);
-			status = response (command);
+			    status = send_cmd_1("NLST");
 			FREE(fname);
 			if (status != 1) {
 			    /** Action not started **/
@@ -3110,8 +3116,7 @@ PUBLIC int HTFTPLoad ARGS4(
 	**  which we're dealing with if we don't know yet. - FM
 	*/
 	if (!(type) || (type && *type != 'D')) {
-	    sprintf(command, "RETR %s%c%c", filename, CR, LF);
-	    status = response(command);
+	    status = send_cmd_2("RETR", filename);
 	} else {
 	    status = 5; 	/* Failed status set as flag. - FM */
 	}
@@ -3120,16 +3125,13 @@ PUBLIC int HTFTPLoad ARGS4(
 	    if (strcmp(filename, "/"))
 		init_help_message_cache();
 
-	    sprintf(command, "CWD %s%c%c", filename, CR, LF);
-	    status = response(command);
-
+	    status = send_cwd(filename);
 	    if (status == 2) {	/* Succeeded : let's NAME LIST it */
 		isDirectory = YES;
-	    if (use_list)
-		sprintf(command, "LIST%c%c", CR, LF);
-	    else
-		sprintf(command, "NLST%c%c", CR, LF);
-	    status = response (command);
+		if (use_list)
+		    status = send_cmd_1("LIST");
+		else
+		    status = send_cmd_1("NLST");
 	    }
 	}
 	FREE(fname);

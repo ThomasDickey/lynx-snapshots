@@ -264,23 +264,15 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 
 /*	Make command to process file
 */
-    me->end_command = (char *)malloc (
-    			(strlen (pres->command) + 10+ 3*strlen(fnam))
-    			 * sizeof (char));
-    if (me == NULL) outofmem(__FILE__, "SaveAndExecute");
-    
-    sprintf (me->end_command, pres->command, fnam, fnam, fnam);
+    me->end_command = 0;
+    HTSprintf0(&(me->end_command), pres->command, fnam, fnam, fnam);
 
     me->remove_command = NULL;	/* If needed, put into end_command */
 #ifdef NOPE
 /*	Make command to delete file
 */ 
-    me->remove_command = (char *)malloc (
-    			(strlen (REMOVE_COMMAND) + 10+ strlen(fnam))
-    			 * sizeof (char));
-    if (me == NULL) outofmem(__FILE__, "SaveAndExecute");
-    
-    sprintf (me->remove_command, REMOVE_COMMAND, fnam);
+    me->remove_command = 0;
+    HTSprintf0(&(me->remove_command), REMOVE_COMMAND, fnam);
 #endif
 
     me->announce = NO;

@@ -172,7 +172,7 @@ failed:
     return 0;
 
 cancelled:
-    HTInfoMsg(gettext("Cancelling."));
+    HTInfoMsg(CANCELLING);
     return 0;
 }
 

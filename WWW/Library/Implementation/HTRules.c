@@ -319,7 +319,7 @@ PUBLIC int  HTSetConfiguration ARGS1(
 	word3 = HTNextField(&pointer);	/* Just the next word */
 
     if (!word2) {
-	fprintf(stderr, gettext("HTRule: Insufficient operands: %s\n"), line);
+	fprintf(stderr, "HTRule: %s %s\n", RULE_NEEDS_DATA, line);
 	FREE(line);
 	return -2;	/*syntax error */
     }
@@ -357,7 +357,7 @@ PUBLIC int  HTSetConfiguration ARGS1(
 	    :	0==strcasecomp(word1, "protect") ? HT_Protect
 	    :						HT_Invalid;
 	if (op==HT_Invalid) {
-	    fprintf(stderr, gettext("HTRule: Bad rule `%s'\n"), config);
+	    fprintf(stderr, "HTRule: %s '%s'\n", RULE_INCORRECT, config);
 	} else {
 	    HTAddRule(op, word2, word3);
 	}

@@ -211,7 +211,6 @@ PRIVATE void parse_menu ARGS2(
     char gtype;
     char ch;
     char line[BIG];
-    char address[BIG];
     char *name = NULL, *selector = NULL;	/* Gopher menu fields */
     char *host = NULL;
     char *port;
@@ -233,7 +232,7 @@ PRIVATE void parse_menu ARGS2(
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
     else
-	PUTS(gettext("Gopher Menu"));
+	PUTS(GOPHER_MENU_TITLE);
     END(HTML_TITLE);
     PUTS("\n");
     END(HTML_HEAD);
@@ -245,7 +244,7 @@ PRIVATE void parse_menu ARGS2(
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
     else
-	PUTS(gettext("Gopher Menu"));
+	PUTS(GOPHER_MENU_TITLE);
     END(HTML_H1);
     PUTS("\n");
     START(HTML_PRE);
@@ -269,7 +268,7 @@ PRIVATE void parse_menu ARGS2(
 	    gtype = *p++;
 
 	    if (bytes > BytesReported + 1024) {
-		sprintf(buffer, gettext("Transferred %d bytes"), bytes);
+		sprintf(buffer, TRANSFERRED_X_BYTES, bytes);
 		HTProgress(buffer);
 		BytesReported = bytes;
 	    }
@@ -327,23 +326,26 @@ PRIVATE void parse_menu ARGS2(
 		PUTS(name);
 
 	    } else if (port) {		/* Other types need port */
+		char *address = 0;
+
 		if (gtype == GOPHER_TELNET) {
 		    PUTS(" (TEL) ");
-		    if (*selector) sprintf(address, "telnet://%s@%s/",
+		    if (*selector)
+			HTSprintf0(&address, "telnet://%s@%s/",
 					   selector, host);
-		    else sprintf(address, "telnet://%s/", host);
+		    else
+			HTSprintf0(&address, "telnet://%s/", host);
 		}
 		else if (gtype == GOPHER_TN3270)
 		{
 		    PUTS("(3270) ");
 		    if (*selector)
-			sprintf(address, "tn3270://%s@%s/",
+			HTSprintf0(&address, "tn3270://%s@%s/",
 				selector, host);
 		    else
-			sprintf(address, "tn3270://%s/", host);
+			HTSprintf0(&address, "tn3270://%s/", host);
 		}
 		else {			/* If parsed ok */
-		    char *q;
 		    char *r;
 
 		    switch(gtype) {
@@ -398,19 +400,18 @@ PRIVATE void parse_menu ARGS2(
 			    break;
 		    }
 
-		    sprintf(address, "//%s/%c", host, gtype);
+		    HTSprintf0(&address, "//%s/%c", host, gtype);
 
-		    q = address+ strlen(address);
-		    for(r=selector; *r; r++) {	/* Encode selector string */
-			if (acceptable[(unsigned char)*r]) *q++ = *r;
-			else {
-			    *q++ = HEX_ESCAPE;	/* Means hex coming */
-			    *q++ = hex[(TOASCII(*r)) >> 4];
-			    *q++ = hex[(TOASCII(*r)) & 15];
+		    for(r = selector; *r; r++) { /* Encode selector string */
+			if (acceptable[(unsigned char)*r]) {
+			    HTSprintf(&address, "%c", *r);
+			} else {
+			    HTSprintf(&address, "%c%c%c",
+				HEX_ESCAPE,	/* Means hex coming */
+				hex[(TOASCII(*r)) >> 4],
+				hex[(TOASCII(*r)) & 15]);
 			}
 		    }
-
-		    *q++ = '\0';	/* terminate address */
 		}
 		/* Error response from Gopher doesn't deserve to
 		   be a hyperlink. */
@@ -418,6 +419,7 @@ PRIVATE void parse_menu ARGS2(
 		    write_anchor(name, address);
 		else
 		    PUTS(name);
+		FREE(address);
 	    } else { /* parse error */
 		CTRACE(tfp, "HTGopher: Bad menu item.\n");
 		PUTS(line);
@@ -472,7 +474,7 @@ PRIVATE void parse_cso ARGS2(
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
     else
-	PUTS(gettext("CSO Search Results"));
+	PUTS(GOPHER_CSO_SEARCH_RESULTS);
     END(HTML_TITLE);
     PUTS("\n");
     END(HTML_HEAD);
@@ -482,7 +484,7 @@ PRIVATE void parse_cso ARGS2(
 	PUTS(title);
     else {
 	PUTS(arg);
-	PUTS(gettext(" Search Results"));
+	PUTS(GOPHER_SEARCH_RESULTS);
     }
     END(HTML_H1);
     PUTS("\n");
@@ -615,7 +617,7 @@ PRIVATE void display_cso ARGS2(
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
     else
-	PUTS(gettext("CSO index"));
+	PUTS(GOPHER_CSO_INDEX);
     END(HTML_TITLE);
     PUTS("\n");
     START(HTML_ISINDEX);
@@ -627,15 +629,15 @@ PRIVATE void display_cso ARGS2(
 	PUTS(title);
     else {
        PUTS(arg);
-       PUTS(gettext(" index"));
+       PUTS(INDEX_SEGMENT);
     }
     END(HTML_H1);
-    PUTS(gettext("\nThis is a searchable index of a CSO database.\n"));
+    PUTS(GOPHER_CSO_INDEX_SUBTITLE);
     START(HTML_P);
-    PUTS(gettext("\nPress the 's' key and enter search keywords.\n"));
+    PUTS(GOPHER_CSO_SOLICIT_KEYWORDS);
     START(HTML_P);
-    PUTS(gettext("\nThe keywords that you enter will allow you to search on a"));
-    PUTS(gettext(" person's name in the database.\n"));
+    PUTS(SEGMENT_KEYWORDS_WILL);
+    PUTS(SEGMENT_PERSONS_DB_NAME);
 
     if (!HTAnchor_title(anAnchor))
 	HTAnchor_setTitle(anAnchor, arg);
@@ -660,7 +662,7 @@ PRIVATE void display_index ARGS2(
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
     else
-	PUTS(gettext("Gopher index"));
+	PUTS(GOPHER_INDEX_TITLE);
     END(HTML_TITLE);
     PUTS("\n");
     START(HTML_ISINDEX);
@@ -672,12 +674,12 @@ PRIVATE void display_index ARGS2(
 	PUTS(title);
     else {
        PUTS(arg);
-       PUTS(gettext(" index"));
+       PUTS(INDEX_SEGMENT);
     }
     END(HTML_H1);
-    PUTS(gettext("\nThis is a searchable Gopher index.\n"));
+    PUTS(GOPHER_INDEX_SUBTITLE);
     START(HTML_P);
-    PUTS(gettext("\nPlease enter search keywords.\n"));
+    PUTS(GOPHER_SOLICIT_KEYWORDS);
 
     if (!HTAnchor_title(anAnchor))
 	HTAnchor_setTitle(anAnchor, arg);
@@ -741,7 +743,7 @@ PRIVATE void free_CSOfields NOPARAMS
 /*	Interpret CSO/PH form template keys. - FM
 **	=========================================
 */
-PRIVATE int interpret_cso_key ARGS5(
+PRIVATE void interpret_cso_key ARGS5(
 	char *, 		key,
 	char *, 		buf,
 	int *,			length,
@@ -776,7 +778,7 @@ PRIVATE int interpret_cso_key ARGS5(
 	}
 	if (!error) {
 	    *length = strlen(buf);
-	    return -1;
+	    return;
 	}
     }
     buf[0] = '\0';
@@ -867,10 +869,10 @@ PRIVATE int interpret_cso_key ARGS5(
 	buf[out++] = ')';
 	buf[out] = '\0';
 	*length = strlen(buf);
-	return -1;
+	return;
     }
     *length = strlen(buf);
-    return 0;
+    return;
 }
 
 /*	Parse the elements in a CSO/PH fields structure. - FM
@@ -1184,11 +1186,8 @@ PRIVATE int generate_cso_form ARGS4(
 			j = 0;
 		    }
 		    if (ctx.seek) {
-			char *temp = (char *)malloc(strlen(ctx.seek) + 20);
-			if (temp) {
-			    outofmem(__FILE__, "HTLoadCSO");
-			}
-			sprintf(temp, gettext("Seek fail on %s\n"), ctx.seek);
+			char *temp = 0;
+			HTSprintf0(&temp, GOPHER_CSO_SEEK_FAILED, ctx.seek);
 			(*Target->isa->put_block)(Target, temp, strlen(temp));
 			FREE(temp);
 		    }
@@ -1217,12 +1216,12 @@ PRIVATE int generate_cso_form ARGS4(
 /*	Generate a results report for CSO/PH form-based searches. - FM
 **	==============================================================
 */
-PRIVATE int generate_cso_report ARGS2(
-	char *, 	buf,
+PRIVATE int generate_cso_report ARGS1(
 	HTStream *,	Target)
 {
     char ch;
     char line[BIG];
+    char *buf = 0;
     char *p = line, *href = NULL;
     int len, i, prev_ndx, ndx;
     char *rcode, *ndx_str, *fname, *fvalue, *l;
@@ -1238,7 +1237,6 @@ PRIVATE int generate_cso_report ARGS2(
     */
     while (!stop && (ch = NEXT_CHAR) != (char)EOF) {
 	if (interrupted_in_htgetcharacter) {
-	    buf[0] = '\0';
 	    CTRACE(tfp, "HTLoadCSO: Interrupted in HTGetCharacter, apparently.\n");
 	    _HTProgress (CONNECTION_INTERRUPTED);
 	    goto end_CSOreport;
@@ -1277,22 +1275,22 @@ PRIVATE int generate_cso_report ARGS2(
 		ndx = atoi(ndx_str);
 		if (prev_ndx != ndx) {
 		    if (prev_ndx != -100) {
-			strcpy(buf, "</DL></DL>\n");
+			HTSprintf0(&buf, "</DL></DL>\n");
 			(*Target->isa->put_block)(Target, buf, strlen(buf));
 		    }
 		    if (ndx == 0) {
-			strcpy(buf,
+			HTSprintf0(&buf,
 		  "<HR><DL><DT>Information/status<DD><DL><DT>\n");
 			(*Target->isa->put_block)(Target, buf, strlen(buf));
 		    } else {
-			sprintf(buf,
+			HTSprintf0(&buf,
 	      "<HR><DL><DT>Entry %d:<DD><DL COMPACT><DT>\n", ndx);
 			(*Target->isa->put_block)(Target, buf, strlen(buf));
 		    }
 		    prev_ndx = ndx;
 		}
 	    } else {
-		sprintf(buf, "<DD>%s\n", rcode);
+		HTSprintf0(&buf, "<DD>%s\n", rcode);
 		(*Target->isa->put_block)(Target, buf, strlen(buf));
 		continue;
 	    }
@@ -1325,27 +1323,22 @@ PRIVATE int generate_cso_report ARGS2(
 			}
 		    }
 		    if (fld && fld->url) {
-			sprintf(buf,
+			HTSprintf0(&buf,
 				"<DT><I>%s</I><DD><A HREF=\"%s\">%s</A>\n",
 				fname, fvalue, fvalue);
 			(*Target->isa->put_block)(Target, buf, strlen(buf));
 		    } else {
-			sprintf(buf, "<DT><I>%s</I><DD>", fname);
+			HTSprintf0(&buf, "<DT><I>%s</I><DD>", fname);
 			(*Target->isa->put_block)(Target, buf, strlen(buf));
-			i = 0;
-			buf[i] = '\0';
+			buf[0] = '\0';
 			l = fvalue;
 			while (*l) {
 			    if (*l == '<') {
-				strcat(buf, "&lt;");
+				StrAllocCat(buf, "&lt;");
 				l++;
-				i += 4;
-				buf[i] = '\0';
 			    } else if (*l == '>') {
-				strcat(buf, "&gt;");
+				StrAllocCat(buf, "&gt;");
 				l++;
-				i += 4;
-				buf[i] = '\0';
 			    } else if (strncmp(l, "news:", 5) &&
 				       strncmp(l, "snews://", 8) &&
 				       strncmp(l, "nntp://", 7) &&
@@ -1362,45 +1355,34 @@ PRIVATE int generate_cso_report ARGS2(
 				       strncmp(l, "mailto:", 7) &&
 				       strncmp(l, "cso://", 6) &&
 				       strncmp(l, "gopher://", 9)) {
-				buf[i++] = *l++;
-				buf[i] = '\0';
+				HTSprintf(&buf, "%c", *l++);
 			    } else {
-				strcat(buf, "<a href=\"");
-				i += 9;
-				buf[i] = '\0';
+				StrAllocCat(buf, "<a href=\"");
 				StrAllocCopy(href, l);
-				strcat(buf, strtok(href, " \r\n\t,>)\""));
-				strcat(buf, "\">");
-				i = strlen(buf);
+				StrAllocCat(buf, strtok(href, " \r\n\t,>)\""));
+				StrAllocCat(buf, "\">");
 				while (*l && !strchr(" \r\n\t,>)\"", *l)) {
-				    buf[i++] = *l++;
+				    HTSprintf(&buf, "%c", *l++);
 				}
-				buf[i] = '\0';
-				strcat(buf, "</a>");
-				i += 4;
+				StrAllocCat(buf, "</a>");
 				FREE(href);
 			    }
 			}
-			strcat(buf, "\n");
+			StrAllocCat(buf, "\n");
 			(*Target->isa->put_block)(Target, buf, strlen(buf));
 		    }
 		} else {
-		    sprintf(buf, "<DD>");
+		    HTSprintf0(&buf, "<DD>");
 		    (*Target->isa->put_block)(Target, buf, strlen(buf));
-		    i = 0;
-		    buf[i] = '\0';
+		    buf[0] = '\0';
 		    l = fvalue;
 		    while (*l) {
 			if (*l == '<') {
-			    strcat(buf, "&lt;");
+			    StrAllocCat(buf, "&lt;");
 			    l++;
-			    i += 4;
-			    buf[i] = '\0';
 			} else if (*l == '>') {
-			    strcat(buf, "&gt;");
+			    StrAllocCat(buf, "&gt;");
 			    l++;
-			    i += 4;
-			    buf[i] = '\0';
 			} else if (strncmp(l, "news:", 5) &&
 				   strncmp(l, "snews://", 8) &&
 				   strncmp(l, "nntp://", 7) &&
@@ -1417,39 +1399,34 @@ PRIVATE int generate_cso_report ARGS2(
 				   strncmp(l, "mailto:", 7) &&
 				   strncmp(l, "cso://", 6) &&
 				   strncmp(l, "gopher://", 9)) {
-			    buf[i++] = *l++;
-			    buf[i] = '\0';
+			    HTSprintf(&buf, "%c", *l++);
 			} else {
-			    strcat(buf, "<a href=\"");
-			    i += 9;
-			    buf[i] = '\0';
+			    StrAllocCat(buf, "<a href=\"");
 			    StrAllocCopy(href, l);
-			    strcat(buf, strtok(href, " \r\n\t,>)\""));
-			    strcat(buf, "\">");
-			    i = strlen(buf);
+			    StrAllocCat(buf, strtok(href, " \r\n\t,>)\""));
+			    StrAllocCat(buf, "\">");
 			    while (*l && !strchr(" \r\n\t,>)\"", *l)) {
-				buf[i++] = *l++;
+				HTSprintf(&buf, "%c", *l++);
 			    }
-			    buf[i] = '\0';
-			    strcat(buf, "</a>");
-			    i += 4;
+			    StrAllocCat(buf, "</a>");
 			    FREE(href);
 			}
 		    }
-		    strcat(buf, "\n");
+		    StrAllocCat(buf, "\n");
 		    (*Target->isa->put_block)(Target, buf, strlen(buf));
 		}
 	    } else {
-		sprintf(buf, "<DD>%s\n", fname ? fname : rcode );
+		HTSprintf0(&buf, "<DD>%s\n", fname ? fname : rcode );
 		(*Target->isa->put_block)(Target, buf, strlen(buf));
 	    }
 	}
     }
 end_CSOreport:
     if (prev_ndx != -100) {
-	sprintf(buf, "</DL></DL>\n");
+	HTSprintf0(&buf, "</DL></DL>\n");
 	(*Target->isa->put_block)(Target, buf, strlen(buf));
     }
+    FREE(buf);
     return 0;
 }
 
@@ -1462,12 +1439,13 @@ PRIVATE int HTLoadCSO ARGS4(
 	HTFormat,		format_out,
 	HTStream*,		sink)
 {
+    static CONST char end_form[] = "</BODY>\n</HTML>\n";
     char *host, *cp;
     int port = CSO_PORT;
     int status; 			/* tcp return */
     char *command = NULL;
     char *content = NULL;
-    int len, i, j, start, finish, flen, ndx, clen;
+    int len, i, j, start, finish, flen, ndx;
     int return_type, has_indexed;
     CSOfield_info *fld;
     char buf[2048];
@@ -1503,19 +1481,17 @@ PRIVATE int HTLoadCSO ARGS4(
 
     HTInitInput(s);		/* Set up input buffering */
 
-    if ((command = (char *)malloc(12)) == NULL)
-	outofmem(__FILE__, "HTLoadCSO");
-    sprintf(command, "fields%c%c", CR, LF);
+    HTSprintf0(&command, "fields%c%c", CR, LF);
     CTRACE(tfp, "HTLoadCSO: Connected, writing command `%s' to socket %d\n",
 		command, s);
-    _HTProgress (gettext("Sending CSO/PH request."));
+    _HTProgress (GOPHER_SENDING_CSO_REQUEST);
     status = NETWRITE(s, command, (int)strlen(command));
     FREE(command);
     if (status < 0) {
 	CTRACE(tfp, "HTLoadCSO: Unable to send command.\n");
 	return HTInetStatus("send");
     }
-    _HTProgress (gettext("CSO/PH request sent; waiting for response."));
+    _HTProgress (GOPHER_SENT_CSO_REQUEST);
 
     /*
     **	Now read the data from the socket.
@@ -1528,7 +1504,7 @@ PRIVATE int HTLoadCSO ARGS4(
 	} else if (buf[0] != '\0') {
 	    HTAlert(buf);
 	} else {
-	    HTAlert(gettext("No response from server!"));
+	    HTAlert(FAILED_NO_RESPONSE);
 	}
 	return HT_NOT_LOADED;
     }
@@ -1536,12 +1512,9 @@ PRIVATE int HTLoadCSO ARGS4(
 			   format_out,
 			   sink, anAnchor);
     if (!Target || Target == NULL) {
-	char *temp = (char *)malloc(256);
-	if (!temp) {
-	    outofmem(__FILE__, "HTLoadCSO");
-	}
-	sprintf(temp, CANNOT_CONVERT_I_TO_O,
-		HTAtom_name(format_in), HTAtom_name(format_out));
+	char *temp = 0;
+	HTSprintf0(&temp, CANNOT_CONVERT_I_TO_O,
+		   HTAtom_name(format_in), HTAtom_name(format_out));
 	HTAlert(temp);
 	FREE(temp);
 	NETCLOSE(s);
@@ -1565,11 +1538,14 @@ PRIVATE int HTLoadCSO ARGS4(
 	free_CSOfields();
 	return HT_LOADED;
     }
-    sprintf(buf,
+
+    HTSprintf0(&command,
      "<HTML>\n<HEAD>\n<TITLE>CSO/PH Results on %s</TITLE>\n</HEAD>\n<BODY>\n",
 	    host);
-    (*Target->isa->put_block)(Target, buf, strlen(buf));
+    (*Target->isa->put_block)(Target, command, strlen(command));
+    FREE(command);
     FREE(host);
+
     StrAllocCopy(content, anAnchor->post_data);
     if (content[strlen(content)-1] != '&')
 	StrAllocCat(content, "&");
@@ -1583,7 +1559,7 @@ PRIVATE int HTLoadCSO ARGS4(
     len = strlen(content);
     return_type = 0;
     has_indexed = 0;
-    start = finish = clen = 0;
+    start = finish = 0;
     for (i = 0; i < len; i++) {
 	if (!content[i] || content[i] == '&') {
 	    /*
@@ -1616,17 +1592,13 @@ PRIVATE int HTLoadCSO ARGS4(
 				    if (fld->lookup) {
 					if (fld->indexed)
 					    has_indexed = 1;
-					if (clen == 0) {
+					if (command == 0 || *command == 0) {
 					    StrAllocCopy(command, "query ");
-					    clen = 6;
 					} else {
 					    StrAllocCat(command, " ");
-					    clen++;
 					}
-					sprintf(buf, "%s=\"%s\"",
-						fld->name, &content[j+1]);
-					StrAllocCat(command, buf);
-					clen += strlen(buf);
+					HTSprintf(&command, "%s=\"%s\"",
+						  fld->name, &content[j+1]);
 				    } else {
 					strcpy(buf,
 				"Warning: non-lookup field ignored<BR>\n");
@@ -1653,7 +1625,7 @@ PRIVATE int HTLoadCSO ARGS4(
 	}
     }
     FREE(content);
-    if ((clen == 0) || !has_indexed) {
+    if ((command == 0 || *command == 0) || !has_indexed) {
 	NETCLOSE(s);
 	strcpy(buf,
   "<EM>Error:</EM> At least one indexed field value must be specified!\n");
@@ -1669,39 +1641,32 @@ PRIVATE int HTLoadCSO ARGS4(
     */
     if (return_type == 1) {
 	StrAllocCat(command, " return all");
-	clen += 11;
     } else if (return_type == 2) {
 	StrAllocCat(command, " return");
-	clen += 7;
 	for (fld = CSOfields; fld; fld = fld->next) {
 	    if (fld->explicit_return) {
-		sprintf(buf, " %s", fld->name);
-		StrAllocCat(command, buf);
-		clen += strlen(buf);
+		HTSprintf(&command, " %s", fld->name);
 	    }
 	}
     }
-    sprintf(buf, "%c%c", CR, LF);
-    StrAllocCat(command, buf);
-    clen += strlen(buf);
+    HTSprintf(&command, "%c%c", CR, LF);
     strcpy(buf, "<H2>\n<EM>CSO/PH command:</EM> ");
     (*Target->isa->put_block)(Target, buf, strlen(buf));
-    (*Target->isa->put_block)(Target, command, clen);
+    (*Target->isa->put_block)(Target, command, strlen(command));
     strcpy(buf, "</H2>\n");
     (*Target->isa->put_block)(Target, buf, strlen(buf));
     CTRACE(tfp, "HTLoadCSO: Writing command `%s' to socket %d\n",
 		command, s);
-    status = NETWRITE(s, command, clen);
+    status = NETWRITE(s, command, strlen(command));
     FREE(command);
     if (status < 0) {
 	CTRACE(tfp, "HTLoadCSO: Unable to send command.\n");
 	free_CSOfields();
 	return HTInetStatus("send");
     }
-    generate_cso_report(buf, Target);
+    generate_cso_report(Target);
     NETCLOSE(s);
-    strcpy(buf, "</BODY>\n</HTML>\n");
-    (*Target->isa->put_block)(Target, buf, strlen(buf));
+    (*Target->isa->put_block)(Target, end_form, sizeof(end_form)-1);
     (*Target->isa->_free)(Target);
     FREE(host);
     free_CSOfields();
@@ -1878,7 +1843,7 @@ PRIVATE int HTLoadGopher ARGS4(
     }
 #endif
 
-    _HTProgress (gettext("Sending Gopher request."));
+    _HTProgress (GOPHER_SENDING_REQUEST);
 
     status = NETWRITE(s, command, (int)strlen(command));
     FREE(command);
@@ -1887,7 +1852,7 @@ PRIVATE int HTLoadGopher ARGS4(
 	return HTInetStatus("send");
     }
 
-    _HTProgress (gettext("Gopher request sent; waiting for response."));
+    _HTProgress (GOPHER_SENT_REQUEST);
 
     /*
     **	Now read the data from the socket.

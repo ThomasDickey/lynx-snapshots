@@ -1206,7 +1206,7 @@ do
 	for cf_quote in '' '"'
 	do
 		cat >$cf_dir/makefile <<CF_EOF
-SHELL=${CONFIG_SHELL-/bin/sh} 
+SHELL=/bin/sh
 ${cf_include} ${cf_quote}../$cf_inc${cf_quote}
 all :
 	@echo 'cf_make_include=\$(RESULT)'
