@@ -218,7 +218,7 @@ cancelled:
  *  LYUpload_options writes out the current upload choices to a
  *  file so that the user can select printers in the same way that
  *  they select all other links.  Upload links look like:
- *	LYNXDIRED//UPLOAD=<#>/TO=<STRING>
+ *	LYNXDIRED://UPLOAD=<#>/TO=<STRING>
  */
 PUBLIC int LYUpload_options ARGS2(
 	char **,	newfile,

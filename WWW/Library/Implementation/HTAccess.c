@@ -831,6 +831,14 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	}
 	return YES;
     }
+    if (status == HT_PARTIAL_CONTENT) {
+	HTAlert("Loading incomplete.");
+	if (TRACE) {
+	    fprintf(stderr, "HTAccess: `%s' has been accessed, partial content.\n",
+	    full_address);
+	}
+	return YES;
+    }
 
     if (status == HT_NO_DATA) {
 	if (TRACE) {

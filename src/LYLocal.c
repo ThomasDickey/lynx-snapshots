@@ -1248,7 +1248,7 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 	/*
 	 *  Make sure we have a valid set-permission
 	 *  file comparison string loaded via a previous
-	 *  call with srcpath != NULL. - kw
+	 *  call with srcpath != NULL. - KW
 	 */
 	if (LYValidPermitFile[0] == '\0') {
 	    if (LYCursesON)
@@ -1275,7 +1275,7 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 	
 	/*
 	 *  Make sure that the file string is the one from
-	 *  the last displayed File Permissions menu. - kw
+	 *  the last displayed File Permissions menu. - KW
 	 */
 	if (strcmp(destpath, LYValidPermitFile)) {
 	    if (LYCursesON)
@@ -1287,6 +1287,7 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 			destpath);
 	    return 0;
 	}
+
 	/*
 	 *  A couple of sanity tests.
 	 */

@@ -62,11 +62,11 @@ PUBLIC BOOL UCCanTranslateFromTo ARGS2(
 	}
 	if (!strcmp(fromname, "koi8-r")) {
 	    /*
-	     *  Will try to uses stripping of high bit...
+	     *  Will try to use stripping of high bit...
 	     */
 	    return YES;
 	}
-	    
+
 	if (!strcmp(fromname, "koi8-r") || /* from cyrillic */
 	    !strcmp(fromname, "iso-8859-5") ||
 	    !strcmp(fromname, "windows-1251") ||

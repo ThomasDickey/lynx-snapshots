@@ -1535,6 +1535,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    int len;
 	    char *cp = NULL;
 	    char *semicolon = NULL;
+            int status;
 
 	    if (HTEditable(vmsname)) {
 		HTAtom * put = HTAtom_for("PUT");
@@ -1590,9 +1591,9 @@ PUBLIC int HTLoadFile ARGS4(
 	        *semicolon = ';';
 	    FREE(filename);
 	    FREE(nodename);
-	    HTParseFile(format, format_out, anchor, fp, sink);
+	    status = HTParseFile(format, format_out, anchor, fp, sink);
 	    fclose(fp);
-            return HT_LOADED;
+            return status;
         }  /* If successfull open */
 	FREE(filename);
     }
@@ -2045,6 +2046,7 @@ open_file:
 	    if (fp) {		/* Good! */
 	        int len;
 		char *cp = NULL;
+		int status;
 
 		if (HTEditable(localname)) {
 		    HTAtom * put = HTAtom_for("PUT");
@@ -2085,9 +2087,9 @@ open_file:
 		}
 		FREE(localname);
 		FREE(nodename);
-		HTParseFile(format, format_out, anchor, fp, sink);
+		status = HTParseFile(format, format_out, anchor, fp, sink);
 		fclose(fp);
-		return HT_LOADED;
+		return status;
 	    }  /* If succesfull open */
 	}    /* scope of fp */
     }  /* local unix file system */    

@@ -110,7 +110,7 @@ PUBLIC void highlight ARGS3(
 #ifdef EXP_CHARTRANS
     BOOL utf_flag = (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8);
 #else
-#define utf_flag TRUE
+#define utf_flag FALSE
 #endif
 
     tmp[0] = tmp[1] = tmp[2] = '\0';
@@ -211,7 +211,7 @@ PUBLIC void highlight ARGS3(
 			tmp[1] = links[cur].hightext2[++i];
 			addstr(tmp);
 			tmp[1] = '\0';
-	} else {
+		    } else {
 			addstr(tmp);
 		    }
 		 }
@@ -234,7 +234,7 @@ PUBLIC void highlight ARGS3(
 	 *  our link), and with all IsSpecial characters stripped, so we
 	 *  don't need to deal with them here. - FM
 	 */
-	if (target && *target && links[cur].type == WWW_LINK_TYPE &&
+	if (target && *target && (links[cur].type & WWW_LINK_TYPE) &&
 	    links[cur].hightext && *links[cur].hightext &&
 	    HText_getFirstTargetInLine(HTMainText,
 				       links[cur].anchor_line_num,
@@ -247,7 +247,7 @@ PUBLIC void highlight ARGS3(
 	    char *data;
 	    int tlen = strlen(target);
 	    int hlen, hLen;
-	    int hline = links[cur].ly, hoffset = links[cur].lx;
+	    int hLine = links[cur].ly, hoffset = links[cur].lx;
 	    size_t utf_extra = 0;
 
 	    /*
@@ -324,7 +324,7 @@ PUBLIC void highlight ARGS3(
 		 *  Go to the start of the hightext and
 		 *  handle its first character. - FM
 		 */
-		move(hline, offset);
+		move(hLine, offset);
 		tmp[0] = data[itmp];
 		if (utf_flag && !isascii(tmp[0])) {
 		    if ((*tmp & 0xe0) == 0xc0) {
@@ -363,7 +363,7 @@ PUBLIC void highlight ARGS3(
 			TargetEmphasisON = TRUE;
 			addstr(tmp);
 		    } else {
-			move(hline, (offset + 1));
+			move(hLine, (offset + 1));
 		    }
 		    tmp[1] = '\0';
 		    written += (utf_extra + 1);
@@ -382,7 +382,7 @@ PUBLIC void highlight ARGS3(
 			TargetEmphasisON = TRUE;
 			addstr(tmp);
 		    } else {
-			move(hline, (offset + 1));
+			move(hLine, (offset + 1));
 		    }
 		    tmp[1] = '\0';
 		    written += 2;
@@ -396,7 +396,7 @@ PUBLIC void highlight ARGS3(
 			TargetEmphasisON = TRUE;
 			addstr(tmp);
 		    } else {
-			move(hline, (offset + 1));
+			move(hLine, (offset + 1));
 		    }
 		    written++;
 		}
@@ -461,7 +461,7 @@ PUBLIC void highlight ARGS3(
 			    LYstopTargetEmphasis();
 			    TargetEmphasisON = FALSE;
 			    LYGetYX(y, offset);
-			    move(hline, (offset + 1));
+			    move(hLine, (offset + 1));
 			} else {
 			    addstr(tmp);
 			}
@@ -482,7 +482,7 @@ PUBLIC void highlight ARGS3(
 			    LYstopTargetEmphasis();
 			    TargetEmphasisON = FALSE;
 			    LYGetYX(y, offset);
-			    move(hline, (offset + 1));
+			    move(hLine, (offset + 1));
 			} else {
 			    addstr(tmp);
 			}
@@ -498,7 +498,7 @@ PUBLIC void highlight ARGS3(
 			    LYstopTargetEmphasis();
 			    TargetEmphasisON = FALSE;
 			    LYGetYX(y, offset);
-			    move(hline, (offset + 1));
+			    move(hLine, (offset + 1));
 			} else {
 			    addstr(tmp);
 			}
@@ -588,7 +588,7 @@ highlight_hit_within_hightext:
 	     *  Go to the start of the hit and
 	     *  handle its first character. - FM
 	     */
-	    move(hline, offset);
+	    move(hLine, offset);
 	    tmp[0] = data[itmp];
 	    if (utf_flag && !isascii(tmp[0])) {
 		if ((*tmp & 0xe0) == 0xc0) {
@@ -621,15 +621,16 @@ highlight_hit_within_hightext:
 		/*
 		 *  Start emphasis immediately if we are making
 		 *  the link non-current, or we are making it
-		 *  current but this is not the first character
-		 *  of the hightext. - FM
+		 *  current but this is not the first or last
+		 *  character of the hightext. - FM
 		 */
-		if (flag != ON || offset > hoffset) {
+		if (flag != ON ||
+		    (offset > hoffset && data[itmp+1] != '\0')) {
 		    LYstartTargetEmphasis();
 		    TargetEmphasisON = TRUE;
 		    addstr(tmp);
 		} else {
-		    move(hline, (offset + 1));
+		    move(hLine, (offset + 1));
 		}
 		tmp[1] = '\0';
 		written += (utf_extra + 1);
@@ -642,15 +643,16 @@ highlight_hit_within_hightext:
 		/*
 		 *  Start emphasis immediately if we are making
 		 *  the link non-current, or we are making it
-		 *  current but this is not the first character
-		 *  of the hightext. - FM
+		 *  current but this is not the first or last
+		 *  character of the hightext. - FM
 		 */
-		if (flag != ON || offset > hoffset) {
+		if (flag != ON ||
+		    (offset > hoffset && data[itmp+1] != '\0')) {
 		    LYstartTargetEmphasis();
 		    TargetEmphasisON = TRUE;
 		    addstr(tmp);
 		} else {
-		    move(hline, (offset + 1));
+		    move(hLine, (offset + 1));
 		}
 		tmp[1] = '\0';
 		written += 2;
@@ -661,12 +663,13 @@ highlight_hit_within_hightext:
 		 *  current but this is not the first character
 		 *  of the hightext. - FM
 		 */
-		if (flag != ON || offset > hoffset) {
+		if (flag != ON ||
+		    (offset > hoffset && data[itmp+1] != '\0')) {
 		    LYstartTargetEmphasis();
 		    TargetEmphasisON = TRUE;
 		    addstr(tmp);
 		} else {
-		    move(hline, (offset + 1));
+		    move(hLine, (offset + 1));
 		}
 		written++;
 	    }
@@ -728,7 +731,7 @@ highlight_hit_within_hightext:
 			LYstopTargetEmphasis();
 			TargetEmphasisON = FALSE;
 			LYGetYX(y, offset);
-			move(hline, (offset + 1));
+			move(hLine, (offset + 1));
 		    } else {
 			addstr(tmp);
 		    }
@@ -749,7 +752,7 @@ highlight_hit_within_hightext:
 			LYstopTargetEmphasis();
 			TargetEmphasisON = FALSE;
 			LYGetYX(y, offset);
-			move(hline, (offset + 1));
+			move(hLine, (offset + 1));
 		    } else {
 			addstr(tmp);
 		    }
@@ -765,7 +768,7 @@ highlight_hit_within_hightext:
 			LYstopTargetEmphasis();
 			TargetEmphasisON = FALSE;
 			LYGetYX(y, offset);
-			move(hline, (offset + 1));
+			move(hLine, (offset + 1));
 		    } else {
 			addstr(tmp);
 		    }
@@ -828,7 +831,7 @@ highlight_hit_within_hightext:
 		    (hoffset + hLen)) {
 		    offset = (HitOffset + offset);
 		    data = (buffer + (offset - hoffset));
-		    move(hline, offset);
+		    move(hLine, offset);
 		    itmp = 0;
 		    written = 0;
 		    len = strlen(data);
@@ -884,7 +887,7 @@ highlight_hit_within_hightext:
 				LYstopTargetEmphasis();
 				TargetEmphasisON = FALSE;
 				LYGetYX(y, offset);
-				move(hline, (offset + 1));
+				move(hLine, (offset + 1));
 			    } else {
 				addstr(tmp);
 			    }
@@ -943,7 +946,7 @@ highlight_hit_within_hightext:
 	    goto highlight_search_hightext2;
 	}
 highlight_search_hightext2:
-	if (target && *target && links[cur].type == WWW_LINK_TYPE &&
+	if (target && *target && (links[cur].type & WWW_LINK_TYPE) &&
 	    links[cur].hightext2 && *links[cur].hightext2 &&
 	    links[cur].ly < display_lines &&
 	    HText_getFirstTargetInLine(HTMainText,
@@ -957,7 +960,7 @@ highlight_search_hightext2:
 	    char *data;
 	    int tlen = strlen(target);
 	    int hlen, hLen;
-	    int hline = (links[cur].ly + 1);
+	    int hLine = (links[cur].ly + 1);
 	    int hoffset = links[cur].hightext2_offset;
 	    size_t utf_extra = 0;
 
@@ -1029,7 +1032,7 @@ highlight_search_hightext2:
 		 *  Go to the start of the hightext2 and
 		 *  handle its first character. - FM
 		 */
-		move(hline, offset);
+		move(hLine, offset);
 		tmp[0] = data[itmp];
 		if (utf_flag && !isascii(tmp[0])) {
 		    if ((*tmp & 0xe0) == 0xc0) {
@@ -1068,7 +1071,7 @@ highlight_search_hightext2:
 			TargetEmphasisON = TRUE;
 			addstr(tmp);
 		    } else {
-			move(hline, (offset + 1));
+			move(hLine, (offset + 1));
 		    }
 		    tmp[1] = '\0';
 		    written += (utf_extra + 1);
@@ -1087,7 +1090,7 @@ highlight_search_hightext2:
 			TargetEmphasisON = TRUE;
 			addstr(tmp);
 		    } else {
-			move(hline, (offset + 1));
+			move(hLine, (offset + 1));
 		    }
 		    tmp[1] = '\0';
 		    written += 2;
@@ -1101,7 +1104,7 @@ highlight_search_hightext2:
 			TargetEmphasisON = TRUE;
 			addstr(tmp);
 		    } else {
-			move(hline, (offset + 1));
+			move(hLine, (offset + 1));
 		    }
 		    written++;
 		}
@@ -1166,7 +1169,7 @@ highlight_search_hightext2:
 			    LYstopTargetEmphasis();
 			    TargetEmphasisON = FALSE;
 			    LYGetYX(y, offset);
-			    move(hline, (offset + 1));
+			    move(hLine, (offset + 1));
 			} else {
 			    addstr(tmp);
 			}
@@ -1187,7 +1190,7 @@ highlight_search_hightext2:
 			    LYstopTargetEmphasis();
 			    TargetEmphasisON = FALSE;
 			    LYGetYX(y, offset);
-			    move(hline, (offset + 1));
+			    move(hLine, (offset + 1));
 			} else {
 			    addstr(tmp);
 			}
@@ -1203,7 +1206,7 @@ highlight_search_hightext2:
 			    LYstopTargetEmphasis();
 			    TargetEmphasisON = FALSE;
 			    LYGetYX(y, offset);
-			    move(hline, (offset + 1));
+			    move(hLine, (offset + 1));
 			} else {
 			    addstr(tmp);
 			}
@@ -1293,7 +1296,7 @@ highlight_hit_within_hightext2:
 	     *  Go to the start of the hit and
 	     *  handle its first character. - FM
 	     */
-	    move(hline, offset);
+	    move(hLine, offset);
 	    tmp[0] = data[itmp];
 	    if (utf_flag && !isascii(tmp[0])) {
 		if ((*tmp & 0xe0) == 0xc0) {
@@ -1334,7 +1337,7 @@ highlight_hit_within_hightext2:
 		    TargetEmphasisON = TRUE;
 		    addstr(tmp);
 		} else {
-		    move(hline, (offset + 1));
+		    move(hLine, (offset + 1));
 		}
 		tmp[1] = '\0';
 		written += (utf_extra + 1);
@@ -1355,7 +1358,7 @@ highlight_hit_within_hightext2:
 		    TargetEmphasisON = TRUE;
 		    addstr(tmp);
 		} else {
-		    move(hline, (offset + 1));
+		    move(hLine, (offset + 1));
 		}
 		tmp[1] = '\0';
 		written += 2;
@@ -1371,7 +1374,7 @@ highlight_hit_within_hightext2:
 		    TargetEmphasisON = TRUE;
 		    addstr(tmp);
 		} else {
-		    move(hline, (offset + 1));
+		    move(hLine, (offset + 1));
 		}
 		written++;
 	    }
@@ -1433,7 +1436,7 @@ highlight_hit_within_hightext2:
 			LYstopTargetEmphasis();
 			TargetEmphasisON = FALSE;
 			LYGetYX(y, offset);
-			move(hline, (offset + 1));
+			move(hLine, (offset + 1));
 		    } else {
 			addstr(tmp);
 		    }
@@ -1454,7 +1457,7 @@ highlight_hit_within_hightext2:
 			LYstopTargetEmphasis();
 			TargetEmphasisON = FALSE;
 			LYGetYX(y, offset);
-			move(hline, (offset + 1));
+			move(hLine, (offset + 1));
 		    } else {
 			addstr(tmp);
 		    }
@@ -1470,7 +1473,7 @@ highlight_hit_within_hightext2:
 			LYstopTargetEmphasis();
 			TargetEmphasisON = FALSE;
 			LYGetYX(y, offset);
-			move(hline, (offset + 1));
+			move(hLine, (offset + 1));
 		    } else {
 			addstr(tmp);
 		    }
@@ -1533,7 +1536,7 @@ highlight_hit_within_hightext2:
 		    (hoffset + hLen)) {
 		    offset = (HitOffset + offset);
 		    data = (buffer + (offset - hoffset));
-		    move(hline, offset);
+		    move(hLine, offset);
 		    itmp = 0;
 		    written = 0;
 		    len = strlen(data);
@@ -1589,7 +1592,7 @@ highlight_hit_within_hightext2:
 				LYstopTargetEmphasis();
 				TargetEmphasisON = FALSE;
 				LYGetYX(y, offset);
-				move(hline, (offset + 1));
+				move(hLine, (offset + 1));
 			    } else {
 				addstr(tmp);
 			    }

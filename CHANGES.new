@@ -10,7 +10,33 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+1997-07-30
+* Added workaround for curses with broken handling of 8-bit acs characters
+  (which may be used for drawing of popup boxes) to LYCurses.h.  This fixes
+  box characters and attributes/colors for solaris curses used with linux
+  console as terminal.  Currently it is not automatically enabled or
+  configured, but can be enabled by -DBROKEN_CURSES_8BIT_ACS. - KW
+* Fixed code in LYOptions.c for the case when NEVER_ALLOW_REMOTE_EXEC was
+  not defined and ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS was defined. - KW
+1997-07-28
+* Avoid traversing the full list of anchors each time when HText_endAnchor()
+  is called with a non-zero anchor number, if that number corresponds to
+  the last anchor added to the HText structure. It is is the most common case
+  that HText_endAnchor() refers to the last anchor, and the only case that
+  could be handled correctly before FM's changes of 1997-05-13.  Avoiding
+  the loop over the list of anchor can improve loading time significantly,
+  especially for large files with thousands of anchors. - KW
+* Add progress display and 'z'appability for loading of local files.
+  They are activated only after a few hundred k bytes have been read.
+  Added define for HT_PARTIAL_CONTENT to HTUtils.h, used in above.
+  (The WWW Library 5.x uses HTTP-ish status codes like this throughout.
+  I find it much less confusing than -29998 and so on, and there's no
+  conflict in this case. - KW
+* Minor LYUtils.c tweaks. - KW
 1997-07-27
+* Changed code for checks in LYGetFile.c for URL schemes which should 
+  be rejected when received as redirections, added checks for more 
+  schemes. - FM
 * Rename top-level Makefile to Makefile.old (it's obsolete) - TD
 * Reduce top-level targets to one, 'lynx' - TD
 * Move comments describing DirEd to README.configure from makefile.in,
@@ -20,6 +46,12 @@ file) are duplicated here. - KW]
 * Correct sense of autoconf'd symbol for size-change. - TD
 * Accommodate systems with obsolete ncurses.h in configure tests. - TD
 1997-07-26
+* Changed the variable hline in LYUtils.c to hLine, so as not to conflict
+  with a curses function or macro. - FM
+* Fixed an esoteric glitch in highlight() of LYUtils.c which could cause
+  the last character of a current link to receive WHEREIS search target
+  emphasis if it happened to be the first character of the target (though
+  perfection is unattainable, we should strive to achieve it :). - FM
 * Changed the default value for STRIP_DOTDOT_URLS (lynx.cfg) to TRUE. - KW
 * Made some of the additional checks introduced yesterday in LYMainLoop.c
   for invalid links to internal dired URLs more strict, as they probably
@@ -35,7 +67,7 @@ file) are duplicated here. - KW]
   variable and constant names and usage, ordering of statements) to aid
   further comparison.  The logic is still messy and needs further cleanup
   and simplification, but seems to do what it should.  Note that this
-  also handles color-curses, in a (hopefully) resonable way.  Command
+  also handles color-curses, in a (hopefully) reasonable way.  Command
   line flags -nocolor and (if using slang) -color override a preference
   found in the RC file. See updated "Lynx Users Guide" file and the 
   comments written to the RC file.

@@ -846,6 +846,10 @@
  * LY_UMLAUT controls the 7-bit expansion of characters with dieresis or
  * umlaut.  If defined, a digraph is displayed, e.g., auml --> ae
  * Otherwise, a single character is displayed,  e.g., auml --> a
+ * Note that this is currently not supported with the chartrans code,
+ * or rather it doesn't have an effect if translations for a display 
+ * character set are taken from one of the *.tbl files in src/chrtrans.
+ * One would have to modify the corresponding *.tbl file for this.
  */
 #define LY_UMLAUT
 
@@ -1246,7 +1250,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.43"
+#define LYNX_VERSION "2.7.1ac-0.45"
 
 /****************************************************************
  * The LYMessages_en.h header defines default, English strings

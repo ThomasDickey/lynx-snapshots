@@ -1264,13 +1264,13 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	} else if (!strcmp(UC_MIMEcharset, "gb2312")) {
 	  return UCGetLYhndl_byMIME("iso-2022-cn");
 	} else if (!strcmp(UC_MIMEcharset, "euc-cn")) {
-	  return UCGetLYhndl_byMIME("iso-2022-cn");
+	    return UCGetLYhndl_byMIME("iso-2022-cn");
 	} else if (!strcmp(UC_MIMEcharset, "windows-1252")) {
 	    /*
 	     *  It's not my fault that Microsoft hasn't registered
-	     *  the name people are using... - kw
+	     *  the name people are using. - KW
 	     */
-	  return UCGetLYhndl_byMIME("iso-8859-1-windows-3.1-latin-1");
+	    return UCGetLYhndl_byMIME("iso-8859-1-windows-3.1-latin-1");
 	} else if (!strncmp(UC_MIMEcharset, "ibm", 3)) {
 	    CONST char * cp = UC_MIMEcharset + 3;
 	    char * cptmp = NULL;
@@ -1278,7 +1278,7 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 		*(cp++) && isdigit(*cp) &&
 		*(cp++) && isdigit(*cp)) {
 		/*
-		 *  For "ibmNNN<...>", try "cpNNN<...>" if not yet found - kw
+		 *  For "ibmNNN<...>", try "cpNNN<...>" if not yet found. - KW
 		 */
 		StrAllocCopy(cptmp, UC_MIMEcharset + 1);
 		cptmp[0] = 'c';
@@ -1652,30 +1652,30 @@ PRIVATE void UCcleanup_mem NOARGS
 
 PUBLIC void UCInit NOARGS
 {
-  UCreset_allocated_LYCharSets();
-  atexit(UCcleanup_mem);
-  UCconsole_map_init();
+    UCreset_allocated_LYCharSets();
+    atexit(UCcleanup_mem);
+    UCconsole_map_init();
 
-  UC_CHARSET_SETUP;
-  UC_CHARSET_SETUP_iso_8859_1;
-  UC_CHARSET_SETUP_iso_8859_2;
-  UC_CHARSET_SETUP_iso_8859_3;
-  UC_CHARSET_SETUP_iso_8859_4;
-  UC_CHARSET_SETUP_iso_8859_5;
-  UC_CHARSET_SETUP_iso_8859_7;
-  UC_CHARSET_SETUP_iso_8859_9;
-  UC_CHARSET_SETUP_iso_8859_10;
-  UC_CHARSET_SETUP_koi8_r;
+    UC_CHARSET_SETUP;
+    UC_CHARSET_SETUP_iso_8859_1;
+    UC_CHARSET_SETUP_iso_8859_2;
+    UC_CHARSET_SETUP_iso_8859_3;
+    UC_CHARSET_SETUP_iso_8859_4;
+    UC_CHARSET_SETUP_iso_8859_5;
+    UC_CHARSET_SETUP_iso_8859_7;
+    UC_CHARSET_SETUP_iso_8859_9;
+    UC_CHARSET_SETUP_iso_8859_10;
+    UC_CHARSET_SETUP_koi8_r;
 
-  UC_CHARSET_SETUP_cp437;
-  UC_CHARSET_SETUP_cp850;
-  UC_CHARSET_SETUP_cp852;
-  UC_CHARSET_SETUP_windows_1250;
-  UC_CHARSET_SETUP_windows_1251;
-  UC_CHARSET_SETUP_iso_8859_1_windows_;
-  UC_CHARSET_SETUP_unicode_1_1_utf_8;
-  UC_CHARSET_SETUP_mnemonic_ascii_0;
-  UC_CHARSET_SETUP_mnemonic;
+    UC_CHARSET_SETUP_cp437;
+    UC_CHARSET_SETUP_cp850;
+    UC_CHARSET_SETUP_cp852;
+    UC_CHARSET_SETUP_windows_1250;
+    UC_CHARSET_SETUP_windows_1251;
+    UC_CHARSET_SETUP_iso_8859_1_windows_;
+    UC_CHARSET_SETUP_unicode_1_1_utf_8;
+    UC_CHARSET_SETUP_mnemonic_ascii_0;
+    UC_CHARSET_SETUP_mnemonic;
 #ifdef NOTDEFINED
     UC_CHARSET_SETUP_mnem;
 #endif /* NOTDEFINED */

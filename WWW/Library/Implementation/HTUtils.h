@@ -359,6 +359,7 @@ Sucess (>=0) and failure (<0) codes
 
 #define HT_REDIRECTING 29996
 #define HT_LOADED 29997                 /* Instead of a socket */
+#define HT_PARTIAL_CONTENT      206     /* Partial Content */
 #define HT_INTERRUPTED -29998
 #define HT_NOT_LOADED -29999
 #define HT_OK           0               /* Generic success*/

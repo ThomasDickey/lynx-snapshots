@@ -2459,7 +2459,7 @@ PUBLIC void HText_endAnchor ARGS2(
      *  without needing to close any anchor with an HREF
      *  within which that link might be embedded. - FM
      */
-    if (number <= 0) {
+    if (number <= 0 || text->last_anchor->number == number) {
 	a = text->last_anchor;
     } else {
         for (a = text->first_anchor; a; a = a->next) {
