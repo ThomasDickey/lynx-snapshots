@@ -576,7 +576,9 @@ PRIVATE size_t fill_rehostent ARGS3(
 #define h_errno my_errno
 static int my_errno;
 #else /* we do HAVE_H_ERRNO: */
+#ifndef h_errno		/* there may be a macro as well as the extern data */
 extern int h_errno;
+#endif
 #endif
 
 /*	Resolve an internet hostname, like gethostbyname
@@ -1173,7 +1175,7 @@ PUBLIC int HTParseInet ARGS2(
     if ((port = strchr(host, ':')) != NULL) {
 	*port++ = 0;		/* Chop off port */
 	if (port[0] >= '0' && port[0] <= '9') {
-#ifdef unix
+#ifdef UNIX
 	    soc_in->sin_port = htons(atol(port));
 #else /* VMS: */
 #ifdef DECNET

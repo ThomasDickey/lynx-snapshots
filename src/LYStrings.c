@@ -3448,3 +3448,98 @@ PUBLIC char *LYSafeGets ARGS2(
 	*src = result;
     return result;
 }
+
+#ifdef EXP_FILE_UPLOAD
+static char basis_64[] =
+   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+#define B64_LINE       76
+
+#if 0
+#define XX 255	/* illegal base64 char */
+#define EQ 254	/* padding */
+static unsigned char index_64[256] = {
+    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
+    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
+    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,62, XX,XX,XX,63,
+    52,53,54,55, 56,57,58,59, 60,61,XX,XX, XX,EQ,XX,XX,
+    XX, 0, 1, 2,  3, 4, 5, 6,  7, 8, 9,10, 11,12,13,14,
+    15,16,17,18, 19,20,21,22, 23,24,25,XX, XX,XX,XX,XX,
+    XX,26,27,28, 29,30,31,32, 33,34,35,36, 37,38,39,40,
+    41,42,43,44, 45,46,47,48, 49,50,51,XX, XX,XX,XX,XX,
+
+    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
+    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
+    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
+    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
+    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
+    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
+    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
+    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
+};
+
+#define GETC(str,len)  (len > 0 ? len--,*str++ : EOF)
+#define INVALID_B64(c) (index_64[(unsigned char)c] == XX)
+#endif
+
+PUBLIC void base64_encode ARGS3(
+    char *,	dest,
+    char *,	src,
+    int,	len)
+{
+    int rlen;   /* length of result string */
+    unsigned char c1, c2, c3;
+    char *eol, *r, *str;
+    int eollen;
+    int chunk;
+
+    str = src;
+    eol = "\n";
+    eollen = 1;
+
+    /* calculate the length of the result */
+    rlen = (len+2) / 3 * 4;	/* encoded bytes */
+    if (rlen) {
+	/* add space for EOL */
+	rlen += ((rlen-1) / B64_LINE + 1) * eollen;
+    }
+
+    /* allocate a result buffer */
+    r = dest;
+
+    /* encode */
+    for (chunk=0; len > 0; len -= 3, chunk++) {
+	if (chunk == (B64_LINE/4)) {
+	    char *c = eol;
+	    char *e = eol + eollen;
+	    while (c < e)
+		*r++ = *c++;
+	    chunk = 0;
+	}
+	c1 = *str++;
+	c2 = *str++;
+	*r++ = basis_64[c1>>2];
+	*r++ = basis_64[((c1 & 0x3)<< 4) | ((c2 & 0xF0) >> 4)];
+	if (len > 2) {
+	    c3 = *str++;
+	    *r++ = basis_64[((c2 & 0xF) << 2) | ((c3 & 0xC0) >>6)];
+	    *r++ = basis_64[c3 & 0x3F];
+	} else if (len == 2) {
+	    *r++ = basis_64[(c2 & 0xF) << 2];
+	    *r++ = '=';
+	} else { /* len == 1 */
+	    *r++ = '=';
+	    *r++ = '=';
+	}
+    }
+    if (rlen) {
+	/* append eol to the result string */
+	char *c = eol;
+	char *e = eol + eollen;
+	while (c < e)
+	    *r++ = *c++;
+    }
+    *r = '\0';  /* every SV in perl should be NUL-terminated */
+}
+
+#endif /* EXP_FILE_UPLOAD */

@@ -2326,6 +2326,41 @@ PUBLIC int HTCheckForInterrupt NOARGS
 }
 
 /*
+ * Check if the given filename looks like it's an absolute pathname, i.e.,
+ * references a directory.
+ */
+PUBLIC BOOLEAN LYisAbsPath ARGS1(
+	char *,		path)
+{
+    BOOLEAN result;
+#ifdef DOSPATH
+    result = (LYIsPathSep(path[0])
+     || (isalpha(path[0])
+      && (path[1] == ':')
+       && LYIsPathSep(path[2])));
+#else
+    result = (LYIsPathSep(path[0]));
+#endif /* __DJGPP__ */
+    return result;
+}
+
+/*
+ * Check if the given filename is the root path, e.g., "/" on Unix.
+ */
+PUBLIC BOOLEAN LYisRootPath ARGS1(
+	char *,		path)
+{
+#ifdef DOSPATH
+    if (strlen(path) == 3
+     && isalpha(path[0])
+     && path[1] == ':'
+     && LYIsPathSep(path[2]))
+    	return TRUE;
+#endif
+    return ((strlen(path) == 1) && LYIsPathSep(path[0]));
+}
+
+/*
  *  A file URL for a remote host is an obsolete ftp URL.
  *  Return YES only if we're certain it's a local file. - FM
  */
@@ -4210,7 +4245,7 @@ have_VMS_URL:
 	    /*
 	     *	On Unix, convert '~' to Home_Dir().
 	     */
-	    StrAllocCat(*AllocatedString, Home_Dir());
+	    StrAllocCat(*AllocatedString, wwwName(Home_Dir()));
 	    if ((cp = strchr(old_string, '/')) != NULL) {
 		/*
 		 *  Append rest of path, if present, skipping "user" if
@@ -4415,11 +4450,7 @@ have_VMS_URL:
 	     *	Has a Home_Dir() reference.  Handle it
 	     *	as if there weren't a lead slash. - FM
 	     */
-#ifdef VMS
-	    StrAllocCat(*AllocatedString, HTVMS_wwwName((char *)Home_Dir()));
-#else
-	    StrAllocCat(*AllocatedString, Home_Dir());
-#endif /* VMS */
+	    StrAllocCat(*AllocatedString, wwwName(Home_Dir()));
 	    if ((cp = strchr((old_string + 1), '/')) != NULL) {
 		/*
 		 *  Append rest of path, if present, skipping "user" if
@@ -6490,7 +6521,7 @@ PUBLIC void LYAddPathSep ARGS1(
  * to it.  This only applies to local filesystems.
  */
 PUBLIC void LYAddPathSep0 ARGS1(
-	char *,	path)
+	char *,		path)
 {
     size_t len;
 
@@ -6499,6 +6530,22 @@ PUBLIC void LYAddPathSep0 ARGS1(
      && !LYIsPathSep(path[len-1])) {
 	strcat(path, PATHSEP_STR);
     }
+}
+
+/*
+ * Check if a given string contains a path separator
+ */
+PUBLIC char * LYLastPathSep ARGS1(
+	char *,		path)
+{
+    char *result;
+#ifdef DOSPATH
+    if ((result = strrchr(path, '\\')) == 0)
+	result = strrchr(path, '/');
+#else
+    result = strrchr(path, '/');
+#endif
+    return result;
 }
 
 /*
@@ -6576,7 +6623,7 @@ PUBLIC int LYCopyFile ARGS2(
 }
 
 /*
- * Invoke a shell command
+ * Invoke a shell command, return nonzero on error.
  */
 PUBLIC int LYSystem ARGS1(
 	char *,	command)

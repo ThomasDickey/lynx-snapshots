@@ -158,9 +158,9 @@ PRIVATE void addlbl ARGS1(CONST char *, text)
 
 PUBLIC void LYoptions NOARGS
 {
-#ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
+#ifdef ENABLE_OPTS_CHANGE_EXEC
     int itmp;
-#endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
+#endif /* ENABLE_OPTS_CHANGE_EXEC */
     int response, ch;
     /*
      *	If the user changes the display we need memory to put it in.
@@ -176,7 +176,7 @@ PUBLIC void LYoptions NOARGS
     BOOL use_assume_charset, old_use_assume_charset;
 
 #ifdef DIRED_SUPPORT
-#ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
+#ifdef ENABLE_OPTS_CHANGE_EXEC
     if (LYlines < 24) {
 	HTAlert(OPTION_SCREEN_NEEDS_24);
 	return;
@@ -186,9 +186,9 @@ PUBLIC void LYoptions NOARGS
 	HTAlert(OPTION_SCREEN_NEEDS_23);
 	return;
     }
-#endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
+#endif /* ENABLE_OPTS_CHANGE_EXEC */
 #else
-#ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
+#ifdef ENABLE_OPTS_CHANGE_EXEC
     if (LYlines < 23) {
 	HTAlert(OPTION_SCREEN_NEEDS_23);
 	return;
@@ -198,7 +198,7 @@ PUBLIC void LYoptions NOARGS
 	HTAlert(OPTION_SCREEN_NEEDS_22);
 	return;
     }
-#endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
+#endif /* ENABLE_OPTS_CHANGE_EXEC */
 #endif /* DIRED_SUPPORT */
 
     term_options = FALSE;
@@ -422,7 +422,7 @@ draw_options:
     addlbl("user (A)gent                 : ");
     addstr((LYUserAgent && *LYUserAgent) ? LYUserAgent : "NONE");
 
-#ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
+#ifdef ENABLE_OPTS_CHANGE_EXEC
     move(L_Exec, 5);
     addlbl("local e(X)ecution links      : ");
 #ifndef NEVER_ALLOW_REMOTE_EXEC
@@ -433,7 +433,7 @@ draw_options:
     addstr(local_exec_on_local_files ? "FOR LOCAL FILES ONLY" :
 				       "ALWAYS OFF          ");
 #endif /* !NEVER_ALLOW_REMOTE_EXEC */
-#endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
+#endif /* ENABLE_OPTS_CHANGE_EXEC */
 
     move(LYlines-3, 2);
     addstr(SELECT_SEGMENT);
@@ -1594,7 +1594,7 @@ draw_options:
 		response = ' ';
 		break;
 
-#ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
+#ifdef ENABLE_OPTS_CHANGE_EXEC
 	    case 'x':	/* Change local exec restriction. */
 	    case 'X':
 		if (exec_frozen && !LYSelectPopups) {
@@ -1634,7 +1634,8 @@ draw_options:
 		    itmp = popup_choice(itmp,
 					L_Exec, -1,
 					choices,
-					0, (exec_frozen ? TRUE : FALSE));
+					0, (exec_frozen ? TRUE : FALSE),
+					FALSE);
 #if defined(VMS) || defined(USE_SLANG)
 		    move(L_Exec, COL_OPTION_VALUES);
 		    clrtoeol();
@@ -1678,7 +1679,7 @@ draw_options:
 #endif /* !VMS || USE_SLANG */
 		}
 		break;
-#endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
+#endif /* ENABLE_OPTS_CHANGE_EXEC */
 
 	    case '>':	/* Save current options to RC file. */
 		if (!no_option_save) {
@@ -3177,8 +3178,7 @@ restore_popup_statusline:
     }
     FREE(popup_status_msg);
 #ifndef USE_SLANG
-    /* added touchline() - kw 19990513 */
-    touchline(stdscr, top, bottom - top);
+    touchwin(stdscr);
     delwin(form_window);
 #ifdef NCURSES
     LYsubwindow(0);
@@ -3246,7 +3246,7 @@ static char * x_display_string		= "display";
 static char * editor_string		= "editor";
 static char * emacs_keys_string		= "emacs_keys";
 
-#ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
+#ifdef ENABLE_OPTS_CHANGE_EXEC
 #define EXEC_ALWAYS 2
 #define EXEC_LOCAL  1
 #define EXEC_NEVER  0
@@ -3258,7 +3258,7 @@ static OptValues exec_links_values[]	= {
 	{ EXEC_ALWAYS,	"ALWAYS ON",		"ALWAYS ON" },
 #endif
 	{ 0, 0, 0 }};
-#endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
+#endif /* ENABLE_OPTS_CHANGE_EXEC */
 
 #ifdef EXP_KEYBOARD_LAYOUT
 static char * kblayout_string		= "kblayout";
@@ -3634,7 +3634,7 @@ PUBLIC int postoptions ARGS1(
 	}
 
 	/* Execution links: SELECT */
-#ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
+#ifdef ENABLE_OPTS_CHANGE_EXEC
 	if (!strcmp(data[i].tag, exec_links_string)
 	 && GetOptValues(exec_links_values, data[i].value, &code)) {
 #ifndef NEVER_ALLOW_REMOTE_EXEC
@@ -3642,7 +3642,7 @@ PUBLIC int postoptions ARGS1(
 #endif /* !NEVER_ALLOW_REMOTE_EXEC */
 	    local_exec_on_local_files = (code == EXEC_LOCAL);
 	}
-#endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
+#endif /* ENABLE_OPTS_CHANGE_EXEC */
 
 	/* Keypad Mode: SELECT */
 	if (!strcmp(data[i].tag, keypad_mode_string)) {
@@ -4432,7 +4432,7 @@ PRIVATE int gen_options ARGS1(
     }
 
     /* Execution links: SELECT */
-#ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
+#ifdef ENABLE_OPTS_CHANGE_EXEC
     PutLabel(fp0, gettext("Execution links"));
     BeginSelect(fp0, exec_links_string);
 #ifndef NEVER_ALLOW_REMOTE_EXEC
@@ -4449,7 +4449,7 @@ PRIVATE int gen_options ARGS1(
 	       exec_links_values);
 #endif /* !NEVER_ALLOW_REMOTE_EXEC */
     EndSelect(fp0);
-#endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
+#endif /* ENABLE_OPTS_CHANGE_EXEC */
 
     /*
      * Headers transferred to remote server

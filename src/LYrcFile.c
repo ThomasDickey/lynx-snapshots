@@ -480,7 +480,7 @@ PUBLIC void read_rc NOPARAMS
 #endif /* DISP_PARTIAL */
 #endif /* NOTUSED */
 
-#ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
+#ifdef ENABLE_OPTS_CHANGE_EXEC
 	/*
 	 *  Local execution mode - all links.
 	 */
@@ -501,7 +501,7 @@ PUBLIC void read_rc NOPARAMS
 		local_exec_on_local_files = TRUE;
 	    else
 		local_exec_on_local_files=FALSE;
-#endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
+#endif /* ENABLE_OPTS_CHANGE_EXEC */
 
 	} else if (FIND_KEYWORD(cp, "verbose_images")) {
 	   cp = SkipEquals(cp);

@@ -120,8 +120,6 @@ PUBLIC BOOLEAN underline_on = OFF;
 PUBLIC BOOLEAN bold_on      = OFF;
 
 #ifdef SOURCE_CACHE
-PUBLIC char * source_cache_filename = NULL;
-PUBLIC HTChunk * source_cache_chunk = NULL;
 PUBLIC int LYCacheSource = SOURCE_CACHE_NONE;
 PUBLIC BOOLEAN from_source_cache = FALSE;  /* mutable */
 #endif
@@ -187,13 +185,12 @@ struct _HText {
 	HTParentAnchor *	node_anchor;
 #ifdef SOURCE_CACHE
 #undef	lines			/* FIXME */
-	char *			source_cache_file;
-	HTChunk *		source_cache_chunk;
 	/*
 	 * Parse settings when this HText was generated.
 	 */
 	BOOLEAN			clickable_images;
 	BOOLEAN			pseudo_inline_alts;
+	BOOLEAN			verbose_img;
 	BOOLEAN			raw_mode;
 	BOOLEAN			historical_comments;
 	BOOLEAN			minimal_comments;
@@ -516,24 +513,11 @@ PUBLIC HText *	HText_new ARGS1(
     self->tabs = NULL;
 #ifdef SOURCE_CACHE
     /*
-     * Yes, this is a Gross And Disgusting Hack(TM), I know...
-     */
-    self->source_cache_file = NULL;
-    if (LYCacheSource == SOURCE_CACHE_FILE && source_cache_filename) {
-      StrAllocCopy(self->source_cache_file, source_cache_filename);
-      FREE(source_cache_filename);
-    }
-    self->source_cache_chunk = NULL;
-    if (LYCacheSource == SOURCE_CACHE_MEMORY && source_cache_chunk) {
-	self->source_cache_chunk = source_cache_chunk;
-	source_cache_chunk = NULL;
-    }
-
-    /*
      * Remember the parse settings.
      */
     self->clickable_images = clickable_images;
     self->pseudo_inline_alts = pseudo_inline_alts;
+    self->verbose_img = verbose_img;
     self->raw_mode = LYUseDefaultRawMode;
     self->historical_comments = historical_comments;
     self->minimal_comments = minimal_comments;
@@ -791,23 +775,6 @@ PUBLIC void HText_free ARGS1(
 	     */
 	    HTMainAnchor = NULL;
     }
-
-#ifdef SOURCE_CACHE
-    /*
-     * Clean up the source cache, if any.
-     */
-    if (self->source_cache_file) {
-	CTRACE(tfp, "Removing source cache file %s\n",
-	       self->source_cache_file);
-	LYRemoveTemp(self->source_cache_file);
-	FREE(self->source_cache_file);
-    }
-    if (self->source_cache_chunk) {
-	CTRACE(tfp, "Removing memory source cache %p\n",
-	       (void *)self->source_cache_chunk);
-	HTChunkFree(self->source_cache_chunk);
-    }
-#endif
 
     FREE(self);
 }
@@ -2122,9 +2089,9 @@ PRIVATE void split_line ARGS2(
 		    (previous->styles[spare - 1].direction == ABS_ON &&
 		     previous->styles[spare - 2].direction == ABS_OFF)
 		       )) {
-	       /*
-		*  Skip pairs of adjacent ON/OFF or OFF/ON changes.
-		*/
+	        /*
+		 *  Skip pairs of adjacent ON/OFF or OFF/ON changes.
+		 */
 	    spare -= 2;
 	} else if (spare && !previous->styles[spare - 1].direction) {
 	    /*
@@ -3765,8 +3732,8 @@ PUBLIC void HText_trimHightext ARGS2(
     if (!text)
 	return;
 
-    CTRACE(tfp,"Gridtext: Entering HText_trimHightext %s\n",
-	       final ? "(final)" : "(partial)");
+    CTRACE(tfp, "Gridtext: Entering HText_trimHightext %s\n",
+	        final ? "(final)" : "(partial)");
 
     /*
      *  Get the first line.
@@ -6171,7 +6138,7 @@ PUBLIC void HTuncache_current_document NOARGS
 		FREE(htmain_anchor->UCStages);
 	    }
 	}
-	CTRACE(tfp, "\rHTuncache.. freeing document for '%s'%s\n",
+	CTRACE(tfp, "\nHTuncache.. freeing document for '%s'%s\n",
 			    ((htmain_anchor &&
 			      htmain_anchor->address) ?
 			       htmain_anchor->address : "unknown anchor"),
@@ -6191,30 +6158,30 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 {
     BOOLEAN ok = FALSE;
 
-    if (!HTMainText || LYCacheSource == SOURCE_CACHE_NONE ||
+    if (!HTMainAnchor || LYCacheSource == SOURCE_CACHE_NONE ||
 	(LYCacheSource == SOURCE_CACHE_FILE &&
-	 !HTMainText->source_cache_file) ||
+	!HTMainAnchor->source_cache_file) ||
 	(LYCacheSource == SOURCE_CACHE_MEMORY &&
-	 !HTMainText->source_cache_chunk))
+	!HTMainAnchor->source_cache_chunk))
 	return FALSE;
 
-    if (LYCacheSource == SOURCE_CACHE_FILE && HTMainText->source_cache_file) {
+    if (LYCacheSource == SOURCE_CACHE_FILE && HTMainAnchor->source_cache_file) {
 	FILE * fp;
 	HTFormat format;
 	int ret;
 
 	CTRACE(tfp, "Reparsing source cache file %s\n",
-	       HTMainText->source_cache_file);
+	      HTMainAnchor->source_cache_file);
 
 	/*
 	 * This is more or less copied out of HTLoadFile(), except we don't
 	 * get a content encoding.  This may be overkill.  -dsb
 	 */
-	if (HTMainText->node_anchor->content_type) {
-	    format = HTAtom_for(HTMainText->node_anchor->content_type);
+	if (HTMainAnchor->content_type) {
+	   format = HTAtom_for(HTMainAnchor->content_type);
 	} else {
-	    format = HTFileFormat(HTMainText->source_cache_file, NULL, NULL);
-	    format = HTCharsetFormat(format, HTMainText->node_anchor,
+	   format = HTFileFormat(HTMainAnchor->source_cache_file, NULL, NULL);
+	   format = HTCharsetFormat(format, HTMainAnchor,
 					     UCLYhndl_for_unspec);
 	    /* not UCLYhndl_HTFile_for_unspec - we are talking about remote
 	     * documents...
@@ -6222,17 +6189,10 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	}
 	CTRACE(tfp, "  Content type is \"%s\"\n", format->name);
 
-	/*
-	 * Pass the source cache filename on to the next HText.  Mark it
-	 * NULL here so that it won't get deleted by HText_free().
-	 */
-	source_cache_filename = HTMainText->source_cache_file;
-	HTMainText->source_cache_file = NULL;
-
-	fp = fopen(source_cache_filename, "r");
+	fp = fopen(HTMainAnchor->source_cache_file, "r");
 	if (!fp) {
-	    CTRACE(tfp, "  Cannot read file %s\n", source_cache_filename);
-	    FREE(source_cache_filename);
+	   CTRACE(tfp, "  Cannot read file %s\n", HTMainAnchor->source_cache_file);
+	   FREE(HTMainAnchor->source_cache_file);
 	    return FALSE;
 	}
 #ifdef DISP_PARTIAL
@@ -6245,22 +6205,19 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	     */
 	    HTAlert(RELOADING_FORM);
 	}
-	ret = HTParseFile(format, HTOutputFormat, HTMainText->node_anchor,
+	ret = HTParseFile(format, HTOutputFormat, HTMainAnchor,
 			  fp, NULL);
 	fclose(fp);
 	ok = (ret == HT_LOADED);
-	if (!ok) {
-	    FREE(source_cache_filename);
-	}
     }
 
     if (LYCacheSource == SOURCE_CACHE_MEMORY &&
-	HTMainText->source_cache_chunk) {
+	HTMainAnchor->source_cache_chunk) {
 	HTFormat format = WWW_HTML;
 	int ret;
 
 	CTRACE(tfp, "Reparsing from source memory cache %p\n",
-	       (void *)HTMainText->source_cache_chunk);
+		    (void *)HTMainAnchor->source_cache_chunk);
 
 	/*
 	 * This is only done to make things aligned with SOURCE_CACHE_NONE and
@@ -6270,16 +6227,9 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	 * user-visible benefits, seems just '=' Info Page will show source's
 	 * effective charset as "(assumed)".
 	 */
-	format = HTCharsetFormat(format, HTMainText->node_anchor,
+	format = HTCharsetFormat(format, HTMainAnchor,
 					 UCLYhndl_for_unspec);
 	/* not UCLYhndl_HTFile_for_unspec - we are talking about remote documents... */
-
-	/*
-	 * Pass the source cache HTChunk on to the next HText.  Clear it
-	 * here so that it won't get deleted by HText_free().
-	 */
-	source_cache_chunk = HTMainText->source_cache_chunk;
-	HTMainText->source_cache_chunk = NULL;
 
 #ifdef DISP_PARTIAL
 	display_partial = display_partial_flag;  /* restore */
@@ -6291,13 +6241,9 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	     */
 	    HTAlert(RELOADING_FORM);
 	}
-	ret = HTParseMem(format, HTOutputFormat, HTMainText->node_anchor,
-			 source_cache_chunk, NULL);
+	ret = HTParseMem(format, HTOutputFormat, HTMainAnchor,
+			HTMainAnchor->source_cache_chunk, NULL);
 	ok = (ret == HT_LOADED);
-	if (!ok) {
-	    HTChunkFree(source_cache_chunk);
-	    source_cache_chunk = NULL;
-	}
     }
 
     CTRACE(tfp, "Reparse %s\n", (ok ? "succeeded" : "failed"));
@@ -6311,17 +6257,17 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 
 PUBLIC BOOLEAN HTcan_reparse_document NOARGS
 {
-    if (!HTMainText || LYCacheSource == SOURCE_CACHE_NONE ||
+    if (!HTMainAnchor || LYCacheSource == SOURCE_CACHE_NONE ||
 	(LYCacheSource == SOURCE_CACHE_FILE &&
-	 !HTMainText->source_cache_file) ||
+	!HTMainAnchor->source_cache_file) ||
 	(LYCacheSource == SOURCE_CACHE_MEMORY &&
-	 !HTMainText->source_cache_chunk))
+	!HTMainAnchor->source_cache_chunk))
 	return FALSE;
 
-    if (LYCacheSource == SOURCE_CACHE_FILE && HTMainText->source_cache_file) {
+    if (LYCacheSource == SOURCE_CACHE_FILE && HTMainAnchor->source_cache_file) {
 	FILE * fp;
 
-	fp = fopen(HTMainText->source_cache_file, "r");
+	fp = fopen(HTMainAnchor->source_cache_file, "r");
 	if (!fp) {
 	    return FALSE;
 	}
@@ -6330,7 +6276,7 @@ PUBLIC BOOLEAN HTcan_reparse_document NOARGS
     }
 
     if (LYCacheSource == SOURCE_CACHE_MEMORY &&
-	HTMainText->source_cache_chunk) {
+	HTMainAnchor->source_cache_chunk) {
 	return TRUE;
     }
 
@@ -6353,11 +6299,11 @@ PUBLIC BOOLEAN HTdocument_settings_changed NOARGS
      * Annoying Hack(TM):  If we don't have a source cache, we can't
      * reparse anyway, so pretend the settings haven't changed.
      */
-    if (!HTMainText || LYCacheSource == SOURCE_CACHE_NONE ||
+    if (!HTMainAnchor || !HTMainText || LYCacheSource == SOURCE_CACHE_NONE ||
 	(LYCacheSource == SOURCE_CACHE_FILE &&
-	 !HTMainText->source_cache_file) ||
+	!HTMainAnchor->source_cache_file) ||
 	(LYCacheSource == SOURCE_CACHE_MEMORY &&
-	 !HTMainText->source_cache_chunk))
+	!HTMainAnchor->source_cache_chunk))
 	return FALSE;
 
     if (TRACE) {
@@ -6369,6 +6315,9 @@ PUBLIC BOOLEAN HTdocument_settings_changed NOARGS
 	trace_setting_change("PSEUDO_INLINE_ALTS",
 			     HTMainText->pseudo_inline_alts,
 			     pseudo_inline_alts);
+	trace_setting_change("VERBOSE_IMG",
+			    HTMainText->verbose_img,
+			    verbose_img);
 	trace_setting_change("RAW_MODE", HTMainText->raw_mode,
 			     LYUseDefaultRawMode);
 	trace_setting_change("HISTORICAL_COMMENTS",
@@ -6387,6 +6336,7 @@ PUBLIC BOOLEAN HTdocument_settings_changed NOARGS
 
     return (HTMainText->clickable_images != clickable_images ||
 	    HTMainText->pseudo_inline_alts != pseudo_inline_alts ||
+	   HTMainText->verbose_img != verbose_img ||
 	    HTMainText->raw_mode != LYUseDefaultRawMode ||
 	    HTMainText->historical_comments != historical_comments ||
 	    HTMainText->minimal_comments != minimal_comments ||
@@ -7535,6 +7485,7 @@ PUBLIC int HText_beginInput ARGS3(
 	    f->type = F_RANGE_TYPE;
 	} else if (!strcasecomp(I->type,"file")) {
 	    f->type = F_FILE_TYPE;
+	    CTRACE(tfp, "ok, got a file uploader\n");
 	} else if (!strcasecomp(I->type,"keygen")) {
 	    f->type = F_KEYGEN_TYPE;
 	} else {
@@ -7683,7 +7634,9 @@ PUBLIC int HText_beginInput ARGS3(
 	 *  for types that are not yet implemented.
 	 */
 	case F_HIDDEN_TYPE:
+#ifndef EXP_FILE_UPLOAD
 	case F_FILE_TYPE:
+#endif
 	case F_RANGE_TYPE:
 	case F_KEYGEN_TYPE:
 	    a->number = 0;
@@ -8295,6 +8248,15 @@ PUBLIC int HText_SubmitForm ARGS4(
 			}
 			break;
 		    }
+
+#ifdef EXP_FILE_UPLOAD
+		case F_FILE_TYPE:
+		    CTRACE(tfp, "I'd submit %s (from %s), but you've not finished it\n", form_ptr->value, form_ptr->name);
+		    name_used = (form_ptr->name ? form_ptr->name : "");
+		    val_used = (form_ptr->value ? form_ptr->value : "");
+ 		    break;
+#endif
+ 
 		    /*  fall through  */
 		case F_RADIO_TYPE:
 		case F_CHECKBOX_TYPE:
@@ -8494,6 +8456,86 @@ PUBLIC int HText_SubmitForm ARGS4(
 
 		case F_RESET_TYPE:
 		    break;
+
+#ifdef EXP_FILE_UPLOAD
+		case F_FILE_TYPE:
+		{
+		    int cdisp_name_startpos = 0;
+		    FILE *fd;
+		    int bytes;
+		    char buffer[257];
+
+		    CTRACE(tfp, "Ok, about to convert %s to mime/thingy\n", form_ptr->value);
+		    if (first_one) {
+			if (Boundary) {
+			    HTSprintf(&query, "--%s\r\n", Boundary);
+			}
+			first_one = FALSE;
+		    } else {
+			if (PlainText) {
+			    HTSprintf(&query, "\n");
+			} else if (SemiColon) {
+			    HTSprintf(&query, ";");
+			} else if (Boundary) {
+			    HTSprintf(&query, "\r\n--%s\r\n", Boundary);
+			} else {
+			    HTSprintf(&query, "&");
+			}
+		    }
+
+		    if (PlainText) {
+			StrAllocCopy(escaped1, name_used);
+		    } else if (Boundary) {
+			StrAllocCopy(escaped1,
+				"Content-Disposition: form-data; name=");
+			cdisp_name_startpos = strlen(escaped1);
+			StrAllocCat(escaped1, name_used);
+			StrAllocCat(escaped1, "; filename=\"");
+			StrAllocCat(escaped1, val_used); 
+			StrAllocCat(escaped1, "\"");
+			if (MultipartContentType) {
+			    StrAllocCat(escaped1, MultipartContentType);
+			    StrAllocCat(escaped1, "\r\nContent-Transfer-Encoding: base64");
+			}
+			StrAllocCat(escaped1, "\r\n\r\n");
+		    } else {
+			escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
+		    }
+
+		    if ((fd = fopen(val_used, "rb")) == 0) {
+			/* We can't open the file, what do we do? */
+			HTAlert("Can't open file for uploading");
+			return 0;
+		    }
+		    StrAllocCopy(escaped2, "");
+		    while ((bytes = fread(buffer, sizeof(char), 45, fd)) != 0) {
+			char base64buf[128];
+			base64_encode(base64buf, buffer, bytes);
+			StrAllocCat(escaped2, base64buf);
+		    }
+		    if (ferror(fd)) {
+			/* We got an error reading the file, what do we do? */
+			HTAlert("Short read from file, problem?");
+			fclose(fd);
+			return 0;
+		    }
+		    fclose(fd);
+		    /* we need to modify the mime-type here */
+
+		    /* Argh.  We need counted-length strings here */
+		    HTSprintf(&query,
+				   "%s%s%s%s%s",
+				   escaped1,
+				   (Boundary ? "" : "="),
+				   (PlainText ? "\n" : ""),
+					escaped2,
+				   ((PlainText && *escaped2) ?
+							 "\n" : ""));
+		    FREE(escaped1);
+		    FREE(escaped2);
+		}
+		break;
+#endif /* EXP_FILE_UPLOAD */
 
 		case F_SUBMIT_TYPE:
 		case F_TEXT_SUBMIT_TYPE:
@@ -8830,6 +8872,8 @@ PUBLIC int HText_SubmitForm ARGS4(
 	StrAllocCopy(query, "");
     }
     FREE(previous_blanks);
+	
+    CTRACE(tfp, "QUERY (%d) >> \n%s\n", strlen(query), query);
 
     if (submit_item->submit_method == URL_MAIL_METHOD) {
 	HTUserMsg2(gettext("Submitting %s"), submit_item->submit_action);
@@ -8959,7 +9003,7 @@ PUBLIC BOOLEAN HText_HaveUserChangedForms NOARGS
     TextAnchor * anchor_ptr;
 
     if (HTMainText == 0)
-       return FALSE;
+	return FALSE;
 
     /*
      *  Go through list of anchors to check if any value was changed.
@@ -9904,23 +9948,23 @@ PRIVATE void update_subsequent_anchors ARGS4(
 		if ((anchor->number - n) == start_tag)
 		    break;
 
-	        /*** A HANG (infinite loop) *has* occurred here, with */
-	        /*** the values of anchor and anchor->next being the  */
-	        /*** the same, OR with anchor->number "magically" and */
-	        /*** suddenly taking on an anchor-pointer-like value. */
-	        /***                                                  */
-	        /*** The same code and same doc have both passed and  */
-	        /*** failed at different times, which indicates some  */
-	        /*** sort of content/html dependency, or some kind of */
-	        /*** a "race" condition, but I'll be damned if I can  */
-	        /*** find it after tons of CTRACE's, printf()'s, gdb  */
-	        /*** breakpoints and watchpoints, etc.                */
-	        /***                                                  */
-	        /*** I have added a hang detector (with error msg and */
-	        /*** beep) here, to break the loop and warn the user, */
-	        /*** until it can be isolated and fixed.              */
-	        /***                                                  */
-	        /*** [One UGLY intermittent .. gak ..!  02/22/99 KED] */
+		/*** A HANG (infinite loop) *has* occurred here, with */
+		/*** the values of anchor and anchor->next being the  */
+		/*** the same, OR with anchor->number "magically" and */
+		/*** suddenly taking on an anchor-pointer-like value. */
+		/***                                                  */
+		/*** The same code and same doc have both passed and  */
+		/*** failed at different times, which indicates some  */
+		/*** sort of content/html dependency, or some kind of */
+		/*** a "race" condition, but I'll be damned if I can  */
+		/*** find it after tons of CTRACE's, printf()'s, gdb  */
+		/*** breakpoints and watchpoints, etc.                */
+		/***                                                  */
+		/*** I have added a hang detector (with error msg and */
+		/*** beep) here, to break the loop and warn the user, */
+		/*** until it can be isolated and fixed.              */
+		/***                                                  */
+		/*** [One UGLY intermittent .. gak ..!  02/22/99 KED] */
 
 		hang++;
 		if ((anchor == anchor->next) || (hang >= hang_detect))
@@ -10284,7 +10328,7 @@ PUBLIC void HText_ExpandTextarea ARGS2(
 	    !strcmp (anchor_ptr->input_field->name, areaname))   {
 
 	    if (firstanchor)
-	        firstanchor = FALSE;
+		firstanchor = FALSE;
 
 	    end_anchor = anchor_ptr;
 
@@ -10312,7 +10356,7 @@ PUBLIC void HText_ExpandTextarea ARGS2(
     }
 
     CTRACE(tfp, "GridText: %d blank line(s) added to TEXTAREA name=|%s|\n",
-	        newlines, areaname);
+		newlines, areaname);
 
     /*
      *	We need to adjust various things in all anchor bearing lines
@@ -10849,7 +10893,7 @@ PUBLIC void redraw_lines_of_link ARGS1(
 PUBLIC void HTMark_asSource NOARGS
 {
     if (HTMainText)
-        HTMainText->source = TRUE;
+	HTMainText->source = TRUE;
 }
 #endif
 

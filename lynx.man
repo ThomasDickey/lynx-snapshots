@@ -312,7 +312,7 @@ disable the retrieval status messages.
 force numbering of links.
 .TP
 .B -partial
-display partial pages while loading.
+toggles display partial pages while loading.
 .TP
 .B partial_thres\fR=\fINUMBER
 number of lines to render before repainting display

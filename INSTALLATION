@@ -294,6 +294,10 @@ II. Compile instructions -- UNIX
 	Compiles-in an alternative list-page, bound to 'A' rather than 'l',
 	which always lists URLs rather than titles.
 
+  --enable-change-exec			(define ENABLE_OPTS_CHANGE_EXEC)
+  	Allow users to change the execution status within the options screen.
+	See EXEC_LINKS and EXEC_SCRIPTS.
+
   --enable-cgi-links			(define LYNXCGI_LINKS)
 	Allows lynx to access a cgi script directly without the need for
 	a http daemon.
@@ -325,6 +329,9 @@ II. Compile instructions -- UNIX
   --enable-find-leaks			(define LY_FIND_LEAKS)
 	Use this option to compile-in logic for testing memory leaks.
 
+  --enable-file-upload			(define EXP_FILE_UPLOAD)
+	Compile-in support for form-based file-upload.
+
   --enable-font-switch			(define EXP_CHARTRANS_AUTOSWITCH)
 	Allow Lynx to automatically change the Linux console state (switch
 	fonts) according to the current Display Character Set.  (Linux console
@@ -347,6 +354,7 @@ II. Compile instructions -- UNIX
 
   --enable-libjs			(define EXP_LIBJS)
   	Disabled by default; used for ifdef'ing JavaScript interface.
+	Currently dummy: no JavaScript support implemented in Lynx yet.
 
   --enable-nls
 	use Native Language Support (i.e., gettext).
@@ -356,8 +364,9 @@ II. Compile instructions -- UNIX
 	so that `z' will stop the `look-up' phase of a connection.
 
   --enable-prettysrc			(define USE_PSRC)
-	Use this option to compile-in support for colorizing the source
-	view of HTML pages.
+	Use this option to compile-in support for colorizing the source view of
+	HTML pages.  If compiled-in, new source view mode is available with
+	-prettysrc command line option.
 
   --enable-source-cache			(define SOURCE_CACHE)
 	Use this option to compile-in support for caching HTML pages locally,
@@ -409,13 +418,13 @@ II. Compile instructions -- UNIX
 	Use this option to configure with the socks5 library.
 
 	If you make a SOCKSified lynx, you may have trouble accessing FTP
-        servers.  Also, instead of SOCKSifying lynx for use behind a firewall,
-        you are better off if you make it normally, and set it up to use a
-        proxy server.  You can SOCKSify the proxy server, and it will handle
-        all clients, not just Lynx.  If your SOCKS server was compiled to use
-        the short version of Rbind, also include -DSHORTENED_RBIND in your
-        SITE_LYDEFS and SITE_DEFS.  If you do SOCKSify lynx, you can turn off
-        SOCKS proxy usage via a -nosocks command line switch.
+	servers.  Also, instead of SOCKSifying lynx for use behind a firewall,
+	you are better off if you make it normally, and set it up to use a
+	proxy server.  You can SOCKSify the proxy server, and it will handle
+	all clients, not just Lynx.  If your SOCKS server was compiled to use
+	the short version of Rbind, also include -DSHORTENED_RBIND in your
+	SITE_LYDEFS and SITE_DEFS.  If you do SOCKSify lynx, you can turn off
+	SOCKS proxy usage via a -nosocks command line switch.
 
   --with-zlib				(define USE_ZLIB)
 	Use zlib for decompression of some gzip files.

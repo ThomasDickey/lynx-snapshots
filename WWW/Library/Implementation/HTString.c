@@ -890,3 +890,65 @@ PUBLIC void HTEndParam ARGS3(
     }
     CTRACE(tfp, "PARAM-END:%s\n", *result);
 }
+
+
+#ifdef EXP_FILE_UPLOAD
+/*	bstring Allocate and Concatenate
+*/
+
+/*	Allocate a new copy of a bstring, and returns it
+*/
+PUBLIC void HTSABCopy ARGS3(
+	bstring**,	dest,
+	CONST char *,	src,
+	int,		len)
+{
+    bstring *t;
+    CTRACE(tfp, "HTSABCopy(%p, %p, %d)\n", dest, src, len);
+    /* if we already have a bstring ** ... */
+    if (dest) {
+    	/* ... with a valid bstring *, free it ... */
+    	if (*dest) {
+	    FREE((*dest)->str);
+	    FREE(*dest);
+    	}
+	*dest = malloc(sizeof(bstring));
+	if (src) {
+	    CTRACE(tfp, "%% [%s]\n", src);
+	    t = (bstring*) malloc(sizeof(bstring));
+	    if (t == NULL)
+		outofmem(__FILE__, "HTSABCopy");
+	    t->str = (char *) malloc (len);
+	    if (t->str == NULL)
+		outofmem(__FILE__, "HTSABCopy");
+	    memcpy (t->str, src, len);
+	    t->len = len;
+	    *dest = t;
+	}
+    }
+}
+
+PUBLIC void HTSABCat ARGS3(
+	bstring **,	dest,
+	CONST char *,	src,
+	int,		len)
+{
+    bstring *t = *dest;
+    if (src) {
+	if (t) {
+	    int length = t->len;
+	    t->str = (char *)realloc(t->str, length + len);
+	} else {
+	    t = (bstring *)calloc(1, sizeof(*t));
+	    if (t == NULL)
+		outofmem(__FILE__, "HTSACat");
+	    t->str = (char *)malloc(len);
+	}
+	if (t->str == NULL)
+	    outofmem(__FILE__, "HTSACat");
+	memcpy (t->str + t->len, src, len);
+	t->len += len;
+	*dest = t;
+    }
+}
+#endif /* EXP_FILE_UPLOAD */

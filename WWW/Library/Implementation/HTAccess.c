@@ -1356,7 +1356,7 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
 	    StrAllocCopy(my_home_document, REMOTE_ADDRESS);
     }
 
-#ifdef unix
+#ifdef UNIX
     if (my_home_document == NULL) {
 	FILE * fp = NULL;
 	CONST char * home =  (CONST char*)getenv("HOME");
@@ -1377,7 +1377,7 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
 	    FREE(my_home_document);
 	}
     }
-#endif /* unix */
+#endif /* UNIX */
     ref = HTParse((my_home_document ?
 		   my_home_document : (HTClientHost ?
 				     REMOTE_ADDRESS : LAST_RESORT)),

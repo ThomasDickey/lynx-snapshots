@@ -3500,7 +3500,7 @@ new_cmd:  /*
 		    psrc_view = FALSE;	/* we get here if link is not internal */
 #endif
 
-#ifdef DIRED_SUPPORT
+#if defined(DIRED_SUPPORT) && !defined(__DJGPP__)
 		    if (lynx_edit_mode) {
 			  HTuncache_current_document();
 			  /*
@@ -3511,7 +3511,7 @@ new_cmd:  /*
 			  HTUnEscapeSome(newdoc.address,"/");
 			  strip_trailing_slash(newdoc.address);
 		    }
-#endif /* DIRED_SUPPORT */
+#endif /* DIRED_SUPPORT  && !__DJGPP__ */
 		    if (!strncmp(curdoc.address, "LYNXCOOKIE:", 11)) {
 			HTuncache_current_document();
 		    }
@@ -5172,6 +5172,9 @@ if (!LYUseFormsOptions) {
 	    /*
 	     *	Don't do if not allowed or already viewing the menu.
 	     */
+#ifdef __DJGPP__
+	    lynx_edit_mode = TRUE;
+#endif /* __DJGPP__ */
 	    if (lynx_edit_mode && !no_dired_support &&
 		strcmp(curdoc.address, LYDiredFileURL) &&
 		strcmp((curdoc.title ? curdoc.title : ""),
@@ -6435,19 +6438,20 @@ PRIVATE void exit_immediately_with_error_message ARGS2(
     if (state == NOT_FOUND)
     {
 	HTSprintf0(&buf, "%s\n%s %s\n",
-		   buf2,
+		   buf2 ? buf2 : "",
 		   gettext("lynx: Can't access startfile"),
 		   /*
 		    * hack: if we fail in HTAccess.c
 		    * avoid duplicating URL, oh.
 		    */
-		   strstr(buf2, gettext("Can't Access")) ? "" : startfile);
+		   (buf2 && strstr(buf2, gettext("Can't Access"))) ?
+							       "" : startfile);
     }
 
     if (state == NULLFILE)
     {
 	HTSprintf0(&buf, "%s\n%s\n%s\n",
-		   buf2,
+		   buf2 ? buf2 : "",
 		   gettext("lynx: Start file could not be found or is not text/html or text/plain"),
 		   gettext("      Exiting..."));
     }

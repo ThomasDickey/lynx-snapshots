@@ -1643,7 +1643,7 @@ PRIVATE int print_local_dir ARGS5(
 	if (status != HT_PARTIAL_CONTENT)
 	    _HTProgress (gettext("OK"));
 	else
-	    CTRACE(tfp, "Reading the directory interrupred by user\n");
+	    CTRACE(tfp, "Reading the directory interrupted by user\n");
 
 
 	/*

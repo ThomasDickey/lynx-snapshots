@@ -26,11 +26,13 @@
 #undef DONT_TRACK_INTERNAL_LINKS /* CF_ARG_DISABLE(internal-links) */
 #undef EBCDIC			/* CF_EBCDIC */
 #undef ENABLE_NLS		/* defined if NLS is requested */
+#undef ENABLE_OPTS_CHANGE_EXEC	/* CF_ARG_ENABLE(change-exec) */
 #undef EXEC_LINKS		/* CF_ARG_ENABLE(exec-links) */
 #undef EXEC_SCRIPTS		/* CF_ARG_ENABLE(exec-scripts) */
 #undef EXP_ADDRLIST_PAGE	/* CF_ARG_ENABLE(addrlist-page) */
 #undef EXP_ALT_BINDINGS		/* CF_ARG_ENABLE(alt-bindings) */
 #undef EXP_CHARTRANS_AUTOSWITCH	/* CF_ARG_ENABLE(font-switch) */
+#undef EXP_FILE_UPLOAD		/* CF_ARG_ENABLE(file-upload) */
 #undef EXP_KEYBOARD_LAYOUT	/* CF_ARG_ENABLE(kbd-layout) */
 #undef EXP_LIBJS		/* CF_ARG_ENABLE(libjs) */
 #undef EXP_PERSISTENT_COOKIES	/* CF_ARG_ENABLE(persistent-cookies) */
@@ -191,7 +193,6 @@
 #undef const
 #endif
 
-/* FIXME:ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
 /* FIXME:DECLARE_WAIS_LOGFILES */
 /* FIXME:DGUX */
 /* FIXME:DGUX_OLD */
