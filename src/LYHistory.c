@@ -84,7 +84,7 @@ PUBLIC void LYAddVisitedLink ARGS1(
     }
 
     if ((new = (VisitedLink *)calloc(1, sizeof(*new))) == NULL)
-	outofmem(__FILE__, "HTAddVisitedLink");
+	outofmem(__FILE__, "LYAddVisitedLink");
     StrAllocCopy(new->address, doc->address);
     StrAllocCopy(new->title, (doc->title ? doc->title : gettext("(no title)")));
 

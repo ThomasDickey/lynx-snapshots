@@ -25,6 +25,8 @@
 #include <LYCharSets.h>
 #include <LYStrings.h>
 
+#include <LYLeaks.h>
+
 /*
  *  Include tables & parameters.
  */
@@ -66,6 +68,8 @@
 #ifdef NOTDEFINED
 #include <mnem_suni.h>
 #endif /* NOTDEFINED */
+
+PUBLIC  char *UC_TEMPcharset = 0;	/* temporary in UCGetLYhndl_byMIME */
 
 /*
  *  Some of the code below, and some of the comments, are left in for
@@ -1017,11 +1021,6 @@ PRIVATE void UCconsole_map_init NOARGS
 /*
  *  OK now, finally, some stuff that is more specifically for Lynx: - KW
  */
-#ifdef NOTDEFINED
-PUBLIC int UCGetcharset_byMIMEname PARAMS((CONST char * UC_MIMEcharset));
-PUBLIC int UCGetcharset_byLYNXname PARAMS((CONST char * UC_LYNXcharset));
-#endif /* NOTDEFINED */
-
 PUBLIC int UCTransUniChar ARGS2(
 	long,		unicode,
 	int,		charset_out)
@@ -1510,9 +1509,9 @@ PUBLIC int UCGetRawUniMode_byLYhndl ARGS1(
 PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	CONST char *,	value)
 {
-  int i;
-  int LYhndl = -1;
-  char *UC_MIMEcharset = NULL;
+#define UC_MIMEcharset UC_TEMPcharset
+    int i;
+    int LYhndl = -1;
 
     if (!value || !(*value)) {
 	CTRACE(tfp, "UCGetLYhndl_byMIME: NULL argument instead of MIME name.\n");
@@ -1639,6 +1638,7 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 
     CTRACE(tfp, "UCGetLYhndl_byMIME: unrecognized MIME name \"%s\"\n", value);
     return -1;	/* returns -1 if no charset found by that MIME name */
+#undef UC_MIMEcharset
 }
 
 /*

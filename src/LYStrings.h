@@ -22,7 +22,7 @@ extern int LYgetstr PARAMS((
 	int		recall));
 extern char *LYstrsep PARAMS((
 	char **		stringp,
-	const char *	delim));
+	CONST char *	delim));
 extern char * LYstrstr PARAMS((
 	char *		chptr,
 	CONST char *	tarptr));

@@ -157,7 +157,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		 */
 		StrAllocCopy(path, me->anchor->FileCache);
 		if ((len = strlen(path)) > 2) {
-		    if (!strcasecomp((char *)&path[len-2], "gz")) {
+		    if (!strcasecomp(&path[len-2], "gz")) {
 #ifdef USE_ZLIB
 			if (!skip_loadfile) {
 			    use_gzread = YES;
@@ -167,7 +167,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			    path[len-3] = '\0';
 			    remove(path);
 			}
-		    } else if (!strcasecomp((char *)&path[len-1], "Z")) {
+		    } else if (!strcasecomp(&path[len-1], "Z")) {
 			path[len-2] = '\0';
 			remove(path);
 		    }
@@ -626,11 +626,11 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 	    return(NULL);
 	}
 
-	if (((cp=strchr((char *)pres->rep->name, ';')) != NULL) &&
+	if (((cp=strchr(pres->rep->name, ';')) != NULL) &&
 	    strstr((cp+1), "charset") != NULL) {
-	    _user_message(WRONG_CHARSET_D_OR_C, (char *)pres->rep->name);
-	} else if (*((char *)pres->rep->name) != '\0')	{
-	    _user_message(UNMAPPED_TYPE_D_OR_C, (char *)pres->rep->name);
+	    _user_message(WRONG_CHARSET_D_OR_C, pres->rep->name);
+	} else if (*(pres->rep->name) != '\0')	{
+	    _user_message(UNMAPPED_TYPE_D_OR_C, pres->rep->name);
 	} else {
 	    _statusline(CANNOT_DISPLAY_FILE_D_OR_C);
 	}

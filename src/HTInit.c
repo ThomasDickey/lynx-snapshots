@@ -532,9 +532,14 @@ PRIVATE int PassesTest ARGS1(
     /*
      *  Build the command and execute it.
      */
-    if (LYOpenTemp(TmpFileName, HTML_SUFFIX, "w") == 0)
-	ExitWithError(CANNOT_OPEN_TEMP);
-    LYCloseTemp(TmpFileName);
+    if (strchr(mc->testcommand, '%')) {
+	if (LYOpenTemp(TmpFileName, HTML_SUFFIX, "w") == 0)
+	    ExitWithError(CANNOT_OPEN_TEMP);
+	LYCloseTemp(TmpFileName);
+    } else {
+	/* We normally don't need a temp file name - kw */
+	TmpFileName[0] = '\0';
+    }
     cmd = (char *)malloc(1024);
     if (!cmd)
 	ExitWithError(MEMORY_EXHAUSTED_ABORT);

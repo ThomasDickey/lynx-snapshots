@@ -49,7 +49,7 @@ PRIVATE char *lynx_compile_opts NOARGS
 	BeginInternalPage (fp0, CONFIG_DEF_TITLE, NULL);
 	fprintf(fp0, "<pre>\n");
 
-	fprintf(fp0, "%s <a href=\"%s\">%s lynx.cfg</a> %s\n\n",
+	fprintf(fp0, "%s %s<a href=\"%s\"> lynx.cfg</a> %s\n\n",
 	    SEE_ALSO,
 	    YOUR_SEGMENT,
 	    lynx_cfg_infopage(),
@@ -85,7 +85,6 @@ PUBLIC int showinfo ARGS4(
 	char *, 	owner_address)
 {
     static char tempfile[LY_MAXPATH];
-    static char *info_url;
     int url_type;
     FILE *fp0;
     char *Address = NULL, *Title = NULL;
@@ -104,12 +103,10 @@ PUBLIC int showinfo ARGS4(
 	return(-1);
     }
 
-    LYLocalFileToURL(&info_url, tempfile);
-
     /*
      *	Point the address pointer at this Url
      */
-    StrAllocCopy(newdoc->address, info_url);
+    LYLocalFileToURL(&newdoc->address, tempfile);
 
     if (nlinks > 0 && links[doc->link].lname != NULL &&
 	(url_type = is_url(links[doc->link].lname)) != 0 &&

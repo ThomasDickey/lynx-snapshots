@@ -9,7 +9,7 @@ typedef struct _LYUCcharset {
     int UChndl;
     CONST char * MIMEname;
     int enc;
-    int codepage;
+    int codepage;	/* IBM specific number */
 
     /* parameters below are not used by chartrans mechanism, */
     /* they describe some relationships against built-in Latin1 charset...*/

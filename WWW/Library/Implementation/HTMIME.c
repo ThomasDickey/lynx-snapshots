@@ -1843,7 +1843,7 @@ PUBLIC HTStream* HTNetMIME ARGS3(
 #ifdef ESC
 #undef ESC
 #endif /* ESC */
-#include "LYCharVals.h"  /* S/390 -- gil -- 0163 */
+#include <LYCharVals.h>  /* S/390 -- gil -- 0163 */
 #define ESC	CH_ESC
 
 PRIVATE char HTmm64[] =

@@ -147,7 +147,7 @@ PRIVATE void HTPlain_put_character ARGS2(
     } else if (TOASCII((unsigned char)c) >= 127 && TOASCII((unsigned char)c) < 161 &&
 	       HTPassHighCtrlRaw) {
 	HText_appendCharacter(me->text, c);
-    } else if ((unsigned char)c == CH_NBSP) {  /* S/390 -- gil -- 0341 */
+    } else if ((unsigned char)c == CH_NBSP) { /* S/390 -- gil -- 0341 */
 	HText_appendCharacter(me->text, ' ');
     } else if ((unsigned char)c == CH_SHY) {
 	return;

@@ -105,6 +105,8 @@ typedef struct _HTSuffix {
 #define MAYBE_END(e) if (HTML_dtd.tags[e].contents != SGML_EMPTY) \
 			(*target->isa->end_element)(target, e, 0)
 #define FREE_TARGET (*target->isa->_free)(target)
+#define ABORT_TARGET (*targetClass._abort)(target, NULL);
+
 struct _HTStructured {
 	CONST HTStructuredClass *	isa;
 	/* ... */
@@ -1985,6 +1987,7 @@ PUBLIC int HTLoadFile ARGS4(
 		{
 		    HTBTree * bt = HTBTree_new((HTComparer)strcmp);
 
+		    status = HT_LOADED;	/* assume we don't get interrupted */
 		    while ((dirbuf = readdir(dp)) != NULL) {
 			/*
 			**  While there are directory entries to be read...
@@ -2075,6 +2078,11 @@ PUBLIC int HTLoadFile ARGS4(
 			while (next_element != NULL) {
 			    char *entry, *file_extra;
 
+			    if (HTCheckForInterrupt()) {
+				_HTProgress ("Data transfer interrupted.");
+				status = HT_PARTIAL_CONTENT;
+				break;
+			    }
 			    StrAllocCopy(tmpfilename,localname);
 			    if (strcmp(localname, "/"))
 				/*
@@ -2172,14 +2180,16 @@ PUBLIC int HTLoadFile ARGS4(
 				/* pick up the next element of the list;
 				 if none, return NULL*/
 			}
-			if (state == 'I') {
-			    START(HTML_P);
-			    PUTS(gettext("Empty Directory"));
-			}
+			if (status == HT_LOADED) {
+			    if (state == 'I') {
+				START(HTML_P);
+				PUTS("Empty Directory");
+			    }
 #ifndef LONG_LIST
-			else
-			    END(HTML_DIR);
+			    else
+				END(HTML_DIR);
 #endif /* !LONG_LIST */
+			}
 		    }
 			/* end while directory entries left to read */
 		    closedir(dp);
@@ -2188,12 +2198,16 @@ PUBLIC int HTLoadFile ARGS4(
 		    FREE(tail);
 		    HTBTreeAndObject_free(bt);
 
-		    if (HTDirReadme == HT_DIR_README_BOTTOM)
-			  do_readme(target, localname);
-		    FREE_TARGET;
+		    if (status == HT_LOADED) {
+			if (HTDirReadme == HT_DIR_README_BOTTOM)
+			    do_readme(target, localname);
+			FREE_TARGET;
+		    } else {
+			ABORT_TARGET;
+		    }
 		    FREE(localname);
 		    FREE(nodename);
-		    return HT_LOADED;	/* document loaded */
+		    return status;	/* document loaded, maybe partial */
 		}
 
 	    } /* end if localname is directory */
@@ -2204,7 +2218,13 @@ PUBLIC int HTLoadFile ARGS4(
 */
 #endif /* HAVE_READDIR */
 	{
+#  ifdef __EMX__
+	    int len = strlen(localname);
+	    int bin = ((len > 3) && !strcasecomp(localname + len - 3, ".gz"));
+	    FILE * fp = fopen(localname, (bin ? "rb" : "r"));
+#  else	/* !( defined __EMX__ ) */
 	    FILE * fp = fopen(localname, "r");
+#  endif
 
 	    CTRACE (tfp, "HTLoadFile: Opening `%s' gives %p\n",
 				 localname, (void*)fp);

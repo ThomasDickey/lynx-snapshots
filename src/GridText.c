@@ -464,9 +464,14 @@ PUBLIC HText *	HText_new ARGS1(
     /*
      *  If we are going to render the List Page, always merge in hidden
      *  links to get the numbering consistent if form fields are numbered
-     *  and show up as hidden links in the list of links. - kw
+     *  and show up as hidden links in the list of links.
+     *  If we are going to render a bookmark file, also always merge in
+     *	hidden links, to get the link numbers consistent with the counting
+     *  in remove_bookmark_link().  Normally a bookmark file shouldn't
+     *	contain any entries with empty titles, but it might happen. - kw
      */
-    if (anchor->address && !strcmp(anchor->address, LYlist_temp_url()))
+    if (anchor->bookmark ||
+	(anchor->address && !strcmp(anchor->address, LYlist_temp_url())))
 	self->hiddenlinkflag = HIDDENLINKS_MERGE;
     else
 	self->hiddenlinkflag = LYHiddenLinks;
@@ -1036,7 +1041,10 @@ PRIVATE void display_page ARGS3(
 {
     HTLine * line = NULL;
     int i;
-    char *cp, tmp[7];
+#if defined(FANCY_CURSES) || defined(USE_SLANG)
+    char *cp;
+#endif
+    char tmp[7];
     int last_screen;
     TextAnchor *Anchor_ptr = NULL;
     FormInfo *FormInfo_ptr;
@@ -1143,8 +1151,10 @@ PRIVATE void display_page ARGS3(
      *  Output the page.
      */
     if (line) {
+#if defined(FANCY_CURSES) || defined(USE_SLANG)
 	char *data;
 	int offset, HitOffset, LenNeeded;
+#endif
 	for (i = 0; i < (display_lines); i++)  {
 	    /*
 	     *  Verify and display each line.
@@ -1208,7 +1218,7 @@ PRIVATE void display_page ARGS3(
 		for (;
 		     written < len && (tmp[0] = data[itmp]) != '\0';
 		     itmp++)  {
-		    if (IsSpecialAttrChar(tmp[0])) {
+		    if (IsSpecialAttrChar(tmp[0]) && tmp[0] != LY_SOFT_NEWLINE) {
 			/*
 			 *  Ignore special characters.
 			 */
@@ -1714,8 +1724,8 @@ PRIVATE void split_line ARGS2(
     if (line->numstyles > 0 && line->numstyles < MAX_STYLES_ON_LINE) {
 	int n;
 	inew ++;
-	for (n = line->numstyles; n >= 0; n--)
-		line->styles[n + inew] = line->styles[n];
+	for (n = 0; n < line->numstyles; n++)
+		line->styles[n] = line->styles[n + inew];
     } else
 	if (line->numstyles == 0)
 	/* FIXME: RJP - shouldn't use 0xffffffff for largest integer */
@@ -1754,7 +1764,7 @@ PRIVATE void split_line ARGS2(
     if (split > 0) {	/* Delete space at "split" splitting line */
 	char *p, *prevdata = previous->data, *linedata = line->data;
 	unsigned plen;
-	unsigned i;
+	int i;
 
 	/*
 	 *  Split the line. - FM
@@ -1767,7 +1777,13 @@ PRIVATE void split_line ARGS2(
 	 *  of our new line. - FM
 	 */
 	p = prevdata + split;
-	while (*p == ' ' || *p == LY_SOFT_HYPHEN) {
+	while ((*p == ' ' &&
+		(HeadTrim || text->first_anchor ||
+		 underline_on || bold_on ||
+		 text->style->alignment != HT_LEFT ||
+		 text->style->wordWrap || text->style->freeFormat ||
+		 text->style->spaceBefore || text->style->spaceAfter)) ||
+	       *p == LY_SOFT_HYPHEN) {
 	    p++;
 	    HeadTrim++;
 	}
@@ -1782,7 +1798,7 @@ PRIVATE void split_line ARGS2(
 	     */
 	    underline_on = NO;
 	    if (split) {
-		for (i = (split-1); i != 0; i--) {
+		for (i = (split-1); i >= 0; i--) {
 		    if (prevdata[i] == LY_UNDERLINE_END_CHAR) {
 			break;
 		    }
@@ -1802,7 +1818,7 @@ PRIVATE void split_line ARGS2(
 		SpecialAttrChars++;
 	    }
 	    if (plen) {
-		for (i = (plen - 1); i != 0; i--) {
+		for (i = (plen - 1); i >= 0; i--) {
 		    if (p[i] == LY_UNDERLINE_START_CHAR) {
 			underline_on = YES;
 			break;
@@ -1812,7 +1828,7 @@ PRIVATE void split_line ARGS2(
 			break;
 		    }
 		}
-		for (i = (plen - 1); i != 0; i--) {
+		for (i = (plen - 1); i >= 0; i--) {
 		    if (p[i] == LY_UNDERLINE_START_CHAR ||
 			p[i] == LY_UNDERLINE_END_CHAR) {
 			ctrl_chars_on_this_line++;
@@ -1827,7 +1843,7 @@ PRIVATE void split_line ARGS2(
 	 */
 	bold_on = NO;
 	if (split) {
-	    for (i = (split - 1); i != 0; i--) {
+	    for (i = (split - 1); i >= 0; i--) {
 		if (prevdata[i] == LY_BOLD_END_CHAR) {
 		    break;
 		}
@@ -1845,10 +1861,9 @@ PRIVATE void split_line ARGS2(
 	    linedata[line->size] = '\0';
 	    ctrl_chars_on_this_line++;
 	    SpecialAttrChars++;;
-	} else
-	    bold_on = OFF;
+	}
 	if (plen) {
-	    for (i = (plen - 1); i != 0; i--) {
+	    for (i = (plen - 1); i >= 0; i--) {
 		if (p[i] == LY_BOLD_START_CHAR) {
 		    bold_on = YES;
 		    break;
@@ -1858,14 +1873,14 @@ PRIVATE void split_line ARGS2(
 		    break;
 		}
 	    }
-	    for (i = (plen - 1); i != 0; i--) {
+	    for (i = (plen - 1); i >= 0; i--) {
 		if (p[i] == LY_BOLD_START_CHAR ||
 		    p[i] == LY_BOLD_END_CHAR ||
 		    IS_UTF_EXTRA(p[i]) ||
 		    p[i] == LY_SOFT_HYPHEN) {
 		    ctrl_chars_on_this_line++;
 		}
-		if (p[i] == LY_SOFT_HYPHEN && text->permissible_split < i) {
+		if (p[i] == LY_SOFT_HYPHEN && (int)text->permissible_split < i) {
 		    text->permissible_split = i + 1;
 		}
 	    }
@@ -1882,7 +1897,12 @@ PRIVATE void split_line ARGS2(
      *  Economize on space.
      */
     while ((previous->size > 0) &&
-	(previous->data[previous->size-1] == ' ')) {
+	   (previous->data[previous->size-1] == ' ') &&
+	   (ctrl_chars_on_this_line || HeadTrim || text->first_anchor ||
+	    underline_on || bold_on ||
+	    text->style->alignment != HT_LEFT ||
+	    text->style->wordWrap || text->style->freeFormat ||
+	    text->style->spaceBefore || text->style->spaceAfter)) {
 	/*
 	 *  Strip trailers.
 	 */
@@ -1908,23 +1928,28 @@ PRIVATE void split_line ARGS2(
     /*
      *  Align left, right or center.
      */
-    for (cp = previous->data; *cp; cp++) {
-	if (*cp == LY_UNDERLINE_START_CHAR ||
-	    *cp == LY_UNDERLINE_END_CHAR ||
-	    *cp == LY_BOLD_START_CHAR ||
-	    *cp == LY_BOLD_END_CHAR ||
-	    IS_UTF_EXTRA(*cp) ||
-	    *cp == LY_SOFT_HYPHEN)
-	    ctrl_chars_on_previous_line++;
+    spare = 0;
+    if (style->alignment == HT_CENTER ||
+	style->alignment == HT_RIGHT) {
+	/* Calculate spare character positions if needed */
+	for (cp = previous->data; *cp; cp++) {
+	    if (*cp == LY_UNDERLINE_START_CHAR ||
+		*cp == LY_UNDERLINE_END_CHAR ||
+		*cp == LY_BOLD_START_CHAR ||
+		*cp == LY_BOLD_END_CHAR ||
+		IS_UTF_EXTRA(*cp) ||
+		*cp == LY_SOFT_HYPHEN)
+		ctrl_chars_on_previous_line++;
+	}
+	/* @@ first line indent */
+	spare =  (LYcols-1) -
+	    (int)style->rightIndent - indent +
+	    ctrl_chars_on_previous_line - previous->size -
+	    ((previous->size > 0) &&
+	     (int)(previous->data[previous->size-1] ==
+		   LY_SOFT_HYPHEN ?
+		   1 : 0));
     }
-    /* @@ first line indent */
-    spare =  (LYcols-1) -
-		(int)style->rightIndent - indent +
-		ctrl_chars_on_previous_line - previous->size -
-		((previous->size > 0) &&
-		 (int)(previous->data[previous->size-1] ==
-					    LY_SOFT_HYPHEN ?
-							 1 : 0));
 
     switch (style->alignment) {
 	case HT_CENTER :
@@ -2282,7 +2307,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 	return;
     }
 
-    if (IsSpecialAttrChar(ch)) {
+    if (IsSpecialAttrChar(ch) && ch != LY_SOFT_NEWLINE) {
 #ifndef USE_COLOR_STYLE
 	if (line->size >= (MAX_LINE-1)) return;
 	if (ch == LY_UNDERLINE_START_CHAR) {
@@ -2309,11 +2334,6 @@ PUBLIC void HText_appendCharacter ARGS2(
 	    line->data[line->size++] = LY_BOLD_END_CHAR;
 	    line->data[line->size] = '\0';
 	    bold_on = OFF;
-	    ctrl_chars_on_this_line++;
-	    return;
-	} else if (ch == LY_SOFT_NEWLINE) {
-	    line->data[line->size++] = LY_SOFT_NEWLINE;
-	    line->data[line->size] = '\0';
 	    ctrl_chars_on_this_line++;
 	    return;
 	} else if (ch == LY_SOFT_HYPHEN) {
@@ -2343,6 +2363,10 @@ PUBLIC void HText_appendCharacter ARGS2(
 #else
 	return;
 #endif
+    } else if (ch == LY_SOFT_NEWLINE) {
+	line->data[line->size++] = LY_SOFT_NEWLINE;
+	line->data[line->size] = '\0';
+	return;
     }
 
     if (IS_UTF_EXTRA(ch)) {
@@ -4066,7 +4090,9 @@ PUBLIC void HText_pageDisplay ARGS2(
 	int,		line_num,
 	char *,		target)
 {
-    CTRACE(tfp, "GridText: HText_pageDisplay at line %d started\n", line_num);
+    if (debug_display_partial || (LYTraceLogFP != NULL)) {
+	CTRACE(tfp, "GridText: HText_pageDisplay at line %d started\n", line_num);
+    }
 
 #ifdef DISP_PARTIAL
     if (display_partial && detected_forms_input_partial) {
@@ -4093,7 +4119,9 @@ PUBLIC void HText_pageDisplay ARGS2(
 
     is_www_index = HTAnchor_isIndex(HTMainAnchor);
 
-    CTRACE(tfp, "GridText: HText_pageDisplay finished\n");
+    if (debug_display_partial || (LYTraceLogFP != NULL)) {
+	CTRACE(tfp, "GridText: HText_pageDisplay finished\n");
+    }
 }
 
 /*

@@ -270,10 +270,11 @@ extern char *form_post_data;         /* User data for post form */
 extern char *form_get_data;          /* User data for get form */
 extern char *http_error_file;        /* Place HTTP status code in this file */
 extern char *authentication_info[2]; /* Id:Password for protected documents */
-extern char *proxyauth_info[2];	  /* Id:Password for protected proxy server */
-extern BOOLEAN HEAD_request;	     /* Do a HEAD request */
+extern char *proxyauth_info[2];      /* Id:Password for protected proxy server */
+extern char *UC_TEMPcharset;         /* temporary in UCGetLYhndl_byMIME */
+extern BOOLEAN HEAD_request;         /* Do a HEAD request */
 extern BOOLEAN scan_for_buried_news_references;
-extern BOOLEAN bookmark_start;	  /* Use bookmarks as startfile */
+extern BOOLEAN bookmark_start;       /* Use bookmarks as startfile */
 extern BOOLEAN clickable_images;
 extern BOOLEAN pseudo_inline_alts;
 extern BOOLEAN crawl;

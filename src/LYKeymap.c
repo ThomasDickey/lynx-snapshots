@@ -8,6 +8,29 @@
 
 #include <LYLeaks.h>
 
+#ifdef EXP_KEYBOARD_LAYOUT
+#include <jcuken_kb.h>
+#include <yawerty_kb.h>
+#include <rot13_kb.h>
+#endif
+
+#ifdef EXP_KEYBOARD_LAYOUT
+PUBLIC int current_layout = 0;  /* Index into LYKbLayouts[]   */
+
+PUBLIC unsigned short * LYKbLayouts[]={
+	kb_layout_rot13,
+	kb_layout_jcuken,
+	kb_layout_yawerty
+};
+
+PUBLIC char * LYKbLayoutNames[]={
+	"ROT13'd keyboard layout",
+	"JCUKEN Cyrillic, for AT 101-key kbd",
+	"YAWERTY Cyrillic, for DEC LK201 kbd",
+        (char *) 0
+};
+#endif
+
 PRIVATE CONST DocAddress keymap_anchor = {"LYNXKEYMAP", NULL, NULL};
 
 struct _HTStream
@@ -751,8 +774,10 @@ GLOBALDEF PUBLIC HTProtocol LYLynxKeymap = {"LYNXKEYMAP", LYLoadKeymap, 0};
  * func must be present in the revmap table.
  * returns TRUE if the mapping was made, FALSE if not.
  */
-PUBLIC int remap ARGS2(char *,key, char *,func)
- {
+PUBLIC int remap ARGS2(
+	char *,	key,
+	char *,	func)
+{
        int i;
        struct rmap *mp;
        int c = 0;
@@ -897,7 +922,7 @@ PUBLIC void reset_numbers_as_arrows NOARGS
 }
 
 PUBLIC int lookup_keymap ARGS1(
-	int,		func)
+	int,	func)
 {
     size_t i;
 
@@ -910,7 +935,7 @@ PUBLIC int lookup_keymap ARGS1(
 }
 
 PUBLIC char *key_for_func ARGS1 (
-	int,		func)
+	int,	func)
 {
     static char buf[512];
     int i;
@@ -947,7 +972,7 @@ PUBLIC BOOL LYisNonAlnumKeyname ARGS2(
  *  LYK_foo value passed to it as an argument. - FM
  */
 PUBLIC int LYReverseKeymap ARGS1(
-	int,		key_name)
+	int,	key_name)
 {
     int i;
 
@@ -959,3 +984,20 @@ PUBLIC int LYReverseKeymap ARGS1(
 
     return(-1);
 }
+
+#ifdef EXP_KEYBOARD_LAYOUT
+PUBLIC int LYSetKbLayout ARGS1(
+	char *,	layout_id)
+{
+    int i;
+
+    for (i = 0; i < (int) TABLESIZE(LYKbLayoutNames) - 1; i++) {
+	if (!strcmp(LYKbLayoutNames[i], layout_id)) {
+	    current_layout = i;
+	    return (-1);
+	}
+    }
+
+    return 0;
+}
+#endif

@@ -407,7 +407,7 @@ static Keysym_String_List Keysym_Strings [] =
  * Ncurses stores the termcap/terminfo names in arrays sorted to match the
  * array of strings in the TERMTYPE struct.
  */
-PRIVATE int lookup_tiname (char *name, NCURSES_CONST char *const *names)
+PRIVATE int lookup_tiname (char *name, NCURSES_CONST char *CONST *names)
 {
     int code;
 

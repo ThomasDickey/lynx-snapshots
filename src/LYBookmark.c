@@ -7,6 +7,7 @@
 #include <LYSignal.h>
 #include <LYKeymap.h>
 #include <LYCharUtils.h> /* need for META charset */
+#include <UCAux.h>
 #include <LYCharSets.h>  /* need for LYHaveCJKCharacterSet */
 #include <LYCurses.h>
 #include <GridText.h>
@@ -171,8 +172,9 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
     return(newfile);
 }
 
-PRIVATE  BOOLEAN have8bit PARAMS((char *Title));
-PRIVATE  char* title_convert8bit PARAMS((char *Title));
+PRIVATE  BOOLEAN havevisible PARAMS((CONST char *Title));
+PRIVATE  BOOLEAN have8bit PARAMS((CONST char *Title));
+PRIVATE  char* title_convert8bit PARAMS((CONST char *Title));
 
 /*
  *  Adds a link to a bookmark file, creating the file
@@ -259,17 +261,19 @@ PUBLIC void save_bookmark_link ARGS2(
     /*
      *	Allow user to change the title. - FM
      */
-    string_buffer[255] = '\0';
-    LYstrncpy(string_buffer, title, 255);
-    convert_to_spaces(string_buffer, FALSE);
-    LYMBM_statusline(TITLE_PROMPT);
-    LYgetstr(string_buffer, VISIBLE, sizeof(string_buffer), NORECALL);
-    if (*string_buffer == '\0') {
-	LYMBM_statusline(CANCELLED);
-	sleep(MessageSecs);
-	FREE(bookmark_URL);
-	return;
-    }
+    string_buffer[sizeof(string_buffer)-1] = '\0';
+    do {
+	LYstrncpy(string_buffer, title, sizeof(string_buffer)-1);
+	convert_to_spaces(string_buffer, FALSE);
+	LYMBM_statusline(TITLE_PROMPT);
+	LYgetstr(string_buffer, VISIBLE, sizeof(string_buffer), NORECALL);
+	if (*string_buffer == '\0') {
+	    LYMBM_statusline(CANCELLED);
+	    sleep(MessageSecs);
+	    FREE(bookmark_URL);
+	    return;
+	}
+    } while(!havevisible(string_buffer));
 
     /*
      *	Create the Title with any left-angle-brackets
@@ -283,8 +287,11 @@ PUBLIC void save_bookmark_link ARGS2(
     StrAllocCopy(Title, string_buffer);
     LYEntify(&Title, TRUE);
     if (UCSaveBookmarksInUnicode &&
-		have8bit(Title) && (!LYHaveCJKCharacterSet))
-	StrAllocCopy(Title, title_convert8bit(Title));
+	have8bit(Title) && (!LYHaveCJKCharacterSet)) {
+	char *p = title_convert8bit(Title);
+	FREE(Title);
+	Title = p;
+    }
 
     /*
      *	Create the bookmark file, if it doesn't exist already,
@@ -877,9 +884,38 @@ PUBLIC void LYMBM_statusline  ARGS1(
 }
 
 /*
+ * Check whether we have any visible (non-blank) chars.
+ */
+PRIVATE  BOOLEAN havevisible ARGS1(CONST char *, Title)
+{
+    CONST char *p = Title;
+    unsigned char c;
+    long unicode;
+
+    for ( ; *p; p++) {
+	c = (unsigned char)(TOASCII(*p));
+	if (c > 32 && c < 127)
+	    return(TRUE);
+	if (c <= 32 || c == 127)
+	    continue;
+	if (LYHaveCJKCharacterSet || !UCCanUniTranslateFrom(current_char_set))
+	    return(TRUE);
+	unicode = UCTransToUni(*p, current_char_set);
+	if (unicode > 32 && unicode < 127)
+	    return(TRUE);
+	if (c <= 32 || (c >= 127 && c <= 160) || c == 0xad)
+	    continue;
+	if (unicode >= 0x2000 && unicode < 0x200f)
+	    continue;
+	return(TRUE);
+    }
+    return(FALSE); /* if we came here */
+}
+
+/*
  * Check whether string have 8 bit chars.
  */
-PRIVATE  BOOLEAN have8bit ARGS1(char *, Title)
+PRIVATE  BOOLEAN have8bit ARGS1(CONST char *, Title)
 {
     CONST char *p = Title;
 
@@ -909,14 +945,17 @@ PRIVATE  BOOLEAN have8bit ARGS1(char *, Title)
  *  Older versions fail.
  *
  */
-PRIVATE  char* title_convert8bit ARGS1(char *, Title)
+PRIVATE  char* title_convert8bit ARGS1(CONST char *, Title)
 {
     CONST char *p = Title;
     char temp[256];
+    char *p0;
     char *q = temp;
     char *comment = NULL;
     char *ncr     = NULL;
     char *buf = NULL;
+    int charset_in  = current_char_set;
+    int charset_out = -1;
 
     for ( ; *p; p++) {
 	LYstrncpy(q, p, 1);
@@ -924,12 +963,12 @@ PRIVATE  char* title_convert8bit ARGS1(char *, Title)
 	    StrAllocCat(comment, q);
 	    StrAllocCat(ncr, q);
 	} else {
-	int charset_in, charset_out, uck;
+	int uck;
 	long unicode;
 	char replace_buf [10], replace_buf2 [10];
 
-	charset_in  = current_char_set;
-	charset_out = UCGetLYhndl_byMIME("us-ascii");
+	if (charset_out < 0)
+	    charset_out = UCGetLYhndl_byMIME("us-ascii");
 
 	uck = UCTransCharStr(replace_buf, sizeof(replace_buf), *q,
 			      charset_in, charset_out, YES);
@@ -946,6 +985,19 @@ PRIVATE  char* title_convert8bit ARGS1(char *, Title)
     }
 
     /*
+     *  Cleanup comment, collapse multiple dashes into one dash,
+     *  skip '>'.
+     */
+    for (q = p0 = comment; *p0; p0++) {
+	if ((unsigned char)(TOASCII(*p0)) >= 32 &&
+	    *p0 != '>' &&
+	    (q == comment || *p0 != '-' || *(q-1) != '-')) {
+	    *q++ = *p0;
+	}
+    }
+    *q = '\0';
+
+    /*
      * valid bookmark should be a single line (no linebreaks!).
      */
     StrAllocCat(buf, "<!-- ");
@@ -953,5 +1005,7 @@ PRIVATE  char* title_convert8bit ARGS1(char *, Title)
     StrAllocCat(buf, " -->");
     StrAllocCat(buf, ncr);
 
+    FREE(comment);
+    FREE(ncr);
     return(buf);
 }

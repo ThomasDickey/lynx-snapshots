@@ -107,12 +107,15 @@ PUBLIC void highlight ARGS3(
 {
     char buffer[200];
     int i;
-    char tmp[7], *cp;
+    char tmp[7];
+#if defined(FANCY_CURSES) || defined(USE_SLANG)
+    char *cp;
     char *theData = NULL;
     char *Data = NULL;
     int Offset, HitOffset, tLen;
     int LenNeeded;
     BOOL TargetEmphasisON = FALSE;
+#endif
     BOOL utf_flag = (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8);
 
     tmp[0] = tmp[1] = tmp[2] = '\0';
@@ -5356,10 +5359,6 @@ Cambridge, MA 02139, USA.  */
 #define NULL 0
 #endif /* !NULL */
 
-#if !__STDC__
-#define const
-#endif /* !__STDC__ */
-
 extern char **environ;
 
 /*
@@ -6039,6 +6038,7 @@ PUBLIC int LYSystem ARGS1(
 	char *,	command)
 {
     int code;
+    int do_free = 0;
 
     fflush(stdout);
     fflush(stderr);
@@ -6051,6 +6051,29 @@ PUBLIC int LYSystem ARGS1(
 #ifdef VMS
     code = DCLsystem(command);
 #else
+#  ifdef __EMX__			/* FIXME: Should be LY_CONVERT_SLASH? */
+    /* Configure writes commands which contain direct slashes.
+       Native command-(non)-shell will not tolerate this. */
+    {
+	char *space = command, *slash = command;
+	while (*space && *space != ' ' && *space != '\t')
+	    space++;
+	while (slash < space && *slash != '/')
+	    slash++;
+	if (slash != space) {
+	    char *old = command;
+
+	    command = NULL;
+	    StrAllocCopy(command, old);
+	    do_free = 1;
+	    slash = (slash - old) + command - 1;
+	    space = (space - old) + command;
+	    while (++slash < space)
+		if (*slash == '/')
+		    *slash = '\\';
+	}
+    }
+#  endif
     code = system(command);
 #endif
 
@@ -6062,6 +6085,8 @@ PUBLIC int LYSystem ARGS1(
     fflush(stdout);
     fflush(stderr);
 
+    if (do_free)
+	FREE(command);
     return code;
 }
 

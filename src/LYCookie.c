@@ -495,6 +495,14 @@ PRIVATE void store_cookie ARGS3(
 	co = NULL;
 
     /*
+     * Don't add the cookie if the value is NULL. - BJP
+     */
+    } else if (co->value[0] == '\0') {
+	CTRACE(tfp, "store_cookie: Value is NULL! Not storing cookie.\n");
+	freeCookie(co);
+	co = NULL;
+
+    /*
      *	If it's a replacement for a cookie that had not expired,
      *	and never allow has not been set, add it again without
      *	confirmation. - FM

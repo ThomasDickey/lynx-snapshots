@@ -359,9 +359,9 @@ PRIVATE char *HTAlloc ARGS2(char *, ptr, size_t, length)
  */
 typedef enum { Flags, Width, Prec, Type, Format } PRINTF;
 
-#define VA_INTGR(type) ival = va_arg(ap, type)
-#define VA_FLOAT(type) fval = va_arg(ap, type)
-#define VA_POINT(type) pval = (void *)va_arg(ap, type)
+#define VA_INTGR(type) ival = va_arg((*ap), type)
+#define VA_FLOAT(type) fval = va_arg((*ap), type)
+#define VA_POINT(type) pval = (void *)va_arg((*ap), type)
 
 #define NUM_WIDTH 10	/* allow for width substituted for "*" in "%*s" */
 #define GROW_EXPR(n) (((n) * 3) / 2)
@@ -371,13 +371,14 @@ PRIVATE char * StrAllocVsprintf ARGS4(
 	char **,	pstr,
 	size_t,		dst_len,
 	CONST char *,	fmt,
-	va_list,	ap)
+	va_list *,	ap)
 {
     size_t tmp_len = GROW_SIZE;
     size_t have, need;
     char *tmp_ptr = 0;
     char *fmt_ptr;
     char *dst_ptr = *pstr;
+    CONST char *format = fmt;
 
     if (fmt == 0 || *fmt == '\0')
 	return 0;
@@ -466,9 +467,11 @@ PRIVATE char * StrAllocVsprintf ARGS4(
 		    case 'E': /* FALLTHRU */
 		    case 'g': /* FALLTHRU */
 		    case 'G': /* FALLTHRU */
+#if 0	/* we don't need this, it doesn't work on SunOS 4.x */
 			if (type == 'L')
 			    VA_FLOAT(long double);
 			else
+#endif
 			    VA_FLOAT(double);
 			used = 'f';
 			break;
@@ -495,6 +498,8 @@ PRIVATE char * StrAllocVsprintf ARGS4(
 			used = 0;
 			break;
 		    default:
+			CTRACE(tfp, "unknown format character '%c' in %s\n",
+			            *fmt, format);
 			break;
 		    }
 		} else if (*fmt == '.') {
@@ -540,22 +545,30 @@ PRIVATE char * StrAllocVsprintf ARGS4(
  * for its arguments.  Unlike sprintf, this always concatenates to the destination
  * buffer.
  */
-#if USE_STDARG_H
+#if ANSI_VARARGS
 PUBLIC char * HTSprintf (char ** pstr, CONST char * fmt, ...)
 #else
-PUBLIC char * HTSprintf (pstr, fmt, va_alist)
-    char **		pstr;
-    CONST char *	fmt;
+PUBLIC char * HTSprintf (va_alist)
     va_dcl
 #endif
 {
+    char *result = 0;
+    size_t inuse = 0;
     va_list ap;
 
     LYva_start(ap,fmt);
-    StrAllocVsprintf(pstr, (pstr && *pstr) ? strlen(*pstr) : 0, fmt, ap);
+    {
+#if !ANSI_VARARGS
+	char **		pstr = va_arg(ap, char **);
+	CONST char *	fmt  = va_arg(ap, CONST char *);
+#endif
+	if (pstr != 0 && *pstr != 0)
+	    inuse = strlen(*pstr);
+	result = StrAllocVsprintf(pstr, inuse, fmt, &ap);
+    }
     va_end(ap);
 
-    return (*pstr);
+    return (result);
 }
 
 /*
@@ -563,22 +576,27 @@ PUBLIC char * HTSprintf (pstr, fmt, va_alist)
  * needed for its arguments.  Like sprintf, this always resets the destination
  * buffer.
  */
-#if USE_STDARG_H
+#if ANSI_VARARGS
 PUBLIC char * HTSprintf0 (char ** pstr, CONST char * fmt, ...)
 #else
-PUBLIC char * HTSprintf0 (pstr, fmt, va_alist)
-    char **		pstr;
-    CONST char *	fmt;
+PUBLIC char * HTSprintf0 (va_alist)
     va_dcl
 #endif
 {
+    char *result = 0;
     va_list ap;
 
     LYva_start(ap,fmt);
-    if (pstr != 0 && *pstr != 0)
-     	*pstr = 0;
-    StrAllocVsprintf(pstr, 0, fmt, ap);
+    {
+#if !ANSI_VARARGS
+	char **		pstr = va_arg(ap, char **);
+	CONST char *	fmt  = va_arg(ap, CONST char *);
+#endif
+	if (pstr != 0)
+	    *pstr = 0;
+	result = StrAllocVsprintf(pstr, 0, fmt, &ap);
+    }
     va_end(ap);
 
-    return (*pstr);
+    return (result);
 }

@@ -454,6 +454,7 @@ PUBLIC int HTParseInet ARGS2(
 	    struct timeval timeout;
 	    int dns_patience = 30; /* how many seconds will we wait for DNS? */
 	    int child_exited = 0;
+	    int ok_to_select_stdin = -1;
 
 	    /*
 	    **  Reap any children that have terminated since last time
@@ -526,19 +527,32 @@ PUBLIC int HTParseInet ARGS2(
 		*/
 		cycle++;
 
-		timeout.tv_sec = 1;
-		timeout.tv_usec = 0;
 		FD_ZERO(&readfds);
-		FD_SET(pfd[0], &readfds);
 #ifndef USE_SLANG
 		/*
 		**  This allows us to abort immediately, not after 1-second
 		**  timeout, when user hits abort key.  Can't do this when
 		**  using SLANG (or at least I don't know how), so SLANG
 		**  users must live with up-to-1s timeout.  -BL
+		**
+		**  Whoops -- we need to make sure stdin is actually
+		**  selectable!  /dev/null isn't, on some systems, which
+		**  makes some useful Lynx invocations fail.  -BL
 		*/
-		FD_SET(0, &readfds);    /* stdin -BL */
+		if (ok_to_select_stdin == -1) {
+		    timeout.tv_sec = 0;
+		    timeout.tv_usec = 0;
+		    FD_SET(0, &readfds);    /* stdin -BL */
+		    selret = select(1, &readfds, NULL, NULL, &timeout);
+		    if (selret >= 0) ok_to_select_stdin = 1;
+		    else ok_to_select_stdin = 0;
+		    FD_ZERO(&readfds);
+		}
+		if (ok_to_select_stdin) FD_SET(0, &readfds);
 #endif /* USE_SLANG */
+		timeout.tv_sec = 1;
+		timeout.tv_usec = 0;
+		FD_SET(pfd[0], &readfds);
 
 		/*
 		**  Return when data received, interrupted, or failed.

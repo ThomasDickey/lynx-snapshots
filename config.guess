@@ -225,7 +225,7 @@ EOF
     VAX*:ULTRIX*:*:*)
 	echo vax-dec-ultrix${UNAME_RELEASE}
 	exit 0 ;;
-    2020:CLIX:*:*)
+    2020:CLIX:*:* | 2430:CLIX:*:*)
 	echo clipper-intergraph-clix${UNAME_RELEASE}
 	exit 0 ;;
     mips:*:*:UMIPS | mips:*:*:RISCos)

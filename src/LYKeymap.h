@@ -19,6 +19,13 @@ extern void set_vms_keys NOPARAMS;
 
 extern unsigned short keymap[]; /* main keymap matrix */
 
+#ifdef EXP_KEYBOARD_LAYOUT
+extern int current_layout;
+extern unsigned short * LYKbLayouts[];
+extern char * LYKbLayoutNames[];
+extern int LYSetKbLayout PARAMS((char *layout_id));
+#endif
+
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
 extern unsigned short key_override[];
 #endif

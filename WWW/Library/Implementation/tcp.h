@@ -134,7 +134,7 @@ extern unsigned char IBM1047[];
 #else  /* EBCDIC */
 
 #if '0' != 48
-#error Host character set is not ASCII.
+ error Host character set is not ASCII.
 #endif
 
 #define TOASCII(c) (c)
