@@ -143,6 +143,7 @@ TABLES= \
  $(CHRTR)cp869_uni.h \
  $(CHRTR)def7_uni.h \
  $(CHRTR)dmcs_uni.h \
+ $(CHRTR)hp_uni.h \
  $(CHRTR)iso01_uni.h \
  $(CHRTR)iso02_uni.h \
  $(CHRTR)iso03_uni.h \

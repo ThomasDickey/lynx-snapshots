@@ -282,6 +282,8 @@ PUBLIC void setHashStyle ARGS5(int,style,int,color,int,cattr,int,mono,char*,elem
     ds->code=style;
     FREE(ds->name);
     ds->name=malloc(sizeof(char)*(strlen(element)+2));
+    if(!ds->name)
+	outofmem(__FILE__, "setHashStyle");
     strcpy(ds->name, element);
 }
 
@@ -333,8 +335,10 @@ PUBLIC void curses_w_style ARGS3(
 	{
 		/* ABS_OFF is the same as STACK_OFF for the moment */
 	case STACK_OFF:
-		if (last_ptr)
-			LYAttrset(win,last_styles[--last_ptr],-1);
+		if (last_ptr) {
+		    int last_attr = last_styles[--last_ptr];
+		    LYAttrset(win,last_attr,last_attr);
+		}
 		else
 			LYAttrset(win,A_NORMAL,-1);
 		return;
@@ -1023,7 +1027,7 @@ PUBLIC BOOLEAN setup ARGS1(
 PUBLIC BOOLEAN setup ARGS1(
 	char *, 	terminal)
 {
-    static char term_putenv[120];
+    static char *term_putenv;
     char buffer[120];
     char *cp;
 #if defined(HAVE_SIZECHANGE) && !defined(USE_SLANG) && defined(NOTDEFINED)
@@ -1060,7 +1064,7 @@ PUBLIC BOOLEAN setup ARGS1(
     }
 
     if (terminal != NULL) {
-	sprintf(term_putenv, "TERM=%s", terminal);
+	HTSprintf0(&term_putenv, "TERM=%s", terminal);
 	(void) putenv(term_putenv);
     }
 
@@ -1080,7 +1084,7 @@ PUBLIC BOOLEAN setup ARGS1(
 	if (strlen(buffer) == 0)
 	    strcpy(buffer,"vt100");
 
-	sprintf(term_putenv,"TERM=%s", buffer);
+	HTSprintf0(&term_putenv,"TERM=%s", buffer);
 	(void) putenv(term_putenv);
 	printf("\n%s%s\n", gettext("TERMINAL TYPE IS SET TO"), getenv("TERM"));
 	sleep(MESSAGESECS);

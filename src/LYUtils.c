@@ -1824,8 +1824,8 @@ PUBLIC void statusline ARGS1(
      *	character set selected, otherwise, strip any escapes.  Also,
      *	make sure text is not longer than the statusline window. - FM
      */
-    max_length = ((LYcols - 2) < sizeof(buffer))
-		? (LYcols - 2) : sizeof(buffer)-1;
+    max_length = ((LYcols - 2) < (int)sizeof(buffer))
+		? (LYcols - 2) : (int)sizeof(buffer)-1;
     if ((text[0] != '\0') &&
 	(LYHaveCJKCharacterSet)) {
 	/*
@@ -1922,7 +1922,8 @@ PUBLIC void statusline ARGS1(
 #else
 	/* draw the status bar in the STATUS style */
 	{
-		int a=(strncmp(buffer, "Alert", 5) || !hashStyles[s_alert].name ? s_status : s_alert);
+		int a=(strncmp(buffer, ALERT_FORMAT, ALERT_PREFIX_LEN) ||
+		       !hashStyles[s_alert].name ? s_status : s_alert);
 		LynxChangeStyle (a, ABS_ON, 1);
 		addstr(buffer);
 		wbkgdset(stdscr,
@@ -2372,8 +2373,8 @@ PUBLIC BOOLEAN LYisLocalAlias ARGS1(
 **  returns PROXY_URL_TYPE. - FM
 **
 **  If a colon is present but the string segment which
-**  precedes it is not being proxied, and we can rule
-**  out that what follows the colon is not a port field,
+**  precedes it is not being proxied, and we can be sure
+**  that what follows the colon is not a port field,
 **  it returns UNKNOWN_URL_TYPE.  Otherwise, it returns
 **  0 (not a URL). - FM
 */
@@ -2407,12 +2408,20 @@ PUBLIC int LYCheckForProxyURL ARGS1(
 	    return(PROXY_URL_TYPE);
 	}
 	FREE(cp2);
+#if defined (DOSPATH)
+	if (cp[1] == ':')
+	    return(0);		/* could be drive letter? - kw */
+#endif
 	cp1++;
-	if (isdigit((unsigned char)*cp1)) {
+	if (!*cp) {
+	    return(0);
+	} else if (isdigit((unsigned char)*cp1)) {
 	    while (*cp1 && isdigit((unsigned char)*cp1))
 		cp1++;
 	    if (*cp1 && !LYIsHtmlSep(*cp1))
 		return(UNKNOWN_URL_TYPE);
+	} else {
+	    return(UNKNOWN_URL_TYPE);
 	}
     }
 
@@ -2478,9 +2487,10 @@ PUBLIC int is_url ARGS1(
      *	Can't be a URL if it starts with a slash.
      *	So return immediately for this common case,
      *	also to avoid false positives if there was
-     *	a colon later in the string. - KW
+     *	a colon later in the string.  Also can't be
+     *  a URL if it starts with a colon. - KW
      */
-    if (LYIsHtmlSep(*cp))
+    if (*cp == ':' || LYIsHtmlSep(*cp))
 	return(0);
 
     if (compare_type(cp, "news:", 5)) {
@@ -3572,6 +3582,7 @@ PUBLIC void LYCheckMail NOARGS
     static BOOL firsttime = TRUE;
     static char *mf;
     static time_t lastcheck;
+    static time_t lasttime;
     static long lastsize;
     time_t now;
     struct stat st;
@@ -3579,6 +3590,7 @@ PUBLIC void LYCheckMail NOARGS
     if (firsttime) {
 	mf = getenv("MAIL");
 	firsttime = FALSE;
+	time(&lasttime);
     }
 
     if (mf == NULL)
@@ -3589,21 +3601,21 @@ PUBLIC void LYCheckMail NOARGS
 	return;
     lastcheck = now;
 
-    if (stat(mf,&st) < 0) {
+    if ((stat(mf,&st) < 0)
+     || !S_ISREG(st.st_mode)) {
 	mf = NULL;
 	return;
     }
 
     if (st.st_size > 0) {
-	if (st.st_mtime > st.st_atime ||
-	    (lastsize && st.st_size > lastsize))
+	if (((lasttime != st.st_mtime) && (st.st_mtime > st.st_atime))
+	 || ((lastsize != 0) && (st.st_size > lastsize)))
 	    HTUserMsg(HAVE_NEW_MAIL_MSG);
 	else if (lastsize == 0)
 	    HTUserMsg(HAVE_MAIL_MSG);
-	lastsize = st.st_size;
-	return;
     }
     lastsize = st.st_size;
+    lasttime = st.st_mtime;
     return;
 }
 #endif /* VMS */

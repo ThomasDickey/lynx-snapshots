@@ -9,16 +9,17 @@ LYLeaks.o LYexit.o LYJump.o LYList.o LYCgi.o LYTraversal.o \
 LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o LYExtern.o \
 LYStyle.o LYHash.o
 
-CFLAGS= $(MCFLAGS) -I. -I.. $(SLANGINC)
+CFLAGS= $(MCFLAGS) $(INTLFLAGS) -I. -I.. $(SLANGINC)
 
 CC = gcc
 MCFLAGS = -O2 -DDISP_PARTIAL -DUSE_ZLIB -DUSE_EXTERNALS \
 -DUSE_SLANG -DDJGPP_KEYHANDLER -DACCESS_AUTH -DNO_CUSERID \
--DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP -I../WWW/library/implement -I../djgpp/tcplib/include \
--I./chrtrans -I../djgpp/tcplib/include/tcp
-WWWLIB = ../WWW/library/djgpp/libwww.a ../djgpp/tcplib/obj/libtcp.a
-LIBS= -lslang -lz
+-DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP -I../WWW/Library/Implementation \
+-I../djgpp/tcplib/include -I./chrtrans -I../djgpp/tcplib/include/tcp
+WWWLIB = ../WWW/Library/djgpp/libwww.a ../djgpp/tcplib/obj/libtcp.a
+LIBS= -lslang -lz # -lintl
 CHRTR= ./chrtrans/
+#INTLFLAGS = -DHAVE_GETTEXT -DHAVE_LIBINTL_H
 
 all: lynx.exe
 

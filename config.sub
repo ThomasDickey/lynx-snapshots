@@ -150,8 +150,8 @@ case $basic_machine in
 	# Recognize the basic CPU types without company name.
 	# Some are omitted here because they have special meanings below.
 	tahoe | i860 | m32r | m68k | m68000 | m88k | ns32k | arc | arm \
-		| arme[lb] | pyramid | mn10200 | mn10300 \
-		| tron | a29k | 580 | i960 | h8300 | hppa | hppa1.0 | hppa1.1 \
+		| arme[lb] | pyramid | mn10200 | mn10300 | tron | a29k \
+		| 580 | i960 | h8300 | hppa | hppa1.0 | hppa1.1 | hppa2.0 \
 		| alpha | alphaev5 | alphaev56 | we32k | ns16k | clipper \
 		| i370 | sh | powerpc | powerpcle | 1750a | dsp16xx | pdp11 \
 		| mips64 | mipsel | mips64el | mips64orion | mips64orionel \
@@ -175,7 +175,7 @@ case $basic_machine in
 	      | m88k-* | sparc-* | ns32k-* | fx80-* | arc-* | arm-* | c[123]* \
 	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-* \
 	      | power-* | none-* | 580-* | cray2-* | h8300-* | i960-* \
-	      | xmp-* | ymp-* | hppa-* | hppa1.0-* | hppa1.1-* \
+	      | xmp-* | ymp-* | hppa-* | hppa1.0-* | hppa1.1-* | hppa2.0-* \
 	      | alpha-* | alphaev5-* | alphaev56-* | we32k-* | cydra-* \
 	      | ns16k-* | pn-* | np1-* | xps100-* | clipper-* | orion-* \
 	      | sparclite-* | pdp11-* | sh-* | powerpc-* | powerpcle-* \
@@ -349,13 +349,13 @@ case $basic_machine in
 		basic_machine=i370-ibm
 		os=-mvs
 		;;
-	s390 | s390-ibm*) 
-# OS/390 support after: 
-#  Linkname: Mortice Kern Systems (MKS) Inc. - OS/390 OpenEdition -- GNU Utilities Downloads 
-#       URL: http://www.mks.com/s390/gnu/download.htm#autoconf 
-		basic_machine=s390-ibm  #  /* S/390 -- gil -- 1419 */ 
-		os=-os390 
-		;; 
+	s390 | s390-ibm*)
+# OS/390 support after:
+#  Linkname: Mortice Kern Systems (MKS) Inc. - OS/390 OpenEdition -- GNU Utilities Downloads
+#       URL: http://www.mks.com/s390/gnu/download.htm#autoconf
+		basic_machine=s390-ibm  #  /* S/390 -- gil -- 1419 */
+		os=-os390
+		;;
 # I'm not sure what "Sysv32" means.  Should this be sysv3.2?
 	i[34567]86v32)
 		basic_machine=`echo $1 | sed -e 's/86.*/86-pc/'`
@@ -714,15 +714,14 @@ case $os in
 	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -solaris* | -sym* \
 	      | -amigaos* | -amigados* | -msdos* | -newsos* | -unicos* | -aof* \
 	      | -aos* \
-	      | -nindy* | -vxsim* | -vxworks* | -ebmon* \
-	      | -hms* | -mvs* | -os390* \
+	      | -nindy* | -vxsim* | -vxworks* | -ebmon* | -hms* | -mvs* | -os390* \
 	      | -clix* | -riscos* | -uniplus* | -iris* | -rtu* | -xenix* \
 	      | -hiux* | -386bsd* | -netbsd* | -openbsd* | -freebsd* | -riscix* \
 	      | -lynxos* | -bosx* | -nextstep* | -cxux* | -aout* | -elf* \
 	      | -ptx* | -coff* | -ecoff* | -winnt* | -domain* | -vsta* \
 	      | -udi* | -eabi* | -lites* | -ieee* | -go32* | -aux* \
-	      | -cygwin32* | -pe* | -psos* | -moss* | -proelf* | -rtems* \
-	      | -mingw32* | -linux-gnu* | -uxpv*)
+	      | -cygwin* | -pe* | -psos* | -moss* | -proelf* | -rtems* \
+	      | -mingw32* | -linux-gnu* | -uxpv* | -beos*)
 	# Remember, each alternative MUST END IN *, to match a version number.
 		;;
 	-linux*)
@@ -834,6 +833,9 @@ case $basic_machine in
 		;;
 	sparc-* | *-sun)
 		os=-sunos4.1.1
+		;;
+	*-be)
+		os=-beos
 		;;
 	s390-ibm)
 		os=-os390  #  /* S/390 -- gil -- 1451 */

@@ -77,7 +77,7 @@ PRIVATE CONST char * ISO_Latin1[] = {
 	"\313", /* capital E, dieresis or umlaut mark (&#203;) - Euml */
 	"\315", /* capital I, acute accent (&#205;) - Iacute */
 	"\316", /* capital I, circumflex accent (&#206;) - Icirc */
-	"\314", /* capital I, grave accent (&#200;) - Igrave */
+	"\314", /* capital I, grave accent (&#204;) - Igrave */
 	"\317", /* capital I, dieresis or umlaut mark (&#207;) - Iuml */
 	"\321", /* capital N, tilde (&#209;) - Ntilde */
 	"\323", /* capital O, acute accent (&#211;) - Oacute */

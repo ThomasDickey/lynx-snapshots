@@ -647,11 +647,30 @@ PRIVATE int ExitWithError ARGS1(
     return(-1);
 }
 
+#define reverse_mailcap 1
 
 PRIVATE int HTLoadTypesConfigFile ARGS1(
 	char *,		fn)
 {
-  return ProcessMailcapFile(fn);
+    int result = 0;
+    HTList * saved = HTPresentations;
+
+    if (reverse_mailcap) {		/* temporarily hide existing list */
+	HTPresentations = NULL;
+    }
+
+    result = ProcessMailcapFile(fn);
+
+    if (reverse_mailcap) {
+	if (result && HTPresentations) {
+	    HTList_reverse(HTPresentations);
+	    HTList_appendList(HTPresentations, saved);
+	    FREE(saved);
+	} else {
+	    HTPresentations = saved;
+	}
+    }
+    return result;
 }
 
 

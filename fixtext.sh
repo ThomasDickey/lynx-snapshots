@@ -6,4 +6,5 @@
 
 sed	-e 's/")/");/' \
 	-e 's/^#define[ 	]*\([^ 	]*\)[ 	]*gettext/char *\1 = gettext/' \
+	-e 's,^#define[ 	]*\([^ 	]*\)[ 	]*\\,/* #define \1 */char *\1 = \\,' \
 	$*

@@ -60,6 +60,17 @@ extern HTList * HTList_new NOPARAMS;
 extern void HTList_delete PARAMS((
 	HTList *	me));
 
+/*	Reverse a list.
+*/
+extern HTList * HTList_reverse PARAMS((
+	HTList *	start));
+
+/*	Append two lists, making second list empty.
+*/
+extern HTList * HTList_appendList PARAMS((
+	HTList *	start,
+	HTList *	tail));
+
 
 /*      Add object to START of list (so it is pointed to by the head).
 */

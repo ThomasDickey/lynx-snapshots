@@ -75,10 +75,9 @@ extern int HTrjis PARAMS((
 	char *	t,
 	char *	s));
 
-PUBLIC int HTmaybekanji PARAMS((
+extern int HTmaybekanji PARAMS((
 	int	c1,
 	int	c2));
-
 
 #endif /* !HTMIME_H */
 

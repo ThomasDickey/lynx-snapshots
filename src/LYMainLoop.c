@@ -5082,15 +5082,17 @@ check_add_bookmark_to_self:
 	    goto new_cmd;
 
 	case LYK_RAW_TOGGLE:
-	    if (LYUseDefaultRawMode)
-		LYUseDefaultRawMode = FALSE;
-	    else
-		LYUseDefaultRawMode = TRUE;
-	    HTUserMsg(LYRawMode ? RAWMODE_OFF : RAWMODE_ON);
-	    HTMLSetCharacterHandling(current_char_set);
-	    LYRawMode_flag = LYRawMode;
-	    cmd = LYK_RELOAD;
-	    goto new_cmd;
+	    if (HTLoadedDocumentCharset()) {
+		HTUserMsg(gettext("charset for this document specified explicitely, sorry..."));
+		break;
+	    } else {
+		LYUseDefaultRawMode = !LYUseDefaultRawMode;
+		HTUserMsg(LYRawMode ? RAWMODE_OFF : RAWMODE_ON);
+		HTMLSetCharacterHandling(current_char_set);
+		LYRawMode_flag = LYRawMode;
+		cmd = LYK_RELOAD;
+		goto new_cmd;
+	    }
 
 	case LYK_HEAD:
 	    if (nlinks > 0 &&

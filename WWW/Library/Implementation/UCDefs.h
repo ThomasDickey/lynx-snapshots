@@ -6,10 +6,11 @@
 #include <HTUtils.h>
 
 typedef struct _LYUCcharset {
-    int UChndl;
+    int UChndl;  	/* -1 for "old" charsets, >= 0 for chartrans tables */
+
     CONST char * MIMEname;
     int enc;
-    int codepage;	/* IBM specific number */
+    int codepage;	/* IBM OS/2 specific number */
 
     /* parameters below are not used by chartrans mechanism, */
     /* they describe some relationships against built-in Latin1 charset...*/

@@ -1155,6 +1155,56 @@ AC_DEFUN([CF_HELP_MESSAGE],
 [AC_DIVERT_HELP([$1])dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl For Lynx, check if the libraries we have found give us inet_aton, or
+dnl inet_addr.  If not, try to find the latter function with -lbind or
+dnl -lresolv, and put that on the end of the libraries, i.e., after the network
+dnl libraries.
+dnl
+dnl FIXME: the inner cases will probably need work on the header files.
+AC_DEFUN([CF_INET_ADDR],[
+AC_CACHE_CHECK(for inet_aton function,cf_cv_have_inet_aton,[
+AC_TRY_LINK([
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+],[inet_aton(0, (struct in_addr *)0)],
+    [cf_cv_have_inet_aton=yes],
+    [cf_cv_have_inet_aton=no])])
+if test "$cf_cv_have_inet_aton" = yes ; then
+    AC_DEFINE(HAVE_INET_ATON)
+else
+    AC_CACHE_CHECK(for inet_addr function,cf_cv_have_inet_addr,[
+    AC_TRY_LINK([
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+    ],[inet_addr(0)],
+	[cf_cv_have_inet_addr=yes],
+	[cf_cv_have_inet_addr=no])])
+    if test "$cf_cv_have_inet_addr" = no ; then
+	AC_CACHE_CHECK(for library with inet_addr,cf_cv_lib_inet_addr,[
+	    cf_save_LIBS="$LIBS"
+	    for cf_inetlib in -lbind -lresolv
+	    do
+		LIBS="$cf_save_LIBS $cf_inetlib"
+		AC_TRY_LINK([
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+		],[inet_addr(0)],
+		    [cf_cv_lib_inet_addr=$cf_inetlib],
+		    [cf_cv_lib_inet_addr=no])
+	    done
+	])
+	if test "$cf_cv_lib_inet_addr" != no ; then
+	    LIBS="$LIBS $cf_cv_lib_inet_addr"
+	else
+	    AC_MSG_WARN(Unable to find library for inet_addr function)
+	fi
+    fi
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Construct a search-list for a nonstandard library-file
 AC_DEFUN([CF_LIBRARY_PATH],
 [$1=""

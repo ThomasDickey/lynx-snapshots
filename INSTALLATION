@@ -672,6 +672,15 @@ V. Compile instructions -- 386 DOS
     keyhandler allows mapping of ALT and Function keys, but has the risk of
     incompatibilities from mixing different programs.
 
+    If you wish to compile with support for internationalization of messages,
+    you first need to install the DOS port of the GNU gettext package,
+    available from any DJGPP mirror site.  You may wish to recompile with DJGPP
+    2.02.  Then uncomment the lines for INTLFLAGS in src/makefile.dsl and in
+    WWW/Library/djgpp/makefile.sla, and remove the "#" from the LIBS line in
+    src/makefile.dsl.  Make similar changes if using one of the other DOS
+    makefiles.  See the gettext documentation for information on creating and
+    using message files for different languages.
+
     If all goes well, you will have a lynx.exe file.  If you have trouble,
     check to be sure djgpp.env is the way it came in the original package.
     To compile lynx with DJGPP you may need about 20Mb of free disk space
@@ -786,123 +795,16 @@ VI. General installation instructions
 
 VII. Setting environment variables before running Lynx (optional)
 
-1. Unix and VMS
-    To set your site's NTTP server as the default host for news reading
-    and posting via Lynx, set the environment variable NNTPSERVER so that
-    it points to its Internet address.  The variable "NNTPSERVER" is used
-    to specify the host which will be used as the default for news URLs.
+1. All ports
 
-	UNIX
-		setenv NNTPSERVER "news.server.dom"
+   Lynx Users Guide describes a complete set of environment variables
+   used by Lynx.  This should be checked later along with reading lynx.cfg
+   after you have installed Lynx.
 
-	VMS
-		define/system NNTPSERVER "news.server.dom"
+2. Win32 (95/NT) and 386 DOS
+   These ports cannot start before setting certain environment variables
 
-    The environment variables "ORGANIZATION" or "NEWS_ORGANIZATION", if set,
-    will be used for the Organization: header in news postings.  (On Unix,
-    Lynx also checks for an /etc/organization file.)
-
-    The environment variable "LYNX_CFG", if set, will override the default
-    location and name of the global configuration file (lynx.cfg) that was
-    defined via the constant "LYNX_CFG_FILE" in userdefs.h.  See userdefs.h
-    for more information.
-
-    The environment variable "LYNX_TEMP_SPACE", if set, will override the
-    default path prefix for temporary files that was defined via the constant
-    "TEMP_SPACE" in userdefs.h.  See userdefs.h for more information.
-
-    The environment variable "LYNX_SAVE_SPACE", if set, will override the
-    default path prefix for files saved to disk that was defined via the
-    constant "SAVE_SPACE" in lynx.cfg.  See lynx.cfg for more information.
-
-    The variable "WWW_HOME", if set, will override the default startup
-    URL specified in any of the configuration files.
-
-    Lynx still supports use of gateway servers, with the servers specified
-    via the variables "WWW_access_GATEWAY", where "access" is lower case
-    and can be "http", "ftp", "gopher" or "wais".  Most of the gateway
-    servers have been discontinued, but "http://www.w3.org:8001" is
-    available for wais searches (note that you do not include a terminal
-    '/' for gateways, but do for proxies; see below).
-
-    Lynx version 2.2 and beyond supports the use of proxy servers that can
-    act as firewall gateways and caching servers.  They are preferable to
-    the older gateway servers.  Each protocol used by Lynx can be mapped
-    separately using PROTOCOL_proxy environment variables of the form:
-
-	UNIX
-		setenv http_proxy "http://some.server.dom:port/"
-		setenv https_proxy "http://some.server.dom:port/"
-		setenv ftp_proxy "http://some.server.dom:port/"
-		setenv gopher_proxy "http://some.server.dom:port/"
-		setenv news_proxy "http://some.server.dom:port/"
-		setenv newspost_proxy "http://some.server.dom:port/"
-		setenv newsreply_proxy "http://some.server.dom:port/"
-		setenv snews_proxy "http://some.server.dom:port/"
-		setenv snewspost_proxy "http://some.server.dom:port/"
-		setenv snewsreply_proxy "http://some.server.dom:port/"
-		setenv nntp_proxy "http://some.server.dom:port/"
-		setenv wais_proxy "http://some.server.dom:port/"
-		setenv finger_proxy "http://some.server.dom:port/"
-		setenv cso_proxy "http://some.server.dom:port/"
-
-	VMS
-		define "http_proxy" "http://some.server.dom:port/"
-		define "https_proxy" "http://some.server.dom:port/"
-		define "ftp_proxy" "http://some.server.dom:port/"
-		define "gopher_proxy" "http://some.server.dom:port/"
-		define "news_proxy" "http://some.server.dom:port/"
-		define "newspost_proxy" "http://some.server.dom:port/"
-		define "newsreply_proxy" "http://some.server.dom:port/"
-		define "snews_proxy" "http://some.server.dom:port/"
-		define "snewspost_proxy" "http://some.server.dom:port/"
-		define "snewsreply_proxy" "http://some.server.dom:port/"
-		define "nntp_proxy" "http://some.server.dom:port/"
-		define "wais_proxy" "http://some.server.dom:port/"
-		define "finger_proxy" "http://some.server.dom:port/"
-		define "cso_proxy" "http://some.server.dom:port/"
-		(Encase *BOTH* strings in double-quotes to maintain
-		 lower case for the PROTOCOL_proxy variable and for
-		 the http access type; include /system if you want
-		 proxying for all clients on your system.)
-
-    If you wish to override the use of a proxy server for specific hosts or
-    entire domains you may use the "no_proxy" environment variable.  Here is
-    an example use of "no_proxy":
-
-	UNIX
-		setenv no_proxy "host.domain.dom, domain1.dom, domain2"
-
-	VMS
-		define "no_proxy" "host.domain.dom, domain1.dom, domain2"
-
-    You can include a port number in the no_proxy list to override use
-    of a proxy server for the host accessed via that port, but not via
-    other ports.  For example, if you use "host.domain.dom:119" and/or
-    "host.domain.dom:210", then news (port 119) URLs and/or any wais
-    (port 210) searches on that host would be excluded, but http, ftp,
-    and gopher services (if normally proxied) would still be included,
-    as would any news or wais services on other hosts.
-
-    If you wish to override the use of a proxy server completely (i.e.,
-    globally override any existing proxy variables), set the value of
-    "no_proxy" to "*".
-
-    Note that Lynx treats file URLs on the local host as requests for
-    direct access to the file, and does not attempt ftp if that fails.
-    It treats both ftp URLs and file URLs on remote hosts as ftp URLs,
-    and does not attempt direct file access for either.  If ftp URLs are
-    being proxied, file URLs on a remote host will be converted to ftp
-    URLs before submission by Lynx to the proxy server, so no special
-    procedure for inducing the proxy server to handle them is required.
-    Other WWW clients may require that the http server's configuration
-    file have "Map file:* ftp:*" in it to perform that conversion.
-
-    The proxy and no_proxy variables also can be set at run time via
-    lynx.cfg.
-
-2. Win32 (95/NT) and 386 DOS (adapted from "readme.txt" by Wayne Buttles and
-   "readme.dos" by Doug Kaufman)
+   (adapted from "readme.txt" by Wayne Buttles and "readme.dos" by Doug Kaufman)
 
     Here are some environment variables that should be set, usually in a
     batch file that runs the lynx executable.  Make sure that you have enough
@@ -914,7 +816,7 @@ VII. Setting environment variables before running Lynx (optional)
 
     HOME         Where to keep the bookmark file and personal config files.
     TEMP or TMP  Bookmarks are kept here with no HOME.  Temp files here.
-    USER         Set to your login name
+    USER         Set to your login name (optional)
     LYNX_CFG     Set to the full path and filename for lynx.cfg
 
     386 version only:

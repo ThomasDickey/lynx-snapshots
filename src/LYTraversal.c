@@ -2,6 +2,8 @@
 #include <LYGlobalDefs.h>
 #include <LYUtils.h>
 #include <LYSignal.h>
+#include <LYClean.h>
+#include <LYCurses.h>
 #include <LYTraversal.h>
 
 #include <LYexit.h>
@@ -9,19 +11,37 @@
 
 /* routines to handle special traversal feature */
 
+PRIVATE void final_perror ARGS2(CONST char *,msg, BOOLEAN, clean_flag)
+{
+    int saved_errno = errno;
+    if (LYCursesON) {
+	if (clean_flag)
+	    cleanup();
+	else
+	    stop_curses();
+    }
+    errno = saved_errno;
+    perror(msg);
+}
+
+PRIVATE void exit_with_perror ARGS1(CONST char *,msg)
+{
+    final_perror(msg, TRUE);
+    exit_immediately(-1);
+}
+
 PUBLIC BOOLEAN lookup ARGS1(char *,target)
 {
     FILE *ifp;
     char buffer[200], line[200];
 
     if ((ifp = fopen(TRAVERSE_FILE,"r")) == NULL) {
-        if ((ifp = LYNewTxtFile(TRAVERSE_FILE)) == NULL) {
-            perror(CANNOT_OPEN_TRAV_FILE);
-	    exit_immediately(-1);
+	if ((ifp = LYNewTxtFile(TRAVERSE_FILE)) == NULL) {
+	    exit_with_perror(CANNOT_OPEN_TRAV_FILE);
 	} else {
-            fclose(ifp);
-            return(FALSE);
-        }
+	    fclose(ifp);
+	    return(FALSE);
+	}
     }
 
     sprintf(line,"%s\n",target);
@@ -43,8 +63,7 @@ PUBLIC void add_to_table ARGS1(char *,target)
     FILE *ifp;
 
     if ((ifp = LYAppendToTxtFile(TRAVERSE_FILE)) == NULL) {
-	perror(CANNOT_OPEN_TRAV_FILE);
-	exit_immediately(-1);
+	exit_with_perror(CANNOT_OPEN_TRAV_FILE);
     }
 
     fprintf(ifp,"%s\n",target);
@@ -58,8 +77,7 @@ PUBLIC void add_to_traverse_list ARGS2(char *,fname, char *,prev_link_name)
     FILE *ifp;
 
     if ((ifp = LYAppendToTxtFile(TRAVERSE_FOUND_FILE)) == NULL) {
-	perror(CANNOT_OPEN_TRAF_FILE);
-	exit_immediately(-1);
+	exit_with_perror(CANNOT_OPEN_TRAF_FILE);
     }
 
     fprintf(ifp,"%s\t%s\n",fname, prev_link_name);
@@ -73,10 +91,10 @@ PUBLIC void dump_traversal_history NOARGS
     FILE *ifp;
 
     if (nhist <= 0)
-        return;
+	return;
 
     if ((ifp = LYAppendToTxtFile(TRAVERSE_FILE)) == NULL) {
-        perror(CANNOT_OPEN_TRAV_FILE);
+	final_perror(CANNOT_OPEN_TRAV_FILE, FALSE);
 	return;
     }
 
@@ -97,8 +115,7 @@ PUBLIC void add_to_reject_list ARGS1(char *,target)
     FILE *ifp;
 
     if ((ifp = LYAppendToTxtFile(TRAVERSE_REJECT_FILE)) == NULL) {
-	perror(CANNOT_OPEN_REJ_FILE);
-	exit_immediately(-1);
+	exit_with_perror(CANNOT_OPEN_REJ_FILE);
     }
 
     fprintf(ifp,"%s\n",target);
@@ -122,7 +139,7 @@ PUBLIC BOOLEAN lookup_reject ARGS1(char *,target)
     int  frag;
 
     if ((ifp = fopen(TRAVERSE_REJECT_FILE,"r")) == NULL){
-        return(FALSE);
+	return(FALSE);
     }
 
     sprintf(line,"%s\n",target);
@@ -130,17 +147,17 @@ PUBLIC BOOLEAN lookup_reject ARGS1(char *,target)
     while (fgets(buffer, 200, ifp) != NULL) {
 	frag = strlen(buffer) - 1; /* real length, minus trailing null */
 	ch   = buffer[frag - 1];   /* last character in buffer */
-	if (frag > 0) {            /* if not an empty line */
+	if (frag > 0) { 	   /* if not an empty line */
 	    if (ch == '*') {
-	        if (frag == 1 || ((strncmp(line,buffer,frag - 1)) == 0)) {
-	           fclose(ifp);
-	           return(TRUE);
-	        }
+		if (frag == 1 || ((strncmp(line,buffer,frag - 1)) == 0)) {
+		   fclose(ifp);
+		   return(TRUE);
+		}
 	    } else { /* last character = "*" test */
-	        if (STREQ(line,buffer)) {
-	            fclose(ifp);
-	            return(TRUE);
-	        }
+		if (STREQ(line,buffer)) {
+		    fclose(ifp);
+		    return(TRUE);
+		}
 	    } /* last character = "*" test */
 	} /* frag >= 0 */
     } /* end while */

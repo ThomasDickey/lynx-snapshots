@@ -116,9 +116,10 @@ Try_Redirected_URL:
 			return(NULLFILE);
 		    }
 		    if (value > 65535 || value < 0) {
-			char msg[265];
-			sprintf(msg, PORT_INVALID, (unsigned long)value);
+			char *msg = 0;
+			HTSprintf0(&msg, PORT_INVALID, (unsigned long)value);
 			HTAlert(msg);
+			free(msg);
 			FREE(temp);
 			return(NULLFILE);
 		    }
@@ -400,12 +401,13 @@ Try_Redirected_URL:
 			LYAddVisitedLink(doc);
 
 		     } else {
-			char buf[512];
+			char *buf = 0;
 
-			sprintf(buf,
+			HTSprintf0(&buf,
 				EXECUTION_DISABLED_FOR_FILE,
 				key_for_func(LYK_OPTIONS));
 			HTAlert(buf);
+			free(buf);
 		     }
 #else /* no exec_links */
 		     HTUserMsg(EXECUTION_NOT_COMPILED);
@@ -1190,12 +1192,13 @@ PUBLIC BOOLEAN exec_ok ARGS3(
 	    *cp != '@' && *cp != '~' && *cp != '$' &&
 	    *cp != '&' && *cp != '+' && *cp != '=' &&
 	    *cp != '\t') {
-	    char buf[128];
+	    char *buf = 0;
 
-	    sprintf(buf,
+	    HTSprintf0(&buf,
 		    BADCHAR_IN_EXEC_LINK,
 		    *cp);
 	    HTAlert(buf);
+	    free(buf);
 	    return FALSE;
 	}
     }

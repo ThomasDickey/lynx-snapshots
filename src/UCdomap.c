@@ -48,6 +48,7 @@
 #include <cp869_uni.h>		/* DosGreek2 (cp869)	*/
 #include <def7_uni.h>		/* 7 bit approximations */
 #include <dmcs_uni.h>		/* DEC Multinational	*/
+#include <hp_uni.h>		/* HP Roman8		*/
 #include <iso01_uni.h>		/* ISO Latin 1		*/
 #include <iso02_uni.h>		/* ISO Latin 2		*/
 #include <iso03_uni.h>		/* ISO Latin 3		*/
@@ -2022,6 +2023,7 @@ PUBLIC void UCInit NOARGS
     UC_CHARSET_SETUP_dec_mcs;		  /* DEC Multinational	  */
     UC_CHARSET_SETUP_macintosh; 	  /* Macintosh (8 bit)	  */
     UC_CHARSET_SETUP_next;		  /* NeXT character set   */
+    UC_CHARSET_SETUP_hp_roman8;		  /* HP Roman8		  */
 
     UC_CHARSET_SETUP_viscii;		  /* Vietnamese (VISCII)  */
 

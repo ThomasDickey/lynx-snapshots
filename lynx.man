@@ -619,8 +619,7 @@ servers (see WWW_access_GATEWAY, below).  Each protocol used by \fILynx\fR,
 (http, ftp, gopher, etc), can be mapped separately by setting environment
 variables of the form PROTOCOL_proxy (literally: http_proxy, ftp_proxy,
 gopher_proxy, etc), to "http://some.server.dom:port/".
-See the \fBINSTALLATION\fR file in the \fILynx\fR distribution for additional
-details, and examples.
+See \fBLynx Users Guide\fR for additional details and examples.
 .TP 20
 .B WWW_access_GATEWAY
 \fILynx\fR still supports use of gateway servers, with the servers specified
@@ -628,7 +627,7 @@ via "WWW_access_GATEWAY" variables (where "access" is lower case and can be
 "http", "ftp", "gopher" or "wais"), however most gateway servers have been
 discontinued.  Note that you do not include a terminal '/' for gateways, but
 do for proxies specified by PROTOCOL_proxy environment variables.
-See the \fBINSTALLATION\fR file in the \fILynx\fR distribution for details.
+See \fBLynx Users Guide\fR for details.
 .TP 20
 .B WWW_HOME
 This variable, if set, will override the default startup URL specified
