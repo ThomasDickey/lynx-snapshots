@@ -43,19 +43,26 @@ static char *T_umap_fn = NULL;
 #define SETFONT "setfont"
 #define NOOUTPUT "2>/dev/null >/dev/null"
 
-PRIVATE void call_setfont ARGS3(
-	char *, 	font,
-	char *, 	fnsuffix,
-	char *, 	umap)
+/*
+ *  call_setfont - execute "setfont" command via system()
+ *  returns:	0  ok (as far as we know)
+ *	       -1  error (assume font and umap are not loaded)
+ *		1  error with umap (assume font loaded but umap empty)
+ */
+PRIVATE int call_setfont ARGS3(
+	CONST char *,	font,
+	CONST char *,	fnsuffix,
+	CONST char *,	umap)
 {
     char *T_setfont_cmd = NULL;
+    int rv;
 
     if ((font && T_font_fn && !strcmp(font, T_font_fn))
      && (umap && T_umap_fn && !strcmp(umap, T_umap_fn))) {
 	/*
 	 *  No need to repeat.
 	 */
-	return;
+	return 0;
     }
     if (font)
 	StrAllocCopy(T_font_fn, font);
@@ -78,9 +85,23 @@ PRIVATE void call_setfont ARGS3(
 
     if (T_setfont_cmd) {
 	CTRACE((tfp, "Executing setfont: '%s'\n", T_setfont_cmd));
-	LYSystem(T_setfont_cmd);
+	rv = LYSystem(T_setfont_cmd);
 	FREE(T_setfont_cmd);
+	if (rv) {
+	    CTRACE((tfp, "call_setfont: system returned %d (0x%x)!\n",
+		   rv, rv));
+	    if ((rv == 0x4200 || rv == 0x4100) && umap && *umap)
+		/*
+		 * It seems setfont returns 65 or 66 to the shell if
+		 * the font was loaded ok but something was wrong with
+		 * the umap file. - kw
+		 */
+		return 1;
+	    else
+		return -1;
+	}
     }
+    return 0;
 }
 
 PRIVATE void write_esc ARGS1(
@@ -127,6 +148,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 
     char *tmpbuf1 = NULL;
     char *tmpbuf2 = NULL;
+    int status = 0;
 
     /*
      *	Restore the original character set.
@@ -162,10 +184,6 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	}
 	return;
     } else if (lastcs < 0 && old_umap == 0 && old_font == 0) {
-#if 0
-	old_umap = tempnam((char *)0, "umap");
-	old_font = tempnam((char *)0, "font");
-#endif
 	FILE * fp1;
 	FILE * fp2 = NULL;
 	if ((old_font = calloc(1, LY_MAXPATH)))
@@ -207,6 +225,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 #define SUFF2 "-16.psf"
 #define SUFF3 "-8x16"
 #define SUFF4 "8x16"
+#define SUFF5 ".cp -16"
 
     /*
      *	Use this for output of escape sequences.
@@ -219,12 +238,15 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	return;
     }
 
-    if (!strcmp(name, "iso-8859-10")) {
-	call_setfont("iso10", SUFF1, "iso10.uni");
-	TransT = GN_Kuser;
-	HasUmap = Is_Set;
-	Utf = Is_Unset;
-    } else if (!strncmp(name, "iso-8859-1", 10)) {
+    /* NOTE: `!!umap not in kbd!!' comments below means that the *.uni file
+       is not found in kbd package.  Reference Debian Package: kbd-data,
+       Version: 0.96a-14.  They should be located elsewhere or generated.
+       Also some cpNNN fonts used below are not in the kbd-data.  - kw
+       */
+
+    if (!strncmp(name, "iso-8859-1", 10) &&
+	       (!name[10] || !isdigit((unsigned char)name[10]))
+	) {
 	if ((lastHasUmap == Is_Set) && !strcmp(lastname, "cp850")) {
 	    /*
 	     *	cp850 already contains all latin1 characters.
@@ -236,7 +258,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	    /*
 	     *	"setfont lat1u-16.psf -u lat1u.uni"
 	     */
-	    call_setfont("lat1u", SUFF2, "lat1u.uni");
+	    status = call_setfont("lat1u", SUFF2, "lat1u.uni");
 	    HasUmap = Is_Set;
 	    if (lastTransT != GN_Blat1) {
 		TransT = GN_Blat1;
@@ -248,22 +270,34 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	/*
 	 *  "setfont lat2-16.psf -u lat2.uni"
 	 */
-	call_setfont("lat2", SUFF2, "lat2.uni");  */
+	status = call_setfont("lat2", SUFF2, "lat2.uni");
 #endif /* NOTDEFINED */
 	/*
 	 *  "setfont iso02.f16 -u iso02.uni"
 	 */
-	call_setfont("iso02", SUFF1, "iso02.uni");
+	status = call_setfont("iso02", SUFF1, "iso02.uni");
 	TransT = GN_Kuser;
 	HasUmap = Is_Set;
 	Utf = Is_Unset;
+    } else if (!strcmp(name, "iso-8859-15")) {
+	/*
+	 *  "setfont lat0-16.psf"
+	 */
+	status = call_setfont("lat0", SUFF2, NULL);
+	TransT = GN_Blat1;	/* bogus! */
+	HasUmap = Dunno; /* distributed lat0 files have bogus map data! */
+	Utf = Is_Unset;
     } else if (!strncmp(name, "iso-8859-", 9)) {
-	HTSprintf0(&tmpbuf1, "iso0%s", &name[9]);
-	HTSprintf0(&tmpbuf2, "iso0%s%s", &name[9],".uni");
+	if (strlen(name) <= 10 || !isdigit((unsigned char)name[10]))
+	    HTSprintf0(&tmpbuf1, "iso0%s", &name[9]);
+	else
+	    HTSprintf0(&tmpbuf1, "iso%s", &name[9]);
+	HTSprintf0(&tmpbuf2, "%s.uni", tmpbuf1);
 	/*
 	 *  "setfont iso0N.f16 -u iso0N.uni"
 	 */
-	call_setfont(tmpbuf1, SUFF1, tmpbuf2);
+	status = call_setfont(tmpbuf1, SUFF1, tmpbuf2);
+	FREE(tmpbuf1);
 	FREE(tmpbuf2);
 	TransT = GN_Kuser;
 	HasUmap = Is_Set;
@@ -272,16 +306,16 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	/*
 	 *  "setfont koi8-8x16"
 	 */
-	call_setfont("koi8", SUFF3, NULL);
+	status = call_setfont("koi8", SUFF3, "koi8r.uni"); /* !!umap not in kbd!! */
 	TransT = GN_Kuser;
-	HasUmap = Is_Unset;
+	HasUmap = Is_Set;
 	Utf = Is_Unset;
     } else if (!strcmp(name, "cp437")) {
 	/*
 	 *  "setfont default8x16 -u cp437.uni"
 	 */
-	call_setfont("default", SUFF4, "cp437.uni");
-	if (TransT == GN_Kuser || TransT == GN_Ucp437)
+	status = call_setfont("default", SUFF4, "cp437.uni");
+	if (lastTransT == GN_Kuser || lastTransT == GN_Ucp437)
 	    TransT = GN_dontCare;
 	else
 	    TransT = GN_Ucp437;
@@ -291,7 +325,32 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	/*
 	 *  "setfont cp850-8x16 -u cp850.uni"
 	 */
-	call_setfont("cp850", SUFF3, "cp850.uni");
+	status = call_setfont("cp850", SUFF3, "cp850.uni"); /* !!umap not in kbd!! */
+	TransT = GN_Kuser;
+	HasUmap = Is_Set;
+	Utf = Is_Unset;
+    } else if (!strcmp(name, "cp866") ||
+	       !strcmp(name, "cp852") ||
+#if 0
+	       !strcmp(name, "cp861") ||
+	       !strcmp(name, "cp850") ||
+	       !strcmp(name, "cp437") ||
+#endif
+	       !strcmp(name, "cp862")) { /* MS-Kermit has these files */
+	HTSprintf0(&tmpbuf2, "%s.uni", name);
+	/*
+	 *  "setfont cpNNN.f16"
+	 */
+	status = call_setfont(name, SUFF1, tmpbuf2); /* !!umap not in kbd!! */
+	FREE(tmpbuf2);
+	TransT = GN_Kuser;
+	HasUmap = Is_Set;
+	Utf = Is_Unset;
+    } else if (!strcmp(name, "cp737")) {
+	/*
+	 *  "setfont cp737.cp"
+	 */
+	status = call_setfont("737", SUFF5, "cp737.uni"); /* !!umap not in kbd!! */
 	TransT = GN_Kuser;
 	HasUmap = Is_Set;
 	Utf = Is_Unset;
@@ -301,6 +360,14 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	Utf = Dont_Care;
     } else if (!strncmp(name, "mnem", 4)) {
 	Utf = Dont_Care;
+    }
+
+    if (status == 1)
+	HasUmap = Is_Unset;
+    else if (status < 0) {
+	if (HasUmap == Is_Set)
+	    HasUmap = Dunno;
+	name = "unknown-8bit";
     }
 
     if (TransT != lastTransT) {
@@ -369,7 +436,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 #ifdef __EMX__
     int res = 0;
 
-    if (p->codepage) {
+    if (p->codepage > 0) {
 	res = VioSetCp(0, p->codepage, 0);
 	CTRACE((tfp, "UCChangeTerminalCodepage: VioSetCp(%d) returned %d\n", p->codepage, res));
     }

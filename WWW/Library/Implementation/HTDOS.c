@@ -5,12 +5,6 @@
 #include <HTUtils.h>
 #include <HTDOS.h>
 
-#ifdef _WINDOWS
-#include <HTString.h>
-#include <stdio.h>
-#include <windows.h>
-#endif
-
 /*
  * Make a copy of the source argument in the result, allowing some extra
  * space so we can append directly onto the result without reallocating.

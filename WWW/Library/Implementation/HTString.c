@@ -763,8 +763,6 @@ PUBLIC char * HTSprintf0 (va_alist)
 	char **		pstr = va_arg(ap, char **);
 	CONST char *	fmt  = va_arg(ap, CONST char *);
 #endif
-	if (pstr != 0)
-	    *pstr = 0;
 	result = StrAllocVsprintf(pstr, 0, fmt, &ap);
     }
     va_end(ap);

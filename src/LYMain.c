@@ -774,6 +774,9 @@ PUBLIC int main ARGS2(
     FILE *fp;
     char filename[LY_MAXPATH];
     BOOL LYGetStdinArgs = FALSE;
+#ifdef _WINDOWS
+    WSADATA WSAData;
+#endif /* _WINDOWS */
 
 #ifdef    NOT_ASCII
     FixCharacters();
@@ -784,7 +787,6 @@ PUBLIC int main ARGS2(
 #endif
 
 #ifdef _WINDOWS
-    WSADATA WSAData;
     {
 	int err;
 	WORD wVerReq;

@@ -21,6 +21,7 @@
 
 #ifdef DJGPP
 #include <sys/config.h>	/* pseudo-autoconf values for DJGPP libc/headers */
+#define HAVE_TRUNCATE 1
 #endif /* DJGPP */
 
 #include <stdio.h>
@@ -122,7 +123,9 @@
 #if defined(_WINDOWS) && !defined(__CYGWIN__)	/* SCW */
 #include <windows.h>		/* #include "windef.h" */
 #define BOOLEAN_DEFINED
+#if !_WIN_CC			/* 1999/09/29 (Wed) 22:00:53 */
 #include <dos.h>
+#endif
 #undef sleep			/* 1998/06/23 (Tue) 16:54:53 */
 extern void sleep(unsigned __seconds);
 #define popen _popen

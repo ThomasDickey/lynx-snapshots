@@ -78,10 +78,9 @@ BUGS:	@@@	Limit connection cache size!
 #include <HTUtils.h>
 
 #include <HTAlert.h>
-#include <HTTCP.h>
-#include <HTTP.h>
 
 #include <HTFTP.h>	/* Implemented here */
+#include <HTTCP.h>
 
 /* this define should be in HTFont.h :( */
 #define HT_NON_BREAK_SPACE ((char)1)   /* For now */
@@ -101,7 +100,6 @@ BUGS:	@@@	Limit connection cache size!
 #define INFINITY 512
 
 #include <HTParse.h>
-#include <HTTCP.h>
 #include <HTAnchor.h>
 #include <HTFile.h>	/* For HTFileFormat() */
 #include <HTBTree.h>
@@ -338,12 +336,15 @@ PRIVATE int close_connection ARGS1(
 	connection *,	con)
 {
     connection * scan;
-    int status = NETCLOSE(con->socket);
-    if (TRACE) {
-	CTRACE((tfp, "HTFTP: Closing control socket %d\n", con->socket));
+    int status;
+    CTRACE((tfp, "HTFTP: Closing control socket %d\n", con->socket));
+    status = NETCLOSE(con->socket);
+    if (TRACE && status != 0) {
 #ifdef UNIX
-	if (status != 0)
-	    perror("HTFTP:close_connection");
+	CTRACE((tfp, "HTFTP:close_connection: %s", LYStrerror(errno)));
+#else
+	if (con->socket != INVSOC)
+	    HTInetStatus("HTFTP:close_connection");
 #endif
     }
     con->socket = -1;
@@ -389,32 +390,26 @@ PRIVATE char *help_message_cache_contents NOARGS
    return(help_message_buffer);
 }
 
-/*	Execute Command and get Response
-**	--------------------------------
+/*	Send One Command
+**	----------------
 **
-**	See the state machine illustrated in RFC959, p57. This implements
-**	one command/reply sequence.  It also interprets lines which are to
-**	be continued, which are marked with a "-" immediately after the
-**	status code.
-**
-**	Continuation then goes on until a line with a matching reply code
-**	an a space after it.
+**	This function checks whether we have a control connection, and sends
+**	one command if given.
 **
 ** On entry,
-**	con	points to the connection which is established.
+**	control	points to the connection which is established.
 **	cmd	points to a command, or is NIL to just get the response.
 **
-**	The command is terminated with the CRLF pair.
+**	The command should already be terminated with the CRLF pair.
 **
 ** On exit,
-**	returns:  The first digit of the reply type,
-**		  or negative for communication failure.
+**	returns:  1 for success,
+**		  or negative for communication failure (in which case
+**		  the control connection will be closed).
 */
-PRIVATE int response ARGS1(
+PRIVATE int write_cmd ARGS1(
 	char *,		cmd)
 {
-    int result;				/* Three-digit decimal code */
-    int continuation_response = -1;
     int status;
 
     if (!control) {
@@ -440,6 +435,39 @@ PRIVATE int response ARGS1(
 	    return status;
 	}
     }
+    return 1;
+}
+
+/*	Execute Command and get Response
+**	--------------------------------
+**
+**	See the state machine illustrated in RFC959, p57. This implements
+**	one command/reply sequence.  It also interprets lines which are to
+**	be continued, which are marked with a "-" immediately after the
+**	status code.
+**
+**	Continuation then goes on until a line with a matching reply code
+**	an a space after it.
+**
+** On entry,
+**	control	points to the connection which is established.
+**	cmd	points to a command, or is NIL to just get the response.
+**
+**	The command must already be terminated with the CRLF pair.
+**
+** On exit,
+**	returns:  The first digit of the reply type,
+**		  or negative for communication failure.
+*/
+PRIVATE int response ARGS1(
+	char *,		cmd)
+{
+    int result;				/* Three-digit decimal code */
+    int continuation_response = -1;
+    int status;
+
+    if ((status = write_cmd(cmd)) < 0)
+	return status;
 
     do {
 	char *p = response_text;
@@ -511,6 +539,14 @@ PRIVATE int response ARGS1(
 	result = 555;
     }
     return result/100;
+}
+
+PRIVATE int send_cmd_nowait ARGS1(char *, verb)
+{
+    char command[20];
+
+    sprintf(command, "%.*s%c%c", (int) sizeof(command)-4, verb, CR, LF);
+    return write_cmd(command);
 }
 
 PRIVATE int send_cmd_1 ARGS1(char *, verb)
@@ -1029,7 +1065,7 @@ PRIVATE int close_master_socket NOARGS
     int status;
 
     if (master_socket != -1)
-	FD_CLR( (unsigned) master_socket, &open_sockets);
+	FD_CLR(master_socket, &open_sockets);
     status = NETCLOSE(master_socket);
     CTRACE((tfp, "HTFTP: Closed master socket %d\n", master_socket));
     master_socket = -1;
@@ -1207,7 +1243,7 @@ PRIVATE int get_listen_socket NOARGS
     }
   }
     CTRACE((tfp, "TCP: Master socket(), bind() and listen() all OK\n"));
-    FD_SET( (unsigned) master_socket, &open_sockets);
+    FD_SET(master_socket, &open_sockets);
     if ((master_socket+1) > num_sockets)
 	num_sockets = master_socket+1;
 
@@ -1447,9 +1483,9 @@ PRIVATE void parse_ls_line ARGS2(
 } /* parse_ls_line() */
 
 /*
- * parse_sls_line() --
+ * parse_dls_line() --
  *	Extract the name and size info and whether it refers to a
- *      directory from a LIST line in OS/2 "dls" format.
+ *      directory from a LIST line in "dls" format.
  */
 PRIVATE void parse_dls_line ARGS3(
 	char *,		line,
@@ -2056,8 +2092,8 @@ PRIVATE EntryInfo * parse_dir_entry ARGS3(
 	case DLS_SERVER:
 
 	    /*
-	    **	Interpret and edit LIST output from OS/2 server in
-	    **  "dls" format.
+	    **	Interpret and edit LIST output from a Unix server
+	    **  in "dls" format.
 	    **  This one must have claimed to be Unix in order to
 	    **  get here; if the first line looks fishy, we revert
 	    **  to Unix and hope that fits better (this recovery is
@@ -2565,6 +2601,9 @@ PRIVATE int read_directory ARGS4(
 	    HTChunkClear(chunk);
 
 	    if (HTCheckForInterrupt()) {
+		CTRACE((tfp,
+		       "read_directory: interrupted after %d bytes\n",
+		       BytesReceived));
 		WasInterrupted = TRUE;
 		if (BytesReceived) {
 		    goto unload_btree;	/* unload btree */
@@ -2578,10 +2617,14 @@ PRIVATE int read_directory ARGS4(
 
 	    /*	 read directory entry
 	     */
+	    interrupted_in_next_data_char = FALSE;
 	    for (;;) {			/* Read in one line as filename */
 		ic = NEXT_DATA_CHAR;
 AgainForMultiNet:
 		if (interrupted_in_next_data_char) {
+		    CTRACE((tfp,
+			   "read_directory: interrupted_in_next_data_char after %d bytes\n",
+			   BytesReceived));
 		    WasInterrupted = TRUE;
 		    if (BytesReceived) {
 			goto unload_btree;  /* unload btree */
@@ -2775,26 +2818,24 @@ unload_btree:
 
     FREE(lastpath);
 
-    if (server_type == APPLESHARE_SERVER ||
-	server_type == NETPRESENZ_SERVER ||
-	WasInterrupted)			    {
+    if (WasInterrupted || data_soc != -1) { /* should always be true */
 	/*
 	 *  Without closing the data socket first,
-	 *  the response(NIL) below hangs. - KW
-	 *  Seems to also be needed if the xfer
-	 *  was interrupted ("z" or ^G).  - KED
+	 *  the response(NIL) later may hang.
+	 *  Some servers expect the client to fin/ack the close
+	 *  of the data connection before proceeding with the
+	 *  conversation on the control connection. - kw
 	 */
-	NETCLOSE(data_soc);
+	CTRACE((tfp, "HTFTP: Closing data socket %d\n", data_soc));
+	status = NETCLOSE(data_soc);
+	if (status == -1)
+	    HTInetStatus("close");	/* Comment only */
+	data_soc = -1;
     }
 
     if (WasInterrupted || HTCheckForInterrupt()) {
-	if (server_type != CMS_SERVER)
-	    response(NIL);
 	_HTProgress(TRANSFER_INTERRUPTED);
-	return HT_LOADED;
     }
-    if (server_type != CMS_SERVER)
-	response(NIL);
     return HT_LOADED;
 #ifdef NOTDEFINED
     return response(NIL) == 2 ? HT_LOADED : -1;
@@ -2818,8 +2859,11 @@ PUBLIC int HTFTPLoad ARGS4(
 {
     BOOL isDirectory = NO;
     HTAtom * encoding = NULL;
-    int status;
+    int status, final_status;
     int retry;			/* How many times tried? */
+    int outstanding = 1;	/* outstanding control connection responses
+				   that we are willing to wait for, if we
+				   get to the point of reading data - kw */
     HTFormat format;
 
     /* set use_list to NOT since we don't know what kind of server
@@ -3429,20 +3473,38 @@ listen:
 #else
 /* @@ */
 #endif /* LISTEN */
+    if ((status = send_cmd_nowait("QUIT")) == 1)
+	outstanding++;
     if (isDirectory) {
 	if (server_type == UNIX_SERVER && !unsure_type &&
 	    !strcmp(response_text,
 		    "150 Opening ASCII mode data connection for /bin/dl.\n")) {
-	    CTRACE((tfp, "HTFTP: Treating as OS/2 \"dls\" server.\n"));
+	    CTRACE((tfp, "HTFTP: Treating as \"dls\" server.\n"));
 	    server_type = DLS_SERVER;
 	}
-	status = read_directory (anchor, name, format_out, sink);
-	NETCLOSE(data_soc);
-	NETCLOSE(control->socket);
-	control->socket = -1;
-	init_help_message_cache();  /* to free memory */
-	return status;
-      /* returns HT_LOADED or error */
+	final_status = read_directory (anchor, name, format_out, sink);
+	if (final_status > 0) {
+	    if (server_type != CMS_SERVER)
+		if (outstanding-- > 0) {
+		    status = response(NIL);
+		    if (status < 0 ||
+			(status == 2 && !strncmp(response_text, "221", 3)))
+			outstanding = 0;
+		}
+	} else {		/* HT_INTERRUPTED */
+	    /* User may have pressed 'z' to give up because no
+	       packets got through, so let's not make them wait
+	       any longer - kw */
+	    outstanding = 0;
+	}
+
+	if (data_soc != -1) { /* normally done in read_directory */
+	    CTRACE((tfp, "HTFTP: Closing data socket %d\n", data_soc));
+	    status = NETCLOSE(data_soc);
+	    if (status == -1)
+		HTInetStatus("close");	/* Comment only */
+	}
+	status = final_status;
     } else {
 	int rv;
 	int len;
@@ -3494,31 +3556,72 @@ listen:
 	_HTProgress (gettext("Receiving FTP file."));
 	rv = HTParseSocket(format, format_out, anchor, data_soc, sink);
 
+#if 0				/* already done in HTCopy - kw */
 	if (rv == HT_INTERRUPTED)
 	     _HTProgress(TRANSFER_INTERRUPTED);
+#endif
 
 	HTInitInput(control->socket);
 	/* Reset buffering to control connection DD 921208 */
 
-	status = NETCLOSE(data_soc);
-	CTRACE((tfp, "HTFTP: Closing data socket %d\n", data_soc));
+	if (rv < 0) {
+#if 0
+	    if (rv == HT_INTERRUPTED || rv == -501)
+		if (send_cmd_nowait("ABOR") == 1) {
+		    outstanding++;
+		    CTRACE((tfp, "HTFTP: outstanding responses: %d\n", outstanding));
+		}
+#endif
+	    if (rv == -2)	/* weird error, don't expect much response */
+		outstanding--;
+	    else if (rv == HT_INTERRUPTED || rv == -1)
+		/* User may have pressed 'z' to give up because no
+		   packets got through, so let's not make them wait
+		   longer - kw */
+		outstanding = 0;
+	    CTRACE((tfp, "HTFTP: Closing data socket %d\n", data_soc));
+	    status = NETCLOSE(data_soc);
+	} else
+	    status = 2;	/* data_soc already closed in HTCopy - kw */
+
 	if (status < 0 && rv != HT_INTERRUPTED && rv != -1) {
 	    (void) HTInetStatus("close");	/* Comment only */
 	    data_soc = -1;			/* invalidate it */
 	} else {
-	    data_soc = -1;			/* invalidate it */
-	    status = response(NIL);		/* Pick up final reply */
-	    if (status != 2 && rv != HT_INTERRUPTED && rv != -1) {
-		init_help_message_cache();  /* to free memory */
-		return HTLoadError(sink, 500, response_text);
+	    if (rv != HT_LOADED && outstanding--) {
+		status = response(NIL);		/* Pick up final reply */
+		if (status != 2 && rv != HT_INTERRUPTED && rv != -1) {
+		    data_soc = -1;		/* invalidate it */
+		    init_help_message_cache();  /* to free memory */
+		    return HTLoadError(sink, 500, response_text);
+		} else if (status <= 0) {
+		    outstanding = 0;
+		} else if (status == 2 && !strncmp(response_text, "221", 3))
+		    outstanding = 0;
 	    }
 	}
-
-	NETCLOSE(control->socket);
-	control->socket = -1;
-	init_help_message_cache();  /* to free memory */
-	return HT_LOADED;
+	final_status = HT_LOADED;
     }
+    while (outstanding-- > 0 &&
+	   (status > 0)) {
+	status = response(NIL);
+	if (status == 2 && !strncmp(response_text, "221", 3))
+	    break;
+    }
+    data_soc = -1;			/* invalidate it */
+    CTRACE((tfp, "HTFTPLoad: normal end; "));
+    if (control->socket < 0) {
+	CTRACE((tfp, "control socket is %d\n", control->socket));
+    } else {
+	CTRACE((tfp, "closing control socket %d\n", control->socket));
+	status = NETCLOSE(control->socket);
+	if (status == -1)
+	    HTInetStatus("control connection close");	/* Comment only */
+    }
+    control->socket = -1;
+    init_help_message_cache();  /* to free memory */
+      /* returns HT_LOADED (always for file if we get here) or error */
+    return final_status;
 } /* open_file_read */
 
 /*

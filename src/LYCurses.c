@@ -942,7 +942,7 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
 		  NULL);
     } else
 	mousemask(0, NULL);
-#endif /* _WIN_CC and PDCURSES */
+#endif /* WIN_EX and PDCURSES */
 #endif /* NCURSES_MOUSE_VERSION */
 
 #if defined(DJGPP) && !defined(USE_SLANG)
