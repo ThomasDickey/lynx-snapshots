@@ -38,7 +38,6 @@
 #include <LYCookie.h>
 #include <LYMainLoop.h>
 #include <LYPrettySrc.h>
-#include <GridText.h>
 
 #ifdef KANJI_CODE_OVERRIDE
 #include <HTCJK.h>
@@ -6925,13 +6924,13 @@ new_cmd:  /*
 	    if (no_goto && !LYValidate) { /*  Go to not allowed. - FM */
 		HTUserMsg(GOTO_DISALLOWED);
 	    } else {
-		unsigned char *s = get_clip_grab(), *e, *t;
+		unsigned char *s = (unsigned char *) get_clip_grab(), *e, *t;
 		char *buf;
 		int len2;
 
 		if (!s)
 		    break;
-		len2 = strlen(s);
+		len2 = strlen((const char *) s);
 		e = s + len2;
 		while (s < e && strchr(" \t\n\r", *s))
 		    s++;
@@ -6939,7 +6938,7 @@ new_cmd:  /*
 		    e--;
 		if (s[0] == '<' && e > s && e[-1] == '>') {
 		    s++; e--;
-		    if (!strncasecomp(s,"URL:", 4))
+		    if (!strncasecomp((const char *) s,"URL:", 4))
 			s += 4;
 		}
 		if (s >= e) {
@@ -6950,9 +6949,9 @@ new_cmd:  /*
 		if (len < MAX_LINE)
 		    len = MAX_LINE;	/* Required for do_check_goto_URL() */
 		buf = (char*)malloc(len);
-		strncpy(buf, s, e - s);
+		strncpy(buf, (const char *) s, e - s);
 		buf[e - s] = '\0';
-		t = buf;
+		t = (unsigned char *) buf;
 
 		while (s < e) {
 		    if (strchr(" \t\n\r", *s)) {

@@ -237,11 +237,11 @@ extern void LYRegisterUIPage PARAMS((CONST char * url, UIP_t type));
 extern void LYUIPages_free NOPARAMS;
 
 #ifdef CAN_CUT_AND_PASTE
-extern int put_clip(char *szBuffer);
+extern int put_clip PARAMS((char *szBuffer));
 /* get_clip_grab() returns a pointer to the string in the system area.
    get_clip_release() should be called ASAP after this. */
-extern char* get_clip_grab(void);
-extern void  get_clip_release(void);
+extern char* get_clip_grab NOPARAMS;
+extern void  get_clip_release NOPARAMS;
 #  ifdef WIN_EX
 #    define size_clip()	8192
 #  else

@@ -17,6 +17,7 @@ use "lynx -help" to display a complete list of current options.
 .\" Just in case these number registers aren't set yet...
 .if \nN==0 .nr N 10
 .if \nD==0 .nr D 5
+.hy 0
 .I
 Lynx
 is a fully-featured World Wide Web (WWW) client for users

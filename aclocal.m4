@@ -4,7 +4,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2003/09/14
+dnl Updated: 2004/1/11
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13, patched
 dnl by Tom Dickey.  See your local GNU archives, and this URL:
@@ -4152,9 +4152,10 @@ AC_TRY_LINK([
 test $cf_cv_need_xopen_extension = yes && CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_SOURCE version: 7 updated: 2003/12/29 21:33:30
+dnl CF_XOPEN_SOURCE version: 9 updated: 2004/01/12 20:45:17
 dnl ---------------
-dnl Try to get _XOPEN_SOURCE defined properly that we can use POSIX functions.
+dnl Try to get _XOPEN_SOURCE defined properly that we can use POSIX functions,
+dnl or adapt to the vendor's definitions to get equivalent functionality.
 AC_DEFUN([CF_XOPEN_SOURCE],[
 case $host_os in #(vi
 freebsd*) #(vi
@@ -4163,11 +4164,17 @@ freebsd*) #(vi
 hpux*) #(vi
 	CPPFLAGS="$CPPFLAGS -D_HPUX_SOURCE"
 	;;
+irix6.*) #(vi
+	CPPFLAGS="$CPPFLAGS -D_SGI_SOURCE"
+	;;
 linux*) #(vi
 	CF_GNU_SOURCE
 	;;
+netbsd*) #(vi
+	# setting _XOPEN_SOURCE breaks IPv6 for lynx on NetBSD 1.6, breaks xterm, is not needed for ncursesw
+	;;
 openbsd*) #(vi
-	# setting _XOPEN_SOURCE breaks xterm on OpenBSD 2.8, is not needed for ncurses
+	# setting _XOPEN_SOURCE breaks xterm on OpenBSD 2.8, is not needed for ncursesw
 	;;
 osf[[45]]*) #(vi
 	CPPFLAGS="$CPPFLAGS -D_OSF_SOURCE"

@@ -599,13 +599,13 @@ again:
 
 #ifdef CAN_CUT_AND_PASTE	/* 1998/10/01 (Thu) 19:19:22 */
 	if (action == LYE_PASTE) {
-	    unsigned char *s = get_clip_grab(), *e;
+	    unsigned char *s = (unsigned char *) get_clip_grab(), *e;
 	    char *buf = NULL;
 	    int len;
 
 	    if (!s)
 		break;
-	    len = strlen(s);
+	    len = strlen((const char *) s);
 	    e = s + len;
 
 	    if (len > 0) {
@@ -617,7 +617,7 @@ again:
 			    LYEditInsert(&MyEdit, s, e1 - s, -1, TRUE);
 			s = e1;
 			if (*e1 == '\t') { /* Replace by space */
-			    LYEditInsert(&MyEdit, " ", 1, -1, TRUE);
+			    LYEditInsert(&MyEdit, (unsigned char *) " ", 1, -1, TRUE);
 			    s = ++e1;
 			} else
 			    break;
@@ -629,7 +629,7 @@ again:
 		while (e1 < e && *e1 == '\r')
 		    e1++;
 		if (e1 + 1 < e && *e1 == '\n')
-		    StrAllocCopy(buf, e1 + 1);	/* Survive _release() */
+		    StrAllocCopy(buf, (char *) e1 + 1);	/* Survive _release() */
 		get_clip_release();
 		if (MyEdit.strlen >= max_length) {
 		    HaveMaxlength = TRUE;

@@ -76,10 +76,6 @@ PRIVATE void make_blink_boldbg NOARGS;
 PUBLIC int Current_Attr, Masked_Attr;
 #endif
 
-#define OMIT_SCN_KEEPING 0 /* whether to omit keeping of Style_className
-    in HTML.c when lss support is on. 1 to increase performance. The value
-    must correspond to the value of macro OMIT_SCN_KEEPING defined in HTML.c*/
-
 #ifdef USE_SLANG
 PUBLIC unsigned int Lynx_Color_Flags = 0;
 PUBLIC BOOLEAN FullRefresh = FALSE;
@@ -480,7 +476,7 @@ PUBLIC void curses_w_style ARGS3(
 			"attribute cache FULL, dropping last",
 			last_styles[last_colorattr_ptr],
 			"in LynxChangeStyle(curses_w_style)"));
-	    last_colorattr_ptr--;
+	    last_colorattr_ptr = 127;
 	}
 	last_styles[last_colorattr_ptr++] = LYgetattrs(win);
 	/* don't cache style changes for active links */
@@ -2661,8 +2657,8 @@ PRIVATE void make_blink_boldbg NOARGS
  */
 PUBLIC long LYgetattrs ARGS1(WINDOW *, win)
 {
-    attr_t result;
-    short pair;
+    attr_t result = 0;
+    short pair = 0;
 
     wattr_get(win, &result, &pair, NULL);
     return result;

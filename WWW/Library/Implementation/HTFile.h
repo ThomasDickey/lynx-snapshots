@@ -293,6 +293,7 @@ typedef enum {
     ,ppMV
     ,ppRLOGIN
     ,ppRM
+    ,ppRMDIR
     ,ppTAR
     ,ppTELNET
     ,ppTN3270
