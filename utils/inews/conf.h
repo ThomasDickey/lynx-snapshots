@@ -12,13 +12,16 @@
  * Follow the instructions given in the comments.  See the file
  * README for more comments.
  *
- * $RCSfile: conf.h,v $	$Revision: 1.1 $
+ * $RCSfile: conf.h,v $	$Revision: 1.2 $
  *
- * $Author: news $	$Date: 1989/12/20 17:43:03 $
+ * $Author: tom $	$Date: 1997/07/28 00:39:05 $
  *
  * $State: Exp $	$Locker:  $
  *
  * $Log: conf.h,v $
+ * Revision 1.2  1997/07/28 00:39:05  tom
+ * 2.7.1ac-0.43
+ *
  * Revision 1.1  1989/12/20 17:43:03  news
  * v2_6
  *
@@ -128,12 +131,6 @@
 #ifdef HAVE_STRCHR
 #define	rindex strrchr
 #define index strchr
-#endif
-
-#ifdef NO_BZERO
-#ifndef USG
-#define USG
-#endif
 #endif
 
 /*

@@ -1246,7 +1246,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.42"
+#define LYNX_VERSION "2.7.1ac-0.43"
 
 /****************************************************************
  * The LYMessages_en.h header defines default, English strings

@@ -78,7 +78,7 @@ AC_DEFUN([CF_ALT_CHAR_SET],
 AC_MSG_CHECKING([if curses supports alternate-character set])
 AC_CACHE_VAL(cf_cv_alt_char_set,[
 	AC_TRY_LINK([
-#include <curses.h>
+#include <$cf_cv_ncurses_header>
 	],[
 	chtype x = acs_map['l']
 	],
@@ -123,7 +123,7 @@ AC_DEFUN([CF_BOOL_DEFS],
 AC_MSG_CHECKING(if TRUE/FALSE are defined)
 AC_CACHE_VAL(cf_cv_bool_defs,[
 AC_TRY_COMPILE([
-#include <curses.h>
+#include <$cf_cv_ncurses_header>
 #include <stdio.h>],[int x = TRUE, y = FALSE],
 	[cf_cv_bool_defs=yes],
 	[cf_cv_bool_defs=no])])
@@ -143,7 +143,7 @@ AC_DEFUN([CF_COLOR_CURSES],
 AC_MSG_CHECKING(if curses supports color attributes)
 AC_CACHE_VAL(cf_cv_color_curses,[
 	AC_TRY_LINK([
-#include <curses.h>
+#include <$cf_cv_ncurses_header>
 ],
 	[has_colors();
 	 start_color();
@@ -191,7 +191,7 @@ AC_MSG_CHECKING([for curses performance tradeoff])
 AC_CACHE_VAL(cf_cv_curs_performance,[
     cf_cv_curs_performance=no
     AC_TRY_COMPILE([
-#include <curses.h>],[
+#include <$cf_cv_ncurses_header>],[
 #if defined(wbkgdset) && defined(clearok) && defined(getbkgd)
 	int x = ERR;
 #else
@@ -200,7 +200,7 @@ AC_CACHE_VAL(cf_cv_curs_performance,[
 	],[
 	AC_TRY_COMPILE([
 #define CURS_PERFORMANCE
-#include <curses.h>],[
+#include <$cf_cv_ncurses_header>],[
 #if defined(wbkgdset) && defined(clearok) && defined(getbkgd)
 	int x = ;	/* force an error */
 #else
@@ -249,7 +249,7 @@ AC_DEFUN([CF_FANCY_CURSES],
 AC_MSG_CHECKING(if curses supports fancy attributes)
 AC_CACHE_VAL(cf_cv_fancy_curses,[
 	AC_TRY_LINK([
-#include <curses.h>
+#include <$cf_cv_ncurses_header>
 ],
 	[attrset(A_UNDERLINE|A_BOLD|A_REVERSE);
 	 wattrset(stdscr, A_BLINK|A_DIM);
@@ -379,9 +379,11 @@ dnl ---------------------------------------------------------------------------
 dnl Check for pre-1.9.9g ncurses (among other problems, the most obvious is
 dnl that color combinations don't work).
 AC_DEFUN([CF_NCURSES_BROKEN],
-[AC_CACHE_VAL(cf_cv_ncurses_broken,[
+[
+if test "$cf_cv_ncurses_version" = yes ; then
+AC_CACHE_VAL(cf_cv_ncurses_broken,[
 AC_TRY_COMPILE([
-#include <curses.h>],[
+#include <$cf_cv_ncurses_header>],[
 #if defined(NCURSES_VERSION) && defined(wgetbkgd)
 	make an error
 #else
@@ -394,6 +396,7 @@ AC_TRY_COMPILE([
 if test "$cf_cv_ncurses_broken" = yes ; then
 	AC_MSG_WARN(hmm... you should get an up-to-date version of ncurses)
 	AC_DEFINE(NCURSES_BROKEN)
+fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
@@ -452,6 +455,7 @@ esac
 
 case $cf_cv_ncurses_header in # (vi
 predefined) # (vi
+	cf_cv_ncurses_header=curses.h
 	;;
 *)
 	CF_ADD_INCDIR($cf_incdir)
@@ -467,14 +471,6 @@ AC_DEFUN([CF_NCURSES_LIBS],
 [AC_CHECK_FUNC(initscr,,[
 AC_REQUIRE([CF_NCURSES_CPPFLAGS])
 cf_save_LIBS="$LIBS"
-case $cf_cv_ncurses_header in
-*/ncurses.h) # (vi
-	cf_header=ncurses.h
-	;;
-*) # (vi
-	cf_header=curses.h
-	;;
-esac
 AC_CHECK_LIB(gpm,Gpm_Open,[
 	AC_CHECK_LIB(gpm,initscr,[
 		# don't try to link with gpm, since it contains curses
@@ -482,11 +478,11 @@ AC_CHECK_LIB(gpm,Gpm_Open,[
 		],[
 		AC_MSG_CHECKING(if ncurses needs -lgpm to link)
 		LIBS="-lncurses $cf_save_LIBS"
-		AC_TRY_LINK([#include <$cf_header>],
+		AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
 			[initscr()],
 			[cf_need_gpm=no],
 			[LIBS="-lncurses -lgpm $cf_save_LIBS"
-			AC_TRY_LINK([#include <$cf_header>],
+			AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
 				[initscr()],
 				[cf_need_gpm=yes],
 				[AC_ERROR(cannot link -lncurses)])])
@@ -501,11 +497,7 @@ AC_DEFUN([CF_NCURSES_VERSION],
 AC_CACHE_VAL(cf_cv_ncurses_version,[
 	cf_cv_ncurses_version=no
 	cat > conftest.$ac_ext <<EOF
-#ifdef NCURSESHEADER
-#include <ncurses.h>
-#else
-#include <curses.h>
-#endif
+#include <$cf_cv_ncurses_header>
 #ifdef NCURSES_VERSION
 Autoconf NCURSES_VERSION
 #else
@@ -731,7 +723,7 @@ do
 done
 	])
 AC_MSG_RESULT($cf_cv_sizechange)
-test $cf_cv_sizechange = no && AC_DEFINE(HAVE_SIZECHANGE)
+test $cf_cv_sizechange != no && AC_DEFINE(HAVE_SIZECHANGE)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Look for the slang header files in the standard places, adjusting the
@@ -786,6 +778,10 @@ AC_DEFUN([CF_SLANG_LIBS],
 			[LIBS="-lslang -lm $LIBS"],
 			AC_ERROR(cannot link -lslang),"-lm")],"-lm")])
 ])dnl
+dnl ---------------------------------------------------------------------------
+dnl	Remove "-g" option from the compiler options
+AC_DEFUN([CF_STRIP_G_OPT],
+[$1=`echo ${$1} | sed -e 's/-g //' -e 's/-g$//'`])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check for declaration of sys_errlist in one of stdio.h and errno.h.
 dnl Declaration of sys_errlist on BSD4.4 interferes with our declaration.
@@ -873,7 +869,7 @@ AC_DEFUN([CF_TTYTYPE],
 [
 AC_MSG_CHECKING(if ttytype is declared in curses library)
 AC_CACHE_VAL(cf_cv_have_ttytype,[
-	AC_TRY_LINK([#include <curses.h>],
+	AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
 	[char *x = &ttytype[1]],
 	[cf_cv_have_ttytype=yes],
 	[cf_cv_have_ttytype=no])

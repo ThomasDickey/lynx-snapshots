@@ -76,85 +76,10 @@ WWWINC= WWW/Library/Implementation
 #	ftp://space.mit.edu/pub/davis
 # It provides color support for Lynx.
 
-# !!!!!!!!!!! Lynx Local Directory Listing Formats !!!!!!!!!!!!!!!!!!!!!!!!!!!
-# Lynx supports "ls -l" format for local directory listings on Unix if the
-# LONG_LIST compilation symbol is defined, and includes links to the parent
-# directory if the compilation symbol NO_PARENT_DIR_REFERENCE is not defined.
-# If "ls -l" format is enabled here, the listing format can be modifed via a
-# LIST_FORMAT symbol in userdefs.h and/or lynx.cfg.  Otherwise, only file and
-# directory names will be included in the listings.
-#
-# If you are not including DirEd Support (see below) and wish to disable
-# "ls -l" emulation in local directory listings, prepend "#" to this line:
-DIR_LONG_LIST =   -DLONG_LIST
-#
-# To disable "Up to" parent links in local directory listings,
-# remove "#" from this line:
-#DIR_PARENT =  -DNO_PARENT_DIR_REFERENCE
-
-# !!!!!!!!!!! Lynx DirEd Support !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# Lynx now supports directory editing (DirEd) for local directories.
-# This allows users to do things like view, copy, & remove files using
-# a tabular display of the directory & single-keystroke commands instead
-# of using the command line.  From inside Lynx, the keystroke sequence
-# "g.<enter>" switches Lynx to DirEd mode on the current directory.
-# If you're building a Lynx that is to be used as a kind of restricted
-# shell for users who do not have access to the command line & should
-# not have access to equivalent capabilities, you need to disable DirEd
-# here.  You can also disable some DirEd functions while allowing others.
-#
-# DirEd functions are disabled by inserting or removing "#" signs at
-# the beginnings of lines that contain variable assignments here.
-# All DirEd functions that were enabled on compilation can be disabled
-# or modified at run time via DIRED_MENU symbols in lynx.cfg.
-#
-# To disable DirEd completely, prepend "#" to this line:
-DIRED_SUPPORT     =   -DDIRED_SUPPORT
-#(If you have disabled DirEd completely, you can ignore all the
-#other DirEd stuff here.)
-#
-# To prevent DirEd from extracting files from an archive file,
-# remove "#" from this line:
-#DIRED_ARCHIVE   =  -DARCHIVE_ONLY
-#
-# To prevent DirEd from using the tar program, prepend "#" to this line:
-DIRED_TAR   =   -DOK_TAR
-#
-# To prevent DirEd from using zip & unzip, prepend "#" to this line:
-DIRED_ZIP   =   -DOK_ZIP
-#
-# To prevent DirEd from using gzip & gunzip, prepend "#" to this line:
-DIRED_GZIP   =   -DOK_GZIP
-#
-# To prevent DirEd from using uudecode, prepend "#" to this line:
-DIRED_UUDECODE   =   -DOK_UUDECODE
-#
-# Lynx users can customize their keymaps by creating private versions
-# of lynx.cfg & modifying them, overriding the default keymap.
-# To prevent DirEd keymap overriding, prepend "#" to this line:
-DIRED_OVERRIDE   =   -DOK_OVERRIDE
-#
-# To prevent DirEd from changing the permissions on directories or files
-# (i.e. from doing what the Unix chmod command or the DOS attrib command
-# does), prepend "#" to this line:
-DIRED_PERMIT   =   -DOK_PERMIT
-#
-# If you do not comment out the DIRED_PERMIT line, but want to restrict
-# changes of the eXecute permission to directories (i.e., not allow it to
-# be changed for files), remove "#" from this line (if you don't remove it,
-# you can still block changes of the eXecute permission for files but not
-# directories via the "change_exec_perms" command line restriction):
-#DIRED_NOXPERMS   =   -DNO_CHANGE_EXECUTE_PERMS
-
-# !!!!!!!!!!! Lynx Wishful Thinking !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# If you are on one of the supported systems (see all: list below)
-# you should not have to modify anything from here down (but check
-# it out for your system, anyway)!
-# If you are not, then you should edit the generic: entry below.
-#
+# !!!!!!!!!!!!! NCURSES Support (For color version of Lynx). !!!!!!!!!!!!!!
 # If you need ncurses, the latest version can always be found
-# in ftp://ftp.clark.net/pub/dickey/ncurses/
-# or ftp://ftp.netcom.com/pub/zm/zmbenhal/ncurses/
+# in ftp://ftp.clark.net/pub/dickey/ncurses/  (4.1)
+# or ftp://ftp.netcom.com/pub/zm/zmbenhal/ncurses/ (1.9.9g)
 #
 # Also be sure to check out the compilation symbols in userdefs.h
 # before building Lynx!
@@ -162,34 +87,23 @@ DIRED_PERMIT   =   -DOK_PERMIT
 all:
 	@echo
 	@echo "Please run make with one of the following arguments"
-	@echo "clix       -- for Intergraph CLIX"
-	@echo "generic    -- for generic UNIX"
-	@echo "sco        -- for SCO machines"
-	@echo "sco5       -- for SCO OpenServer Release 5 machines"
-	@echo "umaxv      -- for Encore's UMAXV (SVR3.x) "
+	@echo "lynx       -- to make the executable, put it in this directory"
 	@echo "clean      -- removes all '.o' and 'core' files"
 	@echo "tar        -- runs clean, removes executable, and tars the whole directory"
 	@echo "compress   -- runs tar, then compresses the result"
 	@echo "zip        -- runs clean, removes executable, and zips the whole directory"
 	@echo
 
-DIR_LYDEFS = $(DIRED_SUPPORT) $(DIR_LONG_LIST) $(DIR_PARENT)
-
-DIR_DEFS = $(DIRED_SUPPORT) $(DIRED_ARCHIVE) $(DIRED_TAR) $(DIRED_ZIP) $(DIRED_GZIP) $(DIRED_UUDECODE) $(DIRED_OVERRIDE) $(DIRED_PERMIT) $(DIRED_NOXPERMS)
-
-# If you apply patches which require linking to site-specific libraries,
-# uncomment the following and point SITE_LIBS to those libraries.
-#SITE_LIBS= # Your libraries here (remove the "#")
+# If you apply patches which require linking to site-specific libraries, set
+# SITE_LIBS to those libraries.
+SITE_LIBS= # Your libraries here
 
 # Set SITE_LYDEFS to one or more of the defines for the WWW Library:
-SITE_LYDEFS = $(DIR_LYDEFS) -DEXP_CHARTRANS -I../../../src # Your defines here
+SITE_LYDEFS = # Your defines here
 
 # Set SITE_DEFS to one or more of the defines for lynx below:
-SITE_DEFS = $(DIR_DEFS) -DEXP_CHARTRANS # Your defines here
+SITE_DEFS = # Your defines here
 
-# if you are compiling on a previously unsupported system, modify
-# this generic entry!!
-#
 # defines include:
 # -DHP_TERMINAL    For DIM workaround to REVERSE problems on HP terminals.
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
@@ -199,8 +113,6 @@ SITE_DEFS = $(DIR_DEFS) -DEXP_CHARTRANS # Your defines here
 # -DSHORTENED_RBIND  For a SOCKSified lynx with the short version of Rbind.
 # -DSOCKS	   For making a SOCKSified lynx.
 # -DUNDERLINE_LINKS  Define if you want links underlined instead of bold.
-# -DEXP_CHARTRANS  enable chartrans support w/ new charsets, UTF8 mode etc.
-#                  (needed in SITE_DEFS *and* SITE_LYDEFS !)
 # -DEXP_CHARTRANS_AUTOSWITCH also let lynx switch term mode(Linux console only)
 # -DSLANG_MBCS_HACK prevent cutoff lines when using UTF8 console (slang only)
 #
@@ -230,60 +142,14 @@ SITE_DEFS = $(DIR_DEFS) -DEXP_CHARTRANS # Your defines here
 # -DSYSLOG_REQUESTED_URLS
 #
 # for installation of local execution links, please see the file userdefs.h
-
-generic: # TESTED: Linux FreeBSD SunOS Solaris IRIX CLIX HP-UX AIX SCO
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.."
-	cd src; $(MAKE) all CC="$(CC)" \
+#
+# TESTED: Linux FreeBSD SunOS Solaris IRIX CLIX HP-UX AIX SCO
+lynx:
+	cd WWW/Library/unix && $(MAKE) CC="$(CC)" \
+		LYFLAGS="$(SITE_LYDEFS)"
+	cd src && $(MAKE) all CC="$(CC)" \
 		MCFLAGS="" \
 		LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-# Contributed by Alex Matulich (matuli_a@marlin.navsea.navy.mil).
-# Note that some of the online help files in this distribution need
-# to be edited and renamed to conform with the Intergraph CLIX 14
-# character file name limit.
-clix:	# NOT-TESTED
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -DUSG" \
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-DUSG" \
-		LIBS="-lmalloc -lcurses -ltermcap -lbsd -lc_s \
-		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-# Contributed by Thanh Ma (tma@encore.com).
-umaxv:	# NOT-TESTED (replaces umaxv-curses, umaxv-slang)
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -D_SYSV3"
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-D_SYSV3" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-#     has a const/volatile bug in its native cc compiler. (don't use it ;)
-sco:	# NOT-TESTED
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -DSCO -DSVR4"
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-s -DSCO" \
-		LIBS="$(LIBS) -lmalloc $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-sco5:	# NOT-TESTED
-	cd WWW/Library/unix; $(MAKE) CC="cc -belf" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -DSCO -DSVR4"
-	cd src; $(MAKE) all CC="cc -belf" \
-		MCFLAGS="-s -DSCO" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		SITE_DEFS="$(SITE_DEFS)" \
 		WWWINC=$(WWWINC) \
 		WWWLIB="../WWW/Library/unix/libwww.a"

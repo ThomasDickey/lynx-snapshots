@@ -10,6 +10,15 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+1997-07-27
+* Rename top-level Makefile to Makefile.old (it's obsolete) - TD
+* Reduce top-level targets to one, 'lynx' - TD
+* Move comments describing DirEd to README.configure from makefile.in,
+  leaving only the definitions that haven't been integrated yet. - TD
+* Add configure options to enable/disable DirEd and its associated modes. - TD
+* Add configure option to enable/disable char-trans support. - TD
+* Correct sense of autoconf'd symbol for size-change. - TD
+* Accommodate systems with obsolete ncurses.h in configure tests. - TD
 1997-07-26
 * Changed the default value for STRIP_DOTDOT_URLS (lynx.cfg) to TRUE. - KW
 * Made some of the additional checks introduced yesterday in LYMainLoop.c

@@ -26,7 +26,7 @@
 #endif /* !VMS */
 
 #ifdef DOSPATH
-#define GOT_READ_DIR
+#define HAVE_READDIR
 #include <dirent.h>
 #define USE_DIRENT
 #include "HTDOS.h"
@@ -440,7 +440,7 @@ PRIVATE void free_suffixes NOARGS
 **
 **  If a README file exists, then it is inserted into the document here.
 */
-#ifdef GOT_READ_DIR
+#ifdef HAVE_READDIR
 PRIVATE void do_readme ARGS2(HTStructured *, target, CONST char *, localname)
 { 
     FILE * fp;
@@ -485,7 +485,7 @@ Bug removed thanks to joe@athena.mit.edu */
 	fclose(fp);
     } 
 }
-#endif /* GOT_READ_DIR */
+#endif /* HAVE_READDIR */
 
 /*	Make the cache file name for a W3 document.
 **	-------------------------------------------
@@ -1614,7 +1614,7 @@ PUBLIC int HTLoadFile ARGS4(
 	char * localname = HTLocalName(addr);
 	struct stat dir_info;
 	
-#ifdef GOT_READ_DIR
+#ifdef HAVE_READDIR
         /*
 	**  Multiformat handling.
 	**
@@ -2034,7 +2034,7 @@ forget_multi:
 	
 /* End of directory reading section
 */
-#endif /* GOT_READ_DIR */
+#endif /* HAVE_READDIR */
 open_file:
 	{
 	    FILE * fp = fopen(localname, "r");

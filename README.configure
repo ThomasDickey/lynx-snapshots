@@ -1,17 +1,18 @@
--- 1997/7/22 - T.Dickey <dickey@clark.net>
+-- 1997/7/27 - T.Dickey <dickey@clark.net>
 
-This is the second pass of an auto-configure script which I and Jim Spath
-have been working on.  It uses autoconf 2.12 to generate a Bourne shell
-script (configure), which can be run on a UNIX platform to generate:
+--------------------------------------------------------------------------------
+
+Overview
+--------
+
+This is an auto-configure script which I and Jim Spath have been working
+on.  It uses autoconf 2.12 to generate a Bourne shell script
+(configure), which can be run on a UNIX platform to generate:
 
 	lynx_cfg.h
 	makefile
 
-to replace the top-level Makefile of Lynx.  Ultimately the generated
-makefile will have a single target (rather than the multitude of specific
-platforms).  At this stage, we've gotten as far as combining several of the
-more common configurations (noted in makefile according to when they were
-tested).
+to replace the top-level Makefile of Lynx.
 
 To use the configure script, simply type
 
@@ -20,13 +21,15 @@ or	configure --with-screen=ncurses
 or	configure --with-screen=slang
 
 and
-	make <platform>
+	make lynx
 
-e.g., one of
+--------------------------------------------------------------------------------
 
-	make generic
+Platforms
+---------
 
-We've tested this on several platforms:
+We've tested this on several platforms.  It should work properly on any
+Unix-style system.
 
 	Linux 2.0.0 (gcc 2.7.2 with curses, several versions of ncurses
 		and slang)
@@ -41,6 +44,152 @@ We've tested this on several platforms:
 	SCO (cc with curses)
 	HP-UX (K&R and ANSI cc, gcc with curses, ncurses and slang)
 
-Note: SunOS and HP-UX come with a bundled K&R compiler, which is only
+Note:  SunOS and HP-UX come with a bundled K&R compiler, which is only
 useful for compiling with the bundled curses.  Both ncurses and slang
 require a compiler that recognizes prototypes.
+
+--------------------------------------------------------------------------------
+
+Options
+-------
+
+To get a list of the configure script's options, type
+
+	configure --help
+
+The form of the options is determined by the autoconf package.  We can
+use either boolean (enable/disable) or value (with) options.
+
+Here's an alphabetical listing of the Lynx-specific options.  The actual
+order shown by the -help option is different due to the requirements of
+the script:
+
+  --disable-dired-archive
+	Use this option to prevent DirEd from extracting files from an
+	archive file,
+
+  --disable-dired-gzip
+	Use this option to prevent DirEd from using gzip and gunzip.
+
+  --disable-dired-override
+	Lynx users can customize their keymaps by creating private
+	versions of lynx.cfg and modifying them, overriding the default
+	keymap.  Use this option to prevent DirEd keymap overriding.
+
+  --disable-dired-permit
+	Use this option to prevent DirEd from changing the permissions
+	on directories or files (i.e., from doing what the Unix chmod
+	command or the DOS attrib command does).
+
+  --disable-dired-tar
+	Use this option to prevent DirEd from using the tar program.
+
+  --disable-dired-uudecode
+	Use this option to prevent DirEd from using uudecode.
+
+  --disable-dired-xpermit
+	Use this option if you do not disable out the dired-permit
+	option, but want to restrict changes of the eXecute permission
+	to directories (i.e., not allow it to be changed for files).  If
+	you don't do this, you can still block changes of the eXecute
+	permission for files but not directories via the
+	"change_exec_perms" command line restriction.
+
+  --disable-dired-zip
+	Use this option to prevent DirEd from using zip and unzip.
+
+  --disable-echo
+  	Use this option to suppress the "compiling" commands during a build.
+	Doing this makes it easier to find and read warning messages.
+
+  --disable-full-paths
+  	Use this option to control whether full utility pathnames are used.
+	By default, configure substitutes full pathnames.
+
+  --disable-long-list
+  	Use this option to disable long "ls -l" directory listings.
+
+  --disable-parent-dir-refs
+  	Use this option to disable "Up-to" parent-links in directory listings.
+
+  --enable-debug
+  	Use this option to compile-in logic for traces/debugging.
+
+  --enable-find-leaks
+  	Use this option to compile-in logic for testing memory leaks.
+
+  --enable-warnings
+  	Use this option to turn on GCC compiler warnings.
+
+  --with-char-trans
+  	Use this option to enable optional character-translations with
+	new charsets, UTF8 mode, etc.
+
+  --with-color-style
+  	Use this option to enable optional/experimental color style.
+
+  --with-dired
+	Use this option to enable or disable the optional
+	directory-editor.
+
+	Lynx supports directory editing (DirEd) for local directories. 
+	This allows users to do things like view, copy and remove files
+	using a tabular display of the directory and single-keystroke
+	commands instead of using the command line.  From inside Lynx,
+	the keystroke sequence "g.<enter>" switches Lynx to DirEd mode
+	on the current directory.  If you're building a Lynx that is to
+	be used as a kind of restricted shell for users who do not have
+	access to the command line and should not have access to
+	equivalent capabilities, you must disable DirEd with this
+	option.  You can also disable some DirEd functions while
+	allowing others.
+
+	All DirEd functions that were enabled on compilation can be
+	disabled or modified at run time via DIRED_MENU symbols in
+	lynx.cfg.
+
+	If you have disabled DirEd completely, you can ignore all the
+	other DirEd options.
+
+  --with-screen=XXX
+	Use this option to select the screen type.  The option value,
+	XXX must be one of curses (the default), ncurses or slang.
+	Specifying a screen type causes the configure script to look in
+	standard locations for the associated header and library files,
+	unless you have preset the $CFLAGS and $LIBS variables.
+
+--------------------------------------------------------------------------------
+
+Environment
+-----------
+
+This is all documented in great detail in the autoconf package.
+
+The configure script looks for programs and libraries in known/standard
+locations.  You can override the behavior of the script by presetting
+environment variables; if they are set, the script will try to use these
+values rather than computing new ones.  Useful variables include:
+
+	CC - the C compiler.  If you do not override this, configure
+		will try to use gcc.
+
+	CFLAGS - the C compiler options.  These also include C
+		preprocessor options (such as -I), since the $CFLAGS and
+		$CPPFLAGS variables are maintained separately.
+
+	CPPFLAGS - the C preprocessor options.  For some configuration
+		tests, you may need to set both $CFLAGS and $CPPFLAGS if
+		you are compiling against header files in nonstandard
+		locations.
+
+	LDFLAGS - linker/loader options.
+
+	LIBS - the libraries to be linked, e.g,.  with -L and -l
+		options.  If you are linking against libraries in
+		nonstandard locations (e.g., unrelated to the install
+		prefix that you can specify in the configure script),
+		you may have to specify these via the $LIBS variable.
+
+You should not have to edit the generated makefiles to modify the values
+that the configure script generates.  If you do, you have either found a
+bug in the script, or you do not understand how to use it properly.

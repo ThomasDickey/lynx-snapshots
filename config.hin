@@ -4,8 +4,8 @@
 #undef UNPAINT_CACHE		/* FIXME: for RP's code */
 /* #undef TEST			** FIXME: for RP's code */
 #undef LINKEDSTYLES		/* FIXME: for RP's code */
-/* #undef EXP_CHARTRANS		** FIXME: for character-translations */
 #undef ALT_CHAR_SET
+#undef ARCHIVE_ONLY		/* CF_ARG_DISABLE(dired-archive) */
 #undef CHMOD_PATH		/* CF_PATH_PROG(chmod) */
 #undef COLOR_CURSES		/* defined by CF_COLOR_CURSES */
 #undef COMPRESS_PATH		/* CF_PATH_PROG(compress) */
@@ -13,6 +13,8 @@
 #undef CURS_PERFORMANCE
 #undef DEBUG			/* configure --enable-debug */
 #undef DECL_SYS_ERRLIST
+#undef DIRED_SUPPORT		/* AC_ARG_WITH(dired) */
+#undef EXP_CHARTRANS		/* AC_ARG_WITH(char-trans) */
 #undef FANCY_CURSES		/* defined by CF_FANCY_CURSES */
 #undef GZIP_PATH		/* CF_PATH_PROG(gzip) */
 #undef HAVE_CBREAK
@@ -23,13 +25,13 @@
 #undef HAVE_KEYPAD
 #undef HAVE_LIMITS_H
 #undef HAVE_PUTENV
+#undef HAVE_READDIR
 #undef HAVE_SIZECHANGE		/* defined by CF_SIZECHANGE */
 #undef HAVE_STRING_H
 #undef HAVE_SYS_DIR_H		/* defined by AC_HEADER_DIRENT */
 #undef HAVE_SYS_FCNTL_H		/* have <sys/fcntl.h> */
 #undef HAVE_SYS_FILIO_H		/* have <sys/filio.h> */
 #undef HAVE_SYS_NDIR_H		/* defined by AC_HEADER_DIRENT */
-#undef HAVE_TERMIOS
 #undef HAVE_TERMIOS_H		/* have <termios.h> */
 #undef HAVE_TTYTYPE
 #undef HAVE_UNISTD_H		/* have <unistd.h> */
@@ -39,16 +41,24 @@
 #undef INSTALL_PATH		/* CF_PATH_PROG(install) */
 #undef LINUX			/* FIXME: make tests? */
 #undef LOCALE			/* for locale support */
+#undef LONG_LIST		/* CF_ARG_DISABLE(long-list) */
 #undef LY_FIND_LEAKS		/* configure --disable-leaks */
 #undef MKDIR_PATH		/* CF_PATH_PROG(mkdir) */
 #undef MV_PATH			/* CF_PATH_PROG(mv) */
 #undef NCURSES			/* defined for ncurses support */
-#undef NCURSES_BROKEN		/* defined for ncurses color support */
 #undef NCURSESHEADER		/* defined if we include <ncurses.h> */
+#undef NCURSES_BROKEN		/* defined for ncurses color support */
 #undef NEED_PTEM_H		/* defined by CF_SIZECHANGE */
 #undef NEED_REMOVE		/* defined by CF_REMOVE_BROKEN */
 #undef NGROUPS			/* defined by CF_NGROUPS */
+#undef NO_CHANGE_EXECUTE_PERMS	/* CF_ARG_DISABLE(dired-xpermit) */
 #undef NO_PARENT_DIR_REFERENCE	/* configure --disable-parent-dir */
+#undef OK_GZIP			/* CF_ARG_DISABLE(dired-gzip) */
+#undef OK_OVERRIDE		/* CF_ARG_DISABLE(dired-override) */
+#undef OK_PERMIT		/* CF_ARG_DISABLE(dired-permit) */
+#undef OK_TAR			/* CF_ARG_DISABLE(dired-tar) */
+#undef OK_UUDECODE		/* CF_ARG_DISABLE(dired-uudecode) */
+#undef OK_ZIP			/* CF_ARG_DISABLE(dired-zip) */
 #undef RM_PATH			/* CF_PATH_PROG(rm) */
 #undef STDC_HEADERS
 #undef SYSTEM_MAIL		/* CF_DEFINE_PROG */
@@ -70,49 +80,25 @@
 #undef vfork			/* defined by AC_FUNC_FORK */
 /* FIXME:AIX4 */
 /* FIXME:ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
-/* FIXME:ARCHIVE_ONLY */
 /* FIXME:BSDI */
-/* FIXME:CLIX */
 /* FIXME:DECLARE_WAIS_LOGFILES */
 /* FIXME:DGUX */
 /* FIXME:DGUX_OLD */
-/* FIXME:DIRED_SUPPORT */
 /* FIXME:EXEC_LINKS */
-/* FIXME:FALSE=0 */
 /* FIXME:HP_TERMINAL */
 /* FIXME:ISC */
-/* FIXME:LONG_LIST */
-/* FIXME:NEXT */
 /* FIXME:NOPORT */
-/* FIXME:NO_CHANGE_EXECUTE_PERMS */
 /* FIXME:NO_CPU_LIMIT */
 /* FIXME:NSL_FORK */
-/* FIXME:OK_GZIP */
-/* FIXME:OK_OVERRIDE */
-/* FIXME:OK_PERMIT */
-/* FIXME:OK_TAR */
-/* FIXME:OK_UUDECODE */
-/* FIXME:OK_ZIP */
-/* FIXME:PERFORMANCE */
 /* FIXME:POSIX_JC */
 /* FIXME:REVERSE_CLEAR_SCREEN_PROBLEM */
-/* FIXME:SCO */
 /* FIXME:SGI */
 /* FIXME:SHORTENED_RBIND */
 /* FIXME:SNAKE */
 /* FIXME:SOCKS */
 /* FIXME:SVR4_BSDSELECT */
 /* FIXME:SYSLOG_REQUESTED_URLS */
-/* FIXME:TRUE=1 */
-/* FIXME:UNDERLINE_LINKS */
-/* FIXME:USG */
 /* FIXME:_BSD=44 */
 /* FIXME:_BUILTINS */
-/* FIXME:_INCLUDE_AES_SOURCE */
-/* FIXME:_INCLUDE_HPUX_SOURCE */
-/* FIXME:_INCLUDE_POSIX_SOURCE */
-/* FIXME:_INCLUDE_XOPEN_SOURCE */
-/* FIXME:_SYSV3 */
-/* FIXME:__STDC__ */
 /* FIXME:_locp=__lc_locale */
 /* FIXME:loc_t=_LC_locale_t */

@@ -584,8 +584,8 @@ PUBLIC int printfile ARGS1(
 		 *  if the document has 8-bit characters and we we seem
 		 *  to have a valid charset.  - kw
 		 */
-		use_cte = HTLoadedDocumentEightbit();
 #ifdef EXP_CHARTRANS
+		use_cte = HTLoadedDocumentEightbit();
 		disp_charset = LYCharSet_UC[current_char_set].MIMEname;
 		/*
 		 *  Don't send a charset if we have a CJK character set
@@ -597,6 +597,7 @@ PUBLIC int printfile ARGS1(
 		    disp_charset = NULL;
 		}
 #else
+		use_cte = NO;
 		disp_charset = NULL;
 #endif /* EXP_CHARTRANS */
 		use_type =  (disp_charset || HTisDocumentSource());
