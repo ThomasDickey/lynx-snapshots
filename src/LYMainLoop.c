@@ -536,7 +536,7 @@ PRIVATE void do_check_recall ARGS7(
     int,	URLTotal,
     int *,	URLNum,
     int,	recall,
-    BOOLEAN,	FirstURLRecall)
+    BOOLEAN *,	FirstURLRecall)
 {
     char *cp;
 
@@ -582,21 +582,21 @@ PRIVATE void do_check_recall ARGS7(
 	    break;
 	}
 	if (recall && ch == UPARROW) {
-	    if (FirstURLRecall) {
+	    if (*FirstURLRecall) {
 		/*
-		 *	Use last URL in the list. - FM
+		 * Use last URL in the list.  - FM
 		 */
-		FirstURLRecall = FALSE;
+		*FirstURLRecall = FALSE;
 		*URLNum = 0;
 	    } else {
 		/*
-		 *	Go back to the previous URL in the list. - FM
+		 * Go back to the previous URL in the list.  - FM
 		 */
 		*URLNum += 1;
 	    }
 	    if (*URLNum >= URLTotal)
 		/*
-		 *	Roll around to the last URL in the list. - FM
+		 * Roll around to the last URL in the list.  - FM
 		 */
 		*URLNum = 0;
 	    if ((cp = (char *)HTList_objectAt(Goto_URLs,
@@ -627,21 +627,21 @@ PRIVATE void do_check_recall ARGS7(
 		continue;
 	    }
 	} else if (recall && ch == DNARROW) {
-	    if (FirstURLRecall) {
+	    if (*FirstURLRecall) {
 		/*
-		 *	Use the first URL in the list. - FM
+		 * Use the first URL in the list.  - FM
 		 */
-		FirstURLRecall = FALSE;
+		*FirstURLRecall = FALSE;
 		*URLNum = URLTotal - 1;
 	    } else {
 		/*
-		 *	Advance to the next URL in the list. - FM
+		 * Advance to the next URL in the list.  - FM
 		 */
 		*URLNum -= 1;
 	    }
 	    if (*URLNum < 0)
 		/*
-		 *	Roll around to the first URL in the list. - FM
+		 * Roll around to the first URL in the list.  - FM
 		 */
 		*URLNum = URLTotal - 1;
 	    if ((cp=(char *)HTList_objectAt(Goto_URLs, *URLNum)) != NULL) {
@@ -669,6 +669,8 @@ PRIVATE void do_check_recall ARGS7(
 		}
 		continue;
 	    }
+	} else {
+	    break;
 	}
     }
 }
@@ -4757,12 +4759,12 @@ PRIVATE void handle_LYK_WHEREIS ARGS3(
  */
 PRIVATE void handle_LYK_digit ARGS7(
     int,	c,
-    BOOLEAN,	force_load,
+    BOOLEAN *,	force_load,
     char *,	user_input_buffer,
     char *,	prev_target,
     int *,	old_c,
     int,	real_c,
-    BOOLEAN,	try_internal)
+    BOOLEAN *,	try_internal GCC_UNUSED)
 {
     int lindx = ((nlinks > 0) ? curdoc.link : 0);
     int number;
@@ -4865,10 +4867,10 @@ PRIVATE void handle_LYK_digit ARGS7(
 		 */
 		FREE(curdoc.address);
 	    } else
-		try_internal = TRUE;
+		*try_internal = TRUE;
 	    if (!(LYresubmit_posts && newdoc.post_data))
 		LYinternal_flag = TRUE;
-	    force_load = TRUE;
+	    *force_load = TRUE;
 	    break;
 	} else {
 	    /*
@@ -4890,7 +4892,7 @@ PRIVATE void handle_LYK_digit ARGS7(
 	    newdoc.safe = FALSE;
 	}
 	newdoc.internal_link = FALSE;
-	force_load = TRUE;  /* force MainLoop to reload */
+	*force_load = TRUE;  /* force MainLoop to reload */
 	break;
 
     case DO_GOTOLINK_STUFF:
@@ -6548,8 +6550,8 @@ new_cmd:  /*
 	case LYK_7:
 	case LYK_8:
 	case LYK_9:
-	    handle_LYK_digit(c, force_load, user_input_buffer, prev_target,
-			     &old_c, real_c, try_internal);
+	    handle_LYK_digit(c, &force_load, user_input_buffer, prev_target,
+			     &old_c, real_c, &try_internal);
 	    break;
 
 	case LYK_SOURCE:  /* toggle view source mode */
@@ -6775,7 +6777,7 @@ new_cmd:  /*
 				&URLTotal, &URLNum, &FirstURLRecall, &old_c,
 				real_c)) {
 		do_check_recall (ch, user_input_buffer, &temp, URLTotal,
-				 &URLNum, recall, FirstURLRecall);
+				 &URLNum, recall, &FirstURLRecall);
 		do_check_goto_URL(user_input_buffer, &temp, &force_load);
 	    }
 	    break;
@@ -6979,7 +6981,7 @@ new_cmd:  /*
 				    &FirstURLRecall, &URLNum, &URLTotal, &ch,
 				    &old_c, real_c)) {
 		do_check_recall (ch, user_input_buffer, &temp, URLTotal,
-				 &URLNum, recall, FirstURLRecall);
+				 &URLNum, recall, &FirstURLRecall);
 		do_check_goto_URL(user_input_buffer, &temp, &force_load);
 	    }
 	    break;

@@ -62,10 +62,10 @@ PRIVATE void done ARGS1(int, code)
 PRIVATE void usage NOARGS
 {
     static CONST char *tbl[] = {
-	"Usage: makeuctb [parameters]"
+	"Usage: makeuctb [parameters]",
 	"",
 	"Utility to convert .tbl into .h files for Lynx compilation.",
-	""
+	"",
 	"Parameters (all are optional):",
 	"  1: the input file (normally {filename}.tbl, but \"-\" for stdin",
 	"  2: the output file (normally {filename}.tbl but \"-\" for stdout",
@@ -269,7 +269,7 @@ PUBLIC int main ARGS2(
     };
     static char *last_ifdefs[] = {
 	"",
-	"#endif /* NO_CHARSET%s */"
+	"#endif /* NO_CHARSET%s */",
 	"",
 	"#endif /* INCL_CHARSET%s */"
     };
