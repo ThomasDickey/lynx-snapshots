@@ -4,7 +4,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2002/11/12
+dnl Updated: 2002/12/31
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13, patched
 dnl by Tom Dickey.  See your local GNU archives, and this URL:
@@ -607,14 +607,16 @@ fi
 
 if test -n "$cf_new_cppflags" ; then
 	ifelse($2,,,[CF_VERBOSE(add to \$CPPFLAGS $cf_new_cppflags)])
-	CPPFLAGS="$CPPFLAGS $cf_new_cppflags"
+	CPPFLAGS="$cf_new_cppflags $CPPFLAGS"
 fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Add an include-directory to $CPPFLAGS.  Don't add /usr/include, since it's
 dnl redundant.  We don't normally need to add -I/usr/local/include for gcc,
-dnl but old versions (and some misinstalled ones) need that.
+dnl but old versions (and some misinstalled ones) need that.  To make things
+dnl worse, gcc 3.x gives error messages if -I/usr/local/include is added to
+dnl the include-path).
 AC_DEFUN([CF_ADD_INCDIR],
 [
 for cf_add_incdir in $1
@@ -624,11 +626,22 @@ do
 		case $cf_add_incdir in
 		/usr/include) # (vi
 			;;
+		/usr/local/include) # (vi
+			if test "$GCC" = yes
+			then
+				cf_save_CPPFLAGS="$CPPFLAGS"
+				CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
+				AC_TRY_COMPILE([#include <stdio.h>],
+						[printf("Hello")],
+						[],
+						[CPPFLAGS="$cf_save_CPPFLAGS"])
+			fi
+			;;
 		*) # (vi
 			CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
 			;;
 		esac
-		cf_top_incdir=`echo $cf_add_incdir | sed -e 's:/include/.*$:/include:'`
+		cf_top_incdir=`echo $cf_add_incdir | sed -e 's%/include/.*$%/include%'`
 		test "$cf_top_incdir" = "$cf_add_incdir" && break
 		cf_add_incdir="$cf_top_incdir"
 	done
@@ -1302,7 +1315,7 @@ AC_DEFINE_UNQUOTED($2,"$cf_cv_$2")
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl "dirname" is not portable, so we fake it with a shell script.
-AC_DEFUN([CF_DIRNAME],[$1=`echo $2 | sed -e 's:/[[^/]]*$::'`])dnl
+AC_DEFUN([CF_DIRNAME],[$1=`echo $2 | sed -e 's%/[[^/]]*$%%'`])dnl
 dnl ---------------------------------------------------------------------------
 dnl You can always use "make -n" to see the actual options, but it's hard to
 dnl pick out/analyze warning messages when the compile-line is long.
@@ -1825,8 +1838,6 @@ EOF
 		if AC_TRY_EVAL(ac_compile); then
 			test -n "$verbose" && AC_MSG_RESULT(... $cf_attribute)
 			cat conftest.h >>confdefs.h
-#		else
-#			sed -e 's/__attr.*/\/*nothing*\//' conftest.h >>confdefs.h
 		fi
 	done
 else
@@ -1847,7 +1858,7 @@ dnl	-pedantic
 dnl
 AC_DEFUN([CF_GCC_WARNINGS],
 [
-if test "$GCC" = yes
+if ( test "$GCC" = yes || test "$GXX" = yes )
 then
 	cat > conftest.$ac_ext <<EOF
 #line __oline__ "configure"
@@ -2064,6 +2075,37 @@ fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl Check if we can compile with ncurses' header file
+dnl $1 is the cache variable to set
+dnl $2 is the header-file to include
+dnl $3 is the root name (ncurses or ncursesw)
+AC_DEFUN([CF_NCURSES_CC_CHECK],[
+	AC_TRY_COMPILE([
+]ifelse($3,ncursesw,[
+#define _XOPEN_SOURCE_EXTENDED
+#undef  HAVE_LIBUTF8_H	/* in case we used CF_UTF8_LIB */
+#define HAVE_LIBUTF8_H	/* to force ncurses' header file to use cchar_t */
+])[
+#include <$2>],[
+#ifdef NCURSES_VERSION
+]ifelse($3,ncursesw,[
+#ifndef WACS_BSSB
+	make an error
+#endif
+])[
+printf("%s\n", NCURSES_VERSION);
+#else
+#ifdef __NCURSES_H
+printf("old\n");
+#else
+	make an error
+#endif
+#endif
+	]
+	,[$1=$cf_header]
+	,[$1=no])
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Look for the SVr4 curses clone 'ncurses' in the standard places, adjusting
 dnl the CPPFLAGS variable so we can include its header.
 dnl
@@ -2094,22 +2136,11 @@ CPPFLAGS="-I$cf_cv_curses_dir/include -I$cf_cv_curses_dir/include/$cf_ncuhdr_roo
 
 AC_CACHE_CHECK(for $cf_ncuhdr_root header in include-path, cf_cv_ncurses_h,[
 	cf_header_list="$cf_ncuhdr_root/curses.h $cf_ncuhdr_root/ncurses.h"
-	( test "$cf_ncuhdr_root" = ncurses || test "$cf_ncuhdr_root" = ncursesw ) && cf_header_list="curses.h ncurses.h $cf_header_list"
+	( test "$cf_ncuhdr_root" = ncurses || test "$cf_ncuhdr_root" = ncursesw ) && cf_header_list="$cf_header_list curses.h ncurses.h"
 	for cf_header in $cf_header_list
 	do
-	AC_TRY_COMPILE([#include <$cf_header>],[
-#ifdef NCURSES_VERSION
-printf("%s\n", NCURSES_VERSION);
-#else
-#ifdef __NCURSES_H
-printf("old\n");
-#else
-make an error
-#endif
-#endif
-	]
-	,[cf_cv_ncurses_h=$cf_header; break]
-	,[cf_cv_ncurses_h=no])
+		CF_NCURSES_CC_CHECK(cf_cv_ncurses_h,$cf_header,$1)
+		test "$cf_cv_ncurses_h" != no && break
 	done
 ])
 
@@ -2120,39 +2151,38 @@ AC_CACHE_CHECK(for $cf_ncuhdr_root include-path, cf_cv_ncurses_h2,[
 	test -n "$verbose" && echo
 	CF_HEADER_PATH(cf_search,$cf_ncuhdr_root)
 	test -n "$verbose" && echo search path $cf_search
+	cf_save2_CPPFLAGS="$CPPFLAGS"
 	for cf_incdir in $cf_search
 	do
+		CF_ADD_INCDIR($cf_incdir)
 		for cf_header in \
 			ncurses.h \
 			curses.h
 		do
-			if egrep "NCURSES_[[VH]]" $cf_incdir/$cf_header 1>&AC_FD_CC 2>&1; then
+			CF_NCURSES_CC_CHECK(cf_cv_ncurses_h2,$cf_header,$1)
+			if test "$cf_cv_ncurses_h2" != no ; then
 				cf_cv_ncurses_h2=$cf_incdir/$cf_header
 				test -n "$verbose" && echo $ac_n "	... found $ac_c" 1>&AC_FD_MSG
 				break
 			fi
 			test -n "$verbose" && echo "	... tested $cf_incdir/$cf_header" 1>&AC_FD_MSG
 		done
-		test -n "$cf_cv_ncurses_h2" && break
+		CPPFLAGS="$cf_save2_CPPFLAGS"
+		test "$cf_cv_ncurses_h2" != no && break
 	done
-	test -z "$cf_cv_ncurses_h2" && AC_ERROR(not found)
+	test "$cf_cv_ncurses_h2" = no && AC_ERROR(not found)
 	])
 
 	CF_DIRNAME(cf_1st_incdir,$cf_cv_ncurses_h2)
-	CF_DIRNAME(cf_2nd_incdir,$cf_1st_incdir)
 	cf_cv_ncurses_header=`basename $cf_cv_ncurses_h2`
-	test -n "$verbose" && echo cf_1st_include=$cf_1st_incdir
-	test -n "$verbose" && echo cf_2nd_include=$cf_2nd_incdir
 	if test `basename $cf_1st_incdir` = $cf_ncuhdr_root ; then
 		cf_cv_ncurses_header=$cf_ncuhdr_root/$cf_cv_ncurses_header
-		CF_ADD_INCDIR($cf_2nd_incdir)
 	fi
 	CF_ADD_INCDIR($cf_1st_incdir)
 
 fi
 
 AC_DEFINE(NCURSES)
-
 
 case $cf_cv_ncurses_header in # (vi
 *ncurses.h)
@@ -2206,7 +2236,6 @@ esac
 
 LIBS="$cf_ncurses_LIBS $LIBS"
 
-
 if ( test -n "$cf_cv_curses_dir" && test "$cf_cv_curses_dir" != "no" )
 then
 	LIBS="-L$cf_cv_curses_dir/lib -l$cf_nculib_root $LIBS"
@@ -2221,7 +2250,7 @@ if test -n "$cf_ncurses_LIBS" ; then
 	AC_MSG_CHECKING(if we can link $cf_nculib_root without $cf_ncurses_LIBS)
 	cf_ncurses_SAVE="$LIBS"
 	for p in $cf_ncurses_LIBS ; do
-		q=`echo $LIBS | sed -e 's/'$p' //' -e 's/'$p'$//'`
+		q=`echo $LIBS | sed -e "s%$p %%" -e "s%$p$%%"`
 		if test "$q" != "$LIBS" ; then
 			LIBS="$q"
 		fi
@@ -2232,6 +2261,9 @@ if test -n "$cf_ncurses_LIBS" ; then
 		[AC_MSG_RESULT(no)
 		 LIBS="$cf_ncurses_SAVE"])
 fi
+
+CF_UPPER(cf_nculib_ROOT,HAVE_LIB$cf_nculib_root)
+AC_DEFINE_UNQUOTED($cf_nculib_ROOT)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check for the version of ncurses, to aid in reporting bugs, etc.
@@ -2958,7 +2990,7 @@ fi
 dnl ---------------------------------------------------------------------------
 dnl	Remove "-g" option from the compiler options
 AC_DEFUN([CF_STRIP_G_OPT],
-[$1=`echo ${$1} | sed -e 's/-g //' -e 's/-g$//'`])dnl
+[$1=`echo ${$1} | sed -e 's%-g %%' -e 's%-g$%%'`])dnl
 dnl ---------------------------------------------------------------------------
 dnl	Remove "-O" option from the compiler options
 AC_DEFUN([CF_STRIP_O_OPT],[
@@ -3008,48 +3040,56 @@ AC_DEFUN([CF_SUBDIR_PATH],
 
 test -d [$]HOME && {
 	test -n "$verbose" && echo "	... testing $3-directories under [$]HOME"
-	test -d [$]HOME/$3 &&    $1="[$]$1 [$]HOME/$3"
-	test -d [$]HOME/$3/$2 && $1="[$]$1 [$]HOME/$3/$2"
+	test -d [$]HOME/$3 &&          $1="[$]$1 [$]HOME/$3"
+	test -d [$]HOME/$3/$2 &&       $1="[$]$1 [$]HOME/$3/$2"
+	test -d [$]HOME/$3/$2/$3 &&    $1="[$]$1 [$]HOME/$3/$2/$3"
 }
 
 # For other stuff under the home directory, it should be sufficient to put
 # a symbolic link for $HOME/$2 to the actual package location:
 test -d [$]HOME/$2 && {
 	test -n "$verbose" && echo "	... testing $3-directories under [$]HOME/$2"
-	test -d [$]HOME/$2/$3 &&    $1="[$]$1 [$]HOME/$2/$3"
-	test -d [$]HOME/$2/$3/$2 && $1="[$]$1 [$]HOME/$2/$3/$2"
+	test -d [$]HOME/$2/$3 &&       $1="[$]$1 [$]HOME/$2/$3"
+	test -d [$]HOME/$2/$3/$2 &&    $1="[$]$1 [$]HOME/$2/$3/$2"
 }
 
 test "$prefix" != /usr/local && \
 test -d /usr/local && {
 	test -n "$verbose" && echo "	... testing $3-directories under /usr/local"
-	test -d /usr/local/$3 &&    $1="[$]$1 /usr/local/$3"
-	test -d /usr/local/$3/$2 && $1="[$]$1 /usr/local/$3/$2"
-	test -d /usr/local/$2/$3 && $1="[$]$1 /usr/local/$2/$3"
+	test -d /usr/local/$3 &&       $1="[$]$1 /usr/local/$3"
+	test -d /usr/local/$3/$2 &&    $1="[$]$1 /usr/local/$3/$2"
+	test -d /usr/local/$3/$2/$3 && $1="[$]$1 /usr/local/$3/$2/$3"
+	test -d /usr/local/$2/$3 &&    $1="[$]$1 /usr/local/$2/$3"
+	test -d /usr/local/$2/$3/$2 && $1="[$]$1 /usr/local/$2/$3/$2"
 }
 
 test "$prefix" != NONE && \
 test -d $prefix && {
 	test -n "$verbose" && echo "	... testing $3-directories under $prefix"
-	test -d $prefix/$3 &&    $1="[$]$1 $prefix/$3"
-	test -d $prefix/$3/$2 && $1="[$]$1 $prefix/$3/$2"
-	test -d $prefix/$2/$3 && $1="[$]$1 $prefix/$2/$3"
+	test -d $prefix/$3 &&          $1="[$]$1 $prefix/$3"
+	test -d $prefix/$3/$2 &&       $1="[$]$1 $prefix/$3/$2"
+	test -d $prefix/$3/$2/$3 &&    $1="[$]$1 $prefix/$3/$2/$3"
+	test -d $prefix/$2/$3 &&       $1="[$]$1 $prefix/$2/$3"
+	test -d $prefix/$2/$3/$2 &&    $1="[$]$1 $prefix/$2/$3/$2"
 }
 
 test "$prefix" != /opt && \
 test -d /opt && {
 	test -n "$verbose" && echo "	... testing $3-directories under /opt"
-	test -d /opt/$3 &&    $1="[$]$1 /opt/$3"
-	test -d /opt/$3/$2 && $1="[$]$1 /opt/$3/$2"
-	test -d /opt/$2/$3 && $1="[$]$1 /opt/$2/$3"
+	test -d /opt/$3 &&             $1="[$]$1 /opt/$3"
+	test -d /opt/$3/$2 &&          $1="[$]$1 /opt/$3/$2"
+	test -d /opt/$3/$2/$3 &&       $1="[$]$1 /opt/$3/$2/$3"
+	test -d /opt/$2/$3 &&          $1="[$]$1 /opt/$2/$3"
+	test -d /opt/$2/$3/$2 &&       $1="[$]$1 /opt/$2/$3/$2"
 }
 
 test "$prefix" != /usr && \
 test -d /usr && {
 	test -n "$verbose" && echo "	... testing $3-directories under /usr"
-	test -d /usr/$3 &&    $1="[$]$1 /usr/$3"
-	test -d /usr/$3/$2 && $1="[$]$1 /usr/$3/$2"
-	test -d /usr/$2/$3 && $1="[$]$1 /usr/$2/$3"
+	test -d /usr/$3 &&             $1="[$]$1 /usr/$3"
+	test -d /usr/$3/$2 &&          $1="[$]$1 /usr/$3/$2"
+	test -d /usr/$3/$2/$3 &&       $1="[$]$1 /usr/$3/$2/$3"
+	test -d /usr/$2/$3 &&          $1="[$]$1 /usr/$2/$3"
 }
 ])dnl
 dnl ---------------------------------------------------------------------------
@@ -3618,6 +3658,9 @@ AC_ARG_WITH(neXtaw,
 	[  --with-neXtaw           link with neXT Athena library],
 	[cf_x_athena=neXtaw])
 
+AC_ARG_WITH(XawPlus,
+	[  --with-XawPlus          link with Athena-Plus library],
+	[cf_x_athena=XawPlus])
 
 AC_CHECK_LIB(Xext,XextCreateExtension,
 	[LIBS="-lXext $LIBS"])

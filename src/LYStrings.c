@@ -535,7 +535,7 @@ PRIVATE int set_clicked_link ARGS4(
 		c = LAC_TO_LKC0(LYK_CHANGE_LINK);
 	}
 	else {
-	   if (2*y > LYlines){ 		/* Bottom Half of the screen */
+	   if (2*y > LYlines){		/* Bottom Half of the screen */
 	      if (4*y < 3*LYlines){
 		c = LAC_TO_LKC0(LYK_DOWN_TWO);	/* Third quarter */
 	      } else
@@ -2144,8 +2144,6 @@ re_read:
 		}
 #else /* pdcurses version */
 
-	/* _WINDOWS 1997/10/18 (Sat) 19:41:59 */
-
 #define H_CMD_AREA	6
 #define HIST_CMD_2	12
 #define V_CMD_AREA	1
@@ -2162,39 +2160,7 @@ re_read:
 		c = -1;
 		mouse_link = -1;
 
-		if (system_is_NT) {
-		/* for Windows NT */
-		  request_mouse_pos();
-
-		  if (BUTTON_STATUS(1) & BUTTON_PRESSED) {
-			if (MOUSE_Y_POS > (LYlines - V_CMD_AREA)) {
-			    /* Screen BOTTOM */
-			    if (MOUSE_X_POS < left) {
-				c = LTARROW;		p = "<-";
-			    } else if (MOUSE_X_POS < HIST_CMD_2) {
-				c = RTARROW;		p = "->";
-			    } else if (MOUSE_X_POS > right) {
-				c = 'z';		p = "Cancel";
-			    } else {
-				c = PGDOWN;		p = "PGDOWN";
-			    }
-			} else if (MOUSE_Y_POS < V_CMD_AREA) {
-			    /* Screen TOP */
-			    if (MOUSE_X_POS < left) {
-				c = LTARROW;		p = "<-";
-			    } else if (MOUSE_X_POS < HIST_CMD_2) {
-				c = RTARROW;		p = "->";
-			    } else if (MOUSE_X_POS > right) {
-				c = 'z';		p = "Cancel";
-			    } else {
-				c = PGUP;		p = "PGUP";
-			    }
-			} else {
-			    c = set_clicked_link(MOUSE_X_POS, MOUSE_Y_POS, FOR_PANEL, 1);
-			}
-		    }
-		} else {
-		    /* for Windows 95 */
+		if (!system_is_NT) {
 		    tick_count = GetTickCount();
 
 		    /* Guard Mouse button miss click */
@@ -2204,15 +2170,18 @@ re_read:
 		    } else {
 			old_click = tick_count;
 		    }
-		    request_mouse_pos();
-		    if (MOUSE_Y_POS > (LYlines - V_CMD_AREA)) {
+		}
+		request_mouse_pos();
+
+		if (BUTTON_STATUS(1) & BUTTON_PRESSED) {
+		    if (MOUSE_Y_POS > (LYlines - V_CMD_AREA - 1)) {
 			/* Screen BOTTOM */
 			if (MOUSE_X_POS < left) {
 			    c = LTARROW;	p = "<-";
 			} else if (MOUSE_X_POS < HIST_CMD_2) {
 			    c = RTARROW;	p = "->";
 			} else if (MOUSE_X_POS > right) {
-			    c = '\b';		p = "History";
+			    c = 'z';		p = "Cancel";
 			} else {
 			    c = PGDOWN;		p = "PGDOWN";
 			}
@@ -2480,16 +2449,19 @@ PUBLIC BOOLEAN LYRemoveNewlines ARGS1(
 /*
  * Remove ALL whitespace from a string (including embedded blanks).
  */
-PUBLIC void LYRemoveBlanks ARGS1(
+PUBLIC char * LYRemoveBlanks ARGS1(
 	char *,		buffer)
 {
     if (buffer != 0) {
 	size_t i, j;
-	for (i = j = 0; buffer[i]; i++)
+	for (i = j = 0; buffer[i]; i++) {
 	    if (!isspace(UCH((buffer[i]))))
 		buffer[j++] = buffer[i];
+	}
 	buffer[j] = 0;
+	return buffer+j;
     }
+    return NULL;
 }
 
 /*
@@ -4993,7 +4965,7 @@ PUBLIC char *LYstrsep ARGS2(
 {
     char *tmp, *out;
 
-    if (!stringp || !*stringp)		/* nothing to do? */
+    if (isEmpty(stringp))		/* nothing to do? */
 	return 0;			/* then don't fall on our faces */
 
     out = *stringp;			/* save the start of the string */
@@ -5746,7 +5718,7 @@ PUBLIC int LYReadCmdKey ARGS1(
 			++tmp;
 		    }
 		    if (*tmp != '\0') {
-		    	*tmp++ = '\0';
+			*tmp++ = '\0';
 			tmp = LYSkipBlanks(tmp);
 		    }
 		    CTRACE((tfp, "LYSetConfigValue(%s, %s)\n", src, tmp));
@@ -5757,7 +5729,7 @@ PUBLIC int LYReadCmdKey ARGS1(
 	}
 	if (feof(cmd_script)) {
 	    fclose(cmd_script);
-	    cmd_script = 0;    
+	    cmd_script = 0;
 	}
 	if (ch >= 0) {
 	    LYSleepReplay();

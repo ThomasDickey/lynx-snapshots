@@ -106,12 +106,15 @@ static int ResolveYield (void)
 }
 #endif
 
-#ifdef _WINDOWS_NSL
-char host[512];
-struct hostent  *phost;	/* Pointer to host - See netdb.h */
-int donelookup;
+/*
+ * This chunk of code is used in both win32 and cygwin.
+ */
+#if defined(_WINDOWS_NSL)
+static char host[512];
+static struct hostent *phost; /* Pointer to host - See netdb.h */
+static int donelookup;
 
-static unsigned long _fork_func (void *arglist)
+static unsigned long _fork_func (void *arglist GCC_UNUSED)
 {
 #ifdef SH_EX
     unsigned long addr;
@@ -1428,10 +1431,6 @@ PRIVATE void free_HTTCP_hostname NOARGS
 **	-------------------------------------------
 **
 */
-#ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN 64		/* Arbitrary limit */
-#endif /* MAXHOSTNAMELEN */
-
 PRIVATE void get_host_details NOARGS
 {
     char name[MAXHOSTNAMELEN+1];	/* The name of this host */

@@ -1279,10 +1279,12 @@ PUBLIC BOOL HTEditable ARGS1(
 PUBLIC HTStream * HTFileSaveStream ARGS1(
 	HTParentAnchor *,	anchor)
 {
-    CONST char * addr = HTAnchor_address((HTAnchor*)anchor);
-    char *  localname = HTLocalName(addr);
+    char * addr = HTAnchor_address((HTAnchor*)anchor);
+    char * localname = HTLocalName(addr);
+    FILE * fp = fopen(localname, BIN_W);
 
-    FILE* fp = fopen(localname, BIN_W);
+    FREE(addr);
+    FREE(localname);
     if (!fp)
 	return NULL;
 

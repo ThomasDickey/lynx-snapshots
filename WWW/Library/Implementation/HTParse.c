@@ -7,6 +7,7 @@
 
 #include <LYUtils.h>
 #include <LYLeaks.h>
+#include <LYStrings.h>
 
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
@@ -49,8 +50,8 @@ PUBLIC char * HTStrip ARGS1(
     return s;
 }
 
-/*	Scan a filename for its consituents.			scan()
-**	------------------------------------
+/*	Scan a filename for its constituents.			scan()
+**	-------------------------------------
 **
 ** On entry,
 **	name	points to a document name which may be incomplete.
@@ -65,9 +66,6 @@ PRIVATE void scan ARGS2(
 {
     char * after_access;
     char * p;
-#ifdef NOTDEFINED
-    int length = strlen(name);
-#endif /* NOTDEFINED */
 
     parts->access = NULL;
     parts->host = NULL;
@@ -91,9 +89,6 @@ PRIVATE void scan ARGS2(
 	    break;
     }
 
-#ifdef NOTDEFINED
-    for (p = (name + length-1); p >= name; p--) {}
-#endif /* NOTDEFINED */
     /*
     **	Scan left-to-right for a fragment (anchor).
     */
@@ -161,7 +156,7 @@ PRIVATE void scan ARGS2(
 
 #if defined(HAVE_ALLOCA) && !defined(LY_FIND_LEAKS)
 #define LYalloca(x)        alloca(x)
-#define LYalloca_free(x)   x = 0 /*avoid warning*/
+#define LYalloca_free(x)   {}
 #else
 #define LYalloca(x)        malloc(x)
 #define LYalloca_free(x)   free(x)
@@ -187,6 +182,7 @@ PUBLIC char * HTParse ARGS3(
 	int,		wanted)
 {
     char * result = NULL;
+    char *tail = NULL; /* a pointer within 'result' string */
     char * return_value = NULL;
     int len, len1, len2;
     char * name = NULL;
@@ -205,6 +201,15 @@ PUBLIC char * HTParse ARGS3(
 	if (wanted & PARSE_PATH) /* if PARSE_PATH wanted */
 	    wanted &= ~(PARSE_STRICTPATH | PARSE_QUERY); /* ignore details */
     }
+    CTRACE((tfp, "   want:%s%s%s%s%s%s%s\n",
+	    wanted & PARSE_PUNCTUATION ? " punc"   : "",
+	    wanted & PARSE_ANCHOR      ? " anchor" : "",
+	    wanted & PARSE_PATH        ? " path"   : "",
+	    wanted & PARSE_HOST        ? " host"   : "",
+	    wanted & PARSE_ACCESS      ? " access" : "",
+	    wanted & PARSE_STRICTPATH  ? " PATH"   : "",
+	    wanted & PARSE_QUERY       ? " QUERY"  : ""));
+
     /*
     ** Allocate the temporary string. Optimized.
     */
@@ -212,7 +217,7 @@ PUBLIC char * HTParse ARGS3(
     len2 = strlen(relatedName) + 1;
     len = len1 + len2 + 8;     /* Lots of space: more than enough */
 
-    result = (char*)LYalloca(len + len1 + len2);
+    result = tail = (char*)LYalloca(len * 2 + len1 + len2);
     if (result == NULL) {
 	outofmem(__FILE__, "HTParse");
     }
@@ -247,9 +252,12 @@ PUBLIC char * HTParse ARGS3(
     acc_method = given.access ? given.access : related.access;
     if (wanted & PARSE_ACCESS) {
 	if (acc_method) {
-	    strcat(result, acc_method);
-	    if (wanted & PARSE_PUNCTUATION)
-		strcat(result, ":");
+	    strcpy(tail, acc_method);
+	    tail += strlen(tail);
+	    if (wanted & PARSE_PUNCTUATION) {
+		*tail++ = ':';
+		*tail = '\0';
+	    }
 	}
     }
 
@@ -284,10 +292,11 @@ PUBLIC char * HTParse ARGS3(
     */
     if (wanted & PARSE_HOST) {
 	if (given.host || related.host) {
-	    char *tail = result + strlen(result);
-	    if (wanted & PARSE_PUNCTUATION)
-		strcat(result, "//");
-	    strcat(result, given.host ? given.host : related.host);
+	    if (wanted & PARSE_PUNCTUATION) {
+		*tail++ = '/';
+		*tail++ = '/';
+	    }
+	    strcpy(tail, given.host ? given.host : related.host);
 #define CLEAN_URLS
 #ifdef CLEAN_URLS
 	    /*
@@ -353,12 +362,17 @@ PUBLIC char * HTParse ARGS3(
     }
 
     /*
+     * Trim any blanks from the result so far - there's no excuse for blanks
+     * in a hostname.
+     */
+    LYRemoveBlanks(result);
+
+    /*
     **	If host in given or related was ended directly with a '?' (no
     **  slash), fake the search part into absolute.  This is the only
     **  case search is returned from scan.  A host must have been present.
     **  this restores the '?' at which the host part had been truncated in
     **  scan, we have to do this after host part handling is done. - kw
-    **
     */
     if (given.search && *(given.search - 1) == '\0') {
 	given.absolute = given.search - 1;
@@ -383,54 +397,65 @@ PUBLIC char * HTParse ARGS3(
     **	Handle the path.
     */
     if (wanted & (PARSE_PATH | PARSE_STRICTPATH | PARSE_QUERY)) {
-	char *tail = NULL;
 	int want_detail = (wanted & (PARSE_STRICTPATH | PARSE_QUERY));
-	if (want_detail)
-	    tail = result + strlen(result);
+
 	if (acc_method && !given.absolute && given.relative) {
-	    if (!strcasecomp(acc_method, "nntp") ||
-		!strcasecomp(acc_method, "snews") ||
-		(!strcasecomp(acc_method, "news") &&
-		 !strncasecomp(result, "news://", 7))) {
-		/*
-		 *  Treat all given nntp or snews paths,
-		 *  or given paths for news URLs with a host,
-		 *  as absolute.
-		 */
-		given.absolute = given.relative;
-		given.relative = NULL;
+	    /*
+	     * Treat all given nntp or snews paths, or given paths for news
+	     * URLs with a host, as absolute.
+	     */
+	    switch (*acc_method) {
+	    case 'N':
+	    case 'n':
+		if (!strcasecomp(acc_method, "nntp") ||
+		    (!strcasecomp(acc_method, "news") &&
+		     !strncasecomp(result, "news://", 7))) {
+		    given.absolute = given.relative;
+		    given.relative = NULL;
+		}
+		break;
+	    case 'S':
+	    case 's':
+		if (!strcasecomp(acc_method, "snews")) {
+		    given.absolute = given.relative;
+		    given.relative = NULL;
+		}
+		break;
 	    }
 	}
+
+	tail = result + strlen(result);
 	if (given.absolute) {			/* All is given */
 	    if (wanted & PARSE_PUNCTUATION)
-		strcat(result, "/");
-	    strcat(result, given.absolute);
+		*tail++ = '/';
+	    strcpy(tail, given.absolute);
 	    CTRACE((tfp, "HTParse: (ABS)\n"));
 	} else if (related.absolute) {		/* Adopt path not name */
-	    strcat(result, "/");
-	    strcat(result, related.absolute);
+	    *tail++ = '/';
+	    strcpy(tail, related.absolute);
 	    if (given.relative) {
-		p = strchr(result, '?');	/* Search part? */
+		p = strchr(tail, '?');	/* Search part? */
 		if (p == NULL)
-		    p = (result + strlen(result) - 1);
+		    p = (tail + strlen(tail) - 1);
 		for (; *p != '/'; p--)
 		    ;				/* last / */
 		p[1] = '\0';			/* Remove filename */
-		strcat(result, given.relative); /* Add given one */
+		strcat(p, given.relative); /* Add given one */
 		HTSimplify (result);
 	    }
 	    CTRACE((tfp, "HTParse: (Related-ABS)\n"));
 	} else if (given.relative) {
-	    strcat(result, given.relative);		/* what we've got */
+	    strcpy(tail, given.relative);		/* what we've got */
 	    CTRACE((tfp, "HTParse: (REL)\n"));
 	} else if (related.relative) {
-	    strcat(result, related.relative);
+	    strcpy(tail, related.relative);
 	    CTRACE((tfp, "HTParse: (Related-REL)\n"));
 	} else {  /* No inheritance */
 	    if (!isLYNXCGI(aName) &&
 		!isLYNXEXEC(aName) &&
 		!isLYNXPROG(aName)) {
-		strcat(result, "/");
+		*tail++ = '/';
+		*tail = '\0';
 	    }
 	    if (!strcmp(result, "news:/"))
 		result[5] = '*';
@@ -456,16 +481,33 @@ PUBLIC char * HTParse ARGS3(
     }
 
     /*
-    **	Handle the fragment (anchor).
+    **	Handle the fragment (anchor). Never inherit.
     */
-    if (wanted & PARSE_ANCHOR)
-	if ((given.anchor && *given.anchor) ||
-	    (!given.anchor && related.anchor)) {
+    if (wanted & PARSE_ANCHOR) {
+	if (given.anchor && *given.anchor) {
+	    tail += strlen(tail);
 	    if (wanted & PARSE_PUNCTUATION)
-		strcat(result, "#");
-	    strcat(result, (given.anchor) ?
-			     given.anchor : related.anchor);
+		*tail++ = '#';
+	    strcpy(tail, given.anchor);
 	}
+    }
+
+    /*
+     * If there are any blanks remaining in the string, escape them as needed.
+     * See the discussion in LYLegitimizeHREF() for example.
+     */
+    if ((p = strchr(result, ' ')) != 0) {
+	do {
+	    char *q = p + strlen(p) + 2;
+	    while (q != p + 1) {
+		q[0] = q[-2];
+		--q;
+	    }
+	    p[0] = '%';
+	    p[1] = '2';
+	    p[2] = '0';
+	} while ((p = strchr(result, ' ')) != 0);
+    }
     CTRACE((tfp, "HTParse:      result:%s\n", result));
 
     StrAllocCopy(return_value, result);
@@ -474,12 +516,46 @@ PUBLIC char * HTParse ARGS3(
     return return_value;		/* exactly the right length */
 }
 
+/*	HTParseAnchor(), fast HTParse() specialization
+**	----------------------------------------------
+**
+** On exit,
+**	returns		A pointer within input string (probably to its end '\0')
+*/
+PUBLIC CONST char * HTParseAnchor ARGS1(
+	CONST char *,	aName)
+{
+    CONST char* p = aName;
+    for ( ; *p && *p != '#'; p++)
+	;
+    if (*p == '#') {
+	/* the safe way based on HTParse() -
+	 * keeping in mind scan() peculiarities on schemes:
+	 */
+	struct struct_parts given;
+
+	char* name = (char*)LYalloca((p - aName) + strlen(p) + 1);
+	if (name == NULL) {
+	    outofmem(__FILE__, "HTParseAnchor");
+	}
+	strcpy(name, aName);
+	scan(name, &given);
+	LYalloca_free(name);
+
+	p++; /*next to '#'*/
+	if (given.anchor == NULL) {
+	    for ( ; *p; p++)  /*scroll to end '\0'*/
+		;
+	}
+    }
+    return p;
+}
 
 /*	Simplify a filename.				HTSimplify()
 **	--------------------
 **
-**  A unix-style file is allowed to contain the seqeunce xxx/../ which may
-**  be replaced by "" , and the seqeunce "/./" which may be replaced by "/".
+**  A unix-style file is allowed to contain the sequence xxx/../ which may
+**  be replaced by "" , and the sequence "/./" which may be replaced by "/".
 **  Simplification helps us recognize duplicate filenames.
 **
 **	Thus,	/etc/junk/../fred	becomes /etc/fred
@@ -547,15 +623,6 @@ PUBLIC void HTSimplify ARGS1(
 			while (*q1 != '\0')
 			    *p++ = *q1++;
 			*p = '\0';		/* terminate */
-#ifdef NOTDEFINED
-			/*
-			**  Make sure filename has at least one slash.
-			*/
-			if (*filename == '\0') {
-			    *filename = '/';
-			    *(filename + 1) = '\0';
-			}
-#endif /* NOTDEFINED */
 			/*
 			**  Start again with previous slash.
 			*/
@@ -639,7 +706,7 @@ PUBLIC void HTSimplify ARGS1(
 **
 ** This function creates and returns a string which gives an expression of
 ** one address as related to another.  Where there is no relation, an absolute
-** address is retured.
+** address is returned.
 **
 **  On entry,
 **	Both names must be absolute, fully qualified names of nodes
@@ -711,7 +778,7 @@ PUBLIC char * HTRelative ARGS2(
 **	It returns a string which has these characters
 **	represented by a '%' character followed by two hex digits.
 **
-**	Unlike HTUnEscape(), this routine returns a calloced string.
+**	Unlike HTUnEscape(), this routine returns a calloc'd string.
 */
 PRIVATE CONST unsigned char isAcceptable[96] =
 
@@ -825,7 +892,7 @@ PUBLIC char * HTEscapeSP ARGS2(
 	if (a == 32) {
 	    *q++ = '+';
 	} else if (!ACCEPTABLE(a)) {
-	    *q++ = HEX_ESCAPE;	/* Means hex commming */
+	    *q++ = HEX_ESCAPE;	/* Means hex coming */
 	    *q++ = hex[a >> 4];
 	    *q++ = hex[a & 15];
 	} else {
@@ -841,7 +908,7 @@ PUBLIC char * HTEscapeSP ARGS2(
 **
 **	This function takes a pointer to a string in which some
 **	characters may have been encoded in %xy form, where xy is
-**	the acsii hex code for character 16x+y.
+**	the ASCII hex code for character 16x+y.
 **	The string is converted in place, as it will never grow.
 */
 PRIVATE char from_hex ARGS1(
@@ -895,7 +962,7 @@ PUBLIC char * HTUnEscape ARGS1(
 **							    (kweide@tezcat.com)
 **	This function takes a pointer to a string in which some
 **	characters may have been encoded in %xy form, where xy is
-**	the acsii hex code for character 16x+y, and a pointer to
+**	the ASCII hex code for character 16x+y, and a pointer to
 **	a second string containing one or more characters which
 **	should be unescaped if escaped in the first string.
 **	The first string is converted in place, as it will never grow.

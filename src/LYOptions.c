@@ -3162,16 +3162,8 @@ PRIVATE int gen_options ARGS1(
     size_t cset_len = 0;
     size_t text_len = LYscreenWidth() > 45 ? LYscreenWidth() - 38 : 7;	/* cf: PutLabel */
 
-    if (LYReuseTempfiles) {
-	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
-    } else {
-	LYRemoveTemp(tempfile);
-	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
-    }
-    if (fp0 == NULL) {
-	HTAlert(UNABLE_TO_OPEN_TEMPFILE);
+    if ((fp0 = InternalPageFP(tempfile, TRUE)) == 0)
 	return(NOT_FOUND);
-    }
 
     LYLocalFileToURL(newfile, tempfile);
 

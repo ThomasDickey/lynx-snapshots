@@ -22,6 +22,7 @@
 
 #include <LYCookie.h>
 #include <LYCharSets.h>
+#include <LYCharUtils.h>
 #include <LYStrings.h>
 #include <LYUtils.h>
 #include <LYLeaks.h>
@@ -168,36 +169,6 @@ PUBLIC void HTMIME_TrimDoubleQuotes ARGS1(
 	value[i] = cp[(i +1)];
 }
 
-PRIVATE char *parse_parameter ARGS2(
-	char *,		from,
-	char *,		name)
-{
-    size_t len = strlen(name);
-    char *result = NULL;
-    char *string = from;
-
-    do {
-	if ((string = strchr(string, ';')) == NULL)
-	    return NULL;
-	while (*string != '\0' && (*string == ';' || isspace(UCH(*string)))) {
-	    string++;
-	}
-	if (strlen(string) < len) return NULL;
-    } while (strncasecomp(string, name, len) != 0);
-    string += len;
-    while (*string != '\0' && (UCH(isspace(*string)) || *string == '=')) {
-	string++;
-    }
-
-    StrAllocCopy(result, string);
-    len = 0;
-    while (isprint(UCH(string[len])) && string[len] != ';') {
-	len++;
-    }
-    result[len] = '\0';
-    return result;
-}
-
 PRIVATE BOOL content_is_compressed ARGS1(HTStream *, me)
 {
     char *encoding = me->anchor->content_encoding;
@@ -206,6 +177,25 @@ PRIVATE BOOL content_is_compressed ARGS1(HTStream *, me)
         && strcmp(encoding, "8bit") != 0
 	&& strcmp(encoding, "7bit") != 0
 	&& strcmp(encoding, "binary") != 0;
+}
+
+/*
+ * Strip parameters and quotes from a URL.
+ */
+PRIVATE void dequote ARGS1(char *, url)
+{
+    char *p;
+    int len;
+
+    if ((p = strchr(url, '?')) != NULL)
+	*p = '\0';
+    len = strlen(url);
+    if (*url == '\'' && len > 1 && url[len-1] == url[0]) {
+	url[len-1] = '\0';
+	while ((url[0] = url[1]) != '\0') {
+	    ++url;
+	}
+    }
 }
 
 PRIVATE int pumpData ARGS1(HTStream *, me)
@@ -476,27 +466,24 @@ PRIVATE int pumpData ARGS1(HTStream *, me)
 	me->state = MIME_IGNORE;	/* What else to do? */
     }
     if (me->refresh_url != NULL && !content_is_compressed(me)) {
-	char *url = parse_parameter(me->refresh_url, "URL");
+	char *url = NULL;
+	char *num = NULL;
 	char *txt = NULL;
-	char *arg = NULL;
 	char *base = "";	/* FIXME: refresh_url may be relative to doc */
-	int num = 0;
 
+	LYParseRefreshURL(me->refresh_url, &num, &url);
 	if (url != NULL) {
 	    CTRACE((tfp, "Formatting refresh-url as first line of result\n"));
-	    while (isdigit(UCH(me->refresh_url[num])))
-	    	++num;
 	    HTSprintf0(&txt, gettext("Refresh: "));
-	    if (num != 0)
-		HTSprintf(&txt, gettext("%.*s seconds "), num, me->refresh_url);
-	    if ((arg = strchr(url, '?')) != NULL)
-		*arg = '\0';
+	    HTSprintf(&txt, gettext("%s seconds "), num);
+	    dequote(url);
 	    HTSprintf(&txt, "<a href=\"%s%s\">%s</a><br>", base, url, url);
 	    CTRACE((tfp, "URL %s%s\n", base, url));
 	    (me->isa->put_string)(me, txt);
-	    free(url);
 	    free(txt);
 	}
+	FREE(num);
+	FREE(url);
     }
     return HT_OK;
 }

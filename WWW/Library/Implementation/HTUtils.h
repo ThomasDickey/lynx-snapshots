@@ -22,6 +22,7 @@
 #ifdef DJGPP
 #include <sys/config.h>	/* pseudo-autoconf values for DJGPP libc/headers */
 #define HAVE_TRUNCATE 1
+#define HAVE_ALLOCA 1
 #include <limits.h>
 #endif /* DJGPP */
 
@@ -490,7 +491,7 @@ Upper- and Lowercase macros
 #define TOUPPER(c) (islower(UCH(c)) ? toupper(UCH(c)) : UCH(c))
 #endif /* TOLOWER */
 
-#define FREE(x) if (x != 0) {free((char *)x); x = NULL;}
+#define FREE(x)    {if (x != 0) {free((char *)x); x = NULL;}}
 
 /*
 

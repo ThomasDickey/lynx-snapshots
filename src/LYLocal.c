@@ -1952,11 +1952,8 @@ PUBLIC int dired_options ARGS2(
     struct dired_menu *mp;
     char buf[2048];
 
-    LYRemoveTemp(tempfile);
-    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
-	HTAlert(gettext("Unable to open file management menu file."));
+    if ((fp0 = InternalPageFP(tempfile, FALSE)) == 0)
 	return(0);
-    }
 
     /*
      *  Make the tempfile a URL.

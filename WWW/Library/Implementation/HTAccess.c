@@ -382,10 +382,13 @@ PRIVATE int get_physical ARGS2(
 	CONST char *,		addr,
 	HTParentAnchor *,	anchor)
 {
+    int result;
     char * acc_method = NULL;	/* Name of access method */
     char * physical = NULL;
     char * Server_addr = NULL;
     BOOL override_flag = NO;
+
+    CTRACE((tfp, "get_physical %s\n", addr));
 
     /*
     **	Make sure the using_proxy variable is FALSE.
@@ -393,8 +396,7 @@ PRIVATE int get_physical ARGS2(
     using_proxy = NO;
 
 #ifndef NO_RULES
-    physical = HTTranslate(addr);
-    if (!physical) {
+    if ((physical = HTTranslate(addr)) == 0) {
 	if (redirecting_url) {
 	    return HT_REDIRECTING;
 	}
@@ -426,8 +428,7 @@ PRIVATE int get_physical ARGS2(
     }
 #endif /* NO_RULES */
 
-    acc_method =  HTParse(HTAnchor_physical(anchor),
-		STR_FILE_URL, PARSE_ACCESS);
+    acc_method = HTParse(HTAnchor_physical(anchor), STR_FILE_URL, PARSE_ACCESS);
 
     /*
     **	Check whether gateway access has been set up for this.
@@ -561,6 +562,7 @@ PRIVATE int get_physical ARGS2(
     /*
     **	Search registered protocols to find suitable one.
     */
+    result = HT_NO_ACCESS;
     {
 	int i, n;
 #ifndef NO_INIT
@@ -572,13 +574,14 @@ PRIVATE int get_physical ARGS2(
 	    if (!strcmp(p->name, acc_method)) {
 		HTAnchor_setProtocol(anchor, p);
 		FREE(acc_method);
-		return (HT_OK);
+		result = HT_OK;
+		break;
 	    }
 	}
     }
 
     FREE(acc_method);
-    return HT_NO_ACCESS;
+    return result;
 }
 
 /*
@@ -682,7 +685,7 @@ PRIVATE int HTLoad ARGS4(
     LYFixCursesOnForAccess(addr, HTAnchor_physical(anchor));
     p = (HTProtocol *)HTAnchor_protocol(anchor);
     anchor->underway = TRUE;		/* Hack to deal with caching */
-    status= (*(p->load))(HTAnchor_physical(anchor),
+    status= p->load(HTAnchor_physical(anchor),
 			anchor, format_out, sink);
     anchor->underway = FALSE;
     LYUCPopAssumed();
@@ -699,7 +702,7 @@ PUBLIC HTStream *HTSaveStream ARGS1(
     if (!p)
 	return NULL;
 
-    return (*p->saveStream)(anchor);
+    return p->saveStream(anchor);
 }
 
 PUBLIC int redirection_attempts = 0; /* counter in HTLoadDocument */

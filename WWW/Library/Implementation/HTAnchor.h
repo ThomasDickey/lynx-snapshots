@@ -53,9 +53,11 @@ struct _HTParentAnchor {
   HTParentAnchor * parent;	/* Parent of this anchor (self) */
 
   /* ParentAnchor-specific information */
-  HTList *     children_notag; /* Subanchors <a href=...>, tag is NULL */
-  HTBTree *    children;       /* Subanchors <a name="tag">, sorted by tag */
-  HTList *	sources;	/* List of anchors pointing to this, if any */
+  HTBTree *	children;	/* Subanchors <a name="tag">, sorted by tag */
+  HTList	children_notag;	/* Subanchors <a href=...>, tag is NULL */
+  HTList	sources;	/* List of anchors pointing to this, if any */
+  HTList	_add_adults;	/* - just a memory for list entry:) */
+
   HyperDoc *	document;	/* The document within which this is an anchor */
   char *	address;	/* Absolute address of this node */
   char *	post_data;	/* Posting data */
@@ -115,7 +117,10 @@ typedef struct {
   HTParentAnchor * parent;	/* Parent of this anchor */
 
   /* ChildAnchor-specific information */
-  char *	tag;		/* Address of this anchor relative to parent */
+  char *	tag;		/* #fragment,  relative to the parent */
+
+  HTList	_add_children_notag;	/* - just a memory for list entry:) */
+  HTList	_add_sources;		/* - just a memory for list entry:) */
 } HTChildAnchor;
 
 /*
@@ -363,7 +368,7 @@ extern BOOL HTAnchor_setSubject PARAMS((
 **	-------------------------------------
 */
 extern BOOL HTAnchor_link PARAMS((
-	HTAnchor *		source,
+	HTChildAnchor *		source,
 	HTAnchor *		destination,
 	HTLinkType *		type));
 
@@ -442,7 +447,3 @@ extern LYUCcharset * HTAnchor_copyUCInfoStage PARAMS((
 extern void ImageMapList_free PARAMS((HTList * list));
 
 #endif /* HTANCHOR_H */
-
-/*
-
-    */

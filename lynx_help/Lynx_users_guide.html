@@ -922,7 +922,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
             changed, the current document is reloaded, with the no-cache
             flags set, on exit from the Options Menu.   Changes of
             the header are not saved in the RC file.
-        <dd><em ID="note_ua">NOTE:</em> Some sites may regard misrepresenting
+        <dd><em ID="noteUA">NOTE:</em> Some sites may regard misrepresenting
             the browser
             as fraudulent deception, or as gaining unauthorized access, if
             it is used to circumvent blocking that was intentionally put in
@@ -2439,6 +2439,11 @@ where
              <dt><code>-fileversions</code>
                 <dd>include all versions of files in local VMS directory
                     listings.
+             <dt><code>-find_leaks</code>
+                <dd>toggles the memory leak checking off.
+		    Normally this
+		    is not compiled-into your executable, but when it is,
+		    it can be disabled for a session.
              <dt><code>-force_empty_hrefless_a</code>
                 <dd>force HREF-less 'A' elements to be empty (close them as soon as they are seen).
              <dt><code>-force_html</code>
@@ -2512,6 +2517,8 @@ where
                     treated as delimiters for series of comments within
                     the overall comment element.  If historical is set,
                     that overrides minimal or valid comment parsing.
+             <dt><code>-nested_tables</code>
+                <dd>toggles nested-tables logic (for debugging).
              <dt><code>-newschunksize=NUMBER</code>
                 <dd>number of articles in chunked news listings.
              <dt><code>-newsmaxchunk=NUMBER</code>
@@ -2857,7 +2864,7 @@ where
              <dt><code>-useragent=STRING</code>
                 <dd>set different Lynx User-Agent header.  Lynx produces a
                     warning on startup if the STRING does not contain "Lynx"
-                    or "L_y_n_x", see the <A HREF="#note_ua">note</A> in the
+                    or "L_y_n_x", see the <A HREF="#noteUA">note</A> in the
                     Options Menu section for rationale.
              <dt><code>-validate</code>
                 <dd>accept only http URLs (meant for validation).

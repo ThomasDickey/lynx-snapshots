@@ -375,7 +375,7 @@ PRIVATE unsigned LYRead_Jumpfile ARGS1(struct JumpTable *, jtp)
     char *cp;
     unsigned i;
 
-    if (jtp->file == NULL || *(jtp->file) == '\0')
+    if (isEmpty(jtp->file))
 	return 0;
 
     CTRACE((tfp, "Read Jumpfile %s\n", jtp->file));

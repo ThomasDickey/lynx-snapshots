@@ -829,6 +829,7 @@
 #define YOUR_SEGMENT gettext("your")
 #define RUNTIME_OPT_SEGMENT gettext("for runtime options")
 #define COMPILE_OPT_SEGMENT gettext("compile time options")
+#define COLOR_STYLE_SEGMENT gettext("color-style configuration")
 #define REL_VERSION gettext("latest release")
 #define PRE_VERSION gettext("pre-release version")
 #define DEV_VERSION gettext("development version")

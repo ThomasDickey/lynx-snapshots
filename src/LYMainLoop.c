@@ -6941,7 +6941,7 @@ new_cmd:  /*
 			s = links[curdoc.link].lname;
 		} else
 		    s = curdoc.address;
-		if (!s && !*s)
+		if (isEmpty(s))
 		    HTInfoMsg("Current URL is empty.");
 		if (put_clip(s))
 		    HTInfoMsg("Copy to clipboard failed.");

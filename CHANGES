@@ -1,12 +1,84 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2003-01-22 (2.8.5dev.13)
+* change new memory-allocation in HTString.c and GridText.c to provide pointers
+  to data aligned to the host's pointer-size, to work on Tru64 where this
+  happens to be 8 -TD
+* resync ".po" files using msgmerge -TD
+* remove quadratic complexity from insert_blanks_in_line() usage with large
+  tables (Stbl).  It occasionally cleans up split_line() a bit.  CPU load
+  anomaly reported by BL -LP
+* ALLOC_IN_POOL, POOL_NEW, POOL_FREE macros now became functions, suggested by
+  BL -LP
+* define HAVE_ALLOCA for djgpp fixed-configuration -LP
+* add command-line option (--nested-tables) to help in testing this feature -TD
+* add command-line option (--find-leaks) to disable the memory leak checking
+  code, allowing one to build an executable which is useful for both normal
+  and leak-checking (request by Frederic L W Meunier) -TD
+* improve performance of HTParse() for very long strings -LP
+* fix memory leak in HTFileSaveStream() -LP
+* further optimization in HTAnchor.c - save 3 mallocs per HTChildAnchor by
+  using new HTList_ functions:  HTList_linkObject(), HTList_unlinkObject(),
+  HTList_unlinkLastObject() which utilize external memory, no malloc/free -LP
+* modify "make install-help" rule to avoid warning message about keystrokes
+  subdirectory (report by Martin Mokrejs) -TD
+* optimize !HText_TrueLineSize() expressions as HText_TrueEmptyLine() -LP
+* optimize is_url(), rewriting it as case-statements to avoid unnecesary
+  comparisons, make similar optimization in HTParse() -LP, TD
+* corrected logic in is_url() where the "://" was not necessarily checked in
+  the proper position - TD
+* for color-style configuration, add a link to lynx.lss from LYNXCFG: -TD
+* simplify setup of internal pages with new function InternalPageFP() -TD
+* modify parsing of refresh-URL to strip single quotes, to handle
+    http://tovar.yandex.ru/
+  (reported by LP) -TD
+* investigated conflict between NSL_FORK and _WINDOWS_NSL ifdef's for cygwin
+  configuration in HTTCP.c; left them as-is since #undef'ing _WINDOWS_NSL in
+  that case causes problems connecting (feedback by Frederic L W Meunier) -TD
+* corrected an off-by-one error in computing the location of the bottom line
+  for mouse input in PDCurses configuration which made that area ignore mouse
+  clicks.  Merged almost-identical cases for mouse-input for NT/Windows95 -TD
+* ifdef'd out (USE_CURSES_PAIR_0) the ASSUMED_COLORS logic for the PDCurses
+  configuration (reports by DK) -TD
+* LYSetHiText(), LYAddHiText(), and LYClearHiText() use HText memory pool -TD
+* add atexit-cleanup for history stack, removed incomplete code for this from
+  cleanup(), since that gave misleading results in leak-checking.  Fix a few
+  small leaks as well (reported by LP) -TD
+* modify cleanup() to leave the trace file open if checking for leaks -TD
+* add some simple statistics to summary in Lynx.leaks report -TD
+* add malloc-sequence number to Lynx.leaks report, to help with debugging -TD
+* fix memory leaks in nested-tables logic, which did not free subtable data
+  if there was an enclosing table (reports by Frederic L W Meunier) -TD
+* adapted change by LP to allocate HTLine's from memory pool -TD
+* move fallback definition of MAXHOSTNAMELEN from HTFTP.c to www_tcp.h so it
+  can be used in HTTCP.c (Debian #140682).
+* improved configure script checks for ncurses -TD
+* correct description of XLOADIMAGE_COMMAND in lynx.cfg (report by Mats
+  Peterson <mats@alicja.dyns.cx>) -TD
+* fix configure script so it does not compute basename of system mailer when
+  none was found.  Add check in LYMail.c, LYPrint.c to avoid using system
+  mailer when it is not configured (report by Frederic L W Meunier) -TD
+* update several po files (da.po, de.po, et.po, hu.po, sv.po, tr.po) from
+  http://www.iro.umontreal.ca/contrib/po/maint/lynx/
+* correct logic in recent HTAnchor_findChildAndLink() changes around internal
+  links and fragments; avoid unneeded reallocations by using HTParseAnchor()
+  instead of HTParse() -LP
+* trim some fat from HTML_start_element(), case HTML_A -LP
+* add optimized string functions StrAllocCopy_extra() [and paired FREE_extra()]
+  which store string size and never shrink; for heavily reallocated strings in
+  temp objects.  Used in SGML.c for value[] fields currently -LP
+* in HTUtils.h, FREE macro was unsafe if happen before 'else' -LP
+* modify HTParse() to escape any spaces which remain from LYLegitimizeHREF() or
+  other sources (report by Peter Rasmussen <plr@udgaard.com>) -TD
+
 2002-12-18 (2.8.5dev.12)
 * remove a check in LYMain.c for cygwin's console, which does not work with
   screen (report by Frederic L W Meunier) -TD
 * undo line/pool logic, fixing a memory leak -LP
 * changes proposed by Bela Lubkin, to optimize ALLOC_IN_POOL macro
-  substitution, pack bitfields in HTStyleChanges more compact on some systems -LP
+  substitution, pack bitfields in HTStyleChanges to make them more compact on
+  some systems -LP
 * correct logic of do_check_recall(), broken in dev.9 cleanup of pathname
   constants with LYIsDosDrive() (report by Frederic L W Meunier) -TD
 * update makelynx.bat, built with slang configuration -TD
@@ -307,7 +379,7 @@ Changes since Lynx 2.8 release
   directory -TD
 * update config.guess, config.sub -TD
 * add check for HTTP headers using Netscape extension "Refresh", and if found,
-  add a corresponding refresh-url at the beginning of the document.  Fixes
+  add a corresponding refresh-URL at the beginning of the document.  Fixes
   Debian #126723.
 * strip username from URLs used in an HTTP GET, and warn about this condition.
   The example given was

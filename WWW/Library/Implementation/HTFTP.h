@@ -68,7 +68,3 @@ Return Host Name
 extern CONST char * HTHostName NOPARAMS;
 
 #endif
-
-/*
-
-   end  */

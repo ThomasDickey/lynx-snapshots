@@ -239,13 +239,8 @@ PUBLIC int match_item_by_name ARGS3(
 int default_fg = DEFAULT_COLOR;
 int default_bg = DEFAULT_COLOR;
 #else
-#ifdef PDCURSES
-int default_fg = 15;
-int default_bg = COLOR_BLACK;
-#else
 int default_fg = COLOR_WHITE;
 int default_bg = COLOR_BLACK;
-#endif
 #endif
 
 PRIVATE CONST char *Color_Strings[16] =
@@ -1123,7 +1118,7 @@ PRIVATE int parse_html_src_spec ARGS3(
     * message.
     */
     char* ts2;
-    if ( !value || !*value) return 0; /* silently ignoring*/
+    if (isEmpty(value)) return 0; /* silently ignoring*/
 
 #define BS() html_src_bad_syntax(value,option_name)
 
@@ -1215,7 +1210,7 @@ PRIVATE int read_htmlsrc_tagname_xform ARGS1( char*,str)
 
 /* This table is searched ignoring case */
 PRIVATE Config_Type Config_Table [] =
-{ 
+{
      PARSE_SET(RC_ACCEPT_ALL_COOKIES,   LYAcceptAllCookies),
      PARSE_TIM(RC_ALERTSECS,            AlertSecs),
      PARSE_SET(RC_ALWAYS_RESUBMIT_POSTS, LYresubmit_posts),
@@ -1587,35 +1582,31 @@ PRIVATE char *actual_filename ARGS3(
     char *,	parent_filename,
     char *,	dft_filename)
 {
-    static char *my_filename;
+    char *my_filename = NULL;
 
-    if (my_filename != 0) {
-	FREE(my_filename);
-    }
     if (!LYisAbsPath(cfg_filename)
      && !(parent_filename == 0 && LYCanReadFile(cfg_filename))) {
 	if (!strncmp(cfg_filename, "~/", 2)) {
 	    HTSprintf0(&my_filename, "%s%s", Home_Dir(), cfg_filename+1);
-	    cfg_filename = my_filename;
 	} else {
 	    if (parent_filename != 0) {
 		StrAllocCopy(my_filename, parent_filename);
 		*LYPathLeaf (my_filename) = '\0';
 		StrAllocCat(my_filename, cfg_filename);
 	    }
-	    if (my_filename != 0 && LYCanReadFile(my_filename)) {
-		cfg_filename = my_filename;
-	    } else {
+	    if (my_filename == 0 || !LYCanReadFile(my_filename)) {
 		StrAllocCopy(my_filename, dft_filename);
 		*LYPathLeaf (my_filename) = '\0';
 		StrAllocCat(my_filename, cfg_filename);
-		if (LYCanReadFile(my_filename)) {
-		    cfg_filename = my_filename;
+		if (!LYCanReadFile(my_filename)) {
+		    StrAllocCopy(my_filename, cfg_filename);
 		}
 	    }
 	}
+    } else {
+	StrAllocCopy(my_filename, cfg_filename);
     }
-    return cfg_filename;
+    return my_filename;
 }
 
 PUBLIC FILE *LYOpenCFG ARGS3(
@@ -1623,9 +1614,14 @@ PUBLIC FILE *LYOpenCFG ARGS3(
     char *,	parent_filename,
     char *,	dft_filename)
 {
-    cfg_filename = actual_filename(cfg_filename, parent_filename, dft_filename);
-    CTRACE((tfp, "opening config file %s\n", cfg_filename));
-    return fopen(cfg_filename, TXT_R);
+    char *my_file = actual_filename(cfg_filename, parent_filename, dft_filename);
+    FILE *result;
+
+    CTRACE((tfp, "opening config file %s\n", my_file));
+    result = fopen(my_file, TXT_R);
+    FREE(my_file);
+
+    return result;
 }
 
 #define NOPTS_ ( TABLESIZE(Config_Table) - 1 )
@@ -1888,7 +1884,10 @@ PRIVATE void do_read_cfg ARGS5(
 
 #ifndef NO_CONFIG_INFO
 	    if (fp0 != 0  &&  !no_lynxcfg_xinfo) {
-		LYLocalFileToURL(&url, actual_filename(value, cfg_filename, LYNX_CFG_FILE));
+		char *my_file = actual_filename(value, cfg_filename, LYNX_CFG_FILE);
+
+		LYLocalFileToURL(&url, my_file);
+		FREE(my_file);
 		StrAllocCopy(cp1, value);
 		if (strchr(value, '&') || strchr(value, '<')) {
 		    LYEntify(&cp1, TRUE);
@@ -2033,6 +2032,16 @@ PUBLIC void read_cfg ARGS4(
     do_read_cfg(cfg_filename, parent_filename, nesting_level, fp0, NULL);
 }
 
+#ifndef NO_CONFIG_INFO
+PRIVATE void extra_cfg_link ARGS3(
+	FILE *,	fp,
+	char *,	href,
+	char *,	name)
+{
+    fprintf(fp, "<a href=\"%s\">%s</a>",
+	    href, name);
+}
+#endif /* NO_CONFIG_INFO */
 
 /*
  *  Show rendered lynx.cfg data without comments, LYNXCFG:/ internal page.
@@ -2135,17 +2144,9 @@ PUBLIC int lynx_cfg_infopage ARGS1(
     }
     if (lynxcfginfo_url == 0) {
 
-	if (LYReuseTempfiles) {
-	    fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
-	} else {
-	    if (tempfile[0])
-		LYRemoveTemp(tempfile);
-	    fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
-	}
-	if (fp0 == NULL) {
-	    HTAlert(CANNOT_OPEN_TEMP);
+	if ((fp0 = InternalPageFP(tempfile, TRUE)) == 0)
 	    return(NOT_FOUND);
-	}
+
 	LYLocalFileToURL(&lynxcfginfo_url, tempfile);
 
 	LYforce_no_cache = TRUE;  /* don't cache this doc */
@@ -2178,14 +2179,34 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 			     gettext("for more comments."));
 	    }
 
-#if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
-	    if (!no_compileopts_info) {
-		fprintf(fp0, "%s <a href=\"%s\">%s</a>\n\n",
-			SEE_ALSO,
-			STR_LYNXCFLAGS,
-			COMPILE_OPT_SEGMENT);
-	    }
+#ifndef NO_CONFIG_INFO
+#if defined(HAVE_CONFIG_H) && defined(USE_COLOR_STYLE)
+	    if (!no_compileopts_info && !no_lynxcfg_xinfo) {
+		fprintf(fp0, "%s</pre><ul><li>", SEE_ALSO);
+		extra_cfg_link(fp0, STR_LYNXCFLAGS, COMPILE_OPT_SEGMENT);
+
+		fprintf(fp0, "<li>");
+		LYLocalFileToURL(&temp, lynx_lss_file);
+		extra_cfg_link(fp0, temp, COLOR_STYLE_SEGMENT);
+		fprintf(fp0, "</ul><pre>\n");
+	    } else
 #endif
+	    {
+		fprintf(fp0, "%s ", SEE_ALSO);
+#if defined(HAVE_CONFIG_H)
+		if (!no_compileopts_info) {
+		    extra_cfg_link(fp0, STR_LYNXCFLAGS, COMPILE_OPT_SEGMENT);
+		}
+#endif
+#if defined(USE_COLOR_STYLE)
+		if (!no_lynxcfg_xinfo) {
+		    LYLocalFileToURL(&temp, lynx_lss_file);
+		    extra_cfg_link(fp0, temp, COLOR_STYLE_SEGMENT);
+		}
+#endif
+		fprintf(fp0, "\n\n");
+	    }
+#endif /* NO_CONFIG_INFO */
 
 	    /** a new experimental link ... **/
 	    if (user_mode == ADVANCED_MODE)
@@ -2279,16 +2300,9 @@ PUBLIC int lynx_compile_opts ARGS1(
 	}
     }
     if (configinfo_url == NULL) {
-	if (LYReuseTempfiles) {
-	    fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
-	} else {
-	    LYRemoveTemp(tempfile);
-	    fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
-	}
-	if (fp0 == NULL) {
-	    HTAlert(CANNOT_OPEN_TEMP);
+	if ((fp0 = InternalPageFP(tempfile, TRUE)) == 0)
 	    return(NOT_FOUND);
-	}
+
 	LYLocalFileToURL(&configinfo_url, tempfile);
 
 	BeginInternalPage (fp0, CONFIG_DEF_TITLE, NULL);

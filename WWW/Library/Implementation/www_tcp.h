@@ -846,4 +846,8 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #define SOCKADDR_LEN(soc_address) sizeof(soc_address)
 #endif /* INET6 */
 
+#ifndef MAXHOSTNAMELEN
+#define MAXHOSTNAMELEN 64		/* Arbitrary limit */
+#endif /* MAXHOSTNAMELEN */
+
 #endif /* TCP_H */

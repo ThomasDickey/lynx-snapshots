@@ -1193,12 +1193,12 @@ PUBLIC int LYStringToKeycode ARGS1 (
     } else if (len > 2 && !strncasecomp(src, "0x", 2)) {
 	char *dst = 0;
 	key = strtol(src, &dst, 0);
-	if (dst == 0 || *dst != 0)
+	if (isEmpty(dst))
 	    key = -1;
     } else if (len > 6 && !strncasecomp(src, "key-", 4)) {
 	char *dst = 0;
 	key = strtol(src + 4, &dst, 0);
-	if (dst == 0 || *dst != 0)
+	if (isEmpty(dst))
 	    key = -1;
     }
     if (key < 0) {

@@ -64,7 +64,7 @@ PUBLIC void LYEntify ARGS2(
     int in_sjis = 0;
 #endif
 
-    if (p == NULL || *p == '\0')
+    if (isEmpty(p))
 	return;
 
     /*
@@ -390,7 +390,7 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 {
     char * temp = NULL;
 
-    if (*href == NULL || *(*href) == '\0')
+    if (isEmpty(*href))
 	return;
 
     if (!strcmp(*href, "//") || !strncmp(*href, "///", 3)) {
@@ -1107,7 +1107,7 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
     /*
     **	Make sure we have a non-empty string. - FM
     */
-    if (!str || *str == NULL || **str == '\0')
+    if (!str || isEmpty(*str))
 	return str;
 
     /*
@@ -2032,6 +2032,78 @@ PUBLIC BOOL LYUCTranslateBackFormData ARGS4(
 }
 
 /*
+ * Parse a parameter from an HTML META tag, i.e., the CONTENT.
+ */
+PUBLIC char *LYParseTagParam ARGS2(
+	char *,		from,
+	char *,		name)
+{
+    size_t len = strlen(name);
+    char *result = NULL;
+    char *string = from;
+
+    do {
+	if ((string = strchr(string, ';')) == NULL)
+	    return NULL;
+	while (*string != '\0' && (*string == ';' || isspace(UCH(*string)))) {
+	    string++;
+	}
+	if (strlen(string) < len) return NULL;
+    } while (strncasecomp(string, name, len) != 0);
+    string += len;
+    while (*string != '\0' && (UCH(isspace(*string)) || *string == '=')) {
+	string++;
+    }
+
+    StrAllocCopy(result, string);
+    len = 0;
+    while (isprint(UCH(string[len])) && string[len] != ';') {
+	len++;
+    }
+    result[len] = '\0';
+
+    /*
+     * Strip single quotes, just in case.
+     */
+    if (len > 2 && result[0] == '\'' && result[len-1] == result[0]) {
+	result[len-1] = '\0';
+	for (string = result; (string[0] = string[1]) != '\0'; ++string)
+	    ;
+    }
+    return result;
+}
+
+/*
+ * Given a refresh-URL content string, parses the delay time and the URL
+ * string.  Ignore the remainder of the content.
+ */
+PUBLIC void LYParseRefreshURL ARGS3(
+	char *,		content,
+	char **,	p_seconds,
+	char **,	p_address)
+{
+    char *cp;
+    char *cp1 = NULL;
+    char *Seconds = NULL;
+
+    /*
+     *  Look for the Seconds field. - FM
+     */
+    cp = LYSkipBlanks(content);
+    if (*cp && isdigit(UCH(*cp))) {
+	cp1 = cp;
+	while (*cp1 && isdigit(UCH(*cp1)))
+	    cp1++;
+	StrnAllocCopy(Seconds, cp, cp1 - cp);
+    }
+    *p_seconds = Seconds;
+    *p_address = LYParseTagParam(content, "URL");
+
+    CTRACE((tfp, "LYParseRefreshURL\n\tcontent: %s\n\tseconds: %s\n\taddress: %s\n",
+	   content, NonNull(*p_seconds), NonNull(*p_address)));
+}
+
+/*
 **  This function processes META tags in HTML streams. - FM
 */
 PUBLIC void LYHandleMETA ARGS4(
@@ -2414,38 +2486,9 @@ PUBLIC void LYHandleMETA ARGS4(
     } else if (!strcasecomp(NonNull(http_equiv), "Refresh")) {
 	char *Seconds = NULL;
 
-	/*
-	 *  Look for the Seconds field. - FM
-	 */
-	cp = LYSkipBlanks(content);
-	if (*cp && isdigit(UCH(*cp))) {
-	    cp1 = cp;
-	    while (*cp1 && isdigit(UCH(*cp1)))
-		cp1++;
-	    if (*cp1)
-		*cp1++ = '\0';
-	    StrAllocCopy(Seconds, cp);
-	}
+	LYParseRefreshURL(content, &Seconds, &href);
+
 	if (Seconds) {
-	    /*
-	     *	We have the seconds field.
-	     *	Now look for a URL field - FM
-	     */
-	    while (*cp1) {
-		if (!strncasecomp(cp1, "URL", 3)) {
-		    cp = (cp1 + 3);
-		    while (*cp && (*cp == '=' || isspace(UCH(*cp))))
-			cp++;
-		    cp1 = cp;
-		    while (*cp1 && !isspace(UCH(*cp1)))
-			cp1++;
-		    *cp1 = '\0';
-		    if (*cp)
-			StrAllocCopy(href, cp);
-		    break;
-		}
-		cp1++;
-	    }
 	    if (href) {
 		/*
 		 *  We found a URL field, so check it out. - FM
@@ -2497,6 +2540,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	    /*
 	     *	Check for an anchor in http or https URLs. - FM
 	     */
+	    cp = NULL;
 #ifndef DONT_TRACK_INTERNAL_LINKS
 	    /* id_string seems to be used wrong below if given.
 	       not that it matters much.  avoid setting it here. - kw */
@@ -2676,7 +2720,7 @@ PUBLIC void LYHandlePlike ARGS6(
 	     *	to start a newline, if needed, then fall through
 	     *	to handle attributes. - FM
 	     */
-	    if (HText_LastLineSize(me->text, FALSE)) {
+	    if (!HText_LastLineEmpty(me->text, FALSE)) {
 		HText_setLastChar(me->text, ' ');  /* absorb white space */
 		HText_appendCharacter(me->text, '\r');
 	    }
@@ -2962,7 +3006,7 @@ PUBLIC int LYLegitimizeHREF ARGS4(
     char *pound = NULL;
     char *fragment = NULL;
 
-    if (!me || !href || *href == NULL || *(*href) == '\0')
+    if (!me || !href || isEmpty(*href))
 	return(url_type);
 
     if (!LYTrimStartfile(*href)) {
@@ -3256,11 +3300,11 @@ PUBLIC void LYEnsureDoubleSpace ARGS1(
     if (!me || !me->text)
 	return;
 
-    if (HText_LastLineSize(me->text, FALSE)) {
+    if (!HText_LastLineEmpty(me->text, FALSE)) {
 	HText_setLastChar(me->text, ' ');  /* absorb white space */
 	HText_appendCharacter(me->text, '\r');
 	HText_appendCharacter(me->text, '\r');
-    } else if (HText_PreviousLineSize(me->text, FALSE)) {
+    } else if (!HText_PreviousLineEmpty(me->text, FALSE)) {
 	HText_setLastChar(me->text, ' ');  /* absorb white space */
 	HText_appendCharacter(me->text, '\r');
     } else if (me->List_Nesting_Level >= 0) {
@@ -3281,7 +3325,7 @@ PUBLIC void LYEnsureSingleSpace ARGS1(
     if (!me || !me->text)
 	return;
 
-    if (HText_LastLineSize(me->text, FALSE)) {
+    if (!HText_LastLineEmpty(me->text, FALSE)) {
 	HText_setLastChar(me->text, ' ');  /* absorb white space */
 	HText_appendCharacter(me->text, '\r');
     } else if (me->List_Nesting_Level >= 0) {

@@ -494,8 +494,5 @@ Epilogue
 
  */
 extern BOOL HTOutputSource;     /* Flag: shortcut parser */
-#endif
 
-/*
-
-   end */
+#endif /* HTFORMAT_H */

@@ -332,6 +332,5 @@ extern GLOBALREF (HTProtocol,HTFile);
 #else
 GLOBALREF HTProtocol HTFTP, HTFile;
 #endif /* GLOBALREF_IS_MACRO */
-#endif /* HTFILE_H */
 
-/* end of HTFile */
+#endif /* HTFILE_H */

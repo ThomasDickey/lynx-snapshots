@@ -250,7 +250,7 @@ PUBLIC void LYAddHilite ARGS3(
     HiliteList *list = &(links[cur].list);
     HiliteInfo *have = list->hl_info;
     unsigned need = (list->hl_len - 1);
-    unsigned want = ++(list->hl_len) * sizeof(HiliteInfo);
+    unsigned want = (list->hl_len += 1) * sizeof(HiliteInfo);
 
     if (have != NULL) {
 	have = realloc(have, want);
@@ -1951,7 +1951,7 @@ PUBLIC int LYCheckForProxyURL ARGS1(
     /*
      *	Don't crash on an empty argument.
      */
-    if (cp == NULL || *cp == '\0')
+    if (isEmpty(cp))
 	return(NOT_A_URL_TYPE);
 
     /* kill beginning spaces */
@@ -2011,6 +2011,12 @@ static BOOLEAN compare_type ARGS3(
     return FALSE;
 }
 
+#define DoubleHtmlSep(s) (LYIsHtmlSep((s)[0]) && LYIsHtmlSep((s)[1]))
+#define compare_two(tst,cmp,len,limit) \
+	((len + 2) <= limit \
+	&& DoubleHtmlSep(tst + len) \
+	&& compare_type(tst, cmp, len))
+
 /*
 **  Must recognize a URL and return the type.
 **  If recognized, based on a case-insensitive
@@ -2029,11 +2035,13 @@ PUBLIC int is_url ARGS1(
     char *cp = filename;
     char *cp1;
     int result = NOT_A_URL_TYPE;
+    int len;
+    int limit;
 
     /*
      *	Don't crash on an empty argument.
      */
-    if (cp == NULL || *cp == '\0')
+    if (isEmpty(cp))
 	return(result);
 
     /*
@@ -2057,228 +2065,300 @@ PUBLIC int is_url ARGS1(
     if (*cp == ':' || LYIsHtmlSep(*cp)) {
 	result = NOT_A_URL_TYPE;
 
+    } else {
+	limit = strlen(cp);
+	switch (*cp) {
+	case 'L':
+	case 'l':
+	    /*
+	     *  Lynx internal pages ("LYNXfoo:" or "lynxfoo:")
+	     *  start with 'l' or 'L', other URLs aren't.
+	     */
+	    if (compare_type(cp, STR_LYNXEXEC, LEN_LYNXEXEC)) {
+		/*
+		 *  Special External Lynx type to handle execution
+		 *  of commands or scripts which require a pause to
+		 *  read the screen upon completion.
+		 */
+		result = LYNXEXEC_URL_TYPE;
+
+	    } else if (compare_type(cp, STR_LYNXPROG, LEN_LYNXPROG)) {
+		/*
+		 *  Special External Lynx type to handle execution
+		 *  of commands, scripts or programs with do not
+		 *  require a pause to read screen upon completion.
+		 */
+		result = LYNXPROG_URL_TYPE;
+
+	    } else if (compare_type(cp, STR_LYNXCGI, LEN_LYNXCGI)) {
+		/*
+		 *  Special External Lynx type to handle cgi scripts.
+		 */
+		result = LYNXCGI_URL_TYPE;
+
+	    } else if (compare_type(cp, STR_LYNXPRINT, LEN_LYNXPRINT)) {
+		/*
+		 *  Special Internal Lynx type.
+		 */
+		result = LYNXPRINT_URL_TYPE;
+
+	    } else if (compare_type(cp, STR_LYNXOPTIONS, LEN_LYNXOPTIONS)) {
+		/*
+		 *  Special Internal Lynx type.
+		 */
+		result = LYNXOPTIONS_URL_TYPE;
+
+	    } else if (compare_type(cp, STR_LYNXCFG, LEN_LYNXCFG)) {
+		/*
+		 *  Special Internal Lynx type.
+		 */
+		result = LYNXCFG_URL_TYPE;
+
+	    } else if (compare_type(cp, STR_LYNXMESSAGES, LEN_LYNXMESSAGES)) {
+		/*
+		 *  Special Internal Lynx type.
+		 */
+		result = LYNXMESSAGES_URL_TYPE;
+
+	    } else if (compare_type(cp, STR_LYNXCFLAGS, LEN_LYNXCFLAGS)) {
+		/*
+		 *  Special Internal Lynx type.
+		 */
+		result = LYNXCOMPILE_OPTS_URL_TYPE;
+
+	    } else if (compare_type(cp, STR_LYNXDOWNLOAD, LEN_LYNXDOWNLOAD)) {
+		/*
+		 *  Special Internal Lynx type.
+		 */
+		result = LYNXDOWNLOAD_URL_TYPE;
+
+	    } else if (compare_type(cp, STR_LYNXDIRED, LEN_LYNXDIRED)) {
+		/*
+		 *  Special Internal Lynx type.
+		 */
+		result = LYNXDIRED_URL_TYPE;
+
+	    } else if (compare_type(cp, STR_LYNXHIST, LEN_LYNXHIST)) {
+		/*
+		 *  Special Internal Lynx type.
+		 */
+		result = LYNXHIST_URL_TYPE;
+
+	    } else if (compare_type(cp, STR_LYNXKEYMAP, LEN_LYNXKEYMAP)) {
+		/*
+		 *  Special Internal Lynx type.
+		 */
+		result = LYNXKEYMAP_URL_TYPE;
+
+	    } else if (compare_type(cp, STR_LYNXIMGMAP, LEN_LYNXIMGMAP)) {
+		/*
+		 *  Special Internal Lynx type.
+		 */
+		/* force lower/uppercase of next part */
+		(void)is_url(&cp[LEN_LYNXIMGMAP]);
+		result = LYNXIMGMAP_URL_TYPE;
+
+	    } else if (compare_type(cp, STR_LYNXCOOKIE, LEN_LYNXCOOKIE)) {
+		/*
+		 *  Special Internal Lynx type.
+		 */
+		result = LYNXCOOKIE_URL_TYPE;
+	    }
+	    break;
 #ifndef DISABLE_NEWS
-    } else if (compare_type(cp, STR_NEWS_URL, LEN_NEWS_URL)) {
-	result = NEWS_URL_TYPE;
+	    /*
+	     *  NEWSfoo: schemes -
+	     */
+	case 'N':
+	case 'n':
+	    if (compare_type(cp, STR_NEWS_URL, LEN_NEWS_URL)) {
+		result = NEWS_URL_TYPE;
 
-    } else if (compare_type(cp, STR_NNTP_URL, LEN_NNTP_URL)) {
-	result = NNTP_URL_TYPE;
+	    } else if (compare_type(cp, STR_NNTP_URL, LEN_NNTP_URL)) {
+		result = NNTP_URL_TYPE;
 
-    } else if (compare_type(cp, STR_SNEWS_URL, LEN_SNEWS_URL)) {
-	result = SNEWS_URL_TYPE;
+	    } else if (compare_type(cp, "newspost:", 9)) {
+		/*
+		 *  Special Lynx type to handle news posts.
+		 */
+		result = NEWSPOST_URL_TYPE;
 
-    } else if (compare_type(cp, "newspost:", 9)) {
-	/*
-	 *  Special Lynx type to handle news posts.
-	 */
-	result = NEWSPOST_URL_TYPE;
+	    } else if (compare_type(cp, "newsreply:", 10)) {
+		/*
+		 *  Special Lynx type to handle news replies (followups).
+		 */
+		result = NEWSREPLY_URL_TYPE;
+	    }
+	    break;
 
-    } else if (compare_type(cp, "newsreply:", 10)) {
-	/*
-	 *  Special Lynx type to handle news replies (followups).
-	 */
-	result = NEWSREPLY_URL_TYPE;
+	    /*
+	     *  SNEWSfoo: schemes -
+	     */
+	case 'S':
+	case 's':
+	    if (compare_type(cp, STR_SNEWS_URL, LEN_SNEWS_URL)) {
+		result = SNEWS_URL_TYPE;
 
-    } else if (compare_type(cp, "snewspost:", 10)) {
-	/*
-	 *  Special Lynx type to handle snews posts.
-	 */
-	result = NEWSPOST_URL_TYPE;
+	    } else if (compare_type(cp, "snewspost:", 10)) {
+		/*
+		 *  Special Lynx type to handle snews posts.
+		 */
+		result = NEWSPOST_URL_TYPE;
 
-    } else if (compare_type(cp, "snewsreply:", 11)) {
-	/*
-	 *  Special Lynx type to handle snews replies (followups).
-	 */
-	result = NEWSREPLY_URL_TYPE;
+	    } else if (compare_type(cp, "snewsreply:", 11)) {
+		/*
+		 *  Special Lynx type to handle snews replies (followups).
+		 */
+		result = NEWSREPLY_URL_TYPE;
+	    }
+	    break;
 #endif
+	case 'M':
+	case 'm':
+	    if (compare_type(cp, STR_MAILTO_URL, LEN_MAILTO_URL)) {
+		result = MAILTO_URL_TYPE;
+	    }
+	    break;
 
-    } else if (compare_type(cp, STR_MAILTO_URL, LEN_MAILTO_URL)) {
-	result = MAILTO_URL_TYPE;
+	case 'F':
+	case 'f':
+	    if (compare_type(cp, STR_FILE_URL, len = LEN_FILE_URL)) {
+		if (LYisLocalFile(cp)) {
+		    result = FILE_URL_TYPE;
+		} else if (DoubleHtmlSep(cp + len)) {
+		    result = FTP_URL_TYPE;
+		}
+	    }
+#ifndef DISABLE_FTP
+	    else if (compare_two(cp, STR_FTP_URL, LEN_FTP_URL, limit)) {
+		result = FTP_URL_TYPE;
+	    }
+#endif
+#ifndef DISABLE_FINGER
+	    else if (compare_two(cp, STR_FINGER_URL, LEN_FINGER_URL, limit)) {
+		result = FINGER_URL_TYPE;
+	    }
+#endif
+	    break;
 
+	case 'B':
+	case 'b':
 #ifndef DISABLE_BIBP
-    } else if (compare_type(cp, STR_BIBP_URL, LEN_BIBP_URL)) {
-	result = BIBP_URL_TYPE;
+	    if (compare_type(cp, STR_BIBP_URL, LEN_BIBP_URL)) {
+		result = BIBP_URL_TYPE;
+	    }
 #endif
+	    break;
 
-    } else if (compare_type(cp, STR_FILE_URL, LEN_FILE_URL)) {
-	if (LYisLocalFile(cp)) {
-	    result = FILE_URL_TYPE;
-	} else if (LYIsHtmlSep(cp[5]) && LYIsHtmlSep(cp[6])) {
-	    result = FTP_URL_TYPE;
-	} else {
-	    result = NOT_A_URL_TYPE;
-	}
+	case 'D':
+	case 'd':
+	    if (compare_type(cp, "data:", 5)) {
+		result = DATA_URL_TYPE;
+	    }
+	    break;
 
-    } else if (compare_type(cp, "data:", 5)) {
-	result = DATA_URL_TYPE;
+	default:
+	    if (limit >= 3
+	    && ((cp1 = strchr(cp + 3, ':')) == NULL
+	     || !DoubleHtmlSep(cp1 + 1))) {
+		/*
+		 * If it doesn't contain "://", and it's not one of the the
+		 * above, it can't be a URL with a scheme we know, so check if
+		 * it's an unknown scheme for which proxying has been set up. 
+		 * - FM
+		 */
+		if (cp1 != NULL
+		 && (cp1 - cp) > 1	/* exclude DOS-style device:/path */
+		 && LYisAbsPath(cp1+1)) {
+		    result = NCFTP_URL_TYPE;
+		}
 
-    } else if (compare_type(cp, STR_LYNXEXEC, LEN_LYNXEXEC)) {
-	/*
-	 *  Special External Lynx type to handle execution
-	 *  of commands or scripts which require a pause to
-	 *  read the screen upon completion.
-	 */
-	result = LYNXEXEC_URL_TYPE;
+	    } else {
+		switch (*cp) {
+		case 'H':
+		case 'h':
+		    if (compare_type(cp, STR_HTTP_URL, LEN_HTTP_URL)) {
+			result = HTTP_URL_TYPE;
 
-    } else if (compare_type(cp, STR_LYNXPROG, LEN_LYNXPROG)) {
-	/*
-	 *  Special External Lynx type to handle execution
-	 *  of commands, scripts or programs with do not
-	 *  require a pause to read screen upon completion.
-	 */
-	result = LYNXPROG_URL_TYPE;
-
-    } else if (compare_type(cp, STR_LYNXCGI, LEN_LYNXCGI)) {
-	/*
-	 *  Special External Lynx type to handle cgi scripts.
-	 */
-	result = LYNXCGI_URL_TYPE;
-
-    } else if (compare_type(cp, STR_LYNXPRINT, LEN_LYNXPRINT)) {
-	/*
-	 *  Special Internal Lynx type.
-	 */
-	result = LYNXPRINT_URL_TYPE;
-
-    } else if (compare_type(cp, STR_LYNXOPTIONS, LEN_LYNXOPTIONS)) {
-	/*
-	 *  Special Internal Lynx type.
-	 */
-	result = LYNXOPTIONS_URL_TYPE;
-
-    } else if (compare_type(cp, STR_LYNXCFG, LEN_LYNXCFG)) {
-	/*
-	 *  Special Internal Lynx type.
-	 */
-	result = LYNXCFG_URL_TYPE;
-
-    } else if (compare_type(cp, STR_LYNXMESSAGES, LEN_LYNXMESSAGES)) {
-	/*
-	 *  Special Internal Lynx type.
-	 */
-	result = LYNXMESSAGES_URL_TYPE;
-
-    } else if (compare_type(cp, STR_LYNXCFLAGS, LEN_LYNXCFLAGS)) {
-	/*
-	 *  Special Internal Lynx type.
-	 */
-	result = LYNXCOMPILE_OPTS_URL_TYPE;
-
-    } else if (compare_type(cp, STR_LYNXDOWNLOAD, LEN_LYNXDOWNLOAD)) {
-	/*
-	 *  Special Internal Lynx type.
-	 */
-	result = LYNXDOWNLOAD_URL_TYPE;
-
-    } else if (compare_type(cp, STR_LYNXDIRED, LEN_LYNXDIRED)) {
-	/*
-	 *  Special Internal Lynx type.
-	 */
-	result = LYNXDIRED_URL_TYPE;
-
-    } else if (compare_type(cp, STR_LYNXHIST, LEN_LYNXHIST)) {
-	/*
-	 *  Special Internal Lynx type.
-	 */
-	result = LYNXHIST_URL_TYPE;
-
-    } else if (compare_type(cp, STR_LYNXKEYMAP, LEN_LYNXKEYMAP)) {
-	/*
-	 *  Special Internal Lynx type.
-	 */
-	result = LYNXKEYMAP_URL_TYPE;
-
-    } else if (compare_type(cp, STR_LYNXIMGMAP, LEN_LYNXIMGMAP)) {
-	/*
-	 *  Special Internal Lynx type.
-	 */
-	(void)is_url(&cp[11]);	/* forces lower/uppercase of next part */
-	result = LYNXIMGMAP_URL_TYPE;
-
-    } else if (compare_type(cp, STR_LYNXCOOKIE, LEN_LYNXCOOKIE)) {
-	/*
-	 *  Special Internal Lynx type.
-	 */
-	result = LYNXCOOKIE_URL_TYPE;
-
-    } else if (strlen(cp) >= 3
-	    && strstr((cp+3), "://") == NULL) {
-	/*
-	 *  If it doesn't contain "://", and it's not one of the
-	 *  the above, it can't be a URL with a scheme we know,
-	 *  so check if it's an unknown scheme for which proxying
-	 *  has been set up. - FM
-	 */
-	if ((cp1 = strstr(cp, ":")) != NULL
-	 && (cp1 - cp) > 1		/* exclude DOS-style device:/path */
-	 && LYisAbsPath(cp1+1)) {
-	    result = NCFTP_URL_TYPE;
-	} else {
-	    result = LYCheckForProxyURL(filename);
-	}
-
-    } else if (compare_type(cp, STR_HTTP_URL, LEN_HTTP_URL)) {
-	result = HTTP_URL_TYPE;
-
-    } else if (compare_type(cp, STR_HTTPS_URL, LEN_HTTPS_URL)) {
-	result = HTTPS_URL_TYPE;
+		    } else if (compare_type(cp, STR_HTTPS_URL, LEN_HTTPS_URL)) {
+			result = HTTPS_URL_TYPE;
+		    }
+		    break;
 
 #ifndef DISABLE_GOPHER
-    } else if (compare_type(cp, STR_GOPHER_URL, LEN_GOPHER_URL)) {
-	if (strlen(cp) >= 11
-	 && (cp1 = strchr(cp+11,'/')) != NULL) {
+		case 'G':
+		case 'g':
+		    if (compare_type(cp, STR_GOPHER_URL, LEN_GOPHER_URL)) {
+			if (strlen(cp) >= 11
+			 && (cp1 = strchr(cp+11,'/')) != NULL) {
 
-	    if (TOUPPER(*(cp1+1)) == 'H' || *(cp1+1) == 'w')
-		/* if this is a gopher html type */
-		result = HTML_GOPHER_URL_TYPE;
-	    else if (*(cp1+1) == 'T' || *(cp1+1) == '8')
-		result = TELNET_GOPHER_URL_TYPE;
-	    else if (*(cp1+1) == '7')
-		result = INDEX_GOPHER_URL_TYPE;
-	    else
-		result = GOPHER_URL_TYPE;
-	} else {
-	    result = GOPHER_URL_TYPE;
+			    if (TOUPPER(*(cp1+1)) == 'H' || *(cp1+1) == 'w')
+				/* if this is a gopher html type */
+				result = HTML_GOPHER_URL_TYPE;
+			    else if (*(cp1+1) == 'T' || *(cp1+1) == '8')
+				result = TELNET_GOPHER_URL_TYPE;
+			    else if (*(cp1+1) == '7')
+				result = INDEX_GOPHER_URL_TYPE;
+			    else
+				result = GOPHER_URL_TYPE;
+			} else {
+			    result = GOPHER_URL_TYPE;
+			}
+		    }
+		    break;
+#endif
+		case 'W':
+		case 'w':
+		    if (compare_type(cp, STR_WAIS_URL, LEN_WAIS_URL)) {
+			result = WAIS_URL_TYPE;
+		    }
+		    break;
+
+		case 'T':
+		case 't':
+		    if (compare_type(cp, STR_TELNET_URL, LEN_TELNET_URL)) {
+			result = TELNET_URL_TYPE;
+
+		    } else if (compare_type(cp, STR_TN3270_URL, LEN_TN3270_URL)) {
+			result = TN3270_URL_TYPE;
+		    }
+		    break;
+
+		case 'R':
+		case 'r':
+		    if (compare_type(cp, STR_RLOGIN_URL, LEN_RLOGIN_URL)) {
+			result = RLOGIN_URL_TYPE;
+		    }
+		    break;
+
+		case 'C':
+		case 'c':
+		    if (compare_type(cp, STR_CSO_URL, LEN_CSO_URL)) {
+			result = CSO_URL_TYPE;
+		    }
+		    break;
+
+		case 'A':
+		case 'a':
+		    if (compare_type(cp, "afs:", 4)) {
+			result = AFS_URL_TYPE;
+		    }
+		    break;
+
+		case 'P':
+		case 'p':
+		    if (compare_type(cp, "prospero:", 9)) {
+			result = PROSPERO_URL_TYPE;
+		    }
+		    break;
+		}
+	    }
 	}
-#endif
-
-#ifndef DISABLE_FTP
-    } else if (compare_type(cp, STR_FTP_URL, LEN_FTP_URL)) {
-	result = FTP_URL_TYPE;
-#endif
-
-    } else if (compare_type(cp, STR_WAIS_URL, LEN_WAIS_URL)) {
-	result = WAIS_URL_TYPE;
-
-    } else if (compare_type(cp, STR_TELNET_URL, LEN_TELNET_URL)) {
-	result = TELNET_URL_TYPE;
-
-    } else if (compare_type(cp, STR_TN3270_URL, LEN_TN3270_URL)) {
-	result = TN3270_URL_TYPE;
-
-    } else if (compare_type(cp, STR_RLOGIN_URL, LEN_RLOGIN_URL)) {
-	result = RLOGIN_URL_TYPE;
-
-    } else if (compare_type(cp, STR_CSO_URL, LEN_CSO_URL)) {
-	result = CSO_URL_TYPE;
-
-#ifndef DISABLE_FINGER
-    } else if (compare_type(cp, STR_FINGER_URL, LEN_FINGER_URL)) {
-	result = FINGER_URL_TYPE;
-#endif
-
-    } else if (compare_type(cp, "afs:", 4)) {
-	result = AFS_URL_TYPE;
-
-    } else if (compare_type(cp, "prospero:", 9)) {
-	result = PROSPERO_URL_TYPE;
-
-    } else {
 	/*
-	 *  Check if it's an unknown scheme for which
-	 *  proxying has been set up. - FM
+	 * Check if it is an unknown scheme for which proxying has been set up. 
 	 */
-	result = LYCheckForProxyURL(filename);
+	if (result == NOT_A_URL_TYPE)
+	    result = LYCheckForProxyURL(filename);
     }
     return result;
 }
@@ -3680,7 +3760,8 @@ PUBLIC void LYEnsureAbsoluteURL ARGS3(
 		    NonNull(name), (name ? " " : ""), *href));
 	LYConvertToURL(href, fixit);
     }
-    if (non_empty(temp = HTParse(*href, "", PARSE_ALL)))
+    temp = HTParse(*href, "", PARSE_ALL);
+    if (non_empty(temp))
 	StrAllocCopy(*href, temp);
     FREE(temp);
 }
@@ -6583,6 +6664,28 @@ PUBLIC void LYLocalFileToURL ARGS2(
     if (!LYIsHtmlSep(*leaf))
 	LYAddHtmlSep(target);
     StrAllocCat(*target, leaf);
+}
+
+/*
+ * Open a temporary file for internal-pages, optionally reusing an existing
+ * filename.
+ */
+PUBLIC FILE *InternalPageFP ARGS2(
+	char *, filename,
+	int,	reuse_flag)
+{
+    FILE *fp;
+
+    if (LYReuseTempfiles && reuse_flag) {
+	fp = LYOpenTempRewrite(filename, HTML_SUFFIX, BIN_W);
+    } else {
+	LYRemoveTemp(filename);
+	fp = LYOpenTemp(filename, HTML_SUFFIX, BIN_W);
+    }
+    if (fp == NULL) {
+	HTAlert(CANNOT_OPEN_TEMP);
+    }
+    return fp;
 }
 
 PUBLIC void BeginInternalPage ARGS3(

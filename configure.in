@@ -4,7 +4,7 @@ dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ask PRCS to plug-in the project-version for the configure-script.
-dnl $Format: AC_REVISION($ProjectVersion: 2.8.5dev.12 $\""$)
+dnl $Format: AC_REVISION($ProjectVersion: 2.8.5dev.13 $\""$)
 AC_REVISION(none)
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
@@ -344,8 +344,10 @@ CF_DEFINE_PROG(system mailer, SYSTEM_MAIL,
 	/usr/lib/sendmail  \
 	)
 CF_SYSTEM_MAIL_FLAGS
+if test -n "$SYSTEM_MAIL" ; then
 if test $with_full_paths = no ; then
 	SYSTEM_MAIL=`basename $SYSTEM_MAIL`
+fi
 fi
 
 CF_GNU_SOURCE

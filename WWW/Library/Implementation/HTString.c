@@ -272,11 +272,12 @@ PUBLIC char * HTSACopy ARGS2(
 {
     if (src != 0) {
 	if (src != *dest) {
+	    size_t size = strlen(src) + 1;
 	    FREE(*dest);
-	    *dest = (char *) malloc (strlen(src) + 1);
+	    *dest = (char *) malloc(size);
 	    if (*dest == NULL)
 		outofmem(__FILE__, "HTSACopy");
-	    strcpy (*dest, src);
+	    memcpy(*dest, src, size);
 	}
     } else {
 	FREE(*dest);
@@ -292,7 +293,7 @@ PUBLIC char * HTSACat ARGS2(
 {
     if (src && *src && (src != *dest)) {
 	if (*dest) {
-	    int length = strlen(*dest);
+	    size_t length = strlen(*dest);
 	    *dest = (char *)realloc(*dest, length + strlen(src) + 1);
 	    if (*dest == NULL)
 		outofmem(__FILE__, "HTSACat");
@@ -307,6 +308,45 @@ PUBLIC char * HTSACat ARGS2(
     return *dest;
 }
 
+
+/* optimized for heavily realloc'd strings, store length inside */
+
+#define EXTRA_TYPE size_t		/* type we use for length */
+#define EXTRA_SIZE sizeof(void *)	/* alignment >= sizeof(EXTRA_TYPE) */
+
+PUBLIC void   HTSAFree_extra ARGS1(
+	char *,		s)
+{
+    free(s - EXTRA_SIZE);
+}
+
+/* never shrink */
+PUBLIC char * HTSACopy_extra ARGS2(
+	char **,	dest,
+	CONST char *,	src)
+{
+    if (src != 0) {
+	size_t srcsize = strlen(src) + 1;
+	EXTRA_TYPE size = 0;
+
+	if (*dest != 0) {
+	    size = *(EXTRA_TYPE *)((*dest) - EXTRA_SIZE);
+	}
+	if (size < srcsize) {
+	    FREE_extra(*dest);
+	    size = srcsize * 2;   /* x2 step */
+	    *dest = (char *) malloc(size + EXTRA_SIZE);
+	    if (*dest == NULL)
+		outofmem(__FILE__, "HTSACopy_extra");
+	    *(EXTRA_TYPE *)(*dest) = size;
+	    *dest += EXTRA_SIZE;
+	}
+	memcpy(*dest, src, srcsize);
+    } else {
+	Clear_extra(*dest);
+    }
+    return *dest;
+}
 
 /*	Find next Field
 **	---------------
@@ -389,7 +429,8 @@ PUBLIC char * HTNextTok ARGS4(
     BOOL get_comments;
     BOOL get_closing_char_too = FALSE;
     char closer;
-    if (!pstr || !*pstr) return NULL;
+
+    if (isEmpty(pstr)) return NULL;
     if (!delims) delims = " ;,=" ;
     if (!bracks) bracks = "<\"" ;
 

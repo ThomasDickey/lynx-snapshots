@@ -222,6 +222,11 @@
               include  all  versions  of  files  in   local   VMS
               directory listings.
 
+       -find_leaks
+              toggle  memory leak-checking.  Normally this is not
+              compiled-into your executable, but when it  is,  it
+              can be disabled for a session.
+
        -force_empty_hrefless_a
               force  HREF-less  'A'  elements  to be empty (close
               them as soon as they are seen).
@@ -305,6 +310,9 @@
 
        -minimal
               toggles minimal versus valid comment parsing.
+
+       -nested_tables
+              toggles nested-tables logic (for debugging).
 
        -newschunksize=NUMBER
               number of articles in chunked news listings.
@@ -530,6 +538,7 @@
               lynxprog G)oto's.
 
               suspend - disallow  Unix  Control-Z  suspends  with
+
               escape to shell.
 
               telnet_port  - disallow specifying a port in telnet
@@ -637,6 +646,7 @@
        -traversal
               traverse  all  http  links  derived from startfile.
               When used with -crawl, each link that  begins  with
+
               the  same  string as startfile is output to a file,
               intended for indexing.  See CRAWL.announce for more
               information.
@@ -687,8 +697,8 @@
               is 80.
 
        -with_backspaces
-              emit backspaces in output if -dumping or  -crawling
-              (like 'man' does)
+              emit  backspaces  in   output   if   -dump'ing   or
+              -crawl'ing (like 'man' does)
 
 2 Commands
        o  Use Up arrow and Down arrow to scroll through hypertext
@@ -744,6 +754,7 @@
 
        LYNX_LSS            This  variable,  if set, specifies the
                            location of the default Lynx character
+
                            style  sheet  file.   [Currently  only
                            meaningful if  Lynx  was  built  using
                            experimental color style support.]
@@ -798,6 +809,7 @@
                            the  form  PROTOCOL_proxy  (literally:
                            http_proxy,  ftp_proxy,  gopher_proxy,
                            etc),               to
+
                            "http://some.server.dom:port/".    See
                            Lynx   Users   Guide   for  additional
                            details and examples.
@@ -852,6 +864,7 @@
                            lynx.cfg      PRINTER:      definition
                            statement.   If  the  field  does  not
                            exist  for  the document, the variable
+
                            is set to a null string under UNIX, or
                            "No Title" under VMS.
 
@@ -863,7 +876,6 @@
                            program,  as  defined  in  a  lynx.cfg
                            PRINTER: definition statement.  If the
                            field does not exist for the document,
-
                            the  variable  is set to a null string
                            under UNIX, or "No URL" under VMS.
 
@@ -972,7 +984,6 @@
 
        LC_MESSAGES         These  variables,  if set, specify the
                            notion of native  language  formatting
-
                            style.  They are POSIXly correct.
 
        LINGUAS             This   variable,   if   set  prior  to
@@ -1015,8 +1026,8 @@
        page (i.e., try "info  subject",  rather  than  "man  subject").
 
        A  section  shown as (?) denotes that documentation on the
-       topic exists, but is not part of an established documentation
-       retrieval system (see the distribution files associated
+       topic exists, but is not part of an established documenta
+       tion  retrieval system (see the distribution files associated
        with the topic, or contact your System  Administrator
        for further information).
 
@@ -1026,7 +1037,6 @@
        Earl  Fogel  of  Computing  Services  at the University of
        Saskatchewan, who implemented HYPERREZ in the  Unix  envi-
        ronment.    HYPERREZ  was  developed  by  Niel  Larson  of
-
        Think.com and served as the model for the  early  versions
        of  Lynx.  Those versions also incorporated libraries from
        the Unix Gopher clients developed  at  the  University  of

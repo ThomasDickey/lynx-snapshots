@@ -41,6 +41,11 @@ PRIVATE VisitedLink *Last_by_first;
 int nhist_extra;
 
 #ifdef LY_FIND_LEAKS
+PRIVATE int already_registered_free_messages_stack = 0;
+PRIVATE int already_registered_clean_all_history = 0;
+#endif
+
+#ifdef LY_FIND_LEAKS
 /*
  *  Utility for freeing the list of visited links. - FM
  */
@@ -296,17 +301,33 @@ PUBLIC void LYFreeDocInfo ARGS1(
 /*
  *  Free the information in the last history entry.
  */
-PRIVATE void clean_extra NOARGS
+PRIVATE void clean_extra_history NOARGS
 {
-    trace_history("clean_extra");
+    trace_history("clean_extra_history");
     nhist += nhist_extra;
     while (nhist_extra > 0) {
 	nhist--;
 	LYFreeDocInfo(&HDOC(nhist));
 	nhist_extra--;
     }
-    trace_history("...clean_extra");
+    trace_history("...clean_extra_history");
 }
+
+/*
+ * Free the entire history stack, for auditing memory leaks.
+ */
+#ifdef LY_FIND_LEAKS
+PRIVATE void clean_all_history NOARGS
+{
+    trace_history("clean_all_history");
+    clean_extra_history();
+    while (nhist > 0) {
+	nhist--;
+	LYFreeDocInfo(&HDOC(nhist));
+    }
+    trace_history("...clean_all_history");
+}
+#endif
 
 /* FIXME What is the relationship to are_different() from the mainloop?! */
 PRIVATE int are_identical ARGS2(
@@ -374,7 +395,13 @@ PUBLIC int LYpush ARGS2(
 	return 1;
     }
 
-    clean_extra();
+    clean_extra_history();
+#ifdef LY_FIND_LEAKS
+    if (!already_registered_clean_all_history) {
+	already_registered_clean_all_history = 1;
+	atexit(clean_all_history);
+    }
+#endif
 
     /*
      *	OK, push it if we have stack space.
@@ -506,7 +533,7 @@ PUBLIC void LYpop ARGS1(
 	DocInfo *,	doc)
 {
     if (nhist > 0) {
-	clean_extra();
+	clean_extra_history();
 	nhist--;
 
 	LYFreeDocInfo(doc);
@@ -615,16 +642,8 @@ PUBLIC int showhistory ARGS1(
     int x = 0;
     FILE *fp0;
 
-    if (LYReuseTempfiles) {
-	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
-    } else {
-	LYRemoveTemp(tempfile);
-	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
-    }
-    if (fp0 == NULL) {
-	HTAlert(CANNOT_OPEN_TEMP);
+    if ((fp0 = InternalPageFP(tempfile, TRUE)) == 0)
 	return(-1);
-    }
 
     LYLocalFileToURL(newfile, tempfile);
 
@@ -791,16 +810,8 @@ PUBLIC int LYShowVisitedLinks ARGS1(
     if (!cur)
 	return(-1);
 
-    if (LYReuseTempfiles) {
-	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
-    } else {
-	LYRemoveTemp(tempfile);
-	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
-    }
-    if (fp0 == NULL) {
-	HTAlert(CANNOT_OPEN_TEMP);
+    if ((fp0 = InternalPageFP(tempfile, TRUE)) == 0)
 	return(-1);
-    }
 
     LYLocalFileToURL(newfile, tempfile);
     LYRegisterUIPage(*newfile, UIP_VLINKS);
@@ -943,9 +954,6 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 #define STATUSBUFSIZE   40
 PRIVATE char * buffstack[STATUSBUFSIZE];
 PRIVATE int topOfStack = 0;
-#ifdef LY_FIND_LEAKS
-PRIVATE int already_registered_free_messages_stack = 0;
-#endif
 
 #ifdef LY_FIND_LEAKS
 PRIVATE void free_messages_stack NOARGS

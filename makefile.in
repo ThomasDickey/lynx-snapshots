@@ -327,8 +327,9 @@ help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
 	@ECHO_CC@if test -n "$(COMPRESS_EXT)"; then echo 's%\$(COMPRESS_EXT)\$(COMPRESS_EXT)%$(COMPRESS_EXT)%g' >> $@; fi
 	@-rm -f help_files.tmp
 
-install-help : help_files.sed $(HELPDIR) $(HELPDIR)/keystrokes
-	- (cd $(HELPDIR) && WD=`pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_help$$!!'` && test $$WD != $$HEAD && rm -f * keystrokes/*)
+install-help : help_files.sed $(HELPDIR)
+	- (cd $(HELPDIR) && WD=`pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_help$$!!'` && test $$WD != $$HEAD && rm -fr *)
+	test -d $(HELPDIR)/keystrokes || mkdir $(HELPDIR)/keystrokes
 @LYNXCFG_MAKE@	@echo 'Making htmlized lynx.cfg'
 @LYNXCFG_MAKE@	cd src && make LYReadCFG.i
 @LYNXCFG_MAKE@	@-rm -f alphatoc.html body.html cattoc.html
@@ -413,7 +414,6 @@ $(BINDIR) \
 $(MANDIR) \
 $(LIBDIR) \
 $(HELPDIR) \
-$(HELPDIR)/keystrokes \
 $(DOCDIR) :
 	$(srcdir)/mkdirs.sh $@
 etags:

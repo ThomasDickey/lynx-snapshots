@@ -306,7 +306,7 @@ extern void LYUpperCase PARAMS((
 	char *		buffer));
 extern BOOLEAN LYRemoveNewlines PARAMS((
 	char *		buffer));
-extern void LYRemoveBlanks PARAMS((
+extern char * LYRemoveBlanks PARAMS((
 	char *		buffer));
 extern char * LYSkipBlanks PARAMS((
 	char *		buffer));

@@ -11,4 +11,3 @@ extern int print_options PARAMS((char **newfile,
 extern char * GetFileName NOPARAMS;
 
 #endif /* LYPRINT_H */
-

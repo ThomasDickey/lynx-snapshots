@@ -211,6 +211,9 @@ typedef struct {
 #  if defined(NCURSES) && defined(HAVE_NCURSES_TERM_H)
 #    include <ncurses/term.h>
 #  else
+#   if defined(HAVE_NCURSESW_NCURSES_H) || defined(HAVE_NCURSES_NCURSES_H) || defined(HAVE_XCURSES)
+#     undef HAVE_TERM_H			/* only use one in comparable path! */
+#   endif
 #   if defined(HAVE_TERM_H)
 #    include <term.h>
 #   endif
@@ -256,6 +259,19 @@ typedef struct {
  */
 #if defined(NCURSES_VERSION) && !defined(NCURSES_VERSION_MAJOR)
 #undef USE_CURSES_PADS
+#endif
+
+/*
+ * Most implementations of curses treat pair 0 specially, as the default
+ * foreground and background color.  Also, the COLORS variable corresponds to
+ * the total number of colors.
+ *
+ * PDCurses does not follow these rules.  Its COLORS variable claims it has
+ * 8 colors, but it actually implements 16.  That makes it hard to optimize
+ * color settings against color pair 0 in a portable fashion.
+ */
+#if defined(COLOR_CURSES) && !(defined(PDCURSES) || defined(HAVE_XCURSES))
+#define USE_CURSES_PAIR_0
 #endif
 
 #endif /* USE_SLANG */
