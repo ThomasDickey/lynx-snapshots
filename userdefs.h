@@ -243,6 +243,10 @@
  * -cfg command line switch will override these definitions.
  * You can pass the compilation default via the Makefile.
  *
+ * If you are building Lynx using the configure script, you should specify
+ * the default location of the configuration file via that script, since it
+ * also generates the makefile and install-cfg rules.
+ *
  * Note that many implementations of telnetd allow passing of
  * environment variables, which might be used by unscrupulous
  * people to modify the environment in anonymous accounts.  When
@@ -257,6 +261,7 @@
  * override the src/HTInit.c defaults via the mime.types and
  * mailcap files (see the examples in the samples directory).
  */
+#ifndef HAVE_CONFIG_H
 #ifndef LYNX_CFG_FILE
 #ifdef DOSPATH
 #define LYNX_CFG_FILE "./lynx.cfg"
@@ -264,6 +269,7 @@
 #define LYNX_CFG_FILE "/usr/local/lib/lynx.cfg"
 #endif /* DOSPATH */
 #endif /* LYNX_CFG_FILE */
+#endif /* HAVE_CONFIG_H */
 
 /**************************
  * The EXTENSION_MAP file allows you to map file suffix's to
@@ -1206,7 +1212,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8pre.3"
+#define LYNX_VERSION "2.8pre.4"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */

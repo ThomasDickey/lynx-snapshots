@@ -7,6 +7,27 @@ platforms see also INSTALLATION, for some changes for auto-configure and
 simple curses color see also README.configure).  Note that the 2.7 -> 2.7.1
 changes are included here. - KW]
 
+1998-03-06
+* clarify relationship between the configure script and userdefs.h with
+  respect to the LYNX_CFG_FILE definition. - TD
+* newer CF_FIND_LIBRARY autoconf macro, to allow ncurses library in /lib
+  only, needed for SUSE Linux. - TD
+* add casts to UPPER8 function's comparison for equality of parameters, and
+  to TOUPPER macro to guard against sign-extension due to prototype. - AC
+* correct spelling of -lcur_colr library in aclocal.m4, change order of
+  tests to put -lHcurses second on HP-UX (patch by Jonathan Sergent).
+* restore simple zmodem downloader script, displaced by recent undocumented
+  change (there are some concerns about security or permissions with the
+  alternate script).  - DK
+* DOSPATH localfile patch: corrected display of file://localhost/c:/,
+  which was displayed as file://localhost/c%3A/ (it looks strange,
+  no escaping is required in this case; tweak LYConvertToUrl() in LYUtils.c).
+  Now we may start "lynx c:" or 'go' c:  and not see these strange letters.
+  On the other hand, % and # symbols are now restricted to be in local file
+  path manually typed from 'go' URL (usually not happend) and interpreted only
+  as URL #fragment (Hex escaping after % done for valid numbers only). - LP
+* workaround error in vendor's terminfo description of 'dtterm' by ensuring
+  we limit color pair-number accordingly. - TD
 1998-03-04
 * strip -g compiler option if not otherwise specified, for debugging (note
   that autoconf 2.12 does not try to use -O option due to concerns about

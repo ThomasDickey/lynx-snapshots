@@ -42,6 +42,8 @@ extern int _NOSHARE(COLS);
 int lynx_has_color = FALSE;
 #endif
 
+#define COLOR_BKGD ((COLOR_PAIRS >= 9) ? COLOR_PAIR(9) : A_NORMAL)
+
 /*
  *  These are routines to start and stop curses and to cleanup
  *  the screen at the end.
@@ -511,7 +513,9 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 		attr |= A_UNDERLINE;
 	}
 
-	attr |= COLOR_PAIR(code+offs);
+	if (code+offs < COLOR_PAIRS) {
+		attr |= COLOR_PAIR(code+offs);
+	}
 
 	wattrset(win, attr);
     } else {
@@ -534,12 +538,14 @@ PRIVATE void lynx_map_color ARGS1(int, n)
 
     if (lynx_called_initscr) {
 	for (m = 0; m <= 16; m += 8) {
-	    init_pair(n+m+1,
-		lynx_color_pairs[n+m+1].fg,
-		lynx_color_pairs[n+m+1].bg);
+	    int pair = n + m + 1;
+	    if (pair < COLOR_PAIRS)
+		init_pair(pair,
+		    lynx_color_pairs[pair].fg,
+		    lynx_color_pairs[pair].bg);
 	}
 	if (n == 0 && LYShowColor >= SHOW_COLOR_ON)
-	    bkgd(COLOR_PAIR(9) | ' ');
+	    bkgd(COLOR_BKGD | ' ');
     }
 }
 
@@ -563,7 +569,10 @@ PUBLIC int lynx_chg_color ARGS3(
 PUBLIC void lynx_set_color ARGS1(int, a)
 {
     if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON) {
-	attrset(lynx_color_cfg[a].attr | COLOR_PAIR(a+1));
+	attrset(lynx_color_cfg[a].attr
+		| (((a+1) < COLOR_PAIRS)
+			? COLOR_PAIR(a+1)
+			: A_NORMAL));
     }
 }
 
@@ -586,12 +595,13 @@ PRIVATE void lynx_init_colors NOARGS
 	for (n = 0; n < sizeof(lynx_color_cfg)/sizeof(lynx_color_cfg[0]); n++) {
 	    for (m = 0; m <= 16; m += 8) {
 		int pair = n + m + 1;
-		init_pair(pair,
+		if (pair < COLOR_PAIRS)
+		    init_pair(pair,
 			lynx_color_pairs[pair].fg,
 			lynx_color_pairs[pair].bg);
 	    }
 	    if (n == 0 && LYShowColor >= SHOW_COLOR_ON)
-		bkgd(COLOR_PAIR(9) | ' ');
+		bkgd(COLOR_BKGD | ' ');
 	}
     } else if (LYShowColor != SHOW_COLOR_NEVER) {
 	LYShowColor = SHOW_COLOR_OFF;
@@ -1660,7 +1670,7 @@ PUBLIC void lynx_force_repaint NOARGS
     chtype a;
 #ifndef USE_COLOR_STYLE
     if (LYShowColor >= SHOW_COLOR_ON)
-	a = COLOR_PAIR(9);
+	a = COLOR_BKGD;
     else
 #endif
 	a = A_NORMAL;

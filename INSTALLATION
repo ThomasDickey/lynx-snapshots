@@ -242,8 +242,10 @@ II. Compile instructions -- UNIX
 
   --libdir
 	Defines the location where you want the lynx.cfg file installed.
-	Usually this would be the same location as the LYNX_CFG_FILE
-	define in userdefs.h.
+	The configure script defines the symbol LYNX_CFG_FILE to correspond
+	with the $libdir environment variable.  (For platforms which do not
+	support a configure script, such as MS-DOS, Win32 and VMS, you must
+	edit userdefs.h if you wish to specify the location of lynx.cfg).
 
   --with-screen=XXX
 	Use this option to select the screen type.  The option value,

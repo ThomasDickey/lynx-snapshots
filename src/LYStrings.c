@@ -1632,10 +1632,10 @@ PUBLIC char * SNACat ARGS3(
 */
 PUBLIC int UPPER8(int ch1, int ch2)
 {
-    /* Use exact match for speed, but mostly for stability	    */
+    /* Try case-Sensitive match for speed, but mostly for stability */
     /* while doing experiments with the remainder of this function. */
-    if (ch1==ch2)
-	return(0);  /* Exact match */
+    if ((unsigned char)ch1==(unsigned char)ch2)
+       return(0);
 
     /* case-insensitive match for us-ascii */
     if ((unsigned char)ch1 < 128 && (unsigned char)ch2 < 128)

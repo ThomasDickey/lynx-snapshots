@@ -4,7 +4,7 @@
 
 #include <mem.h>
 #include <dos.h>
-#include "htstring.h"
+
 
 /* PUBLIC							HTDOS_wwwName()
 **		CONVERTS DOS Name into WWW Name
@@ -59,7 +59,6 @@ char * HTDOS_name(char *wwwname)
 	int joe;
 
 	memset(cp_url, 0, 1023);
-/*	strset(cp_url,0);                 */
 	sprintf(cp_url, "%s",wwwname);
 
 	for(joe = 0; cp_url[joe] != '\0'; joe++)	{
@@ -82,16 +81,14 @@ char * HTDOS_name(char *wwwname)
 		printf("\n\n%s = i%\n\n",cp_url,strlen(cp_url));
 		sleep(5);
 #endif
-      strcpy(wwwname, cp_url);
-      return(wwwname); /* return(cp_url); */
+		strcpy(wwwname, cp_url);
+		return(wwwname); /* return(cp_url); */
 	} else {
 #if 0
 		printf("\n\n%s = %i\n\n",cp_url+1,strlen(cp_url));
 		sleep(5);
 #endif
-      strcpy(wwwname, cp_url+1);
-      return(wwwname); /* return(cp_url+1);  */
+		strcpy(wwwname, cp_url+1);
+		return(wwwname); /* return(cp_url+1);  */
 	}
 }
-
-

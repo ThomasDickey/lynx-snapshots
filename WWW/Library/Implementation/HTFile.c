@@ -26,7 +26,6 @@
 #endif /* !VMS */
 
 #ifdef DOSPATH
-#define HAVE_READDIR
 #define HAVE_READDIR 1
 #include <dirent.h>
 #define USE_DIRENT
