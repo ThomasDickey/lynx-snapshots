@@ -855,7 +855,7 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
       button 1 is clicked */
 #ifndef _WINDOWS
    if (state)
-     mousemask(BUTTON1_CLICKED | BUTTON2_CLICKED, NULL);
+     mousemask(BUTTON1_CLICKED | BUTTON3_CLICKED, NULL);
    else
      mousemask(0, NULL);
 #else
@@ -1673,26 +1673,6 @@ PUBLIC void lynx_force_repaint NOARGS
     clearok(curscr, TRUE);
 }
 
-PUBLIC void lynx_start_underline_color NOARGS
-{
-    start_underline ();
-}
-
-PUBLIC void lynx_stop_underline_color NOARGS
-{
-    stop_underline ();
-}
-
-PUBLIC void lynx_start_bold_color NOARGS
-{
-    start_bold ();
-}
-
-PUBLIC void lynx_stop_bold_color NOARGS
-{
-    stop_bold ();
-}
-
 PUBLIC void lynx_start_title_color NOARGS
 {
 }
@@ -1727,7 +1707,7 @@ PUBLIC void lynx_start_link_color ARGS2(
 	 *  will be underlined if appropriate. - LE & FM
 	 */
 	if (pending)
-	    lynx_start_underline_color();
+	    start_underline();
      }
 }
 
@@ -1754,7 +1734,7 @@ PUBLIC void lynx_stop_link_color ARGS2(
 	 *  If underlining was turned on above, turn it off. - LE & FM
 	 */
 	if (pending)
-	    lynx_stop_underline_color();
+	    stop_underline();
     }
 #endif
 }

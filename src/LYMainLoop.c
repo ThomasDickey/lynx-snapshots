@@ -2137,16 +2137,23 @@ new_cmd:  /*
 #endif /* NOT_DONE_YET */
 
 	case LYK_QUIT:	/* quit */
-	    _statusline(REALLY_QUIT);
+	    if (LYQuitDefaultYes == TRUE) {
+		_statusline(REALLY_QUIT_Y);
+	    } else {
+		_statusline(REALLY_QUIT_N);
+	    }
 	    c = LYgetch();
-#ifdef QUIT_DEFAULT_YES
-	    if (TOUPPER(c) != 'N' &&
-		c != 7)
-#else
-	    if (TOUPPER(c) == 'Y')
-#endif /* QUIT_DEFAULT_YES */
+	    if (LYQuitDefaultYes == TRUE) {
+		if (TOUPPER(c) != 'N' &&
+		    c != 7) {
+		    return(0);
+		} else {
+		    statusline(NO_CANCEL);
+		    sleep(InfoSecs);
+		}
+	    } else if (TOUPPER(c) == 'Y') {
 		return(0);
-	    else {
+	    } else {
 		statusline(NO_CANCEL);
 		sleep(InfoSecs);
 	    }

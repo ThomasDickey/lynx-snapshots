@@ -7,22 +7,66 @@ platforms see also INSTALLATION, for some changes for auto-configure and
 simple curses color see also README.configure).  Note that the 2.7 -> 2.7.1
 changes are included here. - KW]
 
+1998-02-13
+* use size_t in SGML_dtd. - TD
+* remove trademark symbol, unused quotes from chrtrans/*.tbl - LP
+* New item to lynx.cfg added:  PREPEND_CHARSET_TO_SOURSE (similar to BASE), we
+  need it to resolve charset for downloaded/printed html sourses which became
+  local.  This is really useful because downloaded and printed texts may
+  happend to have different charsets so assume_local_charset fails.  For
+  downloaded source meta charset added from HTTP charset header (if and only if
+  present).  For printed source meta charset added from display_charset (real
+  charset after chartrans).  If the original source have its own meta charset
+  and we add the second on top - Lynx currently use those on top and ignove
+  others (old) value (that is correct, although non standard like BASE on top). 
+  The compilation default is FALSE (compatibility).  - LP
+* modify ncurses mouse behavior to match slang (use button 3 rather than
+  button 2 for "previous document" (reported by Michael Ritzert) - TD
+* use case-independent comparison for tail-only comparison in override_proxy
+  (patch by pg@sweng.stortek.com) - TD
+* remove unneeded definitions of ALT_CHAR_SET, NCURSES_VERSION in
+  src/makefile.dos - DK
+* correct syntax for the RAW_DOS_KEY_HACK in lynx.cfg, add a little information
+  on how to compile this.  Also patched makefile.dos to make compilation of the
+  raw dos key hack the default when compiling in DOS. - DK
+* change back to boolean since the logic was unused: UCCanTranslateFromTo(),
+  UCCanTranslateUniTo(), and UCCanUniTranslateFrom(). - TD
+* Mods of SGML.c and LYCharUtils.c to improve handling of entities,
+  obsolete stuff removed (not all yet). - LP
+* -localhost mode: disable interpreting BASE HREF= if local_host_only
+  to resolve local html files with BASE (Lynx add base to downloaded
+  sources and this may affect links if looking them with -localhost).
+  (tweak in html.c). - LP
+* Modify HTMLGetEntityUCValue in LYCharSets.c:
+  we begin to move from old style entities[] to unicode-based. - LP
+* added a few comments. - LP
+1998-02-07
+* Fixed a bug in HTTP.c which could cause trashing of authorization info
+  for an origin http(s) server if the request is being proxied. - FM
+* Tweak in HTTP.c so that the reloading variable is not reset until
+  after any resubmissions due to authorization challenges. - FM
+* Tweaks of userdefs.h, lynx.cfg, LYMessages_en.h, LYMain.c, LYMainLoop.c,
+  LYClean.c, LYReadCFG.c, and LYGlobalDefs.h so that the QUIT_DEFAULT_YES
+  compilation symbol can be overridden in lynx.cfg, in keeping with
+  the principle that only strict security-related compilation symbols
+  cannot be overridden at run time. - FM
 1998-02-05
 * adjust formatting, comments & some messages in WWW files to simplify
   comparison with 2.7.2 version.  - TD
 * Update SGML entity to Unicode table in HTMLDTD.c from ftp.unicode.org -
-  lots of new entities, iso-latin-1 now included there (htmldtd.c).
+  lots of new entities, iso-latin-1 now included there.
   See also new files in test/ directory:  sgml.html and unicode.html.
-  Tweak a few typos in test/*.html according to sgml.html - LP
+  Tweak a few typos in test/*.html according to sgml.html.
+  Add a few new entries in def7_uni.tbl according to sgml.html - LP
 * Cleanup iso01-iso09, cp866 tables against ones found at ftp.unicode.org
-* Strip the fat from LYCharSets.c - unneccesary obsoleted tables removed
+* Strip the fat from LYCharSets.c - unnecessary obsoleted tables removed
   and redirected to SevenBitApproximation table (ones which have unicode tables
   override it anyway, those for CJK had exactly the same tables as
   SevenBit..). - LP
-* Remove obsoleted "Other ISO Latin" charset, which work *exactly*
-  the same as "7 bit approximation" (tweaks UCdefs.h and LYCharSet.c)
-  (See the note on 06-14-96 where it comes from). - LP
-* Tweaks UCdomap.c and LyCharSet.c according to 2.7.2 for 1997-10-15 - LP
+* Remove obsolete "Other ISO Latin" charset, which works _exactly_ the same
+  as "7 bit approximation" (See the note on 06-14-96 where it comes from).
+* Sort the list of charsets in Options according to 2.7.2 for 1997-10-15,
+  see the comments in UCinit at the bottom of UCDomap.c - LP
 * add ifdef to HTFile.c to workaround conflicting S_IFIFO vs S_IFSOCK
   (e.g., on apollo, from a report by Dave Eaton <dwe@arde.com>) - TD
 * updated INSTALLATION (patch by HN) - TD
@@ -780,7 +824,7 @@ from the lynx code.  I think the following patch does this.
   paranoid dbx. - KW
 * Try to more consistently remember the charset in effect for a document
   when going to SOURCE view, using new LYUC{Push,Pop}Assumed functions.
-  Note that this is only in effect immediately when swithching to SOURCE
+  Note that this is only in effect immediately when switching to SOURCE
   view; any later reloading while within SOURCE view (including those
   caused by RELOAD, RAW_TOGGLE and other keys, or by Options Screen changes)
   may still revert to the usual assumption about charset, which means a

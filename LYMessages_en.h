@@ -21,17 +21,14 @@
  * the header inclusion statement in your userdefs.h to include
  * one of those with a different name.
  */
-#ifdef QUIT_DEFAULT_YES
-#define REALLY_QUIT "Are you sure you want to quit? [Y] "
+#define REALLY_QUIT_Y "Are you sure you want to quit? [Y] "
 #ifdef VMS
-#define REALLY_EXIT "Really exit from Lynx? [Y] "
+#define REALLY_EXIT_Y "Really exit from Lynx? [Y] "
 #endif /* VMS */
-#else
-#define REALLY_QUIT "Are you sure you want to quit? [N] "
+#define REALLY_QUIT_N "Are you sure you want to quit? [N] "
 #ifdef VMS
-#define REALLY_EXIT "Really exit from Lynx? [N] "
+#define REALLY_EXIT_N "Really exit from Lynx? [N] "
 #endif /* VMS */
-#endif /* QUIT_DEFAULT_YES */
 #define CANCELLED "Cancelled!!!"
 #define CANCELLING "Cancelling!"
 #define NO_CANCEL "Excellent!!!"

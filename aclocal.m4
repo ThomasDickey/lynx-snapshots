@@ -298,7 +298,7 @@ if test ".$ac_cv_func_initscr" != .yes ; then
 	])
 
 	# Check for library containing initscr
-	test "$cf_term_lib" != unknown && LIBS="-l$cf_term_lib $cf_save_LIBS"
+	test "$cf_term_lib" != predefined && \ test "$cf_term_lib" != unknown && LIBS="-l$cf_term_lib $cf_save_LIBS"
 	for cf_curs_lib in curses ncurses cursesX jcurses unknown
 	do
 		AC_CHECK_LIB($cf_curs_lib,initscr,[break])

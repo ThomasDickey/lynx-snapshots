@@ -215,6 +215,10 @@ struct _HTStream {
     /* .... */
 };
 
+extern  HTStyle *styles[HTML_ELEMENTS+31]; /* adding 24 nested list styles  */
+					   /* and 3 header alignment styles */
+					   /* and 3 div alignment styles    */
+
 /*
  *	Semi-Private functions. - FM
  */
@@ -222,6 +226,11 @@ extern void HTML_put_character PARAMS((HTStructured *me, char c));
 extern void HTML_put_string PARAMS((HTStructured *me, CONST char *s));
 extern void HTML_write PARAMS((HTStructured *me, CONST char *s, int l));
 extern int HTML_put_entity PARAMS((HTStructured *me, int entity_number));
+extern void actually_set_style PARAMS((HTStructured * me));
+
+/*	Style buffering avoids dummy paragraph begin/ends.
+*/
+#define UPDATE_STYLE if (me->style_change) { actually_set_style(me); }
 #endif /* Lynx_HTML_Handler */
 
 extern void strtolower PARAMS((char* i));

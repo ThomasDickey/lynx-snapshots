@@ -45,7 +45,7 @@ b) directives:
 
     RawOrEnc
 	a number which flags some special property (encoding) for this
-        charset [see utf8.uni for example, see UCDefs.h for details].
+        charset [see utf8_uni.tbl for example, see UCDefs.h for details].
 
 c) character translation definitions:
    they look like
@@ -91,7 +91,8 @@ d) string replacement definitions:
 
   which would mean "Replace Unicode U+00cd (LATIN CAPITAL LETTER I WITH 
   ACUTE" with the string (consisting of two character) I' (if no other
-  translation is available)."
+  translation is available)."  Please note that replacement definitions
+  in certnain charset table will override ones from Default table.
 
   Note that everything after the ':' is currently taken VERBATIM, so
   careful with trailing blanks etc.

@@ -292,13 +292,13 @@ PUBLIC char *LYHostName = NULL;		/* treat as a local host name */
 PUBLIC char *LYLocalDomain = NULL;	/* treat as a local domain tail */
 PUBLIC BOOLEAN clickable_images = MAKE_LINKS_FOR_ALL_IMAGES;
 PUBLIC BOOLEAN pseudo_inline_alts = MAKE_PSEUDO_ALTS_FOR_INLINES;
-PUBLIC BOOLEAN crawl=FALSE;	     /* Do crawl? */
-PUBLIC BOOLEAN traversal=FALSE;     /* Do traversals? */
-PUBLIC BOOLEAN check_realm=FALSE;   /* Restrict to the starting realm? */
+PUBLIC BOOLEAN crawl = FALSE;	     /* Do crawl? */
+PUBLIC BOOLEAN traversal = FALSE;    /* Do traversals? */
+PUBLIC BOOLEAN check_realm = FALSE;  /* Restrict to the starting realm? */
 	       /* Links beyond a displayed page with no links? */
-PUBLIC BOOLEAN more_links=FALSE;
-PUBLIC int     ccount=0;  /* Starting number for lnk#.dat files in crawls */
-PUBLIC BOOLEAN LYCancelledFetch=FALSE; /* TRUE if cancelled binary fetch */
+PUBLIC BOOLEAN more_links = FALSE;
+PUBLIC int     ccount = 0; /* Starting number for lnk#.dat files in crawls */
+PUBLIC BOOLEAN LYCancelledFetch = FALSE; /* TRUE if cancelled binary fetch */
 	       /* Include mime headers with source dump */
 PUBLIC BOOLEAN keep_mime_headers = FALSE;
 PUBLIC BOOLEAN no_url_redirection = FALSE; /* Don't follow URL redirections */
@@ -366,6 +366,8 @@ PUBLIC BOOLEAN LYForceSSLCookiesSecure = FALSE;
 PUBLIC BOOLEAN LYNoCc = FALSE;
 PUBLIC BOOLEAN LYPreparsedSource = FALSE;	/* Show source as preparsed?	 */
 PUBLIC BOOLEAN LYPrependBaseToSource = TRUE;
+PUBLIC BOOLEAN LYPrependCharsetToSource = FALSE;
+PUBLIC BOOLEAN LYQuitDefaultYes = QUIT_DEFAULT_YES;
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
 #ifdef DECLARE_WAIS_LOGFILES

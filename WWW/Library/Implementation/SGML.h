@@ -141,9 +141,9 @@ typedef struct {
     HTTag *             tags;           /* Must be in strcmp order by name */
     int                 number_of_tags;
     CONST char **       entity_names;   /* Must be in strcmp order by name */
-    int                 number_of_entities;
+    size_t              number_of_entities;
     CONST UC_entity_info * extra_entity_info; /* strcmp order by name */
-    int                 number_of_extra_entities;
+    size_t              number_of_extra_entities;
 } SGML_dtd;
 
 

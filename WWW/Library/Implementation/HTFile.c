@@ -877,7 +877,7 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	*cp4 = '\0';
 	cp4 = cp3;
 	chndl = UCGetLYhndl_byMIME(cp3);
-	if (UCCanTranslateFromTo(chndl, current_char_set) != TQ_NO) {
+	if (UCCanTranslateFromTo(chndl, current_char_set)) {
 	    chartrans_ok = YES;
 	    *cp1 = '\0';
 	    format = HTAtom_for(cp);
@@ -890,7 +890,7 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	    **	Got something but we don't recognize it.
 	    */
 	    chndl = UCLYhndl_for_unrec;
-	    if (UCCanTranslateFromTo(chndl, current_char_set) != TQ_NO) {
+	    if (UCCanTranslateFromTo(chndl, current_char_set)) {
 		chartrans_ok = YES;
 		HTAnchor_setUCInfoStage(anchor, chndl,
 					UCT_STAGE_MIME,

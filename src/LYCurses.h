@@ -328,10 +328,6 @@ extern int  lynx_chg_color PARAMS((int, int, int));
 
 extern void lynx_enable_mouse PARAMS((int));
 extern void lynx_force_repaint NOPARAMS;
-extern void lynx_start_underline_color NOPARAMS;
-extern void lynx_stop_underline_color NOPARAMS;
-extern void lynx_start_bold_color NOPARAMS;
-extern void lynx_stop_bold_color NOPARAMS;
 extern void lynx_start_title_color NOPARAMS;
 extern void lynx_stop_title_color NOPARAMS;
 extern void lynx_start_link_color PARAMS((int flag, int pending));

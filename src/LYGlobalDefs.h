@@ -326,6 +326,8 @@ extern BOOLEAN LYForceSSLCookiesSecure;
 extern BOOLEAN LYNoCc;
 extern BOOLEAN LYPreparsedSource;	/* Show source as preparsed?	 */
 extern BOOLEAN LYPrependBaseToSource;
+extern BOOLEAN LYPrependCharsetToSource;
+extern BOOLEAN LYQuitDefaultYes;
 
 #ifdef RAWDOSKEYHACK
 extern BOOLEAN raw_dos_key_hack; /* Turn on and off DOS key hack */

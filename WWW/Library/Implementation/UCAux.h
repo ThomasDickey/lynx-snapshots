@@ -1,25 +1,9 @@
 #ifndef UCAUX_H
 #define UCAUX_H
 
-/*
- *  A type for a "Translation Quality" (actually, Transcoding Quality).
- *  This is a fuzzy concept since we are just looking at the charset
- *  not what characters are actually there, so it's just a guess for
- *  "common" cases.  TQ_NO must be 0 since callers of functions that
- *  return this type may treat result as a boolean flag.
- *  The functions returning this type could be improved to use more
- *  knowledge from the translation tables.
- */
-typedef enum {
-    TQ_NO	= 0,		/* must be 0 */
-    TQ_POOR	= 1,
-    TQ_GOOD	= 2,
-    TQ_EXCELLENT = 3
-} UCTQ_t;
-
-extern UCTQ_t UCCanUniTranslateFrom PARAMS((int from));
-extern UCTQ_t UCCanTranslateUniTo PARAMS((int to));
-extern UCTQ_t UCCanTranslateFromTo PARAMS((int from, int to));
+extern BOOL UCCanUniTranslateFrom PARAMS((int from));
+extern BOOL UCCanTranslateUniTo PARAMS((int to));
+extern BOOL UCCanTranslateFromTo PARAMS((int from, int to));
 extern BOOL UCNeedNotTranslate PARAMS((
 	int		from,
 	int		to));

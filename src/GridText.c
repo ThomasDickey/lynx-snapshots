@@ -771,7 +771,7 @@ PRIVATE int display_line ARGS2(
 		    addch('_');
 		    i++;
 		} else {
-		    lynx_start_underline_color ();
+		    start_underline();
 		}
 		break;
 
@@ -780,16 +780,16 @@ PRIVATE int display_line ARGS2(
 		    addch('_');
 		    i++;
 		} else {
-		    lynx_stop_underline_color ();
+		    stop_underline();
 		}
 		break;
 
 	    case LY_BOLD_START_CHAR:
-		lynx_start_bold_color ();
+		start_bold();
 		break;
 
 	    case LY_BOLD_END_CHAR:
-		lynx_stop_bold_color ();
+		stop_bold ();
 		break;
 #endif
 
@@ -883,8 +883,8 @@ PRIVATE int display_line ARGS2(
     addch('\n');
 
 #ifndef USE_COLOR_STYLE
-    lynx_stop_underline_color ();
-    lynx_stop_bold_color ();
+    stop_underline();
+    stop_bold();
 #else
     while (current_style < line->numstyles)
     {
@@ -984,8 +984,8 @@ PRIVATE void display_title ARGS1(
 		}
 		tmp[j] = '\0';
 	    }
-	    FREE(title);
-	    title = (char *)tmp;
+	    StrAllocCopy(title, (CONST char *)tmp);
+	    FREE(tmp);
 	}
     }
     move(0, 0);
@@ -1035,7 +1035,8 @@ PRIVATE void display_page ARGS3(
     TextAnchor *Anchor_ptr = NULL;
     FormInfo *FormInfo_ptr;
     BOOL display_flag = FALSE;
-    HTAnchor *link_dest, *link_dest_intl = NULL;
+    HTAnchor *link_dest;
+    HTAnchor *link_dest_intl = NULL;
     static int last_nlinks = 0;
     static int charset_last_displayed = -1;
 
@@ -1052,7 +1053,7 @@ PRIVATE void display_page ARGS3(
 	    refresh();
 	    clear();
 	}
-	addstr("\n\nError accessing document.\nNo data available!\n");
+	addstr("\n\nError accessing document!\nNo data available!\n");
 	refresh();
 	nlinks = 0;  /* set number of links to 0 */
 	return;
@@ -1399,15 +1400,7 @@ PRIVATE void display_page ARGS3(
 			    link_dest_intl = NULL;
 			if (link_dest_intl) {
 			    char *cp2 = HTAnchor_address(link_dest_intl);
-#if 0
-			    cp = strchr(cp2, '#');
-			    if (cp && cp != cp2 &&
-				0!=strncmp(cp2, "LYNXIMGMAP:", 11)) {
-				StrAllocCopy(cp_AnchorAddress, cp);
-				FREE(cp2);
-			    } else
-#endif
-				cp_AnchorAddress = cp2;
+			    cp_AnchorAddress = cp2;
 			} else
 #endif
 			    cp_AnchorAddress = HTAnchor_address(link_dest);
@@ -1642,10 +1635,6 @@ PRIVATE void split_line ARGS2(
 	      previous->styles[previous->numstyles-2].direction == STACK_ON) ||
 	     (previous->styles[LastStyle].direction == ABS_OFF &&
 	      previous->styles[previous->numstyles-2].direction == ABS_ON) ||
-#if 0
-	     (previous->styles[LastStyle].direction == STACK_ON &&
-	      previous->styles[previous->numstyles-2].direction == STACK_OFF) ||
-#endif
 	     (previous->styles[LastStyle].direction == ABS_ON &&
 	      previous->styles[previous->numstyles-2].direction == ABS_OFF)
 		)) {
@@ -2417,7 +2406,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 	/*
 	 *  Can split here. - FM
 	 */
-	text->permissible_split = (int)line->size;
+	text->permissible_split = (int)text->last_line->size;
 	/*
 	 *  There are some pages written in
 	 *  different kanji codes. - TA
@@ -2538,7 +2527,7 @@ check_IgnoreExcess:
 	    /*
 	     *  Can split here. - FM
 	     */
-	    text->permissible_split = (int)line->size;
+	    text->permissible_split = (int)text->last_line->size;
 	}
     }
 }
@@ -2642,6 +2631,7 @@ PUBLIC int HText_beginAnchor ARGS3(
     a->next = 0;
     a->anchor = anc;
     a->extent = 0;
+    a->link_type = HYPERTEXT_ANCHOR;
     text->last_anchor = a;
 
 #ifndef DONT_TRACK_INTERNAL_LINKS
@@ -2652,10 +2642,8 @@ PUBLIC int HText_beginAnchor ARGS3(
 #endif
 	if (HTAnchor_followMainLink((HTAnchor*)anc)) {
 	a->number = ++(text->last_anchor_number);
-	a->link_type = HYPERTEXT_ANCHOR;
     } else {
 	a->number = 0;
-	a->link_type = HYPERTEXT_ANCHOR;
     }
 
     /*
@@ -3061,7 +3049,7 @@ PUBLIC void HText_endAnchor ARGS2(
 	    }
 	} else {
 	    /*
-	     *  The anchor's content does not restricted to only
+	     *  The anchor's content is not restricted to only
 	     *  white and special characters, so we'll show it
 	     *  as a link. - FM
 	     */
@@ -3501,8 +3489,9 @@ PUBLIC int HTGetLinkInfo ARGS6(
 	char **,	hightext,
 	char **,	lname)
 {
-    TextAnchor * a;
-    HTAnchor *link_dest, *link_dest_intl = NULL;
+    TextAnchor *a;
+    HTAnchor *link_dest;
+    HTAnchor *link_dest_intl = NULL;
     int anchors_this_line = 0, anchors_this_screen = 0;
     int prev_anchor_line = -1, prev_prev_anchor_line = -1;
 
@@ -3630,21 +3619,9 @@ PUBLIC int HTGetLinkInfo ARGS6(
 			}
 			if (link_dest_intl) {
 			    char *cp2 = HTAnchor_address(link_dest_intl);
-#if 0
-			    char *cp = strchr(cp2, '#');
-			    if (cp && cp != cp2 &&
-				0!=strncmp(cp2, "LYNXIMGMAP:", 11)) {
-				StrAllocCopy(*lname, cp);
-				FREE(cp2);
-				return(WWW_INTERN_LINK_TYPE);
-			    } else {
-#endif
-				FREE(*lname);
-				*lname = cp2;
-				return(WWW_INTERN_LINK_TYPE);
-#if 0
-			    }
-#endif
+			    FREE(*lname);
+			    *lname = cp2;
+			    return(WWW_INTERN_LINK_TYPE);
 			} else
 #endif
 			    cp_freeme = HTAnchor_address(link_dest);
@@ -5054,11 +5031,11 @@ PUBLIC void www_user_search ARGS3(
 	}
 
 	if (case_sensitive && LYno_attr_char_strstr(line->data, target)) {
-	    tentative_result=count;
+	    tentative_result = count;
 	    break;
 	} else if (!case_sensitive &&
 		   LYno_attr_char_case_strstr(line->data, target)) {
-	    tentative_result=count;
+	    tentative_result = count;
 	    break;
 	} else if (line == HTMainText->last_line) {  /* next line */
 	    break;
@@ -5217,7 +5194,7 @@ PUBLIC void www_user_search ARGS3(
 		break;
 	    } else if (!case_sensitive &&
 		       LYno_attr_char_case_strstr(line->data, target)) {
-	        tentative_result=count;
+	        tentative_result = count;
 		break;
 	    } else if (count > start_line) {  /* next line */
 		_user_message(STRING_NOT_FOUND, target);
@@ -6785,11 +6762,11 @@ PRIVATE double get_trans_q ARGS2(
     int,		cs_from,
     char *,		givenmime)
 {
-    double dq = 0.0, df = 1.0;
-    UCTQ_t tq;
+    double df = 1.0;
+    BOOL tq;
     char *p;
     if (!givenmime || !(*givenmime))
-	return dq;
+	return 0.0;
     if ((p = strchr(givenmime,';')) != NULL) {
 	*p++ = '\0';
     }
@@ -6799,9 +6776,8 @@ PRIVATE double get_trans_q ARGS2(
     else
 	tq = UCCanTranslateFromTo(cs_from,
 				  UCGetLYhndl_byMIME(givenmime));
-    if (tq <= TQ_NO)
-	return dq;
-    dq = 1.0;
+    if (!tq)
+	return 0.0;
     if (p && *p) {
 	char *pair, *field = p, *pval, *ptok;
 	/* Get all the parameters to the Charset */
@@ -7083,9 +7059,9 @@ PUBLIC void HText_SubmitForm ARGS4(
 		    /* those specials will be trivial */
 		} else if (UCNeedNotTranslate(form_ptr->value_cs, target_cs)) {
 		    /* already ok */
-		} else if (UCCanTranslateFromTo(form_ptr->value_cs, target_cs) != TQ_NO) {
+		} else if (UCCanTranslateFromTo(form_ptr->value_cs, target_cs)) {
 		    /* also ok */
-		} else if (UCCanTranslateFromTo(target_cs, form_ptr->value_cs) != TQ_NO) {
+		} else if (UCCanTranslateFromTo(target_cs, form_ptr->value_cs)) {
 		    target_cs = form_ptr->value_cs;	/* try this */
 		    target_csname = NULL; /* will be set after loop */
 		} else {
@@ -7103,9 +7079,9 @@ PUBLIC void HText_SubmitForm ARGS4(
 		    /* those specials will be trivial */
 		} else if (UCNeedNotTranslate(form_ptr->name_cs, target_cs)) {
 		    /* already ok */
-		} else if (UCCanTranslateFromTo(form_ptr->name_cs, target_cs) != TQ_NO) {
+		} else if (UCCanTranslateFromTo(form_ptr->name_cs, target_cs)) {
 		    /* also ok */
-		} else if (UCCanTranslateFromTo(target_cs, form_ptr->name_cs) != TQ_NO) {
+		} else if (UCCanTranslateFromTo(target_cs, form_ptr->name_cs)) {
 		    target_cs = form_ptr->value_cs;	/* try this */
 		    target_csname = NULL; /* will be set after loop */
 		} else {

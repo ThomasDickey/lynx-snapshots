@@ -10,8 +10,8 @@ Mus-ascii
 D1
 
 
-# this letters should not normally pass here,
-# but may come from named and numbered entities:
+# us-ascii characters should not normally pass here,
+# they are always processed directly but let declare it here:
 0x20-0x7e  idem
 
 
@@ -92,60 +92,60 @@ U+00fc:u:
 0x79	U+00fd
 U+00fe:th
 0x79	U+00ff
-0x41	U+0100	U+0102	U+0104
-0x61	U+0101	U+0103	U+0105
-0x43	U+0106	U+0108	U+010a	U+010c
+0x41	U+0100	U+0102	U+0104			# A
+0x61	U+0101	U+0103	U+0105			# a
+0x43	U+0106	U+0108	U+010a	U+010c		# C
 # The following line is an example for mapping several accented versions
 # of small letter 'c' to 'c':
-0x63	U+0107	U+0109	U+010b	U+010d
+0x63	U+0107	U+0109	U+010b	U+010d		# c
 0x44	U+010e
 0x64	U+010f
 U+0110:D/
 U+0111:d/
-0x45	U+0112	U+0114	U+0116	U+0118	U+011a
-0x65	U+0113	U+0115	U+0117	U+0119	U+011b
-0x47	U+011c	U+011e	U+0120	U+0122
-0x67	U+011d	U+011f	U+0121	U+0123
+0x45	U+0112	U+0114	U+0116	U+0118	U+011a	# E
+0x65	U+0113	U+0115	U+0117	U+0119	U+011b	# e
+0x47	U+011c	U+011e	U+0120	U+0122		# G
+0x67	U+011d	U+011f	U+0121	U+0123		# g
 0x48	U+0124
 0x68	U+0125
 U+0126:H/
 0x48	U+0127 #	LATIN SMALL LETTER H BAR	-> H
-0x49	U+0128	U+012a	U+012c	U+012e	U+0130
-0x69	U+0129	U+012b	U+012d	U+012f	U+0131
+0x49	U+0128	U+012a	U+012c	U+012e	U+0130	# I
+0x69	U+0129	U+012b	U+012d	U+012f	U+0131	# i
 U+0132:IJ
 U+0133:ij
 0x4a	U+0134
 0x6a	U+0135
 0x4b	U+0136
-0x4b	U+0137
+0x6b	U+0137
 U+0138:kk
-0x4c	U+0139	U+013b	U+013d
-0x6c	U+013a	U+013c	U+013e
+0x4c	U+0139	U+013b	U+013d			# L
+0x6c	U+013a	U+013c	U+013e			# l
 U+013f:L.
 U+0140:l.
 U+0141:L/
 U+0142:l/
-0x4e	U+0143	U+0145	U+0147
-0x6e	U+0144	U+0146	U+0148
+0x4e	U+0143	U+0145	U+0147			# N
+0x6e	U+0144	U+0146	U+0148			# n
 U+0149:'n
 U+014a:NG
 0x4e	U+014B #	LATIN SMALL LETTER ENG	-> N
-0x4f	U+014c	U+014e
-0x6f	U+014d	U+014f
+0x4f	U+014c	U+014e				# O
+0x6f	U+014d	U+014f				# o
 U+0150:O"
 U+0151:o"
 U+0152:OE
 U+0153:oe
-0x52	U+0154	U+0156	U+0158
-0x72	U+0155	U+0157	U+0159
-0x53	U+015a	U+015c	U+015e	U+0160
-0x73	U+015b	U+015d	U+015f	U+0161
-0x54	U+0162	U+0164
-0x74	U+0163	U+0165
+0x52	U+0154	U+0156	U+0158			# R
+0x72	U+0155	U+0157	U+0159			# r
+0x53	U+015a	U+015c	U+015e	U+0160		# S
+0x73	U+015b	U+015d	U+015f	U+0161		# s
+0x54	U+0162	U+0164				# T
+0x74	U+0163	U+0165				# t
 U+0166:T/
 U+0167:t/
-0x55	U+0168	U+016a	U+016c	U+016e	U+0172
-0x75	U+0169	U+016b	U+016d	U+016f	U+0173
+0x55	U+0168	U+016a	U+016c	U+016e	U+0172	# U
+0x75	U+0169	U+016b	U+016d	U+016f	U+0173	# u
 U+0170:U"
 U+0171:u"
 0x57	U+0174
@@ -2168,9 +2168,9 @@ U+001f:US
 U+007f:DT
 U+0080:PA
 U+0081:HO
-# most of that characters (82-9F) processed in the code
-# as windows-1250,1252 if passed silently (HTTP default is iso-latin-1),
-# so should not happen:
+# most of this characters (82-9F) may be switched ON in the code
+# as windows-1252 if come silently (HTTP default is iso-latin-1,
+# but windows-1252 is superset of iso-latin-1)
 #U+0082:BH
 #U+0083:NH
 #U+0084:IN
