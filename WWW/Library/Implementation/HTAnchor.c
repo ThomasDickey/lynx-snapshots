@@ -759,6 +759,10 @@ static void HTParentAnchor_free(HTParentAnchor *me)
     }
     FREE(me->SugFname);
     FREE(me->cache_control);
+#ifdef EXP_HTTP_HEADERS
+    HTChunkClear(&(me->http_headers));
+#endif
+    FREE(me->content_type_params);
     FREE(me->content_type);
     FREE(me->content_language);
     FREE(me->content_encoding);
@@ -1038,6 +1042,22 @@ void HTAnchor_setCitehost(HTParentAnchor *me,
 const char *HTAnchor_SugFname(HTParentAnchor *me)
 {
     return (me ? me->SugFname : NULL);
+}
+
+#ifdef EXP_HTTP_HEADERS
+/*	HTTP Headers.
+*/
+const char *HTAnchor_http_headers(HTParentAnchor *me)
+{
+    return (me ? me->http_headers.data : NULL);
+}
+#endif
+
+/*	Content-Type handling (parameter list).
+*/
+const char *HTAnchor_content_type_params(HTParentAnchor *me)
+{
+    return (me ? me->content_type_params : NULL);
 }
 
 /*	Content-Encoding handling. - FM

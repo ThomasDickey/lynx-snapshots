@@ -822,12 +822,7 @@ PUBLIC_IF_FIND_LEAKS char *StrAllocVsprintf(char **pstr,
 #ifdef HTSprintf		/* if hidden by LYLeaks stuff */
 #undef HTSprintf
 #endif
-#if ANSI_VARARGS
 char *HTSprintf(char **pstr, const char *fmt,...)
-#else
-char *HTSprintf(va_alist)
-    va_dcl
-#endif
 {
     char *result = 0;
     size_t inuse = 0;
@@ -835,10 +830,6 @@ char *HTSprintf(va_alist)
 
     LYva_start(ap, fmt);
     {
-#if !ANSI_VARARGS
-	char **pstr = va_arg(ap, char **);
-	const char *fmt = va_arg(ap, const char *);
-#endif
 	if (pstr != 0 && *pstr != 0)
 	    inuse = strlen(*pstr);
 	result = StrAllocVsprintf(pstr, inuse, fmt, &ap);
@@ -858,22 +849,13 @@ char *HTSprintf(va_alist)
 #ifdef HTSprintf0		/* if hidden by LYLeaks stuff */
 #undef HTSprintf0
 #endif
-#if ANSI_VARARGS
 char *HTSprintf0(char **pstr, const char *fmt,...)
-#else
-char *HTSprintf0(va_alist)
-    va_dcl
-#endif
 {
     char *result = 0;
     va_list ap;
 
     LYva_start(ap, fmt);
     {
-#if !ANSI_VARARGS
-	char **pstr = va_arg(ap, char **);
-	const char *fmt = va_arg(ap, const char *);
-#endif
 #ifdef USE_VASPRINTF
 	if (pstr) {
 	    if (*pstr)
@@ -1238,12 +1220,7 @@ void HTSABFree(bstring **ptr)
  * Use this function to perform formatted sprintf's onto the end of a bstring.
  * The bstring may contain embedded nulls; the formatted portions must not.
  */
-#ifdef ANSI_VARARGS
 bstring *HTBprintf(bstring **pstr, const char *fmt,...)
-#else
-bstring *HTBprintf(va_alist)
-    va_dcl
-#endif
 {
     bstring *result = 0;
     char *temp = 0;
@@ -1251,10 +1228,6 @@ bstring *HTBprintf(va_alist)
 
     LYva_start(ap, fmt);
     {
-#if !ANSI_VARARGS
-	bstring **pstr = va_arg(ap, char **);
-	const char *fmt = va_arg(ap, const char *);
-#endif
 	temp = StrAllocVsprintf(&temp, 0, fmt, &ap);
 	if (!isEmpty(temp)) {
 	    HTSABCat(pstr, temp, strlen(temp));

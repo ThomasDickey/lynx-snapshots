@@ -31,7 +31,7 @@ static char *copy_plus(char **result, const char *source)
  *	returns		WWW file specification
  *
  */
-char *HTDOS_wwwName(const char *dosname)
+const char *HTDOS_wwwName(const char *dosname)
 {
     static char *wwwname = NULL;
     char *cp_url = copy_plus(&wwwname, dosname);

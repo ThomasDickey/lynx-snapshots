@@ -168,7 +168,8 @@ struct _HTPresentation {
     HTAtom *rep;		/* representation name atomized */
     HTAtom *rep_out;		/* resulting representation */
     HTConverter *converter;	/* routine to gen the stream stack */
-    char *command;		/* MIME-format string */
+    char *command;		/* MIME-format command string */
+    char *testcommand;		/* MIME-format test string */
     float quality;		/* Between 0 (bad) and 1 (good) */
     float secs;
     float secs_per_byte;
@@ -232,6 +233,8 @@ HTSetPresentation: Register a system command to present a format
 
   command                 is the MAILCAP - style command template
 
+  testcommand             is the MAILCAP - style testcommand template
+
   quality                 A degradation faction 0..1.0
 
   secs                    A limit on the time user will wait (0.0 for infinity)
@@ -244,6 +247,7 @@ HTSetPresentation: Register a system command to present a format
  */
 extern void HTSetPresentation(const char *representation,
 			      const char *command,
+			      const char *testcommand,
 			      double quality,
 			      double secs,
 			      double secs_per_byte,

@@ -116,7 +116,7 @@ int showlist(DocInfo *newdoc, BOOLEAN titles)
 	     * HIDDENLINKS_MERGE in GridText.c - kw
 	     */
 	    if (fields_are_numbered()) {
-		HText_FormDescNumber(cnt, (char **) &desc);
+		HText_FormDescNumber(cnt, &desc);
 		fprintf(fp0,
 			"<li><a id=%d href=\"#%d\">form field</a> = <em>%s</em>\n",
 			cnt, cnt, desc);
@@ -277,7 +277,7 @@ void printlist(FILE *fp, BOOLEAN titles)
 		 * won't create a forward link to the form.  - FM && LE
 		 */
 		if (fields_are_numbered()) {
-		    HText_FormDescNumber(cnt, (char **) &desc);
+		    HText_FormDescNumber(cnt, &desc);
 		    fprintf(fp, "%4d. form field = %s\n", cnt, desc);
 		}
 		continue;

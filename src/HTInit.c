@@ -38,7 +38,7 @@ static int HTLoadExtensionsConfigFile(char *fn);
        HTSetSuffix5(suffix, mimetype, type, description, 1.0)
 
 #define SET_PRESENT(mimetype, command, quality, delay) \
-  HTSetPresentation(mimetype, command, quality, delay, 0.0, 0, media)
+  HTSetPresentation(mimetype, command, 0, quality, delay, 0.0, 0, media)
 
 #define SET_EXTERNL(rep_in, rep_out, command, quality) \
     HTSetConversion(rep_in, rep_out, command, quality, 3.0, 0.0, 0, mediaEXT)
@@ -115,6 +115,7 @@ void HTFormatInit(void)
     SET_INTERNL("application/html", "text/x-c", HTMLToC, 0.5);
     SET_INTERNL("application/html", "text/plain", HTMLToPlain, 0.5);
     SET_INTERNL("application/html", "www/present", HTMLPresent, 2.0);
+    SET_INTERNL("application/xhtml+xml", "www/present", HTMLPresent, 2.0);
     SET_INTERNL("application/html", "www/source", HTPlainPresent, 1.0);
     SET_INTERNL("application/x-wais-source", "www/source", HTPlainPresent, 1.0);
     SET_INTERNL("application/x-wais-source", "www/present", HTWSRCConvert, 2.0);
@@ -457,52 +458,260 @@ static int ProcessMailcapEntry(FILE *fp, struct MailcapEntry *mc, AcceptMedia me
     if (PassesTest(mc)) {
 	CTRACE((tfp, "ProcessMailcapEntry Setting up conversion %s : %s\n",
 		mc->contenttype, mc->command));
-	HTSetPresentation(mc->contenttype, mc->command, mc->quality,
+	HTSetPresentation(mc->contenttype,
+			  mc->command,
+			  mc->testcommand,
+			  mc->quality,
 			  3.0, 0.0, mc->maxbytes, media);
     }
     FREE(mc->command);
+    FREE(mc->testcommand);
     FREE(mc->contenttype);
 
     return (1);
 }
 
-static void BuildCommand(char **pBuf,
-			 size_t Bufsize,
-			 char *controlstring,
-			 char *TmpFileName,
-			 size_t TmpFileLen)
-{
-    char *from, *to;
-    int prefixed = 0;
+#define L_CURL '{'
+#define R_CURL '}'
 
-    for (from = controlstring, to = *pBuf; *from != '\0'; from++) {
-	if (prefixed) {
+static const char *LYSkipQuoted(const char *s)
+{
+    int escaped = 0;
+
+    ++s;			/* skip first quote */
+    while (*s != 0) {
+	if (escaped) {
+	    escaped = 0;
+	} else if (*s == '\\') {
+	    escaped = 1;
+	} else if (*s == '"') {
+	    ++s;
+	    break;
+	}
+	++s;
+    }
+    return s;
+}
+
+/*
+ * Note: the tspecials[] here are those defined for Content-Type header, so
+ * this function is not really general-purpose.
+ */
+static const char *LYSkipToken(const char *s)
+{
+    static const char tspecials[] = "\"()<>@,;:\\/[]?.=";
+
+    while (*s != '\0' && !WHITE(*s) && strchr(tspecials, *s) == 0) {
+	++s;
+    }
+    return s;
+}
+
+static const char *LYSkipValue(const char *s)
+{
+    if (*s == '"')
+	s = LYSkipQuoted(s);
+    else
+	s = LYSkipToken(s);
+    return s;
+}
+
+/*
+ * Copy the value from the source, dequoting if needed.
+ */
+static char *LYCopyValue(const char *s)
+{
+    const char *t;
+    char *result = 0;
+    int j, k;
+
+    if (*s == '"') {
+	t = LYSkipQuoted(s);
+	StrAllocCopy(result, s + 1);
+	result[t - s - 2] = '\0';
+	for (j = k = 0;; ++j, ++k) {
+	    if (result[j] == '\\') {
+		++j;
+	    }
+	    if ((result[k] = result[j]) == '\0')
+		break;
+	}
+    } else {
+	t = LYSkipToken(s);
+	StrAllocCopy(result, s);
+	result[t - s] = '\0';
+    }
+    return result;
+}
+
+/*
+ * The "Content-Type:" field, contains zero or more parameters after a ';'.
+ * Return the value of the named parameter, or null.
+ */
+static char *LYGetContentType(const char *name,
+			      const char *params)
+{
+    char *result = 0;
+
+    if (params != 0) {
+	if (name != 0) {
+	    size_t length = strlen(name);
+	    const char *test = strchr(params, ';');	/* skip type/subtype */
+	    const char *next;
+
+	    while (test != 0) {
+		BOOL found = FALSE;
+
+		++test;		/* skip the ';' */
+		test = LYSkipCBlanks(test);
+		next = LYSkipToken(test);
+		if ((next - test) == (int) length
+		    && !strncmp(test, name, length)) {
+		    found = TRUE;
+		}
+		test = LYSkipCBlanks(next);
+		if (*test == '=') {
+		    ++test;
+		    test = LYSkipCBlanks(test);
+		    if (found) {
+			result = LYCopyValue(test);
+			break;
+		    } else {
+			test = LYSkipValue(test);
+		    }
+		    test = LYSkipCBlanks(test);
+		}
+		if (*test != ';') {
+		    break;	/* we're lost */
+		}
+	    }
+	} else {		/* return the content-type */
+	    StrAllocCopy(result, params);
+	    *LYSkipNonBlanks(result) = '\0';
+	}
+    }
+    return result;
+}
+
+/*
+ * Check if the command uses a "%s" substitution.  We need to know this, to
+ * decide when to create temporary files, etc.
+ */
+BOOL LYMailcapUsesPctS(const char *controlstring)
+{
+    int result = FALSE;
+    const char *from;
+    const char *next;
+    int prefixed = 0;
+    int escaped = 0;
+
+    for (from = controlstring; *from != '\0'; from++) {
+	if (escaped) {
+	    escaped = 0;
+	} else if (*from == '\\') {
+	    escaped = 1;
+	} else if (prefixed) {
 	    prefixed = 0;
 	    switch (*from) {
-	    case '%':
-		*to++ = '%';
+	    case '%':		/* not defined */
+	    case 'n':
+	    case 'F':
+	    case 't':
+		break;
+	    case 's':
+		result = TRUE;
+		break;
+	    case L_CURL:
+		next = strchr(from, R_CURL);
+		if (next != 0) {
+		    from = next;
+		    break;
+		}
+		/* FALLTHRU */
+	    default:
+		break;
+	    }
+	} else if (*from == '%') {
+	    prefixed = 1;
+	}
+    }
+    return result;
+}
+
+/*
+ * Build the command string for testing or executing a mailcap entry.
+ * If a substitution from the Content-Type header is requested but no
+ * parameters are available, return -1, otherwise 0.
+ *
+ * This does not support multipart %n or %F (does this apply to lynx?)
+ */
+static int BuildCommand(HTChunk *cmd,
+			const char *controlstring,
+			const char *TmpFileName,
+			const char *params)
+{
+    int result = 0;
+    size_t TmpFileLen = strlen(TmpFileName);
+    const char *from;
+    const char *next;
+    char *name, *value;
+    int prefixed = 0;
+    int escaped = 0;
+
+    for (from = controlstring; *from != '\0'; from++) {
+	if (escaped) {
+	    escaped = 0;
+	    HTChunkPutc(cmd, *from);
+	} else if (*from == '\\') {
+	    escaped = 1;
+	} else if (prefixed) {
+	    prefixed = 0;
+	    switch (*from) {
+	    case '%':		/* not defined */
+		HTChunkPutc(cmd, *from);
 		break;
 	    case 'n':
 		/* FALLTHRU */
 	    case 'F':
 		CTRACE((tfp, "BuildCommand: Bad mailcap \"test\" clause: %s\n",
 			controlstring));
-		/* FALLTHRU */
-	    case 's':
-		if (TmpFileLen && TmpFileName) {
-		    if ((to - *pBuf) + TmpFileLen + 1 > Bufsize) {
-			*to = '\0';
-			CTRACE((tfp,
-				"BuildCommand: Too long mailcap \"test\" clause,\n"));
-			CTRACE((tfp, "              ignoring: %s%s...\n",
-				*pBuf, TmpFileName));
-			**pBuf = '\0';
-			return;
-		    }
-		    strcpy(to, TmpFileName);
-		    to += strlen(TmpFileName);
+		break;
+	    case 't':
+		if ((value = LYGetContentType(NULL, params)) != 0) {
+		    HTChunkPuts(cmd, value);
+		    FREE(value);
 		}
 		break;
+	    case 's':
+		if (TmpFileLen && TmpFileName) {
+		    HTChunkPuts(cmd, TmpFileName);
+		}
+		break;
+	    case L_CURL:
+		next = strchr(from, R_CURL);
+		if (next != 0) {
+		    if (params != 0) {
+			++from;
+			name = 0;
+			HTSprintf0(&name, "%.*s", next - from, from);
+			if ((value = LYGetContentType(name, params)) != 0) {
+			    HTChunkPuts(cmd, value);
+			    FREE(value);
+			} else {
+			    if (!strcmp(name, "charset")) {
+				HTChunkPuts(cmd, "ISO-8859-1");
+			    } else {
+				CTRACE((tfp, "BuildCommand no value for %s\n", name));
+			    }
+			}
+			FREE(name);
+		    } else {
+			result = -1;
+		    }
+		    from = next;
+		    break;
+		}
+		/* FALLTHRU */
 	    default:
 		CTRACE((tfp,
 			"BuildCommand: Ignoring unrecognized format code in mailcap file '%%%c'.\n",
@@ -512,18 +721,66 @@ static void BuildCommand(char **pBuf,
 	} else if (*from == '%') {
 	    prefixed = 1;
 	} else {
-	    *to++ = *from;
-	}
-	if (to >= *pBuf + Bufsize) {
-	    (*pBuf)[Bufsize - 1] = '\0';
-	    CTRACE((tfp, "BuildCommand: Too long mailcap \"test\" clause,\n"));
-	    CTRACE((tfp, "              ignoring: %s...\n",
-		    *pBuf));
-	    **pBuf = '\0';
-	    return;
+	    HTChunkPutc(cmd, *from);
 	}
     }
-    *to = '\0';
+    HTChunkTerminate(cmd);
+    return result;
+}
+
+/*
+ * Build the mailcap test-command and execute it.  This is only invoked when
+ * we cannot tell just by looking at the command if it would succeed.
+ *
+ * Returns 0 for success, -1 for error and 1 for deferred.
+ */
+int LYTestMailcapCommand(const char *testcommand,
+			 const char *params)
+{
+    int result;
+    char TmpFileName[LY_MAXPATH];
+    HTChunk *expanded = 0;
+
+    if (LYMailcapUsesPctS(testcommand)) {
+	if (LYOpenTemp(TmpFileName, HTML_SUFFIX, "w") == 0)
+	    ExitWithError(CANNOT_OPEN_TEMP);
+	LYCloseTemp(TmpFileName);
+    } else {
+	/* We normally don't need a temp file name - kw */
+	TmpFileName[0] = '\0';
+    }
+    expanded = HTChunkCreate(1024);
+    if ((result = BuildCommand(expanded, testcommand, TmpFileName, params)) != 0) {
+	result = 1;
+	CTRACE((tfp, "PassesTest: Deferring test command: %s\n", expanded->data));
+    } else {
+	CTRACE((tfp, "PassesTest: Executing test command: %s\n", expanded->data));
+	if ((result = LYSystem(expanded->data)) != 0) {
+	    result = -1;
+	    CTRACE((tfp, "PassesTest: Test failed!\n"));
+	} else {
+	    CTRACE((tfp, "PassesTest: Test passed!\n"));
+	}
+    }
+
+    HTChunkFree(expanded);
+    LYRemoveTemp(TmpFileName);
+
+    return result;
+}
+
+char *LYMakeMailcapCommand(const char *command,
+			   const char *params,
+			   const char *filename)
+{
+    HTChunk *expanded = 0;
+    char *result = 0;
+
+    expanded = HTChunkCreate(1024);
+    BuildCommand(expanded, command, filename, params);
+    StrAllocCopy(result, expanded->data);
+    HTChunkFree(expanded);
+    return result;
 }
 
 #define RTR_forget      0
@@ -574,7 +831,6 @@ static int RememberTestResult(int mode, char *cmd, int result)
 static int PassesTest(struct MailcapEntry *mc)
 {
     int result;
-    char *cmd, TmpFileName[LY_MAXPATH];
 
     /*
      *  Make sure we have a command
@@ -631,28 +887,7 @@ static int PassesTest(struct MailcapEntry *mc)
 
     result = RememberTestResult(RTR_lookup, mc->testcommand, 0);
     if (result == -1) {
-	/*
-	 *  Build the command and execute it.
-	 */
-	if (strchr(mc->testcommand, '%')) {
-	    if (LYOpenTemp(TmpFileName, HTML_SUFFIX, "w") == 0)
-		ExitWithError(CANNOT_OPEN_TEMP);
-	    LYCloseTemp(TmpFileName);
-	} else {
-	    /* We normally don't need a temp file name - kw */
-	    TmpFileName[0] = '\0';
-	}
-	cmd = (char *) malloc(1024);
-	if (!cmd)
-	    ExitWithError(MEMORY_EXHAUSTED_ABORT);
-	BuildCommand(&cmd, 1024,
-		     mc->testcommand,
-		     TmpFileName,
-		     strlen(TmpFileName));
-	CTRACE((tfp, "PassesTest: Executing test command: %s\n", cmd));
-	result = LYSystem(cmd);
-	FREE(cmd);
-	LYRemoveTemp(TmpFileName);
+	result = LYTestMailcapCommand(mc->testcommand, NULL);
 	RememberTestResult(RTR_add, mc->testcommand, result ? 1 : 0);
     }
 
@@ -660,15 +895,16 @@ static int PassesTest(struct MailcapEntry *mc)
      *  Free the test command as well since
      *  we wont be needing it anymore.
      */
-    FREE(mc->testcommand);
+    if (result != 1)
+	FREE(mc->testcommand);
 
-    if (result) {
+    if (result < 0) {
 	CTRACE((tfp, "PassesTest: Test failed!\n"));
-    } else {
+    } else if (result == 0) {
 	CTRACE((tfp, "PassesTest: Test passed!\n"));
     }
 
-    return (result == 0);
+    return (result >= 0);
 }
 
 static int ProcessMailcapFile(char *file, AcceptMedia media)

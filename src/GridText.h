@@ -96,6 +96,7 @@ extern void HTCheckFnameForCompression(char **fname,
 				       BOOLEAN strip_ok);
 extern const char *HText_getLastModified(void);
 extern const char *HText_getDate(void);
+extern const char *HText_getHttpHeaders(void);
 extern const char *HText_getServer(void);
 extern const char *HText_getOwner(void);
 extern const char *HText_getContentBase(void);

@@ -226,6 +226,8 @@ extern BOOLEAN telnet_ok;
 extern BOOLEAN verbose_img;	/* display filenames of images?     */
 extern BOOLEAN vi_keys;		/* TRUE to turn on vi-like key movement */
 
+extern HTList *Goto_URLs;
+
 extern char *LYRequestReferer;	/* Referer, may be set in getfile() */
 extern char *LYRequestTitle;	/* newdoc.title in calls to getfile() */
 extern char *LYTransferName;	/* abbreviation for Kilobytes */

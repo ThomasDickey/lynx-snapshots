@@ -44,7 +44,8 @@ extern void _internal_HTC(HText *text, int style, int dir);
 extern char class_string[TEMPSTRINGSIZE];
 
 /* stack of attributes during page rendering */
-extern int last_styles[128];
+#define MAX_LAST_STYLES 128
+extern int last_styles[MAX_LAST_STYLES];
 extern int last_colorattr_ptr;
 
 #endif

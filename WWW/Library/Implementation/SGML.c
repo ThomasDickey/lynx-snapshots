@@ -322,11 +322,11 @@ static void HTMLSRC_apply_markup(HTStream *context, HTlexeme lexeme, BOOL start)
 						ts->present,
 						(const char **) ts->value,
 						context->current_tag_charset,
-						(char **) &context->include);
+						&context->include);
 	else
 	    (*context->actions->end_element) (context->target,
 					      ts->element,
-					      (char **) &context->include);
+					      &context->include);
 	ts = ts->next;
     }
 }
@@ -800,8 +800,8 @@ static void handle_comment(HTStream *context)
 
     if (context->csi == NULL &&
 	strncmp(s, "!--#", 4) == 0 &&
-	LYCheckForCSI(context->node_anchor, (char **) &context->url) == TRUE) {
-	LYDoCSI(context->url, s, (char **) &context->csi);
+	LYCheckForCSI(context->node_anchor, &context->url) == TRUE) {
+	LYDoCSI(context->url, s, &context->csi);
     } else {
 	LYCommentHacks(context->node_anchor, context->string->data);
     }
@@ -978,7 +978,7 @@ static void do_close_stacked(HTStream *context)
 #endif
 	(*context->actions->end_element) (context->target,
 					  e,
-					  (char **) &context->include);
+					  &context->include);
     context->element_stack = stacked->next;
     pool_free(stacked);
     context->no_lynx_specialcodes = context->element_stack ?
@@ -1111,7 +1111,7 @@ static void end_element(HTStream *context, HTTag * old_tag)
 	if (!psrc_view)		/* Don't actually pass call on if viewing psrc - kw */
 #endif
 	    status = (*context->actions->end_element) (context->target,
-						       e, (char **) &context->include);
+						       e, &context->include);
 	if (status == HT_PARSER_REOPEN_ELT) {
 	    CTRACE((tfp, "SGML: Restart <%s>\n", t->name));
 	    (*context->actions->start_element) (context->target,
@@ -1119,7 +1119,7 @@ static void end_element(HTStream *context, HTTag * old_tag)
 						NULL,
 						NULL,
 						context->current_tag_charset,
-						(char **) &context->include);
+						&context->include);
 	} else if (status == HT_PARSER_OTHER_CONTENT) {
 	    CTRACE((tfp, "SGML: Continue with other content model for <%s>\n", t->name));
 	    context->element_stack->tag = ALT_TAGP_OF_TAGNUM(e);
@@ -1298,7 +1298,7 @@ static void start_element(HTStream *context)
 						 context->present,
 						 (const char **) context->value,	/* coerce type for think c */
 						 context->current_tag_charset,
-						 (char **) &context->include);
+						 &context->include);
     if (status == HT_PARSER_OTHER_CONTENT)
 	new_tag = ALT_TAGP(new_tag);	/* this is only returned for OBJECT */
     if (new_tag->contents != SGML_EMPTY) {	/* i.e., tag not empty */
@@ -1397,7 +1397,7 @@ static void SGML_free(HTStream *context)
 #endif
 	    (*context->actions->end_element) (context->target,
 					      NORMAL_TAGNUM(TAGNUM_OF_TAGP(t)),
-					      (char **) &context->include);
+					      &context->include);
 	FREE(context->include);
     }
 
@@ -3592,7 +3592,7 @@ static void SGML_character(HTStream *context, char c_in)
 		    HTStartAnchor(context->target, string->data, NULL);
 		    (*context->actions->end_element) (context->target,
 						      HTML_A,
-						      (char **) &context->include);
+						      &context->include);
 		} else if (attr_is_href) {
 		    PSRCSTART(href);
 		    HTStartAnchor(context->target, NULL, string->data);
@@ -3601,7 +3601,7 @@ static void SGML_character(HTStream *context, char c_in)
 		if (attr_is_href) {
 		    (*context->actions->end_element) (context->target,
 						      HTML_A,
-						      (char **) &context->include);
+						      &context->include);
 		    PSRCSTOP(href);
 		}
 		PSRCSTOP(attrval);
@@ -3671,7 +3671,7 @@ static void SGML_character(HTStream *context, char c_in)
 		    HTStartAnchor(context->target, string->data, NULL);
 		    (*context->actions->end_element) (context->target,
 						      HTML_A,
-						      (char **) &context->include);
+						      &context->include);
 		} else if (attr_is_href) {
 		    PSRCSTART(href);
 		    HTStartAnchor(context->target, NULL, string->data);
@@ -3680,7 +3680,7 @@ static void SGML_character(HTStream *context, char c_in)
 		if (attr_is_href) {
 		    (*context->actions->end_element) (context->target,
 						      HTML_A,
-						      (char **) &context->include);
+						      &context->include);
 		    PSRCSTOP(href);
 		}
 		PUTC('\'');
@@ -3733,7 +3733,7 @@ static void SGML_character(HTStream *context, char c_in)
 		    HTStartAnchor(context->target, string->data, NULL);
 		    (*context->actions->end_element) (context->target,
 						      HTML_A,
-						      (char **) &context->include);
+						      &context->include);
 		} else if (attr_is_href) {
 		    PSRCSTART(href);
 		    HTStartAnchor(context->target, NULL, string->data);
@@ -3742,7 +3742,7 @@ static void SGML_character(HTStream *context, char c_in)
 		if (attr_is_href) {
 		    (*context->actions->end_element) (context->target,
 						      HTML_A,
-						      (char **) &context->include);
+						      &context->include);
 		    PSRCSTOP(href);
 		}
 		PUTC(c);
@@ -3979,7 +3979,7 @@ static void SGML_character(HTStream *context, char c_in)
 				(*context->actions->end_element)
 				    (context->target,
 				     TAGNUM_OF_TAGP(context->current_tag),
-				     (char **) &context->include);
+				     &context->include);
 			}
 		    } else if (!strcasecomp(string->data, "P")) {
 			/*
@@ -4009,7 +4009,7 @@ static void SGML_character(HTStream *context, char c_in)
 			    (*context->actions->end_element)
 				(context->target,
 				 TAGNUM_OF_TAGP(context->current_tag),
-				 (char **) &context->include);
+				 &context->include);
 		    }
 		    string->size = 0;
 		    context->current_attribute_number = INVALID;

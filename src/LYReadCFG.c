@@ -925,7 +925,7 @@ static int system_editor_fun(char *value)
 }
 
 #define SetViewer(mime_type, viewer) \
-    HTSetPresentation(mime_type, viewer, 1.0, 3.0, 0.0, 0, mediaCFG)
+    HTSetPresentation(mime_type, viewer, 0, 1.0, 3.0, 0.0, 0, mediaCFG)
 
 static int viewer_fun(char *value)
 {

@@ -209,7 +209,7 @@ static int ws_read(int fd, char *buf, int len)
     return res;
 }
 
-static void _thread_func(void *p)
+static DWORD __stdcall _thread_func(void *p)
 {
     int i, val, ret;
     recv_data_t *q = (recv_data_t *) p;
@@ -232,7 +232,7 @@ static void _thread_func(void *p)
 	ret = val;
     }
 
-    ExitThread((DWORD) ret);
+    return ((DWORD) ret);
 }
 
 /* The same like read, but takes care of EINTR and uses select to
@@ -267,8 +267,8 @@ int ws_netread(int fd, char *buf, int len)
     ws_read_per_sec = 0;
     save_TickCount = GetTickCount();
 
-    hThread = CreateThread((void *) NULL, STACK_SIZE,
-			   (LPTHREAD_START_ROUTINE) _thread_func,
+    hThread = CreateThread(NULL, STACK_SIZE,
+			   _thread_func,
 			   (void *) &para, 0UL, &dwThreadID);
 
     if (hThread == 0) {

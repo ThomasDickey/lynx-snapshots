@@ -233,7 +233,7 @@ BOOL HTVMS_checkAccess(const char *FileName,
  *
  *
  */
-char *HTVMS_wwwName(const char *vmsname)
+const char *HTVMS_wwwName(const char *vmsname)
 {
     static char wwwname[LY_MAXPATH];
     const char *src;
@@ -508,7 +508,7 @@ static struct dirent *HTVMSreaddir(DIR *dirp)
     struct dsc$descriptor_s entryname_desc;
     char *space, *slash;
     char VMSentry[256];
-    char *UnixEntry;
+    const char *UnixEntry;
 
     entryname_desc.dsc$w_length = 255;
     entryname_desc.dsc$b_dtype = DSC$K_DTYPE_T;

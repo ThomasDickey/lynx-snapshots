@@ -60,7 +60,8 @@ char *LYVersionDate(void)
  * LYShowInfo prints a page of info about the current file and the link that
  * the cursor is on.
  */
-int LYShowInfo(DocInfo *doc, int size_of_file,
+int LYShowInfo(DocInfo *doc,
+	       int size_of_file,
 	       DocInfo *newdoc,
 	       char *owner_address)
 {
@@ -423,6 +424,13 @@ int LYShowInfo(DocInfo *doc, int size_of_file,
 
 	} else
 	    fprintf(fp0, "<h2>%s</h2>", gettext("No Links on the current page"));
+
+#ifdef EXP_HTTP_HEADERS
+	if ((cp = HText_getHttpHeaders()) != 0) {
+	    fprintf(fp0, "<h2>%s</h2>", gettext("Server Headers:"));
+	    fprintf(fp0, "<pre>%s</pre>", cp);
+	}
+#endif
 
 #ifdef DIRED_SUPPORT
     }

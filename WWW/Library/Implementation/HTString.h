@@ -78,14 +78,8 @@ extern char *HTNextField(char **pstr);
 extern char *HTNextTok(char **pstr,
 		       const char *delims, const char *bracks, char *found);
 
-#ifdef ANSI_VARARGS
 extern char *HTSprintf(char **pstr, const char *fmt,...) GCC_PRINTFLIKE(2,3);
 extern char *HTSprintf0(char **pstr, const char *fmt,...) GCC_PRINTFLIKE(2,3);
-
-#else
-extern char *HTSprintf() GCC_PRINTFLIKE(2,3);
-extern char *HTSprintf0() GCC_PRINTFLIKE(2,3);
-#endif
 
 #if defined(LY_FIND_LEAKS)	/* private otherwise */
 extern char *StrAllocVsprintf(char **pstr,
@@ -143,12 +137,7 @@ extern void HTSABFree(bstring **ptr);
 #define BStrCat0(d,s)  HTSABCat0(  &(d), s)
 #define BStrFree(d)    HTSABFree(  &(d))
 
-#ifdef ANSI_VARARGS
 extern bstring *HTBprintf(bstring **pstr, const char *fmt,...) GCC_PRINTFLIKE(2,3);
-
-#else
-extern bstring *HTBprintf() GCC_PRINTFLIKE(2,3);
-#endif
 
 extern void trace_bstring(bstring *data);
 extern void trace_bstring2(const char *text, int size);

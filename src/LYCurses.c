@@ -474,12 +474,12 @@ void curses_w_style(WINDOW * win, int style,
 	break;
 
     case STACK_ON:		/* remember the current attributes */
-	if (last_colorattr_ptr > 127) {
+	if (last_colorattr_ptr >= MAX_LAST_STYLES) {
 	    CTRACE2(TRACE_STYLE, (tfp, "........... %s (0x%x) %s\r\n",
 				  "attribute cache FULL, dropping last",
 				  last_styles[last_colorattr_ptr],
 				  "in LynxChangeStyle(curses_w_style)"));
-	    last_colorattr_ptr = 127;
+	    last_colorattr_ptr = MAX_LAST_STYLES - 1;
 	}
 	last_styles[last_colorattr_ptr++] = LYgetattrs(win);
 	/* don't cache style changes for active links */

@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.56 Thu, 06 May 2004 17:31:33 -0700 dickey @
+ * @Id: LYStyle.c 1.57 Wed, 30 Jun 2004 16:55:04 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -28,7 +28,7 @@
 static void style_initialiseHashTable(void);
 
 /* stack of attributes during page rendering */
-int last_styles[128] =
+int last_styles[MAX_LAST_STYLES] =
 {0};
 int last_colorattr_ptr = 0;
 

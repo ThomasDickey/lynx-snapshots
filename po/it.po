@@ -22,7 +22,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.4.pre2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-05-23 15:43-0400\n"
+"POT-Creation-Date: 2004-06-28 20:11-0400\n"
 "PO-Revision-Date: 2002-06-23 23:30 +02:00\n"
 "Last-Translator: Giuliano Artico <artico@math.unipd.it>\n"
 "Language-Team: Italian <tp@lists.linux.it>\n"
@@ -2852,7 +2852,7 @@ msgstr "Documento con contenuto POST non trovato in memoria. Ritentare?"
 msgid "Loading failed, use a previous copy."
 msgstr ""
 
-#: WWW/Library/Implementation/HTAccess.c:1045 src/GridText.c:8228
+#: WWW/Library/Implementation/HTAccess.c:1045 src/GridText.c:8240
 msgid "Loading incomplete."
 msgstr "Caricamento incompleto."
 
@@ -3501,34 +3501,34 @@ msgstr "campo di modulo sconosciuto"
 
 # WWW/Libary/Implementation/HTFile.c
 # #, fuzzy
-#: src/GridText.c:9956
+#: src/GridText.c:9968
 msgid "Can't open file for uploading"
 msgstr "Impossibile aprire il file per il caricamento"
 
-#: src/GridText.c:11106
+#: src/GridText.c:11118
 #, c-format
 msgid "Submitting %s"
 msgstr "Invio di %s"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12254
+#: src/GridText.c:12266
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr "Interruzione: struttura TextAnchorrovinata - si suggerisce di abbandonare!"
 
 #. don't show previous state
-#: src/GridText.c:12459
+#: src/GridText.c:12471
 msgid "Wrap lines to fit displayed area?"
 msgstr "Accorciare le righe per adattarle all'area di visualizzazione?"
 
-#: src/GridText.c:12511
+#: src/GridText.c:12523
 msgid "Very long lines have been wrapped!"
 msgstr "Le righe molto lunghe sono state spezzate!"
 
-#: src/GridText.c:12952
+#: src/GridText.c:12964
 msgid "Very long lines have been truncated!"
 msgstr "Le righe molto lunghe sono state troncate!"
 
-#: src/HTAlert.c:142 src/LYShowInfo.c:324
+#: src/HTAlert.c:142 src/LYShowInfo.c:325
 msgid "bytes"
 msgstr "byte"
 
@@ -4104,7 +4104,7 @@ msgstr "Impossibile aprire il file delle opzioni di permesso."
 msgid "Specify permissions below:"
 msgstr "Specificare di seguito i diritti di accesso:"
 
-#: src/LYLocal.c:1340 src/LYShowInfo.c:199
+#: src/LYLocal.c:1340 src/LYShowInfo.c:200
 msgid "Owner:"
 msgstr "Proprietario:"
 
@@ -4239,19 +4239,19 @@ msgstr "Questo messaggio è stato generato automaticamente da"
 msgid "No system mailer configured"
 msgstr ""
 
-#: src/LYMain.c:993
+#: src/LYMain.c:975
 msgid "No Winsock found, sorry."
 msgstr "Nessun Winsock trovato, spiacente."
 
-#: src/LYMain.c:1195
+#: src/LYMain.c:1170
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "SI DEVE definire un'area TMP o TEMP valida! "
 
-#: src/LYMain.c:1248 src/LYMainLoop.c:4927
+#: src/LYMain.c:1223 src/LYMainLoop.c:4927
 msgid "No such directory"
 msgstr "Non esiste la directory indicata"
 
-#: src/LYMain.c:1453
+#: src/LYMain.c:1428
 #, c-format
 msgid ""
 "\n"
@@ -4263,7 +4263,7 @@ msgstr ""
 "\n"
 
 # src/LYMain.c
-#: src/LYMain.c:1463
+#: src/LYMain.c:1438
 #, c-format
 msgid ""
 "\n"
@@ -4274,7 +4274,7 @@ msgstr ""
 "Insiemi di caratteri di Lynx non precisati.\n"
 "\n"
 
-#: src/LYMain.c:1492
+#: src/LYMain.c:1467
 #, c-format
 msgid ""
 "\n"
@@ -4285,7 +4285,7 @@ msgstr ""
 "Edit map di Lynx non precisata.\n"
 "\n"
 
-#: src/LYMain.c:1518
+#: src/LYMain.c:1493
 #, c-format
 msgid ""
 "\n"
@@ -4296,52 +4296,52 @@ msgstr ""
 "Il file Lynx %s non è disponibile.\n"
 "\n"
 
-#: src/LYMain.c:1758
+#: src/LYMain.c:1734
 msgid "Warning:"
 msgstr "Attenzione:"
 
-#: src/LYMain.c:2298
+#: src/LYMain.c:2293
 msgid "persistent cookies state will be changed in next session only."
 msgstr "Lo stato dei cookie persistenti sarà cambiato solo nella prossima sessione."
 
-#: src/LYMain.c:2535 src/LYMain.c:2580
+#: src/LYMain.c:2530 src/LYMain.c:2575
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: ignorato charset=%s sconosciuto.\n"
 
-#: src/LYMain.c:3089
+#: src/LYMain.c:3086
 #, fuzzy, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s versione %s (%s)\n"
 
-#: src/LYMain.c:3112
+#: src/LYMain.c:3109
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Compilato il %s %s %s\n"
 
-#: src/LYMain.c:3134
+#: src/LYMain.c:3131
 msgid "Copyrights held by the University of Kansas, CERN, and other contributors."
 msgstr "Copyright dell'Università del Kansas, del CERN e di altri collaboratori."
 
-#: src/LYMain.c:3135
+#: src/LYMain.c:3132
 msgid "Distributed under the GNU General Public License."
 msgstr "Distribuito nell'ambito della licenza pubblica GNU"
 
-#: src/LYMain.c:3136
+#: src/LYMain.c:3133
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr "Vedere http://lynx.isc.org/ e l'aiuto in linea per ulteriori informazioni."
 
-#: src/LYMain.c:3890
+#: src/LYMain.c:3887
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "USO: %s [opzioni] [file]\n"
 
-#: src/LYMain.c:3891
+#: src/LYMain.c:3888
 #, c-format
 msgid "Options are:\n"
 msgstr "Le opzioni sono:\n"
 
-#: src/LYMain.c:4163
+#: src/LYMain.c:4188
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: opzione non valida: %s\n"
@@ -5188,190 +5188,195 @@ msgstr "RIACQUISIRE LE MODIFICHE"
 msgid "Your primary configuration"
 msgstr "La configurazione principale"
 
-#: src/LYShowInfo.c:128
+#: src/LYShowInfo.c:129
 msgid "Directory that you are currently viewing"
 msgstr "Directory attualmente visualizzata"
 
-#: src/LYShowInfo.c:131
+#: src/LYShowInfo.c:132
 msgid "Name:"
 msgstr "Nome:"
 
-#: src/LYShowInfo.c:134
+#: src/LYShowInfo.c:135
 msgid "URL:"
 msgstr "URL:"
 
-#: src/LYShowInfo.c:146
+#: src/LYShowInfo.c:147
 msgid "Directory that you have currently selected"
 msgstr "Directory attualmente selezionata"
 
-#: src/LYShowInfo.c:149
+#: src/LYShowInfo.c:150
 msgid "File that you have currently selected"
 msgstr "File attualmente selezionato"
 
-#: src/LYShowInfo.c:153
+#: src/LYShowInfo.c:154
 msgid "Symbolic link that you have currently selected"
 msgstr "Link simbolico attualmente selezionato"
 
-#: src/LYShowInfo.c:157
+#: src/LYShowInfo.c:158
 msgid "Item that you have currently selected"
 msgstr "Voce attualmente selezionata"
 
-#: src/LYShowInfo.c:159
+#: src/LYShowInfo.c:160
 msgid "Full name:"
 msgstr "Nome completo:"
 
-#: src/LYShowInfo.c:168
+#: src/LYShowInfo.c:169
 msgid "Unable to follow link"
 msgstr "Impossibile attivare il link"
 
-#: src/LYShowInfo.c:171
+#: src/LYShowInfo.c:172
 msgid "Points to file:"
 msgstr "Punta al file:"
 
-#: src/LYShowInfo.c:177
+#: src/LYShowInfo.c:178
 msgid "Name of owner:"
 msgstr "Nome del proprietario:"
 
-#: src/LYShowInfo.c:181
+#: src/LYShowInfo.c:182
 msgid "Group name:"
 msgstr "Nome del gruppo:"
 
-#: src/LYShowInfo.c:184
+#: src/LYShowInfo.c:185
 msgid "File size:"
 msgstr "Lunghezza file:"
 
-#: src/LYShowInfo.c:190
+#: src/LYShowInfo.c:191
 msgid "Creation date:"
 msgstr "Data di creazione:"
 
-#: src/LYShowInfo.c:193
+#: src/LYShowInfo.c:194
 msgid "Last modified:"
 msgstr "Ultimo aggiornamento:"
 
-#: src/LYShowInfo.c:196
+#: src/LYShowInfo.c:197
 msgid "Last accessed:"
 msgstr "Ultimo accesso:"
 
-#: src/LYShowInfo.c:198
+#: src/LYShowInfo.c:199
 msgid "Access Permissions"
 msgstr "Diritti di accesso"
 
-#: src/LYShowInfo.c:264
+#: src/LYShowInfo.c:265
 msgid "File that you are currently viewing"
 msgstr "File attualmente visualizzato"
 
-#: src/LYShowInfo.c:269 src/LYShowInfo.c:384
+#: src/LYShowInfo.c:270 src/LYShowInfo.c:385
 msgid "Linkname:"
 msgstr "Nome del link:"
 
 # NdT May be this translation is too long
-#: src/LYShowInfo.c:282 src/LYShowInfo.c:295
+#: src/LYShowInfo.c:283 src/LYShowInfo.c:296
 msgid "Charset:"
 msgstr "Set di caratteri:"
 
-#: src/LYShowInfo.c:302
+#: src/LYShowInfo.c:303
 msgid "Server:"
 msgstr "Server:"
 
-#: src/LYShowInfo.c:306
+#: src/LYShowInfo.c:307
 msgid "Date:"
 msgstr "Data:"
 
-#: src/LYShowInfo.c:309
+#: src/LYShowInfo.c:310
 msgid "Last Mod:"
 msgstr "Ultima mod:"
 
-#: src/LYShowInfo.c:315
+#: src/LYShowInfo.c:316
 msgid "&nbsp;Expires:"
 msgstr "&nbsp;Scade:"
 
-#: src/LYShowInfo.c:319
+#: src/LYShowInfo.c:320
 msgid "Cache-Control:"
 msgstr "Controllo cache:"
 
-#: src/LYShowInfo.c:323
+#: src/LYShowInfo.c:324
 msgid "Content-Length:"
 msgstr "Lunghezza contenuto:"
 
-#: src/LYShowInfo.c:328
+#: src/LYShowInfo.c:329
 msgid "Language:"
 msgstr "Lingua:"
 
-#: src/LYShowInfo.c:335
+#: src/LYShowInfo.c:336
 msgid "Post Data:"
 msgstr "Dati POST:"
 
-#: src/LYShowInfo.c:339
+#: src/LYShowInfo.c:340
 msgid "Post Content Type:"
 msgstr "Tipo di contenuto POST :"
 
-#: src/LYShowInfo.c:348
+#: src/LYShowInfo.c:349
 msgid "Owner(s):"
 msgstr "Proprietario/i:"
 
-#: src/LYShowInfo.c:351
+#: src/LYShowInfo.c:352
 msgid "size:"
 msgstr "grandezza:"
 
-#: src/LYShowInfo.c:351
+#: src/LYShowInfo.c:352
 msgid "lines"
 msgstr "Righe"
 
-#: src/LYShowInfo.c:354
+#: src/LYShowInfo.c:355
 msgid "mode:"
 msgstr "Modo:"
 
-#: src/LYShowInfo.c:356
+#: src/LYShowInfo.c:357
 msgid "forms mode"
 msgstr "tipo modulo"
 
-#: src/LYShowInfo.c:358
+#: src/LYShowInfo.c:359
 msgid "source"
 msgstr "origine"
 
-#: src/LYShowInfo.c:359
+#: src/LYShowInfo.c:360
 msgid "normal"
 msgstr "normale"
 
-#: src/LYShowInfo.c:360
+#: src/LYShowInfo.c:361
 msgid ", safe"
 msgstr ", protetto"
 
-#: src/LYShowInfo.c:361
+#: src/LYShowInfo.c:362
 msgid ", via internal link"
 msgstr ", collegato internamente"
 
-#: src/LYShowInfo.c:367
+#: src/LYShowInfo.c:368
 msgid ", no-cache"
 msgstr ", nessuna cache"
 
-#: src/LYShowInfo.c:369
+#: src/LYShowInfo.c:370
 msgid ", ISMAP script"
 msgstr ", script ISMAP"
 
-#: src/LYShowInfo.c:371
+#: src/LYShowInfo.c:372
 msgid ", bookmark file"
 msgstr ", file dei bookmark"
 
-#: src/LYShowInfo.c:380
+#: src/LYShowInfo.c:381
 msgid "Link that you currently have selected"
 msgstr "Link attualmente selezionato"
 
-#: src/LYShowInfo.c:393
+#: src/LYShowInfo.c:394
 msgid "Method:"
 msgstr "Metodo:"
 
-#: src/LYShowInfo.c:398
+#: src/LYShowInfo.c:399
 msgid "Enctype:"
 msgstr "Codifica:"
 
-#: src/LYShowInfo.c:410
+#: src/LYShowInfo.c:411
 msgid "(Form field)"
 msgstr "(campo del modulo)"
 
-#: src/LYShowInfo.c:425
+#: src/LYShowInfo.c:426
 msgid "No Links on the current page"
 msgstr "Nessun link nella pagina attuale"
+
+#: src/LYShowInfo.c:430
+#, fuzzy
+msgid "Server Headers:"
+msgstr "Server:"
 
 #: src/LYStyle.c:286
 #, c-format

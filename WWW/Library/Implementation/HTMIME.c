@@ -489,6 +489,7 @@ static int dispatchField(HTStream *me)
     char *cp;
 
     *me->value_pointer = '\0';
+
     cp = me->value_pointer;
     while ((cp > me->value) && *(--cp) == ' ')	/* S/390 -- gil -- 0146 */
 	/*
@@ -754,6 +755,7 @@ static int dispatchField(HTStream *me)
 	}
 	me->value[j] = '\0';
 	me->format = HTAtom_for(me->value);
+	StrAllocCopy(me->anchor->content_type_params, me->value);
 	break;
     case miDATE:
 	HTMIME_TrimDoubleQuotes(me->value);
@@ -1853,6 +1855,17 @@ static void HTMIME_put_character(HTStream *me,
 
     }				/* switch on state */
 
+#ifdef EXP_HTTP_HEADERS
+    HTChunkPutc(&me->anchor->http_headers, c);
+    if (me->state == MIME_TRANSPARENT) {
+	HTChunkTerminate(&me->anchor->http_headers);
+	CTRACE((tfp, "Server Headers:\n%.*s\n",
+		me->anchor->http_headers.size,
+		me->anchor->http_headers.data));
+	CTRACE((tfp, "Server Content-Type:%s\n",
+		me->anchor->content_type_params));
+    }
+#endif
     return;
 
   value_too_long:
@@ -1860,6 +1873,11 @@ static void HTMIME_put_character(HTStream *me,
 
   bad_field_name:		/* Ignore it */
     me->state = miJUNK_LINE;
+
+#ifdef EXP_HTTP_HEADERS
+    HTChunkPutc(&me->anchor->http_headers, c);
+#endif
+
     return;
 
 }
@@ -1968,6 +1986,11 @@ HTStream *HTMIMEConvert(HTPresentation *pres,
     FREE(me->anchor->cache_control);
     FREE(me->anchor->SugFname);
     FREE(me->anchor->charset);
+#ifdef EXP_HTTP_HEADERS
+    HTChunkClear(&me->anchor->http_headers);
+    HTChunkInit(&me->anchor->http_headers, 128);
+#endif
+    FREE(me->anchor->content_type_params);
     FREE(me->anchor->content_language);
     FREE(me->anchor->content_encoding);
     FREE(me->anchor->content_base);

@@ -3927,7 +3927,7 @@ void LYConvertToURL(char **AllocatedString,
 		if (strchr(old_string, '[') ||
 		    ((cp = strchr(old_string, ':')) != NULL &&
 		     !isdigit(UCH(cp[1]))) ||
-		    !LYExpandHostForURL((char **) &old_string,
+		    !LYExpandHostForURL(&old_string,
 					URLDomainPrefixes,
 					URLDomainSuffixes)) {
 		    /*
@@ -3945,7 +3945,7 @@ void LYConvertToURL(char **AllocatedString,
 		     * Assume a URL is wanted, so guess the scheme with
 		     * "http://" as the default.  - FM
 		     */
-		    if (!LYAddSchemeForURL((char **) &old_string, "http://")) {
+		    if (!LYAddSchemeForURL(&old_string, "http://")) {
 			StrAllocCopy(*AllocatedString, "http://");
 			StrAllocCat(*AllocatedString, old_string);
 		    } else {
@@ -3964,7 +3964,7 @@ void LYConvertToURL(char **AllocatedString,
 	    if (strchr(old_string, '[') ||
 		((cp = strchr(old_string, ':')) != NULL &&
 		 !isdigit(UCH(cp[1]))) ||
-		!LYExpandHostForURL((char **) &old_string,
+		!LYExpandHostForURL(&old_string,
 				    URLDomainPrefixes,
 				    URLDomainSuffixes)) {
 		/*
@@ -3980,7 +3980,7 @@ void LYConvertToURL(char **AllocatedString,
 		 * Assume a URL is wanted, so guess the scheme with "http://"
 		 * as the default.  - FM
 		 */
-		if (!LYAddSchemeForURL((char **) &old_string, "http://")) {
+		if (!LYAddSchemeForURL(&old_string, "http://")) {
 		    StrAllocCopy(*AllocatedString, "http://");
 		    StrAllocCat(*AllocatedString, old_string);
 		} else {
@@ -4204,10 +4204,10 @@ void LYConvertToURL(char **AllocatedString,
 		    }
 		}
 #endif
-		if (LYExpandHostForURL((char **) &old_string,
+		if (LYExpandHostForURL(&old_string,
 				       URLDomainPrefixes,
 				       URLDomainSuffixes)) {
-		    if (!LYAddSchemeForURL((char **) &old_string, "http://")) {
+		    if (!LYAddSchemeForURL(&old_string, "http://")) {
 			StrAllocCopy(*AllocatedString, "http://");
 			StrAllocCat(*AllocatedString, old_string);
 		    } else {
@@ -7557,6 +7557,12 @@ void get_clip_release()
 #define WSABASEERR 10000
 #endif
 
+#ifdef ENABLE_IPV6
+#define WSOCK_NAME  "ws2_32"
+#else
+#define WSOCK_NAME  "wsock32"
+#endif
+
 /*
  * Description: the windows32 version of perror()
  *
@@ -7577,6 +7583,7 @@ char *w32_strerror(DWORD ercode)
     HMODULE hModule;
     int i, msg_type;
     unsigned char *p, *q, tmp_buff[256];
+    DWORD rc;
 
     hModule = NULL;
     msg_type = FORMAT_MESSAGE_FROM_SYSTEM;
@@ -7589,22 +7596,20 @@ char *w32_strerror(DWORD ercode)
      * Special code for winsock error handling.
      */
     if (ercode > WSABASEERR) {
-	hModule = GetModuleHandle("wsock32");
-	if (hModule == NULL)
-	    ercode = GetLastError();
-	else
+	hModule = GetModuleHandle(WSOCK_NAME);
+	if (hModule)
 	    msg_type = FORMAT_MESSAGE_FROM_HMODULE;
     }
     /*
-     * message handling
+     * message handling. If not found in module, retry from system.
      */
-    FormatMessage(msg_type,
-		  hModule,
-		  ercode,
-		  LANG_NEUTRAL,
-		  msg_buff,
-		  sizeof(msg_buff),
-		  NULL);
+    rc = FormatMessage(msg_type, hModule, ercode, LANG_NEUTRAL,
+		       msg_buff, sizeof(msg_buff), NULL);
+
+    if (rc == 0 && msg_type == FORMAT_MESSAGE_FROM_HMODULE) {
+	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, ercode,
+		      LANG_NEUTRAL, msg_buff, sizeof(msg_buff), NULL);
+    }
 
     strcpy(tmp_buff, msg_buff);
     p = q = tmp_buff;
