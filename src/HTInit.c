@@ -112,7 +112,7 @@ PUBLIC void HTFormatInit NOARGS
  HTSetConversion("application/html", "text/plain",
  					HTMLToPlain,	0.5, 0.0, 0.0, 0);
  HTSetConversion("application/html", "www/present",
- 					HTMLPresent,	1.0, 0.0, 0.0, 0);
+ 					HTMLPresent,	2.0, 0.0, 0.0, 0);
  HTSetConversion("application/html", "www/source",
  					HTPlainPresent,	1.0, 0.0, 0.0, 0);
  HTSetConversion("application/x-wais-source", "www/source",  	     
@@ -147,7 +147,7 @@ PUBLIC void HTFormatInit NOARGS
  HTSetConversion("text/x-sgml",
  			      "www/source",  HTPlainPresent, 1.0, 0.0, 0.0, 0);
  HTSetConversion("text/x-sgml",
- 			      "www/present", HTMLPresent,    1.0, 0.0, 0.0, 0);
+ 			      "www/present", HTMLPresent,    2.0, 0.0, 0.0, 0);
  HTSetConversion("text/sgml", "www/source",  HTPlainPresent, 1.0, 0.0, 0.0, 0);
  HTSetConversion("text/sgml", "www/present", HTMLPresent,    1.0, 0.0, 0.0, 0);
  HTSetConversion("text/plain","www/present", HTPlainPresent, 1.0, 0.0, 0.0, 0);

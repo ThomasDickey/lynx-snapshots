@@ -20,6 +20,7 @@ AC_PROG_RANLIB
 AC_PROG_MAKE_SET
 CF_MAKE_INCLUDE
 AC_PROG_INSTALL
+AC_CHECK_PROGS(LINT, lint alint lclint tdlint, [])
 
 AC_MSG_CHECKING(if you want full utility pathnames)
 CF_ARG_DISABLE(full-paths,
@@ -58,7 +59,9 @@ dnl --------------------------------------------------------------------------
 dnl If we're able to run this script, this is true!
 AC_DEFINE(UNIX)
 
-CF_ANSI_CC
+if test -z "$GCC" ; then
+	CF_ANSI_CC
+fi
 AC_C_CONST
 
 dnl Only add to this case statement things that we cannot design tests for.
@@ -301,6 +304,21 @@ no)
 	;;
 esac
 
+AC_MSG_CHECKING(if you want to use zlib for compression/decompression)
+AC_CACHE_VAL(cf_cv_zlib,[
+AC_ARG_WITH(zlib,
+[  --with-zlib             use zlib for compression/decompression],
+	[cf_cv_zlib=$withval],
+	[cf_cv_zlib=no])])
+AC_MSG_RESULT($cf_cv_zlib)
+if test ".$cf_cv_zlib" != ".no" ; then
+	CF_FIND_LIBRARY(z,
+		[#include <zlib.h>],
+		[gzopen("name","mode")],
+		gzopen)
+	AC_DEFINE(USE_ZLIB)
+fi
+
 # All DirEd functions that were enabled on compilation can be disabled
 # or modified at run time via DIRED_MENU symbols in lynx.cfg.
 AC_MSG_CHECKING(if directory-editor code should be used)
@@ -396,7 +414,16 @@ CF_ARG_ENABLE(debug,
 	[with_debug=yes],
 	[with_debug=no])
 AC_MSG_RESULT($with_debug)
-if test "$with_debug" != "yes" ; then
+if test "$with_debug" = "yes" ; then
+	case $host_os in
+	ultrix*)
+		if test -z "$GCC" ; then
+			CF_STRIP_O_OPT(CFLAGS)
+			CFLAGS="$CFLAGS -g3"
+		fi
+		;;
+	esac
+else
 if test -n "$GCC" ; then
 	CF_STRIP_G_OPT(CFLAGS)
 fi

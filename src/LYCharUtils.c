@@ -66,6 +66,844 @@ PUBLIC int OL_VOID = -29998;	     /* flag for whether a count is set */
 
 
 /*
+**  This function converts any ampersands in allocated
+**  strings to "&amp;".  If isTITLE is TRUE, it also
+**  converts any angle-brackets to "&lt;" or "&gt;". - FM
+*/
+PUBLIC void LYEntify ARGS2(
+	char **,	str,
+	BOOLEAN,	isTITLE)
+{
+    char *p = *str;
+    char *q = NULL, *cp = NULL;
+    int amps = 0, lts = 0, gts = 0;
+    
+    if (p == NULL || *p == '\0')
+        return;
+
+    /*
+     *  Count the ampersands. - FM
+     */
+    while ((*p != '\0') && (q = strchr(p, '&')) != NULL) {
+        amps++;
+	p = (q + 1);
+    }
+
+    /*
+     *  Count the left-angle-brackets, if needed. - FM
+     */
+    if (isTITLE == TRUE) {
+        p = *str;
+	while ((*p != '\0') && (q = strchr(p, '<')) != NULL) {
+	    lts++;
+	    p = (q + 1);
+	}
+    }
+
+    /*
+     *  Count the right-angle-brackets, if needed. - FM
+     */
+    if (isTITLE == TRUE) {
+        p = *str;
+	while ((*p != '\0') && (q = strchr(p, '>')) != NULL) {
+	    gts++;
+	    p = (q + 1);
+	}
+    }
+
+    /*
+     *  Check whether we need to convert anything. - FM
+     */
+    if (amps == 0 && lts == 0 && gts == 0)
+        return;
+
+    /*
+     *  Allocate space and convert. - FM
+     */
+    q = (char *)calloc(1,
+    		     (strlen(*str) + (4 * amps) + (3 * lts) + (3 * gts) + 1));
+    if ((cp = q) == NULL)
+        outofmem(__FILE__, "LYEntify");
+    for (p = *str; *p; p++) {
+    	if (*p == '&') {
+	    *q++ = '&';
+	    *q++ = 'a';
+	    *q++ = 'm';
+	    *q++ = 'p';
+	    *q++ = ';';
+	} else if (isTITLE && *p == '<') {
+	    *q++ = '&';
+	    *q++ = 'l';
+	    *q++ = 't';
+	    *q++ = ';';
+	} else if (isTITLE && *p == '>') {
+	    *q++ = '&';
+	    *q++ = 'g';
+	    *q++ = 't';
+	    *q++ = ';';
+	} else {
+	    *q++ = *p;
+	}
+    }
+    StrAllocCopy(*str, cp);
+    FREE(cp);
+}
+
+/*
+**  This function trims characters <= that of a space (32),
+**  including HT_NON_BREAK_SPACE (1) and HT_EM_SPACE (2),
+**  but not ESC, from the heads of strings. - FM
+*/
+PUBLIC void LYTrimHead ARGS1(
+	char *, str)
+{
+    int i = 0, j;
+
+    if (!str || *str == '\0')
+        return;
+
+    while (str[i] != '\0' && WHITE(str[i]) && (unsigned char)str[i] != 27) 
+        i++;
+    if (i > 0) {
+        for (j = 0; str[i] != '\0'; i++) {
+	    str[j++] = str[i];
+	}
+	str[j] = '\0';
+    }
+}
+
+/*
+**  This function trims characters <= that of a space (32),
+**  including HT_NON_BREAK_SPACE (1), HT_EM_SPACE (2), and
+**  ESC from the tails of strings. - FM
+*/
+PUBLIC void LYTrimTail ARGS1(
+	char *, str)
+{
+    int i;
+
+    if (!str || *str == '\0')
+        return;
+
+    i = (strlen(str) - 1);
+    while (i >= 0) {
+	if (WHITE(str[i]))
+	    str[i] = '\0';
+	else
+	    break;
+	i--;
+    }
+}
+
+/*
+** This function should receive a pointer to the start
+** of a comment.  It returns a pointer to the end ('>')
+** character of comment, or it's best guess if the comment
+** is invalid. - FM
+*/
+PUBLIC char *LYFindEndOfComment ARGS1(
+	char *, str)
+{
+    char *cp, *cp1;
+    enum comment_state { start1, start2, end1, end2 } state;
+
+    if (str == NULL)
+        /*
+	 *  We got NULL, so return NULL. - FM
+	 */
+        return NULL;
+
+    if (strncmp(str, "<!--", 4))
+        /*
+	 *  We don't have the start of a comment, so
+	 *  return the beginning of the string. - FM
+	 */
+        return str;
+
+    cp = (str + 4);
+    if (*cp =='>')
+        /*
+	 * It's an invalid comment, so
+	 * return this end character. - FM
+	 */
+	return cp;
+
+    if ((cp1 = strchr(cp, '>')) == NULL)
+        /*
+	 *  We don't have an end character, so
+	 *  return the beginning of the string. - FM
+	 */
+	return str;
+
+    if (*cp == '-')
+        /*
+	 *  Ugh, it's a "decorative" series of dashes,
+	 *  so return the next end character. - FM
+	 */
+	return cp1;
+
+    /*
+     *  OK, we're ready to start parsing. - FM
+     */
+    state = start2;
+    while (*cp != '\0') {
+        switch (state) {
+	    case start1:
+	        if (*cp == '-')
+		    state = start2;
+		else
+		    /*
+		     *  Invalid comment, so return the first
+		     *  '>' from the start of the string. - FM
+		     */
+		    return cp1;
+		break;
+
+	    case start2:
+	        if (*cp == '-')
+		    state = end1;
+		break;
+
+	    case end1:
+	        if (*cp == '-')
+		    state = end2;
+		else
+		    /*
+		     *  Invalid comment, so return the first
+		     *  '>' from the start of the string. - FM
+		     */
+		    return cp1;
+		break;
+
+	    case end2:
+	        if (*cp == '>')
+		    /*
+		     *  Valid comment, so return the end character. - FM
+		     */
+		    return cp;
+		if (*cp == '-') {
+		    state = start1;
+		} else if (!(WHITE(*cp) && (unsigned char)*cp != 27)) {
+		    /*
+		     *  Invalid comment, so return the first
+		     *  '>' from the start of the string. - FM
+		     */
+		    return cp1;
+		 }
+		break;
+
+	    default:
+		break;
+	}
+	cp++;
+    }
+
+    /*
+     *  Invalid comment, so return the first
+     *  '>' from the start of the string. - FM
+     */
+    return cp1;
+}
+
+/*
+**  If an HREF, itself or if resolved against a base,
+**  represents a file URL, and the host is defaulted,
+**  force in "//localhost".  We need this until
+**  all the other Lynx code which performs security
+**  checks based on the "localhost" string is changed
+**  to assume "//localhost" when a host field is not
+**  present in file URLs - FM
+*/
+PUBLIC void LYFillLocalFileURL ARGS2(
+	char **,	href,
+	char *,		base)
+{
+    char * temp = NULL;
+
+    if (*href == NULL || *(*href) == '\0')
+        return;
+
+    if (!strcmp(*href, "//") || !strncmp(*href, "///", 3)) {
+	if (base != NULL && !strncmp(base, "file:", 5)) {
+	    StrAllocCopy(temp, "file:");
+	    StrAllocCat(temp, *href);
+	    StrAllocCopy(*href, temp);
+	}
+    }
+    if (!strncmp(*href, "file:", 5)) {
+	if (*(*href+5) == '\0') {
+	    StrAllocCat(*href, "//localhost");
+	} else if (!strcmp(*href, "file://")) {
+	    StrAllocCat(*href, "localhost");
+	} else if (!strncmp(*href, "file:///", 8)) {
+	    StrAllocCopy(temp, (*href+7));
+	    StrAllocCopy(*href, "file://localhost");
+	    StrAllocCat(*href, temp);
+	} else if (!strncmp(*href, "file:/", 6) && *(*href+6) != '/') {
+	    StrAllocCopy(temp, (*href+5));
+	    StrAllocCopy(*href, "file://localhost");
+	    StrAllocCat(*href, temp);
+	}
+    }
+
+    /*
+     * No path in a file://localhost URL means a
+     * directory listing for the current default. - FM
+     */
+    if (!strcmp(*href, "file://localhost")) {
+#ifdef VMS
+	StrAllocCat(*href, HTVMS_wwwName(getenv("PATH")));
+#else
+	char curdir[DIRNAMESIZE];
+#if HAVE_GETCWD
+	getcwd (curdir, DIRNAMESIZE);
+#else
+	getwd (curdir);
+#endif /* NO_GETCWD */
+#ifdef DOSPATH
+	StrAllocCat(*href, HTDOS_wwwName(curdir));
+#else
+	StrAllocCat(*href, curdir);
+#endif /* DOSPATH */
+#endif /* VMS */
+    }
+
+#ifdef VMS
+    /*
+     * On VMS, a file://localhost/ URL means
+     * a listing for the login directory. - FM
+     */
+    if (!strcmp(*href, "file://localhost/"))
+	StrAllocCat(*href, (HTVMS_wwwName((char *)Home_Dir())+1));
+#endif /* VMS */
+
+    FREE(temp);
+    return;
+}
+
+#ifdef EXP_CHARTRANS
+/*
+**  This function writes a line with a META tag to an open file,
+**  which will specify a charset parameter to use when the file is
+**  read back in.  It is meant for temporary HTML files used by the
+**  various special pages which may show titles of documents.  When those
+**  files are created, the title strings normally have been translated and
+**  expanded to the display character set, so we have to make sure they
+**  don't get translated again.
+**  If the user has changed the display character set during the lifetime
+**  of the Lynx session (or, more exactly, during the time the title
+**  strings to be written were generated), they may now have different
+**  character encodings and there is currently no way to get it all right.
+**  To change this, we would have to add a variable for each string which
+**  keeps track of its character encoding...
+**  But at least we can try to ensure that reading the file after future
+**  display character set changes will give reasonable output.
+**
+**  The META tag is not written if the display character set (passed as
+**  disp_chndl) already corresponds to the charset assumption that
+**  would be made when the file is read. - KW
+*/
+PUBLIC void LYAddMETAcharsetToFD ARGS2(
+	FILE *,		fd,
+	int,		disp_chndl)
+{
+    if (disp_chndl == -1)
+	/*
+	 *  -1 means use current_char_set.
+	 */
+	disp_chndl = current_char_set;
+
+    if (fd == NULL || disp_chndl < 0)
+	/*
+	 *  Should not happen.
+	 */
+	return;
+
+    if (UCLYhndl_HTFile_for_unspec == disp_chndl)
+	/*
+	 *  Not need to do, so we don't.
+	 */
+	return;
+
+    if (LYCharSet_UC[disp_chndl].enc == UCT_ENC_7BIT)
+	/*
+	 *  There shouldn't be any 8-bit characters in this case.
+	 */
+	return;
+
+    /*
+     *  In other cases we don't know because UCLYhndl_for_unspec may
+     *  change during the lifetime of the file (by toggling raw mode
+     *  or changing the display character set), so proceed.
+     */
+    fprintf(fd, "<META %s content=\"text/html;charset=%s\">\n",
+		"http-equiv=\"content-type\"",
+		LYCharSet_UC[disp_chndl].MIMEname);
+}
+#endif /* EXP_CHARTRANS */
+
+/*
+** This function returns OL TYPE="A" strings in
+** the range of " A." (1) to "ZZZ." (18278). - FM
+*/
+PUBLIC char *LYUppercaseA_OL_String ARGS1(
+	int, seqnum)
+{
+    static char OLstring[8];
+
+    if (seqnum <= 1 ) {
+        strcpy(OLstring, " A.");
+        return OLstring;
+    }
+    if (seqnum < 27) {
+        sprintf(OLstring, " %c.", (seqnum + 64));
+        return OLstring;
+    }
+    if (seqnum < 703) {
+        sprintf(OLstring, "%c%c.", ((seqnum-1)/26 + 64),
+		(seqnum - ((seqnum-1)/26)*26 + 64));
+        return OLstring;
+    }
+    if (seqnum < 18279) {
+        sprintf(OLstring, "%c%c%c.", ((seqnum-27)/676 + 64),
+		(((seqnum - ((seqnum-27)/676)*676)-1)/26 + 64),
+		(seqnum - ((seqnum-1)/26)*26 + 64));
+        return OLstring;
+    }
+    strcpy(OLstring, "ZZZ.");
+    return OLstring;
+}
+
+/*
+** This function returns OL TYPE="a" strings in
+** the range of " a." (1) to "zzz." (18278). - FM
+*/
+PUBLIC char *LYLowercaseA_OL_String ARGS1(
+	int, seqnum)
+{
+    static char OLstring[8];
+
+    if (seqnum <= 1 ) {
+        strcpy(OLstring, " a.");
+        return OLstring;
+    }
+    if (seqnum < 27) {
+        sprintf(OLstring, " %c.", (seqnum + 96));
+        return OLstring;
+    }
+    if (seqnum < 703) {
+        sprintf(OLstring, "%c%c.", ((seqnum-1)/26 + 96),
+		(seqnum - ((seqnum-1)/26)*26 + 96));
+        return OLstring;
+    }
+    if (seqnum < 18279) {
+        sprintf(OLstring, "%c%c%c.", ((seqnum-27)/676 + 96),
+		(((seqnum - ((seqnum-27)/676)*676)-1)/26 + 96),
+		(seqnum - ((seqnum-1)/26)*26 + 96));
+        return OLstring;
+    }
+    strcpy(OLstring, "zzz.");
+    return OLstring;
+}
+
+/*
+** This function returns OL TYPE="I" strings in the
+** range of " I." (1) to "MMM." (3000).- FM
+*/
+PUBLIC char *LYUppercaseI_OL_String ARGS1(
+	int, seqnum)
+{
+    static char OLstring[8];
+    int Arabic = seqnum;
+
+    if (Arabic >= 3000) {
+        strcpy(OLstring, "MMM.");
+        return OLstring;
+    }
+
+    switch(Arabic) {
+    case 1:
+        strcpy(OLstring, " I.");
+        return OLstring;
+    case 5:
+        strcpy(OLstring, " V.");
+        return OLstring;
+    case 10:
+        strcpy(OLstring, " X.");
+        return OLstring;
+    case 50:
+        strcpy(OLstring, " L.");
+        return OLstring;
+    case 100:
+        strcpy(OLstring, " C.");
+        return OLstring;
+    case 500:
+        strcpy(OLstring, " D.");
+        return OLstring;
+    case 1000:
+        strcpy(OLstring, " M.");
+        return OLstring;
+    default:
+        OLstring[0] = '\0';
+	break;
+    }
+
+    while (Arabic >= 1000) {
+        strcat(OLstring, "M");
+        Arabic -= 1000;
+    }
+
+    if (Arabic >= 900) {
+        strcat(OLstring, "CM");
+	Arabic -= 900;
+    }
+
+    if (Arabic >= 500) {
+	strcat(OLstring, "D");
+        Arabic -= 500;
+	while (Arabic >= 500) {
+	    strcat(OLstring, "C");
+	    Arabic -= 10;
+	}
+    }
+
+    if (Arabic >= 400) {
+	strcat(OLstring, "CD");
+        Arabic -= 400;
+    }
+
+    while (Arabic >= 100) {
+        strcat(OLstring, "C");
+        Arabic -= 100;
+    }
+
+    if (Arabic >= 90) {
+        strcat(OLstring, "XC");
+	Arabic -= 90;
+    }
+
+    if (Arabic >= 50) {
+	strcat(OLstring, "L");
+        Arabic -= 50;
+	while (Arabic >= 50) {
+	    strcat(OLstring, "X");
+	    Arabic -= 10;
+	}
+    }
+
+    if (Arabic >= 40) {
+	strcat(OLstring, "XL");
+        Arabic -= 40;
+    }
+
+    while (Arabic > 10) {
+        strcat(OLstring, "X");
+	Arabic -= 10;
+    }    
+
+    switch (Arabic) {
+    case 1:
+        strcat(OLstring, "I.");
+	break;
+    case 2:
+        strcat(OLstring, "II.");
+	break;
+    case 3:
+        strcat(OLstring, "III.");
+	break;
+    case 4:
+        strcat(OLstring, "IV.");
+	break;
+    case 5:
+        strcat(OLstring, "V.");
+	break;
+    case 6:
+        strcat(OLstring, "VI.");
+	break;
+    case 7:
+        strcat(OLstring, "VII.");
+	break;
+    case 8:
+        strcat(OLstring, "VIII.");
+	break;
+    case 9:
+        strcat(OLstring, "IX.");
+	break;
+    case 10:
+        strcat(OLstring, "X.");
+	break;
+    default:
+        strcat(OLstring, ".");
+	break;
+    }
+
+    return OLstring;
+}
+
+/*
+** This function returns OL TYPE="i" strings in
+** range of " i." (1) to "mmm." (3000).- FM
+*/
+PUBLIC char *LYLowercaseI_OL_String ARGS1(
+	int, seqnum)
+{
+    static char OLstring[8];
+    int Arabic = seqnum;
+
+    if (Arabic >= 3000) {
+        strcpy(OLstring, "mmm.");
+        return OLstring;
+    }
+
+    switch(Arabic) {
+    case 1:
+        strcpy(OLstring, " i.");
+        return OLstring;
+    case 5:
+        strcpy(OLstring, " v.");
+        return OLstring;
+    case 10:
+        strcpy(OLstring, " x.");
+        return OLstring;
+    case 50:
+        strcpy(OLstring, " l.");
+        return OLstring;
+    case 100:
+        strcpy(OLstring, " c.");
+        return OLstring;
+    case 500:
+        strcpy(OLstring, " d.");
+        return OLstring;
+    case 1000:
+        strcpy(OLstring, " m.");
+        return OLstring;
+    default:
+        OLstring[0] = '\0';
+	break;
+    }
+
+    while (Arabic >= 1000) {
+        strcat(OLstring, "m");
+        Arabic -= 1000;
+    }
+
+    if (Arabic >= 900) {
+        strcat(OLstring, "cm");
+	Arabic -= 900;
+    }
+
+    if (Arabic >= 500) {
+	strcat(OLstring, "d");
+        Arabic -= 500;
+	while (Arabic >= 500) {
+	    strcat(OLstring, "c");
+	    Arabic -= 10;
+	}
+    }
+
+    if (Arabic >= 400) {
+	strcat(OLstring, "cd");
+        Arabic -= 400;
+    }
+
+    while (Arabic >= 100) {
+        strcat(OLstring, "c");
+        Arabic -= 100;
+    }
+
+    if (Arabic >= 90) {
+        strcat(OLstring, "xc");
+	Arabic -= 90;
+    }
+
+    if (Arabic >= 50) {
+	strcat(OLstring, "l");
+        Arabic -= 50;
+	while (Arabic >= 50) {
+	    strcat(OLstring, "x");
+	    Arabic -= 10;
+	}
+    }
+
+    if (Arabic >= 40) {
+	strcat(OLstring, "xl");
+        Arabic -= 40;
+    }
+
+    while (Arabic > 10) {
+        strcat(OLstring, "x");
+	Arabic -= 10;
+    }    
+
+    switch (Arabic) {
+    case 1:
+        strcat(OLstring, "i.");
+	break;
+    case 2:
+        strcat(OLstring, "ii.");
+	break;
+    case 3:
+        strcat(OLstring, "iii.");
+	break;
+    case 4:
+        strcat(OLstring, "iv.");
+	break;
+    case 5:
+        strcat(OLstring, "v.");
+	break;
+    case 6:
+        strcat(OLstring, "vi.");
+	break;
+    case 7:
+        strcat(OLstring, "vii.");
+	break;
+    case 8:
+        strcat(OLstring, "viii.");
+	break;
+    case 9:
+        strcat(OLstring, "ix.");
+	break;
+    case 10:
+        strcat(OLstring, "x.");
+	break;
+    default:
+        strcat(OLstring, ".");
+	break;
+    }
+
+    return OLstring;
+}
+
+/*
+**  This function initializes the Ordered List counter. - FM
+*/
+PUBLIC void LYZero_OL_Counter ARGS1(
+	HTStructured *, 	me)
+{
+    int i;
+
+    if (!me)
+        return;
+
+    for (i = 0; i < 12; i++) {
+        me->OL_Counter[i] = OL_VOID;
+	me->OL_Type[i] = '1';
+    }
+	
+    me->Last_OL_Count = 0;
+    me->Last_OL_Type = '1';
+    
+    return;
+}
+
+#ifdef EXP_CHARTRANS
+/*
+**  This function is used by the HTML Structured object. - kw
+*/
+PUBLIC void LYGetChartransInfo ARGS1(
+	HTStructured *,		me)
+{
+    me->UCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,
+					UCT_STAGE_STRUCTURED);
+    if (me->UCLYhndl < 0) {
+	int chndl = HTAnchor_getUCLYhndl(me->node_anchor, UCT_STAGE_HTEXT);
+
+	if (chndl < 0) {
+	    chndl = current_char_set;
+	    HTAnchor_setUCInfoStage(me->node_anchor, chndl, UCT_STAGE_HTEXT,
+				    UCT_SETBY_STRUCTURED);
+	}
+	HTAnchor_setUCInfoStage(me->node_anchor, chndl,
+				UCT_STAGE_STRUCTURED, UCT_SETBY_STRUCTURED);
+	me->UCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,
+					    UCT_STAGE_STRUCTURED);
+    }
+    me->UCI = HTAnchor_getUCInfoStage(me->node_anchor, UCT_STAGE_STRUCTURED);
+}
+
+#endif /* EXP_CHARTRANS */
+
+/*
+**  This function reallocates an allocated string with
+**  8-bit printable Latin characters (>= 160) converted
+**  to their HTML entity names and then translated for
+**  the current character set. - FM
+*/
+PUBLIC void LYExpandString ARGS1(
+	char **, str)
+{
+    char *p = *str;
+    char *q = *str;
+    CONST char *name;
+    int i, j, value, high, low, diff = 0;
+
+    /*
+    **  Don't do anything if we have no string
+    **  or are in CJK mode. - FM
+    */
+    if (!p || *p == '\0' ||
+        HTCJK != NOCJK)
+        return;
+
+    /*
+    **  Start a clean copy of the string, without
+    **  invalidating our pointer to the original. - FM
+    */
+    *str = NULL;
+    StrAllocCopy(*str, "");
+
+    /*
+    **  Check each character in the original string,
+    **  and add the characters or substitutions to
+    **  our clean copy. - FM
+    */
+    for (i = 0; p[i]; i++) {
+	/*
+	**  Substitute Lynx special character for
+	**  160 (nbsp) if HTPassHighCtrlRaw is not
+	**  set. - FM
+	*/
+        if (((unsigned char)p[i]) == 160 &&
+	    !HTPassHighCtrlRaw) {
+	    p[i] = HT_NON_BREAK_SPACE;
+	/*
+	**  Substitute Lynx special character for
+	**  173 (shy) if HTPassHighCtrlRaw is not
+	**  set. - FM
+	*/
+        } else if (((unsigned char)p[i]) == 173 &&
+	    !HTPassHighCtrlRaw) {
+	    p[i] = LY_SOFT_HYPHEN;
+	/*
+	**  Substitute other 8-bit characters based on
+	**  the LYCharsets.c tables if HTPassEightBitRaw
+	**  is not set. - FM
+	*/
+	} else if (((unsigned char)p[i]) > 160 &&
+		   !HTPassEightBitRaw) {
+	    value = (int)(((unsigned char)p[i]) - 160);
+	    p[i] = '\0';
+	    StrAllocCat(*str, q);
+	    q = &p[i+1];
+	    name = HTMLGetEntityName(value);
+	    for (low = 0, high = HTML_dtd.number_of_entities;
+		 high > low;
+		 diff < 0 ? (low = j+1) : (high = j)) {
+		/* Binary search */
+		j = (low + (high-low)/2);
+		diff = strcmp(HTML_dtd.entity_names[j], name);
+		if (diff == 0) {
+		    StrAllocCat(*str, p_entity_values[j]);
+		    break;
+		}
+	    }
+	}
+    }
+    StrAllocCat(*str, q);
+    free_and_clear(&p);
+}
+
+/*
 **  This function converts HTML named entities within a string
 **  to their translations in the active LYCharSets.c array.
 **  It also converts numeric entities to their HTML entity names
@@ -874,843 +1712,6 @@ PUBLIC void LYUnEscapeToLatinOne ARGS2(
     }
 }
 
-/*
-**  This function reallocates an allocated string with
-**  8-bit printable Latin characters (>= 160) converted
-**  to their HTML entity names and then translated for
-**  the current character set. - FM
-*/
-PUBLIC void LYExpandString ARGS1(
-	char **, str)
-{
-    char *p = *str;
-    char *q = *str;
-    CONST char *name;
-    int i, j, value, high, low, diff = 0;
-
-    /*
-    **  Don't do anything if we have no string
-    **  or are in CJK mode. - FM
-    */
-    if (!p || *p == '\0' ||
-        HTCJK != NOCJK)
-        return;
-
-    /*
-    **  Start a clean copy of the string, without
-    **  invalidating our pointer to the original. - FM
-    */
-    *str = NULL;
-    StrAllocCopy(*str, "");
-
-    /*
-    **  Check each character in the original string,
-    **  and add the characters or substitutions to
-    **  our clean copy. - FM
-    */
-    for (i = 0; p[i]; i++) {
-	/*
-	**  Substitute Lynx special character for
-	**  160 (nbsp) if HTPassHighCtrlRaw is not
-	**  set. - FM
-	*/
-        if (((unsigned char)p[i]) == 160 &&
-	    !HTPassHighCtrlRaw) {
-	    p[i] = HT_NON_BREAK_SPACE;
-	/*
-	**  Substitute Lynx special character for
-	**  173 (shy) if HTPassHighCtrlRaw is not
-	**  set. - FM
-	*/
-        } else if (((unsigned char)p[i]) == 173 &&
-	    !HTPassHighCtrlRaw) {
-	    p[i] = LY_SOFT_HYPHEN;
-	/*
-	**  Substitute other 8-bit characters based on
-	**  the LYCharsets.c tables if HTPassEightBitRaw
-	**  is not set. - FM
-	*/
-	} else if (((unsigned char)p[i]) > 160 &&
-		   !HTPassEightBitRaw) {
-	    value = (int)(((unsigned char)p[i]) - 160);
-	    p[i] = '\0';
-	    StrAllocCat(*str, q);
-	    q = &p[i+1];
-	    name = HTMLGetEntityName(value);
-	    for (low = 0, high = HTML_dtd.number_of_entities;
-		 high > low;
-		 diff < 0 ? (low = j+1) : (high = j)) {
-		/* Binary search */
-		j = (low + (high-low)/2);
-		diff = strcmp(HTML_dtd.entity_names[j], name);
-		if (diff == 0) {
-		    StrAllocCat(*str, p_entity_values[j]);
-		    break;
-		}
-	    }
-	}
-    }
-    StrAllocCat(*str, q);
-    free_and_clear(&p);
-}
-
-/*
-**  This function converts any ampersands in allocated
-**  strings to "&amp;".  If isTITLE is TRUE, it also
-**  converts any angle-brackets to "&lt;" or "&gt;". - FM
-*/
-PUBLIC void LYEntify ARGS2(
-	char **,	str,
-	BOOLEAN,	isTITLE)
-{
-    char *p = *str;
-    char *q = NULL, *cp = NULL;
-    int amps = 0, lts = 0, gts = 0;
-    
-    if (p == NULL || *p == '\0')
-        return;
-
-    /*
-     *  Count the ampersands. - FM
-     */
-    while ((*p != '\0') && (q = strchr(p, '&')) != NULL) {
-        amps++;
-	p = (q + 1);
-    }
-
-    /*
-     *  Count the left-angle-brackets, if needed. - FM
-     */
-    if (isTITLE == TRUE) {
-        p = *str;
-	while ((*p != '\0') && (q = strchr(p, '<')) != NULL) {
-	    lts++;
-	    p = (q + 1);
-	}
-    }
-
-    /*
-     *  Count the right-angle-brackets, if needed. - FM
-     */
-    if (isTITLE == TRUE) {
-        p = *str;
-	while ((*p != '\0') && (q = strchr(p, '>')) != NULL) {
-	    gts++;
-	    p = (q + 1);
-	}
-    }
-
-    /*
-     *  Check whether we need to convert anything. - FM
-     */
-    if (amps == 0 && lts == 0 && gts == 0)
-        return;
-
-    /*
-     *  Allocate space and convert. - FM
-     */
-    q = (char *)calloc(1,
-    		     (strlen(*str) + (4 * amps) + (3 * lts) + (3 * gts) + 1));
-    if ((cp = q) == NULL)
-        outofmem(__FILE__, "LYEntify");
-    for (p = *str; *p; p++) {
-    	if (*p == '&') {
-	    *q++ = '&';
-	    *q++ = 'a';
-	    *q++ = 'm';
-	    *q++ = 'p';
-	    *q++ = ';';
-	} else if (isTITLE && *p == '<') {
-	    *q++ = '&';
-	    *q++ = 'l';
-	    *q++ = 't';
-	    *q++ = ';';
-	} else if (isTITLE && *p == '>') {
-	    *q++ = '&';
-	    *q++ = 'g';
-	    *q++ = 't';
-	    *q++ = ';';
-	} else {
-	    *q++ = *p;
-	}
-    }
-    StrAllocCopy(*str, cp);
-    FREE(cp);
-}
-
-/*
-**  This function trims characters <= that of a space (32),
-**  including HT_NON_BREAK_SPACE (1) and HT_EM_SPACE (2),
-**  but not ESC, from the heads of strings. - FM
-*/
-PUBLIC void LYTrimHead ARGS1(
-	char *, str)
-{
-    int i = 0, j;
-
-    if (!str || *str == '\0')
-        return;
-
-    while (str[i] != '\0' && WHITE(str[i]) && (unsigned char)str[i] != 27) 
-        i++;
-    if (i > 0) {
-        for (j = 0; str[i] != '\0'; i++) {
-	    str[j++] = str[i];
-	}
-	str[j] = '\0';
-    }
-}
-
-/*
-**  This function trims characters <= that of a space (32),
-**  including HT_NON_BREAK_SPACE (1), HT_EM_SPACE (2), and
-**  ESC from the tails of strings. - FM
-*/
-PUBLIC void LYTrimTail ARGS1(
-	char *, str)
-{
-    int i;
-
-    if (!str || *str == '\0')
-        return;
-
-    i = (strlen(str) - 1);
-    while (i >= 0) {
-	if (WHITE(str[i]))
-	    str[i] = '\0';
-	else
-	    break;
-	i--;
-    }
-}
-
-/*
-** This function should receive a pointer to the start
-** of a comment.  It returns a pointer to the end ('>')
-** character of comment, or it's best guess if the comment
-** is invalid. - FM
-*/
-PUBLIC char *LYFindEndOfComment ARGS1(
-	char *, str)
-{
-    char *cp, *cp1;
-    enum comment_state { start1, start2, end1, end2 } state;
-
-    if (str == NULL)
-        /*
-	 *  We got NULL, so return NULL. - FM
-	 */
-        return NULL;
-
-    if (strncmp(str, "<!--", 4))
-        /*
-	 *  We don't have the start of a comment, so
-	 *  return the beginning of the string. - FM
-	 */
-        return str;
-
-    cp = (str + 4);
-    if (*cp =='>')
-        /*
-	 * It's an invalid comment, so
-	 * return this end character. - FM
-	 */
-	return cp;
-
-    if ((cp1 = strchr(cp, '>')) == NULL)
-        /*
-	 *  We don't have an end character, so
-	 *  return the beginning of the string. - FM
-	 */
-	return str;
-
-    if (*cp == '-')
-        /*
-	 *  Ugh, it's a "decorative" series of dashes,
-	 *  so return the next end character. - FM
-	 */
-	return cp1;
-
-    /*
-     *  OK, we're ready to start parsing. - FM
-     */
-    state = start2;
-    while (*cp != '\0') {
-        switch (state) {
-	    case start1:
-	        if (*cp == '-')
-		    state = start2;
-		else
-		    /*
-		     *  Invalid comment, so return the first
-		     *  '>' from the start of the string. - FM
-		     */
-		    return cp1;
-		break;
-
-	    case start2:
-	        if (*cp == '-')
-		    state = end1;
-		break;
-
-	    case end1:
-	        if (*cp == '-')
-		    state = end2;
-		else
-		    /*
-		     *  Invalid comment, so return the first
-		     *  '>' from the start of the string. - FM
-		     */
-		    return cp1;
-		break;
-
-	    case end2:
-	        if (*cp == '>')
-		    /*
-		     *  Valid comment, so return the end character. - FM
-		     */
-		    return cp;
-		if (*cp == '-') {
-		    state = start1;
-		} else if (!(WHITE(*cp) && (unsigned char)*cp != 27)) {
-		    /*
-		     *  Invalid comment, so return the first
-		     *  '>' from the start of the string. - FM
-		     */
-		    return cp1;
-		 }
-		break;
-
-	    default:
-		break;
-	}
-	cp++;
-    }
-
-    /*
-     *  Invalid comment, so return the first
-     *  '>' from the start of the string. - FM
-     */
-    return cp1;
-}
-
-/*
-**  If an HREF, itself or if resolved against a base,
-**  represents a file URL, and the host is defaulted,
-**  force in "//localhost".  We need this until
-**  all the other Lynx code which performs security
-**  checks based on the "localhost" string is changed
-**  to assume "//localhost" when a host field is not
-**  present in file URLs - FM
-*/
-PUBLIC void LYFillLocalFileURL ARGS2(
-	char **,	href,
-	char *,		base)
-{
-    char * temp = NULL;
-
-    if (*href == NULL || *(*href) == '\0')
-        return;
-
-    if (!strcmp(*href, "//") || !strncmp(*href, "///", 3)) {
-	if (base != NULL && !strncmp(base, "file:", 5)) {
-	    StrAllocCopy(temp, "file:");
-	    StrAllocCat(temp, *href);
-	    StrAllocCopy(*href, temp);
-	}
-    }
-    if (!strncmp(*href, "file:", 5)) {
-	if (*(*href+5) == '\0') {
-	    StrAllocCat(*href, "//localhost");
-	} else if (!strcmp(*href, "file://")) {
-	    StrAllocCat(*href, "localhost");
-	} else if (!strncmp(*href, "file:///", 8)) {
-	    StrAllocCopy(temp, (*href+7));
-	    StrAllocCopy(*href, "file://localhost");
-	    StrAllocCat(*href, temp);
-	} else if (!strncmp(*href, "file:/", 6) && *(*href+6) != '/') {
-	    StrAllocCopy(temp, (*href+5));
-	    StrAllocCopy(*href, "file://localhost");
-	    StrAllocCat(*href, temp);
-	}
-    }
-
-    /*
-     * No path in a file://localhost URL means a
-     * directory listing for the current default. - FM
-     */
-    if (!strcmp(*href, "file://localhost")) {
-#ifdef VMS
-	StrAllocCat(*href, HTVMS_wwwName(getenv("PATH")));
-#else
-	char curdir[DIRNAMESIZE];
-#if HAVE_GETCWD
-	getcwd (curdir, DIRNAMESIZE);
-#else
-	getwd (curdir);
-#endif /* NO_GETCWD */
-#ifdef DOSPATH
-	StrAllocCat(*href, HTDOS_wwwName(curdir));
-#else
-	StrAllocCat(*href, curdir);
-#endif /* DOSPATH */
-#endif /* VMS */
-    }
-
-#ifdef VMS
-    /*
-     * On VMS, a file://localhost/ URL means
-     * a listing for the login directory. - FM
-     */
-    if (!strcmp(*href, "file://localhost/"))
-	StrAllocCat(*href, (HTVMS_wwwName((char *)Home_Dir())+1));
-#endif /* VMS */
-
-    FREE(temp);
-    return;
-}
-
-#ifdef EXP_CHARTRANS
-/*
-**  This function writes a line with a META tag to an open file,
-**  which will specify a charset parameter to use when the file is
-**  read back in.  It is meant for temporary HTML files used by the
-**  various special pages which may show titles of documents.  When those
-**  files are created, the title strings normally have been translated and
-**  expanded to the display character set, so we have to make sure they
-**  don't get translated again.
-**  If the user has changed the display character set during the lifetime
-**  of the Lynx session (or, more exactly, during the time the title
-**  strings to be written were generated), they may now have different
-**  character encodings and there is currently no way to get it all right.
-**  To change this, we would have to add a variable for each string which
-**  keeps track of its character encoding...
-**  But at least we can try to ensure that reading the file after future
-**  display character set changes will give reasonable output.
-**
-**  The META tag is not written if the display character set (passed as
-**  disp_chndl) already corresponds to the charset assumption that
-**  would be made when the file is read. - KW
-*/
-PUBLIC void LYAddMETAcharsetToFD ARGS2(
-	FILE *,		fd,
-	int,		disp_chndl)
-{
-    if (disp_chndl == -1)
-	/*
-	 *  -1 means use current_char_set.
-	 */
-	disp_chndl = current_char_set;
-
-    if (fd == NULL || disp_chndl < 0)
-	/*
-	 *  Should not happen.
-	 */
-	return;
-
-    if (UCLYhndl_HTFile_for_unspec == disp_chndl)
-	/*
-	 *  Not need to do, so we don't.
-	 */
-	return;
-
-    if (LYCharSet_UC[disp_chndl].enc == UCT_ENC_7BIT)
-	/*
-	 *  There shouldn't be any 8-bit characters in this case.
-	 */
-	return;
-
-    /*
-     *  In other cases we don't know because UCLYhndl_for_unspec may
-     *  change during the lifetime of the file (by toggling raw mode
-     *  or changing the display character set), so proceed.
-     */
-    fprintf(fd, "<META %s content=\"text/html;charset=%s\">\n",
-		"http-equiv=\"content-type\"",
-		LYCharSet_UC[disp_chndl].MIMEname);
-}
-#endif /* EXP_CHARTRANS */
-
-/*
-** This function returns OL TYPE="A" strings in
-** the range of " A." (1) to "ZZZ." (18278). - FM
-*/
-PUBLIC char *LYUppercaseA_OL_String ARGS1(
-	int, seqnum)
-{
-    static char OLstring[8];
-
-    if (seqnum <= 1 ) {
-        strcpy(OLstring, " A.");
-        return OLstring;
-    }
-    if (seqnum < 27) {
-        sprintf(OLstring, " %c.", (seqnum + 64));
-        return OLstring;
-    }
-    if (seqnum < 703) {
-        sprintf(OLstring, "%c%c.", ((seqnum-1)/26 + 64),
-		(seqnum - ((seqnum-1)/26)*26 + 64));
-        return OLstring;
-    }
-    if (seqnum < 18279) {
-        sprintf(OLstring, "%c%c%c.", ((seqnum-27)/676 + 64),
-		(((seqnum - ((seqnum-27)/676)*676)-1)/26 + 64),
-		(seqnum - ((seqnum-1)/26)*26 + 64));
-        return OLstring;
-    }
-    strcpy(OLstring, "ZZZ.");
-    return OLstring;
-}
-
-/*
-** This function returns OL TYPE="a" strings in
-** the range of " a." (1) to "zzz." (18278). - FM
-*/
-PUBLIC char *LYLowercaseA_OL_String ARGS1(
-	int, seqnum)
-{
-    static char OLstring[8];
-
-    if (seqnum <= 1 ) {
-        strcpy(OLstring, " a.");
-        return OLstring;
-    }
-    if (seqnum < 27) {
-        sprintf(OLstring, " %c.", (seqnum + 96));
-        return OLstring;
-    }
-    if (seqnum < 703) {
-        sprintf(OLstring, "%c%c.", ((seqnum-1)/26 + 96),
-		(seqnum - ((seqnum-1)/26)*26 + 96));
-        return OLstring;
-    }
-    if (seqnum < 18279) {
-        sprintf(OLstring, "%c%c%c.", ((seqnum-27)/676 + 96),
-		(((seqnum - ((seqnum-27)/676)*676)-1)/26 + 96),
-		(seqnum - ((seqnum-1)/26)*26 + 96));
-        return OLstring;
-    }
-    strcpy(OLstring, "zzz.");
-    return OLstring;
-}
-
-/*
-** This function returns OL TYPE="I" strings in the
-** range of " I." (1) to "MMM." (3000).- FM
-*/
-PUBLIC char *LYUppercaseI_OL_String ARGS1(
-	int, seqnum)
-{
-    static char OLstring[8];
-    int Arabic = seqnum;
-
-    if (Arabic >= 3000) {
-        strcpy(OLstring, "MMM.");
-        return OLstring;
-    }
-
-    switch(Arabic) {
-    case 1:
-        strcpy(OLstring, " I.");
-        return OLstring;
-    case 5:
-        strcpy(OLstring, " V.");
-        return OLstring;
-    case 10:
-        strcpy(OLstring, " X.");
-        return OLstring;
-    case 50:
-        strcpy(OLstring, " L.");
-        return OLstring;
-    case 100:
-        strcpy(OLstring, " C.");
-        return OLstring;
-    case 500:
-        strcpy(OLstring, " D.");
-        return OLstring;
-    case 1000:
-        strcpy(OLstring, " M.");
-        return OLstring;
-    default:
-        OLstring[0] = '\0';
-	break;
-    }
-
-    while (Arabic >= 1000) {
-        strcat(OLstring, "M");
-        Arabic -= 1000;
-    }
-
-    if (Arabic >= 900) {
-        strcat(OLstring, "CM");
-	Arabic -= 900;
-    }
-
-    if (Arabic >= 500) {
-	strcat(OLstring, "D");
-        Arabic -= 500;
-	while (Arabic >= 500) {
-	    strcat(OLstring, "C");
-	    Arabic -= 10;
-	}
-    }
-
-    if (Arabic >= 400) {
-	strcat(OLstring, "CD");
-        Arabic -= 400;
-    }
-
-    while (Arabic >= 100) {
-        strcat(OLstring, "C");
-        Arabic -= 100;
-    }
-
-    if (Arabic >= 90) {
-        strcat(OLstring, "XC");
-	Arabic -= 90;
-    }
-
-    if (Arabic >= 50) {
-	strcat(OLstring, "L");
-        Arabic -= 50;
-	while (Arabic >= 50) {
-	    strcat(OLstring, "X");
-	    Arabic -= 10;
-	}
-    }
-
-    if (Arabic >= 40) {
-	strcat(OLstring, "XL");
-        Arabic -= 40;
-    }
-
-    while (Arabic > 10) {
-        strcat(OLstring, "X");
-	Arabic -= 10;
-    }    
-
-    switch (Arabic) {
-    case 1:
-        strcat(OLstring, "I.");
-	break;
-    case 2:
-        strcat(OLstring, "II.");
-	break;
-    case 3:
-        strcat(OLstring, "III.");
-	break;
-    case 4:
-        strcat(OLstring, "IV.");
-	break;
-    case 5:
-        strcat(OLstring, "V.");
-	break;
-    case 6:
-        strcat(OLstring, "VI.");
-	break;
-    case 7:
-        strcat(OLstring, "VII.");
-	break;
-    case 8:
-        strcat(OLstring, "VIII.");
-	break;
-    case 9:
-        strcat(OLstring, "IX.");
-	break;
-    case 10:
-        strcat(OLstring, "X.");
-	break;
-    default:
-        strcat(OLstring, ".");
-	break;
-    }
-
-    return OLstring;
-}
-
-/*
-** This function returns OL TYPE="i" strings in
-** range of " i." (1) to "mmm." (3000).- FM
-*/
-PUBLIC char *LYLowercaseI_OL_String ARGS1(
-	int, seqnum)
-{
-    static char OLstring[8];
-    int Arabic = seqnum;
-
-    if (Arabic >= 3000) {
-        strcpy(OLstring, "mmm.");
-        return OLstring;
-    }
-
-    switch(Arabic) {
-    case 1:
-        strcpy(OLstring, " i.");
-        return OLstring;
-    case 5:
-        strcpy(OLstring, " v.");
-        return OLstring;
-    case 10:
-        strcpy(OLstring, " x.");
-        return OLstring;
-    case 50:
-        strcpy(OLstring, " l.");
-        return OLstring;
-    case 100:
-        strcpy(OLstring, " c.");
-        return OLstring;
-    case 500:
-        strcpy(OLstring, " d.");
-        return OLstring;
-    case 1000:
-        strcpy(OLstring, " m.");
-        return OLstring;
-    default:
-        OLstring[0] = '\0';
-	break;
-    }
-
-    while (Arabic >= 1000) {
-        strcat(OLstring, "m");
-        Arabic -= 1000;
-    }
-
-    if (Arabic >= 900) {
-        strcat(OLstring, "cm");
-	Arabic -= 900;
-    }
-
-    if (Arabic >= 500) {
-	strcat(OLstring, "d");
-        Arabic -= 500;
-	while (Arabic >= 500) {
-	    strcat(OLstring, "c");
-	    Arabic -= 10;
-	}
-    }
-
-    if (Arabic >= 400) {
-	strcat(OLstring, "cd");
-        Arabic -= 400;
-    }
-
-    while (Arabic >= 100) {
-        strcat(OLstring, "c");
-        Arabic -= 100;
-    }
-
-    if (Arabic >= 90) {
-        strcat(OLstring, "xc");
-	Arabic -= 90;
-    }
-
-    if (Arabic >= 50) {
-	strcat(OLstring, "l");
-        Arabic -= 50;
-	while (Arabic >= 50) {
-	    strcat(OLstring, "x");
-	    Arabic -= 10;
-	}
-    }
-
-    if (Arabic >= 40) {
-	strcat(OLstring, "xl");
-        Arabic -= 40;
-    }
-
-    while (Arabic > 10) {
-        strcat(OLstring, "x");
-	Arabic -= 10;
-    }    
-
-    switch (Arabic) {
-    case 1:
-        strcat(OLstring, "i.");
-	break;
-    case 2:
-        strcat(OLstring, "ii.");
-	break;
-    case 3:
-        strcat(OLstring, "iii.");
-	break;
-    case 4:
-        strcat(OLstring, "iv.");
-	break;
-    case 5:
-        strcat(OLstring, "v.");
-	break;
-    case 6:
-        strcat(OLstring, "vi.");
-	break;
-    case 7:
-        strcat(OLstring, "vii.");
-	break;
-    case 8:
-        strcat(OLstring, "viii.");
-	break;
-    case 9:
-        strcat(OLstring, "ix.");
-	break;
-    case 10:
-        strcat(OLstring, "x.");
-	break;
-    default:
-        strcat(OLstring, ".");
-	break;
-    }
-
-    return OLstring;
-}
-
-/*
-**  This function initializes the Ordered List counter. - FM
-*/
-PUBLIC void LYZero_OL_Counter ARGS1(
-	HTStructured *, 	me)
-{
-    int i;
-
-    if (!me)
-        return;
-
-    for (i = 0; i < 12; i++) {
-        me->OL_Counter[i] = OL_VOID;
-	me->OL_Type[i] = '1';
-    }
-	
-    me->Last_OL_Count = 0;
-    me->Last_OL_Type = '1';
-    
-    return;
-}
-
-#ifdef EXP_CHARTRANS
-/*
-**  This function is used by the HTML Structured object. - kw
-*/
-PUBLIC void LYGetChartransInfo ARGS1(
-	HTStructured *,		me)
-{
-    me->UCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,
-					UCT_STAGE_STRUCTURED);
-    if (me->UCLYhndl < 0) {
-	int chndl = HTAnchor_getUCLYhndl(me->node_anchor, UCT_STAGE_HTEXT);
-
-	if (chndl < 0) {
-	    chndl = current_char_set;
-	    HTAnchor_setUCInfoStage(me->node_anchor, chndl, UCT_STAGE_HTEXT,
-				    UCT_SETBY_STRUCTURED);
-	}
-	HTAnchor_setUCInfoStage(me->node_anchor, chndl,
-				UCT_STAGE_STRUCTURED, UCT_SETBY_STRUCTURED);
-	me->UCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,
-					    UCT_STAGE_STRUCTURED);
-    }
-    me->UCI = HTAnchor_getUCInfoStage(me->node_anchor, UCT_STAGE_STRUCTURED);
-}
-
-#endif /* EXP_CHARTRANS */
 /*
 **  This function processes META tags in HTML streams. - FM
 */
@@ -2710,7 +2711,6 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	 *  it, such that the bad partial reference might get corrected
 	 *  by the document provider. - FM
 	 */
-        int i = 0, j = 0;
 	char *temp = NULL, *path = NULL, *str = "", *cp;
 
 	if (((temp = HTParse(*href,

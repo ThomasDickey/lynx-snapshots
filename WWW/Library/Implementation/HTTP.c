@@ -281,7 +281,7 @@ try_again:
 				HTAtom_name(pres->rep),
 				temp);
 		  len += strlen(line);
-		  if (len > 1000 && !first_Accept) {
+		  if (len > 252 && !first_Accept) {
 		      StrAllocCat(command, crlf);
 		      sprintf(line, "Accept: %s%s",
 		      		    HTAtom_name(pres->rep),
@@ -293,7 +293,7 @@ try_again:
 	      }
           }
       }
-      sprintf(line, "%s*/*;q=0.001%c%c",
+      sprintf(line, "%s*/*;q=0.01%c%c",
       		    (first_Accept ?
 		       "Accept: " : ", "), CR, LF);
       StrAllocCat(command, line);

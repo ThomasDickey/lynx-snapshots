@@ -71,7 +71,8 @@
 #undef UNCOMPRESS_PATH		/* CF_PATH_PROG(gunzip) */
 #undef UNIX
 #undef UNZIP_PATH		/* CF_PATH_PROG(unzip) */
-#undef USE_SLANG
+#undef USE_SLANG		/* AC_ARG_WITH(screen=slang) */
+#undef USE_ZLIB			/* AC_ARG_WITH(zlib) */
 #undef UTMPX_FOR_UTMP		/* use <utmpx.h> since <utmp.h> not found */
 #undef UUDECODE_PATH		/* CF_PATH_PROG(uudecode) */
 #undef ZCAT_PATH		/* CF_PATH_PROG(zcat) */
@@ -98,7 +99,3 @@
 /* FIXME:SOCKS */
 /* FIXME:SVR4_BSDSELECT */
 /* FIXME:SYSLOG_REQUESTED_URLS */
-/* FIXME:_BSD=44 */
-/* FIXME:_BUILTINS */
-/* FIXME:_locp=__lc_locale */
-/* FIXME:loc_t=_LC_locale_t */

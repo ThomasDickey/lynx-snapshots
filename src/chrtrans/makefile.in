@@ -17,6 +17,7 @@ SITE_DEFS	= # FIXME: set in parent makefile
 MCFLAGS		= # FIXME: set in parent makefile
 
 CC		= @CC@
+CPP		= @CPP@
 CPPOPTS		= @DEFS@ @CPPFLAGS@ -I.. -I../.. -I../../$(WWWINC) $(MCFLAGS)
 CFLAGS		= $(CPPOPTS) @CFLAGS@
 
@@ -103,3 +104,8 @@ clean:
 distclean: clean
 	-rm -rf obsolete
 	rm -f core *.bak *.sav *~ *.h_old
+
+depend :
+	makedepend -fmakefile -- $(CFLAGS) -- $(C_SRC)
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

@@ -52,3 +52,7 @@ all : $(LOB)/libwww.a
 @SHOW_CC@
 	@ECHO_CC@$(CPP) -C $(CPPOPTS) $*.c >$@
 
+depend :
+	makedepend -fmakefile -- $(CFLAGS) -- $(CFILES)
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

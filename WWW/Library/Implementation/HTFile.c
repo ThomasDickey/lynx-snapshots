@@ -46,6 +46,10 @@
 #endif /* LONG_LIST */
 #endif /* !VMS */
   
+#ifdef USE_ZLIB
+#include <GridText.h>
+#endif
+
 #define INFINITY 512		/* file name length @@ FIXME */
 #define MULTI_SUFFIX ".multi"   /* Extension for scanning formats */
 
@@ -1423,7 +1427,7 @@ PUBLIC int HTLoadFile ARGS4(
     extern char *list_format;
 #endif /* VMS */
 #ifdef USE_ZLIB
-    gzFile gzfp;
+    gzFile gzfp = 0;
     BOOL use_gzread = NO;
 #endif /* USE_ZLIB */
 
@@ -1645,7 +1649,7 @@ PUBLIC int HTLoadFile ARGS4(
 					 "Could not open file for decompression!");
 		}
 	    } else
-#endif /* USE_GZREAD */
+#endif /* USE_ZLIB */
 	    {
 		status = HTParseFile(format, format_out, anchor, fp, sink);
 		fclose(fp);
@@ -1787,9 +1791,7 @@ forget_multi:
 		base[-1] = '/';		/* Restore directory name */
 		base[0] = '\0';
 		StrAllocCat(localname, best_name);
-                FREE(best_name);
-                /* goto open_file; */  /* Nope - might be a directory - kw */
-		
+		FREE(best_name);
 	    } else { 			/* If not found suitable file */
 		FREE(localname);
 		FREE(nodename);
@@ -2147,7 +2149,6 @@ forget_multi:
 /* End of directory reading section
 */
 #endif /* HAVE_READDIR */
-open_file:
 	{
 	    FILE * fp = fopen(localname, "r");
 
@@ -2242,7 +2243,7 @@ open_file:
 				     "Could not open file for decompression!");
 		    }
 		} else
-#endif /* USE_GZREAD */
+#endif /* USE_ZLIB */
 		{
 		    status = HTParseFile(format, format_out, anchor, fp, sink);
 		    fclose(fp);

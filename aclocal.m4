@@ -272,6 +272,44 @@ AC_MSG_RESULT($cf_cv_fancy_curses)
 test $cf_cv_fancy_curses = yes && AC_DEFINE(FANCY_CURSES)
 ])
 dnl ---------------------------------------------------------------------------
+dnl Look for a non-standard library, given parameters for AC_TRY_LINK.  We
+dnl prefer a standard location, and use -L options only if we do not find the
+dnl library in the standard library location(s).
+dnl	$1 = library name
+dnl	$2 = includes
+dnl	$3 = code fragment to compile/link
+dnl	$4 = corresponding function-name
+AC_DEFUN([CF_FIND_LIBRARY],
+[
+	cf_cv_have_lib_$1=no
+	AC_CHECK_FUNC($4,cf_cv_have_lib_$1=no,[
+		cf_save_LIBS="$LIBS"
+		AC_MSG_CHECKING(for $4 in -l$1)
+		LIBS="-l$1 $LIBS"
+		AC_TRY_LINK([$2],[$3],
+			[AC_MSG_RESULT(yes)
+			 cf_cv_have_lib_$1=yes
+			],
+			[AC_MSG_RESULT(no)
+			CF_LIBRARY_PATH(cf_search,$1)
+			for cf_libdir in $cf_search
+			do
+				AC_MSG_CHECKING(for -l$1 in $cf_libdir)
+				LIBS="-L$cf_libdir -l$1 $cf_save_LIBS"
+				AC_TRY_LINK([$2],[$3],
+					[AC_MSG_RESULT(yes)
+			 		 cf_cv_have_lib_$1=yes
+					 break],
+					[AC_MSG_RESULT(no)
+					 LIBS="$cf_save_LIBS"])
+			done
+			])
+		])
+if test $cf_cv_have_lib_$1 = no ; then
+	AC_ERROR(Cannot link $1 library)
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Check if the compiler supports useful warning options.  There's a few that
 dnl we don't use, simply because they're too noisy:
 dnl
@@ -322,9 +360,34 @@ dnl ---------------------------------------------------------------------------
 dnl Construct a search-list for a nonstandard header-file
 AC_DEFUN([CF_HEADER_PATH],
 [$1=""
-test "$prefix" != NONE       && $1="$prefix/include $prefix/include/$2"
-test "$prefix" != /usr/local && $1="[$]$1 /usr/local/include /usr/local/include/$2"
-test "$prefix" != /usr       && $1="[$]$1 /usr/include /usr/include/$2"
+if test -d "$includedir"  ; then
+test "$includedir" != NONE       && $1="[$]$1 $includedir $includedir/$2"
+fi
+if test -d "$oldincludedir"  ; then
+test "$oldincludedir" != NONE    && $1="[$]$1 $oldincludedir $oldincludedir/$2"
+fi
+if test -d "$prefix"; then
+test "$prefix" != NONE           && $1="[$]$1 $prefix/include $prefix/include/$2"
+fi
+test "$prefix" != /usr/local     && $1="[$]$1 /usr/local/include /usr/local/include/$2"
+test "$prefix" != /usr           && $1="[$]$1 /usr/include /usr/include/$2"
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Construct a search-list for a nonstandard library-file
+AC_DEFUN([CF_LIBRARY_PATH],
+[$1=""
+if test -d "$libdir"  ; then
+test "$libdir" != NONE           && $1="[$]$1 $libdir $libdir/$2"
+fi
+if test -d "$exec_prefix"; then
+test "$exec_prefix" != NONE      && $1="[$]$1 $exec_prefix/lib $exec_prefix/lib/$2"
+fi
+if test -d "$prefix"; then
+test "$prefix" != NONE           && \
+test "$prefix" != "$exec_prefix" && $1="[$]$1 $prefix/lib $prefix/lib/$2"
+fi
+test "$prefix" != /usr/local     && $1="[$]$1 /usr/local/lib /usr/local/lib/$2"
+test "$prefix" != /usr           && $1="[$]$1 /usr/lib /usr/lib/$2"
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check if we've got setlocale() and its header, <locale.h>
@@ -475,39 +538,45 @@ dnl ---------------------------------------------------------------------------
 dnl Look for the ncurses library.  This is a little complicated on Linux,
 dnl because it may be linked with the gpm (general purpose mouse) library.
 dnl Some distributions have gpm linked with (bsd) curses, which makes it
-dnl unusable with ncurses.
+dnl unusable with ncurses.  However, we don't want to link with gpm unless
+dnl ncurses has a dependency, since gpm is normally set up as a shared library,
+dnl and the linker will record a dependency.
 AC_DEFUN([CF_NCURSES_LIBS],
-[AC_CHECK_FUNC(initscr,,[
-AC_REQUIRE([CF_NCURSES_CPPFLAGS])
-cf_save_LIBS="$LIBS"
-AC_CHECK_LIB(gpm,Gpm_Open,[
-	AC_CHECK_LIB(gpm,initscr,[
-		# don't try to link with gpm, since it contains curses
-		AC_CHECK_LIB(ncurses,initscr)
-		],[
-		AC_MSG_CHECKING(if ncurses needs -lgpm to link)
-		LIBS="-lncurses $cf_save_LIBS"
-		AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
-			[initscr()],
-			[cf_need_gpm=no],
-			[LIBS="-lncurses -lgpm $cf_save_LIBS"
-			AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
-				[initscr()],
-				[cf_need_gpm=yes],
-				[AC_ERROR(cannot link -lncurses)])])
-		AC_MSG_RESULT($cf_need_gpm)
-		])],
-	[AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
-		[initscr()],,[
-		case $host_os in #(vi
-		freebsd*)
-			AC_CHECK_LIB(mytinfo,tgoto,[LIBS="-lmytinfo $LIBS"])
-			;;
-		esac
-		LIBS="-lncurses $LIBS"
-		AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
-			[initscr()],,[AC_ERROR(cannot link -lncurses)])])])
-])])
+[AC_REQUIRE([CF_NCURSES_CPPFLAGS])
+
+cf_ncurses_LIBS=""
+AC_CHECK_LIB(gpm,Gpm_Open,[AC_CHECK_LIB(gpm,initscr,,[cf_ncurses_LIBS="-lgpm"])])
+
+case $host_os in #(vi
+freebsd*)
+	# This is only necessary if you are linking against an obsolete
+	# version of ncurses (but it should do no harm, since it's static).
+	AC_CHECK_LIB(mytinfo,tgoto,[cf_ncurses_LIBS="-lmytinfo $cf_ncurses_LIBS"])
+	;;
+esac
+
+LIBS="$cf_ncurses_LIBS $LIBS"
+CF_FIND_LIBRARY(ncurses,
+	[#include <$cf_cv_ncurses_header>],
+	[initscr()],
+	initscr)
+
+if test -n "$cf_ncurses_LIBS" ; then
+	AC_MSG_CHECKING(if we can link ncurses without $cf_ncurses_LIBS)
+	cf_ncurses_SAVE="$LIBS"
+	for p in $cf_ncurses_LIBS ; do
+		q=`echo $LIBS | sed -e 's/'$p' //' -e 's/'$p'$//'`
+		if test "$q" != "$LIBS" ; then
+			LIBS="$q"
+		fi
+	done
+	AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
+		[initscr()],
+		[AC_MSG_RESULT(yes)],
+		[AC_MSG_RESULT(no)
+		 LIBS="$cf_ncurses_SAVE"])
+fi
+])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check for the version of ncurses, to aid in reporting bugs, etc.
 AC_DEFUN([CF_NCURSES_VERSION],
@@ -785,21 +854,26 @@ predefined) # (vi
 esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl Look for the slang library (it needs the math-library because it uses
-dnl trig functions).
+dnl Look for the slang library.
 AC_DEFUN([CF_SLANG_LIBS],
 [
-	AC_CHECK_FUNC(SLtt_get_screen_size,,[
-	AC_CHECK_LIB(slang,SLtt_get_screen_size,
-		[LIBS="-lslang $LIBS"],
-		[AC_CHECK_LIB(slang,SLtt_get_screen_size,
-			[LIBS="-lslang -lm $LIBS"],
-			AC_ERROR(cannot link -lslang),"-lm")],"-lm")])
+dnl AC_CHECK_FUNC(acos,,[AC_CHECK_LIB(m,acos,[LIBS="-lm $LIBS"])])
+CF_FIND_LIBRARY(slang,
+	[#include <slang.h>],
+	[SLtt_get_screen_size()],
+	SLtt_get_screen_size)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl	Remove "-g" option from the compiler options
 AC_DEFUN([CF_STRIP_G_OPT],
 [$1=`echo ${$1} | sed -e 's/-g //' -e 's/-g$//'`])dnl
+dnl ---------------------------------------------------------------------------
+dnl	Remove "-O" option from the compiler options
+AC_DEFUN([CF_STRIP_O_OPT],[
+changequote(,)dnl
+$1=`echo ${$1} | sed -e 's/-O[1-9]\? //' -e 's/-O[1-9]\?$//'`
+changequote([,])dnl
+])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check for declaration of sys_errlist in one of stdio.h and errno.h.
 dnl Declaration of sys_errlist on BSD4.4 interferes with our declaration.

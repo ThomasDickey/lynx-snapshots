@@ -1,3 +1,23 @@
+1997-08-20
+----------
+* Modify top-level install rule to depend on 'all'. - TD
+* Suppress check for ANSI compiler when we are using gcc. - TD
+* Use -g3 option in place of -O -g for Ultrix compiler --debug configuration
+  (request by Hynek Med). - TD
+* Drop "-lm" library from slang configuration, since it does not seem to
+  be used. - TD
+* Add configure --includedir and --oldincludedir values to header search
+  path for ncurses and slang. - TD
+* Modify configure checks for ncurses and slang libraries to generate
+  -L options as required, using new macros CF_FIND_LIBRARY and
+  CF_LIBRARY_PATH. - TD
+* Add substitution for CPP in src/makefile.in so that .c.i rule works. - TD
+* Add configure test for lint program. - TD
+* Add "make depend" target to generated makefiles.  This is intended only
+  for use in editing/developing, since many of the header dependencies in
+  chrtrans are generated during the build process and cannot be determined
+  by makedepend in advance. - TD
+* Add configure option --with-zlib. - TD
 1997-08-07
 ----------
 * Refine configure tests for acs_map, ttytype to accommodate broken linker

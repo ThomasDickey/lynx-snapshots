@@ -608,7 +608,7 @@ SaveAndExecute_tempname:
     if (me->remove_command == NULL)
         outofmem(__FILE__, "HTSaveAndExecute");
     
-    sprintf(me->remove_command, REMOVE_COMMAND, fnam, "", "", "", "", "", "");
+    sprintf(me->remove_command, REMOVE_COMMAND, fnam);
 
     StrAllocCopy(anchor->FileCache, fnam);
     return me;
@@ -808,8 +808,7 @@ SaveToFile_tempname:
     if (ret_obj->remove_command == NULL)
         outofmem(__FILE__, "HTSaveToFile");
 
-    sprintf(ret_obj->remove_command,
-	    REMOVE_COMMAND, fnam, "", "", "", "", "", "");
+    sprintf(ret_obj->remove_command, REMOVE_COMMAND, fnam);
 
 #ifdef VMS
     if (IsBinary && UseFixedRecords) {
@@ -881,7 +880,7 @@ PUBLIC HTStream* HTCompressed ARGS3(
     HTStream* me;
     HTFormat format;
     char *type = NULL;
-    HTPresentation *Pres;
+    HTPresentation *Pres = NULL;
     int n, i;
     BOOL can_present = FALSE;
     char fnam[256];
@@ -1099,7 +1098,7 @@ Compressed_tempname:
     					    strlen(fnam)) * sizeof(char));
     if (me->remove_command == NULL)
         outofmem(__FILE__, "HTCompressed");
-    sprintf(me->remove_command, REMOVE_COMMAND, fnam, "", "", "", "", "", "");
+    sprintf(me->remove_command, REMOVE_COMMAND, fnam);
 
     /*
      *  Save the filename and return the structure. - FM

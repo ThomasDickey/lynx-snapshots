@@ -190,16 +190,7 @@ PUBLIC void highlight ARGS3(
 	 */
 	if (links[cur].hightext2 && links[cur].ly < display_lines) {
 	    lynx_stop_link_color (flag == ON, links[cur].inUnderline);
-
-#ifndef USE_SLANG
-	    if ((char)(inch() & A_CHARTEXT) == '-')
-		move(links[cur].ly + 1, 0);
-	    else
-#endif
-		addch('\n');
-	    for (i = 0; i < links[cur].hightext2_offset; i++)
-	        addch(' ');
-
+	    move((links[cur].ly + 1), links[cur].hightext2_offset);
 #ifndef USE_COLOR_STYLE
 	    lynx_start_link_color (flag == ON, links[cur].inUnderline);
 #else
