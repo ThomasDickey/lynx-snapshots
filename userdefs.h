@@ -2,7 +2,7 @@
  * Lynx - Hypertext navigation system
  *
  *   (c) Copyright 1992, 1993, 1994 University of Kansas
- *	 1996: GNU General Public License
+ *	 1995, 1996: GNU General Public License
  */
 
 /*******************************************************************
@@ -345,13 +345,13 @@
  */
 
 /*****************************
- * STARTFILE is the default file if none is specified on the command line
- * or via a WWW_HOME environment variable.
+ * STARTFILE is the default file if none is specified in lynx.cfg,
+ *  on the command line, or via a WWW_HOME environment variable.
  * 
  * note: STARTFILE must be a URL.  See the Lynx online help for more
  *       information on URLs
  */
-#define STARTFILE "http://www.nyu.edu/pages/wsn/subir/lynx.html"
+#define STARTFILE "http://lynx.browser.org/"
 
 /*****************************
  * HELPFILE must be defined as a URL and must have a 
@@ -361,10 +361,10 @@
  *   for this distribution (use SHELL syntax including the device
  *   on VMS systems).
  * The default HELPFILE is:
- * http://www.nyu.edu/pages/wsn/subir/lynx.html
+ * http://www.crl.com/~subir/lynx/lynx_help/lynx_help_main.html
  *   This should be changed here or in lynx.cfg to the local path.
  */
-#define HELPFILE "http://www.nyu.edu/pages/wsn/subir/lynx.html"
+#define HELPFILE "http://www.crl.com/~subir/lynx/lynx_help/lynx_help_main.html"
 /* #define HELPFILE "file://localhost/PATH_TO/lynx_help/lynx_help_main.html" */
 
 /*****************************
@@ -556,6 +556,46 @@
  */
 #define PREFERRED_CHARSET ""
 
+/*****************************
+* If MULTI_BOOKMARK_SUPPORT is set TRUE, and BLOCK_MULTI_BOOKMARKS (see
+* below) is FALSE, and sub-bookmarks exist, all bookmark-operations will
+* first prompt the user to select an active sub-bookmark file or the
+* default bookmark file.  FALSE is the default so that one (the default)
+* bookmark file will be available initially.  The default set here can
+* be overridden in lynx.cfg.  The user can turn on multiple bookmark
+* support via the 'o'ptions menu, and can save that choice as the startup
+* default via the .lynxrc file.   The startup default, however set, can
+* be overridden on the command line via the -restrictions=multibook or
+* the -anonymous or -validate switches.
+*/
+#ifndef MULTI_BOOKMARK_SUPPORT
+#define MULTI_BOOKMARK_SUPPORT FALSE
+#endif /* MULTI_BOOKMARK_SUPPORT */
+
+/*****************************
+* If BLOCK_MULTI_BOOKMARKS is set TRUE, multiple bookmark support will
+* be forced off, and cannot to toggled on via the 'o'ptions menu.  This
+* compilation setting can be overridden via lynx.cfg.
+*/
+#ifndef BLOCK_MULTI_BOOKMARKS
+#define BLOCK_MULTI_BOOKMARKS FALSE
+#endif /* BLOCK_MULTI_BOOKMARKS */
+
+/*****************************
+* If ADVANCED_MULTI_BOOKMARKS is set FALSE, the associated prompting
+* feature will be disabled.  When it is TRUE, multiple bookmark support
+* is on, and the user mode is ADVANCED, the VIEW_BOOKMARK command will
+* invoke a statusline prompt at which the user can enter the letter token
+* of the desired bookmark, or '=' to get a menu of available bookmark
+* files.  The menu always is presented in NOVICE or INTERMEDIATE mode.
+* No prompting or menu display occurs if only one (the startup default)
+* bookmark file has been defined (define additional ones via the 'o'ptions
+* menu).  This compilation setting can be overridden via lynx.cfg.
+*/
+#ifndef ADVANCED_MULTI_BOOKMARKS
+#define ADVANCED_MULTI_BOOKMARKS TRUE
+#endif /* ADVANCED_MULTI_BOOKMARKS */
+
 /********************************
  * URL_DOMAIN_PREFIXES and URL_DOMAIN_SUFFIXES are strings which will be
  * prepended (together with a scheme://) and appended to the first element
@@ -598,6 +638,18 @@
  * The default defined here can be changed in lynx.cfg.
  */
 #define LIST_NEWS_DATES FALSE
+
+/********************************
+ * If USE_SELECT_POPUPS is set FALSE, Lynx will present a vertical list
+ * of radio buttons for the OPTIONs in SELECT blocks which lack the
+ * MULTIPLE attribute, instead of using a popup menu.  Note that if
+ * the MULTIPLE attribute is present in the SELECT start tag, Lynx
+ * always will create a vertical list of checkboxes for the OPTIONs.
+ *
+ * The default defined here can be changed in lynx.cfg, and can be
+ * toggled via the -popup command line switch.
+ */
+#define USE_SELECT_POPUPS TRUE
 
 
 /****************************************************************

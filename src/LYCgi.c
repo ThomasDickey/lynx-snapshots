@@ -176,10 +176,8 @@ PUBLIC int LYLoadCGI ARGS4(
 	sleep(MessageSecs);
 	status = HT_NOT_LOADED;
 
-    } else if (!reloading && no_bookmark_exec && bookmark_page &&
-	       (strstr(HTLoadedDocumentURL(), bookmark_page) ||
-		!strcmp(HTLoadedDocumentTitle(),
-			MOSAIC_BOOKMARK_TITLE))) {
+    } else if (!reloading && no_bookmark_exec &&
+ 	       HTLoadedDocumentBookmark()) {
 	_statusline(BOOKMARK_EXEC_DISABLED);
 	sleep(MessageSecs);
 	status = HT_NOT_LOADED;

@@ -468,33 +468,48 @@ PUBLIC HTTag * SGMLFindTag ARGS2(
 
 
 /*	Could check that we are back to bottom of stack! @@  */
-
+/* 	Do check! - FM					     */
+/*							     */
 PUBLIC void SGML_free  ARGS1(
 	HTStream *,	context)
 {
     int i;
     HTElement * cur;
     HTElement * next;
+    HTTag * t;
 
-    (*context->actions->_free)(context->target);
-    HTChunkFree(context->string);
-
-    /* free strings */
-    for (i = 0; i < MAX_ATTRIBUTES; i++) 
-	FREE(context->value[i]);
-
+    /*
+    **  Free the buffers. - FM
+    */
     FREE(context->recover);
-    FREE(context->include);
     FREE(context->url);
     FREE(context->csi);
+    FREE(context->include);
 
-    cur = context->element_stack;
-    while (cur) {
-        next = cur->next;
+    /*
+    **  Wind down stack if any elements are open. - FM
+    */
+    while (context->element_stack) {
+        cur = context->element_stack;
+	t = cur->tag;
+	context->element_stack = cur->next;	/* Remove from stack */
 	FREE(cur);
-	cur = next;
+	(*context->actions->end_element)(context->target,
+		 t - context->dtd->tags, (char **)&context->include);
+	FREE(context->include);
     }
 
+    /*
+    **  Finish off the target. - FM
+    */
+    (*context->actions->_free)(context->target);
+
+    /*
+    **  Free the strings and context structure. - FM
+    */
+    HTChunkFree(context->string);
+    for (i = 0; i < MAX_ATTRIBUTES; i++) 
+	FREE(context->value[i]);
     FREE(context);
 }
 
@@ -504,18 +519,25 @@ PUBLIC void SGML_abort ARGS2(
 {
     int i;
 
+    /*
+    **  Abort the target. - FM
+    */
     (*context->actions->_abort)(context->target, e);
-    HTChunkFree(context->string);
 
-    /* free strings */
-    for (i = 0; i < MAX_ATTRIBUTES; i++) 
-	FREE(context->value[i]);
-
+    /*
+    **  Free the buffers. - FM
+    */
     FREE(context->recover);
     FREE(context->include);
     FREE(context->url);
     FREE(context->csi);
 
+    /*
+    **  Free the strings and context structure. - FM
+    */
+    HTChunkFree(context->string);
+    for (i = 0; i < MAX_ATTRIBUTES; i++) 
+	FREE(context->value[i]);
     FREE(context);
 }
 

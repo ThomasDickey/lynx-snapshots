@@ -64,7 +64,12 @@ extern int HText_sourceAnchors PARAMS((HText * text));
 extern void HText_setStale PARAMS((HText * text));
 extern void HText_refresh PARAMS((HText * text));
 extern char * HText_getTitle NOPARAMS;
+extern char * HText_getSugFname NOPARAMS;
+extern char * HText_getLastModified NOPARAMS;
+extern char * HText_getDate NOPARAMS;
+extern char * HText_getServer NOPARAMS;
 extern char * HText_getOwner NOPARAMS;
+extern void HText_setMainTextOwner PARAMS((CONST char * owner));
 extern char * HText_getRevTitle NOPARAMS;
 extern void print_wwwfile_to_fd PARAMS((FILE * fp, int is_reply));
 extern BOOLEAN HTFindPoundSelector PARAMS((char *selector));
@@ -78,6 +83,9 @@ extern char * HTLoadedDocumentURL NOPARAMS;
 extern char * HTLoadedDocumentPost_data NOPARAMS;
 extern char * HTLoadedDocumentTitle NOPARAMS;
 extern BOOLEAN HTLoadedDocumentIsHEAD NOPARAMS;
+extern char * HTLoadedDocumentCharset NOPARAMS;
+extern void HText_setNodeAnchorBookmark PARAMS((CONST char *bookmark));
+extern char * HTLoadedDocumentBookmark NOPARAMS;
 extern int HText_LastLineSize PARAMS((HText *me));
 extern int HText_PreviousLineSize PARAMS((HText *me));
 extern void HText_NegateLineOne PARAMS((HText *text));
@@ -99,6 +107,7 @@ extern char * HText_setLastOptionValue PARAMS((HText *text, char *value,
 extern int HText_beginInput PARAMS((HText *text, InputFieldData *I));
 extern void HText_SubmitForm PARAMS((FormInfo *submit_item, document *doc,
 				     char *link_name, char *link_value));
+extern void HText_DisableCurrentForm NOPARAMS;
 extern void HText_ResetForm PARAMS((FormInfo *form));
 extern void HText_activateRadioButton PARAMS((FormInfo *form));
 

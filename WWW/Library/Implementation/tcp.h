@@ -76,6 +76,11 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #define USE_DIRENT              /* sys V style directory open */
 #endif /* _IBMR2 */
 
+#ifdef _SYSV3
+#include <fcntl.h>
+#include <dirent.h>
+#endif /* _SYSV3 */
+
 /* Solaris. */
 #if defined(sun) && defined(__svr4__) && !defined(USE_DIRENT)
 #define USE_DIRENT              /* sys V style directory open */
@@ -169,6 +174,15 @@ VAX/VMS
 #undef NETWRITE
 #undef IOCTL
 #undef SOCKET_ERRNO
+/*
+**  Remove these socket_foo() prototypes if
+**  MultiNet someday actually does this. - FM
+*/
+extern int socket_read();
+extern int socket_write();
+extern int socket_close();
+extern int socket_ioctl();
+
 #define SOCKET_READ(s,b,l)  ((s)>10 ? socket_read((s),(b),(l)) : \
 				read((s),(b),(l)))
 #define NETWRITE(s,b,l) ((s)>10 ? socket_write((s),(b),(l)) : \
@@ -209,6 +223,23 @@ VAX/VMS
 #define INCLUDES_DONE
 
 #ifdef MULTINET  /* Include from standard Multinet directories */
+/*
+**  Remove these multinet_foo() and associated prototypes
+**  if MultiNet someday actually does this. - FM
+*/
+extern int multinet_accept();
+extern int multinet_bind();
+extern int bzero();
+extern int multinet_connect();
+extern int multinet_gethostname();
+extern int multinet_getsockname();
+extern unsigned short multinet_htons();
+extern unsigned short multinet_ntohs();
+extern int multinet_listen();
+extern int multinet_select();
+extern int multinet_socket();
+extern char *vms_errno_string();
+
 #ifndef __SOCKET_TYPEDEFS
 #define __SOCKET_TYPEDEFS 1
 #endif /* !__SOCKET_TYPEDEFS */
@@ -238,6 +269,17 @@ VAX/VMS
 #include "multinet_root:[multinet.include.arpa]inet.h"
 #include "multinet_root:[multinet.include]netdb.h"
 #include "multinet_root:[multinet.include.sys]ioctl.h"
+/*
+**  Uncomment this if you get compiler messages
+**  about struct timeval having no linkage. - FM
+*/
+/*#define NO_TIMEVAL*/
+#ifdef NO_TIMEVAL
+struct timeval {
+    long tv_sec;		/* seconds since Jan. 1, 1970 */
+    long tv_usec;		/* microseconds */
+};
+#endif /* NO_TIMEVAL */
 #endif /* MULTINET */
 
 

@@ -75,7 +75,7 @@
        dumps the formatted output of the default document or one specified
        on the command line to standard out.  This can be used in the
        following way:
-           lynx -dump http://www.nyu.edu/pages/wsn/subir/lynx.html
+           lynx -dump http://www.crl.com/~subir/lynx.html
 
   -editor=EDITOR
        enable edit mode using the specified EDITOR. (vi, ed, emacs, etc.)
@@ -180,6 +180,10 @@
   -number_links
        force numbering of links.
 
+  -popup
+       toggles handling of single-choice SELECT options via
+       popup windows or as lists of radio buttons.
+
   -post_data
        send form data from stdin using POST method and dump results.
 
@@ -253,9 +257,11 @@
 
        jump - disable the 'j' (jump) command.
 
-       mail - disable mailing feature.
+       multibook - disallow multiple bookmark files.
 
-       news_post - disable USENET News posting.
+       mail - disallow mail.
+
+       news_post - disallow USENET News posting.
 
        options_save - disallow saving options in .lynxrc.
 

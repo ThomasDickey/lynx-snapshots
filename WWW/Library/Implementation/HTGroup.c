@@ -76,7 +76,7 @@ PRIVATE void syntax_error ARGS3(FILE *,	 fp,
 {
     char buffer[41];
     int cnt = 0;
-    char ch;
+    int ch;
 
     while ((ch = getc(fp)) != EOF  &&  ch != '\n')
 	if (cnt < 40) buffer[cnt++] = ch;

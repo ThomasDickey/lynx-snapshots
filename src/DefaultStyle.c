@@ -277,18 +277,11 @@ PRIVATE HTStyle HTStyleExample = {
 	&HTStyleGlossaryCompact6,  "Example", "XMP",
 	HT_FONT, 1.0, HT_BLACK,		0, 0,
 	0, 0, 0, HT_LEFT,		1, 0,	tabs_8,
-	NO, NO, 1, 1,			0
-};	
-
-PRIVATE HTStyle HTStyleStyle = { /* HTML 3.0 STYLE - FM */
-	&HTStyleExample,  "Style", "STYLE",
-	HT_FONT, 1.0, HT_BLACK,		0, 0,
-	0, 0, 0, HT_LEFT,		1, 0,	tabs_8,
-	NO, NO, 1, 1,			0
+	NO, NO, 0, 0,			0
 };	
 
 PRIVATE HTStyle HTStylePreformatted = {
-	&HTStyleStyle,  	"Preformatted", "PRE",
+	&HTStyleExample,  	"Preformatted", "PRE",
 	HT_FONT, 1.0, HT_BLACK,		0, 0,
 	0, 0, 0, HT_LEFT,		1, 0,	tabs_8,
 	NO, YES, 0, 0,			0
@@ -298,7 +291,7 @@ PRIVATE HTStyle HTStyleListing = {
 	&HTStylePreformatted,  "Listing", "LISTING",
 	HT_FONT, 1.0, HT_BLACK,		0, 0,
 	0, 0, 0, HT_LEFT,		1, 0,	tabs_8,
-	NO, NO, 1, 1,			0 };	
+	NO, NO, 0, 0,			0 };	
 
 PRIVATE HTStyle HTStyleAddress = {
 	&HTStyleListing,  "Address", "ADDRESS",

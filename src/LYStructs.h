@@ -33,14 +33,8 @@ typedef struct _document {
    int    link;
    int    line;
    BOOL   isHEAD;
+   char * bookmark;
 } document;
-
-#ifdef DIRED_SUPPORT
-typedef struct _taglink {
-   char *name;
-   struct _taglink *next;
-} taglink;
-#endif
 
 #ifndef HTFORMS_H
 #include "HTForms.h" 
@@ -54,6 +48,7 @@ typedef struct _histstruct {
     int    link;
     int    page;
     BOOL   isHEAD;
+    char * bookmark;
 } histstruct;
 
 extern histstruct history[MAXHIST];

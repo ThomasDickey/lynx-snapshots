@@ -9,10 +9,12 @@
 #include "LYSystem.h"
 #include "LYKeymap.h"
 #include "LYCharUtils.h"
+#include "LYCurses.h"
 
 #ifdef VMS
 #include "HTVMSUtils.h"
 #include <nam.h>
+extern BOOLEAN HadVMSInterrupt;	/* Flag from cleanup_sig() AST */
 #endif /* VMS */
 
 #include "LYLeaks.h"
@@ -26,42 +28,60 @@ PRIVATE char * convert_mosaic_bookmark_file PARAMS((char *filename_buffer));
  *  Tries to open the bookmark file for reading.
  *  if successful the file is closed and the filename
  *  is returned and the URL is given in name.
+ *
+ *  Returns a zero-length pointer to flag a cancel,
+ *  a space to flag an undefined selection, and
+ *  NULL for a failure (processing error). - FM
  */
-PUBLIC char * get_bookmark_filename ARGS1(char **,URL)
+PUBLIC char * get_bookmark_filename ARGS1(
+	char **, URL)
 {
     char URL_buffer[256];
     static char filename_buffer[256];
     char string_buffer[256];
     FILE *fp;
+    int MBM_tmp;
 
-    if (!bookmark_page) {
+    /*
+     *  Multi_Bookmarks support. - FMG & FM
+     *  Let user select a bookmark file.
+     */
+    MBM_tmp = select_multi_bookmarks();
+    if (MBM_tmp == -2)
+        /*
+	 *  Zero-length pointer flags a cancel.
+	*/
+        return("");
+    if (MBM_tmp == -1) {
 	sprintf(string_buffer,
 		BOOKMARK_FILE_NOT_DEFINED,
 		key_for_func(LYK_OPTIONS));
 	_statusline(string_buffer);
 	sleep(AlertSecs);
-	return(NULL);
+	/*
+	 *  Space flags an undefined selection.
+	*/
+	return(" ");
+    } else {
+	StrAllocCopy(BookmarkPage, MBM_A_subbookmark[MBM_tmp]);
     }
 
     /*
-     *  See if it is in the home path.
+     *  Seek it in the home path.
      */
 #ifdef VMS
-    sprintf(filename_buffer,"%s%s", Home_Dir(), bookmark_page);
+    LYVMS_HomePathAndFilename(filename_buffer,
+			      sizeof(filename_buffer),
+			      BookmarkPage);
 #else
-    sprintf(filename_buffer,"%s/%s", Home_Dir(), bookmark_page);
+    sprintf(filename_buffer,"%s/%s", Home_Dir(), BookmarkPage);
 #endif /* VMS */
+    if (TRACE)
+        fprintf(stderr, "\nget_bookmark_filename: SEEKING %s\n   AS %s\n\n",
+		BookmarkPage, filename_buffer);
     if ((fp = fopen(filename_buffer,"r")) != NULL) {
 	goto success;
     }
-
-    /*
-     *  See if we can open it raw.
-     */
-    if ((fp = fopen(bookmark_page,"r")) != NULL) {
-	strcpy(filename_buffer, bookmark_page);
-	goto success;
-    } 
 
     /*
      *  Failure.
@@ -70,8 +90,8 @@ PUBLIC char * get_bookmark_filename ARGS1(char **,URL)
 
 success:
     /*
-     *  We now have the file open.  Check if it is a mosaic
-     *  hotlist.
+     *  We now have the file open.
+     *  Check if it is a mosaic hotlist.
      */
     if (fgets(string_buffer, 255, fp) &&
 	!strncmp(string_buffer, "ncsa-xmosaic-hotlist-format-1", 29)) {
@@ -79,23 +99,23 @@ success:
 	/*
 	 *  It is a mosaic hotlist file.
 	 */
-	is_mosaic_hotlist=TRUE;
+	is_mosaic_hotlist = TRUE;
 	fclose(fp);
 	newname = convert_mosaic_bookmark_file(filename_buffer);
 #ifdef VMS
-    sprintf(URL_buffer,"file://localhost%s", HTVMS_wwwName((char *)newname));
+	sprintf(URL_buffer,"file://localhost%s",
+		HTVMS_wwwName((char *)newname));
 #else
-    sprintf(URL_buffer,"file://localhost%s", newname);
+	sprintf(URL_buffer,"file://localhost%s", newname);
 #endif /* VMS */
-
     } else {
 	fclose(fp);
-	is_mosaic_hotlist=FALSE;
+	is_mosaic_hotlist = FALSE;
 #ifdef VMS
-    sprintf(URL_buffer,"file://localhost%s",
-    			HTVMS_wwwName((char *)filename_buffer));
+	sprintf(URL_buffer,"file://localhost%s",
+    		HTVMS_wwwName((char *)filename_buffer));
 #else
-    sprintf(URL_buffer,"file://localhost%s", filename_buffer);
+	sprintf(URL_buffer,"file://localhost%s", filename_buffer);
 #endif /* VMS */
     }
 
@@ -104,7 +124,8 @@ success:
 
 } /* big end */
 
-PRIVATE char * convert_mosaic_bookmark_file ARGS1(char *,filename_buffer)
+PRIVATE char * convert_mosaic_bookmark_file ARGS1(
+	char *,	filename_buffer)
 {
     static char newfile[256];
     static BOOLEAN first = TRUE;
@@ -122,14 +143,13 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(char *,filename_buffer)
 #endif /* VMS */
     }
 
-
-    if((nfp = fopen(newfile, "w")) == NULL) {
+    if ((nfp = fopen(newfile, "w")) == NULL) {
 	_statusline(NO_TEMP_FOR_HOTLIST);
 	sleep(AlertSecs);
 	return ("");
     }
 
-    if((fp = fopen(filename_buffer, "r")) == NULL)
+    if ((fp = fopen(filename_buffer, "r")) == NULL)
 	return ("");  /* should always open */
 
     fprintf(nfp,"<head>\n<title>%s</title>\n</head>\n",MOSAIC_BOOKMARK_TITLE);
@@ -161,7 +181,9 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(char *,filename_buffer)
     return(newfile);
 }
 
-PUBLIC void save_bookmark_link ARGS2(char *,address, char *,title)
+PUBLIC void save_bookmark_link ARGS2(
+	char *,	address,
+	char *,	title)
 {
     FILE *fp;
     BOOLEAN first_time = FALSE;
@@ -177,9 +199,26 @@ PUBLIC void save_bookmark_link ARGS2(char *,address, char *,title)
     }
 
     filename = get_bookmark_filename(&bookmark_URL);
-    FREE(bookmark_URL); /* don't need it */
-    if (!bookmark_page)
+
+    /*
+     *  If filename is a space, invalid bookmark
+     *  file was selected.  If zero-length, user
+     *  cancelled.  Ignore request in both cases!
+     */
+    if (filename)
+      if (*filename == '\0' || !strcmp(filename," "))
 	return;
+    /*
+     *  If BookmarkPage didn't get loaded, something
+     *  went wrong, so ignore the request.
+     */
+    if (!BookmarkPage)
+	return;
+
+     /*
+      *  We don't need the full URL.
+      */
+    FREE(bookmark_URL);
 
     /*
      *  Allow user to change the title. - FM
@@ -205,32 +244,25 @@ PUBLIC void save_bookmark_link ARGS2(char *,address, char *,title)
     /*
      *  Open the bookmark file. - FM
      */
-    if (filename == NULL) {
+    if (filename == NULL)
 	first_time = TRUE;
-	/*
-	 *  Try in the home directory first.
-	 */
+    /*
+     *  Try in the home directory.
+     */
 #ifdef VMS
-    	sprintf(filename_buffer, "sys$login:%s", bookmark_page);
+    LYVMS_HomePathAndFilename(filename_buffer,
+			      sizeof(filename_buffer),
+			      BookmarkPage);
 #else
-    	sprintf(filename_buffer, "%s/%s", Home_Dir(), bookmark_page);
+    sprintf(filename_buffer, "%s/%s", Home_Dir(), BookmarkPage);
 #endif /* VMS */
-    	if ((fp = fopen(filename_buffer,"w")) == NULL) {
-	   /*
-	    *  Try it raw.
-	    */
-    	    if ((fp = fopen(bookmark_page,"r")) == NULL) {
-	        _statusline(BOOKMARK_OPEN_FAILED);
-	        sleep(AlertSecs);
-	        return;
-	    }
-	}
-    } else {
-	if ((fp = fopen(filename,"a+")) == NULL) {
-	    _statusline(BOOKMARK_OPEN_FAILED);
-	    sleep(AlertSecs);
-	    return;
-	}
+    if (TRACE)
+        fprintf(stderr, "\nsave_bookmark_link: SEEKING %s\n   AS %s\n\n",
+		BookmarkPage, filename_buffer);
+    if ((fp = fopen(filename_buffer, (first_time ? "w" : "a+"))) == NULL) {
+	_statusline(BOOKMARK_OPEN_FAILED);
+	sleep(AlertSecs);
+	return;
     }
 
     /*
@@ -245,8 +277,8 @@ PUBLIC void save_bookmark_link ARGS2(char *,address, char *,title)
     if (first_time) {
 	fprintf(fp,"<head>\n<title>%s</title>\n</head>\n",BOOKMARK_TITLE);
 	fprintf(fp,"\
-     You can delete links using the new remove bookmark command.\n\
-     it is usually the 'R' key but may have been remapped by you or\n\
+     You can delete links using the remove bookmark command.  It\n\
+     is usually the 'R' key but may have been remapped by you or\n\
      your system administrator.<br>\n\
      This file may also be edited with a standard text editor.\n\
      Outdated or invalid links may be removed by simply deleting\n\
@@ -277,38 +309,47 @@ PUBLIC void save_bookmark_link ARGS2(char *,address, char *,title)
     sleep(MessageSecs);
 }
 	
-PUBLIC void remove_bookmark_link ARGS1(int,cur)
+PUBLIC void remove_bookmark_link ARGS2(
+	int,		cur,
+	char *,		cur_bookmark_page)
 {
     FILE *fp, *nfp;
     char buf[BUFSIZ];
     int n;
 #ifdef VMS
+    char filename_buffer[NAM$C_MAXRSS+12];
     char newfile[NAM$C_MAXRSS+12];
 #else
-    char newfile[128];
+    char filename_buffer[256];
+    char newfile[256];
     struct stat stat_buf;
     mode_t mode;
 #endif /* VMS */
-    char *filename;
-    char *URL = 0;
 
     if (TRACE)
 	fprintf(stderr, "remove_bookmark_link: deleting link number: %d\n",
 			cur);
 
-    filename = get_bookmark_filename(&URL);
-    FREE(URL); /* don't need it */
-    if (!bookmark_page)
+    if (!cur_bookmark_page)
 	return;
-
-    if ((!filename) || (fp=fopen(filename, "r")) == NULL) {
+#ifdef VMS
+    LYVMS_HomePathAndFilename(filename_buffer,
+			      sizeof(filename_buffer),
+			      cur_bookmark_page);
+#else
+    sprintf(filename_buffer,"%s/%s", Home_Dir(), cur_bookmark_page);
+#endif /* VMS */
+    if (TRACE)
+        fprintf(stderr, "\nremove_bookmark_link: SEEKING %s\n   AS %s\n\n",
+		cur_bookmark_page, filename_buffer);
+    if ((fp = fopen(filename_buffer, "r")) == NULL) {
 	_statusline(BOOKMARK_OPEN_FAILED_FOR_DEL);
 	sleep(AlertSecs);
 	return;
     }
 
 #ifdef VMS
-    sprintf(newfile, "%s-%d", filename, getpid());
+    sprintf(newfile, "%s-%d", filename_buffer, getpid());
 #else
     tempname(newfile, NEW_FILE);
 #endif /* VMS */
@@ -327,7 +368,7 @@ PUBLIC void remove_bookmark_link ARGS1(int,cur)
     /*
      *  Explicitly preserve bookmark file mode on Unix. - DSL
      */
-    if (stat(filename,&stat_buf) == 0) {
+    if (stat(filename_buffer, &stat_buf) == 0) {
 	mode = ((stat_buf.st_mode & 0777) | 0600);
 	(void) fclose(nfp);
 	nfp = NULL;
@@ -385,27 +426,27 @@ PUBLIC void remove_bookmark_link ARGS1(int,cur)
 
     if (TRACE)
 	fprintf(stderr, "remove_bookmark_link: files: %s %s\n",
-			newfile, filename);
+			newfile, filename_buffer);
 
     fclose(fp);
     fp = NULL;
     fclose(nfp);
     nfp = NULL;
  	
-    if (rename(newfile, filename) != -1) {
+    if (rename(newfile, filename_buffer) != -1) {
 #ifdef VMS
 	char VMSfilename[256];
 	/*
 	 *  Purge lower version of file.
 	 */
-	sprintf(VMSfilename, "%s;-1", filename);
+	sprintf(VMSfilename, "%s;-1", filename_buffer);
         while (remove(VMSfilename) == 0)
 	    ;
 	/*
 	 *  Reset version number.
 	 */
-	sprintf(VMSfilename, "%s;1", filename);
-	rename(filename, VMSfilename);
+	sprintf(VMSfilename, "%s;1", filename_buffer);
+	rename(filename_buffer, VMSfilename);
 #endif /* VMS */
         return;
     } else {
@@ -417,7 +458,7 @@ PUBLIC void remove_bookmark_link ARGS1(int,cur)
 	 */
 	if (errno == EXDEV) {
 	    char buffer[2048];
-	    sprintf(buffer, "%s %s %s", MV_PATH, newfile, filename);
+	    sprintf(buffer, "%s %s %s", MV_PATH, newfile, filename_buffer);
 	    system(buffer);
 	    return;
 	}
@@ -441,4 +482,305 @@ failure:
     if (fp != NULL)
         fclose(fp);
     remove(newfile);
+}
+
+/*
+ *  Allows user to select sub-bookmarks files. - FMG & FM
+ */
+PUBLIC int select_multi_bookmarks NOARGS
+{
+    int c;
+
+    /*
+     *  If not enabled, pick the "default" (0).
+     */
+    if (LYMultiBookmarks == FALSE || LYHaveSubBookmarks() == FALSE) {
+	if (MBM_A_subbookmark[0]) /* If it exists! */
+            return(0);
+	else
+            return(-1);
+    }
+
+    /*
+     *  For ADVANCED users, we can just mess with the status line to save
+     *  the 2 redraws of the screen, if LYMBMAdvnced is TRUE.  '=' will
+     *  still show the screen and let them do it the "long" way.
+     */
+    if (LYMBMAdvanced && user_mode == ADVANCED_MODE) {
+	move(LYlines-1, 0);
+	clrtoeol();
+	start_reverse();
+	addstr("Select subbookmark, '=' for menu, or ^G to cancel: ");
+	stop_reverse();
+	refresh();
+
+get_advanced_choice:
+	c = LYgetch();
+#ifdef VMS
+	if (HadVMSInterrupt) {
+	    HadVMSInterrupt = FALSE;
+	    c = 7;
+        }
+#endif /* VMS */
+	if (LYisNonAlnumKeyname(c, LYK_PREV_DOC) ||
+	    c == 7 || c == 3) {
+	    /*
+	     *  Treat left-arrow, ^G, or ^C as cancel.
+	     */
+	    return(-2);
+	}
+	if (LYisNonAlnumKeyname(c, LYK_REFRESH)) {
+	    /*
+	     *  Refresh the screen.
+	     */
+	    clearok(curscr, TRUE);
+	    refresh();
+	    goto get_advanced_choice;
+	}
+	if (LYisNonAlnumKeyname(c, LYK_ACTIVATE)) {
+	    /*
+	     *  Assume default bookmark file on ENTER or right-arrow.
+	     */
+	    return (MBM_A_subbookmark[0] ? 0 : -1);
+	}
+	switch (c) {
+	    case '=':
+	        /*
+		 *  Get the choice via the menu.
+		 */
+		return(select_menu_multi_bookmarks());
+
+	    default:
+	        /*
+		 *  Convert to an array index, act on it if valid.
+		 *  Otherwise, get another keystroke.
+		 */
+		c = TOUPPER(c) - 'A';
+		if (c < 0 || c > MBM_V_MAXFILES) {
+		    goto get_advanced_choice;
+		}
+	}
+	/*
+	 *  See if we have a bookmark like that.
+	 */
+	return (MBM_A_subbookmark[c] ? c : -1);
+    } else {
+        /*
+	 *  Get the choice via the menu.
+	 */
+	return(select_menu_multi_bookmarks());
+    }
+}
+
+/*
+ *  Allows user to select sub-bookmarks files. - FMG & FM
+ */
+PUBLIC int select_menu_multi_bookmarks NOARGS
+{
+    FILE *fp;
+    int c, MBM_counter, MBM_tmp_count, MBM_allow;
+    int MBM_screens, MBM_from, MBM_to, MBM_current;
+    char string_buffer[256];
+    char *cp, *cp1;
+
+    /*
+     *  If not enabled, pick the "default" (0).
+     */
+    if (LYMultiBookmarks == FALSE)
+	return(0);
+
+    /*
+     *  Filip M. Gieszczykiewicz (filipg@paranoia.com) & FM
+     *  ---------------------------------------------------
+     *  LYMultiBookmarks - TRUE when multi_support enabled.
+     *
+     *  MBM_A_subbookmark[n] - Hold values of the respective
+     *  "multi_bookmarkn" in the lynxrc file.
+     *
+     *  MBM_A_subdescript[n] - Hold description entries in the
+     *  lynxrc file.
+     *
+     *  Note: MBM_A_subbookmark[0] is defined to be same value as
+     *        "bookmark_file" in the lynxrc file and/or the startup
+     *        "bookmark_page".
+     *
+     *  We make the display of bookmarks depend on rows we have
+     *  available.
+     *
+     *  We load BookmarkPage with the valid MBM_A_subbookmark[n]
+     *  via get_bookmark_filename().  Otherwise, that function
+     *  returns a zero-length string to indicate a cancel, a
+     *  single space to indicate an invalid choice, or NULL to
+     *  indicate an inaccessible file.
+     */
+    MBM_allow=(LYlines-7);	/* We need 7 for header and footer */
+    /*
+     *  Screen big enough?
+     */
+    if (MBM_allow <= 0) {
+        /*
+	 *  Too small.
+	 */
+	_statusline(MULTIBOOKMARKS_SMALL);
+	sleep(AlertSecs);
+	return (-2);
+    }
+    /*
+     *  Load the bad choice message.
+     */
+    sprintf(string_buffer,
+    	    BOOKMARK_FILE_NOT_DEFINED,
+	    key_for_func(LYK_OPTIONS));
+
+    MBM_screens = (MBM_V_MAXFILES/MBM_allow)+1; /* int rounds off low. */
+
+    MBM_current = 1; /* Gotta start somewhere :-) */
+
+draw_bookmark_choices:
+    MBM_from = MBM_allow * MBM_current - MBM_allow;
+    if (MBM_from < 0)
+	MBM_from = 0; /* 0 is default bookmark... */
+    if (MBM_current != 1)
+	MBM_from++;
+
+    MBM_to = (MBM_allow * MBM_current);
+    if (MBM_to > MBM_V_MAXFILES)
+	MBM_to = MBM_V_MAXFILES;
+
+    /*
+     * Display menu of bookmarks.
+     */
+    clear();
+    move(1, 5);
+    if (bold_H1 || bold_headers)
+	start_bold();
+    if (MBM_screens > 1)
+	printw(" Select Bookmark (screen %d of %d)", MBM_current, MBM_screens);
+    else
+	printw("       Select Bookmark");
+    if (bold_H1 || bold_headers)
+	stop_bold();
+
+    MBM_tmp_count = 0;
+    for (c = MBM_from; c <= MBM_to; c++) {
+	move(3+MBM_tmp_count, 5);
+	printw("%c : %s",(c+'A'),
+	       (!MBM_A_subdescript[c] ? "" : MBM_A_subdescript[c]));
+
+	move(3+MBM_tmp_count,36);
+	printw("(%s)",
+	       (!MBM_A_subbookmark[c] ? "" : MBM_A_subbookmark[c]));
+
+	MBM_tmp_count++;
+    }
+
+    /*
+     *  Don't need to show it if it all fits on one screen!
+     */
+    if (MBM_screens > 1) {
+	move(LYlines-2, 0);
+	addstr(MULTIBOOKMARKS_MOVE);
+    }
+
+    move(LYlines-1, 0);
+    clrtoeol();
+    start_reverse();
+    addstr(MULTIBOOKMARKS_SAVE);
+    stop_reverse();
+    refresh();
+
+get_bookmark_choice:
+    c = LYgetch();
+#ifdef VMS
+    if (HadVMSInterrupt) {
+	HadVMSInterrupt = FALSE;
+	c = 7;
+    }
+#endif /* VMS */
+
+    if (LYisNonAlnumKeyname(c, LYK_PREV_DOC) ||
+	c == 7 || c == 3) {
+	/*
+	 *  Treat left-arrow, ^G, or ^C as cancel.
+	 */
+	return(-2);
+    }
+
+    if (LYisNonAlnumKeyname(c, LYK_REFRESH)) {
+	/*
+	 *  Refresh the screen.
+	 */
+	clearok(curscr, TRUE);
+	refresh();
+	goto get_bookmark_choice;
+    }
+
+    if (LYisNonAlnumKeyname(c, LYK_ACTIVATE)) {
+	/*
+	 *  Assume default bookmark file on ENTER or right-arrow.
+	 */
+	return(MBM_A_subbookmark[0] ? 0 : -1);
+    }
+
+    /*
+     *  Next range, if available.
+     */
+    if ((c == ']' ||  LYisNonAlnumKeyname(c, LYK_NEXT_PAGE)) &&
+        MBM_screens > 1) {
+	if (++MBM_current > MBM_screens)
+	    MBM_current = 1;
+	goto draw_bookmark_choices;
+    }
+
+    /*
+     *  Previous range, if available.
+     */
+    if ((c == '[' ||  LYisNonAlnumKeyname(c, LYK_PREV_PAGE)) &&
+        MBM_screens > 1) {
+	if (--MBM_current <= 0)
+	    MBM_current = MBM_screens;
+	goto draw_bookmark_choices;
+    }
+
+    c = TOUPPER(c) - 'A';
+    /*
+     *  See if we have a bookmark like that.
+     */
+    if (c < 0 || c > MBM_V_MAXFILES) {
+	goto get_bookmark_choice;
+    } else if (!MBM_A_subbookmark[c]) {
+	move(LYlines-1, 0);
+	clrtoeol();
+	start_reverse();
+ 	addstr(string_buffer);
+	stop_reverse();
+	refresh();
+	sleep(AlertSecs);
+	move(LYlines-1, 0);
+	clrtoeol();
+	start_reverse();
+	addstr(MULTIBOOKMARKS_SAVE);
+	stop_reverse();
+	refresh();
+	goto get_bookmark_choice;
+    } else {
+	return(c);
+    }
+}
+
+/*
+ *  This function returns TRUE if we have sub-bookmarks defined.
+ *  Otherwise (i.e., only the default bookmark file is defined),
+ *  it returns FALSE. - FM
+ */
+PUBLIC BOOLEAN LYHaveSubBookmarks NOARGS
+{
+    int i;
+
+    for (i = 1; i < MBM_V_MAXFILES; i++) {
+        if (MBM_A_subbookmark[i] != NULL && *MBM_A_subbookmark[i] != '\0')
+	    return(TRUE);
+    }
+
+    return(FALSE);
 }

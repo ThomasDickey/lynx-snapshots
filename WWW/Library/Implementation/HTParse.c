@@ -585,6 +585,10 @@ PUBLIC char * HTUnEscape ARGS1(
 {
     char * p = str;
     char * q = str;
+
+    if (!(p && *p))
+        return str;
+
     while (*p) {
         if (*p == HEX_ESCAPE) {
 	    p++;
@@ -603,4 +607,43 @@ PUBLIC char * HTUnEscape ARGS1(
     
 } /* HTUnEscape */
 
+/*		Decode some %xx escaped characters	      HTUnEscapeSome()
+**		----------------------------------	      Klaus Weide
+**							    (kweide@tezcat.com)
+**	This function takes a pointer to a string in which some
+**	characters may have been encoded in %xy form, where xy is
+**	the acsii hex code for character 16x+y, and a pointer to
+**	a second string containing one or more characters which
+**	should be unescaped if escaped in the first string.
+**	The first string is converted in place, as it will never grow.
+*/
+PUBLIC char * HTUnEscapeSome ARGS2(
+	char *,		str,
+        CONST char *,	do_trans)
+{
+    char * p = str;
+    char * q = str;
+    char testcode;
+
+    if (!(p && *p) || !(do_trans && *do_trans))
+        return str;
+
+    while (*p) {
+        if (*p == HEX_ESCAPE &&
+	    p[1] && p[2] &&	/* tests shouldn't be needed, but.. */
+	    isxdigit((unsigned char)p[1]) &&
+	    isxdigit((unsigned char)p[2]) &&
+	    (testcode = from_hex(p[1])*16 + from_hex(p[2])) && /* %00 no good*/
+	    strchr(do_trans, testcode)) { /* it's one of the ones we want */
+	    *q++ = FROMASCII(testcode); 
+	    p += 3;
+	} else {
+	    *q++ = *p++; 
+	}
+    }
+    
+    *q++ = '\0';
+    return str;
+    
+} /* HTUnEscapeSome */
 

@@ -40,6 +40,9 @@ extern BOOLEAN local_modify PARAMS((document *doc, char **newpath));
 extern BOOLEAN local_remove PARAMS((document *doc));
 extern BOOLEAN local_install PARAMS((char *destpath, char *srcpath, char **newpath));
 
+/* MainLoop needs to know about this one for atexit cleanup */
+extern void clear_tags NOPARAMS;
+
 /* Define the PRIVATE routines in case they ever go PUBLIC
 
 extern BOOLEAN modify_name PARAMS((char *testpath));
@@ -49,10 +52,10 @@ extern BOOLEAN create_directory PARAMS((char *testpath));
 extern BOOLEAN modify_tagged PARAMS((char *testpath));
 extern BOOLEAN remove_tagged NOPARAMS;
 extern BOOLEAN remove_single PARAMS ((char *testpath));
-*/
 extern BOOLEAN is_a_file PARAMS((char *testname));
+*/
 extern void tagflag PARAMS((int flag, int cur)); 
-extern void showtags PARAMS((taglink *tag));
+extern void showtags PARAMS((HTList *tag));
 extern char * strip_trailing_slash PARAMS((char * dirname));
 extern int local_dired PARAMS((document *doc));
 extern int dired_options PARAMS ((document *doc, char ** newfile));

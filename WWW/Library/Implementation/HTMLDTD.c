@@ -249,9 +249,9 @@ static attr body_attr[] = {			/* BODY attributes */
 	{ "ID" },
 	{ "LANG" },
 	{ "LINK" },
-	{ "STYLE" },
 	{ "ONLOAD" },
 	{ "ONUNLOAD" },
+	{ "STYLE" },
 	{ "TEXT" },
 	{ "VLINK" },
 	{ 0 } /* Terminate list */
@@ -600,8 +600,8 @@ static attr list_attr[] = {			/* LI attributes */
 	{ "ID" },
 	{ "LANG" },
 	{ "MD" },
-	{ "SRC" },
 	{ "SKIP" },
+	{ "SRC" },
 	{ "STYLE" },
 	{ "TYPE" },
 	{ "VALUE" },
@@ -747,10 +747,10 @@ static attr param_attr[] = {			/* PARAM attribures */
 	{ "ACCEPT-ENCODING" },
 	{ "CLASS" },
 	{ "CLEAR" },
+	{ "DATA" },
 	{ "DIR" },
 	{ "ID" },
 	{ "LANG" },
-	{ "DATA" },
 	{ "NAME" },
 	{ "OBJECT" },
 	{ "REF" },
@@ -774,8 +774,8 @@ static attr script_attr[] = {			/* SCRIPT attribures */
 	{ "NAME" },
 	{ "SCRIPTENGINE" },
 	{ "SRC" },
-	{ "TYPE" },
 	{ "STYLE" },
+	{ "TYPE" },
 	{ 0 }	/* Terminate list */
 };
 

@@ -1,10 +1,15 @@
 #include "HTUtils.h"
 #include "tcp.h"
-#include "HTInit.h"
+#include "HTParse.h"
+#include "HTAccess.h"
+#include "HTList.h"
 #include "HTFile.h"
+#ifdef VMS
+#include "HTVMSUtils.h"
+#endif /* VMS */
+#include "HTInit.h"
 #include "LYCurses.h"
 #include "HTML.h"
-#include "HTAccess.h"
 #include "LYUtils.h"
 #include "LYGlobalDefs.h"
 #include "LYSignal.h"
@@ -16,12 +21,9 @@
 #include "LYReadCFG.h"
 #include "LYrcFile.h"
 #include "LYKeymap.h"
-#include "HTParse.h"
-#ifdef VMS
-#include "HTVMSUtils.h"
-#endif /* VMS */
 #include "LYList.h"
 #include "LYJump.h"
+#include "LYBookmark.h"
 
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
@@ -83,7 +85,7 @@ PUBLIC char *syslog_txt = NULL;		/* syslog arb text for session */
 PUBLIC BOOLEAN lynx_edit_mode = FALSE;
 PUBLIC BOOLEAN no_dired_support = FALSE;
 PUBLIC BOOLEAN dir_list_style = MIXED_STYLE;
-PUBLIC taglink *tagged = NULL;
+PUBLIC HTList *tagged = NULL;
 #ifdef OK_OVERRIDE
 PUBLIC BOOLEAN prev_lynx_edit_mode = FALSE;
 #endif /* OK_OVERRIDE */
@@ -177,6 +179,8 @@ PUBLIC BOOLEAN no_suspend = FALSE;
 PUBLIC BOOLEAN no_editor = FALSE;
 PUBLIC BOOLEAN no_shell = FALSE;
 PUBLIC BOOLEAN no_bookmark = FALSE;
+PUBLIC BOOLEAN no_multibook = FALSE;
+PUBLIC BOOLEAN no_bookmark_exec = FALSE;
 PUBLIC BOOLEAN no_option_save = FALSE;
 PUBLIC BOOLEAN no_print = FALSE;
 PUBLIC BOOLEAN no_download = FALSE;
@@ -184,7 +188,6 @@ PUBLIC BOOLEAN no_disk_save = FALSE;
 PUBLIC BOOLEAN no_exec = FALSE;
 PUBLIC BOOLEAN no_lynxcgi = FALSE;
 PUBLIC BOOLEAN exec_frozen = FALSE;
-PUBLIC BOOLEAN no_bookmark_exec = FALSE;
 PUBLIC BOOLEAN no_goto = FALSE;
 PUBLIC BOOLEAN no_goto_cso = FALSE;
 PUBLIC BOOLEAN no_goto_file = FALSE;
@@ -220,7 +223,8 @@ PUBLIC char *homepage = NULL;	/* home page or main screen */
 PUBLIC char *editor = NULL;	/* the name of the current editor */
 PUBLIC char *jumpfile = NULL;	/* the name of the default jumps file */
 PUBLIC char *jumpprompt = NULL;	/* the default jumps prompt */
-PUBLIC char *bookmark_page = NULL; /* the name of the current bookmark page */
+PUBLIC char *bookmark_page = NULL; /* the name of the default bookmark page */
+PUBLIC char *BookmarkPage = NULL;  /* the name of the current bookmark page */
 PUBLIC char *startfile = NULL;	/* the first file */
 PUBLIC char *helpfile = NULL; 	/* the main help file */
 PUBLIC char *helpfilepath = NULL;   /* the path to the help file set */
@@ -276,9 +280,9 @@ PUBLIC int more = FALSE;	/* is there more text to display? */
 PUBLIC int InfoSecs;	/* Seconds to sleep() for Information messages */
 PUBLIC int MessageSecs;	/* Seconds to sleep() for important Messages   */
 PUBLIC int AlertSecs;	/* Seconds to sleep() for HTAlert() messages   */
-PUBLIC BOOLEAN bookmark_start=FALSE;
-PUBLIC char *LYUserAgent=NULL;		/* Lynx User-Agent header          */
-PUBLIC char *LYUserAgentDefault=NULL;	/* Lynx default User-Agent header  */
+PUBLIC BOOLEAN bookmark_start = FALSE;
+PUBLIC char *LYUserAgent = NULL;	/* Lynx User-Agent header          */
+PUBLIC char *LYUserAgentDefault = NULL;	/* Lynx default User-Agent header  */
 PUBLIC BOOLEAN LYNoRefererHeader=FALSE;	/* Never send Referer header?      */
 PUBLIC BOOLEAN LYNoRefererForThis=FALSE;/* No Referer header for this URL? */
 PUBLIC BOOLEAN LYNoFromHeader=FALSE;	/* Never send From header?         */
@@ -288,6 +292,11 @@ PUBLIC BOOLEAN LYisConfiguredForX = FALSE;
 PUBLIC char *URLDomainPrefixes = NULL;
 PUBLIC char *URLDomainSuffixes = NULL;
 PUBLIC BOOLEAN startfile_ok = FALSE;
+PUBLIC BOOLEAN LYSelectPopups = USE_SELECT_POPUPS;
+PUBLIC BOOLEAN LYUseDefSelPop = TRUE;	/* Command line -popup toggle */
+PUBLIC int LYMultiBookmarks = MULTI_BOOKMARK_SUPPORT;
+PUBLIC BOOLEAN LYMBMBlocked = BLOCK_MULTI_BOOKMARKS;
+PUBLIC BOOLEAN LYMBMAdvanced = ADVANCED_MULTI_BOOKMARKS;
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
 #ifdef DECLARE_WAIS_LOGFILES
@@ -367,6 +376,11 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(helpfilepath);
     FREE(aboutfilepath);
     FREE(bookmark_page);
+    FREE(BookmarkPage);
+    for (i = 0; i <= MBM_V_MAXFILES; i++) {
+        FREE(MBM_A_subbookmark[i]);
+        FREE(MBM_A_subdescript[i]);
+    }
     FREE(editor);
     FREE(authentication_info[0]);
     FREE(authentication_info[1]);
@@ -431,14 +445,23 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
      *  Initialize our startup and global variables.
      */
 #ifdef ULTRIX
-    /* Need this for ultrix. */
+    /*
+     *  Need this for ultrix.
+     */
     terminal = getenv("TERM");
     if ((terminal == NULL) || !strncasecomp(terminal, "xterm", 5))
         terminal = "vt100";
 #endif /* ULTRIX */
-    /* Zero the links and history struct array. */
+    /*
+     *  Zero the links and history struct arrays.
+     */
     memset((void *)links, 0, sizeof(linkstruct)*MAXLINKS);
     memset((void *)history, 0, sizeof(histstruct)*MAXHIST);
+    /*
+     *  Zero the MultiBookmark arrays.
+     */
+    memset((void *)MBM_A_subbookmark, 0, sizeof(char)*(MBM_V_MAXFILES+1));
+    memset((void *)MBM_A_subdescript, 0, sizeof(char)*(MBM_V_MAXFILES+1));
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
     openlog("lynx", LOG_PID, LOG_LOCAL5);
@@ -840,9 +863,35 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
     if (keypad_mode == NUMBERS_AS_ARROWS)
         set_numbers_as_arrows();
 
-    /* disable news posting if no posting command */
+    /*
+     *  Check the -popup command line toggle. - FM
+     */
+    if (LYUseDefSelPop == FALSE) {
+        if (LYSelectPopups == TRUE)
+	    LYSelectPopups = FALSE;
+	else
+	    LYSelectPopups = TRUE;
+    }
+
+    /*
+     *  Disable news posting if no posting command.
+     */
     if (*inews_path == '\0' || !strcasecomp(inews_path,"none"))
         no_newspost = TRUE;
+
+    /*
+     *  Disable multiple bookmark support if not interactive,
+     *  so it doesn't crash on curses functions, or if the
+     *  support was blocked via userdefs.h and/or lynx.cfg,
+     *  or via command line restrictions. - FM
+     */
+    if (no_multibook)
+        LYMBMBlocked = TRUE;
+    if (dump_output_immediately || LYMBMBlocked || no_multibook) {
+        LYMultiBookmarks = FALSE;
+	LYMBMBlocked = TRUE;
+	no_multibook == TRUE;
+    }
 
 #ifdef VMS
     set_vms_keys();
@@ -1015,6 +1064,9 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
     if (!homepage)
 	StrAllocCopy(homepage, startfile);
 
+    /*
+     *  Set up the inside/outside domain restriction flags. - FM
+     */
     if (inlocaldomain()) {
 #if defined(NO_UTMP) || defined(VMS) /* not selective */
         telnet_ok = !no_inside_telnet && !no_outside_telnet && telnet_ok;
@@ -1039,12 +1091,15 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
     }
 
 #ifdef SIGTSTP
+    /*
+     *  Block Control-Z suspending if requested. - FM
+     */
     if (no_suspend)
 	(void) signal(SIGTSTP,SIG_IGN);
 #endif /* SIGTSTP */
 
     /*
-     *  Here's where we do all the work.
+     *  Check for a valid HEAD request. - FM
      */
     if (HEAD_request && strncmp(startfile, "http", 4)) {
         fprintf(stderr,
@@ -1061,6 +1116,10 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
 #endif /* SIGTSTP */
 	exit(-1);
     }
+
+    /*
+     *  Check for a valid MIME headers request. - FM
+     */
     if (keep_mime_headers && strncmp(startfile, "http", 4)) {
         fprintf(stderr,
  "The '-mime_header' switch is for http URLs and cannot be used for\n'%s'.\n",
@@ -1076,6 +1135,10 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
 #endif /* SIGTSTP */
 	exit(-1);
     }
+
+    /*
+     *  Check for a valid traversal request. - FM
+     */
     if (traversal && strncmp(startfile, "http", 4)) {
         fprintf(stderr,
  "The '-traversal' switch is for http URLs and cannot be used for\n'%s'.\n",
@@ -1091,6 +1154,10 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
 #endif /* SIGTSTP */
 	exit(-1);
     }
+
+    /*
+     *  Set up our help and about file base paths. - FM
+     */
     StrAllocCopy(helpfilepath, helpfile);
     if ((cp=strrchr(helpfilepath, '/')) != NULL)
         *cp = '\0';
@@ -1100,9 +1167,32 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
 	StrAllocCat(aboutfilepath, "/about_lynx/");
     }
     StrAllocCat(helpfilepath, "/");
-    if (!bookmark_page || *bookmark_page == '\0')
+
+
+    /*
+     *  Make sure our bookmark default strings
+     *  are all allocated and synchronized. - FM
+     */
+    if (!bookmark_page || *bookmark_page == '\0') {
         StrAllocCopy(bookmark_page, "lynx_bookmarks.html");
+        StrAllocCopy(BookmarkPage, bookmark_page);
+        StrAllocCopy(MBM_A_subbookmark[0], bookmark_page);
+        StrAllocCopy(MBM_A_subdescript[0], "Default");
+    }
+    if (!BookmarkPage || *BookmarkPage == '\0') {
+        StrAllocCopy(BookmarkPage, bookmark_page);
+        StrAllocCopy(MBM_A_subbookmark[0], bookmark_page);
+        StrAllocCopy(MBM_A_subdescript[0], MULTIBOOKMARKS_DEFAULT);
+    }
+
+    /*
+     *  Here's where we do all the work.
+     */
     if (dump_output_immediately) {
+        /*
+	 *  Finish setting up and start a
+	 *  NON-INTERACTIVE session. - FM
+	 */
         if (crawl && !number_links) {
 	    keypad_mode = NUMBERS_AS_ARROWS;
 	} else if (!nolist) {
@@ -1124,6 +1214,10 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
 	  (void) signal(SIGTSTP,SIG_DFL);
 #endif /* SIGTSTP */
     } else {
+        /*
+	 *  Finish setting up and start an
+	 *  INTERACTIVE session. - FM
+	 */
  	if (setup(terminal)) {
 	    if (display != NULL && *display != '\0') {
 	        LYisConfiguredForX = TRUE;
@@ -1253,6 +1347,7 @@ PRIVATE void parse_arg ARGS3(char **, argv, int *, i, int, argc)
 	        printf("\
    jump            disable the 'j' (jump) command\n\
    mail            disallow mail\n\
+   multibook       disallow multiple bookmark files\n\
    news_post       disallow USENET News posting setting in the O)ptions menu\n\
    option_save     disallow saving options in .lynxrc\n");
 #if defined(NO_UTMP) || defined(VMS) /* not selective */
@@ -1345,8 +1440,8 @@ PRIVATE void parse_arg ARGS3(char **, argv, int *, i, int, argc)
 	emacs_keys = TRUE;
 	
     } else if (strncmp(argv[0], "-version", 8) == 0) {
-	printf("\n%s Version %s\n(c)GNU General Public License\n\
-<URL:http://www.nyu.edu/pages/wsn/subir/lynx.html>\n\n",
+	printf("\n%s Version %s\n(c)1996 GNU General Public License\n\
+<URL:http://lynx.browser.org/>\n\n",
 		LYNX_NAME, LYNX_VERSION);
 	exit(0);
 	
@@ -1369,6 +1464,9 @@ PRIVATE void parse_arg ARGS3(char **, argv, int *, i, int, argc)
     } else if (strncmp(argv[0], "-noreferer", 10) == 0) {
 	LYNoRefererHeader = TRUE;
 	
+    } else if (strncmp(argv[0], "-popup", 6) == 0) {
+	LYUseDefSelPop = FALSE;
+
     } else if (strncmp(argv[0], "-crawl", 6) == 0) {
 	crawl = TRUE;
 	LYcols=80;
@@ -1583,6 +1681,7 @@ PRIVATE void parse_arg ARGS3(char **, argv, int *, i, int, argc)
         /* Include mime headers and force source dump */
 	keep_mime_headers = TRUE;
 	dump_output_immediately = TRUE;
+	HTOutputFormat = HTAtom_for("www/dump");
 	LYcols=999;
 
     } else if (strncmp(argv[0], "-error_file", 11) == 0) { /* Output return
@@ -1726,6 +1825,8 @@ PRIVATE void parse_arg ARGS3(char **, argv, int *, i, int, argc)
 #endif /* SOCKS */
 	printf("    -nostatus        disable the miscellaneous information messages\n");
 	printf("    -number_links    force numbering of links\n");
+	printf("    -popup           toggles handling of single-choice SELECT options via\n");
+        printf("                     popup windows or as lists of radio buttons\n");
  	printf("    -post_data       user data for post forms, read from stdin,\n");
         printf("                     terminated by '---' on a line\n");
 	printf("    -print           enable print functions (DEFAULT)\n");

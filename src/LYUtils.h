@@ -47,7 +47,10 @@ extern BOOLEAN LYExpandHostForURL PARAMS((
 extern BOOLEAN LYAddSchemeForURL PARAMS((
 	char **AllocatedString, char *default_scheme));
 #ifdef VMS
-extern void Define_VMSLogical PARAMS((char *LogicalName, char *LogicalValue));
+extern void Define_VMSLogical PARAMS((
+	char *LogicalName, char *LogicalValue));
+extern void LYVMS_HomePathAndFilename PARAMS((
+	char *fbuffer, int fbuffer_size, char * fname));
 #endif /* VMS */
 
 /*	Whether or not the status line must be shown.

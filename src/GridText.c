@@ -68,10 +68,10 @@ PUBLIC char * HTAppVersion = LYNX_VERSION;        /* Application version */
 
 PUBLIC int HTFormNumber = 0;
 PUBLIC int HTFormFields = 0;
-PUBLIC char * HTCurSelectGroup = NULL;		/* form select group name */
-PUBLIC int HTCurSelectGroupType = F_RADIO_TYPE;	/* group type */
-PUBLIC char * HTCurSelectGroupSize = NULL;	/* length of select */
-PRIVATE char * HTCurSelectedOptionValue = NULL;	/* select choice */
+PUBLIC char * HTCurSelectGroup = NULL;		/* Form select group name */
+PUBLIC int HTCurSelectGroupType = F_RADIO_TYPE;	/* Group type */
+PUBLIC char * HTCurSelectGroupSize = NULL;	/* Length of select */
+PRIVATE char * HTCurSelectedOptionValue = NULL;	/* Select choice */
 
 PUBLIC char * checked_box = "[X]";
 PUBLIC char * unchecked_box = "[ ]";
@@ -157,7 +157,8 @@ struct _HText {
 /*
  *  Boring static variable used for moving cursor across
  */
-#define UNDERSCORES(n) (&underscore_string[(MAX_LINE-1) - (n)])
+#define UNDERSCORES(n) \
+ ((n) >= MAX_LINE ? underscore_string : &underscore_string[(MAX_LINE-1)] - (n))
 
 /*
  *	Memory leak fixed.
@@ -192,7 +193,7 @@ PUBLIC HText *	HText_new ARGS1(HTParentAnchor *,anchor)
     int status, VMType=3, VMTotal;
 #endif /* VMS && VAXC && !__DECC */
     HTLine * line = NULL;
-    HText * self = (HText *) calloc(sizeof(*self),1);
+    HText * self = (HText *) calloc(1, sizeof(*self));
     if (!self) return self;
     
 #if defined(VMS) && defined (VAXC) && !defined(__DECC)
@@ -239,7 +240,7 @@ PUBLIC HText *	HText_new ARGS1(HTParentAnchor *,anchor)
 #endif /* VMS && VAXC && !__DECC */
     }
     
-    line = self->last_line = (HTLine *)calloc(sizeof(char),LINE_SIZE(MAX_LINE));
+    line = self->last_line = (HTLine *)calloc(1, LINE_SIZE(MAX_LINE));
     if (line == NULL)
         outofmem(__FILE__, "HText_New");
     line->next = line->prev = line;
@@ -281,14 +282,20 @@ PUBLIC HText *	HText_new ARGS1(HTParentAnchor *,anchor)
      *	Check to see if our underline and star_string need initialization
      *		if the underline is not filled with dots.
      */ 
-    if (underscore_string[0] != '.') { /* Make a line */
+    if (underscore_string[0] != '.') {
         char *p;
-        for (p=underscore_string; p<underscore_string+(MAX_LINE-1); p++)
-            *p = '.';           /* Used for printfs later */
+	/*
+	 * Create and array of dots for the UNDERSCORES macro. - FM
+	 */
+	memset(underscore_string, '.', (MAX_LINE-1));
         underscore_string[(MAX_LINE-1)] = '\0';
-        for (p=star_string; p<star_string+(LINESIZE-1); p++)
-            *p = '_';           /* Used for printfs later */
-        star_string[(LINESIZE-1)] = '\0';
+        underscore_string[MAX_LINE] = '\0';
+	/*
+	 * Create and array of underscores for the STARS macro. - FM
+	 */
+	memset(star_string, '_', (MAX_LINE-1));
+        star_string[(MAX_LINE-1)] = '\0';
+        star_string[MAX_LINE] = '\0';
     }
 
     underline_on = FALSE; /* reset */
@@ -594,7 +601,8 @@ PRIVATE void display_title ARGS1(HText *,text)
     if (cp == NULL)
         outofmem(__FILE__, "display_title");
     if (HTCJK != NOCJK) {
-        if (*title && (tmp = (unsigned char *)calloc(1, strlen(title) + 1))) {
+        if (*title &&
+	    (tmp = (unsigned char *)calloc(1, (strlen(title) + 1)))) {
 	    if (kanji_code == EUC) {
 	        TO_EUC((unsigned char *)title, tmp);
 	    } else if (kanji_code == SJIS) {
@@ -878,7 +886,7 @@ PRIVATE void display_page ARGS3(HText *,text, int,line_number, char *, target)
 	    }
 	} 
 
-	if (Anchor_ptr == text->last_anchor)
+	if (Anchor_ptr == text->last_anchor || nlinks == MAXLINKS)
 	    break;
     }
 
@@ -953,7 +961,7 @@ PRIVATE void split_line ARGS2(HText *,text, int,split)
     HTLine * previous = text->last_line;
     int ctrl_chars_on_previous_line = 0;
     char * cp;
-    HTLine * line = (HTLine *)calloc(sizeof(char), LINE_SIZE(MAX_LINE));
+    HTLine * line = (HTLine *)calloc(1, LINE_SIZE(MAX_LINE));
 
     ctrl_chars_on_this_line = 0; /*reset since we are going to a new line*/
     HTML_Last_Char = ' ';
@@ -1126,7 +1134,7 @@ PRIVATE void split_line ARGS2(HText *,text, int,split)
      *  problem with Ultrix (4.2) : realloc() is not declared properly.
      *  So we'll use a substitute for realloc.
      */
-    temp = (HTLine *)calloc(sizeof(char), LINE_SIZE(previous->size));
+    temp = (HTLine *)calloc(1, LINE_SIZE(previous->size));
     if (temp == NULL)
         outofmem(__FILE__, "split_line");
     memcpy(temp, previous, LINE_SIZE(previous->size));
@@ -1639,7 +1647,7 @@ PUBLIC void HText_beginAnchor ARGS2(HText *,text, HTChildAnchor *,anc)
 {
     char marker[16];
 
-    TextAnchor * a = (TextAnchor *) calloc(sizeof(*a),1);
+    TextAnchor * a = (TextAnchor *) calloc(1, sizeof(*a));
     
     if (a == NULL)
         outofmem(__FILE__, "HText_beginAnchor");
@@ -1938,7 +1946,8 @@ PUBLIC HTChildAnchor * HText_childNumber ARGS1(int,number)
     return (HTChildAnchor *)0;	/* Fail */
 }
 
-/* HTGetLinkInfo returns some link info based on the number
+/*
+ *  HTGetLinkInfo returns some link info based on the number.
  */
 PUBLIC int HTGetLinkInfo ARGS3(int, number, char **, hightext, char **, lname)
 {
@@ -1969,16 +1978,18 @@ PUBLIC int HTGetLinkInfo ARGS3(int, number, char **, hightext, char **, lname)
     return(NO);
 }
 
-/* HText_getNumOfLines returns the number of lines in the
- * current document
+/*
+ *  HText_getNumOfLines returns the number of lines in the
+ *  current document.
  */
 PUBLIC int HText_getNumOfLines NOARGS
 {
      return(HTMainText->lines);
 }
 
-/* HText_getTitle returns the title of the
- * current document
+/*
+ *  HText_getTitle returns the title of the
+ *  current document.
  */
 PUBLIC char * HText_getTitle NOARGS
 {
@@ -1986,12 +1997,47 @@ PUBLIC char * HText_getTitle NOARGS
 }
 
 /*
- * HText_pageDisplay displays a screen of text
- * starting from the line 'line_num'-1
- * this is the primary call for lynx
+ *  HText_getSugFname returns the suggested filename of the current
+ *  document (normally derived from a Content-Disposition header with
+ *  file; filename=name.suffix). - FM
  */
-extern char is_www_index;
+PUBLIC char * HText_getSugFname NOARGS
+{
+   return((char *) HTAnchor_SugFname(HTMainText->node_anchor));
+}
 
+/*
+ *  HText_getLastModified returns the Last-Modified header
+ *  if available, for the current document. - FM
+ */
+PUBLIC char * HText_getLastModified NOARGS
+{
+   return((char *) HTAnchor_last_modified(HTMainText->node_anchor));
+}
+
+/*
+ *  HText_getDate returns the Date header
+ *  if available, for the current document. - FM
+ */
+PUBLIC char * HText_getDate NOARGS
+{
+   return((char *) HTAnchor_date(HTMainText->node_anchor));
+}
+
+/*
+ *  HText_getServer returns the Server header
+ *  if available, for the current document. - FM
+ */
+PUBLIC char * HText_getServer NOARGS
+{
+   return((char *) HTAnchor_server(HTMainText->node_anchor));
+}
+
+/*
+ *  HText_pageDisplay displays a screen of text
+ *  starting from the line 'line_num'-1
+ *  this is the primary call for lynx
+ */
 PUBLIC void HText_pageDisplay ARGS2(int,line_num, char *, target)
 {
     display_page(HTMainText, line_num-1, target);
@@ -2000,8 +2046,8 @@ PUBLIC void HText_pageDisplay ARGS2(int,line_num, char *, target)
 } 
 
 /*
- * HText_LinksInLines returns the number of links in the
- * 'lines' number of lines beginning with 'line_num'-1. - FM
+ *  HText_LinksInLines returns the number of links in the
+ *  'lines' number of lines beginning with 'line_num'-1. - FM
  */
 PUBLIC int HText_LinksInLines ARGS3(HText *,text, int,line_num, int,lines)
 {
@@ -2034,7 +2080,8 @@ PUBLIC void HText_setStale ARGS1(HText *,text)
 
 PUBLIC void HText_refresh ARGS1(HText *,text)
 {
-    if (text->stale) display_page(text, text->top_of_screen, "");
+    if (text->stale)
+        display_page(text, text->top_of_screen, "");
 }
 
 PUBLIC int HText_sourceAnchors ARGS1(HText *,text)
@@ -2679,8 +2726,7 @@ PUBLIC void www_user_search ARGS2(int,start_line, char *,target)
 	        www_search_result=count;
 		return;
 	    } else if (count > start_line) {  /* next line */
-    		_user_message("\"%s\" could not be found in this document",
-			      target);
+    		_user_message(STRING_NOT_FOUND, target);
     		sleep(MessageSecs);
 	        return;			/* end */
 	    } else {
@@ -2721,7 +2767,18 @@ PUBLIC  void  user_message ARGS2(char *,message, char *,argument)
  */
 PUBLIC char * HText_getOwner NOARGS
 {
-   return((char *)HTAnchor_owner(HTMainText->node_anchor));
+    return((char *)HTAnchor_owner(HTMainText->node_anchor));
+}
+
+/* HText_setMainTextOwner sets the owner for the
+ * current document
+ */
+PUBLIC void HText_setMainTextOwner ARGS1(CONST char *, owner)
+{
+    if (!HTMainText)
+        return;
+
+    HTAnchor_setOwner(HTMainText->node_anchor, owner);
 }
 
 /* HText_getRevTitle returns the RevTitle element of the
@@ -2730,7 +2787,7 @@ PUBLIC char * HText_getOwner NOARGS
  */
 PUBLIC char * HText_getRevTitle NOARGS
 {
-   return((char *)HTAnchor_RevTitle(HTMainText->node_anchor));
+    return((char *)HTAnchor_RevTitle(HTMainText->node_anchor));
 }
 
 PUBLIC void HTuncache_current_document NOARGS
@@ -2743,51 +2800,83 @@ PUBLIC void HTuncache_current_document NOARGS
 
 PUBLIC int HTisDocumentSource NOARGS
 {
-   return(HTMainText->source);
+    return(HTMainText->source);
 }
 
 PUBLIC char * HTLoadedDocumentURL NOARGS
 {
-   if (!HTMainText)
+    if (!HTMainText)
 	return ("");
 
-   if (HTMainText->node_anchor && HTMainText->node_anchor->address) 
+    if (HTMainText->node_anchor && HTMainText->node_anchor->address) 
        	return(HTMainText->node_anchor->address);
-   else
+    else
 	return ("");
 }
 
 PUBLIC char * HTLoadedDocumentPost_data NOARGS
 {
-   if (!HTMainText)
+    if (!HTMainText)
 	return ("");
 
-   if (HTMainText->node_anchor && HTMainText->node_anchor->post_data) 
+    if (HTMainText->node_anchor && HTMainText->node_anchor->post_data) 
        	return(HTMainText->node_anchor->post_data);
-   else
+    else
 	return ("");
 }
 
 PUBLIC char * HTLoadedDocumentTitle NOARGS
 {
-   if (!HTMainText)
+    if (!HTMainText)
 	return ("");
 
-   if (HTMainText->node_anchor && HTMainText->node_anchor->title) 
+    if (HTMainText->node_anchor && HTMainText->node_anchor->title) 
        	return(HTMainText->node_anchor->title);
-   else
+    else
 	return ("");
 }
 
 PUBLIC BOOLEAN HTLoadedDocumentIsHEAD NOARGS
 {
-   if (!HTMainText)
+    if (!HTMainText)
 	return (FALSE);
 
-   if (HTMainText->node_anchor && HTMainText->node_anchor->isHEAD) 
+    if (HTMainText->node_anchor && HTMainText->node_anchor->isHEAD) 
        	return(HTMainText->node_anchor->isHEAD);
-   else
+    else
 	return (FALSE);
+}
+
+PUBLIC char * HTLoadedDocumentCharset NOARGS
+{
+    if (!HTMainText)
+	return (NULL);
+
+    if (HTMainText->node_anchor && HTMainText->node_anchor->charset) 
+       	return(HTMainText->node_anchor->charset);
+    else
+	return (NULL);
+}
+
+PUBLIC void HText_setNodeAnchorBookmark ARGS1(
+	CONST char *,	bookmark)
+{
+    if (!HTMainText)
+	return;
+
+    if (HTMainText->node_anchor)
+	HTAnchor_setBookmark(HTMainText->node_anchor, bookmark);
+}
+
+PUBLIC char * HTLoadedDocumentBookmark NOARGS
+{
+    if (!HTMainText)
+	return (NULL);
+
+    if (HTMainText->node_anchor && HTMainText->node_anchor->bookmark) 
+       	return(HTMainText->node_anchor->bookmark);
+    else
+	return (NULL);
 }
 
 PUBLIC int HText_LastLineSize ARGS1(HText *,text)
@@ -2921,6 +3010,7 @@ PRIVATE int HTFormMethod;
 PRIVATE char * HTFormAction = NULL;
 PRIVATE char * HTFormEnctype = NULL;
 PRIVATE char * HTFormTitle = NULL;
+PRIVATE BOOLEAN HTFormDisabled = FALSE;
 
 PUBLIC void HText_beginForm ARGS4(
 	char *,		action,
@@ -2931,7 +3021,11 @@ PUBLIC void HText_beginForm ARGS4(
     HTFormMethod = URL_GET_METHOD;
     HTFormNumber++;
     HTFormFields = 0;
+    HTFormDisabled = FALSE;
 
+    /*
+     *  Check the ACTION. - FM
+     */
     if (action != NULL) {
 	if (!strncmp(action, "mailto:", 7)) {
 	    HTFormMethod = URL_MAIL_METHOD;
@@ -2941,15 +3035,28 @@ PUBLIC void HText_beginForm ARGS4(
     else
 	StrAllocCopy(HTFormAction, HTLoadedDocumentURL());
     
-    if (method != NULL)
-	if (!strcasecomp(method,"post") && HTFormMethod != URL_MAIL_METHOD)
-	   HTFormMethod = URL_POST_METHOD;
+    /*
+     *  Check the METHOD. - FM
+     */
+    if (method != NULL && HTFormMethod != URL_MAIL_METHOD)
+	if (!strcasecomp(method,"post") || !strcasecomp(method,"pget"))
+	    HTFormMethod = URL_POST_METHOD;
 
-    if ((enctype != NULL) && *enctype)
+    /*
+     *  Check the ENCTYPE. - FM
+     */
+    if ((enctype != NULL) && *enctype) {
         StrAllocCopy(HTFormEnctype, enctype);
-    else
+	if (HTFormMethod != URL_MAIL_METHOD &&
+	    !strncasecomp(enctype, "multipart/form-data", 19)) 
+	    HTFormMethod = URL_POST_METHOD;
+    } else {
         FREE(HTFormEnctype);
+    }
 
+    /*
+     *  Check the TITLE. - FM
+     */
     if ((title != NULL) && *title)
         StrAllocCopy(HTFormTitle, title);
     else
@@ -2992,6 +3099,8 @@ PUBLIC void HText_endForm ARGS1(HText *,text)
 		    StrAllocCopy(a->input_field->submit_title, HTFormTitle);
 		a->input_field->submit_method = HTFormMethod;
 		a->input_field->type = F_TEXT_SUBMIT_TYPE;
+		if (HTFormDisabled)
+		    a->input_field->disabled = TRUE;
 		break;
 	    }
 	    if (a == text->last_anchor)
@@ -3006,6 +3115,7 @@ PUBLIC void HText_endForm ARGS1(HText *,text)
     FREE(HTFormEnctype);
     FREE(HTFormTitle);
     HTFormFields = 0;
+    HTFormDisabled = FALSE;
 }
 
 PUBLIC void HText_beginSelect ARGS3(char *,name, BOOLEAN,multiple, char *, size)
@@ -3087,7 +3197,15 @@ PUBLIC char * HText_setLastOptionValue ARGS5(HText *, text, char *, value,
 	 *  Put the text on the screen as well.
 	 */
         HText_appendText(text, cp);
- 
+
+    } else if (LYSelectPopups == FALSE) {
+        StrAllocCopy(text->last_anchor->input_field->value,
+		     (submit_value ? submit_value : cp));
+        /*
+	 *  Put the text on the screen as well.
+	 */
+        HText_appendText(text, cp);
+
     } else {
 	/*
 	 *  Create a linked list of option values.
@@ -3106,7 +3224,7 @@ PUBLIC char * HText_setLastOptionValue ARGS5(HText *, text, char *, value,
 	     *  No option items yet.
 	     */
 	    new_ptr = text->last_anchor->input_field->select_list = 
-				(OptionType *) calloc(1,sizeof(OptionType));
+				(OptionType *) calloc(1, sizeof(OptionType));
 	    if (new_ptr == NULL)
 	        outofmem(__FILE__, "HText_setLastOptionValue");
 
@@ -3119,7 +3237,7 @@ PUBLIC char * HText_setLastOptionValue ARGS5(HText *, text, char *, value,
 	    number++;  /* add one more */
 
 	    op_ptr->next = new_ptr =
-	    			(OptionType *) calloc(1,sizeof(OptionType));
+	    			(OptionType *) calloc(1, sizeof(OptionType));
 	    if (new_ptr == NULL)
 	        outofmem(__FILE__, "HText_setLastOptionValue");
 	}
@@ -3248,11 +3366,17 @@ PUBLIC int HText_beginInput ARGS2(HText *,text, InputFieldData *,I)
 
 
     /*
-     *  If this is a radio button, and it's the first with this name,
-     *  make sure it's checked by default.  Otherwise, if it's checked,
-     *  uncheck the default or any preceding radio button with this name
-     *  that was checked. - FM
+     *  If this is a radio button, or an OPTION we're converting
+     *  to a radio button, and it's the first with this name, make
+     *  sure it's checked by default.  Otherwise, if it's checked,
+     *  uncheck the default or any preceding radio button with this
+     *  name that was checked. - FM
      */
+    if (I->type != NULL && !strcmp(I->type,"OPTION") &&
+ 	HTCurSelectGroupType == F_RADIO_TYPE && LYSelectPopups == FALSE) {
+	I->type = "RADIO";
+	I->name = HTCurSelectGroup;
+    }
     if (I->name && I->type && !strcasecomp(I->type, "radio")) {
         if (!text->last_anchor) {
 	    I->checked = TRUE;
@@ -3299,7 +3423,7 @@ PUBLIC int HText_beginInput ARGS2(HText *,text, InputFieldData *,I)
 
     f->select_list = 0;
     f->number = HTFormNumber;
-    f->disabled = I->disabled;
+    f->disabled = (HTFormDisabled ? TRUE : I->disabled);
     f->no_cache = NO;
 
     HTFormFields++;
@@ -3312,22 +3436,12 @@ PUBLIC int HText_beginInput ARGS2(HText *,text, InputFieldData *,I)
         f->no_cache = TRUE;
 
     /*
-     *  Disable if the ENCTYPE is multipart/form-data
-     *  until we add code to handle it. - FM
-     */
-    if (HTFormEnctype) {
-         if (!strcmp(HTFormEnctype, "multipart/form-data")) {
-	     f->disabled = YES;
-	 }
-    }
-
-    /*
      *  Set up VALUE.
      */
     if (I->value)
         StrAllocCopy(IValue, I->value);
     if (IValue && HTCJK != NOCJK) {
-	if ((tmp = (unsigned char *)calloc(1, strlen(IValue)+1))) {
+	if ((tmp = (unsigned char *)calloc(1, (strlen(IValue) + 1)))) {
 	    if (kanji_code == EUC) {
 		TO_EUC((unsigned char *)IValue, tmp);
 	    } else if (kanji_code == SJIS) {
@@ -3346,6 +3460,7 @@ PUBLIC int HText_beginInput ARGS2(HText *,text, InputFieldData *,I)
 
     /*
      *  Special case of OPTION.
+     *  Is handled above if radio type and LYSelectPopups is FALSE.
      */
     /* set the values and let the parsing below do the work */
     if (I->type != NULL && !strcmp(I->type,"OPTION")) {
@@ -3365,7 +3480,6 @@ PUBLIC int HText_beginInput ARGS2(HText *,text, InputFieldData *,I)
 	if (HTCurSelectGroupSize != NULL) {
 	    f->size_l = atoi(HTCurSelectGroupSize);
 	    FREE(HTCurSelectGroupSize);
-	    HTCurSelectGroupSize = NULL;
 	}
     }
 
@@ -3518,10 +3632,10 @@ PUBLIC int HText_beginInput ARGS2(HText *,text, InputFieldData *,I)
 	    StrAllocCopy(f->submit_title, HTFormTitle);
 	f->submit_method = HTFormMethod;
 
-    } else if (f->type == F_RADIO_TYPE || f->type == F_CHECKBOX_TYPE ) {
+    } else if (f->type == F_RADIO_TYPE || f->type == F_CHECKBOX_TYPE) {
 	f->size=3;
 	if (IValue == NULL)
-	   StrAllocCopy(f->value, "on");
+	   StrAllocCopy(f->value, (f->type == F_CHECKBOX_TYPE ? "on" : ""));
 
     }
     FREE(IValue); 
@@ -3578,14 +3692,55 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
     char *previous_blanks = NULL;
     BOOLEAN PlainText = FALSE;
     BOOLEAN SemiColon = FALSE;
+    char *Boundary = NULL;
+    char *MultipartContentType = NULL;
 
     if (submit_item->submit_action) {
+        /*
+	 *  If we're mailing, make sure it's a mailto ACTION. - FM
+	 */
+        if ((submit_item->submit_method == URL_MAIL_METHOD) &&
+	    strncmp(submit_item->submit_action, "mailto:", 7)) {
+	    HTAlert(BAD_FORM_MAILTO);
+	    return;
+	}
+
         /*
 	 *  Set length plus breathing room.
 	 */
         len = strlen(submit_item->submit_action) + 2048;
     } else {
 	return;
+    }
+
+    /*
+     *  Check the ENCTYPE and set up the appropriate variables. - FM
+     */
+    if (submit_item->submit_enctype &&
+	!strncasecomp(submit_item->submit_enctype, "text/plain", 10)) {
+	/*
+	 *  Do not hex escape, and use physical newlines
+	 *  to separate name=value pairs. - FM
+	 */
+	PlainText = TRUE;
+    } else if (submit_item->submit_enctype &&
+	       !strncasecomp(submit_item->submit_enctype,
+			     "application/sgml-form-urlencoded", 32)) {
+	/*
+	 *  Use semicolons instead of ampersands as the
+	 *  separators for name=value pairs. - FM
+	 */
+	SemiColon = TRUE;
+    } else if (submit_item->submit_enctype &&
+	       !strncasecomp(submit_item->submit_enctype,
+			     "multipart/form-data", 19)) {
+	/*
+	 *  Use the multipart MIME format.  We should generate
+	 *  a boundary string which we are sure doesn't occur
+	 *  in the content, but for now we'll just assume that
+	 *  this string doesn't. - FM
+	 */
+	Boundary = "xnyLAaB03X";
     }
 
     /*
@@ -3597,15 +3752,14 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 
 	        form_ptr = anchor_ptr->input_field;
 	
-	        len += strlen(form_ptr->name)+10;
+	        len += (strlen(form_ptr->name) + (Boundary ? 100 : 10));
 		/*
 		 *	Calculate by the option submit value if present.
 		 */
-		if (form_ptr->cp_submit_value != NULL)	{
-			len += strlen(form_ptr->cp_submit_value) + 10;
-		}
-		else	{
-	        	len += strlen(form_ptr->value)+10;
+		if (form_ptr->cp_submit_value != NULL) {
+		    len += (strlen(form_ptr->cp_submit_value) + 10);
+		} else {
+	            len += (strlen(form_ptr->value) + 10);
 		}
 	        len += 32; /* plus and ampersand + safty net */
 
@@ -3623,28 +3777,11 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
     /*
      *  Get query ready.
      */
-    query = (char *)calloc (sizeof(char), len);
+    query = (char *)calloc(1, len);
     if (query == NULL)
         outofmem(__FILE__, "HText_SubmitForm");
 
-    if (submit_item->submit_enctype &&
-	!strncasecomp(submit_item->submit_enctype, "text/plain", 10)) {
-	/*
-	 *  Do not hex escape, and use physical newlines
-	 *  to separate name=value pairs. - FM
-	 */
-	PlainText = TRUE;
-    } else if (submit_item->submit_enctype &&
-	       !strncasecomp(submit_item->submit_enctype,
-			     "application/sgml-form-urlencoded", 32)) {
-	/*
-	 *  Use semicolons instead of ampersands as the
-	 *  separators for name=value pairs. - FM
-	 */
-	SemiColon = TRUE;
-    }
-
-    if (submit_item->submit_method == URL_GET_METHOD) {
+    if (submit_item->submit_method == URL_GET_METHOD && Boundary == NULL) {
        	strcpy (query, submit_item->submit_action);
        	/*
 	 *  Method is GET.  Clip out any anchor in the current URL.
@@ -3660,44 +3797,59 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 	strcat(query,"?");
     } else {
         query[0] = '\0';
-	if (submit_item->submit_method != URL_MAIL_METHOD) {
-	    /*
-	     *  We are submitting POST content to a server,
-	     *  so load the post_content_type element. - FM
-	     */
-	    if (SemiColon == TRUE) {
-	        StrAllocCopy(doc->post_content_type,
-			     "application/sgml-form-urlencoded");
-	    } else if (PlainText == TRUE) {
-	        StrAllocCopy(doc->post_content_type,
-			     "text/plain");
-	    } else {
-	        StrAllocCopy(doc->post_content_type,
-	        	     "application/x-www-form-urlencoded");
-	    }
+	/*
+	 *  We are submitting POST content to a server,
+	 *  so load the post_content_type element. - FM
+	 */
+	if (SemiColon == TRUE) {
+	    StrAllocCopy(doc->post_content_type,
+			 "application/sgml-form-urlencoded");
+	} else if (PlainText == TRUE) {
+	    StrAllocCopy(doc->post_content_type,
+			 "text/plain");
+	} else if (Boundary != NULL) {
+	    StrAllocCopy(doc->post_content_type,
+			 "multipart/form-data; boundary=");
+	    StrAllocCat(doc->post_content_type, Boundary);
+	} else {
+	    StrAllocCopy(doc->post_content_type,
+			 "application/x-www-form-urlencoded");
+	}
 
-	    /*
-	     *  Append the exended charset info if known, and it is
-	     *  not ISO-8859-1 or US-ASCII.  We'll assume the user
-	     *  has the matching character set selected, or a
-	     *  download offer would have been forced and we would
-	     *  not be processing the form here.  We don't yet want
-	     *  to do this unless the server indicated the charset
-	     *  in the original transmission, because otherwise it
-	     *  might be an old server and CGI script which will
-	     *  not parse out the extended charset info, and reject
-	     *  the POST Content-Type as invalid. - FM
-	     */
-	    if (HTMainText->node_anchor->charset != NULL &&
-	        *HTMainText->node_anchor->charset != '\0') {
-		if (strcasecomp(HTMainText->node_anchor->charset,
-				"iso-8859-1") &&
-		    strcasecomp(HTMainText->node_anchor->charset,
-				"us-ascii")) {
-		    StrAllocCat(doc->post_content_type, ";charset=");
-		    StrAllocCat(doc->post_content_type,
-				HTMainText->node_anchor->charset);
-		}
+	/*
+	 *  Append the exended charset info if known, and it is not
+	 *  ISO-8859-1 or US-ASCII.  We'll assume the user has the
+	 *  matching character set selected, or a download offer would
+	 *  have been forced and we would not be processing the form
+	 *  here.  We don't yet want to do this unless the server
+	 *  indicated the charset in the original transmission, because
+	 *  otherwise it might be an old server and CGI script which
+	 *  will not parse out the extended charset info, and reject
+	 *  the POST Content-Type as invalid.  If the ENCTYPE is
+	 *  multipart/form-data and the charset is known, set up a
+	 *  Content-Type string for the text fields and append the
+	 *  charset even if it is ISO-8859-1 or US-ASCII, but don't
+	 *  append it to the post_content_type header.  Note that we do
+	 *  not yet have a way to vary the charset among multipart form
+	 *  fields, so this code assumes it is the same for all of the
+	 *  text fields. - FM
+	 */
+	if (HTMainText->node_anchor->charset != NULL &&
+	    *HTMainText->node_anchor->charset != '\0') {
+	    if (Boundary == NULL &&
+	        strcasecomp(HTMainText->node_anchor->charset, "iso-8859-1") &&
+		strcasecomp(HTMainText->node_anchor->charset, "us-ascii")) {
+		StrAllocCat(doc->post_content_type, "; charset=");
+		StrAllocCat(doc->post_content_type,
+			    HTMainText->node_anchor->charset);
+	    } else if (Boundary != NULL) {
+	        MultipartContentType = (char *)calloc(1,
+			     (40 + strlen(HTMainText->node_anchor->charset)));
+		if (query == NULL)
+		    outofmem(__FILE__, "HText_SubmitForm");
+		sprintf(MultipartContentType,
+			"\r\nContent-Type: text/plain; charset=%s",
+			HTMainText->node_anchor->charset);
 	    }
 	}
     }
@@ -3735,12 +3887,19 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 		        (form_ptr->value && *form_ptr->value != '\0' &&
 		         !strcmp(form_ptr->value, link_value)))) {
 		        if (first_one) {
+			    if (Boundary) {
+			        sprintf(&query[strlen(query)],
+					"--%s\r\n", Boundary);
+			    }
                             first_one=FALSE;
                         } else {
 			    if (PlainText) {
 			        strcat(query, "\n");
 			    } else if (SemiColon) {
 			        strcat(query, ";");
+			    } else if (Boundary) {
+			        sprintf(&query[strlen(query)],
+					"\r\n--%s\r\n", Boundary);
 			    } else {
                                 strcat(query, "&");
 			    }
@@ -3749,6 +3908,14 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 			if (PlainText) {
 			    StrAllocCopy(escaped1, (form_ptr->name ?
 			    			    form_ptr->name : ""));
+			} else if (Boundary) {
+			    StrAllocCopy(escaped1,
+			    	    "Content-Disposition: form-data; name=");
+			    StrAllocCat(escaped1, (form_ptr->name ?
+			    			    form_ptr->name : ""));
+			    if (MultipartContentType)
+			        StrAllocCat(escaped1, MultipartContentType);
+			    StrAllocCat(escaped1, "\r\n\r\n");
 			} else {
 		            escaped1 = HTEscape(form_ptr->name,URL_XALPHAS);
 			}
@@ -3772,7 +3939,7 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 				    form_ptr->cp_submit_value[i] = 173;
 				}
 			    }
-			    if (PlainText) {
+			    if (PlainText || Boundary) {
 			        StrAllocCopy(escaped2,
 					     (form_ptr->cp_submit_value ?
 					      form_ptr->cp_submit_value : ""));
@@ -3796,7 +3963,7 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 				    form_ptr->value[i] = 173;
 				}
 			    }
-			    if (PlainText) {
+			    if (PlainText || Boundary) {
 			        StrAllocCopy(escaped2, (form_ptr->value ?
 							form_ptr->value : ""));
 			    } else {
@@ -3805,34 +3972,46 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 			    }
 		        }
 
-			if (!strcmp(form_ptr->value, "[IMAGE]-Submit"))
+			if (!strcmp(form_ptr->value, "[IMAGE]-Submit")) {
 			    /*
 			     * It's a clickable image submit button.
 			     * Fake a 0,0 coordinate pair, which
 			     * typically returns the image's default. - FM
 			     */
-			    sprintf(&query[strlen(query)],
-				    "%s.x=0%s%s.y=0%s",
-				    escaped1,
-				    (PlainText ?
-				          "\n" : (SemiColon ?
-					  		";" : "&")),
-				    escaped1,
-				    ((PlainText && *escaped1) ?
-				    			 "\n" : ""));
-			else
+			    if (Boundary) {
+			        escaped1[(strlen(escaped1) - 4)] = '\0';
+			        sprintf(&query[strlen(query)],
+				    "%s.x\r\n\r\n0\r\n--%s\r\n%s.y\r\n\r\n0",
+					escaped1,
+					Boundary,
+					escaped1);
+			    } else {
+			        sprintf(&query[strlen(query)],
+					"%s.x=0%s%s.y=0%s",
+					escaped1,
+					(PlainText ?
+					      "\n" : (SemiColon ?
+							    ";" : "&")),
+					escaped1,
+					((PlainText && *escaped1) ?
+				    			     "\n" : ""));
+			    }
+			} else {
 			    /*
 			     * It's a standard submit button.
 			     * Use the name=value pair. = FM
 			     */
 			    sprintf(&query[strlen(query)],
-				    "%s=%s%s%s",
+				    "%s%s%s%s%s",
 				    escaped1,
+				    (Boundary ?
+				    	   "" : "="),
 				    (PlainText ?
 				          "\n" : ""),
 				    escaped2,
 				    ((PlainText && *escaped2) ?
 				    			 "\n" : ""));
+			}
 		        FREE(escaped1);
 		        FREE(escaped2);
 		    }
@@ -3843,12 +4022,19 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 		    /* only add if selected */
 		    if (form_ptr->num_value) {
 	                if (first_one) {
+			    if (Boundary) {
+			        sprintf(&query[strlen(query)],
+					"--%s\r\n", Boundary);
+			    }
 		            first_one=FALSE;
 	                } else {
 			    if (PlainText) {
 			        strcat(query, "\n");
 			    } else if (SemiColon) {
 			        strcat(query, ";");
+			    } else if (Boundary) {
+			        sprintf(&query[strlen(query)],
+					"\r\n--%s\r\n", Boundary);
 			    } else {
 		                strcat(query, "&");
 			    }
@@ -3857,6 +4043,15 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 			if (PlainText) {
 			    StrAllocCopy(escaped1, (form_ptr->name ?
 			    			    form_ptr->name : ""));
+			} else if (Boundary) {
+			    StrAllocCopy(escaped1,
+			    	     "Content-Disposition: form-data; name=");
+			    StrAllocCat(escaped1,
+				        (form_ptr->name ?
+			    		 form_ptr->name : ""));
+			    if (MultipartContentType)
+			        StrAllocCat(escaped1, MultipartContentType);
+			    StrAllocCat(escaped1, "\r\n\r\n");
 			} else {
 		            escaped1 = HTEscape(form_ptr->name, URL_XALPHAS);
 			}
@@ -3879,7 +4074,7 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 				    form_ptr->cp_submit_value[i] = 173;
 				 }
 			    }
-			    if (PlainText) {
+			    if (PlainText || Boundary) {
 			        StrAllocCopy(escaped2,
 					     (form_ptr->cp_submit_value ?
 					      form_ptr->cp_submit_value : ""));
@@ -3904,7 +4099,7 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 
 				}
 			    }
-			    if (PlainText) {
+			    if (PlainText || Boundary) {
 			        StrAllocCopy(escaped2, (form_ptr->value ?
 							form_ptr->value : ""));
 			    } else {
@@ -3914,8 +4109,10 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 			}
 
                         sprintf(&query[strlen(query)],
-				"%s=%s%s%s",
+				"%s%s%s%s%s",
 				escaped1,
+				(Boundary ?
+				       "" : "="),
 				(PlainText ?
 				      "\n" : ""),
 				escaped2,
@@ -3939,7 +4136,7 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 			    form_ptr->value[i] = 173;
 			}
 		    }
-		    if (PlainText) {
+		    if (PlainText || Boundary) {
 		        StrAllocCopy(escaped2, (form_ptr->value ? 
 						form_ptr->value : ""));
 		    } else {
@@ -3955,12 +4152,19 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 			 */
 			FREE(previous_blanks);
 		        if (first_one) {
+			    if (Boundary) {
+			        sprintf(&query[strlen(query)],
+					"--%s\r\n", Boundary);
+			    }
                             first_one=FALSE;
                         } else {
 			    if (PlainText) {
 			        strcat(query, "\n");
 			    } else if (SemiColon) {
 			        strcat(query, ";");
+			    } else if (Boundary) {
+			        sprintf(&query[strlen(query)],
+					"\r\n--%s\r\n", Boundary);
 			    } else {
                                 strcat(query, "&");
 			    }
@@ -3968,12 +4172,22 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 			if (PlainText) {
 			    StrAllocCopy(escaped1, (form_ptr->name ?
 			    			    form_ptr->name : ""));
+			} else if (Boundary) {
+			    StrAllocCopy(escaped1,
+			    	    "Content-Disposition: form-data; name=");
+			    StrAllocCat(escaped1, (form_ptr->name ?
+			    			    form_ptr->name : ""));
+			    if (MultipartContentType)
+			        StrAllocCat(escaped1, MultipartContentType);
+			    StrAllocCat(escaped1, "\r\n\r\n");
 			} else {
                             escaped1 = HTEscape(form_ptr->name, URL_XALPHAS);
 			}
                         sprintf(&query[strlen(query)],
-				"%s=%s%s%s",
+				"%s%s%s%s%s",
 				escaped1,
+				(Boundary ?
+				       "" : "="),
 				(PlainText ?
 				      "\n" : ""),
 				escaped2,
@@ -3994,6 +4208,9 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 			    if (PlainText) {
 			        sprintf(&query[strlen(query)], "%s\n",
 							       escaped2);
+			    } else if (Boundary) {
+			        sprintf(&query[strlen(query)], "%s\r\n",
+							       escaped2);
 			    } else {
 			        sprintf(&query[strlen(query)], "%%0a%s",
 							       escaped2);
@@ -4001,6 +4218,8 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 			} else {
 			    if (PlainText) {
 			        StrAllocCat(previous_blanks, "\n");
+			    } else if (Boundary) {
+			        StrAllocCat(previous_blanks, "\r\n");
 			    } else {
 			        StrAllocCat(previous_blanks, "%0a");
 			    }
@@ -4014,12 +4233,19 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 		case F_OPTION_LIST_TYPE:
 		case F_HIDDEN_TYPE:
 	            if (first_one) {
+			if (Boundary) {
+			    sprintf(&query[strlen(query)],
+				    "--%s\r\n", Boundary);
+			}
 		        first_one=FALSE;
 	            } else {
 		        if (PlainText) {
 			    strcat(query, "\n");
 			} else if (SemiColon) {
 			    strcat(query, ";");
+			} else if (Boundary) {
+			    sprintf(&query[strlen(query)],
+			    	    "\r\n--%s\r\n", Boundary);
 			} else {
 		            strcat(query, "&");
 			}
@@ -4028,6 +4254,14 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 		    if (PlainText) {
 		       StrAllocCopy(escaped1, (form_ptr->name ?
 		       			       form_ptr->name : ""));
+		    } else if (Boundary) {
+			StrAllocCopy(escaped1,
+			    	    "Content-Disposition: form-data; name=");
+			StrAllocCat(escaped1, (form_ptr->name ?
+			    		       form_ptr->name : ""));
+			if (MultipartContentType)
+			    StrAllocCat(escaped1, MultipartContentType);
+			StrAllocCat(escaped1, "\r\n\r\n");
 		    } else {
 		        escaped1 = HTEscape(form_ptr->name, URL_XALPHAS);
 		    }
@@ -4051,7 +4285,7 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 				form_ptr->cp_submit_value[i] = 173;
 			    }
 			}
-			if (PlainText) {
+			if (PlainText || Boundary) {
 			    StrAllocCopy(escaped2,
 			    		 (form_ptr->cp_submit_value ?
 					  form_ptr->cp_submit_value : ""));
@@ -4075,7 +4309,7 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 				form_ptr->value[i] = 173;
 			    }
 			}
-			if (PlainText) {
+			if (PlainText || Boundary) {
 			    StrAllocCopy(escaped2, (form_ptr->value ?
 			    			    form_ptr->value : ""));
 			} else {
@@ -4085,8 +4319,10 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 		    }
 
                     sprintf(&query[strlen(query)],
-		    	    "%s=%s%s%s",
+		    	    "%s%s%s%s%s",
 			    escaped1,
+			    (Boundary ?
+			    	   "" : "="),
 			    (PlainText ?
 				  "\n" : ""),
 			    escaped2,
@@ -4106,15 +4342,13 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 
 	anchor_ptr = anchor_ptr->next;
     }
+    if (Boundary) {
+        sprintf(&query[strlen(query)], "\r\n--%s--\r\n", Boundary);
+    }
     FREE(previous_blanks);
 
     if (submit_item->submit_method == URL_MAIL_METHOD) {
-	if (strncmp(submit_item->submit_action, "mailto:", 7)) {
-	    HTAlert(BAD_FORM_MAILTO);
-	    FREE(query);
-	    return;
-	}
-	_user_message("submitting %s", submit_item->submit_action);
+	_user_message("Submitting %s", submit_item->submit_action);
 	if (TRACE) {
 	    fprintf(stderr, "\nGridText - mailto_address: %s\n",
 	    		    (submit_item->submit_action+7));
@@ -4133,14 +4367,16 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 		   (submit_item->submit_title) :
 		   	     (HText_getTitle() ?
 			      HText_getTitle() : "")),
-		 query);
+		 query,
+		 doc->post_content_type);
 	FREE(query);
+        FREE(doc->post_content_type);
 	return;
     } else {
         _statusline(SUBMITTING_FORM);
     }
    
-    if (submit_item->submit_method == URL_POST_METHOD) {
+    if (submit_item->submit_method == URL_POST_METHOD || Boundary) {
         StrAllocCopy(doc->post_data, query);
         if (TRACE)
 	    fprintf(stderr,"GridText - post_data: %s\n",doc->post_data);
@@ -4156,14 +4392,42 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
     }
 }
 
+PUBLIC void HText_DisableCurrentForm NOARGS
+{
+    TextAnchor * anchor_ptr = HTMainText->first_anchor;
+
+    HTFormDisabled = TRUE;
+
+    /*
+     *  Go through list of anchors and set the disabled flag.
+     */
+    while (1) {
+        if (anchor_ptr->link_type == INPUT_ANCHOR &&
+            anchor_ptr->input_field->number == HTFormNumber) {
+
+            anchor_ptr->input_field->disabled = TRUE;
+        }
+
+        if (anchor_ptr == HTMainText->last_anchor)
+            break;
+
+
+        anchor_ptr = anchor_ptr->next;
+    }
+
+    return;
+}
+
 PUBLIC void HText_ResetForm ARGS1(FormInfo *,form)
 {
     TextAnchor * anchor_ptr = HTMainText->first_anchor;
 
     _statusline(RESETTING_FORM);
 
-   /* go through list of anchors and reset values */
-   while (1) {
+    /*
+     *  Go through list of anchors and reset values.
+     */
+    while (1) {
         if (anchor_ptr->link_type == INPUT_ANCHOR) {
             if (anchor_ptr->input_field->number == form->number) {
 
@@ -4198,9 +4462,7 @@ PUBLIC void HText_ResetForm ARGS1(FormInfo *,form)
 
 
         anchor_ptr = anchor_ptr->next;
-   }
-
-
+    }
 }
 
 PUBLIC void HText_activateRadioButton ARGS1(FormInfo *,form)

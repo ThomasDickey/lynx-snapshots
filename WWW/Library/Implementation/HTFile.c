@@ -997,8 +997,16 @@ PUBLIC void HTDirEntry ARGS3(
 	CONST char *,	tail,
 	CONST char *,	entry)
 {
-    char * relative;
-    char * escaped = HTEscape(entry, URL_XPALPHAS);
+    char * relative = NULL;
+    char * escaped = NULL;
+
+    if (0 == strcmp(entry,"../"))
+        /*
+	 *  Undo slash appending for anchor creation.
+	 */
+	StrAllocCopy(escaped,"..");
+    else
+	escaped = HTEscape(entry, URL_XPALPHAS);
 
 
     if (tail == NULL || *tail == '\0') {
@@ -1006,7 +1014,7 @@ PUBLIC void HTDirEntry ARGS3(
         HTStartAnchor(target, NULL, escaped);
     } else {
         /* If empty tail, gives absolute ref below */
-        relative = (char*) malloc(strlen(tail) + strlen(escaped)+2);
+        relative = (char*)malloc(strlen(tail) + strlen(escaped)+2);
         if (relative == NULL)
 	    outofmem(__FILE__, "DirRead");
         sprintf(relative, "%s/%s", tail, escaped);
@@ -1038,6 +1046,7 @@ PUBLIC void HTDirTitles ARGS2(
 		TOUPPER(*(cp+6)) == 'I')
 		*cp = '\0';
 	}
+	cp = NULL;
     }
     current = strrchr(path, '/');	/* last part or "" */
 
@@ -1056,7 +1065,7 @@ PUBLIC void HTDirTitles ARGS2(
 	  FREE(cp);
       }
 #else 
-      StrAllocCopy(printable, (current + 1));
+      StrAllocCopy(printable, (current ? current + 1 : ""));
 #endif /* DIRED_SUPPORT */
 
       START(HTML_HEAD);
@@ -1100,9 +1109,10 @@ PUBLIC void HTDirTitles ARGS2(
      */
 
     if (current && current[1]) {   /* was a slash AND something else too */
-        char * parent;
-	char * relative;
-	*current++ = 0;
+        char * parent = NULL;
+	char * relative = NULL;
+
+	*current++ = '\0';
         parent = strrchr(path, '/');  /* penultimate slash */
 
 	if ((parent && 0 == strncasecomp(parent, "/%2F", 4)) ||
@@ -1126,10 +1136,36 @@ PUBLIC void HTDirTitles ARGS2(
 	     *  HTVMSBrowseDir().
 	     */
 	    extern BOOLEAN LYisLocalFile PARAMS((char *logical));
-	    DIR  * dp=NULL;
+	    DIR  * dp = NULL;
 
 	    if (LYisLocalFile(logical)) {
-	        if ((dp = opendir(relative)) == NULL) {
+		/*
+		 *  We need an absolute file path for the opendir.
+		 *  We also need to unescape for this test.
+		 *  Don't worry about %2F now, they presumably have been
+		 *  dealt with above, and shouldn't appear for local
+		 *  files anyway...  Assume OS / filesystem will just
+		 *  ignore superfluous slashes. - KW
+		 */
+		char * fullparentpath = NULL;
+
+		/*
+		 *  Path has been shortened above
+		 */
+		StrAllocCopy(fullparentpath, path);
+
+		/*
+		 *  Guard against weirdness.
+		 */
+		if (0 == strcmp(current,"..")) {
+		    StrAllocCat(fullparentpath,"/../..");
+		} else if (0 == strcmp(current,".")) {
+		    StrAllocCat(fullparentpath,"/..");
+		}
+
+		HTUnEscape(fullparentpath);
+	        if ((dp = opendir(fullparentpath)) == NULL) {
+	            FREE(fullparentpath);
 	            FREE(logical);
 	            FREE(relative);
 	            FREE(path);
@@ -1137,6 +1173,7 @@ PUBLIC void HTDirTitles ARGS2(
 		}
 		if (dp)
 	    	    closedir(dp);
+		FREE(fullparentpath);
 	    }
 	}
 #endif /* !VMS */
@@ -1151,10 +1188,16 @@ PUBLIC void HTDirTitles ARGS2(
 #ifdef DIRED_SUPPORT
 	   if (dir_list_style == MIXED_STYLE) {
 	      PUTS("../");
-	   } else {
-#else
-	   {
+	   } else
 #endif /* DIRED_SUPPORT */
+	   if ((0 == strcmp(current,".")) ||
+	       (0 == strcmp(current,".."))) {
+	       /*
+	        *  Should not happen, but if it does.
+		*  at least avoid giving misleading info. - KW
+		*/
+	       PUTS("..");
+	   } else {
 	      char * printable = NULL;
 	      StrAllocCopy(printable, parent + 1);
 	      HTUnEscape(printable);
@@ -1588,7 +1631,7 @@ forget_multi:
 		    while ((dirbuf = readdir(dp))!=0)
 		    {
 			/* while there are directory entries to be read */
-		        HTBTElement * dirname = NULL;
+		        char * dirname = NULL;
 			extern BOOLEAN no_dotfiles, show_dotfiles;
 
 		        if (dirbuf->d_ino == 0)
@@ -1607,8 +1650,7 @@ forget_multi:
 			     * begins with '.' */
 			    continue;
 
-			dirname = (HTBTElement *)malloc(
-					strlen(dirbuf->d_name) + 4);
+			dirname = (char *)malloc(strlen(dirbuf->d_name) + 4);
 			if (dirname == NULL)
 			    outofmem(__FILE__,"DirRead");
 			StrAllocCopy(tmpfilename,localname);

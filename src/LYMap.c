@@ -212,6 +212,7 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	WWWDoc.address = address;
         WWWDoc.post_data = NULL;
         WWWDoc.post_content_type = NULL;
+        WWWDoc.bookmark = NULL;
 	WWWDoc.isHEAD = FALSE;
         LYforce_no_cache = TRUE;
 	reloading = TRUE;
@@ -246,6 +247,7 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	WWWDoc.address = address;
         WWWDoc.post_data = NULL;
         WWWDoc.post_content_type = NULL;
+        WWWDoc.bookmark = NULL;
 	WWWDoc.isHEAD = FALSE;
         LYforce_no_cache = TRUE;
 	reloading = TRUE;

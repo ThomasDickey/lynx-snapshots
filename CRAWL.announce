@@ -19,7 +19,9 @@ Added switches are:
                   startfile or WWW_HOME.
 
   -realm	  Further restrict http links to ones in the same realm
-                  as the startpage (e.g., http://host/~user/).
+                  (having a matching base URI) as the startpage (e.g.,
+		  http://host/~user/ will restrict the traversal to that
+		  user's public html tree).
 
   -crawl          With [-traversal] outputs each unique hypertext page
                   as an lnk###########.dat file in the format specified
@@ -49,7 +51,10 @@ TRAVERSE_FILE (traverse.dat):
                   traversed again (important if runs are started and 
                   stopped).  Placing an entry in this file BEFORE the
                   run will block traversal of that URL.  Unlike reject.dat
-                  a final * has no effect (see below).
+                  a final * has no effect (see below).  Note that Lynx
+		  internal client-side image MAP URLs will be included in
+		  this file (e.g., LYNXIMGMAP:http://server/foo.html#map1),
+		  in addition to the "real" (external) http URLs.
 
 TRAVERSE_FOUND_FILE (traverse2.dat):
                   Contains a list of all URLs that were traversed, in the
@@ -58,6 +63,11 @@ TRAVERSE_FOUND_FILE (traverse2.dat):
                   (separated from the URLs by TABs)  A URL and TITLE may be
                   present in this list many times.  To simplify the list,
                   on VMS use:  sort/nodups traverse2.dat;1 ;2
+		  Note that the URLs and TITLEs of the Lynx internal
+		  client-side image MAP pseudo-documents will not be
+		  included in this file, though "traversed", but only the
+		  http URLs and TITLEs derived from the MAP's AREA tag
+		  HREFs that were traversed.
 
 TRAVERSE_REJECT_FILE (reject.dat):
                   Contains a list of URLs that have been rejected from the
@@ -110,6 +120,12 @@ lnk########.dat   Numbered output files containing the contents of traversed
 		  numbered links) to be appended as well.  If you want
 		  numbered links but not the References list, include the
 		  -nolist switch as well.
+
+		  Note that any client-side image MAP pseudo documents
+		  that were "traversed" will not have lnk########.dat
+		  output files created for them, but output files will
+		  be created for "real" documents that were traversed
+		  based on the HREFs of the MAP's AREA tags.
 
 This functionality is still under development.  Feedback and suggestions
 are welcome.

@@ -1,15 +1,12 @@
 # Makefile for NN version of mini inews.
 #
-# $RCSfile: Makefile,v $	$Revision: 1.3 $
+# @RCSfile: Makefile,v @	@Revision: 1.3 @
 #
-# $Author: news $	$Date: 1989/12/21 17:59:52 $
+# @Author: news @	@Date: 89/12/21 17:59:52 @
 #
-# $State: Exp $	$Locker:  $
+# @State: Exp @	@Locker:  @
 #
-# $Log: Makefile,v $
-# Revision 1.3  1989/12/21 17:59:52  news
-# v2_6
-#
+# @Log:	Makefile,v @
 # Revision 1.3  89/12/21  17:59:52  news
 # Added kit processing, cleanups.
 #
@@ -23,14 +20,14 @@ CC	= cc
 # General definitions here which apply to all -- form -DDEF
 DEFS	= -DFOR_NN
 # Link libraries -- form -lLIB
-LIBS	=    # ../hostname.o
+LIBS	= -lsocket -lnsl -lucb
 # Lint definitions -- same as DEFS, but form -D DEF
 LDEFS	= -D lint -D FOR_NN
 # Lint libraries -- same as LIBS, but form -l LIB
 LLIBS	=
 # Set to -g for debugging, -O for optimise, or both if compiler handles it
 DEBUG	= -O
-CFLAGS	= $(DEBUG) $(DEFS) -I.. -I../conf
+CFLAGS	= $(DEBUG) $(DEFS) -I.. -I../conf -L/usr/ucblib
 
 SRCS	= inews.c clientlib.c version.c
 OBJS	= inews.o clientlib.o version.o

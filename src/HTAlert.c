@@ -13,11 +13,12 @@
 #include "HTUtils.h"
 #include "tcp.h"
 #include "HTAlert.h"
+#include "LYGlobalDefs.h"
+#include "LYCurses.h"
 #include "LYStrings.h"
 #include "LYUtils.h"
 #include "LYSignal.h"
 #include "GridText.h"
-#include "LYGlobalDefs.h"
 
 #include "LYLeaks.h"
 
@@ -211,6 +212,112 @@ PUBLIC void HTPromptUsernameAndPassword ARGS3(CONST char *,     Msg,
 	     StrAllocCopy(*password, "");
 	}
 	
+    }
+}
+
+
+#define	SERVER_ASKED_FOR_REDIRECTION \
+ "Server asked for redirection of POST content to"
+#define	PROCEED_GET_CANCEL "P)roceed, use G)ET or C)ancel "
+#define	ADVANCED_POST_REDIRECT \
+ "Redirection of POST content. P)roceed, see U)RL, use G)ET or C)ancel"
+#define	LOCATION_HEADER "Location: "
+
+/*      Confirm redirection of POST		HTConfirmPostRedirect()
+**
+** On entry,
+**      redirecting_url             is the Location.
+**
+** On exit,
+**      Returns 0 on cancel,
+**	  1 for redirect of POST with content,
+**	303 for redirect as GET without content
+*/
+PUBLIC int HTConfirmPostRedirect ARGS1(
+	CONST char *,	redirecting_url)
+{
+    char *show_POST_url = NULL;
+    char url[256];
+    int on_screen = 0;	/* 0 - show menu
+   			 * 1 - show url
+			 * 2 - menu is already on screen */
+
+    if (dump_output_immediately)
+	/*
+	 *  Treat as 303 (GET without content) if not interactive.
+	 */
+        return 303;
+
+    if (user_mode == NOVICE_MODE) {
+        on_screen = 2;
+        move(LYlines-2, 0);
+        addstr(SERVER_ASKED_FOR_REDIRECTION);
+	clrtoeol();
+        move(LYlines-1, 0);
+	sprintf(url, "URL: %.*s",
+		    (LYcols < 250 ? LYcols-6 : 250), redirecting_url);
+        addstr(url);
+	clrtoeol();
+        _statusline(PROCEED_GET_CANCEL);
+    } else {
+	StrAllocCopy(show_POST_url, LOCATION_HEADER);
+	StrAllocCat(show_POST_url, redirecting_url);
+    }
+    while (1) {
+	int c;  
+
+	switch (on_screen) {
+	    case 0:
+	        _statusline(ADVANCED_POST_REDIRECT);
+		break;
+	    case 1:
+	        _statusline(show_POST_url);
+	}
+	c = LYgetch();
+	switch (TOUPPER(c)) {
+	    case 'P':
+		/*
+		 *  Proceed with 301 or 302 redirect of POST
+		 *  (we check only for 0 and 303 in HTTP.c).
+		 */
+	        FREE(show_POST_url);
+		return 1;	
+
+ 	    case 7:
+ 	    case 'C':
+	        /*
+		 * Cancel request.
+		 */
+	        FREE(show_POST_url);
+		return 0;
+
+	    case 'G':
+	        /*
+		 *  Treat as 303 (GET without content).
+		 */
+	        FREE(show_POST_url);
+		return 303;
+
+	    case 'U':
+	        /*
+		 *  Show URL for intermediate or advanced mode.
+		 */
+	        if (user_mode != NOVICE_MODE)
+		    if (on_screen == 1)
+			on_screen = 0;
+		    else
+			on_screen = 1;
+		break;
+
+	    default:
+	        /*
+		 *  Get another character.
+		 */
+		if (on_screen == 1)
+		    on_screen = 0;
+		else
+		    on_screen = 2;
+	}
     }
 }
 

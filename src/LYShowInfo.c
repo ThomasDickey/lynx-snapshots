@@ -11,6 +11,7 @@
 #include "LYShowInfo.h"
 #include "LYSignal.h"
 #include "LYCharUtils.h"
+#include "GridText.h"
 
 #include "LYLeaks.h"
 
@@ -97,9 +98,9 @@ PUBLIC int showinfo ARGS4(
     fprintf(fp0,"<h2>%s Version %s</h2>\n", LYNX_NAME, LYNX_VERSION);
 
 #ifdef DIRED_SUPPORT
-    if (lynx_edit_mode) {
+    if (lynx_edit_mode && nlinks > 0) {
 	fprintf(fp0,
-	   	"<h2>Directory that you are currently viewing</h2>\n<pre>");
+	 "<h2>Directory that you are currently viewing</h2>\n<pre>");
 
 	cp = doc->address;
 	if (!strncmp(cp, "file://localhost", 16)) 
@@ -109,8 +110,8 @@ PUBLIC int showinfo ARGS4(
 	strcpy(temp, cp);
 	HTUnEscape(temp);
 
-	fprintf(fp0,"   Name:  %s\n", temp);
-	fprintf(fp0,"    URL:  %s\n", doc->address);
+	fprintf(fp0,"   <em>Name:</em>  %s\n", temp);
+	fprintf(fp0,"   <em> URL:</em>  %s\n", doc->address);
 
 	cp = links[doc->link].lname;
 	if (!strncmp(cp, "file://localhost", 16)) 
@@ -126,16 +127,18 @@ PUBLIC int showinfo ARGS4(
 	    char modes[80];
 	    if (((dir_info.st_mode) & S_IFMT) == S_IFDIR) {
 		fprintf(fp0,
-		 	"\nDirectory that you have currently selected\n\n");
+		 "\nDirectory that you have currently selected\n\n");
 	    } else if (((dir_info.st_mode) & S_IFMT) == S_IFREG) {
-		fprintf(fp0, "\nFile that you have currently selected\n\n");
+		fprintf(fp0, 
+		      "\nFile that you have currently selected\n\n");
 	    } else if (((dir_info.st_mode) & S_IFMT) == S_IFLNK) {
 		fprintf(fp0,
-		      "\nSymbolic link that you have currently selected\n\n");
+	     "\nSymbolic link that you have currently selected\n\n");
 	    } else {
-		fprintf(fp0, "\nItem that you have currently selected\n\n");
+		fprintf(fp0,
+		      "\nItem that you have currently selected\n\n");
 	    }
-	    fprintf(fp0,"       Full name:  %s\n", temp);
+	    fprintf(fp0,"       <em>Full name:</em>  %s\n", temp);
 	    if (((dir_info.st_mode) & S_IFMT) == S_IFLNK) {
 		char buf[1025];
 		int buf_size;
@@ -145,16 +148,16 @@ PUBLIC int showinfo ARGS4(
 		} else {
 		    strcpy(buf, "Unable to follow link");
 		}
-		fprintf(fp0, "  Points to file:  %s\n", buf);
+		fprintf(fp0, "  <em>Points to file:</em>  %s\n", buf);
 	    }
 	    pw = getpwuid(dir_info.st_uid);
 	    if (pw)
-	        fprintf(fp0, "   Name of owner:  %s\n", pw->pw_name);
+	        fprintf(fp0, "   <em>Name of owner:</em>  %s\n", pw->pw_name);
 	    grp = getgrgid(dir_info.st_gid);
 	    if (grp && grp->gr_name)
-	        fprintf(fp0, "      Group name:  %s\n", grp->gr_name);
+	        fprintf(fp0, "      <em>Group name:</em>  %s\n", grp->gr_name);
 	    if (((dir_info.st_mode) & S_IFMT) == S_IFREG) {
-		sprintf(temp, "       File size:  %ld (bytes)\n",
+		sprintf(temp, "       <em>File size:</em>  %ld (bytes)\n",
 		 	      (long)dir_info.st_size);
 		fprintf(fp0, "%s", temp);
 	    }
@@ -162,16 +165,16 @@ PUBLIC int showinfo ARGS4(
 	     *  Include date and time information.
 	     */
 	    cp = ctime(&dir_info.st_ctime);
-	    fprintf(fp0, "   Creation date:  %s", cp);
+	    fprintf(fp0, "   <em>Creation date:</em>  %s", cp);
 
 	    cp = ctime(&dir_info.st_mtime);	      
-	    fprintf(fp0, "   Last modified:  %s", cp);
+	    fprintf(fp0, "   <em>Last modified:</em>  %s", cp);
 
 	    cp = ctime(&dir_info.st_atime);
-	    fprintf(fp0, "   Last accessed:  %s\n", cp);
+	    fprintf(fp0, "   <em>Last accessed:</em>  %s\n", cp);
 
-	    fprintf(fp0, "   Access Permissions\n");
-	    fprintf(fp0, "      Owner:  ");
+	    fprintf(fp0, "   <em>Access Permissions</em>\n");
+	    fprintf(fp0, "      <em>Owner:</em>  ");
 	    modes[0] = '\0';
 	    modes[1] = '\0';   /* In case there are no permissions */
 	    modes[2] = '\0';
@@ -190,7 +193,7 @@ PUBLIC int showinfo ARGS4(
 	    }
 	    fprintf(fp0, "%s\n", (char *)&modes[2]); /* Skip leading ', ' */
 
-	    fprintf(fp0, "      Group:  ");
+	    fprintf(fp0, "      <em>Group:</em>  ");
 	    modes[0] = '\0';
 	    modes[1] = '\0';   /* In case there are no permissions */
 	    modes[2] = '\0';
@@ -209,7 +212,7 @@ PUBLIC int showinfo ARGS4(
 	    }
 	    fprintf(fp0, "%s\n", (char *)&modes[2]);  /* Skip leading ', ' */
 
-	    fprintf(fp0, "      World:  ");
+	    fprintf(fp0, "      <em>World:</em>  ");
 	    modes[0] = '\0';
 	    modes[1] = '\0';   /* In case there are no permissions */
 	    modes[2] = '\0';
@@ -232,21 +235,33 @@ PUBLIC int showinfo ARGS4(
     } else {
 #endif /* DIRED_SUPPORT */
 
-    fprintf(fp0, "<h2>File that you are currently viewing</h2>\n<dl compact>");
+    fprintf(fp0,
+       "<h2>File that you are currently viewing</h2>\n<dl compact>");
 
     StrAllocCopy(Title, doc->title);
     LYEntify(&Title, TRUE);
-    fprintf(fp0,"<dt>Linkname: %s\n", Title);
+    fprintf(fp0,"<dt><em>Linkname:</em> %s\n", Title);
 
     StrAllocCopy(Address, doc->address);
     LYEntify(&Address, FALSE);
-    fprintf(fp0, "<dt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;URL: %s\n", Address);
+    fprintf(fp0,
+    	    "<dt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>URL:</em> %s\n", Address);
+
+    if ((cp = HText_getServer()) != NULL && *cp != '\0')
+        fprintf(fp0, "<dt><em>&nbsp;&nbsp;Server:</em> %s\n", cp);
+
+    if ((cp = HText_getDate()) != NULL && *cp != '\0')
+        fprintf(fp0, "<dt><em>&nbsp;&nbsp;&nbsp;&nbsp;Date:</em> %s\n", cp);
+
+    if ((cp = HText_getLastModified()) != NULL && *cp != '\0')
+        fprintf(fp0, "<dt><em>Last Mod:</em> %s\n", cp);
 
     if (doc->post_data) {
         StrAllocCopy(Address, doc->post_data);
 	LYEntify(&Address, FALSE);
-	fprintf(fp0, "<dt>Post Data: %s\n", Address);
-	fprintf(fp0, "<dt>Post Content Type: %s\n", doc->post_content_type);
+	fprintf(fp0, "<dt><em>Post Data:</em> <xmp>%s</xmp>\n", Address);
+	fprintf(fp0,
+	     "<dt><em>Post Content Type:</em> %s\n", doc->post_content_type);
     }
 
     if (owner_address) {
@@ -255,34 +270,41 @@ PUBLIC int showinfo ARGS4(
     } else {
         StrAllocCopy(Address, "None");
     }
-    fprintf(fp0, "<dt>Owner(s): %s\n", Address);
+    fprintf(fp0, "<dt><em>Owner(s):</em> %s\n", Address);
 
-    fprintf(fp0, "<dt>&nbsp;&nbsp;&nbsp;&nbsp;size: %d lines\n", size_of_file);
+    fprintf(fp0,
+	"<dt>&nbsp;&nbsp;&nbsp;&nbsp;<em>size:</em> %d lines\n", size_of_file);
 
-    fprintf(fp0, "<dt>&nbsp;&nbsp;&nbsp;&nbsp;mode: %s\n",
+    fprintf(fp0, "<dt>&nbsp;&nbsp;&nbsp;&nbsp;<em>mode:</em> %s\n",
 		 (lynx_mode == FORMS_LYNX_MODE ? "forms mode" : "normal"));
 
     fprintf(fp0, "</dl>\n");  /* end of list */
 
     if (nlinks > 0) {
 	fprintf(fp0,
-	        "<h2>Link that you currently have selected</h2>\n<dl compact>");
+      "<h2>Link that you currently have selected</h2>\n<dl compact>");
 	StrAllocCopy(Title, links[doc->link].hightext);
 	LYEntify(&Title, TRUE);
-	fprintf(fp0, "<dt>Linkname: %s\n", Title);
+	fprintf(fp0, "<dt><em>Linkname:</em> %s\n", Title);
 	if (lynx_mode == FORMS_LYNX_MODE &&
 	    links[doc->link].type == WWW_FORM_LINK_TYPE) {
 	    if (links[doc->link].form->submit_method) {
 	        int method = links[doc->link].form->submit_method;
-		fprintf(fp0, "<dt>&nbsp;&nbsp;Method: %s\n",
+	        char *enctype = links[doc->link].form->submit_enctype;
+
+		fprintf(fp0, "<dt>&nbsp;&nbsp;<em>Method:</em> %s\n",
 			     (method == URL_POST_METHOD) ? "POST" :
 			     (method == URL_MAIL_METHOD) ? "(email)" :
 							   "GET");
+		fprintf(fp0, "<dt>&nbsp;<em>Enctype:</em> %s\n",
+			     (enctype &&
+			      *enctype ?
+			       enctype : "application/x-www-form-urlencoded"));
 	    }
 	    if (links[doc->link].form->submit_action) {
 	        StrAllocCopy(Address, links[doc->link].form->submit_action);
 		LYEntify(&Address, FALSE);
-	        fprintf(fp0, "<dt>&nbsp;&nbsp;Action: %s\n", Address);
+	        fprintf(fp0, "<dt>&nbsp;&nbsp;<em>Action:</em> %s\n", Address);
 	    }
 	    if (!(links[doc->link].form->submit_method &&
 		links[doc->link].form->submit_action)) {
@@ -295,7 +317,7 @@ PUBLIC int showinfo ARGS4(
 	    } else {
 	        StrAllocCopy(Title, "");
 	    }
-	    fprintf(fp0, "<dt>Filename: %s\n", Title);
+	    fprintf(fp0, "<dt><em>Filename:</em> %s\n", Title);
 	}
 	fprintf(fp0, "</dl>\n");  /* end of list */
 

@@ -3,7 +3,7 @@
                                        
    The Lynx help files are included with the distribution of Lynx sources
    and documentation. Links to sites which supply the distribution are
-   maintained in the [1]Lynx Enhanced Pages.
+   maintained in [1]Lynx links.
    
    Once you have downloaded and extracted the distribution, set HELPFILE
    in the lynx.cfg as:
@@ -14,4 +14,4 @@
 
 References
 
-   1. http://www.nyu.edu/pages/wsn/subir/lynx.html
+   1. http://www.crl.com/~subir/lynx.html
