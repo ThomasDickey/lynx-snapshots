@@ -15,6 +15,12 @@
 *	Why keep two structures for entities?  Backward compatibility..
 */
 
+#ifndef ENTITIES_H
+#define ENTITIES_H 1
+
+#include <HTUtils.h>
+#include <SGML.h>
+
 /* UC_entity_info structure is defined in SGML.h.
    This has to be sorted alphabetically (case-sensitive),
    bear this in mind when you add some more entities..  */
@@ -1082,3 +1088,5 @@ static CONST UC_entity_info unicode_entities[] = {
 /* {"scnap",	0x????},  succeeds, not approximately equal to	 # ISOamsn */
 /* {"smid",	0x????},  shortmid				 # ISOamsr */
 };
+
+#endif /* ENTITIES_H */

@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTAccess.h>
 #include <HTList.h>
 #include <HTAlert.h>
@@ -14,23 +13,14 @@
 #include <LYClean.h>
 #include <LYGetFile.h>
 #include <LYHistory.h>
-#include <LYSystem.h>
 #include <LYList.h>
 #include <LYCharSets.h>  /* To get current charset for mail header. */
-#ifdef VMS
-#include <HTVMSUtils.h>
-#endif /* VMS */
-#ifdef DOSPATH
-#include <HTDOS.h>
-#endif
 
 #include <LYLeaks.h>
 
-#define FREE(x) if (x) {free(x); x = NULL;}
-
 /*
  *  printfile prints out the current file minus the links and targets
- *  to a veriaty of places
+ *  to a variety of places
  */
 
 /* it parses an incoming link that looks like
@@ -38,30 +28,49 @@
  *  LYNXPRINT://LOCAL_FILE/lines=##
  *  LYNXPRINT://MAIL_FILE/lines=##
  *  LYNXPRINT://TO_SCREEN/lines=##
+ *  LYNXPRINT://LPANSI/lines=##
  *  LYNXPRINT://PRINTER/lines=##/number=#
  */
 
 #define TO_FILE   1
 #define TO_SCREEN 2
-#define MAIL	  3
-#define PRINTER   4
+/*
+ * "lpansi.c"
+ * Original author: Gary Day (gday@comp.uark.edu), 11/30/93
+ * Current version: 2.1 by Noel Hunter (noel@wfu.edu), 10/20/94
+ *
+ * Basic structure based on print -- format files for printing from
+ * _Practical_C_Programming by Steve Oualline, O'Reilly & Associates
+ *
+ * adapted from the README for lpansi.c v2.1, dated 10/20/1994:
+ *		    Print to ANSI printer on local terminal
+ *     The VT100 standard defines printer on and off escape sequences,
+ *     esc[5i is printer on, and esc[4i is printer off.
+ *
+ * incorporate the idea of "lpansi" directly into LYPrint.c - HN
+ */
+#define LPANSI	  3
+#define MAIL	  4
+#define PRINTER   5
 
 #ifdef VMS
 PRIVATE int remove_quotes PARAMS((char *string));
 #endif /* VMS */
 
+PRIVATE  char* subject_translate8bit PARAMS((char *source));
+
 PUBLIC int printfile ARGS1(
 	document *,	newdoc)
 {
-    static char tempfile[256];
-    static BOOLEAN first = TRUE;
+    static char tempfile[LY_MAXPATH];
     char buffer[LINESIZE];
     char filename[LINESIZE];
     char user_response[256];
     int lines_in_file = 0;
     int printer_number = 0;
     int pages = 0;
-    int type = 0, c, len;
+    int type = 0, c;
+    BOOLEAN Lpansi = FALSE;
     FILE *outfile_fp;
     char *cp = NULL;
     lynx_printer_item_type *cur_printer;
@@ -78,11 +87,12 @@ PUBLIC int printfile ARGS1(
     HTAtom *encoding;
     BOOL use_mime, use_cte, use_type;
     CONST char *disp_charset;
+    char *subject = NULL;   /* print-to-email */
     static BOOLEAN first_mail_preparsed = TRUE;
     char *envbuffer = NULL;
 #ifdef VMS
     BOOLEAN isPMDF = FALSE;
-    char hdrfile[256];
+    char hdrfile[LY_MAXPATH];
     FILE *hfd;
 
     if (!strncasecomp(system_mail, "PMDF SEND", 9)) {
@@ -114,7 +124,7 @@ PUBLIC int printfile ARGS1(
      */
     if (HText_getContentBase()) {
 	StrAllocCopy(content_base, HText_getContentBase());
-	collapse_spaces(content_base);
+	LYRemoveBlanks(content_base);
 	if (!(content_base && *content_base)) {
 	    FREE(content_base);
 	}
@@ -126,7 +136,7 @@ PUBLIC int printfile ARGS1(
     if (HTisDocumentSource()) {
 	if (HText_getContentLocation()) {
 	    StrAllocCopy(content_location, HText_getContentLocation());
-	    collapse_spaces(content_location);
+	    LYRemoveBlanks(content_location);
 	    if (!(content_location && *content_location)) {
 		FREE(content_location);
 	    }
@@ -146,7 +156,7 @@ PUBLIC int printfile ARGS1(
     /*
      *	Load the suggested filename string. - FM
      */
-    if (HText_getSugFname() != NULL)
+    if (HText_getSugFname() != 0)
 	StrAllocCopy(sug_filename, HText_getSugFname()); /* must be freed */
     else
 	StrAllocCopy(sug_filename, newdoc->address); /* must be freed */
@@ -196,6 +206,9 @@ PUBLIC int printfile ARGS1(
 	type = TO_FILE;
     } else if (strstr(link_info, "TO_SCREEN")) {
 	type = TO_SCREEN;
+    } else if (strstr(link_info, "LPANSI")) {
+	Lpansi = TRUE;
+	type = TO_SCREEN;
     } else if (strstr(link_info, "MAIL_FILE")) {
 	type = MAIL;
     } else if (strstr(link_info, "PRINTER")) {
@@ -227,10 +240,8 @@ PUBLIC int printfile ARGS1(
      *	Act on the request. - FM
      */
     switch (type) {
+
 	case TO_FILE:
-#if defined(__DJGPP__) || defined(_WINDOWS)
-		_fmode = O_TEXT;
-#endif /* __DJGPP__  or _WINDOWS */
 		_statusline(FILENAME_PROMPT);
 	retry:	strcpy(filename, sug_filename);  /* add suggestion info */
 		/* make the sug_filename conform to system specs */
@@ -325,18 +336,12 @@ PUBLIC int printfile ARGS1(
 		    /*
 		     *	Save cancelled.
 		     */
-		    _statusline(SAVE_REQUEST_CANCELLED);
-		    sleep(InfoSecs);
+		    HTInfoMsg(SAVE_REQUEST_CANCELLED);
 		    break;
 		}
 
 		if (no_dotfiles || !show_dotfiles) {
-		    if (*filename == '.' ||
-#ifdef VMS
-			((cp = strrchr(filename, ':')) && *(cp+1) == '.') ||
-			((cp = strrchr(filename, ']')) && *(cp+1) == '.') ||
-#endif /* VMS */
-			((cp = strrchr(filename, '/')) && *(cp+1) == '.')) {
+		    if (*LYPathLeaf(filename) == '.') {
 			HTAlert(FILENAME_CANNOT_BE_DOT);
 			_statusline(NEW_FILENAME_PROMPT);
 			FirstRecall = TRUE;
@@ -355,24 +360,14 @@ PUBLIC int printfile ARGS1(
 		if (!strcmp(filename, "/dev/null"))
 #endif /* VMS */
 		{
-		    _statusline(SAVE_REQUEST_CANCELLED);
-		    sleep(InfoSecs);
+		    HTInfoMsg(SAVE_REQUEST_CANCELLED);
 		    break;
 		}
 		if ((cp = strchr(filename, '~'))) {
 		    *(cp++) = '\0';
 		    strcpy(buffer, filename);
-		    if ((len=strlen(buffer)) > 0 && buffer[len-1] == '/')
-			buffer[len-1] = '\0';
-#ifdef DOSPATH
-		    strcat(buffer, HTDOS_wwwName((char *)Home_Dir()));
-#else
-#ifdef VMS
-		    strcat(buffer, HTVMS_wwwName((char *)Home_Dir()));
-#else
-		    strcat(buffer, Home_Dir());
-#endif /* VMS */
-#endif /* DOSPATH */
+		    LYTrimPathSep(buffer);
+		    strcat(buffer, wwwName(Home_Dir()));
 		    strcat(buffer, cp);
 		    strcpy(filename, buffer);
 		}
@@ -390,22 +385,25 @@ PUBLIC int printfile ARGS1(
 		    strcpy(buffer, filename);
 		}
 #else
-		if (*filename != '/')
+
+#ifndef __EMX__
+		if (!LYIsPathSep(*filename)) {
+#if defined(__DJGPP__) || defined(_WINDOWS)
+		if (strchr(buffer, ':') != NULL)
+			cp = NULL;
+		else
+#endif /*  __DJGPP__ || _WINDOWS */
 		    cp = getenv("PWD");
+		}
 		else
+#endif
 		    cp = NULL;
+
+		LYTrimPathSep(cp);
 		if (cp)
-#ifdef DOSPATH
-		    sprintf(buffer, "%s/%s", cp, HTDOS_name(filename));
-#else
-		    sprintf(buffer, "%s/%s", cp, filename);
-#endif
+		    sprintf(buffer, "%s/%s", cp, HTSYS_name(filename));
 		else
-#ifdef DOSPATH
-		    strcpy(buffer, HTDOS_name(filename));
-#else
-		    strcpy(buffer, filename);
-#endif
+		    strcpy(buffer, HTSYS_name(filename));
 #endif /* VMS */
 
 		/*
@@ -425,14 +423,12 @@ PUBLIC int printfile ARGS1(
 #ifdef VMS
 		    if (HadVMSInterrupt) {
 			HadVMSInterrupt = FALSE;
-			_statusline(SAVE_REQUEST_CANCELLED);
-			sleep(InfoSecs);
+			HTInfoMsg(SAVE_REQUEST_CANCELLED);
 			break;
 		    }
 #endif /* VMS */
 		    if (c == 7 || c == 3) { /* Control-G or Control-C */
-			_statusline(SAVE_REQUEST_CANCELLED);
-			sleep(InfoSecs);
+			HTInfoMsg(SAVE_REQUEST_CANCELLED);
 			break;
 		    }
 		    if (TOUPPER(c) == 'N') {
@@ -459,10 +455,17 @@ PUBLIC int printfile ARGS1(
 		     *	get any partial or relative URLs resolved
 		     *	properly if no BASE tag is present to
 		     *	replace it. - FM
+		     *
+		     *  Add timestamp (last reload).
 		     */
+
 		    fprintf(outfile_fp,
-			    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n",
-			    newdoc->address, content_base);
+			    "<!-- X-URL: %s -->\n", newdoc->address);
+		    if (HText_getDate() != NULL)
+			 fprintf(outfile_fp,
+			    "<!-- Date: %s -->\n", HText_getDate());
+		    fprintf(outfile_fp,
+			    "<BASE HREF=\"%s\">\n", content_base);
 		}
 
 		if (LYPrependCharsetToSource && HTisDocumentSource()) {
@@ -513,9 +516,6 @@ PUBLIC int printfile ARGS1(
 #else
 		HTAddSugFilename(buffer);
 #endif /* VMS */
-#if defined(__DJGPP__) || defined(_WINDOWS)
-		_fmode = O_BINARY;
-#endif /* __DJGPP__ or _WINDOWS */
 		break;
 
 	case MAIL:
@@ -529,8 +529,7 @@ PUBLIC int printfile ARGS1(
 #ifdef VMS
 		if (HadVMSInterrupt) {
 		    HadVMSInterrupt = FALSE;
-		    _statusline(MAIL_REQUEST_CANCELLED);
-		    sleep(InfoSecs);
+		    HTInfoMsg(MAIL_REQUEST_CANCELLED);
 		    break;
 		}
 #endif /* VMS */
@@ -539,8 +538,7 @@ PUBLIC int printfile ARGS1(
 		    addstr("   Ok...");
 		    first_mail_preparsed = FALSE;
 		} else	{
-		    _statusline(MAIL_REQUEST_CANCELLED);
-		    sleep(InfoSecs);
+		    HTInfoMsg(MAIL_REQUEST_CANCELLED);
 		    break;
 		}
 	    }
@@ -551,8 +549,7 @@ PUBLIC int printfile ARGS1(
 		if (LYgetstr(user_response, VISIBLE,
 			     sizeof(user_response), NORECALL) < 0 ||
 		    *user_response == '\0') {
-		    _statusline(MAIL_REQUEST_CANCELLED);
-		    sleep(InfoSecs);
+		    HTInfoMsg(MAIL_REQUEST_CANCELLED);
 		    break;
 		}
 
@@ -578,7 +575,13 @@ PUBLIC int printfile ARGS1(
 		}
 		use_type =  (disp_charset || HTisDocumentSource());
 
-		change_sug_filename(sug_filename);
+		/*
+		 *  Use newdoc->title as a subject instead of sug_filename:
+		 *  MORE readable and 8-bit letters shouldn't be a problem - LP
+		 */
+		/* change_sug_filename(sug_filename); */
+		StrAllocCopy(subject, subject_translate8bit(newdoc->title));
+
 #ifdef VMS
 		if (strchr(user_response,'@') && !strchr(user_response,':') &&
 		   !strchr(user_response,'%') && !strchr(user_response,'"')) {
@@ -586,44 +589,19 @@ PUBLIC int printfile ARGS1(
 		    strcpy(user_response, filename);
 		}
 
-		if (first) {
-		    tempname(tempfile, NEW_FILE);
-		    if (isPMDF) {
-			tempname(hdrfile, NEW_FILE);
-			if ((len = strlen(hdrfile)) > 4) {
-			    len -= 5;
-			    if (!strcasecomp((hdrfile + len), ".html")) {
-				hdrfile[len] = '\0';
-				strcat(hdrfile, ".txt");
-			    }
-			}
-		    }
-		    first = FALSE;
-		} else {
-		    remove(tempfile);	/* remove duplicates */
-		}
-		if (HTisDocumentSource()) {
-		    if ((len = strlen(tempfile)) > 3) {
-			len -= 4;
-			if (!strcasecomp((tempfile + len), ".txt")) {
-			    tempfile[len] = '\0';
-			    strcat(tempfile, ".html");
-			}
-		    }
-		} else if ((len = strlen(tempfile)) > 4) {
-		    len -= 5;
-		    if (!strcasecomp((tempfile + len), ".html")) {
-			tempfile[len] = '\0';
-			strcat(tempfile, ".txt");
-		    }
-		}
-		if ((outfile_fp = LYNewTxtFile(tempfile)) == NULL) {
+		LYRemoveTemp(tempfile);
+		outfile_fp = LYOpenTemp(tempfile,
+					(HTisDocumentSource())
+						? HTML_SUFFIX
+						: ".txt",
+					"w");
+		if (outfile_fp == NULL) {
 		    HTAlert(UNABLE_TO_OPEN_TEMPFILE);
 		    break;
 		}
 
 		if (isPMDF) {
-		    if ((hfd = LYNewTxtFile(hdrfile)) == NULL) {
+		    if ((hfd = LYOpenTemp(hdrfile, ".txt", "w")) == NULL) {
 			HTAlert(UNABLE_TO_OPEN_TEMPFILE);
 			break;
 		    }
@@ -692,15 +670,15 @@ PUBLIC int printfile ARGS1(
 		print_wwwfile_to_fd(outfile_fp, 0);
 		if (keypad_mode)
 		    printlist(outfile_fp, FALSE);
-		fclose(outfile_fp);
+		LYCloseTempFP(outfile_fp);
 
 		if (isPMDF) {
 		    /*
 		     *	For PMDF, put the subject in the
 		     *	header file and close it. - FM
 		     */
-		    fprintf(hfd, "Subject: %.70s\n\n", sug_filename);
-		    fclose(hfd);
+		    fprintf(hfd, "Subject: %.70s\n\n", subject);
+		    LYCloseTempFP(hfd);
 		    /*
 		     *	Now set up the command. - FM
 		     */
@@ -716,46 +694,35 @@ PUBLIC int printfile ARGS1(
 		     *	For "generic" VMS MAIL, include
 		     *	the subject in the command. - FM
 		     */
-		    remove_quotes(sug_filename);
+		    remove_quotes(subject);
 		    sprintf(buffer,
 			    "%s %s/subject=\"%.70s\" %s %s",
 			    system_mail,
 			    system_mail_flags,
-			    sug_filename,
+			    subject,
 			    tempfile,
 			    user_response);
 		}
 
 		stop_curses();
 		printf(MAILING_FILE);
-		fflush(stdout);
-		system(buffer);
-		fflush(stdout);
+		LYSystem(buffer);
 		sleep(AlertSecs);
 		start_curses();
-		if (isPMDF) {
-		    /*
-		     *	Delete the header file. - FM
-		     */
-		    remove(hdrfile);
-		}
-#else /* Unix: */
-		sprintf(buffer, "%s %s", system_mail, system_mail_flags);
+		if (isPMDF)
+		    LYRemoveTemp(hdrfile);
+#else /* Unix or DOS */
 
 #ifdef DOSPATH
-		sprintf(tempfile, "%s%s", lynx_temp_space, "temp_mail.txt");
-		if ((outfile_fp = LYNewTxtFile(tempfile)) == NULL) {
-			_statusline(MAIL_REQUEST_FAILED);
-			sleep(AlertSecs);
-			return;
-		}
+		outfile_fp = LYOpenTemp(tempfile, ".txt", "w");
 #else
-		if ((outfile_fp = popen(buffer, "w")) == NULL) {
-			_statusline(MAIL_REQUEST_FAILED);
-			sleep(AlertSecs);
-			break;
-		}
+		sprintf(buffer, "%s %s", system_mail, system_mail_flags);
+		outfile_fp = popen(buffer, "w");
 #endif
+		if (outfile_fp == NULL) {
+		    HTAlert(MAIL_REQUEST_FAILED);
+		    break;
+		}
 
 		/*
 		 *  Determine which mail headers should be sent.
@@ -775,7 +742,7 @@ PUBLIC int printfile ARGS1(
 		/*
 		 *  Don't send a charset if we have a CJK character set
 		 *  selected, since it may not be appropriate for mail...
-		 *  Also don't use an inofficial "x-" charset. - kw
+		 *  Also don't use an unofficial "x-" charset. - kw
 		 */
 		if (!use_cte || LYHaveCJKCharacterSet ||
 		    strncasecomp(disp_charset, "x-", 2) == 0) {
@@ -840,7 +807,7 @@ PUBLIC int printfile ARGS1(
 		 *  Add the To, Subject, and X-URL headers. - FM
 		 */
 		fprintf(outfile_fp, "To: %s\nSubject: %s\n",
-				     user_response, sug_filename);
+				     user_response, subject);
 		fprintf(outfile_fp, "X-URL: %s\n\n", newdoc->address);
 		if (LYPrependBaseToSource && HTisDocumentSource()) {
 		    /*
@@ -861,13 +828,13 @@ PUBLIC int printfile ARGS1(
 
 #ifdef DOSPATH
 		sprintf(buffer, "%s -t \"%s\" -F %s", system_mail, user_response, tempfile);
-		fclose(outfile_fp);	/* Close the tmpfile. */
+		LYCloseTempFP(outfile_fp);	/* Close the tmpfile. */
 		stop_curses();
-		printf("Sending \n\n$ %s\n\nPlease wait...", buffer);
-		system(buffer);
+		printf("%s\n\n$ %s\n\n%s", gettext("Sending"), buffer, gettext("Please wait..."));
+		LYSystem(buffer);
 		sleep(MessageSecs);
 		start_curses();
-		remove(tempfile);	/* Delete the tmpfile. */
+		LYRemoveTemp(tempfile); /* Delete the tmpfile. */
 #else
 		pclose(outfile_fp);
 #endif
@@ -882,12 +849,11 @@ PUBLIC int printfile ARGS1(
 		if (pages > 4) {
 		    sprintf(filename, CONFIRM_LONG_SCREEN_PRINT, pages);
 		    _statusline(filename);
-		    c=LYgetch();
+		    c = LYgetch();
 #ifdef VMS
 		    if (HadVMSInterrupt) {
 			HadVMSInterrupt = FALSE;
-			_statusline(PRINT_REQUEST_CANCELLED);
-			sleep(InfoSecs);
+			HTInfoMsg(PRINT_REQUEST_CANCELLED);
 			break;
 		    }
 #endif /* VMS */
@@ -895,18 +861,20 @@ PUBLIC int printfile ARGS1(
 			 || c == '\n' || c == '\r') {
 			addstr("   Ok...");
 		    } else {
-			_statusline(PRINT_REQUEST_CANCELLED);
-			sleep(InfoSecs);
+			HTInfoMsg(PRINT_REQUEST_CANCELLED);
 			break;
 		    }
 		}
 
-		_statusline(PRESS_RETURN_TO_BEGIN);
+		if (Lpansi) {
+		      _statusline(CHECK_PRINTER);
+		} else	{
+		      _statusline(PRESS_RETURN_TO_BEGIN);
+		}
 		*filename = '\0';
 		if (LYgetstr(filename, VISIBLE,
 			     sizeof(filename), NORECALL) < 0) {
-		      _statusline(PRINT_REQUEST_CANCELLED);
-		      sleep(InfoSecs);
+		      HTInfoMsg(PRINT_REQUEST_CANCELLED);
 		      break;
 		}
 
@@ -930,6 +898,8 @@ PUBLIC int printfile ARGS1(
 			    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
 			    newdoc->address, content_base);
 		}
+		if (Lpansi)
+		    printf("\033[5i");
 		print_wwwfile_to_fd(outfile_fp, 0);
 		if (keypad_mode)
 		    printlist(outfile_fp, FALSE);
@@ -941,13 +911,18 @@ PUBLIC int printfile ARGS1(
 		     break;
 		}
 #endif /* VMS */
-		fprintf(stdout,"\n\n%s", PRESS_RETURN_TO_FINISH);
-
-		fflush(stdout);  /* refresh to screen */
-		LYgetch();  /* grab some user input to pause */
+		if (Lpansi) {
+		     printf("\n\014");	/* Form feed */
+		     printf("\033[4i");
+		     Lpansi = FALSE;
+		} else {
+		     fprintf(stdout,"\n\n%s", PRESS_RETURN_TO_FINISH);
+		     LYgetch();  /* grab some user input to pause */
 #ifdef VMS
-		HadVMSInterrupt = FALSE;
+		     HadVMSInterrupt = FALSE;
 #endif /* VMS */
+		}
+		fflush(stdout);  /* refresh to screen */
 		start_curses();
 		break;
 
@@ -963,8 +938,7 @@ PUBLIC int printfile ARGS1(
 #ifdef VMS
 		    if (HadVMSInterrupt) {
 			HadVMSInterrupt = FALSE;
-			_statusline(PRINT_REQUEST_CANCELLED);
-			sleep(InfoSecs);
+			HTInfoMsg(PRINT_REQUEST_CANCELLED);
 			break;
 		    }
 #endif /* VMS */
@@ -972,34 +946,18 @@ PUBLIC int printfile ARGS1(
 			 || c == '\n' || c == '\r') {
 			addstr("   Ok...");
 		    } else  {
-			_statusline(PRINT_REQUEST_CANCELLED);
-			sleep(InfoSecs);
+			HTInfoMsg(PRINT_REQUEST_CANCELLED);
 			break;
 		    }
 		}
 
-		if (first) {
-		    tempname(tempfile, NEW_FILE);
-		    first = FALSE;
-		} else {
-		    remove(tempfile);	/* Remove previous tempfile. */
-		}
-		if (((cp = strrchr(tempfile, '.')) != NULL) &&
-#ifdef VMS
-		    NULL == strchr(cp, ']') &&
-#endif /* VMS */
-		    NULL == strchr(cp, '/')) {
-		    if (HTisDocumentSource() &&
-			strcasecomp(cp, HTML_SUFFIX)) {
-			*cp = '\0';
-			strcat(tempfile, HTML_SUFFIX);
-		    } else if (!HTisDocumentSource() &&
-			       strcasecomp(cp, ".txt")) {
-			*cp = '\0';
-			strcat(tempfile, ".txt");
-		    }
-		}
-		if ((outfile_fp = LYNewTxtFile(tempfile)) == NULL) {
+		LYRemoveTemp(tempfile);
+		outfile_fp = LYOpenTemp(tempfile,
+					(HTisDocumentSource())
+						? HTML_SUFFIX
+						: ".txt",
+					"w");
+		if (outfile_fp == NULL) {
 		    HTAlert(FILE_ALLOC_FAILED);
 		    break;
 		}
@@ -1021,7 +979,7 @@ PUBLIC int printfile ARGS1(
 		if (keypad_mode)
 		    printlist(outfile_fp, FALSE);
 
-		fclose(outfile_fp);
+		LYCloseTempFP(outfile_fp);
 
 		/* find the right printer number */
 		{
@@ -1134,21 +1092,12 @@ PUBLIC int printfile ARGS1(
 			    /*
 			     *	Printer cancelled.
 			     */
-			    _statusline(PRINT_REQUEST_CANCELLED);
-			    sleep(InfoSecs);
+			    HTInfoMsg(PRINT_REQUEST_CANCELLED);
 			    break;
 			}
 
 			if (no_dotfiles || !show_dotfiles) {
-			    if (*filename == '.' ||
-#ifdef VMS
-			       ((cp = strrchr(filename, ':')) &&
-						*(cp+1) == '.') ||
-			       ((cp = strrchr(filename, ']')) &&
-						*(cp+1) == '.') ||
-#endif /* VMS */
-			       ((cp = strrchr(filename, '/')) &&
-						*(cp+1) == '.')) {
+			    if (*LYPathLeaf(filename) == '.') {
 				HTAlert(FILENAME_CANNOT_BE_DOT);
 				_statusline(NEW_FILENAME_PROMPT);
 				FirstRecall = TRUE;
@@ -1167,14 +1116,13 @@ PUBLIC int printfile ARGS1(
 			if (!strcmp(filename, "/dev/null"))
 #endif /* VMS */
 			{
-			    _statusline(PRINT_REQUEST_CANCELLED);
-			    sleep(InfoSecs);
+			    HTInfoMsg(PRINT_REQUEST_CANCELLED);
 			    break;
 			}
 			HTAddSugFilename(filename);
 		    }
 
-#ifdef VMS
+#if defined (VMS) || defined (__EMX__) || defined(__DJGPP__)
 		    sprintf(buffer, cur_printer->command, tempfile, filename,
 				    "", "", "", "", "", "", "", "", "", "");
 #else /* Unix: */
@@ -1200,8 +1148,7 @@ PUBLIC int printfile ARGS1(
 		move(1,1);
 
 		stop_curses();
-		if (TRACE)
-		    fprintf(stderr, "command: %s\n", buffer);
+		CTRACE(tfp, "command: %s\n", buffer);
 		printf(PRINTING_FILE);
 #ifdef VMS
 		/*
@@ -1219,8 +1166,7 @@ PUBLIC int printfile ARGS1(
 		StrAllocCat(envbuffer, HText_getTitle());
 		putenv(envbuffer);
 #endif /* VMS */
-		fflush(stdout);
-		system(buffer);
+		LYSystem(buffer);
 #ifdef VMS
 		/*
 		 *  Remove LYNX_PRINT_TITLE logical. - FM
@@ -1240,11 +1186,11 @@ PUBLIC int printfile ARGS1(
 #endif /* !VMS */
 		sleep(MessageSecs);
 		start_curses();
-		/* don't remove(tempfile); */
     } /* end switch */
 
     FREE(link_info);
     FREE(sug_filename);
+    FREE(subject);
     FREE(content_base);
     FREE(content_location);
     return(NORMAL);
@@ -1269,96 +1215,147 @@ PRIVATE int remove_quotes ARGS1(
 #endif /* VMS */
 
 /*
+ *  Mail subject may have 8-bit characters and they are in display charset.
+ *  There is no stable practice for 8-bit subject encodings:
+ *  MIME define "quoted-printable" which holds charset info
+ *  but most mailers still don't support it, on the other hand
+ *  many mailers send open 8-bit subjects without charset info
+ *  and use local assumption for certain countries.
+ *
+ *  We translate subject to "outgoing_mail_charset" (defined in lynx.cfg)
+ *  it may correspond to US-ASCII as the safest value or any other
+ *  lynx character handler, -1 for no translation (so display charset).
+ *
+ */
+PRIVATE char* subject_translate8bit ARGS1(char *, source)
+{
+    CONST char *p = source;
+    char temp[256];
+    char *q = temp;
+    char *target = NULL;
+
+    int charset_in, charset_out, uck;
+    char replace_buf [10];
+
+    int i = outgoing_mail_charset;  /* from lynx.cfg, -1 by default */
+
+    if (i < 0
+     || LYHaveCJKCharacterSet
+     || LYCharSet_UC[i].enc == UCT_ENC_CJK) {
+	return(source); /* OK */
+    } else {
+	charset_out = i;
+	charset_in  = current_char_set;
+    }
+
+    for ( ; *p; p++) {
+	LYstrncpy(q, p, 1);
+	if ((unsigned char)*q <= 127) {
+	    StrAllocCat(target, q);
+	} else {
+	    uck = UCTransCharStr(replace_buf, sizeof(replace_buf), *q,
+				 charset_in, charset_out, YES);
+	    if (uck >0)
+	    StrAllocCat(target, replace_buf);
+	}
+    }
+
+    return(target);
+}
+
+/*
  * print_options writes out the current printer choices to a file
  * so that the user can select printers in the same way that
  * they select all other links
  * printer links look like
  *  LYNXPRINT://LOCAL_FILE/lines=#	     print to a local file
  *  LYNXPRINT://TO_SCREEN/lines=#	     print to the screen
+ *  LYNXPRINT://LPANSI/lines=#		     print to the local terminal
  *  LYNXPRINT://MAIL_FILE/lines=#	     mail the file
  *  LYNXPRINT://PRINTER/lines=#/number=#   print to printer number #
  */
-PUBLIC int print_options ARGS2(
+PUBLIC int print_options ARGS3(
 	char **,	newfile,
+	char **,	printed_url,
 	int,		lines_in_file)
 {
-    static char tempfile[256];
-    static BOOLEAN first = TRUE;
-    static char print_filename[256];
+    static char tempfile[LY_MAXPATH];
     char buffer[LINESIZE];
     int count;
     int pages;
     FILE *fp0;
     lynx_printer_item_type *cur_printer;
 
-    pages = lines_in_file/66 + 1;
 
-    if (first) {
-	tempname(tempfile, NEW_FILE);
-#if defined (VMS) || defined (DOSPATH)
-	sprintf(print_filename, "file://localhost/%s", tempfile);
-#else
-	sprintf(print_filename, "file://localhost%s", tempfile);
-#endif /* VMS */
-	first = FALSE;
-#ifdef VMS
-    } else {
-	remove(tempfile);   /* Remove duplicates on VMS. */
-#endif /* !VMS */
-    }
-
-    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
+    LYRemoveTemp(tempfile);
+    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
 	HTAlert(UNABLE_TO_OPEN_PRINTOP_FILE);
 	return(-1);
     }
 
-    StrAllocCopy(*newfile, print_filename);
-    LYforce_no_cache = TRUE;
+    LYLocalFileToURL(newfile, tempfile);
 
-    fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
-		 PRINT_OPTIONS_TITLE);
+    BeginInternalPage(fp0, PRINT_OPTIONS_TITLE, PRINT_OPTIONS_HELP);
 
-    fprintf(fp0,"<h1>Printing Options (%s Version %s)</h1><pre>\n",
-				       LYNX_NAME, LYNX_VERSION);
+    fprintf(fp0, "<pre>\n");
 
+    /*  pages = lines_in_file/66 + 1; */
     pages = (lines_in_file+65)/66;
-    sprintf(buffer,
-	   "   There are %d lines, or approximately %d page%s, to print.\n",
-	    lines_in_file, pages, (pages > 1 ? "s" : ""));
-    fputs(buffer,fp0);
+    sprintf(buffer, "   <em>%s</em> %s\n   <em>%s</em> %d\n   <em>%s</em> %d %s %s\n",
+	    gettext("Document:"), *printed_url,
+	    gettext("Number of lines:"), lines_in_file,
+	    gettext("Number of pages:"), pages,
+	    (pages > 1 ? gettext("pages") : gettext("page")),
+	    gettext("(approximately)"));
+    fputs(buffer, fp0);
 
     if (no_print || no_disk_save || child_lynx || no_mail)
-	fprintf(fp0, "   Some print functions have been disabled!!!\n");
+	fprintf(fp0, "   <em>%s</em>\n", gettext("Some print functions have been disabled!"));
 
-    fprintf(fp0, "   You have the following print choices.\n");
-    fprintf(fp0, "   Please select one:\n\n");
+    fprintf(fp0, "\n%s %s\n", gettext("options:"),
+	    (user_mode == NOVICE_MODE) ? gettext("Standard print") : gettext("Print"));
 
-    if (child_lynx == FALSE && no_disk_save == FALSE && no_print == FALSE)
+    if (child_lynx == FALSE && no_disk_save == FALSE && no_print == FALSE) {
 	fprintf(fp0,
-   "   <a href=\"LYNXPRINT://LOCAL_FILE/lines=%d\">Save to a local file</a>\n",
-		lines_in_file);
-    else
-	fprintf(fp0,"   Save to disk disabled.\n");
-    if (child_lynx == FALSE && no_mail == FALSE)
+		"   <a href=\"LYNXPRINT://LOCAL_FILE/lines=%d\">%s</a>\n",
+		lines_in_file,
+		gettext("Save to a local file"));
+    } else {
+	fprintf(fp0,"   <em>%s</em>\n", gettext("Save to disk disabled"));
+    }
+    if (child_lynx == FALSE && no_mail == FALSE && local_host_only == FALSE)
 	 fprintf(fp0,
-   "   <a href=\"LYNXPRINT://MAIL_FILE/lines=%d\">Mail the file</a>\n",
-		lines_in_file);
+		 "   <a href=\"LYNXPRINT://MAIL_FILE/lines=%d\">%s</a>\n",
+		 lines_in_file,
+		 gettext("Mail the file"));
+
+#ifndef DOSPATH
     fprintf(fp0,
-   "   <a href=\"LYNXPRINT://TO_SCREEN/lines=%d\">Print to the screen</a>\n",
-		lines_in_file);
+	    "   <a href=\"LYNXPRINT://TO_SCREEN/lines=%d\">%s</a>\n",
+	    lines_in_file,
+	    gettext("Print to the screen"));
+    fprintf(fp0,
+	    "   <a href=\"LYNXPRINT://LPANSI/lines=%d\">%s</a>\n",
+	    lines_in_file,
+	    gettext("Print out on a printer attached to your vt100 terminal"));
+#endif
+
+    if (user_mode == NOVICE_MODE)
+	fprintf(fp0, "\n%s\n", gettext("Local additions:"));
 
     for (count = 0, cur_printer = printers; cur_printer != NULL;
 	cur_printer = cur_printer->next, count++)
     if (no_print == FALSE || cur_printer->always_enabled) {
 	fprintf(fp0,
-   "   <a href=\"LYNXPRINT://PRINTER/number=%d/pagelen=%d/lines=%d\">",
+		"   <a href=\"LYNXPRINT://PRINTER/number=%d/pagelen=%d/lines=%d\">",
 		count, cur_printer->pagelen, lines_in_file);
 	fprintf(fp0, (cur_printer->name ?
 		      cur_printer->name : "No Name Given"));
 	fprintf(fp0, "</a>\n");
     }
-    fprintf(fp0, "</pre>\n</body>\n");
-    fclose(fp0);
+    fprintf(fp0, "</pre>\n");
+    EndInternalPage(fp0);
+    LYCloseTempFP(fp0);
 
     LYforce_no_cache = TRUE;
     return(0);

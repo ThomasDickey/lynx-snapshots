@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <LYGlobalDefs.h>
 #include <LYUtils.h>
 #include <LYSignal.h>
@@ -17,7 +16,7 @@ PUBLIC BOOLEAN lookup ARGS1(char *,target)
 
     if ((ifp = fopen(TRAVERSE_FILE,"r")) == NULL) {
         if ((ifp = LYNewTxtFile(TRAVERSE_FILE)) == NULL) {
-            perror("unable to open or create a traversal file");
+            perror(CANNOT_OPEN_TRAV_FILE);
 #ifndef NOSIGHUP
 	    (void) signal(SIGHUP, SIG_DFL);
 #endif /* NOSIGHUP */
@@ -55,7 +54,7 @@ PUBLIC void add_to_table ARGS1(char *,target)
     FILE *ifp;
 
     if ((ifp = LYAppendToTxtFile(TRAVERSE_FILE)) == NULL) {
-	perror("unable to open traversal file");
+	perror(CANNOT_OPEN_TRAV_FILE);
 #ifndef NOSIGHUP
 	(void) signal(SIGHUP, SIG_DFL);
 #endif /* NOSIGHUP */
@@ -81,7 +80,7 @@ PUBLIC void add_to_traverse_list ARGS2(char *,fname, char *,prev_link_name)
     FILE *ifp;
 
     if ((ifp = LYAppendToTxtFile(TRAVERSE_FOUND_FILE)) == NULL) {
-	perror("unable to open traversal found file");
+	perror(CANNOT_OPEN_TRAF_FILE);
 #ifndef NOSIGHUP
 	(void) signal(SIGHUP, SIG_DFL);
 #endif /* NOSIGHUP */
@@ -110,12 +109,13 @@ PUBLIC void dump_traversal_history NOARGS
         return;
 
     if ((ifp = LYAppendToTxtFile(TRAVERSE_FILE)) == NULL) {
-        perror("unable to open traversal file");
+        perror(CANNOT_OPEN_TRAV_FILE);
 	return;
     }
 
-    fprintf(ifp, "\n\nTRAVERSAL WAS INTERUPTED\n\n\
-\t    here is a list of the history stack so that you may rebuild\n\n");
+    fprintf(ifp, "\n\n%s\n\n\t    %s\n\n",
+	    TRAV_WAS_INTERRUPTED,
+	    gettext("here is a list of the history stack so that you may rebuild"));
 
     for (x = nhist-1; x >= 0; x--) {
 	fprintf(ifp,"%s\t%s\n", history[x].title, history[x].address);
@@ -130,7 +130,7 @@ PUBLIC void add_to_reject_list ARGS1(char *,target)
     FILE *ifp;
 
     if ((ifp = LYAppendToTxtFile(TRAVERSE_REJECT_FILE)) == NULL) {
-	perror("unable to open reject file");
+	perror(CANNOT_OPEN_REJ_FILE);
 #ifndef NOSIGHUP
 	(void) signal(SIGHUP, SIG_DFL);
 #endif /* NOSIGHUP */

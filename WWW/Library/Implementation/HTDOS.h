@@ -13,7 +13,7 @@
 **	returns		WWW file specification
 **
 */
-char * HTDOS_wwwName (char * dosname);
+char * HTDOS_wwwName PARAMS((char * dosname));
 
 
 /* PUBLIC                                                       HTDOS_name()
@@ -26,7 +26,7 @@ char * HTDOS_wwwName (char * dosname);
 **
 ** Bug:	Returns pointer to static -- non-reentrant
 */
-char * HTDOS_name (char * wwwname);
+char * HTDOS_name PARAMS((char * wwwname));
 
 
 #endif /*  HTDOS_H */

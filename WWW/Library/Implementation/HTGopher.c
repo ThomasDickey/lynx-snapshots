@@ -16,7 +16,6 @@
 */
 
 #include <HTUtils.h>		/* Coding convention macros */
-#include <tcp.h>
 #include <HTAlert.h>
 #include <HTParse.h>
 #include <HTTCP.h>
@@ -26,8 +25,6 @@
 **  Implements.
 */
 #include <HTGopher.h>
-
-#define HT_EM_SPACE ((char)2)		/* For now */
 
 #define GOPHER_PORT 70		/* See protocol spec */
 #define CSO_PORT 105		/* See protocol spec */
@@ -61,19 +58,17 @@
 #define GOPHER_PLUS_SOUND	'<'
 #define GOPHER_PLUS_PDF 	'P'
 
-#include <ctype.h>
-
 #include <HTParse.h>
 #include <HTFormat.h>
 #include <HTTCP.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
 **  Hypertext object building machinery.
 */
 #include <HTML.h>
 
+#include <LYStrings.h>
+#include <LYUtils.h>
 #include <LYLeaks.h>
 
 #define PUTC(c) (*targetClass.put_character)(target, c)
@@ -196,8 +191,7 @@ PRIVATE void write_anchor ARGS2(CONST char *,text, CONST char *,addr)
     present[HTML_A_TITLE] = YES;
     ((CONST char **)value)[HTML_A_TITLE] = text;
 
-    if(TRACE)
-	fprintf(stderr,"HTGopher: adding URL: %s\n",addr);
+    CTRACE(tfp,"HTGopher: adding URL: %s\n",addr);
 
     HT_Is_Gopher_URL = TRUE;  /* tell HTML.c that this is a Gopher URL */
     (*targetClass.start_element)(target, HTML_A, present,
@@ -239,7 +233,7 @@ PRIVATE void parse_menu ARGS2(
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
     else
-	PUTS("Gopher Menu");
+	PUTS(gettext("Gopher Menu"));
     END(HTML_TITLE);
     PUTS("\n");
     END(HTML_HEAD);
@@ -251,16 +245,14 @@ PRIVATE void parse_menu ARGS2(
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
     else
-	PUTS("Gopher Menu");
+	PUTS(gettext("Gopher Menu"));
     END(HTML_H1);
     PUTS("\n");
     START(HTML_PRE);
     while ((ch=NEXT_CHAR) != (char)EOF) {
 
 	if (interrupted_in_htgetcharacter) {
-	    if (TRACE)
-		fprintf(stderr,
-		    "HTGopher: Interrupted in HTGetCharacter, apparently.\n");
+	    CTRACE(tfp, "HTGopher: Interrupted in HTGetCharacter, apparently.\n");
 	    goto end_html;
 	}
 
@@ -273,12 +265,11 @@ PRIVATE void parse_menu ARGS2(
 	    bytes += p-line;	/* add size */
 	    p = line;		/* Scan it to parse it */
 	    port = 0;		/* Flag "not parsed" */
-	    if (TRACE)
-		fprintf(stderr, "HTGopher: Menu item: %s\n", line);
+	    CTRACE(tfp, "HTGopher: Menu item: %s\n", line);
 	    gtype = *p++;
 
 	    if (bytes > BytesReported + 1024) {
-		sprintf(buffer, "Transferred %d bytes", bytes);
+		sprintf(buffer, gettext("Transferred %d bytes"), bytes);
 		HTProgress(buffer);
 		BytesReported = bytes;
 	    }
@@ -428,8 +419,7 @@ PRIVATE void parse_menu ARGS2(
 		else
 		    PUTS(name);
 	    } else { /* parse error */
-		if (TRACE)
-		    fprintf(stderr, "HTGopher: Bad menu item.\n");
+		CTRACE(tfp, "HTGopher: Bad menu item.\n");
 		PUTS(line);
 
 	    } /* parse error */
@@ -482,7 +472,7 @@ PRIVATE void parse_cso ARGS2(
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
     else
-	PUTS("CSO Search Results");
+	PUTS(gettext("CSO Search Results"));
     END(HTML_TITLE);
     PUTS("\n");
     END(HTML_HEAD);
@@ -492,7 +482,7 @@ PRIVATE void parse_cso ARGS2(
 	PUTS(title);
     else {
 	PUTS(arg);
-	PUTS(" Search Results");
+	PUTS(gettext(" Search Results"));
     }
     END(HTML_H1);
     PUTS("\n");
@@ -625,7 +615,7 @@ PRIVATE void display_cso ARGS2(
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
     else
-	PUTS("CSO index");
+	PUTS(gettext("CSO index"));
     END(HTML_TITLE);
     PUTS("\n");
     START(HTML_ISINDEX);
@@ -637,15 +627,15 @@ PRIVATE void display_cso ARGS2(
 	PUTS(title);
     else {
        PUTS(arg);
-       PUTS(" index");
+       PUTS(gettext(" index"));
     }
     END(HTML_H1);
-    PUTS("\nThis is a searchable index of a CSO database.\n");
+    PUTS(gettext("\nThis is a searchable index of a CSO database.\n"));
     START(HTML_P);
-    PUTS("\nPress the 's' key and enter search keywords.\n");
+    PUTS(gettext("\nPress the 's' key and enter search keywords.\n"));
     START(HTML_P);
-    PUTS("\nThe keywords that you enter will allow you to search on a");
-    PUTS(" person's name in the database.\n");
+    PUTS(gettext("\nThe keywords that you enter will allow you to search on a"));
+    PUTS(gettext(" person's name in the database.\n"));
 
     if (!HTAnchor_title(anAnchor))
 	HTAnchor_setTitle(anAnchor, arg);
@@ -670,7 +660,7 @@ PRIVATE void display_index ARGS2(
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
     else
-	PUTS("Gopher index");
+	PUTS(gettext("Gopher index"));
     END(HTML_TITLE);
     PUTS("\n");
     START(HTML_ISINDEX);
@@ -682,12 +672,12 @@ PRIVATE void display_index ARGS2(
 	PUTS(title);
     else {
        PUTS(arg);
-       PUTS(" index");
+       PUTS(gettext(" index"));
     }
     END(HTML_H1);
-    PUTS("\nThis is a searchable Gopher index.\n");
+    PUTS(gettext("\nThis is a searchable Gopher index.\n"));
     START(HTML_P);
-    PUTS("\nPlease enter search keywords.\n");
+    PUTS(gettext("\nPlease enter search keywords.\n"));
 
     if (!HTAnchor_title(anAnchor))
 	HTAnchor_setTitle(anAnchor, arg);
@@ -889,7 +879,6 @@ PRIVATE int interpret_cso_key ARGS5(
 PRIVATE int parse_cso_field_info ARGS1(
 	CSOfield_info *,	blk)
 {
-    int i;
     char *info, *max_spec;
 
     /*
@@ -903,8 +892,7 @@ PRIVATE int parse_cso_field_info ARGS1(
     **	are converted to all lower-case for comparison.
     */
     info = blk->attributes;
-    for (i = 0; info[i]; i++)
-	info[i] = TOLOWER(info[i]);
+    LYLowerCase(info);
     if (strstr(info, "indexed "))
 	blk->indexed = 1;
     if (strstr(info, "default "))
@@ -950,10 +938,7 @@ PRIVATE int parse_cso_fields ARGS2(
     */
     while ((ch = NEXT_CHAR) != (char)EOF) {
 	if (interrupted_in_htgetcharacter) {
-	    if (TRACE) {
-		fprintf(stderr,
-		  "HTLoadCSO: Interrupted in HTGetCharacter, apparently.\n");
-	    }
+	    CTRACE(tfp, "HTLoadCSO: Interrupted in HTGetCharacter, apparently.\n");
 	    free_CSOfields();
 	    buf[0] = '\0';
 	    return HT_INTERRUPTED;
@@ -1203,7 +1188,7 @@ PRIVATE int generate_cso_form ARGS4(
 			if (temp) {
 			    outofmem(__FILE__, "HTLoadCSO");
 			}
-			sprintf(temp, "Seek fail on %s\n", ctx.seek);
+			sprintf(temp, gettext("Seek fail on %s\n"), ctx.seek);
 			(*Target->isa->put_block)(Target, temp, strlen(temp));
 			FREE(temp);
 		    }
@@ -1254,11 +1239,8 @@ PRIVATE int generate_cso_report ARGS2(
     while (!stop && (ch = NEXT_CHAR) != (char)EOF) {
 	if (interrupted_in_htgetcharacter) {
 	    buf[0] = '\0';
-	    if (TRACE) {
-		fprintf(stderr,
-		  "HTLoadCSO: Interrupted in HTGetCharacter, apparently.\n");
-	    }
-	    _HTProgress ("Connection interrupted.");
+	    CTRACE(tfp, "HTLoadCSO: Interrupted in HTGetCharacter, apparently.\n");
+	    _HTProgress (gettext("Connection interrupted."));
 	    goto end_CSOreport;
 	}
 
@@ -1499,8 +1481,7 @@ PRIVATE int HTLoadCSO ARGS4(
 	return -3;		/* Bad if no name sepcified	*/
     if (!*arg)
 	return -2;		/* Bad if name had zero length	*/
-    if (TRACE)
-	fprintf(stderr, "HTLoadCSO: Looking for %s\n", arg);
+    CTRACE(tfp, "HTLoadCSO: Looking for %s\n", arg);
 
     /*
     **	Set up a socket to the server for the data.
@@ -1510,16 +1491,12 @@ PRIVATE int HTLoadCSO ARGS4(
 	/*
 	**  Interrupt cleanly.
 	*/
-	if (TRACE)
-	    fprintf(stderr,
-		 "HTLoadCSO: Interrupted on connect; recovering cleanly.\n");
-	_HTProgress ("Connection interrupted.");
+	CTRACE(tfp, "HTLoadCSO: Interrupted on connect; recovering cleanly.\n");
+	_HTProgress (gettext("Connection interrupted."));
 	return HT_NOT_LOADED;
     }
     if (status < 0) {
-	if (TRACE)
-	    fprintf(stderr,
-		    "HTLoadCSO: Unable to connect to remote host for `%s'.\n",
+	CTRACE(tfp, "HTLoadCSO: Unable to connect to remote host for `%s'.\n",
 		    arg);
 	return HTInetStatus("connect");
     }
@@ -1529,19 +1506,16 @@ PRIVATE int HTLoadCSO ARGS4(
     if ((command = (char *)malloc(12)) == NULL)
 	outofmem(__FILE__, "HTLoadCSO");
     sprintf(command, "fields%c%c", CR, LF);
-    if (TRACE)
-	fprintf(stderr,
-		"HTLoadCSO: Connected, writing command `%s' to socket %d\n",
+    CTRACE(tfp, "HTLoadCSO: Connected, writing command `%s' to socket %d\n",
 		command, s);
-    _HTProgress ("Sending CSO/PH request.");
+    _HTProgress (gettext("Sending CSO/PH request."));
     status = NETWRITE(s, command, (int)strlen(command));
     FREE(command);
     if (status < 0) {
-	if (TRACE)
-	    fprintf(stderr, "HTLoadCSO: Unable to send command.\n");
+	CTRACE(tfp, "HTLoadCSO: Unable to send command.\n");
 	return HTInetStatus("send");
     }
-    _HTProgress ("CSO/PH request sent; waiting for response.");
+    _HTProgress (gettext("CSO/PH request sent; waiting for response."));
 
     /*
     **	Now read the data from the socket.
@@ -1550,11 +1524,11 @@ PRIVATE int HTLoadCSO ARGS4(
     if (status) {
 	NETCLOSE(s);
 	if (status == HT_INTERRUPTED) {
-	    _HTProgress ("Connection interrupted.");
+	    _HTProgress (gettext("Connection interrupted."));
 	} else if (buf[0] != '\0') {
 	    HTAlert(buf);
 	} else {
-	    HTAlert("No response from server!");
+	    HTAlert(gettext("No response from server!"));
 	}
 	return HT_NOT_LOADED;
     }
@@ -1566,7 +1540,7 @@ PRIVATE int HTLoadCSO ARGS4(
 	if (!temp) {
 	    outofmem(__FILE__, "HTLoadCSO");
 	}
-	sprintf(temp, "Sorry, no known way of converting %s to %s.",
+	sprintf(temp, gettext("Sorry, no known way of converting %s to %s."),
 		HTAtom_name(format_in), HTAtom_name(format_out));
 	HTAlert(temp);
 	FREE(temp);
@@ -1715,15 +1689,12 @@ PRIVATE int HTLoadCSO ARGS4(
     (*Target->isa->put_block)(Target, command, clen);
     strcpy(buf, "</H2>\n");
     (*Target->isa->put_block)(Target, buf, strlen(buf));
-    if (TRACE)
-	fprintf(stderr,
-		"HTLoadCSO: Writing command `%s' to socket %d\n",
+    CTRACE(tfp, "HTLoadCSO: Writing command `%s' to socket %d\n",
 		command, s);
     status = NETWRITE(s, command, clen);
     FREE(command);
     if (status < 0) {
-	if (TRACE)
-	    fprintf(stderr, "HTLoadCSO: Unable to send command.\n");
+	CTRACE(tfp, "HTLoadCSO: Unable to send command.\n");
 	free_CSOfields();
 	return HTInetStatus("send");
     }
@@ -1761,8 +1732,7 @@ PRIVATE int HTLoadGopher ARGS4(
 	return -3;		/* Bad if no name sepcified	*/
     if (!*arg)
 	return -2;		/* Bad if name had zero length	*/
-    if (TRACE)
-	fprintf(stderr, "HTGopher: Looking for %s\n", arg);
+    CTRACE(tfp, "HTGopher: Looking for %s\n", arg);
 
     /*
     **	If it's a port 105 GOPHER_CSO gtype with no ISINDEX token ('?'),
@@ -1775,8 +1745,7 @@ PRIVATE int HTLoadGopher ARGS4(
 	if ((len = strlen(arg)) > 5) {
 	    if (0 == strcmp((CONST char *)&arg[len-6], ":105/2")) {
 		/* Use CSO gateway. */
-		if (TRACE)
-		    fprintf(stderr, "HTGopher: Passing to CSO/PH gateway.\n");
+		CTRACE(tfp, "HTGopher: Passing to CSO/PH gateway.\n");
 		return HTLoadCSO(arg, anAnchor, format_out, sink);
 	    }
 	}
@@ -1786,8 +1755,7 @@ PRIVATE int HTLoadGopher ARGS4(
     **	If it's a port 79/0[/...] URL, use the finger gateway. - FM
     */
     if (strstr(arg, ":79/0") != NULL) {
-	if (TRACE)
-	    fprintf(stderr, "HTGopher: Passing to finger gateway.\n");
+	CTRACE(tfp, "HTGopher: Passing to finger gateway.\n");
 	return HTLoadFinger(arg, anAnchor, format_out, sink);
     }
 
@@ -1884,17 +1852,13 @@ PRIVATE int HTLoadGopher ARGS4(
 	/*
 	**  Interrupt cleanly.
 	*/
-	if (TRACE)
-	    fprintf(stderr,
-		    "HTGopher: Interrupted on connect; recovering cleanly.\n");
-	_HTProgress ("Connection interrupted.");
+	CTRACE(tfp, "HTGopher: Interrupted on connect; recovering cleanly.\n");
+	_HTProgress (gettext("Connection interrupted."));
 	FREE(command);
 	return HT_NOT_LOADED;
     }
     if (status < 0) {
-	if (TRACE)
-	    fprintf(stderr,
-		    "HTGopher: Unable to connect to remote host for `%s'.\n",
+	CTRACE(tfp, "HTGopher: Unable to connect to remote host for `%s'.\n",
 		    arg);
 	FREE(command);
 	return HTInetStatus("connect");
@@ -1902,9 +1866,7 @@ PRIVATE int HTLoadGopher ARGS4(
 
     HTInitInput(s);		/* Set up input buffering */
 
-    if (TRACE)
-	fprintf(stderr,
-		"HTGopher: Connected, writing command `%s' to socket %d\n",
+    CTRACE(tfp, "HTGopher: Connected, writing command `%s' to socket %d\n",
 		command, s);
 
 #ifdef NOT_ASCII
@@ -1916,17 +1878,16 @@ PRIVATE int HTLoadGopher ARGS4(
     }
 #endif
 
-    _HTProgress ("Sending Gopher request.");
+    _HTProgress (gettext("Sending Gopher request."));
 
     status = NETWRITE(s, command, (int)strlen(command));
     FREE(command);
     if (status < 0) {
-	if (TRACE)
-	    fprintf(stderr, "HTGopher: Unable to send command.\n");
+	CTRACE(tfp, "HTGopher: Unable to send command.\n");
 	return HTInetStatus("send");
     }
 
-    _HTProgress ("Gopher request sent; waiting for response.");
+    _HTProgress (gettext("Gopher request sent; waiting for response."));
 
     /*
     **	Now read the data from the socket.

@@ -12,20 +12,16 @@
 **	(c) Copyright CERN 1991 - See Copyright.html
 **
 */
+
 #include <HTUtils.h>
 
 #define HASH_SIZE	101		/* Tunable */
 #include <HTAtom.h>
 
-/*#include <stdio.h> included by HTUtils.h -- FM *//* joe@athena, TBL 921019 */
-#include <string.h>
-
 #include <HTList.h>
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 PRIVATE HTAtom * hash_table[HASH_SIZE];
 PRIVATE BOOL initialised = NO;
@@ -44,7 +40,7 @@ PUBLIC HTAtom * HTAtom_for ARGS1(CONST char *, string)
 {
     int hash;
     HTAtom * a;
-    
+
     /*		First time around, clear hash table
     */
     /*
@@ -58,21 +54,20 @@ PUBLIC HTAtom * HTAtom_for ARGS1(CONST char *, string)
 	initialised = YES;
 	atexit(free_atoms);
     }
-    
+
     /*		Generate hash function
     */
     hash = HASH_FUNCTION(string);
-    
+
     /*		Search for the string in the list
     */
     for (a = hash_table[hash]; a; a = a->next) {
 	if (0 == strcasecomp(a->name, string)) {
-    	    /* if (TRACE) fprintf(stderr,
-	    	"HTAtom: Old atom %p for `%s'\n", a, string); */
+    	    /* CTRACE(tfp, "HTAtom: Old atom %p for `%s'\n", a, string); */
 	    return a;				/* Found: return it */
 	}
     }
-    
+
     /*		Generate a new entry
     */
     a = (HTAtom *)malloc(sizeof(*a));
@@ -85,8 +80,7 @@ PUBLIC HTAtom * HTAtom_for ARGS1(CONST char *, string)
     a->next = hash_table[hash];		/* Put onto the head of list */
     hash_table[hash] = a;
 #ifdef NOT_DEFINED
-    if (TRACE)
-	fprintf(stderr, "HTAtom: New atom %p for `%s'\n", a, string);
+    CTRACE(tfp, "HTAtom: New atom %p for `%s'\n", a, string);
 #endif /* NOT_DEFINED */
     return a;
 }
@@ -147,7 +141,7 @@ PRIVATE BOOL mime_match ARGS2(CONST char *, name,
     }
     return NO;
 }
-	
+
 
 PUBLIC HTList *HTAtom_templateMatches ARGS1(CONST char *, templ)
 {

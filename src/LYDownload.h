@@ -9,7 +9,5 @@
 extern void LYDownload PARAMS((char *line));
 extern int LYdownload_options PARAMS((char **newfile, char *data_file));
 
-#define DOWNLOAD_OPTIONS_TITLE "Lynx Download Options"
-
 #endif /* LYDOWNLOAD_H */
 

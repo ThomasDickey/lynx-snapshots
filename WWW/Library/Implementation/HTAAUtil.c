@@ -1,4 +1,3 @@
-
 /* MODULE							HTAAUtil.c
 **		COMMON PARTS OF ACCESS AUTHORIZATION MODULE
 **			FOR BOTH SERVER AND BROWSER
@@ -45,13 +44,13 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>	/* NETREAD() etc.	*/
-#include <string.h>
+
 #include <HTAAUtil.h>	/* Implemented here	*/
 #include <HTAssoc.h>	/* Assoc list		*/
 #include <HTTCP.h>
 #include <HTAlert.h>
 
+#include <LYStrings.h>
 #include <LYLeaks.h>
 
 /* PUBLIC						HTAAScheme_enum()
@@ -67,17 +66,12 @@
 PUBLIC HTAAScheme HTAAScheme_enum ARGS1(CONST char*, name)
 {
     char *upcased = NULL;
-    char *cur;
 
     if (!name)
 	return HTAA_UNKNOWN;
 
     StrAllocCopy(upcased, name);
-    cur = upcased;
-    while (*cur) {
-	*cur = TOUPPER(*cur);
-	cur++;
-    }
+    LYUpperCase(upcased);
 
     if (!strncmp(upcased, "NONE", 4)) {
 	FREE(upcased);
@@ -116,22 +110,16 @@ PUBLIC char *HTAAScheme_name ARGS1(HTAAScheme, scheme)
     switch (scheme) {
 	case HTAA_NONE:
 	    return "None";
-	    break;
 	case HTAA_BASIC:
 	    return "Basic";
-	    break;
 	case HTAA_PUBKEY:
 	    return "Pubkey";
-	    break;
 	case HTAA_KERBEROS_V4:
 	    return "KerberosV4";
-	    break;
 	case HTAA_KERBEROS_V5:
 	    return "KerberosV5";
-	    break;
 	case HTAA_UNKNOWN:
 	    return "UNKNOWN";
-	    break;
 	default:
 	    return "THIS-IS-A-BUG";
     }
@@ -149,23 +137,12 @@ PUBLIC char *HTAAScheme_name ARGS1(HTAAScheme, scheme)
 */
 PUBLIC HTAAMethod HTAAMethod_enum ARGS1(CONST char *, name)
 {
-    char tmp[MAX_METHODNAME_LEN+1];
-    CONST char *src = name;
-    char *dest = tmp;
-
     if (!name)
 	return METHOD_UNKNOWN;
 
-    while (*src) {
-	*dest = TOUPPER(*src);
-	dest++;
-	src++;
-    }
-    *dest = 0;
-
-    if (0==strcmp(tmp, "GET"))
+    if (0==strcasecomp(name, "GET"))
 	return METHOD_GET;
-    else if (0==strcmp(tmp, "PUT"))
+    else if (0==strcasecomp(name, "PUT"))
 	return METHOD_PUT;
     else
 	return METHOD_UNKNOWN;
@@ -187,13 +164,10 @@ PUBLIC char *HTAAMethod_name ARGS1(HTAAMethod, method)
     switch (method) {
       case METHOD_GET:
 	  return "GET";
-	  break;
       case METHOD_PUT:
 	  return "PUT";
-	  break;
       case METHOD_UNKNOWN:
 	  return "UNKNOWN";
-	  break;
       default:
 	  return "THIS-IS-A-BUG";
     }
@@ -217,8 +191,7 @@ PUBLIC BOOL HTAAMethod_inList ARGS2(HTAAMethod, method,
     char *item;
 
     while (NULL != (item = (char*)HTList_nextObject(cur))) {
-	if (TRACE)
-	    fprintf(stderr, " %s", item);
+	CTRACE(tfp, " %s", item);
 	if (method == HTAAMethod_enum(item))
 	    return YES;
     }
@@ -367,9 +340,8 @@ PUBLIC char *HTAA_makeProtectionTemplate ARGS1(CONST char *, docname)
     else
 	StrAllocCopy(template, "*");
 
-    if (TRACE)
-	fprintf(stderr, "make_template: made template `%s' for file `%s'\n",
-			template, docname);
+    CTRACE(tfp, "make_template: made template `%s' for file `%s'\n",
+		template, docname);
 
     return template;
 }
@@ -501,9 +473,8 @@ PRIVATE int in_soc = -1;
 **			will use this buffer first and then
 **			proceed to read from socket.
 */
-PUBLIC void HTAA_setupReader ARGS4(char *,	start_of_headers,
+PUBLIC void HTAA_setupReader ARGS3(char *,	start_of_headers,
 				   int, 	length,
-				   void *,	handle,
 				   int, 	soc)
 {
     start_pointer = buffer;
@@ -549,10 +520,9 @@ PUBLIC char *HTAA_getUnfoldedLine NOARGS
     BOOL peek_for_folding = NO;
 
     if (in_soc < 0) {
-	if (TRACE)
-	    fprintf(stderr, "%s %s\n",
-			    "HTAA_getUnfoldedLine: buffer not initialized",
-			    "with function HTAA_setupReader()");
+	CTRACE(tfp, "%s %s\n",
+		    "HTAA_getUnfoldedLine: buffer not initialized",
+		    "with function HTAA_setupReader()");
 	return NULL;
     }
 

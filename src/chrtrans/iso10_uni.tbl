@@ -10,7 +10,7 @@ D0
 Miso-8859-10
 
 #Name as a Display Charset (used on Options screen)
-OISO 8859-10
+OISO-8859-10
  
 0x20-0x7e	idem
 #0x7f		U+2302

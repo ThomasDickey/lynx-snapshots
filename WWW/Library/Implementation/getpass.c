@@ -23,7 +23,6 @@ Cambridge, MA 02139, USA.  */
  */
 
 #include <HTUtils.h>
-/*#include <stdio.h>  included by HTUtils.h -- FM */
 #include <descrip.h>
 #include <psldef.h>
 #include <iodef.h>

@@ -14,6 +14,13 @@ top_srcdir	= @top_srcdir@
 srcdir		= @srcdir@
 VPATH		= $(srcdir)
 
+top_builddir	= ../..
+
+LIBS		= @LIBS@ $(SITE_LIBS)
+LDFLAGS		= @LDFLAGS@
+
+INTLLIB		= @INTLDIR_MAKE@@INTLLIBS@ 
+
 WWWINC		= WWW/Library/Implementation
 SITE_DEFS	= # FIXME: set in parent makefile
 
@@ -21,7 +28,8 @@ CC		= @CC@
 CPP		= @CPP@
 CFLAGS		= @CFLAGS@
 CPP_OPTS	= @DEFS@ @CPPFLAGS@ \
-		-I../.. \
+		-I$(top_builddir) \
+		-I$(top_srcdir)/intl \
 		-I$(top_srcdir)/src \
 		-I$(top_srcdir)/src/chrtrans \
 		-I$(top_srcdir)/$(WWWINC) \
@@ -79,7 +87,7 @@ default: $(FONTMAP_INC)
 tables: $(TABLES)
 
 makeuctb$x: makeuctb.o
-	$(CC) $(CC_OPTS) -o $@ makeuctb.o
+	$(CC) $(CC_OPTS) -o $@ makeuctb.o $(INTLLIB) $(LIBS)
 
 makeuctb.o: $(srcdir)/UCkd.h $(srcdir)/makeuctb.c
 
@@ -107,6 +115,7 @@ cp1256_uni.h:		$(srcdir)/cp1256_uni.tbl	makeuctb$x
 cp1257_uni.h:		$(srcdir)/cp1257_uni.tbl	makeuctb$x
 cp437_uni.h:		$(srcdir)/cp437_uni.tbl		makeuctb$x
 cp737_uni.h:		$(srcdir)/cp737_uni.tbl		makeuctb$x
+cp775_uni.h:		$(srcdir)/cp775_uni.tbl		makeuctb$x
 cp850_uni.h:		$(srcdir)/cp850_uni.tbl		makeuctb$x
 cp852_uni.h:		$(srcdir)/cp852_uni.tbl		makeuctb$x
 cp862_uni.h:		$(srcdir)/cp862_uni.tbl		makeuctb$x

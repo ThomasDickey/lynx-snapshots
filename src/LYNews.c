@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTParse.h>
 #include <HTAccess.h>
 #include <HTCJK.h>
@@ -12,7 +11,6 @@
 #include <LYStrings.h>
 #include <LYGetFile.h>
 #include <LYHistory.h>
-#include <LYSystem.h>
 #include <GridText.h>
 #include <LYCharSets.h>
 #include <LYNews.h>
@@ -20,8 +18,6 @@
 #include <LYGlobalDefs.h>
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
 **  Global variable for async i/o.
@@ -47,6 +43,7 @@ PUBLIC char *LYNewsPost ARGS2(
     char user_input[1024];
     char CJKinput[1024];
     char *cp = NULL;
+    CONST char *kp = NULL;
     int c = 0;  /* user input */
     FILE *fd = NULL;
     char my_tempfile[256];
@@ -68,8 +65,7 @@ PUBLIC char *LYNewsPost ARGS2(
      *  Open a temporary file for the headers
      *  and message body. - FM
      */
-    tempname(my_tempfile, NEW_FILE);
-    if ((fd = LYNewTxtFile(my_tempfile)) == NULL) {
+    if ((fd = LYOpenTemp(my_tempfile, HTML_SUFFIX, "w")) == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(postfile);
     }
@@ -79,18 +75,11 @@ PUBLIC char *LYNewsPost ARGS2(
      *  open a temporary file for a conversion to JIS. - FM
      */
     CJKfile[0] = '\0';
-    if (!strncmp(LYchar_set_names[current_char_set], "Japanese (EUC)", 14) ||
-	!strncmp(LYchar_set_names[current_char_set], "Japanese (SJIS)", 15)) {
-	tempname(CJKfile, NEW_FILE);
-	if ((fc = LYNewTxtFile(CJKfile)) == NULL) {
+    if (current_char_set == UCGetLYhndl_byMIME("euc-jp") ||
+	current_char_set == UCGetLYhndl_byMIME("shift_jis")) {
+	if ((fc = LYOpenTemp(CJKfile, HTML_SUFFIX, "w")) == NULL) {
 	    HTAlert(CANNOT_OPEN_TEMP);
-	    fclose(fd);
-#ifdef VMS
-	    while (remove(my_tempfile) == 0)
-		; /* loop through all versions */
-#else
-	    remove(my_tempfile);
-#endif /* VMS */
+	    LYRemoveTemp(my_tempfile);
 	    return(postfile);
 	}
     }
@@ -116,7 +105,7 @@ PUBLIC char *LYNewsPost ARGS2(
     clear();
     move(2,0);
     scrollok(stdscr, TRUE);	/* Enable scrolling. */
-    addstr("You will be posting to:");
+    addstr(gettext("You will be posting to:"));
     addstr("\n\t");
     addstr(NewsGroups);
     addch('\n');
@@ -125,17 +114,16 @@ PUBLIC char *LYNewsPost ARGS2(
      *  Get the mail address for the From header,
      *  offering personal_mail_address as default.
      */
-    addstr("\n\n Please provide your mail address for the From: header\n");
+    addstr(gettext("\n\n Please provide your mail address for the From: header\n"));
     strcpy(user_input, "From: ");
     if (personal_mail_address)
 	strcat(user_input, personal_mail_address);
     if (LYgetstr(user_input, VISIBLE,
 		 sizeof(user_input), NORECALL) < 0 ||
 	term_message) {
-        _statusline(NEWS_POST_CANCELLED);
-	sleep(InfoSecs);
-	fclose(fd);		 /* Close the temp file. */
-	scrollok(stdscr, FALSE); /* Stop scrolling.	 */
+        HTInfoMsg(NEWS_POST_CANCELLED);
+	LYCloseTempFP(fd);		/* Close the temp file.	*/
+	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
 	goto cleanup;
     }
     fprintf(fd, "%s\n", user_input);
@@ -145,29 +133,26 @@ PUBLIC char *LYNewsPost ARGS2(
      *  document's title as the default if this is a
      *  followup rather than a new post. - FM
      */
-    addstr("\n\n Please provide or edit the Subject: header\n");
+    addstr(gettext("\n\n Please provide or edit the Subject: header\n"));
     strcpy(user_input, "Subject: ");
     if ((followup == TRUE && nhist > 0) &&
-        (cp = HText_getTitle()) != NULL) {
+        (kp = HText_getTitle()) != NULL) {
 	/*
 	 *  Add the default subject.
 	 */
-	while (isspace(*cp)) {
-	    cp++;
-	}
-	if (strncasecomp(cp, "Re:", 3)) {
+	kp = LYSkipCBlanks(kp);
+	if (strncasecomp(kp, "Re:", 3)) {
             strcat(user_input, "Re: ");
 	}
-        strcat(user_input, cp);
+        strcat(user_input, kp);
     }
     cp = NULL;
     if (LYgetstr(user_input, VISIBLE,
 		 sizeof(user_input), NORECALL) < 0 ||
 	term_message) {
-        _statusline(NEWS_POST_CANCELLED);
-        sleep(InfoSecs);
-        fclose(fd);		 /* Close the temp file. */
-	scrollok(stdscr, FALSE); /* Stop scrolling.	 */
+        HTInfoMsg(NEWS_POST_CANCELLED);
+        LYCloseTempFP(fd);		/* Close the temp file. */
+	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
         goto cleanup;
     }
     fprintf(fd,"%s\n",user_input);
@@ -196,14 +181,13 @@ PUBLIC char *LYNewsPost ARGS2(
     }
     LYstrncpy(user_input, cp, (sizeof(user_input) - 16));
     FREE(cp); 
-    addstr("\n\n Please provide or edit the Organization: header\n");
+    addstr(gettext("\n\n Please provide or edit the Organization: header\n"));
     if (LYgetstr(user_input, VISIBLE,
 		 sizeof(user_input), NORECALL) < 0 ||
 	term_message) {
-        _statusline(NEWS_POST_CANCELLED);
-        sleep(InfoSecs);
-        fclose(fd);		 /* Close the temp file. */
-	scrollok(stdscr, FALSE); /* Stop scrolling.	 */
+        HTInfoMsg(NEWS_POST_CANCELLED);
+        LYCloseTempFP(fd);		/* Close the temp file. */
+	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
         goto cleanup;
     }
     fprintf(fd, "%s\n", user_input);
@@ -241,8 +225,8 @@ PUBLIC char *LYNewsPost ARGS2(
 		 */
 	        print_wwwfile_to_fd(fd, 1);
 	}
-	fclose(fd);		 /* Close the temp file. */
-	scrollok(stdscr, FALSE); /* Stop scrolling.	 */
+	LYCloseTempFP(fd);		/* Close the temp file. */
+	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
 	if (term_message || c == 7 || c == 3)
 	    goto cleanup;
 
@@ -255,10 +239,9 @@ PUBLIC char *LYNewsPost ARGS2(
 	sprintf(user_input,"%s%s %s", editor, editor_arg, my_tempfile);
 	_statusline(SPAWNING_EDITOR_FOR_NEWS);
 	stop_curses();
-	if (system(user_input)) {
+	if (LYSystem(user_input)) {
 	    start_curses();
-	    _statusline(ERROR_SPAWNING_EDITOR);
-	    sleep(AlertSecs);
+	    HTAlert(ERROR_SPAWNING_EDITOR);
 	} else {
 	    start_curses();
 	}
@@ -266,18 +249,17 @@ PUBLIC char *LYNewsPost ARGS2(
         /*
 	 *  Use the built in line editior.
 	 */
-	addstr("\n\n Please enter your message below.");
-	addstr("\n When you are done, press enter and put a single period (.)");
-	addstr("\n on a line and press enter again.");
+	addstr(gettext("\n\n Please enter your message below."));
+	addstr(gettext("\n When you are done, press enter and put a single period (.)"));
+	addstr(gettext("\n on a line and press enter again."));
 	addstr("\n\n");
 	refresh();
         *user_input = '\0';
 	if (LYgetstr(user_input, VISIBLE,
 	    	     sizeof(user_input), NORECALL) < 0 ||
 	    term_message) {
-	    _statusline(NEWS_POST_CANCELLED);
-	    sleep(InfoSecs);
-	    fclose(fd);			/* Close the temp file.	*/
+	    HTInfoMsg(NEWS_POST_CANCELLED);
+	    LYCloseTempFP(fd);		/* Close the temp file.	*/
 	    scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
 	    goto cleanup;
 	}
@@ -287,16 +269,15 @@ PUBLIC char *LYNewsPost ARGS2(
 	    *user_input = '\0';
 	    if (LYgetstr(user_input, VISIBLE,
 	       		 sizeof(user_input), NORECALL) < 0) {
-	        _statusline(NEWS_POST_CANCELLED);
-	        sleep(InfoSecs);
-	        fclose(fd);		 /* Close the temp file. */
-		scrollok(stdscr, FALSE); /* Stop scrolling.	 */
+	        HTInfoMsg(NEWS_POST_CANCELLED);
+	        LYCloseTempFP(fd);		/* Close the temp file. */
+		scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
 	        goto cleanup;
 	    }
  	}
 	fprintf(fd, "\n");
-	fclose(fd);		 /* Close the temp file. */
-	scrollok(stdscr, FALSE); /* Stop scrolling.	 */
+	LYCloseTempFP(fd);		/* Close the temp file. */
+	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
     }
 
     /*
@@ -324,7 +305,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	       !term_message && c != 7   && c != 3)
 	    c = LYgetch();
 	if (TOUPPER(c) == 'Y') {
-	    if ((fd = fopen(my_tempfile, "a")) != NULL) {
+	    if ((fd = LYAppendToTxtFile (my_tempfile)) != NULL) {
 	        fputs("-- \n", fd);
 	        while (fgets(user_input, sizeof(user_input), fp) != NULL) {
 		    fputs(user_input, fd);
@@ -350,16 +331,10 @@ PUBLIC char *LYNewsPost ARGS2(
 		       (unsigned char *)CJKinput);
 		fputs(CJKinput, fc);
 	    }
-	    fclose(fc);
+	    LYCloseTempFP(fc);
 	    StrAllocCopy(postfile, CJKfile);
 	    fclose(fd);
-#ifdef VMS
-	    while (remove(my_tempfile) == 0)
-		; /* loop through all versions */
-#else
-	    remove(my_tempfile);
-#endif /* VMS */
-	    fd = fc;
+	    LYRemoveTemp(my_tempfile);
 	    strcpy(my_tempfile, CJKfile);
 	    CJKfile[0] = '\0';
 	} else {
@@ -381,9 +356,8 @@ PUBLIC char *LYNewsPost ARGS2(
         LYforce_no_cache = TRUE;
     }
     LYStatusLine = (LYlines - 1);
-    statusline(POSTING_TO_NEWS);
+    HTUserMsg(POSTING_TO_NEWS);
     LYStatusLine = -1;
-    sleep(MessageSecs);
 
     /*
      *  Come here to cleanup and exit.
@@ -393,23 +367,9 @@ cleanup:
     signal(SIGINT, cleanup_sig);
 #endif /* !VMS */
     term_message = FALSE;
-    if (!postfile) {
-#ifdef VMS
-        while (remove(my_tempfile) == 0)
-	    ; /* loop through all versions */
-#else
-	remove(my_tempfile);
-#endif /* VMS */
-    }
-    if (CJKfile[0] != '\0') {
-#ifdef VMS
-	fclose(fc);
-        while (remove(CJKfile) == 0)
-	    ; /* loop through all versions */
-#else
-	remove(CJKfile);
-#endif /* VMS */
-    }
+    if (!postfile)
+	LYRemoveTemp(my_tempfile);
+    LYRemoveTemp(CJKfile);
     FREE(NewsGroups);
 
     return(postfile);

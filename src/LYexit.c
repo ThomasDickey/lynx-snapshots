@@ -2,19 +2,17 @@
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
  */
 #include <HTUtils.h>
-#include <tcp.h>
 #include <LYexit.h>
 #ifndef VMS
 #include <LYGlobalDefs.h>
 #include <LYUtils.h>
 #include <LYSignal.h>
 #include <LYClean.h>
+#include <LYMainLoop.h>
 #ifdef SYSLOG_REQUESTED_URLS
 #include <syslog.h>
 #endif /* SYSLOG_REQUESTED_URLS */
 #endif /* !VMS */
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
  *  Stack of functions to call upon exit.
@@ -113,13 +111,7 @@ PUBLIC void LYexit ARGS1(
 	printf("\r\n%s\r\n\r\n", MEMORY_EXHAUSTED_ABORT);
 	fflush(stdout);
     }
-    if (LYTraceLogFP != NULL) {
-	fflush(stdout);
-	fflush(stderr);
-	fclose(LYTraceLogFP);
-	LYTraceLogFP = NULL;
-	*stderr = LYOrigStderr;
-    }
+    LYCloseTracelog();
 #endif /* !VMS */
     exit(status);
 }
@@ -144,8 +136,7 @@ void (*function)();
      *  Check for available space.
      */
     if (topOfStack == ATEXITSIZE) {
-	if (TRACE)
-	    fprintf(stderr, "(LY)atexit: Too many functions, ignoring one!\n");
+	CTRACE(tfp, "(LY)atexit: Too many functions, ignoring one!\n");
 	return(-1);
     }
 
@@ -174,4 +165,13 @@ PRIVATE void LYCompleteExit NOPARAMS
     while (--topOfStack >= 0) {
 	callstack[topOfStack]();
     }
+}
+
+PUBLIC void outofmem ARGS2(
+	CONST char *,	fname,
+	CONST char *,	func)
+{
+    fprintf(stderr, "\n\n\n%s %s: %s\n", fname, func, MEMORY_EXHAUSTED_ABORTING);
+    LYOutOfMemory = TRUE;
+    LYexit(-1);
 }

@@ -17,14 +17,11 @@ not, write to the Free Software Foundation, Inc., 675 Mass Ave,
 Cambridge, MA 02139, USA.  */
 
 /* CHANGED FOR VMS */
-
 /*
  * <getline.c>
  */
 
 #include <HTUtils.h>
-#include <tcp.h>
-#include <stddef.h>
 
 #include <LYLeaks.h>
 

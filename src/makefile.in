@@ -11,6 +11,11 @@ top_srcdir	= @top_srcdir@
 srcdir		= @srcdir@
 VPATH		= $(srcdir)
 
+top_builddir	= ..
+
+# see po/makefile
+localedir	= $(prefix)/@DATADIRNAME@/locale
+
 # Symbols which the configure script can set in each makefile:
 CC		= @CC@
 CPP		= @CPP@
@@ -18,25 +23,28 @@ CFLAGS		= @CFLAGS@
 DEFS		= @DEFS@
 CPPFLAGS	= @CPPFLAGS@
 
-LIBS		= @LIBS@ $(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)
+LIBS		= @LIBS@ $(RESOLVLIB) $(WAISLIB) $(SITE_LIBS)
 LDFLAGS		= @LDFLAGS@
 
 # Symbols inherited from the top-level makefile
 RESOLVLIB	= # FIXME: set in parent makefile
 SITE_DEFS	= # FIXME: set in parent makefile
 SITE_LIBS	= # FIXME: set in parent makefile
-SOCKSLIB	= # FIXME: set in parent makefile
 WAISLIB		= # FIXME: set in parent makefile
 
 WWWINC		= WWW/Library/Implementation
-WWWLIB		= ../WWW/Library/unix/libwww.a
+WWWLIB		= $(top_builddir)/WWW/Library/unix/libwww.a
+
+INTLLIB		= @INTLDIR_MAKE@@INTLLIBS@ 
 
 CPP_OPTS	= $(DEFS) $(CPPFLAGS) \
+		-DLOCALEDIR=\"$(localedir)\" \
 		-I. \
-		-I.. \
+		-I$(top_builddir) \
 		-Ichrtrans \
 		-I$(srcdir)/chrtrans \
 		-I$(top_srcdir) \
+		-I$(top_srcdir)/intl \
 		-I$(top_srcdir)/src \
 		-I$(top_srcdir)/$(WWWINC) \
 		$(SITE_DEFS)
@@ -44,6 +52,9 @@ CC_OPTS		= $(CPP_OPTS) $(CFLAGS)
 
 LINT		= @LINT@
 LINTOPTS	=
+
+COMPRESS_PROG	=@COMPRESS_PROG@
+COMPRESS_EXT	=@COMPRESS_EXT@
 
 CHARTRANS_OBJS=UCdomap.o UCAux.o UCAuto.o
 OBJS=  LYClean.o LYShowInfo.o LYEdit.o LYStrings.o \
@@ -70,11 +81,11 @@ all: lynx$x
 @RULE_CC@
 	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $*.c >$@
 
-lynx$x:   message do_chartrans_stuff $(OBJS) $(WWWLIB)
+lynx$x:   message do_chartrans_stuff $(top_builddir)/LYHelp.h $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
-	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(WWWLIB) $(LIBS)
+	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(WWWLIB) $(INTLLIB) $(LIBS)
 	@echo "Copying Lynx executable into top-level directory"
-	cp $@ ..
+	cp $@ $(top_builddir)
 	@echo "Welcome to Lynx!"
 
 message:
@@ -88,7 +99,7 @@ do_chartrans_stuff:
 		CC="$(CC)" tables
 
 lint:
-	$(LINT) $(LINTOPTS) $(CPP_OPTS) *.c  > ../lint.out
+	$(LINT) $(LINTOPTS) $(CPP_OPTS) *.c  > $(top_builddir)
 
 clean:
 	rm -f lynx$x core *.[ob] *.bak
@@ -96,20 +107,19 @@ clean:
 
 distclean: clean
 
-LYMain.o: ../userdefs.h
-LYMainLoop.o: ../userdefs.h
-LYReadCFG.o: ../userdefs.h
-HTFWriter.o: ../userdefs.h
-LYGetFile.o: ../userdefs.h
-LYOptions.o: ../userdefs.h
-LYReadCFG.o: ../userdefs.h
-LYrcFile.o: ../userdefs.h
-LYMail.o: ../userdefs.h
-LYUtils.o: ../userdefs.h
-HTInit.o: ../userdefs.h
-LYTraversal.o: ../userdefs.h
-LYMail.o: ../userdefs.h
-LYCharSets.o: ../userdefs.h
+HTFWriter.o:	$(top_srcdir)/userdefs.h
+HTInit.o:	$(top_srcdir)/userdefs.h
+LYCharSets.o:	$(top_srcdir)/userdefs.h
+LYGetFile.o:	$(top_srcdir)/userdefs.h
+LYMail.o:	$(top_srcdir)/userdefs.h
+LYMain.o:	$(top_srcdir)/userdefs.h
+LYMainLoop.o:	$(top_srcdir)/userdefs.h
+LYOptions.o:	$(top_srcdir)/userdefs.h
+LYReadCFG.o:	$(top_srcdir)/userdefs.h
+LYShowInfo.o:	$(top_srcdir)/cfg_defs.h
+LYTraversal.o:	$(top_srcdir)/userdefs.h
+LYUtils.o:	$(top_srcdir)/userdefs.h
+LYrcFile.o:	$(top_srcdir)/userdefs.h
 
 CHRTR= chrtrans/
 
@@ -151,16 +161,16 @@ TABLES= \
  $(CHRTR)utf8_uni.h \
  $(CHRTR)viscii_uni.h
 
-CMN=../WWW/Library/Implementation/
+CMN=$(top_srcdir)/WWW/Library/Implementation/
 
 $(TABLES):
 	-cd chrtrans && $(MAKE) tables
 
 UCdomap.o: UCdomap.c chrtrans/UCkd.h chrtrans/makeuctb chrtrans/makeuctb.c \
-                 UCdomap.h $(CMN)UCMap.h $(TABLES) ../userdefs.h
+                 UCdomap.h $(CMN)UCMap.h $(TABLES) $(top_srcdir)/userdefs.h
 
 UCAux.o : UCAux.c $(CMN)UCAux.h $(CMN)UCDefs.h
-LYCookie.o: ../userdefs.h
+LYCookie.o: $(top_srcdir)/userdefs.h
 
 depend : $(TABLES)
 	makedepend -fmakefile -- $(CC_OPTS) -- $(C_SRC)

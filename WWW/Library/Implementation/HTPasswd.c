@@ -15,10 +15,8 @@
 **
 */
 
-
 #include <HTUtils.h>
-#include <tcp.h>	/* FROMASCII()		*/
-#include <string.h>
+
 #include <HTAAUtil.h>	/* Common parts of AA	*/
 #include <HTAAFile.h>	/* File routines	*/
 #include <HTAAServ.h>	/* Server routines	*/
@@ -138,7 +136,7 @@ PUBLIC BOOL HTAA_passwdMatch ARGS2(CONST char *, password,
 				   CONST char *, encrypted)
 {
     char *result;
-    int len;
+    size_t len;
     int status;
 
     if (!password || !encrypted)
@@ -152,7 +150,7 @@ PUBLIC BOOL HTAA_passwdMatch ARGS2(CONST char *, password,
 	outofmem(__FILE__, "HTAA_encryptPasswd");
 
     *result = (char)0;
-    while (len > 0) {
+    while (len != 0) {
 	char salt[3];
 	char chunk[9];
 	CONST char *cur1 = password;
@@ -176,9 +174,7 @@ PUBLIC BOOL HTAA_passwdMatch ARGS2(CONST char *, password,
 
     status = strncmp(result, encrypted, strlen(encrypted));
 
-    if (TRACE)
-	fprintf(stderr,
-		"%s `%s' (encrypted: `%s') with: `%s' => %s\n",
+    CTRACE(tfp, "%s `%s' (encrypted: `%s') with: `%s' => %s\n",
 		"HTAA_passwdMatch: Matching password:",
 		password, result, encrypted,
 		(status==0 ? "OK" : "INCORRECT"));
@@ -266,16 +262,14 @@ PUBLIC BOOL HTAA_checkPassword ARGS3(CONST char *, username,
     else			fp = fopen(PASSWD_FILE,"r");
 
     if (!fp) {
-	if (TRACE) fprintf(stderr, "%s `%s'\n",
-			   "HTAA_checkPassword: Unable to open password file",
-			   (filename && *filename ? filename : PASSWD_FILE));
+	CTRACE(tfp, "%s `%s'\n",
+		    "HTAA_checkPassword: Unable to open password file",
+		    (filename && *filename ? filename : PASSWD_FILE));
 	return NO;
     }
     do {
 	if (2 == (status = HTAAFile_readPasswdRec(fp,user,pw))) {
-	    if (TRACE)
-		fprintf(stderr,
-			"HTAAFile_validateUser: %s \"%s\" %s \"%s:%s\"\n",
+	    CTRACE(tfp, "HTAAFile_validateUser: %s \"%s\" %s \"%s:%s\"\n",
 			"Matching username:", username,
 			"against passwd record:", user, pw);
 	    if (username  &&  user  &&  !strcmp(username,user)) {
@@ -292,7 +286,7 @@ PUBLIC BOOL HTAA_checkPassword ARGS3(CONST char *, username,
 
     fclose(fp);
     
-    if (TRACE) fprintf(stderr, "HTAAFile_checkPassword: (%s,%s) %scorrect\n",
+    CTRACE(tfp, "HTAAFile_checkPassword: (%s,%s) %scorrect\n",
 		       username, password, ((status != EOF) ? "" : "in"));
 
     if (status == EOF)  return NO;  /* We traversed to the end without luck */
