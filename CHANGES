@@ -1,6 +1,26 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-02-25 (2.8.3dev.21)
+* modify check for empty news-posting to warn but allow user to override if
+  it contains nonspace characters -TD
+* add FTP_PASSIVE option to lynx.cfg, allowing installer to defer decision
+  of whether lynx uses passive ftp connection (adapted from patch by
+  Bernhard Rosenkraenzer <bero@redhat.de>) -TD
+* remove duplicate definitions of HT_NON_BREAK_SPACE, HT_EN_SPACE leaving them
+  in HTFont.h -TD
+* lynx.cfg option CONNECT_TIMEOUT and commandline option "connect_timeout" were
+  added (not available for DOS port) -VH
+* don't perform submission of the content of disabled form fields -VH
+* add bindings for ^ and $ (like vi) to move the cursor to the first and last
+  link on the current line (prompted by complaint by DH that < and > used to
+  allow movement to the ends of a line) -TD
+* remove --enable-kanji option (request by TH) -TD
+* replace 3 CONV_JISX0201KANA_ISX0208KANA to CONV_JISX0201KANA_JISX0208KANA -TH
+* enable the routines to change kanji code which is used for overriding,
+  since my last change disabled this -TH
+* remove redundant/conflicting definitions of ON/OFF from HTVMS_WaisUI.h -TD
+* fixes for K&R build on SunOS -TD
 2000-02-15 (2.8.3dev.20)
 * ifdef fixes for CYGWIN, broken in dev.19 -TD
 * add make-msc.bat script, and update src/chrtrans/makefile.msc to add rules
@@ -9,7 +29,7 @@ Changes since Lynx 2.8 release
 * use HTAddParam/HTEndParam rather than HTSprintf0 for building external
   commands, protecting against badly-formatted string with more than one %s
   (reported by PW) -TD
-* update placeholder po/no.po -JS
+* update placeholder po/nl.po -JS
 * add configure option --enable-kanji for defining symbols related to TH's
   patch.
 * improved handling of Japanese text (patch by Hataguchi Takeshi (TH)

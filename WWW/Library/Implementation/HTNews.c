@@ -16,12 +16,10 @@
 
 #include <HTCJK.h>
 #include <HTMIME.h>
+#include <HTFont.h>
 #include <HTTCP.h>
 #include <LYUtils.h>
 #include <LYStrings.h>
-
-/* this define should be in HTFont.h :( */
-#define HT_NON_BREAK_SPACE ((char)1)   /* For now */
 
 #define NEWS_PORT 119		/* See rfc977 */
 #define SNEWS_PORT 563		/* See Lou Montulli */

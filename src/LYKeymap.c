@@ -99,19 +99,14 @@ LYK_TRACE_TOGGLE,       0,        LYK_SWITCH_DTD,  LYK_REFRESH,
 LYK_NEXT_PAGE,       LYK_SHELL,  LYK_SOFT_DQUOTES,  LYK_TOOLBAR,
 /* sp */             /* ! */         /* " */        /* # */
 
-0,                      0,              0,          LYK_HISTORICAL,
+LYK_LAST_LINK,          0,              0,          LYK_HISTORICAL,
 /* $ */              /* % */         /* & */        /* ' */
 
 LYK_UP_HALF,      LYK_DOWN_HALF, LYK_IMAGE_TOGGLE,  LYK_NEXT_PAGE,
 /* ( */              /* ) */         /* * */        /* + */
 
-#ifndef USE_EXTERNALS
-LYK_NEXT_PAGE,    LYK_PREV_PAGE,        0,          LYK_WHEREIS,
-/* , */              /* - */         /* . */        /* / */
-#else
 LYK_NEXT_PAGE,    LYK_PREV_PAGE, LYK_EXTERN,        LYK_WHEREIS,
 /* , */              /* - */         /* . */        /* / */
-#endif
 
 LYK_F_LINK_NUM,      LYK_1,          LYK_2,         LYK_3,
 /* 0 */              /* 1 */         /* 2 */        /* 3 */
@@ -128,18 +123,8 @@ LYK_UP_LINK,         LYK_INFO,     LYK_DOWN_LINK,   LYK_HELP,
 LYK_RAW_TOGGLE,      LYK_ADDRLIST, LYK_PREV_PAGE,   LYK_COMMENT,
 /* @ */              /* A */         /* B */        /* C */
 
-LYK_DOWNLOAD,        LYK_ELGOTO,
-/* D */              /* E */
-
-#if defined(DIRED_SUPPORT) || defined(VMS)
-LYK_DIRED_MENU,
-#else
-0,
-#endif /* DIRED_SUPPORT || VMS */
-/* F */
-
-LYK_ECGOTO,
-/* G */
+LYK_DOWNLOAD,        LYK_ELGOTO,  LYK_DIRED_MENU,   LYK_ECGOTO,
+/* D */              /* E */         /* F */        /* G */
 
 LYK_HELP,            LYK_INDEX,      LYK_JUMP,      LYK_KEYMAP,
 /* H */              /* I */         /* J */        /* K */
@@ -156,24 +141,14 @@ LYK_TAG_LINK,      LYK_PREV_DOC,    LYK_VLINKS,         0,
 LYK_NOCACHE,            0,        LYK_INTERRUPT,    LYK_INLINE_TOGGLE,
 /* X */              /* Y */         /* Z */        /* [ */
 
-LYK_SOURCE,          LYK_HEAD,          0,          LYK_CLEAR_AUTH,
+LYK_SOURCE,          LYK_HEAD,    LYK_FIRST_LINK,   LYK_CLEAR_AUTH,
 /* \ */              /* ] */         /* ^ */        /* _ */
 
 LYK_MINIMAL,   LYK_ADD_BOOKMARK,  LYK_PREV_PAGE,    LYK_COMMENT,
 /* ` */              /* a */         /* b */        /* c */
 
-LYK_DOWNLOAD,        LYK_EDIT,
-/* d */              /* e */
-
-#if defined(DIRED_SUPPORT) || defined(VMS)
-LYK_DIRED_MENU,
-#else
-0,
-#endif /* DIRED_SUPPORT || VMS */
-/* f */
-
-LYK_GOTO,
-/* g */
+LYK_DOWNLOAD,        LYK_EDIT,    LYK_DIRED_MENU,   LYK_GOTO,
+/* d */              /* e */         /* f */        /* g */
 
 LYK_HELP,            LYK_INDEX,      LYK_JUMP,      LYK_KEYMAP,
 /* h */              /* i */         /* j */        /* k */
@@ -672,6 +647,8 @@ PRIVATE struct rmap revmap[] = {
 { "REFRESH",		"refresh the screen to clear garbled text" },
 { "HOME",		"go to the beginning of the current document" },
 { "END",		"go to the end of the current document" },
+{ "FIRST_LINK",		"make the first link on the line current" },
+{ "LAST_LINK",		"make the last link on the line current" },
 { "PREV_LINK",		"make the previous link current" },
 { "NEXT_LINK",		"make the next link current" },
 { "LPOS_PREV_LINK",	"make previous link current, same column for input" },

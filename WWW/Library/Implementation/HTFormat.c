@@ -1418,7 +1418,7 @@ PRIVATE CONST HTStreamClass HTErrorStreamClass =
     HTErrorStream_write
 };
 
-PUBLIC HTStream * HTErrorStream (void)
+PUBLIC HTStream * HTErrorStream NOARGS
 {
     CTRACE((tfp, "ErrorStream. Created\n"));
     HTBaseStreamInstance.isa = &HTErrorStreamClass;    /* The rest is random */

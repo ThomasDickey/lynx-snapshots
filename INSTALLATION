@@ -379,11 +379,6 @@ II. Compile instructions -- UNIX
         alternate opinion asserts that the feature could actually result in
         inappropriate resubmission of form content.
 
-  --enable-kanji			(define KANJI_CODE_OVERRIDE)
-	Add special logic for supporting KANJI documents.
-	Also defines CONV_JISX0201KANA_JISX0208KANA and
-	USE_TH_JP_AUTO_DETECT.
-
   --enable-kbd-layout			(define EXP_KEYBOARD_LAYOUT)
 	Disabled by default, this option allows you to use translation
 	tables on the input keystrokes.  Current tables include

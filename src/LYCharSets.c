@@ -6,7 +6,6 @@
 #include <UCMap.h>
 #include <UCDefs.h>
 #include <LYCharSets.h>
-#include <HTFont.h>
 #include <GridText.h>
 #include <LYCurses.h>
 #include <LYStrings.h>

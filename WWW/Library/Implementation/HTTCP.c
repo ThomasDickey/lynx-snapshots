@@ -1598,17 +1598,18 @@ PUBLIC int HTDoConnect ARGS4(
 	    /*
 	    **	Protect against an infinite loop.
 	    */
-	    if (tries++ >= 180000) {
-		HTAlert(gettext("Connection failed for 180,000 tries."));
+	    if ((tries++/10) >= connect_timeout) {
+		HTAlert(gettext("Connection failed (too many retries)."));
 		return HT_NO_DATA;
 	    }
 
 #ifdef _WINDOWS_NSL
-	    timeout.tv_sec = 100;
+	    timeout.tv_sec = connect_timeout;
+	    timeout.tv_usec = 0;
 #else
 	    timeout.tv_sec = 0;
-#endif /* _WINDOWS_NSL */
 	    timeout.tv_usec = 100000;
+#endif /* _WINDOWS_NSL */
 	    FD_ZERO(&writefds);
 	    FD_SET((unsigned) *s, &writefds);
 #ifdef SOCKS

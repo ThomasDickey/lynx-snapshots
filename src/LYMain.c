@@ -164,6 +164,7 @@ PUBLIC BOOLEAN LYUserSpecifiedURL = TRUE;/* always TRUE  the first time */
 PUBLIC BOOLEAN LYJumpFileURL = FALSE;	 /* always FALSE the first time */
 PUBLIC BOOLEAN jump_buffer = JUMPBUFFER; /* TRUE if offering default shortcut */
 PUBLIC BOOLEAN goto_buffer = GOTOBUFFER; /* TRUE if offering default goto URL */
+PUBLIC BOOLEAN ftp_passive = FTP_PASSIVE; /* TRUE if doing ftp in passive mode */
 PUBLIC BOOLEAN recent_sizechange = FALSE;/* the window size changed recently? */
 PUBLIC int user_mode = NOVICE_MODE;
 PUBLIC BOOLEAN dump_output_immediately = FALSE;
@@ -437,6 +438,8 @@ PUBLIC BOOLEAN LYPrependBaseToSource = TRUE;
 PUBLIC BOOLEAN LYPrependCharsetToSource = TRUE;
 PUBLIC BOOLEAN LYQuitDefaultYes = QUIT_DEFAULT_YES;
 PUBLIC BOOLEAN dont_wrap_pre = FALSE;
+
+PUBLIC int connect_timeout = 18000;/*=180000*0.1 - used in HTDoConnect.*/
 
 #ifdef EXP_JUSTIFY_ELTS
 PUBLIC BOOL ok_justify = TRUE;
@@ -3159,6 +3162,12 @@ static Parse_Args_Type Arg_Table [] =
       "force color mode on with standard bg colors"
    ),
 #endif
+#ifndef __DJGPP__
+   PARSE_SET(
+      "connect_timeout", NEED_INT_ARG,		&connect_timeout,
+      "=N\nset the N-second connection timeout"
+   ),
+#endif
 #ifdef MISC_EXP
    PARSE_SET(
       "convert_to",	FUNCTION_ARG,		convert_to_fun,
@@ -3208,8 +3217,8 @@ with -dump, format output as with -traversal, but to stdout"
    ),
    PARSE_SET(
       "dont_wrap_pre",	SET_ARG,		&dont_wrap_pre,
-      "inhibit wrapping of text in <pre> when -dump'ing and \n"
-      "-crawl'ing, mark wrapped lines in interactive session"
+      "inhibit wrapping of text in <pre> when -dump'ing and \n\
+-crawl'ing, mark wrapped lines in interactive session"
    ),
    PARSE_FUN(
       "dump",		FUNCTION_ARG,		dump_output_fun,

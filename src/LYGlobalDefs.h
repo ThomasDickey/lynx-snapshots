@@ -171,6 +171,7 @@ extern BOOLEAN dump_output_immediately;
 extern BOOLEAN emacs_keys;        /* TRUE to turn on emacs-like key movement */
 extern BOOLEAN error_logging;     /* TRUE to mail error messages */
 extern BOOLEAN ftp_ok;
+extern BOOLEAN ftp_passive;	/* TRUE if we want to use passive mode ftp */
 extern BOOLEAN goto_buffer;     /* TRUE if offering default goto URL */
 extern BOOLEAN is_www_index;
 extern BOOLEAN jump_buffer;     /* TRUE if offering default shortcut */
@@ -381,15 +382,19 @@ extern char *LYCookieSRejectDomains;    /* domains to reject all cookies */
 extern char *LYCookieSStrictCheckDomains;/* domains to check strictly    */
 extern char *LYCookieSLooseCheckDomains;/* domains to check loosely      */
 extern char *LYCookieSQueryCheckDomains;/* domains to check w/a query    */
+
 #ifdef EXP_PERSISTENT_COOKIES
 extern BOOLEAN persistent_cookies;
 extern char *LYCookieFile;              /* cookie read file              */
 extern char *LYCookieSaveFile;          /* cookie save file              */
 #endif /* EXP_PERSISTENT_COOKIES */
+
 extern char *XLoadImageCommand;		/* Default image viewer for X	 */
+
 #ifdef USE_EXTERNALS
 extern BOOLEAN no_externals; 		/* don't allow the use of externals */
 #endif
+
 extern BOOLEAN LYNoISMAPifUSEMAP;	/* Omit ISMAP link if MAP present? */
 extern int LYHiddenLinks;
 
@@ -400,24 +405,24 @@ extern BOOL Old_DTD;
  *  Arrays that holds the names of sub-bookmark files
  *  and their descriptions.
  */
-extern char *MBM_A_subbookmark[MBM_V_MAXFILES+1];
-extern char *MBM_A_subdescript[MBM_V_MAXFILES+1];
-extern FILE *LYTraceLogFP;		/* Pointer for TRACE log	 */
-extern char *LYTraceLogPath;		/* Path for TRACE log		 */
-extern BOOLEAN LYUseTraceLog;		/* Use a TRACE log?		 */
-extern BOOLEAN LYSeekFragMAPinCur;
-extern BOOLEAN LYSeekFragAREAinCur;
-extern BOOLEAN LYStripDotDotURLs;	/* Try to fix ../ in some URLs?  */
 extern BOOLEAN LYForceSSLCookiesSecure;
 extern BOOLEAN LYNoCc;
+extern BOOLEAN LYNonRestartingSIGWINCH;
 extern BOOLEAN LYPreparsedSource;	/* Show source as preparsed?	 */
 extern BOOLEAN LYPrependBaseToSource;
 extern BOOLEAN LYPrependCharsetToSource;
 extern BOOLEAN LYQuitDefaultYes;
-extern BOOLEAN LYNonRestartingSIGWINCH;
 extern BOOLEAN LYReuseTempfiles;
+extern BOOLEAN LYSeekFragAREAinCur;
+extern BOOLEAN LYSeekFragMAPinCur;
+extern BOOLEAN LYStripDotDotURLs;	/* Try to fix ../ in some URLs?  */
 extern BOOLEAN LYUseBuiltinSuffixes;
+extern BOOLEAN LYUseTraceLog;		/* Use a TRACE log?		 */
 extern BOOLEAN dont_wrap_pre;
+extern FILE *LYTraceLogFP;		/* Pointer for TRACE log	 */
+extern char *LYTraceLogPath;		/* Path for TRACE log		 */
+extern char *MBM_A_subbookmark[MBM_V_MAXFILES+1];
+extern char *MBM_A_subdescript[MBM_V_MAXFILES+1];
 
 #ifdef MISC_EXP
 extern int LYNoZapKey;  /* 0: off (do 'z' checking), 1: full, 2: initially */
@@ -433,6 +438,7 @@ extern BOOLEAN with_backspaces;
 #endif
 
 extern BOOL force_empty_hrefless_a;
+extern int connect_timeout;
 
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 extern BOOL textfields_need_activation;

@@ -639,18 +639,6 @@ CF_ARG_ENABLE(cjk,
 AC_MSG_RESULT($use_cjk)
 test $use_cjk != no && AC_DEFINE(CJK_EX)
 
-AC_MSG_CHECKING(if experimental KANJI logic should be used)
-CF_ARG_ENABLE(kanji,
-[  --enable-cjk            use experimental KANJI logic],
-	[use_kanji=$enableval],
-	[use_kanji=no])
-AC_MSG_RESULT($use_kanji)
-if test $use_kanji != no ; then
-	AC_DEFINE(KANJI_CODE_OVERRIDE)
-	AC_DEFINE(CONV_JISX0201KANA_JISX0208KANA)
-	AC_DEFINE(USE_TH_JP_AUTO_DETECT)
-fi
-
 AC_MSG_CHECKING(if color-style code should be used)
 CF_ARG_ENABLE(color-style,
 [  --enable-color-style    use optional/experimental color style],

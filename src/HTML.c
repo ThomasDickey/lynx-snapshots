@@ -35,7 +35,6 @@
 #include <LYCharSets.h>
 
 #include <HTAlert.h>
-#include <HTFont.h>
 #include <HTForms.h>
 #include <HTNestedList.h>
 #include <GridText.h>

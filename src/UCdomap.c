@@ -1728,9 +1728,9 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
 {
     CONST char **ISO_Latin1 = LYCharSets[0];
     CONST char **p;
-    char **prepl;
+    CONST char **prepl;
     CONST u16 *pp;
-    char **tp;
+    CONST char **tp;
     CONST char *s7;
     CONST char *s8;
     size_t i;
@@ -1741,7 +1741,7 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
     /*
      *	Create a temporary table for reverse lookup of latin1 codes:
      */
-    tp = (char **)malloc(96 * sizeof(CONST char *));
+    tp = (CONST char **)malloc(96 * sizeof(CONST char *));
     if (!tp)
 	return NULL;
     for (i = 0; i < 96; i++)
@@ -1786,7 +1786,7 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
 	list = UCInfo[UC_charset_in_hndl].replacedesc.entries;
 	while (ct--) {
 	    if ((k = list->unicode) >= 160 && k < 256) {
-		tp[k-160] = (char *)(list->replace_str);
+		tp[k-160] = list->replace_str;
 	    }
 	    list++;
 	}
@@ -1795,14 +1795,14 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
      *	Now allocate a new table compatible with LYCharSets[]
      *	and with the HTMLDTD for entities.
      *	We don't know yet whether we'll keep it around. */
-    prepl = (char **)malloc(HTML_dtd.number_of_entities * sizeof(char *));
+    prepl = (CONST char **)malloc(HTML_dtd.number_of_entities * sizeof(char *));
     if (!prepl) {
 	FREE(tp);
 	FREE(ti);
 	return 0;
     }
 
-    p = (CONST char **)prepl;
+    p = prepl;
     changed = 0;
     for (i = 0; i < HTML_dtd.number_of_entities; i++, p++) {
 	/*
@@ -1873,7 +1873,7 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
 	FREE(prepl);
 	return NULL;
     }
-    return (CONST char **)prepl;
+    return prepl;
 }
 
 /*

@@ -4,7 +4,6 @@
 
 #include <HTUtils.h>
 #include <HTString.h>
-#include <HTFont.h>
 #include <HTAccess.h>
 #include <HTAnchor.h>
 #include <HTParse.h>
@@ -3809,7 +3808,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		    ) &&
 		    ((unsigned char)ch >= 0xA1) &&
 		    ((unsigned char)ch <= 0xDF)) {
-#ifdef CONV_JISX0201KANA_ISX0208KANA
+#ifdef CONV_JISX0201KANA_JISX0208KANA
 		    unsigned char c = (unsigned char)ch;
 		    unsigned char kb = (unsigned char)text->kanji_buf;
 		    JISx0201TO0208_SJIS(c,
@@ -4297,7 +4296,7 @@ check_WrapSource:
 			line->data[line->size++] = tmp[0];
 			line->data[line->size++] = tmp[1];
 		    } else if (IS_EUC(hi, lo)) {
-#ifdef CONV_JISX0201KANA_ISX0208KANA
+#ifdef CONV_JISX0201KANA_JISX0208KANA
 			JISx0201TO0208_EUC(hi, lo, &hi, &lo);
 #endif
 			line->data[line->size++] = hi;
@@ -4312,7 +4311,7 @@ check_WrapSource:
 		case SJIS:
 		    if ((text->kcode == EUC) || (text->kcode == JIS))
 		    {
-#ifndef CONV_JISX0201KANA_ISX0208KANA
+#ifndef CONV_JISX0201KANA_JISX0208KANA
 			if (IS_EUC_X0201KANA(hi, lo))
 			    line->data[line->size++] = lo;
 			else
@@ -10191,7 +10190,8 @@ PUBLIC int HText_SubmitForm ARGS4(
     anchor_ptr = HTMainText->first_anchor;
     while (anchor_ptr) {
 	if (anchor_ptr->link_type == INPUT_ANCHOR) {
-	    if (anchor_ptr->input_field->number == form_number) {
+	    if (anchor_ptr->input_field->number == form_number &&
+			!anchor_ptr->input_field->disabled) {
 
 		char *p;
 		char * val;
@@ -10375,7 +10375,8 @@ PUBLIC int HText_SubmitForm ARGS4(
      */
     while (anchor_ptr) {
 	if (anchor_ptr->link_type == INPUT_ANCHOR) {
-	    if (anchor_ptr->input_field->number == form_number) {
+	    if (anchor_ptr->input_field->number == form_number &&
+			!anchor_ptr->input_field->disabled) {
 		char *p;
 		int out_cs;
 		form_ptr = anchor_ptr->input_field;
@@ -11443,11 +11444,7 @@ PUBLIC void HText_setKcode ARGS3(
 	**  If we get to here, it's not CJK, so disable that if
 	**  it is enabled.  But only if we are quite sure. - FM & kw
 	*/
-#ifdef KANJI_CODE_OVERRIDE
-	last_kcode = text->kcode = NOKANJI;
-#else
 	text->kcode = NOKANJI;
-#endif
 	if (HTCJK != NOCJK) {
 	    if (!p_in || p_in->enc != UCT_ENC_CJK)
 		HTCJK = NOCJK;

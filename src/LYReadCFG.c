@@ -1318,6 +1318,9 @@ static Config_Type Config_Table [] =
 #ifdef USE_COLOR_TABLE
      PARSE_FUN("color", CONF_FUN, color_fun),
 #endif
+#ifndef __DJGPP__
+     PARSE_INT("connect_timeout",CONF_INT,&connect_timeout),
+#endif
      PARSE_STR("cookie_accept_domains", CONF_STR, &LYCookieSAcceptDomains),
 #ifdef EXP_PERSISTENT_COOKIES
      PARSE_STR("cookie_file", CONF_STR, &LYCookieFile),
@@ -1363,6 +1366,7 @@ static Config_Type Config_Table [] =
 #if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
      PARSE_SET("forms_options", CONF_BOOL, &LYUseFormsOptions),
 #endif
+     PARSE_SET("ftp_passive", CONF_BOOL, &ftp_passive),
      PARSE_ENV("ftp_proxy", CONF_ENV, 0 ),
      PARSE_STR("global_extension_map", CONF_STR, &global_extension_map),
      PARSE_STR("global_mailcap", CONF_STR, &global_type_map),

@@ -446,16 +446,24 @@ PUBLIC void LYMainLoop_pageDisplay ARGS1(
 }
 
 
+PRIVATE void set_curdoc_link ARGS1(
+    int,	nextlink)
+{
+    if (curdoc.link != nextlink
+     && nextlink >= 0
+     && nextlink < nlinks) {
+	if (curdoc.link >= 0 && curdoc.link < nlinks)
+	    highlight(OFF, curdoc.link, prev_target);
+	curdoc.link = nextlink;
+    }
+}
+
 PRIVATE int do_change_link NOARGS
 {
     /* Is there a mouse-clicked link waiting? */
     int mouse_tmp = get_mouse_link();
     /* If yes, use it as the link */
     if (mouse_tmp != -1) {
-	if (curdoc.link >= 0 && curdoc.link < nlinks
-	 && curdoc.link != mouse_tmp) {
-	    highlight(OFF, curdoc.link, prev_target);
-	}
 	if (mouse_tmp < 0 || mouse_tmp >= nlinks) {
 	    char *msgtmp = NULL;
 	    HTSprintf0(&msgtmp,
@@ -465,7 +473,7 @@ PRIVATE int do_change_link NOARGS
 	    FREE(msgtmp);
 	    return(-1);		/* indicates unexpected error */
 	}
-	curdoc.link = mouse_tmp;
+	set_curdoc_link(mouse_tmp);
     }
     return(0);			/* indicates OK */
 }
@@ -2229,10 +2237,9 @@ PRIVATE void handle_LYK_DOWN_LINK ARGS3(
 
 	newlink = find_link_near_col(*follow_col, 1);
 	if (newlink > -1) {
-	    highlight(OFF, curdoc.link, prev_target);
-	    curdoc.link = newlink;
+	    set_curdoc_link(newlink);
 	} else if (more) {  /* next page */
-		Newline += (display_lines);
+	    Newline += (display_lines);
 	} else if (*old_c != real_c) {
 	    *old_c = real_c;
 	    HTUserMsg(NO_LINKS_BELOW);
@@ -2743,8 +2750,7 @@ PRIVATE BOOLEAN handle_LYK_FASTBACKW_LINK ARGS3(
 		    nextlink--;
 		}
 	}
-	highlight(OFF, curdoc.link, prev_target);
-	curdoc.link = nextlink;
+	set_curdoc_link(nextlink);
 	return FALSE;		/* and we are done. */
 
     } else if (Newline > 1 &&	/* need a previous page */
@@ -2813,8 +2819,7 @@ PRIVATE void handle_LYK_FASTFORW_LINK ARGS2(
 	}
     }
     if (samepage) {
-	highlight(OFF, curdoc.link, prev_target);
-	curdoc.link = nextlink;
+	set_curdoc_link(nextlink);
 	return;		/* and we are done. */
 
     /*
@@ -2822,8 +2827,7 @@ PRIVATE void handle_LYK_FASTFORW_LINK ARGS2(
      *	Move to the top link on the page.
      */
     } else if (!more && Newline == 1 && curdoc.link == nlinks-1) {
-	highlight(OFF, curdoc.link, prev_target);
-	curdoc.link = 0;
+	set_curdoc_link(0);
 
     } else if (more &&	/* need a later page */
 	       HTGetLinkOrFieldStart(curdoc.link,
@@ -2837,6 +2841,18 @@ PRIVATE void handle_LYK_FASTFORW_LINK ARGS2(
 	HTInfoMsg(NO_LINKS_BELOW);
     }
     return;
+}
+
+PRIVATE void handle_LYK_FIRST_LINK NOARGS
+{
+    int i;
+
+    for (i = curdoc.link - 1; i >= 0; i--) {
+	if (links[i].ly != links[curdoc.link].ly) {
+	    set_curdoc_link(i + 1);
+	    break;
+	}
+    }
 }
 
 PRIVATE BOOLEAN handle_LYK_GOTO ARGS9(
@@ -3509,12 +3525,23 @@ PRIVATE void handle_LYK_KEYMAP ARGS4(
     }
 }
 
+PRIVATE void handle_LYK_LAST_LINK NOARGS
+{
+    int i;
+
+    for (i = curdoc.link; i < nlinks; i++) {
+	if (links[i].ly != links[curdoc.link].ly) {
+	    set_curdoc_link(i - 1);
+	    break;
+	}
+    }
+}
+
 PRIVATE void handle_LYK_LEFT_LINK NOARGS
 {
     if (curdoc.link>0 &&
 		links[curdoc.link].ly == links[curdoc.link-1].ly) {
-	highlight(OFF, curdoc.link, prev_target);
-	curdoc.link--;
+	set_curdoc_link(curdoc.link-1);
     }
 }
 
@@ -3869,11 +3896,10 @@ PRIVATE void handle_LYK_NEXT_LINK ARGS3(
      *	Move to the top link on the page.
      */
     } else if (!more && Newline == 1 && curdoc.link == nlinks-1) {
-	highlight(OFF, curdoc.link, prev_target);
-	curdoc.link = 0;
+	set_curdoc_link(0);
 
     } else if (more) {	/* next page */
-	 Newline += (display_lines);
+	Newline += (display_lines);
 
     } else if (*old_c != real_c) {
 	*old_c = real_c;
@@ -3888,8 +3914,7 @@ PRIVATE void handle_LYK_NEXT_PAGE ARGS2(
     if (more) {
 	Newline += display_lines;
     } else if (curdoc.link < nlinks-1) {
-	highlight(OFF, curdoc.link, prev_target);
-	curdoc.link = nlinks-1;  /* put on last link */
+	set_curdoc_link(nlinks - 1);
     } else if (*old_c != real_c) {
 	*old_c = real_c;
 	HTInfoMsg(ALREADY_AT_END);
@@ -3924,22 +3949,16 @@ PRIVATE void handle_LYK_PREV_LINK ARGS3(
     int,	real_c)
 {
     if (curdoc.link > 0) {	     /* previous link */
-	/*
-	 *  Unhighlight current link.
-	 */
-	highlight(OFF, curdoc.link, prev_target);
-	curdoc.link--;
+	set_curdoc_link(curdoc.link - 1);
 
     } else if (!more &&
 	       curdoc.link==0 && Newline==1) { /* at the top of list */
 	/*
 	 *  If there is only one page of data and the user
-	 *  goes off the top, then unhighlight the current
-	 *  link and just move the cursor to last link on
+	 *  goes off the top, just move the cursor to last link on
 	 *  the page.
 	 */
-	highlight(OFF, curdoc.link, prev_target);
-	curdoc.link = nlinks-1;  /* the last link */
+	set_curdoc_link(nlinks - 1);
 
     } else if (curdoc.line > 1) {	/* previous page */
 	/*
@@ -4082,8 +4101,7 @@ PRIVATE void handle_LYK_PREV_PAGE ARGS2(
     if (Newline > 1) {
 	Newline -= display_lines;
     } else if (curdoc.link > 0) {
-	highlight(OFF, curdoc.link, prev_target);
-	curdoc.link = 0;  /* put on first link */
+	set_curdoc_link(0);
     } else if (*old_c != real_c) {
 	*old_c = real_c;
 	HTInfoMsg(ALREADY_AT_BEGIN);
@@ -4245,8 +4263,7 @@ PRIVATE void handle_LYK_RIGHT_LINK NOARGS
 {
     if (curdoc.link<nlinks-1 &&
 		links[curdoc.link].ly == links[curdoc.link+1].ly) {
-	highlight(OFF, curdoc.link, prev_target);
-	curdoc.link++;
+	set_curdoc_link(curdoc.link + 1);
     }
 }
 
@@ -4469,11 +4486,9 @@ PRIVATE void handle_LYK_TAG_LINK NOARGS
 	    }
 	}
 	if (curdoc.link < nlinks-1) {
-	    highlight(OFF, curdoc.link, prev_target);
-	    curdoc.link++;
+	    set_curdoc_link(curdoc.link + 1);
 	} else if (!more && Newline == 1 && curdoc.link == nlinks-1) {
-	    highlight(OFF, curdoc.link, prev_target);
-	    curdoc.link = 0;
+	    set_curdoc_link(0);
 	} else if (more) {  /* next page */
 	    Newline += (display_lines);
 	}
@@ -4653,8 +4668,7 @@ PRIVATE void handle_LYK_UP_LINK ARGS4(
 
 	newlink = find_link_near_col(*follow_col, -1);
 	if (newlink > -1) {
-	    highlight(OFF, curdoc.link, prev_target);
-	    curdoc.link = newlink;
+	    set_curdoc_link(newlink);
 	} else if (*old_c != real_c) {
 	    *old_c = real_c;
 	    HTUserMsg(NO_LINKS_ABOVE);
@@ -5005,13 +5019,8 @@ PRIVATE void handle_LYK_digit ARGS6(
 		} else {
 		    /*
 		     *	It's a different link on this page,
-		     *	so turn the highlighting off, set the
-		     *	current link to the new link value from
-		     *	follow_link_number(), and re-initialize
-		     *	the new link value. - FM
 		     */
-		    highlight(OFF, curdoc.link, prev_target);
-		    curdoc.link = newdoc.link;
+		    set_curdoc_link(newdoc.link);
 		    newdoc.link = 0;
 		}
 	    }
@@ -6859,6 +6868,14 @@ new_cmd:  /*
 		cmd = LYK_NEXT_PAGE;
 		goto new_cmd;
 	    }
+	    break;
+
+	case LYK_FIRST_LINK:
+	    handle_LYK_FIRST_LINK();
+	    break;
+
+	case LYK_LAST_LINK:
+	    handle_LYK_LAST_LINK();
 	    break;
 
 	case LYK_PREV_LINK:

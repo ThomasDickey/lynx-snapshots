@@ -166,7 +166,7 @@ PUBLIC void HTMIME_TrimDoubleQuotes ARGS1(
 	value[i] = cp[(i +1)];
 }
 
-PRIVATE int pumpData (HTStream * me)
+PRIVATE int pumpData ARGS1(HTStream *, me)
 {
     if (strchr(HTAtom_name(me->format), ';') != NULL) {
 	char *cp = NULL, *cp1, *cp2, *cp3 = NULL, *cp4;
@@ -437,7 +437,7 @@ PRIVATE int pumpData (HTStream * me)
     return HT_OK;
 }
 
-PRIVATE int dispatchField (HTStream * me)
+PRIVATE int dispatchField ARGS1(HTStream *, me)
 {
     int i, j;
     char *cp;
