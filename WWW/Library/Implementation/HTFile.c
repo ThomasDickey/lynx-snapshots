@@ -1910,6 +1910,13 @@ PUBLIC int HTLoadFile ARGS4(
 	format = HTAtom_for(anchor->content_type);
 	myEncoding = HTAtom_for(anchor->content_encoding);
     } else {
+	int default_UCLYhndl = UCLYhndl_HTFile_for_unspec;
+
+	if (force_old_UCLYhndl_on_reload) {
+	    force_old_UCLYhndl_on_reload = FALSE;
+	    default_UCLYhndl = forced_UCLYhdnl;
+	}
+
 	format = HTFileFormat(filename, &myEncoding, NULL);
 
     /*
@@ -1918,7 +1925,7 @@ PUBLIC int HTLoadFile ARGS4(
     **	by the last parameter (fallback will effectively be
     **	UCLYhndl_for_unspec, by default ISO-8859-1). - kw
     */
-	format = HTCharsetFormat(format, anchor, UCLYhndl_HTFile_for_unspec);
+	format = HTCharsetFormat(format, anchor, default_UCLYhndl );
     }
 
 #ifdef VMS

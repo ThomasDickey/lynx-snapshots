@@ -432,7 +432,7 @@ PUBLIC char * HTParse ARGS3(
 	    strcat(result, (given.anchor) ?
 			     given.anchor : related.anchor);
 	}
-    CTRACE(tfp, "HTParse: result:%s\n", result);
+    CTRACE(tfp, "HTParse:      result:%s\n", result);
     FREE(rel);
     FREE(name);
 

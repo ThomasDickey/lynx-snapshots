@@ -1,6 +1,32 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-05-24 (2.8.2pre.6)
+* fix for problem reported by LP -VH
+  Load an html file with META charset and switch "\" to source mode.  Now press
+  ^R to reload: 
+  (1) In -prettysrc case you got a broken document (charset will be assumed by
+    lynx from assume_charset or assume_local_charset, not from a META charset
+    which was previously pushed with LYPushAssumed() so you get a problem with
+    8bit documents when assume_charset != META charset). 
+  (2) Without -prettysrc you got a document handled properly via META charset
+    assumption.  Now if you press ^R again you will get a broken document.
+* LYK_SOURCE & HTreparse_document():  when using SOURCE_CACHE_MEMORY fix tiny
+  charset problem when switching to the source mode and the original document
+  have its charset specified.  Now aligned with SOURCE_CACHE_NONE and
+  SOURCE_CACHE_FILE.  More LYK_SOURCE fixes that might affect next coming
+  document in come cases (mainly Info page and Options menu, which now show
+  correct charset information) -LP
+* add CTRACE_FLUSH call before fork() in NSL_FORK logic so child's messages
+  will not mess parent ones -LP
+* add a few trace messages -LP
+* HTReadProgress message now display statusline properly in TRACE mode
+  (was always broken since early HTReadProgress days) -LP
+* install COPYING and COPYRIGHT for install-help rule as well as install-doc,
+  so we can refer to local copies of those files -TD
+* tweak HTParse trace message -LP
+* minor formatting change for Lynx_users_guide.html -LP
+* correct a few mismatches between variable declarations (char vs BOOLEAN) -LP
 1999-05-20 (2.8.2pre.5)
 * correct links to COPYHEADER and COPYING in about_lynx.html, by pointing to
   author's URLs, rather than to files which are not installed anyway -PG

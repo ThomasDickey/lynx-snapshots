@@ -747,7 +747,7 @@ PRIVATE void handle_identifier ARGS1(
 {
     CONST char *s = context->string->data;
 
-    CTRACE(tfp, "SGML Identifier\n<%s>\n", s);
+    CTRACE(tfp, "SGML Identifier:\n<%s>\n", s);
 
     return;
 }
@@ -761,7 +761,7 @@ PRIVATE void handle_doctype ARGS1(
 {
     CONST char *s = context->string->data;
 
-    CTRACE(tfp, "SGML Doctype\n<%s>\n", s);
+    CTRACE(tfp, "SGML Doctype:\n<%s>\n", s);
 
     return;
 }

@@ -687,6 +687,8 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
     CTRACE(tfp, "LYGetHostByName: Calling gethostbyname(%s)\n", host);
 #endif /* MVS */
 
+    CTRACE_FLUSH(tfp);  /* so child messages will not mess parent log */
+
     lynx_nsl_status = HT_INTERNAL;	/* should be set to something else below */
 
 #ifdef NSL_FORK
