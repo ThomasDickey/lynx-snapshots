@@ -1505,6 +1505,7 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_DEF(RC_TRUSTED_LYNXCGI,      CGI_PATH),
 #endif
      PARSE_PRG(RC_UNCOMPRESS_PATH,      ppUNCOMPRESS),
+     PARSE_SET(RC_UNDERLINE_LINKS,      LYUnderlineLinks),
      PARSE_PRG(RC_UNZIP_PATH,           ppUNZIP),
 #ifdef DIRED_SUPPORT
      PARSE_ADD(RC_UPLOADER,             uploaders),

@@ -526,6 +526,7 @@ HREF="keystrokes/option_help.html">HELP!</A>
   Document Appearance
   Show color                       : [ON....]
   Show cursor                      : [OFF]
+  Underline links (!)              : [OFF]
   Show scrollbar                   : [OFF]
   Popups for select fields         : [ON.]
   HTML error recovery (!)          : [strict (SortaSGML mode)]
@@ -614,31 +615,17 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 <em>Options Menu</em>:
 
 <dl>
-   <dt>Editor
-        <dd>The editor to be invoked when editing browsable files, when
-            sending mail or comments, when preparing a news article for
-            posting, and for external TEXTAREA editing.  The full pathname
-            of the editor command should be specified when possible.
-
-   <dt>DISPLAY variable
-        <dd>This option is only relevant to X Window users.  The DISPLAY
-            (Unix) or DECW$DISPLAY (VMS) variable is picked up automatically
-            from the environment if it has been previously set.
-
-   <dt>Multi-bookmarks
-        <dd>Lynx supports a default bookmark file, and up to 26 total
-            bookmark files (see below).  When multi-bookmarks is OFF,
-            the default bookmark file is used for the '<em>v</em>'iew
-            bookmarks and '<em>a</em>'dd bookmark link commands.  If
-            multi-bookmark support is available in your account, the
-            setting can be changed to STANDARD or ADVANCED.  In STANDARD
-            mode, a menu of available bookmarks always is invoked when
-            you seek to view a bookmark file or add a link, and you select
-            the bookmark file by its letter token (see
-            <em>Bookmark file</em>, below) in that menu.  In ADVANCED mode,
-            you instead are prompted for the letter of the desired bookmark
-            file, but can enter '<em>=</em>' to invoke the STANDARD selection
-            menu, or <em>RETURN</em> for the default bookmark file.
+   <dt>Assumed document character set
+        <dd>This option changes the handling of documents which do not
+            explicitly specify a charset.  Normally Lynx assumes that 8-bit
+            characters in those documents are encoded according to iso-8859-1
+            (the official default for the HTTP protocol).  Unfortunately,
+            many non-English web pages "forget" to include proper charset info;
+            this option helps you to browse those broken pages if you know
+            by some means what the charset is.  When the value
+            given here or by an -assume_charset command line flag is in effect,
+            Lynx will treat documents as if they were encoded accordingly.
+            This option active when 'Raw 8-bit or CJK Mode' is OFF.
 
    <dt>Bookmark file
         <dd>When multi-bookmarks is OFF, this is the filename and location
@@ -665,55 +652,10 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
             [.BM]lynx_bookmarks.html).
             For Win32, see [???].
 
-   <dt>FTP sort criteria
-        <dd>This option allows you to specify how files will be sorted
-            within FTP listings.  The current options include
-        "<code>By Filename</code>", "<code>By Size</code>",
-        "<code>By Type</code>", and "<code>By Date</code>".
-
-   <dt>Personal mail address
-        <dd>This mail address will be used to help you send files to
-            yourself and will be included as the From: address in any mail
-            or comments that you send.  It will also be sent as the From:
-            field in HTTP or HTTPS requests if inclusion of that header
-            has been enabled via the NO_FROM_HEADER definition in
-            <A HREF="#lynx.cfg">lynx.cfg</A>
-            (the compilation default is not to send the header), or via the
-            <em>-from</em> command line toggle.
-
-   <dt>Searching type
-        <dd>Searching type has two possible values: CASE INSENSITIVE
-            (default) and CASE SENSITIVE.  The searching type effects
-            inter-document searches only, and determines whether searches
-            for words within documents will be done in a case-sensitive or
-            case-insensitive manner.
-
-   <dt>Preferred Document Language
-        <dd>The language you prefer if multi-language files are available
-            from servers.  Use RFC 1766 abbreviations, e.g., en for English,
-            fr for French, etc.  Can be a comma-separated list, which may
-            be interpreted by servers as descending order of preferences.
-            You can also make your order of preference explicit by using
-            q factors as defined by the HTTP protocol, for servers which
-            understand it, for example:
-            da,&nbsp;en-gb;q=0.8,&nbsp;en;q=0.7
-
-   <dt>Preferred Document Charset
-        <dd>The character set you prefer if sets in addition to ISO-8859-1
-            and US-ASCII are available from servers.  Use MIME notation
-            (e.g., ISO-8859-2) and do not include ISO-8859-1 or US-ASCII,
-            since those values are always assumed by default.  Can be a
-            comma-separated list, which may be interpreted by servers as
-            descending order of preferences.  You can also make your order
-            of preference explicit by using q factors as defined by the
-            HTTP protocol, for servers which understand it, for example:
-            iso-8859-5,&nbsp;utf-8;q=0.8
-
-   <dt>Use locale-based character set
-        <dd>This option allows you to request lynx to obtain a MIME name
-            from the operating system which corresponds to your locale
-            setting.  If successful, it overrides the normal setting of
-            the display character set.
+   <dt>DISPLAY variable
+        <dd>This option is only relevant to X Window users.  The DISPLAY
+            (Unix) or DECW$DISPLAY (VMS) variable is picked up automatically
+            from the environment if it has been previously set.
 
    <dt>Display Character set
         <dd>This option allows you to set up the default character set for
@@ -728,78 +670,11 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
             that cpXXX codepages used within IBM PC computers, and
             windows-xxxx within native MS-Windows apps.)
 
-   <dt>Raw 8-bit or CJK Mode
-        <dd>Whether 8-bit characters are assumed to correspond with the
-            display character set and therefore are processed without
-            translation via the chartrans conversion tables.  Should be ON
-            by default when the display character set is one of the
-            Asian (CJK) sets and the 8-bit characters are Kanji multibytes.
-            Should be OFF for the other display character sets,
-            but can be turned ON
-            when the document's charset is unknown (e.g., is not ISO-8859-1
-            and no charset parameter was specified in a reply header from
-            an HTTP server to indicate what it is) but you know by some
-            means that you have the matching display character set selected.
-            Should be OFF when an Asian (CJK) set is selected but the document
-            is ISO-8859-1 or another 'assumed document character set'.
-            The setting also can be toggled via the RAW_TOGGLE
-            command, normally mapped to '<em>@</em>', and at startup via the
-            <em>-raw</em> switch.
-
-   <dt>Assumed document character set
-        <dd>This option changes the handling of documents which do not
-            explicitly specify a charset.  Normally Lynx assumes that 8-bit
-            characters in those documents are encoded according to iso-8859-1
-            (the official default for the HTTP protocol).  Unfortunately,
-            many non-English web pages "forget" to include proper charset info;
-            this option helps you to browse those broken pages if you know
-            by some means what the charset is.  When the value
-            given here or by an -assume_charset command line flag is in effect,
-            Lynx will treat documents as if they were encoded accordingly.
-            This option active when 'Raw 8-bit or CJK Mode' is OFF.
-
-   <dt>Show color.
-        <dd>This option will be present if color support is available.
-            If set to ON or ALWAYS, color mode will be forced on if possible.
-            If (n)curses color support is available but cannot be used for
-            the current terminal type, selecting ON is rejected with a message.
-            If set to OFF or NEVER, color mode will be turned off.<BR>
-            ALWAYS and
-            NEVER are not offered in anonymous accounts.  If saved to a
-            <em>.lynxrc</em> file in non-anonymous accounts, ALWAYS will
-            cause Lynx to set color mode on at startup if supported.
-            If Lynx is built with the slang library, this is equivalent to
-            having included the <em>-color</em> command line switch or having the
-            <em>COLORTERM</em> environment variable set.  If color support is
-            provided by curses or ncurses, this is equivalent to the default
-            behavior of using color when the terminal type supports it.
-            If (n)curses color support is available but cannot be used for
-            the current terminal type, the preference can still be saved
-            but will have no effect.<BR>
-            A saved value of NEVER will
-            cause Lynx to assume a monochrome terminal at startup.
-            It is similar to the <em>-nocolor</em> switch, but (when the
-            slang library is used) can be overridden with the <em>-color</em>
-            switch.<BR>
-            If the setting is OFF or ON
-            when the current options are saved to a <em>.lynxrc</em> file,
-            the default startup behavior is retained, such that color mode
-            will be turned on at startup only if the terminal info indicates
-            that you have a color-capable terminal, or (when the
-            slang library is used) if forced on via the
-            <em>-color</em> switch or <em>COLORTERM</em> variable.  This
-            default behavior always is used in anonymous accounts, or if
-            the <em>option_save</em> restriction is set explicitly.  If
-            for any reason the startup color mode is incorrect for your
-            terminal, set it appropriately on or off via this option.
-
-   <dt>VI keys
-        <dd>If set to ON then the lowercase h, j, k, and l keys will be
-            mapped to left, down, up, and right arrow, respectively.  The
-            uppercase H, J, K, and L keys remain mapped to their configured
-            bindings (normally HELP, JUMP, KEYMAP, and LIST, respectively).
-
-         <p>Note: this has no effect on the line-editor's key bindings.
+   <dt>Editor
+        <dd>The editor to be invoked when editing browsable files, when
+            sending mail or comments, when preparing a news article for
+            posting, and for external TEXTAREA editing.  The full pathname
+            of the editor command should be specified when possible.
 
    <dt>Emacs keys
         <dd>If set to ON then the CTRL-P, CTRL-N, CTRL-F, and CTRL-B keys
@@ -810,41 +685,11 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 
          <p>Note: this has no direct effect on the line-editor's key bindings.
 
-   <dt>Visited Pages
-        <dd>Enable several different views of the visited links:
-        <dl>
-          <dt>By First Visit
-          <dt>By First Visit Reversed
-          <dt>As Visit Tree
-          <dt>By Last Visit
-          <dt>By Last Visit Reversed
-        </dl>
-
-   <dt>Show dot files
-        <dd>If display/creation of hidden (dot) files/directories is
-            enabled, you can turn the feature on or off via this setting.
-
-   <dt>Popups for select fields
-        <dd>Lynx normally uses a popup window for the OPTIONs in form
-            SELECT fields when the field does not have the MULTIPLE
-            attribute specified, and thus only one OPTION can be selected.
-            The use of popup windows can be disabled by changing this setting
-            to OFF, in which case the OPTIONs will be rendered as a list of
-            radio buttons.  Note that if the SELECT field does have the
-            MULTIPLE attribute specified, the OPTIONs always are rendered
-            as a list of checkboxes.
-
-   <dt>Show cursor for current link or option.
-        <dd>Lynx normally hides the cursor by positioning it to the right
-            and if possible the very bottom of the screen, so that the
-            current link or OPTION is indicated solely by its highlighting
-            or color.  If show cursor is set to ON, the cursor will be
-            positioned at the left of the current link or OPTION.  This
-            is helpful when Lynx is being used with a speech or braille
-            interface.  It also is useful for sighted users when the
-            terminal cannot distinguish the character attributes used
-            to distinguish the current link or OPTION from the others in
-            the screen display.
+   <dt>FTP sort criteria
+        <dd>This option allows you to specify how files will be sorted
+            within FTP listings.  The current options include
+        "<code>By Filename</code>", "<code>By Size</code>",
+        "<code>By Type</code>", and "<code>By Date</code>".
 
    <dt>Keypad as arrows, numbered links, numbered fields, or numbered links and form fields
         <dd>This option gives the choice among navigating with the arrow
@@ -899,27 +744,172 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
           </dl>
           </dl>
 
-   <dt>User Mode
-       <dd>There are three possible choices: Novice, Intermediate, and
-           Advanced.
-         <dl>
-            <dt>Novice
-                <dd>In Novice mode two lines of help are displayed at the
-                    bottom of the screen.
-            <dt>Intermediate
-                <dd>Intermediate mode turns off the help lines.
-            <dt>Advanced
-                <dd>Advanced mode displays the URL of the currently selected
-                    link at the bottom of the screen.
-         </dl>
+   <dt>Local execution scripts or links
+        <dd>Local execution is activated when Lynx is first set up.
+            If it has not been activated you will not see this option
+            in the <em>Options Menu</em>.
+        <dd>When a local execution script is encountered Lynx  checks the
+            users options to see whether the script can be executed. Users
+            have the following options:
+          <dl>
+             <dt> Always off
+                 <dd>Local execution scripts will never be executed
+             <dt>For Local files only
+                 <dd>Local execution scripts will only be executed if the
+                     script to be executed resides on the local machine,
+                     and is referenced by a URL that begins with
+                     <em>file://localhost</em>
+             <dt>Always on
+                 <dd>All local execution scripts will be executed
+          </dl>
 
-   <dt>Verbose Images
-        <dd>Controls whether or not Lynx replaces the [LINK], [INLINE] and
-            [IMAGE] comments (for images without ALT) with filenames of these
-            images.  This is extremely useful because now we can determine
-            immediately what images are just decorations (button.gif, line.gif)
-            and what images are important.  This setting can also be toggled
-            on startup via the <em>-verbose</em> switch.
+        <dd>If the users options permit the script to be executed Lynx will
+            spawn a shell and run the script.  If the script cannot be
+            executed Lynx will show the script within the Lynx window and
+            inform the user that the script is not allowed to be executed
+            and will ask the user to check his/her options.
+            [<A HREF="#ToC-InteractiveOptions">ToC</A>]
+
+   <dt>Multi-bookmarks
+        <dd>Lynx supports a default bookmark file, and up to 26 total
+            bookmark files (see below).  When multi-bookmarks is OFF,
+            the default bookmark file is used for the '<em>v</em>'iew
+            bookmarks and '<em>a</em>'dd bookmark link commands.  If
+            multi-bookmark support is available in your account, the
+            setting can be changed to STANDARD or ADVANCED.  In STANDARD
+            mode, a menu of available bookmarks always is invoked when
+            you seek to view a bookmark file or add a link, and you select
+            the bookmark file by its letter token (see
+            <em>Bookmark file</em>, below) in that menu.  In ADVANCED mode,
+            you instead are prompted for the letter of the desired bookmark
+            file, but can enter '<em>=</em>' to invoke the STANDARD selection
+            menu, or <em>RETURN</em> for the default bookmark file.
+
+   <dt>Personal mail address
+        <dd>This mail address will be used to help you send files to
+            yourself and will be included as the From: address in any mail
+            or comments that you send.  It will also be sent as the From:
+            field in HTTP or HTTPS requests if inclusion of that header
+            has been enabled via the NO_FROM_HEADER definition in
+            <A HREF="#lynx.cfg">lynx.cfg</A>
+            (the compilation default is not to send the header), or via the
+            <em>-from</em> command line toggle.
+
+   <dt>Popups for select fields
+        <dd>Lynx normally uses a popup window for the OPTIONs in form
+            SELECT fields when the field does not have the MULTIPLE
+            attribute specified, and thus only one OPTION can be selected.
+            The use of popup windows can be disabled by changing this setting
+            to OFF, in which case the OPTIONs will be rendered as a list of
+            radio buttons.  Note that if the SELECT field does have the
+            MULTIPLE attribute specified, the OPTIONs always are rendered
+            as a list of checkboxes.
+
+   <dt>Preferred Document Language
+        <dd>The language you prefer if multi-language files are available
+            from servers.  Use RFC 1766 abbreviations, e.g., en for English,
+            fr for French, etc.  Can be a comma-separated list, which may
+            be interpreted by servers as descending order of preferences.
+            You can also make your order of preference explicit by using
+            q factors as defined by the HTTP protocol, for servers which
+            understand it, for example:
+            da,&nbsp;en-gb;q=0.8,&nbsp;en;q=0.7
+
+   <dt>Preferred Document Charset
+        <dd>The character set you prefer if sets in addition to ISO-8859-1
+            and US-ASCII are available from servers.  Use MIME notation
+            (e.g., ISO-8859-2) and do not include ISO-8859-1 or US-ASCII,
+            since those values are always assumed by default.  Can be a
+            comma-separated list, which may be interpreted by servers as
+            descending order of preferences.  You can also make your order
+            of preference explicit by using q factors as defined by the
+            HTTP protocol, for servers which understand it, for example:
+            iso-8859-5,&nbsp;utf-8;q=0.8
+
+   <dt>Raw 8-bit or CJK Mode
+        <dd>Whether 8-bit characters are assumed to correspond with the
+            display character set and therefore are processed without
+            translation via the chartrans conversion tables.  Should be ON
+            by default when the display character set is one of the
+            Asian (CJK) sets and the 8-bit characters are Kanji multibytes.
+            Should be OFF for the other display character sets,
+            but can be turned ON
+            when the document's charset is unknown (e.g., is not ISO-8859-1
+            and no charset parameter was specified in a reply header from
+            an HTTP server to indicate what it is) but you know by some
+            means that you have the matching display character set selected.
+            Should be OFF when an Asian (CJK) set is selected but the document
+            is ISO-8859-1 or another 'assumed document character set'.
+            The setting also can be toggled via the RAW_TOGGLE
+            command, normally mapped to '<em>@</em>', and at startup via the
+            <em>-raw</em> switch.
+
+   <dt>Show color.
+        <dd>This option will be present if color support is available.
+            If set to ON or ALWAYS, color mode will be forced on if possible.
+            If (n)curses color support is available but cannot be used for
+            the current terminal type, selecting ON is rejected with a message.
+            If set to OFF or NEVER, color mode will be turned off.<BR>
+            ALWAYS and
+            NEVER are not offered in anonymous accounts.  If saved to a
+            <em>.lynxrc</em> file in non-anonymous accounts, ALWAYS will
+            cause Lynx to set color mode on at startup if supported.
+            If Lynx is built with the slang library, this is equivalent to
+            having included the <em>-color</em> command line switch or having the
+            <em>COLORTERM</em> environment variable set.  If color support is
+            provided by curses or ncurses, this is equivalent to the default
+            behavior of using color when the terminal type supports it.
+            If (n)curses color support is available but cannot be used for
+            the current terminal type, the preference can still be saved
+            but will have no effect.<BR>
+            A saved value of NEVER will
+            cause Lynx to assume a monochrome terminal at startup.
+            It is similar to the <em>-nocolor</em> switch, but (when the
+            slang library is used) can be overridden with the <em>-color</em>
+            switch.<BR>
+            If the setting is OFF or ON
+            when the current options are saved to a <em>.lynxrc</em> file,
+            the default startup behavior is retained, such that color mode
+            will be turned on at startup only if the terminal info indicates
+            that you have a color-capable terminal, or (when the
+            slang library is used) if forced on via the
+            <em>-color</em> switch or <em>COLORTERM</em> variable.  This
+            default behavior always is used in anonymous accounts, or if
+            the <em>option_save</em> restriction is set explicitly.  If
+            for any reason the startup color mode is incorrect for your
+            terminal, set it appropriately on or off via this option.
+
+   <dt>Searching type
+        <dd>Searching type has two possible values: CASE INSENSITIVE
+            (default) and CASE SENSITIVE.  The searching type effects
+            inter-document searches only, and determines whether searches
+            for words within documents will be done in a case-sensitive or
+            case-insensitive manner.
+
+   <dt>Show cursor for current link or option.
+        <dd>Lynx normally hides the cursor by positioning it to the right
+            and if possible the very bottom of the screen, so that the
+            current link or OPTION is indicated solely by its highlighting
+            or color.  If show cursor is set to ON, the cursor will be
+            positioned at the left of the current link or OPTION.  This
+            is helpful when Lynx is being used with a speech or braille
+            interface.  It also is useful for sighted users when the
+            terminal cannot distinguish the character attributes used
+            to distinguish the current link or OPTION from the others in
+            the screen display.
+
+   <dt>Show dot files
+        <dd>If display/creation of hidden (dot) files/directories is
+            enabled, you can turn the feature on or off via this setting.
+
+   <dt>Use locale-based character set
+        <dd>This option allows you to request lynx to obtain a MIME name
+            from the operating system which corresponds to your locale
+            setting.  If successful, it overrides the normal setting of
+            the display character set.
+
+   <dt>Underline links
+        <dd>Use underline-attribute rather than bold for links.
 
    <dt>User Agent
         <dd>The header string which Lynx sends to HTTP servers to indicate the
@@ -946,31 +936,45 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
             header is changed to one which does not include &quot;Lynx&quot;
             or &quot;L_y_n_x&quot;.
 
-   <dt>Local execution scripts or links
-        <dd>Local execution is activated when Lynx is first set up.
-            If it has not been activated you will not see this option
-            in the <em>Options Menu</em>.
-        <dd>When a local execution script is encountered Lynx  checks the
-            users options to see whether the script can be executed. Users
-            have the following options:
-          <dl>
-             <dt> Always off
-                 <dd>Local execution scripts will never be executed
-             <dt>For Local files only
-                 <dd>Local execution scripts will only be executed if the
-                     script to be executed resides on the local machine,
-                     and is referenced by a URL that begins with
-                     <em>file://localhost</em>
-             <dt>Always on
-                 <dd>All local execution scripts will be executed
-          </dl>
+   <dt>User Mode
+       <dd>There are three possible choices: Novice, Intermediate, and
+           Advanced.
+         <dl>
+            <dt>Novice
+                <dd>In Novice mode two lines of help are displayed at the
+                    bottom of the screen.
+            <dt>Intermediate
+                <dd>Intermediate mode turns off the help lines.
+            <dt>Advanced
+                <dd>Advanced mode displays the URL of the currently selected
+                    link at the bottom of the screen.
+         </dl>
 
-        <dd>If the users options permit the script to be executed Lynx will
-            spawn a shell and run the script.  If the script cannot be
-            executed Lynx will show the script within the Lynx window and
-            inform the user that the script is not allowed to be executed
-            and will ask the user to check his/her options.
-            [<A HREF="#ToC-InteractiveOptions">ToC</A>]
+   <dt>Verbose Images
+        <dd>Controls whether or not Lynx replaces the [LINK], [INLINE] and
+            [IMAGE] comments (for images without ALT) with filenames of these
+            images.  This is extremely useful because now we can determine
+            immediately what images are just decorations (button.gif, line.gif)
+            and what images are important.  This setting can also be toggled
+            on startup via the <em>-verbose</em> switch.
+
+   <dt>VI keys
+        <dd>If set to ON then the lowercase h, j, k, and l keys will be
+            mapped to left, down, up, and right arrow, respectively.  The
+            uppercase H, J, K, and L keys remain mapped to their configured
+            bindings (normally HELP, JUMP, KEYMAP, and LIST, respectively).
+
+         <p>Note: this has no effect on the line-editor's key bindings.
+
+   <dt>Visited Pages
+        <dd>Enable several different views of the visited links:
+        <dl>
+          <dt>By First Visit
+          <dt>By First Visit Reversed
+          <dt>As Visit Tree
+          <dt>By Last Visit
+          <dt>By Last Visit Reversed
+        </dl>
 </dl>
 
 <h2 ID="Mail"><A NAME="Mail"><em>Comments and mailto: links</em></A></h2>

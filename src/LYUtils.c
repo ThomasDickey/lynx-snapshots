@@ -1449,7 +1449,7 @@ PUBLIC void noviceline ARGS1(
 	return;
 
     LYmove(LYlines-2,0);
-    /* stop_reverse(); */
+    /* lynx_stop_reverse(); */
     LYclrtoeol();
     LYaddstr(NOVICE_LINE_ONE);
     LYclrtoeol();
@@ -6008,7 +6008,7 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 	}
 	if (make_it) {
 	    int old_mask = umask(HIDE_UMASK);
-	    StrAllocCat(lynx_temp_space, "XXXXXX");
+	    StrAllocCat(lynx_temp_space, "XXXXXXXXXX");
 	    if (mkdtemp(lynx_temp_space) == 0) {
 		printf("%s: %s\n", lynx_temp_space, LYStrerror(errno));
 		exit(EXIT_FAILURE);

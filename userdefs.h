@@ -517,6 +517,8 @@
 /*****************************
  * If FTP_PASSIVE is set to TRUE here or in lynx.cfg, ftp transfers will
  * be done in passive mode.
+ * Note: if passive transfers fail, lynx falls back to active mode, and
+ * vice versa if active transfers fail at first.
  */
 #define FTP_PASSIVE	  TRUE
 
@@ -935,6 +937,14 @@
 #define SHOW_CURSOR FALSE
 
 /******************************
+* UNDERLINE_LINKS controls whether links are underlined by default, or shown
+* in bold.  Normally this default is set from the configure script.
+*/
+#ifndef HAVE_CONFIG_H
+#define UNDERLINE_LINKS FALSE
+#endif
+
+/******************************
 * VERBOSE_IMAGES controls whether or not Lynx replaces the [LINK], [INLINE]
 * and [IMAGE] comments (for images without ALT) with filenames of these
 * images.  This is extremely useful because now we can determine immediately
@@ -1350,11 +1360,11 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.5pre.3"
+#define LYNX_VERSION "2.8.5pre.4"
 #define LYNX_WWW_HOME "http://lynx.isc.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Sat, 24 Jan 2004 17:51:04 -0800"
+#define LYNX_DATE "Wed, 28 Jan 2004 11:30:38 -0800"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 
@@ -1453,6 +1463,13 @@
 #define TELNET_PATH     "telnet"
 #define TN3270_PATH     "tn3270"
 #define RLOGIN_PATH     "rlogin"
+
+/* see src/LYLocal.c for these */
+#define TAR_UP_OPTIONS	 "-cf"
+#define TAR_DOWN_OPTIONS "-xf"
+#define TAR_PIPE_OPTIONS "-"
+#define TAR_FILE_OPTIONS ""
+
 /*
  * These are not used:
  * #define COPY_PATH       "cp"

@@ -4,7 +4,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2004/1/24
+dnl Updated: 2004/1/26
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13, patched
 dnl by Tom Dickey.  See your local GNU archives, and this URL:
@@ -12,7 +12,7 @@ dnl http://invisible-island.net/autoconf/autoconf.html
 dnl
 dnl ---------------------------------------------------------------------------
 dnl ---------------------------------------------------------------------------
-dnl AM_GNU_GETTEXT version: 10 updated: 2002/11/17 17:25:28
+dnl AM_GNU_GETTEXT version: 11 updated: 2004/01/26 20:58:40
 dnl --------------
 dnl Usage: Just like AM_WITH_NLS, which see.
 AC_DEFUN([AM_GNU_GETTEXT],
@@ -77,12 +77,18 @@ strdup strtoul tsearch __argz_count __argz_stringify __argz_next])
    dnl find the mkinstalldirs script in another subdir but ($top_srcdir).
    dnl Try to locate it.
    dnl changed mkinstalldirs to mkdirs.sh for Lynx /je spath 1998-Aug-21
+   dnl added check for separate locations of scripts -mirabile 2004-Jan-18
    MKINSTALLDIRS=
    if test -n "$ac_aux_dir"; then
      MKINSTALLDIRS="$ac_aux_dir/mkdirs.sh"
    fi
    if test -z "$MKINSTALLDIRS"; then
      MKINSTALLDIRS="\$(top_srcdir)/mkdirs.sh"
+   fi
+   if test -n "$GNUSYSTEM_AUX_DIR" ; then
+     if test -e "${GNUSYSTEM_AUX_DIR}/mkinstalldirs"; then
+       MKINSTALLDIRS="${GNUSYSTEM_AUX_DIR}/mkinstalldirs"
+     fi
    fi
    AC_SUBST(MKINSTALLDIRS)
 
@@ -910,7 +916,7 @@ if test "$USE_INCLUDED_LIBINTL" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CHECK_CACHE version: 7 updated: 2001/12/19 00:50:10
+dnl CF_CHECK_CACHE version: 8 updated: 2004/01/26 20:58:40
 dnl --------------
 dnl Check if we're accidentally using a cache from a different machine.
 dnl Derive the system name, as a check for reusing the autoconf cache.
@@ -921,7 +927,7 @@ dnl an extra parameter that we may override, e.g., for AC_CANONICAL_SYSTEM
 dnl which is useful in cross-compiles.
 AC_DEFUN([CF_CHECK_CACHE],
 [
-if test -f $srcdir/config.guess ; then
+if test -f $ac_config_sub ; then
 	ifelse([$1],,[AC_CANONICAL_HOST],[$1])
 	system_name="$host_os"
 else
@@ -2754,11 +2760,12 @@ ifelse($1,,,[$1=$PATHSEP])
 	AC_SUBST(PATHSEP)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_PATH_PROG version: 5 updated: 2001/11/18 20:52:38
+dnl CF_PATH_PROG version: 6 updated: 2004/01/26 20:58:41
 dnl ------------
 dnl Check for a given program, defining corresponding symbol.
 dnl	$1 = environment variable, which is suffixed by "_PATH" in the #define.
 dnl	$2 = program name to find.
+dnl	$3 = optional list of additional program names to test.
 dnl
 dnl If there is more than one token in the result, #define the remaining tokens
 dnl to $1_ARGS.  We need this for 'install' in particular.
@@ -2767,7 +2774,7 @@ dnl FIXME: we should allow this to be overridden by environment variables
 dnl
 AC_DEFUN([CF_PATH_PROG],[
 test -z "[$]$1" && $1=$2
-AC_PATH_PROG($1,$2,[$]$1)
+AC_PATH_PROGS($1,[$]$1 $2 $3,[$]$1)
 
 cf_path_prog=""
 cf_path_args=""
@@ -3566,6 +3573,40 @@ AC_DEFUN([CF_SYS_ERRLIST],
     CF_CHECK_ERRNO(sys_errlist)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_TAR_OPTIONS version: 1 updated: 2004/01/26 20:58:41
+dnl --------------
+dnl This is just a list of the most common tar options, allowing for variants
+dnl that can operate with the "-" standard input/output option.
+AC_DEFUN([CF_TAR_OPTIONS],
+[
+case ifelse($1,,tar,$1) in
+*pax)
+	TAR_UP_OPTIONS="-w"
+	TAR_DOWN_OPTIONS="-r"
+	TAR_PIPE_OPTIONS=""
+	TAR_FILE_OPTIONS="-f"
+	;;
+*star)
+	TAR_UP_OPTIONS="-c -f"
+	TAR_DOWN_OPTIONS="-x -U -f"
+	TAR_PIPE_OPTIONS="-"
+	TAR_FILE_OPTIONS=""
+	;;
+*tar)
+	# FIXME: some versions of tar require, some don't allow the "-"
+	TAR_UP_OPTIONS="-cf"
+	TAR_DOWN_OPTIONS="-xf"
+	TAR_PIPE_OPTIONS="-"
+	TAR_FILE_OPTIONS=""
+	;;
+esac
+
+AC_SUBST(TAR_UP_OPTIONS)
+AC_SUBST(TAR_DOWN_OPTIONS)
+AC_SUBST(TAR_FILE_OPTIONS)
+AC_SUBST(TAR_PIPE_OPTIONS)
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl CF_TERMCAP_LIBS version: 10 updated: 2001/10/18 20:42:39
 dnl ---------------
 dnl Look for termcap libraries, or the equivalent in terminfo.
@@ -4176,7 +4217,7 @@ AC_TRY_LINK([
 test $cf_cv_need_xopen_extension = yes && CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_SOURCE version: 9 updated: 2004/01/12 20:45:17
+dnl CF_XOPEN_SOURCE version: 11 updated: 2004/01/26 20:58:41
 dnl ---------------
 dnl Try to get _XOPEN_SOURCE defined properly that we can use POSIX functions,
 dnl or adapt to the vendor's definitions to get equivalent functionality.
@@ -4194,6 +4235,9 @@ irix6.*) #(vi
 linux*) #(vi
 	CF_GNU_SOURCE
 	;;
+mirbsd*) #(vi
+	# setting _XOPEN_SOURCE or _POSIX_SOURCE breaks <arpa/inet.h>
+	;;
 netbsd*) #(vi
 	# setting _XOPEN_SOURCE breaks IPv6 for lynx on NetBSD 1.6, breaks xterm, is not needed for ncursesw
 	;;
@@ -4202,6 +4246,9 @@ openbsd*) #(vi
 	;;
 osf[[45]]*) #(vi
 	CPPFLAGS="$CPPFLAGS -D_OSF_SOURCE"
+	;;
+sco*) #(vi
+	# setting _XOPEN_SOURCE breaks Lynx on SCO Unix / OpenServer
 	;;
 solaris*) #(vi
 	CPPFLAGS="$CPPFLAGS -D__EXTENSIONS__"

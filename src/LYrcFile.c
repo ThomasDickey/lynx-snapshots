@@ -533,6 +533,7 @@ presented regardless of user mode.\n\
 ")),
     MAYBE_FUN(RC_TAGSOUP,               get_tagsoup,        put_tagsoup,
               MSG_ENABLE_LYNXRC),
+    MAYBE_SET(RC_UNDERLINE_LINKS,       LYUnderlineLinks,   MSG_ENABLE_LYNXRC),
     PARSE_ENU(RC_USER_MODE,             user_mode,          tbl_user_mode, N_("\
 user_mode specifies the users level of knowledge with Lynx.  The\n\
 default is \"NOVICE\" which displays two extra lines of help at the\n\

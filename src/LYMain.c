@@ -171,6 +171,7 @@ PUBLIC BOOLEAN LYJumpFileURL = FALSE;	 /* always FALSE the first time */
 PUBLIC BOOLEAN LYPermitURL = FALSE;
 PUBLIC BOOLEAN LYRestricted = FALSE; /* whether we have -anonymous option */
 PUBLIC BOOLEAN LYShowCursor = SHOW_CURSOR; /* to show or not to show */
+PUBLIC BOOLEAN LYUnderlineLinks = UNDERLINE_LINKS; /* Show the links underlined vs bold */
 PUBLIC BOOLEAN LYUseDefShoCur = TRUE;	/* Command line -show_cursor toggle */
 PUBLIC BOOLEAN LYUserSpecifiedURL = TRUE;/* always TRUE  the first time */
 PUBLIC BOOLEAN LYValidate = FALSE;
@@ -3817,6 +3818,10 @@ treated '>' as a co-terminator for double-quotes and tags"
    PARSE_SET(
       "trim_input_fields", 2|SET_ARG,		LYtrimInputFields,
       "trim input text/textarea fields in forms"
+   ),
+   PARSE_SET(
+      "underline_links",4|TOGGLE_ARG,		LYUnderlineLinks,
+      "toggles use of underline/bold attribute for links"
    ),
    PARSE_SET(
       "underscore",	4|TOGGLE_ARG,		use_underscore,

@@ -110,6 +110,7 @@ struct dired_menu {
     char *href;
     struct dired_menu *next;
 } defmenu[] = {
+
 /*
  *  The following initializations determine the contents of the f)ull menu
  *  selection when in dired mode.  If any menu entries are defined in the
@@ -1165,10 +1166,10 @@ PRIVATE int remove_single ARGS1(
 	/*** Course, it's probably broken for screen sizes other 80, too     ***/
 	if (strlen(cp) < 37) {
 	    HTSprintf0(&tmpbuf,
-		       gettext("Remove '%s' and all of its contents?"), cp);
+		       gettext("Remove directory '%s'?"), cp);
 	} else {
 	    HTSprintf0(&tmpbuf,
-		       gettext("Remove directory and all of its contents?"));
+		       gettext("Remove directory?"));
 	}
 	is_directory = TRUE;
     } else if (S_ISREG(dir_info.st_mode)) {
@@ -1524,7 +1525,7 @@ PUBLIC void tagflag ARGS2(
 {
     if (nlinks > 0) {
 	LYmove(links[cur].ly, 2);
-	stop_reverse();
+	lynx_stop_reverse();
 	if (flag == ON) {
 	    LYaddch('+');
 	} else {
@@ -1678,81 +1679,92 @@ PRIVATE char *build_command ARGS3(
 # ifndef ARCHIVE_ONLY
 #  ifdef OK_GZIP
 	if ((arg = match_op("UNTAR_GZ", line)) != 0) {
-#define FMT_UNTAR_GZ "cd %s; %s -qdc %s |  %s -xf -"
+#define FMT_UNTAR_GZ "cd %s; %s -qdc %s |  %s %s %s"
 	    if ((program = HTGetProgramPath(ppGZIP)) != NULL) {
 		dirname = DirectoryOf(arg);
 		HTAddParam(&buffer, FMT_UNTAR_GZ, 1, dirname);
 		HTAddParam(&buffer, FMT_UNTAR_GZ, 2, program);
 		HTAddParam(&buffer, FMT_UNTAR_GZ, 3, arg);
 		HTAddParam(&buffer, FMT_UNTAR_GZ, 4, tar_path);
-		HTEndParam(&buffer, FMT_UNTAR_GZ, 4);
+		HTAddToCmd(&buffer, FMT_UNTAR_GZ, 5, TAR_DOWN_OPTIONS);
+		HTAddToCmd(&buffer, FMT_UNTAR_GZ, 6, TAR_PIPE_OPTIONS);
+		HTEndParam(&buffer, FMT_UNTAR_GZ, 6);
 	    }
 	    return buffer;
 	}
 #  endif /* OK_GZIP */
 	if ((arg = match_op("UNTAR_Z", line)) != 0) {
-#define FMT_UNTAR_Z "cd %s; %s %s |  %s -xf -"
+#define FMT_UNTAR_Z "cd %s; %s %s |  %s %s %s"
 	    if ((program = HTGetProgramPath(ppZCAT)) != NULL) {
 		dirname = DirectoryOf(arg);
 		HTAddParam(&buffer, FMT_UNTAR_Z, 1, dirname);
 		HTAddParam(&buffer, FMT_UNTAR_Z, 2, program);
 		HTAddParam(&buffer, FMT_UNTAR_Z, 3, arg);
 		HTAddParam(&buffer, FMT_UNTAR_Z, 4, tar_path);
-		HTEndParam(&buffer, FMT_UNTAR_Z, 4);
+		HTAddToCmd(&buffer, FMT_UNTAR_Z, 5, TAR_DOWN_OPTIONS);
+		HTAddToCmd(&buffer, FMT_UNTAR_Z, 6, TAR_PIPE_OPTIONS);
+		HTEndParam(&buffer, FMT_UNTAR_Z, 6);
 	    }
 	    return buffer;
 	}
 	if ((arg = match_op("UNTAR", line)) != 0) {
-#define FMT_UNTAR "cd %s; %s -xf %s"
+#define FMT_UNTAR "cd %s; %s %s %s"
 	    dirname = DirectoryOf(arg);
 	    HTAddParam(&buffer, FMT_UNTAR, 1, dirname);
 	    HTAddParam(&buffer, FMT_UNTAR, 2, tar_path);
-	    HTAddParam(&buffer, FMT_UNTAR, 3, arg);
-	    HTEndParam(&buffer, FMT_UNTAR, 3);
+	    HTAddToCmd(&buffer, FMT_UNTAR, 3, TAR_DOWN_OPTIONS);
+	    HTAddParam(&buffer, FMT_UNTAR, 4, arg);
+	    HTEndParam(&buffer, FMT_UNTAR, 4);
 	    return buffer;
 	}
 # endif /* !ARCHIVE_ONLY */
 
 # ifdef OK_GZIP
 	if ((arg = match_op("TAR_GZ", line)) != 0) {
-#define FMT_TAR_GZ "cd %s; %s -cf - %s | %s -qc >%s%s"
+#define FMT_TAR_GZ "cd %s; %s %s %s %s | %s -qc >%s%s"
 	    if ((program = HTGetProgramPath(ppGZIP)) != NULL) {
 		dirname = DirectoryOf(arg);
 		HTAddParam(&buffer, FMT_TAR_GZ, 1, dirname);
 		HTAddParam(&buffer, FMT_TAR_GZ, 2, tar_path);
-		HTAddParam(&buffer, FMT_TAR_GZ, 3, LYPathLeaf(arg));
-		HTAddParam(&buffer, FMT_TAR_GZ, 4, program);
-		HTAddParam(&buffer, FMT_TAR_GZ, 5, LYonedot(LYPathLeaf(arg)));
-		HTAddParam(&buffer, FMT_TAR_GZ, 6, EXT_TAR_GZ);
-		HTEndParam(&buffer, FMT_TAR_GZ, 6);
+		HTAddToCmd(&buffer, FMT_TAR_GZ, 3, TAR_UP_OPTIONS);
+		HTAddToCmd(&buffer, FMT_TAR_GZ, 4, TAR_PIPE_OPTIONS);
+		HTAddParam(&buffer, FMT_TAR_GZ, 5, LYPathLeaf(arg));
+		HTAddParam(&buffer, FMT_TAR_GZ, 6, program);
+		HTAddParam(&buffer, FMT_TAR_GZ, 7, LYonedot(LYPathLeaf(arg)));
+		HTAddParam(&buffer, FMT_TAR_GZ, 8, EXT_TAR_GZ);
+		HTEndParam(&buffer, FMT_TAR_GZ, 8);
 	    }
 	    return buffer;
 	}
 # endif /* OK_GZIP */
 
 	if ((arg = match_op("TAR_Z", line)) != 0) {
-#define FMT_TAR_Z "cd %s; %s -cf - %s | %s >%s%s"
+#define FMT_TAR_Z "cd %s; %s %s %s %s | %s >%s%s"
 	    if ((program = HTGetProgramPath(ppCOMPRESS)) != NULL) {
 		dirname = DirectoryOf(arg);
 		HTAddParam(&buffer, FMT_TAR_Z, 1, dirname);
 		HTAddParam(&buffer, FMT_TAR_Z, 2, tar_path);
-		HTAddParam(&buffer, FMT_TAR_Z, 3, LYPathLeaf(arg));
-		HTAddParam(&buffer, FMT_TAR_Z, 4, program);
-		HTAddParam(&buffer, FMT_TAR_Z, 5, LYonedot(LYPathLeaf(arg)));
-		HTAddParam(&buffer, FMT_TAR_Z, 6, EXT_TAR_Z);
-		HTEndParam(&buffer, FMT_TAR_Z, 6);
+		HTAddToCmd(&buffer, FMT_TAR_Z, 3, TAR_UP_OPTIONS);
+		HTAddToCmd(&buffer, FMT_TAR_Z, 4, TAR_PIPE_OPTIONS);
+		HTAddParam(&buffer, FMT_TAR_Z, 5, LYPathLeaf(arg));
+		HTAddParam(&buffer, FMT_TAR_Z, 6, program);
+		HTAddParam(&buffer, FMT_TAR_Z, 7, LYonedot(LYPathLeaf(arg)));
+		HTAddParam(&buffer, FMT_TAR_Z, 8, EXT_TAR_Z);
+		HTEndParam(&buffer, FMT_TAR_Z, 8);
 	    }
 	    return buffer;
 	}
 
 	if ((arg = match_op("TAR", line)) != 0) {
-#define FMT_TAR "cd %s; %s -cf %s.tar %s"
+#define FMT_TAR "cd %s; %s %s %s %s.tar %s"
 	    dirname = DirectoryOf(arg);
 	    HTAddParam(&buffer, FMT_TAR, 1, dirname);
 	    HTAddParam(&buffer, FMT_TAR, 2, tar_path);
-	    HTAddParam(&buffer, FMT_TAR, 3, LYonedot(LYPathLeaf(arg)));
-	    HTAddParam(&buffer, FMT_TAR, 4, LYPathLeaf(arg));
-	    HTEndParam(&buffer, FMT_TAR, 4);
+	    HTAddToCmd(&buffer, FMT_TAR, 3, TAR_UP_OPTIONS);
+	    HTAddToCmd(&buffer, FMT_TAR, 4, TAR_FILE_OPTIONS);
+	    HTAddParam(&buffer, FMT_TAR, 5, LYonedot(LYPathLeaf(arg)));
+	    HTAddParam(&buffer, FMT_TAR, 6, LYPathLeaf(arg));
+	    HTEndParam(&buffer, FMT_TAR, 6);
 	    return buffer;
 	}
     }

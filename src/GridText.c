@@ -1384,8 +1384,8 @@ PRIVATE int display_line ARGS4(
 		if (!cp_tgt || i_start_tgt != i) {
 		    LYstopTargetEmphasis();
 		    intarget = NO;
-		    if (inbold)		start_bold();
-		    if (inunderline)	start_underline();
+		    if (inbold)		lynx_start_bold();
+		    if (inunderline)	lynx_start_underline();
 		}
 	    }
 	}
@@ -1416,11 +1416,11 @@ PRIVATE int display_line ARGS4(
 		    if (!intarget) {
 #if defined(PDCURSES)
 			if (LYShowColor == SHOW_COLOR_NEVER)
-			    start_bold();
+			    lynx_start_bold();
 			else
-			    start_underline();
+			    lynx_start_underline();
 #else
-			start_underline();
+			lynx_start_underline();
 #endif	/* PDCURSES */
 		    }
 		}
@@ -1435,11 +1435,11 @@ PRIVATE int display_line ARGS4(
 		    if (!intarget) {
 #if defined(PDCURSES)
 		    if (LYShowColor == SHOW_COLOR_NEVER)
-			stop_bold();
+			lynx_stop_bold();
 		    else
-			stop_underline();
+			lynx_stop_underline();
 #else
-		    stop_underline();
+		    lynx_stop_underline();
 #endif	/* PDCURSES */
 		    }
 		}
@@ -1448,13 +1448,13 @@ PRIVATE int display_line ARGS4(
 	    case LY_BOLD_START_CHAR:
 		inbold = YES;
 		if (!intarget)
-		    start_bold();
+		    lynx_start_bold();
 		break;
 
 	    case LY_BOLD_END_CHAR:
 		inbold = NO;
 		if (!intarget)
-		    stop_bold();
+		    lynx_stop_bold();
 		break;
 
 #endif
@@ -1572,8 +1572,8 @@ after_while:
 #undef intarget
 #endif /* SHOW_WHEREIS_TARGETS && !USE_COLOR_STYLE */
 #ifndef USE_COLOR_STYLE
-    stop_underline();
-    stop_bold();
+    lynx_stop_underline();
+    lynx_stop_bold();
 #else
     while (current_style < line->numstyles)
     {
@@ -13201,7 +13201,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 		    LYaddch('_');
 		    i++;
 		} else {
-		    start_underline();
+		    lynx_start_underline();
 		}
 		break;
 
@@ -13210,16 +13210,16 @@ PRIVATE void redraw_part_of_line ARGS4(
 		    LYaddch('_');
 		    i++;
 		} else {
-		    stop_underline();
+		    lynx_stop_underline();
 		}
 		break;
 
 	    case LY_BOLD_START_CHAR:
-		start_bold();
+		lynx_start_bold();
 		break;
 
 	    case LY_BOLD_END_CHAR:
-		stop_bold ();
+		lynx_stop_bold ();
 		break;
 
 #endif
@@ -13293,8 +13293,8 @@ PRIVATE void redraw_part_of_line ARGS4(
     } /* end of while */
 
 #ifndef USE_COLOR_STYLE
-    stop_underline();
-    stop_bold();
+    lynx_stop_underline();
+    lynx_stop_bold();
 #else
 
     while (current_style < line->numstyles)
@@ -13491,8 +13491,8 @@ PRIVATE void move_to_glyph ARGS10(
 #endif /* SHOW_WHEREIS_TARGETS */
 		{
 		    if (inunderline)	inU = YES;
-		    if (inunderline)	stop_underline();
-		    if (inbold)		stop_bold();
+		    if (inunderline)	lynx_stop_underline();
+		    if (inbold)		lynx_stop_bold();
 		    lynx_start_link_color (flag, inU);
 		}
 
@@ -13548,8 +13548,8 @@ PRIVATE void move_to_glyph ARGS10(
 			    }
 			}
 			if (!incurlink) {
-			    if (inbold)		start_bold();
-			    if (inunderline)	start_underline();
+			    if (inbold)		lynx_start_bold();
+			    if (inunderline)	lynx_start_underline();
 			}
 		    }
 		}
@@ -13581,25 +13581,25 @@ PRIVATE void move_to_glyph ARGS10(
 	    case LY_UNDERLINE_START_CHAR:
 		if (!drawing || !incurlink) inunderline = YES;
 		if (drawing && !intarget && !incurlink)
-		    start_underline();
+		    lynx_start_underline();
 		break;
 
 	    case LY_UNDERLINE_END_CHAR:
 		inunderline = NO;
 		if (drawing && !intarget && !incurlink)
-		    stop_underline();
+		    lynx_stop_underline();
 		break;
 
 	    case LY_BOLD_START_CHAR:
 		if (!drawing || !incurlink) inbold = YES;
 		if (drawing && !intarget && !incurlink)
-		    start_bold();
+		    lynx_start_bold();
 		break;
 
 	    case LY_BOLD_END_CHAR:
 		inbold = NO;
 		if (drawing && !intarget && !incurlink)
-		    stop_bold();
+		    lynx_stop_bold();
 		break;
 
 	    case LY_SOFT_NEWLINE:
@@ -13720,9 +13720,9 @@ PRIVATE void move_to_glyph ARGS10(
 #endif /* SHOW_WHEREIS_TARGETS */
 			{
 			    if (inbold)
-				start_bold();
+				lynx_start_bold();
 			    if (inunderline)
-				start_underline();
+				lynx_start_underline();
 			}
 		    }
 		    LYaddstr(buffer);

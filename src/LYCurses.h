@@ -447,21 +447,12 @@ extern unsigned int Lynx_Color_Flags;
 #define SL_LYNX_USE_COLOR	1
 #define SL_LYNX_OVERRIDE_COLOR	2
 
-#ifdef UNDERLINE_LINKS
-#define start_bold()      	LYaddAttr(4)
+#define start_bold()      	LYaddAttr(LYUnderlineLinks ? 4 : 1)
 #define start_reverse()   	LYaddAttr(2)
-#define start_underline() 	LYaddAttr(1)
-#define stop_bold()       	LYsubAttr(4)
+#define start_underline() 	LYaddAttr(LYUnderlineLinks ? 1 : 4)
+#define stop_bold()       	LYsubAttr(LYUnderlineLinks ? 4 : 1)
 #define stop_reverse()    	LYsubAttr(2)
-#define stop_underline()  	LYsubAttr(1)
-#else
-#define start_bold()      	LYaddAttr(1)
-#define start_reverse()   	LYaddAttr(2)
-#define start_underline() 	LYaddAttr(4)
-#define stop_bold()       	LYsubAttr(1)
-#define stop_reverse()    	LYsubAttr(2)
-#define stop_underline()  	LYsubAttr(4)
-#endif
+#define stop_underline()  	LYsubAttr(LYUnderlineLinks ? 1 : 4)
 
 #ifdef FANCY_CURSES
 #undef FANCY_CURSES
@@ -533,17 +524,10 @@ extern void VTHome NOPARAMS;
  *  add and subtract, respectively, the attributes
  *  _UNDERLINE, _BOLD, _REVERSE, and _BLINK. - FM
  */
-#ifdef UNDERLINE_LINKS
-#define start_bold()		setattr(_UNDERLINE)
-#define stop_bold()		clrattr(_UNDERLINE)
-#define start_underline()	setattr(_BOLD)
-#define stop_underline()	clrattr(_BOLD)
-#else /* not UNDERLINE_LINKS */
-#define start_bold()		setattr(_BOLD)
-#define stop_bold()		clrattr(_BOLD)
-#define start_underline()	setattr(_UNDERLINE)
-#define stop_underline()	clrattr(_UNDERLINE)
-#endif /* UNDERLINE_LINKS */
+#define start_bold()		setattr(LYUnderlineLinks ? _UNDERLINE : _BOLD)
+#define stop_bold()		clrattr(LYUnderlineLinks ? _UNDERLINE : _BOLD)
+#define start_underline()	setattr(LYUnderlineLinks ? _BOLD : _UNDERLINE)
+#define stop_underline()	clrattr(LYUnderlineLinks ? _BOLD : _UNDERLINE)
 #define start_reverse()		setattr(_REVERSE)
 #define wstart_reverse(w)	wsetattr(w, _REVERSE)
 #define stop_reverse()		clrattr(_REVERSE)
@@ -577,21 +561,10 @@ extern int  lynx_chg_color PARAMS((int, int, int));
 #define LYsubWAttr(win,attr)	wattroff(win,attr)
 #endif
 
-#ifdef UNDERLINE_LINKS
-#define start_bold()		LYaddAttr(A_UNDERLINE)
-#define stop_bold()		LYsubAttr(A_UNDERLINE)
-#define start_underline()	LYaddAttr(A_BOLD)
-#define stop_underline()	LYsubAttr(A_BOLD)
-#else /* not UNDERLINE_LINKS: */
-#define start_bold()		LYaddAttr(A_BOLD)
-#define stop_bold()		LYsubAttr(A_BOLD)
-#ifdef USE_COLOR_STYLE
-#define start_underline()	attron(A_UNDERLINE) /* allow combining - kw */
-#else
-#define start_underline()	LYaddAttr(A_UNDERLINE)
-#endif /* USE_COLOR_STYLE */
-#define stop_underline()	LYsubAttr(A_UNDERLINE)
-#endif /* UNDERLINE_LINKS */
+#define start_bold()		LYaddAttr(LYUnderlineLinks ? A_UNDERLINE : A_BOLD)
+#define stop_bold()		LYsubAttr(LYUnderlineLinks ? A_UNDERLINE : A_BOLD)
+#define start_underline()	LYaddAttr(LYUnderlineLinks ? A_BOLD : A_UNDERLINE)
+#define stop_underline()	LYsubAttr(LYUnderlineLinks ? A_BOLD : A_UNDERLINE)
 
 #if defined(SNAKE) && defined(HP_TERMINAL)
 #define start_reverse()		LYaddWAttr(LYwin, A_DIM)
@@ -710,6 +683,13 @@ extern void lynx_stop_prompt_color NOPARAMS;
 extern void lynx_start_radio_color NOPARAMS;
 extern void lynx_stop_radio_color NOPARAMS;
 extern void lynx_stop_all_colors NOPARAMS;
+
+extern void lynx_start_bold NOPARAMS;
+extern void lynx_start_reverse NOPARAMS;
+extern void lynx_start_underline NOPARAMS;
+extern void lynx_stop_bold NOPARAMS;
+extern void lynx_stop_reverse NOPARAMS;
+extern void lynx_stop_underline NOPARAMS;
 
 /*
  * To prevent corrupting binary data on DOS, MS-WINDOWS or OS/2 we open files

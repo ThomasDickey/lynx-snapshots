@@ -4,8 +4,8 @@ dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ask PRCS to plug-in the project-version for the configure-script.
-dnl $Format: AC_REVISION($ProjectVersion: 2.8.5pre.3 $\""$)
-AC_REVISION(none)
+dnl $Format: "AC_REVISION($ProjectVersion$)"$
+AC_REVISION(2.8.5pre.4)
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
 # in the environment, or whether autoconf added -O and -g options:
@@ -31,8 +31,9 @@ AC_CONFIG_HEADER($CONFIG_H:config.hin)
 CF_CHECK_CACHE
 
 PACKAGE=lynx
-VERSION=2.8.5
-
+dnl ask PRCS to plug-in the project-version for the packages.
+# $Format: "VERSION=$ProjectVersion$"$
+VERSION=2.8.5pre.4
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_SUBST(DESTDIR)
@@ -237,12 +238,12 @@ linux*)
 	;;
 msdosdjgpp*)
 	LIBS="$LIBS -lwatt"
-	TRY_CFLAGS="$TRY_CFLAGS -DDOSPATH -DNOUSERS -DWATT32"
+	TRY_CFLAGS="$TRY_CFLAGS -DDOSPATH -DNOUSERS"
 	;;
 next*)
 	TRY_CFLAGS="$TRY_CFLAGS -DNEXT"
 	;;
-openbsd*)
+openbsd* | ekkobsd* | mirbsd*)
 	LIBS="$LIBS -lcompat"
 	;;
 osf4*)
@@ -933,7 +934,8 @@ CF_ARG_ENABLE(underlines,
 	[use_underline=yes],
 	[use_underline=no])
 AC_MSG_RESULT($use_underline)
-test $use_underline = yes && AC_DEFINE(UNDERLINE_LINKS)
+test $use_underline = yes && AC_DEFINE(UNDERLINE_LINKS,1)
+test $use_underline = no  && AC_DEFINE(UNDERLINE_LINKS,0)
 
 AC_MSG_CHECKING(if help files should be gzip'ed)
 CF_ARG_ENABLE(gzip-help,
@@ -1093,15 +1095,16 @@ if test ".$use_dired" != ".no" ; then
 
 CF_PATH_PROG(COMPRESS,	compress)
 CF_PATH_PROG(RM,	rm)
-CF_PATH_PROG(TAR,	tar)
+CF_PATH_PROG(TAR,	tar, pax gtar gnutar bsdtar star)
 CF_PATH_PROG(UUDECODE,	uudecode)
 CF_PATH_PROG(ZCAT,	zcat)
 CF_PATH_PROG(ZIP,	zip)
 
-dnl builtin: CF_PATH_PROG(CHMOD,	chmod)
-dnl builtin: CF_PATH_PROG(COPY,		cp)
-dnl builtin: CF_PATH_PROG(MKDIR,	mkdir)
-dnl builtin: CF_PATH_PROG(TOUCH,	touch)
+CF_TAR_OPTIONS($TAR)
+AC_DEFINE_UNQUOTED(TAR_UP_OPTIONS,   "$TAR_UP_OPTIONS")
+AC_DEFINE_UNQUOTED(TAR_DOWN_OPTIONS, "$TAR_DOWN_OPTIONS")
+AC_DEFINE_UNQUOTED(TAR_FILE_OPTIONS, "$TAR_FILE_OPTIONS")
+AC_DEFINE_UNQUOTED(TAR_PIPE_OPTIONS, "$TAR_PIPE_OPTIONS")
 
 dnl 'INSTALL' is a special case, since the configure script has to find a
 dnl BSD-compatible one so the build/install works properly.
@@ -1193,9 +1196,9 @@ srcdir="$srcdir"
 SRCDIR_CLEAN="#"
 if test -n "$srcdir" ; then
 	echo srcdir is $srcdir
-	$CONFIG_SHELL $srcdir/mkdirs.sh WWW/Library/Implementation
-	$CONFIG_SHELL $srcdir/mkdirs.sh src/chrtrans
-	test "$USE_INCLUDED_LIBINTL" = yes && $CONFIG_SHELL $srcdir/mkdirs.sh intl
+	$CONFIG_SHELL $MKINSTALLDIRS WWW/Library/Implementation
+	$CONFIG_SHELL $MKINSTALLDIRS src/chrtrans
+	test "$USE_INCLUDED_LIBINTL" = yes && $CONFIG_SHELL $MKINSTALLDIRS intl
 	test "$srcdir" != "." && SRCDIR_CLEAN=""
 fi
 

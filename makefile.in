@@ -25,7 +25,14 @@ LIBS		= @LIBS@
 INSTALL		= @INSTALL@
 INSTALL_PROGRAM	= @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
+
 LN_S		= @LN_S@
+
+MKINSTALLDIRS	= @MKINSTALLDIRS@
+
+TAR		= @TAR@
+TAR_UP		= $(TAR) @TAR_UP_OPTIONS@ @TAR_PIPE_OPTIONS@
+TAR_DOWN	= $(TAR) @TAR_DOWN_OPTIONS@ @TAR_PIPE_OPTIONS@
 
 ## This is the version which we are developing (or, upon release, make this
 ## the same).  Use no dots in the name, since it must work on VMS and MS-DOS.
@@ -246,7 +253,7 @@ zip:  clean
 	cd ..; rm -f $(lynxname).zip; zip -r $(lynxname).zip $(lynxdir)
 
 save:
-	cd ..; rm -f $(lynxname).tar; tar -cf - $(lynxdir) > $(lynxname).tar
+	cd ..; rm -f $(lynxname).tar; $(TAR_UP) $(lynxdir) > $(lynxname).tar
 
 compress: tar
 	cd ..; rm -f $(lynxname).tar.Z; compress -f -v $(lynxname).tar
@@ -291,8 +298,8 @@ install-man : $(MANDIR)
 
 install-doc : $(DOCDIR) $(HELPDIR)
 	@echo Copying sample files
-	(cd $(srcdir) && tar cf - C[HO]* PROBLEMS README docs samples test ) | \
-			       ( cd $(DOCDIR) && chmod -R u+w . && tar xf - )
+	(cd $(srcdir) && $(TAR_UP) C[HO]* PROBLEMS README docs samples test ) | \
+			       ( cd $(DOCDIR) && chmod -R u+w . && $(TAR_DOWN) )
 	$(SHELL) -c 'if test "$(COMPRESS_PROG)" != "" ; then \
 		(cd $(DOCDIR) && $(COMPRESS_PROG) -f docs/CHANGES*.[0-9] docs/*.announce ) \
 	fi'
@@ -300,6 +307,7 @@ install-doc : $(DOCDIR) $(HELPDIR)
 		cd $(HELPDIR) && rm -f $$name ;\
 		cd $(HELPDIR) && ( $(LN_S) $(DOCDIR)/$$name . || cp $(DOCDIR)/$$name . );\
 		done'
+	-$(SHELL) -c 'case `id|sed -e "s/(.*//"` in uid=0) chown -R root $(DOCDIR);; esac'
 
 # HPUX 'sed' does not seem to like '=' as pattern delimiter.
 # We cannot use '%' because it may appear in a URL.
@@ -418,6 +426,6 @@ $(MANDIR) \
 $(LIBDIR) \
 $(HELPDIR) \
 $(DOCDIR) :
-	$(SHELL) $(srcdir)/mkdirs.sh $@
+	$(SHELL) $(MKINSTALLDIRS) $@
 etags:
 	etags -r "/\(PRIVATE\|PUBLIC\)[ \t]+\([a-zA-Z_][a-zA-Z_0-1]*[ \t*]+\)*\([a-zA-Z_][a-zA-Z_0-1]*\)[ \t]+\(ARGS[0-9]\|NOARGS\)/\3/" *.[ch] */*.[ch] */*/*.[ch] */*/*/*.[ch]

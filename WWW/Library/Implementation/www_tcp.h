@@ -686,7 +686,7 @@ typedef unsigned short mode_t;
 #include <libgettext.h>
 #endif
 
-#define N_(s) (s)
+#define N_(s) s
 
 #ifndef HAVE_GETTEXT
 #define gettext(s) s

@@ -1001,34 +1001,30 @@ PUBLIC void HTAddXpand ARGS4(
 #endif /* USE_QUOTED_PARAMETER */
 
 /*
- * Append string-parameter to a system command that we are constructing.  The
- * string is a complete parameter (which is a necessary assumption so we can
- * quote it properly).  We're given the index of the newest parameter we're
- * processing.  Zero indicates none, so a value of '1' indicates that we copy
- * from the beginning of the command string up to the first parameter,
- * substitute the quoted parameter and return the result.
+ * Append string to a system command that we are constructing, without quoting. 
+ * We're given the index of the newest parameter we're processing.  Zero
+ * indicates none, so a value of '1' indicates that we copy from the beginning
+ * of the command string up to the first parameter, substitute the quoted
+ * parameter and return the result.
  *
  * Parameters are substituted at "%s" tokens, like printf.  Other printf-style
  * tokens are not substituted; they are passed through without change.
  */
-PUBLIC void HTAddParam ARGS4(
+PUBLIC void HTAddToCmd ARGS4(
     char **,		result,
     CONST char *,	command,
     int,		number,
-    CONST char *,	parameter)
+    CONST char *,	string)
 {
     if (number > 0) {
 	CONST char *last = HTAfterCommandArg(command, number - 1);
 	CONST char *next = last;
-#if USE_QUOTED_PARAMETER
-	char *quoted;
-#endif
 
 	if (number <= 1) {
 	    FREE(*result);
 	}
-	if (parameter == 0)
-	    parameter = "";
+	if (string == 0)
+	    string = "";
 	while (next[0] != 0) {
 	    if (HTIsParam(next)) {
 		if (next != last) {
@@ -1037,18 +1033,34 @@ PUBLIC void HTAddParam ARGS4(
 		    HTSACat(result, last);
 		    (*result)[len] = 0;
 		}
-#if USE_QUOTED_PARAMETER
-		quoted = HTQuoteParameter(parameter);
-		HTSACat(result, quoted);
-		FREE(quoted);
-#else
-		HTSACat(result, parameter);
-#endif
+		HTSACat(result, string);
 		CTRACE((tfp, "PARAM-ADD:%s\n", *result));
 		return;
 	    }
 	    next++;
 	}
+    }
+}
+
+/*
+ * Append string-parameter to a system command that we are constructing.  The
+ * string is a complete parameter (which is a necessary assumption so we can
+ * quote it properly).
+ */
+PUBLIC void HTAddParam ARGS4(
+    char **,		result,
+    CONST char *,	command,
+    int,		number,
+    CONST char *,	parameter)
+{
+    if (number > 0) {
+#if USE_QUOTED_PARAMETER
+	char *quoted = HTQuoteParameter(parameter);
+	HTAddToCmd(result, command, number, quoted);
+	FREE(quoted);
+#else
+	HTAddToCmd(result, command, number, parameter);
+#endif
     }
 }
 

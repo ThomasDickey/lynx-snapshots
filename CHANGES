@@ -1,6 +1,29 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2004-01-28 (2.8.5pre.4)
+* workaround to build with ncurses 4.2 -TD
+* fixes from Thorsten Glaser:
+  + use ${GNUSYSTEM_AUX_DIR}/mkinstalldirs if it exists.
+  + use $ac_config_sub variable in CF_CHECK_CACHE macro.
+  + add case in CF_XOPEN_SOURCE macro to prevent defining _XOPEN_SOURCE
+  + use $(MKINSTALLDIRS) variable in generated makefile.
+  + correct comment in lynx.cfg for the default value of FTP_PASSIVE 
+  + increase pattern length for mkdtemp() call.
+* add command-line & menu option/config variables to replace the compile-time
+  UNDERLINE_LINKS definition (suggested by BL) -TD
+* correct ownership of installed lynx_doc directory (report by FLWM, PG) -TD
+* modify configure check for tar to test several common variants including
+  star, modify makefile.in to use the configured 'tar' program (request by
+  FLWM) -TD
+* compiler ifdef-fixes -BL
+* documentation updates for DJGPP and OpenSSL -DK
+* fixes/updates for DJGPP makefiles -DK
+* modify po/makefile.inn to substitute the PACKAGE and VERSION strings into
+  lynx.pot automatically, and to remove the unused boilerplate header comment
+  (suggested by LP) -TD
+* fixes for substituted project-version in configure script -TD
+
 2004-01-24 (2.8.5pre.3)
 * update documentation's version numbers for release -TD
 * modify configure check for libbz2 to allow for older headers which do not
@@ -11,8 +34,8 @@ Changes since Lynx 2.8 release
   the user to set it via lynx.cfg or the options menu (discussion with Andreas
   Metzler) -TD
 * remove intl subdirectory (gettext-0.10.35), since some of the ".po" files
-  have been modified to rely upon gettext 0.11.x.  Modified configure script
-  macro to report this properly -TD 
+  have been modified to rely upon newer features of gettext.  Modified
+  configure script macro to report this properly -TD 
 * add SSL_CERT_DIR, SSL_CERT_FILE to lynx.man (suggested by Stef Caunter) -TD
 * documentation updates for DJGPP -DK, LP, FLWM
 * update address for Free Software Foundation in COPYHEADER and COPYING
