@@ -949,6 +949,15 @@ Attribute numbers
 #define HTML_UL_WRAP           13
 #define HTML_UL_ATTRIBUTES     14
 
+#ifdef USE_PSRC
+/* values of HTML attributes' types */
+#define HTMLA_NORMAL 0 /* nothing specific */
+#define HTMLA_ANAME  1 /* anchor name - 'id' or a's 'name' */
+#define HTMLA_HREF   2 /* href */
+#define HTMLA_CLASS  4 /* class name.  */
+#define HTMLA_AUXCLASS 8 /* attribute, the value of which also designates
+			    a class name */
+#endif
 extern CONST SGML_dtd HTML_dtd;
 
 extern void HTSwitchDTD PARAMS((

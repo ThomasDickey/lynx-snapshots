@@ -1327,6 +1327,8 @@ options from a list, and fields for entering text.
     entry field.  NOTE, however, that <em>Return</em> also will <a
     href="#submit">submit</a> the form if the text entry field is the
     only non-hidden field in the form.
+
+<dt>TEXTAREA Fields
 <dd>TEXTAREA fields are handled as if they were a series of text entry
     (INPUT) fields for which successive lines imply a newline at the end of
     the preceding line.  You enter text on each line to construct the overall
@@ -1336,7 +1338,44 @@ options from a list, and fields for entering text.
     or next line of the overall message, as for INPUT fields, and the
     <em>TAB</em> key will move you down beyond the bottom of the TEXTAREA
     field, or to the first line on the next page if the overall field
-    extends beyond the currently displayed page.
+    extends beyond the currently displayed page.<P>
+
+<dt>Editing TEXTAREA Fields
+<dd>TEXTAREA fields can be edited using an external editor
+    by entering <em>^ve</em> when in the TEXTAREA.<p>
+
+    You can also use two other special TEXTAREA functions
+    by adding KEYMAP bindings to your <em>lynx.cfg</em> file, e.g.<p>
+
+    &nbsp;&nbsp;KEYMAP:$:GROWTEXTAREA<br>
+    &nbsp;&nbsp;KEYMAP:#:INSERTFILE<p>
+
+    With these binding -- you can choose other keys -- ,<br>
+    (in a TEXTAREA only) <em>^v$</em> adds 5 lines to the TEXTAREA
+    and <em>^v#</em> brings up the name of an existing file
+    to be inserted into the TEXTAREA (above the cursorline).
+    An automatic variation is normally compiled in,
+    so that hitting <em>Enter</em> with the cursor on the last line
+    adds a new line to the TEXTAREA, with the cursor on it.<p>
+
+    Some flavors of UNIX, shells & terminal settings require
+    that you enter <em>^v^ve</em> in order to start the editor,
+    as they also use <em>^v</em> as default command-line quote key
+    (called `lnext' in stty man pages and `stty -a' output);
+    to avoid this, you can put `stty lnext undef' in .cshrc
+    or invoke Lynx with a wrapper script, e.g.<p>
+
+    <code>
+    &nbsp;&nbsp;#!/bin/sh<br>
+    &nbsp;&nbsp;stty lnext undef<br>
+    &nbsp;&nbsp;$HOME/bin/lynx "$@"<br>
+    &nbsp;&nbsp;stty lnext ^V<br>
+    &nbsp;&nbsp;exit</code><p>
+
+    NB when NOT in a TEXTAREA, <em>^v</em> is the default command
+    to switch between SortaSGML and TagSoup HTML parsing
+    (i.e., SWITCH_DTD ).
+
 </dl>
 
 In general, you can move around the form using the standard Lynx navigation

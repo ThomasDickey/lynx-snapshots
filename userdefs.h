@@ -352,6 +352,8 @@
  *	%d	date of last modification
  *	%a	anchor pointing to file or directory
  *	%A	as above but don't show symbolic links
+ *     %t      type of file (description derived from MIME type)
+ *     %T      MIME type as known by Lynx (from mime.types or default)
  *	%k	size of file in Kilobytes
  *	%K	as above but omit size for directories
  *	%s	size of file in bytes
@@ -366,7 +368,11 @@
  *
  * For the Unix "ls -l" format:    "    %p %4l %-8.8o %-8.8g %7s %-12.12d %a"
  */
+#ifdef DOSPATH
+#define LIST_FORMAT "    %4K %-12.12d %a"
+#else
 #define LIST_FORMAT "    %p %4l %-8.8o %-8.8g %7s %-12.12d %a"
+#endif
 
 /*
  *  If NO_FORCED_CORE_DUMP is set to TRUE, Lynx will not force
@@ -410,7 +416,7 @@
  * note: STARTFILE must be a URL.  See the Lynx online help for more
  *       information on URLs
  */
-#define STARTFILE "http://lynx.browser.org/"
+#define STARTFILE "."
 
 /*****************************
  * HELPFILE must be defined as a URL and must have a
@@ -1205,12 +1211,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.2dev.21"
+#define LYNX_VERSION "2.8.2dev.22"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Tue, 30 Mar 1999 10:10:37 -0700"
+#define LYNX_DATE "Tue, 13 Apr 1999 03:39:16 -0600"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1998"

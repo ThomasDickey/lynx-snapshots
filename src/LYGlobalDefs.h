@@ -27,6 +27,10 @@
 #define VISITED_LINKS_HELP	"keystrokes/visited_help.html"
 #endif /* LYHELP_H */
 
+#ifdef SOURCE_CACHE
+#include <HTChunk.h>
+#endif
+
 #ifdef SOCKS
 extern BOOLEAN socks_flag;
 #endif /* SOCKS */
@@ -245,6 +249,14 @@ extern BOOLEAN nolist;
 extern BOOLEAN historical_comments;
 extern BOOLEAN minimal_comments;
 extern BOOLEAN soft_dquotes;
+#ifdef SOURCE_CACHE
+extern char * source_cache_filename;
+extern HTChunk * source_cache_chunk;
+extern int LYCacheSource;
+#define SOURCE_CACHE_NONE	0
+#define SOURCE_CACHE_FILE	1
+#define SOURCE_CACHE_MEMORY	2
+#endif
 extern BOOLEAN LYCancelDownload;
 extern BOOLEAN LYRestricted;
 extern BOOLEAN LYValidate;

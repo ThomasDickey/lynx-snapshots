@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.23 Tue, 30 Mar 1999 10:10:37 -0700 dickey @
+ * @Id: LYStyle.c 1.24 Tue, 13 Apr 1999 03:39:16 -0600 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -22,6 +22,7 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
+#include <LYStrings.h>
 
 #ifdef USE_COLOR_STYLE
 
@@ -30,6 +31,20 @@ PUBLIC int last_styles[128];
 PUBLIC int last_colorattr_ptr=0;
 
 PUBLIC bucket hashStyles[CSHASHSIZE];
+PUBLIC bucket special_bucket =
+{
+ "<special>" /* in order something to be in trace. */
+};
+PUBLIC bucket nostyle_bucket =
+{
+ "<NOSTYLE>" /* in order something to be in trace. */
+};
+
+PUBLIC int cached_tag_styles[HTML_ELEMENTS];
+PUBLIC int current_tag_style;
+PUBLIC BOOL force_current_tag_style=FALSE;
+PUBLIC char* forced_classname;
+PUBLIC BOOL force_classname;
 
 /* definitions for the mono attributes we can use */
 static int ncursesMono[7] = {
@@ -309,7 +324,9 @@ PUBLIC void style_initialiseHashTable NOARGS
 	}
 	if (firsttime) {
 	    firsttime = 0;
+#ifdef LY_FIND_LEAKS
 	    atexit(free_colorstylestuff);
+#endif
 	}
 	s_high   = hash_code("high");
 	s_alink  = hash_code("alink");
@@ -455,6 +472,46 @@ PUBLIC void TrimColorClass ARGS3(
     *phcode = hash_code(lookfrom && *lookfrom ? lookfrom : &tmp[1]);
     CTRACE(tfp, "CSS:%s (trimmed %s)\n",
 	   (styleclassname ? styleclassname : "<null>"), tmp);
+}
+
+/* This function is desgined as faster analog to TrimColorClass.
+   It assumes that tag_name is presentin stylename! -HV
+*/
+PUBLIC void FastTrimColorClass ARGS5 (
+	    CONST char*,	 tag_name,
+	    int,		 name_len,
+	    char*,		 stylename,
+	    char**,		 pstylename_end,/*will be modified*/
+	    int*,		 phcode)	/*will be modified*/
+{
+    char* tag_start = *pstylename_end;
+
+    while (tag_start >= stylename)
+    {
+	for (; tag_start >= stylename &&  *tag_start!=';' ; --tag_start)
+	    ;
+	if ( !strncasecmp(tag_start+1, tag_name, name_len) ) break;
+	    --tag_start;
+    }
+    *tag_start = '\0';
+    *pstylename_end = tag_start;
+    *phcode = hash_code(tag_start+1);
+}
+
+ /* This is called each time lss styles are read. It will fill
+    each elt of 'cached_tag_styles' -HV
+ */
+PUBLIC void cache_tag_styles NOARGS
+{
+    char buf[200];
+    int i;
+
+    for (i = 0; i < HTML_ELEMENTS; ++i)
+    {
+	strcpy(buf, HTML_dtd.tags[i].name);
+	LYLowerCase(buf);
+	cached_tag_styles[i] =hash_code(buf);
+    }
 }
 
 #endif /* USE_COLOR_STYLE */

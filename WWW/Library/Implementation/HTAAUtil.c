@@ -498,7 +498,9 @@ PUBLIC void HTAA_setupReader ARGS3(char *,	start_of_headers,
 				(size_t)(sizeof(char)*(buffer_length + 1)));
     }
     if (buffer == NULL) outofmem(__FILE__, "HTAA_setupReader");
+#ifdef LY_FIND_LEAKS
     atexit(FreeHTAAUtil);
+#endif
     start_pointer = buffer;
     if (start_of_headers) {
 	strncpy(buffer, start_of_headers, length);

@@ -26,9 +26,11 @@
 #include <LYMainLoop.h>
 #include <LYBookmark.h>
 #include <LYCookie.h>
+#include <LYPrettySrc.h>
 
 #ifdef __DJGPP__
 #include <dos.h>
+#include <dpmi.h>
 #endif /* __DJGPP__ */
 
 #ifdef __EMX__
@@ -360,7 +362,7 @@ PUBLIC char *LYCookieSLooseCheckDomains = NULL;  /* check loosely   */
 PUBLIC char *LYCookieSQueryCheckDomains = NULL;  /* check w/a query */
 #ifdef EXP_PERSISTENT_COOKIES
 BOOLEAN persistent_cookies = TRUE;
-PUBLIC char *LYCookieFile = NULL;          /* default cookie file */
+PUBLIC char *LYCookieFile = NULL;	   /* default cookie file */
 #endif /* EXP_PERSISTENT_COOKIES */
 PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 PUBLIC BOOLEAN LYNoISMAPifUSEMAP = FALSE; /* Omit ISMAP link if MAP present? */
@@ -414,6 +416,7 @@ PRIVATE HTList *LYStdinArgs = NULL;
 PRIVATE BOOLEAN no_options_further=FALSE; /* set to TRUE after '--' argument */
 #endif
 
+
 PRIVATE void parse_arg PARAMS((char **arg, int *i));
 PRIVATE void print_help_and_exit PARAMS((int exit_status));
 
@@ -435,11 +438,10 @@ PRIVATE int LY_set_ctrl_break(int setting)
 
 PRIVATE int LY_get_ctrl_break(void)
 {
-    typedef union REGS Regs;
-    extern Regs regs;
+    __dpmi_regs regs;
     regs.h.ah = 0x33;
     regs.h.al = 0x00;
-    int86(0x21, &regs, &regs);
+    __dpmi_int (0x21, &regs);
     return ((int) regs.h.dl);
 }
 
@@ -626,7 +628,7 @@ static void FixCharacters(void)
 /* these are used for matching commandline options. */
 PRIVATE int argcmp ARGS2(
 	char*,		str,
-	char*,	        what)
+	char*,		what)
 {
     if (str[0] == '-' && str[1] == '-' ) ++str;
     return strcmp(str,what);
@@ -634,7 +636,7 @@ PRIVATE int argcmp ARGS2(
 
 PRIVATE int argncmp ARGS2(
 	char*,		str,
-	char*,	        what)
+	char*,		what)
 {
     if (str[0] == '-' && str[1] == '-' ) ++str;
     return strncmp(str, what, strlen(what));
@@ -726,11 +728,12 @@ PUBLIC int main ARGS2(
      *	Will display memory leaks if LY_FIND_LEAKS is defined.
      */
     atexit(LYLeaks);
-#endif /* LY_FIND_LEAKS */
     /*
      *	Register the function which will free our allocated globals.
      */
     atexit(free_lynx_globals);
+#endif /* LY_FIND_LEAKS */
+
 
 #ifdef LOCALE
     /*
@@ -1104,7 +1107,9 @@ PUBLIC int main ARGS2(
 
 		if (LYStdinArgs == NULL) {
 		    LYStdinArgs = HTList_new();
+#ifdef LY_FIND_LEAKS
 		    atexit(LYStdinArgs_free);
+#endif
 		}
 		StrAllocCopy(argument, buf);
 		HTList_appendObject(LYStdinArgs, argument);
@@ -1329,6 +1334,11 @@ PUBLIC int main ARGS2(
 	CTRACE(tfp, "LYNX_SIG_FILE '%s' is bad. Ignoring.\n", LYNX_SIG_FILE);
     }
 
+#ifdef USE_PSRC
+    /*this is required for checking the tagspecs when parsing cfg file by
+       LYReadCFG.c:parse_html_src_spec -HV */
+    HTSwitchDTD(TRUE);
+#endif
     /*
      *	Process the configuration file.
      */
@@ -1357,15 +1367,15 @@ PUBLIC int main ARGS2(
     LYEnsureAbsoluteURL((char **)&LynxHome, "LynxHome");
 
     /*
-     * Process any command line arguments not already handled. - FM
+     *  Process any command line arguments not already handled. - FM
      */
     for (i = 1; i < argc; i++) {
 	parse_arg(&argv[i], &i);
     }
 
     /*
-     * Process any stdin-derived arguments for a lone "-"  which we've
-     * loaded into LYStdinArgs. - FM
+     *  Process any stdin-derived arguments for a lone "-"  which we've
+     *  loaded into LYStdinArgs. - FM
      */
     if (LYStdinArgs != NULL) {
 	char *my_args[2];
@@ -1379,9 +1389,12 @@ PUBLIC int main ARGS2(
     }
 
     /*
-     * Set the rest of variables when the configuration have read.
+     *  Initialize other things based on the configuration read.
      */
 
+#ifdef USE_PSRC
+    if ( (!Old_DTD) != TRUE ) /* skip if they are already initialized -HV */
+#endif
     HTSwitchDTD(!Old_DTD);
 
     /*
@@ -1412,6 +1425,14 @@ PUBLIC int main ARGS2(
 	LYLoadCookies(LYCookieFile);
     }
 #endif
+
+    /*
+     * Set up our help and about file base paths. - FM
+     */
+    StrAllocCopy(helpfilepath, helpfile);
+    if ((cp = LYPathLeaf(helpfilepath)) != helpfilepath)
+	*cp = '\0';
+    LYAddHtmlSep(&helpfilepath);
 
     /*
      *	Check for a save space path in the environment.
@@ -1556,6 +1577,14 @@ PUBLIC int main ARGS2(
 	no_multibook = TRUE;
     }
 
+#ifdef SOURCE_CACHE
+    /*
+     * Disable source caching if not interactive.
+     */
+    if (dump_output_immediately)
+	LYCacheSource = SOURCE_CACHE_NONE;
+#endif
+
 #ifdef VMS
     set_vms_keys();
 #endif /* VMS */
@@ -1637,6 +1666,11 @@ PUBLIC int main ARGS2(
      *  Done here so that URL guessing in LYEnsureAbsoluteURL() can be
      *  interruptible (terminal is in raw mode, select() works).  -BL
      */
+#ifdef USE_PSRC
+    if (!dump_output_immediately)
+	HTMLSRC_init_caches(); /* do it before terminal is initialized*/
+#endif
+
     if (!dump_output_immediately) {
 	setup(terminal);
     }
@@ -1700,14 +1734,6 @@ PUBLIC int main ARGS2(
     }
 
     /*
-     *	Set up our help and about file base paths. - FM
-     */
-    StrAllocCopy(helpfilepath, helpfile);
-    if ((cp = LYPathLeaf(helpfilepath)) != helpfilepath)
-	*cp = '\0';
-    LYAddHtmlSep(&helpfilepath);
-
-    /*
      *	Make sure our bookmark default strings
      *	are all allocated and synchronized. - FM
      */
@@ -1766,6 +1792,10 @@ PUBLIC int main ARGS2(
 	if (x_display != NULL && *x_display != '\0') {
 	    LYisConfiguredForX = TRUE;
 	}
+#ifdef USE_COLOR_STYLE
+	cache_tag_styles();
+#endif
+
 	ena_csi((LYlowest_eightbit[current_char_set] > 155));
 	LYOpenCloset();
 	status = mainloop();
@@ -1802,6 +1832,58 @@ PUBLIC void LYRegisterLynxProtocols NOARGS
     HTRegisterProtocol(&LYLynxCookies);
 }
 
+/*
+ *  Some staff to reload lynx.cfg without restarting new lynx session,
+ *  also load options menu items and command-line options
+ *  to made things consistent.  Not implemented yet.
+ *  Warning: experimental, more main() reorganization required.
+ *
+ *  Called by user of interactive session by LYNXCFG://reload/ link.
+ */
+PUBLIC void reload_read_cfg NOARGS
+{
+    if (!LYRestricted) {
+
+	/* save .lynxrc file in case we change something from Options Menu */
+	if (!save_rc()) return;
+
+	/*
+	 *  Process the configuration file.
+	 */
+	read_cfg(lynx_cfg_file, "main program", 1, (FILE *)0);
+
+	/*
+	 *  Process the RC file.
+	 */
+	read_rc();
+
+
+	/* We are not interested in startfile here */
+	/* but other things may be lost: */
+
+	/*
+	 *  Process any command line arguments not already handled. - FM
+	 */
+		/* Not implemented yet here */
+
+	/*
+	 *  Process any stdin-derived arguments for a lone "-"  which we've
+	 *  loaded into LYStdinArgs. - FM
+	 */
+		/* Not implemented yet here */
+
+	/*
+	 *  Initialize other things based on the configuration read.
+	 */
+		/* Not implemented yet here,
+		 * a major problem: file paths
+		 * like lynx_temp_space, LYCookieFile etc.
+		 */
+
+    }
+}
+
+
 /* There are different ways of setting arguments on the command line, and
  * there are different types of arguments.  These include:
  *
@@ -1813,7 +1895,7 @@ PUBLIC void LYRegisterLynxProtocols NOARGS
  */
 
 struct parse_args_type;
-typedef int (*ParseFunc) PARAMS((struct parse_args_type *, char **, char *));
+typedef int (*ParseFunc) PARAMS((char *));
 
 typedef union {
 	BOOLEAN * set_value;
@@ -1821,8 +1903,6 @@ typedef union {
 	char **   str_value;
 	ParseFunc fun_value;
 } ParseUnion;
-
-#undef  PARSE_DEBUG
 
 /*
  * Storing the four types of data in separate fields costs about 1K of data.
@@ -1906,9 +1986,7 @@ static int parse_authentication ARGS2(
 }
 
 /* -anonymous */
-static int anonymous_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int anonymous_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
    /*
@@ -1923,9 +2001,7 @@ static int anonymous_fun ARGS3(
 }
 
 /* -assume_charset */
-static int assume_charset_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int assume_charset_fun ARGS1(
 	char *,			next_arg)
 {
     UCLYhndl_for_unspec = safeUCGetLYhndl_byMIME(next_arg);
@@ -1939,9 +2015,7 @@ static int assume_charset_fun ARGS3(
 }
 
 /* -assume_local_charset */
-static int assume_local_charset_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int assume_local_charset_fun ARGS1(
 	char *,			next_arg)
 {
     UCLYhndl_HTFile_for_unspec = safeUCGetLYhndl_byMIME(next_arg);
@@ -1949,9 +2023,7 @@ static int assume_local_charset_fun ARGS3(
 }
 
 /* -assume_unrec_charset */
-static int assume_unrec_charset_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int assume_unrec_charset_fun ARGS1(
 	char *,			next_arg)
 {
     UCLYhndl_for_unrec = safeUCGetLYhndl_byMIME(next_arg);
@@ -1959,9 +2031,7 @@ static int assume_unrec_charset_fun ARGS3(
 }
 
 /* -auth */
-static int auth_fun ARGS3(
-	Parse_Args_Type*,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int auth_fun ARGS1(
 	char *,			next_arg)
 {
     parse_authentication(next_arg, authentication_info);
@@ -1969,9 +2039,7 @@ static int auth_fun ARGS3(
 }
 
 /* -base */
-static int base_fun ARGS3(
-	Parse_Args_Type*,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int base_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     /*
@@ -1991,9 +2059,7 @@ static int base_fun ARGS3(
 
 #ifdef USE_SLANG
 /* -blink */
-static int blink_fun ARGS3(
-	Parse_Args_Type*,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int blink_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     Lynx_Color_Flags |= SL_LYNX_USE_BLINK;
@@ -2002,9 +2068,7 @@ static int blink_fun ARGS3(
 #endif
 
 /* -cache */
-static int cache_fun ARGS3(
-	Parse_Args_Type*,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int cache_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg != 0)
@@ -2018,9 +2082,7 @@ static int cache_fun ARGS3(
 }
 
 /* -child */
-static int child_fun ARGS3(
-	Parse_Args_Type*,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int child_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     child_lynx = TRUE;
@@ -2030,9 +2092,7 @@ static int child_fun ARGS3(
 
 #ifdef USE_SLANG
 /* -color */
-static int color_fun ARGS3(
-	Parse_Args_Type*,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int color_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     Lynx_Color_Flags |= SL_LYNX_USE_COLOR;
@@ -2045,9 +2105,7 @@ static int color_fun ARGS3(
 #endif
 
 /* -crawl */
-static int crawl_fun ARGS3(
-	Parse_Args_Type*,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int crawl_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     crawl = TRUE;
@@ -2056,9 +2114,7 @@ static int crawl_fun ARGS3(
 }
 
 /* -display */
-static int display_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int display_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg != 0) {
@@ -2071,9 +2127,7 @@ static int display_fun ARGS3(
 }
 
 /* -dump */
-static int dump_output_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int dump_output_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     dump_output_immediately = TRUE;
@@ -2082,9 +2136,7 @@ static int dump_output_fun ARGS3(
 }
 
 /* -editor */
-static int editor_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int editor_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg != 0)
@@ -2094,9 +2146,7 @@ static int editor_fun ARGS3(
 }
 
 /* -error_file */
-static int error_file_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int error_file_fun ARGS1(
 	char *,			next_arg)
 {
     /*
@@ -2110,9 +2160,7 @@ static int error_file_fun ARGS3(
 
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
 /* -exec */
-static int exec_fun ARGS3(
-	Parse_Args_Type*,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int exec_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
 #ifndef NEVER_ALLOW_REMOTE_EXEC
@@ -2125,9 +2173,7 @@ static int exec_fun ARGS3(
 #endif
 
 /* -get_data */
-static int get_data_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int get_data_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     /*
@@ -2170,9 +2216,7 @@ static int get_data_fun ARGS3(
 }
 
 /* -help */
-static int help_fun ARGS3(
-	Parse_Args_Type*,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int help_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     print_help_and_exit (0);
@@ -2180,9 +2224,7 @@ static int help_fun ARGS3(
 }
 
 /* -hiddenlinks */
-static int hiddenlinks_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int hiddenlinks_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg != 0) {
@@ -2202,9 +2244,7 @@ static int hiddenlinks_fun ARGS3(
 }
 
 /* -homepage */
-static int homepage_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int homepage_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg != 0) {
@@ -2215,9 +2255,7 @@ static int homepage_fun ARGS3(
 }
 
 /* -mime_header */
-static int mime_header_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int mime_header_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     /*
@@ -2233,9 +2271,7 @@ static int mime_header_fun ARGS3(
 
 #ifndef DISABLE_NEWS
 /* -newschunksize */
-static int newschunksize_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int newschunksize_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg != 0) {
@@ -2251,9 +2287,7 @@ static int newschunksize_fun ARGS3(
 }
 
 /* -newsmaxchunk */
-static int newsmaxchunk_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int newsmaxchunk_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg) {
@@ -2270,9 +2304,7 @@ static int newsmaxchunk_fun ARGS3(
 #endif /* not DISABLE_NEWS */
 
 /* -nobrowse */
-static int nobrowse_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int nobrowse_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
    HTDirAccess = HT_DIR_FORBID;
@@ -2280,9 +2312,7 @@ static int nobrowse_fun ARGS3(
 }
 
 /* -nocolor */
-static int nocolor_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int nocolor_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     LYShowColor = SHOW_COLOR_NEVER;
@@ -2294,9 +2324,7 @@ static int nocolor_fun ARGS3(
 }
 
 /* -nopause */
-static int nopause_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int nopause_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     InfoSecs = 0;
@@ -2306,9 +2334,7 @@ static int nopause_fun ARGS3(
 }
 
 /* -pauth */
-static int pauth_fun ARGS3(
-	Parse_Args_Type*,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int pauth_fun ARGS1(
 	char *,			next_arg)
 {
     parse_authentication(next_arg, proxyauth_info);
@@ -2316,9 +2342,7 @@ static int pauth_fun ARGS3(
 }
 
 /* -post_data */
-static int post_data_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int post_data_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     /*
@@ -2359,9 +2383,7 @@ static int post_data_fun ARGS3(
 }
 
 /* -restrictions */
-static int restrictions_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int restrictions_fun ARGS1(
 	char *,			next_arg)
 {
     static CONST char *Usage[] = {
@@ -2456,9 +2478,7 @@ static int restrictions_fun ARGS3(
 }
 
 /* -selective */
-static int selective_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int selective_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
    HTDirAccess = HT_DIR_SELECTIVE;
@@ -2466,9 +2486,7 @@ static int selective_fun ARGS3(
 }
 
 /* -source */
-static int source_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int source_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     dump_output_immediately = TRUE;
@@ -2479,9 +2497,7 @@ static int source_fun ARGS3(
 }
 
 /* -traversal */
-static int traversal_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int traversal_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     traversal = TRUE;
@@ -2495,9 +2511,7 @@ static int traversal_fun ARGS3(
 }
 
 /* -version */
-static int version_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int version_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     SetOutputMode( O_TEXT );
@@ -2525,9 +2539,7 @@ static int version_fun ARGS3(
 }
 
 /* -width */
-static int width_fun ARGS3(
-	Parse_Args_Type*,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
+static int width_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg != 0) {
@@ -2850,8 +2862,14 @@ with partial-display logic"
    PARSE_SET(
       "preparsed",	SET_ARG,		&LYPreparsedSource,
       "show parsed text/html with -source and in source view\n\
-       to visualize how lynx behave with invalid HTML"
+       to visualize how lynx behaves with invalid HTML"
    ),
+#ifdef USE_PSRC
+   PARSE_SET(
+      "prettysrc",	SET_ARG,		&LYpsrc,
+      "do syntax highlighting and hyperlink handling in source view"
+   ),
+#endif
    PARSE_SET(
       "print",		UNSET_ARG,		&no_print,
       "enable print functions (DEFAULT)"
@@ -2919,7 +2937,7 @@ treated '>' as a co-terminator for double-quotes and tags"
    ),
 #endif
 #endif
-   PARSE_FUN(
+   PARSE_SET(
       "tagsoup",	SET_ARG,		&Old_DTD,
       "use TagSoup rather than SortaSGML parser"
    ),
@@ -2988,11 +3006,11 @@ static void print_help_strings ARGS3(
     int pad;
     int c;
     int first;
-    int field_width = 21;
+    int field_width = 20;
 
-    pad = field_width - (5 + (int) strlen (name));
+    pad = field_width - (4 + (int) strlen (name));
 
-    fprintf (stdout, "    -%s", name);
+    fprintf (stdout, "   -%s", name);
 
     if (*help != '=') {
 	pad--;
@@ -3047,7 +3065,11 @@ in double-quotes (\"-\") on VMS)", NULL);
 
     for (p = Arg_Table; p->name != 0; p++) {
 	char temp[LINESIZE], *value = temp;
+#ifdef PARSE_DEBUG
+	Parse_Args_Type * q = p;
+#else
 	ParseUnion *q = (ParseUnion *)(&(p->value));
+#endif
 	switch (p->type & ARG_TYPE_MASK) {
 	    case TOGGLE_ARG:
 	    case SET_ARG:
@@ -3215,7 +3237,7 @@ PRIVATE void parse_arg ARGS2(
 	case FUNCTION_ARG:
 	     fun = q->fun_value;
 	     if (0 != fun) {
-		 if (-1 == (*fun) (p, argv, next_arg)) {
+		 if (-1 == (*fun) (next_arg)) {
 		 }
 	     }
 	     break;

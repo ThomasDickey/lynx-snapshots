@@ -9,6 +9,7 @@
 #include <LYTraversal.h>
 #include <LYCookie.h>
 #include <UCAuto.h>
+#include <HTAlert.h>
 
 #include <LYexit.h>
 #include <LYLeaks.h>

@@ -636,7 +636,9 @@ PRIVATE int get_connection ARGS2(
 	/*
 	**  Set up freeing at exit. - FM
 	*/
+#ifdef LY_FIND_LEAKS
 	atexit(free_FTPGlobals);
+#endif
 	firstuse = FALSE;
     }
 

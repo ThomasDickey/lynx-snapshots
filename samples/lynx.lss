@@ -73,3 +73,20 @@ link.red.prev:bold:yellow:red
 link.blue.prev:bold:yellow:blue
 link.blue.next:bold:blue
 link.green.toc:bold:white:green
+#
+# Define styles that will be used when syntax highlighting is requested
+# (commandline option -prettysrc). 
+span.htmlsrc_comment:normal:white
+span.htmlsrc_tag:normal:white
+#If you don't like that the tag name and attribute name are displayed 
+#in different colors, comment the following line. 
+span.htmlsrc_attrib:normal:cyan
+span.htmlsrc_attrval:normal:magenta
+span.htmlsrc_abracket:normal:white
+span.htmlsrc_entity:normal:white
+##span.htmlsrc_href:
+##span.htmlsrc_entire:
+span.htmlsrc_badseq:normal:red
+span.htmlsrc_badtag:normal:red
+span.htmlsrc_badattr:normal:red
+span.htmlsrc_sgmlspecial:normal:yellow

@@ -102,7 +102,9 @@ PUBLIC int HTAddRule ARGS3(
     }
 
     if (!rules) {
+#ifdef LY_FIND_LEAKS
 	atexit(HTClearRules);
+#endif
     }
 #ifdef PUT_ON_HEAD
     temp->next = rules;
@@ -290,7 +292,7 @@ char * HTTranslate ARGS1(
 ** returns	0 OK, < 0 syntax error.
 */
 PUBLIC int  HTSetConfiguration ARGS1(
-    CONST char *,	config)
+    char *,		config)
 {
     HTRuleOp op;
     char * line = NULL;

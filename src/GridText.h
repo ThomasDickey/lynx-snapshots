@@ -166,6 +166,10 @@ extern BOOL HText_getFirstTargetInLine PARAMS((
 	char *		target));
 extern int HTisDocumentSource NOPARAMS;
 extern void HTuncache_current_document NOPARAMS;
+#ifdef SOURCE_CACHE
+extern BOOLEAN HTreparse_document NOPARAMS;
+extern BOOLEAN HTdocument_settings_changed NOPARAMS;
+#endif
 extern int HText_getTopOfScreen NOPARAMS;
 extern int HText_getLines PARAMS((HText * text));
 extern int HText_getNumOfLines NOPARAMS;
@@ -272,6 +276,9 @@ extern int HText_InsertFile PARAMS((
 	struct link *	form_link));
 
 extern void redraw_lines_of_link PARAMS((int cur));
+
+#ifdef USE_PSRC
 extern void HTMark_asSource NOPARAMS;
+#endif
 
 #endif /* LYGRIDTEXT_H */

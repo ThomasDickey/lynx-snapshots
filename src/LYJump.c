@@ -5,7 +5,6 @@
 #include <LYGlobalDefs.h>
 #include <LYJump.h>
 #include <LYKeymap.h>
-#include <LYSignal.h>
 #include <GridText.h>
 
 #include <LYLeaks.h>

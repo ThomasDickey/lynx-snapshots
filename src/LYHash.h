@@ -26,6 +26,16 @@ typedef struct _hashbucket bucket;
 
 extern bucket hashStyles[CSHASHSIZE];
 extern int hash_code PARAMS((char* string));
+extern bucket special_bucket;/*it's used when OMIT_SCN_KEEPING is 1 in HTML.c
+    and LYCurses.c. */
+extern bucket nostyle_bucket;/*initialized properly - to be used in CTRACE when
+            NOSTYLE is passed as 'style' to curses_w_style */    
+
+extern int hash_code_lowercase_on_fly PARAMS((char* string));
+extern int hash_code_aggregate_char PARAMS((char c,int hash));
+extern int hash_code_aggregate_lower_on_fly  PARAMS((char* c,int hash_was));
+
+
 #ifdef NOT_USED
 extern int hash_table[CSHASHSIZE]; /* 32K should be big enough */
 #endif

@@ -19,7 +19,6 @@
  */
 PUBLIC BOOL LYOutOfMemory = FALSE;
 
-#ifdef LY_FIND_LEAKS
 
 /*
  *  Stack of functions to call upon exit.
@@ -78,9 +77,6 @@ PRIVATE void LYCompleteExit NOPARAMS
 	callstack[topOfStack]();
     }
 }
-#else
-#define LYCompleteExit() /*nothing*/
-#endif /* LY_FIND_LEAKS */
 
 /*
  *  Purpose:		Terminates program.

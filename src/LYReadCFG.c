@@ -22,6 +22,8 @@
 #include <LYCookie.h>
 #include <LYReadCFG.h>
 #include <HTAlert.h>
+#include <LYHistory.h>
+#include <LYPrettySrc.h>
 
 #ifdef DIRED_SUPPORT
 #include <LYLocal.h>
@@ -142,7 +144,9 @@ PRIVATE void add_item_to_list ARGS2(
 	if (cur_item == NULL)
 	    outofmem(__FILE__, "read_cfg");
 	*list_ptr = cur_item;
+#ifdef LY_FIND_LEAKS
 	atexit(free_item_list);
+#endif
     } else {
 	/*
 	 *  Find the last item.
@@ -240,7 +244,9 @@ PRIVATE void add_printer_to_list ARGS2(
 	if (cur_item == NULL)
 	    outofmem(__FILE__, "read_cfg");
 	*list_ptr = cur_item;
+#ifdef LY_FIND_LEAKS
 	atexit(free_printer_item_list);
+#endif
     } else {
 	/*
 	 *  Find the last item.
@@ -450,7 +456,6 @@ typedef union {
 	long	  def_value;
 } ConfigUnion;
 
-#undef  PARSE_DEBUG
 #ifdef	PARSE_DEBUG
 #define ParseData \
 	lynx_html_item_type** add_value; \
@@ -460,18 +465,18 @@ typedef union {
 	ParseFunc fun_value; \
 	long def_value
 #define PARSE_ADD(n,t,v) {n,t,	 &v,  0,  0,  0,  0,  0}
-#define PARSE_SET(n,t,v) {n,t,	  0, &v,  0,  0,  0,  0}
-#define PARSE_INT(n,t,v) {n,t,	  0,  0, &v,  0,  0,  0}
-#define PARSE_STR(n,t,v) {n,t,	  0,  0,  0, &v,  0,  0}
+#define PARSE_SET(n,t,v) {n,t,	  0,  v,  0,  0,  0,  0}
+#define PARSE_INT(n,t,v) {n,t,	  0,  0,  v,  0,  0,  0}
+#define PARSE_STR(n,t,v) {n,t,	  0,  0,  0,  v,  0,  0}
 #define PARSE_ENV(n,t,v) {n,t,	  0,  0,  0,  v,  0,  0}
 #define PARSE_FUN(n,t,v) {n,t,	  0,  0,  0,  0,  v,  0}
 #define PARSE_DEF(n,t,v) {n,t,	  0,  0,  0,  0,  0,  v}
 #else
 #define ParseData long value
 #define PARSE_ADD(n,t,v) {n,t,	 (long)&(v)}
-#define PARSE_SET(n,t,v) {n,t,	 (long)&(v)}
-#define PARSE_INT(n,t,v) {n,t,	 (long)&(v)}
-#define PARSE_STR(n,t,v) {n,t,	 (long)&(v)}
+#define PARSE_SET(n,t,v) {n,t,	 (long) (v)}
+#define PARSE_INT(n,t,v) {n,t,	 (long) (v)}
+#define PARSE_STR(n,t,v) {n,t,	 (long) (v)}
 #define PARSE_ENV(n,t,v) {n,t,	 (long) (v)}
 #define PARSE_FUN(n,t,v) {n,t,	 (long) (v)}
 #define PARSE_DEF(n,t,v) {n,t,	 (long) (v)}
@@ -763,6 +768,21 @@ static int printer_fun ARGS1(
     return 0;
 }
 
+#ifdef SOURCE_CACHE
+static int source_cache_fun ARGS1(
+	char *,		value)
+{
+    if (!strncasecomp(value, "FILE", 4))
+	LYCacheSource = SOURCE_CACHE_FILE;
+    else if (!strncasecomp(value, "MEM", 3))
+	LYCacheSource = SOURCE_CACHE_MEMORY;
+    else if (!strncasecomp(value, "NONE", 4))
+	LYCacheSource = SOURCE_CACHE_NONE;
+
+    return 0;
+}
+#endif
+
 static int suffix_fun ARGS1(
 	char *,		value)
 {
@@ -841,114 +861,245 @@ static int viewer_fun ARGS1(
     return 0;
 }
 
+
+#ifdef USE_PSRC
+
+static void html_src_bad_syntax ARGS2(
+	    char*, value,
+	    char*, option_name)
+{
+    char buf[100];
+
+    strcpy(buf,"HTMLSRC_");
+    strcat(buf,option_name);
+    LYUpperCase(buf);
+    fprintf(stderr,"Bad syntax in TAGSPEC %s:%s\n",buf,value);
+    exit_immediately(-1);
+}
+
+
+static int parse_html_src_spec ARGS3(
+	    HTlexem, lexem_code,
+	    char*, value,
+	    char*, option_name)
+{
+   /* Now checking the value for being correct.  Since HTML_dtd is not
+    * initialized completely (member tags points to non-initiailized data), we
+    * use tags_old.  If the syntax is incorrect, then lynx will exit with error
+    * message.
+    */
+    char* ts2;
+    if ( !value || !*value) return 0; /* silently ignoring*/
+
+#define BS() html_src_bad_syntax(value,option_name)
+
+    ts2 = strchr(value,':');
+    if (!ts2)
+	BS();
+    *ts2 = '\0';
+
+    if ( html_src_parse_tagspec(value, lexem_code, TRUE, TRUE)
+	|| html_src_parse_tagspec(ts2, lexem_code, TRUE, TRUE) )
+    {
+	*ts2 = ':';
+	BS();
+    }
+
+    *ts2 = ':';
+    HTL_tagspecs[lexem_code] = NULL;
+    StrAllocCopy(HTL_tagspecs[lexem_code],value);
+#undef BS
+    return 0;
+}
+
+#define defHTSRC_parse_fun(x) static int html_src_set_##x ARGS1( char*,str) \
+ { parse_html_src_spec(HTL_##x,str,#x); return 0; }
+
+defHTSRC_parse_fun(comm)
+defHTSRC_parse_fun(tag)
+defHTSRC_parse_fun(attrib)
+defHTSRC_parse_fun(attrval)
+defHTSRC_parse_fun(abracket)
+defHTSRC_parse_fun(entity)
+defHTSRC_parse_fun(href)
+defHTSRC_parse_fun(entire)
+defHTSRC_parse_fun(badseq)
+defHTSRC_parse_fun(badtag)
+defHTSRC_parse_fun(badattr)
+defHTSRC_parse_fun(sgmlspecial)
+
+#undef defHTSRC_parse_fun
+
+static int read_htmlsrc_attrname_xform ARGS1( char*,str)
+{
+    int val;
+    if ( 1 == sscanf(str, "%d", &val) ) {
+	if (val<0 || val >2) {
+	    CTRACE(tfp,"bad value for htmlsrc_attrname_xform (ignored - must be one of 0,1,2): %d\n", val);
+	} else
+	    attrname_transform = val;
+    } else {
+	CTRACE(tfp,"bad value for htmlsrc_attrname_xform (ignored): %s\n",
+		    str);
+    }
+    return 0;
+}
+
+static int read_htmlsrc_tagname_xform ARGS1( char*,str)
+{
+    int val;
+    if ( 1 == sscanf(str,"%d",&val) ) {
+	if (val<0 || val >2) {
+	    CTRACE(tfp,"bad value for htmlsrc_tagname_xform (ignored - must be one of 0,1,2): %d\n", val);
+	} else
+	    tagname_transform = val;
+    } else {
+	CTRACE(tfp,"bad value for htmlsrc_tagname_xform (ignored): %s\n",
+		    str);
+    }
+    return 0;
+}
+
+
+#define defHTSRC_option(x) \
+    PARSE_FUN( "htmlsrc_" #x ,CONF_FUN, html_src_set_##x),
+
+#endif
+
+
 /* This table should be sorted alphabetically */
 static Config_Type Config_Table [] =
 {
-     PARSE_SET("accept_all_cookies", CONF_BOOL, LYAcceptAllCookies),
-     PARSE_INT("alertsecs", CONF_INT, AlertSecs),
-     PARSE_SET("always_resubmit_posts", CONF_BOOL, LYresubmit_posts),
+     PARSE_SET("accept_all_cookies", CONF_BOOL, &LYAcceptAllCookies),
+     PARSE_INT("alertsecs", CONF_INT, &AlertSecs),
+     PARSE_SET("always_resubmit_posts", CONF_BOOL, &LYresubmit_posts),
 #ifdef EXEC_LINKS
      PARSE_DEF("always_trusted_exec", CONF_ADD_TRUSTED, ALWAYS_EXEC_PATH),
 #endif
      PARSE_FUN("assume_charset", CONF_FUN, assume_charset_fun),
      PARSE_FUN("assume_local_charset", CONF_FUN, assume_local_charset_fun),
      PARSE_FUN("assume_unrec_charset", CONF_FUN, assume_unrec_charset_fun),
-     PARSE_SET("block_multi_bookmarks", CONF_BOOL, LYMBMBlocked),
-     PARSE_SET("bold_h1", CONF_BOOL, bold_H1),
-     PARSE_SET("bold_headers", CONF_BOOL, bold_headers),
-     PARSE_SET("bold_name_anchors", CONF_BOOL, bold_name_anchors),
-     PARSE_SET("case_sensitive_always_on", CONF_BOOL, case_sensitive),
+     PARSE_SET("block_multi_bookmarks", CONF_BOOL, &LYMBMBlocked),
+     PARSE_SET("bold_h1", CONF_BOOL, &bold_H1),
+     PARSE_SET("bold_headers", CONF_BOOL, &bold_headers),
+     PARSE_SET("bold_name_anchors", CONF_BOOL, &bold_name_anchors),
+     PARSE_SET("case_sensitive_always_on", CONF_BOOL, &case_sensitive),
      PARSE_FUN("character_set", CONF_FUN, character_set_fun),
-     PARSE_SET("checkmail", CONF_BOOL, check_mail),
-     PARSE_SET("collapse_br_tags", CONF_BOOL, LYCollapseBRs),
+     PARSE_SET("checkmail", CONF_BOOL, &check_mail),
+     PARSE_SET("collapse_br_tags", CONF_BOOL, &LYCollapseBRs),
 #ifdef USE_COLOR_TABLE
      PARSE_FUN("color", CONF_FUN, color_fun),
 #endif
-     PARSE_STR("cookie_accept_domains", CONF_STR, LYCookieSAcceptDomains),
+     PARSE_STR("cookie_accept_domains", CONF_STR, &LYCookieSAcceptDomains),
 #ifdef EXP_PERSISTENT_COOKIES
-     PARSE_STR("cookie_file", CONF_STR, LYCookieFile),
+     PARSE_STR("cookie_file", CONF_STR, &LYCookieFile),
 #endif /* EXP_PERSISTENT_COOKIES */
-     PARSE_STR("cookie_loose_invalid_domains", CONF_STR, LYCookieSLooseCheckDomains),
-     PARSE_STR("cookie_query_invalid_domains", CONF_STR, LYCookieSQueryCheckDomains),
-     PARSE_STR("cookie_reject_domains", CONF_STR, LYCookieSRejectDomains),
-     PARSE_STR("cookie_strict_invalid_domains", CONF_STR, LYCookieSStrictCheckDomains),
+     PARSE_STR("cookie_loose_invalid_domains", CONF_STR, &LYCookieSLooseCheckDomains),
+     PARSE_STR("cookie_query_invalid_domains", CONF_STR, &LYCookieSQueryCheckDomains),
+     PARSE_STR("cookie_reject_domains", CONF_STR, &LYCookieSRejectDomains),
+     PARSE_STR("cookie_strict_invalid_domains", CONF_STR, &LYCookieSStrictCheckDomains),
      PARSE_ENV("cso_proxy", CONF_ENV, 0 ),
 #ifdef VMS
-     PARSE_STR("CSWING_PATH", CONF_STR, LYCSwingPath),
+     PARSE_STR("CSWING_PATH", CONF_STR, &LYCSwingPath),
 #endif
      PARSE_FUN("default_bookmark_file", CONF_FUN, default_bookmark_file_fun),
      PARSE_FUN("default_cache_size", CONF_FUN, default_cache_size_fun),
      PARSE_FUN("default_editor", CONF_FUN, default_editor_fun),
-     PARSE_STR("default_index_file", CONF_STR, indexfile),
+     PARSE_STR("default_index_file", CONF_STR, &indexfile),
      PARSE_FUN("default_keypad_mode_is_numbers_as_arrows", CONF_FUN, numbers_as_arrows_fun),
      PARSE_FUN("default_user_mode", CONF_FUN, default_user_mode_fun),
 #if defined(VMS) && defined(VAXC) && !defined(__DECC)
-     PARSE_INT("default_virtual_memory_size", CONF_INT, HTVirtualMemorySize),
+     PARSE_INT("default_virtual_memory_size", CONF_INT, &HTVirtualMemorySize),
 #endif
 #ifdef DIRED_SUPPORT
      PARSE_FUN("dired_menu", CONF_FUN, dired_menu_fun),
 #endif
      PARSE_ADD("downloader", CONF_ADD_ITEM, downloaders),
-     PARSE_SET("emacs_keys_always_on", CONF_BOOL, emacs_keys),
-     PARSE_SET("enable_scrollback", CONF_BOOL, enable_scrollback),
+     PARSE_SET("emacs_keys_always_on", CONF_BOOL, &emacs_keys),
+     PARSE_SET("enable_scrollback", CONF_BOOL, &enable_scrollback),
 #ifdef USE_EXTERNALS
      PARSE_ADD("external", CONF_ADD_ITEM, externals),
 #endif
      PARSE_ENV("finger_proxy", CONF_ENV, 0 ),
-     PARSE_SET("force_8bit_toupper", CONF_BOOL, UCForce8bitTOUPPER),
-     PARSE_SET("force_ssl_cookies_secure", CONF_BOOL, LYForceSSLCookiesSecure),
+     PARSE_SET("force_8bit_toupper", CONF_BOOL, &UCForce8bitTOUPPER),
+     PARSE_SET("force_ssl_cookies_secure", CONF_BOOL, &LYForceSSLCookiesSecure),
 #if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
-     PARSE_SET("forms_options", CONF_BOOL, LYUseFormsOptions),
+     PARSE_SET("forms_options", CONF_BOOL, &LYUseFormsOptions),
 #endif
      PARSE_ENV("ftp_proxy", CONF_ENV, 0 ),
-     PARSE_STR("global_extension_map", CONF_STR, global_extension_map),
-     PARSE_STR("global_mailcap", CONF_STR, global_type_map),
+     PARSE_STR("global_extension_map", CONF_STR, &global_extension_map),
+     PARSE_STR("global_mailcap", CONF_STR, &global_type_map),
      PARSE_ENV("gopher_proxy", CONF_ENV, 0 ),
-     PARSE_SET("gotobuffer", CONF_BOOL, goto_buffer),
-     PARSE_STR("helpfile", CONF_STR, helpfile),
-     PARSE_SET("historical_comments", CONF_BOOL, historical_comments),
+     PARSE_SET("gotobuffer", CONF_BOOL, &goto_buffer),
+     PARSE_STR("helpfile", CONF_STR, &helpfile),
+     PARSE_SET("historical_comments", CONF_BOOL, &historical_comments),
+
+#ifdef USE_PSRC
+
+     defHTSRC_option(abracket)
+     defHTSRC_option(attrib)
+
+     PARSE_FUN("htmlsrc_attrname_xform", CONF_FUN, read_htmlsrc_attrname_xform),
+
+     defHTSRC_option(attrval)
+     defHTSRC_option(badattr)
+     defHTSRC_option(badseq)
+     defHTSRC_option(badtag)
+     defHTSRC_option(comm)
+     defHTSRC_option(entire)
+     defHTSRC_option(entity)
+     defHTSRC_option(href)
+     defHTSRC_option(sgmlspecial)
+     defHTSRC_option(tag)
+
+     PARSE_FUN("htmlsrc_tagname_xform", CONF_FUN, read_htmlsrc_tagname_xform),
+
+
+# undef defHTSRC_option
+#endif
+
      PARSE_ENV("http_proxy", CONF_ENV, 0 ),
      PARSE_ENV("https_proxy", CONF_ENV, 0 ),
      PARSE_FUN("include", CONF_INCLUDE, 0),
-     PARSE_INT("infosecs", CONF_INT, InfoSecs),
-     PARSE_STR("jump_prompt", CONF_STR, jumpprompt),
-     PARSE_SET("jumpbuffer", CONF_BOOL, jump_buffer),
+     PARSE_INT("infosecs", CONF_INT, &InfoSecs),
+     PARSE_STR("jump_prompt", CONF_STR, &jumpprompt),
+     PARSE_SET("jumpbuffer", CONF_BOOL, &jump_buffer),
      PARSE_FUN("jumpfile", CONF_FUN, jumpfile_fun),
 #ifdef EXP_KEYBOARD_LAYOUT
      PARSE_FUN("keyboard_layout", CONF_FUN, keyboard_layout_fun),
 #endif
      PARSE_FUN("keymap", CONF_FUN, keymap_fun),
 #ifndef DISABLE_NEWS
-     PARSE_SET("list_news_numbers", CONF_BOOL, LYListNewsNumbers),
-     PARSE_SET("list_news_dates", CONF_BOOL, LYListNewsDates),
+     PARSE_SET("list_news_numbers", CONF_BOOL, &LYListNewsNumbers),
+     PARSE_SET("list_news_dates", CONF_BOOL, &LYListNewsDates),
 #endif
 #ifndef VMS
-     PARSE_STR("list_format", CONF_STR, list_format),
+     PARSE_STR("list_format", CONF_STR, &list_format),
 #endif
      PARSE_FUN("localhost_alias", CONF_FUN, localhost_alias_fun),
-     PARSE_STR("local_domain", CONF_STR, LYLocalDomain),
+     PARSE_STR("local_domain", CONF_STR, &LYLocalDomain),
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
-     PARSE_SET("local_execution_links_always_on", CONF_BOOL, local_exec),
-     PARSE_SET("local_execution_links_on_but_not_remote", CONF_BOOL, local_exec_on_local_files),
+     PARSE_SET("local_execution_links_always_on", CONF_BOOL, &local_exec),
+     PARSE_SET("local_execution_links_on_but_not_remote", CONF_BOOL, &local_exec_on_local_files),
 #endif
 #ifdef LYNXCGI_LINKS
      PARSE_FUN("lynxcgi_environment", CONF_FUN, lynxcgi_environment_fun),
 #ifndef VMS
-     PARSE_STR("lynxcgi_document_root", CONF_STR, LYCgiDocumentRoot),
+     PARSE_STR("lynxcgi_document_root", CONF_STR, &LYCgiDocumentRoot),
 #endif
 #endif
-     PARSE_STR("lynx_host_name", CONF_STR, LYHostName),
+     PARSE_STR("lynx_host_name", CONF_STR, &LYHostName),
      PARSE_FUN("lynx_sig_file", CONF_FUN, lynx_sig_file_fun),
-     PARSE_SET("mail_system_error_logging", CONF_BOOL, error_logging),
+     PARSE_SET("mail_system_error_logging", CONF_BOOL, &error_logging),
 #ifdef VMS
-     PARSE_STR("mail_adrs", CONF_STR, mail_adrs),
+     PARSE_STR("mail_adrs", CONF_STR, &mail_adrs),
 #endif
-     PARSE_SET("make_links_for_all_images", CONF_BOOL, clickable_images),
-     PARSE_SET("make_pseudo_alts_for_inlines", CONF_BOOL, pseudo_inline_alts),
-     PARSE_INT("messagesecs", CONF_INT, MessageSecs),
-     PARSE_SET("minimal_comments", CONF_BOOL, minimal_comments),
-     PARSE_INT("multi_bookmark_support", CONF_BOOL, LYMultiBookmarks),
-     PARSE_SET("ncr_in_bookmarks", CONF_BOOL, UCSaveBookmarksInUnicode),
+     PARSE_SET("make_links_for_all_images", CONF_BOOL, &clickable_images),
+     PARSE_SET("make_pseudo_alts_for_inlines", CONF_BOOL, &pseudo_inline_alts),
+     PARSE_INT("messagesecs", CONF_INT, &MessageSecs),
+     PARSE_SET("minimal_comments", CONF_BOOL, &minimal_comments),
+     PARSE_SET("multi_bookmark_support", CONF_BOOL, &LYMultiBookmarks),
+     PARSE_SET("ncr_in_bookmarks", CONF_BOOL, &UCSaveBookmarksInUnicode),
 #ifndef DISABLE_NEWS
      PARSE_FUN("news_chunk_size", CONF_FUN, news_chunk_size_fun),
      PARSE_FUN("news_max_chunk", CONF_FUN, news_max_chunk_fun),
@@ -959,82 +1110,83 @@ static Config_Type Config_Table [] =
      PARSE_ENV("nntp_proxy", CONF_ENV, 0),
      PARSE_ENV("nntpserver", CONF_ENV2, 0), /* actually NNTPSERVER */
 #endif
-     PARSE_SET("no_dot_files", CONF_BOOL, no_dotfiles),
-     PARSE_SET("no_file_referer", CONF_BOOL, no_filereferer),
+     PARSE_SET("no_dot_files", CONF_BOOL, &no_dotfiles),
+     PARSE_SET("no_file_referer", CONF_BOOL, &no_filereferer),
 #ifndef VMS
-     PARSE_SET("no_forced_core_dump", CONF_BOOL, LYNoCore),
+     PARSE_SET("no_forced_core_dump", CONF_BOOL, &LYNoCore),
 #endif
-     PARSE_SET("no_from_header", CONF_BOOL, LYNoFromHeader),
-     PARSE_SET("no_ismap_if_usemap", CONF_BOOL, LYNoISMAPifUSEMAP),
+     PARSE_SET("no_from_header", CONF_BOOL, &LYNoFromHeader),
+     PARSE_SET("no_ismap_if_usemap", CONF_BOOL, &LYNoISMAPifUSEMAP),
      PARSE_ENV("no_proxy", CONF_ENV, 0 ),
-     PARSE_SET("no_referer_header", CONF_BOOL, LYNoRefererHeader),
+     PARSE_SET("no_referer_header", CONF_BOOL, &LYNoRefererHeader),
      PARSE_FUN("outgoing_mail_charset", CONF_FUN, outgoing_mail_charset_fun),
 #ifdef DISP_PARTIAL
-     PARSE_SET("partial", CONF_BOOL, display_partial),
-     PARSE_INT("partial_thres", CONF_INT, partial_threshold),
+     PARSE_SET("partial", CONF_BOOL, &display_partial),
+     PARSE_INT("partial_thres", CONF_INT, &partial_threshold),
 #endif
 #ifdef EXP_PERSISTENT_COOKIES
-     PARSE_SET("persistent_cookies", CONF_BOOL, persistent_cookies),
+     PARSE_SET("persistent_cookies", CONF_BOOL, &persistent_cookies),
 #endif /* EXP_PERSISTENT_COOKIES */
-     PARSE_STR("personal_mailcap", CONF_STR, personal_type_map),
-     PARSE_STR("personal_extension_map", CONF_STR, personal_extension_map),
-     PARSE_STR("preferred_charset", CONF_STR, pref_charset),
-     PARSE_STR("preferred_language", CONF_STR, language),
-     PARSE_SET("prepend_base_to_source", CONF_BOOL, LYPrependBaseToSource),
-     PARSE_SET("prepend_charset_to_source", CONF_BOOL, LYPrependCharsetToSource),
+     PARSE_STR("personal_mailcap", CONF_STR, &personal_type_map),
+     PARSE_STR("personal_extension_map", CONF_STR, &personal_extension_map),
+     PARSE_STR("preferred_charset", CONF_STR, &pref_charset),
+     PARSE_STR("preferred_language", CONF_STR, &language),
+     PARSE_SET("prepend_base_to_source", CONF_BOOL, &LYPrependBaseToSource),
+     PARSE_SET("prepend_charset_to_source", CONF_BOOL, &LYPrependCharsetToSource),
      PARSE_FUN("printer", CONF_FUN, printer_fun),
-     PARSE_SET("quit_default_yes", CONF_BOOL, LYQuitDefaultYes),
+     PARSE_SET("quit_default_yes", CONF_BOOL, &LYQuitDefaultYes),
 #ifndef NO_RULES
      PARSE_FUN("rule", CONF_FUN, HTSetConfiguration),
      PARSE_FUN("rulesfile", CONF_FUN, cern_rulesfile_fun),
 #endif /* NO_RULES */
-     PARSE_STR("save_space", CONF_STR, lynx_save_space),
-     PARSE_SET("scan_for_buried_news_refs", CONF_BOOL, scan_for_buried_news_references),
-     PARSE_SET("seek_frag_area_in_cur", CONF_BOOL, LYSeekFragAREAinCur),
-     PARSE_SET("seek_frag_map_in_cur", CONF_BOOL, LYSeekFragMAPinCur),
-     PARSE_SET("set_cookies", CONF_BOOL, LYSetCookies),
-     PARSE_SET("show_cursor", CONF_BOOL, LYShowCursor),
-     PARSE_SET("show_kb_rate", CONF_BOOL, LYshow_kb_rate),
+     PARSE_STR("save_space", CONF_STR, &lynx_save_space),
+     PARSE_SET("scan_for_buried_news_refs", CONF_BOOL, &scan_for_buried_news_references),
+     PARSE_SET("seek_frag_area_in_cur", CONF_BOOL, &LYSeekFragAREAinCur),
+     PARSE_SET("seek_frag_map_in_cur", CONF_BOOL, &LYSeekFragMAPinCur),
+     PARSE_SET("set_cookies", CONF_BOOL, &LYSetCookies),
+     PARSE_SET("show_cursor", CONF_BOOL, &LYShowCursor),
+     PARSE_SET("show_kb_rate", CONF_BOOL, &LYshow_kb_rate),
      PARSE_ENV("snews_proxy", CONF_ENV, 0 ),
      PARSE_ENV("snewspost_proxy", CONF_ENV, 0 ),
      PARSE_ENV("snewsreply_proxy", CONF_ENV, 0 ),
-     PARSE_SET("soft_dquotes", CONF_BOOL, soft_dquotes),
-     PARSE_STR("startfile", CONF_STR, startfile),
-     PARSE_SET("strip_dotdot_urls", CONF_BOOL, LYStripDotDotURLs),
-     PARSE_SET("substitute_underscores", CONF_BOOL, use_underscore),
+     PARSE_SET("soft_dquotes", CONF_BOOL, &soft_dquotes),
+#ifdef SOURCE_CACHE
+     PARSE_SET("source_cache", CONF_FUN, source_cache_fun),
+#endif
+     PARSE_STR("startfile", CONF_STR, &startfile),
+     PARSE_SET("strip_dotdot_urls", CONF_BOOL, &LYStripDotDotURLs),
+     PARSE_SET("substitute_underscores", CONF_BOOL, &use_underscore),
      PARSE_FUN("suffix", CONF_FUN, suffix_fun),
      PARSE_FUN("system_editor", CONF_FUN, system_editor_fun),
-     PARSE_STR("system_mail", CONF_STR, system_mail),
-     PARSE_STR("system_mail_flags", CONF_STR, system_mail_flags),
-     PARSE_SET("tagsoup", CONF_BOOL, Old_DTD),
+     PARSE_STR("system_mail", CONF_STR, &system_mail),
+     PARSE_STR("system_mail_flags", CONF_STR, &system_mail_flags),
+     PARSE_SET("tagsoup", CONF_BOOL, &Old_DTD),
 #ifdef EXEC_LINKS
      PARSE_DEF("trusted_exec", CONF_ADD_TRUSTED, EXEC_PATH),
 #endif
 #ifdef LYNXCGI_LINKS
      PARSE_DEF("trusted_lynxcgi", CONF_ADD_TRUSTED, CGI_PATH),
 #endif
-     PARSE_STR("url_domain_prefixes", CONF_STR, URLDomainPrefixes),
-     PARSE_STR("url_domain_suffixes", CONF_STR, URLDomainSuffixes),
+     PARSE_STR("url_domain_prefixes", CONF_STR, &URLDomainPrefixes),
+     PARSE_STR("url_domain_suffixes", CONF_STR, &URLDomainSuffixes),
 #ifdef DIRED_SUPPORT
      PARSE_ADD("uploader", CONF_ADD_ITEM, uploaders),
 #endif
 #ifdef VMS
-     PARSE_SET("use_fixed_records", CONF_BOOL, UseFixedRecords),
+     PARSE_SET("use_fixed_records", CONF_BOOL, &UseFixedRecords),
 #endif
 #if defined(NCURSES_MOUSE_VERSION) || defined(USE_SLANG_MOUSE)
-     PARSE_SET("use_mouse", CONF_BOOL, LYUseMouse),
+     PARSE_SET("use_mouse", CONF_BOOL, &LYUseMouse),
 #endif
-     PARSE_SET("use_select_popups", CONF_BOOL, LYSelectPopups),
-     PARSE_SET("verbose_images", CONF_BOOL, verbose_img),
-     PARSE_SET("vi_keys_always_on", CONF_BOOL, vi_keys),
+     PARSE_SET("use_select_popups", CONF_BOOL, &LYSelectPopups),
+     PARSE_SET("verbose_images", CONF_BOOL, &verbose_img),
+     PARSE_SET("vi_keys_always_on", CONF_BOOL, &vi_keys),
      PARSE_FUN("viewer", CONF_FUN, viewer_fun),
      PARSE_ENV("wais_proxy", CONF_ENV, 0 ),
-     PARSE_STR("xloadimage_command", CONF_STR, XLoadImageCommand),
+     PARSE_STR("xloadimage_command", CONF_STR, &XLoadImageCommand),
 
      {0}
 };
-
-PRIVATE char *local_url = NULL;
 
 /*
  * Free memory allocated in 'read_cfg()'
@@ -1060,7 +1212,6 @@ PUBLIC void free_lynx_cfg NOARGS
 	    break;
 	}
     }
-    FREE(local_url);
 }
 
 /*
@@ -1136,8 +1287,8 @@ PUBLIC void read_cfg ARGS4(
 
 	/* Significant lines are of the form KEYWORD:WHATEVER */
 	if ((value = strchr (name, ':')) == 0) {
-	     /* fprintf (stderr, "Bad line-- no :\n"); */
-	     continue;
+	    /* fprintf (stderr, "Bad line-- no :\n"); */
+	    continue;
 	}
 
 	/* skip past colon, but replace ':' with 0 to make name meaningful */
@@ -1238,19 +1389,28 @@ PUBLIC void read_cfg ARGS4(
 	case CONF_INCLUDE:
 	    /* include another file */
 #ifndef NO_CONFIG_INFO
-	    if (fp0 != 0) {
+	    if (fp0 != 0  &&  !LYRestricted) {
 		char *url = 0;
+		char *cp1 = NULL;
 		LYLocalFileToURL(&url, value);
-		fprintf(fp0, "%s:<a href=\"%s\">%s</a>\n\n", name, url, value);
-		fprintf(fp0, "    #&lt;begin  %s&gt;\n", value);
+		StrAllocCopy(cp1, value);
+		if (strchr(value, '&') || strchr(value, '<')) {
+		    LYEntify(&cp1, TRUE);
+		}
+
+		fprintf(fp0, "%s:<a href=\"%s\">%s</a>\n\n", name, url, cp1);
+		fprintf(fp0, "	  #&lt;begin  %s&gt;\n", cp1);
+
+		read_cfg (value, cfg_filename, nesting_level + 1, fp0);
+
+		fprintf(fp0, "	  #&lt;end of %s&gt;\n\n", cp1);
 		FREE(url);
-	    }
-#endif
+		FREE(cp1);
+	    } else
+#endif /* !NO_CONFIG_INFO */
+
 	    read_cfg (value, cfg_filename, nesting_level + 1, fp0);
-#ifndef NO_CONFIG_INFO
-	    if (fp0 != 0)
-		fprintf(fp0, "    #&lt;end of %s&gt;\n\n", value);
-#endif
+
 	    break;
 
 	case CONF_ADD_ITEM:
@@ -1356,18 +1516,75 @@ PUBLIC void read_cfg ARGS4(
 }
 
 /*
- * lynx.cfg infopage, returns local url.
+ *  Show rendered lynx.cfg data without comments, LYNXCFG:/ internal page.
+ *  Called from getfile() cyrcle:
+ *  we create and load the page just in place and return to mainloop().
  */
-PUBLIC char *lynx_cfg_infopage NOARGS
+PUBLIC int lynx_cfg_infopage ARGS1(
+    document *,		       newdoc)
 {
-    char tempfile[LY_MAXPATH];
+    static char tempfile[LY_MAXPATH];
+    static char *local_url;  /* static! */
+    DocAddress WWWDoc;  /* need on exit */
     char *temp = 0;
+    char *cp1 = NULL;
     FILE *fp0;
 
+
+#ifndef NO_CONFIG_INFO
+    /*-------------------------------------------------
+     * kludge a link from LYNXCFG:/, the URL was:
+     * "  <a href=\"LYNXCFG://reload\">RELOAD THE CHANGES</a>\n"
+     *--------------------------------------------------*/
+
+    if ((strstr(newdoc->address, "LYNXCFG://reload")) && !LYRestricted) {
+	/*
+	 *  Some staff to reload read_cfg(),
+	 *  but also load options menu items and command-line options
+	 *  to made things consistent.	Not implemented yet. Dummy.
+	 */
+	reload_read_cfg();
+
+	/*
+	 *  now pop-up and return to updated LYNXCFG:/ page,
+	 *  remind postoptions() but much simpler:
+	 */
+
+	/*  the page was pushed, so pop-up. */
+	LYpop(newdoc);
+	WWWDoc.address = newdoc->address;
+	WWWDoc.post_data = newdoc->post_data;
+	WWWDoc.post_content_type = newdoc->post_content_type;
+	WWWDoc.bookmark = newdoc->bookmark;
+	WWWDoc.isHEAD = newdoc->isHEAD;
+	WWWDoc.safe = newdoc->safe;
+	LYforce_no_cache = FALSE;   /* ! */
+	LYoverride_no_cache = TRUE; /* ! */
+
+	/*
+	 * Working out of getfile() cycle we reset *no_cache manually here so
+	 * HTLoadAbsolute() will return "Document already in memory":  it was
+	 * forced reloading obsolete file again without this (overhead).
+	 *
+	 * Probably *no_cache was set in a wrong position because of
+	 * the internal page...
+	 */
+	if (!HTLoadAbsolute(&WWWDoc))
+	    return(NOT_FOUND);
+
+
+	/*  now set up the flag and fall down to create a new LYNXCFG:/ page */
+	local_url = 0;	/* see below */
+    }
+#endif /* !NO_CONFIG_INFO */
+
+
     if (local_url == 0) {
+
+	LYRemoveTemp(tempfile);
 	if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
 	    HTAlert(CANNOT_OPEN_TEMP);
-	    return(0);
+	    return(NOT_FOUND);
 	}
 	LYLocalFileToURL(&local_url, tempfile);
 
@@ -1376,40 +1593,54 @@ PUBLIC char *lynx_cfg_infopage NOARGS
 	BeginInternalPage (fp0, LYNXCFG_TITLE, NULL);
 	fprintf(fp0, "<pre>\n");
 
+
 #ifndef NO_CONFIG_INFO
+	if (!LYRestricted) {
 #if defined(HAVE_CONFIG_H) || defined(VMS)
-	if (strcmp(lynx_cfg_file, LYNX_CFG_FILE)) {
-	    StrAllocCopy(temp, LYNX_CFG_FILE);
-	    fprintf(fp0, "<em>%s\n%s",
-			 gettext("This is read from your lynx.cfg file,"),
-			 gettext("please \"read\" distribution's"));
-	    fprintf(fp0, " <a href=\"%s\">lynx.cfg</a> ",
-			 temp);
-	    FREE(temp);
-	    fprintf(fp0, "%s</em>\n\n",
-			 gettext("for more comments."));
-	} else
+	    if (strcmp(lynx_cfg_file, LYNX_CFG_FILE)) {
+		fprintf(fp0, "<em>%s\n%s",
+			     gettext("This is read from your lynx.cfg file,"),
+			     gettext("please \"read\" distribution's"));
+		LYLocalFileToURL(&temp, LYNX_CFG_FILE);
+		fprintf(fp0, " <a href=\"%s\">lynx.cfg</a> ",
+			     temp);
+		FREE(temp);
+		fprintf(fp0, "%s</em>\n\n",
+			     gettext("for more comments."));
+	    } else
 #endif /* HAVE_CONFIG_H */
-	{
-	/* no absolute path... for lynx.cfg on DOS/Win32 */
-	    fprintf(fp0, "<em>%s\n%s",
-			 gettext("This is read from your lynx.cfg file,"),
-			 gettext("please \"read\" distribution's"));
-	    fprintf(fp0, " </em>lynx.cfg<em> ");
-	    fprintf(fp0, "%s</em>\n\n",
-			 gettext("for more comments."));
-	}
+	    {
+	    /* no absolute path... for lynx.cfg on DOS/Win32 */
+		fprintf(fp0, "<em>%s\n%s",
+			     gettext("This is read from your lynx.cfg file,"),
+			     gettext("please \"read\" distribution's"));
+		fprintf(fp0, " </em>lynx.cfg<em> ");
+		fprintf(fp0, "%s</em>\n",
+			     gettext("for more comments."));
+	    }
 
-	LYLocalFileToURL(&temp, lynx_cfg_file);
-	fprintf(fp0, "    #<em>%s <a href=\"%s\">%s</a></em>\n",
-		    gettext("Your primary configuration"),
-		    temp,
-		    lynx_cfg_file);
-	FREE(temp);
+    /** a new experimental link ... **/
+	    if (user_mode == ADVANCED_MODE)
+		fprintf(fp0, "  <a href=\"LYNXCFG://reload\">%s</a>\n",
+			     gettext("RELOAD THE CHANGES"));
 
-#else
+
+	    LYLocalFileToURL(&temp, lynx_cfg_file);
+	    StrAllocCopy(cp1, lynx_cfg_file);
+	    if (strchr(lynx_cfg_file, '&') || strchr(lynx_cfg_file, '<')) {
+		LYEntify(&cp1, TRUE);
+	    }
+	    fprintf(fp0, "\n    #<em>%s <a href=\"%s\">%s</a></em>\n",
+			gettext("Your primary configuration"),
+			temp,
+			cp1);
+	    FREE(temp);
+	    FREE(cp1);
+
+	} else
+#endif /* !NO_CONFIG_INFO */
+
 	fprintf(fp0, "<em>%s</em>\n\n", gettext("This is read from your lynx.cfg file:"));
-#endif /* NO_CONFIG_INFO */
 
 	/*
 	 *  Process the configuration file.
@@ -1421,5 +1652,78 @@ PUBLIC char *lynx_cfg_infopage NOARGS
 	LYCloseTempFP(fp0);
     }
 
-    return(local_url);
+    /* return to getfile() cyrcle */
+    StrAllocCopy(newdoc->address, local_url);
+    WWWDoc.address = newdoc->address;
+    WWWDoc.post_data = newdoc->post_data;
+    WWWDoc.post_content_type = newdoc->post_content_type;
+    WWWDoc.bookmark = newdoc->bookmark;
+    WWWDoc.isHEAD = newdoc->isHEAD;
+    WWWDoc.safe = newdoc->safe;
+
+    if (!HTLoadAbsolute(&WWWDoc))
+	return(NOT_FOUND);
+    return(NORMAL);
 }
+
+
+#if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
+/*
+ *  Compile-time definitions info, LYNXCOMPILEOPTS:/ internal page,
+ *  from getfile() cyrcle.
+ */
+PUBLIC int lynx_compile_opts ARGS1(
+    document *,		       newdoc)
+{
+    char tempfile[LY_MAXPATH];
+#define PutDefs(table, N) fprintf(fp0, "%-35s %s\n", table[N].name, table[N].value)
+#include <cfg_defs.h>
+    unsigned n;
+    static char *info_url;  /* static! */
+    DocAddress WWWDoc;  /* need on exit */
+    FILE *fp0;
+
+    /* create the page only once - compile-time data will not change... */
+
+    if (info_url == 0) {
+	if ((fp0 = LYOpenTemp (tempfile, HTML_SUFFIX, "w")) == 0) {
+	    HTAlert(CANNOT_OPEN_TEMP);
+	    return(NOT_FOUND);
+	}
+	LYLocalFileToURL(&info_url, tempfile);
+
+	BeginInternalPage (fp0, CONFIG_DEF_TITLE, NULL);
+	fprintf(fp0, "<pre>\n");
+
+	fprintf(fp0, "%s %s<a href=\"LYNXCFG:\"> lynx.cfg</a> %s\n\n",
+		     SEE_ALSO,
+		     YOUR_SEGMENT,
+		     RUNTIME_OPT_SEGMENT);
+
+	fprintf(fp0, "\n%s<br>\n<em>config.cache</em>\n", AUTOCONF_CONFIG_CACHE);
+	for (n = 0; n < TABLESIZE(config_cache); n++) {
+	    PutDefs(config_cache, n);
+	}
+	fprintf(fp0, "\n%s<br>\n<em>lynx_cfg.h</em>\n", AUTOCONF_LYNXCFG_H);
+	for (n = 0; n < TABLESIZE(config_defines); n++) {
+	    PutDefs(config_defines, n);
+	}
+	fprintf(fp0, "</pre>\n");
+	EndInternalPage(fp0);
+	LYCloseTempFP(fp0);
+    }
+
+    /* exit to getfile() cyrcle */
+    StrAllocCopy(newdoc->address, info_url);
+    WWWDoc.address = newdoc->address;
+    WWWDoc.post_data = newdoc->post_data;
+    WWWDoc.post_content_type = newdoc->post_content_type;
+    WWWDoc.bookmark = newdoc->bookmark;
+    WWWDoc.isHEAD = newdoc->isHEAD;
+    WWWDoc.safe = newdoc->safe;
+
+    if (!HTLoadAbsolute(&WWWDoc))
+	return(NOT_FOUND);
+    return(NORMAL);
+}
+#endif /* !NO_CONFIG_INFO */

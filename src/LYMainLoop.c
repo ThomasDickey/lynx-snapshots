@@ -36,6 +36,7 @@
 #include <LYCharUtils.h>
 #include <LYCookie.h>
 #include <LYMainLoop.h>
+#include <LYPrettySrc.h>
 
 #ifdef USE_EXTERNALS
 #include <LYExtern.h>
@@ -52,6 +53,7 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
+
 
 PRIVATE BOOL confirm_post_resub PARAMS((
     CONST char*		address,
@@ -316,7 +318,9 @@ int mainloop NOARGS
 				       language : ""));
     StrAllocCopy(CurrentNegoCharset, (pref_charset ?
 				      pref_charset : ""));
+#ifdef LY_FIND_LEAKS
     atexit(free_mainloop_variables);
+#endif
 initialize:
     StrAllocCopy(newdoc.address, startfile);
     StrAllocCopy(startrealm, startfile);
@@ -562,7 +566,9 @@ try_again:
 			display_partial = FALSE;
 		}
 #endif /* DISP_PARTIAL */
-
+#ifdef USE_PSRC
+		psrc_first_tag = TRUE;
+#endif
 #ifndef DONT_TRACK_INTERNAL_LINKS
 		if (try_internal) {
 		    if (newdoc.address &&
@@ -1022,7 +1028,13 @@ try_again:
 		     *	to Newline, so we get a redraw.
 		     */
 		    curdoc.line = -1;
-
+#ifdef USE_PSRC
+		    if (psrc_view)
+			HTMark_asSource(); /* this flag is not set, since when
+			displaying source, psrc_view is temporary unset when
+			writing the HTML header - and HTMainText is created
+			at that time.*/
+#endif
 		    break;
 		}  /* end switch */
 
@@ -1052,7 +1064,12 @@ try_again:
 	     *	the visited links list. - FM
 	     */
 	    if (ownerS_address != NULL) {
+#ifndef USE_PSRC
 		if (HTOutputFormat == WWW_SOURCE && !HText_getOwner())
+#else
+		if ( (LYpsrc ? psrc_view : HTOutputFormat == WWW_SOURCE)
+			&& !HText_getOwner() )
+#endif
 		    HText_setMainTextOwner(ownerS_address);
 		FREE(ownerS_address);
 	    }
@@ -1073,6 +1090,9 @@ try_again:
 	    *  the source, we get rendered HTML from now on.
 	    */
 	   HTOutputFormat = WWW_PRESENT;
+#ifdef USE_PSRC
+	   psrc_view = FALSE;
+#endif
 
 	   /*
 	    *  Reset all of the other relevant flags. - FM
@@ -1236,6 +1256,26 @@ try_again:
 		}
 	    }
 	}
+
+#ifdef SOURCE_CACHE
+	/*
+	 * If the parse settings have changed since this HText was
+	 * generated, we need to reparse and redraw it.
+	 */
+	if (HTdocument_settings_changed()) {
+	    HTUserMsg(gettext("Reparsing document under current settings..."));
+	    if (HTreparse_document())
+		refresh_screen = TRUE;
+	    else {
+		/*
+		 * Urk.  I have no idea how to recover from a failure here.
+		 * At a guess, I'll try reloading.
+		 */
+		cmd = LYK_RELOAD;
+		goto new_cmd;
+	    }
+	}
+#endif
 
 	/*
 	 *  If the curdoc.line is different than Newline then there must
@@ -1524,6 +1564,8 @@ try_again:
 	    } else {
 	       _statusline(HELP);
 	    }
+	   /* turn off cursor since now it's probably on statusline -HV */
+	   move((LYlines - 1), (LYcols - 1));
 	} else {
 	   show_help = FALSE;
 	}
@@ -2041,6 +2083,8 @@ new_cmd:  /*
 		break;
 	    }
 
+
+#ifndef USE_PSRC
 	    if (HTisDocumentSource()) {
 		HTOutputFormat = WWW_PRESENT;
 	    } else {
@@ -2049,8 +2093,28 @@ new_cmd:  /*
 		LYUCPushAssumed(HTMainAnchor);
 		HTOutputFormat = WWW_SOURCE;
 	    }
-	    LYforce_no_cache = TRUE;
+#else
+	    if (HTisDocumentSource()) {
+		HTOutputFormat = WWW_PRESENT;
+		psrc_view = FALSE;
+	    } else {
+		if (HText_getOwner())
+		    StrAllocCopy(ownerS_address, HText_getOwner());
+		LYUCPushAssumed(HTMainAnchor);
+		if (LYpsrc)
+		    psrc_view = TRUE;
+		else
+		    HTOutputFormat = WWW_SOURCE;
+	    }
+#endif
+#ifdef SOURCE_CACHE
+	    if (HTreparse_document()) {
+		refresh_screen = TRUE;
+		break;
+	    }
+#endif
 	    FREE(curdoc.address); /* so it doesn't get pushed */
+	    LYforce_no_cache = TRUE;
 	    break;
 
 	case LYK_RELOAD:  /* control-R to reload and refresh */
@@ -2068,9 +2132,18 @@ new_cmd:  /*
 	    /*
 	     *	Check to see if should reload source, or load html
 	     */
+
 	    if (HTisDocumentSource()) {
+#ifndef USE_PSRC
 		HTOutputFormat = WWW_SOURCE;
+#else
+		if (LYpsrc)
+		    psrc_view = TRUE;
+		else
+		    HTOutputFormat = WWW_SOURCE;
+#endif
 	    }
+
 	    HEAD_request = HTLoadedDocumentIsHEAD();
 	    HTuncache_current_document();
 #ifdef NO_ASSUME_SAME_DOC
@@ -2125,11 +2198,13 @@ new_cmd:  /*
 				   0, 0) == FALSE) {
 		HTInfoMsg(WILL_NOT_RELOAD_DOC);
 	    } else {
+#ifndef SOURCE_CACHE
 		HTuncache_current_document();
 		StrAllocCopy(newdoc.address, curdoc.address);
 		FREE(curdoc.address);
 		newdoc.line = curdoc.line;
 		newdoc.link = curdoc.link;
+#endif
 	    }
 	    if (historical_comments)
 		historical_comments = FALSE;
@@ -2142,6 +2217,17 @@ new_cmd:  /*
 		HTAlert(historical_comments ?
 			HISTORICAL_ON_VALID_OFF : HISTORICAL_OFF_VALID_ON);
 	    }
+#ifdef SOURCE_CACHE
+	    if (HTreparse_document()) {
+		refresh_screen = TRUE;
+		break;
+	    }
+	    HTuncache_current_document();
+	    StrAllocCopy(newdoc.address, curdoc.address);
+	    FREE(curdoc.address);
+	    newdoc.line = curdoc.line;
+	    newdoc.link = curdoc.link;
+#endif
 	    break;
 
 	case LYK_MINIMAL:	/* toggle 'minimal' comments parsing */
@@ -2157,11 +2243,13 @@ new_cmd:  /*
 				       0, 0) == FALSE) {
 		    HTInfoMsg(WILL_NOT_RELOAD_DOC);
 		} else {
+#ifndef SOURCE_CACHE
 		    HTuncache_current_document();
 		    StrAllocCopy(newdoc.address, curdoc.address);
 		    FREE(curdoc.address);
 		    newdoc.line = curdoc.line;
 		    newdoc.link = curdoc.link;
+#endif
 		}
 	    }
 	    if (minimal_comments)
@@ -2175,6 +2263,17 @@ new_cmd:  /*
 		HTAlert(minimal_comments ?
 			MINIMAL_ON_BUT_HISTORICAL : MINIMAL_OFF_HISTORICAL_ON);
 	    }
+#ifdef SOURCE_CACHE
+	    if (HTreparse_document()) {
+		refresh_screen = TRUE;
+		break;
+	    }
+	    HTuncache_current_document();
+	    StrAllocCopy(newdoc.address, curdoc.address);
+	    FREE(curdoc.address);
+	    newdoc.line = curdoc.line;
+	    newdoc.link = curdoc.link;
+#endif
 	    break;
 
 	case LYK_SOFT_DQUOTES:
@@ -2189,11 +2288,13 @@ new_cmd:  /*
 				   1, 1) == FALSE) {
 		HTInfoMsg(WILL_NOT_RELOAD_DOC);
 	    } else {
+#ifndef SOURCE_CACHE
 		HTuncache_current_document();
 		StrAllocCopy(newdoc.address, curdoc.address);
 		FREE(curdoc.address);
 		newdoc.line = curdoc.line;
 		newdoc.link = curdoc.link;
+#endif
 	    }
 	    if (soft_dquotes)
 		soft_dquotes = FALSE;
@@ -2201,6 +2302,17 @@ new_cmd:  /*
 		soft_dquotes = TRUE;
 	    HTUserMsg(soft_dquotes ?
 		      SOFT_DOUBLE_QUOTE_ON : SOFT_DOUBLE_QUOTE_OFF);
+#ifdef SOURCE_CACHE
+	    if (HTreparse_document()) {
+		refresh_screen = TRUE;
+		break;
+	    }
+	    HTuncache_current_document();
+	    StrAllocCopy(newdoc.address, curdoc.address);
+	    FREE(curdoc.address);
+	    newdoc.line = curdoc.line;
+	    newdoc.link = curdoc.link;
+#endif
 	    break;
 
 	case LYK_SWITCH_DTD:
@@ -2220,12 +2332,25 @@ new_cmd:  /*
 		 *  to the other DTD parsing may show source differences,
 		 *  so stay in source view - kw
 		 */
+
+		/* NOTE: this conditional can be considered incorrect -
+		   current behaviour - when viewing source and
+		   LYPreparsedSource==TRUE, pressing ^V will toggle parser mode
+		   AND switch back from the source view to presentation view.-HV
+		*/
 		if (HTisDocumentSource() && LYPreparsedSource) {
-			HTOutputFormat = WWW_SOURCE;
+#ifdef USE_PSRC
+		    if (LYpsrc)
+			psrc_view = TRUE;
+		    else
+#endif
+		    HTOutputFormat = WWW_SOURCE;
 		}
+#ifndef SOURCE_CACHE
 		HTuncache_current_document();
 		StrAllocCopy(newdoc.address, curdoc.address);
 		FREE(curdoc.address);
+#endif
 	    }
 #ifdef NO_ASSUME_SAME_DOC
 	    newdoc.line = 1;
@@ -2237,6 +2362,15 @@ new_cmd:  /*
 	    Old_DTD = !Old_DTD;
 	    HTSwitchDTD(!Old_DTD);
 	    HTUserMsg(Old_DTD ? USING_DTD_0 : USING_DTD_1);
+#ifdef SOURCE_CACHE
+	    if (HTreparse_document()) {
+		refresh_screen = TRUE;
+		break;
+	    }
+	    HTuncache_current_document();
+	    StrAllocCopy(newdoc.address, curdoc.address);
+	    FREE(curdoc.address);
+#endif
 	    break;
 
 #ifdef NOT_DONE_YET
@@ -3333,6 +3467,10 @@ new_cmd:  /*
 		    }
 		    newdoc.link = 0;
 		    force_load = TRUE;	/* force MainLoop to reload */
+#ifdef USE_PSRC
+		    psrc_view = FALSE;	/* we get here if link is not internal */
+#endif
+
 #ifdef DIRED_SUPPORT
 		    if (lynx_edit_mode) {
 			  HTuncache_current_document();
@@ -3946,7 +4084,14 @@ if (!LYUseFormsOptions) {
 			HTAlert(RELOADING_FORM);
 		    }
 		    if (HTisDocumentSource()) {
+#ifndef PSRC_VIEW
 			HTOutputFormat = WWW_SOURCE;
+#else
+			if (LYpsrc)
+			    psrc_view = TRUE;
+			else
+			    HTOutputFormat = WWW_SOURCE;
+#endif
 		    }
 		    HEAD_request = HTLoadedDocumentIsHEAD();
 		    HTuncache_current_document();
@@ -5447,6 +5592,12 @@ check_add_bookmark_to_self:
 
 	    HTUserMsg(clickable_images ?
 		     CLICKABLE_IMAGES_ON : CLICKABLE_IMAGES_OFF);
+#ifdef SOURCE_CACHE
+	    if (HTreparse_document()) {
+		refresh_screen = TRUE;
+		break;
+	    }
+#endif
 	    cmd = LYK_RELOAD;
 	    goto new_cmd;
 
@@ -5458,6 +5609,12 @@ check_add_bookmark_to_self:
 
 	    HTUserMsg(pseudo_inline_alts ?
 		      PSEUDO_INLINE_ALTS_ON : PSEUDO_INLINE_ALTS_OFF);
+#ifdef SOURCE_CACHE
+	    if (HTreparse_document()) {
+		refresh_screen = TRUE;
+		break;
+	    }
+#endif
 	    cmd = LYK_RELOAD;
 	    goto new_cmd;
 
@@ -5470,6 +5627,12 @@ check_add_bookmark_to_self:
 		HTUserMsg(LYRawMode ? RAWMODE_OFF : RAWMODE_ON);
 		HTMLSetCharacterHandling(current_char_set);
 		LYRawMode_flag = LYRawMode;
+#ifdef SOURCE_CACHE
+		if (HTreparse_document()) {
+		    refresh_screen = TRUE;
+		    break;
+		}
+#endif
 		cmd = LYK_RELOAD;
 		goto new_cmd;
 	    }
@@ -6002,7 +6165,9 @@ PUBLIC void HTAddGotoURL ARGS1(
 
     if (!Goto_URLs) {
 	Goto_URLs = HTList_new();
+#ifdef LY_FIND_LEAKS
 	atexit(HTGotoURLs_free);
+#endif
 	HTList_addObject(Goto_URLs, new);
 	return;
     }

@@ -1,7 +1,6 @@
 #include <HTUtils.h>
 #include <LYGlobalDefs.h>
 #include <LYUtils.h>
-#include <LYSignal.h>
 #include <LYClean.h>
 #include <LYCurses.h>
 #include <LYTraversal.h>

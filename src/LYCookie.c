@@ -211,7 +211,7 @@ PRIVATE BOOLEAN host_matches ARGS2(
      *	The following line will handle both numeric IP addresses and
      *	FQDNs.  Do numeric addresses require special handling?
      */
-    if (*B != '.' && !strcmp(A, B))
+    if (*B != '.' && !strcasecomp(A, B))
 	return YES;
 
     /*
@@ -221,7 +221,7 @@ PRIVATE BOOLEAN host_matches ARGS2(
     if (*B == '.' && B[1] != '\0' && B[1] != '.' && *A != '.') {
 	int diff = (strlen(A) - strlen(B));
 	if (diff > 0) {
-	    if (!strcmp((A + diff), B))
+	    if (!strcasecomp((A + diff), B))
 		return YES;
 	}
     }
@@ -280,7 +280,9 @@ PRIVATE void store_cookie ARGS3(
      *	Ensure that the domain list exists.
      */
     if (domain_list == NULL) {
+#ifdef LY_FIND_LEAKS
 	atexit(LYCookieJar_free);
+#endif
 	domain_list = HTList_new();
 	total_cookies = 0;
     }
@@ -343,9 +345,9 @@ PRIVATE void store_cookie ARGS3(
     }
     /*
      * The next 4 conditions do NOT apply if the domain is still
-     * the default of request-host.
+     * the default of request-host. (domains - case insensitive).
      */
-    if (strcmp(co->domain, hostname) != 0) {
+    if (strcasecomp(co->domain, hostname) != 0) {
 	/*
 	 *  The hostname does not contain a dot.
 	 */
@@ -1074,9 +1076,10 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		     *	not an exact match to the hostname, nor
 		     *	is a numeric IP address, add a lead dot.
 		     *	Otherwise, use the value as is. - FM
+		     *	(domains - case insensitive).
 		     */
 		    if (value[0] != '.' && value[0] != '\0' &&
-			value[1] != '\0' && strcmp(value, hostname)) {
+			value[1] != '\0' && strcasecomp(value, hostname)) {
 			char *ptr = strchr(value, '.');
 			if (ptr != NULL && ptr[1] != '\0') {
 			    ptr = value;
@@ -1575,9 +1578,10 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		     *	not an exact match to the hostname, nor
 		     *	is a numeric IP address, add a lead dot.
 		     *	Otherwise, use the value as is. - FM
+		     *	(domains - case insensitive).
 		     */
 		    if (value[0] != '.' && value[0] != '\0' &&
-			value[1] != '\0' && strcmp(value, hostname)) {
+			value[1] != '\0' && strcasecomp(value, hostname)) {
 			char *ptr = strchr(value, '.');
 			if (ptr != NULL && ptr[1] != '\0') {
 			    ptr = value;
@@ -2121,6 +2125,7 @@ PUBLIC void LYStoreCookies ARGS1 (
     CTRACE(tfp, "LYStoreCookies: save cookies to %s on exit\n", cookie_file);
 
     cookie_handle = LYNewTxtFile (cookie_file);
+    if (cookie_handle == NULL) return;
     for (dl = domain_list; dl != NULL; dl = dl->next) {
 	de = dl->object;
 	if (de == NULL)
@@ -2662,7 +2667,7 @@ PUBLIC void cookie_domain_flag_set ARGS2(
     int isexisting = FALSE;
 
     if (str == NULL)
-        outofmem(__FILE__, "cookie_set_invcheck");
+	outofmem(__FILE__, "cookie_set_invcheck");
 
     /*
      * Is this the first domain we're handling?  If so, initialize
@@ -2670,7 +2675,9 @@ PUBLIC void cookie_domain_flag_set ARGS2(
      */
 
     if (domain_list == NULL) {
+#ifdef LY_FIND_LEAKS
 	atexit(LYCookieJar_free);
+#endif
 	domain_list = HTList_new();
 	total_cookies = 0;
     }

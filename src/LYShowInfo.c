@@ -24,55 +24,6 @@
 
 #define ADVANCED_INFO 1		/* to get more info in advanced mode */
 
-#if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
-#define HAVE_CFG_DEFS_H
-
-#define PutDefs(table, N) fprintf(fp0, "%-35s %s\n", table[N].name, table[N].value)
-
-/*
- *  Compile-time definitions info, returns local url
- */
-PUBLIC char *lynx_compile_opts NOARGS
-{
-    char tempfile[LY_MAXPATH];
-#include <cfg_defs.h>
-    unsigned n;
-    static char *info_url;
-    FILE *fp0;
-
-    if (info_url == 0) {
-	if ((fp0 = LYOpenTemp (tempfile, HTML_SUFFIX, "w")) == 0) {
-	    HTAlert(CANNOT_OPEN_TEMP);
-	    return(0);
-	}
-	LYLocalFileToURL(&info_url, tempfile);
-
-	BeginInternalPage (fp0, CONFIG_DEF_TITLE, NULL);
-	fprintf(fp0, "<pre>\n");
-
-	fprintf(fp0, "%s %s<a href=\"LYNXCFG:\"> lynx.cfg</a> %s\n\n",
-	    SEE_ALSO,
-	    YOUR_SEGMENT,
-	    RUNTIME_OPT_SEGMENT);
-
-	fprintf(fp0, "\n%s<br>\n<em>config.cache</em>\n", AUTOCONF_CONFIG_CACHE);
-	for (n = 0; n < TABLESIZE(config_cache); n++) {
-	    PutDefs(config_cache, n);
-	}
-	fprintf(fp0, "\n%s<br>\n<em>lynx_cfg.h</em>\n", AUTOCONF_LYNXCFG_H);
-	for (n = 0; n < TABLESIZE(config_defines); n++) {
-	    PutDefs(config_defines, n);
-	}
-	fprintf(fp0, "</pre>\n");
-	EndInternalPage(fp0);
-	LYCloseTempFP(fp0);
-    }
-    return info_url;
-}
-#else
-#undef HAVE_CFG_DEFS_H
-#endif /* !NO_CONFIG_INFO */
-
 /*
  *  Showinfo prints a page of info about the current file and the link
  *  that the cursor is on.
@@ -135,7 +86,7 @@ PUBLIC int showinfo ARGS4(
 		 (LYNX_RELEASE ? REL_VERSION       : DEV_VERSION) );
 
     if (!LYRestricted) {
-#ifdef HAVE_CFG_DEFS_H
+#if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
 	fprintf(fp0, " - <a href=\"LYNXCOMPILEOPTS:\">%s</a>\n",
 		COMPILE_OPT_SEGMENT);
 #else

@@ -22,6 +22,7 @@
 #include <UCAuto.h>
 #include <LYGlobalDefs.h>
 #include <LYClean.h>
+#include <LYLeaks.h>
 
 #ifdef EXP_CHARTRANS_AUTOSWITCH
 

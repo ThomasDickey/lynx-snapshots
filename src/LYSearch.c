@@ -5,7 +5,6 @@
 #include <LYSearch.h>
 #include <LYGlobalDefs.h>
 #include <GridText.h>
-#include <LYSignal.h>
 
 #include <LYLeaks.h>
 

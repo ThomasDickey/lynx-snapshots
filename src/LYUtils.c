@@ -2318,6 +2318,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	    HText_pageDisplay(Newline_partial, "");
 	}
 #endif /* DISP_PARTIAL */
+	break;
     } /* end switch */
     /** Other or no keystrokes **/
     return((int)FALSE);
@@ -2438,7 +2439,9 @@ PUBLIC void LYAddLocalhostAlias ARGS1(
 
     if (!localhost_aliases) {
 	localhost_aliases = HTList_new();
+#ifdef LY_FIND_LEAKS
 	atexit(LYLocalhostAliases_free);
+#endif
     }
 
     if ((LocalAlias = (char *)calloc(1, (strlen(alias) + 1))) == NULL)
@@ -3064,7 +3067,9 @@ PUBLIC void HTAddSugFilename ARGS1(
 
     if (!sug_filenames) {
 	sug_filenames = HTList_new();
+#ifdef LY_FIND_LEAKS
 	atexit(HTSugFilenames_free);
+#endif
 	HTList_addObject(sug_filenames, new);
 	return;
     }
@@ -4891,7 +4896,9 @@ PUBLIC CONST char * Home_Dir NOARGS
 	    StrAllocCopy(HomeDir, cp);
 	}
 	homedir = (CONST char *)HomeDir;
+#ifdef LY_FIND_LEAKS
 	atexit(LYHomeDir_free);
+#endif
     }
     return homedir;
 }

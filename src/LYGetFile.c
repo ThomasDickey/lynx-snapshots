@@ -250,33 +250,13 @@ Try_Redirected_URL:
 #endif
 
 		} else if (url_type == LYNXCFG_URL_TYPE) {
-		    /* show lynx.cfg settings */
-		    StrAllocCopy(doc->address, lynx_cfg_infopage());
-		    WWWDoc.address = doc->address;
-		    WWWDoc.post_data = doc->post_data;
-		    WWWDoc.post_content_type = doc->post_content_type;
-		    WWWDoc.bookmark = doc->bookmark;
-		    WWWDoc.isHEAD = doc->isHEAD;
-		    WWWDoc.safe = doc->safe;
+		    /* show/change/reload lynx.cfg settings */
+		    return(lynx_cfg_infopage(doc));
 
-		    if (!HTLoadAbsolute(&WWWDoc))
-			 return(NOT_FOUND);
-		    return(NORMAL);
-
-#ifdef HAVE_CFG_DEFS_H
+#if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
 		} else if (url_type == LYNXCOMPILE_OPTS_URL_TYPE) {
 		    /* show compile-time settings */
-		    StrAllocCopy(doc->address, (char *)lynx_compile_opts());
-		    WWWDoc.address = doc->address;
-		    WWWDoc.post_data = doc->post_data;
-		    WWWDoc.post_content_type = doc->post_content_type;
-		    WWWDoc.bookmark = doc->bookmark;
-		    WWWDoc.isHEAD = doc->isHEAD;
-		    WWWDoc.safe = doc->safe;
-
-		    if (!HTLoadAbsolute(&WWWDoc))
-			 return(NOT_FOUND);
-		    return(NORMAL);
+		    return(lynx_compile_opts(doc));
 #endif
 
 #ifndef DISABLE_NEWS
@@ -1177,7 +1157,9 @@ PUBLIC void add_trusted ARGS2(
     if (!src)
 	return;
     if (first) {
+#ifdef LY_FIND_LEAKS
 	atexit(LYTrusted_free);
+#endif
 	first = FALSE;
     }
 

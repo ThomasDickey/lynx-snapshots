@@ -3,21 +3,23 @@
 */
 #include <LYHash.h>
 
+#ifdef USE_COLOR_STYLE
+
 #ifdef NOT_USED
 
 PUBLIC int hash_table[CSHASHSIZE]; /* 32K should be big enough */
 
 PUBLIC int hash_code_rp ARGS1(char*,string)
 {
-	char* hash_ptr = string;
-	int hash_tmp = 0xC00A | ((*hash_ptr) << 4);
+    char* hash_ptr = string;
+    int hash_tmp = 0xC00A | ((*hash_ptr) << 4);
 
-	while (*hash_ptr++)
-	{
-		hash_tmp ^= (((*hash_ptr)<<4) ^ ((*hash_ptr)<<12));
-		hash_tmp >>= 1;
-	}
-	return (hash_tmp % CSHASHSIZE);
+    while (*hash_ptr++)
+    {
+	hash_tmp ^= (((*hash_ptr)<<4) ^ ((*hash_ptr)<<12));
+	hash_tmp >>= 1;
+    }
+    return (hash_tmp % CSHASHSIZE);
 }
 #endif
 
@@ -42,3 +44,32 @@ PUBLIC int hash_code ARGS1 (char*, string)
 
     return hash;
 }
+
+PUBLIC int hash_code_lowercase_on_fly ARGS1 (char*, string)
+{
+    int hash;
+    unsigned char *p;
+
+    for (p = (unsigned char *)string, hash = 0; *p; p++)
+	hash = (int) (hash * 3 + (unsigned char)tolower(*(char*)p) ) % HASH_SIZE;
+
+    return hash;
+}
+
+PUBLIC int hash_code_aggregate_char ARGS2 (char, c,int,hash)
+{
+    return (int)(hash*3 + (unsigned char)c) % HASH_SIZE;
+}
+
+PUBLIC int hash_code_aggregate_lower_on_fly ARGS2 (char*, string,int,hash_was)
+{
+    int hash;
+    unsigned char *p;
+
+    for (p = (unsigned char *)string, hash = hash_was ; *p; p++)
+	hash = (int) (hash * 3 + (unsigned char)tolower(*(char*)p) ) % HASH_SIZE;
+
+    return hash;
+}
+
+#endif /* USE_COLOR_STYLE */

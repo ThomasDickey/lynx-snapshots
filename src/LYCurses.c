@@ -52,6 +52,11 @@ BOOLEAN LYCursesON = FALSE;
 PRIVATE int Current_Attr;
 #endif
 
+#define OMIT_SCN_KEEPING 0 /* whether to omit keeping of Style_className
+    in HTML.c when lss support is on. 1 to increase performance. The value
+    must correspond to the value of macro OMIT_SCN_KEEPING defined in HTML.c*/
+
+
 #ifdef USE_SLANG
 PUBLIC unsigned int Lynx_Color_Flags = 0;
 PUBLIC BOOLEAN FullRefresh = FALSE;
@@ -62,6 +67,8 @@ PUBLIC int curscr = 0;
  */
 PUBLIC int PHYSICAL_SLtt_Screen_Cols = 10;
 #endif /* SLANG_MBCS_HACK */
+
+
 
 PUBLIC void LY_SLrefresh NOARGS
 {
@@ -311,14 +318,29 @@ PUBLIC void curses_w_style ARGS3(
 	int,		style,
 	int,		dir)
 {
+#if OMIT_SCN_KEEPING
+# define SPECIAL_STYLE /*(CSHASHSIZE+1) */ 88888
+  /* if TRACEs are not compiled in, this macro is redundant - we neend't valid
+    'ds' to stack off. */
+#endif
+
 	int YP,XP;
-	bucket* ds=&hashStyles[style];
+#if !OMIT_SCN_KEEPING
+	bucket* ds= (style == NOSTYLE ? &nostyle_bucket : &hashStyles[style]);
+#else
+        bucket* ds= (style == NOSTYLE ?      &nostyle_bucket :
+                (style== SPECIAL_STYLE ? &special_bucket :&hashStyles[style]) );
+#endif
+
 
 	if (!ds->name)
 	{
 		CTRACE(tfp, "CSS.CS:Style %d not configured\n",style);
+#if !OMIT_SCN_KEEPING
 		return;
+#endif
 	}
+
 	CTRACE(tfp, "CSS.CS:<%s%s> (%d)\n",(dir?"":"/"),ds->name,ds->code);
 
 	getyx (win, YP, XP);
@@ -352,16 +374,20 @@ PUBLIC void curses_w_style ARGS3(
 		}
 		last_styles[last_colorattr_ptr++] = getattrs(stdscr);
 		/* don't cache style changes for active links */
+#if OMIT_SCN_KEEPING
+                /* since we don't compute the hcode
+                  to stack off in HTML.c, we don't know whether this style is
+                  configured. So, we shouldn't simply return on stacking on on
+                  unconfigured styles, we should push curr attrs on stack. -HV
+                */
+                if (!ds->name) return;
+#endif
 		if (style != s_alink)
 		{
 			CTRACE(tfp, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP);
 			if (win==stdscr) cached_styles[YP][XP]=style;
-			LYAttrset(win, ds->color, ds->mono);
 		}
-		else
-		{
-			LYAttrset(win, ds->color, ds->mono);
-		}
+		LYAttrset(win, ds->color, ds->mono);
 		return;
 
 	case ABS_ON: /* change without remembering the previous style */
@@ -370,12 +396,8 @@ PUBLIC void curses_w_style ARGS3(
 		{
 			CTRACE(tfp, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP);
 			if (win==stdscr) cached_styles[YP][XP]=style;
-			LYAttrset(win, ds->color, ds->mono);
 		}
-		else
-		{
-			LYAttrset(win, ds->color, ds->mono);
-		}
+                LYAttrset(win, ds->color, ds->mono);
 		return;
 	}
 }

@@ -213,7 +213,9 @@ PRIVATE BOOL initialize NOARGS
 #endif /* NeXTStep */
 
     s = -1;		/* Disconnected */
+#ifdef LY_FIND_LEAKS
     atexit(free_news_globals);
+#endif
     return YES;
 }
 
@@ -343,7 +345,9 @@ PRIVATE NNTPAuthResult HTHandleAuthInfo ARGS1(
 	}
     } else {
 	NNTP_AuthInfo = HTList_new();
+#ifdef LY_FIND_LEAKS
 	atexit(free_NNTP_AuthInfo);
+#endif
     }
 
     /*

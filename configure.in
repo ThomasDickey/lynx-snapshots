@@ -263,6 +263,7 @@ dgux*)
 	;;
 hpux*)
 	CFLAGS="$CFLAGS -DSNAKE"
+	test -z "$GCC" && TRY_CFLAGS="$TRY_CFLAGS -Wp,-H600000"
 	;;
 isc*)
 	# -DPOSIX_JC is necessary, else LYBookmark.c never finds out what a mode_t is.
@@ -581,6 +582,7 @@ if test $use_color_style != no ; then
 		AC_ERROR(Configuration does not support color-styles)
 	fi
 	AC_DEFINE(USE_HASH)
+	AC_DEFINE(USE_PSRC)
 	AC_DEFINE(LINKEDSTYLES)
 fi
 
@@ -639,6 +641,14 @@ CF_ARG_ENABLE(persistent-cookies,
 	[use_filed_cookies=no])
 AC_MSG_RESULT($use_filed_cookies)
 test $use_filed_cookies != no && AC_DEFINE(EXP_PERSISTENT_COOKIES)
+
+AC_MSG_CHECKING(if source caching should be used)
+CF_ARG_ENABLE(source-cache,
+[  --enable-source-cache   cache HTML source for parse mode changes],
+	[use_source_cache=$enableval],
+	[use_source_cache=no])
+AC_MSG_RESULT($use_source_cache)
+test $use_source_cache != no && AC_DEFINE(SOURCE_CACHE)
 
 dnl --------------------------------------------------------------------------
 dnl Miscellaneous options that don't need to test system features

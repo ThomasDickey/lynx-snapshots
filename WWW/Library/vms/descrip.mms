@@ -167,7 +167,7 @@ CC = gcc
 !        HTParse.h, HTAccess.h, HTTP.h, HTFile.h, -
 !	HTBTree.h, HTTCP.h, SGML.h, -
 !	HTML.h, HTMLDTD.h, HTChunk.h, HTPlain.h, -
-!	HTWriter.h, HTFwriter.h, HTMLGen.h, -
+!	HTFwriter.h, HTMLGen.h, -
 !	HTAtom.h, HTAnchor.h, HTStyle.h, -
 !	HTList.h, HTString.h, HTAlert.h, -
 !	HTRules.h, HTFormat.h, HTInit.h, -
@@ -178,7 +178,7 @@ CC = gcc
 !	HTVMSUtils.h, ufc-crypt.h, patchlevel.h
 
 MODULES = HTParse, HTAccess, HTTP, HTFile, HTBTree, HTFTP, HTTCP, HTString, -
-	SGML, HTMLDTD, HTChunk, HTPlain, HTWriter, HTMLGen, -
+	SGML, HTMLDTD, HTChunk, HTPlain, HTMLGen, -
 	HTAtom, HTAnchor, HTStyle, HTList, HTRules, HTFormat, -
 	HTMIME, HTNews, HTGopher, HTTelnet, HTFinger, -
 	HTWSRC, HTAAUtil, HTAABrow, HTGroup, -
@@ -219,7 +219,6 @@ clean :
 !HTBTree.obj :	HTBTree.c HTBTree.h HTUtils.h
 !HTMLDTD.obj :	HTMLDTD.c HTMLDTD.h SGML.h
 !HTPlain.obj :	HTPlain.c HTPlain.h HTStream.h
-!HTWriter.obj :	HTWriter.c HTWriter.h HTStream.h
 !HTMLGen.obj :	HTMLGen.c HTMLGen.h HTUtils.h HTMLDTD.h
 !HTRules.obj :	HTRules.c HTRules.h HTUtils.h Version.make
 !HTMIME.obj :	HTMIME.c HTMIME.h HTUtils.h HTList.h

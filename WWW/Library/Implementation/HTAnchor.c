@@ -377,7 +377,9 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 	    adult_table = (HTList **)calloc(HASH_SIZE, sizeof(HTList *));
 	    if (!adult_table)
 		outofmem(__FILE__, "HTAnchor_findAddress");
+#ifdef LY_FIND_LEAKS
 	    atexit(free_adult_table);
+#endif
 	}
 	if (!adult_table[hash])
 	    adult_table[hash] = HTList_new();
