@@ -944,9 +944,12 @@ PUBLIC int follow_link_number ARGS4(
 	int *,		num)
 {
     char temp[120];
+    char *p = temp;
+    int rel = 0;
     int new_top, new_link;
     BOOL want_go;
 
+    CTRACE(tfp,"follow_link_number(%d,%d,...)\n",c,cur);
     temp[0] = c;
     temp[1] = '\0';
     *num = -1;
@@ -958,19 +961,42 @@ PUBLIC int follow_link_number ARGS4(
 	HTInfoMsg(CANCELLED);
 	return(DO_NOTHING);
     }
-    *num = atoi(temp);
+    *num = atoi(p);
+    while ( isdigit(*p) )
+	++p;
+    c = *p; /* reuse c; 0 or g or p or + or - */
+    switch ( c ) {
+    case '+': case '-':
+	/* 123+ or 123- */
+	rel = c; c = *++p;
+	break;
+    default:
+	rel = *++p;
+    }
+    /* don't currently check for errors typing suffix */
 
+    CTRACE(tfp,"  temp=%s, *num=%d, rel='%c'\n",temp,*num,rel);
     /*
      *	Check if we had a 'p' or 'P' following the number as
      *	a flag for displaying the page with that number. - FM
      */
-    if (strchr(temp, 'p') != NULL || strchr(temp, 'P') != NULL) {
+    if ( c == 'p' || c == 'P' ) {
 	int nlines = HText_getNumOfLines();
 	int npages = ((nlines + 1) > display_lines) ?
 		(((nlines + 1) + (display_lines - 1))/(display_lines))
 						    : 1;
+	int curline = doc->line; /* passed from mainloop() */
+	int curpage = ((curline + 1) > display_lines) ?
+		     (((curline + 1) + (display_lines - 1))/(display_lines))
+						      : 1;
+	CTRACE(tfp," nlines=%d, npages=%d, curline=%d, curpage=%d\n",
+		nlines,npages,curline,curpage);
 	if (*num < 1)
-	    *num = 1;
+	    *num = rel ? 0 : 1;
+	if ( rel == '+' )
+	    *num = curpage + *num;
+	else if ( rel == '-' )
+	    *num = curpage - *num;
 	doc->line = (npages <= 1) ?
 				1 :
 		((*num <= npages) ? (((*num - 1) * display_lines) + 1)
@@ -982,8 +1008,13 @@ PUBLIC int follow_link_number ARGS4(
      *	Check if we want to make the link corresponding to the
      *	number the current link, rather than ACTIVATE-ing it.
      */
-    want_go = (strchr(temp, 'g') != NULL || strchr(temp, 'G') != NULL);
+    want_go = ( c == 'g' || c == 'G' );
 
+    /* If rel, add or subtract num from current link, or
+     * nearest previous/subsequent link if current link is not on screen.
+     */
+    if ( rel )
+	*num = HTGetRelLinkNum( *num, rel, cur );
    /*
     *  If we have a valid number, act on it.
     */

@@ -656,6 +656,7 @@ PRIVATE void HTML_start_element ARGS6(
     char *alt_string = NULL;
     char *id_string = NULL;
     char *newtitle = NULL;
+    char **pdoctitle = NULL;
     char *href = NULL;
     char *map_href = NULL;
     char *title = NULL;
@@ -1005,10 +1006,6 @@ PRIVATE void HTML_start_element ARGS6(
 		    !strcasecomp(value[HTML_LINK_REL], "Index") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Glossary") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Copyright") ||
-		    !strcasecomp(value[HTML_LINK_REL], "Up") ||
-		    !strcasecomp(value[HTML_LINK_REL], "Next") ||
-		    !strcasecomp(value[HTML_LINK_REL], "Previous") ||
-		    !strcasecomp(value[HTML_LINK_REL], "Prev") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Help") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Search") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Bookmark") ||
@@ -1016,29 +1013,51 @@ PRIVATE void HTML_start_element ARGS6(
 		    !strcasecomp(value[HTML_LINK_REL], "Top") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Origin") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Navigator") ||
-		    !strcasecomp(value[HTML_LINK_REL], "Child") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Disclaimer") ||
-		    !strcasecomp(value[HTML_LINK_REL], "Sibling") ||
-		    !strcasecomp(value[HTML_LINK_REL], "Parent") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Author") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Editor") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Publisher") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Trademark") ||
-		    !strcasecomp(value[HTML_LINK_REL], "Meta") ||
-		    !strcasecomp(value[HTML_LINK_REL], "URC") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Hotlist") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Begin") ||
 		    !strcasecomp(value[HTML_LINK_REL], "First") ||
 		    !strcasecomp(value[HTML_LINK_REL], "End") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Last") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Documentation") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Biblioentry") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Bibliography") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Alternate") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Start") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Section") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Subsection") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Appendix")) {
+		    StrAllocCopy(title, value[HTML_LINK_REL]);
+		    pdoctitle = &title;	/* for setting HTAnchor's title */
+		} else
+		if (!strcasecomp(value[HTML_LINK_REL], "Up") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Next") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Previous") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Prev") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Child") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Sibling") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Parent") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Meta") ||
+		    !strcasecomp(value[HTML_LINK_REL], "URC") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Pointer") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Translation") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Definition") ||
-		    !strcasecomp(value[HTML_LINK_REL], "Chapter") ||
-		    !strcasecomp(value[HTML_LINK_REL], "Documentation") ||
-		    !strcasecomp(value[HTML_LINK_REL], "Biblioentry") ||
-		    !strcasecomp(value[HTML_LINK_REL], "Bibliography")) {
+		    !strcasecomp(value[HTML_LINK_REL], "Chapter")) {
 		    StrAllocCopy(title, value[HTML_LINK_REL]);
+		    /* not setting target HTAnchor's title, for these
+		       link of highly relative character.  Instead,
+		       try to remember the REL attribute as a property
+		       of the link (but not the destination), in the
+		       (otherwise underused) link type in a special format;
+		       the LIST page generation code may later use it. - kw */
+		    if (!intern_flag) {
+			StrAllocCopy(temp, "RelTitle: ");
+			StrAllocCat(temp, value[HTML_LINK_REL]);
+		    }
 		} else {
 		    CTRACE(tfp, "HTML: LINK with REL=\"%s\" ignored.\n",
 				 value[HTML_LINK_REL]);
@@ -1064,6 +1083,7 @@ PRIVATE void HTML_start_element ARGS6(
 		break;
 	    }
 	    StrAllocCopy(title, value[HTML_LINK_REL]);
+	    pdoctitle = &title;
 	}
 	if (href) {
 	    /*
@@ -1077,6 +1097,8 @@ PRIVATE void HTML_start_element ARGS6(
 		TRANSLATE_AND_UNESCAPE_ENTITIES(&title, TRUE, FALSE);
 		LYTrimHead(title);
 		LYTrimTail(title);
+		pdoctitle = &title;
+		FREE(temp); /* forget about recording RelTitle - kw */
 	    }
 	    if (!(title && *title)) {
 		FREE(href);
@@ -1103,12 +1125,14 @@ PRIVATE void HTML_start_element ARGS6(
 				me->node_anchor,	/* Parent */
 				NULL,			/* Tag */
 				href,			/* Addresss */
-				INTERN_LT);		/* Type */
+				temp ?
+       (HTLinkType*)HTAtom_for(temp) : INTERN_LT);	/* Type */
+	    FREE(temp);
 	    if ((dest = HTAnchor_parent(
 			    HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
 				      )) != NULL) {
-		if (!HTAnchor_title(dest))
-		    HTAnchor_setTitle(dest, title);
+		if (pdoctitle && !HTAnchor_title(dest))
+		    HTAnchor_setTitle(dest, *pdoctitle);
 		dest = NULL;
 		if (present[HTML_LINK_CHARSET] &&
 		    value[HTML_LINK_CHARSET] && *value[HTML_LINK_CHARSET] != '\0') {

@@ -8,6 +8,7 @@
 
 /* usage: DUMPSTRUCT_LINK(link_ptr, "message"); */
 #define   DUMPSTRUCT_LINK(L,X) \
+if ((L)) { \
 CTRACE(tfp, "\n" \
             "KED:     link_ptr=0x%08x  sizeof=%d  ["X"]\n" \
             "link       struct {\n"      \
@@ -33,11 +34,16 @@ CTRACE(tfp, "\n" \
             (L)->hightext, (L)->hightext, (L)->hightext2, (L)->hightext2, \
             (L)->hightext2_offset, (L)->inUnderline, (L)->lx, (L)->ly, \
             (L)->type, (L)->anchor_number, (L)->anchor_line_num, (L)->form); \
+}else{ \
+CTRACE(tfp, "\n" \
+            "KED:     link_ptr=0x00000000  (NULL)     ["X"]\n"); \
+} \
 CTRACE_FLUSH(tfp);
 
 
 /* usage: DUMPSTRUCT_ANCHOR(anchor_ptr, "message"); */
 #define   DUMPSTRUCT_ANCHOR(A,X) \
+if ((A)) { \
 CTRACE(tfp, "\n" \
             "KED:   anchor_ptr=0x%08x  sizeof=%d  ["X"]\n" \
             "TextAnchor struct {\n"      \
@@ -67,11 +73,16 @@ CTRACE(tfp, "\n" \
             (A)->hightext2offset, (A)->link_type, \
             (A)->input_field, (A)->input_field, (A)->show_anchor, \
             (A)->inUnderline, (A)->expansion_anch, (A)->anchor); \
+}else{ \
+CTRACE(tfp, "\n" \
+            "KED:   anchor_ptr=0x00000000  (NULL)     ["X"]\n"); \
+} \
 CTRACE_FLUSH(tfp);
 
 
 /* usage: DUMPSTRUCT_FORM(forminfo_ptr, "message"); */
 #define   DUMPSTRUCT_FORMINFO(F,X) \
+if ((F)) { \
 CTRACE(tfp, "\n" \
             "KED: forminfo_ptr=0x%08x  sizeof=%d  ["X"]\n" \
             "FormInfo   struct {\n"      \
@@ -112,11 +123,16 @@ CTRACE(tfp, "\n" \
             (F)->no_cache, (F)->cp_submit_value, (F)->orig_submit_value, \
             (F)->size_l, (F)->disabled, (F)->name_cs, (F)->value_cs, \
             (F)->accept_cs); \
+}else{ \
+CTRACE(tfp, "\n" \
+            "KED: forminfo_ptr=0x00000000  (NULL)     ["X"]\n"); \
+} \
 CTRACE_FLUSH(tfp);
 
 
 /* usage: DUMPSTRUCT_LINE(htline_ptr, "message"); */
 #define   DUMPSTRUCT_LINE(L,X) \
+if ((L)) { \
 CTRACE(tfp, "\n" \
             "KED: htline_ptr=0x%08x  sizeof=%d  ["X"]\n" \
             "HTLine  struct {\n"      \
@@ -134,6 +150,10 @@ CTRACE(tfp, "\n" \
             (L), sizeof(*((L))), \
             (L)->next, (L)->prev, (L)->offset, (L)->size, (L)->split_after, \
             (L)->bullet, (L)->expansion_line, (L)->data, (L)->data); \
+}else{ \
+CTRACE(tfp, "\n" \
+            "KED: htline_ptr=0x00000000  (NULL)     ["X"]\n"); \
+} \
 CTRACE_FLUSH(tfp);
 
 #endif /* STRUCTDUMP_H */

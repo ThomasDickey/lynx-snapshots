@@ -142,6 +142,7 @@ extern void print_wwwfile_to_fd PARAMS((FILE * fp, int is_reply));
 extern BOOL HText_select PARAMS((HText *text));
 extern BOOL HText_POSTReplyLoaded PARAMS((document *doc));
 extern BOOL HTFindPoundSelector PARAMS((char *selector));
+extern int HTGetRelLinkNum PARAMS((int num, int rel, int cur));
 extern int HTGetLinkInfo PARAMS((
 	int		number,
 	int		want_go,
@@ -263,6 +264,11 @@ extern BOOL HText_AreDifferent PARAMS((
 	CONST char *		full_address));
 
 extern int HText_ExtEditForm PARAMS((
+	struct link *	form_link));
+extern void HText_ExpandTextarea PARAMS((
+	struct link *	form_link,
+	int             newlines));
+extern int HText_InsertFile PARAMS((
 	struct link *	form_link));
 
 #endif /* LYGRIDTEXT_H */

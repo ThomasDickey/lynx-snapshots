@@ -1,6 +1,114 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1999-03-04 (2.8.2dev.18)
+* modify configure script to recover if the intl and po directories are
+  missing, allow experimentation with --enable-nls --disable-included-msgs
+  --without-included-gettext options (request by HN) - TD
+* add sanity-check for EBCDIC FixCharacters() in LYMain.c - PG
+* ifdef'd the ADDRLIST code with EXP_ADDRLIST_PAGE, making this available as
+  a configure script option --enable-addrlist-page - TD
+* create a new command called ADDRLIST, which behaves exactly the same as LIST,
+  but which *should* always show only the URL's.  Rather than make it a config
+  option (which would have taken me quite a bit longer to do), I've bound it to
+  the "A" key (that's a capital "A").  Why not "L" you ask?  Because of the "vi
+  keys" option, whereby "l" is used for cursor movement, and "L" stays reserved
+  for L(ist) - KED
+* change the LYK_xxx keymap definitions to an enum, to simplify ifdef's - TD
+* add configure options --disable-gopher, to remove GOPHER code, and
+  --disable-trace to remove TRACE code - JS
+* modify trace log header to always inform us if anonymous restrictions are
+  set - LP
+* chartrans: old-style declarations of charsets which do not have Unicode 
+  tables (CJK, x-transparent, also UTF-8) now moved from LYCharSets.c to 
+  UCdomap.h and now included with UCInit() in UCdomap.c in a standard way - LP 
+  (Please re-test CJK and UTF-8)
+* add configure --enable-libjs option (Lalo Martins <lalo@webcom.com>)
+* add checks for some more LINK tags as listed in "6.12 Link types" of the HTML
+  4.0 Specification (Masayasu Ishikawa <mimasa@isoternet.org>)
+* changed the effect of some LINK tags with REL attribute of a very relative
+  character (Up, Next, Prev, ...) on titles as they appear e.g.  on the LIST
+  page:  the title of the target HTParentAnchor isn't being set when such a
+  LINK tag is parsed, but the relation is now stored as a property of the
+  link itself rather than its destination.  The LIST page shows the relation
+  as additional info, not superseding a URL or title string obtained
+  otherwise - KW
+* move commands in top-level makefile.in which clean *.rej and *.orig from
+  'distclean' rule to 'maintainer-clean', make distinct from the @SRCDIR_CLEAN@
+  substitution which is intended for use with the configure --srcdir option
+  (from reports by Glenn E.  Thobe <thobe@lafn.org> and BL) - TD
+* correct LYRemoveTemp() to close file before attempting to remove it; else
+  the remove fails on some platforms, e.g., DOS/Windows (report by KW) - TD
+* improved documentation for the new cookie options, e.g,.
+  COOKIE_ACCEPT_DOMAINS, in lynx.cfg - BJP
+* fix some memory leaks in LYCookie.c - BJP
+* modify 123g (and similar movement) commands to allow for relative links,
+  e.g., by using a '+' or '-' after the 'g' - LE
+* modify help_files.sed to include '$', making regular expressions work for
+  HP-UX (Jens Schmalzing <jens@stat.physik.uni-muenchen.de>)
+* add a comment to aclocal.m4 to show where patches for autoconf, needed for
+  this configure script, can be found - JS
+* add toggling trace log on/off in partial mode, when the downloading is still
+  in progress - LP
+* more consistent docs for debugging of invalidly nested HTML:  important trace
+  messages from actions on invalid tags now have '***' prefix such as "SGML:
+  ...  ***ignored" (well:  illegal, forced, assumed, etc.), -preparsed mode now
+  better documented - LP
+* minor code cleanup: remove redundant includes, fill in 0's for some static
+  data initialization (John Bley).
+* add 'joe' editor, and variants, to list of those editors that are assumed to
+  position the file to a given line number using the "+line" command-line
+  option - IC
+* remove redundant "(y/n)" substrings from LYMessages_en.h - LV
+* add new command named GROWTEXTAREA which adds 5 new blank lines to the bottom
+  of a TEXTAREA when executed.  It does not have a default binding, so you need
+  to add a KEYMAP for it in your lynx.cfg.  The number of lines added is fixed
+  by a #define, but 5 seems to be a "reasonable" increment to use - KED
+* add new command named INSERTFILE, which (obviously) inserts a file's contents
+  into a TEXTAREA, just above the line the cursor is on when invoked (which
+  means you cannot insert a file *below* the final existing TEXTAREA line ...
+  but see 1) and 3) for easy ways to over- come this limitation).  It too, has
+  no default binding, so a KEYMAP entry is also needed for it - KED
+* by default, when the cursor is on the last line of a TEXTAREA, if you hit the
+  ENTER key, a new line will be added to the TEXTAREA, with the cursor
+  positioned on it.  If that should happen at the bottom of the screen, a
+  DOWN_HALF scroll operation is (effectively) performed - KED
+* ifdef'd this feature (since at least one person objected to this automatic
+  behavior when it was discussed awhile back - BL?), for easy disabling (and to
+  make adding a ./configure option easier).  The symbol is AUTOGROW is
+  #define'd in LYMainLoop.h - KED
+* added an ifdef for the code that causes the external editor to be
+  invoked "automatically" on the TEXTAREA contents when ^Ve (or whatever
+  the EDIT binding is), rather than attempting to invoke it on the .html
+  source file.  This should allow adding a ./configure option to control
+  this behavior, until we come up with a different binding/mechanism to
+  do the job, that we can all agree on.  The symbol AUTOEXTEDIT is also
+  #define'd in LYMainLoop.h.   The command EDITTEXTAREA is still available
+  for seperate KEYMAP binding, per KW's suggestion - KED
+* check the range of chars between 0x80 and LYlowest_eightbit[current_char_set]
+  for validity against the charset in use.  If such chars are detected in
+  edited or inserted data, a "." char is substituted for them, as with normal
+  control chars.  (Suggested by LP) - KED
+* added KW's LYCloseTempFP bugfix - KED
+* add/use function GetFileName(), e.g., by INSERTFILE.  It is fairly general
+  purpose, and can be used whenever the name of an existing file needs to be
+  input.  It uses the same mechanism for filename expansion and "history" as
+  does the PRINT function - KED
+* reorganized a lot of the code into subroutines to provide for 1) and 2);
+  still need to do a bit more cleanup of some other (nearly) common code - KED
+* rename iso9945_uni.tbl to iso9945uni.tbl to accommodate 'make' programs on
+  old systems (such as CLIX 3.1) whose suffix rules fail for filenames longer
+  than 14 characters - TD
+* change VMS WWW build-script to use prefix=all rather than prefix=ansi,
+  so that POSIX functions such as 'stat()' are linked properly (reported by
+  Morris D Cox <coxmd@appstate.edu>) - TD
+* modify configure macro CF_EBCDIC to avoid using #error, since that is not
+  recognized by all compilers - TD
+* include <sys/types.h> in CF_INET_ADDR macro, to accommodate systems which
+  require that to compile test program with the socket.h, other network
+  headers - TD
+* removed a cast in free_lynx_cfg, on FREE's argument, which caused some
+  compilers to report that an rvalue was being modified (reported by PW) - TD
 1999-02-16 (2.8.2dev.17)
 * modify LYReadCFG.c to avoid duplicating data for cookies - BJP
 * modify HTConfirm to use gettext values for yes/no.  Use HTConfirm in a few
@@ -10,7 +118,7 @@ Changes since Lynx 2.8 release
 * modify ./makefile.in so that portions which are commented-out will be done
   without a leading tab, since that confuses the make program on Digital Unix
   3.2 - TD
-* Unix: Don't accept HOME variable with valid if it does not begin with
+* Unix: Don't accept HOME variable as valid if it does not begin with
   a slash - KW
 * changed HTGetCharacter to be 8-bit clean, it could not distinguish between a
   character value 255 and EOF.  Changes affect several protocols:  nntp,

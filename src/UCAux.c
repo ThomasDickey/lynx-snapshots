@@ -1,6 +1,7 @@
 #include <HTUtils.h>
 
 #include <HTCJK.h>
+#include <UCMap.h>
 #include <UCDefs.h>
 #include <HTStream.h>
 #include <UCAux.h>
@@ -17,13 +18,9 @@ PUBLIC BOOL UCCanUniTranslateFrom ARGS1(
 	return NO;
     if (!strcmp(LYCharSet_UC[from].MIMEname, "x-transparent"))
 	return NO;
-    if (from == LATIN1) {
-	if (LYCharSet_UC[from].codepoints & (UCT_CP_SUPERSETOF_LAT1))
-	    return YES;
-    }
 
-    /* others YES, but check for lost tables to be sure */
-    return (LYCharSet_UC[from].UChndl >= 0);
+    /* others YES */
+    return YES;
 }
 
 PUBLIC BOOL UCCanTranslateUniTo ARGS1(
@@ -31,6 +28,11 @@ PUBLIC BOOL UCCanTranslateUniTo ARGS1(
 {
     if (to < 0)
 	return NO;
+/*???
+    if (!strcmp(LYCharSet_UC[to].MIMEname, "x-transparent"))
+       return NO;
+*/
+
     return YES;			/* well at least some characters... */
 }
 
@@ -51,7 +53,7 @@ PUBLIC BOOL UCCanTranslateFromTo ARGS2(
 	CONST char * toname = LYCharSet_UC[to].MIMEname;
 	if (!strcmp(fromname, "x-transparent") ||
 	    !strcmp(toname, "x-transparent")) {
-	    return YES;
+	    return YES; /* ??? */
 	} else if (!strcmp(fromname, "us-ascii")) {
 	    return YES;
 	}
@@ -80,7 +82,7 @@ PUBLIC BOOL UCCanTranslateFromTo ARGS2(
 	    return NO;
 	}
     }
-    return (LYCharSet_UC[from].UChndl >= 0);
+    return YES;    /* others YES */
 }
 
 /*

@@ -1782,7 +1782,7 @@ PUBLIC void LYSetupEdit ARGS4(
      *	up, we'll check it here, and ensure that no buffer overrun can
      *	occur by loading only as much of the head as fits. - FM
      */
-    if (strlen(old) >= maxstr) {
+    if (strlen(old) >= (unsigned)maxstr) {
 	strncpy(edit->buffer, old, maxstr);
 	edit->buffer[maxstr] = '\0';
 	StrLen = maxstr;

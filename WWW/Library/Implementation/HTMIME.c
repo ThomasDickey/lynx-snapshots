@@ -1991,7 +1991,6 @@ PUBLIC void HTmmdecode ARGS2(
 			int LYhndl;
 
 			*qm2 = '\0';
-			LYLowerCase(s+2);
 			invalid = ((LYhndl = UCGetLYhndl_byMIME(s+2)) < 0 ||
 				   UCCanTranslateFromTo(LYhndl,
 						 current_char_set));

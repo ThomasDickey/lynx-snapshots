@@ -70,7 +70,7 @@ within a single LAN.
 <h2 ID="Help"><A NAME="Help"><em>Lynx online help</em></A></h2>
 
 Online help is available while viewing any document.  Press the
-'<em>?</em>' or '<em>H</em>' key (or the '<em>h</em> key if
+'<em>?</em>' or '<em>H</em>' key (or the '<em>h</em>' key if
 vi-like key movement is not on) to see a list of help topics.
 See the section titled <A HREF="#IntraDocNav">Navigating
 hypertext documents with Lynx</A> for information on navigating
@@ -286,9 +286,9 @@ show the <em>Visited Links Page</em>, and you similarly can select links in
 that list.  The MAIN_MENU keystroke command, normally mapped to '<em>m</em>'
 and '<em>M</em>', will take you back to the starting document unless you
 specified the <em>-homepage=URL</em> option at the command line.  Also, the
-LIST keystroke command, normally mapped to '<em>l</em>' and <em>L</em>',
-will create a compact list of all the links in the current document, and
-they can be selected via that list.
+LIST and ADDRLIST keystroke commands, normally mapped to '<em>l</em>' and
+<em>A</em>' respectively, will create a compact lists of all the links in
+the current document, and they can be selected via those lists.
 
 <p>The '<em>i</em>' key presents an index of documents.  The default index
 is usually a document pointing to servers around the world, but the index
@@ -2165,7 +2165,7 @@ where
 	     <dt><code>-number_links</code>
 		<dd>force numbering of links.
 	     <dt><code>-partial</code>
-		<dd>display partial pages while downloading.
+		<dd>toggles display partial pages while downloading.
 	     <dt><code>-pauth=ID:PW</code>
 		<dd>set authorization ID and password for a protected proxy
 		    server at startup.	Be sure to protect any script files
@@ -2184,6 +2184,10 @@ where
 	     <dt><code>-preparsed</code>
 		<dd>show source preparsed and reformatted when used with
 		    -source or in source view ('<em>\</em>').
+		    May be useful for debugging of broken HTML markup
+		    to visualize the difference between SortaSGML and TagSoup
+		   <A HREF="keystrokes/option_help.html#tagsoup">recovery modes</A>,
+		    switched by '<em>^V</em>'.
 	     <dt><code>-print</code>
 		<dd>enable print functions. (default)
 	     <dt><code>-pseudo_inlines</code>

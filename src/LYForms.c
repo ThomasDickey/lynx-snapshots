@@ -515,10 +515,13 @@ breakfor:
 **  If a 'g' or 'p' suffix is included, that will be
 **  loaded into c.  Otherwise, c is zeroed. - FM & LE
 */
-PRIVATE int get_popup_option_number ARGS1(
-	int *,		c)
+PRIVATE int get_popup_option_number ARGS2(
+	int *,		c,
+	int *,		rel)
 {
     char temp[120];
+    char *p = temp;
+    int num;
 
     /*
      *  Load the c argument into the prompt buffer.
@@ -533,21 +536,38 @@ PRIVATE int get_popup_option_number ARGS1(
     if (LYgetstr(temp, VISIBLE, sizeof(temp), NORECALL) < 0 || *temp == 0) {
 	HTInfoMsg(CANCELLED);
 	*c = '\0';
+	*rel = '\0';
 	return(0);
+    }
+
+    *rel = '\0';
+    num = atoi(p);
+    while ( isdigit(*p) )
+	++p;
+    switch ( *p ) {
+    case '+': case '-':
+	/* 123+ or 123- */
+	*rel = *p++; *c = *p;
+	break;
+    default:
+	*c = *p++;
+	*rel = *p;
     }
 
     /*
      *  If we had a 'g' or 'p' suffix, load it into c.
      *  Otherwise, zero c.  Then return the number.
      */
-    if (strchr(temp, 'g') != NULL || strchr(temp, 'G') != NULL) {
+    if ( *p == 'g' || *p == 'G' ) {
 	*c = 'g';
-    } else if (strchr(temp, 'p') != NULL || strchr(temp, 'P') != NULL) {
+    } else if (*p == 'p' || *p == 'P' ) {
 	*c = 'p';
     } else {
 	*c = '\0';
     }
-    return(atoi(temp));
+    if ( *rel != '+' && *rel != '-' )
+	*rel = 0;
+    return num;
 }
 
 /* Use this rather than the 'wprintw()' function to write a blank-padded
@@ -585,7 +605,7 @@ PRIVATE int popup_options ARGS7(
      *  and to position the popup window appropriately,
      *  taking the user_mode setting into account. -- FM
      */
-    int c = 0, cmd = 0, i = 0, j = 0;
+    int c = 0, cmd = 0, i = 0, j = 0, rel = 0;
     int orig_selection = cur_selection;
 #ifndef USE_SLANG
     WINDOW * form_window;
@@ -887,8 +907,27 @@ redraw:
 		 *  a 'g' or 'p' suffix (which will be loaded
 		 *  into c). - FM & LE
 		 */
-		number = get_popup_option_number((int *)&c);
+		number = get_popup_option_number((int *)&c,(int *)&rel);
 
+		/* handle + or - suffix */
+		CTRACE(tfp,"got popup option number %d, ",number);
+		CTRACE(tfp,"rel='%c', c='%c', cur_selection=%d\n",
+				rel,c,cur_selection);
+		if ( c == 'p' ) {
+		    int curpage = ((cur_selection + 1) > length) ?
+			(((cur_selection + 1) + (length - 1))/(length))
+					  : 1;
+		    CTRACE(tfp,"  curpage=%d\n",curpage);
+		    if ( rel == '+' )
+			number = curpage + number;
+		    else if ( rel == '-' )
+			number = curpage - number;
+		} else if ( rel == '+' ) {
+		    number = cur_selection + number + 1;
+		} else if ( rel == '-' ) {
+		    number = cur_selection - number + 1;
+		}
+		if ( rel ) CTRACE(tfp,"new number=%d\n",number);
 		/*
 		 *  Check for a 'p' suffix. - FM
 		 */

@@ -897,11 +897,10 @@ PUBLIC int save_rc NOPARAMS
 
     fprintf(fp, gettext("\
 # cookie_accept_domains and cookie_reject_domains are comma-delimited\n\
-# lists of domains (with a leading '.') to automatically accept or\n\
-# reject all cookies from.  The accept_all_cookies parameter will\n\
-# override any settings made here.  If a single domain is specified in\n\
-# both cookie_accept_domains and in cookie_reject_domains, the rejection\n\
-# will take precedence.\n"));
+# lists of domains from which Lynx should automatically accept or reject\n\
+# all cookies.  If a domain is specified in both options, rejection will\n\
+# take precedence.  The accept_all_cookies parameter will override any\n\
+# settings made here.\n"));
     fprintf(fp, "cookie_accept_domains=%s\n",
 		    (LYCookieAcceptDomains == NULL ? ""
 		    : LYCookieAcceptDomains));
@@ -912,9 +911,12 @@ PUBLIC int save_rc NOPARAMS
 
     fprintf(fp, gettext("\
 # cookie_loose_invalid_domains, cookie_strict_invalid_domains, and\n\
-# cookie_query_invalid_domains control checking incoming cookies'\n\
-# conformance to RFCNNNN.\n\
-# XXX FIXME\n"));
+# cookie_query_invalid_domains are comma-delimited lists of which domains\n\
+# should be subjected to varying degrees of validity checking.  If a\n\
+# domain is set to strict checking, strict conformance to RFC2109 will\n\
+# be applied.  A domain with loose checking will be allowed to set cookies\n\
+# with an invalid path or domain attribute.  All domains will default to\n\
+# querying the user for an invalid path or domain.\n"));
     fprintf(fp, "cookie_loose_invalid_domains=%s\n",
 	    (LYCookieLooseCheckDomains == NULL) ? ""
 		    : LYCookieLooseCheckDomains);

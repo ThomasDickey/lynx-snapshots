@@ -166,11 +166,15 @@ PRIVATE void SetupFilename ARGS2(
 #define FN_DONE 2
 #define FN_QUIT 3
 
-PRIVATE int RecallFilename ARGS4(
+#define PRINT_FLAG   0
+#define GENERIC_FLAG 1
+
+PRIVATE int RecallFilename ARGS5(
 	char *,		filename,
 	BOOLEAN *,	first,
 	int *,		now,
-	int *,		total)
+	int *,		total,
+	int,            flag)
 {
     int ch;
     char *cp;
@@ -255,9 +259,13 @@ PRIVATE int RecallFilename ARGS4(
 	}
 
 	/*
-	 * Save cancelled.
+	 * Operation cancelled.
 	 */
-	HTInfoMsg(SAVE_REQUEST_CANCELLED);
+	if (flag == PRINT_FLAG)
+	    HTInfoMsg(SAVE_REQUEST_CANCELLED);
+	else if (flag == GENERIC_FLAG)
+	    return FN_QUIT;
+
 	return FN_QUIT;
     }
     return FN_DONE;
@@ -280,7 +288,7 @@ PRIVATE BOOLEAN confirm_by_pages ARGS3(
 
 	HTSprintf0(&msg, prompt, pages);
 	_statusline(msg);
-	FREE(msg); 
+	FREE(msg);
 
 	c = LYgetch();
 #ifdef VMS
@@ -325,7 +333,8 @@ retry:
 	strcpy(filename, buffer);
     }
 check_recall:
-    switch (RecallFilename(filename, &FirstRecall, &FnameNum, &FnameTotal)) {
+    switch (RecallFilename(filename,    &FirstRecall, &FnameNum,
+			   &FnameTotal, PRINT_FLAG))  {
 	case FN_INIT:
 	    goto retry;
 	case FN_READ:
@@ -857,7 +866,8 @@ PRIVATE void send_file_to_printer ARGS4(
 again:
 	SetupFilename(my_file, sug_filename);
 check_again:
-	switch (RecallFilename(my_file, &FirstRecall, &FnameNum, &FnameTotal)) {
+	switch (RecallFilename(my_file,     &FirstRecall, &FnameNum,
+			       &FnameTotal, PRINT_FLAG))  {
 	    case FN_INIT:
 		goto again;
 	    case FN_READ:
@@ -1322,4 +1332,125 @@ PUBLIC int print_options ARGS3(
 
     LYforce_no_cache = TRUE;
     return(0);
+}
+
+
+/*
+ *  General purpose filename getter.
+ *
+ *  Returns a pointer to an absolute filename string, if the input
+ *  filename exists, and is readable.  Returns NULL if the input
+ *  was cancelled (^G, or CR on empty input).
+ *
+ *  The pointer to the filename string needs to be free()'d by the
+ *  caller (when non-NULL).
+ *
+ *  --KED  02/21/99
+ */
+PUBLIC char * GetFileName NOARGS
+{
+    struct stat stat_info;
+
+    FILE *fp;
+
+    char  fbuf[LY_MAXPATH];
+    char  tbuf[LY_MAXPATH];
+    char *fn;
+
+    BOOLEAN FirstRecall = TRUE;
+    int     FnameNum    = -1;
+    int     FnameTotal;
+
+
+    _statusline(FILENAME_PROMPT);
+
+retry:
+    /*
+     *  No initial filename.
+     */
+    SetupFilename (fbuf, "");
+
+check_recall:
+    /*
+     *  Go get a filename (it would be nice to do TAB == filename-completion
+     *  as the name is entered, but we'll save doing that for another time.
+     */
+    switch (RecallFilename (fbuf,        &FirstRecall,  &FnameNum,
+			    &FnameTotal, GENERIC_FLAG)) {
+	case FN_INIT:
+	    goto retry;
+	case FN_READ:
+	    goto check_recall;
+	case FN_QUIT:
+	    goto quit;
+	default:
+	    break;
+    }
+
+    /*
+     *  Add raw input form to list ... we may want to reuse/edit it on a
+     *  subsequent call, etc.
+     */
+#ifdef VMS
+    if (0 == strncasecomp (fbuf, "sys$disk:", 9)) {
+        if (0 == strncmp ((fbuf+9), "[]", 2)) {
+	    HTAddSugFilename (fbuf+11);
+        } else {
+	    HTAddSugFilename (fbuf+9);
+        }
+    } else {
+        HTAddSugFilename (fbuf);
+    }
+#else
+    HTAddSugFilename (fbuf);
+#endif /* VMS */
+
+    /*
+     *  Expand tilde's, make filename absolute, etc.
+     */
+    if (!LYValidateFilename (tbuf, fbuf))
+        goto quit;
+
+    /*
+     *  Check for file existence; readability.
+     */
+    if ((stat (tbuf, &stat_info) < 0) ||
+	(!(S_ISREG(stat_info.st_mode) || S_ISLNK(stat_info.st_mode)))) {
+        HTInfoMsg (FILE_DOES_NOT_EXIST);
+        _statusline(FILE_DOES_NOT_EXIST_RE);
+        FirstRecall = TRUE;
+        FnameNum    = FnameTotal;
+        goto retry;
+    }
+
+    if ((fp = fopen (tbuf, "r")) == NULL) {
+        HTInfoMsg (FILE_NOT_READABLE);
+        _statusline(FILE_NOT_READABLE_RE);
+        FirstRecall = TRUE;
+        FnameNum    = FnameTotal;
+        goto retry;
+    } else {
+        fclose (fp);
+    }
+
+    /*
+     *  We have a valid filename, and readable file.  Return it to the
+     *  caller.
+     *
+     *  The returned pointer should be free()'d by the caller.
+     *
+     *  [For some silly reason, if we use StrAllocCopy() here, we get an
+     *   "invalid pointer" reported in the Lynx.leaks file (if compiled
+     *   with  --enable-find-leaks  turned on.  Dumb.]
+     */
+    if ((fn = (char *) calloc (1, (strlen (tbuf) + 1))) == NULL)
+        outofmem(__FILE__, "GetFileName");
+    return (strcpy (fn, tbuf));
+
+
+quit:
+    /*
+     *  The user cancelled the input (^G, or CR on empty input field).
+     */
+    return (NULL);
 }

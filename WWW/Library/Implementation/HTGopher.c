@@ -16,6 +16,8 @@
 */
 
 #include <HTUtils.h>		/* Coding convention macros */
+
+#ifndef DISABLE_GOPHER
 #include <HTAlert.h>
 #include <HTParse.h>
 #include <HTTCP.h>
@@ -58,9 +60,7 @@
 #define GOPHER_PLUS_SOUND	'<'
 #define GOPHER_PLUS_PDF 	'P'
 
-#include <HTParse.h>
 #include <HTFormat.h>
-#include <HTTCP.h>
 
 /*
 **  Hypertext object building machinery.
@@ -1928,3 +1928,5 @@ GLOBALDEF (HTProtocol, HTCSO, _HTCSO_C_1_INIT);
 GLOBALDEF PUBLIC HTProtocol HTGopher = { "gopher", HTLoadGopher, NULL };
 GLOBALDEF PUBLIC HTProtocol HTCSO = { "cso", HTLoadCSO, NULL };
 #endif /* GLOBALDEF_IS_MACRO */
+
+#endif /* not DISABLE_GOPHER */

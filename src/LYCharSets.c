@@ -32,16 +32,19 @@ PUBLIC CONST char** p_entity_values = NULL; /* Pointer, for HTML_put_entity()*/
 			      /* will be initialized in HTMLUseCharacterSet */
 
 /*
+ *  New character sets now declared with UCInit() in UCdomap.c
+ *
  *  INSTRUCTIONS for adding new character sets which do not have
- *		 Unicode tables.
+ *		 Unicode tables now in UCdomap.h
  *
- *  Currently we only declare some charset's properties here
- *  (such as MIME names, etc.), it does not include real mapping.
  *
- *  [We hope you need not correct/add old-style mapping
+ *  [We hope you need not correct/add old-style mapping below
  *  as in ISO_LATIN1[] or SevenBitApproximations[] any more -
  *  it works now via new chartrans mechanism, but kept for compatibility only:
  *  we should cleanup the stuff, but this is not so easy...]
+ *
+ *  Currently we only declare some charset's properties here
+ *  (such as MIME names, etc.), it does not include real mapping.
  *
  *  There is a place marked "Add your new character sets HERE" in this file.
  *  Make up a character set and add it in the same
@@ -328,21 +331,7 @@ PUBLIC CONST char * SevenBitApproximations[] = {
  */
 PUBLIC CONST char ** LYCharSets[MAXCHARSETS]={
 	ISO_Latin1,		/* ISO Latin 1		*/
-	SevenBitApproximations, /* ISO 8859-15 (Latin 9)*/
-	SevenBitApproximations, /* DosLatin1 (cp850)	*/
-	SevenBitApproximations, /* WinLatin1 (cp1252)	*/
-	SevenBitApproximations, /* DosLatinUS (cp437)	*/
-	SevenBitApproximations, /* DEC Multinational	*/
-	SevenBitApproximations, /* Macintosh (8 bit)	*/
-	SevenBitApproximations, /* NeXT character set	*/
-	SevenBitApproximations, /* Chinese		*/
-	SevenBitApproximations, /* Japanese (EUC-JP)	*/
-	SevenBitApproximations, /* Japanese (Shift_JIS)	*/
-	SevenBitApproximations, /* Korean		*/
-	SevenBitApproximations, /* Taipei (Big5)	*/
-	SevenBitApproximations, /* Vietnamese (VISCII)	*/
 	SevenBitApproximations, /* 7 Bit Approximations */
-	SevenBitApproximations, /* Transparent		*/
 };
 
 /*
@@ -351,21 +340,7 @@ PUBLIC CONST char ** LYCharSets[MAXCHARSETS]={
  */
 PUBLIC CONST char * LYchar_set_names[MAXCHARSETS + 1]={
 	"Western (ISO-8859-1)",
-	"Western (ISO-8859-15)",
-	"Western (cp850)",
-	"Western (windows-1252)",
-	"IBM PC US codepage (cp437)",
-	"DEC Multinational",
-	"Macintosh (8 bit)",
-	"NeXT character set",
-	"Chinese",
-	"Japanese (EUC-JP)",
-	"Japanese (Shift_JIS)",
-	"Korean",
-	"Taipei (Big5)",
-	"Vietnamese (VISCII)",
 	"7 bit approximations (US-ASCII)",
-	"Transparent",
 	(char *) 0
 };
 
@@ -393,42 +368,11 @@ PUBLIC LYUCcharset LYCharSet_UC[MAXCHARSETS]=
   /*
    *  Placeholders for Unicode tables. - FM
    */
-  {-1,"iso-8859-15",   UCT_ENC_8BIT,0,0,0,     UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"cp850",         UCT_ENC_8BIT,0,
-                       UCT_REP_SUPERSETOF_LAT1,
-                       0,                      UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"windows-1252",  UCT_ENC_8BIT,0,
-                       UCT_REP_SUPERSETOF_LAT1,
-                       0,                      UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"cp437",         UCT_ENC_8BIT,0,0,0,     UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"dec-mcs",       UCT_ENC_8BIT,0,0,0,     UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"macintosh",     UCT_ENC_8BIT,0,0,0,     UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"next",          UCT_ENC_8BIT,0,0,0,     UCT_R_8BIT,UCT_R_ASCII},
-
-  /*
-   *  There is no strict correlation for the next five, since the transfer
-   *  charset gets decoded into Display Char Set by the CJK code (separate
-   *  from Unicode mechanism).  For now we use the MIME name that describes
-   *  what is output to the terminal. - KW
-   */
-  {-1,"euc-cn",        UCT_ENC_CJK,0,0,0,      UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"euc-jp",        UCT_ENC_CJK,0,0,0,      UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"shift_jis",     UCT_ENC_CJK,0,0,0,      UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"euc-kr",        UCT_ENC_CJK,0,0,0,      UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"big5",          UCT_ENC_CJK,0,0,0,      UCT_R_8BIT,UCT_R_ASCII},
-
-  /*
-   *  Placeholders for Unicode tables. - FM
-   */
-  {-1,"viscii",        UCT_ENC_8BIT_C0,0,0,0,  UCT_R_8BIT,UCT_R_ASCII},
   {-1,"us-ascii",      UCT_ENC_7BIT,0,
                        UCT_REP_SUBSETOF_LAT1,
                        UCT_CP_SUBSETOF_LAT1,   UCT_R_ASCII,UCT_R_ASCII},
 
-  /*
-   *  Placeholder for non-translation mode. - FM
-   */
-  {-1,"x-transparent", UCT_ENC_8BIT,0,0,0,     UCT_R_8BIT,UCT_R_ASCII}
+/*  {-1,"iso-8859-15",   UCT_ENC_8BIT,0,0,0,     UCT_R_8BIT,UCT_R_ASCII}, */
 
 };
 
@@ -442,21 +386,7 @@ PUBLIC LYUCcharset LYCharSet_UC[MAXCHARSETS]=
  */
 PUBLIC int LYlowest_eightbit[MAXCHARSETS]={
 	160,	/* ISO Latin 1		*/
-	160,	/* ISO 8859-15 (Latin 9)*/
-	128,	/* DosLatin1 (cp850)	*/
-	130,	/* WinLatin1 (cp1252)	*/
-	128,	/* DosLatinUS (cp437)	*/
-	160,	/* DEC Multinational	*/
-	128,	/* Macintosh (8 bit)	*/
-	128,	/* NeXT character set	*/
-	128,	/* Chinese		*/
-	128,	/* Japanese (EUC)	*/
-	128,	/* Japanese (SJIS)	*/
-	128,	/* Korean		*/
-	128,	/* Taipei (Big5)	*/
-	128,	/* Vietnamese (VISCII)	*/
 	999,	/* 7 bit approximations */
-	128	/* Transparent	(???)	*/
 };
 
 

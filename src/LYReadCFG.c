@@ -1040,7 +1040,7 @@ PUBLIC void free_lynx_cfg NOARGS
 	case CONF_ENV:
 	    if (q->str_value != 0) {
 		FREE(*(q->str_value));
-		FREE((char *)q->str_value);
+		FREE(q->str_value);
 	    }
 	    break;
 	default:

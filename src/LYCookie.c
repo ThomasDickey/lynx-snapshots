@@ -67,8 +67,6 @@
 #include <LYEdit.h>
 #include <LYStrings.h>
 #include <GridText.h>
-#include <LYUtils.h>
-#include <LYCharUtils.h>
 #include <LYCookie.h>
 
 #include <LYLeaks.h>
@@ -2656,9 +2654,13 @@ PUBLIC void cookie_domain_flag_set ARGS2(
     domain_entry *de = NULL;
     domain_entry *de2 = NULL;
     HTList *hl = NULL;
+    char **str = (char **)calloc(1, sizeof(domainstr));
     char *dstr = NULL;
     char *strsmall = NULL;
     int isexisting = FALSE;
+
+    if (str == NULL)
+        outofmem(__FILE__, "cookie_set_invcheck");
 
     /*
      * Is this the first domain we're handling?  If so, initialize
@@ -2673,7 +2675,9 @@ PUBLIC void cookie_domain_flag_set ARGS2(
 
     StrAllocCopy(dstr, domainstr);
 
-    while ((strsmall = LYstrsep(&dstr, ",")) != 0) {
+    *str = dstr;
+
+    while ((strsmall = LYstrsep(str, ",")) != 0) {
 
 	/*
 	 * Check the list of existing domains to see if this is a
@@ -2746,6 +2750,7 @@ PUBLIC void cookie_domain_flag_set ARGS2(
     }
 
     FREE(strsmall);
+    FREE(str);
     FREE(dstr);
 }
 

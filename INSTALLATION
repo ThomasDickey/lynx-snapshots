@@ -221,6 +221,9 @@ II. Compile instructions -- UNIX
 	menu options code with FORMS_OPTIONS switch in lynx.cfg, or
 	-forms_options command-line switch.
 
+  --disable-gopher			(define DISABLE_GOPHER)
+	Do not compile-in code used to connect to GOPHER servers.
+
   --disable-full-paths
   	Use this option to control whether full utility pathnames are used.
 	By default, configure substitutes full pathnames.
@@ -246,6 +249,16 @@ II. Compile instructions -- UNIX
   --disable-partial			(define DISP_PARTIAL)
 	Turn off code that lets Lynx display parts of a long page while loading
 	it.
+
+  --disable-trace			(define NO_LYNX_TRACE)
+	Turn off code that lets you trace internal details of Lynx's operation. 
+	We recommend that you leave this enabled, since we need this
+	information to diagnose problems with either Lynx or the sites to which
+	you connect.
+
+  --enable-addrlist-page                (define EXP_ADDRLIST_PAGE)
+	Compiles-in an alternative list-page, bound to 'A' rather than 'l',
+	which always lists URLs rather than titles.
 
   --enable-alt-bindings                 (define EXP_ALT_BINDINGS)
 	Compiles-in an alternative set of line-edit bindings, in addition
@@ -298,6 +311,9 @@ II. Compile instructions -- UNIX
 		ROT13'd keyboard layout
 		JCUKEN Cyrillic, for AT 101-key kbd
 		YAWERTY Cyrillic, for DEC LK201 kbd
+
+  --enable-libjs			(define EXP_LIBJS)
+  	Disabled by default; used for ifdef'ing JavaScript interface.
 
   --enable-nls
 	use Native Language Support (i.e., gettext).

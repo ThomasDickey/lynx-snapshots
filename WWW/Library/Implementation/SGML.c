@@ -312,7 +312,7 @@ PRIVATE void handle_attribute_value ARGS2(
 	}
 #endif
     } else {
-	CTRACE(tfp, "SGML: Attribute value %s ignored\n", s);
+	CTRACE(tfp, "SGML: Attribute value %s ***ignored\n", s);
     }
     context->current_attribute_number = INVALID; /* can't have two assignments! */
 }
@@ -690,13 +690,13 @@ PRIVATE void end_element ARGS2(
 	    if (canclose_check != close_NO) {
 		CTRACE(tfp, "SGML: End </%s> \t<- %s end </%s>\n",
 			    context->element_stack->tag->name,
-			    canclose_check == close_valid ? "supplied," : "forced by",
+			    canclose_check == close_valid ? "supplied," : "***forced by",
 			    old_tag->name);
 		do_close_stacked(context);
 		extra_action_taken = YES;
 		stackpos = is_on_stack(context, old_tag);
 	    } else {
-		CTRACE(tfp, "SGML: Still open %s \t<- invalid end </%s>\n",
+		CTRACE(tfp, "SGML: Still open %s \t<- ***invalid end </%s>\n",
 			    context->element_stack->tag->name,
 			    old_tag->name);
 		return;
@@ -712,7 +712,7 @@ PRIVATE void end_element ARGS2(
 	    return;
 	}
 	if (stackpos > 1) {
-	    CTRACE(tfp, "SGML: Nesting <%s>...<%s> \t<- invalid end </%s>\n",
+	    CTRACE(tfp, "SGML: Nesting <%s>...<%s> \t<- ***invalid end </%s>\n",
 			old_tag->name,
 			context->element_stack->tag->name,
 			old_tag->name);
@@ -737,7 +737,7 @@ PRIVATE void end_element ARGS2(
 	    /*
 	    **	Ignore the end tag. - FM
 	    */
-	    CTRACE(tfp, "SGML: Ignoring end tag </%s> in SELECT block.\n",
+	    CTRACE(tfp, "SGML: ***Ignoring end tag </%s> in SELECT block.\n",
 			old_tag->name);
 	    return;
 	}
@@ -747,7 +747,7 @@ PRIVATE void end_element ARGS2(
     */
     CTRACE(tfp, "SGML: End </%s>\n", old_tag->name);
     if (old_tag->contents == SGML_EMPTY) {
-	CTRACE(tfp, "SGML: Illegal end tag </%s> found.\n",
+	CTRACE(tfp, "SGML: ***Illegal end tag </%s> found.\n",
 		    old_tag->name);
 	return;
     }
@@ -762,10 +762,10 @@ PRIVATE void end_element ARGS2(
 
 	if (old_tag != t) {		/* Mismatch: syntax error */
 	    if (context->element_stack->next) { /* This is not the last level */
-		CTRACE(tfp, "SGML: Found </%s> when expecting </%s>. </%s> assumed.\n",
-			    old_tag->name, t->name, t->name);
+		CTRACE(tfp, "SGML: Found </%s> when expecting </%s>. </%s> ***assumed.\n",
+			     old_tag->name, t->name, t->name);
 	    } else {			/* last level */
-		CTRACE(tfp, "SGML: Found </%s> when expecting </%s>. </%s> Ignored.\n",
+		CTRACE(tfp, "SGML: Found </%s> when expecting </%s>. </%s> ***Ignored.\n",
 			    old_tag->name, t->name, old_tag->name);
 		return; 		/* Ignore */
 	    }
@@ -815,14 +815,14 @@ PRIVATE void start_element ARGS1(
 	    if (canclose_check != close_NO) {
 		CTRACE(tfp, "SGML: End </%s> \t<- %s start <%s>\n",
 			    context->element_stack->tag->name,
-			    canclose_check == close_valid ? "supplied," : "forced by",
+			    canclose_check == close_valid ? "supplied," : "***forced by",
 			    new_tag->name);
 		do_close_stacked(context);
 		extra_action_taken = YES;
 		if (canclose_check  == close_error)
 		    direct_container = NO;
 	    } else {
-		CTRACE(tfp, "SGML: Still open %s \t<- invalid start <%s>\n",
+		CTRACE(tfp, "SGML: Still open %s \t<- ***invalid start <%s>\n",
 			    context->element_stack->tag->name,
 			    new_tag->name);
 	    }
@@ -831,7 +831,7 @@ PRIVATE void start_element ARGS1(
 	    (context->element_stack->tag->flags & Tgf_strict) &&
 	    !(valid = element_valid_within(new_tag, context->element_stack->tag,
 					   direct_container))) {
-	    CTRACE(tfp, "SGML: Still open %s \t<- ignoring start <%s>\n",
+	    CTRACE(tfp, "SGML: Still open %s \t<- ***ignoring start <%s>\n",
 			context->element_stack->tag->name,
 			new_tag->name);
 	    return;
@@ -859,7 +859,7 @@ PRIVATE void start_element ARGS1(
 						   new_tag,
 						   context->element_stack->tag,
 						   direct_container))) {
-	    CTRACE(tfp, "SGML: Still open %s \t<- invalid start <%s>\n",
+	    CTRACE(tfp, "SGML: Still open %s \t<- ***invalid start <%s>\n",
 			context->element_stack->tag->name,
 			new_tag->name);
 	}
@@ -905,14 +905,14 @@ PRIVATE void start_element ARGS1(
 		**  It is another form-related start tag, so terminate
 		**  the current SELECT block and fall through. - FM
 		*/
-		CTRACE(tfp, "SGML: Faking SELECT end tag before <%s> start tag.\n",
+		CTRACE(tfp, "SGML: ***Faking SELECT end tag before <%s> start tag.\n",
 			    new_tag->name);
 		end_element(context, SGMLFindTag(context->dtd, "SELECT"));
 	    } else {
 		/*
 		**  Ignore the start tag. - FM
 		*/
-		CTRACE(tfp, "SGML: Ignoring start tag <%s> in SELECT block.\n",
+		CTRACE(tfp, "SGML: ***Ignoring start tag <%s> in SELECT block.\n",
 			    new_tag->name);
 		return;
 	    }
@@ -2744,7 +2744,7 @@ top1:
 		    **	Don't treat these end tags as invalid,
 		    **	nor act on them. - FM
 		    */
-		    CTRACE(tfp, "SGML: `</%s%c' found!  Ignoring it.\n",
+		    CTRACE(tfp, "SGML: `</%s%c' found!	***Ignoring it.\n",
 				string->data, c);
 		    string->size = 0;
 		    context->current_attribute_number = INVALID;
@@ -2782,14 +2782,14 @@ top1:
 			    /*
 			    **	It is not at FORM end tag, so ignore it. - FM
 			    */
-			    CTRACE(tfp, "SGML: Ignoring end tag </%s> in SELECT block.\n",
+			    CTRACE(tfp, "SGML: ***Ignoring end tag </%s> in SELECT block.\n",
 					string->data);
 			} else {
 			    /*
 			    **	End the SELECT block and then
 			    **	handle the FORM end tag. - FM
 			    */
-			    CTRACE(tfp, "SGML: Faking SELECT end tag before </%s> end tag.\n",
+			    CTRACE(tfp, "SGML: ***Faking SELECT end tag before </%s> end tag.\n",
 					string->data);
 			    end_element(context,
 					SGMLFindTag(context->dtd, "SELECT"));
@@ -2805,7 +2805,7 @@ top1:
 			**  Treat a P end tag like a P start tag (Ugh,
 			**  what a hack! 8-). - FM
 			*/
-			CTRACE(tfp, "SGML: `</%s%c' found!  Treating as '<%s%c'.\n",
+			CTRACE(tfp, "SGML: `</%s%c' found!  ***Treating as '<%s%c'.\n",
 				    string->data, c, string->data, c);
 			{
 			    int i;
