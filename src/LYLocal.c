@@ -2401,7 +2401,7 @@ PRIVATE int LYExecv ARGS3(
 #else
 	    execv(path, argv);
 #endif
-	    exit(-1);	/* execv failed, give wait() something to look at */
+	    exit(EXIT_FAILURE);	/* execv failed, give wait() something to look at */
 	default:  /* parent */
 #if !HAVE_WAITPID
 	    while (wait(&wstatus) != pid)

@@ -434,7 +434,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	if (persistent_cookies) 
 	    LYStoreCookies(LYCookieSaveFile); 
 #endif /* EXP_PERSISTENT_COOKIES */ 
-	exit_immediately(0);
+	exit_immediately(EXIT_SUCCESS);
     }
 
     FREE(me);

@@ -138,11 +138,6 @@ PRIVATE HTSuffix no_suffix = { "*", NULL, NULL, NULL, 1.0 };
 PRIVATE HTSuffix unknown_suffix = { "*.*", NULL, NULL, NULL, 1.0};
 
 
-#ifdef _WINDOWS
-#define exists(p)	(access(p,0)==0)
-#endif
-
-
 /*	To free up the suffixes at program exit.
 **	----------------------------------------
 */
@@ -233,13 +228,8 @@ PRIVATE void LYListFmtParse ARGS5(
 #define PTBIT(a, s)  PBIT(a, 0, 0)
 #endif
 
-#ifdef _WINDOWS
-	if (stat(file, &st) < 0)
-		fmtstr = "    %a";	/* can't stat so just do anchor */
-#else
 	if (lstat(file, &st) < 0)
 		fmtstr = "    %a";	/* can't stat so just do anchor */
-#endif
 
 	StrAllocCopy(str, fmtstr);
 	s = str;
@@ -1995,7 +1985,6 @@ PRIVATE int print_local_dir ARGS5(
 	    }
 	} /* end printing out the tree in order */
 
-	closedir(dp);
 	FREE(logical);
 	FREE(tmpfilename);
 	FREE(tail);
@@ -2015,6 +2004,40 @@ PRIVATE int print_local_dir ARGS5(
 #endif /* HAVE_READDIR */
 
 
+#ifndef VMS
+PUBLIC int HTStat ARGS2(
+	CONST char *,	filename,
+	struct stat *,	data)
+{
+    int result = -1;
+    char *temp_name = NULL;
+    size_t len = strlen(filename);
+
+    if (len != 0 && LYIsPathSep(filename[len-1])) {
+	HTSprintf0(&temp_name, "%s.", filename);
+    } else {
+	temp_name = (char *)filename;
+    }
+#ifdef _WINDOWS
+    /*
+     * Someone claims that stat() doesn't give the proper result for a
+     * directory on Windows.
+     */
+    if (access(temp_name, 0) == 0) {
+	if (stat(temp_name, data) == -1) data->st_mode = S_IFDIR;
+	return 0;
+    }
+    return -1;
+#else
+    return stat(temp_name, data);
+#endif
+
+    if (temp_name != filename) {
+	FREE(temp_name);
+    }
+    return result;
+}
+#endif
 
 /*	Load a document.
 **	----------------
@@ -2465,20 +2488,12 @@ PUBLIC int HTLoadFile ARGS4(
 	**  will hold the directory entry, and a type 'DIR' which is used
 	**  to point to the current directory being read.
 	*/
-#ifdef _WINDOWS
-	if (!exists(localname))
-#else
-	if (stat(localname,&dir_info) == -1)	   /* get file information */
-#endif
+	if (HTStat(localname,&dir_info) == -1)	   /* get file information */
 	{
 				/* if can't read file information */
 	    CTRACE((tfp, "HTLoadFile: can't stat %s\n", localname));
 
 	}  else {		/* Stat was OK */
-
-#ifdef _WINDOWS
-	    if (stat(localname,&dir_info) == -1) dir_info.st_mode = S_IFDIR;
-#endif
 
 	    if (S_ISDIR(dir_info.st_mode)) {
 		/*
@@ -2499,7 +2514,6 @@ PUBLIC int HTLoadFile ARGS4(
 		    FREE(nodename);
 		    return HTLoadError(sink, 403, DISALLOWED_DIR_SCAN);
 		}
-
 
 		if (HTDirAccess == HT_DIR_SELECTIVE) {
 		    char * enable_file_name = NULL;
@@ -2527,6 +2541,7 @@ PUBLIC int HTLoadFile ARGS4(
 
 		status = print_local_dir(dp, localname,
 					anchor, format_out, sink);
+		closedir(dp);
 		FREE(localname);
 		FREE(nodename);
 		return status;	/* document loaded, maybe partial */

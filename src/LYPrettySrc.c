@@ -101,7 +101,7 @@ PRIVATE void append_close_tag ARGS3(
     if (idx == -1) {
 	fprintf(stderr,
 	"internal error: previous check didn't find bad HTML tag %s", tagname);
-	exit_immediately(-1);
+	exit_immediately(EXIT_FAILURE);
     }
 
     subj = typecalloc(HT_tagspec);
@@ -348,11 +348,11 @@ PUBLIC void HTMLSRC_init_caches ARGS1(
 	    *p = '\0';
 	if (html_src_parse_tagspec(buf, i, FALSE, TRUE) && !dont_exit ) {
 	    fprintf(stderr, "internal error while caching 1st tagspec of %d lexeme", i);
-	    exit_immediately(-1);
+	    exit_immediately(EXIT_FAILURE);
 	}
 	if (html_src_parse_tagspec( p ? p+1 : NULL , i, FALSE, FALSE) && !dont_exit) {
 	    fprintf(stderr, "internal error while caching 2nd tagspec of %d lexeme", i);
-	    exit_immediately(-1);
+	    exit_immediately(EXIT_FAILURE);
 	}
     }
 }

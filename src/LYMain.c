@@ -428,7 +428,7 @@ BOOLEAN persistent_cookies = FALSE;	/* disabled by default! */
 PUBLIC char *LYCookieFile = NULL;	/* cookie read file */
 PUBLIC char *LYCookieSaveFile = NULL;	/* cookie save file */
 #endif /* EXP_PERSISTENT_COOKIES */
-PUBLIC int LYTransferRate = rateBYTES;
+PUBLIC int LYTransferRate = rateKB;
 PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 PUBLIC BOOLEAN LYNoISMAPifUSEMAP = FALSE; /* Omit ISMAP link if MAP present? */
 PUBLIC int LYHiddenLinks = HIDDENLINKS_SEPARATE; /* Show hidden links? */
@@ -835,6 +835,7 @@ PUBLIC int main ARGS2(
     char *temp = NULL;
     char *cp;
     FILE *fp;
+    struct stat dir_info;
     char filename[LY_MAXPATH];
     BOOL LYGetStdinArgs = FALSE;
 #ifdef _WINDOWS
@@ -882,7 +883,7 @@ PUBLIC int main ARGS2(
 #if defined(__CYGWIN__) && defined(DOSPATH)
     if (strcmp(ttyname(fileno(stdout)), "/dev/conout") != 0) {
 	printf("please \"$CYGWIN=notty\"\n");
-	exit(0);
+	exit(EXIT_SUCCESS);
     }
 #endif
 
@@ -1053,7 +1054,7 @@ PUBLIC int main ARGS2(
 #else
     {
 	printf(gettext("You MUST define a valid TMP or TEMP area!\n"));
-	exit(-1);
+	exit(EXIT_FAILURE);
     }
 #endif
 
@@ -1095,6 +1096,14 @@ PUBLIC int main ARGS2(
 #else
     LYAddPathSep(&lynx_temp_space);
 #endif /* VMS */
+    if ((HTStat(lynx_temp_space, &dir_info) < 0
+	&& mkdir(lynx_temp_space, 0700) < 0)
+     || !S_ISDIR(dir_info.st_mode)) {
+	fprintf(stderr, "%s: %s\n",
+		lynx_temp_space,
+		gettext("No such directory"));
+	exit_immediately(EXIT_FAILURE);
+    }
 
 #ifdef VMS
 #ifdef CSWING_PATH
@@ -1308,7 +1317,7 @@ PUBLIC int main ARGS2(
     if (!LYCanReadFile(lynx_cfg_file)) {
 	fprintf(stderr, gettext("\nConfiguration file %s is not available.\n\n"),
 			lynx_cfg_file);
-	exit(-1);
+	exit(EXIT_FAILURE);
     }
 
     /*
@@ -1317,7 +1326,7 @@ PUBLIC int main ARGS2(
      */
     if (!LYCharSetsDeclared()) {
 	fprintf(stderr, gettext("\nLynx character sets not declared.\n\n"));
-	exit(-1);
+	exit(EXIT_FAILURE);
     }
     /*
      *  (**) in Lynx, UCLYhndl_HTFile_for_unspec and UCLYhndl_for_unrec may be
@@ -1341,7 +1350,7 @@ PUBLIC int main ARGS2(
      */
     if (!LYEditmapDeclared()) {
 	fprintf(stderr, gettext("\nLynx edit map not declared.\n\n"));
-	exit(-1);
+	exit(EXIT_FAILURE);
     }
 
 #if defined(USE_HASH)
@@ -1632,7 +1641,7 @@ PUBLIC int main ARGS2(
 #ifdef SH_EX
     if (show_cfg) {
 	cleanup();
-	exit(0);
+	exit(EXIT_SUCCESS);
     }
 #endif
 
@@ -1809,7 +1818,7 @@ PUBLIC int main ARGS2(
 	fprintf(stderr,
  "The '-head' switch is for http HEAD requests and cannot be used for\n'%s'.\n",
 		startfile);
-	exit_immediately(-1);
+	exit_immediately(EXIT_FAILURE);
     }
 
     /*
@@ -1819,7 +1828,7 @@ PUBLIC int main ARGS2(
 	fprintf(stderr,
  "The '-mime_header' switch is for http URLs and cannot be used for\n'%s'.\n",
 		startfile);
-	exit_immediately(-1);
+	exit_immediately(EXIT_FAILURE);
     }
 
     /*
@@ -1829,7 +1838,7 @@ PUBLIC int main ARGS2(
 	fprintf(stderr,
  "The '-traversal' switch is for http URLs and cannot be used for\n'%s'.\n",
 		startfile);
-	exit_immediately(-1);
+	exit_immediately(EXIT_FAILURE);
     }
 
     /*
@@ -2864,12 +2873,12 @@ PRIVATE int restrictions_fun ARGS1(
 	for (n = 0; n < TABLESIZE(Usage); n++)
 	    printf("%s\n", Usage[n]);
 	SetOutputMode( O_BINARY );
-	exit(0);
+	exit(EXIT_SUCCESS);
     } else if (*next_arg == '?') {
 	SetOutputMode( O_TEXT );
 	print_restrictions_to_fd(stdout);
 	SetOutputMode( O_BINARY );
-	exit(0);
+	exit(EXIT_SUCCESS);
     } else {
 	parse_restrictions(next_arg);
     }
@@ -2958,7 +2967,7 @@ PRIVATE int version_fun ARGS1(
 
     SetOutputMode( O_BINARY );
 
-    exit(0);
+    exit(EXIT_SUCCESS);
     /* NOT REACHED */
     return 0;
 }
@@ -3966,7 +3975,7 @@ Lynx now exiting with signal:  %d\r\n\r\n", sig);
 	 *  Exit and possibly dump core.
 	 */
 	if (LYNoCore) {
-	    exit(-1);
+	    exit(EXIT_FAILURE);
 	}
 	abort();
 
@@ -3978,7 +3987,7 @@ Lynx now exiting with signal:  %d\r\n\r\n", sig);
 	/*
 	 *  Exit without dumping core.
 	 */
-	exit(0);
+	exit(EXIT_SUCCESS);
     }
 }
 #endif /* !VMS */

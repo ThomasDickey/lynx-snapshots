@@ -89,10 +89,6 @@ PUBLIC BOOL HTVMS_checkAccess PARAMS((
 PUBLIC char * HTVMS_wwwName PARAMS((
 	CONST char *	vmsname));
 
-PUBLIC int HTStat PARAMS((
-	CONST char * filename,
-        struct stat * info));
-
 PUBLIC int HTVMSBrowseDir PARAMS((
 	CONST char * address,
 	HTParentAnchor * anchor,

@@ -1053,7 +1053,7 @@ PUBLIC void mailmsg ARGS4(
 	if ((ofp = LYAppendToTxtFile(TRAVERSE_ERRORS)) == NULL) {
 	    if ((ofp = LYNewTxtFile(TRAVERSE_ERRORS)) == NULL) {
 		perror(NOOPEN_TRAV_ERR_FILE);
-		exit_immediately(-1);
+		exit_immediately(EXIT_FAILURE);
 	    }
 	}
 

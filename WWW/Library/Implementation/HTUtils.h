@@ -48,6 +48,10 @@
 #define HAVE_STDARG_H 1
 #endif
 
+#if defined(VMS) || defined(_WINDOWS)
+#define HAVE_STDLIB_H 1
+#endif
+
 /* Accommodate non-autoconf'd Makefile's (VMS, DJGPP, etc) */
 
 #ifndef NO_ARPA_INET_H
@@ -142,14 +146,6 @@ typedef unsigned short mode_t;
 
 #endif /* _WINDOWS */
 
-#ifdef __EMX__
-#include <unistd.h> /* should be re-include protected under EMX */
-#include <stdlib.h> /* should be re-include protected under EMX */
-#define getcwd _getcwd2
-#define chdir _chdir2
-
-#endif
-
 #ifndef USE_COLOR_STYLE
     /* it's useless for such setup */
 #  define NO_EMPTY_HREFLESS_A
@@ -186,9 +182,23 @@ typedef void * HTError;                 /* Unused at present -- best definition?
 Standard C library for malloc() etc
 
  */
-#ifdef DGUX
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif /* DGUX */
+#endif
+
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
+
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
+
+#ifdef __EMX__
+#include <unistd.h> /* should be re-include protected under EMX */
+#define getcwd _getcwd2
+#define chdir _chdir2
+#endif
 
 #ifdef vax
 #ifdef unix
@@ -202,22 +212,15 @@ Standard C library for malloc() etc
 #ifdef NeXT
 #include <libc.h>       /* NeXT */
 #endif /* NeXT */
-#ifndef MACH /* Vincent.Cate@furmint.nectar.cs.cmu.edu */
-#ifndef __STRICT_BSD__
-#include <stdlib.h>
-#endif /* !__STRICT_BSD__ */
-#endif /* !MACH */
 
 #else /* ultrix: */
 
 #include <malloc.h>
 #include <memory.h>
-#include <stdlib.h>   /* ANSI */   /* BSN */
 
 #endif /* !ultrix */
 #else   /* VMS: */
 
-#include <stdlib.h>
 #include <unixlib.h>
 #if defined(VAXC) && !defined(__DECC)
 #define malloc	VAXC$MALLOC_OPT

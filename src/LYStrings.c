@@ -1661,7 +1661,7 @@ re_read:
 #endif /* USE_GETCHAR */
 
 	cleanup();
-	exit_immediately(0);
+	exit_immediately(EXIT_SUCCESS);
     }
 #endif /* USE_SLANG */
 

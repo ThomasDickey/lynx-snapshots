@@ -644,7 +644,7 @@ PRIVATE int ExitWithError ARGS1(
 {
     if (txt)
 	fprintf(tfp, "Lynx: %s\n", txt);
-    exit_immediately(-1);
+    exit_immediately(EXIT_FAILURE);
     return(-1);
 }
 

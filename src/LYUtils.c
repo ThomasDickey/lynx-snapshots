@@ -6573,7 +6573,7 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 	    if (mktemp(lynx_temp_space) == 0
 	     || mkdir(lynx_temp_space, 0700) < 0) {
 		printf("%s: %s\n", lynx_temp_space, LYStrerror(errno));
-		exit(-1);
+		exit(EXIT_FAILURE);
 	    }
 	    umask(old_mask);
 	    lynx_temp_subspace = 1;
