@@ -41,9 +41,13 @@ extern char * HTNewsHost;
 
 extern void HTClearNNTPAuthInfo NOPARAMS;
 
+#ifdef USE_SSL
+extern int HTNewsProxyConnect PARAMS ((
+	int		sock,
+	CONST char *	url,
+	HTParentAnchor *anAnchor,
+	HTFormat	format_out,
+	HTStream *	sink));
+#endif
+
 #endif /* HTNEWS_H */
-
-
-/*
-
-   tbl */

@@ -841,6 +841,10 @@ PUBLIC int main ARGS2(
 #ifdef _WINDOWS
     WSADATA WSAData;
 #endif /* _WINDOWS */
+#ifdef USE_SSL
+    char SSLLibraryVersion[256];
+    char *SSLcp;
+#endif /* USE_SSL */
 
     /*
      * Just in case someone has the idea to install lynx set-uid, let's try
@@ -1024,6 +1028,20 @@ PUBLIC int main ARGS2(
 	StrAllocCat(LYUserAgent, " libwww-FM/");
 	StrAllocCat(LYUserAgent, HTLibraryVersion);
     }
+#ifdef USE_SSL
+    StrAllocCat(LYUserAgent, " SSL-MM/1.4.1");
+#ifdef OPENSSL_VERSION_TEXT
+    LYstrncpy(SSLLibraryVersion, OPENSSL_VERSION_TEXT, sizeof(SSLLibraryVersion)-1);
+    if ((SSLcp = strchr(SSLLibraryVersion, ' ')) != NULL) {
+	*SSLcp++ = '/';
+	if ((SSLcp = strchr(SSLcp, ' ')) != NULL) {
+	    *SSLcp = '\0';
+	    StrAllocCat(LYUserAgent, " ");
+	    StrAllocCat(LYUserAgent, SSLLibraryVersion);
+	}
+    }
+#endif /* OPENSSL_VERSION_TEXT */
+#endif /* USE_SSL */
     StrAllocCopy(LYUserAgentDefault, LYUserAgent);
 #ifdef VMS
     Define_VMSLogical("LYNX_VERSION", LYNX_VERSION);
@@ -2922,11 +2940,31 @@ PRIVATE int traversal_fun ARGS1(
 PRIVATE int version_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
+#ifdef USE_SSL
+    char SSLLibraryVersion[256];
+    char *SSLcp;
+#endif
+
     SetOutputMode( O_TEXT );
 
     printf(gettext("%s Version %s (%s)\n"),
 	  LYNX_NAME, LYNX_VERSION,
 	  LYVersionDate());
+#ifdef USE_SSL
+    printf("libwww-FM %s, SSL-MM 1.4.1", HTLibraryVersion);
+#ifdef OPENSSL_VERSION_TEXT
+    LYstrncpy(SSLLibraryVersion, OPENSSL_VERSION_TEXT, sizeof(SSLLibraryVersion)-1);
+    if ((SSLcp = strchr(SSLLibraryVersion, ' ')) != NULL) {
+        *SSLcp++ = ' ';
+        if ((SSLcp = strchr(SSLcp, ' ')) != NULL) {
+            *SSLcp = '\0';
+            printf(", %s", SSLLibraryVersion);
+        }
+    }
+#endif /* OPENSSL_VERSION_TEXT */
+    printf("\n");
+#endif /* USE_SSL */
+
 #ifdef SYSTEM_NAME
 #ifndef __DATE__
 #define __DATE__ ""
@@ -2936,6 +2974,7 @@ PRIVATE int version_fun ARGS1(
 #endif
     printf(gettext("Built on %s %s %s\n"), SYSTEM_NAME, __DATE__, __TIME__);
 #endif
+
     printf("\n");
     printf(gettext(
 	  "Copyrights held by the University of Kansas, CERN, and other contributors.\n"
@@ -2944,6 +2983,13 @@ PRIVATE int version_fun ARGS1(
     printf(gettext(
 	  "See http://lynx.browser.org/ and the online help for more information.\n\n"
 	  ));
+#ifdef USE_SSL
+    printf("See http://www.moxienet.com/lynx/ for information about SSL for Lynx.\n");
+#ifdef OPENSSL_VERSION_TEXT
+    printf("See http://www.openssl.org/ for information about OpenSSL.\n");
+#endif /* OPENSSL_VERSION_TEXT */
+    printf("\n");
+#endif /* USE_SSL */
 
 #ifdef SH_EX
 #ifdef __CYGWIN__

@@ -17,7 +17,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 
-#else
+#else  /* HAVE_CONFIG_H */
 
 #ifdef DJGPP
 #include <sys/config.h>	/* pseudo-autoconf values for DJGPP libc/headers */
@@ -101,6 +101,14 @@
 #endif
 
 #endif /* HAVE_CONFIG_H */
+
+#if '0' != 48
+#define NOT_ASCII
+#endif
+
+#if '0' == 240
+#define EBCDIC
+#endif
 
 #ifndef LY_MAXPATH
 #define LY_MAXPATH 256
@@ -507,9 +515,51 @@ extern FILE *TraceFP NOPARAMS;
 #define Rgetpeername  getpeername
 #endif
 
+/*
+ * Workaround for order-of-evaluation problem with gcc and socks5 headers
+ * which breaks the Rxxxx names by attaching the prefix twice:
+ */
+#ifdef INCLUDE_PROTOTYPES
+#undef  Raccept
+#undef  Rbind
+#undef  Rconnect
+#undef  Rlisten
+#undef  Rselect
+#undef  Rgetpeername
+#undef  Rgetsockname
+#define Raccept       accept
+#define Rbind         bind
+#define Rconnect      connect
+#define Rgetpeername  getpeername
+#define Rgetsockname  getsockname
+#define Rlisten       listen
+#define Rselect       select
+#endif
+
 #endif /* USE_SOCKS5 */
 
 #define SHORTENED_RBIND	/* FIXME: do this in configure-script */
+
+#ifdef USE_SSL
+#define free_func free__func
+#ifdef USE_OPENSSL_INCL
+#include <openssl/ssl.h>
+#include <openssl/crypto.h>
+#include <openssl/rand.h>
+#include <openssl/err.h>
+#else
+#include <ssl.h>
+#include <crypto.h>
+#include <rand.h>
+#include <err.h>
+#endif
+#undef free_func
+
+extern SSL * HTGetSSLHandle NOPARAMS;
+extern void HTSSLInitPRNG NOPARAMS;
+extern char HTGetSSLCharacter PARAMS((void * handle));
+
+#endif /* USE_SSL */
 
 #include <userdefs.h>
 

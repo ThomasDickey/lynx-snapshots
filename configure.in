@@ -342,6 +342,17 @@ dnl --------------------------------------------------------------------------
 
 ### Look for network libraries first, since some functions (such as gethostname)
 ### are used in a lot of places.
+AC_CACHE_CHECK(if you want ssl library,cf_cv_use_libssl,[
+AC_ARG_WITH(ssl,
+	[  --with-ssl[=path]       link with ssl library if available],
+	[cf_cv_use_libssl=$withval],
+	[cf_cv_use_libssl=no])
+])
+
+if test "x$cf_cv_use_libssl"  != xno ; then
+	CF_SSL($cf_cv_use_libssl)
+fi
+
 AC_CACHE_CHECK(if you want socks library,cf_cv_use_libsocks,[
 AC_ARG_WITH(socks,
 	[  --with-socks[=path]     link with socks library if available],
@@ -561,7 +572,6 @@ CF_NGROUPS
 CF_SYS_ERRLIST
 CF_UTMP
 CF_CHECK_EXTERN_DATA(h_errno,int)
-CF_EBCDIC
 
 ### These tests must be run after establishing the curses library.
 if test $cf_cv_screen != slang ; then
@@ -575,6 +585,7 @@ if test $cf_cv_screen != slang ; then
 		assume_default_colors \
 		cbreak \
 		define_key \
+		delscreen \
 		getattrs \
 		getbegx \
 		getbegy \

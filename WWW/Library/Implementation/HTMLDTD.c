@@ -1365,6 +1365,9 @@ static attr ulist_attr[] = {		/* UL attributes */
 **
 **    Name*,	Attributes,	No. of attributes,     content,   extra info...
 */
+#undef P
+#undef P
+#undef P_
 #ifdef USE_COLOR_STYLE
 #define P_(x) x , (sizeof x) -1
 #define NULL_HTTag_ NULL, 0
