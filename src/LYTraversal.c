@@ -141,8 +141,7 @@ PUBLIC BOOLEAN lookup_reject ARGS1(char *,target)
     FILE *ifp;
     char *buffer = NULL;
     char *line = NULL;
-    char ch;
-    int  frag;
+    int len;
     int result = FALSE;
 
     if ((ifp = fopen(TRAVERSE_REJECT_FILE,"r")) == NULL){
@@ -152,20 +151,20 @@ PUBLIC BOOLEAN lookup_reject ARGS1(char *,target)
     HTSprintf0(&line, "%s\n", target);
 
     while (LYSafeGets(&buffer, ifp) != NULL && !result) {
-	frag = strlen(buffer) - 1; /* real length, minus trailing null */
-	ch   = buffer[frag - 1];   /* last character in buffer */
-	if (frag > 0) { 	   /* if not an empty line */
-	    if (ch == '*') {
-		if (frag == 1 || ((strncmp(line,buffer,frag - 1)) == 0)) {
+	len = strlen(buffer);
+	if (len > 0) { 	   /* if not an empty line */
+	    if (buffer[len-1] == '*') {
+		/* if last char is * and the rest of the chars match */
+		if ((len == 1) || (strncmp(line,buffer,len - 1) == 0)) {
 		    result = TRUE;
 		}
-	    } else { /* last character = "*" test */
+	    } else {
 		if (STREQ(line,buffer)) {
 		    result = TRUE;
 		}
-	    } /* last character = "*" test */
-	} /* frag >= 0 */
-    } /* end while */
+	    }
+	}
+    } /* end while loop over the file */
     FREE(buffer);
     FREE(line);
 

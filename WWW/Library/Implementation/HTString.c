@@ -564,8 +564,8 @@ PRIVATE char * StrAllocVsprintf ARGS4(
 	}
     }
 
-    free(tmp_ptr);
-    free(fmt_ptr);
+    FREE(tmp_ptr);
+    FREE(fmt_ptr);
     dst_ptr[dst_len] = '\0';
     if (pstr)
     	*pstr = dst_ptr;

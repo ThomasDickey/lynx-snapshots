@@ -2449,6 +2449,7 @@ Delete_all_cookies_in_domain:
 	    sleep(MessageSecs);
 	}
 	FREE(domain);
+	FREE(lynxID);
 	return(HT_NO_DATA);
     }
 

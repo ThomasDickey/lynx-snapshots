@@ -12,6 +12,7 @@
 #undef COPY_PATH		/* CF_PATH_PROG(cp) */
 #undef CURS_PERFORMANCE		/* CF_CURS_PERFORMANCE */
 #undef DEBUG			/* configure --enable-debug */
+#undef DECL_ERRNO
 #undef DECL_GETGRGID
 #undef DECL_GETGRNAM
 #undef DECL_STRSTR

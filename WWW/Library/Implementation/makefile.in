@@ -19,14 +19,16 @@ LYFLAGS		= # FIXME: set in parent makefile
 CC		= @CC@
 DEFS		= @DEFS@
 CPPFLAGS	= @CPPFLAGS@
+
+INTLDIR_CPPFLAGS= @INTLDIR_CPPFLAGS@ -I$(top_srcdir)/intl
+
 CPPOPTS		= $(DEFS) $(CPPFLAGS) $(LYFLAGS) \
 		-I../../.. \
 		-I../../../src \
-		-I../../../intl \
 		-I$(top_srcdir) \
 		-I$(top_srcdir)/src \
-		-I$(top_srcdir)/intl \
-		-I$(WWWINC)
+		$(INTLDIR_CPPFLAGS) -I$(WWWINC)
+
 LY_CFLAGS	= @CFLAGS@
 CFLAGS		= $(CPPOPTS) $(LY_CFLAGS)
 LINT		= @LINT@

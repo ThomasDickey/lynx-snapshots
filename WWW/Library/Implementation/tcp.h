@@ -513,13 +513,9 @@ struct timeval {
 #include <sys/filio.h>
 #endif /* HAVE_SYS_FILIO_H */
 
-/*
-MIPS unix
- */
-/* Mips hack (bsd4.3/sysV mixture...) */
-#ifdef mips
+#ifdef DECL_ERRNO
 extern int errno;
-#endif /* mips */
+#endif /* DECL_ERRNO */
 
 /*
 Regular BSD unix versions

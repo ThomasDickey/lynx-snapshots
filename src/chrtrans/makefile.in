@@ -22,19 +22,21 @@ LDFLAGS		= @LDFLAGS@
 INTLLIB		= @INTLDIR_MAKE@@INTLLIBS@
 
 WWWINC		= WWW/Library/Implementation
+INTLDIR_CPPFLAGS= @INTLDIR_CPPFLAGS@-I$(top_srcdir)/intl
+
 SITE_DEFS	= # FIXME: set in parent makefile
 
 CC		= @CC@
 CPP		= @CPP@
 CFLAGS		= @CFLAGS@
+
 CPP_OPTS	= @DEFS@ @CPPFLAGS@ \
 		-I$(top_builddir) \
-		-I$(top_srcdir)/intl \
 		-I$(top_srcdir)/src \
 		-I$(top_srcdir)/src/chrtrans \
 		-I$(top_srcdir)/$(WWWINC) \
 		-I$(top_srcdir)/ \
-		$(SITE_DEFS)
+		$(INTLDIR_CPPFLAGS) $(SITE_DEFS)
 CC_OPTS		= $(CPP_OPTS) $(CFLAGS)
 
 #
