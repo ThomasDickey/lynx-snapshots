@@ -663,7 +663,7 @@ PUBLIC char * HTAA_UidToName ARGS1(int, uid)
 		    "HTAA_UidToName: getpwuid",
 		    uid,
 		    pw->pw_name, (int) pw->pw_uid);
-	save_uid_info(pw->pw_name, pw->pw_uid);
+	save_uid_info(pw->pw_name, (int) pw->pw_uid);
 	return pw->pw_name;
     }
 #endif
@@ -695,8 +695,8 @@ PUBLIC int HTAA_NameToUid ARGS1(char *, name)
 		    "HTAA_NameToUid: getpwnam",
 		    name,
 		    pw->pw_name, (int) pw->pw_uid);
-	save_uid_info(pw->pw_name, pw->pw_uid);
-	return pw->pw_uid;
+	save_uid_info(pw->pw_name, (int) pw->pw_uid);
+	return (int) pw->pw_uid;
     }
 #endif
     return NONESUCH;
@@ -728,7 +728,7 @@ PUBLIC char * HTAA_GidToName ARGS1(int, gid)
 		    "HTAA_GidToName: getgrgid",
 		    gid,
 		    gr->gr_name, (int) gr->gr_gid);
-	save_gid_info(gr->gr_name, gr->gr_gid);
+	save_gid_info(gr->gr_name, (int) gr->gr_gid);
 	return gr->gr_name;
     }
 #endif
@@ -760,8 +760,8 @@ PUBLIC int HTAA_NameToGid ARGS1(char *, name)
 		    "HTAA_NameToGid: getgrnam",
 		    name,
 		    gr->gr_name, (int) gr->gr_gid);
-	save_gid_info(gr->gr_name, gr->gr_gid);
-	return gr->gr_gid;
+	save_gid_info(gr->gr_name, (int) gr->gr_gid);
+	return (int) gr->gr_gid;
     }
 #endif
     return NONESUCH;

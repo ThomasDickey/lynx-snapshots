@@ -299,7 +299,7 @@ check_recall:
 	    if (HTCountCommandArgs(download_command->command) >= 2) {
 		_statusline(FILENAME_PROMPT);
 	again:	if (sug_file)
-		    strncpy(buffer, sug_file, sizeof(buffer));
+		    strncpy(buffer, sug_file, (sizeof(buffer)/2) - 1);
 		else
 		    *buffer = '\0';
 	check_again:

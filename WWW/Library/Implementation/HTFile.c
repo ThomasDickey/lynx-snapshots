@@ -325,7 +325,7 @@ PRIVATE void LYListFmtParse ARGS5(
 			break;
 
 		case 's':	/* size in bytes */
-			FormatNum(&buf, start, st.st_size);
+			FormatNum(&buf, start, (int) st.st_size);
 			break;
 
 		case 'K':	/* size in Kilobytes but not for directories */
@@ -335,7 +335,7 @@ PRIVATE void LYListFmtParse ARGS5(
 			}
 			/* FALL THROUGH */
 		case 'k':	/* size in Kilobytes */
-			FormatNum(&buf, start, (st.st_size+1023)/1024);
+			FormatNum(&buf, start, (int)((st.st_size+1023)/1024));
 			StrAllocCat(buf, "K");
 			break;
 
@@ -374,7 +374,7 @@ PRIVATE void LYListFmtParse ARGS5(
 			if (*name) {
 				FormatStr(&buf, start, name);
 			} else {
-				FormatNum(&buf, start, st.st_uid);
+				FormatNum(&buf, start, (int) st.st_uid);
 			}
 			break;
 
@@ -383,12 +383,12 @@ PRIVATE void LYListFmtParse ARGS5(
 			if (*name) {
 				FormatStr(&buf, start, name);
 			} else {
-				FormatNum(&buf, start, st.st_gid);
+				FormatNum(&buf, start, (int) st.st_gid);
 			}
 			break;
 
 		case 'l':	/* link count */
-			FormatNum(&buf, start, st.st_nlink);
+			FormatNum(&buf, start, (int) st.st_nlink);
 			break;
 
 		case '%':	/* literal % with flags/width */

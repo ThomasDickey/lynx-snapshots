@@ -317,6 +317,7 @@ PUBLIC void save_bookmark_link ARGS2(
     if ((fp = fopen(filename_buffer, (first_time ? "w" : "a+"))) == NULL) {
 	LYMBM_statusline(BOOKMARK_OPEN_FAILED);
 	sleep(AlertSecs);
+	FREE(Title);
 	FREE(bookmark_URL);
 	return;
     }

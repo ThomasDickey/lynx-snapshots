@@ -614,7 +614,6 @@ PRIVATE BOOLEAN modify_name ARGS1(
 PRIVATE BOOLEAN modify_location ARGS1(
 	char *, 	testpath)
 {
-    int mode;
     char *cp;
     dev_t dev;
     ino_t inode;
@@ -674,7 +673,6 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	 *  Make sure the source and target have the same owner (uid).
 	 */
 	dev = dir_info.st_dev;
-	mode = dir_info.st_mode;
 	inode = dir_info.st_ino;
 	owner = dir_info.st_uid;
 	if (!ok_stat(newpath, &dir_info)) {

@@ -617,7 +617,7 @@ static int jumpfile_fun ARGS1(
     HTSprintf0 (&buffer, "JUMPFILE:%s", value);
     if (!LYJumpInit(buffer))
 	CTRACE(tfp, "Failed to register %s\n", buffer);
-    free(buffer);
+    FREE(buffer);
 
     return 0;
 }
@@ -1503,11 +1503,12 @@ PRIVATE void do_read_cfg ARGS5(
 	    }
 
 #ifndef NO_CONFIG_INFO
-	    /*now list the opts that are allowed in included file. If all opts
-	    are allowed, then emit nothing, else emit an effective set of
-	    allowed options in <ul>. Option names will be and uppercased.
-	    FIXME: uppercasing option names can be considered redundant. */
-
+	    /* 
+	     * Now list the opts that are allowed in included file.  If all
+	     * opts are allowed, then emit nothing, else emit an effective set
+	     * of allowed options in <ul>.  Option names will be uppercased. 
+	     * FIXME:  uppercasing option names can be considered redundant.
+	     */
 	    if (fp0 != 0  &&  !LYRestricted && resultant_set) {
 		char *buf = NULL;
 		unsigned i;
@@ -1520,7 +1521,7 @@ PRIVATE void do_read_cfg ARGS5(
 		    LYUpperCase(buf);
 		    fprintf(fp0,"         * %s\n", buf);
 		}
-		free(buf);
+		FREE(buf);
 	    }
 #endif
 	    do_read_cfg (value, cfg_filename, nesting_level + 1, fp0,resultant_set);

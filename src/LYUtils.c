@@ -5679,7 +5679,7 @@ PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
      * This won't work properly if the user is root, since the chmod succeeds.
      */
     } else if (*mode != 'a') {
-	int save = umask(HIDE_UMASK);
+	mode_t save = umask(HIDE_UMASK);
 	if (chmod(name, HIDE_CHMOD) == 0 || errno == ENOENT)
 	    fp = fopen(name, mode);
 	umask(save);
@@ -5746,7 +5746,7 @@ PUBLIC FILE *LYAppendToTxtFile ARGS1(char *, name)
  */
 PUBLIC void LYRelaxFilePermissions ARGS1(CONST char *, name)
 {
-    int mode;
+    mode_t mode;
     struct stat stat_buf;
     if (stat(name, &stat_buf) == 0 &&
 	S_ISREG(stat_buf.st_mode) &&
@@ -5756,7 +5756,7 @@ PUBLIC void LYRelaxFilePermissions ARGS1(CONST char *, name)
 	 *  temp file paranoid permissions (and the umask wasn't even
 	 *  more restrictive when it was copied). - kw
 	 */
-	int save = umask(HIDE_UMASK);
+	mode_t save = umask(HIDE_UMASK);
 	mode = ((mode & 0700) | 0066) & ~save;
 	umask(save);
 	chmod(name, mode);

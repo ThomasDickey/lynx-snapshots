@@ -1,6 +1,27 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-05-08 (2.8.2pre.2)
+* substitute a few more free()s with FREE()s in files HTString.c and
+  LYReadCFG.c (John Bley)
+* fix buffer problems with long filenames and custom DOWNLOADERs (John Bley)
+* fix typical alloc-fail-return-error-without-free leakage in
+  save_bookmark_link (LYBookmark.c) (John Bley)
+* modify generated WWW/*/makefile and src/chrtrans/makefile to omit include
+  from intl directory if it is not used (report by LP) -TD
+* add configure test for h_errno, by splitting CF_ERRNO macro and reusing
+  test for external data.  Noticed that DECL_ERRNO was not defined/used,
+  added that as well.  The h_errno symbol is provided in some network
+  libraries, e.g., on SCO and Linux, but may/may not be declared (report
+  by BL) -TD
+* fix some serious lossage in lookup_reject (LYTraversal.c): memory and
+  logic errors.  This (replaced) line is one for the record books:
+      frag = strlen(buffer) - 1; /* real length, minus trailing null */
+  Previously, this code caused a read before an array boundary as well as
+  failing to compare the right number of characters in a pattern (John Bley)
+* fix some minor leakage in the cookie jar (John Bley)
+* fix up some casts and mode_t types in HTAAProt.c, HTFile.c, LYLocal.c,
+  LYUtils.c (John Bley)
 1999-05-05 (2.8.2dev.26 - 2.8.2pre.1)
 * remove some weird cruft from HTAAUtil.h (yeah, "/home2/luotonen" is a good
   default path) (John Bley)
@@ -11,7 +32,7 @@ Changes since Lynx 2.8 release
 * allow anchors as input for commands 'g','G','E' -VH
 * correct off-by-one error in pointer to filename in DOSPATH configuration for
   LYPathLeaf() -DK
-* fix infinite recursion bug in lynx.cfg includes, from dev.25 integraton
+* fix infinite recursion bug in lynx.cfg includes, from dev.25 integration
   (reported by LP) -VH
 * implement the following separators in lynx.cfg "include" commands:
   ":" on Unix
@@ -54,13 +75,13 @@ Changes since Lynx 2.8 release
 1999-04-27 (2.8.2dev.25)
 * fix reload_read_cfg() to avoid persistent cookies mode changing at run time;
   reload printers list, downloaders list, environments - as expected. - LP
-* fixes for SOURCE_CACHE!=NONE mode, trying to accomodate HTreparse_document()
+* fixes for SOURCE_CACHE!=NONE mode, trying to accommodate HTreparse_document()
   for mainloop() events:
   - add/use flag "from_source_cache" for better mainloop maintenance
   - add partial display mode for HTreparse_document() operations
   - add warning when the reparsed document may lost its forms content
   - fix options menu staff to use HTreparse_document() when possible - LP
-* fix exit from postoptions() when the reloaded document was in source mode - LP
+* fix exit from postoptions() when the reloaded document was in source mode -LP
 * updates to INSTALLATION -HN
 * undo some redundant dev23 changes, in particular the absence of first
   PSRC_TEST responsible for a wrong line breaking in -prettysrc mode (try "lynx
@@ -152,7 +173,7 @@ Changes since Lynx 2.8 release
 * remove docs/*.old (request by HN) -TD
 * update INSTALLATION notes for DJGPP with PDCurses; a suggested patch is
   no longer applicable -DK
-* fixes for control/C and control/BREAK handling on DGJPP -DK
+* fixes for control/C and control/BREAK handling on DJGPP -DK
 * tweak in HTML_start_element case HTML_DT:  prevent generation of empty line
   between multiple simple DT elements without intervening DD elements (Debian
   bug #3846) -KW
@@ -225,7 +246,7 @@ Changes since Lynx 2.8 release
   session.  NOT allowed for restricted users (LYRestricted) and occasionally
   for user mode other than ADVANCED.  This is an *experimental* code
   (reload_read_cfg() in LYMain.c - more work required):  currently command-line
-  switches may be lost when overriden by lynx.cfg changes, file paths like
+  switches may be lost when overridden by lynx.cfg changes, file paths like
   lynx_save_space and LYCookieFile should not be changed (unwanted results) -LP
 * retest PARSE_DEBUG ifdef's (LYMain.c, LYReadCFG.c), minor corrections
   but found no specific reason for LP's problem with tables, except possibly
@@ -242,7 +263,7 @@ Changes since Lynx 2.8 release
   <paul.wagner@mci.com>) - LP
 * correct an ifdef in LYGetFile.c for config-page - LP
 * reading of long local directories now benefits from partial mode and fully
-  interruptable.  Split out print_local_dir() function from HTLoadFile() - LP
+  interruptible.  Split out print_local_dir() function from HTLoadFile() - LP
 * behave sanely if NSL_FORK fork() fails -BL
 * NSL_FORK try for dns_patience *seconds*, not dns_patience select() calls,
   which might have been shortened by keyboard input  -BL
@@ -255,7 +276,7 @@ Changes since Lynx 2.8 release
   needed except when finding leaks - DK
 * modify LYMain.c on DOS, fixing the determination of BREAK status to be
   independent of SLANG or PDCurses - DK
-* spawn a new function, www_user_search_internals, to begin cancelling the
+* spawn a new function, www_user_search_internals, to begin canceling the
   effects of cut-n-paste coding in www_user_search.  The body of
   www_user_search_internals used to be duplicated at two points in
   www_user_search.  See comment in GridText.c for more details.  (John Bley)
@@ -266,7 +287,7 @@ Changes since Lynx 2.8 release
 * fixes for compiler warnings when building for OpenVMS 6.2 using DEC C and the
   SOCKETSHR library (reported by Andy Harper) - TD
 * add cpp -H option for HPUX bundled C compiler, which otherwise does not
-  have enough symbol table space (reported by JS).  Also, modify ifdefs
+  have enough symbol table space (reported by JS).  Also, modify ifdef's
   for <stdarg.h> vs <varargs.h> to avoid including the former when ANSI_VARARGS
   is not defined since HPUX had a broken <stdarg.h> - TD
 * changed OMIT_SCN_KEEPING ifdef to 0 (inactive) in LYCurses.c and in HTML.c,
@@ -285,14 +306,14 @@ Changes since Lynx 2.8 release
   -VH
 * added HTML source syntax highlighting (when option -prettysrc that is added
   is given to lynx). It's available for lynx compiled with and without lss
-  support (it can be much more beatiful when compiled with lss support - read
+  support (it can be much more beautiful when compiled with lss support - read
   lynx.cfg for description). The code is ifdef'ed with USE_PSRC.
   This functionality coexists with old source view and with -preparsed logic
   (ie different commandline options make source view logic different) -VH
 * HTChunkPutc was inlined in SGML.c for better performance -VH
 * keeping of Style_className was omitted in HTML.c to increase performance of
   lynx compiled with lss support. -VH
-* perfomance of lynx compiled with lss support is increased ~ by 15-20% for
+* performance of lynx compiled with lss support is increased ~ by 15-20% for
   normal documents, and by up to 50% for documents with a lot of tags VH
 * fixed bug in lynx compiled with lss support  that caused it to load local CSS
   stylesheets - lynx didn't understand their syntax so it was exiting VH
@@ -354,7 +375,7 @@ Changes since Lynx 2.8 release
   (was broken from 1999-03-04 changes) - LP
 * trimmed trailing blanks from *.tbl, fixed chrtrans/def7_uni.tbl and
   chrtrans/viscii_uni.tbl, ensure that it produces correct result - TD
-* chrtrans/def7_uni.tbl - entries with trailing spaces now explicitely enclosed
+* chrtrans/def7_uni.tbl - entries with trailing spaces now explicitly enclosed
   in quotes to avoid problems with integrating the patches sent by e-mail,
   more comments added - LP
 * attempt to implement --disable-ftp (John Bley)
@@ -370,7 +391,7 @@ Changes since Lynx 2.8 release
   WWW/Library/Implementation/HTACL.*
   WWW/Library/Implementation/HTPasswd.*
   WWW/Library/Implementation/HTHistory.*
-* --disable-partial wasn't compiling because of a supressed #include, replace
+* --disable-partial wasn't compiling because of a suppressed #include, replace
   one more free() with FREE() (John Bley)
 * correct typo LIsListpageTitle vs LYIsListpageTitle
   (reported by Artur Frysiak <wiget@usa.net> and KED)
@@ -462,7 +483,7 @@ Changes since Lynx 2.8 release
   ENTITIES_HTML40_ONLY (may be useful for page validation), file entities.h
   moved to src/chrtrans directory - LP
 * save few KB of static memory by storing unicodes as 'u16' (was 'long') - LP
-* trace log toggle now really interruptable - LP
+* trace log toggle now really interruptible - LP
 * move entities.h to src/chrtrans - LP
 * fix display of -help output: (on/off) info was wrong for UNSET_ARG case - LP
 * ifdef'd recent changes to LYPrint.c to build with djgpp - LP
@@ -572,7 +593,7 @@ Changes since Lynx 2.8 release
   this behavior, until we come up with a different binding/mechanism to
   do the job, that we can all agree on.  The symbol AUTOEXTEDIT is also
   #define'd in LYMainLoop.h.   The command EDITTEXTAREA is still available
-  for seperate KEYMAP binding, per KW's suggestion - KED
+  for separate KEYMAP binding, per KW's suggestion - KED
 * check the range of chars between 0x80 and LYlowest_eightbit[current_char_set]
   for validity against the charset in use.  If such chars are detected in
   edited or inserted data, a "." char is substituted for them, as with normal
@@ -696,7 +717,7 @@ Changes since Lynx 2.8 release
   Michael Warner) - TD
 1999-02-08 (2.8.2dev.16)
 * minor documentation tweaks for EDITTEXTAREA - LP
-* correct uninitalized buffer variable in send_file_to_mail() which caused
+* correct uninitialized buffer variable in send_file_to_mail() which caused
   core dump (reported by LV) - KW
 * recognize Subject and Message-Id in embedded comments in HTML documents, in
   the form generated by MHonArc for mailing list archives (including lynx-dev).
@@ -899,7 +920,7 @@ Changes since Lynx 2.8 release
   mattack@area.com and comments by HN) - TD
 * resync config.sub, config.guess with autoconf 2.13.19990117 (not yet
   configure, since autoconf 2.13 contains some new bugs) - TD
-* modified handling of untranslatable charsets, after noticingd that a page
+* modified handling of untranslatable charsets, after noticing that a page
   with charset=ISO-2022-JP produced an alert message with a truncated
   "iso-2022-j".  Looking more closely, the code could also result in memory
   corruption in some cases.  Compared with older versions, then changed the
@@ -909,7 +930,7 @@ Changes since Lynx 2.8 release
 * minor changes to SortaSGML DTD for PARAM, THEAD - KW
 * make "Alert" statusline prefix localizable - KW
 * extend fixtext.sh to also change continued lines - KW
-* changed LYCheckForProxyURL to act more like it appears to have been indended,
+* changed LYCheckForProxyURL to act more like it appears to have been indented,
   and clarify comment.  Minor change in is_url - KW
 * prevent removal of hidden link number from bookmark document in a very
   obscure case of a bookmarked ISMAP link - KW
@@ -1035,11 +1056,11 @@ Changes since Lynx 2.8 release
 * more tweaks on transfer rate calculation - LP
 * modify HTSACopy and HTSACat in case the source and destination are the same
   pointer - TD
-* tested/removed redundant OS/2 EMX adjustement to filename from LYEdit.c - TD
+* tested/removed redundant OS/2 EMX adjustment to filename from LYEdit.c - TD
 * optimized LYEdit.c by moving calls on HTSYS_name(filename) to a single place
   near the top - LP
 * forms-based options menu:  prevent spoofing attempts from possible overruns
-  (e.g., user can doing 'e'dit in 'o'ptions and get coredump if
+  (e.g., user can doing 'e'dit in 'o'ptions and get core dump if
   display_char_set gets an illegal number such as 50, or hang the keyboard with
   illegal Line edit style) - LP
 * forms-based options menu:  add new logical section - Document Layout,
@@ -1049,7 +1070,7 @@ Changes since Lynx 2.8 release
   not so hidden from user's view.  Documentation updated also.  (Oh yes, "Line
   edit style" option is now available when we have a real choice >1) - LP
 * split cfg_defs.sh into two script based on revised script from PG - TD
-* minor fixes for toplevel makefile.in - PG
+* minor fixes for top-level makefile.in - PG
 * fixes for makefiles with gcc 2.8.1 using DJGPP 2.02 (do not use "-c -o"
   combination, strip trailing blanks from makefile.sla, change optimization
   level to -O2) - DK
@@ -1103,7 +1124,7 @@ Changes since Lynx 2.8 release
 1998-12-16 (2.8.2dev.10)
 * FROM_FILE is not used any more for a domain (although it is currently still
   defined.  Renamed COOKIE_FLAG_PERSISTENT to COOKIE_FLAG_FROM_FILE.  Don't
-  change a domain's "behaviour" (ACCEPT_ALWAYS, REJECT_ALWAYS, or QUERY_USER)
+  change a domain's "behavior" (ACCEPT_ALWAYS, REJECT_ALWAYS, or QUERY_USER)
   just because there was a persistent cookie for it.  Users who want to always
   accept cookies from a domain without prompting should use
   COOKIE_ACCEPT_DOMAINS - KW
@@ -1128,10 +1149,10 @@ Changes since Lynx 2.8 release
   were in it are expired or superseded or deleted - KW
 * when reading file cookies, set attributes in a way that (hopefully) makes
   more sense than just ignoring them.  See comments in LYLoadCookies.
-  We are restricted a lot by the choice of a netscape-compatible cookie file
+  We are restricted a lot by the choice of a Netscape-compatible cookie file
   format, some version 1 properties just cannot be stored in it AFAIK.  Some
   more tweaking in LYLoadCookies - KW
-* setting a domains behaviour to accept "A)lways" didn't actually work, it had
+* setting a domains behavior to accept "A)lways" didn't actually work, it had
   the same effect as "P)rompt".  Corrected this simple (probably cut-and-paste)
   error - KW
 * some changes in what is displayed on Cookie Jar page:  FROM_FILE is a
@@ -1187,7 +1208,7 @@ Changes since Lynx 2.8 release
   c) Primitive context sensitive menu added to the middle button of a mouse
      (currently ncurses only);
   Current micro-problem with "c" is that I do not know how to refresh a screen
-  before triggering the action, so if the action choosen from the menu would
+  before triggering the action, so if the action chosen from the menu would
   not redraw the screen, the menu outline is left on the screen - IZ
 * modify LYKeymap.c so that it can show internal keymaps above 0400 as
   hexadecimal codes even if they do not appear in the function-key table - IZ
@@ -1484,7 +1505,7 @@ Changes since Lynx 2.8 release
   <spcecdt@armory.com>) - BL
 * minor documentation updates to lynx.cfg (Larry Virden).
 * change some character constants from '\hex' and '\octal' form to decimal,
-  to pursuade compilers that upper-128 compares are legal - TD
+  to persuade compilers that upper-128 compares are legal - TD
 * ifdef'd KEYBOARD_LAYOUT with EXP_KEYBOARD_LAYOUT, add configure option
   --enable-kbd-layout - TD
 * implement EXP_CHARTRANS_AUTOSWITCH for OS/2 EMX (Sergey Svishchev).
