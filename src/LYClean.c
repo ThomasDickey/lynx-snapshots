@@ -23,14 +23,13 @@ BOOLEAN HadVMSInterrupt = FALSE;
 #endif /* VMS */
 
 /*
- *  Interrupt handler.	Stop curses and exit gracefully.
+ * Interrupt handler.  Stop curses and exit gracefully.
  */
-void cleanup_sig (
-	int		sig)
+void cleanup_sig(int sig)
 {
 
 #ifdef IGNORE_CTRL_C
-    if (sig == SIGINT)	{
+    if (sig == SIGINT) {
 	/*
 	 * Need to rearm the signal.
 	 */
@@ -54,20 +53,20 @@ void cleanup_sig (
 	int c;
 
 	/*
-	 *  Reassert the AST.
+	 * Reassert the AST.
 	 */
 	(void) signal(SIGINT, cleanup_sig);
 	if (!LYCursesON)
 	    return;
 
 	/*
-	 *  Refresh screen to get rid of "cancel" message, then query.
+	 * Refresh screen to get rid of "cancel" message, then query.
 	 */
 	lynx_force_repaint();
 	LYrefresh();
 
 	/*
-	 *  Ask if exit is intended.
+	 * Ask if exit is intended.
 	 */
 	if (LYQuitDefaultYes == TRUE) {
 	    c = HTConfirmDefault(REALLY_EXIT, YES);
@@ -86,7 +85,7 @@ void cleanup_sig (
 #endif /* VMS */
 
     /*
-     *	Ignore further interrupts. - mhc: 11/2/91
+     * Ignore further interrupts.  - mhc:  11/2/91
      */
 #ifndef NOSIGHUP
     (void) signal(SIGHUP, SIG_IGN);
@@ -94,7 +93,7 @@ void cleanup_sig (
 
 #ifdef VMS
     /*
-     *	Use ttclose() from cleanup() for VMS if not dumping.
+     * Use ttclose() from cleanup() for VMS if not dumping.
      */
     if (dump_output_immediately)
 #else /* Unix: */
@@ -112,7 +111,7 @@ void cleanup_sig (
 
 	if (!dump_output_immediately) {
 	    /*
-	     *	cleanup() also calls cleanup_files().
+	     * cleanup() also calls cleanup_files().
 	     */
 	    cleanup();
 	}
@@ -130,7 +129,7 @@ void cleanup_sig (
 #endif /* NOSIGHUP */
 
 #ifndef NOSIGHUP
-	 (void) signal(SIGHUP, SIG_DFL);
+    (void) signal(SIGHUP, SIG_DFL);
 #endif /* NOSIGHUP */
     (void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
@@ -146,49 +145,48 @@ void cleanup_sig (
 }
 
 /*
- *  Called by Interrupt handler or at quit time.
- *  Erases the temporary files that lynx created.
+ * Called by Interrupt handler or at quit time.  Erases the temporary files
+ * that lynx created.
  */
-void cleanup_files (void)
+void cleanup_files(void)
 {
     LYCleanupTemp();
     FREE(lynx_temp_space);
 }
 
-void cleanup (void)
+void cleanup(void)
 {
 #ifdef VMS
     extern BOOLEAN DidCleanup;
 #endif /* VMS */
 
     /*
-     *	Cleanup signals - just in case.
-     *	Ignore further interrupts. - mhc: 11/2/91
+     * Cleanup signals - just in case.  Ignore further interrupts.  - mhc: 
+     * 11/2/91
      */
 #ifndef NOSIGHUP
     (void) signal(SIGHUP, SIG_IGN);
 #endif /* NOSIGHUP */
-    (void) signal (SIGTERM, SIG_IGN);
+    (void) signal(SIGTERM, SIG_IGN);
 
-#ifndef VMS  /* use ttclose() from cleanup() for VMS */
-    (void) signal (SIGINT, SIG_IGN);
+#ifndef VMS			/* use ttclose() from cleanup() for VMS */
+    (void) signal(SIGINT, SIG_IGN);
 #endif /* !VMS */
 
     if (LYCursesON) {
-	LYmove(LYlines-1, 0);
+	LYmove(LYlines - 1, 0);
 	LYclrtoeol();
 
-	lynx_stop_all_colors ();
+	lynx_stop_all_colors();
 	LYrefresh();
 
 	stop_curses();
     }
-
 #ifdef EXP_CHARTRANS_AUTOSWITCH
     /*
-     *	Currently implemented only for LINUX: Restore original font.
+     * Currently implemented only for LINUX:  Restore original font.
      */
-    UCChangeTerminalCodepage(-1, (LYUCcharset*)0);
+    UCChangeTerminalCodepage(-1, (LYUCcharset *) 0);
 #endif /* EXP_CHARTRANS_AUTOSWITCH */
 
 #ifdef USE_PERSISTENT_COOKIES
@@ -200,7 +198,7 @@ void cleanup (void)
      * out as well.
      */
     if (persistent_cookies)
-	LYStoreCookies (LYCookieSaveFile);
+	LYStoreCookies(LYCookieSaveFile);
 #endif
 
     cleanup_files();

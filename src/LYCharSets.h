@@ -30,30 +30,30 @@ extern int current_char_set;
  *  Initializer, calls initialization function for the
  *  CHARTRANS handling. - KW
  */
-extern int LYCharSetsDeclared (void);
+extern int LYCharSetsDeclared(void);
 
-
-extern const char ** LYCharSets[];
-extern const char * SevenBitApproximations[];
-extern const char ** p_entity_values;
-extern const char * LYchar_set_names[];  /* Full name, not MIME */
+extern const char **LYCharSets[];
+extern const char *SevenBitApproximations[];
+extern const char **p_entity_values;
+extern const char *LYchar_set_names[];	/* Full name, not MIME */
 extern int LYlowest_eightbit[];
 extern int LYNumCharsets;
 extern LYUCcharset LYCharSet_UC[];
-extern int UCGetLYhndl_byAnyName (char *value);
-extern void HTMLSetCharacterHandling (int i);
-extern void HTMLSetUseDefaultRawMode (int i, BOOLEAN modeflag);
-extern void HTMLUseCharacterSet (int i);
-extern UCode_t HTMLGetEntityUCValue (const char *name);
-extern void Set_HTCJK (const char *inMIMEname, const char *outMIMEname);
+extern int UCGetLYhndl_byAnyName(char *value);
+extern void HTMLSetCharacterHandling(int i);
+extern void HTMLSetUseDefaultRawMode(int i, BOOLEAN modeflag);
+extern void HTMLUseCharacterSet(int i);
+extern UCode_t HTMLGetEntityUCValue(const char *name);
+extern void Set_HTCJK(const char *inMIMEname, const char *outMIMEname);
 
-extern const char * HTMLGetEntityName (UCode_t code);
-		/*
-		** HTMLGetEntityName calls LYEntityNames for iso-8859-1 entity
-		** names only.	This is an obsolete technique but widely used in
-		** the code.  Note that unicode number in general may have
-		** several equivalent entity names because of synonyms.
-		*/
+extern const char *HTMLGetEntityName(UCode_t code);
+
+/*
+ * HTMLGetEntityName calls LYEntityNames for iso-8859-1 entity names only. 
+ * This is an obsolete technique but widely used in the code.  Note that
+ * unicode number in general may have several equivalent entity names because
+ * of synonyms.
+ */
 extern BOOL force_old_UCLYhndl_on_reload;
 extern int forced_UCLYhdnl;
 
@@ -69,32 +69,41 @@ typedef struct {
     int assumed_idx;		/* only this field is needed */
 #endif
 } charset_subset_t;
+
 /* each element corresponds to charset in LYCharSets */
 extern charset_subset_t charset_subsets[];
+
 /* all zeros by default - i.e., all charsets allowed */
 
-extern BOOL custom_display_charset; /* whether the charset choices for display
-    charset were requested by user via lynx.cfg.  It will remain FALSE if no
-    "display_charset_choice" settings were encountered in lynx.cfg */
-extern BOOL custom_assumed_doc_charset; /* similar to custom_display_charset */
+/*
+ * true if the charset choices for display charset were requested by user via
+ * lynx.cfg.  It will remain FALSE if no "display_charset_choice" settings were
+ * encountered in lynx.cfg
+ */
+extern BOOL custom_display_charset;
+
+/* similar to custom_display_charset */
+extern BOOL custom_assumed_doc_charset;
 
 #ifndef ALL_CHARSETS_IN_O_MENU_SCREEN
 
 /* this stuff is initialized after reading lynx.cfg and .lynxrc */
 
-/* these arrays maps index of charset shown in menu to the index in LYCharsets[]*/
+/*
+ * These arrays map index of charset shown in menu to the index in LYCharsets[]
+ */
 extern int display_charset_map[];
 extern int assumed_doc_charset_map[];
 
 /* these arrays are NULL terminated */
-extern const char* display_charset_choices[];
-extern const char* assumed_charset_choices[];
+extern const char *display_charset_choices[];
+extern const char *assumed_charset_choices[];
 
 extern int displayed_display_charset_idx;
 
 #endif
 /* this will be called after lynx.cfg and .lynxrc are read */
-extern void init_charset_subsets (void);
+extern void init_charset_subsets(void);
 #endif /* EXP_CHARSET_CHOICE */
 
 #if !defined(NO_AUTODETECT_DISPLAY_CHARSET)
@@ -116,8 +125,8 @@ enum switch_display_charset_t {
     SWITCH_DISPLAY_CHARSET_REALLY,
     SWITCH_DISPLAY_CHARSET_RESIZE
 };
-extern int Switch_Display_Charset (int ord, enum switch_display_charset_t really);
-extern int Find_Best_Display_Charset (int ord);
+extern int Switch_Display_Charset(int ord, enum switch_display_charset_t really);
+extern int Find_Best_Display_Charset(int ord);
 extern char *charsets_directory;
 extern char *charset_switch_rules;
 extern int switch_display_charsets;

@@ -26,44 +26,46 @@ The HTFormat type
    (comparison and copying) that if we stayed with strings.
 
  */
-typedef HTAtom * HTFormat;
+typedef HTAtom *HTFormat;
 
 /*
 
-   These macros (which used to be constants) define some basic internally referenced
-   representations.  The www/xxx ones are of course not MIME standard.
+   These macros (which used to be constants) define some basic internally
+   referenced representations.  The www/xxx ones are of course not MIME
+   standard.
 
-   www/source  is an output format which leaves the input untouched. It is useful for
-   diagnostics, and for users who want to see the original, whatever it is.
+   www/source is an output format which leaves the input untouched.  It is
+   useful for diagnostics, and for users who want to see the original, whatever
+   it is.
 
  */
-                        /* Internal ones */
-/* #define WWW_SOURCE HTAtom_for("www/source") */    /* Whatever it was originally*/
-extern HTAtom * WWW_SOURCE;     /* calculated once, heavy used */
+			/* Internal ones */
+/* #define WWW_SOURCE HTAtom_for("www/source") *//* Whatever it was originally */
+extern HTAtom *WWW_SOURCE;	/* calculated once, heavy used */
 
 /*
 
-   www/present represents the user's perception of the document.  If you convert to
-   www/present, you present the material to the user.
+   www/present represents the user's perception of the document.  If you
+   convert to www/present, you present the material to the user.
 
  */
-#define WWW_PRESENT HTAtom_for("www/present")   /* The user's perception */
+#define WWW_PRESENT HTAtom_for("www/present")	/* The user's perception */
 
 #define WWW_DEBUG       HTAtom_for("www/debug")
 /*
 
-   WWW_DEBUG represents the user's perception of debug information, for example sent as a
-   HTML document in a HTTP redirection message.
+   WWW_DEBUG represents the user's perception of debug information, for example
+   sent as a HTML document in a HTTP redirection message.
 
  */
 
 /*
 
-   The message/rfc822 format means a MIME message or a plain text message with no MIME
-   header.  This is what is returned by an HTTP server.
+   The message/rfc822 format means a MIME message or a plain text message with
+   no MIME header.  This is what is returned by an HTTP server.
 
  */
-#define WWW_MIME HTAtom_for("www/mime")         /* A MIME message */
+#define WWW_MIME HTAtom_for("www/mime")		/* A MIME message */
 
 /*
   For parsing only the header. - kw
@@ -75,7 +77,7 @@ extern HTAtom * WWW_SOURCE;     /* calculated once, heavy used */
    www/print is like www/present except it represents a printed copy.
 
  */
-#define WWW_PRINT HTAtom_for("www/print")       /* A printed copy */
+#define WWW_PRINT HTAtom_for("www/print")	/* A printed copy */
 
 /*
 
@@ -93,9 +95,9 @@ extern HTAtom * WWW_SOURCE;     /* calculated once, heavy used */
 
 /*
 
-   These are regular MIME types.  HTML is assumed to be added by the W3 code.
-   application/octet-stream was mistakenly application/binary in earlier libwww versions
-   (pre 2.11).
+   These are regular MIME types.  HTML is assumed to be added by the W3 code. 
+   application/octet-stream was mistakenly application/binary in earlier libwww
+   versions (pre 2.11).
 
  */
 #define WWW_PLAINTEXT   HTAtom_for("text/plain")
@@ -107,13 +109,13 @@ extern HTAtom * WWW_SOURCE;     /* calculated once, heavy used */
 
 /*
 
-   We must include the following file after defining HTFormat, to which it makes
-   reference.
+   We must include the following file after defining HTFormat, to which it
+   makes reference.
 
 The HTEncoding type
 
  */
-typedef HTAtom* HTEncoding;
+typedef HTAtom *HTEncoding;
 
 /*
 
@@ -143,53 +145,51 @@ typedef HTAtom* HTEncoding;
         ((enc)==NULL || (enc)==HTAtom_for("identity") ||\
         (enc)==WWW_ENC_8BIT || (enc)==WWW_ENC_BINARY || (enc)==WWW_ENC_7BIT)
 
-
 #include <HTAnchor.h>
 
 /*
 
 The HTPresentation and HTConverter types
 
-   This HTPresentation structure represents a possible conversion algorithm from one
-   format to another.  It includes a pointer to a conversion routine.  The conversion
-   routine returns a stream to which data should be fed. See also HTStreamStack which
-   scans the list of registered converters and calls one.  See the initialisation module
-   for a list of conversion routines.
+   This HTPresentation structure represents a possible conversion algorithm
+   from one format to another.  It includes a pointer to a conversion routine. 
+   The conversion routine returns a stream to which data should be fed.  See
+   also HTStreamStack which scans the list of registered converters and calls
+   one.  See the initialisation module for a list of conversion routines.
 
  */
 typedef struct _HTPresentation HTPresentation;
 
-typedef HTStream * HTConverter (
-        HTPresentation *        pres,
-        HTParentAnchor *        anchor,
-        HTStream *              sink);
+typedef HTStream *HTConverter (HTPresentation *pres,
+			       HTParentAnchor *anchor,
+			       HTStream *sink);
 
 struct _HTPresentation {
-        HTAtom	*	rep;            /* representation name atomized */
-        HTAtom	*	rep_out;        /* resulting representation */
-        HTConverter *	converter;	/* routine to gen the stream stack */
-        char *		command;        /* MIME-format string */
-        float		quality;        /* Between 0 (bad) and 1 (good) */
-        float		secs;
-        float		secs_per_byte;
-	long int	maxbytes;
-	BOOL		get_accept;	/* list in "Accept:" for GET */
+    HTAtom *rep;		/* representation name atomized */
+    HTAtom *rep_out;		/* resulting representation */
+    HTConverter *converter;	/* routine to gen the stream stack */
+    char *command;		/* MIME-format string */
+    float quality;		/* Between 0 (bad) and 1 (good) */
+    float secs;
+    float secs_per_byte;
+    long int maxbytes;
+    BOOL get_accept;		/* list in "Accept:" for GET */
 };
 
 /*
 
-   The list of presentations is kept by this module.  It is also scanned by modules which
-   want to know the set of formats supported. for example.
+   The list of presentations is kept by this module.  It is also scanned by
+   modules which want to know the set of formats supported.  for example.
 
  */
-extern HTList * HTPresentations;
+extern HTList *HTPresentations;
 
 /*
 
    The default presentation is used when no other is appropriate
 
  */
-extern  HTPresentation* default_presentation;
+extern HTPresentation *default_presentation;
 
 /*
 
@@ -209,15 +209,13 @@ HTSetPresentation: Register a system command to present a format
   maxbytes                A limit on the length acceptable as input (0 infinite)
 
  */
-extern void HTSetPresentation (
-        const char *	representation,
-        const char *	command,
-        double		quality,
-        double		secs,
-        double		secs_per_byte,
-	long int	maxbytes
+extern void HTSetPresentation(const char *representation,
+			      const char *command,
+			      double quality,
+			      double secs,
+			      double secs_per_byte,
+			      long int maxbytes
 );
-
 
 /*
 
@@ -233,51 +231,47 @@ HTSetConversion:   Register a converstion routine
 
  */
 
-extern void HTSetConversion (
-        const char *    rep_in,
-        const char *    rep_out,
-        HTConverter *   converter,
-        float           quality,
-        float           secs,
-        float           secs_per_byte,
-	long int	maxbytes
+extern void HTSetConversion(const char *rep_in,
+			    const char *rep_out,
+			    HTConverter *converter,
+			    float quality,
+			    float secs,
+			    float secs_per_byte,
+			    long int maxbytes
 );
-
 
 /*
 
 HTStreamStack:   Create a stack of streams
 
-   This is the routine which actually sets up the conversion.  It currently checks only for
-   direct conversions, but multi-stage conversions are forseen.  It takes a stream into
-   which the output should be sent in the final format, builds the conversion stack, and
-   returns a stream into which the data in the input format should be fed.  The anchor is
-   passed because hypertxet objects load information into the anchor object which
-   represents them.
+   This is the routine which actually sets up the conversion.  It currently
+   checks only for direct conversions, but multi-stage conversions are forseen. 
+   It takes a stream into which the output should be sent in the final format,
+   builds the conversion stack, and returns a stream into which the data in the
+   input format should be fed.  The anchor is passed because hypertxet objects
+   load information into the anchor object which represents them.
 
  */
-extern HTStream * HTStreamStack (
-        HTFormat                format_in,
-        HTFormat                format_out,
-        HTStream*               stream_out,
-        HTParentAnchor*         anchor);
+extern HTStream *HTStreamStack(HTFormat format_in,
+			       HTFormat format_out,
+			       HTStream *stream_out,
+			       HTParentAnchor *anchor);
 
 /*
 HTReorderPresentation: put presentation near head of list
 
-    Look up a presentation (exact match only) and, if found, reorder
-    it to the start of the HTPresentations list. - kw
+    Look up a presentation (exact match only) and, if found, reorder it to the
+    start of the HTPresentations list.  - kw
     */
 
-extern void HTReorderPresentation (
-        HTFormat                format_in,
-        HTFormat                format_out);
+extern void HTReorderPresentation(HTFormat format_in,
+				  HTFormat format_out);
 
 /*
  * Setup 'get_accept' flag to denote presentations that are not redundant,
  * and will be listed in "Accept:" header.
  */
-extern void HTFilterPresentations (void);
+extern void HTFilterPresentations(void);
 
 /*
 
@@ -297,52 +291,48 @@ HTStackValue: Find the cost of a filter stack
   length                  The number of bytes expected in the input format
 
  */
-extern float HTStackValue (
-        HTFormat                format_in,
-        HTFormat                rep_out,
-        float                   initial_value,
-        long int                length);
+extern float HTStackValue(HTFormat format_in,
+			  HTFormat rep_out,
+			  float initial_value,
+			  long int length);
 
 #define NO_VALUE_FOUND  -1e20	/* returned if none found */
 
 /*	Display the page while transfer in progress
-**	-------------------------------------------
-**
-**   Repaint the page only when necessary.
-**   This is a traverse call for HText_pageDispaly() - it works!.
-**
-*/
-extern void HTDisplayPartial (void);
+ *	-------------------------------------------
+ *
+ *   Repaint the page only when necessary.
+ *   This is a traverse call for HText_pageDispaly() - it works!.
+ *
+ */
+extern void HTDisplayPartial(void);
 
-extern void HTFinishDisplayPartial (void);
+extern void HTFinishDisplayPartial(void);
 
 /*
 
 HTCopy:  Copy a socket to a stream
 
-   This is used by the protocol engines to send data down a stream, typically one which
-   has been generated by HTStreamStack.
+   This is used by the protocol engines to send data down a stream, typically
+   one which has been generated by HTStreamStack.
 
  */
-extern int HTCopy (
-	HTParentAnchor *	anchor,
-        int                     file_number,
-	void*			handle,
-        HTStream*               sink);
-
+extern int HTCopy(HTParentAnchor *anchor,
+		  int file_number,
+		  void *handle,
+		  HTStream *sink);
 
 /*
 
 HTFileCopy:  Copy a file to a stream
 
-   This is used by the protocol engines to send data down a stream, typically one which
-   has been generated by HTStreamStack.  It is currently called by HTParseFile
+   This is used by the protocol engines to send data down a stream, typically
+   one which has been generated by HTStreamStack.  It is currently called by
+   HTParseFile
 
  */
-extern int HTFileCopy (
-        FILE*                   fp,
-        HTStream*               sink);
-
+extern int HTFileCopy(FILE *fp,
+		      HTStream *sink);
 
 #ifdef USE_SOURCE_CACHE
 #include <HTChunk.h>
@@ -350,15 +340,14 @@ extern int HTFileCopy (
 
 HTMemCopy:  Copy a memory chunk to a stream
 
-   This is used by the protocol engines to send data down a stream, typically one which
-   has been generated by HTStreamStack.  It is currently called by HTParseMem
+   This is used by the protocol engines to send data down a stream, typically
+   one which has been generated by HTStreamStack.  It is currently called by
+   HTParseMem
 
  */
-extern int HTMemCopy (
-	HTChunk *		chunk,
-	HTStream*		sink);
+extern int HTMemCopy(HTChunk *chunk,
+		     HTStream *sink);
 #endif
-
 
 /*
 
@@ -368,22 +357,21 @@ HTCopyNoCR: Copy a socket to a stream, stripping CR characters.
 
  */
 
-extern void HTCopyNoCR (
-	HTParentAnchor *	anchor,
-        int                     file_number,
-        HTStream*               sink);
-
+extern void HTCopyNoCR(HTParentAnchor *anchor,
+		       int file_number,
+		       HTStream *sink);
 
 /*
 
 Clear input buffer and set file number
 
-   This routine and the one below provide simple character input from sockets. (They are
-   left over from the older architecure and may not be used very much.)  The existence of
-   a common routine and buffer saves memory space in small implementations.
+   This routine and the one below provide simple character input from sockets. 
+   (They are left over from the older architecture and may not be used very
+   much.) The existence of a common routine and buffer saves memory space in
+   small implementations.
 
  */
-extern void HTInitInput (int file_number);
+extern void HTInitInput(int file_number);
 
 /*
 
@@ -391,23 +379,22 @@ Get next character from buffer
 
  */
 extern int interrupted_in_htgetcharacter;
-extern int HTGetCharacter (void);
-
+extern int HTGetCharacter(void);
 
 /*
 
 HTParseSocket: Parse a socket given its format
 
-   This routine is called by protocol modules to load an object.  uses HTStreamStack and
-   the copy routines above.  Returns HT_LOADED if succesful, <0 if not.
+   This routine is called by protocol modules to load an object.  uses
+   HTStreamStack and the copy routines above.  Returns HT_LOADED if successful,
+   <0 if not.
 
  */
-extern int HTParseSocket (
-        HTFormat        format_in,
-        HTFormat        format_out,
-        HTParentAnchor  *anchor,
-        int             file_number,
-        HTStream*       sink);
+extern int HTParseSocket(HTFormat format_in,
+			 HTFormat format_out,
+			 HTParentAnchor *anchor,
+			 int file_number,
+			 HTStream *sink);
 
 /*
 
@@ -418,12 +405,11 @@ HTParseFile: Parse a File through a file pointer
    return HT_PARTIAL_CONTENT, HT_NO_DATA, or other <0 for failure.
 
  */
-extern int HTParseFile (
-        HTFormat        format_in,
-        HTFormat        format_out,
-        HTParentAnchor  *anchor,
-        FILE            *fp,
-        HTStream*       sink);
+extern int HTParseFile(HTFormat format_in,
+		       HTFormat format_out,
+		       HTParentAnchor *anchor,
+		       FILE *fp,
+		       HTStream *sink);
 
 #ifdef USE_SOURCE_CACHE
 /*
@@ -435,12 +421,11 @@ HTParseMem: Parse a document in memory
    return <0 for failure.
 
  */
-extern int HTParseMem (
-	HTFormat	format_in,
-	HTFormat	format_out,
-	HTParentAnchor	*anchor,
-	HTChunk*	chunk,
-	HTStream*	sink);
+extern int HTParseMem(HTFormat format_in,
+		      HTFormat format_out,
+		      HTParentAnchor *anchor,
+		      HTChunk *chunk,
+		      HTStream *sink);
 #endif
 
 #ifdef USE_ZLIB
@@ -452,12 +437,11 @@ HTParseGzFile: Parse a gzip'ed File through a file pointer
    HTStreamStack and HTGzFileCopy.  Returns HT_LOADED if successful, can also
    return HT_PARTIAL_CONTENT, HT_NO_DATA, or other <0 for failure.
  */
-extern int HTParseGzFile (
-        HTFormat        format_in,
-        HTFormat        format_out,
-        HTParentAnchor  *anchor,
-        gzFile          gzfp,
-        HTStream*       sink);
+extern int HTParseGzFile(HTFormat format_in,
+			 HTFormat format_out,
+			 HTParentAnchor *anchor,
+			 gzFile gzfp,
+			 HTStream *sink);
 
 #endif /* USE_ZLIB */
 
@@ -470,12 +454,11 @@ HTParseBzFile: Parse a bzip2'ed File through a file pointer
    HTStreamStack and HTGzFileCopy.  Returns HT_LOADED if successful, can also
    return HT_PARTIAL_CONTENT, HT_NO_DATA, or other <0 for failure.
  */
-extern int HTParseBzFile (
-        HTFormat        format_in,
-        HTFormat        format_out,
-        HTParentAnchor  *anchor,
-        BZFILE          *bzfp,
-        HTStream*       sink);
+extern int HTParseBzFile(HTFormat format_in,
+			 HTFormat format_out,
+			 HTParentAnchor *anchor,
+			 BZFILE * bzfp,
+			 HTStream *sink);
 
 #endif /* USE_BZLIB */
 
@@ -483,31 +466,33 @@ extern int HTParseBzFile (
 
 HTNetToText: Convert Net ASCII to local representation
 
-   This is a filter stream suitable for taking text from a socket and passing it into a
-   stream which expects text in the local C representation.  It does ASCII and newline
-   conversion.  As usual, pass its output stream to it when creating it.
+   This is a filter stream suitable for taking text from a socket and passing
+   it into a stream which expects text in the local C representation.  It does
+   ASCII and newline conversion.  As usual, pass its output stream to it when
+   creating it.
 
  */
-extern HTStream *  HTNetToText (HTStream * sink);
+extern HTStream *HTNetToText(HTStream *sink);
 
 /*
 
 HTFormatInit: Set up default presentations and conversions
 
-   These are defined in HTInit.c or HTSInit.c if these have been replaced. If you don't
-   call this routine, and you don't define any presentations, then this routine will
-   automatically be called the first time a conversion is needed. However, if you
-   explicitly add some conversions (eg using HTLoadRules) then you may want also to
-   explicitly call this to get the defaults as well.
+   These are defined in HTInit.c or HTSInit.c if these have been replaced.  If
+   you don't call this routine, and you don't define any presentations, then
+   this routine will automatically be called the first time a conversion is
+   needed.  However, if you explicitly add some conversions (eg using
+   HTLoadRules) then you may want also to explicitly call this to get the
+   defaults as well.
 
  */
-extern void HTFormatInit (void);
+extern void HTFormatInit(void);
 
 /*
 
 Epilogue
 
  */
-extern BOOL HTOutputSource;     /* Flag: shortcut parser */
+extern BOOL HTOutputSource;	/* Flag: shortcut parser */
 
 #endif /* HTFORMAT_H */

@@ -3,9 +3,9 @@
                                              
  */
 /* History:
-**      26 Sep 90       Written TBL in Objective-C
-**      29 Nov 91       Downgraded to C, for portable implementation.
-*/
+ *      26 Sep 90       Written TBL in Objective-C
+ *      29 Nov 91       Downgraded to C, for portable implementation.
+ */
 
 #ifndef HTNEWS_H
 #define HTNEWS_H
@@ -17,13 +17,14 @@ extern int HTNewsChunkSize;
 extern int HTNewsMaxChunk;
 
 #ifdef GLOBALREF_IS_MACRO
-extern GLOBALREF(HTProtocol, HTNews);
-extern GLOBALREF(HTProtocol, HTNNTP);
-extern GLOBALREF(HTProtocol, HTNewsPost);
-extern GLOBALREF(HTProtocol, HTNewsReply);
-extern GLOBALREF(HTProtocol, HTSNews);
-extern GLOBALREF(HTProtocol, HTSNewsPost);
-extern GLOBALREF(HTProtocol, HTSNewsReply);
+extern GLOBALREF (HTProtocol, HTNews);
+extern GLOBALREF (HTProtocol, HTNNTP);
+extern GLOBALREF (HTProtocol, HTNewsPost);
+extern GLOBALREF (HTProtocol, HTNewsReply);
+extern GLOBALREF (HTProtocol, HTSNews);
+extern GLOBALREF (HTProtocol, HTSNewsPost);
+extern GLOBALREF (HTProtocol, HTSNewsReply);
+
 #else
 GLOBALREF HTProtocol HTNews;
 GLOBALREF HTProtocol HTNNTP;
@@ -34,20 +35,18 @@ GLOBALREF HTProtocol HTSNewsPost;
 GLOBALREF HTProtocol HTSNewsReply;
 #endif /* GLOBALREF_IS_MACRO */
 
-extern void HTSetNewsHost (
-	const char *	value);
-extern const char * HTGetNewsHost (void);
-extern char * HTNewsHost;
+extern void HTSetNewsHost(const char *value);
+extern const char *HTGetNewsHost(void);
+extern char *HTNewsHost;
 
-extern void HTClearNNTPAuthInfo (void);
+extern void HTClearNNTPAuthInfo(void);
 
 #ifdef USE_SSL
-extern int HTNewsProxyConnect (
-	int		sock,
-	const char *	url,
-	HTParentAnchor *anAnchor,
-	HTFormat	format_out,
-	HTStream *	sink);
+extern int HTNewsProxyConnect(int sock,
+			      const char *url,
+			      HTParentAnchor *anAnchor,
+			      HTFormat format_out,
+			      HTStream *sink);
 #endif
 
 #endif /* HTNEWS_H */

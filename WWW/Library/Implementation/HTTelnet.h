@@ -9,9 +9,10 @@
 #include <HTAccess.h>
 
 #ifdef GLOBALREF_IS_MACRO
-extern GLOBALREF(HTProtocol,HTTelnet);
-extern GLOBALREF(HTProtocol,HTRlogin);
-extern GLOBALREF(HTProtocol,HTTn3270);
+extern GLOBALREF (HTProtocol, HTTelnet);
+extern GLOBALREF (HTProtocol, HTRlogin);
+extern GLOBALREF (HTProtocol, HTTn3270);
+
 #else
 GLOBALREF HTProtocol HTTelnet;
 GLOBALREF HTProtocol HTRlogin;

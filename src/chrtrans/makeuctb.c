@@ -47,8 +47,9 @@ static FILE *chdr = 0;
  * everything before leaving, since some old (and a few not-so-old) platforms
  * do not properly implement POSIX 'exit()'.
  */
-static void done (int code) GCC_NORETURN;
-static void done (int code)
+static void done(int code) GCC_NORETURN;
+
+static void done(int code)
 {
     if (chdr != 0) {
 	fflush(chdr);
@@ -58,9 +59,10 @@ static void done (int code)
     exit(code);
 }
 
-static void usage (void)
+static void usage(void)
 {
-    static const char *tbl[] = {
+    static const char *tbl[] =
+    {
 	"Usage: makeuctb [parameters]",
 	"",
 	"Utility to convert .tbl into .h files for Lynx compilation.",
@@ -72,6 +74,7 @@ static void usage (void)
 	"  4: charset display name"
     };
     unsigned n;
+
     for (n = 0; n < TABLESIZE(tbl); n++) {
 	fprintf(stderr, "%s\n", tbl[n]);
     };
@@ -79,39 +82,36 @@ static void usage (void)
 }
 
 #ifdef EXP_ASCII_CTYPES
-int ascii_tolower (int i)
+int ascii_tolower(int i)
 {
-    if ( 91 > i && i > 64 )
-	return (i+32);
+    if (91 > i && i > 64)
+	return (i + 32);
     else
 	return i;
 }
 #endif
 
 /* copied from HTString.c, not everybody has strncasecmp */
-int strncasecomp (
-	const char*	a,
-	const char *	b,
-	int		n)
+int strncasecomp(const char *a, const char *b, int n)
 {
     const char *p = a;
     const char *q = b;
 
-    for (p = a, q = b; ; p++, q++) {
+    for (p = a, q = b;; p++, q++) {
 	int diff;
-	if (p == (a+n))
-	    return 0;	/*   Match up to n characters */
+
+	if (p == (a + n))
+	    return 0;		/*   Match up to n characters */
 	if (!(*p && *q))
 	    return (*p - *q);
 	diff = TOLOWER(*p) - TOLOWER(*q);
 	if (diff)
 	    return diff;
     }
-    /*NOTREACHED*/
+    /*NOTREACHED */
 }
 
-static int getunicode (
-	char **	p0)
+static int getunicode(char **p0)
 {
     char *p = *p0;
 
@@ -125,10 +125,10 @@ static int getunicode (
 	       !isxdigit(UCH(p[3])) ||
 	       !isxdigit(UCH(p[4])) ||
 	       !isxdigit(UCH(p[5])) ||
-	        isxdigit(UCH(p[6]))) {
+	       isxdigit(UCH(p[6]))) {
 	return -1;
     }
-    *p0 = p+6;
+    *p0 = p + 6;
     return strtol((p + 2), 0, 16);
 }
 
@@ -138,31 +138,31 @@ static int getunicode (
 unicode unitable[MAX_FONTLEN][255];
 int unicount[MAX_FONTLEN];
 
-struct unimapdesc_str themap_str = {0, NULL, 0, 0};
+struct unimapdesc_str themap_str =
+{0, NULL, 0, 0};
 
 static char *tblname;
 static char *hdrname;
 
 static int RawOrEnc = 0;
-static int Raw_found = 0;		/* whether explicit R directive found */
+static int Raw_found = 0;	/* whether explicit R directive found */
 static int CodePage = 0;
-static int CodePage_found = 0;		/* whether explicit C directive found */
+static int CodePage_found = 0;	/* whether explicit C directive found */
 
 #define MAX_UNIPAIRS 2500
 
-static void addpair_str (
-	char *		str,
-	int		un)
+static void addpair_str(char *str, int un)
 {
-   int i = 0;
+    int i = 0;
 
     if (un <= 0xfffe) {
 	if (!themap_str.entry_ct) {
 	    /*
 	     *  Initialize the map for replacement strings.
 	     */
-	    themap_str.entries = (struct unipair_str *) malloc (MAX_UNIPAIRS
-				* sizeof (struct unipair_str));
+	    themap_str.entries = (struct unipair_str *) malloc(MAX_UNIPAIRS
+							       * sizeof(struct unipair_str));
+
 	    if (!themap_str.entries) {
 		fprintf(stderr,
 			"%s: Out of memory\n", tblname);
@@ -172,8 +172,8 @@ static void addpair_str (
 	    /*
 	     *  Check that it isn't a duplicate.
 	     */
-	    for (i = 0 ; i < themap_str.entry_ct; i++) {
-		if (themap_str.entries[i].unicode == un ) {
+	    for (i = 0; i < themap_str.entry_ct; i++) {
+		if (themap_str.entries[i].unicode == un) {
 		    themap_str.entries[i].replace_str = str;
 		    return;
 		}
@@ -183,7 +183,7 @@ static void addpair_str (
 	/*
 	 *  Add to list.
 	 */
-	if (themap_str.entry_ct > MAX_UNIPAIRS-1) {
+	if (themap_str.entry_ct > MAX_UNIPAIRS - 1) {
 	    fprintf(stderr,
 		    "ERROR: Only %d unicode replacement strings permitted!\n",
 		    MAX_UNIPAIRS);
@@ -196,24 +196,22 @@ static void addpair_str (
     /* otherwise: ignore */
 }
 
-static void addpair (
-	int	fp,
-	int	un)
+static void addpair(int fp, int un)
 {
     int i;
 
-    if (!Raw_found) {	/* enc not (yet) explicitly given with 'R' */
+    if (!Raw_found) {		/* enc not (yet) explicitly given with 'R' */
 	if (fp >= 128) {
 	    if (RawOrEnc != UCT_ENC_8BIT && RawOrEnc <= UCT_ENC_8859) {
 		if (fp < 160) {	/* cannot be 8859 */
 		    RawOrEnc = UCT_ENC_8BIT;
 		} else if (fp != 160 && fp != 173) {
-		    RawOrEnc = UCT_ENC_8859; /* hmmm.. more tests needed? */
+		    RawOrEnc = UCT_ENC_8859;	/* hmmm.. more tests needed? */
 		} else if (unicount[fp] == 0 && fp != un) {
 		    /* first unicode for fp doesn't map to itself */
 		    RawOrEnc = UCT_ENC_8BIT;
 		} else {
-		    RawOrEnc = UCT_ENC_8859; /* hmmm.. more tests needed? */
+		    RawOrEnc = UCT_ENC_8859;	/* hmmm.. more tests needed? */
 		}
 	    }
 	}
@@ -241,18 +239,17 @@ static void addpair (
     /* otherwise: ignore */
 }
 
-char this_MIMEcharset[UC_MAXLEN_MIMECSNAME +1];
-char this_LYNXcharset[UC_MAXLEN_LYNXCSNAME +1];
-char id_append[UC_MAXLEN_ID_APPEND +1] = "_";
+char this_MIMEcharset[UC_MAXLEN_MIMECSNAME + 1];
+char this_LYNXcharset[UC_MAXLEN_LYNXCSNAME + 1];
+char id_append[UC_MAXLEN_ID_APPEND + 1] = "_";
 int this_isDefaultMap = -1;
 int useDefaultMap = 1;
 int lowest_eight = 999;
 
-int main (
-	int	argc,
-	char **	argv)
+int main(int argc, char **argv)
 {
-    static char *first_ifdefs[] = {
+    static char *first_ifdefs[] =
+    {
 	"/*",
 	" * Compile-in this chunk of code unless we've turned it off specifically",
 	" * or in general (id=%s).",
@@ -282,7 +279,8 @@ int main (
 	"#define UC_CHARSET_SETUP%s /*nothing*/",
 	"#else"
     };
-    static char *last_ifdefs[] = {
+    static char *last_ifdefs[] =
+    {
 	"",
 	"#endif /* NO_CHARSET%s */",
 	"",
@@ -365,15 +363,15 @@ int main (
 
 	/*
 	 *  Syntax accepted:
-	 *	<fontpos>	<unicode> <unicode> ...
-	 *	<fontpos>	<unicode range> <unicode range> ...
-	 *	<fontpos>	idem
-	 *	<range>		idem
-	 *	<range>		<unicode range>
-	 *      <unicode>	:<replace>
-	 *      <unicode range>	:<replace>
-	 *      <unicode>	"<C replace>"
-	 *      <unicode range>	"<C replace>"
+	 *      <fontpos>       <unicode> <unicode> ...
+	 *      <fontpos>       <unicode range> <unicode range> ...
+	 *      <fontpos>       idem
+	 *      <range>         idem
+	 *      <range>         <unicode range>
+	 *      <unicode>       :<replace>
+	 *      <unicode range> :<replace>
+	 *      <unicode>       "<C replace>"
+	 *      <unicode range> "<C replace>"
 	 *
 	 *  where <range> ::= <fontpos>-<fontpos>
 	 *  and <unicode> ::= U+<h><h><h><h>
@@ -397,106 +395,106 @@ int main (
 	     *  Raw Unicode?  I.e. needs some special
 	     *  processing.  One digit code.
 	     */
-	    case 'R':
-		if (p[1] == 'a' || p[1] == 'A') {
-		    buffer[sizeof(buffer) - 1] = '\0';
-		    if (!strncasecomp(p, "RawOrEnc", 8)) {
-			p += 8;
-		    }
+	case 'R':
+	    if (p[1] == 'a' || p[1] == 'A') {
+		buffer[sizeof(buffer) - 1] = '\0';
+		if (!strncasecomp(p, "RawOrEnc", 8)) {
+		    p += 8;
 		}
+	    }
+	    p++;
+	    while (*p == ' ' || *p == '\t') {
 		p++;
-		while (*p == ' ' || *p == '\t') {
-		    p++;
-		}
-		RawOrEnc = strtol(p,0,10);
-		Raw_found = 1;
-		continue;
+	    }
+	    RawOrEnc = strtol(p, 0, 10);
+	    Raw_found = 1;
+	    continue;
 
 	    /*
 	     *  Is this the default table?
 	     */
-	    case 'D':
-		if (p[1] == 'e' || p[1] == 'E') {
-		    buffer[sizeof(buffer) - 1] = '\0';
-		    if (!strncasecomp(p, "Default", 7)) {
-			p += 7;
-		    }
+	case 'D':
+	    if (p[1] == 'e' || p[1] == 'E') {
+		buffer[sizeof(buffer) - 1] = '\0';
+		if (!strncasecomp(p, "Default", 7)) {
+		    p += 7;
 		}
+	    }
+	    p++;
+	    while (*p == ' ' || *p == '\t') {
 		p++;
-		while (*p == ' ' || *p == '\t') {
-		    p++;
-		}
-		this_isDefaultMap = (*p == '1' || TOLOWER(*p) == 'y');
-		continue;
+	    }
+	    this_isDefaultMap = (*p == '1' || TOLOWER(*p) == 'y');
+	    continue;
 
 	    /*
 	     *  Is this the default table?
 	     */
-	    case 'F':
-		if (p[1] == 'a' || p[1] == 'A') {
-		    buffer[sizeof(buffer) - 1] = '\0';
-		    if (!strncasecomp(p, "FallBack", 8)) {
-			p += 8;
-		    }
+	case 'F':
+	    if (p[1] == 'a' || p[1] == 'A') {
+		buffer[sizeof(buffer) - 1] = '\0';
+		if (!strncasecomp(p, "FallBack", 8)) {
+		    p += 8;
 		}
+	    }
+	    p++;
+	    while (*p == ' ' || *p == '\t') {
 		p++;
-		while (*p == ' ' || *p == '\t') {
-		    p++;
-		}
-		useDefaultMap = (*p == '1' || TOLOWER(*p) == 'y');
-		continue;
+	    }
+	    useDefaultMap = (*p == '1' || TOLOWER(*p) == 'y');
+	    continue;
 
-	    case 'M':
-		if (p[1] == 'i' || p[1] == 'I') {
-		    buffer[sizeof(buffer) - 1] = '\0';
-		    if (!strncasecomp(p, "MIMEName", 8)) {
-			p += 8;
-		    }
+	case 'M':
+	    if (p[1] == 'i' || p[1] == 'I') {
+		buffer[sizeof(buffer) - 1] = '\0';
+		if (!strncasecomp(p, "MIMEName", 8)) {
+		    p += 8;
 		}
+	    }
+	    p++;
+	    while (*p == ' ' || *p == '\t') {
 		p++;
-		while (*p == ' ' || *p == '\t') {
-		    p++;
-		}
-		sscanf(p,"%40s",this_MIMEcharset);
-		continue;
+	    }
+	    sscanf(p, "%40s", this_MIMEcharset);
+	    continue;
 
 	    /*
 	     *  Display charset name for options screen.
 	     */
-	    case 'O':
-		if (p[1] == 'p' || p[1] == 'P') {
-		    buffer[sizeof(buffer) - 1] = '\0';
-		    if (!strncasecomp(p, "OptionName", 10)) {
-			p += 10;
-		    }
+	case 'O':
+	    if (p[1] == 'p' || p[1] == 'P') {
+		buffer[sizeof(buffer) - 1] = '\0';
+		if (!strncasecomp(p, "OptionName", 10)) {
+		    p += 10;
 		}
+	    }
+	    p++;
+	    while (*p == ' ' || *p == '\t') {
 		p++;
-		while (*p == ' ' || *p == '\t') {
-		    p++;
-		}
-		for (i = 0; *p && i < UC_MAXLEN_LYNXCSNAME; p++, i++) {
-		    this_LYNXcharset[i] = *p;
-		}
-		this_LYNXcharset[i] = '\0';
-		continue;
+	    }
+	    for (i = 0; *p && i < UC_MAXLEN_LYNXCSNAME; p++, i++) {
+		this_LYNXcharset[i] = *p;
+	    }
+	    this_LYNXcharset[i] = '\0';
+	    continue;
 
 	    /*
 	     *  Codepage number.  Three or four digit code.
 	     */
-	    case 'C':
-		if (p[1] == 'o' || p[1] == 'O') {
-		    buffer[sizeof(buffer) - 1] = '\0';
-		    if (!strncasecomp(p, "CodePage", 8)) {
-			p += 8;
-		    }
+	case 'C':
+	    if (p[1] == 'o' || p[1] == 'O') {
+		buffer[sizeof(buffer) - 1] = '\0';
+		if (!strncasecomp(p, "CodePage", 8)) {
+		    p += 8;
 		}
+	    }
+	    p++;
+	    while (*p == ' ' || *p == '\t') {
 		p++;
-		while (*p == ' ' || *p == '\t') {
-		    p++;
-		}
-		CodePage = strtol(p,0,10);
-		CodePage_found = 1;
-		continue;
+	    }
+	    CodePage = strtol(p, 0, 10);
+	    CodePage_found = 1;
+	    continue;
 	}
 
 	if (*p == 'U') {
@@ -505,7 +503,7 @@ int main (
 		fprintf(stderr, "Bad input line: %s\n", buffer);
 		done(EX_DATAERR);
 		fprintf(stderr,
-    "%s: Bad Unicode range corresponding to font position range 0x%x-0x%x\n",
+			"%s: Bad Unicode range corresponding to font position range 0x%x-0x%x\n",
 			tblname, fp0, fp1);
 		done(EX_DATAERR);
 	    }
@@ -537,7 +535,7 @@ int main (
 		continue;
 	    }
 
-	    tbuf = (char *)malloc(4*strlen(p));
+	    tbuf = (char *) malloc(4 * strlen(p));
 
 	    if (!(p1 = tbuf)) {
 		fprintf(stderr, "%s: Out of memory\n", tblname);
@@ -550,6 +548,7 @@ int main (
 		 *  end of buffer.
 		 */
 		int escaped = 0;
+
 		for (ch = *(++p); (ch = *p) != '\0'; p++) {
 		    if (escaped) {
 			escaped = 0;
@@ -582,7 +581,7 @@ int main (
 	    }
 	    *p1 = '\0';
 	    for (i = un0; i <= un1; i++) {
-		addpair_str(tbuf,i);
+		addpair_str(tbuf, i);
 	    }
 	    continue;
 	}
@@ -637,7 +636,7 @@ int main (
 	    }
 	    if (!strncmp(p, "idem", 4)) {
 		for (i = fp0; i <= fp1; i++) {
-		    addpair(i,i);
+		    addpair(i, i);
 		}
 		p += 4;
 	    } else {
@@ -657,13 +656,13 @@ int main (
 		un1 = getunicode(&p);
 		if (un0 < 0 || un1 < 0) {
 		    fprintf(stderr,
-     "%s: Bad Unicode range corresponding to font position range 0x%x-0x%x\n",
+			    "%s: Bad Unicode range corresponding to font position range 0x%x-0x%x\n",
 			    tblname, fp0, fp1);
 		    done(EX_DATAERR);
 		}
 		if (un1 - un0 != fp1 - fp0) {
 		    fprintf(stderr,
-			"%s: Unicode range U+%x-U+%x not of the same length",
+			    "%s: Unicode range U+%x-U+%x not of the same length",
 			    tblname, un0, un1);
 		    fprintf(stderr,
 			    " as font position range 0x%x-0x%x\n",
@@ -671,7 +670,7 @@ int main (
 		    done(EX_DATAERR);
 		}
 		for (i = fp0; i <= fp1; i++) {
-		    addpair(i,un0-fp0+i);
+		    addpair(i, un0 - fp0 + i);
 		}
 	    }
 	} else {
@@ -684,7 +683,7 @@ int main (
 		p++;
 	    }
 	    if (!strncmp(p, "idem", 4)) {
-		addpair(fp0,fp0);
+		addpair(fp0, fp0);
 		p += 4;
 	    }
 	    while ((un0 = getunicode(&p)) >= 0) {
@@ -720,20 +719,19 @@ int main (
      */
     fclose(ctbl);
 
-
     /*
      *  Compute total size of Unicode list.
      */
     nuni = 0;
-    for (i = 0 ; i < fontlen ; i++) {
+    for (i = 0; i < fontlen; i++) {
 	nuni += unicount[i];
     }
 
     if (argc > 3) {
-	strncpy(this_MIMEcharset,argv[3],UC_MAXLEN_MIMECSNAME);
+	strncpy(this_MIMEcharset, argv[3], UC_MAXLEN_MIMECSNAME);
     } else if (this_MIMEcharset[0] == '\0') {
-	strncpy(this_MIMEcharset,tblname,UC_MAXLEN_MIMECSNAME);
-	if ((p = strchr(this_MIMEcharset,'.')) != 0) {
+	strncpy(this_MIMEcharset, tblname, UC_MAXLEN_MIMECSNAME);
+	if ((p = strchr(this_MIMEcharset, '.')) != 0) {
 	    *p = '\0';
 	}
     }
@@ -741,13 +739,13 @@ int main (
 	*p = TOLOWER(*p);
     }
     if (argc > 4) {
-	strncpy(this_LYNXcharset,argv[4],UC_MAXLEN_LYNXCSNAME);
+	strncpy(this_LYNXcharset, argv[4], UC_MAXLEN_LYNXCSNAME);
     } else if (this_LYNXcharset[0] == '\0') {
-	strncpy(this_LYNXcharset,this_MIMEcharset,UC_MAXLEN_LYNXCSNAME);
+	strncpy(this_LYNXcharset, this_MIMEcharset, UC_MAXLEN_LYNXCSNAME);
     }
 
     if (this_isDefaultMap == -1) {
-	this_isDefaultMap = !strncmp(this_MIMEcharset,"iso-8859-1", 10);
+	this_isDefaultMap = !strncmp(this_MIMEcharset, "iso-8859-1", 10);
     }
     fprintf(stderr,
 	    "makeuctb: %s: %stranslation map",
@@ -756,11 +754,11 @@ int main (
 	*id_append = '\0';
     } else {
 	for (i = 0, p = this_MIMEcharset;
-	     *p && (i < UC_MAXLEN_ID_APPEND-1);
+	     *p && (i < UC_MAXLEN_ID_APPEND - 1);
 	     p++, i++) {
-	    id_append[i+1] = isalnum(UCH(*p)) ? *p : '_';
+	    id_append[i + 1] = isalnum(UCH(*p)) ? *p : '_';
 	}
-	id_append[i+1] = '\0';
+	id_append[i + 1] = '\0';
     }
     fprintf(stderr, " (%s).\n", id_append);
 
@@ -852,23 +850,22 @@ static struct unipair_str repl_map%s[%d] = \n\
     if (themap_str.entry_ct) {
 	fprintf(chdr, "\n\
 static const struct unimapdesc_str dfont_replacedesc%s = {%d,repl_map%s,",
-id_append, themap_str.entry_ct, id_append);
+		id_append, themap_str.entry_ct, id_append);
     } else {
 	fprintf(chdr, "\n\
-static const struct unimapdesc_str dfont_replacedesc%s = {0,NULL,",id_append);
+static const struct unimapdesc_str dfont_replacedesc%s = {0,NULL,", id_append);
     }
     fprintf(chdr, "%d,%d};\n",
 	    this_isDefaultMap ? 1 : 0,
 	    (useDefaultMap && !this_isDefaultMap) ? 1 : 0
-    );
-
+	);
 
     fprintf(chdr, "#define UC_CHARSET_SETUP%s UC_Charset_Setup(\
 \"%s\",\\\n\"%s\",\\\n\
 dfont_unicount%s,dfont_unitable%s,%d,\\\n\
 dfont_replacedesc%s,%d,%d,%d)\n",
-id_append, this_MIMEcharset, this_LYNXcharset,
-id_append, id_append, nuni, id_append, lowest_eight, RawOrEnc, CodePage);
+	    id_append, this_MIMEcharset, this_LYNXcharset,
+	    id_append, id_append, nuni, id_append, lowest_eight, RawOrEnc, CodePage);
 
     for (n = 0; n < TABLESIZE(last_ifdefs); n++) {
 	fprintf(chdr, last_ifdefs[n], id_append);

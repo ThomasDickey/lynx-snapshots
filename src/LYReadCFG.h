@@ -42,23 +42,28 @@ extern int default_bg;
 extern BOOL default_color_reset;
 
 #if defined(HAVE_USE_DEFAULT_COLORS) && defined(USE_DEFAULT_COLORS)
-extern int lynx_default_colors (void);
+extern int lynx_default_colors(void);
 #endif
 
-extern int check_color (char * color, int the_default);
-extern const char * lookup_color (int code);
+extern int check_color(char *color, int the_default);
+extern const char *lookup_color(int code);
 #endif
 
-extern void read_cfg (char *cfg_filename, char *parent_filename, int nesting_level, FILE *fp0);
-extern void free_lynx_cfg (void);
+extern void read_cfg(char *cfg_filename,
+		     char *parent_filename,
+		     int nesting_level,
+		     FILE *fp0);
+extern void free_lynx_cfg(void);
 extern BOOLEAN have_read_cfg;
 
-extern FILE *LYOpenCFG (char *cfg_filename, char *parent_filename, char *dft_filename);
-extern int lynx_cfg_infopage (DocInfo *newdoc);
-extern int lynx_compile_opts (DocInfo *newdoc);
-extern int match_item_by_name (lynx_list_item_type * ptr, char * name, BOOLEAN only_overriders);
-extern lynx_list_item_type *find_item_by_number (lynx_list_item_type * list_ptr, char * number);
-extern void reload_read_cfg (void); /* implemented in LYMain.c */
-extern void LYSetConfigValue (char *name, char *value);
+extern FILE *LYOpenCFG(char *cfg_filename, char *parent_filename, char *dft_filename);
+extern int lynx_cfg_infopage(DocInfo *newdoc);
+extern int lynx_compile_opts(DocInfo *newdoc);
+extern int match_item_by_name(lynx_list_item_type *ptr, char *name, BOOLEAN only_overriders);
+extern lynx_list_item_type *find_item_by_number(lynx_list_item_type *
+						list_ptr,
+						char *number);
+extern void reload_read_cfg(void);	/* implemented in LYMain.c */
+extern void LYSetConfigValue(char *name, char *value);
 
 #endif /* LYREADCFG_H */

@@ -1,6 +1,10 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2004-05-06 (2.8.6dev.3)
++ add scripts/indent.sh, use this to reindent C source files -TD
++ bump version in makefile.in to 2.8.6 -TD
+
 2004-04-27 (2.8.6dev.2)
 * modify CF_NCURSES_LIBS to only look for -lmytinfo when building with ncurses.
   This works around FreeBSD's broken linker semantics when configuring for

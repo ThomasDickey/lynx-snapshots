@@ -17,11 +17,10 @@
 
 /* Special Creation:
 */
-extern HTStructured * HTMLGenerator (HTStream * output);
+extern HTStructured *HTMLGenerator(HTStream *output);
 
-extern HTStream * HTPlainToHTML (
-        HTPresentation *        pres,
-        HTParentAnchor *        anchor,
-        HTStream *              sink);
+extern HTStream *HTPlainToHTML(HTPresentation *pres,
+			       HTParentAnchor *anchor,
+			       HTStream *sink);
 
 #endif /* HTMLGEN_H */

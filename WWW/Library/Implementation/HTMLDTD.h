@@ -16,12 +16,11 @@
 #include <HTFont.h>
 
 /*
-**  Valid name chars for tag parsing.
-*/
+ *  Valid name chars for tag parsing.
+ */
 #define IsNmStart(c) (isalpha(UCH(c)))
 #define IsNmChar(c) (isalnum(UCH(c)) || \
 		      c == '_' || c=='-' || c == '.' || c==':')
-
 
 #define ReallyEmptyTagNum(e) ((HTML_dtd.tags[e].contents == SGML_EMPTY) && \
 			      !(HTML_dtd.tags[e].flags & Tgf_nreie))
@@ -41,125 +40,126 @@ Element Numbers
 
  */
 typedef enum {
-	HTML_A,
-	HTML_ABBREV,
-	HTML_ACRONYM,
-	HTML_ADDRESS,
-	HTML_APPLET,
-	HTML_AREA,
-	HTML_AU,
-	HTML_AUTHOR,
-	HTML_B,
-	HTML_BANNER,
-	HTML_BASE,
-	HTML_BASEFONT,
-	HTML_BDO,
-	HTML_BGSOUND,
-	HTML_BIG,
-	HTML_BLINK,
-	HTML_BLOCKQUOTE,
-	HTML_BODY,
-	HTML_BODYTEXT,
-	HTML_BQ,
-	HTML_BR,
-	HTML_BUTTON,
-	HTML_CAPTION,
-	HTML_CENTER,
-	HTML_CITE,
-	HTML_CODE,
-	HTML_COL,
-	HTML_COLGROUP,
-	HTML_COMMENT,
-	HTML_CREDIT,
-	HTML_DD,
-	HTML_DEL,
-	HTML_DFN,
-	HTML_DIR,
-	HTML_DIV,
-	HTML_DL,
-	HTML_DLC,
-	HTML_DT,
-	HTML_EM,
-	HTML_EMBED,
-	HTML_FIELDSET,
-	HTML_FIG,
-	HTML_FN,
-	HTML_FONT,
-	HTML_FORM,
-	HTML_FRAME,
-	HTML_FRAMESET,
-	HTML_H1,
-	HTML_H2,
-	HTML_H3,
-	HTML_H4,
-	HTML_H5,
-	HTML_H6,
-	HTML_HEAD,
-	HTML_HR,
-	HTML_HTML,
-	HTML_HY,
-	HTML_I,
-	HTML_IFRAME,
-	HTML_IMG,
-	HTML_INPUT,
-	HTML_INS,
-	HTML_ISINDEX,
-	HTML_KBD,
-	HTML_KEYGEN,
-	HTML_LABEL,
-	HTML_LEGEND,
-	HTML_LH,
-	HTML_LI,
-	HTML_LINK,
-	HTML_LISTING,
-	HTML_MAP,
-	HTML_MARQUEE,
-	HTML_MATH,
-	HTML_MENU,
-	HTML_META,
-	HTML_NEXTID,
-	HTML_NOFRAMES,
-	HTML_NOTE,
-	HTML_OBJECT,
-	HTML_OL,
-	HTML_OPTION,
-	HTML_OVERLAY,
-	HTML_P,
-	HTML_PARAM,
-	HTML_PLAINTEXT,
-	HTML_PRE,
-	HTML_Q,
-	HTML_S,
-	HTML_SAMP,
-	HTML_SCRIPT,
-	HTML_SELECT,
-	HTML_SHY,
-	HTML_SMALL,
-	HTML_SPAN,
-	HTML_SPOT,
-	HTML_STRIKE,
-	HTML_STRONG,
-	HTML_STYLE,
-	HTML_SUB,
-	HTML_SUP,
-	HTML_TAB,
-	HTML_TABLE,
-	HTML_TBODY,
-	HTML_TD,
-	HTML_TEXTAREA,
-	HTML_TEXTFLOW,
-	HTML_TFOOT,
-	HTML_TH,
-	HTML_THEAD,
-	HTML_TITLE,
-	HTML_TR,
-	HTML_TT,
-	HTML_U,
-	HTML_UL,
-	HTML_VAR,
-	HTML_WBR,
-	HTML_XMP,
-	HTML_ALT_OBJECT } HTMLElement;
+    HTML_A,
+    HTML_ABBREV,
+    HTML_ACRONYM,
+    HTML_ADDRESS,
+    HTML_APPLET,
+    HTML_AREA,
+    HTML_AU,
+    HTML_AUTHOR,
+    HTML_B,
+    HTML_BANNER,
+    HTML_BASE,
+    HTML_BASEFONT,
+    HTML_BDO,
+    HTML_BGSOUND,
+    HTML_BIG,
+    HTML_BLINK,
+    HTML_BLOCKQUOTE,
+    HTML_BODY,
+    HTML_BODYTEXT,
+    HTML_BQ,
+    HTML_BR,
+    HTML_BUTTON,
+    HTML_CAPTION,
+    HTML_CENTER,
+    HTML_CITE,
+    HTML_CODE,
+    HTML_COL,
+    HTML_COLGROUP,
+    HTML_COMMENT,
+    HTML_CREDIT,
+    HTML_DD,
+    HTML_DEL,
+    HTML_DFN,
+    HTML_DIR,
+    HTML_DIV,
+    HTML_DL,
+    HTML_DLC,
+    HTML_DT,
+    HTML_EM,
+    HTML_EMBED,
+    HTML_FIELDSET,
+    HTML_FIG,
+    HTML_FN,
+    HTML_FONT,
+    HTML_FORM,
+    HTML_FRAME,
+    HTML_FRAMESET,
+    HTML_H1,
+    HTML_H2,
+    HTML_H3,
+    HTML_H4,
+    HTML_H5,
+    HTML_H6,
+    HTML_HEAD,
+    HTML_HR,
+    HTML_HTML,
+    HTML_HY,
+    HTML_I,
+    HTML_IFRAME,
+    HTML_IMG,
+    HTML_INPUT,
+    HTML_INS,
+    HTML_ISINDEX,
+    HTML_KBD,
+    HTML_KEYGEN,
+    HTML_LABEL,
+    HTML_LEGEND,
+    HTML_LH,
+    HTML_LI,
+    HTML_LINK,
+    HTML_LISTING,
+    HTML_MAP,
+    HTML_MARQUEE,
+    HTML_MATH,
+    HTML_MENU,
+    HTML_META,
+    HTML_NEXTID,
+    HTML_NOFRAMES,
+    HTML_NOTE,
+    HTML_OBJECT,
+    HTML_OL,
+    HTML_OPTION,
+    HTML_OVERLAY,
+    HTML_P,
+    HTML_PARAM,
+    HTML_PLAINTEXT,
+    HTML_PRE,
+    HTML_Q,
+    HTML_S,
+    HTML_SAMP,
+    HTML_SCRIPT,
+    HTML_SELECT,
+    HTML_SHY,
+    HTML_SMALL,
+    HTML_SPAN,
+    HTML_SPOT,
+    HTML_STRIKE,
+    HTML_STRONG,
+    HTML_STYLE,
+    HTML_SUB,
+    HTML_SUP,
+    HTML_TAB,
+    HTML_TABLE,
+    HTML_TBODY,
+    HTML_TD,
+    HTML_TEXTAREA,
+    HTML_TEXTFLOW,
+    HTML_TFOOT,
+    HTML_TH,
+    HTML_THEAD,
+    HTML_TITLE,
+    HTML_TR,
+    HTML_TT,
+    HTML_U,
+    HTML_UL,
+    HTML_VAR,
+    HTML_WBR,
+    HTML_XMP,
+    HTML_ALT_OBJECT
+} HTMLElement;
 
 /* Notes: HTML.c uses a different extension of the HTML_ELEMENTS space
           privately, see HTNestedList.h. */
@@ -174,7 +174,6 @@ typedef enum {
                       additional variant(s) at end. */
 #define HTML_ALL_ELEMENTS 119
 
-
 /*
 
 Attribute numbers
@@ -188,7 +187,7 @@ Attribute numbers
 
  */
 #define HTML_A_ACCESSKEY        0
-#define HTML_A_CHARSET          1 /* i18n draft, added tentatively - KW */
+#define HTML_A_CHARSET          1	/* i18n draft, added tentatively - KW */
 #define HTML_A_CLASS            2
 #define HTML_A_CLEAR            3
 #define HTML_A_COORDS           4
@@ -465,7 +464,7 @@ Attribute numbers
 #define HTML_FONT_STYLE         8
 #define HTML_FONT_ATTRIBUTES    9
 
-#define HTML_FORM_ACCEPT_CHARSET  0 /* HTML 4.0 draft - kw */
+#define HTML_FORM_ACCEPT_CHARSET  0	/* HTML 4.0 draft - kw */
 #define HTML_FORM_ACTION        1
 #define HTML_FORM_CLASS         2
 #define HTML_FORM_CLEAR         3
@@ -571,7 +570,7 @@ Attribute numbers
 #define HTML_IMG_ATTRIBUTES     19
 
 #define HTML_INPUT_ACCEPT       0
-#define HTML_INPUT_ACCEPT_CHARSET  1 /* RFC 2070 HTML i18n - kw */
+#define HTML_INPUT_ACCEPT_CHARSET  1	/* RFC 2070 HTML i18n - kw */
 #define HTML_INPUT_ALIGN        2
 #define HTML_INPUT_ALT          3
 #define HTML_INPUT_CHECKED      4
@@ -604,12 +603,12 @@ Attribute numbers
 #define HTML_INPUT_WIDTH       31
 #define HTML_INPUT_ATTRIBUTES  32
 
-#define HTML_ISINDEX_ACTION     0  /* Treat as synonym for HREF. - FM */
+#define HTML_ISINDEX_ACTION     0	/* Treat as synonym for HREF. - FM */
 #define HTML_ISINDEX_DIR        1
-#define HTML_ISINDEX_HREF       2  /* HTML 3.0 "action". - FM */
+#define HTML_ISINDEX_HREF       2	/* HTML 3.0 "action". - FM */
 #define HTML_ISINDEX_ID         3
 #define HTML_ISINDEX_LANG       4
-#define HTML_ISINDEX_PROMPT     5  /* HTML 3.0 "prompt". - FM */
+#define HTML_ISINDEX_PROMPT     5	/* HTML 3.0 "prompt". - FM */
 #define HTML_ISINDEX_TITLE      6
 #define HTML_ISINDEX_ATTRIBUTES 7
 
@@ -661,7 +660,7 @@ Attribute numbers
 #define HTML_LI_VALUE          12
 #define HTML_LI_ATTRIBUTES     13
 
-#define HTML_LINK_CHARSET       0 /* RFC 2070 HTML i18n - kw */
+#define HTML_LINK_CHARSET       0	/* RFC 2070 HTML i18n - kw */
 #define HTML_LINK_CLASS         1
 #define HTML_LINK_HREF          2
 #define HTML_LINK_ID            3
@@ -695,7 +694,7 @@ Attribute numbers
 #define HTML_MATH_ATTRIBUTES    8
 
 #define HTML_META_CONTENT       0
-#define HTML_META_HTTP_EQUIV    1  /* For parsing in HTML.c - FM */
+#define HTML_META_HTTP_EQUIV    1	/* For parsing in HTML.c - FM */
 #define HTML_META_NAME          2
 #define HTML_META_ATTRIBUTES    3
 
@@ -707,7 +706,7 @@ Attribute numbers
 #define HTML_NOTE_ID            3
 #define HTML_NOTE_LANG          4
 #define HTML_NOTE_MD            5
-#define HTML_NOTE_ROLE          6 /* Old name for CLASS - FM */
+#define HTML_NOTE_ROLE          6	/* Old name for CLASS - FM */
 #define HTML_NOTE_SRC           7
 #define HTML_NOTE_STYLE         8
 #define HTML_NOTE_TITLE         9
@@ -809,7 +808,7 @@ Attribute numbers
 #define HTML_PARAM_TITLE       13
 #define HTML_PARAM_TYPE        14
 #define HTML_PARAM_VALUE       15
-#define HTML_PARAM_VALUEREF    16  /* Use VALUETYPE (DATA|REF|OBJECT). - FM */
+#define HTML_PARAM_VALUEREF    16	/* Use VALUETYPE (DATA|REF|OBJECT). - FM */
 #define HTML_PARAM_VALUETYPE   17
 #define HTML_PARAM_ATTRIBUTES  18
 
@@ -918,7 +917,7 @@ Attribute numbers
 #define HTML_TD_WIDTH          19
 #define HTML_TD_ATTRIBUTES     20
 
-#define HTML_TEXTAREA_ACCEPT_CHARSET  0 /* RFC 2070 HTML i18n - kw */
+#define HTML_TEXTAREA_ACCEPT_CHARSET  0		/* RFC 2070 HTML i18n - kw */
 #define HTML_TEXTAREA_ALIGN     1
 #define HTML_TEXTAREA_CLASS     2
 #define HTML_TEXTAREA_CLEAR     3
@@ -973,16 +972,16 @@ Attribute numbers
 
 #ifdef USE_PRETTYSRC
 /* values of HTML attributes' types */
-#define HTMLA_NORMAL 0 /* nothing specific */
-#define HTMLA_ANAME  1 /* anchor name - 'id' or a's 'name' */
-#define HTMLA_HREF   2 /* href */
-#define HTMLA_CLASS  4 /* class name.  */
-#define HTMLA_AUXCLASS 8 /* attribute, the value of which also designates
-			    a class name */
+#define HTMLA_NORMAL 0		/* nothing specific */
+#define HTMLA_ANAME  1		/* anchor name - 'id' or a's 'name' */
+#define HTMLA_HREF   2		/* href */
+#define HTMLA_CLASS  4		/* class name.  */
+#define HTMLA_AUXCLASS 8	/* attribute, the value of which also designates
+				   a class name */
 #endif
 extern const SGML_dtd HTML_dtd;
 
-extern void HTSwitchDTD (int new_flag);
+extern void HTSwitchDTD(int new_flag);
 
 extern HTTag HTTag_unrecognized;
 extern HTTag HTTag_mixedObject;
@@ -1002,17 +1001,13 @@ Start anchor element
    to be omitted.
 
  */
-extern void HTStartAnchor (
-		HTStructured * targetstream,
-		const char *	name,
-		const char *	href);
+extern void HTStartAnchor(HTStructured * targetstream, const char *name,
+			  const char *href);
 
-extern void HTStartAnchor5 (
-		HTStructured * targetstream,
-		const char *	name,
-		const char *	href,
-		const char *	linktype,
-		int		tag_charset);
+extern void HTStartAnchor5(HTStructured * targetstream, const char *name,
+			   const char *href,
+			   const char *linktype,
+			   int tag_charset);
 
 /*
 
@@ -1029,9 +1024,7 @@ Start IsIndex element - FM
    to be omitted.
 
  */
-extern void HTStartIsIndex (
-		HTStructured * targetstream,
-		const char *	prompt,
-		const char *	href);
+extern void HTStartIsIndex(HTStructured * targetstream, const char *prompt,
+			   const char *href);
 
 #endif /* HTMLDTD_H */

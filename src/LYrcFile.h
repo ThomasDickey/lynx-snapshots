@@ -240,12 +240,12 @@ extern Config_Enum tbl_multi_bookmarks[];
 extern Config_Enum tbl_transfer_rate[];
 extern Config_Enum tbl_user_mode[];
 
-extern BOOL LYgetEnum (Config_Enum * table, char * name, int * result);
-extern BOOL will_save_rc (char * name);
-extern const char *LYputEnum (Config_Enum * table, int value);
-extern int enable_lynxrc (char * value);
-extern int get_tagsoup (char * value);
-extern int save_rc (FILE *);
-extern void read_rc (FILE *);
+extern BOOL LYgetEnum(Config_Enum * table, char *name, int *result);
+extern BOOL will_save_rc(char *name);
+extern const char *LYputEnum(Config_Enum * table, int value);
+extern int enable_lynxrc(char *value);
+extern int get_tagsoup(char *value);
+extern int save_rc(FILE *);
+extern void read_rc(FILE *);
 
 #endif /* LYRCFILE_H */

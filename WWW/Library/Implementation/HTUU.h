@@ -1,10 +1,11 @@
 /*                              ENCODING TO PRINTABLE CHARACTERS
 
-   File module provides functions HTUU_encode() and HTUU_decode() which convert a buffer
-   of bytes to/from RFC 1113 printable encoding format.  This technique is similar to the
-   familiar Unix uuencode format in that it maps 6 binary bits to one ASCII character (or
-   more aptly, 3 binary bytes to 4 ASCII characters).  However, RFC 1113 does not use the
-   same mapping to printable characters as uuencode.
+   File module provides functions HTUU_encode() and HTUU_decode() which convert
+   a buffer of bytes to/from RFC 1113 printable encoding format.  This
+   technique is similar to the familiar Unix uuencode format in that it maps 6
+   binary bits to one ASCII character (or more aptly, 3 binary bytes to 4 ASCII
+   characters).  However, RFC 1113 does not use the same mapping to printable
+   characters as uuencode.
 
  */
 
@@ -14,13 +15,13 @@
 #ifndef HTUTILS_H
 #include <HTUtils.h>
 #endif
- 
-extern int HTUU_encode (unsigned char *bufin,
-                               unsigned int nbytes,
-                               char *bufcoded);
 
-extern int HTUU_decode (char *bufcoded,
-                               unsigned char *bufplain,
-                               int outbufsize);
+extern int HTUU_encode(unsigned char *bufin,
+		       unsigned int nbytes,
+		       char *bufcoded);
+
+extern int HTUU_decode(char *bufcoded,
+		       unsigned char *bufplain,
+		       int outbufsize);
 
 #endif /* HTUU_H */

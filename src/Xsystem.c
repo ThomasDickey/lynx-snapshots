@@ -1,4 +1,4 @@
-/* @Id: Xsystem.c 1.12 Mon, 19 Jan 2004 04:16:02 -0800 dickey @
+/* @Id: Xsystem.c 1.13 Thu, 06 May 2004 17:31:33 -0700 dickey @
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -51,7 +51,7 @@
 
 #define	TABLESIZE(v)	(sizeof(v)/sizeof(v[0]))
 
-#define STR_MAX 512	/* MAX command line */
+#define STR_MAX 512		/* MAX command line */
 
 extern char *mktemp(char *);
 
@@ -63,7 +63,7 @@ extern char *mktemp(char *);
 #define isdeg(c) ('0' <= (c) && (c) <= '9')
 
 #ifndef NEAR
-#if 0	/* MS-C */
+#if 0				/* MS-C */
 #define NEAR	_near
 #else
 #define NEAR
@@ -85,8 +85,7 @@ typedef struct _proc {
 
 static PRO *p1 = 0;
 
-static char *NEAR
-xmalloc(size_t n)
+static char *NEAR xmalloc(size_t n)
 {
     char *bp;
 
@@ -97,8 +96,7 @@ xmalloc(size_t n)
     return bp;
 }
 
-static char *NEAR
-xrealloc(void *p, size_t n)
+static char *NEAR xrealloc(void *p, size_t n)
 {
     char *bp;
 
@@ -109,21 +107,20 @@ xrealloc(void *p, size_t n)
     return bp;
 }
 
-static int NEAR
-is_builtin_command(char *s)
+static int NEAR is_builtin_command(char *s)
 {
 #ifdef WIN_EX
     extern int system_is_NT;	/* 1997/11/05 (Wed) 22:10:35 */
 #endif
 
-    static char *cmdtab[]=
+    static char *cmdtab[] =
     {
 	"dir", "type", "rem", "ren", "rename", "erase", "del",
 	"copy", "pause", "date", "time", "ver", "vol", "label",
 	"cd", "chdir", "md", "mkdir", "rd", "rmdir", "break",
 	"verify", "set", "prompt", "path", "exit", "ctty", "echo",
 	"if", "for", "cls", "goto", "shift"
-	,"start"	/* start is NT only */
+	,"start"		/* start is NT only */
     };
     int i, l, lc, count;
 
@@ -132,7 +129,7 @@ is_builtin_command(char *s)
     count--;
 #ifdef WIN_EX
     if (system_is_NT)
-        count++;
+	count++;
 #endif
     for (i = 0; i < count; i++) {
 	if (strcasecomp(s, cmdtab[i]) == 0)
@@ -144,8 +141,7 @@ is_builtin_command(char *s)
     return 0;
 }
 
-static int NEAR
-getswchar(void)
+static int NEAR getswchar(void)
 {
 #ifdef __WIN32__
     return '/';
@@ -158,8 +154,7 @@ getswchar(void)
 #endif
 }
 
-static int NEAR
-csystem(PRO * p, int flag)
+static int NEAR csystem(PRO * p, int flag)
 {
     char *cmp;
     char SW[3];
@@ -174,8 +169,7 @@ csystem(PRO * p, int flag)
     return rc < 0 ? -2 : rc;
 }
 
-static PRO *NEAR
-pars1c(char *s)
+static PRO *NEAR pars1c(char *s)
 {
     PRO *pp;
     char *fnp;
@@ -264,8 +258,7 @@ pars1c(char *s)
     return pp;
 }
 
-static PRO *NEAR
-pars(char *s)
+static PRO *NEAR pars(char *s)
 {
     char *lb;
     int li, ls, q;
@@ -305,8 +298,7 @@ pars(char *s)
     return p1;
 }
 
-static int NEAR
-try3(char *cnm, PRO * p, int flag)
+static int NEAR try3(char *cnm, PRO * p, int flag)
 {
     char cmdb[STR_MAX];
     int rc;
@@ -329,8 +321,7 @@ try3(char *cnm, PRO * p, int flag)
     return -1;
 }
 
-static int NEAR
-prog_go(PRO * p, int flag)
+static int NEAR prog_go(PRO * p, int flag)
 {
     char *s;
     char *extp = 0;
@@ -368,6 +359,7 @@ prog_go(PRO * p, int flag)
 
 	    if (ep && *ep) {
 		int i;
+
 		for (i = 0; *ep != ';' && *ep != '\0'; ep++, i++)
 		    lc = cmdb[i] = *ep;
 		if (*ep == ';')
@@ -395,8 +387,7 @@ prog_go(PRO * p, int flag)
     }
 }
 
-static char *NEAR
-tmpf(char *tp)
+static char *NEAR tmpf(char *tp)
 {
     char tplate[STR_MAX];
     char *ev;
@@ -414,8 +405,7 @@ tmpf(char *tp)
     return strdup(mktemp(tplate));
 }
 
-static int NEAR
-redopen(char *fn, int md, int sfd)
+static int NEAR redopen(char *fn, int md, int sfd)
 {
     int rc;
     int fd;
@@ -433,8 +423,7 @@ redopen(char *fn, int md, int sfd)
     return -1;
 }
 
-static int NEAR
-redclose(int fd, int sfd)
+static int NEAR redclose(int fd, int sfd)
 {
     if (fd != -1) {
 	dup2(fd, sfd);
@@ -443,8 +432,7 @@ redclose(int fd, int sfd)
     return -1;
 }
 
-static void NEAR
-redswitch(PRO * p)
+static void NEAR redswitch(PRO * p)
 {
     int d;
 
@@ -456,8 +444,7 @@ redswitch(PRO * p)
     }
 }
 
-static void NEAR
-redunswitch(PRO * p)
+static void NEAR redunswitch(PRO * p)
 {
     int d;
 
@@ -469,8 +456,7 @@ redunswitch(PRO * p)
     }
 }
 
-int
-xsystem(char *cmd)
+int xsystem(char *cmd)
 {
     PRO *p, *pn;
     char *pof, *pif, *pxf;
@@ -479,13 +465,13 @@ xsystem(char *cmd)
     int rc = 0;
     static char *cmdline = 0;
 
-#ifdef SH_EX	/* 1997/11/01 (Sat) 10:04:03 add by JH7AYN */
+#ifdef SH_EX			/* 1997/11/01 (Sat) 10:04:03 add by JH7AYN */
     pif = cmd;
     while (*pif++) {
 	if (*pif == '\r') {
 	    *pif = '\0';
 	    break;
-	} else if (*pif ==  '\n') {
+	} else if (*pif == '\n') {
 	    *pif = '\0';
 	    break;
 	}
@@ -548,7 +534,7 @@ xsystem(char *cmd)
     return rc < 0 ? 0xFF00 : rc;
 }
 
-int exec_command(char * cmd, int wait_flag)
+int exec_command(char *cmd, int wait_flag)
 {
 #if defined(__MINGW32__)
     return system(cmd);
@@ -559,7 +545,7 @@ int exec_command(char * cmd, int wait_flag)
     int cmd_str;
 
     pif = cmd;
-    while(*pif == ' ')
+    while (*pif == ' ')
 	pif++;
 
     cmd = pif;
@@ -569,14 +555,14 @@ int exec_command(char * cmd, int wait_flag)
 	if (*pif == '\r') {
 	    *pif = '\0';
 	    break;
-	} else if (*pif ==  '\n') {
+	} else if (*pif == '\n') {
 	    *pif = '\0';
 	    break;
 	} else if (cmd_str) {
-	    if (*pif ==  '/')
+	    if (*pif == '/')
 		*pif = '\\';
 	} else if (cmd_str) {
-	    if (*pif ==  ' ')
+	    if (*pif == ' ')
 		cmd_str = FALSE;
 	}
     }
@@ -591,10 +577,8 @@ int exec_command(char * cmd, int wait_flag)
 #endif
 }
 
-
 #ifdef TEST
-void
-main()
+void main()
 {
     char line_buff[STR_MAX];
 
@@ -602,4 +586,4 @@ main()
 	printf("\nreturn %04X\n", xsystem(line_buff));
     }
 }
-#endif	/* TEST */
+#endif /* TEST */

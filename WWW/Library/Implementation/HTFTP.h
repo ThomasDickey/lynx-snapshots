@@ -18,24 +18,22 @@
 #define FILE_BY_TYPE 1
 #define FILE_BY_SIZE 2
 #define FILE_BY_DATE 3
-extern int HTfileSortMethod;  /* specifies the method of sorting */
 
+extern int HTfileSortMethod;	/* specifies the method of sorting */
 
 /* PUBLIC						 HTVMS_name()
-**		CONVERTS WWW name into a VMS name
-** ON ENTRY:
-**	nn		Node Name (optional)
-**	fn		WWW file name
-**
-** ON EXIT:
-**	returns		vms file specification
-**
-** Bug:	Returns pointer to static -- non-reentrant
-*/
-extern char * HTVMS_name (
-	const char * nn,
-	const char * fn);
-
+ *		CONVERTS WWW name into a VMS name
+ * ON ENTRY:
+ *	nn		Node Name (optional)
+ *	fn		WWW file name
+ *
+ * ON EXIT:
+ *	returns		vms file specification
+ *
+ * Bug:	Returns pointer to static -- non-reentrant
+ */
+extern char *HTVMS_name(const char *nn,
+			const char *fn);
 
 /*
 
@@ -46,25 +44,22 @@ Retrieve File from Server
   returns                 Socket number for file if good.<0 if bad.
 
  */
-extern int HTFTPLoad 
-(
-  const char *          name,
-  HTParentAnchor *      anchor,
-  HTFormat              format_out,
-  HTStream*             sink
-);
+extern int HTFTPLoad(const char *name,
+		     HTParentAnchor *anchor,
+		     HTFormat format_out,
+		     HTStream *sink);
 
 /*
-**  This function frees any user entered password, so that
-**  it must be entered again for a future request. - FM
-*/
-extern void HTClearFTPPassword (void);
+ *  This function frees any user entered password, so that
+ *  it must be entered again for a future request. - FM
+ */
+extern void HTClearFTPPassword(void);
 
 /*
 
 Return Host Name
 
  */
-extern const char * HTHostName (void);
+extern const char *HTHostName(void);
 
 #endif

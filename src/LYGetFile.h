@@ -7,17 +7,16 @@
 #define NORMAL 1
 #define NULLFILE 3
 
-extern int getfile (DocInfo *doc);
-extern void srcmode_for_next_retrieval (int);
-extern int follow_link_number (
-	int		c,
-	int		cur,
-	DocInfo *	doc,
-	int *		num);
-extern void add_trusted (char *str, int type);
-extern BOOLEAN exec_ok (const char *source, const char *linkpath, int type);
+extern int getfile(DocInfo *doc);
+extern void srcmode_for_next_retrieval(int);
+extern int follow_link_number(int c,
+			      int cur,
+			      DocInfo *doc,
+			      int *num);
+extern void add_trusted(char *str, int type);
+extern BOOLEAN exec_ok(const char *source, const char *linkpath, int type);
 
-extern char * WWW_Download_File;
+extern char *WWW_Download_File;
 
 /* values for follow_link_number() */
 #define DO_LINK_STUFF		1
