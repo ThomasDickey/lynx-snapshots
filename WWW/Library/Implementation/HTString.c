@@ -412,7 +412,7 @@ PRIVATE char * StrAllocVsprintf ARGS4(
 	    size_t f     = 0;
 
 	    fmt_ptr[f++] = *fmt;
-	    while (*++fmt != '\0' && dst_len != 0 && !done) {
+	    while (*++fmt != '\0' && !done) {
 		fmt_ptr[f++] = *fmt;
 
 		if (isdigit(*fmt)) {

@@ -1,11 +1,26 @@
 Changes since Lynx 2.8.1 release
 ================================================================================
 
+1998-11-21 (2.8.2dev.6)
++ add call on dbug_init to LYMain.c, allowing use of the debugging code built
+  into the WATTCP code which is included in the DJGPP port of lynx.  This is
+  activated by placing lines in the WATTCP.CFG file for:
+    DEBUG.MODE= (choices are HEADERS, DUMP, or ALL)
+    DEBUG.PROTO= (choices are TCP, UDP, or  ALL)
+    DEBUG.FILE= (name of log file. Defaults to WATTCP.DBG)
+  This adds about 2K to the size of the stripped, compressed executable.  You
+  get a log of the headers and/or a binary dump of the packets sent and
+  received.  Maybe this will help in determining where ftp is failing in this
+  port - DK
+* correct definitions for ANSI_VARARGS, HAVE_STDARG_H in HTUtils.h (reported
+  by LP, for djgpp) - TD
+* correct logic in StrAllocVsprintf(), remove spurious test on dst_len
+  (analysis by LV) - TD
 1998-11-21 (2.8.2dev.5)
 * modify HTLoadFile() to make compressed files work with OS/2 EMX and
   LYSystem() to convert forward slashes in pathnames to backslashes, also for
   EMX (patches by Ilya Zakharevich).
-* documentation nits (aprostrophes) in lynx.cfg and userdefs.h - LV
+* documentation nits (apostrophes) in lynx.cfg and userdefs.h - LV
 * fix inconsistent newlines in po/it.po (report by Irving_Wolfe@Wolfe.net) - TD
 * modify config.guess, added Intergraph 2430 CLIX machines (reported by Alex
   Matulich <matuli_a@marlin.navsea.navy.mil>) - TD

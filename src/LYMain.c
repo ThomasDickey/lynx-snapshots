@@ -627,6 +627,7 @@ PUBLIC int main ARGS2(
 	init_ctrl_break[0] = 1;
     }
     atexit(reset_break);
+    dbug_init();
     sock_init();
 #endif
 
