@@ -1,6 +1,15 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2001-07-10 (2.8.4pre.4)
+* correct red/blue color swapping for PDCurses when built on Unix, which uses
+  X11 -TD
+* correct order of checks for wrapping in www_search_forward() and
+  www_search_backward(), which would allow an infinite loop if there were no
+  anchors on the current page (report by Frederic L W Meunier) -TD
+* add a missing chunk to reverted change of SGML_character()
+  -nsh@horae.dti.ne.jp
+
 2001-07-07 (2.8.4pre.3)
 * review/add descriptions of new command-line options in lynx.man, lynx.hlp and
   Lynx_users_guide.html -TD

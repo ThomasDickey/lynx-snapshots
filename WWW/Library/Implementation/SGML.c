@@ -3649,6 +3649,8 @@ top1:
 	break;
 
     case S_equals:		/* After attr = */
+	if (WHITE(c))
+	    break;		/* Before attribute value */
 	if (c == '>') {		/* End of tag */
 	    CTRACE((tfp, "SGML: found = but no value\n"));
 #ifdef USE_PRETTYSRC

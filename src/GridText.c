@@ -7756,12 +7756,12 @@ PRIVATE int www_search_forward ARGS5(
 	if (LYno_attr_strstr(line->data, target)) {
 	    tentative_result = count;
 	    break;
-	} else if (line == HTMainText->last_line) {
-	    count = 0;
-	    wrapped = TRUE;
 	} else if (count == start_line && wrapped) {
 	    HTUserMsg2(STRING_NOT_FOUND, target);
 	    return -1;
+	} else if (line == HTMainText->last_line) {
+	    count = 0;
+	    wrapped = TRUE;
 	}
 	line = line->next;
 	count++;
@@ -7799,12 +7799,12 @@ PRIVATE int www_search_backward ARGS5(
 	if (LYno_attr_strstr(line->data, target)) {
 	    tentative_result = count;
 	    break;
-	} else if (line == FirstHTLine(HTMainText)) {
-	    count = line_num_in_text(HTMainText, LastHTLine(HTMainText)) + 1;
-	    wrapped = TRUE;
 	} else if (count == start_line && wrapped) {
 	    HTUserMsg2(STRING_NOT_FOUND, target);
 	    return -1;
+	} else if (line == FirstHTLine(HTMainText)) {
+	    count = line_num_in_text(HTMainText, LastHTLine(HTMainText)) + 1;
+	    wrapped = TRUE;
 	}
 	line = line->prev;
 	count--;

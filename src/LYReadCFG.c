@@ -264,7 +264,7 @@ PRIVATE CONST char *Color_Strings[16] =
     "white"
 };
 
-#if defined(PDCURSES)
+#if defined(PDCURSES) && !defined(XCURSES)
 /*
  * PDCurses (and possibly some other implementations) use a non-ANSI set of
  * codes for colors.
