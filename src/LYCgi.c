@@ -140,6 +140,16 @@ PUBLIC void add_lynxcgi_environment ARGS1(
     }
 }
 
+#ifdef __MINGW32__
+PRIVATE int LYLoadCGI ARGS4(
+	CONST char *, 		arg,
+	HTParentAnchor *,	anAnchor,
+	HTFormat,		format_out,
+	HTStream*,		sink)
+{
+	return -1;
+}
+#else
 PRIVATE int LYLoadCGI ARGS4(
 	CONST char *, 		arg,
 	HTParentAnchor *,	anAnchor,
@@ -684,6 +694,7 @@ PRIVATE int LYLoadCGI ARGS4(
 #endif /* LYNXCGI_LINKS */
     return(status);
 }
+#endif /* __MINGW32__ */
 
 #ifdef GLOBALDEF_IS_MACRO
 #define _LYCGI_C_GLOBALDEF_1_INIT { "lynxcgi", LYLoadCGI, 0 }

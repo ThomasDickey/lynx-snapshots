@@ -323,7 +323,7 @@ BOOL run_external ARGS2(
 
 	    /* command running. */
 #ifdef WIN_EX			/* 1997/10/17 (Fri) 14:07:50 */
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) || defined(__MINGW32__)
 	    status = system(cmdbuf);
 #else
 	    status = xsystem(cmdbuf);

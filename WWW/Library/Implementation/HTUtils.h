@@ -206,7 +206,7 @@ typedef unsigned short mode_t;
 #endif
 
 #if defined(UNIX)
-#  if (defined(__BEOS__) || defined(__CYGWIN__) || defined(__DJGPP__) || defined(__EMX__))
+#  if (defined(__BEOS__) || defined(__CYGWIN__) || defined(__DJGPP__) || defined(__EMX__) || defined(__MINGW32__))
 #    define SINGLE_USER_UNIX	/* well, at least they try */
 #  else
 #    define MULTI_USER_UNIX

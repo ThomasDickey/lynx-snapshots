@@ -12,6 +12,10 @@
 
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
+#else
+#ifdef __MINGW32__
+#include <malloc.h>
+#endif /* __MINGW32__ */
 #endif
 
 #define HEX_ESCAPE '%'

@@ -110,10 +110,7 @@ Default values
 #define AIX
 #endif /* _AIX */
 
-#ifdef __CYGWIN__
-#define _WINDOWS_NSL
-#define WIN_EX
-#else
+#ifndef __CYGWIN__
 #ifdef WIN_EX
 #define HAVE_FTIME 1
 #define HAVE_SYS_TIMEB_H 1

@@ -4,6 +4,14 @@
 #include <HTAccess.h>
 #include <HTCJK.h>
 #include <HTAlert.h>
+
+#ifdef __MINGW32__
+int kbhit(void);
+#ifdef UNIX
+#undef UNIX
+#endif /* UNIX */
+#endif /* __MINGW32__ */
+
 #include <LYCurses.h>
 #include <LYHistory.h>
 #include <LYStrings.h>

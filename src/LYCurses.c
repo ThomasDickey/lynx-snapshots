@@ -1,6 +1,12 @@
 #include <HTUtils.h>
 #include <HTAlert.h>
 
+#ifdef __MINGW32__
+#ifdef UNIX
+#undef UNIX
+#endif /* UNIX */
+#endif /* __MINGW32__ */
+
 #include <LYCurses.h>
 #include <LYStyle.h>
 #include <LYUtils.h>
@@ -1327,7 +1333,11 @@ PUBLIC void stop_curses NOARGS
 #ifdef __DJGPP__
     ScreenClear();
 #else
+#ifdef __MINGW32__
+    clear();
+#else
     clrscr();
+#endif
 #endif
 #else
 
@@ -2691,10 +2701,11 @@ PRIVATE void make_blink_boldbg NOARGS
  */
 PUBLIC long LYgetattrs ARGS1(WINDOW *, win)
 {
-    attr_t result = 0;
 #if (defined(NCURSES_VERSION_MAJOR) && NCURSES_VERSION_MAJOR < 5) || !defined(NCURSES_MAJOR_VERSION)
+    long result = 0;
     result = getattrs(win);
 #else
+    attr_t result = 0;
     short pair = 0;
 
     wattr_get(win, &result, &pair, NULL);
