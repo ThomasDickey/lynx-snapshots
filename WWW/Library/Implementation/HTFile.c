@@ -20,8 +20,6 @@
 **			 the device or top directory.
 */
 
-#include <HTUtils.h>
-
 #ifndef VMS
 /* #define LONG_LIST */ /* Define this for long style unix listings (ls -l) */
 /* #define NO_PARENT_DIR_REFERENCE */ /* Define this for no parent links */
@@ -29,10 +27,13 @@
 
 #ifdef DOSPATH
 #define HAVE_READDIR 1
+#include <dirent.h>
 #define USE_DIRENT
 #include <HTDOS.h>
 #endif /* DOSPATH */
 
+#include <HTUtils.h>
+#include <tcp.h>
 #include <HTFile.h>		/* Implemented here */
 #ifdef VMS
 #include <stat.h>
@@ -51,6 +52,14 @@
 
 #define INFINITY 512		/* file name length @@ FIXME */
 #define MULTI_SUFFIX ".multi"	/* Extension for scanning formats */
+
+#define HT_EM_SPACE ((char)2)
+
+#define FREE(x) if (x) {free(x); x = NULL;}
+
+#ifdef VMS
+#include <HTVMSUtils.h>
+#endif /* VMS */
 
 #include <HTParse.h>
 #include <HTTCP.h>
@@ -72,7 +81,6 @@
 #include <LYexit.h>
 #include <LYCharSets.h>
 #include <LYGlobalDefs.h>
-#include <LYStrings.h>
 #include <LYUtils.h>
 #include <LYLeaks.h>
 
@@ -91,10 +99,6 @@ typedef struct _HTSuffix {
 #define NGROUPS 32
 #endif /* NGROUPS_MAX */
 #endif /* NGROUPS */
-
-#ifndef GETGROUPS_T
-#define GETGROUPS_T int
-#endif
 
 #include <HTML.h>		/* For directory object building */
 
@@ -117,10 +121,15 @@ PUBLIC int HTDirAccess = HT_DIR_OK;
 
 #ifdef DIRED_SUPPORT
 PUBLIC int HTDirReadme = HT_DIR_README_NONE;
+#define FILES_FIRST 1
+#define MIXED_STYLE 2
+extern BOOLEAN lynx_edit_mode;
+extern BOOLEAN dir_list_style;
 #else
 PUBLIC int HTDirReadme = HT_DIR_README_TOP;
 #endif /* DIRED_SUPPORT */
 
+extern BOOLEAN LYRawMode;
 extern BOOL HTPassEightBitRaw;
 extern HTCJKlang HTCJK;
 
@@ -214,7 +223,6 @@ PRIVATE void LYListFmtParse ARGS5(
 			s++;
 		c = *s; 	/* the format char. or \0 */
 		*s = '\0';
-		buf[0] = '\0';
 
 		switch (c) {
 		case '\0':
@@ -228,7 +236,7 @@ PRIVATE void LYListFmtParse ARGS5(
 			PUTS(buf);
 			END(HTML_A);
 #ifdef S_IFLNK
-			if (c != 'A' && S_ISLNK(st.st_mode) &&
+			if (c != 'A' && (st.st_mode & S_IFMT) == S_IFLNK &&
 			    (len = readlink(file, buf, sizeof(buf))) >= 0) {
 				PUTS(" -> ");
 				buf[len] = '\0';
@@ -262,7 +270,7 @@ PRIVATE void LYListFmtParse ARGS5(
 			break;
 
 		case 'K':	/* size in Kilobytes but not for directories */
-			if (S_ISDIR(st.st_mode)) {
+			if ((st.st_mode & S_IFMT) == S_IFDIR) {
 				sprintf(fmt, "%%%ss ", start);
 				sprintf(buf, fmt, "");
 				break;
@@ -557,60 +565,59 @@ PRIVATE int HTCreatePath ARGS1(CONST char *,path)
 **  On exit:
 **	Returns a malloc'ed string which must be freed by the caller.
 */
-PUBLIC char * HTnameOfFile_WWW ARGS3(
-	CONST char *,	name,
-	BOOL,		WWW_prefix,
-	BOOL,		expand_all)
+PUBLIC char * HTLocalName ARGS1(
+	CONST char *,	name)
 {
     char * acc_method = HTParse(name, "", PARSE_ACCESS);
     char * host = HTParse(name, "", PARSE_HOST);
     char * path = HTParse(name, "", PARSE_PATH+PARSE_PUNCTUATION);
-    char * home;
-    char * result = NULL;
 
-    if (expand_all)
-    	HTUnEscape(path);		/* Interpret all % signs */
-    else
-	HTUnEscapeSome(path, "/");	/* Interpret % signs for path delims */
+    HTUnEscape(path);	/* Interpret % signs */
 
-    if (0 == strcmp(acc_method, "file")	/* local file */
-     || !*acc_method) {			/* implicitly local? */
+    if (0 == strcmp(acc_method, "file")) { /* local file */
+	FREE(acc_method);
 	if ((0 == strcasecomp(host, HTHostName())) ||
 	    (0 == strcasecomp(host, "localhost")) || !*host) {
-	    CTRACE(tfp, "Node `%s' means path `%s'\n", name, path);
+	    FREE(host);
+	    if (TRACE)
+		fprintf(stderr, "Node `%s' means path `%s'\n", name, path);
 #ifdef DOSPATH
-	    StrAllocCopy(result, HTDOS_name(path));
+	    {
+		char *ret_path = NULL;
+		StrAllocCopy(ret_path, HTDOS_name(path));
+		if (TRACE) {
+		    fprintf(stderr, "HTDOS_name changed `%s' to `%s'\n",
+			    path, ret_path);
+		}
+		FREE(path);
+		return(ret_path);
+	    }
 #else
-#ifdef __EMX__
-	    if (path[0] == '/'
-	     && isalpha(path[1])
-	     && path[2] == ':') /* pesky leading slash */
-		StrAllocCopy(result, path+1);
-	    else
-		StrAllocCopy(result, path);
-	    CTRACE(tfp, "EMX hack changed `%s' to `%s'\n", path, result);
-#else
-	    StrAllocCopy(result, path);
-#endif /* __EMX__ */
+	    return(path);
 #endif /* DOSPATH */
-	} else if (WWW_prefix) {
-	    result = (char *)malloc(
-				strlen("/Net/")+strlen(host)+strlen(path)+1);
-	    if (result == NULL)
-		outofmem(__FILE__, "HTLocalName");
-	    sprintf(result, "%s%s%s", "/Net/", host, path);
-	    CTRACE(tfp, "Node `%s' means file `%s'\n", name, result);
 	} else {
-	    StrAllocCopy(result, path);
+	    char * result = (char *)malloc(
+				strlen("/Net/")+strlen(host)+strlen(path)+1);
+	      if (result == NULL)
+		  outofmem(__FILE__, "HTLocalName");
+	    sprintf(result, "%s%s%s", "/Net/", host, path);
+	    FREE(host);
+	    FREE(path);
+	    if (TRACE)
+		fprintf(stderr, "Node `%s' means file `%s'\n", name, result);
+	    return result;
 	}
-    } else if (WWW_prefix) {  /* other access */
+    } else {  /* other access */
+	char * result;
 #ifdef VMS
-	if ((home = getenv("HOME")) == 0)
+	char * home =  getenv("HOME");
+	if (!home)
 	    home = HTCacheRoot;
 	else
 	    home = HTVMS_wwwName(home);
 #else
-	if ((home = getenv("HOME")) == 0)
+	CONST char * home =  (CONST char*)getenv("HOME");
+	if (!home)
 	    home = "/tmp";
 #endif /* VMS */
 	result = (char *)malloc(
@@ -618,15 +625,11 @@ PUBLIC char * HTnameOfFile_WWW ARGS3(
 	if (result == NULL)
 	    outofmem(__FILE__, "HTLocalName");
 	sprintf(result, "%s/WWW/%s/%s%s", home, acc_method, host, path);
-    } else {
-	StrAllocCopy(result, path);
+	FREE(path);
+	FREE(acc_method);
+	FREE(host);
+	return result;
     }
-
-    FREE(host);
-    FREE(path);
-    FREE(acc_method);
-
-    return result;
 }
 
 /*	Make a WWW name from a full local path name.
@@ -660,7 +663,8 @@ PUBLIC char * WWW_nameOfFile ARGS1(
 	    outofmem(__FILE__, "WWW_nameOfFile");
 	sprintf(result, "file://%s%s", HTHostName(), name);
     }
-    CTRACE(tfp, "File `%s'\n\tmeans node `%s'\n", name, result);
+    if (TRACE)
+	fprintf(stderr, "File `%s'\n\tmeans node `%s'\n", name, result);
     return result;
 }
 
@@ -855,13 +859,17 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
     char *cp = NULL, *cp1, *cp2, *cp3 = NULL, *cp4;
     BOOL chartrans_ok = FALSE;
     int chndl = -1;
+    int i;
 
     FREE(anchor->charset);
     StrAllocCopy(cp, format->name);
-    LYLowerCase(cp);
+    for (i = 0; cp[i]; i++)
+	cp[i] = TOLOWER(cp[i]);
     if (((cp1 = strchr(cp, ';')) != NULL) &&
 	(cp2 = strstr(cp1, "charset")) != NULL) {
-	CTRACE(tfp, "HTCharsetFormat: Extended MIME Content-Type is %s\n",
+	if (TRACE)
+	    fprintf(stderr,
+		    "HTCharsetFormat: Extended MIME Content-Type is %s\n",
 		    format->name);
 	cp2 += 7;
 	while (*cp2 == ' ' || *cp2 == '=')
@@ -888,12 +896,6 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	    **	Got something but we don't recognize it.
 	    */
 	    chndl = UCLYhndl_for_unrec;
-	    if (chndl < 0)
-	    /*
-	    **  UCLYhndl_for_unrec not defined :-(
-	    **  fallback to UCLYhndl_for_unspec which always valid.
-	    */
-	    chndl = UCLYhndl_for_unspec;  /* always >= 0 */
 	    if (UCCanTranslateFromTo(chndl, current_char_set)) {
 		chartrans_ok = YES;
 		HTAnchor_setUCInfoStage(anchor, chndl,
@@ -938,9 +940,35 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 		    HTPassEightBitRaw = TRUE;
 		}
 	    } else if (p_out->enc == UCT_ENC_CJK) {
-		Set_HTCJK(p_in->MIMEname, p_out->MIMEname);
+		if (LYRawMode) {
+		    if ((!strcmp(p_in->MIMEname, "euc-jp") ||
+			 !strcmp(p_in->MIMEname, "shift_jis")) &&
+			(!strcmp(p_out->MIMEname, "euc-jp") ||
+			 !strcmp(p_out->MIMEname, "shift_jis"))) {
+			HTCJK = JAPANESE;
+		    } else if (!strcmp(p_in->MIMEname, "euc-cn") &&
+			       !strcmp(p_out->MIMEname, "euc-cn")) {
+			HTCJK = CHINESE;
+		    } else if (!strcmp(p_in->MIMEname, "big-5") &&
+			       !strcmp(p_out->MIMEname, "big-5")) {
+			HTCJK = TAIPEI;
+		    } else if (!strcmp(p_in->MIMEname, "euc-kr") &&
+			       !strcmp(p_out->MIMEname, "euc-kr")) {
+			HTCJK = KOREAN;
+		    } else {
+			HTCJK = NOCJK;
+		    }
+		} else {
+		    HTCJK = NOCJK;
+		}
 	    }
-	} else {
+	/*
+	**  Check for an iso-8859-# we don't know. - FM
+	*/
+	} else if (!strncmp(cp4, "iso-8859-", 9) &&
+		   isdigit((unsigned char)cp4[9]) &&
+		   !strncmp(LYchar_set_names[current_char_set],
+			    "Other ISO Latin", 15)) {
 	    /*
 	    **	Hope it's a match, for now. - FM
 	    */
@@ -1005,8 +1033,9 @@ PUBLIC float HTFileValue ARGS1(
 	suff = (HTSuffix *)HTList_objectAt(HTSuffixes, i);
 	ls = strlen(suff->suffix);
 	if ((ls <= lf) && 0==strcmp(suff->suffix, filename + lf - ls)) {
-	    CTRACE(tfp, "File: Value of %s is %.3f\n",
-			filename, suff->quality);
+	    if (TRACE)
+		fprintf(stderr, "File: Value of %s is %.3f\n",
+				filename, suff->quality);
 	    return suff->quality;		/* OK -- found */
 	}
     }
@@ -1053,7 +1082,11 @@ PUBLIC BOOL HTEditable ARGS1(
 #ifdef NO_GROUPS
     return NO;		/* Safe answer till we find the correct algorithm */
 #else
-    GETGROUPS_T groups[NGROUPS];
+#ifdef NeXT
+    int 	groups[NGROUPS];
+#else
+    gid_t	groups[NGROUPS];
+#endif /* NeXT */
     uid_t	myUid;
     int 	ngroups;			/* The number of groups  */
     struct stat fileStatus;
@@ -1067,16 +1100,14 @@ PUBLIC BOOL HTEditable ARGS1(
 
     if (TRACE) {
 	int i2;
-	fprintf(tfp,
+	fprintf(stderr,
 	    "File mode is 0%o, uid=%d, gid=%d. My uid=%d, %d groups (",
-	    (unsigned int) fileStatus.st_mode,
-	    (int) fileStatus.st_uid,
-	    (int) fileStatus.st_gid,
-	    (int) myUid,
-	    (int) ngroups);
+	    (unsigned int) fileStatus.st_mode, fileStatus.st_uid,
+	    fileStatus.st_gid,
+	    myUid, ngroups);
 	for (i2 = 0; i2 < ngroups; i2++)
-	    fprintf(tfp, " %d", (int) groups[i2]);
-	fprintf(tfp, ")\n");
+	    fprintf(stderr, " %d", groups[i2]);
+	fprintf(stderr, ")\n");
     }
 
     if (fileStatus.st_mode & 0002)		/* I can write anyway? */
@@ -1093,7 +1124,8 @@ PUBLIC BOOL HTEditable ARGS1(
 		return YES;
 	}
     }
-    CTRACE(tfp, "\tFile is not editable.\n");
+    if (TRACE)
+	fprintf(stderr, "\tFile is not editable.\n");
     return NO;					/* If no excuse, can't do */
 #endif /* NO_GROUPS */
 }
@@ -1228,11 +1260,11 @@ PUBLIC BOOL HTDirTitles ARGS3(
       char * printable = NULL;
 
 #ifdef DIRED_SUPPORT
-      printable = HTfullURL_toFile(
-	    (0 == strncasecomp(path, "/%2F", 4))	/* "//" ? */
-	    ? (path+1)
-	    : path);
-      if (0 == strncasecomp(printable, "/vmsysu:", 8) ||
+      if (0 == strncasecomp(path, "/%2F", 4))
+	  StrAllocCopy(printable, (path+1));
+      else
+	  StrAllocCopy(printable, path);
+      if (0 == strncasecomp(printable, "/vmsysu%2b", 10) ||
 	  0 == strncasecomp(printable, "/anonymou.", 10)) {
 	  StrAllocCopy(cp, (printable+1));
 	  StrAllocCopy(printable, cp);
@@ -1240,11 +1272,11 @@ PUBLIC BOOL HTDirTitles ARGS3(
       }
 #else
       StrAllocCopy(printable, (current ? current + 1 : ""));
-      HTUnEscape(printable);
 #endif /* DIRED_SUPPORT */
 
       START(HTML_HEAD);
       PUTS("\n");
+      HTUnEscape(printable);
       START(HTML_TITLE);
       PUTS(*printable ? printable : "Welcome");
       PUTS(" directory");
@@ -1496,9 +1528,10 @@ PUBLIC int HTLoadFile ARGS4(
     **	to the directories or files listed.
     */
     if (HTStat(filename, &stat_info) == -1) {
-	CTRACE(tfp, "HTLoadFile: Can't stat %s\n", filename);
+	if (TRACE)
+	    fprintf(stderr, "HTLoadFile: Can't stat %s\n", filename);
     } else {
-	if (S_ISDIR(stat_info.st_mode)) {
+	if (((stat_info.st_mode) & S_IFMT) == S_IFDIR) {
 	    if (HTDirAccess == HT_DIR_FORBID) {
 		FREE(filename);
 		FREE(nodename);
@@ -1544,12 +1577,14 @@ PUBLIC int HTLoadFile ARGS4(
 	*/
 	if (!fp) {
 	    char ultrixname[INFINITY];
-	    CTRACE(tfp, "HTLoadFile: Can't open as %s\n", vmsname);
+	    if (TRACE)
+		fprintf(stderr, "HTLoadFile: Can't open as %s\n", vmsname);
 	    sprintf(ultrixname, "%s::\"%s\"", nodename, filename);
 	    fp = fopen(ultrixname, "r", "shr=put", "shr=upd");
 	    if (!fp) {
-		CTRACE(tfp, "HTLoadFile: Can't open as %s\n",
-			    ultrixname);
+		if (TRACE)
+		    fprintf(stderr, "HTLoadFile: Can't open as %s\n",
+				    ultrixname);
 	    }
 	}
 	if (fp) {
@@ -1589,7 +1624,9 @@ PUBLIC int HTLoadFile ARGS4(
 			*semicolon = ';';
 		    gzfp = gzopen(vmsname, "rb");
 
-		    CTRACE(tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
+		    if (TRACE)
+			fprintf(stderr,
+				"HTLoadFile: gzopen of `%s' gives %p\n",
 				vmsname, (void*)gzfp);
 		    use_gzread = YES;
 		} else
@@ -1635,7 +1672,9 @@ PUBLIC int HTLoadFile ARGS4(
 				*semicolon = ';';
 			    gzfp = gzopen(vmsname, "rb");
 
-			    CTRACE(tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
+			    if (TRACE)
+				fprintf(stderr,
+				       "HTLoadFile: gzopen of `%s' gives %p\n",
 					vmsname, (void*)gzfp);
 			    use_gzread = YES;
 			}
@@ -1718,7 +1757,7 @@ PUBLIC int HTLoadFile ARGS4(
 	if ((strlen(localname) > strlen(MULTI_SUFFIX)) &&
 	    (0 == strcmp(localname + strlen(localname) - strlen(MULTI_SUFFIX),
 			 MULTI_SUFFIX))) {
-	    DIR *dp = 0;
+	    DIR *dp;
 	    BOOL forget_multi = NO;
 
 	    STRUCT_DIRENT * dirbuf;
@@ -1808,7 +1847,9 @@ PUBLIC int HTLoadFile ARGS4(
 			}
 		    }
 		    if (value != NO_VALUE_FOUND) {
-			CTRACE(tfp, "HTLoadFile: value of presenting %s is %f\n",
+			if (TRACE)
+			    fprintf(stderr,
+				 "HTLoadFile: value of presenting %s is %f\n",
 				    HTAtom_name(rep), value);
 			if  (value > best) {
 			    best_rep = rep;
@@ -1854,7 +1895,8 @@ PUBLIC int HTLoadFile ARGS4(
 #endif
 	{
 				       /* if can't read file information */
-	    CTRACE(tfp, "HTLoadFile: can't stat %s\n", localname);
+	    if (TRACE)
+		fprintf(stderr, "HTLoadFile: can't stat %s\n", localname);
 
 	}  else {		/* Stat was OK */
 
@@ -1862,7 +1904,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    if (stat(localname,&dir_info) == -1) dir_info.st_mode = S_IFDIR;
 #endif
 
-	    if (S_ISDIR(dir_info.st_mode)) {
+	    if (((dir_info.st_mode) & S_IFMT) == S_IFDIR) {
 		/*
 		**  If localname is a directory.
 		*/
@@ -1878,7 +1920,8 @@ PUBLIC int HTLoadFile ARGS4(
 		BOOL need_parent_link = FALSE;
 		struct stat file_info;
 
-		CTRACE(tfp, "%s is a directory\n", localname);
+		if (TRACE)
+		    fprintf(stderr, "%s is a directory\n", localname);
 
 		/*
 		**  Check directory access.
@@ -2024,14 +2067,13 @@ PUBLIC int HTLoadFile ARGS4(
 
 			StrAllocCat(tmpfilename, dirbuf->d_name);
 			stat(tmpfilename, &file_info);
-			if (S_ISDIR(file_info.st_mode))
+			if (((file_info.st_mode) & S_IFMT) == S_IFDIR)
 #ifndef DIRED_SUPPORT
 			    sprintf((char *)dirname, "D%s",dirbuf->d_name);
 			else
 			    sprintf((char *)dirname, "F%s",dirbuf->d_name);
 			    /* D & F to have first directories, then files */
 #else
-			{
 			    if (dir_list_style == MIXED_STYLE)
 				sprintf((char *)dirname,
 					" %s/", dirbuf->d_name);
@@ -2041,7 +2083,6 @@ PUBLIC int HTLoadFile ARGS4(
 			    else
 				sprintf((char *)dirname,
 					"D%s", dirbuf->d_name);
-			}
 			else if (dir_list_style == MIXED_STYLE)
 			    sprintf((char *)dirname, " %s", dirbuf->d_name);
 			else if (dir_list_style == FILES_FIRST)
@@ -2204,7 +2245,8 @@ PUBLIC int HTLoadFile ARGS4(
 	{
 	    FILE * fp = fopen(localname, "r");
 
-	    CTRACE (tfp, "HTLoadFile: Opening `%s' gives %p\n",
+	    if (TRACE)
+		fprintf (stderr, "HTLoadFile: Opening `%s' gives %p\n",
 				 localname, (void*)fp);
 	    if (fp) {		/* Good! */
 		int len;
@@ -2233,7 +2275,9 @@ PUBLIC int HTLoadFile ARGS4(
 			fclose(fp);
 			gzfp = gzopen(localname, "rb");
 
-			CTRACE(tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
+			if (TRACE)
+			    fprintf(stderr,
+				    "HTLoadFile: gzopen of `%s' gives %p\n",
 				    localname, (void*)gzfp);
 			use_gzread = YES;
 		    } else
@@ -2272,7 +2316,9 @@ PUBLIC int HTLoadFile ARGS4(
 			    fclose(fp);
 			    gzfp = gzopen(localname, "rb");
 
-			    CTRACE(tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
+			    if (TRACE)
+				fprintf(stderr,
+				       "HTLoadFile: gzopen of `%s' gives %p\n",
 					localname, (void*)gzfp);
 			    use_gzread = YES;
 			}
@@ -2359,7 +2405,8 @@ PUBLIC int HTLoadFile ARGS4(
     **	All attempts have failed.
     */
     {
-	CTRACE(tfp, "Can't open `%s', errno=%d\n", addr, SOCKET_ERRNO);
+	if (TRACE)
+	    fprintf(stderr, "Can't open `%s', errno=%d\n", addr, SOCKET_ERRNO);
 
 	return HTLoadError(sink, 403, "Can't access requested file.");
     }

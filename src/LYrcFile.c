@@ -1,4 +1,5 @@
 #include <HTUtils.h>
+#include <tcp.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
 #include <LYrcFile.h>
@@ -6,20 +7,13 @@
 #include <LYGlobalDefs.h>
 #include <LYCharSets.h>
 #include <LYBookmark.h>
-#include <LYCookie.h>
 
 #include <LYLeaks.h>
-
-#ifdef FNAMES_8_3
-#define FNAME_LYNXRC "lynx.rc"
-#else
-#define FNAME_LYNXRC ".lynxrc"
-#endif /* FNAMES_8_3 */
 
 PUBLIC void read_rc NOPARAMS
 {
     char line_buffer[256];
-    char rcfile[LY_MAXPATH];
+    char rcfile[256];
     FILE *fp;
     char *cp, *cp2;
     int number_sign;
@@ -31,7 +25,15 @@ PUBLIC void read_rc NOPARAMS
     /*
      *  Make an RC file name.
      */
-    LYAddPathToHome(rcfile, sizeof(rcfile), FNAME_LYNXRC);
+#ifdef DJGPP
+    sprintf(rcfile, "%s/lynx.rc", Home_Dir());
+#else
+#ifdef VMS
+    sprintf(rcfile, "sys$login:.lynxrc");
+#else
+    sprintf(rcfile, "%s/.lynxrc", Home_Dir());
+#endif /* VMS */
+#endif /* DJGPP */
 
     /*
      *  Open the RC file for reading.
@@ -43,7 +45,7 @@ PUBLIC void read_rc NOPARAMS
     /*
      *  Process the entries.
      */
-    while (fgets(line_buffer, sizeof(line_buffer)-1, fp) != NULL) {
+    while (fgets(line_buffer, 256, fp) != NULL) {
 	/*
 	 *  Remove the /n from the end of the line.
 	 */
@@ -53,7 +55,8 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Remove any trailing white space.
 	 */
-	LYTrimTrailing(line_buffer);
+	while (line_buffer[0] && isspace(line_buffer[strlen(line_buffer)-1]))
+	    line_buffer[strlen(line_buffer)-1] = '\0';
 
 	/*
 	 *  Skip any comment or blank lines.
@@ -78,7 +81,8 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 	    StrAllocCopy(editor, cp);
 
 	/*
@@ -89,7 +93,8 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp,'=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 
 	    /*
 	     *  Since this is the "Default Bookmark File", we save it
@@ -108,7 +113,8 @@ PUBLIC void read_rc NOPARAMS
 
 	   if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = (cp2 + 1);
-	   cp = LYSkipBlanks(cp);
+	   while (isspace(*cp))
+	       cp++;  /* get rid of spaces */
 	   if (!strncasecomp(cp, "standard", 8)) {
 	      LYMultiBookmarks = TRUE;
 	      LYMBMAdvanced = FALSE;
@@ -175,7 +181,8 @@ PUBLIC void read_rc NOPARAMS
 			    /*
 			     *  Eat spaces in front of description.
 			     */
-			    MBM_cp1 = LYSkipBlanks(MBM_cp1);
+			    while (isspace(*MBM_cp1))
+				MBM_cp1++;
 			    while (*MBM_cp1)
 				MBM_line[MBM_i2++] = *MBM_cp1++;
 			    MBM_line[MBM_i2++] = '\0';
@@ -198,7 +205,8 @@ PUBLIC void read_rc NOPARAMS
 
 	   if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	   cp = LYSkipBlanks(cp);
+	   while (isspace(*cp))
+	       cp++;  /* get rid of spaces */
 	   if (!strncasecomp(cp, "BY_FILENAME", 11))
 		HTfileSortMethod = FILE_BY_NAME;
 	   else if (!strncasecomp(cp, "BY_TYPE", 7))
@@ -217,7 +225,8 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 	    StrAllocCopy(personal_mail_address, cp);
 
 	/*
@@ -229,7 +238,8 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 	    if (!strncasecomp(cp, "on", 2))
 		case_sensitive = TRUE;
 	    else
@@ -245,13 +255,15 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
-
-	    i = UCGetLYhndl_byAnyName(cp); /* by MIME or full name */
-	    if (i < 0)
-		; /* do nothing here: so fallback to lynx.cfg */
-	    else
-		current_char_set = i;
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
+	    for (; LYchar_set_names[i]; i++) {
+		if (!strncmp(cp, LYchar_set_names[i], strlen(cp))) {
+		    current_char_set=i;
+		    HTMLSetRawModeDefault(i);
+		    break;
+		}
+	    }
 
 	/*
 	 *  Preferred language.
@@ -262,7 +274,8 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 	    StrAllocCopy(language, cp);
 
 	/*
@@ -274,7 +287,8 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 	    StrAllocCopy(pref_charset, cp);
 
 	/*
@@ -285,7 +299,8 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 	    if (!strncasecomp(cp, "on", 2))
 		vi_keys = TRUE;
 	    else
@@ -299,7 +314,8 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 	    if (!strncasecomp(cp, "on", 2))
 		emacs_keys = TRUE;
 	    else
@@ -313,7 +329,8 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 	    if (!strncasecomp(cp, "on", 2))
 		show_dotfiles = TRUE;
 	    else
@@ -327,7 +344,8 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 	    if (!strncasecomp(cp, "always", 6)) {
 		LYrcShowColor = SHOW_COLOR_ALWAYS;
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
@@ -350,7 +368,8 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 	    if (!strncasecomp(cp, "off", 3))
 		LYSelectPopups = FALSE;
 	    else
@@ -364,7 +383,8 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 	    if (!strncasecomp(cp, "off", 3))
 		LYShowCursor = FALSE;
 	    else
@@ -378,7 +398,8 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 	    if (LYstrstr(cp, "LINKS_ARE_NUMBERED"))
 		keypad_mode = LINKS_ARE_NUMBERED;
 	    else if (LYstrstr(cp, "LINKS_AND_FORM_FIELDS_ARE_NUMBERED"))
@@ -396,7 +417,8 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 	    for (; LYLineeditNames[i]; i++) {
 		if (!strncmp(cp, LYLineeditNames[i], strlen(cp))) {
 		    current_lineedit = i;
@@ -413,7 +435,8 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp,'=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 	    if (LYstrstr(cp, "FILES_FIRST") != NULL) {
 		dir_list_style = FILES_FIRST;
 	    } else if (LYstrstr(cp,"DIRECTORIES_FIRST") != NULL) {
@@ -424,59 +447,6 @@ PUBLIC void read_rc NOPARAMS
 #endif /* DIRED_SUPPORT */
 
 	/*
-	 *  Accept cookies from all domains?
-	 */
-	} else if ((cp = LYstrstr(line_buffer, "accept_all_cookies")) != NULL &&
-		   cp-line_buffer < number_sign) {
-	    if((cp2 = (char *)strchr(cp,'=')) != NULL)
-		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++; /* get rid of spaces */
-	    if (LYstrstr(cp,"TRUE") != NULL) {
-		LYAcceptAllCookies = TRUE;
-	    } else {
-		LYAcceptAllCookies = FALSE;
-	    }
-
-
-	/*
-	 * Accept all cookies from certain domains?
-	 */
-	} else if ((cp = LYstrstr(line_buffer, "cookie_accept_domains"))
-		!= NULL && cp-line_buffer < number_sign) {
-	    if((cp2 = (char *)strchr(cp,'=')) != NULL)
-		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++; /* get rid of spaces */
-	    cookie_add_acceptlist(cp);
-
-
-	/*
-	 * Reject all cookies from certain domains?
-	 */
-	} else if ((cp = LYstrstr(line_buffer, "cookie_reject_domains"))
-		!= NULL && cp-line_buffer < number_sign) {
-	    if((cp2 = (char *)strchr(cp,'=')) != NULL)
-		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++; /* get rid of spaces */
-	    cookie_add_rejectlist(cp);
-
-#ifdef EXP_PERSISTENT_COOKIES
-	/*
-	 * File to store cookies in.
-	 */
-	} else if ((cp = LYstrstr(line_buffer, "cookie_file"))
-		!= NULL && cp-line_buffer < number_sign) {
-	    if((cp2 = (char *)strchr(cp,'=')) != NULL)
-		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++; /* get rid of spaces */
-
-	    StrAllocCopy(LYCookieFile, cp);
-#endif /* EXP_PERSISTENT_COOKIES */
-
-	/*
 	 *  User mode.
 	 */
 	} else if ((cp = LYstrstr(line_buffer, "user_mode")) != NULL &&
@@ -484,7 +454,8 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 	    if (LYstrstr(cp, "ADVANCED") != NULL) {
 		user_mode = ADVANCED_MODE;
 	    } else if (LYstrstr(cp,"INTERMEDIATE") != NULL) {
@@ -503,25 +474,13 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
+
 	    if (!strncasecomp(cp, "on", 2))
 		local_exec = TRUE;
 	     else
 		local_exec = FALSE;
-
-#ifdef DISP_PARTIAL
-	/*
-	 * Partial display logic--set the threshold # of lines before
-	 * Lynx redraws the screen
-	 */
-	} else if ((cp = LYstrstr(line_buffer, "partial_thres")) != NULL &&
-		   cp-line_buffer < number_sign) {
-	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-	        cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
-	    if (atoi(cp) != 0)
-	        partial_threshold = atoi(cp);
-#endif /* DISP_PARTIAL */
 
 	/*
 	 *  Local execution mode - only links in local files.
@@ -532,24 +491,13 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
 	    if (!strncasecomp(cp, "on", 2))
 		local_exec_on_local_files = TRUE;
 	    else
 		local_exec_on_local_files=FALSE;
 #endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
-
-	} else if ((cp = LYstrstr(line_buffer,
-				  "verbose_images")) != NULL &&
-		   cp-line_buffer < number_sign) {
-
-	   if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	   cp = LYSkipBlanks(cp);
-	   if (!strncasecomp(cp, "on", 2))
-		verbose_img = 1;
-	   else if (!strncasecomp(cp, "off", 3))
-		verbose_img = 0;
 
 	} /* end of if */
 
@@ -560,7 +508,7 @@ PUBLIC void read_rc NOPARAMS
 
 PUBLIC int save_rc NOPARAMS
 {
-    char rcfile[LY_MAXPATH];
+    char rcfile[256];
     FILE *fp;
     int i;
     int MBM_c;
@@ -568,11 +516,22 @@ PUBLIC int save_rc NOPARAMS
     /*
      *  Make a name.
      */
-    LYAddPathToHome(rcfile, sizeof(rcfile), FNAME_LYNXRC);
+#ifdef DJGPP
+    sprintf(rcfile, "%s/lynx.rc", Home_Dir());
+#else
+#ifdef VMS
+    sprintf(rcfile, "sys$login:.lynxrc");
+#else
+    sprintf(rcfile, "%s/.lynxrc", Home_Dir());
+#endif /* VMS */
+#endif /* DJGPP */
 
     /*
      *  Open the file for write.
      */
+#if defined(__DJGPP__) || defined(_WINDOWS)
+    _fmode = O_TEXT;
+#endif /* __DJGPP__  or _WINDOWS */
     if ((fp = LYNewTxtFile(rcfile)) == NULL) {
 	return FALSE;
     }
@@ -813,7 +772,7 @@ PUBLIC int save_rc NOPARAMS
 # current link in documents, or current option in select popup windows.\n\
 # Positioning the cursor to the left of the current link or option is\n\
 # helpful for speech or braille interfaces, and when the terminal is\n\
-# one which does not distinguish the current link based on highlighting\n\
+# one which does not distingish the current link based on highlighting\n\
 # or color.  A value of \"on\" will set positioning to the left as the\n\
 # default while a value of \"off\" will set 'hiding' of the cursor.\n\
 # The default can be overridden via the -show_cursor command line toggle.\n");
@@ -850,24 +809,11 @@ PUBLIC int save_rc NOPARAMS
 	       ((keypad_mode == LINKS_ARE_NUMBERED) ? "LINKS_ARE_NUMBERED" :
 				      "LINKS_AND_FORM_FIELDS_ARE_NUMBERED")));
 
-#ifdef DISP_PARTIAL
-    /*
-     * Partial display threshold
-     */
-    fprintf(fp, "\
-# partial_thres specifies the number of lines Lynx should download and render\n\
-# before we redraw the screen in Partial Display logic\n\
-# e.g. partial_thres=2\n\
-# would have Lynx redraw every 2 lines that it renders\n\
-# partial_thres=-1 would use the entire screensize\n");
-    fprintf(fp, "partial_thres=%d\n\n", partial_threshold);
-#endif /* DISP_PARTIAL */
-
     /*
      *  Lineedit mode.
      */
     fprintf(fp, "\
-# lineedit_mode specifies the key binding used for inputting strings in\n\
+# linedit_mode specifies the key binding used for inputting strings in\n\
 # prompts and forms.  If lineedit_mode is set to \"Default Binding\" then\n\
 # the following control characters are used for moving and deleting:\n\
 #\n\
@@ -918,50 +864,12 @@ PUBLIC int save_rc NOPARAMS
 			 (user_mode == ADVANCED_MODE ?
 					  "ADVANCED" : "INTERMEDIATE")));
 
-    /*
-     * Cookie options
-     */
-    fprintf(fp, "\
-# accept_all_cookies allows the user to tell Lynx to automatically\n\
-# accept all cookies if desired.  The default is \"FALSE\" which will\n\
-# prompt for each cookie.  Set accept_all_cookies to \"TRUE\" to accept\n\
-# all cookies.\n");
-    fprintf(fp, "accept_all_cookies=%s\n\n",
-		(LYAcceptAllCookies == FALSE ? "FALSE" : "TRUE"));
-
-    fprintf(fp, "\
-# cookie_accept_domains and cookie_reject_domains are comma-delimited\n\
-# lists of domains (with a leading '.') to automatically accept or\n\
-# reject all cookies from.  The accept_all_cookies parameter will\n\
-# override any settings made here.  If a single domain is specified in\n\
-# both cookie_accept_domains and in cookie_reject_domains, the rejection\n\
-# will take precedence.\n");
-    fprintf(fp, "# cookie_accept_domains=\n");
-    fprintf(fp, "# cookie_reject_domains=\n\n");
-
-    /*
-     * cookie_accept_domains and cookie_reject_domains not set here because
-     * there's not currently a method on the options menu (maybe later?)
-     * to set them.
-     */
-
-#ifdef EXP_PERSISTENT_COOKIES
-    /*
-     * Cookie file.
-     */
-    fprintf(fp, "\
-# cookie_file specifies the file in which to store persistent cookies.\n\
-# The default is ~/.lynx_cookies.\n");
-    fprintf(fp, "cookie_file=%s\n\n",
-		(LYCookieFile == NULL ? "~/.lynx_cookies" : LYCookieFile));
-#endif /* EXP_PERSISTENT_COOKIES */
-
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
     /*
      *  Local execution mode - all links.
      */
     fprintf(fp, "\
-# If run_all_execution_links is set \"on\" then all local execution links\n\
+# If run_all_execution_links is set \"on\" then all local exection links\n\
 # will be executed when they are selected.\n\
 #\n\
 # WARNING - This is potentially VERY dangerous.  Since you may view\n\
@@ -993,19 +901,24 @@ PUBLIC int save_rc NOPARAMS
 		(local_exec_on_local_files ? "on" : "off"));
 #endif /* defined(EXEC_LINKS) || defined(EXEC_SCRIPTS) */
 
-    fprintf(fp, "\
-# If verbose_images is \"on\", lynx will print the name of the image\n\
-# source file in place of [INLINE], [LINK] or [IMAGE]\n\
-# See also VERBOSE_IMAGES in lynx.cfg\n");
-    fprintf(fp, "verbose_images=%s\n\n",
-		verbose_img ? "on" : "off");
-
     /*
      *  Close the RC file.
      */
     fclose(fp);
+#if defined(__DJGPP__) || defined(_WINDOWS)
+    _fmode = O_BINARY;
+#endif /* __DJGPP__ or _WINDOWS */
 
-    HTSYS_purge(rcfile);
+#ifdef VMS
+    /*
+     *  Get rid of any copies of the .lynxrc file that VMS creates.
+     */
+    while (remove("sys$login:.lynxrc;-1") == 0) ;
+	/*
+	 *  Reset version number.
+	 */
+	rename("sys$login:.lynxrc", "sys$login:.lynxrc;1");
+#endif /* VMS */
 
-    return TRUE;
+   return TRUE;
 }

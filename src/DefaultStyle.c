@@ -4,6 +4,7 @@
 */
 
 #include <HTUtils.h>
+#include <tcp.h>
 #include <HTStyle.h>
 #include <HTFont.h>
 

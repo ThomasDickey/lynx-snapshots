@@ -1,7 +1,6 @@
+
 #ifndef LYGETFILE_H
 #define LYGETFILE_H
-
-#include <LYStructs.h>
 
 #define NOT_FOUND 0
 #define NORMAL 1

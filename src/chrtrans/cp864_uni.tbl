@@ -2,7 +2,7 @@
 Mcp864
 
 #Name as a Display Charset (used on Options screen).
-OArabic (cp864)
+ODosArabic (cp864)
 
 #    Name:     cp864_DOSArabic to Unicode table
 #    Unicode version: 2.0

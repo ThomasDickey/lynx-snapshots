@@ -76,13 +76,13 @@
  * Note that some implementations of telnet allow passing of
  * environment variables, which might be used by unscrupulous
  * people to modify the environment in anonymous accounts.  When
- * making Lynx and Web access publicly available via anonymous
+ * making Lynx and Web access publically available via anonymous
  * accounts intended to run Lynx captively, be sure the wrapper
  * uses the -cfg switch and specifies the startfile, rather than
  * relying on the LYNX_CFG, LYNX_CFG_FILE, or WWW_HOME variables.
  *
  * Note that any SUFFIX or VIEWER mappings in the configuration
- * file will be overridden by any suffix or viewer mappings
+ * file will be overidden by any suffix or viewer mappings
  * that are established as defaults in src/HTInit.c.  You can
  * override the src/HTInit.c defaults via the mime.types and
  * mailcap files (see the examples in the samples directory).
@@ -126,7 +126,7 @@
 
 /**************************
  * SYSTEM_MAIL must be defined here to your mail sending command,
- * and SYSTEM_MAIL_FLAGS to appropriate qualifiers.  They can be
+ * and SYSTEM_MAIL_FLAGS to approrpriate qualifiers.  They can be
  * changed in lynx.cfg.
  *
  * The mail command will be spawned as a subprocess of lynx
@@ -230,7 +230,7 @@
 #else     /* UNIX */
 
 /**************************
- * NOTE: This variable is set by the configure script; editing changes will
+ * NOTE: This variable is set by the configure scrip; editing changes will
  * be ignored.
  *
  * LYNX_CFG_FILE is the location and name of the default lynx
@@ -253,13 +253,13 @@
  * Note that many implementations of telnetd allow passing of
  * environment variables, which might be used by unscrupulous
  * people to modify the environment in anonymous accounts.  When
- * making Lynx and Web access publicly available via anonymous
+ * making Lynx and Web access publically available via anonymous
  * accounts intended to run Lynx captively, be sure the wrapper
  * uses the -cfg switch and specifies the startfile, rather than
  * relying on the LYNX_CFG, LYNX_CFG_FILE, or WWW_HOME variables.
  *
  * Note that any SUFFIX or VIEWER mappings in the configuration
- * file will be overridden by any suffix or viewer mappings
+ * file will be overidden by any suffix or viewer mappings
  * that are established as defaults in src/HTInit.c.  You can
  * override the src/HTInit.c defaults via the mime.types and
  * mailcap files (see the examples in the samples directory).
@@ -344,14 +344,16 @@
 #define TEMP_SPACE "/tmp/"
 
 /********************************
- * Comment this line out to let the user enter his/her email address
- * when sending a message.  There should be no need to do this unless
- * your mailer agent does not put in the From: field for you.  (If your
- * mailer agent does not automatically put in the From: field, you should
- * upgrade, because anonymous mail makes it far too easy for a user to
- * spoof someone else's email address.)
+ * Don't let the user enter his/her email address when sending a message.
+ * Anonymous mail makes it far too easy for a user to spoof someone else's
+ * email address.
+ * This requires that your mailer agent put in the From: field for you.
+ *
+ * The default should be to uncomment this line but there probably are too
+ * many mail agents out there that won't do the right thing if there is no
+ * From: line.
  */
-#define NO_ANONYMOUS_EMAIL TRUE
+/* #define NO_ANONYMOUS_EMAIL TRUE */
 
 /********************************
  * LIST_FORMAT defines the display for local files when LONG_LIST
@@ -451,7 +453,7 @@
 
 /*****************************
  * If USE_TRACE_LOG is set FALSE, then when TRACE mode is invoked the
- * syserr messages will not be directed to a log file named Lynx.trace
+ * syserr messages will not be directed to a log file named lynx.trace
  * in the account's HOME directory.  The default defined here can be
  * toggled via the -tlog command line switch.  Also, it is set FALSE
  * automatically when Lynx is executed in an anonymous or validation
@@ -466,7 +468,7 @@
  * the log, even if TRACE mode is turned off via the TOGGLE_TRACE
  * (Control-T) command.
  */
-#define USE_TRACE_LOG	TRUE
+#define USE_TRACE_LOG	FALSE
 
 /*******************************
  * If GOTOBUFFER is set to TRUE here or in lynx.cfg the last entered
@@ -490,7 +492,7 @@
  * <dt>?<dd><a href="file://localhost/path/jumps.html">This Shortcut List</a>
  *
  * If not defined here or in lynx.cfg, the JUMP command will invoke
- * the NO_JUMPFILE status line message (see LYMessages_en.h).  The prompt
+ * the NO_JUMPFILE statusline message (see LYMessages_en.h).  The prompt
  * associated with the default jumps file is defined as JUMP_PROMPT in
  * LYMessages_en.h and can be modified in lynx.cfg.  Additional, alternate
  * jumps files can be defined and mapped to keystrokes, and alternate
@@ -540,7 +542,7 @@
 
 /*********************
  * LOCAL_DOMAIN is used for a tail match with the ut_host element of
- * the utmp or utmpx structure on systems with utmp capabilities, to
+ * the utmp or utmpx structure on systems with utmp capabilites, to
  * determine if a user is local to your campus or organization when
  * handling -restrictions=inside_foo or outside_foo settings for ftp,
  * news, telnet/tn3270 and rlogin URLs.  An "inside" user is assumed
@@ -597,7 +599,7 @@
 
 /********************************
  * CHARACTER_SET defines the default character set, i.e., that assumed
- * to be installed on the user's terminal.  It determines which characters
+ * to be installed on the user's termimal.  It determines which characters
  * or strings will be used to represent 8-bit character entities within
  * HTML.  New character sets may be defined as explained in the README
  * files of the src/chrtrans directory in the Lynx source code distribution.
@@ -606,65 +608,61 @@
  * via the 'o'ptions menu.  The 'o'ptions menu setting will be stored in
  * the user's RC file whenever those settings are saved, and thereafter
  * will be used as the default.  Also see lynx.cfg for information about
- * the -raw switch and LYK_RAW_TOGGLE command.
+ * the -raw switch and LYE_RAW_TOGGLE command.
  *
- * Since Lynx now supports a wide range of platforms it may be useful
- * to note that cpXXX codepages used by IBM PC compatible computers,
- * and windows-xxxx used by native MS-Windows apps.
+ * The default character sets include:
  *
- *  Recognized character sets include:
- *
- *     string for 'O'ptions Menu          MIME name
- *     ===========================        =========
- *     7 bit approximations (US-ASCII)    us-ascii
- *     Western (ISO-8859-1)               iso-8859-1
- *     Western (cp850)                    cp850
- *     Western (windows-1252)             windows-1251
- *     IBM PC US codepage (cp437)         cp437
- *     DEC Multinational                  dec-mcs
- *     Macintosh (8 bit)                  macintosh
- *     NeXT character set                 next
- *     Chinese                            euc-cn
- *     Japanese (EUC-JP)                  euc-jp
- *     Japanese (Shift_JIS)               shift_jis
- *     Korean                             euc-kr
- *     Taipei (Big5)                      big5
- *     Vietnamese (VISCII)                viscii
- *     Eastern European (ISO-8859-2)      iso-8859-2
- *     Eastern European (cp852)           cp852
- *     Eastern European (windows-1250)    windows-1250
- *     Latin 3 (ISO-8859-3)               iso-8859-3
- *     Latin 4 (ISO-8859-4)               iso-8859-4
- *     Baltic Rim (cp775)                 cp775
- *     Baltic Rim (windows-1257)          windows-1257
- *     Cyrillic (ISO-8859-5)              is-8859-5
- *     Cyrillic (cp866)                   cp866
- *     Cyrillic (windows-1251)            windows-1251
- *     Cyrillic (KOI8-R)                  koi8-r
- *     Arabic (ISO-8859-6)                iso-8859-6
- *     Arabic (cp864)                     cp864
- *     Arabic (windows-1256)              windows-1256
- *     Greek (ISO-8859-7)                 iso-8859-7
- *     Greek (cp737)                      cp737
- *     Greek2 (cp869)                     cp869
- *     Greek (windows-1253)               windows-1253
- *     Hebrew (ISO-8859-8)                iso-8859-8
- *     Hebrew (cp862)                     cp862
- *     Hebrew (windows-1255)              windows-1255
- *     Turkish (ISO-8859-9)               iso-8859-9
- *     ISO-8859-10                        iso-8859-10
- *     UNICODE (UTF-8)                    utf-8
- *     RFC 1345 w/o Intro                 mnemonic+ascii+0
- *     RFC 1345 Mnemonic                  mnemonic
- *     Transparent                        x-transparent
+ *   Display Character Set name		MIME name
+ *   ==========================		=========
+ *   7 bit approximations		us-ascii
+ *   Chinese				euc-cn
+ *   DEC Multinational			dec-mcs
+ *   DosArabic (cp864)			cp864
+ *   DosBaltRim (cp775)			cp775
+ *   DosCyrillic (cp866)		cp866
+ *   DosGreek (cp737)			cp737
+ *   DosGreek2 (cp869)			cp869
+ *   DosHebrew (cp862)			cp862
+ *   DosLatin1 (cp850)			cp850
+ *   DosLatin2 (cp852)			cp852
+ *   DosLatinUS (cp437)			cp437
+ *   ISO 8859-10			iso-8859-10
+ *   ISO 8859-5 Cyrillic		iso-8859-5
+ *   ISO 8859-6 Arabic			iso-8859-6
+ *   ISO 8859-7 Greek			iso-8859-7
+ *   ISO 8859-8 Hebrew			iso-8859-8
+ *   ISO 8859-9 (Latin 5)		iso-8859-9
+ *   ISO Latin 1			iso-8859-1
+ *   ISO Latin 2			iso-8859-2
+ *   ISO Latin 3			iso-8859-3
+ *   ISO Latin 4			iso-8859-4
+ *   Japanese (EUC)			euc-jp
+ *   Japanese (SJIS)			shift_jis
+ *   KOI8-R Cyrillic			koi8-r
+ *   Korean				euc-kr
+ *   Macintosh (8 bit)			macintosh
+ *   NeXT character set			next
+ *   RFC 1345 Mnemonic			mnemonic
+ *   RFC 1345 w/o Intro			mnemonic+ascii+0
+ *   Taipei (Big5)			big5
+ *   Transparent			x-transparent
+ *   UNICODE UTF-8			utf-8
+ *   Vietnamese (VISCII)		viscii
+ *   WinArabic (cp1256)			windows-1256
+ *   WinBaltRim (cp1257)		windows-1257
+ *   WinCyrillic (cp1251)		windows-1251
+ *   WinGreek (cp1253)			windows-1253
+ *   WinHebrew (cp1255)			windows-1255
+ *   WinLatin1 (cp1252)			windows-1252
+ *   WinLatin2 (cp1250)			windows-1250
  */
-#define CHARACTER_SET "iso-8859-1"
+#define CHARACTER_SET "ISO Latin 1"
 
 /*****************************
  * PREFERRED_LANGUAGE is the language in MIME notation (e.g., "en",
  * "fr") which will be indicated by Lynx in its Accept-Language headers
  * as the preferred language.  If available, the document will be
- * transmitted in that language.  This definition can be overridden via
+ * transmitted in that language.  This definition can be overriden via
  * lynx.cfg.  Users also can change it via the 'o'ptions menu and save
  * that preference in their RC file. This may be a comma-separated list
  * of languages in decreasing preference.
@@ -675,7 +673,7 @@
  * PREFERRED_CHARSET specifies the character set in MIME notation (e.g.,
  * "ISO-8859-2", "ISO-8859-5") which Lynx will indicate you prefer in
  * requests to http servers using an Accept-Charsets header.
- * This definition can be overridden via lynx.cfg.  Users also can change it
+ * This definition can be overriden via lynx.cfg.  Users also can change it
  * via the 'o'ptions menu and save that preference in their RC file.
  * The value should NOT include "ISO-8859-1" or "US-ASCII", since those
  * values are always assumed by default.
@@ -699,7 +697,7 @@
 * support via the 'o'ptions menu, and can save that choice as the startup
 * default via the .lynxrc file.  When on, the setting can be STANDARD or
 * ADVANCED.  If support is set to the latter, and the user mode also is
-* ADVANCED, the VIEW_BOOKMARK command will invoke a status line prompt at
+* ADVANCED, the VIEW_BOOKMARK command will invoke a statusline prompt at
 * which the user can enter the letter token (A - Z) of the desired bookmark,
 * or '=' to get a menu of available bookmark files.  The menu always is
 * presented in NOVICE or INTERMEDIATE mode, or if the support is set to
@@ -729,7 +727,7 @@
  * cannot be opened as a local file (file://localhost/string).  Both
  * can be comma-separated lists.  Each prefix must end with a dot, each
  * suffix must begin with a dot, and either may contain other dots (e.g.,
- * .co.jp).  The default lists are defined here, and can be changed
+ * .com.jp).  The default lists are defined here, and can be changed
  * in lynx.cfg.  Each prefix will be used with each suffix, in order,
  * until a valid Internet host is created, based on a successful DNS
  * lookup (e.g., foo will be tested as www.foo.com and then www.foo.edu
@@ -804,10 +802,8 @@
 
 /********************************
  * If COLLAPSE_BR_TAGS is set FALSE, Lynx will not collapse serial
- * BR tags.  If set TRUE, two or more concurrent BRs will be collapsed
- * into a single blank line.  Note that the valid way to insert extra
- * blank lines in HTML is via a PRE block with only newlines in the
- * block.
+ * BR tags.  Note that the valid way to insert extra blank lines in
+ * HTML is via a PRE block with only newlines in the block.
  *
  * The default defined here can be changed in lynx.cfg.
  */
@@ -822,15 +818,6 @@
  */
 #define SET_COOKIES TRUE
 
-/*******************************
- * If ACCEPT_ALL_COOKIES is set TRUE, and SET_COOKIES is TRUE, Lynx will
- * accept all cookies.
- *
- * The default defined here can be changed in lynx.cfg, and .lynxrc, or
- * toggled via the -accept_all_cookies command line switch.
- */
-#define ACCEPT_ALL_COOKIES FALSE
-
 
 /****************************************************************
  *   Section 2.   Things that you probably want to change or review
@@ -839,10 +826,10 @@
 
 /*****************************
  * The following three definitions set the number of seconds for
- * pauses following status line messages that would otherwise be
+ * pauses following statusline messages that would otherwise be
  * replaced immediately, and are more important than the unpaused
  * progress messages.  Those set by INFOSECS are also basically
- * progress messages (e.g., that a prompted input has been canceled)
+ * progress messages (e.g., that a prompted input has been cancelled)
  * and should have the shortest pause.  Those set by MESSAGESECS are
  * informational (e.g., that a function is disabled) and should have
  * a pause of intermediate duration.  Those set by ALERTSECS typically
@@ -882,15 +869,15 @@
 
 /******************************
 * VERBOSE_IMAGES controls whether or not Lynx replaces the [LINK], [INLINE] and
-* [IMAGE] comments (for images without ALT) with filenames of these images.
+* [IMAGE] comments (for images without ALT) with filenames of these images. 
 * This is extremely useful because now we can determine immediately what images
-* are just decorations (button.gif, line.gif) and what images are important.
-*
-* The default defined here can be changed in lynx.cfg.
-*/
-#define VERBOSE_IMAGES TRUE
-
-/******************************
+* are just decorations (button.gif, line.gif) and what images are important. 
+* 
+* The default defined here can be changed in lynx.cfg. 
+*/ 
+#define VERBOSE_IMAGES FALSE 
+ 
+/****************************** 
  * BOXVERT and BOXHORI control the layout of popup menus.  Set to 0 if your
  * curses supports line-drawing characters, set to '*' or any other character
  * to not use line-drawing (e.g., '|' for vertical and '-' for horizontal).
@@ -1044,7 +1031,7 @@
  * specify the DEFAULT setting of the users execution link
  * options, but the user may still change those options.
  * If you do not wish the user to be able to change the
- * execution link settings you may wish to use the command line option:
+ * execution link settings you may wish to use the commandline option:
  *    -restrictions=exec_frozen
  *
  * LOCAL_EXECUTION_LINKS_ALWAYS_ON will be FALSE
@@ -1078,16 +1065,16 @@
 #define MAIL_SYSTEM_ERROR_LOGGING   FALSE  /*mail a message for every error?*/
 
 /*********************************
- * If CHECKMAIL is set to TRUE, the user will be informed (via a status line
+ * If CHECKMAIL is set to TRUE, the user will be informed (via a statusline
  * message) about the existence of any unread mail at startup of Lynx, and
- * will get status line messages if subsequent new mail arrives.  If a jumps
+ * will get statusline messages if subsequent new mail arrives.  If a jumps
  * file with a lynxprog URL for invoking mail is available, or your html
  * pages include an mail launch file URL, the user thereby can access mail
- * and read the messages.  The checks and status line reports will not be
+ * and read the messages.  The checks and statusline reports will not be
  * performed if Lynx has been invoked with the -restrictions=mail switch.
  *
  *  VMS USERS !!!
- * New mail is normally broadcast as it arrives, via "unsolicited screen
+ * New mail is normally broadcast as it arrives, via "unsolicitied screen
  * broadcasts", which can be "wiped" from the Lynx display via the Ctrl-W
  * command.  You may prefer to disable the broadcasts and use CHECKMAIL
  * instead (e.g., in a public account which will be used by people who
@@ -1143,7 +1130,7 @@
  * strings will be links for the resolved SRC rather than just text.  For
  * ISMAP or other graphic links, the ALT or pseudo-ALT ("[ISMAP]" or "[LINK]")
  * strings will have '-' and a link labeled "[IMAGE]" for the resolved SRC
- * appended. See also VERBOSE_IMAGES flag.
+ * appended.
  *
  * The default defined here can be changed in lynx.cfg, and the user can
  * use LYK_IMAGE_TOGGLE to toggle the feature on or off at run time.
@@ -1158,7 +1145,6 @@
  * i.e., they'll be treated as having ALT="".  If MAKE_LINKS_FOR_ALL_IMAGES
  * is defined or toggled to TRUE, however, the pseudo-ALTs will be created
  * for inlines, so that they can be used as links to the SRCs.
- * See also VERBOSE_IMAGES flag.
  *
  * The default defined here can be changed in lynx.cfg, and the user can
  * use LYK_INLINE_TOGGLE to toggle the feature on or off at run time.
@@ -1188,7 +1174,7 @@
 
 /********************************
  * These definitions specify files created or used in conjunction
- * with traversals.  See CRAWL.ANNOUNCE for more information.
+ * with traversals.  See CRAWL.ANNOUNCE for more infomation.
  */
 #define TRAVERSE_FILE "traverse.dat"
 #define TRAVERSE_FOUND_FILE "traverse2.dat"
@@ -1197,7 +1183,7 @@
 
 /****************************************************************
  * The LYMessages_en.h header defines default, English strings
- * used in status line prompts, messages, and warnings during
+ * used in statusline prompts, messages, and warnings during
  * program execution.  See the comments in LYMessages_en.h for
  * information on translating or customizing them for your site.
  */
@@ -1216,15 +1202,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.1rel.2"
-#define LYNX_WWW_HOME "http://lynx.browser.org/"
-#define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
-#define LYNX_RELEASE TRUE
-/* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Tue, 27 Oct 1998 19:08:12 -0700"
-#define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
-#define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
-#define LYNX_RELEASE_DATE "1998"
+#define LYNX_VERSION "2.8.1dev.4"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */
@@ -1246,7 +1224,7 @@
 #define MAXCHARSETSP 61		/* always one more than MAXCHARSETS */
 
 /* Win32 may support more, but old win16 helper apps may not. */
-#if defined(__DJGPP__) || defined(_WINDOWS)
+#if defined(__DJGPP__) && defined(_WINDOWS)
 #define FNAMES_8_3
 #endif
 
@@ -1266,17 +1244,13 @@
 #else
 
 #ifdef DOSPATH
-/*  Something has to be defined for this or we don't compile. */
-#define SYSTEM_MAIL "sendmail"
-#define SYSTEM_MAIL_FLAGS "-t -oi"
 /*
 **  Following executables may be sought from your PATH at run-time.
-**  To get those programs look for GNU-port stuff elsewhere. Currently,
-**  if compiled with -DUSE_ZLIB and without -DDIRED_SUPPORT (default),
-**  you need only "cp.exe" from the list below.
+**  To get those programs look for GNU-port stuff elsewhere.
+**  Currently, if compiled with -DUSE_ZLIB (default), you need only "cp"
 **
-**    WINDOWS/DOS
-**    ===========
+**    WINDOWS
+**  ===========
 */
 #define COMPRESS_PATH   "compress"
 #define UNCOMPRESS_PATH "uncompress"
@@ -1286,6 +1260,11 @@
 #define INSTALL_PATH    "install"
 #define TAR_PATH        "tar"
 #define TOUCH_PATH      "touch"
+
+/*
+**    WINDOWS/DOS
+**  ===========
+*/
 #define ZIP_PATH        "zip"
 #define UNZIP_PATH      "unzip"
 #define MKDIR_PATH      "mkdir"
@@ -1295,11 +1274,7 @@
 #define CHMOD_PATH      "chmod"
 
 #else	/* Unix */
-	/* Standard locations are defined via the configure script.  When
-	 * helper applications are in your home directory or other nonstandard
-	 * locations, you probably will have to preset the path to them with
-	 * environment variables (see INSTALLATION, Section II-1d).
-	 */
+	/* this is done via the configure script */
 #endif /* DOSPATH */
 #endif /* VMS */
 

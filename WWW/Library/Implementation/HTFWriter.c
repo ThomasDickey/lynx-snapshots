@@ -16,8 +16,9 @@
 #include <HTAlert.h>
 #include <HTFile.h>
 
-#include <LYUtils.h>
 #include <LYLeaks.h>
+
+#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*		Stream Object
 **		------------
@@ -152,7 +153,8 @@ PRIVATE void HTFWriter_abort ARGS2(HTStream *, me, HTError, e)
 {
     fclose(me->fp);
     if (me->end_command) {		/* Temp file */
-	CTRACE(tfp, "HTFWriter: Aborting: file not executed.\n");
+	if (TRACE) fprintf(stderr,
+		"HTFWriter: Aborting: file not executed.\n");
 	FREE(me->end_command);
 	if (me->remove_command) {
 	    system(me->remove_command);
@@ -248,7 +250,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     
     /* Save the file under a suitably suffixed name */
     
-    suffix = HTFileSuffix(pres->rep, anchor->content_encoding);
+    suffix = HTFileSuffix(pres->rep);
 
     fnam = (char *)malloc (L_tmpnam + 16 + strlen(suffix));
     tmpnam (fnam);
@@ -326,7 +328,7 @@ PUBLIC HTStream* HTSaveLocally ARGS3(
     
     /* Save the file under a suitably suffixed name */
     
-    suffix = HTFileSuffix(pres->rep, anchor->content_encoding);
+    suffix = HTFileSuffix(pres->rep);
 
     fnam = (char *)malloc (L_tmpnam + 16 + strlen(suffix));
     tmpnam (fnam);

@@ -32,6 +32,7 @@
 */
 
 #include <HTUtils.h>
+#include <tcp.h>
 #include <HTVMS_WaisUI.h>
 #include <HTVMS_WaisProt.h>
 
@@ -57,7 +58,7 @@
 
 /*----------------------------------------------------------------------*/
 
-static unsigned long userInfoTagSize PARAMS((data_tag tag,
+static unsigned long userInfoTagSize _AP((data_tag tag,
 					  unsigned long length));
 
 static unsigned long
@@ -79,7 +80,7 @@ unsigned long length;
 
 /*----------------------------------------------------------------------*/
 
-static char* writeUserInfoHeader PARAMS((data_tag tag,long infoSize,	
+static char* writeUserInfoHeader _AP((data_tag tag,long infoSize,	
 				      long estHeaderSize,char* buffer,
 				      long* len));
 
@@ -126,7 +127,7 @@ long* len;
 
 /*----------------------------------------------------------------------*/
 
-static char* readUserInfoHeader PARAMS((data_tag* tag,unsigned long* num,
+static char* readUserInfoHeader _AP((data_tag* tag,unsigned long* num,
 				     char* buffer));
 
 static char*
@@ -227,8 +228,8 @@ char* buffer;
   char* buf = buffer;
   unsigned long size; 
   unsigned long headerSize;
+  data_tag tag;
   long chunkCode,chunkIDLen;
-  data_tag tag1;
   char* chunkMarker = NULL;
   char* highlightMarker = NULL;
   char* deHighlightMarker = NULL;
@@ -236,7 +237,7 @@ char* buffer;
   
   chunkCode = chunkIDLen = UNUSED;
   
-  buf = readUserInfoHeader(&tag1,&size,buf);
+  buf = readUserInfoHeader(&tag,&size,buf);
   headerSize = buf - buffer;
     
   while (buf < (buffer + size + headerSize))
@@ -435,7 +436,7 @@ DocObj* doc;
 
 /*----------------------------------------------------------------------*/
 
-static char* writeDocObj PARAMS((DocObj* doc,char* buffer,long* len));
+static char* writeDocObj _AP((DocObj* doc,char* buffer,long* len));
 
 static char*
 writeDocObj(doc,buffer,len)
@@ -482,7 +483,7 @@ long* len;
 
 /*----------------------------------------------------------------------*/
 
-static char* readDocObj PARAMS((DocObj** doc,char* buffer));
+static char* readDocObj _AP((DocObj** doc,char* buffer));
 
 static char*
 readDocObj(doc,buffer)
@@ -609,7 +610,7 @@ char* buffer;
     { char* buf = buffer;
       unsigned long size; 
       unsigned long headerSize;
-      data_tag tag1;
+      data_tag tag;
       char* seedWords = NULL;
       char* beginDateRange = NULL;
       char* endDateRange = NULL;
@@ -623,7 +624,7 @@ char* buffer;
 
       dateFactor = maxDocsRetrieved = UNUSED;
   
-      buf = readUserInfoHeader(&tag1,&size,buf);
+      buf = readUserInfoHeader(&tag,&size,buf);
       headerSize = buf - buffer;
   
       while (buf < (buffer + size + headerSize))
@@ -768,7 +769,7 @@ long* len;
   unsigned long header_len = userInfoTagSize(DT_DocumentHeaderGroup ,
 					     DefWAISDocHeaderSize);
   char* buf = buffer + header_len;
-  unsigned long size1;
+  unsigned long size;
   
   RESERVE_SPACE_FOR_WAIS_HEADER(len);
    
@@ -799,8 +800,8 @@ long* len;
   buf = writeString(header->OriginCity,DT_OriginCity,buf,len);
   
   /* now write the header and size */
-  size1 = buf - buffer; 
-  buf = writeUserInfoHeader(DT_DocumentHeaderGroup,size1,header_len,buffer,len);
+  size = buf - buffer; 
+  buf = writeUserInfoHeader(DT_DocumentHeaderGroup,size,header_len,buffer,len);
 
   return(buf);
 }
@@ -813,9 +814,9 @@ WAISDocumentHeader** header;
 char* buffer;
 {
   char* buf = buffer;
-  unsigned long size1; 
+  unsigned long size; 
   unsigned long headerSize;
-  data_tag tag1;
+  data_tag tag;
   any* docID = NULL;
   long versionNumber,score,bestMatch,docLength,lines;
   char** types = NULL;
@@ -826,10 +827,10 @@ char* buffer;
   
   versionNumber = score = bestMatch = docLength = lines = UNUSED;
   
-  buf = readUserInfoHeader(&tag1,&size1,buf);
+  buf = readUserInfoHeader(&tag,&size,buf);
   headerSize = buf - buffer;
     
-  while (buf < (buffer + size1 + headerSize))
+  while (buf < (buffer + size + headerSize))
     { data_tag tag = peekTag(buf);
       switch (tag)
 	{ case DT_DocumentID:
@@ -976,13 +977,13 @@ char* buffer;
   char* buf = buffer;
   unsigned long size; 
   unsigned long headerSize;
-  data_tag tag1;
+  data_tag tag;
   any* docID = NULL;
   long versionNumber,score,bestMatch,docLength,lines;
   
   versionNumber = score = bestMatch = docLength = lines = UNUSED;
   
-  buf = readUserInfoHeader(&tag1,&size,buf);
+  buf = readUserInfoHeader(&tag,&size,buf);
   headerSize = buf - buffer;
     
   while (buf < (buffer + size + headerSize))
@@ -1104,7 +1105,7 @@ long* len;
   unsigned long header_len = userInfoTagSize(DT_DocumentLongHeaderGroup ,
 					     DefWAISLongHeaderSize);
   char* buf = buffer + header_len;
-  unsigned long size1;
+  unsigned long size;
   
   RESERVE_SPACE_FOR_WAIS_HEADER(len);
    
@@ -1138,8 +1139,8 @@ long* len;
   buf = writeString(header->IndustryCodes,DT_IndustryCodes,buf,len);
   
   /* now write the header and size */
-  size1 = buf - buffer; 
-  buf = writeUserInfoHeader(DT_DocumentLongHeaderGroup,size1,header_len,buffer,len);
+  size = buf - buffer; 
+  buf = writeUserInfoHeader(DT_DocumentLongHeaderGroup,size,header_len,buffer,len);
 
   return(buf);
 }
@@ -1152,9 +1153,9 @@ WAISDocumentLongHeader** header;
 char* buffer;
 {
   char* buf = buffer;
-  unsigned long size1; 
+  unsigned long size; 
   unsigned long headerSize;
-  data_tag tag1;
+  data_tag tag;
   any* docID;
   long versionNumber,score,bestMatch,docLength,lines;
   char **types;
@@ -1165,10 +1166,10 @@ char* buffer;
   types = NULL;
   source = date = headline = originCity = stockCodes = companyCodes = industryCodes = NULL;
   
-  buf = readUserInfoHeader(&tag1,&size1,buf);
+  buf = readUserInfoHeader(&tag,&size,buf);
   headerSize = buf - buffer;
     
-  while (buf < (buffer + size1 + headerSize))
+  while (buf < (buffer + size + headerSize))
     { data_tag tag = peekTag(buf);
       switch (tag)
 	{ case DT_DocumentID:
@@ -1395,7 +1396,7 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 static void
-cleanUpWaisSearchResponse PARAMS((char* buf,char* seedWordsUsed,
+cleanUpWaisSearchResponse _AP((char* buf,char* seedWordsUsed,
 			       WAISDocumentHeader** docHeaders,
 			       WAISDocumentShortHeader** shortHeaders,
 			       WAISDocumentLongHeader** longHeaders,
@@ -1473,7 +1474,7 @@ char* buffer;
   char* buf = buffer;
   unsigned long size; 
   unsigned long headerSize;
-  data_tag tag1;
+  data_tag tag;
   void* header = NULL;
   WAISDocumentHeader** docHeaders = NULL;
   WAISDocumentShortHeader** shortHeaders = NULL;
@@ -1490,7 +1491,7 @@ char* buffer;
   
   numDocHeaders = numLongHeaders = numShortHeaders = numText = numHeadlines = numCodes = 0;
   
-  buf = readUserInfoHeader(&tag1,&size,buf);
+  buf = readUserInfoHeader(&tag,&size,buf);
   headerSize = buf - buffer;
     
   while (buf < (buffer + size + headerSize))
@@ -1671,14 +1672,14 @@ char* buffer;
   char* buf = buffer;
   unsigned long size; 
   unsigned long headerSize;
-  data_tag tag1;
+  data_tag tag;
   any *docID,*documentText;
   long versionNumber;
   
   docID = documentText = NULL;
   versionNumber = UNUSED;
   
-  buf = readUserInfoHeader(&tag1,&size,buf);
+  buf = readUserInfoHeader(&tag,&size,buf);
   headerSize = buf - buffer;
     
   while (buf < (buffer + size + headerSize))
@@ -1787,7 +1788,7 @@ char* buffer;
   char* buf = buffer;
   unsigned long size; 
   unsigned long headerSize;
-  data_tag tag1;
+  data_tag tag;
   any* docID;
   long versionNumber;
   char *source,*date,*headline,*originCity;
@@ -1796,7 +1797,7 @@ char* buffer;
   versionNumber = UNUSED;
   source = date = headline = originCity = NULL;
   
-  buf = readUserInfoHeader(&tag1,&size,buf);
+  buf = readUserInfoHeader(&tag,&size,buf);
   headerSize = buf - buffer;
     
   while (buf < (buffer + size + headerSize))
@@ -1912,7 +1913,7 @@ char* buffer;
   char* buf = buffer;
   unsigned long size; 
   unsigned long headerSize;
-  data_tag tag1;
+  data_tag tag;
   any* docID;
   long versionNumber;
   char *stockCodes,*companyCodes,*industryCodes;
@@ -1921,7 +1922,7 @@ char* buffer;
   versionNumber = UNUSED;
   stockCodes = companyCodes = industryCodes = NULL;
   
-  buf = readUserInfoHeader(&tag1,&size,buf);
+  buf = readUserInfoHeader(&tag,&size,buf);
   headerSize = buf - buffer;
     
   while (buf < (buffer + size + headerSize))
@@ -1961,9 +1962,9 @@ char* buffer;
 
 char* 
 writePresentInfo(present,buffer,len)
-PresentAPDU* present GCC_UNUSED;
+PresentAPDU* present;
 char* buffer;
-long* len GCC_UNUSED;
+long* len;
 {
   /* The WAIS protocol doesn't use present info */
   return(buffer);
@@ -1985,9 +1986,9 @@ char* buffer;
 
 char* 
 writePresentResponseInfo(response,buffer,len)
-PresentResponseAPDU* response GCC_UNUSED;
+PresentResponseAPDU* response;
 char* buffer;
-long* len GCC_UNUSED;
+long* len;
 {
   /* The WAIS protocol doesn't use presentResponse info */
   return(buffer);
@@ -2044,7 +2045,7 @@ char* buffer;
         ( XXX return type could be in the element set)
 */
 
-static query_term** makeWAISQueryTerms PARAMS((DocObj** docs));
+static query_term** makeWAISQueryTerms _AP((DocObj** docs));
    
 static query_term**
 makeWAISQueryTerms(docs)
@@ -2163,7 +2164,7 @@ DocObj** docs;
 
 /*----------------------------------------------------------------------*/
 
-static DocObj** makeWAISQueryDocs PARAMS((query_term** terms));
+static DocObj** makeWAISQueryDocs _AP((query_term** terms));
 
 static DocObj** 
 makeWAISQueryDocs(terms)

@@ -7,10 +7,6 @@
    automatically reallocating them as necessary.
    
  */
-#ifndef HTCHUNK_H
-#define HTCHUNK_H 1
-
-#include <HTUtils.h>
 #include <UCMap.h>
 
 typedef struct {
@@ -170,4 +166,6 @@ Append a zero character to a  chunk
 
 extern void HTChunkTerminate PARAMS((HTChunk * ch));
 
-#endif /* HTCHUNK_H */
+/*
+
+   end */

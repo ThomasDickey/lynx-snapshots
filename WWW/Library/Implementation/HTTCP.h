@@ -7,7 +7,10 @@
 #ifndef HTTCP_H
 #define HTTCP_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif /* HTUTILS_H */
+#include <tcp.h>
 
 #ifdef SHORT_NAMES
 #define HTInetStatus            HTInStat
@@ -112,3 +115,6 @@ extern int HTDoRead PARAMS((
 	unsigned 	nbyte));
 
 #endif   /* HTTCP_H */
+/*
+
+   End.  */

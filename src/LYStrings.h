@@ -1,7 +1,8 @@
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
 
-#include <HTUtils.h>
+#include <string.h>
+
 
 /*  UPPER8(ch1,ch2) is an extension of (TOUPPER(ch1) - TOUPPER(ch2))  */
 extern int UPPER8  PARAMS((
@@ -20,12 +21,9 @@ extern int LYgetstr PARAMS((
 	int		hidden,
 	size_t		bufsize,
 	int		recall));
-extern char *LYstrsep PARAMS((
-	char **		stringp,
-	const char *	delim));
 extern char * LYstrstr PARAMS((
 	char *		chptr,
-	CONST char *	tarptr));
+	char *		tarptr));
 extern char * LYmbcsstrncpy PARAMS((
 	char *		dst,
 	CONST char *	src,
@@ -69,6 +67,8 @@ extern char * SNACat PARAMS((
 #define StrnAllocCopy(dest, src, n)  SNACopy (&(dest), src, n)
 #define StrnAllocCat(dest, src, n)   SNACat  (&(dest), src, n)
 
+#define printable(c) (((c)>31 && (c)<=255) || (c)==9 || (c)==10 || (c)<0 )
+
 /* values for LYgetch */
 #define UPARROW		256	/* 0x100 */
 #define DNARROW		257	/* 0x101 */
@@ -77,7 +77,7 @@ extern char * SNACat PARAMS((
 #define PGDOWN		260	/* 0x104 */
 #define PGUP		261	/* 0x105 */
 #define HOME		262	/* 0x106 */
-#define END_KEY		263	/* 0x107 */
+#define END		263	/* 0x107 */
 #define F1		264	/* 0x108 */
 #define DO_KEY		265	/* 0x109 */
 #define FIND_KEY	266	/* 0x10A */
@@ -144,28 +144,6 @@ typedef struct _EditFieldData {
 
 #define LYE_AIX   (LYE_LKCMD +1)  /* Hex 97		   */
 
-#if defined(USE_KEYMAPS)
-extern int lynx_initialize_keymaps NOPARAMS;
-#endif
-
-extern void LYLowerCase PARAMS((
-	char *		buffer));
-extern void LYUpperCase PARAMS((
-	char *		buffer));
-extern void LYRemoveBlanks PARAMS((
-	char *		buffer));
-extern char * LYSkipBlanks PARAMS((
-	char *		buffer));
-extern char * LYSkipNonBlanks PARAMS((
-	char *		buffer));
-extern CONST char * LYSkipCBlanks PARAMS((
-	CONST char *	buffer));
-extern CONST char * LYSkipCNonBlanks PARAMS((
-	CONST char *	buffer));
-extern void LYTrimLeading PARAMS((
-	char *		buffer));
-extern void LYTrimTrailing PARAMS((
-	char *		buffer));
 extern void LYSetupEdit PARAMS((
 	EditFieldData *	edit,
 	char *		old,
@@ -184,7 +162,7 @@ extern int current_lineedit;
 extern char * LYLineeditNames[];
 extern char * LYLineEditors[];
 
-/* Push a character through the lineedit machinery */
+/* Push a chacter through the linedit machinery */
 #define EditBinding(c) (LYLineEditors[current_lineedit][c])
 #define LYLineEdit(e,c,m) LYEdit1(e,c,EditBinding(c),m)
 

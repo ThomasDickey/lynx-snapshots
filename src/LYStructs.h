@@ -1,3 +1,4 @@
+
 #ifndef LYSTRUCTS_H
 #define LYSTRUCTS_H
 
@@ -31,9 +32,9 @@ typedef struct _document {
    char * address;
    char * post_data;
    char * post_content_type;
-   char * bookmark;
    BOOL   safe;
    BOOL   isHEAD;
+   char * bookmark;
    int    link;
    int    line;
    BOOL   internal_link;	/* whether doc was reached via an internal
@@ -52,11 +53,11 @@ typedef struct _histstruct {
     char * address;
     char * post_data;
     char * post_content_type;
-    char * bookmark;
     BOOL   safe;
+    char * bookmark;
     BOOL   isHEAD;
     int    link;
-    int    line;
+    int    page;
     BOOL   internal_link;	/* whether doc was reached via an internal
 				 (fragment) link. - kw */
     int    intern_seq_start;	/* indicates which element on the history

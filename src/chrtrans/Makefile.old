@@ -30,7 +30,6 @@ TABLES= \
  cp1257_uni.h \
  cp437_uni.h \
  cp737_uni.h \
- cp775_uni.h \
  cp850_uni.h \
  cp852_uni.h \
  cp862_uni.h \
@@ -77,7 +76,6 @@ cp1256_uni.h: cp1256_uni.tbl makeuctb
 cp1257_uni.h: cp1257_uni.tbl makeuctb
 cp437_uni.h: cp437_uni.tbl makeuctb
 cp737_uni.h: cp737_uni.tbl makeuctb
-cp775_uni.h: cp775_uni.tbl makeuctb
 cp850_uni.h: cp850_uni.tbl makeuctb
 cp852_uni.h: cp852_uni.tbl makeuctb
 cp862_uni.h: cp862_uni.tbl makeuctb

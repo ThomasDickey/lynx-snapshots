@@ -1,10 +1,6 @@
 #ifndef HTSAVETOFILE_H
 #define HTSAVETOFILE_H
 
-#include <HTUtils.h>
-#include <HTStream.h>
-#include <HTFormat.h>
-
 extern HTStream * HTSaveToFile PARAMS((
         HTPresentation *        pres,
         HTParentAnchor *        anchor,

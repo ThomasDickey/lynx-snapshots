@@ -43,10 +43,7 @@ extern int default_bg;
 extern int check_color PARAMS((char * color, int the_default));
 #endif
 
-extern void read_cfg PARAMS((char *cfg_filename, char *parent_filename, int nesting_level, FILE *fp0));
-extern void free_lynx_cfg NOPARAMS;
+extern void read_cfg PARAMS((char *cfg_filename, char *parent_filename, int nesting_level));
 extern BOOLEAN have_read_cfg;
-
-extern char *lynx_cfg_infopage NOPARAMS;
 
 #endif /* LYREADCFG_H */

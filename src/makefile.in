@@ -18,13 +18,14 @@ CFLAGS		= @CFLAGS@
 DEFS		= @DEFS@
 CPPFLAGS	= @CPPFLAGS@
 
-LIBS		= @LIBS@ $(RESOLVLIB) $(WAISLIB) $(SITE_LIBS)
+LIBS		= @LIBS@ $(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)
 LDFLAGS		= @LDFLAGS@
 
 # Symbols inherited from the top-level makefile
 RESOLVLIB	= # FIXME: set in parent makefile
 SITE_DEFS	= # FIXME: set in parent makefile
 SITE_LIBS	= # FIXME: set in parent makefile
+SOCKSLIB	= # FIXME: set in parent makefile
 WAISLIB		= # FIXME: set in parent makefile
 
 WWWINC		= WWW/Library/Implementation
@@ -43,9 +44,6 @@ CC_OPTS		= $(CPP_OPTS) $(CFLAGS)
 
 LINT		= @LINT@
 LINTOPTS	=
-
-COMPRESS_PROG	=@COMPRESS_PROG@
-COMPRESS_EXT	=@COMPRESS_EXT@
 
 CHARTRANS_OBJS=UCdomap.o UCAux.o UCAuto.o
 OBJS=  LYClean.o LYShowInfo.o LYEdit.o LYStrings.o \
@@ -72,7 +70,7 @@ all: lynx$x
 @RULE_CC@
 	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $*.c >$@
 
-lynx$x:   message do_chartrans_stuff ../LYHelp.h $(OBJS) $(WWWLIB)
+lynx$x:   message do_chartrans_stuff $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
 	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(WWWLIB) $(LIBS)
 	@echo "Copying Lynx executable into top-level directory"
@@ -112,7 +110,6 @@ HTInit.o: ../userdefs.h
 LYTraversal.o: ../userdefs.h
 LYMail.o: ../userdefs.h
 LYCharSets.o: ../userdefs.h
-LYShowInfo.o: ../cfg_defs.h
 
 CHRTR= chrtrans/
 

@@ -16,7 +16,13 @@
  *  version 2, or at your option any later version.
  */
 
-#define DONT_USE_SOCKS5
+#ifdef NOTDEFINED
+#include <stdio.h>
+#include <stdlib.h>
+#include <sysexits.h>
+#include <string.h>
+#include <ctype.h>
+#else
 #include <HTUtils.h>
 #include <tcp.h>
 /*
@@ -25,6 +31,7 @@
 #ifdef exit
 #undef exit
 #endif /* exit */
+#endif /* NODEFINED */
 
 #ifndef TOLOWER
 #define TOLOWER(c) (isupper((unsigned char)c) ? tolower((unsigned char)c) : (c))
@@ -40,16 +47,6 @@
  */
 typedef u16 unicode;
 
-/*
- * Since we're writing the formatted file to stdout, ensure that we flush
- * everything before leaving, since some old (and a few not-so-old) platforms
- * that do not implement POSIX 'exit()'.
- */
-#define done(code)  \
-    fflush(stdout); \
-    fflush(stderr); \
-    exit(code)
-
 PRIVATE void usage ARGS1(
 	char *,		argv0)
 {
@@ -59,7 +56,7 @@ PRIVATE void usage ARGS1(
 	    argv0);
     fprintf(stderr,
 	    "Utility to convert .tbl into .h files for Lynx compilation.\n");
-    done(EX_USAGE);
+    exit(EX_USAGE);
 }
 
 /* copied from HTString.c, not everybody has strncasecmp */
@@ -132,7 +129,7 @@ PRIVATE void addpair_str ARGS2(
 	    if (!themap_str.entries) {
 		fprintf(stderr,
 			"%s: Out of memory\n", tblname);
-		done(EX_DATAERR);
+		exit(EX_DATAERR);
 	    }
 	} else {
 	    /*
@@ -152,7 +149,7 @@ PRIVATE void addpair_str ARGS2(
 	if (themap_str.entry_ct > 1999) {
 	    fprintf(stderr,
 		"ERROR: Only 2000 unicode replacement strings permitted!\n");
-	    done(EX_DATAERR);
+	    exit(EX_DATAERR);
 	}
 	themap_str.entries[themap_str.entry_ct].unicode = un;
 	themap_str.entries[themap_str.entry_ct].replace_str = str;
@@ -198,7 +195,7 @@ PRIVATE void addpair ARGS2(
 	 */
 	if (unicount[fp] > 254) {
 	    fprintf(stderr, "ERROR: Only 255 unicodes/glyph permitted!\n");
-	    done(EX_DATAERR);
+	    exit(EX_DATAERR);
 	}
 	unitable[fp][unicount[fp]] = un;
 	unicount[fp]++;
@@ -236,7 +233,7 @@ PUBLIC int main ARGS2(
 	ctbl = fopen(tblname = argv[1], "r");
 	if (!ctbl) {
 	    perror(tblname);
-	    done(EX_NOINPUT);
+	    exit(EX_NOINPUT);
 	}
     }
 
@@ -386,11 +383,11 @@ PUBLIC int main ARGS2(
 	    un0 = getunicode(&p);
 	    if (un0 < 0) {
 		fprintf(stderr, "Bad input line: %s\n", buffer);
-		done(EX_DATAERR);
+		exit(EX_DATAERR);
 		fprintf(stderr,
     "%s: Bad Unicode range corresponding to font position range 0x%x-0x%x\n",
 			tblname, fp0, fp1);
-		done(EX_DATAERR);
+		exit(EX_DATAERR);
 	    }
 	    un1 = un0;
 	    while (*p == ' ' || *p == '\t') {
@@ -407,7 +404,7 @@ PUBLIC int main ARGS2(
 			    "%s: Bad Unicode range U+%x-U+%x\n",
 			    tblname, un0, un1);
 		    fprintf(stderr, "Bad input line: %s\n", buffer);
-		    done(EX_DATAERR);
+		    exit(EX_DATAERR);
 		}
 		while (*p == ' ' || *p == '\t') {
 		    p++;
@@ -424,7 +421,7 @@ PUBLIC int main ARGS2(
 
 	    if (!(p1 = tbuf)) {
 		fprintf(stderr, "%s: Out of memory\n", tblname);
-		done(EX_DATAERR);
+		exit(EX_DATAERR);
 	    }
 	    if (*p == '"') {
 		/*
@@ -484,7 +481,7 @@ PUBLIC int main ARGS2(
 	fp0 = strtol(p, &p1, 0);
 	if (p1 == p) {
 	    fprintf(stderr, "Bad input line: %s\n", buffer);
-	    done(EX_DATAERR);
+	    exit(EX_DATAERR);
         }
 	p = p1;
 
@@ -496,7 +493,7 @@ PUBLIC int main ARGS2(
 	    fp1 = strtol(p, &p1, 0);
 	    if (p1 == p) {
 		fprintf(stderr, "Bad input line: %s\n", buffer);
-		done(EX_DATAERR);
+		exit(EX_DATAERR);
 	    }
 	    p = p1;
         } else {
@@ -507,13 +504,13 @@ PUBLIC int main ARGS2(
 	    fprintf(stderr,
 		    "%s: Glyph number (0x%x) larger than font length\n",
 		    tblname, fp0);
-	    done(EX_DATAERR);
+	    exit(EX_DATAERR);
 	}
 	if (fp1 && (fp1 < fp0 || fp1 >= fontlen)) {
 	    fprintf(stderr,
 		    "%s: Bad end of range (0x%x)\n",
 		    tblname, fp1);
-	    done(EX_DATAERR);
+	    exit(EX_DATAERR);
 	}
 
 	if (fp1) {
@@ -540,7 +537,7 @@ PUBLIC int main ARGS2(
 			    tblname);
 		    fprintf(stderr,
 			    " there should be a Unicode range.\n");
-		    done(EX_DATAERR);
+		    exit(EX_DATAERR);
 	        }
 		p++;
 		un1 = getunicode(&p);
@@ -548,7 +545,7 @@ PUBLIC int main ARGS2(
 		    fprintf(stderr,
      "%s: Bad Unicode range corresponding to font position range 0x%x-0x%x\n",
 			    tblname, fp0, fp1);
-		    done(EX_DATAERR);
+		    exit(EX_DATAERR);
 	        }
 		if (un1 - un0 != fp1 - fp0) {
 		    fprintf(stderr,
@@ -557,7 +554,7 @@ PUBLIC int main ARGS2(
 		    fprintf(stderr,
 			    " as font position range 0x%x-0x%x\n",
 			    fp0, fp1);
-		    done(EX_DATAERR);
+		    exit(EX_DATAERR);
 	        }
 		for (i = fp0; i <= fp1; i++) {
 		    addpair(i,un0-fp0+i);
@@ -588,7 +585,7 @@ PUBLIC int main ARGS2(
 			fprintf(stderr,
 				"%s: Bad Unicode range 0x%x-0x%x\n",
 				tblname, un0, un1);
-			done(EX_DATAERR);
+			exit(EX_DATAERR);
 		    }
 		    for (un0++; un0 <= un1; un0++) {
 			addpair(fp0, un0);
@@ -634,14 +631,12 @@ PUBLIC int main ARGS2(
     } else if (this_LYNXcharset[0] == '\0') {
 	strncpy(this_LYNXcharset,this_MIMEcharset,UC_MAXLEN_LYNXCSNAME);
     }
-/***** DO NOT produce trailing spaces!
     if ((i = strlen(this_LYNXcharset)) < UC_LEN_LYNXCSNAME) {
 	for (; i < UC_LEN_LYNXCSNAME; i++) {
 	    this_LYNXcharset[i] = ' ';
 	}
 	this_LYNXcharset[i] = '\0';
     }
-*******/
 #ifdef NOTDEFINED
     fprintf(stderr,"this_MIMEcharset: %s.\n",this_MIMEcharset);
     fprintf(stderr,"this_LYNXcharset: %s.\n",this_LYNXcharset);
@@ -660,8 +655,8 @@ PUBLIC int main ARGS2(
 	     p++, i++) {
 	    id_append[i+1] = isalnum(*p) ? *p : '_';
 	}
-	id_append[i+1] = '\0';
     }
+    id_append[i+1] = '\0';
     fprintf(stderr, " (%s).\n", id_append);
 
     printf("\
@@ -765,5 +760,5 @@ dfont_replacedesc%s,%d,%d)\n",
 id_append, this_MIMEcharset, this_LYNXcharset,
 id_append, id_append, nuni, id_append, lowest_eight, RawOrEnc);
 
-    done(EX_OK);
+    exit(EX_OK);
 }

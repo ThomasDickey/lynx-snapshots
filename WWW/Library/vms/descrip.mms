@@ -76,14 +76,12 @@
 DEBUGFLAGS = /Debug /NoOptimize
 .endif
 
-INCLUDES = /Include=([-.Implementation],[---.src],[---])
-
 ! defines valid for all compilations
 EXTRADEFINES = DEBUG, ACCESS_AUTH, VC="""$(VC)"""
 
 ! DECC flags for all compilations
 .ifdef DEC_C
-DCFLAGS = /NoMember /Warning=(disable=implicitfunc)  $(INCLUDES)
+DCFLAGS = /NoMember /Warning=(disable=implicitfunc)
 .endif
 
 .ifdef UCX
@@ -91,7 +89,7 @@ TCP = UCX
 .ifdef DEC_C
 CFLAGS = /decc/Prefix=All $(DEBUGFLAGS) $(DCFLAGS) /Define=($(EXTRADEFINES), UCX)
 .else
-CFLAGS = $(DEBUGFLAGS) /Define=($(EXTRADEFINES), UCX) $(INCLUDES)
+CFLAGS = $(DEBUGFLAGS) /Define=($(EXTRADEFINES), UCX)
 .endif
 .endif
 
@@ -100,7 +98,7 @@ TCP = TCPWARE
 .ifdef DEC_C
 CFLAGS = /decc/Prefix=All $(DEBUGFLAGS) $(DCFLAGS) /Define=($(EXTRADEFINES), UCX, TCPWARE)
 .else
-CFLAGS = $(DEBUGFLAGS) /Define = ($(EXTRADEFINES), UCX, TCPWARE) $(INCLUDES)
+CFLAGS = $(DEBUGFLAGS) /Define = ($(EXTRADEFINES), UCX, TCPWARE)
 .endif
 .endif
 
@@ -109,7 +107,7 @@ TCP = MULTINET
 .ifdef DEC_C
 CFLAGS = /decc/Prefix=ANSI $(DEBUGFLAGS) $(DCFLAGS) /Define=(_DECC_V4_SOURCE, __SOCKET_TYPEDEFS, $(EXTRADEFINES), MULTINET)
 .else
-CFLAGS = $(DEBUGFLAGS) /Define = ($(EXTRADEFINES), MULTINET) $(INCLUDES)
+CFLAGS = $(DEBUGFLAGS) /Define = ($(EXTRADEFINES), MULTINET)
 .endif
 .endif
 
@@ -118,7 +116,7 @@ TCP = WIN_TCP
 .ifdef DEC_C
 CFLAGS = /decc/Prefix=ANSI $(DEBUGFLAGS) $(DCFLAGS) /Define=($(EXTRADEFINES), WIN_TCP)
 .else
-CFLAGS = $(DEBUGFLAGS) /Define = ($(EXTRADEFINES), WIN_TCP) $(INCLUDES)
+CFLAGS = $(DEBUGFLAGS) /Define = ($(EXTRADEFINES), WIN_TCP)
 .endif
 .endif
 
@@ -127,7 +125,7 @@ TCP = CMU_TCP
 .ifdef DEC_C
 CFLAGS = /decc/Prefix=ANSI $(DEBUGFLAGS) $(DCFLAGS) /Define=($(EXTRADEFINES), CMU_TCP)
 .else
-CFLAGS = $(DEBUGFLAGS) /Define = ($(EXTRADEFINES), CMU_TCP) $(INCLUDES)
+CFLAGS = $(DEBUGFLAGS) /Define = ($(EXTRADEFINES), CMU_TCP)
 .endif
 .endif
 
@@ -136,7 +134,7 @@ TCP = SOCKETSHR_TCP
 .ifdef DEC_C
 CFLAGS = /decc/Prefix=ANSI $(DEBUGFLAGS) $(DCFLAGS) /Define=($(EXTRADEFINES), SOCKETSHR_TCP)
 .else
-CFLAGS = $(DEBUGFLAGS) /Define = ($(EXTRADEFINES), SOCKETSHR_TCP) $(INCLUDES)
+CFLAGS = $(DEBUGFLAGS) /Define = ($(EXTRADEFINES), SOCKETSHR_TCP)
 .endif
 .endif
 
@@ -145,7 +143,7 @@ TCP = DECNET
 .ifdef DEC_C
 CFLAGS = /decc/Prefix=All $(DEBUGFLAGS) $(DCFLAGS) /Define=($(EXTRADEFINES), DECNET)
 .else
-CFLAGS = $(DEBUGFLAGS) /Define = ($(EXTRADEFINES), DECNET) $(INCLUDES)
+CFLAGS = $(DEBUGFLAGS) /Define = ($(EXTRADEFINES), DECNET)
 .endif
 .endif
 
@@ -155,7 +153,7 @@ TCP = MULTINET			! (Default to MULTINET)
 .ifdef DEC_C
 CFLAGS = /decc/Prefix=ANSI $(DEBUGFLAGS) $(DCFLAGS) /Define=(_DECC_V4_SOURCE, __SOCKET_TYPEDEFS, $(EXTRADEFINES), MULTINET)
 .else
-CFLAGS = $(DEBUGFLAGS) /Define = ($(EXTRADEFINES), MULTINET) $(INCLUDES)
+CFLAGS = $(DEBUGFLAGS) /Define = ($(EXTRADEFINES), MULTINET)
 .endif
 .endif
 

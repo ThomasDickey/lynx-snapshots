@@ -9,6 +9,7 @@
 */
 
 #include <HTUtils.h>
+#include <tcp.h>
 #include <LYCurses.h>
 #include <HTFWriter.h>
 #include <HTSaveToFile.h>
@@ -19,11 +20,18 @@
 #include <HTFile.h>
 #include <HTPlain.h>
 #include <HTFile.h>
+#ifdef VMS
+#include <HTVMSUtils.h>
+#endif /* VMS */
+#ifdef DOSPATH
+#include <HTDOS.h>
+#endif
 
 #include <LYStrings.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
 #include <LYSignal.h>
+#include <LYSystem.h>
 #include <GridText.h>
 #include <LYexit.h>
 #include <LYLeaks.h>
@@ -50,6 +58,9 @@ PUBLIC HTStream* HTSaveToFile PARAMS((
 	HTParentAnchor *       anchor,
 	HTStream *	       sink));
 
+#define FREE(x) if (x) {free(x); x = NULL;}
+
+
 /*	Stream Object
 **	-------------
 */
@@ -65,7 +76,7 @@ struct _HTStream {
 	HTParentAnchor *	anchor;     /* Original stream's anchor. */
 	HTStream *		sink;	    /* Original stream's sink.	 */
 #ifdef FNAMES_8_3
-	BOOLEAN			idash; /* remember position to become '.'*/
+	int			idash; /* remember position to become '.'*/
 #endif
 };
 
@@ -124,7 +135,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 
     fflush(me->fp);
     if (me->end_command) {		/* Temp file */
-	LYCloseTempFP(me->fp);
+	fclose(me->fp);
 #ifdef VMS
 	if (0 == strcmp(me->end_command, "SaveVMSBinaryFile")) {
 	/*
@@ -132,7 +143,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	 *  we want to convert to fixed records format. - FM
 	 */
 #ifdef USE_COMMAND_FILE
-	    LYSystem(FIXED_RECORD_COMMAND);
+	    system(FIXED_RECORD_COMMAND);
 #else
 	    LYVMS_FixedLengthRecords(FIXED_RECORD_COMMAND);
 #endif /* USE_COMMAND_FILE */
@@ -140,6 +151,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 
 	    if (me->remove_command) {
 		/* NEVER REMOVE THE FILE unless during an abort!*/
+		/* system(me->remove_command); */
 		FREE(me->remove_command);
 	    }
 	} else
@@ -183,7 +195,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		     *	Uncompress it. - FM
 		     */
 		    if (me->end_command && me->end_command[0])
-			LYSystem(me->end_command);
+			system(me->end_command);
 		    fp = fopen(me->anchor->FileCache, "r");
 		}
 		if (fp != NULL) {
@@ -215,13 +227,11 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		     */
 		    if (skip_loadfile) {
 			char *new_path = NULL;
-			char *the_dash = me->idash ? strrchr(path, '-') : 0;
-			if (the_dash != 0) {
-			    unsigned off = (the_dash - path);
+			if (me->idash > 1 && path[me->idash] == '-') {
 			    StrAllocCopy(new_path, path);
-			    new_path[off] = '.';
-			    if (strlen(new_path + off) > 4)
-				new_path[off + 4] = '\0';
+			    new_path[me->idash] = '.';
+			    if (strlen(new_path + me->idash) > 4)
+				new_path[me->idash + 4] = '\0';
 			    if (rename(path, new_path) == 0) {
 				FREE(path);
 				path = new_path;
@@ -231,7 +241,17 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			}
 		    }
 #endif /* FNAMES_8_3 */
-		    LYLocalFileToURL (&addr, path);
+		    StrAllocCopy(addr, "file://localhost");
+#ifdef DOSPATH
+		    StrAllocCat(addr, "/");
+		    StrAllocCat(addr, HTDOS_wwwName(path));
+#else
+#ifdef VMS
+		    StrAllocCat(addr, HTVMS_wwwName(path));
+#else
+		    StrAllocCat(addr, path);
+#endif /* VMS */
+#endif /* DOSPATH */
 		    if (!use_gzread) {
 			StrAllocCopy(me->anchor->FileCache, path);
 			StrAllocCopy(me->anchor->content_encoding, "binary");
@@ -279,7 +299,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			 *  (or even the same!).  We can skip this
 			 *  needless duplication by using the
 			 *  viewer_command which has already been
-			 *  determined when the HTCompressed stream was
+			 *  determind when the HTCompressed stream was
 			 *  created. - kw
 			 */
 			FREE(me->end_command);
@@ -300,10 +320,11 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			    HTProgress(me->end_command);
 			    stop_curses();
 			}
-			LYSystem(me->end_command);
+			system(me->end_command);
 
 			if (me->remove_command) {
 			    /* NEVER REMOVE THE FILE unless during an abort!!!*/
+			    /* system(me->remove_command); */
 			    FREE(me->remove_command);
 			}
 			if (!dump_output_immediately)
@@ -329,6 +350,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	    }
 	    if (me->remove_command) {
 		/* NEVER REMOVE THE FILE unless during an abort!!!*/
+		/* system(me->remove_command); */
 		FREE(me->remove_command);
 	    }
 	} else if (strcmp(me->end_command, "SaveToFile")) {
@@ -343,10 +365,11 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		_HTProgress(me->end_command);
 		stop_curses();
 	    }
-	    LYSystem(me->end_command);
+	    system(me->end_command);
 
 	    if (me->remove_command) {
 		/* NEVER REMOVE THE FILE unless during an abort!!!*/
+		/* system(me->remove_command); */
 		FREE(me->remove_command);
 	    }
 	    if (!dump_output_immediately)
@@ -358,6 +381,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	     */
 	    if (me->remove_command) {
 		/* NEVER REMOVE THE FILE unless during an abort!!!*/
+		/* system(me->remove_command); */
 		FREE(me->remove_command);
 	    }
 	}
@@ -394,14 +418,17 @@ PRIVATE void HTFWriter_abort ARGS2(
 	HTStream *,	me,
 	HTError,	e GCC_UNUSED)
 {
-    CTRACE(tfp,"HTFWriter_abort called\n");
-    LYCloseTempFP(me->fp);
+    if (TRACE)
+	fprintf(stderr,"HTFWriter_abort called\n");
+
+    fclose(me->fp);
     FREE(me->viewer_command);
     if (me->end_command) {		/* Temp file */
-	CTRACE(tfp, "HTFWriter: Aborting: file not executed.\n");
+	if (TRACE)
+	    fprintf(stderr, "HTFWriter: Aborting: file not executed.\n");
 	FREE(me->end_command);
 	if (me->remove_command) {
-	    LYSystem(me->remove_command);
+	    system(me->remove_command);
 	    FREE(me->remove_command);
 	}
     }
@@ -476,7 +503,9 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 {
     char fnam[256];
     CONST char *suffix;
+    char *cp;
     HTStream* me;
+    FILE *fp = NULL;
 
     if (traversal) {
 	LYCancelledFetch = TRUE;
@@ -490,7 +519,8 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 	    return(NULL);
 	}
 	if (no_exec) {
-	    HTAlert(EXECUTION_DISABLED);
+	    _statusline(EXECUTION_DISABLED);
+	    sleep(AlertSecs);
 	    return HTPlainPresent(pres, anchor, sink);
 	}
 	if (!local_exec)
@@ -503,7 +533,8 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 
 		sprintf(buf, EXECUTION_DISABLED_FOR_FILE,
 			     key_for_func(LYK_OPTIONS));
-		HTAlert(buf);
+		_statusline(buf);
+		sleep(AlertSecs);
 		return HTPlainPresent(pres, anchor, sink);
 	    }
     }
@@ -522,27 +553,61 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     me->anchor = anchor;
     me->sink = sink;
 
-    if (LYCachedTemp(fnam, &(anchor->FileCache))) {
-	me->fp = LYNewBinFile (fnam);
+    if (anchor->FileCache) {
+	strcpy(fnam, anchor->FileCache);
+	FREE(anchor->FileCache);
+	if ((fp = fopen(fnam, "r")) != NULL) {
+	    fclose(fp);
+	    fp = NULL;
+	    remove(fnam);
+	}
     } else {
 	/*
-	 *  Check for a suffix.
-	 *	Save the file under a suitably suffixed name.
+	 *  Lynx routine to create a temporary filename
 	 */
-	if (!strcasecomp(pres->rep->name, "text/html")) {
-	    suffix = HTML_SUFFIX;
-	} else if (!strcasecomp(pres->rep->name, "text/plain")) {
-	    suffix = ".txt";
-	} else if (!strcasecomp(pres->rep->name,
-				"application/octet-stream")) {
-	    suffix = ".bin";
-	} else if ((suffix = HTFileSuffix(pres->rep, anchor->content_encoding)) == 0
-		   || *suffix != '.') {
-	    suffix = HTML_SUFFIX;
+SaveAndExecute_tempname:
+	tempname (fnam, NEW_FILE);
+	/*
+	 *  Check for a suffix.
+	 */
+	if (((cp = strrchr(fnam, '.')) != NULL) &&
+#ifdef VMS
+	    NULL == strchr(cp, ']') &&
+#endif /* VMS */
+	    NULL == strchr(cp, '/')) {
+	    /*
+	     *	Save the file under a suitably suffixed name.
+	     */
+	    *cp = '\0';
+	    if (!strcasecomp(pres->rep->name, "text/html")) {
+		strcat(fnam, HTML_SUFFIX);
+	    } else if (!strcasecomp(pres->rep->name, "text/plain")) {
+		strcat(fnam, ".txt");
+	    } else if (!strcasecomp(pres->rep->name,
+				    "application/octet-stream")) {
+		strcat(fnam, ".bin");
+	    } else if ((suffix = HTFileSuffix(pres->rep, anchor->content_encoding))
+		       && *suffix == '.') {
+		strcat(fnam, suffix);
+		/*
+		 *  It's not one of the suffixes checked for a
+		 *  spoof in tempname(), so check it now. - FM
+		 */
+		if (strcmp(suffix, HTML_SUFFIX) &&
+		    strcmp(suffix, ".txt") &&
+		    strcmp(suffix, ".bin") &&
+		    (fp = fopen(fnam, "r")) != NULL) {
+		    fclose(fp);
+		    fp = NULL;
+		    goto SaveAndExecute_tempname;
+		}
+	    } else {
+		*cp = '.';
+	    }
 	}
-	me->fp = LYOpenTemp(fnam, suffix, "wb");
     }
 
+    me->fp = LYNewBinFile (fnam);
     if (!me->fp) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	FREE(me);
@@ -602,8 +667,9 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
     char fnam[256];
     CONST char * suffix;
     char *cp;
-    int c = 0;
+    int c=0;
     BOOL IsBinary = TRUE;
+    FILE *fp = NULL;
 
     ret_obj = (HTStream*)calloc(sizeof(* ret_obj),1);
     if (ret_obj == NULL)
@@ -628,7 +694,8 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 	if (traversal ||
 	    (no_download && !override_no_download && no_disk_save)) {
 	    if (!traversal) {
-		HTAlert(CANNOT_DISPLAY_FILE);
+		_statusline(CANNOT_DISPLAY_FILE);
+		sleep(AlertSecs);
 	    }
 	    LYCancelDownload = TRUE;
 	    if (traversal)
@@ -674,32 +741,58 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
     /*
      *	Set up a 'D'ownload.
      */
-    if (LYCachedTemp(fnam, &(anchor->FileCache))) {
-	ret_obj->fp = LYNewBinFile (fnam);
+    if (anchor->FileCache) {
+	strcpy(fnam, anchor->FileCache);
+	FREE(anchor->FileCache);
+	if ((fp = fopen(fnam, "r")) != NULL) {
+	    fclose(fp);
+	    fp = NULL;
+	    remove(fnam);
+	}
     } else {
 	/*
-	 *  Check for a suffix.
-	 *  Save the file under a suitably suffixed name.
+	 *  Lynx routine to create a temporary filename
 	 */
-	if (!strcasecomp(pres->rep->name, "text/html")) {
-	    suffix = HTML_SUFFIX;
-	} else if (!strcasecomp(pres->rep->name, "text/plain")) {
-	    suffix = ".txt";
-	} else if (!strcasecomp(pres->rep->name,
+SaveToFile_tempname:
+	tempname(fnam, NEW_FILE);
+	/*
+	 *  Check for a suffix.
+	 */
+	if (((cp=strrchr(fnam, '.')) != NULL) &&
+#ifdef VMS
+	    NULL == strchr(cp, ']') &&
+#endif /* VMS */
+	    NULL == strchr(cp, '/')) {
+	    /*
+	     *	Save the file under a suitably suffixed name.
+	     */
+	    *cp = '\0';
+	    if (!strcasecomp(pres->rep->name, "text/html")) {
+		strcat(fnam, HTML_SUFFIX);
+	    } else if (!strcasecomp(pres->rep->name, "text/plain")) {
+		strcat(fnam, ".txt");
+	    } else if (!strcasecomp(pres->rep->name,
 				    "application/octet-stream")) {
-	    suffix = ".bin";
-	} else if ((suffix = HTFileSuffix(pres->rep,
-					  anchor->content_encoding)) == 0
-		    || *suffix != '.') {
-	    suffix = HTML_SUFFIX;
+		strcat(fnam, ".bin");
+	    } else if ((suffix = HTFileSuffix(pres->rep,
+					      anchor->content_encoding)) && *suffix == '.') {
+		strcat(fnam, suffix);
+		/*
+		 *  It's not one of the suffixes checked for a
+		 *  spoof in tempname(), so check it now. - FM
+		 */
+		if (strcmp(suffix, HTML_SUFFIX) &&
+		    strcmp(suffix, ".txt") &&
+		    strcmp(suffix, ".bin") &&
+		    (fp = fopen(fnam, "r")) != NULL) {
+		    fclose(fp);
+		    fp = NULL;
+		    goto SaveToFile_tempname;
+		}
+	    } else {
+		*cp = '.';
+	    }
 	}
-	ret_obj->fp = LYOpenTemp(fnam, suffix, "wb");
-    }
-
-    if (!ret_obj->fp) {
-	HTAlert(CANNOT_OPEN_OUTPUT);
-	FREE(ret_obj);
-	return NULL;
     }
 
     if (0==strncasecomp(pres->rep->name, "text/", 5) ||
@@ -712,6 +805,13 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 	 */
 	IsBinary = FALSE;
 
+    ret_obj->fp = LYNewBinFile (fnam);
+    if (!ret_obj->fp) {
+	HTAlert(CANNOT_OPEN_OUTPUT);
+	FREE(ret_obj);
+	return NULL;
+    }
+
     /*
      *	Any "application/foo" or other non-"text/foo" types that
      *	are actually text but not checked, above, will be treated
@@ -719,7 +819,8 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
      *	Unix folks don't need to know this, but we'll show it to
      *	them, too. - FM
      */
-    HTUserMsg2("Content-type: %s", pres->rep->name);
+    user_message("Content-type: %s", pres->rep->name);
+    sleep(MessageSecs);
 
     StrAllocCopy(WWW_Download_File,fnam);
 
@@ -745,7 +846,8 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 		* sizeof (char),1);
 	if (FIXED_RECORD_COMMAND == NULL)
 	    outofmem(__FILE__, "HTSaveToFile");
-	sprintf(FIXED_RECORD_COMMAND, FIXED_RECORD_COMMAND_MASK, fnam);
+	sprintf(FIXED_RECORD_COMMAND,
+		FIXED_RECORD_COMMAND_MASK, fnam, "", "", "", "", "", "");
     } else {
 #endif /* VMS */
     ret_obj->end_command = (char *)calloc (sizeof(char)*12,1);
@@ -770,8 +872,6 @@ Prepend_BASE:
 	 *  Note that the markup will be technically invalid if a DOCTYPE
 	 *  declaration, or HTML or HEAD tags, are present, and thus the
 	 *  file may need editing for perfection. - FM
-	 *
-	 *  Add timestamp (last reload).
 	 */
 	char *temp = NULL;
 
@@ -781,19 +881,15 @@ Prepend_BASE:
 	    StrAllocCopy(temp, anchor->content_location);
 	}
 	if (temp) {
-	    LYRemoveBlanks(temp);
+	    collapse_spaces(temp);
 	    if (!is_url(temp)) {
 		FREE(temp);
 	    }
 	}
 
 	fprintf(ret_obj->fp,
-		"<!-- X-URL: %s -->\n", anchor->address);
-	if (anchor->date && *anchor->date)
-	     fprintf(ret_obj->fp,
-		"<!-- Date: %s -->\n", anchor->date);
-	fprintf(ret_obj->fp,
-		"<BASE HREF=\"%s\">\n\n", (temp ? temp : anchor->address));
+		"<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
+		anchor->address, (temp ? temp : anchor->address));
 	FREE(temp);
     }
     if (LYPrependCharsetToSource &&
@@ -812,8 +908,8 @@ Prepend_BASE:
 
 	if (anchor->charset && *anchor->charset) {
 	    StrAllocCopy(temp, anchor->charset);
-	    LYRemoveBlanks(temp);
-	    fprintf(ret_obj->fp,
+	    collapse_spaces(temp);
+		fprintf(ret_obj->fp,
 		"<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=%s\">\n\n",
 		temp);
 	}
@@ -837,15 +933,15 @@ PUBLIC HTStream* HTCompressed ARGS3(
     int n, i;
     BOOL can_present = FALSE;
     char fnam[256];
-    char temp[256];
     CONST char *suffix;
     char *uncompress_mask = NULL;
     char *compress_suffix = "";
+    char *cp;
     CONST char *middle;
     FILE *fp = NULL;
 
     /*
-     *	Deal with any inappropriate invocations of this function,
+     *	Deal with any inappropriate invokations of this function,
      *	or a download request, in which case we won't bother to
      *	uncompress the file. - FM
      */
@@ -924,9 +1020,6 @@ PUBLIC HTStream* HTCompressed ARGS3(
     me->output_format = pres->rep_out;
     me->anchor = anchor;
     me->sink = sink;
-#ifdef FNAMES_8_3
-    me->idash = FALSE;
-#endif
 
     /*
      *	Remove any old versions of the file. - FM
@@ -942,45 +1035,61 @@ PUBLIC HTStream* HTCompressed ARGS3(
     /*
      *	Get a new temporary filename and substitute a suitable suffix. - FM
      */
-    middle = NULL;
-    if (!strcasecomp(anchor->content_type, "text/html")) {
-	middle = HTML_SUFFIX;
-	middle++;		/* point to 'h' of .htm(l) - kw */
-    } else if (!strcasecomp(anchor->content_type, "text/plain")) {
-	middle = "txt";
-    } else if (!strcasecomp(anchor->content_type,
-			    "application/octet-stream")) {
-	middle = "bin";
-    } else if ((suffix =
-		HTFileSuffix(HTAtom_for(anchor->content_type), NULL)) &&
-	       *suffix == '.') {
+Compressed_tempname:
+    tempname(fnam, NEW_FILE);
+    if ((cp = strrchr(fnam, '.')) != NULL) {
+	middle = NULL;
+	if (!strcasecomp(anchor->content_type, "text/html")) {
+	    middle = HTML_SUFFIX;
+	    middle++;		/* point to 'h' of .htm(l) - kw */
+	} else if (!strcasecomp(anchor->content_type, "text/plain")) {
+	    middle = "txt";
+	} else if (!strcasecomp(anchor->content_type,
+				"application/octet-stream")) {
+	    middle = "bin";
+	} else if ((suffix =
+		    HTFileSuffix(HTAtom_for(anchor->content_type), NULL)) &&
+		   *suffix == '.') {
 #if defined(VMS) || defined(FNAMES_8_3)
-	if (strchr(suffix + 1, '.') == NULL)
+	    if (strchr(suffix + 1, '.') == NULL)
 #endif
-	    middle = suffix + 1;
-    }
-
-    temp[0] = 0;		/* construct the suffix */
-    if (middle) {
+		middle = suffix + 1;
+	}
+	if (middle) {
+	    *cp = '\0';
 #ifdef FNAMES_8_3
-	me->idash = TRUE;	/* remember position of '-'  - kw */
-	strcat(temp, "-");	/* NAME-htm,  NAME-txt, etc. - hack for DOS */
+	    me->idash = strlen(fnam);	  /* remember position of '-'  - kw */
+	    strcat(fnam, "-");	/* NAME-htm,  NAME-txt, etc. - hack for DOS */
 #else
-	strcat(temp, ".");	/* NAME.html, NAME-txt etc. */
+	    strcat(fnam, ".");	/* NAME.html, NAME-txt etc. */
 #endif /* FNAMES_8_3 */
-	strcat(temp, middle);
+	    strcat(fnam, middle);
 #ifdef VMS
-	strcat(temp, "-");	/* NAME.html-gz, NAME.txt-gz, NAME.txt-Z etc.*/
+	    strcat(fnam, "-");	/* NAME.html-gz, NAME.txt-gz, NAME.txt-Z etc.*/
 #else
-	strcat(temp, ".");	/* NAME-htm.gz (DOS), NAME.html.gz (UNIX)etc.*/
+	    strcat(fnam, ".");	/* NAME-htm.gz (DOS), NAME.html.gz (UNIX)etc.*/
 #endif /* VMS */
+	} else {
+	    *(cp + 1) = '\0';
+	}
+    } else {
+	strcat(fnam, ".");
     }
-    strcat(temp, compress_suffix);
+    strcat(fnam, compress_suffix);
+    /*
+     *	It's not one of the suffixes checked for a
+     *	spoof in tempname(), so check it now. - FM
+     */
+    if ((fp = fopen(fnam, "r")) != NULL) {
+	fclose(fp);
+	fp = NULL;
+	goto Compressed_tempname;
+    }
 
     /*
      *	Open the file for receiving the compressed input stream. - FM
      */
-    me->fp = LYOpenTemp (fnam, temp, "wb");
+    me->fp = LYNewBinFile (fnam);
     if (!me->fp) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	FREE(uncompress_mask);
@@ -1138,7 +1247,7 @@ PUBLIC unsigned long LYVMS_FixedLengthRecords ARGS1(char *, filename)
     /* RMS supplies a user-mode channel (see FAB$L_FOP FAB$V_UFO doc) */
     channel = (unsigned short) fab.fab$l_stv;
 
-    /* set up ACP interface structures */
+    /* set up ACP interface strutures */
     /* file information block, passed by descriptor; it's okay to start with
        an empty FIB after RMS has accessed the file for us */
     fib_dsc.len = sizeof fib;

@@ -15,7 +15,7 @@
 */
 
 #include <HTUtils.h>
-#include <HTFile.h>
+#include <tcp.h>
 #include <HTParse.h>
 #include <HTAlert.h>
 #include <LYCurses.h>
@@ -26,49 +26,52 @@
 #include <LYClean.h>
 #include <LYGetFile.h>
 #include <LYUpload.h>
+#include <LYSystem.h>
 #include <LYLocal.h>
 
 #include <LYexit.h>
 #include <LYLeaks.h>
 
-PUBLIC char LYUploadFileURL[LY_MAXPATH] = "\0";
+#define FREE(x) if (x) {free(x); x = NULL;}
+
+PUBLIC char LYUploadFileURL[256] = "\0";
 
 /*
- *  LYUpload uploads a file to a given location using a
+ *  LYUpload uploads a file to a given location using a 
  *  specified upload method.  It parses an incoming link
  *  that looks like:
  *	LYNXDIRED://UPLOAD=<#>/TO=<STRING>
  */
 PUBLIC int LYUpload ARGS1(
-	char *, 	line)
+	char *,		line) 
 {
     char *method, *directory, *dir;
     int method_number;
     int count;
-    char tmpbuf[LY_MAXPATH];
-    char buffer[LY_MAXPATH];
+    char tmpbuf[256];
+    char buffer[256];
     lynx_html_item_type *upload_command = 0;
     int c;
     char *cp;
     FILE *fp;
-    char cmd[20 + (LY_MAXPATH*2)];
+    char cmd[512];
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
 #endif /* VMS */
 
     /*
-     *	Use configured upload commands.
+     *  Use configured upload commands.
      */
     if((directory = (char *)strstr(line, "TO=")) == NULL)
 	goto failed;
     *(directory - 1) = '\0';
     /* go past "Directory=" */
-    directory += 3;
+    directory+=3;
 
     if((method = (char *)strstr(line, "UPLOAD=")) == NULL)
 	goto failed;
     /*
-     *	Go past "Method=".
+     *  Go past "Method=".
      */
     method += 7;
     method_number = atoi(method);
@@ -78,22 +81,23 @@ PUBLIC int LYUpload ARGS1(
       ; /* null body */
 
     /*
-     *	Parsed out the Method and the Location?
+     *  Parsed out the Method and the Location?
      */
     if (upload_command->command == NULL) {
-	HTAlert("ERROR! - upload command is misconfigured");
+	_statusline("ERROR! - upload command is misconfigured");
+	sleep(AlertSecs);
 	goto failed;
     }
 
     /*
-     *	Care about the local name?
+     *  Care about the local name?
      */
     if (strstr(upload_command->command, "%s")) {
 	/*
 	 *  Commands have the form "command %s [etc]"
 	 *  where %s is the filename.
 	 */
-	_statusline(FILENAME_PROMPT);
+	_statusline("Enter a filename: ");
 retry:
 	*tmpbuf = '\0';
 	if (LYgetstr(tmpbuf, VISIBLE, sizeof(tmpbuf), NORECALL) < 0)
@@ -103,21 +107,31 @@ retry:
 	    goto cancelled;
 
 	if (strstr(tmpbuf, "../") != NULL) {
-	    HTAlert("Illegal redirection \"../\" found! Request ignored.");
+	    _statusline(
+		    "Illegal redirection \"../\" found! Request ignored.");
+	    sleep(AlertSecs);
 	    goto cancelled;
 	} else if (strchr(tmpbuf, '/') != NULL) {
-	    HTAlert("Illegal character \"/\" found! Request ignored.");
+	    _statusline("Illegal character \"/\" found! Request ignored.");
+	    sleep(AlertSecs);
 	    goto cancelled;
 	} else if (tmpbuf[0] == '~') {
-	    HTAlert("Illegal redirection using \"~\" found! Request ignored.");
+	    _statusline(
+		"Illegal redirection using \"~\" found! Request ignored.");
+	    sleep(AlertSecs);
 	    goto cancelled;
 	}
 	sprintf(buffer, "%s/%s", directory, tmpbuf);
 
 	if (no_dotfiles || !show_dotfiles) {
-	    if (*LYPathLeaf(buffer) == '.') {
-		HTAlert(FILENAME_CANNOT_BE_DOT);
-		_statusline(NEW_FILENAME_PROMPT);
+	    if (*buffer == '.' ||
+#ifdef VMS
+		((cp = strrchr(buffer, ':')) && *(cp+1) == '.') ||
+		((cp = strrchr(buffer, ']')) && *(cp+1) == '.') ||
+#endif /* VMS */
+		((cp = strrchr(buffer, '/')) && *(cp+1) == '.')) {
+		_statusline(
+		  "File name may not begin with dot. Enter a new filename: ");
 		goto retry;
 	    }
 	}
@@ -129,9 +143,9 @@ retry:
 	    fclose(fp);
 
 #ifdef VMS
-	    _statusline(FILE_EXISTS_HPROMPT);
+	    _statusline("File exists. Create higher version? (y/n)");
 #else
-	    _statusline(FILE_EXISTS_OPROMPT);
+	    _statusline("File exists. Overwrite? (y/n)");
 #endif /* VMS */
 	    c = 0;
 	    while (TOUPPER(c) != 'Y' && TOUPPER(c) != 'N' && c != 7 && c != 3)
@@ -148,7 +162,7 @@ retry:
 	    }
 
 	    if (TOUPPER(c) == 'N') {
-		_statusline(NEW_FILENAME_PROMPT);
+		_statusline("Enter a filename: ");
 		goto retry;
 	    }
 	}
@@ -156,18 +170,15 @@ retry:
 	/*
 	 *  See if we can write to it.
 	 */
-	CTRACE(tfp, "LYUpload: filename is %s", buffer);
-
 	if ((fp = fopen(buffer, "w")) != NULL) {
 	    fclose(fp);
 	    remove(buffer);
 	} else {
-	    HTAlert(CANNOT_WRITE_TO_FILE);
-	    _statusline(NEW_FILENAME_PROMPT);
+	    _statusline("Cannot write to file. Enter a new filename: ");
 	    goto retry;
 	}
 
-#if defined (VMS) || defined (__EMX__) || defined(__DJGPP__)
+#ifdef VMS
 	sprintf(tmpbuf, upload_command->command, buffer, "", "", "", "", "");
 #else
 	cp = quote_pathname(buffer); /* to prevent spoofing of the shell */
@@ -182,22 +193,26 @@ retry:
     sprintf(cmd, "cd %s ; %s", dir, tmpbuf);
     FREE(dir);
     stop_curses();
-    CTRACE(tfp, "command: %s\n", cmd);
-    LYSystem(cmd);
+    if (TRACE)
+	fprintf(stderr, "command: %s\n", cmd);
+    system(cmd);
+    fflush(stdout);
     start_curses();
-#ifdef UNIX
+#ifdef UNIX 
     chmod(buffer, HIDE_CHMOD);
-#endif /* UNIX */
+#endif /* UNIX */ 
     /* don't remove(file); */
 
     return 1;
 
 failed:
-    HTAlert("Unable to upload file.");
+    _statusline("Unable to upload file.");
+    sleep(AlertSecs);
     return 0;
 
 cancelled:
-    HTInfoMsg("Cancelling.");
+    _statusline("Cancelling.");
+    sleep(InfoSecs);
     return 0;
 }
 
@@ -209,17 +224,33 @@ cancelled:
  */
 PUBLIC int LYUpload_options ARGS2(
 	char **,	newfile,
-	char *, 	directory)
+	char *,		directory)
 {
-    static char tempfile[LY_MAXPATH];
+    static char tempfile[256];
+    static BOOLEAN first = TRUE;
     FILE *fp0;
     lynx_html_item_type *cur_upload;
     int count;
-    static char curloc[LY_MAXPATH];
+    static char curloc[256];
     char *cp;
 
-    LYRemoveTemp(tempfile);
-    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
+    if (first) {
+	/*
+	 *  Get an unused tempfile name. - FM
+	 */
+        tempname(tempfile, NEW_FILE);
+#ifdef VMS
+    } else {
+        remove(tempfile);   /* Remove duplicates on VMS. */
+#endif /* VMS */
+    }
+
+    /*
+     *  Open the tempfile for writing and set it's
+     *  protection in case this wasn't done via an
+     *  external umask. - FM
+     */
+    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
@@ -227,38 +258,57 @@ PUBLIC int LYUpload_options ARGS2(
 #ifdef VMS
     strcpy(curloc, "/sys$login");
 #else
-    cp = HTfullURL_toFile(directory);
+    cp = directory;
+    if (!strncmp(cp, "file://localhost", 16))
+        cp += 16;
+    else if (!strncmp(cp, "file:", 5))
+        cp += 5;
     strcpy(curloc,cp);
-    LYTrimPathSep(curloc);
-    free(cp);
+    HTUnEscape(curloc);
+    if (curloc[strlen(curloc) - 1] == '/')
+        curloc[strlen(curloc) - 1] = '\0';
 #endif /* VMS */
 
-    LYLocalFileToURL(newfile, tempfile);
-    strcpy(LYUploadFileURL, *newfile);
+    if (first) {
+	/*
+	 *  Make the tempfile a URL.
+ 	 */
+#if defined (VMS) || defined (DOSPATH)
+	sprintf(LYUploadFileURL, "file://localhost/%s", tempfile);
+#else
+	sprintf(LYUploadFileURL, "file://localhost%s", tempfile);
+#endif /* VMS */
+	first = FALSE;
+    }
+    StrAllocCopy(*newfile, LYUploadFileURL);
 
-    BeginInternalPage(fp0, UPLOAD_OPTIONS_TITLE, UPLOAD_OPTIONS_HELP);
+    fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
+    		 UPLOAD_OPTIONS_TITLE);
 
-    fprintf(fp0, "<pre>\n");
-    fprintf(fp0, "   <em>Upload To:</em> %s\n", curloc);
-    fputs("\nUpload options:\n", fp0);
+    fprintf(fp0, "<h1>Upload Options (%s Version %s)</h1>\n",
+    				      LYNX_NAME, LYNX_VERSION);
+
+    fputs("You have the following upload choices.<br>\n", fp0);
+    fputs("Please select one:<br>\n<pre>\n", fp0);
 
     if (uploaders != NULL) {
 	for (count = 0, cur_upload = uploaders;
-	     cur_upload != NULL;
+	     cur_upload != NULL; 
 	     cur_upload = cur_upload->next, count++) {
 	    fprintf(fp0, "   <a href=\"LYNXDIRED://UPLOAD=%d/TO=%s\">",
 			 count, curloc);
-	    fprintf(fp0, (cur_upload->name ?
+	    fprintf(fp0, (cur_upload->name ? 
 			  cur_upload->name : "No Name Given"));
 	    fprintf(fp0, "</a>\n");
 	}
     } else {
-	fprintf(fp0, "   &lt;NONE&gt;\n");
-    }
+	fprintf(fp0, "\n   \
+No other upload methods have been defined yet.  You may define\n   \
+an unlimited number of upload methods using the lynx.cfg file.\n");
 
-    fprintf(fp0, "</pre>\n");
-    EndInternalPage(fp0);
-    LYCloseTempFP(fp0);
+    }
+    fprintf(fp0, "</pre>\n</body>\n");
+    fclose(fp0);
 
     LYforce_no_cache = TRUE;
 

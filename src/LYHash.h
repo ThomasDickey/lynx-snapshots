@@ -1,8 +1,6 @@
 #if !defined(_LYHASH_H_)
 #define _LYHASH_H_ 1
 
-#include <HTUtils.h>
-
 struct _hashbucket {
 	char *name; /* name of this item */
 	int	code; /* code of this item */

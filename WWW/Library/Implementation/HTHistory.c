@@ -1,4 +1,5 @@
 #include <HTUtils.h>
+#include <tcp.h>		/* for standard io */
 
 #include <HTHistory.h>
 
@@ -70,9 +71,10 @@ HTAnchor * HTHistory_moveBy
       }
       return destination;
     } else {
-        CTRACE(tfp, "HTHistory_moveBy: offset by %+d goes out of list %p.\n",
-		    offset, (void*)kids);
-        return NULL;
+      if (TRACE) fprintf(stderr, 
+      		"HTHistory_moveBy: offset by %+d goes out of list %p.\n",
+		offset, (void*)kids);
+      return NULL;
     }
   } else {  /* Was a parent */
     return NULL;  /* FIXME we could possibly follow the next link... */
@@ -146,11 +148,10 @@ int HTHistory_count
 */
 
 void HTHistory_leavingFrom
-    ARGS1 (HTAnchor *,anchor)
+  ARGS1 (HTAnchor *,anchor)
 {
-    if (HTList_removeLastObject (history)) {
-        HTList_addObject (history, anchor);
-    } else {
-        CTRACE(tfp, "HTHistory_leavingFrom: empty history !\n");
-    }
+  if (HTList_removeLastObject (history))
+    HTList_addObject (history, anchor);
+  else
+    if (TRACE) fprintf(stderr, "HTHistory_leavingFrom: empty history !\n");
 }

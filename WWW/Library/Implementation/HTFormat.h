@@ -14,6 +14,9 @@ Preamble
 #ifndef HTFORMAT_H
 #define HTFORMAT_H
 
+#ifndef HTUTILS_H
+#include <HTUtils.h>
+#endif /* HTUTILS_H */
 #include <HTStream.h>
 #include <HTAtom.h>
 #include <HTList.h>

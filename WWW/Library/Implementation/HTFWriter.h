@@ -8,7 +8,11 @@
 #ifndef HTFWRITE_H
 #define HTFWRITE_H
 
+#ifndef HTUTILS_H
+#include <HTUtils.h>
+#endif /* HTUTILS_H */
 #include <HTStream.h>
+/*#include <stdio.h> included by HTUtils.h -- FM */
 #include <HTFormat.h>
 
 #ifdef SHORT_NAMES

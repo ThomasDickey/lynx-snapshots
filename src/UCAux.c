@@ -1,4 +1,5 @@
 #include <HTUtils.h>
+#include <tcp.h>
 
 #include <HTCJK.h>
 #include <UCDefs.h>
@@ -37,9 +38,9 @@ PUBLIC BOOL UCCanTranslateFromTo ARGS2(
 	return YES;
     if (from < 0 || to < 0)
 	return NO;
-    if (from == LATIN1)
+    if (from == 0)
 	return UCCanTranslateUniTo(to);
-    if (to == LATIN1 || LYCharSet_UC[to].enc == UCT_ENC_UTF8)
+    if (to == 0 || LYCharSet_UC[to].enc == UCT_ENC_UTF8)
 	return UCCanUniTranslateFrom(from);
     {
 	CONST char * fromname = LYCharSet_UC[from].MIMEname;
@@ -102,7 +103,7 @@ PUBLIC BOOL UCNeedNotTranslate ARGS2(
     }
     if (to < 0)
 	return NO;		/* ??? */
-    if (to == LATIN1) {
+    if (to == 0) {
 	if (LYCharSet_UC[from].codepoints & (UCT_CP_SUBSETOF_LAT1))
 	    return YES;
     }
@@ -113,7 +114,7 @@ PUBLIC BOOL UCNeedNotTranslate ARGS2(
     if (LYCharSet_UC[to].enc == UCT_ENC_UTF8) {
 	return NO;
     }
-    if (from == LATIN1) {
+    if (from == 0) {
 	if (LYCharSet_UC[from].codepoints & (UCT_CP_SUPERSETOF_LAT1))
 	    return YES;
     }
@@ -121,7 +122,14 @@ PUBLIC BOOL UCNeedNotTranslate ARGS2(
 	if (HTCJK == NOCJK)	/* Use that global flag, for now. */
 	    return NO;
 	if (HTCJK == JAPANESE &&
+	    /*
+	    **  Always strip the "x-" from "x-euc-jp",
+	    **  or convert "x-shift-jis" to "shift_jis",
+	    **  before calling this function, and so
+	    **  don't check for them here. - FM
+	    */
 	    (!strcmp(fromname, "euc-jp") ||
+	     !strncmp(fromname, "iso-2022-jp",11) ||
 	     !strcmp(fromname, "shift_jis")))
 	    return YES;	/* ??? */
 	return NO;	/* If not handled by (from == to) above. */
@@ -178,7 +186,7 @@ PUBLIC void UCSetTransParams ARGS5(
 	pT->trans_C0_to_uni = (p_in->enc == UCT_ENC_8BIT_C0 ||
 			       p_out->enc == UCT_ENC_8BIT_C0);
     } else {
-	/*
+        /*
 	**  Initialize local flags. - FM
 	*/
 	BOOL intm_ucs = FALSE;
@@ -215,7 +223,7 @@ PUBLIC void UCSetTransParams ARGS5(
 	    **  equivalent to them, i.e. if we have UCS without
 	    **  having to do a table translation.
 	    */
-	    intm_ucs = (cs_in == LATIN1 || pT->decode_utf8 ||
+	    intm_ucs = (cs_in == 0 || pT->decode_utf8 ||
 			(p_in->codepoints &
 			 (UCT_CP_SUBSETOF_LAT1|UCT_CP_SUBSETOF_UCS2)));
 	    /*
@@ -270,7 +278,7 @@ PUBLIC void UCSetTransParams ARGS5(
 	    */
 	    pT->use_raw_char_in = (!pT->output_utf8 &&
 				   cs_in == cs_out &&
-				   !pT->trans_C0_to_uni);
+		                   !pT->trans_C0_to_uni);
 	    /*
 	    **  This should be set TRUE when we expect to have
 	    **  done translation to Unicode or had the equivalent
@@ -405,7 +413,7 @@ PUBLIC BOOL UCConvertUniToUtf8 ARGS2(
 
     if (code <= 0 || code > 0x7fffffffL) {
 	*ch = '\0';
-	return NO;
+        return NO;
     }
 
     if (code < 0x800L) {

@@ -9,6 +9,7 @@
 */
 
 #include <HTUtils.h>
+#include <tcp.h>
 
 #include <HTWSRC.h>
 
@@ -17,6 +18,8 @@
 #include <HTParse.h>
 
 #include <LYLeaks.h>
+
+#define FREE(x) if (x) {free(x); x = NULL;}
 
 #define BIG 10000		/* Arbitrary limit to value length */
 #define PARAM_MAX BIG
@@ -159,8 +162,9 @@ PRIVATE void WSRCParser_put_character ARGS2(HTStream*, me, char, c)
 		}
 	    }
 	    if (!par_name[me->param_number]) {	/* Unknown field */
-		CTRACE(tfp, "HTWSRC: Unknown field `%s' in source file\n",
-			    me->param);
+		if (TRACE) fprintf(stderr,
+		    "HTWSRC: Unknown field `%s' in source file\n",
+		    me->param);
 		me->param_number = PAR_UNKNOWN;
 		me->state = before_value;	/* Could be better ignore */
 		return;

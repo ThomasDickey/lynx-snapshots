@@ -10,9 +10,14 @@
 #define NO_MEMORY_TRACKING
 
 #include <HTUtils.h>
+#include <tcp.h>
 #include <LYexit.h>
 #include <LYLeaks.h>
 #include <LYUtils.h>
+#include <ctype.h>
+/*#include <stdio.h> included by HTUtils.h -- FM */
+
+#define FREE(x) if (x) {free(x); x = NULL;}
 
 PRIVATE AllocationList *ALp_RunTimeAllocations = NULL;
 
@@ -155,8 +160,22 @@ PUBLIC void LYLeaks NOARGS
     fprintf(Fp_leakagesink, "\nTotal memory leakage this run:\t%u\n",
 		(unsigned)st_total);
     fclose(Fp_leakagesink);
-
-    HTSYS_purge(LEAKAGE_SINK);
+#ifdef VMS
+    {
+	char VMSfilename[256];
+	/*
+	 *  Purge lower versions of the file.
+	 */
+	sprintf(VMSfilename, "%s;-1", LEAKAGE_SINK);
+	while (remove(VMSfilename) == 0)
+	    ;
+	/*
+	 *  Reset version number.
+	 */
+	sprintf(VMSfilename, "%s;1", LEAKAGE_SINK);
+	rename(LEAKAGE_SINK, VMSfilename);
+    }
+#endif /* VMS */
 }
 
 /*

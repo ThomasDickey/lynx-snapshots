@@ -11,6 +11,7 @@
 */
 
 #include <HTUtils.h>
+#include <tcp.h>
 #include <HTAccess.h>
 
 /* Implements:
@@ -47,9 +48,12 @@ PUBLIC long int HTMaxBytes  = 0;	/* No effective limit */
 
 #include <LYexit.h>
 #include <LYUtils.h>
-#include <GridText.h>
 #include <LYGlobalDefs.h>
 #include <LYLeaks.h>
+
+#define FREE(x) if (x) {free(x); x = NULL;}
+
+extern int HTCheckForInterrupt NOPARAMS;
 
 PUBLIC	BOOL HTOutputSource = NO;	/* Flag: shortcut parser to stdout */
 /* extern  BOOL interactive; LJM */
@@ -231,11 +235,14 @@ PUBLIC char HTGetCharacter NOARGS
 		if (status == 0)
 		    return (char)EOF;
 		if (status == HT_INTERRUPTED) {
-		    CTRACE(tfp, "HTFormat: Interrupted in HTGetCharacter\n");
+		    if (TRACE)
+			fprintf(stderr,
+				"HTFormat: Interrupted in HTGetCharacter\n");
 		    interrupted_in_htgetcharacter = 1;
 		    return (char)EOF;
 		}
-		CTRACE(tfp, "HTFormat: File read error %d\n", status);
+		if (TRACE)
+		    fprintf(stderr, "HTFormat: File read error %d\n", status);
 		return (char)EOF; /* -1 is returned by UCX
 				     at end of HTTP link */
 	    }
@@ -259,8 +266,9 @@ PRIVATE int half_match ARGS2(char *,trial_type, char *,target)
     if (!cp || *(cp+1) != '*')
 	return 0;
 
-    CTRACE(tfp, "HTFormat: comparing %s and %s for half match\n",
-		trial_type, target);
+    if (TRACE)
+	fprintf(stderr,"HTFormat: comparing %s and %s for half match\n",
+						      trial_type, target);
 
 	/* main type matches */
     if (!strncmp(trial_type, target, (cp-trial_type)-1))
@@ -287,7 +295,9 @@ PRIVATE HTPresentation * HTFindPresentation ARGS3(
 {
     HTAtom * wildcard = HTAtom_for("*");
 
-    CTRACE(tfp, "HTFormat: Looking up presentation for %s to %s\n",
+    if (TRACE)
+	fprintf(stderr,
+		"HTFormat: Looking up presentation for %s to %s\n",
 		HTAtom_name(rep_in), HTAtom_name(rep_out));
 
     /* don't do anymore do it in the Lynx code at startup LJM */
@@ -306,7 +316,9 @@ PRIVATE HTPresentation * HTFindPresentation ARGS3(
 	    pres = (HTPresentation *)HTList_objectAt(HTPresentations, i);
 	    if (pres->rep == rep_in) {
 		if (pres->rep_out == rep_out) {
-		    CTRACE(tfp, "FindPresentation: found exact match: %s\n",
+		    if (TRACE)
+			fprintf(stderr,
+				"FindPresentation: found exact match: %s\n",
 				HTAtom_name(pres->rep));
 		    return pres;
 
@@ -316,7 +328,9 @@ PRIVATE HTPresentation * HTFindPresentation ARGS3(
 		    if (!strong_wildcard_match)
 			strong_wildcard_match = pres;
 		    /* otherwise use the first one */
-		    CTRACE(tfp, "StreamStack: found strong wildcard match: %s\n",
+		    if (TRACE)
+			fprintf(stderr,
+			     "StreamStack: found strong wildcard match: %s\n",
 				HTAtom_name(pres->rep));
 		}
 
@@ -329,7 +343,9 @@ PRIVATE HTPresentation * HTFindPresentation ARGS3(
 		    if (!strong_subtype_wildcard_match)
 			strong_subtype_wildcard_match = pres;
 		    /* otherwise use the first one */
-		    CTRACE(tfp, "StreamStack: found strong subtype wildcard match: %s\n",
+		    if (TRACE)
+			fprintf(stderr,
+		     "StreamStack: found strong subtype wildcard match: %s\n",
 				HTAtom_name(pres->rep));
 		}
 	    }
@@ -339,7 +355,9 @@ PRIVATE HTPresentation * HTFindPresentation ARGS3(
 		    if (!weak_wildcard_match)
 			weak_wildcard_match = pres;
 		    /* otherwise use the first one */
-		    CTRACE(tfp, "StreamStack: found weak wildcard match: %s\n",
+		    if (TRACE)
+			fprintf(stderr,
+			    "StreamStack: found weak wildcard match: %s\n",
 				HTAtom_name(pres->rep_out));
 		}
 		if (pres->rep_out == wildcard) {
@@ -385,7 +403,9 @@ PUBLIC HTStream * HTStreamStack ARGS4(
     HTPresentation temp;
     HTPresentation *match;
 
-    CTRACE(tfp, "HTFormat: Constructing stream stack for %s to %s\n",
+    if (TRACE)
+	fprintf(stderr,
+		"HTFormat: Constructing stream stack for %s to %s\n",
 		HTAtom_name(rep_in), HTAtom_name(rep_out));
 
     /* don't return on WWW_SOURCE some people might like
@@ -399,9 +419,13 @@ PUBLIC HTStream * HTStreamStack ARGS4(
 
     if ((match = HTFindPresentation(rep_in, rep_out, &temp))) {
 	if (match == &temp) {
-	    CTRACE(tfp, "StreamStack: Using %s\n", HTAtom_name(temp.rep_out));
+	    if (TRACE)
+		fprintf(stderr,
+			"StreamStack: Using %s\n", HTAtom_name(temp.rep_out));
 	} else {
-	    CTRACE(tfp, "StreamStack: found exact match: %s\n",
+	    if (TRACE)
+		fprintf(stderr,
+			"StreamStack: found exact match: %s\n",
 			HTAtom_name(match->rep));
 	}
 	return (*match->converter)(match, anchor, sink);
@@ -442,7 +466,9 @@ PUBLIC float HTStackValue ARGS4(
 {
     HTAtom * wildcard = HTAtom_for("*");
 
-    CTRACE(tfp, "HTFormat: Evaluating stream stack for %s worth %.3f to %s\n",
+    if (TRACE)
+	fprintf(stderr,
+		"HTFormat: Evaluating stream stack for %s worth %.3f to %s\n",
 		HTAtom_name(rep_in), initial_value, HTAtom_name(rep_out));
 
     if (rep_out == WWW_SOURCE || rep_out == rep_in)
@@ -472,61 +498,13 @@ PUBLIC float HTStackValue ARGS4(
 
 }
 
-/*	Display the page while transfer in progress
-**	-------------------------------------------
-**
-**   Repaint the page only when necessary.
-**
-*/
-#ifdef DISP_PARTIAL
-PRIVATE void HTDisplayPartial NOARGS
-{
-    if (display_partial) {
-	/*
-	**  HText_getNumOfLines() = "current" number of lines received
-	**  NumOfLines_partial = number of lines at the moment of last repaint.
-	**
-	**  We update NumOfLines_partial only when we repaint the display.
-	**  -1 is the special value:
-	**  This is a synchronization flag switched to 0 when HText_new()
-	**  starts a new HTMainText object - all hypertext functions use it,
-	**  lines counter in particular [we call it from HText_getNumOfLines()].
-	**
-	**  Otherwise HTMainText holds info from the previous document
-	**  and we may repaint it instead of the new one:
-	**  prev doc scrolled to the first line (=Newline_partial)
-	**  is not good looking :-)	  23 Aug 1998 Leonid Pauzner
-	**
-	**  So repaint the page only when necessary:
-	*/
-	if ((NumOfLines_partial != -1)
-		/* new hypertext document available  */
-	&& ((Newline_partial + display_lines) > NumOfLines_partial)
-		/* current page not complete... */
-	&& (partial_threshold > 0 ? ((Newline_partial + partial_threshold)  < HText_getNumOfLines()) : 
-		 ((Newline_partial + display_lines) < HText_getNumOfLines()))) { 
-		/* 
-		 * Originally we rendered by increments of 2 lines, 
-		 * but that got annoying on slow network connections. 
-		 * Then we switched to full-pages.  Now it's configurable. 
-		 * If partial_threshold < 0, then it's a full page 
-		 */
-	    NumOfLines_partial = HText_getNumOfLines();
-	    HText_pageDisplay(Newline_partial, "");
-	}
-    }
-}
-#else
-#define HTDisplayPartial() /*nothing*/
-#endif
-
 /*	Push data from a socket down a stream
 **	-------------------------------------
 **
 **   This routine is responsible for creating and PRESENTING any
 **   graphic (or other) objects described by the file.
 **
-**   The file number given is assumed to be a TELNET stream, i.e., containing
+**   The file number given is assumed to be a TELNET stream ie containing
 **   CRLF at the end of lines which need to be stripped to LF for unix
 **   when the format is textual.
 **
@@ -538,7 +516,8 @@ PUBLIC int HTCopy ARGS4(
 	HTStream*,		sink)
 {
     HTStreamClass targetClass;
-    int bytes;
+    char line[256];
+    int bytes = 0;
     int rv = 0;
 
     /*	Push the data down the stream
@@ -549,7 +528,6 @@ PUBLIC int HTCopy ARGS4(
     **
     **	This operation could be put into a main event loop
     */
-    HTReadProgress(bytes = 0, 0);
     for (;;) {
 	int status;
 
@@ -587,7 +565,7 @@ PUBLIC int HTCopy ARGS4(
 		       SOCKET_ERRNO == ECONNRESET ||
 		       SOCKET_ERRNO == EPIPE) {
 		/*
-		 *  Arrrrgh, HTTP 0/1 compatibility problem, maybe.
+		 *  Arrrrgh, HTTP 0/1 compability problem, maybe.
 		 */
 		if (bytes <= 0) {
 		    /*
@@ -601,7 +579,8 @@ PUBLIC int HTCopy ARGS4(
 		    *  Treat what we've gotten already
 		    *  as the complete transmission. - FM
 		    */
-		   CTRACE(tfp,
+		   if (TRACE)
+		       fprintf(stderr,
 	    "HTCopy: Unexpected server disconnect. Treating as completed.\n");
 		   status = 0;
 		   break;
@@ -620,9 +599,14 @@ PUBLIC int HTCopy ARGS4(
 #endif /* NOT_ASCII */
 
 	(*targetClass.put_block)(sink, input_buffer, status);
+
 	bytes += status;
-	HTReadProgress(bytes, anchor ? anchor->content_length : 0);
-	HTDisplayPartial();
+	if (anchor && anchor->content_length > 0)
+	    sprintf(line, "Read %d of %d bytes of data.",
+			  bytes, anchor->content_length);
+	else
+	    sprintf(line, "Read %d bytes of data.", bytes);
+	HTProgress(line);
 
     } /* next bufferload */
 
@@ -647,7 +631,8 @@ PUBLIC int HTFileCopy ARGS2(
 	HTStream*,		sink)
 {
     HTStreamClass targetClass;
-    int status, bytes;
+    char line[256];
+    int status, bytes = 0, nreads = 0, nprogr = 0;
     int rv = HT_OK;
 
     /*	Push the data down the stream
@@ -656,15 +641,17 @@ PUBLIC int HTFileCopy ARGS2(
 
     /*	Push binary from socket down sink
     */
-    HTReadProgress(bytes = 0, 0);
     for (;;) {
 	status = fread(input_buffer, 1, INPUT_BUFFER_SIZE, fp);
+	nreads++;
 	if (status == 0) { /* EOF or error */
 	    if (ferror(fp) == 0) {
 		rv = HT_LOADED;
 		break;
 	    }
-	    CTRACE(tfp, "HTFormat: Read error, read returns %d\n",
+	    if (TRACE)
+		fprintf(stderr,
+			"HTFormat: Read error, read returns %d\n",
 			ferror(fp));
 	    if (bytes) {
 		rv = HT_PARTIAL_CONTENT;
@@ -673,20 +660,41 @@ PUBLIC int HTFileCopy ARGS2(
 	    }
 	    break;
 	}
-
 	(*targetClass.put_block)(sink, input_buffer, status);
-	bytes += status;
-	HTReadProgress(bytes, 0);
-	HTDisplayPartial();
 
-	if (HTCheckForInterrupt()) {
-	    _HTProgress ("Data transfer interrupted.");
-	    if (bytes) {
-		rv = HT_INTERRUPTED;
+	bytes += status;
+	if (nreads >= 100) {
+	    /*
+	    **	Show progress messages for local files, and check for
+	    **	user interruption.  Start doing so only after a certain
+	    **	number of reads have been done, and don't update it on
+	    **	every read (normally reading in a local file should be
+	    **	speedy). - KW
+	    */
+	    if (nprogr == 0) {
+		if (bytes < 1024000) {
+		    sprintf(line, "Read %d bytes of data.", bytes);
+		} else {
+		    sprintf(line, "Read %d KB of data. %s",
+				  bytes/1024,
+		    "(Press 'z' if you want to abort loading.)");
+		}
+		HTProgress(line);
+		if (HTCheckForInterrupt()) {
+		    _HTProgress ("Data transfer interrupted.");
+		    if (bytes) {
+			rv = HT_INTERRUPTED;
+		    } else {
+			rv = -1;
+		    }
+		    break;
+		}
+		nprogr++;
+	    } else if (nprogr == 25) {
+		nprogr = 0;
 	    } else {
-		rv = -1;
+		nprogr++;
 	    }
-	    break;
 	}
     } /* next bufferload */
 
@@ -707,7 +715,8 @@ PRIVATE int HTGzFileCopy ARGS2(
 	HTStream*,		sink)
 {
     HTStreamClass targetClass;
-    int status, bytes;
+    char line[256];
+    int status, bytes = 0, nreads = 0, nprogr = 0;
     int gzerrnum;
     int rv = HT_OK;
 
@@ -715,21 +724,23 @@ PRIVATE int HTGzFileCopy ARGS2(
     */
     targetClass = *(sink->isa); /* Copy pointers to procedures */
 
-    /*	read and inflate gzip'd file, and push binary down sink
+    /*	read and inflate gzipped file, and push binary down sink
     */
-    HTReadProgress(bytes = 0, 0);
     for (;;) {
 	status = gzread(gzfp, input_buffer, INPUT_BUFFER_SIZE);
+	nreads++;
 	if (status <= 0) { /* EOF or error */
 	    if (status == 0) {
 		rv = HT_LOADED;
 		break;
 	    }
-	    CTRACE(tfp, "HTGzFileCopy: Read error, gzread returns %d\n",
-			status);
-	    CTRACE(tfp, "gzerror   : %s\n",
-			gzerror(gzfp, &gzerrnum));
 	    if (TRACE) {
+		fprintf(stderr,
+			"HTGzFileCopy: Read error, gzread returns %d\n",
+			status);
+		fprintf(stderr,
+			"gzerror   : %s\n",
+			gzerror(gzfp, &gzerrnum));
 		if (gzerrnum == Z_ERRNO)
 		    perror("gzerror   ");
 	    }
@@ -740,20 +751,42 @@ PRIVATE int HTGzFileCopy ARGS2(
 	    }
 	    break;
 	}
-
 	(*targetClass.put_block)(sink, input_buffer, status);
-	bytes += status;
-	HTReadProgress(bytes, -1);
-	HTDisplayPartial();
 
-	if (HTCheckForInterrupt()) {
-	    _HTProgress ("Data transfer interrupted.");
-	    if (bytes) {
-		rv = HT_INTERRUPTED;
+	bytes += status;
+	if (nreads >= 100) {
+	    /*
+	    **	Show progress messages for local files, and check for
+	    **	user interruption.  Start doing so only after a certain
+	    **	number of reads have been done, and don't update it on
+	    **	every read (normally reading in a local file should be
+	    **	speedy). - KW
+	    */
+	    if (nprogr == 0) {
+		if (bytes < 1024000) {
+		    sprintf(line,
+			    "Read %d uncompressed bytes of data.", bytes);
+		} else {
+		    sprintf(line, "Read %d uncompressed KB of data. %s",
+				  bytes/1024,
+		    "(Press 'z' to abort.)");
+		}
+		HTProgress(line);
+		if (HTCheckForInterrupt()) {
+		    _HTProgress ("Data transfer interrupted.");
+		    if (bytes) {
+			rv = HT_INTERRUPTED;
+		    } else {
+			rv = -1;
+		    }
+		    break;
+		}
+		nprogr++;
+	    } else if (nprogr == 25) {
+		nprogr = 0;
 	    } else {
-		rv = -1;
+		nprogr++;
 	    }
-	    break;
 	}
     } /* next bufferload */
 
@@ -829,7 +862,8 @@ PUBLIC int HTParseSocket ARGS5(
 	}
 	sprintf(buffer, "Sorry, can't convert from %s to %s.",
 		HTAtom_name(rep_in), HTAtom_name(format_out));
-	CTRACE(tfp, "HTFormat: %s\n", buffer);
+	if (TRACE)
+	    fprintf(stderr, "HTFormat: %s\n", buffer);
 	return HTLoadError(sink, 501, buffer); /* returns -501 */
     }
 
@@ -877,7 +911,8 @@ PUBLIC int HTParseFile ARGS5(
 	}
 	sprintf(buffer, "Sorry, can't convert from %s to %s.",
 		HTAtom_name(rep_in), HTAtom_name(format_out));
-	CTRACE(tfp, "HTFormat(in HTParseFile): %s\n", buffer);
+	if (TRACE)
+	    fprintf(stderr, "HTFormat(in HTParseFile): %s\n", buffer);
 	return HTLoadError(sink, 501, buffer);
     }
 
@@ -915,7 +950,7 @@ PRIVATE int HTCloseGzFile ARGS1(
 	if (gzres == Z_ERRNO) {
 	    perror("gzclose   ");
 	} else if (gzres != Z_OK) {
-	    CTRACE(tfp, "gzclose   : error number %d\n", gzres);
+	    fprintf(stderr, "gzclose   : error number %d\n", gzres);
 	}
     }
     return(gzres);
@@ -938,6 +973,7 @@ PUBLIC int HTParseGzFile ARGS5(
 
     if (!stream) {
 	char buffer[1024];	/* @@@@@@@@ */
+	extern char LYCancelDownload;
 	HTCloseGzFile(gzfp);
 	if (LYCancelDownload) {
 	    LYCancelDownload = FALSE;
@@ -945,7 +981,8 @@ PUBLIC int HTParseGzFile ARGS5(
 	}
 	sprintf(buffer, "Sorry, can't convert from %s to %s.",
 		HTAtom_name(rep_in), HTAtom_name(format_out));
-	CTRACE(tfp, "HTFormat(in HTParseGzFile): %s\n", buffer);
+	if (TRACE)
+	    fprintf(stderr, "HTFormat(in HTParseGzFile): %s\n", buffer);
 	return HTLoadError(sink, 501, buffer);
     }
 

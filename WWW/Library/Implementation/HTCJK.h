@@ -11,8 +11,6 @@
 #ifndef HTCJK_H
 #define HTCJK_H
 
-#include <HTUtils.h>
-
 /*
 **	STATUS CHANGE CODES
 */
@@ -98,15 +96,15 @@ extern unsigned char * EUC_TO_JIS PARAMS((
 	CONST char *		toA));
 
 extern unsigned char * TO_EUC PARAMS((
-	CONST unsigned char *	jis,
+	unsigned char *		jis,
 	unsigned char *		euc));
 
 extern void TO_SJIS PARAMS((
-	CONST unsigned char *	any,
+	unsigned char *		any,
 	unsigned char *		sjis));
 
 extern void TO_JIS PARAMS((
-	CONST unsigned char *	any,
+	unsigned char *		any,
 	unsigned char *		jis));
 
 #endif /* HTCJK_H */

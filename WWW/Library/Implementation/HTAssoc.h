@@ -7,7 +7,11 @@
 #ifndef HTASSOC_H
 #define HTASSOC_H
 
+#ifndef HTUTILS_H
+#include <HTUtils.h>
+#endif /* HTUTILS_H */
 #include <HTList.h>
+
 
 #ifdef SHORT_NAMES
 #define HTAL_new        HTAssocList_new

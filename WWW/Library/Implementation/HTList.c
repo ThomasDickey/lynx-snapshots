@@ -9,7 +9,12 @@
 #include <HTUtils.h>
 #include <HTList.h>
 
+/*#include <stdio.h> included by HTUtils.h -- FM *//* joe@athena, TBL 921019 */
+
 #include <LYLeaks.h>
+
+#define FREE(x) if (x) {free(x); x = NULL;}
+
 
 /*	Create list.
 */
@@ -58,9 +63,10 @@ PUBLIC void HTList_addObject ARGS2(
 	newNode->next = me->next;
 	me->next = newNode;
 
-    } else {
-        CTRACE(tfp, "HTList: Trying to add object %p to a nonexisting list\n",
-		    newObject);
+    } else if (TRACE) {
+        fprintf(stderr,
+		"HTList: Trying to add object %p to a nonexisting list\n",
+		newObject);
     }
 
     return;
@@ -100,14 +106,20 @@ PUBLIC void HTList_insertObjectAt ARGS3(
     int Pos = pos;
 
     if (!temp) {
-	CTRACE(tfp, "HTList: Trying to add object %p to a nonexisting list\n",
+	if (TRACE) {
+	    fprintf(stderr,
+		    "HTList: Trying to add object %p to a nonexisting list\n",
 		    newObject);
+	}
 	return;
     }
     if (Pos < 0) {
 	Pos = 0;
-	CTRACE(tfp, "HTList: Treating negative object position %d as %d.\n",
+	if (TRACE) {
+	    fprintf(stderr,
+		    "HTList: Treating negative object position %d as %d.\n",
 		    pos, Pos);
+	}
     }
 
     prevNode = temp;

@@ -2,14 +2,18 @@
 **		===========
 **
 */
-
 #include <HTUtils.h>
+#include <tcp.h>
 
 #include <HTWriter.h>
 
 #define BUFFER_SIZE 4096	/* Tradeoff */
 
+/*#include <stdio.h> included by HTUtils.h -- FM */
+
 #include <LYLeaks.h>
+
+#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*		HTML Object
 **		-----------
@@ -48,7 +52,8 @@ PRIVATE void flush ARGS1(HTStream *, me)
 	status = NETWRITE(me->soc, me->buffer,	/* Put timeout? @@@ */
 			write_pointer - read_pointer);
 	if (status<0) {
-	    CTRACE(tfp, "HTWrite: Error: write() on socket returns %d !!!\n", status);
+	    if(TRACE) fprintf(stderr,
+	    "HTWrite: Error: write() on socket returns %d !!!\n", status);
 	    return;
 	}
 	read_pointer = read_pointer + status;
@@ -103,7 +108,8 @@ PRIVATE void HTWriter_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	int status = NETWRITE(me->soc, (char *)read_pointer,
 			write_pointer - read_pointer);
 	if (status<0) {
-	    CTRACE(tfp, "HTWriter_write: Error on socket output stream!!!\n");
+	    if(TRACE) fprintf(stderr,
+	    "HTWriter_write: Error on socket output stream!!!\n");
 	    return;
 	}
 	read_pointer = read_pointer + status;

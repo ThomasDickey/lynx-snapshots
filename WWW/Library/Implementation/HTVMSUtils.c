@@ -14,12 +14,15 @@
 */
 
 #include <HTUtils.h>
+#include <tcp.h>
 #include <HTFormat.h>
 #include <HTStream.h>
 #include <UCDefs.h>
 #include <UCMap.h>
 #include <UCAux.h>
 #include <HTVMSUtils.h>
+/*#include <stdio.h> included by HTUtils.h -- FM */
+/*#include <unixlib.h> included by HTUtils.h -- FM */
 #include <ssdef.h>
 #include <jpidef.h>
 #include <prvdef.h>
@@ -30,7 +33,6 @@
 #include <starlet.h>
 #include <rmsdef.h>
 
-#include <LYUtils.h>
 #include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
@@ -104,10 +106,12 @@ unsigned long Prv[2], PreviousPrv[2];
    Prv[1] = 0;
    Result = sys$setprv(1,&Prv,0,&PreviousPrv);
 
-   if (Result == SS$_NORMAL) {
-       if (!(PreviousPrv[0] & PRV$M_SYSPRV)) {
-           CTRACE(tfp, "HTVMS_enableSysPrv: Enabled SYSPRV\n");
-       }
+   if (TRACE) {
+      if (Result == SS$_NORMAL) {
+         if (!(PreviousPrv[0] & PRV$M_SYSPRV)) {
+            fprintf(stderr, "HTVMS_enableSysPrv: Enabled SYSPRV\n");
+         }
+      }
    }
 }
 
@@ -130,10 +134,12 @@ unsigned long Prv[2], PreviousPrv[2];
    Prv[1] = 0;
    Result = sys$setprv(0,&Prv,0,&PreviousPrv);
 
-   if (Result == SS$_NORMAL) {
-       if (PreviousPrv[0] & PRV$M_SYSPRV) {
-           CTRACE(tfp, "HTVMS_disableSysPrv: Disabled SYSPRV\n");
-       }
+   if (TRACE) {
+      if (Result == SS$_NORMAL) {
+         if (PreviousPrv[0] & PRV$M_SYSPRV) {
+            fprintf(stderr, "HTVMS_disableSysPrv: Disabled SYSPRV\n");
+         }
+      }
    }
 }
 
@@ -377,7 +383,7 @@ PUBLIC char * HTVMS_name ARGS2(
 */
 PUBLIC int HTStat ARGS2(
 	CONST char *, filename, 
-	struct stat *, info)
+	stat_t *, info)
 {
    /* 
       the following stuff does not work in VMS with a normal stat...
@@ -472,6 +478,9 @@ char Name[256];
    Result = stat(Name,info);
    return(Result);
 }
+
+/*** "dirent.h" ***/
+/* #include <types.h>	already in tcp.h */
 
 #ifndef	_POSIX_SOURCE
 #define	d_ino	d_fileno	/* compatability */
@@ -725,7 +734,7 @@ typedef struct _VMSEntryInfo {
     BOOLEAN      display;  /* show this entry? */
 } VMSEntryInfo;
 
-PRIVATE void free_VMSEntryInfo_contents ARGS1(VMSEntryInfo *,entry_info)
+PRIVATE void free_VMSEntryInfo_struct_contents ARGS1(VMSEntryInfo *,entry_info)
 {
     if (entry_info) {
 	FREE(entry_info->filename);
@@ -891,7 +900,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
     extern BOOLEAN no_dotfiles, show_dotfiles;
 
     HTUnEscape(pathname);
-    CTRACE(tfp,"HTVMSBrowseDir: Browsing `%s\'\n", pathname);
+    CTRACE(stderr,"HTVMSBrowseDir: Browsing `%s\'\n", pathname);
 
     /*
      *  Require at least two elements (presumably a device and directory)
@@ -1104,13 +1113,17 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 	    StrAllocCopy(entry_info->type, cp);
 
 	    StrAllocCopy(entry_info->filename, dirbuf->d_name);
-	    if (S_ISDIR(file_info.st_mode)) {
+	    if ((file_info.st_mode & S_IFMT) == S_IFDIR) {
 	        /* strip .DIR part... */
                 char *dot;
                 dot = strstr(entry_info->filename, ".DIR");
                 if (dot)
                    *dot = '\0';
-		LYLowerCase(entry_info->filename);
+		cp = entry_info->filename;
+		while (cp && *cp) {
+		    *cp = TOLOWER(*cp);
+		    cp++;
+		}
 		StrAllocCopy(entry_info->type, "Directory");
 	    } else {
 	        if ((cp = strstr(entry_info->filename, "READ")) == NULL) {
@@ -1129,7 +1142,10 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 		        cp = entry_info->filename;
 		    }
 		}
-		LYLowerCase(cp);
+		while (cp && *cp) {
+		    *cp = TOLOWER(*cp);
+		    cp++;
+		}
 		if (((len = strlen(entry_info->filename)) > 2) &&
 		    entry_info->filename[len-1] == 'z') {
 		    if (entry_info->filename[len-2] == '.' ||
@@ -1154,7 +1170,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 	    }
 
 	    /* Get the size */
-	    if (!S_ISDIR(file_info.st_mode))
+	    if ((file_info.st_mode & S_IFMT) != S_IFDIR)
 	        entry_info->size = (unsigned int)file_info.st_size;
 	    else
 	        entry_info->size = 0;
@@ -1162,7 +1178,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 	    /* Now, update the BTree etc. */
 	    if(entry_info->display)
 	      {
-		 CTRACE(tfp,"Adding file to BTree: %s\n",
+		 CTRACE(stderr,"Adding file to BTree: %s\n",
 						      entry_info->filename);
 	         HTBTree_add(bt, (VMSEntryInfo *)entry_info); 
 	      }
@@ -1223,7 +1239,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 
 		PUTC('\n'); /* end of this entry */
 
-		free_VMSEntryInfo_contents(entry_info);
+		free_VMSEntryInfo_struct_contents(entry_info);
 	    }
 	}
 
@@ -1246,33 +1262,3 @@ PUBLIC int HTVMSBrowseDir ARGS4(
     return HT_LOADED;
 
 } /* End of directory reading section */
-
-/*
- * Remove all versions of the given file.  We assume there are no permissions
- * problems, since we do this mainly for removing temporary files.
- */
-int HTVMS_remove(char *filename)
-{
-    int code = remove(filename);	/* return the first status code */
-    while (remove(filename) == 0)
-	;
-    return code;
-}
-
-/*
- * Remove all older versions of the given file.  We may fail to remove some
- * version due to permissions -- the loop stops either at that point, or when
- * we run out of older versions to remove.
- */
-void HTVMS_purge(char *filename)
-{
-    char *older_file = 0;
-
-    StrAllocCopy(older_file, filename);
-    StrAllocCat(older_file, ";-1");
-
-    while (remove(older_file) == 0)
-	;
-
-    FREE(older_file);
-}

@@ -1,11 +1,11 @@
 #include <HTUtils.h>
+#include <tcp.h>
 #include <HTFTP.h>
 #include <HTML.h>
 #include <LYCurses.h>
 #include <LYUtils.h>
 #include <LYStrings.h>
 #include <LYGlobalDefs.h>
-#include <LYHistory.h>
 #include <LYOptions.h>
 #include <LYSignal.h>
 #include <LYClean.h>
@@ -18,16 +18,21 @@
 #include <HTAlert.h>
 #include <LYBookmark.h>
 #include <GridText.h>
-#include <LYGetFile.h>
-#include <LYReadCFG.h>
 
 #include <LYLeaks.h>
 
+#define FREE(x) if (x) {free(x); x = NULL;}
+
+#ifdef VMS
+#define DISPLAY "DECW$DISPLAY"
+#else
+#define DISPLAY "DISPLAY"
+#endif /* VMS */
+
+#define COL_OPTION_VALUES 36  /* display column where option values start */
+
 BOOLEAN term_options;
-
 PRIVATE void terminate_options	PARAMS((int sig));
-
-#ifndef NO_OPTION_MENU
 PRIVATE int boolean_choice PARAMS((
 	int		status,
 	int		line,
@@ -43,70 +48,6 @@ PRIVATE int popup_choice PARAMS((
 
 #define MAXCHOICES 10
 
-/*
- *  Values for the options menu. - FM
- *
- *  L_foo values are the Y coordinates for the menu item.
- *  B_foo values are the X coordinates for the item's prompt string.
- *  C_foo values are the X coordinates for the item's value string.
- */
-#define L_EDITOR	 2
-#define L_DISPLAY	 3
-
-#define L_HOME		 4
-#define C_MULTI		24
-#define B_BOOK		34
-#define C_DEFAULT	50
-
-#define L_FTPSTYPE	 5
-#define L_MAIL_ADDRESS	 6
-#define L_SSEARCH	 7
-#define L_LANGUAGE	 8
-#define L_PREF_CHARSET	 9
-#define L_ASSUME_CHARSET (L_PREF_CHARSET + 1)
-#define L_CHARSET	10
-#define L_RAWMODE	11
-
-#define L_COLOR		L_RAWMODE
-#define B_COLOR		44
-#define C_COLOR		62
-
-#define L_BOOL_A	12
-#define B_VIKEYS	5
-#define C_VIKEYS	15
-#define B_EMACSKEYS	22
-#define C_EMACSKEYS	36
-#define B_SHOW_DOTFILES	44
-#define C_SHOW_DOTFILES	62
-
-#define L_BOOL_B	13
-#define B_SELECT_POPUPS	5
-#define C_SELECT_POPUPS	36
-#define B_SHOW_CURSOR	44
-#define C_SHOW_CURSOR	62
-
-#define L_KEYPAD	14
-#define L_LINEED	15
-
-#ifdef DIRED_SUPPORT
-#define L_DIRED		16
-#define L_USER_MODE	17
-#define L_USER_AGENT	18
-#define L_EXEC		19
-#else
-#define L_USER_MODE	16
-#define L_USER_AGENT	17
-#define L_EXEC		18
-#endif /* DIRED_SUPPORT */
-
-#define L_VERBOSE_IMAGES L_USER_MODE
-#define B_VERBOSE_IMAGES 50
-#define C_VERBOSE_IMAGES (B_VERBOSE_IMAGES + 21)
-
-
-#define COL_OPTION_VALUES 36  /* display column where option values start */
-
-/* a kludge to add assume_charset only in ADVANCED mode... */
 #define L_Bool_A (use_assume_charset ? L_BOOL_A + 1 : L_BOOL_A)
 #define L_Bool_B (use_assume_charset ? L_BOOL_B + 1 : L_BOOL_B)
 #define L_Exec (use_assume_charset ? L_EXEC + 1 : L_EXEC)
@@ -119,8 +60,54 @@ PRIVATE int popup_choice PARAMS((
 #define L_User_Mode (use_assume_charset ? L_USER_MODE + 1 : L_USER_MODE)
 #define L_User_Agent (use_assume_charset ? L_USER_AGENT + 1 : L_USER_AGENT)
 
+PRIVATE void option_statusline ARGS1(
+	CONST char *,		text)
+{
+    /*
+     *	Make sure we have a pointer to a string.
+     */
+    if (text == NULL)
+	return;
 
-PUBLIC void LYoptions NOARGS
+    /*
+     *	Don't print statusline messages if dumping to stdout.
+     */
+    if (dump_output_immediately)
+	return;
+
+    /*
+     *	Use _statusline() set to output on the bottom line. - FM
+     */
+    LYStatusLine = (LYlines - 1);
+    _statusline(text);
+    LYStatusLine = -1;
+}
+
+PRIVATE void option_user_message ARGS2(
+	CONST char *,		message,
+	char *, 		argument)
+{
+    /*
+     *	Make sure we have a pointer to a string.
+     */
+    if (message == NULL || argument == NULL)
+	return;
+
+    /*
+     *	Don't print statusline messages if dumping to stdout.
+     */
+    if (dump_output_immediately)
+	return;
+
+    /*
+     *	Use _user_message() set to output on the bottom line.
+     */
+    LYStatusLine = (LYlines - 1);
+    _user_message(message, argument);
+    LYStatusLine = -1;
+}
+
+PUBLIC void options NOARGS
 {
 #ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
     int itmp;
@@ -130,10 +117,13 @@ PUBLIC void LYoptions NOARGS
      *	If the user changes the display we need memory to put it in.
      */
     char display_option[256];
+#ifndef VMS
+    static char putenv_command[142];
+#endif /* !VMS */
     char *choices[MAXCHOICES];
     int CurrentCharSet = current_char_set;
-    int CurrentAssumeCharSet = UCLYhndl_for_unspec;
     int CurrentShowColor = LYShowColor;
+    int CurrentAssumeCharSet = UCLYhndl_for_unspec;
     BOOLEAN CurrentRawMode = LYRawMode;
     BOOLEAN AddValueAccepted = FALSE;
     char *cp = NULL;
@@ -167,7 +157,6 @@ PUBLIC void LYoptions NOARGS
 #endif /* DIRED_SUPPORT */
 
     term_options = FALSE;
-    LYStatusLine = (LYlines - 1);	/* screen is otherwise too crowded */
     signal(SIGINT, terminate_options);
     if (no_option_save) {
 	if (LYShowColor == SHOW_COLOR_NEVER) {
@@ -241,7 +230,7 @@ draw_options:
 
     move(L_DISPLAY, 5);
     addstr("D)ISPLAY variable            : ");
-    addstr((x_display && *x_display) ? x_display : "NONE");
+    addstr((display && *display) ? display : "NONE");
 
     move(L_HOME, 5);
     addstr("mu(L)ti-bookmarks: ");
@@ -309,7 +298,7 @@ draw_options:
     } else {
 	switch (LYChosenShowColor) {
 	case SHOW_COLOR_NEVER:
-		addstr("NEVER     ");
+                addstr("NEVER     ");
 		break;
 	case SHOW_COLOR_OFF:
 		addstr("OFF");
@@ -374,9 +363,6 @@ draw_options:
       ((user_mode == INTERMEDIATE_MODE) ? "Intermediate" :
 					  "Advanced    "));
 
-    addstr("  verbose images (!) : ");
-    addstr( verbose_img ? "ON " : "OFF" );
-
     move(L_User_Agent, 5);
     addstr("user (A)gent                 : ");
     addstr((LYUserAgent && *LYUserAgent) ? LYUserAgent : "NONE");
@@ -421,7 +407,7 @@ draw_options:
 	   response != '>' && !term_options &&
 	   response != 7 &&  response != 3) {
 	if (AddValueAccepted == TRUE) {
-	    _statusline(VALUE_ACCEPTED);
+	    option_statusline(VALUE_ACCEPTED);
 	    AddValueAccepted = FALSE;
 	}
 	move((LYlines - 2), 0);
@@ -441,9 +427,9 @@ draw_options:
 	    case 'e':	/* Change the editor. */
 	    case 'E':
 		if (no_editor) {
-		    _statusline(EDIT_DISABLED);
+		    option_statusline(EDIT_DISABLED);
 		} else if (system_editor ) {
-		    _statusline(EDITOR_LOCKED);
+		    option_statusline(EDITOR_LOCKED);
 		} else {
 		    if (editor && *editor)
 			strcpy(display_option, editor);
@@ -452,7 +438,7 @@ draw_options:
 			addstr("    ");
 			*display_option = '\0';
 		    }
-		    _statusline(ACCEPT_DATA);
+		    option_statusline(ACCEPT_DATA);
 		    move(L_EDITOR, COL_OPTION_VALUES);
 		    start_bold();
 		    ch = LYgetstr(display_option, VISIBLE,
@@ -471,10 +457,11 @@ draw_options:
 		    }
 		    clrtoeol();
 		    if (ch == -1) {
-			HTInfoMsg(CANCELLED);
-			HTInfoMsg("");
+			option_statusline(CANCELLED);
+			sleep(InfoSecs);
+			option_statusline("");
 		    } else {
-			_statusline(VALUE_ACCEPTED);
+			option_statusline(VALUE_ACCEPTED);
 		    }
 		}
 		response = ' ';
@@ -482,14 +469,14 @@ draw_options:
 
 	    case 'd':	/* Change the display. */
 	    case 'D':
-		if (x_display && *x_display) {
-		    strcpy(display_option, x_display);
+		if (display && *display) {
+		    strcpy(display_option, display);
 		} else {  /* clear the NONE */
 		    move(L_DISPLAY, COL_OPTION_VALUES);
 		    addstr("    ");
 		    *display_option = '\0';
 		}
-		_statusline(ACCEPT_DATA);
+		option_statusline(ACCEPT_DATA);
 		move(L_DISPLAY, COL_OPTION_VALUES);
 		start_bold();
 		ch = LYgetstr(display_option, VISIBLE,
@@ -497,37 +484,38 @@ draw_options:
 		stop_bold();
 		move(L_DISPLAY, COL_OPTION_VALUES);
 		if ((term_options || ch == -1) ||
-		    (x_display != NULL &&
+		    (display != NULL &&
 #ifdef VMS
-		     !strcasecomp(x_display, display_option)))
+		     !strcasecomp(display, display_option)))
 #else
-		     !strcmp(x_display, display_option)))
+		     !strcmp(display, display_option)))
 #endif /* VMS */
 		{
 		    /*
 		     *	Cancelled, or a non-NULL display string
 		     *	wasn't changed. - FM
 		     */
-		    addstr((x_display && *x_display) ? x_display : "NONE");
+		    addstr((display && *display) ? display : "NONE");
 		    clrtoeol();
 		    if (ch == -1) {
-			HTInfoMsg(CANCELLED);
-			HTInfoMsg("");
+			option_statusline(CANCELLED);
+			sleep(InfoSecs);
+			option_statusline("");
 		    } else {
-			_statusline(VALUE_ACCEPTED);
+			option_statusline(VALUE_ACCEPTED);
 		    }
 		    response = ' ';
 		    break;
 		} else if (*display_option == '\0') {
-		    if ((x_display == NULL) ||
-			(x_display != NULL && *x_display == '\0')) {
+		    if ((display == NULL) ||
+			(display != NULL && *display == '\0')) {
 			/*
 			 *  NULL or zero-length display string
 			 *  wasn't changed. - FM
 			 */
 			addstr("NONE");
 			clrtoeol();
-			_statusline(VALUE_ACCEPTED);
+			option_statusline(VALUE_ACCEPTED);
 			response = ' ';
 			break;
 		    }
@@ -535,32 +523,42 @@ draw_options:
 		/*
 		 *  Set the new DISPLAY variable. - FM
 		 */
-		LYsetXDisplay(display_option);
-		if ((cp = LYgetXDisplay()) != NULL) {
-		    StrAllocCopy(x_display, cp);
+#ifdef VMS
+		{
+		    int i;
+		    for (i = 0; display_option[i]; i++)
+			display_option[i] = TOUPPER(display_option[i]);
+		    Define_VMSLogical(DISPLAY, display_option);
+		}
+#else
+		sprintf(putenv_command, "DISPLAY=%s", display_option);
+		putenv(putenv_command);
+#endif /* VMS */
+		if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0') {
+		    StrAllocCopy(display, cp);
 		} else {
-		    FREE(x_display);
+		    FREE(display);
 		}
 		cp = NULL;
-		addstr(x_display ? x_display : "NONE");
+		addstr(display ? display : "NONE");
 		clrtoeol();
-		if ((x_display == NULL && *display_option == '\0') ||
-		    (x_display != NULL &&
-		     !strcmp(x_display, display_option))) {
-		    if (x_display == NULL &&
+		if ((display == NULL && *display_option == '\0') ||
+		    (display != NULL &&
+		     !strcmp(display, display_option))) {
+		    if (display == NULL &&
 			LYisConfiguredForX == TRUE) {
-			_statusline(VALUE_ACCEPTED_WARNING_X);
-		    } else if (x_display != NULL &&
+			option_statusline(VALUE_ACCEPTED_WARNING_X);
+		    } else if (display != NULL &&
 			LYisConfiguredForX == FALSE) {
-			_statusline(VALUE_ACCEPTED_WARNING_NONX);
+			option_statusline(VALUE_ACCEPTED_WARNING_NONX);
 		    } else {
-			_statusline(VALUE_ACCEPTED);
+			option_statusline(VALUE_ACCEPTED);
 		    }
 		} else {
 		    if (*display_option) {
-			_statusline(FAILED_TO_SET_DISPLAY);
+			option_statusline(FAILED_TO_SET_DISPLAY);
 		    } else {
-			_statusline(FAILED_CLEAR_SET_DISPLAY);
+			option_statusline(FAILED_CLEAR_SET_DISPLAY);
 		    }
 		}
 		response = ' ';
@@ -569,7 +567,7 @@ draw_options:
 	    case 'l':	/* Change multibookmarks option. */
 	    case 'L':
 		if (LYMBMBlocked) {
-		    _statusline(MULTIBOOKMARKS_DISALLOWED);
+		    option_statusline(MULTIBOOKMARKS_DISALLOWED);
 		    response = ' ';
 		    break;
 		}
@@ -656,7 +654,7 @@ draw_options:
 			clrtoeol();
 			*display_option = '\0';
 		    }
-		    _statusline(ACCEPT_DATA);
+		    option_statusline(ACCEPT_DATA);
 		    move(L_HOME, C_DEFAULT);
 		    start_bold();
 		    ch = LYgetstr(display_option, VISIBLE,
@@ -672,7 +670,7 @@ draw_options:
 			addstr((bookmark_page && *bookmark_page) ?
 						   bookmark_page : "NONE");
 			clrtoeol();
-			_statusline(USE_PATH_OFF_HOME);
+			option_statusline(USE_PATH_OFF_HOME);
 			response = ' ';
 			break;
 		    } else {
@@ -683,13 +681,14 @@ draw_options:
 		    }
 		    clrtoeol();
 		    if (ch == -1) {
-			HTInfoMsg(CANCELLED);
-			HTInfoMsg("");
+			option_statusline(CANCELLED);
+			sleep(InfoSecs);
+			option_statusline("");
 		    } else {
-			_statusline(VALUE_ACCEPTED);
+			option_statusline(VALUE_ACCEPTED);
 		    }
 		} else { /* anonymous */
-		    _statusline(BOOKMARK_CHANGE_DISALLOWED);
+		    option_statusline(BOOKMARK_CHANGE_DISALLOWED);
 		}
 		response = ' ';
 		break;
@@ -751,7 +750,7 @@ draw_options:
 		    addstr("    ");
 		    *display_option = '\0';
 		}
-		_statusline(ACCEPT_DATA);
+		option_statusline(ACCEPT_DATA);
 		move(L_MAIL_ADDRESS, COL_OPTION_VALUES);
 		start_bold();
 		ch = LYgetstr(display_option, VISIBLE,
@@ -771,15 +770,16 @@ draw_options:
 		}
 		clrtoeol();
 		if (ch == -1) {
-		    HTInfoMsg(CANCELLED);
-		    HTInfoMsg("");
+		    option_statusline(CANCELLED);
+		    sleep(InfoSecs);
+		    option_statusline("");
 		} else {
-		    _statusline(VALUE_ACCEPTED);
+		    option_statusline(VALUE_ACCEPTED);
 		}
 		response = ' ';
 		break;
 
-	    case 's':	/* Change case sensitivity for searches. */
+	    case 's':	/* Change case sentitivity for searches. */
 	    case 'S':
 		/*
 		 *  Copy strings into choice array.
@@ -832,9 +832,9 @@ draw_options:
 		    }
 
 		    /*
-		     *	Set the raw 8-bit or CJK mode defaults and
-		     *	character set if changed. - FM
-		     */
+		 *  Set the raw 8-bit or CJK mode defaults and
+		 *  character set if changed. - FM
+		 */
 		    if (CurrentAssumeCharSet != UCLYhndl_for_unspec ||
 			UCLYhndl_for_unspec != curval) {
 			if (UCLYhndl_for_unspec != CurrentAssumeCharSet) {
@@ -843,7 +843,7 @@ draw_options:
 			}
 			LYRawMode = (UCLYhndl_for_unspec == current_char_set);
 			HTMLSetUseDefaultRawMode(current_char_set, LYRawMode);
-			HTMLSetCharacterHandling(current_char_set);
+			HTMLUseCharacterSet(current_char_set);
 			CurrentAssumeCharSet = UCLYhndl_for_unspec;
 			CurrentRawMode = LYRawMode;
 #if !defined(VMS) && !defined(USE_SLANG)
@@ -870,12 +870,12 @@ draw_options:
 #endif /* !VMS || USE_SLANG */
 		    }
 		} else {
-		    _statusline(NEED_ADVANCED_USER_MODE);
+		    option_statusline(NEED_ADVANCED_USER_MODE);
 		    AddValueAccepted = FALSE;
 		}
 		break;
 
-	    case 'c':	/* Change display charset setting. */
+	    case 'c':	/* Change charset setting. */
 	    case 'C':
 		if (!LYSelectPopups) {
 		    current_char_set = boolean_choice(current_char_set,
@@ -897,6 +897,7 @@ draw_options:
 		 *  character set if changed. - FM
 		 */
 		if (CurrentCharSet != current_char_set) {
+		    HTMLSetRawModeDefault(current_char_set);
 		    LYUseDefaultRawMode = TRUE;
 		    HTMLUseCharacterSet(current_char_set);
 		    CurrentCharSet = current_char_set;
@@ -959,7 +960,7 @@ draw_options:
 		    addstr("    ");
 		    *display_option = '\0';
 		}
-		_statusline(ACCEPT_DATA);
+		option_statusline(ACCEPT_DATA);
 		move(L_LANGUAGE, COL_OPTION_VALUES);
 		start_bold();
 		ch = LYgetstr(display_option, VISIBLE,
@@ -978,10 +979,11 @@ draw_options:
 		}
 		clrtoeol();
 		if (ch == -1) {
-		    HTInfoMsg(CANCELLED);
-		    HTInfoMsg("");
+		    option_statusline(CANCELLED);
+		    sleep(InfoSecs);
+		    option_statusline("");
 		} else {
-		    _statusline(VALUE_ACCEPTED);
+		    option_statusline(VALUE_ACCEPTED);
 		}
 		response = ' ';
 		break;
@@ -995,7 +997,7 @@ draw_options:
 		    addstr("    ");
 		    *display_option = '\0';
 		}
-		_statusline(ACCEPT_DATA);
+		option_statusline(ACCEPT_DATA);
 		move(L_PREF_CHARSET, COL_OPTION_VALUES);
 		start_bold();
 		ch = LYgetstr(display_option, VISIBLE,
@@ -1014,10 +1016,11 @@ draw_options:
 		}
 		clrtoeol();
 		if (ch == -1) {
-		    HTInfoMsg(CANCELLED);
-		    HTInfoMsg("");
+		    option_statusline(CANCELLED);
+		    sleep(InfoSecs);
+		    option_statusline("");
 		} else {
-		    _statusline(VALUE_ACCEPTED);
+		    option_statusline(VALUE_ACCEPTED);
 		}
 		response = ' ';
 		break;
@@ -1071,7 +1074,7 @@ draw_options:
 	    case 'W':	/* Change show dotfiles setting. */
 	    case 'w':
 		if (no_dotfiles) {
-		    _statusline(DOTFILE_ACCESS_DISABLED);
+		    option_statusline(DOTFILE_ACCESS_DISABLED);
 		} else {
 		    /*
 		     *	Copy strings into choice array.
@@ -1117,11 +1120,12 @@ draw_options:
 		    if (!has_colors()) {
 			char * terminal = getenv("TERM");
 			if (terminal)
-			    HTUserMsg2(
+			    option_user_message(
 				COLOR_TOGGLE_DISABLED_FOR_TERM,
 				terminal);
 			else
-			    HTUserMsg(COLOR_TOGGLE_DISABLED);
+			    option_statusline(COLOR_TOGGLE_DISABLED);
+			sleep(AlertSecs);
 		    }
 #endif
 		/*
@@ -1178,11 +1182,12 @@ draw_options:
 			if (again) {
 			    char * terminal = getenv("TERM");
 			    if (terminal)
-				HTUserMsg2(
+				option_user_message(
 				    COLOR_TOGGLE_DISABLED_FOR_TERM,
 				    terminal);
 			    else
-				HTUserMsg(COLOR_TOGGLE_DISABLED);
+				option_statusline(COLOR_TOGGLE_DISABLED);
+			    sleep(AlertSecs);
 			}
 #endif
 		    } while (again);
@@ -1432,46 +1437,6 @@ draw_options:
 		}
 		break;
 
-	    case '!':
-		/*
-		 *  Copy strings into choice array.
-		 */
-		choices[0] = NULL;
-		StrAllocCopy(choices[0], "OFF");
-		choices[1] = NULL;
-		StrAllocCopy(choices[1], "ON ");
-		choices[2] = NULL;
-		if (!LYSelectPopups) {
-		    verbose_img = boolean_choice(verbose_img,
-						L_VERBOSE_IMAGES,
-						C_VERBOSE_IMAGES,
-						choices);
-		} else {
-		    verbose_img = popup_choice(verbose_img,
-					     L_VERBOSE_IMAGES,
-					     C_VERBOSE_IMAGES,
-					     choices,
-					     2, FALSE);
-		}
-		FREE(choices[0]);
-		FREE(choices[1]);
-		response = ' ';
-		if (LYSelectPopups) {
-#if !defined(VMS) || defined(USE_SLANG)
-		    if (term_options) {
-			term_options = FALSE;
-		    } else {
-			AddValueAccepted = TRUE;
-		    }
-		    goto draw_options;
-#else
-		    term_options = FALSE;
-		    if (use_assume_charset != old_use_assume_charset)
-			goto draw_options;
-#endif /* !VMS || USE_SLANG */
-		}
-		break;
-
 	    case 'a':	/* Change user agent string. */
 	    case 'A':
 		if (!no_useragent) {
@@ -1482,7 +1447,7 @@ draw_options:
 			addstr("    ");
 			*display_option = '\0';
 		    }
-		    _statusline(ACCEPT_DATA_OR_DEFAULT);
+		    option_statusline(ACCEPT_DATA_OR_DEFAULT);
 		    move(L_User_Agent, COL_OPTION_VALUES);
 		    start_bold();
 		    ch = LYgetstr(display_option, VISIBLE,
@@ -1504,17 +1469,18 @@ draw_options:
 		    }
 		    clrtoeol();
 		    if (ch == -1) {
-			HTInfoMsg(CANCELLED);
-			HTInfoMsg("");
+			option_statusline(CANCELLED);
+			sleep(InfoSecs);
+			option_statusline("");
 		    } else if (LYUserAgent && *LYUserAgent &&
 			!strstr(LYUserAgent, "Lynx") &&
 			!strstr(LYUserAgent, "lynx")) {
-			_statusline(UA_COPYRIGHT_WARNING);
+			option_statusline(UA_COPYRIGHT_WARNING);
 		    } else {
-			_statusline(VALUE_ACCEPTED);
+			option_statusline(VALUE_ACCEPTED);
 		    }
 		} else { /* disallowed */
-		    _statusline(UA_COPYRIGHT_WARNING);
+		    option_statusline(UA_COPYRIGHT_WARNING);
 		}
 		response = ' ';
 		break;
@@ -1523,7 +1489,7 @@ draw_options:
 	    case 'x':	/* Change local exec restriction. */
 	    case 'X':
 		if (exec_frozen && !LYSelectPopups) {
-		    _statusline(CHANGE_OF_SETTING_DISALLOWED);
+		    option_statusline(CHANGE_OF_SETTING_DISALLOWED);
 		    response = ' ';
 		    break;
 		}
@@ -1607,15 +1573,15 @@ draw_options:
 
 	    case '>':	/* Save current options to RC file. */
 		if (!no_option_save) {
-		    _statusline(SAVING_OPTIONS);
+		    option_statusline(SAVING_OPTIONS);
 		    if (save_rc()) {
 			LYrcShowColor = LYChosenShowColor;
-			_statusline(OPTIONS_SAVED);
+			option_statusline(OPTIONS_SAVED);
 		    } else {
 			HTAlert(OPTIONS_NOT_SAVED);
 		    }
 		} else {
-		    _statusline(R_TO_RETURN_TO_LYNX);
+		    option_statusline(R_TO_RETURN_TO_LYNX);
 		    /*
 		     *	Change response so that we don't exit
 		     *	the options menu.
@@ -1630,15 +1596,14 @@ draw_options:
 
 	    default:
 		if (!no_option_save) {
-		    _statusline(SAVE_OR_R_TO_RETURN_TO_LYNX);
+		    option_statusline(SAVE_OR_R_TO_RETURN_TO_LYNX);
 		} else {
-		    _statusline(R_TO_RETURN_TO_LYNX);
+		    option_statusline(R_TO_RETURN_TO_LYNX);
 		}
 	}  /* end switch */
     }  /* end while */
 
     term_options = FALSE;
-    LYStatusLine = -1;		/* let user_mode have some of the screen */
     signal(SIGINT, cleanup_sig);
 }
 
@@ -1672,7 +1637,7 @@ PRIVATE int boolean_choice ARGS4(
     /*
      *	Update the statusline.
      */
-    _statusline(ANY_KEY_CHANGE_RET_ACCEPT);
+    option_statusline(ANY_KEY_CHANGE_RET_ACCEPT);
 
     /*
      *	Highlight the current choice.
@@ -1780,16 +1745,16 @@ PRIVATE int boolean_choice ARGS4(
 
 	    if (term_options) {
 		term_options = FALSE;
-		HTInfoMsg(CANCELLED);
-		HTInfoMsg("");
+		option_statusline(CANCELLED);
+		sleep(InfoSecs);
+		option_statusline("");
 	    } else {
-		_statusline(VALUE_ACCEPTED);
+		option_statusline(VALUE_ACCEPTED);
 	    }
 	    return(cur_choice);
 	}
     }
 }
-#endif /* !NO_OPTION_MENU */
 
 PRIVATE void terminate_options ARGS1(
 	int,		sig GCC_UNUSED)
@@ -1948,13 +1913,13 @@ draw_bookmark_list:
 	 */
 	if (response == '>') {
 	    if (!no_option_save) {
-		_statusline(SAVING_OPTIONS);
+		option_statusline(SAVING_OPTIONS);
 		if (save_rc())
-		    _statusline(OPTIONS_SAVED);
+		    option_statusline(OPTIONS_SAVED);
 		else
 		    HTAlert(OPTIONS_NOT_SAVED);
 	    } else {
-		_statusline(R_TO_RETURN_TO_LYNX);
+		option_statusline(R_TO_RETURN_TO_LYNX);
 		/*
 		 *  Change response so that we don't exit
 		 *  the options menu.
@@ -2011,7 +1976,7 @@ draw_bookmark_list:
 			goto draw_bookmark_list;
 		    }
 		}
-		_statusline(ACCEPT_DATA);
+		option_statusline(ACCEPT_DATA);
 
 		if (a > 0) {
 		    start_bold();
@@ -2096,7 +2061,6 @@ draw_bookmark_list:
     signal(SIGINT, cleanup_sig);
 }
 
-#ifndef NO_OPTION_MENU
 /*
 **  This function prompts for a choice or page number.
 **  If a 'g' or 'p' suffix is included, that will be
@@ -2112,14 +2076,15 @@ PRIVATE int get_popup_choice_number ARGS1(
      */
     temp[0] = *c;
     temp[1] = '\0';
-    _statusline(OPTION_CHOICE_NUMBER);
+    option_statusline(OPTION_CHOICE_NUMBER);
 
     /*
      *	Get the number, possibly with a suffix, from the user.
      */
     if (LYgetstr(temp, VISIBLE, sizeof(temp), NORECALL) < 0 ||
 	*temp == 0 || term_options) {
-	HTInfoMsg(CANCELLED);
+	option_statusline(CANCELLED);
+	sleep(InfoSecs);
 	*c = '\0';
 	term_options = FALSE;
 	return(0);
@@ -2159,8 +2124,7 @@ PRIVATE int popup_choice ARGS6(
 #ifndef USE_SLANG
     WINDOW * form_window;
 #endif /* !USE_SLANG */
-    int num_choices = 0, top, bottom, length = -1;
-    unsigned width = 0;
+    int num_choices = 0, top, bottom, length = -1, width = 0;
     char ** Cptr = choices;
     int window_offset = 0;
     int DisplayLines = (LYlines - 2);
@@ -2296,7 +2260,7 @@ PRIVATE int popup_choice ARGS6(
     if (!(form_window = newwin(bottom - top, (Lnum + width + 4),
 			       top, (lx - 1))) &&
 	!(form_window = newwin(bottom - top, 0, top, 0))) {
-	HTAlert(POPUP_FAILED);
+	option_statusline(POPUP_FAILED);
 	return(orig_choice);
     }
     scrollok(form_window, TRUE);
@@ -2319,9 +2283,9 @@ PRIVATE int popup_choice ARGS6(
     move((LYlines - 2), 0);
     clrtoeol();
     if (disabled) {
-	_statusline(CHOICE_LIST_UNM_MSG);
+	option_statusline(CHOICE_LIST_UNM_MSG);
     } else {
-	_statusline(CHOICE_LIST_MESSAGE);
+	option_statusline(CHOICE_LIST_MESSAGE);
     }
 
     /*
@@ -2454,6 +2418,9 @@ redraw:
 	term_options = FALSE;
 	c = LYgetch();
 	if (term_options || c == 3 || c == 7) {
+	     /*
+	      *  Control-C or Control-G
+	      */
 	    cmd = LYK_QUIT;
 	} else {
 	    cmd = keymap[c+1];
@@ -2493,20 +2460,21 @@ redraw:
 		     */
 		    if (number <= 1) {
 			if (window_offset == 0) {
-			    HTUserMsg(ALREADY_AT_CHOICE_BEGIN);
+			    option_statusline(ALREADY_AT_CHOICE_BEGIN);
+			    sleep(MessageSecs);
 			    if (disabled) {
-				_statusline(CHOICE_LIST_UNM_MSG);
+				option_statusline(CHOICE_LIST_UNM_MSG);
 			    } else {
-				_statusline(CHOICE_LIST_MESSAGE);
+				option_statusline(CHOICE_LIST_MESSAGE);
 			    }
 			    break;
 			}
 			window_offset = 0;
 			cur_choice = 0;
 			if (disabled) {
-			    _statusline(CHOICE_LIST_UNM_MSG);
+			    option_statusline(CHOICE_LIST_UNM_MSG);
 			} else {
-			    _statusline(CHOICE_LIST_MESSAGE);
+			    option_statusline(CHOICE_LIST_MESSAGE);
 			}
 			goto redraw;
 		    }
@@ -2517,11 +2485,12 @@ redraw:
 		     */
 		    if (number >= npages) {
 			if (window_offset >= ((num_choices - length) + 1)) {
-			    HTUserMsg(ALREADY_AT_CHOICE_END);
+			    option_statusline(ALREADY_AT_CHOICE_END);
+			    sleep(MessageSecs);
 			    if (disabled) {
-				_statusline(CHOICE_LIST_UNM_MSG);
+				option_statusline(CHOICE_LIST_UNM_MSG);
 			    } else {
-				_statusline(CHOICE_LIST_MESSAGE);
+				option_statusline(CHOICE_LIST_MESSAGE);
 			    }
 			    break;
 			}
@@ -2532,9 +2501,9 @@ redraw:
 			if (cur_choice < window_offset)
 			    cur_choice = window_offset;
 			if (disabled) {
-			    _statusline(CHOICE_LIST_UNM_MSG);
+			    option_statusline(CHOICE_LIST_UNM_MSG);
 			} else {
-			    _statusline(CHOICE_LIST_MESSAGE);
+			    option_statusline(CHOICE_LIST_MESSAGE);
 			}
 			goto redraw;
 		    }
@@ -2544,19 +2513,20 @@ redraw:
 		     */
 		    if (((number - 1) * length) == window_offset) {
 			sprintf(buffer, ALREADY_AT_CHOICE_PAGE, number);
-			HTUserMsg(buffer);
+			option_statusline(buffer);
+			sleep(MessageSecs);
 			if (disabled) {
-			    _statusline(CHOICE_LIST_UNM_MSG);
+			    option_statusline(CHOICE_LIST_UNM_MSG);
 			} else {
-			    _statusline(CHOICE_LIST_MESSAGE);
+			    option_statusline(CHOICE_LIST_MESSAGE);
 			}
 			break;
 		    }
 		    cur_choice = window_offset = ((number - 1) * length);
 		    if (disabled) {
-			_statusline(CHOICE_LIST_UNM_MSG);
+			option_statusline(CHOICE_LIST_UNM_MSG);
 		    } else {
-			_statusline(CHOICE_LIST_MESSAGE);
+			option_statusline(CHOICE_LIST_MESSAGE);
 		    }
 		    goto redraw;
 
@@ -2594,11 +2564,12 @@ redraw:
 			     */
 			    sprintf(buffer,
 				    CHOICE_ALREADY_CURRENT, (number + 1));
-			    HTUserMsg(buffer);
+			    option_statusline(buffer);
+			    sleep(MessageSecs);
 			    if (disabled) {
-				_statusline(CHOICE_LIST_UNM_MSG);
+				option_statusline(CHOICE_LIST_UNM_MSG);
 			    } else {
-				_statusline(CHOICE_LIST_MESSAGE);
+				option_statusline(CHOICE_LIST_MESSAGE);
 			    }
 			    break;
 			}
@@ -2622,9 +2593,9 @@ redraw:
 				    window_offset = 0;
 			    }
 			    if (disabled) {
-				_statusline(CHOICE_LIST_UNM_MSG);
+				option_statusline(CHOICE_LIST_UNM_MSG);
 			    } else {
-				_statusline(CHOICE_LIST_MESSAGE);
+				option_statusline(CHOICE_LIST_MESSAGE);
 			    }
 			    goto redraw;
 			}
@@ -2632,7 +2603,8 @@ redraw:
 			/*
 			 *  Not in range. - FM
 			 */
-			HTUserMsg(BAD_CHOICE_NUM_ENTERED);
+			option_statusline(BAD_CHOICE_NUM_ENTERED);
+			sleep(MessageSecs);
 		    }
 		}
 
@@ -2640,9 +2612,9 @@ redraw:
 		 *  Restore the popup statusline. - FM
 		 */
 		if (disabled) {
-		    _statusline(CHOICE_LIST_UNM_MSG);
+		    option_statusline(CHOICE_LIST_UNM_MSG);
 		} else {
-		    _statusline(CHOICE_LIST_MESSAGE);
+		    option_statusline(CHOICE_LIST_MESSAGE);
 		}
 		break;
 
@@ -2860,14 +2832,15 @@ redraw:
 		strcpy(prev_target, prev_target_buffer);
 	    case LYK_WHEREIS:
 		if (*prev_target == '\0' ) {
-		    _statusline(ENTER_WHEREIS_QUERY);
+		    option_statusline(ENTER_WHEREIS_QUERY);
 		    if ((ch = LYgetstr(prev_target, VISIBLE,
 				       sizeof(prev_target_buffer),
 				       recall)) < 0) {
 			/*
 			 *  User cancelled the search via ^G. - FM
 			 */
-			HTInfoMsg(CANCELLED);
+			option_statusline(CANCELLED);
+			sleep(InfoSecs);
 			goto restore_popup_statusline;
 		    }
 		}
@@ -2878,7 +2851,8 @@ check_recall:
 		    /*
 		     *	No entry.  Simply break.   - FM
 		     */
-		    HTInfoMsg(CANCELLED);
+		    option_statusline(CANCELLED);
+		    sleep(InfoSecs);
 		    goto restore_popup_statusline;
 		}
 
@@ -2918,20 +2892,21 @@ check_recall:
 			strcpy(prev_target, cp);
 			if (*prev_target_buffer &&
 			    !strcmp(prev_target_buffer, prev_target)) {
-			    _statusline(EDIT_CURRENT_QUERY);
+			    option_statusline(EDIT_CURRENT_QUERY);
 			} else if ((*prev_target_buffer && QueryTotal == 2) ||
 				   (!(*prev_target_buffer) &&
 				      QueryTotal == 1)) {
-			    _statusline(EDIT_THE_PREV_QUERY);
+			    option_statusline(EDIT_THE_PREV_QUERY);
 			} else {
-			    _statusline(EDIT_A_PREV_QUERY);
+			    option_statusline(EDIT_A_PREV_QUERY);
 			}
 			if ((ch = LYgetstr(prev_target, VISIBLE,
 				sizeof(prev_target_buffer), recall)) < 0) {
 			    /*
 			     *	User cancelled the search via ^G. - FM
 			     */
-			    HTInfoMsg(CANCELLED);
+			    option_statusline(CANCELLED);
+			    sleep(InfoSecs);
 			    goto restore_popup_statusline;
 			}
 			goto check_recall;
@@ -2972,14 +2947,14 @@ check_recall:
 			strcpy(prev_target, cp);
 			if (*prev_target_buffer &&
 			    !strcmp(prev_target_buffer, prev_target)) {
-			    _statusline(EDIT_CURRENT_QUERY);
+			    option_statusline(EDIT_CURRENT_QUERY);
 			} else if ((*prev_target_buffer &&
 				    QueryTotal == 2) ||
 				   (!(*prev_target_buffer) &&
 				    QueryTotal == 1)) {
-			    _statusline(EDIT_THE_PREV_QUERY);
+			    option_statusline(EDIT_THE_PREV_QUERY);
 			} else {
-			    _statusline(EDIT_A_PREV_QUERY);
+			    option_statusline(EDIT_A_PREV_QUERY);
 			}
 			if ((ch = LYgetstr(prev_target, VISIBLE,
 					   sizeof(prev_target_buffer),
@@ -2987,7 +2962,8 @@ check_recall:
 			    /*
 			     * User cancelled the search via ^G. - FM
 			     */
-			    HTInfoMsg(CANCELLED);
+			    option_statusline(CANCELLED);
+			    sleep(InfoSecs);
 			    goto restore_popup_statusline;
 			}
 			goto check_recall;
@@ -3037,7 +3013,8 @@ check_recall:
 		 *  If we started at the beginning, it can't be present. - FM
 		 */
 		if (cur_choice == 0) {
-		    HTUserMsg2(STRING_NOT_FOUND, prev_target_buffer);
+		    option_user_message(STRING_NOT_FOUND, prev_target_buffer);
+		    sleep(MessageSecs);
 		    goto restore_popup_statusline;
 		}
 
@@ -3079,7 +3056,8 @@ check_recall:
 		/*
 		 *  Didn't find it in the preceding choices either. - FM
 		 */
-		HTUserMsg2(STRING_NOT_FOUND, prev_target_buffer);
+		option_user_message(STRING_NOT_FOUND, prev_target_buffer);
+		sleep(MessageSecs);
 
 restore_popup_statusline:
 		/*
@@ -3087,9 +3065,9 @@ restore_popup_statusline:
 		 *  reset the search variables. - FM
 		 */
 		if (disabled)
-		    _statusline(CHOICE_LIST_UNM_MSG);
+		    option_statusline(CHOICE_LIST_UNM_MSG);
 		else
-		    _statusline(CHOICE_LIST_MESSAGE);
+		    option_statusline(CHOICE_LIST_MESSAGE);
 		*prev_target = '\0';
 		QueryTotal = (search_queries ? HTList_count(search_queries)
 					     : 0);
@@ -3106,7 +3084,8 @@ restore_popup_statusline:
 	    case LYK_PREV_DOC:
 		cur_choice = orig_choice;
 		term_options = TRUE;
-		HTUserMsg(CANCELLED);
+		option_statusline(CANCELLED);
+		sleep(MessageSecs);
 		cmd = LYK_ACTIVATE; /* to exit */
 		break;
 	}
@@ -3119,994 +3098,10 @@ restore_popup_statusline:
 #endif /* !USE_SLANG */
 
     if (disabled || term_options) {
-	_statusline("");
+	option_statusline("");
 	return(orig_choice);
     } else {
-	_statusline(VALUE_ACCEPTED);
+	option_statusline(VALUE_ACCEPTED);
 	return(cur_choice);
     }
 }
-
-#endif /* !NO_OPTION_MENU */
-
-#ifndef NO_OPTION_FORMS
-
-/*
- * I'm paranoid about mistyping strings.  Also, this way they get combined
- * so we don't have to worry about the intelligence of the compiler.
- * We don't need to burn memory like it's cheap.  We're better than that.
- */
-#define SELECTED(flag) (flag) ? selected_string : ""
-#define DISABLED(flag) (flag) ? disabled_string : ""
-#define NOTEMPTY(text) (text && text[0]) ? text : ""
-
-typedef struct {
-    int value;
-    CONST char *LongName;
-    CONST char *HtmlName;
-} OptValues;
-
-typedef struct {
-    char * tag;
-    char * value;
-} PostPair;
-
-static CONST char selected_string[] = "selected";
-static CONST char disabled_string[] = "disabled";
-static CONST char on_string[]	    = "ON";
-static CONST char off_string[]	    = "OFF";
-static CONST char never_string[]    = "NEVER";
-static CONST char always_string[]   = "ALWAYS";
-static OptValues bool_values[] = {
-	{ FALSE,	     "OFF",		  "OFF" 	},
-	{ TRUE, 	     "ON",		  "ON"		},
-	{ 0, 0, 0 }};
-
-static char * secure_string		= "secure";
-static char * secure_value		= NULL;
-static char * save_options_string	= "save_options";
-
-/*
- * Personal Preferences
- */
-static char * cookies_string		= "cookies";
-static char * cookies_ignore_all_string = "ignore";
-static char * cookies_up_to_user_string = "ask user";
-static char * cookies_accept_all_string = "accept all";
-static char * x_display_string		= "display";
-static char * editor_string		= "editor";
-static char * emacs_keys_string 	= "emacs_keys";
-
-#ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
-#define EXEC_ALWAYS 2
-#define EXEC_LOCAL  1
-#define EXEC_NEVER  0
-static char * exec_links_string 	= "exec_options";
-static OptValues exec_links_values[]	= {
-	{ EXEC_NEVER,	"ALWAYS OFF",		"ALWAYS OFF" },
-	{ EXEC_LOCAL,	"FOR LOCAL FILES ONLY",	"FOR LOCAL FILES ONLY" },
-#ifndef NEVER_ALLOW_REMOTE_EXEC
-	{ EXEC_ALWAYS,	"ALWAYS ON",		"ALWAYS ON" },
-#endif
-	{ 0, 0, 0 }};
-#endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
-
-static char * keypad_mode_string	= "keypad_mode";
-static OptValues keypad_mode_values[]	= {
-	{ NUMBERS_AS_ARROWS,  "Numbers act as arrows", "number_arrows" },
-	{ LINKS_ARE_NUMBERED, "Links are numbered",    "links_numbered" },
-	{ LINKS_AND_FORM_FIELDS_ARE_NUMBERED,
-			      "Links and form fields are numbered",
-			      "links_and_forms" },
-	{ 0, 0, 0 }};
-static char * mail_address_string	= "mail_address";
-static char * search_type_string	= "search_type";
-static OptValues search_type_values[] = {
-	{ FALSE,	    "Case insensitive",  "case_insensitive" },
-	{ TRUE, 	    "Case sensitive",	 "case_sensitive" },
-	{ 0, 0, 0 }};
-static char * select_popups_string	= "select_popups";
-#if defined(USE_SLANG) || defined(COLOR_CURSES)
-static char * show_color_string		= "show_color";
-static OptValues show_color_values[] = {
-	{ SHOW_COLOR_NEVER,  	never_string,	never_string },
-	{ SHOW_COLOR_OFF,    	off_string,	off_string },
-	{ SHOW_COLOR_ON,     	on_string, 	on_string },
-	{ SHOW_COLOR_ALWAYS, 	always_string,	always_string },
-	{ 0, 0, 0 }};
-#endif
-static char * show_cursor_string	= "show_cursor";
-static char * user_mode_string		= "user_mode";
-static OptValues user_mode_values[] = {
-	{ NOVICE_MODE,		"Novice",	"Novice" },
-	{ INTERMEDIATE_MODE,	"Intermediate", "Intermediate" },
-	{ ADVANCED_MODE,	"Advanced",	"Advanced" },
-	{ 0, 0, 0 }};
-static char * verbose_images_string	= "verbose_images";
-static char * vi_keys_string		= "vi_keys";
-
-/*
- * Bookmark Options
- */
-static char * mbm_advanced_string	= "ADVANCED";
-static char * mbm_off_string		= "OFF";
-static char * mbm_standard_string	= "STANDARD";
-static char * mbm_string		= "multi_bookmarks_mode";
-static char * single_bookmark_string	= "single_bookmark_name";
-
-/*
- * Character Set Options
- */
-static char * assume_char_set_string	= "assume_char_set";
-static char * display_char_set_string	= "display_char_set";
-static char * raw_mode_string		= "raw_mode";
-
-/*
- * File Management Options
- */
-static char * show_dotfiles_string	= "show_dotfiles";
-#ifdef DIRED_SUPPORT
-static char * dired_sort_string 	= "dired_sort";
-static OptValues dired_values[] = {
-	{ 0,			"Directories first",	"dired_dir" },
-	{ FILES_FIRST,		"Files first",		"dired_files" },
-	{ MIXED_STYLE,		"Mixed style",		"dired_mixed" },
-	{ 0, 0, 0 }};
-#endif /* DIRED_SUPPORT */
-static char * ftp_sort_string = "ftp_sort";
-static OptValues ftp_sort_values[] = {
-	{ FILE_BY_NAME, 	"By Name",		"ftp_by_name" },
-	{ FILE_BY_TYPE, 	"By Type",		"ftp_by_type" },
-	{ FILE_BY_SIZE, 	"By Size",		"ftp_by_size" },
-	{ FILE_BY_DATE, 	"By Date",		"ftp_by_date" },
-	{ 0, 0, 0 }};
-
-/*
- * Headers transferred to remote server
- */
-static char * preferred_doc_char_string = "preferred_doc_char";
-static char * preferred_doc_lang_string = "preferred_doc_lang";
-static char * user_agent_string		= "user_agent";
-
-#define PutLabel(fp, text) \
-	fprintf(fp,"  %-33s: ", text)
-
-#define PutTextInput(fp, Name, Value, Size, disable) \
-	fprintf(fp,\
-	"<input size=%d type=\"text\" name=\"%s\" value=\"%s\" %s>\n",\
-		(int) Size, Name, Value, disable)
-
-#define PutOption(fp, flag, html, name) \
-	fprintf(fp,"<option value=\"%s\" %s>%s\n", html, SELECTED(flag), name)
-
-#define BeginSelect(fp, text) \
-	fprintf(fp,"<select name=\"%s\">\n", text)
-
-#define MaybeSelect(fp, flag, text) \
-	fprintf(fp,"<select name=\"%s\" %s>\n", text, DISABLED(flag))
-
-#define EndSelect(fp)\
-	fprintf(fp,"</select>\n")
-
-PRIVATE void PutOptValues ARGS3(
-	FILE *, 	fp,
-	int,		value,
-	OptValues *,	table)
-{
-    while (table->LongName != 0) {
-	PutOption(fp,
-	    value == table->value,
-	    table->HtmlName,
-	    table->LongName);
-	table++;
-    }
-}
-
-PRIVATE int GetOptValues ARGS2(
-	OptValues *,	table,
-	char *, 	value)
-{
-    while (table->LongName != 0) {
-	if (!strcmp(value, table->HtmlName))
-	    return table->value;
-	table++;
-    }
-    return -1;
-}
-
-/*
- * Break cgi line into array of pairs of pointers.  Don't bother trying to
- * be efficient.  We're not called all that often.
- * We come in with a string looking like:
- * tag1=value1&tag2=value2&...&tagN=valueN
- * We leave with an array of post_pairs.  The last element in the array
- * will have a tag pointing to NULL.
- * Not pretty, but works.  Hey, if strings can be null terminate arrays...
- */
-
-PRIVATE PostPair * break_data ARGS1(
-    char *,	data)
-{
-    char * p = data;
-    PostPair * q = NULL;
-    int count = 0;
-
-    if (p==NULL || p[0]=='\0')
-	return NULL;
-
-    q = calloc(sizeof(PostPair), 1);
-    if (q==NULL)
-	outofmem(__FILE__, "break_data(calloc)");
-
-    do {
-	/*
-	 * First, break up on '&', sliding 'p' on down the line.
-	 */
-	q[count].value = LYstrsep(&p, "&");
-	/*
-	 * Then break up on '=', sliding value down, and setting tag.
-	 */
-	q[count].tag = LYstrsep(&(q[count].value), "=");
-
-	/*
-	 * Clean them up a bit, in case user entered a funky string.
-	 */
-	HTUnEscape(q[count].tag);
-
-	/* In the value field we have '+' instead of ' '. So do a simple
-	 * find&replace on the value field before UnEscaping() - SKY
-	 */
-	{
-	   size_t i, len;
-	   len = strlen(q[count].value);
-	   for (i = 0; i < len; i++) {
-		if (q[count].value[i] == '+') {
-#ifdef UNIX
-		    /*
-		     * Allow for special case of options which begin with a "+" on
-		     * Unix - TD
-		     */
-		    if (i > 0
-		    && q[count].value[i+1] == '+'
-		    && isalnum(q[count].value[i+2])) {
-			q[count].value[i++] = ' ';
-			i++;
-			continue;
-		    }
-
-#endif
-		    q[count].value[i] = ' ';
-		}
-	   }
-	}
-	HTUnEscape(q[count].value);
-
-	count++;
-	/*
-	 * Like I said, screw efficiency.  Sides, realloc is fast on
-	 * Linux ;->
-	 */
-	q = realloc(q, sizeof(PostPair)*(count+1));
-	if (q==NULL)
-	    outofmem(__FILE__, "break_data(realloc)");
-	q[count].tag=NULL;
-    } while (p!=NULL && p[0]!='\0');
-    return q;
-}
-
-/*
- * Handle options from the pseudo-post.  I think we really only need
- * post_data here, but bring along everything just in case.  It's only a
- * pointer.  MRC
- *
- * By changing the certain options value (like preferred language or
- * fake browser name) we need to inform the remote server and reload 
- * (uncache on a proxy) the document which was active just before 
- * the Options menu was invoked.  Another values (like display_char_set 
- * or assume_char_set) used by lynx initial rendering stages 
- * and can only be changed after reloading :-( 
- * So we introduce boolean flag 'need_reload' (currently dummy).
- *
- * Options are processed in order according to gen_options(), we should not
- * depend on it and add boolean flags where the order is essential (save,
- * character sets...)
- *
- * Security:  some options are disabled in gen_options() under certain
- * conditions.  We *should* duplicate the same conditions here in postoptions()
- * to prevent user with a limited access from editing HTML options code
- * manually and submit it to access the restricted items.  - LP
- */
-
-PUBLIC int postoptions ARGS1(
-    document *, 	newdoc)
-{
-    PostPair *data = 0;
-    int i;
-    BOOLEAN save_all = FALSE;
-    int display_char_set_old = current_char_set;
-    BOOLEAN raw_mode_old = LYRawMode;
-    BOOLEAN assume_char_set_changed = FALSE;
-    BOOLEAN need_reload = FALSE;
-#if defined(USE_SLANG) || defined(COLOR_CURSES)
-    int CurrentShowColor = LYShowColor;
-#endif
-
-    /*-------------------------------------------------
-     * kludge a link from mbm_menu, the URL was:
-     * "<a href=\"LYNXOPTIONS://MBM_MENU\">Goto multi-bookmark menu</a>\n"
-     *--------------------------------------------------*/
-
-    if (strstr(newdoc->address, "LYNXOPTIONS://MBM_MENU")) {
-	FREE(newdoc->post_data);
-	FREE(data);
-	edit_bookmarks();
-	return(NULLFILE);
-    }
-
-    data = break_data(newdoc->post_data);
-
-    for (i = 0; data[i].tag != NULL; i++) {
-	/*
-	 * Paranoid security.
-	 */
-	if (!strcmp(data[i].tag, secure_string)) {
-	    if (!secure_value || strcmp(data[i].value, secure_value)) {
-		/*
-		 * FIXME: We've been spoofed message here.
-		 */
-		FREE(data);
-		return(NULLFILE);
-	    }
-	    FREE(secure_value);
-	}
-
-	/* Save options */
-	if (!strcmp(data[i].tag, save_options_string) && (!no_option_save)) {
-	    save_all = TRUE;
-	}
-
-	/* Cookies: SELECT */
-	if (!strcmp(data[i].tag, cookies_string)) {
-	    if (!strcmp(data[i].value, cookies_ignore_all_string)) {
-		LYSetCookies = FALSE;
-	    } else if (!strcmp(data[i].value, cookies_up_to_user_string)) {
-		LYSetCookies = TRUE;
-		LYAcceptAllCookies = FALSE;
-	    } else if (!strcmp(data[i].value, cookies_accept_all_string)) {
-		LYSetCookies = TRUE;
-		LYAcceptAllCookies = TRUE;
-	    }
-	}
-
-	/* X Display: INPUT */
-	if (!strcmp(data[i].tag, x_display_string)) {
-	    LYsetXDisplay(data[i].value);
-	}
-
-	/* Editor: INPUT */
-	if (!strcmp(data[i].tag, editor_string)) {
-	    FREE(editor);
-	    StrAllocCopy(editor, data[i].value);
-	}
-
-	/* Emacs keys: ON/OFF */
-	if (!strcmp(data[i].tag, emacs_keys_string)) {
-	    if ((emacs_keys = GetOptValues(bool_values, data[i].value))) {
-		set_emacs_keys();
-	    } else {
-		reset_emacs_keys();
-	    }
-	}
-
-	/* Execution links: SELECT */
-#ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
-	if (!strcmp(data[i].tag, exec_links_string)) {
-	    int code = GetOptValues(exec_links_values, data[i].value);
-#ifndef NEVER_ALLOW_REMOTE_EXEC
-	    local_exec = (code == EXEC_ALWAYS);
-#endif /* !NEVER_ALLOW_REMOTE_EXEC */
-	    local_exec_on_local_files = (code == EXEC_LOCAL);
-	}
-#endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
-
-	/* Keypad Mode: SELECT */
-	if (!strcmp(data[i].tag, keypad_mode_string)) {
-	    keypad_mode = GetOptValues(keypad_mode_values, data[i].value);
-	}
-
-	/* Mail Address: INPUT */
-	if (!strcmp(data[i].tag, mail_address_string)) {
-	    FREE(personal_mail_address);
-	    StrAllocCopy(personal_mail_address, data[i].value);
-	}
-
-	/* Search Type: SELECT */
-	if (!strcmp(data[i].tag, search_type_string)) {
-	    case_sensitive = GetOptValues(search_type_values, data[i].value);
-	}
-
-	/* Select Popups: ON/OFF */
-	if (!strcmp(data[i].tag, select_popups_string)) {
-	    LYSelectPopups = GetOptValues(bool_values, data[i].value);
-	}
-
-#if defined(USE_SLANG) || defined(COLOR_CURSES)
-	/* Show Color: SELECT */
-	if (!strcmp(data[i].tag, show_color_string)) {
-	    LYShowColor = GetOptValues(show_color_values, data[i].value);
-	    LYChosenShowColor = LYShowColor;
-	    if (CurrentShowColor != LYShowColor) {
-		lynx_force_repaint();
-	    }
-	    CurrentShowColor = LYShowColor;
-#ifdef USE_SLANG
-	    SLtt_Use_Ansi_Colors = (LYShowColor > 1 ? 1 : 0);
-#endif
-	}
-#endif /* USE_SLANG || COLOR_CURSES */
-
-	/* Show Cursor: ON/OFF */
-	if (!strcmp(data[i].tag, show_cursor_string)) {
-	    LYShowCursor = GetOptValues(bool_values, data[i].value);
-	}
-
-	/* User Mode: SELECT */
-	if (!strcmp(data[i].tag, user_mode_string)) {
-	    user_mode = GetOptValues(user_mode_values, data[i].value);
-	    if (user_mode == NOVICE_MODE) {
-		display_lines = (LYlines - 4);
-	    } else {
-		display_lines = LYlines-2;
-	    }
-	}
-
-	/* Verbose Images: ON/OFF */
-	if (!strcmp(data[i].tag, verbose_images_string)) {
-	    verbose_img = GetOptValues(bool_values, data[i].value);
-	}
-
-	/* VI Keys: ON/OFF */
-	if (!strcmp(data[i].tag, vi_keys_string)) {
-	    if ((vi_keys = GetOptValues(bool_values, data[i].value))) {
-		set_vi_keys();
-	    } else if (!strcmp(data[i].value, off_string)) {
-		reset_vi_keys();
-	    }
-	}
-
-	/* Bookmarks File Menu: SELECT */
-	if (!strcmp(data[i].tag, mbm_string) && (!LYMBMBlocked)) {
-	    if (!strcmp(data[i].value, mbm_off_string)) {
-		LYMultiBookmarks = FALSE;
-	    } else if (!strcmp(data[i].value, mbm_standard_string)) {
-		LYMultiBookmarks = TRUE;
-		LYMBMAdvanced = FALSE;
-	    } else if (!strcmp(data[i].value, mbm_advanced_string)) {
-		LYMultiBookmarks = TRUE;
-		LYMBMAdvanced = TRUE;
-	    }
-	}
-
-	/* Single Bookmarks filename: INPUT */
-	if (!strcmp(data[i].tag, single_bookmark_string)) {
-	    if (strcmp(data[i].value, "")) {
-		FREE(bookmark_page);
-		StrAllocCopy(bookmark_page, data[i].value);
-	    }
-	}
-
-	/* Assume Character Set: SELECT */
-	if (!strcmp(data[i].tag, assume_char_set_string)) {
-	    int newval;
-
-	    newval = UCGetLYhndl_byMIME(data[i].value);
-	    if ((raw_mode_old &&
-		 newval != safeUCGetLYhndl_byMIME(UCAssume_MIMEcharset))
-	       || (!raw_mode_old &&
-		   newval != UCLYhndl_for_unspec)) {
-
-		UCLYhndl_for_unspec = newval;
-		StrAllocCopy(UCAssume_MIMEcharset, data[i].value);
-		assume_char_set_changed = TRUE;
-	    }
-	}
-
-	/* Display Character Set: SELECT */
-	if (!strcmp(data[i].tag, display_char_set_string)) {
-           current_char_set = atoi(data[i].value); 
-	}
-
-	/* Raw Mode: ON/OFF */
-	if (!strcmp(data[i].tag, raw_mode_string)) {
-           LYRawMode = GetOptValues(bool_values, data[i].value); 
-	}
-
-	/*
-	 * ftp sort: SELECT
-	 */
-	if (!strcmp(data[i].tag, ftp_sort_string)) {
-	    HTfileSortMethod = GetOptValues(ftp_sort_values, data[i].value);
-	}
-
-#ifdef DIRED_SUPPORT
-	/* Local Directory Sort: SELECT */
-	if (!strcmp(data[i].tag, dired_sort_string)) {
-	    dir_list_style = GetOptValues(dired_values, data[i].value);
-	}
-#endif /* DIRED_SUPPORT */
-
-	/* Show dot files: ON/OFF */
-	if (!strcmp(data[i].tag, show_dotfiles_string) && (!no_dotfiles)) {
-	    show_dotfiles = GetOptValues(bool_values, data[i].value);
-	}
-
-	/* Preferred Document Character Set: INPUT */
-	if (!strcmp(data[i].tag, preferred_doc_char_string)) {
-	    FREE(pref_charset);
-	    StrAllocCopy(pref_charset, data[i].value);
-	}
-
-	/* Preferred Document Language: INPUT */
-	if (!strcmp(data[i].tag, preferred_doc_lang_string)) {
-	    FREE(language);
-	    StrAllocCopy(language, data[i].value);
-	}
-
-	/* User Agent: INPUT */
-	if (!strcmp(data[i].tag, user_agent_string) && (!no_useragent)) {
-	    FREE(LYUserAgent);
-	    /* ignore Copyright warning ? */
-	    StrAllocCopy(LYUserAgent,
-	    	*(data[i].value)
-	    	? data[i].value
-		: LYUserAgentDefault);
-	    if (LYUserAgent && *LYUserAgent &&
-		!strstr(LYUserAgent, "Lynx") &&
-		!strstr(LYUserAgent, "lynx")) {
-		HTAlert(UA_COPYRIGHT_WARNING);
-	    }
-	}
-    } /* end of loop */
-
-    /*
-     * Process the flags:
-     */
-     if ( display_char_set_old != current_char_set ||
-	       raw_mode_old != LYRawMode ||
-	       assume_char_set_changed ) {
-	/*
-	 * charset settings: the order is essential here.
-	 */
-       if (display_char_set_old != current_char_set) {
-		/*
-		 *  Set the LYUseDefaultRawMode value and character
-		 *  handling if LYRawMode was changed. - FM
-		 */
-		LYUseDefaultRawMode = TRUE;
-		HTMLUseCharacterSet(current_char_set);
-	    }
-	if (assume_char_set_changed) {
-		LYRawMode = (UCLYhndl_for_unspec == current_char_set);
-	    }
-       if (raw_mode_old != LYRawMode || assume_char_set_changed) {
-		/*
-		 *  Set the raw 8-bit or CJK mode defaults and
-		 *  character set if changed. - FM
-		 */
-		HTMLSetUseDefaultRawMode(current_char_set, LYRawMode);
-		HTMLSetCharacterHandling(current_char_set);
-	    }
-	need_reload = TRUE;
-     } /* end of charset settings */
-
-
-    /*
-     * FIXME: Golly gee, we need to write all of this out now, don't we?
-     */
-    FREE(newdoc->post_data);
-    FREE(data);
-    if (save_all) {
-	_statusline(SAVING_OPTIONS);
-	if (save_rc()) {
-	    _statusline(OPTIONS_SAVED);
-	} else {
-	    HTAlert(OPTIONS_NOT_SAVED);
-	}
-    }
-    LYpop(newdoc);  /* return to previous doc, not to options menu! */
-
-    if (need_reload == TRUE)  {
-	/* FIXME: currently dummy */
-    }
-    return(NULLFILE);
-}
-
-PRIVATE char *NewSecureValue NOARGS
-{
-    FREE(secure_value);
-    if ((secure_value = malloc(80)) != 0) {
-	sprintf(secure_value, "%ld", (long)secure_value + (long)time(0));
-	return secure_value;
-    }
-    return "?";
-}
-
-/*
- * Okay, someone wants to change options.  So, lets gen up a form for them
- * and pass it around.  Gor, this is ugly.  Be a lot easier in Bourne with
- * "here" documents.  :->
- * Basic Strategy:  For each option, throw up the appropriate type of
- * control, giving defaults as appropriate.  If nothing else, we're
- * probably going to test every control there is.  MRC
- *
- * This function is synchronized with postoptions().  Read the comments in
- * postoptions() header if you change something in gen_options().
- */
-PUBLIC int gen_options ARGS1(
-	char **,	newfile)
-{
-    int i;
-#if defined(USE_SLANG) || defined(COLOR_CURSES)
-    BOOLEAN can_do_colors;
-#endif
-    static char tempfile[LY_MAXPATH];
-    FILE *fp0;
-    size_t cset_len = 0;
-    size_t text_len = COLS - 38;	/* cf: PutLabel */
-
-    LYRemoveTemp(tempfile);
-    fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
-    if (fp0 == NULL) {
-	HTAlert(UNABLE_TO_OPEN_TEMPFILE);
-	return(-1);
-    }
-
-    LYLocalFileToURL(newfile, tempfile);
-
-    LYforce_no_cache = TRUE;
-
-    BeginInternalPage(fp0, OPTIONS_TITLE, NULL); /* help link below */
-
-    /*
-     * I do C, not HTML.  Feel free to pretty this up.
-     */
-    fprintf(fp0,"<form action=\"LYNXOPTIONS:\" method=\"post\">\n");
-    /*
-     * use following with some sort of one shot secret key akin to NCSA
-     * (or was it CUTE?) telnet one shot password to allow ftp to self.
-     * to prevent spoofing.
-     */
-    fprintf(fp0,"<input name=\"%s\" type=\"hidden\" value=\"%s\">\n",
-	    secure_string, NewSecureValue());
-
-    /*
-     * visible text begins here
-     */
-
-    /* Submit/Reset/Help */
-    fprintf(fp0,"<p align=center>\n");
-    fprintf(fp0,"<input type=\"submit\" value=\"Accept Changes\"> - \n");
-    fprintf(fp0,"<input type=\"reset\" value=\"Reset Changes\">\n");
-    fprintf(fp0,"Left Arrow cancels changes\n");
-    fprintf(fp0, "<a href=\"%s%s\">HELP!</a>\n",
-		 helpfilepath, OPTIONS_HELP);
-
-    /* Save options */
-    if (!no_option_save) {
-	fprintf(fp0, "<p align=center>Save options to disk: ");
-	fprintf(fp0, "<input type=\"checkbox\" name=\"%s\">\n",
-		save_options_string);
-    }
-
-    /*
-     * preformatted text follows
-     */
-    fprintf(fp0,"<pre>\n");
-    fprintf(fp0,"\n  <em>Personal Preferences</em>\n");
-
-    /* Cookies: SELECT */
-    PutLabel(fp0, "Cookies");
-    BeginSelect(fp0, cookies_string);
-    PutOption(fp0, !LYSetCookies,
-	      cookies_ignore_all_string,
-	      cookies_ignore_all_string);
-    PutOption(fp0, LYSetCookies && !LYAcceptAllCookies,
-	      cookies_up_to_user_string,
-	      cookies_up_to_user_string);
-    PutOption(fp0, LYSetCookies && LYAcceptAllCookies,
-	      cookies_accept_all_string,
-	      cookies_accept_all_string);
-    EndSelect(fp0);
-
-    /* Editor: INPUT */
-    PutLabel(fp0, "Editor");
-    PutTextInput(fp0, editor_string, NOTEMPTY(editor), text_len,
-		DISABLED(no_editor || system_editor));
-
-    /* Emacs keys: ON/OFF */
-    PutLabel(fp0, "Emacs keys");
-    BeginSelect(fp0, emacs_keys_string);
-    PutOptValues(fp0, emacs_keys, bool_values);
-    EndSelect(fp0);
-
-    /* Execution links: SELECT */
-#ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
-    PutLabel(fp0, "Execution links");
-    BeginSelect(fp0, exec_links_string);
-#ifndef NEVER_ALLOW_REMOTE_EXEC
-    PutOptValues(fp0, local_exec
-			? EXEC_ALWAYS
-			: (local_exec_on_local_files
-				? EXEC_LOCAL
-				: EXEC_NEVER),
-		exec_links_values);
-#else
-    PutOptValues(fp0, local_exec_on_local_files
-			? EXEC_LOCAL
-			: EXEC_NEVER,
-		exec_links_values);
-#endif /* !NEVER_ALLOW_REMOTE_EXEC */
-    EndSelect(fp0);
-#endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
-
-    /* Keypad Mode: SELECT */
-    PutLabel(fp0, "Keypad mode");
-    BeginSelect(fp0, keypad_mode_string);
-    PutOptValues(fp0, keypad_mode, keypad_mode_values);
-    EndSelect(fp0);
-
-    /* Mail Address: INPUT */
-    PutLabel(fp0, "Personal mail address");
-    PutTextInput(fp0, mail_address_string,
-		NOTEMPTY(personal_mail_address), text_len, "");
-
-    /* Select Popups: ON/OFF */
-    PutLabel(fp0, "Popups for select fields");
-    BeginSelect(fp0, select_popups_string);
-    PutOptValues(fp0, LYSelectPopups, bool_values);
-    EndSelect(fp0);
-
-    /* Search Type: SELECT */
-    PutLabel(fp0, "Searching type");
-    BeginSelect(fp0, search_type_string);
-    PutOptValues(fp0, case_sensitive, search_type_values);
-    EndSelect(fp0);
-
-    /* Show Color: SELECT */
-#if defined(USE_SLANG) || defined(COLOR_CURSES)
-    can_do_colors = 1;
-#if defined(COLOR_CURSES)
-    can_do_colors = has_colors();
-#endif
-    PutLabel(fp0, "Show color");
-    MaybeSelect(fp0, !can_do_colors, show_color_string);
-    if (no_option_save) {
-	if (LYShowColor == SHOW_COLOR_NEVER) {
-	    LYShowColor = SHOW_COLOR_OFF;
-	} else if (LYShowColor == SHOW_COLOR_ALWAYS) {
-	    LYShowColor = SHOW_COLOR_ON;
-	}
-	PutOptValues(fp0, LYShowColor, bool_values);
-    } else {
-	if (LYChosenShowColor == SHOW_COLOR_UNKNOWN) {
-	    switch (LYrcShowColor) {
-	    case SHOW_COLOR_NEVER:
-		LYChosenShowColor =
-		    (LYShowColor >= SHOW_COLOR_ON) ?
-			SHOW_COLOR_ON : SHOW_COLOR_NEVER;
-		break;
-	    case SHOW_COLOR_ALWAYS:
-		if (!can_do_colors)
-		    LYChosenShowColor = SHOW_COLOR_ALWAYS;
-		else
-		    LYChosenShowColor =
-			(LYShowColor >= SHOW_COLOR_ON) ?
-				SHOW_COLOR_ALWAYS : SHOW_COLOR_OFF;
-		break;
-	    default:
-		LYChosenShowColor =
-		    (LYShowColor >= SHOW_COLOR_ON) ?
-			SHOW_COLOR_ON : SHOW_COLOR_OFF;
-	    }
-	}
-	show_color_values[3].LongName = (can_do_colors) ? always_string
-							: "Always try";
-	PutOptValues(fp0, LYChosenShowColor, show_color_values);
-    }
-    EndSelect(fp0);
-#endif /* USE_SLANG || COLOR_CURSES */
-
-    /* Show cursor: ON/OFF */
-    PutLabel(fp0, "Show cursor");
-    BeginSelect(fp0, show_cursor_string);
-    PutOptValues(fp0, LYShowCursor, bool_values);
-    EndSelect(fp0);
-
-    /* User Mode: SELECT */
-    PutLabel(fp0, "User mode");
-    BeginSelect(fp0, user_mode_string);
-    PutOptValues(fp0, user_mode, user_mode_values);
-    EndSelect(fp0);
-
-    /* Verbose Images: ON/OFF */
-    PutLabel(fp0, "Verbose images");
-    BeginSelect(fp0, verbose_images_string);
-    PutOptValues(fp0, verbose_img, bool_values);
-    EndSelect(fp0);
-
-    /* VI Keys: ON/OFF */
-    PutLabel(fp0, "VI keys");
-    BeginSelect(fp0, vi_keys_string);
-    PutOptValues(fp0, vi_keys, bool_values);
-    EndSelect(fp0);
-
-
-    /* X Display: INPUT */
-    PutLabel(fp0, "X Display");
-    PutTextInput(fp0, x_display_string, NOTEMPTY(x_display), text_len, "");
-
-    /*
-     * Bookmark Options
-     */
-    fprintf(fp0,"\n  <em>Bookmark Options</em>\n");
-
-    /* Multi-Bookmark Mode: SELECT */
-    if (!LYMBMBlocked) {
-       PutLabel(fp0, "Multi-bookmarks");
-       BeginSelect(fp0, mbm_string);
-       PutOption(fp0, !LYMultiBookmarks,
-	   mbm_off_string,
-	   mbm_off_string);
-       PutOption(fp0, LYMultiBookmarks && !LYMBMAdvanced,
-	   mbm_standard_string,
-	   mbm_standard_string);
-       PutOption(fp0, LYMultiBookmarks && LYMBMAdvanced,
-	   mbm_advanced_string,
-	   mbm_advanced_string);
-       EndSelect(fp0);
-    }
-
-    /* Bookmarks File Menu: LINK/INPUT */
-    if (LYMultiBookmarks) {
-
-	PutLabel(fp0, "Review/edit Bookmarks files");
-	fprintf(fp0,
-	"<a href=\"LYNXOPTIONS://MBM_MENU\">Goto multi-bookmark menu</a>\n");
-
-    } else {
-	PutLabel(fp0, "Bookmarks file");
-	PutTextInput(fp0, single_bookmark_string,
-		NOTEMPTY(bookmark_page), text_len, "");
-    }
-
-    /*
-     * Character Set Options
-     */
-    fprintf(fp0,"\n  <em>Character Set Options</em>\n");
-
-    /* Assume Character Set: SELECT */
-    /* if (user_mode==ADVANCED_MODE) */
-    {
-	int curval;
-	curval = UCLYhndl_for_unspec;
-
-	/*
-	 * FIXME: If bogus value in lynx.cfg, then in old way, that is the
-	 * string that was displayed.  Now, user will never see that.  Good
-	 * or bad?  I don't know.  MRC
-	 */
-	if (curval == current_char_set) {
-	    /* ok, LYRawMode, so use UCAssume_MIMEcharset */
-	    curval = safeUCGetLYhndl_byMIME(UCAssume_MIMEcharset);
-	}
-	PutLabel(fp0, "Assumed document character set");
-	BeginSelect(fp0, assume_char_set_string);
-	for (i = 0; i < LYNumCharsets; i++) {
-	    PutOption(fp0, i==curval,
-		      LYCharSet_UC[i].MIMEname,
-		      LYCharSet_UC[i].MIMEname);
-	}
-	EndSelect(fp0);
-    }
-
-    /* Display Character Set: SELECT */
-    PutLabel(fp0, "Display character set");
-    BeginSelect(fp0, display_char_set_string);
-    for (i = 0; LYchar_set_names[i]; i++) {
-	char temp[10];
-	size_t len = strlen(LYchar_set_names[i]);
-	if (len > cset_len)
-		cset_len = len;
-	sprintf(temp, "%d", i);
-	PutOption(fp0, i==current_char_set, temp, LYchar_set_names[i]);
-    }
-    EndSelect(fp0);
-
-    /* Raw Mode: ON/OFF */
-    if	(LYHaveCJKCharacterSet)
-	/*
-	 * Since CJK people hardly mixed with other world
-	 * we split the header to make it more readable:
-	 * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
-	 */
-	PutLabel(fp0, "CJK mode");
-    else
-	PutLabel(fp0, "Raw 8-bit");
-
-    BeginSelect(fp0, raw_mode_string);
-    PutOptValues(fp0, LYRawMode, bool_values);
-    EndSelect(fp0);
-
-    /*
-     * File Management Options
-     */
-    fprintf(fp0,"\n  <em>File Management Options</em>\n");
-
-    /* FTP sort: SELECT */
-    PutLabel(fp0, "Ftp sort criteria");
-    BeginSelect(fp0, ftp_sort_string);
-    PutOptValues(fp0, HTfileSortMethod, ftp_sort_values);
-    EndSelect(fp0);
-
-#ifdef DIRED_SUPPORT
-    /* Local Directory Sort: SELECT */
-    PutLabel(fp0, "Local directory sort criteria");
-    BeginSelect(fp0, dired_sort_string);
-    PutOptValues(fp0, dir_list_style, dired_values);
-    EndSelect(fp0);
-#endif /* DIRED_SUPPORT */
-
-    /* Show dot files: ON/OFF */
-    if (!no_dotfiles) {
-	PutLabel(fp0, "Show dot files");
-	BeginSelect(fp0, show_dotfiles_string);
-	PutOptValues(fp0, show_dotfiles, bool_values);
-	EndSelect(fp0);
-    }
-
-    /*
-     * Headers transferred to remote server
-     */
-    fprintf(fp0,"\n  <em>Headers transferred to remote server</em>\n");
-
-    /* Preferred Document Character Set: INPUT */
-    PutLabel(fp0, "Preferred document character set");
-    PutTextInput(fp0, preferred_doc_char_string,
-	    NOTEMPTY(pref_charset), cset_len+2, "");
-
-    /* Preferred Document Language: INPUT */
-    PutLabel(fp0, "Preferred document language");
-    PutTextInput(fp0, preferred_doc_lang_string,
-	    NOTEMPTY(language), cset_len+2, "");
-
-    /* User Agent: INPUT */
-    if (!no_useragent) {
-	PutLabel(fp0, "User-Agent header");
-	PutTextInput(fp0, user_agent_string,
-		     NOTEMPTY(LYUserAgent), text_len, "");
-    }
-
-    if (!LYRestricted) {
-	fprintf(fp0,
-		"\n  Check your <a href=\"%s\">lynx.cfg</a> here\n",
-		lynx_cfg_infopage());
-    }
-
-    fprintf(fp0,"\n</pre>\n");
-
-    /* Submit/Reset */
-    fprintf(fp0,"<p align=center>\n");
-    fprintf(fp0,"<input type=\"submit\" value=\"Accept Changes\">\n - ");
-    fprintf(fp0,"<input type=\"reset\" value=\"Reset Changes\">\n");
-    fprintf(fp0,"Left Arrow cancels changes\n");
-
-    /*
-     * close HTML
-     */
-    fprintf(fp0,"</form>\n");
-    EndInternalPage(fp0);
-
-    LYCloseTempFP(fp0);
-    return(0);
-}
-#endif /* !NO_OPTION_FORMS */

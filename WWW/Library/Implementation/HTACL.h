@@ -5,6 +5,9 @@
 #ifndef HTACL_H
 #define HTACL_H
 
+#ifndef HTUTILS_H
+#include <HTUtils.h>
+#endif /* HTUTILS_H */
 #include <HTAAUtil.h>
 #include <HTGroup.h>
 
