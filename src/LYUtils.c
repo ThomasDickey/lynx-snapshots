@@ -1721,7 +1721,7 @@ PUBLIC void free_and_clear ARGS1(
 	char **,	pointer)
 {
     if (*pointer) {
-	free(*pointer);
+	FREE(*pointer);
 	*pointer = 0;
     }
     return;
@@ -2188,8 +2188,35 @@ PUBLIC int HTCheckForInterrupt NOARGS
     else if (display_partial && (NumOfLines_partial > 2))
     /* OK, we got several lines from new document and want to scroll... */
     {
+	int res;
 	switch (keymap[c+1])
 	{
+	case LYK_FASTBACKW_LINK :
+	    if (Newline_partial <= (display_lines)+1) {
+		Newline_partial -= display_lines ;
+	    } else if ((res =
+			HTGetLinkOrFieldStart(-1,
+					      &Newline_partial, NULL,
+					      -1, TRUE)) == LINK_LINE_FOUND) {
+		Newline_partial++;
+	    } else if (res == LINK_DO_ARROWUP) {
+		Newline_partial -= display_lines ;
+	    }
+	    break;
+	case LYK_FASTFORW_LINK :
+	    if (HText_canScrollDown()) {
+		/* This is not an exact science... - kw */
+		if ((res =
+		     HTGetLinkOrFieldStart(HText_LinksInLines(HTMainText,
+							      Newline_partial,
+							      display_lines)
+					   - 1,
+					   &Newline_partial, NULL,
+					   +1, TRUE)) == LINK_LINE_FOUND) {
+		    Newline_partial++;
+		}
+	    }
+	    break;
 	case LYK_PREV_PAGE :
 	    if (Newline_partial > 1)
 		Newline_partial -= display_lines ;
@@ -4725,7 +4752,11 @@ PUBLIC CONST char * Home_Dir NOARGS
     char *cp = NULL;
 
     if (homedir == NULL) {
-	if ((cp = getenv("HOME")) == NULL || *cp == '\0') {
+	if ((cp = getenv("HOME")) == NULL || *cp == '\0'
+#ifdef UNIX
+	    || *cp != '/'
+#endif /* UNIX */
+	    ) {
 #if defined (DOSPATH) || defined (__EMX__) /* BAD!	WSB */
 	    if ((cp = getenv("TEMP")) == NULL || *cp == '\0') {
 		if ((cp = getenv("TMP")) == NULL || *cp == '\0') {
@@ -4764,6 +4795,10 @@ PUBLIC CONST char * Home_Dir NOARGS
 		 */
 		StrAllocCopy(HomeDir, "/tmp");
 	    }
+#ifdef UNIX
+	    if (cp && *cp)
+		HTAlwaysAlert(NULL, gettext("Ignoring invalid HOME"));
+#endif
 #endif /* VMS */
 #endif /* DOSPATH */
 	} else {
@@ -5422,7 +5457,7 @@ PUBLIC int putenv ARGS1(
       new_environ[size] = (char *) string;
       new_environ[size + 1] = NULL;
       if (last_environ != NULL)
-	free ((char *) last_environ);
+	FREE ((char *) last_environ);
       last_environ = new_environ;
       environ = new_environ;
     }
@@ -5494,7 +5529,7 @@ PRIVATE BOOL IsOurFile ARGS1(char *, name)
 		break;
 	    }
 	} while (leaf != path);
-	free(path);
+	FREE(path);
 #endif
 	return !linked;
     }
@@ -5847,8 +5882,8 @@ PUBLIC void LYRemoveTemp ARGS1(
 		CTRACE_FLUSH(tfp);
 		if (p->file != 0)
 		    fclose(p->file);
-		free(p->name);
-		free(p);
+		FREE(p->name);
+		FREE(p);
 		break;
 	    }
 	}
@@ -6251,6 +6286,7 @@ PUBLIC int LYSystem ARGS1(
 
     fflush(stdout);
     fflush(stderr);
+    CTRACE_FLUSH(tfp);
 
 #ifdef __DJGPP__
     __djgpp_set_ctrl_c(0);

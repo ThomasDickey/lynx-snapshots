@@ -35,6 +35,7 @@
 #include <LYCharSets.h>
 #include <LYCharUtils.h>	/* LYUCTranslateBack... */
 #include <UCMap.h>
+#include <LYEdit.h>
 #ifdef EXP_CHARTRANS_AUTOSWITCH
 #include <UCAuto.h>
 #endif /* EXP_CHARTRANS_AUTOSWITCH */
@@ -130,6 +131,7 @@ typedef struct _line {
 	unsigned	size;		/* Number of characters */
 	BOOL	split_after;		/* Can we split after? */
 	BOOL	bullet;			/* Do we bullet? */
+	BOOL	expansion_line;		/* TEXTAREA edit new line flag */
 #if defined(USE_COLOR_STYLE)
 	HTStyleChange	styles[MAX_STYLES_ON_LINE];
 	int	numstyles;
@@ -153,6 +155,7 @@ typedef struct _TextAnchor {
 	FormInfo *		input_field;	/* Info for form links */
 	BOOL			show_anchor;	/* Show the anchor? */
 	BOOL			inUnderline;	/* context is underlined */
+	BOOL			expansion_anch; /* TEXTAREA edit new anchor */
 	HTChildAnchor *		anchor;
 } TextAnchor;
 
@@ -3947,10 +3950,10 @@ PUBLIC void HText_FormDescNumber ARGS2(
 /*
  *  HTGetLinkInfo returns some link info based on the number.
  *
- *  If want_go is not NULL, caller requests to know a line number for
+ *  If want_go is not 0, caller requests to know a line number for
  *  the link indicated by number.  It will be returned in *go_line, and
  *  *linknum will be set to an index into the links[] array, to use after
- *  the line in *line has been made the new top screen line.
+ *  the line in *go_line has been made the new top screen line.
  *  *hightext and *lname are unchanged. - KW
  *
  *  If want_go is 0 and the number doesn't represent an input field, info
@@ -4107,6 +4110,263 @@ PUBLIC int HTGetLinkInfo ARGS6(
 		}
 		return(WWW_LINK_TYPE);
 	    }
+	}
+    }
+    return(NO);
+}
+
+PRIVATE BOOLEAN same_anchor_or_field ARGS5(
+    int,		numberA,
+    FormInfo *,		formA,
+    int,		numberB,
+    FormInfo *,		formB,
+    BOOLEAN,		ta_same)
+{
+    if (numberA > 0 || numberB > 0) {
+	if (numberA == numberB)
+	    return(YES);
+	else if (!ta_same)
+	    return(NO);
+    }
+    if (formA || formB) {
+	if (formA == formB) {
+	    return(YES);
+	} else if (!ta_same) {
+	    return(NO);
+	} else if (!(formA && formB)) {
+	    return(NO);
+	}
+    } else {
+	return(NO);
+    }
+    if (formA->type != formB->type ||
+	formA->type != F_TEXTAREA_TYPE || formB->type != F_TEXTAREA_TYPE) {
+	return(NO);
+    }
+    if (formA->number != formB->number)
+	return(NO);
+    if (!formA->name || !formB->name)
+	return(YES);
+    return(strcmp(formA->name, formB->name) == 0);
+}
+
+#define same_anchor_as_link(i,a) (i >= 0 && a &&\
+		same_anchor_or_field(links[i].anchor_number,\
+                (links[i].type == WWW_FORM_LINK_TYPE) ? links[i].form : NULL,\
+		a->number,\
+		(a->link_type == INPUT_ANCHOR) ? a->input_field : NULL,\
+		ta_skip))
+#define same_anchors(a1,a2) (a1 && a2 &&\
+		same_anchor_or_field(a1->number,\
+		(a1->link_type == INPUT_ANCHOR) ? a1->input_field : NULL,\
+		a2->number,\
+		(a2->link_type == INPUT_ANCHOR) ? a2->input_field : NULL,\
+		ta_skip))
+
+/*
+ *  HTGetLinkOrFieldStart - moving to previous or next link or form field.
+ *
+ *  On input,
+ *	curlink: current link, as index in links[] array (-1 if none)
+ *	direction: whether to move up or down (or stay where we are)
+ *	ta_skip: if FALSE, input fields belonging to the same textarea are
+ *		 are treated as different fields, as usual;
+ *		 if TRUE, fields of the same textarea are treated as a
+ *		 group for skipping.
+ *  The caller wants a information for positioning on the new link to be
+ *  deposited in *go_line and (if linknum is not NULL) *linknum.
+ *
+ *  On failure (no more links in the requested direction) returns NO
+ *  and doesn't change *go_line or *linknum.  Otherwise, LINK_DO_ARROWUP
+ *  may be returned, and *go_line and *linknum not changed, to indicate that
+ *  the caller should use a normal PREV_LINK or PREV_PAGE mechanism.
+ *  Otherwise:
+ *  The number (0-based counting) for the new top screen line will be returned
+ *  in *go_line, and *linknum will be set to an index into the links[] array,
+ *  to use after the line in *go_line has been made the new top screen
+ *  line. - kw
+ */
+PUBLIC int HTGetLinkOrFieldStart ARGS5(
+	int,		curlink,
+	int *,		go_line,
+	int *,		linknum,
+	int,		direction,
+	BOOLEAN,	ta_skip)
+{
+    TextAnchor *a;
+    int anchors_this_line = 0;
+    int prev_anchor_line = -1, prev_prev_anchor_line = -1;
+
+    struct agroup {
+	TextAnchor *anc;
+	int prev_anchor_line;
+	int anchors_this_line;
+	int anchors_this_group;
+    } previous, current;
+    struct agroup *group_to_go = NULL;
+
+    if (!HTMainText)
+	return(NO);
+
+    previous.anc = current.anc = NULL;
+    previous.prev_anchor_line = current.prev_anchor_line = -1;
+    previous.anchors_this_line = current.anchors_this_line = 0;
+    previous.anchors_this_group = current.anchors_this_group = 0;
+
+    for (a = HTMainText->first_anchor; a; a = a->next) {
+	/*
+	 *  Count anchors, first on current line if there is more
+	 *  than one.  We have to count all links, including form
+	 *  field anchors and others with a->number == 0, because
+	 *  they are or will be included in the links[] array.
+	 *  The exceptions are hidden form fields and anchors with
+	 *  show_anchor not set, because they won't appear in links[]
+	 *  and don't count towards nlinks. - KW
+	 */
+	if ((a->show_anchor) &&
+	    (a->link_type != INPUT_ANCHOR ||
+	     a->input_field->type != F_HIDDEN_TYPE)) {
+	    if (a->line_num == prev_anchor_line) {
+		anchors_this_line++;
+	    } else {
+		/*
+		 *  This anchor is on a different line than the previous one.
+		 *  Remember which was the line number of the previous anchor,
+		 *  for use in screen positioning later. - KW
+		 */
+		anchors_this_line = 1;
+		prev_prev_anchor_line = prev_anchor_line;
+		prev_anchor_line = a->line_num;
+	    }
+
+	    if (!same_anchors(current.anc, a)) {
+		previous.anc = current.anc;
+		previous.prev_anchor_line = current.prev_anchor_line;
+		previous.anchors_this_line = current.anchors_this_line;
+		previous.anchors_this_group = current.anchors_this_group;
+		current.anc = a;
+		current.prev_anchor_line = prev_prev_anchor_line;
+		current.anchors_this_line = anchors_this_line;
+		current.anchors_this_group = 1;
+	    } else {
+		current.anchors_this_group++;
+	    }
+	    if (curlink >= 0) {
+		if (same_anchor_as_link(curlink,a)) {
+		    if (direction == -1) {
+			group_to_go = &previous;
+			break;
+		    } else if (direction == 0) {
+			group_to_go = &current;
+			break;
+		    }
+		} else if (direction > 0 &&
+			   same_anchor_as_link(curlink,previous.anc)) {
+		    group_to_go = &current;
+		    break;
+		}
+	    } else {
+		if (a->line_num >= HTMainText->top_of_screen) {
+		    if (direction < 0) {
+			group_to_go = &previous;
+			break;
+		    } else if (direction == 0) {
+			if (previous.anc) {
+			    group_to_go = &previous;
+			    break;
+			} else {
+			    group_to_go = &current;
+			    break;
+			}
+		    } else {
+			group_to_go = &current;
+			break;
+		    }
+		}
+	    }
+	}
+    }
+    if (!group_to_go && curlink < 0 && direction <= 0) {
+	group_to_go = &current;
+    }
+    if (group_to_go) {
+	a = group_to_go->anc;
+	if (a) {
+	    int max_offset;
+	    /*
+	     *  We know where to go; most of the stuff below is just
+	     *  tweaks to try to position the new screen in a specific
+	     *  way.
+	     *
+	     *  In some cases going to a previous link can be done
+	     *  via the normal LYK_PREV_LINK action, which may give
+	     *  better positioning of the new screen. - kw
+	     */
+	    if (a->line_num < HTMainText->top_of_screen &&
+		a->line_num >= HTMainText->top_of_screen-(display_lines)) {
+		if ((curlink < 0 &&
+		     group_to_go->anchors_this_group == 1) ||
+		    (direction < 0 &&
+		     group_to_go != &current &&
+		     current.anc &&
+		     current.anc->line_num >= HTMainText->top_of_screen &&
+		     group_to_go->anchors_this_group == 1) ||
+		    (a->next &&
+		     a->next->line_num >= HTMainText->top_of_screen)) {
+		    return(LINK_DO_ARROWUP);
+		}
+	    }
+	    /*
+	     *  The fundamental limitation of the current anchors_this_line
+	     *  counter method is that we only can set *linknum to the right
+	     *  index into the future links[] array if the line with our link
+	     *  ends up being the first line with any links (that count) on
+	     *  the new screen.  Subject to that restriction we still have
+	     *  some vertical liberty (sometimes), and try to make the best
+	     *  of it.  It may be a question of taste though. - kw
+	     */
+	    if (a->line_num <= (display_lines)) {
+		max_offset = 0;
+	    } else if (a->line_num < HTMainText->top_of_screen) {
+		int screensback =
+		    (HTMainText->top_of_screen - a->line_num + (display_lines) - 1)
+		    / (display_lines);
+		max_offset = a->line_num - (HTMainText->top_of_screen -
+					    screensback * (display_lines));
+	    } else if (HTMainText->Lines - a->line_num <= (display_lines)) {
+		max_offset = a->line_num - (HTMainText->Lines - (display_lines));
+	    } else if (a->line_num >=
+		       HTMainText->top_of_screen+(display_lines)) {
+		int screensahead =
+		    (a->line_num - HTMainText->top_of_screen) / (display_lines);
+		max_offset = a->line_num - HTMainText->top_of_screen -
+		    screensahead * (display_lines);
+	    } else {
+		max_offset = SEARCH_GOAL_LINE - 1;
+	    }
+
+	    /* Stuff below should remain unchanged if line positioning
+	       is tweaked. - kw */
+	    if (max_offset < 0)
+		max_offset = 0;
+	    else if (max_offset >= display_lines)
+		max_offset = display_lines - 1;
+	    *go_line = a->line_num - max_offset;
+	    if (*go_line <= group_to_go->prev_anchor_line)
+		*go_line = group_to_go->prev_anchor_line + 1;
+
+#if 0
+	    if (*go_line > HTMainText->top_of_screen &&
+		*go_line < HTMainText->top_of_screen+(display_lines) &&
+		HTMainText->top_of_screen+(display_lines) <= a->line_num &&
+		HTMainText->top_of_screen+2*(display_lines) <= HTMainText->Lines)
+		*go_line = HTMainText->top_of_screen+(display_lines);
+#endif
+	    if (*go_line < 0)
+		*go_line = 0;
+	    if (linknum)
+		*linknum = group_to_go->anchors_this_line - 1;
+	    return(LINK_LINE_FOUND);
 	}
     }
     return(NO);
@@ -8705,11 +8965,11 @@ PUBLIC BOOL HText_AreDifferent ARGS2(
  *  be allowed to expand in the event of a tag width change (eg, 99 -> 100)
  *  as controlled by arg6 (CHOP or NOCHOP).  Arg4 is either (the address
  *  of) a value which must match, in order for the tag to be incremented,
- *  or (the address of) a 0-value, which matches any value, and will cause
+ *  or (the address of) a 0-value, which will match any value, and cause
  *  any valid tag to be incremented.  Arg2 is a pointer to the first/only
- *  Anchor that exists on the line (if any); we may need to adjust their
- *  position(s) on the line.  Arg3 when non-0 indicates the number of new
- *  digits that were added to the 2nd line in a line crossing pair.
+ *  Anchor that exists on the line; we may need to adjust their position(s)
+ *  on the line.  Arg3 when non-0 indicates the number of new digits that
+ *  were added to the 2nd line in a line crossing pair.
  *
  *  All tags fields in a line which individually match an expected new value,
  *  are incremented.  Line crossing [tags] are handled (PITA).
@@ -8747,9 +9007,10 @@ PRIVATE int increment_tagged_htline ARGS6(
     int   pre_n;
     int   fixup = 0;
 
+
     /*
      *  Cleanup for the 2nd half of a line crosser, whose number of tag
-     *  digits grew by some number of places (usually 1, when it does
+     *  digits grew by some number of places (usually 1 when it does
      *  happen, though it *could* be more).  The tag chars were already
      *  rendered into the 2nd line of the pair, but the positioning and
      *  other effects haven't been rippled through any other anchors on
@@ -8767,22 +9028,23 @@ PRIVATE int increment_tagged_htline ARGS6(
 	}
 	fixup  = *lx_val;
 	*lx_val = 0;
-	st_anchor = st_anchor->next;
+	if (st_anchor) st_anchor = st_anchor->next;
     }
+
 
     /*
      *  Walk thru the line looking for tags (ie, "[nnn]" strings).
      */
-    while (*p != '\0') {
-	if (*p != '[') {
-	    *s++ = *p++;
-	    continue;
+    while  (*p != '\0') {
+	if (*p != '[')	{
+	   *s++ = *p++;
+	   continue;
 
 	} else {
 	    *s++ = *p++;
 	    t = p;
 	    n = 0;
-	    valid = TRUE;   /* p = t = byte after ']' */
+	    valid = TRUE;   /* p = t = byte after '[' */
 
 	    /*
 	     *  Make sure there are only digits between "[" and "]".
@@ -8817,12 +9079,12 @@ PRIVATE int increment_tagged_htline ARGS6(
 	     *   string are probably not possible, since little of the actual
 	     *   anchor-associated-text is retained in the TextAnchor or the
 	     *   FormInfo structs.  Fortunately, I think the current method is
-	     *   more than adequate to weed out 99.99% of any possible false
+	     *   more than adequate to weed out 99.999% of any possible false
 	     *   matches, just as it stands.  Caveat emptor.]
 	     */
 	    if ((valid) && (n > 0)) {
 		val = atoi (p);
-		if ((val == *old_val) || (*old_val == 0)) {
+		if ((val == *old_val) || (*old_val == 0)) {  /* 0 matches all */
 		    if (*old_val != 0)
 			(*old_val)++;
 		    val += incr;
@@ -8854,12 +9116,12 @@ PRIVATE int increment_tagged_htline ARGS6(
 		     */
 		    if (new_n -= n) {
 			nxt_anchor = st_anchor;
-			while ((nxt_anchor) 			  &&
+			while ((nxt_anchor)			      &&
 			    (nxt_anchor->line_num == a->line_num)) {
 			    nxt_anchor->line_pos += new_n;
 			    nxt_anchor = nxt_anchor->next;
 			}
-			st_anchor = st_anchor->next;
+			if (st_anchor) st_anchor = st_anchor->next;
 		    }
 		}
 	    }
@@ -8929,8 +9191,8 @@ PRIVATE int increment_tagged_htline ARGS6(
 			*lx_val = new_n - n;
 		    }
 		}
-		break;	/* had an lx'er, so we're done with this line */
-	    }
+	      break;  /* had an lx'er, so we're done with this line */
+	   }
 	}
     }
 
@@ -8958,7 +9220,7 @@ PRIVATE int increment_tagged_htline ARGS6(
  *  --KED  02/01/99
  */
 PUBLIC int HText_ExtEditForm ARGS1(
-	   struct link *,  form_link)
+           struct link *,  form_link)
 {
     struct stat stat_info;
 
@@ -8966,13 +9228,16 @@ PUBLIC int HText_ExtEditForm ARGS1(
     FILE       *fp;
 
     TextAnchor *anchor_ptr;
-    TextAnchor *start_anchor = NULL;
-    TextAnchor *end_anchor   = NULL;
-    BOOLEAN	firstanchor  = TRUE;
-    int 	entry_line   = form_link->anchor_line_num;
-    int 	exit_line    = 0;
-    int 	orig_cnt     = 0;
-    int 	line_cnt     = 1;
+    TextAnchor *start_anchor  = NULL;
+    TextAnchor *end_anchor    = NULL;
+    BOOLEAN	firstanchor   = TRUE;
+
+    char	ed_offset[10] = "\0";
+    int 	start_line    = 0;
+    int 	entry_line    = form_link->anchor_line_num;
+    int 	exit_line     = 0;
+    int 	orig_cnt      = 0;
+    int 	line_cnt      = 1;
 
     FormInfo   *form	 = form_link->form;
     char       *areaname = form->name;
@@ -8991,9 +9256,10 @@ PUBLIC int HText_ExtEditForm ARGS1(
     char       *cp;
     char       *p;
     char       *s;
-    int 	curr_tag;
-    int 	line_adj = 0;
-    int 	tag_adj  = 0;
+    int         curr_tag;
+    int         line_adj = 0;
+    int         tag_adj  = 0;
+    int         newlines = 0;
     int 	len;
     int 	i;
     int 	n;
@@ -9035,8 +9301,9 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	    !strcmp (anchor_ptr->input_field->name, areaname))   {
 
 	    if (firstanchor) {
-		firstanchor = FALSE;
+		firstanchor  = FALSE;
 		start_anchor = anchor_ptr;
+		start_line   = anchor_ptr->line_num;
 	    }
 	    orig_cnt++;
 
@@ -9056,13 +9323,23 @@ PUBLIC int HText_ExtEditForm ARGS1(
     fclose (fp);
 
     CTRACE(tfp, "GridText: TEXTAREA name=|%s| dumped to tempfile\n", areaname);
+    CTRACE(tfp, "GridText: invoking editor (%s) on tempfile\n", editor);
 
     /*
-     *	Go edit the TEXTAREA temp file.
+     *	Go edit the TEXTAREA temp file, with the initial editor line
+     *  corresponding to the TEXTAREA line the cursor is on (if such
+     *  positioning is supported by the editor [as lynx knows it]).
      */
-    HTSprintf0 (&tbuf, "%s %s", editor, ed_temp);
+    if (((entry_line - start_line) > 0) && editor_can_position())
+#ifdef VMS
+       sprintf (ed_offset, "-%d", ((entry_line - start_line) + 1));
+    HTSprintf0 (&tbuf, "%s %s %s", editor, ed_temp, ed_offset);
+#else
+       sprintf (ed_offset, "+%d", ((entry_line - start_line) + 1));
+    HTSprintf0 (&tbuf, "%s %s %s", editor, ed_offset, ed_temp);
+#endif
 
-    LYSystem (tbuf);
+    LYSystem (tbuf);   /* finally the editor is called */
 
 #ifdef UNIX
     /*
@@ -9072,15 +9349,15 @@ PUBLIC int HText_ExtEditForm ARGS1(
     if (stat (tbuf, &stat_info) == 0)
        remove (tbuf);
 #endif
-    free (tbuf);
+    FREE (tbuf);
 
     CTRACE(tfp, "GridText: returned from editor (%s)\n", editor);
 
     /*
-     *	Read back the edited temp file.
+     *	Read back the edited temp file into our buffer.
      */
     if ((stat (ed_temp, &stat_info) < 0)   ||
-	!S_ISREG(stat_info.st_mode)	   ||
+	!S_ISREG(stat_info.st_mode)        ||
 	((size = stat_info.st_size) == 0)) {
 	size = 0;
 	ebuf = (char *) calloc (1, 1);
@@ -9099,9 +9376,6 @@ PUBLIC int HText_ExtEditForm ARGS1(
      */
     while ((size != 0) && (isspace (ebuf[size-1]) || (ebuf[size-1] == '\0')))
 	ebuf[--size] = '\0';
-
-    if (size == 0)
-	ebuf[0] = '\0'; 
 
     /*
      *	Copy each line from the temp file into the corresponding anchor
@@ -9133,7 +9407,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	 *  Whack off trailing whitespace from the line.
 	 */
 	for (i = len, p = line + (len - 1); i != 0; p--, i--) {
-	    if (isspace(*p))
+	    if (isspace (*p))
 		*p = '\0';
 	    else
 		break;
@@ -9171,9 +9445,23 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	     *  we leave any chars above 0x7f alone (ie, no translation is
 	     *  performed ... the assumption being that the charset used in
 	     *  the editor is compatible with the charset rendered by lynx).
+	     *
+	     *  [At some point in time, when/if lynx ever supports multibyte
+	     *   characters internally (eg, UCS-2, UCS-4, UTF-16, etc), this
+	     *   kind of thing may well cause problems.  But then, supporting
+	     *   such char sets will require massive changes in (most) all
+	     *   parts of the lynx code, so until then, we do the rational
+	     *   thing with chars that would otherwise foul the display, if
+	     *   left alone.  If you're implementing multibyte character set
+	     *   support, consider yourself to have been warned.]
 	     */
 	    for (p = line, s = tbuf; *s != '\0'; p++, s++)
-		*p = (*s < ' ') ? SPLAT : *s;
+#ifndef EBCDIC
+		*p = (((unsigned char)*s  < ' ')    ||
+		      ((unsigned char)*s == '\177')) ? SPLAT : *s;
+#else
+	        *p = ((unsigned char)*s  < ' ') ? SPLAT : *s;
+#endif
 	    *p = '\0';
 	}
 
@@ -9198,26 +9486,30 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	     *   floating around in here, as it is.  IMNSHO.]
 	     */
 	    for (htline = HTMainText->last_line->next, i = 0;
-		i != end_anchor->line_num;
-		htline = htline->next, i++);
+		 end_anchor->line_num != i;            i++) {
+		htline = htline->next;
+		if (htline == HTMainText->last_line)
+		    break;
+	    }
 
 	    /*
 	     *  Clone and initialize the structs needed to add a new
 	     *  TEXTAREA anchor.
 	     */
-	    if (((a = (TextAnchor *) calloc (1, sizeof(*a)))	      == 0)  ||
+	    if (((a = (TextAnchor *) calloc (1, sizeof(*a)))          == 0)  ||
 		((f = (FormInfo   *) calloc (1, sizeof(*f)))	      == 0)  ||
 		((l = (HTLine	  *) calloc (1, LINE_SIZE(MAX_LINE))) == 0))
 		outofmem(__FILE__, "HText_ExtEditForm");
 
-	    /*  Init all the fields in the new TextAnchor.  */
-	    a->next	       = end_anchor->next;
-	    a->number	       = end_anchor->number;
-	    a->start	       = end_anchor->start +
-				 end_anchor->input_field->size + 1;
-	    a->line_pos	       = end_anchor->line_pos;
-	    a->extent	       = end_anchor->extent;
-	    a->line_num	       = end_anchor->line_num + 1;
+	    /*  Init all the fields in the new TextAnchor.                 */
+	    /*  [anything "special" needed based on ->show_anchor value ?] */
+	    a->next	        = end_anchor->next;
+	    a->number	        = end_anchor->number;
+	    a->start	        = end_anchor->start +
+				  end_anchor->input_field->size + 1;
+	    a->line_pos	        = end_anchor->line_pos;
+	    a->extent	        = end_anchor->extent;
+	    a->line_num	        = end_anchor->line_num + 1;
 	    StrAllocCopy (a->hightext,  end_anchor->hightext);
 	    StrAllocCopy (a->hightext2, end_anchor->hightext2);
 	    a->hightext2offset  = end_anchor->hightext2offset;
@@ -9225,26 +9517,30 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	    a->input_field      = f;
 	    a->show_anchor      = end_anchor->show_anchor;
 	    a->inUnderline      = end_anchor->inUnderline;
-	    a->anchor		= end_anchor->anchor;
+	    a->expansion_anch   = TRUE;
+	    a->anchor	        = NULL;
 
 	    /*  Just the (seemingly) relevant fields in the new FormInfo.  */
+	    /*  [do we need to do anything "special" based on ->disabled]  */
 	    StrAllocCopy (f->name, end_anchor->input_field->name);
-	    f->number	       = end_anchor->input_field->number;
-	    f->type	       = end_anchor->input_field->type;
+	    f->number	        = end_anchor->input_field->number;
+	    f->type	        = end_anchor->input_field->type;
 	    StrAllocCopy (f->orig_value, "");
-	    f->size	       = end_anchor->input_field->size;
-	    f->maxlength       = end_anchor->input_field->maxlength;
-	    f->no_cache        = end_anchor->input_field->no_cache;
+	    f->size	        = end_anchor->input_field->size;
+	    f->maxlength        = end_anchor->input_field->maxlength;
+	    f->no_cache         = end_anchor->input_field->no_cache;
+	    f->disabled         = end_anchor->input_field->disabled;
 
 	    /*  Init all the fields in the new HTLine (but see the #if).   */
-	    l->next	       = htline->next;
-	    l->prev	       = htline;
-	    l->offset	       = htline->offset;
-	    l->size	       = htline->size;
+	    l->next	        = htline->next;
+	    l->prev	        = htline;
+	    l->offset	        = htline->offset;
+	    l->size	        = htline->size;
 	    l->split_after      = htline->split_after;
-	    l->bullet	       = htline->bullet;
+	    l->bullet	        = htline->bullet;
+	    l->expansion_line   = TRUE;
 #if defined(USE_COLOR_STYLE)
-	    /* dup styles[] if needed [no need in TEXTAREA (?); leave 0's] */
+	   /* dup styles[] if needed [no need in TEXTAREA (?); leave 0's] */
 	    l->numstyles        = htline->numstyles;
 #endif
 	    strcpy (l->data,      htline->data);
@@ -9256,6 +9552,15 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	    }
 
 	    /*
+	     *  If we're at the tail end of the TextAnchor or HTLine list(s),
+	     *  the new node becomes the last node.
+	     */
+	    if (end_anchor == HTMainText->last_anchor)
+		HTMainText->last_anchor = a;
+	    if (htline == HTMainText->last_line)
+		HTMainText->last_line = l;
+
+	    /*
 	     *  Link in the new TextAnchor and make it current; link in
 	     *  the new HTLine.
 	     */
@@ -9264,8 +9569,11 @@ PUBLIC int HText_ExtEditForm ARGS1(
 
 	    htline->next->prev = l;
 	    htline->next = l;
-	    htline = l;
+	    htline = l->next;
+
+	    newlines++;
 	}
+
 
 	/*
 	 *  Finally copy the new line from the edit buffer into the anchor.
@@ -9274,22 +9582,25 @@ PUBLIC int HText_ExtEditForm ARGS1(
 
 
 	/*
-	 *  And do the next line, for the next anchor ...
+	 *  Keep track of 1st blank line in any trailing blank lines, for
+	 *  later cursor repositioning.
 	 */
-	lp += len;
-	if (*lp) lp++;
-
 	if (len > 0)
 	    exit_line = 0;
 	else if (exit_line == 0)
 	    exit_line = anchor_ptr->line_num;
 
+	/*
+	 *  And do the next line of edited text, for the next anchor ...
+	 */
+	lp += len;
+	if (*lp) lp++;
+
 	end_anchor = anchor_ptr;
 	anchor_ptr = anchor_ptr->next;
-	curr_tag   = anchor_ptr->number;
 
-	if (htline != NULL)
-	    htline   = htline->next;
+	if (anchor_ptr)
+	   curr_tag = anchor_ptr->number;
 
 	line_cnt++;
     }
@@ -9306,15 +9617,23 @@ PUBLIC int HText_ExtEditForm ARGS1(
      *	[dunno if the char counts really need to be done, or if we're using
      *	 the exactly proper values ... seems to be OK though ...]
      */
-    if ((n = (line_cnt - 1) - orig_cnt) > 0) {
-	i = (end_anchor->input_field->size + 1) * n;
+    if (newlines > 0) {
 
+	CTRACE(tfp, "GridText: adjusting struct's to add %d new lines\n",
+		    newlines);
+
+	i = (end_anchor->input_field->size + 1) * newlines;
+
+	/*
+	 *  [*may* need to bypass bumping ->number if ->input_field->type
+	 *  is of F_HIDDEN_TYPE ... need to investigate further]
+	 */
 	while (anchor_ptr) {
 	    if (keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED)
-	       anchor_ptr->number += n;
-	    anchor_ptr->line_num  += n;
+		anchor_ptr->number += newlines;
+	    anchor_ptr->line_num  += newlines;
 	    anchor_ptr->start	  += i;
-	    anchor_ptr		   = anchor_ptr->next;
+	    anchor_ptr 	           = anchor_ptr->next;
 	}
 	anchor_ptr = end_anchor;
 
@@ -9340,39 +9659,61 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	 *
 	 *  Yes, it *can* happen, but in real life, it probably won't be
 	 *  seen very much ...
+	 *
+	 *  [This may also be an artifact of bumping into the right hand
+	 *   screen edge (or RHS margin), since we don't even *think* about
+	 *   relocating an anchor to the following line, when [tag] digits
+	 *   expansion pushes things too far in that direction.]
 	 */
 	if (keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED) {
 	    lx = 0;
 	    while (htline != HTMainText->last_line->next) {
+
 		while (anchor_ptr) {
-		    if ((anchor_ptr->number - n) == curr_tag)
+		    if ((anchor_ptr->number - newlines) == curr_tag)
 			break;
 		    else
 			anchor_ptr = anchor_ptr->next;
 		}
-		line_adj = increment_tagged_htline (htline, anchor_ptr, &lx,
-						   &curr_tag, n, NOCHOP);
-		htline->size += line_adj;
-		tag_adj      += line_adj;
+
+		if (anchor_ptr) {
+		    line_adj = increment_tagged_htline (htline,   anchor_ptr,
+							&lx,	&curr_tag,
+							newlines, NOCHOP);
+		    htline->size += line_adj;
+		    tag_adj	 += line_adj;
+
+		} else {
+
+		    break;  /* out of anchors ... we're done */
+		}
+
 		htline = htline->next;
-	   }
+	    }
 	}
 
-	nlinks			       += n;
-	HTMainText->Lines	       += n;
-	HTMainText->last_anchor_number += n;
+	/*
+	 *  Fixup various global variables.
+	 */
+	nlinks			       += newlines;
+	HTMainText->Lines	       += newlines;
+	HTMainText->last_anchor_number += newlines;
 	HTMainText->chars	       += (i + tag_adj);
 
-	if (n) more = TRUE;
+	more = TRUE;
+
+	CTRACE(tfp, "GridText: TextAnchor and HTLine struct's adjusted\n");
     }
 
     CTRACE(tfp, "GridText: struct's adjusted - exiting HText_ExtEditForm()\n");
 
-    free (line);
-    free (ebuf);
-    free (tbuf);
+    FREE (line);
+    FREE (ebuf);
+    FREE (tbuf);
     LYRemoveTemp (ed_temp);
-    free (ed_temp);
+    FREE (ed_temp);
+
+    CTRACE(tfp, "GridText: exiting HText_ExtEditForm()\n");
 
     /*
      *  Return the offset needed to move the cursor from its current

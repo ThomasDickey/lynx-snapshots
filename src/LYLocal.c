@@ -285,11 +285,11 @@ PRIVATE BOOLEAN ok_localname ARGS2(char*, dst, char*, src)
 
     if (!ok_stat(s, &dir_info)
      || !ok_file_or_dir(&dir_info)) {
-	free(s);
+	FREE(s);
 	return FALSE;
     }
     strcpy(dst, s);
-    free(s);
+    FREE(s);
     return TRUE;
 }
 
@@ -465,7 +465,7 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 	    cp = HTfullURL_toFile(cp);
 	    StrAllocCopy(savepath, cp);
 	}
-	free(cp);
+	FREE(cp);
 
 	if (!ok_stat(savepath, &dir_info)) {
 	    FREE(savepath);
@@ -713,7 +713,7 @@ PUBLIC BOOLEAN local_modify ARGS2(
     if (!HTList_isEmpty(tagged)) {
 	cp = HTpartURL_toFile(doc->address);
 	strcpy(testpath, cp);
-	free(cp);
+	FREE(cp);
 
 	count = modify_tagged(testpath);
 
@@ -745,7 +745,7 @@ PUBLIC BOOLEAN local_modify ARGS2(
     if (strchr("NLP", ans) != NULL) {
 	cp = HTfullURL_toFile(links[doc->link].lname);
 	strcpy(testpath, cp);
-	free(cp);
+	FREE(cp);
 
 	if (ans == 'N') {
 	    return(modify_name(testpath));
@@ -878,7 +878,7 @@ PUBLIC BOOLEAN local_create ARGS1(
 
     cp = HTfullURL_toFile(doc->address);
     strcpy(testpath,cp);
-    free(cp);
+    FREE(cp);
 
     if (ans == 'F') {
 	return(create_file(testpath));
@@ -895,7 +895,6 @@ PUBLIC BOOLEAN local_create ARGS1(
 PRIVATE BOOLEAN remove_single ARGS1(
 	char *, 	testpath)
 {
-    int c;
     int code = 0;
     char *cp;
     char *tmpbuf = 0;
@@ -919,23 +918,23 @@ PRIVATE BOOLEAN remove_single ARGS1(
 	/*** Course, it's probably broken for screen sizes other 80, too     ***/
 	if (strlen(cp) < 37) {
 	    HTSprintf0(&tmpbuf,
-		       gettext("Remove '%s' and all of its contents (y or n): "), cp);
+		       gettext("Remove '%s' and all of its contents: "), cp);
 	} else {
 	    HTSprintf0(&tmpbuf,
-		       gettext("Remove directory and all of its contents (y or n): "));
+		       gettext("Remove directory and all of its contents: "));
 	}
     } else if (S_ISREG(dir_info.st_mode)) {
 	if (strlen(cp) < 60) {
-	    HTSprintf0(&tmpbuf, gettext("Remove file '%s' (y or n): "), cp);
+	    HTSprintf0(&tmpbuf, gettext("Remove file '%s': "), cp);
 	} else {
-	    HTSprintf0(&tmpbuf, gettext("Remove file (y or n): "));
+	    HTSprintf0(&tmpbuf, gettext("Remove file: "));
 	}
 #ifdef S_IFLNK
     } else if (S_ISLNK(dir_info.st_mode)) {
 	if (strlen(cp) < 50) {
-	    HTSprintf0(&tmpbuf, gettext("Remove symbolic link '%s' (y or n): "), cp);
+	    HTSprintf0(&tmpbuf, gettext("Remove symbolic link '%s': "), cp);
 	} else {
-	    HTSprintf0(&tmpbuf, gettext("Remove symbolic link (y or n): "));
+	    HTSprintf0(&tmpbuf, gettext("Remove symbolic link: "));
 	}
 #endif
     } else {
@@ -943,10 +942,8 @@ PRIVATE BOOLEAN remove_single ARGS1(
 	FREE(tmpbuf);
 	return 0;
     }
-    _statusline(tmpbuf);
 
-    c = LYgetch();
-    if (TOUPPER(c) == 'Y') {
+    if (HTConfirm(tmpbuf) == YES) {
 	HTSprintf0(&tmpbuf,"remove %s",testpath);
 	args[0] = "rm";
 	args[1] = "-rf";
@@ -982,7 +979,7 @@ PUBLIC BOOLEAN local_remove ARGS1(
     if (is_url(cp) == FILE_URL_TYPE) {
 	tp = HTfullURL_toFile(cp);
 	strcpy(testpath, tp);
-	free(tp);
+	FREE(tp);
 
 	if ((i = strlen(testpath)) && testpath[i - 1] == '/')
 	    testpath[(i - 1)] = '\0';
@@ -1049,7 +1046,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
 
 	cp = HTfullURL_toFile(strip_trailing_slash(srcpath));
 	strcpy(local_src, cp);
-	free(cp);
+	FREE(cp);
 
 	/*
 	 *  A couple of sanity tests.
@@ -1183,7 +1180,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
 		return(0);
 
 	strcpy(tmpdst, destpath);	/* operate only on filename */
-	free(destpath);
+	FREE(destpath);
 	destpath = tmpdst;
 
 	/*
@@ -1622,7 +1619,7 @@ PUBLIC int dired_options ARGS2(
 	cp = HTfullURL_toFile(links[doc->link].lname);
 	strcpy(path, cp);
 	LYTrimPathSep(path);
-	free(cp);
+	FREE(cp);
 
 	if (!ok_lstat(path, &dir_info)) {
 	    LYCloseTempFP(fp0);
@@ -1838,7 +1835,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 	    int err;
 	    args[src] = HTfullURL_toFile(name);
 	    err = (LYExecv(INSTALL_PATH, args, tmpbuf) <= 0);
-	    free(args[src]);
+	    FREE(args[src]);
 	    if (err)
 		return ((count == 0) ? -1 : count);
 	    count++;

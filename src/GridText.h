@@ -149,6 +149,12 @@ extern int HTGetLinkInfo PARAMS((
 	int *		linknum,
 	char **		hightext,
 	char **		lname));
+extern int HTGetLinkOrFieldStart PARAMS((
+	int		curlink,
+	int *		go_line,
+	int *		linknum,
+	int		direction,
+	BOOLEAN		ta_skip));
 extern BOOL HText_getFirstTargetInLine PARAMS((
 	HText *		text,
 	int		line_num,

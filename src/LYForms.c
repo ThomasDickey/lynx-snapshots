@@ -375,6 +375,8 @@ again:
 	action = EditBinding(ch);
 	if (action == LYE_ENTER)
 	    break;
+	if (action == LYE_FORM_PASS)
+	    break;
 	if (action == LYE_LKCMD) {
 	    _statusline(ENTER_LYNX_COMMAND);
 	    ch = LYgetch();
@@ -399,17 +401,17 @@ again:
 	if (keymap[ch + 1] == LYK_REFRESH)
 	    break;
 	switch (ch) {
+#ifdef NOTDEFINED	/* The first four are mapped to LYE_FORM_PASS now */
 	    case DNARROW:
 	    case UPARROW:
 	    case PGUP:
 	    case PGDOWN:
-#ifdef NOTDEFINED
 	    case HOME:
 	    case END_KEY:
 	    case FIND_KEY:
 	    case SELECT_KEY:
-#endif /* NOTDEFINED */
 		goto breakfor;
+#endif /* NOTDEFINED */
 
 	    /*
 	     *  Left arrrow in column 0 deserves special treatment here,
@@ -456,7 +458,9 @@ again:
 		LYRefreshEdit(&MyEdit);
 	}
     }
+#ifdef NOTDEFINED
 breakfor:
+#endif /* NOTDEFINED */
     if (Edited) {
 	char  *p;
 
@@ -998,7 +1002,7 @@ redraw:
 			    char *msg = 0;
 			    HTSprintf0(&msg, OPTION_ALREADY_CURRENT, (number + 1));
 			    HTUserMsg(msg);
-			    free(msg);
+			    FREE(msg);
 			    if (disabled) {
 				_statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
 			    } else {

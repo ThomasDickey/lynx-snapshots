@@ -280,7 +280,7 @@ PRIVATE BOOLEAN confirm_by_pages ARGS3(
 
 	HTSprintf0(&msg, prompt, pages);
 	_statusline(msg);
-	free(msg);
+	FREE(msg); 
 
 	c = LYgetch();
 #ifdef VMS
@@ -740,7 +740,7 @@ PRIVATE void send_file_to_mail ARGS3(
     }
     /*
      * If we are using MIME headers, add content-base and content-location if
-     * we have them.  This will always be the case if the document is source. 
+     * we have them.  This will always be the case if the document is source.
      * - kw
      */
     if (use_mime) {
@@ -926,7 +926,7 @@ check_again:
      * [could use unsetenv(), but it's not portable]
      */
     SET_ENVIRON(LYNX_PRINT_TITLE,   "", "");
-    SET_ENVIRON(LYNX_PRINT_URL,     "","");
+    SET_ENVIRON(LYNX_PRINT_URL,     "", "");
     SET_ENVIRON(LYNX_PRINT_DATE,    "", "");
     SET_ENVIRON(LYNX_PRINT_LASTMOD, "", "");
 

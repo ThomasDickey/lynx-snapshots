@@ -209,7 +209,7 @@ PRIVATE void parse_menu ARGS2(
 	HTParentAnchor *,	anAnchor)
 {
     char gtype;
-    char ch;
+    int ich;
     char line[BIG];
     char *name = NULL, *selector = NULL;	/* Gopher menu fields */
     char *host = NULL;
@@ -248,15 +248,15 @@ PRIVATE void parse_menu ARGS2(
     END(HTML_H1);
     PUTS("\n");
     START(HTML_PRE);
-    while ((ch=NEXT_CHAR) != (char)EOF) {
+    while ((ich=NEXT_CHAR) != EOF) {
 
 	if (interrupted_in_htgetcharacter) {
 	    CTRACE(tfp, "HTGopher: Interrupted in HTGetCharacter, apparently.\n");
 	    goto end_html;
 	}
 
-	if (ch != LF) {
-	    *p = ch;		/* Put character in line */
+	if ((char)ich != LF) {
+	    *p = ich;		/* Put character in line */
 	    if (p< &line[BIG-1]) p++;
 
 	} else {
@@ -462,7 +462,7 @@ PRIVATE void parse_cso ARGS2(
 	CONST char *,		arg,
 	HTParentAnchor *,	anAnchor)
 {
-    char ch;
+    int ich;
     char line[BIG];
     char *p = line;
     char *second_colon, last_char='\0';
@@ -493,11 +493,11 @@ PRIVATE void parse_cso ARGS2(
     /*
     **	Start grabbing chars from the network.
     */
-    while ((ch=NEXT_CHAR) != (char)EOF)
+    while ((ich=NEXT_CHAR) != EOF)
 	{
-	    if (ch != LF)
+	    if ((char)ich != LF)
 		{
-		    *p = ch;		/* Put character in line */
+		    *p = ich;		/* Put character in line */
 		    if (p< &line[BIG-1]) p++;
 		}
 	    else
@@ -924,7 +924,7 @@ PRIVATE int parse_cso_fields ARGS2(
 	char *, 	buf,
 	int,		size)
 {
-    char ch;
+    int ich;
     char *p = buf;
     int i, code = 0, prev_code;
     size_t alen;
@@ -938,7 +938,7 @@ PRIVATE int parse_cso_fields ARGS2(
     /*
     **	Start grabbing chars from the network.
     */
-    while ((ch = NEXT_CHAR) != (char)EOF) {
+    while ((ich = NEXT_CHAR) != EOF) {
 	if (interrupted_in_htgetcharacter) {
 	    CTRACE(tfp, "HTLoadCSO: Interrupted in HTGetCharacter, apparently.\n");
 	    free_CSOfields();
@@ -946,8 +946,8 @@ PRIVATE int parse_cso_fields ARGS2(
 	    return HT_INTERRUPTED;
 	}
 
-	if (ch != LF) {
-	    *p = ch;		/* Put character in buffer */
+	if ((char)ich != LF) {
+	    *p = ich;		/* Put character in buffer */
 	    if (p < &buf[size-1]) {
 		p++;
 	    }
@@ -1219,7 +1219,7 @@ PRIVATE int generate_cso_form ARGS4(
 PRIVATE int generate_cso_report ARGS1(
 	HTStream *,	Target)
 {
-    char ch;
+    int ich;
     char line[BIG];
     char *buf = 0;
     char *p = line, *href = NULL;
@@ -1235,15 +1235,15 @@ PRIVATE int generate_cso_report ARGS1(
     /*
     **	Start grabbing chars from the network.
     */
-    while (!stop && (ch = NEXT_CHAR) != (char)EOF) {
+    while (!stop && (ich = NEXT_CHAR) != EOF) {
 	if (interrupted_in_htgetcharacter) {
 	    CTRACE(tfp, "HTLoadCSO: Interrupted in HTGetCharacter, apparently.\n");
 	    _HTProgress (CONNECTION_INTERRUPTED);
 	    goto end_CSOreport;
 	}
 
-	if (ch != LF) {
-	    *p = ch;		/* Put character in line */
+	if ((char)ich != LF) {
+	    *p = ich;		/* Put character in line */
 	    if (p < &line[BIG-1]) {
 		p++;
 	    }

@@ -175,9 +175,9 @@ SITE_DEFS = # Your defines here
 
 # TESTED: Linux FreeBSD SunOS Solaris IRIX CLIX HP-UX AIX SCO
 all lynx$x: cfg_defs.h LYHelp.h
-	@MSG_DIR_MAKE@$(SHELL) $(srcdir)/fixtext.sh $(srcdir)/LYMessages_en.h >LYMessages.c
-	@INTLDIR_MAKE@cd intl && $(MAKE) CC="$(CC)"
-	@MSG_DIR_MAKE@cd po && $(MAKE) CC="$(CC)"
+@MSG_DIR_MAKE@	$(SHELL) $(srcdir)/fixtext.sh $(srcdir)/LYMessages_en.h >LYMessages.c
+@INTLDIR_MAKE@	cd intl && $(MAKE) CC="$(CC)"
+@MSG_DIR_MAKE@	cd po && $(MAKE) CC="$(CC)"
 	cd WWW/Library/unix && $(MAKE) CC="$(CC)" \
 		LY_CFLAGS="$(CFLAGS)" \
 		CPPFLAGS="$(CPPFLAGS)" \
@@ -219,10 +219,11 @@ clean:
 	rm -f WWW/Library/*/*.[aob]
 	rm -f WWW/Library/*/.created
 	cd src && $(MAKE) clean
-	@MSG_DIR_MAKE@rm -f LYMessages.c
-	@INTLDIR_MAKE@cd intl && $(MAKE) $@
-	@MSG_DIR_MAKE@cd po && $(MAKE) $@
-	rm -f *.b src/lynx$x core Lynx.leaks cfg_defs.h LYHelp.h lint.*
+@MSG_DIR_MAKE@	rm -f LYMessages.c
+@INTLDIR_MAKE@	cd intl && $(MAKE) $@
+@MSG_DIR_MAKE@	cd po && $(MAKE) $@
+	rm -f *.b src/lynx$x *.leaks cfg_defs.h LYHelp.h lint.*
+	rm -f core *.core
 
 depend: cfg_defs.h LYHelp.h
 	cd WWW/Library/unix && $(MAKE) $@
@@ -234,16 +235,16 @@ distclean: clean
 	-rm -rf src/obsolete
 	-cd src && $(MAKE) $@
 	-cd src/chrtrans && $(MAKE) $@
-	@INTLDIR_MAKE@cd intl && $(MAKE) $@
-	@MSG_DIR_MAKE@-rmdir intl
-	@MSG_DIR_MAKE@cd po && $(MAKE) $@
-	@MSG_DIR_MAKE@-rmdir po
+@INTLDIR_MAKE@	cd intl && $(MAKE) $@
+@MSG_DIR_MAKE@	-rmdir intl
+@MSG_DIR_MAKE@	cd po && $(MAKE) $@
+@MSG_DIR_MAKE@	-rmdir po
 	-rm -f *~ *.bak *.sav
 	-rm -f WWW/Library/unix/makefile src/makefile src/chrtrans/makefile
-	@SRCDIR_CLEAN@-find . -type f -name '*.rej' -exec rm -f {} \;
-	@SRCDIR_CLEAN@-find . -type f -name '*.orig' -exec rm -f {} \;
-	@SRCDIR_CLEAN@-rmdir WWW/Library/unix && rmdir WWW/Library && rmdir WWW
-	@SRCDIR_CLEAN@-rmdir src/chrtrans && rmdir src
+@SRCDIR_CLEAN@	-find . -type f -name '*.rej' -exec rm -f {} \;
+@SRCDIR_CLEAN@	-find . -type f -name '*.orig' -exec rm -f {} \;
+@SRCDIR_CLEAN@	-rmdir WWW/Library/unix && rmdir WWW/Library && rmdir WWW
+@SRCDIR_CLEAN@	-rmdir src/chrtrans && rmdir src
 	-rm -f makefile lynx_cfg.h config.status config.log config.cache
 	-rm -f lynx$x install-*
 
@@ -284,7 +285,7 @@ install-full: install install-help install-doc
 	@echo Full installation complete.
 
 install-bin: $(bindir)
-	@MSG_DIR_MAKE@cd po && $(MAKE) CC="$(CC)" install
+@MSG_DIR_MAKE@	cd po && $(MAKE) CC="$(CC)" install
 	-mv -f $(bindir)/lynx$x $(bindir)/lynx.old
 	$(INSTALL_PROGRAM) lynx$x $(bindir)/
 
@@ -383,7 +384,7 @@ install-lss : $(libdir)
 	$(INSTALL_DATA) $(srcdir)/samples/lynx.lss $(libdir)/lynx.lss
 
 uninstall:
-	@MSG_DIR_MAKE@cd po && $(MAKE) CC="$(CC)" uninstall
+@MSG_DIR_MAKE@	cd po && $(MAKE) CC="$(CC)" uninstall
 	-rm -f $(bindir)/lynx$x
 	-rm -f $(mandir)/lynx.1
 	-rm -f $(libdir)/lynx.cfg

@@ -46,13 +46,13 @@ unsigned short keymap[KEYMAP_SIZE] = {
 0,
 /* EOF */
 
-0,                  LYK_HOME,       LYK_PREV_PAGE,     0,
+LYK_DO_NOTHING,     LYK_HOME,       LYK_PREV_PAGE,     0,
 /* nul */           /* ^A */        /* ^B */       /* ^C */
 
 LYK_ABORT,          LYK_END,        LYK_NEXT_PAGE,     0,
 /* ^D */            /* ^E */        /* ^F */       /* ^G */
 
-LYK_HISTORY,      LYK_NEXT_LINK,    LYK_ACTIVATE,  LYK_COOKIE_JAR,
+LYK_HISTORY,    LYK_FASTFORW_LINK,  LYK_ACTIVATE,  LYK_COOKIE_JAR,
 /* bs */            /* ht */        /* nl */       /* ^K */
 
 LYK_REFRESH,      LYK_ACTIVATE,     LYK_DOWN_TWO,      0,
@@ -164,8 +164,17 @@ LYK_TAG_LINK,     LYK_PREV_DOC,   LYK_VIEW_BOOKMARK,   0,
 LYK_NOCACHE,            0,          LYK_INTERRUPT,     0,
 /* x */              /* y */          /* z */       /* { */
 
+#if (defined(_WINDOWS) || defined(__DJGPP__))
+
+LYK_PIPE,               0,              0,             0,
+/* | */               /* } */         /* ~ */
+
+#else
+
 LYK_PIPE,               0,              0,          LYK_HISTORY,
 /* | */               /* } */         /* ~ */       /* del */
+
+#endif /* _WINDOWS || __DJGPP__ */
 
 /* 80..9F (illegal ISO-8859-1) 8-bit characters. */
    0,                  0,              0,             0,
@@ -203,49 +212,38 @@ LYK_PIPE,               0,              0,          LYK_HISTORY,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
 
-/* 100..10E function key definitions in LYStrings.h */
+/* 100..10F function key definitions in LYStrings.h */
 LYK_PREV_LINK,    LYK_NEXT_LINK,    LYK_ACTIVATE,   LYK_PREV_DOC,
 /* UPARROW */     /* DNARROW */     /* RTARROW */   /* LTARROW */
 
 LYK_NEXT_PAGE,    LYK_PREV_PAGE,    LYK_HOME,       LYK_END,
 /* PGDOWN */      /* PGUP */        /* HOME */      /* END */
 
-#if defined(__DJGPP__) ||  defined(_WINDOWS)
-#ifdef USE_SLANG
-LYK_END,          LYK_HOME,         LYK_PREV_PAGE,     0,
-/* END */ 	  /* HOME */          /* PGUP */       /* B2 Key */
+#if (defined(_WINDOWS) || defined(__DJGPP__))
 
-LYK_END,          LYK_NEXT_PAGE,       0,
-/* END */         /* PGDOWN */
-
+LYK_HELP,              0,              0,             0,
+/* F1*/
 #else
-   0,             LYK_HELP,            0,              0,
-/* F0 */ 	  /* F1 */          /* F2 */        /* F3 */
 
-   0,                  0,              0,
-
-#endif /* USE_SLANG */
-#else
 LYK_HELP,         LYK_ACTIVATE,     LYK_HOME,       LYK_END,
 /* F1*/ 	  /* Do key */      /* Find key */  /* Select key */
 
-LYK_UP_TWO,       LYK_DOWN_TWO,
-/* Insert key */  /* Remove key */
+#endif /* _WINDOWS || __DJGPP__ */
 
-LYK_DO_NOTHING,
-/* DO_NOTHING*/
-#endif /* __DJGPP__ || _WINDOWS */
-/* 10F..18F */
+LYK_UP_TWO,       LYK_DOWN_TWO,     LYK_DO_NOTHING, LYK_FASTBACKW_LINK,
+/* Insert key */  /* Remove key */  /* DO_NOTHING*/ /* Back tab */
 
-   0,
-#if defined(USE_SLANG) && !defined(DJGPP_KEYHANDLER)
+/* 110..18F */
+
+#if (defined(_WINDOWS) || defined(__DJGPP__)) && defined(USE_SLANG) && !defined(DJGPP_KEYHANDLER)
    LYK_HISTORY,        LYK_ACTIVATE,   0,             0,
    /* Backspace */     /* Enter */
 #else
    0,                  0,              0,             0,
-#endif /* USE_SLANG */
+#endif /* USE_SLANG &&(_WINDOWS || __DJGPP) && !DJGPP_KEYHANDLER */
    0,                  0,              0,             0,
-   0,                  0,              0,             0,
+   0,             LYK_DO_NOTHING,      0,             0,
+               /* 0x11d: MOUSE_KEY */
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
@@ -253,16 +251,12 @@ LYK_DO_NOTHING,
 #ifdef DJGPP_KEYHANDLER
    0,                  LYK_ABORT,      0,             0,
                        /* ALT_X */
-   0,                  0,              0,             0,
-   0,                  0,              0,             0,
-   0,                  0,              0,             LYK_HELP,
-                                                      /* F1 */
 #else
    0,                  0,              0,             0,
-   0,                  0,              0,             0,
-   0,                  0,              0,             0,
-   0,                  0,              0,             0,
 #endif /* DJGPP_KEYHANDLER */
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
@@ -296,34 +290,39 @@ LYK_DO_NOTHING,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
+#if (defined(_WINDOWS) || defined(__DJGPP__)) && !defined(USE_SLANG) /* PDCurses */
    LYK_ABORT,          0,              0,             0,
    /* ALT_X */
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
-   0,                  0,              0,           LYK_ACTIVATE,
-                                                    /* KP_ENTER */
+   0,                  0,              LYK_WHEREIS,   LYK_ACTIVATE,
+                                       /* KP_SLASH    KP_ENTER */
    0,                  0,              0,           LYK_IMAGE_TOGGLE,
                                                     /* KP_* */
    LYK_PREV_PAGE,      LYK_NEXT_PAGE,  0,             0,
    /* KP_- */          /* KP_+ */
-   0,                  0,              0,             0,
-   0,                  0,              0,             0,
-   0,                  0,              0,             0,
-   0,                  0,              0,             0,
-   0,                  0,              0,             0,
-   0,                  0,              0,             0,
-   0,                  0,              0,             0,
-   0,                  0,              0,             0,
-   0,                  0,              0,             0,
-   0,                  0,              0,             0,
-   0,                  0,              0,             0,
-#if defined(USE_SLANG) && !defined(DJGPP_KEYHANDLER)
-   0,                  LYK_HELP,       0,             0,
-                       /* F1 */
 #else
    0,                  0,              0,             0,
-#endif /* USE_SLANG */
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+#endif /* (_WINDOWS || __DJGPP__) && !USE_SLANG */
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
@@ -509,7 +508,7 @@ LYK_TAG_LINK,      LYK_UPLOAD,         0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
 
-/* 100..10E function key definitions in LYStrings.h */
+/* 100..10F function key definitions in LYStrings.h */
    0,                   0,             0,              0,
 /* UPARROW */     /* DNARROW */     /* RTARROW */   /* LTARROW */
 
@@ -519,11 +518,113 @@ LYK_TAG_LINK,      LYK_UPLOAD,         0,             0,
    0,                  0,              0,              0,
 /* F1*/ 	  /* Do key */      /* Find key */  /* Select key */
 
-   0,                  0,
-/* Insert key */  /* Remove key */
+   0,                  0,           LYK_DO_NOTHING,    0,
+/* Insert key */  /* Remove key */  /* DO_NOTHING */ /* Back tab */
 
-LYK_DO_NOTHING,
-/* DO_NOTHING*/
+/* 110..18F */
+
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+/* 190..20F */
+
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+/* 210..28F */
+
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   0,                  0,              0,             0,
+   /* 290...293 */
+   0,                  0,              0,             0,
 };
 #endif /* DIRED_SUPPORT && OK_OVERRIDE */
 
@@ -558,6 +659,8 @@ PRIVATE struct rmap revmap[] = {
 { "END",		"go to the end of the current document" },
 { "PREV_LINK",		"make the previous link current" },
 { "NEXT_LINK",		"make the next link current" },
+{ "FASTBACKW_LINK",	"previous link or text area, only stops on links" },
+{ "FASTFORW_LINK",	"next link or text area, only stops on links" },
 { "UP_LINK",		"move up the page to a previous link" },
 { "DOWN_LINK",		"move down the page to another link" },
 { "RIGHT_LINK",		"move right to another link" },
@@ -570,7 +673,7 @@ PRIVATE struct rmap revmap[] = {
 { "HELP",		"display help on using the browser" },
 { "INDEX",		"display an index of potentially useful documents" },
 { "NOCACHE",		"force submission of form or link with no-cache" },
-{ "INTERRUPT",		"interrupt network transmission" },
+{ "INTERRUPT",		"interrupt network connection or transmission" },
 { "MAIN_MENU",		"return to the first screen (home page)" },
 { "OPTIONS",		"display and change option settings" },
 { "INDEX_SEARCH",	"allow searching of an index" },
@@ -641,7 +744,12 @@ PRIVATE CONST char *funckey[] = {
   "Find key",
   "Select key",
   "Insert key",
-  "Remove key"
+  "Remove key",
+  "(DO_NOTHING)",		/* should normally not appear in list */
+  "Back Tab",
+  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0,
+  "mouse pseudo key",		/* normally not mapped to keymap[] action? */
 };
 
 PRIVATE char *pretty ARGS1 (int, c)
@@ -649,22 +757,23 @@ PRIVATE char *pretty ARGS1 (int, c)
 	static char buf[30];
 
 	if (c == '\t')
-		sprintf(buf, "&lt;tab&gt;       ");
+		sprintf(buf, "&lt;tab&gt;      ");
 	else if (c == '\r')
-		sprintf(buf, "&lt;return&gt;    ");
+		sprintf(buf, "&lt;return&gt;   ");
 	else if (c == ' ')
-		sprintf(buf, "&lt;space&gt;     ");
+		sprintf(buf, "&lt;space&gt;    ");
 	else if (c == '<')
-		sprintf(buf, "&lt;           ");
+		sprintf(buf, "&lt;          ");
 	else if (c == '>')
-		sprintf(buf, "&gt;           ");
+		sprintf(buf, "&gt;          ");
 	else if (c == 0177)
-		sprintf(buf, "&lt;delete&gt;    ");
+		sprintf(buf, "&lt;delete&gt;   ");
 	else if (c > ' ' && c <= 0377)
 		sprintf(buf, "%c", c);
 	else if (c < ' ')
 		sprintf(buf, "^%c", c|0100);
-	else if (c >= 0400 && (c - 0400) < (int) TABLESIZE(funckey))
+	else if (c >= 0400 && (c - 0400) < (int) TABLESIZE(funckey)
+		 && funckey[c-0400])
 		sprintf(buf, "%s", funckey[c-0400]);
 	else if (c >= 0400)
 		sprintf(buf, "%#x", c);
@@ -687,7 +796,7 @@ PRIVATE char * format_binding ARGS2(
      && revmap[the_key].name != 0
      && revmap[the_key].doc != 0
      && (formatted = pretty(i-1)) != 0) {
-	HTSprintf0(&buf, "%-12s%-14s%s\n", formatted,
+	HTSprintf0(&buf, "%-11s %-13s %s\n", formatted,
 		revmap[the_key].name,
 		revmap[the_key].doc);
 	return buf;
@@ -755,9 +864,12 @@ PRIVATE int LYLoadKeymap ARGS4 (
     for (i = 1; i < KEYMAP_SIZE; i++) {
 	/*
 	 *  LYK_PIPE not implemented yet.
+	 *
+	 *  Don't show CHANGE_LINK if mouse not enabled.
 	 */
 	if ((i >= 0400 || i <= ' ' || !isalpha(i-1)) &&
-	    strcmp(revmap[keymap[i]].name, "PIPE")) {
+	    strcmp(revmap[keymap[i]].name, "PIPE") &&
+	    (LYUseMouse || strcmp(revmap[keymap[i]].name, "CHANGE_LINK"))) {
 	    print_binding(target, i);
 	}
     }

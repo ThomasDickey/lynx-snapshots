@@ -218,7 +218,7 @@ PUBLIC void HTInitInput ARGS1 (int,file_number)
 }
 
 PUBLIC int interrupted_in_htgetcharacter = 0;
-PUBLIC char HTGetCharacter NOARGS
+PUBLIC int HTGetCharacter NOARGS
 {
     char ch;
     interrupted_in_htgetcharacter = 0;
@@ -228,15 +228,15 @@ PUBLIC char HTGetCharacter NOARGS
 				 input_buffer, INPUT_BUFFER_SIZE);
 	    if (status <= 0) {
 		if (status == 0)
-		    return (char)EOF;
+		    return EOF;
 		if (status == HT_INTERRUPTED) {
 		    CTRACE(tfp, "HTFormat: Interrupted in HTGetCharacter\n");
 		    interrupted_in_htgetcharacter = 1;
-		    return (char)EOF;
+		    return EOF;
 		}
 		CTRACE(tfp, "HTFormat: File read error %d\n", status);
-		return (char)EOF; /* -1 is returned by UCX
-				     at end of HTTP link */
+		return EOF; /* -1 is returned by UCX
+			       at end of HTTP link */
 	    }
 	    input_pointer = input_buffer;
 	    input_limit = input_buffer + status;
@@ -244,7 +244,7 @@ PUBLIC char HTGetCharacter NOARGS
 	ch = *input_pointer++;
     } while (ch == (char) 13); /* Ignore ASCII carriage return */
 
-    return FROMASCII(ch);
+    return FROMASCII((unsigned char)ch);
 }
 
 /*  Match maintype to any MIME type starting with maintype,

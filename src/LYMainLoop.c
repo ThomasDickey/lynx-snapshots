@@ -68,7 +68,7 @@ PRIVATE int are_phys_different PARAMS((document *doc1, document *doc2));
 #endif
 
 #define FASTTAB
-#ifdef FASTTAB
+
 PRIVATE int sametext ARGS2(
 	char *, 	een,
 	char *, 	twee)
@@ -77,7 +77,6 @@ PRIVATE int sametext ARGS2(
 	return (strcmp(een, twee) == 0);
     return TRUE;
 }
-#endif /* FASTTAB */
 
 PUBLIC	HTList * Goto_URLs = NULL;  /* List of Goto URLs */
 
@@ -2408,6 +2407,176 @@ new_cmd:  /*
 	    }
 	    break;
 
+	case LYK_FASTFORW_LINK:
+	{
+	    int samepage = 0, nextlink = curdoc.link;
+	    if (nlinks > 1) {
+
+		/*
+		 *  If in textarea, move to first link or field
+		 *  after it if there is one on this screen. - kw
+		 */
+		if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
+		    links[curdoc.link].form->type == F_TEXTAREA_TYPE) {
+		    int thisgroup = links[curdoc.link].form->number;
+		    char *thisname = links[curdoc.link].form->name;
+
+		    if (curdoc.link < nlinks-1 &&
+			!(links[nlinks-1].type == WWW_FORM_LINK_TYPE &&
+			  links[nlinks-1].form->type == F_TEXTAREA_TYPE &&
+			  links[nlinks-1].form->number == thisgroup &&
+			  sametext(links[nlinks-1].form->name, thisname))) {
+			do nextlink++;
+			while
+			    (links[nextlink].type == WWW_FORM_LINK_TYPE &&
+			     links[nextlink].form->type == F_TEXTAREA_TYPE &&
+			     links[nextlink].form->number == thisgroup &&
+			     sametext(links[nextlink].form->name, thisname));
+			samepage = 1;
+		    } else if (!more && Newline == 1 && curdoc.link > 0) {
+			nextlink = 0;
+			samepage = 1;
+		    }
+		} else if (curdoc.link < nlinks-1) {
+		    nextlink++;
+		    samepage = 1;
+		} else if (!more && Newline == 1 && curdoc.link > 0) {
+		    nextlink = 0;
+		    samepage = 1;
+		}
+	    }
+	    if (samepage) {
+		highlight(OFF, curdoc.link, prev_target);
+		curdoc.link = nextlink;
+		break;		/* and we are done. */
+
+	    /*
+	     *	At the bottom of list and there is only one page.
+	     *	Move to the top link on the page.
+	     */
+	    } else if (!more && Newline == 1 && curdoc.link == nlinks-1) {
+		highlight(OFF, curdoc.link, prev_target);
+		curdoc.link = 0;
+
+	    } else if (more &&	/* need a later page */
+		       HTGetLinkOrFieldStart(curdoc.link,
+					     &Newline, &newdoc.link,
+					     +1, TRUE) != NO) {
+		Newline++;	/* our line counting starts with 1 not 0 */
+		/* nothing more to do here */
+
+	    } else if (old_c != real_c) {
+		old_c = real_c;
+		HTInfoMsg(NO_LINKS_BELOW);
+	    }
+	    break;
+	}
+	case LYK_FASTBACKW_LINK:
+	{
+	    int samepage = 0, nextlink = curdoc.link;
+	    int res;
+	    if (nlinks > 1) {
+
+		/*
+		 *  If in textarea, move to first link or textarea group
+		 *  before it if there is one on this screen. - kw
+		 */
+		if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
+		    links[curdoc.link].form->type == F_TEXTAREA_TYPE) {
+		    int thisgroup = links[curdoc.link].form->number;
+		    char *thisname = links[curdoc.link].form->name;
+
+		    if (curdoc.link > 0 &&
+			!(links[0].type == WWW_FORM_LINK_TYPE &&
+			  links[0].form->type == F_TEXTAREA_TYPE &&
+			  links[0].form->number == thisgroup &&
+			  sametext(links[0].form->name, thisname))) {
+			do nextlink--;
+			while
+			    (links[nextlink].type == WWW_FORM_LINK_TYPE &&
+			     links[nextlink].form->type == F_TEXTAREA_TYPE &&
+			     links[nextlink].form->number == thisgroup &&
+			     sametext(links[nextlink].form->name, thisname));
+			samepage = 1;
+
+		    } else if (!more && Newline == 1 &&
+			       (links[0].type == WWW_FORM_LINK_TYPE &&
+				links[0].form->type == F_TEXTAREA_TYPE &&
+				links[0].form->number == thisgroup &&
+				sametext(links[0].form->name, thisname)) &&
+			       !(links[nlinks-1].type == WWW_FORM_LINK_TYPE &&
+				 links[nlinks-1].form->type == F_TEXTAREA_TYPE &&
+				 links[nlinks-1].form->number == thisgroup &&
+				 sametext(links[nlinks-1].form->name, thisname))) {
+			nextlink = nlinks - 1;
+			samepage = 1;
+
+		    } else if (!more && Newline == 1 && curdoc.link > 0) {
+			nextlink = 0;
+			samepage = 1;
+		    }
+		} else if (curdoc.link > 0) {
+		    nextlink--;
+		    samepage = 1;
+		} else if (!more && Newline == 1) {
+		    nextlink = nlinks - 1;
+		    samepage = 1;
+		}
+	    }
+	    if (samepage) {
+		/*
+		 *  If the link as determined so far is part of a
+		 *  group of textarea fields, try to use the first
+		 *  of them that's on the screen instead. - kw
+		 */
+		if (nextlink > 0 &&
+		    links[nextlink].type == WWW_FORM_LINK_TYPE &&
+		    links[nextlink].form->type == F_TEXTAREA_TYPE) {
+		    int thisgroup = links[nextlink].form->number;
+		    char *thisname = links[nextlink].form->name;
+		    if (links[0].type == WWW_FORM_LINK_TYPE &&
+			links[0].form->type == F_TEXTAREA_TYPE &&
+			links[0].form->number == thisgroup &&
+			sametext(links[0].form->name, thisname)) {
+			nextlink = 0;
+		    } else
+			while
+			    (nextlink > 1 &&
+			     links[nextlink-1].type == WWW_FORM_LINK_TYPE &&
+			     links[nextlink-1].form->type == F_TEXTAREA_TYPE &&
+			     links[nextlink-1].form->number == thisgroup &&
+			     sametext(links[nextlink-1].form->name, thisname)) {
+			    nextlink--;
+			}
+		}
+		highlight(OFF, curdoc.link, prev_target);
+		curdoc.link = nextlink;
+		break;		/* and we are done. */
+
+	    } else if (Newline > 1 &&	/* need a previous page */
+		       (res = HTGetLinkOrFieldStart(curdoc.link,
+						    &Newline, &newdoc.link,
+						    -1, TRUE)) != NO) {
+		if (res == LINK_DO_ARROWUP) {
+		    /*
+		     *  It says we should use the normal PREV_LINK
+		     *  mechanism, so we'll do that. - kw
+		     */
+		    if (nlinks > 0)
+			curdoc.link = 0;
+		    cmd = LYK_PREV_LINK;
+		    goto new_cmd;
+		}
+		Newline++;	/* our line counting starts with 1 not 0 */
+		/* nothing more to do here */
+
+	    } else if (old_c != real_c) {
+		old_c = real_c;
+		HTInfoMsg(NO_LINKS_ABOVE);
+	    }
+	    break;
+	}
+
 	case LYK_UP_LINK:
 	    if (curdoc.link > 0 &&
 		(links[0].ly != links[curdoc.link].ly ||
@@ -4196,7 +4365,7 @@ if (!LYUseFormsOptions) {
 		    if (is_url(cp) == FILE_URL_TYPE) {
 			cp = HTfullURL_toFile(cp);
 			StrAllocCopy(tp, cp);
-			free(cp);
+			FREE(cp);
 
 			if (stat(tp, &dir_info) == -1) {
 			    HTAlert(NO_STATUS);
@@ -4851,7 +5020,7 @@ check_add_bookmark_to_self:
 	case LYK_SHELL:  /* shell escape */
 	    if (!no_shell) {
 		stop_curses();
-		printf(SPAWNING_MSG);
+		printf("%s\r\n", SPAWNING_MSG);
 		LYSystem(LYSysShell());
 		start_curses();
 		refresh_screen = TRUE;	/* for an HText_pageDisplay() */

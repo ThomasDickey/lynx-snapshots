@@ -154,7 +154,7 @@ PRIVATE void free_suffixes NOPARAMS;
 PRIVATE char *FormatStr ARGS3(
     char **,	bufp,
     char *,	start,
-    char *,	entry)
+    CONST char *,	entry)
 {
     char fmt[512];
     if (*start) {
@@ -218,7 +218,7 @@ PRIVATE void LYListFmtParse ARGS5(
 #endif
 
 	if (lstat(file, &st) < 0)
-		fmtstr = "%a";	/* can't stat so just do anchor */
+		fmtstr = "    %a";	/* can't stat so just do anchor */
 
 	StrAllocCopy(str, fmtstr);
 	s = str;
@@ -251,7 +251,7 @@ PRIVATE void LYListFmtParse ARGS5(
 
 		switch (c) {
 		case '\0':
-		        PUTS(start);
+			PUTS(start);
 			continue;
 
 		case 'A':
@@ -270,6 +270,37 @@ PRIVATE void LYListFmtParse ARGS5(
 			}
 #endif
 			break;
+
+		case 'T':	/* MIME type */
+		case 't':	/* MIME type description */
+		    if (S_ISDIR(st.st_mode)) {
+			if (c != 'T') {
+			    FormatStr(&buf, start, ENTRY_IS_DIRECTORY);
+			} else {
+			    FormatStr(&buf, start, "");
+			}
+		    } else {
+			CONST char *cp2;
+			HTFormat format;
+			format = HTFileFormat(file, NULL, &cp2);
+
+			if (c != 'T') {
+			    if (cp2 == NULL) {
+				if (!strncmp(HTAtom_name(format),
+					     "application",11)) {
+				    cp2 = HTAtom_name(format) + 12;
+				    if (!strncmp(cp2,"x-",2))
+					cp2 += 2;
+				} else {
+				    cp2 = HTAtom_name(format);
+				}
+			    }
+			    FormatStr(&buf, start, cp2);
+			} else {
+			    FormatStr(&buf, start, HTAtom_name(format));
+			}
+		    }
+		    break;
 
 		case 'd':	/* date */
 			now = time(0);
@@ -593,7 +624,7 @@ PUBLIC char * HTnameOfFile_WWW ARGS3(
     char * result = NULL;
 
     if (expand_all)
-    	HTUnEscape(path);		/* Interpret all % signs */
+	HTUnEscape(path);		/* Interpret all % signs */
     else
 	HTUnEscapeSome(path, "/");	/* Interpret % signs for path delims */
 
@@ -2139,7 +2170,7 @@ PUBLIC int HTLoadFile ARGS4(
 				    if (dir_list_style != MIXED_STYLE) {
 				       START(HTML_EM);
 				       PUTS(state == 'D'
-				          ? LABEL_SUBDIRECTORIES
+					  ? LABEL_SUBDIRECTORIES
 					  : LABEL_FILES);
 				       END(HTML_EM);
 				    }
@@ -2161,7 +2192,7 @@ PUBLIC int HTLoadFile ARGS4(
 				    START(HTML_H2);
 				    START(HTML_EM);
 				    PUTS(state == 'D'
-				        ? LABEL_SUBDIRECTORIES
+					? LABEL_SUBDIRECTORIES
 					: LABEL_FILES);
 				    END(HTML_EM);
 				    END(HTML_H2);

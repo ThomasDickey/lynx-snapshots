@@ -97,8 +97,18 @@ extern char * SNACat PARAMS((
 #define SELECT_KEY	267	/* 0x10B */
 #define INSERT_KEY	268	/* 0x10C */
 #define REMOVE_KEY	269	/* 0x10D */
-#define MOUSE_KEY	270	/* 0x10E */
-#define DO_NOTHING	271	/* 0x10F */
+#define DO_NOTHING	270	/* 0x10E */
+#define BACKTAB_KEY	271	/* 0x10F */
+#define MOUSE_KEY	0x11d	/* 0x11D */
+/*  *** NOTE: ***
+    If you add definitions for new lynxkeycodes to the above list that
+    need to be mapped to LYK_* lynxactioncodes -
+    - AT LEAST the tables keymap[] and key_override[] in LYKeymap.c
+      have to be changed/reviewed, AS WELL AS the lineedit binding
+      tables in LYEditmap.c !
+    - KEYMAP_SIZE, defined in LYKeymap.h, may need to be changed !
+*/
+
 
 #  define FOR_PANEL	0
 #  define FOR_CHOICE	1
@@ -136,11 +146,15 @@ typedef struct _EditFieldData {
 
 #define LYE_NOP 0		  /* Do Nothing            */
 #define LYE_CHAR  (LYE_NOP   +1)  /* Insert printable char */
-#define LYE_ENTER (LYE_CHAR  +1)  /* Input complete, return char */
+#define LYE_ENTER (LYE_CHAR  +1)  /* Input complete, return char/lynxkeycode */
 #define LYE_TAB   (LYE_ENTER +1)  /* Input complete, return TAB  */
 #define LYE_ABORT (LYE_TAB   +1)  /* Input cancelled       */
 
-#define LYE_DELN  (LYE_ABORT +1)  /* Delete next/curr char */
+#define LYE_FORM_PASS (LYE_ABORT +1)  /* In form fields: input complete,
+					 return char / lynxkeycode;
+					 Elsewhere: Do Nothing */
+
+#define LYE_DELN  (LYE_FORM_PASS +1)  /* Delete next/curr char */
 #define LYE_DELC  (LYE_DELN)      /* Obsolete (DELC case was equiv to DELN) */
 #define LYE_DELP  (LYE_DELN  +1)  /* Delete prev      char */
 #define LYE_DELNW (LYE_DELP  +1)  /* Delete next word      */

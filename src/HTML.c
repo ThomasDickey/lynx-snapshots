@@ -609,7 +609,7 @@ char class_string[TEMPSTRINGSIZE];
 #endif
 
 #ifdef USE_COLOR_STYLE
-static char *Style_className;
+static char *Style_className = NULL;
 static char myHash[128];
 static int hcode;
 #endif
@@ -2033,6 +2033,8 @@ PRIVATE void HTML_start_element ARGS6(
 	if (!me->style_change)	{
 	    if (HText_LastLineSize(me->text, FALSE)) {
 		HText_appendCharacter(me->text, '\r');
+	    } else {
+		HText_NegateLineOne(me->text);
 	    }
 	} else {
 	    UPDATE_STYLE;
@@ -6839,6 +6841,9 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	}
 	styles[HTML_PRE]->alignment = HT_LEFT;
     }
+#ifdef USE_COLOR_STYLE
+    FREE(Style_className);
+#endif
     FREE(me->base_href);
     FREE(me->map_address);
     FREE(me->LastOptionValue);
@@ -6925,6 +6930,9 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
 	}
 	styles[HTML_PRE]->alignment = HT_LEFT;
     }
+#ifdef USE_COLOR_STYLE
+    FREE(Style_className);
+#endif
     FREE(me->base_href);
     FREE(me->map_address);
     FREE(me->textarea_name);

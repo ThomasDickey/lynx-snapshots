@@ -57,6 +57,7 @@ CTRACE(tfp, "\n" \
             "      input_field=|%s|\n"   \
             "      show_anchor=%1x\n"    \
             "      inUnderline=%1x\n"    \
+            "   expansion_anch=%1x\n"    \
             "          *anchor=0x%08x\n" \
             "}\n", \
             (A), sizeof(*((A))), \
@@ -64,8 +65,8 @@ CTRACE(tfp, "\n" \
             (A)->extent, (A)->line_num, \
             (A)->hightext, (A)->hightext, (A)->hightext2, (A)->hightext2, \
             (A)->hightext2offset, (A)->link_type, \
-            (A)->input_field, (A)->input_field, \
-            (A)->show_anchor, (A)->inUnderline, (A)->anchor); \
+            (A)->input_field, (A)->input_field, (A)->show_anchor, \
+            (A)->inUnderline, (A)->expansion_anch, (A)->anchor); \
 CTRACE_FLUSH(tfp);
 
 
@@ -118,20 +119,21 @@ CTRACE_FLUSH(tfp);
 #define   DUMPSTRUCT_LINE(L,X) \
 CTRACE(tfp, "\n" \
             "KED: htline_ptr=0x%08x  sizeof=%d  ["X"]\n" \
-            "HTLine struct {\n"      \
-            "        *next=0x%08x\n" \
-            "        *prev=0x%08x\n" \
-            "       offset=%d\n"     \
-            "         size=%d\n"     \
-            "  split_after=%1x\n"    \
-            "       bullet=%1x\n"    \
-            "nodef U_C_S\n"          \
-            "       data[]=0x%08x\n" \
-            "         data=|%s|\n"   \
+            "HTLine  struct {\n"      \
+            "         *next=0x%08x\n" \
+            "         *prev=0x%08x\n" \
+            "        offset=%d\n"     \
+            "          size=%d\n"     \
+            "   split_after=%1x\n"    \
+            "        bullet=%1x\n"    \
+            "expansion_line=%1x\n"    \
+            "w/o U_C_S def\n"         \
+            "        data[]=0x%08x\n" \
+            "          data=|%s|\n"   \
             "}\n", \
             (L), sizeof(*((L))), \
             (L)->next, (L)->prev, (L)->offset, (L)->size, (L)->split_after, \
-            (L)->bullet, (L)->data, (L)->data); \
+            (L)->bullet, (L)->expansion_line, (L)->data, (L)->data); \
 CTRACE_FLUSH(tfp);
 
 #endif /* STRUCTDUMP_H */

@@ -1,6 +1,10 @@
-# This is a sample key sequence definition file.  It is used by Lynx when built
-# with ncurses or slang, to augment the definitions from your terminal's
+# This is a sample key sequence definition file.  It is used by Lynx when
+# built with ncurses or slang, to augment the definitions from your terminal's
 # termcap or terminfo description.
+
+# (Lynx implements this mechanism only if USE_KEYMAPS is defined during
+# compilation, which has nothing to do with the KEYMAP directives in lynx.cfg,
+# see source file LYCurses.h.)
 
 # Lines that start with a '#' are comment lines.  Blank lines are ignored.
 
@@ -9,7 +13,7 @@
 #   1.  setkey ESC-SEQUENCE  KEYSYM
 #   2.  setkey ESC-SEQUENCE  KEYSYM_NAME
 #
-# where KEYSYM is an integer.  A keysym is essentually with the lynx.rc
+# where KEYSYM is an integer.  A keysym is essentially with the lynx.cfg
 # file calls a 'keystroke', but I think that keysym is a more appropriate
 # name.  The keysym is an integer and may be expressed in various ways:
 #
@@ -83,6 +87,15 @@ setkey "^[[K"		END
 #
 setkey "^[<"		HOME
 setkey "^[>"		END
+#
+# Note that it may be impossible to map several sequences to the same
+# keysym (NCURSES only?), in that case the mapping occurring last wins.
+#
+# The following maps a sequence commonly used for Shift+Tab to the
+# corresponding code.  It should not be needed if the terminfo file
+# has the correct info for kcbt.
+#
+setkey "^[[Z"		0x10F
 #
 # Other special escapes:
 #	\a		bell

@@ -153,14 +153,14 @@ PUBLIC int showinfo ARGS4(
 
 	s = HTfullURL_toFile(doc->address);
 	strcpy(temp, s);
-	free(s);
+	FREE(s);
 
 	fprintf(fp0, "   <em>%4s</em>  %s\n", gettext("Name:"), temp);
 	fprintf(fp0, "   <em>%4s</em>  %s\n", gettext("URL:"), doc->address);
 
 	s = HTfullURL_toFile(links[doc->link].lname);
 	strcpy(temp, s);
-	free(s);
+	FREE(s);
 
 	if (lstat(temp, &dir_info) == -1) {
 	    CTRACE(tfp, "lstat(%s) failed, errno=%d\n", temp, errno);

@@ -55,12 +55,16 @@ compiled in or chosen in `lynx.cfg':<P>
 <H1><A NAME="CK">Cookies</A></H1>
 
 This can be set to accept or reject all cookies or to ask each time.
-See the Users Guide (under `h'elp) for details of cookie usage.
+See the Users Guide for details of <A HREF="../Lynx_users_guide.html#Cookies" 
+>cookie usage</A>. 
 
 <H1><A NAME="ED">Editor</A></H1>
 
-If non-empty, it defines the editor to spawn when editing a local file
-or sending mail.  Any valid text editor may be entered here.
+This is the editor to be invoked when editing browsable files, 
+sending mail or comments, or filling form's textarea (multiline input field). 
+The full pathname of the editor command should be specified when possible. 
+It is assumed the text editor supports the same character set 
+you have for "display character set" in Lynx. 
 
 <H1><A NAME="EM">Emacs keys</A></H1>
 
@@ -286,8 +290,9 @@ and windows-xxxx within native MS-Windows applications.
 
 <H1><A NAME="DV">X DISPLAY variable</A></H1>
 
-If non-empty, it specifies your <A HREF="xterm_help.html">X terminal</A>
-display address.
+This option is only relevant to X Window users. It specifies 
+the DISPLAY (Unix) or DECW$DISPLAY (VMS) variable.  It is picked up 
+automatically from the environment if it has been previously set. 
 
 <H1><A NAME="MB">Multi-bookmarks</A></H1>
 

@@ -1,4 +1,3 @@
-
 #ifndef HTFORMS_H
 #define HTFORMS_H
 
@@ -92,7 +91,7 @@ typedef struct _FormInfo {
 typedef struct _PerFormInfo
 {
 	int			number;	   /* form number, see GridText.c */
-    /* except for the last two, the followign fields aren't actually used.. */ 
+    /* except for the last two, the followign fields aren't actually used.. */
 	int			disabled;  /* If YES, can't change values */
         struct _PerFormInfo *	next; 	   /* pointer to next form in doc */
         int			nfields;   /* number of fields */
@@ -124,7 +123,8 @@ typedef struct _PerFormInfo
 #define WWW_FORM_LINK_TYPE  1
 #define WWW_LINK_TYPE   2
 #define WWW_INTERN_LINK_TYPE   6 /* can be used as a bitflag... - kw */
-#define LINK_LINE_FOUND	8	/* used in follow_link_number - kw */
+#define LINK_LINE_FOUND	8	/* used in follow_link_number, others - kw */
+#define LINK_DO_ARROWUP	16	/* returned by HTGetLinkOrFieldStart - kw */
 
 /* #define different lynx modes */
 #define NORMAL_LYNX_MODE 1

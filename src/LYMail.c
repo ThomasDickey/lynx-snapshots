@@ -1552,15 +1552,9 @@ PUBLIC void reply_by_mail ARGS4(
 	     */
 	    BOOLEAN is_preparsed = (LYPreparsedSource &&
 				    HTisDocumentSource());
-	    if (is_preparsed)
-		_statusline(INC_PREPARSED_MSG_PROMPT);
-	    else
-		_statusline(INC_ORIG_MSG_PROMPT);
-	    c = 0;
-	    while (TOUPPER(c) != 'Y' && TOUPPER(c) != 'N' &&
-		   !term_letter && c != 7   && c != 3)
-		c = LYgetch();
-	    if (TOUPPER(c) == 'Y') {
+	    if (HTConfirm(is_preparsed
+	    	? INC_PREPARSED_MSG_PROMPT
+		: INC_ORIG_MSG_PROMPT) == YES) {
 		/*
 		 *  The 1 will add the reply "> " in front of every line.
 		 */
@@ -1676,29 +1670,26 @@ PUBLIC void reply_by_mail ARGS4(
     signal(SIGINT, SIG_IGN);
 #endif /* !VMS */
     LYStatusLine = (LYlines - 1);
-    if (body)
-	_statusline(SEND_MESSAGE_PROMPT);
-    else
-	_statusline(SEND_COMMENT_PROMPT);
+    c = HTConfirm (body ? SEND_MESSAGE_PROMPT : SEND_COMMENT_PROMPT);
     LYStatusLine = -1;
-    c = 0;
-    while (TOUPPER(c) != 'Y' && TOUPPER(c) != 'N' &&
-	   !term_letter && c != 7   && c != 3)
-	c = LYgetch();
-    if (TOUPPER(c) != 'Y') {
+    if (c != YES) {
 	clear();  /* clear the screen */
 	goto cleanup;
     }
     if ((body == NULL && LynxSigFile != NULL) &&
 	(fp = fopen(LynxSigFile, "r")) != NULL) {
 	LYStatusLine = (LYlines - 1);
-	_user_message(APPEND_SIG_FILE, LynxSigFile);
-	c = 0;
+	if (term_letter) {
+	    _user_message(APPEND_SIG_FILE, LynxSigFile);
+	    c = 0;
+	} else {
+	    char *msg = NULL;
+	    HTSprintf0(&msg, APPEND_SIG_FILE, LynxSigFile);
+	    c = HTConfirm(msg);
+	    FREE(msg);
+	}
 	LYStatusLine = -1;
-	while (TOUPPER(c) != 'Y' && TOUPPER(c) != 'N' &&
-	       !term_letter && c != 7	&& c != 3)
-	    c = LYgetch();
-	if (TOUPPER(c) == 'Y') {
+	if (c == YES) {
 	    if ((fd = fopen(my_tmpfile, "a")) != NULL) {
 		fputs("-- \n", fd);
 		while (fgets(user_input, sizeof(user_input), fp) != NULL) {

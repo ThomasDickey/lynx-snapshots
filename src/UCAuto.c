@@ -150,11 +150,11 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	    }
 
 	    remove(old_font);
-	    free(old_font);
+	    FREE(old_font);
 	    old_font = 0;
 
 	    remove(old_umap);
-	    free(old_umap);
+	    FREE(old_umap);
 	    old_umap = 0;
 	}
 	return;

@@ -119,7 +119,7 @@ Try_Redirected_URL:
 			char *msg = 0;
 			HTSprintf0(&msg, PORT_INVALID, (unsigned long)value);
 			HTAlert(msg);
-			free(msg);
+			FREE(msg);
 			FREE(temp);
 			return(NULLFILE);
 		    }
@@ -407,7 +407,7 @@ Try_Redirected_URL:
 				EXECUTION_DISABLED_FOR_FILE,
 				key_for_func(LYK_OPTIONS));
 			HTAlert(buf);
-			free(buf);
+			FREE(buf);
 		     }
 #else /* no exec_links */
 		     HTUserMsg(EXECUTION_NOT_COMPILED);
@@ -1212,7 +1212,7 @@ PUBLIC BOOLEAN exec_ok ARGS3(
 		    BADCHAR_IN_EXEC_LINK,
 		    *cp);
 	    HTAlert(buf);
-	    free(buf);
+	    FREE(buf);
 	    return FALSE;
 	}
     }

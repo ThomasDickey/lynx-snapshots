@@ -408,11 +408,11 @@ PUBLIC void read_rc NOPARAMS
 	 */
 	} else if (FIND_KEYWORD(cp, "cookie_accept_domains")) {
 	    cp = SkipEquals(cp);
-	    cookie_add_acceptlist(cp);
-	    if(LYCookieAcceptDomains != NULL) { 
-		StrAllocCat(LYCookieAcceptDomains, ","); 
-	    } 
-	    StrAllocCat(LYCookieAcceptDomains, cp); 
+	    cookie_domain_flag_set(cp, FLAG_ACCEPT_ALWAYS);
+	    if(LYCookieAcceptDomains != NULL) {
+		StrAllocCat(LYCookieAcceptDomains, ",");
+	    }
+	    StrAllocCat(LYCookieAcceptDomains, cp);
 
 
 	/*
@@ -420,11 +420,11 @@ PUBLIC void read_rc NOPARAMS
 	 */
 	} else if (FIND_KEYWORD(cp, "cookie_reject_domains")) {
 	    cp = SkipEquals(cp);
-	    cookie_add_rejectlist(cp);
-	    if(LYCookieRejectDomains != NULL) { 
-		StrAllocCat(LYCookieRejectDomains, ","); 
-	    } 
-	    StrAllocCat(LYCookieRejectDomains, cp); 
+	    cookie_domain_flag_set(cp, FLAG_REJECT_ALWAYS);
+	    if(LYCookieRejectDomains != NULL) {
+		StrAllocCat(LYCookieRejectDomains, ",");
+	    }
+	    StrAllocCat(LYCookieRejectDomains, cp);
 
 	/*
 	 *  Cookie domains to perform loose checks?
@@ -432,7 +432,7 @@ PUBLIC void read_rc NOPARAMS
 	} else if (FIND_KEYWORD(cp, "cookie_loose_invalid_domains")) {
 	    cp = SkipEquals(cp);
 	    StrAllocCopy(LYCookieLooseCheckDomains, cp);
-	    cookie_set_invcheck(LYCookieLooseCheckDomains, INVCHECK_LOOSE);
+	    cookie_domain_flag_set(cp, FLAG_INVCHECK_LOOSE);
 
 	/*
 	 *  Cookie domains to perform strict checks?
@@ -440,7 +440,7 @@ PUBLIC void read_rc NOPARAMS
 	} else if (FIND_KEYWORD(cp, "cookie_strict_invalid_domains")) {
 	    cp = SkipEquals(cp);
 	    StrAllocCopy(LYCookieStrictCheckDomains, cp);
-	    cookie_set_invcheck(LYCookieStrictCheckDomains, INVCHECK_STRICT);
+	    cookie_domain_flag_set(cp, FLAG_INVCHECK_STRICT);
 
 	/*
 	 *  Cookie domains to query user over invalid cookies?
@@ -448,11 +448,11 @@ PUBLIC void read_rc NOPARAMS
 	} else if (FIND_KEYWORD(cp, "cookie_query_invalid_domains")) {
 	    cp = SkipEquals(cp);
 	    StrAllocCopy(LYCookieQueryCheckDomains, cp);
-	    cookie_set_invcheck(LYCookieQueryCheckDomains, INVCHECK_QUERY);
+	    cookie_domain_flag_set(cp, FLAG_INVCHECK_QUERY);
 
 #ifdef EXP_PERSISTENT_COOKIES
 	/*
-	 *  File in which to store persistent cookies. 
+	 *  File in which to store persistent cookies.
 	 */
 	} else if (FIND_KEYWORD(cp, "cookie_file")) {
 	    cp = SkipEquals(cp);
@@ -493,7 +493,7 @@ PUBLIC void read_rc NOPARAMS
 	} else if (FIND_KEYWORD(cp, "partial_thres")) {
 	    cp = SkipEquals(cp);
 	    if (atoi(cp) != 0)
-	        partial_threshold = atoi(cp);
+		partial_threshold = atoi(cp);
 #endif /* DISP_PARTIAL */
 
 	/*
@@ -902,12 +902,12 @@ PUBLIC int save_rc NOPARAMS
 # override any settings made here.  If a single domain is specified in\n\
 # both cookie_accept_domains and in cookie_reject_domains, the rejection\n\
 # will take precedence.\n"));
-    fprintf(fp, "cookie_accept_domains=%s\n", 
-		    (LYCookieAcceptDomains == NULL ? ""  
-		    : LYCookieAcceptDomains)); 
-    fprintf(fp, "cookie_reject_domains=%s\n\n", 
-		    (LYCookieRejectDomains == NULL ? ""  
-		    : LYCookieRejectDomains)); 
+    fprintf(fp, "cookie_accept_domains=%s\n",
+		    (LYCookieAcceptDomains == NULL ? ""
+		    : LYCookieAcceptDomains));
+    fprintf(fp, "cookie_reject_domains=%s\n\n",
+		    (LYCookieRejectDomains == NULL ? ""
+		    : LYCookieRejectDomains));
 
 
     fprintf(fp, gettext("\

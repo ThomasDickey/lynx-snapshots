@@ -102,7 +102,7 @@ lint:
 	$(LINT) $(LINTOPTS) $(CPP_OPTS) *.c  > $(top_builddir)/lint.lynx
 
 clean:
-	rm -f lynx$x core *.[ob] *.bak
+	rm -f lynx$x core *.core *.leaks *.[ob] *.bak
 	cd chrtrans && $(MAKE) clean
 
 distclean: clean

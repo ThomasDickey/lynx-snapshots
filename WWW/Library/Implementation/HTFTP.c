@@ -303,7 +303,7 @@ PUBLIC char * HTMake_VMS_name ARGS2(
 /*	Procedure: Read a character from the data connection
 **	----------------------------------------------------
 */
-PRIVATE char next_data_char NOARGS
+PRIVATE int next_data_char NOARGS
 {
     int status;
     if (data_read_pointer >= data_write_pointer) {
@@ -311,7 +311,7 @@ PRIVATE char next_data_char NOARGS
       if (status == HT_INTERRUPTED)
 	interrupted_in_next_data_char = 1;
       if (status <= 0)
-	return (char)-1;
+	return -1;
       data_write_pointer = data_buffer + status;
       data_read_pointer = data_buffer;
     }
@@ -321,7 +321,7 @@ PRIVATE char next_data_char NOARGS
 	return FROMASCII(c);
     }
 #else
-    return *data_read_pointer++;
+    return (unsigned char)(*data_read_pointer++);
 #endif /* NOT_ASCII */
 }
 
@@ -439,7 +439,8 @@ PRIVATE int response ARGS1(
     do {
 	char *p = response_text;
 	for (;;) {
-	    if (((*p++ = NEXT_CHAR) == LF)
+	    int ich = NEXT_CHAR;
+	    if (((*p++ = ich) == LF)
 			|| (p == &response_text[LINE_LENGTH])) {
 
 		char continuation;
@@ -479,7 +480,7 @@ PRIVATE int response ARGS1(
 		return HT_INTERRUPTED;
 	    }
 
-	    if (*(p-1) == (char) EOF) {
+	    if (ich == EOF) {
 		CTRACE(tfp, "Error on rx: closing socket %d\n",
 			    control->socket);
 		strcpy(response_text, "000 *** TCP read error on response\n");
@@ -1349,7 +1350,7 @@ PRIVATE void parse_eplf_line ARGS2(
 		StrAllocCopy(info->date, ct);
 		break;
 	    case '/':
-		StrAllocCopy(info->type, "Directory");
+		StrAllocCopy(info->type, ENTRY_IS_DIRECTORY);
 	    default:
 		while (*cp) {
 		    if (*cp++ == ',')
@@ -1579,7 +1580,7 @@ PRIVATE void parse_ms_windows_dir_entry ARGS2(
 	if (isdigit(*cps)) {
 	    entry_info->size = atoi(cps);
 	} else {
-	    StrAllocCopy(entry_info->type, "Directory");
+	    StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
 	}
     } else {
 	StrAllocCopy(entry_info->type, "");
@@ -1715,7 +1716,7 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
 	if (isdigit(*cps)) {
 	    entry_info->size = atoi(cps);
 	} else {
-	    StrAllocCopy(entry_info->type, "Directory");
+	    StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
 	}
     } else {
 	StrAllocCopy(entry_info->type, "");
@@ -1772,7 +1773,7 @@ PRIVATE void parse_cms_dir_entry ARGS2(
     *cps++ ='\0';
     if ((0 == strcasecomp(cp, "DIR")) && (cp - line) > 17) {
 	/** It's an SFS directory. **/
-	StrAllocCopy(entry_info->type, "Directory");
+	StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
 	entry_info->size = 0;
     } else {
 	/** It's a file. **/
@@ -1945,7 +1946,7 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
 		/*
 		**  It's a directory.
 		*/
-		StrAllocCopy(entry_info->type, "Directory");
+		StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
 		remove_size=TRUE; /* size is not useful */
 	    } else if (entry[0] == 'l') {
 		/*
@@ -1953,7 +1954,7 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
 		**  knowing if it is symbolic?	I think so since
 		**  it might be a directory.
 		*/
-		StrAllocCopy(entry_info->type, "Symbolic Link");
+		StrAllocCopy(entry_info->type, gettext("Symbolic Link"));
 		remove_size=TRUE; /* size is not useful */
 
 		/*
@@ -2000,7 +2001,7 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
 	    len = strlen(entry_info->filename);
 	    if ((len > 4) && !strcmp(&entry_info->filename[len-4], ".dir")) {
 		entry_info->filename[len-4] = '\0';
-		StrAllocCopy(entry_info->type, "Directory");
+		StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
 		remove_size=TRUE; /* size is not useful */
 	    }
 	    /*
@@ -2087,7 +2088,7 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
 		**  It's a dir, remove / and mark it as such.
 		*/
 		entry[len-1] = '\0';
-		StrAllocCopy(entry_info->type, "Directory");
+		StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
 		remove_size=TRUE; /* size is not useful */
 	    }
 	    /*
@@ -2353,13 +2354,13 @@ PRIVATE int read_directory ARGS4(
 
     {
 	HTBTree * bt = HTBTree_new((HTComparer)compare_EntryInfo_structs);
-	char c;
+	int ic;
 	HTChunk * chunk = HTChunkCreate(128);
 	int BytesReceived = 0;
 	int BytesReported = 0;
 	char NumBytes[64];
 	PUTS("\n");  /* prettier LJM */
-	for (c = 0; c != (char)EOF;) {	/* For each entry in the directory */
+	for (ic = 0; ic != EOF;) {	/* For each entry in the directory */
 	    HTChunkClear(chunk);
 
 	    if (HTCheckForInterrupt()) {
@@ -2376,7 +2377,7 @@ PRIVATE int read_directory ARGS4(
 	    /*	 read directory entry
 	     */
 	    for (;;) {		       /* Read in one line as filename */
-		c = NEXT_DATA_CHAR;
+		ic = NEXT_DATA_CHAR;
 AgainForMultiNet:
 		if (interrupted_in_next_data_char) {
 		    WasInterrupted = TRUE;
@@ -2387,7 +2388,7 @@ AgainForMultiNet:
 			HTBTreeAndObject_free(bt);
 			return HT_INTERRUPTED;
 		    }
-		} else if (c == CR || c == LF) {    /* Terminator? */
+		} else if ((char)ic == CR || (char)ic == LF) {    /* Terminator? */
 		    if (chunk->size != 0) {  /* got some text */
 			/* Deal with MultiNet's wrapping of long lines */
 			if (server_type == VMS_SERVER) {
@@ -2403,7 +2404,7 @@ AgainForMultiNet:
 				    goto AgainForMultiNet;
 				}
 				if (status <= 0) {
-				    c = (char)EOF;
+				    ic = EOF;
 				    break;
 				}
 				data_write_pointer = data_buffer + status;
@@ -2419,10 +2420,10 @@ AgainForMultiNet:
 			else
 			    break;	      /* finish getting one entry */
 		    }
-		} else if (c == (char)EOF) {
+		} else if (ic == EOF) {
 		    break;	       /* End of file */
 		} else {
-		    HTChunkPutc(chunk, c);
+		    HTChunkPutc(chunk, (char)ic);
 		}
 	    }
 	    HTChunkTerminate(chunk);
@@ -2434,7 +2435,7 @@ AgainForMultiNet:
 		BytesReported = BytesReceived;
 	    }
 
-	    if (c == (char) EOF && chunk->size == 1)
+	    if (ic == EOF && chunk->size == 1)
 	    /* 1 means empty: includes terminating 0 */
 		break;
 	    CTRACE(tfp, "HTFTP: Line in %s is %s\n",
@@ -2446,6 +2447,7 @@ AgainForMultiNet:
 			    entry_info->filename);
 		HTBTree_add(bt, (EntryInfo *)entry_info);
 	    } else {
+		free_entryinfo_struct_contents(entry_info);
 		FREE(entry_info);
 	    }
 
