@@ -1,6 +1,9 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-10-14 (2.8.3dev.12)
+* fixes for restructured LYMainLoop.c (reported by PG, LP) -TD
+* minor fix for makeutcb, to compile with K&R C -TD
 1999-10-13 (2.8.3dev.11)
 * restructured LYMainLoop.c, so the main switch statement calls functions
   rather than doing everything inline.  This greatly reduces memory required
