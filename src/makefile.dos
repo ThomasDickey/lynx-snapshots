@@ -5,14 +5,13 @@ LYOptions.o LYReadCFG.o LYSearch.o LYHistory.o \
 LYForms.o LYPrint.o LYrcFile.o LYDownload.o LYNews.o LYKeymap.o \
 HTFWriter.o HTInit.o DefaultStyle.o LYLocal.o LYUpload.o \
 LYLeaks.o LYexit.o LYJump.o LYList.o LYCgi.o LYTraversal.o \
-LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o HTML.o \
-UCAUTO.o UCAUX.o UCDOMAP.o
+LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o HTML.o 
 
 CFLAGS= $(MCFLAGS) -I.. $(SLANGINC)
 
 CC = gcc
 #MCFLAGS = -O -DNCURSES -DFANCY_CURSES -DACCESS_AUTH -DNO_CUSERID -DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP -I../WWW/library/implementation -I../djgpp/tcplib/include -I../djgpp/tcplib/include/tcp -I../djgpp/pdcurses/include
-MCFLAGS = -DEXP_CHARTRANS -DCOLOR_CURSES -DNCURSES -DFANCY_CURSES -DACCESS_AUTH -DNO_CUSERID -DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP -I../WWW/library/implementation -I../djgpp/tcplib/include -I../djgpp/tcplib/include/tcp -I../djgpp/pdcurses/include
+MCFLAGS = -DNCURSES -DFANCY_CURSES -DACCESS_AUTH -DNO_CUSERID -DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP -I../WWW/library/implementation -I../djgpp/tcplib/include -I../djgpp/tcplib/include/tcp -I../djgpp/pdcurses/include
 WWWLIB = ../WWW/library/djgpp/libwww.a ../djgpp/pdcurses/lib/libcurso.a ../djgpp/tcplib/obj/libtcp.a
 
 all: lynx

@@ -42,6 +42,9 @@
 **			otherwise HTUU_encode() reads uninitialized memory
 **			every now and then (not a real bug but not pretty).
 **			Corrected the formula for uuencode destination size.
+**
+** 28 Apr 1997	AJL	Do Proxy Authorisation.
+**
 ** BUGS:
 **
 **
@@ -61,6 +64,7 @@
 #include "LYLeaks.h"
 
 extern BOOL using_proxy;	/* Are we using an HTTP gateway? */
+extern BOOL auth_proxy;		/* Generate a proxy authorization - AJL */
 
 /*
 **  Local datatype definitions
@@ -124,6 +128,10 @@ PRIVATE char *current_docname	= NULL;	/* The document's name we are        */
                                         /* trying to access.		     */
 PRIVATE char *HTAAForwardAuth	= NULL;	/* Authorization: line to forward    */
                                         /* (used by gateway httpds)	     */
+PRIVATE HTAASetup *proxy_setup	= NULL;	/* Same as above, but for Proxy -AJL */
+PRIVATE char *proxy_hostname	= NULL;
+PRIVATE char *proxy_docname	= NULL;
+PRIVATE int proxy_portnumber	= 80;
 
 
 /*** HTAAForwardAuth for enabling gateway-httpds to forward Authorization ***/
@@ -583,7 +591,7 @@ PRIVATE char *compose_auth_string ARGS2(HTAAScheme,	scheme,
 	      	     setup->server->hostname : "??") + 40;
 	if (!(msg = (char*)calloc(1, sizeof(char) * len)))
 	    outofmem(__FILE__, "compose_auth_string");
-	if (using_proxy && setup->template) {
+	if ((!auth_proxy) && using_proxy && setup->template) {
 	    proxiedHost = HTParse(setup->template, "", PARSE_HOST);
 	    if (proxiedHost && *proxiedHost != '\0') {
 	        theHost = proxiedHost;
@@ -739,6 +747,8 @@ PRIVATE void free_HTAAGlobals NOARGS
     FREE(HTAA_composeAuthResult);
     FREE(current_hostname);
     FREE(current_docname);
+    FREE(proxy_hostname);
+    FREE(proxy_docname);
     FREE(compose_auth_stringResult);
     FREE(secret_key);
 }
@@ -799,79 +809,159 @@ PUBLIC char *HTAA_composeAuth ARGS3(CONST char *,	hostname,
 
     FREE(HTAA_composeAuthResult);	/* From previous call */
 
-    if (TRACE)
-	fprintf(stderr, 
-		"Composing Authorization for %s:%d/%s\n",
-		hostname, portnumber, docname);
+    if (auth_proxy) {
+        /*
+	**  Proxy Authorization required. - AJL
+	*/
 
-    if (current_portnumber != portnumber ||
-	!current_hostname || !current_docname ||
-	!hostname         || !docname         ||
-	0 != strcmp(current_hostname, hostname) ||
-	0 != strcmp(current_docname, docname)) {
+	if (TRACE)
+	    fprintf(stderr, 
+		    "Composing Proxy Authorization for %s:%d/%s\n",
+		    hostname, portnumber, docname);
 
-	retry = NO;
+	if (proxy_portnumber != portnumber ||
+	    !proxy_hostname || !proxy_docname ||
+	    !hostname         || !docname         ||
+	    0 != strcmp(proxy_hostname, hostname) ||
+	    0 != strcmp(proxy_docname, docname)) {
 
-	current_portnumber = portnumber;
-	
-	if (hostname)
-	    StrAllocCopy(current_hostname, hostname);
-	else
-	    FREE(current_hostname);
+	    retry = NO;
 
-	if (docname)
-	    StrAllocCopy(current_docname, docname);
-	else
-	    FREE(current_docname);
-    } else {
-        retry = YES;
-    }
-    
-    if (!current_setup || !retry)
-	current_setup = HTAASetup_lookup(hostname, portnumber, docname);
+	    proxy_portnumber = portnumber;
 
-    if (!current_setup)
-	return NULL;
+	    if (hostname)
+		StrAllocCopy(proxy_hostname, hostname);
+	    else
+		FREE(proxy_hostname);
 
-
-    switch (scheme = HTAA_selectScheme(current_setup)) {
-      case HTAA_BASIC:
-      case HTAA_PUBKEY:
-	auth_string = compose_auth_string(scheme, current_setup);
-	break;
-      case HTAA_KERBEROS_V4:
-	/* OTHER AUTHENTICATION ROUTINES ARE CALLED HERE */
-      default:
-	{
-	    char msg[100];
-	    sprintf(msg, "%s %s `%s'",
-		    "This client doesn't know how to compose authentication",
-		    "information for scheme", HTAAScheme_name(scheme));
-	    HTAlert(msg);
-	    auth_string = NULL;
+	    if (docname)
+		StrAllocCopy(proxy_docname, docname);
+	    else
+		FREE(proxy_docname);
+	} else {
+	    retry = YES;
 	}
-    } /* switch scheme */
 
-    current_setup->retry = NO;
+	if (!proxy_setup || !retry)
+	    proxy_setup = HTAASetup_lookup(hostname, portnumber, docname);
 
-    if (!auth_string)
-        /*
-	 *  Signal a failure. - FM
-	 */
-	return NULL;  /* Added by marca. */
-    if (*auth_string == '\0') {
-        /*
-	 *  Signal an abort. - FM
-	 */
-        StrAllocCopy(HTAA_composeAuthResult, "");
-	return(HTAA_composeAuthResult);
+	if (!proxy_setup)
+	    return NULL;
+
+    	switch (scheme = HTAA_selectScheme(proxy_setup)) {
+	  case HTAA_BASIC:
+	  case HTAA_PUBKEY:
+	    auth_string = compose_auth_string(scheme, proxy_setup);
+	    break;
+	  case HTAA_KERBEROS_V4:
+	    /* OTHER AUTHENTICATION ROUTINES ARE CALLED HERE */
+	  default:
+	    {
+		char msg[100];
+		sprintf(msg, "%s %s `%s'",
+			"This client doesn't know how to compose proxy authentication",
+			"information for scheme", HTAAScheme_name(scheme));
+		HTAlert(msg);
+		auth_string = NULL;
+	    }
+	} /* switch scheme */
+
+	proxy_setup->retry = NO;
+
+	if (!auth_string)
+	    /*
+	    **  Signal a failure. - FM
+	    */
+	    return NULL;  /* Added by marca. */
+	if (*auth_string == '\0') {
+	    /*
+	    **  Signal an abort. - FM
+	    */
+	    StrAllocCopy(HTAA_composeAuthResult, "");
+	    return(HTAA_composeAuthResult);
+	}
+	len = strlen(auth_string) + strlen((char *)HTAAScheme_name(scheme)) + 26;
+	if (!(HTAA_composeAuthResult = (char*)calloc(1, sizeof(char) * len)))
+	    outofmem(__FILE__, "HTAA_composeAuth");
+	strcpy(HTAA_composeAuthResult, "Proxy-Authorization: ");
+
+    } else {
+	/*
+	**  Normal WWW authorization.
+	*/
+	if (TRACE)
+	    fprintf(stderr, 
+		    "Composing Authorization for %s:%d/%s\n",
+		    hostname, portnumber, docname);
+
+	if (current_portnumber != portnumber ||
+	    !current_hostname || !current_docname ||
+	    !hostname         || !docname         ||
+	    0 != strcmp(current_hostname, hostname) ||
+	    0 != strcmp(current_docname, docname)) {
+
+	    retry = NO;
+
+	    current_portnumber = portnumber;
+
+	    if (hostname)
+		StrAllocCopy(current_hostname, hostname);
+	    else
+		FREE(current_hostname);
+
+	    if (docname)
+		StrAllocCopy(current_docname, docname);
+	    else
+		FREE(current_docname);
+	} else {
+	    retry = YES;
+	}
+
+	if (!current_setup || !retry)
+	    current_setup = HTAASetup_lookup(hostname, portnumber, docname);
+
+	if (!current_setup)
+	    return NULL;
+
+	switch (scheme = HTAA_selectScheme(current_setup)) {
+	  case HTAA_BASIC:
+	  case HTAA_PUBKEY:
+	    auth_string = compose_auth_string(scheme, current_setup);
+	    break;
+	  case HTAA_KERBEROS_V4:
+	    /* OTHER AUTHENTICATION ROUTINES ARE CALLED HERE */
+	  default:
+	    {
+		char msg[100];
+		sprintf(msg, "%s %s `%s'",
+			"This client doesn't know how to compose authentication",
+			"information for scheme", HTAAScheme_name(scheme));
+		HTAlert(msg);
+		auth_string = NULL;
+	    }
+	} /* switch scheme */
+
+	current_setup->retry = NO;
+
+	if (!auth_string)
+	    /*
+	    **  Signal a failure. - FM
+	    */
+	    return NULL;  /* Added by marca. */
+	if (*auth_string == '\0') {
+	    /*
+	    **  Signal an abort. - FM
+	    */
+	    StrAllocCopy(HTAA_composeAuthResult, "");
+	    return(HTAA_composeAuthResult);
+	}
+
+	len = strlen(auth_string) + strlen((char *)HTAAScheme_name(scheme)) + 20;
+	if (!(HTAA_composeAuthResult = (char*)calloc(1, sizeof(char) * len)))
+	    outofmem(__FILE__, "HTAA_composeAuth");
+	strcpy(HTAA_composeAuthResult, "Authorization: ");
     }
-    
-    len = strlen(auth_string) + strlen((char *)HTAAScheme_name(scheme)) + 20;
-    if (!(HTAA_composeAuthResult =
-    		(char*)calloc(1, sizeof(char) * len)))
-	outofmem(__FILE__, "HTAA_composeAuth");
-    strcpy(HTAA_composeAuthResult, "Authorization: ");
+
     strcat(HTAA_composeAuthResult, HTAAScheme_name(scheme));
     strcat(HTAA_composeAuthResult, " ");
     strcat(HTAA_composeAuthResult, auth_string);
@@ -943,8 +1033,11 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(char *, start_of_headers,
 	    char *fieldname = HTNextField(&p);
 	    char *arg1 = HTNextField(&p);
 	    char *args = p;
-	    
-	    if (0==strcasecomp(fieldname, "WWW-Authenticate:")) {
+
+	    if ((auth_proxy &&
+		 0==strcasecomp(fieldname, "Proxy-Authenticate:")) ||
+	        (!auth_proxy &&
+		 0==strcasecomp(fieldname, "WWW-Authenticate:"))) {
 	        if (!(arg1 && *arg1 && args && *args)) {
 		    temp = (char *)calloc(1, strlen(line) +
 		    			     (arg1 ? strlen(arg1) : 0) +
@@ -976,11 +1069,14 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(char *, start_of_headers,
 		else if (TRACE) {
 		    fprintf(stderr, "Unknown scheme `%s' %s\n",
 			    (arg1 ? arg1 : "(null)"),
-			    "in WWW-Authenticate: field");
+			    (auth_proxy ?
+			     "in Proxy-Authenticate: field" :
+			     "in WWW-Authenticate: field"));
 		}
 	    }
 
-	    else if (0==strcasecomp(fieldname, "WWW-Protection-Template:")) {
+	    else if (!auth_proxy &&
+		     0==strcasecomp(fieldname, "WWW-Protection-Template:")) {
 		if (TRACE)
 		    fprintf(stderr, "Protection template set to `%s'\n", arg1);
 		StrAllocCopy(template, arg1);
@@ -997,37 +1093,104 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(char *, start_of_headers,
 
 
     /*
-    **  So should we retry with authorization
+    **  So should we retry with authorization?
     */
-    if (num_schemes == 0) {		/* No authentication valid */
+    if (auth_proxy) {
+	if (num_schemes == 0) {
+	    /*
+	    **  No proxy authentication valid
+	    */
+	    proxy_setup = NULL;
+	    return NO;
+	}
+        /*
+	**  Doing it for proxy.  -AJL
+	*/
+	if (proxy_setup && proxy_setup->server) {
+	    /* 
+	    **  We have already tried with proxy authorization.
+	    **  Either we don't have access or username or
+	    **  password was misspelled.
+	    **
+	    **  Update scheme-specific parameters
+	    **  (in case they have expired by chance).
+	    */
+	    HTAASetup_updateSpecifics(proxy_setup, scheme_specifics);
+
+	    if (NO == HTConfirm("Authorization failed.  Retry?")) {
+		proxy_setup = NULL;
+		return NO;
+	    } else {
+	        /*
+		**  Re-ask username+password (if misspelled).
+		*/
+		proxy_setup->retry = YES;
+		return YES;
+	    }
+	} else {
+	    /*
+	    **  proxy_setup == NULL, i.e. we have a
+	    **  first connection to a protected server or
+	    **  the server serves a wider set of documents
+	    **  than we expected so far.
+	    */
+	    HTAAServer *server = HTAAServer_lookup(proxy_hostname,
+						   proxy_portnumber);
+	    if (!server) {
+		server = HTAAServer_new(proxy_hostname,
+					proxy_portnumber);
+	    }
+	    if (!template)	/* Proxy matches everything  -AJL */
+		StrAllocCopy(template, "*");
+	    proxy_setup = HTAASetup_new(server, 
+					  template,
+					  valid_schemes,
+					  scheme_specifics);
+	    FREE(template);
+
+	    HTAlert("Proxy authentication required -- retrying");
+	    return YES;
+	}
+	/* Never reached */
+    }
+    /*
+    **  Normal WWW authorization.
+    */
+    if (num_schemes == 0) {
+	/*
+	**  No authentication valid.
+	*/
 	current_setup = NULL;
 	return NO;
     }
-
     if (current_setup && current_setup->server) {
-	/* So we have already tried with authorization.	*/
-	/* Either we don't have access or username or	*/
-	/* password was misspelled.			*/
-	    
-	/* Update scheme-specific parameters	*/
-	/* (in case they have expired by chance).	*/
+	/*
+	**  So we have already tried with WWW authorization.
+	**  Either we don't have access or username or
+	**  password was misspelled.
+	**
+	**  Update scheme-specific parameters
+	**  (in case they have expired by chance).
+	*/
 	HTAASetup_updateSpecifics(current_setup, scheme_specifics);
 
 	if (NO == HTConfirm("Authorization failed.  Retry?")) {
 	    current_setup = NULL;
 	    return NO;
-	} /* HTConfirm(...) == NO */
-	else { /* re-ask username+password (if misspelled) */
+	} else {
+	    /*
+	    **  Re-ask username+password (if misspelled).
+	    */
 	    current_setup->retry = YES;
 	    return YES;
-	} /* HTConfirm(...) == YES */
-    } /* if current_setup != NULL */
-
-    else { /* current_setup == NULL, i.e. we have a	 */
-	   /* first connection to a protected server or  */
-	   /* the server serves a wider set of documents */
-	   /* than we expected so far.                   */
-
+	}
+    } else {
+        /*
+	**  current_setup == NULL, i.e. we have a
+	**  first connection to a protected server or
+	**  the server serves a wider set of documents
+	**  than we expected so far.
+	*/
 	HTAAServer *server = HTAAServer_lookup(current_hostname,
 					       current_portnumber);
 	if (!server) {
@@ -1044,8 +1207,7 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(char *, start_of_headers,
 
         HTAlert("Access without authorization denied -- retrying");
 	return YES;
-    } /* else current_setup == NULL */
-
+    }
     /* Never reached */
 }
 

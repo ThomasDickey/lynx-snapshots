@@ -9,6 +9,7 @@
 #endif /* VMS */
 #include "HTInit.h"
 #include "LYCurses.h"
+#include "LYStyle.h"
 #include "HTML.h"
 #include "LYUtils.h"
 #include "LYGlobalDefs.h"
@@ -26,6 +27,7 @@
 #include "LYKeymap.h"
 #include "LYList.h"
 #include "LYJump.h"
+#include "LYMainLoop.h"
 #include "LYBookmark.h"
 #ifdef DOSPATH
 #include "HTDOS.h"
@@ -143,6 +145,10 @@ PUBLIC lynx_printer_item_type *printers = NULL;
 			    /* linked list of download options */
 PUBLIC lynx_html_item_type *downloaders = NULL;
 			    /* linked list of upload options */
+#ifdef USE_EXTERNALS
+PUBLIC lynx_html_item_type *externals = NULL;
+                            /* linked list of external options */
+#endif
 PUBLIC lynx_html_item_type *uploaders = NULL;
 PUBLIC int port_syntax = 1;
 PUBLIC BOOLEAN LYShowCursor = SHOW_CURSOR; /* to show or not to show */
@@ -180,6 +186,9 @@ PUBLIC BOOLEAN news_ok = TRUE;
 PUBLIC BOOLEAN rlogin_ok = TRUE;
 PUBLIC BOOLEAN ftp_ok = TRUE;
 PUBLIC BOOLEAN system_editor = FALSE;
+#ifdef USE_EXTERNALS
+PUBLIC BOOLEAN no_externals = FALSE;
+#endif
 PUBLIC BOOLEAN no_inside_telnet = FALSE;
 PUBLIC BOOLEAN no_outside_telnet = FALSE;
 PUBLIC BOOLEAN no_telnet_port = FALSE;
@@ -328,6 +337,15 @@ PUBLIC int LYStatusLine = -1;		 /* Line for statusline() if > -1 */
 PUBLIC BOOLEAN LYCollapseBRs = COLLAPSE_BR_TAGS;  /* Collapse serial BRs? */
 PUBLIC BOOLEAN LYSetCookies = SET_COOKIES; /* Process Set-Cookie headers? */
 PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
+PUBLIC BOOLEAN LYNoISMAPifUSEMAP = FALSE; /* Omit ISMAP link if MAP present? */
+PUBLIC int LYHiddenLinks = HIDDENLINKS_SEPARATE; /* Show hidden links? */
+
+PUBLIC BOOL New_DTD = YES;
+PUBLIC FILE *LYTraceLogFP = NULL;		/* Pointer for TRACE log  */
+PUBLIC char *LYTraceLogPath = NULL;		/* Path for TRACE log	   */
+PUBLIC BOOLEAN LYUseTraceLog = USE_TRACE_LOG;	/* Use a TRACE log?	   */
+PUBLIC FILE LYOrigStderr;			/* Original stderr pointer */
+PUBLIC BOOLEAN LYStripDotDotURLs = FALSE;	/* Try to fix ../ in some URLs? */
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
 #ifdef DECLARE_WAIS_LOGFILES
@@ -425,12 +443,44 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(URLDomainPrefixes);
     FREE(URLDomainSuffixes);
     FREE(XLoadImageCommand);
+    FREE(LYTraceLogPath);
     for (i = 0; i < nlinks; i++) {
         FREE(links[i].lname);
     }
     nlinks = 0;
 
     return;
+}
+
+#if defined(USEHASH)
+    char *lynx_lss_file=NULL;
+#endif
+
+PRIVATE char *make_homedir_lynxrc_filename ARGS1(char *, name)
+{
+   char *home = NULL;
+
+   if (name == NULL)
+     {
+#if defined(UNIX) && !defined(DJGPP)
+	name = "/.lynxrc";
+#else
+	name = "/lynx.rc";
+#endif
+     }
+
+#ifdef DOSPATH
+   StrAllocCopy(home, HTDOS_wwwName((char *)Home_Dir()));
+#else
+#ifdef VMS
+   StrAllocCopy(home, HTVMS_wwwName((char *)Home_Dir()));
+#else
+   StrAllocCopy(home, Home_Dir());
+#endif /* VMS */
+#endif /* DOSPATH */
+   
+   StrAllocCat(home, name);
+   return home;
 }
 
 /*
@@ -474,7 +524,7 @@ WSADATA WSAData;
 #endif
 
 #ifdef DOSPATH
-	 terminal = "vt100";
+    terminal = "vt100";
 #endif
 
     /*
@@ -549,23 +599,6 @@ WSADATA WSAData;
 	HTUnEscapeSome(startfile, " \r\n\t");
 	convert_to_spaces(startfile, TRUE);
     }
-    StrAllocCopy(jumpprompt, JUMP_PROMPT);
-#ifdef JUMPFILE
-    StrAllocCopy(jumpfile, JUMPFILE);
-    {
-        temp = (char *)malloc(strlen(jumpfile) + 10);
-	if (!temp) {
-	    outofmem(__FILE__, "main");
-	} else {
-	    sprintf(temp, "JUMPFILE:%s", jumpfile);
-	    if (!LYJumpInit(temp)) {
-		if (TRACE)
-		    fprintf(stderr, "Failed to register %s\n", temp);
-	    }
-	    FREE(temp);
-	}
-    }
-#endif /* JUMPFILE */
     StrAllocCopy(indexfile, DEFAULT_INDEX_FILE);
     StrAllocCopy(global_type_map, GLOBAL_MAILCAP);
     StrAllocCopy(personal_type_map, PERSONAL_MAILCAP);
@@ -683,17 +716,30 @@ WSADATA WSAData;
     no_newspost = (LYNewsPosting == FALSE);
 
     /*
-     *  Set up trace, the anonymous account defaults, and/or
-     *  the nosocks flag, if requested, and an alternate
-     *  configuration file, if specified, NOW.  Also, if
-     *  we only want the help menu, output that and exit. - FM
+     *  Set up trace, the anonymous account defaults,
+     *  validate restrictions, and/or the nosocks flag,
+     *  if requested, and an alternate configuration
+     *  file, if specified, NOW.  Also, if we only want
+     *  the help menu, output that and exit. - FM
      */
-    for (i=1; i<argc; i++) {
+    for (i = 1; i < argc; i++) {
 	if (strncmp(argv[i], "-trace", 6) == 0) {
 	    WWW_TraceFlag = TRUE;
+	} else if (strncmp(argv[i], "-tlog", 5) == 0) {
+	    if (LYUseTraceLog) {
+	        LYUseTraceLog = FALSE;
+	    } else {
+	        LYUseTraceLog = TRUE;
+	    }
 	} else if (strncmp(argv[i], "-anonymous", 10) == 0) {
-	    parse_restrictions("default");
+	    if (!LYValidate)
+	        parse_restrictions("default");
 	    anon_restrictions_set = TRUE;
+	} else if (strcmp(argv[0], "-validate") == 0) {
+	    /*
+	     *  Follow only http URLs.
+	     */
+	    LYValidate = TRUE;
 #ifdef SOCKS
 	} else if (strncmp(argv[i], "-nosocks", 8) == 0) {
 	    socks_flag = FALSE;
@@ -715,11 +761,22 @@ WSADATA WSAData;
 #endif /* SOCKS */
 
     /*
-     *  If we didn't get and act on an -anonymous switch,
-     *  but can verify that this is the anonymous account,
-     *  set the default restrictions for that account NOW. - FM
+     *  If we had -validate set all of the restrictions
+     *  and disallow a TRACE log NOW. - FM
      */
-    if (!anon_restrictions_set && strlen((char *)ANONYMOUS_USER) > 0 &&
+    if (LYValidate == TRUE) {
+	parse_restrictions("all");
+	LYUseTraceLog = FALSE;
+    }
+
+    /*
+     *  If we didn't get and act on a -validate or -anonymous
+     *  switch, but can verify that this is the anonymous account,
+     *  set the default restrictions for that account and disallow
+     *  a TRACE log NOW. - FM
+     */
+    if (!LYValidate && !anon_restrictions_set &&
+        strlen((char *)ANONYMOUS_USER) > 0 &&
 #if defined (VMS) || defined (NOUSERS)
 	!strcasecomp(((char *)getenv("USER")==NULL ? " " : getenv("USER")),
 		     ANONYMOUS_USER)) {
@@ -732,10 +789,74 @@ WSADATA WSAData;
 #endif /* VMS */
 	parse_restrictions("default");
 	anon_restrictions_set = TRUE;
+	LYUseTraceLog = FALSE;
     }
+
+    /*
+     *  Set up the TRACE log path, and logging if appropriate. - FM
+     */
+#ifdef VMS
+    StrAllocCopy(LYTraceLogPath, "sys$login:Lynx.trace");
+#else
+    StrAllocCopy(LYTraceLogPath, (Home_Dir() ? Home_Dir() : ""));
+    StrAllocCat(LYTraceLogPath, "/Lynx.trace");
+#endif /* VMS */
+    LYOrigStderr = *stderr;
+    if (TRACE && LYUseTraceLog) {
+        /*
+	 *  If we can't open it for writing, give up.
+	 *  Otherwise, on VMS close it, delete it and any
+	 *  versions from previous sessions so they don't
+	 *  accumulate, and open it again. - FM
+	 */
+	if ((LYTraceLogFP = fopen(LYTraceLogPath, "w")) == NULL) {
+	    WWW_TraceFlag = FALSE;
+	    fprintf(stderr, "%s\n", TRACELOG_OPEN_FAILED);
+	    exit(-1);
+	}
+#ifdef VMS
+	fclose(LYTraceLogFP);
+	while (remove(LYTraceLogPath) == 0)
+	    ;
+	if ((LYTraceLogFP = fopen(LYTraceLogPath, "w",
+				  "shr=get")) == NULL) {
+	    WWW_TraceFlag = FALSE;
+	    printf("%s\n", TRACELOG_OPEN_FAILED);
+	    exit(-1);
+	}
+#endif /* VMS */
+	*stderr = *LYTraceLogFP;
+	fprintf(stderr, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
+    }
+
+    /*
+     *  If TRACE is on, indicate whether the
+     *  anonymous restrictions are set. - FM
+     */
     if (TRACE && anon_restrictions_set) {
 	fprintf(stderr, "LYMain: Anonymous restrictions set.\n");
     }
+
+    /*
+     *  Set up the default jump file stuff. - FM
+     */
+    StrAllocCopy(jumpprompt, JUMP_PROMPT);
+#ifdef JUMPFILE
+    StrAllocCopy(jumpfile, JUMPFILE);
+    {
+        temp = (char *)malloc(strlen(jumpfile) + 10);
+	if (!temp) {
+	    outofmem(__FILE__, "main");
+	} else {
+	    sprintf(temp, "JUMPFILE:%s", jumpfile);
+	    if (!LYJumpInit(temp)) {
+		if (TRACE)
+		    fprintf(stderr, "Failed to register %s\n", temp);
+	    }
+	    FREE(temp);
+	}
+    }
+#endif /* JUMPFILE */
 
     /*
      *  If no alternate configuration file was specified on
@@ -746,6 +867,21 @@ WSADATA WSAData;
 	    (cp=getenv("lynx_cfg")) != NULL)
 	    StrAllocCopy(lynx_cfg_file, cp);
     }
+
+   /* If we still have no config file, check one in home directory */
+   if (NULL == lynx_cfg_file)
+     {
+	temp = make_homedir_lynxrc_filename (NULL);
+	if (temp != NULL)
+	  {
+	     if (NULL != (fp = fopen (temp, "r")))
+	       {
+		  fclose (fp);
+		  StrAllocCopy (lynx_cfg_file, temp);
+	       }
+	     FREE(temp);
+	  }
+     }
 
     /*
      *  If we still don't have a configuration file,
@@ -758,25 +894,15 @@ WSADATA WSAData;
      *  Convert a '~' in the configuration file path to $HOME.
      */
 #ifndef _WINDOWS /* avoid the whole ~ thing for now */
-    if ((cp = strchr(lynx_cfg_file, '~'))) {
-	*(cp++) = '\0';
-	StrAllocCopy(temp, lynx_cfg_file);
-	if (((len = strlen(temp)) > 0) && temp[len-1] == '/')
-	    temp[len-1] = '\0';
-#ifdef DOSPATH
-	StrAllocCat(temp, HTDOS_wwwName((char *)Home_Dir()));
-#else
-#ifdef VMS
-	StrAllocCat(temp, HTVMS_wwwName((char *)Home_Dir()));
-#else
-	StrAllocCat(temp, Home_Dir());
-#endif /* VMS */
-#endif /* DOSPATH */
-	StrAllocCat(temp, cp);
-	StrAllocCopy(lynx_cfg_file, temp);
-	FREE(temp);
-    }
-#endif /* _WINDOWS */
+   /* I think this should only be performed if lynx_cfg_file starts with ~/ */
+   if ((lynx_cfg_file[0] == '~') && (lynx_cfg_file[1] == '/'))
+     {
+	temp = make_homedir_lynxrc_filename (lynx_cfg_file + 2);
+	FREE(lynx_cfg_file);
+	lynx_cfg_file = temp;
+	temp = NULL;
+     }
+#endif
 
     /*
      *  If the configuration file is not available,
@@ -800,6 +926,59 @@ WSADATA WSAData;
     }
 #endif /* EXP_CHARTRANS */
 
+#if defined(USEHASH)
+    /*
+     *  If no alternate lynxile file was specified on
+     *  the command line, see if it's in the environment.
+     */
+    if (!lynx_lss_file) {
+        if (((cp=getenv("LYNX_LSS")) != NULL) ||
+            (cp=getenv("lynx_lss")) != NULL)
+            StrAllocCopy(lynx_lss_file, cp);
+    }
+
+    /*
+     *  If we still don't have a lynxile file,
+     *  use the userdefs.h definition.
+     */
+    if (!lynx_lss_file)
+        StrAllocCopy(lynx_lss_file, LYNX_LSS_FILE);
+
+    /*
+     *  Convert a '~' in the lynxile file path to $HOME.
+     */
+    if ((cp = strchr(lynx_lss_file, '~'))) {
+        char *temp = NULL;
+        int len;
+
+        *(cp++) = '\0';
+        StrAllocCopy(temp, lynx_lss_file);
+        if ((len=strlen(temp)) > 0 && temp[len-1] == '/')
+            temp[len-1] = '\0';
+#ifdef VMS
+        StrAllocCat(temp, HTVMS_wwwName((char *)Home_Dir()));
+#else
+        StrAllocCat(temp, Home_Dir());
+#endif /* VMS */
+        StrAllocCat(temp, cp);
+        StrAllocCopy(lynx_lss_file, temp);
+        FREE(temp);
+    }
+    /*
+     *  If the lynxile file is not available,
+     *  inform the user and exit.
+     */
+    if ((fp = fopen(lynx_lss_file, "r")) == NULL) {
+        fprintf(stderr, "\nLynxile file %s is not available.\n\n",
+                        lynx_lss_file);
+    }
+    else
+    {
+        fclose(fp);
+        style_readFromFile(lynx_lss_file);
+    }
+#endif
+
     /*
      *  Make sure we have the edit map declared. - FM
      */
@@ -808,7 +987,7 @@ WSADATA WSAData;
 	exit(-1);
     }
 
-#if defined(USE_SLANG) || defined(COLOR_CURSES)
+#if USE_COLOR_TABLE
     /*
      *  Set up default foreground and background colors.
      */
@@ -837,6 +1016,8 @@ WSADATA WSAData;
     read_cfg(lynx_cfg_file);
     FREE(lynx_cfg_file);
 
+    HTSwitchDTD(New_DTD);
+
     /*
      *  Check for a save space path in the environment.
      *  If one was set in the configuration file, that
@@ -858,7 +1039,7 @@ WSADATA WSAData;
 	    if (((len = strlen(temp)) > 0) && temp[len-1] == '/')
 	        temp[len-1] = '\0';
 #ifdef DOSPATH
-	StrAllocCat(temp, HTDOS_wwwName((char *)Home_Dir()));
+	    StrAllocCat(temp, HTDOS_wwwName((char *)Home_Dir()));
 #else
 #ifdef VMS
 	    StrAllocCat(temp, HTVMS_wwwName((char *)Home_Dir()));
@@ -1654,6 +1835,19 @@ PRIVATE void parse_arg ARGS3(
 	 */
 	HEAD_request = TRUE;
 
+    } else if (strncmp(argv[0], "-hiddenlinks", 7) == 0) {
+        if (nextarg) {
+	    if (strncasecomp(cp, "merge", 1) == 0)
+		LYHiddenLinks = HIDDENLINKS_MERGE;
+	    else if (strncasecomp(cp, "listonly", 1) == 0)
+		LYHiddenLinks = HIDDENLINKS_SEPARATE;
+	    else if (strncasecomp(cp, "ignore", 1) == 0)
+		LYHiddenLinks = HIDDENLINKS_IGNORE;
+	    else
+		goto Output_Error_and_Help_List;
+	} else
+	    LYHiddenLinks = HIDDENLINKS_MERGE;
+
     } else if (strncmp(argv[0], "-historical", 11) == 0) {
         if (historical_comments)
 	    historical_comments = FALSE;
@@ -1693,6 +1887,12 @@ PRIVATE void parse_arg ARGS3(
 	if (nextarg)
 	    StrAllocCopy(indexfile, cp);
 
+    } else if (strncmp(argv[0], "-ismap", 6) == 0) {
+	if (LYNoISMAPifUSEMAP)
+	    LYNoISMAPifUSEMAP = FALSE;
+	else
+	    LYNoISMAPifUSEMAP = TRUE;
+
     } else {
         goto Output_Error_and_Help_List;
     }
@@ -1702,6 +1902,16 @@ PRIVATE void parse_arg ARGS3(
     if (strncmp(argv[0], "-link", 5) == 0) {
         if (nextarg)
 	    ccount = atoi(cp);
+#if defined(USEHASH)
+        } else if (strncmp(argv[0], "-lss", 4) == 0) {
+        fprintf(stderr, "***********************\n");
+            if ((cp=strchr(argv[0],'=')) != NULL)
+                StrAllocCopy(lynx_lss_file, cp+1);
+            else {
+                StrAllocCopy(lynx_lss_file, argv[1]);
+                i++;
+            }
+#endif
 
     } else if (strncmp(argv[0], "-localhost", 10) == 0) {
 	local_host_only = TRUE;
@@ -1908,12 +2118,17 @@ PRIVATE void parse_arg ARGS3(
    dired_support   disallow local file management\n");
 #endif /* DIRED_SUPPORT */
 	        printf("\
-   disk_save       disallow saving binary files to disk in the download menu\n\
+   disk_save       disallow saving to disk in the download and print menus\n\
    dotfiles        disallow access to, or creation of, hidden (dot) files\n\
    download        disallow downloaders in the download menu\n\
    editor          disallow editing\n\
    exec            disable execution scripts\n\
-   exec_frozen     disallow the user from changing the execution link\n\
+    exec_frozen     disallow the user from changing the execution link\n");
+#ifdef USE_EXTERNALS
+        printf("\
+    externals       disable passing URLs to external programs\n");
+#endif
+        printf("\
    file_url        disallow using G)oto, served links or bookmarks for\n\
                    file: URL's\n\
    goto            disable the 'g' (goto) command\n");
@@ -2005,6 +2220,16 @@ PRIVATE void parse_arg ARGS3(
 	     HTAtom_for("www/download") : HTAtom_for("www/dump"));
 	LYcols=999;
 
+#if defined(USEHASH)
+    } else if (strncmp(argv[0], "-lss", 4) == 0) {
+        /*
+         *  Already read the alternate lynxile file
+         *  so just check whether we need to increment i
+         */
+        if (nextarg)
+            ; /* do nothing */
+#endif
+
     } else if (strncmp(argv[0], "-stack_dump", 11) == 0) {
 	stack_dump = TRUE;
 
@@ -2032,8 +2257,17 @@ PRIVATE void parse_arg ARGS3(
 	if (nextarg)
 	    terminal = cp;
 
+    } else if (strncmp(argv[0], "-tlog", 5) == 0) {
+        /*
+	 *  Already handled. - FM
+	 */
+	break;
+
     } else if (strncmp(argv[0], "-trace", 6) == 0) {
-	WWW_TraceFlag = TRUE;
+        /*
+	 *  Already handled. - FM
+	 */
+	break;
 
     } else if (strncmp(argv[0], "-traversal", 10) == 0) {
 	traversal = TRUE;
@@ -2055,7 +2289,7 @@ PRIVATE void parse_arg ARGS3(
 	else
 	    use_underscore = TRUE;
 
-#ifdef NCURSES_MOUSE_VERSION
+#if defined(NCURSES_MOUSE_VERSION) || defined(USE_SLANG_MOUSE)
     } else if (strncmp(argv[0], "-use_mouse", 9) == 0) {
         LYUseMouse = TRUE;
 #endif
@@ -2068,9 +2302,9 @@ PRIVATE void parse_arg ARGS3(
     if (strcmp(argv[0], "-validate") == 0) {
         /*
 	 *  Follow only http URLs.
+	 *  Already handled. - FM
 	 */
-	LYValidate = TRUE;
-	parse_restrictions("all");
+	break;
 
     } else if (strncmp(argv[0], "-version", 8) == 0) {
 	printf("\n%s Version %s (1997)\n", LYNX_NAME, LYNX_VERSION);
@@ -2096,7 +2330,12 @@ Output_Error_and_Help_List:
 #ifdef VMS
     printf(" LYNX: Invalid Option: %s\n", argv[0]);
 #else
-    printf("%s: Invalid Option: %s\n", pgm, argv[0]);
+#ifdef UNIX
+    if (strncmp(argv[0], "-help", 5) != 0)
+	fprintf(stderr, "%s: Invalid Option: %s\n", pgm, argv[0]);
+    else
+#endif /* UNIX */
+	printf("%s: Invalid Option: %s\n", pgm, argv[0]);
 #endif /* VMS */
 Output_Help_List:
 #ifdef VMS
@@ -2152,12 +2391,18 @@ Output_Help_List:
     printf("                     terminated by '---' on a line\n");
     printf("    -head            send a HEAD request\n");
     printf("    -help            print this usage message\n");
+    printf("    -hiddenlinks=[option]  hidden links: options are merge, listonly, or ignore\n");
     printf("    -historical      toggles use of '>' or '-->' as a terminator for comments\n");
     printf("    -homepage=URL    set homepage separate from start page\n");
     printf("    -image_links     toggles inclusion of links for all images\n");
     printf("    -index=URL       set the default index file to URL\n");
+    printf("    -ismap           toggles inclusion of ISMAP links when client-side\n");
+    printf("                     MAPs are present\n");
     printf("    -link=NUMBER     starting count for lnk#.dat files produced by -crawl\n");
     printf("    -localhost       disable URLs that point to remote hosts\n");
+#if defined(USEHASH)
+    printf("    -lss=FILENAME    specifies a lynx.css file other than the default\n");
+#endif
     printf("    -mime_header     include mime headers and force source dump\n");
     printf("    -minimal         toggles minimal versus valid comment parsing\n");
     printf("    -newschunksize=NUMBER  number of articles in chunked news listings\n");
@@ -2204,10 +2449,11 @@ Output_Help_List:
 #endif /* !VMS */
     printf("    -telnet          disable telnets\n");
     printf("    -term=TERM       set terminal type to TERM\n");
-    printf("    -trace           turns on WWW trace mode\n");
+    printf("    -tlog            toggles use of a Lynx Trace Log for the current session\n");
+    printf("    -trace           turns on Lynx trace mode\n");
     printf("    -traversal       traverse all http links derived from startfile\n");
     printf("    -underscore      toggles use of _underline_ format in dumps\n");
-#ifdef NCURSES_MOUSE_VERSION
+#if defined(NCURSES_MOUSE_VERSION) || defined(USE_SLANG_MOUSE)
     printf("    -use_mouse       enable use of the mouse\n");
 #endif
     printf("    -validate        accept only http URLs (for validation)\n");
@@ -2229,7 +2475,7 @@ PRIVATE void FatalProblem ARGS1(
      *  Ignore further interrupts. - mhc: 11/2/91
      */
 #ifndef NOSIGHUP
-				(void) signal(SIGHUP, SIG_DFL);
+				(void) signal(SIGHUP, SIG_IGN);
 #endif /* NOSIGHUP */
     (void) signal (SIGTERM, SIG_IGN);
     (void) signal (SIGINT, SIG_IGN);

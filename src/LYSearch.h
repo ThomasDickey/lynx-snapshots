@@ -6,7 +6,7 @@
 #include "LYStructs.h"
 #endif /* LYSTRUCT_H */
 
-extern void textsearch PARAMS((document *cur_doc,
+extern BOOL textsearch PARAMS((document *cur_doc,
 			       char *prev_target, BOOL next));
 
 #define IN_FILE 1

@@ -1,6 +1,18 @@
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
+/*
+ * The simple color scheme maps the 8 combinations of bold/underline/reverse
+ * to the standard 8 ANSI colors (with some variations based on context).
+ */
+#undef USE_COLOR_TABLE
+
+#ifndef USE_COLOR_STYLE
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
+#define USE_COLOR_TABLE 1
+#endif
+#endif
+
 #ifdef TRUE
 #undef TRUE  /* to prevent parse error :( */
 #endif /* TRUE */
@@ -108,7 +120,20 @@ extern void VMSbox PARAMS((WINDOW *win, int height, int width));
 #endif /* !USE_SLANG */
 #endif /* VMS */
 
-#if defined(USE_SLANG) || defined(COLOR_CURSES)
+#if defined(USE_COLOR_STYLE)
+extern void curses_css PARAMS((char * name,int dir));
+extern void curses_style PARAMS((int style,int dir,int previous));
+extern void curses_w_style PARAMS((WINDOW* win,int style,int dir,int previous));
+extern void setHashStyle PARAMS((int style,int color,int cattr,int mono,char* element));
+extern void setStyle PARAMS((int style,int color,int cattr,int mono));
+extern void wcurses_css PARAMS((WINDOW * win,char* name,int dir));
+#define LynxChangeStyle curses_style
+#else
+extern int slang_style PARAMS((int style,int dir,int previous));
+#define LynxChangeStyle slang_style
+#endif /* USE_COLOR_STYLE */
+
+#if USE_COLOR_TABLE
 extern void lynx_add_attr PARAMS((int a));
 extern void lynx_sub_attr PARAMS((int a));
 extern void lynx_setup_colors NOPARAMS;
@@ -116,6 +141,10 @@ extern unsigned int Lynx_Color_Flags;
 #endif
 
 #ifdef USE_SLANG
+#if !defined(VMS) && !defined(DJGPP)
+#define USE_SLANG_MOUSE		1
+#endif
+
 #define SL_LYNX_USE_COLOR	1
 #define SL_LYNX_USE_BLINK	2
 #define start_bold()      lynx_add_attr(1)
@@ -140,7 +169,8 @@ extern int PHYSICAL_SLtt_Screen_Cols;
 #define LINES SLtt_Screen_Rows
 #define move SLsmg_gotorc
 #define addstr SLsmg_write_string
-#define clear SLsmg_cls
+extern void LY_SLclear NOPARAMS;
+#define clear LY_SLclear
 #define standout SLsmg_reverse_video
 #define standend  SLsmg_normal_video
 #define clrtoeol SLsmg_erase_eol
@@ -192,7 +222,7 @@ extern void VTHome NOPARAMS;
 
 #else /* NOT VMS: */
 
-#ifdef COLOR_CURSES
+#if USE_COLOR_TABLE
 extern void lynx_add_wattr PARAMS((WINDOW *, int));
 extern void lynx_sub_wattr PARAMS((WINDOW *, int));
 extern void lynx_set_color PARAMS((int));
@@ -246,5 +276,27 @@ extern int  lynx_chg_color PARAMS((int, int, int));
 
 #endif /* FANCY_CURSES */
 #endif /* USE_SLANG */
+
+extern void lynx_enable_mouse PARAMS((int));
+extern void lynx_start_underline_color NOPARAMS;
+extern void lynx_stop_underline_color NOPARAMS;
+extern void lynx_start_bold_color NOPARAMS;
+extern void lynx_stop_bold_color NOPARAMS;
+extern void lynx_start_title_color NOPARAMS;
+extern void lynx_stop_title_color NOPARAMS;
+extern void lynx_start_link_color PARAMS((int));
+extern void lynx_stop_link_color PARAMS((int));
+extern void lynx_stop_target_color NOPARAMS;
+extern void lynx_start_target_color NOPARAMS;
+extern void lynx_start_status_color NOPARAMS;
+extern void lynx_stop_status_color NOPARAMS;
+extern void lynx_start_h1_color NOPARAMS;
+extern void lynx_stop_h1_color NOPARAMS;
+extern void lynx_start_prompt_color NOPARAMS;
+extern void lynx_stop_prompt_color NOPARAMS;
+extern void lynx_start_radio_color NOPARAMS;
+extern void lynx_stop_radio_color NOPARAMS;
+extern void lynx_stop_all_colors NOPARAMS;
+
 
 #endif /* LYCURSES_H */

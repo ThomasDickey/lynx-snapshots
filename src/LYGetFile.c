@@ -47,6 +47,7 @@
 PRIVATE int fix_http_urls PARAMS((document *doc));
 extern char * WWW_Download_File;
 extern BOOL redirect_post_content;
+extern BOOL reloading;
 #ifdef VMS
 extern BOOLEAN LYDidRename;
 #endif /* VMS */
@@ -321,6 +322,9 @@ Try_Redirected_URL:
 		    WWWDoc.bookmark = doc->bookmark;
 		    WWWDoc.isHEAD = doc->isHEAD;
 		    WWWDoc.safe = doc->safe;
+		    if (doc->internal_link && !reloading) {
+			LYoverride_no_cache = TRUE;
+		    }
 
 		    if (!HTLoadAbsolute(&WWWDoc)) {
 		        HTMLSetCharacterHandling(current_char_set);
@@ -751,6 +755,7 @@ Try_Redirected_URL:
 			    LYAddVisitedLink(doc);
 			    StrAllocCopy(doc->address, fname);
 			    FREE(fname);
+			    doc->internal_link = FALSE;
 		    	    WWWDoc.address = doc->address;
 			    FREE(doc->post_data);
 		    	    WWWDoc.post_data = NULL;
@@ -814,49 +819,96 @@ Try_Redirected_URL:
 }
 
 /*
- *  The user wants to select a link by number.
+ *  The user wants to select a link or a page by number.
  *  If follow_link_number returns DO_LINK_STUFF do_link
- *   will be run immeditely following its execution.
+ *   will be run immediately following its execution.
+ *  If follow_link_number returns DO_GOTOLINK_STUFF
+ *   it has updated the passed in doc for positioning on a link.
+ *  If follow_link_number returns DO_GOTOPAGE_STUFF
+ *   it has set doc->line to the top line of the desired page
+ *   for displaying that page.
  *  If follow_link_number returns PRINT_ERROR an error message
  *   will be given to the user.
  *  If follow_link_number returns DO_FORMS_STUFF some forms stuff
- *   will be done.
+ *   will be done. (Not yet implemented.)
  *  If follow_link_number returns DO_NOTHING nothing special
  *   will run after it.
  */
-PUBLIC int follow_link_number ARGS2(
+PUBLIC int follow_link_number ARGS4(
 	int,		c,
-	int,		cur)
+	int,		cur,
+	document *,	doc,
+	int *,		num)
 {
     char temp[120];
-    int link_number;
+    int new_top, new_link;
+    BOOL want_go;
 
     temp[0] = c;
     temp[1] = '\0';
+    *num = -1;
     _statusline(FOLLOW_LINK_NUMBER);
     /*
-     *  Get the number from the user.
+     *  Get the number, possibly with a letter suffix, from the user.
      */
     if (LYgetstr(temp, VISIBLE, sizeof(temp), NORECALL) < 0 || *temp == 0) {
         _statusline(CANCELLED);
         sleep(InfoSecs);
         return(DO_NOTHING);
     }
+    *num = atoi(temp);
 
-    link_number = atoi(temp);
+    /*
+     *  Check if we had a 'p' or 'P' following the number as
+     *  a flag for displaying the page with that number. - FM
+     */
+    if (strchr(temp, 'p') != NULL || strchr(temp, 'P') != NULL) {
+        int nlines = HText_getNumOfLines();
+        int npages = ((nlines + 1) > display_lines) ?
+		(((nlines + 1) + (display_lines - 1))/(display_lines))
+						    : 1;
+        if (*num < 1)
+	    *num = 1;
+	doc->line = (npages <= 1) ?
+			        1 :
+		((*num <= npages) ? (((*num - 1) * display_lines) + 1)
+				  : (((npages - 1) * display_lines) + 1));
+	return(DO_GOTOPAGE_STUFF);
+    }
 
-    if (link_number > 0) {
+    /*
+     *  Check if we want to make the link corresponding to the
+     *  number the current link, rather than ACTIVATE-ing it.
+     */
+    want_go = (strchr(temp, 'g') != NULL || strchr(temp, 'G') != NULL);
+ 
+   /*
+    *  If we have a valid number, act on it.
+    */
+   if (*num > 0) {
+	int info;
         /*
-	 *  Get the lname, and hightext, direct from
-	 *  www structures and add it to the cur link
-	 *  so that we can pass it transparently on to
-	 *  get_file().  This is done so that you may select a link
-	 * anywhere in the document, whether it is displayed
-	 * on the screen or not!
+	 *  Get the lname, and hightext, directly from www
+	 *  structures and add it to the cur link so that
+	 *  we can pass it transparently on to getfile(),
+	 *  and load new_top and new_link if we instead want
+	 *  to make the link number current.  These things
+	 *  are done so that a link can be selected anywhere
+	 *  in the current document, whether it is displayed
+	 *  on the screen or not!
 	 */
-	if (HTGetLinkInfo(link_number,
+	if ((info = HTGetLinkInfo(*num,
+				  want_go ? &new_top : NULL,
+				  want_go ? &new_link : NULL,
 			  &links[cur].hightext, 
-			  &links[cur].lname)) {
+			  &links[cur].lname)) == WWW_INTERN_LINK_TYPE) {
+	    links[cur].type = WWW_INTERN_LINK_TYPE;
+	    return(DO_LINK_STUFF);
+	} else if (info == LINK_LINE_FOUND) {
+	    doc->line = new_top + 1;
+	    doc->link = new_link;
+	    return(DO_GOTOLINK_STUFF);
+	} else if (info) {
 	    links[cur].type = WWW_LINK_TYPE;
 	    return(DO_LINK_STUFF);
 	} else {

@@ -54,12 +54,14 @@ makeuctb: makeuctb.c UCkd.h
 
 iso01_uni.h: iso01_uni.tbl makeuctb
 iso02_uni.h: iso02_uni.tbl makeuctb
+def7_uni.h: def7_uni.tbl makeuctb
 iso03_uni.h: iso03_uni.tbl makeuctb
 iso04_uni.h: iso04_uni.tbl makeuctb
 iso05_uni.h: iso05_uni.tbl makeuctb
 iso07_uni.h: iso07_uni.tbl makeuctb
 iso09_uni.h: iso09_uni.tbl makeuctb
 iso10_uni.h: iso10_uni.tbl makeuctb
+koi8r_uni.h: koi8r_uni.tbl makeuctb
 cp437_uni.h: cp437_uni.tbl makeuctb
 cp850_uni.h: cp850_uni.tbl makeuctb
 cp852_uni.h: cp852_uni.tbl makeuctb

@@ -14,8 +14,12 @@ CFLAGS		= $(CPPOPTS) @CFLAGS@
 LIBS		= @LIBS@
 
 ##this is the name of the directory the lynx source code is in.
+##(e.g. lynx2-7-1, not the full path)
+lynxdir= lynx2-7-1
+
+##this is the name of the directory the lynx source code is in.
 ##(e.g. lynx2-7, not the full path)
-lynxname= lynx2-7
+lynxname= lynx2-7-1
 
 ## Where you want lynx installed
 bindir= @bindir@
@@ -142,24 +146,6 @@ DIRED_PERMIT   =   -DOK_PERMIT
 # directories via the "change_exec_perms" command line restriction):
 #DIRED_NOXPERMS   =   -DNO_CHANGE_EXECUTE_PERMS
 
-# !!!!!!!!!!! NOTE:  NetBSD and FreeBSD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# On NetBSD 1.1 and earlier, as well as FreeBSD 2.0.5 and earlier,
-# the system make program uses different syntax for including files
-# than the GNU make program.  If you get the following error --
-#   * "Makefile", line 27: Need an operator *
-# you have several choices to run GNU make:
-#
-# * Install GNU make as `/usr/bin/make', after moving /usr/bin/make
-#   to /usr/bin/old-make
-#
-# * Install GNU make in a different directory which is earlier in
-#   your search path.
-#
-# * Install GNU make as gmake, and change occurrences of `make' to
-#   `gmake' in any Makefile used by your install.  You won't need to
-#   change all of the Makefiles, just the top-level one, and the one
-#   in WWW/Library/???bsd
-
 # !!!!!!!!!!! Lynx Wishful Thinking !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # If you are on one of the supported systems (see all: list below)
 # you should not have to modify anything from here down (but check
@@ -176,51 +162,20 @@ DIRED_PERMIT   =   -DOK_PERMIT
 all:
 	@echo
 	@echo "Please run make with one of the following arguments"
-	@echo "aix4       -- for RS/6000 running AIX 4.n and some 3.2"
-	@echo "aix32      -- for RS/6000 running AIX 3.2"
-	@echo "apollo     -- apollo systems (untested)"
-	@echo "bsdi       -- BSD Interactive"
 	@echo "clix       -- for Intergraph CLIX"
-	@echo "convex     -- for Convex C-series"
-	@echo "dgux       -- for DGUX "
-	@echo "freebsd    -- for FreeBSD"
 	@echo "generic    -- for generic UNIX"
-	@echo "isc        -- for Interactive Machines (untested)"
-	@echo "linux      -- for PC linux"
-	@echo "mips       -- for MIPS, svr3/bsd flavour (untested)"
-	@echo "netbsd     -- for NetBSD"
-	@echo "news       -- for SONY NEWS-OS 4.2.1R"
-	@echo "next       -- for NeXT OS"
-	@echo "osf        -- for Alpha OSF/1"
-	@echo "ptx        -- for Sequent's DYNIX/ptx, version 4, (current version)"
 	@echo "ptx        -- for Sequent's DYNIX/ptx, current version"
 	@echo "ptx2       -- for Sequent's DYNIX/ptx, version 2"
-	@echo "riscos     -- Control Data Unix machine running EP/IX"
 	@echo "sco        -- for SCO machines"
 	@echo "sco5       -- for SCO OpenServer Release 5 machines"
-	@echo "sgi        -- for SGI machines"
-	@echo "sun3       -- for SUN 3 OS with System V curses"
-	@echo "sun4       -- for SUN 4 OS"
-	@echo "svr4       -- for SVR4"
-	@echo "snake      -- for HP-UX lt 9.01 (gcc)"
 	@echo "snake2     -- for HP-UX gte 9.01 (gcc)"
 	@echo "snake3     -- for HP-UX (purchased compiler)"
-	@echo "solaris    -- for solaris 2.x"
-	@echo "ultrix     -- for DEC Ultrix"
-	@echo "decstation -- for DEC Ultrix (same as ultrix)"
-	@echo "umaxv   -- for Encore's UMAXV (SVR3.x) "
-	@echo "unixware   -- for Novell's Unixware"
-	@echo "univell    -- for Novell's Unixware"
+	@echo "umaxv      -- for Encore's UMAXV (SVR3.x) "
 	@echo "clean      -- removes all '.o' and 'core' files"
 	@echo "tar        -- runs clean, removes executable, and tars the whole directory"
 	@echo "compress   -- runs tar, then compresses the result"
 	@echo "zip        -- runs clean, removes executable, and zips the whole directory"
 	@echo
-
-# Map some extra commands to existing ones
-unix: generic
-decstation: ultrix
-univell: unixware
 
 DIR_LYDEFS = $(DIRED_SUPPORT) $(DIR_LONG_LIST) $(DIR_PARENT)
 
@@ -231,7 +186,7 @@ DIR_DEFS = $(DIRED_SUPPORT) $(DIRED_ARCHIVE) $(DIRED_TAR) $(DIRED_ZIP) $(DIRED_G
 #SITE_LIBS= # Your libraries here (remove the "#")
 
 # Set SITE_LYDEFS to one or more of the defines for the WWW Library:
-SITE_LYDEFS = $(DIR_LYDEFS) -DEXP_CHARTRANS # Your defines here
+SITE_LYDEFS = $(DIR_LYDEFS) -DEXP_CHARTRANS -I../../../src # Your defines here
 
 # Set SITE_DEFS to one or more of the defines for lynx below:
 SITE_DEFS = $(DIR_DEFS) -DEXP_CHARTRANS # Your defines here
@@ -278,20 +233,14 @@ SITE_DEFS = $(DIR_DEFS) -DEXP_CHARTRANS # Your defines here
 #
 # -DSYSLOG_REQUESTED_URLS
 #
-## if you would like to enable code to detect memory leaks define this in both
-## LYFLAGS (SITE_LYDEFS) and MCFLAGS (SITE_DEFS)
-##
-## -DLY_FIND_LEAKS
-#
 # for installation of local execution links, please see the file userdefs.h
 
-#generic machines with original Berkeley curses
 generic: # NOT-TESTED
 	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
 		LYFLAGS="$(SITE_LYDEFS) -I../../.."
 	cd src; $(MAKE) all CC="$(CC)" \
 		MCFLAGS="" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
+		LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		SITE_DEFS="$(SITE_DEFS)" \
 		WWWINC=$(WWWINC) \
 		WWWLIB="../WWW/Library/unix/libwww.a"
@@ -302,99 +251,10 @@ generic: # NOT-TESTED
 # character file name limit.
 clix:	# NOT-TESTED
 	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -DUSG -DCLIX" \
+		LYFLAGS="$(SITE_LYDEFS) -I../../.. -DUSG" \
 	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-DUSG -DCLIX" \
+		MCFLAGS="-DUSG" \
 		LIBS="-lmalloc -lcurses -ltermcap -lbsd -lc_s \
-		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-# Tested on C3 series under ConvexOS 10.1, CC V5.0;
-# Should work on other C-series
-convex:	# NOT-TESTED (replaces convex-curses, convex-ncurses)
-	cd WWW/Library/convex; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -D__STDC__ -Dunix" \
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-D__STDC__ -Dunix" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-dgux:	# NOT-TESTED
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -DDGUX"
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-DDGUX" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-mips:	# NOT-TESTED
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -systype svr3 -I/svr3/usr/include/bsd"
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-systype svr3 -I/svr3/usr/include/bsd" \
-		LIBS="-lcurses -lnsl -lbsd \
-		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-freebsd: # NOT-TESTED: replaces freebsd-curses, freebsd-ncurses, freebsd-slang
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.."
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-netbsd:  # NOT-TESTED: replaces netbsd-curses, netbsd-ncurses, netbsd-slang
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.."
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-# Tested on DN 3500 & 4500's running Domain O/S 10.4 BSD
-# -Acpu,mathchip may have to be changed on other machines - see man cpuhep
-apollo:	# NOT-TESTED
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -D_BUILTINS -W0,-opt,4"
-	cd src; $(MAKE) all CC="cc" \
-		MCFLAGS="-D_BUILTINS -W0,-opt,4" \
-		LIBS="-lcurses -ltermcap \
-		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a $(MYWWWLIB)"
-
-riscos:	# NOT-TESTED
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.."
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-Dremove=unlink" \
-		LIBS="-lcurses -ltermcap \
-		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-# aka HP-UX
-snake:	# NOT-TESTED
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.."
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-DSNAKE" \
-		LIBS="-lcurses -ltermcap \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		SITE_DEFS="$(SITE_DEFS)" \
 		WWWINC=$(WWWINC) \
@@ -408,7 +268,7 @@ snake2:	# NOT-TESTED
 		-D_INCLUDE_AES_SOURCE \
 		-D_INCLUDE_XOPEN_SOURCE"
 	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-DSNAKE \
+		MCFLAGS="\
 		-D_INCLUDE_HPUX_SOURCE \
 		-D_INCLUDE_POSIX_SOURCE \
 		-D_INCLUDE_AES_SOURCE \
@@ -426,17 +286,7 @@ snake3:	# NOT-TESTED (replaces snake3-curses, snake3-slang)
 	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
 		LYFLAGS="$(SITE_LYDEFS) -I../../.. -Ae"
 	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-Ae -DSNAKE" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-svr4:	# NOT-TESTED
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -DSVR4_BSDSELECT -DSVR4"
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-DSVR4_BSDSELECT -DTRUE=1 -DFALSE=0" \
+		MCFLAGS="-Ae" \
 		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		SITE_DEFS="$(SITE_DEFS)" \
 		WWWINC=$(WWWINC) \
@@ -476,16 +326,6 @@ umaxv:	# NOT-TESTED (replaces umaxv-curses, umaxv-slang)
 		WWWINC=$(WWWINC) \
 		WWWLIB="../WWW/Library/unix/libwww.a"
 
-unixware: # NOT-TESTED (replaces unixware-curses, unixware-slang)
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -DUNIXWARE"
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-DTRUE=1 -DFALSE=0 -DUNIXWARE" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
 #     has a const/volatile bug in its native cc compiler. (don't use it ;)
 sco:	# NOT-TESTED
 	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
@@ -503,157 +343,6 @@ sco5:	# NOT-TESTED
 	cd src; $(MAKE) all CC="cc -belf" \
 		MCFLAGS="-s -DSCO" \
 		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-bsdi:	# TESTED(97/4/15 dickey): replaces bsdi-curses, bsdi-ncurses
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -DBSDI"
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-solaris: # TESTED(97/2/17 dickey) replaces solaris2 solaris2cc solaris2-slang solaris2-slangcc
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -DNGROUPS=16 -Dd_namlen=d_reclen -DSOLARIS2 -DSVR4"
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="" \
-		LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-osf:	# NOT-TESTED: replaces osf-curses, osf-slang
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -Olimit 2000 -DSYS5"
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-Olimit 4000" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-sgi:	# TESTED(97/2/17 dickey) curses, ncurses, slang
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -cckr"
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-cckr" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-linux:	# TESTED(97/2/16 dickey): curses, ncurses, slang
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.."
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-##Various AIX environments
-aix:
-	@echo "Run make again and use \"make aix4\" or \"make aix32\""
-
-# For AIX 4.n, and AIX 3.2.5 with POWER2 architectures, L2 caches,
-# and APAR#IX58890
-aix4:	# NOT-TESTED
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -D_BSD=44"
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-DAIX4 -D_BSD=44" \
-		LIBS="$(LIBS) -lbsd $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-aix32:	# NOT-TESTED
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.."
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="" \
-		LIBS="$(LIBS) -lbsd $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-##ultrix - DEC Ultrix
-ultrix:	# NOT-TESTED (replaces ultrix-curses, ultrix-slang)
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.."
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-##Various SunOS environments
-sun:
-	@echo "Run make again and use \"make sun3\" or \"make sun4\""
-
-# define RESOLVLIB (above) for the "LIBS" entry if needed
-sun3:	# NOT-TESTED
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.."
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-DSUN" \
-		LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-# define RESOLVLIB (above) for the "LIBS" entry if needed
-sun4:	# TESTED(97/2/17 dickey) replaces sun4-curses, sun4-ncurses, sun4-slang
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.."
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-DSUN -DSUN4" \
-		LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-# news - SONY NEWS-OS 4.2.1R
-news:	# NOT-TESTED (replaces news-curses, news-ncurses, news-slang)
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.."
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-# next - Nextstep
-next:	# NOT-TESTED: replaces next-curses, next-ncurses, next-slang
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -DXMOSAIC_HACK"
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-DNEXT" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-# isc - Interactive Unix for i386 and i486 machines
-# According to Robert Salter (salter1@mster.nsbf.nasa.gov),
-#  cc should be used instead of gcc.
-# According to Walter Skorski (walt@clyde.jmp.tju.edu),
-#  -DPOSIX_JC is necessary, else LYBookmark.c never finds out
-#  what a mode_t is.
-isc:	# NOT-TESTED
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -DISC"
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-DISC -DPOSIX_JC" \
-		LIBS="$(LIBS) -linet -lnsl_s -lcposix $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		SITE_DEFS="$(SITE_DEFS)" \
 		WWWINC=$(WWWINC) \
 		WWWLIB="../WWW/Library/unix/libwww.a"

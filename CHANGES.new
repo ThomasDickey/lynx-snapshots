@@ -10,8 +10,684 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+1997-05-24
+* integrate patch JED's mods which support mouse for slang as well as add
+  new functions to encapsulate differences between slang/curses. - TD
+1997-05-20
+* correct 2 occurrences of "me->inFONT == TRUE;" in HTML.c - TD
+* add configure --with-color-style option to merge RP's alpha changes for
+  color styles (this works only with ncurses, since it does not initialize
+  the window background, leaving it null, thereby exploiting a bug in
+  ncurses which sets null backgrounds to a space).  Also some whitespace
+  (and renamed CS to make this build w/o ncurses) - TD
+* test-built with ncurses 1.8.7, 1.9.4, 1.9.9e and 4.0, as well as bsd 4.4
+  curses and slang - TD
+* Tweak of HTFWriter.c so that it does the anti-spoof tests normally
+  done by tempname() (see the 1997-05-19 mods) in all cases for which
+  it changes the temporary file suffix from any of those checked by
+  tempname() itself.  At this point, every way I've thought of for
+  trying to spoof Lynx via links for temporary files is blocked, but
+  people should beat on today's code to see if there's any spoofing
+  strategy I haven't yet blocked. - FM
+* Modified the Lynx Trace Log handling so that it doesn't use actual
+  redirection of stderr via freopen() calls, and restores the original
+  value of stderr during any escape to shell.  This avoids the problem
+  on Unix that sh and ksh send their prompt strings to stderr, and that
+  bash sends both its prompt and command line echo to stderr, so they
+  end up in the log instead of being visible.  I had tested the initial
+  design on VMS and with csh on Unix, and thus didn't notice this
+  foolishness for the other Unix shells.  Anyway, it's OK for all of
+  them now. - FM
+* Tweaked SIGTSTP interrupt handler in the USE_SLANG for-unix code, so
+  that it gets set to SIG_DFL when stop_curses() is called, to prevent
+  strange interferences experienced when ^Z is used while a helper 
+  process is in the foreground. - KW
+* Change in LYForms.c to prevent forced screen refresh after selection
+  from a popup box. - KW
+1997-05-19
+* Recognize linux console F1 key in LYgetch() (applies if -DNO_KEYPAD
+  is in effect, as for all binaries built with slang). - KW
+* Protect LYgetch() against returning raw values of keypad() symbols
+  which are invalid when used later as an index into keymap[],
+  override[], etc. - KW
+* in the USE_SLANG for-unix start_curses(), honor the no_suspend flag
+  if set.  Note that the no_suspend flag cannot be suspected to have
+  the desired effect if lynx is executed from a shell script, unless
+  the shell process forked for the script also ignores the SIGTSTP
+  signal generated (usually) by the ^Z key.  Also if the user is 
+  allowed to execute any helper process (VIEWER, PRINTER, etc.) which
+  does allow suspending while no_suspend is in effect for the Lynx
+  parent process (by overriding the SIG_IGN setting done by Lynx or by 
+  other means), then suspending may still be possible, in addition to
+  strange effects either immediately or when the process or process group
+  is continued (wrong tty and screen state, zombie processes, total
+  hang of the session without any way to interrupt - you get the idea...).
+  Trying to use the suspend restriction in order to prevent users from
+  getting a shell prompt doesn't make much sense anyway when they are
+  allowed access to execute commands which may be interrupted or allow
+  escaping to a shell... - KW
+* Tweak of HTFile.c so that we no longer lose an LYforce_HTML_mode
+  directive if the file is gzipped or compressed and the uncompressed
+  suffix is not mapped to text/html. - FM
+* Modified tempname() in LYUtils.c so that it checks whether files
+  with the current PID and target count already exist, and if so,
+  increments the count until a name for a non-existing file has been
+  created. - FM 
+1997-05-18
+* Mods in LYMainLoop.c and LYClean.c so that Control-G is treated as
+  a synonym for 'n'o in quit confirmation prompts. - FM
+* Mods in LYPrint.c to strip any gzip or compress suffix from the
+  suggested filename, on the assumption that we're deal with a text/html
+  or text/plain file that had a corresponding Content-Encoding and no
+  Content-Disposition: file; filename=name.suffix  header indicating
+  the appropriate filename after uncompression.  This assumption does
+  apply for our current ftp gateway, and for most present-day http
+  servers.  This mod in turn ensures that text/html files which are
+  not being printed as source will have their uncompressed suffixes
+  converted to .txt, indicated that they are rendered. - FM
+1997-05-17
+* Fixed long-standing bug in display_page() of GridText.c.  When it
+  was updating the links structures, it wasn't re-initializing the
+  form element if the links structure is not for a form field. - FM
+1997-05-16
+* Changed the line where a WHEREIS search target should preferably be
+  displayed to the 4th line (not counting the title line).  This can
+  be changed by redefining SEARCH_GOAL_LINE in userdefs.h.
+  SEARCH_GOAL_LINE can also be a simple expression in terms of the
+  variable display_lines, e.g. `#define SEARCH_GOAL_LINE (display_lines/3)',
+  this should then automatically adapt to screen size changes (provided the
+  display system can deal with that...)
+  Note that this this goal line will normally not be used if the next 
+  target, according to the algorithm Lynx uses, is already on the displayed
+  screen.  Also, when the displayed page changes to show a search result,
+  there is no guarantee that it will end up on the line set by 
+  SEARCH_GOAL_LINE.  It should rather be regarded as a maximum.
+  For example the presence of anchors on the line with the target or on
+  the preceding lines will change the positioning. - KW
+* The SEARCH_GOAL_LINE line will also be used for "going to" a link with
+  'g' suffix at the "Follow link ..." prompt, although the algorithm is
+  quite different.  As for a search target, this only applies when Lynx
+  has to position to a different page of the document, and then is only
+  a maximum. - KW
+* Enabled the no-cache setting for the pseudo document Lynx creates for
+  a client-side image map in LYMap.c, for now. - KW
+* Minor typo fix for the proxy authentication mods. - FM
+* Tweak of PRE block handling in HTML.c to ensure an implied paragraph
+  after the block if it is in a list and not followed by an LI. - FM
+* Tweaks of SGML.c and LYCharUtils.c to allow any non-digit to terminate
+  a numeric character reference once at least one digit has been found in
+  the reference. - FM
+* Change in LYUnEscapeToLatinOne() to use isdigit() instead of isalnum()
+  for recognizing numeric character references like LYUnEscapeEntities()
+  does. - KW
+1997-05-15
+* Worked in JED's mods for taking a suspend into account during select()
+  calls. - FM
+* Mods in LYMainLoop.c to not force a cache refresh on a proxy any more
+  when INLINE_TOGGLE, IMAGE_TOGGLE, RAW_TOGGLE are used.  On the other
+  hand, do force a proxy cache refresh after one of the variables relevant
+  for content negotiation `language' or `pref_charset' has been changed
+  from the Options screen, if the current document is from a http, https, or
+  lynxcgi resource. - KW
+* Set HTTP_ACCEPT_CHARSET environment variable for the child process in
+  LYCgi.c if pref_charset is not NULL. - KW
+* (chartrans) Write a META tag with the current display character sets to
+  the files generated for Bookmarks, List, Info, History, and Visited Links
+  pages, so title strings contained in those files will (hopefully) not
+  get erroneously translated again.  Use new function add_META_charset_to_fd()
+  in LUCharUtils for this purpose. - KW
+* (chartrans) makeuctb now sets RawUni to UCT_ENC_8BIT if not otherwise set
+  and if there are char values above 127. - KW
+* (chartrans) Change in HTuncache_current_document() to prevent caching of
+  UCStages info which should be discarded.  Still allow caching for this
+  in the node_anchor for source display, so that a META tag in the parsed
+  HTML can influence the display after using the SOURCE '\' key. - KW
+1997-05-14
+* Don't use title in showlist() if it is empty, to prevent "hidden links"
+  on the List Page itself caused by documents with <TITLE></TITLE>. - KW
+* Changed display_title() in GridText.c to not rely on sprintf() to get
+  the number of blanks right. - KW
+* (chartrans) Added new lynx.cfg symbols ASSUME_CHARSET, 
+  ASSUME_LOCAL_CHARSET, and ASSUME_UNREC_CHARSET.  They are only
+  recognized if compiled with -DEXP_CHARTRANS.  They correspond to the
+  command line options -assume_charset, -assume_local_charset, and
+  -assume_unrec_charset.
+  The default for ASSUME_CHARSET is iso-8859-1 (corresponding to display
+  character set "ISO Latin 1").  If no ASSUME_LOCAL_CHARSET is set,
+  the explicit or default value for ASSUME_CHARSET will also be used for
+  local files.  ASSUME_UNREC_CHARSET has no default.  See added text
+  in lynx.cfg. - KW
+* (chartrans) Changes in LYCharSets.c to HTMLSetCharacterHandling() and
+  HTMLSetUseDefaultRawMode() to support (hopefully) more consistent
+  and user-friendly handling of raw mode and its default.
+  Note that the following description does not apply if the display
+  character set is one of the CJK settings.  In that case, -raw and
+  the corresponding Options setting is used as a CJK toggle as before.
+  Note that the -raw flag is a toggle.  It changes the "raw mode"
+  setting from the default.  The current setting of "raw mode" can be
+  seen on the Options screen, and is also shown in a statusline message
+  when the RAW_TOGGLE key (normally '@') is used.
+  The default depends on the display character set (as previously)
+  but now also on the ASSUME_CHARSET setting (as determined by a setting
+  in lynx.cfg, possibly overridden by -assume_charset on the command 
+  line, or the default iso-8859-1).  When the display character set
+  corresponds to the ASSUME_CHARSET, the default for "raw mode" is ON,
+  otherwise it is OFF.
+  The effect of "raw mode" on the interpretation of documents which have
+  no explicit charset label (from HTTP headers, a META tag, or otherwise)
+  is as follows.  There is an internal "assume charset" which may differ
+  from the user-specified ASSUME_CHARSET value.  When "raw mode" is set 
+  ON, the internal variable is set to correspond to the display character
+  set.  When "raw mode" is set OFF, the internal variable changes to
+  the user-specified ASSUME_CHARSET or, if that also corresponds to the
+  display character set (so that otherwise there would be no change),
+  reverts back to the iso-8859-1 Web default.
+  Raw mode doesn't imply total rawness.  HTML character entities may
+  be expanded and translated with either setting, 8-bit characters which
+  are inappropriate for the display character set will not be sent to
+  the terminal.  For a "more raw" setting, try the "Transparent" pseudo
+  display character set. - KW
+1997-05-13
+* Changed the compilation default in userdefs.h for USE_TRACE_LOG
+  to FALSE, for now. - KW
+* Code for "fixing" of relative http and https URLs which start with a 
+  ../ segment from FM added, but it has to be enabled with the new
+  lynx.cfg symbol STRIP_DOTDOT_URLS (default currently set to FALSE).
+  See FM's description under 1997-04-23. - KW
+* Changed the test for dot segment fixing in LYLegitimizeHREF() so
+  that now (if enabled) it also applies when the http or https base URL
+  in effect does have a non-empty path but without any slashes in it
+  (beyond the initial one between host and path).  The test was too narrow
+  before and did not recognize this case, so that an unmodified URL with
+  ../ in it would still be sent to the server and without generating a
+  statusline message. - KW
+* Tweak of case LYK_REFRESH: in LYMainLoop.c so that the REFRESH command
+  still invokes an obligatory, complete refresh of the screen for slang
+  on Unix with the new LY_SLclear() function (see 1997-05-09 mods),
+  by using scrollok() if USE_SLANG is defined. - FM
+* Changed the local variable name, lines, in follow_link_number() of
+  LYGetFile.c to nlines, to deal with the AIX 4.2 bug of treating lines
+  as a macro.  Also changed the variable name, pages, to npages for
+  logical complementarity (they both refer to the total number). - FM
+* Tweaks of the Lynx Trace Log handling to deal with reloads when the
+  HText structure for the log has been dumped.  Made the first letter
+  of the filename uppercase (Lynx.trace), complementary to Lynx.leaks.
+  Eliminated the log from the Visited Links Page so it can't be sought
+  there as a forward link.  Use the History Page if you want to 'd'ownload
+  the log, or use the 'p'rint option while viewing the log.  Note that
+  suffix maps do tail matching, and thus the so-called suffixes need not
+  begin with a dot.  If you want to use an external viewer for the log,
+  you can put:
+  	SUFFIX:Lynx.trace:application/x-LynxTrace
+  	VIEWER:application/x-LynxTrace:most +s %s
+  in your lynx.cfg, or their equivalents in your mime.types and mailcap
+  files. - FM
+* Tweaks in LYMainLoop.c to set newdoc.title for various special pages
+  generated by Lynx (History Page, Info Page, etc.) and when following
+  a link. - FM
+* Small change to the heuristics for New_DTD in start_element() 
+  in SGML.c (try a bit more to close containing element if it's the
+  same tag) - KW
+1997-05-12
+* Added support for proxy authentication. - AJL & FM
+* Updated follow_help.html to indicate that 0 is the universal
+  F_LINK_NUM mapping for invoking the "Follow link (or ...) number:"
+  prompt. - FM
+1997-05-11
+* Tweaks in LYMainLoop.c to ensure that the LYforce_HTML_mode flag is
+  reset reliably, so it doesn't carry over to requests for text/plain
+  documents, as it was doing under some circumstances in the vanilla
+  code, e.g., when a bookmark file was used as the startfile via a
+  file://localhost/path URL rather than via the -book switch. - FM
+* Very minor change in Lynx_users_guide.html, added two words - KW
+1997-05-10
+* Fixed a typo in statusline() of LYUtils.c.  The check for whether
+  the string is zero length before bothering to convert CJK multi-bytes
+  was checking a holding buffer instead of the string. - FM
+* Fixed a bug in LYHandleMETA() of LYCharUtils.c.  The check for a
+  URL following the SECONDS value in REFRESH directives was not
+  taking into account that an EOL might follow the digits for the
+  SECONDS value. - FM
+* Changed the behavior of boolean_choice() in LYOptions.c so that the
+  cursor is positioned immediately at the option display line instead
+  of staying at the statusline instructions until an initial entry is
+  made, and modified the statusline instructions accordingly. - LE & FM
+* Added a check for a NULL pointer in the LYCookie.c code for blocking
+  sharing of SSL encrypted cookies with http servers, based on a patch
+  from RT, and added a comment on why code for a block based on the
+  scheme is there, despite its being redundant with the current blanket
+  restriction based of the ports. - FM
+* Mapped 0 to F_LINK_NUM (as suggested by KW), so that 0 invokes the 
+  "Follow link (or goto link or page) number:" prompt under all 
+  circumstances (but with the 0 not treated as the first digit of 
+  the number entry).  That's a better way
+  to do it, because then the F_LINK_NUM command and explanation always
+  appears in the "Current Key Map" display, and only the mappings of
+  numbers to functions drop out when going from NUMBERS_AS_ARROWS to
+  LINKS_ARE_NUMBERS mode (as they should, 'cuz the numbers no longer
+  are mapped to functions; though maybe they should stay mapped to
+  functions now that we have an explicit command key for invoking the
+  prompt; something to think about...). - FM
+* Updated the PROBLEMS file to indicate that you should try changing
+  -lresolve to -lbind if you have upgraded to the bind-8.1 or later
+  library on a Sun system and keep getting the message "Alert!:  Unable
+  to connect to remote host". - FM
+1997-05-09
+* Typo fix in follow_help.html. - FM
+* Added an LY_SLclear() function in LYCurses.c as a more efficient
+  substitute for slang of the curses clear(), based on a patch from
+  JED. - FM
+* Added a USE_TRACE_LOG compilation (userdefs.h) symbol and -tlog command
+  line toggle of the compilation default (normally TRUE), for directing
+  syserr messages to a lynx.trace file in the user's home directory when
+  TRACE mode has been turned on (either via the -trace command line switch,
+  or the TOGGLE_TRACE (Control-T) command.  Also added a TRACE_LOG command
+  (normally ';') for viewing the "Lynx Trace Log" (lynx.trace) at any time,
+  if one has been initiated during the current session.  The trace log
+  feature is disabled automatically in anonymous or validation accounts,
+  and should not be used in any account which could have different users
+  simultaneously.  The mods work well to the extent I've exercised them
+  thus far on VMS and for the solaris2 target, but possibly need more
+  refinements, depending on the behavior for other Unix flavors of
+  freopen(), which is used for redirecting stderr to the log.  Updated
+  lynx.man, lynx.hlp, and the online 'h'elp to describe these new
+  features. - FM
+1997-05-08
+* Made the handling of hidden links dependent on a new command line
+  option.  With -hiddenlinks=listonly hidden links are only shown on
+  'l'ist screens and listings generated by -dump or from the 'p'rint
+  menu, but appear separately at the end of those lists.
+  With -hiddenlinks=ignore they don't appear even in listings.
+  With -hiddenlinks=merge hidden links are treated as before,
+  i.e. they show up as bracketed numbers if LINKS_ARE_NUMBERED is on,
+  and are numbered together with other links in the sequence of their
+  occurence in the document.  The default is -hiddenlinks=listonly.
+  Changed the new follow_help.html file accordingly.
+  This may help obviate an apparent need to call something a bug which
+  others regard as a feature... - KW
+* Function HText_AreDifferent() updated as in FM's code, but still 
+  unused. - KW
+1997-05-07
+* Added another argument in follow_link_number() of LYGetFile.c for
+  returning the number entered at the "Follow link (or page) number:"
+  prompt to the mainloop(), and modified the statusline error messages
+  that may be issued from the mainloop() in conjunction the with 'g' or
+  'p' suffixes so that they report that number when appropriate. - FM
+* Changed the prompt to "Follow link (or goto link or page) number:" - KW
+* Tweaked case HTML_DD: in HTML.c so that it checks whether a wrap
+  has just occurred naturally before imposing a newline for DD start
+  tags.  Without that check, seemingly random, extra newlines could
+  occur in the DL/DT/DD blocks. - FM
+* Created a follow_help.html for the keystroke_commands subdirectory
+  of the online 'h'elp, describing the "Follow link (or page) number:"
+  features, and added links to it in Lynx_users_guide.html and
+  keystroke_help.html. - FM
+* Changed the help description according to what is implemented here - KW
+1997-05-06
+* Further tweaked KW's mainloop() tweak (see yesterday's entry), so that
+  newdoc.link is reinitialized properly when we're going to, but not
+  ACTIVATE-ing, a link in the current page due to a 'g' suffix for a
+  "Follow link (or page) number:" entry.  Otherwise, if the number with
+  a 'g' suffix was used to make the last link on the current page the
+  current link, and then a NEXT_LINK command was used, one could end
+  up on a link beyond the first one in the next page.  Also added a
+  statusline message if the 'g' suffix is used with a number which
+  corresponds to a link that already is current. - FM
+* Tweaked yesterday's LYList.c mods so that an OL with the CONTINUE
+  attribute is used when a "Hidden links:" list is appended to a
+  "Visible links:" list and NUMBERS_AS_ARROWS mode is on.  This allows
+  you to see the number to enter at "Follow link (or page) number:"
+  prompts, as when LINKS_ARE_NUMBERED mode is on. - FM
+* Mods in HTML.c for LI and LH handling so that a pointless wrap will not
+  occur at the spacer following the bullet in UL blocks or the Arabic
+  number, Roman numeral, or upper- or lowercase letter in OL blocks if
+  the subsequent text has no spaces, itself, up to the right margin.
+  In such cases, that text now stays on the initial LI or LH line, and
+  wraps at the right margin to the left indentation for a second or
+  greater line in the LI or LH. - FM
+* Changes to avoid memory leaks in LYCookie.c - KW
+* Escape '<' and '>' characters (using the LYEntify functions) in URL
+  strings written to the temporary files for LIST and INFO screens, to
+  avoid invalid HTML and corrupted display as a result of URLs which
+  contain these characters (although they shouldn't) and have not been
+  escaped earlier. - KW
+* Changed the label for the currently selected link from "Filename:"
+  to "URL:", and fixed an alignment glitch for the 9th item on the
+  History and Visited Links pages. - KW
+* Changed an "8-bit" occurring in HtInit.c to "8bit", tweaked LYKeymap.c
+  comments. - KW
+1997-05-05
+* Added HText_AddHiddenLink(), HText_HiddenLinkCount(), and
+  HText_HiddenLinkAt() functions in GridText.c for keeping track of the
+  addresses (URL, plus fragment if present) for links that were converted
+  to hidden by HText_endAnchor() due to their having no visible link name,
+  and modified showlist() and printlist() in LYList.c so that if any hidden
+  links were create during the rendition, the "References in this document:"
+  menu for the 'l'ist command or appendix on dumps segregates and clearly
+  labels the visible versus hidden links. - FM
+* Plugged a memory leak in LYEntify() of LYCharUtils.c. - FM
+* Modified experimental DTD info to not close anchors when an invalid 
+  P, H1-H6, or ADDRESS start tag is encountered, and to change error
+  recovery for P and MAP. - KW
+* Modified experimental DTD info and HTML.c to not close PRE when
+  an invalid FORM start tag is encountered, and to use the appropriate
+  handling for preformatted text if PRE is in effect but is not the top 
+  element on HTML.c's stack.  The HTStyle structure's freeFormat (which 
+  wasn't used anywhere before) is now used as one test whether we are 
+  within preformatted text, also corrected the style setting of freeFormat
+  for PRE in DefaultStyle.c. - KW
+* Changed internal gateways (in HTNews.c, HTFile.c, HTWAIS.c, HTWSRC.c)
+  to end LI, DT, and DD elements if they are not declared SGML_EMPTY,
+  so that HTML.c's stack won't get overloaded in this case. - KW
+* Tweaks in mainloop() handling of DO_GOTOLINK_STUFF and DO_GOTOPAGE_STUFF.
+  Going to a link with the 'g' suffix and then immediately ACTIVATing that
+  link could previously show the wrong page of the new document, since
+  newdoc.line was not being reset. - KW
+1997-05-03
+* (chartrans) Now always check for LYlowest_eightbit[current_char_set]
+  near the top of HText_appendCharacter(), to prevent writing C1 control 
+  chars to the terminal if they are not valid as displayabable characters 
+  according to the selected "display character set" Option.
+  All this should be handled earlier in processing, and this check may
+  disappear again for testing, but somebody asked for it... - KW
+* (chartrans) Small changes to README files. - KW
+* In the section of HTUtils.h for non-autoconf builds, don't set 
+  HAVE_KEYPAD or HAVE_TTYTYPE if USE_SLANG is defined. - KW
+* Modified HText_LinksInLines() to not count hidden form fields. - KW 
+1997-05-02
+* Fixed a bug in LYAddImageMap() of LYMap.c which could cause multiple
+  insertions of the same MAP into the LynxMaps structure, and crashes
+  on some systems due to the consequent multiple FREE()'s at exit. - FM
+1997-05-01
+* More mods in HTML.c, LYCharUtils.c and GridText.c for rational handling
+  of potentially wrapped form fields in PRE blocks.  We now artificially
+  wrap the line if the form field would start within 6 columns from the
+  right margin.  This makes sure that editing windows and the highlighted
+  segments of submit or reset buttons will not ever be ridiculously short,
+  and is homologous to our use of a collapsible space before input fields
+  and buttons when not in PRE blocks to promote a wrap there instead of
+  within the fields or buttons. - FM
+* Expanded the WHEREIS query support so that it also locates the values
+  of form fields within the current document and repositions or pages
+  accordingly, as for normal (Anchor) links and for text strings.  Note
+  that if the hit was for an OPTION value in a retracted SELECT popup,
+  you are positioned on the retracted window, and must pop it up and
+  search again to be positioned on the OPTION value with the hit, unless
+  it already is the selected OPTION.  The mods are hairy enough without
+  trying to do the latter automatically, at least for now. - FM
+1997-04-30
+* Quote the URL for external command (not for VMS or DOS or Windows)
+  to avoid dangerous chars and shell spoofing. - KW
+* Escape characters properly when constructing URLs from filenames
+  in LYConvertToURL.  If a string given for startfile, home page, or
+  a goto command which does not already have the form of an absolute 
+  URL starting with an URL scheme and which does not start with '~' 
+  (but may start with '/') specifies an existing file or directory in 
+  valid Unix-like format for the native filesystem, i.e. without using
+  escaping, it gets URL-escaped, otherwise it is assumed to already
+  be URL-escaped. - KW
+1997-04-29
+* Updated RP Styles 0.2 code, don't allow comma as separator between
+  fg and bg colors after all, fix the LYNX_VERSION string generation
+  in userdefs.h to have `-Styles' appended *within* the quoted string. - KW
+* Added support for a 'p' suffix, like the 'g' suffix for making a link
+  number the current link rather than ACTIVATE-ing it,
+  but for displaying the page indicated by the number preceding the
+  'p' suffix entered at the "follow link (or goto link or page) number:" 
+  prompt.  [...]  If the number
+  entered at the prompt is '1' or less followed by the 'p' suffix, or only
+  'p' is entered, you get the same behavior as for the HOME command.  If
+  the number is equal to or greater than the number of pages, you get the
+  last page displayed as you would if you had used successive PAGE_DOWN
+  commands from the HOME position to reach it.  This differs from the END
+  command, which fills the screen with lines from the end of the document
+  if you are not already displaying the end of the document.  Note that if
+  you enter a number without a suffix (to ACTIVATE the link with that number)
+  or with the 'g' suffix (to make the link with that number the current link)
+  it must correspond to a valid link number or an error statusline message
+  will be issued, in contrast to the 'p' suffix for which an out of range
+  number is treated as a request to display the first or last actual page in
+  the current document. - FM
+* Fixed some typos in lynx.man. - LWV
+* More modifications of the anchor counting code for HTGetLinkInfo() in
+  GridText.c so that it properly skips hidden form fields and anchors
+  without selectable text. - KW
+* More modifications in GridText.c and HTML.c so that it deals rationally
+  with submit or reset button values, and the underscore placeholders for
+  other form fields, when in versus not in PRE blocks.  The entire submit
+  or reset button values are now always displayed, whether or not a portion
+  of it was wrapped, but we still can only highlight the portion before the
+  wrap to indicate a link for submission of the form or for resetting the
+  form field values. - FM
+* Undid some mysterious changes in SIGHUP setting (SIG_IGN vs. SIG_DFL)
+  which had sneaked in in connection with adding the NOSIGHUP
+  conditional. - KW
+* Tweaks to New DTD's extra info for CENTER and H1..H6 - KW
+* New function HText_AreDifferent() from FM added to GridText.c, but
+  not used yet. - KW
+* Tweaks to WB's additions for external command: use strncasecomp, add
+  LYExtern.o to src/makefile.in, changed test for empty command. - KW
+* Changed LYKeymap.h and LYKeymap.c so they agree about the symbols
+  assigned to the new keys (SWITCH_DTD, EXTERN). - KW
+* correct minor syntax err that caused SCO 3.x to fail make-include
+  autoconf test.  also, eliminate whitespace before '#' that causes
+  compile-fail on K&R compilers. - TD
+1997-04-28
+* Updated lynx_url_support.html so as to make clear that the offer to
+  include the currently displayed document with right-angle-bracket
+  prefixing for mailto, newsreply, and snewsreply URLs is made only if
+  the user has defined an external editor via the Options Menu, and that
+  the user is expected to edit this inclusion so that it retains only
+  those passages relevant to the email or followup message which the
+  user will add. - FM
+* Tweak of INPUT handling in HTML.c so that we use nbsp instead of any
+  spaces when loading a submit or reset button's actual value instead
+  of a series of underscores into the HText structure, so that we
+  still promote a wrap, if needed, at the space we ensured would be
+  present before each INPUT. - FM
+* Made first_option a structure member rather than a static variable 
+  in HTML.c - KW
+1997-04-27
+* Tweak of Control-C and Control-G handling for popup_options() in
+  LYForms.c.  They were being sought improperly as command keys rather
+  than as raw keyboard entries.  Note that only Control-G should be
+  used as "cancel" within popup windows on Unix, because Control-C
+  is not being trapped to a handler as on VMS. - LE & FM 
+* Tweak of the anchor counting code for HTGetLinkInfo() in GridText.c
+  so that it takes form fields into account when making a link current
+  based on a "Follow link number" entry with the 'g' suffix.
+  Also added comments to that code. - KW
+1997-04-25
+* Added information in the "Lynx bookmarks" section of the Users Guide
+  about appropriate versus unsupported modifications when editing the
+  bookmark files. - FM
+* RP Styles 0.2 fixed a bit and brought up to current experimental code 
+  level (no autoconfig or simple-curses, only older version of Wayne's 
+  mods, maybe something else is missing, too).  No documentation, no
+  detailed checking, no real cleanup.  Makefile slightly adapted,
+  but still needs changing for new systems - see comments there. - KW
+1997-04-24
+* Tweaks for enhanced mouse support in Win32 and hooks for 386 which
+  doesn't have mouse support yet. - WB
+* External command added.  See LYExtern.* in src and lynx.cfg.
+  You need to define USE_EXTERNALS to compile this in. - WB
+1997-04-23
+* Modified LYCharUtils.c, HTML.c and LYMessages_en.h so that if a
+  partial reference (HREF or SRC value) would be resolved to an http
+  or https URL which has only two dots as the first symbolic element in
+  the path (e.g., http://host/../foo.html), such that the server would
+  reject the request, that element is excluded from the resultant URL,
+  but a statusline message is issued (once per document) about a bad
+  partial reference, as immediate feedback which might lead to the
+  document provider correcting the bad partial reference(s).  We still
+  retain that first symbolic element, in compliance with the IETF RFCs
+  and IDs for resolving URLs, with other URL schemes (e.g., ftp). - FM
+* Added a skip_stack int to the HTML.h struct _HTStructured, to use
+  for flagging that the next call to HTML_start_element or 
+  HTML_end_element is an internal shortcut and should skip pushing
+  or popping the HTML.c paragraph style stack even for elements
+  that are not declared SGML_EMPTY.  Added a SET_SKIP_STACK macro
+  to HTML.c to set the flag, use it. - KW
+* Changes to HTML.c to better deal with a number of elements which may
+  or may not have been declared SGML_EMPTY in HTMLDTD.c:
+  if the last stacked element is HTML_OPTION, treat text as for
+  HTML_SELECT in HTML_put_character and HTML_put_character and 
+  HTML_put_string.  Added handling code for </P> to HTML_end_element
+  (similar but not identical to that for P in HTML_start_element).
+  Added check whether a SELECT is still open to FORM handling in
+  HTML_end_element.  Added check whether a FORM is open to SELECT
+  handling in HTML_end_element.  Added cases for end tags of
+  TABLE-related elements (TR, THEAD, TFOOT, TBODY, COLGROUP, TH, TD)
+  and of DT, DD, LH, LI, FONT, OVERLAY to the switch in
+  HTML_end_element, currently just break from the switch. - KW
+  Some tweaks and corrections to the additional element info and
+  to the content types used with New_DTD, in HTMLDTD.c.  Made
+  OPTION non-empty. - KW
+* Now changed the tags_old[] in HTMLDTD.c, which is used with the
+  switchable "old" SGML parsing, to follow the changes for A, B, 
+  BLINK, CITE, EM, FONT, I, STRONG, and U mentioned in the entry
+  of 1997-04-15.  These, together with FORM and P, are all declared
+  as SGML_EMPTY now when the "old" SGML parsing is in effect, but
+  not with new parsing. - KW
+* Changes to LYMail.c and LYPrint.c to send Content-Transfer-Encoding
+  headers and/or a charset parameter when mailing, based on idea from
+  Hynek Med.  Don't use charset if we only have 7-bit characters
+  anyway.  If compiled with EXP_CHARTRANS, use MIME name corresponding
+  to display character set if it looks valid (not "x-"), otherwise
+  only an explicitly given document charset.  In the chartrans case,
+  don't send charset parameter for CJK since it may be wrong... - KW
+* Added TRACE output to UCAuto.c - HM
+1997-04-22
+* refined check for slang libraries/headers by checking if $CFLAGS has been
+  set so that slang.h is in the search path - TD
+* add check to allow use of broken ncurses 1.9.9e's color - TD
+* add check for NGROUPS, TRUE, FALSE macro definitions - TD
+* remove top-level makefile.in targets that can be combined with the generic
+  target (more work required on the remaining ones) - TD.
+* Plugged memory leak in deleteLinks() of HTAnchor.c. - KW
+* When dumping or outputting a rendered document via the 'p'rint menu,
+  Lynx would use the underscore placeholders for submit/image/reset
+  buttons as for other INPUT fields.  We now load the values of
+  submit/image/reset buttons instead of placeholders into the HText
+  structure, so the values will be seen when dumping or outputting
+  via the 'p'rint menu.  See the comments under case HTML_INPUT: in
+  HTML.c for the still less than optimal things that happen if a
+  wrap occurs within the INPUT value or placeholder strings, as might
+  happen in PRE blocks, or for strings wider than the screen. - LE & FM
+* SGML_abort() did not free memory used by the SGML.c parser stack.
+  Now it does, but still doesn't call HTML_end_element() for the
+  stacked elements (it's an abort after all...) - KW
+1997-04-21
+* Tweaks of the 1997-04-11 and 1997-04-09 mods in HText_endAnchor() of
+  GridText.c so as to take possible wrapping of Anchor content into
+  account when deciding whether or not to implement the Anchor as an
+  ACTIVATE-able link. - FM
+* New SGML.c parser, and new HTMLDTD.c with additional element info.
+  Extra content information for each tag is now included in the
+  HTTag structure, and given in an extended tags_new[] table in
+  HTMLDTD.c.  Modified start_element() and end_element() in SGML.c
+  to perform some heuristic wind-downs of the parsing stack, based
+  on the extra element info. - KW
+* Revert treatment of some tags which were treated as SGML_EMPTY
+  before to their "natural" content model.  No changes made to
+  HTML.c to accomodate this change, so results may differ where
+  HTML.c relies on previous hacks or has now handling code for
+  end tags of elements which were previously SGML_EMPTY. - KW
+* Made SGML parsing switchable between old and new HTMLDTD info
+  and SGML.c code, controlled by a New_DTD global variable and
+  LYK_SWITCH_DTD toggle key.  Use (temporarily?) ^V for the toggle key.
+  This is not yet changable via command line, lynx.cfg, etc., and the 
+  default is New_DTD==YES (so that it gets tested :-) ). - KW
+* Made some of the error messages before exit in LYMainLoop.c and 
+  LYMain.c go to stderr instead of stdout, but only for UNIX and,
+  in the case of the LYMainLoop.c messages, only if
+  dump_output_immediately was in effect. - KW
+1997-04-20
+* Tweaks in LYCharUtils.c to bind META CONTENT to a header value only
+  via an HTTP-EQUIV attribute (i.e., not via a NAME attribute). - FM
+* Mod in HTAccess.c to ignore the anchor's no_cache element if we're
+  seeking a position in the currently loaded document. - FM
+* Commented out the above change in HTAccess.c.  There's a more complete
+  mechanism for it already in this code... - KW
+* Fixed a typo in the bookmark file lead text. - DK
+1997-04-19
+* Changed the inappropriate StrAllocCat() to StrAllocCopy() for
+  loading the XLOADIMAGE_COMMAND in LYReadCFG.c. - PC
+1997-04-18
+* Based on recent discussions in www-html@w3.org, added HY and SHY
+  to the DTD (treated as synonyms; one or the other is most likely
+  to be used in future HTML specs, so for now, we support both), as
+  markup equivalent to the named entity &shy; and numeric character
+  reference &#173; (soft hyphen).  Note that Lynx implements soft
+  hyphens as specified in IETF RFC 2070 (link "HTML i18n" in the
+  Users Guide).  Use of a tag instead of entity is preferable for
+  a soft hyphen because browsers which do not support soft hyphen
+  will ignore it as an "unknown tag" instead of inappropriately
+  inserting a hyphen or displaying the raw entity.  Also added WBR,
+  which is handled like soft hyphen (indicating a permissible wrap
+  point), but does not insert a hyphen at the wrap. - FM
+1997-04-17
+* Mods in HTML.c, HTML.h, and LYMessages_en.h to issue an HTML stack
+  overrun message only once per document, and as a statusline message
+  if not in TRACE mode, and to check in HTML_end_element() for
+  correspondence between the SGML and HTML stacks if an overrun should
+  occur. - FM
+* Corrections in HTML.c for the bounds checks associated with DIV and
+  CENTER nesting levels, and for an HTML stack underrun. - KW
+* Plugged a memory leak under case HTML_IMG: of HTML_start_element() in
+  HTML.c, and removed an inappropriate if(){} in HText_endAnchor() of
+  GridText.c. - FM & KW
+* Modified the lead text created for bookmark files in LYBoomark.c so
+  that it indicates that an editor can be used to delete or reorder
+  the links, but that the format within lines should not be changed,
+  nor other HTML markup added.  Note that the new lead text will be
+  used only when new bookmark files are created via the 'a'dd bookmark
+  link command.  A new bookmark file is not created if the one being
+  sought already exists, so existing ones will still have the old
+  lead text. - FM
+1997-04-16
+* Extensive changes to try to keep track of whether a document (or 
+  a location within it) was reached by an internal (fragment-only)
+  URL reference or not.  The basic idea is to be serious about I-D
+  (currently) draft-fielding-url-syntax-04.txt.  
+  URL references starting with '#' are always to the current
+  document (from which the reference is made). This leads to a
+  lot of hackery in HTML.c, LYMainLoop.c, LYHistory.c, etc. etc...
+  to distinguish a doc that was reached by an "internal" reference
+  from others.  But it seems necessary to keep track of how the
+  reference to a fragment was specified, whether with a non-empty
+  "real" URL (possibly relative) preceding the '#' or without it, 
+  all the way way from the HTML parsing to the mainloop.  Only then
+  can the mainloop decide to not start a new retrieval for an internal
+  reference without skipping a new retrieval if a full URL reference
+  with fragment is made to a location in the same document (which
+  may be non-cachable or the result of a POST)...
+  This code prevents unnecessary/inappropriate POST form resubmissions
+  on following an internal link in a POST response, as they are
+  present for example in WebTechs validation results. - KW
+* A "Goto numbered link" feature.  The user interface could be improved...
+  Start typing the link number, then add 'g' before hitting enter.
+* Some improvements to WHEREIS search.  Will not always position
+  found string on first line (details depend on whether anchors are
+  present, usually will position in top third of screen), and avoid
+  some unnecessary screen updates. - KW
 1997-04-15
-----------
+* Miscellanous additional tweaks in HTML.c for more robust error recovery
+  from bad HTML involving emphasis or style elements (B, BLINK, CITE, EM,
+  FONT, I, STRONG, and U), or HREF-less NAME-ed Anchors without matching
+  end tags. - FM
+* Modified the declarations in HTMLDTD.c and code in SGML.C, HTML.c, and
+  GridText.c to handle A, B, BLINK, CITE, EM, FONT, I, STRONG, and U
+  container elements homologously to the modified handling of FORM (see
+  1997-04-05 mods) so that if they are invalidly interdigitated or have
+  spurious end tags in the markup, substitutions of the "expected" end
+  tags by the SGML.c stack-based parser will not be made, and without
+  messing up the HTML.c stack-based parser.  Appears to work reliably
+  for all of the elements, and to be reasonably crash safe (hopefully
+  as safe as the vanilla v2.7.1), but there are no guarantees. - FM
+* Only *some* (most?) of the changes described in the above two
+  entries are used, as far as they change HTML.c.  Not yet using the
+  changes to HTMLDTD.c and SGML.c. - KW
 * refined logic of SVr4 curses color support to test the no_color_video
   attribute - TD
 * ifdef'd NCURSES_MOUSE_VERSION logic to allow build with ncurses 1.9.4 - TD
@@ -29,15 +705,95 @@ file) are duplicated here. - KW]
 * add config.guess & config.sub to allow specialized host-type checks - TD
 * guard against redefinition of NO_FILIO_H - TD
 * use new autoconf macro CF_SYSTEM_MAIL_FLAGS /jes
-
+1997-04-14
+* Tweaked LYAddImageMap() in LYMap.c so that it removes all pre-existing
+  AREA element entries when updating MAP element content, and set the
+  no_cache anchor element in LYLoadIMGmap() so that the updated MAPs
+  always will be used when rendering. - FM
+* Not using the no_cache change from last entry, until further 
+  investigation. - KW
+* Removed two spurious lines under case LYK_PRINT: in LYMainLoop.c
+  (from an old cut and paste from case LYK_HISTORY: done too late
+  at night 8-). - FM
+1997-04-13
+* Modified the handling of BASE for resolving HREFs in relation to MAP
+  and AREA elements, and USEMAPs in IMG and OBJECT elements.  The
+  formally released code was treating such links equivalently to the
+  handling of fragments for positioning the display to ID-ed elements
+  or NAME-ed Anchors, and assuming they're in the same document if the
+  associated HREF value begins with a '#', rather than resolving versus
+  the BASE, and was always resolving versus the BASE for MAP ID or NAME
+  attributes, and for the AREA HREFs in MAP content.  We now always
+  resolve the MAP ID or NAME attributes versus the current stream's
+  address (since the MAP must be in it or we wouldn't be handling it)
+  [...] According to the
+  original draft and the current HTML 3.2 Proposed Standard,
+  MAPs need not be in the same document as the IMG or OBJECT elements
+  which specify links to the MAPs.  Because MAPs are "deferred objects",
+  they logically should be placed above any IMG or OBJECT elements which
+  reference them in the same document (as is done for SCRIPTs), but this
+  isn't stated in the specs, nor always done in practice.  [...]
+  ([A]uthors who place the MAPs further down in the same document should be
+  informed about "deferred objects" and encouraged to move them up 8-). - FM
+* Use logical extension of the rules for HREF references also for
+  USEMAP references to MAPs: relative URL references are resolved with
+  respect to a BASE element if one is present in the document where they
+  occur, unless they are URL references without a URL, i.e. only a
+  fragment starting with '#'.  In the latter case they are taken as
+  internal references referring to a MAP in the same ocument where
+  the USEMAP occurs, whether the MAP occurs before the USEMAP (as it
+  should, according to previous entry) or after the USEMAP. 
+  HREF's in AREA elements follow the same rules. - KW
+* Fixed bug in HTML_free() for the case when LYMapsOnly is set.  We
+  didn't create an HText structure for the stream (just scanned it for
+  MAPs and processed them into LYMap.c's LynxMaps structure), nor do
+  we want to create a blank one (as was being done) since we didn't
+  render the stream, nor would we have a me->target set.  So we just
+  free any me elements that might still be allocated (though they
+  should have been freed already), and return rather than continuing
+  through the rest of the HTML_free() code. - FM
+1997-04-11
+* Fixed bugs in Gridtext.c and HTML.c which could cause mishandling
+  of anchors in LINKS_ARE_NUMBERS mode if a line wrap occurred in
+  the numbered bracket or the anchor content following the bracket,
+  and failures to suppress the numbered bracket if the anchor content
+  was empty due to ALT="" in an IMG tag, or if Lynx was configured or
+  toggled to suppress the link for the server-side image map if both
+  ISMAP and USEMAP attibutes were present in the IMG tag. - FM
+* Only using the number-removing code under additional conditions:
+  ISMAPs which appear together with USEMAPs and which are suppressed
+  with LYNoISMAPifUSEMAP in LINKS_ARE_NUMBERS mode. - KW
+* Extended the disk_save restriction to the print menu as well as
+  the download menu, and accordingly updated lynx.hlp, lynx.man, and
+  Lynx_users_guide.html. -  NHE & FM
 1997-04-09
 * Many changes to further the Win32 and 386 ports.  An emulation of
   the HTVMS_ calls was used to try and cover all the DOS'izms.
   A specialized ifdef for pdcurses color mapping added.  Some keypad
   tweaks.  More generalized process spawing.  .lynrc is lynx.rc for 386.
   - WB
+* Tweak to ensure that a newline isn't inserted by virtue of a
+  FORM start tag if it's in the first line of a list element and
+  no text precedes it other than a UL's bullet or OL's number
+  on that line. -  FM
+* Added pauses for the "Bad HTML" statusline messages under cases
+  HTML_HTML and HTML_BODY in HTML_end_element(), and eliminated
+  their checks for an unclosed FORM because we no longer expect
+  that to cause a serious problem. - LE & FM
+* Added a NO_ISMAP_IF_USEMAP configuration symbol and -ismap
+  command line toggle for suppressing inclusion of a link for the
+  server-side-image-map if an IMG or OBJECT element has both ISMAP
+  and USEMAP attributes such that a client-side-image-map link is
+  created.  Updated lynx.man, lynx.hlp and Lynx_users_guide.html
+  accordingly. - FM
+* Fixed a glitch in HText_endAnchor() of Gridtext.c which could
+  cause dangling Anchors in LINKS_ARE_NUMBERED mode if the Anchor's
+  content was handled in a manner which caused it to become zero
+  length. - FM
 * Moved handling for NEWS_POSTING in LYReadCFG.c to the right place,
   so that it can actually have an effect. - LWV
+* Typo fixes for the comment concerning NO_ANONYMOUS_EMAIL in
+  userdefs.h - NHE & FM
 1997-04-08
 * New translation table koi8r_uni for KOI8-R charset.  Lynx can now
   translate between iso-8859-5 and KOI8-R, at least for the cyrillic
@@ -83,6 +839,7 @@ file) are duplicated here. - KW]
   submit buttons, have been processed.  Should be reasonably crash
   safe (hopefully as safe as the vanilla v2.7.1), but there are no
   guarantees. - FM
+1997-04-04
 =======================================================================
 ---  Release of Lynx2-7 + BUGFIXES as Lynx v2.7.1 (April 4, 1997)   ---
 -----------------------------------------------------------------------
@@ -140,7 +897,7 @@ file) are duplicated here. - KW]
   the startfile URL always to be added to the goto buffer, even if
   it had POST content such that it could be resent inappropriately
   as a GET request via the goto buffer. - FM
-* Added a bsdi-slang target to the Makefile. - LE
+* Added a bsdi-slang target to the Makefile. - Laura Eaves
 1997-03-26
 * Changed highlighting of strings found by a WHEREIS ('/') search.
   Now uses Christmas tree attribute combination ("all bits are on"),

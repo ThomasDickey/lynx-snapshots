@@ -6,6 +6,9 @@
 #include "LYStructs.h"
 #include "LYGlobalDefs.h"
 #include "LYCharSets.h"
+#ifdef EXP_CHARTRANS
+#include "UCMap.h"
+#endif /* EXP_CHARTRANS */
 #include "LYKeymap.h"
 #include "LYJump.h"
 #include "LYGetFile.h"
@@ -101,6 +104,18 @@ PRIVATE void free_item_list NOARGS
     }
     uploaders = NULL;
 #endif /* DIRED_SUPPORT */
+
+#ifdef USE_EXTERNALS
+    cur = externals;
+    while (cur) {
+        next = cur->next;
+    	FREE(cur->name);
+    	FREE(cur->command);
+	FREE(cur);
+        cur = next;
+    }
+    externals = NULL;
+#endif /* USE_EXTERNALS */
 
     return;
 }
@@ -273,7 +288,7 @@ PRIVATE void add_printer_to_list ARGS2(
     }
 }
 
-#if defined(USE_SLANG) || defined(COLOR_CURSES)
+#if USE_COLOR_TABLE
 #ifdef DOSPATH /* I.E. broken curses */
 static char *Color_Strings[16] =
 {
@@ -397,7 +412,7 @@ PRIVATE void parse_color ARGS1(
 	exit_with_color_syntax();
 #endif
 }
-#endif /* defined(USE_SLANG) || defined(COLOR_CURSES) */
+#endif /* USE_COLOR_TABLE */
 
 /*
  * Process the configuration file (lynx.cfg).
@@ -475,6 +490,30 @@ PUBLIC void read_cfg ARGS1(
 	} else if (!strncasecomp(buffer, "ALWAYS_TRUSTED_EXEC:", 20)) {
 	    add_trusted(&buffer[20], ALWAYS_EXEC_PATH); /* Add exec path */
 #endif /* EXEC_LINKS */
+
+#ifdef EXP_CHARTRANS
+	} else if (!strncasecomp(buffer, "ASSUME_CHARSET:", 15)) {
+	    StrAllocCopy(UCAssume_MIMEcharset, buffer+15);
+	    for (i = 0; UCAssume_MIMEcharset[i]; i++)
+	        UCAssume_MIMEcharset[i] = TOLOWER(UCAssume_MIMEcharset[i]);
+	    UCLYhndl_for_unspec =
+		UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
+
+	} else if (!strncasecomp(buffer, "ASSUME_LOCAL_CHARSET:", 21)) {
+	    StrAllocCopy(UCAssume_localMIMEcharset, buffer+21);
+	    for (i = 0; UCAssume_localMIMEcharset[i]; i++)
+	        UCAssume_localMIMEcharset[i] = TOLOWER(UCAssume_localMIMEcharset[i]);
+	    UCLYhndl_HTFile_for_unspec =
+		UCGetLYhndl_byMIME(UCAssume_localMIMEcharset);
+
+	} else if (!strncasecomp(buffer, "ASSUME_UNREC_CHARSET:", 21)) {
+	    StrAllocCopy(UCAssume_unrecMIMEcharset, buffer+21);
+	    for (i = 0; UCAssume_unrecMIMEcharset[i]; i++)
+	        UCAssume_unrecMIMEcharset[i] = TOLOWER(UCAssume_unrecMIMEcharset[i]);
+	    UCLYhndl_for_unrec =
+		UCGetLYhndl_byMIME(UCAssume_unrecMIMEcharset);
+#endif /* EXP_CHARTRANS */
+
 	}
 	break;
 
@@ -513,10 +552,10 @@ PUBLIC void read_cfg ARGS1(
 	} else if (!strncasecomp(buffer, "COLLAPSE_BR_TAGS:", 17)) {
 		LYCollapseBRs = is_true(buffer+17);
 
-#if defined(USE_SLANG) || defined(COLOR_CURSES)
+#if USE_COLOR_TABLE
 	} else if (!strncasecomp(buffer, "COLOR:", 6)) {
 		parse_color(buffer + 6);
-#endif /* defined(USE_SLANG) || defined(COLOR_CURSES) */
+#endif /* USE_COLOR_TABLE */
 
 	} else if (!strncasecomp(buffer, "cso_proxy:", 10)) {
 	    if (getenv("cso_proxy") == NULL) {
@@ -593,6 +632,11 @@ PUBLIC void read_cfg ARGS1(
 	} else if (!strncasecomp(buffer, "ENABLE_SCROLLBACK:", 18)) {
 	    enable_scrollback = is_true(buffer+18);
 	}
+#ifdef USE_EXTERNALS
+        else if(!strncasecomp(buffer,"EXTERNAL:",9)) {
+            add_item_to_list(&buffer[9],&externals);
+                }
+#endif
 	break;
 
 	case 'F':
@@ -820,11 +864,7 @@ PUBLIC void read_cfg ARGS1(
 	break;
 
 	case 'N':
-	if (!strncasecomp(buffer, "NEWS_POSTING:", 13)) {
-	    LYNewsPosting = is_true(buffer+13);
-	    no_newspost = (LYNewsPosting == FALSE);
-
-	} else if (!strncasecomp(buffer, "NEWS_CHUNK_SIZE:", 16)) {
+	if (!strncasecomp(buffer, "NEWS_CHUNK_SIZE:", 16)) {
 		HTNewsChunkSize = atoi(buffer+16);
 		/*
 		 * If the new HTNewsChunkSize exceeds the maximum,
@@ -843,6 +883,10 @@ PUBLIC void read_cfg ARGS1(
 		if (HTNewsChunkSize > HTNewsMaxChunk) {
 		    HTNewsChunkSize = HTNewsMaxChunk;
 		}
+
+	} else if (!strncasecomp(buffer, "NEWS_POSTING:", 13)) {
+	    LYNewsPosting = is_true(buffer+13);
+	    no_newspost = (LYNewsPosting == FALSE);
 
 	} else if (!strncasecomp(buffer, "news_proxy:", 11)) {
 	    if (getenv("news_proxy") == NULL) {
@@ -917,6 +961,9 @@ PUBLIC void read_cfg ARGS1(
 
 	} else if (!strncasecomp(buffer, "NO_FROM_HEADER:", 15)) {
 	    LYNoFromHeader = is_true(buffer+15);
+
+	} else if (!strncasecomp(buffer, "NO_ISMAP_IF_USEMAP:", 19)) {
+	    LYNoISMAPifUSEMAP = is_true(buffer+19);
 
 	} else if (!strncasecomp(buffer, "no_proxy:", 9)) {
 	    if (getenv("no_proxy") == NULL) {
@@ -1012,6 +1059,9 @@ PUBLIC void read_cfg ARGS1(
 	} else if (!strncasecomp(buffer, "STARTFILE:", 10)) {
 	    StrAllocCopy(startfile, buffer+10);
 
+	} else if (!strncasecomp(buffer, "STRIP_DOTDOT_URLS:", 18)) {
+	    LYStripDotDotURLs = is_true(buffer+18);
+
 	} else if (!strncasecomp(buffer, "SUBSTITUTE_UNDERSCORES:", 23)) {
 	    use_underscore = is_true(buffer+23);
 
@@ -1082,7 +1132,7 @@ PUBLIC void read_cfg ARGS1(
 	    UseFixedRecords = is_true(buffer+18);
 #endif /* VMS */
 
-#ifdef NCURSES_MOUSE_VERSION
+#if defined(NCURSES_MOUSE_VERSION) || defined(USE_SLANG_MOUSE)
 	} else if(!strncasecomp(buffer, "USE_MOUSE:",10)) {
 		LYUseMouse = is_true(buffer+10);
 #endif
@@ -1161,7 +1211,7 @@ PUBLIC void read_cfg ARGS1(
 
 	case 'X':
 	if (!strncasecomp(buffer, "XLOADIMAGE_COMMAND:", 19)) {
-	    StrAllocCat(XLoadImageCommand, (char *)&buffer[19]);
+	    StrAllocCopy(XLoadImageCommand, (char *)&buffer[19]);
 	}
 	break;
 

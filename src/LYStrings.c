@@ -189,6 +189,49 @@ PUBLIC void LYsubwindow ARGS1(WINDOW *, param)
 }
 #endif
 
+#ifdef USE_SLANG_MOUSE
+PRIVATE int sl_parse_mouse_event ARGS3(int *, x, int *, y, int *, button)
+{
+   /* "ESC [ M" has already been processed.  There more characters are 
+    * expected:  BUTTON X Y
+    */
+   *button = SLang_getkey ();
+   switch (*button)
+     {
+      case 040:			       /* left button */
+      case 041:			       /* middle button */
+      case 042:			       /* right button */
+	*button -= 040;
+	break;
+
+      default:			       /* Hmmm.... */
+	SLang_flush_input ();
+	return -1;
+     }
+
+   *x = SLang_getkey () - 33;
+   *y = SLang_getkey () - 33;
+   return 0;
+}
+#endif
+
+#ifdef USE_SLANG_MOUSE
+PRIVATE int map_function_to_key ARGS1(char, keysym)
+{
+   int i;
+   
+   /* I would prefer to use sizeof keymap but its size is not available.
+    * A better method would be to declare it as some fixed size.
+    */
+   for (i = 1; i < 256; i++)
+     {
+	if (keymap[i] == keysym)
+	  return i - 1;
+     }
+   return -1;
+}
+#endif
+
 /*
  * LYgetch() translates some escape sequences and may fake noecho
  */
@@ -233,7 +276,6 @@ re_read:
 			case 440: c = 'Q'; break;  /* alt x */
 			default: break;
 		}
-//		if (c < 256) return(c);
 	}
 #endif
 #ifdef USE_GETCHAR
@@ -300,7 +342,32 @@ re_read:
         case 's': c = PGDOWN; break;  /* keypad on pc ncsa telnet */
         case 'w': c = HOME; break;  /* keypad on pc ncsa telnet */
         case 'q': c = END; break;  /* keypad on pc ncsa telnet */
-        case 'M': c = '\n'; break; /* kepad enter on pc ncsa telnet */
+        case 'M':
+#ifdef USE_SLANG_MOUSE
+	   if ((c == 27) && (b == '['))
+	     {
+		int mouse_x, mouse_y, button;
+		
+		mouse_link = -1;
+		c = -1;
+		if (-1 != sl_parse_mouse_event (&mouse_x, &mouse_y, &button))
+		  {
+		     if (button == 0)  /* left */
+		       c = set_clicked_link (mouse_x, mouse_y);
+		     else if (button == 2)   /* right */
+		       {
+			  /* Right button: go back to prev document.  
+			   * The problem is that we need to determine 
+			   * what to return to achieve this.
+			   */
+			  c = map_function_to_key (LYK_PREV_DOC);
+		       }
+		  }
+	     }
+	   else 
+#endif
+	     c = '\n'; /* kepad enter on pc ncsa telnet */
+	   break; 
 
         case 'm':
 #ifdef VMS
@@ -329,6 +396,12 @@ re_read:
             if (b != 'O')
 #endif /* VMS */
                 c = F1;  /* macintosh help button */
+            break;
+        case 'p':
+#ifdef VMS
+            if (b == 'O')
+#endif /* VMS */
+                c = '0';  /* keypad 0 */
             break;
         case '1':                           /** VT300  Find  **/
             if ((b == '[' || c == 155) && (d=GetChar()) == '~')
@@ -366,6 +439,12 @@ re_read:
             if ((b == '[' || c == 155) && (d=GetChar()) == '~')
                 c = PGDOWN;
             break;
+        case '[':                            /** Linux F1-F5: ^[[[A etc. **/
+            if (b == '[' || c == 155) {
+		if ((d=GetChar()) == 'A')
+		    c = F1;
+		break;
+	    }
 	default:
 	   if (TRACE) {
 		fprintf(stderr,"Unknown key sequence: %d:%d:%d\n",c,b,a);
@@ -443,9 +522,11 @@ re_read:
 	   c=127;		   /* backspace key (delete, not Ctrl-H) */
 	   break;
 #endif /* KEY_BACKSPACE */
+
 #ifdef NCURSES_MOUSE_VERSION
 	case KEY_MOUSE:
 	  {
+#ifndef DOSPATH
            MEVENT event;
            int err;
 
@@ -455,6 +536,26 @@ re_read:
 	   if (event.bstate & BUTTON1_CLICKED) {
 	     c = set_clicked_link(event.x, event.y);
 	   }
+#else /* pdcurses version */
+              int left,right;
+              /* yes, I am assuming that my screen will be a certain width. */
+              left = 6;
+              right = LYcols-6;
+              c = -1;
+              mouse_link = -1;
+              request_mouse_pos();
+              if (Mouse_status.button[0] & BUTTON_CLICKED) {
+                if (Mouse_status.y == (LYlines-1))
+                       if (Mouse_status.x < left) c=LTARROW;
+                       else if (Mouse_status.x > right) c='\b';
+                       else c=PGDOWN;
+                else if (Mouse_status.y == 0)
+                       if (Mouse_status.x < left) c=LTARROW;
+                       else if (Mouse_status.x > right) c='\b';
+                       else c=PGUP;
+                else c = set_clicked_link(Mouse_status.x, Mouse_status.y);
+              }
+#endif /* _WINDOWS */
 	  }
 	  break;
 #endif /* NCURSES_MOUSE_VERSION */
@@ -462,6 +563,13 @@ re_read:
     }
 #endif /* defined(HAVE_KEYPAD) */
 
+    if (c > DO_NOTHING)
+    /* Don't return raw values for KEYPAD symbols which we may have missed
+     * in the switch above if they are obviously invalid when used as an
+     * index into (e.g.) keypad[]. - kw
+     */
+       return (0);
+    else
     return(c);
 }
 

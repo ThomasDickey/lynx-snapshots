@@ -1,3 +1,11 @@
+/* The configure script translates "config.hin" into "lynx_cfg.h" */
+#undef USE_COLOR_STYLE		/* FIXME: was 'CS' */
+#undef SLCS			/* FIXME: rename to USE_SLANG_STYLE */
+#undef USEHASH			/* FIXME: rename to USE_HASHING */
+#undef UNPAINT_CACHE		/* FIXME: for RP's code */
+/* #undef TEST			** FIXME: for RP's code */
+#undef LINKEDSTYLES		/* FIXME: for RP's code */
+/* #undef EXP_CHARTRANS		** FIXME: for character-translations */
 #undef ALT_CHAR_SET
 #undef CHMOD_PATH		/* CF_PATH_PROG(chmod) */
 #undef COLOR_CURSES		/* defined by CF_COLOR_CURSES */
@@ -36,9 +44,11 @@
 #undef MKDIR_PATH		/* CF_PATH_PROG(mkdir) */
 #undef MV_PATH			/* CF_PATH_PROG(mv) */
 #undef NCURSES			/* defined for ncurses support */
+#undef NCURSES_BROKEN		/* defined for ncurses color support */
 #undef NCURSESHEADER		/* defined if we include <ncurses.h> */
 #undef NEED_PTEM_H		/* defined by CF_SIZECHANGE */
 #undef NEED_REMOVE		/* defined by CF_REMOVE_BROKEN */
+#undef NGROUPS			/* defined by CF_NGROUPS */
 #undef NO_PARENT_DIR_REFERENCE	/* configure --disable-parent-dir */
 #undef RM_PATH			/* CF_PATH_PROG(rm) */
 #undef STDC_HEADERS
@@ -73,7 +83,6 @@
 /* FIXME:HP_TERMINAL */
 /* FIXME:ISC */
 /* FIXME:LONG_LIST */
-/* FIXME:LY_FIND_LEAKS */
 /* FIXME:NEXT */
 /* FIXME:NOPORT */
 /* FIXME:NO_CHANGE_EXECUTE_PERMS */
@@ -98,7 +107,6 @@
 /* FIXME:SYSLOG_REQUESTED_URLS */
 /* FIXME:TRUE=1 */
 /* FIXME:UNDERLINE_LINKS */
-/* FIXME:UNIXWARE */
 /* FIXME:USG */
 /* FIXME:_BSD=44 */
 /* FIXME:_BUILTINS */
@@ -110,4 +118,3 @@
 /* FIXME:__STDC__ */
 /* FIXME:_locp=__lc_locale */
 /* FIXME:loc_t=_LC_locale_t */
-/* This is a template for the configure script, which produces config.h */

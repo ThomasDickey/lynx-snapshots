@@ -13,7 +13,7 @@
 **	(c) Copyright CERN 1991 - See Copyright.html
 */
 
-#define HASH_SIZE 101		/* Arbitrary prime. Memory/speed tradeoff */
+#define HASH_SIZE 8193		/* Arbitrary prime. Memory/speed tradeoff */
 
 #include "HTUtils.h"
 #include "tcp.h"
@@ -37,7 +37,7 @@
 /*
  *	This is the original function.  We'll use it again. - FM
  */ 
-PRIVATE int HASH_FUNCTION ARGS1(
+PUBLIC int HASH_FUNCTION ARGS1(
 	CONST char *,	cp_address)
 {
     int hash;
@@ -490,6 +490,11 @@ PRIVATE void deleteLinks ARGS1(
 	        me->parent != parent) {
 	        HTAnchor_delete(parent);
 	    }
+	    /* The link structure has to be deleted, too!
+	    ** That was missing, but this code probably never
+	    ** got exercised by Lynx.  - kw
+	    */
+	    FREE(target);
         }
 
         /*
@@ -647,6 +652,9 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
     FREE(me->expires);
     FREE(me->last_modified);
     FREE(me->server);
+#ifdef USEHASH
+    FREE(me->style);
+#endif
  
     /*
      *  Remove ourselves from the hash table's list.
@@ -795,11 +803,40 @@ PUBLIC BOOL HTAnchor_isIndex ARGS1(
     return me ? me->isIndex : NO;
 }
 
+/*	Whether Anchor has been designated as an ISMAP link
+**	(normally by presence of an ISMAP attribute on A or IMG) - KW
+*/
+PUBLIC BOOL HTAnchor_isISMAPScript ARGS1(
+	HTAnchor *,	me)
+{
+    return me ? me->parent->isISMAPScript : NO;
+}
+
 PUBLIC BOOL HTAnchor_hasChildren ARGS1(
 	HTParentAnchor *,	me)
 {
     return me ? ! HTList_isEmpty(me->children) : NO;
 }
+
+#if defined(USEHASH)
+/*      Style handling.
+*/
+PUBLIC CONST char * HTAnchor_style ARGS1(
+        HTParentAnchor *,       me)
+{
+        return me ? me->style : NULL;
+}
+
+PUBLIC void HTAnchor_setStyle ARGS2(
+        HTParentAnchor *,       me,
+        CONST char *,           style)
+{
+    if (me) {
+        StrAllocCopy(me->style, style);
+    }
+}
+#endif
+
 
 /*	Title handling.
 */

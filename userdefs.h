@@ -75,6 +75,11 @@
 #define LYNX_CFG_FILE "Lynx_Dir:lynx.cfg"
 #endif /* LYNX_CFG_FILE */
 
+#ifndef LYNX_LSS_FILE
+#define LYNX_LSS_FILE "Lynx_Dir:lynx.lss"
+#endif /* LYNX_LSS_FILE */
+
+
 /**************************
  * The EXTENSION_MAP file allows you to map file suffix's to 
  * mime types.
@@ -223,6 +228,10 @@
 #endif /* DOSPATH */
 #endif /* LYNX_CFG_FILE */
 
+#ifndef LYNX_LSS_FILE
+#define LYNX_LSS_FILE "/usr/local/lib/lynx.lss"
+#endif /* LYNX_LSS_FILE */
+
 /**************************
  * The EXTENSION_MAP file allows you to map file suffix's to 
  * mime types.
@@ -310,10 +319,10 @@
 
 /********************************
  * Don't let the user enter his/her email address when sending a message.
- * Anonymous mail makes it far too easy for a user to spoof someone elses
+ * Anonymous mail makes it far too easy for a user to spoof someone else's
  * email address.
  * This requires that your mailer agent put in the From: field for you.
-
+ *
  * The default should be to uncomment this line but there probably are too
  * many mail agents out there that won't do the right thing if there is no
  * From: line.
@@ -387,6 +396,25 @@
  * pointers to lots of interesting places on the web.
  */
 #define DEFAULT_INDEX_FILE "http://www.ncsa.uiuc.edu/SDG/Software/Mosaic/MetaIndex.html"
+
+/*****************************
+ * If USE_TRACE_LOG is set FALSE, then when TRACE mode is invoked the
+ * syserr messages will not be directed to a log file named lynx.trace
+ * in the account's HOME directory.  The default defined here can be
+ * toggled via the -tlog command line switch.  Also, it is set FALSE
+ * automatically when Lynx is executed in an anonymous or validation
+ * account (if indicated via the -anonymous or -validate command line
+ * switches, or via the check for the ANONYMOUS_USER, defined below).
+ * When FALSE, the TRACE_LOG command (normally ';') cannot be used to
+ * examine the Lynx Trace Log during the current session.  If left
+ * TRUE, but you wish to use command line piping of stderr to a file
+ * you specify, include the -tlog toggle on the command line.  Note
+ * that once TRACE mode is turned on during a session and stderr is
+ * directed to the log, all stderr messages will continue going to
+ * the log, even if TRACE mode is turned off via the TOGGLE_TRACE
+ * (Control-T) command.
+ */
+#define USE_TRACE_LOG	FALSE
 
 /*******************************
  * If GOTOBUFFER is set to TRUE here or in lynx.cfg the last entered
@@ -1169,11 +1197,16 @@
  */
 
 #define LYNX_NAME "Lynx"
-/* The strange-looking comment on the next line tells PRCS to replace
+#ifdef USE_COLOR_STYLE
+/* The strange-looking comments on the next line tell PRCS to replace
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
+/* $Format: "#define LYNX_VERSION \"$ProjectVersion$-Styles\""$ */
+#define LYNX_VERSION "2.7.1ac-0.28-Styles"
+#else
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.5"
+#define LYNX_VERSION "2.7.1ac-0.28"
+#endif
 
 /****************************************************************
  * The LYMessages_en.h header defines default, English strings
@@ -1196,6 +1229,10 @@
 #define MAXCOMMAND MAXFNAME	/* max length of command should be the same */
 #define MAXHIST  1024		/* max links we remember in history */
 #define MAXLINKS 1024		/* max links on one screen */
+
+#ifndef SEARCH_GOAL_LINE
+#define SEARCH_GOAL_LINE 4	/* try to position search target there */
+#endif
 
 #ifdef EXP_CHARTRANS
 #define MAX_CHARSETS 40

@@ -38,7 +38,8 @@ typedef enum _SGMLContent{
   SGML_CDATA,    /* character data. recognize </ only */
   SGML_RCDATA,   /* replaceable character data. recognize </ and &ref; */
   SGML_MIXED,    /* elements and parsed character data. recognize all markup */
-  SGML_ELEMENT   /* any data found will be returned as an error*/
+  SGML_ELEMENT,  /* any data found will be returned as an error*/
+  SGML_PCDATA    /* added - kw */
   } SGMLContent;
 
 
@@ -47,6 +48,50 @@ typedef struct {
                                 /* Could put type info in here */
 } attr;
 
+typedef enum _TagClass {
+    /* textflow */
+    Tgc_FONTlike	= 0x00001,/* S,STRIKE,I,B,TT,U,BIG,SMALL,STYLE,BLINK;BR,TAB */
+    Tgc_EMlike		= 0x00002, /* EM,STRONG,DFN,CODE,SAMP,KBD,VAR,CITE,Q,INS,DEL,SPAN,.. */
+    Tgc_MATHlike	= 0x00004, /* SUB,SUP,MATH,COMMENT */
+    Tgc_Alike		= 0x00008, /* A */
+    Tgc_formula		= 0x00010, /* not used until math is supported better... */
+    /* used for special structures: forms, tables,... */
+    Tgc_TRlike		= 0x00020,/* TR and similar */
+    Tgc_SELECTlike	= 0x00040,/* SELECT,INPUT,TEXTAREA(,...) */
+    /* structure */
+    Tgc_FORMlike	= 0x00080,/* FORM itself */
+    Tgc_Plike		= 0x00100, /* P,H1..H6,... structures containing text or
+				    insertion but not other structures */
+    Tgc_DIVlike		= 0x00200, /* ADDRESS,FIG,BDO,NOTE,FN,DIV,CENTER;FIG
+				    structures which can contain other structures */
+    Tgc_LIlike		= 0x00400, /* LH,LI,DT,DD;TH,TD structure-like, only valid
+				    within certain other structures */
+    Tgc_ULlike		= 0x00800, /* UL,OL,DL,DIR,MENU;TABLE;XMP,LISTING
+				    special in some way, cannot contain (parsed)
+				    text directly */
+    /* insertions */
+    Tgc_BRlike		= 0x01000,/* BR,IMG,TAB allowed in any text */
+    Tgc_APPLETlike	= 0x02000, /* APPLET,OBJECT,EMBED,SCRIPT */
+    Tgc_HRlike		= 0x04000, /* HR,MARQUEE can contain all kinds of things
+				    and/or are not allowed (?) in running text */
+    Tgc_MAPlike		= 0x08000, /* MAP,AREA some specials that never contain
+				    (directly or indirectly) other things than
+				    special insertions */
+    Tgc_outer		= 0x10000, /* HTML,FRAMESET,FRAME,PLAINTEXT; */
+    Tgc_BODYlike	= 0x20000, /* BODY,BODYTEXT,NOFRAMES,TEXTFLOW; */
+    Tgc_HEADstuff	= 0x40000, /* HEAD,BASE,STYLE,TITLE; */
+    /* special relations */
+    Tgc_same		= 0x80000
+} TagClass;
+
+/* Some more properties of tags (or rather, elements) and rules how
+   to deal with them. - kw */
+typedef enum _TagFlags {
+    Tgf_endO		= 0x00001, /* end tag can be Omitted */
+    Tgf_startO		= 0x00002, /* start tag can be Omitted */
+    Tgf_mafse   	= 0x00004  /* Make Attribute-Free Start-tag End instead
+				      (if found invalid) */
+} TagFlags;
 
 /*              A tag structure describes an SGML element.
 **              -----------------------------------------
@@ -68,6 +113,14 @@ struct _tag{
     attr *      attributes;             /* The list of acceptable attributes */
     int         number_of_attributes;   /* Number of possible attributes */
     SGMLContent contents;               /* End only on end tag @@ */
+    TagClass	tagclass,
+	contains,	/* which classes of elements this one can contain directly */
+	icontains,	/* which classes of elements this one can contain indirectly */
+	contained,	/* in which classes can this tag be contained ? */
+	icontained,	/* in which classes can this tag be indirectly contained ? */
+	canclose;	/* which classes of elements can this one close
+			   if something looks wrong ? */
+    TagFlags	flags;
 };
 
 

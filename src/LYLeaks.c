@@ -98,7 +98,7 @@ PUBLIC void LYLeaks NOARGS	{
 			}
 		}
 		else	{
-			int i_counter;
+			size_t i_counter;
 
 			/*
 			 *	Increment the count of total memory lost and

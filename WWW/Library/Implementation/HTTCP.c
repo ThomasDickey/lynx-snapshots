@@ -784,6 +784,14 @@ PUBLIC int HTDoConnect ARGS4(
 	    else
 #endif /* SOCKS */
             ret = select(FD_SETSIZE, NULL, (void *)&writefds, NULL, &timeout);
+
+	   /*
+	   **  If we suspend, then it is possible that select will be 
+	   **  interrupted.  Allow for this possibility. - JED
+	   */
+	   if ((ret == -1) && (errno == EINTR))
+	     continue;
+
             /*
             **  Again according to the Sun and Motorola man pagse for connect:
             **     EALREADY            The socket is non-blocking and a  previ-
@@ -940,16 +948,25 @@ PUBLIC int HTDoRead ARGS3(
 	    return HT_INTERRUPTED;
 	}
 
-        timeout.tv_sec = 0;
-	timeout.tv_usec = 100000;
-        FD_ZERO(&readfds);
-        FD_SET(fildes, &readfds);
+	/*
+	**  If we suspend, then it is possible that select will be 
+	**  interrupted.  Allow for this possibility. - JED
+	*/
+        do {
+	    timeout.tv_sec = 0;
+	    timeout.tv_usec = 100000;
+	    FD_ZERO(&readfds);
+	    FD_SET(fildes, &readfds);
 #ifdef SOCKS
-	if (socks_flag)
-            ret = Rselect(FD_SETSIZE, (void *)&readfds, NULL, NULL, &timeout);
-	else
+	    if (socks_flag)
+	        ret = Rselect(FD_SETSIZE,
+			      (void *)&readfds, NULL, NULL, &timeout);
+	    else
 #endif /* SOCKS */
-        ret = select(FD_SETSIZE, (void *)&readfds, NULL, NULL, &timeout);
+		ret = select(FD_SETSIZE,
+			     (void *)&readfds, NULL, NULL, &timeout);
+	} while ((ret == -1) && (errno == EINTR));
+
         if (ret < 0) {
             return -1;
         } else if (ret > 0) {

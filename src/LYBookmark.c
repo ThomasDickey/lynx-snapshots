@@ -345,16 +345,19 @@ PUBLIC void save_bookmark_link ARGS2(
      *  If we created a new bookmark file, write the headers. - FM
      */
     if (first_time) {
-	fprintf(fp,"<head>\n<title>%s</title>\n</head>\n",BOOKMARK_TITLE);
+	fprintf(fp,"<head>\n");
+#ifdef EXP_CHARTRANS
+	add_META_charset_to_fd(fp, -1);
+#endif
+	fprintf(fp,"<title>%s</title>\n</head>\n",BOOKMARK_TITLE);
 	fprintf(fp,"\
-     You can delete links using the remove bookmark command.  It\n\
-     is usually the 'R' key but may have been remapped by you or\n\
-     your system administrator.<br>\n\
-     This file may also be edited with a standard text editor.\n\
-     Outdated or invalid links may be removed by simply deleting\n\
-     the line the link appears on in this file.\n\
-     Please refer to the Lynx documentation or help files\n\
-     for the HTML link syntax.\n\n<p>\n<ol>\n");
+     You can delete links using the remove bookmark command.  It is usually\n\
+     the 'R' key but may have been remapped by you or your system\n\
+     administrator.<br>\n\
+     This file also may be edited with a standard text editor to delete\n\
+     outdated or invalid links, or to change their order, but you should\n\
+     not change the format within the lines or add other HTML markup.\n\n\
+     <p>\n<ol>\n");
     }
 
     /*
@@ -755,8 +758,7 @@ draw_bookmark_choices:
      */
     clear();
     move(1, 5);
-    if (bold_H1 || bold_headers)
-	start_bold();
+    lynx_start_h1_color ();
     if (MBM_screens > 1) {
         sprintf(shead_buffer,
 		MULTIBOOKMARKS_SHEAD_MASK, MBM_current, MBM_screens);
@@ -764,8 +766,8 @@ draw_bookmark_choices:
     } else {
         addstr(MULTIBOOKMARKS_SHEAD);
     }
-    if (bold_H1 || bold_headers)
-	stop_bold();
+   
+   lynx_stop_h1_color ();
 
     MBM_tmp_count = 0;
     for (c = MBM_from; c <= MBM_to; c++) {

@@ -602,6 +602,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
     char * address_to_load =  (char *)full_address;
     extern char LYforce_no_cache;		       /* from   GridText.c */
     extern char LYoverride_no_cache;		       /* from LYMainLoop.c */
+    extern char * HTLoadedDocumentURL NOPARAMS;		   /* in GridText.c */
     extern BOOL HText_hasNoCacheSet PARAMS((HText *text)); /* in GridText.c */
     extern BOOL reloading;
     extern char *redirecting_url;
@@ -693,6 +694,20 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	/*
 	**  Already loaded.  Check it it's OK to use it. - FM
 	*/
+#ifdef NOTUSED_FOTEMODS
+	/* not sure whether this is always the right thing to do,
+	 * and anyway, we have a far more complete (and complicated...)
+	 * way to prevent reloading on internal URL references now...
+	 * - kw
+	 */
+	if ((cp = strchr(address_to_load, '#')) != NULL) {
+	    *cp = '\0';
+	    if (!strcmp(address_to_load, HTLoadedDocumentURL()) &&
+	        strncasecomp(address_to_load, "LYNXIMGMAP:", 11))
+	        LYoverride_no_cache = TRUE;
+	    *cp = '#';
+	}
+#endif /* NOTUSED_FOTEMODS */
 	if (LYoverride_no_cache || !HText_hasNoCacheSet(text)) {
             if (TRACE)
 	        fprintf(stderr, "HTAccess: Document already in memory.\n");

@@ -35,6 +35,11 @@ typedef struct _document {
    char * bookmark;
    int    link;
    int    line;
+   BOOL   internal_link;	/* whether doc was reached via an internal
+				 (fragment) link. - kw */
+#ifdef USEHASH
+   char * style;
+#endif
 } document;
 
 #ifndef HTFORMS_H
@@ -51,6 +56,11 @@ typedef struct _histstruct {
     BOOL   isHEAD;
     int    link;
     int    page;
+   BOOL   internal_link;	/* whether doc was reached via an internal
+				 (fragment) link. - kw */
+    int   intern_seq_start;	/* indicates which element on the history
+				   is the start of this sequence of
+				   "internal links", otherwise -1 */
 } histstruct;
 
 typedef struct _VisitedLink {
@@ -91,5 +101,10 @@ extern lynx_html_item_type *downloaders;
 
 /* for upload commands */
 extern lynx_html_item_type *uploaders;
+
+#ifdef USE_EXTERNALS
+/* for external commands */
+extern lynx_html_item_type *externals;
+#endif
 
 #endif /* LYSTRUCTS_H */

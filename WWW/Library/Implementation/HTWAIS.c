@@ -107,6 +107,8 @@ PRIVATE char	line[2048];	/* For building strings to display */
 #define PUTS(s) (*target->isa->put_string)(target, s)
 #define START(e) (*target->isa->start_element)(target, e, 0, 0, 0)
 #define END(e) (*target->isa->end_element)(target, e, 0)
+#define MAYBE_END(e) if (HTML_dtd.tags[e].contents != SGML_EMPTY) \
+                        (*target->isa->end_element)(target, e, 0)
 #define FREE_TARGET (*target->isa->_free)(target)
 
 struct _HTStructured {
@@ -562,6 +564,7 @@ PRIVATE void display_search_response ARGS4(
 	    		head->Score,
 	    		head->Lines);
 		PUTS( line);
+	        MAYBE_END(HTML_LI);
       	    } /* next document header */
     	} /* if there were any document headers */
     

@@ -152,11 +152,10 @@ PRIVATE void LYCookieJar_free NOARGS
 	    cl = de->cookie_list;
 	    while (cl) {
 		next = cl->next;
+		co = cl->object;
 		if (co) {
-		    co = cl->object;
 		    HTList_removeObject(de->cookie_list, co);
 		    freeCookie(co);
-		    co = NULL;
 		}
 		cl = next;
 	    }
@@ -165,6 +164,19 @@ PRIVATE void LYCookieJar_free NOARGS
 	    de->cookie_list = NULL;
 	}
 	dl = dl->next;
+    }
+    if (dump_output_immediately) {
+	cl = cookie_list;
+	while (cl) {
+	    next = cl->next;
+	    co = cl->object;
+	    if (co) {
+		HTList_removeObject(cookie_list, co);
+		freeCookie(co);
+	    }
+	    cl = next;
+	}
+	HTList_delete(cookie_list);
     }
     cookie_list = NULL;
     HTList_delete(domain_list);
@@ -431,8 +443,8 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 	next = hl->next;
 
 	if (TRACE && co) {
-	    fprintf(stderr, "Checking cookie %x %s=%s\n",
-		    	    hl,
+	    fprintf(stderr, "Checking cookie %lx %s=%s\n",
+		    	    (long) hl,
 			    (co->name ? co->name : "(no name)"),
 			    (co->value ? co->value : "(no value)"));
 	    fprintf(stderr, "%s %s %i %s %s %i%s\n",
@@ -750,8 +762,8 @@ PUBLIC void LYSetCookie ARGS2(
 			cur_cookie->expires = (time(NULL) + temp);
 			if (TRACE)
 			    fprintf(stderr,
-			    	    "LYSetCooke: expires %i, %s",
-				    cur_cookie->expires,
+			    	    "LYSetCooke: expires %ld, %s",
+				    (long) cur_cookie->expires,
 				    ctime(&cur_cookie->expires));
 		    }
 		}
@@ -777,8 +789,8 @@ PUBLIC void LYSetCookie ARGS2(
 			if (cur_cookie->expires > 0) {
 			    if (TRACE)
 				fprintf(stderr,
-					"LYSetCooke: expires %i, %s",
-					cur_cookie->expires,
+					"LYSetCooke: expires %ld, %s",
+					(long) cur_cookie->expires,
 					ctime(&cur_cookie->expires));
 			}
 		    }
@@ -849,10 +861,20 @@ PUBLIC void LYSetCookie ARGS2(
     /*
      *  Store the final cookie if within length limit. - FM
      */
-    if (length <= 4096) {
+    if (length <= 4096 && cur_cookie != NULL) {
         /*
-	 *  Force the secure flag on if it's not
-	 *  set but this is an https URL. - FM
+	 *  Force the secure flag on if it's not set but this
+	 *  is an https URL.  This ensures that cookies from
+	 *  https servers will not be shared with ones for
+	 *  http (non-SSL) servers and thus be transmitted
+	 *  unencrypted, and is redundant with the current,
+	 *  blanket port restriction.  However, this seemed
+	 *  a side-effect rather than conscious intent within
+	 *  the port restriction.  A port attribute is likely
+	 *  to be added, and we can independently regulate
+	 *  sharing based on port versus scheme, with user
+	 *  configuration and run time options, "when the
+	 *  time is right". - FM
 	 */
         if (!strncasecomp(address, "https:", 6) &&
 	    !(cur_cookie->flags & COOKIE_FLAG_SECURE)) {

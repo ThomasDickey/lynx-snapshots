@@ -111,15 +111,14 @@ draw_options:
     response = 0;
     clear(); 
     move(0, 5);
-    if (bold_H1 || bold_headers)
-        start_bold();
+    
+    lynx_start_h1_color ();
     addstr("         Options Menu (");
     addstr(LYNX_NAME);
     addstr(" Version ");
     addstr(LYNX_VERSION);
     addch(')');
-    if (bold_H1 || bold_headers)
-        stop_bold();
+    lynx_stop_h1_color ();
     move(L_EDITOR, 5);  
     addstr("E)ditor                      : ");
     addstr((editor && *editor) ? editor : "NONE");
@@ -258,9 +257,9 @@ draw_options:
 	   response != 7 &&  response != 3) {
 
            move(LYlines-2, 0);
-	   start_reverse();
+           lynx_start_prompt_color ();
 	   addstr(COMMAND_PROMPT);
-	   stop_reverse();
+           lynx_stop_prompt_color ();
 
 	   refresh();
            response = LYgetch();
@@ -965,18 +964,25 @@ PRIVATE int boolean_choice ARGS4(
 
     number--;
 
-    option_statusline(ACCEPT_DATA);
+    /*
+     *  Update the statusline.
+     */
+    option_statusline(ANY_KEY_CHANGE_RET_ACCEPT);
+
     /*
      *  Highlight the current selection.
      */
     move(line, col);
     standout();
     addstr(choices[status]);
+    refresh();
 
-    standend();
-    option_statusline(ANY_KEY_CHANGE_RET_ACCEPT);
-    standout();
-
+    /*
+     *  Get the keyboard entry, and leave the
+     *  cursor at the choice, to indicate that
+     *  it can be changed, until the user accepts
+     *  the current choice.
+     */
     while (1) {
 	move(line, col);
 	response = LYgetch();
@@ -1038,7 +1044,7 @@ PRIVATE int boolean_choice ARGS4(
 	    addstr(choices[status]);
 
 	    option_statusline(VALUE_ACCEPTED);
-	     return(status);
+	    return(status);
 	}
     }
 }
@@ -1087,16 +1093,17 @@ draw_bookmark_list:
      */
     clear(); 
     move(0, 5);
-    if (bold_H1 || bold_headers)
-        start_bold();
+
+    lynx_start_h1_color ();
+
     if (LYlines < (MBM_V_MAXFILES + MULTI_OFFSET)) {
         sprintf(ehead_buffer, MULTIBOOKMARKS_EHEAD_MASK, MBM_current);
 	addstr(ehead_buffer);
     } else {
         addstr(MULTIBOOKMARKS_EHEAD);
     }
-    if (bold_H1 || bold_headers)
-        stop_bold();
+    
+   lynx_stop_h1_color ();
 
     if (LYlines < (MBM_V_MAXFILES + MULTI_OFFSET)) {
 	for (a = ((MBM_V_MAXFILES/2 + 1) * (MBM_current - 1));
@@ -1169,9 +1176,10 @@ draw_bookmark_list:
 	   response != '>') {
 
 	move((LYlines - 2), 0);
-	start_reverse();
+        
+	lynx_start_prompt_color ();
 	addstr(MULTIBOOKMARKS_LETTER);
-	stop_reverse();
+	lynx_stop_prompt_color ();
 
 	refresh();
         response = (def_response ? def_response : LYgetch());

@@ -132,7 +132,7 @@ include all versions of files in local VMS directory listings.
 forces the first document to be interpreted as HTML.
 .TP
 .B -from
-toggle transmissions of From headers.
+toggles transmissions of From headers.
 .TP
 .B -ftp 
 disable ftp access.
@@ -158,7 +158,11 @@ toggles inclusion of links for all images.
 .B -index\fR=\fIURL
 set the default index file to the specified URL.
 .TP
-.B -link\fR=\fNUMBER
+.B -ismap
+toggles inclusion of ISMAP links when client-side
+MAPs are present.
+.TP
+.B -link\fR=\fINUMBER
 starting count for lnk#.dat files produced by -crawl.
 .TP
 .B -localhost
@@ -175,10 +179,10 @@ source.
 .B -minimal
 toggles minimal versus valid comment parsing.
 .TP
-.B -newschunksize\fR=\fNUMBER
+.B -newschunksize\fR=\fINUMBER
 number of articles in chunked news listings.
 .TP
-.B -newsmaxchunk\fR=\fNUMBER
+.B -newsmaxchunk\fR=\fINUMBER
 maximum news articles in listings before chunking.
 .TP
 .B -nobrowse
@@ -275,8 +279,8 @@ are setable within userdefs.h.
 - disallow local file management.
 
 .I disk_save 
-- disallow saving binary files to disk in the 
-download menu.
+- disallow saving to disk in the download and
+print menus.
 
 .I download
 - disallow downloaders in the download menu.
@@ -395,6 +399,9 @@ tell Lynx what terminal type to assume its talking to.
 (This may be useful for remote execution, when, for example,
 Lynx connects to a remote TCP/IP port that starts a script that,
 in turn, starts another Lynx process.)
+.TP
+.B -tlog
+toggles use of a Lynx Trace Log for the current session.
 .TP
 .B -trace
 turns on WWW trace mode.

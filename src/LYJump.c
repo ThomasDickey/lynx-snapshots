@@ -378,7 +378,7 @@ PRIVATE unsigned LYRead_Jumpfile ARGS1(struct JumpTable *,jtp)
     BOOL IsStream_LF = TRUE;
 #endif /* VMS */
     char *cp;
-    int i;
+    unsigned i;
 
     if (jtp->file == NULL || *(jtp->file) == '\0')
 	return 0;

@@ -8,6 +8,13 @@
 **	
 **	 6 Feb 93  Binary seraches used. Intreface modified.
 */
+
+/* Remove the following to disable the experimental HTML DTD parsing.
+   Currently only used in this source file. - kw */
+
+#define EXTENDED_HTMLDTD
+
+
 #include "HTUtils.h"
 #include "tcp.h"		/* For FROMASCII */
 
@@ -188,6 +195,12 @@ extern BOOL historical_comments;
 extern BOOL minimal_comments;
 extern BOOL soft_dquotes;
 
+#ifdef USE_COLOR_STYLE
+#include "AttrList.h"
+extern char class_string[TEMPSTRINGSIZE];
+int current_is_class=0;
+#endif
+
 /*	Handle Attribute
 **	----------------
 */
@@ -211,6 +224,11 @@ PRIVATE void handle_attribute_name ARGS2(
     	    context->current_attribute_number = i;
 	    context->present[i] = YES;
 	    FREE(context->value[i]);
+#ifdef USE_COLOR_STYLE
+	current_is_class=(!strcasecomp("class", s));
+	if (TRACE)
+		fprintf(stderr, "SGML: found attribute %s, %d\n", s, current_is_class);
+#endif
 	    return;
 	} /* if */
 	
@@ -232,6 +250,19 @@ PRIVATE void handle_attribute_value ARGS2(
 {
     if (context->current_attribute_number != INVALID) {
 	StrAllocCopy(context->value[context->current_attribute_number], s);
+#ifdef USE_COLOR_STYLE
+        if (current_is_class)
+        {
+                strncpy (class_string, s, TEMPSTRINGSIZE);
+                if (TRACE)
+                fprintf(stderr, "SGML: class is '%s'\n", s);
+        }
+        else
+        {
+                if (TRACE)
+                fprintf(stderr, "SGML: attribute value is '%s'\n", s);
+        }
+#endif
     } else {
         if (TRACE)
 	    fprintf(stderr, "SGML: Attribute value %s ignored\n", s);
@@ -506,6 +537,75 @@ PRIVATE void handle_sgmlatt ARGS1(
 }
 
 
+PRIVATE BOOL element_valid_within ARGS3(
+    HTTag *, 	new_tag,
+    HTTag *,	stacked_tag,
+    BOOL,	direct)
+{
+    TagClass usecontains, usecontained;
+    if (!stacked_tag || !new_tag)
+	return YES;
+    usecontains = (direct ? stacked_tag->contains : stacked_tag->icontains);
+    usecontained = (direct ? new_tag->contained : new_tag->icontained);
+    if (new_tag == stacked_tag)
+	return ((Tgc_same & usecontains) &&
+		(Tgc_same & usecontained));
+    else
+	return ((new_tag->tagclass & usecontains) &&
+		(stacked_tag->tagclass & usecontained));
+}
+
+#ifdef EXTENDED_HTMLDTD
+
+extern BOOL New_DTD;
+
+typedef enum {
+    close_NO	= 0,
+    close_error = 1,
+    close_valid	= 2,
+} canclose_t;
+
+PRIVATE canclose_t can_close ARGS2(
+    HTTag *, 	new_tag,
+    HTTag *,	stacked_tag)
+{
+    if (!stacked_tag)
+	return close_NO;
+    if (stacked_tag->flags & Tgf_endO)
+	return close_valid;
+    else if (new_tag == stacked_tag)
+	return ((Tgc_same & new_tag->canclose) ? close_error : close_NO);
+    else
+	return ((stacked_tag->tagclass & new_tag->canclose) ?
+		close_error : close_NO);
+}
+PRIVATE void do_close_stacked ARGS1(
+    HTStream *,	context)
+{
+    HTElement * stacked = context->element_stack;
+    if (!stacked)
+	return;			/* stack was empty */
+    (*context->actions->end_element)(
+        context->target,
+        stacked->tag - context->dtd->tags,
+        (char **)&context->include);
+    context->element_stack = stacked->next;
+    FREE(stacked);
+}
+PRIVATE int is_on_stack ARGS2(
+	HTStream *,	context,
+	HTTag *,	old_tag)
+{
+    HTElement * stacked = context->element_stack;
+    int i = 1;
+    for (; stacked; stacked = stacked->next, i++) {
+	if (stacked->tag == old_tag)
+	    return i;
+    }
+    return 0;
+}
+#endif /* EXTENDED_HTMLDTD */
+
 /*	End element
 **	-----------
 */
@@ -513,6 +613,57 @@ PRIVATE void end_element ARGS2(
 	HTStream *,	context,
 	HTTag *,	old_tag)
 {
+#ifdef EXTENDED_HTMLDTD
+
+    BOOL extra_action_taken = NO;
+    canclose_t canclose_check = close_valid;
+    int stackpos = is_on_stack(context, old_tag);
+
+    if (New_DTD) {
+	while (canclose_check != close_NO &&
+	       context->element_stack &&
+	       (stackpos > 1 || (!extra_action_taken && stackpos == 0))) {
+	    canclose_check = can_close(old_tag, context->element_stack->tag);
+	    if (canclose_check != close_NO) {
+		if (TRACE)
+		    fprintf(stderr, "SGML: End </%s> \t<- %s end </%s>\n",
+			    context->element_stack->tag->name,
+			    canclose_check == close_valid ? "supplied," : "forced by",
+			    old_tag->name);
+		do_close_stacked(context);
+		extra_action_taken = YES;
+		stackpos = is_on_stack(context, old_tag);
+	    } else {
+		if (TRACE)
+		    fprintf(stderr, "SGML: Still open %s \t<- invalid end </%s>\n",
+			    context->element_stack->tag->name,
+			    old_tag->name);
+		return;
+	    }
+	}
+
+	if (stackpos == 0 && old_tag->contents != SGML_EMPTY) {
+	    if (TRACE)
+		fprintf(stderr, "SGML: Still open %s, no open %s for </%s>\n",
+			context->element_stack ?
+			context->element_stack->tag->name : "none",
+			old_tag->name,
+			old_tag->name);
+	    return;
+	}
+	if (stackpos > 1) {
+	    if (TRACE)
+		fprintf(stderr, "SGML: Nesting <%s>...<%s> \t<- invalid end </%s>\n",
+			old_tag->name,
+			context->element_stack->tag->name,
+			old_tag->name);
+	    return;
+	}
+    }
+    /* Now let the old code deal with the rest... - kw */
+
+#endif /* EXTENDED_HTMLDTD */
+
     if (TRACE)
         fprintf(stderr, "SGML: End </%s>\n", old_tag->name);
     if (old_tag->contents == SGML_EMPTY) {
@@ -568,7 +719,73 @@ PRIVATE void start_element ARGS1(
 	HTStream *,	context)
 {
     HTTag * new_tag = context->current_tag;
+
+#ifdef EXTENDED_HTMLDTD
+
+    BOOL valid = YES;
+    BOOL direct_container = YES;
+    BOOL extra_action_taken = NO;
+    canclose_t canclose_check = close_valid;
+
+    if (New_DTD) {
+	while (context->element_stack &&
+	       (canclose_check == close_valid ||
+		(canclose_check == close_error &&
+		 new_tag == context->element_stack->tag)) &&
+	       !(valid = element_valid_within(new_tag, context->element_stack->tag,
+					      direct_container))) {
+	    canclose_check = can_close(new_tag, context->element_stack->tag);
+	    if (canclose_check != close_NO) {
+		if (TRACE)
+		    fprintf(stderr, "SGML: End </%s> \t<- %s start <%s>\n",
+			    context->element_stack->tag->name,
+			    canclose_check == close_valid ? "supplied," : "forced by",
+			    new_tag->name);
+		do_close_stacked(context);
+		extra_action_taken = YES;
+		if (canclose_check  == close_error)
+		    direct_container = NO;
+	    } else {
+		if (TRACE)
+		    fprintf(stderr, "SGML: Still open %s \t<- invalid start <%s>\n",
+			    context->element_stack->tag->name,
+			    new_tag->name);
+	    }
+	}
+
+	if (context->element_stack && !extra_action_taken &&
+	    canclose_check == close_NO && !valid && (new_tag->flags & Tgf_mafse)) {
+	    BOOL has_attributes = NO;
+	    int i = 0;
+	    for (; i< new_tag->number_of_attributes && !has_attributes; i++)
+		has_attributes = context->present[i];
+	    if (!has_attributes) {
+		if (TRACE)
+		    fprintf(stderr, "SGML: Still open %s, converting invalid <%s> to </%s>\n",
+			    context->element_stack->tag->name,
+			    new_tag->name,
+			    new_tag->name);
+		end_element(context, new_tag);
+		return;
+	    }
+	}
     
+	if (context->element_stack &&
+	    canclose_check == close_error && !(valid =
+					       element_valid_within(
+						   new_tag,
+						   context->element_stack->tag,
+						   direct_container))) {
+	    if (TRACE)
+		fprintf(stderr, "SGML: Still open %s \t<- invalid start <%s>\n",
+			context->element_stack->tag->name,
+			new_tag->name);
+	}
+    }
+    /* fall through to the old code - kw */
+
+#endif /* EXTENDED_HTMLDTD */
+
     if (TRACE)
         fprintf(stderr, "SGML: Start <%s>\n", new_tag->name);
     (*context->actions->start_element)(
@@ -677,6 +894,7 @@ PUBLIC void SGML_abort ARGS2(
 	HTError, 	e)
 {
     int i;
+    HTElement * cur;
 
     /*
     **  Abort the target. - FM
@@ -690,6 +908,15 @@ PUBLIC void SGML_abort ARGS2(
     FREE(context->include);
     FREE(context->url);
     FREE(context->csi);
+
+    /*
+    **  Free stack memory if any elements were left open. - kw
+    */
+    while (context->element_stack) {
+        cur = context->element_stack;
+	context->element_stack = cur->next;	/* Remove from stack */
+	FREE(cur);
+    }
 
     /*
     **  Free the strings and context structure. - FM
@@ -900,6 +1127,8 @@ top1:
 			 (context->element_stack->tag  &&
 	    		  (context->element_stack->tag->contents ==
 			  		SGML_MIXED ||
+			   context->element_stack->tag->contents ==
+			  		SGML_PCDATA ||
 			   context->element_stack->tag->contents ==
 			      		SGML_RCDATA)))) {
 	    /*
@@ -1130,20 +1359,6 @@ top1:
 	    */
 	    PUTC('&');
 	    PUTC('#');
-	    context->state = S_text;
-	    goto top1;
-	} else if (unsign_c > 127 || isalnum((unsigned char)c)) {
-	    /*
-	    **  We have digit(s), but not a valid terminator,
-	    **  so recover the "&#" and digit(s) and recycle
-	    **  the character. - FM
-	    */
-	    int i;
-	    PUTC('&');
-	    PUTC('#');
-	    for (i = 0; i < string->size; i++)	/* recover */
-	       PUTC(string->data[i]);
-	    string->size = 0;
 	    context->state = S_text;
 	    goto top1;
 	} else {
@@ -1837,6 +2052,14 @@ top1:
 	    } else {
 		BOOL tag_OK = (c == '>' || WHITE(c));
 	        context->current_tag = t;
+#ifdef EXTENDED_HTMLDTD
+		/*
+		**  Just handle ALL end tags normally :-) - kw
+		*/
+		if (New_DTD) {
+		    end_element( context, context->current_tag);
+		} else
+#endif /* EXTENDED_HTMLDTD */
 		if (tag_OK &&
 		    (!strcasecomp(string->data, "DD") ||
 		     !strcasecomp(string->data, "DT") ||
@@ -1894,44 +2117,22 @@ top1:
 		    }
 		    break;
 		} else if (tag_OK &&
-			   !strcasecomp(string->data, "FONT")) {
+			   (!strcasecomp(string->data, "A") ||
+			    !strcasecomp(string->data, "B") ||
+			    !strcasecomp(string->data, "BLINK") ||
+			    !strcasecomp(string->data, "CITE") ||
+			    !strcasecomp(string->data, "EM") ||
+			    !strcasecomp(string->data, "FONT") ||
+			    !strcasecomp(string->data, "FORM") ||
+			    !strcasecomp(string->data, "I") ||
+			    !strcasecomp(string->data, "STRONG") ||
+			    !strcasecomp(string->data, "U"))) {
 		    /*
-		    **  Treat a FONT end tag as a FONT start tag with
-		    **  a dummy END attribute.  It's too likely to be
-		    **  interdigited and mess up the parsing, so we've
-		    **  declared FONT as SGML_EMPTY and will handle the
-		    **  end tag in HTML_start_element. - FM
-		    */
-		    if (TRACE)
-		        fprintf(stderr,
-				"SGML: `</%s%c' found!  Treating as '<%s%c'.\n",
-				string->data, c, string->data, c);
-		    {
-		        int i;
-			for (i = 0;
-			     i < context->current_tag->number_of_attributes;
-			     i++) {
-			    context->present[i] = (i == HTML_FONT_END);
-			}
-		    }
-		    string->size = 0;
-		    context->current_attribute_number = INVALID;
-		    if (context->current_tag->name)
-			start_element(context);
-		    if (c != '>') {
-			context->state = S_junk_tag;
-		    } else {
-			context->state = S_text;
-		    }
-		    break;
-		} else if (tag_OK &&
-			   !strcasecomp(string->data, "FORM")) {
-		    /*
-		    **  Handle a FORM end tag.  We declared FORM
-		    **  as SGML_EMPTY to prevent "expected tag
-		    **  substitution" and avoid throwing the
-		    **  HTML.c stack out of whack (Wow, what
-		    **  a hack! 8-). - FM
+		    **  Handle end tags for container elements declared
+		    **  as SGML_EMPTY to prevent "expected tag substitution"
+		    **  but still processed via HTML_end_element() in HTML.c
+		    **  with checks there to avoid throwing the HTML.c stack
+		    **  out of whack (Ugh, what a hack! 8-). - FM
 		    */
 		    if (TRACE)
 		        fprintf(stderr, "SGML: End </%s>\n", string->data);

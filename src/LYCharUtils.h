@@ -41,7 +41,6 @@ extern char *LYUppercaseI_OL_String PARAMS((
 	int			seqnum));
 extern char *LYLowercaseI_OL_String PARAMS((
 	int			seqnum));
-extern void html_get_chartrans_info PARAMS((HTStructured * me));
 extern void LYHandleMETA PARAMS((
 	HTStructured *		me,
 	CONST BOOL*	 	present,
@@ -50,7 +49,8 @@ extern void LYHandleMETA PARAMS((
 extern int LYLegitimizeHREF PARAMS((
 	HTStructured *	 	me,
 	char **			href,
-	BOOL			force_slash));
+	BOOL			force_slash,
+	BOOL			strip_dots));
 extern void LYCheckForContentBase PARAMS((
 	HTStructured *		me));
 extern void LYCheckForID PARAMS((
@@ -73,5 +73,14 @@ extern BOOLEAN LYCheckForCSI PARAMS((
 	HTStructured *		me,
 	char **			url));
 #endif /* Lynx_HTML_Handler */
+
+#ifdef EXP_CHARTRANS
+#ifdef HTML_H
+extern void html_get_chartrans_info PARAMS((HTStructured * me));
+#endif
+extern void add_META_charset_to_fd PARAMS((
+    FILE *	fp,
+    int		disp_chndl));
+#endif /* EXP_CHARTRANS */
 
 #endif /* LYCHARUTILS_H */

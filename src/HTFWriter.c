@@ -195,6 +195,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		     *  so the uncompression failed. - FM
 		     */
 		    fclose(fp);
+		    fp = NULL;
 		    if (!dump_output_immediately) {
 		        clearok(curscr, TRUE);
 			refresh();
@@ -453,14 +454,16 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     if (anchor->FileCache) {
         strcpy(fnam, anchor->FileCache);
 	FREE(anchor->FileCache);
-        if ((fp=fopen(fnam, "r")) != NULL) {
+        if ((fp = fopen(fnam, "r")) != NULL) {
 	    fclose(fp);
+	    fp = NULL;
 	    remove(fnam);
 	}
     } else {
         /*
 	 *  Lynx routine to create a temporary filename
 	 */
+SaveAndExecute_tempname:
         tempname (fnam, NEW_FILE);
 	/*
 	 *  Check for a suffix.
@@ -483,6 +486,15 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 	        strcat(fnam, ".bin");
 	    } else if ((suffix = HTFileSuffix(pres->rep)) && *suffix == '.') {
 	        strcat(fnam, suffix);
+		/*
+		 *  It's not one of the suffixes checked for a
+		 *  spoof in tempname(), so check it now. - FM
+		 */
+		if ((fp = fopen(fnam, "r")) != NULL) {
+		    fclose(fp);
+		    fp = NULL;
+		    goto SaveAndExecute_tempname;
+		}
 	    } else {
 	        *cp = '.';
 	    }
@@ -630,14 +642,16 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
     if (anchor->FileCache) {
         strcpy(fnam, anchor->FileCache);
 	FREE(anchor->FileCache);
-        if ((fp=fopen(fnam, "r")) != NULL) {
+        if ((fp = fopen(fnam, "r")) != NULL) {
 	    fclose(fp);
+	    fp = NULL;
 	    remove(fnam);
 	}
     } else {
         /*
 	 *  Lynx routine to create a temporary filename
 	 */
+SaveToFile_tempname:
         tempname(fnam, NEW_FILE);
 	/*
 	 *  Check for a suffix.
@@ -660,6 +674,15 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 	        strcat(fnam, ".bin");
 	    } else if ((suffix = HTFileSuffix(pres->rep)) && *suffix == '.') {
 	        strcat(fnam, suffix);
+		/*
+		 *  It's not one of the suffixes checked for a
+		 *  spoof in tempname(), so check it now. - FM
+		 */
+		if ((fp = fopen(fnam, "r")) != NULL) {
+		    fclose(fp);
+		    fp = NULL;
+		    goto SaveToFile_tempname;
+		}
 	    } else {
 	        *cp = '.';
 	    }
@@ -884,6 +907,7 @@ PUBLIC HTStream* HTCompressed ARGS3(
     /*
      *  Get a new temporary filename and substitute a suitable suffix. - FM
      */
+Compressed_tempname:
     tempname(fnam, NEW_FILE);
     if ((cp = strchr(fnam, '.')) != NULL) {
 	*cp = '\0';
@@ -922,7 +946,16 @@ PUBLIC HTStream* HTCompressed ARGS3(
 	strcat(fnam, ".");
     }
     strcat(fnam, compress_suffix);
-    
+    /*
+     *  It's not one of the suffixes checked for a
+     *  spoof in tempname(), so check it now. - FM
+     */
+    if ((fp = fopen(fnam, "r")) != NULL) {
+	fclose(fp);
+	fp = NULL;
+	goto Compressed_tempname;
+    }
+
     /*
      *  Open the file for receiving the compressed input stream. - FM
      */

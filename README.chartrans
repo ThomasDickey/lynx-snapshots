@@ -28,9 +28,7 @@ Lynx CHARTRANS
 
  - some minor changes: sometimes invalid characters are displayed in a hex
    notation Uxxxx (helps debugging, but I also regard it as at least not
-   worse than showing the wrong char without warning).  KOI8 -> other cs
-   will just strip high bit from cyrillic chars (gives somewhat readable
-   ASCII, KOI was constructed that way...)
+   worse than showing the wrong char without warning).
 
 Additions/changes to user interface:
 
@@ -42,11 +40,17 @@ Additions/changes to user interface:
                         specify a charset parameter in HTTP headers
    -assume_unknown_charset=...  in case a charset parameter is not recognized 
    -assume_local_charset=... assume this as charset of local file: docs 
+   also available as ASSUME_CHARSET etc. in lynx.cfg
 
  - The "Raw" toggle (from -raw flag, '@' key, or Options screen)
    o  should work as before for CJK charsets,
    o  otherwise toggles the assumption "Default remote charset is same 
       as Display Character Set" on or off.
+      Toggling of the assumed charset is between Display Character Set and
+      the specified ASSUME_CHARSET or, if they are the same, between the
+      specified ASSUME_CHARSET and ISO-8859-1.
+   o  The default for raw mode now depends on the Display Character Set as
+      well as on the specified ASSUME_CHARSET value.
    (Try the "Transparent" Display Character Set for more "rawness".)
 
 Requirements:  same as for Lynx in general :)
@@ -69,9 +73,11 @@ Other usual warnings about alpha software apply...
 HOW TO GET SOURCES:
 
 The location of files mentioned below is currently at
-         <URL: http://www.tezcat.com/~kweide/lynx-chartrans/> or
-(preferred location:)
-         <URL: http://sol.slcc.edu/lynx/klaus/merged/all/>.
+         <URL: http://sol.slcc.edu/lynx/klaus/merged/all/>
+but it is probably easier to get a full package of the development code
+from
+         <URL: http://sol.slcc.edu/lynx/current/>
+(different formats there, check it out.)
 Check both locations to find the newest version.
 
 There are three alternatives:
@@ -81,34 +87,34 @@ There are three alternatives:
    Provided as a full Lynx distribution (for now..) - in zip format.
    This contains the complete Lynx source package.
 
-   Just get lynx-2.7ac-*.zip.
+   Just get lynx-2.7.1ac-*.zip.
 
 (2.)
-   Provided as add-on over the Lynx 2.7 distribution, i.e. all files that
+   Provided as add-on over the Lynx 2.7.1 distribution, i.e. all files that
    are new or have changed - in zip format.
-   (a) Get the official Lynx 2.7 distribution - see list of download sites at
+   (a) Get the official Lynx 2.7.1 distribution - see list of download sites at
            <URL: http://www.crl.com/~subir/lynx/sources.html>.
-   (b) Get add-to-offi-2.7ac-*.zip.
-   (c) Unpack the official 2.7 package, then unzip add-to-offi-2.7ac-*.zip
+   (b) Get add-to-offi-2.7.1ac-*.zip.
+   (c) Unpack the official 2.7.1 package, then unzip add-to-offi-2.7.1ac-*.zip
        over that directory tree.
 
 (3.)
    Provided in two files (for minimal download time) to install over the
-   Lynx 2.7 distribution - needs gunzip, tar, and patch.
-   (a) Get the official Lynx 2.7 distribution - see list of download sites at
+   Lynx 2.7.1 distribution - needs gunzip, tar, and patch.
+   (a) Get the official Lynx 2.7.1 distribution - see list of download sites at
            <URL: http://www.crl.com/~subir/lynx/sources.html>.
-   (b) Get lynx-newfiles-2.7ac-*.tar.gz.
-   (c) Get lynx-patch-2.7ac-*.pch.gz.
-   (d) Unpack the official 2.7 package, then unpack lynx-newfiles-2.7ac-*.tar.gz
-       over that directory tree.
-   (d) Apply patches from lynx-patch-2.7ac-*.pch.
+   (b) Get lynx-newfiles-2.7.1ac-*.tar.gz.
+   (c) Get lynx-patch-2.7.1ac-*.pch.gz.
+   (d) Unpack the official 2.7.1 package, then unpack 
+       lynx-newfiles-2.7.1ac-*.tar.gz over that directory tree.
+   (d) Apply patches from lynx-patch-2.7.1ac-*.pch.
 
 
 HOW TO INSTALL:
 
 (4) before compiling:
 
-    Check top level Makefile and userdefs.h as usual.
+    Check top level makefile or Makefile and userdefs.h as usual.
 
     NOTE that there is a new "#define" in userdefs.h for MAX_CHARSETS
     near the end (in "Section 3.").
@@ -129,7 +135,7 @@ HOW TO INSTALL:
     more info.)
 
     If all goes well, just invoking make from the top-level Lynx dir
-    as usual should do everything automatically.  If not, the Makefiles
+    as usual should do everything automatically.  If not, the makefiles
     may need some tweaking... or:
 
 (6) Some things to look at if compilation fails:
@@ -140,8 +146,8 @@ HOW TO INSTALL:
 
     For recompiling Lynx, `make clean' should not be necessary if only
     files in src/chrtrans have been changed.  On the other hand 
-    `make clean' from the top directory doesn' currently propagate to
-    the src/chrtrans directory, so you have to cd to that directory 
+    may not propagate to the src/chrtrans directory (depending how things
+    are going with auto-config), you may have to cd to that directory 
     and `make clean' there to really clean up there.
 
 (7) To customize (add/change translation tables etc.):
@@ -188,4 +194,4 @@ HOW TO INSTALL:
     contributed translation tables (for stuff that is not available
     at ftp://dkuug.dk or ftp://unicode.org).
 
-KW  1996-03-12
+KW  1996-05-03

@@ -83,6 +83,8 @@ PRIVATE int	diagnostic;			/* level: 0=none 2=source */
 #define PUTS(s) (*targetClass.put_string)(target, s)
 #define START(e) (*targetClass.start_element)(target, e, 0, 0, 0)
 #define END(e) (*targetClass.end_element)(target, e, 0)
+#define MAYBE_END(e) if (HTML_dtd.tags[e].contents != SGML_EMPTY) \
+                        (*targetClass.end_element)(target, e, 0)
 
 PRIVATE void free_news_globals NOARGS
 {
@@ -834,6 +836,7 @@ PRIVATE int read_article NOARGS
 		PUTS(from);
 	    else
 		PUTS(from);
+	    MAYBE_END(HTML_DT);
 	    PUTC('\n');
 
 	    if (!replyto)
@@ -850,6 +853,7 @@ PRIVATE int read_article NOARGS
     	        PUTS(author_address(replyto));
      	    END(HTML_A);
 	    START(HTML_BR);
+	    MAYBE_END(HTML_DT);
 	    PUTC('\n');
 
 	    FREE(from);
@@ -863,6 +867,7 @@ PRIVATE int read_article NOARGS
 	    END(HTML_B);
             PUTC(' ');
 	    PUTS(date);
+	    MAYBE_END(HTML_DT);
 	    PUTC('\n');
 	    FREE(date);
 	}
@@ -874,6 +879,7 @@ PRIVATE int read_article NOARGS
 	    END(HTML_B);
             PUTC(' ');
 	    PUTS(organization);
+	    MAYBE_END(HTML_DT);
 	    PUTC('\n');
 	    FREE(organization);
 	}
@@ -897,8 +903,10 @@ PRIVATE int read_article NOARGS
 	    PUTS("Newsgroups:");
 	    END(HTML_B);
 	    PUTC('\n');
+	    MAYBE_END(HTML_DT);
 	    START(HTML_DD);
 	    write_anchors(newsgroups);
+	    MAYBE_END(HTML_DD);
 	    PUTC('\n');
 
 	    START(HTML_DT);
@@ -909,6 +917,7 @@ PRIVATE int read_article NOARGS
             start_anchor(href);
             PUTS("newsgroup(s)");
             END(HTML_A);
+	    MAYBE_END(HTML_DT);
 	    PUTC('\n');
 	}
 	FREE(newsgroups);
@@ -919,9 +928,11 @@ PRIVATE int read_article NOARGS
 	    START(HTML_B);
 	    PUTS("References:");
 	    END(HTML_B);
+	    MAYBE_END(HTML_DT);
 	    PUTC('\n');
 	    START(HTML_DD);
 	    write_anchors(references);
+	    MAYBE_END(HTML_DD);
 	    PUTC('\n');
 	    FREE(references);
 	}
@@ -996,7 +1007,7 @@ PRIVATE int read_article NOARGS
 		    char *l = line;
 		    char *p;
 
-		    while ((p = strstr(l, "rticle <")) != 0) {
+		    while ((p = strstr(l, "rticle <")) != NULL) {
 		        char *q  = strchr(p,'>');
 		        char *at = strchr(p, '@');
 		        if (q && at && at<q) {
@@ -1163,12 +1174,13 @@ PRIVATE int read_list ARGS1(char *, arg)
 	    if (TRACE)
 	        fprintf(stderr, "B %s", line);
 	    if (line[0] == '.') {
-		if (line[1] < ' ') {		/* End of article? */
+		if ((unsigned char)line[1] < ' ') {		/* End of article? */
 		    done = YES;
 		    break;
 		} else {			/* Line starts with dot */
 		    START(HTML_DT);
 		    PUTS(&line[1]);
+		    MAYBE_END(HTML_DT);
 		}
 	    } else if (line[0] == '#') {	/* Comment? */
 	        p = line;			/* Restart at beginning */
@@ -1194,9 +1206,11 @@ PRIVATE int read_list ARGS1(char *, arg)
 		    START(HTML_DT);
 		    write_anchor(line, line);
 		    listing++;
+		    MAYBE_END(HTML_DT);
 		    PUTC('\n');
     	            START(HTML_DD);
 		    PUTS(&line[i+1]); /* put description */
+		    MAYBE_END(HTML_DD);
 		} else {
 		    if ((head && strncasecomp(line, pattern, len)) ||
 		        (tail && (i < len ||
@@ -1206,6 +1220,7 @@ PRIVATE int read_list ARGS1(char *, arg)
 		    }
 		    START(HTML_DT);
 		    write_anchor(line, line);
+		    MAYBE_END(HTML_DT);
 		    listing++;
 		}
 	    } /* if not dot */
@@ -1216,6 +1231,7 @@ PRIVATE int read_list ARGS1(char *, arg)
         START(HTML_DT);
 	sprintf(line, "No matches for: %s", arg);
 	PUTS(line);
+	MAYBE_END(HTML_DT);
     }
     END(HTML_DLC);
     PUTC('\n');
@@ -1536,6 +1552,7 @@ PRIVATE int read_group ARGS3(
 		    PUTS(buffer);
 		    FREE(date);
 		}
+		MAYBE_END(HTML_LI);
 		/*
 		**  Indicate progress!   @@@@@@
 		*/
@@ -1563,6 +1580,7 @@ PRIVATE int read_group ARGS3(
 		END(HTML_I);
 		PUTC(' ');
 		PUTS(response_text);
+		MAYBE_END(HTML_LI);
 	    } /* Handle response to HEAD request */
 	} /* Loop over article */	    
     } /* If read headers */
@@ -1858,7 +1876,7 @@ PUBLIC int HTLoadNews ARGS4(
 	    if (TRACE)
 		fprintf(stderr,
 	      		"HTNews: Proxy command is '%.*s'\n",
-			(strlen(proxycmd) - 4), proxycmd);
+			(int)(strlen(proxycmd) - 4), proxycmd);
 	    strcat(command, "/");
 	    StrAllocCopy(ProxyHREF, NewsHREF);
 	    StrAllocCopy(NewsHREF, command);

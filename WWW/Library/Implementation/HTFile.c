@@ -100,6 +100,8 @@ typedef struct _HTSuffix {
 #define PUTS(s) (*target->isa->put_string)(target, s)
 #define START(e) (*target->isa->start_element)(target, e, 0, 0, 0)
 #define END(e) (*target->isa->end_element)(target, e, 0)
+#define MAYBE_END(e) if (HTML_dtd.tags[e].contents != SGML_EMPTY) \
+                        (*target->isa->end_element)(target, e, 0)
 #define FREE_TARGET (*target->isa->_free)(target)
 struct _HTStructured {
 	CONST HTStructuredClass *	isa;
@@ -684,7 +686,6 @@ PUBLIC HTFormat HTFileFormat ARGS2(
     extern char LYforce_HTML_mode;
 
     if (LYforce_HTML_mode) {
-        LYforce_HTML_mode = FALSE;
         return WWW_HTML;
     }
 
@@ -1987,6 +1988,7 @@ forget_multi:
 				PUTS(file_extra);
 				FREE(file_extra);
 			    }
+                            MAYBE_END(HTML_LI);
 #endif /* LONG_LIST */
 
 			    next_element = HTBTree_next(bt, next_element);

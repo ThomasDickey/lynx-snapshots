@@ -53,7 +53,7 @@ PUBLIC void LYexit ARGS1(
 	 *  Ignore further interrupts. - FM
  	 */
 #ifndef NOSIGHUP
-				(void) signal(SIGHUP, SIG_DFL);
+				(void) signal(SIGHUP, SIG_IGN);
 #endif /* NOSIGHUP */
 	(void) signal (SIGTERM, SIG_IGN);
 	(void) signal (SIGINT, SIG_IGN);

@@ -115,9 +115,14 @@ SOLARIS 2
 #define HAVE_GETCWD 1
 #endif
 
+#ifndef USE_SLANG
 #ifndef NO_KEYPAD
 #define HAVE_KEYPAD 1
 #endif
+#ifndef NO_TTYTYPE
+#define HAVE_TTYTYPE 1
+#endif
+#endif /* USE_SLANG */
 
 #ifndef NO_PUTENV
 #define HAVE_PUTENV 1
@@ -125,10 +130,6 @@ SOLARIS 2
 
 #ifndef NO_SIZECHANGE
 #define HAVE_SIZECHANGE 1
-#endif
-
-#ifndef NO_TTYTYPE
-#define HAVE_TTYTYPE 1
 #endif
 
 #ifndef NO_UNISTD_H

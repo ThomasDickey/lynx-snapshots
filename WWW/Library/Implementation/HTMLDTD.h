@@ -85,6 +85,7 @@ typedef enum _HTMLElement {
 	HTML_HEAD,
 	HTML_HR,
 	HTML_HTML,
+	HTML_HY,
         HTML_I,
 	HTML_IMG,
 	HTML_INPUT,
@@ -118,6 +119,7 @@ typedef enum _HTMLElement {
         HTML_SAMP,
 	HTML_SCRIPT,
 	HTML_SELECT,
+	HTML_SHY,
         HTML_SMALL,
 	HTML_SPAN,
 	HTML_SPOT,
@@ -141,9 +143,10 @@ typedef enum _HTMLElement {
         HTML_U,
 	HTML_UL,
         HTML_VAR,
+        HTML_WBR,
 	HTML_XMP } HTMLElement;
 
-#define HTML_ELEMENTS 112
+#define HTML_ELEMENTS 115
 
 /*
 
@@ -854,6 +857,9 @@ Attribute numbers
 #define HTML_UL_ATTRIBUTES     13
 
 extern CONST SGML_dtd HTML_dtd;
+
+extern void HTSwitchDTD PARAMS((
+    BOOL new));
 
 /*
 

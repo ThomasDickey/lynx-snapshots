@@ -348,16 +348,20 @@ to="ngp">(post a followup message)<BR>
 NNTPSERVER configuration or environmental variable.  Inclusion of at
 least one newsgroup in the URL is required, and additional groups can
 be specified as a comma-separated list.  Wildcarding of newgroup names
-is not supported for these URLs.  For newsreply and snewsreply URLs, the
-user is offered the option to include the currently displayed document,
+is not supported for these URLs.  For newsreply and snewsreply URLs, if
+an external editor has been defined via the <em>Options Menu</em>, the
+user is offered an option to include the currently displayed document,
 which presumeably is a news article with a <em>followup</em> link that
 was activated, and if confirmed, each line of that document is prefixed
-with a right-angle-bracket.  These URLs can be used as command line
-startfiles (in which case, Lynx will exit after posting the message,
-and the newreply or snewsreply URLs degrade to newspost or snewpost
-URLs, respectively).  They also can be used as HREF attribute values
-in any HTML document homologously to <a href="#mailto">mailto</a> URLs,
-with the qualification that they presently are supported only by Lynx. 
+with a right-angle-bracket.  The user is expected to edit such an inclusion
+so that only the passages relevant to the followup message are retained.
+
+<p>These URLs can be used as command line startfiles (in which case, Lynx
+will exit after posting the message, and the newreply or snewsreply URLs
+degrade to newspost or snewpost URLs, respectively).  They also can be used
+as HREF attribute values in any HTML document homologously to <a
+href="#mailto">mailto</a> URLs, with the qualification that they presently
+are supported only by Lynx.
 <HR WIDTH="100%">
 
 <H2><a name="mailto">The <em>mailto</em> URL:</a></H2>
@@ -434,6 +438,13 @@ transmission across gateways.  If the ENCTYPE was not <em>text/plain</em>,
 any script which decodes the mailed content should ignore the physical
 newlines and recognize only hex escaped newline characters as intended
 to be present in the decoded content.
+
+<p>If the mailto URL is not the ACTION for a FORM, and if an external
+editor has been defined via the <em>Options Menu</em>, the user is offered
+an option to include the currently displayed document.  If this option is
+accepted, each line of that document is prefixed with a right-angle-bracket,
+and the prefixed inclusion should be trimmed by the user to just those
+passages relevant to the message which will be sent.
 <HR WIDTH="100%">
 
 <H2><a name="finger">The <em>finger</em> URL:</a></H2>

@@ -1,5 +1,58 @@
-$Id: CHANGES.chartrans,v 1.1 1997/04/08 17:33:48 tom Exp $
-$ProjectHeader: Lynx 2.7.1ac-0.5 Sat, 12 Apr 1997 20:52:08 -0600 buttles $
+$Id: CHANGES.chartrans,v 1.2 1997/05/16 08:51:31 tom Exp $
+$ProjectHeader: Lynx 2.7.1ac-0.28 Sat, 24 May 1997 18:14:19 -0600 dickey $
+
+1997-05-15
+ Lynx 2.7.1wb+ct-0.26
+* Mods in LYMainLoop.c to not force a cache refresh on a proxy any more
+  when INLINE_TOGGLE, IMAGE_TOGGLE, RAW_TOGGLE are used.  On the other
+  hand, do force a proxy cache refresh after one of the variables relevant
+  for content negotiation `language' or `pref_charset' has been changed
+  from the Options screen, if the current document is from a http, https, or
+  lynxcgi resource.
+* Set HTTP_ACCEPT_CHARSET environment variable for the child process in
+  LYCgi.c if pref_charset is not NULL.
+* Write a META tag with the current display character sets to
+  the files generated for Bookmarks, List, Info, History, and Visited Links
+  pages, so title strings contained in those files will (hopefully) not
+  get erroneously translated again.  Use new function add_META_charset_to_fd()
+  in LUCharUtils for this purpose.
+* makeuctb now sets RawUni to UCT_ENC_8BIT if not otherwise set
+  and if there are char values above 127.
+* Change in HTuncache_current_document() to prevent caching of
+  UCStages info which should be discarded.  Still allow caching for this
+  in the node_anchor for source display, so that a META tag in the parsed
+  HTML can influence the display after using the SOURCE '\' key. - KW
+* Changed display_title() in GridText.c to not rely on sprintf() to get
+  the number of blanks right.  There were problems with C1 characters.
+* Added new lynx.cfg symbols ASSUME_CHARSET, 
+  ASSUME_LOCAL_CHARSET, and ASSUME_UNREC_CHARSET.  They are only
+  recognized if compiled with -DEXP_CHARTRANS.  They correspond to the
+  command line options -assume_charset, -assume_local_charset, and
+  -assume_unrec_charset.
+  The default for ASSUME_CHARSET is iso-8859-1 (corresponding to display
+  character set "ISO Latin 1").  If no ASSUME_LOCAL_CHARSET is set,
+  the explicit or default value for ASSUME_CHARSET will also be used for
+  local files.  ASSUME_UNREC_CHARSET has no default.  See added text
+  in lynx.cfg.
+* Changes in LYCharSets.c to HTMLSetCharacterHandling() and
+  HTMLSetUseDefaultRawMode() to support (hopefully) more consistent
+  and user-friendly handling of raw mode and its default.
+  
+1997-05-03
+ Lynx 2.7.1wb+ct-0.20
+  Now always check for LYlowest_eightbit[current_char_set]
+  near the top of HText_appendCharacter(), to prevent writing C1 control 
+  chars to the terminal if they are not valid as displayabable characters 
+  according to the selected "display character set" Option.
+  All this should be handled earlier in processing, and this check may
+  disappear again for testing, but somebody asked for it...
+  Slightly updated some doc files.
+
+1997-04-12
+ Lynx 2.7.1wb+ct-0.11
+  Added TRACE output to UCAuto.c
+  Changes in LYMail.c and LYPrint.c to send Content-Transfer-Encoding
+  header and/or charset parameter in mail
 
 1997-04-08
  Lynx 2.7.1wb+ct-0.3

@@ -92,7 +92,11 @@ PUBLIC int showinfo ARGS4(
 	}
     }
 
-    fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
+    fprintf(fp0, "<head>\n");
+#ifdef EXP_CHARTRANS
+    add_META_charset_to_fd(fp0, -1);
+#endif
+    fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 SHOWINFO_TITLE);
     fprintf(fp0,"<h1>You have reached the Information Page</h1>\n");
     fprintf(fp0,"<h2>%s Version %s</h2>\n", LYNX_NAME, LYNX_VERSION);
@@ -243,7 +247,7 @@ PUBLIC int showinfo ARGS4(
     fprintf(fp0,"<dt><em>Linkname:</em> %s\n", Title);
 
     StrAllocCopy(Address, doc->address);
-    LYEntify(&Address, FALSE);
+    LYEntify(&Address, TRUE);
     fprintf(fp0,
     	    "<dt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>URL:</em> %s\n", Address);
 
@@ -283,7 +287,7 @@ PUBLIC int showinfo ARGS4(
 
     if (owner_address) {
         StrAllocCopy(Address, owner_address);
-	LYEntify(&Address, FALSE);
+	LYEntify(&Address, TRUE);
     } else {
         StrAllocCopy(Address, "None");
     }
@@ -292,8 +296,11 @@ PUBLIC int showinfo ARGS4(
     fprintf(fp0,
 	"<dt>&nbsp;&nbsp;&nbsp;&nbsp;<em>size:</em> %d lines\n", size_of_file);
 
-    fprintf(fp0, "<dt>&nbsp;&nbsp;&nbsp;&nbsp;<em>mode:</em> %s\n",
-		 (lynx_mode == FORMS_LYNX_MODE ? "forms mode" : "normal"));
+    fprintf(fp0, "<dt>&nbsp;&nbsp;&nbsp;&nbsp;<em>mode:</em> %s%s%s\n",
+		 (lynx_mode == FORMS_LYNX_MODE ? "forms mode" : "normal"),
+	    (doc->safe ? ", safe" : ""),
+	    (doc->internal_link ? ", internal link" : "")
+	    );
 
     fprintf(fp0, "</dl>\n");  /* end of list */
 
@@ -320,7 +327,7 @@ PUBLIC int showinfo ARGS4(
 	    }
 	    if (links[doc->link].form->submit_action) {
 	        StrAllocCopy(Address, links[doc->link].form->submit_action);
-		LYEntify(&Address, FALSE);
+		LYEntify(&Address, TRUE);
 	        fprintf(fp0, "<dt>&nbsp;&nbsp;<em>Action:</em> %s\n", Address);
 	    }
 	    if (!(links[doc->link].form->submit_method &&
@@ -334,7 +341,7 @@ PUBLIC int showinfo ARGS4(
 	    } else {
 	        StrAllocCopy(Title, "");
 	    }
-	    fprintf(fp0, "<dt><em>Filename:</em> %s\n", Title);
+	    fprintf(fp0, "<dt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>URL:</em> %s\n", Title);
 	}
 	fprintf(fp0, "</dl>\n");  /* end of list */
 

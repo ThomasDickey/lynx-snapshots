@@ -76,6 +76,23 @@ ifelse($3,,[    :]dnl
 ])dnl
   ])])dnl
 dnl ---------------------------------------------------------------------------
+dnl Check if curses.h defines TRUE/FALSE (it does under SVr4).
+AC_DEFUN([CF_BOOL_DEFS],
+[
+AC_MSG_CHECKING(if TRUE/FALSE are defined)
+AC_CACHE_VAL(cf_cv_bool_defs,[
+AC_TRY_COMPILE([
+#include <curses.h>
+#include <stdio.h>],[int x = TRUE, y = FALSE],
+	[cf_cv_bool_defs=yes],
+	[cf_cv_bool_defs=no])])
+AC_MSG_RESULT($cf_cv_bool_defs)
+if test "$cf_cv_bool_defs" = no ; then
+	AC_DEFINE(TRUE,(1))
+	AC_DEFINE(FALSE,(0))
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Check if curses supports color.  (Note that while SVr3 curses supports
 dnl color, it does this differently from SVr4 curses; more work would be needed
 dnl to accommodate SVr3).
@@ -89,7 +106,9 @@ AC_CACHE_VAL(cf_cv_color_curses,[
 ],
 	[has_colors();
 	 start_color();
+#ifndef NCURSES_BROKEN
 	 wbkgd(curscr, getbkgd(stdscr)); /* X/Open XPG4 aka SVr4 Curses */
+#endif
 	],
 	[cf_cv_color_curses=yes],
 	[cf_cv_color_curses=no])
@@ -279,22 +298,26 @@ AC_DEFUN([CF_MAKE_INCLUDE],
 AC_MSG_CHECKING(for style of include in makefiles)
 make_include_left=""
 make_include_right=""
-make_include_quote=""
+make_include_quote="unknown"
 for cf_include in "include" ".include" "!include"
 do
-	for cf_quote in ' ' '"'
+	for cf_quote in '' '"'
 	do
 		cat >WWW/Library/unix/makefile <<CF_EOF
+SHELL=/bin/sh
 ${cf_include} ${cf_quote}../../Library/Implementation/Version.make${cf_quote}
 all :
 	@echo 'cf_make_include=OK'
 CF_EOF
 	cf_make_include=""
-	eval `cd WWW/Library/unix && ${MAKE-make} 2>/dev/null | grep cf_make_include=OK`
+	eval `cd WWW/Library/unix && ${MAKE-make} 2>&5 | grep cf_make_include=OK`
 	if test -n "$cf_make_include"; then
 		make_include_left="$cf_include"
 		make_include_quote="$cf_quote"
 		break
+	else
+		echo Tried 1>&5
+		cat WWW/Library/unix/makefile 1>&5
 	fi
 	done
 	test -n "$cf_make_include" && break
@@ -303,7 +326,7 @@ done
 if test -z "$make_include_left" ; then
 	AC_ERROR(Your $ac_make program does not support includes)
 fi
-if test -n "$make_include_quote" ; then
+if test ".$make_include_quote" != .unknown ; then
 	make_include_left="$make_include_left $make_include_quote"
 	make_include_right="$make_include_quote"
 fi
@@ -311,6 +334,27 @@ AC_MSG_RESULT(${make_include_left}file${make_include_right})
 AC_SUBST(make_include_left)
 AC_SUBST(make_include_right)
 ])
+dnl ---------------------------------------------------------------------------
+dnl Check for pre-1.9.9g ncurses (among other problems, the most obvious is
+dnl that color combinations don't work).
+AC_DEFUN([CF_NCURSES_BROKEN],
+[AC_CACHE_VAL(cf_cv_ncurses_broken,[
+AC_TRY_COMPILE([
+#include <curses.h>],[
+#if defined(NCURSES_VERSION) && defined(wgetbkgd)
+	make an error
+#else
+	int x = 1
+#endif
+],
+	[cf_cv_ncurses_broken=no],
+	[cf_cv_ncurses_broken=yes])
+])
+if test "$cf_cv_ncurses_broken" = yes ; then
+	AC_MSG_WARN(hmm... you should get an up-to-date version of ncurses)
+	AC_DEFINE(NCURSES_BROKEN)
+fi
+])dnl
 dnl ---------------------------------------------------------------------------
 dnl Look for the SVr4 curses clone 'ncurses' in the standard places, adjusting
 dnl the CPPFLAGS variable.
@@ -341,7 +385,7 @@ AC_CACHE_VAL(cf_cv_ncurses_header,[
 			curses.h \
 			ncurses.h
 		do
-			if egrep "NCURSES" $cf_incdir/$cf_header >/dev/null 2>&1; then
+			if egrep "NCURSES" $cf_incdir/$cf_header 1>&5 2>&1; then
 				cf_cv_ncurses_header=$cf_incdir/$cf_header 
 				test -n "$verbose" && echo $ac_n "	... found $ac_c" 1>&6
 				break
@@ -410,6 +454,37 @@ AC_CHECK_LIB(gpm,Gpm_Open,[
 	[AC_CHECK_LIB(ncurses,initscr)])
 ])])
 dnl ---------------------------------------------------------------------------
+dnl Check for the version of ncurses, to aid in reporting bugs, etc.
+AC_DEFUN([CF_NCURSES_VERSION],
+[AC_MSG_CHECKING(for ncurses version)
+AC_CACHE_VAL(cf_cv_ncurses_version,[
+	cf_cv_ncurses_version=no
+	cat > conftest.$ac_ext <<EOF
+#ifdef NCURSESHEADER
+#include <ncurses.h>
+#else
+#include <curses.h>
+#endif
+#ifdef NCURSES_VERSION
+Autoconf NCURSES_VERSION
+#else
+#ifdef __NCURSES_H
+Autoconf "old"
+#endif
+#endif
+EOF
+	cf_try="$ac_cpp conftest.$ac_ext 2>&5 | grep '^Autoconf ' >conftest.out"
+	AC_TRY_EVAL(cf_try)
+	if test -f conftest.out ; then
+changequote(,)dnl
+		cf_out=`cat conftest.out | sed -e 's@^[^\"]*\"@@' -e 's@\".*@@'`
+changequote([,])dnl
+		test -n "$cf_out" && cf_cv_ncurses_version="$cf_out"
+	fi
+])
+AC_MSG_RESULT($cf_cv_ncurses_version)
+])
+dnl ---------------------------------------------------------------------------
 dnl After checking for functions in the default $LIBS, make a further check
 dnl for the functions that are netlib-related (these aren't always in the
 dnl libc, etc., and have to be handled specially because there are conflicting
@@ -448,6 +523,40 @@ AC_CHECK_FUNC(strcasecmp,[AC_DEFINE(HAVE_STRCASECMP)],[
 		NETLIBS="-lresolv $NETLIBS"],,
 		[$NETLIBS])])
 LIBS="$LIBS $NETLIBS"
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Check for the symbol NGROUPS
+AC_DEFUN([CF_NGROUPS],
+[
+AC_MSG_CHECKING(if NGROUPS is defined)
+AC_CACHE_VAL(cf_cv_ngroups,[
+AC_TRY_COMPILE([
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
+],[int x = NGROUPS],
+	[cf_cv_ngroups=yes],
+	[AC_TRY_COMPILE([
+#if HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
+],[int x = NGROUPS_MAX],
+		[cf_cv_ngroups=NGROUPS_MAX],
+		[cf_cv_ngroups=no])
+	])
+AC_MSG_RESULT($cf_cv_ngroups)
+if test "$cf_cv_ngroups" = no ; then
+	AC_DEFINE(NGROUPS,16)
+elif test "$cf_cv_ngroups" = NGROUPS_MAX ; then
+	AC_DEFINE(NGROUPS,NGROUPS_MAX)
+fi
+])
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check for a given program, defining corresponding symbol.
@@ -579,13 +688,16 @@ AC_DEFUN([CF_SLANG_CPPFLAGS],
 [
 AC_MSG_CHECKING(for slang header file)
 AC_CACHE_VAL(cf_cv_slang_header,[
+	AC_TRY_COMPILE([#include <slang.h>],
+	[printf("%s\n", SLANG_VERSION)],
+	[cf_cv_slang_header=predefined],[
 	CF_HEADER_PATH(cf_search,slang)
 	for cf_incdir in $cf_search
 	do
 		for cf_header in \
 			slang.h
 		do
-			if egrep "SLANG_VERSION" $cf_incdir/$cf_header >/dev/null 2>&1; then
+			if egrep "SLANG_VERSION" $cf_incdir/$cf_header 1>&5 2>&1; then
 				cf_cv_slang_header=$cf_incdir/$cf_header 
 				break
 			fi
@@ -593,7 +705,7 @@ AC_CACHE_VAL(cf_cv_slang_header,[
 		test -n "$cf_cv_slang_header" && break
 	done
 	test -z "$cf_cv_slang_header" && AC_ERROR(not found)
-	])
+	])])
 AC_MSG_RESULT($cf_cv_slang_header)
 AC_DEFINE(USE_SLANG)
 changequote(,)dnl
@@ -611,7 +723,7 @@ AC_DEFUN([CF_SLANG_LIBS],
 		[LIBS="-lslang $LIBS"],
 		[AC_CHECK_LIB(slang,SLtt_get_screen_size,
 			[LIBS="-lslang -lm $LIBS"],
-			AC_ERROR(cannot link -lslang),"-lm")])])
+			AC_ERROR(cannot link -lslang),"-lm")],"-lm")])
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check for declaration of sys_errlist in one of stdio.h and errno.h.

@@ -82,6 +82,10 @@ extern BOOLEAN local_exec_on_local_files; /* TRUE to enable local program  *
 #define NUMBERS_AS_ARROWS 0
 #define LINKS_ARE_NUMBERED 1
 
+#define HIDDENLINKS_MERGE	0
+#define HIDDENLINKS_SEPARATE	1
+#define HIDDENLINKS_IGNORE	2
+
 #define NOVICE_MODE 	  0
 #define INTERMEDIATE_MODE 1
 #define ADVANCED_MODE 	  2
@@ -277,6 +281,13 @@ extern int LYStatusLine;		/* Line for statusline() or -1   */
 extern BOOLEAN LYCollapseBRs;		/* Collapse serial BRs?		 */
 extern BOOLEAN LYSetCookies;		/* Process Set-Cookie headers?	 */
 extern char *XLoadImageCommand;		/* Default image viewer for X	 */
+#ifdef USE_EXTERNALS
+extern BOOLEAN no_externals; /* don't allow the use of externals */
+#endif
+extern BOOLEAN LYNoISMAPifUSEMAP;	/* Omit ISMAP link if MAP present? */
+extern int LYHiddenLinks;
+
+extern BOOL New_DTD; 
 
 #define BOOKMARK_TITLE "Bookmark file"
 #define MOSAIC_BOOKMARK_TITLE "Converted Mosaic Hotlist"
@@ -287,4 +298,10 @@ extern char *XLoadImageCommand;		/* Default image viewer for X	 */
  */
 extern char *MBM_A_subbookmark[MBM_V_MAXFILES+1];
 extern char *MBM_A_subdescript[MBM_V_MAXFILES+1];
+extern FILE *LYTraceLogFP;		/* Pointer for TRACE log	 */
+extern char *LYTraceLogPath;		/* Path for TRACE log		 */
+extern BOOLEAN LYUseTraceLog;		/* Use a TRACE log?		 */
+extern FILE LYOrigStderr;		/* Original stderr pointer	 */
+extern BOOLEAN LYStripDotDotURLs;	/* Try to fix ../ in some URLs?  */
+
 #endif /* LYGLOBALDEFS_H */
