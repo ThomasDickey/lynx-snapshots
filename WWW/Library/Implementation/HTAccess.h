@@ -114,8 +114,8 @@ Load a document from relative name
 
  */
 extern  BOOL HTLoadRelative PARAMS((
-                CONST char *            relative_name,
-                HTParentAnchor *        here));
+		CONST char *		relative_name,
+		HTParentAnchor *	here));
 
 
 /*
@@ -150,7 +150,7 @@ Load a document from absolute name to a stream
 
  */
 extern BOOL HTLoadToStream PARAMS((CONST char * addr, BOOL filter_it,
-                                HTStream * sink));
+				HTStream * sink));
 
 
 /*
@@ -210,8 +210,8 @@ Search Given Indexname
 
  */
 extern BOOL HTSearchAbsolute PARAMS((
-        CONST char *    keywords,
-        char *    	indexname));
+	CONST char *	keywords,
+	char *		indexname));
 
 
 /*
@@ -221,15 +221,15 @@ Register an access method
  */
 
 typedef struct _HTProtocol {
-        char * name;
+	char * name;
 
-        int (*load)PARAMS((
-                CONST char *    full_address,
-                HTParentAnchor * anchor,
-                HTFormat        format_out,
-                HTStream*       sink));
+	int (*load)PARAMS((
+		CONST char *	full_address,
+		HTParentAnchor * anchor,
+		HTFormat	format_out,
+		HTStream*	sink));
 
-        HTStream* (*saveStream)PARAMS((HTParentAnchor * anchor));
+	HTStream* (*saveStream)PARAMS((HTParentAnchor * anchor));
 
 } HTProtocol;
 

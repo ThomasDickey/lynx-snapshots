@@ -37,13 +37,10 @@
 #undef EXP_ALT_BINDINGS		/* CF_ARG_ENABLE(alt-bindings) */
 #undef EXP_CHARSET_CHOICE	/* CF_ARG_ENABLE(charset-choice) */
 #undef EXP_CHARTRANS_AUTOSWITCH	/* CF_ARG_ENABLE(font-switch) */
-#undef EXP_FILE_UPLOAD		/* CF_ARG_ENABLE(file-upload) */
 #undef EXP_JUSTIFY_ELTS		/* CF_ARG_ENABLE(justify-elts) */
 #undef EXP_KEYBOARD_LAYOUT	/* CF_ARG_ENABLE(kbd-layout) */
 #undef EXP_LIBJS		/* CF_ARG_ENABLE(libjs) */
 #undef EXP_NESTED_TABLES	/* CF_ARG_ENABLE(nested-tables) */
-#undef EXP_PERSISTENT_COOKIES	/* CF_ARG_ENABLE(persistent-cookies) */
-#undef EXP_READPROGRESS		/* CF_ARG_ENABLE(read-eta) */
 #undef FANCY_CURSES		/* CF_FANCY_CURSES */
 #undef GCC_NORETURN		/* CF_GCC_ATTRIBUTES */
 #undef GCC_PRINTF		/* CF_GCC_ATTRIBUTES */
@@ -98,10 +95,10 @@
 #undef HAVE_MUNMAP		/* AM_GNU_GETTEXT */
 #undef HAVE_NAPMS
 #undef HAVE_NCURSESW_NCURSES_H	/* defined if we include <ncursesw/ncurses.h> */
+#undef HAVE_NCURSESW_TERM_H	/* have <ncursesw/term.h> */
 #undef HAVE_NCURSES_H		/* defined if we include <ncurses.h> */
 #undef HAVE_NCURSES_NCURSES_H	/* defined if we include <ncurses/ncurses.h> */
 #undef HAVE_NCURSES_TERM_H	/* have <ncurses/term.h> */
-#undef HAVE_NCURSESW_TERM_H	/* have <ncursesw/term.h> */
 #undef HAVE_NEWPAD
 #undef HAVE_NEWTERM
 #undef HAVE_NL_TYPES_H		/* AM_GNU_GETTEXT */
@@ -155,6 +152,7 @@
 #undef HAVE_VASPRINTF
 #undef HAVE_VFORK_H		/* have <vfork.h> */
 #undef HAVE_WAITPID
+#undef HAVE_WATTR_GET
 #undef HAVE_WBORDER
 #undef HAVE_WREDRAWLN
 #undef HAVE_WRESIZE
@@ -198,7 +196,6 @@
 #undef RLOGIN_PATH		/* CF_PATH_PROG(rlogin) */
 #undef RM_PATH			/* CF_PATH_PROG(rm) */
 #undef SOCKS			/* CF_SOCKS, CF_SOCKS5 */
-#undef SOURCE_CACHE		/* CF_ARG_ENABLE(source-cache) */
 #undef STDC_HEADERS
 #undef SYSTEM_MAIL		/* CF_DEFINE_PROG */
 #undef SYSTEM_MAIL_FLAGS	/* CF_SYSTEM_MAIL_FLAGS */
@@ -214,21 +211,28 @@
 #undef UNDERLINE_LINKS		/* CF_ARG_ENABLE(underlines) */
 #undef UNIX
 #undef UNZIP_PATH		/* CF_PATH_PROG(unzip) */
+#undef USE_BZLIB		/* AC_ARG_WITH(bzlib) */
 #undef USE_COLOR_STYLE		/* CF_ARG_ENABLE(color-style) */
 #undef USE_DEFAULT_COLORS	/* CF_ARG_ENABLE(default-colors) */
 #undef USE_EXECVP		/* CF_ARG_DISABLE(full-paths) */
 #undef USE_EXTERNALS		/* CF_ARG_ENABLE(externs) */
 #undef USE_FCNTL		/* CF_FIONBIO */
+#undef USE_FILE_UPLOAD		/* CF_ARG_ENABLE(file-upload) */
 #undef USE_GNUTLS_INCL		/* CF_GNUTLS */
 #undef USE_OPENSSL_INCL		/* CF_SSL */
+#undef USE_PERSISTENT_COOKIES	/* CF_ARG_ENABLE(persistent-cookies) */
 #undef USE_PRETTYSRC		/* CF_ARG_ENABLE(prettysrc) */
+#undef USE_READPROGRESS		/* CF_ARG_ENABLE(read-eta) */
 #undef USE_SCROLLBAR		/* CF_ARG_ENABLE(scrollbar) */
 #undef USE_SLANG		/* AC_ARG_WITH(screen=slang) */
 #undef USE_SOCKS4_PREFIX	/* CF_SOCKS5 */
 #undef USE_SOCKS5		/* CF_SOCKS5 */
+#undef USE_SOURCE_CACHE		/* CF_ARG_ENABLE(source-cache) */
 #undef USE_SSL			/* CF_SSL */
 #undef USE_SYSV_UTMP		/* CF_UTMP */
+#undef USE_X509_SUPPORT		/* CF_GNUTLS, CF_SSL */
 #undef USE_ZLIB			/* AC_ARG_WITH(zlib) */
+#undef UTF8			/* CF_SLANG_CPPFLAGS */
 #undef UTMPX_FOR_UTMP		/* use <utmpx.h> since <utmp.h> not found */
 #undef UUDECODE_PATH		/* CF_PATH_PROG(uudecode) */
 #undef WAITPID_USES_UNION	/* CF_FUNC_WAIT */

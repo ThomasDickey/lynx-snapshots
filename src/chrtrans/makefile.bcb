@@ -112,3 +112,11 @@ BccW32.cfg :
 -v-
 | $@
 
+clean :
+	-del *_uni.h
+	-del *.exe
+	-del *.map
+	-del *.obj
+	-del *.tds
+	-del BccW32.cfg
+	-del /f/s/q *.i

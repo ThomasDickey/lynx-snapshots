@@ -89,7 +89,7 @@ extern CONST char * HTParseAnchor PARAMS((
 **  be replaced by "" , and the seqeunce "/./" which may be replaced by "/".
 **  Simplification helps us recognize duplicate filenames.
 **
-**	Thus, 	/etc/junk/../fred 	becomes	/etc/fred
+**	Thus,	/etc/junk/../fred	becomes /etc/fred
 **		/etc/junk/./fred	becomes	/etc/junk/fred
 **
 **      but we should NOT change

@@ -3,8 +3,6 @@
 SHELL		= @CONFIG_SHELL@
 CDPATH		= .
 
-x		= @PROG_EXT@
-
 .SUFFIXES:
 @SET_MAKE@
 prefix		= @prefix@
@@ -18,6 +16,9 @@ CFLAGS		= @CFLAGS@
 DEFS		= @DEFS@
 CPPFLAGS	= @CPPFLAGS@
 LINT		= @LINT@
+
+x		= @EXEEXT@
+o		= .@OBJEXT@
 
 LIBS		= @LIBS@
 
@@ -113,6 +114,7 @@ SITE_LYDEFS = # Your defines here
 SITE_DEFS = # Your defines here
 
 # defines for which there are no configure options:
+# -DEXP_ASCII_CTYPES use POSIX locale for toupper/tolower/isupper
 # -DHP_TERMINAL    For DIM workaround to REVERSE problems on HP terminals.
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
 # -DNO_RULES       Disables CERN-style access rules (see lynx.cfg).
@@ -178,7 +180,7 @@ help:
 	@echo
 	@echo "Please run make with one of the following arguments"
 	@echo "all        -- to make the executable, put it in this directory"
-	@echo "clean      -- removes all '.o' and 'core' files"
+	@echo "clean      -- removes all '$o' and 'core' files"
 	@echo "depend     -- use makedepend to generate header-dependencies"
 	@echo "tar        -- runs clean, removes executable, and tars the whole directory"
 	@echo "compress   -- runs tar, then compresses the result"
@@ -322,7 +324,7 @@ help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
 		-e 's%\(.*\)=\(.*\.html\)$$%s=\2=\2$(COMPRESS_EXT)=g%' \
 		-e 's%\.html=%\\.html=%' \
 		help_files.tmp | $(FIX_SED) >> $@
-	@ECHO_CC@if test -n "$(COMPRESS_EXT)"; then echo 's%\$(COMPRESS_EXT)\$(COMPRESS_EXT)%$(COMPRESS_EXT)%g' >> $@; fi
+	@ECHO_CC@if test -n "$(COMPRESS_EXT)"; then echo 's%\(\$(COMPRESS_EXT)\)*\$(COMPRESS_EXT)%$(COMPRESS_EXT)%g' >> $@; fi
 	@-rm -f help_files.tmp
 
 install-help : help_files.sed $(HELPDIR)
@@ -383,7 +385,7 @@ LYHelp.h : help_files.sed LYHelp.hin
 
 cfg_defs.h : $(srcdir)/cfg_defs.sh $(srcdir)/cfg_edit.sh config.cache lynx_cfg.h
 	@rm -f $@
-	$(SHELL) -c '$(srcdir)/cfg_defs.sh $(srcdir)'
+	$(SHELL) $(srcdir)/cfg_defs.sh $(srcdir)
 
 install-cfg : $(LIBDIR)
 	@$(SHELL) -c '$(srcdir)/scripts/install-cfg.sh "$(INSTALL_DATA)" $(srcdir)/lynx.cfg $(LIBDIR)/lynx.cfg'
@@ -413,6 +415,6 @@ $(MANDIR) \
 $(LIBDIR) \
 $(HELPDIR) \
 $(DOCDIR) :
-	$(srcdir)/mkdirs.sh $@
+	$(SHELL) $(srcdir)/mkdirs.sh $@
 etags:
 	etags -r "/\(PRIVATE\|PUBLIC\)[ \t]+\([a-zA-Z_][a-zA-Z_0-1]*[ \t*]+\)*\([a-zA-Z_][a-zA-Z_0-1]*\)[ \t]+\(ARGS[0-9]\|NOARGS\)/\3/" *.[ch] */*.[ch] */*/*.[ch] */*/*/*.[ch]

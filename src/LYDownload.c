@@ -500,7 +500,7 @@ PUBLIC int LYdownload_options ARGS2(
 
     if ((fp0 = InternalPageFP(tempfile, TRUE)) == 0)
 	return(-1);
- 
+
     StrAllocCopy(downloaded_url, *newfile);
     LYLocalFileToURL(newfile, tempfile);
 
@@ -548,11 +548,17 @@ PUBLIC int LYdownload_options ARGS2(
 	     */
 	    if (SuffixIs(data_file, HTML_SUFFIX)
 	     || SuffixIs(data_file, TEXT_SUFFIX)) {
+		char *target = NULL;
+		char *source = LYAddPathToSave(data_file);
+
+		LYLocalFileToURL(&target, source);
 		fprintf(fp0,
-			"   <a href=\"file://localhost%s%s\">%s</a>\n",
-			NonNull(lynx_save_space),
-			data_file,
+			"   <a href=\"%s\">%s</a>\n",
+			target,
 			gettext("View temporary file"));
+
+		FREE(source);
+		FREE(target);
 	    }
 	}
     } else {

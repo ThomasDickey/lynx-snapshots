@@ -46,12 +46,10 @@ extern int UCLYhndl_for_unrec;
 extern int UCLYhndl_HTFile_for_unspec;
 extern int UCLYhndl_HTFile_for_unrec;
 
-#undef UTF8		/* defined in some broken header files */
-
 /* easy to type: */
 extern int LATIN1;     /* UCGetLYhndl_byMIME("iso-8859-1") */
 extern int US_ASCII;   /* UCGetLYhndl_byMIME("us-ascii")   */
-extern int UTF8;       /* UCGetLYhndl_byMIME("utf-8")      */
+extern int UTF8_handle;	/* UCGetLYhndl_byMIME("utf-8")      */
 
 #undef TRANSPARENT	/* defined on Solaris in <sys/stream.h> */
 extern int TRANSPARENT; /* UCGetLYhndl_byMIME("x-transparent")  */

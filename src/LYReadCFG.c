@@ -396,7 +396,7 @@ PRIVATE void parse_color ARGS1(
 }
 #endif /* USE_COLOR_TABLE */
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 static Config_Enum tbl_source_cache[] = {
     { "FILE",	SOURCE_CACHE_FILE },
     { "MEMORY",	SOURCE_CACHE_MEMORY },
@@ -1208,6 +1208,31 @@ PRIVATE int read_htmlsrc_tagname_xform ARGS1( char*,str)
 }
 #endif
 
+#if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
+PRIVATE int screen_size_fun ARGS1(
+	char *,		value)
+{
+    char *cp;
+
+    if ((cp = strchr(value, ',')) != 0) {
+	*cp++ = '\0';       /* Terminate ID */
+	scrsize_x = atoi(value);
+	scrsize_y = atoi(cp);
+	if ((scrsize_x <= 1) || (scrsize_y <= 1)) {
+	    scrsize_x = scrsize_y = 0;
+	}
+	if ((scrsize_x > 0) && (scrsize_x < 80)) {
+	    scrsize_x = 80;
+	}
+	if ((scrsize_y > 0) && (scrsize_y < 4)) {
+	    scrsize_y = 4;
+	}
+	CTRACE((tfp, "scrsize: x=%d, y=%d\n", scrsize_x, scrsize_y));
+    }
+    return 0;
+}
+#endif
+
 /* This table is searched ignoring case */
 PRIVATE Config_Type Config_Table [] =
 {
@@ -1254,15 +1279,15 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_PRG(RC_COPY_PATH,            ppCOPY),
      PARSE_INT(RC_CONNECT_TIMEOUT,      connect_timeout),
      PARSE_STR(RC_COOKIE_ACCEPT_DOMAINS, LYCookieSAcceptDomains),
-#ifdef EXP_PERSISTENT_COOKIES
+#ifdef USE_PERSISTENT_COOKIES
      PARSE_STR(RC_COOKIE_FILE,          LYCookieFile),
-#endif /* EXP_PERSISTENT_COOKIES */
+#endif /* USE_PERSISTENT_COOKIES */
      PARSE_STR(RC_COOKIE_LOOSE_INVALID_DOMAINS, LYCookieSLooseCheckDomains),
      PARSE_STR(RC_COOKIE_QUERY_INVALID_DOMAINS, LYCookieSQueryCheckDomains),
      PARSE_STR(RC_COOKIE_REJECT_DOMAINS, LYCookieSRejectDomains),
-#ifdef EXP_PERSISTENT_COOKIES
+#ifdef USE_PERSISTENT_COOKIES
      PARSE_STR(RC_COOKIE_SAVE_FILE,     LYCookieSaveFile),
-#endif /* EXP_PERSISTENT_COOKIES */
+#endif /* USE_PERSISTENT_COOKIES */
      PARSE_STR(RC_COOKIE_STRICT_INVALID_DOMAIN, LYCookieSStrictCheckDomains),
      PARSE_Env(RC_CSO_PROXY,		0),
 #ifdef VMS
@@ -1400,9 +1425,9 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_SET(RC_PARTIAL,              display_partial_flag),
      PARSE_INT(RC_PARTIAL_THRES,        partial_threshold),
 #endif
-#ifdef EXP_PERSISTENT_COOKIES
+#ifdef USE_PERSISTENT_COOKIES
      PARSE_SET(RC_PERSISTENT_COOKIES,   persistent_cookies),
-#endif /* EXP_PERSISTENT_COOKIES */
+#endif /* USE_PERSISTENT_COOKIES */
      PARSE_STR(RC_PERSONAL_EXTENSION_MAP, personal_extension_map),
      PARSE_STR(RC_PERSONAL_MAILCAP,     personal_type_map),
      PARSE_STR(RC_PREFERRED_CHARSET,    pref_charset),
@@ -1429,6 +1454,9 @@ PRIVATE Config_Type Config_Table [] =
 #endif /* NO_RULES */
      PARSE_STR(RC_SAVE_SPACE,           lynx_save_space),
      PARSE_SET(RC_SCAN_FOR_BURIED_NEWS_REFS, scan_for_buried_news_references),
+#if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
+     PARSE_FUN(RC_SCREEN_SIZE,          screen_size_fun),
+#endif
 #ifdef USE_SCROLLBAR
      PARSE_SET(RC_SCROLLBAR,            LYShowScrollbar),
      PARSE_SET(RC_SCROLLBAR_ARROW,      LYsb_arrow),
@@ -1442,7 +1470,7 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_Env(RC_SNEWSPOST_PROXY,      0),
      PARSE_Env(RC_SNEWSREPLY_PROXY,     0),
      PARSE_SET(RC_SOFT_DQUOTES,         soft_dquotes),
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
      PARSE_ENU(RC_SOURCE_CACHE,         LYCacheSource, tbl_source_cache),
      PARSE_ENU(RC_SOURCE_CACHE_FOR_ABORTED, LYCacheSourceForAborted, tbl_abort_source_cache),
 #endif

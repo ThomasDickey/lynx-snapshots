@@ -1917,7 +1917,7 @@ PUBLIC int HTDoRead ARGS3(
     fd_set readfds;
     struct timeval select_timeout;
     int tries=0;
-#ifdef EXP_READPROGRESS
+#ifdef USE_READPROGRESS
     int otries = 0;
     time_t otime = time((time_t *)0);
 #endif
@@ -1968,7 +1968,7 @@ PUBLIC int HTDoRead ARGS3(
 	    return HT_INTERRUPTED;
 	}
 
-#ifdef EXP_READPROGRESS
+#ifdef USE_READPROGRESS
 	if (tries - otries > 10) {
 	    time_t t = time((time_t *)0);
 

@@ -139,7 +139,7 @@ extern BOOL HText_getFirstTargetInLine PARAMS((
 extern int HTisDocumentSource NOPARAMS;
 extern void HTuncache_current_document NOPARAMS;
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 extern BOOLEAN HTreparse_document NOPARAMS;
 extern BOOLEAN HTcan_reparse_document NOPARAMS;
 extern BOOLEAN HTdocument_settings_changed NOPARAMS;
@@ -222,7 +222,7 @@ extern int HText_SubmitForm PARAMS((
 extern void HText_DisableCurrentForm NOPARAMS;
 extern void HText_ResetForm PARAMS((FormInfo *form));
 extern void HText_activateRadioButton PARAMS((FormInfo *form));
-extern BOOLEAN HText_HaveUserChangedForms NOPARAMS;
+extern BOOLEAN HText_HaveUserChangedForms PARAMS((HText *text));
 
 extern HTList * search_queries; /* Previous isindex and whereis queries */
 extern void HTSearchQueries_free NOPARAMS;

@@ -92,7 +92,7 @@ struct _HTParentAnchor {
   BOOL		isISMAPScript;	/* Script for clickable image map */
   BOOL		isHEAD;		/* Document is headers from a HEAD request */
   BOOL		safe;			/* Safe */
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
   char *	source_cache_file;
   HTChunk *	source_cache_chunk;
 #endif
@@ -205,7 +205,7 @@ extern BOOL HTAnchor_delete PARAMS((
 extern void HTAnchor_delete_links PARAMS((
 	HTParentAnchor *	me));
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 extern void HTAnchor_clearSourceCache PARAMS((
 	HTParentAnchor *	me));
 #endif

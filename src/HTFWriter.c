@@ -37,7 +37,7 @@ extern int exec_command(char * cmd, int wait_flag); /* xsystem.c */
 #include <LYLeaks.h>
 #include <LYKeymap.h>
 
-#ifdef EXP_PERSISTENT_COOKIES
+#ifdef USE_PERSISTENT_COOKIES
 #include <LYCookie.h>
 #endif
 
@@ -136,7 +136,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
     char *path = NULL;
     char *addr = NULL;
     int status;
-    BOOL use_gzread = NO;
+    BOOL use_zread = NO;
     BOOLEAN found = FALSE;
 #ifdef WIN_EX
     HANDLE cur_handle;
@@ -183,7 +183,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		    !strcasecomp(&path[len-2], "gz")) {
 #ifdef USE_ZLIB
 		    if (!skip_loadfile) {
-			use_gzread = YES;
+			use_zread = YES;
 		    } else
 #endif /* USE_ZLIB */
 		    {
@@ -191,13 +191,20 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			remove(path);
 		    }
 		} else if (len > 4 && !strcasecomp(&path[len-3], "bz2")) {
-		    path[len-4] = '\0';
-		    remove(path);
+#ifdef USE_BZLIB
+		    if (!skip_loadfile) {
+			use_zread = YES;
+		    } else
+#endif /* USE_BZLIB */
+		    {
+			path[len-4] = '\0';
+			remove(path);
+		    }
 		} else if (len > 2 && !strcasecomp(&path[len-1], "Z")) {
 		    path[len-2] = '\0';
 		    remove(path);
 		}
-		if (!use_gzread) {
+		if (!use_zread) {
 		    if (!dump_output_immediately) {
 			/*
 			 *  Tell user what's happening. - FM
@@ -255,7 +262,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		    }
 #endif /* FNAMES_8_3 */
 		    LYLocalFileToURL (&addr, path);
-		    if (!use_gzread) {
+		    if (!use_zread) {
 			LYRenamedTemp(me->anchor->FileCache, path);
 			StrAllocCopy(me->anchor->FileCache, path);
 			StrAllocCopy(me->anchor->content_encoding, "binary");
@@ -424,14 +431,14 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	if (me->anchor->FileCache)
 	    remove(me->anchor->FileCache);
 	FREE(me);
-#ifdef EXP_PERSISTENT_COOKIES
+#ifdef USE_PERSISTENT_COOKIES
 	/*
 	 *  We want to save cookies picked up when in source
 	 *  mode.  ...
 	 */
 	if (persistent_cookies)
 	    LYStoreCookies(LYCookieSaveFile);
-#endif /* EXP_PERSISTENT_COOKIES */
+#endif /* USE_PERSISTENT_COOKIES */
 	exit_immediately(EXIT_SUCCESS);
     }
 
@@ -1216,12 +1223,22 @@ PUBLIC HTStream* HTCompressed ARGS3(
     /*
      *	Make command to process file. - FM
      */
-#ifdef USE_ZLIB
-    if (compress_suffix[0] == 'g' && /* must be gzip */
-	!me->viewer_command) {
+#ifdef USE_BZLIB
+    if (compress_suffix[0] == 'b'	/* must be bzip2 */
+	&& !me->viewer_command) {
 	/*
-	 *  We won't call gzip externally, so we don't need to supply
-	 *  a command for it. - kw
+	 * We won't call bzip2 externally, so we don't need to supply a command
+	 * for it.
+	 */
+	StrAllocCopy(me->end_command, "");
+    } else
+#endif
+#ifdef USE_ZLIB
+    if (compress_suffix[0] == 'g'	/* must be gzip */
+	&& !me->viewer_command) {
+	/*
+	 * We won't call gzip or compress externally, so we don't need to
+	 * supply a command for it.
 	 */
 	StrAllocCopy(me->end_command, "");
     } else

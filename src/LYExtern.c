@@ -149,7 +149,7 @@ PRIVATE char *format_command ARGS2(
 	    /* Less ==> short filename with backslashes,
 	     * less ==> long filename with forward slashes, may be quoted
 	     */
-	    if (isupper(command[0])) {
+	    if (ISUPPER(command[0])) {
 		format(&cmdbuf,
 			command, HTDOS_short_name(e_buff));
 	    } else {

@@ -191,7 +191,7 @@ PUBLIC void cleanup NOARGS
     UCChangeTerminalCodepage(-1, (LYUCcharset*)0);
 #endif /* EXP_CHARTRANS_AUTOSWITCH */
 
-#ifdef EXP_PERSISTENT_COOKIES
+#ifdef USE_PERSISTENT_COOKIES
     /*
      * This can go right here for now.  We need to work up a better place
      * to save cookies for the next release, preferably whenever a new

@@ -43,7 +43,7 @@
 
 /*#define DEBUG_APPCH 1*/
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 #include <HTFile.h>
 #endif
 
@@ -139,7 +139,7 @@ PUBLIC char * unchecked_radio = "( )";
 PRIVATE BOOLEAN underline_on = OFF;
 PRIVATE BOOLEAN bold_on      = OFF;
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 PUBLIC int LYCacheSource = SOURCE_CACHE_NONE;
 PUBLIC int LYCacheSourceForAborted = SOURCE_CACHE_FOR_ABORTED_DROP;
 #endif
@@ -242,7 +242,7 @@ There are 3 functions - POOL_NEW, POOL_FREE, and ALLOC_IN_POOL.
 #define POOLallocstyles(ptr, n)     ptr = ALLOC_IN_POOL(&HTMainText->pool, n * sizeof(pool_data))
 #define POOLallocHTLine(ptr, size)  ptr = (HTLine*) ALLOC_IN_POOL(&HTMainText->pool, LINE_SIZE(size))
 #define POOLallocstring(ptr, len)   ptr = (char*) ALLOC_IN_POOL(&HTMainText->pool, len + 1)
-#define POOLtypecalloc(T,ptr)	    ptr = (T*) ALLOC_IN_POOL(&HTMainText->pool, sizeof(T))
+#define POOLtypecalloc(T, ptr)      ptr = (T*) ALLOC_IN_POOL(&HTMainText->pool, sizeof(T))
 
 /**************************************************************************/
 /*
@@ -332,7 +332,20 @@ typedef struct _line {
 } HTLine;
 
 
-#define LINE_SIZE(l) (sizeof(HTLine)+(l))	/* Allow for terminator */
+#define LINE_SIZE(size) (sizeof(HTLine)+(size))   /* Allow for terminator */
+
+#define HTLINE_NOT_IN_POOL 0	/* debug with this set to 1 */
+
+#if HTLINE_NOT_IN_POOL
+#define allocHTLine(ptr, size)  { ptr = (HTLine *)calloc(1, LINE_SIZE(size)); }
+#define freeHTLine(self, ptr)   { \
+	if (ptr && ptr != TEMP_LINE(self, 0) && ptr != TEMP_LINE(self, 1)) \
+	    FREE(ptr); \
+    }
+#else
+#define allocHTLine(ptr, size)  POOLallocHTLine(ptr, size)
+#define freeHTLine(self, ptr)   {}
+#endif
 
 /*
  * Last line buffer; the second is used in split_line(). Not in pool!
@@ -445,7 +458,7 @@ struct _HText {
 
 	HTPool*			pool;		/* this HText memory pool */
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 	/*
 	* Parse settings when this HText was generated.
 	*/
@@ -585,9 +598,6 @@ PRIVATE int HText_TrueLineSize PARAMS((
 	HText *		text,
 	BOOL		IgnoreSpaces));
 
-PRIVATE void HText_RemoveEmptyLastLine PARAMS((
-	HText *		text));
-
 #ifdef CHECK_FREE_MEM
 
 /*
@@ -656,8 +666,6 @@ PRIVATE void * LY_check_calloc ARGS2(
     n = HTList_count(loaded_texts);
     for (i = n - 1; i > 0; i--) {
 	HText * t = (HText *) HTList_objectAt(loaded_texts, i);
-	if (t == HTMainText)
-	    t = NULL;		/* shouldn't happen */
 	CTRACE((tfp, "\nBUG *** Emergency freeing document %d/%d for '%s'%s!\n",
 		    i + 1, n,
 		    ((t && t->node_anchor &&
@@ -705,6 +713,7 @@ PRIVATE void LYClearHiText ARGS1(
     a->lites.hl_base.hl_text = NULL;
     a->lites.hl_len = 0;
 }
+#define LYFreeHiText(a)     FREE((a)->lites.hl_info)
 
 /*
  * Set the initial highlight information for a given anchor.
@@ -787,7 +796,6 @@ PRIVATE char *LYGetHiTextStr ARGS2(
     else
 	result = a->lites.hl_base.hl_text;
     result += LYAdjHiTextPos(a, count);
-    CTRACE((tfp, "FIXME text '%s'\n", result));
     return result;
 }
 
@@ -807,7 +815,6 @@ PRIVATE int LYGetHiTextPos ARGS2(
     else
 	result = a->line_pos;
     result += LYAdjHiTextPos(a, count);
-    CTRACE((tfp, "FIXME cols '%d'\n", result));
     return result;
 }
 
@@ -855,6 +862,54 @@ PRIVATE void PerFormInfo_free ARGS1(
 	FREE(form->thisacceptcs);
 	FREE(form);
     }
+}
+
+PRIVATE void free_form_fields ARGS1(
+	FormInfo *,	input_field)
+{
+    /*
+     *  Free form fields.
+     */
+    if (input_field->type == F_OPTION_LIST_TYPE &&
+	input_field->select_list != NULL) {
+	/*
+	 *  Free off option lists if present.
+	 *  It should always be present for F_OPTION_LIST_TYPE
+	 *  unless we had invalid markup which prevented
+	 *  HText_setLastOptionValue from finishing its job
+	 *  and left the input field in an insane state. - kw
+	 */
+	OptionType *optptr = input_field->select_list;
+	OptionType *tmp;
+	while (optptr) {
+	    tmp = optptr;
+	    optptr = tmp->next;
+	    FREE(tmp->name);
+	    FREE(tmp->cp_submit_value);
+	    FREE(tmp);
+	}
+	input_field->select_list = NULL;
+	/*
+	 *  Don't free the value field on option
+	 *  lists since it points to a option value
+	 *  same for orig value.
+	 */
+	input_field->value = NULL;
+	input_field->orig_value = NULL;
+	input_field->cp_submit_value = NULL;
+	input_field->orig_submit_value = NULL;
+    } else {
+	FREE(input_field->value);
+	FREE(input_field->orig_value);
+	FREE(input_field->cp_submit_value);
+	FREE(input_field->orig_submit_value);
+    }
+    FREE(input_field->name);
+    FREE(input_field->submit_action);
+    FREE(input_field->submit_enctype);
+    FREE(input_field->submit_title);
+
+    FREE(input_field->accept_cs);
 }
 
 PRIVATE void FormList_delete ARGS1(
@@ -915,8 +970,7 @@ PUBLIC HText *	HText_new ARGS1(
     /*
      *  Links between anchors & documents are a 1-1 relationship.  If
      *  an anchor is already linked to a document we didn't call
-     *  HTuncache_current_document(), e.g., for the showinfo, options,
-     *  download, print, etc., temporary file URLs, so we'll check now
+     *  HTuncache_current_document(),  so we'll check now
      *  and free it before reloading. - Dick Wesseling (ftu@fi.ruu.nl)
      */
     if (anchor->document) {
@@ -967,7 +1021,7 @@ PUBLIC HText *	HText_new ARGS1(
     self->stale = YES;
     self->toolbar = NO;
     self->tabs = NULL;
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     /*
      * Remember the parse settings.
      */
@@ -1126,57 +1180,29 @@ PUBLIC void HText_free ARGS1(
     if (!self)
 	return;
 
+#if HTLINE_NOT_IN_POOL
+    {
+	HTLine *f = FirstHTLine(self);
+	HTLine *l = self->last_line;
+
+	while (l != f) {	/* Free off line array */
+	    self->last_line = l->prev;
+	    freeHTLine(self, l);
+	    l = self->last_line;
+	}
+	freeHTLine(self, f);
+    }
+#endif
+
     while (self->first_anchor) {		/* Free off anchor array */
 	TextAnchor * l = self->first_anchor;
 	self->first_anchor = l->next;
 
 	if (l->link_type == INPUT_ANCHOR && l->input_field) {
-	    /*
-	     *  Free form fields.
-	     */
-	    if (l->input_field->type == F_OPTION_LIST_TYPE &&
-		l->input_field->select_list != NULL) {
-		/*
-		 *  Free off option lists if present.
-		 *  It should always be present for F_OPTION_LIST_TYPE
-		 *  unless we had invalid markup which prevented
-		 *  HText_setLastOptionValue from finishing its job
-		 *  and left the input field in an insane state. - kw
-		 */
-		OptionType *optptr = l->input_field->select_list;
-		OptionType *tmp;
-		while (optptr) {
-		    tmp = optptr;
-		    optptr = tmp->next;
-		    FREE(tmp->name);
-		    FREE(tmp->cp_submit_value);
-		    FREE(tmp);
-		}
-		l->input_field->select_list = NULL;
-		/*
-		 *  Don't free the value field on option
-		 *  lists since it points to a option value
-		 *  same for orig value.
-		 */
-		l->input_field->value = NULL;
-		l->input_field->orig_value = NULL;
-		l->input_field->cp_submit_value = NULL;
-		l->input_field->orig_submit_value = NULL;
-	    } else {
-		FREE(l->input_field->value);
-		FREE(l->input_field->orig_value);
-		FREE(l->input_field->cp_submit_value);
-		FREE(l->input_field->orig_submit_value);
-	    }
-	    FREE(l->input_field->name);
-	    FREE(l->input_field->submit_action);
-	    FREE(l->input_field->submit_enctype);
-	    FREE(l->input_field->submit_title);
-
-	    FREE(l->input_field->accept_cs);
+	    free_form_fields(l->input_field);
 	}
 
-	LYClearHiText(l);
+	LYFreeHiText(l);
     }
     FormList_delete(self->forms);
 
@@ -1217,7 +1243,7 @@ PUBLIC void HText_free ARGS1(
 				  UCT_SETBY_NONE);
 	HTAnchor_resetUCInfoStage(self->node_anchor, -1, UCT_STAGE_HTEXT,
 				  UCT_SETBY_NONE);
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 	/* Remove source cache files and chunks always, even if the
 	 * HTAnchor_delete call does not actually remove the anchor.
 	 * Keeping them would just be a waste of space - they won't
@@ -2464,10 +2490,6 @@ PUBLIC void HText_beginAppend ARGS1(
 */
 #define new_line(text) split_line(text, 0)
 
-#define AT_START_OF_CELL(text)	\
-  (text->stbl			\
-   && Stbl_at_start_of_cell(text->stbl, text->Lines, text->last_line->size))
-
 #define DEBUG_SPLITLINE
 
 #ifdef DEBUG_SPLITLINE
@@ -2566,7 +2588,7 @@ PRIVATE void move_anchors_in_region ARGS7(
  *  Some necessary changes for anchors starting on this line are also done
  *  here if needed. Updates 'prev_anchor' internally.
  *  Returns a newly allocated HTLine* if changes were made
- *    (lines allocated in pool, caller should not free the old one).
+ *    (caller has to free the old one).
  *  Returns NULL if no changes needed.  (Remove-spaces code may be buggy...)
  * - kw
  */
@@ -2607,7 +2629,7 @@ PRIVATE HTLine * insert_blanks_in_line ARGS7(
 	else
 	   mod_line = TEMP_LINE(text, 0);
     } else {
-	POOLallocHTLine(mod_line, line->size + added_chars);
+	allocHTLine(mod_line, line->size + added_chars);
     }
     if (!mod_line)
 	return NULL;
@@ -2678,32 +2700,6 @@ PRIVATE HTLine * insert_blanks_in_line ARGS7(
     mod_line->size = t - newdata;
     return mod_line;
 }
-
-PRIVATE void reset_cached_linedata ARGS3(
-	HText *,	text,
-	char *,		p,
-	unsigned,	plen)
-{			/* Count funny characters */
-    int i;
-
-    text->permissible_split = ctrl_chars_on_this_line =
-	utfxtra_on_this_line = 0;
-    for (i = (plen - 1); i >= 0; i--) {
-	if (p[i] == LY_UNDERLINE_START_CHAR ||
-	    p[i] == LY_UNDERLINE_END_CHAR ||
-	    p[i] == LY_BOLD_START_CHAR ||
-	    p[i] == LY_BOLD_END_CHAR ||
-	    p[i] == LY_SOFT_HYPHEN) {
-	    ctrl_chars_on_this_line++;
-	} else if (IS_UTF_EXTRA(p[i])) {
-	    utfxtra_on_this_line++;
-	}
-	if (p[i] == LY_SOFT_HYPHEN && (int)text->permissible_split < i)
-	    text->permissible_split = i + 1;
-    }
-    ctrl_chars_on_this_line += utfxtra_on_this_line;
-}
-
 
 #if defined(USE_COLOR_STYLE)
 PRIVATE HTStyleChange * skip_matched_and_correct_offsets ARGS3(
@@ -2856,6 +2852,7 @@ PRIVATE void split_line ARGS2(
     if (split > 0) {	/* Delete space at "split" splitting line */
 	char *prevdata = previous->data, *linedata = line->data;
 	unsigned plen;
+	int i;
 
 	/* Split the line. -FM */
 	prevdata[previous->size] = '\0';
@@ -2888,7 +2885,20 @@ PRIVATE void split_line ARGS2(
 
 	plen = strlen(p);
 	if (plen) {			/* Count funny characters */
-	    reset_cached_linedata(text,	p, plen);
+	    for (i = (plen - 1); i >= 0; i--) {
+		if (p[i] == LY_UNDERLINE_START_CHAR ||
+		    p[i] == LY_UNDERLINE_END_CHAR ||
+		    p[i] == LY_BOLD_START_CHAR ||
+		    p[i] == LY_BOLD_END_CHAR ||
+		    p[i] == LY_SOFT_HYPHEN) {
+		    ctrl_chars_on_this_line++;
+		} else if (IS_UTF_EXTRA(p[i])) {
+		    utfxtra_on_this_line++;
+		}
+		if (p[i] == LY_SOFT_HYPHEN && (int)text->permissible_split < i)
+		    text->permissible_split = i + 1;
+	    }
+	    ctrl_chars_on_this_line += utfxtra_on_this_line;
 
 	    /* Add the data to the new line. -FM */
 	    strcat(linedata, p);
@@ -3046,7 +3056,7 @@ PRIVATE void split_line ARGS2(
 
     {
     HTLine* temp;
-    POOLallocHTLine(temp, previous->size);
+    allocHTLine(temp, previous->size);
     if (!temp)
 	outofmem(__FILE__, "split_line_2");
     memcpy(temp, previous, LINE_SIZE(previous->size));
@@ -3340,6 +3350,8 @@ PRIVATE void split_line ARGS2(
 	    previous->next->prev = jline;
 	    previous->prev->next = jline;
 
+	    freeHTLine(text, previous);
+
 	    previous = jline;
 	}
 	{ /* (ht_num_runs==1) */
@@ -3408,15 +3420,14 @@ PRIVATE void blank_lines ARGS2(
 	    return;			/* Do not add a blank line at start */
 #endif
 
-	while (line != text->last_line &&
-			HText_TrueEmptyLine(line, text, FALSE)) {
+	while (line != NULL &&
+	       line != text->last_line &&
+	       HText_TrueEmptyLine(line, text, FALSE)) {
 	    if (newlines == 0)
 		break;
 	    newlines--;		/* Don't bother: already blank */
 	    line = line->prev;
 	}
-    } else if (AT_START_OF_CELL(text)) {
-	newlines = 1;			/* New line to get a correct offset */
     } else {
 	newlines++;			/* Need also to finish this line */
     }
@@ -3437,8 +3448,7 @@ PUBLIC void HText_appendParagraph ARGS1(
 {
     int after = text->style->spaceAfter;
     int before = text->style->spaceBefore;
-    if (!AT_START_OF_CELL(text))
-	blank_lines(text, ((after > before) ? after : before));
+    blank_lines(text, ((after > before) ? after : before));
 }
 
 
@@ -4021,8 +4031,6 @@ PUBLIC void HText_appendCharacter ARGS2(
      *  New Line.
      */
     if (ch == '\n') {
-	if (AT_START_OF_CELL(text))
-	    return;
 	new_line(text);
 	text->in_line_1 = YES;	/* First line of new paragraph */
 	/*
@@ -4056,8 +4064,6 @@ PUBLIC void HText_appendCharacter ARGS2(
      *  i.e., use the second line indenting.
      */
     if (ch == '\r') {
-	if (AT_START_OF_CELL(text))
-	    return;
 	new_line(text);
 	text->in_line_1 = NO;
 	/*
@@ -4612,6 +4618,7 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	    lines_changed++;
 	    if (line == first_line)
 		first_line = mod_line;
+	    freeHTLine(me, line);
 	    line = mod_line;
 #ifdef DISP_PARTIAL
 	    /*
@@ -4833,72 +4840,6 @@ PRIVATE void free_enclosed_stbl ARGS1(
 #define free_enclosed_stbl(me) /* nothing */
 #endif
 
-/*	Remove trailing blank lines from the last cell.  */
-PUBLIC int HText_trimCellLines ARGS1(
-	HText *,	text)
-{
-    int ret = 0;
-    HTLine *lastline;
-#if defined(USE_COLOR_STYLE)
-    HTStyleChange *laststyles;
-#endif
-
-    if (!(text && text->stbl))
-	return 0;
-
-    lastline = text->last_line;
-#if defined(USE_COLOR_STYLE)
-    laststyles = lastline->styles;
-#endif
-    while ( text->last_line && text->Lines >= 1
-	    && HText_LastLineSize(text, FALSE) == 0 ) {
-	/* Empty line should survive only if
-	   a) It is a first line of a row;
-	   b) This is not a fake row.
-	   */
-	if (Stbl_trimFakeRows(text->stbl, text->Lines, text->last_line->size))
-	    ret++, HText_RemoveEmptyLastLine(text);
-	else
-	    break;
-    }
-
-    if (!ret)
-	return 0;
-
-#ifndef FIXME_FIXME_XXXX
-    /* De-POOL the line */
-    memcpy(lastline, text->last_line, LINE_SIZE(text->last_line->size));
-#if defined(USE_COLOR_STYLE)
-    /* De-POOL the style buffers */
-    memcpy(laststyles, lastline->styles,
-	   sizeof(HTStyleChange)*lastline->numstyles);
-    lastline->styles = laststyles;
-#endif
-
-    if (text->last_line->next == text->last_line)
-	lastline->next = lastline->prev = lastline;
-    text->last_line = lastline;
-    lastline->prev->next = lastline;	/* Link in new line */
-    lastline->next->prev = lastline;	/* Could be same node of course */
-
-#endif	/* FIXME_FIXME_XXXX */
-
-    /* Fix global state for the last line */
-    reset_cached_linedata(text, text->last_line->data,
-			  text->last_line->size);
-#if 0
-    /* XXXX This is not enough.  Actually we need also to clear the
-       me->in_word flag of HTML.c.  Since this is not
-       possible, fake a real space. */
-    text->LastChar = (text->last_line->size
-		      ? text->last_line->data[text->last_line->size - 1]
-		      : ' ');
-#else
-    HText_appendCharacter(text, ' ');
-#endif
-    return ret;
-}
-
 /*	Finish simple table handling
  *	Return TRUE if the table is nested inside another table.
  */
@@ -4975,8 +4916,9 @@ PUBLIC void HText_startStblTR ARGS2(
 PUBLIC void HText_endStblTR ARGS1(
 	HText *,	me)
 {
-    if (me && me->stbl)
-	Stbl_finishRowInTable(me->stbl);
+    if (!me || !me->stbl)
+	return;
+    /* should this do something?? */
 }
 
 /*	Start simple table cell
@@ -5012,7 +4954,6 @@ PUBLIC void HText_endStblTD ARGS1(
 {
     if (!me || !me->stbl)
 	return;
-    HText_trimCellLines(me);
     if (Stbl_finishCellInTable(me->stbl, TRST_ENDCELL_ENDTD,
 			       me->Lines, HText_LastLineOffset(me), HText_LastLineSize(me,FALSE)) < 0)
 	HText_cancelStbl(me);	/* give up */
@@ -5724,6 +5665,7 @@ PUBLIC void HText_endAppend ARGS1(
 	 */
 	next_to_the_last_line->next = line_ptr;
 	line_ptr->prev = next_to_the_last_line;
+	freeHTLine(text, text->last_line);
 	text->last_line = next_to_the_last_line;
 	text->Lines--;
 	CTRACE((tfp, "GridText: New bottom line: `%s'\n",
@@ -8277,13 +8219,6 @@ PUBLIC void HTuncache_current_document NOARGS
     if (HTMainText) {
 	HTParentAnchor * htmain_anchor = HTMainText->node_anchor;
 
-	if (HText_HaveUserChangedForms()) {
-	    /*
-	     * Issue a warning.  User forms content will be lost.
-	     */
-	    HTAlert(RELOADING_FORM);
-	}
-
 	if (htmain_anchor) {
 	    if (!(HTOutputFormat && HTOutputFormat == WWW_SOURCE)) {
 		FREE(htmain_anchor->UCStages);
@@ -8305,7 +8240,7 @@ PUBLIC void HTuncache_current_document NOARGS
     }
 }
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 
 PRIVATE HTProtocol scm = { "source-cache-mem", 0, 0 }; /* dummy - kw */
 
@@ -8360,7 +8295,7 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	    return FALSE;
 	}
 
-	if (HText_HaveUserChangedForms()) {
+	if (HText_HaveUserChangedForms(HTMainText)) {
 	    /*
 	     * Issue a warning.  Will not restore changed forms, currently.
 	     */
@@ -8413,7 +8348,7 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	}
 	/* not UCLYhndl_HTFile_for_unspec - we are talking about remote documents... */
 
-	if (HText_HaveUserChangedForms()) {
+	if (HText_HaveUserChangedForms(HTMainText)) {
 	    /*
 	     * Issue a warning.  Will not restore changed forms, currently.
 	     */
@@ -8778,7 +8713,7 @@ PUBLIC void HText_RemovePreviousLine ARGS1(
 {
     HTLine *line, *previous;
 
-    if (!(text && text->Lines >= 1))	/* Lines is 0-based */
+    if (!(text && text->Lines > 1))
 	return;
 
     line = text->last_line->prev;
@@ -8786,29 +8721,7 @@ PUBLIC void HText_RemovePreviousLine ARGS1(
     previous->next = text->last_line;
     text->last_line->prev = previous;
     text->Lines--;
-}
-
-/*
- *  This function is for removing the last blank lines.
- *  It should be called after
- *  checking the situation with HText_LastLineSize().
- *  With POOLed allocation is should be wrapped into code restoring the
- *  expected POOLed/unPOOLed state of the line chain.
- */
-PRIVATE void HText_RemoveEmptyLastLine ARGS1(
-	HText *,	text)
-{
-    HTLine *line, *previous;
-
-    if (!(text && text->Lines >= 1))	/* Lines is 0-based */
-	return;
-
-    line = text->last_line;
-    previous = line->prev;
-    previous->next = line->next;
-    previous->next->prev = previous;
-    text->last_line = previous;
-    text->Lines--;
+    freeHTLine(text, line);
 }
 
 /*
@@ -9882,7 +9795,7 @@ PUBLIC int HText_beginInput ARGS3(
 	 *  for types that are not yet implemented.
 	 */
 	case F_HIDDEN_TYPE:
-#ifndef EXP_FILE_UPLOAD
+#ifndef USE_FILE_UPLOAD
 	case F_FILE_TYPE:
 #endif
 	case F_RANGE_TYPE:
@@ -10137,7 +10050,7 @@ PRIVATE int find_best_target_cs ARGS3(
     return (-1);
 }
 
-#ifdef EXP_FILE_UPLOAD
+#ifdef USE_FILE_UPLOAD
 PRIVATE void load_a_file ARGS2(
     char *,	val_used,
     bstring **,	result)
@@ -10148,13 +10061,15 @@ PRIVATE void load_a_file ARGS2(
 
     CTRACE((tfp, "Ok, about to convert %s to mime/thingy\n", val_used));
 
-    if ((fd = fopen(val_used, BIN_R)) == 0) {
-	HTAlert(gettext("Can't open file for uploading"));
-    } else {
-	while ((bytes = fread(buffer, sizeof(char), 256, fd)) != 0) {
-	    HTSABCat(result, buffer, bytes);
+    if (*val_used) {		/* ignore empty form field */
+	if ((fd = fopen(val_used, BIN_R)) == 0) {
+	    HTAlert(gettext("Can't open file for uploading"));
+	} else {
+	    while ((bytes = fread(buffer, sizeof(char), 256, fd)) != 0) {
+		HTSABCat(result, buffer, bytes);
+	    }
+	    LYCloseInput(fd);
 	}
-	LYCloseInput(fd);
     }
 }
 
@@ -10167,7 +10082,7 @@ PRIVATE CONST char *guess_content_type ARGS1(CONST char *, filename)
 	    ? format->name
 	    : "text/plain";
 }
-#endif /* EXP_FILE_UPLOAD */
+#endif /* USE_FILE_UPLOAD */
 
 
 PRIVATE void cannot_transcode ARGS2(
@@ -10753,7 +10668,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 	    case F_RESET_TYPE:
 		CTRACE((tfp, "reset\n"));
 		break;
-#ifdef EXP_FILE_UPLOAD
+#ifdef USE_FILE_UPLOAD
 	    case F_FILE_TYPE:
 		val_used = NonNull(form_ptr->value);
 		CTRACE((tfp, "I will submit %s (from %s)\n",
@@ -10945,11 +10860,11 @@ PUBLIC int HText_SubmitForm ARGS4(
 		skip_field = TRUE;
 		break;
 
-#ifdef EXP_FILE_UPLOAD
+#ifdef USE_FILE_UPLOAD
 	    case F_FILE_TYPE:
 		load_a_file(val_used, &(my_data[anchor_count].data));
 		break;
-#endif /* EXP_FILE_UPLOAD */
+#endif /* USE_FILE_UPLOAD */
 
 	    case F_SUBMIT_TYPE:
 	    case F_TEXT_SUBMIT_TYPE:
@@ -11014,7 +10929,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 				BStrLen(my_data[anchor_count].data));
 		    BStrCopy0(my_data[anchor_count].data, escaped2);
 		    FREE(escaped2);
-	        }
+		}
 	    }
 	    ++anchor_count;
 
@@ -11241,7 +11156,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 	    case F_RANGE_TYPE:
 		/* not implemented */
 		break;
-#ifdef EXP_FILE_UPLOAD
+#ifdef USE_FILE_UPLOAD
 	    case F_FILE_TYPE:
 		if (PlainText) {
 		    StrAllocCopy(escaped1, my_data[anchor_count].name);
@@ -11277,7 +11192,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			HTBprintf(&my_query, "\n");
 		}
 		break;
-#endif /* EXP_FILE_UPLOAD */
+#endif /* USE_FILE_UPLOAD */
 	    case F_KEYGEN_TYPE:
 		/* not implemented */
 		break;
@@ -11418,18 +11333,19 @@ PUBLIC void HText_ResetForm ARGS1(
  * whether any forms content was changed by user so any information will be
  * lost.
  */
-PUBLIC BOOLEAN HText_HaveUserChangedForms NOARGS
+PUBLIC BOOLEAN HText_HaveUserChangedForms ARGS1(
+	HText *,	text)
 {
     TextAnchor * anchor_ptr;
 
-    if (HTMainText == 0)
+    if (text == 0)
 	return FALSE;
 
     /*
      *  Go through list of anchors to check if any value was changed.
      *  This code based on HText_ResetForm()
      */
-    for (anchor_ptr = HTMainText->first_anchor;
+    for (anchor_ptr = text->first_anchor;
 	 anchor_ptr != NULL;
 	 anchor_ptr = anchor_ptr->next) {
 	if (anchor_ptr->link_type == INPUT_ANCHOR) {
@@ -12161,8 +12077,25 @@ PRIVATE int increment_tagged_htline ARGS6(
     *s = '\0';
 
     n = strlen (ht->data);
-    if (mode == CHOP)
+    if (mode == CHOP) {
 	*(buf + n) = '\0';
+    } else if (strlen(buf) > ht->size) {
+	/* we didn't allocate enough space originally - increase it */
+	HTLine* temp;
+	allocHTLine(temp, strlen(buf));
+	if (!temp)
+	    outofmem(__FILE__, "increment_tagged_htline");
+	memcpy(temp, ht, LINE_SIZE(0));
+#if defined(USE_COLOR_STYLE)
+	POOLallocstyles(temp->styles, ht->numstyles);
+	if (!temp->styles)
+	    outofmem(__FILE__, "increment_tagged_htline");
+	memcpy(temp->styles, ht->styles, sizeof(HTStyleChange)*ht->numstyles);
+#endif
+	ht = temp;
+	ht->prev->next = ht;	/* Link in new line */
+	ht->next->prev = ht;	/* Could be same node of course */
+    }
     strcpy (ht->data, buf);
 
     return (strlen (buf) - n + fixup);
@@ -12216,7 +12149,7 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
      *  Clone and initialize the struct's needed to add a new TEXTAREA
      *  anchor.
      */
-    POOLallocHTLine(l, MAX_LINE);
+    allocHTLine(l, MAX_LINE);
     POOLtypecalloc(TextAnchor, a);
     POOLtypecalloc(FormInfo, f);
     if (a == NULL || l == NULL || f == NULL)
@@ -12261,6 +12194,13 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
     l->styles = htline->styles;
 #endif
     strcpy (l->data,     htline->data);
+
+    /*
+     *  Link in the new HTLine.
+     */
+    htline->next->prev = l;
+    htline->next       = l;
+
     if (fields_are_numbered()) {
 	a->number++;
 	increment_tagged_htline (l, a, &lx, &curr_tag, 1, CHOP);
@@ -12277,13 +12217,11 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
 
     /*
      *  Link in the new TextAnchor and point the entry anchor arg at it;
-     *  link in the new HTLine and point the entry htline arg at it, too.
+     *  point the entry HTLine arg at it, too.
      */
     anchor->next = a;
    *curr_anchor  = a;
 
-    htline->next->prev = l;
-    htline->next       = l;
    *exit_htline        = l->next;
 
     return;
@@ -13040,7 +12978,7 @@ PUBLIC int HText_InsertFile ARGS1(
 	    break;
     }
 
-    POOLallocHTLine(l, MAX_LINE);
+    allocHTLine(l, MAX_LINE);
     POOLtypecalloc(TextAnchor, a);
     POOLtypecalloc(FormInfo, f);
     if (a == NULL || l == NULL || f == NULL)

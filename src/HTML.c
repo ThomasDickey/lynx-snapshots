@@ -73,7 +73,7 @@
 
 #endif /* USE_COLOR_STYLE */
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 #include <HTAccess.h>
 #endif
 
@@ -87,7 +87,7 @@
 
 struct _HTStream {
     CONST HTStreamClass *	isa;
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     HTParentAnchor *		anchor;
     FILE *			fp;
     char *			filename;
@@ -150,7 +150,7 @@ PRIVATE char* MakeNewMapValue PARAMS((CONST char ** value, CONST char* mapstr));
 PUBLIC void strtolower ARGS1(char*, i)
 {
     if (!i) return;
-    while (*i) { *i=(char)tolower(*i); i++; }
+    while (*i) { *i = (char)TOLOWER(*i); i++; }
 }
 
 /*		Flattening the style structure
@@ -2912,11 +2912,11 @@ PRIVATE int HTML_start_element ARGS6(
 	    me->inBoldA = TRUE;
 
 	    StrAllocCopy(href, value[HTML_A_HREF]);
-	    CHECK_FOR_INTERN(intern_flag,href);  /*NULL, '\0', or '#'*/
+	    if (isEmpty(href))
+		StrAllocCopy(href, "#");
+	    CHECK_FOR_INTERN(intern_flag,href);	 /* '#'*/
 
 	    if (intern_flag) { /*** FAST WAY: ***/
-		if (isEmpty(href))
-		    StrAllocCopy(href, "#");
 		TRANSLATE_AND_UNESCAPE_TO_STD(&href);
 
 	    } else {
@@ -4609,7 +4609,7 @@ PRIVATE int HTML_start_element ARGS6(
 		} else if (!strcasecomp(I.type, "file")) {
 		    if (present[HTML_INPUT_ACCEPT])
 			I.accept = value[HTML_INPUT_ACCEPT];
-#ifndef EXP_FILE_UPLOAD
+#ifndef USE_FILE_UPLOAD
 		    not_impl = "[FILE Input]";
 		    CTRACE((tfp, "Attempting to fake as: %s\n", I.type));
 #ifdef NOTDEFINED
@@ -4617,7 +4617,7 @@ PRIVATE int HTML_start_element ARGS6(
 			HText_DisableCurrentForm();
 #endif /* NOTDEFINED */
 		    CTRACE((tfp, "HTML: Ignoring TYPE=\"file\"\n"));
-#endif /* EXP_FILE_UPLOAD */
+#endif /* USE_FILE_UPLOAD */
 
 		} else if (!strcasecomp(I.type, "button")) {
 		    /*
@@ -4778,7 +4778,7 @@ PRIVATE int HTML_start_element ARGS6(
 		if (!I.type)
 		    me->UsePlainSpace = TRUE;
 		else if (!strcasecomp(I.type, "text") ||
-#ifdef EXP_FILE_UPLOAD
+#ifdef USE_FILE_UPLOAD
 			 !strcasecomp(I.type, "file") ||
 #endif
 			 !strcasecomp(I.type, "submit") ||
@@ -4885,7 +4885,7 @@ PRIVATE int HTML_start_element ARGS6(
 		I.md = value[HTML_INPUT_MD];
 
 	    chars = HText_beginInput(me->text, me->inUnderline, &I);
-#ifndef EXP_FILE_UPLOAD
+#ifndef USE_FILE_UPLOAD
 	    CTRACE((tfp, "I.%s have %d chars, or something\n", NONNULL(I.type), chars));
 #endif
 	    /*
@@ -4962,7 +4962,7 @@ PRIVATE int HTML_start_element ARGS6(
 		}
 		HText_setIgnoreExcess(me->text, TRUE);
 	    }
-#ifndef EXP_FILE_UPLOAD
+#ifndef USE_FILE_UPLOAD
 	    CTRACE((tfp, "I.%s, %d\n", NONNULL(I.type), IsSubmitOrReset));
 #endif
 	    if (IsSubmitOrReset == FALSE) {
@@ -7913,7 +7913,7 @@ PUBLIC HTStructured* HTML_new ARGS3(
     return (HTStructured*) me;
 }
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 
 /*
  *  A flag set by a file write error.  Used for only generating an alert

@@ -393,7 +393,7 @@ PUBLIC int LYGetNewline NOARGS
     return Newline;
 }
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 PRIVATE BOOLEAN from_source_cache = FALSE;
 
 /*
@@ -410,7 +410,7 @@ PRIVATE BOOLEAN reparse_document NOARGS
     from_source_cache = FALSE;
     return ok;
 }
-#endif /* SOURCE_CACHE */
+#endif /* USE_SOURCE_CACHE */
 
 /*
  * Prefer reparsing if we can, but reload if we must - to force regeneration
@@ -419,7 +419,7 @@ PRIVATE BOOLEAN reparse_document NOARGS
 PRIVATE BOOLEAN reparse_or_reload ARGS1(
     int *,	cmd)
 {
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     if (reparse_document()) {
 	return FALSE;
     }
@@ -478,7 +478,7 @@ PUBLIC BOOL LYMainLoop_pageDisplay ARGS1(
      */
     Newline = line_num;
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     /*
      * reparse_document() acts on 'curdoc' which always on top of the
      * history stack: no need to resolve #fragment position since
@@ -1850,7 +1850,7 @@ PRIVATE void handle_LYK_DIRED_MENU ARGS3(
 {
 #ifdef VMS
     char *cp, *temp = 0;
-    char *test = HTGetProgramPath(ppCSWING);
+    const char *test = HTGetProgramPath(ppCSWING);
 
     /*
      *	Check if the CSwing Directory/File Manager is available.
@@ -2947,7 +2947,7 @@ PRIVATE BOOLEAN handle_LYK_HEAD ARGS1(
 		    LYforce_no_cache = TRUE;
 		    StrAllocCopy(newdoc.title, curdoc.title);
 		    if (HTLoadedDocumentIsHEAD()) {
-			HTuncache_current_document();
+			HText_setNoCache(HTMainText);
 			free_address(&curdoc);
 		    } else {
 			StrAllocCat(newdoc.title, " - HEAD");
@@ -3025,7 +3025,7 @@ PRIVATE BOOLEAN handle_LYK_HEAD ARGS1(
 		    LYforce_no_cache = TRUE;
 		    StrAllocCopy(newdoc.title, curdoc.title);
 		    if (HTLoadedDocumentIsHEAD()) {
-			HTuncache_current_document();
+			HText_setNoCache(HTMainText);
 			free_address(&curdoc);
 		    } else {
 			StrAllocCat(newdoc.title, " - HEAD");
@@ -3062,7 +3062,7 @@ PRIVATE void handle_LYK_HELP ARGS1(
 
 PRIVATE void handle_LYK_HISTORICAL NOARGS
 {
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     if (!HTcan_reparse_document()) {
 #endif
     /*
@@ -3075,12 +3075,12 @@ PRIVATE void handle_LYK_HISTORICAL NOARGS
 	confirm_post_resub(curdoc.address, NULL, 0, 0) == FALSE) {
 	HTInfoMsg(WILL_NOT_RELOAD_DOC);
     } else {
-	HTuncache_current_document();
+	HText_setNoCache(HTMainText);
 	move_address(&newdoc, &curdoc);
 	newdoc.line = curdoc.line;
 	newdoc.link = curdoc.link;
     }
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     } /* end if no bypass */
 #endif
     historical_comments = !historical_comments;
@@ -3091,7 +3091,7 @@ PRIVATE void handle_LYK_HISTORICAL NOARGS
 	HTAlert(historical_comments ?
 		HISTORICAL_ON_VALID_OFF : HISTORICAL_OFF_VALID_ON);
     }
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     (void) reparse_document();
 #endif
     return;
@@ -3570,7 +3570,7 @@ PRIVATE void handle_LYK_MAIN_MENU ARGS2(
 PRIVATE void handle_LYK_MINIMAL NOARGS
 {
     if (!historical_comments) {
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     if (!HTcan_reparse_document()) {
 #endif
 	/*
@@ -3583,12 +3583,12 @@ PRIVATE void handle_LYK_MINIMAL NOARGS
 	    confirm_post_resub(curdoc.address, NULL, 0, 0) == FALSE) {
 	    HTInfoMsg(WILL_NOT_RELOAD_DOC);
 	} else {
-	    HTuncache_current_document();
+	    HText_setNoCache(HTMainText);
 	    move_address(&newdoc, &curdoc);
 	    newdoc.line = curdoc.line;
 	    newdoc.link = curdoc.link;
 	}
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     } /* end if no bypass */
 #endif
     }
@@ -3600,7 +3600,7 @@ PRIVATE void handle_LYK_MINIMAL NOARGS
 	HTAlert(minimal_comments ?
 		MINIMAL_ON_BUT_HISTORICAL : MINIMAL_OFF_HISTORICAL_ON);
     }
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     (void)reparse_document();
 #endif
     return;
@@ -3700,7 +3700,7 @@ PRIVATE BOOLEAN handle_LYK_OPTIONS ARGS2(
 	     */
 	    if ((curdoc.post_data != NULL &&
 		 curdoc.safe != TRUE) &&
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 		(!(canreparse_post = HTcan_reparse_document())) &&
 #endif
 		confirm_post_resub(curdoc.address, curdoc.title,
@@ -3730,7 +3730,7 @@ PRIVATE BOOLEAN handle_LYK_OPTIONS ARGS2(
 		if (HTisDocumentSource()) {
 		    srcmode_for_next_retrieval(1);
 		}
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 		if (reloading == FALSE) {
 		    /* one more attempt to be smart enough: */
 		    if (reparse_document()) {
@@ -3754,7 +3754,7 @@ PRIVATE BOOLEAN handle_LYK_OPTIONS ARGS2(
 		}
 
 		HEAD_request = HTLoadedDocumentIsHEAD();
-		HTuncache_current_document();
+		HText_setNoCache(HTMainText);
 #ifdef NO_ASSUME_SAME_DOC
 		newdoc.line = 1;
 		newdoc.link = 0;
@@ -4138,13 +4138,13 @@ PRIVATE BOOLEAN handle_LYK_RAW_TOGGLE ARGS1(
     }
 }
 
-/*
- * Check if this is a reply from a POST, and if so,
- * seek confirmation if the safe element is not set.  - FM
- */
 PRIVATE void handle_LYK_RELOAD ARGS1(
     int,	real_cmd)
 {
+    /*
+     * Check if this is a reply from a POST, and if so,
+     * seek confirmation if the safe element is not set.  - FM
+     */
     if ((curdoc.post_data != NULL &&
 	 curdoc.safe != TRUE) &&
 	HTConfirm(CONFIRM_POST_RESUBMISSION) == FALSE) {
@@ -4163,7 +4163,7 @@ PRIVATE void handle_LYK_RELOAD ARGS1(
     }
 
     HEAD_request = HTLoadedDocumentIsHEAD();
-    HTuncache_current_document();
+    HText_setNoCache(HTMainText);
 #ifdef NO_ASSUME_SAME_DOC
     /*
      *	Don't assume the reloaded document will be the same. - FM
@@ -4248,7 +4248,7 @@ PRIVATE void handle_LYK_SHELL ARGS3(
 
 PRIVATE void handle_LYK_SOFT_DQUOTES NOARGS
 {
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     if (!HTcan_reparse_document()) {
 #endif
     /*
@@ -4261,36 +4261,36 @@ PRIVATE void handle_LYK_SOFT_DQUOTES NOARGS
 	confirm_post_resub(curdoc.address, NULL, 1, 1) == FALSE) {
 	HTInfoMsg(WILL_NOT_RELOAD_DOC);
     } else {
-	HTuncache_current_document();
+	HText_setNoCache(HTMainText);
 	move_address(&newdoc, &curdoc);
 	newdoc.line = curdoc.line;
 	newdoc.link = curdoc.link;
     }
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     } /* end if no bypass */
 #endif
     soft_dquotes = !soft_dquotes;
     HTUserMsg(soft_dquotes ?
 	      SOFT_DOUBLE_QUOTE_ON : SOFT_DOUBLE_QUOTE_OFF);
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     (void)reparse_document();
 #endif
     return;
 }
 
-/*
- * Check if this is a reply from a POST, and if so,
- * seek confirmation if the safe element is not set.  - FM
- */
 PRIVATE void handle_LYK_SOURCE ARGS1(
     char **,	ownerS_address_p)
 {
-#ifdef SOURCE_CACHE
+    /*
+     * Check if this is a reply from a POST, and if so,
+     * seek confirmation if the safe element is not set.  - FM
+     */
+#ifdef USE_SOURCE_CACHE
     BOOLEAN canreparse_post = FALSE;
 #endif
     if ((curdoc.post_data != NULL &&
 	 curdoc.safe != TRUE) &&
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 	(!(canreparse_post = HTcan_reparse_document())) &&
 #endif
 	(curdoc.isHEAD ? HTConfirm(CONFIRM_POST_RESUBMISSION) :
@@ -4308,7 +4308,7 @@ PRIVATE void handle_LYK_SOURCE ARGS1(
 	srcmode_for_next_retrieval(1);
     }
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     if (reparse_document()) {
 	/*
 	 * These normally get cleaned up after getfile() returns;
@@ -4341,7 +4341,7 @@ PRIVATE void handle_LYK_SOURCE ARGS1(
 
 PRIVATE void handle_LYK_SWITCH_DTD NOARGS
 {
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     BOOLEAN canreparse = FALSE;
     if (!(canreparse = HTcan_reparse_document())) {
 #endif
@@ -4369,7 +4369,7 @@ PRIVATE void handle_LYK_SWITCH_DTD NOARGS
 	    if (HTisDocumentSource() && LYPreparsedSource) {
 		srcmode_for_next_retrieval(1);
 	    }
-	    HTuncache_current_document();
+	    HText_setNoCache(HTMainText);
 	    move_address(&newdoc, &curdoc);
 #ifdef NO_ASSUME_SAME_DOC
 	    newdoc.line = 1;
@@ -4379,13 +4379,13 @@ PRIVATE void handle_LYK_SWITCH_DTD NOARGS
 	    newdoc.link = curdoc.link;
 #endif /* NO_ASSUME_SAME_DOC */
 	}
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     } /* end if no bypass */
 #endif
     Old_DTD = !Old_DTD;
     HTSwitchDTD(!Old_DTD);
     HTUserMsg(Old_DTD ? USING_DTD_0 : USING_DTD_1);
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     if (canreparse) {
 	if (HTisDocumentSource() && LYPreparsedSource) {
 	    srcmode_for_next_retrieval(1);
@@ -6191,7 +6191,7 @@ try_again:
 	    }
 	}
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 	/*
 	 * If the parse settings have changed since this HText was
 	 * generated, we need to reparse and redraw it.  -dsb

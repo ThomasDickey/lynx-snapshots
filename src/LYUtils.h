@@ -130,6 +130,7 @@ extern FILE *LYOpenTemp PARAMS((char *result, CONST char *suffix, CONST char *mo
 extern FILE *LYOpenTempRewrite PARAMS((char *result, CONST char *suffix, CONST char *mode));
 extern FILE *LYReopenTemp PARAMS((char *name));
 extern char *Current_Dir PARAMS((char * pathname));
+extern char *LYAddPathToSave PARAMS((char *fname));
 extern char *LYGetEnv PARAMS((CONST char * name));
 extern char *LYGetHiliteStr PARAMS(( int cur, int count));
 extern char *LYLastPathSep PARAMS((CONST char *path));
@@ -191,6 +192,12 @@ extern void remove_backslashes PARAMS((char *buf));
 extern void size_change PARAMS((int sig));
 extern void statusline PARAMS((CONST char *text));
 extern void toggle_novice_line NOPARAMS;
+
+#ifdef EXP_ASCII_CTYPES
+extern int ascii_tolower PARAMS((int i));
+extern int ascii_toupper PARAMS((int i));
+extern int ascii_isupper PARAMS((int i));
+#endif
 
 #ifdef __CYGWIN__
 extern int Cygwin_Shell PARAMS((void));

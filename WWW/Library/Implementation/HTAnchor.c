@@ -769,7 +769,7 @@ PRIVATE void HTParentAnchor_free ARGS1(
     FREE(me->owner);
     FREE(me->RevTitle);
     FREE(me->citehost);
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     HTAnchor_clearSourceCache(me);
 #endif
     if (me->FileCache) {
@@ -812,7 +812,7 @@ PRIVATE void HTParentAnchor_free ARGS1(
     ImageMapList_free(me->imaps);
 }
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 PUBLIC void HTAnchor_clearSourceCache ARGS1(
 	HTParentAnchor *,	me)
 {
@@ -832,7 +832,7 @@ PUBLIC void HTAnchor_clearSourceCache ARGS1(
 	me->source_cache_chunk = NULL;
     }
 }
-#endif /* SOURCE_CACHE */
+#endif /* USE_SOURCE_CACHE */
 
 /*	Data access functions
 **	---------------------

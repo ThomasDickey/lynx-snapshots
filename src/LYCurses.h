@@ -85,7 +85,7 @@ typedef struct {
 #define SLSMG_BLOCK_CHAR '#'
 #endif
 
-#ifndef ACS_UARROW  
+#ifndef ACS_UARROW
 #define ACS_UARROW  SLSMG_UARROW_CHAR
 #endif
 
@@ -274,8 +274,12 @@ typedef struct {
  * 8 colors, but it actually implements 16.  That makes it hard to optimize
  * color settings against color pair 0 in a portable fashion.
  */
-#if defined(COLOR_CURSES) && !(defined(PDCURSES) || defined(HAVE_XCURSES))
+#if defined(COLOR_CURSES)
+#if defined(PDCURSES) || defined(HAVE_XCURSES)
+#define COLORS 16		/* should be a variable... */
+#else
 #define USE_CURSES_PAIR_0
+#endif
 #endif
 
 #endif /* USE_SLANG */
@@ -295,9 +299,6 @@ extern WINDOW *LYstartPopup PARAMS((int top_y, int left_x, int height, int width
 /*
  * Useful macros not in PDCurses or very old ncurses headers.
  */
-#if !defined(HAVE_GETATTRS) && !defined(getattrs)
-#define getattrs(win) ((win)->_attrs)
-#endif
 #if !defined(HAVE_GETBEGX) && !defined(getbegx)
 #define getbegx(win) ((win)->_begx)
 #endif
@@ -307,6 +308,16 @@ extern WINDOW *LYstartPopup PARAMS((int top_y, int left_x, int height, int width
 #if !defined(HAVE_GETBKGD) && !defined(getbkgd)
 #define getbkgd(win) ((win)->_bkgd)
 #endif
+
+#if defined(HAVE_WATTR_GET)
+extern long LYgetattrs PARAMS((WINDOW *win));
+#else
+#if defined(HAVE_GETATTRS) || defined(getattrs)
+#define LYgetattrs(win) getattrs(win)
+#else
+#define LYgetattrs(win) ((win)->_attrs)
+#endif
+#endif /* HAVE_WATTR_GET */
 
 #if defined(PDCURSES)
 #define HAVE_GETBKGD 1	/* can use fallback definition */
@@ -622,7 +633,16 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
 
 #endif /* FANCY_CURSES */
 
-#ifndef ACS_UARROW  
+#ifdef __hpux			/* FIXME: configure check */
+#undef ACS_UARROW
+#undef ACS_DARROW
+#undef ACS_LARROW
+#undef ACS_RARROW
+#undef ACS_BLOCK
+#undef ACS_CKBOARD
+#endif
+
+#ifndef ACS_UARROW
 #define ACS_UARROW  '^'
 #endif
 
@@ -636,6 +656,14 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
 
 #ifndef ACS_RARROW
 #define ACS_RARROW '}'
+#endif
+
+#ifndef ACS_BLOCK
+#define ACS_BLOCK  '}'
+#endif
+
+#ifndef ACS_CKBOARD
+#define ACS_CKBOARD '}'
 #endif
 
 #define LYaddch(ch)		waddch(LYwin, ch)
@@ -655,7 +683,7 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
 #endif /* USE_SLANG */
 
 /*
- * If the screen library allows us to specify "default" color, allow user to 
+ * If the screen library allows us to specify "default" color, allow user to
  * control it.
  */
 #ifdef USE_DEFAULT_COLORS

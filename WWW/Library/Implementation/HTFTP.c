@@ -93,7 +93,7 @@ BUGS:	@@@	Limit connection cache size!
 
 typedef struct _connection {
     struct _connection *	next;	/* Link on list		*/
-    u_long			addr;	/* IP address		*/
+    unsigned long		addr;	/* IP address		*/
     int				socket; /* Socket number for communication */
     BOOL			binary; /* Binary mode? */
 } connection;
@@ -102,12 +102,13 @@ typedef struct _connection {
 */
 #include <HTML.h>
 
-#define PUTC(c) (*targetClass.put_character)(target, c)
-#define PUTS(s) (*targetClass.put_string)(target, s)
-#define START(e) (*targetClass.start_element)(target, e, 0, 0, -1, 0)
-#define END(e) (*targetClass.end_element)(target, e, 0)
-#define FREE_TARGET (*targetClass._free)(target)
-#define ABORT_TARGET (*targetClass._free)(target)
+#define PUTC(c)      (*targetClass.put_character) (target, c)
+#define PUTS(s)      (*targetClass.put_string)    (target, s)
+#define START(e)     (*targetClass.start_element) (target, e, 0, 0, -1, 0)
+#define END(e)       (*targetClass.end_element)   (target, e, 0)
+#define FREE_TARGET  (*targetClass._free)         (target)
+#define ABORT_TARGET (*targetClass._free)         (target)
+
 struct _HTStructured {
 	CONST HTStructuredClass *	isa;
 	/* ... */
@@ -117,6 +118,7 @@ struct _HTStructured {
 **	---------------------
 */
 PUBLIC int HTfileSortMethod = FILE_BY_NAME;
+
 #ifndef DISABLE_FTP /*This disables everything to end-of-file */
 PRIVATE char ThisYear[8];
 PRIVATE char LastYear[8];
@@ -132,6 +134,15 @@ PRIVATE connection * control = NULL;	/* Current connection */
 PRIVATE int data_soc = -1;		/* Socket for data transfer =invalid */
 PRIVATE char *user_entered_password = NULL;
 PRIVATE char *last_username_and_host = NULL;
+
+/*
+ * ProFTPD 1.2.5rc1 is known to have a broken implementation of RETR.  If asked
+ * to retrieve a directory, it gets confused and fails subsequent commands such
+ * as CWD and LIST.  Since this is an unusual bug, we should remove this ifdef
+ * at some point - TD 2004/1/1.
+ */
+#define BROKEN_PROFTPD 1
+PRIVATE int ProFTPD_bugs = FALSE;
 
 typedef enum {
 	GENERIC_SERVER
@@ -474,6 +485,12 @@ PRIVATE int response ARGS1(
 			    continuation == ' ')
 			    continuation_response = -1; /* ended */
 		}
+#ifdef BROKEN_PROFTPD
+		if (result == 220 && LYstrstr(response_text, "ProFTPD 1.2.5")) {
+		    ProFTPD_bugs = TRUE;
+		    CTRACE((tfp, "This server is broken (RETR)\n"));
+		}
+#endif
 		break;
 	    } /* if end of line */
 
@@ -2902,45 +2919,29 @@ unload_btree:
     return HT_LOADED;
 }
 
-/*	Retrieve File from Server
-**	-------------------------
-**
-** On entry,
-**	name		WWW address of a file: document, including hostname
-** On exit,
-**	returns		Socket number for file if good.
-**			<0 if bad.
-*/
-PUBLIC int HTFTPLoad ARGS4(
+/*
+ * Setup an FTP connection.
+ */
+PRIVATE int setup_connection ARGS2(
 	CONST char *,		name,
-	HTParentAnchor *,	anchor,
-	HTFormat,		format_out,
-	HTStream *,		sink)
+	HTParentAnchor *,	anchor)
 {
-    BOOL isDirectory = NO;
-    HTAtom * encoding = NULL;
-    int status, final_status;
     int retry;			/* How many times tried? */
-    int outstanding = 1;	/* outstanding control connection responses
-				   that we are willing to wait for, if we
-				   get to the point of reading data - kw */
-    HTFormat format;
-
-    CTRACE((tfp, "HTFTPLoad(%s) %s connection\n", name, ftp_passive ? "passive" : "normal"));
+    int status;
 
     /* set use_list to NOT since we don't know what kind of server
      * this is yet.  And set the type to GENERIC
      */
     use_list = FALSE;
     server_type = GENERIC_SERVER;
-    HTReadProgress(0,0);
+    ProFTPD_bugs = FALSE;
 
     for (retry = 0; retry < 2; retry++) { /* For timed out/broken connections */
 	status = get_connection(name, anchor);
 	if (status < 0)
 	    return status;
 
-	if (!ftp_passive) {
+	if (!ftp_local_passive) {
 	    status = get_listen_socket();
 	    if (status < 0) {
 		NETCLOSE (control->socket);
@@ -3090,6 +3091,37 @@ PUBLIC int HTFTPLoad ARGS4(
 	break;	/* No more retries */
 
     } /* for retries */
+    return status;
+}
+
+/*	Retrieve File from Server
+**	-------------------------
+**
+** On entry,
+**	name		WWW address of a file: document, including hostname
+** On exit,
+**	returns		Socket number for file if good.
+**			<0 if bad.
+*/
+PUBLIC int HTFTPLoad ARGS4(
+	CONST char *,		name,
+	HTParentAnchor *,	anchor,
+	HTFormat,		format_out,
+	HTStream *,		sink)
+{
+    BOOL isDirectory = NO;
+    HTAtom * encoding = NULL;
+    int status, final_status;
+    int outstanding = 1;	/* outstanding control connection responses
+				   that we are willing to wait for, if we
+				   get to the point of reading data - kw */
+    HTFormat format;
+
+    CTRACE((tfp, "HTFTPLoad(%s) %s connection\n", name, ftp_local_passive ? "passive" : "normal"));
+
+    HTReadProgress(0,0);
+
+    status = setup_connection(name, anchor);
     if (status < 0)
 	return status;		/* Failed with this code */
 
@@ -3540,6 +3572,23 @@ PUBLIC int HTFTPLoad ARGS4(
 	*/
 	if (!(type) || (type && *type != 'D')) {
 	    status = send_cmd_2("RETR", filename);
+#ifdef BROKEN_PROFTPD
+	    /*
+	     * ProFTPD 1.2.5rc1 gets confused when asked to RETR a directory.
+	     */
+	    if (status >= 5) {
+		int check;
+
+		if (ProFTPD_bugs) {
+		    CTRACE((tfp, "{{reconnecting...\n"));
+		    close_connection(control);
+		    check = setup_connection(name, anchor);
+		    CTRACE((tfp, "...done }}reconnecting\n"));
+		    if (check < 0)
+			return check;
+		}
+	    }
+#endif
 	} else {
 	    status = 5;		/* Failed status set as flag. - FM */
 	}
@@ -3571,7 +3620,7 @@ PUBLIC int HTFTPLoad ARGS4(
     }
 
 listen:
-    if(!ftp_passive) {
+    if(!ftp_local_passive) {
 	/* Wait for the connection */
 #ifdef INET6
 	struct sockaddr_storage soc_address;
@@ -3595,7 +3644,7 @@ listen:
 	}
 	CTRACE((tfp, "TCP: Accepted new socket %d\n", status));
 	data_soc = status;
-    } /* !ftp_passive */
+    } /* !ftp_local_passive */
 
 #if 0	/* no - this makes the data connection go away too soon (2.8.3dev.22) */
     if ((status = send_cmd_nowait("QUIT")) == 1)

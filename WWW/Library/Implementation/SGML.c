@@ -2254,16 +2254,15 @@ top1:
 		    PSRCSTOP(abracket);
 
 		    context->current_tag = NULL;
-		    string->size = 0;
-		    context->current_attribute_number = INVALID;
-		    context->state = S_text;
-		    break;
-		}
+		} else
 #endif
-		end_element(context, context->element_stack->tag);
+		    end_element(context, context->element_stack->tag);
+
 		string->size = 0;
 		context->current_attribute_number = INVALID;
 		context->state = S_text;
+		context->leading_spaces = 0;
+		context->trailing_spaces = 0;
 		break;
 	    }
 
@@ -4342,7 +4341,7 @@ after_switch:
 	    FREE(context->active_include);
 	    context->include_index = 0;
 	} else {
-	    if (context->current_tag_charset == UTF8 ||
+	    if (context->current_tag_charset == UTF8_handle ||
 		context->T.trans_from_uni) {
 		/*
 		 *  If it looks like we would have fed UTF-8 to the
@@ -4454,7 +4453,6 @@ PUBLIC HTStream* SGML_new  ARGS3(
     context->actions = (CONST HTStructuredClass*)(((HTStream*)target)->isa);
 					/* Ugh: no OO */
     context->unknown_tag = &HTTag_unrecognized;
-/*    context->extra_tags = dtd->tags + dtd->number_of_tags; */
     context->current_tag = context->slashedtag = NULL;
     context->state = S_text;
     context->kanji_buf = '\0';

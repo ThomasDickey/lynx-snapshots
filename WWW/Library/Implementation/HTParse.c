@@ -324,7 +324,7 @@ PUBLIC char * HTParse ARGS3(
 	    {
 		char *p2, *h;
 		if ((p2 = strchr(result, '@')) != NULL)
- 		   tail = (p2 + 1);
+		   tail = (p2 + 1);
 		p2 = strchr(tail, ':');
 		if (p2 != NULL && !isdigit(UCH(p2[1])))
 		    /*
@@ -515,7 +515,6 @@ PUBLIC char * HTParse ARGS3(
      */
     if ((p = strchr(result, ' ')) != 0) {
 	switch (is_url(result)) {
-	case NOT_A_URL_TYPE:
 	case UNKNOWN_URL_TYPE:
 	    CTRACE((tfp, "HTParse:      ignore:`%s'\n", result));
 	    break;
@@ -535,6 +534,7 @@ PUBLIC char * HTParse ARGS3(
 	case LYNXMESSAGES_URL_TYPE:
 	    CTRACE((tfp, "HTParse:      spaces:`%s'\n", result));
 	    break;
+	case NOT_A_URL_TYPE:
 	default:
 	    CTRACE((tfp, "HTParse:      encode:`%s'\n", result));
 	    do {
@@ -817,8 +817,8 @@ PUBLIC char * HTRelative ARGS2(
 	strcat(result, last_slash+1);
     }
     CTRACE((tfp,
-	"HTparse: `%s' expressed relative to\n	 `%s' is\n   `%s'.\n",
-		aName, relatedName, result));
+	    "HTparse: `%s' expressed relative to\n   `%s' is\n   `%s'.\n",
+	    aName, relatedName, result));
     return result;
 }
 

@@ -98,7 +98,7 @@ PUBLIC Config_Enum tbl_transfer_rate[] = {
     { "TRUE",		rateKB },
     { "BYTES",		rateBYTES },
     { "FALSE",		rateBYTES },
-#ifdef EXP_READPROGRESS
+#ifdef USE_READPROGRESS
     { "KB,ETA",		rateEtaKB },
     { "BYTES,ETA",	rateEtaBYTES },
 #endif
@@ -122,7 +122,7 @@ PRIVATE Config_Enum tbl_visited_links[] = {
 };
 
 PUBLIC Config_Enum tbl_force_prompt[] = {
-    { "default",	FORCE_PROMPT_DFT	},
+    { "prompt",		FORCE_PROMPT_DFT	},
     { "yes",		FORCE_PROMPT_YES	},
     { "no",		FORCE_PROMPT_NO		},
     { NULL,		-1			}
@@ -323,7 +323,7 @@ all cookies.  If a domain is specified in both options, rejection will\n\
 take precedence.  The accept_all_cookies parameter will override any\n\
 settings made here.\n\
 ")),
-#ifdef EXP_PERSISTENT_COOKIES
+#ifdef USE_PERSISTENT_COOKIES
     PARSE_STR(RC_COOKIE_FILE,	        LYCookieFile, N_("\
 cookie_file specifies the file from which to read persistent cookies.\n\
 The default is ~/.lynx_cookies.\n\
@@ -513,7 +513,7 @@ honored only if enabled via userdefs.h and/or lynx.cfg, and not\n\
 restricted via a command line switch.  If display of hidden files\n\
 is disabled, creation of such files via Lynx also is disabled.\n\
 ")),
-#ifdef EXP_READPROGRESS
+#ifdef USE_READPROGRESS
     MAYBE_ENU(RC_SHOW_KB_RATE,          LYTransferRate,    tbl_transfer_rate,
 	      MSG_ENABLE_LYNXRC),
 #endif

@@ -3,6 +3,11 @@
 @echo .
 @echo off
 
+if "%1"=="" goto normal
+make -l -f makefile.bcb %1
+goto done
+
+:normal
 make -l -f makefile.bcb
 
 makeuctb cp1250_uni.tbl
@@ -42,6 +47,9 @@ makeuctb mac_uni.tbl
 makeuctb mnem2_suni.tbl
 makeuctb mnem_suni.tbl
 makeuctb next_uni.tbl
+makeuctb pt154_uni.tbl
 makeuctb rfc_suni.tbl
 makeuctb utf8_uni.tbl
 makeuctb viscii_uni.tbl
+
+:done

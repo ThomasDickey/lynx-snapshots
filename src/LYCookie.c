@@ -1864,7 +1864,7 @@ PUBLIC char * LYAddCookieHeader ARGS4(
     return(NULL);
 }
 
-#ifdef EXP_PERSISTENT_COOKIES
+#ifdef USE_PERSISTENT_COOKIES
 PRIVATE int number_of_file_cookies = 0;
 
 /* rjp - experiment cookie loading */
