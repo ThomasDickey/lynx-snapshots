@@ -464,7 +464,7 @@ AC_SUBST(CHARSET_DEFS)
 
 AC_MSG_CHECKING(if you want only a few charsets)
 AC_ARG_WITH(charsets,
-[ --with-charsets=list  limit charsets to given list of MIME names],
+[  --with-charsets=list    limit charsets to given list of MIME names],
 [cf_charsets=$withval],
 [cf_charsets=])
 
@@ -481,11 +481,27 @@ if test -n "$cf_charsets" ; then
 	cf_charsets=`echo $cf_charsets | sed -e "s/minimal/$cf_min_charsets/g" -e 's/,/ /g'`
 	for cf_charset in $cf_charsets
 	do
+		cf_def_charset=`echo $cf_charset | sed -e 's/+/_/g' -e 's/-/_/g'`
+		cf_use_charset=no
+		# check charsets that are defined via .tbl files
 		if ( egrep '^M'$cf_charset'$' $srcdir/src/chrtrans/*.tbl 2>/dev/null >/dev/null )
 		then
+			cf_use_charset=yes
+		# check charsets that are "built-in"
+		else
+			for cf_tst_charset in big5 euc_cn euc_jp euc_kr shift_jis x_transparent
+			do
+				if test "$cf_tst_charset" = "$cf_def_charset"
+				then
+					cf_use_charset=yes
+					break
+				fi
+			done
+		fi
+		if test $cf_use_charset=yes
+		then
 			CF_VERBOSE(found $cf_charset)
-			cf_charset=`echo $cf_charset | sed -e 's/-/_/g'`
-			CHARSET_DEFS="-DNO_CHARSET_${cf_charset}=0 $CHARSET_DEFS"
+			CHARSET_DEFS="-DNO_CHARSET_${cf_def_charset}=0 $CHARSET_DEFS"
 		else
 			CF_VERBOSE(not found $cf_charset)
 		fi
@@ -1067,6 +1083,7 @@ dnl --------------------------------------------------------------------------
 dnl Test features that rely on configure-definitions
 dnl --------------------------------------------------------------------------
 if test $cf_cv_screen = pdcurses ; then
+	CF_HELP_MESSAGE(Special Libraries for PDCurses X11:)
 	CF_PDCURSES_X11
 else
 	CF_TERMIO_AND_CURSES(LYCurses.h)

@@ -2014,6 +2014,7 @@ AC_TRY_LINK([#include <slang.h>],
 #ifdef REAL_UNIX_SYSTEM
 make an error
 #else
+extern int SLang_TT_Baud_Rate;
 int x = SLang_TT_Baud_Rate
 #endif
 ],
