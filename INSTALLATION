@@ -672,16 +672,14 @@ V. Compile instructions -- 386 DOS
     zlib.h and zconf.h in the include subdirectory.
 
     In addition to the files in the Lynx distribution, you will need a
-    curses package and a TCP package. You can use PDCurses (available at
-    "http://www.lightlink.com/hessling/") and the DJGPP port of WATTCP
-    (available in two different versions at "ftp://neonatal.sm.med.ic.ac.uk/"
-    and in "http://www.fdisk.com/doslynx/wlynx/source/djgpp.zip").
-    A patched copy of the version from the neonatal site is also
-    available from "http://www.rahul.net/dkaufman/tcplibdj.zip" or
-    "ftp://ftp.rahul.net/pub/dkaufman/tcplibdj.zip". You can also use slang
-    ("ftp://space.mit.edu/pub/davis/slang") as your curses library. You need
-    to compile these before you go any further. If you wish to use PDCurses
-    2.3, you need to first apply the following patch:
+    curses package and a TCP package. You can use PDCurses (available
+    at "http://www.lightlink.com/hessling/") and the DJGPP port of
+    WATTCP. The updated version of WATTCP is known as WATT-32, and
+    is available at "http://www.bgnett.no/~giva/". You can also
+    use slang ("ftp://space.mit.edu/pub/davis/slang") as your curses
+    library. You need to compile these before you go any further. If
+    you wish to use PDCurses 2.3, you need to first apply the following
+    patch:
 
 *** curses.h	Thu Jul  9 19:38:28 1998
 --- curses.h.new	Sat Aug 15 11:02:08 1998
@@ -716,14 +714,11 @@ V. Compile instructions -- 386 DOS
   # else
 
     If you have trouble applying the patch, try using the "patch" program,
-    ("http://www.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/pat25b.zip").  The
-    WATTCP TCPLIB sources must also be patched prior to compilation.  See
-    "http://www.flora.org/lynx-dev/html/month1197/msg00403.html".
-
+    ("http://www.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/pat25b.zip").
     To read the Unix man style documentation, use, for example, "less"
     ("http://www.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/lss332b.zip").
     Compile or place your compiled PDCurses library in lynx2-*/curses, and
-    compile or place your compiled WATTCP library in lynx2-*/djgpp/tcplib.  If
+    compile or place your compiled WATT-32 library in lynx2-*/djgpp/watt32.  If
     using the SLANG library, put libslang.a in your DJGPP/lib directory and put
     slang.h and slcurses.h in your DJGPP/include directory, or in the
     appropriate directories specified by LIBRARY_PATH and INCLUDE_PATH in your
@@ -797,8 +792,9 @@ V. Compile instructions -- 386 DOS
     texts more readable under DOS.  If you compile lynx regularly, you may
     automate the procedure by creating a batch file such as the following.
 
-	cd djgpp\tcplib\obj
-	make
+	cd djgpp\watt32\src
+	build djgpp
+	make -f djgpp.mak
 	cd ..\..\..\www\library\djgpp
 	make
 	cd ..\..\..\src\chrtrans
@@ -808,7 +804,7 @@ V. Compile instructions -- 386 DOS
 	strip lynx.exe
 	cd ..
 
-    This batch file expects the DJGPP port of WATTCP to be installed in the
+    This batch file expects the DJGPP port of WATT-32 to be installed in the
     lynx2-* directory.  Place a copy of this batch file, named "djgpp.bat",
     in the lynx2-* directory, move to that directory and type "djgpp".  A more
     complete batch file with error checking and annotation can be found at:
@@ -879,7 +875,6 @@ VII. Setting environment variables before running Lynx (optional)
 
     386 version only:
     WATTCP.CFG   Set to the full path for the WATTCP.CFG directory
-    (Depending on how you compiled libtcp.a, you may have to use WATCONF.)
 
     Define these in your batch file for running Lynx.  For example, if your
     application line is "D:\win32\lynx.bat", lynx.bat for Win32 may look like:

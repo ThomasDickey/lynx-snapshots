@@ -9,6 +9,10 @@
 
 #include <LYLeaks.h>
 
+#ifdef _WINDOWS
+#include <stdlib.h>	/* bsearch() */
+#endif
+
 #ifdef VMS
 #include <fab.h>
 #endif /* VMS */

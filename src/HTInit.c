@@ -49,10 +49,10 @@ PUBLIC void HTFormatInit NOARGS
   HTSetPresentation("image/x-xbm",      XLoadImageCommand,  1.0, 3.0, 0.0, 0);
   HTSetPresentation("image/x-xbitmap",  XLoadImageCommand,  1.0, 3.0, 0.0, 0);
   HTSetPresentation("image/x-png",      XLoadImageCommand,  2.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/png",	XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+  HTSetPresentation("image/png",        XLoadImageCommand,  1.0, 3.0, 0.0, 0);
   HTSetPresentation("image/x-rgb",      XLoadImageCommand,  1.0, 3.0, 0.0, 0);
   HTSetPresentation("image/x-tiff",     XLoadImageCommand,  2.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/tiff",	XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+  HTSetPresentation("image/tiff",       XLoadImageCommand,  1.0, 3.0, 0.0, 0);
   HTSetPresentation("image/jpeg",       XLoadImageCommand,  1.0, 3.0, 0.0, 0);
   HTSetPresentation("video/mpeg",       "mpeg_play %s &",   1.0, 3.0, 0.0, 0);
 
@@ -62,9 +62,9 @@ PUBLIC void HTFormatInit NOARGS
 #ifdef EXEC_SCRIPTS
  /* set quality to 999.0 for protected exec applications */
 #ifndef VMS
- HTSetPresentation("application/x-csh",	"csh %s", 999.0, 3.0, 0.0, 0);
- HTSetPresentation("application/x-sh",	"sh %s",  999.0, 3.0, 0.0, 0);
- HTSetPresentation("application/x-ksh",	"ksh %s", 999.0, 3.0, 0.0, 0);
+ HTSetPresentation("application/x-csh", "csh %s", 999.0, 3.0, 0.0, 0);
+ HTSetPresentation("application/x-sh",  "sh %s",  999.0, 3.0, 0.0, 0);
+ HTSetPresentation("application/x-ksh", "ksh %s", 999.0, 3.0, 0.0, 0);
 #else
  HTSetPresentation("application/x-VMS_script",	"@%s", 999.0, 3.0, 0.0, 0);
 #endif /* not VMS */
@@ -153,7 +153,7 @@ PUBLIC void HTFormatInit NOARGS
  /*
   *  Load the local maps.
   */
- if ((fp = fopen(personal_type_map,"r")) != NULL) {
+ if ((fp = fopen(personal_type_map, TXT_R)) != NULL) {
      fclose(fp);
      /* These should override everything else. */
      HTLoadTypesConfigFile(personal_type_map);
@@ -376,7 +376,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 		/* no support for now.  What does this do anyways? */
 		/* ExceptionalNewline(mc->contenttype, atoi(eq)); */
 	    } else if (eq && !strcmp(arg, "q")) {
-	        mc->quality = atof(eq);
+	        mc->quality = (float)atof(eq);
 		if (mc->quality > 0.000 && mc->quality < 0.001)
 		    mc->quality = 0.001;
 	    } else if (eq && !strcmp(arg, "mxb")) {
@@ -624,7 +624,7 @@ PRIVATE int ProcessMailcapFile ARGS1(
 
     CTRACE(tfp, "ProcessMailcapFile: Loading file '%s'.\n",
 		file);
-    if ((fp = fopen(file, "r")) == NULL) {
+    if ((fp = fopen(file, TXT_R)) == NULL) {
 	CTRACE(tfp, "ProcessMailcapFile: Could not open '%s'.\n",
 		    file);
 	return(-1 == 0);
@@ -752,6 +752,8 @@ PUBLIC void HTFileInit NOARGS
     HTSetSuffix(".wsrc",	"application/x-WAIS-source", "8bit", 1.0);
 
     HTSetSuffix(".zip",		"application/x-Zip File", "binary", 1.0);
+
+    HTSetSuffix(".bz2",		"application/x-bzip2", "binary", 1.0);
 
     HTSetSuffix(".bz2",		"application/x-bzip2", "binary", 1.0);
 
@@ -909,7 +911,7 @@ PUBLIC void HTFileInit NOARGS
     /* These should override the default extensions as necessary. */
     HTLoadExtensionsConfigFile(global_extension_map);
 
-    if ((fp = fopen(personal_extension_map,"r")) != NULL) {
+    if ((fp = fopen(personal_extension_map, TXT_R)) != NULL) {
 	fclose(fp);
 	/* These should override everything else. */
 	HTLoadExtensionsConfigFile(personal_extension_map);
@@ -997,7 +999,7 @@ PRIVATE int HTLoadExtensionsConfigFile ARGS1(
 
     CTRACE(tfp, "HTLoadExtensionsConfigFile: Loading file '%s'.\n", fn);
 
-    if ((f = fopen(fn,"r")) == NULL) {
+    if ((f = fopen(fn, TXT_R)) == NULL) {
 	CTRACE(tfp, "HTLoadExtensionsConfigFile: Could not open '%s'.\n", fn);
 	return count;
     }

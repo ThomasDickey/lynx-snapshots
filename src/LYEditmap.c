@@ -47,7 +47,11 @@ LYE_NOP,        LYE_ENTER,      LYE_FORWW,      LYE_ABORT,
 LYE_BACKW,      LYE_NOP,        LYE_DELN,       LYE_NOP,
 /* ^P           XON             ^R              XOFF    */
 
+#ifdef WIN_EX
+LYE_UPPER,      LYE_ERASE,      LYE_LKCMD,      LYE_PASTE,
+#else
 LYE_UPPER,      LYE_ERASE,      LYE_LKCMD,      LYE_NOP,
+#endif
 /* ^T           ^U              ^V              ^W      */
 
 LYE_ERASE,      LYE_NOP,        LYE_NOP,        LYE_NOP,
@@ -88,8 +92,12 @@ LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
+#ifdef CJK_EX	/* 1997/11/03 (Mon) 20:30:54 */
+LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
+#else
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_AIX,
 /*                                               97 AIX    */
+#endif
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 
@@ -276,7 +284,7 @@ LYE_NOP,        LYE_BOL,        LYE_BACK,       LYE_ABORT,
 LYE_DELN,       LYE_EOL,        LYE_FORW,       LYE_ABORT,
 /* ^D           ^E              ^F              ^G      */
 
-LYE_DELP,       LYE_ENTER,      LYE_ENTER,      LYE_DELEL,
+LYE_DELP,       LYE_ENTER,      LYE_ENTER,      LYE_DELNW, /* LYE_DELEL,*/
 /* bs           tab             nl              ^K      */
 
 LYE_NOP,        LYE_ENTER,      LYE_FORWW,      LYE_ABORT,
@@ -285,7 +293,11 @@ LYE_NOP,        LYE_ENTER,      LYE_FORWW,      LYE_ABORT,
 LYE_BACKW,      LYE_NOP,        LYE_DELPW,      LYE_NOP,
 /* ^P           XON             ^R              XOFF    */
 
+#ifdef WIN_EX
+LYE_DELNW,      LYE_ERASE,      LYE_LKCMD,      LYE_PASTE,
+#else
 LYE_DELNW,      LYE_ERASE,      LYE_LKCMD,      LYE_NOP,
+#endif
 /* ^T           ^U              ^V              ^W      */
 
 LYE_DELBL,      LYE_NOP,        LYE_NOP,        LYE_NOP,
@@ -326,8 +338,12 @@ LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
+#ifdef CJK_EX	/* 1997/11/03 (Mon) 20:30:54 */
+LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
+#else
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_AIX,
 /*                                               97 AIX    */
+#endif
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 

@@ -78,6 +78,8 @@
 #include <HTAccess.h>
 #endif
 
+#include <LYJustify.h>
+
 #include <LYexit.h>
 #include <LYLeaks.h>
 
@@ -226,6 +228,10 @@ PRIVATE void change_paragraph_style ARGS2(HTStructured *, me, HTStyle *,style)
 */
 PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 {
+#ifdef CJK_EX
+    static unsigned char save_ch1 = 0;
+    static unsigned char save_ch2 = 0;
+#endif
     /*
      *	Ignore all non-MAP content when just
      *	scanning a document for MAPs. - FM
@@ -406,7 +412,27 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 	    } else {
 		me->inP = TRUE;
 		me->inLABEL = FALSE;
+#ifdef CJK_EX
+		if (last_kcode == EUC) {
+		    if (save_ch1 && !save_ch2) {
+			if ((unsigned char)c & 0x80) {
+			    save_ch2 = c;
+			}
+			HText_appendCharacter(me->text, save_ch1);
+			HText_appendCharacter(me->text, save_ch2);
+			save_ch1 = save_ch2 = '\0';
+		    } else if ((unsigned char)c & 0x80) {
+			save_ch1 = c;
+			save_ch2 = '\0';
+		    } else {
+			HText_appendCharacter(me->text, c);
+		    }
+		} else {
+		    HText_appendCharacter(me->text, c);
+		}
+#else
 		HText_appendCharacter(me->text, c);
+#endif
 		me->in_word = YES;
 	    }
 	}
@@ -446,7 +472,7 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 	StrAllocCopy(translated_string,s);
 	TRANSLATE_AND_UNESCAPE_ENTITIES(&translated_string, TRUE, FALSE);
 	s = (CONST char *) translated_string;
-    };
+    }
 #endif
 
     switch (me->sp[0].tag_number) {
@@ -707,8 +733,14 @@ PRIVATE void HTMLSRC_apply_markup ARGS4(
 }
 #  define START TRUE
 #  define STOP FALSE
+
+#ifdef __STDC__
 #  define PSRCSTART(x)	HTMLSRC_apply_markup(me,HTL_##x,START,tag_charset)
 #  define PSRCSTOP(x)  HTMLSRC_apply_markup(me,HTL_##x,STOP,tag_charset)
+#else
+#  define PSRCSTART(x)	HTMLSRC_apply_markup(me,HTL_/**/x,START,tag_charset)
+#  define PSRCSTOP(x)  HTMLSRC_apply_markup(me,HTL_/**/x,STOP,tag_charset)
+#endif
 
 #  define PUTC(x) HTML_put_character(me,x)
 #  define PUTS(x) HTML_put_string(me,x)
@@ -1207,7 +1239,7 @@ PRIVATE void HTML_start_element ARGS6(
 		 */
 /*  lss and css has different syntax - lynx shouldn't try to
     parse them now (it tries to parse them as lss, so it exits with
-    error message the 1st non-empty line) - HVV
+    error message on the 1st non-empty line) - VH
 */
 #ifndef USE_COLOR_STYLE
 		if (!strcasecomp(value[HTML_LINK_REL], "StyleSheet") ||
@@ -1591,6 +1623,7 @@ PRIVATE void HTML_start_element ARGS6(
 				NULL,			/* Tag */
 				href,			/* Addresss */
 				INTERN_LT);		/* Type */
+	    CAN_JUSTIFY_PUSH(FALSE);
 	    LYEnsureSingleSpace(me);
 	    if (me->inUnderline == FALSE)
 		HText_appendCharacter(me->text, LY_UNDERLINE_START_CHAR);
@@ -1609,6 +1642,7 @@ PRIVATE void HTML_start_element ARGS6(
 		HText_appendCharacter(me->text, LY_BOLD_END_CHAR);
 	    HText_endAnchor(me->text, 0);
 	    LYEnsureSingleSpace(me);
+	    CAN_JUSTIFY_POP;
 	} else {
 	    CHECK_ID(HTML_FRAME_ID);
 	}
@@ -1662,6 +1696,7 @@ PRIVATE void HTML_start_element ARGS6(
 				href,			/* Addresss */
 				INTERN_LT);		/* Type */
 	    LYEnsureDoubleSpace(me);
+	    CAN_JUSTIFY_PUSH_F
 	    LYResetParagraphAlignment(me);
 	    if (me->inUnderline == FALSE)
 		HText_appendCharacter(me->text, LY_UNDERLINE_START_CHAR);
@@ -1669,6 +1704,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (me->inUnderline == FALSE)
 		HText_appendCharacter(me->text, LY_UNDERLINE_END_CHAR);
 	    HTML_put_character(me, ' ');
+
 	    me->in_word = NO;
 	    CHECK_ID(HTML_IFRAME_ID);
 	    HText_beginAnchor(me->text, me->inUnderline, me->CurrentA);
@@ -1680,6 +1716,7 @@ PRIVATE void HTML_start_element ARGS6(
 		HText_appendCharacter(me->text, LY_BOLD_END_CHAR);
 	    HText_endAnchor(me->text, 0);
 	    LYEnsureSingleSpace(me);
+	    CAN_JUSTIFY_POP;
 	} else {
 	    CHECK_ID(HTML_IFRAME_ID);
 	}
@@ -2014,6 +2051,7 @@ PRIVATE void HTML_start_element ARGS6(
 	}
 	UPDATE_STYLE;
 
+	CANT_JUSTIFY_THIS_LINE
 	if (present[HTML_TAB_ALIGN] && value[HTML_TAB_ALIGN] &&
 	    (strcasecomp(value[HTML_TAB_ALIGN], "left") ||
 	     !(present[HTML_TAB_TO] || present[HTML_TAB_INDENT]))) {
@@ -2069,6 +2107,7 @@ PRIVATE void HTML_start_element ARGS6(
 	     *	or right, just add a collapsible space, otherwise, add the
 	     *	appropriate number of spaces. - FM
 	     */
+
 	    if (target < column ||
 		target > HText_getMaximumColumn(me->text)) {
 		HTML_put_character(me, ' ');
@@ -2273,8 +2312,10 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (me->inUnderline == FALSE)
 		HText_appendCharacter(me->text, LY_UNDERLINE_END_CHAR);
 	    HTML_put_character(me, ' ');
+	    CAN_JUSTIFY_START;
 	    FREE(note);
 	}
+	CAN_JUSTIFY_START;
 	me->inLABEL = TRUE;
 	me->in_word = NO;
 	me->inP = FALSE;
@@ -2305,6 +2346,7 @@ PRIVATE void HTML_start_element ARGS6(
 	}
 	UPDATE_STYLE;	  /* update to the new style */
 	CHECK_ID(HTML_DL_ID);
+
 	break;
 
     case HTML_DLC:
@@ -2693,6 +2735,7 @@ PRIVATE void HTML_start_element ARGS6(
 		HText_setLastChar(me->text, ' ');
 	    }
 	}
+	CAN_JUSTIFY_START;
 	me->in_word = NO;
 	me->inP = FALSE;
 	break;
@@ -2731,6 +2774,7 @@ PRIVATE void HTML_start_element ARGS6(
 	if (me->inUnderline == FALSE)
 	    HText_appendCharacter(me->text, LY_UNDERLINE_END_CHAR);
 	HTML_put_character(me, ' ');
+	CAN_JUSTIFY_START
 	me->inLABEL = TRUE;
 	me->in_word = NO;
 	me->inP = FALSE;
@@ -2923,17 +2967,20 @@ PRIVATE void HTML_start_element ARGS6(
 					    me->inUnderline, me->CurrentA);
 	if (me->inBoldA == TRUE && me->inBoldH == FALSE)
 	    HText_appendCharacter(me->text, LY_BOLD_START_CHAR);
-#ifdef NOTUSED_FOTEMODS
+#if defined(NOTUSED_FOTEMODS) || !defined(NO_EMPTY_HREFLESS_A)
 	/*
 	 *  Close an HREF-less NAMED-ed now if we aren't making their
 	 *  content bold, and let the check in HTML_end_element() deal
 	 *  with any dangling end tag this creates. - FM
 	 */
-	if (href == NULL && me->inBoldA == FALSE) {
-	    SET_SKIP_STACK(HTML_A);
-	    HTML_end_element(me, HTML_A, &include);
-	}
-#endif /* NOTUSED_FOTEMODS */
+# ifndef NO_EMPTY_HREFLESS_A
+	if (force_empty_hrefless_a)
+# endif
+	    if (href == NULL && me->inBoldA == FALSE) {
+		SET_SKIP_STACK(HTML_A);
+		HTML_end_element(me, HTML_A, include);
+	    }
+#endif /* NOTUSED_FOTEMODS || !defined(NO_EMPTY_HREFLESS_A)*/
 	FREE(href);
 	break;
 
@@ -4192,6 +4239,7 @@ PRIVATE void HTML_start_element ARGS6(
 	if (me->inUnderline == FALSE)
 	    HText_appendCharacter(me->text, LY_UNDERLINE_END_CHAR);
 	HTML_put_character(me, ' ');
+	CAN_JUSTIFY_START;
 
 	if (me->inFIG)
 	    /*
@@ -4223,6 +4271,7 @@ PRIVATE void HTML_start_element ARGS6(
 	if (me->inUnderline == FALSE)
 	    HText_appendCharacter(me->text, LY_UNDERLINE_END_CHAR);
 	HTML_put_character(me, ' ');
+	CAN_JUSTIFY_START
 
 	if (me->inFIG)
 	    /*
@@ -4271,6 +4320,7 @@ PRIVATE void HTML_start_element ARGS6(
 	     *	Set to know we are in a new form.
 	     */
 	    me->inFORM = TRUE;
+	    EMIT_IFDEF_EXP_JUSTIFY_ELTS(form_in_htext=TRUE;)
 
 	    if (present && present[HTML_FORM_ACCEPT_CHARSET]) {
 		accept_cs = value[HTML_FORM_ACCEPT_CHARSET] ?
@@ -4593,7 +4643,9 @@ PRIVATE void HTML_start_element ARGS6(
 	    BOOL HaveSRClink = FALSE;
 	    char* ImageSrc = NULL;
 	    BOOL IsSubmitOrReset = FALSE;
-
+#ifdef CJK_EX
+	    HTkcode kcode = 0;
+#endif
 	    /* init */
 	    I.align=NULL; I.accept=NULL; I.checked=NO; I.class=NULL;
 	    I.disabled=NO; I.error=NULL; I.height= NULL; I.id=NULL;
@@ -5032,6 +5084,12 @@ PRIVATE void HTML_start_element ARGS6(
 		for (; chars > 0; chars--)
 		    HTML_put_character(me, '_');
 	    } else {
+#ifdef CJK_EX
+		if (HTCJK != NOCJK) {
+		    kcode = HText_getKcode(me->text);
+		    HText_updateKcode(me->text, kanji_code);
+		}
+#endif
 		if (me->sp[0].tag_number == HTML_PRE ||
 		    !me->sp->style->freeFormat) {
 		    /*
@@ -5071,6 +5129,10 @@ PRIVATE void HTML_start_element ARGS6(
 		    while (i < chars)
 			HTML_put_character(me, HT_NON_BREAK_SPACE);
 		}
+#ifdef CJK_EX
+		if (HTCJK != NOCJK)
+		    HText_updateKcode(me->text, kcode);
+#endif
 	    }
 	    HText_setIgnoreExcess(me->text, FALSE);
 	    FREE(ImageSrc);
@@ -5383,7 +5445,7 @@ PRIVATE void HTML_start_element ARGS6(
 	     */
 	    if (HTCurSelectGroupType == F_RADIO_TYPE &&
 		LYSelectPopups &&
-		keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED) {
+		keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) {
 		char marker[8];
 		int opnum = HText_getOptionNum(me->text);
 
@@ -5430,10 +5492,27 @@ PRIVATE void HTML_start_element ARGS6(
 	if (present && present[HTML_TABLE_ALIGN] &&
 	    value[HTML_TABLE_ALIGN] && *value[HTML_TABLE_ALIGN]) {
 	    if (!strcasecomp(value[HTML_TABLE_ALIGN], "center")) {
+#ifdef SH_EX	/* 1998/10/09 (Fri) 15:20:09 */
+		if (no_table_center) {
+		    me->DivisionAlignments[me->Division_Level] = HT_LEFT;
+		    change_paragraph_style(me, styles[HTML_DLEFT]);
+		    UPDATE_STYLE;
+		    me->current_default_alignment =
+				styles[HTML_DLEFT]->alignment;
+		} else {
+		    me->DivisionAlignments[me->Division_Level] = HT_CENTER;
+		    change_paragraph_style(me, styles[HTML_DCENTER]);
+		    UPDATE_STYLE;
+		    me->current_default_alignment =
+					styles[HTML_DCENTER]->alignment;
+		}
+#else
 		me->DivisionAlignments[me->Division_Level] = HT_CENTER;
 		change_paragraph_style(me, styles[HTML_DCENTER]);
 		UPDATE_STYLE;
 		me->current_default_alignment = styles[HTML_DCENTER]->alignment;
+
+#endif
 	    } else if (!strcasecomp(value[HTML_TABLE_ALIGN], "right")) {
 		me->DivisionAlignments[me->Division_Level] = HT_RIGHT;
 		change_paragraph_style(me, styles[HTML_DRIGHT]);
@@ -5491,9 +5570,18 @@ PRIVATE void HTML_start_element ARGS6(
 	    me->sp->style->alignment = me->current_default_alignment;
 	}
 	if (present && present[HTML_TR_ALIGN] && value[HTML_TR_ALIGN]) {
+#ifdef SH_EX
+	    if (!strcasecomp(value[HTML_TR_ALIGN], "center") &&
+		!(me->List_Nesting_Level >= 0 && !me->inP))
+		if (no_table_center)
+		    me->sp->style->alignment = HT_LEFT;
+		else
+		    me->sp->style->alignment = HT_CENTER;
+#else
 	    if (!strcasecomp(value[HTML_TR_ALIGN], "center") &&
 		!(me->List_Nesting_Level >= 0 && !me->inP))
 		me->sp->style->alignment = HT_CENTER;
+#endif
 	    else if (!strcasecomp(value[HTML_TR_ALIGN], "right") &&
 		!(me->List_Nesting_Level >= 0 && !me->inP))
 		me->sp->style->alignment = HT_RIGHT;
@@ -5593,7 +5681,8 @@ PRIVATE void HTML_start_element ARGS6(
 
     if (HTML_dtd.tags[ElementNumber].contents != SGML_EMPTY) {
 	if (me->skip_stack > 0) {
-	    CTRACE(tfp, "HTML:begin_element: internal call (level %d), leaving on stack - %s\n",
+	    CTRACE(tfp,
+    "HTML:begin_element: internal call (level %d), leaving on stack - `%s'\n",
 			me->skip_stack, me->sp->style->name);
 	    me->skip_stack--;
 	    return;
@@ -5619,6 +5708,11 @@ PRIVATE void HTML_start_element ARGS6(
 	(me->sp)--;
 	me->sp[0].style = me->new_style;	/* Stack new style */
 	me->sp[0].tag_number = ElementNumber;
+#ifdef EXP_JUSTIFY_ELTS
+	if (wait_for_this_stacked_elt<0 &&
+		HTML_dtd.tags[ElementNumber].can_justify==FALSE)
+	    wait_for_this_stacked_elt=me->stack - me->sp;
+#endif
     }
 
 #if defined(USE_COLOR_STYLE)
@@ -5672,6 +5766,7 @@ PRIVATE void HTML_end_element ARGS3(
     int i = 0;
     char *temp = NULL, *cp = NULL;
     BOOL BreakFlag = FALSE;
+    EMIT_IFDEF_EXP_JUSTIFY_ELTS(BOOL reached_awaited_stacked_elt=FALSE;)
 
 #ifdef USE_PSRC
     if (psrc_view && !sgml_in_psrc_was_initialized) {
@@ -5793,6 +5888,10 @@ PRIVATE void HTML_end_element ARGS3(
 	     */
 	    return;
 	} else if (me->sp < (me->stack + MAX_NESTING - 1)) {
+#ifdef EXP_JUSTIFY_ELTS
+	    if (wait_for_this_stacked_elt==me->stack-me->sp)
+		reached_awaited_stacked_elt=TRUE;
+#endif
 	    (me->sp)++;
 	    CTRACE(tfp, "HTML:end_element[%d]: Popped style off stack - %s\n",
 			(int) STACKLEVEL(me),
@@ -5802,8 +5901,13 @@ PRIVATE void HTML_end_element ARGS3(
   "Stack underflow error!  Tried to pop off more styles than exist in stack\n");
 	}
     }
-    if (BreakFlag == TRUE)
+    if (BreakFlag == TRUE) {
+#ifdef EXP_JUSTIFY_ELTS
+	    if (reached_awaited_stacked_elt)
+		wait_for_this_stacked_elt=-1;
+#endif
 	return;
+    }
 
     /*
      *	Check for unclosed TEXTAREA. - FM
@@ -6587,6 +6691,7 @@ End_Object:
 		me->inBadHTML = TRUE;
 	    }
 	}
+	EMIT_IFDEF_EXP_JUSTIFY_ELTS(form_in_htext=FALSE;)
 
 	/*
 	 *  Check if we still have a SELECT element open.
@@ -7026,6 +7131,11 @@ End_Object:
 	break;
 
     } /* switch */
+
+#ifdef EXP_JUSTIFY_ELTS
+	    if (reached_awaited_stacked_elt)
+		wait_for_this_stacked_elt=-1;
+#endif
 #ifdef USE_COLOR_STYLE
 #if !OPT_SCN
     TrimColorClass(HTML_dtd.tags[element_number].name,
@@ -7122,15 +7232,17 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	    CTRACE(tfp,"HTML_free: Ending underline\n");
 	}
 	if (me->inA) {
-	    HTML_end_element(me, HTML_A, &include);
+	    HTML_end_element(me, HTML_A, (char **)&include);
 	    me->inA = FALSE;
+	    if (TRACE)
+		fprintf(stderr,"HTML_free: Ending HTML_A\n");
 	}
 	if (me->inFONT) {
-	    HTML_end_element(me, HTML_FONT, &include);
+	    HTML_end_element(me, HTML_FONT, (char **)&include);
 	    me->inFONT = FALSE;
 	}
 	if (me->inFORM) {
-	    HTML_end_element(me, HTML_FORM, &include);
+	    HTML_end_element(me, HTML_FORM, (char **)&include);
 	    me->inFORM = FALSE;
 	}
 	if (me->option.size > 0) {
@@ -7720,6 +7832,19 @@ PUBLIC HTStructured* HTML_new ARGS3(
 		     me->outUCLYhndl, me->outUCI);
 #endif
 
+#ifdef EXP_JUSTIFY_ELTS
+    wait_for_this_stacked_elt = !ok_justify
+#  ifdef USE_PSRC
+	|| psrc_view
+#  endif
+	? MAX_NESTING+2 /*some unreachable value*/ : -1;
+    can_justify_here = TRUE;
+    can_justify_this_line = TRUE;
+    form_in_htext = FALSE;
+
+    ht_justify_cleanup();
+#endif
+
     me->target = stream;
     if (stream)
 	me->targetClass = *stream->isa;			/* Copy pointers */
@@ -8064,7 +8189,29 @@ PRIVATE char * MakeNewTitle ARGS2(CONST char **, value, int, src_type)
     } else {
 	StrAllocCat(newtitle, ptr + 1);
     }
+#ifdef SH_EX	/* 1998/04/02 (Thu) 16:02:00 */
+
+    /* for proxy server 1998/12/19 (Sat) 11:53:30 */
+    if (stricmp(newtitle + 1, "internal-gopher-menu") == 0) {
+	StrAllocCopy(newtitle, "+");
+    } else if (stricmp(newtitle + 1, "internal-gopher-unknown") == 0) {
+	StrAllocCopy(newtitle, " ");
+    } else {
+	/* normal title */
+	ptr = strrchr(newtitle, '.');
+	if (ptr) {
+	  if (stricmp(ptr, ".gif") == 0)
+	    *ptr = '\0';
+	  else if (stricmp(ptr, ".jpg") == 0)
+	    *ptr = '\0';
+	  else if (stricmp(ptr, ".jpeg") == 0)
+	    *ptr = '\0';
+	}
+	StrAllocCat(newtitle, "]");
+    }
+#else
     StrAllocCat(newtitle, "]");
+#endif
     return newtitle;
 }
 
@@ -8091,7 +8238,7 @@ PRIVATE char * MakeNewMapValue ARGS2(CONST char **, value, CONST char*, mapstr)
 
     StrAllocCopy(newtitle, "[");
     StrAllocCat(newtitle,mapstr); /* ISMAP or USEMAP */
-    if ( verbose_img ) {
+    if ( verbose_img && value[HTML_IMG_SRC] && *value[HTML_IMG_SRC] ) {
 	StrAllocCat(newtitle,":");
 	ptr = strrchr(value[HTML_IMG_SRC], '/');
 	if (!ptr) {

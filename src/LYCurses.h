@@ -71,6 +71,10 @@
 #undef PENDIN
 #endif
 
+#if defined(_MSC_VER)
+#undef MOUSE_MOVED	/* conflict between PDCURSES and _WIN32 */
+#endif /* _MSC_VER */
+
 #ifdef HAVE_CONFIG_H
 # ifdef HAVE_NCURSES_H
 #  include <ncurses.h>
@@ -81,7 +85,11 @@
 #   ifdef HAVE_JCURSES_H
 #    include <jcurses.h>	/* sony_news */
 #   else
-#    include <curses.h>		/* default */
+#    ifdef PDCURSES
+#     include <pdcurses.h>	/* for PDCurses */
+#    else
+#     include <curses.h>	/* default */
+#    endif
 #   endif
 #  endif
 # endif
@@ -315,8 +323,13 @@ extern int  lynx_chg_color PARAMS((int, int, int));
 #ifdef UNDERLINE_LINKS
 #define start_bold()		LYaddAttr(A_UNDERLINE)
 #define stop_bold()		LYsubAttr(A_UNDERLINE)
+#ifdef __CYGWIN__	/* 1999/02/25 (Thu) 01:09:45 */
+#define start_underline()	/* LYaddAttr(A_BOLD) */
+#define stop_underline()	/* LYsubAttr(A_BOLD) */
+#else
 #define start_underline()	LYaddAttr(A_BOLD)
 #define stop_underline()	LYsubAttr(A_BOLD)
+#endif /* __CYGWIN__ */
 #else /* not UNDERLINE_LINKS: */
 #define start_bold()		LYaddAttr(A_BOLD)
 #define stop_bold()		LYsubAttr(A_BOLD)
@@ -327,6 +340,7 @@ extern int  lynx_chg_color PARAMS((int, int, int));
 #endif /* USE_COLOR_STYLE */
 #define stop_underline()	LYsubAttr(A_UNDERLINE)
 #endif /* UNDERLINE_LINKS */
+
 #if defined(SNAKE) && defined(HP_TERMINAL)
 #define start_reverse()		LYaddWAttr(stdscr, A_DIM)
 #define wstart_reverse(a)	LYaddWAttr(a, A_DIM)
@@ -338,6 +352,7 @@ extern int  lynx_chg_color PARAMS((int, int, int));
 #define stop_reverse()		LYsubAttr(A_REVERSE)
 #define wstop_reverse(a)	LYsubWAttr(a, A_REVERSE)
 #endif /* SNAKE && HP_TERMINAL */
+
 #endif /* VMS */
 
 #else /* Not FANCY_CURSES: */
@@ -403,7 +418,7 @@ extern void lynx_stop_all_colors NOPARAMS;
  * Note:  EMX has no corresponding variable like _fmode on DOS, but it does
  * have setmode.
  */
-#if defined(_WINDOWS) || defined(DJGPP) || defined(__EMX__)
+#if defined(_WINDOWS) || defined(DJGPP) || defined(__EMX__) || defined(WIN_EX)
 #define SetOutputMode(mode) setmode(fileno(stdout), mode)
 #else
 #define SetOutputMode(mode) /* nothing */

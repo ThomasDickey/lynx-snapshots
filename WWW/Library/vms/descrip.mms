@@ -163,7 +163,7 @@ CFLAGS = $(DEBUGFLAGS) /Define = ($(EXTRADEFINES), MULTINET) $(INCLUDES)
 CC = gcc
 .endif
 
-!HEADERS = HTUtils.h, HTStream.h, tcp.h, HText.h -
+!HEADERS = HTUtils.h, HTStream.h, www_tcp.h, HText.h -
 !        HTParse.h, HTAccess.h, HTTP.h, HTFile.h, -
 !	HTBTree.h, HTTCP.h, SGML.h, -
 !	HTML.h, HTMLDTD.h, HTChunk.h, HTPlain.h, -
@@ -212,7 +212,7 @@ clean :
 ! Simple Dependencies
 
 
-!HTString.obj :	HTString.c HTString.h tcp.h Version.make HTUtils.h
+!HTString.obj :	HTString.c HTString.h www_tcp.h Version.make HTUtils.h
 !HTAtom.obj :	HTAtom.c HTAtom.h HTUtils.h HTString.h
 !HTChunk.obj :	HTChunk.c HTChunk.h HTUtils.h
 !HTList.obj :	HTList.c HTList.h HTUtils.h
@@ -235,7 +235,7 @@ clean :
 !HTNews.obj :	HTNews.c HTNews.h HTUtils.h HTList.h
 !HTParse.obj :	HTParse.c HTParse.h HTUtils.h
 !HTStyle.obj :	HTStyle.c HTStyle.h HTUtils.h
-!HTTCP.obj :	HTTCP.c HTTCP.h HTUtils.h tcp.h
+!HTTCP.obj :	HTTCP.c HTTCP.h HTUtils.h www_tcp.h
 !HTTP.obj :	HTTP.c HTTP.h HTUtils.h
 !SGML.obj :	SGML.c SGML.h HTUtils.h
 !HTAABrow.obj :	HTAABrow.c HTUtils.h

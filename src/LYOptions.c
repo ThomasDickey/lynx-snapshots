@@ -1683,15 +1683,15 @@ draw_options:
 
 	    case '>':	/* Save current options to RC file. */
 		if (!no_option_save) {
-		    _statusline(SAVING_OPTIONS);
+		    HTInfoMsg(SAVING_OPTIONS);
 		    if (save_rc()) {
 			LYrcShowColor = LYChosenShowColor;
-			_statusline(OPTIONS_SAVED);
+			HTInfoMsg(OPTIONS_SAVED);
 		    } else {
 			HTAlert(OPTIONS_NOT_SAVED);
 		    }
 		} else {
-		    _statusline(R_TO_RETURN_TO_LYNX);
+		    HTInfoMsg(R_TO_RETURN_TO_LYNX);
 		    /*
 		     *	Change response so that we don't exit
 		     *	the options menu.
@@ -1706,9 +1706,9 @@ draw_options:
 
 	    default:
 		if (!no_option_save) {
-		    _statusline(SAVE_OR_R_TO_RETURN_TO_LYNX);
+		    HTInfoMsg(SAVE_OR_R_TO_RETURN_TO_LYNX);
 		} else {
-		    _statusline(R_TO_RETURN_TO_LYNX);
+		    HTInfoMsg(R_TO_RETURN_TO_LYNX);
 		}
 	}  /* end switch */
     }  /* end while */
@@ -2023,13 +2023,13 @@ draw_bookmark_list:
 	 */
 	if (response == '>') {
 	    if (!no_option_save) {
-		_statusline(SAVING_OPTIONS);
+		HTInfoMsg(SAVING_OPTIONS);
 		if (save_rc())
-		    _statusline(OPTIONS_SAVED);
+		    HTInfoMsg(OPTIONS_SAVED);
 		else
 		    HTAlert(OPTIONS_NOT_SAVED);
 	    } else {
-		_statusline(R_TO_RETURN_TO_LYNX);
+		HTInfoMsg(R_TO_RETURN_TO_LYNX);
 		/*
 		 *  Change response so that we don't exit
 		 *  the options menu.
@@ -2372,7 +2372,7 @@ PUBLIC int popup_choice ARGS7(
 		lx = 1;
 	}
     }
-	
+
     /*
      *	Set up the overall window, including the boxing characters ('*'),
      *	if it all fits.  Otherwise, set up the widest window possible. - FM
@@ -2393,7 +2393,7 @@ PUBLIC int popup_choice ARGS7(
 #ifdef NCURSES
     LYsubwindow(form_window);
 #endif
-#if defined(HAVE_GETBKGD) /* not defined in ncurses 1.8.7 */
+#if defined(HAVE_GETBKGD) && !defined(PDCURSES)/* not defined in ncurses 1.8.7 */
     wbkgd(form_window, getbkgd(stdscr));
     wbkgdset(form_window, getbkgd(stdscr));
 #endif
@@ -2525,9 +2525,17 @@ redraw:
 #else
 	wmove(form_window, ((i + 1) - window_offset), 2);
 	waddstr(form_window, Cnum);
+#if defined(WIN_EX)	/* 1997/10/18 (Sat) 00:10:51 */
+	wattron(form_window, A_REVERSE);
+#else
 	wstart_reverse(form_window);
+#endif
 	waddstr(form_window, Cptr[i]);
+#if defined(WIN_EX)	/* 1997/10/18 (Sat) 00:10:58 */
+	wattroff(form_window, A_REVERSE);
+#else
 	wstop_reverse(form_window);
+#endif
 	/*
 	 *  If LYShowCursor is ON, move the cursor to the left
 	 *  of the current choice, so that blind users, who are
@@ -3267,7 +3275,7 @@ static char * keypad_mode_string	= "keypad_mode";
 static OptValues keypad_mode_values[]	= {
 	{ NUMBERS_AS_ARROWS,  "Numbers act as arrows", "number_arrows" },
 	{ LINKS_ARE_NUMBERED, "Links are numbered",    "links_numbered" },
-	{ LINKS_AND_FORM_FIELDS_ARE_NUMBERED,
+	{ LINKS_AND_FIELDS_ARE_NUMBERED,
 			      "Links and form fields are numbered",
 			      "links_and_forms" },
 	{ 0, 0, 0 }};
@@ -3299,12 +3307,14 @@ static char * vi_keys_string		= "vi_keys";
 /*
  * Document Layout
  */
+#ifndef SH_EX	/* 1999/01/19 (Tue) */
 static char * DTD_recovery_string      = "DTD";
 static OptValues DTD_type_values[] = {
 	/* Old_DTD variable */
 	{ TRUE,		    "relaxed (TagSoup mode)",	 "tagsoup" },
 	{ FALSE,	    "strict (SortaSGML mode)",	 "sortasgml" },
 	{ 0, 0, 0 }};
+#endif
 static char * select_popups_string     = "select_popups";
 static char * images_string            = "images";
 static char * images_ignore_all_string  = "ignore";
@@ -3690,6 +3700,7 @@ PUBLIC int postoptions ARGS1(
 	    case_sensitive = code;
 	}
 
+#ifndef SH_EX	/* 1999/01/19 (Tue) */
 	/* HTML error tolerance: SELECT */
 	if (!strcmp(data[i].tag, DTD_recovery_string)
 	 && GetOptValues(DTD_type_values, data[i].value, &code)) {
@@ -3699,6 +3710,7 @@ PUBLIC int postoptions ARGS1(
 		need_reload = TRUE;
 	    }
 	}
+#endif
 
 	/* Select Popups: ON/OFF */
 	if (!strcmp(data[i].tag, select_popups_string)
@@ -3895,7 +3907,7 @@ PUBLIC int postoptions ARGS1(
 	/*
 	 * charset settings: the order is essential here.
 	 */
-       if (display_char_set_old != current_char_set) {
+	if (display_char_set_old != current_char_set) {
 		/*
 		 *  Set the LYUseDefaultRawMode value and character
 		 *  handling if LYRawMode was changed. - FM
@@ -3906,7 +3918,7 @@ PUBLIC int postoptions ARGS1(
 	if (assume_char_set_changed) {
 		LYRawMode = (UCLYhndl_for_unspec == current_char_set);
 	    }
-       if (raw_mode_old != LYRawMode || assume_char_set_changed) {
+	if (raw_mode_old != LYRawMode || assume_char_set_changed) {
 		/*
 		 *  Set the raw 8-bit or CJK mode defaults and
 		 *  character set if changed. - FM
@@ -3924,10 +3936,10 @@ PUBLIC int postoptions ARGS1(
     FREE(newdoc->post_data);
     FREE(data);
     if (save_all) {
-	_statusline(SAVING_OPTIONS);
+	HTInfoMsg(SAVING_OPTIONS);
 	if (save_rc()) {
 	    LYrcShowColor = LYChosenShowColor;
-	    _statusline(OPTIONS_SAVED);
+	    HTInfoMsg(OPTIONS_SAVED);
 	} else {
 	    HTAlert(OPTIONS_NOT_SAVED);
 	}
@@ -3941,7 +3953,7 @@ PUBLIC int postoptions ARGS1(
     CTRACE(tfp, "                            need_reload = %s\n",
                     need_reload ? "TRUE" : "FALSE");
     CTRACE(tfp, "                            need_end_reload = %s\n",
-                    need_end_reload ? "TRUE" : "FALSE");
+		    need_end_reload ? "TRUE" : "FALSE");
 
     /*  Options menu was pushed before postoptions(), so pop-up. */
     LYpop(newdoc);
@@ -4344,11 +4356,13 @@ PRIVATE int gen_options ARGS1(
     PutOptValues(fp0, LYRawMode, bool_values);
     EndSelect(fp0);
 
+#ifndef SH_EX	/* 1999/01/19 (Tue) */
     /* HTML error recovery: SELECT */
     PutLabel(fp0, gettext("HTML error recovery"));
     BeginSelect(fp0, DTD_recovery_string);
     PutOptValues(fp0, Old_DTD, DTD_type_values);
     EndSelect(fp0);
+#endif
 
     /* Select Popups: ON/OFF */
     PutLabel(fp0, gettext("Popups for select fields"));

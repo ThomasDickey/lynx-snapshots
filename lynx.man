@@ -52,6 +52,12 @@ file or remote URL specified at the command
 line.  For help with URLs, press \fB"?"\fR
 or \fB"H"\fR while running \fILynx\fR.
 Then follow the link titled, "Help on URLs."
+
+\fILynx\fR uses only long option names. Option
+names can begin with double dash as well, 
+underscores and dashes can be intermixed in
+option names (in the reference below options
+are with one dash before them and with underscores).
 .PP
 .TP
 .B -
@@ -129,7 +135,7 @@ library like \fBncurses\fR, Lynx relies completely on the terminal
 description to determine whether color mode is possible, and
 this flag is not needed and thus unavailable.)
 A saved show_color=always setting found in a .lynxrc file at
-startup has the same effect.  A saved show_color=always found
+startup has the same effect.  A saved show_color=never found
 in .lynxrc on startup is overridden by this flag.
 .TP
 .B -cookies
@@ -150,6 +156,9 @@ incremental display stages with MessageSecs delay
 .TP
 .B -display\fR=\fIDISPLAY
 set the display variable for X rexec-ed programs.
+.TP
+.B -dont_wrap_pre
+inhibit wrapping of text in <pre> when -dump'ing and -crawl'ing.
 .TP
 .B -dump
 dumps the formatted output of the default document or one
@@ -177,6 +186,9 @@ enable local program execution (normally not configured).
 .TP
 .B -fileversions
 include all versions of files in local VMS directory listings.
+.TP
+.B -force_empty_hrefless_a
+force HREF-less 'A' elements to be empty (close them as soon as they are seen).
 .TP
 .B -force_html
 forces the first document to be interpreted as HTML.
@@ -234,6 +246,9 @@ set the default index file to the specified URL.
 .B -ismap
 toggles inclusion of ISMAP links when client-side
 MAPs are present.
+.TP
+.B -justify
+do justification of text.
 .TP
 .B -link\fR=\fINUMBER
 starting count for lnk#.dat files produced by -crawl.
@@ -356,7 +371,8 @@ flushes the cache on a proxy server
 .TP
 .B -restrictions\fR=\fI[option][,option][,option]...
 allows a list of services to be disabled
-selectively.  The following list is printed
+selectively. Dashes and underscores in option names
+can be intermixed. The following list is printed
 if no options are specified.
 
 .I all
@@ -584,6 +600,9 @@ enable vi-like key movement.
 .TP
 .B -width\fR=\fINUMBER
 number of columns for formatting of dumps, default is 80.
+.TP
+.B -with_backspaces
+emit backspaces in output if -dumping or -crawling (like 'man' does)
 .SH COMMANDS
 o Use \fBUp arrow\fR and \fBDown arrow\fR to scroll through hypertext links.
 .br

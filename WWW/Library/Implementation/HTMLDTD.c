@@ -8,6 +8,7 @@
 #include <HTUtils.h>
 #include <HTMLDTD.h>
 #include <LYLeaks.h>
+#include <LYJustify.h>
 
 /*
  *     Character entities like &nbsp now excluded from our DTD tables,
@@ -86,7 +87,7 @@ static CONST char* entities[] = {
   "frac12",	/* fraction 1/2 */
   "frac14",	/* fraction 1/4 */
   "frac34",	/* fraction 3/4 */
-  "gt", 	/* greater than */
+  "gt",		/* greater than */
   "hibar",	/* spacing macron */
   "iacute",	/* small i, acute accent */
   "icirc",	/* small i, circumflex accent */
@@ -95,7 +96,7 @@ static CONST char* entities[] = {
   "iquest",	/* inverted question mark */
   "iuml",	/* small i, dieresis or umlaut mark */
   "laquo",	/* angle quotation mark, left */
-  "lt", 	/* less than */
+  "lt",		/* less than */
   "macr",	/* spacing macron */
   "mdash",	/* dash the width of emsp */
   "micro",	/* micro sign */
@@ -279,7 +280,7 @@ static attr body_attr[] = {			/* BODY attributes */
 	{ 0               T(N) } /* Terminate list */
 };
 
-static attr bodytext_attr[] = { 		/* BODYTEXT attributes */
+static attr bodytext_attr[] = {			/* BODYTEXT attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DATA"          T(N) },
@@ -427,7 +428,7 @@ static attr fig_attr[] = {			/* FIG attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr fieldset_attr[] = { 		/* FIELDSET attributes */
+static attr fieldset_attr[] = {			/* FIELDSET attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DIR"           T(N) },
@@ -494,7 +495,7 @@ static attr frame_attr[] = {			/* FRAME attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr frameset_attr[] = { 		/* FRAMESET attributes */
+static attr frameset_attr[] = {			/* FRAMESET attributes */
 	{ "COLS"          T(N) },
 	{ "ROWS"          T(N) },
 	{ 0               T(N) }	/* Terminate list */
@@ -511,7 +512,7 @@ static attr gen_attr[] = {			/* Minimum HTML 3.0 */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr glossary_attr[] = { 		/* DL (and DLC) attributes */
+static attr glossary_attr[] = {			/* DL (and DLC) attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "COMPACT"       T(N) },
@@ -993,7 +994,7 @@ static attr td_attr[] = {			/* TD and TH attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr textarea_attr[] = { 		/* TEXTAREA attributes */
+static attr textarea_attr[] = {			/* TEXTAREA attributes */
 	{ "ACCEPT-CHARSET" T(N) },	/* RFC 2070 HTML i18n - kw */
 	{ "ALIGN"         T(N) },
 	{ "CLASS"         T(c) },
@@ -1076,7 +1077,7 @@ static attr ulist_attr[] = {			/* UL attributes */
    BASEFONT, APPLET, OBJECT, EMBED, SCRIPT, MAP, MARQUEE, HR, ISINDEX, BGSOUND, TAB,?IMG,
    1 e?      2	     2 l     1 e    2 l     8	 4	  4 E 1? E     1 E	! E ?1 E
    IMAGE, BR, plus NOEMBED, SERVER, SPACER, AUDIOSCOPE, and SIDEBAR; ?area
-   1 n	  1 E	     n	      n       n       n 	      n       8 E
+   1 n	  1 E	     n	      n	      n	      n		      n	      8 E
 
    %text;
 
@@ -1148,7 +1149,7 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "BIG"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
 #define T_BIG		0x0001, 0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00001,0x00014
  /* { "BLINK"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
-#define T_BLINK 	0x0001, 0x8B04F,0x8FFFF,0xA778F,0xF7FAF,0x00001,0x00014
+#define T_BLINK		0x0001, 0x8B04F,0x8FFFF,0xA778F,0xF7FAF,0x00001,0x00014
  /* { "BLOCKQUOTE", bq_attr,	HTML_BQ_ATTRIBUTES,	SGML_MIXED }, */
 #define T_BLOCKQUOTE	0x0200, 0xAFBCF,0xAFFFF,0xB6680,0xB6FAF,0x8031F,0x00000
  /* { "BODY"	, body_attr,	HTML_BODY_ATTRIBUTES,	SGML_MIXED }, */
@@ -1195,7 +1196,7 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "EM"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
 #define T_EM		0x0002, 0x8B04F,0x8FFFF,0xA778F,0xF7FAF,0x00003,0x00010
  /* { "EMBED"	, embed_attr,	HTML_EMBED_ATTRIBUTES,	SGML_EMPTY }, */
-#define T_EMBED 	0x2000, 0x8F107,0x8FFF7,0xB6FBF,0xB7FBF,0x1FF7F,0x00001
+#define T_EMBED		0x2000, 0x8F107,0x8FFF7,0xB6FBF,0xB7FBF,0x1FF7F,0x00001
  /* { "FIELDSET", fieldset_attr,HTML_FIELDSET_ATTRIBUTES, SGML_MIXED }, */
 #define T_FIELDSET	0x0200, 0x0FB42,0x0FF5F,0x07787,0x37FF7,0x8805F,0x00000
  /* { "FIG"	, fig_attr,	HTML_FIG_ATTRIBUTES,	SGML_MIXED }, */
@@ -1207,7 +1208,7 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "FORM"	, form_attr,	HTML_FORM_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_FORM		0x0080, 0x0FF6F,0x0FF7F,0x36E07,0x33F07,0x88DFF,0x00000
  /* { "FRAME"	, frame_attr,	HTML_FRAME_ATTRIBUTES,	SGML_EMPTY }, */
-#define T_FRAME 	0x10000,0x00000,0x00000,0x10000,0x10000,0x9FFFF,0x00001
+#define T_FRAME		0x10000,0x00000,0x00000,0x10000,0x10000,0x9FFFF,0x00001
  /* { "FRAMESET", frameset_attr,HTML_FRAMESET_ATTRIBUTES, SGML_MIXED }, */
 #define T_FRAMESET	0x10000,0x90000,0x90000,0x90000,0x93000,0x9FFFF,0x00000
  /* { "H1"	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED }, */
@@ -1235,7 +1236,7 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "IMG"	, img_attr,	HTML_IMG_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_IMG		0x1000, 0x00000,0x00000,0x3779F,0x37FBF,0x80000,0x00001
  /* { "INPUT"	, input_attr,	HTML_INPUT_ATTRIBUTES,	SGML_EMPTY }, */
-#define T_INPUT 	0x0040, 0x00000,0x00000,0x03F87,0x37F87,0x8904F,0x00001
+#define T_INPUT		0x0040, 0x00000,0x00000,0x03F87,0x37F87,0x8904F,0x00001
  /* { "INS"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
 #define T_INS		0x0002, 0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00003,0x00000
  /* { "ISINDEX" , isindex_attr, HTML_ISINDEX_ATTRIBUTES,SGML_EMPTY }, */
@@ -1245,7 +1246,7 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "KEYGEN"	, keygen_attr,	HTML_KEYGEN_ATTRIBUTES, SGML_EMPTY }, */
 #define T_KEYGEN	0x0040, 0x00000,0x00000,0x07FB7,0x37FB7,0x80070,0x00001
  /* { "LABEL"	, label_attr,	HTML_LABEL_ATTRIBUTES,	SGML_MIXED }, */
-#define T_LABEL 	0x0020, 0x9FFFF,0x9FFFF,0x9FFFF,0x9FFFF,0x00007,0x00000
+#define T_LABEL		0x0020, 0x9FFFF,0x9FFFF,0x9FFFF,0x9FFFF,0x00007,0x00000
 #define T_LEGEND	0x0002, 0x0B04F,0x0FF7F,0x00200,0x37FA7,0x00003,0x00000
  /* { "LH"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_LH		0x0400, 0x0BB7F,0x8FFFF,0x00800,0x97FFF,0x8071F,0x00001
@@ -1282,7 +1283,7 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "P"	, p_attr,	HTML_P_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_P		0x0100, 0x0B04F,0x8FFFF,0x36680,0xB6FA7,0x80117,0x00001
  /* { "PARAM"	, param_attr,	HTML_PARAM_ATTRIBUTES,	SGML_EMPTY }, */
-#define T_PARAM 	0x1000, 0x00000,0x00000,0x33500,0x37FFF,0x81560,0x00001
+#define T_PARAM		0x1000, 0x00000,0x00000,0x33500,0x37FFF,0x81560,0x00001
  /* { "PLAINTEXT", gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL }, */
 #define T_PLAINTEXT	0x10000,0xFFFFF,0xFFFFF,0x90000,0x90000,0x3FFFF,0x00001
  /* { "PRE"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
@@ -1299,7 +1300,7 @@ static attr ulist_attr[] = {			/* UL attributes */
 #define T_SELECT	0x0040, 0x08000,0x08000,0x03FAF,0x13FBF,0x80F5F,0x00008
 #define T_SHY		0x1000, 0x00000,0x00000,0x3779F,0x77FBF,0x8101F,0x00001
  /* { "SMALL"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
-#define T_SMALL 	0x0001, 0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00001,0x00014
+#define T_SMALL		0x0001, 0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00001,0x00014
  /* { "SPAN"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
 #define T_SPAN		0x0002, 0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x80003,0x00000
  /* { "SPOT"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY }, */
@@ -1309,7 +1310,7 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "STRONG"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
 #define T_STRONG	0x0002, 0x8B04F,0x8FFFF,0xA778F,0xF7FAF,0x00003,0x00010
  /* { "STYLE"	, style_attr,	HTML_STYLE_ATTRIBUTES,	SGML_LITTERAL }, */
-#define T_STYLE 	0x40000,0x00000,0x00000,0x7638F,0x76FAF,0x8001F,0x00000
+#define T_STYLE		0x40000,0x00000,0x00000,0x7638F,0x76FAF,0x8001F,0x00000
  /* { "SUB"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
 #define T_SUB		0x0004, 0x8B05F,0x8FFFF,0x8779F,0xF7FBF,0x00007,0x00000
  /* { "SUP"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
@@ -1317,9 +1318,9 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "TAB"	, tab_attr,	HTML_TAB_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_TAB		0x1000, 0x00000,0x00000,0x3778F,0x57FAF,0x00001,0x00001
  /* { "TABLE"	, table_attr,	HTML_TABLE_ATTRIBUTES,	SGML_MIXED }, */
-#define T_TABLE 	0x0800, 0x0F1E0,0x8FFFF,0x36680,0xB6FA7,0x8C57F,0x00000
+#define T_TABLE		0x0800, 0x0F1E0,0x8FFFF,0x36680,0xB6FA7,0x8C57F,0x00000
  /* { "TBODY"	, tr_attr,	HTML_TR_ATTRIBUTES,	SGML_EMPTY }, */
-#define T_TBODY 	0x0020, 0x00020,0x8FFFF,0x00880,0xB7FB7,0x8C75F,0x00003
+#define T_TBODY		0x0020, 0x00020,0x8FFFF,0x00880,0xB7FB7,0x8C75F,0x00003
  /* { "TD"	, td_attr,	HTML_TD_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_TD		0x0400, 0x0FBCF,0x8FFFF,0x00020,0xB7FB7,0x8C75F,0x00001
  /* { "TEXTAREA", textarea_attr,HTML_TEXTAREA_ATTRIBUTES, SGML_LITTERAL }, */
@@ -1327,13 +1328,13 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "TEXTFLOW", bodytext_attr,HTML_BODYTEXT_ATTRIBUTES, SGML_MIXED }, */
 #define T_TEXTFLOW	0x20000,0x8FBFF,0x9FFFF,0x977B0,0xB7FB7,0x9B00F,0x00003
  /* { "TFOOT"	, tr_attr,	HTML_TR_ATTRIBUTES,	SGML_EMPTY }, */
-#define T_TFOOT 	0x0020, 0x00020,0x8FFFF,0x00800,0xB7FB7,0x8CF5F,0x00001
+#define T_TFOOT		0x0020, 0x00020,0x8FFFF,0x00800,0xB7FB7,0x8CF5F,0x00001
  /* { "TH"	, td_attr,	HTML_TD_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_TH		0x0400, 0x0FBCF,0x0FFFF,0x00020,0xB7FB7,0x8CF5F,0x00001
  /* { "THEAD"	, tr_attr,	HTML_TR_ATTRIBUTES,	SGML_EMPTY }, */
-#define T_THEAD 	0x0020, 0x00020,0x8FFFF,0x00800,0xB7FB7,0x8CF5F,0x00001
+#define T_THEAD		0x0020, 0x00020,0x8FFFF,0x00800,0xB7FB7,0x8CF5F,0x00001
  /* { "TITLE",	  gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_RCDATA }, */
-#define T_TITLE 	0x40000,0x00000,0x00000,0x50000,0x50000,0x0031F,0x00004
+#define T_TITLE		0x40000,0x00000,0x00000,0x50000,0x50000,0x0031F,0x00004
  /* { "TR"	, tr_attr,	HTML_TR_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_TR		0x0020, 0x00400,0x8FFFF,0x00820,0xB7FB7,0x8C75F,0x00001
  /* { "TT"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
@@ -1361,14 +1362,24 @@ static attr ulist_attr[] = {			/* UL attributes */
 **  of the tags_old[] table (otherwise unchanged from original Lynx treatment)
 **  with the tags_new[] table below. - kw
 **
-**    Name,	Attributes,	No. of attributes,     content,   extra info...
+**    Name*,	Attributes,	No. of attributes,     content,   extra info...
 */
 #ifdef USE_COLOR_STYLE
-#define P(x) x , (sizeof x) -1
-#define NULL_HTTag NULL, 0
+#define P_(x) x , (sizeof x) -1
+#define NULL_HTTag_ NULL, 0
 #else
-#define P(x) x
-#define NULL_HTTag NULL
+#define P_(x) x
+#define NULL_HTTag_ NULL
+#endif
+
+#ifdef EXP_JUSTIFY_ELTS
+#define P(x) P_(x), 1
+#define P0(x) P_(x), 0
+#define NULL_HTTag NULL_HTTag_,0
+#else
+#define P(x) P_(x)
+#define P0(x) P_(x)
+#define NULL_HTTag NULL_HTTag_
 #endif
 
 static CONST HTTag tags_old[HTML_ELEMENTS] = {
@@ -1381,7 +1392,7 @@ static CONST HTTag tags_old[HTML_ELEMENTS] = {
  { P("AU")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_AU},
  { P("AUTHOR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_AUTHOR},
  { P("B")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_B},
- { P("BANNER")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_BANNER},
+ { P0("BANNER")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_BANNER},
  { P("BASE")	, base_attr,	HTML_BASE_ATTRIBUTES,	SGML_EMPTY,T_BASE},
  { P("BASEFONT"), font_attr,	HTML_FONT_ATTRIBUTES,	SGML_EMPTY,T_BASEFONT},
  { P("BDO")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_BDO},
@@ -1395,7 +1406,7 @@ static CONST HTTag tags_old[HTML_ELEMENTS] = {
  { P("BR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_BR},
  { P("BUTTON")	, button_attr,	HTML_BUTTON_ATTRIBUTES, SGML_MIXED,T_BUTTON},
  { P("CAPTION") , caption_attr, HTML_CAPTION_ATTRIBUTES, SGML_MIXED,T_CAPTION},
- { P("CENTER")	, div_attr,	HTML_DIV_ATTRIBUTES,	SGML_MIXED,T_CENTER},
+ { P0("CENTER")	, div_attr,	HTML_DIV_ATTRIBUTES,	SGML_MIXED,T_CENTER},
  { P("CITE")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_CITE},
  { P("CODE")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_CODE},
  { P("COL")	, col_attr,	HTML_COL_ATTRIBUTES,	SGML_EMPTY,T_COL},
@@ -1419,12 +1430,12 @@ static CONST HTTag tags_old[HTML_ELEMENTS] = {
  { P("FORM")	, form_attr,	HTML_FORM_ATTRIBUTES,	SGML_EMPTY,T_FORM},
  { P("FRAME")	, frame_attr,	HTML_FRAME_ATTRIBUTES,	SGML_EMPTY,T_FRAME},
  { P("FRAMESET"), frameset_attr,HTML_FRAMESET_ATTRIBUTES, SGML_MIXED,T_FRAMESET},
- { P("H1")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H1},
- { P("H2")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H2},
- { P("H3")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H3},
- { P("H4")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H4},
- { P("H5")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H5},
- { P("H6")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H6},
+ { P0("H1")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H1},
+ { P0("H2")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H2},
+ { P0("H3")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H3},
+ { P0("H4")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H4},
+ { P0("H5")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H5},
+ { P0("H6")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H6},
  { P("HEAD")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_HEAD},
  { P("HR")	, hr_attr,	HTML_HR_ATTRIBUTES,	SGML_EMPTY,T_HR},
  { P("HTML")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_HTML},
@@ -1458,10 +1469,10 @@ static CONST HTTag tags_old[HTML_ELEMENTS] = {
  { P("P")	, p_attr,	HTML_P_ATTRIBUTES,	SGML_EMPTY,T_P},
  { P("PARAM")	, param_attr,	HTML_PARAM_ATTRIBUTES,	SGML_EMPTY,T_PARAM},
  { P("PLAINTEXT"), gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL,T_PLAINTEXT},
- { P("PRE")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_PRE},
+ { P0("PRE")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_PRE},
  { P("Q")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_Q},
  { P("S")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_S},
- { P("SAMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_SAMP},
+ { P0("SAMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_SAMP},
  { P("SCRIPT")	, script_attr,	HTML_SCRIPT_ATTRIBUTES, SGML_LITTERAL,T_SCRIPT},
  { P("SELECT")	, select_attr,	HTML_SELECT_ATTRIBUTES, SGML_MIXED,T_SELECT},
  { P("SHY")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_SHY},
@@ -1474,7 +1485,7 @@ static CONST HTTag tags_old[HTML_ELEMENTS] = {
  { P("SUB")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_SUB},
  { P("SUP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_SUP},
  { P("TAB")	, tab_attr,	HTML_TAB_ATTRIBUTES,	SGML_EMPTY,T_TAB},
- { P("TABLE")	, table_attr,	HTML_TABLE_ATTRIBUTES,	SGML_MIXED,T_TABLE},
+ { P0("TABLE")	, table_attr,	HTML_TABLE_ATTRIBUTES,	SGML_MIXED,T_TABLE},
  { P("TBODY")	, tr_attr,	HTML_TR_ATTRIBUTES,	SGML_EMPTY,T_TBODY},
  { P("TD")	, td_attr,	HTML_TD_ATTRIBUTES,	SGML_EMPTY,T_TD},
  { P("TEXTAREA"), textarea_attr,HTML_TEXTAREA_ATTRIBUTES, SGML_LITTERAL,T_TEXTAREA},
@@ -1489,7 +1500,7 @@ static CONST HTTag tags_old[HTML_ELEMENTS] = {
  { P("UL")	, ulist_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED,T_UL},
  { P("VAR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_VAR},
  { P("WBR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_WBR},
- { P("XMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL,T_XMP},
+ { P0("XMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL,T_XMP},
 };
 
 static CONST HTTag tags_new[HTML_ELEMENTS] = {
@@ -1502,7 +1513,7 @@ static CONST HTTag tags_new[HTML_ELEMENTS] = {
  { P("AU")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_AU},
  { P("AUTHOR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_AUTHOR},
  { P("B")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_B},
- { P("BANNER")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_BANNER},
+ { P0("BANNER")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_BANNER},
  { P("BASE")	, base_attr,	HTML_BASE_ATTRIBUTES,	SGML_EMPTY,T_BASE},
  { P("BASEFONT"), font_attr,	HTML_FONT_ATTRIBUTES,	SGML_EMPTY,T_BASEFONT},
  { P("BDO")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_BDO},
@@ -1516,7 +1527,7 @@ static CONST HTTag tags_new[HTML_ELEMENTS] = {
  { P("BR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_BR},
  { P("BUTTON")	, button_attr,	HTML_BUTTON_ATTRIBUTES, SGML_MIXED,T_BUTTON},
  { P("CAPTION") , caption_attr, HTML_CAPTION_ATTRIBUTES, SGML_MIXED,T_CAPTION},
- { P("CENTER")	, div_attr,	HTML_DIV_ATTRIBUTES,	SGML_MIXED,T_CENTER},
+ { P0("CENTER")	, div_attr,	HTML_DIV_ATTRIBUTES,	SGML_MIXED,T_CENTER},
  { P("CITE")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_CITE},
  { P("CODE")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_CODE},
  { P("COL")	, col_attr,	HTML_COL_ATTRIBUTES,	SGML_EMPTY,T_COL},
@@ -1540,12 +1551,12 @@ static CONST HTTag tags_new[HTML_ELEMENTS] = {
  { P("FORM")	, form_attr,	HTML_FORM_ATTRIBUTES,	SGML_MIXED,T_FORM},
  { P("FRAME")	, frame_attr,	HTML_FRAME_ATTRIBUTES,	SGML_EMPTY,T_FRAME},
  { P("FRAMESET"), frameset_attr,HTML_FRAMESET_ATTRIBUTES, SGML_ELEMENT,T_FRAMESET},
- { P("H1")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H1},
- { P("H2")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H2},
- { P("H3")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H3},
- { P("H4")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H4},
- { P("H5")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H5},
- { P("H6")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H6},
+ { P0("H1")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H1},
+ { P0("H2")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H2},
+ { P0("H3")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H3},
+ { P0("H4")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H4},
+ { P0("H5")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H5},
+ { P0("H6")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H6},
  { P("HEAD")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_ELEMENT,T_HEAD},
  { P("HR")	, hr_attr,	HTML_HR_ATTRIBUTES,	SGML_EMPTY,T_HR},
  { P("HTML")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_HTML},
@@ -1579,10 +1590,10 @@ static CONST HTTag tags_new[HTML_ELEMENTS] = {
  { P("P")	, p_attr,	HTML_P_ATTRIBUTES,	SGML_MIXED,T_P},
  { P("PARAM")	, param_attr,	HTML_PARAM_ATTRIBUTES,	SGML_EMPTY,T_PARAM},
  { P("PLAINTEXT"), gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL,T_PLAINTEXT},
- { P("PRE")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_PRE},
+ { P0("PRE")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_PRE},
  { P("Q")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_Q},
  { P("S")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_S},
- { P("SAMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_SAMP},
+ { P0("SAMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_SAMP},
  { P("SCRIPT")	, script_attr,	HTML_SCRIPT_ATTRIBUTES, SGML_LITTERAL,T_SCRIPT},
  { P("SELECT")	, select_attr,	HTML_SELECT_ATTRIBUTES, SGML_ELEMENT,T_SELECT},
  { P("SHY")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_SHY},
@@ -1595,7 +1606,7 @@ static CONST HTTag tags_new[HTML_ELEMENTS] = {
  { P("SUB")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_SUB},
  { P("SUP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_SUP},
  { P("TAB")	, tab_attr,	HTML_TAB_ATTRIBUTES,	SGML_EMPTY,T_TAB},
- { P("TABLE")	, table_attr,	HTML_TABLE_ATTRIBUTES,	SGML_ELEMENT,T_TABLE},
+ { P0("TABLE")	, table_attr,	HTML_TABLE_ATTRIBUTES,	SGML_ELEMENT,T_TABLE},
  { P("TBODY")	, tr_attr,	HTML_TR_ATTRIBUTES,	SGML_ELEMENT,T_TBODY},
  { P("TD")	, td_attr,	HTML_TD_ATTRIBUTES,	SGML_MIXED,T_TD},
  { P("TEXTAREA"), textarea_attr,HTML_TEXTAREA_ATTRIBUTES, SGML_LITTERAL,T_TEXTAREA},
@@ -1610,9 +1621,12 @@ static CONST HTTag tags_new[HTML_ELEMENTS] = {
  { P("UL")	, ulist_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED,T_UL},
  { P("VAR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_VAR},
  { P("WBR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_WBR},
- { P("XMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL,T_XMP},
+ { P0("XMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL,T_XMP},
 };
+
 #undef P
+#undef P0
+#undef P_
 
 /* Dummy space, will be filled with the contents of either tags_new
    or tags_old on calling HTSwitchDTD - kw */
@@ -1668,7 +1682,7 @@ struct _HTStructured {
 };
 
 PUBLIC void HTStartAnchor ARGS3(
-	HTStructured *, 	obj,
+	HTStructured *,		obj,
 	CONST char *,		name,
 	CONST char *,		href)
 {
@@ -1692,7 +1706,7 @@ PUBLIC void HTStartAnchor ARGS3(
 }
 
 PUBLIC void HTStartIsIndex ARGS3(
-	HTStructured *, 	obj,
+	HTStructured *,		obj,
 	CONST char *,		prompt,
 	CONST char *,		href)
 {

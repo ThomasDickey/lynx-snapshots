@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * $Id: LYStyle.c,v 1.21 1999/05/28 14:18:50 tom Exp $
+ * $Id: LYStyle.c,v 1.22 1999/07/14 16:44:55 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -22,6 +22,7 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 #include <LYStrings.h>
+#include <LYUtils.h>
 
 #ifdef USE_COLOR_STYLE
 
@@ -404,7 +405,7 @@ PUBLIC int style_readFromFile ARGS1(char*, file)
     CTRACE(tfp, "CSS:Reading styles from file: %s\n", file ? file : "?!? empty ?!?");
     if (file == NULL || *file == '\0')
 	return -1;
-    fh = fopen(file, "r");
+    fh = fopen(file, TXT_R);
     if (!fh)
     {
 	/* this should probably be an alert or something */

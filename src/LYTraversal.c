@@ -37,7 +37,7 @@ PUBLIC BOOLEAN lookup ARGS1(char *,target)
     char *line = NULL;
     int result = FALSE;
 
-    if ((ifp = fopen(TRAVERSE_FILE,"r")) == NULL) {
+    if ((ifp = fopen(TRAVERSE_FILE, TXT_R)) == NULL) {
 	if ((ifp = LYNewTxtFile(TRAVERSE_FILE)) == NULL) {
 	    exit_with_perror(CANNOT_OPEN_TRAV_FILE);
 	} else {
@@ -144,7 +144,7 @@ PUBLIC BOOLEAN lookup_reject ARGS1(char *,target)
     int len;
     int result = FALSE;
 
-    if ((ifp = fopen(TRAVERSE_REJECT_FILE,"r")) == NULL){
+    if ((ifp = fopen(TRAVERSE_REJECT_FILE, TXT_R)) == NULL){
 	return(FALSE);
     }
 

@@ -187,7 +187,8 @@ PUBLIC char * HTParse ARGS3(
     char * acc_method;
     struct struct_parts given, related;
 
-    CTRACE(tfp, "HTParse: aName:%s   relatedName:%s\n", aName, relatedName);
+    CTRACE(tfp, "HTParse: aName:`%s'\n", aName);
+    CTRACE(tfp, "   relatedName:`%s'\n", relatedName);
 
     if (wanted & (PARSE_STRICTPATH | PARSE_QUERY)) { /* if detail wanted... */
 	if ((wanted & (PARSE_STRICTPATH | PARSE_QUERY))
@@ -371,7 +372,7 @@ PUBLIC char * HTParse ARGS3(
 	    if (wanted & PARSE_PUNCTUATION)
 		strcat(result, "/");
 	    strcat(result, given.absolute);
-	    CTRACE(tfp, "1\n");
+	    CTRACE(tfp, "HTParse: (ABS)\n");
 	} else if (related.absolute) {		/* Adopt path not name */
 	    strcat(result, "/");
 	    strcat(result, related.absolute);
@@ -385,13 +386,13 @@ PUBLIC char * HTParse ARGS3(
 		strcat(result, given.relative); /* Add given one */
 		HTSimplify (result);
 	    }
-	    CTRACE(tfp, "2\n");
+	    CTRACE(tfp, "HTParse: (Related-ABS)\n");
 	} else if (given.relative) {
 	    strcat(result, given.relative);		/* what we've got */
-	    CTRACE(tfp, "3\n");
+	    CTRACE(tfp, "HTParse: (REL)\n");
 	} else if (related.relative) {
 	    strcat(result, related.relative);
-	    CTRACE(tfp, "4\n");
+	    CTRACE(tfp, "HTParse: (Related-REL)\n");
 	} else {  /* No inheritance */
 	    if (strncasecomp(aName, "lynxcgi:", 8) &&
 		strncasecomp(aName, "lynxexec:", 9) &&
@@ -400,7 +401,7 @@ PUBLIC char * HTParse ARGS3(
 	    }
 	    if (!strcmp(result, "news:/"))
 		result[5] = '*';
-	    CTRACE(tfp, "5\n");
+	    CTRACE(tfp, "HTParse: (No inheritance)\n");
 	}
 	if (want_detail) {
 	    p = strchr(tail, '?');	/* Search part? */
@@ -664,7 +665,8 @@ PUBLIC char * HTRelative ARGS2(
 	    strcat(result, "../");
 	strcat(result, last_slash+1);
     }
-    CTRACE(tfp, "HT: `%s' expressed relative to\n    `%s' is\n   `%s'.",
+    CTRACE(tfp,
+        "HTparse: `%s' expressed relative to\n   `%s' is\n   `%s'.\n",
 		aName, relatedName, result);
     return result;
 }
@@ -797,16 +799,21 @@ PUBLIC char * HTUnEscape ARGS1(
 	    p[1] && p[2] &&
 	    isxdigit((unsigned char)p[1]) &&
 	    isxdigit((unsigned char)p[2])) {
-	    p++;
-	    if (*p)
-	        *q = from_hex(*p++) * 16;
-	    if (*p)
-		/*
-		** Careful!  FROMASCII() may evaluate its arg more than once!
-		*/  /* S/390 -- gil -- 0221 */
-		*q =           *q + from_hex(*p++) ;
-		*q = FROMASCII(*q                 );
-	    q++;
+	      if (iscntrl(FROMASCII(from_hex(p[1])*16 + from_hex(p[2])))) {
+		*q++ = *p++;     /* Ignore control codes.  --HN [98/09/08] */
+	      } else {
+		p++;
+		if (*p)
+		    *q = from_hex(*p++) * 16;
+		if (*p) {
+		    /*
+		    ** Careful! FROMASCII() may evaluate its arg more than once!
+		    */  /* S/390 -- gil -- 0221 */
+		    *q = *q + from_hex(*p++) ;
+		}
+		*q = FROMASCII(*q);
+		q++;
+	      }
 	} else {
 	    *q++ = *p++;
 	}

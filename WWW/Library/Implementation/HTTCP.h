@@ -33,7 +33,7 @@ extern CONST char * HTInetString PARAMS((struct sockaddr_in* mysin));
 ** On return:
 **      returns a negative status in the unix way.
 */
-#ifdef __STDC__
+#if defined(__STDC__) || defined(__BORLANDC__) || defined(_MSC_VER)
         extern int HTInetStatus(char *where);
 #else
         extern int HTInetStatus();
@@ -104,7 +104,7 @@ extern struct hostent * LYGetHostByName PARAMS((
 **               *sin is filled in.  If no port is specified in str, that
 **               field is left unchanged in *sin.
 */
-#ifdef __STDC__
+#if defined(__STDC__) || defined(__BORLANDC__) || defined(_MSC_VER)
         extern int HTParseInet(struct sockaddr_in * mysin, CONST char * str);
         /*!! had to change this to get it to compile. CTB */
 #else

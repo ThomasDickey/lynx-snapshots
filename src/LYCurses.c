@@ -198,7 +198,7 @@ PUBLIC void VMSbox ARGS3(
     wmove(win, 0, 0);
     waddstr(win, "\033)0\016l");
     for (i = 1; i < width; i++)
-       waddch(win, 'q');
+	waddch(win, 'q');
     waddch(win, 'k');
     for (i = 1; i < height-1; i++) {
 	wmove(win, i, 0);
@@ -209,7 +209,7 @@ PUBLIC void VMSbox ARGS3(
     wmove(win, i, 0);
     waddch(win, 'm');
     for (i = 1; i < width; i++)
-       waddch(win, 'q');
+	waddch(win, 'q');
     waddstr(win, "j\017");
 }
 #else
@@ -328,8 +328,8 @@ PUBLIC void curses_w_style ARGS3(
 #if !OMIT_SCN_KEEPING
 	bucket* ds= (style == NOSTYLE ? &nostyle_bucket : &hashStyles[style]);
 #else
-        bucket* ds= (style == NOSTYLE ?      &nostyle_bucket :
-                (style== SPECIAL_STYLE ? &special_bucket :&hashStyles[style]) );
+	bucket* ds= (style == NOSTYLE ?	     &nostyle_bucket :
+		(style== SPECIAL_STYLE ? &special_bucket :&hashStyles[style]) );
 #endif
 
 
@@ -375,12 +375,12 @@ PUBLIC void curses_w_style ARGS3(
 		last_styles[last_colorattr_ptr++] = getattrs(stdscr);
 		/* don't cache style changes for active links */
 #if OMIT_SCN_KEEPING
-                /* since we don't compute the hcode
-                  to stack off in HTML.c, we don't know whether this style is
-                  configured. So, we shouldn't simply return on stacking on on
-                  unconfigured styles, we should push curr attrs on stack. -HV
-                */
-                if (!ds->name) return;
+		/* since we don't compute the hcode to stack off in HTML.c, we
+		 * don't know whether this style is configured.  So, we
+		 * shouldn't simply return on stacking on on unconfigured
+		 * styles, we should push curr attrs on stack.  -HV
+		 */
+		if (!ds->name) return;
 #endif
 		if (style != s_alink)
 		{
@@ -397,7 +397,7 @@ PUBLIC void curses_w_style ARGS3(
 			CTRACE(tfp, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP);
 			if (win==stdscr) cached_styles[YP][XP]=style;
 		}
-                LYAttrset(win, ds->color, ds->mono);
+		LYAttrset(win, ds->color, ds->mono);
 		return;
 	}
 }
@@ -490,7 +490,7 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 	int offs = 1;
 	static int NoColorVideo = -1;
 
-#ifdef UNIX
+#if defined(UNIX) && !defined(PDCURSES)
 	if (NoColorVideo < 0) {
 		NoColorVideo = tigetnum("ncv");
 	}
@@ -545,9 +545,9 @@ PRIVATE void lynx_map_color ARGS1(int, n)
 	for (m = 0; m <= 16; m += 8) {
 	    int pair = n + m + 1;
 	    if (pair < COLOR_PAIRS)
-		init_pair(pair,
-		    lynx_color_pairs[pair].fg,
-		    lynx_color_pairs[pair].bg);
+		init_pair((short)pair,
+		    (short)lynx_color_pairs[pair].fg,
+		    (short)lynx_color_pairs[pair].bg);
 	}
 	if (n == 0 && LYShowColor >= SHOW_COLOR_ON)
 	    bkgd(COLOR_BKGD | ' ');
@@ -602,9 +602,9 @@ PRIVATE void lynx_init_colors NOARGS
 	    for (m = 0; m <= 16; m += 8) {
 		int pair = n + m + 1;
 		if (pair < COLOR_PAIRS)
-		    init_pair(pair,
-			lynx_color_pairs[pair].fg,
-			lynx_color_pairs[pair].bg);
+		    init_pair((short)pair,
+			(short)lynx_color_pairs[pair].fg,
+			(short)lynx_color_pairs[pair].bg);
 	    }
 	    if (n == 0 && LYShowColor >= SHOW_COLOR_ON)
 		bkgd(COLOR_BKGD | ' ');
@@ -653,9 +653,9 @@ PUBLIC void start_curses NOARGS
 	if (LYUseMouse)
 	    lynx_enable_mouse (1);
 
-    } else
+    } else {
 	sock_init();
-
+    }
     LYCursesON = TRUE;
     CTRACE(tfp, "start_curses: done.\n");
     clear();
@@ -677,7 +677,9 @@ PUBLIC void start_curses NOARGS
     }
 
     if (slinit == 0) {
+#if !defined(USE_KEYMAPS)
 	SLtt_get_terminfo();
+#endif
 #if defined(__DJGPP__) && !defined(DJGPP_KEYHANDLER)
 	SLkp_init ();
 #endif /* __DJGPP__ && !DJGPP_KEYHANDLER */
@@ -737,7 +739,11 @@ PUBLIC void start_curses NOARGS
 #endif /* VMS || UNIX */
     }
 #ifdef __DJGPP__
+#ifdef WATT32
+    _eth_init();
+#else
     else sock_init();
+#endif /* WATT32 */
 #endif /* __DJGPP__ */
 
     slinit = 1;
@@ -825,7 +831,7 @@ PUBLIC void start_curses NOARGS
 	if (has_colors()) {
 	    lynx_has_color = TRUE;
 	    start_color();
-#if HAVE_USE_DEFAULT_COLORS
+#if HAVE_USE_DEFAULT_COLORS && !defined(PDCURSES)
 	    if (use_default_colors() == OK) {
 		default_fg = DEFAULT_COLOR;
 		default_bg = DEFAULT_COLOR;
@@ -875,19 +881,19 @@ PUBLIC void start_curses NOARGS
     fflush(stderr);
 #endif /* USE_SLANG */
 
-#ifdef _WINDOWS
+#if defined(WIN_EX)
     clear();
 #endif
 
     LYCursesON = TRUE;
     CTRACE(tfp, "start_curses: done.\n");
-}
+}  /* end of start_curses() */
 
 
 PUBLIC void lynx_enable_mouse ARGS1(int,state)
 {
 
-#ifdef __BORLANDC__
+#if defined(WIN_EX)
 /* modify lynx_enable_mouse() for pdcurses configuration so that mouse support
    is disabled unless -use_mouse is specified.  This is ifdef'd with
    __BORLANDC__ for the time being (WB).
@@ -911,7 +917,7 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
 #else
 
 #ifdef NCURSES_MOUSE_VERSION
-#if defined(__BORLANDC__) && defined(__PDCURSES__)
+#if defined(WIN_EX) && defined(PDCURSES)
     if (state)
     {
 	SetConsoleMode(hConIn, ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT);
@@ -945,23 +951,27 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
 		  NULL);
     } else
 	mousemask(0, NULL);
-#endif /* __BORLANDC__ and __PDCURSES__ */
+#endif /* _WIN_CC and PDCURSES */
 #endif /* NCURSES_MOUSE_VERSION */
 
 #if defined(DJGPP) && !defined(USE_SLANG)
     if (state)
 	mouse_set(BUTTON1_CLICKED | BUTTON2_CLICKED | BUTTON3_CLICKED);
 #endif
-#endif				       /* NOT USE_SLANG_MOUSE */
+#endif				/* NOT USE_SLANG_MOUSE */
 }
 
 PUBLIC void stop_curses NOARGS
 {
     echo();
-#ifdef DJGPP
+#ifdef __DJGPP__
+#ifdef WATT32
+    _eth_release();
+#else
     sock_exit();
-#endif
-#if defined (DOSPATH) && !defined(USE_SLANG)
+#endif /* WATT32 */
+#endif /* __DJGPP__ */
+#if defined(DOSPATH) && !(defined(USE_SLANG) || _WIN_CC)
     clrscr();
 #else
 
@@ -971,8 +981,18 @@ PUBLIC void stop_curses NOARGS
      */
     if(LYCursesON == TRUE)	{
 	 lynx_enable_mouse (0);
+#ifndef WIN_EX	/* @@@ */
 	 endwin();	/* stop curses */
+#endif
     }
+#ifdef SH_EX
+    {
+	int i;
+	for (i=0; i <= 3; i++) {
+	    fprintf(stdout, "\r\n");
+	}
+    }
+#endif
 
     fflush(stdout);
 #endif /* DJGPP */
@@ -1177,6 +1197,14 @@ PUBLIC BOOLEAN setup ARGS1(
     LYlines = LINES;
     LYcols = COLS;
 #endif /* HAVE_SIZECHANGE && !USE_SLANG && USE_NOTDEFINED */
+#if defined(WIN_EX) && defined(NOTDEFINED)
+    {
+	extern int current_codepage;	/* PDCurses lib. */
+
+	if (current_codepage == 932)
+	    LYcols = COLS - 1;
+    }
+#endif
     if (LYlines <= 0)
 	LYlines = 24;
     if (LYcols <= 0)
@@ -1765,10 +1793,16 @@ PUBLIC void lynx_force_repaint NOARGS
 
 PUBLIC void lynx_start_title_color NOARGS
 {
+#ifdef SH_EX
+    start_reverse();
+#endif
 }
 
 PUBLIC void lynx_stop_title_color NOARGS
 {
+#ifdef SH_EX
+    stop_reverse();
+#endif
 }
 
 PUBLIC void lynx_start_link_color ARGS2(

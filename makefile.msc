@@ -1,0 +1,391 @@
+#
+# Makefile for `Lynx' browser for Microsoft Visual C++ 4.2 or later
+#
+
+CC       = cl
+LD       = link
+
+SRC_DIR = src
+WWW_DIR = WWW\Library\Implementation
+
+# pdcurses.lib panel.lib dirent.obj curses.h panel.h dirent.h
+ETC_LIB = lib
+
+INCLUDES = /I "." /I "$(SRC_DIR)" /I "$(SRC_DIR)\chrtrans" /I "$(WWW_DIR)" /I "$(ETC_LIB)"
+DEFS = /D "NDEBUG" /D\
+ "__WIN32__" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "NO_UNISTD_H" /D VC="2.14FM" /D\
+ "_WINDOWS" /D "XMOSAIC_HACK" /D "ACCESS_AUTH" /D "NO_FILIO_H" /D "NO_UTMP" /D\
+ "NO_CUSERID" /D "NO_TTYTYPE" /D "NOSIGHUP" /D "DOSPATH" /D "NOUSERS" /D\
+ "EXP_CHARTRANS" /D "NCURSES" /D "FANCY_CURSES" /D "COLOR_CURSES" /D\
+ "USE_COLOR_TABLE" /D "HAVE_KEYPAD" /D "NCURSES_VERSION" /D "USE_EXTERNALS" /D\
+ "PDCURSES" /D "SUPPORT_MULTIBYTE_EDIT" /D "USE_MULTIBYTE_CURSES" \
+ /D "LONG_LIST" /D "DISP_PARTIAL" /D\
+ "EXP_PERSISTENT_COOKIES" /D "NO_CONFIG_INFO" /D\
+ "EXP_ALT_BINDINGS" /D LY_MAXPATH="1024" /D _WIN_CC="1" /D "CJK_EX" /D "SH_EX" /D "WIN_EX" /D "USE_ZLIB"
+CFLAGS   = /nologo /MT /W3 /GX /O2 /c
+
+LDFLAGS  = /nologo /subsystem:console /incremental:no /machine:I386
+LIBS     = kernel32.lib user32.lib wsock32.lib /NODEFAULTLIB:libc\
+ $(ETC_LIB)\pdcurses.lib $(ETC_LIB)\zlib.lib dirent.obj
+
+COMPILE = $(CC) $(CFLAGS) $(INCLUDES) $(DEFS)
+LINK    = $(LD) $(LDFLAGS) /out:$@
+
+OBJS = \
+	"crypt.obj" \
+	"crypt_util.obj" \
+	"DefaultStyle.obj" \
+	"getline.obj" \
+	"GridText.obj" \
+	"HTAABrow.obj" \
+	"HTAAProt.obj" \
+	"HTAAUtil.obj" \
+	"HTAccess.obj" \
+	"HTAlert.obj" \
+	"HTAnchor.obj" \
+	"HTAssoc.obj" \
+	"HTAtom.obj" \
+	"HTBTree.obj" \
+	"HTChunk.obj" \
+	"HTDOS.obj" \
+	"HTFile.obj" \
+	"HTFinger.obj" \
+	"HTFormat.obj" \
+	"HTFTP.obj" \
+	"HTFWriter.obj" \
+	"HTGopher.obj" \
+	"HTGroup.obj" \
+	"HTInit.obj" \
+	"HTLex.obj" \
+	"HTList.obj" \
+	"HTMIME.obj" \
+	"HTML.obj" \
+	"HTMLDTD.obj" \
+	"HTMLGen.obj" \
+	"HTNews.obj" \
+	"HTParse.obj" \
+	"HTPlain.obj" \
+	"HTRules.obj" \
+	"HTString.obj" \
+	"HTStyle.obj" \
+	"HTTCP.obj" \
+	"HTTelnet.obj" \
+	"HTTP.obj" \
+	"HTUU.obj" \
+	"HTWSRC.obj" \
+	"LYBookmark.obj" \
+	"LYCgi.obj" \
+	"LYCharSets.obj" \
+	"LYCharUtils.obj" \
+	"LYClean.obj" \
+	"LYCookie.obj" \
+	"LYCurses.obj" \
+	"LYDownload.obj" \
+	"LYEdit.obj" \
+	"LYEditmap.obj" \
+	"LYexit.obj" \
+	"LYExtern.obj" \
+	"LYForms.obj" \
+	"LYGetFile.obj" \
+	"LYHistory.obj" \
+	"LYJump.obj" \
+	"LYKeymap.obj" \
+	"LYLeaks.obj" \
+	"LYList.obj" \
+	"LYLocal.obj" \
+	"LYMail.obj" \
+	"LYMain.obj" \
+	"LYMainLoop.obj" \
+	"LYMap.obj" \
+	"LYNews.obj" \
+	"LYOptions.obj" \
+	"LYPrint.obj" \
+	"LYrcFile.obj" \
+	"LYReadCFG.obj" \
+	"LYSearch.obj" \
+	"LYShowInfo.obj" \
+	"LYStrings.obj" \
+	"LYTraversal.obj" \
+	"LYUpload.obj" \
+	"LYUtils.obj" \
+	"SGML.obj" \
+	"UCAuto.obj" \
+	"UCAux.obj" \
+	"UCdomap.obj" \
+	"Xsystem.obj"
+
+
+# Dependencies for building
+
+all : lynx.exe
+
+clean:
+	-del $(OBJS)
+
+lynx.exe: $(OBJS) dirent.obj
+	$(LINK) $(OBJS) $(LIBS)
+
+DefaultStyle.obj : $(SRC_DIR)\DefaultStyle.c
+	$(COMPILE) $(SRC_DIR)\DefaultStyle.c
+
+GridText.obj : $(SRC_DIR)\GridText.c
+	$(COMPILE) $(SRC_DIR)\GridText.c
+
+HTAlert.obj : $(SRC_DIR)\HTAlert.c
+	$(COMPILE) $(SRC_DIR)\HTAlert.c
+
+HTFWriter.obj : $(SRC_DIR)\HTFWriter.c
+	$(COMPILE) $(SRC_DIR)\HTFWriter.c
+
+HTInit.obj : $(SRC_DIR)\HTInit.c
+	$(COMPILE) $(SRC_DIR)\HTInit.c
+
+HTML.obj : $(SRC_DIR)\HTML.c
+	$(COMPILE) $(SRC_DIR)\HTML.c
+
+LYBookmark.obj : $(SRC_DIR)\LYBookmark.c
+	$(COMPILE) $(SRC_DIR)\LYBookmark.c
+
+LYCgi.obj : $(SRC_DIR)\LYCgi.c
+	$(COMPILE) $(SRC_DIR)\LYCgi.c
+
+LYCharSets.obj : $(SRC_DIR)\LYCharSets.c
+	$(COMPILE) $(SRC_DIR)\LYCharSets.c
+
+LYCharUtils.obj : $(SRC_DIR)\LYCharUtils.c
+	$(COMPILE) $(SRC_DIR)\LYCharUtils.c
+
+LYClean.obj : $(SRC_DIR)\LYClean.c
+	$(COMPILE) $(SRC_DIR)\LYClean.c
+
+LYCookie.obj : $(SRC_DIR)\LYCookie.c
+	$(COMPILE) $(SRC_DIR)\LYCookie.c
+
+LYCurses.obj : $(SRC_DIR)\LYCurses.c
+	$(COMPILE) $(SRC_DIR)\LYCurses.c
+
+LYDownload.obj : $(SRC_DIR)\LYDownload.c
+	$(COMPILE) $(SRC_DIR)\LYDownload.c
+
+LYEdit.obj : $(SRC_DIR)\LYEdit.c
+	$(COMPILE) $(SRC_DIR)\LYEdit.c
+
+LYEditmap.obj : $(SRC_DIR)\LYEditmap.c
+	$(COMPILE) $(SRC_DIR)\LYEditmap.c
+
+LYexit.obj : $(SRC_DIR)\LYexit.c
+	$(COMPILE) $(SRC_DIR)\LYexit.c
+
+LYExtern.obj : $(SRC_DIR)\LYExtern.c
+	$(COMPILE) $(SRC_DIR)\LYExtern.c
+
+LYForms.obj : $(SRC_DIR)\LYForms.c
+	$(COMPILE) $(SRC_DIR)\LYForms.c
+
+LYGetFile.obj : $(SRC_DIR)\LYGetFile.c
+	$(COMPILE) $(SRC_DIR)\LYGetFile.c
+
+LYHash.obj : $(SRC_DIR)\LYHash.c
+	$(COMPILE) $(SRC_DIR)\LYHash.c
+
+LYHistory.obj : $(SRC_DIR)\LYHistory.c
+	$(COMPILE) $(SRC_DIR)\LYHistory.c
+
+LYJump.obj : $(SRC_DIR)\LYJump.c
+	$(COMPILE) $(SRC_DIR)\LYJump.c
+
+LYKeymap.obj : $(SRC_DIR)\LYKeymap.c
+	$(COMPILE) $(SRC_DIR)\LYKeymap.c
+
+LYLeaks.obj : $(SRC_DIR)\LYLeaks.c
+	$(COMPILE) $(SRC_DIR)\LYLeaks.c
+
+LYList.obj : $(SRC_DIR)\LYList.c
+	$(COMPILE) $(SRC_DIR)\LYList.c
+
+LYLocal.obj : $(SRC_DIR)\LYLocal.c
+	$(COMPILE) $(SRC_DIR)\LYLocal.c
+
+LYMail.obj : $(SRC_DIR)\LYMail.c
+	$(COMPILE) $(SRC_DIR)\LYMail.c
+
+LYMain.obj : $(SRC_DIR)\LYMain.c
+	$(COMPILE) $(SRC_DIR)\LYMain.c
+
+LYMainLoop.obj : $(SRC_DIR)\LYMainLoop.c
+	$(COMPILE) $(SRC_DIR)\LYMainLoop.c
+
+LYMap.obj : $(SRC_DIR)\LYMap.c
+	$(COMPILE) $(SRC_DIR)\LYMap.c
+
+LYNews.obj : $(SRC_DIR)\LYNews.c
+	$(COMPILE) $(SRC_DIR)\LYNews.c
+
+LYOptions.obj : $(SRC_DIR)\LYOptions.c
+	$(COMPILE) $(SRC_DIR)\LYOptions.c
+
+LYPrint.obj : $(SRC_DIR)\LYPrint.c
+	$(COMPILE) $(SRC_DIR)\LYPrint.c
+
+LYrcFile.obj : $(SRC_DIR)\LYrcFile.c
+	$(COMPILE) $(SRC_DIR)\LYrcFile.c
+
+LYReadCFG.obj : $(SRC_DIR)\LYReadCFG.c
+	$(COMPILE) $(SRC_DIR)\LYReadCFG.c
+
+LYSearch.obj : $(SRC_DIR)\LYSearch.c
+	$(COMPILE) $(SRC_DIR)\LYSearch.c
+
+LYShowInfo.obj : $(SRC_DIR)\LYShowInfo.c
+	$(COMPILE) $(SRC_DIR)\LYShowInfo.c
+
+LYStrings.obj : $(SRC_DIR)\LYStrings.c
+	$(COMPILE) $(SRC_DIR)\LYStrings.c
+
+LYStyle.obj : $(SRC_DIR)\LYStyle.c
+	$(COMPILE) $(SRC_DIR)\LYStyle.c
+
+LYTraversal.obj : $(SRC_DIR)\LYTraversal.c
+	$(COMPILE) $(SRC_DIR)\LYTraversal.c
+
+LYUpload.obj : $(SRC_DIR)\LYUpload.c
+	$(COMPILE) $(SRC_DIR)\LYUpload.c
+
+LYUtils.obj : $(SRC_DIR)\LYUtils.c
+	$(COMPILE) $(SRC_DIR)\LYUtils.c
+
+mktime.obj : $(SRC_DIR)\mktime.c
+	$(COMPILE) $(SRC_DIR)\mktime.c
+
+strstr.obj : $(SRC_DIR)\strstr.c
+	$(COMPILE) $(SRC_DIR)\strstr.c
+
+UCAuto.obj : $(SRC_DIR)\UCAuto.c
+	$(COMPILE) $(SRC_DIR)\UCAuto.c
+
+UCAux.obj : $(SRC_DIR)\UCAux.c
+	$(COMPILE) $(SRC_DIR)\UCAux.c
+
+UCdomap.obj : $(SRC_DIR)\UCdomap.c
+	$(COMPILE) $(SRC_DIR)\UCdomap.c
+
+Xsystem.obj : $(SRC_DIR)\Xsystem.c
+	$(COMPILE) $(SRC_DIR)\Xsystem.c
+
+crypt.obj : $(WWW_DIR)\crypt.c
+	$(COMPILE) $(WWW_DIR)\crypt.c
+
+crypt_util.obj : $(WWW_DIR)\crypt_util.c
+	$(COMPILE) $(WWW_DIR)\crypt_util.c
+
+dirent.obj : $(ETC_LIB)\dirent.c
+	$(COMPILE) $(ETC_LIB)\dirent.c
+
+getline.obj : $(WWW_DIR)\getline.c
+	$(COMPILE) $(WWW_DIR)\getline.c
+
+getpass.obj : $(WWW_DIR)\getpass.c
+	$(COMPILE) $(WWW_DIR)\getpass.c
+
+HTAABrow.obj : $(WWW_DIR)\HTAABrow.c
+	$(COMPILE) $(WWW_DIR)\HTAABrow.c
+
+HTAAFile.obj : $(WWW_DIR)\HTAAFile.c
+	$(COMPILE) $(WWW_DIR)\HTAAFile.c
+
+HTAAProt.obj : $(WWW_DIR)\HTAAProt.c
+	$(COMPILE) $(WWW_DIR)\HTAAProt.c
+
+HTAAUtil.obj : $(WWW_DIR)\HTAAUtil.c
+	$(COMPILE) $(WWW_DIR)\HTAAUtil.c
+
+HTAccess.obj : $(WWW_DIR)\HTAccess.c
+	$(COMPILE) $(WWW_DIR)\HTAccess.c
+
+HTAnchor.obj : $(WWW_DIR)\HTAnchor.c
+	$(COMPILE) $(WWW_DIR)\HTAnchor.c
+
+HTAssoc.obj : $(WWW_DIR)\HTAssoc.c
+	$(COMPILE) $(WWW_DIR)\HTAssoc.c
+
+HTAtom.obj : $(WWW_DIR)\HTAtom.c
+	$(COMPILE) $(WWW_DIR)\HTAtom.c
+
+HTBTree.obj : $(WWW_DIR)\HTBTree.c
+	$(COMPILE) $(WWW_DIR)\HTBTree.c
+
+HTChunk.obj : $(WWW_DIR)\HTChunk.c
+	$(COMPILE) $(WWW_DIR)\HTChunk.c
+
+HTDOS.obj : $(WWW_DIR)\HTDOS.c
+	$(COMPILE) $(WWW_DIR)\HTDOS.c
+
+HTFile.obj : $(WWW_DIR)\HTFile.c
+	$(COMPILE) $(WWW_DIR)\HTFile.c
+
+HTFinger.obj : $(WWW_DIR)\HTFinger.c
+	$(COMPILE) $(WWW_DIR)\HTFinger.c
+
+HTFormat.obj : $(WWW_DIR)\HTFormat.c
+	$(COMPILE) $(WWW_DIR)\HTFormat.c
+
+HTFTP.obj : $(WWW_DIR)\HTFTP.c
+	$(COMPILE) $(WWW_DIR)\HTFTP.c
+
+HTGopher.obj : $(WWW_DIR)\HTGopher.c
+	$(COMPILE) $(WWW_DIR)\HTGopher.c
+
+HTGroup.obj : $(WWW_DIR)\HTGroup.c
+	$(COMPILE) $(WWW_DIR)\HTGroup.c
+
+HTLex.obj : $(WWW_DIR)\HTLex.c
+	$(COMPILE) $(WWW_DIR)\HTLex.c
+
+HTList.obj : $(WWW_DIR)\HTList.c
+	$(COMPILE) $(WWW_DIR)\HTList.c
+
+HTMIME.obj : $(WWW_DIR)\HTMIME.c
+	$(COMPILE) $(WWW_DIR)\HTMIME.c
+
+HTMLDTD.obj : $(WWW_DIR)\HTMLDTD.c
+	$(COMPILE) $(WWW_DIR)\HTMLDTD.c
+
+HTMLGen.obj : $(WWW_DIR)\HTMLGen.c
+	$(COMPILE) $(WWW_DIR)\HTMLGen.c
+
+HTNews.obj : $(WWW_DIR)\HTNews.c
+	$(COMPILE) $(WWW_DIR)\HTNews.c
+
+HTParse.obj : $(WWW_DIR)\HTParse.c
+	$(COMPILE) $(WWW_DIR)\HTParse.c
+
+HTPlain.obj : $(WWW_DIR)\HTPlain.c
+	$(COMPILE) $(WWW_DIR)\HTPlain.c
+
+HTRules.obj : $(WWW_DIR)\HTRules.c
+	$(COMPILE) $(WWW_DIR)\HTRules.c
+
+HTString.obj : $(WWW_DIR)\HTString.c
+	$(COMPILE) $(WWW_DIR)\HTString.c
+
+HTStyle.obj : $(WWW_DIR)\HTStyle.c
+	$(COMPILE) $(WWW_DIR)\HTStyle.c
+
+HTTCP.obj : $(WWW_DIR)\HTTCP.c
+	$(COMPILE) $(WWW_DIR)\HTTCP.c
+
+HTTelnet.obj : $(WWW_DIR)\HTTelnet.c
+	$(COMPILE) $(WWW_DIR)\HTTelnet.c
+
+HTTP.obj : $(WWW_DIR)\HTTP.c
+	$(COMPILE) $(WWW_DIR)\HTTP.c
+
+HTUU.obj : $(WWW_DIR)\HTUU.c
+	$(COMPILE) $(WWW_DIR)\HTUU.c
+
+HTWSRC.obj : $(WWW_DIR)\HTWSRC.c
+	$(COMPILE) $(WWW_DIR)\HTWSRC.c
+
+SGML.obj : $(WWW_DIR)\SGML.c
+	$(COMPILE) $(WWW_DIR)\SGML.c
+

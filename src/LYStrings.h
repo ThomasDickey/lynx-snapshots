@@ -237,15 +237,19 @@ typedef struct _EditFieldData {
 #define LYE_FORM_LAC 0x1000       /* Flag to pass lynxactioncode given by
 				     lower bits.  Doesn't fit in a char! */
 
+#if defined(WIN_EX)
+#define LYE_PASTE (LYE_AIX +1)	  /* ClipBoard to Lynx	   */
+#endif
+
 #if defined(USE_KEYMAPS)
 extern int lynx_initialize_keymaps NOPARAMS;
 extern int map_string_to_keysym PARAMS((char * src, int *lec));
 #endif
 
 extern void LYLowerCase PARAMS((
-	char *		buffer));
+	unsigned char *	buffer));
 extern void LYUpperCase PARAMS((
-	char *		buffer));
+	unsigned char *	buffer));
 extern void LYRemoveBlanks PARAMS((
 	char *		buffer));
 extern char * LYSkipBlanks PARAMS((

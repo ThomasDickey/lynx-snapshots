@@ -116,7 +116,7 @@ HFILES = $(CMN)HTParse.h $(CMN)HTAccess.h $(CMN)HTTP.h $(CMN)HTFile.h \
 	$(CMN)HTFormat.h $(CMN)HTInit.h \
 	$(CMN)HTMIME.h $(CMN)HTNews.h \
 	$(CMN)HTGopher.h \
-	$(CMN)HTUtils.h $(CMN)tcp.h $(CMN)HText.h \
+	$(CMN)HTUtils.h $(CMN)www_tcp.h $(CMN)HText.h \
 	$(CMN)HTTelnet.h $(CMN)HTFinger.h \
 	$(CMN)HTWAIS.h  $(CMN)HTWSRC.h \
 	$(CMN)HTAAUtil.h $(CMN)HTAABrow.h \

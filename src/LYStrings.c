@@ -32,6 +32,14 @@ extern unsigned short *LYKbLayout;
 extern BOOL HTPassHighCtrlRaw;
 extern HTCJKlang HTCJK;
 
+#ifdef SUPPORT_MULTIBYTE_EDIT
+#define IS_KANA(c)	(0xa0 <= c && c <= 0xdf)
+#endif
+
+#if defined(WIN_EX)
+#define BUTTON_CTRL	0	/* Quick hack */
+#endif
+
 /*Allowing the user to press tab when entering URL to get the closest
   match in the closet*/
 #define LYClosetSize 100
@@ -59,14 +67,14 @@ static int mouse_link = -1;
 
 static int have_levent;
 
-#ifdef NCURSES_MOUSE_VERSION
+#if defined(NCURSES_MOUSE_VERSION) && !defined(WIN_EX)
 static MEVENT levent;
 #endif
 
 /* Return the value of mouse_link */
 PUBLIC int peek_mouse_levent NOARGS
 {
-#ifdef NCURSES_MOUSE_VERSION
+#if defined(NCURSES_MOUSE_VERSION) && !defined(WIN_EX)
     if (have_levent > 0) {
 	ungetmouse(&levent);
 	have_levent--;
@@ -99,13 +107,70 @@ PUBLIC int fancy_mouse ARGS3(
     int *,	position)
 {
     int cmd = LYK_DO_NOTHING;
-#ifdef NCURSES_MOUSE_VERSION
+#if defined(NCURSES_MOUSE_VERSION)
 #ifndef getbegx
 #define getbegx(win) ((win)->_begx)
 #endif
 #ifndef getbegy
 #define getbegy(win) ((win)->_begy)
 #endif
+
+#if defined(WIN_EX)	/* 1998/12/05 (Sat) 08:10:42 */
+
+    request_mouse_pos();
+
+    if (BUTTON_STATUS(1)
+      && (MOUSE_X_POS >= getbegx(win)
+      && (MOUSE_X_POS < (getbegx(win) + getmaxx(win))))) {
+	int mypos = MOUSE_Y_POS - getbegy(win);
+	int delta = mypos - row;
+
+	if (mypos+1 == getmaxy(win)) {
+	    /* At the decorative border: scroll forward */
+	    if (BUTTON_STATUS(1) & BUTTON1_TRIPLE_CLICKED)
+		cmd = LYK_END;
+	    else if (BUTTON_STATUS(1) & BUTTON1_DOUBLE_CLICKED)
+		cmd = LYK_NEXT_PAGE;
+	    else
+		cmd = LYK_NEXT_LINK;
+	} else if (mypos >= getmaxy(win)) {
+	    if (BUTTON_STATUS(1) & (BUTTON1_DOUBLE_CLICKED | BUTTON1_TRIPLE_CLICKED))
+		cmd = LYK_END;
+	    else
+		cmd = LYK_NEXT_PAGE;
+	} else if (mypos == 0) {
+	    /* At the decorative border: scroll back */
+	    if (BUTTON_STATUS(1) & BUTTON1_TRIPLE_CLICKED)
+		cmd = LYK_HOME;
+	    else if (BUTTON_STATUS(1) & BUTTON1_DOUBLE_CLICKED)
+		cmd = LYK_PREV_PAGE;
+	    else
+		cmd = LYK_PREV_LINK;
+	} else if (mypos < 0) {
+	    if (BUTTON_STATUS(1) & (BUTTON1_DOUBLE_CLICKED | BUTTON1_TRIPLE_CLICKED))
+		cmd = LYK_HOME;
+	    else
+		cmd = LYK_PREV_PAGE;
+#ifdef KNOW_HOW_TO_TOGGLE
+	} else if (BUTTON_STATUS(1) & (BUTTON_CTRL)) {
+	    cur_selection += delta;
+	    cmd = LYX_TOGGLE;
+#endif
+	} else if (BUTTON_STATUS(1) & (BUTTON_ALT | BUTTON_SHIFT | BUTTON_CTRL)) {
+	    /* Probably some unrelated activity, such as selecting some text. 
+	     * Select, but do nothing else.
+	     */
+	    *position += delta;
+	    cmd = -1;
+	} else {
+	    /* No scrolling or overflow checks necessary. */
+	    *position += delta;
+	    cmd = LYK_ACTIVATE;
+	}
+    } else if (BUTTON_STATUS(1) & (BUTTON3_CLICKED | BUTTON3_DOUBLE_CLICKED | BUTTON3_TRIPLE_CLICKED)) {
+	cmd = LYK_QUIT;
+    }
+#else
     MEVENT	event;
 
     getmouse(&event);
@@ -186,6 +251,7 @@ PUBLIC int fancy_mouse ARGS3(
     } else if (event.bstate & (BUTTON3_CLICKED | BUTTON3_DOUBLE_CLICKED | BUTTON3_TRIPLE_CLICKED)) {
 	cmd = LYK_QUIT;
     }
+#endif	/* _WINDOWS */
 #endif
     return cmd;
 }
@@ -518,8 +584,10 @@ PRIVATE WINDOW *my_subwindow;
 
 PUBLIC void LYsubwindow ARGS1(WINDOW *, param)
 {
+#if !defined(WIN_EX)
     if ((my_subwindow = param) != 0)
 	keypad(param, TRUE);
+#endif
 }
 #endif
 
@@ -614,10 +682,17 @@ static SLKeyMap_List_Type *Keymap_List;
  * the CSI logic and other special cases for VMS, NCSA telnet, etc.
  */
 #ifdef USE_SLANG
-#define DEFINE_KEY(string,lynx,curses) {string,lynx}
+# ifdef VMS
+#  define EXTERN_KEY(string,string1,lynx,curses) {string,lynx}
+# else
+#  define EXTERN_KEY(string,string1,lynx,curses) {string1,lynx}
+# endif
+# define INTERN_KEY(string,lynx,curses)          {string,lynx}
 #else
-#define DEFINE_KEY(string,lynx,curses) {string,curses}
+#define INTERN_KEY(string,lynx,curses)           {string,curses}
+#define EXTERN_KEY(string,string1,lynx,curses)   {string,curses}
 #endif
+
 
 typedef struct
 {
@@ -628,22 +703,22 @@ Keysym_String_List;
 
 static Keysym_String_List Keysym_Strings [] =
 {
-    DEFINE_KEY( "UPARROW",	UPARROW,	KEY_UP ),
-    DEFINE_KEY( "DNARROW",	DNARROW,	KEY_DOWN ),
-    DEFINE_KEY( "RTARROW",	RTARROW,	KEY_RIGHT ),
-    DEFINE_KEY( "LTARROW",	LTARROW,	KEY_LEFT ),
-    DEFINE_KEY( "PGDOWN",	PGDOWN,		KEY_NPAGE ),
-    DEFINE_KEY( "PGUP",		PGUP,		KEY_PPAGE ),
-    DEFINE_KEY( "HOME",		HOME,		KEY_HOME ),
-    DEFINE_KEY( "END",		END_KEY,	KEY_END ),
-    DEFINE_KEY( "F1",		F1,		KEY_F(1) ),
-    DEFINE_KEY( "DO_KEY",	DO_KEY,		KEY_F(16) ),
-    DEFINE_KEY( "FIND_KEY",	FIND_KEY,	KEY_FIND ),
-    DEFINE_KEY( "SELECT_KEY",	SELECT_KEY,	KEY_SELECT ),
-    DEFINE_KEY( "INSERT_KEY",	INSERT_KEY,	KEY_IC ),
-    DEFINE_KEY( "REMOVE_KEY",	REMOVE_KEY,	KEY_DC ),
-    DEFINE_KEY( "DO_NOTHING",	DO_NOTHING,	DO_NOTHING|LKC_ISLKC ),
-    DEFINE_KEY( NULL, 		-1,		ERR )
+    INTERN_KEY( "UPARROW",	UPARROW,	KEY_UP ),
+    INTERN_KEY( "DNARROW",	DNARROW,	KEY_DOWN ),
+    INTERN_KEY( "RTARROW",	RTARROW,	KEY_RIGHT ),
+    INTERN_KEY( "LTARROW",	LTARROW,	KEY_LEFT ),
+    INTERN_KEY( "PGDOWN",	PGDOWN,		KEY_NPAGE ),
+    INTERN_KEY( "PGUP",		PGUP,		KEY_PPAGE ),
+    INTERN_KEY( "HOME",		HOME,		KEY_HOME ),
+    INTERN_KEY( "END",		END_KEY,	KEY_END ),
+    INTERN_KEY( "F1",		F1,		KEY_F(1) ),
+    INTERN_KEY( "DO_KEY",	DO_KEY,		KEY_F(16) ),
+    INTERN_KEY( "FIND_KEY",	FIND_KEY,	KEY_FIND ),
+    INTERN_KEY( "SELECT_KEY",	SELECT_KEY,	KEY_SELECT ),
+    INTERN_KEY( "INSERT_KEY",	INSERT_KEY,	KEY_IC ),
+    INTERN_KEY( "REMOVE_KEY",	REMOVE_KEY,	KEY_DC ),
+    INTERN_KEY( "DO_NOTHING",	DO_NOTHING,	DO_NOTHING|LKC_ISLKC ),
+    INTERN_KEY( NULL, 		-1,		ERR )
 };
 
 #ifdef NCURSES_VERSION
@@ -1008,26 +1083,26 @@ PRIVATE int read_keymap_file NOARGS
 PRIVATE void setup_vtXXX_keymap NOARGS
 {
     static Keysym_String_List table[] = {
-	DEFINE_KEY( "\033[A",	UPARROW,	KEY_UP ),
-	DEFINE_KEY( "\033OA",	UPARROW,	KEY_UP ),
-	DEFINE_KEY( "\033[B",	DNARROW,	KEY_DOWN ),
-	DEFINE_KEY( "\033OB",	DNARROW,	KEY_DOWN ),
-	DEFINE_KEY( "\033[C",	RTARROW,	KEY_RIGHT ),
-	DEFINE_KEY( "\033OC",	RTARROW,	KEY_RIGHT ),
-	DEFINE_KEY( "\033[D",	LTARROW,	KEY_LEFT ),
-	DEFINE_KEY( "\033OD",	LTARROW,	KEY_LEFT ),
-	DEFINE_KEY( "\033[1~",	FIND_KEY,	KEY_FIND ),
-	DEFINE_KEY( "\033[2~",	INSERT_KEY,	KEY_IC ),
-	DEFINE_KEY( "\033[3~",	REMOVE_KEY,	KEY_DC ),
-	DEFINE_KEY( "\033[4~",	SELECT_KEY,	KEY_SELECT ),
-	DEFINE_KEY( "\033[5~",	PGUP,		KEY_PPAGE ),
-	DEFINE_KEY( "\033[6~",	PGDOWN,		KEY_NPAGE ),
-	DEFINE_KEY( "\033[8~",	END_KEY,	KEY_END ),
-	DEFINE_KEY( "\033[7~",	HOME,		KEY_HOME),
-	DEFINE_KEY( "\033[28~",	F1,		KEY_F(1) ),
-	DEFINE_KEY( "\033OP",	F1,		KEY_F(1) ),
-	DEFINE_KEY( "\033[OP",	F1,		KEY_F(1) ),
-	DEFINE_KEY( "\033[29~",	DO_KEY,		KEY_F(16) ),
+	EXTERN_KEY( "\033[A",	"^(ku)", UPARROW,	KEY_UP ),
+	EXTERN_KEY( "\033OA",	"^(ku)", UPARROW,	KEY_UP ),
+	EXTERN_KEY( "\033[B",	"^(kd)", DNARROW,	KEY_DOWN ),
+	EXTERN_KEY( "\033OB",	"^(kd)", DNARROW,	KEY_DOWN ),
+	EXTERN_KEY( "\033[C",	"^(kr)", RTARROW,	KEY_RIGHT ),
+	EXTERN_KEY( "\033OC",	"^(kr)", RTARROW,	KEY_RIGHT ),
+	EXTERN_KEY( "\033[D",	"^(kl)", LTARROW,	KEY_LEFT ),
+	EXTERN_KEY( "\033OD",	"^(kl)", LTARROW,	KEY_LEFT ),
+	EXTERN_KEY( "\033[1~",	"^(@0)", FIND_KEY,	KEY_FIND ),
+	EXTERN_KEY( "\033[2~",	"^(kI)", INSERT_KEY,	KEY_IC ),
+	EXTERN_KEY( "\033[3~",	"^(kD)", REMOVE_KEY,	KEY_DC ),
+	EXTERN_KEY( "\033[4~",	"^(*6)", SELECT_KEY,	KEY_SELECT ),
+	EXTERN_KEY( "\033[5~",	"^(kP)", PGUP,		KEY_PPAGE ),
+	EXTERN_KEY( "\033[6~",	"^(kN)", PGDOWN,	KEY_NPAGE ),
+	EXTERN_KEY( "\033[8~",	"^(@7)", END_KEY,	KEY_END ),
+	EXTERN_KEY( "\033[7~",	"^(kh)", HOME,		KEY_HOME),
+	EXTERN_KEY( "\033[28~",	"^(k1)", F1,		KEY_F(1) ),
+	EXTERN_KEY( "\033OP",	"^(k1)", F1,		KEY_F(1) ),
+	EXTERN_KEY( "\033[OP",	"^(k1)", F1,		KEY_F(1) ),
+	EXTERN_KEY( "\033[29~",	"^(F6)", DO_KEY,	KEY_F(16) ),
     };
     size_t n;
     for (n = 0; n < TABLESIZE(table); n++)
@@ -1039,6 +1114,11 @@ PUBLIC int lynx_initialize_keymaps NOARGS
 #ifdef USE_SLANG
     int i;
     char keybuf[2];
+
+    /* The escape sequences may contain embedded termcap strings.  Make
+     * sure the library is initialized for that.
+     */
+    SLtt_get_terminfo();
 
     if (NULL == (Keymap_List = SLang_create_keymap ("Lynx", NULL)))
 	return -1;
@@ -1529,6 +1609,26 @@ re_read:
 	case KEY_RIGHT: 	   /* ... */
 	   c = RTARROW;
 	   break;
+#if defined(SH_EX) && defined(DOSPATH)	/* for NEC PC-9800 1998/08/30 (Sun) 21:50:35 */
+	case KEY_C2:
+	   c = DNARROW;
+	   break;
+	case KEY_A2:
+	   c = UPARROW;
+	   break;
+	case KEY_B1:
+	   c = LTARROW;
+	   break;
+	case KEY_B3:
+	   c = RTARROW;
+	   break;
+	case PAD0:	 	   /* PC-9800 Ins */
+	   c = INSERT_KEY;
+	   break;
+	case PADSTOP:	   	   /* PC-9800 DEL */
+	   c = REMOVE_KEY;
+	   break;
+#endif /* SH_EX */
 	case KEY_HOME:		   /* Home key (upward+left arrow) */
 	   c = HOME;
 	   break;
@@ -1694,7 +1794,7 @@ re_read:
 		getmouse(&event);	/* Completely ignore event - kw */
 		c = DO_NOTHING;
 	    } else {
-#ifndef DOSPATH
+#if !defined(WIN_EX)
 		MEVENT event;
 		int err;
 		int lac = LYK_UNKNOWN;
@@ -1759,17 +1859,101 @@ re_read:
 		    c = MOUSE_KEY;
 		}
 #else /* pdcurses version */
+
+	/* _WINDOWS 1997/10/18 (Sat) 19:41:59 */
+
+#define H_CMD_AREA	6
+#define HIST_CMD_2	12
+#define V_CMD_AREA	1
+
+		int left,right;
+		extern BOOLEAN system_is_NT;
+		/* yes, I am assuming that my screen will be a certain width. */
+
+		int tick_count;
+		char *p = NULL;
+		char mouse_info[128];
+		static int old_click = 0;	/* [m Sec] */
+
+		left = H_CMD_AREA;
+		right = (LYcols - H_CMD_AREA);
 		c = -1;
 		mouse_link = -1;
-		request_mouse_pos();
-		if (BUTTON_STATUS(1) & BUTTON_CLICKED) {
-		    c = set_clicked_link(MOUSE_X_POS, MOUSE_Y_POS,FOR_PANEL,1);
-		} else if (BUTTON_STATUS(3) & BUTTON_CLICKED) {
-		    c = LAC_TO_LKC(LYK_PREV_DOC);
+
+		if (system_is_NT) {
+		/* for Windows NT */
+		  request_mouse_pos();
+
+		  if (BUTTON_STATUS(1) & BUTTON_CLICKED) {
+			if (MOUSE_Y_POS > (LYlines - V_CMD_AREA)) {
+			    /* Screen BOTTOM */
+			    if (MOUSE_X_POS < left) {
+				c = LTARROW;	p = "<-";
+			    } else if (MOUSE_X_POS < HIST_CMD_2) {
+				c = RTARROW;	p = "->";
+			    } else if (MOUSE_X_POS > right) {
+				c = 'z';		p = "Cancel";
+			    } else {
+				c = PGDOWN;		p = "PGDOWN";
+			    }
+			} else if (MOUSE_Y_POS < V_CMD_AREA) {
+			    /* Screen TOP */
+			    if (MOUSE_X_POS < left) {
+				c = LTARROW;	p = "<-";
+			    } else if (MOUSE_X_POS < HIST_CMD_2) {
+				c = RTARROW;	p = "->";
+			    } else if (MOUSE_X_POS > right) {
+				c = 'z';		p = "Cancel";
+			    } else {
+				c = PGUP;		p = "PGUP";
+			    }
+			} else {
+			    c = set_clicked_link(MOUSE_X_POS, MOUSE_Y_POS, FOR_PANEL);
+			}
+		    }
+		} else {
+		/* for Windows 95 */
+		    tick_count = GetTickCount();
+
+		    /* Guard Mouse button miss click */
+		    if ((tick_count - old_click) < 700) {
+			c = DO_NOTHING;
+			break;
+		    } else {
+			old_click = tick_count;
+		    }
+		    request_mouse_pos();
+		    if (MOUSE_Y_POS > (LYlines - V_CMD_AREA)) {
+			/* Screen BOTTOM */
+			if (MOUSE_X_POS < left) {
+			    c = LTARROW;	p = "<-";
+			} else if (MOUSE_X_POS < HIST_CMD_2) {
+			    c = RTARROW;	p = "->";
+			} else if (MOUSE_X_POS > right) {
+			    c = '\b';		p = "History";
+			} else {
+			    c = PGDOWN;		p = "PGDOWN";
+			}
+		    } else if (MOUSE_Y_POS < V_CMD_AREA) {
+			/* Screen TOP */
+			if (MOUSE_X_POS < left) {
+			    c = LTARROW;	p = "<-";
+			} else if (MOUSE_X_POS < HIST_CMD_2) {
+			    c = RTARROW;	p = "->";
+			} else if (MOUSE_X_POS > right) {
+			    c = 'z';		p = "Cancel";
+			} else {
+			    c = PGUP;		p = "PGUP";
+			}
+		    } else {
+			c = set_clicked_link(MOUSE_X_POS, MOUSE_Y_POS, FOR_PANEL);
+		    }
 		}
-#endif /* DOSPATH */
-/*		if (c < 0)
-		    c = 0; */
+		if (p && c != -1) {
+		    sprintf(mouse_info, "Mouse = 0x%x, [%s]", c, p);
+		    SetConsoleTitle(mouse_info);
+		}
+#endif /* !(WIN_EX) */
 		if ((c+1) >= KEYMAP_SIZE && (c&LKC_ISLAC))
 		    return(c);
 	    }
@@ -1906,22 +2090,48 @@ PUBLIC int LYgetch NOARGS
  * Convert a null-terminated string to lowercase
  */
 PUBLIC void LYLowerCase ARGS1(
-	char *, 	buffer)
+    unsigned char *, 	buffer)
 {
     size_t i;
     for (i = 0; buffer[i]; i++)
+#ifdef SUPPORT_MULTIBYTE_EDIT	/* 1998/11/23 (Mon) 17:04:55 */
+    {
+	if (buffer[i] & 0x80) {
+	    if (IS_KANA(buffer[i])) {
+		continue;
+	    }
+	    i++;
+	} else {
+	    buffer[i] = TOLOWER(buffer[i]);
+	}
+    }
+#else
 	buffer[i] = TOLOWER(buffer[i]);
+#endif
 }
 
 /*
  * Convert a null-terminated string to uppercase
  */
 PUBLIC void LYUpperCase ARGS1(
-	char *, 	buffer)
+unsigned char *, 	buffer)
 {
     size_t i;
     for (i = 0; buffer[i]; i++)
+#ifdef SUPPORT_MULTIBYTE_EDIT	/* 1998/11/23 (Mon) 17:05:10 */
+    {
+	if (buffer[i] & 0x80) {
+	    if (IS_KANA(buffer[i])) {
+		continue;
+	    }
+	    i++;
+	} else {
+	    buffer[i] = TOUPPER(buffer[i]);
+	}
+    }
+#else
 	buffer[i] = TOUPPER(buffer[i]);
+#endif
 }
 
 /*
@@ -2110,6 +2320,36 @@ PUBLIC void LYSetupEdit ARGS4(
     }
 }
 
+#ifdef SUPPORT_MULTIBYTE_EDIT
+
+PRIVATE int prev_pos ARGS2(
+	EDREC *,	edit,
+	int,		pos)
+{
+    int i = 0;
+
+    if (pos <= 0)
+	return 0;
+    if (HTCJK == NOCJK)
+	return (pos - 1);
+    else {
+	while (i < pos - 1) {
+	    int c;
+	    c = Buf[i];
+	    
+	    if (!(isascii(c) || IS_KANA(c))) {
+		i++;
+	    }
+	    i++;
+	}
+	if (i == pos)
+	    return (i - 2);
+	else
+	    return i;
+    }
+}
+#endif /* SUPPORT_MULTIBYTE_EDIT */
+
 PUBLIC int LYEdit1 ARGS4(
 	EDREC *,	edit,
 	int,		ch,
@@ -2139,6 +2379,7 @@ PUBLIC int LYEdit1 ARGS4(
 	map_active = ~map_active;
 	break;
 #endif
+#ifndef CJK_EX
     case LYE_AIX:
 	/*
 	 *  Hex 97.
@@ -2148,6 +2389,7 @@ PUBLIC int LYEdit1 ARGS4(
 	 */
 	 if (HTCJK == NOCJK && LYlowest_eightbit[current_char_set] > 0x97)
 	     return(ch);
+#endif
     case LYE_CHAR:
 #ifdef EXP_KEYBOARD_LAYOUT
 	if (map_active && ch < 128 && ch >= 0 &&
@@ -2197,12 +2439,16 @@ PUBLIC int LYEdit1 ARGS4(
 	    Buf[length+1]='\0';
 	    Buf[Pos] = (unsigned char) ch;
 	    Pos++;
-	} else if (maxMessage) {
+	} else {
+	    if (maxMessage) {
 	    _statusline(MAXLEN_REACHED_DEL_OR_MOV);
+	}
+	    return(ch);
 	}
 	break;
 
     case LYE_BACKW:
+#ifndef SUPPORT_MULTIBYTE_EDIT
 	/*
 	 *  Backword.
 	 *  Definition of word is very naive: 1 or more a/n characters.
@@ -2211,16 +2457,58 @@ PUBLIC int LYEdit1 ARGS4(
 	    Pos--;
 	while (Pos &&  isalnum(Buf[Pos-1]))
 	    Pos--;
+#else /* SUPPORT_MULTIBYTE_EDIT */
+	/*
+	 *  Backword.
+	 *  Definition of word is very naive: 1 or more a/n characters,
+	 *  or 1 or more multibyte character.
+	 */
+	{
+	    int pos0;
+
+	    pos0 = prev_pos(edit, Pos);
+	    while (Pos &&
+		   (HTCJK == NOCJK || isascii(Buf[pos0])) &&
+		   !isalnum(Buf[pos0])) {
+		Pos = pos0;
+		pos0 = prev_pos(edit, Pos);
+	    }
+	    if (HTCJK != NOCJK && !isascii(Buf[pos0])) {
+		while (Pos && !isascii(Buf[pos0])) {
+		    Pos = pos0;
+		    pos0 = prev_pos(edit, Pos);
+		}
+	    } else {
+		while (Pos && isascii(Buf[pos0]) && isalnum(Buf[pos0])) {
+		    Pos = pos0;
+		    pos0 = prev_pos(edit, Pos);
+		}
+	    }
+	}
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 	break;
 
     case LYE_FORWW:
 	/*
 	 *  Word forward.
 	 */
+#ifndef SUPPORT_MULTIBYTE_EDIT
 	while (isalnum(Buf[Pos]))
 	    Pos++;   /* '\0' is not a/n */
 	while (!isalnum(Buf[Pos]) && Buf[Pos])
 	    Pos++ ;
+#else /* SUPPORT_MULTIBYTE_EDIT */
+	if (HTCJK != NOCJK && !isascii(Buf[Pos])) {
+	    while (!isascii(Buf[Pos]))
+		Pos += 2;
+	} else {
+	    while (isascii(Buf[Pos]) && isalnum(Buf[Pos]))
+		Pos++;	/* '\0' is not a/n */
+	}
+	while ((HTCJK == NOCJK || isascii(Buf[Pos])) &&
+	       !isalnum(Buf[Pos]) && Buf[Pos])
+	    Pos++;
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 	break;
 
     case LYE_ERASE:
@@ -2283,7 +2571,7 @@ PUBLIC int LYEdit1 ARGS4(
 	}
 	break;
 
-    case LYE_DELEL:
+    case LYE_DELEL:	/* @@@ */
 	/*
 	 *  Delete from current cursor position thru EOL.
 	 */
@@ -2303,6 +2591,10 @@ PUBLIC int LYEdit1 ARGS4(
 	 */
 	if (Pos >= length)
 	    break;
+#ifdef SUPPORT_MULTIBYTE_EDIT
+	if (HTCJK != NOCJK && !isascii(Buf[Pos]))
+	    Pos++;
+#endif
 	Pos++;
 	/* fall through - DO NOT RELOCATE the LYE_DELN case wrt LYE_DELP */
 
@@ -2310,6 +2602,7 @@ PUBLIC int LYEdit1 ARGS4(
 	/*
 	 *  Delete preceding character.
 	 */
+#ifndef SUPPORT_MULTIBYTE_EDIT
 	if (length == 0 || Pos == 0)
 	    break;
 #ifdef ENHANCED_LINEEDIT
@@ -2320,6 +2613,23 @@ PUBLIC int LYEdit1 ARGS4(
 	for (i = Pos; i < length; i++)
 	    Buf[i] = Buf[i+1];
 	i--;
+#else /* SUPPORT_MULTIBYTE_EDIT */
+	{
+	    int offset = 1;
+	    int pos0 = Pos;
+
+	    if (length == 0 || Pos == 0)
+		break;
+	    if (HTCJK != NOCJK) {
+		Pos = prev_pos(edit, pos0);
+		offset = pos0 - Pos;
+	    } else
+		Pos--;
+	    for (i = Pos; i < length; i++)
+		Buf[i] = Buf[i + offset];
+	    i -= offset;
+	}
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 	Buf[i] = 0;
 	break;
 
@@ -2327,16 +2637,33 @@ PUBLIC int LYEdit1 ARGS4(
 	/*
 	 *  Move cursor to the right.
 	 */
+#ifndef SUPPORT_MULTIBYTE_EDIT
 	if (Pos < length)
 	    Pos++;
+#else /* SUPPORT_MULTIBYTE_EDIT */
+	if (Pos < length) {
+	    Pos++;
+	    if (HTCJK != NOCJK && !isascii(Buf[Pos-1]))
+		Pos++;
+	}
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 	break;
 
     case LYE_BACK:
 	/*
 	 *  Left-arrow move cursor to the left.
 	 */
+#ifndef SUPPORT_MULTIBYTE_EDIT
 	if (Pos > 0)
 	    Pos--;
+#else /* SUPPORT_MULTIBYTE_EDIT */
+	if (Pos > 0) {
+	    if (HTCJK != NOCJK)
+		Pos = prev_pos(edit, Pos);
+	    else
+		Pos--;
+	}
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 	break;
 
 #ifdef ENHANCED_LINEEDIT
@@ -2449,6 +2776,10 @@ PUBLIC void LYRefreshEdit ARGS1(
     int padsize;
     char *str;
     char buffer[3];
+#ifdef SUPPORT_MULTIBYTE_EDIT
+    int begin_multi = 0;
+    int end_multi = 0;
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 
     buffer[0] = buffer[1] = buffer[2] = '\0';
     if (!edit->dirty || (DspWdth == 0))
@@ -2473,16 +2804,52 @@ PUBLIC void LYRefreshEdit ARGS1(
  *   data entry at low baudrates.
  */
     if ((DspStart + DspWdth) <= length)
+#ifndef SUPPORT_MULTIBYTE_EDIT
 	if (Pos >= (DspStart + DspWdth) - Margin)
 	    DspStart=(Pos - DspWdth) + Margin;
+#else /* SUPPORT_MULTIBYTE_EDIT */
+	if (Pos >= (DspStart + DspWdth) - Margin) {
+	    if (HTCJK != NOCJK) {
+		int tmp = (Pos - DspWdth) + Margin;
+
+		while (DspStart < tmp) {
+		    if (!isascii(Buf[DspStart]))
+			DspStart++;
+		    DspStart++;
+		}
+	    } else
+		DspStart=(Pos - DspWdth) + Margin;
+	}
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 
     if (Pos < DspStart + Margin) {
+#ifndef SUPPORT_MULTIBYTE_EDIT
+	DspStart = Pos - Margin;
+	if (DspStart < 0)
+	    DspStart = 0;
+#else /* SUPPORT_MULTIBYTE_EDIT */
+	if (HTCJK != NOCJK) {
+	    int tmp = Pos - Margin;
+
+	    DspStart = 0;
+	    while (DspStart < tmp) {
+		if (!isascii(Buf[DspStart]))
+		    DspStart++;
+		DspStart++;
+	    }
+	} else {
 	DspStart = Pos - Margin;
 	if (DspStart < 0)
 	    DspStart = 0;
     }
+#endif /* SUPPORT_MULTIBYTE_EDIT */
+    }
 
     str = &Buf[DspStart];
+#ifdef SUPPORT_MULTIBYTE_EDIT
+    if (HTCJK != NOCJK && !isascii(str[0]))
+	begin_multi = 1;
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 
     nrdisplayed = length-DspStart;
     if (nrdisplayed > DspWdth)
@@ -2515,15 +2882,29 @@ PUBLIC void LYRefreshEdit ARGS1(
 		    !(LYCharSet_UC[current_char_set].like8859
 		      & UCT_R_8859SPECL))))) {
 		addch(' ');
+#ifdef SUPPORT_MULTIBYTE_EDIT
+		end_multi = 0;
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 	    } else {
 		/* For CJK strings, by Masanobu Kimura */
 		if (HTCJK != NOCJK && !isascii(buffer[0])) {
+#ifndef SUPPORT_MULTIBYTE_EDIT
 		    if (i < (nrdisplayed - 1))
 			buffer[1] = str[++i];
+#else /* SUPPORT_MULTIBYTE_EDIT */
+		    if (i < (nrdisplayed - 1)) {
+			buffer[1] = str[++i];
+			end_multi = 1;
+		    } else
+			end_multi = 0;
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 		    addstr(buffer);
 		    buffer[1] = '\0';
 		} else {
 		    addstr(buffer);
+#ifdef SUPPORT_MULTIBYTE_EDIT
+		    end_multi = 0;
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 		}
 	    }
     }
@@ -2540,16 +2921,39 @@ PUBLIC void LYRefreshEdit ARGS1(
      */
     if (edit->panon) {
 	if ((DspStart + nrdisplayed) < length) {
+#ifndef SUPPORT_MULTIBYTE_EDIT
 	    move(edit->sy, edit->sx+nrdisplayed-1);
 	    addch('}');
+#else /* SUPPORT_MULTIBYTE_EDIT */
+	    if (end_multi) {
+		move(edit->sy, edit->sx+nrdisplayed-2);
+		addstr(" }");
+	    } else {
+		move(edit->sy, edit->sx+nrdisplayed-1);
+		addch('}');
+	}
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 	}
 	if (DspStart) {
 	    move(edit->sy, edit->sx);
+#ifndef SUPPORT_MULTIBYTE_EDIT
 	    addch('{');
+#else /* SUPPORT_MULTIBYTE_EDIT */
+	    if (begin_multi)
+		addstr("{ ");
+	    else
+	    addch('{');
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 	}
     }
 
     move(edit->sy, edit->sx + Pos - DspStart);
+#ifdef SUPPORT_MULTIBYTE_EDIT
+#if (!USE_SLANG && !defined(USE_MULTIBYTE_CURSES))
+    if (HTCJK != NOCJK)
+	lynx_force_repaint();
+#endif /* !USE_SLANG && !defined(USE_MULTIBYTE_CURSES) */
+#endif /* SUPPORT_MULTIBYTE_EDIT */
     refresh();
 }
 
@@ -2567,6 +2971,9 @@ PUBLIC int LYgetstr ARGS4(
     int last_xlkc = -1;
     EditFieldData MyEdit;
     char *res;
+#ifdef SUPPORT_MULTIBYTE_EDIT
+    BOOL refresh = TRUE;
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 
     LYGetYX(y, x);		/* Use screen from cursor position to eol */
     MaxStringSize = (bufsize < sizeof(MyEdit.buffer)) ?
@@ -2576,8 +2983,25 @@ PUBLIC int LYgetstr ARGS4(
 
     for (;;) {
 again:
+#ifndef SUPPORT_MULTIBYTE_EDIT
 	LYRefreshEdit(&MyEdit);
+#else /* SUPPORT_MULTIBYTE_EDIT */
+	if (refresh)
+	    LYRefreshEdit(&MyEdit);
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 	ch = LYgetch_for(FOR_PROMPT);
+#ifdef SUPPORT_MULTIBYTE_EDIT 
+#ifdef CJK_EX	/* for SJIS code */
+	if (!refresh
+	 && (EditBinding(ch) != LYE_CHAR))
+	    goto again;
+#else
+	if (!refresh
+	 && (EditBinding(ch) != LYE_CHAR)
+	 && (EditBinding(ch) != LYE_AIX))
+	    goto again;
+#endif
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 #ifdef VMS
 	if (term_letter || term_options ||
 #ifndef DISABLE_NEWS
@@ -2607,8 +3031,10 @@ again:
 		ch |= LKC_MOD3;
 	    last_xlkc = -1;	/* consumed */
 	}
+#ifndef WIN_EX
 	if (LKC_TO_LAC(keymap,ch) == LYK_REFRESH)
 	    goto again;
+#endif
 	xlec = EditBinding(ch);
 	if ((xlec & LYE_DF) && !(xlec & LYE_FORM_LAC)) {
 	    last_xlkc = ch;
@@ -2644,6 +3070,8 @@ again:
 		ch = '\0';
 	    }
 	    break;
+
+#ifndef CJK_EX	/* 1997/11/03 (Mon) 20:13:45 */
 	case LYE_AIX:
 	    /*
 	     *	Hex 97.
@@ -2653,10 +3081,12 @@ again:
 	     */
 	    if (ch != '\t' &&
 		(HTCJK != NOCJK ||
-		 LYlowest_eightbit[current_char_set] <= 0x97)) {
+		 LYlowest_eightbit[current_char_set] <= 0x97))
+	    {
 		LYLineEdit(&MyEdit,ch, FALSE);
 		break;
 	    }
+#endif
 	case LYE_ENTER:
 	    /*
 	     *	Terminate the string and return.
@@ -2664,6 +3094,32 @@ again:
 	    strcpy(inputline, MyEdit.buffer);
 	    LYAddToCloset(MyEdit.buffer);
 	    return(ch);
+
+#if defined(WIN_EX)
+	/* 1998/10/01 (Thu) 15:05:49 */
+
+#define PASTE_MAX	512
+
+	case LYE_PASTE:
+	    {
+		unsigned char buff[PASTE_MAX];
+		int i, len;
+
+		len = get_clip(buff, PASTE_MAX);
+
+		if (len > 0) {
+		    i = 0;
+		    while ((ch = buff[i]) != '\0') {
+			if (ch == '\r' || ch == '\n')
+			    break;
+			if (ch >= ' ')
+			    LYLineEdit(&MyEdit, ch, FALSE);
+			i++;
+		    }
+		}
+		break;
+	    }
+#endif
 
 	case LYE_ABORT:
 	    /*
@@ -2698,7 +3154,20 @@ again:
 		break;
 	    }
 
+#ifndef SUPPORT_MULTIBYTE_EDIT
 	    LYLineEdit(&MyEdit, ch, FALSE);
+#else /* SUPPORT_MULTIBYTE_EDIT */
+	    if (LYLineEdit(&MyEdit, ch, FALSE) == 0) {
+		if (refresh && HTCJK != NOCJK && (0x81 <= ch) && (ch <= 0xfe))
+		    refresh = FALSE;
+		else
+		    refresh = TRUE;
+	    } else {
+		if (!refresh) {
+		    LYEdit1(&MyEdit, 0, LYE_DELP, FALSE);
+		}
+	    }
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 	}
     }
 }
@@ -2822,6 +3291,63 @@ PUBLIC char * LYno_attr_char_case_strstr ARGS2(
     } /* end for */
 
     return(NULL);
+}
+
+PUBLIC void LYOpenCloset NOARGS
+{
+    /* We initialize the list-looka-like, i.e., the Closet */
+    int i = 0;
+    while(i < LYClosetSize){
+	LYCloset[i] = NULL;
+	i = i + 1;
+    }
+    LYClosetTop = 0;
+}
+
+PUBLIC void LYCloseCloset NOARGS
+{
+    int i = 0;
+
+    /* Clean up the list-looka-like, i.e., the Closet */
+    while (i < LYClosetSize){
+	FREE(LYCloset[i]);
+	i = i + 1;
+    }
+}
+
+/*
+ * Strategy:  We begin at the top and search downwards.  We return the first
+ * match, i.e., the newest since we search from the top.  This should be made
+ * more intelligent, but works for now.
+ */
+PRIVATE char * LYFindInCloset ARGS1(char*, base)
+{
+    int shelf;
+    unsigned len = strlen(base);
+
+    shelf = (LYClosetTop - 1 + LYClosetSize) % LYClosetSize;
+
+    while (LYCloset[shelf] != NULL){
+	if (!strncmp(base, LYCloset[shelf], len)) {
+	    return(LYCloset[shelf]);
+	}
+	shelf = (shelf - 1 + LYClosetSize) % LYClosetSize;
+    }
+    return(0);
+}
+
+PRIVATE int LYAddToCloset ARGS1(char*, str)
+{
+    unsigned len = strlen(str);
+
+    LYCloset[LYClosetTop] = malloc(len+1);
+    if (!LYCloset[LYClosetTop])
+	outofmem(__FILE__, "LYAddToCloset");
+    strcpy(LYCloset[LYClosetTop], str);
+
+    LYClosetTop = (LYClosetTop + 1) % LYClosetSize;
+    FREE(LYCloset[LYClosetTop]);
+    return(1);
 }
 
 /*
@@ -3161,63 +3687,6 @@ PUBLIC char * LYno_attr_mbcs_strstr ARGS5(
     return(NULL);
 }
 
-PUBLIC void LYOpenCloset NOARGS
-{
-    /* We initialize the list-looka-like, i.e., the Closet */
-    int i = 0;
-    while(i < LYClosetSize){
-	LYCloset[i] = NULL;
-	i = i + 1;
-    }
-    LYClosetTop = 0;
-}
-
-PUBLIC void LYCloseCloset NOARGS
-{
-    int i = 0;
-
-    /* Clean up the list-looka-like, i.e., the Closet */
-    while (i < LYClosetSize){
-	FREE(LYCloset[i]);
-	i = i + 1;
-    }
-}
-
-/*
- * Strategy:  We begin at the top and search downwards.  We return the first
- * match, i.e., the newest since we search from the top.  This should be made
- * more intelligent, but works for now.
- */
-PRIVATE char * LYFindInCloset ARGS1(char*, base)
-{
-    int shelf;
-    unsigned len = strlen(base);
-
-    shelf = (LYClosetTop - 1 + LYClosetSize) % LYClosetSize;
-
-    while (LYCloset[shelf] != NULL){
-	if (!strncmp(base, LYCloset[shelf], len)) {
-	    return(LYCloset[shelf]);
-	}
-	shelf = (shelf - 1 + LYClosetSize) % LYClosetSize;
-    }
-    return(0);
-}
-
-PRIVATE int LYAddToCloset ARGS1(char*, str)
-{
-    unsigned len = strlen(str);
-
-    LYCloset[LYClosetTop] = malloc(len+1);
-    if (!LYCloset[LYClosetTop])
-	outofmem(__FILE__, "LYAddToCloset");
-    strcpy(LYCloset[LYClosetTop], str);
-
-    LYClosetTop = (LYClosetTop + 1) % LYClosetSize;
-    FREE(LYCloset[LYClosetTop]);
-    return(1);
-}
-
 /*
  *  Allocate a new copy of a string, and returns it.
  */
@@ -3386,9 +3855,9 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
 	charset_in  = current_char_set;  /* display character set */
 	charset_out = UCGetLYhndl_byMIME("us-ascii");
 
-	uck1 = UCTransCharStr(replace_buf1, sizeof(replace_buf1), ch1,
+	uck1 = UCTransCharStr(replace_buf1, sizeof(replace_buf1), (char)ch1,
 			      charset_in, charset_out, YES);
-	uck2 = UCTransCharStr(replace_buf2, sizeof(replace_buf2), ch2,
+	uck2 = UCTransCharStr(replace_buf2, sizeof(replace_buf2), (char)ch2,
 			      charset_in, charset_out, YES);
 
 	if ((uck1 > 0) && (uck2 > 0))  /* both replacement strings found */

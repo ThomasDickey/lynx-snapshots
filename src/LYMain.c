@@ -275,6 +275,34 @@ PUBLIC BOOLEAN local_host_only = FALSE;
 PUBLIC BOOLEAN override_no_download = FALSE;
 PUBLIC BOOLEAN show_dotfiles = FALSE; /* From rcfile if no_dotfiles is false */
 PUBLIC BOOLEAN LYforce_HTML_mode = FALSE;
+
+#ifdef WIN_EX
+#undef SYSTEM_MAIL
+#undef SYSTEM_MAIL_FLAGS
+#define SYSTEM_MAIL		"BLATJ"
+#define SYSTEM_MAIL_FLAGS	""
+PUBLIC BOOLEAN focus_window = FALSE;	/* 1998/10/05 (Mon) 17:18:42 */
+PUBLIC char windows_drive[4];		/* 1998/01/13 (Tue) 21:13:24 */
+#endif
+
+#ifdef _WINDOWS
+#define	TIMEOUT	180		/* 1998/03/30 (Mon) 14:50:44 */
+PUBLIC int lynx_timeout = TIMEOUT;
+PUBLIC CRITICAL_SECTION critSec_DNS;	/* 1998/09/03 (Thu) 22:01:56 */
+PUBLIC CRITICAL_SECTION critSec_READ;	/* 1998/09/03 (Thu) 22:01:56 */
+#endif /* _WINDOWS */
+
+#if defined(WIN_EX)
+PUBLIC BOOLEAN system_is_NT = FALSE;
+#endif
+
+#ifdef SH_EX
+PUBLIC BOOLEAN show_cfg = FALSE;
+PUBLIC BOOLEAN mail_is_blat = TRUE;
+PUBLIC int     debug_delay = 0;		/* 1998/10/06 (Tue) 08:41:20 */
+PUBLIC BOOLEAN no_table_center = FALSE;	/* 1998/10/09 (Fri) 15:12:49 */
+#endif /* SH_EX */
+
 PUBLIC char *editor = NULL;	/* the name of the current editor */
 PUBLIC char *jumpfile = NULL;	/* the name of the default jumps file */
 PUBLIC char *jumpprompt = NULL; /* the default jumps prompt */
@@ -401,6 +429,19 @@ PUBLIC BOOLEAN LYPreparsedSource = FALSE;	/* Show source as preparsed?	 */
 PUBLIC BOOLEAN LYPrependBaseToSource = TRUE;
 PUBLIC BOOLEAN LYPrependCharsetToSource = TRUE;
 PUBLIC BOOLEAN LYQuitDefaultYes = QUIT_DEFAULT_YES;
+PUBLIC BOOLEAN dont_wrap_pre = FALSE;
+
+#ifdef EXP_JUSTIFY_ELTS
+PUBLIC BOOL ok_justify = TRUE;
+#endif
+
+#ifndef NO_DUMP_WITH_BACKSPACES
+PUBLIC BOOLEAN with_backspaces = FALSE;
+#endif
+
+#ifndef NO_EMPTY_HREFLESS_A
+PUBLIC BOOL force_empty_hrefless_a = FALSE;
+#endif
 
 #ifdef DISP_PARTIAL
 PUBLIC BOOLEAN display_partial_flag = TRUE; /* Display document during download */
@@ -438,6 +479,12 @@ PRIVATE HTList *LYStdinArgs = NULL;
 /* if set then additional non-option args (before the last one) will be
    made available for 'g'oto recall - kw */
 #define EXTENDED_STARTFILE_RECALL 1
+#endif
+
+#ifndef OPTNAME_ALLOW_DASHES
+/* if set, then will allow dashes and underscores to be used interchangeable
+   in commandline option's names - VH */
+#define OPTNAME_ALLOW_DASHES 1
 #endif
 
 #if EXTENDED_OPTION_LOGIC
@@ -479,6 +526,20 @@ PRIVATE void reset_break(void)
     LY_set_ctrl_break(init_ctrl_break[0]);
 }
 #endif /* __DJGPP__ */
+
+#if defined(WIN_EX)
+PUBLIC int is_windows_nt(void)
+{
+    DWORD version;
+
+    version = GetVersion();
+    if ((version & 0x80000000) == 0)
+    	return 1;
+    else
+    	return 0;
+}
+#endif
+
 
 #ifdef LY_FIND_LEAKS
 PRIVATE void free_lynx_globals NOARGS
@@ -661,7 +722,18 @@ PRIVATE int argcmp ARGS2(
 	char*,		what)
 {
     if (str[0] == '-' && str[1] == '-' ) ++str;
+#if !OPTNAME_ALLOW_DASHES
     return strcmp(str,what);
+#else
+    ++str; ++what; /*skip leading dash in both strings*/
+    {
+	int l1 = strlen(str);
+	int l2 = strlen(what);
+	if (l1 != l2)
+	    return 1; /* this function simulates strcmp!*/
+	return !strn_dash_equ(str, what, l2);
+    }
+#endif
 }
 
 PRIVATE int argncmp ARGS2(
@@ -669,7 +741,12 @@ PRIVATE int argncmp ARGS2(
 	char*,		what)
 {
     if (str[0] == '-' && str[1] == '-' ) ++str;
+#if OPTNAME_ALLOW_DASHES
     return strncmp(str, what, strlen(what));
+#else
+    ++str; ++what; /*skip leading dash in both strings*/
+    return !strn_dash_equ(str, what, strlen(what));
+#endif
 }
 
 /*
@@ -704,10 +781,34 @@ PUBLIC int main ARGS2(
 	{
 	    printf(gettext("No Winsock found, sorry."));
 	    sleep(5);
-	    return;
+	    return 1;
 	}
     }
+
+    /* 1998/09/03 (Thu) 22:02:32 */
+    InitializeCriticalSection(&critSec_DNS);
+    InitializeCriticalSection(&critSec_READ);
+
 #endif /* _WINDOWS */
+
+#if defined(__CYGWIN__) && defined(DOSPATH)
+    if (strcmp(ttyname(fileno(stdout)), "/dev/conout") != 0) {
+	printf("please \"$CYGWIN=notty\"\n");
+	exit(0);
+    }
+#endif
+
+#if defined(WIN_EX)
+    /* 1997/10/19 (Sun) 21:40:54 */
+    system_is_NT = is_windows_nt();
+
+    /* 1998/01/13 (Tue) 21:13:47 */
+    GetWindowsDirectory(filename, sizeof filename);
+    windows_drive[0] = filename[0];
+    windows_drive[1] = filename[1];
+    windows_drive[2] = '\0';
+#endif
+
 
 #ifdef __DJGPP__
     if (LY_get_ctrl_break() == 0) {
@@ -740,6 +841,12 @@ PUBLIC int main ARGS2(
      *	Set up the argument list.
      */
     pgm = argv[0];
+    cp = NULL;
+#ifdef DOSPATH
+    if ((cp = strrchr(pgm, '\\')) != NULL) {
+	pgm = cp + 1;
+    } else if (cp == NULL)
+#endif
     if ((cp = strrchr(pgm, '/')) != NULL) {
 	pgm = cp + 1;
     }
@@ -751,6 +858,11 @@ PUBLIC int main ARGS2(
 	if (argncmp(argv[i], "-help") == 0) {
 	    parse_arg(&argv[i], &i);
 	}
+#ifdef SH_EX
+	if (strncmp(argv[i], "-show_cfg", 9) == 0) {
+	    show_cfg = TRUE;
+	}
+#endif
     }
 
 #ifdef LY_FIND_LEAKS
@@ -849,9 +961,9 @@ PUBLIC int main ARGS2(
 #endif
 #if defined (DOSPATH) || defined (__EMX__)
     else if ((cp = getenv("TEMP")) != NULL)
-	StrAllocCopy(lynx_temp_space, HTDOS_name(cp));
+	StrAllocCopy(lynx_temp_space, HTSYS_name(cp));
     else if ((cp = getenv("TMP")) != NULL)
-	StrAllocCopy(lynx_temp_space, HTDOS_name(cp));
+	StrAllocCopy(lynx_temp_space, HTSYS_name(cp));
 #endif
     else
 #ifdef TEMP_SPACE
@@ -1190,7 +1302,14 @@ PUBLIC int main ARGS2(
     /*
      *	Set up the TRACE log path, and logging if appropriate. - FM
      */
-    LYAddPathToHome(LYTraceLogPath = malloc(LY_MAXPATH), LY_MAXPATH, "Lynx.trace");
+#ifdef FNAMES_8_3
+    LYAddPathToHome(LYTraceLogPath =
+		malloc(LY_MAXPATH), LY_MAXPATH, "LY-TRACE.LOG");
+#else
+    LYAddPathToHome(LYTraceLogPath =
+		malloc(LY_MAXPATH), LY_MAXPATH, "Lynx.trace");
+#endif
+
     LYOpenTraceLog();
 
     /*
@@ -1346,7 +1465,7 @@ PUBLIC int main ARGS2(
     }
 #endif /* USE_HASH */
 
-#if USE_COLOR_TABLE
+#ifdef USE_COLOR_TABLE
     /*
      *	Set up default foreground and background colors.
      */
@@ -1540,6 +1659,13 @@ PUBLIC int main ARGS2(
     }
 #endif /* SYSLOG_REQUESTED_URLS */
 #endif /* !VMS */
+
+#ifdef SH_EX
+    if (show_cfg) {
+	cleanup();
+	exit(0);
+    }
+#endif
 
 #ifdef USE_SLANG
     if (LYShowColor >= SHOW_COLOR_ON &&
@@ -1773,7 +1899,7 @@ PUBLIC int main ARGS2(
 	ftp_ok = !no_inside_ftp && !no_outside_ftp && ftp_ok;
 	rlogin_ok = !no_inside_rlogin && !no_outside_rlogin && rlogin_ok;
 #else
-	CTRACE(tfp,"LYMain.c: User in Local domain\n");
+	CTRACE(tfp,"LYMain: User in Local domain\n");
 	telnet_ok = !no_inside_telnet && telnet_ok;
 #ifndef DISABLE_NEWS
 	news_ok = !no_inside_news && news_ok;
@@ -1782,7 +1908,7 @@ PUBLIC int main ARGS2(
 	rlogin_ok = !no_inside_rlogin && rlogin_ok;
 #endif /* !HAVE_UTMP || VMS */
     } else {
-	CTRACE(tfp,"LYMain.c: User in REMOTE domain\n");
+	CTRACE(tfp,"LYMain: User in REMOTE domain\n");
 	telnet_ok = !no_outside_telnet && telnet_ok;
 #ifndef DISABLE_NEWS
 	news_ok = !no_outside_news && news_ok;
@@ -1832,7 +1958,7 @@ PUBLIC int main ARGS2(
 	if (!nolist &&
 	    !crawl &&		/* For -crawl it has already been done! */
 	    (keypad_mode == LINKS_ARE_NUMBERED ||
-	     keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED))
+	     keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED))
 	    printlist(stdout,FALSE);
 #ifdef EXP_PERSISTENT_COOKIES
 	/*
@@ -1856,7 +1982,13 @@ PUBLIC int main ARGS2(
 	cache_tag_styles();
 #endif
 
-	ena_csi((LYlowest_eightbit[current_char_set] > 155));
+#ifndef NO_DUMP_WITH_BACKSPACES
+	if (with_backspaces) {
+	    /* we should warn about this somehow (nop for now) -VH */
+	    with_backspaces = FALSE;
+	}
+#endif
+	ena_csi((BOOLEAN)(LYlowest_eightbit[current_char_set] > 155));
 	LYOpenCloset();
 	status = mainloop();
 	LYCloseCloset();
@@ -2671,6 +2803,22 @@ static int version_fun ARGS1(
 	  "See http://lynx.browser.org/ and the online help for more information.\n\n"
 	  ));
 
+#ifdef SH_EX
+#ifdef __CYGWIN__
+    printf("Compiled by CYGWIN (%s %s).\n", __DATE__, __TIME__);
+#else
+#ifdef __BORLANDC__
+    printf("Compiled by Borland C++ (%s %s).\n", __DATE__, __TIME__);
+#else
+#ifdef _MSC_VER
+    printf("Compiled by Microsoft Visual C++ (%s %s).\n", __DATE__, __TIME__);
+#else
+    printf("Compiled at (%s %s).\n", __DATE__, __TIME__);
+#endif /* _MSC_VER */
+#endif /* __BORLANDC__ */
+#endif /* __CYGWIN__ */
+#endif /* SH_EX */
+
     SetOutputMode( O_BINARY );
 
     exit(0);
@@ -2744,6 +2892,12 @@ static Parse_Args_Type Arg_Table [] =
       "case",		SET_ARG,		&case_sensitive,
       "enable case sensitive user searching"
    ),
+#ifdef SH_EX
+   PARSE_SET(
+      "center",		TOGGLE_ARG,	&no_table_center,
+      "Toggle center alignment in HTML TABLE"
+   ),
+#endif
    PARSE_STR(
       "cfg",		IGNORE_ARG|NEED_NEXT_ARG,	0,
       "=FILENAME\nspecifies a lynx.cfg file other than the default"
@@ -2785,9 +2939,19 @@ with -dump, format output as with -traversal, but to stdout"
       "incremental display stages with MessageSecs delay"
    ),
 #endif
+#ifdef SH_EX
+   PARSE_SET(
+      "delay",		NEED_INT_ARG,		&debug_delay,
+      "=NNN\nset the NNN msec delay at statusline message"
+   ),
+#endif
    PARSE_FUN(
       "display",	NEED_FUNCTION_ARG,	display_fun,
       "=DISPLAY\nset the display variable for X exec'ed programs"
+   ),
+   PARSE_SET(
+      "dont_wrap_pre",	SET_ARG,		&dont_wrap_pre,
+      "inhibit wrapping of text in <pre> when -dump'ing and -crawl'ing"
    ),
    PARSE_FUN(
       "dump",		FUNCTION_ARG,		dump_output_fun,
@@ -2844,6 +3008,12 @@ keys (may be incompatible with some curses packages)"
       "from",		TOGGLE_ARG,		&LYNoFromHeader,
       "toggle transmissions of From headers"
    ),
+#ifndef NO_EMPTY_HREFLESS_A
+   PARSE_SET(
+      "force_empty_hrefless_a",	SET_ARG,	&force_empty_hrefless_a,
+      "force HREF-less 'A' elements to be empy (close them as soon as they are seen)"
+   ),
+#endif
 #if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
    PARSE_SET(
       "forms_options",	TOGGLE_ARG,		&LYUseFormsOptions,
@@ -2890,6 +3060,12 @@ keys (may be incompatible with some curses packages)"
       "ismap",		TOGGLE_ARG,		&LYNoISMAPifUSEMAP,
       "toggles inclusion of ISMAP links when client-side\nMAPs are present"
    ),
+#ifdef EXP_JUSTIFY_ELTS
+   PARSE_SET(
+      "justify",	SET_ARG,		&ok_justify,
+      "do justification of text"
+   ),
+#endif
    PARSE_INT(
       "link",		NEED_INT_ARG,		&ccount,
       "=NUMBER\nstarting count for lnk#.dat files produced by -crawl"
@@ -2913,6 +3089,8 @@ keys (may be incompatible with some curses packages)"
       "toggles minimal versus valid comment parsing"
    ),
 #ifndef DISABLE_NEWS
+#endif
+#ifndef DISABLE_NEWS
    PARSE_FUN(
       "newschunksize",	NEED_FUNCTION_ARG,	newschunksize_fun,
       "=NUMBER\nnumber of articles in chunked news listings"
@@ -2920,6 +3098,12 @@ keys (may be incompatible with some curses packages)"
    PARSE_FUN(
       "newsmaxchunk",	NEED_FUNCTION_ARG,	newsmaxchunk_fun,
       "=NUMBER\nmaximum news articles in listings before chunking"
+   ),
+#endif
+#ifdef SH_EX
+   PARSE_SET(
+      "noblat",		TOGGLE_ARG,		&mail_is_blat,
+      "select mail tool (`BLAT' ==> `sendmail')"
    ),
 #endif
    PARSE_FUN(
@@ -3026,7 +3210,8 @@ to visualize how lynx behaves with invalid HTML"
    ),
    PARSE_SET(
       "raw",		UNSET_ARG,		&LYUseDefaultRawMode,
-      "toggles default setting of 8-bit character translations\nor CJK mode for the startup character set"
+      "toggles default setting of 8-bit character translations\n\
+or CJK mode for the startup character set"
    ),
    PARSE_SET(
       "realm",		SET_ARG,		&check_realm,
@@ -3054,6 +3239,12 @@ with the PREV_DOC command or from the History List"
       "selective",	FUNCTION_ARG,		selective_fun,
       "require .www_browsable files to browse directories"
    ),
+#ifdef SH_EX
+   PARSE_SET(
+      "show_cfg",	SET_ARG,		&show_cfg,
+      "Show `LYNX.CFG' setting"
+   ),
+#endif
    PARSE_SET(
       "show_cursor",	TOGGLE_ARG,		&LYUseDefShoCur,
       "toggles hiding of the cursor in the lower right corner"
@@ -3099,6 +3290,12 @@ treated '>' as a co-terminator for double-quotes and tags"
       "tlog",		IGNORE_ARG,		0,
       "toggles use of a Lynx Trace Log for the current session"
    ),
+#ifdef _WINDOWS
+   PARSE_SET(
+      "timeout",	SET_ARG,		&lynx_timeout,
+      "set TCP/IP timeout"
+   ),
+#endif
    PARSE_SET(
       "trace",		IGNORE_ARG,		0,
       "turns on Lynx trace mode"
@@ -3141,6 +3338,12 @@ treated '>' as a co-terminator for double-quotes and tags"
       "width",		NEED_FUNCTION_ARG,	width_fun,
       "=NUMBER\nscreen width for formatting of dumps (default is 80)"
    ),
+#ifndef NO_DUMP_WITH_BACKSPACES
+   PARSE_SET(
+      "with_backspaces",	SET_ARG,		&with_backspaces,
+      "emit backspaces in output if -dumping or -crawling (like 'man' does)"
+   ),
+#endif
    {NULL, 0, 0, NULL}
 };
 
@@ -3277,6 +3480,9 @@ static int arg_eqs_parse ARGS3(
 		    return 0;
 		}
 	    } else {
+#if OPTNAME_ALLOW_DASHES
+		if (!(*a == '_' && *b == '-'))
+#endif
 		return 0;
 	    }
 	}
@@ -3317,6 +3523,18 @@ PRIVATE void parse_arg ARGS2(
 #endif
 	StrAllocCopy(startfile, arg_name);
 	LYTrimStartfile(startfile);
+#ifdef _WINDOWS	/* 1998/01/14 (Wed) 20:11:17 */
+	HTUnEscape(startfile);
+	{
+	    char *p;
+
+	    p = startfile;
+	    while (*p++) {
+		if (*p == '|')
+		    *p = ':';
+	    }
+	}
+#endif
 	return;
     }
 #if EXTENDED_OPTION_LOGIC
@@ -3487,6 +3705,19 @@ Do NOT mail the core file if one was generated.\r\n");
 	if (sig != 0) {
 	    fprintf(stderr, "\r\n\
 Lynx now exiting with signal:  %d\r\n\r\n", sig);
+#ifdef WIN_EX	/* 1998/08/09 (Sun) 09:58:25 */
+	{
+	    char *msg;
+	    switch (sig) {
+	    case SIGABRT:	msg = "SIGABRT";	break;
+	    case SIGFPE:	msg = "SIGFPE";		break;
+	    case SIGILL:	msg = "SIGILL";		break;
+	    case SIGSEGV:	msg = "SIGSEGV";	break;
+	    default:		msg = "Not-def";	break;
+	    }
+	    fprintf(stderr, "signal code = %s\n", msg);
+	}
+#endif
 	}
 
 	/*

@@ -7,6 +7,9 @@
 */
 
 #include <HTUtils.h>
+#ifdef __DJGPP__
+#include <tcp.h>
+#endif /* __DJGPP__ */
 #include <HTTP.h>
 #include <LYUtils.h>
 
@@ -68,6 +71,179 @@ extern BOOL dump_output_immediately;  /* TRUE if no interactive user */
 #define HTTP_NETWRITE(a, b, c, d)  NETWRITE(a, b, c)
 #define HTTP_NETCLOSE(a, b)  (void)NETCLOSE(a)
 
+#ifdef _WINDOWS		/* 1997/11/06 (Thu) 13:00:08 */
+
+#define	BOX_TITLE	"Lynx " __FILE__
+#define	BOX_FLAG	(MB_ICONINFORMATION | MB_SETFOREGROUND)
+
+typedef struct {
+	int fd;
+	char *buf;
+	int len;
+} recv_data_t;
+
+PUBLIC int ws_read_per_sec = 0;
+PRIVATE int ws_errno = 0;
+
+PRIVATE DWORD g_total_times = 0;
+PRIVATE DWORD g_total_bytes = 0;
+
+
+PUBLIC char * str_speed(void)
+{
+    static char buff[32];
+
+    if (ws_read_per_sec > 1000)
+	sprintf(buff, "%d.%03dkB", ws_read_per_sec / 1000, 
+			(ws_read_per_sec % 1000) );
+    else
+	sprintf(buff, "%3d", ws_read_per_sec);
+
+    return buff;
+}
+
+/* The same like read, but takes care of EINTR and uses select to
+   timeout the stale connections.  */
+
+PRIVATE int ws_read(int fd, char *buf, int len)
+{
+     int res;
+     int retry = 3;
+
+     do {
+	res = recv(fd, buf, len, 0);
+	if (WSAEWOULDBLOCK == WSAGetLastError()) {
+	  Sleep(100);
+	  if (retry-- > 0)
+	    continue;
+	}
+     } while (res == SOCKET_ERROR && SOCKET_ERRNO == EINTR);
+
+     return res;
+}
+
+PRIVATE void _thread_func (void *p)
+{
+    int i, val, ret;
+    recv_data_t *q = (recv_data_t *)p;
+
+    i = 0;
+    i++;
+    val = ws_read(q->fd, q->buf, q->len);
+
+    if (val == SOCKET_ERROR) {
+	ws_errno = WSAGetLastError();
+#if 0
+	char buff[256];
+	sprintf(buff, "Thread read: %d, error (%ld), fd = %d, len = %d",
+		i, ws_errno, q->fd, q->len);
+	MessageBox(NULL, buff, BOX_TITLE, BOX_FLAG);
+#endif
+	ret = -1;
+    } else {
+	ret = val;
+    }
+
+    ExitThread((DWORD)ret);
+}
+
+/* The same like read, but takes care of EINTR and uses select to
+   timeout the stale connections.  */
+
+PUBLIC int ws_netread(int fd, char *buf, int len)
+{
+    int i;
+    char buff[256];
+
+     /* 1998/03/30 (Mon) 09:01:21 */
+    HANDLE hThread;
+    DWORD dwThreadID;
+    DWORD exitcode = 0;
+    DWORD ret_val, val, process_time, now_TickCount, save_TickCount;
+
+    static recv_data_t para;
+
+    extern int win32_check_interrupt(void);	/* LYUtil.c */
+    extern int lynx_timeout;			/* LYMain.c */
+    extern int AlertSecs;			/* LYMain.c */
+    extern CRITICAL_SECTION critSec_READ;	/* LYMain.c */
+
+#define TICK	5
+#define STACK_SIZE	0x2000uL
+
+    InitializeCriticalSection(&critSec_READ);
+
+    para.fd = fd;
+    para.buf = buf;
+    para.len = len;
+
+    ws_read_per_sec = 0;
+    save_TickCount = GetTickCount();
+
+    hThread = CreateThread((void *)NULL, STACK_SIZE,
+		 (LPTHREAD_START_ROUTINE)_thread_func,
+		 (void *)&para, 0UL, &dwThreadID);
+
+    if (hThread == 0) {
+	HTInfoMsg("CreateThread Failed (read)");
+	goto read_exit;
+    }
+
+    i = 0;
+    while (1) {
+	val = WaitForSingleObject(hThread, 1000/TICK);
+	i++;
+	if (val == WAIT_FAILED) {
+	    HTInfoMsg("Wait Failed");
+	    ret_val = -1;
+	    break;
+	} else if (val == WAIT_TIMEOUT) {
+	    i++;
+	    if (i/TICK > (AlertSecs + 2)) {
+		sprintf(buff, "Read Waiting (%2d.%01d) for %d Bytes",
+			i/TICK, (i%TICK) * 10 / TICK, len);
+		SetConsoleTitle(buff);
+	    }
+	    if (win32_check_interrupt() || ((i/TICK) > lynx_timeout)) {
+		if (CloseHandle(hThread) == FALSE) {
+		    HTInfoMsg("Thread terminate Failed");
+		}
+		WSASetLastError(ETIMEDOUT);
+		ret_val = HT_INTERRUPTED;
+		break;
+	    }
+	} else if (val == WAIT_OBJECT_0) {
+	    if (GetExitCodeThread(hThread, &exitcode) == FALSE) {
+		exitcode = -1;
+	    }
+	    if (CloseHandle(hThread) == FALSE) {
+		HTInfoMsg("Thread terminate Failed");
+	    }
+	    now_TickCount = GetTickCount();
+	    if (now_TickCount > save_TickCount)
+		process_time = now_TickCount - save_TickCount;
+	    else
+		process_time = now_TickCount + (0xffffffff - save_TickCount);
+
+	    g_total_times += process_time;
+	    g_total_bytes += exitcode;
+	    
+	    if (g_total_bytes > 2000000) {
+		ws_read_per_sec = g_total_bytes / (g_total_times/1000);
+	    } else {
+		ws_read_per_sec = g_total_bytes * 1000 / g_total_times;
+	    }
+	    ret_val = exitcode;
+	    break;
+	}
+    }	/* end while(1) */
+
+    read_exit:
+    LeaveCriticalSection(&critSec_READ);
+    return ret_val;
+}
+#endif
+
 
 /*		Load Document from HTTP Server			HTLoadHTTP()
 **		==============================
@@ -109,6 +285,7 @@ PRIVATE int HTLoadHTTP ARGS4 (
   BOOL had_header;		/* Have we had at least one header? */
   char *line_buffer;
   char *line_kept_clean;
+  int real_length_of_line;
   BOOL extensions;		/* Assume good HTTP server */
   char line[INIT_LINE_SIZE];
   char temp[80];
@@ -178,8 +355,15 @@ try_again:
        goto done;
    }
    if (status < 0) {
-	CTRACE(tfp, "HTTP: Unable to connect to remote host for `%s' (errno = %d).\n",
+#ifdef _WINDOWS
+      CTRACE(tfp, "HTTP: Unable to connect to remote host for `%s'\n"
+			  " (status = %d, sock_errno = %d).\n",
+			  url, status, SOCKET_ERRNO);
+#else
+      CTRACE(tfp,
+	    "HTTP: Unable to connect to remote host for `%s' (errno = %d).\n",
 	    url, SOCKET_ERRNO);
+#endif
       HTAlert(gettext("Unable to connect to remote host."));
       status = HT_NOT_LOADED;
       goto done;
@@ -674,8 +858,7 @@ try_again:
 	    if (line_buffer == NULL)
 		outofmem(__FILE__, "HTLoadHTTP");
 	}
-	CTRACE (tfp, "HTTP: Trying to read %d\n",
-		     buffer_length - length - 1);
+	CTRACE(tfp, "HTTP: Trying to read %d\n", buffer_length - length - 1);
 	status = HTTP_NETREAD(s, line_buffer + length,
 			      buffer_length - length - 1, handle);
 	CTRACE (tfp, "HTTP: Read %d\n", status);
@@ -692,6 +875,9 @@ try_again:
 		goto clean_up;
 	    } else if  (status < 0 &&
 			(SOCKET_ERRNO == ENOTCONN ||
+#ifdef _WINDOWS	/* 1997/11/09 (Sun) 16:59:58 */
+			 SOCKET_ERRNO == ETIMEDOUT ||
+#endif
 			 SOCKET_ERRNO == ECONNRESET ||
 			 SOCKET_ERRNO == EPIPE) &&
 			!already_retrying && !do_post) {
@@ -745,6 +931,7 @@ try_again:
 	    if (line_kept_clean == NULL)
 		outofmem(__FILE__, "HTLoadHTTP");
 	    memcpy(line_kept_clean, line_buffer, buffer_length);
+	    real_length_of_line = length + status;
 	}
 
 	eol = strchr(line_buffer + length, LF);
@@ -1720,7 +1907,12 @@ Cookie2_continuation:
       **  It was a HEAD request, or we want the headers and source.
       */
       start_of_data = line_kept_clean;
+#ifdef SH_EX	/* FIX BUG by kaz@maczuka.hitachi.ibaraki.jp */
+/* GIF file contains \0, so strlen does not return the data length */
+      length = real_length_of_line;
+#else
       length = rawlength;
+#endif
       format_in = HTAtom_for("text/plain");
   }
 

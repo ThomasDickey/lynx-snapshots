@@ -18,7 +18,7 @@
 #ifdef EXP_KEYBOARD_LAYOUT
 PUBLIC int current_layout = 0;  /* Index into LYKbLayouts[]   */
 
-PUBLIC unsigned short * LYKbLayouts[]={
+PUBLIC LYKeymap_t * LYKbLayouts[]={
 	kb_layout_rot13,
 	kb_layout_jcuken,
 	kb_layout_yawerty
@@ -70,11 +70,19 @@ LYK_ABORT,          LYK_END,        LYK_NEXT_PAGE,     0,
 LYK_HISTORY,    LYK_FASTFORW_LINK,  LYK_ACTIVATE,  LYK_COOKIE_JAR,
 /* bs */            /* ht */        /* nl */       /* ^K */
 
+#ifdef SH_EX	/* 1998/10/02 (Fri) 08:48:44 */
+LYK_CHG_KCODE,    LYK_ACTIVATE,     LYK_DOWN_TWO,      0,
+/* ^L */            /* cr */        /* ^N */       /* ^O */
+
+LYK_UP_TWO,       LYK_CHG_CENTER,   LYK_RELOAD,    LYK_TO_CLIPBOARD,
+/* ^P */            /* XON */       /* ^R */       /* ^S */
+#else
 LYK_REFRESH,      LYK_ACTIVATE,     LYK_DOWN_TWO,      0,
 /* ^L */            /* cr */        /* ^N */       /* ^O */
 
 LYK_UP_TWO,             0,          LYK_RELOAD,        0,
 /* ^P */            /* XON */       /* ^R */       /* XOFF */
+#endif
 
 LYK_TRACE_TOGGLE,       0,        LYK_SWITCH_DTD,  LYK_REFRESH,
 /* ^T */            /* ^U */        /* ^V */       /* ^W */
@@ -753,6 +761,11 @@ PRIVATE struct rmap revmap[] = {
 { "UPLOAD",		"upload from your computer to the current directory" },
 { "INSTALL",		"install file or tagged files into a system area" },
 #endif /* DIRED_SUPPORT */
+#ifdef SH_EX		/* 1999/01/01 (Fri) 01:18:12 */
+{ "CHANGE_CENTER",	"toggle center alignment in HTML TABLE" },
+{ "TO_CLIPBOARD",	"link's URL to Clip Board" },
+{ "CHANGE_KCODE",	"Change Kanji code" },
+#endif
 #endif /* VMS */
 { NULL,			"" }
 };
@@ -899,11 +912,11 @@ PUBLIC int lkcstring_to_lkc ARGS1(
 	   }
 #endif
 #endif
-       } 
-       if (c < -1)
-	   return (-1);
-       else
-	   return c;
+	}
+	if (c < -1)
+	    return (-1);
+	else
+	    return c;
 }
 
 PRIVATE int LYLoadKeymap ARGS4 (
@@ -1022,7 +1035,7 @@ PUBLIC void set_vms_keys NOARGS
       keymap['$'+1] = LYK_SHELL;
 }
 
-static char saved_vi_keys[4];
+static LYKeymap_t saved_vi_keys[4];
 static BOOLEAN did_vi_keys;
 
 PUBLIC void set_vi_keys NOARGS
@@ -1052,7 +1065,7 @@ PUBLIC void reset_vi_keys NOARGS
       did_vi_keys = FALSE;
 }
 
-static char saved_emacs_keys[4];
+static LYKeymap_t saved_emacs_keys[4];
 static BOOLEAN did_emacs_keys;
 
 PUBLIC void set_emacs_keys NOARGS
@@ -1082,7 +1095,7 @@ PUBLIC void reset_emacs_keys NOARGS
       did_emacs_keys = FALSE;
 }
 
-static char saved_number_keys[9];
+static LYKeymap_t saved_number_keys[9];
 static BOOLEAN did_number_keys;
 
 PUBLIC void set_numbers_as_arrows NOARGS

@@ -49,7 +49,7 @@ PUBLIC void read_rc NOPARAMS
     /*
      *  Open the RC file for reading.
      */
-    if ((fp = fopen(rcfile, "r")) == NULL) {
+    if ((fp = fopen(rcfile, TXT_R)) == NULL) {
 	return;
     }
 
@@ -333,7 +333,7 @@ PUBLIC void read_rc NOPARAMS
 	    if (LYstrstr(cp, "LINKS_ARE_NUMBERED"))
 		keypad_mode = LINKS_ARE_NUMBERED;
 	    else if (LYstrstr(cp, "LINKS_AND_FORM_FIELDS_ARE_NUMBERED"))
-		keypad_mode = LINKS_AND_FORM_FIELDS_ARE_NUMBERED;
+		keypad_mode = LINKS_AND_FIELDS_ARE_NUMBERED;
 	    else
 		keypad_mode = NUMBERS_AS_ARROWS;
 

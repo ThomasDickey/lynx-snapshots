@@ -94,7 +94,7 @@ default: $(FONTMAP_INC)
 tables: $(TABLES)
 
 makeuctb$x: makeuctb.o
-	$(CC) $(CC_OPTS) -o $@ makeuctb.o $(INTLLIB) $(LIBS)
+	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@ makeuctb.o $(INTLLIB) $(LIBS)
 
 makeuctb.o: $(srcdir)/UCkd.h $(srcdir)/makeuctb.c
 

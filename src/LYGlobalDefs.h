@@ -88,7 +88,7 @@ extern char *LYCgiDocumentRoot;  /* DOCUMENT_ROOT in the lynxcgi env */
 /* Values to which keypad_mode can be set */
 #define NUMBERS_AS_ARROWS 0
 #define LINKS_ARE_NUMBERED 1
-#define LINKS_AND_FORM_FIELDS_ARE_NUMBERED 2
+#define LINKS_AND_FIELDS_ARE_NUMBERED 2
 
 #define HIDDENLINKS_MERGE	0
 #define HIDDENLINKS_SEPARATE	1
@@ -384,6 +384,19 @@ extern BOOLEAN LYPrependCharsetToSource;
 extern BOOLEAN LYQuitDefaultYes;
 extern BOOLEAN LYNonRestartingSIGWINCH;
 extern BOOLEAN LYReuseTempfiles;
+extern BOOLEAN dont_wrap_pre;
+
+#ifdef EXP_JUSTIFY_ELTS
+extern BOOL ok_justify;
+#endif
+
+#ifndef NO_DUMP_WITH_BACKSPACES
+extern BOOLEAN with_backspaces;
+#endif
+
+#ifndef NO_EMPTY_HREFLESS_A
+extern BOOL force_empty_hrefless_a;
+#endif
 
 #ifndef VMS
 extern BOOLEAN LYNoCore;
@@ -391,5 +404,35 @@ extern BOOLEAN restore_sigpipe_for_children;
 #endif /* !VMS */
 
 extern int HTNoDataOK;		/* HT_NO_DATA-is-ok hack */
+
+#ifdef WIN_EX
+/* LYMain.c */
+extern int lynx_timeout;
+extern BOOLEAN system_is_NT;
+extern BOOLEAN focus_window;
+#endif /* _WINDOWS */
+
+#ifdef SH_EX
+extern BOOLEAN show_cfg;
+extern BOOLEAN mail_is_blat;
+extern BOOLEAN no_table_center;
+extern int     debug_delay;
+#endif
+
+#if !defined(__CYGWIN__) && defined(__CYGWIN32__)
+#define __CYGWIN__
+
+#define	cygwin_conv_to_full_win32_path(p, q) \
+	cygwin32_conv_to_full_win32_path(p, q)
+
+#define	cygwin_conv_to_full_posix_path(p, q) \
+	cygwin32_conv_to_full_posix_path(p, q)
+#endif
+
+#if defined(__CYGWIN__)
+extern void cygwin_conv_to_full_win32_path(char *posix, char *dos);
+extern void cygwin_conv_to_full_posix_path(char *dos, char *posix);
+extern int setmode(int handle, int amode);
+#endif
 
 #endif /* LYGLOBALDEFS_H */

@@ -41,12 +41,12 @@
 #define IS_EUC_LOS(lo)	((0x21<=lo)&&(lo<=0x7E))	/* standard */
 #define IS_EUC_LOX(lo)	((0xA1<=lo)&&(lo<=0xFE))	/* extended */
 #define IS_EUC_HI(hi)	((0xA1<=hi)&&(hi<=0xFE))
-#define IS_EUC(hi,lo) IS_EUC_HI(hi) && (IS_EUC_LOS(lo) || IS_EUC_LOX(lo))
+#define IS_EUC(hi,lo) (IS_EUC_HI(hi) && (IS_EUC_LOS(lo) || IS_EUC_LOX(lo)))
 
 #define IS_BIG5_LOS(lo)	((0x40<=lo)&&(lo<=0x7E))	/* standard */
 #define IS_BIG5_LOX(lo)	((0xA1<=lo)&&(lo<=0xFE))	/* extended */
 #define IS_BIG5_HI(hi)	((0xA1<=hi)&&(hi<=0xFE))
-#define IS_BIG5(hi,lo) IS_BIG5_HI(hi) && (IS_BIG5_LOS(lo) || IS_BIG5_LOX(lo))
+#define IS_BIG5(hi,lo) (IS_BIG5_HI(hi) && (IS_BIG5_LOS(lo) || IS_BIG5_LOX(lo)))
 
 typedef enum _HTkcode {NOKANJI, EUC, SJIS, JIS} HTkcode;
 typedef enum _HTCJKlang {NOCJK, JAPANESE, CHINESE, KOREAN, TAIPEI} HTCJKlang;

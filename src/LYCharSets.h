@@ -14,6 +14,9 @@
 extern BOOLEAN LYHaveCJKCharacterSet;
 extern BOOLEAN DisplayCharsetMatchLocale;
 
+#include <HTCJK.h>
+extern HTkcode kanji_code;
+
 /*
  *  currently active character set (internal handler)
  */

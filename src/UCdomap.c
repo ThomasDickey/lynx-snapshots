@@ -763,7 +763,7 @@ PRIVATE void con_set_default_unimap NOARGS
     p = dfont_unitable;
     for (i = 0; i < 256; i++) {
 	for (j = dfont_unicount[i]; j; j--) {
-	    con_insert_unipair(*(p++), i, 1);
+	    con_insert_unipair(*(p++), (u16)i, 1);
 	}
     }
 
@@ -820,7 +820,7 @@ PRIVATE int UC_con_set_unimap ARGS2(
 
     for (i = 0; i < 256 && UCInfo[UC_charset_out_hndl].unicount != NULL; i++) {
 	for (j = UCInfo[UC_charset_out_hndl].unicount[i]; j; j--) {
-	    con_insert_unipair(*(p++), i, 0);
+	    con_insert_unipair(*(p++), (u16)i, 0);
 	}
     }
 

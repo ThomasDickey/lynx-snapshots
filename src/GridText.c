@@ -1,4 +1,4 @@
-/*		Character grid hypertext object
+/*
 **		===============================
 */
 
@@ -45,6 +45,10 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
+#ifdef SH_EX	/* for DEBUG (1997/10/10 (Fri) 07:58:47) */
+#define NOTUSED_BAD_FOR_SCREEN
+#endif
+
 #undef DEBUG_APPCH
 
 #ifdef SOURCE_CACHE
@@ -59,12 +63,15 @@ unsigned int cached_styles[CACHEH][CACHEW];
 
 #endif
 
+#include <LYJustify.h>
+
+
 #ifdef USE_COLOR_STYLE_UNUSED
 void LynxClearScreenCache NOARGS
 {
     int i,j;
 
-    CTRACE(tfp, "flushing cached screen styles\n");
+    CTRACE(tfp, "GridText: flushing cached screen styles\n");
     for (i=0;i<CACHEH;i++)
 	for (j=0;j<CACHEW;j++)
 	    cached_styles[i][j]=s_a;
@@ -92,8 +99,15 @@ struct _HTStream {			/* only know it as object */
 			  ((unsigned char)(ch)&0xc0) == 0x80)
 
 extern BOOL HTPassHighCtrlRaw;
-extern HTkcode kanji_code;
 extern HTCJKlang HTCJK;
+
+#ifdef CJK_EX
+PUBLIC HTkcode last_kcode = NOKANJI;	/* 1997/11/14 (Fri) 09:09:26 */
+extern char *str_kcode(HTkcode code);
+#define CHAR_WIDTH 6
+#else
+#define CHAR_WIDTH 1
+#endif
 
 /*	Exports
 */
@@ -250,6 +264,63 @@ struct _HText {
 
 PRIVATE void HText_AddHiddenLink PARAMS((HText *text, TextAnchor *textanchor));
 
+
+#ifdef EXP_JUSTIFY_ELTS
+PUBLIC BOOL can_justify_here;
+PUBLIC BOOL can_justify_here_saved;
+
+PUBLIC BOOL can_justify_this_line;/* =FALSE if line contains form objects */
+PUBLIC int wait_for_this_stacked_elt;/* -1 if can justify contents of the
+    element on the op of stack. If positive - specifies minimal stack depth
+    plus 1 at which we can justify element (can be MAX_LINE+2 if
+    ok_justify ==FALSE or in psrcview. */
+PUBLIC BOOL form_in_htext;/*to indicate that we are in form (since HTML_FORM is
+  not stacked in the HTML.c */
+#ifdef DEBUG_JUSTIFY
+PUBLIC BOOL can_justify_stack_depth;/* can be 0 or 1 if all code is correct*/
+#endif
+
+
+typedef struct ht_run_info_ {
+    int byte_len;		/*length in bytes*/
+    int cell_len;		/*length in cells*/
+} ht_run_info;
+
+static int justify_start_position;/* this is an index of char from which
+    justification can start (eg after "* " preceeding <li> text) */
+
+static int ht_num_runs;/*the number of runs filled*/
+static ht_run_info ht_runs[MAX_LINE];
+static BOOL this_line_was_splitted;
+static TextAnchor* last_anchor_of_previous_line;
+static int justified_text_map[MAX_LINE]; /* this is a map - for each index i
+    it tells to which position j=justified_text_map[i] in justified text
+    i-th character is mapped - it's used for anchor positions fixup and for
+    color style's positions adjustment. */
+
+PUBLIC void ht_justify_cleanup NOARGS
+{
+    last_anchor_of_previous_line = NULL;
+    this_line_was_splitted = FALSE;
+}
+
+PUBLIC void mark_justify_start_position ARGS1(void*,text)
+{
+    if (text && ((HText*)text)->last_line)
+	justify_start_position = ((HText*)text )->last_line->size;
+}
+
+
+#define REALLY_CAN_JUSTIFY(text) ( (wait_for_this_stacked_elt<0) && \
+	( text->style->alignment == HT_LEFT     || \
+	  text->style->alignment == HT_JUSTIFY) && \
+	HTCJK == NOCJK && \
+	can_justify_here && can_justify_this_line && !form_in_htext )
+
+#endif /* EXP_JUSTIFY_ELTS */
+
+
+
 /*
  *  Boring static variable used for moving cursor across
  */
@@ -287,6 +358,7 @@ PRIVATE int HText_TrueLineSize PARAMS((
 #ifndef VMS			/* VMS has a better way - right? - kw */
 #define CHECK_FREE_MEM
 #endif
+
 
 #ifdef CHECK_FREE_MEM
 
@@ -546,7 +618,7 @@ PUBLIC HText *	HText_new ARGS1(
     self->LastChar = '\0';
     self->IgnoreExcess = FALSE;
 
-#ifndef PSRC_TEST
+#ifndef USE_PSRC
     if (HTOutputFormat == WWW_SOURCE)
 	self->source = YES;
     else
@@ -855,7 +927,14 @@ PRIVATE int display_line ARGS2(
 		    addch('_');
 		    i++;
 		} else {
+#if (defined(DOSPATH) || defined(WIN_EX)) && !defined(USE_SLANG)
+		    if (LYShowColor == SHOW_COLOR_NEVER)
+			start_bold();
+		    else
+			start_underline();
+#else
 		    start_underline();
+#endif	/* DOSPATH ... */
 		}
 		break;
 
@@ -864,7 +943,14 @@ PRIVATE int display_line ARGS2(
 		    addch('_');
 		    i++;
 		} else {
+#if (defined(DOSPATH) || defined(WIN_EX)) && !defined(USE_SLANG)
+		    if (LYShowColor == SHOW_COLOR_NEVER)
+			stop_bold();
+		    else
+			stop_underline();
+#else
 		    stop_underline();
+#endif	/* DOSPATH ... */
 		}
 		break;
 
@@ -1020,7 +1106,7 @@ PRIVATE void display_title ARGS1(
      */
     StrAllocCopy(title,
 		 (HTAnchor_title(text->node_anchor) ?
-		  HTAnchor_title(text->node_anchor) : ""));
+		  HTAnchor_title(text->node_anchor) : " "));	/* "" -> " " */
 
     /*
      *  There shouldn't be any \n in the title field,
@@ -1073,7 +1159,7 @@ PRIVATE void display_title ARGS1(
      */
     if (HTCJK != NOCJK) {
 	if (*title &&
-	    (tmp = (unsigned char *)calloc(1, (strlen(title) + 1)))) {
+	    (tmp = (unsigned char *)calloc(1, (strlen(title) + 256)))) {
 	    if (kanji_code == EUC) {
 		TO_EUC((unsigned char *)title, tmp);
 	    } else if (kanji_code == SJIS) {
@@ -1092,11 +1178,14 @@ PRIVATE void display_title ARGS1(
     }
     move(0, 0);
     clrtoeol();
+#ifdef CJK_EX
+    addstr(str_kcode(last_kcode));
+#endif
     if (text->top_of_screen > 0 && HText_hasToolbar(text)) {
 	addch('#');
     }
     i = (LYcols - 1) - strlen(percent) - strlen(title);
-    if (i > 0) {
+    if (i >= CHAR_WIDTH) {
 	move(0, i);
     } else {
 	/*
@@ -1104,9 +1193,9 @@ PRIVATE void display_title ARGS1(
 	 *  account the possibility that multibyte
 	 *  characters might be present. - FM
 	 */
-	if (LYcols - 2 >= (int)strlen(percent))
-	    title[((LYcols - 2) - strlen(percent))] = '\0';
-	move(0, 1);
+	if ((i = ((LYcols - 2) - strlen(percent)) - CHAR_WIDTH) >= 0)
+	    title[i] = '\0';
+	move(0, CHAR_WIDTH);
     }
     addstr(title);
     if (percent[0] != '\0')
@@ -1554,7 +1643,7 @@ PRIVATE void display_page ARGS3(
 			    if (link_dest_intl && link_dest_intl != link_dest) {
 
 				CTRACE(tfp,
-				    "display_page: unexpected typed link to %s!\n",
+		    "GridText: display_page: unexpected typed link to %s!\n",
 					    link_dest_intl->parent->address);
 				link_dest_intl = NULL;
 			    }
@@ -1854,7 +1943,17 @@ PRIVATE void split_line ARGS2(
 	 *  of our new line. - FM
 	 */
 	p = prevdata + split;
-	while ((*p == ' ' &&
+	while ((
+#ifdef EXP_JUSTIFY_ELTS
+		/* if justification is allowed for prev line, then raw
+		 * HT_NON_BREAK_SPACE are still present in data[] (they'll be
+		 * substituted at the end of this function with ' ') - VH
+		 */
+		(*p == ' ' || *p == HT_NON_BREAK_SPACE ) &&
+#else
+		(*p == ' ') &&
+#endif
+
 		(HeadTrim || text->first_anchor ||
 		 underline_on || bold_on ||
 		 text->style->alignment != HT_LEFT ||
@@ -1970,7 +2069,16 @@ PRIVATE void split_line ARGS2(
      *  Economize on space.
      */
     while ((previous->size > 0) &&
+#ifdef EXP_JUSTIFY_ELTS
+	    /* if justification is allowed for prev line, then raw
+	     * HT_NON_BREAK_SPACE are still present in data[] (they'll be
+	     * substituted at the end of this function with ' ') - VH
+	     */
+	   ((previous->data[previous->size-1] == ' ') ||
+	    (previous->data[previous->size-1] == HT_NON_BREAK_SPACE)) &&
+#else
 	   (previous->data[previous->size-1] == ' ') &&
+#endif
 	   (ctrl_chars_on_this_line || HeadTrim || text->first_anchor ||
 	    underline_on || bold_on ||
 	    text->style->alignment != HT_LEFT ||
@@ -2089,7 +2197,7 @@ PRIVATE void split_line ARGS2(
 		    (previous->styles[spare - 1].direction == ABS_ON &&
 		     previous->styles[spare - 2].direction == ABS_OFF)
 		       )) {
-	        /*
+		/*
 		 *  Skip pairs of adjacent ON/OFF or OFF/ON changes.
 		 */
 	    spare -= 2;
@@ -2167,8 +2275,13 @@ PRIVATE void split_line ARGS2(
      *  Align left, right or center.
      */
     spare = 0;
-    if (style->alignment == HT_CENTER ||
-	style->alignment == HT_RIGHT) {
+    ctrl_chars_on_previous_line = 0; /* - VH */
+    if (
+#ifdef EXP_JUSTIFY_ELTS
+	this_line_was_splitted ||
+#endif
+	(style->alignment == HT_CENTER ||
+	 style->alignment == HT_RIGHT) ) {
 	/* Calculate spare character positions if needed */
 	for (cp = previous->data; *cp; cp++) {
 	    if (*cp == LY_UNDERLINE_START_CHAR ||
@@ -2359,6 +2472,287 @@ PRIVATE void split_line ARGS2(
 	    }
 	}
     }
+
+#ifdef EXP_JUSTIFY_ELTS
+    /* now perform justification - by VH */
+
+    if (this_line_was_splitted && spare ) {
+	/* this is the only case when we need justification*/
+	char* jp = previous->data + justify_start_position;
+	ht_run_info* r = ht_runs;
+	char c;
+	int total_byte_len = 0, total_cell_len = 0;
+	int d_, r_, i, j, cur_byte_num, *m;
+	HTLine * jline;
+	char *jdata;
+	char *prevdata = previous->data;
+
+	ht_num_runs = 0;
+	r->byte_len = r->cell_len = 0;
+
+	for(; (c = *jp) != 0; ++jp) {
+	    if (c == ' ') {
+		total_byte_len += r->byte_len;
+		total_cell_len += r->cell_len;
+		++r;
+		++ht_num_runs;
+		r->byte_len = r->cell_len = 0;
+		continue;
+	    }
+	    ++r->byte_len;
+	    if ( IsSpecialAttrChar(c) )
+		continue;
+
+	    ++r->cell_len;
+	    if (c == HT_NON_BREAK_SPACE) {
+		*jp = ' ';	/* substitute it */
+		continue;
+	    }
+	    if (text->T.output_utf8 && !isascii(c)) {
+		    int utf_extra = 0;
+		    if ((c & 0xe0) == 0xc0) {
+			utf_extra = 1;
+		    } else if ((c & 0xf0) == 0xe0) {
+			utf_extra = 2;
+		    } else if ((c & 0xf8) == 0xf0) {
+			utf_extra = 3;
+		    } else if ((c & 0xfc) == 0xf8) {
+			utf_extra = 4;
+		    } else if ((c & 0xfe) == 0xfc) {
+			utf_extra = 5;
+		    } else
+			utf_extra = 0;
+		    if ( (int) strlen(jp+1) < utf_extra)
+			utf_extra = 0;
+		    r->byte_len += utf_extra;
+		    jp += utf_extra;
+	    }
+	}
+	total_byte_len += r->byte_len;
+	total_cell_len += r->cell_len;
+	++ht_num_runs;
+
+	if (ht_num_runs != 1) {
+
+	    jline = (HTLine *)LY_CALLOC(1, LINE_SIZE(previous->size+spare));
+	    if (jline == NULL)
+		outofmem(__FILE__, "split_line_1");
+
+	    jdata = jline->data;
+
+	    /*
+	     * we have to spread num_spaces among (ht_num_runs-1) runs - we
+	     * fill justified_text_map in order to apply changes caused by
+	     * justification to anchor data and color styles, and justify
+	     * original string on the fly
+	     */
+	    d_ = spare/(ht_num_runs-1);
+	    r_ = spare % (ht_num_runs-1);
+
+	    m = justified_text_map;
+	    for(jp=previous->data,i=0;i<justify_start_position;++i) {
+		*m++ = i;
+		*jdata++ = ( *prevdata == HT_NON_BREAK_SPACE ? ' ' : *prevdata);
+		++prevdata;
+	    }
+
+	    cur_byte_num = i;
+
+	    for (r = ht_runs; r < ht_runs + ht_num_runs; ++r ) {
+
+		/* copy the reference to run content */
+		for(i=0; i < r->byte_len;  ++i) {
+		    *m++ = cur_byte_num++;
+		    *jdata++ = *prevdata++;
+		}
+		if ( r - ht_runs  == ht_num_runs - 1 ) { /* nop on last run */
+		    *jdata++ = '\0';
+		    break;
+		}
+
+		/* the space that was in original string */
+		*m++ = cur_byte_num++;
+		*jdata++ = ' ';
+		prevdata++;/* skip that space */
+
+		cur_byte_num += j=( d_ + ( r_--  > 0 ) );
+		for (i=0; i<j; ++i)
+		    *jdata++ = ' ';
+	    }
+	    *m++ = justify_start_position + total_cell_len +
+		    spare + ht_num_runs - 1; /*map the end*/
+
+	    text->chars += spare;
+
+	    jline->offset = previous->offset;
+	    jline->size = previous->size + spare;
+	    jline->split_after = previous->split_after;
+	    jline->bullet = previous->bullet;
+	    jline->expansion_line = previous->expansion_line;
+
+	    jline->prev = previous->prev;
+	    jline->next = previous->next;
+	    previous->next->prev = jline;
+	    previous->prev->next = jline;
+
+#if defined(USE_COLOR_STYLE)
+	    jline->numstyles = previous->numstyles;
+
+	    /* now copy and fix colorstyles */
+	    for(i = 0; i < jline->numstyles; ++i) {
+		jline->styles[i].style = previous->styles[i].style;
+		jline->styles[i].direction = previous->styles[i].direction;
+		jline->styles[i].previous = previous->styles[i].previous;
+		jline->styles[i].horizpos = justified_text_map[previous->styles[i].horizpos];
+	    }
+#endif
+	    /* we have to fix anchors*/
+	    {
+		/*a2 is the last anchor on the line preceeding 'previous'*/
+		TextAnchor* a2 = last_anchor_of_previous_line;
+
+		if (!a2)
+		    a2 = text->first_anchor;
+		else if (a2 == text->last_anchor)
+		    a2 = NULL;
+		else
+		    a2 = a2->next; /*1st anchor on line we justify */
+
+		if (a2) {
+		    for (; a2 /*&& a2->line_num == text->Lines-1*/;
+			    last_anchor_of_previous_line = a2, a2 = a2->next) {
+			int oldpos = a2->line_pos,
+			    newpos = justified_text_map[a2->line_pos],
+			    shift = newpos - oldpos;
+
+			if (a2->line_num == text->Lines)
+			    break;/*new line not yet completed*/
+
+			if (a2->line_num == text->Lines-1) {
+			    a2->line_pos = newpos;
+			    a2->start += shift;
+
+			    if (!a2->extent && a2->number &&
+				(a2->link_type & HYPERTEXT_ANCHOR) &&
+				!a2->show_anchor &&
+				a2->number == text->last_anchor_number)
+				/* seems endAnchor wasn't called for it */ {
+				a2 = a2->next; /*don't allow .start to be incremented
+				    by 'spare' once more */
+				break;
+			    }
+
+			    if ( a2->extent + oldpos > (int) previous->size)
+				/*anchor content wrapped to new line */
+				a2->extent += (jline->size - newpos) -
+				    (previous->size - oldpos);
+			    else
+				a2->extent = justified_text_map[oldpos+a2->extent]
+				    - newpos;
+
+			} else {
+			    /* This is the anchor that was started on previous
+			     * line.  Its .line_pos and .start were updated. 
+			     * So we have to update only extent.  If anchor
+			     * text is longer than two lines, we don't bother
+			     * setting it to correct value.
+			     */
+			    if (a2->line_num != text->Lines-2)
+				continue; /* don't bother */
+			    if (!a2->extent && a2->number &&
+				(a2->link_type & HYPERTEXT_ANCHOR) &&
+				!a2->show_anchor &&
+				a2->number == text->last_anchor_number)
+				/* seems endAnchor wasn't called for it */
+				continue;
+			    /* anchor is started at text->Lines-2, and there
+			     * are two cases - either it was wrapped to newline
+			     * or it ended in previous text->Lines-1.
+			     */
+			    {
+				int p2sz = previous->prev->size,
+				    p1sz = previous->size,
+				    onp2sz = p2sz - a2->line_pos,
+				    onp1sz = a2->extent - 1 - onp2sz;
+
+				if (onp1sz >= p1sz)
+				    /* this anchor will be skipped at the next
+				     * split_line here, since its line_num will
+				     * be text->Lines-3
+				     */
+				    a2->extent += spare;
+				else {
+				    a2->extent += justified_text_map[onp1sz-1]
+					 - onp1sz + 1;
+				}
+			    }
+
+			}
+
+		    }
+
+		    /* iterate on anchors in the last line */
+		    for (; a2; a2 = a2->next)
+			a2->start += spare;
+		}
+	    }
+
+	    FREE(previous);
+
+	} else { /* (ht_num_runs==1) */
+	    /* keep maintaining 'last_anchor_of_previous_line' */
+	    TextAnchor* a2 = last_anchor_of_previous_line;
+	    if (!a2)
+		a2 = text->first_anchor;
+	    else if (a2 == text->last_anchor)
+		a2 = NULL;
+	    else
+		a2 = a2->next; /* 1st anchor on line we justify */
+
+	    if (a2)
+		for (; a2 && a2->line_num <= text->Lines-1;
+		    last_anchor_of_previous_line = a2, a2 = a2->next);
+	}
+    } else {
+	if (REALLY_CAN_JUSTIFY(text) ) {
+	    char* p;
+
+	    /* it was permitted to justify line, but this function was called
+	     * to end paragraph - we must subsitute HT_NON_BREAK_SPACEs with
+	     * spaces in previous line
+	     */
+	    if (line->size) {
+		  CTRACE(tfp,"justification: shouldn't happen - new line is not empty!\n");
+	    }
+
+	    for (p=previous->data;*p;++p)
+		if (*p == HT_NON_BREAK_SPACE)
+		    *p = ' ';
+	}
+
+	/* HT_NON_BREAK_SPACEs were subsituted with spaces in
+	   HText_appendCharacter */
+	{
+	    /* keep maintaining 'last_anchor_of_previous_line' */
+	    TextAnchor* a2 = last_anchor_of_previous_line;
+	    if (!a2)
+		a2 = text->first_anchor;
+	    else if (a2 == text->last_anchor)
+		a2 = NULL;
+	    else
+		a2 = a2->next; /*1st anchor on line we justify */
+
+	    if (a2)
+		for (; a2 && a2->line_num <= text->Lines-1;
+		    last_anchor_of_previous_line = a2, a2 = a2->next);
+	}
+    }
+
+	/* cleanup */
+    can_justify_this_line = TRUE;
+    justify_start_position = 0;
+    this_line_was_splitted = FALSE;
+#endif
 } /* split_line */
 
 
@@ -2439,6 +2833,10 @@ PUBLIC void HText_appendCharacter ARGS2(
     int indent;
 
 #ifdef DEBUG_APPCH
+#ifdef CJK_EX
+    static unsigned char save_ch = 0;
+#endif
+
     if (TRACE) {
 	char * special = NULL;  /* make trace a little more readable */
 	switch(ch) {
@@ -2475,8 +2873,28 @@ PUBLIC void HText_appendCharacter ARGS2(
 	    CTRACE(tfp, "add(%s %d special char) %d/%d\n", special, ch,
 		   HTisDocumentSource(), HTOutputFormat != WWW_SOURCE);
 	} else {
-	    CTRACE(tfp, "add(%c) %d/%d\n", ch,
-		   HTisDocumentSource(), HTOutputFormat != WWW_SOURCE);
+#ifdef CJK_EX	/* 1998/08/30 (Sun) 13:26:23 */
+	    if (save_ch == 0) {
+		if (IS_SJIS_HI1(ch) || IS_SJIS_HI2(ch)) {
+		    save_ch = ch;
+		} else {
+		    CTRACE(tfp, "add(%c) %d/%d\n", ch,
+			HTisDocumentSource(), HTOutputFormat != WWW_SOURCE);
+		}
+	    } else {
+		CTRACE(tfp, "add(%c%c) %d/%d\n", save_ch, ch,
+			HTisDocumentSource(), HTOutputFormat != WWW_SOURCE);
+		save_ch = 0;
+	    }
+#else
+	    if (ch < 0x80) {
+		CTRACE(tfp, "add(%c) %d/%d\n", ch,
+		    HTisDocumentSource(), HTOutputFormat != WWW_SOURCE);
+	    } else {
+		CTRACE(tfp, "add(%02x) %d/%d\n", ch,
+		    HTisDocumentSource(), HTOutputFormat != WWW_SOURCE);
+	    }
+#endif	/* CJK_EX */
 	}
     } /* trace only */
 #endif /* DEBUG_APPCH */
@@ -2642,9 +3060,19 @@ PUBLIC void HText_appendCharacter ARGS2(
 		} else {
 		    text->kanji_buf = '\216';
 		    ch |= 0200;
+#ifdef SH_EX
+		    /**** Add Next Line by patakuti ****/
+		    text->permissible_split = (int)text->last_line->size;
+		    {
+			unsigned char hi, low;
+			JISx0201TO0208_EUC(0x8e, ch, &hi, &low);
+			text->kanji_buf = hi;
+			ch = low;
 		}
-		break;
+#endif
 	}
+		break;
+	} /* end switch */
 
 	if (!text->kanji_buf) {
 	    if ((ch & 0200) != 0) {
@@ -2653,7 +3081,8 @@ PUBLIC void HText_appendCharacter ARGS2(
 		 */
 		if ((text->kcode == SJIS) &&
 		    ((unsigned char)ch >= 0xA1) &&
-		    ((unsigned char)ch <= 0xDF)) {
+		    ((unsigned char)ch <= 0xDF))
+		{
 		    unsigned char c = (unsigned char)ch;
 		    unsigned char kb = (unsigned char)text->kanji_buf;
 		    JISx0201TO0208_SJIS(c,
@@ -2661,6 +3090,8 @@ PUBLIC void HText_appendCharacter ARGS2(
 					(unsigned char *)&c);
 		    ch = (char)c;
 		    text->kanji_buf = kb;
+		    /* 1998/01/19 (Mon) 09:06:15 */
+		    text->permissible_split = (int)text->last_line->size;
 		} else {
 		    text->kanji_buf = ch;
 		    /*
@@ -2677,9 +3108,20 @@ PUBLIC void HText_appendCharacter ARGS2(
 	return;
     }
 
+#ifdef CJK_EX	/* MOJI-BAKE Fix! 1997/10/12 -- 10/31 (Fri) 00:22:57 - JH7AYN */
+    if (ch == LY_BOLD_START_CHAR || ch == LY_BOLD_END_CHAR) {
+	text->permissible_split = (int)line->size;	/* Can split here */
+	if (HTCJK == JAPANESE)
+	    text->kcode = NOKANJI;
+    }
+#endif
+
     if (IsSpecialAttrChar(ch) && ch != LY_SOFT_NEWLINE) {
-#ifndef USE_COLOR_STYLE
+#if !defined(USE_COLOR_STYLE) || !defined(NO_DUMP_WITH_BACKSPACES)
 	if (line->size >= (MAX_LINE-1)) return;
+#if defined(USE_COLOR_STYLE) && !defined(NO_DUMP_WITH_BACKSPACES)
+	if (with_backspaces && HTCJK==NOCJK && !text->T.output_utf8) {
+#endif
 	if (ch == LY_UNDERLINE_START_CHAR) {
 	    line->data[line->size++] = LY_UNDERLINE_START_CHAR;
 	    line->data[line->size] = '\0';
@@ -2730,6 +3172,12 @@ PUBLIC void HText_appendCharacter ARGS2(
 		return;
 	    }
 	}
+#if defined(USE_COLOR_STYLE) && !defined(NO_DUMP_WITH_BACKSPACES)
+	} /* if (with_backspaces && HTCJK==HTNOCJK && !text->T.output_utf8) */
+	 else
+	     return;
+#endif
+
 #else
 	return;
 #endif
@@ -2766,6 +3214,15 @@ PUBLIC void HText_appendCharacter ARGS2(
      */
     if (ch == HT_EN_SPACE)
 	ch = ' ';
+
+#ifdef SH_EX	/* 1997/11/01 (Sat) 12:08:54 */
+    if (ch == 0x0b) {	/* ^K ??? */
+	ch = '\r';
+    }
+    if (ch == 0x1a) {	/* ^Z ??? */
+	ch = '\r';
+    }
+#endif
 
     /*
      *  I'm going to cheat here in a BIG way.  Since I know that all
@@ -2898,6 +3355,10 @@ check_IgnoreExcess:
 					     1 : 0))) >= (LYcols - 1)) {
 
 	if (style->wordWrap && HTOutputFormat != WWW_SOURCE) {
+#ifdef EXP_JUSTIFY_ELTS
+	    if (REALLY_CAN_JUSTIFY(text))
+		this_line_was_splitted=TRUE;
+#endif
 	    split_line(text, text->permissible_split);
 	    if (ch == ' ') return;	/* Ignore space causing split */
 
@@ -2916,7 +3377,14 @@ check_IgnoreExcess:
 		 *  For normal stuff like pre let's go ahead and
 		 *  wrap so the user can see all of the text.
 		 */
-		new_line(text);
+
+		if ( (dump_output_immediately|| (crawl && traversal) )
+		     && dont_wrap_pre) {
+		    if ((int)line->size >= (int)(MAX_LINE-1))
+			new_line(text);
+		} else
+		    new_line(text);
+
 	}
     } else if ((int)line->size >= (int)(MAX_LINE-1)) {
 	/*
@@ -2928,18 +3396,93 @@ check_IgnoreExcess:
     /*
      *  Insert normal characters.
      */
-    if (ch == HT_NON_BREAK_SPACE) {
+    if (ch == HT_NON_BREAK_SPACE
+#ifdef EXP_JUSTIFY_ELTS
+     && !REALLY_CAN_JUSTIFY(text)
+#endif
+     )
 	ch = ' ';
-    }
+    /* we leave raw HT_NON_BREAK_SPACE otherwise (we'll substitute it later) */
 
     if (ch & 0x80)
 	text->have_8bit_chars = YES;
 
+    /*
+     * Kanji charactor handling.
+     */
     {
 	HTFont font = style->font;
 	unsigned char hi, lo, tmp[2];
 
 	line = text->last_line; /* May have changed */
+
+#ifdef CJK_EX	/* 1997/11/14 (Fri) 09:10:03 */
+	if (HTCJK != NOCJK && text->kanji_buf) {
+	    hi = (unsigned char)text->kanji_buf;
+	    lo = (unsigned char)ch;
+
+	    if (HTCJK == JAPANESE) {
+		if (text->kcode == NOKANJI)
+		{
+		    if (IS_SJIS(hi, lo, text->in_sjis) && IS_EUC(hi, lo)) {
+			text->kcode = NOKANJI;
+		    } else if (IS_SJIS(hi, lo, text->in_sjis)) {
+			text->kcode = SJIS;
+		    } else if (IS_EUC(hi, lo)) {
+			text->kcode = EUC;
+		    }
+		}
+
+		switch (kanji_code) {
+		case EUC:
+		    if (text->kcode == SJIS) {
+			SJIS_TO_EUC1(hi, lo, tmp);
+			line->data[line->size++] = tmp[0];
+			line->data[line->size++] = tmp[1];
+		    } else if (text->kcode == EUC) {
+			JISx0201TO0208_EUC(hi, lo, &hi, &lo);
+			line->data[line->size++] = hi;
+			line->data[line->size++] = lo;
+		    }
+		    break;
+
+		case SJIS:
+		    if (last_kcode != SJIS && text->kcode == EUC)
+		    {
+			EUC_TO_SJIS1(hi, lo, tmp);
+			line->data[line->size++] = tmp[0];
+			line->data[line->size++] = tmp[1];
+		    } else {
+			/* text->kcode == (SJIS or NOKANJI) */
+#ifdef CJK_EX	/* 1998/01/20 (Tue) 16:46:34 */
+			if (last_kcode == EUC) {
+			    if (lo == 0) {	/* BAD EUC code */
+				hi = '=';
+				lo = '=';
+			    } else if (hi == 0x8e) {
+				text->kcode = NOKANJI;
+				JISx0201TO0208_EUC(hi, lo, &hi, &lo);
+				EUC_TO_SJIS1(hi, lo, tmp);
+				hi = tmp[0];
+				lo = tmp[1];
+			    }
+			}
+#endif
+			line->data[line->size++] = hi;
+			line->data[line->size++] = lo;
+		    }
+		    break;
+
+		default:
+		    break;
+		}
+	    } else {
+		line->data[line->size++] = hi;
+		line->data[line->size++] = lo;
+	    }
+	    text->kanji_buf = 0;
+	}
+#else
 	if (HTCJK != NOCJK && text->kanji_buf) {
 	    hi = (unsigned char)text->kanji_buf, lo = (unsigned char)ch;
 	    if (HTCJK == JAPANESE && text->kcode == NOKANJI) {
@@ -2971,7 +3514,9 @@ check_IgnoreExcess:
 		line->data[line->size++] = lo;
 	    }
 	    text->kanji_buf = 0;
-	} else if (HTCJK != NOCJK) {
+	}
+#endif
+	else if (HTCJK != NOCJK) {
 	    line->data[line->size++] = (kanji_code != NOKANJI) ?
 							    ch :
 					  (font & HT_CAPITALS) ?
@@ -3113,7 +3658,7 @@ PUBLIC int HText_beginAnchor ARGS3(
      */
     if ((a->number > 0) &&
 	(keypad_mode == LINKS_ARE_NUMBERED ||
-	 keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED)) {
+	 keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED)) {
 	char saved_lastchar = text->LastChar;
 	int saved_linenum = text->Lines;
 	sprintf(marker,"[%d]", a->number);
@@ -3163,7 +3708,7 @@ PUBLIC void HText_endAnchor ARGS2(
 	}
     }
 
-    CTRACE(tfp, "HText_endAnchor: number:%d link_type:%d\n",
+    CTRACE(tfp, "GridText:HText_endAnchor: number:%d link_type:%d\n",
 			a->number, a->link_type);
     if (a->link_type == INPUT_ANCHOR) {
 	/*
@@ -3181,7 +3726,7 @@ PUBLIC void HText_endAnchor ARGS2(
 	int i, j, k, l;
 	BOOL remove_numbers_on_empty =
 	    ((keypad_mode == LINKS_ARE_NUMBERED ||
-	      keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED) &&
+	      keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) &&
 	     (text->hiddenlinkflag != HIDDENLINKS_MERGE ||
 	      (LYNoISMAPifUSEMAP &&
 	       !(text->node_anchor && text->node_anchor->bookmark) &&
@@ -3672,8 +4217,7 @@ PUBLIC void HText_endAppend ARGS1(
     while (text->last_line->data[0] == '\0' && text->Lines > 2) {
 	HTLine *next_to_the_last_line = text->last_line->prev;
 
-
-	CTRACE(tfp, "GridText: Removing bottom blank line: %s\n",
+	CTRACE(tfp, "GridText: Removing bottom blank line: `%s'\n",
 			    text->last_line->data);
 	/*
 	 *  line_ptr points to the first line.
@@ -3683,7 +4227,7 @@ PUBLIC void HText_endAppend ARGS1(
 	FREE(text->last_line);
 	text->last_line = next_to_the_last_line;
 	text->Lines--;
-	CTRACE(tfp, "GridText: New bottom line: %s\n",
+	CTRACE(tfp, "GridText: New bottom line: `%s'\n",
 			    text->last_line->data);
     }
 
@@ -3733,7 +4277,7 @@ PUBLIC void HText_trimHightext ARGS2(
 	return;
 
     CTRACE(tfp, "Gridtext: Entering HText_trimHightext %s\n",
-	        final ? "(final)" : "(partial)");
+		final ? "(final)" : "(partial)");
 
     /*
      *  Get the first line.
@@ -3825,8 +4369,7 @@ re_parse:
 	}
 	anchor_ptr->start += cur_shift;
 
-	CTRACE(tfp, "anchor text: '%s'\n",
-					   line_ptr->data);
+	CTRACE(tfp, "anchor text: '%s'\n", line_ptr->data);
 	/*
 	 *  If the link begins with an end of line and we have more
 	 *  lines, then start the highlighting on the next line. - FM
@@ -5582,6 +6125,11 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
     register int i;
     int first = TRUE;
     HTLine * line;
+#ifndef NO_DUMP_WITH_BACKSPACES
+    HText* text = HTMainText;
+    BOOL in_b=FALSE,in_u=FALSE,
+	bs=text && with_backspaces && HTCJK==NOCJK && !text->T.output_utf8;
+#endif
 
     if (!HTMainText)
 	return;
@@ -5612,6 +6160,17 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 	 */
 	for (i = 0; line->data[i] != '\0'; i++) {
 	    if (!IsSpecialAttrChar(line->data[i])) {
+#ifndef NO_DUMP_WITH_BACKSPACES
+		if (in_b) {
+		    fputc(line->data[i], fp);
+		    fputc('\b',fp);
+		    fputc(line->data[i], fp);
+		} else if (in_u) {
+		    fputc('_',fp);
+		    fputc('\b',fp);
+		    fputc(line->data[i], fp);
+		} else
+#endif
 		fputc(line->data[i], fp);
 	    } else if (line->data[i] == LY_SOFT_HYPHEN &&
 		line->data[i + 1] == '\0') { /* last char on line */
@@ -5636,6 +6195,27 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 			break;
 		}
 	    }
+#ifndef NO_DUMP_WITH_BACKSPACES
+	    else if (bs) {
+		switch (line->data[i]) {
+		    case LY_UNDERLINE_START_CHAR:
+			if (!in_b)
+			    in_u = TRUE; /*favor bold over underline*/
+			break;
+		    case LY_UNDERLINE_END_CHAR:
+			in_u = FALSE;
+			break;
+		    case LY_BOLD_START_CHAR:
+			if (in_u)
+			    in_u = FALSE; /* turn it off*/
+			in_b = TRUE;
+			break;
+		    case LY_BOLD_END_CHAR:
+			in_b = FALSE;
+			break;
+		}
+	    }
+#endif
 	}
 
 	if (line == HTMainText->last_line)
@@ -5663,6 +6243,12 @@ PUBLIC void print_crawl_to_fd ARGS3(
     register int i;
     int first = TRUE;
     HTLine * line;
+#ifndef NO_DUMP_WITH_BACKSPACES
+    HText* text = HTMainText;
+    BOOL in_b=FALSE,in_u=FALSE,
+	bs=text && with_backspaces && HTCJK==NOCJK && !text->T.output_utf8;
+#endif
+
 
     if (!HTMainText)
 	return;
@@ -5704,6 +6290,28 @@ PUBLIC void print_crawl_to_fd ARGS3(
 		    fputc('-', fp);
 		}
 	     }
+#ifndef NO_DUMP_WITH_BACKSPACES
+	    else if (bs) {
+		switch (line->data[i]) {
+		    case LY_UNDERLINE_START_CHAR:
+			if (!in_b)
+			    in_u = TRUE; /*favor bold over underline*/
+			break;
+		    case LY_UNDERLINE_END_CHAR:
+			in_u = FALSE;
+			break;
+		    case LY_BOLD_START_CHAR:
+			if (in_u)
+			    in_u = FALSE; /* turn it off*/
+			in_b = TRUE;
+			break;
+		    case LY_BOLD_END_CHAR:
+			in_b = FALSE;
+			break;
+		}
+	    }
+#endif
+
 	}
 
 	if (line == HTMainText->last_line) {
@@ -5717,7 +6325,7 @@ PUBLIC void print_crawl_to_fd ARGS3(
      */
     if ((nolist == FALSE) &&
 	(keypad_mode == LINKS_ARE_NUMBERED ||
-	 keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED)) {
+	 keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED)) {
 	printlist(fp,FALSE);
     }
 
@@ -6969,7 +7577,7 @@ PRIVATE char * HText_skipOptionNumPrefix ARGS1(
     /*
      *  Check if we are in the correct keypad mode.
      */
-    if (keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED) {
+    if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) {
 	/*
 	 *  Skip the option number embedded in the option name so the
 	 *  extra chars won't mess up cgi scripts processing the value.
@@ -7057,7 +7665,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	cp++;
     if (HTCurSelectGroupType == F_RADIO_TYPE &&
 	LYSelectPopups &&
-	keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED) {
+	keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) {
 	/*
 	 *  Collapse any space between the popup option
 	 *  prefix and actual value. - FM
@@ -7162,6 +7770,10 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	if (HTCJK != NOCJK) {
 	    if (cp &&
 		(tmp = (unsigned char *)calloc(1, strlen(cp)+1))) {
+#ifdef SH_EX
+		if (tmp == NULL)
+		    outofmem(__FILE__, "HText_setLastOptionValue");
+#endif
 		if (kanji_code == EUC) {
 		    TO_EUC((unsigned char *)cp, tmp);
 		    val_cs = current_char_set;
@@ -7296,7 +7908,7 @@ PUBLIC int HText_beginInput ARGS3(
     unsigned char *tmp = NULL;
     int i, j;
 
-    CTRACE(tfp,"Entering HText_beginInput\n");
+    CTRACE(tfp, "GridText: Entering HText_beginInput\n");
 
     if (a == NULL || f == NULL)
 	outofmem(__FILE__, "HText_beginInput");
@@ -7380,6 +7992,10 @@ PUBLIC int HText_beginInput ARGS3(
 	StrAllocCopy(IValue, I->value);
     if (IValue && HTCJK != NOCJK) {
 	if ((tmp = (unsigned char *)calloc(1, (strlen(IValue) + 1)))) {
+#ifdef SH_EX
+	    if (tmp == NULL)
+		outofmem(__FILE__, "HText_beginInput");
+#endif
 	    if (kanji_code == EUC) {
 		TO_EUC((unsigned char *)IValue, tmp);
 		I->value_cs = current_char_set;
@@ -7643,13 +8259,13 @@ PUBLIC int HText_beginInput ARGS3(
 	    break;
 
 	default:
-	    if (keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED)
+	    if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED)
 		a->number = ++(text->last_anchor_number);
 	    else
 		a->number = 0;
 	    break;
     }
-    if (keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED && a->number > 0) {
+    if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED && a->number > 0) {
 	char marker[16];
 
 	if (f->type != F_OPTION_LIST_TYPE)
@@ -7698,7 +8314,7 @@ PUBLIC int HText_beginInput ARGS3(
 	     *  If we are numbering form links, take that into
 	     *  account as well. - FM
 	     */
-	    if (keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED)
+	    if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED)
 		MaximumSize -= ((a->number/10) + 3);
 	    if (f->size > MaximumSize)
 		f->size = MaximumSize;
@@ -8254,9 +8870,9 @@ PUBLIC int HText_SubmitForm ARGS4(
 		    CTRACE(tfp, "I'd submit %s (from %s), but you've not finished it\n", form_ptr->value, form_ptr->name);
 		    name_used = (form_ptr->name ? form_ptr->name : "");
 		    val_used = (form_ptr->value ? form_ptr->value : "");
- 		    break;
+		    break;
 #endif
- 
+
 		    /*  fall through  */
 		case F_RADIO_TYPE:
 		case F_CHECKBOX_TYPE:
@@ -8491,7 +9107,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			cdisp_name_startpos = strlen(escaped1);
 			StrAllocCat(escaped1, name_used);
 			StrAllocCat(escaped1, "; filename=\"");
-			StrAllocCat(escaped1, val_used); 
+			StrAllocCat(escaped1, val_used);
 			StrAllocCat(escaped1, "\"");
 			if (MultipartContentType) {
 			    StrAllocCat(escaped1, MultipartContentType);
@@ -8768,7 +9384,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		    } else {
 			/*
 			 *  This is a continuation of a previous textarea
-			 *  add %0a (\n) and the escaped string.
+			 *  add %0d%0a (\r\n) and the escaped string.
 			 */
 			if (escaped2[0] != '\0') {
 			    if (previous_blanks) {
@@ -8780,7 +9396,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			    } else if (Boundary) {
 				HTSprintf(&query, "%s\r\n", escaped2);
 			    } else {
-				HTSprintf(&query, "%%0a%s", escaped2);
+				HTSprintf(&query, "%%0d%%0a%s", escaped2);
 			    }
 			} else {
 			    if (PlainText) {
@@ -8788,7 +9404,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			    } else if (Boundary) {
 				StrAllocCat(previous_blanks, "\r\n");
 			    } else {
-				StrAllocCat(previous_blanks, "%0a");
+				StrAllocCat(previous_blanks, "%0d%0a");
 			    }
 			}
 		    }
@@ -8872,7 +9488,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 	StrAllocCopy(query, "");
     }
     FREE(previous_blanks);
-	
+
     CTRACE(tfp, "QUERY (%d) >> \n%s\n", strlen(query), query);
 
     if (submit_item->submit_method == URL_MAIL_METHOD) {
@@ -9227,9 +9843,12 @@ PUBLIC void HText_setKcode ARGS3(
     **  appropriately. - FM
     */
     if (!strcmp(charset, "shift_jis") ||
-	!strcmp(charset, "x-shift-jis")) {
+	!strcmp(charset, "x-sjis") ||		/* 1997/11/28 (Fri) 18:11:33 */
+	!strcmp(charset, "x-shift-jis"))
+    {
 	text->kcode = SJIS;
     } else if ((p_in && (p_in->enc == UCT_ENC_CJK)) ||
+	       !strcmp(charset, "x-euc") ||	/* 1997/11/28 (Fri) 18:11:24 */
 	       !strcmp(charset, "euc-jp") ||
 	       !strncmp(charset, "x-euc-", 6) ||
 	       !strcmp(charset, "iso-2022-jp") ||
@@ -9248,7 +9867,11 @@ PUBLIC void HText_setKcode ARGS3(
 	**  If we get to here, it's not CJK, so disable that if
 	**  it is enabled.  But only if we are quite sure. - FM & kw
 	*/
+#ifdef CJK_EX
+	last_kcode = text->kcode = NOKANJI;
+#else
 	text->kcode = NOKANJI;
+#endif
 	if (HTCJK != NOCJK) {
 	    if (!p_in || p_in->enc != UCT_ENC_CJK)
 		HTCJK = NOCJK;
@@ -9830,7 +10453,7 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
     l->numstyles       = htline->numstyles;
 #endif
     strcpy (l->data,     htline->data);
-    if (keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED) {
+    if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) {
 	a->number++;
 	increment_tagged_htline (l, a, &lx, &curr_tag, 1, CHOP);
     }
@@ -9883,10 +10506,10 @@ PRIVATE void update_subsequent_anchors ARGS4(
     HTLine     *htline = start_htline;
 
     int form_chars_added = (start_anchor->input_field->size + 1) * n;
-    int         line_adj = 0;
-    int         tag_adj  = 0;
-    int         lx       = 0;
-    int      hang        = 0;  /* for HANG detection of a nasty intermittent */
+    int		line_adj = 0;
+    int		tag_adj	 = 0;
+    int		lx	 = 0;
+    int	     hang	 = 0;  /* for HANG detection of a nasty intermittent */
     int      hang_detect = 100000;  /* ditto */
 
 
@@ -9902,7 +10525,7 @@ PRIVATE void update_subsequent_anchors ARGS4(
      */
     anchor = start_anchor->next;   /* begin updating with the NEXT anchor */
     while (anchor) {
-	if ((keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED) &&
+	if ((keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) &&
 	    (anchor->number != 0))
 	    anchor->number += n;
 	anchor->line_num  += n;
@@ -9940,7 +10563,7 @@ PRIVATE void update_subsequent_anchors ARGS4(
      *   relocating an anchor to the following line, when [tag] digits
      *   expansion pushes things too far in that direction.]
      */
-    if (keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED) {
+    if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) {
 	anchor = start_anchor->next;
 	while (htline != HTMainText->last_line->next) {
 
@@ -10894,6 +11517,21 @@ PUBLIC void HTMark_asSource NOARGS
 {
     if (HTMainText)
 	HTMainText->source = TRUE;
+}
+#endif
+
+#ifdef CJK_EX
+PUBLIC HTkcode HText_getKcode ARGS1(
+      HText *,	      text)
+{
+    return text->kcode;
+}
+
+PUBLIC void HText_updateKcode ARGS2(
+      HText *,	      text,
+      HTkcode,	      kcode)
+{
+    text->kcode = kcode;
 }
 #endif
 

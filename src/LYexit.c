@@ -92,6 +92,12 @@ PUBLIC void LYexit ARGS1(
 {
 #ifndef VMS	/*  On VMS, the VMSexit() handler does these. - FM */
 #ifdef _WINDOWS
+    extern CRITICAL_SECTION critSec_DNS;	/* 1998/09/03 (Thu) 22:01:56 */
+    extern CRITICAL_SECTION critSec_READ;	/* 1998/09/03 (Thu) 22:01:56 */
+
+    DeleteCriticalSection(&critSec_DNS);
+    DeleteCriticalSection(&critSec_READ);
+
     WSACleanup();
 #endif
     if (LYOutOfMemory == TRUE) {

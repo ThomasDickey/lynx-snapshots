@@ -1,6 +1,63 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-07-14 (2.8.3dev.4)
+* minor fixes to build with SunOS K&R compiler -TD
+* cleanup unbalanced curly braces from other recent experimental options -TD
+* rename internal definition for LINKS_AND_FORM_FIELDS_ARE_NUMBERED to
+  LINKS_AND_FIELDS_ARE_NUMBERED to keep it shorter than 32 characters -TD
+* change ifndef's for NO_JUSTIFY to ifdef EXP_JUSTIFY_ELTS since something in
+  VH's recent code causes core dumps, by crosslinking the state of two parts of
+  the parser -TD
+* modify slang code to recognize F1 from terminfo/termcap on Unix (John Davis)
+* changes to use the WATT-32 tcp library, making a DOS port that does http,
+  ftp, news, mailto, and telnet -DK
+  Remaining work includes:
+  * This has been tested only with slang and the djgpp_keyhandler code.  There
+    will probably need to be more changes to have this work properly with
+    PDCurses.
+  * There is at least one bug.  When set to use http_proxy, there seems to be a
+    long wait between socket connect and write if the proxy is accessed too
+    rapidly in succession.  It seems that if it is accessed more frequently
+    than about 20 seconds, there is a timeout of up to about 85 seconds.
+  * some problems with ctrl-break handling, will report to the watt-32 list.
+* rename tcp.h to www_tcp.h -DK
+* fix typo in manpage description of -color (Christian Hudon
+  <chrish@debian.org>).
+* add $(LDFLAGS) to chrtrans/makefile.in, for NetBSD -JS
+* use symbolic link rather than hard link for installing copyright files -TD
+* now dashes and underscores can be intermixed in commandline options, and in
+  -restriction option, ifdef'd with OPTNAME_ALLOW_DASHES -VH
+* added commandline switch '-dont_wrap_pre' that will inhibit line wrapping in
+  <pre> when -dump'ing and -crawl'ing.  (But maximal length of line on output
+  can't exceed MAX_LINE (1023 by default)) -VH
+* lynx.man updated to reflect new option -dont_wrap_pre and to note that gnu
+  style of options (with two dashes) is also supported -VH
+* some small developer's docs tweaks -VH
+* added text justification (controlled by commandline switch '-justify' and
+  from lynx.cfg too), ifdef'd with NO_JUSTIFY -VH
+* added support for emitting backspaces (a-la man) - commandline option is
+  '-with-backspaces', ifdef'd with NO_DUMP_WITH_BACKSPACES -VH
+* added support for forcing-empty-HREFless-As - ie A element that doesn't
+  contain HREF will be closed after it was seen (without waiting for </a>) -
+  this fixes rendering of documentation, produced by broken translators that
+  don't emit balanced 'A's (eg RedHat docs produced by 'dlh', Sybase docs) -
+  commandline option is --force-empty-hrefless-a, and force_empty_hrefless_a in
+  lynx.cfg, ifdef'd with NO_EMPTY_HREFLESS_A -VH
+* incorporate changes for win32 by Hiroyuki Senshu <senshu@shonai-cit.ac.jp>
+  from
+    ftp://crab.it.osha.sut.ac.jp/pub/Win32/develope/senshu/Lynx/
+  based on his patch against 2.8.2pre.6
+  Most changes are ifdef'd
+    #define _WIN_CC=    .... for Windows C Compiler
+    #define CJK_EX      .... CJK EXtention
+    #define SH_EX       .... Senshu Hiroyuki EXtention
+    #define WIN_EX      .... Windows EXtention
+* add missing null-pointer check in MakeNewMapValue(), for verbose-images
+  (from Debian bug report #39596) -TD
+* test/build with gettext-0.10.35 -TD
+* renamed uppercase makefiles and .bat files to lowercase, change the makefiles
+  consistently to Unix-style format -TD
 1999-06-29 (2.8.3dev.3)
 * move HTAlert call so we don't get it each time we run the options menu -TD
 * entify messages in LYshow_statusline_messages() -LP
@@ -74,7 +131,7 @@ Changes since Lynx 2.8 release
 * minor tweaks (LYCharUtils.c, LYMain.c, LYPrint.c) -KW
 * flush Lynx.leaks file after writing each memory leak record but before
   freeing the memory block, to ensure the info is on disk if something goes
-  seriously wrong (i.e., FREE causes a signal).
+  seriously wrong (i.e., FREE causes a signal) -KW
 * more general checking in postoptions - `lynx LYNXOPTIONS:foo' now doesn't
   crash -KW
 * revived dired "install" functionality, more or less as it was (apparently)

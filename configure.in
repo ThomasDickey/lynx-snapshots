@@ -488,6 +488,7 @@ AC_CHECK_FUNCS( \
 	putenv \
 	readdir \
 	strerror \
+	truncate \
 	unsetenv \
 	waitpid \
 )

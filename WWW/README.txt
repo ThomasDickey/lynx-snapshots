@@ -95,8 +95,8 @@ Basic WWW software installation from source
       Check the  WWW/All/$WWW_MACH/Makefile.include for suitable directory and
       flag definitions.
       
-      Check the file tcp.h for the system-specific include file coordinates,
-      etc.
+      Check the file www_tcp.h for the system-specific include file
+      coordinates, etc.
       
       Send any changes you have to make back to www-request@info.cern.ch for
       inclusion into future releases.

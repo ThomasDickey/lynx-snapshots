@@ -103,7 +103,12 @@ PRIVATE HTParentAnchor * HTParentAnchor_new NOARGS
 
 PRIVATE HTChildAnchor * HTChildAnchor_new NOARGS
 {
-    return (HTChildAnchor *)calloc(1, sizeof(HTChildAnchor)); /* zero-filled */
+    HTChildAnchor *p;
+
+    p = (HTChildAnchor *)calloc(1, sizeof(HTChildAnchor)); /* zero-filled */
+    if (p == NULL)
+	outofmem(__FILE__, "HTChildAnchor_new");
+    return p;
 }
 
 
@@ -149,6 +154,12 @@ PRIVATE BOOL HTIdentical ARGS2(
 	CONST char *,	t)
 {
     if (s && t) {  /* Make sure they point to something */
+#ifdef SH_EX	/* 1998/04/28 (Tue) 22:02:58 */
+	if (*s == 'P' || *t == 'P') {
+	    if (strcmp(s + 1, "Name") == 0 || strcmp(t + 1, "Name") == 0)
+		return NO;
+	}
+#endif
 	for (; *s && *t; s++, t++) {
 	    if (*s != *t) {
 		return(NO);
@@ -202,9 +213,7 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
     }
 
     child = HTChildAnchor_new();
-    if (child == NULL)
-	outofmem(__FILE__, "HTChildAnchor_new");
-    CTRACE(tfp, "new Anchor %p named `%s' is child of %p\n",
+    CTRACE(tfp, "HTAnchor: New Anchor %p named `%s' is child of %p\n",
 		(void *)child,
 		tag ? tag : (CONST char *)"",
 		(void *)parent); /* int for apollo */
