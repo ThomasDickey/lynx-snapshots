@@ -1,6 +1,21 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-05-16 (2.8.2pre.4)
+* add 'fixit' parameter to LYEnsureAbsoluteURL() to suppress logic in
+  LYConvertToURL() that was changed in 2.8.1dev.4, to re-offer the original
+  string after an invalid URL is entered at a 'g' prompt.  The calls to support
+  'g' are unmodified; other calls revert to the older behavior (recommended by
+  KW) -TD
+* add/use string functions that make EBCDIC comparisons sort in the ASCII
+  collating sequence, eliminating some special ifdef's in HTMLDTD.c -PG
+* when STARTFILE cannot not be loaded, lynx now exits with more understandable
+  status messages:  all important statusline messages are now printed to
+  stderr/stdout -LP
+* add definition for _DECC_V4_SOURCE for VMS SOCKETSHR_TCP configuration to
+  top-level and ./src build*.com files (reported by Andy Harper) -TD
+* change UNKNOWN_URL_TYPE to 1, to keep it distinct from NOT_A_URL_TYPE, fixes
+  an error introduced when changing UrlTypes to an enum (reported by KW) -TD
 1999-05-12 (2.8.2pre.3)
 * add DEBUG_SOURCE_CACHE makefile flag so all documents will be cached in
   SOURCE_CACHE mode, including local files.  Normally undef'ed so only http

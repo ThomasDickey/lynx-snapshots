@@ -217,6 +217,7 @@ $ THEN
 $  compiler := "DECC"
 $  if option .eqs. "UCX" then optfile = "UCXSHR"
 $  if option .eqs. "TCPWARE" then optfile = "TCPWARESHR"
+$  if option .eqs. "SOCKETSHR_TCP" then extra = extra + ",_DECC_V4_SOURCE"
 $  if option .eqs. "MULTINET" then -
 	extra = extra + ",_DECC_V4_SOURCE,__SOCKET_TYPEDEFS"
 $  v1 = f$verify(1)

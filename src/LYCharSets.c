@@ -868,12 +868,6 @@ PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
     /*
      *	Try UC_entity_info unicode_entities[].
      */
-#ifdef    NOT_ASCII  /* S/390 -- gil -- 1656 */
-    for (i = 0; i < number_of_unicode_entities; i++ ) {
-	/*
-	**  Linear search for NOT_ASCII.
-	*/
-#else  /* NOT_ASCII */
     for (low = 0, high = number_of_unicode_entities;
 	 high > low;
 	 diff < 0 ? (low = i+1) : (high = i)) {
@@ -881,15 +875,12 @@ PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
 	**  Binary search.
 	*/
 	i = (low + (high-low)/2);
-#endif /* NOT_ASCII  S/390 -- gil -- 1662 */
-	diff = strcmp(unicode_entities[i].name, name);	/* Case sensitive! */
+	diff = AS_cmp(unicode_entities[i].name, name);	/* Case sensitive! */
 	if (diff == 0) {
 	    value = unicode_entities[i].code;
 	    break;
 	}
     }
-    /* } NOT_ASCII */
-
     return(value);
 }
 

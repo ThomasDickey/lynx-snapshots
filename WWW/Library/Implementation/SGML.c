@@ -1215,7 +1215,7 @@ PUBLIC HTTag * SGMLFindTag ARGS2(
 	 high > low;
 	 diff < 0 ? (low = i+1) : (high = i)) {	 /* Binary search */
 	i = (low + (high-low)/2);
-	diff = strcasecomp(dtd->tags[i].name, string);	/* Case insensitive */
+	diff = AS_casecomp(dtd->tags[i].name, string);	/* Case insensitive */
 	if (diff == 0) {		/* success: found it */
 	    return &dtd->tags[i];
 	}

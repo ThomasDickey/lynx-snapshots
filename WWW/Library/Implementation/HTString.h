@@ -16,6 +16,22 @@ extern int WWW_TraceFlag;       /* Global flag for all W3 trace */
 extern CONST char * HTLibraryVersion;   /* String for help screen etc */
 
 /*
+    EBCDIC string comparison using ASCII collating sequence
+*/
+#ifdef    NOT_ASCII
+extern int AS_casecomp  PARAMS((CONST char *a, CONST char *b));
+extern int AS_ncmp PARAMS((CONST char *a, CONST char *b, unsigned int n));
+#define    AS_cmp( a, b )  ( AS_ncmp( ( a ), ( b ), -1 ) )
+extern int AS_cmp PARAMS((CONST char *a, CONST char *b));
+
+#else
+#define AS_casecomp( a, b ) ( strcasecomp( ( a ), ( b ) ) )
+#define AS_ncmp( a, b, c )  ( strncmp( ( a ), ( b ), ( c ) ) )
+#define AS_cmp strcmp
+
+#endif /* NOT_ASCII */
+
+/*
 
 Case-insensitive string comparison
 

@@ -122,6 +122,65 @@ PUBLIC int strncasecomp ARGS3(
 }
 #endif /* VM */
 
+#ifdef NOT_ASCII
+
+/*	Case-insensitive with ASCII collating sequence
+**	----------------
+*/
+PUBLIC int AS_casecomp ARGS2(
+	CONST char*,	p,
+	CONST char*,	q)
+{
+    int diff;
+
+    for ( ; ; p++, q++) {
+	if (!(*p && *q))
+	    return ((unsigned char) *p - (unsigned char) *q);
+	diff = TOASCII(TOLOWER(*p))
+	     - TOASCII(TOLOWER(*q));
+	if (diff)
+	    return diff;
+    }
+    /*NOTREACHED*/
+}
+
+
+/*	With count limit and ASCII collating sequence
+**	----------------
+**	AS_cmp uses n == -1 to compare indefinite length.
+*/
+PUBLIC int AS_ncmp ARGS3(
+	CONST char *,	p,
+	CONST char *,	q,
+	unsigned int,	n)
+{
+    CONST char *a = p;
+    int diff;
+
+    for ( ; (p-a) < n; p++, q++) {
+	if (!(*p && *q))
+	    return ((unsigned char) *p - (unsigned char) *q);
+	diff = TOASCII(*p)
+	     - TOASCII(*q);
+	if (diff)
+	    return diff;
+    }
+    return 0;	/*   Match up to n characters */
+}
+
+
+/*	With ASCII collating sequence
+**	----------------
+*/
+PUBLIC int AS_cmp ARGS2(
+	CONST char *,	p,
+	CONST char *,	q)
+{
+    return( AS_ncmp( p, q, -1 ) );
+}
+#endif /* NOT_ASCII */
+
+
 /*	Allocate a new copy of a string, and returns it
 */
 PUBLIC char * HTSACopy ARGS2(

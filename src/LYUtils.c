@@ -2514,7 +2514,7 @@ PUBLIC int LYCheckForProxyURL ARGS1(
      *	Don't crash on an empty argument.
      */
     if (cp == NULL || *cp == '\0')
-	return(0);
+	return(NOT_A_URL_TYPE);
 
     /* kill beginning spaces */
     cp = LYSkipBlanks(cp);
@@ -2535,11 +2535,11 @@ PUBLIC int LYCheckForProxyURL ARGS1(
 	FREE(cp2);
 #if defined (DOSPATH)
 	if (cp[1] == ':')
-	    return(0);		/* could be drive letter? - kw */
+	    return(NOT_A_URL_TYPE);	/* could be drive letter? - kw */
 #endif
 	cp1++;
 	if (!*cp) {
-	    return(0);
+	    return(NOT_A_URL_TYPE);
 	} else if (isdigit((unsigned char)*cp1)) {
 	    while (*cp1 && isdigit((unsigned char)*cp1))
 		cp1++;
@@ -2550,7 +2550,7 @@ PUBLIC int LYCheckForProxyURL ARGS1(
 	}
     }
 
-    return(0);
+    return(NOT_A_URL_TYPE);
 }
 
 /*
@@ -3791,9 +3791,10 @@ PUBLIC void LYCheckMail NOARGS
 **  an 'g'oto entries, after they have been
 **  passed to LYFillLocalFileURL(). - FM
 */
-PUBLIC void LYEnsureAbsoluteURL ARGS2(
+PUBLIC void LYEnsureAbsoluteURL ARGS3(
 	char **,	href,
-	CONST char *,	name)
+	CONST char *,	name,
+	int,		fixit)
 {
     char *temp = NULL;
 
@@ -3812,7 +3813,7 @@ PUBLIC void LYEnsureAbsoluteURL ARGS2(
     if (!is_url(*href)) {
 	CTRACE(tfp, "%s%s'%s' is not a URL\n",
 		    (name ? name : ""), (name ? " " : ""), *href);
-	LYConvertToURL(href);
+	LYConvertToURL(href, fixit);
     }
     if ((temp = HTParse(*href, "", PARSE_ALL)) != NULL && *temp != '\0')
 	StrAllocCopy(*href, temp);
@@ -3825,8 +3826,9 @@ PUBLIC void LYEnsureAbsoluteURL ARGS2(
  *  directory on the local system, otherwise as an
  *  http URL. - FM
  */
-PUBLIC void LYConvertToURL ARGS1(
-	char **,	AllocatedString)
+PUBLIC void LYConvertToURL ARGS2(
+	char **,	AllocatedString,
+	int,		fixit)
 {
     char *old_string = *AllocatedString;
     char *temp = NULL;
@@ -4183,7 +4185,7 @@ have_VMS_URL:
 		    } else {
 			StrAllocCopy(*AllocatedString, old_string);
 		    }
-		} else {
+		} else if (fixit) {
 		  /* RW 1998Mar16  Restore AllocatedString to 'old_string' */
 		    StrAllocCopy(*AllocatedString, old_string);
 		}

@@ -1011,7 +1011,8 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 
     /* Failure in accessing a document */
     cp = NULL;
-    StrAllocCopy(cp, "Can't Access `");
+    StrAllocCopy(cp, gettext("Can't Access"));
+    StrAllocCat(cp, " `");
     StrAllocCat(cp, full_address);
     StrAllocCat(cp, "'");
     _HTProgress(cp);
