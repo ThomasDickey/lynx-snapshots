@@ -1487,7 +1487,7 @@ PUBLIC void reply_by_mail ARGS4(
 	    if (HTConfirm(is_preparsed
 		? INC_PREPARSED_MSG_PROMPT
 		: INC_ORIG_MSG_PROMPT) == YES) {
-		print_wwwfile_to_fd(fd, (BOOL) !is_preparsed);
+		print_wwwfile_to_fd(fd, TRUE, (BOOL) !is_preparsed);
 	    }
 	}
 	LYCloseTempFP(fd);	/* Close the tmpfile. */

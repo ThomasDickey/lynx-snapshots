@@ -107,7 +107,7 @@ extern CONST char * HText_getRevTitle NOPARAMS;
 extern CONST char * HText_getStyle NOPARAMS;
 #endif
 extern void HText_setMainTextOwner PARAMS((CONST char * owner));
-extern void print_wwwfile_to_fd PARAMS((FILE * fp, BOOLEAN is_reply));
+extern void print_wwwfile_to_fd PARAMS((FILE * fp, BOOLEAN is_email, BOOLEAN is_reply));
 extern BOOL HText_select PARAMS((HText *text));
 extern BOOL HText_POSTReplyLoaded PARAMS((DocInfo *doc));
 extern BOOL HTFindPoundSelector PARAMS((CONST char *selector));

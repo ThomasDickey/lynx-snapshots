@@ -338,7 +338,7 @@ PUBLIC char *LYNewsPost ARGS2(
 		 *  any non-EUC or non-SJIS 8-bit characters in it where
 		 *  converted to 7-bit equivalents. - FM
 		 */
-		print_wwwfile_to_fd(fd, TRUE);
+		print_wwwfile_to_fd(fd, FALSE, TRUE);
 	    }
 	}
 	LYCloseTempFP(fd);		/* Close the temp file. */

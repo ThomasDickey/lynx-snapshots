@@ -1,9 +1,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.5pre.3\n"
+"Project-Id-Version: lynx 2.8.5rel.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-01-26 20:35-0500\n"
+"POT-Creation-Date: 2004-04-19 19:39-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2780,16 +2780,18 @@ msgstr ""
 msgid "Loading failed, use a previous copy."
 msgstr ""
 
-#: WWW/Library/Implementation/HTAccess.c:1047 src/GridText.c:8311
+#: WWW/Library/Implementation/HTAccess.c:1047 src/GridText.c:8317
 msgid "Loading incomplete."
 msgstr ""
 
 #: WWW/Library/Implementation/HTAccess.c:1077
+#, c-format
 msgid ""
 "**** HTAccess: socket or file number returned by obsolete load routine!\n"
 msgstr ""
 
 #: WWW/Library/Implementation/HTAccess.c:1079
+#, c-format
 msgid ""
 "**** HTAccess: Internal software error.  Please mail lynx-dev@sig.net!\n"
 msgstr ""
@@ -3411,30 +3413,30 @@ msgstr ""
 msgid "unknown form field"
 msgstr ""
 
-#: src/GridText.c:10065
+#: src/GridText.c:10071
 msgid "Can't open file for uploading"
 msgstr ""
 
-#: src/GridText.c:11217
+#: src/GridText.c:11223
 #, c-format
 msgid "Submitting %s"
 msgstr ""
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12374
+#: src/GridText.c:12380
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr ""
 
 #. don't show previous state
-#: src/GridText.c:12580
+#: src/GridText.c:12586
 msgid "Wrap lines to fit displayed area?"
 msgstr ""
 
-#: src/GridText.c:12632
+#: src/GridText.c:12638
 msgid "Very long lines have been wrapped!"
 msgstr ""
 
-#: src/GridText.c:13078
+#: src/GridText.c:13084
 msgid "Very long lines have been truncated!"
 msgstr ""
 
@@ -3442,32 +3444,32 @@ msgstr ""
 msgid "bytes"
 msgstr ""
 
-#: src/HTAlert.c:282
+#: src/HTAlert.c:285
 #, c-format
 msgid "Read %s of %s of data"
 msgstr ""
 
-#: src/HTAlert.c:284
+#: src/HTAlert.c:287
 #, c-format
 msgid "Read %s of data"
 msgstr ""
 
-#: src/HTAlert.c:289
+#: src/HTAlert.c:292
 #, c-format
 msgid ", %s/sec"
 msgstr ""
 
-#: src/HTAlert.c:298
+#: src/HTAlert.c:301
 #, c-format
 msgid " (stalled for %s)"
 msgstr ""
 
-#: src/HTAlert.c:302
+#: src/HTAlert.c:305
 #, c-format
 msgid ", ETA %s"
 msgstr ""
 
-#: src/HTAlert.c:309
+#: src/HTAlert.c:312
 msgid " (Press 'z' to abort)"
 msgstr ""
 
@@ -3496,11 +3498,11 @@ msgstr ""
 #. *  Lynx will also accept y Y n N as responses unless there is a conflict
 #. *  with the first letter of the "yes" or "no" translation.
 #.
-#: src/HTAlert.c:350 src/HTAlert.c:398
+#: src/HTAlert.c:353 src/HTAlert.c:401
 msgid "yes"
 msgstr ""
 
-#: src/HTAlert.c:353 src/HTAlert.c:399
+#: src/HTAlert.c:356 src/HTAlert.c:402
 msgid "no"
 msgstr ""
 
@@ -3541,6 +3543,7 @@ msgid ""
 msgstr ""
 
 #: src/LYBookmark.c:379
+#, c-format
 msgid ""
 "     You can delete links by the 'R' key<br>\n"
 "<ol>\n"
@@ -3576,23 +3579,23 @@ msgstr ""
 #. *  Neither the path as given nor any components examined by
 #. *  backing up were stat()able. - kw
 #.
-#: src/LYCgi.c:231
+#: src/LYCgi.c:241
 msgid "Unable to access cgi script"
 msgstr ""
 
-#: src/LYCgi.c:654 src/LYCgi.c:657
+#: src/LYCgi.c:664 src/LYCgi.c:667
 msgid "Good Advice"
 msgstr ""
 
-#: src/LYCgi.c:660
+#: src/LYCgi.c:670
 msgid "An excellent http server for VMS is available via"
 msgstr ""
 
-#: src/LYCgi.c:667
+#: src/LYCgi.c:677
 msgid "this link"
 msgstr ""
 
-#: src/LYCgi.c:671
+#: src/LYCgi.c:681
 msgid "It provides state of the art CGI script support.\n"
 msgstr ""
 
@@ -3616,38 +3619,39 @@ msgstr ""
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr ""
 
-#: src/LYCurses.c:1000
+#: src/LYCurses.c:1006
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr ""
 
-#: src/LYCurses.c:1424
+#: src/LYCurses.c:1434
 msgid "Terminal ="
 msgstr ""
 
-#: src/LYCurses.c:1428
+#: src/LYCurses.c:1438
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr ""
 
-#: src/LYCurses.c:1478
+#: src/LYCurses.c:1488
 msgid "Your Terminal type is unknown!"
 msgstr ""
 
-#: src/LYCurses.c:1479
+#: src/LYCurses.c:1489
 msgid "Enter a terminal type:"
 msgstr ""
 
-#: src/LYCurses.c:1493
+#: src/LYCurses.c:1503
 msgid "TERMINAL TYPE IS SET TO"
 msgstr ""
 
-#: src/LYCurses.c:1992
+#: src/LYCurses.c:2002
 #, c-format
 msgid ""
 "\n"
 "A Fatal error has occurred in %s Ver. %s\n"
 msgstr ""
 
-#: src/LYCurses.c:1994
+#: src/LYCurses.c:2004
+#, c-format
 msgid ""
 "\n"
 "Please notify your system administrator to confirm a bug, and if\n"
@@ -3703,6 +3707,7 @@ msgid "Local additions:"
 msgstr ""
 
 #: src/LYDownload.c:578 src/LYUpload.c:216
+#, c-format
 msgid "No Name Given"
 msgstr ""
 
@@ -4119,10 +4124,12 @@ msgid "No system mailer configured"
 msgstr ""
 
 #: src/LYMain.c:976
+#, c-format
 msgid "No Winsock found, sorry."
 msgstr ""
 
 #: src/LYMain.c:1178
+#, c-format
 msgid "You MUST define a valid TMP or TEMP area!\n"
 msgstr ""
 
@@ -4139,6 +4146,7 @@ msgid ""
 msgstr ""
 
 #: src/LYMain.c:1454
+#, c-format
 msgid ""
 "\n"
 "Lynx character sets not declared.\n"
@@ -4146,6 +4154,7 @@ msgid ""
 msgstr ""
 
 #: src/LYMain.c:1483
+#, c-format
 msgid ""
 "\n"
 "Lynx edit map not declared.\n"
@@ -4184,15 +4193,18 @@ msgid "Built on %s %s %s\n"
 msgstr ""
 
 #: src/LYMain.c:3178
+#, c-format
 msgid ""
 "Copyrights held by the University of Kansas, CERN, and other contributors.\n"
 msgstr ""
 
 #: src/LYMain.c:3180
+#, c-format
 msgid "Distributed under the GNU General Public License.\n"
 msgstr ""
 
 #: src/LYMain.c:3182
+#, c-format
 msgid ""
 "See http://lynx.isc.org/ and the online help for more information.\n"
 "\n"
@@ -4204,6 +4216,7 @@ msgid "USAGE: %s [options] [file]\n"
 msgstr ""
 
 #: src/LYMain.c:3936
+#, c-format
 msgid "Options are:\n"
 msgstr ""
 
@@ -4284,7 +4297,7 @@ msgstr ""
 msgid "Current URL is empty."
 msgstr ""
 
-#: src/LYMainLoop.c:6915 src/LYUtils.c:1688
+#: src/LYMainLoop.c:6915 src/LYUtils.c:1696
 msgid "Copy to clipboard failed."
 msgstr ""
 
@@ -4831,6 +4844,7 @@ msgid "View the file "
 msgstr ""
 
 #: src/LYPrint.c:952
+#, c-format
 msgid " Print job complete.\n"
 msgstr ""
 
@@ -4891,6 +4905,7 @@ msgid "Print out on a printer attached to your vt100 terminal"
 msgstr ""
 
 #: src/LYReadCFG.c:339
+#, c-format
 msgid ""
 "Syntax Error parsing COLOR in configuration file:\n"
 "The line must be of the form:\n"
@@ -5201,31 +5216,33 @@ msgstr ""
 msgid "Upload options:"
 msgstr ""
 
-#: src/LYUtils.c:1690
+#: src/LYUtils.c:1698
 msgid "Download document URL put to clipboard."
 msgstr ""
 
-#: src/LYUtils.c:2468
+#: src/LYUtils.c:2476
 msgid "Unexpected access protocol for this URL scheme."
 msgstr ""
 
-#: src/LYUtils.c:3294
+#: src/LYUtils.c:3302
 msgid "Too many tempfiles"
 msgstr ""
 
-#: src/LYUtils.c:3595
+#: src/LYUtils.c:3603
 msgid "unknown restriction"
 msgstr ""
 
-#: src/LYUtils.c:3626
+#: src/LYUtils.c:3634
+#, c-format
 msgid "No restrictions set.\n"
 msgstr ""
 
-#: src/LYUtils.c:3629
+#: src/LYUtils.c:3637
+#, c-format
 msgid "Restrictions set:\n"
 msgstr ""
 
-#: src/LYUtils.c:5034
+#: src/LYUtils.c:5042
 msgid "Cannot find HOME directory"
 msgstr ""
 

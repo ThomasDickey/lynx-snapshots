@@ -16,18 +16,22 @@
  *  version 2, or at your option any later version.
  */
 
+#ifndef HAVE_CONFIG_H
+/* override HTUtils.h fallbacks for cross-compiling */
+#define HAVE_LSTAT
+#define NO_FILIO_H
+#endif
+
 #define DONT_USE_SOCKS5
-#include <HTUtils.h>
+#include <UCDefs.h>
+#include <UCkd.h>
 
 /*
- *  Don't try to use LYexit().
+ *  Don't try to use LYexit() since this is a standalone file.
  */
 #ifdef exit
 #undef exit
 #endif /* exit */
-
-#include <UCkd.h>
-#include <UCDefs.h>
 
 #define MAX_FONTLEN 256
 
@@ -41,13 +45,15 @@ static FILE *chdr = 0;
 /*
  * Since we may be writing the formatted file to stdout, ensure that we flush
  * everything before leaving, since some old (and a few not-so-old) platforms
- * that do not implement POSIX 'exit()'.
+ * do not properly implement POSIX 'exit()'.
  */
 PRIVATE void done PARAMS((int code)) GCC_NORETURN;
 PRIVATE void done ARGS1(int, code)
 {
-    fflush(chdr);
-    fclose(chdr);
+    if (chdr != 0) {
+	fflush(chdr);
+	fclose(chdr);
+    }
     fflush(stderr);
     exit(code);
 }
@@ -568,9 +574,6 @@ PUBLIC int main ARGS2(
 		    if (UCH(ch) < 32 || ch == '\\' || ch == '\"' ||
 			UCH(ch) >= 127) {
 			sprintf(p1, "\\%.3o", UCH(ch));
-#ifdef NOTDEFINED
-			fprintf(stderr, "%s\n", tbuf);
-#endif /* NOTDEFINED */
 			p1 += 3;
 		    } else {
 			*p1 = ch;
@@ -579,9 +582,6 @@ PUBLIC int main ARGS2(
 	    }
 	    *p1 = '\0';
 	    for (i = un0; i <= un1; i++) {
-#ifdef NOTDEFINED
-		fprintf(chdr, "U+0x%x:%s\n", i, tbuf); */
-#endif /* NOTDEFINED */
 		addpair_str(tbuf,i);
 	    }
 	    continue;
@@ -745,18 +745,7 @@ PUBLIC int main ARGS2(
     } else if (this_LYNXcharset[0] == '\0') {
 	strncpy(this_LYNXcharset,this_MIMEcharset,UC_MAXLEN_LYNXCSNAME);
     }
-/***** DO NOT produce trailing spaces!
-    if ((i = strlen(this_LYNXcharset)) < UC_LEN_LYNXCSNAME) {
-	for (; i < UC_LEN_LYNXCSNAME; i++) {
-	    this_LYNXcharset[i] = ' ';
-	}
-	this_LYNXcharset[i] = '\0';
-    }
-*******/
-#ifdef NOTDEFINED
-    fprintf(stderr,"this_MIMEcharset: %s.\n",this_MIMEcharset);
-    fprintf(stderr,"this_LYNXcharset: %s.\n",this_LYNXcharset);
-#endif /* NOTDEFINED */
+
     if (this_isDefaultMap == -1) {
 	this_isDefaultMap = !strncmp(this_MIMEcharset,"iso-8859-1", 10);
     }

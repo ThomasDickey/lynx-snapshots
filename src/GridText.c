@@ -7625,11 +7625,13 @@ PRIVATE void write_hyphen ARGS1(
 /*
  *  Print the contents of the file in HTMainText to
  *  the file descriptor fp.
+ *  If is_email is TRUE add ">" before each "From " line.
  *  If is_reply is TRUE add ">" to the beginning of each
  *  line to specify the file is a reply to message.
  */
-PUBLIC void print_wwwfile_to_fd ARGS2(
+PUBLIC void print_wwwfile_to_fd ARGS3(
 	FILE *,		fp,
+	BOOLEAN,	is_email,
 	BOOLEAN,	is_reply)
 {
     register int i;
@@ -7639,7 +7641,7 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
     HText* text = HTMainText;
     BOOL in_b = FALSE;
     BOOL in_u = FALSE;
-    BOOL bs = (BOOL)(!is_reply
+    BOOL bs = (BOOL)(!is_email && !is_reply
 		&& text != 0
 		&& with_backspaces
 		&& HTCJK == NOCJK
@@ -7655,6 +7657,8 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 	    first = FALSE;
 	    if (is_reply) {
 		fputc('>',fp);
+	    } else if (is_email && !strncmp(line->data, "From ", 5)) {
+		fputc('>',fp);
 	    }
 	} else if (line->data[0] != LY_SOFT_NEWLINE) {
 	    fputc('\n',fp);
@@ -7662,6 +7666,8 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 	     *  Add news-style quotation if requested. -FM
 	     */
 	    if (is_reply) {
+		fputc('>',fp);
+	    } else if (is_email && !strncmp(line->data, "From ", 5)) {
 		fputc('>',fp);
 	    }
 	}

@@ -26,6 +26,12 @@ CPPFLAGS	= @CPPFLAGS@
 x		= @EXEEXT@
 o		= .@OBJEXT@
 
+BUILD_CC	= @BUILD_CC@
+BUILD_CPP	= @BUILD_CPP@
+BUILD_CFLAGS	= @BUILD_CFLAGS@
+BUILD_CPPFLAGS	= @BUILD_CPPFLAGS@ @DEFS@
+BUILD_EXEEXT	= @BUILD_EXEEXT@
+
 LIBS		= @LIBS@ $(RESOLVLIB) $(WAISLIB) $(SITE_LIBS)
 LDFLAGS		= @LDFLAGS@
 
@@ -100,9 +106,9 @@ message:
 do_chartrans_stuff:
 	-cd chrtrans && $(MAKE) \
 		SITE_DEFS="$(SITE_DEFS)" \
-		CFLAGS="$(CFLAGS)" \
-		CPPFLAGS="$(CPPFLAGS)" \
-		CC="$(CC)" tables
+		BUILD_CFLAGS="$(BUILD_CFLAGS)" \
+		BUILD_CPPFLAGS="$(BUILD_CPPFLAGS)" \
+		BUILD_CC="$(BUILD_CC)" tables
 
 lint:
 	$(LINT) $(LINTOPTS) $(CPP_OPTS) *.c  > $(top_builddir)/lint.lynx
@@ -176,11 +182,14 @@ TABLES= \
 $(TABLES):
 	-cd chrtrans && $(MAKE) tables
 
-UCdomap$o : UCdomap.c chrtrans/UCkd.h chrtrans/makeuctb$x chrtrans/makeuctb.c \
+UCdomap$o :	UCdomap.c \
+		chrtrans/UCkd.h \
+		chrtrans/makeuctb$(BUILD_EXEEXT) \
+		chrtrans/makeuctb.c \
 	UCdomap.h $(CMN)UCMap.h $(TABLES) $(top_srcdir)/userdefs.h
 
-chrtrans/makeuctb$x:
-	cd chrtrans; make makeuctb$x
+chrtrans/makeuctb$(BUILD_EXEEXT):
+	cd chrtrans; make makeuctb$(BUILD_EXEEXT)
 
 UCAux$o : UCAux.c $(CMN)UCAux.h $(CMN)UCDefs.h
 LYCookie$o : $(top_srcdir)/userdefs.h
