@@ -2315,7 +2315,7 @@ PRIVATE int LYHandleCookies ARGS4 (
      */
     if (HTList_isEmpty(domain_list)) {
 	HTProgress(COOKIE_JAR_IS_EMPTY);
-	sleep(MessageSecs);
+	LYSleepMsg();
 	HTNoDataOK = 1;
 	return(HT_NO_DATA);
     }
@@ -2402,7 +2402,7 @@ PRIVATE int LYHandleCookies ARGS4 (
 			    } else {
 				HTProgress(COOKIE_EATEN);
 			    }
-			    sleep(MessageSecs);
+			    LYSleepMsg();
 			    HTNoDataOK = 1;
 			    break;
 			}
@@ -2460,7 +2460,7 @@ PRIVATE int LYHandleCookies ARGS4 (
 				    HTList_removeObject(domain_list, de);
 				    FREE(de);
 				    HTProgress(DOMAIN_EATEN);
-				    sleep(MessageSecs);
+				    LYSleepMsg();
 				    break;
 				}
 Delete_all_cookies_in_domain:
@@ -2481,7 +2481,7 @@ Delete_all_cookies_in_domain:
 				    cl = next;
 				}
 				HTProgress(DOMAIN_COOKIES_EATEN);
-				sleep(MessageSecs);
+				LYSleepMsg();
 				/*
 				 *  If a default accept/reject
 				 *  choice is set, we're done. - FM
@@ -2500,7 +2500,7 @@ Delete_all_cookies_in_domain:
 				    HTList_removeObject(domain_list, de);
 				    FREE(de);
 				    HTProgress(DOMAIN_EATEN);
-				    sleep(MessageSecs);
+				    LYSleepMsg();
 				}
 				break;
 
@@ -2543,7 +2543,7 @@ Delete_all_cookies_in_domain:
 	     *  atexit may be called multiple times. - kw
 	     */
 	    HTProgress(ALL_COOKIES_EATEN);
-	    sleep(MessageSecs);
+	    LYSleepMsg();
 	}
 	FREE(domain);
 	FREE(lynxID);

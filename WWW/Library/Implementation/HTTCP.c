@@ -93,29 +93,11 @@ PUBLIC unsigned long socks_bind_remoteAddr; /* for long Rbind */
 **  On return,
 **	returns		a negative status in the Unix way.
 */
-#ifndef PCNFS
-
-#ifdef VMS
-#include <perror.h>
-#ifndef errno
-extern int errno;
-#endif /* !errno */
-#endif /* VMS */
-
-#ifndef VM
-#ifndef VMS
-#ifndef THINK_C
 
 #ifdef DECL_SYS_ERRLIST
 extern char *sys_errlist[];		/* see man perror on cernvax */
 extern int sys_nerr;
 #endif /* DECL_SYS_ERRLIST */
-
-#endif /* !THINK_C */
-#endif /* !VMS */
-#endif /* !VM */
-
-#endif	/* !PCNFS */
 
 #ifdef _WINDOWS_NSL
 char host[512];
@@ -167,7 +149,7 @@ PUBLIC int HTioctl ARGS3(
     } ioctl_desc;
 
     if ((sdc = vaxc$get_sdc (d)) == 0) {
-	errno = EBADF;
+	set_errno(EBADF);
 	return -1;
     }
     ioctl_desc.opt  = UCX$C_IOCTL;
@@ -186,11 +168,11 @@ PUBLIC int HTioctl ARGS3(
     ioctl_comm.addr = (char *)argp;
     status = sys$qiow (0, sdc, fun, iosb, 0, 0, 0, 0, 0, 0, p5, p6);
     if (!(status & 01)) {
-	errno = status;
+	set_errno(status);
 	return -1;
     }
     if (!(iosb[0] & 01)) {
-	errno = iosb[0];
+	set_errno(iosb[0]);
 	return -1;
     }
     return 0;
@@ -206,6 +188,7 @@ PUBLIC int HTioctl ARGS3(
 PUBLIC int HTInetStatus ARGS1(
 	char *,		where)
 {
+    int saved_errno = errno;
 #ifdef VMS
 #ifdef MULTINET
     SOCKET_ERRNO = vmserrno;
@@ -252,6 +235,8 @@ PUBLIC int HTInetStatus ARGS1(
 	   vaxc$errno));
 #endif /* MULTINET */
 #endif /* VMS */
+
+    set_errno(saved_errno);
 
 #ifdef VMS
     /*
@@ -833,7 +818,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 	    /* to detect cases when it doesn't get set although it should */
 	    h_errno = -2;
 #endif
-	    errno = 0;
+	    set_errno(0);
 	    phost = gethostbyname(host);
 	    statuses.child_errno = errno;
 	    statuses.child_h_errno = h_errno;
@@ -952,7 +937,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 		readret = read(pfd[0], &statuses, sizeof(statuses));
 		if (readret == sizeof(statuses)) {
 		    h_errno = statuses.child_h_errno;
-		    errno = statuses.child_errno;
+		    set_errno(statuses.child_errno);
 #ifdef HAVE_H_ERRNO
 		    if (statuses.h_errno_valid) {
 			lynx_nsl_status = HT_H_ERRNO_VALID;
@@ -1585,11 +1570,7 @@ PUBLIC int HTDoConnect ARGS4(
 	int tries=0;
 
 #ifdef SOCKET_DEBUG_TRACE
-	{
-	    int saved_errno = SOCKET_ERRNO;
-	    HTInetStatus("this socket's first connect");
-	    errno = saved_errno;	/* I don't trust HTInetStatus */
-	}
+	HTInetStatus("this socket's first connect");
 #endif /* SOCKET_DEBUG_TRACE */
 	ret = 0;
 	while (ret <= 0) {
@@ -1622,24 +1603,20 @@ PUBLIC int HTDoConnect ARGS4(
 
 #ifdef SOCKET_DEBUG_TRACE
 	    if (tries == 1) {
-		int saved_errno = SOCKET_ERRNO;
 		HTInetStatus("this socket's first select");
-		errno = saved_errno;	/* I don't trust HTInetStatus */
 	    }
 #endif /* SOCKET_DEBUG_TRACE */
-	   /*
-	   **  If we suspend, then it is possible that select will be
-	   **  interrupted.  Allow for this possibility. - JED
-	   */
-	   if ((ret == -1) && (errno == EINTR))
-	     continue;
+	    /*
+	    **  If we suspend, then it is possible that select will be
+	    **  interrupted.  Allow for this possibility. - JED
+	    */
+	    if ((ret == -1) && (errno == EINTR))
+		continue;
 
 #ifdef SOCKET_DEBUG_TRACE
-	   if (ret < 0) {
-	       int saved_errno = SOCKET_ERRNO;
-	       HTInetStatus("failed select");
-	       errno = saved_errno;	/* I don't trust HTInetStatus */
-	   }
+	    if (ret < 0) {
+		HTInetStatus("failed select");
+	    }
 #endif /* SOCKET_DEBUG_TRACE */
 	    /*
 	    **	Again according to the Sun and Motorola man pages for connect:
@@ -1687,9 +1664,7 @@ PUBLIC int HTDoConnect ARGS4(
 		else {
 #ifdef SOCKET_DEBUG_TRACE
 		    if (status < 0) {
-			int saved_errno = SOCKET_ERRNO;
 			HTInetStatus("confirm-ready connect");
-			errno = saved_errno;
 		    }
 #endif /* SOCKET_DEBUG_TRACE */
 		    break;
@@ -1725,9 +1700,7 @@ PUBLIC int HTDoConnect ARGS4(
 #endif /* UCX */
 		    (SOCKET_ERRNO != EISCONN)) {
 #ifdef SOCKET_DEBUG_TRACE
-		    int saved_errno = SOCKET_ERRNO;
 		    HTInetStatus("confirm-not-ready connect");
-		    errno = saved_errno;
 #endif /* SOCKET_DEBUG_TRACE */
 		    break;
 		}
@@ -1746,9 +1719,7 @@ PUBLIC int HTDoConnect ARGS4(
     }
 #ifdef SOCKET_DEBUG_TRACE
     else if (status < 0) {
-	    int saved_errno = SOCKET_ERRNO;
-	    HTInetStatus("this socket's first and only connect");
-	    errno = saved_errno;	/* I don't trust HTInetStatus */
+	HTInetStatus("this socket's first and only connect");
     }
 #endif /* SOCKET_DEBUG_TRACE */
 #endif /* !__DJGPP__ */
@@ -1891,7 +1862,6 @@ PUBLIC int HTDoRead ARGS3(
 #if !defined(UCX) || !defined(VAXC)
 #ifdef UNIX
     while ((nb = SOCKET_READ (fildes, buf, nbyte)) == -1) {
-	int saved_errno = errno;
 	if (errno == EINTR)
 	    continue;
 #ifdef ERESTARTSYS
@@ -1899,7 +1869,6 @@ PUBLIC int HTDoRead ARGS3(
 	    continue;
 #endif /* ERESTARTSYS */
 	HTInetStatus("read");
-	errno = saved_errno;	/* our caller may check it */
 	break;
     }
     return nb;
@@ -1922,7 +1891,7 @@ PUBLIC int HTDoRead ARGS3(
     */
     if ((nb <= 0) && (errno == EPIPE)) {
 	nb = 0;
-	errno = 0;
+	set_errno(0);
     }
     return nb;
 #endif /* UCX, BSN */

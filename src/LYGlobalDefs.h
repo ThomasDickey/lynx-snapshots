@@ -464,7 +464,7 @@ extern BOOLEAN FileInitAlreadyDone;
 /* LYMain.c */
 extern BOOLEAN focus_window;
 extern BOOLEAN system_is_NT;
-extern char windows_drive[];
+extern char windows_drive[4];
 extern int lynx_timeout;
 #endif /* _WINDOWS */
 

@@ -33,9 +33,10 @@ WHAT IS LYNX?
 HOW TO GET LYNX
 
    For the latest release of Lynx goto:
-       <URL: http://www.slcc.edu/lynx/release>;
+       <URL: http://lynx.isc.org/release>;
+       <URL: ftp://lynx.isc.org/release>;
    the latest development version is at:
-       <URL: http://sol.slcc.edu/lynx/current>.
+       <URL: http://lynx.isc.org/current>.
    The Lynx homepage is <URL: http://lynx.browser.org/>.
    The on-line help page (enter `h') has links to many useful things.
 
@@ -49,7 +50,7 @@ LICENSE
 
    Certain portions of the Lynx source distribution were originally
    created by CERN and have been modified during the development of
-   Lynx.  See WWW/Copyright.txt for copyright info regarding CERN
+   Lynx.  See WWW/FreeOfCharge.html for copyright info regarding CERN
    products used in Lynx.
 
 YEAR 2000 COMPLIANCE

@@ -299,78 +299,6 @@ int dir;
 }
 
 
-/* PUBLIC							HTVMS_name()
-**		CONVERTS WWW name into a VMS name
-** ON ENTRY:
-**	nn		Node Name (optional)
-**	fn		WWW file name
-**
-** ON EXIT:
-**	returns		vms file specification
-**
-** Bug:	Returns pointer to static -- non-reentrant
-*/
-PUBLIC char * HTVMS_name ARGS2(
-	CONST char *, nn,
-	CONST char *, fn)
-{
-
-/*	We try converting the filename into Files-11 syntax.  That is, we assume
-**	first that the file is, like us, on a VMS node.  We try remote
-**	(or local) DECnet access.  Files-11, VMS, VAX and DECnet
-**	are trademarks of Digital Equipment Corporation.
-**	The node is assumed to be local if the hostname WITHOUT DOMAIN
-**	matches the local one. @@@
-*/
-    static char vmsname[INFINITY];	/* returned */
-    char * filename = (char*)malloc(strlen(fn)+1);
-    char * nodename = (char*)malloc(strlen(nn)+2+1);	/* Copies to hack */
-    char *second;		/* 2nd slash */
-    char *last;			/* last slash */
-
-    char * hostname = (char *)HTHostName();
-
-    if (!filename || !nodename) outofmem(__FILE__, "HTVMSname");
-    strcpy(filename, fn);
-    strcpy(nodename, "");	/* On same node?  Yes if node names match */
-    if (strncmp(nn,"localhost",9)) {
-	char *p, *q;
-	for (p=hostname, q=(char *)nn;
-	     *p && *p!='.' && *q && *q!='.'; p++, q++){
-	    if (TOUPPER(*p)!=TOUPPER(*q)) {
-		strcpy(nodename, nn);
-		q = strchr(nodename, '.');	/* Mismatch */
-		if (q) *q=0;			/* Chop domain */
-		strcat(nodename, "::");		/* Try decnet anyway */
-		break;
-	    }
-	}
-    }
-
-    second = strchr(filename+1, '/');		/* 2nd slash */
-    last = strrchr(filename, '/');	/* last slash */
-
-    if (!second) {				/* Only one slash */
-	sprintf(vmsname, "%s%s", nodename, filename + 1);
-    } else if(second==last) {		/* Exactly two slashes */
-	*second = 0;		/* Split filename from disk */
-	sprintf(vmsname, "%s%s:%s", nodename, filename+1, second+1);
-	*second = '/';	/* restore */
-    } else {				/* More than two slashes */
-	char * p;
-	*second = 0;		/* Split disk from directories */
-	*last = 0;		/* Split dir from filename */
-	sprintf(vmsname, "%s%s:[%s]%s",
-		nodename, filename+1, second+1, last+1);
-	*second = *last = '/';	/* restore filename */
-	for (p=strchr(vmsname, '['); *p!=']'; p++)
-	    if (*p=='/') *p='.';	/* Convert dir sep.  to dots */
-    }
-    FREE(nodename);
-    FREE(filename);
-    return vmsname;
-}
-
 /*
 **	The code below is for directory browsing by VMS Curses clients.
 **	It is based on the newer WWWLib's HTDirBrw.c. - Foteos Macrides
@@ -797,7 +725,7 @@ PUBLIC int compare_VMSEntryInfo_structs ARGS2(VMSEntryInfo *,entry1,
 				}
 			    }
 			    i++;
-			    sprintf(month, "%s%d", (i < 10 ? "0" : ""), i);
+			    sprintf(month, "%02d", i);
 			    strcat(date1, month);
 			    strncat(date1, (char *)&entry1->date[4], 2);
 			    date1[8] = '\0';
@@ -820,7 +748,7 @@ PUBLIC int compare_VMSEntryInfo_structs ARGS2(VMSEntryInfo *,entry1,
 				}
 			    }
 			    i++;
-			    sprintf(month, "%s%d", (i < 10 ? "0" : ""), i);
+			    sprintf(month, "%02d", i);
 			    strcat(date2, month);
 			    strncat(date2, (char *)&entry2->date[4], 2);
 			    date2[8] = '\0';
@@ -1007,10 +935,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
     }
     FREE(header);
     if (parent) {
-	relative = (char*) malloc(strlen(tail) + 4);
-	if (relative == NULL)
-		outofmem(__FILE__, "HTVMSBrowseDir");
-	sprintf(relative, "%s/..", tail);
+	HTSprintf0(&relative, "%s/..", tail);
 	HTStartAnchor(target, "", relative);
 	PUTS("Up to ");
 	HTUnEscape(parent);

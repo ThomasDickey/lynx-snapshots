@@ -1,13 +1,3 @@
-/*
- * This file checked for sprintf() buffer overruns on 1998/05/06 by Bela
- * Lubkin <filbo@armory.com>.  Please don't introduce any new ones...
- *
- * See comments marked "- BL" for two still-possible overruns in the VMS
- * code.
- *
- * Not yet checked for any other sort of buffer overrun.
- */
-
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <LYGlobalDefs.h>
@@ -69,7 +59,7 @@ PRIVATE char *blat_cmd(
 	char *mail_addr)
 {
     FILE *fp;
-    static char b_cmd[512];
+    static char *b_cmd;
 #ifdef __CYGWIN__
     char dosname[LY_MAXPATH];
 #endif
@@ -98,9 +88,9 @@ PRIVATE char *blat_cmd(
 
 #ifdef __CYGWIN__
     cygwin_conv_to_full_win32_path(bl_cmd_file, dosname);
-    sprintf(b_cmd, "%s \"@%s\"", mail_cmd, dosname);
+    HTSprintf0(&b_cmd, "%s \"@%s\"", mail_cmd, dosname);
 #else
-    sprintf(b_cmd, "%s @%s", mail_cmd, bl_cmd_file);
+    HTSprintf0(&b_cmd, "%s @%s", mail_cmd, bl_cmd_file);
 #endif
 
     return b_cmd;
@@ -139,6 +129,7 @@ PUBLIC void mailform ARGS4(
 	CONST char *, 	mailto_content,
 	CONST char *, 	mailto_type)
 {
+    static char *cmd;
     FILE *fd;
     char *address = NULL;
     char *ccaddr = NULL;
@@ -147,7 +138,7 @@ PUBLIC void mailform ARGS4(
     char self[80];
     char subject[80];
     char *searchpart = NULL;
-    char cmd[512];
+    char buf[512];
     char *cp0 = NULL, *cp1 = NULL;
     int ch, len, i;
 #ifdef VMS
@@ -413,7 +404,7 @@ PUBLIC void mailform ARGS4(
     }
 
 #if CAN_PIPE_TO_MAILER
-    sprintf(cmd, "%s %s", system_mail, system_mail_flags);
+    HTSprintf0(&cmd, "%s %s", system_mail, system_mail_flags);
     if ((fd = popen(cmd, "w")) == NULL) {
 	HTAlert(FORM_MAILTO_FAILED);
 	FREE(address);
@@ -502,9 +493,9 @@ PUBLIC void mailform ARGS4(
 	i = 0;
 	len = strlen(mailto_content);
 	while (len > 78) {
-	    strncpy(cmd, &mailto_content[i], 78);
-	    cmd[78] = '\0';
-	    fprintf(fd, "%s\n", cmd);
+	    strncpy(buf, &mailto_content[i], 78);
+	    buf[78] = '\0';
+	    fprintf(fd, "%s\n", buf);
 	    i += 78;
 	    len = strlen(&mailto_content[i]);
 	}
@@ -514,9 +505,9 @@ PUBLIC void mailform ARGS4(
     i = 0;
     len = strlen(mailto_content);
     while (len > 78) {
-	strncpy(cmd, &mailto_content[i], 78);
-	cmd[78] = '\0';
-	fprintf(fd, "%s\n", cmd);
+	strncpy(buf, &mailto_content[i], 78);
+	buf[78] = '\0';
+	fprintf(fd, "%s\n", buf);
 	i += 78;
 	len = strlen(&mailto_content[i]);
     }
@@ -525,7 +516,7 @@ PUBLIC void mailform ARGS4(
 
 #if CAN_PIPE_TO_MAILER
     pclose(fd);
-    sleep(MessageSecs);
+    LYSleepMsg();
 #endif /* UNIX */
 #if defined(VMS) || defined(DOSPATH) || defined(SH_EX)
     LYCloseTempFP(fd);
@@ -546,7 +537,7 @@ PUBLIC void mailform ARGS4(
 	/*
 	 *  Now set up the command. - FM
 	 */
-	sprintf(cmd,
+	HTSprintf0(&cmd,
 		"%s %s %s,%s ",
 		system_mail,
 		system_mail_flags,
@@ -558,10 +549,8 @@ PUBLIC void mailform ARGS4(
 	 *  command, and ignore any keywords to minimize risk
 	 *  of them making the line too long or having problem
 	 *  characters. - FM
-	 *
-	 *  Possibly still a problem if user supplies long subject. - BL
 	 */
-	sprintf(cmd,
+	HTSprintf0(&cmd,
 		"%s %s%s/subject=\"%s\" %s ",
 		system_mail,
 		system_mail_flags,
@@ -587,16 +576,12 @@ PUBLIC void mailform ARGS4(
 	 *  4 letters is arbitrarily the smallest possible mail
 	 *  address, at least for lynx.  That way extra spaces
 	 *  won't confuse the mailer and give a blank address.
-	 *
-	 *  ignore addresses so long that they would overflow the
-	 *  temporary buffer (i.e., about 500 chars). - BL
 	 */
-	if (strlen(address_ptr1) > 3 &&
-	    strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
+	if (strlen(address_ptr1) > 3) {
 	    if (!first) {
 		StrAllocCat(command, ",");
 	    }
-	    sprintf(cmd, mail_adrs, address_ptr1);
+	    HTSprintf0(&cmd, mail_adrs, address_ptr1);
 	    StrAllocCat(command, cmd);
 	    first = FALSE;
 	}
@@ -620,18 +605,13 @@ PUBLIC void mailform ARGS4(
 	     *	4 letters is arbitrarily the smallest possible mail
 	     *	address, at least for lynx.  That way extra spaces
 	     *	won't confuse the mailer and give a blank address.
-	     *
-	     *  ignore addresses so long that they would overflow the
-	     *  temporary buffer (i.e., about 500 chars). - BL
 	     */
-	    if (strlen(address_ptr1) > 3 &&
-		strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
+	    if (strlen(address_ptr1) > 3) {
 		StrAllocCat(command, ",");
-		sprintf(cmd, mail_adrs, address_ptr1);
+		HTSprintf(&command, mail_adrs, address_ptr1);
 		if (isPMDF) {
-		    strcat(cmd, "/CC");
+		    StrAllocCat(command, "/CC");
 		}
-		StrAllocCat(command, cmd);
 	    }
 	    address_ptr1 = address_ptr2;
 	} while (address_ptr1 != NULL);
@@ -641,7 +621,7 @@ PUBLIC void mailform ARGS4(
     printf("%s\n\n$ %s\n\n%s", SENDING_FORM_CONTENT, command, PLEASE_WAIT);
     LYSystem(command);	/* Mail (VMS) */
     FREE(command);
-    sleep(AlertSecs);
+    LYSleepAlert();
     start_curses();
     LYRemoveTemp(my_tmpfile);
     LYRemoveTemp(hdrfile);
@@ -673,7 +653,7 @@ PUBLIC void mailform ARGS4(
     printf("%s\n\n$ %s\n\n%s", SENDING_FORM_CONTENT, command, PLEASE_WAIT);
     LYSystem(command);	/* Mail sending form content (DOS/Windows) */
     FREE(command);
-    sleep(MessageSecs);
+    LYSleepMsg();
     start_curses();
     LYRemoveTemp(my_tmpfile);
 
@@ -938,9 +918,6 @@ PUBLIC void mailmsg ARGS4(
 	 *  4 letters is arbitrarily the smallest possible mail
 	 *  address, at least for lynx.  That way extra spaces
 	 *  won't confuse the mailer and give a blank address.
-	 *
-	 *  ignore addresses so long that they would overflow the
-	 *  temporary buffer (i.e., about 500 chars). - BL
 	 */
 	if (!first) {
 	    StrAllocCat(command, ",");
@@ -961,7 +938,7 @@ PUBLIC void mailmsg ARGS4(
 #else /* DOSPATH */
 #if USE_BLAT_MAILER
     if (mail_is_blat)
-	strcpy(cmd,
+	StrAllocCopy(cmd,
 		blat_cmd(
 		    system_mail,
 		    my_tmpfile,
@@ -973,13 +950,11 @@ PUBLIC void mailmsg ARGS4(
 	);
     else
 #endif
-	sprintf(cmd, "%s -t \"%s\" -F %s", system_mail, address, my_tmpfile);
+	HTSprintf0(&cmd, "%s -t \"%s\" -F %s", system_mail, address, my_tmpfile);
 
     LYSystem(cmd);	/* Mail (DOS/Windows) */
+    FREE(cmd);
 
-#if 0	/* Not SH_EX */
-    FREE(command);
-#endif
     LYRemoveTemp(my_tmpfile);
 #if USE_BLAT_MAILER
     if (mail_is_blat)
@@ -1028,10 +1003,10 @@ PUBLIC void reply_by_mail ARGS4(
     char *temp = NULL;
     int i, len;
     int c = 0;	/* user input */
-    char my_tmpfile[LY_MAXPATH], cmd[512];
+    char my_tmpfile[LY_MAXPATH];
+    char *command = NULL;
 #if !CAN_PIPE_TO_MAILER
     char tmpfile2[LY_MAXPATH];
-    char *command = NULL;
 #endif
 #ifndef NO_ANONYMOUS_EMAIL
     static char *personal_name = NULL;
@@ -1249,30 +1224,22 @@ PUBLIC void reply_by_mail ARGS4(
 			    i = 0;
 			    len = strlen(cp0);
 			    while (len > 78) {
-				strncpy(cmd, (char *)&cp0[i], 78);
-				cmd[78] = '\0';
-				strcat(cmd, "\n");
-				StrAllocCat(body, cmd);
+				HTSprintf(&body, "%.78s\n", &cp0[i]);
 				i += 78;
-				len = strlen((char *)&cp0[i]);
+				len = strlen(&cp0[i]);
 			    }
-			    sprintf(cmd, "%s\n", (char *)&cp0[i]);
-			    StrAllocCat(body, cmd);
+			    HTSprintf(&body, "%s\n", &cp0[i]);
 			    cp0 = (cp + 1);
 			}
 			i = 0;
 			len = strlen(cp0);
 			while (len > 78) {
-			    strncpy(cmd, (char *)&cp0[i], 78);
-			    cmd[78] = '\0';
-			    strcat(cmd, "\n");
-			    StrAllocCat(body, cmd);
+			    HTSprintf(&body, "%.78s\n", &cp0[i]);
 			    i += 78;
-			    len = strlen((char *)&cp0[i]);
+			    len = strlen(&cp0[i]);
 			}
 			if (len) {
-			    sprintf(cmd, "%s\n", (char *)&cp0[i]);
-			    StrAllocCat(body, cmd);
+			    HTSprintf(&body, "%s\n", &cp0[i]);
 			}
 			FREE(temp);
 		    }
@@ -1403,9 +1370,8 @@ PUBLIC void reply_by_mail ARGS4(
 	if (!LYHaveCJKCharacterSet &&
 	    strncasecomp(LYCharSet_UC[current_char_set].MIMEname, "x-", 2)
 	    != 0) {
-	    sprintf(buf,"Content-Type: text/plain; charset=%s\n",
+	    HTSprintf(&header, "Content-Type: text/plain; charset=%s\n",
 		    LYCharSet_UC[current_char_set].MIMEname);
-	    StrAllocCat(header, buf);
 	}
 	StrAllocCat(header, "Content-Transfer-Encoding: 8bit\n");
     }
@@ -1421,8 +1387,7 @@ PUBLIC void reply_by_mail ARGS4(
 	StrAllocCat(header, address);
     }
     StrAllocCat(header, "\n");
-    sprintf(buf, "X-Mailer: Lynx, Version %s\n", LYNX_VERSION);
-    StrAllocCat(header, buf);
+    HTSprintf(&header, "X-Mailer: Lynx, Version %s\n", LYNX_VERSION);
 
     if (refid && *refid) {
 	StrAllocCat(header, "In-Reply-To: <");
@@ -1548,8 +1513,10 @@ PUBLIC void reply_by_mail ARGS4(
     addstr("From: ");
 #endif /* VMS */
     /* Add the personal mail address if there is one. */
-    sprintf(user_input, "%s", (personal_mail_address ?
-			       personal_mail_address : ""));
+    sprintf(user_input, "%.*s", (int)(sizeof(user_input) - 1),
+	    (personal_mail_address
+	    ? personal_mail_address
+	    : ""));
     if (LYgetstr(user_input, VISIBLE, sizeof(user_input), NORECALL) < 0 ||
 	term_letter) {
 	addstr("\n");
@@ -1626,8 +1593,10 @@ PUBLIC void reply_by_mail ARGS4(
 	/*
 	 *  Add the mail address if there is one.
 	 */
-	sprintf(user_input, "%s", (personal_mail_address ?
-				   personal_mail_address : ""));
+	sprintf(user_input, "%.*s", (int) (sizeof(user_input) - 1),
+		(personal_mail_address
+		    ? personal_mail_address
+		    : ""));
 	if (LYgetstr(user_input, VISIBLE, sizeof(user_input), NORECALL) < 0 ||
 	    term_letter) {
 	    addstr("\n");
@@ -1684,8 +1653,7 @@ PUBLIC void reply_by_mail ARGS4(
     /*
      *	Terminate the header.
      */
-    sprintf(buf, "\n");
-    StrAllocCat(header, buf);
+    StrAllocCat(header, "\n");
     CTRACE((tfp,"**header==\n%s",header));
 #endif /* !VMS */
 
@@ -1732,15 +1700,17 @@ PUBLIC void reply_by_mail ARGS4(
 	if (strstr(editor, "pico")) {
 	    editor_arg = " -t"; /* No prompt for filename to use */
 	}
-	sprintf(user_input, "%s%s %s", editor, editor_arg, my_tmpfile);
+	command = 0;
+	HTSprintf0(&command, "%s%s %s", editor, editor_arg, my_tmpfile);
 	_statusline(SPAWNING_EDITOR_FOR_MAIL);
 	stop_curses();
-	if (LYSystem(user_input)) {	/* Spawn Editor */
+	if (LYSystem(command)) {	/* Spawn Editor */
 	    start_curses();
 	    HTAlert(ERROR_SPAWNING_EDITOR);
 	} else {
 	    start_curses();
 	}
+	FREE(command);
 
     } else if (body) {
 	/*
@@ -1760,7 +1730,7 @@ PUBLIC void reply_by_mail ARGS4(
 		addstr("\n");
 		if (term_letter || c == 7 || c == 3) {
 		    addstr(CANCELLED);
-		    sleep(InfoSecs);
+		    LYSleepInfo();
 		    LYCloseTempFP(fd); 		/* Close the tmpfile. */
 		    scrollok(stdscr, FALSE);	/* Stop scrolling.    */
 		    goto cleanup;
@@ -1879,8 +1849,7 @@ PUBLIC void reply_by_mail ARGS4(
 	/*
 	 *  Now set up the command. - FM
 	 */
-	sprintf(cmd,
-		"%s %s %s,%s ",
+	HTSprintf0(&command, "%s %s %s,%s ",
 		system_mail,
 		system_mail_flags,
 		hdrfile,
@@ -1891,18 +1860,14 @@ PUBLIC void reply_by_mail ARGS4(
 	 *  command, and ignore any keywords to minimize risk
 	 *  of them making the line too long or having problem
 	 *  characters. - FM
-	 *
-	 *  Possibly still a problem if user supplies long subject. - BL
 	 */
-	sprintf(cmd,
-		"%s %s%s/subject=\"%s\" %s ",
+	HTSprintf0(&command, "%s %s%s/subject=\"%s\" %s ",
 		system_mail,
 		system_mail_flags,
 		(strncasecomp(system_mail, "MAIL", 4) ? "" : "/noself"),
 		subject,
 		my_tmpfile);
     }
-    StrAllocCopy(command, cmd);
 
     /*
      *	Now add all the people in the address field. - FM
@@ -1920,17 +1885,12 @@ PUBLIC void reply_by_mail ARGS4(
 	 *  4 letters is arbitrarily the smallest possible mail
 	 *  address, at least for lynx.  That way extra spaces
 	 *  won't confuse the mailer and give a blank address.
-	 *
-	 *  ignore addresses so long that they would overflow the
-	 *  temporary buffer (i.e., about 500 chars). - BL
 	 */
-	if (strlen(address_ptr1) > 3 &&
-	    strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
+	if (strlen(address_ptr1) > 3) {
 	    if (!first) {
 		StrAllocCat(command, ",");
 	    }
-	    sprintf(cmd, mail_adrs, address_ptr1);
-	    StrAllocCat(command, cmd);
+	    HTSprintf(command, mail_adrs, address_ptr1);
 	    first = FALSE;
 	}
 	address_ptr1 = address_ptr2;
@@ -1953,18 +1913,13 @@ PUBLIC void reply_by_mail ARGS4(
 	     *	4 letters is arbitrarily the smallest possible mail
 	     *	address, at least for lynx.  That way extra spaces
 	     *	won't confuse the mailer and give a blank address.
-	     *
-	     *  ignore addresses so long that they would overflow the
-	     *  temporary buffer (i.e., about 500 chars). - BL
 	     */
-	    if (strlen(address_ptr1) > 3 &&
-		strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
+	    if (strlen(address_ptr1) > 3) {
 		StrAllocCat(command, ",");
-		sprintf(cmd, mail_adrs, address_ptr1);
+		HTSprintf(&command, mail_adrs, address_ptr1);
 		if (isPMDF) {
-		    strcat(cmd, "/CC");
+		    StrAllocCat(command, "/CC");
 		}
-		StrAllocCat(command, cmd);
 	    }
 	    address_ptr1 = address_ptr2;
 	} while (address_ptr1 != NULL);
@@ -1974,7 +1929,7 @@ PUBLIC void reply_by_mail ARGS4(
     printf("%s\n\n$ %s\n\n%s", SENDING_COMMENT, command, PLEASE_WAIT);
     LYSystem(command);	/* SENDING COMMENT (VMS) */
     FREE(command);
-    sleep(AlertSecs);
+    LYSleepAlert();
     start_curses();
 #else /* Unix/DOS/Windows */
     /*
@@ -1983,12 +1938,13 @@ PUBLIC void reply_by_mail ARGS4(
     _statusline(SENDING_YOUR_MSG);
 #if CAN_PIPE_TO_MAILER
     signal(SIGINT, SIG_IGN);
-    sprintf(cmd, "%s %s", system_mail, system_mail_flags);
-    CTRACE((tfp, "%s\n", cmd));
-    fp = popen(cmd, "w");
+    HTSprintf0(&command, "%s %s", system_mail, system_mail_flags);
+    CTRACE((tfp, "%s\n", command));
+    fp = popen(command, "w");
     if (fp == NULL) {
 	HTInfoMsg(COMMENT_REQUEST_CANCELLED);
     }
+    FREE(command);
 #else
     if ((fp = LYOpenTemp(tmpfile2, ".txt", "w")) == NULL) {
 	HTAlert(MAILTO_URL_TEMPOPEN_FAILED);
@@ -2042,7 +1998,7 @@ PUBLIC void reply_by_mail ARGS4(
 	    printf("%s\n\n$ %s\n\n%s", SENDING_COMMENT, command, PLEASE_WAIT);
 	    LYSystem(command);	/* SENDING COMMENT (DOS/Windows/Unix) */
 	    FREE(command);
-	    sleep(MessageSecs);
+	    LYSleepMsg();
 	    start_curses();
 	    LYRemoveTemp(tmpfile2);	/* Delete the tmpfile. */
 #if USE_BLAT_MAILER

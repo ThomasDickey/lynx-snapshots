@@ -354,7 +354,7 @@ check_recall:
 				 jtp->nel, sizeof(JumpDatum), LYCompare);
     if (!found) {
 	user_message("Unknown target '%s'", buf);
-	sleep(AlertSecs);
+	LYSleepAlert();
     }
 
     StrAllocCopy(jtp->shortcut, bp);

@@ -254,11 +254,11 @@ void run_external ARGS1(char *, c)
 		    char e_buff[PATH_MAX], *p;
 
 		    p = c + 17;
+		    *e_buff = 0;
 		    if (strchr(p, ':') == NULL) {
-			sprintf(e_buff, "%s/%s", windows_drive, p);
-		    } else {
-			strcpy(e_buff, p);
+			sprintf(e_buff, "%.3s/", windows_drive);
 		    }
+		    strncat(e_buff, p, sizeof(e_buff) - strlen(e_buff) - 1);
 		    p = strrchr(e_buff, '.');
 		    if (p) {
 			p = strchr(p, '#');

@@ -348,7 +348,7 @@
  * upgrade, because anonymous mail makes it far too easy for a user to
  * spoof someone else's email address.)
  */
-#define NO_ANONYMOUS_EMAIL TRUE
+/*#define NO_ANONYMOUS_EMAIL TRUE */
 
 /********************************
  * LIST_FORMAT defines the display for local files when LONG_LIST
@@ -1299,6 +1299,20 @@
 
 
 /****************************************************************
+ * DEFAULT_VISITED_LINKS may be set to one or more of
+ *					VISITED_LINKS_AS_FIRST_V
+ *					VISITED_LINKS_AS_TREE
+ *					VISITED_LINKS_AS_LATEST
+ *					VISITED_LINKS_REVERSE
+ * to change the organization of the Visited Links page.
+ *
+ * (Not all combinations are meaningful; see src/LYrcFile.c for a list
+ * in the visited_links_tbl table).
+ */
+#define DEFAULT_VISITED_LINKS (VISITED_LINKS_AS_LATEST | VISITED_LINKS_REVERSE)
+
+
+/****************************************************************
  *   Section 3.   Things that you should not change until you
  *  		  have a good knowledge of the program
  */
@@ -1308,12 +1322,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.3dev.21"
+#define LYNX_VERSION "2.8.3dev.22"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
-#define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
+#define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Fri, 25 Feb 2000 04:38:35 -0800"
+#define LYNX_DATE "Sun, 12 Mar 2000 16:38:38 -0800"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1999"

@@ -2111,7 +2111,7 @@ draw_bookmark_list:
 		} else if (!LYPathOffHomeOK(MBM_tmp_line,
 					    sizeof(MBM_tmp_line))) {
 			LYMBM_statusline(USE_PATH_OFF_HOME);
-			sleep(AlertSecs);
+			LYSleepAlert();
 		} else {
 		    StrAllocCopy(MBM_A_subbookmark[a], MBM_tmp_line);
 		    if (a == 0) {
@@ -2180,6 +2180,12 @@ PRIVATE int get_popup_choice_number ARGS1(
     }
     return(atoi(temp));
 }
+
+#define FormatChoiceNum(dst, choice, value) \
+	    sprintf(dst, "%s%d: %.500s", \
+			   ((num_choices > 8 && choice < 9) ? \
+						   " " : ""), \
+			   (choice + 1), value)
 
 /*
  *  This function offers the choices for values of an
@@ -2412,10 +2418,7 @@ redraw:
      */
     for (i = 0; i <= num_choices; i++) {
 	if (i >= window_offset && i - window_offset < length) {
-	    sprintf(Cnum, "%s%d: ",
-			   ((num_choices > 8 && i < 9) ?
-						   " " : ""),
-			   (i + 1));
+	    FormatChoiceNum(Cnum, i, "");
 #ifdef USE_SLANG
 	    SLsmg_gotorc(top + ((i + 1) - window_offset), (lx - 1 + 2));
 	    addstr(Cnum);
@@ -2448,10 +2451,7 @@ redraw:
 	 *  Unreverse cur choice.
 	 */
 	if (Cptr != NULL) {
-	    sprintf(Cnum, "%s%d: ",
-			  ((num_choices > 8 && i < 9) ?
-						  " " : ""),
-			  (i + 1));
+	    FormatChoiceNum(Cnum, i, "");
 #ifdef USE_SLANG
 	    SLsmg_gotorc((top + ((i + 1) - window_offset)), (lx - 1 + 2));
 	    addstr(Cnum);
@@ -2464,10 +2464,7 @@ redraw:
 	}
 	Cptr = choices;
 	i = cur_choice;
-	sprintf(Cnum, "%s%d: ",
-		      ((num_choices > 8 && i < 9) ?
-					      " " : ""),
-		      (i + 1));
+	FormatChoiceNum(Cnum, i, "");
 #ifdef USE_SLANG
 	SLsmg_gotorc((top + ((i + 1) - window_offset)), (lx - 1 + 2));
 	addstr(Cnum);
@@ -3048,11 +3045,7 @@ check_recall:
 		 *  Start search at the next choice. - FM
 		 */
 		for (j = 1; Cptr[i+j] != NULL; j++) {
-		    sprintf(buffer, "%s%d: %s",
-				    ((num_choices > 8 && (j + i) < 9) ?
-								  " " : ""),
-				    (i + j + 1),
-				    Cptr[i+j]);
+		    FormatChoiceNum(buffer, (i + j), Cptr[i+j]);
 		    if (case_sensitive) {
 			if (strstr(buffer, prev_target_buffer) != NULL)
 			    break;
@@ -3090,11 +3083,7 @@ check_recall:
 		 *  Search from the beginning to the current choice. - FM
 		 */
 		for (j = 0; j < cur_choice; j++) {
-		    sprintf(buffer, "%s%d: %s",
-				    ((num_choices > 8 && j < 9) ?
-							    " " : ""),
-				    (j + 1),
-				    Cptr[j]);
+		    FormatChoiceNum(buffer, (j + 1), Cptr[j]);
 		    if (case_sensitive) {
 			if (strstr(buffer, prev_target_buffer) != NULL)
 			    break;

@@ -3,6 +3,7 @@
  */
 #include <HTUtils.h>
 #include <LYexit.h>
+#include <HTAlert.h>
 #ifndef VMS
 #include <LYGlobalDefs.h>
 #include <LYUtils.h>
@@ -124,7 +125,7 @@ PUBLIC void LYexit ARGS1(
 	 *  Deal with curses, if on, and clean up. - FM
 	 */
 	if (LYCursesON) {
-	    sleep(AlertSecs);
+	    LYSleepAlert();
 	}
 	cleanup_sig(0);
 #ifndef __linux__

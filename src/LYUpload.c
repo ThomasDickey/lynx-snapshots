@@ -46,7 +46,7 @@ PUBLIC int LYUpload ARGS1(
     int count;
     char *the_upload = 0;
     char tmpbuf[LY_MAXPATH];
-    char buffer[LY_MAXPATH];
+    char *filename = NULL;
     lynx_html_item_type *upload_command = 0;
     FILE *fp;
     char *the_command = 0;
@@ -107,16 +107,16 @@ retry:
 	    HTAlert(gettext("Illegal redirection using \"~\" found! Request ignored."));
 	    goto cancelled;
 	}
-	sprintf(buffer, "%s/%s", directory, tmpbuf);
+	HTSprintf0(&filename, "%s/%s", directory, tmpbuf);
 
 #if HAVE_POPEN
-	if (LYIsPipeCommand(buffer)) {
+	if (LYIsPipeCommand(filename)) {
 	    HTAlert(CANNOT_WRITE_TO_FILE);
 	    _statusline(NEW_FILENAME_PROMPT);
 	    goto retry;
 	}
 #endif
-	switch (LYValidateOutput(buffer)) {
+	switch (LYValidateOutput(filename)) {
 	case 'Y':
 	    break;
 	case 'N':
@@ -128,18 +128,18 @@ retry:
 	/*
 	 *  See if we can write to it.
 	 */
-	CTRACE((tfp, "LYUpload: filename is %s", buffer));
+	CTRACE((tfp, "LYUpload: filename is %s", filename));
 
-	if ((fp = fopen(buffer, "w")) != NULL) {
+	if ((fp = fopen(filename, "w")) != NULL) {
 	    fclose(fp);
-	    remove(buffer);
+	    remove(filename);
 	} else {
 	    HTAlert(CANNOT_WRITE_TO_FILE);
 	    _statusline(NEW_FILENAME_PROMPT);
 	    goto retry;
 	}
 
-	HTAddParam(&the_upload, upload_command->command, 1, buffer);
+	HTAddParam(&the_upload, upload_command->command, 1, filename);
 	HTEndParam(&the_upload, upload_command->command, 1);
     } else {			/* No substitution, no changes */
 	StrAllocCopy(the_upload, upload_command->command);
@@ -158,9 +158,10 @@ retry:
     FREE(the_command);
     FREE(the_upload);
 #ifdef UNIX
-    chmod(buffer, HIDE_CHMOD);
+    if (filename != 0)
+	chmod(filename, HIDE_CHMOD);
 #endif /* UNIX */
-    /* don't remove(file); */
+    FREE(filename);
 
     return 1;
 

@@ -364,6 +364,10 @@ II. Compile instructions -- UNIX
   --enable-gzip-help
 	Install the lynx help files in gzip'd format [*.gz] to save space.
 
+  --enable-htmlized-cfg
+	generate an HTMLized copy of lynx.cfg which will be installed with
+	the other help files.
+
   --enable-justify-elts			(define EXP_JUSTIFY_ELTS)
 	use experimental element-justification logic.
 
@@ -722,13 +726,16 @@ V. Compile instructions -- 386 DOS
     and either type the command:
    	 "stubedit cc1.exe bufsize=63k minstack=2M",
     or edit interactively with: "stubedit cc1.exe".
+    The requirements for compiling with optimization using DJGPP 2.03
+    and GCC 2.95.2 have not yet been fully investigated. The above
+    should serve as a guide.
 
     Unpack the source code using a DOS program like UNZIP386.  If you are
     using PKUNZIP to unpack the .zip archive, you must use the -d command
     line switch to restore the directory structure contained in the archive,
     i.e., do "pkunzip -d lynx-cur.zip".  No switch is required if you use
     unzip386 or unzip.  If you are trying to compile the 386DOS port under a
-    Win95/NT DOS shell, be sure to unpack the source with a DOS program so
+    WinNT DOS shell, be sure to unpack the source with a DOS program so
     that all directories will be adjusted to the DOS 8.3 file format necessary
     for compiling with DJGPP.  Do NOT use Winzip, because that will create
     long filenames that will not be recognized by DJGPP tools.
@@ -745,41 +752,43 @@ V. Compile instructions -- 386 DOS
     is available at "http://www.bgnett.no/~giva/". You can also
     use slang ("ftp://space.mit.edu/pub/davis/slang") as your curses
     library. You need to compile these before you go any further. If
-    you wish to use PDCurses 2.3, you need to first apply the following
+    you wish to use PDCurses 2.4, you need to first apply the following
     patch:
 
-*** curses.h   Fri Jul 10 11:24:28 1998
---- curses.h.new       Mon Dec  6 22:46:08 1999
-***************
-*** 1802,1807 ****
---- 1802,1809 ----
-  #define getbegx(w)              (w)->_begx
-  #define getbegy(w)              (w)->_begy
-  #define getbegyx(w,y,x)         ( y = (w)->_begy, x = (w)->_begx )
-+ #define getbkgd(w)              ((w)->_bkgd)
-+ #define getattrs(win)           ((win)->_attrs)
-  #define getch()                 wgetch(stdscr)
-  #define getmaxx(w)              (w)->_maxx
-  #define getmaxy(w)              (w)->_maxy
-*** dos/pdckbd.c	Sat Jul 12 17:10:12 1997
---- dos/pdckbd.c.new	Thu Apr 15 20:52:16 1999
-***************
-*** 443,449 ****
-  		_watch_breaks();
-  #else
-  # ifdef GO32
-! 	(void*)signal(SIGINT,(setting ? SIG_DFL : SIG_IGN));
-  /*	__djgpp_set_ctrl_c(setting);*/
-  	setcbrk(setting);
-  # else
---- 443,449 ----
-  		_watch_breaks();
-  #else
-  # ifdef GO32
-! /*	(void*)signal(SIGINT,(setting ? SIG_DFL : SIG_IGN)); */
-  /*	__djgpp_set_ctrl_c(setting);*/
-  	setcbrk(setting);
-  # else
+    --- curses.h.ori	Mon Jan 17 13:35:36 2000
+    +++ curses.h	Fri Mar  3 00:18:30 2000
+    @@ -1949,9 +1949,11 @@
+     #define echochar(c)             (addch((chtype)c)==ERR?ERR:refresh())
+     #define erase()                 werase( stdscr )
+     #define fixterm()               reset_prog_mode()
+    +#define getattrs(w)             (w)->_attrs
+     #define getbegx(w)              (w)->_begx
+     #define getbegy(w)              (w)->_begy
+     #define getbegyx(w,y,x)         ( y = (w)->_begy, x = (w)->_begx )
+    +#define getbkgd(w)              (w)->_bkgd
+     #define getch()                 wgetch(stdscr)
+     #define getmaxx(w)              (w)->_maxx
+     #define getmaxy(w)              (w)->_maxy
+    --- dos/pdckbd.c.ori	Sun Dec 26 23:15:04 1999
+    +++ dos/pdckbd.c	Fri Mar  3 00:20:14 2000
+    @@ -336,7 +336,7 @@
+     	||  (scan == 0x4e && ascii == 0x2b)  /* Plus */
+     	||  (scan == 0xe0 && ascii == 0x2f)) /* Slash */
+     		return ((int) ((ascii & 0x0f) | 0xf0) << 8);
+    -	if (ascii == 0x00 || ascii == 0xe0)
+    +	if (ascii == 0x00 || (ascii == 0xe0 && scan != 0x00))
+     		return ((int) (scan << 8));
+     	return ((int) (ascii));
+     }
+    @@ -496,7 +496,7 @@
+     		_watch_breaks();
+     #else
+     # ifdef GO32
+    -	(void*)signal(SIGINT,(setting ? SIG_DFL : SIG_IGN));
+    +/*	(void*)signal(SIGINT,(setting ? SIG_DFL : SIG_IGN)); */
+     /*	__djgpp_set_ctrl_c(setting);*/
+     	setcbrk(setting);
+     # else
 
     If you have trouble applying the patch, try using the "patch" program,
     ("http://www.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/pat25b.zip").
@@ -810,7 +819,7 @@ V. Compile instructions -- 386 DOS
     If you wish to compile with support for internationalization of messages,
     you first need to install the DOS port of the GNU gettext package,
     available from any DJGPP mirror site.  You may wish to recompile with DJGPP
-    2.02.  Then uncomment the lines for INTLFLAGS in src/makefile.dsl and in
+    2.03.  Then uncomment the lines for INTLFLAGS in src/makefile.dsl and in
     WWW/Library/djgpp/makefile.sla, and remove the "#" from the LIBS line in
     src/makefile.dsl.  Make similar changes if using one of the other DOS
     makefiles.  See the gettext documentation for information on creating and
@@ -823,7 +832,7 @@ V. Compile instructions -- 386 DOS
     method is to use a null packet driver that just allows Lynx to start up,
     but doesn't do anything else.  One such executable driver has been posted,
     uuencoded, to the lynx-dev mailing list:
-    "http://www.flora.org/lynx-dev/html/month0198/msg00057.html".
+    "http://www.flora.org/lynx-dev/html/month011998/msg00057.html".
     Start the dummy packet driver with "nullpkt 0x60", and take it out of
     memory with "nullpkt -u".  You can also use slip8250.com.  See the CRYNWR
     package "http://www.simtel.net/pub/simtelnet/msdos/pktdrvr/pktd11.zip".
@@ -838,7 +847,7 @@ V. Compile instructions -- 386 DOS
     "http://mvmpc9.ciw.uni-karlsruhe.de/c:/user/toni/dosppp/dosppp06.zip",
     "http://personal.redestb.es/tonilop/dosppp/dosppp06.zip", or
     "ftp://ftp.agate.net/users/01935/internet/dosppp06.zip";
-    "ftp://ftp.klos.com/demo/pppshare.exe".)
+    "http://www.klos.com/get.pppshare.html")
 
     File access looks like this:
 
@@ -849,17 +858,18 @@ V. Compile instructions -- 386 DOS
     file://localhost/c:/dos
     file://localhost/c:/dos/command.com
 
-    See "http://www.fdisk.com/doslynx/lynxport.htm" for more hints and some
-    precompiled libraries.  One problem you can run into is when editing
-    userdefs.h and lynx.cfg, which have unix-style end of lines.  You would be
-    well advised to use an editor that can handle end of lines terminated with
-    a single LF character.  You can also unpack the source code using unzip386
-    or unzip with the -a switch to convert unix LF to dos CRLF.  That will make
-    texts more readable under DOS.  If you compile lynx regularly, you may
-    automate the procedure by creating a batch file such as the following.
+    See "http://www.fdisk.com/doslynx/lynxport.htm" for more hints and
+    some precompiled libraries. One problem you can encounter is editing
+    userdefs.h and lynx.cfg, which have unix-style end of lines. You would
+    be well advised to use an editor that can handle end of lines terminated
+    with a single LF character. You can also unpack the source code using
+    unzip386 or unzip with the -a switch to convert unix LF to dos CRLF.
+    That will make texts more readable under DOS. If you compile lynx
+    regularly, you may automate the procedure by creating a batch file such
+    as the following.
 
 	cd djgpp\watt32\src
-	build djgpp
+	configur djgpp
 	make -f djgpp.mak
 	cd ..\..\..\www\library\djgpp
 	make
@@ -874,18 +884,18 @@ V. Compile instructions -- 386 DOS
     lynx2-* directory.  Place a copy of this batch file, named "djgpp.bat",
     in the lynx2-* directory, move to that directory and type "djgpp".  A more
     complete batch file with error checking and annotation can be found at:
-    "http://www.flora.org/lynx-dev/html/month1197/msg00250.html".
+    "http://www.flora.org/lynx-dev/html/month111997/msg00250.html".
 
 -- 1997/9/29 - D. Kaufman <dkaufman@rahul.net>
 -- 1997/10/3 - B. Schiavo <Wschiavo@concentric.net>
--- Last update - 2000/01/15
+-- Last update - 2000/03/03
 
 
 VI. General installation instructions
 
     Once you have compiled Lynx, test it out first on a local file.  Be sure
     Lynx can find lynx.cfg.  A _sample_ test command line would be:
-    `lynx -cfg=/usr/local/lib/lynx.cfg .`.  Once you are satisfied that
+    'lynx -cfg=/usr/local/lib/lynx.cfg .'.  Once you are satisfied that
     Lynx works, go ahead and install it.  For Unix, type "make install".
 
     For VMS, you need to have the executable in a public place, make it
@@ -932,7 +942,7 @@ VII. Setting environment variables before running Lynx (optional)
     setting in config.sys.  In addition, lynx looks for a "SHELL" environment
     variable when shelling to DOS.  If  you wish to preserve the environment
     space when shelling, put a line like this in your AUTOEXEC.BAT file also
-    "SET SHELL=C:\COMMAND.COM /E:2048".  It should match CONFIG.SYS.
+    "SET SHELL=C:\COMMAND.COM /E:4096".  It should match CONFIG.SYS.
 
     HOME         Where to keep the bookmark file and personal config files.
     TEMP or TMP  Bookmarks are kept here with no HOME.  Temp files here.

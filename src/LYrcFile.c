@@ -17,9 +17,59 @@
 #define FNAME_LYNXRC ".lynxrc"
 #endif /* FNAMES_8_3 */
 
+typedef struct
+{
+    CONST char *name;
+    int value;
+}
+Config_Enum;
+
 #define FIND_KEYWORD(cp, keyword) \
     ((cp = LYstrstr(line_buffer, keyword)) != NULL && \
      (cp - line_buffer) < number_sign)
+
+#define putBool(value) ((value) ? "on" : "off")
+
+#ifdef DIRED_SUPPORT
+static Config_Enum dir_list_style_tbl[] = {
+    { "FILES_FIRST",	FILES_FIRST },
+    { "DIRECTORIES_FIRST", 0 },
+    { "MIXED_STYLE",	MIXED_STYLE },
+    { NULL,		-1 },
+};
+#endif
+
+static Config_Enum file_sort_tbl[] = {
+    { "BY_FILENAME",	FILE_BY_NAME },
+    { "BY_TYPE",	FILE_BY_TYPE },
+    { "BY_SIZE",	FILE_BY_SIZE },
+    { "BY_DATE",	FILE_BY_DATE },
+    { NULL,		-1 },
+};
+
+static Config_Enum keypad_mode_tbl[] = {
+    { "LINKS_AND_FIELDS_ARE_NUMBERED", LINKS_AND_FIELDS_ARE_NUMBERED },
+    { "LINKS_AND_FORM_FIELDS_ARE_NUMBERED", LINKS_AND_FIELDS_ARE_NUMBERED },
+    { "LINKS_ARE_NUMBERED", LINKS_ARE_NUMBERED },
+    { "NUMBERS_AS_ARROWS", NUMBERS_AS_ARROWS },
+    { NULL,		-1 }
+};
+
+static Config_Enum user_mode_tbl[] = {
+    { "ADVANCED",	ADVANCED_MODE },
+    { "INTERMEDIATE",	INTERMEDIATE_MODE },
+    { "NOVICE",		NOVICE_MODE },
+    { NULL,		-1 }
+};
+
+static Config_Enum visited_links_tbl[] = {
+    { "FIRST_REVERSED",	VISITED_LINKS_AS_FIRST_V | VISITED_LINKS_REVERSE },
+    { "FIRST",		VISITED_LINKS_AS_FIRST_V },
+    { "TREE",		VISITED_LINKS_AS_TREE    },
+    { "LAST_REVERSED",	VISITED_LINKS_AS_LATEST | VISITED_LINKS_REVERSE },
+    { "LAST",		VISITED_LINKS_AS_LATEST  },
+    { NULL,		-1 }
+};
 
 PRIVATE char *SkipEquals ARGS1(char *, src)
 {
@@ -27,6 +77,41 @@ PRIVATE char *SkipEquals ARGS1(char *, src)
     if ((tmp = (char *)strchr(src, '=')) != NULL)
 	src = tmp + 1;
     return LYSkipBlanks(src);
+}
+
+PRIVATE BOOL getBool ARGS1(char *, src)
+{
+    src = SkipEquals(src);
+    return (!strncasecomp(src, "on", 2) || !strncasecomp(src, "true", 4));
+}
+
+PRIVATE CONST char *putEnum ARGS2(
+    Config_Enum *,	table,
+    int,		value)
+{
+    while (table->name != 0) {
+	if (table->value == value) {
+	    return table->name;
+	}
+	table++;
+    }
+    return "?";
+}
+
+PRIVATE BOOL getEnum ARGS3(
+    Config_Enum *,	table,
+    char *,		src,
+    int *,		value)
+{
+    src = SkipEquals(src);
+    while (table->name != 0) {
+	if (!strncasecomp(table->name, src, strlen(table->name))) {
+	    *value = table->value;
+	    return TRUE;
+	}
+	table++;
+    }
+    return FALSE;
 }
 
 /*  Read and process user options.
@@ -195,15 +280,7 @@ PUBLIC void read_rc ARGS1(FILE *, fp)
 	 */
 	} else if (FIND_KEYWORD(cp, "file_sorting_method")) {
 
-	   cp = SkipEquals(cp);
-	   if (!strncasecomp(cp, "BY_FILENAME", 11))
-		HTfileSortMethod = FILE_BY_NAME;
-	   else if (!strncasecomp(cp, "BY_TYPE", 7))
-		HTfileSortMethod = FILE_BY_TYPE;
-	   else if (!strncasecomp(cp, "BY_SIZE", 7))
-		HTfileSortMethod = FILE_BY_SIZE;
-	   else if (!strncasecomp(cp, "BY_DATE", 7))
-		HTfileSortMethod = FILE_BY_DATE;
+	    getEnum(file_sort_tbl, cp, &HTfileSortMethod);
 
 	/*
 	 *  Personal mail address.
@@ -218,11 +295,7 @@ PUBLIC void read_rc ARGS1(FILE *, fp)
 	 */
 	} else if (FIND_KEYWORD(cp, "case_sensitive_searching")) {
 
-	    cp = SkipEquals(cp);
-	    if (!strncasecomp(cp, "on", 2))
-		case_sensitive = TRUE;
-	    else
-		case_sensitive = FALSE;
+	    case_sensitive = getBool(cp);
 
 	/*
 	 *  Character set.
@@ -260,33 +333,21 @@ PUBLIC void read_rc ARGS1(FILE *, fp)
 	 */
 	} else if (FIND_KEYWORD(cp, "vi_keys")) {
 
-	    cp = SkipEquals(cp);
-	    if (!strncasecomp(cp, "on", 2))
-		vi_keys = TRUE;
-	    else
-		vi_keys = FALSE;
+	    vi_keys = getBool(cp);
 
 	/*
 	 *  EMACS keys.
 	 */
 	} else if (FIND_KEYWORD(cp, "emacs_keys")) {
 
-	    cp = SkipEquals(cp);
-	    if (!strncasecomp(cp, "on", 2))
-		emacs_keys = TRUE;
-	    else
-		emacs_keys=FALSE;
+	    emacs_keys = getBool(cp);
 
 	/*
 	 *  Show dot files.
 	 */
 	} else if (FIND_KEYWORD(cp, "show_dotfiles")) {
 
-	    cp = SkipEquals(cp);
-	    if (!strncasecomp(cp, "on", 2))
-		show_dotfiles = TRUE;
-	    else
-		show_dotfiles = FALSE;
+	    show_dotfiles = getBool(cp);
 
 	/*
 	 *  Show color.
@@ -335,13 +396,8 @@ PUBLIC void read_rc ARGS1(FILE *, fp)
 	 */
 	} else if (FIND_KEYWORD(cp, "keypad_mode")) {
 
-	    cp = SkipEquals(cp);
-	    if (LYstrstr(cp, "LINKS_ARE_NUMBERED"))
-		keypad_mode = LINKS_ARE_NUMBERED;
-	    else if (LYstrstr(cp, "LINKS_AND_FORM_FIELDS_ARE_NUMBERED"))
-		keypad_mode = LINKS_AND_FIELDS_ARE_NUMBERED;
-	    else
-		keypad_mode = NUMBERS_AS_ARROWS;
+	    if (!getEnum(keypad_mode_tbl, cp, &keypad_mode))
+		keypad_mode = DEFAULT_KEYPAD_MODE;
 
 	/*
 	 *  Keyboard layout.
@@ -381,27 +437,15 @@ PUBLIC void read_rc ARGS1(FILE *, fp)
 	 */
 	} else if (FIND_KEYWORD(cp, "dir_list_style")) {
 
-	    cp = SkipEquals(cp);
-	    if (LYstrstr(cp, "FILES_FIRST") != NULL) {
-		dir_list_style = FILES_FIRST;
-	    } else if (LYstrstr(cp,"DIRECTORIES_FIRST") != NULL) {
-		dir_list_style = 0;
-	    } else {
+	    if (!getEnum(dir_list_style_tbl, cp, &dir_list_style))
 		dir_list_style = MIXED_STYLE;
-	    }
 #endif /* DIRED_SUPPORT */
 
 	/*
 	 *  Accept cookies from all domains?
 	 */
 	} else if (FIND_KEYWORD(cp, "accept_all_cookies")) {
-	    cp = SkipEquals(cp);
-	    if (LYstrstr(cp,"TRUE") != NULL) {
-		LYAcceptAllCookies = TRUE;
-	    } else {
-		LYAcceptAllCookies = FALSE;
-	    }
-
+	    LYAcceptAllCookies = getBool(cp);
 
 	/*
 	 *  Accept all cookies from certain domains?
@@ -464,14 +508,8 @@ PUBLIC void read_rc ARGS1(FILE *, fp)
 	 */
 	} else if (FIND_KEYWORD(cp, "user_mode")) {
 
-	    cp = SkipEquals(cp);
-	    if (LYstrstr(cp, "ADVANCED") != NULL) {
-		user_mode = ADVANCED_MODE;
-	    } else if (LYstrstr(cp,"INTERMEDIATE") != NULL) {
-		user_mode = INTERMEDIATE_MODE;
-	    } else {
+	    if (!getEnum(user_mode_tbl, cp, &user_mode))
 		user_mode = NOVICE_MODE;
-	    }
 
 #ifdef NOTUSED
 #ifdef DISP_PARTIAL
@@ -492,29 +530,21 @@ PUBLIC void read_rc ARGS1(FILE *, fp)
 	 */
 	} else if (FIND_KEYWORD(cp, "run_all_execution_links")) {
 
-	    cp = SkipEquals(cp);
-	    if (!strncasecomp(cp, "on", 2))
-		local_exec = TRUE;
-	     else
-		local_exec = FALSE;
+	    local_exec = getBool(cp);
 
 	/*
 	 *  Local execution mode - only links in local files.
 	 */
 	} else if (FIND_KEYWORD(cp, "run_execution_links_on_local_files")) {
-	    cp = SkipEquals(cp);
-	    if (!strncasecomp(cp, "on", 2))
-		local_exec_on_local_files = TRUE;
-	    else
-		local_exec_on_local_files=FALSE;
+	    local_exec_on_local_files = getBool(cp);
 #endif /* ENABLE_OPTS_CHANGE_EXEC */
 
 	} else if (FIND_KEYWORD(cp, "verbose_images")) {
-	   cp = SkipEquals(cp);
-	   if (!strncasecomp(cp, "on", 2))
-		verbose_img = 1;
-	   else if (!strncasecomp(cp, "off", 3))
-		verbose_img = 0;
+	    verbose_img = getBool(cp);
+
+	} else if (FIND_KEYWORD(cp, "visited_links")) {
+	    if (!getEnum(visited_links_tbl, cp, &Visited_Links_As))
+		Visited_Links_As = DEFAULT_VISITED_LINKS;
 
 	} /* end of if */
 
@@ -661,12 +691,7 @@ file lists such as FTP directories.  The options are:\n\
    BY_DATE     -- sorts on the date of the file\n\
 "));
     fprintf(fp, "file_sorting_method=%s\n\n",
-		(HTfileSortMethod == FILE_BY_NAME ? "BY_FILENAME"
-						  :
-		(HTfileSortMethod == FILE_BY_SIZE ? "BY_SIZE"
-						  :
-		(HTfileSortMethod == FILE_BY_TYPE ? "BY_TYPE"
-						  : "BY_DATE"))));
+		putEnum(file_sort_tbl, HTfileSortMethod));
 
     /*
      *  Personal mail address.
@@ -691,8 +716,7 @@ If case_sensitive_searching is \"on\" then when the user invokes a search\n\
 using the 's' or '/' keys, the search performed will be case sensitive\n\
 instead of case INsensitive.  The default is usually \"off\".\n\
 "));
-    fprintf(fp, "case_sensitive_searching=%s\n\n",
-		(case_sensitive ? "on" : "off"));
+    fprintf(fp, "case_sensitive_searching=%s\n\n", putBool(case_sensitive));
 
     /*
      *  Character set.
@@ -779,7 +803,7 @@ will be enabled.  These keys are only lower case.\n\
 Capital 'H', 'J' and 'K will still activate help, jump shortcuts,\n\
 and the keymap display, respectively.\n\
 "));
-     fprintf(fp, "vi_keys=%s\n\n", (vi_keys ? "on" : "off"));
+     fprintf(fp, "vi_keys=%s\n\n", putBool(vi_keys));
 
     /*
      *  EMACS keys.
@@ -790,7 +814,7 @@ If emacs_keys is to \"on\" then the normal EMACS movement keys:\n\
   ^B = left    ^F = right\n\
 will be enabled.\n\
 "));
-    fprintf(fp, "emacs_keys=%s\n\n", (emacs_keys ? "on" : "off"));
+    fprintf(fp, "emacs_keys=%s\n\n", putBool(emacs_keys));
 
     /*
      *  Show dot files.
@@ -802,7 +826,7 @@ honored only if enabled via userdefs.h and/or lynx.cfg, and not\n\
 restricted via a command line switch.  If display of hidden files\n\
 is disabled, creation of such files via Lynx also is disabled.\n\
 "));
-    fprintf(fp, "show_dotfiles=%s\n\n", (show_dotfiles ? "on" : "off"));
+    fprintf(fp, "show_dotfiles=%s\n\n", putBool(show_dotfiles));
 
     /*
      *  Select popups.
@@ -816,7 +840,7 @@ of checkboxes for the OPTIONs.  A value of \"on\" will set popup menus\n\
 as the default while a value of \"off\" will set use of radio boxes.\n\
 The default can be overridden via the -popup command line toggle.\n\
 "));
-    fprintf(fp, "select_popups=%s\n\n", (LYSelectPopups ? "on" : "off"));
+    fprintf(fp, "select_popups=%s\n\n", putBool(LYSelectPopups));
 
     /*
      *  Show cursor.
@@ -832,7 +856,7 @@ or color.  A value of \"on\" will set positioning to the left as the\n\
 default while a value of \"off\" will set 'hiding' of the cursor.\n\
 The default can be overridden via the -show_cursor command line toggle.\n\
 "));
-    fprintf(fp, "show_cursor=%s\n\n", (LYShowCursor ? "on" : "off"));
+    fprintf(fp, "show_cursor=%s\n\n", putBool(LYShowCursor));
 
     /*
      *  Keypad mode.
@@ -864,10 +888,7 @@ NOTE: Some fixed format documents may look disfigured when\n\
 \"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n\
 enabled.\n\
 "));
-    fprintf(fp, "keypad_mode=%s\n\n",
-		((keypad_mode == NUMBERS_AS_ARROWS) ?  "NUMBERS_AS_ARROWS" :
-	       ((keypad_mode == LINKS_ARE_NUMBERED) ? "LINKS_ARE_NUMBERED" :
-				      "LINKS_AND_FORM_FIELDS_ARE_NUMBERED")));
+    fprintf(fp, "keypad_mode=%s\n\n", putEnum(keypad_mode_tbl, keypad_mode));
 
 #ifdef NOTUSED
 #ifdef DISP_PARTIAL
@@ -924,10 +945,7 @@ files and directories together.  \"FILES_FIRST\" lists files first and\n\
 \"DIRECTORIES_FIRST\" lists directories first.\n\
 "));
     fprintf(fp, "dir_list_style=%s\n\n",
-		(dir_list_style==FILES_FIRST ? "FILES_FIRST"
-					     :
-		(dir_list_style==MIXED_STYLE ? "MIXED_STYLE"
-					     : "DIRECTORIES_FIRST")));
+		putEnum(dir_list_style_tbl, dir_list_style));
 #endif /* DIRED_SUPPORT */
 
     /*
@@ -942,9 +960,7 @@ Use \"ADVANCED\" to see the URL of the currently selected link at the\n\
 bottom of the screen.\n\
 "));
     fprintf(fp, "user_mode=%s\n\n",
-		(user_mode == NOVICE_MODE ? "NOVICE" :
-			 (user_mode == ADVANCED_MODE ?
-					  "ADVANCED" : "INTERMEDIATE")));
+		putEnum(user_mode_tbl, user_mode));
 
     /*
      *  Cookie options
@@ -955,8 +971,7 @@ accept all cookies if desired.  The default is \"FALSE\" which will\n\
 prompt for each cookie.  Set accept_all_cookies to \"TRUE\" to accept\n\
 all cookies.\n\
 "));
-    fprintf(fp, "accept_all_cookies=%s\n\n",
-		(LYAcceptAllCookies == FALSE ? "FALSE" : "TRUE"));
+    fprintf(fp, "accept_all_cookies=%s\n\n", putBool(LYAcceptAllCookies));
 
     write_list(fp, gettext("\
 cookie_accept_domains and cookie_reject_domains are comma-delimited\n\
@@ -1022,8 +1037,7 @@ WARNING - This is potentially VERY dangerous.  Since you may view\n\
           or compromise security.  This should only be set to \"on\" if\n\
           you are viewing trusted source information.\n\
 "));
-    fprintf(fp, "run_all_execution_links=%s\n\n",
-		(local_exec ? "on" : "off"));
+    fprintf(fp, "run_all_execution_links=%s\n\n", putBool(local_exec));
 
     /*
      *  Local execution mode - only links in local files.
@@ -1043,7 +1057,7 @@ WARNING - This is potentially dangerous.  Since you may view\n\
           you are viewing trusted source information.\n\
 "));
     fprintf(fp, "run_execution_links_on_local_files=%s\n\n",
-		(local_exec_on_local_files ? "on" : "off"));
+		putBool(local_exec_on_local_files));
 #endif /* defined(EXEC_LINKS) || defined(EXEC_SCRIPTS) */
 
     write_list(fp, gettext("\
@@ -1051,8 +1065,14 @@ If verbose_images is \"on\", lynx will print the name of the image\n\
 source file in place of [INLINE], [LINK] or [IMAGE]\n\
 See also VERBOSE_IMAGES in lynx.cfg\n\
 "));
-    fprintf(fp, "verbose_images=%s\n\n",
-		verbose_img ? "on" : "off");
+    fprintf(fp, "verbose_images=%s\n\n", putBool(verbose_img));
+
+    write_list(fp, gettext("\
+The visited_links setting controls how Lynx organizes the information\n\
+in the Visited Links Page.\n\
+"));
+    fprintf(fp, "visited_links=%s\n\n",
+	    putEnum(visited_links_tbl, Visited_Links_As));
 
     /*
      *  Close the RC file.

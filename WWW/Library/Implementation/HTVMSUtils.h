@@ -89,21 +89,6 @@ PUBLIC BOOL HTVMS_checkAccess PARAMS((
 PUBLIC char * HTVMS_wwwName PARAMS((
 	CONST char *	vmsname));
 
-/* PUBLIC							HTVMS_name()
-**		CONVERTS WWW name into a VMS name
-** ON ENTRY:
-**	nn		Node Name (optional)
-**	fn		WWW file name
-**
-** ON EXIT:
-**	returns 	vms file specification
-**
-** Bug:	Returns pointer to static -- non-reentrant
-*/
-PUBLIC char * HTVMS_name PARAMS((
-	CONST char * nn, 
-	CONST char * fn));
-
 PUBLIC int HTStat PARAMS((
 	CONST char * filename,
         struct stat * info));

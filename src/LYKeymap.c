@@ -845,7 +845,7 @@ PRIVATE char *pretty ARGS1 (int, c)
 		sprintf(buf, "^%c", c|0100);
 	else if (c >= 0400 && (c - 0400) < (int) TABLESIZE(funckey)
 		 && funckey[c-0400])
-		sprintf(buf, "%s", funckey[c-0400]);
+		sprintf(buf, "%.*s", (int)(sizeof(buf) - 1), funckey[c-0400]);
 	else if (c >= 0400)
 		sprintf(buf, "key-%#x", c);
 	else
@@ -879,7 +879,7 @@ PRIVATE char *pretty_html ARGS1 (int, c)
 		sprintf(buf, "^%c", c|0100);
 	else if (c >= 0400 && (c - 0400) < (int) TABLESIZE(funckey)
 		 && funckey[c-0400])
-		sprintf(buf, "%s", funckey[c-0400]);
+		sprintf(buf, "%.*s", (int)(sizeof(buf) - 1), funckey[c-0400]);
 	else if (c >= 0400)
 		sprintf(buf, "%#x", c);
 	else

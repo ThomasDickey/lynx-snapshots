@@ -2410,7 +2410,7 @@ PRIVATE int LYExecv ARGS3(
 	 *  Screen may have message from the failed execv'd command.
 	 *  Give user time to look at it before screen refresh.
 	 */
-	sleep(AlertSecs);
+	LYSleepAlert();
     }
     start_curses();
     if (tmpbuf != 0) {

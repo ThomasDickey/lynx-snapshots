@@ -287,7 +287,7 @@ PRIVATE int HTLoadHTTP ARGS4 (
   char *line_kept_clean;
   int real_length_of_line;
   BOOL extensions;		/* Assume good HTTP server */
-  char line[INIT_LINE_SIZE];
+  char *linebuf = NULL;
   char temp[80];
   BOOL first_Accept = TRUE;
   BOOL show_401 = FALSE;
@@ -415,8 +415,7 @@ try_again:
       char * host = NULL;
 
       if ((host = HTParse(anAnchor->address, "", PARSE_HOST)) != NULL) {
-	  sprintf(line, "Host: %s%c%c", host, CR,LF);
-	  StrAllocCat(command, line);
+	  HTSprintf(&command, "Host: %s%c%c", host, CR,LF);
 	  FREE(host);
       }
 
@@ -446,53 +445,49 @@ try_again:
 		  } else {
 		      temp[0] = '\0';
 		  }
-		  sprintf(line, "%s%s%s",
+		  HTSprintf0(&linebuf, "%s%s%s",
 				(first_Accept ?
 				   "Accept: " : ", "),
 				HTAtom_name(pres->rep),
 				temp);
-		  len += strlen(line);
+		  len += strlen(linebuf);
 		  if (len > 252 && !first_Accept) {
 		      StrAllocCat(command, crlf);
-		      sprintf(line, "Accept: %s%s",
+		      HTSprintf0(&linebuf, "Accept: %s%s",
 				    HTAtom_name(pres->rep),
 				    temp);
-		      len = strlen(line);
+		      len = strlen(linebuf);
 		  }
-		  StrAllocCat(command, line);
+		  StrAllocCat(command, linebuf);
 		  first_Accept = FALSE;
 	      }
 	  }
       }
-      sprintf(line, "%s*/*;q=0.01%c%c",
+      HTSprintf(&command, "%s*/*;q=0.01%c%c",
 		    (first_Accept ?
 		       "Accept: " : ", "), CR, LF);
-      StrAllocCat(command, line);
       first_Accept = FALSE;
       len = 0;
 
-      sprintf(line, "Accept-Encoding: %s, %s%c%c",
+      HTSprintf(&command, "Accept-Encoding: %s, %s%c%c",
 		    "gzip", "compress", CR, LF);
-      StrAllocCat(command, line);
 
       if (language && *language) {
-	  sprintf(line, "Accept-Language: %s%c%c", language, CR, LF);
-	  StrAllocCat(command, line);
+	  HTSprintf(&command, "Accept-Language: %s%c%c", language, CR, LF);
       }
 
       if (pref_charset && *pref_charset) {
 	  StrAllocCat(command, "Accept-Charset: ");
-	  strcpy(line, pref_charset);
-	  if (line[strlen(line)-1] == ',')
-	      line[strlen(line)-1] = '\0';
-	  LYLowerCase(line);
-	  if (strstr(line, "iso-8859-1") == NULL)
-	      strcat(line, ", iso-8859-1;q=0.01");
-	  if (strstr(line, "us-ascii") == NULL)
-	      strcat(line, ", us-ascii;q=0.01");
-	  StrAllocCat(command, line);
-	  sprintf(line, "%c%c", CR, LF);
-	  StrAllocCat(command, line);
+	  StrAllocCopy(linebuf, pref_charset);
+	  if (linebuf[strlen(linebuf)-1] == ',')
+	      linebuf[strlen(linebuf)-1] = '\0';
+	  LYLowerCase(linebuf);
+	  if (strstr(linebuf, "iso-8859-1") == NULL)
+	      StrAllocCat(linebuf, ", iso-8859-1;q=0.01");
+	  if (strstr(linebuf, "us-ascii") == NULL)
+	      StrAllocCat(linebuf, ", us-ascii;q=0.01");
+	  StrAllocCat(command, linebuf);
+	  HTSprintf(&command, "%c%c", CR, LF);
       }
 
 #if 0
@@ -519,8 +514,7 @@ try_again:
       **  new-httpd@apache.org from Koen Holtman, Jan 1999.
       */
       if (!do_post) {
-	  sprintf(line, "Negotiate: trans%c%c", CR, LF);
-	  StrAllocCat(command, line);
+	  HTSprintf(&command, "Negotiate: trans%c%c", CR, LF);
       }
 #endif /* 0 */
 
@@ -531,29 +525,25 @@ try_again:
       **  Also send it as a Cache-Control header for HTTP/1.1. - FM
       */
       if (reloading) {
-	  sprintf(line, "Pragma: no-cache%c%c", CR, LF);
-	  StrAllocCat(command, line);
-	  sprintf(line, "Cache-Control: no-cache%c%c", CR, LF);
-	  StrAllocCat(command, line);
+	  HTSprintf(&command, "Pragma: no-cache%c%c", CR, LF);
+	  HTSprintf(&command, "Cache-Control: no-cache%c%c", CR, LF);
       }
 
       if (LYUserAgent && *LYUserAgent) {
 	  char *cp = LYSkipBlanks(LYUserAgent);
 	  /* Won't send it at all if all blank - kw */
 	  if (*cp != '\0')
-	      sprintf(line, "User-Agent: %.*s%c%c",
+	      HTSprintf(&command, "User-Agent: %.*s%c%c",
 		      INIT_LINE_SIZE-15, LYUserAgent, CR, LF);
       } else {
-	  sprintf(line, "User-Agent: %s/%s  libwww-FM/%s%c%c",
+	  HTSprintf(&command, "User-Agent: %s/%s  libwww-FM/%s%c%c",
 		  HTAppName ? HTAppName : "unknown",
 		  HTAppVersion ? HTAppVersion : "0.0",
 		  HTLibraryVersion, CR, LF);
       }
-      StrAllocCat(command, line);
 
       if (personal_mail_address && !LYNoFromHeader) {
-	  sprintf(line, "From: %s%c%c", personal_mail_address, CR,LF);
-	  StrAllocCat(command, line);
+	  HTSprintf(&command, "From: %s%c%c", personal_mail_address, CR,LF);
       }
 
       if (!(LYUserSpecifiedURL ||
@@ -572,8 +562,7 @@ try_again:
 	  } else {
 	      StrAllocCat(command, cp);
 	  }
-	  sprintf(line, "%c%c", CR, LF);
-	  StrAllocCat(command, line);
+	  HTSprintf(&command, "%c%c", CR, LF);
       }
 
       {
@@ -635,8 +624,7 @@ try_again:
 		**  If auth is not NULL nor zero-length, it's
 		**  an Authorization header to be included. - FM
 		*/
-		sprintf(line, "%s%c%c", auth, CR, LF);
-		StrAllocCat(command, line);
+		HTSprintf(&command, "%s%c%c", auth, CR, LF);
 		CTRACE((tfp, "HTTP: Sending authorization: %s\n", auth));
 	    } else if (auth && *auth == '\0') {
 		/*
@@ -727,8 +715,7 @@ try_again:
 	    **	an Authorization or Proxy-Authorization
 	    **	header to be included. - FM
 	    */
-	    sprintf(line, "%s%c%c", auth, CR, LF);
-	    StrAllocCat(command, line);
+	    HTSprintf(&command, "%s%c%c", auth, CR, LF);
 	    CTRACE((tfp, (auth_proxy ?
 			 "HTTP: Sending proxy authorization: %s\n" :
 			 "HTTP: Sending authorization: %s\n"),
@@ -769,28 +756,24 @@ try_again:
 	CTRACE((tfp, "HTTP: Doing post, content-type '%s'\n",
 		     anAnchor->post_content_type ? anAnchor->post_content_type
 						 : "lose"));
-      sprintf (line, "Content-type: %s%c%c",
-	       anAnchor->post_content_type ? anAnchor->post_content_type
-					   : "lose", CR, LF);
-      StrAllocCat(command, line);
-      {
-	int content_length;
-	if (!anAnchor->post_data)
-	  content_length = 0;
-	else
+	HTSprintf(&command, "Content-type: %s%c%c",
+		   anAnchor->post_content_type
+		   ? anAnchor->post_content_type
+		   : "lose",
+		  CR, LF);
 /*
  * Ack!  This assumes non-binary data!  Icky!
  *
  */
-	  content_length = strlen (anAnchor->post_data);
-	sprintf (line, "Content-length: %d%c%c",
-		 content_length, CR, LF);
-	StrAllocCat(command, line);
-      }
+	HTSprintf(&command, "Content-length: %d%c%c",
+		  (anAnchor->post_data)
+		   ? strlen (anAnchor->post_data)
+		   : 0,
+		  CR, LF);
 
-      StrAllocCat(command, crlf);	/* Blank line means "end" of headers */
+	StrAllocCat(command, crlf);	/* Blank line means "end" of headers */
 
-      StrAllocCat(command, anAnchor->post_data);
+	StrAllocCat(command, anAnchor->post_data);
     }
     else
         StrAllocCat(command, crlf);	/* Blank line means "end" of headers */
@@ -810,6 +793,7 @@ try_again:
 #endif /* NOT_ASCII */
   status = HTTP_NETWRITE(s, command, (int)strlen(command), handle);
   FREE(command);
+  FREE(linebuf);
   if (status <= 0) {
       if (status == 0) {
 	  CTRACE((tfp, "HTTP: Got status 0 in initial write\n"));
@@ -1588,12 +1572,13 @@ try_again:
 			 sink, anAnchor);
 
   if (!target || target == NULL) {
-      char buffer[1024];	/* @@@@@@@@ */
+      char *buffer = NULL;
 
       HTTP_NETCLOSE(s, handle);
-      sprintf(buffer, CANNOT_CONVERT_I_TO_O,
+      HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
 	      HTAtom_name(format_in), HTAtom_name(format_out));
       _HTProgress (buffer);
+      FREE(buffer);
       status = -1;
       goto clean_up;
   }

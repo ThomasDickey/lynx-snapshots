@@ -12,7 +12,7 @@
 CFLAGS = $(MCFLAGS)
 
 CC = gcc
-MCFLAGS = -O3 -DDOSPATH -DNO_TTYTYP \
+MCFLAGS = -O1 -DDOSPATH -DNO_TTYTYP \
 -I. \
 -I../../WWW/Library/Implementation \
 -I../../djgpp/watt32/inc \

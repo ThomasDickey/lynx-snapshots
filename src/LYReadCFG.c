@@ -520,6 +520,25 @@ typedef struct
 }
 Config_Type;
 
+typedef struct
+{
+    CONST char *name;
+    int value;
+}
+Config_Enum;
+
+static int config_enum ARGS2(
+    Config_Enum *,	table,
+    CONST char *,	name)
+{
+    while (table->name != 0) {
+	if (!strcasecomp(table->name, name))
+	    break;
+	table++;
+    }
+    return table->value;
+}
+
 static int assume_charset_fun ARGS1(
 	char *,		value)
 {
@@ -631,14 +650,15 @@ static int numbers_as_arrows_fun ARGS1(
 static int default_user_mode_fun ARGS1(
 	char *,		value)
 {
-    if (!strncasecomp(value, "NOVICE", 6))
-	user_mode = NOVICE_MODE;
-    else if (!strncasecomp(value, "INTER", 5))
-	user_mode = INTERMEDIATE_MODE;
-    else if (!strncasecomp(value, "ADVANCE", 7))
-	user_mode = ADVANCED_MODE;
+    static Config_Enum table[] = {
+    	{ "NOVICE",	NOVICE_MODE },
+	{ "INTER",	INTERMEDIATE_MODE },
+	{ "ADVANCE",	ADVANCED_MODE },
+	{ NULL,		NOVICE_MODE }
+    };
+    user_mode = config_enum(table, value);
 
-   return 0;
+    return 0;
 }
 
 #ifdef DIRED_SUPPORT
@@ -897,12 +917,13 @@ static int referer_with_query_fun ARGS1(
 static int source_cache_fun ARGS1(
 	char *,		value)
 {
-    if (!strncasecomp(value, "FILE", 4))
-	LYCacheSource = SOURCE_CACHE_FILE;
-    else if (!strncasecomp(value, "MEM", 3))
-	LYCacheSource = SOURCE_CACHE_MEMORY;
-    else if (!strncasecomp(value, "NONE", 4))
-	LYCacheSource = SOURCE_CACHE_NONE;
+    static Config_Enum table[] = {
+	{ "FILE",	SOURCE_CACHE_FILE },
+	{ "MEM",	SOURCE_CACHE_MEMORY },
+	{ "NONE",	SOURCE_CACHE_NONE },
+	{ NULL,		SOURCE_CACHE_NONE },
+    };
+    LYCacheSource = config_enum(table, value);
 
     return 0;
 }
@@ -978,7 +999,7 @@ static int suffix_fun ARGS1(
 		   sq, value));
 	    q = -1.0;
 	} else {
-	    q = df;
+	    q = (float) df;
 	}
     }
     HTSetSuffix5(value, mime_type, encoding, description, q);
@@ -1211,16 +1232,10 @@ static int parse_html_src_spec ARGS3(
     return 0;
 }
 
-typedef struct string_int_pair_
-{
-    char* str;
-    int val;
-} string_int_pair;
-
 PRIVATE int psrcspec_fun ARGS1(char*,s)
 {
     char* e;
-    static string_int_pair lexemnames[] =
+    static Config_Enum lexemnames[] =
     {
 	{ "comm",	HTL_comm	},
 	{ "tag",	HTL_tag		},
@@ -1236,8 +1251,7 @@ PRIVATE int psrcspec_fun ARGS1(char*,s)
 	{ "sgmlspecial", HTL_sgmlspecial },
 	{ NULL,		-1		}
     };
-    string_int_pair* cur = lexemnames;
-    BOOL found = FALSE;
+    int found;
 
     e = strchr(s,':');
     if (!e) {
@@ -1245,16 +1259,11 @@ PRIVATE int psrcspec_fun ARGS1(char*,s)
 	return 0;
     }
     *e = '\0';
-    while (cur->str) {
-	if ((found = !strcasecomp(s, cur->str)) != 0)
-	    break;
-	++cur;
-    }
-    if (!found) {
+    if ((found = config_enum(lexemnames, s)) < 0) {
 	CTRACE((tfp,"bad format of PRETTYSRC_SPEC setting value, ignored %s:%s\n",s,e+1));
 	return 0;
     }
-    parse_html_src_spec(cur->val, e+1, s);
+    parse_html_src_spec(found, e+1, s);
     return 0;
 }
 
@@ -1525,9 +1534,9 @@ static Config_Type Config_Table [] =
      PARSE_SET("use_mouse", CONF_BOOL, &LYUseMouse),
 #endif
      PARSE_SET("use_select_popups", CONF_BOOL, &LYSelectPopups),
+     PARSE_FUN("viewer", CONF_FUN, viewer_fun),
      PARSE_SET("verbose_images", CONF_BOOL, &verbose_img),
      PARSE_SET("vi_keys_always_on", CONF_BOOL, &vi_keys),
-     PARSE_FUN("viewer", CONF_FUN, viewer_fun),
      PARSE_ENV("wais_proxy", CONF_ENV, 0 ),
      PARSE_STR("xloadimage_command", CONF_STR, &XLoadImageCommand),
 

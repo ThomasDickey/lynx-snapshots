@@ -2085,9 +2085,9 @@ re_read:
 			if (MOUSE_Y_POS > (LYlines - V_CMD_AREA)) {
 			    /* Screen BOTTOM */
 			    if (MOUSE_X_POS < left) {
-				c = LTARROW;	p = "<-";
+				c = LTARROW;		p = "<-";
 			    } else if (MOUSE_X_POS < HIST_CMD_2) {
-				c = RTARROW;	p = "->";
+				c = RTARROW;		p = "->";
 			    } else if (MOUSE_X_POS > right) {
 				c = 'z';		p = "Cancel";
 			    } else {
@@ -2096,9 +2096,9 @@ re_read:
 			} else if (MOUSE_Y_POS < V_CMD_AREA) {
 			    /* Screen TOP */
 			    if (MOUSE_X_POS < left) {
-				c = LTARROW;	p = "<-";
+				c = LTARROW;		p = "<-";
 			    } else if (MOUSE_X_POS < HIST_CMD_2) {
-				c = RTARROW;	p = "->";
+				c = RTARROW;		p = "->";
 			    } else if (MOUSE_X_POS > right) {
 				c = 'z';		p = "Cancel";
 			    } else {

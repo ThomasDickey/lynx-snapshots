@@ -229,7 +229,7 @@ PRIVATE BOOL initialize NOARGS
 **	Negative status indicates transmission error, socket closed.
 **	Positive status is an NNTP status.
 */
-PRIVATE int response ARGS1(CONST char *,command)
+PRIVATE int response ARGS1(char *,command)
 {
     int result;
     char * p = response_text;
@@ -358,10 +358,7 @@ PRIVATE NNTPAuthResult HTHandleAuthInfo ARGS1(
 
     while (tries) {
 	if (UserName == NULL) {
-	    if ((msg = (char *)calloc(1, (strlen(host) + 30))) == NULL) {
-		outofmem(__FILE__, "HTHandleAuthInfo");
-	    }
-	    sprintf(msg, gettext("Username for news host '%s':"), host);
+	    HTSprintf0(&msg, gettext("Username for news host '%s':"), host);
 	    UserName = HTPrompt(msg, NULL);
 	    FREE(msg);
 	    if (!(UserName && *UserName)) {
@@ -443,10 +440,7 @@ PRIVATE NNTPAuthResult HTHandleAuthInfo ARGS1(
 	tries = 3;
 	while (tries) {
 	    if (PassWord == NULL) {
-		if ((msg = (char *)calloc(1, (strlen(host) + 30))) == NULL) {
-		    outofmem(__FILE__, "HTHandleAuthInfo");
-		}
-		sprintf(msg, gettext("Password for news host '%s':"), host);
+		HTSprintf0(&msg, gettext("Password for news host '%s':"), host);
 		PassWord = HTPromptPassword(msg);
 		FREE(msg);
 		if (!(PassWord && *PassWord)) {
@@ -1698,10 +1692,12 @@ PRIVATE int read_list ARGS1(char *, arg)
 	} /* if end of line */
     } /* Loop over characters */
     if (!listing) {
+	char *msg = NULL;
 	START(HTML_DT);
-	sprintf(line, gettext("No matches for: %s"), arg);
-	PUTS(line);
+	HTSprintf0(&msg, gettext("No matches for: %s"), arg);
+	PUTS(msg);
 	MAYBE_END(HTML_DT);
+	FREE(msg);
     }
     END(HTML_DLC);
     PUTC('\n');
@@ -2033,7 +2029,7 @@ PRIVATE int read_group ARGS3(
 			    }
 			}
 		    }
-		    sprintf(buffer, " [%s]", date);
+		    sprintf(buffer, " [%.*s]", (int)(sizeof(buffer) - 4), date);
 		    PUTS(buffer);
 		    FREE(date);
 		}
@@ -2231,7 +2227,7 @@ PRIVATE int HTLoadNews ARGS4(
 		StrAllocCopy(NewsHost, cp);
 	    }
 	    FREE(cp);
-	    sprintf(command, "%s://%.*s/",
+	    HTSprintf0(&NewsHREF, "%s://%.*s/",
 			     (post_wanted ?
 			       "newspost" :
 			    (reply_wanted ?
@@ -2239,7 +2235,6 @@ PRIVATE int HTLoadNews ARGS4(
 			    (spost_wanted ?
 			      "snewspost" : "snewsreply"))),
 			    (int) sizeof(command) - 15, NewsHost);
-	    StrAllocCopy(NewsHREF, command);
 
 	    /*
 	    **	If the SSL daemon is being used as a proxy,

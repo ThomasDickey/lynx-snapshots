@@ -5,6 +5,10 @@
 #include <HTUtils.h>
 #include <HTDOS.h>
 
+#ifdef WIN_EX
+#include <LYGlobalDefs.h>
+#endif
+
 /*
  * Make a copy of the source argument in the result, allowing some extra
  * space so we can append directly onto the result without reallocating.
@@ -114,7 +118,8 @@ char * HTDOS_name ARGS1(char *, wwwname)
 
 #ifdef _WINDOWS	/* 1998/04/02 (Thu) 08:59:48 */
     if (strchr(result, '\\') && strchr(result, ':')==NULL) {
-	sprintf(temp_buff, "%s\\%s", windows_drive, result);
+	sprintf(temp_buff, "%.3s\\%.*s", windows_drive,
+		(int)(sizeof(temp_buff) - sizeof(windows_drive) - 2), result);
 	ret = NULL;
 	StrAllocCopy(ret, temp_buff);
 	free(cp_url);

@@ -760,9 +760,7 @@ PRIVATE void interpret_cso_key ARGS5(
 	if (0 == strncmp(key, "$(FID)", 6)) {
 	    sprintf(buf, "%d", fld->id);
 	} else if (0 == strncmp(key, "$(FDESC)", 8)) {
-	    sprintf(buf, "%s%s%s", fld->description,
-		    ctx->public_override ? /***" "***/"" : "",
-		    ctx->public_override ? /***fld->attributes***/"" : "");
+	    sprintf(buf, "%.2046s", fld->description);
 	} else if (0 == strncmp(key, "$(FDEF)", 7)) {
 	    strcpy(buf, fld->defreturn ? " checked" : "");
 	} else if (0 == strncmp(key, "$(FNDX)", 7)) {

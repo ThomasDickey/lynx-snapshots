@@ -231,6 +231,7 @@ clean:
 @INTLDIR_MAKE@	cd intl && $(MAKE) $@
 @MSG_DIR_MAKE@	cd po && $(MAKE) $@
 	rm -f *.b src/lynx$x *.leaks cfg_defs.h LYHelp.h lint.*
+	rm -f help_files.sed
 	rm -f core *.core
 
 depend: cfg_defs.h LYHelp.h
@@ -333,25 +334,34 @@ install-doc : $(DOCDIR) $(HELPDIR)
 FIX_SED = tr '=' '%'
 #FIX_SED = cat
 
-install-help : $(HELPDIR)
-	(cd $(HELPDIR) && WD=`pwd` && HEAD=`echo $$WD|sed -e 's@/lynx_help$$@@'` && test $$WD != $$HEAD && rm -rf *)
-	@echo Constructing sed-script
+help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
+	@echo Constructing sed-script $@
+	@-rm -f $@ help_files.tmp
+	@cat $(srcdir)/lynx_help/help_files.txt > help_files.tmp
+@LYNXCFG_MAKE@	@echo 's!http://www.hippo.ru/%7Ehvv/lynxcfg_toc.html#alphatoc!alphatoc.html\$(COMPRESS_EXT)!' >> help_files.tmp
+@LYNXCFG_MAKE@	@echo 's!http://www.hippo.ru/%7Ehvv/lynxcfg_toc.html!cattoc.html\$(COMPRESS_EXT)!' >> help_files.tmp
 	@ECHO_CC@sed	-e '/^#/d' -e '/^$$/d' \
 		-e 's%\(.*\)=\(.*\@.*\)$$%s=@\1@=\2=g%' \
 		-e 's%\(.*\)=\(http:.*\)$$%s=@\1@=\2=g%' \
 		-e 's%\(.*\)=\(ftp:.*\)$$%s=@\1@=\2=g%' \
 		-e 's%\(.*\)=\(.*\.html\)$$%s=@\1@=\2$(COMPRESS_EXT)=g%' \
-		$(srcdir)/lynx_help/help_files.txt | $(FIX_SED) > \
-		$(HELPDIR)/help_files.sed
-	@echo Appending interim-fix for existing html files
+		help_files.tmp | $(FIX_SED) > $@
+	@echo Appending interim-fix for existing html files to $@
 	@ECHO_CC@sed	-e '/^#/d' -e '/[:@]/d' -e '/^$$/d' \
 		-e 's%\(.*\)=\(.*\.html\)$$%s=\2=\2$(COMPRESS_EXT)=g%' \
 		-e 's%\.html=%\\.html=%' \
-		$(srcdir)/lynx_help/help_files.txt | $(FIX_SED) >> \
-		$(HELPDIR)/help_files.sed
-	@ECHO_CC@if test -n "$(COMPRESS_EXT)"; then echo 's%\$(COMPRESS_EXT)\$(COMPRESS_EXT)%$(COMPRESS_EXT)%g' >> \
-		$(HELPDIR)/help_files.sed; fi
+		help_files.tmp | $(FIX_SED) >> $@
+	@ECHO_CC@if test -n "$(COMPRESS_EXT)"; then echo 's%\$(COMPRESS_EXT)\$(COMPRESS_EXT)%$(COMPRESS_EXT)%g' >> $@; fi
+	@-rm -f help_files.tmp
+
+install-help : help_files.sed $(HELPDIR)
+	(cd $(HELPDIR) && WD=`pwd` && HEAD=`echo $$WD|sed -e 's@/lynx_help$$@@'` && test $$WD != $$HEAD && rm -rf *)
+@LYNXCFG_MAKE@	@echo 'Making htmlized lynx.cfg'
+@LYNXCFG_MAKE@	@-rm -f alphatoc.html body.html cattoc.html
+@LYNXCFG_MAKE@	perl $(srcdir)/scripts/cfg2html.pl $(srcdir)/lynx.cfg
+@LYNXCFG_MAKE@	mv alphatoc.html body.html cattoc.html $(HELPDIR)
 	@echo Translating/copying html files
+	@cat help_files.sed > $(HELPDIR)/help_files.sed
 	@ECHO_CC@$(SHELL) -c 'cd $(srcdir)/lynx_help && ( \
 		dirs=keystrokes; \
 		(cd $(HELPDIR) && mkdir $$dirs 2>/dev/null ) ; \
@@ -363,7 +373,7 @@ install-help : $(HELPDIR)
 			(cd $(HELPDIR) && $(COMPRESS_PROG) $$files ) \
 		fi ; \
 		)'
-	-rm -f $(HELPDIR)/help_files.sed
+	@-rm -f $(HELPDIR)/help_files.sed
 	@echo Updating $(libdir)/lynx.cfg
 	$(SHELL) -c 'if test -f $(LIBDIR)/lynx.cfg ; then \
 		mv $(LIBDIR)/lynx.cfg $(LIBDIR)/lynx.tmp ; \
@@ -381,18 +391,9 @@ install-help : $(HELPDIR)
 	chmod 644 $(LIBDIR)/lynx.cfg
 	-rm -f $(LIBDIR)/lynx.tmp
 
-LYHelp.h : LYHelp.hin
-	@echo Constructing sed-script
-	@ECHO_CC@sed	-e '/^#/d' -e '/^$$/d' \
-		-e 's%\(.*\)=\(.*\@.*\)$$%s=@\1@=\2=g%' \
-		-e 's%\(.*\)=\(http:.*\)$$%s=@\1@=\2=g%' \
-		-e 's%\(.*\)=\(ftp:.*\)$$%s=@\1@=\2=g%' \
-		-e 's%\(.*\)=\(.*\.html\)$$%s=@\1@=\2$(COMPRESS_EXT)=g%' \
-		$(srcdir)/lynx_help/help_files.txt | $(FIX_SED) > \
-		help_files.sed
+LYHelp.h : help_files.sed LYHelp.hin
 	@echo Creating $@
 	@sed -f help_files.sed $(srcdir)/LYHelp.hin > $@
-	-@rm -f help_files.sed
 	@echo '**********************************************'
 	@echo
 	@$(SHELL) -c 'if test "$(COMPRESS_PROG)" = "" ; then \

@@ -4379,7 +4379,7 @@ check_WrapSource:
 #ifndef CONV_JISX0201KANA_JISX0208KANA
 	else if ((HTCJK == JAPANESE) && IS_SJIS_X0201KANA((unsigned char)(ch)) &&
 		 (kanji_code == EUC)) {
-	    line->data[line->size++] = 0x8e;
+	    line->data[line->size++] = (unsigned char) 0x8e;
 	    line->data[line->size++] = ch;
 	}
 #endif
@@ -6957,7 +6957,7 @@ PUBLIC void HText_pageDisplay ARGS2(
 
 #ifdef DISP_PARTIAL
     if (display_partial && debug_display_partial)
-	sleep(MessageSecs);
+	LYSleepMsg();
 #endif
 
     is_www_index = HTAnchor_isIndex(HTMainAnchor);
@@ -10358,7 +10358,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		_user_message(
 		    CANNOT_TRANSCODE_FORM,
 		    target_csname ? target_csname : "UNKNOWN");
-		sleep(AlertSecs);
+		LYSleepAlert();
 	    }
 	}
     }
@@ -10490,7 +10490,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			    _user_message(
 				CANNOT_TRANSCODE_FORM,
 				target_csname ? target_csname : "UNKNOWN");
-			    sleep(AlertSecs);
+			    LYSleepAlert();
 			}
 			out_cs = form_ptr->value_cs;
 		    } else {
@@ -10592,7 +10592,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			    _user_message(
 				CANNOT_TRANSCODE_FORM,
 				target_csname ? target_csname : "UNKNOWN");
-			    sleep(AlertSecs);
+			    LYSleepAlert();
 			}
 		    }
 		    if (Boundary) {

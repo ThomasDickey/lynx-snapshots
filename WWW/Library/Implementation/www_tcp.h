@@ -491,6 +491,11 @@ struct timeval {
 #endif  /* __GNUC__ */
 #endif /* VAXC && !DECC */
 
+#include <perror.h>
+#ifndef errno
+extern int errno;
+#endif /* !errno */
+
 #endif /* VMS */
 
 /*
@@ -641,7 +646,7 @@ typedef int pid_t;
 
 #else
 
-#if !(defined(VM) || defined(VMS) || defined(THINK_C) || defined(__MINGW32__))
+#if !(defined(VM) || defined(VMS) || defined(THINK_C) || defined(PCNFS) || defined(__MINGW32__))
 #define DECL_SYS_ERRLIST 1
 #endif
 
@@ -771,5 +776,13 @@ typedef unsigned int fd_set;
 #endif  /* !FD_SET */
 #endif  /* SELECT */
 
+/*
+ * Macro for setting errno - only define this if you really can do it.
+ */
+#if !defined(errno) && (!defined(VMS) || defined(UCX))
+#define set_errno(value) errno = value
+#else
+#define set_errno(value) /* we do not know how */
+#endif
 
 #endif /* TCP_H */
