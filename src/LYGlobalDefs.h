@@ -132,7 +132,6 @@ extern char *LynxHome;
 extern char *startfile;
 extern char *helpfile;
 extern char *helpfilepath;
-extern char *aboutfilepath;
 extern char *lynxjumpfile;
 extern char *lynxlistfile;
 extern char *lynxlinksfile;

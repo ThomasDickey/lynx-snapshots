@@ -1,3 +1,12 @@
+97-10-21
+--------
+* revised tests for wait/waitpid/union-wait. - TD
+* correct/update handling of default prefix in CF_WITH_PATH macro, used for
+  parsing --with-cfg-file and --with-lss-file options.  - TD
+* add uninstall target to top-level makefile. - TD
+* remove redundant install options from $(INSTALL_DATA). - TD
+* add configure --with-lss-file option.
+* minor cleanup of gcc warnings, ifdefs. - TD
 97-10-08
 --------
 * add logic to implement mouse button 2 "previous document" for

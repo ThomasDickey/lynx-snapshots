@@ -62,7 +62,6 @@
 #include "HTAlert.h"
 #include "HTCJK.h"
 #include "UCMap.h"
-#include "LYGlobalDefs.h"
 
 #include "LYexit.h"
 #include "LYLeaks.h"
@@ -539,6 +538,8 @@ PRIVATE int get_physical ARGS2(
  *  has finished. - kw @@@   
  */
 
+extern char*UCAssume_MIMEcharset;
+
 PUBLIC void LYUCPushAssumed ARGS1(
     HTParentAnchor *,	anchor)
 {
@@ -550,11 +551,11 @@ PUBLIC void LYUCPushAssumed ARGS1(
 	    anchor_UCI = HTAnchor_getUCInfoStage(anchor,
 						 UCT_STAGE_PARSER);
 	if (anchor_UCI && anchor_UCI->MIMEname) {
-	    pushed_assume_LYhndl = anchor_LYhndl;
-	    UCLYhndl_for_unspec = anchor_LYhndl;
 	    pushed_assume_MIMEname = UCAssume_MIMEcharset;
 	    UCAssume_MIMEcharset = NULL;
 	    StrAllocCopy(UCAssume_MIMEcharset, anchor_UCI->MIMEname);
+	    pushed_assume_LYhndl = anchor_LYhndl;
+	    UCLYhndl_for_unspec = anchor_LYhndl;
 	    return;
 	}
     }
@@ -748,23 +749,60 @@ PRIVATE BOOL HTLoadDocument ARGS4(
     */
     if (!LYforce_no_cache && (text = (HText *)HTAnchor_document(anchor))) {	
 	/*
-	**  Already loaded.  Check it it's OK to use it. - FM
+	**  We have a cached rendition of the target document.
+	**  Check if it's OK to re-use it.  We consider it OK if:
+	**   (1) the anchor does not have the no_cache element set, or
+	**   (2) we've overridden it, e.g., because we are acting on
+	**       a PREV_DOC command or a link in the History Page and
+	**       it's not a reply from a POST with the LYresubmit_posts
+	**       flag set, or
+	**   (3) we are repositioning within the currently loaded document
+	**       based on the target anchor's address (URL_Reference).
+	*
+	*    If DONT_TRACK_INTERNAL_LINKS is defined, HText_AreDifferent()
+	*    is used to determine whether (3) applies.  If the target address
+	*    differs from that of the current document only by a fragment
+	*    and the taget address has an appended fragment, repositioning
+	*    without reloading is always assumed.
+	*    Note that HText_AreDifferent() currently always returns TRUE
+	*    if the target has a LYNXIMGMAP URL, so that an internally
+	*    generated pseudo-document will normally not be re-used unless
+	*    condition (2) appplies. (Condition (1) cannot apply since in
+	*    LYMap.c, no_cache is always set in the anchor object).  This
+	*    doesn't guarantee that the resource from which the MAP element
+	*    is taken will be read again (reloaded) when the list of links
+	*    for a client-side image map is regenerated, when in some cases
+	*    it should (e.g. user requested RELOAD, or HTTP response with
+	*    no-cache header and we are not overriding).
+	*
+	*    If DONT_TRACK_INTERNAL_LINKS is undefined, a target address that
+	*    points to the same URL as the current document may still result in
+	*    reloading, depending on whether the original URL-Reference
+	*    was given as an internal link in the context of the previously
+	*    loaded document.  HText_AreDifferent() is not used here for
+	*    testing whether we are just repositioning.  For an internal
+	*    link, the potential callers of this function from mainloop()
+	*    down will either avoid making the call (and do the repositioning
+	*    differently) or set LYoverride_no_cache.
+	*    Note that (a) LYNXIMGMAP pseudo-documents and (b) The "List Page"
+	*    document are treated logically as being part of the document on
+	*    which they are based, for the purpose of whether to treat a link
+	*    as internal, but the logic for this (by setting LYoverride_no_cache
+	*    as necessary) is implemented elsewhere.  For LYNXIMGMAP the same
+	*    caveat as above applies.
+	*
+	**  We also should be checking other aspects of cache
+	**  regulation (e.g., based on an If-Modified-Since check,
+	**  etc.) but the code for doing those other things isn't
+	**  available yet.
 	*/
-#ifdef NOTUSED_FOTEMODS
-	/* not sure whether this is always the right thing to do,
-	 * and anyway, we have a far more complete (and complicated...)
-	 * way to prevent reloading on internal URL references now...
-	 * - kw
-	 */
-	if ((cp = strchr(address_to_load, '#')) != NULL) {
-	    *cp = '\0';
-	    if (!strcmp(address_to_load, HTLoadedDocumentURL()) &&
-	        strncasecomp(address_to_load, "LYNXIMGMAP:", 11))
-	        LYoverride_no_cache = TRUE;
-	    *cp = '#';
-	}
-#endif /* NOTUSED_FOTEMODS */
-	if (LYoverride_no_cache || !HText_hasNoCacheSet(text)) {
+#ifdef DONT_TRACK_INTERNAL_LINKS
+	if (LYoverride_no_cache || !HText_hasNoCacheSet(text) ||
+	    !HText_AreDifferent(anchor, full_address))
+#else
+	if (LYoverride_no_cache || !HText_hasNoCacheSet(text))
+#endif /* TRACK_INTERNAL_LINKS */
+	{
             if (TRACE)
 	        fprintf(stderr, "HTAccess: Document already in memory.\n");
             HText_select(text);

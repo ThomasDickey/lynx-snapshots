@@ -1307,7 +1307,7 @@ to keep track of information across a series of related form submissions,
 but have the potential for including information about the user that might
 be considered to represent an invasion of privacy.  NOTE, in this regard,
 that Lynx has implemented the <a
-href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
+href="http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a>
 <em>DISABLED</em> attribute for <em>all</em> of its form fields.  These
 can be used to keep track of information across submissions, and to cast
 it unmodifiable in the current form, but keep the user aware that it will
@@ -1392,7 +1392,7 @@ elements is included in the test subdirectory of the Lynx distribution.
 <h2><A NAME="21"><em>Lynx and HTML Tabs</em></a></h2>
 
 Lynx implements the <a
-href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
+href="http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a>
 TAB element only when LEFT alignment is in effect.  If the alignment is
 CENTER or RIGHT (JUSTIFY is not yet implemented in Lynx, and is treated
 as a synonym for LEFT), or if the TAB element indicates a position to the
@@ -1439,7 +1439,7 @@ links with brief, descriptive link names, analogous to a Windows toolbar.
 Such windows have been termed <em>banners</em>.
 
 <p>Lynx recognizes and processes all of the <a
-href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
+href="http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a>
 REL attribute tokens in LINK elements for creating a <em>banner</em>, and
 a number of others which have subsequently been proposed.  These
 <em>banner</em> tokens are <em>Home</em>, <em>ToC</em>, <em>Contents</em>,
@@ -1486,7 +1486,7 @@ a '<em>#</em>' at the top, left-hand corner of the screen when the second
 or subsequent pages of the document are being displayed.
 
 <p>Lynx also recognizes the <a
-href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
+href="http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a>
 BANNER container element, and will create a <em>banner</em> based on its
 content if one has not already been created based on LINK elements.  Lynx
 treats the MicroSoft MARQUEE element as a synonym for BANNER (i.e.,
@@ -1501,7 +1501,7 @@ displayed, to indicate it's accessibility via the TOOLBAR keystroke command.
 <h2><A NAME="24"><em>Lynx and HTML Footnotes</em></a></h2>
 
 Lynx implements the <a
-href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
+href="http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a>
 FN element similarly to a named <em>A</em>nchor within the current document,
 and assumes that the footnotes will be positioned at the bottom of the
 document.  However, in contrast to named <em>A</em>nchors, the FN container
@@ -1525,7 +1525,7 @@ markup that is valid in the BODY of the document.
 <h2><A NAME="25"><em>Lynx and HTML Notes</em></a></h2>
 
 Lynx implements the <a
-href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
+href="http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a>
 NOTE element (<em>Admonishment</em>) as a labeled block, i.e., as if a new
 paragraph were indicated whether or not paragraphing markup is included
 in its content, with greater than normal left and right margins, and with
@@ -1549,19 +1549,19 @@ NOTE, except for recognition of the ID attribute as a named <em>A</em>nchor.
 <h2><A NAME="26"><em>Lynx and HTML Lists</em></a></h2>
 
 Lynx implements the <a
-href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
+href="http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a>
 list elements UL (<em>Unordered List</em>), OL (<em>Ordered List</em>),
 and DL (<em>Definition List</em>), and their associated attributes, and
 elements (LH, LI, DT, and DD) for the most part as described in that
 specification.  The lists can be nested, yielding progressively greater
 indentation, up to six levels.  The <a
-href="http://www.w3.org/pub/WWW/MarkUp/html-spec/html-spec_toc.html"
+href="http://www.w3.org/MarkUp/html-spec/html-spec_toc.html"
 >HTML 2.0</a> MENU and DIR elements <em>both</em> are treated as synonyms
 for UL with the PLAIN attribute (no <em>bullets</em>, see below).  Note,
 thus, that neither DIR nor MENU yields a series of columns with 24-character
 spacing.  A single nesting index is maintained, so that different types of
 List elements can be used for different levels within the nest.  Also, the
-<a href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
+<a href="http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a>
 FIG, CAPTION and CREDIT elements are treated as valid within list blocks.
 They will be rendered with indentation appropriate for the current nesting
 depth, and the CAPTION or CREDIT elements will have a <em>CAPTION:</em> or
@@ -1609,7 +1609,7 @@ DD elements unless the COMPACT attribute has been specified.
 <h2><A NAME="27"><em>Lynx and HTML Quotes</em></a></h2>
 
 The <a
-href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a> and
+href="http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a> and
 later specifications provide for two classes of quotation in HTML documents.
 Block quotes, designated by the BLOCKQUOTE element (or it's abbreviated
 synonym BQ in HTML 3.0), have implied paragraph breaks preceding and following
@@ -1684,7 +1684,7 @@ disabled by default via the configuration file (lynx.cfg), and the
 default can be toggled via the <em>-ismap</em> command line switch.
 
 <p>Lynx also recognizes the <a
-href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
+href="http://www.w3.org/MarkUp/html3/Contents.html">HTML 3.0</a>
 FIG and OVERLAY elements, and will handle them as intended for text clients.
 These are the ideal way to handle <em>client-side-image-maps</em>, because
 the FIG content provides complete alternative markup, rather than relying
@@ -2234,14 +2234,13 @@ of Academic Computing Services at The University of Kansas.  Lynx was
 implemented by Lou Montulli and maintained by Garrett Arch Blythe and
 Craig Lavender.
 
-<p><em>Foteos Macrides</em> and members of the
-<a href="../about_lynx/about_lynx-dev.html">lynx-dev</a> list have
-developed and supported Lynx since release of v2.3 in May 1994. The
-Lynx2-3FM code set was released as v2.4 in June 1995. The Lynx2-4FM
-code set was released as v2.5 in May 1996. The Lynx2-5FM code set was
-released as v2.6 in September 1996. The Lynx2-6FM code set was released
-as v2.7 in February 1997, and v2.7.1 with bug fixes for v2.7 was
-released in April 1997.
+<p><em>Foteos Macrides</em> and members of the <a href="lynx-dev.html">
+lynx-dev</a> list have developed and supported Lynx since release of v2.3
+in May 1994. The Lynx2-3FM code set was released as v2.4 in June 1995.
+The Lynx2-4FM code set was released as v2.5 in May 1996. The Lynx2-5FM
+code set was released as v2.6 in September 1996. The Lynx2-6FM code set
+was released as v2.7 in February 1997, and v2.7.1 with bug fixes for v2.7
+was released in April 1997.
 
 <p>Lynx has incorporated code from a variety of sources along the
 way.  The earliest versions of Lynx included code from Earl Fogel

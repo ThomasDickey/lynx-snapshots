@@ -36,7 +36,7 @@ mandir= @mandir@/man1
 libdir= @libdir@
 
 installbin= @INSTALL_PROGRAM@ -c -s -m 755
-installdoc= @INSTALL_DATA@ -c -m 444
+installdoc= @INSTALL_DATA@
 
 ##set the relative location of the WWW library Implementation directory,
 ##from this directory
@@ -102,7 +102,8 @@ SITE_DEFS = # Your defines here
 # defines include:
 # -DARCHIVE_ONLY   (see README.configure)
 # -DDIRED_SUPPORT  (see README.configure)
-# -DEXP_CHARTRANS  (see README.configure)
+# -DDONT_TRACK_INTERNAL_LINKS - Handle following links to same doc differently.
+# -DEXP_CHARTRANS  (see README.configure - needs to be set)
 # -DEXP_CHARTRANS_AUTOSWITCH also let lynx switch term mode(Linux console only)
 # -DHP_TERMINAL    For DIM workaround to REVERSE problems on HP terminals.
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
@@ -125,9 +126,8 @@ SITE_DEFS = # Your defines here
 # -DSLANG_MBCS_HACK prevent cutoff lines when using UTF8 console (slang only)
 # -DSOCKS          For making a SOCKSified lynx.
 # -DUNDERLINE_LINKS  Define if you want links underlined instead of bold.
-# -DUNPAINT_CACHE  (see README.configure)
-# -DUSEHASH        (see README.configure)
 # -DUSE_COLOR_STYLE (see README.configure)
+# -DUSE_HASH       (see README.configure)
 # -DUSE_SLANG      (see README.configure)
 # -DUSE_ZLIB       To use some functions from zlib library if you have it.
 #
@@ -235,3 +235,8 @@ install: lynx
 	$(installbin) lynx $(bindir)/lynx
 	$(installdoc) lynx.man $(mandir)/lynx.1
 	$(installdoc) lynx.cfg $(libdir)/lynx.cfg
+
+uninstall:
+	-rm -f $(bindir)/lynx
+	-rm -f $(mandir)/lynx.1
+	-rm -f $(libdir)/lynx.cfg

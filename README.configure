@@ -1,4 +1,4 @@
--- 1997/7/27 - T.Dickey <dickey@clark.net>
+-- 1997/10/21 - T.Dickey <dickey@clark.net>
 
 --------------------------------------------------------------------------------
 
@@ -141,7 +141,7 @@ the script:
 
   --enable-color-style			(define USE_COLOR_STYLE)
   	Use this option to enable optional/experimental color style.
-	(Also defines USEHASH, UNPAINT_CACHE, LINKEDSTYLES)
+	(Also defines USE_HASH, LINKEDSTYLES)
 
   --enable-debug
   	Use this option to compile-in support for debugging.
@@ -156,6 +156,12 @@ the script:
   --with-cfg-file=XXX			(defines LYNX_CFG_FILE)
 	Use this option to override the location of the site
 	configuration file's pathname.  It defaults to $libdir/lynx.cfg,
+	where $libdir is set in the configure script, e.g., to
+	/usr/local/lib.
+
+  --with-lss-file=XXX			(defines LYNX_LSS_FILE)
+	Use this option to override the location of the site
+	style-sheet file's pathname.  It defaults to $libdir/lynx.lss,
 	where $libdir is set in the configure script, e.g., to
 	/usr/local/lib.
 

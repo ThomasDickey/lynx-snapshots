@@ -39,7 +39,7 @@ typedef struct _document {
    int    line;
    BOOL   internal_link;	/* whether doc was reached via an internal
 				 (fragment) link. - kw */
-#ifdef USEHASH
+#ifdef USE_HASH
    char * style;
 #endif
 } document;

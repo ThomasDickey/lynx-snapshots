@@ -53,9 +53,26 @@
 #endif /*_WINDOWS */
 #endif /* VMS */
 
+#ifndef WEXITSTATUS
+# if HAVE_TYPE_UNIONWAIT
+#  define	WEXITSTATUS(status)	(status.w_retcode)
+# else
+#  define	WEXITSTATUS(status)	(((status) & 0xff00) >> 8)
+# endif
+#endif
+
+#ifndef WTERMSIG
+# if HAVE_TYPE_UNIONWAIT
+#  define	WTERMSIG(status)	(status.w_termsig)
+# else
+#  define	WTERMSIG(status)	((status) & 0x7f)
+# endif
+#endif
+
 #include "LYLeaks.h"
 
 #define FREE(x) if (x) {free(x); x = NULL;}
+
 
 PUBLIC int LYExecv PARAMS((
 	char *		path,
@@ -2204,7 +2221,7 @@ PUBLIC int LYExecv ARGS3(
     int rc;
     char tmpbuf[512];
     pid_t pid;
-#if HAVE_TYPE_UNIONWAIT && !HAVE_WAITPID
+#if HAVE_TYPE_UNIONWAIT
     union wait wstatus;
 #else
     int wstatus;
@@ -2223,7 +2240,7 @@ PUBLIC int LYExecv ARGS3(
 	    execv(path, argv);
 	    exit(-1);	/* execv failed, give wait() something to look at */
 	default:  /* parent */
-#if HAVE_TYPE_UNIONWAIT && !HAVE_WAITPID
+#if !HAVE_WAITPID
 	    while (wait(&wstatus) != pid)
 		; /* do nothing */
 #else
@@ -2238,7 +2255,7 @@ PUBLIC int LYExecv ARGS3(
 #endif /* ERESTARTSYS */
 		break;
 	    }
-#endif /* HAVE_TYPE_UNIONWAIT && !HAVE_WAITPID */
+#endif /* !HAVE_WAITPID */
 	    if (WEXITSTATUS(wstatus) != 0 ||
 		WTERMSIG(wstatus) > 0)  { /* error return */
 		sprintf(tmpbuf, "Probable failure to %s due to system error!",

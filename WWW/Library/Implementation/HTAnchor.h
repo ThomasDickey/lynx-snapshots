@@ -98,7 +98,7 @@ struct _HTParentAnchor {
   char *        title;          /* Title of document */
   char *        owner;          /* Owner of document */
   char *        RevTitle;       /* TITLE in REV="made" or REV="owner" LINK */
-#ifdef USEHASH
+#ifdef USE_HASH
   char *	style;
 #endif
 
@@ -263,7 +263,7 @@ extern BOOL HTAnchor_isISMAPScript PARAMS((
 extern BOOL HTAnchor_hasChildren PARAMS((
 	HTParentAnchor *	me));
 
-#if defined(USEHASH)
+#if defined(USE_HASH)
 extern CONST char * HTAnchor_style PARAMS((
 	HTParentAnchor *	me));
 

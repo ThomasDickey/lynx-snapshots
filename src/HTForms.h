@@ -81,6 +81,27 @@ typedef struct _FormInfo {
         char *			accept_cs;
 } FormInfo;
 
+/*
+ *  As structure for info associated with a form.
+ *  There is some redundancy here, this shouldn't waste too much memory
+ *  since the total number of forms (as opposed to form fields) per doc
+ *  is expected to be rather small.
+ *  More things which are per form rather than per field could be moved
+ *  here. - kw
+ */
+typedef struct _PerFormInfo
+{
+	int			number;	   /* form number, see GridText.c */
+    /* except for the last two, the followign fields aren't actually used.. */ 
+	int			disabled;  /* If YES, can't change values */
+        struct _PerFormInfo *	next; 	   /* pointer to next form in doc */
+        int			nfields;   /* number of fields */
+        FormInfo *		first_field;
+        FormInfo *		last_field; /* pointer to last field in form */
+        char *			accept_cs;
+        char *			thisacceptcs; /* used during submit */
+} PerFormInfo;
+
 #define HYPERTEXT_ANCHOR 1
 #define INPUT_ANCHOR     2   /* forms mode input fields */
 #define INTERNAL_LINK_ANCHOR 5	/* 1+4, can be used as bitflag... - kw */

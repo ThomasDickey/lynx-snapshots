@@ -10,6 +10,81 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+1997-10-27
+* Updated links to www.w3.org in help files. - KW
+* Some changes for DOS compilation. - DK
+* Changes to INSTALLATION file. - NHE
+* Tweaks of internal links stuff. - KW
+* Allow HEAD on URLs starting with LYNXIMGMAP:http by stripping the
+  prefix. - KW
+* Reverted LYCheckForCSI() to previous incarnation. - KW
+1997-10-26
+* If compiled with -DDONT_TRACK_INTERNAL_LINKS, behavior with respect to
+  internal links as in FM's code. - KW
+*  Some chartrans tweaks. - KW
+1997-10-25
+* Changes to INSTALLATION file. - NHE
+* Make temp file names conform to 8+3 naming convention for DOS, and
+  give LYNX_TEMP_SPACE priority over TEMP and TMP for DOS. - DK
+* Create temp file names with '-' char as separator between pid and
+  sequential number for non-8+3 systems, to prevent (unlikely)
+  collision. - KW
+1997-10-24
+* Change in HTML.c to use the base (rather than current document, if the
+  base differs) in all cases for form ACTIONs (i.e., if the ACTION is
+  empty, or has a lone fragment, or an ACTION attribute is not included)
+  as specified in the -07 to -09 Fielding URL drafts. - FM
+1997-10-23
+* Fixed a few typos and glued together a few URLs to make it easier for
+  folk to cut and paste them, in the new INSTALLATION file. - LVW
+1997-10-22
+* Many locations of files changed, about_lynx/ directory and references to
+  aboutfilepath removed, userdefs.h reorganized, changed README, new 
+  INSTALLATION file, doc changes, some doc files removed. - NHE
+  (Removed paragraph in README which doesn't apply yet, some files still
+  not done - KW)
+* Patch to WWW/Library/djgpp/makefile - WS
+* Added entity names from HTML 4.0 draft to extra entities in HTMLDTD.c - KW
+* Understand lists in ACCEPT-CHARSET attributes.  Added a list of forms
+  to GridText structure (currently underused). - KW
+* Don't try to use box drawing chars in UTF-8 display mode. - KW
+* Changed chartrans mechanism (UCdomap.c, makeuctb.c) so that the "default"
+  translation table is now used as a fallback for other translation tables.
+  This also applies to display character sets which do not have a chartrans
+  table file but are listed in LYCharSets.c.  Changed syntax of table files
+  (see src/chrtrans/README.format), added a keyword to disable using the
+  fallback.  Currently def7_uni (corresponding to "7 bit approximations"
+  and the MIME charset "us-ascii") is used as default table, as before;
+  but previously the default table didn't have any real meaning.
+  Conceptually every translation table (unless it disables fallback) is
+  extended as if it included all the replacements from the default table.
+  Note that mappings for some characters in the default table file still
+  differ from the old mappings given in LYCharSets.c, and what is displayed
+  e.g. for umlaut characters may not be consistent, this still has to be
+  sorted out.  It may just have become more visible now. - KW
+* Tweaks to some replacement strings in def7_uni.tbl; contributions of
+  more useful strings would be welcome... - KW
+* Removed mappings for invalid chars from some chartrans files, removed
+  Ethiopic chars from iso01_uni.tbl. - KW
+* Some other corrections and tweaks for chartrans mechanisms. - KW
+1997-11-21
+* Fixed handling of Control-D (delete character under the cursor) in the
+  line editor when the cursor is at the end of the line instead of on a
+  character in the string being edited. - FM
+* revised tests for wait/waitpid/union-wait. - TD
+* correct/update handling of default prefix in CF_WITH_PATH macro, used for
+  parsing --with-cfg-file and --with-lss-file options.  - TD
+* add uninstall target to top-level makefile. - TD
+* remove redundant install options from $(INSTALL_DATA). - TD
+* add configure --with-lss-file option.
+* minor cleanup of gcc warnings, ifdefs. - TD
+1997-10-20
+* Mods in the CSO/PH gateway to set the anchor's safe flag to TRUE so the
+  user need not be bothered with confirmation prompts on resubmissions of
+  the search form. - FM
+* Tweaked the break point setting code in GridText.c for CJK di-bytes
+  so that one is set after a recognized "ESC(" ISO 2022 escape sequence
+  has been found. - FM
 1997-10-16
 * Tweaks to recognition of Japanese (better recognize x-euc-*), and to
   the mechanism in GridText.c keeping track of which encoding is used for
@@ -25,7 +100,7 @@ file) are duplicated here. - KW]
   may still revert to the usual assumption about charset, which means a
   charset specified in a META tag may be forgotten at that point; this may
   be considered a feature... - KW
-* Refer to TagSoup and SortaSGML parsing (coinded by FM), rather than "old"
+* Refer to TagSoup and SortaSGML parsing (coined by FM), rather than "old"
   and "new" DTD. - KW
 * Made some of the changes concerning and removal and location changes of
   files proposed by NHE. - KW
@@ -41,7 +116,7 @@ file) are duplicated here. - KW]
 * Added LYLeakSACopy and LYLeakSACat to LYLeaks.c.  Running Lynx compiled
   with LY_FIND_LEAKS defined will now give the source locations where
   StrAllocCopy and StrAllocCat are used, if those create leaks.  Added
-  missing incude of LYLeaks.h in LYCookie.c. - KW
+  missing include of LYLeaks.h in LYCookie.c. - KW
 * More heavy tweaks in LYCharUtils.c.  Associated changes in HTChunk.c
   (new functions), small change for -raw (in connection with attribute
   values) in SGML_character.  LYCharUtils.c is still a work in
@@ -86,8 +161,8 @@ file) are duplicated here. - KW]
 * A tweak of color style memory allocation. - KW
 1997-10-09
 * Some more tweaks from FM for VMS build - KW
-* For DJGPP compilation, src/chrtrans/makefile.dos - Bill Schiavo
-  <Wschiavo@concentric.net>
+* For DJGPP compilation, src/chrtrans/makefile.dos - WS (Bill Schiavo
+  <Wschiavo@concentric.net>)
 * Some cleanup in Hext_SubmitForm (needs more). Start using ACCEPT-CHARSET
   (doesn't recognize list yet, only recognized if on the INPUT field that
   causes submission). - KW

@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.7 Wed, 17 Sep 1997 17:34:13 -0600 dickey @
+ * @Id: LYStyle.c 1.13 Wed, 22 Oct 1997 08:29:34 -0600 dickey @
  */
 #include "HTUtils.h"
 #include "HTML.h"
@@ -247,7 +247,7 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n", buffer);
 	*/
  else
  {
-#if !defined(USEHASH)
+#if !defined(USE_HASH)
 	int i;
 	for (i=0; i<HTML_ELEMENTS; i++)
 	{

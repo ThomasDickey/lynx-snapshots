@@ -146,7 +146,7 @@ $(LOB)/libwww.a : $(COMMON)
 
 #	Clean up everything generatable except final products
 clean :
-	rm $(LOB)/*.o $(LOB)/created
+	rm $(LOB)/*.o 
 	-rmdir $(LOB)
 
 #	Clean up everything generatable including final products
@@ -212,15 +212,7 @@ $(WWW)/Copyright.txt : $(WWW)/../Copyright.html
 # 			Common code
 #			-----------
 
-#	Directory for object files - created checks it exists
-
-OE = $(LOB)/created
-$(OE) :
-	if [ ! -r $(WTMP) ] ; then mkdir $(WTMP); else echo OK ; fi
-	if [ ! -r $(WTMP)/Library ] ; then mkdir $(WTMP)/Library; else echo OK ; fi
-	if [ ! -r $(WTMP)/Library/$(WWW_MACH) ] ; \
-		then mkdir $(WTMP)/Library/$(WWW_MACH); else echo OK ; fi
-	touch $@
+#	Directory for object files
 
 $(LOB)/HTList.o : $(OE) $(CMN)HTList.c $(CMN)HTUtils.h $(CMN)HTList.h
 	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTList.c

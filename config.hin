@@ -2,18 +2,13 @@
 #ifndef LYNX_CFG_H
 #define LYNX_CFG_H 1
 
-#undef USE_COLOR_STYLE		/* FIXME: was 'CS' */
-#undef USEHASH			/* FIXME: rename to USE_HASHING */
-#undef UNPAINT_CACHE		/* FIXME: for RP's code */
-/* #undef TEST			** FIXME: for RP's code */
-#undef LINKEDSTYLES		/* FIXME: for RP's code */
-#undef ALT_CHAR_SET
+#undef ALT_CHAR_SET		/* CF_ALT_CHAR_SET */
 #undef ARCHIVE_ONLY		/* CF_ARG_DISABLE(dired-archive) */
 #undef CHMOD_PATH		/* CF_PATH_PROG(chmod) */
 #undef COLOR_CURSES		/* defined by CF_COLOR_CURSES */
 #undef COMPRESS_PATH		/* CF_PATH_PROG(compress) */
 #undef COPY_PATH		/* CF_PATH_PROG(cp) */
-#undef CURS_PERFORMANCE
+#undef CURS_PERFORMANCE		/* CF_CURS_PERFORMANCE */
 #undef DEBUG			/* configure --enable-debug */
 #undef DECL_SYS_ERRLIST
 #undef DIRED_SUPPORT		/* AC_ARG_WITH(dired) */
@@ -47,6 +42,7 @@
 #undef IGNORE_CTRL_C		/* FIXME: make tests? */
 #undef INSTALL_ARGS		/* CF_PATH_PROG(install) */
 #undef INSTALL_PATH		/* CF_PATH_PROG(install) */
+#undef LINKEDSTYLES		/* see USE_COLOR_STYLE */
 #undef LINUX			/* FIXME: make tests? */
 #undef LOCALE			/* for locale support */
 #undef LONG_LIST		/* CF_ARG_DISABLE(long-list) */
@@ -78,10 +74,14 @@
 #undef UNCOMPRESS_PATH		/* CF_PATH_PROG(gunzip) */
 #undef UNIX
 #undef UNZIP_PATH		/* CF_PATH_PROG(unzip) */
+#undef USE_COLOR_STYLE		/* CF_ARG_ENABLE(color-style) */
+#undef USE_HASH			/* see USE_COLOR_STYLE */
 #undef USE_SLANG		/* AC_ARG_WITH(screen=slang) */
 #undef USE_ZLIB			/* AC_ARG_WITH(zlib) */
 #undef UTMPX_FOR_UTMP		/* use <utmpx.h> since <utmp.h> not found */
 #undef UUDECODE_PATH		/* CF_PATH_PROG(uudecode) */
+#undef WAITPID_USES_UNION	/* CF_FUNC_WAIT */
+#undef WAIT_USES_UNION		/* CF_FUNC_WAIT */
 #undef ZCAT_PATH		/* CF_PATH_PROG(zcat) */
 #undef ZIP_PATH			/* CF_PATH_PROG(zip) */
 #undef const			/* defined by AC_C_CONST */

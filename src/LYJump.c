@@ -494,5 +494,5 @@ PRIVATE unsigned LYRead_Jumpfile ARGS1(struct JumpTable *,jtp)
 
 PRIVATE int LYCompare ARGS2 (CONST void *, e1, CONST void *, e2)
 {
-    return strcasecomp(((JumpDatum *)e1)->key, ((JumpDatum *)e2)->key);
+    return strcasecomp(((CONST JumpDatum *)e1)->key, ((CONST JumpDatum *)e2)->key);
 }

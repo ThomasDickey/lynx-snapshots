@@ -1,0 +1,399 @@
+For a description of Lynx please read the README file.
+
+        Lynx Installation guide.
+
+        Last Updated February 1997
+
+UNIX & VMS Step 1a. 
+    Most of the variables that you are likely to change are in the
+    userdefs.h file.  There are a few that you must change or verify,
+    and a few more that you will probably want to change.  The variables
+    that must be changed are marked as such in the userdefs.h file.
+    Just edit it and the changes should be straight forward.  You also
+    should check LYMessages_en.h for tailoring the Lynx statusline
+    prompts, messages and warnings to requirements of your site.
+
+    NOTE: Many of the variables in userdefs.h are now configurable in
+	  the lynx.cfg file.  Please read the lynx.cfg file as well.
+	  Also see the example mime.types, mailcap and jumps files
+	  in the samples subdirectory.
+
+UNIX & VMS Step 1b. (optional)
+    Set up local printers and downloaders
+    in the lynx.cfg file.  (see lynx.cfg for details)
+
+UNIX & VMS Step 1c. (optional)
+      If your system requires the PASV FTP code instead of
+      the standard PORT FTP code (e.g., to deal with a
+      firewall) then edit WWW/Library/Implementation/HTFTP.c
+      and comment out line 43 like so:
+      /*  #define LISTEN   /* @@@@ Test LJM */
+      On Unix you can define NOPORT in the top Makefile instead
+      of changing HTFTP.c
+
+UNIX Extra Step: !! CONFIGURATION !!
+    There now is a configure script which takes care of system-dependent
+    setting automatically.  See the file README.configure for more details.
+    You may want to run "./configure --help" first to see what flags are
+    available.
+
+    Run configure, eg "./configure", and
+    wait while it figures out what software is on your
+    computer, what type of computer and operating system
+    you have, etc, and then finally uses makefile.in
+    to produce the makefile that will get used when
+    you finally (later on) say "make".
+
+    The rest of this file has not yet been updated for installation with
+    the configure script.  The information in README.configure is newer
+    and should be consulted.  In particular UNIX Steps 1f and 2 below should
+    not be necessary on most systems after "./configure" has been run
+    (running "make" is of course still required, but it does not reqire
+    specifying a system type).  Other points mostly still apply.  If you
+    need or want to make manual change in addition to the auto configuration,
+    note that "makefile" is now used instead of "Makefile".
+
+UNIX Step 1d.  (WAIS support is built into Lynx for VMS, skip to step 1e)
+    Adding Direct WAIS support.
+    Get the freeWAIS distribution from:
+    	ftp://ftp.cnidr.org/pub/NIDR.tools/freewais
+    and compile it.  The compile process will create some libraries, you will 
+    need wais.a and client.a.  Edit the Makefile in the top level  directory 
+    and add the library locations under the DIRECT WAIS ACCESS heading.  
+    Edit the Makefile for the WWW Library in the
+    WWW/Library/Implementation/CommonMakefile to make the WAIS.c sources
+    in the library.  If everything goes well you should
+    be able to make and have direct WAIS access.
+
+UNIX & VMS Step 1e.
+    Adding NEWS support.
+    To set your site's NTTP server as the default host for news reading
+    and posting via Lynx, set the environment variable NNTPSERVER so that
+    it points to its Internet address (see Step 5).
+
+    For news posting ability to be enabled in Lynx, in userdefs.h (and
+    optionally in lynx.cfg) the NEWS_POSTING symbol must be defined to
+    TRUE.  Also define LYNX_SIG_FILE in usersdefs.h or lynx.cfg so that
+    it points to users' signature files for appending to posted messages.
+    For the Organization: header in news postings, Lynx checks for an
+    ORGANIZATION or NEWS_ORGANIZATION environment variable.  On Unix,
+    Lynx also checks for an /etc/organization file.
+
+UNIX Step 1f. (Sun systems)
+    Sun resolv library.
+    On Sun systems you may need to define RESOLVLIB in the top Makefile
+    to enable access to remote hosts.  See the comments in the Makefile
+    and PROBLEMS file for more information.
+
+VMS Step 1f.
+    Downloading binary files.
+    Lynx must handle all IO as streams, and on VMS, output files are always
+    created with Stream_LF format via the C RTL's fopen().  The file headers
+    indicate Implied Carriage Control, even when the transfer was in binary
+    mode, which can confuse downloading software and cause corruption of
+    the file contents.  To deal with this, you should define the symbol
+    USE_FIXED_RECORDS as TRUE in userdefs.h and/or lynx.cfg.  This will
+    instruct Lynx to correct the header information to indicate FIXED 512
+    records, with No Implied Carriage Control.  If Lynx fails to do the
+    conversion (because the file wasn't mapped to a binary MIME type) you can
+    execute FIXED512.COM externally to correct the header information.  The
+    command file uses Joe Meadow's FILE utility, or the SET FILE/ATTRIBUTES
+    command on current versions of VMS, to modify the headers.  See the
+    comments in FIXED512.COM, userdefs.h and lynx.cfg for more information.
+
+
+UNIX Step 2.
+    VMS users skip to 'VMS step 2'
+
+    Check the top level Makefile for any site-specific definitions
+    you require or desire. Then, you should be ready to compile!
+
+    If you type "make" with no arguments you will see a list of 
+    supported systems.  If your system type IS listed you just
+    need to type "make SYSTEM_TYPE".  For instance, if you are
+    running under IBM's RS/6000 AIX 3.2 you would just type
+    "make aix32".  If you were running Ultrix you would type
+    "make ultrix".
+
+    If you are on a SUN workstation and do not have 'gcc' you 
+    may change 'gcc' to '/usr/5bin/cc' in the Makefile
+
+    If you are on a system that is not listed in the makefile it may be
+    more difficult. The first thing you should try is just "make generic",
+    this will compile with the "fancy_curses" option, and will give a much
+    nicer screen display.  If it doesn't compile or if the screen display
+    looks strange (real strange), try compiling with the "low_curses" option.
+    Edit the Makefile and remove the '-DFANCY_CURSES' definition under the
+    'generic:' entry.  There may be some compatibility problems on some
+    systems, but we don't know what they might be at this point.  If you
+    are running on a currently unsupported system please contact us via
+    the lynx-dev email list (see RELEASE_STATEMENT).  If there are any
+    problems we will try to fix them as soon as possible.  
+
+VMS step 2.
+    Lynx uses the VMS port of gzip for uncompressing streams which have
+    Content-Encoding headers indicated compression with gzip or the
+    Unix compress.  If you do not have gzip installed on your system
+    you can get it from ftp://ftp.wku.edu/ in the fileserv directory.
+    The command Lynx uses to uncompress on VMS is "gzip -d".
+
+    If you are using the SOCKETSHR library, read SOCKETSHR.announce and
+    make sure you have defined SOCKETSHR and SOCKETSHR_LIBRARY as explained
+    therein.
+
+    A "build.com" and "build-slang.com" script for building Lynx with curses
+    or slang is in the top level directory.  All you have to do is type
+    "@build" or "@build-slang" and answer its prompt for your system's TCP-IP
+    software.  Current choices are:
+           MULTINET (default)
+	   UCX
+	   WIN_TCP
+           CMU_TCP
+	   SOCKETSHR_TCP
+	   TCPWARE
+    It will autosense whether you have VAXC, DECC or GNUC on VAX or AXP
+    and build appropriately.  If a WWWLib already exists for that TCP-IP
+    software, it will prompt you for whether you want to rebuild it.  If
+    you want to build a WWWLib separately, you can type "@libmake.com"
+    with your default directory set to [.WWW.Library.vms] instead doing
+    it via "build.com" in the top directory.  You may need to modify
+    "build-slang.com", as described in its header, so that it can find
+    slang.olb on your system.  If you have both DECC and VAXC, it will
+    use DECC to benefit from the newer and more efficient memory management
+    functions.
+
+    (optional compilation method)
+    If you have and want to use MMS, read the header of descrip.mms
+    in the top directory and be sure you include the appropriate macro
+    definitions when you invoke it:
+	$ MMS /Macro = (MULTINET=1)		for VAXC - MultiNet
+	$ MMS /Macro = (WIN_TCP=1)		for VAXC - Wollongong TCP/IP
+	$ MMS /Macro = (UCX=1)			for VAXC - UCX
+	$ MMS /Macro = (CMU_TCP=1)		for VAXC - OpenCMU TCP/IP
+	$ MMS /Macro = (SOCKETSHR_TCP=1)	for VAXC - SOCKETSHR/NETLIB
+	$ MMS /Macro = (TCPWARE=1)		for VAXC - TCPWare TCP/IP
+
+	$ MMS /Macro = (MULTINET=1, DEC_C=1)	for DECC - MultiNet
+	$ MMS /Macro = (WIN_TCP=1, DEC_C=1)	for DECC - Wollongong TCP/IP
+	$ MMS /Macro = (UCX=1, DEC_C=1)		for DECC - UCX
+	$ MMS /Macro = (CMU_TCP=1, DEC_C=1)	for DECC - OpenCMU TCP/IP
+	$ MMS /Macro = (SOCKETSHR_TCP=1,DEC_C=1) for DECC - SOCKETSHR/NETLIB
+	$ MMS /Macro = (TCPWARE=1, DEC_C=1)	for DECC - TCPWare TCP/IP
+
+	$ MMS /Macro = (MULTINET=1, GNU_C=1)	for GNUC - MultiNet
+	$ MMS /Macro = (WIN_TCP=1, GNU_C=1)	for GNUC - Wollongong TCP/IP
+	$ MMS /Macro = (UCX=1, GNU_C=1)		for GNUC - UCX
+	$ MMS /Macro = (CMU_TCP=1, GNU_C=1)	for GNUC - OpenCMU TCP/IP
+	$ MMS /Macro = (SOCKETSHR_TCP=1,GNU_C=1) for GNUC - SOCKETSHR/NETLIB
+	$ MMS /Macro = (TCPWARE=1, GNU_C=1)	for GNUC - TCPWare TCP/IP
+
+        If you just type "MMS" it will default to the MULTINET and VAXC
+	configuration.  MMS will build the WWW library and Lynx sources,
+	and link the executable.  However, not all of the header dependencies
+	are specified.  If you are not a developer, and need a clean build,
+	you should use build.com instead of the MMS utility.
+
+    If you want SOCKS support on VMS, you must add SOCKS as a compilation
+    definition, and the SOCKS library to the link command.  However, instead
+    of SOCKSifying Lynx for use behind a firewall, you are better off if you
+    build Lynx normally, and set up Lynx to use a proxy server (see below).
+    You instead can SOCKSify the proxy server, and it will handle all clients,
+    not just Lynx.
+
+
+UNIX Step 3.
+    Go ahead and test it out with the about_lynx/about_lynx.html file.
+    You shouldn't need to install Lynx to test it.
+    Once you are satisfied that it works, go ahead and install it.
+
+	VERY IMPORTANT!!!!!
+	    If you are setting up an anonymous account with Lynx you
+	    are strongly advised to use the -anonymous command line
+	    option.  If you do not use this option, users may be able
+	    to gain access to all readable files on your machine.
+	    ALSO NOTE that many implementations of telnetd allow passing
+	    of environment variables, which might be used by unscrupulous
+	    people to modify the environment in anonymous accounts.  When
+	    making Lynx and Web access publicly available via anonymous
+	    accounts intended to run Lynx captively, be sure the wrapper
+	    uses the -cfg switch and specifies the startfile, rather than
+	    relying on the LYNX_CFG, LYNX_CFG_FILE, or WWW_HOME variables.
+
+VMS Step 3. 
+    Go ahead and test it out with the [.about_lynx]about_lynx.html file.
+    You shouldn't need to install Lynx to test it.
+    Once you are satisfied that it works, go ahead and install it.
+
+	VERY IMPORTANT!!!!!
+	    If you are setting up an anonymous account with Lynx you
+	    are strongly advised to use the -anonymous command line
+	    option.  If you do not use this option, users will be able
+	    to gain access to all readable files on your machine.
+ 	    ALSO NOTE that some implementations of telnet allow passing
+	    of environment variables, which might be used by unscrupulous
+	    people to modify the environment in anonymous accounts.  When
+	    making Lynx and Web access publicly available via anonymous
+	    accounts intended to run Lynx captively, be sure the wrapper
+	    uses the -cfg switch and specifies the startfile, rather than
+	    relying on the LYNX_CFG, LYNX_CFG_FILE, or WWW_HOME variables.
+
+
+UNIX Step 4. (Installation)
+    Lynx is very easy to install, if you want Lynx installed anywhere 
+    besides "/usr/local/bin", with the man files in "/usr/man/man1", you 
+    need to edit the Makefile and change the "exec" and "doc" defines.
+    Otherwise just "su" to root and type "make install" and make will
+    copy "lynx", "lynx.cfg" and  "lynx.1" to the specified directories.  
+    Those are the only two files necessary to run Lynx.  
+    lynx.1 isn't really necessary, but it should be available.
+    lynx.cfg isn't absolutely necessary either but is the only way
+    to configure printers and downloaders (and uploaders if DIRED_SUPPORT
+    is implemented), so it is highly recommended.
+    Also check out the mailcaps, mime.types and jumps file samples in the
+    samples directory.
+
+VMS Step 4.
+    You need to have the executable in a public place, make it accessible,
+    define it as a foreign command, and copy lynx.cfg to "Lynx_Dir".  Look
+    at lynx.com in the samples directory as a model for installing Lynx.
+    Also check out the mailcaps, mime.types and jumps file samples in the
+    samples directory.  To include lynx.hlp in the system HELP library,
+    use the command:
+
+    		$ library/replace sys$help:helplib.hlb lynx.hlp
+
+
+UNIX and VMS Step 5.
+    Lynx uses some environment variables to regulate it's behavior.
+    
+    The variable "NNTPSERVER" is used to specify the host which will
+    be used as the default for news URLs.
+    
+	UNIX
+		setenv NNTPSERVER "news.server.dom"
+	
+	VMS
+		define/system NNTPSERVER "news.server.dom"
+
+
+    The environment variables "ORGANIZATION" or "NEWS_ORGANIZATION", if set,
+    will be used for the Organization: header in news postings.
+
+
+    The environment variable "LYNX_CFG", if set, will override the default
+    location and name of the global configuration file (lynx.cfg) that was
+    defined via the constant "LYNX_CFG_FILE" in userdefs.h.  See userdefs.h
+    for more information.
+
+
+    The environment variable "LYNX_TEMP_SPACE", if set, will override the
+    default path prefix for temporary files that was defined via the constant
+    "TEMP_SPACE" in userdefs.h.  See userdefs.h for more information.
+
+
+    The environment variable "LYNX_SAVE_SPACE", if set, will override the
+    default path prefix for files saved to disk that was defined via the
+    constant "SAVE_SPACE" in lynx.cfg.  See lynx.cfg for more information.
+
+
+    The variable "WWW_HOME", if set, will override the default startup
+    URL specified in any of the configuration files.
+
+
+    Lynx still supports use of gateway servers, with the servers specified
+    via the variables "WWW_access_GATEWAY", where "access" is lower case
+    and can be "http", "ftp", "gopher" or "wais".  Most of the gateway
+    servers have been discontinued, but "http://www.w3.org:8001" is
+    available for wais searches (note that you do not include a terminal
+    '/' for gateways, but do for proxies; see below).
+
+
+    Lynx version 2.2 and beyond supports the use of proxy servers that can
+    act as firewall gateways and caching servers.  They are preferable to
+    the older gateway servers.  Each protocol used by Lynx can be mapped
+    separately using PROTOCOL_proxy environment variables of the form:
+    
+        UNIX
+                setenv http_proxy "http://some.server.dom:port/"
+                setenv https_proxy "http://some.server.dom:port/"
+                setenv ftp_proxy "http://some.server.dom:port/"
+                setenv gopher_proxy "http://some.server.dom:port/"
+                setenv news_proxy "http://some.server.dom:port/"
+                setenv newspost_proxy "http://some.server.dom:port/"
+                setenv newsreply_proxy "http://some.server.dom:port/"
+                setenv snews_proxy "http://some.server.dom:port/"
+                setenv snewspost_proxy "http://some.server.dom:port/"
+                setenv snewsreply_proxy "http://some.server.dom:port/"
+                setenv nntp_proxy "http://some.server.dom:port/"
+                setenv wais_proxy "http://some.server.dom:port/"
+                setenv finger_proxy "http://some.server.dom:port/"
+                setenv cso_proxy "http://some.server.dom:port/"
+                
+        VMS
+                define "http_proxy" "http://some.server.dom:port/"
+                define "https_proxy" "http://some.server.dom:port/"
+                define "ftp_proxy" "http://some.server.dom:port/"
+                define "gopher_proxy" "http://some.server.dom:port/"
+                define "news_proxy" "http://some.server.dom:port/"
+                define "newspost_proxy" "http://some.server.dom:port/"
+                define "newsreply_proxy" "http://some.server.dom:port/"
+                define "snews_proxy" "http://some.server.dom:port/"
+                define "snewspost_proxy" "http://some.server.dom:port/"
+                define "snewsreply_proxy" "http://some.server.dom:port/"
+                define "nntp_proxy" "http://some.server.dom:port/"
+                define "wais_proxy" "http://some.server.dom:port/"
+                define "finger_proxy" "http://some.server.dom:port/"
+                define "cso_proxy" "http://some.server.dom:port/"
+                (Encase *BOTH* strings in double-quotes to maintain
+		 lower case for the PROTOCOL_proxy variable and for
+		 the http access type; include /system if you want
+		 proxying for all clients on your system.)
+
+    If you wish to override the use of a proxy server for specific hosts or
+    entire domains you may use the "no_proxy" environment variable. Here is
+    an example use of "no_proxy":
+          
+        UNIX
+                setenv no_proxy "host.domain.dom, domain1.dom, domain2"
+                
+        VMS
+                define "no_proxy" "host.domain.dom, domain1.dom, domain2"
+
+    You can include a port number in the no_proxy list to override use
+    of a proxy server for the host accessed via that port, but not via
+    other ports.  For example, if you use "host.domain.dom:119" and/or
+    "host.domain.dom:210", then news (port 119) URLs and/or any wais
+    (port 210) searches on that host would be excluded, but http, ftp,
+    and gopher services (if normally proxied) would still be included,
+    as would any news or wais services on other hosts.
+
+    If you wish to override the use of a proxy server completely (i.e.,
+    globally override any existing proxy variables), set the value of
+    "no_proxy" to "*".
+
+    Note that Lynx treats file URLs on the local host as requests for
+    direct access to the file, and does not attempt ftp if that fails.
+    It treats both ftp URLs and file URLs on remote hosts as ftp URLs,
+    and does not attempt direct file access for either.  If ftp URLs are
+    being proxied, file URLs on a remote host will be converted to ftp
+    URLs before submission by Lynx to the proxy server, so no special
+    procedure for inducing the proxy server to handle them is required.
+    Other WWW clients may require that the http server's configuration
+    file have "Map file:* ftp:*" in it to perform that conversion.
+
+    The proxy and no_proxy variables also can be set at run time via
+    lynx.cfg.
+
+    Copies of the Lynx online help are included in the lynx_help
+    subdirectory tree and should be made accessible in response to
+    the Lynx 'h'elp command by defining HELPFILE in userdefs.h and/or
+    lynx.cfg to an appropriate file://localhost/path URL.
+    
+
+UNIX & VMS Step 6. (Hopefully Optional)
+    If something doesn't work, or you can't get it to compile at all, or
+    you can't figure out what one of the defines means, or if you just
+    want to make a comment, send an email message to the Lynx-Dev mailing
+    list (see the README file about subscribing to Lynx-Dev).  Until Lynx
+    has been ported to all the world's operating systems, we expect there 
+    will be some compatibility problems, but we'll do our best to help you.

@@ -263,7 +263,6 @@ PUBLIC char *LynxHome = NULL;	/* the default Home HREF. */
 PUBLIC char *startfile = NULL;	/* the first file */
 PUBLIC char *helpfile = NULL; 	/* the main help file */
 PUBLIC char *helpfilepath = NULL;   /* the path to the help file set */
-PUBLIC char *aboutfilepath = NULL;  /* the path to the about lynx file */
 PUBLIC char *lynxjumpfile = NULL;   /* the current jump file URL */
 PUBLIC char *lynxlistfile = NULL;   /* the current list file URL */
 PUBLIC char *lynxlinksfile = NULL;  /* the current visited links file URL */
@@ -390,7 +389,7 @@ PUBLIC BOOLEAN LYNoCore = NO_FORCED_CORE_DUMP;
 PRIVATE void FatalProblem PARAMS((int sig));
 #endif /* !VMS */
 
-#if defined(USEHASH)
+#if defined(USE_HASH)
     char *lynx_lss_file=NULL;
 #endif
 
@@ -455,7 +454,6 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(lynx_save_space);
     FREE(homepage);
     FREE(helpfilepath);
-    FREE(aboutfilepath);
     FREE(bookmark_page);
     FREE(BookmarkPage);
     for (i = 0; i <= MBM_V_MAXFILES; i++) {
@@ -474,9 +472,12 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(URLDomainSuffixes);
     FREE(XLoadImageCommand);
     FREE(LYTraceLogPath);
-#if defined(USEHASH)
+#if defined(USE_HASH)
     FREE(lynx_lss_file);
 #endif
+    FREE(UCAssume_MIMEcharset);
+    FREE(UCAssume_unrecMIMEcharset);
+    FREE(UCAssume_localMIMEcharset);
     for (i = 0; i < nlinks; i++) {
         FREE(links[i].lname);
     }
@@ -657,6 +658,9 @@ PUBLIC int main ARGS2(
     StrAllocCat(lynx_version_putenv_command, LYNX_VERSION);
     putenv(lynx_version_putenv_command);
 #endif /* VMS */
+    if ((cp = getenv("LYNX_TEMP_SPACE")) != NULL)
+        StrAllocCopy(lynx_temp_space, cp);
+    else
 #ifdef DOSPATH
        if ((cp = getenv("TEMP")) != NULL)
                 StrAllocCopy(lynx_temp_space, cp);
@@ -664,9 +668,6 @@ PUBLIC int main ARGS2(
                 StrAllocCopy(lynx_temp_space, cp);
        else
 #endif
-    if ((cp = getenv("LYNX_TEMP_SPACE")) != NULL)
-        StrAllocCopy(lynx_temp_space, cp);
-    else
         StrAllocCopy(lynx_temp_space, TEMP_SPACE);
     if ((cp = strchr(lynx_temp_space, '~'))) {
 	*(cp++) = '\0';
@@ -719,12 +720,17 @@ PUBLIC int main ARGS2(
 	StrAllocCat(lynx_temp_space, ":");
     }
 #else
-    {
-	if (((len = strlen(lynx_temp_space)) > 1) &&
-	    lynx_temp_space[len-1] != '/') {
-	    StrAllocCat(lynx_temp_space, "/");
-	}
+#ifndef __DJGPP__
+    if (((len = strlen(lynx_temp_space)) > 1) &&
+	lynx_temp_space[len-1] != '/') {
+	StrAllocCat(lynx_temp_space, "/");
     }
+#else
+    if (((len = strlen(lynx_temp_space)) > 1) &&
+	lynx_temp_space[len-1] != '\\') {
+	StrAllocCat(lynx_temp_space, "\\");
+    }
+#endif /* __DJGPP__ */
 #endif /* VMS */
 #ifdef VMS
     StrAllocCopy(mail_adrs, MAIL_ADRS);
@@ -800,7 +806,7 @@ PUBLIC int main ARGS2(
                 i++;
             }
 
-#if defined(USEHASH)
+#if defined(USE_HASH)
 	} else if (strncmp(argv[i], "-lss", 4) == 0) {
 	    if ((cp=strchr(argv[i],'=')) != NULL)
 		StrAllocCopy(lynx_lss_file, cp+1);
@@ -878,7 +884,7 @@ PUBLIC int main ARGS2(
 		    if (*cp)
 			StrAllocCopy(lynx_cfg_file, cp);
 	        }
- #if defined(USEHASH)
+#if defined(USE_HASH)
 	    } else if (strncmp(buf, "-lss", 4) == 0) {
 		if ((cp = strchr(buf,'=')) != NULL) {
 		    StrAllocCopy(lynx_lss_file, cp+1);
@@ -1143,7 +1149,7 @@ PUBLIC int main ARGS2(
     }
 #endif /* EXP_CHARTRANS */
 
-#if defined(USEHASH)
+#if defined(USE_HASH)
     /*
      *  If no alternate lynx-style file was specified on
      *  the command line, see if it's in the environment.
@@ -1623,11 +1629,10 @@ PUBLIC int main ARGS2(
     StrAllocCopy(helpfilepath, helpfile);
     if ((cp=strrchr(helpfilepath, '/')) != NULL)
         *cp = '\0';
-    StrAllocCopy(aboutfilepath, helpfilepath);
-    if ((cp=strrchr(aboutfilepath, '/')) != NULL) {
-        *cp = '\0';
-	StrAllocCat(aboutfilepath, "/about_lynx/");
-    }
+    /*
+     *  Remove code to merge the historical about_lynx
+     *  directory into lynx_help. - HN
+     */
     StrAllocCat(helpfilepath, "/");
 
 
@@ -2181,7 +2186,7 @@ PRIVATE void parse_arg ARGS3(
 	local_exec_on_local_files = TRUE;
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
 
-#if defined(USEHASH)
+#if defined(USE_HASH)
     } else if (strncmp(argv[0], "-lss", 4) == 0) {
         /*
 	 *  Already read the alternate lynx-style file
@@ -2714,7 +2719,7 @@ Output_Help_List:
     printf("                     MAPs are present\n");
     printf("    -link=NUMBER     starting count for lnk#.dat files produced by -crawl\n");
     printf("    -localhost       disable URLs that point to remote hosts\n");
-#if defined(USEHASH)
+#if defined(USE_HASH)
     printf("    -lss=FILENAME    specifies a lynx.css file other than the default\n");
 #endif
     printf("    -mime_header     include mime headers and force source dump\n");

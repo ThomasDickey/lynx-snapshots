@@ -53,6 +53,13 @@ extern void UCSetTransParams PARAMS((
 extern void UCTransParams_clear PARAMS((
 	UCTransParams *		pT));
 
+extern void UCSetBoxChars PARAMS((
+    int		cset,
+    int *	pvert_out,
+    int *	phori_out,
+    int		vert_in,
+    int		hori_in));
+
 #ifndef HTSTREAM_H
 #include "HTStream.h"
 #endif /* HTSTREAM_H */

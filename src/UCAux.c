@@ -55,6 +55,8 @@ PUBLIC UCTQ_t UCCanTranslateFromTo ARGS2(
 	if (!strcmp(fromname, "x-transparent") ||
 	    !strcmp(toname, "x-transparent")) {
 	    return TQ_GOOD;
+	} else if (!strcmp(fromname, "us-ascii")) {
+	    return TQ_GOOD;
 	}
 	if (LYCharSet_UC[from].enc == UCT_ENC_CJK) {
 	    if (HTCJK == NOCJK)	/* use that global flag, for now */
@@ -232,7 +234,29 @@ PUBLIC void UCTransParams_clear ARGS1(
     pT->repl_translated_C0 = FALSE;
     pT->trans_from_uni = FALSE;
 }
-
+/*
+ *  If terminal is in UTF-8 mode, it probably cannot understand
+ *  box drawing chars as (n)curses handles them.  (This may also
+ *  be true for other display character sets, but isn't currently
+ *  checked.)  In that case set the chars for hori and vert drawing
+ *  chars to displayable ASCII chars if '0' was requested.  They'll
+ *  stay as they are otherwise. - kw
+ */
+PUBLIC void UCSetBoxChars ARGS5(
+    int,	cset,
+    int *,	pvert_out,
+    int *,	phori_out,
+    int,	vert_in,
+    int,	hori_in)
+{
+    if (cset >= -1 && LYCharSet_UC[cset].enc == UCT_ENC_UTF8) {
+	*pvert_out = (vert_in ? vert_in : '|'); 
+	*phori_out = (hori_in ? hori_in : '-');
+    } else {
+	*pvert_out = vert_in;
+	*phori_out = hori_in;
+    }
+}
 /*
  *  Given an output target HTStream* (can also be a HTStructured* via
  *  typecast), the target stream's put_character method, and a unicode

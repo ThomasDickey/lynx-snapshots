@@ -6,6 +6,7 @@
 #include "LYCurses.h"
 #include "GridText.h"
 #include "LYCharSets.h"
+#include "UCAux.h"
 #include "LYUtils.h"
 #include "LYStructs.h"  /* includes HTForms.h */
 #include "LYStrings.h"
@@ -468,7 +469,7 @@ breakfor:
 	 *  truthfully) the user confirms by changing the field that
 	 *  the character encoding is right. - kw
 	 */
-	if (*p)
+	if (form->value && *form->value)
 	    form->value_cs = current_char_set;
     }
     return(ch);
@@ -747,13 +748,17 @@ redraw:
 #ifdef VMS
     VMSbox(form_window, (bottom - top), (width + 4));
 #else
+    {
+	int boxvert, boxhori;
+	UCSetBoxChars(current_char_set, &boxvert, &boxhori, BOXVERT, BOXHORI);
 #ifdef CSS
-    wcurses_css(form_window, "frame", ABS_ON);
-    box(form_window, BOXVERT, BOXHORI);
-    wcurses_css(form_window, "frame", ABS_OFF);
+	wcurses_css(form_window, "frame", ABS_ON);
+	box(form_window, boxvert, boxhori);
+	wcurses_css(form_window, "frame", ABS_OFF);
 #else
-    box(form_window, BOXVERT, BOXHORI);
+	box(form_window, boxvert, boxhori);
 #endif
+    }
 #endif /* VMS */
     wrefresh(form_window);
 #endif /* USE_SLANG */

@@ -12,7 +12,7 @@ There are four kinds of lines:
 Summary example:
 
   # This line is a comment, the next line is a directive
-  OBrand new Charset!
+  O Brand new Charset!
   0x41    U+0041 U+0391
   U+00cd:I'
 
@@ -23,12 +23,25 @@ a) comment lines start with a '#' character.
    check the examples..)
 
 b) directives:
-   start with a special character, currently recognized are the letters:
+   start with a keyword which may be abbreviated to one letter (first
+   letter must be capitalized), followed by space and a value.
+   Currently recognized:
  
-    O   The name under which this should appear on the O)ptions screen
-    M   The name for this charset in MIME syntax (one word with digits
+    OptionName
+	The name under which this should appear on the O)ptions screen
+	in the list for Display Character Set
+    MIMEName
+	The name for this charset in MIME syntax (one word with digits
         and some other non-letters allowed, should be IANA registered)
-    R   a number which flags some special property (encoding) for this
+    Default
+	This is the default (fallback) translation table, it will be used
+	for Unicode -> 8bit (or 7bit) translation if no translation is found
+	in the specific table.
+    FallBack
+	Whether to use the default table if no translation is found in
+	this table.  Normally fallback is used, "FallBack NO" disables it.
+    RawOrEnc
+	a number which flags some special property (encoding) for this
         charset [see utf8.uni for example, see UCDefs.h for details].
 
 c) character translation definitions:

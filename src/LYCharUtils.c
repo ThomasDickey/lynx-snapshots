@@ -825,15 +825,18 @@ PUBLIC void LYGetChartransInfo ARGS1(
 
 	if (chndl < 0) {
 	    chndl = current_char_set;
-	    HTAnchor_setUCInfoStage(me->node_anchor, chndl, UCT_STAGE_HTEXT,
+	    HTAnchor_setUCInfoStage(me->node_anchor, chndl,
+				    UCT_STAGE_HTEXT,
 				    UCT_SETBY_STRUCTURED);
 	}
 	HTAnchor_setUCInfoStage(me->node_anchor, chndl,
-				UCT_STAGE_STRUCTURED, UCT_SETBY_STRUCTURED);
+				UCT_STAGE_STRUCTURED,
+				UCT_SETBY_STRUCTURED);
 	me->UCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,
 					    UCT_STAGE_STRUCTURED);
     }
-    me->UCI = HTAnchor_getUCInfoStage(me->node_anchor, UCT_STAGE_STRUCTURED);
+    me->UCI = HTAnchor_getUCInfoStage(me->node_anchor,
+				      UCT_STAGE_STRUCTURED);
 }
 
 #endif /* EXP_CHARTRANS */
@@ -1026,23 +1029,23 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
     char * p;
     char *q, *qs;
     HTChunk *chunk = NULL;
-    char * cp;
-    char cpe;
+    char * cp = 0;
+    char cpe = 0;
     char *esc = NULL;
     char replace_buf[64];
     int uck;
     int lowest_8;
-    UCode_t code;
+    UCode_t code = 0;
     long int lcode;
-    BOOL output_utf8, repl_translated_C0;
+    BOOL output_utf8 = 0, repl_translated_C0 = 0;
     size_t len;
     int high, low, diff = 0, i;
     CONST char ** entities = HTML_dtd.entity_names;
     CONST UC_entity_info * extra_entities = HTML_dtd.extra_entity_info;
-    CONST char * name;
+    CONST char * name = 0;
     BOOLEAN no_bytetrans;
     UCTransParams T;
-    BOOL from_is_utf8;
+    BOOL from_is_utf8 = FALSE;
     char * puni;
     enum _state
         { S_text, S_esc, S_dollar, S_paren, S_nonascii_text, S_dollar_paren,
@@ -1480,17 +1483,23 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    **  the Lynx special character. - FM
 		    */
 		if (code == 173) {
-		    if (hidden) {
-			;
-		    } else if (plain_space) {
+		    if (plain_space) {
 			replace_buf[0] = '\0';
 			state = S_got_outstring;
 			break;
+		    } else if (Back && 
+			       !(LYCharSet_UC[cs_to].enc == UCT_ENC_8859 ||
+				 (LYCharSet_UC[cs_to].like8859 &
+				  	       UCT_R_8859SPECL))) {
+			;	/* nothing, may be translated later */
+		    } else if (hidden || Back) {
+			state = S_got_outchar;
+			break;
 		    } else {
 			code = LY_SOFT_HYPHEN;
+			state = S_got_outchar;
+			break;
 		    }
-		    state = S_got_outchar;
-		    break;
 		}
 		/*
 		**  Seek a translation from the chartrans tables.
@@ -1538,7 +1547,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 			   */
 			   (uck = UCTransUniCharStr(replace_buf,
 						    60, code,
-						    current_char_set,
+						    cs_to,
 						    0) >= 0)) {
 		    state = S_got_outstring;
 		    break;
@@ -1606,7 +1615,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		} else if (code < 161 || 
 			   (code < 256 &&
 			    (HTPassEightBitNum ||
-			     !strncmp(LYchar_set_names[current_char_set],
+			     !strncmp(LYchar_set_names[cs_to],
 				      "ISO Latin 1", 11)))) {
 		    /*
 		    **  No conversion needed.
@@ -2122,10 +2131,10 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		**  Seek a translation from the chartrans tables.
 		*/
 		if ((uck = UCTransUniChar(code,
-					  current_char_set)) >= 32 &&
+					  cs_to)) >= 32 &&
 		    uck < 256 &&
 		    (uck < 127 || uck >= lowest_8)) {
-		    if (uck == 160 && current_char_set == 0) {
+		    if (uck == 160 && cs_to == 0) {
 			/*
 			**  Would only happen if some other unicode
 			**  is mapped to Latin-1 160.
@@ -2142,7 +2151,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 			    *p = cpe;
 			}
 			continue;
-		    } else if (uck == 173 && current_char_set == 0) {
+		    } else if (uck == 173 && cs_to == 0) {
 			/*
 			    **  Would only happen if some other unicode
 			    **  is mapped to Latin-1 173.
@@ -3343,7 +3352,6 @@ PUBLIC void LYHandleMETA ARGS4(
 	    cp1 += 7;
 	    while (*cp1 == ' ' || *cp1 == '=' || *cp1 == '"')
 	        cp1++;
-#ifdef EXP_CHARTRANS
 	    StrAllocCopy(cp3, cp1); /* copy to mutilate more */
 	    for (cp4 = cp3; (*cp4 != '\0' && *cp4 != '"' &&
 			     *cp4 != ';'  && *cp4 != ':' &&
@@ -3381,7 +3389,6 @@ PUBLIC void LYHandleMETA ARGS4(
 					    UCT_SETBY_STRUCTURED);
 		}
 	    }
-	    FREE(cp3);
 	    if (chartrans_ok) {
 		LYUCcharset * p_out =
 				HTAnchor_setUCInfoStage(me->node_anchor,
@@ -3410,22 +3417,44 @@ PUBLIC void LYHandleMETA ARGS4(
 		    HTAnchor_setUCInfoStage(me->node_anchor,
 				HTAnchor_getUCLYhndl(me->node_anchor,
 						     UCT_STAGE_PARSER),
-						     UCT_STAGE_HTEXT,
-						     UCT_SETBY_DEFAULT);
+					    UCT_STAGE_HTEXT,
+					    UCT_SETBY_DEFAULT);
 		}
-		if ((p_in->enc != UCT_ENC_CJK) &&
-		    (p_in->codepoints & UCT_CP_SUBSETOF_LAT1)) {
+		if (p_in->enc != UCT_ENC_CJK) {
 		    HTCJK = NOCJK;
-		} else if (chndl == current_char_set) {
-		    HTPassEightBitRaw = TRUE;
+		    if (!(p_in->codepoints &
+			  UCT_CP_SUBSETOF_LAT1) &&
+			chndl == current_char_set) {
+			HTPassEightBitRaw = TRUE;
+		    }
+		} else if (p_out->enc == UCT_ENC_CJK) {
+		    if (LYRawMode) {
+			if ((!strcmp(p_in->MIMEname, "euc-jp") ||
+			     !strcmp(p_in->MIMEname, "shift_jis")) &&
+			    (!strcmp(p_out->MIMEname, "euc-jp") ||
+			     !strcmp(p_out->MIMEname, "shift_jis"))) {
+			    HTCJK = JAPANESE;
+			} else if (!strcmp(p_in->MIMEname, "euc-cn") &&
+				   !strcmp(p_out->MIMEname, "euc-cn")) {
+			    HTCJK = CHINESE;
+			} else if (!strcmp(p_in->MIMEname, "big-5") &&
+				   !strcmp(p_out->MIMEname, "big-5")) {
+			    HTCJK = TAIPEI;
+			} else if (!strcmp(p_in->MIMEname, "euc-kr") &&
+				   !strcmp(p_out->MIMEname, "euc-kr")) {
+			    HTCJK = KOREAN;
+			} else {
+			    HTCJK = NOCJK;
+			}
+		    } else {
+			HTCJK = NOCJK;
+		    }
 		}
 		LYGetChartransInfo(me);
 	    /*
 	     *  Fall through to old behavior.
 	     */
-			} else
-#endif /* EXP_CHARTRANS */
-	    if (!strncmp(cp1, "us-ascii", 8) ||
+	    } else if (!strncmp(cp1, "us-ascii", 8) ||
 		       !strncmp(cp1, "iso-8859-1", 10)) {
 		StrAllocCopy(me->node_anchor->charset, "iso-8859-1");
 		HTCJK = NOCJK;
@@ -3436,14 +3465,18 @@ PUBLIC void LYHandleMETA ARGS4(
 		StrAllocCopy(me->node_anchor->charset, "iso-8859-2");
 		HTPassEightBitRaw = TRUE;
 
-	    } else if (!strncmp(cp1, "iso-8859-", 9) &&
+	    } else if (!strncmp(cp4, "iso-8859-", 9) &&
 		       !strncmp(LYchar_set_names[current_char_set],
 				"Other ISO Latin", 15)) {
 		/*
 		 *  Hope it's a match, for now. - FM
 		 */
-		StrAllocCopy(me->node_anchor->charset, "iso-8859- ");
-		me->node_anchor->charset[9] = cp1[9];
+		cp1 = &cp4[10];
+		while (*cp1 &&
+		       isdigit((unsigned char)(*cp1)))
+		    cp1++;
+		*cp1 = '\0';
+		StrAllocCopy(me->node_anchor->charset, cp4);
 		HTPassEightBitRaw = TRUE;
 		HTAlert(me->node_anchor->charset);
 
@@ -3489,10 +3522,11 @@ PUBLIC void LYHandleMETA ARGS4(
 	    } else if (!strncmp(cp1, "iso-2022-cn", 11) && HTCJK == CHINESE) {
 		StrAllocCopy(me->node_anchor->charset, "iso-2022-cn");
 	    }
+	    FREE(cp3);
 
 	    if (TRACE && me->node_anchor->charset) {
 		fprintf(stderr,
-			"HTML: New charset: %s\n",
+			"LYHandleMETA: New charset: %s\n",
 			me->node_anchor->charset);
 	    }
 	}
@@ -3894,7 +3928,7 @@ PUBLIC void LYHandleSELECT ARGS5(
 	     */
 	    if (TRACE)
 		fprintf(stderr,
-			"HTML: Ignoring SIZE=\"%s\" for SELECT.\n",
+			"LYHandleSELECT: Ignoring SIZE=\"%s\" for SELECT.\n",
 			(char *)value[HTML_SELECT_SIZE]);
 #endif /* NOTDEFINED */
 	}
@@ -4419,66 +4453,35 @@ PUBLIC void LYResetParagraphAlignment ARGS1(
 }
 
 /*
-**  This is an example interface for accessing elements of the HTML
-**  parser's HTStructured object by the SGML parser.  The SGML parser
-**  knows the HTML parsers's HTStructured objects as context->target
-**  elements, and, homologously, uses them as an argument in calls to
-**  HTML_start_element() and HTML_end_element(), but should not
-**  manipulate the context->target's elements, itself, because those
-**  are defined in the Lynx_HTML_Handler section of HTML.h, to which
-**  SGML.c is blind.  This *example* function check's whether the
-**  node_anchor element of an HTML parser HTStructured object has
+**  This example function checks whether the given anchor has
 **  an address with a file scheme, and if so, loads it into the
 **  the SGML parser's context->url element, which was passed as
 **  the second argument.  The handle_comment() calling function in
 **  SGML.c then calls LYDoCSI() in LYUtils.c to insert HTML markup
 **  into the corresponding stream, homologously to an SSI by an
 **  HTTP server. - FM
-**  Since SGML.c is blind to the HTML parsers's HTStructured object
-**  details it may be calling this function inappropriately when
-**  its context->target isn't actually the HTStructured object
-**  implemented in HTML.c but one in HTMLDTD.c.  Therefore this
-**  function checks for the expected HTStructuredClass's signature
-**  in me->isa->name before doing anything else which requires
-**  access to the expected HTStructured object's data fields, and
-**  returns a failure indication if it finds that it has been called
-**  inappropriately. - kw
-**  Functions such as this also could
-**  be used to set the values of elements (existing ones, or any
-**  new ones needed for future development) in the HTML parser's
-**  HTStructured objects, so that they will be accessible to all
-**  Lynx_HTML_Handler utility functions, thus avoiding the need
-**  to increase the number of arguments in the calls to those
-**  functions, and keeping them object-specific via their 'me'
-**  arguments. - FM
-**  But to generalize the SGML.c -> HTStructured calling mechanism
-**  so that it can deal with more than one implementation of what
-**  SGML.c sees as context->target, new functions will either have
-**  to check whether they are called for the expected kind of target
-**  object (such as here), or they have to come in several object-
-**  specific versions to work across all possible target object classes;
-**  in the latter case they should become new member functions of the
-**  Structured Object definition in SGML.h. - kw
+**
+**  For functions similar to this but which depend on details of
+**  the HTML handler's internal data, the calling interface should
+**  be changed, and functions in SGML.c would have to make sure not
+**  to call such functions inappropriately (e.g. calling a function
+**  specific to the Lynx_HTML_Handler when SGML.c output goes to
+**  some other HTStructured object like in HTMLGen.c), or the new
+**  functions could be added to the SGML.h interface.
 */
 PUBLIC BOOLEAN LYCheckForCSI ARGS2(
-	HTStructured *, 	me,
+	HTParentAnchor *, 	anchor,
 	char **,		url)
 {
-    if (!me)
+    if (!(anchor && anchor->address))
         return FALSE;
 
-    if (!me->isa || strcmp(me->isa->name, "Lynx_HTML_Handler"))
-	return FALSE;
-
-    if (!(me->node_anchor && me->node_anchor->address))
+    if (strncasecomp(anchor->address, "file:", 5))
         return FALSE;
 
-    if (strncasecomp(me->node_anchor->address, "file:", 5))
+    if (!LYisLocalHost(anchor->address))
         return FALSE;
-
-    if (!LYisLocalHost(me->node_anchor->address))
-        return FALSE;
-
-    StrAllocCopy(*url, me->node_anchor->address);
+     
+    StrAllocCopy(*url, anchor->address);
     return TRUE;
 }

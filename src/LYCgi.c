@@ -301,7 +301,7 @@ PRIVATE int LYLoadCGI ARGS4(
 	int fd1[2], fd2[2];
 	char buf[1024];
 	pid_t pid;
-#if HAVE_TYPE_UNIONWAIT && !HAVE_WAITPID
+#if HAVE_TYPE_UNIONWAIT
 	union wait wstatus;
 #else
 	int wstatus;
@@ -388,7 +388,7 @@ PRIVATE int LYLoadCGI ARGS4(
 		    
 		    (*target->isa->put_block)(target, buf, chars);
 		}
-#if HAVE_TYPE_UNIONWAIT && !HAVE_WAITPID
+#if !HAVE_WAITPID
 		while (wait(&wstatus) != pid)
 		    ; /* do nothing */
 #else
@@ -403,7 +403,7 @@ PRIVATE int LYLoadCGI ARGS4(
 #endif /* ERESTARTSYS */
 		    break;
 		}
-#endif /* HAVE_TYPE_UNIONWAIT && !HAVE_WAITPID */
+#endif /* !HAVE_WAITPID */
 		if (anAnchor->post_data) {
 		    close(fd1[1]);
 		}

@@ -109,7 +109,7 @@ extern void LYEnsureSingleSpace PARAMS((
 extern void LYResetParagraphAlignment PARAMS((
 	HTStructured *		me));
 extern BOOLEAN LYCheckForCSI PARAMS((
-	HTStructured *		me,
+	HTParentAnchor *	anchor,
 	char **			url));
 #endif /* Lynx_HTML_Handler */
 

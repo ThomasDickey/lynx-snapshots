@@ -842,7 +842,7 @@ PUBLIC int LYEdit1 ARGS4(
         /*
 	 *  Delete current character.
 	 */
-	if (length == 0)
+	if (length == 0 || Pos == length)
 	    break;
 	for (i = Pos; i < length; i++)
 	    Buf[i] = Buf[i+1];

@@ -33,14 +33,12 @@
 #include "LYList.h"
 #include "LYCharSets.h"
 #include "LYCharUtils.h"	/* LYUCTranslateBack... */
-#ifdef EXP_CHARTRANS
 #include "UCDefs.h"
 #include "UCAux.h"
 #include "UCMap.h"
 #ifdef EXP_CHARTRANS_AUTOSWITCH
 #include "UCAuto.h"
 #endif /* EXP_CHARTRANS_AUTOSWITCH */
-#endif /* EXP_CHARTRANS */
 
 #include "LYexit.h"
 #include "LYLeaks.h"
@@ -172,6 +170,7 @@ struct _HText {
 	int			chars;		/* Number of them */
 	TextAnchor *		first_anchor;	/* Singly linked list */
 	TextAnchor *		last_anchor;
+	HTList *		forms;		/* also linked internally */
 	int			last_anchor_number;	/* user number */
 	BOOL			source;		/* Is the text source? */
 	BOOL			toolbar;	/* Toolbar set? */
@@ -202,11 +201,9 @@ struct _HText {
         int			halted;			/* emergency halt */
 
 	BOOL			have_8bit_chars;   /* Any non-ASCII chars? */
-#ifdef EXP_CHARTRANS
 	LYUCcharset *		UCI;		   /* node_anchor UCInfo */
 	int			UCLYhndl;	   /* charset we are fed */
 	UCTransParams		T;
-#endif
 
         HTStream *		target;                 /* Output stream */
         HTStreamClass		targetClass;            /* Output routines */
@@ -358,13 +355,13 @@ PRIVATE void * LY_check_calloc ARGS2(
 
 #define LY_CALLOC LY_check_calloc
 
-#else
+#else  /* CHECK_FREE_MEM */
 
+  /* using the regular calloc */
 #define LY_CALLOC calloc
 
 #endif /* CHECK_FREE_MEM */
 
-#ifdef EXP_CHARTRANS
 PRIVATE void HText_getChartransInfo ARGS1(
 	HText *,	me)
 {
@@ -378,7 +375,26 @@ PRIVATE void HText_getChartransInfo ARGS1(
     }
     me->UCI = HTAnchor_getUCInfoStage(me->node_anchor, UCT_STAGE_HTEXT);
 }
-#endif /* EXP_CHARTRANS */
+
+PRIVATE void PerFormInfo_free ARGS1(
+    PerFormInfo *,	form)
+{
+    if (form) {
+	FREE(form->accept_cs);
+	FREE(form->thisacceptcs);
+	FREE(form);
+    }
+}
+
+PRIVATE void FormList_delete ARGS1(
+    HTList *,		forms)
+{
+    HTList *cur = forms;
+    PerFormInfo *form;
+    while ((form = (PerFormInfo *)HTList_nextObject(cur)) != NULL)
+	PerFormInfo_free(form);
+    HTList_delete(forms);
+}
 
 /*			Creation Method
 **			---------------
@@ -475,14 +491,12 @@ PUBLIC HText *	HText_new ARGS1(
     self->state = S_text;
     self->kanji_buf = '\0';
     self->in_sjis = 0;
-#ifdef EXP_CHARTRANS
     self->have_8bit_chars = NO;
     HText_getChartransInfo(self);
     UCSetTransParams(&self->T,
 		     self->UCLYhndl, self->UCI,
 		     current_char_set,
 		     &LYCharSet_UC[current_char_set]);
-#endif /* EXP_CHARTRANS */
 
     /*
      *  Check the kcode setting if the anchor has a charset element. - FM
@@ -499,13 +513,13 @@ PUBLIC HText *	HText_new ARGS1(
      */ 
     if (underscore_string[0] != '.') {
 	/*
-	 *  Create and array of dots for the UNDERSCORES macro. - FM
+	 *  Create an array of dots for the UNDERSCORES macro. - FM
 	 */
 	memset(underscore_string, '.', (MAX_LINE-1));
         underscore_string[(MAX_LINE-1)] = '\0';
         underscore_string[MAX_LINE] = '\0';
 	/*
-	 *  Create and array of underscores for the STARS macro. - FM
+	 *  Create an array of underscores for the STARS macro. - FM
 	 */
 	memset(star_string, '_', (MAX_LINE-1));
         star_string[(MAX_LINE-1)] = '\0';
@@ -618,6 +632,7 @@ PUBLIC void HText_free ARGS1(
 
 	FREE(l);
     }
+    FormList_delete(self->forms);
 
     /*
      *  Free the tabs list. - FM
@@ -652,12 +667,10 @@ PUBLIC void HText_free ARGS1(
      *  if it is not a destination of other links. - FM
      */
     if (self->node_anchor) {
-#ifdef EXP_CHARTRANS
 	HTAnchor_resetUCInfoStage(self->node_anchor, -1, UCT_STAGE_STRUCTURED,
 				  UCT_SETBY_NONE);
 	HTAnchor_resetUCInfoStage(self->node_anchor, -1, UCT_STAGE_HTEXT,
 				  UCT_SETBY_NONE);
-#endif /* EXP_CHARTRANS */
         if (HTAnchor_delete(self->node_anchor))
 	    /*
 	     *  Make sure HTMainAnchor won't point
@@ -684,9 +697,7 @@ PRIVATE int display_line ARGS2(
     register int i, j;
     char buffer[7];
     char *data;
-#ifdef EXP_CHARTRANS
     size_t utf_extra = 0;
-#endif
 #ifdef USE_COLOR_STYLE
     int current_style = 0;
 #endif
@@ -793,8 +804,7 @@ PRIVATE int display_line ARGS2(
 		}
 
 	    default:
-		    i++;
-#ifdef EXP_CHARTRANS
+		i++;
 		if (text->T.output_utf8 && !isascii(buffer[0])) {
 		    if ((*buffer & 0xe0) == 0xc0) {
 			utf_extra = 1;
@@ -827,9 +837,7 @@ PRIVATE int display_line ARGS2(
 		    buffer[1] = '\0';
 		    data += utf_extra;
 		    utf_extra = 0;
-		} else
-#endif /* EXP_CHARTRANS */
-		    if (HTCJK != NOCJK && !isascii(buffer[0])) {
+		} else if (HTCJK != NOCJK && !isascii(buffer[0])) {
 		    /*
 		     *  For CJK strings, by Masanobu Kimura.
 		     */
@@ -1016,9 +1024,7 @@ PRIVATE void display_page ARGS3(
     BOOL display_flag = FALSE;
     HTAnchor *link_dest, *link_dest_intl = NULL;
     static int last_nlinks = 0;
-#ifdef EXP_CHARTRANS
     static int charset_last_displayed = -1;
-#endif /* EXP_CHARTRANS */
 
     lynx_mode = NORMAL_LYNX_MODE;
  
@@ -1033,7 +1039,7 @@ PRIVATE void display_page ARGS3(
 	    refresh();
 	    clear();
 	}
-	addstr("\n\nError accessing document\nNo data available\n");
+	addstr("\n\nError accessing document.\nNo data available.\n");
 	refresh();
 	nlinks = 0;  /* set number of links to 0 */
 	return;
@@ -1076,7 +1082,6 @@ PRIVATE void display_page ARGS3(
 #endif /* !VMS */
     }
 
-#ifdef EXP_CHARTRANS
     if (LYlowest_eightbit[current_char_set] <= 255 &&
 	(current_char_set != charset_last_displayed) &&
 	/*
@@ -1110,8 +1115,6 @@ PRIVATE void display_page ARGS3(
 #endif /* LINUX */
 #endif /* EXP_CHARTRANS_AUTOSWITCH */
     }
-
-#endif /* EXP_CHARTRANS */
 
     /*
      *  Check whether to force a screen clear to enable scrollback,
@@ -1189,9 +1192,7 @@ PRIVATE void display_page ARGS3(
 		int written = 0;
 		int x_pos = offset + (int)(cp - data);
 		int len = strlen(target);
-#ifdef EXP_CHARTRANS
 		size_t utf_extra = 0;
-#endif /* EXP_CHARTRANS */
 		int y;
 
 		text->page_has_target = YES;
@@ -1218,7 +1219,6 @@ PRIVATE void display_page ARGS3(
 			 *  First printable character of target.
 			 */
             		move((i + 1), x_pos);
-#ifdef EXP_CHARTRANS
 			if (text->T.output_utf8 && !isascii(tmp[0])) {
 			    if ((*tmp & 0xe0) == 0xc0) {
 				utf_extra = 1;
@@ -1251,9 +1251,7 @@ PRIVATE void display_page ARGS3(
 			    tmp[1] = '\0';
 			    written += (utf_extra + 1);
 			    utf_extra = 0;
-		    } else
-#endif /* EXP_CHARTRANS */
-			if (HTCJK != NOCJK && !isascii(tmp[0])) {
+			} else if (HTCJK != NOCJK && !isascii(tmp[0])) {
 			    /*
 			     *  For CJK strings, by Masanobu Kimura.
 			     */
@@ -1270,7 +1268,6 @@ PRIVATE void display_page ARGS3(
 			/*
 			 *  Output all the other printable target chars.
 			 */
-#ifdef EXP_CHARTRANS
 			if (text->T.output_utf8 && !isascii(tmp[0])) {
 			    if ((*tmp & 0xe0) == 0xc0) {
 				utf_extra = 1;
@@ -1303,9 +1300,7 @@ PRIVATE void display_page ARGS3(
 			    tmp[1] = '\0';
 			    written += (utf_extra + 1);
 			    utf_extra = 0;
-		    } else
-#endif /* EXP_CHARTRANS */
-			if (HTCJK != NOCJK && !isascii(tmp[0])) {
+			} else if (HTCJK != NOCJK && !isascii(tmp[0])) {
 			    /*
 			     *  For CJK strings, by Masanobu Kimura.
 			     */
@@ -1396,6 +1391,7 @@ PRIVATE void display_page ARGS3(
 		    if (traversal)
 		        cp_AnchorAddress = stub_HTAnchor_address(link_dest);
 		    else {
+#ifndef DONT_TRACK_INTERNAL_LINKS
 			if (Anchor_ptr->link_type == INTERNAL_LINK_ANCHOR) {
 			    link_dest_intl = HTAnchor_followTypedLink(
 				(HTAnchor *)Anchor_ptr->anchor, LINK_INTERNAL);
@@ -1410,14 +1406,17 @@ PRIVATE void display_page ARGS3(
 			    link_dest_intl = NULL;
 			if (link_dest_intl) {
 			    char *cp2 = HTAnchor_address(link_dest_intl);
+#if 0
 			    cp = strchr(cp2, '#');
 			    if (cp && cp != cp2 &&
 				0!=strncmp(cp2, "LYNXIMGMAP:", 11)) {
 				StrAllocCopy(cp_AnchorAddress, cp);
 				FREE(cp2);
 			    } else
+#endif
 				cp_AnchorAddress = cp2;
 			} else
+#endif
 			    cp_AnchorAddress = HTAnchor_address(link_dest);
 		    }
 		    FREE(links[nlinks].lname);
@@ -1552,13 +1551,8 @@ PRIVATE void display_page ARGS3(
 	addstr("\n     Document is empty");
     }
 
-
-    if (HTCJK != NOCJK ||
-#ifdef EXP_CHARTRANS
-	text->T.output_utf8 ||
-#endif /* EXP_CHARTRANS */
-	TRACE) {
-	/*
+    if (HTCJK != NOCJK || text->T.output_utf8 || TRACE) {
+        /*
 	 *  For non-multibyte curses.
 	 */
         lynx_force_repaint();
@@ -1607,7 +1601,10 @@ PRIVATE void split_line ARGS2(
 {
     HTStyle * style = text->style;
     HTLine * temp;
-    int spare, inew;
+    int spare;
+#if defined(USE_COLOR_STYLE)
+    int inew;
+#endif
     int indent = text->in_line_1 ?
     	  text->style->indent1st : text->style->leftIndent;
     TextAnchor * a;
@@ -1867,9 +1864,7 @@ PRIVATE void split_line ARGS2(
 	for (i = (plen - 1); i >= 0; i--) {
 	    if (p[i] == LY_BOLD_START_CHAR ||
 	        p[i] == LY_BOLD_END_CHAR ||
-#ifdef EXP_CHARTRANS
 		IS_UTF_EXTRA(p[i]) ||
-#endif /* EXP_CHARTRANS */
 		p[i] == LY_SOFT_HYPHEN) {
 	        ctrl_chars_on_this_line++;
 	    }
@@ -1920,9 +1915,7 @@ PRIVATE void split_line ARGS2(
 	    *cp == LY_UNDERLINE_END_CHAR ||
 	    *cp == LY_BOLD_START_CHAR ||
 	    *cp == LY_BOLD_END_CHAR ||
-#ifdef EXP_CHARTRANS
 	    IS_UTF_EXTRA(*cp) ||
-#endif /* EXP_CHARTRANS */
 	    *cp == LY_SOFT_HYPHEN)
 	    ctrl_chars_on_previous_line++;
     }
@@ -2059,7 +2052,17 @@ PUBLIC void HText_appendCharacter ARGS2(
 	return;
 
     if (text->halted > 1) {
+	/*
+	 *  We should stop outputting more text, because low memory was
+	 *  detected.  - kw
+	 */
 	if (text->halted == 2) {
+	    /*
+	     *  But if we haven't done so yet, first append a warning.
+	     *  We should still have a few bytes left for that :).
+	     *  We temporarily reset test->halted to 0 for this, since
+	     *  this function will get called recursively. - kw
+	     */
 	    text->halted = 0;
 	    text->kanji_buf = '\0';
 	    HText_appendText(text, " *** MEMORY EXHAUSTED ***");
@@ -2072,12 +2075,20 @@ PUBLIC void HText_appendCharacter ARGS2(
      */
     if (ch == '\033' && HTCJK == NOCJK)			/* decimal 27 */
 	return;
-#ifdef EXP_CHARTRANS
+#ifndef USE_SLANG
+    /*
+     *  Block 8-bit chars not allowed by the current display character
+     *  set if they are below what LYlowest_eightbit indicates.
+     *  Slang used its own replacements, so for USE_SLANG blocking her
+     *  is not necessary to protect terminas from those characters.
+     *  They should have been filtered out or translated by an earlier
+     *  processing stage anyway. - kw
+     */
     if ((unsigned char)ch >= 128 && HTCJK == NOCJK &&
 	!text->T.transp && !text->T.output_utf8 &&
 	(unsigned char)ch < LYlowest_eightbit[current_char_set])
 	return;
-#endif /* EXP_CHARTRANS */
+#endif /* USE_SLANG */
     if ((unsigned char)ch == 155 && HTCJK == NOCJK) {	/* octal 233 */
         if (!HTPassHighCtrlRaw &&
 #ifdef EXP_CHARTRANS
@@ -2105,6 +2116,10 @@ PUBLIC void HText_appendCharacter ARGS2(
 	switch(text->state) {
 	    case S_text:
 		if (ch == '\033') {
+		    /*
+		    **  Setting up for CJK escape sequence handling (based on
+		    **  Takuya ASADA's (asada@three-a.co.jp) CJK Lynx). - FM
+		    */
 		    text->state = S_esc;
 		    text->kanji_buf = '\0';
 		    return;
@@ -2112,6 +2127,9 @@ PUBLIC void HText_appendCharacter ARGS2(
 		break;
 
 		case S_esc:
+		/*
+		 *  Expecting '$'or '(' following CJK ESC.
+		 */
 		if (ch == '$') {
 		    text->state = S_dollar;
 		    return;
@@ -2123,6 +2141,9 @@ PUBLIC void HText_appendCharacter ARGS2(
 		}
 
 		case S_dollar:
+		/*
+		 *  Expecting '@', 'B', 'A' or '(' after CJK "ESC$".
+		 */
 		if (ch == '@' || ch == 'B' || ch=='A') {
 		    text->state = S_nonascii_text;
 		    return;
@@ -2135,6 +2156,9 @@ PUBLIC void HText_appendCharacter ARGS2(
 		break;
 
 		case S_dollar_paren:
+		/*
+		 * Expecting 'C' after CJK "ESC$(".
+		 */
 		if (ch == 'C') {
 		    text->state = S_nonascii_text;
 		    return;
@@ -2144,11 +2168,22 @@ PUBLIC void HText_appendCharacter ARGS2(
 		break;
 
 		case S_paren:
+		/*
+		 *  Expecting 'B', 'J', 'T' or 'I' after CJK "ESC(".
+		 */
 		if (ch == 'B' || ch == 'J' || ch == 'T')  {
+		    /*
+		     *  Can split here. - FM
+		     */
+		    text->permissible_split = (int)text->last_line->size;
 		    text->state = S_text;
 		    return;
 		} else if (ch == 'I')  {
 		    text->state = S_jisx0201_text;
+		    /*
+		     *  Can split here. - FM
+		     */
+		    text->permissible_split = (int)text->last_line->size;
 		    return;
 		} else {
 		    text->state = S_text;
@@ -2197,7 +2232,10 @@ PUBLIC void HText_appendCharacter ARGS2(
 		    text->kanji_buf = (char)kb;
 	        } else {
 		    text->kanji_buf = ch;
-		    text->permissible_split = line->size;   /* Can split here */
+		    /*
+		     *  Can split here. - FM
+		     */
+		    text->permissible_split = (int)text->last_line->size;
 		    return;
 	        }
 	    }
@@ -2265,14 +2303,12 @@ PUBLIC void HText_appendCharacter ARGS2(
 #endif
     }
 
-#ifdef EXP_CHARTRANS
     if (IS_UTF_EXTRA(ch)) {
 	line->data[line->size++] = ch;
 	line->data[line->size] = '\0';
 	ctrl_chars_on_this_line++;
 	return;
     }
-#endif /* EXP_CHARTRANS */
 
     /*
      *  New Line.
@@ -2431,11 +2467,10 @@ check_IgnoreExcess:
 	}
     } else if ((int)line->size >= (int)(MAX_LINE-1)) {
 	/*
-	 *  Never overrun memory if LYcols is set to a large value - kw
+	 *  Never overrun memory if LYcols is set to a large value - KW
 	 */
 	new_line(text);
     }
-
 
     /*
      *  Insert normal characters.
@@ -2444,16 +2479,14 @@ check_IgnoreExcess:
         ch = ' ';
     }
 
-#ifdef EXP_CHARTRANS
     if (ch & 0x80)
 	text->have_8bit_chars = YES;
-#endif
 
     {
-        HTLine * line = text->last_line;	/* May have changed */
         HTFont font = style->font;
 	unsigned char hi, lo, tmp[2];
 
+        line = text->last_line;	/* May have changed */
 	if (HTCJK != NOCJK && text->kanji_buf) {
 	    hi = (unsigned char)text->kanji_buf, lo = (unsigned char)ch;
 	    if (HTCJK == JAPANESE && text->kcode == NOKANJI) {
@@ -2606,11 +2639,14 @@ PUBLIC int HText_beginAnchor ARGS3(
     a->anchor = anc;
     a->extent = 0;
     text->last_anchor = a;
-    
+
+#ifndef DONT_TRACK_INTERNAL_LINKS
     if (HTAnchor_followTypedLink((HTAnchor*)anc, LINK_INTERNAL)) {
         a->number = ++(text->last_anchor_number);
 	a->link_type = INTERNAL_LINK_ANCHOR;
-    } else if (HTAnchor_followMainLink((HTAnchor*)anc)) {
+    } else
+#endif
+	if (HTAnchor_followMainLink((HTAnchor*)anc)) {
         a->number = ++(text->last_anchor_number);
 	a->link_type = HYPERTEXT_ANCHOR;
     } else {
@@ -3124,6 +3160,11 @@ PUBLIC void HText_endAppend ARGS1(
     new_line(text);
     
     if (text->halted) {
+	/*
+	 *  If output was stopped becasue memory was low, and we made
+	 *  it to the end of the document, reset those flags and hope
+	 *  things are better now. - kw
+	 */
 	LYFakeZap(NO);
 	text->halted = 0;
     }
@@ -3575,6 +3616,7 @@ PUBLIC int HTGetLinkInfo ARGS6(
 		    if (traversal) {
 			cp_freeme = stub_HTAnchor_address(link_dest);
 		    } else {
+#ifndef DONT_TRACK_INTERNAL_LINKS
 			if (a->link_type == INTERNAL_LINK_ANCHOR) {
 			    link_dest_intl = HTAnchor_followTypedLink(
 				(HTAnchor *)a->anchor, LINK_INTERNAL);
@@ -3588,6 +3630,7 @@ PUBLIC int HTGetLinkInfo ARGS6(
 			}
 			if (link_dest_intl) {
 			    char *cp2 = HTAnchor_address(link_dest_intl);
+#if 0
 			    char *cp = strchr(cp2, '#');
 			    if (cp && cp != cp2 &&
                                 0!=strncmp(cp2, "LYNXIMGMAP:", 11)) {
@@ -3595,11 +3638,15 @@ PUBLIC int HTGetLinkInfo ARGS6(
 				FREE(cp2);
 				return(WWW_INTERN_LINK_TYPE);
 			    } else {
+#endif
 				FREE(*lname);
 				*lname = cp2;
 				return(WWW_INTERN_LINK_TYPE);
+#if 0
 			    }
+#endif
 			} else
+#endif
 			    cp_freeme = HTAnchor_address(link_dest);
 		    }
 		    StrAllocCopy(*lname, cp_freeme);
@@ -3716,7 +3763,7 @@ PUBLIC char * HText_getTitle NOARGS
    	  (char *) HTAnchor_title(HTMainText->node_anchor) : NULL);
 }
 
-#ifdef USEHASH
+#ifdef USE_HASH
 PUBLIC char *HText_getStyle NOARGS
 {
    return(HTMainText ?
@@ -4708,9 +4755,11 @@ PUBLIC void print_crawl_to_fd ARGS3(
         return;
 
     line = HTMainText->last_line->next;
-    fprintf(fp,"THE_URL:%s\n",thelink);
-    if (thetitle != NULL)fprintf(fp,"THE_TITLE:%s\n",thetitle);;
-      
+    fprintf(fp, "THE_URL:%s\n", thelink);
+    if (thetitle != NULL) {
+	fprintf(fp, "THE_TITLE:%s\n", thetitle);
+    }
+
     for (;; line = line->next) {
         /*
 	 *  Add offset.
@@ -5364,7 +5413,6 @@ PUBLIC char * HTLoadedDocumentCharset NOARGS
 	return (NULL);
 }
 
-#ifdef EXP_CHARTRANS
 PUBLIC BOOL HTLoadedDocumentEightbit NOARGS
 {
     if (!HTMainText)
@@ -5372,7 +5420,6 @@ PUBLIC BOOL HTLoadedDocumentEightbit NOARGS
     else
 	return (HTMainText->have_8bit_chars);
 }
-#endif
 
 PUBLIC void HText_setNodeAnchorBookmark ARGS1(
 	CONST char *,	bookmark)
@@ -5431,28 +5478,21 @@ PRIVATE int HText_TrueLineSize ARGS3(
     if (IgnoreSpaces) {
 	for (i = 0; i < line->size; i++) {
 	    if (!IsSpecialAttrChar((unsigned char)line->data[i]) &&
-#ifdef EXP_CHARTRANS
 		(!(text && text->T.output_utf8) ||
 		 (unsigned char)line->data[i] < 128 ||
 		 ((unsigned char)(line->data[i] & 0xc0) == 0xc0)) &&
-#endif
 	        !isspace((unsigned char)line->data[i]) &&
 		(unsigned char)line->data[i] != HT_NON_BREAK_SPACE &&
 		(unsigned char)line->data[i] != HT_EM_SPACE) {
-#ifdef EXP_CHARTRANS
-	  if (!text->T.output_utf8 || (unsigned char)line->data[i] < 128 ||
-    		((unsigned char)(line->data[i] & 0xc0) == 0xc0))
-#endif /* EXP_CHARTRANS */
 		true_size++;
 	    }
 	}
     } else {
 	for (i = 0; i < line->size; i++) {
-	    if (!IsSpecialAttrChar(line->data[i])) {
-#ifdef EXP_CHARTRANS
-	  if (!text->T.output_utf8 || (unsigned char)line->data[i] < 128 ||
-    		((unsigned char)(line->data[i] & 0xc0) == 0xc0))
-#endif /* EXP_CHARTRANS */
+	    if (!IsSpecialAttrChar(line->data[i]) &&
+		(!(text && text->T.output_utf8) ||
+		 (unsigned char)line->data[i] < 128 ||
+		 ((unsigned char)(line->data[i] & 0xc0) == 0xc0))) {
 		true_size++;
 	    }
 	}
@@ -5674,8 +5714,9 @@ PRIVATE int HTFormMethod;
 PRIVATE char * HTFormAction = NULL;
 PRIVATE char * HTFormEnctype = NULL;
 PRIVATE char * HTFormTitle = NULL;
-PRIVATE char * HTFormAcceptCharset = NULL; /* !!! NEED TO DO SOMETHING WITH IT */
+PRIVATE char * HTFormAcceptCharset = NULL;
 PRIVATE BOOLEAN HTFormDisabled = FALSE;
+PRIVATE PerFormInfo * HTCurrentForm;
 
 PUBLIC void HText_beginForm ARGS5(
 	char *,		action,
@@ -5684,6 +5725,7 @@ PUBLIC void HText_beginForm ARGS5(
 	char *,		title,
 	CONST char *,	accept_cs)
 {
+    PerFormInfo * newform;
     HTFormMethod = URL_GET_METHOD;
     HTFormNumber++;
     HTFormFields = 0;
@@ -5709,12 +5751,6 @@ PUBLIC void HText_beginForm ARGS5(
 	    HTFormMethod = URL_POST_METHOD;
 
     /*
-     *  Check the ACCEPT_CHARSET. - kw
-     */
-    if (accept_cs != NULL)
-	StrAllocCopy(HTFormAcceptCharset, accept_cs);
-
-    /*
      *  Check the ENCTYPE. - FM
      */
     if ((enctype != NULL) && *enctype) {
@@ -5734,6 +5770,35 @@ PUBLIC void HText_beginForm ARGS5(
     else
         FREE(HTFormTitle);
 
+    /*
+     *  Check for an ACCEPT_CHARSET.  If present, store it and
+     *  convert to lowercase and collapse spaces. - kw
+     */
+    if (accept_cs != NULL) {
+	int i;
+	StrAllocCopy(HTFormAcceptCharset, accept_cs);
+	collapse_spaces(HTFormAcceptCharset);
+	for (i = 0; HTFormAcceptCharset[i]; i++)
+	    HTFormAcceptCharset[i] = TOLOWER(HTFormAcceptCharset[i]);
+    }
+
+    /*
+     *  Create a new "PerFormInfo" structure to hold info on the current
+     *  form.  The HTForm* variables could all migrate there, currently
+     *  this isn't done (yet?) but it might be less confusing.
+     *  Currently the only data saved in this structure that will actually
+     *  be used is the accept_cs string.
+     *  This will be appended to the forms list kept by the HText object
+     *  if and when we reach a HText_endForm. - kw
+     */
+    newform = (PerFormInfo *)calloc(1, sizeof(PerFormInfo));
+    if (newform == NULL)
+	outofmem(__FILE__,"HText_beginForm");
+    newform->number = HTFormNumber;
+    
+    PerFormInfo_free(HTCurrentForm); /* shouldn't happen here - kw */
+    HTCurrentForm = newform;
+				    
     if (TRACE)
 	fprintf(stderr,
 		"BeginForm: action:%s Method:%d%s%s%s%s%s%s\n",
@@ -5783,6 +5848,28 @@ PUBLIC void HText_endForm ARGS1(
 	    a = a->next;
 	}
     }
+    /*
+     *  Append info on the current form to the HText object's list of
+     *  forms.
+     *  HText_beginInput call will have set some of the data in the
+     *  PerFormInfo structure (if there were any form fields at all),
+     *  we also fill in the ACCEPT-CHARSET data now (this could have
+     *  been done earlier). - kw
+     */
+    if (HTCurrentForm) {
+	if (HTFormDisabled)
+	    HTCurrentForm->disabled = TRUE;
+	HTCurrentForm->accept_cs = HTFormAcceptCharset;
+	HTFormAcceptCharset = NULL;
+	if (!text->forms)
+	    text->forms = HTList_new();
+	HTList_appendObject(text->forms, HTCurrentForm);
+	HTCurrentForm = NULL;
+    } else {
+	if (TRACE)
+	    fprintf(stderr, "endForm:    HTCurrentForm is missing!\n");
+    }
+
     FREE(HTCurSelectGroup);
     FREE(HTCurSelectGroupSize);
     FREE(HTCurSelectedOptionValue);
@@ -6239,11 +6326,6 @@ PUBLIC int HText_beginInput ARGS3(
 	}
     }
 
-    if (text->last_anchor) {
-        text->last_anchor->next = a;
-    } else {
-        text->first_anchor = a;
-    }
     a->next = 0;
     a->anchor = NULL;
     a->link_type = INPUT_ANCHOR;
@@ -6420,6 +6502,15 @@ PUBLIC int HText_beginInput ARGS3(
 	}
     }
 
+    /*
+     *  Add this anchor to the anchor list
+     */
+    if (text->last_anchor) {
+        text->last_anchor->next = a;
+    } else {
+        text->first_anchor = a;
+    }
+
     /* 
      *  Set VALUE, if it exists.  Otherwise, if it's not
      *  an option list make it a zero-length string. - FM
@@ -6502,7 +6593,8 @@ PUBLIC int HText_beginInput ARGS3(
     }
 
     /*
-     *  Store accept-charset if present. - kw
+     *  Store accept-charset if present, converting to lowercase
+     *  and collapsing spaces. - kw
      */
     if (I->accept_cs) {
 	StrAllocCopy(f->accept_cs, I->accept_cs);
@@ -6607,9 +6699,30 @@ PUBLIC int HText_beginInput ARGS3(
     }
 
     /*
-     *  Add this anchor to the anchor list
+     *  Finalise adding this anchor to the anchor list
      */
     text->last_anchor = a;
+
+    if (HTCurrentForm) {	/* should always apply! - kw */
+	if (!HTCurrentForm->first_field) {
+	    HTCurrentForm->first_field = f;
+	}
+	HTCurrentForm->last_field = f;
+	HTCurrentForm->nfields++; /* will count hidden fields - kw */
+	/*
+	 *  Propagate form field's accept-charset attribute to enclosing
+	 *  form if the form itself didn't have an accept-charset - kw
+	 */
+	if (f->accept_cs && !HTFormAcceptCharset) {
+	    StrAllocCopy(HTFormAcceptCharset, f->accept_cs);
+	}
+	if (!text->forms) {
+	    text->forms = HTList_new();
+	}
+    } else {
+	if (TRACE)
+	    fprintf(stderr, "beginInput: HTCurrentForm is missing!\n");
+    }
 
     if (TRACE) {
 	fprintf(stderr,"Input link: name=%s\nvalue=%s\nsize=%d\n",
@@ -6640,6 +6753,102 @@ PUBLIC int HText_beginInput ARGS3(
     return(f->size);
 }
 
+/*
+ *  Get a translation (properly: transcoding) quality, factoring in
+ *  our ability to translate (an UCTQ_t) and a possible q parameter
+ *  on the given charset string, for cs_from -> givenmime.
+ *  The parsed input string will be mutilated on exit(!).
+ *  Note that results are not normalised to 1.0, but results from
+ *  different calls of this function can be compared. - kw
+ */
+PRIVATE double get_trans_q ARGS2(
+    int,		cs_from,
+    char *,		givenmime)
+{
+    double dq = 0.0, df = 1.0;
+    UCTQ_t tq;
+    char *p;
+    if (!givenmime || !(*givenmime))
+	return dq;
+    if ((p = strchr(givenmime,';')) != NULL) {
+	*p++ = '\0';
+    }
+    if (!strcmp(givenmime, "*"))
+	tq = UCCanTranslateFromTo(cs_from,
+				  UCGetLYhndl_byMIME("utf-8"));
+    else
+	tq = UCCanTranslateFromTo(cs_from,
+				  UCGetLYhndl_byMIME(givenmime));
+    if (tq <= TQ_NO)
+	return dq;
+    dq = 1.0;
+    if (p && *p) {
+	char *pair, *field = p, *pval, *ptok;
+	/* Get all the parameters to the Charset */
+	while ((pair = HTNextTok(&field, ";", "\"", NULL)) != NULL) {
+	    if ((ptok = HTNextTok(&pair, "= ", NULL, NULL)) != NULL &&
+		(pval = HTNextField(&pair)) != NULL) {
+		if (0==strcasecomp(ptok,"q")) {
+		    df = strtod(pval, NULL);
+		    break;
+		}
+	    }
+	}
+	return (df * tq);
+    } else {
+	return tq;
+    }
+}
+
+/*
+ *  Find the best charset for submission, if we have an ACCEPT_CHARSET
+ *  list.  It factors in how well we can translate (just as guess, and
+ *  not a very good one..) and possible  ";q=" factors.  Yes this is
+ *  more general than it needs to be here.
+ *
+ *  Input is cs_in and acceptstring.
+ *
+ *  Will return charset handle as int.
+ *  best_csname will point to a newly allocated MIME string for the
+ *  charset corresponding to the return value if return value >= 0.
+ *  - kw
+ */
+PRIVATE int find_best_target_cs ARGS3(
+    char **,		best_csname,
+    int,		cs_from,
+    CONST char *,	acceptstring)
+{
+    char *paccept = NULL;
+    double bestq = -1.0;
+    char *bestmime = NULL;
+    char *field, *nextfield;
+    StrAllocCopy(paccept, acceptstring);
+    nextfield = paccept;
+    while ((field = HTNextTok(&nextfield, ",", "\"", NULL)) != NULL) {
+	double q;
+	if (*field != '\0') {
+	    /* Get the Charset*/
+	    q = get_trans_q(cs_from, field);
+	    if (q > bestq) {
+		bestq = q;
+		bestmime = field;
+	    }
+	}
+    }
+    if (bestmime) {
+	if (!strcmp(bestmime, "*")) /* non-standard for HTML attribute.. */
+	    StrAllocCopy(*best_csname, "utf-8");
+	else
+	    StrAllocCopy(*best_csname, bestmime);
+	FREE(paccept);
+	if (bestq > 0)
+	    return (UCGetLYhndl_byMIME(*best_csname));
+	else
+	    return (-1);
+    }
+    FREE(paccept);
+    return (-1);
+}
 
 PUBLIC void HText_SubmitForm ARGS4(
 	FormInfo *,	submit_item,
@@ -6650,6 +6859,7 @@ PUBLIC void HText_SubmitForm ARGS4(
     TextAnchor *anchor_ptr;
     int form_number = submit_item->number;
     FormInfo *form_ptr;
+    PerFormInfo *thisform;
     int len;
     char *query = NULL;
     char *escaped1 = NULL, *escaped2 = NULL;
@@ -6664,7 +6874,7 @@ PUBLIC void HText_SubmitForm ARGS4(
     int target_cs = -1;
     CONST char *out_csname;
     CONST char *target_csname = NULL;
-    char *name_used;
+    char *name_used = "";
 #ifdef EXP_CHARTRANS
     BOOL form_has_8bit = NO, form_has_special = NO;
     BOOL field_has_8bit = NO, field_has_special = NO;
@@ -6672,13 +6882,28 @@ PUBLIC void HText_SubmitForm ARGS4(
     BOOL have_accept_cs = NO;
     BOOL success;
     BOOL had_chartrans_warning = NO;
-    char *val_used;
+    char *val_used = "";
     char *copied_val_used = NULL;
     char *copied_name_used = NULL;
 #endif
 
     if (!HTMainText)
         return;
+
+    thisform = HTList_objectAt(HTMainText->forms, form_number - 1);
+    /*  Sanity check */
+    if (!thisform) {
+	if (TRACE)
+	    fprintf(stderr,
+		    "SubmitForm: form %d not in HTMainText's list!\n",
+		    form_number);
+    } else if (thisform->number != form_number) {
+	if (TRACE)
+	    fprintf(stderr,
+		    "SubmitForm: failed sanity check, %d!=%d !\n",
+		    thisform->number, form_number);
+	thisform = NULL;
+    }
 
     if (submit_item->submit_action) {
         /*
@@ -6737,17 +6962,26 @@ PUBLIC void HText_SubmitForm ARGS4(
      *		  charset to submit
      */
 #ifdef EXP_CHARTRANS
-    
-    if (submit_item->accept_cs &&
-	strcasecomp(submit_item->accept_cs, "UNKNOWN"))
-	have_accept_cs = YES;
-    if (submit_item->accept_cs && *submit_item->accept_cs &&
-	strcmp(submit_item->accept_cs, "*") &&
+
+    /* Look at ACCEPT-CHARSET on the submitting field if we have one. */
+    if (thisform && submit_item->accept_cs &&
 	strcasecomp(submit_item->accept_cs, "UNKNOWN")) {
-	target_cs = UCGetLYhndl_byMIME(submit_item->accept_cs);
-	if (target_cs >= 0) {
-	    target_csname = submit_item->accept_cs;
-	}
+	have_accept_cs = YES;
+	target_cs = find_best_target_cs(&thisform->thisacceptcs,
+					current_char_set,
+					submit_item->accept_cs);
+    }
+    /* Look at ACCEPT-CHARSET on form as a whole if submitting field
+     * didn't have one. */
+    if (thisform && !have_accept_cs && thisform->accept_cs &&
+	strcasecomp(thisform->accept_cs, "UNKNOWN")) {
+	have_accept_cs = YES;
+	target_cs = find_best_target_cs(&thisform->thisacceptcs,
+					current_char_set,
+					thisform->accept_cs);
+    }
+    if (have_accept_cs && (target_cs >= 0) && thisform->thisacceptcs) {
+	target_csname = thisform->thisacceptcs;
     }
 
     if (target_cs < 0 &&
@@ -7798,6 +8032,7 @@ PRIVATE void free_all_texts NOARGS
     FREE(HTFormEnctype);
     FREE(HTFormTitle);
     FREE(HTFormAcceptCharset);
+    PerFormInfo_free(HTCurrentForm);
 
     return;
 }
@@ -7846,13 +8081,11 @@ PUBLIC BOOL HText_hasNoCacheSet ARGS1(
     return ((text && text->no_cache) ? TRUE : FALSE);
 }
 
-#ifdef EXP_CHARTRANS
 PUBLIC BOOL HText_hasUTF8OutputSet ARGS1(
 	HText *,	text)
 {
     return ((text && text->T.output_utf8) ? TRUE : FALSE);
 }
-#endif
 
 /*
 **  Check charset and set the kcode element. - FM
@@ -7873,7 +8106,7 @@ PUBLIC void HText_setKcode ARGS3(
         return;
 
     /*
-    **  Check whether we have some king of info. - kw
+    **  Check whether we have some kind of info. - kw
     */
     if (!charset && !p_in) {
 	return;
@@ -7897,7 +8130,8 @@ PUBLIC void HText_setKcode ARGS3(
     **  so check the charset value and set the text->kcode element
     **  appropriately. - FM
     */
-    if (!strcmp(charset, "shift_jis")) {
+    if (!strcmp(charset, "shift_jis") ||
+	!strcmp(charset, "x-shift-jis")) {
 	text->kcode = SJIS;
     } else if ((p_in && (p_in->enc == UCT_ENC_CJK)) ||
 	       !strcmp(charset, "euc-jp") ||
@@ -7935,7 +8169,10 @@ PUBLIC void HText_setBreakPoint ARGS1(
     if (!text)
         return;
 
-    text->permissible_split = (int)text->last_line->size;  /* Can split here */
+    /*
+     *  Can split here. - FM
+     */
+    text->permissible_split = (int)text->last_line->size;
 
     return;
 }

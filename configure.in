@@ -268,10 +268,12 @@ slang)
 	;;
 esac
 
+AC_MSG_CHECKING(for location of config-file)
 CF_WITH_PATH(cfg-file,
-[  --with-cfg-file=XXXX    specify config-pathname],
+[  --with-cfg-file=XXXX    specify config-file path],
 LYNX_CFG_FILE,LIBDIR/lynx.cfg,[$]libdir/lynx.cfg)
 AC_DEFINE_UNQUOTED(LYNX_CFG_FILE,"$LYNX_CFG_FILE")
+AC_MSG_RESULT($LYNX_CFG_FILE)
 
 dnl --------------------------------------------------------------------------
 dnl Checks for standard headers
@@ -289,14 +291,12 @@ AC_CHECK_HEADERS( \
 	sys/ioctl.h \
 	sys/param.h \
 	sys/time.h \
-	sys/wait.h \
 	termio.h \
 	termios.h \
 	unistd.h \
-	waitstatus.h \
 )
 CF_TERMIO_AND_TERMIOS
-CF_UNION_WAIT
+CF_FUNC_WAIT
 
 dnl --------------------------------------------------------------------------
 dnl Checks for library units
@@ -374,8 +374,7 @@ if test $use_color_style != no ; then
 	if test $cf_cv_screen = slang ; then
 		AC_ERROR(Configuration does not support color-styles)
 	fi
-	AC_DEFINE(USEHASH)
-	AC_DEFINE(UNPAINT_CACHE)
+	AC_DEFINE(USE_HASH)
 	AC_DEFINE(LINKEDSTYLES)
 fi
 
@@ -386,6 +385,13 @@ no)
 *)
 	AC_DEFINE(USE_COLOR_STYLE)
 	AC_MSG_RESULT(curses-style)
+
+	AC_MSG_CHECKING(for location of style-sheet file)
+	CF_WITH_PATH(lss-file,
+	[  --with-lss-file=XXXX    specify style-sheet path],
+	LYNX_LSS_FILE,LIBDIR/lynx.lss,[$]libdir/lynx.lss)
+	AC_DEFINE_UNQUOTED(LYNX_LSS_FILE,"$LYNX_LSS_FILE")
+	AC_MSG_RESULT($LYNX_LSS_FILE)
 	;;
 esac
 
