@@ -34,6 +34,8 @@
 
 #ifdef USE_COLOR_STYLE
 # include <LYStyle.h>
+#endif
+#ifdef USE_PSRC
 # include <LYPrettySrc.h>
 #endif
 
@@ -187,7 +189,7 @@ struct _HTStream {
 static BOOL seen_letter_in_junk_tag;
 
 PRIVATE void HTMLSRC_apply_markup ARGS3(
-	    HTStream*,	      context,
+	    HTStream *,	      context,
 	    HTlexem,	      lexem,
 	    BOOL,	      start)
 {

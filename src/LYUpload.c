@@ -21,7 +21,6 @@
 #include <LYCurses.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
-#include <LYSignal.h>
 #include <LYStrings.h>
 #include <LYClean.h>
 #include <LYGetFile.h>

@@ -153,7 +153,7 @@ static CONST char* entities[] = {
 # define x HTMLA_AUXCLASS
 # define T(t) , t
 #else
-# define T(t) 
+# define T(t) /*nothing*/
 #endif
 
 static attr a_attr[] = {			/* Anchor attributes */
@@ -298,6 +298,7 @@ static attr bodytext_attr[] = { 		/* BODYTEXT attributes */
 };
 
 static attr bq_attr[] = {			/* BQ (BLOCKQUOTE) attributes */
+	{ "CITE"          T(h) },
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DIR"           T(N) },
@@ -483,6 +484,7 @@ static attr form_attr[] = {			/* FORM attributes */
 
 static attr frame_attr[] = {			/* FRAME attributes */
 	{ "ID"            T(i) },
+	{ "LONGDESC"      T(h) },
 	{ "MARGINHEIGHT"  T(N) },
 	{ "MARGINWIDTH"   T(N) },
 	{ "NAME"          T(N) },
@@ -560,6 +562,7 @@ static attr iframe_attr[] = {			/* IFRAME attributes */
 	{ "FRAMEBORDER"   T(N) },
 	{ "HEIGHT"        T(N) },
 	{ "ID"            T(i) },
+	{ "LONGDESC"      T(h) },
 	{ "MARGINHEIGHT"  T(N) },
 	{ "MARGINWIDTH"   T(N) },
 	{ "NAME"          T(N) },
@@ -578,6 +581,7 @@ static attr img_attr[] = {			/* IMG attributes */
 	{ "CLEAR"         T(N) },
 	{ "DIR"           T(N) },
 	{ "HEIGHT"        T(N) },
+	{ "LONGDESC"      T(h) },
 	{ "ID"            T(i) },
 	{ "ISMAP"         T(N) },
 	{ "ISOBJECT"      T(N) },
@@ -941,6 +945,7 @@ static attr tab_attr[] = {			/* TAB attributes */
 
 static attr table_attr[] = {			/* TABLE attributes */
 	{ "ALIGN"         T(N) },
+	{ "BACKGROUND"    T(h) },
 	{ "BORDER"        T(N) },
 	{ "CELLPADDING"   T(N) },
 	{ "CELLSPACING"   T(N) },
@@ -968,6 +973,7 @@ static attr td_attr[] = {			/* TD and TH attributes */
 	{ "ALIGN"         T(N) },
 	{ "AXES"          T(N) },
 	{ "AXIS"          T(N) },
+	{ "BACKGROUND"    T(h) },
 	{ "CHAR"          T(N) },
 	{ "CHAROFF"       T(N) },
 	{ "CLASS"         T(c) },
@@ -975,6 +981,7 @@ static attr td_attr[] = {			/* TD and TH attributes */
 	{ "COLSPAN"       T(N) },
 	{ "DIR"           T(N) },
 	{ "DP"            T(N) },
+	{ "HEIGHT"        T(N) },
 	{ "ID"            T(i) },
 	{ "LANG"          T(N) },
 	{ "NOWRAP"        T(N) },
@@ -982,6 +989,7 @@ static attr td_attr[] = {			/* TD and TH attributes */
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
 	{ "VALIGN"        T(N) },
+	{ "WIDTH"         T(N) },
 	{ 0               T(N) }	/* Terminate list */
 };
 
@@ -1355,7 +1363,7 @@ static attr ulist_attr[] = {			/* UL attributes */
 **
 **    Name,	Attributes,	No. of attributes,     content,   extra info...
 */
-#ifdef USE_PSRC    
+#ifdef USE_COLOR_STYLE
 #define P(x) x , (sizeof x) -1
 #define NULL_HTTag NULL, 0
 #else

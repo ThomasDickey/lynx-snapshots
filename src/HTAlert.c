@@ -18,6 +18,7 @@
 #include <LYClean.h>
 #include <GridText.h>
 #include <LYCookie.h>
+#include <LYHistory.h> /* store statusline messages */
 
 #include <LYLeaks.h>
 
@@ -30,6 +31,7 @@ PUBLIC void HTAlert ARGS1(
     CTRACE(tfp, "\nAlert!: %s\n\n", Msg);
     CTRACE_FLUSH(tfp);
     _user_message(ALERT_FORMAT, Msg);
+    LYstore_message2(ALERT_FORMAT, Msg);
 
     sleep(AlertSecs);
 }
@@ -69,6 +71,7 @@ PUBLIC void HTInfoMsg ARGS1(
     _statusline(Msg);
     if (Msg && *Msg) {
 	CTRACE(tfp, "Info message: %s\n", Msg);
+	LYstore_message(Msg);
 	sleep(InfoSecs);
     }
 }
@@ -82,6 +85,7 @@ PUBLIC void HTUserMsg ARGS1(
     _statusline(Msg);
     if (Msg && *Msg) {
 	CTRACE(tfp, "User message: %s\n", Msg);
+	LYstore_message(Msg);
 	sleep(MessageSecs);
     }
 }
@@ -95,6 +99,7 @@ PUBLIC void HTUserMsg2 ARGS2(
 	CTRACE(tfp, "User message: ");
 	CTRACE(tfp, Msg2, Arg);
 	CTRACE(tfp, "\n");
+	LYstore_message2(Msg2, Arg);
 	sleep(MessageSecs);
     }
 }
@@ -105,10 +110,9 @@ PUBLIC void HTUserMsg2 ARGS2(
 PUBLIC void HTProgress ARGS1(
 	CONST char *,	Msg)
 {
-    if (TRACE)
-	fprintf(tfp, "%s\n", Msg);
-    else
-	statusline(Msg);
+    statusline(Msg);
+    LYstore_message(Msg); 
+    CTRACE(tfp, "%s\n", Msg); 
 }
 
 /*	Issue a read-progress message.			HTReadProgress()
@@ -174,7 +178,12 @@ PUBLIC void HTReadProgress ARGS2(
 		if (total < -1)
 		    strcat(line, gettext(" (Press 'z' to abort)"));
 	    }
-	    HTProgress(line);
+ 
+	    /* do not store the message for history page. */ 
+	    if (TRACE) 
+		fprintf(tfp, "%s\n", line); 
+	    else 
+		statusline(line); 
 	}
     }
 }

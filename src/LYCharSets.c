@@ -6,7 +6,6 @@
 #include <UCMap.h>
 #include <UCDefs.h>
 #include <LYCharSets.h>
-#include <LYCharUtils.h>
 #include <HTFont.h>
 #include <GridText.h>
 #include <LYCurses.h>
@@ -396,6 +395,8 @@ PUBLIC int LYlowest_eightbit[MAXCHARSETS]={
 PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 {
     int chndl = safeUCGetLYhndl_byMIME(UCAssume_MIMEcharset);
+    BOOLEAN LYRawMode_flag = LYRawMode;
+    int UCLYhndl_for_unspec_flag = UCLYhndl_for_unspec;
 
     if (LYCharSet_UC[i].enc != UCT_ENC_CJK) {
 	HTCJK = NOCJK;
@@ -482,6 +483,18 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 #endif /* USE_SLANG */
 
     ena_csi((LYlowest_eightbit[current_char_set] > 155));
+
+    /* some diagnostics */
+    if (TRACE) {
+	if (LYRawMode_flag != LYRawMode)
+	    CTRACE(tfp, "HTMLSetCharacterHandling: LYRawMode changed %s -> %s\n",
+			(LYRawMode_flag ? "ON" : "OFF"),
+			(LYRawMode	? "ON" : "OFF"));
+	if (UCLYhndl_for_unspec_flag != UCLYhndl_for_unspec)
+	    CTRACE(tfp, "HTMLSetCharacterHandling: UCLYhndl_for_unspec changed %d -> %d\n",
+			UCLYhndl_for_unspec_flag,
+			UCLYhndl_for_unspec);
+    }
 
     return;
 }

@@ -6,7 +6,6 @@
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
 #include <LYStrings.h>
-#include <LYGetFile.h>
 #include <LYDownload.h>
 
 #include <LYLeaks.h>
@@ -414,7 +413,7 @@ check_recall:
 	     */
 	    count = 1;
 	    HTAddParam(&the_command, download_command->command, count, file);
-	    if (HTCountCommandArgs(download_command->command) > 1) 
+	    if (HTCountCommandArgs(download_command->command) > 1)
 		HTAddParam(&the_command, download_command->command, ++count, buffer);
 	    HTEndParam(&the_command, download_command->command, count);
 

@@ -637,8 +637,10 @@ PRIVATE char *expand_tiname (char *first, size_t len, char **result)
     name[len] = '\0';
     if ((code = lookup_tiname(name, strnames)) >= 0
      || (code = lookup_tiname(name, strfnames)) >= 0) {
-	strcpy(*result, cur_term->type.Strings[code]);
-	(*result) += strlen(*result);
+	if (cur_term->type.Strings[code] != 0) {
+	    strcpy(*result, cur_term->type.Strings[code]);
+	    (*result) += strlen(*result);
+	}
     }
     return first + len;
 }
@@ -889,7 +891,7 @@ PRIVATE int read_keymap_file NOARGS
 	{"unsetkey", unsetkey_cmd },
     };
 
-    char line[1024];
+    char *line = NULL;
     FILE *fp;
     char file[LY_MAXPATH];
     int ret;
@@ -903,7 +905,7 @@ PRIVATE int read_keymap_file NOARGS
 
     linenum = 0;
     ret = 0;
-    while ((fgets (line, sizeof (line), fp) != 0) && (ret == 0))
+    while ((line = LYSafeGets(line, fp)) != 0 && (ret == 0))
     {
 	char *s = LYSkipBlanks(line);
 
@@ -923,6 +925,7 @@ PRIVATE int read_keymap_file NOARGS
 	    }
 	}
     }
+    FREE(line);
 
     fclose (fp);
 
@@ -1364,7 +1367,12 @@ re_read:
 	case KEY_ENTER:		   /* enter/return	*/
 	   c = '\n';
 	   break;
-#endif /* KEY_END */
+#endif /* KEY_ENTER */
+#ifdef PADENTER			   /* PDCURSES */
+	case PADENTER:
+	   c = '\n';
+	   break;
+#endif /* PADENTER */
 #ifdef KEY_END
 	case KEY_END:		   /* end key		001 */
 	   c = END_KEY;
@@ -2936,3 +2944,32 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
     return(-10);  /* mismatch, if we come to here */
 }
 #endif /* NOTUSED */
+
+/*
+ * Replaces 'fgets()' calls into a fixed-size buffer with reads into a buffer
+ * that is allocated.  When an EOF or error is found, the buffer is automatically
+ * freed.
+ */
+PUBLIC char *LYSafeGets ARGS2(
+	char *,	src,
+	FILE *,	fp)
+{
+    char buffer[BUFSIZ];
+    char *result = 0;
+
+    if (src != 0)
+	*src = 0;
+
+    while (fgets(buffer, sizeof(buffer)-1, fp) != 0) {
+	if (*buffer)
+	    result = StrAllocCat(src, buffer);
+	if (strchr(buffer, '\n') != 0)
+	    break;
+	if (feof(fp)
+	 || ferror(fp)) {
+	    FREE(src);
+	    break;
+	}
+    }
+    return result;
+}

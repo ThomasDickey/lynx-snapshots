@@ -3,6 +3,7 @@
 #include <LYUtils.h>
 #include <LYClean.h>
 #include <LYCurses.h>
+#include <LYStrings.h>
 #include <LYTraversal.h>
 
 #include <LYexit.h>
@@ -32,7 +33,9 @@ PRIVATE void exit_with_perror ARGS1(CONST char *,msg)
 PUBLIC BOOLEAN lookup ARGS1(char *,target)
 {
     FILE *ifp;
-    char buffer[200], line[200];
+    char *buffer = NULL;
+    char *line = NULL;
+    int result = FALSE;
 
     if ((ifp = fopen(TRAVERSE_FILE,"r")) == NULL) {
 	if ((ifp = LYNewTxtFile(TRAVERSE_FILE)) == NULL) {
@@ -43,17 +46,19 @@ PUBLIC BOOLEAN lookup ARGS1(char *,target)
 	}
     }
 
-    sprintf(line,"%s\n",target);
+    HTSprintf0(&line, "%s\n", target);
 
-    while(fgets(buffer, 200, ifp) != NULL) {
+    while((buffer = LYSafeGets(buffer, ifp)) != NULL) {
 	if (STREQ(line,buffer)) {
-	    fclose(ifp);
-	    return(TRUE);
+	    result = TRUE;
+	    break;
 	}
     } /* end while */
+    FREE(line);
+    FREE(buffer);
 
     fclose(ifp);
-    return(FALSE);
+    return(result);
 }
 
 PUBLIC void add_to_table ARGS1(char *,target)
@@ -134,33 +139,36 @@ PUBLIC void add_to_reject_list ARGS1(char *,target)
 PUBLIC BOOLEAN lookup_reject ARGS1(char *,target)
 {
     FILE *ifp;
-    char buffer[200], line[200], ch;
+    char *buffer = NULL;
+    char *line = NULL;
+    char ch;
     int  frag;
+    int result = FALSE;
 
     if ((ifp = fopen(TRAVERSE_REJECT_FILE,"r")) == NULL){
 	return(FALSE);
     }
 
-    sprintf(line,"%s\n",target);
+    HTSprintf0(&line, "%s\n", target);
 
-    while (fgets(buffer, 200, ifp) != NULL) {
+    while ((buffer = LYSafeGets(buffer, ifp)) != NULL && !result) {
 	frag = strlen(buffer) - 1; /* real length, minus trailing null */
 	ch   = buffer[frag - 1];   /* last character in buffer */
 	if (frag > 0) { 	   /* if not an empty line */
 	    if (ch == '*') {
 		if (frag == 1 || ((strncmp(line,buffer,frag - 1)) == 0)) {
-		   fclose(ifp);
-		   return(TRUE);
+		    result = TRUE;
 		}
 	    } else { /* last character = "*" test */
 		if (STREQ(line,buffer)) {
-		    fclose(ifp);
-		    return(TRUE);
+		    result = TRUE;
 		}
 	    } /* last character = "*" test */
 	} /* frag >= 0 */
     } /* end while */
+    FREE(buffer);
+    FREE(line);
 
     fclose(ifp);
-    return(FALSE);
+    return(result);
 }

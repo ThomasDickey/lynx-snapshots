@@ -580,6 +580,11 @@ PUBLIC void LYUCPushAssumed ARGS1(
 	    UCAssume_MIMEcharset = NULL;
 	    StrAllocCopy(UCAssume_MIMEcharset, anchor_UCI->MIMEname);
 	    pushed_assume_LYhndl = anchor_LYhndl;
+	    /* some diagnostics */
+	    if (UCLYhndl_for_unspec != anchor_LYhndl)
+	    CTRACE(tfp, "LYUCPushAssumed: UCLYhndl_for_unspec changed %d -> %d\n",
+			UCLYhndl_for_unspec,
+			anchor_LYhndl);
 	    UCLYhndl_for_unspec = anchor_LYhndl;
 	    return;
 	}
@@ -592,9 +597,15 @@ PUBLIC void LYUCPushAssumed ARGS1(
  *  UCLYhndl_for_unspec used for charset "assuming" from the values
  *  saved by LYUCPushAssumed, if any. - kw
  */
-PRIVATE int LYUCPopAssumed NOARGS
+PUBLIC int LYUCPopAssumed NOARGS
 {
+
     if (pushed_assume_LYhndl >= 0) {
+	/* some diagnostics */
+	if (UCLYhndl_for_unspec != pushed_assume_LYhndl)
+	CTRACE(tfp, "LYUCPopAssumed: UCLYhndl_for_unspec changed %d -> %d\n",
+		    UCLYhndl_for_unspec,
+		    pushed_assume_LYhndl);
 	UCLYhndl_for_unspec = pushed_assume_LYhndl;
 	pushed_assume_LYhndl = -1;
 	FREE(UCAssume_MIMEcharset);

@@ -144,6 +144,7 @@
 #undef SYSLOG_REQUESTED_URLS	/* CF_ARG_ENABLE(syslog) */
 #undef SYSTEM_MAIL		/* CF_DEFINE_PROG */
 #undef SYSTEM_MAIL_FLAGS	/* defined by CF_SYSTEM_MAIL_FLAGS */
+#undef SYSTEM_NAME		/* CF_CHECK_CACHE */
 #undef TAR_PATH			/* CF_PATH_PROG(tar) */
 #undef TELNET_PATH		/* CF_PATH_PROG(telnet) */
 #undef TERMIO_AND_CURSES	/* CF_TERMIO_AND_CURSES workaround */
@@ -161,7 +162,7 @@
 #undef USE_EXTERNALS		/* CF_ARG_ENABLE(externs) */
 #undef USE_FCNTL		/* CF_FIONBIO */
 #undef USE_HASH			/* see USE_COLOR_STYLE */
-#undef USE_PSRC			/* see USE_COLOR_STYLE */
+#undef USE_PSRC			/* CF_ARG_ENABLE(prettysrc) */
 #undef USE_SIZECHANGEHACK	/* FIXME: find a case where this works! */
 #undef USE_SLANG		/* AC_ARG_WITH(screen=slang) */
 #undef USE_SOCKS4_PREFIX	/* CF_SOCKS5 */

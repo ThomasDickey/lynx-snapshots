@@ -23,7 +23,6 @@
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
 #include <LYClean.h>
-#include <LYSignal.h>
 #include <GridText.h>
 #include <LYexit.h>
 #include <LYLeaks.h>

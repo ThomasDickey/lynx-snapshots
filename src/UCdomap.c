@@ -25,7 +25,6 @@
 #include <UCMap.h>
 #include <UCDefs.h>
 #include <LYCharSets.h>
-#include <LYStrings.h>
 
 #include <LYLeaks.h>
 

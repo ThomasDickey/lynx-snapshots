@@ -1,10 +1,9 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.24 Tue, 13 Apr 1999 03:39:16 -0600 dickey @
+ * @Id: LYStyle.c 1.25 Fri, 23 Apr 1999 08:56:35 -0600 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
-#include <LYSignal.h>
 #include <LYGlobalDefs.h>
 
 #include <LYStructs.h>
@@ -399,7 +398,7 @@ PUBLIC void style_defaultStyleSheet NOARGS
 PUBLIC int style_readFromFile ARGS1(char*, file)
 {
     FILE *fh;
-    char buffer[1024];
+    char *buffer = NULL;
     int len;
 
     CTRACE(tfp, "CSS:Reading styles from file: %s\n", file ? file : "?!? empty ?!?");
@@ -416,16 +415,9 @@ PUBLIC int style_readFromFile ARGS1(char*, file)
     style_initialiseHashTable();
     style_deleteStyleList();
 
-    while (!feof(fh)
-    && fgets(buffer, sizeof(buffer)-1, fh) != NULL)
+    while ((buffer = LYSafeGets(buffer, fh)) != NULL)
     {
-	len = strlen(buffer);
-	if (len > 0) {
-	    if (buffer[len-1] == '\n' || buffer[len-1] == '\r')
-		buffer[len-1] = '\0'; /* hack */
-	    else
-		buffer[sizeof(buffer)-1] = '\0'; /* hack */
-	}
+	LYTrimTrailing(buffer);
 	LYTrimTail(buffer);
 	LYTrimHead(buffer);
 	if (buffer[0] != '#' && (len = strlen(buffer)) > 0)

@@ -14,4 +14,8 @@ extern void LYpop PARAMS((document *doc));
 extern void LYpop_num PARAMS((int number, document *doc));
 extern void LYpush PARAMS((document *doc, BOOLEAN force_push));
 
+extern void LYstore_message2 PARAMS((CONST char *message, CONST char *argument));
+extern void LYstore_message PARAMS((CONST char *message));
+extern int LYshow_statusline_messages PARAMS((document *newdoc));
+
 #endif /* LYHISTORY_H */

@@ -793,6 +793,7 @@
 #define PERMIT_OPTIONS_TITLE	gettext("File Permission Options")
 #define PRINT_OPTIONS_TITLE	gettext("Printing Options")
 #define SHOWINFO_TITLE		gettext("Information about the current document")
+#define STATUSLINES_TITLE	gettext("Your recent statusline messages")
 #define UPLOAD_OPTIONS_TITLE	gettext("Upload Options")
 #define VISITED_LINKS_TITLE	gettext("Visited Links Page")
 

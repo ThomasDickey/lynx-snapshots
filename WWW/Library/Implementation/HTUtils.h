@@ -30,11 +30,14 @@
 /* Explicit system-configure */
 #ifdef VMS
 #define NO_SIZECHANGE
-#define NO_UNISTD_H
+#if defined(VAXC) && !defined(__DECC)
+#define NO_UNISTD_H	/* DEC C has unistd.h, but not VAX C */
+#endif
 #define NO_KEYPAD
 #define NO_UTMP
 #define NO_FILIO_H
 #define NOUSERS
+#define DISP_PARTIAL	/* experimental */
 #endif
 
 #if defined(__STDC__) || defined(VMS)
@@ -122,13 +125,13 @@ Debug message control.
 
  */
 
-#ifdef DEBUG
+#ifdef NO_LYNX_TRACE
+#define TRACE 0
+#define PROGRESS(str) /* nothing for now */
+#else
 #define TRACE (WWW_TraceFlag)
 #define PROGRESS(str) printf(str)
         extern int WWW_TraceFlag;
-#else
-#define TRACE 0
-#define PROGRESS(str) /* nothing for now */
 #endif
 
 /*

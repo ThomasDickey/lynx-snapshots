@@ -314,6 +314,9 @@ send form data from stdin using POST method and dump results.
 show HTML source preparsed and reformatted when used with -source
 or in source view.
 .TP
+.B -prettysrc
+show HTML source view with lexical elements and tags in color.
+.TP
 .B -print
 enable print functions. (default)
 .TP

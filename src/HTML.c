@@ -49,12 +49,15 @@
 #include <LYCurses.h>
 #endif /* VMS */
 
+#ifdef USE_PSRC
+#include <LYPrettySrc.h>
+#endif
+
 #ifdef USE_COLOR_STYLE
 #include <SGML.h>
 #include <AttrList.h>
 #include <LYHash.h>
 #include <LYStyle.h>
-#include <LYPrettySrc.h>
 #undef SELECTED_STYLES
 #define pHText_changeStyle(X,Y,Z) {}
 
@@ -2281,7 +2284,23 @@ PRIVATE void HTML_start_element ARGS6(
     case HTML_DT:
 	CHECK_ID(HTML_GEN_ID);
 	if (!me->style_change) {
+	    BOOL in_line_1 = HText_inLineOne(me->text);
+	    HTCoord saved_spaceBefore = me->sp->style->spaceBefore;
+	    HTCoord saved_spaceAfter = me->sp->style->spaceAfter;
+	    /*
+	     *  If there are several DT elements and this is not the first,
+	     *  and the preceding DT element's first (and normally only) line
+	     *  has not yet been ended, suppress intervening blank line by
+	     *  temporarily modifying the paragraph style in place.  Ugly
+	     *  but there's ample precedence. - kw
+	     */
+	    if (in_line_1) {
+		me->sp->style->spaceBefore = 0;	/* temporary change */
+		me->sp->style->spaceAfter = 0;	/* temporary change */
+	    }
 	    HText_appendParagraph(me->text);
+	    me->sp->style->spaceBefore = saved_spaceBefore; /* undo */
+	    me->sp->style->spaceAfter = saved_spaceAfter; /* undo */
 	    me->in_word = NO;
 	    me->sp->style->alignment = HT_LEFT;
 	}
@@ -7696,19 +7715,19 @@ PRIVATE HTStream* CacheThru_new ARGS2(
 {
     char filename[LY_MAXPATH];
     HTStream *stream = NULL;
-    HTProtocol *p = (HTProtocol *)anchor->protocol;
+/*    HTProtocol *p = (HTProtocol *)anchor->protocol; */
 
     /*
      * Neatly and transparently vanish if source caching is disabled.
      */
     if (LYCacheSource == SOURCE_CACHE_NONE)
 	return target;
-
+/*
     if (strcmp(p->name, "http") != 0) {
 	CTRACE(tfp, "Protocol is \"%s\"; not caching\n", p->name);
 	return target;
     }
-
+*/
     stream = (HTStream *) malloc(sizeof(*stream));
     if (!stream)
 	outofmem(__FILE__, "CacheThru_new");

@@ -954,25 +954,25 @@ PUBLIC int HTVMSBrowseDir ARGS4(
      *  Output the title and header.
      */
     START(HTML_HTML);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_HEAD);
-    PUTS("\n");
+    PUTC('\n');
     HTUnEscape(title);
     START(HTML_TITLE);
     PUTS(title);
     PUTS(" directory");
     END(HTML_TITLE);
-    PUTS("\n");
+    PUTC('\n');
     FREE(title);
     END(HTML_HEAD);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_BODY);
-    PUTS("\n");
+    PUTC('\n');
     HTUnEscape(header);
     START(HTML_H1);
     PUTS(header);
     END(HTML_H1);
-    PUTS("\n");
+    PUTC('\n');
     if (HTDirReadme == HT_DIR_README_TOP) {
         FILE * fp;
 	if (header[strlen(header)-1] != '/')
@@ -1018,7 +1018,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 	PUTS(parent);
 	END(HTML_A);
 	START(HTML_P);
-	PUTS("\n");
+	PUTC('\n');
 	FREE(relative);
 	FREE(parent);
     }
@@ -1233,11 +1233,11 @@ PUBLIC int HTVMSBrowseDir ARGS4(
      *  Complete the output stream.
      */
     END(HTML_PRE);
-    PUTS("\n");
+    PUTC('\n');
     END(HTML_BODY);
-    PUTS("\n");
+    PUTC('\n');
     END(HTML_HTML);
-    PUTS("\n");
+    PUTC('\n');
     FREE(tail);
     FREE_TARGET;
 

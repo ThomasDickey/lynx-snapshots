@@ -5,7 +5,6 @@
 #include <LYClean.h>
 #include <LYMainLoop.h>
 #include <LYGlobalDefs.h>
-#include <LYStrings.h>
 #include <LYTraversal.h>
 #include <LYCookie.h>
 #include <UCAuto.h>
@@ -104,6 +103,7 @@ PUBLIC void cleanup_sig ARGS1(
 	    cleanup();
 	}
 	if (sig != 0) {
+	    SetOutputMode(O_TEXT);
 	    printf("\n\n%s %d\n\n",
 		   gettext("Exiting via interrupt:"),
 		   sig);

@@ -572,6 +572,7 @@ PRIVATE size_t fill_rehostent ARGS3(
 #define REHOSTENT_SIZE 128		/* not bigger than pipe buffer! */
 
 #ifndef HAVE_H_ERRNO
+#undef  h_errno
 #define h_errno my_errno
 static int my_errno;
 #endif

@@ -5,7 +5,6 @@
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
 #include <LYEdit.h>
-#include <LYStrings.h>
 #ifdef VMS
 #include <unixio.h>
 #endif /* VMS */

@@ -13,6 +13,7 @@ CFLAGS= $(MCFLAGS) $(INTLFLAGS) -I. -I.. $(SLANGINC)
 
 CC = gcc
 MCFLAGS = -O2 -DDISP_PARTIAL -DUSE_ZLIB -DUSE_EXTERNALS \
+-DSOURCE_CACHE -DUSE_PSRC \
 -DUSE_SLANG -DDJGPP_KEYHANDLER -DACCESS_AUTH -DNO_CUSERID \
 -DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP -I../WWW/Library/Implementation \
 -I../djgpp/tcplib/include -I./chrtrans -I../djgpp/tcplib/include/tcp

@@ -123,6 +123,7 @@ PUBLIC BOOLEAN bold_on      = OFF;
 PUBLIC char * source_cache_filename = NULL;
 PUBLIC HTChunk * source_cache_chunk = NULL;
 PUBLIC int LYCacheSource = SOURCE_CACHE_NONE;
+PUBLIC BOOLEAN from_source_cache = FALSE;  /* mutable */
 #endif
 
 #if defined(USE_COLOR_STYLE)
@@ -561,7 +562,7 @@ PUBLIC HText *	HText_new ARGS1(
     self->LastChar = '\0';
     self->IgnoreExcess = FALSE;
 
-#ifndef PSRC_TEST
+#ifndef USE_PSRC
     if (HTOutputFormat == WWW_SOURCE)
 	self->source = YES;
     else
@@ -1951,7 +1952,7 @@ PRIVATE void split_line ARGS2(
 	    linedata[line->size++] = LY_BOLD_START_CHAR;
 	    linedata[line->size] = '\0';
 	    ctrl_chars_on_this_line++;
-	    SpecialAttrChars++;;
+	    SpecialAttrChars++;
 	}
 	if (plen) {
 	    for (i = (plen - 1); i >= 0; i--) {
@@ -6186,14 +6187,15 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 
 	/*
 	 * This is more or less copied out of HTLoadFile(), except we don't
-	 * get a content encoding.  This may be overkill...
+	 * get a content encoding.  This may be overkill.  -dsb
 	 */
 	if (HTMainText->node_anchor->content_type) {
 	    format = HTAtom_for(HTMainText->node_anchor->content_type);
 	} else {
 	    format = HTFileFormat(HTMainText->source_cache_file, NULL, NULL);
 	    format = HTCharsetFormat(format, HTMainText->node_anchor,
-				     UCLYhndl_HTFile_for_unspec);
+					     UCLYhndl_for_unspec);
+	    /* not UCLYhndl_HTFile_for_unspec - we are talking about remote documents... */
 	}
 	CTRACE(tfp, "  Content type is \"%s\"\n", format->name);
 
@@ -6210,12 +6212,29 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	    FREE(source_cache_filename);
 	    return FALSE;
 	}
+#ifdef DISP_PARTIAL
+	display_partial = display_partial_flag;  /* restore */
+	Newline_partial = Newline;  /* initialize */
+#endif
+	if (lynx_mode == FORMS_LYNX_MODE) {
+	    /*
+	     *  Note that if there are no form links on the current
+	     *  page, lynx_mode won't have this setting and we won't
+	     *  know that this warning should be issued. - FM
+	     */
+	    HTAlert(RELOADING_FORM);
+	}
 	ret = HTParseFile(format, HTOutputFormat, HTMainText->node_anchor,
 			  fp, NULL);
 	fclose(fp);
 	ok = (ret == HT_LOADED);
-	if (!ok)
+	if (!ok) {
 	    FREE(source_cache_filename);
+	}
+#ifdef USE_PSRC
+	else if (LYpsrc && psrc_view)
+	    HTMainText->source = TRUE;
+#endif
     }
 
     if (LYCacheSource == SOURCE_CACHE_MEMORY &&
@@ -6233,6 +6252,18 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	source_cache_chunk = HTMainText->source_cache_chunk;
 	HTMainText->source_cache_chunk = NULL;
 
+#ifdef DISP_PARTIAL
+	display_partial = display_partial_flag;  /* restore */
+	Newline_partial = Newline;  /* initialize */
+#endif
+	if (lynx_mode == FORMS_LYNX_MODE) {
+	    /*
+	     *  Note that if there are no form links on the current
+	     *  page, lynx_mode won't have this setting and we won't
+	     *  know that this warning should be issued. - FM
+	     */
+	    HTAlert(RELOADING_FORM);
+	}
 	ret = HTParseMem(format, HTOutputFormat, HTMainText->node_anchor,
 			 source_cache_chunk, NULL);
 	ok = (ret == HT_LOADED);
@@ -6240,10 +6271,57 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	    HTChunkFree(source_cache_chunk);
 	    source_cache_chunk = NULL;
 	}
+#ifdef USE_PSRC
+	else if (LYpsrc && psrc_view)
+	    HTMainText->source = TRUE;
+#endif
     }
 
+    /*
+     * I have no idea what this does, but it seems to be necessary... -dsb
+     */
+    LYUCPopAssumed();
+
     CTRACE(tfp, "Reparse %s\n", (ok ? "succeeded" : "failed"));
+
+    if (ok)  {/* fix few flags: */
+	from_source_cache = TRUE;  /* flag for mainloop events */
+#ifdef USE_PSRC
+	if (LYpsrc && psrc_view)
+	    HTMainText->source = TRUE;
+#endif
+	more = HText_canScrollDown();  /* the length may be changed */
+    }
+
     return ok;
+}
+
+PUBLIC BOOLEAN HTcan_reparse_document NOARGS
+{
+    if (!HTMainText || LYCacheSource == SOURCE_CACHE_NONE ||
+	(LYCacheSource == SOURCE_CACHE_FILE &&
+	 !HTMainText->source_cache_file) ||
+	(LYCacheSource == SOURCE_CACHE_MEMORY &&
+	 !HTMainText->source_cache_chunk))
+	return FALSE;
+
+    if (LYCacheSource == SOURCE_CACHE_FILE && HTMainText->source_cache_file) {
+	FILE * fp;
+
+	fp = fopen(HTMainText->source_cache_file, "r");
+	if (!fp) {
+	    return FALSE;
+	}
+	fclose(fp);
+	return TRUE;
+    }
+
+    if (LYCacheSource == SOURCE_CACHE_MEMORY &&
+	HTMainText->source_cache_chunk) {
+	return TRUE;
+    }
+
+    return FALSE;  /* if came to here */
 }
 
 PRIVATE void trace_setting_change ARGS3(
@@ -6305,7 +6383,7 @@ PUBLIC BOOLEAN HTdocument_settings_changed NOARGS
 	    HTMainText->cols != LYcols);
 }
 #endif
- 
+
 PUBLIC int HTisDocumentSource NOARGS
 {
     return (HTMainText != 0) ? HTMainText->source : FALSE;
@@ -6471,6 +6549,15 @@ PUBLIC void HText_NegateLineOne ARGS1(
 	text->in_line_1 = NO;
     }
     return;
+}
+
+PUBLIC BOOL HText_inLineOne ARGS1(
+	HText *,	text)
+{
+    if (text) {
+	return text->in_line_1;
+    }
+    return YES;
 }
 
 /*

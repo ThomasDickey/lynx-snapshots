@@ -594,7 +594,7 @@ PUBLIC void mailmsg ARGS4(
     FILE *fd, *fp;
     char *address = NULL;
     char *searchpart = NULL;
-    char cmd[512], *cp, *cp0, *cp1;
+    char *cmd = NULL, *cp, *cp0, *cp1;
 #if defined(VMS) || defined(DOSPATH)
     char my_tmpfile[LY_MAXPATH];
     char *command = NULL;
@@ -693,7 +693,7 @@ PUBLIC void mailmsg ARGS4(
     }
 
 #ifdef UNIX
-    sprintf(cmd, "%s %s", system_mail, system_mail_flags);
+    HTSprintf0(&cmd, "%s %s", system_mail, system_mail_flags);
     if ((fd = popen(cmd, "w")) == NULL) {
 	FREE(address);
 	CTRACE(tfp, "mailmsg: '%s' failed.\n",
@@ -744,7 +744,8 @@ PUBLIC void mailmsg ARGS4(
     if ((LynxSigFile != NULL) &&
 	(fp = fopen(LynxSigFile, "r")) != NULL) {
 	fputs("-- \n", fd);
-	while (fgets(cmd, sizeof(cmd), fp) != NULL)
+	FREE(cmd);
+	while ((cmd = LYSafeGets(cmd, fp) )!= NULL)
 	    fputs(cmd, fd);
 	fclose(fp);
     }
@@ -764,7 +765,7 @@ PUBLIC void mailmsg ARGS4(
 	/*
 	 *  Now set up the command. - FM
 	 */
-	sprintf(cmd,
+	HTSprintf0(&command,
 		"%s %s %s,%s ",
 		system_mail,
 		system_mail_flags,
@@ -775,14 +776,13 @@ PUBLIC void mailmsg ARGS4(
 	 *  For "generic" VMS MAIL, include the
 	 *  subject in the command. - FM
 	 */
-	sprintf(cmd,
+	HTSprintf0(&command,
 		"%s %s/self/subject=\"Lynx Error in %.56s\" %s ",
 		system_mail,
 		system_mail_flags,
 		filename,
 		my_tmpfile);
     }
-    StrAllocCopy(command, cmd);
     address_ptr1 = address;
     do {
 	if ((cp = strchr(address_ptr1, ',')) != NULL) {
@@ -799,20 +799,18 @@ PUBLIC void mailmsg ARGS4(
 	 *  ignore addresses so long that they would overflow the
 	 *  temporary buffer (i.e., about 500 chars). - BL
 	 */
-	if (strlen(address) > 3 &&
-	    strlen(address) + strlen(mail_adrs) < sizeof(cmd)) {
-	    if (!first) {
-		StrAllocCat(command, ",");
-	    }
-	    sprintf(cmd, mail_adrs, address_ptr1);
-	    StrAllocCat(command, cmd);
-	    first = FALSE;
+	if (!first) {
+	    StrAllocCat(command, ",");
 	}
+	HTSprintf0(&cmd, mail_adrs, address_ptr1);
+	StrAllocCat(command, cmd);
+	first = FALSE;
 	address_ptr1 = address_ptr2;
     } while (address_ptr1 != NULL);
 
     LYSystem(command);
     FREE(command);
+    FREE(cmd);
     LYRemoveTemp(my_tmpfile);
     if (isPMDF) {
 	LYRemoveTemp(hdrfile);
@@ -1691,9 +1689,10 @@ PUBLIC void reply_by_mail ARGS4(
 	LYStatusLine = -1;
 	if (c == YES) {
 	    if ((fd = fopen(my_tmpfile, "a")) != NULL) {
+		char *buffer = NULL;
 		fputs("-- \n", fd);
-		while (fgets(user_input, sizeof(user_input), fp) != NULL) {
-		    fputs(user_input, fd);
+		while ((buffer = LYSafeGets(buffer, fp)) != NULL) {
+		    fputs(buffer, fd);
 		}
 		fclose(fd);
 	    }

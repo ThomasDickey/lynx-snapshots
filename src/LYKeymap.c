@@ -297,8 +297,8 @@ LYK_UP_TWO,       LYK_DOWN_TWO,     LYK_DO_NOTHING, LYK_FASTBACKW_LINK,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
-   0,                  0,              LYK_WHEREIS,   LYK_ACTIVATE,
-                                       /* KP_SLASH    KP_ENTER */
+   0,                  0,              LYK_WHEREIS,   0,
+                                       /* KP_SLASH */
    0,                  0,              0,           LYK_IMAGE_TOGGLE,
                                                     /* KP_* */
    LYK_PREV_PAGE,      LYK_NEXT_PAGE,  0,             0,

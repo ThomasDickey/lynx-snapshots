@@ -39,7 +39,6 @@
 #include <LYStrings.h>
 #include <LYCharUtils.h>
 #include <LYStructs.h>
-#include <LYGetFile.h>
 #include <LYHistory.h>
 #include <LYUpload.h>
 #include <LYLocal.h>
@@ -329,7 +328,7 @@ PRIVATE BOOLEAN not_already_exists ARGS1(char *, name)
     return FALSE;
 }
 
-PRIVATE BOOLEAN dir_has_same_owner ARGS2(struct stat *, info, int, owner)
+PRIVATE BOOLEAN dir_has_same_owner ARGS2(struct stat *, info, uid_t, owner)
 {
     if (S_ISDIR(info->st_mode)) {
 	if (info->st_uid == owner) {

@@ -1,5 +1,6 @@
 #include <HTUtils.h>
 #include <HTTP.h>
+#include <GridText.h>
 #include <HTAlert.h>
 #include <HText.h>
 #include <LYGlobalDefs.h>
@@ -11,9 +12,9 @@
 #include <LYKeymap.h>
 #include <LYList.h>
 #include <LYShowInfo.h>
-#include <LYSignal.h>
 #include <LYStrings.h>
 #include <LYCharUtils.h>
+#include <LYGetFile.h>
 
 #ifdef DIRED_SUPPORT
 #include <LYUpload.h>
@@ -83,6 +84,7 @@ PUBLIC void LYAddVisitedLink ARGS1(
 	!strcmp((doc->title ? doc->title : ""), ADDRLIST_PAGE_TITLE) ||
 #endif
 	!strcmp((doc->title ? doc->title : ""), SHOWINFO_TITLE) ||
+	!strcmp((doc->title ? doc->title : ""), STATUSLINES_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), CONFIG_DEF_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), LYNXCFG_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), COOKIE_JAR_TITLE) ||
@@ -335,7 +337,6 @@ PUBLIC void LYpop ARGS1(
 #ifdef DISP_PARTIAL
 	/* assume we pop the 'doc' to show it soon... */
 	Newline_partial = doc->line;	/* reinitialize */
-	NumOfLines_partial = -1;	/* initialize to -1 */
 #endif /* DISP_PARTIAL */
 	CTRACE(tfp, "LYpop[%d]: address:%s\n     title:%s\n",
 		    nhist, doc->address, doc->title);
@@ -365,7 +366,6 @@ PUBLIC void LYpop_num ARGS2(
 #ifdef DISP_PARTIAL
 	/* assume we pop the 'doc' to show it soon... */
 	Newline_partial = doc->line;	/* reinitialize */
-	NumOfLines_partial = -1;	/* initialize to -1 */
 #endif /* DISP_PARTIAL */
     }
 }
@@ -394,7 +394,11 @@ PUBLIC int showhistory ARGS1(
 
     BeginInternalPage(fp0, HISTORY_PAGE_TITLE, HISTORY_PAGE_HELP);
 
+    fprintf(fp0, "<tr align=right> <a href=\"LYNXMESSAGES:\">[%s]</a> </tr>\n",
+		 STATUSLINES_TITLE);
+
     fprintf(fp0, "<pre>\n");
+
     fprintf(fp0, "<em>%s</em>\n", gettext("You selected:"));
     for (x = nhist-1; x >= 0; x--) {
 	/*
@@ -458,6 +462,12 @@ PUBLIC BOOLEAN historytarget ARGS1(
 
     if ((number = atoi(newdoc->address+9)) > nhist || number < 0)
 	return(FALSE);
+
+    /*
+     * Optimization: assume we came from the History Page,
+     * so never return back - always a new version next time.
+     */
+    HTuncache_current_document();  /* don't waste the cache */
 
     LYpop_num(number, newdoc);
     if (((newdoc->internal_link &&
@@ -591,3 +601,128 @@ PUBLIC int LYShowVisitedLinks ARGS1(
     FREE(Address);
     return(0);
 }
+
+
+/*
+ *  Keep cycled buffer for statusline messages.
+ */
+#define STATUSBUFSIZE   40
+PRIVATE char * buffstack[STATUSBUFSIZE];
+PRIVATE int topOfStack = 0;
+
+PRIVATE void to_stack ARGS1(char *, str)
+{
+    /*
+     *  Cycle buffer:
+     */
+    if (topOfStack == STATUSBUFSIZE) {
+        topOfStack = 0;
+    }
+
+    /*
+     *  Register string.
+     */
+    FREE(buffstack[topOfStack]);
+    buffstack[topOfStack] = str;
+    topOfStack++;
+}
+
+#ifdef LY_FIND_LEAKS
+PRIVATE void free_messages_stack NOARGS
+{
+    topOfStack = STATUSBUFSIZE;
+
+    while (--topOfStack >= 0) {
+	FREE(buffstack[topOfStack]);
+    }
+}
+#endif
+
+/*
+ *  Status line messages list, LYNXMESSAGES:/ internal page,
+ *  called from getfile() cyrcle.
+ */
+PUBLIC int LYshow_statusline_messages ARGS1(
+    document *,			      newdoc)
+{
+    static char tempfile[LY_MAXPATH];
+    static char *info_url;
+    DocAddress WWWDoc;  /* need on exit */
+    FILE *fp0;
+    int i;
+
+    LYRemoveTemp(tempfile);
+    if ((fp0 = LYOpenTemp (tempfile, HTML_SUFFIX, "w")) == 0) {
+	HTAlert(CANNOT_OPEN_TEMP);
+	return(NOT_FOUND);
+    }
+    LYLocalFileToURL(&info_url, tempfile);
+
+    LYforce_no_cache = TRUE;  /* don't cache this doc */
+
+    BeginInternalPage (fp0, STATUSLINES_TITLE, NULL);
+    fprintf(fp0, "<pre>\n");
+    fprintf(fp0, "<ol>\n");
+
+    i = topOfStack;
+    while (--i >= 0) {
+	if (buffstack[i] != NULL)
+	    fprintf(fp0,  "<li> <em>%s</em>\n",  buffstack[i]);
+    }
+    i = STATUSBUFSIZE;
+    while (--i >= topOfStack) {
+	if (buffstack[i] != NULL)
+	fprintf(fp0,  "<li> <em>%s</em>\n",  buffstack[i]);
+    }
+
+    fprintf(fp0, "</ol>\n");
+    fprintf(fp0, "</pre>\n");
+    EndInternalPage(fp0);
+    LYCloseTempFP(fp0);
+
+
+    /* exit to getfile() cyrcle */
+    StrAllocCopy(newdoc->address, info_url);
+    WWWDoc.address = newdoc->address;
+    WWWDoc.post_data = newdoc->post_data;
+    WWWDoc.post_content_type = newdoc->post_content_type;
+    WWWDoc.bookmark = newdoc->bookmark;
+    WWWDoc.isHEAD = newdoc->isHEAD;
+    WWWDoc.safe = newdoc->safe;
+
+    if (!HTLoadAbsolute(&WWWDoc))
+	return(NOT_FOUND);
+    return(NORMAL);
+}
+
+
+PUBLIC void LYstore_message2 ARGS2(
+	CONST char *,	message,
+	CONST char *,	argument)
+{
+    char *temp = NULL;
+
+    if (message == NULL)
+	return;
+
+    HTSprintf(&temp, message, (argument == 0) ? "" : argument);
+
+    to_stack(temp);
+
+    return;
+}
+PUBLIC void LYstore_message ARGS1(
+	CONST char *,	message)
+{
+    char *temp = NULL;
+
+    if (message == NULL)
+	return;
+
+    HTSprintf(&temp, message);
+
+    to_stack(temp);
+
+    return;
+}
+
