@@ -1,6 +1,15 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-09-01 (2.8.4dev.9)
+* improve ifdef's for endwin/newterm logic, making a fallback for LYscreen
+  variable -PG
+* modify CF_CURSES_LIBS to check if both initscr() and tgoto() are in the
+  $LIBS list before deciding not to try to look for them -T
+* add %s substitution to mailcap_substitute(), overlooked when implementing
+  the logic to read from stdin when %s is omitted (reported by IC) -TD
+* restore endwin/newterm code for ncurses (as PG notes it really is needed).
+
 2000-08-24 (2.8.4dev.8)
 * refine CJK-related suppress of refresh() in statusline() to do this only
   when the status line does not contain CJK characters (Hataguchi Takeshi)
