@@ -887,4 +887,5 @@ id_append, id_append, nuni, id_append, lowest_eight, RawOrEnc, CodePage);
     }
 
     done(EX_OK);
+    return 0;
 }

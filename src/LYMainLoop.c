@@ -7619,9 +7619,9 @@ PRIVATE void show_main_statusline ARGS2(
 	if (is_www_index) {
 	    char *indx = gettext("-index-");
 	    LYmove(LYlines-1, LYcols - strlen(indx) - 1);
-	    start_reverse();
+	    lynx_start_reverse();
 	    LYaddstr(indx);
-	    stop_reverse();
+	    lynx_stop_reverse();
 	}
 
     } else if (user_mode == ADVANCED_MODE && nlinks > 0) {

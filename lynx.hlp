@@ -657,6 +657,9 @@
        trim_input_fields
               trim input text/textarea fields in forms.
 
+       -underline_links
+              toggles use of underline/bold attribute for links.
+
        -underscore
               toggles use of _underline_ format in dumps.
 

@@ -184,6 +184,7 @@ extern BOOLEAN LYJumpFileURL;   /* URL from the jump file shortcuts? */
 extern BOOLEAN LYNewsPosting;	/* News posting supported if TRUE */
 extern BOOLEAN LYShowCursor;	/* Show the cursor or hide it?	    */
 extern BOOLEAN LYShowTransferRate;
+extern BOOLEAN LYUnderlineLinks; /* Show the links underlined vs bold */
 extern BOOLEAN LYUseDefShoCur;	/* Command line -show_cursor toggle */
 extern BOOLEAN LYUserSpecifiedURL;  /* URL from a goto or document? */
 extern BOOLEAN LYfind_leaks;

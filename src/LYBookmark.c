@@ -869,15 +869,15 @@ PUBLIC int select_menu_multi_bookmarks NOARGS
 	if (MBM_screens > 1) {
 	    LYmove(LYlines-2, 0);
 	    LYaddstr("'");
-	    start_bold();
+	    lynx_start_bold();
 	    LYaddstr("[");
-	    stop_bold();
+	    lynx_stop_bold();
 	    LYaddstr("' ");
 	    LYaddstr(PREVIOUS);
 	    LYaddstr(", '");
-	    start_bold();
+	    lynx_start_bold();
 	    LYaddstr("]");
-	    stop_bold();
+	    lynx_stop_bold();
 	    LYaddstr("' ");
 	    LYaddstr(NEXT_SCREEN);
 	}

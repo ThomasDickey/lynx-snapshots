@@ -230,18 +230,18 @@ PRIVATE void addlbl ARGS1(CONST char *, text)
 	actual[d++] = text[s];
 	if (text[s] == LPAREN) {
 	    d = add_it(actual, d-1);
-	    start_bold();
+	    lynx_start_bold();
 	    b = TRUE;
 	    actual[d++] = text[s];
 	} else if (text[s] == RPAREN) {
 	    d = add_it(actual, d);
-	    stop_bold();
+	    lynx_stop_bold();
 	    b = FALSE;
 	}
     }
     add_it(actual, d);
     if (b)
-	stop_bold();
+	lynx_stop_bold();
 }
 
 #if !defined(VMS) || defined(USE_SLANG)
@@ -564,23 +564,23 @@ draw_options:
 
     LYmove(LYlines-3, 2);
     LYaddstr(SELECT_SEGMENT);
-    start_bold();
+    lynx_start_bold();
     LYaddstr(CAP_LETT_SEGMENT);
-    stop_bold();
+    lynx_stop_bold();
     LYaddstr(OF_OPT_LINE_SEGMENT);
     if (!no_option_save) {
 	LYaddstr(" '");
-	start_bold();
+	lynx_start_bold();
 	LYaddstr(">");
-	stop_bold();
+	lynx_stop_bold();
 	LYaddstr("'");
 	LYaddstr(TO_SAVE_SEGMENT);
     }
     LYaddstr(OR_SEGMENT);
     LYaddstr("'");
-    start_bold();
+    lynx_start_bold();
     LYaddstr("r");
-    stop_bold();
+    lynx_stop_bold();
     LYaddstr("'");
     LYaddstr(TO_RETURN_SEGMENT);
 
@@ -622,10 +622,10 @@ draw_options:
 		    }
 		    _statusline(ACCEPT_DATA);
 		    LYmove(L_EDITOR, COL_OPTION_VALUES);
-		    start_bold();
+		    lynx_start_bold();
 		    ch = LYgetstr(display_option, VISIBLE,
 				  sizeof(display_option), NORECALL);
-		    stop_bold();
+		    lynx_stop_bold();
 		    LYmove(L_EDITOR, COL_OPTION_VALUES);
 		    if (term_options || ch == -1) {
 			LYaddstr((editor && *editor) ?
@@ -658,10 +658,10 @@ draw_options:
 		}
 		_statusline(ACCEPT_DATA);
 		LYmove(L_DISPLAY, COL_OPTION_VALUES);
-		start_bold();
+		lynx_start_bold();
 		ch = LYgetstr(display_option, VISIBLE,
 			      sizeof(display_option), NORECALL);
-		stop_bold();
+		lynx_stop_bold();
 		LYmove(L_DISPLAY, COL_OPTION_VALUES);
 
 #ifdef VMS
@@ -776,10 +776,10 @@ draw_options:
 		    }
 		    _statusline(ACCEPT_DATA);
 		    LYmove(L_HOME, C_DEFAULT);
-		    start_bold();
+		    lynx_start_bold();
 		    ch = LYgetstr(display_option, VISIBLE,
 				  sizeof(display_option), NORECALL);
-		    stop_bold();
+		    lynx_stop_bold();
 		    LYmove(L_HOME, C_DEFAULT);
 		    if (term_options ||
 			ch == -1 || *display_option == '\0') {
@@ -843,10 +843,10 @@ draw_options:
 		}
 		_statusline(ACCEPT_DATA);
 		LYmove(L_MAIL_ADDRESS, COL_OPTION_VALUES);
-		start_bold();
+		lynx_start_bold();
 		ch = LYgetstr(display_option, VISIBLE,
 			      sizeof(display_option), NORECALL);
-		stop_bold();
+		lynx_stop_bold();
 		LYmove(L_MAIL_ADDRESS, COL_OPTION_VALUES);
 		if (term_options || ch == -1) {
 		    LYaddstr((personal_mail_address &&
@@ -1051,10 +1051,10 @@ draw_options:
 		}
 		_statusline(ACCEPT_DATA);
 		LYmove(L_LANGUAGE, COL_OPTION_VALUES);
-		start_bold();
+		lynx_start_bold();
 		ch = LYgetstr(display_option, VISIBLE,
 			      sizeof(display_option), NORECALL);
-		stop_bold();
+		lynx_stop_bold();
 		LYmove(L_LANGUAGE, COL_OPTION_VALUES);
 		if (term_options || ch == -1) {
 		    LYaddstr((language && *language) ?
@@ -1086,10 +1086,10 @@ draw_options:
 		}
 		_statusline(ACCEPT_DATA);
 		LYmove(L_PREF_CHARSET, COL_OPTION_VALUES);
-		start_bold();
+		lynx_start_bold();
 		ch = LYgetstr(display_option, VISIBLE,
 			      sizeof(display_option), NORECALL);
-		stop_bold();
+		lynx_stop_bold();
 		LYmove(L_PREF_CHARSET, COL_OPTION_VALUES);
 		if (term_options || ch == -1) {
 		    LYaddstr((pref_charset && *pref_charset) ?
@@ -1421,10 +1421,10 @@ draw_options:
 		    }
 		    _statusline(ACCEPT_DATA_OR_DEFAULT);
 		    LYmove(L_User_Agent, COL_OPTION_VALUES);
-		    start_bold();
+		    lynx_start_bold();
 		    ch = LYgetstr(display_option, VISIBLE,
 				  sizeof(display_option), NORECALL);
-		    stop_bold();
+		    lynx_stop_bold();
 		    LYmove(L_User_Agent, COL_OPTION_VALUES);
 		    if (term_options || ch == -1) {
 			LYaddstr((LYUserAgent &&
@@ -1605,7 +1605,7 @@ PRIVATE int boolean_choice ARGS4(
      *	Highlight the current choice.
      */
     LYmove(line, col);
-    start_reverse();
+    lynx_start_reverse();
     show_choice(choices[cur_choice], width);
     if (LYShowCursor)
 	LYmove(line, (col - 1));
@@ -1704,7 +1704,7 @@ PRIVATE int boolean_choice ARGS4(
 	     *	Unhighlight choice.
 	     */
 	    LYmove(line, col);
-	    stop_reverse();
+	    lynx_stop_reverse();
 	    show_choice(choices[cur_choice], width);
 
 	    if (term_options) {
@@ -1820,15 +1820,15 @@ draw_bookmark_list:
     if (LYlines < MBM_V_MAXFILES + MULTI_OFFSET) {
 	LYmove((LYlines - 4), 0);
 	LYaddstr("'");
-	start_bold();
+	lynx_start_bold();
 	LYaddstr("[");
-	stop_bold();
+	lynx_stop_bold();
 	LYaddstr("' ");
 	LYaddstr(PREVIOUS);
 	LYaddstr(", '");
-	start_bold();
+	lynx_start_bold();
 	LYaddstr("]");
-	stop_bold();
+	lynx_stop_bold();
 	LYaddstr("' ");
 	LYaddstr(NEXT_SCREEN);
     }
@@ -1836,17 +1836,17 @@ draw_bookmark_list:
     LYmove((LYlines - 3), 0);
     if (!no_option_save) {
 	LYaddstr("'");
-	start_bold();
+	lynx_start_bold();
 	LYaddstr(">");
-	stop_bold();
+	lynx_stop_bold();
 	LYaddstr("'");
 	LYaddstr(TO_SAVE_SEGMENT);
     }
     LYaddstr(OR_SEGMENT);
     LYaddstr("'");
-    start_bold();
+    lynx_start_bold();
     LYaddstr("^G");
-    stop_bold();
+    lynx_stop_bold();
     LYaddstr("'");
     LYaddstr(TO_RETURN_SEGMENT);
 
@@ -1941,7 +1941,7 @@ draw_bookmark_list:
 		_statusline(ACCEPT_DATA);
 
 		if (a > 0) {
-		    start_bold();
+		    lynx_start_bold();
 		    if (LYlines < (MBM_V_MAXFILES + MULTI_OFFSET))
 			LYmove(
 			 (3 + a) - ((MBM_V_MAXFILES/2 + 1)*(MBM_current - 1)),
@@ -1954,7 +1954,7 @@ draw_bookmark_list:
 			      sizeof(MBM_tmp_line) - 1);
 		    ch = LYgetstr(MBM_tmp_line, VISIBLE,
 				  sizeof(MBM_tmp_line), NORECALL);
-		    stop_bold();
+		    lynx_stop_bold();
 
 		    if (strlen(MBM_tmp_line) < 1) {
 			FREE(MBM_A_subdescript[a]);
@@ -1982,13 +1982,13 @@ draw_bookmark_list:
 		    LYmove((3 + a), 35);
 		LYaddstr("| ");
 
-		start_bold();
+		lynx_start_bold();
 		LYstrncpy(MBM_tmp_line,
 			  NonNull(MBM_A_subbookmark[a]),
 			  sizeof(MBM_tmp_line) - 1);
 		ch = LYgetstr(MBM_tmp_line, VISIBLE,
 			      sizeof(MBM_tmp_line), NORECALL);
-		stop_bold();
+		lynx_stop_bold();
 
 		if (*MBM_tmp_line == '\0') {
 		    if (a == 0)
@@ -2173,6 +2173,8 @@ static OptValues show_color_values[] = {
 #endif
 
 static char * show_cursor_string	= RC_SHOW_CURSOR;
+
+static char * underline_links_string	= RC_UNDERLINE_LINKS;
 
 #ifdef USE_SCROLLBAR
 static char * show_scrollbar_string	= RC_SCROLLBAR;
@@ -2724,6 +2726,12 @@ PUBLIC int postoptions ARGS1(
 	if (!strcmp(data[i].tag, show_cursor_string)
 	 && GetOptValues(bool_values, data[i].value, &code)) {
 	    LYShowCursor = (BOOL) code;
+	}
+
+	/* Underline links: ON/OFF */
+	if (!strcmp(data[i].tag, underline_links_string)
+	 && GetOptValues(bool_values, data[i].value, &code)) {
+	    LYUnderlineLinks = (BOOL) code;
 	}
 
 #ifdef USE_SCROLLBAR
@@ -3505,6 +3513,12 @@ PRIVATE int gen_options ARGS1(
     PutLabel(fp0, gettext("Show cursor"), show_cursor_string);
     BeginSelect(fp0, show_cursor_string);
     PutOptValues(fp0, LYShowCursor, bool_values);
+    EndSelect(fp0);
+
+    /* Underline links: ON/OFF */
+    PutLabel(fp0, gettext("Underline links"), underline_links_string);
+    BeginSelect(fp0, underline_links_string);
+    PutOptValues(fp0, LYUnderlineLinks, bool_values);
     EndSelect(fp0);
 
 #ifdef USE_SCROLLBAR

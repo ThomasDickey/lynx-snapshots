@@ -864,64 +864,64 @@ V. Compile instructions -- 386 DOS
 +	CFLAGS  = -c -O2 -Wall
  	LDFLAGS =
  endif
- 
+
 -CPPFLAGS	= -I$(PDCURSES_HOME) -I$(CCINCDIR) -D_NAIVE_DOS_REGS
 +CPPFLAGS	= -I$(PDCURSES_HOME) -I$(CCINCDIR) -D_NAIVE_DOS_REGS -DHAVE_STRING_H
- 
+
  CCFLAGS		= $(CFLAGS) $(CPPFLAGS)
- 
+
 @@ -64,10 +64,10 @@
  all:	$(PDCLIBS) $(DEMOS)
- 
+
  clean:
  	-del *.o
 -	-del curses.lib
 -	-del panel.lib
 +	-del pdcurses.a
 +	-del panel.a
- 
+
  demos:	$(DEMOS)
- 
+
 @@ -287,33 +287,27 @@
  #------------------------------------------------------------------------
- 
+
  firework.exe:	firework.o $(LIBCURSES)
 -	$(LINK) $(LDFLAGS) -o firework firework.o $(LIBCURSES)
 -	$(COFF2EXE) firework
 +	$(LINK) $(LDFLAGS) -o firework.exe firework.o $(LIBCURSES)
  	strip $@
- 
+
  newdemo.exe:	newdemo.o $(LIBCURSES)
 -	$(LINK) $(LDFLAGS) -o newdemo newdemo.o $(LIBCURSES)
 -	$(COFF2EXE) newdemo
 +	$(LINK) $(LDFLAGS) -o newdemo.exe newdemo.o $(LIBCURSES)
  	strip $@
- 
+
  ptest.exe:	ptest.o $(LIBCURSES) $(LIBPANEL)
 -	$(LINK) $(LDFLAGS) -o ptest ptest.o $(LIBCURSES) $(LIBPANEL)
 -	$(COFF2EXE) ptest
 +	$(LINK) $(LDFLAGS) -o ptest.exe ptest.o $(LIBCURSES) $(LIBPANEL)
  	strip $@
- 
+
  testcurs.exe:	testcurs.o $(LIBCURSES)
 -	$(LINK) $(LDFLAGS) -o testcurs testcurs.o $(LIBCURSES)
 -	$(COFF2EXE) testcurs
 +	$(LINK) $(LDFLAGS) -o testcurs.exe testcurs.o $(LIBCURSES)
  	strip $@
- 
+
  tuidemo.exe:	tuidemo.o tui.o $(LIBCURSES)
 -	$(LINK) $(LDFLAGS) -o tuidemo tuidemo.o tui.o $(LIBCURSES)
 -	$(COFF2EXE) tuidemo
 +	$(LINK) $(LDFLAGS) -o tuidemo.exe tuidemo.o tui.o $(LIBCURSES)
  	strip $@
- 
+
  xmas.exe:	xmas.o $(LIBCURSES)
 -	$(LINK) $(LDFLAGS) -o xmas xmas.o $(LIBCURSES)
 -	$(COFF2EXE) xmas
 +	$(LINK) $(LDFLAGS) -o xmas.exe xmas.o $(LIBCURSES)
  	strip $@
- 
- 
+
+
 --- dos/pdckbd.c.ori	2002-09-01 00:13:30.000000000 -0800
 +++ dos/pdckbd.c	2004-01-19 20:30:02.000000000 -0800
 @@ -362,7 +362,7 @@
@@ -947,7 +947,7 @@ V. Compile instructions -- 386 DOS
 @@ -27,6 +27,10 @@
  #include <memory.h>
  #endif
- 
+
 +#ifdef HAVE_STRING_H
 +#include <string.h>
 +#endif
@@ -960,18 +960,18 @@ V. Compile instructions -- 386 DOS
 @@ -49,7 +49,7 @@
  #  include <limits.h>
  #endif
- 
+
 -#ifdef STDC_HEADERS
 +#if defined(STDC_HEADERS) || defined(HAVE_STRING_H)
  #  include <string.h>
  #endif
- 
+
 --- pdcurses/pdcwin.c.ori	2002-05-25 17:13:32.000000000 -0800
 +++ pdcurses/pdcwin.c	2003-12-13 21:26:02.000000000 -0800
 @@ -27,6 +27,10 @@
  # include <memory.h>
  #endif
- 
+
 +#ifdef HAVE_STRING_H
 +#include <string.h>
 +#endif
@@ -980,11 +980,11 @@ V. Compile instructions -- 386 DOS
  # define memmove PDC_memmove
  #endif
 
-    If you wish to compile with SSL enabled, you need to get and
-    compile OpenSSL. The DJGPP port has been successfully compiled with
-    the 0.9.7 stable series of OpenSSL. DJGPP can compile OpenSSL from
-    the standard source distribution (http://www.openssl.org/). See the file "INSTALL.DJGPP" in
-    the OpenSSL distribution.
+    If you wish to compile with SSL enabled, you need to get and compile
+    OpenSSL. The DJGPP port has been successfully compiled with the
+    0.9.7 stable series of OpenSSL. DJGPP can compile OpenSSL from the
+    standard source distribution (http://www.openssl.org/). See the file
+    "INSTALL.DJGPP" in the OpenSSL distribution.
 
 
     If you have trouble applying the patches, try using the "patch" program,

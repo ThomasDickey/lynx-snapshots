@@ -1,14 +1,9 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: lynx 2.8.5pre.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-01-22 20:49-0500\n"
+"POT-Creation-Date: 2004-01-26 20:35-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3819,272 +3814,272 @@ msgstr ""
 msgid "Visible links"
 msgstr ""
 
-#: src/LYLocal.c:267
+#: src/LYLocal.c:268
 #, c-format
 msgid "Unable to get status of '%s'."
 msgstr ""
 
-#: src/LYLocal.c:301
+#: src/LYLocal.c:302
 msgid "The selected item is not a file or a directory!  Request ignored."
 msgstr ""
 
-#: src/LYLocal.c:366
+#: src/LYLocal.c:367
 #, c-format
 msgid "Unable to %s due to system error!"
 msgstr ""
 
 #. error return
-#: src/LYLocal.c:400
+#: src/LYLocal.c:401
 #, c-format
 msgid "Probable failure to %s due to system error!"
 msgstr ""
 
-#: src/LYLocal.c:463 src/LYLocal.c:484
+#: src/LYLocal.c:464 src/LYLocal.c:485
 #, c-format
 msgid "remove %s"
 msgstr ""
 
-#: src/LYLocal.c:502
+#: src/LYLocal.c:503
 #, c-format
 msgid "touch %s"
 msgstr ""
 
-#: src/LYLocal.c:529
+#: src/LYLocal.c:530
 #, c-format
 msgid "move %s to %s"
 msgstr ""
 
-#: src/LYLocal.c:569
+#: src/LYLocal.c:570
 msgid "There is already a directory with that name!  Request ignored."
 msgstr ""
 
-#: src/LYLocal.c:571
+#: src/LYLocal.c:572
 msgid "There is already a file with that name!  Request ignored."
 msgstr ""
 
-#: src/LYLocal.c:573
+#: src/LYLocal.c:574
 msgid "The specified name is already in use!  Request ignored."
 msgstr ""
 
-#: src/LYLocal.c:584
+#: src/LYLocal.c:585
 msgid "Destination has different owner!  Request denied."
 msgstr ""
 
-#: src/LYLocal.c:587
+#: src/LYLocal.c:588
 msgid "Destination is not a valid directory!  Request denied."
 msgstr ""
 
-#: src/LYLocal.c:609
+#: src/LYLocal.c:610
 msgid "Remove all tagged files and directories?"
 msgstr ""
 
-#: src/LYLocal.c:668
+#: src/LYLocal.c:669
 msgid "Enter new location for tagged items: "
 msgstr ""
 
-#: src/LYLocal.c:737
+#: src/LYLocal.c:738
 msgid "Path too long"
 msgstr ""
 
-#: src/LYLocal.c:768
+#: src/LYLocal.c:769
 msgid "Source and destination are the same location - request ignored!"
 msgstr ""
 
-#: src/LYLocal.c:826
+#: src/LYLocal.c:827
 msgid "Enter new name for directory: "
 msgstr ""
 
-#: src/LYLocal.c:828
+#: src/LYLocal.c:829
 msgid "Enter new name for file: "
 msgstr ""
 
-#: src/LYLocal.c:840
+#: src/LYLocal.c:841
 msgid "Illegal character (path-separator) found! Request ignored."
 msgstr ""
 
-#: src/LYLocal.c:889
+#: src/LYLocal.c:890
 msgid "Enter new location for directory: "
 msgstr ""
 
-#: src/LYLocal.c:895
+#: src/LYLocal.c:896
 msgid "Enter new location for file: "
 msgstr ""
 
-#: src/LYLocal.c:922
+#: src/LYLocal.c:923
 msgid "Unexpected failure - unable to find trailing path separator"
 msgstr ""
 
-#: src/LYLocal.c:942
+#: src/LYLocal.c:943
 msgid "Source and destination are the same location!  Request ignored!"
 msgstr ""
 
-#: src/LYLocal.c:991
+#: src/LYLocal.c:992
 msgid "Modify name, location, or permission (n, l, or p): "
 msgstr ""
 
-#: src/LYLocal.c:993
+#: src/LYLocal.c:994
 msgid "Modify name or location (n or l): "
 msgstr ""
 
 #.
 #. *	Code for changing ownership needed here.
 #.
-#: src/LYLocal.c:1022
+#: src/LYLocal.c:1023
 msgid "This feature not yet implemented!"
 msgstr ""
 
-#: src/LYLocal.c:1040
+#: src/LYLocal.c:1041
 msgid "Enter name of file to create: "
 msgstr ""
 
-#: src/LYLocal.c:1048 src/LYLocal.c:1090
+#: src/LYLocal.c:1049 src/LYLocal.c:1091
 msgid "Illegal redirection \"//\" found! Request ignored."
 msgstr ""
 
-#: src/LYLocal.c:1082
+#: src/LYLocal.c:1083
 msgid "Enter name for new directory: "
 msgstr ""
 
-#: src/LYLocal.c:1127
+#: src/LYLocal.c:1128
 msgid "Create file or directory (f or d): "
 msgstr ""
 
-#: src/LYLocal.c:1168
+#: src/LYLocal.c:1169
 #, c-format
-msgid "Remove '%s' and all of its contents?"
+msgid "Remove directory '%s'?"
 msgstr ""
 
-#: src/LYLocal.c:1171
-msgid "Remove directory and all of its contents?"
+#: src/LYLocal.c:1172
+msgid "Remove directory?"
 msgstr ""
 
-#: src/LYLocal.c:1176
+#: src/LYLocal.c:1177
 #, c-format
 msgid "Remove file '%s'?"
 msgstr ""
 
-#: src/LYLocal.c:1178
+#: src/LYLocal.c:1179
 msgid "Remove file?"
 msgstr ""
 
-#: src/LYLocal.c:1183
+#: src/LYLocal.c:1184
 #, c-format
 msgid "Remove symbolic link '%s'?"
 msgstr ""
 
-#: src/LYLocal.c:1185
+#: src/LYLocal.c:1186
 msgid "Remove symbolic link?"
 msgstr ""
 
-#: src/LYLocal.c:1273
+#: src/LYLocal.c:1274
 msgid "Sorry, don't know how to permit non-UNIX files yet."
 msgstr ""
 
-#: src/LYLocal.c:1303
+#: src/LYLocal.c:1304
 msgid "Unable to open permit options file"
 msgstr ""
 
-#: src/LYLocal.c:1330
+#: src/LYLocal.c:1331
 msgid "Specify permissions below:"
 msgstr ""
 
-#: src/LYLocal.c:1331 src/LYShowInfo.c:196
+#: src/LYLocal.c:1332 src/LYShowInfo.c:196
 msgid "Owner:"
 msgstr ""
 
-#: src/LYLocal.c:1347
+#: src/LYLocal.c:1348
 msgid "Group"
 msgstr ""
 
-#: src/LYLocal.c:1363
+#: src/LYLocal.c:1364
 msgid "Others:"
 msgstr ""
 
-#: src/LYLocal.c:1381
+#: src/LYLocal.c:1382
 msgid "form to permit"
 msgstr ""
 
-#: src/LYLocal.c:1477
+#: src/LYLocal.c:1478
 msgid "Invalid mode format."
 msgstr ""
 
-#: src/LYLocal.c:1481
+#: src/LYLocal.c:1482
 msgid "Invalid syntax format."
 msgstr ""
 
-#: src/LYLocal.c:1670
+#: src/LYLocal.c:1671
 msgid "Warning!  UUDecoded file will exist in the directory you started Lynx."
 msgstr ""
 
-#: src/LYLocal.c:1850
+#: src/LYLocal.c:1862
 msgid "NULL URL pointer"
 msgstr ""
 
-#: src/LYLocal.c:1933
+#: src/LYLocal.c:1945
 #, c-format
 msgid "Executing %s "
 msgstr ""
 
-#: src/LYLocal.c:1936
+#: src/LYLocal.c:1948
 msgid "Executing system command. This might take a while."
 msgstr ""
 
-#: src/LYLocal.c:2010
+#: src/LYLocal.c:2022
 msgid "Current directory:"
 msgstr ""
 
-#: src/LYLocal.c:2013 src/LYLocal.c:2031
+#: src/LYLocal.c:2025 src/LYLocal.c:2043
 msgid "Current selection:"
 msgstr ""
 
-#: src/LYLocal.c:2017
+#: src/LYLocal.c:2029
 msgid "Nothing currently selected."
 msgstr ""
 
-#: src/LYLocal.c:2032
+#: src/LYLocal.c:2044
 msgid "tagged item:"
 msgstr ""
 
-#: src/LYLocal.c:2032
+#: src/LYLocal.c:2044
 msgid "tagged items:"
 msgstr ""
 
-#: src/LYLocal.c:2130 src/LYLocal.c:2141
+#: src/LYLocal.c:2142 src/LYLocal.c:2153
 msgid "Illegal filename; request ignored."
 msgstr ""
 
 #. directory not writable
-#: src/LYLocal.c:2238 src/LYLocal.c:2296
+#: src/LYLocal.c:2250 src/LYLocal.c:2308
 msgid "Install in the selected directory not permitted."
 msgstr ""
 
-#: src/LYLocal.c:2292
+#: src/LYLocal.c:2304
 msgid "The selected item is not a directory!  Request ignored."
 msgstr ""
 
-#: src/LYLocal.c:2301
+#: src/LYLocal.c:2313
 msgid "Just a moment, ..."
 msgstr ""
 
-#: src/LYLocal.c:2318
+#: src/LYLocal.c:2330
 msgid "Error buiding install args"
 msgstr ""
 
-#: src/LYLocal.c:2333 src/LYLocal.c:2362
+#: src/LYLocal.c:2345 src/LYLocal.c:2374
 #, c-format
 msgid "Source and target are the same: %s"
 msgstr ""
 
-#: src/LYLocal.c:2340 src/LYLocal.c:2369
+#: src/LYLocal.c:2352 src/LYLocal.c:2381
 #, c-format
 msgid "Already in target directory: %s"
 msgstr ""
 
-#: src/LYLocal.c:2387
+#: src/LYLocal.c:2399
 msgid "Installation complete"
 msgstr ""
 
-#: src/LYLocal.c:2576
+#: src/LYLocal.c:2588
 msgid "Temporary URL or list would be too long."
 msgstr ""
 
@@ -4123,19 +4118,19 @@ msgstr ""
 msgid "No system mailer configured"
 msgstr ""
 
-#: src/LYMain.c:971
+#: src/LYMain.c:976
 msgid "No Winsock found, sorry."
 msgstr ""
 
-#: src/LYMain.c:1173
+#: src/LYMain.c:1178
 msgid "You MUST define a valid TMP or TEMP area!\n"
 msgstr ""
 
-#: src/LYMain.c:1227 src/LYMainLoop.c:5027
+#: src/LYMain.c:1232 src/LYMainLoop.c:5027
 msgid "No such directory"
 msgstr ""
 
-#: src/LYMain.c:1439
+#: src/LYMain.c:1444
 #, c-format
 msgid ""
 "\n"
@@ -4143,21 +4138,21 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1449
+#: src/LYMain.c:1454
 msgid ""
 "\n"
 "Lynx character sets not declared.\n"
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1478
+#: src/LYMain.c:1483
 msgid ""
 "\n"
 "Lynx edit map not declared.\n"
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1507
+#: src/LYMain.c:1512
 #, c-format
 msgid ""
 "\n"
@@ -4165,54 +4160,54 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1746
+#: src/LYMain.c:1755
 msgid "Warning:"
 msgstr ""
 
-#: src/LYMain.c:2296
+#: src/LYMain.c:2305
 msgid "persistent cookies state will be changed in next session only."
 msgstr ""
 
-#: src/LYMain.c:2543 src/LYMain.c:2591
+#: src/LYMain.c:2552 src/LYMain.c:2600
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr ""
 
-#: src/LYMain.c:3123
+#: src/LYMain.c:3132
 #, c-format
 msgid "%s Version %s (%s)"
 msgstr ""
 
-#: src/LYMain.c:3146
+#: src/LYMain.c:3155
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr ""
 
-#: src/LYMain.c:3169
+#: src/LYMain.c:3178
 msgid ""
 "Copyrights held by the University of Kansas, CERN, and other contributors.\n"
 msgstr ""
 
-#: src/LYMain.c:3171
+#: src/LYMain.c:3180
 msgid "Distributed under the GNU General Public License.\n"
 msgstr ""
 
-#: src/LYMain.c:3173
+#: src/LYMain.c:3182
 msgid ""
 "See http://lynx.isc.org/ and the online help for more information.\n"
 "\n"
 msgstr ""
 
-#: src/LYMain.c:3922
+#: src/LYMain.c:3935
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr ""
 
-#: src/LYMain.c:3923
+#: src/LYMain.c:3936
 msgid "Options are:\n"
 msgstr ""
 
-#: src/LYMain.c:4194
+#: src/LYMain.c:4207
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr ""
@@ -4387,8 +4382,8 @@ msgid "ON"
 msgstr ""
 
 #. verbose_img variable
-#: src/LYOptions.c:2104 src/LYOptions.c:2108 src/LYOptions.c:2235
-#: src/LYOptions.c:2244
+#: src/LYOptions.c:2104 src/LYOptions.c:2108 src/LYOptions.c:2237
+#: src/LYOptions.c:2246
 msgid "OFF"
 msgstr ""
 
@@ -4400,7 +4395,7 @@ msgstr ""
 msgid "ALWAYS"
 msgstr ""
 
-#: src/LYOptions.c:2120 src/LYOptions.c:2228
+#: src/LYOptions.c:2120 src/LYOptions.c:2230
 msgid "ignore"
 msgstr ""
 
@@ -4448,227 +4443,231 @@ msgstr ""
 msgid "Case sensitive"
 msgstr ""
 
-#: src/LYOptions.c:2181
+#: src/LYOptions.c:2183
 msgid "prompt normally"
 msgstr ""
 
-#: src/LYOptions.c:2182
+#: src/LYOptions.c:2184
 msgid "force yes-response"
 msgstr ""
 
-#: src/LYOptions.c:2183
+#: src/LYOptions.c:2185
 msgid "force no-response"
 msgstr ""
 
-#: src/LYOptions.c:2198
+#: src/LYOptions.c:2200
 msgid "Novice"
 msgstr ""
 
-#: src/LYOptions.c:2199
+#: src/LYOptions.c:2201
 msgid "Intermediate"
 msgstr ""
 
-#: src/LYOptions.c:2200
+#: src/LYOptions.c:2202
 msgid "Advanced"
 msgstr ""
 
-#: src/LYOptions.c:2207
+#: src/LYOptions.c:2209
 msgid "By First Visit"
 msgstr ""
 
-#: src/LYOptions.c:2209
+#: src/LYOptions.c:2211
 msgid "By First Visit Reversed"
 msgstr ""
 
-#: src/LYOptions.c:2210
+#: src/LYOptions.c:2212
 msgid "As Visit Tree"
 msgstr ""
 
-#: src/LYOptions.c:2211
+#: src/LYOptions.c:2213
 msgid "By Last Visit"
 msgstr ""
 
-#: src/LYOptions.c:2213
+#: src/LYOptions.c:2215
 msgid "By Last Visit Reversed"
 msgstr ""
 
 #. Old_DTD variable
-#: src/LYOptions.c:2222
+#: src/LYOptions.c:2224
 msgid "relaxed (TagSoup mode)"
 msgstr ""
 
-#: src/LYOptions.c:2223
+#: src/LYOptions.c:2225
 msgid "strict (SortaSGML mode)"
 msgstr ""
 
-#: src/LYOptions.c:2229
+#: src/LYOptions.c:2231
 msgid "as labels"
 msgstr ""
 
-#: src/LYOptions.c:2230
+#: src/LYOptions.c:2232
 msgid "as links"
 msgstr ""
 
-#: src/LYOptions.c:2236
+#: src/LYOptions.c:2238
 msgid "show filename"
 msgstr ""
 
-#: src/LYOptions.c:2245
+#: src/LYOptions.c:2247
 msgid "STANDARD"
 msgstr ""
 
-#: src/LYOptions.c:2246
+#: src/LYOptions.c:2248
 msgid "ADVANCED"
 msgstr ""
 
-#: src/LYOptions.c:2266
+#: src/LYOptions.c:2272
 msgid "Directories first"
 msgstr ""
 
-#: src/LYOptions.c:2267
+#: src/LYOptions.c:2273
 msgid "Files first"
 msgstr ""
 
-#: src/LYOptions.c:2268
+#: src/LYOptions.c:2274
 msgid "Mixed style"
 msgstr ""
 
-#: src/LYOptions.c:2273 src/LYOptions.c:2288
+#: src/LYOptions.c:2279 src/LYOptions.c:2294
 msgid "By Name"
 msgstr ""
 
-#: src/LYOptions.c:2274 src/LYOptions.c:2289
+#: src/LYOptions.c:2280 src/LYOptions.c:2295
 msgid "By Type"
 msgstr ""
 
-#: src/LYOptions.c:2275 src/LYOptions.c:2290
+#: src/LYOptions.c:2281 src/LYOptions.c:2296
 msgid "By Size"
 msgstr ""
 
-#: src/LYOptions.c:2276 src/LYOptions.c:2291
+#: src/LYOptions.c:2282 src/LYOptions.c:2297
 msgid "By Date"
 msgstr ""
 
-#: src/LYOptions.c:2277
+#: src/LYOptions.c:2283
 msgid "By Mode"
 msgstr ""
 
-#: src/LYOptions.c:2279
+#: src/LYOptions.c:2285
 msgid "By User"
 msgstr ""
 
-#: src/LYOptions.c:2280
+#: src/LYOptions.c:2286
 msgid "By Group"
 msgstr ""
 
-#: src/LYOptions.c:2297
+#: src/LYOptions.c:2303
 msgid "Do not show rate"
 msgstr ""
 
-#: src/LYOptions.c:2298 src/LYOptions.c:2299
+#: src/LYOptions.c:2304 src/LYOptions.c:2305
 #, c-format
 msgid "Show %s/sec rate"
 msgstr ""
 
-#: src/LYOptions.c:2301 src/LYOptions.c:2302
+#: src/LYOptions.c:2307 src/LYOptions.c:2308
 #, c-format
 msgid "Show %s/sec, ETA"
 msgstr ""
 
-#: src/LYOptions.c:2552 src/LYOptions.c:2576
+#: src/LYOptions.c:2558 src/LYOptions.c:2582
 #, c-format
 msgid "Use %s to invoke the Options menu!"
 msgstr ""
 
-#: src/LYOptions.c:3273
+#: src/LYOptions.c:3297
 msgid "(options marked with (!) will not be saved)"
 msgstr ""
 
-#: src/LYOptions.c:3281
+#: src/LYOptions.c:3305
 msgid "General Preferences"
 msgstr ""
 
 #. ***************************************************************
 #. User Mode: SELECT
-#: src/LYOptions.c:3285
+#: src/LYOptions.c:3309
 msgid "User mode"
 msgstr ""
 
 #. Editor: INPUT
-#: src/LYOptions.c:3291
+#: src/LYOptions.c:3315
 msgid "Editor"
 msgstr ""
 
 #. Search Type: SELECT
-#: src/LYOptions.c:3296
+#: src/LYOptions.c:3320
 msgid "Type of Search"
 msgstr ""
 
-#: src/LYOptions.c:3301
+#: src/LYOptions.c:3325
 msgid "Security and Privacy"
 msgstr ""
 
 #. ***************************************************************
 #. Cookies: SELECT
-#: src/LYOptions.c:3305
+#: src/LYOptions.c:3329
 msgid "Cookies"
 msgstr ""
 
 #. Cookie Prompting: SELECT
-#: src/LYOptions.c:3319
+#: src/LYOptions.c:3343
 msgid "Invalid-Cookie Prompting"
 msgstr ""
 
 #. SSL Prompting: SELECT
-#: src/LYOptions.c:3326
+#: src/LYOptions.c:3350
 msgid "SSL Prompting"
 msgstr ""
 
-#: src/LYOptions.c:3332
+#: src/LYOptions.c:3356
 msgid "Keyboard Input"
 msgstr ""
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
-#: src/LYOptions.c:3336
+#: src/LYOptions.c:3360
 msgid "Keypad mode"
 msgstr ""
 
 #. Emacs keys: ON/OFF
-#: src/LYOptions.c:3342
+#: src/LYOptions.c:3366
 msgid "Emacs keys"
 msgstr ""
 
 #. VI Keys: ON/OFF
-#: src/LYOptions.c:3348
+#: src/LYOptions.c:3372
 msgid "VI keys"
 msgstr ""
 
 #. Line edit style: SELECT
 #. well, at least 2 line edit styles available
-#: src/LYOptions.c:3355
+#: src/LYOptions.c:3379
 msgid "Line edit style"
 msgstr ""
 
 #. Keyboard layout: SELECT
-#: src/LYOptions.c:3367
+#: src/LYOptions.c:3391
 msgid "Keyboard layout"
 msgstr ""
 
 #.
 #. * Display and Character Set
 #.
-#: src/LYOptions.c:3380
+#: src/LYOptions.c:3404
 msgid "Display and Character Set"
 msgstr ""
 
-#. ***************************************************************
+#. Use locale-based character set: ON/OFF
+#: src/LYOptions.c:3409
+msgid "Use locale-based character set"
+msgstr ""
+
 #. Display Character Set: SELECT
-#: src/LYOptions.c:3384
+#: src/LYOptions.c:3418
 msgid "Display character set"
 msgstr ""
 
-#: src/LYOptions.c:3413
+#: src/LYOptions.c:3447
 msgid "Assumed document character set"
 msgstr ""
 
@@ -4677,152 +4676,157 @@ msgstr ""
 #. * we split the header to make it more readable:
 #. * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 #.
-#: src/LYOptions.c:3433
+#: src/LYOptions.c:3467
 msgid "CJK mode"
 msgstr ""
 
-#: src/LYOptions.c:3435
+#: src/LYOptions.c:3469
 msgid "Raw 8-bit"
 msgstr ""
 
 #. X Display: INPUT
-#: src/LYOptions.c:3443
+#: src/LYOptions.c:3477
 msgid "X Display"
 msgstr ""
 
 #.
 #. * Document Appearance
 #.
-#: src/LYOptions.c:3449
+#: src/LYOptions.c:3483
 msgid "Document Appearance"
 msgstr ""
 
-#: src/LYOptions.c:3455
+#: src/LYOptions.c:3489
 msgid "Show color"
 msgstr ""
 
 #. Show cursor: ON/OFF
-#: src/LYOptions.c:3479
+#: src/LYOptions.c:3513
 msgid "Show cursor"
 msgstr ""
 
+#. Underline links: ON/OFF
+#: src/LYOptions.c:3519
+msgid "Underline links"
+msgstr ""
+
 #. Show scrollbar: ON/OFF
-#: src/LYOptions.c:3486
+#: src/LYOptions.c:3526
 msgid "Show scrollbar"
 msgstr ""
 
 #. Select Popups: ON/OFF
-#: src/LYOptions.c:3493
+#: src/LYOptions.c:3533
 msgid "Popups for select fields"
 msgstr ""
 
 #. HTML error recovery: SELECT
-#: src/LYOptions.c:3499
+#: src/LYOptions.c:3539
 msgid "HTML error recovery"
 msgstr ""
 
 #. Show Images: SELECT
-#: src/LYOptions.c:3505
+#: src/LYOptions.c:3545
 msgid "Show images"
 msgstr ""
 
 #. Verbose Images: ON/OFF
-#: src/LYOptions.c:3519
+#: src/LYOptions.c:3559
 msgid "Verbose images"
 msgstr ""
 
 #.
 #. * Headers Transferred to Remote Servers
 #.
-#: src/LYOptions.c:3527
+#: src/LYOptions.c:3567
 msgid "Headers Transferred to Remote Servers"
 msgstr ""
 
 #. ***************************************************************
 #. Mail Address: INPUT
-#: src/LYOptions.c:3531
+#: src/LYOptions.c:3571
 msgid "Personal mail address"
 msgstr ""
 
 #. Preferred Document Character Set: INPUT
-#: src/LYOptions.c:3536
+#: src/LYOptions.c:3576
 msgid "Preferred document character set"
 msgstr ""
 
 #. Preferred Document Language: INPUT
-#: src/LYOptions.c:3541
+#: src/LYOptions.c:3581
 msgid "Preferred document language"
 msgstr ""
 
-#: src/LYOptions.c:3547
+#: src/LYOptions.c:3587
 msgid "User-Agent header"
 msgstr ""
 
 #.
 #. * Listing and Accessing Files
 #.
-#: src/LYOptions.c:3555
+#: src/LYOptions.c:3595
 msgid "Listing and Accessing Files"
 msgstr ""
 
 #. ***************************************************************
 #. FTP sort: SELECT
-#: src/LYOptions.c:3559
+#: src/LYOptions.c:3599
 msgid "FTP sort criteria"
 msgstr ""
 
 #. Local Directory Sort: SELECT
-#: src/LYOptions.c:3566
+#: src/LYOptions.c:3606
 msgid "Local directory sort criteria"
 msgstr ""
 
 #. Local Directory Order: SELECT
-#: src/LYOptions.c:3572
+#: src/LYOptions.c:3612
 msgid "Local directory sort order"
 msgstr ""
 
-#: src/LYOptions.c:3581
+#: src/LYOptions.c:3621
 msgid "Show dot files"
 msgstr ""
 
-#: src/LYOptions.c:3589
+#: src/LYOptions.c:3629
 msgid "Execution links"
 msgstr ""
 
 #. Show transfer rate: SELECT
-#: src/LYOptions.c:3609
+#: src/LYOptions.c:3649
 msgid "Show transfer rate"
 msgstr ""
 
 #.
 #. * Special Files and Screens
 #.
-#: src/LYOptions.c:3628
+#: src/LYOptions.c:3668
 msgid "Special Files and Screens"
 msgstr ""
 
-#: src/LYOptions.c:3633
+#: src/LYOptions.c:3673
 msgid "Multi-bookmarks"
 msgstr ""
 
-#: src/LYOptions.c:3641
+#: src/LYOptions.c:3681
 msgid "Review/edit Bookmarks files"
 msgstr ""
 
-#: src/LYOptions.c:3643
+#: src/LYOptions.c:3683
 msgid "Goto multi-bookmark menu"
 msgstr ""
 
-#: src/LYOptions.c:3645
+#: src/LYOptions.c:3685
 msgid "Bookmarks file"
 msgstr ""
 
 #. Visited Pages: SELECT
-#: src/LYOptions.c:3651
+#: src/LYOptions.c:3691
 msgid "Visited Pages"
 msgstr ""
 
-#: src/LYOptions.c:3656
+#: src/LYOptions.c:3696
 msgid "View the file "
 msgstr ""
 
@@ -4935,38 +4939,38 @@ msgstr ""
 msgid "(no name)"
 msgstr ""
 
-#: src/LYReadCFG.c:1783
+#: src/LYReadCFG.c:1787
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr ""
 
-#: src/LYReadCFG.c:1785
+#: src/LYReadCFG.c:1789
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr ""
 
-#: src/LYReadCFG.c:1786
+#: src/LYReadCFG.c:1790
 #, c-format
 msgid "included from '%s'.\n"
 msgstr ""
 
-#: src/LYReadCFG.c:2192 src/LYReadCFG.c:2205 src/LYReadCFG.c:2263
+#: src/LYReadCFG.c:2196 src/LYReadCFG.c:2209 src/LYReadCFG.c:2267
 msgid "The following is read from your lynx.cfg file."
 msgstr ""
 
-#: src/LYReadCFG.c:2193 src/LYReadCFG.c:2206
+#: src/LYReadCFG.c:2197 src/LYReadCFG.c:2210
 msgid "Please read the distribution"
 msgstr ""
 
-#: src/LYReadCFG.c:2199 src/LYReadCFG.c:2209
+#: src/LYReadCFG.c:2203 src/LYReadCFG.c:2213
 msgid "for more comments."
 msgstr ""
 
-#: src/LYReadCFG.c:2245
+#: src/LYReadCFG.c:2249
 msgid "RELOAD THE CHANGES"
 msgstr ""
 
-#: src/LYReadCFG.c:2254
+#: src/LYReadCFG.c:2258
 msgid "Your primary configuration"
 msgstr ""
 
@@ -5341,7 +5345,7 @@ msgid ""
 "Current lineedit modes are:\n"
 msgstr ""
 
-#: src/LYrcFile.c:404
+#: src/LYrcFile.c:407
 msgid ""
 "The following allow you to define sub-bookmark files and descriptions.\n"
 "The format is multi_bookmark<capital_letter>=<filename>,<description>\n"
@@ -5349,7 +5353,7 @@ msgid ""
 "We start with \"multi_bookmarkB\" since 'A' is the default (see above).\n"
 msgstr ""
 
-#: src/LYrcFile.c:410
+#: src/LYrcFile.c:413
 msgid ""
 "personal_mail_address specifies your personal mail address.  The\n"
 "address will be sent during HTTP file transfers for authorization and\n"
@@ -5360,7 +5364,7 @@ msgid ""
 "your mailed comments.\n"
 msgstr ""
 
-#: src/LYrcFile.c:419
+#: src/LYrcFile.c:422
 msgid ""
 "preferred_charset specifies the character set in MIME notation (e.g.,\n"
 "ISO-8859-2, ISO-8859-5) which Lynx will indicate you prefer in requests\n"
@@ -5376,7 +5380,7 @@ msgid ""
 "is also allowed.\n"
 msgstr ""
 
-#: src/LYrcFile.c:433
+#: src/LYrcFile.c:436
 msgid ""
 "preferred_language specifies the language in MIME notation (e.g., en,\n"
 "fr, may be a comma-separated list in decreasing preference)\n"
@@ -5385,7 +5389,7 @@ msgid ""
 "Otherwise, the server will send the file in its default language.\n"
 msgstr ""
 
-#: src/LYrcFile.c:442
+#: src/LYrcFile.c:445
 msgid ""
 "If run_all_execution_links is set \"on\" then all local execution links\n"
 "will be executed when they are selected.\n"
@@ -5398,7 +5402,7 @@ msgid ""
 "          you are viewing trusted source information.\n"
 msgstr ""
 
-#: src/LYrcFile.c:453
+#: src/LYrcFile.c:456
 msgid ""
 "If run_execution_links_on_local_files is set \"on\" then all local\n"
 "execution links that are found in LOCAL files will be executed when they\n"
@@ -5414,7 +5418,7 @@ msgid ""
 "          you are viewing trusted source information.\n"
 msgstr ""
 
-#: src/LYrcFile.c:471
+#: src/LYrcFile.c:474
 msgid ""
 "select_popups specifies whether the OPTIONs in a SELECT block which\n"
 "lacks a MULTIPLE attribute are presented as a vertical list of radio\n"
@@ -5425,7 +5429,7 @@ msgid ""
 "The default can be overridden via the -popup command line toggle.\n"
 msgstr ""
 
-#: src/LYrcFile.c:481
+#: src/LYrcFile.c:484
 msgid ""
 "show_color specifies how to set the color mode at startup.  A value of\n"
 "\"never\" will force color mode off (treat the terminal as monochrome)\n"
@@ -5444,7 +5448,7 @@ msgid ""
 "\"off\" \"show color\" settings will be treated as \"default\".\n"
 msgstr ""
 
-#: src/LYrcFile.c:498
+#: src/LYrcFile.c:501
 msgid ""
 "show_cursor specifies whether to 'hide' the cursor to the right (and\n"
 "bottom, if possible) of the screen, or to place it to the left of the\n"
@@ -5457,7 +5461,7 @@ msgid ""
 "The default can be overridden via the -show_cursor command line toggle.\n"
 msgstr ""
 
-#: src/LYrcFile.c:509
+#: src/LYrcFile.c:512
 msgid ""
 "show_dotfiles specifies that the directory listing should include\n"
 "\"hidden\" (dot) files/directories.  If set \"on\", this will be\n"
@@ -5466,7 +5470,7 @@ msgid ""
 "is disabled, creation of such files via Lynx also is disabled.\n"
 msgstr ""
 
-#: src/LYrcFile.c:520
+#: src/LYrcFile.c:523
 msgid ""
 "If sub_bookmarks is not turned \"off\", and multiple bookmarks have\n"
 "been defined (see below), then all bookmark operations will first\n"
@@ -5479,7 +5483,7 @@ msgid ""
 "presented regardless of user mode.\n"
 msgstr ""
 
-#: src/LYrcFile.c:533
+#: src/LYrcFile.c:537
 msgid ""
 "user_mode specifies the users level of knowledge with Lynx.  The\n"
 "default is \"NOVICE\" which displays two extra lines of help at the\n"
@@ -5489,14 +5493,14 @@ msgid ""
 "bottom of the screen.\n"
 msgstr ""
 
-#: src/LYrcFile.c:542
+#: src/LYrcFile.c:546
 msgid ""
 "If verbose_images is \"on\", lynx will print the name of the image\n"
 "source file in place of [INLINE], [LINK] or [IMAGE]\n"
 "See also VERBOSE_IMAGES in lynx.cfg\n"
 msgstr ""
 
-#: src/LYrcFile.c:547
+#: src/LYrcFile.c:551
 msgid ""
 "If vi_keys is set to \"on\", then the normal VI movement keys:\n"
 "  j = down    k = up\n"
@@ -5506,13 +5510,13 @@ msgid ""
 "and the keymap display, respectively.\n"
 msgstr ""
 
-#: src/LYrcFile.c:555
+#: src/LYrcFile.c:559
 msgid ""
 "The visited_links setting controls how Lynx organizes the information\n"
 "in the Visited Links Page.\n"
 msgstr ""
 
-#: src/LYrcFile.c:772
+#: src/LYrcFile.c:776
 msgid ""
 "If keypad_mode is set to \"NUMBERS_AS_ARROWS\", then the numbers on\n"
 "your keypad when the numlock is on will act as arrow keys:\n"
@@ -5523,13 +5527,13 @@ msgid ""
 "regardless of whether numlock is on.\n"
 msgstr ""
 
-#: src/LYrcFile.c:781
+#: src/LYrcFile.c:785
 msgid ""
 "If keypad_mode is set to \"LINKS_ARE_NUMBERED\", then numbers will\n"
 "appear next to each link and numbers are used to select links.\n"
 msgstr ""
 
-#: src/LYrcFile.c:785
+#: src/LYrcFile.c:789
 msgid ""
 "If keypad_mode is set to \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\", then\n"
 "numbers will appear next to each link and visible form input field.\n"
@@ -5540,14 +5544,14 @@ msgid ""
 "lists and output from the list command also enumerate form inputs.\n"
 msgstr ""
 
-#: src/LYrcFile.c:794
+#: src/LYrcFile.c:798
 msgid ""
 "NOTE: Some fixed format documents may look disfigured when\n"
 "\"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n"
 "enabled.\n"
 msgstr ""
 
-#: src/LYrcFile.c:827
+#: src/LYrcFile.c:831
 msgid ""
 "Lynx User Defaults File\n"
 "\n"

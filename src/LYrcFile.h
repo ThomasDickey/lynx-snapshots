@@ -212,6 +212,7 @@
 #define RC_TRUSTED_EXEC                 "trusted_exec"
 #define RC_TRUSTED_LYNXCGI              "trusted_lynxcgi"
 #define RC_UNCOMPRESS_PATH              "uncompress_path"
+#define RC_UNDERLINE_LINKS              "underline_links"
 #define RC_UNZIP_PATH                   "unzip_path"
 #define RC_UPLOADER                     "uploader"
 #define RC_URL_DOMAIN_PREFIXES          "url_domain_prefixes"

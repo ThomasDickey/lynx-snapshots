@@ -111,6 +111,7 @@ extern void HTAddXpand PARAMS((char ** result, CONST char * command, int number,
 #endif
 
 extern int HTCountCommandArgs PARAMS((CONST char * command));
+extern void HTAddToCmd PARAMS((char ** result, CONST char * command, int number, CONST char * string));
 extern void HTAddParam PARAMS((char ** result, CONST char * command, int number, CONST char * parameter));
 extern void HTEndParam PARAMS((char ** result, CONST char * command, int number));
 

@@ -1683,10 +1683,10 @@ PUBLIC void LYstartTargetEmphasis NOARGS
     }
 #endif
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
-    start_bold();
-    start_reverse();
+    lynx_start_bold();
+    lynx_start_reverse();
 #endif /* FANCY_CURSES || USE_SLANG */
-    start_underline();
+    lynx_start_underline();
 }
 
 PUBLIC void LYstopTargetEmphasis NOARGS
@@ -1697,10 +1697,10 @@ PUBLIC void LYstopTargetEmphasis NOARGS
 	return;
     }
 #endif
-    stop_underline();
+    lynx_stop_underline();
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
-    stop_reverse();
-    stop_bold();
+    lynx_stop_reverse();
+    lynx_stop_bold();
 #endif /* FANCY_CURSES || USE_SLANG */
 }
 
@@ -2463,14 +2463,14 @@ PUBLIC void lynx_force_repaint NOARGS
 PUBLIC void lynx_start_title_color NOARGS
 {
 #ifdef SH_EX
-    start_reverse();
+    lynx_start_reverse();
 #endif
 }
 
 PUBLIC void lynx_stop_title_color NOARGS
 {
 #ifdef SH_EX
-    stop_reverse();
+    lynx_stop_reverse();
 #endif
 }
 
@@ -2483,26 +2483,26 @@ PUBLIC void lynx_start_link_color ARGS2(
 	 * they can't handle two attributes at the
 	 * same time
 	 */
-	/* start_bold();  */
-	start_reverse();
+	/* lynx_start_bold();  */
+	lynx_start_reverse();
 #if defined(USE_SLANG)
 #ifndef __DJGPP__
 	if (SLtt_Use_Ansi_Colors)
 #endif /* !__DJGPP__ */
-	    start_underline ();
+	    lynx_start_underline ();
 #endif /* USE_SLANG */
 #if defined(FANCY_CURSES) && defined(COLOR_CURSES)
 	if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
-	    start_underline ();
+	    lynx_start_underline ();
 #endif /* USE_SLANG */
      } else {
-	start_bold();
+	lynx_start_bold();
 	/*
 	 *  Make sure when flag is OFF that "unhighlighted" links
 	 *  will be underlined if appropriate. - LE & FM
 	 */
 	if (pending)
-	    start_underline();
+	    lynx_start_underline();
      }
 }
 
@@ -2514,41 +2514,42 @@ PUBLIC void lynx_stop_link_color ARGS2(
     LynxChangeStyle(flag == ON ? s_alink : s_a, ABS_OFF);
 #else
     if (flag) {
-	stop_reverse();
+	lynx_stop_reverse();
 #if defined(USE_SLANG)
 #ifndef __DJGPP__
 	if (SLtt_Use_Ansi_Colors)
 #endif /* !__DJGPP__ */
-	stop_underline ();
+	lynx_stop_underline ();
 #endif /* USE_SLANG */
 #if defined(FANCY_CURSES) && defined(COLOR_CURSES)
 	if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
-	    stop_underline ();
+	    lynx_stop_underline ();
 #endif /* FANCY_CURSES && COLOR_CURSES */
     } else {
-	stop_bold();
+	lynx_stop_bold();
 	/*
 	 *  If underlining was turned on above, turn it off. - LE & FM
 	 */
 	if (pending)
-	    stop_underline();
+	    lynx_stop_underline();
     }
 #endif
 }
 
+/* FIXME: consider inlining these */
 
 PUBLIC void lynx_stop_target_color NOARGS
 {
-    stop_underline();
-    stop_reverse();
-    stop_bold();
+    lynx_stop_underline();
+    lynx_stop_reverse();
+    lynx_stop_bold();
 }
 
 PUBLIC void lynx_start_target_color NOARGS
 {
-    start_bold();
-    start_reverse();
-    start_underline();
+    lynx_start_bold();
+    lynx_start_reverse();
+    lynx_start_underline();
 }
 
 
@@ -2559,7 +2560,7 @@ PUBLIC void lynx_start_status_color NOARGS
 	lynx_set_color (2);
     else
 #endif
-	start_reverse ();
+	lynx_start_reverse ();
 }
 
 PUBLIC void lynx_stop_status_color NOARGS
@@ -2569,46 +2570,79 @@ PUBLIC void lynx_stop_status_color NOARGS
 	lynx_set_color (0);
     else
 #endif
-	stop_reverse ();
+	lynx_stop_reverse ();
 }
 
 PUBLIC void lynx_start_h1_color NOARGS
 {
     if (bold_H1 || bold_headers)
-	start_bold();
+	lynx_start_bold();
 }
 
 PUBLIC void lynx_stop_h1_color NOARGS
 {
     if (bold_H1 || bold_headers)
-	stop_bold();
+	lynx_stop_bold();
 }
 
 PUBLIC void lynx_start_prompt_color NOARGS
 {
-    start_reverse ();
+    lynx_start_reverse ();
 }
 
 PUBLIC void lynx_stop_prompt_color NOARGS
 {
-    stop_reverse ();
+    lynx_stop_reverse ();
 }
 
 PUBLIC void lynx_start_radio_color NOARGS
 {
-    start_bold ();
+    lynx_start_bold ();
 }
 
 PUBLIC void lynx_stop_radio_color NOARGS
 {
-    stop_bold ();
+    lynx_stop_bold ();
 }
 
 PUBLIC void lynx_stop_all_colors NOARGS
 {
-    stop_underline ();
-    stop_reverse ();
-    stop_bold ();
+    lynx_stop_underline ();
+    lynx_stop_reverse ();
+    lynx_stop_bold ();
+}
+
+/*
+ * Wrappers for LYUnderlineLinks flag.
+ */
+PUBLIC void lynx_start_bold NOARGS
+{
+    start_bold();
+}
+
+PUBLIC void lynx_start_reverse NOARGS
+{
+    start_reverse();
+}
+
+PUBLIC void lynx_start_underline NOARGS
+{
+    start_underline();
+}
+
+PUBLIC void lynx_stop_bold NOARGS
+{
+    stop_bold();
+}
+
+PUBLIC void lynx_stop_reverse NOARGS
+{
+    stop_reverse();
+}
+
+PUBLIC void lynx_stop_underline NOARGS
+{
+    stop_underline();
 }
 
 /*
@@ -2658,9 +2692,13 @@ PRIVATE void make_blink_boldbg NOARGS
 PUBLIC long LYgetattrs ARGS1(WINDOW *, win)
 {
     attr_t result = 0;
+#if (defined(NCURSES_VERSION_MAJOR) && NCURSES_VERSION_MAJOR < 5) || !defined(NCURSES_MAJOR_VERSION)
+    result = getattrs(win);
+#else
     short pair = 0;
 
     wattr_get(win, &result, &pair, NULL);
+#endif
     return result;
 }
 #endif /* HAVE_WATTR_GET */
