@@ -122,6 +122,9 @@ esac
 ### recognize some manufacturers as not being operating systems, so we
 ### can provide default operating systems below.
 case $os in
+	-os2)
+		basic_machine=`echo $1 | sed -e 's/86-.*/86/'`
+		;;
 	-sun*os*)
 		# Prevent following clause from handling this invalid input.
 		;;
@@ -1003,6 +1006,7 @@ case $os in
 		os=-nto-qnx
 		;;
 	-sim | -es1800* | -hms* | -xray | -os68k* | -none* | -v88r* \
+	      | -os2 \
 	      | -windows* | -osx | -abug | -netware* | -os9* | -beos* \
 	      | -macos* | -mpw* | -magic* | -mmixware* | -mon960* | -lnews*)
 		;;

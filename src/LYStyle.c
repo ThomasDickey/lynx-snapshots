@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.37 Sun, 16 Jul 2000 20:16:13 -0700 dickey @
+ * @Id: LYStyle.c 1.38 Thu, 24 Aug 2000 18:30:11 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -454,8 +454,7 @@ PRIVATE int style_readFromFileREC ARGS2(char*, file, int, toplevel)
 	style_deleteStyleList();
     }
 
-    while (LYSafeGets(&buffer, fh) != NULL)
-    {
+    while (LYSafeGets(&buffer, fh) != NULL) {
 	LYTrimTrailing(buffer);
 	LYTrimTail(buffer);
 	LYTrimHead(buffer);
@@ -465,7 +464,7 @@ PRIVATE int style_readFromFileREC ARGS2(char*, file, int, toplevel)
 	    HStyle_addStyle(buffer);
     }
 
-    fclose (fh);
+    LYCloseInput (fh);
     if (toplevel && LYCursesON)
 	parse_userstyles();
     return 0;

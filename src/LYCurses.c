@@ -657,6 +657,27 @@ PUBLIC void LYnoVideo ARGS1(
 #endif
 }
 
+#if       !defined(VMS) && !defined(USE_SLANG)
+/*
+ * If newterm is not defined, assume a curses subset which
+ * supports only initscr.  --gil
+ */
+#ifdef    HAVE_NEWTERM
+static SCREEN *LYscreen = NULL;
+#define LYDELSCR(scr) { \
+    delscreen(scr);     \
+    scr = NULL; }
+/*
+ * Surrogates for newterm annd delscreen
+ */
+#else  /* HAVE_NEWTERM   */
+static WINDOW *LYscreen = NULL;
+#undef  newterm
+#define newterm(type, out, in) (initscr())
+#define LYDELSCR(scr)  /* nothing */
+#endif /* HAVE_NEWTERM   */
+#endif /* !defined(VMS) && !defined(USE_SLANG) */
+
 PUBLIC void start_curses NOARGS
 {
 #ifdef USE_SLANG
@@ -773,7 +794,7 @@ PUBLIC void start_curses NOARGS
 
    lynx_enable_mouse (1);
 
-#else /* Using curses: */
+#else /* USE_SLANG; Now using curses: */
 
 
 #ifdef VMS
@@ -784,14 +805,26 @@ PUBLIC void start_curses NOARGS
     initscr();	/* start curses */
 #else  /* Unix: */
 
-    static BOOLEAN first_time = TRUE;
-
-    if (first_time) {
+    if (!LYscreen) {
 	/*
 	 *  If we're not VMS then only do initscr() one time,
 	 *  and one time only!
 	 */
-	if (initscr() == NULL) {  /* start curses */
+	{
+	    static char lines_putenv[] = "LINES=abcde",
+			cols_putenv[]  = "COLUMNS=abcde";
+	    BOOLEAN savesize;
+
+	    savesize = recent_sizechange;
+	    size_change(0);
+	    recent_sizechange = savesize;    /* avoid extra redraw */
+	    sprintf(lines_putenv + 6, "%d", LYlines & 0xfff);
+	    sprintf(cols_putenv  + 8, "%d", LYcols  & 0xfff);
+	    putenv(lines_putenv);
+	    putenv(cols_putenv);
+	    CTRACE((tfp, "start_curses putenv %s, %s\n", lines_putenv, cols_putenv));
+	}
+	if (!(LYscreen=newterm(NULL,stdout,stdin))) {  /* start curses */
 	    fprintf(tfp, "%s\n",
 		gettext("Terminal initialisation failed - unknown terminal type?"));
 	    exit_immediately (-1);
@@ -864,7 +897,6 @@ PUBLIC void start_curses NOARGS
 #ifdef USE_COLOR_STYLE
 	parse_userstyles();
 #endif
-	first_time = FALSE;
 #if USE_COLOR_TABLE
 	lynx_init_colors();
 #endif /* USE_COLOR_TABLE */
@@ -1018,9 +1050,14 @@ PUBLIC void stop_curses NOARGS
      *	05-28-94 Lynx 2-3-1 Garrett Arch Blythe
      */
     if(LYCursesON == TRUE)	{
-	 lynx_enable_mouse (0);
-#if (!defined(WIN_EX) || defined(__CYGWIN__))	/* @@@ */
-	 endwin();	/* stop curses */
+	lynx_enable_mouse (0);
+#if !defined(NCURSES) && !defined(VMS) && !defined(USE_SLANG) && (!defined(WIN_EX) || defined(__CYGWIN__))	/* @@@ */
+	if(LYscreen) {
+	    endwin();	/* stop curses */
+	    if (recent_sizechange) {
+		LYDELSCR(LYscreen);
+	    }
+	 }
 #endif
     }
 #ifdef SH_EX
@@ -1403,18 +1440,17 @@ PUBLIC void LYtouchline ARGS1(
 #if defined(HAVE_WREDRAWLN)
     wredrawln(stdscr, row, 1);
 #else
-#if defined(VMS) && !defined(_BSD44_CURSES) && !defined(USE_SLANG)
-    /* touchline() is not available on VMS before version 7.0, and then
-     * only on Alpha, since prior ports of curses were broken.
+#if defined(HAVE_TOUCHLINE)
+    /* touchline() is not available on VMS before version 7.0, and then only on
+     * Alpha, since prior ports of curses were broken.  BSD touchline() has a
+     * 4th parameter since it is used internally by touchwin().
      */
+    touchline(stdscr, row, 1, 0);
+#else
+#if !defined(USE_SLANG)
     touchwin(stdscr);
 #else
-#if defined(FANCY_CURSES)
-    touchline(stdscr, row, 1);
-#else
-#if defined(USE_SLANG)
     SLsmg_touch_lines(row, 1);
-#endif
 #endif
 #endif
 #endif

@@ -2013,7 +2013,7 @@ PRIVATE void do_read_cfg ARGS5(
 	}
     }
 
-    fclose (fp);
+    LYCloseInput (fp);
 
     /*
      *	If any DOWNLOADER: commands have always_enabled set (:TRUE),
@@ -2195,9 +2195,7 @@ PUBLIC int lynx_cfg_infopage ARGS1(
     if (LYforce_no_cache && reloading) {
 	FREE(lynxcfginfo_url); /* flag to code below to regenerate - kw */
     } else if (lynxcfginfo_url != NULL) {
-	if ((fp0 = fopen(tempfile, "r")) != NULL) { /* check existence */
-	    fclose(fp0);		/* OK */
-	} else {
+	if (!LYCanReadFile(tempfile)) { /* check existence */
 	    FREE(lynxcfginfo_url); /* flag to code below to try again - kw */
 	}
     }
@@ -2341,9 +2339,7 @@ PUBLIC int lynx_compile_opts ARGS1(
     if (LYforce_no_cache && reloading) {
 	FREE(configinfo_url); /* flag to code below to regenerate - kw */
     } else if (configinfo_url != NULL) {
-	if ((fp0 = fopen(tempfile, "r")) != NULL) { /* check existence */
-	    fclose(fp0);		/* OK */
-	} else {
+	if (!LYCanReadFile(tempfile)) { /* check existence */
 	    FREE(configinfo_url); /* flag to code below to try again - kw */
 	}
     }

@@ -93,8 +93,9 @@ struct _HTStream {
 */
 PRIVATE void HTFWriter_put_character ARGS2(HTStream *, me, char, c)
 {
-    if (me->fp)
+    if (me->fp) {
 	putc(c, me->fp);
+    }
 }
 
 /*	String handling
@@ -104,8 +105,9 @@ PRIVATE void HTFWriter_put_character ARGS2(HTStream *, me, char, c)
 */
 PRIVATE void HTFWriter_put_string ARGS2(HTStream *, me, CONST char*, s)
 {
-    if (me->fp)
+    if (me->fp) {
 	fputs(s, me->fp);
+    }
 }
 
 /*	Buffer write.  Buffers can (and should!) be big.
@@ -113,8 +115,9 @@ PRIVATE void HTFWriter_put_string ARGS2(HTStream *, me, CONST char*, s)
 */
 PRIVATE void HTFWriter_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 {
-    if (me->fp)
+    if (me->fp) {
 	fwrite(s, 1, l, me->fp);
+    }
 }
 
 
@@ -129,12 +132,12 @@ PRIVATE void HTFWriter_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 */
 PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 {
-    FILE *fp = NULL;
     int len;
     char *path = NULL;
     char *addr = NULL;
     int status;
     BOOL use_gzread = NO;
+    BOOLEAN found = FALSE;
 #ifdef WIN_EX
     HANDLE cur_handle;
 
@@ -208,15 +211,13 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		     */
 		    if (me->end_command && me->end_command[0])
 			LYSystem(me->end_command);
-		    fp = fopen(me->anchor->FileCache, "r");
+		    found = LYCanReadFile(me->anchor->FileCache);
 		}
-		if (fp != NULL) {
+		if (found) {
 		    /*
 		     *	It's still there with the "gz" or "Z" suffix,
 		     *	so the uncompression failed. - FM
 		     */
-		    fclose(fp);
-		    fp = NULL;
 		    if (!dump_output_immediately) {
 			lynx_force_repaint();
 			refresh();
@@ -500,11 +501,89 @@ PUBLIC HTStream* HTFWriter_new ARGS1(FILE *, fp)
     return me;
 }
 
+PRIVATE void chrcat ARGS2(
+	char *,		result,
+	int,		ch)
+{
+    result += strlen(result);
+    *result++ = ch;
+    *result = 0;
+}
+
 /*	Make system command from template
 **	---------------------------------
 **
 **	See mailcap spec for description of template.
 */
+PRIVATE char *mailcap_substitute ARGS3(
+	HTParentAnchor *,	anchor,
+	HTPresentation *,	pres,
+	char *,			fnam)
+{
+    int pass;
+    int skip;
+    size_t need = 0;
+    char *result = 0;
+    char *s;
+    char *repl;
+
+    for (pass = 0; pass < 2; pass++) {
+	for (s = pres->command; *s; s++) {
+	    if (*s == '%') {
+		repl = 0;
+		skip = 0;
+		if (s[1] == 't') {
+		    repl = pres->rep->name;
+		    skip = 1;
+		} else if (!strncasecomp(s+1, "{charset}", 9)) {
+		    repl = anchor->charset;
+		    skip = 9;
+		} else if (!strncasecomp(s+1, "{encoding}", 10)) {
+		    repl = anchor->content_encoding;
+		    skip = 10;
+		}
+		if (skip != 0) {
+		    if (repl == 0)
+			repl = "";
+		    if (pass) {
+			strcat(result, repl);
+		    } else {
+			need += strlen(repl);
+		    }
+		    s += skip;
+		} else {
+		    if (pass) {
+			chrcat(result, *s);
+		    } else {
+			need++;
+		    }
+		}
+	    } else {
+		if (pass) {
+		    chrcat(result, *s);
+		} else {
+		    need++;
+		}
+	    }
+	}
+	if (pass == 0) {
+	    if ((result = malloc(need)) == 0)
+		outofmem(__FILE__, "mailcap_substitute");
+	    *result = 0;
+	}
+    }
+#if defined(UNIX)
+    /* if we don't have a "%s" token, expect to provide the file via stdin */
+    if (strstr(pres->command, "%s") == 0) {
+	char *prepend = 0;
+	HTAddParam(&prepend, "cat %s", 1, fnam); /* ...to quote if needed */
+	HTSprintf(&prepend, "|%s", pres->command); /* ...avoid quoting */
+	FREE(result);
+	result = prepend;
+    }
+#endif
+    return result;
+}
 
 #ifndef VMS
 #define REMOVE_COMMAND "/bin/rm -f %s"
@@ -624,11 +703,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 
 	    StrAllocCopy(me->viewer_command, pres->command);
 
-	    me->end_command = typecallocn(char,
-			strlen (pres->command) + 10 + strlen(view_fname));
-	    if (me->end_command == NULL)
-		outofmem(__FILE__, "HTSaveAndExecute");
-	    sprintf(me->end_command, pres->command, view_fname);
+	    me->end_command = mailcap_substitute(anchor, pres, view_fnam);
 	    me->remove_command = NULL;
 
 	    return me;
@@ -664,9 +739,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     /*
      *	Make command to process file.
      */
-    me->end_command = 0;
-    HTAddParam(&(me->end_command), pres->command, 1, fnam);
-    HTEndParam(&(me->end_command), pres->command, 1);
+    me->end_command = mailcap_substitute(anchor, pres, fnam);
 
     /*
      *	Make command to delete file.

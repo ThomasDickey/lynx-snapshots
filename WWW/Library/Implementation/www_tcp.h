@@ -69,7 +69,18 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #endif /* INET6 */
 #endif
 
+#ifdef INET6
+#ifdef SIN6_LEN
+#define SOCKADDR_LEN(soc_address) ((struct sockaddr *)&soc_address)->sa_len
+#else
+#define SOCKADDR_LEN(soc_address) SA_LEN((struct sockaddr *)&soc_address)
+#endif /* SIN6_LEN */
+#else
+#define SOCKADDR_LEN(soc_address) sizeof(soc_address)
+#endif /* INET6 */
+
 #ifndef VMS
+
 #include <sys/types.h>
 
 #if defined(__BORLANDC__)
@@ -614,22 +625,6 @@ typedef unsigned short mode_t;
 #ifndef pid_t
 typedef int pid_t;
 #endif /* !pid_t */
-
-#ifndef WEXITSTATUS
-#ifdef sony_news
-#define WEXITSTATUS(s) WIFEXITED(s)
-#else
-#define WEXITSTATUS(s) (((s).w_status >> 8) & 0377)
-#endif /* sony_news */
-#endif /* !WEXITSTATUS */
-
-#ifndef WTERMSIG
-#ifdef sony_news
-#define WTERMSIG(s) (s).w_termsig
-#else
-#define WTERMSIG(s) (((s).w_status >> 8) & 0177)
-#endif /* sony_news */
-#endif /* !WTERMSIG */
 
 #endif /* NeXT || sony_news */
 

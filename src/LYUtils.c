@@ -143,6 +143,7 @@ PUBLIC	HTList * sug_filenames = NULL;		/* Suggested filenames	 */
 typedef struct _LYTemp {
     struct _LYTemp *next;
     char *name;
+    BOOLEAN outs;
     FILE *file;
 } LY_TEMP;
 
@@ -2065,16 +2066,25 @@ PUBLIC void statusline ARGS1(
     clrtoeol();
 
     if (text != NULL && text[0] != '\0') {
-#ifdef HAVE_UTF8_STATUSLINES
-	if ((LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) || 
-	    (HTCJK != NOCJK)) {
-	    refresh();
-	}
-#else
+	BOOLEAN has_CJK = FALSE;
+
 	if (HTCJK != NOCJK) {
+	    for (i = 0; buffer[i] != '\0'; i++) {
+		if (buffer[i] & 0x80) {
+		    has_CJK = TRUE;
+		    break;
+		}
+	    }
+	}
+
+	if (has_CJK
+#ifdef HAVE_UTF8_STATUSLINES
+	    || (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8)
+#endif
+	    ) {
 	    refresh();
 	}
-#endif /* HAVE_UTF8_STATUSLINES */
+
 #ifndef USE_COLOR_STYLE
 	lynx_start_status_color ();
 	addstr (buffer);
@@ -3144,6 +3154,68 @@ PUBLIC BOOLEAN LYCanDoHEAD ARGS1(
 }
 
 /*
+ * Close an input file.
+ */
+PUBLIC BOOLEAN LYCloseInput ARGS1(
+	FILE *,		fp)
+{
+    if (fp != 0) {
+	int err = ferror(fp);
+	fclose(fp);
+	if (!err) {
+	    return TRUE;
+	}
+    }
+    return FALSE;
+}
+
+/*
+ * Close an output file, reporting any problems with writing to it.
+ */
+PUBLIC BOOLEAN LYCloseOutput ARGS1(
+	FILE *,		fp)
+{
+    if (fp != 0) {
+	int err = ferror(fp);
+	fclose(fp);
+	if (!err) {
+	    return TRUE;
+	}
+    }
+    HTAlert(CANNOT_WRITE_TO_FILE);
+    return FALSE;
+}
+
+/*
+ * Test if we'll be able to write a file.  If not, warn the user.
+ */
+PUBLIC BOOLEAN LYCanWriteFile ARGS1(
+	CONST char*,	filename)
+{
+    if (LYCloseOutput(fopen(filename, "w"))) {
+	remove(filename);
+	return TRUE;
+    } else {
+	_statusline(NEW_FILENAME_PROMPT);
+	return FALSE;
+    }
+}
+
+/*
+ * Test if we'll be able to read a file.
+ */
+PUBLIC BOOLEAN LYCanReadFile ARGS1(
+	CONST char*,	filename)
+{
+    FILE *fp;
+
+    if ((fp = fopen(filename, "r")) != 0) {
+	return LYCloseInput(fp);
+    }
+    return FALSE;
+}
+
+/*
  *  Remove backslashes from any string.
  */
 PUBLIC void remove_backslashes ARGS1(
@@ -3187,7 +3259,7 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
 	do {
 	    n = fread((char *) &me, sizeof(struct utmp), 1, fp);
 	} while (n > 0 && !STREQ(me.ut_line, mytty));
-	(void) fclose(fp);
+	(void) LYCloseInput(fp);
 
 	if (n > 0 &&
 	    strlen(me.ut_host) > strlen(LYLocalDomain) &&
@@ -3822,7 +3894,7 @@ PRIVATE int fmt_tempname ARGS3(
 	    break;
 	}
     }
-    if (counter >= MAX_TEMPNAME)
+    if (names_used >= MAX_TEMPNAME)
 	HTAlert("Too many tempfiles");
 #else
     counter++;
@@ -4372,7 +4444,6 @@ PUBLIC void LYConvertToURL ARGS2(
     char *cp = NULL;
 #ifndef VMS
     struct stat st;
-    FILE *fptemp = NULL;
 #endif /* !VMS */
 
     if (!old_string || *old_string == '\0')
@@ -4634,7 +4705,7 @@ have_VMS_URL:
 	    LYTrimRelFromAbsPath(temp);
 	    CTRACE((tfp, "Converted '%s' to '%s'\n", old_string, temp));
 	    if ((stat(temp, &st) > -1) ||
-		(fptemp = fopen(temp, "r")) != NULL) {
+		LYCanReadFile(temp)) {
 		/*
 		 *  It is a subdirectory or file on the local system.
 		 */
@@ -4672,7 +4743,7 @@ have_VMS_URL:
 
 		if (strcmp(temp2, temp) != 0 &&
 		    ((stat(temp2, &st) > -1) ||
-		     (fptemp = fopen(temp2, "r")) != NULL)) {
+		     LYCanReadFile(temp2))) {
 		    /*
 		     *	It is a subdirectory or file on the local system
 		     *	with escaped characters and/or a fragment to be
@@ -4779,10 +4850,6 @@ have_VMS_URL:
 	    }
 	    FREE(temp);
 	    FREE(temp2);
-	    if (fptemp) {
-		fclose(fptemp);
-		fptemp = NULL;
-	    }
 	}
 #endif /* VMS */
     } else {
@@ -4800,7 +4867,7 @@ have_VMS_URL:
 #else
 	    StrAllocCat(*AllocatedString, "/");
 	} else if ((stat(old_string, &st) > -1) ||
-		   (fptemp = fopen(old_string, "r")) != NULL) {
+		   LYCanReadFile(old_string)) {
 	    /*
 	     *	It is an absolute directory or file
 	     *	on the local system. - KW
@@ -4812,10 +4879,6 @@ have_VMS_URL:
 	    StrAllocCat(*AllocatedString, cp);
 	    FREE(cp);
 	    FREE(temp);
-	    if (fptemp) {
-		fclose(fptemp);
-		fptemp = NULL;
-	    }
 	    CTRACE((tfp, "Converted '%s' to '%s'\n",
 			old_string, *AllocatedString));
 #endif /* VMS */
@@ -6425,13 +6488,10 @@ PUBLIC BOOLEAN LYCachedTemp ARGS2(
 	char *,		result,
 	char **,	cached)
 {
-    FILE *fp;
-
     if (*cached) {
 	LYstrncpy(result, *cached, LY_MAXPATH);
 	FREE(*cached);
-	if ((fp = fopen(result, "r")) != NULL) {
-	    fclose(fp);
+	if (LYCanReadFile(result)) {
 	    remove(result);
 	}
 	return TRUE;
@@ -6466,7 +6526,7 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 	case 'b':	txt = FALSE;	break;
 	default:
 		CTRACE((tfp, "%s @%d: BUG\n", __FILE__, __LINE__));
-		return fp;
+		return 0;
 	}
     }
 
@@ -6543,6 +6603,7 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 	p->next = ly_temp;
 	StrAllocCopy((p->name), result);
 	p->file = fp;
+	p->outs = (wrt != 'r');
 	ly_temp = p;
     } else {
 	outofmem(__FILE__, "LYOpenTemp");
@@ -6759,6 +6820,19 @@ PUBLIC FILE *LYOpenScratch ARGS2(
     return fp;
 }
 
+PRIVATE void LY_close_temp ARGS1(
+	LY_TEMP *,	p)
+{
+    if (p->file != 0) {
+	if (p->outs) {
+	    LYCloseOutput(p->file);
+	} else {
+	    LYCloseInput(p->file);
+	}
+	p->file = 0;
+    }
+}
+
 /*
  * Close a temp-file, given its name
  */
@@ -6771,10 +6845,7 @@ PUBLIC void LYCloseTemp ARGS1(
     if ((p = FindTempfileByName(name)) != 0) {
 	CTRACE((tfp, "...LYCloseTemp(%s)%s\n", name,
 	    (p->file != 0) ? ", closed" : ""));
-	if (p->file != 0) {
-	    fclose(p->file);
-	    p->file = 0;
-	}
+	LY_close_temp(p);
     }
 }
 
@@ -6788,8 +6859,7 @@ PUBLIC void LYCloseTempFP ARGS1(
 
     CTRACE((tfp, "LYCloseTempFP\n"));
     if ((p = FindTempfileByFP(fp)) != 0) {
-	fclose(p->file);
-	p->file = 0;
+	LY_close_temp(p);
 	CTRACE((tfp, "...LYCloseTempFP(%s)\n", p->name));
     }
 }
@@ -6812,8 +6882,7 @@ PUBLIC int LYRemoveTemp ARGS1(
 		} else {
 		    ly_temp = p->next;
 		}
-		if (p->file != 0)
-		    fclose(p->file);
+		LY_close_temp(p);
 		code = HTSYS_remove(name);
 		CTRACE((tfp, "...LYRemoveTemp done(%d)%s\n", code,
 		       (p->file != 0) ? ", closed" : ""));
@@ -7145,7 +7214,6 @@ PUBLIC BOOLEAN LYValidateFilename ARGS2(
 PUBLIC int LYValidateOutput ARGS1(
 	char *,		filename)
 {
-    FILE *fp;
     int c;
 
     /*
@@ -7166,8 +7234,7 @@ PUBLIC int LYValidateOutput ARGS1(
     /*
      *  See if it already exists.
      */
-    if ((fp = fopen(filename, "r")) != NULL) {
-	fclose(fp);
+    if (LYCanReadFile(filename)) {
 #ifdef VMS
 	c = HTConfirm(FILE_EXISTS_HPROMPT);
 #else
@@ -7395,6 +7462,8 @@ PUBLIC int LYCopyFile ARGS2(
 	char *,		src,
 	char *,		dst)
 {
+    int code;
+
 #if defined(DOSPATH) || defined(__CYGWIN__) /* thanks to Hiroyuki Senshu */
 
 #define BUF_SIZE	1024
@@ -7403,26 +7472,22 @@ PUBLIC int LYCopyFile ARGS2(
     unsigned char buff[BUF_SIZE];
     int len;
 
-    fin = fopen(src, "rb");
-    if (fin == NULL)
-	return EOF;
-
-    fout = fopen(dst, "wb");
-    if (fout == NULL) {
-	fclose(fin);		/* it was opened, yes? */
-	return EOF;
+    code = EOF;
+    if ((fin = fopen(src, "rb")) != 0) {
+	if ((fout = fopen(dst, "wb")) != 0) {
+	    code = 0;
+	    while ((len = fread(buff, 1, BUF_SIZE, fin)) > 0) {
+		fwrite(buff, 1, len, fout);
+		if (ferror(fout)) {
+		    code = EOF;
+		    break;
+		}
+	    }
+	    LYCloseOutput(fout);
+	}
+	LYCloseInput(fin);
     }
-
-    while ((len = fread(buff, 1, BUF_SIZE, fin)) > 0) {
-	fwrite(buff, 1, len, fout);
-    }
-    fclose(fin);
-    fclose(fout);
-
-    return 0;
-
 #else
-    int code;
     char *the_command = 0;
 
     HTAddParam(&the_command, COPY_COMMAND, 1, COPY_PATH);
@@ -7436,8 +7501,12 @@ PUBLIC int LYCopyFile ARGS2(
     start_curses();
 
     FREE(the_command);
-    return code;
 #endif
+
+    if (code) {
+	HTAlert(CANNOT_WRITE_TO_FILE);
+    }
+    return code;
 }
 
 /*

@@ -43,30 +43,7 @@
 #include <LYUpload.h>
 #include <LYLocal.h>
 #include <LYClean.h>
-
-#ifndef VMS
-#ifndef _WINDOWS
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
-#endif /*_WINDOWS */
-#endif /* VMS */
-
-#ifndef WEXITSTATUS
-# ifdef HAVE_TYPE_UNIONWAIT
-#  define	WEXITSTATUS(status)	(status.w_retcode)
-# else
-#  define	WEXITSTATUS(status)	(((status) & 0xff00) >> 8)
-# endif
-#endif
-
-#ifndef WTERMSIG
-# ifdef HAVE_TYPE_UNIONWAIT
-#  define	WTERMSIG(status)	(status.w_termsig)
-# else
-#  define	WTERMSIG(status)	((status) & 0x7f)
-# endif
-#endif
+#include <www_wait.h>
 
 #ifdef SUPPORT_CHDIR
 #include <LYMainLoop.h>

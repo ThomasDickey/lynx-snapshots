@@ -422,8 +422,9 @@ PRIVATE unsigned LYRead_Jumpfile ARGS1(struct JumpTable *,jtp)
 	FREE(mp);
 	return 0;
     } else
-	while(fgets(mp+strlen(mp), 1024, fp) != NULL) ;
-    fclose(fp);
+	while(fgets(mp+strlen(mp), 1024, fp) != NULL)
+	    ;
+	LYCloseInput(fp);
     }
 #endif /* VMS */
 

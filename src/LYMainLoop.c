@@ -5591,7 +5591,7 @@ try_again:
 					newdoc.address : links[curdoc.link].lname,
 					links[curdoc.link].target);
 			    }
-			    fclose(ofp);
+			    LYCloseOutput(ofp);
 			}
 		    }
 
@@ -6463,7 +6463,7 @@ try_again:
 		ccount = ccount + 1;
 		if ((cfp = LYNewTxtFile(cfile))  != NULL) {
 		    print_crawl_to_fd(cfp,curdoc.address,curdoc.title);
-		    fclose(cfp);
+		    LYCloseOutput(cfp);
 		} else {
 		    if (!dump_output_immediately)
 			cleanup();

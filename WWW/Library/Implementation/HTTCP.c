@@ -25,7 +25,7 @@
 
 #ifdef NSL_FORK
 #include <signal.h>
-#include <sys/wait.h>
+#include <www_wait.h>
 #endif /* NSL_FORK */
 
 #ifdef HAVE_RESOLV_H
@@ -302,11 +302,7 @@ PUBLIC CONST char * HTInetString ARGS1(
 #ifdef INET6
     static char hostbuf[MAXHOSTNAMELEN];
     getnameinfo((struct sockaddr *)soc_in,
-#ifdef SIN6_LEN
-	    ((struct sockaddr *)soc_in)->sa_len,
-#else
-	    SA_LEN((struct sockaddr *)soc_in),
-#endif /* SIN6_LEN */
+	    SOCKADDR_LEN(soc_in),
 	    hostbuf, sizeof(hostbuf), NULL, 0, NI_NUMERICHOST);
     return hostbuf;
 #else
@@ -1016,18 +1012,10 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 		**  Make sure child is cleaned up.  -BL
 		*/
 		if (!child_exited)
-#ifdef HAVE_TYPE_UNIONWAIT
-		    waitret = waitpid(fpid, &waitstat.w_status, WNOHANG);
-#else
 		    waitret = waitpid(fpid, &waitstat, WNOHANG);
-#endif
 		if (!WIFEXITED(waitstat) && !WIFSIGNALED(waitstat)) {
 		    kill(fpid, SIGTERM);
-#ifdef HAVE_TYPE_UNIONWAIT
-		    waitret = waitpid(fpid, &waitstat.w_status, WNOHANG);
-#else
 		    waitret = waitpid(fpid, &waitstat, WNOHANG);
-#endif
 		}
 		break;
 	    }
@@ -1036,21 +1024,13 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 	    **  Clean up if child exited before & no data received.  -BL
 	    */
 	    if (child_exited) {
-#ifdef HAVE_TYPE_UNIONWAIT
-		waitret = waitpid(fpid, &waitstat.w_status, WNOHANG);
-#else
 		waitret = waitpid(fpid, &waitstat, WNOHANG);
-#endif
 		break;
 	    }
 	    /*
 	    **  If child exited, loop once more looking for data.  -BL
 	    */
-#ifdef HAVE_TYPE_UNIONWAIT
-	    if ((waitret = waitpid(fpid, &waitstat.w_status, WNOHANG)) > 0) {
-#else
 	    if ((waitret = waitpid(fpid, &waitstat, WNOHANG)) > 0) {
-#endif
 		/*
 		**	Data will be arriving right now, so make sure we
 		**	don't short-circuit out for too many loops, and
@@ -1079,16 +1059,11 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 	}
 	if (waitret > 0) {
 	    if (WIFEXITED(waitstat)) {
-#ifdef HAVE_TYPE_UNIONWAIT
 		CTRACE((tfp, "LYGetHostByName: NSL_FORK child %d exited, status 0x%x.\n",
-			(int)waitret, waitstat.w_status));
-#else
-		CTRACE((tfp, "LYGetHostByName: NSL_FORK child %d exited, status 0x%x.\n",
-			(int)waitret, waitstat));
-#endif
+			(int)waitret, WEXITSTATUS(waitstat)));
 	    } else if (WIFSIGNALED(waitstat)) {
 		CTRACE((tfp, "LYGetHostByName: NSL_FORK child %d got signal, status 0x%x!\n",
-		       (int)waitret, waitstat));
+		       (int)waitret, WTERMSIG(waitstat)));
 #ifdef WCOREDUMP
 		if (WCOREDUMP(waitstat)) {
 		    CTRACE((tfp, "LYGetHostByName: NSL_FORK child %d dumped core!\n",
@@ -1096,13 +1071,8 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 		}
 #endif /* WCOREDUMP */
 	    } else if (WIFSTOPPED(waitstat)) {
-#ifdef HAVE_TYPE_UNIONWAIT
-	      CTRACE((tfp, "LYGetHostByName: NSL_FORK child %d is stopped, status 0x%x!\n",
-		      (int)waitret, waitstat.w_status));
-#else
-	      CTRACE((tfp, "LYGetHostByName: NSL_FORK child %d is stopped, status 0x%x!\n",
-		      (int)waitret, waitstat));
-#endif
+		CTRACE((tfp, "LYGetHostByName: NSL_FORK child %d is stopped, status 0x%x!\n",
+			(int)waitret, WEXITSTATUS(waitstat)));
 	    }
 	}
 	if (!got_rehostent) {

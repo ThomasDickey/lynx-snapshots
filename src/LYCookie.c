@@ -2166,7 +2166,7 @@ PUBLIC void LYLoadCookies ARGS1 (
 	 */
 	store_cookie(moo, domain, path);
     }
-    fclose (cookie_handle);
+    LYCloseInput (cookie_handle);
 }
 
 /* rjp - experimental persistent cookie support */
@@ -2264,7 +2264,7 @@ PUBLIC void LYStoreCookies ARGS1 (
 	    CTRACE((tfp, "STORED\n"));
 	}
     }
-    fclose(cookie_handle);
+    LYCloseOutput(cookie_handle);
 
     HTSYS_purge(cookie_file);
 }

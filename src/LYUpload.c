@@ -48,7 +48,6 @@ PUBLIC int LYUpload ARGS1(
     char tmpbuf[LY_MAXPATH];
     char *filename = NULL;
     lynx_html_item_type *upload_command = 0;
-    FILE *fp;
     char *the_command = 0;
 
     /*
@@ -130,12 +129,7 @@ retry:
 	 */
 	CTRACE((tfp, "LYUpload: filename is %s", filename));
 
-	if ((fp = fopen(filename, "w")) != NULL) {
-	    fclose(fp);
-	    remove(filename);
-	} else {
-	    HTAlert(CANNOT_WRITE_TO_FILE);
-	    _statusline(NEW_FILENAME_PROMPT);
+	if (! LYCanWriteFile(filename)) {
 	    goto retry;
 	}
 

@@ -1411,6 +1411,10 @@ int main()
 [cf_cv_getaddrinfo=no],
 [cf_cv_getaddrinfo=unknown])
 ])
+if test "$cf_cv_getaddrinfo" = yes ; then
+	AC_DEFINE(HAVE_GAI_STRERROR)
+	AC_DEFINE(HAVE_GETADDRINFO)
+fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl A conventional existence-check for 'lstat' won't work with the Linux
@@ -2291,8 +2295,7 @@ dnl FIXME: check that this works with "snake" (HP-UX 10.x)
 AC_DEFUN([CF_SIZECHANGE],
 [
 AC_REQUIRE([CF_STRUCT_TERMIOS])
-AC_MSG_CHECKING([declaration of size-change])
-AC_CACHE_VAL(cf_cv_sizechange,[
+AC_CACHE_CHECK(declaration of size-change, cf_cv_sizechange,[
     cf_cv_sizechange=unknown
     cf_save_CFLAGS="$CFLAGS"
 
@@ -2340,13 +2343,19 @@ do
 	CFLAGS="$cf_save_CFLAGS"
 	if test "$cf_cv_sizechange" = yes ; then
 		echo "size-change succeeded ($cf_opts)" >&AC_FD_CC
-		test -n "$cf_opts" && AC_DEFINE_UNQUOTED($cf_opts)
+		test -n "$cf_opts" && cf_cv_sizechange="$cf_opts"
 		break
 	fi
 done
-	])
-AC_MSG_RESULT($cf_cv_sizechange)
-test $cf_cv_sizechange != no && AC_DEFINE(HAVE_SIZECHANGE)
+])
+if test "$cf_cv_sizechange" != no ; then
+	AC_DEFINE(HAVE_SIZECHANGE)
+	case $cf_cv_sizechange in #(vi
+	NEED*)
+		AC_DEFINE_UNQUOTED($cf_cv_sizechange )
+		;;
+	esac
+fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Look for the slang header files in the standard places, adjusting the
@@ -2532,13 +2541,13 @@ unistd.h \
 if test "$ISC" = yes ; then
 	AC_CHECK_HEADERS( sys/termio.h )
 fi
-if test $ac_cv_header_termios_h = yes ; then
+if test "$ac_cv_header_termios_h" = yes ; then
 	case "$CFLAGS" in
 	*-D_POSIX_SOURCE*)
 		termios_bad=dunno ;;
 	*)	termios_bad=maybe ;;
 	esac
-	if test $termios_bad = maybe ; then
+	if test "$termios_bad" = maybe ; then
 	AC_MSG_CHECKING(whether termios.h needs _POSIX_SOURCE)
 	AC_TRY_COMPILE([#include <termios.h>],
 		[struct termios foo; int x = foo.c_iflag],

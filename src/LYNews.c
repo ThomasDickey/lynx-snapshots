@@ -69,7 +69,7 @@ PRIVATE BOOLEAN message_has_content ARGS2(
 	}
 	if (firstnonblank && firstnonblank != '>') {
 	    if (!in_headers) {
-		fclose(fp);
+		LYCloseInput(fp);
 		FREE(buffer);
 		return TRUE;
 	    }
@@ -79,7 +79,7 @@ PRIVATE BOOLEAN message_has_content ARGS2(
 	}
     }
     FREE(buffer);
-    fclose(fp);
+    LYCloseInput(fp);
     return FALSE;
 }
 
@@ -291,7 +291,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	    }
 	}
 	FREE(buffer);
-	fclose(fp);
+	LYCloseInput(fp);
     }
 #else
 #ifdef _WINDOWS	/* 1998/05/14 (Thu) 17:47:01 */
@@ -311,7 +311,7 @@ PUBLIC char *LYNewsPost ARGS2(
 			StrAllocCat(cp, user_input);
 		    }
 		}
-		fclose(fp);
+		LYCloseInput(fp);
 	    }
 	}
     }
@@ -457,10 +457,10 @@ PUBLIC char *LYNewsPost ARGS2(
 		while (LYSafeGets(&buffer, fp) != NULL) {
 		    fputs(buffer, fd);
 		}
-		fclose(fd);
+		LYCloseOutput(fd);
 	    }
 	}
-	fclose(fp);
+	LYCloseInput(fp);
 	FREE(msg);
 	LYStatusLine = -1;
     }
@@ -483,7 +483,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	    }
 	    LYCloseTempFP(fc);
 	    StrAllocCopy(postfile, CJKfile);
-	    fclose(fd);
+	    LYCloseInput(fd);
 	    LYRemoveTemp(my_tempfile);
 	    strcpy(my_tempfile, CJKfile);
 	    CJKfile[0] = '\0';

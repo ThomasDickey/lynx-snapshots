@@ -62,7 +62,9 @@ PUBLIC int edit_current_file ARGS3(
 #endif
     char *number_sign;
     char position[80];
+#if defined(VMS) || defined(CANT_EDIT_UNWRITABLE_FILES)
     FILE *fp;
+#endif
 #if defined(__CYGWIN__) && defined(DOSPATH)
     unsigned char temp_buff[LY_MAXPATH];
 #endif
@@ -92,8 +94,7 @@ PUBLIC int edit_current_file ARGS3(
     filename = HTParse(newfile, "", PARSE_PATH+PARSE_PUNCTUATION);
     HTUnEscape(filename);
     StrAllocCopy(filename, HTSYS_name(filename));
-    if ((fp = fopen(filename, "r")) == NULL)
-    {
+    if (!LYCanReadFile(filename)) {
 #ifdef SH_EX
 	HTUserMsg2(COULD_NOT_EDIT_FILE, filename);
 #else
@@ -113,17 +114,16 @@ PUBLIC int edit_current_file ARGS3(
 #endif
     StrAllocCopy(filename, (colon + 1));
     HTUnEscape(filename);
-    if ((fp = fopen(filename, "r")) == NULL) {
+    if (!LYCanReadFile(filename)) {
 	FREE(filename);
 	filename = HTParse(newfile, "", PARSE_PATH+PARSE_PUNCTUATION);
 	HTUnEscape(filename);
-	if ((fp = fopen(HTSYS_name(filename), "r")) == NULL) {
+	if (!LYCanReadFile(HTSYS_name(filename))) {
 	    HTAlert(COULD_NOT_ACCESS_FILE);
 	    goto done;
 	}
     }
 #endif /* !(VMS || !DOSPATH || !__EMX__) */
-    fclose(fp);
 
 #if defined(VMS) || defined(CANT_EDIT_UNWRITABLE_FILES)
     /*
