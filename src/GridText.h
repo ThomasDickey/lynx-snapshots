@@ -10,6 +10,12 @@
 #include <HTForms.h>
 #endif /* HTFORMS_H */
 
+#ifndef HT_NON_BREAK_SPACE
+#define HT_NON_BREAK_SPACE	((char)1)	/* remember it */
+#endif /* !HT_NON_BREAK_SPACE */
+#ifndef HT_EM_SPACE
+#define HT_EM_SPACE		((char)2)	/* remember it */
+#endif /* !HT_EM_SPACE */
 #define LY_UNDERLINE_START_CHAR	'\003'
 #define LY_UNDERLINE_END_CHAR	'\004'
 #define LY_BOLD_START_CHAR	'\005'
@@ -18,7 +24,45 @@
 #define LY_SOFT_HYPHEN		((char)7)
 #endif /* !LY_SOFT_HYPHEN */
 #define LY_SOFT_NEWLINE         ((char)8)
+
 #define IsSpecialAttrChar(a)  ((a > '\002') && (a <= '\010'))
+
+/* just for information:
+US-ASCII control characters <32 which are not defined in Unicode standard
+=00	U+0000	NULL
+=01	U+0001	START OF HEADING
+=02	U+0002	START OF TEXT
+=03	U+0003	END OF TEXT
+=04	U+0004	END OF TRANSMISSION
+=05	U+0005	ENQUIRY
+=06	U+0006	ACKNOWLEDGE
+=07	U+0007	BELL
+=08	U+0008	BACKSPACE
+=09	U+0009	HORIZONTAL TABULATION
+=0A	U+000A	LINE FEED
+=0B	U+000B	VERTICAL TABULATION
+=0C	U+000C	FORM FEED
+=0D	U+000D	CARRIAGE RETURN
+=0E	U+000E	SHIFT OUT
+=0F	U+000F	SHIFT IN
+=10	U+0010	DATA LINK ESCAPE
+=11	U+0011	DEVICE CONTROL ONE
+=12	U+0012	DEVICE CONTROL TWO
+=13	U+0013	DEVICE CONTROL THREE
+=14	U+0014	DEVICE CONTROL FOUR
+=15	U+0015	NEGATIVE ACKNOWLEDGE
+=16	U+0016	SYNCHRONOUS IDLE
+=17	U+0017	END OF TRANSMISSION BLOCK
+=18	U+0018	CANCEL
+=19	U+0019	END OF MEDIUM
+=1A	U+001A	SUBSTITUTE
+=1B	U+001B	ESCAPE
+=1C	U+001C	FILE SEPARATOR
+=1D	U+001D	GROUP SEPARATOR
+=1E	U+001E	RECORD SEPARATOR
+=1F	U+001F	UNIT SEPARATOR
+=7F	U+007F	DELETE
+*/
 
 extern int HTCurSelectGroupType;
 extern char * HTCurSelectGroupSize;
@@ -159,6 +203,9 @@ extern int HText_beginInput PARAMS((
 	HText *		text,
 	BOOL		underline,
 	InputFieldData *I));
+extern void HText_trimHightext PARAMS((
+	HText *		text,
+	BOOLEAN		disable_trace));
 extern void HText_SubmitForm PARAMS((
 	FormInfo *	submit_item,
 	document *	doc,

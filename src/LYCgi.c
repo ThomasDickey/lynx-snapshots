@@ -545,9 +545,7 @@ PRIVATE int LYLoadCGI ARGS4(
 		if (LYCgiDocumentRoot != NULL && path_info != NULL ) {
 		    /* Construct and add PATH_TRANSLATED to env */
 		    StrAllocCopy(document_root, LYCgiDocumentRoot);
-		    if (document_root[strlen(document_root) - 1] == '/') {
-			document_root[strlen(document_root) - 1] = '\0';
-		    }
+		    LYTrimHtmlSep(document_root);
 		    path_translated = document_root;
 		    StrAllocCat(path_translated, path_info);
 		    cp = NULL;

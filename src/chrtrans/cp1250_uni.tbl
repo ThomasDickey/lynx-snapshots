@@ -2,7 +2,7 @@
 Mwindows-1250
 
 #Name as a Display Charset (used on Options screen)
-OWinLatin2 (cp1250)
+OEastern European (windows-1250)
 
 #
 #    Name:     cp1250 to Unicode table

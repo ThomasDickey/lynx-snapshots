@@ -4,12 +4,14 @@
 #include <HTCJK.h>
 #include <HTAlert.h>
 #include <LYCurses.h>
+#include <LYHistory.h>
 #include <LYUtils.h>
 #include <LYStrings.h>
 #include <LYGlobalDefs.h>
 #include <LYSignal.h>
 #include <GridText.h>
 #include <LYCharSets.h>
+#include <LYCharUtils.h>
 
 #ifdef DOSPATH
 #include <HTDOS.h>
@@ -2393,7 +2395,7 @@ PUBLIC int LYCheckForProxyURL ARGS1(
 	if (isdigit((unsigned char)*cp1)) {
 	    while (*cp1 && isdigit((unsigned char)*cp1))
 		cp1++;
-	    if (*cp1 && *cp1 != '/')
+	    if (*cp1 && !LYIsHtmlSep(*cp1))
 		return(UNKNOWN_URL_TYPE);
 	}
     }
@@ -2462,7 +2464,7 @@ PUBLIC int is_url ARGS1(
      *	also to avoid false positives if there was
      *	a colon later in the string. - KW
      */
-    if (*cp == '/')
+    if (LYIsHtmlSep(*cp))
 	return(0);
 
 #if defined (DOSPATH) || defined (__EMX__) /* sorry! */
@@ -2510,7 +2512,7 @@ PUBLIC int is_url ARGS1(
     } else if (compare_type(cp, "file:", 5)) {
 	if (LYisLocalFile(cp)) {
 	    return(FILE_URL_TYPE);
-	} else if (cp[5] == '/' && cp[6] == '/') {
+	} else if (LYIsHtmlSep(cp[5]) && LYIsHtmlSep(cp[6])) {
 	    return(FTP_URL_TYPE);
 	} else {
 	    return(0);
@@ -2742,8 +2744,11 @@ PUBLIC char * quote_pathname ARGS1(
     if (result == NULL)
 	outofmem(__FILE__, "quote_pathname");
 
-    result[0] = '\'';
-    for (i = 0, n = 1; i < strlen(pathname); i++)
+    n = 0;
+#ifndef __DJGPP__
+    result[n++] = '\'';
+#endif /* __DJGPP__ */
+    for (i = 0; i < strlen(pathname); i++) {
 	if (pathname[i] == '\'') {
 	    result[n++] = '\'';
 	    result[n++] = '"';
@@ -2753,7 +2758,10 @@ PUBLIC char * quote_pathname ARGS1(
 	} else {
 	    result[n++] = pathname[i];
 	}
+    }
+#ifndef __DJGPP__
     result[n++] = '\'';
+#endif /* !__DJGPP__ */
     result[n] = '\0';
     return result;
 }
@@ -2991,7 +2999,7 @@ PUBLIC void change_sug_filename ARGS1(
 #else
     cp = lynx_temp_space;
 #endif
-    if (*cp == '/') {
+    if (LYIsHtmlSep(*cp)) {
 	sprintf(temp, "file://localhost%s%d", cp, (int)getpid());
     } else {
 	sprintf(temp, "file://localhost/%s%d", cp, (int)getpid());
@@ -3900,8 +3908,7 @@ have_VMS_URL:
 #else
 		StrAllocCopy(temp, curdir);
 #endif
-		if(curdir[strlen(curdir)-1] != '/')
-		    StrAllocCat(temp, "/");
+		LYAddPathSep(&temp);
 		LYstrncpy(curdir, temp, (DIRNAMESIZE - 1));
 		StrAllocCat(temp, old_string);
 	    } else {
@@ -3939,8 +3946,7 @@ have_VMS_URL:
 	    } else {
 		char *cp2 = NULL;
 		StrAllocCopy(temp2, curdir);
-		if (curdir[0] != '\0' && curdir[strlen(curdir)-1] != '/')
-		    StrAllocCat(temp2, "/");
+		LYAddPathSep(&temp2);
 		StrAllocCopy(cp, old_string);
 		if ((fragment = strchr(cp, '#')) != NULL)
 		    *fragment = '\0';	/* keep as pointer into cp string */
@@ -3965,8 +3971,7 @@ have_VMS_URL:
 			 *  old_string as given. - kw
 			 */
 			temp = HTEscape(curdir, URL_PATH);
-			if (curdir[0] != '\0' && curdir[strlen(curdir)-1] != '/')
-			    StrAllocCat(temp, "/");
+			LYAddHtmlSep(&temp);
 			StrAllocCat(temp, old_string);
 		    } else {
 			temp = HTEscape(temp2, URL_PATH);
@@ -3996,8 +4001,7 @@ have_VMS_URL:
 			 *  old_string as given. - kw
 			 */
 			temp = HTEscape(curdir, URL_PATH);
-			if (curdir[0] != '\0' && curdir[strlen(curdir)-1] != '/')
-			    StrAllocCat(temp, "/");
+			LYAddHtmlSep(&temp);
 			StrAllocCat(temp, old_string);
 		    } else {
 			temp = HTEscape(temp2, URL_PATH);
@@ -4552,13 +4556,13 @@ PUBLIC void LYTrimRelFromAbsPath ARGS1(
     /*
      *	Make sure we have a pointer to an absolute path. - FM
      */
-    if (path == NULL || *path != '/')
+    if (path == NULL || !LYIsPathSep(*path))
 	return;
 
     /*
      *	Check whether the path has a terminal slash. - FM
      */
-    TerminalSlash = (path[(strlen(path) - 1)] == '/');
+    TerminalSlash = LYIsPathSep(path[(strlen(path) - 1)]);
 
     /*
      *	Simplify the path and then do any necessary trimming. - FM
@@ -4571,7 +4575,7 @@ PUBLIC void LYTrimRelFromAbsPath ARGS1(
 	     *	Eliminate trailing dot. - FM
 	     */
 	    cp[1] = '\0';
-	} else if (cp[2] == '/') {
+	} else if (LYIsPathSep(cp[2])) {
 	    /*
 	     *	Skip over the "/." of a "/./". - FM
 	     */
@@ -4604,9 +4608,8 @@ PUBLIC void LYTrimRelFromAbsPath ARGS1(
 	    path[i] = cp[i];
 	path[i] = '\0';
     }
-    if (TerminalSlash == FALSE &&
-	path[(strlen(path) - 1)] == '/') {
-	path[(strlen(path) - 1)] = '\0';
+    if (TerminalSlash == FALSE) {
+	LYTrimPathSep(path);
     }
 }
 
@@ -4888,7 +4891,7 @@ PUBLIC BOOLEAN LYPathOffHomeOK ARGS2(
     /*
      *	Check for a URL or absolute path, and reject if present. - FM
      */
-    if (is_url(cp) || *cp == '/') {
+    if (is_url(cp) || LYIsPathSep(*cp)) {
 	FREE(file);
 	return(FALSE);
     }
@@ -4910,8 +4913,11 @@ PUBLIC BOOLEAN LYPathOffHomeOK ARGS2(
     /*
      *	Check for spoofing. - FM
      */
-    if (*cp == '\0' || *cp == '/' || cp[(strlen(cp) - 1)] == '/' ||
-	strstr(cp, "..") != NULL || !strcmp(cp, ".")) {
+    if (*cp == '\0'
+     || LYIsPathSep(*cp)
+     || LYIsPathSep(cp[(strlen(cp) - 1)])
+     || strstr(cp, "..") != NULL
+     || !strcmp(cp, ".")) {
 	FREE(file);
 	return(FALSE);
     }
@@ -5819,4 +5825,255 @@ PUBLIC void LYLocalFileToURL ARGS2(
 #endif /* __EMX__ */
 #endif /* VMS */
 #endif /* DOSPATH */
+}
+
+PUBLIC void BeginInternalPage ARGS3(
+	FILE *, fp0,
+	char*, Title,
+	char*, HelpURL)
+{
+    fprintf(fp0, "<html>\n<head>\n");
+    LYAddMETAcharsetToFD(fp0, -1);
+    if (!strcmp(Title, LIST_PAGE_TITLE)) {
+	if (strchr(HTLoadedDocumentURL(), '"') == NULL) {
+	    char *Address = NULL;
+	    /*
+	     * Insert a BASE tag so there is some way to relate the List Page
+	     * file to its underlying document after we are done.  It won't be
+	     * actually used for resolving relative URLs.  - kw
+	     */
+	    StrAllocCopy(Address, HTLoadedDocumentURL());
+	    LYEntify(&Address, FALSE);
+	    fprintf(fp0, "<base href=\"%s\">\n", Address);
+	    FREE(Address);
+	}
+    }
+    fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
+		 Title);
+
+    if ((user_mode == NOVICE_MODE)
+     && LYwouldPush(Title)
+     && (HelpURL != 0)) {
+        fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
+		LYNX_NAME, LYNX_VERSION,
+		helpfilepath, HelpURL, Title);
+    } else {
+        fprintf(fp0, "<h1>%s (%s Version %s)</h1>\n",
+		Title, LYNX_NAME, LYNX_VERSION);
+    }
+}
+
+
+PUBLIC void EndInternalPage ARGS1(
+	FILE *, fp0)
+{
+    fprintf(fp0, "</body>\n</html>");
+}
+
+/*
+ * Trim a trailing path-separator to avoid confusing other programs when we concatenate
+ * to it.  This only applies to local filesystems.
+ */
+PUBLIC void LYTrimPathSep ARGS1(
+	char *,	path)
+{
+    size_t len;
+
+    if (path != 0
+     && (len = strlen(path)) != 0
+     && LYIsPathSep(path[len-1]))
+    	path[len-1] = 0;
+}
+
+#ifdef DOSPATH
+#define PATHSEP_STR "\\"
+#else
+#define PATHSEP_STR "/"
+#endif
+
+/*
+ * Add a trailing path-separator to avoid confusing other programs when we concatenate
+ * to it.  This only applies to local filesystems.
+ */
+PUBLIC void LYAddPathSep ARGS1(
+	char **,	path)
+{
+    size_t len;
+    char *temp;
+
+    if ((path != 0)
+     && ((temp = *path) != 0)
+     && (len = strlen(temp)) != 0
+     && !LYIsPathSep(temp[len-1])) {
+	StrAllocCat(*path, PATHSEP_STR);
+    }
+}
+
+/*
+ * Add a trailing path-separator to avoid confusing other programs when we concatenate
+ * to it.  This only applies to local filesystems.
+ */
+PUBLIC void LYAddPathSep0 ARGS1(
+	char *,	path)
+{
+    size_t len;
+
+    if ((path != 0)
+     && (len = strlen(path)) != 0
+     && !LYIsPathSep(path[len-1])) {
+	strcat(path, PATHSEP_STR);
+    }
+}
+
+/*
+ * Trim a trailing path-separator to avoid confusing other programs when we concatenate
+ * to it.  This only applies to HTML paths.
+ */
+PUBLIC void LYTrimHtmlSep ARGS1(
+	char *,	path)
+{
+    size_t len;
+
+    if (path != 0
+     && (len = strlen(path)) != 0
+     && LYIsHtmlSep(path[len-1]))
+    	path[len-1] = 0;
+}
+
+/*
+ * Add a trailing path-separator to avoid confusing other programs when we concatenate
+ * to it.  This only applies to HTML paths.
+ */
+PUBLIC void LYAddHtmlSep ARGS1(
+	char **,	path)
+{
+    size_t len;
+    char *temp;
+
+    if ((path != 0)
+     && ((temp = *path) != 0)
+     && (len = strlen(temp)) != 0
+     && !LYIsHtmlSep(temp[len-1])) {
+	StrAllocCat(*path, "/");
+    }
+}
+
+/*
+ * Add a trailing path-separator to avoid confusing other programs when we concatenate
+ * to it.  This only applies to HTML paths.
+ */
+PUBLIC void LYAddHtmlSep0 ARGS1(
+	char *,	path)
+{
+    size_t len;
+
+    if ((path != 0)
+     && (len = strlen(path)) != 0
+     && !LYIsHtmlSep(path[len-1])) {
+	strcat(path, "/");
+    }
+}
+
+/*
+ * Invoke a shell command
+ */
+PUBLIC int LYSystem ARGS1(
+	char *,	command)
+{
+    int code;
+
+    fflush(stdout);
+    fflush(stderr);
+
+#ifdef __DJGPP__
+    __djgpp_set_ctrl_c(0);
+    _go32_want_ctrl_break(1);
+#endif /* __DJGPP__ */
+
+#ifdef VMS
+    code = DCLsystem(command);
+#else
+    code = system(command);
+#endif
+
+#ifdef __DJGPP__
+    __djgpp_set_ctrl_c(1);
+    _go32_want_ctrl_break(0);
+#endif /* __DJGPP__ */
+
+    fflush(stdout);
+    fflush(stderr);
+
+    return code;
+}
+
+/*
+ * Return a string which can be used in LYSystem() for spawning a subshell
+ */
+PUBLIC char *LYSysShell NOARGS
+{
+    char *shell = 0;
+#ifdef DOSPATH
+    if (getenv("SHELL") != NULL) {
+	shell = getenv("SHELL");
+    } else {
+	shell = (getenv("COMSPEC") == NULL) ? "command.com" : getenv("COMSPEC");
+    }
+#else
+#ifdef __EMX__
+    if (getenv("SHELL") != NULL) {
+	shell = getenv("SHELL");
+    } else {
+	shell = (getenv("COMSPEC") == NULL) ? "cmd.exe" : getenv("COMSPEC");
+    }
+#else
+#ifdef VMS
+    shell = "";
+#else
+    shell = "exec $SHELL";
+#endif /* __EMX__ */
+#endif /* VMS */
+#endif /* DOSPATH */
+    return shell;
+}
+
+#ifdef VMS
+#define DISPLAY "DECW$DISPLAY"
+#else
+#define DISPLAY "DISPLAY"
+#endif /* VMS */
+
+/*
+ * Return the X-Window $DISPLAY string if it is nonnull/nonempty
+ */
+PUBLIC char *LYgetXDisplay NOARGS
+{
+    char *cp;
+    if ((cp = getenv(DISPLAY)) == NULL || *cp == '\0')
+ 	cp = 0;
+    return cp;
+}
+
+/*
+ * Set the value of the X-Window $DISPLAY variable (yes it leaks memory, but
+ * that is putenv's fault).
+ */
+PUBLIC void LYsetXDisplay ARGS1(
+	char *,	new_display)
+{
+    if (new_display != 0 && *new_display != '\0') {
+#ifdef VMS
+	LYUpperCase(new_display);
+	Define_VMSLogical(DISPLAY, new_display);
+#else
+	static char *display_putenv_command;
+	display_putenv_command = malloc(strlen(new_display) + 12);
+
+	sprintf(display_putenv_command, "DISPLAY=%s", new_display);
+	putenv(display_putenv_command);
+#endif /* VMS */
+	if ((new_display = LYgetXDisplay()) != 0) {
+	    StrAllocCopy(x_display, new_display);
+	}
+    }
 }

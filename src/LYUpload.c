@@ -25,7 +25,6 @@
 #include <LYClean.h>
 #include <LYGetFile.h>
 #include <LYUpload.h>
-#include <LYSystem.h>
 #include <LYLocal.h>
 
 #include <LYexit.h>
@@ -180,8 +179,7 @@ retry:
     FREE(dir);
     stop_curses();
     CTRACE(tfp, "command: %s\n", cmd);
-    system(cmd);
-    fflush(stdout);
+    LYSystem(cmd);
     start_curses();
 #ifdef UNIX
     chmod(buffer, HIDE_CHMOD);
@@ -232,18 +230,14 @@ PUBLIC int LYUpload_options ARGS2(
 	cp += 5;
     strcpy(curloc,cp);
     HTUnEscape(curloc);
-    if (curloc[strlen(curloc) - 1] == '/')
-	curloc[strlen(curloc) - 1] = '\0';
+    LYTrimPathSep(curloc);
 #endif /* VMS */
 
     LYLocalFileToURL(LYUploadFileURL, tempfile);
     StrAllocCopy(*newfile, LYUploadFileURL);
 
-    fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
-		 UPLOAD_OPTIONS_TITLE);
-    fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
-		 LYNX_NAME, LYNX_VERSION,
-		 helpfilepath, UPLOAD_OPTIONS_HELP, UPLOAD_OPTIONS_TITLE);
+    BeginInternalPage(fp0, UPLOAD_OPTIONS_TITLE, UPLOAD_OPTIONS_HELP);
+
     fprintf(fp0, "<pre>\n");
     fprintf(fp0, "   <em>Upload To:</em> %s\n", curloc);
     fputs("\nUpload options:\n", fp0);
@@ -266,7 +260,8 @@ Please refer to the <a href=\"%s\">lynx.cfg</a> file, \
 sections 'UPLOAD' and 'INCLUDE'.\n",
 	LYNX_CFG_FILE);
     }
-    fprintf(fp0, "</pre>\n</body>\n");
+    fprintf(fp0, "</pre>\n");
+    EndInternalPage(fp0);
     LYCloseTempFP(fp0);
 
     LYforce_no_cache = TRUE;

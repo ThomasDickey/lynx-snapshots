@@ -17,8 +17,6 @@
 **		- FM					1997-08-02
 **
 **  TO DO: (roughly in order of decreasing priority)
-      * A means to specify "always allow" and "never allow" domains via
-	a configuration file is needed.
       * Hex escaping isn't considered at all.  Any semi-colons, commas,
 	or spaces actually in cookie names or values (i.e., not serving
 	as punctuation for the overall Set-Cookie value) should be hex
@@ -56,7 +54,6 @@
 #include <LYGlobalDefs.h>
 #include <LYEdit.h>
 #include <LYStrings.h>
-#include <LYSystem.h>
 #include <GridText.h>
 #include <LYUtils.h>
 #include <LYCharUtils.h>
@@ -1908,14 +1905,13 @@ PUBLIC void LYLoadCookies ARGS1 (
 
 /* rjp - experimental persistent cookie support */
 PRIVATE void LYStoreCookies ARGS1 (
-	CONST char *,	cookie_fileX)
+	CONST char *,	cookie_file)
 {
     char buf[1024];
     HTList *dl, *cl;
     domain_entry *de;
     cookie *co;
     FILE *cookie_handle;
-    char *cookie_file = "cookies";
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
 #endif /* VMS */
@@ -2016,7 +2012,7 @@ PRIVATE int LYHandleCookies ARGS4 (
 
 #ifdef EXP_PERSISTENT_COOKIES
     /* rjp - this can go here for now */
-    LYStoreCookies ("j");
+    LYStoreCookies (LYCookieFile);
 #endif
 
     /*
@@ -2481,7 +2477,7 @@ PUBLIC void cookie_add_acceptlist ARGS1(
 	    de = (domain_entry *)calloc(1, sizeof(domain_entry));
 
 	    if (de == NULL)
-		    outofmem(__FILE__, "cookie_accept_domain");
+		    outofmem(__FILE__, "cookie_add_acceptlist");
 
 	    de->bv = ACCEPT_ALWAYS;
 
@@ -2548,7 +2544,7 @@ PUBLIC void cookie_add_rejectlist ARGS1(
 	    de = (domain_entry *)calloc(1, sizeof(domain_entry));
 
 	    if (de == NULL)
-		    outofmem(__FILE__, "cookie_reject_domain");
+		    outofmem(__FILE__, "cookie_add_rejectlist");
 
 	    de->bv = REJECT_ALWAYS;
 

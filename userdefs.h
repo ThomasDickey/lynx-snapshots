@@ -610,53 +610,57 @@
  * will be used as the default.  Also see lynx.cfg for information about
  * the -raw switch and LYK_RAW_TOGGLE command.
  *
- * The default character sets include:
+ * Since Lynx now supports a wide range of platforms it may be useful
+ * to note that cpXXX codepages used by IBM PC compatible computers,
+ * and windows-xxxx used by native MS-Windows apps.
  *
- *   Display Character Set name		MIME name
- *   ==========================		=========
- *   7 bit approximations		us-ascii
- *   Chinese				euc-cn
- *   DEC Multinational			dec-mcs
- *   DosArabic (cp864)			cp864
- *   DosBaltRim (cp775)			cp775
- *   DosCyrillic (cp866)		cp866
- *   DosGreek (cp737)			cp737
- *   DosGreek2 (cp869)			cp869
- *   DosHebrew (cp862)			cp862
- *   DosLatin1 (cp850)			cp850
- *   DosLatin2 (cp852)			cp852
- *   DosLatinUS (cp437)			cp437
- *   ISO 8859-10			iso-8859-10
- *   ISO 8859-5 Cyrillic		iso-8859-5
- *   ISO 8859-6 Arabic			iso-8859-6
- *   ISO 8859-7 Greek			iso-8859-7
- *   ISO 8859-8 Hebrew			iso-8859-8
- *   ISO 8859-9 (Latin 5)		iso-8859-9
- *   ISO Latin 1			iso-8859-1
- *   ISO Latin 2			iso-8859-2
- *   ISO Latin 3			iso-8859-3
- *   ISO Latin 4			iso-8859-4
- *   Japanese (EUC)			euc-jp
- *   Japanese (SJIS)			shift_jis
- *   KOI8-R Cyrillic			koi8-r
- *   Korean				euc-kr
- *   Macintosh (8 bit)			macintosh
- *   NeXT character set			next
- *   RFC 1345 Mnemonic			mnemonic
- *   RFC 1345 w/o Intro			mnemonic+ascii+0
- *   Taipei (Big5)			big5
- *   Transparent			x-transparent
- *   UNICODE UTF-8			utf-8
- *   Vietnamese (VISCII)		viscii
- *   WinArabic (cp1256)			windows-1256
- *   WinBaltRim (cp1257)		windows-1257
- *   WinCyrillic (cp1251)		windows-1251
- *   WinGreek (cp1253)			windows-1253
- *   WinHebrew (cp1255)			windows-1255
- *   WinLatin1 (cp1252)			windows-1252
- *   WinLatin2 (cp1250)			windows-1250
+ *  Recognized character sets include:
+ *
+ *     string for 'O'ptions Menu          MIME name
+ *     ===========================        =========
+ *     7 bit approximations (US-ASCII)    us-ascii
+ *     Western (ISO-8859-1)               iso-8859-1
+ *     Western (cp850)                    cp850
+ *     Western (windows-1252)             windows-1251
+ *     IBM PC US codepage (cp437)         cp437
+ *     DEC Multinational                  dec-mcs
+ *     Macintosh (8 bit)                  macintosh
+ *     NeXT character set                 next
+ *     Chinese                            euc-cn
+ *     Japanese (EUC-JP)                  euc-jp
+ *     Japanese (Shift_JIS)               shift_jis
+ *     Korean                             euc-kr
+ *     Taipei (Big5)                      big5
+ *     Vietnamese (VISCII)                viscii
+ *     Eastern European (ISO-8859-2)      iso-8859-2
+ *     Eastern European (cp852)           cp852
+ *     Eastern European (windows-1250)    windows-1250
+ *     Latin 3 (ISO-8859-3)               iso-8859-3
+ *     Latin 4 (ISO-8859-4)               iso-8859-4
+ *     Baltic Rim (cp775)                 cp775
+ *     Baltic Rim (windows-1257)          windows-1257
+ *     Cyrillic (ISO-8859-5)              is-8859-5
+ *     Cyrillic (cp866)                   cp866
+ *     Cyrillic (windows-1251)            windows-1251
+ *     Cyrillic (KOI8-R)                  koi8-r
+ *     Arabic (ISO-8859-6)                iso-8859-6
+ *     Arabic (cp864)                     cp864
+ *     Arabic (windows-1256)              windows-1256
+ *     Greek (ISO-8859-7)                 iso-8859-7
+ *     Greek (cp737)                      cp737
+ *     Greek2 (cp869)                     cp869
+ *     Greek (windows-1253)               windows-1253
+ *     Hebrew (ISO-8859-8)                iso-8859-8
+ *     Hebrew (cp862)                     cp862
+ *     Hebrew (windows-1255)              windows-1255
+ *     Turkish (ISO-8859-9)               iso-8859-9
+ *     ISO-8859-10                        iso-8859-10
+ *     UNICODE (UTF-8)                    utf-8
+ *     RFC 1345 w/o Intro                 mnemonic+ascii+0
+ *     RFC 1345 Mnemonic                  mnemonic
+ *     Transparent                        x-transparent
  */
-#define CHARACTER_SET "ISO Latin 1"
+#define CHARACTER_SET "iso-8859-1"
 
 /*****************************
  * PREFERRED_LANGUAGE is the language in MIME notation (e.g., "en",
@@ -727,7 +731,7 @@
  * cannot be opened as a local file (file://localhost/string).  Both
  * can be comma-separated lists.  Each prefix must end with a dot, each
  * suffix must begin with a dot, and either may contain other dots (e.g.,
- * .com.jp).  The default lists are defined here, and can be changed
+ * .co.jp).  The default lists are defined here, and can be changed
  * in lynx.cfg.  Each prefix will be used with each suffix, in order,
  * until a valid Internet host is created, based on a successful DNS
  * lookup (e.g., foo will be tested as www.foo.com and then www.foo.edu
@@ -1214,7 +1218,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.1dev.24"
+#define LYNX_VERSION "2.8.1dev.25"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE

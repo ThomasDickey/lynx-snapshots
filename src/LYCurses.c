@@ -14,12 +14,6 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
-#ifdef VMS
-#define DISPLAY "DECW$DISPLAY"
-#else
-#define DISPLAY "DISPLAY"
-#endif /* VMS */
-
 #if defined(VMS) && defined(__GNUC__)
 #include <gnu_hacks.h>
 #undef LINES
@@ -944,10 +938,10 @@ PUBLIC BOOLEAN setup ARGS1(
      *	If the display was not set by a command line option then
      *	see if it is available from the environment.
      */
-    if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0') {
-	StrAllocCopy(display, cp);
+    if ((cp = LYgetXDisplay()) != 0) {
+	StrAllocCopy(x_display, cp);
     } else {
-	FREE(display);
+	FREE(x_display);
     }
 
     /*
@@ -1041,10 +1035,10 @@ PUBLIC BOOLEAN setup ARGS1(
     *  If the display was not set by a command line option then
     *  see if it is available from the environment .
     */
-    if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0') {
-	StrAllocCopy(display, cp);
+    if ((cp = LYgetXDisplay()) != NULL) {
+	StrAllocCopy(x_display, cp);
     } else {
-	FREE(display);
+	FREE(x_display);
     }
 
     if (terminal != NULL) {
@@ -1582,7 +1576,7 @@ void (*func)();
  *	Exception-handler routines for regulating interrupts and enabling
  *	Control-T during spawns.  Includes TRUSTED flag for versions of VMS
  *	which require it in captive accounts.  This code should be used
- *	instead of the VAXC or DECC system(), by including LYSystem.h in
+ *	instead of the VAXC or DECC system(), by including LYUtils.h in
  *	modules which have system() calls.  It helps ensure that we return
  *	to Lynx instead of breaking out to DCL if a user issues interrupts
  *	or generates an ACCVIO during spawns.

@@ -10,7 +10,6 @@
 #include <LYClean.h>
 #include <LYGetFile.h>
 #include <LYDownload.h>
-#include <LYSystem.h>
 #ifdef VMS
 #include <HTVMSUtils.h>
 #endif /* VMS */
@@ -46,7 +45,7 @@ PUBLIC void LYDownload ARGS1(
     char command[512];
     char *cp, *cp1;
     lynx_html_item_type *download_command = 0;
-    int c, len;
+    int c;
     FILE *fp;
     int ch, recall;
     int FnameTotal;
@@ -236,8 +235,7 @@ check_recall:
 	if ((cp = strchr(buffer, '~'))) {
 	    *(cp++) = '\0';
 	    strcpy(command, buffer);
-	    if ((len = strlen(command)) > 0 && command[len-1] == '/')
-		command[len-1] = '\0';
+	    LYTrimPathSep(command);
 #ifdef DOSPATH
 	    strcat(command, HTDOS_wwwName((char *)Home_Dir()));
 #else
@@ -263,12 +261,22 @@ check_recall:
 	    strcpy(buffer, command);
 	}
 #else
+
 #ifndef __EMX__
-	if (*buffer != '/')
+	if (!LYIsPathSep(*buffer)) {
+#if defined(__DJGPP__) || defined(_WINDOWS)
+	    if (strchr(buffer, ':') != NULL)
+		cp = NULL;
+	    else
+#endif /*  __DJGPP__ || _WINDOWS */
 	    cp = getenv("PWD");
+	}
 	else
 #endif /* __EMX__*/
 	    cp = NULL;
+
+	LYTrimPathSep(cp);
+
 	if (cp) {
 	    sprintf(command, "%s/%s", cp, buffer);
 #ifdef DOSPATH
@@ -343,12 +351,8 @@ check_recall:
 	    CTRACE(tfp, "         FAILED!\n");
 	    sprintf(command, COPY_COMMAND, file, buffer);
 	    CTRACE(tfp, "command: %s\n", command);
-	    fflush(stderr);
-	    fflush(stdout);
 	    stop_curses();
-	    system(command);
-	    fflush(stdout);
-	    fflush(stderr);
+	    LYSystem(command);
 	    start_curses();
 	} else {
 	    /*
@@ -373,12 +377,8 @@ check_recall:
 	sprintf(command, "%s %s %s", COPY_PATH, file, buffer);
 #endif /* __EMX__ */
 	CTRACE(tfp, "command: %s\n", command);
-	fflush(stderr);
-	fflush(stdout);
 	stop_curses();
-	system(command);
-	fflush(stdout);
-	fflush(stderr);
+	LYSystem(command);
 	start_curses();
 #if defined(UNIX)
 	LYRelaxFilePermissions(buffer);
@@ -542,11 +542,7 @@ check_recall:
 
 	CTRACE(tfp, "command: %s\n", command);
 	stop_curses();
-	fflush(stderr);
-	fflush(stdout);
-	system(command);
-	fflush(stderr);
-	fflush(stdout);
+	LYSystem(command);
 	start_curses();
 	/* don't remove(file); */
     }
@@ -617,11 +613,8 @@ PUBLIC int LYdownload_options ARGS2(
     LYforce_no_cache = TRUE;  /* don't cache this doc */
 
 
-    fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
-		 DOWNLOAD_OPTIONS_TITLE);
-    fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
-		 LYNX_NAME, LYNX_VERSION,
-		 helpfilepath, DOWNLOAD_OPTIONS_HELP, DOWNLOAD_OPTIONS_TITLE);
+    BeginInternalPage(fp0, DOWNLOAD_OPTIONS_TITLE, DOWNLOAD_OPTIONS_HELP);
+
     fprintf(fp0, "<pre>\n");
     fprintf(fp0, "\
    <em>You download the link:</em> %s\n\
@@ -669,7 +662,8 @@ sections 'DOWNLOAD' and 'INCLUDE'. \
 --> \n",
 	LYNX_CFG_FILE);
     }
-    fprintf(fp0, "</pre>\n</body>\n");
+    fprintf(fp0, "</pre>\n");
+    EndInternalPage(fp0);
     LYCloseTempFP(fp0);
 
     /*

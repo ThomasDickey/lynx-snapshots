@@ -24,10 +24,14 @@ INSTALL		= @INSTALL@
 INSTALL_PROGRAM	= @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
 
+## This is the version which we are developing (or, upon release, make this
+## the same).  Use no dots in the name, since it must work on VMS and MS-DOS.
+VERSION		= 2-8-1
+
 ##this is the name of the directory the lynx source code is in.
 ##(e.g. lynx2-8, not the full path)
-lynxdir= lynx2-8
-lynxname= lynx2-8
+lynxdir= lynx$(VERSION)
+lynxname= lynx$(VERSION)
 
 ## Where you want lynx installed
 bindir= @bindir@
@@ -129,7 +133,6 @@ SITE_DEFS = # Your defines here
 # -DLINKEDSTYLES
 # -DLONG_LIST
 # -DLY_FIND_LEAKS
-# -DNCURSES
 # -DNO_CHANGE_EXECUTE_PERMS
 # -DNO_PARENT_DIR_REFERENCE
 # -DNSL_FORK

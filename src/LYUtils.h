@@ -5,71 +5,89 @@
 #include <HTList.h>
 #endif /* HTLIST_H */
 
-extern void highlight PARAMS((int flag, int cur, char *target));
-extern void free_and_clear PARAMS((char **obj));
-extern void convert_to_spaces PARAMS((char *string, BOOL condense));
-extern char * strip_trailing_slash PARAMS((char * my_dirname));
-extern void statusline PARAMS((CONST char *text));
-extern void toggle_novice_line NOPARAMS;
-extern void noviceline PARAMS((int more_flag));
-extern void LYFakeZap PARAMS((BOOL set));
-extern int HTCheckForInterrupt NOPARAMS;
+#ifdef DOSPATH
+#define LYIsPathSep(ch) ((ch) == '/' || (ch) == '\\')
+#else
+#define LYIsPathSep(ch) ((ch) == '/')
+#endif
+
+#define LYIsHtmlSep(ch) ((ch) == '/')
+
+extern BOOLEAN LYAddSchemeForURL PARAMS((char **AllocatedString, char *default_scheme));
+extern BOOLEAN LYCachedTemp PARAMS((char *result, char **cached));
+extern BOOLEAN LYCanDoHEAD PARAMS((CONST char *address));
+extern BOOLEAN LYExpandHostForURL PARAMS((char **AllocatedString, char *prefix_list, char *suffix_list));
+extern BOOLEAN LYPathOffHomeOK PARAMS((char *fbuffer, size_t fbuffer_size));
+extern BOOLEAN LYisLocalAlias PARAMS((char *filename));
 extern BOOLEAN LYisLocalFile PARAMS((char *filename));
 extern BOOLEAN LYisLocalHost PARAMS((char *filename));
-extern void LYLocalhostAliases_free NOPARAMS;
-extern void LYAddLocalhostAlias PARAMS((char *alias));
-extern BOOLEAN LYisLocalAlias PARAMS((char *filename));
-extern int LYCheckForProxyURL PARAMS((char *filename));
-extern int is_url PARAMS((char *filename));
-extern BOOLEAN LYCanDoHEAD PARAMS((CONST char *address));
-extern void remove_backslashes PARAMS((char *buf));
-extern char *quote_pathname PARAMS((char *pathname));
 extern BOOLEAN inlocaldomain NOPARAMS;
-extern void size_change PARAMS((int sig));
-extern void HTSugFilenames_free NOPARAMS;
-extern void HTAddSugFilename PARAMS((char *fname));
-extern void change_sug_filename PARAMS((char *fname));
-extern int number2arrows PARAMS((int number));
-extern void parse_restrictions PARAMS((CONST char *s));
-extern void checkmail NOPARAMS;
-extern void LYCheckMail NOPARAMS;
-extern void LYEnsureAbsoluteURL PARAMS((char **href, CONST char *name));
-extern void LYConvertToURL PARAMS((char **AllocatedString));
-extern BOOLEAN LYExpandHostForURL PARAMS((
-	char **AllocatedString, char *prefix_list, char *suffix_list));
-extern BOOLEAN LYAddSchemeForURL PARAMS((
-	char **AllocatedString, char *default_scheme));
-extern void LYTrimRelFromAbsPath PARAMS((char *path));
-extern void LYDoCSI PARAMS((char *url, CONST char *comment, char **csi));
-#ifdef VMS
-extern void Define_VMSLogical PARAMS((
-	char *LogicalName, char *LogicalValue));
-#endif /* VMS */
 extern CONST char *Home_Dir NOPARAMS;
+extern FILE *LYAppendToTxtFile PARAMS((char * name));
+extern FILE *LYNewBinFile PARAMS((char * name));
+extern FILE *LYNewTxtFile PARAMS((char * name));
+extern FILE *LYOpenScratch PARAMS((char *result, CONST char *prefix));
+extern FILE *LYOpenTemp PARAMS((char *result, CONST char *suffix, CONST char *mode));
+extern FILE *LYReopenTemp PARAMS((char *name));
 extern char *LYPathLeaf PARAMS((char * pathname));
-extern BOOLEAN LYPathOffHomeOK PARAMS((char *fbuffer, size_t fbuffer_size));
-extern void LYAddPathToHome PARAMS((
-	char *fbuffer, size_t fbuffer_size, char *fname));
+extern char *LYSysShell NOPARAMS;
+extern char *LYgetXDisplay NOPARAMS;
+extern char *quote_pathname PARAMS((char *pathname));
+extern char *strip_trailing_slash PARAMS((char * my_dirname));
+extern int HTCheckForInterrupt NOPARAMS;
+extern int LYCheckForProxyURL PARAMS((char *filename));
+extern int LYSystem PARAMS((char *command));
+extern int is_url PARAMS((char *filename));
+extern int number2arrows PARAMS((int number));
 extern time_t LYmktime PARAMS((char *string, BOOL absolute));
+extern void BeginInternalPage PARAMS((FILE *fp0, char *Title, char *HelpURL));
+extern void EndInternalPage PARAMS((FILE *fp0));
+extern void HTAddSugFilename PARAMS((char *fname));
+extern void HTSugFilenames_free NOPARAMS;
+extern void LYAddHtmlSep PARAMS((char **path));
+extern void LYAddHtmlSep0 PARAMS((char *path));
+extern void LYAddLocalhostAlias PARAMS((char *alias));
+extern void LYAddPathSep PARAMS((char **path));
+extern void LYAddPathSep0 PARAMS((char *path));
+extern void LYAddPathToHome PARAMS((char *fbuffer, size_t fbuffer_size, char *fname));
+extern void LYCheckMail NOPARAMS;
+extern void LYCleanupTemp NOPARAMS;
+extern void LYCloseTemp PARAMS((char *name));
+extern void LYCloseTempFP PARAMS((FILE *fp));
+extern void LYConvertToURL PARAMS((char **AllocatedString));
+extern void LYDoCSI PARAMS((char *url, CONST char *comment, char **csi));
+extern void LYEnsureAbsoluteURL PARAMS((char **href, CONST char *name));
+extern void LYFakeZap PARAMS((BOOL set));
+extern void LYLocalFileToURL PARAMS((char *target, char *source));
+extern void LYLocalhostAliases_free NOPARAMS;
+extern void LYRemoveTemp PARAMS((char *name));
+extern void LYTrimHtmlSep PARAMS((char *path));
+extern void LYTrimPathSep PARAMS((char *path));
+extern void LYTrimRelFromAbsPath PARAMS((char *path));
+extern void LYsetXDisplay PARAMS((char *new_display));
+extern void change_sug_filename PARAMS((char *fname));
+extern void checkmail NOPARAMS;
+extern void convert_to_spaces PARAMS((char *string, BOOL condense));
+extern void free_and_clear PARAMS((char **obj));
+extern void highlight PARAMS((int flag, int cur, char *target));
+extern void noviceline PARAMS((int more_flag));
+extern void parse_restrictions PARAMS((CONST char *s));
+extern void remove_backslashes PARAMS((char *buf));
+extern void size_change PARAMS((int sig));
+extern void statusline PARAMS((CONST char *text));
+extern void toggle_novice_line NOPARAMS;
+
+#ifdef VMS
+extern void Define_VMSLogical PARAMS((char *LogicalName, char *LogicalValue));
+#endif /* VMS */
+
 #if ! HAVE_PUTENV
 extern int putenv PARAMS((CONST char *string));
 #endif /* HAVE_PUTENV */
 
-extern FILE *LYNewBinFile PARAMS((char * name));
-extern FILE *LYNewTxtFile PARAMS((char * name));
-extern FILE *LYAppendToTxtFile PARAMS((char * name));
 #ifdef UNIX
 extern void LYRelaxFilePermissions PARAMS((CONST char * name));
 #endif
-extern BOOLEAN LYCachedTemp PARAMS((char *result, char **cached));
-extern FILE *LYOpenTemp PARAMS((char *result, CONST char *suffix, CONST char *mode));
-extern FILE *LYReopenTemp PARAMS((char *name));
-extern FILE *LYOpenScratch PARAMS((char *result, CONST char *prefix));
-extern void LYCloseTemp PARAMS((char *name));
-extern void LYCloseTempFP PARAMS((FILE *fp));
-extern void LYRemoveTemp PARAMS((char *name));
-extern void LYCleanupTemp NOPARAMS;
-extern void LYLocalFileToURL PARAMS((char *target, char *source));
 
 /*
  *  Whether or not the status line must be shown.

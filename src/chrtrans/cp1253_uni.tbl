@@ -2,7 +2,7 @@
 Mwindows-1253
 
 #Name as a Display Charset (used on Options screen)
-OWinGreek (cp1253)
+OGreek (windows-1253)
 
 #
 #    Name:     cp1253 to Unicode table
@@ -26,7 +26,7 @@ OWinGreek (cp1253)
 
 0x20-0x7e       idem
 #
-0x80    U+20AC  #EURO SIGN
+0x80	U+20AC	#EURO SIGN
 0x81		#UNDEFINED
 0x82	U+201A	#SINGLE LOW-9 QUOTATION MARK
 0x83	U+0192	#LATIN SMALL LETTER F WITH HOOK

@@ -80,25 +80,8 @@ PUBLIC int showlist ARGS2(
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
     LYforce_no_cache = TRUE;	/* force this file to be new */
 
+    BeginInternalPage(fp0, LIST_PAGE_TITLE, LIST_PAGE_HELP);
 
-    fprintf(fp0, "<head>\n");
-    LYAddMETAcharsetToFD(fp0, -1);
-    if (strchr(HTLoadedDocumentURL(), '"') == NULL) {
-	/*
-	 *  Insert a BASE tag so there is some way to relate the List Page
-	 *  file to its underlying document after we are done.	It won't
-	 *  be actually used for resolving relative URLs. - kw
-	 */
-	StrAllocCopy(Address, HTLoadedDocumentURL());
-	LYEntify(&Address, FALSE);
-	fprintf(fp0, "<base href=\"%s\">\n", Address);
-	FREE(Address);
-    }
-    fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
-		 LIST_PAGE_TITLE);
-    fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
-	LYNX_NAME, LYNX_VERSION,
-	helpfilepath, LIST_PAGE_HELP, LIST_PAGE_TITLE);
     StrAllocCopy(Address, HTLoadedDocumentURL());
     LYEntify(&Address, FALSE);
     fprintf(fp0, "References in %s<p>\n",
@@ -213,8 +196,10 @@ PUBLIC int showlist ARGS2(
 	FREE(Address);
     }
 
-    fprintf(fp0,"\n</%s>\n</body>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
-				       "ol" : "ul"));
+    fprintf(fp0,"\n</%s>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
+			     "ol" : "ul"));
+    EndInternalPage(fp0);
+    LYCloseTempFP(fp0);
 
     /*
      *	Make necessary changes to newdoc before returning to caller.
@@ -236,7 +221,6 @@ PUBLIC int showlist ARGS2(
     }
     newdoc->isHEAD = FALSE;
     newdoc->safe = FALSE;
-    LYCloseTempFP(fp0);
     return(0);
 }
 

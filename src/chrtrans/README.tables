@@ -4,6 +4,7 @@ ftp://dkuug.dk/) and are believed to be correct in their mappings,
 but not checked in detail.  The Unicode/UCS2 values
 for some of the RFC 1345 Mnemonic codes are out of date,
 a cleanup and update would be needed for serious use.
+[See also http://czyborra.com/charsets/iso8859.html for codepages survey.]
 
 More translation files can be easily provided (and new character entities
 added to entities.h), this set is just to test whether the system works

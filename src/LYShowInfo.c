@@ -71,19 +71,19 @@ PUBLIC int showinfo ARGS4(
 	}
     }
 
-    fprintf(fp0, "<head>\n");
+    fprintf(fp0, "<html>\n<head>\n");
     LYAddMETAcharsetToFD(fp0, -1);
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 SHOWINFO_TITLE);
 
 #ifdef LYNX_COMPILE_OPTS
-    fprintf(fp0, "<h1>%s %s (<a href=\"%s\">%s</a>) - <a href=\"%s\">compile time settings</a>\n",
+    fprintf(fp0, "<h1>%s %s (<a href=\"%s\">%s</a>) - <a href=\"%s\">compile time settings</a></h1>\n",
 		 LYNX_NAME, LYNX_VERSION,
 		 (LYNX_RELEASE ? LYNX_WWW_HOME   : LYNX_WWW_DIST),
 		 (LYNX_RELEASE ? "major release" : "development version"),
 		 LYNX_COMPILE_OPTS);
 #else
-    fprintf(fp0, "<h1>%s %s (<a href=\"%s\">%s</a>)\n",
+    fprintf(fp0, "<h1>%s %s (<a href=\"%s\">%s</a>)</h1>\n",
 		 LYNX_NAME, LYNX_VERSION,
 		 (LYNX_RELEASE ? LYNX_WWW_HOME   : LYNX_WWW_DIST),
 		 (LYNX_RELEASE ? "major release" : "development version") );
@@ -346,7 +346,7 @@ PUBLIC int showinfo ARGS4(
 #ifdef DIRED_SUPPORT
     }
 #endif /* DIRED_SUPPORT */
-    fprintf(fp0, "</body>\n");
+    EndInternalPage(fp0);
 
     refresh();
 

@@ -352,7 +352,7 @@ AC_DEFINE_UNQUOTED(LYNX_CFG_FILE,"$LYNX_CFG_FILE")
 AC_MSG_RESULT($LYNX_CFG_FILE)
 
 AC_MSG_CHECKING(for location of site specific options-file)
-LYNX_COMPILE_OPTS=$cf_libdir/lynx_help/lynx_site.txt
+LYNX_COMPILE_OPTS=$cf_libdir/lynx_site.txt
 AC_DEFINE_UNQUOTED(LYNX_COMPILE_OPTS,"$LYNX_COMPILE_OPTS")
 AC_MSG_RESULT($LYNX_COMPILE_OPTS)
 
@@ -446,14 +446,6 @@ dnl --------------------------------------------------------------------------
 
 CF_HELP_MESSAGE(
 Miscellaneous Options:)
-
-AC_MSG_CHECKING(if experimental 8-bit case-conversion should be used)
-CF_ARG_ENABLE(8bit-toupper,
-[  --enable-8bit-toupper   use experimental 8-bit case-conversion],
-	[use_8bit_toupper=$enableval],
-	[use_8bit_toupper=no])
-AC_MSG_RESULT($use_8bit_toupper)
-test $use_8bit_toupper != no && AC_DEFINE(EXP_8BIT_TOUPPER)
 
 AC_MSG_CHECKING(if experimental forms-based options screen should be used)
 CF_ARG_ENABLE(forms-options,
@@ -556,6 +548,18 @@ AC_MSG_CHECKING(if you want cgi-link support)
 CF_ARG_ENABLE(cgi-links,
 [  --enable-cgi-links      support cgi links w/o a http daemon],
 	[AC_DEFINE(LYNXCGI_LINKS)])
+AC_MSG_RESULT($enableval)
+
+AC_MSG_CHECKING(if you want exec-links support)
+CF_ARG_ENABLE(exec-links,
+[  --enable-exec-links     support cgi links w/o a http daemon],
+	[AC_DEFINE(EXEC_LINKS)])
+AC_MSG_RESULT($enableval)
+
+AC_MSG_CHECKING(if you want exec-scripts support)
+CF_ARG_ENABLE(exec-scripts,
+[  --enable-exec-scripts   support cgi links w/o a http daemon],
+	[AC_DEFINE(EXEC_SCRIPTS)])
 AC_MSG_RESULT($enableval)
 
 AC_MSG_CHECKING(if you want internal-links feature)

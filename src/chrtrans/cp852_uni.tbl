@@ -2,7 +2,7 @@
 Mcp852
 
 #Name as a Display Charset (used on Options screen)
-ODosLatin2 (cp852)
+OEastern European (cp852)
 
 #
 #    Name:     cp852_DOSLatin2 to Unicode table

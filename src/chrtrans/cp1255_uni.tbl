@@ -2,7 +2,7 @@
 Mwindows-1255
 
 #Name as a Display Charset (used on Options screen).
-OWinHebrew (cp1255)
+OHebrew (windows-1255)
 
 #
 #    Name:     cp1255 to Unicode table

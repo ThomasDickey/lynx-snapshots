@@ -8,7 +8,7 @@ D0
 Mcp850
 
 #Name as a Display Charset (used on Options screen)
-ODosLatin1 (cp850)
+OWestern (cp850)
 
 #
 #    Name:     cp850_DOSLatin1 to Unicode table

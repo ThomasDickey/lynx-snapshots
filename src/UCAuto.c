@@ -15,6 +15,7 @@
 */
 
 #include <HTUtils.h>
+#include <LYUtils.h>
 
 #include <UCMap.h>
 #include <UCDefs.h>
@@ -24,12 +25,6 @@
 #include <LYUtils.h>
 
 #ifdef EXP_CHARTRANS_AUTOSWITCH
-
-#ifdef VMS
-#define DISPLAY "DECW$DISPLAY"
-#else
-#define DISPLAY "DISPLAY"
-#endif /* VMS */
 
 #ifdef LINUX
 typedef enum {
@@ -83,7 +78,7 @@ PRIVATE void call_setfont ARGS3(
 
     if (*T_setfont_cmd) {
 	CTRACE(tfp, "Executing setfont: '%s'\n", T_setfont_cmd);
-	system(T_setfont_cmd);
+	LYSystem(T_setfont_cmd);
     }
 }
 
@@ -130,7 +125,6 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
     TGen_state_t HasUmap = Dunno;
 
     char tmpbuf1[100], tmpbuf2[20];
-    char *cp;
 
     /*
      *	Restore the original character set.
@@ -149,7 +143,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 		    sprintf(tmpbuf1, "%s %s %s",
 			    SETFONT, old_font, NOOUTPUT);
 		}
-		system(tmpbuf1);
+		LYSystem(tmpbuf1);
 	    }
 
 	    remove(old_font);
@@ -166,7 +160,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	old_font = tempnam((char *)0, "font");
 	sprintf(tmpbuf1, "%s -o %s -ou %s %s",
 		SETFONT, old_font, old_umap, NOOUTPUT);
-	system(tmpbuf1);
+	LYSystem(tmpbuf1);
     }
 
     name = p->MIMEname;
@@ -182,8 +176,8 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
     /*
      *	Use this for output of escape sequences.
      */
-    if ((display != NULL) ||
-	((cp = getenv(DISPLAY)) != NULL && *cp != '\0')) {
+    if ((x_display != NULL) ||
+	LYgetXDisplay() != NULL) {
 	/*
 	 *  We won't do anything in an xterm.  Better that way...
 	 */

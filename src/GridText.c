@@ -41,6 +41,8 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
+#undef DEBUG_APPCH
+
 #ifdef USE_COLOR_STYLE
 #include <AttrList.h>
 #include <LYHash.h>
@@ -1606,14 +1608,18 @@ PRIVATE void split_line ARGS2(
     HTLine * previous = text->last_line;
     int ctrl_chars_on_previous_line = 0;
     char * cp;
-    HTLine * line = (HTLine *)LY_CALLOC(1, LINE_SIZE(MAX_LINE));
+    /* can't wrap in middle of multibyte sequences, so allocate 2 extra */
+    HTLine * line = (HTLine *)LY_CALLOC(1, LINE_SIZE(MAX_LINE)+2);
     if (line == NULL)
 	outofmem(__FILE__, "split_line_1");
 
     ctrl_chars_on_this_line = 0; /*reset since we are going to a new line*/
     text->LastChar = ' ';
 
-    CTRACE(tfp,"GridText: split_line called\n");
+#ifdef DEBUG_APPCH
+    CTRACE(tfp,"GridText: split_line(%p,%d) called\n", text, split);
+    CTRACE(tfp,"   bold_on=%d, underline_on=%d\n", bold_on, underline_on);
+#endif
 
     text->Lines++;
 
@@ -1716,7 +1722,7 @@ PRIVATE void split_line ARGS2(
 	line->styles[0].horizpos = 0xffffffff;
     if (previous->numstyles == 0)
 	previous->styles[0].horizpos = 0xffffffff;
-#endif
+#endif /*USE_COLOR_STYLE*/
     previous->next = line;
     text->last_line = line;
     line->size = 0;
@@ -1839,7 +1845,8 @@ PRIVATE void split_line ARGS2(
 	    linedata[line->size] = '\0';
 	    ctrl_chars_on_this_line++;
 	    SpecialAttrChars++;;
-	}
+	} else
+	    bold_on = OFF;
 	if (plen) {
 	    for (i = (plen - 1); i != 0; i--) {
 		if (p[i] == LY_BOLD_START_CHAR) {
@@ -2036,8 +2043,49 @@ PUBLIC void HText_appendCharacter ARGS2(
     HTStyle * style;
     int indent;
 
-    CTRACE(tfp, "add(%c) %d/%d\n", ch,
-		HTisDocumentSource(), HTOutputFormat != WWW_SOURCE);
+#ifdef DEBUG_APPCH
+    if (TRACE) {
+	char * special = NULL;  /* make trace a little more readable */
+	switch(ch) {
+	case HT_NON_BREAK_SPACE:
+		special = "HT_NON_BREAK_SPACE";
+		break;
+	case HT_EM_SPACE:
+		special = "HT_EM_SPACE";
+		break;
+	case LY_UNDERLINE_START_CHAR:
+		special = "LY_UNDERLINE_START_CHAR";
+		break;
+	case LY_UNDERLINE_END_CHAR:
+		special = "LY_UNDERLINE_END_CHAR";
+		break;
+	case LY_BOLD_START_CHAR:
+		special = "LY_BOLD_START_CHAR";
+		break;
+	case LY_BOLD_END_CHAR:
+		special = "LY_BOLD_END_CHAR";
+		break;
+	case LY_SOFT_HYPHEN:
+		special = "LY_SOFT_HYPHEN";
+		break;
+	case LY_SOFT_NEWLINE:
+		special = "LY_SOFT_NEWLINE";
+		break;
+	default:
+		special = NULL;
+		break;
+	}
+
+	if (special != NULL) {
+	    CTRACE(tfp, "add(%s %d special char) %d/%d\n", special, ch,
+		   HTisDocumentSource(), HTOutputFormat != WWW_SOURCE);
+	} else {
+	    CTRACE(tfp, "add(%c) %d/%d\n", ch,
+		   HTisDocumentSource(), HTOutputFormat != WWW_SOURCE);
+	}
+    } /* trace only */
+#endif /* DEBUG_APPCH */
+
     /*
      *  Make sure we don't crash on NULLs.
      */
@@ -2081,19 +2129,11 @@ PUBLIC void HText_appendCharacter ARGS2(
 	!text->T.transp && !text->T.output_utf8 &&
 	(unsigned char)ch < LYlowest_eightbit[current_char_set])
 	return;
-#endif /* USE_SLANG */
+#endif /* !USE_SLANG */
     if ((unsigned char)ch == 155 && HTCJK == NOCJK) {	/* octal 233 */
 	if (!HTPassHighCtrlRaw &&
 	    !text->T.transp && !text->T.output_utf8 &&
-	    (155 < LYlowest_eightbit[current_char_set]) &&
-	    strncmp(LYchar_set_names[current_char_set],
-		    "DosLatin1 (cp850)", 17) &&
-	    strncmp(LYchar_set_names[current_char_set],
-		    "DosLatinUS (cp437)", 18) &&
-	    strncmp(LYchar_set_names[current_char_set],
-		    "Macintosh (8 bit)", 17) &&
-	    strncmp(LYchar_set_names[current_char_set],
-		    "NeXT character set", 18)) {
+	    (155 < LYlowest_eightbit[current_char_set])) {
 	    return;
 	}
     }
@@ -2242,6 +2282,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 
     if (IsSpecialAttrChar(ch)) {
 #ifndef USE_COLOR_STYLE
+        if (line->size >= (MAX_LINE-1)) return;
 	if (ch == LY_UNDERLINE_START_CHAR) {
 	    line->data[line->size++] = LY_UNDERLINE_START_CHAR;
 	    line->data[line->size] = '\0';
@@ -3160,9 +3201,7 @@ PUBLIC void HText_endAppend ARGS1(
 	HText *,	text)
 {
     int cur_line, cur_char, cur_shift;
-    TextAnchor *anchor_ptr;
     HTLine *line_ptr;
-    unsigned char ch;
 
     if (!text)
 	return;
@@ -3217,6 +3256,46 @@ PUBLIC void HText_endAppend ARGS1(
      *  Fix up the anchor structure values and
      *  create the hightext strings. - FM
      */
+    HText_trimHightext(HTMainText, FALSE);
+}
+
+/*
+**  This function gets the hightext from the text by finding the char
+**  position, and brings the anchors in line with the text by adding the text
+**  offset to each of the anchors.
+**
+**  `Forms input' fields cannot be displayed properly without this function
+**  to be invoked (detected in display_partial mode).
+**
+**  (BOOLEAN value allow us to disable annoying repeated trace messages
+**  for display_partial mode).
+*/
+PUBLIC void HText_trimHightext ARGS2(
+	HText *,	text,
+	BOOLEAN,	disable_trace)
+{
+    int cur_line, cur_char, cur_shift;
+    TextAnchor *anchor_ptr;
+    HTLine *line_ptr;
+    unsigned char ch;
+
+    if (!text)
+	return;
+
+    CTRACE(tfp,"Gridtext: Entering HText_trimHightext\n");
+
+    /*
+     *  Get the first line.
+     */
+    line_ptr = text->last_line->next;
+    cur_char = line_ptr->size;
+    cur_line = 0;
+    cur_shift = 0;
+
+    /*
+     *  Fix up the anchor structure values and
+     *  create the hightext strings. - FM
+     */
     for (anchor_ptr = text->first_anchor;
 	 anchor_ptr; anchor_ptr=anchor_ptr->next) {
 re_parse:
@@ -3238,6 +3317,7 @@ re_parse:
 	if (anchor_ptr->line_pos < 0)
 	    anchor_ptr->line_pos = 0;
 
+	if (!disable_trace)
 	CTRACE(tfp, "Gridtext: Anchor found on line:%d col:%d\n",
 			    cur_line, anchor_ptr->line_pos);
 
@@ -3258,6 +3338,8 @@ re_parse:
 	if (anchor_ptr->extent < 0) {
 	    anchor_ptr->extent = 0;
 	}
+
+	if (!disable_trace)
 	CTRACE(tfp, "anchor text: '%s'   col: %d\n",
 			    line_ptr->data, anchor_ptr->line_pos);
 	/*
@@ -3335,7 +3417,8 @@ re_parse:
 	anchor_ptr->line_pos += line_ptr->offset;
 	anchor_ptr->line_num  = cur_line;
 
-	CTRACE(tfp, "GridText:     add link on line %d in HText_endAppend\n",
+	if (!disable_trace)
+	CTRACE(tfp, "GridText:     add link on line %d in HText_trimHightext\n",
 		    cur_line);
 
 	/*
@@ -3978,8 +4061,8 @@ PUBLIC CONST char * HText_getServer NOARGS
 
 /*
  *  HText_pageDisplay displays a screen of text
- *  starting from the line 'line_num'-1
- *  this is the primary call for lynx
+ *  starting from the line 'line_num'-1.
+ *  This is the primary call for lynx.
  */
 PUBLIC void HText_pageDisplay ARGS2(
 	int,		line_num,
@@ -3987,16 +4070,28 @@ PUBLIC void HText_pageDisplay ARGS2(
 {
     CTRACE(tfp, "GridText: HText_pageDisplay at line %d started\n", line_num);
 
+#ifdef DISP_PARTIAL
+    if (display_partial && !debug_display_partial)
+	/*
+	**  Garbage is reported from forms input fields in incremental mode.
+	**  So we start HText_trimHightext() to forget this side effect.
+	**  This function was split-out from HText_endAppend().
+	**  It may not be the best solution but it works. - LP
+	**  (TRUE =  to disable annoying repeated trace messages)
+	*/
+	HText_trimHightext(HTMainText, TRUE);
+#endif
+
     display_page(HTMainText, line_num-1, target);
 
-    CTRACE(tfp, "GridText: HText_pageDisplay finished\n");
-
 #ifdef DISP_PARTIAL
-	if (display_partial && debug_display_partial)
+    if (display_partial && debug_display_partial)
 	sleep(MessageSecs);
 #endif
 
     is_www_index = HTAnchor_isIndex(HTMainAnchor);
+
+    CTRACE(tfp, "GridText: HText_pageDisplay finished\n");
 }
 
 /*

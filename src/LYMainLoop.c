@@ -27,7 +27,6 @@
 #include <LYEdit.h>
 #include <LYShowInfo.h>
 #include <LYBookmark.h>
-#include <LYSystem.h>
 #include <LYKeymap.h>
 #include <LYJump.h>
 #include <LYDownload.h>
@@ -90,7 +89,6 @@ PUBLIC char * LYRequestTitle = NULL; /* newdoc.title in calls to getfile() */
 #ifdef DISP_PARTIAL
 PUBLIC int Newline_partial = 0;     /* required for display_partial mode */
 PUBLIC int NumOfLines_partial = -1; /* required for display_partial mode */
-PUBLIC BOOLEAN debug_display_partial;  /* show with MessageSecs delay */
 #endif
 
 PRIVATE document newdoc;
@@ -1159,9 +1157,7 @@ try_again:
 		FREE(temp);
 		if (!(temp = HTParse(curdoc.address, "",
 				     PARSE_PATH+PARSE_PUNCTUATION))) {
-		    if (startrealm[strlen(startrealm)-1] != '/') {
-			StrAllocCat(startrealm, "/");
-		    }
+		    LYAddHtmlSep(&startrealm);
 		} else {
 		    if (forced_HTML_mode &&
 			!dump_output_immediately &&
@@ -1219,9 +1215,7 @@ try_again:
 			StrAllocCopy(traversal_host, "None");
 		    } else {
 			StrAllocCopy(traversal_host, temp);
-			if (traversal_host[strlen(traversal_host)-1] != '/') {
-			    StrAllocCat(traversal_host, "/");
-			}
+			LYAddHtmlSep(&traversal_host);
 		    }
 		    FREE(temp);
 		}
@@ -4548,8 +4542,7 @@ check_goto_URL:
 			 *  We're viewing a local directory.  Make
 			 *  that the CSwing argument. - FM
 			 */
-			if (cp[(strlen(cp) - 1)] != '/')
-			    StrAllocCat(cp, "/");
+			LYAddPathSep(&cp);
 			StrAllocCopy(VMSdir, HTVMS_name("", cp));
 			FREE(cp);
 		    } else {
@@ -4603,7 +4596,7 @@ check_goto_URL:
 		refresh_screen = TRUE;	/* redisplay */
 	    }
 	    stop_curses();
-	    system(temp);
+	    LYSystem(temp);
 	    start_curses();
 	    FREE(temp);
 	    break;
@@ -4840,37 +4833,7 @@ check_add_bookmark_to_self:
 	    if (!no_shell) {
 		stop_curses();
 		printf(SPAWNING_MSG);
-		fflush(stdout);
-		fflush(stderr);
-#ifdef DOSPATH
-#ifdef __DJGPP__
-		__djgpp_set_ctrl_c(0);
-		_go32_want_ctrl_break(1);
-#endif /* __DJGPP__ */
-		if (getenv("SHELL") != NULL) {
-		    system(getenv("SHELL"));
-		} else {
-		    system(getenv("COMSPEC") == NULL ? "command.com" : getenv("COMSPEC"));
-		}
-#ifdef __DJGPP__
-		__djgpp_set_ctrl_c(1);
-		_go32_want_ctrl_break(0);
-#endif /* __DJGPP__ */
-#else
-#ifdef __EMX__
-		if (getenv("SHELL") != NULL) {
-		    system(getenv("SHELL"));
-		} else {
-		    system(getenv("COMSPEC") == NULL ? "cmd.exe" : getenv("COMSPEC"));
-		}
-#else
-#ifdef VMS
-		system("");
-#else
-		system("exec $SHELL");
-#endif /* __EMX__ */
-#endif /* VMS */
-#endif /* DOSPATH */
+		LYSystem(LYSysShell());
 		start_curses();
 		refresh_screen = TRUE;	/* for an HText_pageDisplay() */
 	    } else {

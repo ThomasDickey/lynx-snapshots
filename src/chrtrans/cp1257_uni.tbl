@@ -2,7 +2,7 @@
 Mwindows-1257
 
 #Name as a Display Charset (used on Options screen)
-OWinBaltRim (cp1257)
+OBaltic Rim (windows-1257)
 
 #
 #    Name:     cp1257 to Unicode table

@@ -17,7 +17,8 @@
 #undef DIRED_SUPPORT		/* AC_ARG_WITH(dired) */
 #undef DISP_PARTIAL		/* CF_ARG_ENABLE(partial) */
 #undef DONT_TRACK_INTERNAL_LINKS /* CF_ARG_DISABLE(internal-links) */
-#undef EXP_8BIT_TOUPPER		/* AC_ARG_ENABLE(8bit-toupper) */
+#undef EXEC_LINKS		/* CF_ARG_ENABLE(exec-links) */
+#undef EXEC_SCRIPTS		/* CF_ARG_ENABLE(exec-scripts) */
 #undef EXP_CHARTRANS_AUTOSWITCH	/* AC_ARG_ENABLE(font-switch) */
 #undef EXP_FORMS_OPTIONS	/* AC_ARG_ENABLE(forms-options) */
 #undef EXP_PERSISTENT_COOKIES	/* AC_ARG_ENABLE(persistent-cookies) */
@@ -129,8 +130,6 @@
 /* FIXME:DECLARE_WAIS_LOGFILES */
 /* FIXME:DGUX */
 /* FIXME:DGUX_OLD */
-/* FIXME:EXEC_LINKS */
-/* FIXME:EXEC_SCRIPTS */
 /* FIXME:HP_TERMINAL */
 /* FIXME:NOPORT */
 /* FIXME:POSIX_JC */

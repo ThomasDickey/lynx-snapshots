@@ -5,7 +5,6 @@
 #include <LYBookmark.h>
 #include <LYGlobalDefs.h>
 #include <LYSignal.h>
-#include <LYSystem.h>
 #include <LYKeymap.h>
 #include <LYCharUtils.h> /* need for META charset */
 #include <LYCharSets.h>  /* need for LYHaveCJKCharacterSet */
@@ -289,7 +288,7 @@ PUBLIC void save_bookmark_link ARGS2(
      */
     StrAllocCopy(Title, string_buffer);
     LYEntify(&Title, TRUE);
-    if (LYSaveBookmarksInUnicode &&
+    if (UCSaveBookmarksInUnicode &&
 		have8bit(Title) && (!LYHaveCJKCharacterSet))
 	StrAllocCopy(Title, title_convert8bit(Title));
 
@@ -525,7 +524,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 	    RM_PATH, newfile);
 
 	CTRACE(tfp, "remove_bookmark_link: %s\n", buffer);
-	if( system( buffer ) ) {
+	if( LYSystem( buffer ) ) {
 	    HTAlert(BOOKTEMP_COPY_FAIL);
 	} else {
 	    return;
@@ -563,7 +562,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 	{
 	    char buffer[2048];
 	    sprintf(buffer, "%s %s %s", MV_PATH, newfile, filename_buffer);
-	    system(buffer);
+	    LYSystem(buffer);
 	    return;
 	}
 #endif /* !VMS */

@@ -23,7 +23,7 @@ typedef struct _HTStream HTStream;
    for end_document which must be called before free.  It should be merged with free in
    fact:  it should be dummy for new streams.
    
-   The put_block method was write, but this upset systems whiuch had macros for write().
+   The put_block method was write, but this upset systems which had macros for write().
    
  */
 typedef struct _HTStreamClass {

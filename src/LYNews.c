@@ -11,7 +11,6 @@
 #include <LYStrings.h>
 #include <LYGetFile.h>
 #include <LYHistory.h>
-#include <LYSystem.h>
 #include <GridText.h>
 #include <LYCharSets.h>
 #include <LYNews.h>
@@ -240,7 +239,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	sprintf(user_input,"%s%s %s", editor, editor_arg, my_tempfile);
 	_statusline(SPAWNING_EDITOR_FOR_NEWS);
 	stop_curses();
-	if (system(user_input)) {
+	if (LYSystem(user_input)) {
 	    start_curses();
 	    HTAlert(ERROR_SPAWNING_EDITOR);
 	} else {

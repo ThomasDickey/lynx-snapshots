@@ -335,7 +335,7 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 	    StrAllocCopy(temp, (*href+7));
 	    StrAllocCopy(*href, "file://localhost");
 	    StrAllocCat(*href, temp);
-	} else if (!strncmp(*href, "file:/", 6) && *(*href+6) != '/') {
+	} else if (!strncmp(*href, "file:/", 6) && !LYIsHtmlSep(*(*href+6))) {
 	    StrAllocCopy(temp, (*href+5));
 	    StrAllocCopy(*href, "file://localhost");
 	    StrAllocCat(*href, temp);
@@ -363,8 +363,7 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 	temp2 = curdir;
 #endif /* DOSPATH */
 #endif /* VMS */
-	if (temp2[0] != '/')
-	    StrAllocCat(*href, "/");
+	LYAddHtmlSep(href);
 	/*
 	 *  Check for pathological cases - current dir has chars which
 	 *  MUST BE URL-escaped - kw
@@ -3532,7 +3531,7 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 			    PARSE_PATH+PARSE_PUNCTUATION)) != NULL &&
 	    !strncmp(path, "/..", 3)) {
 	    cp = (path + 3);
-	    if (*cp == '/' || *cp == '\0') {
+	    if (LYIsHtmlSep(*cp) || *cp == '\0') {
 		if ((me->inBASE ?
 	       me->base_href[4] : me->node_anchor->address[4]) == 's') {
 		    str = "s";
@@ -3550,7 +3549,7 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	    }
 	    if (*cp == '\0') {
 		StrAllocCopy(*href, "/");
-	    } else if (*cp == '/') {
+	    } else if (LYIsHtmlSep(*cp)) {
 		while (!strncmp(cp, "/..", 3)) {
 		    if (*(cp + 3) == '/') {
 			cp += 3;

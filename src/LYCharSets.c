@@ -331,8 +331,8 @@ PUBLIC CONST char ** LYCharSets[MAXCHARSETS]={
 	SevenBitApproximations, /* Macintosh (8 bit)	*/
 	SevenBitApproximations, /* NeXT character set	*/
 	SevenBitApproximations, /* Chinese		*/
-	SevenBitApproximations, /* Japanese (EUC)	*/
-	SevenBitApproximations, /* Japanese (SJIS)	*/
+	SevenBitApproximations, /* Japanese (EUC-JP)	*/
+	SevenBitApproximations, /* Japanese (Shift_JIS)	*/
 	SevenBitApproximations, /* Korean		*/
 	SevenBitApproximations, /* Taipei (Big5)	*/
 	SevenBitApproximations, /* Vietnamese (VISCII)	*/
@@ -345,20 +345,20 @@ PUBLIC CONST char ** LYCharSets[MAXCHARSETS]={
  *  The order of LYCharSets and LYchar_set_names MUST be the same
  */
 PUBLIC CONST char * LYchar_set_names[MAXCHARSETSP]={
-	"ISO Latin 1         ",
-	"DosLatin1 (cp850)   ",
-	"WinLatin1 (cp1252)  ",
-	"DosLatinUS (cp437)  ",
+	"Western (ISO-8859-1)  ",
+	"Western (cp850)       ",
+	"Western (windows-1252)",
+	"IBM PC US codepage (cp437)",
 	"DEC Multinational   ",
 	"Macintosh (8 bit)   ",
 	"NeXT character set  ",
 	"Chinese             ",
-	"Japanese (EUC)      ",
-	"Japanese (SJIS)     ",
+	"Japanese (EUC-JP)   ",
+	"Japanese (Shift_JIS)",
 	"Korean              ",
 	"Taipei (Big5)       ",
 	"Vietnamese (VISCII) ",
-	"7 bit approximations",
+	"7 bit approximations (US-ASCII)",
 	"Transparent         ",
 	(char *) 0
 };
@@ -469,7 +469,7 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 {
     int chndl = -2;
     if (LYCharSet_UC[i].enc != UCT_ENC_CJK) {
-	chndl = 0;
+	chndl = UCGetLYhndl_byMIME("iso-8859-1");
 
 	if (UCAssume_MIMEcharset)
 	    chndl = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
@@ -507,7 +507,7 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 	HTPassHighCtrlRaw = (HTCJK != NOCJK) ? TRUE : FALSE;
 	HTPassHighCtrlNum = FALSE;
 
-    } else if (!strncmp(LYchar_set_names[i], "Japanese (EUC)", 14)) {
+    } else if (!strncmp(LYchar_set_names[i], "Japanese (EUC-JP)", 17)) {
 	HTCJK = LYUseDefaultRawMode ? JAPANESE : NOCJK;
 	LYRawMode = (HTCJK != NOCJK) ? TRUE : FALSE;
 	kanji_code = EUC;
@@ -516,7 +516,7 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 	HTPassHighCtrlRaw = (HTCJK != NOCJK) ? TRUE : FALSE;
 	HTPassHighCtrlNum = FALSE;
 
-    } else if (!strncmp(LYchar_set_names[i], "Japanese (SJIS)", 15)) {
+    } else if (!strncmp(LYchar_set_names[i], "Japanese (Shift_JIS)", 20)) {
 	HTCJK = LYUseDefaultRawMode ? JAPANESE : NOCJK;
 	LYRawMode = (HTCJK != NOCJK) ? TRUE : FALSE;
 	kanji_code = SJIS;
@@ -557,7 +557,7 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 	UCLYhndl_for_unspec = i;
     } else {
 	if (chndl == -2) {
-	    chndl = 0;
+	    chndl = UCGetLYhndl_byMIME("iso-8859-1");
 
 	    if (UCAssume_MIMEcharset)
 		chndl = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
@@ -567,7 +567,7 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 	     LYCharSet_UC[chndl].enc != UCT_ENC_CJK)) {
 	    UCLYhndl_for_unspec = chndl;
 	} else {
-	    UCLYhndl_for_unspec = 0;
+	    UCLYhndl_for_unspec = UCGetLYhndl_byMIME("iso-8859-1");
 	}
     }
 
@@ -593,10 +593,10 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
  */
 PUBLIC void HTMLSetRawModeDefault ARGS1(int,i)
 {
-    if (!strncmp(LYchar_set_names[i], "ISO Latin 1", 11) ||
+    if (!strncmp(LYchar_set_names[i], "Western (ISO-8859-1)", 20) ||
 	!strncmp(LYchar_set_names[i], "Chinese", 7) ||
-	!strncmp(LYchar_set_names[i], "Japanese (EUC)", 14) ||
-	!strncmp(LYchar_set_names[i], "Japanese (SJIS)", 15) ||
+	!strncmp(LYchar_set_names[i], "Japanese (EUC-JP)", 17) ||
+	!strncmp(LYchar_set_names[i], "Japanese (Shift_JIS)", 20) ||
 	!strncmp(LYchar_set_names[i], "Korean", 6) ||
 	!strncmp(LYchar_set_names[i], "Taipei (Big5)", 13)) {
 	LYDefaultRawMode = TRUE;
@@ -616,7 +616,7 @@ PUBLIC void HTMLSetUseDefaultRawMode ARGS2(
 	BOOLEAN,	modeflag)
 {
     if (LYCharSet_UC[i].enc != UCT_ENC_CJK) {
-	int chndl = 0;
+	int chndl = UCGetLYhndl_byMIME("iso-8859-1");
 
 	if (UCAssume_MIMEcharset)
 	    chndl = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
@@ -624,10 +624,10 @@ PUBLIC void HTMLSetUseDefaultRawMode ARGS2(
 	    LYUseDefaultRawMode = modeflag;
 	else
 	    LYUseDefaultRawMode = (!modeflag);
-    } else if (!strncmp(LYchar_set_names[i], "ISO Latin 1", 11) ||
+    } else if (!strncmp(LYchar_set_names[i], "Western (ISO-8859-1)", 20) ||
 	       !strncmp(LYchar_set_names[i], "Chinese", 7) ||
-	       !strncmp(LYchar_set_names[i], "Japanese (EUC)", 14) ||
-	       !strncmp(LYchar_set_names[i], "Japanese (SJIS)", 15) ||
+	       !strncmp(LYchar_set_names[i], "Japanese (EUC-JP)", 17) ||
+	       !strncmp(LYchar_set_names[i], "Japanese (Shift_JIS)", 20) ||
 	       !strncmp(LYchar_set_names[i], "Korean", 6) ||
 	       !strncmp(LYchar_set_names[i], "Taipei (Big5)", 13)) {
 	if (modeflag == TRUE) {
@@ -652,8 +652,8 @@ PUBLIC void HTMLSetUseDefaultRawMode ARGS2(
 PUBLIC void HTMLSetHaveCJKCharacterSet ARGS1(int,i)
 {
     if (!strncmp(LYchar_set_names[i], "Chinese", 7) ||
-	!strncmp(LYchar_set_names[i], "Japanese (EUC)", 14) ||
-	!strncmp(LYchar_set_names[i], "Japanese (SJIS)", 15) ||
+	!strncmp(LYchar_set_names[i], "Japanese (EUC-JP)", 17) ||
+	!strncmp(LYchar_set_names[i], "Japanese (Shift_JIS)", 20) ||
 	!strncmp(LYchar_set_names[i], "Korean", 6) ||
 	!strncmp(LYchar_set_names[i], "Taipei (Big5)", 13)) {
 	LYHaveCJKCharacterSet = TRUE;
@@ -671,33 +671,36 @@ PUBLIC void HTMLSetHaveCJKCharacterSet ARGS1(int,i)
  */
 PRIVATE void HTMLSetDisplayCharsetMatchLocale ARGS1(int,i)
 {
-    if (strncasecomp(LYCharSet_UC[i].MIMEname, "cp", 2) ||
-	strncasecomp(LYCharSet_UC[i].MIMEname, "windows", 7)) {
+    if  (LYHaveCJKCharacterSet) {
 	/*
-	** Assume dos/windows displays usually on remote terminal,
-	** so rarely match locale.
-	** (in fact, MS Windows codepoints locale are never seen on UNIX).
+	** We have no intention to pass CJK via UCTransChar if that happened.
+	** Let someone from CJK correct this if necessary.
+	*/
+	DisplayCharsetMatchLocale = TRUE; /* old-style */
+	return;
+
+    } else if (strncasecomp(LYCharSet_UC[i].MIMEname, "cp", 2) ||
+		strncasecomp(LYCharSet_UC[i].MIMEname, "windows", 7)) {
+	/*
+	** Assume dos/windows displays usually on remote terminal, hence it
+	** rarely matches locale.  (In fact, MS Windows codepoints locale are
+	** never seen on UNIX).
 	*/
 	DisplayCharsetMatchLocale = FALSE;
     } else {
-	DisplayCharsetMatchLocale = TRUE;
-    }
+	DisplayCharsetMatchLocale = TRUE; /* guess, but see below */
 
 #if !defined(LOCALE)
-	/*
-	** But we have no intention to pass CJK via UCTransChar if that happened.
-	** Let someone from CJK correct this if necessary.
-	*/
-	if  (!LYHaveCJKCharacterSet)
+	DisplayCharsetMatchLocale = FALSE;
+#else
+	if (UCForce8bitTOUPPER) {
+	    /*
+	    ** Force disable locale (from lynx.cfg)
+	    */
 	    DisplayCharsetMatchLocale = FALSE;
+	}
 #endif
-#if defined(LOCALE) && defined(EXP_8BIT_TOUPPER)
-	/*
-	** Force disable locale
-	*/
-	if  (!LYHaveCJKCharacterSet)
-	    DisplayCharsetMatchLocale = FALSE;
-#endif
+    }
 
     return;
 }
@@ -897,7 +900,7 @@ PUBLIC int LYCharSetsDeclared NOPARAMS
     if (UCAssume_MIMEcharset && *UCAssume_MIMEcharset) {
 	UCLYhndl_for_unspec = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
     } else {
-	UCLYhndl_for_unspec = 0;
+	UCLYhndl_for_unspec = UCGetLYhndl_byMIME("iso-8859-1");
     }
     if (UCAssume_localMIMEcharset && *UCAssume_localMIMEcharset)
 	UCLYhndl_HTFile_for_unspec =

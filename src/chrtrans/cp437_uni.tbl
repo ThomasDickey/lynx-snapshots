@@ -6,7 +6,7 @@ D0
 Mcp437
 
 #Name as a Display Charset (used on Options screen)
-ODosLatinUS (cp437)
+OLatinUS (cp437)
 #
 #    Name:     cp437_DOSLatinUS to Unicode table
 #    Unicode version: 1.1

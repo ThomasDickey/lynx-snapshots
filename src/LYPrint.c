@@ -13,7 +13,6 @@
 #include <LYClean.h>
 #include <LYGetFile.h>
 #include <LYHistory.h>
-#include <LYSystem.h>
 #include <LYList.h>
 #include <LYCharSets.h>  /* To get current charset for mail header. */
 #ifdef VMS
@@ -74,7 +73,7 @@ PUBLIC int printfile ARGS1(
     int lines_in_file = 0;
     int printer_number = 0;
     int pages = 0;
-    int type = 0, c, len;
+    int type = 0, c;
     BOOLEAN Lpansi = FALSE;
     FILE *outfile_fp;
     char *cp = NULL;
@@ -372,8 +371,7 @@ PUBLIC int printfile ARGS1(
 		if ((cp = strchr(filename, '~'))) {
 		    *(cp++) = '\0';
 		    strcpy(buffer, filename);
-		    if ((len=strlen(buffer)) > 0 && buffer[len-1] == '/')
-			buffer[len-1] = '\0';
+		    LYTrimPathSep(buffer);
 #ifdef DOSPATH
 		    strcat(buffer, HTDOS_wwwName((char *)Home_Dir()));
 #else
@@ -400,12 +398,21 @@ PUBLIC int printfile ARGS1(
 		    strcpy(buffer, filename);
 		}
 #else
+
 #ifndef __EMX__
-		if (*filename != '/')
+		if (!LYIsPathSep(*filename)) {
+#if defined(__DJGPP__) || defined(_WINDOWS)
+		if (strchr(buffer, ':') != NULL)
+			cp = NULL;
+		else
+#endif /*  __DJGPP__ || _WINDOWS */
 		    cp = getenv("PWD");
+		}
 		else
 #endif
 		    cp = NULL;
+
+		LYTrimPathSep(cp);
 		if (cp)
 #ifdef DOSPATH
 		    sprintf(buffer, "%s/%s", cp, HTDOS_name(filename));
@@ -717,9 +724,7 @@ PUBLIC int printfile ARGS1(
 
 		stop_curses();
 		printf(MAILING_FILE);
-		fflush(stdout);
-		system(buffer);
-		fflush(stdout);
+		LYSystem(buffer);
 		sleep(AlertSecs);
 		start_curses();
 		if (isPMDF)
@@ -846,7 +851,7 @@ PUBLIC int printfile ARGS1(
 		LYCloseTempFP(outfile_fp);	/* Close the tmpfile. */
 		stop_curses();
 		printf("Sending \n\n$ %s\n\nPlease wait...", buffer);
-		system(buffer);
+		LYSystem(buffer);
 		sleep(MessageSecs);
 		start_curses();
 		LYRemoveTemp(tempfile); /* Delete the tmpfile. */
@@ -1181,8 +1186,7 @@ PUBLIC int printfile ARGS1(
 		StrAllocCat(envbuffer, HText_getTitle());
 		putenv(envbuffer);
 #endif /* VMS */
-		fflush(stdout);
-		system(buffer);
+		LYSystem(buffer);
 #ifdef VMS
 		/*
 		 *  Remove LYNX_PRINT_TITLE logical. - FM
@@ -1264,14 +1268,10 @@ PUBLIC int print_options ARGS2(
 
     StrAllocCopy(*newfile, print_filename);
 
-    fprintf(fp0, "<html>\n<head>\n<title>%s</title>\n</head>\n<body>\n",
-		 PRINT_OPTIONS_TITLE);
-    fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
-		 LYNX_NAME, LYNX_VERSION,
-		 helpfilepath, PRINT_OPTIONS_HELP, PRINT_OPTIONS_TITLE);
+    BeginInternalPage(fp0, PRINT_OPTIONS_TITLE, PRINT_OPTIONS_HELP);
 
-    pages = (lines_in_file+65)/66;
     fprintf(fp0, "<pre>\n");
+    pages = (lines_in_file+65)/66;
     sprintf(buffer, "   \
 <em>You print the document:</em> %s\n   \
        <em>Number of lines:</em> %d\n   \
@@ -1315,7 +1315,8 @@ PUBLIC int print_options ARGS2(
 		      cur_printer->name : "No Name Given"));
 	fprintf(fp0, "</a>\n");
     }
-    fprintf(fp0, "</pre>\n</body>\n</html>\n");
+    fprintf(fp0, "</pre>\n");
+    EndInternalPage(fp0);
     LYCloseTempFP(fp0);
 
     LYforce_no_cache = TRUE;

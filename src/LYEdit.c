@@ -8,7 +8,7 @@
 #include <LYGlobalDefs.h>
 #include <LYEdit.h>
 #include <LYStrings.h>
-#include <LYSystem.h>
+#include <LYUtils.h>
 #ifdef VMS
 #include <unixio.h>
 #include <HTVMSUtils.h>
@@ -161,12 +161,8 @@ PUBLIC int edit_current_file ARGS3(
     /*
      *  Invoke the editor. - FM
      */
-    fflush(stderr);
-    fflush(stdout);
     stop_curses();
-    system(command);
-    fflush(stdout);
-    fflush(stderr);
+    LYSystem(command);
     start_curses();
 
     /*

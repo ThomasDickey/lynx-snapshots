@@ -129,6 +129,7 @@
  "Reloading document.  Any form entries will be lost!"
 #define CANNOT_TRANSCODE_FORM "Warning: Cannot transcode form data to charset %s!"
 #define BAD_FORM_MAILTO "Malformed mailto form submission!  Cancelled!"
+#define MAILTO_SQUASH_CTL "Warning! Control codes in mail address replaced by ?"
 #define FORM_MAILTO_DISALLOWED "Mail disallowed!  Cannot submit."
 #define FORM_MAILTO_FAILED "Mailto form submission failed!"
 #define FORM_MAILTO_CANCELLED "Mailto form submission Cancelled!!!"

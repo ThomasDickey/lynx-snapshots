@@ -157,6 +157,7 @@ extern void LYstartTargetEmphasis NOPARAMS;
 extern void LYstopTargetEmphasis NOPARAMS;
 
 #ifdef VMS
+extern int DCLsystem (char *command);
 extern void VMSexit();
 extern int ttopen();
 extern int ttclose();
