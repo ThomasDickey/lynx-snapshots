@@ -124,21 +124,22 @@ PRIVATE int fd_mosaic_connect_to_server ARGS3(
 	long,		port,
 	long *, 	fd)
 {
-    /*
-    **	New version.
-    */
-    char dummy[256];
+    char *dummy = NULL;
     int status;
+    int result;
 
-    sprintf (dummy, "wais://%s:%d/", host_name, port);
+    HTSprintf0(&dummy, "wais://%s:%d/", host_name, port);
 
     status = HTDoConnect (dummy, "WAIS", 210, (int *)fd);
     if (status == HT_INTERRUPTED) {
-	return -1;
+	result = -1;
+    } else if (status < 0) {
+	result = 0;
+    } else {
+	result = 1;
     }
-    if (status < 0)
-	return 0;
-    return 1;
+    FREE(dummy);
+    return result;
 }
 
 /* Returns 1 on success, 0 on fail, -1 on interrupt. */
@@ -526,21 +527,24 @@ PRIVATE void display_search_response ARGS4(
 		} else { /* Not archie */
 		    docname =  WWW_from_WAIS(docid);
 		    if (docname) {
-			char * dbname = HTEscape(database, URL_XPALPHAS);
-			sprintf(line,
-				"/%s/%s/%d/%s", 	/* W3 address */
-				dbname,
-				head->Types ? head->Types[0] : "TEXT",
-				(int)(head->DocumentLength),
-				docname);
-			HTStartAnchor(target, NULL,
-				      ((head->Types) &&
-				       (!strcmp(head->Types[0], "URL")))
-						?
-				       headline : line); /* NT, Sep 93 */
+			if ((head->Types) &&
+			   (!strcmp(head->Types[0], "URL"))) {
+			    HTStartAnchor(target, NULL, headline);
+			} else{
+			    char * dbname = HTEscape(database, URL_XPALPHAS);
+			    char * w3_address = NULL;
+			    HTSprintf0(&w3_address,
+					"/%s/%s/%d/%s",
+					dbname,
+					head->Types ? head->Types[0] : "TEXT",
+					(int)(head->DocumentLength),
+					docname);
+			    HTStartAnchor(target, NULL, w3_address);
+			    FREE(w3_address);
+			    FREE(dbname);
+			}
 			PUTS(headline);
 			END(HTML_A);
-			FREE(dbname);
 			FREE(docname);
 		    } else {
 			PUTS(gettext("(bad doc id)"));
@@ -753,7 +757,7 @@ PUBLIC int HTLoadWAIS ARGS4(
     */
     if (key && !*key) { 			/* I N D E X */
 #ifdef CACHE_FILE_PREFIX
-	char filename[256];
+	char * filename = NULL;
 	FILE * fp;
 #endif
 	HTStructured * target = HTML_new(anAnchor, format_out, sink);
@@ -790,7 +794,7 @@ PUBLIC int HTLoadWAIS ARGS4(
 	**  If we have seen a source file for this database, use that.
 	*/
 #ifdef CACHE_FILE_PREFIX
-	sprintf(filename, "%sWSRC-%s:%s:%.100s.txt",
+	HTSprintf0(&filename, "%sWSRC-%s:%s:%.100s.txt",
 		CACHE_FILE_PREFIX,
 		server_name, service, www_database);
 
@@ -807,6 +811,7 @@ PUBLIC int HTLoadWAIS ARGS4(
 	    END(HTML_PRE);
 	    fclose(fp);
 	}
+	FREE(filename);
 #endif
 	START(HTML_P);
 	PUTS(gettext("\nEnter the 's'earch command and then specify search words.\n"));

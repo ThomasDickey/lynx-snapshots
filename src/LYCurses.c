@@ -1201,7 +1201,7 @@ PUBLIC BOOLEAN setup ARGS1(
 
 	(void) putenv(term_putenv);
 	printf("\n%s %s\n", gettext("TERMINAL TYPE IS SET TO"), getenv("TERM"));
-	sleep(MESSAGESECS);
+	LYSleepMsg();
     }
 
     start_curses();

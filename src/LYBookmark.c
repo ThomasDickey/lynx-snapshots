@@ -146,7 +146,7 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
     LYRemoveTemp(newfile);
     if ((nfp = LYOpenTemp(newfile, HTML_SUFFIX, "w")) == NULL) {
 	LYMBM_statusline(NO_TEMP_FOR_HOTLIST);
-	sleep(AlertSecs);
+	LYSleepAlert();
 	return ("");
     }
 
@@ -298,7 +298,7 @@ PUBLIC void save_bookmark_link ARGS2(
 	LYgetstr(string_buffer, VISIBLE, sizeof(string_buffer), NORECALL);
 	if (*string_buffer == '\0') {
 	    LYMBM_statusline(CANCELLED);
-	    sleep(MessageSecs);
+	    LYSleepMsg();
 	    FREE(bookmark_URL);
 	    return;
 	}
@@ -354,7 +354,7 @@ PUBLIC void save_bookmark_link ARGS2(
 		BookmarkPage, filename_buffer));
     if ((fp = fopen(filename_buffer, (first_time ? "w" : "a+"))) == NULL) {
 	LYMBM_statusline(BOOKMARK_OPEN_FAILED);
-	sleep(AlertSecs);
+	LYSleepAlert();
 	FREE(Title);
 	FREE(bookmark_URL);
 	return;
@@ -452,7 +452,7 @@ Note: if you edit this file manually\n\
     FREE(Address);
     FREE(bookmark_URL);
     LYMBM_statusline(OPERATION_DONE);
-    sleep(MessageSecs);
+    LYSleepMsg();
 }
 
 /*
@@ -611,7 +611,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 	    LYRemoveTemp(newfile);
 	    return;
 	}
-	sleep(AlertSecs);	/* give a chance to see error from cp - kw */
+	LYSleepAlert();	/* give a chance to see error from cp - kw */
 	HTUserMsg(BOOKTEMP_COPY_FAIL);
 	keep_tempfile = TRUE;
     }

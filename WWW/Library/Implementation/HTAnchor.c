@@ -860,13 +860,8 @@ PUBLIC char * HTAnchor_address ARGS1(
 	    !((HTChildAnchor *)me)->tag) {  /* it's an adult or no tag */
 	    StrAllocCopy(addr, me->parent->address);
 	} else {  /* it's a named child */
-	    addr = malloc(2 +
-			  strlen(me->parent->address) +
-			  strlen(((HTChildAnchor *)me)->tag));
-	    if (addr == NULL)
-		outofmem(__FILE__, "HTAnchor_address");
-	    sprintf(addr, "%s#%s",
-			   me->parent->address, ((HTChildAnchor *)me)->tag);
+	    HTSprintf0(&addr, "%s#%s",
+		       me->parent->address, ((HTChildAnchor *)me)->tag);
 	}
     }
     return(addr);

@@ -107,7 +107,7 @@ PRIVATE void start_anchor ARGS1(CONST char *,  href)
 
 
 PRIVATE int response ARGS5(
-	CONST char *,		command,
+	char *,			command,
 	char *,			sitename,
 	HTParentAnchor *,	anAnchor,
 	HTFormat,		format_out,

@@ -1,6 +1,36 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-03-12 (2.8.3dev.22)
+* modify Home_Dir() so that on DOS & Windows, if the $HOMEDRIVE variable is
+  set, it may be used to specify the drive on which $HOME is located -TD
+* add configure option --enable-htmlized-cfg to install the htmlized lynx.cfg
+  in the help directory (request by LP) -TD
+* suppress sleep's in crawl or traversal mode (request by LV) -TD
+* cleanup LYrcFile.c a little, using new functions putBool, getBool, putEnum
+  and getEnum -TD
+* change default mode for visited-links-page to match original behavior, add
+  visited_links to .lynxrc file (requests by KD, LP) -TD
+* update documentation to reflect move from sol.slcc.edu to lynx.isc.org -PG
+* remove obsolete files:  WWW/Copyright.txt (replaced by FreeOfCharge.html) and
+  WWW/README.txt (recommended by DK) -TD
+* clean up some of the loose ends, primarily in documentation.  A Russian user
+  pointed out that the DOS binary was ignoring character 0xe0.  This turned out
+  to be a bug in the PDCurses code for DOS.  I modified the INSTALLATION file
+  to reflect the patch to PDCurses.  Also include the file for the public
+  domain release of the CERN wwwlib code (FreeOfCharge.html).  Other changes
+  fix dead links, Y2K changes, and reflect newer versions of other programs -DK
+* comment-out/disable NO_ANONYMOUS_EMAIL definition in userdefs.h -DK
+* change optimization level to -O1 in makefile.dos -DK
+* use macro set_errno() to hide some of the clutter in HTTCP.c as well as make
+  it simpler to build with threaded libraries -TD
+* ifdef'd out a "QUIT" command sent to the FTP server immediately after opening
+  a data connection in HTFTPLoad(), since this makes the ftp.wku.edu server
+  close the connection prematurely -TD
+* combine redundant HTMake_VMS_name() with HTVMS_name() -TD
+* review use of "%s" in sprintf, to guard against buffer overflows, modified
+  some to use HTSprintf0 or StrAllocCopy, others to use specific lengths
+  (KW noted a related problem in HTTP.c) -TD
 2000-02-25 (2.8.3dev.21)
 * modify check for empty news-posting to warn but allow user to override if
   it contains nonspace characters -TD

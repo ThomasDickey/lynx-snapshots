@@ -655,7 +655,7 @@ PRIVATE void send_file_to_mail ARGS3(
     SetOutputMode( O_TEXT );
     printf(MAILING_FILE);
     LYSystem(buffer);
-    sleep(AlertSecs);
+    LYSleepAlert();
     start_curses();
     SetOutputMode( O_BINARY );
 
@@ -781,7 +781,7 @@ PRIVATE void send_file_to_mail ARGS3(
     SetOutputMode(O_TEXT);
     printf("%s\n\n$ %s\n\n%s", gettext("Sending"), buffer, PLEASE_WAIT);
     LYSystem(buffer);
-    sleep(MessageSecs);
+    LYSleepMsg();
     start_curses();
     SetOutputMode( O_BINARY );
 
@@ -964,7 +964,7 @@ check_again:
     fflush(stdout);
 #endif
     SetOutputMode( O_BINARY );
-    sleep(MessageSecs);
+    LYSleepMsg();
     start_curses();
 
 done:	/* send_file_to_printer() */

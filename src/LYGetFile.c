@@ -903,7 +903,7 @@ Try_Redirected_URL:
 				if (LYCursesON) {
 				    _user_message(WWW_ILLEGAL_URL_MESSAGE,
 						  use_this_url_instead);
-				    sleep(AlertSecs);
+				    LYSleepAlert();
 				} else {
 				    fprintf(stderr,
 					    WWW_ILLEGAL_URL_MESSAGE,
@@ -931,7 +931,7 @@ Try_Redirected_URL:
 			    CTRACE_SLEEP(MessageSecs);
 			    _user_message(WWW_USING_MESSAGE,
 					  use_this_url_instead);
-			    sleep(InfoSecs);
+			    LYSleepInfo();
 			    CTRACE((tfp, "\n"));
 			    StrAllocCopy(doc->address,
 					use_this_url_instead);

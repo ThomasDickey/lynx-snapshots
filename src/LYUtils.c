@@ -167,6 +167,15 @@ PRIVATE LY_TEMP *FindTempfileByFP ARGS1(FILE *, fp)
 }
 
 /*
+ * Get an environment variable, rejecting empty strings
+ */
+PRIVATE char *getenv_text ARGS1(char *, name)
+{
+    char *result = getenv(name);
+    return (result != 0 && *result != 0) ? result : 0;
+}
+
+/*
  *  Highlight (or unhighlight) a given link.
  */
 PUBLIC void highlight ARGS3(
@@ -2476,6 +2485,9 @@ PUBLIC int HTCheckForInterrupt NOARGS
 PUBLIC BOOLEAN LYisAbsPath ARGS1(
 	char *,		path)
 {
+#ifdef VMS
+    return TRUE;
+#else
     BOOLEAN result;
 #ifdef DOSPATH
     result = (BOOL) (LYIsPathSep(path[0])
@@ -2486,6 +2498,7 @@ PUBLIC BOOLEAN LYisAbsPath ARGS1(
     result = (LYIsPathSep(path[0]));
 #endif /* DOSPATH */
     return result;
+#endif
 }
 
 /*
@@ -3128,7 +3141,7 @@ PUBLIC BOOLEAN LYCanDoHEAD ARGS1(
 	if (acc_method && *acc_method) {
 	    char *proxy;
 	    StrAllocCat(acc_method, "_proxy");
-	    proxy = (char *)getenv(acc_method);
+	    proxy = getenv(acc_method);
 	    if (proxy && (!strncmp(proxy, "http:", 5) ||
 			  !strncmp(proxy, "lynxcgi:", 8)) &&
 		!override_proxy(temp0)) {
@@ -3465,7 +3478,7 @@ PUBLIC void HTAddSugFilename ARGS1(
 PUBLIC void change_sug_filename ARGS1(
 	char *,		fname)
 {
-    char *temp, *cp, *cp1, *end;
+    char *temp = 0, *cp, *cp1, *end;
 #ifdef VMS
     char *dot;
     int j, k;
@@ -3484,30 +3497,26 @@ PUBLIC void change_sug_filename ARGS1(
     /*
      *	Rename any temporary files.
      */
-    temp = (char *)calloc(1, (strlen(lynx_temp_space) + 60));
-    if (temp == NULL)
-	outofmem(__FILE__, "change_sug_filename");
     cp = wwwName(lynx_temp_space);
 #ifdef FNAMES_8_3
     if (LYIsHtmlSep(*cp)) {
-	sprintf(temp, "file://localhost%s%04x", cp, GETPID());
+	HTSprintf0(&temp, "file://localhost%s%04x", cp, GETPID());
     } else {
-	sprintf(temp, "file://localhost/%s%04x", cp, GETPID());
+	HTSprintf0(&temp, "file://localhost/%s%04x", cp, GETPID());
     }
 #else
     if (LYIsHtmlSep(*cp)) {
-	sprintf(temp, "file://localhost%s%d", cp, (int)getpid());
+	HTSprintf0(&temp, "file://localhost%s%d", cp, (int)getpid());
     } else {
-	sprintf(temp, "file://localhost/%s%d", cp, (int)getpid());
+	HTSprintf0(&temp, "file://localhost/%s%d", cp, (int)getpid());
     }
 #endif
     if (!strncmp(fname, temp, strlen(temp))) {
 	cp = strrchr(fname, '.');
 	if (strlen(cp) > (strlen(temp) - 4))
 	    cp = NULL;
-	strcpy(temp, (cp ? cp : ""));
-	strcpy(fname, "temp");
-	strcat(fname, temp);
+	StrAllocCopy(temp, (cp ? cp : ""));
+	sprintf(fname, "temp%.*s", LY_MAXPATH - 10, temp);
     }
     FREE(temp);
 
@@ -4726,7 +4735,7 @@ have_VMS_URL:
 			sprintf(buff,
 			    "'%s' not exist, Goto LynxHome '%s'.", q, p);
 			_statusline(buff);
-			sleep(AlertSecs);
+			LYSleepAlert();
 			FREE(temp);
 			StrAllocCat(*AllocatedString, p);
 			goto Retry;
@@ -5462,36 +5471,21 @@ PUBLIC CONST char * Home_Dir NOARGS
     char *cp = NULL;
 
     if (homedir == NULL) {
-	if ((cp = getenv("HOME")) == NULL || *cp == '\0'
-#ifdef UNIX
-		 || !(LYIsPathSep(*cp)
-#  ifdef __EMX__
-		 || (*cp && cp[1] == ':' && LYIsPathSep(cp[2]))
-#  endif
-		)
-#endif /* UNIX */
-	    ) {
+	if ((cp = getenv_text("HOME")) == NULL
+	 || !LYisAbsPath(cp)) {
 #if defined (DOSPATH) || defined (__EMX__) /* BAD!	WSB */
-	    if ((cp = getenv("TEMP")) == NULL || *cp == '\0') {
-		if ((cp = getenv("TMP")) == NULL || *cp == '\0') {
-		    StrAllocCopy(HomeDir, "C:\\");
-		} else {
-		    StrAllocCopy(HomeDir, cp);
-		}
-	    } else {
-		StrAllocCopy(HomeDir, cp);
+	    if ((cp = getenv_text("TEMP")) == NULL
+	     && (cp = getenv_text("TMP")) == NULL) {
+		cp = "C:\\";
 	    }
+	    StrAllocCopy(HomeDir, cp);
 #else
 #ifdef VMS
-	    if ((cp = getenv("SYS$LOGIN")) == NULL || *cp == '\0') {
-		if ((cp = getenv("SYS$SCRATCH")) == NULL || *cp == '\0') {
-		    StrAllocCopy(HomeDir, "sys$scratch:");
-		} else {
-		    StrAllocCopy(HomeDir, cp);
-		}
-	    } else {
-		StrAllocCopy(HomeDir, cp);
+	    if ((cp = getenv_text("SYS$LOGIN")) == NULL
+	     && (cp = getenv_text("SYS$SCRATCH")) == NULL) {
+		cp = "sys$scratch:";
 	    }
+	    StrAllocCopy(HomeDir, cp);
 #else
 #if HAVE_UTMP
 	    /*
@@ -5516,6 +5510,14 @@ PUBLIC CONST char * Home_Dir NOARGS
 #endif /* VMS */
 #endif /* DOSPATH */
 	} else {
+#if defined(_WINDOWS) || defined(DOSPATH)
+	    char *hp = getenv_text("HOMEDRIVE");
+	    if (hp != 0
+	     && (LYIsPathSep(*cp) || !LYisAbsPath(cp))) {
+		StrAllocCopy(HomeDir, hp);
+		StrAllocCat(HomeDir, cp);
+	    } else
+#endif
 	    StrAllocCopy(HomeDir, cp);
 	}
 	homedir = (CONST char *)HomeDir;
@@ -5817,11 +5819,8 @@ PUBLIC void LYAddPathToHome ARGS3(
 	     *	SHELL syntax and append subdirectory path,
 	     *	then convert that to VMS syntax. - FM
 	     */
-	    char *temp = (char *)calloc(1,
-					(strlen(home) + strlen(file) + 10));
-	    if (temp == NULL)
-		outofmem(__FILE__, "LYAddPathToHome");
-	    sprintf(temp, "%s%s", HTVMS_wwwName(home), (file + 1));
+	    char *temp = NULL;
+	    HTSprintf0(&temp, "%s%s", HTVMS_wwwName(home), (file + 1));
 	    sprintf(fbuffer, "%.*s",
 		    (fbuffer_size - 1), HTVMS_name("", temp));
 	    FREE(temp);
@@ -7031,12 +7030,17 @@ PUBLIC BOOLEAN LYValidateFilename ARGS2(
 #endif /* __EMX__*/
 	cp = NULL;
 
+    *result = 0;
     if (cp) {
 	LYTrimPathSep(cp);
-	sprintf(result, "%s/%s", cp, HTSYS_name(given));
-    } else {
-	strcpy(result, HTSYS_name(given));
+	if (strlen(cp) >= LY_MAXPATH - 2)
+	    return FALSE;
+	sprintf(result, "%s/", cp);
     }
+    cp = HTSYS_name(given);
+    if (strlen(result) + strlen(cp) >= LY_MAXPATH - 1)
+	return FALSE;
+    strcat(result, cp);
 #endif /* VMS */
     return TRUE;
 }
@@ -7426,7 +7430,7 @@ PUBLIC int LYSystem ARGS1(
 	if (strchr(p, '\\') == NULL) {
 	    /* for Windows Application */
 	    cygwin_conv_to_full_win32_path(p, win32_name);
-	    sprintf(new_command, "%s \"%s\"", new_cmd, win32_name);
+	    sprintf(new_command, "%.*s \"%.*s\"", LY_MAXPATH, new_cmd, LY_MAXPATH, win32_name);
 	} else {
 	    /* for DOS like editor */
 	    q = win32_name;
@@ -7439,7 +7443,7 @@ PUBLIC int LYSystem ARGS1(
 		q++, p++;
 	    }
 	    *q = '\0';
-	    sprintf(new_command, "%s %s", new_cmd, win32_name);
+	    sprintf(new_command, "%.*s %.*s", LY_MAXPATH, new_cmd, LY_MAXPATH, win32_name);
 	}
 	command = new_command;
     }
@@ -7502,7 +7506,7 @@ PUBLIC int Cygwin_Shell NOARGS
     /* Init a startup structure */
     GetStartupInfo(&startUpInfo);
 
-    shell = getenv("COMSPEC");
+    shell = getenv_text("COMSPEC");
 
     /* Create the child process, specifying
      inherited handles. Pass the value of the
@@ -7531,10 +7535,10 @@ PUBLIC char *LYSysShell NOARGS
     char *shell = 0;
 #ifdef DOSPATH
 #ifdef WIN_EX
-    shell = getenv("SHELL");
+    shell = getenv_text("SHELL");
     if (shell) {
 	if (access(shell, 0) != 0)
-	    shell = getenv("COMSPEC");
+	    shell = getenv_text("COMSPEC");
     }
     if (shell == NULL) {
 	if (system_is_NT)
@@ -7543,9 +7547,9 @@ PUBLIC char *LYSysShell NOARGS
 	    shell = "command.com";
     }
 #else
-    shell = getenv("SHELL");
+    shell = getenv_text("SHELL");
     if (shell == NULL) {
-	shell = getenv("COMSPEC");
+	shell = getenv_text("COMSPEC");
     }
     if (shell == NULL) {
 	shell = "command.com";
@@ -7553,10 +7557,10 @@ PUBLIC char *LYSysShell NOARGS
 #endif /* WIN_EX */
 #else
 #ifdef __EMX__
-    if (getenv("SHELL") != NULL) {
-	shell = getenv("SHELL");
+    if (getenv_text("SHELL") != NULL) {
+	shell = getenv_text("SHELL");
     } else {
-	shell = (getenv("COMSPEC") == NULL) ? "cmd.exe" : getenv("COMSPEC");
+	shell = (getenv_text("COMSPEC") == NULL) ? "cmd.exe" : getenv_text("COMSPEC");
     }
 #else
 #ifdef VMS
@@ -7581,7 +7585,7 @@ PUBLIC char *LYSysShell NOARGS
 PUBLIC char *LYgetXDisplay NOARGS
 {
     char *cp;
-    if ((cp = getenv(DISPLAY)) == NULL || *cp == '\0')
+    if ((cp = getenv_text(DISPLAY)) == NULL)
 	cp = 0;
     return cp;
 }
@@ -7599,11 +7603,8 @@ PUBLIC void LYsetXDisplay ARGS1(
 	Define_VMSLogical(DISPLAY, new_display);
 #else
 	static char *display_putenv_command;
-	display_putenv_command = malloc(strlen(new_display) + 12);
-	if (!display_putenv_command)
-	    outofmem(__FILE__, "LYsetXDisplay");
 
-	sprintf(display_putenv_command, "DISPLAY=%s", new_display);
+	HTSprintf0(&display_putenv_command, "DISPLAY=%s", new_display);
 	putenv(display_putenv_command);
 #endif /* VMS */
 	if ((new_display = LYgetXDisplay()) != 0) {

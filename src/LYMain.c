@@ -1343,16 +1343,12 @@ PUBLIC int main ARGS2(
 #ifdef JUMPFILE
     StrAllocCopy(jumpfile, JUMPFILE);
     {
-	temp = (char *)malloc(strlen(jumpfile) + 10);
-	if (!temp) {
-	    outofmem(__FILE__, "main");
-	} else {
-	    sprintf(temp, "JUMPFILE:%s", jumpfile);
-	    if (!LYJumpInit(temp)) {
-		CTRACE((tfp, "Failed to register %s\n", temp));
-	    }
-	    FREE(temp);
+	temp = NULL;
+	HTSprintf0(&temp, "JUMPFILE:%s", jumpfile);
+	if (!LYJumpInit(temp)) {
+	    CTRACE((tfp, "Failed to register %s\n", temp));
 	}
+	FREE(temp);
     }
 #endif /* JUMPFILE */
 
@@ -3743,10 +3739,10 @@ in double-quotes (\"-\") on VMS)", NULL);
 	switch (p->type & ARG_TYPE_MASK) {
 	    case TOGGLE_ARG:
 	    case SET_ARG:
-		sprintf(temp, "%s", *(q->set_value) ? "on" : "off");
+		strcpy(temp, *(q->set_value) ? "on" : "off");
 		break;
 	    case UNSET_ARG:
-		sprintf(temp, "%s", *(q->set_value) ? "off" : "on");
+		strcpy(temp, *(q->set_value) ? "off" : "on");
 		break;
 	    case INT_ARG:
 		sprintf(temp, "%d", *(q->int_value));
@@ -3995,7 +3991,7 @@ PRIVATE void FatalProblem ARGS1(
      *	Deal with curses, if on, and clean up. - FM
      */
     if (LYOutOfMemory && LYCursesON) {
-	sleep(AlertSecs);
+	LYSleepAlert();
     }
     cleanup_sig(0);
 #ifndef __linux__

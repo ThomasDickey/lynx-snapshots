@@ -1159,11 +1159,9 @@ PRIVATE int HTLoadExtensionsConfigFile ARGS1(
 	while(line[0]) {
 	    HTGetWord(word, line, ' ', '\t');
 	    if (word[0] && (word[0] != ' ')) {
-		char *ext = (char *)malloc(sizeof(char) * (strlen(word)+1+1));
-	        if (!ext)
-	            outofmem(__FILE__, "HTLoadExtensionsConfigFile");
+		char *ext = NULL;
 
-		sprintf(ext, ".%s", word);
+		HTSprintf0(&ext, ".%s", word);
 		LYLowerCase(ext);
 
 		CTRACE((tfp, "SETTING SUFFIX '%s' to '%s'.\n", ext, ct));

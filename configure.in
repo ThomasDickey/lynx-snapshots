@@ -696,6 +696,22 @@ CF_ARG_ENABLE(file-upload,
 AC_MSG_RESULT($use_file_upload)
 test $use_file_upload != no && AC_DEFINE(EXP_FILE_UPLOAD)
 
+AC_MSG_CHECKING(if experimental htmlized lynx.cfg should be built)
+CF_ARG_ENABLE(htmlized-cfg,
+[  --enable-htmlized-cfg   build experimental htmlized lynx.cfg],
+	[use_exp_htmlized_cfg=$enableval],
+	[use_exp_htmlized_cfg=no])
+AC_MSG_RESULT($use_exp_htmlized_cfg)
+
+LYNXCFG_MAKE=''
+LYNXCFG_URL=''
+if test $use_exp_htmlized_cfg = no ; then
+	LYNXCFG_MAKE='#'
+	LYNXCFG_URL='http://www.hippo.ru/%7Ehvv/'
+fi
+AC_SUBST(LYNXCFG_MAKE)
+AC_SUBST(LYNXCFG_URL)
+
 AC_MSG_CHECKING(if experimental element-justification logic should be used)
 CF_ARG_ENABLE(justify-elts,
 [  --enable-justify-elts   use experimental element-justification logic],

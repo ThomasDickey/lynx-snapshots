@@ -103,6 +103,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	BOOLEAN,	followup)
 {
     char user_input[1024];
+    char *command = NULL;
     char CJKinput[1024];
     char *cp = NULL;
     CONST char *kp = NULL;
@@ -377,15 +378,16 @@ PUBLIC char *LYNewsPost ARGS2(
 	if (strstr(editor, "pico")) {
 	    editor_arg = " -t"; /* No prompt for filename to use */
 	}
-	sprintf(user_input,"%s%s %s", editor, editor_arg, my_tempfile);
+	HTSprintf0(&command, "%s%s %s", editor, editor_arg, my_tempfile);
 	_statusline(SPAWNING_EDITOR_FOR_NEWS);
 	stop_curses();
-	if (LYSystem(user_input)) {
+	if (LYSystem(command)) {
 	    start_curses();
 	    HTAlert(ERROR_SPAWNING_EDITOR);
 	} else {
 	    start_curses();
 	}
+	FREE(command);
 
 	nonempty = message_has_content(my_tempfile, &nonspaces);
 

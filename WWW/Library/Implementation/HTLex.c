@@ -119,10 +119,10 @@ PUBLIC char *lex_verbose ARGS1(LexItem, lex_item)
       case LEX_AT_SIGN:		/* Address qualifier	*/
 	return "address qualifier '@'";
       case LEX_ALPH_STR:	/* Alphanumeric string	*/
-	sprintf(msg, "alphanumeric string '%s'", HTlex_buffer);
+	sprintf(msg, "alphanumeric string '%.70s'", HTlex_buffer);
 	return msg;
       case LEX_TMPL_STR:	/* Template string	*/
-	sprintf(msg, "template string '%s'", HTlex_buffer);
+	sprintf(msg, "template string '%.70s'", HTlex_buffer);
 	return msg;
       default:
 	return "UNKNOWN-LEX-ITEM";

@@ -1842,7 +1842,7 @@ PRIVATE void handle_LYK_DIRED_MENU ARGS3(
     int,	real_c GCC_UNUSED)
 {
 #ifdef VMS
-    char *cp, *temp;
+    char *cp, *temp = 0;
 
     /*
      *	Check if the CSwing Directory/File Manager is available.
@@ -1888,10 +1888,7 @@ PRIVATE void handle_LYK_DIRED_MENU ARGS3(
 	if (HTStat(cp, &stat_info) == -1) {
 	    CTRACE((tfp, "mainloop: Can't stat %s\n", cp));
 	    FREE(cp);
-	    temp = (char *)calloc(1, (strlen(LYCSwingPath) + 4));
-	    if (temp == NULL)
-		outofmem(__FILE__, "mainloop");
-	    sprintf(temp, "%s []", LYCSwingPath);
+	    HTSprintf0(&temp, "%s []", LYCSwingPath);
 	    *refresh_screen = TRUE;  /* redisplay */
 	} else {
 	    char *VMSdir = NULL;
@@ -1919,13 +1916,7 @@ PRIVATE void handle_LYK_DIRED_MENU ARGS3(
 		    cp == NULL;
 		}
 	    }
-	    temp = (char *)calloc(1,
-				  (strlen(LYCSwingPath) +
-				   strlen(VMSdir) +
-				   2));
-	    if (temp == NULL)
-		outofmem(__FILE__, "mainloop");
-	    sprintf(temp, "%s %s", LYCSwingPath, VMSdir);
+	    HTSprintf0(&temp, "%s %s", LYCSwingPath, VMSdir);
 	    FREE(VMSdir);
 	    /*
 	     *	Uncache the current document in case we
@@ -1950,10 +1941,7 @@ PRIVATE void handle_LYK_DIRED_MENU ARGS3(
 	 *  an argument and don't uncache the current
 	 *  document. - FM
 	 */
-	temp = (char *)calloc(1, (strlen(LYCSwingPath) + 4));
-	if (temp == NULL)
-	    outofmem(__FILE__, "mainloop");
-	sprintf(temp, "%s []", LYCSwingPath);
+	HTSprintf0(&temp, "%s []", LYCSwingPath);
 	*refresh_screen = TRUE;	/* redisplay */
     }
     stop_curses();
@@ -4511,7 +4499,7 @@ PRIVATE void handle_LYK_TOOLBAR ARGS4(
     int,	real_c)
 {
     char *cp;
-    char *toolbar;
+    char *toolbar = NULL;
 
     if (!HText_hasToolbar(HTMainText)) {
 	if (*old_c != real_c) {
@@ -4522,12 +4510,8 @@ PRIVATE void handle_LYK_TOOLBAR ARGS4(
 	*old_c = real_c;
 	if ((cp = strchr(curdoc.address, '#')) != NULL)
 	    *cp = '\0';
-	toolbar = (char *)malloc(strlen(curdoc.address) +
-				 strlen(LYToolbarName) + 2);
-	if (!toolbar)
-	    outofmem(__FILE__, "mainloop");
 
-	sprintf(toolbar, "%s#%s", curdoc.address, LYToolbarName);
+	HTSprintf0(&toolbar, "%s#%s", curdoc.address, LYToolbarName);
 	if (cp)
 	    *cp = '#';
 	StrAllocCopy(newdoc.address, toolbar);
@@ -4760,7 +4744,7 @@ PRIVATE void handle_LYK_VIEW_BOOKMARK ARGS3(
 	if (*old_c != real_c) {
 	    *old_c = real_c;
 	    LYMBM_statusline(BOOKMARKS_NOT_OPEN);
-	    sleep(AlertSecs);
+	    LYSleepAlert();
 	    if (LYMultiBookmarks == TRUE) {
 		*refresh_screen = TRUE;
 	    }
@@ -5705,17 +5689,15 @@ try_again:
 			     *	if so, reload if with the relevant
 			     *	bookmark elements set. - FM
 			     */
-			    if ((cp = (char *)calloc(1,
-				  (strlen((char *)&temp[len]) + 2))) == NULL)
-				outofmem(__FILE__, "mainloop");
+			    cp = NULL;
 			    if (temp[len] == '/') {
-				if (strchr((char *)&temp[(len + 1)], '/')) {
-				    sprintf(cp, ".%s", (char *)&temp[len]);
+				if (strchr(&temp[(len + 1)], '/')) {
+				    HTSprintf0(&cp, ".%s", &temp[len]);
 				} else {
-				    strcpy(cp, (char *)&temp[(len + 1)]);
+				    StrAllocCopy(cp, &temp[(len + 1)]);
 				}
 			    } else {
-				strcpy(cp, (char *)&temp[len]);
+				StrAllocCopy(cp, &temp[len]);
 			    }
 #ifdef VMS
 #define CompareBookmark(a,b) strcasecomp(a, b)
@@ -5855,7 +5837,7 @@ try_again:
 
 	    if (TRACE) {
 		if (!LYTraceLogFP || trace_mode_flag) {
-		    sleep(AlertSecs); /* allow me to look at the results */
+		    LYSleepAlert(); /* allow me to look at the results */
 		}
 	    }
 
@@ -6088,7 +6070,7 @@ try_again:
 	    if (TRACE) {
 		refresh_screen = TRUE;
 		if (!LYTraceLogFP || trace_mode_flag) {
-		    sleep(AlertSecs);
+		    LYSleepAlert();
 		}
 	    }
 	}
@@ -7607,18 +7589,25 @@ PRIVATE void status_link ARGS3(
 #define MAX_STATUS (LYcols - 2)
 #define MIN_STATUS 0
     char format[MAX_LINE];
-    int prefix;
+    int prefix = 0;
     int length;
 
     *format = 0;
-    if (show_more)
-	sprintf(format, "%s ", gettext("-more-"));
-    if (show_indx)
-	sprintf(format + strlen(format), "%s ", gettext("-index-"));
+    if (show_more) {
+	sprintf(format, "%.*s ",
+		(int)(sizeof(format) - 1),
+		gettext("-more-"));
+	prefix = strlen(format);
+    }
+    if (show_indx) {
+	sprintf(format + prefix, "%.*s ",
+		(int)(sizeof(format) - prefix - 1),
+		gettext("-index-"));
+    }
     prefix = strlen(format);
     length = strlen(curlink_name);
 
-    if (prefix > MAX_STATUS) {
+    if (prefix > MAX_STATUS || prefix >= MAX_LINE - 1) {
 	_user_message("%s", format);	/* no room for url */
     } else {
 	sprintf(format + prefix, "%%.%ds", MAX_STATUS - prefix);

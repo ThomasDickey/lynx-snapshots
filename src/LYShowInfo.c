@@ -44,7 +44,6 @@ PUBLIC int showinfo ARGS4(
 #endif
 
 #ifdef DIRED_SUPPORT
-    char temp[LY_MAXPATH];
     struct stat dir_info;
 #endif /* DIRED_SUPPORT */
 
@@ -93,21 +92,18 @@ PUBLIC int showinfo ARGS4(
 
 #ifdef DIRED_SUPPORT
     if (lynx_edit_mode && nlinks > 0) {
-	char *s;
+	char *temp;
 
 	fprintf(fp0, "<pre>\n");
 	fprintf(fp0, "\n%s\n\n", gettext("Directory that you are currently viewing"));
 
-	s = HTfullURL_toFile(doc->address);
-	strcpy(temp, s);
-	FREE(s);
-
+	temp = HTfullURL_toFile(doc->address);
 	fprintf(fp0, "   <em>%4s</em>  %s\n", gettext("Name:"), temp);
+	FREE(temp);
+
 	fprintf(fp0, "   <em>%4s</em>  %s\n", gettext("URL:"), doc->address);
 
-	s = HTfullURL_toFile(links[doc->link].lname);
-	strcpy(temp, s);
-	FREE(s);
+	temp = HTfullURL_toFile(links[doc->link].lname);
 
 	if (lstat(temp, &dir_info) == -1) {
 	    CTRACE((tfp, "lstat(%s) failed, errno=%d\n", temp, errno));
@@ -138,7 +134,7 @@ PUBLIC int showinfo ARGS4(
 		if ((buf_size = readlink(temp, buf, sizeof(buf)-1)) != -1) {
 		    buf[buf_size] = '\0';
 		} else {
-		    strcpy(buf, gettext("Unable to follow link"));
+		    sprintf(buf, "%.1024s", gettext("Unable to follow link"));
 		}
 		fprintf(fp0, "  <em>%s</em>  %s\n", gettext("Points to file:"), buf);
 	    }
@@ -225,6 +221,7 @@ PUBLIC int showinfo ARGS4(
 	    }
 	    fprintf(fp0, "%s\n", (char *)&modes[2]);  /* Skip leading ', ' */
 	}
+	FREE(temp);
 	fprintf(fp0,"</pre>\n");
     } else {
 #endif /* DIRED_SUPPORT */

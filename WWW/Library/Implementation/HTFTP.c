@@ -79,9 +79,6 @@ BUGS:	@@@	Limit connection cache size!
 #define LAST_TCP_PORT	5999
 
 #define LINE_LENGTH 256
-#define COMMAND_LENGTH 256
-
-#define INFINITY 512
 
 #include <HTParse.h>
 #include <HTAnchor.h>
@@ -208,7 +205,7 @@ PRIVATE void free_FTPGlobals NOARGS
 }
 #endif /* LY_FIND_LEAKS */
 
-/* PUBLIC						HTMake_VMS_name()
+/* PUBLIC						HTVMS_name()
 **		CONVERTS WWW name into a VMS name
 ** ON ENTRY:
 **	nn		Node Name (optional)
@@ -219,7 +216,7 @@ PRIVATE void free_FTPGlobals NOARGS
 **
 ** Bug: Returns pointer to static -- non-reentrant
 */
-PUBLIC char * HTMake_VMS_name ARGS2(
+PUBLIC char * HTVMS_name ARGS2(
 	CONST char *,	nn,
 	CONST char *,	fn)
 {
@@ -231,7 +228,7 @@ PUBLIC char * HTMake_VMS_name ARGS2(
 **	The node is assumed to be local if the hostname WITHOUT DOMAIN
 **	matches the local one. @@@
 */
-    static char vmsname[INFINITY];	/* returned */
+    static char *vmsname;
     char * filename = (char*)malloc(strlen(fn)+1);
     char * nodename = (char*)malloc(strlen(nn)+2+1);	/* Copies to hack */
     char *second;		/* 2nd slash */
@@ -264,16 +261,16 @@ PUBLIC char * HTMake_VMS_name ARGS2(
     last = strrchr(filename, '/');	/* last slash */
 
     if (!second) {				/* Only one slash */
-	sprintf(vmsname, "%s%s", nodename, filename + 1);
+	HTSprintf0(&vmsname, "%s%s", nodename, filename + 1);
     } else if (second == last) {		/* Exactly two slashes */
 	*second = '\0';		/* Split filename from disk */
-	sprintf(vmsname, "%s%s:%s", nodename, filename+1, second+1);
+	HTSprintf0(&vmsname, "%s%s:%s", nodename, filename+1, second+1);
 	*second = '/';	/* restore */
     } else {				/* More than two slashes */
 	char * p;
 	*second = '\0';		/* Split disk from directories */
 	*last = '\0';		/* Split dir from filename */
-	sprintf(vmsname, "%s%s:[%s]%s",
+	HTSprintf0(&vmsname, "%s%s:[%s]%s",
 		nodename, filename+1, second+1, last+1);
 	*second = *last = '/';	/* restore filename */
 	for (p = strchr(vmsname, '['); *p!=']'; p++)
@@ -523,6 +520,7 @@ PRIVATE int response ARGS1(
     return result/100;
 }
 
+#if 0
 PRIVATE int send_cmd_nowait ARGS1(char *, verb)
 {
     char command[20];
@@ -530,6 +528,7 @@ PRIVATE int send_cmd_nowait ARGS1(char *, verb)
     sprintf(command, "%.*s%c%c", (int) sizeof(command)-4, verb, CR, LF);
     return write_cmd(command);
 }
+#endif
 
 PRIVATE int send_cmd_1 ARGS1(char *, verb)
 {
@@ -1266,8 +1265,7 @@ PRIVATE void set_years_and_date NOARGS
 	}
     }
     i++;
-    sprintf(month, "%s%d", (i < 10 ? "0" : ""), i);
-    sprintf(date, "9999%.2s%.2s", month, day);
+    sprintf(date, "9999%02d%.2s", i, day);
     TheDate = atoi(date);
     strcpy(ThisYear, (char *)ctime(&NowTime)+20);
     ThisYear[4] = '\0';
@@ -1644,30 +1642,22 @@ PRIVATE void parse_vms_dir_entry ARGS2(
 	isalpha(*(cpd+1)) && *(cpd+4) == '-') {
 
 	/** Month **/
-	*(cpd+4) = '\0';
 	*(cpd+2) = (char) TOLOWER(*(cpd+2));
 	*(cpd+3) = (char) TOLOWER(*(cpd+3));
-	sprintf(date, "%s ", cpd+1);
-	*(cpd+4) = '-';
+	sprintf(date, "%.3s ", cpd+1);
 
 	/** Day **/
-	*cpd = '\0';
 	if (isdigit(*(cpd-2)))
-	    sprintf(date+4, "%s ", cpd-2);
+	    sprintf(date+4, "%.2s ", cpd-2);
 	else
-	    sprintf(date+4, "%c%s ", HT_NON_BREAK_SPACE, cpd-1);
-	*cpd = '-';
+	    sprintf(date+4, "%c%.1s ", HT_NON_BREAK_SPACE, cpd-1);
 
 	/** Time or Year **/
 	if (!strncmp(ThisYear, cpd+5, 4) &&
 	    strlen(cpd) > 15 && *(cpd+12) == ':') {
-	    *(cpd+15) = '\0';
-	    sprintf(date+7, "%s", cpd+10);
-	    *(cpd+15) = ' ';
+	    sprintf(date+7, "%.5s", cpd+10);
 	} else {
-	    *(cpd+9) = '\0';
-	    sprintf(date+7, " %s", cpd+5);
-	    *(cpd+9) = ' ';
+	    sprintf(date+7, " %.4s", cpd+5);
 	}
 
 	StrAllocCopy(entry_info->date, date);
@@ -1768,10 +1758,10 @@ PRIVATE void parse_ms_windows_dir_entry ARGS2(
 	    *(cpd+17) = '\0';  /* Time */
 	    if (strcmp(ThisYear, cpd+7))
 		/* Not this year, so show the year */
-		sprintf(date, "%s  %s", cpd, (cpd+7));
+		sprintf(date, "%.6s  %.4s", cpd, (cpd+7));
 	    else
 		/* Is this year, so show the time */
-		sprintf(date, "%s %s", cpd, (cpd+12));
+		sprintf(date, "%.6s %.5s", cpd, (cpd+12));
 	    StrAllocCopy(entry_info->date, date);
 	    if (entry_info->date[4] == ' '|| entry_info->date[4] == '0') {
 		entry_info->date[4] = HT_NON_BREAK_SPACE;
@@ -1849,16 +1839,16 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
 	*(cp+2)  = '\0';	/* Month */
 	i = atoi(cp) - 1;
 	*(cp+5) = '\0';		/* Day */
-	sprintf(date, "%s %s", months[i], (cp+3));
+	sprintf(date, "%.3s %.2s", months[i], (cp+3));
 	if (date[4] == '0')
 	    date[4] = ' ';
 	cp += 6;			/* Year */
 	if (strcmp((ThisYear+2), cp)) {
 	    /* Not this year, so show the year */
 	    if (atoi(cp) < 70) {
-		sprintf(&date[6], "  20%s", cp);
+		sprintf(&date[6], "  20%.2s", cp);
 	    } else {
-		sprintf(&date[6], "  19%s", cp);
+		sprintf(&date[6], "  19%.2s", cp);
 	    }
 	} else {
 	    /* Is this year, so show the time */
@@ -1866,9 +1856,7 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
 	    i = atoi(cpd);
 	    if (*(cpd+5) == 'P' || *(cpd+5) == 'p')
 		i += 12;
-	    *(cpd+5) = '\0';
-	    sprintf(&date[6], " %s%d:%s",
-				     (i < 10 ? "0" : ""), i, (cpd+3));
+	    sprintf(&date[6], " %02d:%.2s", i, (cpd+3));
 	}
 	StrAllocCopy(entry_info->date, date);
 	if (entry_info->date[4] == ' '|| entry_info->date[4] == '0') {
@@ -2007,23 +1995,22 @@ PRIVATE void parse_cms_dir_entry ARGS2(
 	    if (*cpd == ' ')
 		*cpd = '0';
 	    i = atoi(cpd) - 1;
-	    sprintf(date, "%s %s", months[i], (cpd+3));
+	    sprintf(date, "%.3s %.2s", months[i], (cpd+3));
 	    if (date[4] == '0')
 		date[4] = ' ';
 	    cpd += 6;		/* Year */
 	    if (strcmp((ThisYear+2), cpd)) {
 		/* Not this year, so show the year. */
 		if (atoi(cpd) < 70) {
-		    sprintf(&date[6], "  20%s", cpd);
+		    sprintf(&date[6], "  20%.2s", cpd);
 		} else {
-		    sprintf(&date[6], "  19%s", cpd);
+		    sprintf(&date[6], "  19%.2s", cpd);
 		}
 	    } else {
 		/* Is this year, so show the time. */
 		*(cps+2) = '\0';	/* Hour */
 		i = atoi(cps);
-		sprintf(&date[6], " %s%d:%s",
-				     (i < 10 ? "0" : ""), i, (cps+3));
+		sprintf(&date[6], " %02d:%.2s", i, (cps+3));
 	    }
 	    StrAllocCopy(entry_info->date, date);
 	    if (entry_info->date[4] == ' '|| entry_info->date[4] == '0') {
@@ -2432,7 +2419,7 @@ PRIVATE int compare_EntryInfo_structs ARGS2(
 		    }
 		}
 		i++;
-		sprintf(month, "%s%d", (i < 10 ? "0" : ""), i);
+		sprintf(month, "%02d", i);
 		strcat(date1, month);
 		strncat(date1, &entry1->date[4], 2);
 		date1[8] = '\0';
@@ -2467,7 +2454,7 @@ PRIVATE int compare_EntryInfo_structs ARGS2(
 		    }
 		}
 		i++;
-		sprintf(month, "%s%d", (i < 10 ? "0" : ""), i);
+		sprintf(month, "%02d", i);
 		strcat(date2, month);
 		strncat(date2, &entry2->date[4], 2);
 		date2[8] = '\0';
@@ -2931,8 +2918,8 @@ PUBLIC int HTFTPLoad ARGS4(
 
 	    /* Open connection for data:  */
 
-	    sprintf(command,
-		    "ftp://%d.%d.%d.%d:%d/",h0,h1,h2,h3,passive_port);
+	    sprintf(command, "ftp://%d.%d.%d.%d:%d/",
+		    h0, h1, h2, h3, passive_port);
 	    status = HTDoConnect(name, "FTP", passive_port, &data_soc);
 
 	    if (status < 0) {
@@ -2955,6 +2942,7 @@ PUBLIC int HTFTPLoad ARGS4(
     {
 	char *filename = HTParse(name, "", PARSE_PATH + PARSE_PUNCTUATION);
 	char *fname = filename; /** Save for subsequent free() **/
+	char *vmsname = NULL;
 	BOOL binary;
 	char *type = NULL;
 	char *cp;
@@ -3133,13 +3121,10 @@ PUBLIC int HTFTPLoad ARGS4(
 		    filename[i] = filename[(i+1)];
 		filename[i] = '\0';
 		CTRACE((tfp, "HTFTP: Trimmed '%s'\n", filename));
-		cp = HTMake_VMS_name("", filename);
+		cp = HTVMS_name("", filename);
 		CTRACE((tfp, "HTFTP: VMSized '%s'\n", cp));
 		if ((cp1=strrchr(cp, ']')) != NULL) {
-		    cp1++;
-		    for (i = 0; cp1[i]; i++)
-			filename[i] = cp1[i];
-		    filename[i] = '\0';
+		    strcpy(filename, ++cp1);
 		    CTRACE((tfp, "HTFTP: Filename '%s'\n", filename));
 		    *cp1 = '\0';
 		    status = send_cwd(cp);
@@ -3178,22 +3163,16 @@ PUBLIC int HTFTPLoad ARGS4(
 			   strchr(cp, ']') == NULL) {
 		    cp1++;
 		    if (*cp1 != '\0') {
-			for (i = 0; cp1[i]; i++)
-			    filename[i] = cp1[i];
-			filename[i] = '\0';
+			strcpy(filename, cp1);
 			CTRACE((tfp, "HTFTP: Filename '%s'\n", filename));
-			*cp1 = '\0';
-			strcat(cp, "[");
-			strcat(cp, filename);
-			strcat(cp, "]");
-			status = send_cwd(cp);
+			HTSprintf0(&vmsname, "%.*s[%s]", cp1-cp, cp, filename);
+			status = send_cwd(vmsname);
 			if (status != 2) {
-			    *cp1 = '\0';
-			    strcat(cp, "[000000]");
-			    status = send_cwd(cp);
+			    HTSprintf(&vmsname, "%.*s[000000]", cp1-cp, cp);
+			    status = send_cwd(vmsname);
 			    if (status != 2) {
-				*cp1 = '\0';
-				status = send_cwd(cp);
+				HTSprintf(&vmsname, "%.*s", cp1-cp, cp);
+				status = send_cwd(vmsname);
 				if (status != 2) {
 				    FREE(fname);
 				    init_help_message_cache();
@@ -3203,15 +3182,15 @@ PUBLIC int HTFTPLoad ARGS4(
 				}
 			    }
 			} else {
-			    strcpy(cp, "000000");
-			    filename = cp;
+			    HTSprintf0(&vmsname, "000000");
+			    filename = vmsname;
 			}
 		    }
 		} else if (0==strcmp(cp, (filename+1))) {
 		    status = send_cwd(cp);
 		    if (status != 2) {
-			strcat(cp, ":");
-			status = send_cwd(cp);
+			HTSprintf0(&vmsname, "%s:", cp);
+			status = send_cwd(vmsname);
 			if (status != 2) {
 			    FREE(fname);
 			    init_help_message_cache();	/* to free memory */
@@ -3220,8 +3199,8 @@ PUBLIC int HTFTPLoad ARGS4(
 			    return ((status < 0) ? status : -status);
 			}
 		    }
-		    strcpy(cp, "000000");
-		    filename = cp;
+		    HTSprintf0(&vmsname, "000000");
+		    filename = vmsname;
 		}
 	    }
 	    /** Trim trailing slash if filename is not the top directory **/
@@ -3420,6 +3399,7 @@ PUBLIC int HTFTPLoad ARGS4(
 	    }
 	}
 	FREE(fname);
+	FREE(vmsname);
 	if (status != 1) {
 	    init_help_message_cache();	/* to free memory */
 	    NETCLOSE(control->socket);
@@ -3454,8 +3434,11 @@ listen:
 	data_soc = status;
     } /* !ftp_passive */
 
+#if 0	/* no - this makes the data connection go away too soon (2.8.3dev.22) */
     if ((status = send_cmd_nowait("QUIT")) == 1)
 	outstanding++;
+#endif
+
     if (isDirectory) {
 	if (server_type == UNIX_SERVER && !unsure_type &&
 	    !strcmp(response_text,

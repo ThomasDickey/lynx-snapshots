@@ -35,7 +35,7 @@ PUBLIC void HTAlert ARGS1(
     _user_message(ALERT_FORMAT, Msg);
     LYstore_message2(ALERT_FORMAT, Msg);
 
-    sleep(AlertSecs);
+    LYSleepAlert();
 }
 
 PUBLIC void HTAlwaysAlert ARGS2(
@@ -51,14 +51,14 @@ PUBLIC void HTAlwaysAlert ARGS2(
 		    extra_prefix, Msg);
 	    fflush(stdout);
 	    LYstore_message2(ALERT_FORMAT, Msg);
-	    sleep(AlertSecs);
+	    LYSleepAlert();
 	} else {
 	    fprintf(((TRACE) ? stdout : stderr),
 		    ALERT_FORMAT,
 		    (Msg == 0) ? "" : Msg);
 	    fflush(stdout);
 	    LYstore_message2(ALERT_FORMAT, Msg);
-	    sleep(AlertSecs);
+	    LYSleepAlert();
 	    fprintf(((TRACE) ? stdout : stderr), "\n");
 	}
 	CTRACE((tfp, "\nAlert!: %s\n\n", Msg));
@@ -90,7 +90,7 @@ PUBLIC void HTUserMsg ARGS1(
     if (Msg && *Msg) {
 	CTRACE((tfp, "User message: %s\n", Msg));
 	LYstore_message(Msg);
-	sleep(MessageSecs);
+	LYSleepMsg();
     }
 }
 
@@ -104,7 +104,7 @@ PUBLIC void HTUserMsg2 ARGS2(
 	CTRACE((tfp, Msg2, Arg));
 	CTRACE((tfp, "\n"));
 	LYstore_message2(Msg2, Arg);
-	sleep(MessageSecs);
+	LYSleepMsg();
     }
 }
 
@@ -219,7 +219,7 @@ PUBLIC void HTReadProgress ARGS2(
     static long bytes_last;
 
     double transfer_rate;
-    char line[80];
+    char line[MAX_LINE];
     struct timeb tb;
     char *units = "bytes";
 
@@ -1098,6 +1098,29 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
     FREE(StatusInfo);
     FREE(url);
     return (result);
+}
+
+#define okToSleep() (!crawl && !traversal && LYCursesON)
+
+/*
+ * Sleep for the given message class's time.
+ */
+PUBLIC void LYSleepAlert NOARGS
+{
+    if (okToSleep())
+	sleep(AlertSecs);
+}
+
+PUBLIC void LYSleepInfo NOARGS
+{
+    if (okToSleep())
+	sleep(InfoSecs);
+}
+
+PUBLIC void LYSleepMsg NOARGS
+{
+    if (okToSleep())
+	sleep(MessageSecs);
 }
 
 /*

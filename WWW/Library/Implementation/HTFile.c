@@ -2210,7 +2210,7 @@ PUBLIC int HTLoadFile ARGS4(
 		    StrAllocCopy(anchor->content_encoding, "x-compress");
 		    format = HTAtom_for("www/compressed");
 		} else if ((len > 3) &&
-			   !strcasecomp((char *)&vmsname[len - 2], "gz")) {
+			   !strcasecomp(&vmsname[len - 2], "gz")) {
 		    if (vmsname[len - 3] == '.' ||
 			vmsname[len - 3] == '-' ||
 			vmsname[len - 3] == '_') {

@@ -29,7 +29,7 @@
 #include <HTCJK.h>
 
 PUBLIC HTList * Visited_Links = NULL;	/* List of safe popped docs. */
-PUBLIC int Visited_Links_As = VISITED_LINKS_AS_TREE;
+PUBLIC int Visited_Links_As = VISITED_LINKS_AS_LATEST | VISITED_LINKS_REVERSE;
 PRIVATE VisitedLink *PrevVisitedLink = NULL;	    /* NULL on auxillary */
 PRIVATE VisitedLink *PrevActiveVisitedLink = NULL;  /* Last non-auxillary */
 PRIVATE VisitedLink Latest_first;
