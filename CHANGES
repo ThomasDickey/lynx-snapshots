@@ -1,7 +1,11 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2004-02-01 (2.8.5pre.5)
+2004-02-04 (2.8.5rel.1)
+* build fixes for MINGW32 -DK
+* build fixes for OS/2 (reported by IZ) -TD
+
+2004-02-02 (2.8.5pre.5)
 * MINGW32-specific changes to build with that configuration using the configure
   script in Cygwin and "-mno-cygwin" option -DK
 * move Cygwin defines for WIN_EX, _WINDOWS_NSL out of www_tcp.h, to the

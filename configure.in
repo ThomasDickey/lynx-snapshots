@@ -5,7 +5,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ask PRCS to plug-in the project-version for the configure-script.
 dnl $Format: "AC_REVISION($ProjectVersion$)"$
-AC_REVISION(2.8.5pre.5)
+AC_REVISION(2.8.5rel.1)
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
 # in the environment, or whether autoconf added -O and -g options:
@@ -33,7 +33,7 @@ CF_CHECK_CACHE
 PACKAGE=lynx
 dnl ask PRCS to plug-in the project-version for the packages.
 # $Format: "VERSION=$ProjectVersion$"$
-VERSION=2.8.5pre.5
+VERSION=2.8.5rel.1
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_SUBST(DESTDIR)
@@ -862,7 +862,7 @@ CF_ARG_ENABLE(externs,
 AC_MSG_RESULT($use_externs)
 if test $use_externs != "no" ; then
 	AC_DEFINE(USE_EXTERNALS)
-	LIBOBJS="$LIBOBJS LYExtern.o"
+	LIBOBJS="$LIBOBJS LYExtern\$o"
 fi
 
 AC_MSG_CHECKING(if you want to use setfont support)
@@ -1021,7 +1021,7 @@ CF_ARG_DISABLE(dired,
 AC_MSG_RESULT($use_dired)
 
 if test ".$use_dired" != ".no" ; then
-	LIBOBJS="$LIBOBJS LYLocal.o"
+	LIBOBJS="$LIBOBJS LYLocal\$o"
 	AC_DEFINE(DIRED_SUPPORT)
 
 	AC_MSG_CHECKING(if you wish to allow extracting from archives via DirEd)

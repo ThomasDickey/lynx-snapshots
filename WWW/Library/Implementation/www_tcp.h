@@ -169,7 +169,11 @@ IBM-PC running Windows NT
 */
 
 #ifdef _WINDOWS
+
+#ifndef _WINDOWS_NSL
 #define _WINDOWS_NSL
+#endif
+
 #include <fcntl.h>                      /* For HTFile.c */
 #include <sys\types.h>                  /* For HTFile.c */
 #include <sys\stat.h>                   /* For HTFile.c */

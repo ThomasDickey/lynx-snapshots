@@ -168,6 +168,10 @@ char *alloca ();
 #define BOOLEAN_DEFINED
 #undef HAVE_POPEN		/* FIXME: does this not work, or is it missing */
 #undef small			/* see <w32api/rpcndr.h> */
+#endif
+
+/* cygwin, mingw32, etc. */
+#ifdef FILE_DOES_NOT_EXIST
 #undef FILE_DOES_NOT_EXIST	/* see <w32api/winnt.h> */
 #endif
 
