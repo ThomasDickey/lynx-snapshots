@@ -634,6 +634,10 @@ PUBLIC void start_curses NOARGS
 		  keypad(stdscr, TRUE);
 		  fflush(stdin);
 		  fflush(stdout);
+		  if (has_colors()) {
+		      lynx_has_color = TRUE;
+		      start_color();
+		  }
 		  lynx_init_colors();
 		  lynx_called_initscr = TRUE;
 
@@ -1308,7 +1312,6 @@ PUBLIC void VMSexit NOARGS
 	fflush(stdout);
 	fflush(stderr);
     }
-    *stderr = LYOrigStderr;
 }
 
 /*

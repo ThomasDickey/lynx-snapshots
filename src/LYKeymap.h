@@ -94,15 +94,16 @@ extern char override[];
 #define       LYK_F_LINK_NUM    70
 #define       LYK_CLEAR_AUTH    71
 #define       LYK_SWITCH_DTD    72
+#define       LYK_ELGOTO        73
 
 #ifdef USE_EXTERNALS
-#define       LYK_EXTERN        73
+#define       LYK_EXTERN        74
 #if defined(VMS) || defined(DIRED_SUPPORT)
-#define       LYK_DIRED_MENU    74
+#define       LYK_DIRED_MENU    75
 #endif /* VMS || DIRED_SUPPORT */
 #else  /* USE_EXTERNALS */
 #if defined(VMS) || defined(DIRED_SUPPORT)
-#define       LYK_DIRED_MENU    73
+#define       LYK_DIRED_MENU    74
 #endif /* VMS || DIRED_SUPPORT */
 #endif /* !defined(USE_EXTERNALS) */
 

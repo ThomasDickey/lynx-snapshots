@@ -154,7 +154,7 @@ TCPFLAGS = /Define = (DEBUG, ACCESS_AUTH, $(TCP))
 TOPT = sys$disk:[]$(TCPOPT).opt
 COPT = sys$disk:[]$(COMPILER).opt
 WWWLIB = [-.WWW.Library.Implementation]WWWLib_$(TCP).olb
-CFLAGS = $(TCPFLAGS) $(CFLAGS)/Include = ([-], [-.WWW.Library.Implementation])
+CFLAGS = $(TCPFLAGS) $(CFLAGS)/Include = ([-], [.chrtrans], [-.WWW.Library.Implementation])
 
 
 lynx :	lynx.exe

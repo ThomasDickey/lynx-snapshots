@@ -1112,20 +1112,8 @@ PRIVATE void display_page ARGS3(
 	 *  Currently implemented only for LINUX
 	 */
 	stop_curses();
-	if (LYTraceLogFP)
-	    /*
-	     *  Set stderr back to its original value,
-	     *  because the current UCChangeTerminalCodepage()
-	     *  writes escape sequences to stderr. - KW
-	     */
-	    *stderr = LYOrigStderr;
 	UCChangeTerminalCodepage(current_char_set,
 				 &LYCharSet_UC[current_char_set]);
-	if (LYTraceLogFP)
-	    /*
-	     *  Set stderr back to the log file on return.
-	     */
-	    *stderr = *LYTraceLogFP;
 	start_curses();
 #endif /* LINUX */
 #endif /* EXP_CHARTRANS_AUTOSWITCH */
@@ -1787,9 +1775,10 @@ PRIVATE void split_line ARGS2(
 		    "........... ", previous->data);
     }
     if (line->numstyles > 0 && line->numstyles < MAX_STYLES_ON_LINE) {
+	int n;
 	inew ++;
-	memmove(line->styles, &line->styles[inew],
-		line->numstyles * sizeof(line->styles[0]));
+	for (n = line->numstyles; n >= 0; n--)
+		line->styles[n + inew] = line->styles[n];
     } else
 	if (line->numstyles == 0)
 	/* FIXME: RJP - shouldn't use 0xffffffff for largest integer */

@@ -143,12 +143,25 @@ the script:
   	Use this option to compile-in support for debugging.
 	(The symbol DEBUG is always defined).
 
-  --enable-externs			(define USE_EXTERNS)
+  --enable-externs			(define USE_EXTERNALS)
   	Use this option to compile-in support for passing URLs to external
 	programs.
 
   --enable-find-leaks			(defines LY_FIND_LEAKS)
   	Use this option to compile-in logic for testing memory leaks.
+
+  --enable-font-switch			(defines EXP_CHARTRANS_AUTOSWITCH)
+	Use this option to compile-in support for Linux setfont program,
+	to switch between fonts automatically.
+
+  --enable-nsl-fork			(defines NSL_FORK)
+  	Use this option to compile-in code that forks off gethostbyname
+	lookups so the 'z' key can be used to abort a lookup that hangs
+	or takes forever.
+
+  --enable-underlines			(defines UNDERLINE_LINKS)
+  	Use this option to compile-in logic that makes links underlined
+	rather than boldface.
 
   --enable-warnings
   	Use this option to turn on GCC compiler warnings.

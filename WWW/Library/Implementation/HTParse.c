@@ -475,16 +475,18 @@ PUBLIC void HTSimplify ARGS1(
 	    }
 	    if (*p == '/') {
 		if ((p[1] == '.') && (p[2] == '.') &&
-		    (p[3] == '/' || p[3] == '\0')) {
+		    (p[3] == '/' || p[3] == '?' || p[3] == '\0')) {
 		    /*
-		    **  Handle "/../" or "/..".
+		    **  Handle "../", "..?" or "..".
 		    */
 		    for (q = (p - 1); (q >= filename) && (*q != '/'); q--)
 			/*
 			**  Back up to previous slash or beginning of string.
 			*/
 		        ;
-		    if ((q[0] == '/') && strncmp(q, "/../", 4) &&
+		    if ((q[0] == '/') &&
+		        (strncmp(q, "/../", 4) &&
+			 strncmp(q, "/..?", 4)) &&
 		        !((q - 1) > filename && q[-1] == '/')) {
 			/*
 			**  Not at beginning of string or in a
@@ -511,9 +513,19 @@ PUBLIC void HTSimplify ARGS1(
 		    }
 		} else if (p[1] == '.' && p[2] == '/') {
 		    /*
-		    **  Handle "/." by removing the characters.
+		    **  Handle "./" by removing both characters.
 		    */
 		    q = p;
+		    q1 = (p + 2);
+		    while (*q1 != '\0')
+		       *q++ = *q1++;
+		    *q = '\0';		/* terminate */
+		    p--;
+		} else if (p[1] == '.' && p[2] == '?') {
+		    /*
+		    **  Handle ".?" by removing the dot.
+		    */
+		    q = (p + 1);
 		    q1 = (p + 2);
 		    while (*q1 != '\0')
 		       *q++ = *q1++;

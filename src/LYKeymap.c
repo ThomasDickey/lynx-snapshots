@@ -1,8 +1,8 @@
 #include "HTUtils.h"
 #include "tcp.h"
 #include "LYUtils.h"
-#include "LYKeymap.h"
 #include "LYGlobalDefs.h"
+#include "LYKeymap.h"
 #include "HTAccess.h"
 #include "HTFormat.h"
 #include "HTAlert.h"
@@ -84,7 +84,7 @@ LYK_UP_LINK,         LYK_INFO,     LYK_DOWN_LINK,   LYK_HELP,
 LYK_RAW_TOGGLE,  LYK_ADD_BOOKMARK, LYK_PREV_PAGE,   LYK_COMMENT,
 /* @ */              /* A */         /* B */        /* C */
 
-LYK_DOWNLOAD,        LYK_EDIT,             
+LYK_DOWNLOAD,        LYK_ELGOTO,             
 /* D */              /* E */         
 
 #if defined(DIRED_SUPPORT) || defined(VMS)
@@ -464,6 +464,7 @@ PRIVATE struct rmap revmap[] = {
 { "F_LINK_NUM",		"invoke the 'Follow link (or page) number:' prompt" },
 { "CLEAR_AUTH",		"clear all authorization info for this session" },
 { "SWITCH_DTD",		"switch between two ways of parsing HTML" },
+{ "ELGOTO",		"edit the current link's URL or ACTION and go to it" },
 #ifdef USE_EXTERNALS
 { "EXTERN",		"run external program with url" },
 #endif

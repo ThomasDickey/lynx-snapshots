@@ -597,10 +597,10 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
    <dt>Display Character set
 	<dd>This option allows you to set up the default character set for
 	    your specific terminal.  The display character set provides a
-            mapping from the character encodings of viewed documents and 
-            from HTML entities into viewable characters.  It should be set
+	    mapping from the character encodings of viewed documents and 
+	    from HTML entities into viewable characters.  It should be set
 	    according to your terminal's character set so that characters
-            other than 7-bit ASCII can be displayed correctly, using
+	    other than 7-bit ASCII can be displayed correctly, using
 	    approximations if necessary.  You must have the selected
 	    character set installed on your terminal.
 
@@ -630,7 +630,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    NEVER are not offered in anonymous accounts.  If saved to a
 	    <em>.lynxrc</em> file in non-anonymous accounts, ALWAYS will
 	    cause Lynx to set color mode on at startup if supported.
-            If Lynx is built with the slang library, this is equivalent to
+	    If Lynx is built with the slang library, this is equivalent to
 	    having included the <em>-color</em> command line switch or having the
 	    <em>COLORTERM</em> environment variable set. If color support is
 	    provided by curses or ncurses, this is equivalent to the default
@@ -648,7 +648,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    the default startup behavior is retained, such that color mode
 	    will be turned on at startup only if the terminal info indicates
 	    that you have a color-capable terminal, or (when the
-            slang library is used) if forced on via the
+	    slang library is used) if forced on via the
 	    <em>-color</em> switch or <em>COLORTERM</em> variable.  This
 	    default behavior always is used in anonymous accounts, or if
 	    the <em>option_save</em> restriction is set explicitly.  If
@@ -1057,6 +1057,18 @@ commands.
 	    submission, that modified URL will be entered into the circular
 	    buffer for goto URLs, and can be accessed for further
 	    modification via the '<em>g</em>' command.
+
+   <dt><em>E</em>
+  	<dd>The '<em>E</em>' command allows you to edit the URL (or ACTION)
+	    of the current link and then use that as a goto URL.  Pressing
+  	    the '<em>E</em>' command will bring up a prompt asking you
+	    to edit the current link's URL.  If you do not modify it, or
+	    completely delete it, or enter Control-G, the command will be
+	    cancelled.  Otherwise, the request for the 'E'dited URL will be
+	    sent with method GET, and will be entered into the circular
+	    buffer for goto URLs so that it can be accessed for further
+	    modification via the '<em>g</em>' command.  Note that lower
+	    case 'e' invokes the editor for the current document.
 
    <dt><em>=</em>
   	<dd>The '<em>=</em>' command shows information about the current
@@ -1877,7 +1889,7 @@ where
              <dt><code>-child</code>
     		<dd>exit on left-arrow in startfile, and disable save to disk.
              <dt><code>-color</code>
-    		<dd>forces color mode on, if available.  Default color control sequences
+		<dd>forces color mode on, if available.  Default color control sequences
 		       which work for many terminal types are assumed if the terminal
 		       capability description does not specify how to handle color.
 		       Lynx needs to be compiled with the slang library for this flag.
@@ -2234,8 +2246,8 @@ of Academic Computing Services at The University of Kansas.  Lynx was
 implemented by Lou Montulli and maintained by Garrett Arch Blythe and
 Craig Lavender.
 
-<p><em>Foteos Macrides</em> and members of the <a href="lynx-dev.html">
-lynx-dev</a> list have developed and supported Lynx since release of v2.3
+<p><em>Foteos Macrides</em> and members of the
+<a href="lynx-dev.html">lynx-dev</a> list have developed and supported Lynx since release of v2.3
 in May 1994. The Lynx2-3FM code set was released as v2.4 in June 1995.
 The Lynx2-4FM code set was released as v2.5 in May 1996. The Lynx2-5FM
 code set was released as v2.6 in September 1996. The Lynx2-6FM code set

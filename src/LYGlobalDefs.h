@@ -325,6 +325,7 @@ extern BOOLEAN LYStripDotDotURLs;	/* Try to fix ../ in some URLs?  */
 extern BOOLEAN LYForceSSLCookiesSecure;
 extern BOOLEAN LYNoCc;
 extern BOOLEAN LYPreparsedSource;	/* Show source as preparsed?	 */
+extern BOOLEAN LYPrependBaseToSource;
 
 #ifdef RAWDOSKEYHACK
 extern BOOLEAN raw_dos_key_hack; /* Turn on and off DOS key hack */

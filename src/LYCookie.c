@@ -1,4 +1,4 @@
-/*	  		       Lynx Cookie Support	           LYCookies.c
+/*	  		       Lynx Cookie Support	           LYCookie.c
 **			       ===================
 **
 **	Author:	AMK	A.M. Kuchling (amk@magnet.com)	12/25/96
@@ -28,8 +28,8 @@
 	out in practice.
       * The prompt should show more information about the cookie being
         set in Novice mode.
-      * The truncation heuristic in HTConfirmCookie should probably be 
-        smarter, smart enough to leave a really short name/value string 
+      * The truncation heuristic in HTConfirmCookie should probably be
+        smarter, smart enough to leave a really short name/value string
 	alone.
       * We protect against denial-of-service attacks (see section 6.3.1
         of the draft) by limiting a domain to 50 cookies, limiting the
@@ -103,7 +103,7 @@ typedef struct _cookie cookie;
 #define COOKIE_FLAG_EXPIRES_SET 4  /* If set, an expiry date was set */
 #define COOKIE_FLAG_DOMAIN_SET 8   /* If set, an non-default domain was set */
 #define COOKIE_FLAG_PATH_SET 16    /* If set, an non-default path was set */
-struct _HTStream 
+struct _HTStream
 {
   HTStreamClass * isa;
 };
@@ -114,7 +114,7 @@ PRIVATE void MemAllocCopy ARGS3(
 	CONST char *,	end)
 {
     char *temp;
-    
+
     if (!(start && end) || (end <= start)) {
         HTSACopy(dest, "");
 	return;
@@ -137,7 +137,7 @@ PRIVATE cookie * newCookie NOARGS
         outofmem(__FILE__, "newCookie");
     sprintf(lynxID, "%p", p);
     StrAllocCopy(p->lynxID, lynxID);
-    p->port = 80; 
+    p->port = 80;
     return p;
 }
 
@@ -146,7 +146,7 @@ PRIVATE void freeCookie ARGS1(
 {
     if (co) {
         FREE(co->lynxID);
-	FREE(co->name); 
+	FREE(co->name);
 	FREE(co->value);
 	FREE(co->comment);
 	FREE(co->commentURL);
@@ -295,7 +295,7 @@ PRIVATE void store_cookie ARGS3(
         return;
     }
     /*
-     *  The next 4 conditions do NOT apply if the domain is still 
+     *  The next 4 conditions do NOT apply if the domain is still
      *  the default of request-host.
      */
     if (strcmp(co->domain, hostname) != 0) {
@@ -314,7 +314,7 @@ PRIVATE void store_cookie ARGS3(
 
 	/*
 	 *  Section 4.3.2, condition 2: The value for the Domain attribute
-	 *  contains no embedded dots or does not start with a dot. 
+	 *  contains no embedded dots or does not start with a dot.
 	 *  (A dot is embedded if it's neither the first nor last character.)
 	 *  Note that we added a lead dot ourselves if a domain attribute
 	 *  value otherwise qualified. - FM
@@ -338,7 +338,7 @@ PRIVATE void store_cookie ARGS3(
 	    co = NULL;
 	    return;
 	}
-      
+
         /*
 	 *  Section 4.3.2, condition 3: The value for the request-host does
 	 *  not domain-match the Domain attribute.
@@ -354,19 +354,35 @@ PRIVATE void store_cookie ARGS3(
 	}
 
         /*
-	 *  Section 4.3.2, condition 4: The request-host is a FQDN (not IP
+	 *  Section 4.3.2, condition 4: The request-host is an HDN (not IP
 	 *  address) and has the form HD, where D is the value of the Domain
 	 *  attribute, and H is a string that contains one or more dots.
 	 */
 	ptr = ((hostname + strlen(hostname)) - strlen(co->domain));
 	if (strchr(hostname, '.') < ptr) {
-	    if (TRACE)
-		fprintf(stderr,
-			"store_cookie: Rejecting domain '%s' for host '%s'.\n",
-			co->domain, hostname);
-	    freeCookie(co);
-	    co = NULL;
-	    return;
+	    char *msg = calloc(1,
+			       (strlen(co->domain) +
+			        strlen(hostname) +
+				strlen(INVALID_COOKIE_DOMAIN_CONFIRMATION) +
+				1));
+
+	    sprintf(msg,
+		    INVALID_COOKIE_DOMAIN_CONFIRMATION,
+		    co->domain,
+		    hostname);
+	    if (!HTConfirm(msg)) {
+		if (TRACE) {
+		    fprintf(stderr,
+		       "store_cookie: Rejecting domain '%s' for host '%s'.\n",
+			    co->domain,
+			    hostname);
+		}
+		freeCookie(co);
+	    	co = NULL;
+		FREE(msg);
+		return;
+	    }
+	    FREE(msg);
 	}
     }
 
@@ -409,7 +425,7 @@ PRIVATE void store_cookie ARGS3(
 	    HTList_addObject(domain_list, de);
 	}
     }
-  
+
     /*
      *  Loop over the cookie list, deleting expired and matching cookies.
      */
@@ -488,7 +504,7 @@ PRIVATE void store_cookie ARGS3(
      *  Get confirmation if we need it, and add cookie
      *  if confirmed or 'allow' is set to always. - FM
      */
-    } else if (HTConfirmCookie(de, hostname, 
+    } else if (HTConfirmCookie(de, hostname,
 			       co->domain, co->path, co->name, co->value)) {
 	HTList_insertObjectAt(cookie_list, co, pos);
 	total_cookies++;
@@ -526,7 +542,7 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 		    	    (long)hl,
 			    (co->name ? co->name : "(no name)"),
 			    (co->value ? co->value : "(no value)"));
-	    fprintf(stderr, "%s %s %i %s %s %i%s\n",
+	    fprintf(stderr, "%s %s %d %s %s %d%s\n",
 	    		    hostname,
 			    (co->domain ? co->domain : "(no domain)"),
 			    host_matches(hostname, co->domain),
@@ -550,7 +566,7 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 	 *  Check if we have a unexpired match, and handle if we do.
 	 */
 	if (((co != NULL) &&
-	     host_matches(hostname, co->domain)) && 
+	     host_matches(hostname, co->domain)) &&
 	    (co->pathlen == 0 || !strncmp(path, co->path, co->pathlen))) {
 	    /*
 	     *  Skip if the secure flag is set and we don't have
@@ -582,7 +598,7 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 		     *  first cookie.
 		     */
 		    char version[16];
-		    sprintf(version, "$Version=\"%i\"; ", co->version);
+		    sprintf(version, "$Version=\"%d\"; ", co->version);
 		    StrAllocCopy(header, version);
 		    len += strlen(header);
 		}
@@ -654,14 +670,14 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 	}
 	hl = next;
     }
- 
+
     return(header);
 }
 
 /*
 **  Process potentially concatenated Set-Cookie2 and/or Set-Cookie
 **  headers. - FM
-*/  
+*/
 PRIVATE void LYProcessSetCookies ARGS6(
 	CONST char *,	SetCookie,
 	CONST char *,	SetCookie2,
@@ -722,7 +738,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	while (*p != '\0' && isspace((unsigned char)*p)) {
 	    p++;
 	}
-      
+
         /*
 	 *  Check for an '=' delimiter, or an 'expires' name followed
 	 *  by white, since Netscape's bogus parser doesn't require
@@ -748,7 +764,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	     *  Hack alert!  We must handle Netscape-style cookies with
 	     *		"Expires=Mon, 01-Jan-96 13:45:35 GMT" or
 	     *		"Expires=Mon,  1 Jan 1996 13:45:35 GMT".
-	     *  No quotes, but there are spaces.  Argh... 
+	     *  No quotes, but there are spaces.  Argh...
 	     *  Anyway, we know it will have at least 3 space separators
 	     *  within it, and two dashes or two more spaces, so this code
 	     *  looks for a space after the 5th space separator or dash to
@@ -1223,7 +1239,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	while (*p != '\0' && isspace((unsigned char)*p)) {
 	    p++;
 	}
-      
+
         /*
 	 *  Check for an '=' delimiter, or an 'expires' name followed
 	 *  by white, since Netscape's bogus parser doesn't require
@@ -1245,13 +1261,13 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	     *  Hack alert!  We must handle Netscape-style cookies with
 	     *		"Expires=Mon, 01-Jan-96 13:45:35 GMT" or
 	     *		"Expires=Mon,  1 Jan 1996 13:45:35 GMT".
-	     *  No quotes, but there are spaces.  Argh... 
+	     *  No quotes, but there are spaces.  Argh...
 	     *  Anyway, we know it will have at least 3 space separators
 	     *  within it, and two dashes or two more spaces, so this code
 	     *  looks for a space after the 5th space separator or dash to
 	     *  mark the end of the value. - FM
 	     */
-	    if ((attr_end - attr_start) == 7 && 
+	    if ((attr_end - attr_start) == 7 &&
 		!strncasecomp(attr_start, "Expires", 7)) {
 		int spaces = 6;
 		value_start = p;
@@ -1746,14 +1762,14 @@ PUBLIC void LYSetCookie ARGS3(
         port = atoi(ptr);
     } else if (!strncasecomp(address, "https:", 6)) {
         port = 443;
-    } 
+    }
     if (((path = HTParse(address, "",
     			 PARSE_PATH|PARSE_PUNCTUATION)) != NULL) &&
 	(ptr = strrchr(path, '/')) != NULL) {
 	if (ptr == path) {
 	    *(ptr+1) = '\0';	/* Leave a single '/' alone */
 	} else {
-	    *ptr = '\0'; 
+	    *ptr = '\0';
 	}
     }
     if (!(SetCookie && *SetCookie) &&
@@ -1818,7 +1834,7 @@ PUBLIC char * LYCookie ARGS4(
 
     if (TRACE) {
 	fprintf(stderr,
-		"LYCookie: Searching for '%s:%i', '%s'.\n",
+		"LYCookie: Searching for '%s:%d', '%s'.\n",
 		(hostname ? hostname : "(null)"),
 		port,
 		(path ? path : "(null)"));
@@ -1934,7 +1950,7 @@ PRIVATE int LYHandleCookies ARGS4 (
 	     *  If there is a path string (not just a slash) in the
 	     *  LYNXCOOKIE: URL, that's a cookie's lynxID and this
 	     *  is a request to delete it from the Cookie Jar. - FM
-	     */ 
+	     */
 	    if ((lynxID = HTParse(arg, "", PARSE_PATH)) != NULL) {
 	        if (*lynxID == '\0') {
 		    FREE(lynxID);
@@ -2025,7 +2041,7 @@ PRIVATE int LYHandleCookies ARGS4 (
 			switch(TOUPPER(ch)) {
 			    case 'A':
 			        /*
-				 *  Set to accept all cookies 
+				 *  Set to accept all cookies
 				 *  from this domain. - FM
 				 */
 				de->bv = QUERY_USER;
@@ -2154,7 +2170,7 @@ Delete_all_cookies_in_domain:
      *  deletion request.  Set up an HTML stream and
      *  return an updated Cookie Jar Page. - FM
      */
-    target = HTStreamStack(format_in, 
+    target = HTStreamStack(format_in,
 			   format_out,
 			   sink, anAnchor);
     if (!target || target == NULL) {
@@ -2251,9 +2267,10 @@ Delete_all_cookies_in_domain:
 	    } else {
 	        StrAllocCopy(path, "/");
 	    }
-	    sprintf(buf, "<DD>Path=%s\n<DD>Port: %i Secure: %s\n",
+	    sprintf(buf, "<DD>Path=%s\n<DD>Port: %d Secure: %s Discard: %s\n",
 			 path, co->port,
-			 ((co->flags & COOKIE_FLAG_SECURE) ? "YES" : "NO"));
+			 ((co->flags & COOKIE_FLAG_SECURE) ? "YES" : "NO"),
+			 ((co->flags & COOKIE_FLAG_DISCARD) ? "YES" : "NO"));
 	    FREE(path);
 	    (*target->isa->put_block)(target, buf, strlen(buf));
 

@@ -88,6 +88,16 @@ PRIVATE void call_setfont ARGS3(
     }
 }
 
+PRIVATE void write_esc ARGS1(
+	CONST char *,	p)
+{
+    int fd = open("/dev/tty", O_WRONLY);
+    if (fd >= 0) {
+	write(fd, p, strlen(p));
+	close(fd);
+    }
+}
+
 /*
  *  This is the thing that actually gets called from display_page().
  */
@@ -96,14 +106,12 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	LYUCcharset *,	p)
 {
     static int lastcs = -1;
-    static char * lastname = NULL;
-    static TGNstate_t lastGN = G0;
+    static CONST char * lastname = NULL;
     static TTransT_t lastTransT = GN_dunno;
     static TGen_state_t lastUtf = Dunno;
     static TGen_state_t lastHasUmap = Dunno;
 
-    char * name = p->MIMEname;
-    TGNstate_t GN = G0;
+    CONST char * name = p->MIMEname;
     TTransT_t TransT = GN_dunno;
     TGen_state_t Utf = Dunno;
     TGen_state_t HasUmap = Dunno;
@@ -124,7 +132,6 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
      *
      *  For some reason stdout won't do; maybe needs flush() somewhere.
      */
-#define ESCOUT stderr
     if (display || (cp = getenv(DISPLAY)) != NULL) {
 	/*
 	 *  We won't do anything in an xterm.  Better that way...
@@ -220,19 +227,19 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	    /*
 	     *  Switch Linux console to lat1 table.
 	     */
-	    fprintf(ESCOUT, "\033(B");
+	    write_esc("\033(B");
 	} else if (TransT == GN_0decgraf) {
-	    fprintf(ESCOUT, "\033(0");
+	    write_esc("\033(0");
 	} else if (TransT == GN_Ucp437) {
 	     /*
 	      *  Switch Linux console to 437 table?
 	      */
-	    fprintf(ESCOUT, "\033(U");
+	    write_esc("\033(U");
 	} else if (TransT == GN_Kuser) {
 	     /*
 	      *  Switch Linux console to user table.
 	      */
-	    fprintf(ESCOUT, "\033(K");
+	    write_esc("\033(K");
 	}
 	if (TransT != GN_dunno && TransT != GN_dontCare) {
 	    lastTransT = TransT;
@@ -250,7 +257,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	    /*
 	     *  Turn Linux console UTF8 mode ON.
 	     */
-	    fprintf(ESCOUT, "\033%%G");
+	    write_esc("\033%G");
 	    lastUtf = Utf;
 	}
 	return;
@@ -259,7 +266,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	/*
 	 *  Turn Linux console UTF8 mode OFF.
 	 */
-	fprintf(ESCOUT, "\033%%@");
+	write_esc("\033%@");
 	lastUtf = Utf;
     }
 

@@ -3,7 +3,7 @@
 # tells Lynx that "unicode-1-1-utf-8" is Unicode/UCS2 encoded in UTF8...
 #
 #The MIME name of this charset. 
-MIMEname unicode-1-1-utf-8
+Mutf-8
 
 #Name as a Display Charset (used on Options screen)
 OptionName UNICODE UTF 8

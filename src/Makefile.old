@@ -56,28 +56,27 @@ LYCharSets.o: ../userdefs.h
 
 CHRTR= chrtrans/
 
-TABLES= $(CHRTR)iso01_uni.h \
- $(CHRTR)def7_uni.h \
- $(CHRTR)iso02_uni.h \
- $(CHRTR)cp1252_uni.h \
- $(CHRTR)dmcs_uni.h \
- $(CHRTR)mac_uni.h \
- $(CHRTR)next_uni.h \
- $(CHRTR)koi8r_uni.h \
- $(CHRTR)viscii_uni.h \
- $(CHRTR)cp437_uni.h \
- $(CHRTR)cp850_uni.h \
- $(CHRTR)cp852_uni.h \
- $(CHRTR)cp866_uni.h \
- $(CHRTR)cp737_uni.h \
- $(CHRTR)cp869_uni.h \
- $(CHRTR)cp864_uni.h \
- $(CHRTR)cp862_uni.h \
+TABLES= \
  $(CHRTR)cp1250_uni.h \
  $(CHRTR)cp1251_uni.h \
+ $(CHRTR)cp1252_uni.h \
  $(CHRTR)cp1253_uni.h \
  $(CHRTR)cp1255_uni.h \
  $(CHRTR)cp1256_uni.h \
+ $(CHRTR)cp1257_uni.h \
+ $(CHRTR)cp437_uni.h \
+ $(CHRTR)cp737_uni.h \
+ $(CHRTR)cp775_uni.h \
+ $(CHRTR)cp850_uni.h \
+ $(CHRTR)cp852_uni.h \
+ $(CHRTR)cp862_uni.h \
+ $(CHRTR)cp864_uni.h \
+ $(CHRTR)cp866_uni.h \
+ $(CHRTR)cp869_uni.h \
+ $(CHRTR)def7_uni.h \
+ $(CHRTR)dmcs_uni.h \
+ $(CHRTR)iso01_uni.h \
+ $(CHRTR)iso02_uni.h \
  $(CHRTR)iso03_uni.h \
  $(CHRTR)iso04_uni.h \
  $(CHRTR)iso05_uni.h \
@@ -86,10 +85,14 @@ TABLES= $(CHRTR)iso01_uni.h \
  $(CHRTR)iso08_uni.h \
  $(CHRTR)iso09_uni.h \
  $(CHRTR)iso10_uni.h \
- $(CHRTR)utf8_uni.h \
+ $(CHRTR)koi8r_uni.h \
+ $(CHRTR)mac_uni.h \
+ $(CHRTR)mnem_suni.h \
+ $(CHRTR)mnem2_suni.h \
+ $(CHRTR)next_uni.h \
  $(CHRTR)rfc_suni.h \
- $(CHRTR)mnemonic_suni.h \
- $(CHRTR)mnem_suni.h
+ $(CHRTR)utf8_uni.h \
+ $(CHRTR)viscii_uni.h
 
 CMN=../WWW/Library/Implementation/
 

@@ -117,6 +117,9 @@ PRIVATE void HTFWriter_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 }
 
 
+extern int HTLoadFile PARAMS((
+	CONST char *addr,	HTParentAnchor *anchor,
+	HTFormat format_out,	HTStream *sink));
 
 
 /*	Free an HTML object
@@ -133,9 +136,6 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
     char *path = NULL;
     char *addr = NULL;
     int status;
-    extern int HTLoadFile PARAMS((
-    	CONST char *addr,	HTParentAnchor *anchor,
-	HTFormat format_out,	HTStream *sink));
     BOOL use_gzread = NO;
 
     fflush(me->fp);
@@ -868,7 +868,8 @@ SaveToFile_tempname:
 
     StrAllocCopy(anchor->FileCache, fnam);
 Prepend_BASE:
-    if (!strncasecomp(pres->rep->name, "text/html", 9) &&
+    if (LYPrependBaseToSource &&
+        !strncasecomp(pres->rep->name, "text/html", 9) &&
 	!anchor->content_encoding) {
         /*
 	 *  Add the document's base as a BASE tag at the top of the file,

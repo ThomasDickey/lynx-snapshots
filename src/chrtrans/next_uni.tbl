@@ -34,10 +34,10 @@ ONeXT character set
 #	128 characters (0x0 - 0x7f) are identical to ASCII and Unicode,
 #	this table only maps the NextStep range from 0x80 - 0xFF.
 #
-#       Format:  Three tab-separated columns
-#                Column #1 is the NextStep code (in hex as 0xXX)
-#                Column #2 is the Unicode (in hex as 0xXXXX)
-#                Column #3 NextStep name, Unicode name (follows a comment sign, '#')
+#       Format: Three tab-separated columns
+#               Column #1 is the NextStep code (in hex as 0xXX)
+#               Column #2 is the Unicode (in hex as 0xXXXX)
+#               Column #3 NextStep name, Unicode name (follows a comment sign, '#')
 #
 #       The entries are in NextStep order
 #

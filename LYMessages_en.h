@@ -159,8 +159,13 @@
 #define SPAWNING_MSG \
  "Spawning DCL subprocess.  Use 'logout' to return to Lynx.\n"
 #else
+#ifdef DOSPATH
+#define SPAWNING_MSG \
+ "Type EXIT to return to Lynx.\r\n"
+#else /* UNIX */
 #define SPAWNING_MSG \
  "Spawning your default shell.  Use 'exit' to return to Lynx.\n"
+#endif
 #endif /* VMS */
 #define SPAWNING_DISABLED "Spawning is currently disabled."
 #define DOWNLOAD_DISABLED "The 'd'ownload command is currently disabled."
@@ -310,6 +315,8 @@
 #define EDIT_A_PREV_GOTO "Edit a previous Goto URL: "
 #define CURRENT_DOC_HAS_POST_DATA "Current document has POST data."
 #define EDIT_CURDOC_URL "Edit this document's URL: "
+#define EDIT_CURLINK_URL "Edit the current link's URL: "
+#define EDIT_FM_MENU_URLS_DISALLOWED "You cannot edit File Management URLs"
 #define ENTER_DATABASE_QUERY "Enter a database query: "
 #define ENTER_WHEREIS_QUERY "Enter a whereis query: "
 #define EDIT_CURRENT_QUERY "Edit the current query: "
@@ -567,6 +574,8 @@
 #define SENDING_MESSAGE_WITH_BODY_TO \
  "You are sending a message with body to:\n  "
 #define SENDING_COMMENT_TO "You are sending a comment to:\n  "
+#define WITH_COPY_TO "\n With copy to:\n  "
+#define WITH_COPIES_TO "\n With copies to:\n  "
 #define CTRL_G_TO_CANCEL_SEND \
  "\n\nUse Ctrl-G to cancel if you do not want to send a message\n"
 #define ENTER_NAME_OR_BLANK \
@@ -589,6 +598,8 @@
  "\n on a line and press enter again."
 #define ADVANCED_COOKIE_CONFIRMATION \
  "%s cookie: %.*s=%.*s  Allow? (Y/N/Always/neVer)"
+#define INVALID_COOKIE_DOMAIN_CONFIRMATION \
+ "Accept invalid cookie domain=%s for '%s'?"
 #define ALLOWING_COOKIE "Allowing this cookie."
 #define REJECTING_COOKIE "Rejecting this cookie."
 #define COOKIE_JAR_IS_EMPTY "The Cookie Jar is empty."

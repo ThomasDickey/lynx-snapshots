@@ -19,13 +19,14 @@
 #include "LYGlobalDefs.h"
 #include "LYUtils.h"
 #include "LYExtern.h"
+#include "LYCurses.h"
 
 #include "LYLeaks.h"
 
 #ifdef USE_EXTERNALS
 #define FREE(x) if (x) {free(x); x = NULL;}
 
-void run_external(char * c)
+void run_external ARGS1(char *, c)
 {
 	char command[1024];
 	lynx_html_item_type *externals2=0;
@@ -74,13 +75,13 @@ void run_external(char * c)
 		 stop_curses();
 		 fflush(stdout);
 #ifdef __DJGPP__
-              __djgpp_set_ctrl_c(0);
-              _go32_want_ctrl_break(1);
+		__djgpp_set_ctrl_c(0);
+		_go32_want_ctrl_break(1);
 #endif /* __DJGPP__ */
 		 system(command);
 #ifdef __DJGPP__
-              __djgpp_set_ctrl_c(1);
-              _go32_want_ctrl_break(0);
+		__djgpp_set_ctrl_c(1);
+		_go32_want_ctrl_break(0);
 #endif /* __DJGPP__ */
 
 		 fflush(stdout);
