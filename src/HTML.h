@@ -207,7 +207,9 @@ struct _HTStructured {
     int 		tag_charset; /* charset for attribute values etc. */
 };
 
-extern  HTStyle *LYstyles PARAMS((int style_number));
+extern  HTStyle *styles[HTML_ELEMENTS+31]; /* adding 24 nested list styles  */
+					   /* and 3 header alignment styles */
+					   /* and 3 div alignment styles    */
 
 /*
  *	Semi-Private functions. - FM

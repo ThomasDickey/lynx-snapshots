@@ -38,18 +38,13 @@ AC_DEFUN([CF_ALT_CHAR_SET],
 [
 AC_MSG_CHECKING([if curses supports alternate-character set])
 AC_CACHE_VAL(cf_cv_alt_char_set,[
-for mapname in acs_map _acs_map
-do
 	AC_TRY_LINK([
-#include <${cf_cv_ncurses_header-curses.h}>
-	],[chtype x = $mapname['l']; $mapname['m'] = 0],
-	[cf_cv_alt_char_set=$mapname
-	 break],  
-	[cf_cv_alt_char_set=no])
-done
-	])
+#include <$cf_cv_ncurses_header>
+	],[chtype x = acs_map['l']; acs_map['m'] = 0],
+	[cf_cv_alt_char_set=yes],  
+	[cf_cv_alt_char_set=no])])
 AC_MSG_RESULT($cf_cv_alt_char_set)
-test $cf_cv_alt_char_set != no && AC_DEFINE_UNQUOTED(ALT_CHAR_SET,$cf_cv_alt_char_set)
+test $cf_cv_alt_char_set = yes && AC_DEFINE(ALT_CHAR_SET)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl This is adapted from the macros 'fp_PROG_CC_STDC' and 'fp_C_PROTOTYPES'
@@ -67,13 +62,7 @@ cf_save_CFLAGS="$CFLAGS"
 # HP-UX			-Aa -D_HPUX_SOURCE
 # SVR4			-Xc
 # UnixWare 1.2		(cannot use -Xc, since ANSI/POSIX clashes)
-for cf_arg in "-DCC_HAS_PROTOS" \
-	"" \
-	-qlanglvl=ansi \
-	-std1 \
-	"-Aa -D_HPUX_SOURCE +e" \
-	"-Aa -D_HPUX_SOURCE" \
-	-Xc
+for cf_arg in "-DCC_HAS_PROTOS" "" -qlanglvl=ansi -std1 "-Aa -D_HPUX_SOURCE" -Xc
 do
 	CFLAGS="$cf_save_CFLAGS $cf_arg"
 	AC_TRY_COMPILE(
@@ -137,7 +126,7 @@ AC_DEFUN([CF_BOOL_DEFS],
 AC_MSG_CHECKING(if TRUE/FALSE are defined)
 AC_CACHE_VAL(cf_cv_bool_defs,[
 AC_TRY_COMPILE([
-#include <${cf_cv_ncurses_header-curses.h}>
+#include <$cf_cv_ncurses_header>
 #include <stdio.h>],[int x = TRUE, y = FALSE],
 	[cf_cv_bool_defs=yes],
 	[cf_cv_bool_defs=no])])
@@ -243,7 +232,7 @@ dnl ---------------------------------------------------------------------------
 dnl Check if curses supports color.  (Note that while SVr3 curses supports
 dnl color, it does this differently from SVr4 curses; more work would be needed
 dnl to accommodate SVr3).
-dnl
+dnl 
 AC_DEFUN([CF_COLOR_CURSES],
 [
 AC_MSG_CHECKING(if curses supports color attributes)
@@ -315,7 +304,7 @@ if test ".$ac_cv_func_initscr" != .yes ; then
 
 	# Check for library containing initscr
 	test "$cf_term_lib" != predefined && test "$cf_term_lib" != unknown && LIBS="-l$cf_term_lib $cf_save_LIBS"
-	for cf_curs_lib in cursesX curses ncurses xcurses jcurses unknown
+	for cf_curs_lib in curses ncurses xcurses cursesX jcurses unknown
 	do
 		AC_CHECK_LIB($cf_curs_lib,initscr,[break])
 	done
@@ -357,7 +346,7 @@ AC_MSG_CHECKING([for curses performance tradeoff])
 AC_CACHE_VAL(cf_cv_curs_performance,[
     cf_cv_curs_performance=no
     AC_TRY_COMPILE([
-#include <${cf_cv_ncurses_header-curses.h}>],[
+#include <$cf_cv_ncurses_header>],[
 #if defined(wbkgdset) && defined(clearok) && defined(getbkgd)
 	int x = ERR;
 #else
@@ -366,7 +355,7 @@ AC_CACHE_VAL(cf_cv_curs_performance,[
 	],[
 	AC_TRY_COMPILE([
 #define CURS_PERFORMANCE
-#include <${cf_cv_ncurses_header-curses.h}>],[
+#include <$cf_cv_ncurses_header>],[
 #if defined(wbkgdset) && defined(clearok) && defined(getbkgd)
 	int x = ;	/* force an error */
 #else
@@ -438,7 +427,7 @@ AC_DEFUN([CF_FANCY_CURSES],
 AC_MSG_CHECKING(if curses supports fancy attributes)
 AC_CACHE_VAL(cf_cv_fancy_curses,[
 	AC_TRY_LINK([
-#include <${cf_cv_ncurses_header-curses.h}>
+#include <$cf_cv_ncurses_header>
 ],
 	[attrset(A_UNDERLINE|A_BOLD|A_REVERSE);
 	 wattrset(stdscr, A_BLINK|A_DIM);
@@ -791,7 +780,7 @@ all :
 	@echo 'cf_make_include=\$(RESULT)'
 CF_EOF
 	cf_make_include=""
-	eval `(cd $cf_dir && ${MAKE-make}) 2>&AC_FD_CC | grep cf_make_include=OK`
+	eval `cd $cf_dir && ${MAKE-make} 2>&AC_FD_CC | grep cf_make_include=OK`
 	if test -n "$cf_make_include"; then
 		make_include_left="$cf_include"
 		make_include_quote="$cf_quote"
@@ -829,7 +818,7 @@ if test "$cf_cv_ncurses_version" != no ; then
 AC_MSG_CHECKING(for obsolete/broken version of ncurses)
 AC_CACHE_VAL(cf_cv_ncurses_broken,[
 AC_TRY_COMPILE([
-#include <${cf_cv_ncurses_header-curses.h}>],[
+#include <$cf_cv_ncurses_header>],[
 #if defined(NCURSES_VERSION) && defined(wgetbkgd)
 	make an error
 #else
@@ -1122,15 +1111,7 @@ fi
 
 cf_path_prog=""
 cf_path_args=""
-IFS="${IFS= 	}"; cf_save_ifs="$IFS"
-case $host_os in #(vi
-os2*) #(vi
-	IFS="${IFS};"
-	;;
-*)
-	IFS="${IFS}:"
-	;;
-esac
+IFS="${IFS= 	}"; cf_save_ifs="$IFS"; IFS="${IFS}:"
 for cf_temp in $ac_cv_path_$1
 do
 	if test -z "$cf_path_prog" ; then
@@ -1330,75 +1311,6 @@ AC_MSG_RESULT($cf_result)
 test $cf_result = no && LIBS="$cf_slang_LIBS3"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl Check for socks library
-dnl $1 = the [optional] directory in which the library may be found
-dnl $2 = the [optional] name of the library
-AC_DEFUN([CF_SOCKS],[
-case "$1" in #(vi
-no|yes) #(vi
-  ;;
-*)
-  LIBS="$LIBS -L$1"
-  ;;
-esac
-LIBS="$LIBS -lsocks"
-AC_DEFINE(SOCKS)
-AC_DEFINE(accept,Raccept)
-AC_DEFINE(bind,Rbind)
-AC_DEFINE(connect,Rconnect)
-AC_DEFINE(getpeername,Rgetpeername)
-AC_DEFINE(getsockname,Rgetsockname)
-AC_DEFINE(listen,Rlisten)
-AC_DEFINE(recvfrom,Rrecvfrom)
-AC_DEFINE(select,Rselect)
-AC_TRY_LINK([
-#include <stdio.h>],[
-	accept((char *)0)],,
-	[AC_ERROR(Cannot link with socks library)])
-])dnl
-dnl ---------------------------------------------------------------------------
-dnl Check for socks5 configuration
-dnl $1 = the [optional] directory in which the library may be found
-AC_DEFUN([CF_SOCKS5],[
-case "$1" in #(vi
-no|yes) #(vi
-  ;;
-*)
-  LIBS="$LIBS -L$1"
-  CFLAGS="$CFLAGS -I$1/../include"
-  ;;
-esac
-LIBS="$LIBS -lsocks5"
-AC_DEFINE(USE_SOCKS5)
-AC_DEFINE(SOCKS)
-AC_MSG_CHECKING(if the socks library uses socks4 prefix)
-AC_TRY_LINK([
-#include <socks.h>],[
-	Rinit((char *)0)],
-	[AC_DEFINE(USE_SOCKS4_PREFIX)
-	 cf_use_socks4=yes],
-	[AC_TRY_LINK([#include <socks.h>],
-		[SOCKSinit((char *)0)],
-		[cf_use_socks4=no],
-		[AC_ERROR(Cannot link with socks5 library)])])
-AC_MSG_RESULT($cf_use_socks4)
-if test "$cf_use_socks4" = "yes" ; then
-	AC_DEFINE(accept,Raccept)
-	AC_DEFINE(bind,Rbind)
-	AC_DEFINE(connect,Rconnect)
-	AC_DEFINE(getpeername,Rgetpeername)
-	AC_DEFINE(getsockname,Rgetsockname)
-	AC_DEFINE(listen,Rlisten)
-	AC_DEFINE(recvfrom,Rrecvfrom)
-	AC_DEFINE(select,Rselect)
-else
-	AC_DEFINE(accept,SOCKSaccept)
-	AC_DEFINE(getpeername,SOCKSgetpeername)
-	AC_DEFINE(getsockname,SOCKSgetsockname)
-	AC_DEFINE(recvfrom,SOCKSrecvfrom)
-fi
-])dnl
-dnl ---------------------------------------------------------------------------
 dnl	Remove "-g" option from the compiler options
 AC_DEFUN([CF_STRIP_G_OPT],
 [$1=`echo ${$1} | sed -e 's/-g //' -e 's/-g$//'`])dnl
@@ -1466,27 +1378,6 @@ if test "$cf_cv_lib_termcap" = none; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl Check if including termio.h with <curses.h> dies like on sysv68
-dnl FIXME: this is too Lynx-specific
-AC_DEFUN([CF_TERMIO_AND_CURSES],
-[
-AC_CACHE_CHECK(if we can include termio.h with curses,cf_cv_termio_and_curses,[
-    cf_save_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -DHAVE_CONFIG_H -I. -I${srcdir-.} -I${srcdir-.}/src -I${srcdir-.}/WWW/Library/Implementation"
-    touch lynx_cfg.h
-    AC_TRY_COMPILE([
-#include <$1>
-#include <termio.h>],
-    [putchar(0x0a)],
-    [cf_cv_termio_and_curses=yes],
-    [cf_cv_termio_and_curses=no])
-    CFLAGS="$cf_save_CFLAGS"
-    rm -f lynx_cfg.h
-])
-
-test $cf_cv_termio_and_curses = yes && AC_DEFINE(TERMIO_AND_CURSES)
-])dnl
-dnl ---------------------------------------------------------------------------
 dnl Check if including both termio.h and termios.h die like on DG.UX
 AC_DEFUN([CF_TERMIO_AND_TERMIOS],
 [
@@ -1510,7 +1401,7 @@ AC_DEFUN([CF_TTYTYPE],
 [
 AC_MSG_CHECKING(if ttytype is declared in curses library)
 AC_CACHE_VAL(cf_cv_have_ttytype,[
-	AC_TRY_LINK([#include <${cf_cv_ncurses_header-curses.h}>],
+	AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
 	[char *x = &ttytype[1]; *x = 1],
 	[cf_cv_have_ttytype=yes],
 	[cf_cv_have_ttytype=no])

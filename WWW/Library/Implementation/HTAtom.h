@@ -21,6 +21,9 @@
 #ifndef HTATOM_H
 #define HTATOM_H
 
+#ifndef HTUTILS_H
+#include <HTUtils.h>
+#endif /* HTUTILS_H */
 #include <HTList.h>
 
 #ifdef SHORT_NAMES

@@ -23,7 +23,9 @@
  *
  */
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
 
 #include <ufc-crypt.h>
 

@@ -38,10 +38,10 @@ extern char *LYFindEndOfComment PARAMS((
 	char *		str));
 extern void LYFillLocalFileURL PARAMS((
 	char ** 	href,
-	CONST char *	base));
+	char *		base));
 extern void LYAddMETAcharsetToFD PARAMS((
-	FILE *		fd,
-	int		disp_chndl));
+	FILE *			fd,
+	int			disp_chndl));
 
 #ifdef Lynx_HTML_Handler
 extern int OL_CONTINUE; 	/* flag for whether CONTINUE is set */

@@ -6,6 +6,7 @@
 */
 
 #include <HTUtils.h>
+#include <tcp.h>
 #include <HTTP.h>
 #include <HTAnchor.h>
 #include <HTAccess.h>
@@ -27,6 +28,8 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
+
+#define FREE(x) if (x) {free(x); x=NULL;}
 
 typedef struct _LYMapElement {
    char * address;
@@ -168,8 +171,6 @@ PUBLIC BOOL LYAddImageMap ARGS3(
     if (theList) {
 	cur = theList;
 	while (NULL != (old = (LYImageMap *)HTList_nextObject(cur))) {
-	    if (old->address == 0)	/* shouldn't happen */
-	    	continue;
 	    if (!strcmp(old->address, address)) {
 		FREE(old->address);
 		FREE(old->title);

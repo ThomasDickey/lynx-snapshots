@@ -13,9 +13,7 @@ CFLAGS = $(MCFLAGS)
 
 CC = gcc
 MCFLAGS = -O3 -DDOSPATH -DNO_TTYTYP \
--I. \
--I../../WWW/library/implement \
--I../../djgpp/tcplib/include \
+-I../../WWW/library/implement -I../../djgpp/tcplib/include \
 -I../../djgpp/tcplib/include/tcp
 
 .SUFFIXES: .tbl
@@ -83,7 +81,6 @@ cp1256_uni.h:		cp1256_uni.tbl		makeuctb.exe
 cp1257_uni.h:		cp1257_uni.tbl		makeuctb.exe
 cp437_uni.h:		cp437_uni.tbl		makeuctb.exe
 cp737_uni.h:		cp737_uni.tbl		makeuctb.exe
-cp775_uni.h:		cp775_uni.tbl		makeuctb.exe
 cp850_uni.h:		cp850_uni.tbl		makeuctb.exe
 cp852_uni.h:		cp852_uni.tbl		makeuctb.exe
 cp862_uni.h:		cp862_uni.tbl		makeuctb.exe

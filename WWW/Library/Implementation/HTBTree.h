@@ -9,11 +9,6 @@
    part of libWWW
    
  */
-#ifndef HTBTREE_H
-#define HTBTREE_H 1
-
-#include <HTUtils.h>
-
 #ifdef SHORT_NAMES
 #define HTBTree_new             HTBTNew
 #define HTBTree_free            HTBTFree
@@ -104,4 +99,6 @@ Find next element in depth-first order
  */
 extern HTBTElement * HTBTree_next PARAMS((HTBTree* tree, HTBTElement * ele));
 
-#endif /* HTBTREE_H */
+/*
+
+   end  */

@@ -1,4 +1,5 @@
 #include <HTUtils.h>
+#include <tcp.h>
 #include <HTParse.h>
 #include <HTAlert.h>
 #include <LYCurses.h>
@@ -8,12 +9,18 @@
 #include <LYGlobalDefs.h>
 #include <LYEdit.h>
 #include <LYStrings.h>
-#include <LYUtils.h>
+#include <LYSystem.h>
 #ifdef VMS
 #include <unixio.h>
+#include <HTVMSUtils.h>
 #endif /* VMS */
+#ifdef DOSPATH
+#include <HTDOS.h>
+#endif
 
 #include <LYLeaks.h>
+
+#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
  *  In edit mode invoke either emacs, vi, pico, jove, jed sedt or the
@@ -36,7 +43,8 @@ PUBLIC int edit_current_file ARGS3(
      *  If its a remote file then we can't edit it.
      */
     if (!LYisLocalFile(newfile)) {
-	HTUserMsg(CANNOT_EDIT_REMOTE_FILES);
+	_statusline(CANNOT_EDIT_REMOTE_FILES);
+	sleep(MessageSecs);
 	return FALSE;
     }
 
@@ -53,7 +61,7 @@ PUBLIC int edit_current_file ARGS3(
      *
      * On VMS, only try the path.
      */
-#if !defined (VMS) && !defined (DOSPATH) && !defined (__EMX__)
+#if !defined (VMS) && !defined (DOSPATH)
     colon = strchr(newfile, ':');
     StrAllocCopy(filename, (colon + 1));
     HTUnEscape(filename);
@@ -62,16 +70,23 @@ PUBLIC int edit_current_file ARGS3(
 #endif /* !VMS */
 	filename = HTParse(newfile, "", PARSE_PATH+PARSE_PUNCTUATION);
 	HTUnEscape(filename);
-#if defined (DOSPATH) || defined (__EMX__)
+#ifdef DOSPATH
 	if (strlen(filename)>1) filename++;
 #endif
-	if ((fp = fopen(HTSYS_name(filename), "r")) == NULL)
-	{
+#ifdef DOSPATH
+	if ((fp = fopen(HTDOS_name(filename),"r")) == NULL) {
+#else
+#ifdef VMS
+	if ((fp = fopen(HTVMS_name("", filename), "r")) == NULL) {
+#else
+	if ((fp = fopen(filename, "r")) == NULL) {
+#endif /* VMS */
+#endif /* DOSPATH */
 	    HTAlert(COULD_NOT_ACCESS_FILE);
 	    FREE(filename);
 	    goto failure;
 	}
-#if !defined (VMS) && !defined (DOSPATH) && !defined (__EMX__)
+#if !defined (VMS) && !defined (DOSPATH)
     }
 #endif /* !VMS */
     fclose(fp);
@@ -80,9 +95,17 @@ PUBLIC int edit_current_file ARGS3(
     /*
      *  Don't allow editing if user lacks append access.
      */
-    if ((fp = fopen(HTSYS_name(filename), "a")) == NULL)
-    {
-	HTUserMsg(NOAUTH_TO_EDIT_FILE);
+#ifdef DOSPATH
+    if ((fp = fopen(HTDOS_name("", filename), "a")) == NULL) {
+#else
+#ifdef VMS
+    if ((fp = fopen(HTVMS_name("", filename), "a")) == NULL) {
+#else
+    if ((fp = fopen(filename, "a")) == NULL) {
+#endif /* VMS */
+#endif /* DOSPATH */
+	_statusline(NOAUTH_TO_EDIT_FILE);
+	sleep(MessageSecs);
 	goto failure;
     }
     fclose(fp);
@@ -115,25 +138,38 @@ PUBLIC int edit_current_file ARGS3(
 	sprintf(command, "%s +%d \"%s\"",
 			 editor,
 			 (lineno + (nlinks ? links[cur].ly : 0)),
-			 HTSYS_name(filename));
+#ifdef DOSPATH
+			 HTDOS_name(filename));
+#else
+			 filename);
+#endif /* DOSPATH */
     else
 #ifdef __DJGPP__
 	sprintf(command, "%s %s", editor, HTDOS_name(filename));
 #else
-	sprintf(command, "%s \"%s\"", editor, HTSYS_name(filename));
+	sprintf(command, "%s \"%s\"", editor,
+#ifdef DOSPATH
+				 HTDOS_name(filename));
+#else
+				 filename);
+#endif /* DOSPATH */
 #endif /* __DJGPP__ */
 #endif /* VMS */
-    CTRACE(tfp, "LYEdit: %s\n", command);
-    CTRACE_SLEEP(MessageSecs);
-#ifndef __EMX__
+    if (TRACE) {
+	fprintf(stderr, "LYEdit: %s\n", command);
+	sleep(MessageSecs);
+    }
     FREE(filename);
-#endif
 
     /*
      *  Invoke the editor. - FM
      */
+    fflush(stderr);
+    fflush(stdout);
     stop_curses();
-    LYSystem(command);
+    system(command);
+    fflush(stdout);
+    fflush(stderr);
     start_curses();
 
     /*

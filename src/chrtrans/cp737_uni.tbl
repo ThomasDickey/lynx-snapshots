@@ -2,7 +2,7 @@
 Mcp737
 
 #Name as a Display Charset (used on Options screen)
-OGreek (cp737)
+ODosGreek (cp737)
 
 #
 #    Name:     cp737_DOSGreek to Unicode table

@@ -1,5 +1,5 @@
 #include <HTUtils.h>
-#include <HTAlert.h>
+#include <tcp.h>
 #include <LYUtils.h>
 #include <LYStrings.h>
 #include <LYSearch.h>
@@ -8,6 +8,8 @@
 #include <LYSignal.h>
 
 #include <LYLeaks.h>
+
+#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
  *  Search for the target string inside of the links
@@ -215,7 +217,8 @@ PUBLIC BOOL textsearch ARGS3(
 	     *  Restore prev_target and return. - FM
 	     */
 	    strcpy(prev_target, prev_target_buffer);
-	    HTInfoMsg(CANCELLED);
+	    _statusline(CANCELLED);
+	    sleep(InfoSecs);
 	    return(FALSE);
 	}
     }
@@ -229,7 +232,8 @@ check_recall:
 	 *  previous search string will no longer occur, but it can
 	 *  be used again via LYK_NEXT.   - FM
 	 */
-        HTInfoMsg(CANCELLED);
+        _statusline(CANCELLED);
+        sleep(InfoSecs);
 	return(FALSE);
     }
 
@@ -280,7 +284,8 @@ check_recall:
 		 *  Restore prev_target and return. - FM
 		 */
 		strcpy(prev_target, prev_target_buffer);
-		HTInfoMsg(CANCELLED);
+		_statusline(CANCELLED);
+		sleep(InfoSecs);
 		return(FALSE);
 	    }
 	    goto check_recall;
@@ -332,7 +337,8 @@ check_recall:
 		 *  Restore prev_target and return. - FM
 		 */
 		strcpy(prev_target, prev_target_buffer);
-		HTInfoMsg(CANCELLED);
+		_statusline(CANCELLED);
+		sleep(InfoSecs);
 		return(FALSE);
 	    }
 	    goto check_recall;

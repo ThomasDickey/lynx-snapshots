@@ -2,8 +2,9 @@
 
  */
 
-#include <HTUtils.h>
-#include <HTDOS.h>
+#include <mem.h>
+#include <dos.h>
+
 
 /* PUBLIC							HTDOS_wwwName()
 **		CONVERTS DOS Name into WWW Name
@@ -66,11 +67,10 @@ char * HTDOS_name(char *wwwname)
 		}
 	}
 
-	/* Needed to surf the root of a local drive. */
-
-	if(strlen(cp_url) < 4) cp_url[2] = ':';
+/*	if(strlen(cp_url) < 4) cp_url[] = ':';
 	if(strlen(cp_url) == 3) cp_url[3] = '\\';
-	if(strlen(cp_url) == 4) cp_url[4] = '.';
+
+	if(strlen(cp_url) == 4) cp_url[4] = '.'; */
 
 	if((strlen(cp_url) > 2) && (cp_url[1] == '|'))
 		cp_url[1] = ':';
@@ -81,18 +81,14 @@ char * HTDOS_name(char *wwwname)
 		printf("\n\n%s = i%\n\n",cp_url,strlen(cp_url));
 		sleep(5);
 #endif
-		CTRACE(tfp, "HTDOS_name changed `%s' to `%s'\n",
-			wwwname, cp_url);
 		strcpy(wwwname, cp_url);
-		return(wwwname);  /* return(cp_url); */
+		return(wwwname); /* return(cp_url); */
 	} else {
 #if 0
 		printf("\n\n%s = %i\n\n",cp_url+1,strlen(cp_url));
 		sleep(5);
 #endif
-		CTRACE(tfp, "HTDOS_name changed `%s' to `%s'\n",
-			wwwname, cp_url+1);
 		strcpy(wwwname, cp_url+1);
-		return(wwwname);  /* return(cp_url+1); */
+		return(wwwname); /* return(cp_url+1);  */
 	}
 }

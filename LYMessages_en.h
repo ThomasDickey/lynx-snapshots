@@ -8,7 +8,7 @@
 #define LYMESSAGES_EN_H
 
 /*******************************************************************
- * The following definitions are for status line prompts, messages,
+ * The following definitions are for statusline prompts, messages,
  * or warnings issued by Lynx during program execution.  You can
  * modify them to make them more appropriate for you site, and/or
  * to use other languages.  Links to collections of alternate
@@ -22,9 +22,11 @@
  * one of those with a different name.
  */
 #define REALLY_QUIT_Y "Are you sure you want to quit? [Y] "
-#define REALLY_QUIT_N "Are you sure you want to quit? [N] "
 #ifdef VMS
 #define REALLY_EXIT_Y "Really exit from Lynx? [Y] "
+#endif /* VMS */
+#define REALLY_QUIT_N "Are you sure you want to quit? [N] "
+#ifdef VMS
 #define REALLY_EXIT_N "Really exit from Lynx? [N] "
 #endif /* VMS */
 #define CANCELLED "Cancelled!!!"
@@ -39,8 +41,6 @@
 #define MOREHELP \
  "-- press space for more, use arrow keys to move, '?' for help, 'q' to quit."
 #define MORE "-- press space for next page --"
-
-/* Forms messages */
 #define FORM_LINK_TEXT_MESSAGE \
  "(Text entry field) Enter text.  Use UP or DOWN arrows or tab to move off."
 #define FORM_LINK_TEXT_UNM_MSG \
@@ -89,12 +89,6 @@
  "UNMODIFIABLE option list.  Use return or arrow keys to review or leave."
 #define CHOICE_LIST_UNM_MSG \
  "UNMODIFIABLE choice list.  Use return or arrow keys to review or leave."
-#define SUBMITTING_FORM "Submitting form..."
-#define RESETTING_FORM "Resetting form..."
-#define RELOADING_FORM \
- "Reloading document.  Any form entries will be lost!"
-#define CANNOT_TRANSCODE_FORM "Warning: Cannot transcode form data to charset %s!"
-
 #define NORMAL_LINK_MESSAGE \
  "(NORMAL LINK)   Use right-arrow or <return> to activate."
 #define LINK_NOT_FOUND "The resource requested is not available at this time."
@@ -126,10 +120,12 @@
  "            Enter text into the field by typing on the keyboard              "
 #define FORM_NOVICELINE_TWO \
 "    Ctrl-U to delete all text in field, [Backspace] to delete a character    "
-
-/* mailto */
+#define SUBMITTING_FORM "Submitting form..."
+#define RESETTING_FORM "Resetting form..."
+#define RELOADING_FORM \
+ "Reloading document.  Any form entries will be lost!"
+#define CANNOT_TRANSCODE_FORM "Warning: Cannot transcode form data to charset %s!"
 #define BAD_FORM_MAILTO "Malformed mailto form submission!  Cancelled!"
-#define MAILTO_SQUASH_CTL "Warning! Control codes in mail address replaced by ?"
 #define FORM_MAILTO_DISALLOWED "Mail disallowed!  Cannot submit."
 #define FORM_MAILTO_FAILED "Mailto form submission failed!"
 #define FORM_MAILTO_CANCELLED "Mailto form submission Cancelled!!!"
@@ -149,7 +145,6 @@
 #define SEND_COMMENT_PROMPT "Send this comment? (y/n) "
 #define SEND_MESSAGE_PROMPT "Send this message? (y/n) "
 #define SENDING_YOUR_MSG "Sending your message..."
-
 #define FILE_ACTIONS_DISALLOWED "file: ACTIONs are disallowed!"
 #define FILE_SERVED_LINKS_DISALLOWED \
  "file: URLs via served links are disallowed!"
@@ -171,9 +166,8 @@
 #endif /* VMS */
 #define SPAWNING_DISABLED "Spawning is currently disabled."
 #define DOWNLOAD_DISABLED "The 'd'ownload command is currently disabled."
-#define NO_DOWNLOAD_INPUT "You cannot download an input field."
+#define NO_DOWNLOAD_INPUT "You cannot download a input field."
 #define NO_DOWNLOAD_MAILTO_ACTION "Form has a mailto action!  Cannot download."
-#define NO_DOWNLOAD_MAILTO_LINK "You cannot download a mailto: link."
 #define NO_DOWNLOAD_COOKIES "You cannot download cookies."
 #define NO_DOWNLOAD_PRINT_OP "You cannot download a printing option."
 #define NO_DOWNLOAD_UPLOAD_OP "You cannot download an upload option."
@@ -220,14 +214,14 @@
 #define BOOKMARK_OPEN_FAILED "ERROR - unable to open bookmark file."
 #define BOOKMARK_OPEN_FAILED_FOR_DEL \
  "Unable to open bookmark file for deletion of link."
+#ifdef VMS
 #define BOOKSCRA_OPEN_FAILED_FOR_DEL \
  "Unable to open scratch file for deletion of link."
-#ifdef VMS
 #define ERROR_RENAMING_SCRA "Error renaming scratch file."
 #else
+#define BOOKTEMP_OPEN_FAILED_FOR_DEL \
+ "Unable to open temporary file for deletion of link."
 #define ERROR_RENAMING_TEMP "Error renaming temporary file."
-#define BOOKTEMP_COPY_FAIL \
- "Unable to copy temporary file for deletion of link."
 #define BOOKTEMP_REOPEN_FAIL_FOR_DEL \
  "Unable to reopen temporary file for deletion of link."
 #endif /* VMS */
@@ -466,8 +460,6 @@
 #define PRESS_RETURN_TO_FINISH "Press <return> to finish: "
 #define CONFIRM_LONG_PAGE_PRINT \
  "File is %d pages long.  Are you sure you want to print? [y]"
-#define CHECK_PRINTER \
- "Be sure your printer is on-line.  Press <return> to start printing:"
 #define FILE_ALLOC_FAILED "ERROR - Unable to allocate file space!!!"
 #define UNABLE_TO_OPEN_TEMPFILE "Unable to open tempfile"
 #define UNABLE_TO_OPEN_PRINTOP_FILE "Unable to open print options file"
@@ -478,14 +470,12 @@
 #define MAP_NOT_ACCESSIBLE "Client-side image MAP is not accessible!"
 #define MAPS_NOT_AVAILABLE "No client-side image MAPs are available!"
 #define MAP_NOT_AVAILABLE "Client-side image MAP is not available!"
-#ifndef NO_OPTION_MENU
 #define OPTION_SCREEN_NEEDS_24 \
  "Screen height must be at least 24 lines for the Options menu!"
 #define OPTION_SCREEN_NEEDS_23 \
  "Screen height must be at least 23 lines for the Options menu!"
 #define OPTION_SCREEN_NEEDS_22 \
  "Screen height must be at least 22 lines for the Options menu!"
-#endif /* !NO_OPTION_MENU */
 #define NEED_ADVANCED_USER_MODE "That key requires Advanced User mode."
 #define COMMAND_PROMPT "Command: "
 #define SELECT_SEGMENT "Select "
@@ -572,7 +562,7 @@
  "Maximum links per page exceeded!  Use half-page or two-line scrolling."
 #define MAXHIST_REACHED \
  "History List maximum reached!  Document not pushed."
-#define VISITED_LINKS_EMPTY "No previously visited links available!"
+#define VISITED_LINKS_EMPTY "No previously visited links available!" 
 #define MEMORY_EXHAUSTED_ABORT "Memory exhausted!  Program aborted!"
 #define DFM_NOT_AVAILABLE "Directory/File Manager not available"
 #define BASE_NOT_ABSOLUTE "HREF in BASE tag is not an absolute URL."
@@ -603,8 +593,6 @@
  "\n When you are done, press enter and put a single period (.)"
 #define ENTER_PERIOD_WHEN_DONE_B \
  "\n on a line and press enter again."
-
-/* Cookies messages */
 #define ADVANCED_COOKIE_CONFIRMATION \
  "%s cookie: %.*s=%.*s  Allow? (Y/N/Always/neVer)"
 #define INVALID_COOKIE_DOMAIN_CONFIRMATION \
@@ -612,13 +600,14 @@
 #define ALLOWING_COOKIE "Allowing this cookie."
 #define REJECTING_COOKIE "Rejecting this cookie."
 #define COOKIE_JAR_IS_EMPTY "The Cookie Jar is empty."
+#define COOKIE_JAR_TITLE "Lynx Cookie Jar"
+#define REACHED_COOKIE_JAR_PAGE "You have reached the Lynx Cookie Jar Page"
 #define ACTIVATE_TO_GOBBLE \
  "Activate links to gobble up cookies or entire domains,"
 #define OR_CHANGE_ALLOW "or to change a domain's 'allow' setting."
 #define COOKIES_NEVER_ALLOWED "(Cookies never allowed.)"
 #define COOKIES_ALWAYS_ALLOWED "(Cookies always allowed.)"
 #define COOKIES_ALLOWED_VIA_PROMPT "(Cookies allowed via prompt.)"
-#define COOKIES_READ_FROM_FILE "(Persistent Cookies.)"
 #define NO_NAME "(No name.)"
 #define NO_VALUE "(No value.)"
 #define END_OF_SESSION "(End of session.)"
@@ -633,10 +622,9 @@
 #define DOMAIN_COOKIES_EATEN "All cookies in the domain have been eaten!"
 #define ALWAYS_ALLOWING_COOKIES "'A'lways allowing from domain '%s'."
 #define NEVER_ALLOWING_COOKIES "ne'V'er allowing from domain '%s'."
-#define PROMPTING_TO_ALLOW_COOKIES "'P'rompting to allow from domain '%s'."
+#define PROMTING_TO_ALLOW_COOKIES "'P'rompting to allow from domain '%s'."
 #define DELETE_ALL_COOKIES_IN_DOMAIN "Delete all cookies in this domain?"
 #define ALL_COOKIES_EATEN "All of the cookies in the jar have been eaten!"
-
 #define PORT_NINETEEN_INVALID "Port 19 not permitted in URLs."
 #define PORT_TWENTYFIVE_INVALID "Port 25 not permitted in URLs."
 #define PORT_INVALID "Port %lu not permitted in URLs."
@@ -652,33 +640,6 @@
  "Form field value exceeds buffer length!  Trim the tail."
 #define FORM_TAIL_COMBINED_WITH_HEAD \
  "Modified tail combined with head of form field value."
-
-/* Lynx internal page titles */
-#define CONFIG_DEF_TITLE	"Configuration Definitions"
-#define COOKIE_JAR_TITLE	"Cookie Jar"
-#define CURRENT_KEYMAP_TITLE	"Current Key Map"
-#define DIRED_MENU_TITLE	"File Management Options"
-#define DOWNLOAD_OPTIONS_TITLE	"Download Options"
-#define HISTORY_PAGE_TITLE	"History Page"
-#define LIST_PAGE_TITLE		"List Page"
-#define LYNXCFG_TITLE		"Lynx.cfg Information"
-#define OPTIONS_TITLE		"Options Menu"
-#define PERMIT_OPTIONS_TITLE	"File Permission Options"
-#define PRINT_OPTIONS_TITLE	"Printing Options"
-#define SHOWINFO_TITLE		"Information about the current document"
-#define UPLOAD_OPTIONS_TITLE	"Upload Options"
-#define VISITED_LINKS_TITLE	"Visited Links Page"
-#define BOOKMARK_TITLE		"Bookmark file"
-#define MOSAIC_BOOKMARK_TITLE	"Converted Mosaic Hotlist"
-
-/* CONFIG_DEF_TITLE subtitles */
-#define AUTOCONF_CONFIG_CACHE \
- "The following data were derived during the automatic configuration/build\n\
-process of this copy of Lynx.  When reporting a bug, please include a copy\n\
-of this page."
-#define AUTOCONF_LYNXCFG_H \
- "The following data were used as automatically-configured compile-time\n\
-definitions when this copy of Lynx was built."
 
 #ifdef DIRED_SUPPORT
 #define DIRED_NOVICELINE \

@@ -7,7 +7,7 @@
 Mutf-8
 
 #Name as a Display Charset (used on Options screen)
-OUNICODE (UTF-8)
+OUNICODE UTF-8
 
 # Some kind of raw Unicode?
 # Use 6 for for really "raw" 16bit UCS-2, 7 for UTF-8, ...

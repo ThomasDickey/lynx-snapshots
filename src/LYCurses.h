@@ -1,7 +1,6 @@
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
-#include <HTUtils.h>
 #include <userdefs.h>
 
 /*
@@ -99,11 +98,6 @@
 extern void LYsubwindow PARAMS((WINDOW * param));
 # endif /* NCURSES */
 
-#if defined(NCURSES_VERSION) && defined(HAVE_DEFINE_KEY)
-#include <term.h>
-#define USE_KEYMAPS		1
-#endif
-
 #else
 # if defined(VMS) && defined(__GNUC__)
 #  include <LYGCurses.h>
@@ -162,25 +156,24 @@ extern void LYstartTargetEmphasis NOPARAMS;
 extern void LYstopTargetEmphasis NOPARAMS;
 
 #ifdef VMS
-extern int DCLsystem (char *command);
 extern void VMSexit();
 extern int ttopen();
 extern int ttclose();
 extern int ttgetc();
-extern void VMSsignal PARAMS((int sig, void (*func)()));
+extern void *VMSsignal PARAMS((int sig, void (*func)()));
 #endif /* VMS */
 
 #if defined(USE_COLOR_STYLE)
 extern void curses_css PARAMS((char * name, int dir));
-extern void curses_style PARAMS((int style, int dir));
-extern void curses_w_style PARAMS((WINDOW* win, int style, int dir));
+extern void curses_style PARAMS((int style, int dir, int previous));
+extern void curses_w_style PARAMS((WINDOW* win, int style, int dir, int previous));
 extern void setHashStyle PARAMS((int style, int color, int cattr, int mono, char* element));
 extern void setStyle PARAMS((int style, int color, int cattr, int mono));
 extern void wcurses_css PARAMS((WINDOW * win, char* name, int dir));
-#define LynxChangeStyle(style,dir,previous) curses_style(style,dir)
+#define LynxChangeStyle curses_style
 #else
 extern int slang_style PARAMS((int style, int dir, int previous));
-#define LynxChangeStyle(style,dir,previous) slang_style(style,dir,previous)
+#define LynxChangeStyle slang_style
 #endif /* USE_COLOR_STYLE */
 
 #if USE_COLOR_TABLE
@@ -191,19 +184,13 @@ extern unsigned int Lynx_Color_Flags;
 #endif
 
 #ifdef USE_SLANG
-
 #if !defined(VMS) && !defined(DJGPP)
 #define USE_SLANG_MOUSE		1
-#endif
-
-#if !defined(__DJGPP__)
-#define USE_KEYMAPS		1
-#endif
+#endif /* USE_SLANG */
 
 #define SL_LYNX_USE_COLOR	1
 #define SL_LYNX_USE_BLINK	2
 #define SL_LYNX_OVERRIDE_COLOR	4
-
 #define start_bold()      	LYaddAttr(1)
 #define start_reverse()   	LYaddAttr(2)
 #define start_underline() 	LYaddAttr(4)
@@ -301,7 +288,9 @@ extern void VTHome NOPARAMS;
  */
 #if USE_COLOR_TABLE
 extern void LYaddWAttr PARAMS((WINDOW *win, int a));
+extern void LYaddAttr PARAMS((int a));
 extern void LYsubWAttr PARAMS((WINDOW *win, int a));
+extern void LYsubAttr PARAMS((int a));
 extern void LYaddWAttr PARAMS((WINDOW *win, int a));
 extern void LYsubWAttr PARAMS((WINDOW *win, int a));
 extern void lynx_set_color PARAMS((int a));
@@ -388,25 +377,5 @@ extern void lynx_stop_prompt_color NOPARAMS;
 extern void lynx_start_radio_color NOPARAMS;
 extern void lynx_stop_radio_color NOPARAMS;
 extern void lynx_stop_all_colors NOPARAMS;
-
-/*
- * To prevent corrupting binary data on DOS, MS-WINDOWS or OS/2 we open files
- * and stdout in BINARY mode by default.  Where necessary we should open and
- * (close!) TEXT mode.
- *
- * Note:  EMX has no corresponding variable like _fmode on DOS, but it does
- * have setmode.
- */
-#if defined(_WINDOWS) || defined(DJGPP) || defined(__EMX__)
-#define SetOutputMode(mode) setmode(fileno(stdout), mode)
-#else
-#define SetOutputMode(mode) /* nothing */
-#endif
-
-#if defined(_WINDOWS) || defined(DJGPP)
-#define SetDefaultMode(mode) _fmode = mode
-#else
-#define SetDefaultMode(mode) /* nothing */
-#endif
 
 #endif /* LYCURSES_H */

@@ -60,11 +60,10 @@
 #include <UCMap.h>
 #include <GridText.h>
 
-#include <GridText.h>
-#include <LYGlobalDefs.h>
 #include <LYexit.h>
-#include <LYUtils.h>
 #include <LYLeaks.h>
+
+#define FREE(x) if (x) {free(x); x = NULL;}
 
 extern HTCJKlang HTCJK;
 
@@ -332,10 +331,10 @@ PUBLIC BOOL override_proxy ARGS1(
 **
 **  On entry,
 **	addr		must point to the fully qualified hypertext reference.
-**	anchor		a parent anchor with whose address is addr
+**	anchor		a pareent anchor with whose address is addr
 **
 **  On exit,
-**	returns 	HT_NO_ACCESS		Error has occurred.
+**	returns 	HT_NO_ACCESS		Error has occured.
 **			HT_OK			Success
 */
 PRIVATE int get_physical ARGS2(
@@ -353,7 +352,8 @@ PRIVATE int get_physical ARGS2(
     }
     if (anchor->isISMAPScript == TRUE) {
 	StrAllocCat(physical, "?0,0");
-	CTRACE(tfp, "HTAccess: Appending '?0,0' coordinate pair.\n");
+	if (TRACE)
+	    fprintf(stderr, "HTAccess: Appending '?0,0' coordinate pair.\n");
     }
     HTAnchor_setPhysical(anchor, physical);
     FREE(physical);			/* free our copy */
@@ -361,7 +361,8 @@ PRIVATE int get_physical ARGS2(
     if (anchor->isISMAPScript == TRUE) {
 	StrAllocCopy(physical, addr);
 	StrAllocCat(physical, "?0,0");
-	CTRACE(tfp, "HTAccess: Appending '?0,0' coordinate pair.\n");
+	if (TRACE)
+	    fprintf(stderr, "HTAccess: Appending '?0,0' coordinate pair.\n");
 	HTAnchor_setPhysical(anchor, physical);
 	FREE(physical); 		/* free our copy */
     } else {
@@ -450,10 +451,10 @@ PRIVATE int get_physical ARGS2(
 	proxy = (char *)getenv(gateway_parameter);
 	FREE(gateway_parameter);
 
-	if (gateway)
-	    CTRACE(tfp, "Gateway found: %s\n", gateway);
-	if (proxy)
-	    CTRACE(tfp, "proxy server found: %s\n", proxy);
+	if (TRACE && gateway)
+	    fprintf(stderr, "Gateway found: %s\n", gateway);
+	if (TRACE && proxy)
+	    fprintf(stderr, "proxy server found: %s\n", proxy);
 
 	/*
 	**  Proxy servers have precedence over gateway servers.
@@ -579,13 +580,13 @@ PRIVATE int LYUCPopAssumed NOARGS
 **
 **  On entry,
 **	addr		must point to the fully qualified hypertext reference.
-**	anchor		a parent anchor with whose address is addr
+**	anchor		a pareent anchor with whose address is addr
 **
 **  On exit,
-**	returns 	<0		Error has occurred.
+**	returns 	<0		Error has occured.
 **			HT_LOADED	Success
 **			HT_NO_DATA	Success, but no document loaded.
-**					(telnet session started etc)
+**					(telnet sesssion started etc)
 */
 PRIVATE int HTLoad ARGS4(
 	CONST char *,		addr,
@@ -623,6 +624,8 @@ PUBLIC HTStream *HTSaveStream ARGS1(
     return (*p->saveStream)(anchor);
 }
 
+extern char LYinternal_flag;		       /* from LYMainLoop.c */
+
 /*	Load a document - with logging etc		HTLoadDocument()
 **	----------------------------------
 **
@@ -641,6 +644,16 @@ PUBLIC HTStream *HTSaveStream ARGS1(
 **		     NO      Failure
 */
 
+extern char LYforce_no_cache;				 /* from GridText.c */
+extern char LYoverride_no_cache;		       /* from LYMainLoop.c */
+extern char * HTLoadedDocumentURL NOPARAMS;		   /* in GridText.c */
+extern BOOL HText_hasNoCacheSet PARAMS((HText *text));	   /* in GridText.c */
+extern BOOL reloading;
+extern BOOL permanent_redirection;
+#ifdef DIRED_SUPPORT
+extern BOOLEAN lynx_edit_mode;
+#endif
+
 PRIVATE BOOL HTLoadDocument ARGS4(
 	CONST char *,		full_address,
 	HTParentAnchor *,	anchor,
@@ -654,7 +667,8 @@ PRIVATE BOOL HTLoadDocument ARGS4(
     BOOL ForcingNoCache = LYforce_no_cache;
     static int redirection_attempts = 0;
 
-    CTRACE (tfp, "HTAccess: loading document %s\n", address_to_load);
+    if (TRACE)
+	fprintf (stderr, "HTAccess: loading document %s\n", address_to_load);
 
     /*
     **	Free use_this_url_instead and reset permanent_redirection
@@ -710,9 +724,11 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	       !strncmp(cp, "Location=", 9)) {
 	    DocAddress NewDoc;
 
-	    CTRACE (tfp, "HTAccess: '%s' is a redirection URL.\n",
-			  anchor->address);
-	    CTRACE (tfp, "HTAccess: Redirecting to '%s'\n", cp+9);
+	    if (TRACE) {
+		fprintf (stderr, "HTAccess: '%s' is a redirection URL.\n",
+				  anchor->address);
+		fprintf (stderr, "HTAccess: Redirecting to '%s'\n", cp+9);
+	    }
 
 	    /*
 	    **	Don't exceed the redirection_attempts limit. - FM
@@ -764,12 +780,12 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	*    If DONT_TRACK_INTERNAL_LINKS is defined, HText_AreDifferent()
 	*    is used to determine whether (3) applies.	If the target address
 	*    differs from that of the current document only by a fragment
-	*    and the target address has an appended fragment, repositioning
+	*    and the taget address has an appended fragment, repositioning
 	*    without reloading is always assumed.
 	*    Note that HText_AreDifferent() currently always returns TRUE
 	*    if the target has a LYNXIMGMAP URL, so that an internally
 	*    generated pseudo-document will normally not be re-used unless
-	*    condition (2) applies. (Condition (1) cannot apply since in
+	*    condition (2) appplies. (Condition (1) cannot apply since in
 	*    LYMap.c, no_cache is always set in the anchor object).  This
 	*    doesn't guarantee that the resource from which the MAP element
 	*    is taken will be read again (reloaded) when the list of links
@@ -810,7 +826,8 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	     strncmp(full_address, "LYNXIMGMAP:", 11)))
 #endif /* TRACK_INTERNAL_LINKS */
 	{
-	    CTRACE(tfp, "HTAccess: Document already in memory.\n");
+	    if (TRACE)
+		fprintf(stderr, "HTAccess: Document already in memory.\n");
 	    HText_select(text);
 
 #ifdef DIRED_SUPPORT
@@ -827,7 +844,9 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	    reloading = TRUE;
 #endif
 	    ForcingNoCache = YES;
-	    CTRACE(tfp, "HTAccess: Auto-reloading document.\n");
+	    if (TRACE) {
+		fprintf(stderr, "HTAccess: Auto-reloading document.\n");
+	    }
 	}
     }
 
@@ -842,7 +861,9 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	FREE(anchor->title);
     }
     status = HTLoad(address_to_load, anchor, format_out, sink);
-    CTRACE(tfp, "HTAccess:  status=%d\n", status);
+    if (TRACE) {
+	fprintf(stderr, "HTAccess:  status=%d\n", status);
+    }
 
     /*
     **	Log the access if necessary.
@@ -856,7 +877,8 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 		status < 0 ? "FAIL" : "GET",
 		full_address);
 	fflush(HTlogfile);	/* Actually update it on disk */
-	CTRACE(tfp, "Log: %24.24s %s %s %s\n",
+	if (TRACE)
+	    fprintf(stderr, "Log: %24.24s %s %s %s\n",
 		    ctime(&theTime),
 		    HTClientHost ? HTClientHost : "local",
 		    status < 0 ? "FAIL" : "GET",
@@ -885,10 +907,12 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	**  in LYGetFile.c when the status is HT_REDIRECTING.  This may
 	**  seem bizarre, but it works like a charm! - FM
 	*/
-	CTRACE(tfp, "HTAccess: '%s' is a redirection URL.\n",
-		    address_to_load);
-	CTRACE(tfp, "HTAccess: Redirecting to '%s'\n",
-		     redirecting_url);
+	if (TRACE) {
+	    fprintf(stderr, "HTAccess: '%s' is a redirection URL.\n",
+			    address_to_load);
+	    fprintf(stderr, "HTAccess: Redirecting to '%s'\n",
+			     redirecting_url);
+	}
 	/*
 	**  Prevent circular references.
 	*/
@@ -928,59 +952,73 @@ PRIVATE BOOL HTLoadDocument ARGS4(
     permanent_redirection = FALSE;
 
     if (status == HT_LOADED) {
-	CTRACE(tfp, "HTAccess: `%s' has been accessed.\n",
-		    full_address);
+	if (TRACE) {
+	    fprintf(stderr, "HTAccess: `%s' has been accessed.\n",
+	    full_address);
+	}
 	return YES;
     }
     if (status == HT_PARTIAL_CONTENT) {
 	HTAlert("Loading incomplete.");
-	CTRACE(tfp, "HTAccess: `%s' has been accessed, partial content.\n",
-		    full_address);
+	if (TRACE) {
+	    fprintf(stderr, "HTAccess: `%s' has been accessed, partial content.\n",
+	    full_address);
+	}
 	return YES;
     }
 
     if (status == HT_NO_DATA) {
-	CTRACE(tfp, "HTAccess: `%s' has been accessed, No data left.\n",
-		    full_address);
+	if (TRACE) {
+	    fprintf(stderr,
+	    "HTAccess: `%s' has been accessed, No data left.\n",
+	    full_address);
+	}
 	return NO;
     }
 
     if (status == HT_NOT_LOADED) {
-	CTRACE(tfp, "HTAccess: `%s' has been accessed, No data loaded.\n",
-		    full_address);
+	if (TRACE) {
+	    fprintf(stderr,
+	    "HTAccess: `%s' has been accessed, No data loaded.\n",
+	    full_address);
+	}
 	return NO;
     }
 
     if (status == HT_INTERRUPTED) {
-	CTRACE(tfp, "HTAccess: `%s' has been accessed, transfer interrupted.\n",
-		    full_address);
+	if (TRACE) {
+	    fprintf(stderr,
+	    "HTAccess: `%s' has been accessed, transfer interrupted.\n",
+	    full_address);
+	}
+/*	_HTProgress("Data transfer interrupted."); */
 	return NO;
     }
 
-    if (status > 0) {
-	/*
-	**	If you get this, then please find which routine is returning
-	**	a positive unrecognized error code!
-	*/
-	fprintf(stderr,
- "**** HTAccess: socket or file number returned by obsolete load routine!\n");
-	fprintf(stderr,
- "**** HTAccess: Internal software error. Please mail lynx_dev@sig.net!\n");
-	fprintf(stderr, "**** HTAccess: Status returned was: %d\n",status);
-	exit(-1);
+    if (status <= 0) {		/* Failure in accessing a document */
+	char *temp = NULL;
+	StrAllocCopy(temp, "Can't Access `");
+	StrAllocCat(temp, full_address);
+	StrAllocCat(temp, "'");
+	_HTProgress(temp);
+	FREE(temp);
+	if (TRACE) fprintf(stderr,
+		"HTAccess: Can't access `%s'\n", full_address);
+	HTLoadError(sink, 500, "Unable to access document.");
+	return NO;
     }
 
-    /* Failure in accessing a document */
-    cp = NULL;
-    StrAllocCopy(cp, "Can't Access `");
-    StrAllocCat(cp, full_address);
-    StrAllocCat(cp, "'");
-    _HTProgress(cp);
-    FREE(cp);
+    /*
+    **	If you get this, then please find which routine is returning
+    **	a positive unrecognised error code!
+    */
+    fprintf(stderr,
+ "**** HTAccess: socket or file number returned by obsolete load routine!\n");
+    fprintf(stderr,
+ "**** HTAccess: Internal software error. Please mail lynx_dev@sig.net!\n");
+    fprintf(stderr, "**** HTAccess: Status returned was: %d\n",status);
+    exit(-1);
 
-    CTRACE(tfp, "HTAccess: Can't access `%s'\n", full_address);
-    HTLoadError(sink, 500, "Unable to access document.");
-    return NO;
 } /* HTLoadDocument */
 
 /*	Load a document from absolute name.		HTLoadAbsolute()
@@ -1078,7 +1116,7 @@ PUBLIC BOOL HTLoadRelative ARGS2(
 **	----------------------------------------
 **
 **  On Entry,
-**	  destination		    The child or parent anchor to be loaded.
+**	  destination		    The child or parenet anchor to be loaded.
 **
 **  On Exit,
 **	  returns    YES     Success
@@ -1094,7 +1132,7 @@ PUBLIC BOOL HTLoadAnchor ARGS1(
 
     parent = HTAnchor_parent(destination);
 
-    if (HTAnchor_document(parent) == NULL) {	/* If not already loaded */
+    if (HTAnchor_document(parent) == NULL) {	/* If not alread loaded */
 						/* TBL 921202 */
 	BOOL result;
 	char * address = HTAnchor_address((HTAnchor*) parent);
@@ -1220,16 +1258,16 @@ PUBLIC BOOL HTSearch ARGS2(
 **	the new address.
 **
 **  On Entry,
-**	*keywords	space-separated keyword list or similar search list
-**	*indexname	is name of object search is to be done on.
+**	 *keywords	space-separated keyword list or similar search list
+**	*addres 	is name of object search is to be done on.
 */
 PUBLIC BOOL HTSearchAbsolute ARGS2(
 	CONST char *,	keywords,
-	char *,		indexname)
+	CONST char *,	indexname)
 {
     DocAddress abs_doc;
     HTParentAnchor * anchor;
-    abs_doc.address = indexname;
+    abs_doc.address = (char *)indexname;
     abs_doc.post_data = NULL;
     abs_doc.post_content_type = NULL;
     abs_doc.bookmark = NULL;
@@ -1247,7 +1285,7 @@ PUBLIC BOOL HTSearchAbsolute ARGS2(
 **	As it involves file access, this should only be done once
 **	when the program first runs.
 **	This is a default algorithm -- browser don't HAVE to use this.
-**	But consistency between browsers is STRONGLY recommended!
+**	But consistency betwen browsers is STRONGLY recommended!
 **
 **  Priority order is:
 **		1	WWW_HOME environment variable (logical name, etc)
@@ -1305,7 +1343,9 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
 	if (fp) {
 	    fclose(fp);
 	} else {
-	    CTRACE(tfp, "HTBrowse: No local home document ~/%s or %s\n",
+	    if (TRACE)
+		fprintf(stderr,
+			"HTBrowse: No local home document ~/%s or %s\n",
 			PERSONAL_DEFAULT, LOCAL_DEFAULT_FILE);
 	    FREE(my_home_document);
 	}
@@ -1317,7 +1357,9 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
 		  "file:",
 		  PARSE_ACCESS|PARSE_HOST|PARSE_PATH|PARSE_PUNCTUATION);
     if (my_home_document) {
-	CTRACE(tfp, "HTAccess: Using custom home page %s i.e. address %s\n",
+	if (TRACE)
+	    fprintf(stderr,
+		    "HTAccess: Using custom home page %s i.e. address %s\n",
 		    my_home_document, ref);
 	FREE(my_home_document);
     }

@@ -7,7 +7,7 @@
 ** History
 **
 **	   Nov 1990  Written in Objective-C for the NeXT browser (TBL)
-**	24-Oct-1991 (JFG), written in C, browser-independent
+**	24-Oct-1991 (JFG), written in C, browser-independant
 **	21-Nov-1991 (JFG), first complete version
 **
 **	(c) Copyright CERN 1991 - See Copyright.html
@@ -16,6 +16,8 @@
 #define HASH_SIZE 101		/* Arbitrary prime. Memory/speed tradeoff */
 
 #include <HTUtils.h>
+#include <tcp.h>
+#include <ctype.h>
 #include <HTAnchor.h>
 #include <HTParse.h>
 #include <UCAux.h>
@@ -23,6 +25,8 @@
 
 #include <LYCharSets.h>
 #include <LYLeaks.h>
+
+#define FREE(x) if (x) {free(x); x = NULL;}
 
 #ifdef NOT_DEFINED
 /*
@@ -40,12 +44,12 @@ PRIVATE int HASH_FUNCTION ARGS1(
 	CONST char *,	cp_address)
 {
     int hash;
-    CONST unsigned char *p;
+    unsigned char *p;
 
-    for (p = (CONST unsigned char *)cp_address, hash = 0; *p; p++)
-	hash = (int) (hash * 3 + (*(CONST unsigned char *)p)) % HASH_SIZE;
+    for (p = (unsigned char *)cp_address, hash = 0; *p; p++)
+	hash = (int) (hash * 3 + (*(unsigned char *)p)) % HASH_SIZE;
 
-    return(hash);
+    return hash;
 }
 
 typedef struct _HyperDoc Hyperdoc;
@@ -80,7 +84,7 @@ PRIVATE HTParentAnchor * HTParentAnchor_new NOARGS
     newAnchor->no_cache = FALSE;	/* no-cache? - FM */
     newAnchor->content_type = NULL;	/* Content-Type. - FM */
     newAnchor->content_language = NULL; /* Content-Language. - FM */
-    newAnchor->content_encoding = NULL; /* Compression algorithm. - FM */
+    newAnchor->content_encoding = NULL; /* Compression algorith. - FM */
     newAnchor->content_base = NULL;	/* Content-Base. - FM */
     newAnchor->content_disposition = NULL; /* Content-Disposition. - FM */
     newAnchor->content_location = NULL; /* Content-Location. - FM */
@@ -90,7 +94,7 @@ PRIVATE HTParentAnchor * HTParentAnchor_new NOARGS
     newAnchor->expires = NULL;		/* Expires. - FM */
     newAnchor->last_modified = NULL;	/* Last-Modified. - FM */
     newAnchor->server = NULL;		/* Server. - FM */
-    return(newAnchor);
+    return newAnchor;
 }
 
 PRIVATE HTChildAnchor * HTChildAnchor_new NOARGS
@@ -116,12 +120,12 @@ PRIVATE BOOL HTEquivalent ARGS2(
     if (s && t) {  /* Make sure they point to something */
 	for (; *s && *t; s++, t++) {
 	    if (TOUPPER(*s) != TOUPPER(*t)) {
-		return(NO);
+		return NO;
 	    }
 	}
-	return( TOUPPER(*s) == TOUPPER(*t));
+	return TOUPPER(*s) == TOUPPER(*t);
     } else {
-	return(s == t); 	/* Two NULLs are equivalent, aren't they ? */
+	return s == t;	/* Two NULLs are equivalent, aren't they ? */
     }
 }
 
@@ -143,12 +147,12 @@ PRIVATE BOOL HTIdentical ARGS2(
     if (s && t) {  /* Make sure they point to something */
 	for (; *s && *t; s++, t++) {
 	    if (*s != *t) {
-		return(NO);
+		return NO;
 	    }
 	}
-	return(*s == *t);
+	return *s == *t;
     } else {
-	return(s == t); 	/* Two NULLs are identical, aren't they ? */
+	return s == t;	/* Two NULLs are identical, aren't they ? */
     }
 }
 #endif /* CASE_INSENSITIVE_ANCHORS */
@@ -168,8 +172,9 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
     HTList *kids;
 
     if (!parent) {
-	CTRACE(tfp, "HTAnchor_findChild called with NULL parent.\n");
-	return(NULL);
+	if (TRACE)
+	    fprintf(stderr, "HTAnchor_findChild called with NULL parent.\n");
+	return NULL;
     }
     if ((kids = parent->children) != 0) {
 	/*
@@ -178,14 +183,15 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
 	if (tag && *tag) {		/* TBL */
 	    while (NULL != (child=(HTChildAnchor *)HTList_nextObject(kids))) {
 #ifdef CASE_INSENSITIVE_ANCHORS
-		if (HTEquivalent(child->tag, tag)) /* Case insensitive */
+		if (HTEquivalent(child->tag, tag)) { /* Case insensitive */
 #else
-		if (HTIdentical(child->tag, tag)) /* Case sensitive - FM */
+		if (HTIdentical(child->tag, tag)) {  /* Case sensitive - FM */
 #endif /* CASE_INSENSITIVE_ANCHORS */
-		{
-		    CTRACE(tfp, "Child anchor %p of parent %p with name `%s' already exists.\n",
+		    if (TRACE)
+			fprintf(stderr,
+	      "Child anchor %p of parent %p with name `%s' already exists.\n",
 				(void *)child, (void *)parent, tag);
-		    return(child);
+		    return child;
 		}
 	    }
 	}  /*  end if tag is void */
@@ -194,14 +200,16 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
     }
 
     child = HTChildAnchor_new();
-    CTRACE(tfp, "new Anchor %p named `%s' is child of %p\n",
+    if (TRACE)
+	fprintf(stderr,
+		"new Anchor %p named `%s' is child of %p\n",
 		(void *)child,
 		tag ? tag : (CONST char *)"",
 		(void *)parent); /* int for apollo */
     HTList_addObject (parent->children, child);
     child->parent = parent;
     StrAllocCopy(child->tag, tag);
-    return(child);
+    return child;
 }
 
 
@@ -220,7 +228,8 @@ PUBLIC HTChildAnchor * HTAnchor_findChildAndLink ARGS4(
 {
     HTChildAnchor * child = HTAnchor_findChild(parent, tag);
 
-    CTRACE(tfp,"Entered HTAnchor_findChildAndLink\n");
+    if (TRACE)
+	fprintf(stderr,"Entered HTAnchor_findChildAndLink\n");
 
     if (href && *href) {
 	char *relative_to = HTAnchor_address((HTAnchor *)parent);
@@ -249,7 +258,7 @@ PUBLIC HTChildAnchor * HTAnchor_findChildAndLink ARGS4(
 	FREE(parsed_doc.address);
 	FREE(relative_to);
     }
-    return(child);
+    return child;
 }
 
 /*
@@ -297,7 +306,8 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
     /* Anchor tag specified ? */
     char *tag = HTParse(newdoc->address, "", PARSE_ANCHOR);
 
-    CTRACE(tfp,"Entered HTAnchor_findAddress\n");
+    if (TRACE)
+	fprintf(stderr,"Entered HTAnchor_findAddress\n");
 
     /*
     **	If the address represents a sub-anchor, we recursively load its
@@ -361,7 +371,9 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 		foundAnchor->isHEAD == newdoc->isHEAD)
 #endif /* CASE_INSENSITIVE_ANCHORS */
 	    {
-		CTRACE(tfp, "Anchor %p with address `%s' already exists.\n",
+		if (TRACE)
+		    fprintf(stderr,
+			    "Anchor %p with address `%s' already exists.\n",
 			    (void *)foundAnchor, newdoc->address);
 		 return (HTAnchor *)foundAnchor;
 	     }
@@ -371,7 +383,9 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 	**  Node not found: create new anchor.
 	*/
 	foundAnchor = HTParentAnchor_new();
-	CTRACE(tfp, "New anchor %p has hash %d and address `%s'\n",
+	if (TRACE)
+	    fprintf(stderr,
+		    "New anchor %p has hash %d and address `%s'\n",
 		    (void *)foundAnchor, hash, newdoc->address);
 	StrAllocCopy(foundAnchor->address, newdoc->address);
 	if (newdoc->post_data)
@@ -717,7 +731,7 @@ PUBLIC void HTAnchor_makeLastChild ARGS1(
 PUBLIC HTParentAnchor * HTAnchor_parent ARGS1(
 	HTAnchor *,	me)
 {
-    return( me ? me->parent : NULL);
+    return me ? me->parent : NULL;
 }
 
 PUBLIC void HTAnchor_setDocument ARGS2(
@@ -731,7 +745,7 @@ PUBLIC void HTAnchor_setDocument ARGS2(
 PUBLIC HyperDoc * HTAnchor_document ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->document : NULL);
+    return me ? me->document : NULL;
 }
 
 
@@ -764,7 +778,7 @@ PUBLIC char * HTAnchor_address ARGS1(
 			   me->parent->address, ((HTChildAnchor *)me)->tag);
 	}
     }
-    return(addr);
+    return addr;
 }
 
 PUBLIC void HTAnchor_setFormat ARGS2(
@@ -778,7 +792,7 @@ PUBLIC void HTAnchor_setFormat ARGS2(
 PUBLIC HTFormat HTAnchor_format ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->format : NULL);
+    return me ? me->format : NULL;
 }
 
 PUBLIC void HTAnchor_setIndex ARGS2(
@@ -803,7 +817,7 @@ PUBLIC void HTAnchor_setPrompt ARGS2(
 PUBLIC BOOL HTAnchor_isIndex ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->isIndex : NO);
+    return me ? me->isIndex : NO;
 }
 
 /*	Whether Anchor has been designated as an ISMAP link
@@ -812,13 +826,13 @@ PUBLIC BOOL HTAnchor_isIndex ARGS1(
 PUBLIC BOOL HTAnchor_isISMAPScript ARGS1(
 	HTAnchor *,	me)
 {
-    return( me ? me->parent->isISMAPScript : NO);
+    return me ? me->parent->isISMAPScript : NO;
 }
 
 PUBLIC BOOL HTAnchor_hasChildren ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? ! HTList_isEmpty(me->children) : NO);
+    return me ? ! HTList_isEmpty(me->children) : NO;
 }
 
 #if defined(USE_HASH)
@@ -827,7 +841,7 @@ PUBLIC BOOL HTAnchor_hasChildren ARGS1(
 PUBLIC CONST char * HTAnchor_style ARGS1(
 	HTParentAnchor *,	me)
 {
-	return( me ? me->style : NULL);
+	return me ? me->style : NULL;
 }
 
 PUBLIC void HTAnchor_setStyle ARGS2(
@@ -846,7 +860,7 @@ PUBLIC void HTAnchor_setStyle ARGS2(
 PUBLIC CONST char * HTAnchor_title ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->title : NULL);
+    return me ? me->title : NULL;
 }
 
 PUBLIC void HTAnchor_setTitle ARGS2(
@@ -888,7 +902,7 @@ PUBLIC void HTAnchor_appendTitle ARGS2(
 PUBLIC CONST char * HTAnchor_bookmark ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->bookmark : NULL);
+    return me ? me->bookmark : NULL;
 }
 
 PUBLIC void HTAnchor_setBookmark ARGS2(
@@ -904,7 +918,7 @@ PUBLIC void HTAnchor_setBookmark ARGS2(
 PUBLIC CONST char * HTAnchor_owner ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->owner : NULL);
+    return (me ? me->owner : NULL);
 }
 
 PUBLIC void HTAnchor_setOwner ARGS2(
@@ -921,7 +935,7 @@ PUBLIC void HTAnchor_setOwner ARGS2(
 PUBLIC CONST char * HTAnchor_RevTitle ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->RevTitle : NULL);
+    return (me ? me->RevTitle : NULL);
 }
 
 PUBLIC void HTAnchor_setRevTitle ARGS2(
@@ -948,7 +962,7 @@ PUBLIC void HTAnchor_setRevTitle ARGS2(
 PUBLIC CONST char * HTAnchor_SugFname ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->SugFname : NULL);
+    return me ? me->SugFname : NULL;
 }
 
 /*	Content-Encoding handling. - FM
@@ -958,7 +972,7 @@ PUBLIC CONST char * HTAnchor_SugFname ARGS1(
 PUBLIC CONST char * HTAnchor_content_encoding ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->content_encoding : NULL);
+    return me ? me->content_encoding : NULL;
 }
 
 /*	Content-Type handling. - FM
@@ -966,7 +980,7 @@ PUBLIC CONST char * HTAnchor_content_encoding ARGS1(
 PUBLIC CONST char * HTAnchor_content_type ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->content_type : NULL);
+    return me ? me->content_type : NULL;
 }
 
 /*	Last-Modified header handling. - FM
@@ -974,7 +988,7 @@ PUBLIC CONST char * HTAnchor_content_type ARGS1(
 PUBLIC CONST char * HTAnchor_last_modified ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->last_modified : NULL);
+    return me ? me->last_modified : NULL;
 }
 
 /*	Date header handling. - FM
@@ -982,7 +996,7 @@ PUBLIC CONST char * HTAnchor_last_modified ARGS1(
 PUBLIC CONST char * HTAnchor_date ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->date : NULL);
+    return me ? me->date : NULL;
 }
 
 /*	Server header handling. - FM
@@ -990,7 +1004,7 @@ PUBLIC CONST char * HTAnchor_date ARGS1(
 PUBLIC CONST char * HTAnchor_server ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->server : NULL);
+    return me ? me->server : NULL;
 }
 
 /*	Safe header handling. - FM
@@ -998,7 +1012,7 @@ PUBLIC CONST char * HTAnchor_server ARGS1(
 PUBLIC BOOL HTAnchor_safe ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->safe : FALSE);
+    return me ? me->safe : FALSE;
 }
 
 /*	Content-Base header handling. - FM
@@ -1006,7 +1020,7 @@ PUBLIC BOOL HTAnchor_safe ARGS1(
 PUBLIC CONST char * HTAnchor_content_base ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->content_base : NULL);
+    return me ? me->content_base : NULL;
 }
 
 /*	Content-Location header handling. - FM
@@ -1014,7 +1028,7 @@ PUBLIC CONST char * HTAnchor_content_base ARGS1(
 PUBLIC CONST char * HTAnchor_content_location ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->content_location : NULL);
+    return me ? me->content_location : NULL;
 }
 
 /*	Link me Anchor to another given one
@@ -1026,8 +1040,10 @@ PUBLIC BOOL HTAnchor_link ARGS3(
 	HTLinkType *,	type)
 {
     if (!(source && destination))
-	return(NO);  /* Can't link to/from non-existing anchor */
-    CTRACE(tfp, "Linking anchor %p to anchor %p\n", source, destination);
+	return NO;  /* Can't link to/from non-existing anchor */
+    if (TRACE)
+	fprintf(stderr,
+		"Linking anchor %p to anchor %p\n", source, destination);
     if (!source->mainLink.dest) {
 	source->mainLink.dest = destination;
 	source->mainLink.type = type;
@@ -1044,7 +1060,7 @@ PUBLIC BOOL HTAnchor_link ARGS3(
     if (!destination->parent->sources)
 	destination->parent->sources = HTList_new();
     HTList_addObject (destination->parent->sources, source);
-    return(YES);  /* Success */
+    return YES;  /* Success */
 }
 
 
@@ -1054,7 +1070,7 @@ PUBLIC BOOL HTAnchor_link ARGS3(
 PUBLIC HTAnchor * HTAnchor_followMainLink ARGS1(
 	HTAnchor *,	me)
 {
-    return( me->mainLink.dest);
+    return me->mainLink.dest;
 }
 
 PUBLIC HTAnchor * HTAnchor_followTypedLink ARGS2(
@@ -1062,17 +1078,17 @@ PUBLIC HTAnchor * HTAnchor_followTypedLink ARGS2(
 	HTLinkType *,	type)
 {
     if (me->mainLink.type == type)
-	return( me->mainLink.dest);
+	return me->mainLink.dest;
     if (me->links) {
 	HTList *links = me->links;
 	HTLink *the_link;
 	while (NULL != (the_link=(HTLink *)HTList_nextObject(links))) {
 	    if (the_link->type == type) {
-		return( the_link->dest);
+		return the_link->dest;
 	    }
 	}
     }
-    return(NULL);  /* No link of me type */
+    return NULL;  /* No link of me type */
 }
 
 
@@ -1084,7 +1100,7 @@ PUBLIC BOOL HTAnchor_makeMainLink ARGS2(
 {
     /* Check that everything's OK */
     if (!(me && HTList_removeObject (me->links, movingLink))) {
-	return(NO);  /* link not found or NULL anchor */
+	return NO;  /* link not found or NULL anchor */
     } else {
 	/* First push current main link onto top of links list */
 	HTLink *newLink = (HTLink *)calloc (1, sizeof (HTLink));
@@ -1098,7 +1114,7 @@ PUBLIC BOOL HTAnchor_makeMainLink ARGS2(
 	memcpy((void *)&me->mainLink,
 	       (CONST void *)movingLink, sizeof (HTLink));
 	FREE(movingLink);
-	return(YES);
+	return YES;
     }
 }
 
@@ -1112,7 +1128,7 @@ PUBLIC HTList * HTAnchor_methods ARGS1(
     if (!me->methods) {
 	me->methods = HTList_new();
     }
-    return( me->methods);
+    return me->methods;
 }
 
 /*	Protocol
@@ -1121,7 +1137,7 @@ PUBLIC HTList * HTAnchor_methods ARGS1(
 PUBLIC void * HTAnchor_protocol ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me->protocol);
+    return me->protocol;
 }
 
 PUBLIC void HTAnchor_setProtocol ARGS2(
@@ -1137,7 +1153,7 @@ PUBLIC void HTAnchor_setProtocol ARGS2(
 PUBLIC char * HTAnchor_physical ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me->physical);
+    return me->physical;
 }
 
 PUBLIC void HTAnchor_setPhysical ARGS2(
@@ -1179,7 +1195,7 @@ PUBLIC LYUCcharset * HTAnchor_getUCInfoStage ARGS2(
 {
     if (me && !me->UCStages) {
 	int i;
-	int chndl = UCLYhndl_for_unspec;  /* always >= 0 */
+	int chndl = UCLYhndl_for_unspec;
 	UCAnchorInfo * stages = (UCAnchorInfo*)calloc(1,
 						      sizeof(UCAnchorInfo));
 	if (stages == NULL)
@@ -1190,25 +1206,28 @@ PUBLIC LYUCcharset * HTAnchor_getUCInfoStage ARGS2(
 	}
 	if (me->charset) {
 	    chndl = UCGetLYhndl_byMIME(me->charset);
-	    if (chndl < 0)
+	    if (chndl < 0) {
 		chndl = UCLYhndl_for_unrec;
-	    if (chndl < 0)
-		/*
-		**  UCLYhndl_for_unrec not defined :-(
-		**  fallback to UCLYhndl_for_unspec which always valid.
-		*/
-		chndl = UCLYhndl_for_unspec;  /* always >= 0 */
+	    }
 	}
-	memcpy(&stages->s[UCT_STAGE_MIME].C, &LYCharSet_UC[chndl],
-	       sizeof(LYUCcharset));
-	stages->s[UCT_STAGE_MIME].lock = UCT_SETBY_DEFAULT;
+	if (chndl >= 0) {
+	    memcpy(&stages->s[UCT_STAGE_MIME].C, &LYCharSet_UC[chndl],
+		   sizeof(LYUCcharset));
+	    stages->s[UCT_STAGE_MIME].lock = UCT_SETBY_DEFAULT;
+	} else {
+	    /*
+	     *	Should not happen...
+	     */
+	    stages->s[UCT_STAGE_MIME].C.UChndl = -1;
+	    stages->s[UCT_STAGE_MIME].lock = UCT_SETBY_NONE;
+	}
 	stages->s[UCT_STAGE_MIME].LYhndl = chndl;
 	me->UCStages = stages;
     }
     if (me) {
-	return( &me->UCStages->s[which_stage].C);
+	return &me->UCStages->s[which_stage].C;
     }
-    return(NULL);
+    return NULL;
 }
 
 PUBLIC int HTAnchor_getUCLYhndl ARGS2(
@@ -1223,10 +1242,10 @@ PUBLIC int HTAnchor_getUCLYhndl ARGS2(
 	    (void) HTAnchor_getUCInfoStage(me, which_stage);
 	}
 	if (me->UCStages->s[which_stage].lock > UCT_SETBY_NONE) {
-	    return( me->UCStages->s[which_stage].LYhndl);
+	    return me->UCStages->s[which_stage].LYhndl;
 	}
     }
-    return( -1);
+    return -1;
 }
 
 PUBLIC LYUCcharset * HTAnchor_setUCInfoStage ARGS4(
@@ -1252,10 +1271,10 @@ PUBLIC LYUCcharset * HTAnchor_setUCInfoStage ARGS4(
 	    else {
 		p->UChndl = -1;
 	    }
-	    return(p);
+	    return p;
 	}
     }
-    return(NULL);
+    return NULL;
 }
 
 PUBLIC LYUCcharset * HTAnchor_resetUCInfoStage ARGS4(
@@ -1265,10 +1284,10 @@ PUBLIC LYUCcharset * HTAnchor_resetUCInfoStage ARGS4(
 	int,			set_by)
 {
     if (!me || !me->UCStages)
-	return(NULL);
+	return NULL;
     me->UCStages->s[which_stage].lock = set_by;
     me->UCStages->s[which_stage].LYhndl = LYhndl;
-    return( &me->UCStages->s[which_stage].C);
+    return &me->UCStages->s[which_stage].C;
 }
 
 /*
@@ -1299,8 +1318,8 @@ PUBLIC LYUCcharset * HTAnchor_copyUCInfoStage ARGS4(
 		me->UCStages->s[from_stage].LYhndl;
 	    if (p_to != p_from)
 		memcpy(p_to, p_from, sizeof(LYUCcharset));
-	    return(p_to);
+	    return p_to;
 	}
     }
-    return(NULL);
+    return NULL;
 }

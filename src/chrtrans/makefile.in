@@ -107,7 +107,6 @@ cp1256_uni.h:		$(srcdir)/cp1256_uni.tbl	makeuctb$x
 cp1257_uni.h:		$(srcdir)/cp1257_uni.tbl	makeuctb$x
 cp437_uni.h:		$(srcdir)/cp437_uni.tbl		makeuctb$x
 cp737_uni.h:		$(srcdir)/cp737_uni.tbl		makeuctb$x
-cp775_uni.h:		$(srcdir)/cp775_uni.tbl		makeuctb$x
 cp850_uni.h:		$(srcdir)/cp850_uni.tbl		makeuctb$x
 cp852_uni.h:		$(srcdir)/cp852_uni.tbl		makeuctb$x
 cp862_uni.h:		$(srcdir)/cp862_uni.tbl		makeuctb$x

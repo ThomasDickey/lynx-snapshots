@@ -9,10 +9,10 @@
 extern BOOLEAN term_letter;
 
 extern void mailform PARAMS((
-	CONST char *	mailto_address,
-	CONST char *	mailto_subject,
-	CONST char *	mailto_content,
-	CONST char *	mailto_type));
+	char *		mailto_address,
+	char *		mailto_subject,
+	char *		mailto_content,
+	char *		mailto_type));
 extern void mailmsg PARAMS((
 	int 		cur,
 	char *		owner_address,

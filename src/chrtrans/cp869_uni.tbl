@@ -2,7 +2,7 @@
 Mcp869
 
 #Name as a Display Charset (used on Options screen)
-OGreek2 (cp869)
+ODosGreek2 (cp869)
 
 #    Name:     cp869_DOSGreek2 to Unicode table
 #    Unicode version: 2.0

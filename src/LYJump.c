@@ -1,4 +1,5 @@
 #include <HTUtils.h>
+#include <tcp.h>
 #include <HTAlert.h>
 #include <LYUtils.h>
 #include <LYStrings.h>
@@ -13,6 +14,8 @@
 #ifdef VMS
 #include <fab.h>
 #endif /* VMS */
+
+#define FREE(x) if (x) {free(x); x = NULL;}
 
 struct JumpTable *JThead = NULL;
 
@@ -225,7 +228,8 @@ PUBLIC char *LYJump ARGS1(int, key)
 	/*
 	 * User cancelled the Jump via ^G. - FM
 	 */
-	HTInfoMsg(CANCELLED);
+	_statusline(CANCELLED);
+	sleep(InfoSecs);
 	return NULL;
     }
 
@@ -233,7 +237,8 @@ check_recall:
     bp = buf;
     if (toupper(key) == 'G' && strncmp(buf, "o ", 2) == 0)
 	bp++;
-    bp = LYSkipBlanks(bp);
+    while (isspace(*bp))
+	bp++;
     if (*bp == '\0' &&
 	!(recall && (ch == UPARROW || ch == DNARROW))) {
 	/*
@@ -241,7 +246,8 @@ check_recall:
 	 */
 	*buf = '\0';
 	StrAllocCopy(jtp->shortcut, buf);
-	HTInfoMsg(CANCELLED);
+	_statusline(CANCELLED);
+	sleep(InfoSecs);
 	return NULL;
     }
 #ifdef PERMIT_GOTO_FROM_JUMP
@@ -252,7 +258,8 @@ check_recall:
 	if (no_goto) {
 	    *buf = '\0';
 	    StrAllocCopy(jtp->shortcut, buf);
-	    HTUserMsg(RANDOM_URL_DISALLOWED);
+	    _statusline(RANDOM_URL_DISALLOWED);
+	    sleep(MessageSecs);
 	    return NULL;
 	}
 	StrAllocCopy(temp, "Go ");
@@ -298,7 +305,8 @@ check_recall:
 		/*
 		 * User cancelled the jump via ^G.
 		 */
-		HTInfoMsg(CANCELLED);
+		_statusline(CANCELLED);
+		sleep(InfoSecs);
 		return NULL;
 	    }
 	    goto check_recall;
@@ -338,7 +346,8 @@ check_recall:
 		/*
 		 * User cancelled the jump via ^G.
 		 */
-		HTInfoMsg(CANCELLED);
+		_statusline(CANCELLED);
+		sleep(InfoSecs);
 		return NULL;
 	    }
 	    goto check_recall;
@@ -394,11 +403,10 @@ PRIVATE unsigned LYRead_Jumpfile ARGS1(struct JumpTable *,jtp)
 	    return 0;
 	}
     } else
-    if ((fd=open(jtp->file, O_RDONLY, "mbc=32")) < 0)
+    if ((fd=open(jtp->file, O_RDONLY, "mbc=32")) < 0) {
 #else
-    if ((fd=open(jtp->file, O_RDONLY)) < 0)
+    if ((fd=open(jtp->file, O_RDONLY)) < 0) {
 #endif /* VMS */
-    {
 	HTAlert(CANNOT_OPEN_JUMP_FILE);
 	FREE(mp);
 	return 0;

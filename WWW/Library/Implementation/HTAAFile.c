@@ -1,3 +1,4 @@
+
 /* MODULE							HTAAFile.c
 **		FILE ROUTINES FOR AUTHENTICATION
 **		(PASSWD AND GROUP FILES) AND
@@ -13,8 +14,14 @@
 **
 */
 
-#include <HTUtils.h>
 
+#ifndef HTUTILS_H
+#include <HTUtils.h>
+#endif /* HTUTILS_H */
+
+#include <tcp.h>		/* Macro FROMASCII() */
+/*#include <stdio.h> included by HTUtils.h -- FM *//* FILE */
+#include <string.h>
 #include <HTAAUtil.h>		/* Common utilities used in AA */
 #include <HTAAFile.h>		/* Implemented here */
 

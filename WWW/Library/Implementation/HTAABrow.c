@@ -51,6 +51,7 @@
 */
 
 #include <HTUtils.h>
+#include <string.h>		/* strchr() */
 #include <HTString.h>
 #include <HTParse.h>		/* URL parsing function		*/
 #include <HTList.h>		/* HTList object		*/
@@ -340,29 +341,32 @@ PRIVATE HTAASetup *HTAASetup_lookup ARGS4(
 
 	HTList *cur = server->setups;
 
-	CTRACE(tfp, "%s %s (%s:%d:%s)\n",
-		    "HTAASetup_lookup: resolving setup for",
-		    (IsProxy ? "proxy" : "server"),
-		    hostname, portnumber, docname);
+	if (TRACE)
+	    fprintf(stderr, "%s %s (%s:%d:%s)\n",
+			    "HTAASetup_lookup: resolving setup for",
+			    (IsProxy ? "proxy" : "server"),
+			    hostname, portnumber, docname);
 
 	while (NULL != (setup = (HTAASetup*)HTList_nextObject(cur))) {
 	    if (HTAA_templateMatch(setup->template, docname)) {
-		CTRACE(tfp, "%s `%s' %s `%s'\n",
-			    "HTAASetup_lookup:", docname,
-			    "matched template", setup->template);
+		if (TRACE)
+		    fprintf(stderr, "%s `%s' %s `%s'\n",
+				    "HTAASetup_lookup:", docname,
+				    "matched template", setup->template);
 		return setup;
-	    } else {
-	        CTRACE(tfp, "%s `%s' %s `%s'\n",
-			    "HTAASetup_lookup:", docname,
-			    "did NOT match template", setup->template);
 	    }
+	    else if (TRACE)
+	        fprintf(stderr, "%s `%s' %s `%s'\n",
+				"HTAASetup_lookup:", docname,
+				"did NOT match template", setup->template);
 	} /* while setups remain */
     } /* if valid parameters and server found */
 
-    CTRACE(tfp, "%s `%s' %s\n",
-		 "HTAASetup_lookup: No template matched",
-		 (docname ? docname : "(null)"),
-		 "(so probably not protected)");
+    if (TRACE)
+        fprintf(stderr, "%s `%s' %s\n",
+		        "HTAASetup_lookup: No template matched",
+		        (docname ? docname : "(null)"),
+		        "(so probably not protected)");
 
     return NULL;	/* NULL in parameters, or not found */
 }
@@ -599,11 +603,12 @@ PRIVATE char *compose_auth_string ARGS3(
     realm = HTAARealm_lookup(setup->server->realms, realmname);
     if (!(realm &&
     	  realm->username && *realm->username &&
-	  realm->password) || setup->retry) { 
+	  realm->password && *realm->password) || setup->retry) {
 	if (!realm) {
-	    CTRACE(tfp, "%s `%s' %s\n",
-			"compose_auth_string: realm:", realmname,
-			"not found -- creating");
+	    if (TRACE)
+	        fprintf(stderr, "%s `%s' %s\n",
+			        "compose_auth_string: realm:", realmname,
+			        "not found -- creating");
 	    realm = HTAARealm_new(setup->server->realms,
 				  realmname, NULL, NULL);
 	}
@@ -670,7 +675,7 @@ PRIVATE char *compose_auth_string ARGS3(
 	     *  Signals to retry. - FM
 	     */
 	    return NULL;
-	} else if (*realm->username == '\0') { 
+	} else if (*realm->username == '\0' || *realm->password == '\0') {
 	    /*
 	     *  Signals to abort. - FM
 	     */
@@ -855,8 +860,9 @@ PUBLIC char *HTAA_composeAuth ARGS4(
     **  on server-side.  Life is hard.)
     */
     if (HTAAForwardAuth) {
-	CTRACE(tfp, "HTAA_composeAuth: %s\n",
-		    "Forwarding received authorization");
+	if (TRACE)
+	    fprintf(stderr, "HTAA_composeAuth: %s\n",
+			    "Forwarding received authorization");
 	StrAllocCopy(HTAA_composeAuthResult, HTAAForwardAuth);
 	HTAAForwardAuth_reset();	/* Just a precaution */
 	return HTAA_composeAuthResult;
@@ -869,7 +875,9 @@ PUBLIC char *HTAA_composeAuth ARGS4(
 	**  Proxy Authorization required. - AJL
 	*/
 
-	CTRACE(tfp, "Composing Proxy Authorization for %s:%d/%s\n",
+	if (TRACE)
+	    fprintf(stderr, 
+		    "Composing Proxy Authorization for %s:%d/%s\n",
 		    hostname, portnumber, docname);
 
 	if (proxy_portnumber != portnumber ||
@@ -944,7 +952,9 @@ PUBLIC char *HTAA_composeAuth ARGS4(
 	/*
 	**  Normal WWW authorization.
 	*/
-	CTRACE(tfp, "Composing Authorization for %s:%d/%s\n",
+	if (TRACE)
+	    fprintf(stderr, 
+		    "Composing Authorization for %s:%d/%s\n",
 		    hostname, portnumber, docname);
 
 	if (current_portnumber != portnumber ||
@@ -1051,9 +1061,10 @@ PUBLIC char *HTAA_composeAuth ARGS4(
 **				  field (in function HTAA_composeAuth()).
 **			NO, otherwise.
 */
-PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(
+PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS5(
 	char *,		start_of_headers,
 	int,		length,
+	void *,		handle,
 	int,		soc,
 	BOOL,		IsProxy)
 {
@@ -1076,11 +1087,13 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(
     /*
     **  Read server reply header lines
     */
-    CTRACE(tfp, "Server reply header lines:\n");
+    if (TRACE)
+	fprintf(stderr, "Server reply header lines:\n");
 
-    HTAA_setupReader(start_of_headers, length, soc);
+    HTAA_setupReader(start_of_headers, length, handle, soc);
     while (NULL != (line = HTAA_getUnfoldedLine())  &&  *line != '\0') {
-	CTRACE(tfp, "%s\n", line);
+	if (TRACE)
+	    fprintf(stderr, "%s\n", line);
 
 	if (strchr(line, ':')) {	/* Valid header line */
 
@@ -1120,8 +1133,9 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(
 		    }
 		    scheme_specifics[scheme] = HTAA_parseArgList(args);
 		    num_schemes++;
-		} else {
-		    CTRACE(tfp, "Unknown scheme `%s' %s\n",
+		}
+		else if (TRACE) {
+		    fprintf(stderr, "Unknown scheme `%s' %s\n",
 			    (arg1 ? arg1 : "(null)"),
 			    (IsProxy ?
 			     "in Proxy-Authenticate: field" :
@@ -1131,13 +1145,14 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(
 
 	    else if (!IsProxy &&
 		     0==strcasecomp(fieldname, "WWW-Protection-Template:")) {
-		CTRACE(tfp, "Protection template set to `%s'\n", arg1);
+		if (TRACE)
+		    fprintf(stderr, "Protection template set to `%s'\n", arg1);
 		StrAllocCopy(template, arg1);
 	    }
 
 	} /* if a valid header line */
-	else {
-	    CTRACE(tfp, "Invalid header line `%s' ignored\n", line);
+	else if (TRACE) {
+	    fprintf(stderr, "Invalid header line `%s' ignored\n", line);
 	} /* else invalid header line */
 
 	FREE(line);

@@ -5,11 +5,15 @@
 #ifndef HTLEX_H
 #define HTLEX_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif /* HTUTILS_H */
+
 
 #ifdef SHORT_NAMES
 #define lex_verb        lex_verbose
 #endif /*SHORT_NAMES*/
+
 
 typedef enum {
     LEX_NONE,		/* Internally used      */
@@ -55,3 +59,6 @@ PUBLIC char *lex_verbose PARAMS((LexItem lex_item));
  */
 
 #endif /* not HTLEX_H */
+/*
+
+   End of file HTLex.h.  */

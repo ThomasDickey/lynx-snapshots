@@ -25,6 +25,9 @@
 #ifndef HTWAIS_H
 #define HTWAIS_H
 
+#ifndef HTUTILS_H
+#include <HTUtils.h>
+#endif /* HTUTILS_H */
 #include <HTAccess.h>
 
 #ifdef GLOBALREF_IS_MACRO

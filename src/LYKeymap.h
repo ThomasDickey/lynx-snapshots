@@ -1,27 +1,26 @@
 #ifndef LYKEYMAP_H
 #define LYKEYMAP_H
 
-#include <HTUtils.h>
-
-extern BOOLEAN LYisNonAlnumKeyname PARAMS((int ch, int key_name));
-extern char *key_for_func PARAMS((int func));
-extern int LYReverseKeymap PARAMS((int key_name));
-extern int lookup_keymap PARAMS((int code));
 extern int remap PARAMS((char *key, char *func));
-extern void print_keymap PARAMS((char **newfile));
-extern void reset_emacs_keys NOPARAMS;
-extern void reset_numbers_as_arrows NOPARAMS;
+extern void set_vms_keys NOPARAMS;
+extern void set_vi_keys NOPARAMS;
 extern void reset_vi_keys NOPARAMS;
 extern void set_emacs_keys NOPARAMS;
+extern void reset_emacs_keys NOPARAMS;
 extern void set_numbers_as_arrows NOPARAMS;
-extern void set_vi_keys NOPARAMS;
-extern void set_vms_keys NOPARAMS;
+extern void reset_numbers_as_arrows NOPARAMS;
+extern void print_keymap PARAMS((char **newfile));
+extern char *key_for_func PARAMS((int func));
+extern BOOLEAN LYisNonAlnumKeyname PARAMS((int ch, int key_name));
+extern int LYReverseKeymap PARAMS((int key_name));
 
-extern unsigned short keymap[]; /* main keymap matrix */
+extern char keymap[]; /* main keymap matrix */
 
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
-extern unsigned short key_override[];
+extern char override[];
 #endif
+
+#define CURRENT_KEYMAP_TITLE "Current Key Map"
 
 #define       LYK_1             1
 #define       LYK_2             2
@@ -116,14 +115,6 @@ extern unsigned short key_override[];
 #define       LYK_UPLOAD        (LYK_DIRED_MENU+5)
 #define       LYK_INSTALL       (LYK_DIRED_MENU+6)
 #endif /* DIRED_SUPPORT */
-
-#ifndef LYK_DIRED_MENU
-#define       LYK_DIRED_MENU    0
-#endif
-
-#ifndef LYK_TAG_LINK
-#define       LYK_TAG_LINK      0
-#endif
 
 #ifdef NOT_USED
 #define       LYK_VERSION       81

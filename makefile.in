@@ -22,14 +22,10 @@ INSTALL		= @INSTALL@
 INSTALL_PROGRAM	= @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
 
-## This is the version which we are developing (or, upon release, make this
-## the same).  Use no dots in the name, since it must work on VMS and MS-DOS.
-VERSION		= 2-8-1
-
 ##this is the name of the directory the lynx source code is in.
 ##(e.g. lynx2-8, not the full path)
-lynxdir= lynx$(VERSION)
-lynxname= lynx$(VERSION)
+lynxdir= lynx2-8
+lynxname= lynx2-8
 
 ## Where you want lynx installed
 bindir= @bindir@
@@ -40,22 +36,16 @@ mandir= @mandir@/man1
 ## Where you want the lynx.cfg file installed
 libdir= @libdir@
 
-## Where you want the doc-files installed
-docdir= @libdir@/lynx_doc
-
 ## Where you want the help-files installed
 helpdir= @libdir@/lynx_help
+
+installbin= @INSTALL_PROGRAM@ -s -m 755
+installdoc= @INSTALL_DATA@
 
 ##set the relative location of the WWW library Implementation directory,
 ##from this directory
 ##do not set this to be an absolute path!!!
 WWWINC= WWW/Library/Implementation
-
-## Path to gzip that will compress the help files.
-## It will be used when --enable-gzip-help is set by configure.
-## Leave *both* empty if you don't want to gzip help files.
-COMPRESS_PROG=@COMPRESS_PROG@
-COMPRESS_EXT=@COMPRESS_EXT@
 
 # !!!!!!!!!!! SUN resolv LIBRARY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # To include resolv in the LIBS="" list for SUN 3, 4 or Solaris OS,
@@ -64,6 +54,20 @@ COMPRESS_EXT=@COMPRESS_EXT@
 # access a host other than localhost and have made Lynx without it.
 # See the PROBLEMS file for more information.
 #RESOLVLIB= -lresolv
+
+# !!!!!!!!!!! Alternate socket functions for SOCKS !!!!!!!!!!!!!!!!!!
+# To make a SOCKSified lynx, include -DSOCKS in your SITE_LYDEFS and
+# SITE_DEFS, below, and point SOCKSLIB to your SOCKS library.  Note
+# that you may have problems accessing FTP servers.  Also, instead of
+# SOCKSifying lynx for use behind a firewall, you are better off if
+# you make it normally, and set it up to use a proxy server.  You can
+# SOCKSify the proxy server, and it will handle all clients, not just
+# Lynx (see the INSTALLATION file in this distribution).  If your SOCKS
+# server was compiled to use the short version of Rbind, also include
+# -DSHORTENED_RBIND in your SITE_LYDEFS and SITE_DEFS.  If you do
+# SOCKSify lynx, you can turn off SOCKS proxy usage via a -nosocks
+# command line switch.
+#SOCKSLIB= /usr/local/lib/libsocks.a
 
 # !!!!!!!!!!!!!  DIRECT WAIS ACCESS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # If you are adding direct wais access you must fill in the
@@ -106,6 +110,7 @@ SITE_DEFS = # Your defines here
 # -DNO_CPU_LIMIT   Disables Max CPU timeout (includes CLOCKS_PER_SECOND)
 # -DSHORTENED_RBIND  For a SOCKSified lynx with the short version of Rbind.
 # -DSLANG_MBCS_HACK prevent cutoff lines when using UTF8 console (slang only)
+# -DSOCKS          For making a SOCKSified lynx.
 #
 # if you are linking to freeWAIS-0.202 or older, you should define this
 # in SITE_DEFS
@@ -126,25 +131,21 @@ SITE_DEFS = # Your defines here
 # for their inet_addr(host) calls.
 #
 # -DDGUX_OLD
+#
+# if you would like logging of client requests via syslog(), you should
+# define this in SITE_DEFS
+#
+# -DSYSLOG_REQUESTED_URLS
 
 # defines which have configure options   (see INSTALLATION, Section II-1c.):
 # -DARCHIVE_ONLY
 # -DDIRED_SUPPORT
-# -DDISP_PARTIAL
-# -DDONT_TRACK_INTERNAL_LINKS
-# -DEXEC_LINKS
-# -DEXEC_SCRIPTS
 # -DEXP_CHARTRANS_AUTOSWITCH
-# -DEXP_PERSISTENT_COOKIES
 # -DLINKEDSTYLES
 # -DLONG_LIST
-# -DLYNXCGI_LINKS
 # -DLY_FIND_LEAKS
 # -DNCURSES
 # -DNO_CHANGE_EXECUTE_PERMS
-# -DNO_EXTENDED_HTMLDTD
-# -DOPTIONS_FORMS
-# -DOPTIONS_MENU
 # -DNO_PARENT_DIR_REFERENCE
 # -DNSL_FORK
 # -DOK_GZIP
@@ -153,21 +154,16 @@ SITE_DEFS = # Your defines here
 # -DOK_TAR
 # -DOK_UUDECODE
 # -DOK_ZIP
-# -DSOCKS
-# -DSYSLOG_REQUESTED_URLS
 # -DUNDERLINE_LINKS
 # -DUSE_COLOR_STYLE
-# -DUSE_DEFAULT_COLORS
-# -DUSE_EXTERNALS
 # -DUSE_HASH
 # -DUSE_SLANG
-# -DUSE_SOCKS5
 # -DUSE_ZLIB
 #
 # for installation of local execution links, please see the file userdefs.h
 
 # TESTED: Linux FreeBSD SunOS Solaris IRIX CLIX HP-UX AIX SCO
-all lynx$x: cfg_defs.h LYHelp.h
+all lynx$x:
 	cd WWW/Library/unix && $(MAKE) CC="$(CC)" \
 		LY_CFLAGS="$(CFLAGS)" \
 		CPPFLAGS="$(CPPFLAGS)" \
@@ -175,7 +171,7 @@ all lynx$x: cfg_defs.h LYHelp.h
 	cd src && $(MAKE) all CC="$(CC)" \
 		CFLAGS="$(CFLAGS)" \
 		CPPFLAGS="$(CPPFLAGS)" \
-		LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SITE_LIBS)" \
+		LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		SITE_DEFS="$(SITE_DEFS)" \
 		WWWINC=$(WWWINC) \
 		WWWLIB="../WWW/Library/unix/libwww.a"
@@ -196,9 +192,9 @@ clean:
 	rm -f WWW/Library/*/*.[aob]
 	rm -f WWW/Library/*/.created
 	cd src && $(MAKE) clean
-	rm -f *.b src/lynx$x core Lynx.leaks cfg_defs.h LYHelp.h
+	rm -f *.b src/lynx$x core Lynx.leaks
 
-depend: cfg_defs.h LYHelp.h
+depend:
 	cd WWW/Library/unix && $(MAKE) $@
 	cd src && $(MAKE) $@
 
@@ -247,98 +243,32 @@ compress: tar
 install: lynx$x install-bin install-man install-cfg @INSTALL_LSS@
 	@echo
 	@echo "Use $(MAKE) install-help to install the help-files"
-	@echo "Use $(MAKE) install-doc to install extra documentation files"
 	@echo
 
 install-bin: $(bindir)
 	-mv -f $(bindir)/lynx$x $(bindir)/lynx.old
-	$(INSTALL_PROGRAM) lynx$x $(bindir)/
+	$(installbin) lynx$x $(bindir)/
 
-install-man : $(mandir)
-	$(INSTALL_DATA) $(srcdir)/lynx.man $(mandir)/lynx.1
-
-install-doc : $(docdir)
-	@echo Copying sample files
-	(cd $(srcdir) && tar cf - C[HO]* PROBLEMS README samples test ) | \
-			       ( cd $(docdir) && tar xf - )
-	-rm -f $(libdir)/lynx.tmp
-
-# HPUX 'sed' does not seem to like '=' as pattern delimiter.
-FIX_SED = tr '=' '%'
-#FIX_SED = cat
+install-man : $(mandir) 
+	$(installdoc) $(srcdir)/lynx.man $(mandir)/lynx.1
 
 install-help : $(helpdir)
 	(cd $(helpdir) && rm -rf *)
-	@echo Constructing sed-script
-	@ECHO_CC@sed	-e '/^#/d' -e '/^$$/d' \
-		-e 's%\(.*\)=\(.*\@.*\)%s=@\1@=\2=g%' \
-		-e 's%\(.*\)=\(http:.*\)%s=@\1@=\2=g%' \
-		-e 's%\(.*\)=\(ftp:.*\)%s=@\1@=\2=g%' \
-		-e 's%\(.*\)=\(.*\.html\)$$%s=@\1@=\2$(COMPRESS_EXT)=g%' \
-		$(srcdir)/lynx_help/help_files.txt | $(FIX_SED) > \
-		$(helpdir)/help_files.sed
-	@echo Appending interim-fix for existing html files
-	@ECHO_CC@sed	-e '/^#/d' -e '/[:@]/d' -e '/^$$/d' \
-		-e 's%\(.*\)=\(.*\.html\)$$%s=\2=\2$(COMPRESS_EXT)=g%' \
-		-e 's%\.html=%\\.html=%' \
-		$(srcdir)/lynx_help/help_files.txt | $(FIX_SED) >> \
-		$(helpdir)/help_files.sed
-	@echo Translating/copying html files
-	@ECHO_CC@sh -c	'cd $(srcdir)/lynx_help && ( \
-		dirs=keystrokes; \
-		(cd $(helpdir) && mkdir $$dirs 2>/dev/null ) ; \
-		files="*.html */*.html" ; \
-		for f in $$files ; do \
-			sed -f $(helpdir)/help_files.sed $$f > $(helpdir)/$$f ; \
-		done ; \
-		if test "$(COMPRESS_PROG)" != "" ; then \
-			(cd $(helpdir) && $(COMPRESS_PROG) $$files ) \
-		fi ; \
-		)'
-	-rm -f $(helpdir)/help_files.sed
-	@echo Updating $(libdir)/lynx.cfg 
+	(cd $(srcdir)/lynx_help && tar cf - . ) | ( cd $(helpdir) && tar xf - )
+	(cd $(srcdir) && tar cf - C[HO]* PROBLEMS README samples test ) | \
+			       ( cd $(helpdir) && tar xf - )
+	-rm -f $(libdir)/lynx.tmp
 	sh -c 'if test -f $(libdir)/lynx.cfg ; then \
 		mv $(libdir)/lynx.cfg $(libdir)/lynx.tmp ; \
 	else \
 		cp $(srcdir)/lynx.cfg $(libdir)/lynx.tmp ; \
 	fi'
-	@echo Updating $(libdir)/lynx.cfg to point to installed help-files
-	@ECHO_CC@sed	-e '/^HELPFILE:http/s@^@#@' \
+	sed	-e '/^HELPFILE:http/s@^@#@' \
 		-e '/^#HELPFILE:file/s@#@@' \
 		-e '/^HELPFILE:file/s@/PATH_TO/lynx_help@$(helpdir)@' \
-		-e '/^HELPFILE:file/s@$$@$(COMPRESS_EXT)@' \
-		-e '/^HELPFILE:file/s@$(COMPRESS_EXT)$(COMPRESS_EXT)$$@$(COMPRESS_EXT)@' \
 		$(libdir)/lynx.tmp >$(libdir)/lynx.cfg
 	chmod 644 $(libdir)/lynx.cfg
 	-rm -f $(libdir)/lynx.tmp
-
-LYHelp.h : LYHelp.hin
-	@echo Constructing sed-script
-	@ECHO_CC@sed	-e '/^#/d' -e '/^$$/d' \
-		-e 's%\(.*\)=\(.*\@.*\)%s=@\1@=\2=g%' \
-		-e 's%\(.*\)=\(http:.*\)%s=@\1@=\2=g%' \
-		-e 's%\(.*\)=\(ftp:.*\)%s=@\1@=\2=g%' \
-		-e 's%\(.*\)=\(.*\.html\)$$%s=@\1@=\2$(COMPRESS_EXT)=g%' \
-		$(srcdir)/lynx_help/help_files.txt | $(FIX_SED) > \
-		help_files.sed
-	@echo Creating $@
-	@sed -f help_files.sed $(srcdir)/LYHelp.hin > $@
-	-@rm -f help_files.sed
-	@echo '**********************************************'
-	@echo
-	@sh -c 'if test "$(COMPRESS_PROG)" = "" ; then \
-		echo "       Help files will NOT be gzipped."; \
-	else \
-		echo "       Help links point to compressed files"; \
-		echo "       To access them properly you have to type"; \
-		echo "                 make install-help"; \
-	fi'
-	@echo
-	@echo '**********************************************'
-
-cfg_defs.h : $(srcdir)/cfg_defs.sh
-	@rm -f $@
-	sh $(srcdir)/cfg_defs.sh >$@
 
 install-cfg : $(libdir)
 	-mv -f $(libdir)/lynx.cfg $(libdir)/lynx.oldcfg
@@ -353,8 +283,7 @@ uninstall:
 	-rm -f $(mandir)/lynx.1
 	-rm -f $(libdir)/lynx.cfg
 	-rm -f $(libdir)/lynx.lss
-	-rm -rf $(helpdir)
-	-rm -rf $(docdir)
+	-rm -rf $(libdir)/lynx_help
 
-$(bindir) $(mandir) $(libdir) $(helpdir) $(docdir) :
+$(bindir) $(mandir) $(libdir) $(helpdir) :
 	$(srcdir)/mkdirs.sh $@

@@ -8,11 +8,12 @@
 **	translation necessary to
 **	represent a document. It is a linked list of styles.
 */
-
 #include <HTUtils.h>
 #include <HTStyle.h>
 
 #include <LYLeaks.h>
+
+#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*	Create a new style
 */
@@ -183,7 +184,7 @@ HTStyle * HTStyleNamed ARGS2 (HTStyleSheet *,self, CONST char *,name)
     HTStyle * scan;
     for (scan=self->styles; scan; scan=scan->next)
 	if (0==strcmp(scan->name, name)) return scan;
-    CTRACE(tfp, "StyleSheet: No style named `%s'\n", name);
+    if (TRACE) fprintf(stderr, "StyleSheet: No style named `%s'\n", name);
     return NULL;
 }
 
@@ -234,8 +235,8 @@ HTStyle * HTStyleForRun (HTStyleSheet *self, NXRun *run)
 	    }
 	}
     }
-    CTRACE(tfp, "HTStyleForRun: Best match for style is %d out of 18\n",
-		 bestMatch);
+    if (TRACE) fprintf(stderr, "HTStyleForRun: Best match for style is %d out of 18\n",
+			 bestMatch);
     return best;
 }
 #endif /* NEXT_SUPRESS */
@@ -324,7 +325,7 @@ HTStyleSheet * HTStyleSheetRead(HTStyleSheet * self, NXStream * stream)
     HTStyle * style;
     char styleName[80];
     NXScanf(stream, " %d ", &numStyles);
-    CTRACE(tfp, "Stylesheet: Reading %d styles\n", numStyles);
+    if (TRACE) fprintf(stderr, "Stylesheet: Reading %d styles\n", numStyles);
     for (i=0; i<numStyles; i++) {
 	NXScanf(stream, "%s", styleName);
 	style = HTStyleNamed(self, styleName);
@@ -352,7 +353,7 @@ HTStyleSheet * HTStyleSheetWrite(HTStyleSheet * self, NXStream * stream)
     for(style=self->styles; style; style=style->next) numStyles++;
     NXPrintf(stream, "%d\n", numStyles);
 
-    CTRACE(tfp, "StyleSheet: Writing %d styles\n", numStyles);
+    if (TRACE) fprintf(stderr, "StyleSheet: Writing %d styles\n", numStyles);
     for (style=self->styles; style; style=style->next) {
 	NXPrintf(stream, "%s ", style->name);
 	(void) HTStyleWrite(style, stream);

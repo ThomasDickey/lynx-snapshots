@@ -17,6 +17,10 @@
 
 
 #include <HTUtils.h>
+
+/*#include <stdio.h> included by HTUtils.h -- FM *//* FILE */
+#include <string.h>
+
 #include <HTAAFile.h>	/* File routines	*/
 #include <HTGroup.h>	/* GroupDef		*/
 #include <HTACL.h>	/* Implemented here	*/
@@ -170,17 +174,20 @@ PUBLIC GroupDef *HTAA_getAclEntry ARGS3(FILE *, 	acl_file,
 
     while (EOF != HTAAFile_readField(acl_file, buf, len+1)) {
 #ifdef VMS
-	if (HTAA_templateCaseMatch(buf, filename))
+	if (HTAA_templateCaseMatch(buf, filename)) {
 #else /* not VMS */
-	if (HTAA_templateMatch(buf, filename))
+	if (HTAA_templateMatch(buf, filename)) {
 #endif /* not VMS */
-	{
 	    HTList *methods = HTList_new();
 	    HTAAFile_readList(acl_file, methods, MAX_METHODNAME_LEN);
-	    CTRACE(tfp, "Filename '%s' matched template '%s', allowed methods:",
+	    if (TRACE) {
+		fprintf(stderr,
+			"Filename '%s' matched template '%s', allowed methods:",
 			filename, buf);
+	    }
 	    if (HTAAMethod_inList(method, methods)) {	/* right method? */
-		CTRACE(tfp, " METHOD OK\n");
+		if (TRACE)
+		    fprintf(stderr, " METHOD OK\n");
 		HTList_delete(methods);
 		methods = NULL;
 		FREE(buf);
@@ -190,15 +197,18 @@ PUBLIC GroupDef *HTAA_getAclEntry ARGS3(FILE *, 	acl_file,
 		** separator so we don't call HTAAFile_nextRec().
 		*/
 		return group_def;
-	    } else {
-		CTRACE(tfp, " METHOD NOT FOUND\n");
+	    } else if (TRACE) {
+		fprintf(stderr, " METHOD NOT FOUND\n");
 	    }
 	    HTList_delete(methods);
 	    methods = NULL;
 	}	/* if template match */
 	else {
-	    CTRACE(tfp, "Filename '%s' didn't match template '%s'\n",
+	    if (TRACE) {
+		fprintf(stderr,
+			"Filename '%s' didn't match template '%s'\n",
 			filename, buf);
+	    }
 	}
 
 	HTAAFile_nextRec(acl_file);
@@ -208,3 +218,4 @@ PUBLIC GroupDef *HTAA_getAclEntry ARGS3(FILE *, 	acl_file,
     return NULL;	/* No entry for requested file */
 			/* (or an empty entry).        */
 }
+

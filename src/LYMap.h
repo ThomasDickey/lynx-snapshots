@@ -1,9 +1,6 @@
+
 #ifndef LYMAP_H
 #define LYMAP_H
-
-#include <HTUtils.h>
-#include <HTList.h>
-#include <HTAnchor.h>
 
 extern BOOL LYMapsOnly;
 

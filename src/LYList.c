@@ -6,7 +6,7 @@
 */
 
 #include <HTUtils.h>
-#include <HTAlert.h>
+#include <tcp.h>
 #include <LYUtils.h>
 #include <GridText.h>
 #include <LYList.h>
@@ -22,6 +22,8 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
+#define FREE(x) if (x) {free(x); x = NULL;}
+
 /*	showlist - F.Macrides (macrides@sci.wfeb.edu)
 **	--------
 **	Create a temporary text/html file with a list of links to
@@ -32,7 +34,7 @@
 **			Clear:	we only get addresses.
 */
 
-static char *list_filename = 0;
+static char list_filename[256] = "\0";
 
 /*
  *  Returns the name of the file used for the List Page, if one has
@@ -41,7 +43,7 @@ static char *list_filename = 0;
  */
 PUBLIC char * LYlist_temp_url NOARGS
 {
-    return list_filename ? list_filename : "";
+    return list_filename;
 }
 
 PUBLIC int showlist ARGS2(
@@ -51,6 +53,7 @@ PUBLIC int showlist ARGS2(
     int cnt;
     int refs, hidden_links;
     static char tempfile[256];
+    static BOOLEAN first = TRUE;
     FILE *fp0;
     char *Address = NULL, *Title = NULL, *cp = NULL;
     BOOLEAN intern_w_post = FALSE;
@@ -60,32 +63,67 @@ PUBLIC int showlist ARGS2(
     hidden_links = HText_HiddenLinkCount(HTMainText);
     if (refs <= 0 && hidden_links > 0 &&
 	LYHiddenLinks != HIDDENLINKS_SEPARATE) {
-	HTUserMsg(NO_VISIBLE_REFS_FROM_DOC);
+	_statusline(NO_VISIBLE_REFS_FROM_DOC);
+	sleep(MessageSecs);
 	return(-1);
     }
     if (refs <= 0 && hidden_links <= 0) {
-	HTUserMsg(NO_REFS_FROM_DOC);
+	_statusline(NO_REFS_FROM_DOC);
+	sleep(MessageSecs);
 	return(-1);
     }
 
-    LYRemoveTemp(tempfile);
-    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
-	HTUserMsg(CANNOT_OPEN_TEMP);
-	return(-1);
+    if (first) {
+	tempname(tempfile, NEW_FILE);
+	/*
+	 *  Make the file a URL now.
+	 */
+#if defined (VMS) || defined (DOSPATH)
+	sprintf(list_filename, "file://localhost/%s", tempfile);
+#else
+	sprintf(list_filename, "file://localhost%s", tempfile);
+#endif /* VMS */
+	first = FALSE;
+#ifdef VMS
+    } else {
+	remove(tempfile);  /* Remove duplicates on VMS. */
+#endif /* VMS */
     }
 
-    LYLocalFileToURL(&list_filename, tempfile);
+    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
+	_statusline(CANNOT_OPEN_TEMP);
+	sleep(MessageSecs);
+	return(-1);
+    }
 
     StrAllocCopy(newdoc->address, list_filename);
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
     LYforce_no_cache = TRUE;	/* force this file to be new */
 
-    BeginInternalPage(fp0, LIST_PAGE_TITLE, LIST_PAGE_HELP);
 
+    fprintf(fp0, "<head>\n");
+    LYAddMETAcharsetToFD(fp0, -1);
+    if (strchr(HTLoadedDocumentURL(), '"') == NULL) {
+	/*
+	 *  Insert a BASE tag so there is some way to relate the List Page
+	 *  file to its underlying document after we are done.	It won't
+	 *  be actually used for resolving relative URLs. - kw
+	 */
+	StrAllocCopy(Address, HTLoadedDocumentURL());
+	LYEntify(&Address, FALSE);
+	fprintf(fp0, "<base href=\"%s\">\n", Address);
+	FREE(Address);
+    }
+    fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
+		 LIST_PAGE_TITLE);
+    fprintf(fp0, "<h1>You have reached the List Page</h1>\n");
+    fprintf(fp0, "<h2>%s Version %s</h2>\n", LYNX_NAME, LYNX_VERSION);
     StrAllocCopy(Address, HTLoadedDocumentURL());
     LYEntify(&Address, FALSE);
-    fprintf(fp0, "References in %s<p>\n",
-	((Address != NULL && *Address != '\0') ? Address : "this document:"));
+    fprintf(fp0,
+	    "  References in %s<p>\n",
+	    ((Address != NULL && *Address != '\0') ?
+					   Address : "this document:"));
     FREE(Address);
     if (refs > 0) {
 	fprintf(fp0, "<%s compact>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
@@ -141,8 +179,8 @@ PUBLIC int showlist ARGS2(
 	    /*
 	     *	Set flag to note that we had at least one internal link,
 	     *	if the document from which we are generating the list
-	     *	has associated POST data; after an extra check that the
-	     *	link destination really has the same POST data so that
+	     *	has assosiated POST data; after an extra check that the
+	     *	link destination really has hthe same POST data so that
 	     *	we can believe it is an internal link.
 	     */
 	    intern_w_post = TRUE;
@@ -196,16 +234,14 @@ PUBLIC int showlist ARGS2(
 	FREE(Address);
     }
 
-    fprintf(fp0,"\n</%s>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
-			     "ol" : "ul"));
-    EndInternalPage(fp0);
-    LYCloseTempFP(fp0);
+    fprintf(fp0,"\n</%s>\n</body>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
+				       "ol" : "ul"));
 
     /*
      *	Make necessary changes to newdoc before returning to caller.
      *	If the intern_w_post flag is set, we keep the POST data in
      *	newdoc that have been passed in.  They should be the same as
-     *	in the loaded document for which we generated the list.
+     *	in the loaded locument for which we generated the list.
      *	In that case the file we have written will be associated with
      *	the same POST data when it is loaded after we are done here,
      *	so that following one of the links we have marked as "internal
@@ -221,6 +257,7 @@ PUBLIC int showlist ARGS2(
     }
     newdoc->isHEAD = FALSE;
     newdoc->safe = FALSE;
+    fclose(fp0);
     return(0);
 }
 
@@ -267,7 +304,7 @@ PUBLIC void printlist ARGS2(
 	    if (child == 0) {
 		/*
 		 *  child should not be 0 unless form field numbering is on
-		 *  and cnt is the number of a form input field.
+		 *  and cnt is the number of a form intput field.
 		 *  HText_FormDescNumber() will set desc to a description
 		 *  of what type of input field this is.  We'll create a
 		 *  within-document link to ensure that the link numbers on

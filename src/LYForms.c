@@ -1,4 +1,5 @@
 #include <HTUtils.h>
+#include <tcp.h>
 #include <HTCJK.h>
 #include <HTTP.h>
 #include <HTAlert.h>
@@ -33,8 +34,9 @@ PRIVATE int popup_options PARAMS((
 	int		i_length,
 	int		disabled));
 
-PUBLIC int change_form_link ARGS5(
+PUBLIC int change_form_link ARGS6(
 	struct link *,	form_link,
+	int,		mode,
 	document *,	newdoc,
 	BOOLEAN *,	refresh_screen,
 	char *,		link_name,
@@ -137,7 +139,9 @@ PUBLIC int change_form_link ARGS5(
 		 *  only one down at a time!
 		 */
 	    if (form->num_value) {
-		HTUserMsg(NEED_CHECKED_RADIO_BUTTON);
+		_statusline(NEED_CHECKED_RADIO_BUTTON);
+		sleep(MessageSecs);
+
 	    } else {
 		int i;
 		/*
@@ -198,7 +202,8 @@ PUBLIC int change_form_link ARGS5(
 	    if (c == '\r' || c == '\n') {
 		form_link->hightext = form->value;
 		if (!form->submit_action || *form->submit_action == '\0') {
-		    HTUserMsg(NO_FORM_ACTION);
+		    _statusline(NO_FORM_ACTION);
+		    sleep(MessageSecs);
 		    c = DO_NOTHING;
 		    break;
 		} else if (form->submit_method == URL_MAIL_METHOD && no_mail) {
@@ -299,7 +304,8 @@ PRIVATE int form_getstr ARGS1(
 	    /*
 	     *  If we can edit it, report that we are using the tail. - FM
 	     */
-	    HTUserMsg(FORM_VALUE_TOO_LONG);
+	    _statusline(FORM_VALUE_TOO_LONG);
+	    sleep(MessageSecs);
 	    switch(form->type) {
 		case F_PASSWORD_TYPE:
 		    statusline(FORM_LINK_PASSWORD_MESSAGE);
@@ -382,7 +388,7 @@ again:
 	    case PGDOWN:
 #ifdef NOTDEFINED
 	    case HOME:
-	    case END_KEY:
+	    case END:
 	    case FIND_KEY:
 	    case SELECT_KEY:
 #endif /* NOTDEFINED */
@@ -449,7 +455,8 @@ breakfor:
 	     */
 	    form->value[(strlen(form->value) - strlen(value))] = '\0';
 	    StrAllocCat(form->value, MyEdit.buffer);
-	    HTUserMsg(FORM_TAIL_COMBINED_WITH_HEAD);
+	    _statusline(FORM_TAIL_COMBINED_WITH_HEAD);
+	    sleep(MessageSecs);
 	}
 
 	/*
@@ -501,7 +508,8 @@ PRIVATE int get_popup_option_number ARGS1(
      *  Get the number, possibly with a suffix, from the user.
      */
     if (LYgetstr(temp, VISIBLE, sizeof(temp), NORECALL) < 0 || *temp == 0) {
-	HTInfoMsg(CANCELLED);
+	_statusline(CANCELLED);
+	sleep(InfoSecs);
 	*c = '\0';
 	return(0);
     }
@@ -804,8 +812,8 @@ redraw:
 	    SLsmg_gotorc((LYlines - 1), (LYcols - 1));
 	SLsmg_refresh();
 #else
-	wmove(form_window, ((i + 1) - window_offset), 2);
 	wstart_reverse(form_window);
+	wmove(form_window, ((i + 1) - window_offset), 2);
 	paddstr(form_window, width, opt_ptr->name);
 	wstop_reverse(form_window);
 	/*
@@ -864,7 +872,8 @@ redraw:
 		     */
 		    if (number <= 1) {
 			if (window_offset == 0) {
-			    HTUserMsg(ALREADY_AT_OPTION_BEGIN);
+			    _statusline(ALREADY_AT_OPTION_BEGIN);
+			    sleep(MessageSecs);
 			    if (disabled) {
 				_statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
 			    } else {
@@ -888,7 +897,8 @@ redraw:
 		     */
 		    if (number >= npages) {
 			if (window_offset >= ((num_options - length) + 1)) {
-			    HTUserMsg(ALREADY_AT_OPTION_END);
+			    _statusline(ALREADY_AT_OPTION_END);
+			    sleep(MessageSecs);
 			    if (disabled) {
 				_statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
 			    } else {
@@ -915,7 +925,8 @@ redraw:
 		     */
 		    if (((number - 1) * length) == window_offset) {
 			sprintf(buffer, ALREADY_AT_OPTION_PAGE, number);
-			HTUserMsg(buffer);
+			_statusline(buffer);
+			sleep(MessageSecs);
 			if (disabled) {
 			    _statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
 			} else {
@@ -965,7 +976,8 @@ redraw:
 			     */
 			    sprintf(buffer,
 				    OPTION_ALREADY_CURRENT, (number + 1));
-			    HTUserMsg(buffer);
+			    _statusline(buffer);
+			    sleep(MessageSecs);
 			    if (disabled) {
 				_statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
 			    } else {
@@ -1003,7 +1015,8 @@ redraw:
 			/*
 			 *  Not in range. - FM
 			 */
-			HTUserMsg(BAD_OPTION_NUM_ENTERED);
+			_statusline(BAD_OPTION_NUM_ENTERED);
+			sleep(MessageSecs);
 		    }
 		}
 
@@ -1238,7 +1251,8 @@ redraw:
 			/*
 			 *  User cancelled the search via ^G. - FM
 			 */
-			HTInfoMsg(CANCELLED);
+			_statusline(CANCELLED);
+			sleep(InfoSecs);
 			goto restore_popup_statusline;
 		    }
 		}
@@ -1249,7 +1263,8 @@ check_recall:
 		    /*
 		     *  No entry.  Simply break.   - FM
 		     */
-		    HTInfoMsg(CANCELLED);
+		    _statusline(CANCELLED);
+		    sleep(InfoSecs);
 		    goto restore_popup_statusline;
 		}
 
@@ -1302,7 +1317,8 @@ check_recall:
 			    /*
 			     *  User cancelled the search via ^G. - FM
 			     */
-			    HTInfoMsg(CANCELLED);
+			    _statusline(CANCELLED);
+			    sleep(InfoSecs);
 			    goto restore_popup_statusline;
 			}
 			goto check_recall;
@@ -1358,7 +1374,8 @@ check_recall:
 			    /*
 			     * User cancelled the search via ^G. - FM
 			     */
-			    HTInfoMsg(CANCELLED);
+			    _statusline(CANCELLED);
+			    sleep(InfoSecs);
 			    goto restore_popup_statusline;
 			}
 			goto check_recall;
@@ -1404,7 +1421,8 @@ check_recall:
 		 *  If we started at the beginning, it can't be present. - FM
 		 */
 		if (cur_selection == 0) {
-		    HTUserMsg2(STRING_NOT_FOUND, prev_target_buffer);
+		    _user_message(STRING_NOT_FOUND, prev_target_buffer);
+		    sleep(MessageSecs);
 		    goto restore_popup_statusline;
 		}
 
@@ -1442,7 +1460,8 @@ check_recall:
 		/*
 		 *  Didn't find it in the preceding options either. - FM
 		 */
-		HTUserMsg2(STRING_NOT_FOUND, prev_target_buffer);
+		_user_message(STRING_NOT_FOUND, prev_target_buffer);
+		sleep(MessageSecs);
 
 restore_popup_statusline:
 		/*

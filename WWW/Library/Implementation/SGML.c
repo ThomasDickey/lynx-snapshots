@@ -4,12 +4,13 @@
 **	This module implements an HTStream object. To parse an
 **	SGML file, create this object which is a parser. The object
 **	is (currently) created by being passed a DTD structure,
-**	and a target HTStructured object at which to throw the parsed stuff.
+**	and a target HTStructured oject at which to throw the parsed stuff.
 **
-**	 6 Feb 93  Binary searches used. Interface modified.
+**	 6 Feb 93  Binary seraches used. Intreface modified.
 */
 
 #include <HTUtils.h>
+#include <tcp.h>		/* For FROMASCII */
 
 /* Remove the following to disable the experimental HTML DTD parsing.
    Currently only used in this source file. - kw */
@@ -25,13 +26,16 @@
 #include <UCDefs.h>
 #include <UCAux.h>
 
+#include <ctype.h>
+/*#include <stdio.h> included in HTUtils.h -- FM */
 #include <HTChunk.h>
 
 #include <LYCharSets.h>
-#include <LYStrings.h>
 #include <LYLeaks.h>
 
 #define INVALID (-1)
+
+#define FREE(x) if (x) {free(x); x = NULL;}
 
 PUBLIC HTCJKlang HTCJK = NOCJK; 	/* CJK enum value.		*/
 PUBLIC BOOL HTPassEightBitRaw = FALSE;	/* Pass 161-172,174-255 raw.	*/
@@ -39,7 +43,7 @@ PUBLIC BOOL HTPassEightBitNum = FALSE;	/* Pass ^ numeric entities raw. */
 PUBLIC BOOL HTPassHighCtrlRaw = FALSE;	/* Pass 127-160,173,&#127; raw. */
 PUBLIC BOOL HTPassHighCtrlNum = FALSE;	/* Pass &#128;-&#159; raw.	*/
 
-/*  extern int LYlowest_eightbit[];  for completeness here  */
+extern int LYlowest_eightbit[];
 
 /*	The State (context) of the parser
 **
@@ -52,7 +56,7 @@ PUBLIC BOOL HTPassHighCtrlNum = FALSE;	/* Pass &#128;-&#159; raw.	*/
 
 /*		Element Stack
 **		-------------
-**	This allows us to return down the stack reselecting styles.
+**	This allows us to return down the stack reselcting styles.
 **	As we return, attribute values will be garbage in general.
 */
 typedef struct _HTElement HTElement;
@@ -70,7 +74,7 @@ struct _HTStream {
     CONST HTStreamClass *	isa;		/* inherited from HTStream */
 
     CONST SGML_dtd		*dtd;
-    CONST HTStructuredClass	*actions;	/* target class  */
+    HTStructuredClass		*actions;	/* target class  */
     HTStructured		*target;	/* target object */
 
     HTTag			*current_tag;
@@ -196,7 +200,7 @@ PRIVATE void set_chartrans_handling ARGS3(
 	       context->T.trans_from_uni) {
 	context->current_tag_charset = UCGetLYhndl_byMIME("utf-8");
     } else {
-	context->current_tag_charset = LATIN1;
+	context->current_tag_charset = 0;
     }
 }
 
@@ -278,15 +282,17 @@ PRIVATE void handle_attribute_name ARGS2(
 	    FREE(context->value[i]);
 #ifdef USE_COLOR_STYLE
 	    current_is_class=(!strcasecomp("class", s));
-	    CTRACE(tfp, "SGML: found attribute %s, %d\n", s, current_is_class);
+	    if (TRACE)
+		fprintf(stderr, "SGML: found attribute %s, %d\n", s, current_is_class);
 #endif
 	    return;
 	} /* if */
 
     } /* for */
 
-    CTRACE(tfp, "SGML: Unknown attribute %s for tag %s\n",
-		s, context->current_tag->name);
+    if (TRACE)
+	fprintf(stderr, "SGML: Unknown attribute %s for tag %s\n",
+	    s, context->current_tag->name);
     context->current_attribute_number = INVALID;	/* Invalid */
 }
 
@@ -304,15 +310,18 @@ PRIVATE void handle_attribute_value ARGS2(
 	if (current_is_class)
 	{
 	    strncpy (class_string, s, TEMPSTRINGSIZE);
-	    CTRACE(tfp, "SGML: class is '%s'\n", s);
+	    if (TRACE)
+		fprintf(stderr, "SGML: class is '%s'\n", s);
 	}
 	else
 	{
-	    CTRACE(tfp, "SGML: attribute value is '%s'\n", s);
+	    if (TRACE)
+		fprintf(stderr, "SGML: attribute value is '%s'\n", s);
 	}
 #endif
     } else {
-	CTRACE(tfp, "SGML: Attribute value %s ignored\n", s);
+	if (TRACE)
+	    fprintf(stderr, "SGML: Attribute value %s ignored\n", s);
     }
     context->current_attribute_number = INVALID; /* can't have two assignments! */
 }
@@ -322,10 +331,9 @@ PRIVATE void handle_attribute_value ARGS2(
 **  Translate some Unicodes to Lynx special codes and output them.
 **  Special codes - ones those output depend on parsing.
 **
-**  Additional issue, like handling bidirectional text if necessary
+**  Additional issue, like handling bidirectional text if nesseccery
 **  may be called from here:  zwnj (8204), zwj (8205), lrm (8206), rlm (8207)
-**  - currently they are ignored in SGML.c and LYCharUtils.c
-**  but also in UCdomap.c because they are non printable...
+**  - currently they are passed to def7_uni.tbl as regular characters.
 **
 */
 PRIVATE BOOL put_special_unicodes ARGS2(
@@ -353,7 +361,10 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 	**  in the context of line wrapping.  Unfortunately, if we use
 	**  HT_EM_SPACE we override the chartrans tables for those spaces
 	**  (e.g., emsp= double space) with a single '32' for all (but do line
-	**  wrapping more fancy).  So we probably need HT_EN_SPACE etc...
+	**  wrapping more fancy).  In the future we need HT_SPACE with a
+	**  transferred parameter (Unicode number) which falls back to
+	**  chartrans if line wrapping is not the case.
+	**
 	*/
 	PUTC(HT_EM_SPACE);
 #ifdef NOTUSED_FOTEMODS
@@ -392,6 +403,11 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 PRIVATE char replace_buf [64];	      /* buffer for replacement strings */
 PRIVATE BOOL FoundEntity = FALSE;
 
+#define IncludesLatin1Enc \
+		(context->outUCLYhndl == 0 || \
+		 (context->outUCI && \
+		  (context->outUCI->enc & (UCT_CP_SUPERSETOF_LAT1))))
+
 PRIVATE void handle_entity ARGS2(
 	HTStream *,	context,
 	char,		term)
@@ -400,6 +416,9 @@ PRIVATE void handle_entity ARGS2(
     long uck;
     CONST char *p;
     CONST char *s = context->string->data;
+#ifdef NOTUSED_FOTEMODS
+    int high, low, i, diff;
+#endif
 
 
     /*
@@ -453,32 +472,89 @@ PRIVATE void handle_entity ARGS2(
 	    FoundEntity = TRUE;
 	    return;
 	}
+#ifdef NOTUSED_FOTEMODS
 	/*
-	**  Ignore zwnj (8204) and zwj (8205), if we get to here.
-	**  Note that zwnj may have been handled as <WBR>
-	**  by the calling function. - FM
+	**  If the value is greater than 255 and we do not
+	**  have the "7-bit approximations" as our output
+	**  character set (in which case we did it already)
+	**  seek a translation for that. - FM
 	*/
-	if (!strcmp(s, "zwnj") ||
-	    !strcmp(s, "zwj")) {
-	    CTRACE(tfp, "handle_entity: Ignoring '%s'.\n", s);
+	if ((chk = ((code > 255) &&
+		    context->outUCLYhndl !=
+				   UCGetLYhndl_byMIME("us-ascii"))) &&
+	    (uck = UCTransUniChar(code,
+				   UCGetLYhndl_byMIME("us-ascii")))>= 32 &&
+	    uck < 127) {
+	    /*
+	    **	Got an ASCII character (yippey). - FM
+	    */
+	    PUTC(((char)(uck & 0xff)));
+	    FoundEntity = TRUE;
+	    return;
+	} else if ((chk && uck == -4) &&
+		   (uck = UCTransUniCharStr(replace_buf,
+					    60, code,
+					    UCGetLYhndl_byMIME("us-ascii"),
+					    0) >= 0)) {
+	    /*
+	    **	Got a replacement string (yippey). - FM
+	    */
+	    for (p = replace_buf; *p; p++)
+		PUTC(*p);
 	    FoundEntity = TRUE;
 	    return;
 	}
-	/*
-	**  Ignore lrm (8206), and rln (8207), if we get to here. - FM
-	*/
-	if (!strcmp(s, "lrm") ||
-	    !strcmp(s, "rlm")) {
-	    CTRACE(tfp, "handle_entity: Ignoring '%s'.\n", s);
+    }
+    /*
+    **	Ignore zwnj (8204) and zwj (8205), if we get to here.
+    **	Note that zwnj may have been handled as <WBR>
+    **	by the calling function. - FM
+    */
+    if (!strcmp(s, "zwnj") ||
+	!strcmp(s, "zwj")) {
+	if (TRACE) {
+	    fprintf(stderr, "handle_entity: Ignoring '%s'.\n", s);
+	}
+	FoundEntity = TRUE;
+	return;
+    }
+
+    /*
+    **	Ignore lrm (8206), and rln (8207), if we get to here. - FM
+    */
+    if (!strcmp(s, "lrm") ||
+	!strcmp(s, "rlm")) {
+	if (TRACE) {
+	    fprintf(stderr, "handle_entity: Ignoring '%s'.\n", s);
+	}
+	FoundEntity = TRUE;
+	return;
+    }
+
+    /*
+    **	We haven't succeeded yet, so try the old LYCharSets
+    **	arrays for translation strings. - FM
+    */
+    for (low = 0, high = context->dtd->number_of_entities;
+	 high > low;
+	 diff < 0 ? (low = i+1) : (high = i)) {  /* Binary search */
+	i = (low + (high-low)/2);
+	diff = strcmp(entities[i], s);	/* Case sensitive! */
+	if (diff == 0) {		/* success: found it */
+	    for (p = LYCharSets[context->outUCLYhndl][i]; *p; p++) {
+		PUTC(*p);
+	    }
 	    FoundEntity = TRUE;
 	    return;
 	}
+#endif
     }
 
     /*
     **	If entity string not found, display as text.
     */
-    CTRACE(tfp, "SGML: Unknown entity '%s'\n", s);
+    if (TRACE)
+	fprintf(stderr, "SGML: Unknown entity '%s'\n", s);
     PUTC('&');
     for (p = s; *p; p++) {
 	PUTC(*p);
@@ -496,7 +572,8 @@ PRIVATE void handle_comment ARGS1(
 {
     CONST char *s = context->string->data;
 
-    CTRACE(tfp, "SGML Comment:\n<%s>\n", s);
+    if (TRACE)
+	fprintf(stderr, "SGML Comment:\n<%s>\n", s);
 
     if (context->csi == NULL &&
 	strncmp(s, "!--#", 4) == 0 &&
@@ -516,7 +593,8 @@ PRIVATE void handle_identifier ARGS1(
 {
     CONST char *s = context->string->data;
 
-    CTRACE(tfp, "SGML Identifier\n<%s>\n", s);
+    if (TRACE)
+	fprintf(stderr, "SGML Identifier\n<%s>\n", s);
 
     return;
 }
@@ -530,7 +608,8 @@ PRIVATE void handle_doctype ARGS1(
 {
     CONST char *s = context->string->data;
 
-    CTRACE(tfp, "SGML Doctype\n<%s>\n", s);
+    if (TRACE)
+	fprintf(stderr, "SGML Doctype\n<%s>\n", s);
 
     return;
 }
@@ -544,7 +623,8 @@ PRIVATE void handle_marked ARGS1(
 {
     CONST char *s = context->string->data;
 
-    CTRACE(tfp, "SGML Marked Section:\n<%s>\n", s);
+    if (TRACE)
+	fprintf(stderr, "SGML Marked Section:\n<%s>\n", s);
 
     return;
 }
@@ -558,7 +638,8 @@ PRIVATE void handle_sgmlent ARGS1(
 {
     CONST char *s = context->string->data;
 
-    CTRACE(tfp, "SGML Entity Declaration:\n<%s>\n", s);
+    if (TRACE)
+	fprintf(stderr, "SGML Entity Declaration:\n<%s>\n", s);
 
     return;
 }
@@ -572,7 +653,8 @@ PRIVATE void handle_sgmlele ARGS1(
 {
     CONST char *s = context->string->data;
 
-    CTRACE(tfp, "SGML Element Declaration:\n<%s>\n", s);
+    if (TRACE)
+	fprintf(stderr, "SGML Element Declaration:\n<%s>\n", s);
 
     return;
 }
@@ -586,7 +668,8 @@ PRIVATE void handle_sgmlatt ARGS1(
 {
     CONST char *s = context->string->data;
 
-    CTRACE(tfp, "SGML Attribute Declaration:\n<%s>\n", s);
+    if (TRACE)
+	fprintf(stderr, "SGML Attribute Declaration:\n<%s>\n", s);
 
     return;
 }
@@ -633,7 +716,6 @@ PRIVATE canclose_t can_close ARGS2(
 	return ((stacked_tag->tagclass & new_tag->canclose) ?
 		close_error : close_NO);
 }
-
 PRIVATE void do_close_stacked ARGS1(
     HTStream *, context)
 {
@@ -650,7 +732,6 @@ PRIVATE void do_close_stacked ARGS1(
     context->element_stack = stacked->next;
     FREE(stacked);
 }
-
 PRIVATE int is_on_stack ARGS2(
 	HTStream *,	context,
 	HTTag *,	old_tag)
@@ -684,7 +765,8 @@ PRIVATE void end_element ARGS2(
 	       (stackpos > 1 || (!extra_action_taken && stackpos == 0))) {
 	    canclose_check = can_close(old_tag, context->element_stack->tag);
 	    if (canclose_check != close_NO) {
-		CTRACE(tfp, "SGML: End </%s> \t<- %s end </%s>\n",
+		if (TRACE)
+		    fprintf(stderr, "SGML: End </%s> \t<- %s end </%s>\n",
 			    context->element_stack->tag->name,
 			    canclose_check == close_valid ? "supplied," : "forced by",
 			    old_tag->name);
@@ -692,7 +774,8 @@ PRIVATE void end_element ARGS2(
 		extra_action_taken = YES;
 		stackpos = is_on_stack(context, old_tag);
 	    } else {
-		CTRACE(tfp, "SGML: Still open %s \t<- invalid end </%s>\n",
+		if (TRACE)
+		    fprintf(stderr, "SGML: Still open %s \t<- invalid end </%s>\n",
 			    context->element_stack->tag->name,
 			    old_tag->name);
 		return;
@@ -700,7 +783,8 @@ PRIVATE void end_element ARGS2(
 	}
 
 	if (stackpos == 0 && old_tag->contents != SGML_EMPTY) {
-	    CTRACE(tfp, "SGML: Still open %s, no open %s for </%s>\n",
+	    if (TRACE)
+		fprintf(stderr, "SGML: Still open %s, no open %s for </%s>\n",
 			context->element_stack ?
 			context->element_stack->tag->name : "none",
 			old_tag->name,
@@ -708,7 +792,8 @@ PRIVATE void end_element ARGS2(
 	    return;
 	}
 	if (stackpos > 1) {
-	    CTRACE(tfp, "SGML: Nesting <%s>...<%s> \t<- invalid end </%s>\n",
+	    if (TRACE)
+		fprintf(stderr, "SGML: Nesting <%s>...<%s> \t<- invalid end </%s>\n",
 			old_tag->name,
 			context->element_stack->tag->name,
 			old_tag->name);
@@ -733,36 +818,42 @@ PRIVATE void end_element ARGS2(
 	    /*
 	    **	Ignore the end tag. - FM
 	    */
-	    CTRACE(tfp, "SGML: Ignoring end tag </%s> in SELECT block.\n",
+	    if (TRACE) {
+		fprintf(stderr,
+			"SGML: Ignoring end tag </%s> in SELECT block.\n",
 			old_tag->name);
+	    }
 	    return;
 	}
     }
     /*
     **	Handle the end tag. - FM
     */
-    CTRACE(tfp, "SGML: End </%s>\n", old_tag->name);
+    if (TRACE)
+	fprintf(stderr, "SGML: End </%s>\n", old_tag->name);
     if (old_tag->contents == SGML_EMPTY) {
-	CTRACE(tfp, "SGML: Illegal end tag </%s> found.\n",
-		    old_tag->name);
+	if (TRACE)
+	    fprintf(stderr, "SGML: Illegal end tag </%s> found.\n",
+			    old_tag->name);
 	return;
     }
 #ifdef WIND_DOWN_STACK
-    while (context->element_stack) /* Loop is error path only */
+    while (context->element_stack) { /* Loop is error path only */
 #else
-    if (context->element_stack) /* Substitute and remove one stack element */
+    if (context->element_stack) { /* Substitute and remove one stack element */
 #endif /* WIND_DOWN_STACK */
-    {
 	HTElement * N = context->element_stack;
 	HTTag * t = N->tag;
 
 	if (old_tag != t) {		/* Mismatch: syntax error */
 	    if (context->element_stack->next) { /* This is not the last level */
-		CTRACE(tfp, "SGML: Found </%s> when expecting </%s>. </%s> assumed.\n",
-			    old_tag->name, t->name, t->name);
+		if (TRACE) fprintf(stderr,
+		"SGML: Found </%s> when expecting </%s>. </%s> assumed.\n",
+		    old_tag->name, t->name, t->name);
 	    } else {			/* last level */
-		CTRACE(tfp, "SGML: Found </%s> when expecting </%s>. </%s> Ignored.\n",
-			    old_tag->name, t->name, old_tag->name);
+		if (TRACE) fprintf(stderr,
+		    "SGML: Found </%s> when expecting </%s>. </%s> Ignored.\n",
+		    old_tag->name, t->name, old_tag->name);
 		return; 		/* Ignore */
 	    }
 	}
@@ -781,8 +872,9 @@ PRIVATE void end_element ARGS2(
 	/* Syntax error path only */
 
     }
-    CTRACE(tfp, "SGML: Extra end tag </%s> found and ignored.\n",
-		old_tag->name);
+    if (TRACE)
+	fprintf(stderr, "SGML: Extra end tag </%s> found and ignored.\n",
+			old_tag->name);
 }
 
 
@@ -809,7 +901,8 @@ PRIVATE void start_element ARGS1(
 					      direct_container))) {
 	    canclose_check = can_close(new_tag, context->element_stack->tag);
 	    if (canclose_check != close_NO) {
-		CTRACE(tfp, "SGML: End </%s> \t<- %s start <%s>\n",
+		if (TRACE)
+		    fprintf(stderr, "SGML: End </%s> \t<- %s start <%s>\n",
 			    context->element_stack->tag->name,
 			    canclose_check == close_valid ? "supplied," : "forced by",
 			    new_tag->name);
@@ -818,7 +911,8 @@ PRIVATE void start_element ARGS1(
 		if (canclose_check  == close_error)
 		    direct_container = NO;
 	    } else {
-		CTRACE(tfp, "SGML: Still open %s \t<- invalid start <%s>\n",
+		if (TRACE)
+		    fprintf(stderr, "SGML: Still open %s \t<- invalid start <%s>\n",
 			    context->element_stack->tag->name,
 			    new_tag->name);
 	    }
@@ -827,7 +921,8 @@ PRIVATE void start_element ARGS1(
 	    (context->element_stack->tag->flags & Tgf_strict) &&
 	    !(valid = element_valid_within(new_tag, context->element_stack->tag,
 					   direct_container))) {
-	    CTRACE(tfp, "SGML: Still open %s \t<- ignoring start <%s>\n",
+	    if (TRACE)
+		fprintf(stderr, "SGML: Still open %s \t<- ignoring start <%s>\n",
 			context->element_stack->tag->name,
 			new_tag->name);
 	    return;
@@ -840,7 +935,8 @@ PRIVATE void start_element ARGS1(
 	    for (; i< new_tag->number_of_attributes && !has_attributes; i++)
 		has_attributes = context->present[i];
 	    if (!has_attributes) {
-		CTRACE(tfp, "SGML: Still open %s, converting invalid <%s> to </%s>\n",
+		if (TRACE)
+		    fprintf(stderr, "SGML: Still open %s, converting invalid <%s> to </%s>\n",
 			    context->element_stack->tag->name,
 			    new_tag->name,
 			    new_tag->name);
@@ -855,7 +951,8 @@ PRIVATE void start_element ARGS1(
 						   new_tag,
 						   context->element_stack->tag,
 						   direct_container))) {
-	    CTRACE(tfp, "SGML: Still open %s \t<- invalid start <%s>\n",
+	    if (TRACE)
+		fprintf(stderr, "SGML: Still open %s \t<- invalid start <%s>\n",
 			context->element_stack->tag->name,
 			new_tag->name);
 	}
@@ -901,14 +998,18 @@ PRIVATE void start_element ARGS1(
 		**  It is another form-related start tag, so terminate
 		**  the current SELECT block and fall through. - FM
 		*/
-		CTRACE(tfp, "SGML: Faking SELECT end tag before <%s> start tag.\n",
+		if (TRACE)
+		    fprintf(stderr,
+		       "SGML: Faking SELECT end tag before <%s> start tag.\n",
 			    new_tag->name);
 		end_element(context, SGMLFindTag(context->dtd, "SELECT"));
 	    } else {
 		/*
 		**  Ignore the start tag. - FM
 		*/
-		CTRACE(tfp, "SGML: Ignoring start tag <%s> in SELECT block.\n",
+		if (TRACE)
+		    fprintf(stderr,
+			  "SGML: Ignoring start tag <%s> in SELECT block.\n",
 			    new_tag->name);
 		return;
 	    }
@@ -917,7 +1018,8 @@ PRIVATE void start_element ARGS1(
     /*
     **	Handle the start tag. - FM
     */
-    CTRACE(tfp, "SGML: Start <%s>\n", new_tag->name);
+    if (TRACE)
+	fprintf(stderr, "SGML: Start <%s>\n", new_tag->name);
     (*context->actions->start_element)(
 	context->target,
 	new_tag - context->dtd->tags,
@@ -945,7 +1047,7 @@ PRIVATE void start_element ARGS1(
 **		------------------------
 **
 ** On entry,
-**	dtd	points to dtd structure including valid tag list
+**	dtd	points to dtd structire including valid tag list
 **	string	points to name of tag in question
 **
 ** On exit,
@@ -971,7 +1073,7 @@ PUBLIC HTTag * SGMLFindTag ARGS2(
 	/*
 	**  Unrecognized, but may be valid. - KW
 	*/
-	return &HTTag_unrecognized;
+	return (HTTag *)&HTTag_unrecognized;
     }
     return NULL;
 }
@@ -1097,7 +1199,7 @@ PRIVATE void SGML_character ARGS2(
     CONST char * EntityName;
     char * p;
     BOOLEAN chk;	/* Helps (?) walk through all the else ifs... */
-    UCode_t clong, uck = 0; /* Enough bits for UCS4 ... */
+    UCode_t clong, uck; /* Enough bits for UCS4 ... */
     char c;
     char saved_char_in = '\0';
 
@@ -1206,7 +1308,7 @@ PRIVATE void SGML_character ARGS2(
     **	to Unicode, try that now. - FM
     */
     if (context->T.trans_to_uni &&
-	((unsign_c >= LYlowest_eightbit[context->inUCLYhndl]) ||
+	((unsign_c >= 127) ||
 	 (unsign_c < 32 && unsign_c != 0 &&
 	  context->T.trans_C0_to_uni))) {
 	/*
@@ -1301,7 +1403,7 @@ top0a:
 **  which unsign_c has been defined), and from below
 **  when we are recycling a character (e.g., because
 **  it terminated an entity but is not the standard
-**  semi-colon).  The character will already have
+**  semi-colon).  The chararcter will already have
 **  been put through the Unicode conversions. - FM
 */
 top1:
@@ -1431,8 +1533,11 @@ top1:
 		   (uck = UCTransUniChar(unsign_c,
 					 context->outUCLYhndl)) >= 32 &&
 		   uck < 256) {
-	    CTRACE(tfp, "UCTransUniChar returned 0x%.2lX:'%c'.\n",
+	    if (TRACE) {
+		fprintf(stderr,
+			"UCTransUniChar returned 0x%.2lX:'%c'.\n",
 			uck, FROMASCII((char)uck));
+	    }
 	    /*
 	    **	We got one octet from the conversions, so use it. - FM
 	    */
@@ -1449,7 +1554,7 @@ top1:
 					    0) >= 0)) {
 	    /*
 	    **	Got a replacement string.
-	    **	No further tests for validity - assume that whoever
+	    **	No further tests for valididy - assume that whoever
 	    **	defined replacement strings knew what she was doing. - KW
 	    */
 	    for (p = replace_buf; *p; p++)
@@ -1460,19 +1565,13 @@ top1:
 	} else if (context->T.output_utf8 && PUTUTF8(clong)) {
 	    ; /* do nothing more */
 	/*
-	**  If it's any other (> 160) 8-bit character, and
+	**  If it's any other (> 160) 8-bit chararcter, and
 	**  we have not set HTPassEightBitRaw nor HTCJK, nor
 	**  have the "ISO Latin 1" character set selected,
 	**  back translate for our character set. - FM
 	*/
-#define IncludesLatin1Enc \
-		(context->outUCLYhndl == LATIN1 || \
-		 (context->outUCI && \
-		  (context->outUCI->enc & (UCT_CP_SUPERSETOF_LAT1))))
-
 #define PASSHI8BIT (HTPassEightBitRaw || \
 		    (context->T.do_8bitraw && !context->T.trans_from_uni))
-
 	} else if (unsign_c > 160 && unsign_c < 256 &&
 		   !(PASSHI8BIT || HTCJK != NOCJK) &&
 		   !IncludesLatin1Enc) {
@@ -1553,16 +1652,14 @@ top1:
 		for (p = replace_buf; *p; p++)
 		    PUTC(*p);
 	    } else {
-#endif /* NOTUSED_FOTEMODS */
 		/*
 		**  Out of luck, so use the UHHH notation (ugh). - FM
 		*/
-			/* do not print UHHH for now
+#endif /* NOTUSED_FOTEMODS */
 		sprintf(replace_buf, "U%.2lX", unsign_c);
 		for (p = replace_buf; *p; p++) {
 		    PUTC(*p);
 		}
-			 */
 #ifdef NOTUSED_FOTEMODS
 	    }
 #endif /* NOTUSED_FOTEMODS */
@@ -1652,8 +1749,10 @@ top1:
 		*/
 		char temp[8];
 
-		CTRACE(tfp, "SGML_character: Handling 'zwnj' entity as 'WBR' element.\n");
-
+		if (TRACE) {
+		    fprintf(stderr,
+		"SGML_character: Handling 'zwnj' entity as 'WBR' element.\n");
+		}
 		if (c != ';') {
 		    sprintf(temp, "<WBR>%c", c);
 		} else {
@@ -1742,7 +1841,7 @@ top1:
 	    if ((context->isHex ? sscanf(string->data, "%lx", &code) :
 				  sscanf(string->data, "%ld", &code)) == 1) {
 		if ((code == 1) ||
-		    (code > 127 && code < 156)) {
+		    (code > 129 && code < 156)) {
 		    /*
 		    **	Assume these are Microsoft code points,
 		    **	inflicted on us by FrontPage. - FM
@@ -1757,12 +1856,6 @@ top1:
 			    **	WHITE SMILING FACE
 			    */
 			    code = 0x263a;
-			    break;
-			case 128:
-			    /*
-			    **	EURO currency sign
-			    */
-			    code = 0x20ac;
 			    break;
 			case 130:
 			    /*
@@ -1888,8 +1981,10 @@ top1:
 		    */
 		    char temp[8];
 
-		    CTRACE(tfp, "SGML_character: Handling '8204' (zwnj) reference as 'WBR' element.\n");
-
+		    if (TRACE) {
+			fprintf(stderr,
+      "SGML_character: Handling '8204' (zwnj) reference as 'WBR' element.\n");
+		    }
 		    /*
 		    **	Include the terminator if it is not
 		    **	the standard semi-colon. - FM
@@ -1978,7 +2073,6 @@ top1:
 		    */
 		    for (p = replace_buf; *p; p++)
 			PUTC(*p);
-#endif /* NOTUSED_FOTEMODS */
 		/*
 		**  Ignore 8205 (zwj),
 		**  8206 (lrm), and 8207 (rln), if we get to here. - FM
@@ -1991,7 +2085,7 @@ top1:
 			LYstrncpy(replace_buf,
 				  string->data,
 				  (string->size < 64 ? string->size : 63));
-			fprintf(tfp,
+			fprintf(stderr,
 				"SGML_character: Ignoring '%s%s'.\n",
 				(context->isHex ? "&#x" : "&#"),
 				replace_buf);
@@ -2002,6 +2096,7 @@ top1:
 		    if (c != ';')
 			goto top1;
 		    break;
+#endif /* NOTUSED_FOTEMODS */
 		/*
 		**  Show the numeric entity if we get to here
 		**  and the value:
@@ -2171,8 +2266,9 @@ top1:
 	    */
 	    HTTag * t;
 	    if (c == '/') {
-		if (string->size != 0)
-		    CTRACE(tfp,"SGML: `<%s/' found!\n", string->data);
+		if (TRACE)
+		    if (string->size!=0)
+			fprintf(stderr,"SGML: `<%s/' found!\n", string->data);
 		context->state = S_end;
 		break;
 	    }
@@ -2190,18 +2286,21 @@ top1:
 		for (i = 0; i < 3; i++) /* recover */
 		    PUTC(string->data[i]);
 		PUTC(c);
-		CTRACE(tfp, "SGML: Treating <%s%c as text\n",
+		if (TRACE)
+		    fprintf(stderr, "SGML: Treating <%s%c as text\n",
 			    string->data, c);
 		string->size = 0;
 		context->state = S_text;
 		break;
 	    } else if (!t) {
-		CTRACE(tfp, "SGML: *** Invalid element %s\n",
+		if (TRACE)
+		    fprintf(stderr, "SGML: *** Invalid element %s\n",
 			    string->data);
 		context->state = (c == '>') ? S_text : S_junk_tag;
 		break;
 	    } else if (t == context->unknown_tag) {
-		CTRACE(tfp, "SGML: *** Unknown element %s\n",
+		if (TRACE)
+		    fprintf(stderr, "SGML: *** Unknown element %s\n",
 			    string->data);
 		/*
 		**  Fall through and treat like valid
@@ -2556,7 +2655,8 @@ top1:
 	if (WHITE(c))
 	    break;		/* Before attribute value */
 	if (c == '>') { 	/* End of tag */
-	    CTRACE(tfp, "SGML: found = but no value\n");
+	    if (TRACE)
+		fprintf(stderr, "SGML: found = but no value\n");
 	    if (context->current_tag->name)
 		start_element(context);
 	    context->state = S_text;
@@ -2702,7 +2802,8 @@ top1:
 		t = SGMLFindTag(dtd, string->data);
 	    }
 	    if (!t || t == context->unknown_tag) {
-		CTRACE(tfp, "Unknown end tag </%s>\n", string->data);
+		if (TRACE)
+		    fprintf(stderr, "Unknown end tag </%s>\n", string->data);
 	    } else {
 		BOOL tag_OK = (c == '>' || WHITE(c));
 		context->current_tag = t;
@@ -2730,7 +2831,9 @@ top1:
 		    **	Don't treat these end tags as invalid,
 		    **	nor act on them. - FM
 		    */
-		    CTRACE(tfp, "SGML: `</%s%c' found!  Ignoring it.\n",
+		    if (TRACE)
+			fprintf(stderr,
+				"SGML: `</%s%c' found!  Ignoring it.\n",
 				string->data, c);
 		    string->size = 0;
 		    context->current_attribute_number = INVALID;
@@ -2768,19 +2871,27 @@ top1:
 			    /*
 			    **	It is not at FORM end tag, so ignore it. - FM
 			    */
-			    CTRACE(tfp, "SGML: Ignoring end tag </%s> in SELECT block.\n",
+			    if (TRACE) {
+				fprintf(stderr,
+			    "SGML: Ignoring end tag </%s> in SELECT block.\n",
 					string->data);
+			    }
 			} else {
 			    /*
 			    **	End the SELECT block and then
 			    **	handle the FORM end tag. - FM
 			    */
-			    CTRACE(tfp, "SGML: Faking SELECT end tag before </%s> end tag.\n",
+			    if (TRACE) {
+				fprintf(stderr,
+			"SGML: Faking SELECT end tag before </%s> end tag.\n",
 					string->data);
+			    }
 			    end_element(context,
 					SGMLFindTag(context->dtd, "SELECT"));
-			    CTRACE(tfp, "SGML: End </%s>\n", string->data);
-
+			    if (TRACE) {
+				fprintf(stderr,
+					"SGML: End </%s>\n", string->data);
+			    }
 			    (*context->actions->end_element)
 				(context->target,
 				 (context->current_tag - context->dtd->tags),
@@ -2791,7 +2902,9 @@ top1:
 			**  Treat a P end tag like a P start tag (Ugh,
 			**  what a hack! 8-). - FM
 			*/
-			CTRACE(tfp, "SGML: `</%s%c' found!  Treating as '<%s%c'.\n",
+			if (TRACE)
+			    fprintf(stderr,
+				    "SGML: `</%s%c' found!  Treating as '<%s%c'.\n",
 				    string->data, c, string->data, c);
 			{
 			    int i;
@@ -2804,8 +2917,10 @@ top1:
 			if (context->current_tag->name)
 			    start_element(context);
 		    } else {
-			CTRACE(tfp, "SGML: End </%s>\n", string->data);
-
+			if (TRACE) {
+			    fprintf(stderr,
+				    "SGML: End </%s>\n", string->data);
+			}
 			(*context->actions->end_element)
 			    (context->target,
 			     (context->current_tag - context->dtd->tags),
@@ -2830,8 +2945,8 @@ top1:
 	    string->size = 0;
 	    context->current_attribute_number = INVALID;
 	    if (c != '>') {
-		if (!WHITE(c))
-		    CTRACE(tfp,"SGML: `</%s%c' found!\n", string->data, c);
+		if (TRACE && !WHITE(c))
+		    fprintf(stderr,"SGML: `</%s%c' found!\n", string->data, c);
 		context->state = S_junk_tag;
 	    } else {
 		context->state = S_text;
@@ -3093,7 +3208,7 @@ PUBLIC HTStream* SGML_new  ARGS3(
     context->string = HTChunkCreate(128);	/* Grow by this much */
     context->dtd = dtd;
     context->target = target;
-    context->actions = (CONST HTStructuredClass*)(((HTStream*)target)->isa);
+    context->actions = (HTStructuredClass*)(((HTStream*)target)->isa);
 					/* Ugh: no OO */
     context->unknown_tag = &HTTag_unrecognized;
     context->state = S_text;
@@ -3150,7 +3265,7 @@ PUBLIC HTStream* SGML_new  ARGS3(
 **	Added 24-Mar-96 by FM, based on:
 **
 ////////////////////////////////////////////////////////////////////////
-Copyright (c) 1993 Electrotechnical Laboratory (ETL)
+Copyright (c) 1993 Electrotechnical Laboratry (ETL)
 
 Permission to use, copy, modify, and distribute this material
 for any purpose and without fee is hereby granted, provided
@@ -3181,69 +3296,19 @@ PUBLIC void JISx0201TO0208_EUC ARGS4(
 	register unsigned char *,	OLO)
 {
     static char *table[] = {
-	"\241\243",	/* A1,A3 */
-	"\241\326",	/* A1,D6 */
-	"\241\327",	/* A1,D7 */
-	"\241\242",	/* A1,A2 */
-	"\241\246",	/* A1,A6 */
-	"\245\362",	/* A5,F2 */
-	"\245\241",	/* A5,A1 */
-	"\245\243",	/* A5,A3 */
-	"\245\245",	/* A5,A5 */
-	"\245\247",	/* A5,A7 */
-	"\245\251",	/* A5,A9 */
-	"\245\343",	/* A5,E3 */
-	"\245\345",	/* A5,E5 */
-	"\245\347",	/* A5,E7 */
-	"\245\303",	/* A5,C3 */
-	"\241\274",	/* A1,BC */
-	"\245\242",	/* A5,A2 */
-	"\245\244",	/* A5,A4 */
-	"\245\246",	/* A5,A6 */
-	"\245\250",	/* A5,A8 */
-	"\245\252",	/* A5,AA */
-	"\245\253",	/* A5,AB */
-	"\245\255",	/* A5,AD */
-	"\245\257",	/* A5,AF */
-	"\245\261",	/* A5,B1 */
-	"\245\263",	/* A5,B3 */
-	"\245\265",	/* A5,B5 */
-	"\245\267",	/* A5,B7 */
-	"\245\271",	/* A5,B9 */
-	"\245\273",	/* A5,BB */
-	"\245\275",	/* A5,BD */
-	"\245\277",	/* A5,BF */
-	"\245\301",	/* A5,C1 */
-	"\245\304",	/* A5,C4 */
-	"\245\306",	/* A5,C6 */
-	"\245\310",	/* A5,C8 */
-	"\245\312",	/* A5,CA */
-	"\245\313",	/* A5,CB */
-	"\245\314",	/* A5,CC */
-	"\245\315",	/* A5,CD */
-	"\245\316",	/* A5,CE */
-	"\245\317",	/* A5,CF */
-	"\245\322",	/* A5,D2 */
-	"\245\325",	/* A5,D5 */
-	"\245\330",	/* A5,D8 */
-	"\245\333",	/* A5,DB */
-	"\245\336",	/* A5,DE */
-	"\245\337",	/* A5,DF */
-	"\245\340",	/* A5,E0 */
-	"\245\341",	/* A5,E1 */
-	"\245\342",	/* A5,E2 */
-	"\245\344",	/* A5,E4 */
-	"\245\346",	/* A5,E6 */
-	"\245\350",	/* A5,E8 */
-	"\245\351",	/* A5,E9 */
-	"\245\352",	/* A5,EA */
-	"\245\353",	/* A5,EB */
-	"\245\354",	/* A5,EC */
-	"\245\355",	/* A5,ED */
-	"\245\357",	/* A5,EF */
-	"\245\363",	/* A5,F3 */
-	"\241\253",	/* A1,AB */
-	"\241\254"	/* A1,AC */
+	"\xA1\xA3", "\xA1\xD6", "\xA1\xD7", "\xA1\xA2", "\xA1\xA6", "\xA5\xF2",
+	"\xA5\xA1", "\xA5\xA3", "\xA5\xA5", "\xA5\xA7", "\xA5\xA9",
+	"\xA5\xE3", "\xA5\xE5", "\xA5\xE7", "\xA5\xC3", "\xA1\xBC",
+	"\xA5\xA2", "\xA5\xA4", "\xA5\xA6", "\xA5\xA8", "\xA5\xAA",
+	"\xA5\xAB", "\xA5\xAD", "\xA5\xAF", "\xA5\xB1", "\xA5\xB3",
+	"\xA5\xB5", "\xA5\xB7", "\xA5\xB9", "\xA5\xBB", "\xA5\xBD",
+	"\xA5\xBF", "\xA5\xC1", "\xA5\xC4", "\xA5\xC6", "\xA5\xC8",
+	"\xA5\xCA", "\xA5\xCB", "\xA5\xCC", "\xA5\xCD", "\xA5\xCE",
+	"\xA5\xCF", "\xA5\xD2", "\xA5\xD5", "\xA5\xD8", "\xA5\xDB",
+	"\xA5\xDE", "\xA5\xDF", "\xA5\xE0", "\xA5\xE1", "\xA5\xE2",
+	"\xA5\xE4", "\xA5\xE6", "\xA5\xE8", "\xA5\xE9", "\xA5\xEA",
+	"\xA5\xEB", "\xA5\xEC", "\xA5\xED", "\xA5\xEF", "\xA5\xF3",
+	"\xA1\xAB", "\xA1\xAC"
     };
 
     if ((IHI == 0x8E) && (ILO >= 0xA1) && (ILO <= 0xDF)) {
@@ -3312,7 +3377,7 @@ PUBLIC void JISx0201TO0208_SJIS ARGS3(
 {
     unsigned char SJCODE[2];
 
-    JISx0201TO0208_EUC('\216', I, OHI, OLO);
+    JISx0201TO0208_EUC('\x8E', I, OHI, OLO);
     JIS_TO_SJIS1(*OHI&0x7F, *OLO&0x7F, SJCODE);
     *OHI = SJCODE[0];
     *OLO = SJCODE[1];
@@ -3422,11 +3487,10 @@ PUBLIC unsigned char * EUC_TO_JIS ARGS4(
 }
 
 PUBLIC unsigned char * TO_EUC ARGS2(
-	CONST unsigned char *,	jis,
+	unsigned char *,	jis,
 	unsigned char *,	euc)
 {
-    register CONST unsigned char *s;
-    register unsigned char *d, c, jis_stat;
+    register unsigned char *s, *d, c, jis_stat;
     register int to1B, to2B;
     register int in_sjis = 0;
 
@@ -3476,7 +3540,7 @@ PUBLIC unsigned char * TO_EUC ARGS2(
 }
 
 PUBLIC void TO_SJIS ARGS2(
-	CONST unsigned char *,	any,
+	unsigned char *,	any,
 	unsigned char *,	sjis)
 {
     unsigned char *euc;
@@ -3494,7 +3558,7 @@ PUBLIC void TO_SJIS ARGS2(
 }
 
 PUBLIC void TO_JIS ARGS2(
-	CONST unsigned char *,	any,
+	unsigned char *,	any,
 	unsigned char *,	jis)
 {
     unsigned char *euc;
