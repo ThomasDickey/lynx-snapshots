@@ -535,6 +535,9 @@ PRIVATE char *mailcap_substitute ARGS3(
 		if (s[1] == 't') {
 		    repl = pres->rep->name;
 		    skip = 1;
+		} else if (s[1] == 's') {
+		    repl = fnam;
+		    skip = 1;
 		} else if (!strncasecomp(s+1, "{charset}", 9)) {
 		    repl = anchor->charset;
 		    skip = 9;

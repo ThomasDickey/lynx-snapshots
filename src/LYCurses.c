@@ -662,11 +662,12 @@ PUBLIC void LYnoVideo ARGS1(
  * If newterm is not defined, assume a curses subset which
  * supports only initscr.  --gil
  */
-#ifdef    HAVE_NEWTERM
+#if defined(HAVE_NEWTERM) && !defined(NCURSES) && !defined(HAVE_RESIZETERM)
 static SCREEN *LYscreen = NULL;
-#define LYDELSCR(scr) { \
-    delscreen(scr);     \
-    scr = NULL; }
+#define LYDELSCR() { \
+if (recent_sizechange) { \
+    delscreen(LYscreen); \
+    LYscreen = NULL; } }
 /*
  * Surrogates for newterm annd delscreen
  */
@@ -674,8 +675,16 @@ static SCREEN *LYscreen = NULL;
 static WINDOW *LYscreen = NULL;
 #undef  newterm
 #define newterm(type, out, in) (initscr())
-#define LYDELSCR(scr)  /* nothing */
+#define LYDELSCR()  /* nothing */
 #endif /* HAVE_NEWTERM   */
+#else  /* !defined(VMS) && !defined(USE_SLANG) */
+/*
+ * Provide last recourse definitions of LYscreen and LYDELSCR for
+ * stop_curses, which only tests LYscreen for zero/nonzero but
+ * never uses it as a pointer or L-value.
+ */
+#define LYscreen TRUE
+#define LYDELSCR()  /* nothing */
 #endif /* !defined(VMS) && !defined(USE_SLANG) */
 
 PUBLIC void start_curses NOARGS
@@ -810,6 +819,7 @@ PUBLIC void start_curses NOARGS
 	 *  If we're not VMS then only do initscr() one time,
 	 *  and one time only!
 	 */
+#if defined(HAVE_NEWTERM) && !defined(NCURSES) && !defined(HAVE_RESIZETERM)
 	{
 	    static char lines_putenv[] = "LINES=abcde",
 			cols_putenv[]  = "COLUMNS=abcde";
@@ -824,6 +834,7 @@ PUBLIC void start_curses NOARGS
 	    putenv(cols_putenv);
 	    CTRACE((tfp, "start_curses putenv %s, %s\n", lines_putenv, cols_putenv));
 	}
+#endif /* HAVE_NEWTERM   */
 	if (!(LYscreen=newterm(NULL,stdout,stdin))) {  /* start curses */
 	    fprintf(tfp, "%s\n",
 		gettext("Terminal initialisation failed - unknown terminal type?"));
@@ -1051,12 +1062,10 @@ PUBLIC void stop_curses NOARGS
      */
     if(LYCursesON == TRUE)	{
 	lynx_enable_mouse (0);
-#if !defined(NCURSES) && !defined(VMS) && !defined(USE_SLANG) && (!defined(WIN_EX) || defined(__CYGWIN__))	/* @@@ */
+#if (!defined(WIN_EX) || defined(__CYGWIN__))	/* @@@ */
 	if(LYscreen) {
 	    endwin();	/* stop curses */
-	    if (recent_sizechange) {
-		LYDELSCR(LYscreen);
-	    }
+	    LYDELSCR();
 	 }
 #endif
     }
@@ -1070,7 +1079,7 @@ PUBLIC void stop_curses NOARGS
 #endif
 
     fflush(stdout);
-#endif /* DJGPP */
+#endif /* defined(DOSPATH) && !(defined(USE_SLANG) || _WIN_CC) */
     fflush(stderr);
 
     LYCursesON = FALSE;
