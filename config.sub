@@ -976,7 +976,7 @@ case $os in
 	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -solaris* | -sym* \
 	      | -amigaos* | -amigados* | -msdos* | -newsos* | -unicos* | -aof* \
 	      | -aos* \
-	      | -nindy* | -vxsim* | -vxworks* | -ebmon* | -hms* | -mvs* \
+	      | -nindy* | -vxsim* | -vxworks* | -ebmon* | -hms* | -mvs* | -os390* \
 	      | -clix* | -riscos* | -uniplus* | -iris* | -rtu* | -xenix* \
 	      | -hiux* | -386bsd* | -netbsd* | -openbsd* | -freebsd* | -riscix* \
 	      | -lynxos* | -bosx* | -nextstep* | -cxux* | -aout* | -elf* | -oabi* \

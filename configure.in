@@ -29,6 +29,14 @@ dnl --------------------------------------------------------------------------
 dnl Checks for location of programs
 dnl --------------------------------------------------------------------------
 
+dnl Only add to this case statement when a system has a compiler that is not
+dnl detected by AC_PROG_CC. 
+case $host_os in
+os390)	: ${CFLAGS="-D_ALL_SOURCE -Wl,EDIT=NO"}
+	: ${CC=c89}
+	;;
+esac
+
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_LN_S
@@ -186,9 +194,6 @@ os2*)
 	CFLAGS="$CFLAGS -Zmt -D__ST_MT_ERRNO__"
 	LDFLAGS=`echo "$LDFLAGS -Zmt -Zcrtdll" | sed "s/-Zexe//g"`
 	PROG_EXT=".exe"
-	;;
-os390)	: ${CFLAGS="-D_ALL_SOURCE -Wl,EDIT=NO"}
-	: ${CC=c89}
 	;;
 osf4*)
 	# The -Olimit flag (see below) is no longer available with

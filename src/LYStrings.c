@@ -3368,7 +3368,7 @@ PRIVATE void draw_option ARGS5(
 {
 #ifdef USE_SLANG
     if (reversed)
-	SLsmg_gotorc((win->top_y + entry), win->left_x + 2);
+	SLsmg_set_color(2);
     SLsmg_gotorc(win->top_y + entry, win->left_x + 2);
     SLsmg_write_nstring(value, win->width);
     if (reversed)
