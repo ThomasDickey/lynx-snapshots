@@ -3161,10 +3161,6 @@ PUBLIC void remove_backslashes ARGS1(
     return;
 }
 
-#if HAVE_UTMP
-extern char *ttyname PARAMS((int fd));
-#endif
-
 /*
  *  Checks to see if the current process is attached
  *  via a terminal in the local domain.

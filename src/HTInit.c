@@ -310,13 +310,13 @@ PRIVATE int ProcessMailcapEntry ARGS2(
     }
     FREE(LineBuf);
 
-    s = LYSkipBlanks(rawentry);
+    t = s = LYSkipBlanks(rawentry);
     if (!*s) {
 	/* totally blank entry -- quietly ignore */
 	FREE(rawentry);
 	return(0);
     }
-    t = s = strchr(rawentry, ';');
+    s = strchr(rawentry, ';');
     if (s == NULL) {
 	CTRACE((tfp, "ProcessMailcapEntry: Ignoring invalid mailcap entry: %s\n",
 		    rawentry));

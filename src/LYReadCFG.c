@@ -522,14 +522,24 @@ static BOOLEAN config_enum ARGS3(
     CONST char *,	name,
     int *,		result)
 {
-    while (table->name != 0) {
-	if (!strncasecomp(table->name, name, strlen(table->name))) {
-	    *result = table->value;
-	    break;
+    Config_Enum *found = 0;
+    unsigned len = strlen(name);
+
+    if (len != 0) {
+	while (table->name != 0) {
+	    if (!strncasecomp(table->name, name, len)) {
+		if (found != 0)
+		    return FALSE; /* ambiguous, don't use this */
+		found = table;
+	    }
+	    table++;
 	}
-	table++;
+	if (found != 0) {
+	    *result = found->value;
+	    return TRUE;
+	}
     }
-    return (table->name != 0);
+    return FALSE;		/* no match */
 }
 
 static int assume_charset_fun ARGS1(
@@ -656,14 +666,14 @@ static int default_editor_fun ARGS1(
 static int default_keypad_mode_fun ARGS1(
 	char *,		value)
 {
-    if (!strcasecomp(value, "NUMBERS_AS_ARROWS"))
-	keypad_mode = NUMBERS_AS_ARROWS;
-    else if (!strcasecomp(value, "LINKS_ARE_NUMBERED"))
-	keypad_mode = LINKS_ARE_NUMBERED;
-    else if (!strcasecomp(value, "LINKS_AND_FIELDS_ARE_NUMBERED")
-     || !strcasecomp(value, "LINKS_AND_FORM_FIELDS_ARE_NUMBERED"))
-	keypad_mode = LINKS_AND_FIELDS_ARE_NUMBERED;
-
+   static Config_Enum table[] = {
+	{ "NUMBERS_AS_ARROWS",	NUMBERS_AS_ARROWS },
+	{ "LINKS_ARE_NUMBERED",	LINKS_ARE_NUMBERED },
+	{ "LINKS_AND_FIELDS_ARE_NUMBERED", LINKS_AND_FIELDS_ARE_NUMBERED },
+	{ "LINKS_AND_FORM_FIELDS_ARE_NUMBERED", LINKS_AND_FIELDS_ARE_NUMBERED },
+	{ NULL,			-1 }
+   };
+   config_enum(table, value, &keypad_mode );
    return 0;
 }
 
@@ -682,10 +692,10 @@ static int default_user_mode_fun ARGS1(
 	char *,		value)
 {
     static Config_Enum table[] = {
-    	{ "NOVICE",	NOVICE_MODE },
-	{ "INTER",	INTERMEDIATE_MODE },
-	{ "ADVANCE",	ADVANCED_MODE },
-	{ NULL,		-1 }
+    	{ "NOVICE",		NOVICE_MODE },
+	{ "INTERMEDIATE",	INTERMEDIATE_MODE },
+	{ "ADVANCED",		ADVANCED_MODE },
+	{ NULL,			-1 }
     };
     config_enum(table, value, &user_mode);
     return 0;
@@ -949,11 +959,23 @@ static int source_cache_fun ARGS1(
 {
     static Config_Enum table[] = {
 	{ "FILE",	SOURCE_CACHE_FILE },
-	{ "MEM",	SOURCE_CACHE_MEMORY },
+	{ "MEMORY",	SOURCE_CACHE_MEMORY },
 	{ "NONE",	SOURCE_CACHE_NONE },
 	{ NULL,		-1 },
     };
     config_enum(table, value, &LYCacheSource);
+    return 0;
+}
+
+static int source_cache_for_aborted_fun ARGS1(
+	char *,		value)
+{
+    static Config_Enum table[] = {
+	{ "KEEP",	SOURCE_CACHE_FOR_ABORTED_KEEP },
+	{ "DROP",	SOURCE_CACHE_FOR_ABORTED_DROP },
+	{ NULL,		-1 },
+    };
+    config_enum(table, value, &LYCacheSourceForAborted);
     return 0;
 }
 #endif
@@ -1533,6 +1555,7 @@ static Config_Type Config_Table [] =
      PARSE_SET("soft_dquotes", CONF_BOOL, &soft_dquotes),
 #ifdef SOURCE_CACHE
      PARSE_SET("source_cache", CONF_FUN, source_cache_fun),
+     PARSE_SET("source_cache_for_aborted",CONF_FUN, source_cache_for_aborted_fun),
 #endif
      PARSE_STR("startfile", CONF_STR, &startfile),
      PARSE_SET("strip_dotdot_urls", CONF_BOOL, &LYStripDotDotURLs),

@@ -186,6 +186,11 @@ extern int ws_netread(int fd, char *buf, int len);
 #include <time.h>
 #include <errno.h>
 #include <direct.h>
+
+/* FIXME: someone might consider porting to winsock2.h */
+#define USE_WINSOCK_H
+
+#ifdef USE_WINSOCK_H
 #include <winsock.h>
 typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 
@@ -194,7 +199,6 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #undef EAGAIN
 #endif /* _MSC_VER */
 
-#define EWOULDBLOCK          (WSABASEERR+35)	/* ADD by JH7AYN */
 #define EINPROGRESS          (WSABASEERR+36)
 #define EALREADY             (WSABASEERR+37)
 #define EISCONN              (WSABASEERR+56)
@@ -203,9 +207,11 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #define ENOTCONN             (WSABASEERR+57)
 #define ECONNRESET           (WSABASEERR+54)
 #define ETIMEDOUT             WSAETIMEDOUT	/* 1997/11/10 (Mon) */
-#define EINVAL                22
+
 #undef  SOCKET_ERRNO	/* 1997/10/19 (Sun) 18:01:46 */
 #define SOCKET_ERRNO          WSAGetLastError()
+#endif	/* USE_WINSOCK_H */
+
 #define INCLUDES_DONE
 #define TCP_INCLUDES_DONE
 #endif  /* WINDOWS */

@@ -1682,13 +1682,7 @@ PUBLIC void reply_by_mail ARGS4(
 	    if (HTConfirm(is_preparsed
 	    	? INC_PREPARSED_MSG_PROMPT
 		: INC_ORIG_MSG_PROMPT) == YES) {
-		/*
-		 *  The 1 will add the reply "> " in front of every line.
-		 */
-		if (is_preparsed)
-		    print_wwwfile_to_fd(fd, 0);
-		else
-		    print_wwwfile_to_fd(fd, 1);
+		print_wwwfile_to_fd(fd, !is_preparsed);
 	    }
 	}
 	LYCloseTempFP(fd);	/* Close the tmpfile. */

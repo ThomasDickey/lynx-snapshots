@@ -1,6 +1,44 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-06-02 (2.8.4dev.3)
+* initial support for SOURCE_CACHE_FOR_ABORTED -VH 
+* change default_keypad_mode_fun() to use config_enum() -TD
+* modify config_enum() to check if the given name in lynx.cfg is ambiguous,
+  matching more than one name -TD
+* in passive ftp mode (FTP_PASSIVE:TRUE), use the IP address from the server's
+  response for the data connection, rather than doing another lookup of the
+  hostname -KW
+* correct bug introduced in dev.2 for leading whitespace in mailcap (reported
+  by Andrey Chernov) -VH, TD
+* change server types in HTFTP.c to an enum -TD
+* handle a "215 Windows2000" response from "SYST" command (Gisle Vanem)
+* change return value of parse_arg() when processing non-option data to make
+  URL in stdin (after '-') treated in the second pass, restoring behavior lost
+  in cleanup (reported by Gisle Vanem) -TD
+* allow blank as a separator in arg_eqs_parse() in addition to ':' and '=',
+  to restore behavior lost in cleanup of argument parsing -TD
+* make -stdin option a little more flexible by ifdef'ing primarily based on
+  ttyname(), and adding fallback definitions for Win32 and VMS -TD
+* for slang configurations past 1.3.6, call SLsmg_touch_screen() in
+  start_curses to ensure that the screen is properly initialized for non-bce
+  terminals (John Davis)
+* move call on lynx_initialize_keymaps() for slang configuration into the
+  start_curses() function, avoiding premature reference to $TERM, especially
+  when Lynx is running in dump mode, e.g., via cron (report by Hamish Moffatt
+  <hamish@rising.com.au>, analysis by KW) -TD
+* correct logic for ^ and $ commands (FIRST_LINK and LAST_LINK) when the
+  current line happens to be the first or last line on the screen (reported
+  by KW) -TD
+* remove unused fragments of backspace logic from print_crawl_to_fd() -TD
+* modify print_wwwfile_to_fd() and print_crawl_to_fd() to refrain from emitting
+  an offset for empty lines -TD
+* modify print_wwwfile_to_fd() to refrain from emitting backspaces when
+  the is_reply parameter is true -TD
+* add traces for argument parsing, as well as an environment variable
+  LYNX_TRACE which has the effect of the -trace option -TD
+* add configure check for ttyname, used in ifdef's for -stdin option -TD
+
 2000-05-21 (2.8.4dev.2)
 * minor changes to HTInit.c to make it more tolerant of leading whitespace
   in mailcap entries (reported by Sven Guckes <guckes@math.fu-berlin.de>) -TD

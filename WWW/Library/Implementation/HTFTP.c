@@ -145,23 +145,26 @@ PRIVATE int data_soc = -1;		/* Socket for data transfer =invalid */
 PRIVATE char *user_entered_password = NULL;
 PRIVATE char *last_username_and_host = NULL;
 
-#define GENERIC_SERVER	   0
-#define MACHTEN_SERVER	   1
-#define UNIX_SERVER	   2
-#define VMS_SERVER	   3
-#define CMS_SERVER	   4
-#define DCTS_SERVER	   5
-#define TCPC_SERVER	   6
-#define PETER_LEWIS_SERVER 7
-#define NCSA_SERVER	   8
-#define WINDOWS_NT_SERVER  9
-#define MS_WINDOWS_SERVER 10
-#define MSDOS_SERVER	  11
-#define APPLESHARE_SERVER 12
-#define NETPRESENZ_SERVER 13
-#define DLS_SERVER	  14
+typedef enum {
+	GENERIC_SERVER
+	, MACHTEN_SERVER
+	, UNIX_SERVER
+	, VMS_SERVER
+	, CMS_SERVER
+	, DCTS_SERVER
+	, TCPC_SERVER
+	, PETER_LEWIS_SERVER
+	, NCSA_SERVER
+	, WINDOWS_NT_SERVER
+	, WINDOWS_2K_SERVER
+	, MS_WINDOWS_SERVER
+	, MSDOS_SERVER
+	, APPLESHARE_SERVER
+	, NETPRESENZ_SERVER
+	, DLS_SERVER
+} eServerType;
 
-PRIVATE int	server_type = GENERIC_SERVER;	/* the type of ftp host */
+PRIVATE eServerType server_type = GENERIC_SERVER; /* the type of ftp host */
 PRIVATE int	unsure_type = FALSE;		/* sure about the type? */
 PRIVATE BOOLEAN use_list = FALSE;		/* use the LIST command? */
 
@@ -557,7 +560,7 @@ PRIVATE int send_cmd_2 ARGS2(char *, verb, char *, param)
  *  Some servers need an additional letter after the MACB command.
  */
 PRIVATE int set_mac_binary ARGS1(
-	int,		ServerType)
+	eServerType,	ServerType)
 {
     /* try to set mac binary mode */
     if (ServerType == APPLESHARE_SERVER ||
@@ -576,7 +579,7 @@ PRIVATE int set_mac_binary ARGS1(
  */
 
 PRIVATE void get_ftp_pwd ARGS2(
-	int *,		ServerType,
+	eServerType *,	ServerType,
 	BOOLEAN *,	UseList)
 {
 
@@ -631,7 +634,7 @@ PRIVATE void get_ftp_pwd ARGS2(
  */
 
 PRIVATE void set_unix_dirstyle ARGS2(
-	int *,		ServerType,
+	eServerType *,	ServerType,
 	BOOLEAN *,	UseList)
 {
 
@@ -993,6 +996,11 @@ PRIVATE int get_connection ARGS2(
 	    server_type = WINDOWS_NT_SERVER;
 	    CTRACE((tfp, "HTFTP: Treating as Window_NT server.\n"));
 	    set_unix_dirstyle(&server_type, &use_list);
+
+        } else if (strncmp(response_text+4, "Windows2000", 11) == 0) {
+            server_type = WINDOWS_2K_SERVER;
+            CTRACE((tfp, "HTFTP: Treating as Window_2K server.\n"));
+            set_unix_dirstyle(&server_type, &use_list);
 
 	} else if (strncmp(response_text+4, "MS Windows", 10) == 0) {
 	    server_type = MS_WINDOWS_SERVER;
@@ -2106,6 +2114,7 @@ PRIVATE EntryInfo * parse_dir_entry ARGS3(
 	case MACHTEN_SERVER:
 	case MSDOS_SERVER:
 	case WINDOWS_NT_SERVER:
+        case WINDOWS_2K_SERVER:
 	case APPLESHARE_SERVER:
 	case NETPRESENZ_SERVER:
 	    /*
@@ -2920,7 +2929,7 @@ PUBLIC int HTFTPLoad ARGS4(
 
 	    sprintf(command, "ftp://%d.%d.%d.%d:%d/",
 		    h0, h1, h2, h3, passive_port);
-	    status = HTDoConnect(name, "FTP", passive_port, &data_soc);
+	    status = HTDoConnect(command, "FTP data", passive_port, &data_soc);
 
 	    if (status < 0) {
 		(void) HTInetStatus(gettext("connect for data"));

@@ -355,13 +355,13 @@ PUBLIC char *LYNewsPost ARGS2(
 		_statusline(INC_ORIG_MSG_PROMPT);
 	    } else if (HTConfirm(INC_ORIG_MSG_PROMPT) == YES) {
 		/*
-		 *  The 1 will add the reply ">" in front of every line.
+		 *  The 'TRUE' will add the reply ">" in front of every line.
 		 *  We're assuming that if the display character set is
 		 *  Japanese and the document did not have a CJK charset,
 		 *  any non-EUC or non-SJIS 8-bit characters in it where
 		 *  converted to 7-bit equivalents. - FM
 		 */
-		print_wwwfile_to_fd(fd, 1);
+		print_wwwfile_to_fd(fd, TRUE);
 	    }
 	}
 	LYCloseTempFP(fd);		/* Close the temp file. */
