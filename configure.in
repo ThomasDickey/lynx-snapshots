@@ -676,7 +676,7 @@ test $use_cjk != no && AC_DEFINE(CJK_EX)
 
 AC_MSG_CHECKING(if color-style code should be used)
 CF_ARG_ENABLE(color-style,
-[  --enable-color-style    use optional/experimental color style],
+[  --enable-color-style    use optional/experimental color style (ncurses/curses)],
 	[use_color_style=$enableval],
 	[use_color_style=no])
 

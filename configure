@@ -211,7 +211,7 @@ Experimental Options:
   --enable-addrlist-page  use experimental address-list page
   --enable-charset-choice use experimental charset-selection logic
   --enable-cjk            use experimental CJK logic
-  --enable-color-style    use optional/experimental color style
+  --enable-color-style    use optional/experimental color style (ncurses/curses)
 EOF
 cat <<EOF
   --enable-default-colors enable use of default-colors (ncurses/slang)

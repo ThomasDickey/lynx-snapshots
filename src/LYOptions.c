@@ -3461,7 +3461,6 @@ PRIVATE PostPair * break_data ARGS1(
 			i++;
 			continue;
 		    }
-
 #endif
 		    q[count].value[i] = ' ';
 		}
@@ -4033,7 +4032,7 @@ PUBLIC int postoptions ARGS1(
      * memory".
      */
     if (!HTLoadAbsolute(&WWWDoc))
-       return(NOT_FOUND);
+	return(NOT_FOUND);
 
     /*
      * Now most interesting part: reload document when necessary.
@@ -4231,6 +4230,17 @@ PRIVATE int gen_options ARGS1(
     PutOptValues(fp0, user_mode, user_mode_values);
     EndSelect(fp0);
 
+    /* Editor: INPUT */
+    PutLabel(fp0, gettext("Editor"));
+    PutTextInput(fp0, editor_string, NOTEMPTY(editor), text_len,
+		      DISABLED(no_editor || system_editor));
+
+    /* Search Type: SELECT */
+    PutLabel(fp0, gettext("Type of Search"));
+    BeginSelect(fp0, search_type_string);
+    PutOptValues(fp0, case_sensitive, search_type_values);
+    EndSelect(fp0);
+
     /* Cookies: SELECT */
     /* @@@ This is inconsistent - LYAcceptAllCookies gets saved to RC file
        but LYSetCookies doesn't! */
@@ -4247,19 +4257,9 @@ PRIVATE int gen_options ARGS1(
 		   cookies_accept_all_string);
     EndSelect(fp0);
 
-       /* Search Type: SELECT */
-    PutLabel(fp0, gettext("Searching type"));
-    BeginSelect(fp0, search_type_string);
-    PutOptValues(fp0, case_sensitive, search_type_values);
-    EndSelect(fp0);
 
     fprintf(fp0,"\n  <em>%s</em>\n", gettext("Keyboard Input"));
     /*****************************************************************/
-
-    /* Editor: INPUT */
-    PutLabel(fp0, gettext("Editor"));
-    PutTextInput(fp0, editor_string, NOTEMPTY(editor), text_len,
-		      DISABLED(no_editor || system_editor));
 
     /* Keypad Mode: SELECT */
     PutLabel(fp0, gettext("Keypad mode"));
@@ -4344,7 +4344,7 @@ PRIVATE int gen_options ARGS1(
 	BeginSelect(fp0, assume_char_set_string);
 	for (i = 0; i < LYNumCharsets; i++) {
 #ifdef EXP_CHARSET_CHOICE
-    if (!charset_subsets[i].hide_assumed)
+	    if (!charset_subsets[i].hide_assumed)
 #endif
 	    PutOption(fp0, i == curval,
 			   LYCharSet_UC[i].MIMEname,
@@ -4376,7 +4376,7 @@ PRIVATE int gen_options ARGS1(
     /*
      * Document Appearance
      */
-    fprintf(fp0,"\n  <em>%s</em>\n", gettext("Document Apperance"));
+    fprintf(fp0,"\n  <em>%s</em>\n", gettext("Document Appearance"));
     /*****************************************************************/
 
     /* Show Color: SELECT */
@@ -4384,23 +4384,23 @@ PRIVATE int gen_options ARGS1(
     SetupChosenShowColor();
     PutLabel(fp0, gettext("Show color"));
     if (no_option_save) {
-       MaybeSelect(fp0, !can_do_colors, show_color_string);
-       if (LYShowColor == SHOW_COLOR_NEVER) {
+	MaybeSelect(fp0, !can_do_colors, show_color_string);
+	if (LYShowColor == SHOW_COLOR_NEVER) {
 	   LYShowColor = SHOW_COLOR_OFF;
-       } else if (LYShowColor == SHOW_COLOR_ALWAYS) {
+	} else if (LYShowColor == SHOW_COLOR_ALWAYS) {
 	   LYShowColor = SHOW_COLOR_ON;
-       }
-       PutOptValues(fp0, LYShowColor - SHOW_COLOR_OFF, bool_values);
+	}
+	PutOptValues(fp0, LYShowColor - SHOW_COLOR_OFF, bool_values);
     } else {
-       BeginSelect(fp0, show_color_string);
-       if (can_do_colors) {
+	BeginSelect(fp0, show_color_string);
+	if (can_do_colors) {
 	   show_color_values[2].HtmlName = on_string;
 	   show_color_values[3].LongName = always_string;
-       } else {
+	} else {
 	   show_color_values[2].HtmlName = NULL; /* suppress "ON" - kw */
 	   show_color_values[3].LongName = "Always try";
-       }
-       PutOptValues(fp0, LYChosenShowColor, show_color_values);
+	}
+	PutOptValues(fp0, LYChosenShowColor, show_color_values);
     }
     EndSelect(fp0);
 #endif /* USE_SLANG || COLOR_CURSES */
@@ -4468,9 +4468,9 @@ PRIVATE int gen_options ARGS1(
 
     /* User Agent: INPUT */
     if (!no_useragent) {
-       PutLabelNotSaved(fp0, gettext("User-Agent header"));
-       PutTextInput(fp0, user_agent_string,
-			 NOTEMPTY(LYUserAgent), text_len, "");
+	PutLabelNotSaved(fp0, gettext("User-Agent header"));
+	PutTextInput(fp0, user_agent_string,
+			  NOTEMPTY(LYUserAgent), text_len, "");
     }
 
     /*
@@ -4529,28 +4529,28 @@ PRIVATE int gen_options ARGS1(
 
     /* Multi-Bookmark Mode: SELECT */
     if (!LYMBMBlocked) {
-       PutLabel(fp0, gettext("Multi-bookmarks"));
-       BeginSelect(fp0, mbm_string);
-       PutOption(fp0, !LYMultiBookmarks,
-		      mbm_off_string,
-		      mbm_off_string);
-       PutOption(fp0, LYMultiBookmarks && !LYMBMAdvanced,
-		      mbm_standard_string,
-		      mbm_standard_string);
-       PutOption(fp0, LYMultiBookmarks && LYMBMAdvanced,
-		      mbm_advanced_string,
-		      mbm_advanced_string);
-       EndSelect(fp0);
+	PutLabel(fp0, gettext("Multi-bookmarks"));
+	BeginSelect(fp0, mbm_string);
+	PutOption(fp0, !LYMultiBookmarks,
+		       mbm_off_string,
+		       mbm_off_string);
+	PutOption(fp0, LYMultiBookmarks && !LYMBMAdvanced,
+		       mbm_standard_string,
+		       mbm_standard_string);
+	PutOption(fp0, LYMultiBookmarks && LYMBMAdvanced,
+		       mbm_advanced_string,
+		       mbm_advanced_string);
+	EndSelect(fp0);
     }
 
     /* Bookmarks File Menu: LINK/INPUT */
     if (LYMultiBookmarks) {
-       PutLabel(fp0, gettext("Review/edit Bookmarks files"));
-       fprintf(fp0, "<a href=\"LYNXOPTIONS://MBM_MENU\">%s</a>\n",
+	PutLabel(fp0, gettext("Review/edit Bookmarks files"));
+	fprintf(fp0, "<a href=\"LYNXOPTIONS://MBM_MENU\">%s</a>\n",
 		    gettext("Goto multi-bookmark menu"));
     } else {
-       PutLabel(fp0, gettext("Bookmarks file"));
-       PutTextInput(fp0, single_bookmark_string,
+	PutLabel(fp0, gettext("Bookmarks file"));
+	PutTextInput(fp0, single_bookmark_string,
 			 NOTEMPTY(bookmark_page), text_len, "");
     }
 
