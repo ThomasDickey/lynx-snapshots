@@ -39,7 +39,6 @@
 #include <HTForms.h>
 #include <HTNestedList.h>
 #include <GridText.h>
-#include <LYSignal.h>
 #include <LYStrings.h>
 #include <LYUtils.h>
 #include <LYMap.h>
@@ -51,11 +50,29 @@
 #endif /* VMS */
 
 #ifdef USE_COLOR_STYLE
+#include <SGML.h>
 #include <AttrList.h>
 #include <LYHash.h>
 #include <LYStyle.h>
+#include <LYPrettySrc.h>
 #undef SELECTED_STYLES
 #define pHText_changeStyle(X,Y,Z) {}
+
+#define OPT_SCN 1
+#define OMIT_SCN_KEEPING 0 /* whether to omit keeping of Style_className
+    when lss support is on. 1 to increase performance. The value must
+    correspond to one in LYCurses.c. Should be 0 if OPT_SCN=0 */
+
+#if OMIT_SCN_KEEPING
+# define HCODE_TO_STACK_OFF(x) /*(CSHASHSIZE+1)*/ 88888  /*special value.*/
+#else
+# define HCODE_TO_STACK_OFF(x) x /*pass computed value*/
+#endif
+
+#endif /* USE_COLOR_STYLE */
+
+#ifdef SOURCE_CACHE
+#include <HTAccess.h>
 #endif
 
 #include <LYexit.h>
@@ -73,7 +90,14 @@ extern int LYcols;
 
 struct _HTStream {
     CONST HTStreamClass *	isa;
+#ifdef SOURCE_CACHE
+    FILE *			fp;
+    HTChunk *			chunk;
+    CONST HTStreamClass *	actions;
+    HTStream *			target;
+#else
     /* .... */
+#endif
 };
 
 PRIVATE HTStyleSheet * styleSheet = NULL;	/* Application-wide */
@@ -97,6 +121,14 @@ PRIVATE int i_prior_style = -1;
 PRIVATE void HTML_end_element PARAMS((HTStructured *me,
 				      int element_number,
 				      char **include));
+
+PRIVATE void HTML_start_element PARAMS((
+	HTStructured *		me,
+	int			element_number,
+	CONST BOOL*		present,
+	CONST char **		value,
+	int			tag_charset,
+	char **			include));
 
 /*
  * If we have verbose_img set, display labels for images.
@@ -567,7 +599,7 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
  *  In document retrieved from [...]/mypath/mydoc.htm w/ base [...]/otherpath/
  *  a. HREF="[...]/mypath/mydoc.htm"	  -> [...]/mypath/mydoc.htm
  *  b. HREF="[...]/mypath/mydoc.htm#frag" -> [...]/mypath/mydoc.htm#frag
- *  c. HREF="mydoc.htm" 		  -> [...]/otherpath/mydoc.htm
+ *  c. HREF="mydoc.htm"			  -> [...]/otherpath/mydoc.htm
  *  d. HREF="mydoc.htm#frag"		  -> [...]/otherpath/mydoc.htm#frag
  *  e. HREF=""		      -> [...]/mypath/mydoc.htm      (marked internal)
  *  f. HREF="#frag"	      -> [...]/mypath/mydoc.htm#frag (marked internal)
@@ -605,16 +637,69 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
 #endif /* DONT_TRACK_INTERNAL_LINKS */
 
 #ifdef USE_COLOR_STYLE
-static char *Style_className = NULL;
+# if !OPT_SCN
+static char* Style_className = NULL;
 static char myHash[128];
+# else
+PRIVATE char Style_className[4096];/* i hope it's enough :) HV */
+PRIVATE char* Style_className_end=Style_className;/*this points to the
+		    end of string in Style_className (it points to '\0') */
+# endif
 static int hcode;
 #endif
+
+
+#ifdef USE_PSRC
+
+PRIVATE void HTMLSRC_apply_markup ARGS4(
+	    HTStructured *,   context,
+	    HTlexem,	      lexem,
+	    BOOL,	      start,
+	    int,	      tag_charset)
+{
+    HT_tagspec* ts = *( ( start ? lexem_start : lexem_end ) + lexem);
+
+    while (ts) {
+#ifdef USE_COLOR_STYLE
+	if (ts->start) {
+	    current_tag_style = ts->style;
+	    force_current_tag_style = TRUE;
+	    forced_classname = ts->class_name;
+	    force_classname = TRUE;
+	}
+#endif
+	CTRACE(tfp,ts->start ? "SRCSTART %d\n" : "SRCSTOP %d\n",(int)lexem);
+	if (ts->start)
+	    HTML_start_element(
+		context,
+		ts->element,
+		ts->present,
+		(CONST char **)ts->value,
+		tag_charset,
+		NULL);
+	else
+	    HTML_end_element(
+		context,
+		ts->element,
+		NULL);
+	ts = ts->next;
+    }
+}
+#  define START TRUE
+#  define STOP FALSE
+#  define PSRCSTART(x)	HTMLSRC_apply_markup(me,HTL_##x,START,tag_charset)
+#  define PSRCSTOP(x)  HTMLSRC_apply_markup(me,HTL_##x,STOP,tag_charset)
+
+#  define PUTC(x) HTML_put_character(me,x)
+#  define PUTS(x) HTML_put_string(me,x)
+
+#endif /* USE_PSRC*/
 
 /*	Start Element
 **	-------------
 */
 PRIVATE void HTML_start_element ARGS6(
-	HTStructured *, 	me,
+	HTStructured *,		me,
 	int,			element_number,
 	CONST BOOL*,		present,
 	CONST char **,		value,
@@ -635,11 +720,110 @@ PRIVATE void HTML_start_element ARGS6(
     HTParentAnchor *dest = NULL;	     /* An anchor's destination */
     BOOL dest_ismap = FALSE;		     /* Is dest an image map script? */
     BOOL UseBASE = TRUE;		     /* Resoved vs. BASE if present? */
-    HTChildAnchor *ID_A = NULL; 	     /* HTML_foo_ID anchor */
+    HTChildAnchor *ID_A = NULL;		     /* HTML_foo_ID anchor */
     int url_type = 0, i = 0;
     char *cp = NULL;
     int ElementNumber = element_number;
     BOOL intern_flag = FALSE;
+#ifdef USE_COLOR_STYLE
+    char* class_name;
+#  if OPT_SCN
+#    if !OMIT_SCN_KEEPING
+    char* Style_className_end_was = Style_className_end+1;
+#    endif
+    /* assume ';' will be appended*/
+#  endif
+#endif
+
+#ifdef USE_PSRC
+    if (psrc_view && !sgml_in_psrc_was_initialized) {
+	if (!psrc_nested_call) {
+	    HTTag * tag = &HTML_dtd.tags[element_number];
+	    char buf[200];
+	    CONST char* p;
+	    if (psrc_first_tag) {
+		psrc_first_tag=FALSE;
+		/* perform the special actions on the begining of the document.
+		   It's assumed that all lynx modules start generating html
+		   from tag (ie not a text) so we are able to trap this moment
+		   and initialize.
+		*/
+		psrc_nested_call=TRUE;
+		HTML_start_element(me,HTML_BODY, NULL,NULL,tag_charset,NULL);
+		HTML_start_element(me,HTML_PRE, NULL,NULL,tag_charset,NULL);
+		PSRCSTART(entire);
+		psrc_nested_call=FALSE;
+	    }
+
+	    psrc_nested_call=TRUE;
+	    /*write markup for tags and exit*/
+	    PSRCSTART(abracket); PUTC('<'); PSRCSTOP(abracket);
+	    PSRCSTART(tag);
+	    if (tagname_transform!=0)
+		PUTS(tag->name);
+	    else {
+		strcpy(buf,tag->name);
+		LYLowerCase(buf);
+		PUTS(buf);
+	    }
+	    if (present) {
+		for (i = 0; i < tag->number_of_attributes; i++)
+		    if (present[i]) {
+			PUTC(' ');
+			PSRCSTART(attrib);
+			if (attrname_transform!=0)
+			    PUTS(tag->attributes[i].name);
+			else {
+			    strcpy(buf,tag->attributes[i].name);
+			    LYLowerCase(buf);
+			    PUTS(buf);
+			}
+			if (value[i]) {
+			    char q='"';
+				/*0 in dquotes, 1 - in quotes, 2 mixed*/
+			    char kind= ( !strchr(value[i], '"') ?
+					 0 :
+					 !strchr(value[i], '\'') ?
+					 q='\'',1 :
+					 2);
+			    PUTC('=');
+			    PSRCSTOP(attrib);
+			    PSRCSTART(attrval);
+			    PUTC(q);
+			    /*is it special ? */
+			    if (tag->attributes[i].type == HTMLA_ANAME) {
+				HTStartAnchor(me,value[i],NULL);
+				HTML_end_element(me,HTML_A,NULL);
+			    } else if (tag->attributes[i].type == HTMLA_HREF) {
+				PSRCSTART(href);
+				HTStartAnchor(me,NULL,value[i]);
+			    }
+			    if (kind!=2)
+				PUTS(value[i]);
+			    else
+				for (p = value[i]; *p; p++)
+				    if (*p != '"')
+					PUTC(*p);
+				    else
+					PUTS("&#34;");
+			    /*is it special ? */
+			    if (tag->attributes[i].type == HTMLA_HREF) {
+				HTML_end_element(me,HTML_A,NULL);
+				PSRCSTOP(href);
+			    }
+			    PUTC(q);
+			    PSRCSTOP(attrval);
+			} /* if value */
+		    } /* if present[i] */
+	    }/* if present*/
+	    PSRCSTOP(tag);
+	    PSRCSTART(abracket); PUTC('>'); PSRCSTOP(abracket);
+	    psrc_nested_call=FALSE;
+	    return;
+	} /*if (!psrc_nested_call) */
+	/*fall through*/
+    }
+#endif /* USE_PSRC */
 
     if (LYMapsOnly) {
 	if (!(ElementNumber == HTML_MAP || ElementNumber == HTML_AREA ||
@@ -664,19 +848,63 @@ PRIVATE void HTML_start_element ARGS6(
 
 /* this should be done differently */
 #if defined(USE_COLOR_STYLE)
-    HTSprintf (&Style_className, ";%s", HTML_dtd.tags[element_number].name);
-    strcpy (myHash, HTML_dtd.tags[element_number].name);
-    if (class_string[0])
-    {
-	HTSprintf (&Style_className, ".%s", class_string);
-	strcat (myHash, ".");
-	strcat (myHash, class_string);
-    }
-    class_string[0] = '\0';
-    strtolower(myHash);
-    hcode = hash_code(myHash);
-    strtolower(Style_className);
 
+#if !OPT_SCN
+    HTSprintf (&Style_className, ";%s", HTML_dtd.tags[element_number].name);
+#else
+# if !OMIT_SCN_KEEPING
+    *Style_className_end=';';
+    /*strcpy(Style_className_end+1,HTML_dtd.tags[element_number].name);*/
+    memcpy(Style_className_end+1,
+	   HTML_dtd.tags[element_number].name,
+	   HTML_dtd.tags[element_number].name_len+1);
+    Style_className_end += HTML_dtd.tags[element_number].name_len+1;
+# endif
+#endif
+    class_name = (force_classname ? forced_classname : class_string);
+    force_classname = FALSE;
+
+    if (force_current_tag_style == FALSE) {
+	current_tag_style = class_name[0]
+			  ? -1
+			  : cached_tag_styles[element_number];
+    } else {
+	force_current_tag_style = FALSE;
+    }
+
+
+    if (current_tag_style == -1) {
+#if !OPT_SCN
+	strcpy (myHash, HTML_dtd.tags[element_number].name);
+#else
+	hcode=hash_code_lowercase_on_fly(HTML_dtd.tags[element_number].name);
+#endif
+	if (class_name[0])
+	{
+#if !OPT_SCN
+	    HTSprintf (&Style_className, ".%s", class_name);
+	    strcat (myHash, ".");
+	    strcat (myHash, class_name);
+#else
+
+#   if !OMIT_SCN_KEEPING
+	    int l=strlen(class_name);
+	    *Style_className_end = '.';
+	    memcpy(Style_className_end+1, class_name, l+1 );
+	    Style_className_end += l+1;
+#   endif
+
+	    hcode = hash_code_aggregate_char('.', hcode);
+	    hcode = hash_code_aggregate_lower_on_fly(class_name, hcode);
+#endif
+	}
+#if !OPT_SCN
+	strtolower(myHash);
+	hcode = hash_code(myHash);
+#endif
+	class_string[0] = '\0';
+
+#if !OPT_SCN
     if (TRACE)
     {
 	fprintf(tfp, "CSSTRIM:%s -> %d", myHash, hcode);
@@ -699,12 +927,46 @@ PRIVATE void HTML_start_element ARGS6(
 	else
 	    fprintf(tfp, " ca=%d\n", hashStyles[hcode].color);
     }
+#endif
 
-    if (displayStyles[element_number + STARTAT].color > -2) /* actually set */
-    {
-	CTRACE(tfp, "CSSTRIM: start_element: top <%s>\n", HTML_dtd.tags[element_number].name);
-	HText_characterStyle(me->text, hcode, 1);
+	/* seems that this condition is always true - HV */
+	if (displayStyles[element_number + STARTAT].color > -2) /* actually set */
+	{
+	    CTRACE(tfp, "CSSTRIM: start_element: top <%s>\n", HTML_dtd.tags[element_number].name);
+	    HText_characterStyle(me->text, hcode, 1);
+	}
+    } else { /* (current_tag_style!=-1)	 */
+	if (class_name[0]) {
+#if !OPT_SCN
+	    HTSprintf (&Style_className, ".%s", class_name);
+	    strcat (myHash, ".");
+	    strcat (myHash, class_name);
+#else
+#     if !OMIT_SCN_KEEPING
+	    int l = strlen(class_name);
+	    *Style_className_end='.';
+	    memcpy(Style_className_end+1,class_name, l+1 );
+	    Style_className_end+=l+1;
+#     endif
+#endif
+	    class_string[0] = '\0';
+	}
+	hcode = current_tag_style;
+	HText_characterStyle(me->text, hcode , 1);
+	current_tag_style = -1;
     }
+
+#if !OPT_SCN
+    strtolower(Style_className);
+#else
+#  if !OMIT_SCN_KEEPING
+    strtolower(Style_className_end_was);/*only the part that wasn't
+					  lowercased yet*/
+#   endif
+#endif
+
+
+
 #endif /* USE_COLOR_STYLE */
 
     /*
@@ -917,11 +1179,17 @@ PRIVATE void HTML_start_element ARGS6(
 	    /*
 	     *	Handle REL links. - FM
 	     */
+
 	    if (present &&
 		present[HTML_LINK_REL] && value[HTML_LINK_REL]) {
 		/*
 		 *  Ignore style sheets, for now. - FM
 		 */
+/*  lss and css has different syntax - lynx shouldn't try to
+    parse them now (it tries to parse them as lss, so it exits with
+    error message the 1st non-empty line) - HVV
+*/
+#ifndef USE_COLOR_STYLE
 		if (!strcasecomp(value[HTML_LINK_REL], "StyleSheet") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Style")) {
 		    CTRACE(tfp, "HTML: StyleSheet link found.\n");
@@ -959,6 +1227,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    FREE(href);
 		    break;
 		}
+#endif /* ! USE_COLOR_STYLE */
 
 		/*
 		 *  Ignore anything not registered in the the 28-Mar-95
@@ -2881,7 +3150,7 @@ PRIVATE void HTML_start_element ARGS6(
 			if ((ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
 				  id_string,		/* Tag */
-				  NULL, 		/* Addresss */
+				  NULL,			/* Addresss */
 				  (HTLinkType*)0)) != NULL) {	/* Type */
 			    HText_beginAnchor(me->text, me->inUnderline, ID_A);
 			    HText_endAnchor(me->text, 0);
@@ -2930,7 +3199,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    if ((ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
 				  id_string,		/* Tag */
-				  NULL, 		/* Addresss */
+				  NULL,			/* Addresss */
 				  (HTLinkType*)0)) != NULL) {	/* Type */
 			HText_beginAnchor(me->text, me->inUnderline, ID_A);
 			HText_endAnchor(me->text, 0);
@@ -2943,7 +3212,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    if ((ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
 				  id_string,		/* Tag */
-				  NULL, 		/* Addresss */
+				  NULL,			/* Addresss */
 				  (HTLinkType*)0)) != NULL) {	/* Type */
 			HText_beginAnchor(me->text, me->inUnderline, ID_A);
 			HText_endAnchor(me->text, 0);
@@ -2989,7 +3258,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    if ((ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
 				  id_string,		/* Tag */
-				  NULL, 		/* Addresss */
+				  NULL,			/* Addresss */
 				  (HTLinkType*)0)) != NULL) {	/* Type */
 			HText_beginAnchor(me->text, me->inUnderline, ID_A);
 			HText_endAnchor(me->text, 0);
@@ -3094,7 +3363,7 @@ PRIVATE void HTML_start_element ARGS6(
 		if ((ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
 				  id_string,		/* Tag */
-				  NULL, 		/* Addresss */
+				  NULL,			/* Addresss */
 				  (HTLinkType*)0)) != NULL) {	/* Type */
 		    HText_beginAnchor(me->text, me->inUnderline, ID_A);
 		    HText_endAnchor(me->text, 0);
@@ -5251,7 +5520,7 @@ PRIVATE void HTML_start_element ARGS6(
 	}
 
 	CTRACE(tfp,"HTML:begin_element[%d]: adding style to stack - %s\n",
-	    						(int) STACKLEVEL(me),
+							(int) STACKLEVEL(me),
 							me->new_style->name);
 	(me->sp)--;
 	me->sp[0].style = me->new_style;	/* Stack new style */
@@ -5269,10 +5538,20 @@ PRIVATE void HTML_start_element ARGS6(
 #if !defined(USE_HASH)
 	HText_characterStyle(me->text, element_number+STARTAT, STACK_OFF);
 #else
-	HText_characterStyle(me->text, hcode, STACK_OFF);
+	HText_characterStyle(me->text, HCODE_TO_STACK_OFF(hcode), STACK_OFF);
 #endif /* USE_HASH */
+
+#if !OPT_SCN
 	TrimColorClass(HTML_dtd.tags[element_number].name,
 		       Style_className, &hcode);
+#else
+#  if !OMIT_SCN_KEEPING
+	FastTrimColorClass(HTML_dtd.tags[element_number].name,
+			   HTML_dtd.tags[element_number].name_len,
+			   Style_className,
+			   &Style_className_end, &hcode);
+#  endif
+#endif
     }
 #endif /* USE_COLOR_STYLE */
 }
@@ -5292,13 +5571,39 @@ PRIVATE void HTML_start_element ARGS6(
 **	incoming code errors, not this module.
 */
 PRIVATE void HTML_end_element ARGS3(
-	HTStructured *, 	me,
+	HTStructured *,		me,
 	int,			element_number,
 	char **,		include)
 {
     int i = 0;
     char *temp = NULL, *cp = NULL;
     BOOL BreakFlag = FALSE;
+
+#ifdef USE_PSRC
+    if (psrc_view && !sgml_in_psrc_was_initialized) {
+	if (!psrc_nested_call) {
+	    HTTag * tag = &HTML_dtd.tags[element_number];
+	    char buf[200];
+	    int tag_charset=0;
+
+	    psrc_nested_call=TRUE;
+	    PSRCSTART(abracket); PUTS("</"); PSRCSTOP(abracket);
+	    PSRCSTART(tag);
+	    if (tagname_transform!=0)
+		PUTS(tag->name);
+	    else {
+		strcpy(buf,tag->name);
+		LYLowerCase(buf);
+		PUTS(buf);
+	    }
+	    PSRCSTOP(tag);
+	    PSRCSTART(abracket); PUTC('>'); PSRCSTOP(abracket);
+	    psrc_nested_call=FALSE;
+	    return;
+	}
+	/*fall through*/
+    }
+#endif
 
 #ifdef CAREFUL			/* parser assumed to produce good nesting */
     if (element_number != me->sp[0].tag_number &&
@@ -5394,7 +5699,7 @@ PRIVATE void HTML_end_element ARGS3(
 	} else if (me->sp < (me->stack + MAX_NESTING - 1)) {
 	    (me->sp)++;
 	    CTRACE(tfp, "HTML:end_element[%d]: Popped style off stack - %s\n",
-	    		(int) STACKLEVEL(me),
+			(int) STACKLEVEL(me),
 			me->sp->style->name);
 	} else {
 	    CTRACE(tfp,
@@ -6617,8 +6922,17 @@ End_Object:
 
     } /* switch */
 #ifdef USE_COLOR_STYLE
+#if !OPT_SCN
     TrimColorClass(HTML_dtd.tags[element_number].name,
 		   Style_className, &hcode);
+#else
+# if !OMIT_SCN_KEEPING
+    FastTrimColorClass(HTML_dtd.tags[element_number].name,
+		       HTML_dtd.tags[element_number].name_len,
+		       Style_className,
+		       &Style_className_end, &hcode);
+#  endif
+#endif
 
     if (!REALLY_EMPTY(element_number))
     {
@@ -6626,7 +6940,7 @@ End_Object:
 #if !defined(USE_HASH)
 	HText_characterStyle(me->text, element_number+STARTAT, STACK_OFF);
 #else
-	HText_characterStyle(me->text, hcode, STACK_OFF);
+	HText_characterStyle(me->text, HCODE_TO_STACK_OFF(hcode), STACK_OFF);
 #endif /* USE_HASH */
     }
 #endif /* USE_COLOR_STYLE */
@@ -6841,7 +7155,9 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	styles[HTML_PRE]->alignment = HT_LEFT;
     }
 #ifdef USE_COLOR_STYLE
+# if !OPT_SCN
     FREE(Style_className);
+# endif
 #endif
     FREE(me->base_href);
     FREE(me->map_address);
@@ -6930,7 +7246,9 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
 	styles[HTML_PRE]->alignment = HT_LEFT;
     }
 #ifdef USE_COLOR_STYLE
+# if !OPT_SCN
     FREE(Style_className);
+# endif
 #endif
     FREE(me->base_href);
     FREE(me->map_address);
@@ -6995,19 +7313,19 @@ PRIVATE void get_styles NOARGS
 
     styles[HTML_DLC] =		HTStyleNamed(styleSheet, "GlossaryCompact");
 	/* nested list styles */
-    styles[HTML_DLC1] = 	HTStyleNamed(styleSheet, "GlossaryCompact1");
-    styles[HTML_DLC2] = 	HTStyleNamed(styleSheet, "GlossaryCompact2");
-    styles[HTML_DLC3] = 	HTStyleNamed(styleSheet, "GlossaryCompact3");
-    styles[HTML_DLC4] = 	HTStyleNamed(styleSheet, "GlossaryCompact4");
-    styles[HTML_DLC5] = 	HTStyleNamed(styleSheet, "GlossaryCompact5");
-    styles[HTML_DLC6] = 	HTStyleNamed(styleSheet, "GlossaryCompact6");
+    styles[HTML_DLC1] =		HTStyleNamed(styleSheet, "GlossaryCompact1");
+    styles[HTML_DLC2] =		HTStyleNamed(styleSheet, "GlossaryCompact2");
+    styles[HTML_DLC3] =		HTStyleNamed(styleSheet, "GlossaryCompact3");
+    styles[HTML_DLC4] =		HTStyleNamed(styleSheet, "GlossaryCompact4");
+    styles[HTML_DLC5] =		HTStyleNamed(styleSheet, "GlossaryCompact5");
+    styles[HTML_DLC6] =		HTStyleNamed(styleSheet, "GlossaryCompact6");
 
     styles[HTML_ADDRESS] =	HTStyleNamed(styleSheet, "Address");
     styles[HTML_BANNER] =	HTStyleNamed(styleSheet, "Banner");
     styles[HTML_BLOCKQUOTE] =	HTStyleNamed(styleSheet, "Blockquote");
     styles[HTML_BQ] =		HTStyleNamed(styleSheet, "Bq");
     styles[HTML_FN] =		HTStyleNamed(styleSheet, "Footnote");
-    styles[HTML_NOTE] = 	HTStyleNamed(styleSheet, "Note");
+    styles[HTML_NOTE] =		HTStyleNamed(styleSheet, "Note");
     styles[HTML_PLAINTEXT] =
     styles[HTML_XMP] =		HTStyleNamed(styleSheet, "Example");
     styles[HTML_PRE] =		HTStyleNamed(styleSheet, "Preformatted");
@@ -7200,7 +7518,11 @@ PUBLIC HTStructured* HTML_new ARGS3(
     me->comment_end = NULL;
 
 #ifdef USE_COLOR_STYLE
+# if !OPT_SCN
     FREE(Style_className);
+# else
+    Style_className_end = Style_className;
+# endif
     class_string[0] = '\0';
 #endif
 
@@ -7295,10 +7617,156 @@ PUBLIC HTStructured* HTML_new ARGS3(
 
     me->target = stream;
     if (stream)
-	me->targetClass = *stream->isa; 		/* Copy pointers */
+	me->targetClass = *stream->isa;			/* Copy pointers */
 
     return (HTStructured*) me;
 }
+
+#ifdef SOURCE_CACHE
+/*
+ * Pass-thru cache HTStream
+ */
+
+PRIVATE void CacheThru_free ARGS1(
+	HTStream *,	me)
+{
+    if (me->fp)
+	LYCloseTempFP(me->fp);
+    (*me->actions->_free)(me->target);
+    FREE(me);
+}
+
+PRIVATE void CacheThru_abort ARGS2(
+	HTStream *,	me,
+	HTError,	e)
+{
+    if (me->fp)
+	LYCloseTempFP(me->fp);
+    (*me->actions->_abort)(me->target, e);
+    FREE(me);
+}
+
+PRIVATE void CacheThru_put_character ARGS2(
+	HTStream *,	me,
+	char,		c_in)
+{
+    if (me->fp)
+	fputc(c_in, me->fp);
+    else
+	HTChunkPutc(me->chunk, c_in);
+    (*me->actions->put_character)(me->target, c_in);
+}
+
+PRIVATE void CacheThru_put_string ARGS2(
+	HTStream *,	me,
+	CONST char *,	str)
+{
+    if (me->fp)
+	fputs(str, me->fp);
+    else
+	HTChunkPuts(me->chunk, str);
+    (*me->actions->put_string)(me->target, str);
+}
+
+PRIVATE void CacheThru_write ARGS3(
+	HTStream *,	me,
+	CONST char *,	str,
+	int,		l)
+{
+    if (me->fp)
+	fwrite(str, 1, l, me->fp);
+    else
+	HTChunkPutb(me->chunk, str, l);
+    (*me->actions->put_block)(me->target, str, l);
+}
+
+PRIVATE CONST HTStreamClass PassThruCache =
+{
+    "PassThruCache",
+    CacheThru_free,
+    CacheThru_abort,
+    CacheThru_put_character,
+    CacheThru_put_string,
+    CacheThru_write
+};
+
+PRIVATE HTStream* CacheThru_new ARGS2(
+	HTParentAnchor *,	anchor,
+	HTStream *,		target)
+{
+    char filename[LY_MAXPATH];
+    HTStream *stream = NULL;
+    HTProtocol *p = (HTProtocol *)anchor->protocol;
+
+    /*
+     * Neatly and transparently vanish if source caching is disabled.
+     */
+    if (LYCacheSource == SOURCE_CACHE_NONE)
+	return target;
+
+    if (strcmp(p->name, "http") != 0) {
+	CTRACE(tfp, "Protocol is \"%s\"; not caching\n", p->name);
+	return target;
+    }
+
+    stream = (HTStream *) malloc(sizeof(*stream));
+    if (!stream)
+	outofmem(__FILE__, "CacheThru_new");
+
+    stream->isa = &PassThruCache;
+    stream->fp = NULL;
+    stream->chunk = NULL;
+    stream->target = target;
+    stream->actions = target->isa;
+
+    if (LYCacheSource == SOURCE_CACHE_FILE) {
+	if (source_cache_filename) {
+	    CTRACE(tfp, "Reusing source cache file %s\n",
+		   source_cache_filename);
+	    FREE(stream);
+	    return target;
+	}
+
+	/*
+	 * We open the temp file in binary mode to make sure that
+	 * end-of-line stuff and high-bit Latin-1 (or other) characters
+	 * don't get munged; this way, the file should (knock on wood)
+	 * contain exactly what came in from the network.
+	 */
+	if (!(stream->fp = LYOpenTemp(filename, HTML_SUFFIX, "wb"))) {
+	    CTRACE(tfp, "Cannot get source cache file for URL %s\n",
+		   HTAnchor_address((HTAnchor *)anchor));
+	    FREE(stream);
+	    return target;
+	}
+
+	/*
+	 * Yes, this is a Gross And Disgusting Hack(TM), I know...
+	 */
+	StrAllocCopy(source_cache_filename, filename);
+
+	CTRACE(tfp, "Caching source for URL %s in file %s\n",
+	       HTAnchor_address((HTAnchor *)anchor), filename);
+    }
+
+    if (LYCacheSource == SOURCE_CACHE_MEMORY) {
+	if (source_cache_chunk) {
+	    CTRACE(tfp, "Reusing source memory cache %p\n",
+		   (void *)source_cache_chunk);
+	    FREE(stream);
+	    return target;
+	}
+
+	/* I think this is right... */
+	source_cache_chunk = stream->chunk = HTChunkCreate(128);
+	CTRACE(tfp, "Caching source for URL %s in memory cache %p\n",
+	       HTAnchor_address((HTAnchor *)anchor), (void *)stream->chunk);
+
+    }
+
+    return stream;
+}
+#endif
 
 /*	HTConverter for HTML to plain text
 **	----------------------------------
@@ -7313,7 +7781,13 @@ PUBLIC HTStream* HTMLToPlain ARGS3(
 	HTParentAnchor *,	anchor,
 	HTStream *,		sink)
 {
+#ifdef SOURCE_CACHE
+    return CacheThru_new(anchor,
+			 SGML_new(&HTML_dtd, anchor,
+				  HTML_new(anchor, pres->rep_out, sink)));
+#else
     return SGML_new(&HTML_dtd, anchor, HTML_new(anchor, pres->rep_out, sink));
+#endif
 }
 
 /*	HTConverter for HTML source to plain text
@@ -7356,7 +7830,7 @@ PUBLIC HTStream* HTMLParsedPresent ARGS3(
 	    intermediate = HTStreamStack(WWW_PLAINTEXT, WWW_PRESENT,
 					 NULL, anchor);
 	} else {
-	    	/*  this too should amount to calling HTPlainPresent: */
+		/*  this too should amount to calling HTPlainPresent: */
 	    intermediate = HTStreamStack(WWW_PLAINTEXT, pres->rep_out,
 					 NULL, anchor);
 	}
@@ -7372,7 +7846,13 @@ PUBLIC HTStream* HTMLParsedPresent ARGS3(
     }
     if (!intermediate)
 	return NULL;
+#ifdef SOURCE_CACHE
+    return CacheThru_new(anchor,
+			 SGML_new(&HTML_dtd, anchor,
+				  HTMLGenerator(intermediate)));
+#else
     return SGML_new(&HTML_dtd, anchor, HTMLGenerator(intermediate));
+#endif
 }
 
 /*	HTConverter for HTML to C code
@@ -7397,7 +7877,12 @@ PUBLIC HTStream* HTMLToC ARGS3(
     html->comment_start = "/* ";
     html->comment_end = " */\n";	/* Must start in col 1 for cpp */
 /*    HTML_put_string(html,html->comment_start); */
+#ifdef SOURCE_CACHE
+    return CacheThru_new(anchor,
+			 SGML_new(&HTML_dtd, anchor, html));
+#else
     return SGML_new(&HTML_dtd, anchor, html);
+#endif
 }
 
 /*	Presenter for HTML
@@ -7414,7 +7899,13 @@ PUBLIC HTStream* HTMLPresent ARGS3(
 	HTParentAnchor *,	anchor,
 	HTStream *,		sink GCC_UNUSED)
 {
+#ifdef SOURCE_CACHE
+    return CacheThru_new(anchor,
+			 SGML_new(&HTML_dtd, anchor,
+				  HTML_new(anchor, WWW_PRESENT, NULL)));
+#else
     return SGML_new(&HTML_dtd, anchor, HTML_new(anchor, WWW_PRESENT, NULL));
+#endif
 }
 #endif /* !GUI */
 

@@ -163,7 +163,9 @@ PUBLIC BOOL LYAddImageMap ARGS3(
     {
 	if (!LynxMaps) {
 	    LynxMaps = HTList_new();
+#ifdef LY_FIND_LEAKS
 	    atexit(LYLynxMaps_free);
+#endif
 	}
 	theList = LynxMaps;
     }

@@ -392,7 +392,9 @@ PUBLIC HTStyleSheet * DefaultStyle NOARGS
     	result = HTStyleSheetNew ();
 	*result = sheet;
 	result->styles = 0;
+#ifdef LY_FIND_LEAKS
 	atexit(FreeDefaultStyle);
+#endif
 	for (p = sheet.styles; p != 0; p = p->next) {
 	    q = HTStyleNew ();
 	    *q = *p;

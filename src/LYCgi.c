@@ -91,7 +91,9 @@ PRIVATE void remember_alloced ARGS1(
 {
     if (!alloced) {
 	alloced = HTList_new();
+#ifdef LY_FIND_LEAKS
 	atexit(free_alloced_lynxcgi);
+#endif
     }
     HTList_addObject(alloced, ptr);
 }

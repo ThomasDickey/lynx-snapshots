@@ -335,7 +335,7 @@ are generally not the response status from any specific protocol.
 #define HT_BAD_EOF      -12             /* Premature EOF */
 
 #ifndef va_arg
-# if HAVE_STDARG_H
+# if HAVE_STDARG_H && ANSI_VARARGS
 #  include <stdarg.h>
 # else
 #  if HAVE_VARARGS_H

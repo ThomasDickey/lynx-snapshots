@@ -607,7 +607,9 @@ PRIVATE void save_gid_info ARGS2(char *, name, int, user)
     if (!known_grp) {
 	known_grp = HTList_new();
 	if (!uidgid_cache_inited) {
+#ifdef LY_FIND_LEAKS
 	    atexit(clear_uidgid_cache);
+#endif
 	    uidgid_cache_inited = YES;
 	}
     }
@@ -624,7 +626,9 @@ PRIVATE void save_uid_info ARGS2(char *, name, int, user)
     if (!known_pwd) {
 	known_pwd = HTList_new();
 	if (!uidgid_cache_inited) {
+#ifdef LY_FIND_LEAKS
 	    atexit(clear_uidgid_cache);
+#endif
 	    uidgid_cache_inited = YES;
 	}
     }

@@ -16,7 +16,6 @@
 #include <LYStrings.h>
 #include <LYUtils.h>
 #include <LYClean.h>
-#include <LYSignal.h>
 #include <GridText.h>
 #include <LYCookie.h>
 
@@ -231,7 +230,7 @@ PUBLIC BOOL HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 		result = YES;
 	    } else if (TOUPPER(c) == TOUPPER(*msg_no)) {
 		return(NO);
-	    } else if (Dft != DFT_CONFIRM && (c == '\r' || c == '\n')) {
+	    } else if (Dft != DFT_CONFIRM) {
 		return(Dft);
 	    }
 	}

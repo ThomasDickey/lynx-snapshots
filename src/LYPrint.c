@@ -84,10 +84,11 @@ PRIVATE void set_environ ARGS3(
     char *envbuffer = 0;
 #ifdef VMS
 #define SET_ENVIRON(name, value, no_value) set_environ(name, value, no_value)
+    char temp[80];
     StrAllocCopy(envbuffer, value);
     if (!(envbuffer && *envbuffer))
 	StrAllocCopy(envbuffer, no_value);
-    Define_VMSLogical(names[name], envbuffer);
+    Define_VMSLogical(strcpy(temp, names[name]), envbuffer);
     FREE(envbuffer);
 #else
 #define SET_ENVIRON(name, value, no_value) set_environ(name, value, "")

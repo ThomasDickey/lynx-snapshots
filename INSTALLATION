@@ -265,7 +265,8 @@ II. Compile instructions -- UNIX
 	./po subdirectory.
 
   --disable-long-list			(prevent defining LONG_LIST)
-  	Use this option to disable long "ls -l" directory listings.
+	Use this option to disable long "ls -l" directory listings (when
+	enabled, the actual directory style is configurable from lynx.cfg).
 
   --disable-menu-options		(define NO_OPTION_MENU)
 	Disable the menu-style options screen.  (See --disable-forms-options).
@@ -362,6 +363,10 @@ II. Compile instructions -- UNIX
 	'COOKIE_FILE' option, or defaults to ".lynx_cookies" in the home
 	directory.  (Currently there is no protection against conflict
 	if several lynx copies active from the same account).
+
+  --enable-source-cache			(define SOURCE_CACHE)
+	Use this option to compile-in support for caching HTML pages locally,
+	in files.
 
   --enable-syslog			(define SYSLOG_REQUESTED_URLS)
 	Use this option to log NSL requests via syslog().

@@ -2024,7 +2024,9 @@ PUBLIC void UCInit NOARGS
 {
 
     UCreset_allocated_LYCharSets();
+#ifdef LY_FIND_LEAKS
     atexit(UCcleanup_mem);
+#endif
     UCconsole_map_init();
 
 /*

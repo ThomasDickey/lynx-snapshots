@@ -30,12 +30,8 @@
 
 #define exit LYexit
 
-#ifdef LY_FIND_LEAKS
 #define atexit LYatexit
 #define ATEXITSIZE 40
-#else
-#define atexit(func) /*nothing*/
-#endif
 
 /*
  *	Data structures

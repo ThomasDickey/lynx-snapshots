@@ -69,3 +69,16 @@ li:normal:default:blue
 base:normal:default:blue 
 iframe:normal:default:blue 
 cite:normal:yellow:blue 
+
+span.htmlsrc_comment:normal:green:blue 
+span.htmlsrc_tag:normal:brightgreen:blue 
+span.htmlsrc_attrib:normal:brightcyan:blue 
+span.htmlsrc_attrval:normal:white:blue 
+span.htmlsrc_abracket:normal:brightgreen:blue 
+span.htmlsrc_entity:normal:white:blue 
+##span.htmlsrc_href:
+##span.htmlsrc_entire:
+span.htmlsrc_badseq:normal:red:blue 
+span.htmlsrc_badtag:normal:red:blue 
+span.htmlsrc_badattr:normal:red:blue 
+span.htmlsrc_sgmlspecial:normal:yellow:blue 

@@ -1,6 +1,109 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1999-04-13 (2.8.2dev.22)
+* correct a missing include for LYLeaks.h in UCAuto.c - TD
+* implement HTML source caching.  In this implementation, each document kept in
+  cache has associated with it a temporary file containing the HTML source for
+  the document (well, not all of them -- only those using the HTTP protocol, on
+  the premise that file:// documents are probably local and ftp:// documents
+  are probably not HTML).  The temporary file is deleted when the document is
+  uncached.  For certain operations, instead of reloading the document via
+  HTLoad<mumble>(), the source file is reparsed with HTParseFile().  The cached
+  document also remembers certain parser settings (screen size, historical vs. 
+  minimal vs.  valid comment parsing, and the like), and is regenerated from
+  source if it is fetched out of cache under different settings.  This behavior
+  is selectable by a configure option --enable-source-cache and by a lynx.cfg
+  option SOURCE_CACHE; I didn't add a command-line argument or an options menu
+  entry, as this didn't seem to be the sort of thing one would want to change
+  at runtime.  (Scott Bigham <dsb@cs.duke.edu>)
+* amend HTConfirmDefault() logic so that a second character will cause the
+  default response to be returned, e.g,. so that pressing "qq" will make
+  Lynx exit (reported by John Bley) - TD
+* change the PUTS("\n") calls in HTFile.c to PUTC('\n') since that would be
+  a little more efficient (noted by KW) - TD
+* minor cleanup: remove obsolete parameters from command-line parsing functions
+  in LYMain.c, add newlines in HTFile.c for readability of html - LP
+* change default STARTFILE to the current directory, "." - PW
+* revised lynx-dev.html - PW
+* lynx.cfg and farther included cfg files can be edited from LYNXCFG:/ page
+  with the default editor and changes can be activated for the same lynx
+  session.  NOT allowed for restricted users (LYRestricted) and occasionally
+  for user mode other than ADVANCED.  This is an *experimental* code
+  (reload_read_cfg() in LYMain.c - more work required):  currently command-line
+  switches may be lost when overriden by lynx.cfg changes, file paths like
+  lynx_temp_space and LYCookieFile should not be changed (unwanted results) -LP
+* retest PARSE_DEBUG ifdef's (LYMain.c, LYReadCFG.c), minor corrections 
+  but found no specific reason for LP's problem with tables, except possibly
+  different effect from "&(value)" versus "(&value)" - TD
+* fix the problem of reading included lynx.cfg files by changing LYReadCFG.c
+  table signature (now it is more close to one in LYMain.c).  The problem was
+  the ignoring of *some* values got from the included cfg file (at least for
+  DJGPP2.02/gcc2.8.1 build).  Probably we calculate the addresses of variables
+  on a later stage now.  - LP
+* DOSPATH changes: local directory style now configurable from lynx.cfg 
+  (LONG_LIST defined).  Unlike UNIX it is not "ls -l" by default 
+  but a more compact form (date and size present, from lynx.cfg example) - LP 
+* cookies:  domains now match case insensitively (reported by Paul Wagner
+  <paul.wagner@mci.com>) - LP
+* correct an ifdef in LYGetFile.c for config-page - LP
+* reading of long local directories now benefits from partial mode and fully 
+  interruptable.  Split out print_local_dir() function from HTLoadFile() - LP 
+* behave sanely if NSL_FORK fork() fails -BL 
+* NSL_FORK try for dns_patience *seconds*, not dns_patience select() calls,
+  which might have been shortened by keyboard input  -BL
+* fix some screwy comment indentation -BL 
+* add section on editing TEXTAREA to user's guide - PW
+* add a null-pointer check in LYCookie.c (Bill Nottingham <notting@redhat.com>)
+* revise changes ifdef'ing LY_FIND_LEAKS by making atexit a no-op function
+  since the DOS port depends on atexit to keep the DOS BREAK function properly
+  set on exit.  Put back atexit, and ifdef's each place where atexit isn't
+  needed except when finding leaks - DK
+* modify LYMain.c on DOS, fixing the determination of BREAK status to be
+  independent of SLANG or PDCurses - DK
+* spawn a new function, www_user_search_internals, to begin cancelling the
+  effects of cut-n-paste coding in www_user_search.  The body of
+  www_user_search_internals used to be duplicated at two points in
+  www_user_search.  See comment in GridText.c for more details.  (John Bley)
+* big pile of unneeded #includes removed (John Bley)
+* remove obsolete files from the distribution (John Bley)
+  WWW/Library/Implementation/HTWriter.*
+* one malloc check, fix --disable-ftp (John Bley)
+* fixes for compiler warnings when building for OpenVMS 6.2 using DEC C and the
+  SOCKETSHR library (reported by Andy Harper) - TD
+* add cpp -H option for HPUX bundled C compiler, which otherwise does not
+  have enough symbol table space (reported by JS).  Also, modify ifdefs
+  for <stdarg.h> vs <varargs.h> to avoid including the former when ANSI_VARARGS
+  is not defined since HPUX had a broken <stdarg.h> - TD
+* changed OMIT_SCN_KEEPING ifdef to 0 (inactive) in LYCurses.c and in HTML.c,
+  still enabling the Style_className:HTML.c keeping and making lynx with lss
+  slightly slower than it could be (though faster then dev21).  If somebody
+  wishes to fix a bug, here is a description:  If contents of some tag that has
+  corresponding color style occupies more than 2 screens, after navigating to
+  the page, on which the content of that block starts, and then pressing PGDN
+  PGDN PGUP, the effect (color style) of that tag will be lost.  The same
+  (loosing style) happens when jumping to the anchor that is in such block and
+  is located not on the 1st page.  IMO this is something with style stack.  If
+  this will be fixed, then keeping of Style_className:HTML.c can be omitted
+  again -VH
+* Fixed the bug in lynx with lss support -when displaying html pieces such as
+  <b> A <b> B </b> C </b>, only 'AB' was drawn in style corresponding to <b> -VH
+* added HTML source syntax highlighting (when option -prettysrc that is added
+  is given to lynx). It's available for lynx compiled with and without lss
+  support (it can be much more beatiful when compiled with lss support - read
+  lynx.cfg for description). This functionality coexists with old source view
+  and with -preparsed logic (ie different commandline options make source view
+  logic different) VH
+* HTChunkPutc was inlined in SGML.c for better performance -VH
+* Keeping of Style_className was omitted in HTML.c to increase performance of
+  lynx compiled with lss support. -VH
+* perfomance of lynx compiled with lss support is increased ~ by 15-20% for
+  normal documents, and by up to 50% for documents with a lot of tags VH
+* fixed bug in lynx compiled with lss support  that caused it to load local CSS
+  stylesheets - lynx didn't understand their syntax so it was exiting VH
+* added type information for attributes in HTMLDTD.c (it's used in source
+  syntax highlighting mode) VH
+* sample .lss files are updated to support source syntax highlighting VH
 1999-03-30 (2.8.2dev.21)
 * disable LYatexit if memory-leak testing is not configured.
 * fixes for unhighlighting problems with color-style support (Vlad Harchev)
@@ -10,7 +113,7 @@ Changes since Lynx 2.8 release
   and change link to more suitable location for rfc1945 - PW
 * correct logic of --disable-full-paths configure option (reported by Georg
   Schwarz) - TD
-* fix problems building on OpenVMS with DECC 6.2 (reported by Andy Harper 
+* fix problems building on OpenVMS with DECC 6.2 (reported by Andy Harper
   <Andy.Harper@kcl.ac.uk>)
   + remove 'DEBUG' definition from build scripts since it is defined in
     the source code.
@@ -29,9 +132,8 @@ Changes since Lynx 2.8 release
   message is shown - LW
 * Fix of HTUnEscapeSome in HTParse.c for non-ASCII - KW, PG
 * tidy up around ed_offset initialization in GridText.c - KED
-  (the patch as given will not compile on a non-ANSI compiler because it uses
-  aggregate initialization, and it's not clear why the ed_offset variable
-  must be initialized since the variable is sprintf'd before use - TD)
+  (the patch as given did not compile on a non-ANSI compiler because it used
+  aggregate initialization - TD)
 * add samples/mild-colors.lss (Vlad Harchev)
 * add samples/blue-background.lss (from Sergey Svishchev <svs@ropnet.ru>)
 * documentation updates for INSTALLATION and PROBLEMS - PW

@@ -24,7 +24,6 @@
 #include <LYStrings.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
-#include <LYSignal.h>
 
 #include <LYexit.h>
 #include <LYLeaks.h>

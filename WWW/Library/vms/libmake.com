@@ -154,7 +154,6 @@ $ cc [-.Implementation]SGML.c
 $ cc [-.Implementation]HTMLDTD.c
 $ cc [-.Implementation]HTChunk.c
 $ cc [-.Implementation]HTPlain.c
-$ cc [-.Implementation]HTWriter.c
 $ cc [-.Implementation]HTMLGen.c
 $ cc [-.Implementation]HTAtom.c
 $ cc [-.Implementation]HTAnchor.c

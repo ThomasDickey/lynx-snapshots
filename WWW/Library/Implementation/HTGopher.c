@@ -1802,6 +1802,8 @@ PRIVATE int HTLoadGopher ARGS4(
 
 	} else {				/* Not index */
 	    command = (char *)malloc(strlen(selector)+2+1);
+	    if (command == NULL)
+		outofmem(__FILE__, "HTLoadGopher");
 	    de_escape(command, selector);
 	}
 	FREE(p1);

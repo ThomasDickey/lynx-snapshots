@@ -2,9 +2,7 @@
 #include <HTParse.h>
 #include <HTAlert.h>
 #include <LYCurses.h>
-#include <LYSignal.h>
 #include <LYUtils.h>
-#include <LYClean.h>
 #include <LYGlobalDefs.h>
 #include <LYEdit.h>
 #include <LYStrings.h>

@@ -160,8 +160,15 @@ CFLAGS = $(TCPFLAGS) $(CFLAGS)/Include=([], [-], [.chrtrans], [-.WWW.Library.Imp
 lynx :	lynx.exe
 	@ Continue
 
-lynx.exe :   $(OBJS) $(WWWLIB)
+HDRS = [.chrtrans]iso01_uni.h
+
+lynx.exe :   $(HDRS) $(OBJS) $(WWWLIB)
 	$(LINK) /Executable = Lynx.exe $(OBJS), $(WWWLIB)/lib, $(TOPT)/opt, $(COPT)/opt
+
+$(HDRS) :
+	set default [.chrtrans]
+	@build-chrtrans
+	set default [-]
 
 clean :
 	- Set Protection = (Owner:RWED) *.*;-1

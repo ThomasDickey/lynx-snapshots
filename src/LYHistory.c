@@ -67,6 +67,7 @@ PUBLIC void LYAddVisitedLink ARGS1(
      *	or list files. - FM
      */
     if (doc->post_data || doc->isHEAD || doc->bookmark ||
+       (!strncmp(doc->address, "file://localhost/", 17) && (
 	!strcmp((doc->title ? doc->title : ""), HISTORY_PAGE_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), PRINT_OPTIONS_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), DOWNLOAD_OPTIONS_TITLE) ||
@@ -82,9 +83,11 @@ PUBLIC void LYAddVisitedLink ARGS1(
 	!strcmp((doc->title ? doc->title : ""), ADDRLIST_PAGE_TITLE) ||
 #endif
 	!strcmp((doc->title ? doc->title : ""), SHOWINFO_TITLE) ||
+	!strcmp((doc->title ? doc->title : ""), CONFIG_DEF_TITLE) ||
+	!strcmp((doc->title ? doc->title : ""), LYNXCFG_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), COOKIE_JAR_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), VISITED_LINKS_TITLE) ||
-	!strcmp((doc->title ? doc->title : ""), LYNX_TRACELOG_TITLE)) {
+	!strcmp((doc->title ? doc->title : ""), LYNX_TRACELOG_TITLE)))) {
 	return;
     }
 
@@ -95,7 +98,9 @@ PUBLIC void LYAddVisitedLink ARGS1(
 
     if (!Visited_Links) {
 	Visited_Links = HTList_new();
+#ifdef LY_FIND_LEAKS
 	atexit(Visited_Links_free);
+#endif
 	HTList_addObject(Visited_Links, new);
 	return;
     }

@@ -15,6 +15,7 @@
 #include <UCAux.h>
 
 #include <assert.h>
+
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
 #include <syslog.h>
@@ -29,7 +30,6 @@
 #include <LYGlobalDefs.h>
 #include <LYGetFile.h>
 #include <LYClean.h>
-#include <LYSignal.h>
 #include <LYMail.h>
 #include <LYList.h>
 #include <LYCharSets.h>
@@ -37,6 +37,7 @@
 #include <UCMap.h>
 #include <LYEdit.h>
 #include <LYPrint.h>
+#include <LYPrettySrc.h>
 #ifdef EXP_CHARTRANS_AUTOSWITCH
 #include <UCAuto.h>
 #endif /* EXP_CHARTRANS_AUTOSWITCH */
@@ -45,6 +46,10 @@
 #include <LYLeaks.h>
 
 #undef DEBUG_APPCH
+
+#ifdef SOURCE_CACHE
+#include <HTFile.h>
+#endif
 
 #ifdef USE_COLOR_STYLE
 #include <AttrList.h>
@@ -114,6 +119,12 @@ PUBLIC char * unchecked_radio = "( )";
 PUBLIC BOOLEAN underline_on = OFF;
 PUBLIC BOOLEAN bold_on      = OFF;
 
+#ifdef SOURCE_CACHE
+PUBLIC char * source_cache_filename = NULL;
+PUBLIC HTChunk * source_cache_chunk = NULL;
+PUBLIC int LYCacheSource = SOURCE_CACHE_NONE;
+#endif
+
 #if defined(USE_COLOR_STYLE)
 #define MAX_STYLES_ON_LINE 64
 
@@ -173,6 +184,23 @@ typedef struct _HTTabID {
 */
 struct _HText {
 	HTParentAnchor *	node_anchor;
+#ifdef SOURCE_CACHE
+#undef	lines			/* FIXME */
+	char *			source_cache_file;
+	HTChunk *		source_cache_chunk;
+	/*
+	 * Parse settings when this HText was generated.
+	 */
+	BOOLEAN			clickable_images;
+	BOOLEAN			pseudo_inline_alts;
+	BOOLEAN			raw_mode;
+	BOOLEAN			historical_comments;
+	BOOLEAN			minimal_comments;
+	BOOLEAN			soft_dquotes;
+	BOOLEAN			old_dtd;
+	int			lines;		/* Screen size */
+	int			cols;
+#endif
 	HTLine *		last_line;
 	int			Lines;		/* Number of them */
 	int			chars;		/* Number of them */
@@ -432,7 +460,9 @@ PUBLIC HText *	HText_new ARGS1(
 
     if (!loaded_texts)	{
 	loaded_texts = HTList_new();
+#ifdef LY_FIND_LEAKS
 	atexit(free_all_texts);
+#endif
     }
 
     /*
@@ -483,6 +513,34 @@ PUBLIC HText *	HText_new ARGS1(
     self->stale = YES;
     self->toolbar = NO;
     self->tabs = NULL;
+#ifdef SOURCE_CACHE
+    /*
+     * Yes, this is a Gross And Disgusting Hack(TM), I know...
+     */
+    self->source_cache_file = NULL;
+    if (LYCacheSource == SOURCE_CACHE_FILE && source_cache_filename) {
+      StrAllocCopy(self->source_cache_file, source_cache_filename);
+      FREE(source_cache_filename);
+    }
+    self->source_cache_chunk = NULL;
+    if (LYCacheSource == SOURCE_CACHE_MEMORY && source_cache_chunk) {
+	self->source_cache_chunk = source_cache_chunk;
+	source_cache_chunk = NULL;
+    }
+
+    /*
+     * Remember the parse settings.
+     */
+    self->clickable_images = clickable_images;
+    self->pseudo_inline_alts = pseudo_inline_alts;
+    self->raw_mode = LYUseDefaultRawMode;
+    self->historical_comments = historical_comments;
+    self->minimal_comments = minimal_comments;
+    self->soft_dquotes = soft_dquotes;
+    self->old_dtd = Old_DTD;
+    self->lines = LYlines;
+    self->cols = LYcols;
+#endif
     /*
      *  If we are going to render the List Page, always merge in hidden
      *  links to get the numbering consistent if form fields are numbered
@@ -503,10 +561,14 @@ PUBLIC HText *	HText_new ARGS1(
     self->LastChar = '\0';
     self->IgnoreExcess = FALSE;
 
+#ifndef PSRC_TEST
     if (HTOutputFormat == WWW_SOURCE)
 	self->source = YES;
     else
 	self->source = NO;
+#else
+    self->source=( LYpsrc ? psrc_view : HTOutputFormat == WWW_SOURCE);
+#endif
     HTAnchor_setDocument(anchor, (HyperDoc *)self);
     HTFormNumber = 0;  /* no forms started yet */
     HTMainText = self;
@@ -728,6 +790,23 @@ PUBLIC void HText_free ARGS1(
 	     */
 	    HTMainAnchor = NULL;
     }
+
+#ifdef SOURCE_CACHE
+    /*
+     * Clean up the source cache, if any.
+     */
+    if (self->source_cache_file) {
+	CTRACE(tfp, "Removing source cache file %s\n",
+	       self->source_cache_file);
+	LYRemoveTemp(self->source_cache_file);
+	FREE(self->source_cache_file);
+    }
+    if (self->source_cache_chunk) {
+	CTRACE(tfp, "Removing memory source cache %p\n",
+	       (void *)self->source_cache_chunk);
+	HTChunkFree(self->source_cache_chunk);
+    }
+#endif
 
     FREE(self);
 }
@@ -2943,24 +3022,20 @@ check_IgnoreExcess:
 */
 PUBLIC void _internal_HTC ARGS3(HText *,text, int,style, int,dir)
 {
- HTLine* line;
- static int last_style = -1;
- static int last_dir = -1;
+    HTLine* line;
 
- /* can't change style if we have no text to change style with */
- if (!text) return;
+    /* can't change style if we have no text to change style with */
+    if (text != 0) {
 
- line = text->last_line;
+	line = text->last_line;
 
- if ((style != last_style || dir != last_dir) && line->numstyles < MAX_STYLES_ON_LINE)
- {
-      line->styles[line->numstyles].horizpos = line->size;
-      line->styles[line->numstyles].style = style;
-      line->styles[line->numstyles].direction = dir;
-      line->numstyles++;
- }
- last_style = style;
- last_dir = dir;
+	if (line->numstyles < MAX_STYLES_ON_LINE) {
+	    line->styles[line->numstyles].horizpos  = line->size;
+	    line->styles[line->numstyles].style     = style;
+	    line->styles[line->numstyles].direction = dir;
+	    line->numstyles++;
+	}
+    }
 }
 #endif
 
@@ -5291,7 +5366,9 @@ PUBLIC void HTAddSearchQuery ARGS1(
 
     if (!search_queries) {
 	search_queries = HTList_new();
+#ifdef LY_FIND_LEAKS
 	atexit(HTSearchQueries_free);
+#endif
 	HTList_addObject(search_queries, new);
 	return;
     }
@@ -5738,17 +5815,199 @@ PRIVATE void adjust_search_result ARGS3(
     }
 }
 
+/*
+   John Bley, April 1, 1999 (No joke)
+   www_user_search_internals was spawned from www_user_search to
+   remove a cut-n-paste coding hack: basically, this entire function
+   was duplicated at the two points that www_user_search now calls it.
+   And, because www_user_search has a return value defined as modification
+   of the screen and some global values, and since it used an awkward for(;;)
+   construct, this method has to distinguish between when it's "really"
+   returning and when it's just falling through via a break; in the
+   infinite-for-loop.  So, basically, we have a large amount of arguments
+   since this loop used to be directly in www_user_search, and we return
+   1 to say we're "really" returning and 0 to indicate we fell through.
+   Also, due to exactly one difference between the first pass of this
+   code and the second pass, we have the "firstpass" argument, which is
+   true iff it's the first pass.
+
+   I hate cut-n-paste coding.
+ */
+PRIVATE int www_user_search_internals ARGS8(
+	int,		firstpass,
+	int,		start_line,
+	document *,	doc,
+	char *,		target,
+	TextAnchor *,	a,
+	HTLine *,	line,
+	int *,		count,
+	int *,		tentative_result)
+{
+    OptionType * option;
+    char *stars = NULL, *cp;
+
+    for (;;) {
+	while ((a != NULL) && a->line_num == (*count - 1)) {
+	    if (a->show_anchor &&
+		(a->link_type != INPUT_ANCHOR ||
+		 a->input_field->type != F_HIDDEN_TYPE)) {
+		if (((a->hightext != NULL && case_sensitive == TRUE) &&
+		     LYno_attr_char_strstr(a->hightext, target)) ||
+		    ((a->hightext != NULL && case_sensitive == FALSE) &&
+		     LYno_attr_char_case_strstr(a->hightext, target))) {
+		    adjust_search_result(doc, *count, start_line);
+		    return 1;
+		}
+		if (((a->hightext2 != NULL && case_sensitive == TRUE) &&
+		     LYno_attr_char_strstr(a->hightext2, target)) ||
+		    ((a->hightext2 != NULL && case_sensitive == FALSE) &&
+		     LYno_attr_char_case_strstr(a->hightext2, target))) {
+		    adjust_search_result(doc, *count, start_line);
+		    return 1;
+		}
+
+		/*
+		 *  Search the relevant form fields, taking the
+		 *  case_sensitive setting into account. - FM
+		 */
+		if ((a->input_field != NULL && a->input_field->value != NULL) &&
+		    a->input_field->type != F_HIDDEN_TYPE) {
+		    if (a->input_field->type == F_PASSWORD_TYPE) {
+			/*
+			 *  Check the actual, hidden password, and then
+			 *  the displayed string. - FM
+			 */
+			if (((case_sensitive == TRUE) &&
+			     LYno_attr_char_strstr(a->input_field->value,
+						   target)) ||
+			    ((case_sensitive == FALSE) &&
+			     LYno_attr_char_case_strstr(a->input_field->value,
+							target))) {
+			    adjust_search_result(doc, *count, start_line);
+			    return 1;
+			}
+			StrAllocCopy(stars, a->input_field->value);
+			for (cp = stars; *cp != '\0'; cp++)
+			    *cp = '*';
+			if (((case_sensitive == TRUE) &&
+			     LYno_attr_char_strstr(stars, target)) ||
+			    ((case_sensitive == FALSE) &&
+			     LYno_attr_char_case_strstr(stars, target))) {
+			    FREE(stars);
+			    adjust_search_result(doc, *count, start_line);
+			    return 1;
+			}
+			FREE(stars);
+		   } else if (a->input_field->type == F_OPTION_LIST_TYPE) {
+			/*
+			 *  Search the option strings that are displayed
+			 *  when the popup is invoked. - FM
+			 */
+			option = a->input_field->select_list;
+			while (option != NULL) {
+			    if (((option->name != NULL &&
+				  case_sensitive == TRUE) &&
+				 LYno_attr_char_strstr(option->name,
+						       target)) ||
+				((option->name != NULL &&
+				  case_sensitive == FALSE) &&
+				 LYno_attr_char_case_strstr(option->name,
+							    target))) {
+				adjust_search_result(doc, *count, start_line);
+				return 1;
+			    }
+			    option = option->next;
+			}
+		    } else if (a->input_field->type == F_RADIO_TYPE) {
+			/*
+			 *  Search for checked or unchecked parens. - FM
+			 */
+			if (a->input_field->num_value) {
+			    cp = checked_radio;
+			} else {
+			    cp = unchecked_radio;
+			}
+			if (((case_sensitive == TRUE) &&
+			     LYno_attr_char_strstr(cp, target)) ||
+			    ((case_sensitive == FALSE) &&
+			     LYno_attr_char_case_strstr(cp, target))) {
+			    adjust_search_result(doc, *count, start_line);
+			    return 1;
+			}
+		    } else if (a->input_field->type == F_CHECKBOX_TYPE) {
+			/*
+			 *  Search for checked or unchecked
+			 *  square brackets. - FM
+			 */
+			if (a->input_field->num_value) {
+			    cp = checked_box;
+			} else {
+			    cp = unchecked_box;
+			}
+			if (((case_sensitive == TRUE) &&
+			     LYno_attr_char_strstr(cp, target)) ||
+			    ((case_sensitive == FALSE) &&
+			     LYno_attr_char_case_strstr(cp, target))) {
+			    adjust_search_result(doc, *count, start_line);
+			    return 1;
+			}
+		    } else {
+			/*
+			 *  Check the values intended for display.
+			 *  May have been found already via the
+			 *  hightext search, but make sure here
+			 *  that the entire value is searched. - FM
+			 */
+			if (((case_sensitive == TRUE) &&
+			     LYno_attr_char_strstr(a->input_field->value,
+						   target)) ||
+			    ((case_sensitive == FALSE) &&
+			     LYno_attr_char_case_strstr(a->input_field->value,
+							target))) {
+			    adjust_search_result(doc, *count, start_line);
+			    return 1;
+			}
+		    }
+		}
+	    }
+	    a = a->next;
+	}
+	if (a != NULL && a->line_num <= (*count - 1)) {
+	    a = a->next;
+	}
+
+	if (case_sensitive && LYno_attr_char_strstr(line->data, target)) {
+	    *tentative_result = *count;
+	    break;
+	} else if (!case_sensitive &&
+		   LYno_attr_char_case_strstr(line->data, target)) {
+	    *tentative_result = *count;
+	    break;
+	/* Note: this is where the two passes differ */
+	} else if (firstpass && line == HTMainText->last_line) {
+	    /* next line */
+	    break;
+	} else if (!firstpass && *count > start_line) {
+	    HTUserMsg2(STRING_NOT_FOUND, target);
+	    return 1;			/* end */
+	} else {			/* end */
+	    line = line->next;
+	    (*count)++;
+	}
+    }
+    /* No, man, we just fell through.  You want to call us again. */
+    return 0;
+}
+
 PUBLIC void www_user_search ARGS3(
 	int,		start_line,
 	document *,	doc,
 	char *,		target)
 {
-    register HTLine * line;
-    register int count;
+    HTLine * line;
+    int count;
     int tentative_result = -1;
     TextAnchor *a;
-    OptionType *option;
-    char *stars = NULL, *cp;
 
     if (!HTMainText) {
 	return;
@@ -5769,310 +6028,25 @@ PUBLIC void www_user_search ARGS3(
     while (a && a->line_num < count - 1) {
 	a = a->next;
     }
-
-    for (;;) {
-	while ((a != NULL) && a->line_num == (count - 1)) {
-	    if (a->show_anchor &&
-		(a->link_type != INPUT_ANCHOR ||
-		 a->input_field->type != F_HIDDEN_TYPE)) {
-		if (((a->hightext != NULL && case_sensitive == TRUE) &&
-		     LYno_attr_char_strstr(a->hightext, target)) ||
-		    ((a->hightext != NULL && case_sensitive == FALSE) &&
-		     LYno_attr_char_case_strstr(a->hightext, target))) {
-		    adjust_search_result(doc, count, start_line);
-		    return;
-		}
-		if (((a->hightext2 != NULL && case_sensitive == TRUE) &&
-		     LYno_attr_char_strstr(a->hightext2, target)) ||
-		    ((a->hightext2 != NULL && case_sensitive == FALSE) &&
-		     LYno_attr_char_case_strstr(a->hightext2, target))) {
-		    adjust_search_result(doc, count, start_line);
-		    return;
-		}
-
-		/*
-		 *  Search the relevant form fields, taking the
-		 *  case_sensitive setting into account. - FM
-		 */
-		if ((a->input_field != NULL && a->input_field->value != NULL) &&
-		    a->input_field->type != F_HIDDEN_TYPE) {
-		    if (a->input_field->type == F_PASSWORD_TYPE) {
-			/*
-			 *  Check the actual, hidden password, and then
-			 *  the displayed string. - FM
-			 */
-			if (((case_sensitive == TRUE) &&
-			     LYno_attr_char_strstr(a->input_field->value,
-						   target)) ||
-			    ((case_sensitive == FALSE) &&
-			     LYno_attr_char_case_strstr(a->input_field->value,
-							target))) {
-			    adjust_search_result(doc, count, start_line);
-			    return;
-			}
-			StrAllocCopy(stars, a->input_field->value);
-			for (cp = stars; *cp != '\0'; cp++)
-			    *cp = '*';
-			if (((case_sensitive == TRUE) &&
-			     LYno_attr_char_strstr(stars, target)) ||
-			    ((case_sensitive == FALSE) &&
-			     LYno_attr_char_case_strstr(stars, target))) {
-			    FREE(stars);
-			    adjust_search_result(doc, count, start_line);
-			    return;
-			}
-			FREE(stars);
-		   } else if (a->input_field->type == F_OPTION_LIST_TYPE) {
-			/*
-			 *  Search the option strings that are displayed
-			 *  when the popup is invoked. - FM
-			 */
-			option = a->input_field->select_list;
-			while (option != NULL) {
-			    if (((option->name != NULL &&
-				  case_sensitive == TRUE) &&
-				 LYno_attr_char_strstr(option->name,
-						       target)) ||
-				((option->name != NULL &&
-				  case_sensitive == FALSE) &&
-				 LYno_attr_char_case_strstr(option->name,
-							    target))) {
-				adjust_search_result(doc, count, start_line);
-				return;
-			    }
-			    option = option->next;
-			}
-		    } else if (a->input_field->type == F_RADIO_TYPE) {
-			/*
-			 *  Search for checked or unchecked parens. - FM
-			 */
-			if (a->input_field->num_value) {
-			    cp = checked_radio;
-			} else {
-			    cp = unchecked_radio;
-			}
-			if (((case_sensitive == TRUE) &&
-			     LYno_attr_char_strstr(cp, target)) ||
-			    ((case_sensitive == FALSE) &&
-			     LYno_attr_char_case_strstr(cp, target))) {
-			    adjust_search_result(doc, count, start_line);
-			    return;
-			}
-		    } else if (a->input_field->type == F_CHECKBOX_TYPE) {
-			/*
-			 *  Search for checked or unchecked
-			 *  square brackets. - FM
-			 */
-			if (a->input_field->num_value) {
-			    cp = checked_box;
-			} else {
-			    cp = unchecked_box;
-			}
-			if (((case_sensitive == TRUE) &&
-			     LYno_attr_char_strstr(cp, target)) ||
-			    ((case_sensitive == FALSE) &&
-			     LYno_attr_char_case_strstr(cp, target))) {
-			    adjust_search_result(doc, count, start_line);
-			    return;
-			}
-		    } else {
-			/*
-			 *  Check the values intended for display.
-			 *  May have been found already via the
-			 *  hightext search, but make sure here
-			 *  that the entire value is searched. - FM
-			 */
-			if (((case_sensitive == TRUE) &&
-			     LYno_attr_char_strstr(a->input_field->value,
-						   target)) ||
-			    ((case_sensitive == FALSE) &&
-			     LYno_attr_char_case_strstr(a->input_field->value,
-							target))) {
-			    adjust_search_result(doc, count, start_line);
-			    return;
-			}
-		    }
-		}
-	    }
-	    a = a->next;
-	}
-	if (a != NULL && a->line_num <= (count - 1)) {
-	    a = a->next;
-	}
-
-	if (case_sensitive && LYno_attr_char_strstr(line->data, target)) {
-	    tentative_result = count;
-	    break;
-	} else if (!case_sensitive &&
-		   LYno_attr_char_case_strstr(line->data, target)) {
-	    tentative_result = count;
-	    break;
-	} else if (line == HTMainText->last_line) {  /* next line */
-	    break;
-	} else {			/* end */
-	    line = line->next;
-	    count++;
-	}
+    if (www_user_search_internals(1, start_line, doc, target,
+	a, line, &count, &tentative_result) == 1) {
+	return; /* Return the www_user_search_internals result */
     }
+
     if (tentative_result > 0) {
 	adjust_search_result(doc, tentative_result, start_line);
 	return;
     }
-
-    /*
-     *  Search from the beginning.
-     */
+    /* That didn't work, search from the beginning instead */
     line = HTMainText->last_line->next; /* set to first line */
     count = 1;
     a = HTMainText->first_anchor;
     while (a && a->line_num < count - 1) {
 	a = a->next;
     }
-
-    for (;;) {
-	while ((a != NULL) && a->line_num == (count - 1)) {
-	    if (a->show_anchor &&
-		(a->link_type != INPUT_ANCHOR ||
-		 a->input_field->type != F_HIDDEN_TYPE)) {
-		if (((a->hightext != NULL && case_sensitive == TRUE) &&
-		     LYno_attr_char_strstr(a->hightext, target)) ||
-		    ((a->hightext != NULL && case_sensitive == FALSE) &&
-		     LYno_attr_char_case_strstr(a->hightext, target))) {
-		    adjust_search_result(doc, count, start_line);
-		    return;
-		}
-		if (((a->hightext2 != NULL && case_sensitive == TRUE) &&
-		     LYno_attr_char_strstr(a->hightext2, target)) ||
-		    ((a->hightext2 != NULL && case_sensitive == FALSE) &&
-		     LYno_attr_char_case_strstr(a->hightext2, target))) {
-		    adjust_search_result(doc, count, start_line);
-		    return;
-		}
-
-		/*
-		 *  Search the relevant form fields, taking the
-		 *  case_sensitive setting into account. - FM
-		 */
-		if ((a->input_field != NULL && a->input_field->value != NULL) &&
-		    a->input_field->type != F_HIDDEN_TYPE) {
-		    if (a->input_field->type == F_PASSWORD_TYPE) {
-			/*
-			 *  Check the actual, hidden password, and then
-			 *  the displayed string. - FM
-			 */
-			if (((case_sensitive == TRUE) &&
-			     LYno_attr_char_strstr(a->input_field->value,
-						   target)) ||
-			    ((case_sensitive == FALSE) &&
-			     LYno_attr_char_case_strstr(a->input_field->value,
-							target))) {
-			    adjust_search_result(doc, count, start_line);
-			    return;
-			}
-			StrAllocCopy(stars, a->input_field->value);
-			for (cp = stars; *cp != '\0'; cp++)
-			    *cp = '*';
-			if (((case_sensitive == TRUE) &&
-			     LYno_attr_char_strstr(stars, target)) ||
-			    ((case_sensitive == FALSE) &&
-			     LYno_attr_char_case_strstr(stars, target))) {
-			    FREE(stars);
-			    adjust_search_result(doc, count, start_line);
-			    return;
-			}
-			FREE(stars);
-		   } else if (a->input_field->type == F_OPTION_LIST_TYPE) {
-			/*
-			 *  Search the option strings that are displayed
-			 *  when the popup is invoked. - FM
-			 */
-			option = a->input_field->select_list;
-			while (option != NULL) {
-			    if (((option->name != NULL &&
-				  case_sensitive == TRUE) &&
-				 LYno_attr_char_strstr(option->name,
-						       target)) ||
-				((option->name != NULL &&
-				  case_sensitive == FALSE) &&
-				 LYno_attr_char_case_strstr(option->name,
-							    target))) {
-				adjust_search_result(doc, count, start_line);
-				return;
-			    }
-			    option = option->next;
-			}
-		    } else if (a->input_field->type == F_RADIO_TYPE) {
-			/*
-			 *  Search for checked or unchecked parens. - FM
-			 */
-			if (a->input_field->num_value) {
-			    cp = checked_radio;
-			} else {
-			    cp = unchecked_radio;
-			}
-			if (((case_sensitive == TRUE) &&
-			     LYno_attr_char_strstr(cp, target)) ||
-			    ((case_sensitive == FALSE) &&
-			     LYno_attr_char_case_strstr(cp, target))) {
-			    adjust_search_result(doc, count, start_line);
-			    return;
-			}
-		    } else if (a->input_field->type == F_CHECKBOX_TYPE) {
-			/*
-			 *  Search for checked or unchecked
-			 *  square brackets. - FM
-			 */
-			if (a->input_field->num_value) {
-			    cp = checked_box;
-			} else {
-			    cp = unchecked_box;
-			}
-			if (((case_sensitive == TRUE) &&
-			     LYno_attr_char_strstr(cp, target)) ||
-			    ((case_sensitive == FALSE) &&
-			     LYno_attr_char_case_strstr(cp, target))) {
-			    adjust_search_result(doc, count, start_line);
-			    return;
-			}
-		    } else {
-			/*
-			 *  Check the values intended for display.
-			 *  May have been found already via the
-			 *  hightext search, but make sure here
-			 *  that the entire value is searched. - FM
-			 */
-			if (((case_sensitive == TRUE) &&
-			     LYno_attr_char_strstr(a->input_field->value,
-						   target)) ||
-			    ((case_sensitive == FALSE) &&
-			     LYno_attr_char_case_strstr(a->input_field->value,
-							target))) {
-			    adjust_search_result(doc, count, start_line);
-			    return;
-			}
-		    }
-		}
-	    }
-	    a = a->next;
-	}
-	if (a != NULL && a->line_num <= (count - 1)) {
-	    a = a->next;
-	}
-
-	    if (case_sensitive && LYno_attr_char_strstr(line->data, target)) {
-		tentative_result = count;
-		break;
-	    } else if (!case_sensitive &&
-		       LYno_attr_char_case_strstr(line->data, target)) {
-		tentative_result = count;
-		break;
-	    } else if (count > start_line) {  /* next line */
-		HTUserMsg2(STRING_NOT_FOUND, target);
-		return;			/* end */
-	    } else {
-		line = line->next;
-		count++;
-	}
+    if (www_user_search_internals(0, start_line, doc, target,
+	a, line, &count, &tentative_result) == 1) {
+	return; /* Return the www_user_search_internals result */
     }
     if (tentative_result > 0) {
 	adjust_search_result(doc, tentative_result, start_line);
@@ -6190,6 +6164,148 @@ PUBLIC void HTuncache_current_document NOARGS
     }
 }
 
+#ifdef SOURCE_CACHE
+PUBLIC BOOLEAN HTreparse_document NOARGS
+{
+    BOOLEAN ok = FALSE;
+
+    if (!HTMainText || LYCacheSource == SOURCE_CACHE_NONE ||
+	(LYCacheSource == SOURCE_CACHE_FILE &&
+	 !HTMainText->source_cache_file) ||
+	(LYCacheSource == SOURCE_CACHE_MEMORY &&
+	 !HTMainText->source_cache_chunk))
+	return FALSE;
+
+    if (LYCacheSource == SOURCE_CACHE_FILE && HTMainText->source_cache_file) {
+	FILE * fp;
+	HTFormat format;
+	int ret;
+
+	CTRACE(tfp, "Reparsing source cache file %s\n",
+	       HTMainText->source_cache_file);
+
+	/*
+	 * This is more or less copied out of HTLoadFile(), except we don't
+	 * get a content encoding.  This may be overkill...
+	 */
+	if (HTMainText->node_anchor->content_type) {
+	    format = HTAtom_for(HTMainText->node_anchor->content_type);
+	} else {
+	    format = HTFileFormat(HTMainText->source_cache_file, NULL, NULL);
+	    format = HTCharsetFormat(format, HTMainText->node_anchor,
+				     UCLYhndl_HTFile_for_unspec);
+	}
+	CTRACE(tfp, "  Content type is \"%s\"\n", format->name);
+
+	/*
+	 * Pass the source cache filename on to the next HText.  Mark it
+	 * NULL here so that it won't get deleted by HText_free().
+	 */
+	source_cache_filename = HTMainText->source_cache_file;
+	HTMainText->source_cache_file = NULL;
+
+	fp = fopen(source_cache_filename, "r");
+	if (!fp) {
+	    CTRACE(tfp, "  Cannot read file %s\n", source_cache_filename);
+	    FREE(source_cache_filename);
+	    return FALSE;
+	}
+	ret = HTParseFile(format, HTOutputFormat, HTMainText->node_anchor,
+			  fp, NULL);
+	fclose(fp);
+	ok = (ret == HT_LOADED);
+	if (!ok)
+	    FREE(source_cache_filename);
+    }
+
+    if (LYCacheSource == SOURCE_CACHE_MEMORY &&
+	HTMainText->source_cache_chunk) {
+	HTFormat format = WWW_HTML;
+	int ret;
+
+	CTRACE(tfp, "Reparsing from source memory cache %p\n",
+	       (void *)HTMainText->source_cache_chunk);
+
+	/*
+	 * Pass the source cache HTChunk on to the next HText.  Clear it
+	 * here so that it won't get deleted by HText_free().
+	 */
+	source_cache_chunk = HTMainText->source_cache_chunk;
+	HTMainText->source_cache_chunk = NULL;
+
+	ret = HTParseMem(format, HTOutputFormat, HTMainText->node_anchor,
+			 source_cache_chunk, NULL);
+	ok = (ret == HT_LOADED);
+	if (!ok) {
+	    HTChunkFree(source_cache_chunk);
+	    source_cache_chunk = NULL;
+	}
+    }
+
+    CTRACE(tfp, "Reparse %s\n", (ok ? "succeeded" : "failed"));
+    return ok;
+}
+
+PRIVATE void trace_setting_change ARGS3(
+	CONST char *,	name,
+	BOOLEAN,	prev_setting,
+	BOOLEAN,	new_setting)
+{
+    if (prev_setting != new_setting)
+	CTRACE(tfp, "HTdocument_settings_changed: %s setting has changed (was %s, now %s)\n",
+	       name, prev_setting ? "ON" : "OFF", new_setting ? "ON" : "OFF");
+}
+
+PUBLIC BOOLEAN HTdocument_settings_changed NOARGS
+{
+    /*
+     * Annoying Hack(TM):  If we don't have a source cache, we can't
+     * reparse anyway, so pretend the settings haven't changed.
+     */
+    if (!HTMainText || LYCacheSource == SOURCE_CACHE_NONE ||
+	(LYCacheSource == SOURCE_CACHE_FILE &&
+	 !HTMainText->source_cache_file) ||
+	(LYCacheSource == SOURCE_CACHE_MEMORY &&
+	 !HTMainText->source_cache_chunk))
+	return FALSE;
+
+    if (TRACE) {
+	/*
+	 * If we're tracing, note everying that has changed.
+	 */
+	trace_setting_change("CLICKABLE_IMAGES",
+			     HTMainText->clickable_images, clickable_images);
+	trace_setting_change("PSEUDO_INLINE_ALTS",
+			     HTMainText->pseudo_inline_alts,
+			     pseudo_inline_alts);
+	trace_setting_change("RAW_MODE", HTMainText->raw_mode,
+			     LYUseDefaultRawMode);
+	trace_setting_change("HISTORICAL_COMMENTS",
+			     HTMainText->historical_comments,
+			     historical_comments);
+	trace_setting_change("MINIMAL_COMMENTS",
+			     HTMainText->minimal_comments, minimal_comments);
+	trace_setting_change("SOFT_DQUOTES",
+			     HTMainText->soft_dquotes, soft_dquotes);
+	trace_setting_change("OLD_DTD", HTMainText->old_dtd, Old_DTD);
+	if (HTMainText->lines != LYlines || HTMainText->cols != LYcols)
+	    CTRACE(tfp,
+		   "HTdocument_settings_changed: Screen size has changed (was %dx%d, now %dx%d)\n",
+		   HTMainText->cols, HTMainText->lines, LYcols, LYlines);
+    }
+
+    return (HTMainText->clickable_images != clickable_images ||
+	    HTMainText->pseudo_inline_alts != pseudo_inline_alts ||
+	    HTMainText->raw_mode != LYUseDefaultRawMode ||
+	    HTMainText->historical_comments != historical_comments ||
+	    HTMainText->minimal_comments != minimal_comments ||
+	    HTMainText->soft_dquotes != soft_dquotes ||
+	    HTMainText->old_dtd != Old_DTD ||
+	    HTMainText->lines != LYlines ||
+	    HTMainText->cols != LYcols);
+}
+#endif
+ 
 PUBLIC int HTisDocumentSource NOARGS
 {
     return (HTMainText != 0) ? HTMainText->source : FALSE;
@@ -9273,7 +9389,7 @@ PRIVATE int increment_tagged_htline ARGS6(
 		} else {
 		    valid = FALSE;
 		    break;
-	        }
+		}
 	    }
 
 	    /*
@@ -9298,7 +9414,7 @@ PRIVATE int increment_tagged_htline ARGS6(
 		val = atoi (p);
 		if ((val == *old_val) || (*old_val == 0)) { /* 0 matches all */
 		    if (*old_val != 0)
-		        (*old_val)++;
+			(*old_val)++;
 		    val += incr;
 		    sprintf (s, "%d", val);
 		    new_n = strlen (s);
@@ -9328,7 +9444,7 @@ PRIVATE int increment_tagged_htline ARGS6(
 		     */
 		    if (new_n -= n) {
 			nxt_anchor = st_anchor;
-		        while ((nxt_anchor)			      &&
+			while ((nxt_anchor)			      &&
 			       (nxt_anchor->line_num == a->line_num)) {
 			    nxt_anchor->line_pos += new_n;
 			    nxt_anchor = nxt_anchor->next;
@@ -9441,7 +9557,7 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
     HTLine     *l = 0;
 
     int curr_tag  = 0;   /* 0 ==> match any [tag] number */
-    int lx        = 0;   /* 0 ==> no line crossing [tag]; it's a new line */
+    int lx	  = 0;	 /* 0 ==> no line crossing [tag]; it's a new line */
     int i;
 
 
@@ -9745,8 +9861,6 @@ PUBLIC int HText_ExtEditForm ARGS1(
     int		len;
 
 
-    ed_offset[0] = 0; /* pre-ANSI compilers don't initialize aggregates - TD */
-
     CTRACE(tfp, "GridText: entered HText_ExtEditForm()\n");
 
     ed_temp = (char *) malloc (LY_MAXPATH);
@@ -9810,6 +9924,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
      *  corresponding to the TEXTAREA line the cursor is on (if such
      *  positioning is supported by the editor [as lynx knows it]).
      */
+    ed_offset[0] = 0; /* pre-ANSI compilers don't initialize aggregates - TD */
     if (((entry_line - start_line) > 0) && editor_can_position())
 #ifdef VMS
 	sprintf (ed_offset, "-%d", ((entry_line - start_line) + 1));
@@ -10560,3 +10675,11 @@ PUBLIC void redraw_lines_of_link ARGS1(
 #endif
     return;
 }
+
+#ifdef USE_PSRC
+PUBLIC void HTMark_asSource NOARGS
+{
+    if (HTMainText)
+        HTMainText->source = TRUE;
+}
+#endif

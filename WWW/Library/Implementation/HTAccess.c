@@ -105,7 +105,9 @@ PUBLIC BOOL HTRegisterProtocol ARGS1(
 {
     if (!protocols) {
 	protocols = HTList_new();
+#ifdef LY_FIND_LEAKS
 	atexit(free_protocols);
+#endif
     }
     HTList_addObject(protocols, protocol);
     return YES;

@@ -12,7 +12,6 @@
 #include <LYGlobalDefs.h>
 #include <LYKeymap.h>
 #include <LYClean.h>
-#include <LYSignal.h>
 
 #include <LYLeaks.h>
 

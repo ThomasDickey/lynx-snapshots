@@ -5,7 +5,6 @@
 #include <LYBookmark.h>
 #include <LYGlobalDefs.h>
 #include <LYClean.h>
-#include <LYSignal.h>
 #include <LYKeymap.h>
 #include <LYCharUtils.h> /* need for META charset */
 #include <UCAux.h>

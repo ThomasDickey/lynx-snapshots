@@ -96,7 +96,7 @@ PUBLIC void HTSetPresentation ARGS6(
 
     pres->rep = HTAtom_for(representation);
     pres->rep_out = WWW_PRESENT;		/* Fixed for now ... :-) */
-    pres->converter = HTSaveAndExecute; 	/* Fixed for now ...	 */
+    pres->converter = HTSaveAndExecute;		/* Fixed for now ...	 */
     pres->quality = quality;
     pres->secs = secs;
     pres->secs_per_byte = secs_per_byte;
@@ -110,7 +110,9 @@ PUBLIC void HTSetPresentation ARGS6(
      */
     if (!HTPresentations)	{
 	HTPresentations = HTList_new();
+#ifdef LY_FIND_LEAKS
 	atexit(HTFreePresentations);
+#endif
     }
 
     if (strcmp(representation, "*")==0) {
@@ -153,7 +155,9 @@ PUBLIC void HTSetConversion ARGS7(
      */
     if (!HTPresentations)	{
 	HTPresentations = HTList_new();
+#ifdef LY_FIND_LEAKS
 	atexit(HTFreePresentations);
+#endif
     }
 
     HTList_addObject(HTPresentations, pres);
@@ -478,11 +482,12 @@ PUBLIC float HTStackValue ARGS4(
 **	-------------------------------------------
 **
 **   Repaint the page only when necessary.
+**   This is a traverse call for HText_pageDisplay() - it works!.
 **
 */
-#ifdef DISP_PARTIAL
-PRIVATE void HTDisplayPartial NOARGS
+PUBLIC void HTDisplayPartial NOARGS
 {
+#ifdef DISP_PARTIAL
     if (display_partial) {
 	/*
 	**  HText_getNumOfLines() = "current" number of lines received
@@ -491,7 +496,7 @@ PRIVATE void HTDisplayPartial NOARGS
 	**  We update NumOfLines_partial only when we repaint the display.
 	**  -1 is the special value:
 	**  This is a synchronization flag switched to 0 when HText_new()
-	**  starts a new HTMainText object - all hypertext functions use it,
+	**  starts a new HTMainText object - all HText_ functions use it,
 	**  lines counter in particular [we call it from HText_getNumOfLines()].
 	**
 	**  Otherwise HTMainText holds info from the previous document
@@ -502,25 +507,27 @@ PRIVATE void HTDisplayPartial NOARGS
 	**  So repaint the page only when necessary:
 	*/
 	if ((NumOfLines_partial != -1)
-		/* new hypertext document available  */
+		/* new HText object available  */
 	&& ((Newline_partial + display_lines) > NumOfLines_partial)
 		/* current page not complete... */
-	&& (partial_threshold > 0 ? ((Newline_partial + partial_threshold)  < HText_getNumOfLines()) :
-		 ((Newline_partial + display_lines) < HText_getNumOfLines()))) {
+	&& (partial_threshold > 0 ?
+		((Newline_partial + partial_threshold) < HText_getNumOfLines()) :
+		((Newline_partial + display_lines) < HText_getNumOfLines()))
 		/*
 		 * Originally we rendered by increments of 2 lines,
 		 * but that got annoying on slow network connections.
 		 * Then we switched to full-pages.  Now it's configurable.
-		 * If partial_threshold < 0, then it's a full page
+		 * If partial_threshold <= 0, then it's a full page
 		 */
+	) {
 	    NumOfLines_partial = HText_getNumOfLines();
 	    HText_pageDisplay(Newline_partial, "");
 	}
     }
+#else /* nothing */
+#endif  /* DISP_PARTIAL */
 }
-#else
-#define HTDisplayPartial() /*nothing*/
-#endif
+
 
 /*	Push data from a socket down a stream
 **	-------------------------------------
@@ -714,7 +721,7 @@ finished:
 **	always		fp still open, target stream still valid.
 */
 PUBLIC int HTFileCopy ARGS2(
-	FILE *, 		fp,
+	FILE *,			fp,
 	HTStream*,		sink)
 {
     HTStreamClass targetClass;
@@ -764,6 +771,50 @@ PUBLIC int HTFileCopy ARGS2(
     return rv;
 }
 
+#ifdef SOURCE_CACHE
+/*	Push data from an HTChunk down a stream
+**	---------------------------------------
+**
+**   This routine is responsible for creating and PRESENTING any
+**   graphic (or other) objects described by the file.
+**
+**  State of memory and target stream on entry:
+**			HTChunk* (chunk) and target (sink) assumed valid.
+**
+**  Return values:
+**	HT_LOADED	All data sent.
+**
+**  State of memory and target stream on return:
+**	always		chunk unchanged, target stream still valid.
+*/
+PUBLIC int HTMemCopy ARGS2(
+	HTChunk *,		chunk,
+	HTStream *,		sink)
+{
+    HTStreamClass targetClass = *(sink->isa);
+    int bytes = 0;
+    CONST char *data = chunk->data;
+
+    HTReadProgress(0, 0);
+    for (;;) {
+	/* Push the data down the stream a piece at a time, in case we're
+	** running a large document on a slow machine.
+	*/
+	int n = INPUT_BUFFER_SIZE;
+	if (n > chunk->size - bytes)
+	    n = chunk->size - bytes;
+	if (n == 0)
+	    break;
+	(*targetClass.put_block)(sink, data, n);
+	bytes += n;
+	data += n;
+	HTReadProgress(bytes, 0);
+	HTDisplayPartial();
+    }
+    return HT_LOADED;
+}
+#endif
+
 #ifdef USE_ZLIB
 /*	Push data from a gzip file pointer down a stream
 **	-------------------------------------
@@ -786,7 +837,7 @@ PUBLIC int HTFileCopy ARGS2(
 **	always		gzfp still open, target stream still valid.
 */
 PRIVATE int HTGzFileCopy ARGS2(
-	gzFile, 		gzfp,
+	gzFile,			gzfp,
 	HTStream*,		sink)
 {
     HTStreamClass targetClass;
@@ -979,7 +1030,7 @@ PUBLIC int HTParseFile ARGS5(
 	HTFormat,		rep_in,
 	HTFormat,		format_out,
 	HTParentAnchor *,	anchor,
-	FILE *, 		fp,
+	FILE *,			fp,
 	HTStream*,		sink)
 {
     HTStream * stream;
@@ -1026,9 +1077,57 @@ PUBLIC int HTParseFile ARGS5(
 	return HT_LOADED;
 }
 
+#ifdef SOURCE_CACHE
+/*	Parse a document in memory given format and memory block pointer
+**
+**   This routine is responsible for creating and PRESENTING any
+**   graphic (or other) objects described by the file.
+**
+**  State of memory and target stream on entry:
+**			HTChunk* (chunk) assumed valid,
+**			target (sink) usually NULL (will call stream stack).
+**
+**  Return values:
+**	-501		Stream stack failed (cannot present or convert).
+**	HT_LOADED	All data sent.
+**
+**  Stat of memory and target stream on return:
+**	always		chunk unchanged; target freed, aborted, or NULL.
+*/
+PUBLIC int HTParseMem ARGS5(
+	HTFormat,		rep_in,
+	HTFormat,		format_out,
+	HTParentAnchor *,	anchor,
+	HTChunk *,		chunk,
+	HTStream *,		sink)
+{
+    HTStream * stream;
+    HTStreamClass targetClass;
+    int rv;
+
+    stream = HTStreamStack(rep_in, format_out, sink, anchor);
+    if (!stream) {
+	char *buffer = 0;
+	HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
+		   HTAtom_name(rep_in), HTAtom_name(format_out));
+	CTRACE(tfp, "HTFormat(in HTParseMem): %s\n", buffer);
+	rv = HTLoadError(sink, 501, buffer);
+	FREE(buffer);
+	return rv;
+    }
+
+    /* Push the data down the stream
+    */
+    targetClass = *(stream->isa);
+    rv = HTMemCopy(chunk, stream);
+    (*targetClass._free)(stream);
+    return HT_LOADED;
+}
+#endif
+
 #ifdef USE_ZLIB
 PRIVATE int HTCloseGzFile ARGS1(
-	gzFile, 		gzfp)
+	gzFile,			gzfp)
 {
     int gzres;
     if (gzfp == NULL)
@@ -1064,7 +1163,7 @@ PUBLIC int HTParseGzFile ARGS5(
 	HTFormat,		rep_in,
 	HTFormat,		format_out,
 	HTParentAnchor *,	anchor,
-	gzFile, 		gzfp,
+	gzFile,			gzfp,
 	HTStream*,		sink)
 {
     HTStream * stream;

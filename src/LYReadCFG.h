@@ -47,7 +47,8 @@ extern void read_cfg PARAMS((char *cfg_filename, char *parent_filename, int nest
 extern void free_lynx_cfg NOPARAMS;
 extern BOOLEAN have_read_cfg;
 
-extern char *lynx_cfg_infopage NOPARAMS;
-extern char *lynx_compile_opts NOPARAMS;
+extern int lynx_cfg_infopage PARAMS((document *newdoc));
+extern int lynx_compile_opts PARAMS((document *newdoc));
+extern void reload_read_cfg NOPARAMS; /* not implemented yet, in LYMain.c */
 
 #endif /* LYREADCFG_H */

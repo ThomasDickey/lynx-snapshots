@@ -54,7 +54,9 @@ PUBLIC HTAtom * HTAtom_for ARGS1(CONST char *, string)
 	for (i = 0; i < HASH_SIZE; i++)
 	    hash_table[i] = (HTAtom *) 0;
 	initialised = YES;
+#ifdef LY_FIND_LEAKS
 	atexit(free_atoms);
+#endif
     }
 
     /*		Generate hash function

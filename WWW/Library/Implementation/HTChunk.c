@@ -70,6 +70,8 @@ PUBLIC void HTChunkFree ARGS1 (HTChunk *,ch)
 /*	Append a character
 **	------------------
 */
+/* Warning: the code of this function is defined as macro in SGML.c. Change
+  the macro or undefine it in SGML.c when changing this function. -VH */
 PUBLIC void HTChunkPutc ARGS2 (HTChunk *,ch, char,c)
 {
     if (ch->size >= ch->allocated) {

@@ -5,12 +5,10 @@
 #include <LYCurses.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
-#include <LYSignal.h>
 #include <LYStrings.h>
 #include <LYGetFile.h>
 #include <LYDownload.h>
 
-#include <LYexit.h>
 #include <LYLeaks.h>
 
 /*

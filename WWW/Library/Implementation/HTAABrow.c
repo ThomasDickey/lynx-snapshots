@@ -837,7 +837,9 @@ PUBLIC char *HTAA_composeAuth ARGS4(
     **  Setup atexit() freeing if not done already. - FM
     */
     if (!free_HTAAGlobalsSet) {
+#ifdef LY_FIND_LEAKS
         atexit(free_HTAAGlobals);
+#endif
 	free_HTAAGlobalsSet = TRUE;
     }
 
@@ -1065,7 +1067,9 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(
     **  Setup atexit() freeing if not done already. - FM
     */
     if (!free_HTAAGlobalsSet) {
+#ifdef LY_FIND_LEAKS
         atexit(free_HTAAGlobals);
+#endif
 	free_HTAAGlobalsSet = TRUE;
     }
 

@@ -103,6 +103,7 @@ PUBLIC void LYLeaks NOARGS
 	    }
 	} else {
 	    size_t i_counter;
+	    char *value = (char *)(ALp_head->vp_Alloced);
 
 	    /*
 	     *	Increment the count of total memory lost and
@@ -121,9 +122,8 @@ PUBLIC void LYLeaks NOARGS
 		 i_counter < ALp_head->st_Bytes &&
 		 i_counter < MAX_CONTENT_LENGTH;
 		 i_counter++) {
-		if (isprint(((char *)(ALp_head->vp_Alloced))[i_counter])) {
-		    fprintf(Fp_leakagesink, "%c",
-			    ((char *)(ALp_head->vp_Alloced))[i_counter]);
+		if (isprint(value[i_counter])) {
+		    fprintf(Fp_leakagesink, "%c", value[i_counter]);
 		} else {
 		    fprintf(Fp_leakagesink, "|");
 		}
@@ -178,7 +178,7 @@ PUBLIC void LYLeaks NOARGS
 **		the information in a list.
 **  Arguments:	st_bytes	The size of the allocation requested
 **				in bytes.
-**		cp_File 	The file from which the request for
+**		cp_File		The file from which the request for
 **				allocation came from.
 **		ssi_Line	The line number in cp_File where the
 **				allocation request came from.
@@ -191,7 +191,7 @@ PUBLIC void LYLeaks NOARGS
 **	05-26-94	created Lynx 2-3-1 Garrett Arch Blythe
 */
 PUBLIC void *LYLeakMalloc ARGS3(
-	size_t, 	st_bytes,
+	size_t,		st_bytes,
 	CONST char *,	cp_File,
 	CONST short,	ssi_Line)
 {
@@ -238,7 +238,7 @@ PUBLIC void *LYLeakMalloc ARGS3(
 **		save relevant information in a list.
 **  Arguments:	st_number	The number of items to allocate.
 **		st_bytes	The size of each item.
-**		cp_File 	The file which wants to allocation.
+**		cp_File		The file which wants to allocation.
 **		ssi_Line	The line number in cp_File requesting
 **				the allocation.
 **  Return Value:	void *	The allocated memory, or NULL on failure as
@@ -250,8 +250,8 @@ PUBLIC void *LYLeakMalloc ARGS3(
 **		05-26-94	created Lynx 2-3-1 Garrett Arch Blythe
 */
 PUBLIC void *LYLeakCalloc ARGS4(
-	size_t, 	st_number,
-	size_t, 	st_bytes,
+	size_t,		st_number,
+	size_t,		st_bytes,
 	CONST char *,	cp_File,
 	CONST short,	ssi_Line)
 {
@@ -303,7 +303,7 @@ PUBLIC void *LYLeakCalloc ARGS4(
 **				realloc works just like
 **				malloc.
 **		st_newBytes	The new size of the chunk of memory.
-**		cp_File 	The file containing the realloc.
+**		cp_File		The file containing the realloc.
 **		ssi_Line	The line containing the realloc in cp_File.
 **  Return Value:	void *	The new pointer value (could be the same) or
 **				NULL if unable to resize (old block
@@ -317,8 +317,8 @@ PUBLIC void *LYLeakCalloc ARGS4(
 **	05-26-94	created Lynx 2-3-1 Garrett Arch Blythe
 */
 PUBLIC void *LYLeakRealloc ARGS4(
-	void *, 	vp_Alloced,
-	size_t, 	st_newBytes,
+	void *,		vp_Alloced,
+	size_t,		st_newBytes,
 	CONST char *,	cp_File,
 	CONST short,	ssi_Line)
 {
@@ -392,7 +392,7 @@ PUBLIC void *LYLeakRealloc ARGS4(
 **  Purpose:	Capture all requests to free information and also
 **		remove items from the allocation list.
 **  Arguments:	vp_Alloced	The memory to free.
-**		cp_File 	The file calling free.
+**		cp_File		The file calling free.
 **		ssi_Line	The line of cp_File calling free.
 **  Return Value:	void
 **  Remarks/Portability/Dependencies/Restrictions:
@@ -404,7 +404,7 @@ PUBLIC void *LYLeakRealloc ARGS4(
 **	05-26-94	created Lynx 2-3-1 Garrett Arch Blythe
 */
 PUBLIC void LYLeakFree ARGS3(
-	void *, 	vp_Alloced,
+	void *,		vp_Alloced,
 	CONST char *,	cp_File,
 	CONST short,	ssi_Line)
 {
@@ -556,7 +556,7 @@ PRIVATE void AddToList ARGS1(
 **	05-26-94	created Lynx 2-3-1 Garrett Arch Blythe
 */
 PRIVATE AllocationList *FindInList ARGS1(
-	void *, 	vp_find)
+	void *,		vp_find)
 {
     AllocationList *ALp_find = ALp_RunTimeAllocations;
 

@@ -668,7 +668,9 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 
     if (!valid_hostname(host)) {
 	lynx_nsl_status = HT_NOT_ACCEPTABLE;
+#ifdef NO_RECOVERY
 	h_errno = NO_RECOVERY;
+#endif
 	return NULL;
     }
 
@@ -693,11 +695,12 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
     {
 	int got_rehostent = 0;
 	/*
-	**	Pipe, child pid, status buffers, cycle count, select()
+	**	Pipe, child pid, status buffers, start time, select()
 	**	control variables.
-	    */
+	*/
 	pid_t fpid, waitret;
-	int pfd[2], selret, readret, waitstat = 0, cycle = 0;
+	int pfd[2], selret, readret, waitstat = 0;
+	time_t start_time = time(NULL);
 	fd_set readfds;
 	struct timeval timeout;
 	int dns_patience = 30; /* how many seconds will we wait for DNS? */
@@ -723,18 +726,18 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 	    struct hostent  *phost;	/* Pointer to host - See netdb.h */
 	    /*
 	    **  Child - for the long call.
-		**
-		**  Make sure parent can kill us at will.  -BL
-		*/
+	    **
+	    **  Make sure parent can kill us at will.  -BL
+	    */
 	    (void) signal(SIGTERM, quench);
 
 	    /*
-		**  Also make sure the child does not run one of the
-		**  signal handlers that may have been installed by
-		**  Lynx if one of those signals occurs.  For example
-		**  we don't want the child to remove temp files on
-		**  ^C, let the parent deal with that. - kw
-		*/
+	    **  Also make sure the child does not run one of the
+	    **  signal handlers that may have been installed by
+	    **  Lynx if one of those signals occurs.  For example
+	    **  we don't want the child to remove temp files on
+	    **  ^C, let the parent deal with that. - kw
+	    */
 	    (void) signal(SIGINT, quench);
 #ifndef NOSIGHUP
 	    (void) signal(SIGHUP, quench);
@@ -814,11 +817,12 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 
 	close(pfd[1]);      /* parent won't use write side -BL */
 
-	while (cycle < dns_patience) {
-	    /*
-		**  Avoid infinite loop in the face of the unexpected.  -BL
-		*/
-	    cycle++;
+	if (fpid < 0) {     /* fork failed */
+		close(pfd[0]);
+		goto failed;
+	}
+
+	while (child_exited || time(NULL) - start_time < dns_patience) {
 
 	    FD_ZERO(&readfds);
 	    /*
@@ -884,8 +888,8 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 		    lynx_nsl_status = HT_ERROR;
 		}
 		/*
-		    **  Make sure child is cleaned up.  -BL
-		    */
+		**  Make sure child is cleaned up.  -BL
+		*/
 		if (!child_exited)
 		    waitret = waitpid(fpid, &waitstat, WNOHANG);
 		if (!WIFEXITED(waitstat) && !WIFSIGNALED(waitstat)) {
@@ -896,15 +900,15 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 	    }
 
 	    /*
-		**  Clean up if child exited before & no data received.  -BL
-		*/
+	    **  Clean up if child exited before & no data received.  -BL
+	    */
 	    if (child_exited) {
 		waitret = waitpid(fpid, &waitstat, WNOHANG);
 		break;
 	    }
 	    /*
-		**  If child exited, loop once more looking for data.  -BL
-		*/
+	    **  If child exited, loop once more looking for data.  -BL
+	    */
 	    if ((waitret = waitpid(fpid, &waitstat, WNOHANG)) > 0) {
 		/*
 		**	Data will be arriving right now, so make sure we
@@ -912,7 +916,6 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 		**	skip the interrupt check.  -BL
 		*/
 		child_exited = 1;
-		cycle--;
 		continue;
 	    }
 
@@ -1000,7 +1003,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 #else /* !NSL_FORK, !_WINDOWS_NSL: */
     {
 	struct hostent  *phost;
-	phost = gethostbyname(host);	/* See netdb.h */
+	phost = gethostbyname((char *)host);	/* See netdb.h */
 #ifdef MVS
 	CTRACE(tfp, "LYGetHostByName: gethostbyname() returned %d\n", phost);
 #endif /* MVS */
@@ -1262,7 +1265,9 @@ PRIVATE void get_host_details NOARGS
 	return; 			/* Already done */
     gethostname(name, namelength);	/* Without domain */
     StrAllocCopy(hostname, name);
+#ifdef LY_FIND_LEAKS
     atexit(free_HTTCP_hostname);
+#endif
 #ifdef UCX
     /*
     **	UCX doesn't give the complete domain name.

@@ -12,7 +12,6 @@
 #include <LYCurses.h>
 #include <LYStrings.h>
 
-#include <LYexit.h>
 #include <LYLeaks.h>
 
 extern BOOL HTPassEightBitRaw;
