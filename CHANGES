@@ -1,6 +1,10 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-02-15 (2.8.3dev.20)
+* ifdef fixes for CYGWIN, broken in dev.19 -TD
+* add make-msc.bat script, and update src/chrtrans/makefile.msc to add rules
+  for generating header files -TD
 2000-02-14 (2.8.3dev.19)
 * use HTAddParam/HTEndParam rather than HTSprintf0 for building external
   commands, protecting against badly-formatted string with more than one %s
