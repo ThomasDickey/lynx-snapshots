@@ -116,7 +116,7 @@ PRIVATE void change_paragraph_style PARAMS((HTStructured * me,
 #define VERBOSE_IMG(value,string) \
       ((verbose_img) ? (newtitle = MakeNewTitle(value)): string)
 
-PRIVATE char * MakeNewTitle(CONST char ** value);
+PRIVATE char * MakeNewTitle PARAMS((CONST char ** value));
 
 /*	Set an internal flag that the next call to a stack-affecting method
 **	is only internal and the stack manipulation should be skipped. - kw
@@ -7436,7 +7436,7 @@ PUBLIC int HTLoadError ARGS3(
 }
 
 
-PRIVATE char * MakeNewTitle(CONST char ** value)
+PRIVATE char * MakeNewTitle ARGS1(CONST char **, value)
 {
     char *ptr;
     char *newtitle = NULL;

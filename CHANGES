@@ -1,6 +1,46 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-05-10 (2.8.1dev.10)
+* eliminate assignment to stderr for trace-file by making tfp a function. - TD
+* added John Davis' keymaps/keysym patch (it really should be integrated with
+  the normal lynx.cfg file).
+* tweak chartrans, "Convert the octet to Unicode":  incoming symbols >127 but <
+  LYlowest_eightbit[IN-charset] now ignored, previously displayed as UFFFD.
+  (SGML.c, HTPlain.c, LYCharUtils.c) - LP
+* removed conflicting/unused declaration of 'bzero()' from tcp.h (from report
+  by Ashraf Zorkani <zorkani@aucegypt.edu>) - TD
+* modify the set/unset/toggle options to allow "on" and "off" values also - TD
+* apply the "partial display" patch, modified from:  
+      http://www.flora.org/lynx-dev/html/month0398/msg00993.html  
+  The behavior is controlled by a compile-time option (DISP_PARTIAL), by a
+  command-line argument (-partial), and by a lynx.cfg option (PARTIAL).  - BL
+* extend command-line option processing of set/unset/toggle options 
+      -toggle-     (set that toggle to FALSE) 
+      -toggle+     (set that toggle to TRUE) 
+  e.g.,
+      lynx -show_cursor+ -case- 
+  or with explicit 1/0 values, e.g.,
+      -toggle=0     (set that toggle to FALSE) 
+      -toggle=1     (set that toggle to TRUE)  
+  NOTE:  this allows you to change a few flags that would previously have been
+  controlled by lynx.cfg, and are security-related, such as -locexec or
+  -telnet.  I believe there is no issue, because if the user can control the
+  command line to Lynx, he could have run `lynx -cfg my_cfg_file` and
+  circumvented those settings anyway.  - BL
+* fix for buffer-overrun in LYMail.c when processing a mailto:very-log-address
+  URL - BL
+* correct, for OS/2 EMX, a place in LYConvertToURL() which must not use
+  HTDOS_wwwName() (patch by Jason F. McBrayer <jmcbray@mailhost.tcs.tulane.edu>)
+* similar changes to LYCurses.c, LYMain.c, LYStrings.c, add src/makefile.wsl, for building
+  DOS version with slang - Bill Schiavo
+* modify LYCurses.c, LYMain.c, LYStrings.c, add src/makefile.dsl, for building
+  DOS version with slang - DK
+* fix to improve reloading if user changed assume_charset in options menu
+  using ^A, which sometimes did not work - LP
+* add several chartrans-related files to test/ directory:  spaces.html,
+  c1.html, raw8bit.html - LP
+* fixes to compile on SunOS with K&R compiler. - TD
 1998-05-03 (2.8.1dev.9)
 * correct missing counter increment in tempname(), from cleanup. - TD
 1998-05-02 (2.8.1dev.8)
@@ -10,7 +50,7 @@ Changes since Lynx 2.8 release
   alex@unicorn.us.com & FM).  - LP
 * restore information in the INSTALLATION file for the DOS port on patching
   tcplib.  Also, clarifies the location of nullpkt.  It also clarifies
-  that the PDCurses beta has incorporated some of the patches we made for 
+  that the PDCurses beta has incorporated some of the patches we made for
   the lynx DOS port. - DK
 * modify logic that updates bookmark file after removing a link to use copy
   rather than rename, to solve file-ownership problems (patch by Paul

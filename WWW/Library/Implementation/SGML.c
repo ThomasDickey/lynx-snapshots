@@ -4,9 +4,9 @@
 **	This module implements an HTStream object. To parse an
 **	SGML file, create this object which is a parser. The object
 **	is (currently) created by being passed a DTD structure,
-**	and a target HTStructured oject at which to throw the parsed stuff.
+**	and a target HTStructured object at which to throw the parsed stuff.
 **
-**	 6 Feb 93  Binary seraches used. Intreface modified.
+**	 6 Feb 93  Binary searches used. Interface modified.
 */
 
 #include <HTUtils.h>
@@ -31,6 +31,7 @@
 #include <HTChunk.h>
 
 #include <LYCharSets.h>
+#include <LYStrings.h>
 #include <LYLeaks.h>
 
 #define INVALID (-1)
@@ -56,7 +57,7 @@ extern int LYlowest_eightbit[];
 
 /*		Element Stack
 **		-------------
-**	This allows us to return down the stack reselcting styles.
+**	This allows us to return down the stack reselecting styles.
 **	As we return, attribute values will be garbage in general.
 */
 typedef struct _HTElement HTElement;
@@ -326,7 +327,7 @@ PRIVATE void handle_attribute_value ARGS2(
 **  Translate some Unicodes to Lynx special codes and output them.
 **  Special codes - ones those output depend on parsing.
 **
-**  Additional issue, like handling bidirectional text if nesseccery
+**  Additional issue, like handling bidirectional text if necessary
 **  may be called from here:  zwnj (8204), zwj (8205), lrm (8206), rlm (8207)
 **  - currently they are passed to def7_uni.tbl as regular characters.
 **
@@ -411,9 +412,6 @@ PRIVATE void handle_entity ARGS2(
     long uck;
     CONST char *p;
     CONST char *s = context->string->data;
-#ifdef NOTUSED_FOTEMODS
-    int high, low, i, diff;
-#endif
 
 
     /*
@@ -467,78 +465,26 @@ PRIVATE void handle_entity ARGS2(
 	    FoundEntity = TRUE;
 	    return;
 	}
-#ifdef NOTUSED_FOTEMODS
 	/*
-	**  If the value is greater than 255 and we do not
-	**  have the "7-bit approximations" as our output
-	**  character set (in which case we did it already)
-	**  seek a translation for that. - FM
+	**  Ignore zwnj (8204) and zwj (8205), if we get to here.
+	**  Note that zwnj may have been handled as <WBR>
+	**  by the calling function. - FM
 	*/
-	if ((chk = ((code > 255) &&
-		    context->outUCLYhndl !=
-				   UCGetLYhndl_byMIME("us-ascii"))) &&
-	    (uck = UCTransUniChar(code,
-				   UCGetLYhndl_byMIME("us-ascii")))>= 32 &&
-	    uck < 127) {
-	    /*
-	    **	Got an ASCII character (yippey). - FM
-	    */
-	    PUTC(((char)(uck & 0xff)));
-	    FoundEntity = TRUE;
-	    return;
-	} else if ((chk && uck == -4) &&
-		   (uck = UCTransUniCharStr(replace_buf,
-					    60, code,
-					    UCGetLYhndl_byMIME("us-ascii"),
-					    0) >= 0)) {
-	    /*
-	    **	Got a replacement string (yippey). - FM
-	    */
-	    for (p = replace_buf; *p; p++)
-		PUTC(*p);
+	if (!strcmp(s, "zwnj") ||
+	    !strcmp(s, "zwj")) {
+	    CTRACE(tfp, "handle_entity: Ignoring '%s'.\n", s);
 	    FoundEntity = TRUE;
 	    return;
 	}
-    }
-    /*
-    **	Ignore zwnj (8204) and zwj (8205), if we get to here.
-    **	Note that zwnj may have been handled as <WBR>
-    **	by the calling function. - FM
-    */
-    if (!strcmp(s, "zwnj") ||
-	!strcmp(s, "zwj")) {
-	CTRACE(tfp, "handle_entity: Ignoring '%s'.\n", s);
-	FoundEntity = TRUE;
-	return;
-    }
-
-    /*
-    **	Ignore lrm (8206), and rln (8207), if we get to here. - FM
-    */
-    if (!strcmp(s, "lrm") ||
-	!strcmp(s, "rlm")) {
-	CTRACE(tfp, "handle_entity: Ignoring '%s'.\n", s);
-	FoundEntity = TRUE;
-	return;
-    }
-
-    /*
-    **	We haven't succeeded yet, so try the old LYCharSets
-    **	arrays for translation strings. - FM
-    */
-    for (low = 0, high = context->dtd->number_of_entities;
-	 high > low;
-	 diff < 0 ? (low = i+1) : (high = i)) {  /* Binary search */
-	i = (low + (high-low)/2);
-	diff = strcmp(entities[i], s);	/* Case sensitive! */
-	if (diff == 0) {		/* success: found it */
-	    for (p = LYCharSets[context->outUCLYhndl][i]; *p; p++) {
-		PUTC(*p);
-	    }
+	/*
+	**  Ignore lrm (8206), and rln (8207), if we get to here. - FM
+	*/
+	if (!strcmp(s, "lrm") ||
+	    !strcmp(s, "rlm")) {
+	    CTRACE(tfp, "handle_entity: Ignoring '%s'.\n", s);
 	    FoundEntity = TRUE;
 	    return;
 	}
-#endif
     }
 
     /*
@@ -1008,7 +954,7 @@ PRIVATE void start_element ARGS1(
 **		------------------------
 **
 ** On entry,
-**	dtd	points to dtd structire including valid tag list
+**	dtd	points to dtd structure including valid tag list
 **	string	points to name of tag in question
 **
 ** On exit,
@@ -1269,7 +1215,7 @@ PRIVATE void SGML_character ARGS2(
     **	to Unicode, try that now. - FM
     */
     if (context->T.trans_to_uni &&
-	((unsign_c >= 127) ||
+	((unsign_c >= LYlowest_eightbit[context->inUCLYhndl]) ||
 	 (unsign_c < 32 && unsign_c != 0 &&
 	  context->T.trans_C0_to_uni))) {
 	/*
@@ -1364,7 +1310,7 @@ top0a:
 **  which unsign_c has been defined), and from below
 **  when we are recycling a character (e.g., because
 **  it terminated an entity but is not the standard
-**  semi-colon).  The chararcter will already have
+**  semi-colon).  The character will already have
 **  been put through the Unicode conversions. - FM
 */
 top1:
@@ -1512,7 +1458,7 @@ top1:
 					    0) >= 0)) {
 	    /*
 	    **	Got a replacement string.
-	    **	No further tests for valididy - assume that whoever
+	    **	No further tests for validity - assume that whoever
 	    **	defined replacement strings knew what she was doing. - KW
 	    */
 	    for (p = replace_buf; *p; p++)
@@ -1523,7 +1469,7 @@ top1:
 	} else if (context->T.output_utf8 && PUTUTF8(clong)) {
 	    ; /* do nothing more */
 	/*
-	**  If it's any other (> 160) 8-bit chararcter, and
+	**  If it's any other (> 160) 8-bit character, and
 	**  we have not set HTPassEightBitRaw nor HTCJK, nor
 	**  have the "ISO Latin 1" character set selected,
 	**  back translate for our character set. - FM
@@ -2027,6 +1973,7 @@ top1:
 		    */
 		    for (p = replace_buf; *p; p++)
 			PUTC(*p);
+#endif /* NOTUSED_FOTEMODS */
 		/*
 		**  Ignore 8205 (zwj),
 		**  8206 (lrm), and 8207 (rln), if we get to here. - FM
@@ -2050,7 +1997,6 @@ top1:
 		    if (c != ';')
 			goto top1;
 		    break;
-#endif /* NOTUSED_FOTEMODS */
 		/*
 		**  Show the numeric entity if we get to here
 		**  and the value:
@@ -3199,7 +3145,7 @@ PUBLIC HTStream* SGML_new  ARGS3(
 **	Added 24-Mar-96 by FM, based on:
 **
 ////////////////////////////////////////////////////////////////////////
-Copyright (c) 1993 Electrotechnical Laboratry (ETL)
+Copyright (c) 1993 Electrotechnical Laboratory (ETL)
 
 Permission to use, copy, modify, and distribute this material
 for any purpose and without fee is hereby granted, provided

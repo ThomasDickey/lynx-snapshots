@@ -4,6 +4,7 @@
 #include <LYUtils.h>
 #include <LYSignal.h>
 #include <LYClean.h>
+#include <LYMainLoop.h>
 #include <LYGlobalDefs.h>
 #include <LYStrings.h>
 #include <LYTraversal.h>
@@ -198,13 +199,5 @@ PUBLIC void cleanup NOARGS
     DidCleanup = TRUE;
 #endif /* VMS */
 
-    fflush(stdout);
-    fflush(stderr);
-    if (LYTraceLogFP != NULL) {
-	fclose(LYTraceLogFP);
-	LYTraceLogFP = NULL;
-#if !defined(VMS) || (defined(VMS) && !defined(VAXC) && !defined(UCX))
-	*stderr = LYOrigStderr;
-#endif /* !VMS || (VMS && !VAXC && !UCX) */
-    }
+    LYCloseTracelog();
 }

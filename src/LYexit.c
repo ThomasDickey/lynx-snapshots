@@ -9,6 +9,7 @@
 #include <LYUtils.h>
 #include <LYSignal.h>
 #include <LYClean.h>
+#include <LYMainLoop.h>
 #ifdef SYSLOG_REQUESTED_URLS
 #include <syslog.h>
 #endif /* SYSLOG_REQUESTED_URLS */
@@ -113,13 +114,7 @@ PUBLIC void LYexit ARGS1(
 	printf("\r\n%s\r\n\r\n", MEMORY_EXHAUSTED_ABORT);
 	fflush(stdout);
     }
-    if (LYTraceLogFP != NULL) {
-	fflush(stdout);
-	fflush(stderr);
-	fclose(LYTraceLogFP);
-	LYTraceLogFP = NULL;
-	*stderr = LYOrigStderr;
-    }
+    LYCloseTracelog();
 #endif /* !VMS */
     exit(status);
 }

@@ -115,7 +115,6 @@ extern char *HTAA_composeAuth PARAMS((
 extern BOOL HTAA_shouldRetryWithAuth PARAMS((
 	char *		start_of_headers,
 	int		length,
-	void *		handle,
 	int		soc,
 	BOOL		IsProxy));
 

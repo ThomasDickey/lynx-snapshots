@@ -34,6 +34,12 @@
 #include <HTDOS.h>
 #endif
 
+#ifdef __DJGPP__
+#ifdef USE_SLANG
+#include <dos.h>
+#endif /* USE_SLANG */
+#endif /* __DJGPP__ */
+
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
 #include <syslog.h>
@@ -303,6 +309,7 @@ PUBLIC BOOLEAN LYCancelledFetch = FALSE; /* TRUE if cancelled binary fetch */
 	       /* Include mime headers with source dump */
 PUBLIC BOOLEAN keep_mime_headers = FALSE;
 PUBLIC BOOLEAN no_url_redirection = FALSE; /* Don't follow URL redirections */
+PUBLIC BOOLEAN display_partial = FALSE; /* Display document during download */
 PUBLIC char *form_post_data = NULL;  /* User data for post form */
 PUBLIC char *form_get_data = NULL;   /* User data for get form */
 PUBLIC char *http_error_file = NULL; /* Place HTTP status code in this file */
@@ -358,7 +365,6 @@ PUBLIC BOOL New_DTD = YES;
 PUBLIC FILE *LYTraceLogFP = NULL;		/* Pointer for TRACE log  */
 PUBLIC char *LYTraceLogPath = NULL;		/* Path for TRACE log	   */
 PUBLIC BOOLEAN LYUseTraceLog = USE_TRACE_LOG;	/* Use a TRACE log?	   */
-PUBLIC FILE LYOrigStderr;			/* Original stderr pointer */
 PUBLIC BOOLEAN LYSeekFragMAPinCur = TRUE;
 PUBLIC BOOLEAN LYSeekFragAREAinCur = TRUE;
 
@@ -400,9 +406,25 @@ PRIVATE void FatalProblem PARAMS((int sig));
 #endif
 
 #ifdef __DJGPP__
-void  reset_break()
+PRIVATE int LY_set_ctrl_break(int setting)
 {
-    PDC_set_ctrl_break(init_ctrl_break[0]);
+    (void)signal(SIGINT, (setting ? SIG_DFL : SIG_IGN));
+    setcbrk(setting);
+}
+
+PRIVATE int LY_get_ctrl_break(void)
+{
+    typedef union REGS Regs;
+    extern Regs regs;
+    regs.h.ah = 0x33;
+    regs.h.al = 0x00;
+    int86(0x21, &regs, &regs);
+    return ((int) regs.h.dl);
+}
+
+PRIVATE void reset_break(void)
+{
+    LY_set_ctrl_break(init_ctrl_break[0]);
 }
 #endif /* __DJGPP__ */
 
@@ -555,26 +577,28 @@ PUBLIC int main ARGS2(
 #endif /* _WINDOWS */
 
 #ifdef __DJGPP__
-if (PDC_get_ctrl_break() == 0) {
-    PDC_set_ctrl_break(TRUE);
-    init_ctrl_break[0] = 0;}
-else {init_ctrl_break[0] = 1;}
+    if (LY_get_ctrl_break() == 0) {
+	LY_set_ctrl_break(TRUE);
+	init_ctrl_break[0] = 0;
+    } else {
+	init_ctrl_break[0] = 1;
+    }
     atexit(reset_break);
     sock_init();
 #endif
 
 #if defined(_WINDOWS) || defined(DJGPP)
-	/*
-	 * To prevent corrupting binary data with _WINDOWS and DJGPP
-	 * we open files and stdout in BINARY mode by default.
-	 * Where necessary we should open and (close!) TEXT mode.
-	 */
-	_fmode = O_BINARY;
-	setmode( fileno( stdout ), O_BINARY );
+    /*
+     * To prevent corrupting binary data with _WINDOWS and DJGPP
+     * we open files and stdout in BINARY mode by default.
+     * Where necessary we should open and (close!) TEXT mode.
+     */
+    _fmode = O_BINARY;
+    setmode( fileno( stdout ), O_BINARY );
 #endif
 
 #ifdef DOSPATH
-	if (getenv("TERM")==NULL) putenv("TERM=vt100");
+    if (getenv("TERM")==NULL) putenv("TERM=vt100");
 #endif
 
     LYShowColor = (SHOW_COLOR ? SHOW_COLOR_ON : SHOW_COLOR_OFF);
@@ -1060,7 +1084,6 @@ else {init_ctrl_break[0] = 1;}
     StrAllocCopy(LYTraceLogPath, (Home_Dir() ? Home_Dir() : ""));
     StrAllocCat(LYTraceLogPath, "/Lynx.trace");
 #endif /* VMS */
-    LYOrigStderr = *stderr;
     if (TRACE && LYUseTraceLog) {
 	/*
 	 *  If we can't open it for writing, give up.
@@ -1074,7 +1097,7 @@ else {init_ctrl_break[0] = 1;}
 	    exit(-1);
 	}
 #ifdef VMS
-	fclose(LYTraceLogFP);
+	LYCloseTracelog();
 	while (remove(LYTraceLogPath) == 0)
 	    ;
 	if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
@@ -1085,7 +1108,6 @@ else {init_ctrl_break[0] = 1;}
 #endif /* VMS */
 	fflush(stdout);
 	fflush(stderr);
-	*stderr = *LYTraceLogFP;
 	fprintf(tfp, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
     }
 
@@ -1163,6 +1185,10 @@ else {init_ctrl_break[0] = 1;}
     }
     fclose(fp);
 
+#if defined(USE_SLANG_KEYMAPS) 
+    if (-1 == lynx_initialize_keymaps ()) 
+	exit (-1); 
+#endif 
     /*
      * Make sure we have the character sets declared.
      *	This will initialize the CHARTRANS handling. - KW
@@ -1777,7 +1803,7 @@ typedef union {
  * Storing the four types of data in separate fields costs about 1K of data.
  * However, this provides usable type-checking.  The initial version of the
  * parse_args_type used 'long' for all types, and dumped core when processing
- * "lynx -help".  (The compiler was unable to detect some minor errors). 
+ * "lynx -help".  (The compiler was unable to detect some minor errors).
  */
 #ifdef  PARSE_DEBUG
 #define ParseData BOOLEAN *set_value; int *int_value; char **str_value; ParseFunc fun_value
@@ -2313,7 +2339,7 @@ static int post_data_fun ARGS3(
     char buf[1024];
 
     /*
-     * On Unix, conflicts with curses when interactive so let's force a dump. 
+     * On Unix, conflicts with curses when interactive so let's force a dump.
      * - CL
      *
      * On VMS, mods have been made in LYCurses.c to deal with potential
@@ -2781,6 +2807,10 @@ keys (may be incompatible with some curses packages)"
       "number_links",	SET_ARG,		&number_links,
       "force numbering of links"
    ),
+   PARSE_SET(
+      "partial",	TOGGLE_ARG,		&display_partial,
+      "display partial pages while downloading"
+   ),
    PARSE_FUN(
       "pauth",		NEED_FUNCTION_ARG,	pauth_fun,
       "=id:pw\nauthentication information for protected proxy server"
@@ -2836,7 +2866,7 @@ with the PREV_DOC command or from the History List"
       "require .www_browsable files to browse directories"
    ),
    PARSE_SET(
-      "show_cursor",	UNSET_ARG,		&LYUseDefShoCur,
+      "show_cursor",	TOGGLE_ARG,		&LYUseDefShoCur,
       "toggles hiding of the cursor in the lower right corner"
    ),
    PARSE_SET(
@@ -2990,35 +3020,46 @@ in double-quotes (\"-\") on VMS)");
 /*
  * This function performs a string comparison on two strings a and b.  a is
  * assumed to be an ordinary null terminated string, but b may be terminated
- * by an '=' character.  If terminated by '=', *c will be pointed to the
- * character following the '='.
+ * by an '=', '+' or '-' character.  If terminated by '=', *c will be pointed
+ * to the character following the '='.  If terminated by '+' or '-', *c will
+ * be pointed to that character.  (+/- added for toggle processing - BL.)
  * If a and b match, it returns 1.  Otherwise 0 is returned.
  */
-static int arg_eqs_parse (char *a, char *b, char **c)
+static int arg_eqs_parse ARGS3(
+	char *,		a,
+	char *,		b,
+	char **,	c)
 {
-   while (1)
-     {
-	if (*a != *b)
-	  {
-	     if ((*a == 0) && (*b == '='))
-	       {
-		  *c = b + 1;
-		  return 1;
-	       }
-	     return 0;
-	  }
-
-	if (*a == 0)
-	  {
-	     *c = 0;
-	     return 1;
-	  }
-
+    *c = NULL;
+    while (1) {
+	if ((*a != *b)
+	 || (*a == 0)
+	 || (*b == 0)) {
+	    if (*a == 0) {
+		switch (*b) {
+		case '=':
+		    *c = b + 1;
+		    return 1;
+		case '-':	/* FALLTHRU */
+		case '+':
+		    *c = b;
+		    return 1;
+		case 0:
+		    return 1;
+		default:
+		    return 0;
+		}
+	    } else {
+		return 0;
+	    }
+	}
 	a++;
 	b++;
      }
 }
 
+#define is_true(s)  (*s == '1' || *s == '+' || !strcmp(s, "on"))
+#define is_false(s) (*s == '0' || *s == '-' || !strcmp(s, "off"))
 
 PRIVATE void parse_arg ARGS2(
 	char **,	argv,
@@ -3069,7 +3110,7 @@ PRIVATE void parse_arg ARGS2(
 	ParseUnion *q = (ParseUnion *)(&(p->value));
 #endif
 	ParseFunc fun;
-	char *next_arg;
+	char *next_arg = NULL;
 
 	if ((p->name[0] != *arg_name)
 	    || (0 == arg_eqs_parse (p->name, arg_name, &next_arg))) {
@@ -3084,19 +3125,29 @@ PRIVATE void parse_arg ARGS2(
 	}
 
 	switch (p->type & ARG_TYPE_MASK) {
-	case TOGGLE_ARG:
-	     if (q->set_value != 0)
-	         *(q->set_value) = !(*(q->set_value));
-	     break;
-
-	case SET_ARG:
-	     if (q->set_value != 0)
-	         *(q->set_value) = TRUE;
-	     break;
-
+	case TOGGLE_ARG:	/* FALLTHRU */
+	case SET_ARG:		/* FALLTHRU */
 	case UNSET_ARG:
-	     if (q->set_value != 0)
-	         *(q->set_value) = FALSE;
+	     if (q->set_value != 0) {
+		 if (next_arg == 0) {
+		    switch (p->type & ARG_TYPE_MASK) {
+		    case TOGGLE_ARG:
+			 *(q->set_value) = !(*(q->set_value));
+			 break;
+		    case SET_ARG:
+			 *(q->set_value) = TRUE;
+			 break;
+		    case UNSET_ARG:
+			 *(q->set_value) = FALSE;
+			 break;
+		    }
+		 } else if (is_true(next_arg)) {
+		     *(q->set_value) = TRUE;
+		 } else if (is_false(next_arg)) {
+		     *(q->set_value) = FALSE;
+		 }
+		 /* deliberately ignore anything else - BL */
+	     }
 	     break;
 
 	case FUNCTION_ARG:

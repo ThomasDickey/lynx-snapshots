@@ -483,9 +483,8 @@ PRIVATE int in_soc = -1;
 **			will use this buffer first and then
 **			proceed to read from socket.
 */
-PUBLIC void HTAA_setupReader ARGS4(char *,	start_of_headers,
+PUBLIC void HTAA_setupReader ARGS3(char *,	start_of_headers,
 				   int, 	length,
-				   void *,	handle,
 				   int, 	soc)
 {
     start_pointer = buffer;

@@ -1052,10 +1052,9 @@ PUBLIC char *HTAA_composeAuth ARGS4(
 **				  field (in function HTAA_composeAuth()).
 **			NO, otherwise.
 */
-PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS5(
+PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(
 	char *,		start_of_headers,
 	int,		length,
-	void *,		handle,
 	int,		soc,
 	BOOL,		IsProxy)
 {
@@ -1080,7 +1079,7 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS5(
     */
     CTRACE(tfp, "Server reply header lines:\n");
 
-    HTAA_setupReader(start_of_headers, length, handle, soc);
+    HTAA_setupReader(start_of_headers, length, soc);
     while (NULL != (line = HTAA_getUnfoldedLine())  &&  *line != '\0') {
 	CTRACE(tfp, "%s\n", line);
 

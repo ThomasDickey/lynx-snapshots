@@ -157,7 +157,7 @@ PRIVATE void sl_suspend ARGS1(
     SLang_init_tty(3, 0, 1);
 #endif /* SLANG_VERSION > 9929 */
     signal(SIGTSTP, sl_suspend);
-#ifndef _WINDOWS
+#if !defined(_WINDOWS) && !defined(__DJGPP__)
     SLtty_set_suspend_state(1);
 #endif
     if (sig == SIGTSTP)
@@ -466,24 +466,18 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 	int code = 0;
 	int attr = A_NORMAL;
 	int offs = 1;
-	static int have_underline = -1;
+
+#ifdef UNIX
 	static int NoColorVideo = -1;
 
-	if (have_underline < 0) {
-#ifndef DOSPATH
-		have_underline = tigetstr("smul") != 0;
-#else
-		have_underline = 1;
-#endif /* DOSPATH */
-	}
-
-#if ( !defined(__DJGPP__) && !defined(_WINDOWS) )
 	if (NoColorVideo < 0) {
 		NoColorVideo = tigetnum("ncv");
 	}
 	if (NoColorVideo < 0)
 		NoColorVideo = 0;
-#endif /* !__DJGPP__ and !_WINDOWS */
+#else /* PDCurses */
+	static int NoColorVideo = 0;
+#endif /* UNIX */
 
 	if (Current_Attr & A_BOLD)
 		code |= 1;
@@ -494,8 +488,8 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 	attr = lynx_color_cfg[code].attr;
 
 	/*
-	 * FIXME:  no_color_video isn't implemented (97/4/14) in ncurses 4.x,
-	 * but may be in SVr4 (which would make this redundant for the latter).
+	 * no_color_video isn't implemented (97/4/14) in ncurses 4.1, but may
+	 * be in SVr4 (which would make this redundant for the latter).
 	 */
 	if ((Current_Attr & A_BOLD) && !(NoColorVideo & 33)) {
 		attr |= A_BOLD;
@@ -615,34 +609,35 @@ PUBLIC void lynx_setup_colors NOARGS
  */
 PUBLIC void start_curses NOARGS
 {
-	 static BOOLEAN first_time = TRUE;
+    static BOOLEAN first_time = TRUE;
 
-	 if(first_time)
-	 {
-		  initscr();	  /* start curses */
-		  first_time = FALSE;
-		  cbreak();
-		  keypad(stdscr, TRUE);
-		  fflush(stdin);
-		  fflush(stdout);
-		  if (has_colors()) {
-		      lynx_has_color = TRUE;
-		      start_color();
-		  }
-		  lynx_init_colors();
-		  lynx_called_initscr = TRUE;
+    if(first_time)
+    {
+	initscr();		/* start curses */
+	first_time = FALSE;
+	cbreak();
+	keypad(stdscr, TRUE);
+	fflush(stdin);
+	fflush(stdout);
+	if (has_colors()) {
+	    lynx_has_color = TRUE;
+	    start_color();
+	}
+	lynx_init_colors();
+	lynx_called_initscr = TRUE;
 
- /* Inform pdcurses that we're interested in knowing when mouse
-    buttons are clicked.  Maybe someday pdcurses will support it.
- */
-	 if (LYUseMouse)
-	      lynx_enable_mouse (1);
+	/* Inform pdcurses that we're interested in knowing when mouse buttons
+	 * are clicked.  Maybe someday pdcurses will support it.
+	 */
+	if (LYUseMouse)
+	    lynx_enable_mouse (1);
 
-	 } else sock_init();
+    } else
+	sock_init();
 
-	 LYCursesON = TRUE;
-	 clear();
-	 noecho();
+    LYCursesON = TRUE;
+    clear();
+    noecho();
 }
 #else
 PUBLIC void start_curses NOARGS
@@ -655,6 +650,10 @@ PUBLIC void start_curses NOARGS
 
     if (slinit == 0) {
 	SLtt_get_terminfo();
+#ifdef __DJGPP__
+	SLkp_init ();
+#endif /* __DJGPP__ */
+
 #ifdef UNIX
 #if SLANG_VERSION >= 9935
 	SLang_TT_Read_FD = fileno(stdin);
@@ -691,6 +690,7 @@ PUBLIC void start_curses NOARGS
 	}
 	size_change(0);
 
+#if defined(VMS) || defined(UNIX)
 	SLtt_add_color_attribute(4, SLTT_ULINE_MASK);
 	SLtt_add_color_attribute(5, SLTT_ULINE_MASK);
 	/*
@@ -702,7 +702,12 @@ PUBLIC void start_curses NOARGS
 	} else {
 	    SLtt_Blink_Mode = 0;
 	}
+#endif /* VMS || UNIX */
     }
+#ifdef __DJGPP__
+    else sock_init();
+#endif /* __DJGPP__ */
+
     slinit = 1;
     Current_Attr = 0;
 #ifndef VMS
@@ -715,12 +720,14 @@ PUBLIC void start_curses NOARGS
     SLsmg_init_smg();
     SLsmg_Display_Eight_Bit = LYlowest_eightbit[current_char_set];
     if (SLsmg_Display_Eight_Bit > 191)
-       SLsmg_Display_Eight_Bit = 191; /* may print ctrl chars otherwise - kw */
+	SLsmg_Display_Eight_Bit = 191; /* may print ctrl chars otherwise - kw */
     scrollok(0,0);
     SLsmg_Backspace_Moves = 1;
 #ifndef VMS
-#ifndef _WINDOWS
-   SLtty_set_suspend_state(1);
+#if defined(_WINDOWS) || defined(__DJGPP__)
+    /* SLgetkey_map_to_ansi (1); -- FIXME: is this needed? */
+#else
+    SLtty_set_suspend_state(1);
 #endif /* !_WINDOWS */
 #ifdef SIGTSTP
     if (!no_suspend)
@@ -735,7 +742,7 @@ PUBLIC void start_curses NOARGS
 
 #ifdef VMS
     /*
-     *	If we are VMS then do initsrc() everytime start_curses()
+     *	If we are VMS then do initscr() everytime start_curses()
      *	is called!
      */
     initscr();	/* start curses */
@@ -845,29 +852,30 @@ PUBLIC void start_curses NOARGS
 
 PUBLIC void lynx_enable_mouse ARGS1(int,state)
 {
-   if (LYUseMouse == 0)
-     return;
+    if (LYUseMouse == 0)
+	return;
 
 #ifdef USE_SLANG_MOUSE
-   SLtt_set_mouse_mode (state, 0);
-   SLtt_flush_output ();
+    SLtt_set_mouse_mode (state, 0);
+    SLtt_flush_output ();
 #else
 #ifdef NCURSES_MOUSE_VERSION
-     /* Inform ncurses that we're interested in knowing when mouse
-      button 1 is clicked */
+    /* Inform ncurses that we're interested in knowing when mouse
+     * button 1 is clicked */
 #ifndef _WINDOWS
-   if (state)
-     mousemask(BUTTON1_CLICKED | BUTTON3_CLICKED, NULL);
-   else
-     mousemask(0, NULL);
+    if (state)
+	mousemask(BUTTON1_CLICKED | BUTTON3_CLICKED, NULL);
+    else
+	mousemask(0, NULL);
 #else
-   if (state) mouse_set(BUTTON1_CLICKED && BUTTON2_CLICKED && BUTTON3_CLICKED);
+    if (state)
+	mouse_set(BUTTON1_CLICKED && BUTTON2_CLICKED && BUTTON3_CLICKED);
 #endif /* !_WINDOWS */
 #endif /* NCURSES_MOUSE_VERSION */
 
 #if defined(DJGPP) && !defined(USE_SLANG)
-     if (state)
-       mouse_set(BUTTON1_CLICKED | BUTTON2_CLICKED | BUTTON3_CLICKED);
+    if (state)
+	mouse_set(BUTTON1_CLICKED | BUTTON2_CLICKED | BUTTON3_CLICKED);
 #endif
 #endif				       /* NOT USE_SLANG_MOUSE */
 }
@@ -899,8 +907,8 @@ PUBLIC void stop_curses NOARGS
 
 #if defined(SIGTSTP) && defined(USE_SLANG)
 #ifndef VMS
-   if (!no_suspend)
-       signal(SIGTSTP, SIG_DFL);
+    if (!no_suspend)
+	signal(SIGTSTP, SIG_DFL);
 #endif /* !VMS */
 #endif /* SIGTSTP && USE_SLANG */
 

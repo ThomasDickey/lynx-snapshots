@@ -121,6 +121,7 @@ extern BOOLEAN jump_buffer;     /* TRUE if offering default shortcut */
 extern BOOLEAN goto_buffer;     /* TRUE if offering default goto URL */
 extern char *LYRequestTitle;    /* newdoc.title in calls to getfile() */
 extern char *jumpprompt;        /* The default jump statusline prompt */
+extern int Newline;		/* HText_pageDisplay() requires it */
 extern int more;  /* is there more document to display? */
 extern int display_lines; /* number of lines in the display */
 extern int www_search_result;
@@ -251,6 +252,7 @@ extern BOOLEAN enable_scrollback; /* Clear screen before displaying new page */
 extern BOOLEAN keep_mime_headers; /* Include mime headers and *
 				   * force source dump	      */
 extern BOOLEAN no_url_redirection;   /* Don't follow URL redirections */
+extern BOOLEAN display_partial;      /* Display document during download */
 extern char *form_post_data;         /* User data for post form */
 extern char *form_get_data;          /* User data for get form */
 extern char *http_error_file;        /* Place HTTP status code in this file */
@@ -319,7 +321,6 @@ extern char *MBM_A_subdescript[MBM_V_MAXFILES+1];
 extern FILE *LYTraceLogFP;		/* Pointer for TRACE log	 */
 extern char *LYTraceLogPath;		/* Path for TRACE log		 */
 extern BOOLEAN LYUseTraceLog;		/* Use a TRACE log?		 */
-extern FILE LYOrigStderr;		/* Original stderr pointer	 */
 extern BOOLEAN LYSeekFragMAPinCur;
 extern BOOLEAN LYSeekFragAREAinCur;
 extern BOOLEAN LYStripDotDotURLs;	/* Try to fix ../ in some URLs?  */

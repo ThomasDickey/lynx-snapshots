@@ -48,6 +48,7 @@ PUBLIC long int HTMaxBytes  = 0;	/* No effective limit */
 
 #include <LYexit.h>
 #include <LYUtils.h>
+#include <GridText.h>
 #include <LYGlobalDefs.h>
 #include <LYLeaks.h>
 
@@ -577,6 +578,11 @@ PUBLIC int HTCopy ARGS4(
 
 	(*targetClass.put_block)(sink, input_buffer, status);
 
+#ifdef DISP_PARTIAL
+	if (display_partial)
+	    HText_pageDisplay(Newline,"");
+#endif /* DISP_PARTIAL */
+
 	bytes += status;
 	if (anchor && anchor->content_length > 0)
 	    sprintf(line, "Read %d of %d bytes of data.",
@@ -636,6 +642,11 @@ PUBLIC int HTFileCopy ARGS2(
 	    break;
 	}
 	(*targetClass.put_block)(sink, input_buffer, status);
+
+#ifdef DISP_PARTIAL
+	if (display_partial)
+	    HText_pageDisplay(Newline,"");
+#endif /* DISP_PARTIAL */
 
 	bytes += status;
 	if (nreads >= 100) {
@@ -725,6 +736,11 @@ PRIVATE int HTGzFileCopy ARGS2(
 	    break;
 	}
 	(*targetClass.put_block)(sink, input_buffer, status);
+
+#ifdef DISP_PARTIAL
+	if (display_partial)
+	    HText_pageDisplay(Newline,"");
+#endif /* DISP_PARTIAL */
 
 	bytes += status;
 	if (nreads >= 100) {

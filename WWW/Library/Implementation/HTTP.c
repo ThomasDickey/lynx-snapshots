@@ -33,6 +33,7 @@
 #include <HTAABrow.h>
 
 #include <LYGlobalDefs.h>
+#include <GridText.h>
 #include <LYStrings.h>
 #include <LYLeaks.h>
 
@@ -690,6 +691,10 @@ try_again:
 		goto clean_up;
 	    }
 	}
+#ifdef DISP_PARTIAL
+	else if (display_partial)
+	    HText_pageDisplay(Newline,"");
+#endif /* DISP_PARTIAL */
 
 	bytes_already_read += status;
 	sprintf (line, "Read %d bytes of data.", bytes_already_read);
@@ -1462,8 +1467,7 @@ Cookie2_continuation:
 		 */
 		if (show_401)
 		    break;
-		if (HTAA_shouldRetryWithAuth(start_of_data, length,
-					     (void *)handle, s, NO)) {
+		if (HTAA_shouldRetryWithAuth(start_of_data, length, s, NO)) {
 
 		    HTTP_NETCLOSE(s, handle);
 		    if (dump_output_immediately && !authentication_info[0]) {
@@ -1512,8 +1516,7 @@ Cookie2_continuation:
 		 */
 		if (!using_proxy || show_407)
 		    break;
-		if (HTAA_shouldRetryWithAuth(start_of_data, length,
-					     (void *)handle, s, YES)) {
+		if (HTAA_shouldRetryWithAuth(start_of_data, length, s, YES)) {
 
 		    HTTP_NETCLOSE(s, handle);
 		    if (dump_output_immediately && !proxyauth_info[0]) {

@@ -1,3 +1,13 @@
+/*
+ * This file checked for sprintf() buffer overruns on 1998/05/06 by Bela
+ * Lubkin <filbo@armory.com>.  Please don't introduce any new ones...
+ *
+ * See comments marked "- BL" for two still-possible overruns in the VMS
+ * code.
+ *
+ * Not yet checked for any other sort of buffer overrun.
+ */
+
 #include <HTUtils.h>
 #include <tcp.h>
 #include <HTParse.h>
@@ -458,6 +468,8 @@ PUBLIC void mailform ARGS4(
 	 *  command, and ignore any keywords to minimize risk
 	 *  of them making the line too long or having problem
 	 *  characters. - FM
+	 *
+	 *  Possibly still a problem if user supplies long subject. - BL
 	 */
 	sprintf(cmd,
 		"%s %s%s/subject=\"%s\" %s ",
@@ -485,8 +497,12 @@ PUBLIC void mailform ARGS4(
 	 *  4 letters is arbitrarily the smallest possible mail
 	 *  address, at least for lynx.  That way extra spaces
 	 *  won't confuse the mailer and give a blank address.
+	 *
+	 *  ignore addresses so long that they would overflow the
+	 *  temporary buffer (i.e. about 500 chars). - BL
 	 */
-	if (strlen(address_ptr1) > 3) {
+	if (strlen(address_ptr1) > 3 &&
+            strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
 	    if (!first) {
 		StrAllocCat(command, ",");
 	    }
@@ -514,8 +530,12 @@ PUBLIC void mailform ARGS4(
 	     *	4 letters is arbitrarily the smallest possible mail
 	     *	address, at least for lynx.  That way extra spaces
 	     *	won't confuse the mailer and give a blank address.
+	     *
+	     *  ignore addresses so long that they would overflow the
+	     *  temporary buffer (i.e. about 500 chars). - BL
 	     */
-	    if (strlen(address_ptr1) > 3) {
+	    if (strlen(address_ptr1) > 3 &&
+                strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
 		StrAllocCat(command, ",");
 		sprintf(cmd, mail_adrs, address_ptr1);
 		if (isPMDF) {
@@ -536,10 +556,15 @@ PUBLIC void mailform ARGS4(
     remove(my_tmpfile);
     remove(hdrfile);
 #else /* DOSPATH */
-    sprintf(cmd, "%s -t \"%s\" -F %s", system_mail, address, my_tmpfile);
+    StrAllocCopy(command, system_mail);
+    StrAllocCat(command, " -t \"");
+    StrAllocCat(command, address);
+    StrAllocCat(command, "\" -F ");
+    StrAllocCat(command, my_tmpfile);
     stop_curses();
-    printf("Sending form content:\n\n$ %s\n\nPlease wait...", cmd);
-    system(cmd);
+    printf("Sending form content:\n\n$ %s\n\nPlease wait...", command);
+    system(command);
+    FREE(command);
     sleep(MessageSecs);
     start_curses();
     remove(my_tmpfile);
@@ -775,7 +800,16 @@ PUBLIC void mailmsg ARGS4(
 	} else
 	    address_ptr2 = NULL;
 
-	if (strlen(address) > 3) {
+	/*
+	 *  4 letters is arbitrarily the smallest possible mail
+	 *  address, at least for lynx.  That way extra spaces
+	 *  won't confuse the mailer and give a blank address.
+	 *
+	 *  ignore addresses so long that they would overflow the
+	 *  temporary buffer (i.e. about 500 chars). - BL
+	 */
+	if (strlen(address) > 3 &&
+            strlen(address) + strlen(mail_adrs) < sizeof(cmd)) {
 	    if (!first) {
 		StrAllocCat(command, ",");
 	    }
@@ -793,8 +827,13 @@ PUBLIC void mailmsg ARGS4(
 	remove(hdrfile);
     }
 #else /* DOSPATH */
-    sprintf(cmd, "%s -t \"%s\" -F %s", system_mail, address, my_tmpfile);
-    system(cmd);
+    StrAllocCopy(command, system_mail);
+    StrAllocCat(command, " -t \"");
+    StrAllocCat(command, address);
+    StrAllocCat(command, "\" -F ");
+    StrAllocCat(command, my_tmpfile);
+    system(command);
+    FREE(command);
     remove(my_tmpfile);
 #endif
 #endif /* VMS */
@@ -853,11 +892,13 @@ PUBLIC void reply_by_mail ARGS3(
 #ifdef DOSPATH
     char tmpfile2[256];
 #endif
+#if defined(DOSPATH) || defined(VMS)
+    char *command = NULL;
+#endif
     static char *personal_name = NULL;
     char subject[80];
 #ifdef VMS
     char *address_ptr1 = NULL, *address_ptr2 = NULL;
-    char *command = NULL;
     BOOLEAN first = TRUE;
     BOOLEAN isPMDF = FALSE;
     char hdrfile[256];
@@ -1214,8 +1255,9 @@ PUBLIC void reply_by_mail ARGS3(
      *	Put the To: line in the header.
      */
 #ifndef DOSPATH
-    sprintf(buf, "To: %s\n", address);
-    StrAllocCopy(header, buf);
+    StrAllocCopy(header, "To: ");
+    StrAllocCat(header, address);
+    StrAllocCat(header, "\n");
 #endif
 
     /*
@@ -1245,10 +1287,14 @@ PUBLIC void reply_by_mail ARGS3(
     /*
      *	Put the X-URL and X-Mailer lines in the header.
      */
-    sprintf(buf,
-	    "X-URL: %s%s\n",
-	    (filename && *filename) ? filename : "mailto:",
-	    (filename && *filename) ? "" : address);
+    StrAllocCat(header, "X-URL: ");
+    if (filename && *filename) {
+        StrAllocCat(header, filename);
+    }
+    else {
+        StrAllocCat(header, "mailto:");
+        StrAllocCat(header, address);
+    }
     StrAllocCat(header, buf);
     sprintf(buf, "X-Mailer: Lynx, Version %s\n", LYNX_VERSION);
     StrAllocCat(header, buf);
@@ -1349,8 +1395,9 @@ PUBLIC void reply_by_mail ARGS3(
 	fprintf((isPMDF ? hfd : fd),
 		"X-Personal_name: %s\n",user_input);
 #else
-	sprintf(buf, "X-Personal_name: %s\n", user_input);
-	StrAllocCat(header, buf);
+	StrAllocCat(header, "X-Personal_name: ");
+	StrAllocCat(header, user_input);
+	StrAllocCat(header, "\n");
 #endif /* VMS */
     }
 
@@ -1395,8 +1442,9 @@ PUBLIC void reply_by_mail ARGS3(
 	fprintf(fd, "\n");
     }
 #else
-    sprintf(buf, "From: %s\n", user_input);
-    StrAllocCat(header, buf);
+    StrAllocCat(header, "From: ");
+    StrAllocCat(header, user_input);
+    StrAllocCat(header, "\n");
 #endif /* VMS */
 #endif /* !NO_ANONYMOUS_EMAIL */
 #ifdef VMS
@@ -1433,8 +1481,9 @@ PUBLIC void reply_by_mail ARGS3(
 #ifdef VMS
     sprintf(subject, "%.70s", user_input);
 #else
-    sprintf(buf, "Subject: %s\n", user_input);
-    StrAllocCat(header, buf);
+    StrAllocCat(header, "Subject: ");
+    StrAllocCat(header, user_input);
+    StrAllocCat(header, "\n");
 #endif /* VMS */
 
     /*
@@ -1481,8 +1530,9 @@ PUBLIC void reply_by_mail ARGS3(
 
 #ifdef DOSPATH
     if (*address) {
-	sprintf(buf, "To: %s\n", address);
-	StrAllocCat(header, buf);
+        StrAllocCat(header, "To: ");
+        StrAllocCat(header, address);
+        StrAllocCat(header, "\n");
     }
 #endif
 
@@ -1599,9 +1649,9 @@ PUBLIC void reply_by_mail ARGS3(
 		i = (LYlines - 2);
 	    }
 	    *cp++ = '\0';
-	    sprintf(cmd, "%s\n", cp1);
-	    fprintf(fd, cmd);
-	    addstr(cmd);
+	    fprintf(fd, "%s\n", cp1);
+	    addstr(cp1);
+	    addstr("\n");
 	    cp1 = cp;
 	    i--;
 	}
@@ -1726,6 +1776,8 @@ PUBLIC void reply_by_mail ARGS3(
 	 *  command, and ignore any keywords to minimize risk
 	 *  of them making the line too long or having problem
 	 *  characters. - FM
+	 *
+	 *  Possibly still a problem if user supplies long subject. - BL
 	 */
 	sprintf(cmd,
 		"%s %s%s/subject=\"%s\" %s ",
@@ -1753,8 +1805,12 @@ PUBLIC void reply_by_mail ARGS3(
 	 *  4 letters is arbitrarily the smallest possible mail
 	 *  address, at least for lynx.  That way extra spaces
 	 *  won't confuse the mailer and give a blank address.
+	 *
+	 *  ignore addresses so long that they would overflow the
+	 *  temporary buffer (i.e. about 500 chars). - BL
 	 */
-	if (strlen(address_ptr1) > 3) {
+	if (strlen(address_ptr1) > 3 &&
+            strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
 	    if (!first) {
 		StrAllocCat(command, ",");
 	    }
@@ -1782,8 +1838,12 @@ PUBLIC void reply_by_mail ARGS3(
 	     *	4 letters is arbitrarily the smallest possible mail
 	     *	address, at least for lynx.  That way extra spaces
 	     *	won't confuse the mailer and give a blank address.
+	     *
+	     *  ignore addresses so long that they would overflow the
+	     *  temporary buffer (i.e. about 500 chars). - BL
 	     */
-	    if (strlen(address_ptr1) > 3) {
+	    if (strlen(address_ptr1) > 3 &&
+                strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
 		StrAllocCat(command, ",");
 		sprintf(cmd, mail_adrs, address_ptr1);
 		if (isPMDF) {
@@ -1839,14 +1899,19 @@ PUBLIC void reply_by_mail ARGS3(
     while ((n = fread(buf, 1, sizeof(buf), fd)) != 0)
 	fwrite(buf, 1, n, fp);
 #ifdef DOSPATH
-	sprintf(cmd, "%s -t \"%s\" -F %s", system_mail, address, tmpfile2);
-	fclose(fp);		/* Close the tmpfile. */
-	stop_curses();
-	printf("Sending your comment:\n\n$ %s\n\nPlease wait...", cmd);
-	system(cmd);
-	sleep(MessageSecs);
-	start_curses();
-	remove(tmpfile2);	/* Delete the tmpfile. */
+    StrAllocCopy(command, system_mail);
+    StrAllocCat(command, " -t \"");
+    StrAllocCat(command, address);
+    StrAllocCat(command, "\" -F ");
+    StrAllocCat(command, tmpfile2);
+    fclose(fp);		/* Close the tmpfile. */
+    stop_curses();
+    printf("Sending your comment:\n\n$ %s\n\nPlease wait...", command);
+    system(command);
+    FREE(command);
+    sleep(MessageSecs);
+    start_curses();
+    remove(tmpfile2);	/* Delete the tmpfile. */
 #else
     pclose(fp);
 #endif

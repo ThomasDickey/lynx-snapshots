@@ -122,8 +122,9 @@ PUBLIC void options NOARGS
 #endif /* !VMS */
     char *choices[MAXCHOICES];
     int CurrentCharSet = current_char_set;
-    int CurrentShowColor = LYShowColor;
     int CurrentAssumeCharSet = UCLYhndl_for_unspec;
+    int CurrentAssumeLocalCharSet = UCLYhndl_HTFile_for_unspec;
+    int CurrentShowColor = LYShowColor;
     BOOLEAN CurrentRawMode = LYRawMode;
     BOOLEAN AddValueAccepted = FALSE;
     char *cp = NULL;
@@ -841,6 +842,7 @@ draw_options:
 			HTMLSetUseDefaultRawMode(current_char_set, LYRawMode);
 			HTMLUseCharacterSet(current_char_set);
 			CurrentAssumeCharSet = UCLYhndl_for_unspec;
+			CurrentAssumeLocalCharSet = UCLYhndl_HTFile_for_unspec;
 			CurrentRawMode = LYRawMode;
 #if !defined(VMS) && !defined(USE_SLANG)
 			if (!LYSelectPopups)
