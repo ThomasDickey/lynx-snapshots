@@ -98,7 +98,7 @@ PRIVATE int set_clicked_link ARGS2(int,x,int,y)
  */
 PUBLIC char *LYstrncpy ARGS3(
 	char *,		dst,
-	char *,		src,
+	CONST char *,	src,
 	int,		n)
 {
     char *val;
@@ -125,7 +125,7 @@ PUBLIC char *LYstrncpy ARGS3(
  * src string is copied until either end of string or max number of
  * either bytes or glyphs (mbcs sequences) (currently only UTF8).
  */
-PUBLIC char * LYmbcsstrncpy ARGS5(char *,dst, char *,src, int,n_bytes,
+PUBLIC char * LYmbcsstrncpy ARGS5(char *,dst, CONST char *,src, int,n_bytes,
 				  int,n_glyphs,	int,utf_flag)
 {
     char *val = dst;

@@ -173,8 +173,7 @@ int mainloop NOARGS
     int i;
 
 #ifdef DIRED_SUPPORT
-    char *tp;
-    char tmpbuf[1024];
+    char *tp = NULL;
     struct stat dir_info;
     extern char LYPermitFileURL[];
     extern char LYDiredFileURL[];
@@ -3650,21 +3649,25 @@ check_goto_URL:
 	        if (nlinks > 0) {
 		    cp = links[curdoc.link].lname;
 		    if (is_url(cp) == FILE_URL_TYPE) {
-		        tp = cp;
-		        if (!strncmp(tp, "file://localhost", 16))
-		            tp += 16;
-		        else if (!strncmp(tp, "file:", 5))
-		           tp += 5;
-		        strcpy(tmpbuf, tp);
-		        HTUnEscape(tmpbuf);
-		        if (stat(tmpbuf, &dir_info) == -1) {
+		        if (!strncmp(tp, "file://localhost", 16)) {
+			    /*
+			     *  This is the only case that should occur. - kw
+			     */
+			    StrAllocCopy(tp, cp + 16);
+		        } else if (!strncmp(tp, "file:", 5)) {
+			    StrAllocCopy(tp, cp + 5);
+		        } else {
+			    StrAllocCopy(tp, cp);
+			}
+		        HTUnEscape(tp);
+		        if (stat(tp, &dir_info) == -1) {
 		            _statusline(NO_STATUS);
 		            sleep(AlertSecs);
 			} else {
 		            if (((dir_info.st_mode) & S_IFMT) == S_IFREG) {
-			        strcpy(tmpbuf, cp);
-			        HTUnEscapeSome(tmpbuf, "/");
-			        if (edit_current_file(tmpbuf,
+			        StrAllocCopy(tp, cp);
+			        HTUnEscapeSome(tp, "/");
+			        if (edit_current_file(tp,
 			      			      curdoc.link, Newline)) {
 			    	    HTuncache_current_document();
 			  	    StrAllocCopy(newdoc.address,
@@ -3690,6 +3693,7 @@ check_goto_URL:
 			        }
 			    }
 		        }
+			FREE(tp);
 		    }
 	        }
 	    } else

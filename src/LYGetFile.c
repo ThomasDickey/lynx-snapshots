@@ -472,7 +472,7 @@ Try_Redirected_URL:
 				      ((HTMainAnchor && !LYUserSpecifiedURL) ?
 				       (char *)HTMainAnchor->address :
 				       (char *)doc->address),
-				      (char *)title);
+				      title);
 		    }
 		    return(NULLFILE);
 		

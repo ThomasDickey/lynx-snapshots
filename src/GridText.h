@@ -14,7 +14,9 @@
 #define LY_UNDERLINE_END_CHAR	'\004'
 #define LY_BOLD_START_CHAR	'\005'
 #define LY_BOLD_END_CHAR	'\006'
-#define LY_SOFT_HYPHEN		'\007'
+#ifndef LY_SOFT_HYPHEN
+#define LY_SOFT_HYPHEN		((char)7)
+#endif /* !LY_SOFT_HYPHEN */
 #define IsSpecialAttrChar(a)  ((a > '\002') && (a < '\010'))
 
 extern int HTCurSelectGroupType;
@@ -163,7 +165,7 @@ extern HTList * search_queries; /* Previous isindex and whereis queries */
 extern void HTSearchQueries_free NOPARAMS;
 extern void HTAddSearchQuery PARAMS((char *query));
 
-extern void user_message PARAMS((char * message, char * argument));
+extern void user_message PARAMS((CONST char * message, CONST char * argument));
 
 #define _user_message(msg, arg)	mustshow = TRUE, user_message(msg, arg)
 

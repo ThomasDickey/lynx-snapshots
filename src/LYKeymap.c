@@ -520,7 +520,7 @@ PRIVATE char *pretty ARGS1 (int, c)
 		sprintf(buf, "&gt;           ");
 	else if (c == 0177)
 		sprintf(buf, "&lt;delete&gt;    ");
-	else if (c > ' ' && c < 0377)
+	else if (c > ' ' && c <= 0377)
 		sprintf(buf, "%c", c);
 	else if (c < ' ')
 		sprintf(buf, "^%c", c|0100);
@@ -589,7 +589,7 @@ PRIVATE int LYLoadKeymap ARGS4 (
     }
     for (i = 1; i < sizeof(keymap); i++) {
 	/* LYK_PIPE not implemented yet */
-	if (!isalpha(i-1) &&
+	if ((i > 127 || i <= ' ' || !isalpha(i-1)) &&
 	    strcmp(revmap[(unsigned char)keymap[i]].name, "PIPE")) {
 	    print_binding(target, buf, i);
 	}

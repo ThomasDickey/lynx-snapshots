@@ -105,7 +105,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
 	HTStream*,		sink)
 {
   int s;			/* Socket number for returned data */
-  char *url = (char *)arg;	/* The URL which get_physical() returned */
+  CONST char *url = arg;	/* The URL which get_physical() returned */
   char *command = NULL;		/* The whole command */
   char *eol;			/* End of line if found */
   char *start_of_data;		/* Start of body of reply */
@@ -1307,7 +1307,6 @@ Cookie2_continuation:
 	        if (TOUPPER(*cp) != 'L') {
 		    cp++;
 	        } else if (!strncasecomp(cp, "Location:", 9)) {
-		    char *value = NULL;
 	            char *cp1 = NULL, *cp2 = NULL;
 	            cp += 9;
 		    /*

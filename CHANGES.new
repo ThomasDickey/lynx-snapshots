@@ -10,9 +10,21 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
-97-09-17
-* Undo misleading/incorrect use of 'const' in HTML.c, and associated
-  modules. - TD
+1997-09-18
+* Try again after interrupted waitpid() in LYLoadCGI(), as in LYExecv() - KW
+* Tweak in LYKeymap.c to bypass the isalpha() test for non-ASCII values,
+  including values > 255 mapped to arrow keys, etc., when generating the
+  'k'eymap display. - KW
+* Changes to prevent many (but not all) compiler warnings about `const'.
+  Not that this is different from TD's recent changes. Also some other minor
+  tweaks relating to (gcc) compiler warnings. - KW
+1997-09-17
+* Mods in GridText.c to use HTEscapeSP() for space-to-plus conversions of
+  name fields, and not just value fields, in submitted form content.  Note
+  that some CGI scripts may still be doing plus-to-space restorations only
+  for value fields, and only hex unescaping for name fields, while others
+  may not be hex unescaping the name fields, so we may as well follow the
+  specs fully (and cross our fingers :). - KW & FM
 * merge symbols 'has_color' and 'lynx_has_color' to simplify ifdef's,
   and correct a problem building color-style configuration. - TD
 * add configure symbol for ifdef'ing presence of waitpid, which
@@ -27,9 +39,14 @@ file) are duplicated here. - KW]
 * Add configure test for HP-UX -lHcurses library. - TD
 * Minor adjustments to names of configure-script variables, to make
   them the same as other programs (e.g., tin-unoff). - TD
+1997-09-16
+* Added code to JKT's and KW's mods in LYPrint.c to also handle VMS:
+  set the document's title as a logical on VMS (can be accessed via 
+  f$trnlnm("LYNX_PRINT_TITLE") in scripts). - FM
+* Smaller cleanups here and there - FM & KW
 97-09-15
 * Recover from bad sequence "<=" in SGML.c by outputting those characters
-  litterally. - KW
+  literally. - KW
 * Try again after interrupted waitpid() in LYExecv(). - JED
 * Some tweaks in new DTD, some doc typo corrections. - KW
 97-09-13

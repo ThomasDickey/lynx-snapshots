@@ -121,7 +121,7 @@ PRIVATE void MemAllocCopy ARGS3(
     temp = (char *)calloc(1, ((end - start) + 1));
     if (temp == NULL)
         outofmem(__FILE__, "MemAllocCopy");
-    LYstrncpy(temp, (char *)start, (end - start));
+    LYstrncpy(temp, start, (end - start));
     HTSACopy(dest, temp);
     FREE(temp);
 }
@@ -238,7 +238,7 @@ PRIVATE BOOLEAN port_matches ARGS2(
 	int,		port,
 	CONST char *,	list)
 {
-    char *number = (char *)list;
+    CONST char *number = list;
 
     if (!(number && isdigit(*number)))
         return(FALSE);
@@ -897,7 +897,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		value = (char *)calloc(1, value_len + 1);
 		if (value == NULL)
 		    outofmem(__FILE__, "LYProcessSetCookies");
-		LYstrncpy(value, (char *)value_start, value_len);
+		LYstrncpy(value, value_start, value_len);
 	    }
 	    if (len == 6 && !strncasecomp(attr_start, "secure", 6)) {
 	        if (value == NULL) {
@@ -1395,7 +1395,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		value = (char *)calloc(1, value_len + 1);
 		if (value == NULL)
 		    outofmem(__FILE__, "LYProcessSetCookie");
-		LYstrncpy(value, (char *)value_start, value_len);
+		LYstrncpy(value, value_start, value_len);
 	    }
 	    if (len == 6 && !strncasecomp(attr_start, "secure", 6)) {
 	        if (value == NULL) {

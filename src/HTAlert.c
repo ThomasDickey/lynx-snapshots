@@ -32,13 +32,13 @@ PUBLIC void HTAlert ARGS1(
 	CONST char *,	Msg)
 {
     if (TRACE) {
-        fprintf(stderr, "\nAlert!: %s", (char *)Msg);
+        fprintf(stderr, "\nAlert!: %s", Msg);
 	fflush(stderr);
-        _user_message("Alert!: %s", (char *)Msg);
+        _user_message("Alert!: %s", Msg);
         fprintf(stderr, "\n\n");
 	fflush(stderr);
     } else
-        _user_message("Alert!: %s", (char *)Msg);
+        _user_message("Alert!: %s", Msg);
 
     sleep(AlertSecs);
 }
@@ -50,9 +50,9 @@ PUBLIC void HTProgress ARGS1(
 	CONST char *,	Msg)
 {
     if (TRACE)
-        fprintf(stderr, "%s\n", (char *)Msg);
+        fprintf(stderr, "%s\n", Msg);
     else
-        statusline((char *)Msg);
+        statusline(Msg);
 }
 
 /*	Seek confirmation.				HTConfirm()
@@ -68,7 +68,7 @@ PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
 	extern BOOLEAN HadVMSInterrupt;
 #endif /* VMS */
 	
-	_user_message("%s (y/n) ", (char *)Msg);
+	_user_message("%s (y/n) ", Msg);
 	
 	while (1) {
 	    c = LYgetch();
@@ -99,7 +99,7 @@ PUBLIC char * HTPrompt ARGS2(
     Tmp[0] = '\0';
     Tmp[199] = '\0';
 
-    _statusline((char *)Msg);
+    _statusline(Msg);
     if (deflt) 
         strncpy(Tmp, deflt, 199);
 
@@ -124,7 +124,7 @@ PUBLIC char * HTPromptPassword ARGS1(
     pw[0] = '\0';
 
     if (!dump_output_immediately) {
-        _statusline(Msg ? (char *)Msg : PASSWORD_PROMPT);
+        _statusline(Msg ? Msg : PASSWORD_PROMPT);
         LYgetstr(pw, HIDDEN, sizeof(pw), NORECALL); /* hidden */
         StrAllocCopy(result, pw);
     } else {

@@ -378,7 +378,7 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 	 */
 	if (!strncmp(tmpbuf, "~/", 2)) {
 	    char *cp1 = NULL;
-	    StrAllocCopy(cp1, (char *)Home_Dir());
+	    StrAllocCopy(cp1, Home_Dir());
 	    StrAllocCat(cp1, (tmpbuf + 1));
 	    if (strlen(cp1) > (sizeof(tmpbuf) - 1)) {
 		sprintf(tmpbuf, "%s", "Path too long");
@@ -622,8 +622,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	 *  Allow ~/ references to the home directory.
 	 */
 	if (!strncmp(tmpbuf,"~/",2)) {
-	    cp = (char *)Home_Dir();
-	    strcpy(newpath, cp);
+	    strcpy(newpath, Home_Dir());
 	    strcat(newpath, (tmpbuf + 1));
 	    strcpy(tmpbuf, newpath);
 	}
@@ -2228,17 +2227,18 @@ PUBLIC int LYExecv ARGS3(
 	    while (wait(&wstatus) != pid)
 		; /* do nothing */
 #else
-	    while (-1 == waitpid (pid, &wstatus, 0)) /* wait for child */
-	    {
+	    while (-1 == waitpid(pid, &wstatus, 0)) { /* wait for child */
 #ifdef EINTR
-		if (errno == EINTR) continue;
-#endif
+		if (errno == EINTR)
+		    continue;
+#endif /* EINTR */
 #ifdef ERESTARTSYS
-		if (errno == ERESTARTSYS) continue;
-#endif
+		if (errno == ERESTARTSYS)
+		    continue;
+#endif /* ERESTARTSYS */
 		break;
 	    }
-#endif
+#endif /* HAVE_TYPE_UNIONWAIT && !HAVE_WAITPID */
 	    if (WEXITSTATUS(wstatus) != 0 ||
 		WTERMSIG(wstatus) > 0)  { /* error return */
 		sprintf(tmpbuf, "Probable failure to %s due to system error!",

@@ -26,7 +26,7 @@
 #define FREE(x) if (x) {free(x); x = NULL;}
 
 extern int current_char_set;
-extern char *LYchar_set_names[];
+extern CONST char *LYchar_set_names[];
 extern BOOL HTPassEightBitRaw;
 extern HTCJKlang HTCJK;
 
@@ -442,8 +442,9 @@ PRIVATE void HTMIME_put_character ARGS2(
 							    UCT_STAGE_MIME),
 				       UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
 				}
-				if (p_in->enc != UCT_ENC_CJK &&
-				    (p_in->codepoints & UCT_CP_SUBSETOF_LAT1)){
+				if ((p_in->enc != UCT_ENC_CJK) &&
+				    (p_in->codepoints &
+				     UCT_CP_SUBSETOF_LAT1)) {
 				    HTCJK = NOCJK;
 				} else if (chndl == current_char_set) {
 				HTPassEightBitRaw = TRUE;
@@ -2460,7 +2461,7 @@ PUBLIC int HTrjis ARGS2(
 */
 /*
  * RJIS ( Recover JIS code from broken file )
- * @Header: rjis.c,v 0.2 92/09/04 takahasi Exp @
+ * $Header: /usr/build/VCS/lynx/WWW/Library/Implementation/RCS/HTMIME.c,v 1.10 1997/09/19 01:14:00 klaus Exp $
  * Copyright (C) 1992 1994
  * Hironobu Takahashi (takahasi@tiny.or.jp)
  *

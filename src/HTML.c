@@ -520,7 +520,7 @@ char prevailing_class[TEMPSTRINGSIZE];
     int hcode;
 #endif
 
-#define CHECK_ID(code) LYCheckForID(me, present, (CONST char **)value, (int)code)
+#define CHECK_ID(code) LYCheckForID(me, present, value, (int)code)
 
 /*	Start Element
 **	-------------
@@ -529,7 +529,7 @@ PRIVATE void HTML_start_element ARGS5(
 	HTStructured *, 	me,
 	int,			element_number,
 	CONST BOOL*,	 	present,
-	char **,		value,
+	CONST char **,		value,
 	char **,		include)
 {
     char *alt_string = NULL;
@@ -595,14 +595,14 @@ PRIVATE void HTML_start_element ARGS5(
                         fprintf(stderr, " (undefined) %s\n", myHash);
                         if (rp)
                         {
-                                int hcode;
+                                int hcd;
                                 *rp='\0'; /* trim the class */
-                                hcode=hash_code(myHash);
-                                fprintf(stderr, "CSS:%s -> %d", myHash, hcode);
-                                if (hashStyles[hcode].code!=hcode)
+                                hcd = hash_code(myHash);
+                                fprintf(stderr, "CSS:%s -> %d", myHash, hcd);
+                                if (hashStyles[hcd].code!=hcd)
                                         fprintf(stderr, " (undefined) %s\n", myHash);
                                 else
-                                        fprintf(stderr, " ca=%d\n", hashStyles[hcode].color);
+                                        fprintf(stderr, " ca=%d\n", hashStyles[hcd].color);
                         }
                 }
                 else
@@ -4193,9 +4193,9 @@ PRIVATE void HTML_start_element ARGS5(
 		if (current_char_set) {
 		    LYExpandString((char **)&value[HTML_BUTTON_VALUE]);
 		}
-	        LYUnEscapeEntities(value[HTML_BUTTON_VALUE],
+	        LYUnEscapeEntities((char *)value[HTML_BUTTON_VALUE],
 				   me->UsePlainSpace, me->HiddenValue);
-		I.value = value[HTML_BUTTON_VALUE];
+		I.value = (char *)value[HTML_BUTTON_VALUE];
 		/*
 		 *  Convert any newlines or tabs to spaces,
 		 *  and trim any lead or trailing spaces. - FM
@@ -4513,12 +4513,12 @@ PRIVATE void HTML_start_element ARGS5(
 			    (char **)&value[HTML_INPUT_ALT] :
 			    (char **)&value[HTML_INPUT_VALUE]));
 	        LYUnEscapeEntities(((UseALTasVALUE == TRUE) ?
-			      value[HTML_INPUT_ALT] :
-			      value[HTML_INPUT_VALUE]),
+			      (char *)value[HTML_INPUT_ALT] :
+			      (char *)value[HTML_INPUT_VALUE]),
 				   me->UsePlainSpace, me->HiddenValue);
 		I.value = ((UseALTasVALUE == TRUE) ?
-		     value[HTML_INPUT_ALT] :
-		     value[HTML_INPUT_VALUE]);
+		     (char *)value[HTML_INPUT_ALT] :
+		     (char *)value[HTML_INPUT_VALUE]);
 		if (me->UsePlainSpace == TRUE) {
 		    /*
 		     *  Convert any newlines or tabs to spaces,
@@ -5016,7 +5016,7 @@ PRIVATE void HTML_start_element ARGS5(
 			LYUseDefaultRawMode = TRUE;
 			HTMLSetCharacterHandling(current_char_set);
 		    }
-	            LYUnEscapeEntities(value[HTML_OPTION_VALUE],
+	            LYUnEscapeEntities((char *)value[HTML_OPTION_VALUE],
 		    		       me->UsePlainSpace, me->HiddenValue);
 		    if (CurrentCharSet) {
 		        current_char_set = CurrentCharSet;
@@ -5026,7 +5026,7 @@ PRIVATE void HTML_start_element ARGS5(
 			HTCJK = CurrentHTCJK;
 		    }
 
-		    I.value = value[HTML_OPTION_VALUE];
+		    I.value = (char *)value[HTML_OPTION_VALUE];
 		}
 
 	        if (me->select_disabled ||

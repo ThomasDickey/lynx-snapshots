@@ -600,7 +600,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 {
     int	        status;
     HText *	text;
-    char * address_to_load =  (char *)full_address;
+    CONST char * address_to_load = full_address;
     extern char LYforce_no_cache;		       /* from   GridText.c */
     extern char LYoverride_no_cache;		       /* from LYMainLoop.c */
     extern char * HTLoadedDocumentURL NOPARAMS;		   /* in GridText.c */

@@ -128,7 +128,7 @@ PUBLIC int HTDirReadme = HT_DIR_README_TOP;
 #endif /* DIRED_SUPPORT */
 
 extern int current_char_set;
-extern char *LYchar_set_names[];
+extern CONST char *LYchar_set_names[];
 extern BOOL HTPassEightBitRaw;
 extern HTCJKlang HTCJK;
 #ifndef EXP_CHARTRANS
@@ -865,7 +865,7 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 					UCT_STAGE_HTEXT,
 					UCT_SETBY_DEFAULT);
 	    }
-	    if (p_in->enc != UCT_ENC_CJK &&
+	    if ((p_in->enc != UCT_ENC_CJK) &&
 		(p_in->codepoints & UCT_CP_SUBSETOF_LAT1)) {
 		HTCJK = NOCJK;
 	    } else if (chndl == current_char_set) {
@@ -1892,19 +1892,25 @@ PUBLIC int HTLoadFile ARGS4(
         	pathname = HTParse(logical, "", 
 					PARSE_PATH + PARSE_PUNCTUATION);
 
-    		if (!strcmp(pathname,"/"))  /* root path */
+    		if (!strcmp(pathname,"/")) {
+		    /*
+		    **  Root path.
+		    */
         	    StrAllocCopy (tail, "/foo/..");
-    	    	else {
-        	    char *p = strrchr(pathname, '/');  /* find lastslash */
+    	    	} else {
+		    char *p = strrchr(pathname, '/');  /* find lastslash */
+
 		    if (!p) {
 			/*
-			 *  This probably should not happen, but be
-			 *  prepared if it does... - kw
-			 */
+			**  This probably should not happen,
+			**  but be prepared if it does. - KW
+			*/
 			StrAllocCopy (tail, "/foo/..");
 		    } else {
-			/* take slash off the beginning */
-			StrAllocCopy(tail, p+1);
+			/*
+			**  Take slash off the beginning.
+			*/
+			StrAllocCopy(tail, (p + 1));
 		    }
     		}
     		FREE(pathname);

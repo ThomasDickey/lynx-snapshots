@@ -38,7 +38,7 @@ extern int _NOSHARE(COLS);
 #endif
 
 #if defined(COLOR_CURSES)
-int lynx_uses_color = 0;
+int lynx_has_color = 0;
 #endif
 
 /*
@@ -211,7 +211,7 @@ PRIVATE int LYAttrset ARGS3(WINDOW*,win,int,color,int,mono)
 {
 	if (TRACE)
 		fprintf(stderr, "CSS:LYAttrset (%d, %d)\n", color, mono);
-	if (lynx_uses_color && LYShowColor >= SHOW_COLOR_ON && color > -1)
+	if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON && color > -1)
 	{
 		wattrset(win,color);
 #if 0
@@ -393,7 +393,7 @@ PRIVATE struct {
  */
 PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 {
-    if (lynx_uses_color && LYShowColor >= SHOW_COLOR_ON) {
+    if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON) {
 	int code = 0;
 	int attr = A_NORMAL;
 	int offs = 1;
@@ -489,7 +489,7 @@ PUBLIC int lynx_chg_color ARGS3(
 
 PUBLIC void lynx_set_color ARGS1(int, a)
 {
-    if (lynx_uses_color && LYShowColor >= SHOW_COLOR_ON) {
+    if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON) {
 	attrset(lynx_color_cfg[a].attr | COLOR_PAIR(a+1));
     }
 }
@@ -504,12 +504,12 @@ PUBLIC void lynx_standout ARGS1(int, flag)
 
 PRIVATE void lynx_init_colors NOARGS
 {
-    lynx_uses_color = FALSE;
+    lynx_has_color = FALSE;
 
     if (has_colors()) {
 	int n, m;
 
-	lynx_uses_color = TRUE;
+	lynx_has_color = TRUE;
 	start_color();
 
 	for (n = 0; n < sizeof(lynx_color_cfg)/sizeof(lynx_color_cfg[0]); n++) {
@@ -704,8 +704,8 @@ PUBLIC void start_curses NOARGS
 #endif
 
 #ifdef USE_COLOR_STYLE
-	lynx_uses_color = has_colors();
-	if (lynx_uses_color)
+	lynx_has_color = has_colors();
+	if (lynx_has_color)
 		start_color();
 	parse_userstyles();
 #endif
@@ -1602,7 +1602,7 @@ PUBLIC void lynx_start_link_color ARGS2(
 	    start_underline ();
 #endif /* USE_SLANG */
 #if defined(FANCY_CURSES) && defined(COLOR_CURSES)
-	if (lynx_uses_color && LYShowColor >= SHOW_COLOR_ON)
+	if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
 	    start_underline ();
 #endif /* USE_SLANG */
      } else {
@@ -1630,7 +1630,7 @@ PUBLIC void lynx_stop_link_color ARGS2(
 	stop_underline ();
 #endif /* USE_SLANG */
 #if defined(FANCY_CURSES) && defined(COLOR_CURSES)
-	if (lynx_uses_color && LYShowColor >= SHOW_COLOR_ON)
+	if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
 	    stop_underline ();
 #endif /* USE_SLANG */
     } else {
@@ -1663,7 +1663,7 @@ PUBLIC void lynx_start_target_color NOARGS
 PUBLIC void lynx_start_status_color NOARGS
 {
 #if USE_COLOR_TABLE && defined(COLOR_CURSES)
-    if (lynx_uses_color && LYShowColor >= SHOW_COLOR_ON)
+    if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
 	lynx_set_color (2);
     else
 #endif
@@ -1673,7 +1673,7 @@ PUBLIC void lynx_start_status_color NOARGS
 PUBLIC void lynx_stop_status_color NOARGS
 {
 #if USE_COLOR_TABLE && defined(COLOR_CURSES)
-    if (lynx_uses_color && LYShowColor >= SHOW_COLOR_ON)
+    if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
 	lynx_set_color (0);
     else
 #endif

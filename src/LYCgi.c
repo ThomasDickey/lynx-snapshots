@@ -271,6 +271,12 @@ PRIVATE int LYLoadCGI ARGS4(
 	       strcmp(arg, HTLoadedDocumentURL()) &&
 	       HText_AreDifferent(anAnchor, arg) &&
  	       HTLoadedDocumentBookmark()) {
+	/*
+	 *  If we are reloading a lynxcgi document that had already been
+	 *  loaded, the various checks above should allow it even if
+	 *  no_bookmark_exec is TRUE an we are not now coming from a
+	 *  bookmark page. - kw
+	 */
 	_statusline(BOOKMARK_EXEC_DISABLED);
 	sleep(MessageSecs);
 	status = HT_NOT_LOADED;
@@ -281,6 +287,12 @@ PRIVATE int LYLoadCGI ARGS4(
 	       HText_AreDifferent(anAnchor, arg) &&
 	       !exec_ok(HTLoadedDocumentURL(), pgm,
 			CGI_PATH)) { /* exec_ok gives out msg. */
+	/*
+	 *  If we are reloading a lynxcgi document that had already been
+	 *  loaded, the various checks above should allow it even if
+	 *  exec_ok() would reject it because we are not now coming from
+	 *  a document with a URL allowed by TRUSTED_LYNXCGI rules. - kw
+	 */
 	status = HT_NOT_LOADED;
 
     } else {
@@ -380,8 +392,18 @@ PRIVATE int LYLoadCGI ARGS4(
 		while (wait(&wstatus) != pid)
 		    ; /* do nothing */
 #else
-		waitpid(pid, &wstatus, 0); /* wait for child */
-#endif
+		while (-1 == waitpid(pid, &wstatus, 0)) { /* wait for child */
+#ifdef EINTR
+		    if (errno == EINTR)
+			continue;
+#endif /* EINTR */
+#ifdef ERESTARTSYS
+		    if (errno == ERESTARTSYS)
+			continue;
+#endif /* ERESTARTSYS */
+		    break;
+		}
+#endif /* HAVE_TYPE_UNIONWAIT && !HAVE_WAITPID */
 		if (anAnchor->post_data) {
 		    close(fd1[1]);
 		}

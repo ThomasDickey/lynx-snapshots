@@ -52,8 +52,8 @@
 #include "[.chrtrans]cp1250_uni.h"
 #include "[.chrtrans]cp1251_uni.h"
 #include "[.chrtrans]cp1252_uni.h"
-#include "[.chrtrans]utf8_uni.h"
 #include "[.chrtrans]viscii_uni.h"
+#include "[.chrtrans]utf8_uni.h"
 #include "[.chrtrans]rfc_suni.h"
 #include "[.chrtrans]mnemonic_suni.h"
 #ifdef NOTDEFINED 
@@ -314,7 +314,7 @@ PRIVATE int UC_MapGN PARAMS((
 	int		UChndl,
 	int		update_flag));
 PRIVATE int UC_FindGN_byMIME PARAMS((
-	char *		UC_MIMEcharset));
+	CONST char *	UC_MIMEcharset));
 PRIVATE void UCreset_allocated_LYCharSets NOPARAMS;
 PRIVATE void UCfree_allocated_LYCharSets NOPARAMS;
 PRIVATE char ** UC_setup_LYCharSets_repl PARAMS((
@@ -322,8 +322,8 @@ PRIVATE char ** UC_setup_LYCharSets_repl PARAMS((
 	int		lowest8));
 PRIVATE int UC_Register_with_LYCharSets PARAMS((
 	int		s,
-	char *		UC_MIMEcharset,
-	char *		UC_LYNXcharset,
+	CONST char *	UC_MIMEcharset,
+	CONST char *	UC_LYNXcharset,
 	int		lowest_eightbit));
 PRIVATE void UCcleanup_mem NOPARAMS;
 
@@ -1064,21 +1064,23 @@ PUBLIC long int UCTransToUni ARGS2(
 
   ch_iu = (unsigned char)ch_in;
 #ifndef UC_NO_SHORTCUTS
-  if (charset_in == 0)
-    return ch_iu;
-  if ((unsigned char)ch_in < 128 && (unsigned char)ch_in >= 32)
-    return ch_iu;
+    if (charset_in == 0)
+	return ch_iu;
+    if ((unsigned char)ch_in < 128 && (unsigned char)ch_in >= 32)
+	return ch_iu;
 #endif /* UC_NO_SHORTCUTS */
     if (charset_in < 0)
 	return -11;
-  if ((unsigned char)ch_in < 32 &&
-      LYCharSet_UC[charset_in].enc != UCT_ENC_8BIT_C0)
-      /* don't translate C0 chars except for specific charsets */
-      return ch_iu;
-  if ((UChndl_in = LYCharSet_UC[charset_in].UChndl) < 0)
-    return -11;
-  if (!UCInfo[UChndl_in].num_uni)
-    return -11;
+    if ((unsigned char)ch_in < 32 &&
+	LYCharSet_UC[charset_in].enc != UCT_ENC_8BIT_C0)
+	/*
+	 *  Don't translate C0 chars except for specific charsets.
+	 */
+	return ch_iu;
+    if ((UChndl_in = LYCharSet_UC[charset_in].UChndl) < 0)
+	return -11;
+    if (!UCInfo[UChndl_in].num_uni)
+	return -11;
     if ((Gn = UCInfo[UChndl_in].GN) < 0) {
 	Gn = UC_MapGN(UChndl_in,1);
     }
@@ -1219,7 +1221,7 @@ if (buflen<2)
 }
 
 PRIVATE int UC_FindGN_byMIME ARGS1(
-	char *,		UC_MIMEcharset)
+	CONST char *,		UC_MIMEcharset)
 {
   int i;
 
@@ -1500,8 +1502,8 @@ PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
  */
 PRIVATE int UC_Register_with_LYCharSets ARGS4(
 	int,		s,
-				       char *, UC_MIMEcharset,
-				       char *, UC_LYNXcharset,
+				       CONST char *, UC_MIMEcharset,
+				       CONST char *, UC_LYNXcharset,
 				       int, lowest_eightbit)
 {
   int i, LYhndl,found;
@@ -1555,7 +1557,7 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
 	 *  Hmm, try to be conservative here.
 	 */
     LYchar_set_names[LYhndl] = UC_LYNXcharset;
-    LYchar_set_names[LYhndl+1] = (char *) 0;
+    LYchar_set_names[LYhndl+1] = NULL;
 	/*
 	 *  Terminating NULL may be looked for by Lynx code.
 	 */
@@ -1596,8 +1598,8 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
  * is done here yet.
  */
 PUBLIC void UC_Charset_Setup ARGS8(
-	char *,			UC_MIMEcharset,
-		      char *, UC_LYNXcharset,
+	CONST char *,		UC_MIMEcharset,
+	CONST char *,		UC_LYNXcharset,
 	u8 *,			unicount,
 	u16 *,			unitable,
 	int,			nnuni,

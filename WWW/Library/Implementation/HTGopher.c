@@ -185,22 +185,23 @@ PUBLIC BOOLEAN HT_Is_Gopher_URL=FALSE;
 PRIVATE void write_anchor ARGS2(CONST char *,text, CONST char *,addr)
 {
     BOOL present[HTML_A_ATTRIBUTES];
-    char * value[HTML_A_ATTRIBUTES];
+    CONST char * value[HTML_A_ATTRIBUTES];
     
     int i;
     
     for (i = 0; i < HTML_A_ATTRIBUTES; i++)
         present[i] = 0;
     present[HTML_A_HREF] = YES;
-    value[HTML_A_HREF] = addr;
+    ((CONST char **)value)[HTML_A_HREF] = addr;
     present[HTML_A_TITLE] = YES;
-    value[HTML_A_TITLE] = text;
+    ((CONST char **)value)[HTML_A_TITLE] = text;
 
     if(TRACE)
 	fprintf(stderr,"HTGopher: adding URL: %s\n",addr);
     
     HT_Is_Gopher_URL = TRUE;  /* tell HTML.c that this is a Gopher URL */
-    (*targetClass.start_element)(target, HTML_A, present, value, 0);
+    (*targetClass.start_element)(target, HTML_A, present,
+    				 (CONST char **)value, 0);
 	    
     PUTS(text);
     END(HTML_A);
@@ -1772,7 +1773,7 @@ PUBLIC int HTLoadGopher ARGS4(
         int len;
 
 	if ((len = strlen(arg)) > 5) {
-	    if (0 == strcmp((char *)&arg[len-6], ":105/2")) {
+	    if (0 == strcmp(&arg[len-6], ":105/2")) {
 	        /* Use CSO gateway. */
 		if (TRACE)
 		    fprintf(stderr, "HTGopher: Passing to CSO/PH gateway.\n");

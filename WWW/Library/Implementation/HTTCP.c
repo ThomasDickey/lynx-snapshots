@@ -264,7 +264,7 @@ PUBLIC unsigned int HTCardinal ARGS3(
 	char **,	pp,
 	unsigned int,	max_value)
 {
-    int n;
+    unsigned int n;
     if ((**pp<'0') || (**pp>'9')) {	    /* Null string is error */
 	*pstatus = -3;  /* No number where one expeceted */
 	return 0;

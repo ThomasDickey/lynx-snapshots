@@ -5,7 +5,7 @@
 
 typedef struct _LYUCcharset {
     int UChndl;
-    char * MIMEname;
+    CONST char * MIMEname;
     int enc;
     int repertoire;
     int codepoints;

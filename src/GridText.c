@@ -5018,8 +5018,8 @@ PUBLIC void www_user_search ARGS3(
 }
 
 PUBLIC void user_message ARGS2(
-	char *,		message,
-	char *,		argument) 
+	CONST char *,	message,
+	CONST char *,	argument) 
 {
     char *temp = NULL;
     char temp_arg[256];
@@ -5962,7 +5962,7 @@ PUBLIC int HText_beginInput ARGS3(
 	
     TextAnchor * a = (TextAnchor *) calloc(1, sizeof(*a));
     FormInfo * f = (FormInfo *) calloc(1, sizeof(*f)); 
-    char *cp_option = NULL;
+    CONST char *cp_option = NULL;
     char *IValue = NULL;
     unsigned char *tmp = NULL;
     int i, j;
@@ -6633,7 +6633,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 			        StrAllocCat(escaped1, MultipartContentType);
 			    StrAllocCat(escaped1, "\r\n\r\n");
 			} else {
-		            escaped1 = HTEscape(form_ptr->name,URL_XALPHAS);
+		            escaped1 = HTEscapeSP(form_ptr->name,URL_XALPHAS);
 			}
 
 		        /*
@@ -6772,7 +6772,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 			        StrAllocCat(escaped1, MultipartContentType);
 			    StrAllocCat(escaped1, "\r\n\r\n");
 			} else {
-		            escaped1 = HTEscape(form_ptr->name, URL_XALPHAS);
+		            escaped1 = HTEscapeSP(form_ptr->name, URL_XALPHAS);
 			}
 			/*
 			 *  Be sure to use the submit option value.
@@ -6900,7 +6900,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 			        StrAllocCat(escaped1, MultipartContentType);
 			    StrAllocCat(escaped1, "\r\n\r\n");
 			} else {
-                            escaped1 = HTEscape(form_ptr->name, URL_XALPHAS);
+                            escaped1 = HTEscapeSP(form_ptr->name, URL_XALPHAS);
 			}
                         sprintf(&query[strlen(query)],
 				"%s%s%s%s%s",
@@ -6982,7 +6982,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 			    StrAllocCat(escaped1, MultipartContentType);
 			StrAllocCat(escaped1, "\r\n\r\n");
 		    } else {
-		        escaped1 = HTEscape(form_ptr->name, URL_XALPHAS);
+		        escaped1 = HTEscapeSP(form_ptr->name, URL_XALPHAS);
 		    }
 
 		    /*

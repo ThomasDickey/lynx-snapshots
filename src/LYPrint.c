@@ -80,12 +80,11 @@ PUBLIC int printfile ARGS1(
     HTFormat format;
     HTAtom *encoding;
     BOOL use_mime, use_cte, use_type;
-    char *disp_charset;
+    CONST char *disp_charset;
     static BOOLEAN first_mail_preparsed = TRUE;
+    char *envbuffer = NULL;
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
-#else
-    char *envbuffer = NULL;       /* WebSter Print Mods -jkt */
 #endif /* VMS */
 
     /*
@@ -1030,26 +1029,40 @@ PUBLIC int printfile ARGS1(
 		if (TRACE)
 		    fprintf(stderr, "command: %s\n", buffer);
 		printf(PRINTING_FILE);
-
-#ifndef VMS
-		/* Begin WebSter Print Mods - jkt */                
+#ifdef VMS
+		/*
+		 *  Set document's title as a VMS logical. -  FM
+		 */
+		StrAllocCopy(envbuffer, HText_getTitle());
+		if (!(envbuffer && *envbuffer))
+		    StrAllocCopy(envbuffer, "No Title");
+		Define_VMSLogical("LYNX_PRINT_TITLE", envbuffer);
+#else
+		/*
+		 *  Set document's title as an environment variable. - JKT
+		 */                
 		StrAllocCopy(envbuffer, "LYNX_PRINT_TITLE=");
 		StrAllocCat(envbuffer, HText_getTitle());
 		putenv(envbuffer);
-		/* End   WebSter Print Mods - jkt */
-#endif /* !VMS */
-
+#endif /* VMS */
 		fflush(stdout);
 		system(buffer);
-		fflush(stdout);
-#ifndef VMS
-		signal(SIGINT, cleanup_sig);
+#ifdef VMS
 		/*
-		 *  Remove LYNX_PRINT_TITLE value from environment - kw
+		 *  Remove LYNX_PRINT_TITLE logical. - FM
+		 */
+		Define_VMSLogical("LYNX_PRINT_TITLE", "");
+#else
+		/*
+		 *  Remove LYNX_PRINT_TITLE value from environment. - KW
 		 */
 		envbuffer[17] = '\0'; /* truncate after '=' */
 		putenv(envbuffer);
+#endif /* VMS */
 		FREE(envbuffer);
+		fflush(stdout);
+#ifndef VMS
+		signal(SIGINT, cleanup_sig);
 #endif /* !VMS */
 		sleep(MessageSecs);
 		start_curses();
