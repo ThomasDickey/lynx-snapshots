@@ -5,49 +5,52 @@
 #include <HTUtils.h>
 #endif
 
-typedef long UCode_t;
+#ifdef __cplusplus
+extern "C" {
+#endif
+    typedef long UCode_t;
 
-extern int UCTransUniChar(UCode_t unicode,
-			  int charset_out);
-extern int UCTransUniCharStr(char *outbuf,
-			     int buflen,
-			     UCode_t unicode,
-			     int charset_out,
-			     int chk_single_flag);
-extern int UCTransChar(char ch_in,
-		       int charset_in,
-		       int charset_out);
-extern int UCReverseTransChar(char ch_out,
-			      int charset_in,
+    extern int UCTransUniChar(UCode_t unicode,
 			      int charset_out);
-extern int UCTransCharStr(char *outbuf,
-			  int buflen,
-			  char ch_in,
-			  int charset_in,
-			  int charset_out,
-			  int chk_single_flag);
-extern UCode_t UCTransToUni(char ch_in,
-			    int charset_in);
-extern int UCGetRawUniMode_byLYhndl(int i);
-extern int UCGetLYhndl_byMIME(const char *p);	/* returns -1 if name not recognized */
-extern int safeUCGetLYhndl_byMIME(const char *p);	/* returns LATIN1 if name not recognized */
+    extern int UCTransUniCharStr(char *outbuf,
+				 int buflen,
+				 UCode_t unicode,
+				 int charset_out,
+				 int chk_single_flag);
+    extern int UCTransChar(char ch_in,
+			   int charset_in,
+			   int charset_out);
+    extern int UCReverseTransChar(char ch_out,
+				  int charset_in,
+				  int charset_out);
+    extern int UCTransCharStr(char *outbuf,
+			      int buflen,
+			      char ch_in,
+			      int charset_in,
+			      int charset_out,
+			      int chk_single_flag);
+    extern UCode_t UCTransToUni(char ch_in,
+				int charset_in);
+    extern int UCGetRawUniMode_byLYhndl(int i);
+    extern int UCGetLYhndl_byMIME(const char *p);	/* returns -1 if name not recognized */
+    extern int safeUCGetLYhndl_byMIME(const char *p);	/* returns LATIN1 if name not recognized */
 
 #ifdef EXP_LOCALE_CHARSET
-extern void LYFindLocaleCharset(void);
+    extern void LYFindLocaleCharset(void);
 #endif
 
-extern int UCLYhndl_for_unspec;
-extern int UCLYhndl_for_unrec;
-extern int UCLYhndl_HTFile_for_unspec;
-extern int UCLYhndl_HTFile_for_unrec;
+    extern int UCLYhndl_for_unspec;
+    extern int UCLYhndl_for_unrec;
+    extern int UCLYhndl_HTFile_for_unspec;
+    extern int UCLYhndl_HTFile_for_unrec;
 
 /* easy to type: */
-extern int LATIN1;		/* UCGetLYhndl_byMIME("iso-8859-1") */
-extern int US_ASCII;		/* UCGetLYhndl_byMIME("us-ascii")   */
-extern int UTF8_handle;		/* UCGetLYhndl_byMIME("utf-8")      */
+    extern int LATIN1;		/* UCGetLYhndl_byMIME("iso-8859-1") */
+    extern int US_ASCII;	/* UCGetLYhndl_byMIME("us-ascii")   */
+    extern int UTF8_handle;	/* UCGetLYhndl_byMIME("utf-8")      */
 
 #undef TRANSPARENT		/* defined on Solaris in <sys/stream.h> */
-extern int TRANSPARENT;		/* UCGetLYhndl_byMIME("x-transparent")  */
+    extern int TRANSPARENT;	/* UCGetLYhndl_byMIME("x-transparent")  */
 
 /*
 In general, Lynx translates letters from document charset to display charset.
@@ -79,4 +82,7 @@ those unrecognized MIME names are assumed as LATIN1 (via safeUCGetLYhndl...).
 
 #define UCTRANS_NOTFOUND (-4)
 
-#endif /* UCMAP_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* UCMAP_H */

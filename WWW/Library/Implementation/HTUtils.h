@@ -188,6 +188,11 @@ typedef unsigned short mode_t;
 
 #endif /* _WINDOWS */
 
+#if defined(USE_DEFAULT_COLORS) && !defined(HAVE_USE_DEFAULT_COLORS)
+    /* if we don't have use_default_colors() */
+#  undef USE_DEFAULT_COLORS
+#endif
+
 #ifndef USE_COLOR_STYLE
     /* it's useless for such setup */
 #  define NO_EMPTY_HREFLESS_A
@@ -294,8 +299,10 @@ Standard C library for malloc() etc
 #define	typecalloc(cast)		(cast *)calloc(1,sizeof(cast))
 #define	typecallocn(cast,ntypes)	(cast *)calloc(ntypes,sizeof(cast))
 
+#define typeRealloc(cast,ptr,ntypes)    (cast *)realloc(ptr, (ntypes)*sizeof(cast))
+
 #define typeMalloc(cast)                (cast *)malloc(sizeof(cast))
-#define typeMallocn(cast,ntypes)        (cast *)malloc(ntypes*sizeof(cast))
+#define typeMallocn(cast,ntypes)        (cast *)malloc((ntypes)*sizeof(cast))
 
 /*
 
@@ -430,8 +437,6 @@ Out Of Memory checking for malloc() return:
 
 #include <LYexit.h>
 
-extern void outofmem(const char *fname, const char *func);
-
 /*
  * Upper- and Lowercase macros
  *
@@ -451,10 +456,6 @@ extern void outofmem(const char *fname, const char *func);
 #define TOLOWER(c) ascii_tolower(UCH(c))
 #define TOUPPER(c) ascii_toupper(UCH(c))
 #define ISUPPER(c) ascii_isupper(UCH(c))
-
-extern int ascii_toupper(int);
-extern int ascii_tolower(int);
-extern int ascii_isupper(int);
 
 #else
 
@@ -515,8 +516,6 @@ extern int WWW_TraceMask;
 #define tfp TraceFP()
 #define CTRACE_SLEEP(secs) if (TRACE && LYTraceLogFP == 0) sleep(secs)
 #define CTRACE_FLUSH(fp)   if (TRACE) fflush(fp)
-
-extern FILE *TraceFP(void);
 
 #include <www_tcp.h>
 
@@ -599,10 +598,6 @@ extern FILE *TraceFP(void);
 
 #undef free_func
 
-extern SSL *HTGetSSLHandle(void);
-extern void HTSSLInitPRNG(void);
-extern char HTGetSSLCharacter(void *handle);
-
 #endif /* USE_SSL */
 
 #ifdef HAVE_LIBDMALLOC
@@ -621,4 +616,26 @@ extern char HTGetSSLCharacter(void *handle);
 
 #include <userdefs.h>
 
-#endif /* HTUTILS_H */
+#ifdef __cplusplus
+extern "C" {
+#endif
+#ifndef TOLOWER
+#ifdef EXP_ASCII_CTYPES
+    extern int ascii_toupper(int);
+    extern int ascii_tolower(int);
+    extern int ascii_isupper(int);
+#endif
+#endif
+
+    extern FILE *TraceFP(void);
+
+#ifdef USE_SSL
+    extern SSL *HTGetSSLHandle(void);
+    extern void HTSSLInitPRNG(void);
+    extern char HTGetSSLCharacter(void *handle);
+#endif				/* USE_SSL */
+
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTUTILS_H */

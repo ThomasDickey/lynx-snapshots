@@ -11,7 +11,10 @@
 
 #include <HTAnchor.h>
 
-extern BOOL HTVMSFileVersions;	/* Include version numbers in listing? */
+#ifdef __cplusplus
+extern "C" {
+#endif
+    extern BOOL HTVMSFileVersions;	/* Include version numbers in listing? */
 
 /* PUBLIC							HTVMS_authSysPrv()
  *		CHECKS IF THIS PROCESS IS AUTHORIZED TO ENABLE SYSPRV
@@ -21,7 +24,7 @@ extern BOOL HTVMSFileVersions;	/* Include version numbers in listing? */
  * ON EXIT:
  *	returns	YES if SYSPRV is authorized
  */
-extern BOOL HTVMS_authSysPrv(void);
+    extern BOOL HTVMS_authSysPrv(void);
 
 /* PUBLIC							HTVMS_enableSysPrv()
  *		ENABLES SYSPRV
@@ -31,7 +34,7 @@ extern BOOL HTVMS_authSysPrv(void);
  * ON EXIT:
  *
  */
-extern void HTVMS_enableSysPrv(void);
+    extern void HTVMS_enableSysPrv(void);
 
 /* PUBLIC							HTVMS_disableSysPrv()
  *		DISABLES SYSPRV
@@ -41,7 +44,7 @@ extern void HTVMS_enableSysPrv(void);
  * ON EXIT:
  *
  */
-extern void HTVMS_disableSysPrv(void);
+    extern void HTVMS_disableSysPrv(void);
 
 /* PUBLIC							HTVMS_checkAccess()
  *		CHECKS ACCESS TO FILE FOR CERTAIN USER
@@ -53,9 +56,9 @@ extern void HTVMS_disableSysPrv(void);
  *	returns YES if access is allowed
  *
  */
-extern BOOL HTVMS_checkAccess(const char *FileName,
-			      const char *UserName,
-			      const char *Method);
+    extern BOOL HTVMS_checkAccess(const char *FileName,
+				  const char *UserName,
+				  const char *Method);
 
 /* PUBLIC							HTVMS_wwwName()
  *		CONVERTS VMS Name into WWW Name
@@ -82,14 +85,17 @@ extern BOOL HTVMS_checkAccess(const char *FileName,
  *
  *
  */
-const extern char *HTVMS_wwwName(const char *vmsname);
+    const extern char *HTVMS_wwwName(const char *vmsname);
 
-extern int HTVMSBrowseDir(const char *address,
-			  HTParentAnchor *anchor,
-			  HTFormat format_out,
-			  HTStream *sink);
+    extern int HTVMSBrowseDir(const char *address,
+			      HTParentAnchor *anchor,
+			      HTFormat format_out,
+			      HTStream *sink);
 
-extern int HTVMS_remove(char *filename);
-extern void HTVMS_purge(char *filename);
+    extern int HTVMS_remove(char *filename);
+    extern void HTVMS_purge(char *filename);
 
-#endif /* not HTVMSUTIL_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* not HTVMSUTIL_H */

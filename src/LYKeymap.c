@@ -1264,7 +1264,7 @@ static char *pretty_html(int c)
 
 static char *format_binding(LYKeymap_t * table, int i)
 {
-    LYKeymap_t the_key = table[i];
+    LYKeymapCode the_key = (LYKeymapCode) table[i];
     char *buf = 0;
     char *formatted;
     Kcmd *rmap = LYKeycodeToKcmd(the_key);
@@ -1292,7 +1292,7 @@ static void print_binding(HTStream *target, int i,
 
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
     if (prev_lynx_edit_mode && !no_dired_support &&
-	(lac1 = key_override[i]) != LYK_UNKNOWN) {
+	(lac1 = (LYKeymapCode) key_override[i]) != LYK_UNKNOWN) {
 	if ((buf = format_binding(key_override, i)) != 0) {
 	    PUTS(buf);
 	    FREE(buf);
@@ -1300,7 +1300,7 @@ static void print_binding(HTStream *target, int i,
     } else
 #endif /* DIRED_SUPPORT && OK_OVERRIDE */
     if ((buf = format_binding(keymap, i)) != 0) {
-	lac1 = keymap[i];
+	lac1 = (LYKeymapCode) keymap[i];
 	PUTS(buf);
 	FREE(buf);
     }

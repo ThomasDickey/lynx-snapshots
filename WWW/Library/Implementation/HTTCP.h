@@ -11,6 +11,9 @@
 #include <HTUtils.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*      Produce a string for an internet address
  *      ---------------------------------------
  *
@@ -19,11 +22,11 @@
  *                it is to be kept.
  */
 #ifdef INET6
-extern const char *HTInetString(SockA * mysin);
+    extern const char *HTInetString(SockA * mysin);
 
 #else
-extern const char *HTInetString(struct sockaddr_in *mysin);
-#endif /* INET6 */
+    extern const char *HTInetString(struct sockaddr_in *mysin);
+#endif				/* INET6 */
 
 /*      Encode INET status (as in sys/errno.h)                    inet_status()
  *      ------------------
@@ -35,13 +38,13 @@ extern const char *HTInetString(struct sockaddr_in *mysin);
  * On return:
  *      returns a negative status in the unix way.
  */
-extern int HTInetStatus(const char *where);
+    extern int HTInetStatus(const char *where);
 
 /*      Publicly accessible variables
 */
 /* extern struct sockaddr_in HTHostAddress; */
-			/* The internet address of the host */
-			/* Valid after call to HTHostName() */
+    /* The internet address of the host */
+    /* Valid after call to HTHostName() */
 
 /*      Parse a cardinal value                                 parse_cardinal()
  *      ----------------------
@@ -57,15 +60,15 @@ extern int HTInetStatus(const char *where);
  *      *pstatus points to status updated iff bad
  */
 
-extern unsigned int HTCardinal(int *pstatus,
-			       char **pp,
-			       unsigned int max_value);
+    extern unsigned int HTCardinal(int *pstatus,
+				   char **pp,
+				   unsigned int max_value);
 
 /*	Check whether string is a valid Internet hostname
  *	-------------------------------------------------
  */
 
-extern BOOL valid_hostname(char *name);
+    extern BOOL valid_hostname(char *name);
 
 /*	Resolve an internet hostname, like gethostbyname
  *	------------------------------------------------
@@ -81,24 +84,27 @@ extern BOOL valid_hostname(char *name);
  *  The interface is intended to be the same as for gethostbyname(),
  *  but additional status is returned in lynx_nsl_status.
  */
-extern int lynx_nsl_status;
+    extern int lynx_nsl_status;
 
-extern struct hostent *LYGetHostByName(char *str);
+    extern struct hostent *LYGetHostByName(char *str);
 
 /*      Get Name of This Machine
  *      ------------------------
  *
  */
 
-extern const char *HTHostName(void);
+    extern const char *HTHostName(void);
 
-extern int HTDoConnect(const char *url,
-		       const char *protocol,
-		       int default_port,
-		       int *s);
+    extern int HTDoConnect(const char *url,
+			   const char *protocol,
+			   int default_port,
+			   int *s);
 
-extern int HTDoRead(int fildes,
-		    void *buf,
-		    unsigned nbyte);
+    extern int HTDoRead(int fildes,
+			void *buf,
+			unsigned nbyte);
 
-#endif /* HTTCP_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTTCP_H */

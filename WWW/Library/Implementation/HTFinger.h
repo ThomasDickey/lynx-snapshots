@@ -9,16 +9,22 @@
 #include <HTAccess.h>
 #include <HTAnchor.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifdef GLOBALREF_IS_MACRO
-extern GLOBALREF (HTProtocol, HTFinger);
+    extern GLOBALREF (HTProtocol, HTFinger);
 
 #else
-GLOBALREF HTProtocol HTFinger;
-#endif /* GLOBALREF_IS_MACRO */
+    GLOBALREF HTProtocol HTFinger;
+#endif				/* GLOBALREF_IS_MACRO */
 
-extern int HTLoadFinger(const char *arg,
-			HTParentAnchor *anAnchor,
-			HTFormat format_out,
-			HTStream *stream);
+    extern int HTLoadFinger(const char *arg,
+			    HTParentAnchor *anAnchor,
+			    HTFormat format_out,
+			    HTStream *stream);
 
-#endif /* HTFINGER_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTFINGER_H */

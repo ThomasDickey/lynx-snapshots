@@ -692,7 +692,7 @@ static int modify_tagged(char *testpath)
 	    /*
 	     * Prepare to get directory path from one of the tagged files.
 	     */
-	    cp = HTList_lastObject(tagged);
+	    cp = (char *) HTList_lastObject(tagged);
 	    testpath = NULL;	/* Won't be needed any more in this function,
 				   set to NULL as a flag. */
 	}
@@ -1566,7 +1566,7 @@ void showtags(HTList *t)
 
     for (i = 0; i < nlinks; i++) {
 	s = t;
-	while ((name = HTList_nextObject(s)) != NULL) {
+	while ((name = (char *) HTList_nextObject(s)) != NULL) {
 	    if (!strcmp(links[i].lname, name)) {
 		tagflag(ON, i);
 		break;
@@ -2048,7 +2048,7 @@ int dired_options(DocInfo *doc, char **newfile)
 	LYAddHtmlSep(&cd);
 	m = (n < NUM_TAGS_TO_WRITE) ? n : NUM_TAGS_TO_WRITE;
 	for (i = 1; i <= m; i++) {
-	    cp1 = HTRelative(HTList_objectAt(tagged, i - 1),
+	    cp1 = HTRelative((char *) HTList_objectAt(tagged, i - 1),
 			     (*cd ? cd : "file://localhost"));
 	    HTUnEscape(cp1);
 	    LYEntify(&cp1, TRUE);	/* _should_ do this everywhere... */
@@ -2412,7 +2412,7 @@ void clear_tags(void)
 {
     char *cp = NULL;
 
-    while ((cp = HTList_removeLastObject(tagged)) != NULL) {
+    while ((cp = (char *) HTList_removeLastObject(tagged)) != NULL) {
 	FREE(cp);
     }
     if (HTList_isEmpty(tagged))
@@ -2424,7 +2424,7 @@ void clear_tags(void)
  */
 void add_menu_item(char *str)
 {
-    struct dired_menu *new, *mp;
+    struct dired_menu *tmp, *mp;
     char *cp;
 
     /*
@@ -2433,9 +2433,9 @@ void add_menu_item(char *str)
     if (menu_head == defmenu)
 	menu_head = NULL;
 
-    new = typecalloc(struct dired_menu);
+    tmp = typecalloc(struct dired_menu);
 
-    if (new == NULL)
+    if (tmp == NULL)
 	outofmem(__FILE__, "add_menu_item");
 
     /*
@@ -2444,14 +2444,14 @@ void add_menu_item(char *str)
     cp = strchr(str, ':');
     *cp++ = '\0';
     if (strcasecomp(str, "tag") == 0) {
-	new->cond = DE_TAG;
+	tmp->cond = DE_TAG;
     } else if (strcasecomp(str, "dir") == 0) {
-	new->cond = DE_DIR;
+	tmp->cond = DE_DIR;
     } else if (strcasecomp(str, "file") == 0) {
-	new->cond = DE_FILE;
+	tmp->cond = DE_FILE;
 #ifdef S_IFLNK
     } else if (strcasecomp(str, "link") == 0) {
-	new->cond = DE_SYMLINK;
+	tmp->cond = DE_SYMLINK;
 #endif /* S_IFLNK */
     }
 
@@ -2461,25 +2461,25 @@ void add_menu_item(char *str)
     str = cp;
     cp = strchr(str, ':');
     *cp++ = '\0';
-    StrAllocCopy(new->sfx, str);
+    StrAllocCopy(tmp->sfx, str);
 
     str = cp;
     cp = strchr(str, ':');
     *cp++ = '\0';
-    StrAllocCopy(new->link, str);
+    StrAllocCopy(tmp->link, str);
 
     str = cp;
     cp = strchr(str, ':');
     *cp++ = '\0';
-    StrAllocCopy(new->rest, str);
+    StrAllocCopy(tmp->rest, str);
 
-    StrAllocCopy(new->href, cp);
+    StrAllocCopy(tmp->href, cp);
 
     if (menu_head) {
 	for (mp = menu_head; mp && mp->next != NULL; mp = mp->next) ;
-	mp->next = new;
+	mp->next = tmp;
     } else
-	menu_head = new;
+	menu_head = tmp;
 }
 
 void reset_dired_menu(void)

@@ -506,10 +506,10 @@ static BOOL part_match(const char *tcur,
  * ON EXIT:
  *	returns		YES, if match;  NO, if not.
  */
-static BOOL ip_number_match(const char *template,
+static BOOL ip_number_match(const char *ctemplate,
 			    const char *the_inet_addr)
 {
-    const char *tcur = template;
+    const char *tcur = ctemplate;
     const char *icur = the_inet_addr;
     int cnt;
 

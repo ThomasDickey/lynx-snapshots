@@ -125,7 +125,7 @@ BOOL LYAddImageMap(char *address,
 		   char *title,
 		   HTParentAnchor *node_anchor)
 {
-    LYImageMap *new = NULL;
+    LYImageMap *tmp = NULL;
     LYImageMap *old = NULL;
     HTList *cur = NULL;
     HTList *theList = NULL;
@@ -189,17 +189,17 @@ BOOL LYAddImageMap(char *address,
 	}
     }
 
-    new = (old != NULL) ?
+    tmp = (old != NULL) ?
 	old : typecalloc(LYImageMap);
-    if (new == NULL) {
+    if (tmp == NULL) {
 	outofmem(__FILE__, "LYAddImageMap");
 	return FALSE;
     }
-    StrAllocCopy(new->address, address);
+    StrAllocCopy(tmp->address, address);
     if (non_empty(title))
-	StrAllocCopy(new->title, title);
-    if (new != old)
-	HTList_addObject(theList, new);
+	StrAllocCopy(tmp->title, title);
+    if (tmp != old)
+	HTList_addObject(theList, tmp);
     return TRUE;
 }
 
@@ -213,7 +213,7 @@ BOOL LYAddMapElement(char *map,
 		     HTParentAnchor *node_anchor,
 		     BOOL intern_flag GCC_UNUSED)
 {
-    LYMapElement *new = NULL;
+    LYMapElement *tmp = NULL;
     LYImageMap *theMap = NULL;
     HTList *theList = NULL;
     HTList *cur = NULL;
@@ -259,30 +259,30 @@ BOOL LYAddMapElement(char *map,
     if (!theMap->elements)
 	theMap->elements = HTList_new();
     cur = theMap->elements;
-    while (NULL != (new = (LYMapElement *) HTList_nextObject(cur))) {
-	if (!strcmp(new->address, address)) {
-	    FREE(new->address);
-	    FREE(new->title);
-	    HTList_removeObject(theMap->elements, new);
-	    FREE(new);
+    while (NULL != (tmp = (LYMapElement *) HTList_nextObject(cur))) {
+	if (!strcmp(tmp->address, address)) {
+	    FREE(tmp->address);
+	    FREE(tmp->title);
+	    HTList_removeObject(theMap->elements, tmp);
+	    FREE(tmp);
 	    break;
 	}
     }
 
-    new = typecalloc(LYMapElement);
-    if (new == NULL) {
+    tmp = typecalloc(LYMapElement);
+    if (tmp == NULL) {
 	perror("Out of memory in LYAddMapElement");
 	return FALSE;
     }
-    StrAllocCopy(new->address, address);
+    StrAllocCopy(tmp->address, address);
     if (non_empty(title))
-	StrAllocCopy(new->title, title);
+	StrAllocCopy(tmp->title, title);
     else
-	StrAllocCopy(new->title, address);
+	StrAllocCopy(tmp->title, address);
 #ifndef DONT_TRACK_INTERNAL_LINKS
-    new->intern_flag = intern_flag;
+    tmp->intern_flag = intern_flag;
 #endif
-    HTList_appendObject(theMap->elements, new);
+    HTList_appendObject(theMap->elements, tmp);
     return TRUE;
 }
 
@@ -394,7 +394,7 @@ static int LYLoadIMGmap(const char *arg,
     HTFormat format_in = WWW_HTML;
     HTStream *target = NULL;
     char *buf = NULL;
-    LYMapElement *new = NULL;
+    LYMapElement *tmp = NULL;
     LYImageMap *theMap = NULL;
     char *MapTitle = NULL;
     char *MapAddress = NULL;
@@ -571,18 +571,18 @@ static int LYLoadIMGmap(const char *arg,
 					"ol" : "ul"));
     PUTS(buf);
     cur = theMap->elements;
-    while (NULL != (new = (LYMapElement *) HTList_nextObject(cur))) {
-	StrAllocCopy(MapAddress, new->address);
+    while (NULL != (tmp = (LYMapElement *) HTList_nextObject(cur))) {
+	StrAllocCopy(MapAddress, tmp->address);
 	LYEntify(&MapAddress, FALSE);
 	PUTS("<li><a href=\"");
 	PUTS(MapAddress);
 	PUTS("\"");
 #ifndef DONT_TRACK_INTERNAL_LINKS
-	if (new->intern_flag)
+	if (tmp->intern_flag)
 	    PUTS(" TYPE=\"internal link\"");
 #endif
 	PUTS("\n>");
-	LYformTitle(&MapTitle, new->title);
+	LYformTitle(&MapTitle, tmp->title);
 	LYEntify(&MapTitle, TRUE);
 	PUTS(MapTitle);
 	PUTS("</a>\n");

@@ -19,9 +19,9 @@
 
 /*  Get (lynxkeycode+modifier -> lynxeditactioncode) mapping, intermediate.
  */
-#define LKC_TO_LEC_M1(c) ((c)>LAST_MOD1_LKC? LYE_UNMOD: Mod1Binding[c])
-#define LKC_TO_LEC_M2(c) ((c)>LAST_MOD2_LKC? LYE_UNMOD: Mod2Binding[c])
-#define LKC_TO_LEC_M3(c) ((c)>LAST_MOD3_LKC? LYE_UNMOD: Mod3Binding[c])
+#define LKC_TO_LEC_M1(c) ((c)>LAST_MOD1_LKC? (int)LYE_UNMOD: Mod1Binding[c])
+#define LKC_TO_LEC_M2(c) ((c)>LAST_MOD2_LKC? (int)LYE_UNMOD: Mod2Binding[c])
+#define LKC_TO_LEC_M3(c) ((c)>LAST_MOD3_LKC? (int)LYE_UNMOD: Mod3Binding[c])
 
 #endif /* EXP_ALT_BINDINGS */
 

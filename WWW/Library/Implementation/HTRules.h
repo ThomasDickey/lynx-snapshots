@@ -22,23 +22,26 @@
 #include <HTUtils.h>
 #endif
 
-typedef enum {
-    HT_Invalid,
-    HT_Map,
-    HT_Pass,
-    HT_Fail,
-    HT_DefProt,
-    HT_Protect,
-    HT_Progress,
-    HT_InfoMsg,
-    HT_UserMsg,
-    HT_Alert,
-    HT_AlwaysAlert,
-    HT_Redirect,
-    HT_RedirectPerm,
-    HT_PermitRedir,
-    HT_UseProxy
-} HTRuleOp;
+#ifdef __cplusplus
+extern "C" {
+#endif
+    typedef enum {
+	HT_Invalid,
+	HT_Map,
+	HT_Pass,
+	HT_Fail,
+	HT_DefProt,
+	HT_Protect,
+	HT_Progress,
+	HT_InfoMsg,
+	HT_UserMsg,
+	HT_Alert,
+	HT_AlwaysAlert,
+	HT_Redirect,
+	HT_RedirectPerm,
+	HT_PermitRedir,
+	HT_UseProxy
+    } HTRuleOp;
 
 #ifndef NO_RULES
 
@@ -54,8 +57,8 @@ Server Side Script Execution
 
  */
 
-extern char *HTBinDir;		/* Physical /htbin location */
-extern char *HTSearchScript;	/* Search script name */
+    extern char *HTBinDir;	/* Physical /htbin location */
+    extern char *HTSearchScript;	/* Search script name */
 
 /*
 
@@ -84,10 +87,10 @@ HTAddRule:  Add rule to the list
    large.
 
  */
-extern int HTAddRule(HTRuleOp op, const char *pattern,
-		     const char *equiv,
-		     const char *cond_op,
-		     const char *cond);
+    extern int HTAddRule(HTRuleOp op, const char *pattern,
+			 const char *equiv,
+			 const char *cond_op,
+			 const char *cond);
 
 /*
 
@@ -99,7 +102,7 @@ HTClearRules: Clear all rules
 
  */
 
-extern void HTClearRules(void);
+    extern void HTClearRules(void);
 
 /*
 
@@ -120,7 +123,7 @@ HTTranslate: Translate by rules
                          a copy of the original.
 
  */
-extern char *HTTranslate(const char *required);
+    extern char *HTTranslate(const char *required);
 
 /*
 
@@ -134,7 +137,7 @@ HTSetConfiguration:  Load one line of configuration information
    the  rule file, for example INI files for X resources.
 
  */
-extern int HTSetConfiguration(char *config);
+    extern int HTSetConfiguration(char *config);
 
 /*
 
@@ -153,11 +156,14 @@ HtLoadRules:  Load the rules from a file
 
  */
 
-extern int HTLoadRules(const char *filename);
+    extern int HTLoadRules(const char *filename);
 
 /*
 
  */
 
-#endif /* NO_RULES */
-#endif /* HTRULE_H */
+#endif				/* NO_RULES */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTRULE_H */

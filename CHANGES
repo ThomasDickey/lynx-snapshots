@@ -1,56 +1,77 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2004-12-31 (2.8.6dev.9)
-+ remove fixed limit on history[] array (report by Richard Eyre) -TD
-+ improve logic for highlighting links which extend to multiple lines by
+2005-01-02 (2.8.6dev.10)
+* correct final sed command in help_files.sed which was not a basic regular
+  expression, left some links ending with .gz.gz -TD
+* update config.guess, config.sub
+* modify configure script to check for Intel compiler 8.0 -TD
+* modify ifdef's for USE_DEFAULT_COLORS, disabling it if the
+  use_default_colors() function is not found -TD
+* modify to allow compiling with C++ compiler, e.g., rename conflicting
+  keywords such as new, class, template (suggested by Nelson Beebe) -TD
+* remove leading/trailing blanks from suggested title string for ADD_BOOKMARK
+  (request by Walter Ian Kaye) -TD
+* add tags rules to makefile.in's -TD
+* repair fix for Debian #171312 by ensuring that it is only invoked if a URL
+  fragment was found in the getfile() call (report by PG) -TD
+* correct leak-checking for result of LYAddHilite(), which was not freeing
+  the associated strings -TD
+* correct leak-checking for result of LYcommandList(), which was not freeing
+  the associated strings -TD
+* correct pointer initialization in LYCheckForProxyURL() broken by fix for
+  Debian #240237 (reported by GV, Stef Caunter) -TD
+
+2004-12-30 (2.8.6dev.9)
+* remove fixed limit on history[] array (report by Richard Eyre) -TD
+* improve logic for highlighting links which extend to multiple lines by
   ensuring that if they cover a blank line that the following lines of the
   link will be highlighted rather than the blank line (report Hataguchi
   Takeshi).
-+ replace most instances of exit() by exit_immediately(), except those needed
+* replace most instances of exit() by exit_immediately(), except those needed
   for the leak-checking code, to add an ifdef'd call to _nc_freeall() which
   simplifies testing with valgrind -TD
-+ fix definition of put_clip(), to compile in Windows environment (Hataguchi
+* fix definition of put_clip(), to compile in Windows environment (Hataguchi
   Takeshi).
-+ update da.po, et.po, hu.po, nl.po, sv.po, tr.po from
+* update da.po, et.po, hu.po, nl.po, sv.po, tr.po from
     http://www.iro.umontreal.ca/translation/maint/lynx/
-+ fix for mouse versus network I/O -GV
+* fix for mouse versus network I/O -GV
   Building the djgpp version with S-Lang and mouse-support causes network I/O
   to stop when Lynx is idle waiting for key/mouse events.  This patch adds a
   djgpp_idle_loop() function that does what getxkey() used to do; calls
   tcp_tick() to finish off closed sockets and reply to pings etc.  Tested with
   PD-curses 2.6 too, but I couldn't get mouse to work under DOS.  Not sure
   that's possible at all.
-+ add "Anonymous FTP Password" to Options menu, to allow user to override use
+* add "Anonymous FTP Password" to Options menu, to allow user to override use
   of personal email address as the anonymous ftp password (Debian #137480) -TD
-+ modify LYCheckForProxyURL() to check if a colon follows a slash, which would
+* modify LYCheckForProxyURL() to check if a colon follows a slash, which would
   make the colon not part of a URL (report/patch by Matt Kraal, Debian
   #240237).
-+ add test/special_urls.html -TD
-+ minor fixes/update test/iso8859-1.html from
+* add test/special_urls.html -TD
+* minor fixes/update test/iso8859-1.html from
 	http://www.ramsch.org/martin/uni/fmi-hp/iso8859-1.html
-+ add check for broken WU_FTPD 2.6.2-12, e.g., at ftp://ftp.pppl.gov/, and
+* add check for broken WU_FTPD 2.6.2-12, e.g., at ftp://ftp.pppl.gov/, and
   disable EPSV.  This is ifdef'd with BROKEN_WU_FTPD and checks version (Debian
   #66560, as well as April 2003 reports by HN, PW) -TD
-+ modify getfile(), etc., to ensure that following a link consisting of a
+* modify getfile(), etc., to ensure that following a link consisting of a
   fragment will move the cursor to the link containing the target rather than
   simply ensuring that it is visible (Debian #171312) -TD
-+ modify ShowInfo() to list the rendered size in bytes if the Content-Length
+* modify ShowInfo() to list the rendered size in bytes if the Content-Length
   is not available (Debian #61085) -TD
-+ modify print_wwwfile_to_fd() and void print_crawl_to_fd() to ensure that no
+* modify print_wwwfile_to_fd() and void print_crawl_to_fd() to ensure that no
   trailing blanks are written (Debian #204515) -TD
-+ modify behavior when user attempts to toggle a radiobutton off, to make the
+* modify behavior when user attempts to toggle a radiobutton off, to make the
   message that one radio button must be selected only in novice mode (Debian
   #121520) -TD
-+ make the maximum number of cookies configurable in lynx.cfg, added
+* make the maximum number of cookies configurable in lynx.cfg, added
   MAX_COOKIES_DOMAIN, MAX_COOKIES_GLOBAL and MAX_COOKIES_BUFFER (Debian
   #152810) -TD
-+ reduce embedded blanks in button labels to single blanks -TD
-+ reduce embedded blanks in title strings to single blanks (Debian #284679) -TD
-+ add command-line option (-syslog-urls) and lynx.cfg settings (SYSLOG_TEXT,
+* reduce embedded blanks in button labels to single blanks -TD
+* reduce embedded blanks in title strings to single blanks (Debian #284679) -TD
+* add command-line option (-syslog-urls) and lynx.cfg settings (SYSLOG_TEXT,
   SYSLOG_REQUESTED_URLS) to allow syslog'ing of URLs to be optional.  This
   cannot be set from the options menu (Debian #282739) -TD
-+ modify HTParse() to restore a slash which may be removed during
+* modify HTParse() to restore a slash which may be removed during
   simplification of URLs such as "file://localhost/tmp/..".  The
   LYFillLocalFileURL() function would then append the current directory to the
   URL rather than the expected "/".  This case which happens in DIRED, was

@@ -62,51 +62,53 @@ typedef int HTColor;		/* Sorry about the US spelling! */
 
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #define STYLE_NAME_LENGTH       80	/* @@@@@@@@@@@ */
-
-typedef struct {
-    short kind;			/* only NX_LEFTTAB implemented */
-    HTCoord position;		/* x coordinate for stop */
-} HTTabStop;
+    typedef struct {
+	short kind;		/* only NX_LEFTTAB implemented */
+	HTCoord position;	/* x coordinate for stop */
+    } HTTabStop;
 
 /*      The Style Structure
  *      -------------------
  */
 
-typedef struct _HTStyle {
+    typedef struct _HTStyle {
 
 /*      Style management information
 */
-    struct _HTStyle *next;	/* Link for putting into stylesheet */
-    char *name;			/* Style name */
-    int id;			/* equivalent of name, for speed */
-    char *SGMLTag;		/* Tag name to start */
+	struct _HTStyle *next;	/* Link for putting into stylesheet */
+	char *name;		/* Style name */
+	int id;			/* equivalent of name, for speed */
+	char *SGMLTag;		/* Tag name to start */
 
 /*      Character attributes    (a la NXRun)
 */
-    HTFont font;		/* Font id */
-    HTCoord fontSize;		/* The size of font, not independent */
-    HTColor color;		/* text gray of current run */
-    int superscript;		/* superscript (-sub) in points */
+	HTFont font;		/* Font id */
+	HTCoord fontSize;	/* The size of font, not independent */
+	HTColor color;		/* text gray of current run */
+	int superscript;	/* superscript (-sub) in points */
 
-    HTAnchor *anchor;		/* Anchor id if any, else zero */
+	HTAnchor *anchor;	/* Anchor id if any, else zero */
 
 /*      Paragraph Attribtes     (a la NXTextStyle)
 */
-    HTCoord indent1st;		/* how far first line in paragraph is
+	HTCoord indent1st;	/* how far first line in paragraph is
 				   * indented */
-    HTCoord leftIndent;		/* how far second line is indented */
-    HTCoord rightIndent;	/* (Missing from NeXT version */
-    short alignment;		/* quad justification */
-    HTCoord lineHt;		/* line height */
-    HTCoord descentLine;	/* descender bottom from baseline */
-    const HTTabStop *tabs;	/* array of tab stops, 0 terminated */
+	HTCoord leftIndent;	/* how far second line is indented */
+	HTCoord rightIndent;	/* (Missing from NeXT version */
+	short alignment;	/* quad justification */
+	HTCoord lineHt;		/* line height */
+	HTCoord descentLine;	/* descender bottom from baseline */
+	const HTTabStop *tabs;	/* array of tab stops, 0 terminated */
 
-    BOOL wordWrap;		/* Yes means wrap at space not char */
-    BOOL freeFormat;		/* Yes means \n is just white space */
-    HTCoord spaceBefore;	/* Omissions from NXTextStyle */
-    HTCoord spaceAfter;
-    int paraFlags;		/* Paragraph flags, bits as follows: */
+	BOOL wordWrap;		/* Yes means wrap at space not char */
+	BOOL freeFormat;	/* Yes means \n is just white space */
+	HTCoord spaceBefore;	/* Omissions from NXTextStyle */
+	HTCoord spaceAfter;
+	int paraFlags;		/* Paragraph flags, bits as follows: */
 
 #define PARA_KEEP       1	/* Do not break page within this paragraph */
 #define PARA_WITH_NEXT  2	/* Do not break page after this paragraph */
@@ -116,101 +118,104 @@ typedef struct _HTStyle {
 #define HT_RIGHT 2
 #define HT_CENTER 3
 
-} HTStyle;
+    } HTStyle;
 
 #define HT_ALIGN_NONE (-1)
 
 /*      Style functions:
 */
-extern HTStyle *HTStyleNew(void);
-extern HTStyle *HTStyleNewNamed(const char *name);
-extern HTStyle *HTStyleFree(HTStyle *self);
+    extern HTStyle *HTStyleNew(void);
+    extern HTStyle *HTStyleNewNamed(const char *name);
+    extern HTStyle *HTStyleFree(HTStyle *self);
 
 #ifdef SUPRESS
-extern HTStyle *HTStyleRead(HTStyle *self, HTStream *stream);
-extern HTStyle *HTStyleWrite(HTStyle *self, HTStream *stream);
+    extern HTStyle *HTStyleRead(HTStyle *self, HTStream *stream);
+    extern HTStyle *HTStyleWrite(HTStyle *self, HTStream *stream);
 #endif
 /*              Style Sheet
  *              -----------
  */
-typedef struct _HTStyleSheet {
-    char *name;
-    HTStyle *styles;
-} HTStyleSheet;
+    typedef struct _HTStyleSheet {
+	char *name;
+	HTStyle *styles;
+    } HTStyleSheet;
 
 /*      Stylesheet functions:
 */
-extern HTStyleSheet *HTStyleSheetNew(void);
-extern HTStyleSheet *HTStyleSheetFree(HTStyleSheet *self);
-extern HTStyle *HTStyleNamed(HTStyleSheet *self, const char *name);
-extern HTStyle *HTStyleForParagraph(HTStyleSheet *self, HTParagraphStyle * paraStyle);
-extern HTStyle *HTStyleMatching(HTStyleSheet *self, HTStyle *style);
+    extern HTStyleSheet *HTStyleSheetNew(void);
+    extern HTStyleSheet *HTStyleSheetFree(HTStyleSheet *self);
+    extern HTStyle *HTStyleNamed(HTStyleSheet *self, const char *name);
+    extern HTStyle *HTStyleForParagraph(HTStyleSheet *self, HTParagraphStyle * paraStyle);
+    extern HTStyle *HTStyleMatching(HTStyleSheet *self, HTStyle *style);
 
 /* extern HTStyle * HTStyleForRun (HTStyleSheet *self, NXRun * run); */
-extern HTStyleSheet *HTStyleSheetAddStyle(HTStyleSheet *self, HTStyle *style);
-extern HTStyleSheet *HTStyleSheetRemoveStyle(HTStyleSheet *self, HTStyle *style);
+    extern HTStyleSheet *HTStyleSheetAddStyle(HTStyleSheet *self, HTStyle *style);
+    extern HTStyleSheet *HTStyleSheetRemoveStyle(HTStyleSheet *self, HTStyle *style);
 
 #ifdef SUPPRESS
-extern HTStyleSheet *HTStyleSheetRead(HTStyleSheet *self, HTStream *stream);
-extern HTStyleSheet *HTStyleSheetWrite(HTStyleSheet *self, HTStream *stream);
+    extern HTStyleSheet *HTStyleSheetRead(HTStyleSheet *self, HTStream *stream);
+    extern HTStyleSheet *HTStyleSheetWrite(HTStyleSheet *self, HTStream *stream);
 #endif
 #define CLEAR_POINTER ((void *)-1)	/* Pointer value means "clear me" */
 
 /* DefaultStyle.c */
-extern HTStyleSheet *DefaultStyle(HTStyle ***result_array);
+    extern HTStyleSheet *DefaultStyle(HTStyle ***result_array);
 
 /* enum, use this instead of HTStyle name comparisons */
-enum HTStyle_Enum {
-    ST_Normal = 0,
-    ST_DivCenter,
-    ST_DivLeft,
-    ST_DivRight,
-    ST_Banner,
-    ST_Blockquote,
-    ST_Bq,
-    ST_Footnote,
-    ST_List,
-    ST_List1,
-    ST_List2,
-    ST_List3,
-    ST_List4,
-    ST_List5,
-    ST_List6,
-    ST_Menu,
-    ST_Menu1,
-    ST_Menu2,
-    ST_Menu3,
-    ST_Menu4,
-    ST_Menu5,
-    ST_Menu6,
-    ST_Glossary,
-    ST_Glossary1,
-    ST_Glossary2,
-    ST_Glossary3,
-    ST_Glossary4,
-    ST_Glossary5,
-    ST_Glossary6,
-    ST_GlossaryCompact,
-    ST_GlossaryCompact1,
-    ST_GlossaryCompact2,
-    ST_GlossaryCompact3,
-    ST_GlossaryCompact4,
-    ST_GlossaryCompact5,
-    ST_GlossaryCompact6,
-    ST_Example,
-    ST_Preformatted,
-    ST_Listing,
-    ST_Address,
-    ST_Note,
-    ST_Heading1,
-    ST_Heading2,
-    ST_Heading3,
-    ST_Heading4,
-    ST_Heading5,
-    ST_Heading6,
-    ST_HeadingCenter,
-    ST_HeadingLeft,
-    ST_HeadingRight
-};
+    enum HTStyle_Enum {
+	ST_Normal = 0,
+	ST_DivCenter,
+	ST_DivLeft,
+	ST_DivRight,
+	ST_Banner,
+	ST_Blockquote,
+	ST_Bq,
+	ST_Footnote,
+	ST_List,
+	ST_List1,
+	ST_List2,
+	ST_List3,
+	ST_List4,
+	ST_List5,
+	ST_List6,
+	ST_Menu,
+	ST_Menu1,
+	ST_Menu2,
+	ST_Menu3,
+	ST_Menu4,
+	ST_Menu5,
+	ST_Menu6,
+	ST_Glossary,
+	ST_Glossary1,
+	ST_Glossary2,
+	ST_Glossary3,
+	ST_Glossary4,
+	ST_Glossary5,
+	ST_Glossary6,
+	ST_GlossaryCompact,
+	ST_GlossaryCompact1,
+	ST_GlossaryCompact2,
+	ST_GlossaryCompact3,
+	ST_GlossaryCompact4,
+	ST_GlossaryCompact5,
+	ST_GlossaryCompact6,
+	ST_Example,
+	ST_Preformatted,
+	ST_Listing,
+	ST_Address,
+	ST_Note,
+	ST_Heading1,
+	ST_Heading2,
+	ST_Heading3,
+	ST_Heading4,
+	ST_Heading5,
+	ST_Heading6,
+	ST_HeadingCenter,
+	ST_HeadingLeft,
+	ST_HeadingRight
+    };
 
-#endif /* HTStyle_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTStyle_H */

@@ -943,10 +943,10 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 	     */
 #ifdef SOCKS
 	    if (socks_flag)
-		selret = Rselect(pfd[0] + 1, (void *) &readfds, NULL, NULL, &one_second);
+		selret = Rselect(pfd[0] + 1, &readfds, NULL, NULL, &one_second);
 	    else
 #endif /* SOCKS */
-		selret = select(pfd[0] + 1, (void *) &readfds, NULL, NULL, &one_second);
+		selret = select(pfd[0] + 1, &readfds, NULL, NULL, &one_second);
 
 	    if ((selret > 0) && FD_ISSET(pfd[0], &readfds)) {
 		/*
@@ -1359,11 +1359,11 @@ static LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
     LYNX_ADDRINFO hints, *res;
     int error;
     char *p;
-    char *s;
+    char *s = NULL;
     char *host, *port;
     char pbuf[80];
 
-    s = strdup(str);
+    StrAllocCopy(s, str);
 
     if (s[0] == '[' && (p = strchr(s, ']')) != NULL) {
 	*p++ = '\0';
@@ -1715,12 +1715,12 @@ int HTDoConnect(const char *url,
 #ifdef SOCKS
 		if (socks_flag)
 		    ret = Rselect((unsigned) *s + 1, NULL,
-				  (void *) &writefds, NULL, &select_timeout);
+				  &writefds, NULL, &select_timeout);
 		else
 #endif /* SOCKS */
 		    ret = select((unsigned) *s + 1,
 				 NULL,
-				 (void *) &writefds,
+				 &writefds,
 				 NULL,
 				 &select_timeout);
 
@@ -1992,11 +1992,11 @@ int HTDoRead(int fildes,
 #ifdef SOCKS
 	    if (socks_flag)
 		ret = Rselect((unsigned) fildes + 1,
-			      (void *) &readfds, NULL, NULL, &select_timeout);
+			      &readfds, NULL, NULL, &select_timeout);
 	    else
 #endif /* SOCKS */
 		ret = select((unsigned) fildes + 1,
-			     (void *) &readfds, NULL, NULL, &select_timeout);
+			     &readfds, NULL, NULL, &select_timeout);
 	} while ((ret == -1) && (errno == EINTR));
 
 	if (ret < 0) {

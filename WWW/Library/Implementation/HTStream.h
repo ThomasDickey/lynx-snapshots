@@ -17,7 +17,10 @@
 #include <HTUtils.h>
 #endif
 
-typedef struct _HTStream HTStream;
+#ifdef __cplusplus
+extern "C" {
+#endif
+    typedef struct _HTStream HTStream;
 
 /*
 
@@ -29,26 +32,26 @@ typedef struct _HTStream HTStream;
    write().
    
  */
-typedef struct _HTStreamClass {
+    typedef struct _HTStreamClass {
 
-    const char *name;		/* Just for diagnostics */
+	const char *name;	/* Just for diagnostics */
 
-    void (*_free) (HTStream *me);
+	void (*_free) (HTStream *me);
 
-    void (*_abort) (HTStream *me,
-		    HTError e);
+	void (*_abort) (HTStream *me,
+			HTError e);
 
-    void (*put_character) (HTStream *me,
-			   char ch);
+	void (*put_character) (HTStream *me,
+			       char ch);
 
-    void (*put_string) (HTStream *me,
-			const char *str);
+	void (*put_string) (HTStream *me,
+			    const char *str);
 
-    void (*put_block) (HTStream *me,
-		       const char *str,
-		       int len);
+	void (*put_block) (HTStream *me,
+			   const char *str,
+			   int len);
 
-} HTStreamClass;
+    } HTStreamClass;
 
 /*
 
@@ -59,6 +62,9 @@ typedef struct _HTStreamClass {
    example from the network.
 
  */
-extern HTStream *HTErrorStream(void);
+    extern HTStream *HTErrorStream(void);
 
-#endif /* HTSTREAM_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTSTREAM_H */

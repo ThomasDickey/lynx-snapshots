@@ -8,22 +8,23 @@
 #include <HTGroup.h>
 #include <HTAssoc.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
 
 Server's Representation of Document (Tree) Protections
 
- */
-
-typedef struct {
-    char *template;		/* Template for this protection         */
-    char *filename;		/* Current document file                */
-    char *uid_name;		/* Effective uid (name of it)           */
-    char *gid_name;		/* Effective gid (name of it)           */
-    GroupDef *mask_group;	/* Allowed users and IP addresses       */
-    HTList *valid_schemes;	/* Valid authentication schemes         */
-    HTAssocList *values;	/* Association list for scheme specific */
-    /* parameters.                          */
-} HTAAProt;
+ */ typedef struct {
+	char *ctemplate;	/* Template for this protection         */
+	char *filename;		/* Current document file                */
+	char *uid_name;		/* Effective uid (name of it)           */
+	char *gid_name;		/* Effective gid (name of it)           */
+	GroupDef *mask_group;	/* Allowed users and IP addresses       */
+	HTList *valid_schemes;	/* Valid authentication schemes         */
+	HTAssocList *values;	/* Association list for scheme specific */
+	/* parameters.                          */
+    } HTAAProt;
 
 /*
 
@@ -60,9 +61,9 @@ Callbacks for rule system
  *      returns         nothing.
  *                      Sets the module-wide variable default_prot.
  */
-extern void HTAA_setDefaultProtection(const char *cur_docname,
-				      const char *prot_filename,
-				      const char *eff_ids);
+    extern void HTAA_setDefaultProtection(const char *cur_docname,
+					  const char *prot_filename,
+					  const char *eff_ids);
 
 /* PUBLIC                                       HTAA_setCurrentProtection()
  *              SET THE CURRENT PROTECTION MODE
@@ -83,9 +84,9 @@ extern void HTAA_setDefaultProtection(const char *cur_docname,
  *      returns         nothing.
  *                      Sets the module-wide variable current_prot.
  */
-extern void HTAA_setCurrentProtection(const char *cur_docname,
-				      const char *prot_filename,
-				      const char *eff_ids);
+    extern void HTAA_setCurrentProtection(const char *cur_docname,
+					  const char *prot_filename,
+					  const char *eff_ids);
 
 /* SERVER INTERNAL                                      HTAA_clearProtections()
  *              CLEAR DOCUMENT PROTECTION MODE
@@ -98,7 +99,7 @@ extern void HTAA_setCurrentProtection(const char *cur_docname,
  *      returns nothing.
  *              Frees the memory used by protection information.
  */
-extern void HTAA_clearProtections(void);
+    extern void HTAA_clearProtections(void);
 
 /*
 
@@ -127,7 +128,7 @@ Getting Protection Settings
  *              protection setup of the HTTranslate()'d file.
  *              This must not be free()'d.
  */
-extern HTAAProt *HTAA_getCurrentProtection(void);
+    extern HTAAProt *HTAA_getCurrentProtection(void);
 
 /* PUBLIC                                       HTAA_getDefaultProtection()
  *              GET DEFAULT PROTECTION SETUP STRUCTURE
@@ -147,7 +148,7 @@ extern HTAAProt *HTAA_getCurrentProtection(void);
  *              protection settings).
  *              This must not be free()'d.
  */
-extern HTAAProt *HTAA_getDefaultProtection(void);
+    extern HTAAProt *HTAA_getDefaultProtection(void);
 
 /*
 
@@ -165,7 +166,7 @@ Get User and Group IDs to Which Set to
  *      returns the uid number to give to setuid() system call.
  *              Default is 65534 (nobody).
  */
-extern int HTAA_getUid(void);
+    extern int HTAA_getUid(void);
 
 /* PUBLIC                                                       HTAA_getGid()
  *              GET THE GROUP ID TO CHANGE THE PROCESS GID TO
@@ -176,8 +177,8 @@ extern int HTAA_getUid(void);
  *      returns the uid number to give to setgid() system call.
  *              Default is 65534 (nogroup).
  */
-extern int HTAA_getGid(void);
-#endif /* not VMS */
+    extern int HTAA_getGid(void);
+#endif				/* not VMS */
 /*
 
    For VMS:
@@ -194,7 +195,7 @@ extern int HTAA_getGid(void);
  *      returns the user name
  *              Default is "" (nobody).
  */
-extern const char *HTAA_getUidName(void);
+    extern const char *HTAA_getUidName(void);
 
 /* PUBLIC                                                       HTAA_getFileName
  *              GET THE FILENAME (VMS ONLY)
@@ -204,8 +205,8 @@ extern const char *HTAA_getUidName(void);
  * ON EXIT:
  *      returns the filename
  */
-extern const char *HTAA_getFileName(void);
-#endif /* VMS */
+    extern const char *HTAA_getFileName(void);
+#endif				/* VMS */
 
 /* PUBLIC                                                       HTAA_UidToName
  *              GET THE USER NAME
@@ -215,7 +216,7 @@ extern const char *HTAA_getFileName(void);
  * ON EXIT:
  *      returns the user name
  */
-extern const char *HTAA_UidToName(int uid);
+    extern const char *HTAA_UidToName(int uid);
 
 /* PUBLIC                                                       HTAA_NameToUid
  *              GET THE USER ID
@@ -225,7 +226,7 @@ extern const char *HTAA_UidToName(int uid);
  * ON EXIT:
  *      returns the user id
  */
-extern int HTAA_NameToUid(const char *name);
+    extern int HTAA_NameToUid(const char *name);
 
 /* PUBLIC                                                       HTAA_GidToName
  *              GET THE GROUP NAME
@@ -235,7 +236,7 @@ extern int HTAA_NameToUid(const char *name);
  * ON EXIT:
  *      returns the group name
  */
-extern const char *HTAA_GidToName(int gid);
+    extern const char *HTAA_GidToName(int gid);
 
 /* PUBLIC                                                       HTAA_NameToGid
  *              GET THE GROUP ID
@@ -245,6 +246,9 @@ extern const char *HTAA_GidToName(int gid);
  * ON EXIT:
  *      returns the group id
  */
-extern int HTAA_NameToGid(const char *name);
+    extern int HTAA_NameToGid(const char *name);
 
-#endif /* not HTAAPROT_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* not HTAAPROT_H */

@@ -382,7 +382,7 @@ static HTAAProt *HTAAProt_new(const char *cur_docname,
 	if ((prot = typecalloc(HTAAProt)) == 0)
 	      outofmem(__FILE__, "HTAAProt_new");
 
-	prot->template = NULL;
+	prot->ctemplate = NULL;
 	prot->filename = NULL;
 	prot->uid_name = NULL;
 	prot->gid_name = NULL;

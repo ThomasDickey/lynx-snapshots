@@ -120,6 +120,9 @@ clean:
 	rm -f lynx$x core *.core *.leaks *.i *$o *.bak tags TAGS
 	cd chrtrans && $(MAKE) clean
 
+tags:
+	ctags *.[ch]
+
 distclean: clean
 
 CMN=$(top_srcdir)/WWW/Library/Implementation/

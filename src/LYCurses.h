@@ -284,18 +284,21 @@ typedef struct {
 
 #endif /* USE_SLANG */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifdef USE_SLANG
 #define LYstopPopup()		/* nothing */
 #define LYtopwindow() LYwin
 #else
-extern void LYsubwindow(WINDOW * param);
-extern WINDOW *LYtopwindow(void);
+    extern void LYsubwindow(WINDOW * param);
+    extern WINDOW *LYtopwindow(void);
 
 #define LYstopPopup() LYsubwindow(0)
-#endif /* NCURSES */
+#endif				/* NCURSES */
 
-extern void LYbox(WINDOW * win, BOOLEAN formfield);
-extern WINDOW *LYstartPopup(int *top_y, int *left_x, int *height, int *width);
+    extern void LYbox(WINDOW * win, BOOLEAN formfield);
+    extern WINDOW *LYstartPopup(int *top_y, int *left_x, int *height, int *width);
 
 /*
  * Useful macros not in PDCurses or very old ncurses headers.
@@ -311,7 +314,7 @@ extern WINDOW *LYstartPopup(int *top_y, int *left_x, int *height, int *width);
 #endif
 
 #if defined(HAVE_WATTR_GET)
-extern long LYgetattrs(WINDOW * win);
+    extern long LYgetattrs(WINDOW * win);
 
 #else
 #if defined(HAVE_GETATTRS) || defined(getattrs)
@@ -319,11 +322,15 @@ extern long LYgetattrs(WINDOW * win);
 #else
 #define LYgetattrs(win) ((win)->_attrs)
 #endif
-#endif /* HAVE_WATTR_GET */
+#endif				/* HAVE_WATTR_GET */
 
 #if defined(PDCURSES)
 #define HAVE_GETBKGD 1		/* can use fallback definition */
 #define HAVE_NAPMS 1		/* can use millisecond-delays */
+#  if defined(PDC_BUILD) && PDC_BUILD >= 2401
+    extern int saved_scrsize_x;
+    extern int saved_scrsize_y;
+#  endif
 #endif
 
 #ifdef HAVE_NAPMS
@@ -339,14 +346,14 @@ extern long LYgetattrs(WINDOW * win);
 /* Both slang and curses: */
 #ifndef TRUE
 #define TRUE  1
-#endif /* !TRUE */
+#endif				/* !TRUE */
 #ifndef FALSE
 #define FALSE 0
-#endif /* !FALSE */
+#endif				/* !FALSE */
 
 #ifdef REDEFINE_CR
 #define CR FROMASCII('\015')
-#endif /* REDEFINE_CR */
+#endif				/* REDEFINE_CR */
 
 #ifdef ALT_CHAR_SET
 #define BOXVERT 0		/* use alt char set for popup window vertical borders */
@@ -364,8 +371,8 @@ extern long LYgetattrs(WINDOW * win);
 #undef HAVE_KEYPAD		/* avoid confusion with bogus 'keypad()' */
 #endif
 
-extern int LYlines;		/* replaces LINES */
-extern int LYcols;		/* replaces COLS */
+    extern int LYlines;		/* replaces LINES */
+    extern int LYcols;		/* replaces COLS */
 
 /*
  * The scrollbar, if used, occupies the rightmost column.
@@ -386,11 +393,11 @@ extern int LYcols;		/* replaces COLS */
 #endif
 
 #ifdef USE_CURSES_PADS
-extern WINDOW *LYwin;
-extern int LYshiftWin;
-extern int LYwideLines;
-extern int LYtableCols;
-extern BOOL LYuseCursesPads;
+    extern WINDOW *LYwin;
+    extern int LYshiftWin;
+    extern int LYwideLines;
+    extern int LYtableCols;
+    extern BOOL LYuseCursesPads;
 
 #else
 #define LYwin stdscr
@@ -400,62 +407,62 @@ extern BOOL LYuseCursesPads;
 #endif
 
 #if defined(USE_COLOR_TABLE) || defined(USE_SLANG)
-extern int Current_Attr;
-extern int Masked_Attr;
+    extern int Current_Attr;
+    extern int Masked_Attr;
 #endif
 
-extern BOOLEAN setup(char *terminal);
-extern int LYscreenHeight(void);
-extern int LYscreenWidth(void);
-extern int LYstrExtent(const char *string, int len, int maxCells);
-extern int LYstrExtent2(const char *string, int len);
-extern int LYstrCells(const char *string);
-extern void LYclear(void);
-extern void LYclrtoeol(void);
-extern void LYerase(void);
-extern void LYmove(int y, int x);
-extern void LYnoVideo(int mask);
-extern void LYpaddstr(WINDOW * w, int width, const char *s);
-extern void LYrefresh(void);
-extern void LYstartTargetEmphasis(void);
-extern void LYstopTargetEmphasis(void);
-extern void LYtouchline(int row);
-extern void LYwaddnstr(WINDOW * w, const char *s, size_t len);
-extern void start_curses(void);
-extern void stop_curses(void);
+    extern BOOLEAN setup(char *terminal);
+    extern int LYscreenHeight(void);
+    extern int LYscreenWidth(void);
+    extern int LYstrExtent(const char *string, int len, int maxCells);
+    extern int LYstrExtent2(const char *string, int len);
+    extern int LYstrCells(const char *string);
+    extern void LYclear(void);
+    extern void LYclrtoeol(void);
+    extern void LYerase(void);
+    extern void LYmove(int y, int x);
+    extern void LYnoVideo(int mask);
+    extern void LYpaddstr(WINDOW * w, int width, const char *s);
+    extern void LYrefresh(void);
+    extern void LYstartTargetEmphasis(void);
+    extern void LYstopTargetEmphasis(void);
+    extern void LYtouchline(int row);
+    extern void LYwaddnstr(WINDOW * w, const char *s, size_t len);
+    extern void start_curses(void);
+    extern void stop_curses(void);
 
 #define LYaddstr(s)      LYwaddnstr(LYwin, s, strlen(s))
 #define LYaddnstr(s,len) LYwaddnstr(LYwin, s, len)
 #define LYwaddstr(w,s)   LYwaddnstr(w, s, strlen(s))
 
 #ifdef VMS
-extern int DCLsystem(char *command);
-extern void VMSexit();
-extern int ttopen();
-extern int ttclose();
-extern int ttgetc();
-extern void VMSsignal(int sig, void (*func) ());
-#endif /* VMS */
+    extern int DCLsystem(char *command);
+    extern void VMSexit();
+    extern int ttopen();
+    extern int ttclose();
+    extern int ttgetc();
+    extern void VMSsignal(int sig, void (*func) ());
+#endif				/* VMS */
 
 #if defined(USE_COLOR_STYLE)
-extern void curses_css(char *name, int dir);
-extern void curses_style(int style, int dir);
-extern void setHashStyle(int style, int color, int cattr, int mono, char *element);
-extern void setStyle(int style, int color, int cattr, int mono);
-extern void wcurses_css(WINDOW * win, char *name, int dir);
-extern void curses_w_style(WINDOW * win, int style, int dir);
+    extern void curses_css(char *name, int dir);
+    extern void curses_style(int style, int dir);
+    extern void setHashStyle(int style, int color, int cattr, int mono, char *element);
+    extern void setStyle(int style, int color, int cattr, int mono);
+    extern void wcurses_css(WINDOW * win, char *name, int dir);
+    extern void curses_w_style(WINDOW * win, int style, int dir);
 
 #  define LynxChangeStyle(style,dir) curses_style(style,dir)
 #  define LynxWChangeStyle(win,style,dir) curses_w_style(win,style,dir)
 #else
 #  define LynxWChangeStyle(win,style,dir)	(void)1
-#endif /* USE_COLOR_STYLE */
+#endif				/* USE_COLOR_STYLE */
 
 #ifdef USE_COLOR_TABLE
-extern void LYaddAttr(int a);
-extern void LYsubAttr(int a);
-extern void lynx_setup_colors(void);
-extern unsigned int Lynx_Color_Flags;
+    extern void LYaddAttr(int a);
+    extern void LYsubAttr(int a);
+    extern void lynx_setup_colors(void);
+    extern unsigned int Lynx_Color_Flags;
 #endif
 
 #ifdef USE_SLANG
@@ -481,23 +488,23 @@ extern unsigned int Lynx_Color_Flags;
 
 #ifdef FANCY_CURSES
 #undef FANCY_CURSES
-#endif /* FANCY_CURSES */
+#endif				/* FANCY_CURSES */
 
 /*
  *  Map some curses functions to slang functions.
  */
 #define stdscr ((WINDOW *)0)
 #ifdef SLANG_MBCS_HACK
-extern int PHYSICAL_SLtt_Screen_Cols;
+    extern int PHYSICAL_SLtt_Screen_Cols;
 
 #define COLS PHYSICAL_SLtt_Screen_Cols
 #else
 #define COLS SLtt_Screen_Cols
-#endif /* SLANG_MBCS_HACK */
+#endif				/* SLANG_MBCS_HACK */
 #define LINES SLtt_Screen_Rows
 #define move SLsmg_gotorc
 #define addstr SLsmg_write_string
-extern void LY_SLerase(void);
+    extern void LY_SLerase(void);
 
 #define erase LY_SLerase
 #define clear LY_SLerase
@@ -521,29 +528,29 @@ extern void LY_SLerase(void);
 #define echo()
 #define printw        SLsmg_printf
 
-extern int curscr;
-extern BOOLEAN FullRefresh;
+    extern int curscr;
+    extern BOOLEAN FullRefresh;
 
 #ifdef clearok
 #undef clearok
-#endif /* clearok */
+#endif				/* clearok */
 #define clearok(a,b) { FullRefresh = (BOOLEAN)b; }
-extern void LY_SLrefresh(void);
+    extern void LY_SLrefresh(void);
 
 #ifdef refresh
 #undef refresh
-#endif /* refresh */
+#endif				/* refresh */
 #define refresh LY_SLrefresh
 
 #ifdef VMS
-extern void VTHome(void);
+    extern void VTHome(void);
 
 #define endwin() LYclear(),refresh(),SLsmg_reset_smg(),VTHome()
 #else
 #define endwin SLsmg_reset_smg(),SLang_reset_tty
-#endif /* VMS */
+#endif				/* VMS */
 
-#else /* Define curses functions: */
+#else				/* Define curses functions: */
 
 #ifdef FANCY_CURSES
 #define SHOW_WHEREIS_TARGETS 1
@@ -563,9 +570,9 @@ extern void VTHome(void);
 #define stop_reverse()		clrattr(_REVERSE)
 #define wstop_reverse(w)	wclrattr(w, _REVERSE)
 
-#else /* Not VMS: */
+#else				/* Not VMS: */
 
-extern int string_to_attr(char *name);
+    extern int string_to_attr(char *name);
 
 /*
  *  For Unix FANCY_FANCY curses we interpose
@@ -573,13 +580,13 @@ extern int string_to_attr(char *name);
  *  A_foo attributes. - FM
  */
 #ifdef USE_COLOR_TABLE
-extern void LYaddWAttr(WINDOW * win, int a);
-extern void LYsubWAttr(WINDOW * win, int a);
-extern void LYaddWAttr(WINDOW * win, int a);
-extern void LYsubWAttr(WINDOW * win, int a);
-extern void lynx_set_color(int a);
-extern void lynx_standout(int a);
-extern int lynx_chg_color(int, int, int);
+    extern void LYaddWAttr(WINDOW * win, int a);
+    extern void LYsubWAttr(WINDOW * win, int a);
+    extern void LYaddWAttr(WINDOW * win, int a);
+    extern void LYsubWAttr(WINDOW * win, int a);
+    extern void lynx_set_color(int a);
+    extern void lynx_standout(int a);
+    extern int lynx_chg_color(int, int, int);
 
 #undef  standout
 #define standout() 		lynx_standout(TRUE)
@@ -607,11 +614,11 @@ extern int lynx_chg_color(int, int, int);
 #define wstart_reverse(w)	LYaddWAttr(w, A_REVERSE)
 #define stop_reverse()		LYsubAttr(A_REVERSE)
 #define wstop_reverse(w)	LYsubWAttr(w, A_REVERSE)
-#endif /* SNAKE && HP_TERMINAL */
+#endif				/* SNAKE && HP_TERMINAL */
 
-#endif /* VMS */
+#endif				/* VMS */
 
-#else /* Not FANCY_CURSES: */
+#else				/* Not FANCY_CURSES: */
 /* *INDENT-OFF* */
 #ifdef COLOR_CURSES
 #undef COLOR_CURSES
@@ -636,7 +643,7 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
 #define stop_reverse()		standend()
 #define wstop_reverse(a)	wstandend(a)
 
-#endif /* FANCY_CURSES */
+#endif				/* FANCY_CURSES */
 
 #ifdef __hpux			/* FIXME: configure check */
 #undef ACS_UARROW
@@ -675,7 +682,7 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
 
 #define addch_raw(ch)           LYaddch(ch)
 
-#endif /* USE_SLANG */
+#endif				/* USE_SLANG */
 
 #ifdef USE_SLANG
 #define LYGetYX(y, x)   y = SLsmg_get_row(), x = SLsmg_get_column()
@@ -684,8 +691,8 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
 #define LYGetYX(y, x)   getyx(LYwin, y, x)
 #else
 #define LYGetYX(y, x)   y = LYwin->_cury, x = LYwin->_curx
-#endif /* getyx */
-#endif /* USE_SLANG */
+#endif				/* getyx */
+#endif				/* USE_SLANG */
 
 /*
  * If the screen library allows us to specify "default" color, allow user to
@@ -697,31 +704,31 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
 #endif
 #endif
 
-extern void lynx_enable_mouse(int);
-extern void lynx_force_repaint(void);
-extern void lynx_nl2crlf(int normal);
-extern void lynx_start_title_color(void);
-extern void lynx_stop_title_color(void);
-extern void lynx_start_link_color(int flag, int pending);
-extern void lynx_stop_link_color(int flag, int pending);
-extern void lynx_stop_target_color(void);
-extern void lynx_start_target_color(void);
-extern void lynx_start_status_color(void);
-extern void lynx_stop_status_color(void);
-extern void lynx_start_h1_color(void);
-extern void lynx_stop_h1_color(void);
-extern void lynx_start_prompt_color(void);
-extern void lynx_stop_prompt_color(void);
-extern void lynx_start_radio_color(void);
-extern void lynx_stop_radio_color(void);
-extern void lynx_stop_all_colors(void);
+    extern void lynx_enable_mouse(int);
+    extern void lynx_force_repaint(void);
+    extern void lynx_nl2crlf(int normal);
+    extern void lynx_start_title_color(void);
+    extern void lynx_stop_title_color(void);
+    extern void lynx_start_link_color(int flag, int pending);
+    extern void lynx_stop_link_color(int flag, int pending);
+    extern void lynx_stop_target_color(void);
+    extern void lynx_start_target_color(void);
+    extern void lynx_start_status_color(void);
+    extern void lynx_stop_status_color(void);
+    extern void lynx_start_h1_color(void);
+    extern void lynx_stop_h1_color(void);
+    extern void lynx_start_prompt_color(void);
+    extern void lynx_stop_prompt_color(void);
+    extern void lynx_start_radio_color(void);
+    extern void lynx_stop_radio_color(void);
+    extern void lynx_stop_all_colors(void);
 
-extern void lynx_start_bold(void);
-extern void lynx_start_reverse(void);
-extern void lynx_start_underline(void);
-extern void lynx_stop_bold(void);
-extern void lynx_stop_reverse(void);
-extern void lynx_stop_underline(void);
+    extern void lynx_start_bold(void);
+    extern void lynx_start_reverse(void);
+    extern void lynx_start_underline(void);
+    extern void lynx_stop_bold(void);
+    extern void lynx_stop_reverse(void);
+    extern void lynx_stop_underline(void);
 
 /*
  * To prevent corrupting binary data on DOS, MS-WINDOWS or OS/2 we open files
@@ -753,6 +760,9 @@ extern void lynx_stop_underline(void);
 #define LYHideCursor() LYmove((LYlines - 1), (LYcolLimit - 1))
 #endif
 
-extern void LYstowCursor(WINDOW * win, int row, int col);
+    extern void LYstowCursor(WINDOW * win, int row, int col);
 
-#endif /* LYCURSES_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* LYCURSES_H */

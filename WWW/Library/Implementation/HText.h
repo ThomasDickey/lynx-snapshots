@@ -12,25 +12,29 @@
  */
 #ifndef HTEXT_H
 #define HTEXT_H
+
 #include <HTAnchor.h>
 #include <HTStyle.h>
 #include <HTStream.h>
 #include <SGML.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifndef THINK_C
 #ifndef HyperText		/* Objective C version defined HyperText */
-typedef struct _HText HText;	/* Normal Library */
+    typedef struct _HText HText;	/* Normal Library */
 #endif
 #else
-class CHyperText;		/* Mac Think-C browser hook */
-typedef CHyperText HText;
+    class CHyperText;		/* Mac Think-C browser hook */
+    typedef CHyperText HText;
 #endif
 
-extern HText *HTMainText;	/* Pointer to current main text */
-extern HTParentAnchor *HTMainAnchor;	/* Pointer to current text's anchor */
+    extern HText *HTMainText;	/* Pointer to current main text */
+    extern HTParentAnchor *HTMainAnchor;	/* Pointer to current text's anchor */
 
-extern const char *HTAppName;	/* Application name */
-extern const char *HTAppVersion;	/* Application version */
+    extern const char *HTAppName;	/* Application name */
+    extern const char *HTAppVersion;	/* Application version */
 
 /*
 
@@ -44,21 +48,21 @@ Creation and deletion
    which is kep by the creating stream.
 
  */
-extern HText *HText_new(HTParentAnchor *anchor);
+    extern HText *HText_new(HTParentAnchor *anchor);
 
-extern HText *HText_new2(HTParentAnchor *anchor,
-			 HTStream *output_stream);
+    extern HText *HText_new2(HTParentAnchor *anchor,
+			     HTStream *output_stream);
 
-extern HText *HText_new3(HTParentAnchor *anchor,
-			 HTStream *output_stream,
-			 HTStructured * structure);
+    extern HText *HText_new3(HTParentAnchor *anchor,
+			     HTStream *output_stream,
+			     HTStructured * structure);
 
 /*
 
   FREE HYPERTEXT OBJECT
 
  */
-extern void HText_free(HText *me);
+    extern void HText_free(HText *me);
 
 /*
 
@@ -70,9 +74,9 @@ Object Building methods
    which are flushed at the end.
 
  */
-extern void HText_beginAppend(HText *text);
+    extern void HText_beginAppend(HText *text);
 
-extern void HText_endAppend(HText *text);
+    extern void HText_endAppend(HText *text);
 
 /*
 
@@ -80,14 +84,14 @@ extern void HText_endAppend(HText *text);
 
  */
 
-extern void HText_setStyle(HText *text, HTStyle *style);
+    extern void HText_setStyle(HText *text, HTStyle *style);
 
 /*
 
   ADD ONE CHARACTER
 
  */
-extern void HText_appendCharacter(HText *text, int ch);
+    extern void HText_appendCharacter(HText *text, int ch);
 
 /*
 
@@ -95,7 +99,7 @@ extern void HText_appendCharacter(HText *text, int ch);
 
  */
 
-extern void HText_appendText(HText *text, const char *str);
+    extern void HText_appendText(HText *text, const char *str);
 
 /*
 
@@ -104,11 +108,11 @@ extern void HText_appendText(HText *text, const char *str);
    and similar things
 
  */
-extern void HText_appendParagraph(HText *text);
+    extern void HText_appendParagraph(HText *text);
 
-extern void HText_appendLineBreak(HText *text);
+    extern void HText_appendLineBreak(HText *text);
 
-extern void HText_appendHorizontalRule(HText *text);
+    extern void HText_appendHorizontalRule(HText *text);
 
 /*
 
@@ -123,10 +127,10 @@ extern void HText_appendHorizontalRule(HText *text);
    Anchors may not be nested.
 
  */
-extern int HText_beginAnchor(HText *text, BOOL underline,
-			     HTChildAnchor *anc);
-extern void HText_endAnchor(HText *text, int number);
-extern BOOL HText_isAnchorBlank(HText *text, int number);
+    extern int HText_beginAnchor(HText *text, BOOL underline,
+				 HTChildAnchor *anc);
+    extern void HText_endAnchor(HText *text, int number);
+    extern BOOL HText_isAnchorBlank(HText *text, int number);
 
 /*
 
@@ -141,17 +145,17 @@ extern BOOL HText_isAnchorBlank(HText *text, int number);
    simply generate some text linked to the image itself as a separate document.
 
  */
-extern void HText_appendImage(HText *text, HTChildAnchor *anc,
-			      const char *alternative_text,
-			      int alignment,
-			      BOOL isMap);
+    extern void HText_appendImage(HText *text, HTChildAnchor *anc,
+				  const char *alternative_text,
+				  int alignment,
+				  BOOL isMap);
 
 /*
 
   RETURN THE ANCHOR ASSOCIATED WITH THIS NODE
 
  */
-extern HTParentAnchor *HText_nodeAnchor(HText *me);
+    extern HTParentAnchor *HText_nodeAnchor(HText *me);
 
 /*
 
@@ -165,8 +169,8 @@ Browsing functions
 
  */
 
-extern BOOL HText_select(HText *text);
-extern BOOL HText_selectAnchor(HText *text, HTChildAnchor *anchor);
+    extern BOOL HText_select(HText *text);
+    extern BOOL HText_selectAnchor(HText *text, HTChildAnchor *anchor);
 
 /*
 
@@ -181,35 +185,38 @@ Editing functions
 */
 /*      Apply this style to the selection
 */
-extern void HText_applyStyle(HText *me, HTStyle *style);
+    extern void HText_applyStyle(HText *me, HTStyle *style);
 
 /*      Update all text with changed style.
 */
-extern void HText_updateStyle(HText *me, HTStyle *style);
+    extern void HText_updateStyle(HText *me, HTStyle *style);
 
 /*      Return style of  selection
 */
-extern HTStyle *HText_selectionStyle(HText *me, HTStyleSheet *sheet);
+    extern HTStyle *HText_selectionStyle(HText *me, HTStyleSheet *sheet);
 
 /*      Paste in styled text
 */
-extern void HText_replaceSel(HText *me, const char *aString,
-			     HTStyle *aStyle);
+    extern void HText_replaceSel(HText *me, const char *aString,
+				 HTStyle *aStyle);
 
 /*      Apply this style to the selection and all similarly formatted text
  *      (style recovery only)
  */
-extern void HTextApplyToSimilar(HText *me, HTStyle *style);
+    extern void HTextApplyToSimilar(HText *me, HTStyle *style);
 
 /*      Select the first unstyled run.
  *      (style recovery only)
  */
-extern void HTextSelectUnstyled(HText *me, HTStyleSheet *sheet);
+    extern void HTextSelectUnstyled(HText *me, HTStyleSheet *sheet);
 
 /*      Anchor handling:
 */
-extern void HText_unlinkSelection(HText *me);
-extern HTAnchor *HText_referenceSelected(HText *me);
-extern HTAnchor *HText_linkSelTo(HText *me, HTAnchor * anchor);
+    extern void HText_unlinkSelection(HText *me);
+    extern HTAnchor *HText_referenceSelected(HText *me);
+    extern HTAnchor *HText_linkSelTo(HText *me, HTAnchor * anchor);
 
-#endif /* HTEXT_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTEXT_H */

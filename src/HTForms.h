@@ -5,93 +5,93 @@
 #include <LYStructs.h>
 #endif /* LYSTRUCTS_H */
 
-/* in LYForms.c */
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* change_form_link() calls change_form_link_ex() with all its args and FALSE
  * as last arg
- */
-extern int change_form_link(int cur,
-			    DocInfo *newdoc,
-			    BOOLEAN *refresh_screen,
-			    BOOLEAN use_last_tfpos,
-			    BOOLEAN immediate_submit);
+ */ extern int change_form_link(int cur,
+				DocInfo *newdoc,
+				BOOLEAN *refresh_screen,
+				BOOLEAN use_last_tfpos,
+				BOOLEAN immediate_submit);
 
-extern int change_form_link_ex(int cur,
-			       DocInfo *newdoc,
-			       BOOLEAN *refresh_screen,
-			       BOOLEAN use_last_tfpos,
-			       BOOLEAN immediate_submit,
-			       BOOLEAN draw_only);
+    extern int change_form_link_ex(int cur,
+				   DocInfo *newdoc,
+				   BOOLEAN *refresh_screen,
+				   BOOLEAN use_last_tfpos,
+				   BOOLEAN immediate_submit,
+				   BOOLEAN draw_only);
 
 /* InputFieldData is used to pass the info between HTML.c and Gridtext.c in
  * HText_beginInput()
  */
-typedef struct _InputFieldData {
-    const char *accept;
-    const char *align;
-    int checked;
-    const char *class;
-    int disabled;
-    const char *error;
-    const char *height;
-    const char *id;
-    const char *lang;
-    const char *max;
-    const char *maxlength;
-    const char *md;
-    const char *min;
-    const char *name;
-    int size;
-    const char *src;
-    const char *type;
-    char *value;
-    const char *width;
-    int name_cs;		/* charset handle for name */
-    int value_cs;		/* charset handle for value */
-    const char *accept_cs;
-} InputFieldData;
+    typedef struct _InputFieldData {
+	const char *accept;
+	const char *align;
+	int checked;
+	const char *iclass;
+	int disabled;
+	const char *error;
+	const char *height;
+	const char *id;
+	const char *lang;
+	const char *max;
+	const char *maxlength;
+	const char *md;
+	const char *min;
+	const char *name;
+	int size;
+	const char *src;
+	const char *type;
+	char *value;
+	const char *width;
+	int name_cs;		/* charset handle for name */
+	int value_cs;		/* charset handle for value */
+	const char *accept_cs;
+    } InputFieldData;
 
 /* The OptionType structure is for a linked list of option entries
  */
-typedef struct _OptionType {
-    char *name;			/* the name of the entry */
-    char *cp_submit_value;	/* the value to submit   */
-    int value_cs;		/* charset value is in   */
-    struct _OptionType *next;	/* the next entry        */
-} OptionType;
+    typedef struct _OptionType {
+	char *name;		/* the name of the entry */
+	char *cp_submit_value;	/* the value to submit   */
+	int value_cs;		/* charset value is in   */
+	struct _OptionType *next;	/* the next entry        */
+    } OptionType;
 
 /*
  * The FormInfo structure is used to contain the form field data within each
  * anchor.  A pointer to this structure is in the TextAnchor struct.
  */
-typedef struct _FormInfo {
-    char *name;			/* the name of the link */
-    int number;			/* which form is the link within */
-    int type;			/* string, int, etc. */
-    char *value;		/* user entered string data */
-    char *orig_value;		/* the original value */
-    int size;			/* width on the screen */
-    unsigned maxlength;		/* max width of data */
-    int group;			/* a group associated with the link
+    typedef struct _FormInfo {
+	char *name;		/* the name of the link */
+	int number;		/* which form is the link within */
+	int type;		/* string, int, etc. */
+	char *value;		/* user entered string data */
+	char *orig_value;	/* the original value */
+	int size;		/* width on the screen */
+	unsigned maxlength;	/* max width of data */
+	int group;		/* a group associated with the link
 				 *  this is used for select's
 				 */
-    int num_value;		/* value of the numerical fields */
-    int hrange;			/* high numerical range */
-    int lrange;			/* low numerical range */
-    OptionType *select_list;	/* array of option choices */
-    char *submit_action;	/* form's action */
-    int submit_method;		/* form's method */
-    char *submit_enctype;	/* form's entype */
-    char *submit_title;		/* form's title */
-    BOOL no_cache;		/* Always resubmit? */
-    char *cp_submit_value;	/* option value to submit */
-    char *orig_submit_value;	/* original submit value */
-    int size_l;			/* The length of the option list */
-    int disabled;		/* If YES, can't change values */
-    int name_cs;
-    int value_cs;
-    char *accept_cs;
-} FormInfo;
+	int num_value;		/* value of the numerical fields */
+	int hrange;		/* high numerical range */
+	int lrange;		/* low numerical range */
+	OptionType *select_list;	/* array of option choices */
+	char *submit_action;	/* form's action */
+	int submit_method;	/* form's method */
+	char *submit_enctype;	/* form's entype */
+	char *submit_title;	/* form's title */
+	BOOL no_cache;		/* Always resubmit? */
+	char *cp_submit_value;	/* option value to submit */
+	char *orig_submit_value;	/* original submit value */
+	int size_l;		/* The length of the option list */
+	int disabled;		/* If YES, can't change values */
+	int name_cs;
+	int value_cs;
+	char *accept_cs;
+    } FormInfo;
 
 /*
  * As structure for info associated with a form.  There is some redundancy
@@ -99,17 +99,17 @@ typedef struct _FormInfo {
  * (as opposed to form fields) per doc is expected to be rather small.  More
  * things which are per form rather than per field could be moved here.  - kw
  */
-typedef struct _PerFormInfo {
-    int number;			/* form number, see GridText.c */
-    /* except for the last two, the following fields aren't actually used.. */
-    int disabled;		/* If YES, can't change values */
-    struct _PerFormInfo *next;	/* pointer to next form in doc */
-    int nfields;		/* number of fields */
-    FormInfo *first_field;
-    FormInfo *last_field;	/* pointer to last field in form */
-    char *accept_cs;
-    char *thisacceptcs;		/* used during submit */
-} PerFormInfo;
+    typedef struct _PerFormInfo {
+	int number;		/* form number, see GridText.c */
+	/* except for the last two, the following fields aren't actually used.. */
+	int disabled;		/* If YES, can't change values */
+	struct _PerFormInfo *next;	/* pointer to next form in doc */
+	int nfields;		/* number of fields */
+	FormInfo *first_field;
+	FormInfo *last_field;	/* pointer to last field in form */
+	char *accept_cs;
+	char *thisacceptcs;	/* used during submit */
+    } PerFormInfo;
 
 #define HYPERTEXT_ANCHOR 1
 #define INPUT_ANCHOR     2	/* forms mode input fields */
@@ -151,7 +151,9 @@ typedef struct _PerFormInfo {
 #define LAST_ORDER   3
 
 /* in LYForms.c */
-extern void show_formlink_statusline(const FormInfo * form,
-				     int for_what);
-
-#endif /* HTFORMS_H */
+    extern void show_formlink_statusline(const FormInfo * form,
+					 int for_what);
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTFORMS_H */

@@ -11,30 +11,37 @@
 #ifdef VMS
 #include <HTFTP.h>
 #include <HTVMSUtils.h>
-#define HTSYS_name(path)   HTVMS_name("", path)
-#define HTSYS_purge(path)  HTVMS_purge(path)
-#define HTSYS_remove(path) HTVMS_remove(path)
 #endif /* VMS */
 
 #if defined(USE_DOS_DRIVES)
 #include <HTDOS.h>
-#define HTSYS_name(path) HTDOS_name(path)
 #endif
 
+#if defined(SYSLOG_REQUESTED_URLS)
+#include <syslog.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#ifdef VMS
+#define HTSYS_name(path)   HTVMS_name("", path)
+#define HTSYS_purge(path)  HTVMS_purge(path)
+#define HTSYS_remove(path) HTVMS_remove(path)
+#endif				/* VMS */
+#if defined(USE_DOS_DRIVES)
+#define HTSYS_name(path) HTDOS_name(path)
+#endif
 #ifndef HTSYS_name
 #define HTSYS_name(path) path
 #endif
-
 #ifndef HTSYS_purge
 #define HTSYS_purge(path)	/* nothing */
 #endif
-
 #ifndef HTSYS_remove
 #define HTSYS_remove(path) remove(path)
 #endif
-
 #define LYIsPipeCommand(s) ((s)[0] == '|')
-
 #ifdef VMS
 #define TTY_DEVICE "tt:"
 #define NUL_DEVICE "nl:"
@@ -61,21 +68,17 @@
 #define LYIsNullDevice(s) LYSameFilename(s,NUL_DEVICE)
 #define LYSameFilename(a,b) (!strcmp(a,b))
 #define LYSameHostname(a,b) (!strcmp(a,b))
-#endif /* __CYGWIN__ */
-#endif /* DOSPATH */
-#endif /* VMS */
-
+#endif				/* __CYGWIN__ */
+#endif				/* DOSPATH */
+#endif				/* VMS */
 /* See definitions in src/LYCharVals.h.  The hardcoded values...
    This prohibits binding C-c and C-g.  Maybe it is better to remove this? */
 #define LYCharIsINTERRUPT_HARD(ch)	\
   ((ch) == LYCharINTERRUPT1 || ch == LYCharINTERRUPT2)
-
 #define LYCharIsINTERRUPT(ch)		\
   (LYCharIsINTERRUPT_HARD(ch) || LKC_TO_LAC(keymap,ch) == LYK_INTERRUPT)
-
 #define LYCharIsINTERRUPT_NO_letter(ch)	\
   (LYCharIsINTERRUPT(ch) && !isprint(ch))
-
 #if defined(USE_DOS_DRIVES)
 #define PATHSEP_STR "\\"
 #define LYIsPathSep(ch) ((ch) == '/' || (ch) == '\\')
@@ -85,7 +88,6 @@
 #define LYIsPathSep(ch) ((ch) == '/')
 #define LYIsDosDrive(s) FALSE	/* really nothing */
 #endif
-
 #ifdef EXP_ADDRLIST_PAGE
 #define LYIsListpageTitle(name) \
     (!strcmp((name), LIST_PAGE_TITLE) || \
@@ -94,183 +96,181 @@
 #define LYIsListpageTitle(name) \
     (!strcmp((name), LIST_PAGE_TITLE))
 #endif
-
 #define LYIsHtmlSep(ch) ((ch) == '/')
-
 #define findPoundSelector(address) strchr(address, '#')
 #define restorePoundSelector(pound) if ((pound) != NULL) *(pound) = '#'
-
-extern BOOL strn_dash_equ(const char *p1, const char *p2, int len);
-extern BOOLEAN LYAddSchemeForURL(char **AllocatedString, const char *default_scheme);
-extern BOOLEAN LYCachedTemp(char *result, char **cached);
-extern BOOLEAN LYCanDoHEAD(const char *address);
-extern BOOLEAN LYCanReadFile(const char *name);
-extern BOOLEAN LYCanWriteFile(const char *name);
-extern BOOLEAN LYCloseInput(FILE *fp);
-extern BOOLEAN LYCloseOutput(FILE *fp);
-extern BOOLEAN LYExpandHostForURL(char **AllocatedString, char *prefix_list, char *suffix_list);
-extern BOOLEAN LYFixCursesOnForAccess(const char *addr, const char *physical);
-extern BOOLEAN LYPathOffHomeOK(char *fbuffer, size_t fbuffer_size);
-extern BOOLEAN LYValidateFilename(char *result, char *given);
-extern BOOLEAN LYisAbsPath(const char *path);
-extern BOOLEAN LYisLocalAlias(const char *filename);
-extern BOOLEAN LYisLocalFile(const char *filename);
-extern BOOLEAN LYisLocalHost(const char *filename);
-extern BOOLEAN LYisRootPath(const char *path);
-extern BOOLEAN inlocaldomain(void);
-extern FILE *InternalPageFP(char *filename, int reuse_flag);
-extern FILE *LYAppendToTxtFile(const char *name);
-extern FILE *LYNewBinFile(const char *name);
-extern FILE *LYNewTxtFile(const char *name);
-extern FILE *LYOpenScratch(char *result, const char *prefix);
-extern FILE *LYOpenTemp(char *result, const char *suffix, const char *mode);
-extern FILE *LYOpenTempRewrite(char *result, const char *suffix, const char *mode);
-extern FILE *LYReopenTemp(char *name);
-extern char *Current_Dir(char *pathname);
-extern char *LYAddPathToSave(char *fname);
-extern char *LYGetEnv(const char *name);
-extern char *LYLastPathSep(const char *path);
-extern char *LYPathLeaf(char *pathname);
-extern char *LYgetXDisplay(void);
-extern char *strip_trailing_slash(char *my_dirname);
-extern char *trimPoundSelector(char *address);
-extern const char *Home_Dir(void);
-extern const char *LYGetHiliteStr(int cur, int count);
-extern const char *LYSysShell(void);
-extern const char *index_to_restriction(int inx);
-extern const char *wwwName(const char *pathname);
-extern int HTCheckForInterrupt(void);
-extern int LYCheckForProxyURL(char *filename);
-extern int LYConsoleInputFD(BOOLEAN need_selectable);
-extern int LYCopyFile(char *src, char *dst);
-extern int LYGetHilitePos(int cur, int count);
-extern int LYRemoveTemp(char *name);
-extern int LYSystem(char *command);
-extern int LYValidateOutput(char *filename);
-extern int find_restriction(const char *name, int len);
-extern int is_url(char *filename);
-extern int number2arrows(int number);
-extern size_t utf8_length(BOOL utf_flag, const char *data);
-extern time_t LYmktime(char *string, BOOL absolute);
-extern void BeginInternalPage(FILE *fp0, const char *Title, const char *HelpURL);
-extern void EndInternalPage(FILE *fp0);
-extern void HTAddSugFilename(char *fname);
-extern void HTSugFilenames_free(void);
-extern void LYAddHilite(int cur, char *text, int x);
-extern void LYAddHtmlSep(char **path);
-extern void LYAddHtmlSep0(char *path);
-extern void LYAddLocalhostAlias(char *alias);
-extern void LYAddPathSep(char **path);
-extern void LYAddPathSep0(char *path);
-extern void LYAddPathToHome(char *fbuffer, size_t fbuffer_size, const char *fname);
-extern void LYCheckBibHost(void);
-extern void LYCheckMail(void);
-extern void LYCleanupTemp(void);
-extern void LYCloseTemp(char *name);
-extern void LYCloseTempFP(FILE *fp);
-extern void LYConvertToURL(char **AllocatedString, int fixit);
-extern void LYDoCSI(char *url, const char *comment, char **csi);
-extern void LYEnsureAbsoluteURL(char **href, const char *name, int fixit);
-extern void LYFakeZap(BOOL set);
-extern void LYFixCursesOn(const char *reason);
-extern void LYLocalFileToURL(char **target, const char *source);
-extern void LYLocalhostAliases_free(void);
-extern void LYRenamedTemp(char *oldname, char *newname);
-extern void LYSetHilite(int cur, const char *text);
-extern void LYTrimHtmlSep(char *path);
-extern void LYTrimPathSep(char *path);
-extern void LYTrimRelFromAbsPath(char *path);
-extern void LYhighlight(int flag, int cur, const char *target);
-extern void LYmsec_delay(unsigned msec);
-extern void LYsetXDisplay(char *new_display);
-extern void WriteInternalTitle(FILE *fp0, const char *Title);
-extern void change_sug_filename(char *fname);
-extern void convert_to_spaces(char *string, BOOL condense);
-extern void free_and_clear(char **obj);
-extern void noviceline(int more_flag);
-extern void parse_restrictions(const char *s);
-extern void print_restrictions_to_fd(FILE *fp);
-extern void remove_backslashes(char *buf);
-extern void size_change(int sig);
-extern void statusline(const char *text);
-extern void toggle_novice_line(void);
+    extern BOOL strn_dash_equ(const char *p1, const char *p2, int len);
+    extern BOOLEAN LYAddSchemeForURL(char **AllocatedString, const char *default_scheme);
+    extern BOOLEAN LYCachedTemp(char *result, char **cached);
+    extern BOOLEAN LYCanDoHEAD(const char *address);
+    extern BOOLEAN LYCanReadFile(const char *name);
+    extern BOOLEAN LYCanWriteFile(const char *name);
+    extern BOOLEAN LYCloseInput(FILE *fp);
+    extern BOOLEAN LYCloseOutput(FILE *fp);
+    extern BOOLEAN LYExpandHostForURL(char **AllocatedString, char
+				      *prefix_list, char *suffix_list);
+    extern BOOLEAN LYFixCursesOnForAccess(const char *addr, const char *physical);
+    extern BOOLEAN LYPathOffHomeOK(char *fbuffer, size_t fbuffer_size);
+    extern BOOLEAN LYValidateFilename(char *result, char *given);
+    extern BOOLEAN LYisAbsPath(const char *path);
+    extern BOOLEAN LYisLocalAlias(const char *filename);
+    extern BOOLEAN LYisLocalFile(const char *filename);
+    extern BOOLEAN LYisLocalHost(const char *filename);
+    extern BOOLEAN LYisRootPath(const char *path);
+    extern BOOLEAN inlocaldomain(void);
+    extern FILE *InternalPageFP(char *filename, int reuse_flag);
+    extern FILE *LYAppendToTxtFile(const char *name);
+    extern FILE *LYNewBinFile(const char *name);
+    extern FILE *LYNewTxtFile(const char *name);
+    extern FILE *LYOpenScratch(char *result, const char *prefix);
+    extern FILE *LYOpenTemp(char *result, const char *suffix, const char *mode);
+    extern FILE *LYOpenTempRewrite(char *result, const char *suffix, const char *mode);
+    extern FILE *LYReopenTemp(char *name);
+    extern char *Current_Dir(char *pathname);
+    extern char *LYAddPathToSave(char *fname);
+    extern char *LYGetEnv(const char *name);
+    extern char *LYLastPathSep(const char *path);
+    extern char *LYPathLeaf(char *pathname);
+    extern char *LYgetXDisplay(void);
+    extern char *strip_trailing_slash(char *my_dirname);
+    extern char *trimPoundSelector(char *address);
+    extern const char *Home_Dir(void);
+    extern const char *LYGetHiliteStr(int cur, int count);
+    extern const char *LYSysShell(void);
+    extern const char *index_to_restriction(int inx);
+    extern const char *wwwName(const char *pathname);
+    extern int HTCheckForInterrupt(void);
+    extern int LYConsoleInputFD(BOOLEAN need_selectable);
+    extern int LYCopyFile(char *src, char *dst);
+    extern int LYGetHilitePos(int cur, int count);
+    extern int LYRemoveTemp(char *name);
+    extern int LYSystem(char *command);
+    extern int LYValidateOutput(char *filename);
+    extern int find_restriction(const char *name, int len);
+    extern int number2arrows(int number);
+    extern size_t utf8_length(BOOL utf_flag, const char *data);
+    extern time_t LYmktime(char *string, BOOL absolute);
+    extern void BeginInternalPage(FILE *fp0, const char *Title, const char *HelpURL);
+    extern void EndInternalPage(FILE *fp0);
+    extern void HTAddSugFilename(char *fname);
+    extern void HTSugFilenames_free(void);
+    extern void LYAddHilite(int cur, char *text, int x);
+    extern void LYAddHtmlSep(char **path);
+    extern void LYAddHtmlSep0(char *path);
+    extern void LYAddLocalhostAlias(char *alias);
+    extern void LYAddPathSep(char **path);
+    extern void LYAddPathSep0(char *path);
+    extern void LYAddPathToHome(char *fbuffer, size_t fbuffer_size, const char *fname);
+    extern void LYCheckBibHost(void);
+    extern void LYCheckMail(void);
+    extern void LYCleanupTemp(void);
+    extern void LYCloseTemp(char *name);
+    extern void LYCloseTempFP(FILE *fp);
+    extern void LYConvertToURL(char **AllocatedString, int fixit);
+    extern void LYDoCSI(char *url, const char *comment, char **csi);
+    extern void LYEnsureAbsoluteURL(char **href, const char *name, int fixit);
+    extern void LYFakeZap(BOOL set);
+    extern void LYFixCursesOn(const char *reason);
+    extern void LYFreeHilites(int first, int last);
+    extern void LYFreeStringList(HTList *list);
+    extern void LYLocalFileToURL(char **target, const char *source);
+    extern void LYLocalhostAliases_free(void);
+    extern void LYRenamedTemp(char *oldname, char *newname);
+    extern void LYSetHilite(int cur, const char *text);
+    extern void LYTrimHtmlSep(char *path);
+    extern void LYTrimPathSep(char *path);
+    extern void LYTrimRelFromAbsPath(char *path);
+    extern void LYhighlight(int flag, int cur, const char *target);
+    extern void LYmsec_delay(unsigned msec);
+    extern void LYsetXDisplay(char *new_display);
+    extern void WriteInternalTitle(FILE *fp0, const char *Title);
+    extern void change_sug_filename(char *fname);
+    extern void convert_to_spaces(char *string, BOOL condense);
+    extern void free_and_clear(char **obj);
+    extern void noviceline(int more_flag);
+    extern void parse_restrictions(const char *s);
+    extern void print_restrictions_to_fd(FILE *fp);
+    extern void remove_backslashes(char *buf);
+    extern void size_change(int sig);
+    extern void statusline(const char *text);
+    extern void toggle_novice_line(void);
 
 #ifdef EXP_ASCII_CTYPES
-extern int ascii_tolower(int i);
-extern int ascii_toupper(int i);
-extern int ascii_isupper(int i);
+    extern int ascii_tolower(int i);
+    extern int ascii_toupper(int i);
+    extern int ascii_isupper(int i);
 #endif
 
 #ifdef __CYGWIN__
-extern int Cygwin_Shell(void);
+    extern int Cygwin_Shell(void);
 #endif
 
 #ifdef _WIN_CC
-extern int exec_command(char *cmd, int wait_flag);	/* xsystem.c */
-extern int xsystem(char *cmd);
+    extern int exec_command(char *cmd, int wait_flag);	/* xsystem.c */
+    extern int xsystem(char *cmd);
 #endif
 
 /* Keeping track of User Interface Pages: */
-typedef enum {
-    UIP_UNKNOWN = -1
-    ,UIP_HISTORY = 0
-    ,UIP_DOWNLOAD_OPTIONS
-    ,UIP_PRINT_OPTIONS
-    ,UIP_SHOWINFO
-    ,UIP_LIST_PAGE
-    ,UIP_VLINKS
-    ,UIP_LYNXCFG
-    ,UIP_OPTIONS_MENU
-    ,UIP_DIRED_MENU
-    ,UIP_PERMIT_OPTIONS
-    ,UIP_UPLOAD_OPTIONS
-    ,UIP_ADDRLIST_PAGE
-    ,UIP_CONFIG_DEF
-    ,UIP_TRACELOG
-    ,UIP_INSTALL
-} UIP_t;
+    typedef enum {
+	UIP_UNKNOWN = -1
+	,UIP_HISTORY = 0
+	,UIP_DOWNLOAD_OPTIONS
+	,UIP_PRINT_OPTIONS
+	,UIP_SHOWINFO
+	,UIP_LIST_PAGE
+	,UIP_VLINKS
+	,UIP_LYNXCFG
+	,UIP_OPTIONS_MENU
+	,UIP_DIRED_MENU
+	,UIP_PERMIT_OPTIONS
+	,UIP_UPLOAD_OPTIONS
+	,UIP_ADDRLIST_PAGE
+	,UIP_CONFIG_DEF
+	,UIP_TRACELOG
+	,UIP_INSTALL
+    } UIP_t;
 
 #define UIP_P_FRAG 0x0001	/* flag: consider "url#frag" as matching "url" */
 
-extern BOOL LYIsUIPage3(const char *url, UIP_t type, int flagparam);
+    extern BOOL LYIsUIPage3(const char *url, UIP_t type, int flagparam);
 
 #define LYIsUIPage(url,type) LYIsUIPage3(url, type, UIP_P_FRAG)
-extern void LYRegisterUIPage(const char *url, UIP_t type);
+    extern void LYRegisterUIPage(const char *url, UIP_t type);
 
 #define LYUnRegisterUIPage(type) LYRegisterUIPage(NULL, type)
-extern void LYUIPages_free(void);
+    extern void LYUIPages_free(void);
 
 #ifdef CAN_CUT_AND_PASTE
-extern int put_clip(const char *szBuffer);
+    extern int put_clip(const char *szBuffer);
 
 /* get_clip_grab() returns a pointer to the string in the system area.
    get_clip_release() should be called ASAP after this. */
-extern char *get_clip_grab(void);
-extern void get_clip_release(void);
+    extern char *get_clip_grab(void);
+    extern void get_clip_release(void);
 
 #  ifdef WIN_EX
 #    define size_clip()	8192
 #  else
-extern int size_clip(void);
+    extern int size_clip(void);
 
 #  endif
 #endif
 
 #if defined(WIN_EX)		/* 1997/10/16 (Thu) 20:13:28 */
-extern char *HTDOS_short_name(char *path);
-extern char *w32_strerror(DWORD ercode);
+    extern char *HTDOS_short_name(char *path);
+    extern char *w32_strerror(DWORD ercode);
 #endif
 
 #ifdef VMS
-extern void Define_VMSLogical(char *LogicalName, char *LogicalValue);
-#endif /* VMS */
+    extern void Define_VMSLogical(char *LogicalName, char *LogicalValue);
+#endif				/* VMS */
 
 #if ! HAVE_PUTENV
-extern int putenv(const char *string);
-#endif /* HAVE_PUTENV */
+    extern int putenv(const char *string);
+#endif				/* HAVE_PUTENV */
 
 #if defined(MULTI_USER_UNIX)
-extern void LYRelaxFilePermissions(const char *name);
+    extern void LYRelaxFilePermissions(const char *name);
 
 #else
 #define LYRelaxFilePermissions(name)	/* nothing */
@@ -279,7 +279,7 @@ extern void LYRelaxFilePermissions(const char *name);
 /*
  *  Whether or not the status line must be shown.
  */
-extern BOOLEAN mustshow;
+    extern BOOLEAN mustshow;
 
 #define _statusline(msg)	mustshow = TRUE, statusline(msg)
 
@@ -288,59 +288,62 @@ extern BOOLEAN mustshow;
  *
  *  Universal document id types (see LYCheckForProxyURL)
  */
-typedef enum {
-    NOT_A_URL_TYPE = 0,
-    UNKNOWN_URL_TYPE = 1,	/* must be nonzero */
+    typedef enum {
+	NOT_A_URL_TYPE = 0,
+	UNKNOWN_URL_TYPE = 1,	/* must be nonzero */
 
-    HTTP_URL_TYPE,
-    FILE_URL_TYPE,
-    FTP_URL_TYPE,
-    NCFTP_URL_TYPE,
-    WAIS_URL_TYPE,
-    NEWS_URL_TYPE,
-    NNTP_URL_TYPE,
-    TELNET_URL_TYPE,
-    TN3270_URL_TYPE,
-    RLOGIN_URL_TYPE,
-    GOPHER_URL_TYPE,
-    HTML_GOPHER_URL_TYPE,
-    TELNET_GOPHER_URL_TYPE,
-    INDEX_GOPHER_URL_TYPE,
-    MAILTO_URL_TYPE,
-    BIBP_URL_TYPE,
-    FINGER_URL_TYPE,
-    CSO_URL_TYPE,
-    HTTPS_URL_TYPE,
-    SNEWS_URL_TYPE,
-    PROSPERO_URL_TYPE,
-    AFS_URL_TYPE,
+	HTTP_URL_TYPE,
+	FILE_URL_TYPE,
+	FTP_URL_TYPE,
+	NCFTP_URL_TYPE,
+	WAIS_URL_TYPE,
+	NEWS_URL_TYPE,
+	NNTP_URL_TYPE,
+	TELNET_URL_TYPE,
+	TN3270_URL_TYPE,
+	RLOGIN_URL_TYPE,
+	GOPHER_URL_TYPE,
+	HTML_GOPHER_URL_TYPE,
+	TELNET_GOPHER_URL_TYPE,
+	INDEX_GOPHER_URL_TYPE,
+	MAILTO_URL_TYPE,
+	BIBP_URL_TYPE,
+	FINGER_URL_TYPE,
+	CSO_URL_TYPE,
+	HTTPS_URL_TYPE,
+	SNEWS_URL_TYPE,
+	PROSPERO_URL_TYPE,
+	AFS_URL_TYPE,
 
-    DATA_URL_TYPE,
+	DATA_URL_TYPE,
 
-    LYNXEXEC_URL_TYPE,
-    LYNXPROG_URL_TYPE,
-    LYNXCGI_URL_TYPE,
+	LYNXEXEC_URL_TYPE,
+	LYNXPROG_URL_TYPE,
+	LYNXCGI_URL_TYPE,
 
-    NEWSPOST_URL_TYPE,
-    NEWSREPLY_URL_TYPE,
-    SNEWSPOST_URL_TYPE,
-    SNEWSREPLY_URL_TYPE,
+	NEWSPOST_URL_TYPE,
+	NEWSREPLY_URL_TYPE,
+	SNEWSPOST_URL_TYPE,
+	SNEWSREPLY_URL_TYPE,
 
-    LYNXPRINT_URL_TYPE,
-    LYNXHIST_URL_TYPE,
-    LYNXDOWNLOAD_URL_TYPE,
-    LYNXKEYMAP_URL_TYPE,
-    LYNXIMGMAP_URL_TYPE,
-    LYNXCOOKIE_URL_TYPE,
-    LYNXDIRED_URL_TYPE,
-    LYNXOPTIONS_URL_TYPE,
-    LYNXCFG_URL_TYPE,
-    LYNXCOMPILE_OPTS_URL_TYPE,
-    LYNXMESSAGES_URL_TYPE,
+	LYNXPRINT_URL_TYPE,
+	LYNXHIST_URL_TYPE,
+	LYNXDOWNLOAD_URL_TYPE,
+	LYNXKEYMAP_URL_TYPE,
+	LYNXIMGMAP_URL_TYPE,
+	LYNXCOOKIE_URL_TYPE,
+	LYNXDIRED_URL_TYPE,
+	LYNXOPTIONS_URL_TYPE,
+	LYNXCFG_URL_TYPE,
+	LYNXCOMPILE_OPTS_URL_TYPE,
+	LYNXMESSAGES_URL_TYPE,
 
-    PROXY_URL_TYPE
+	PROXY_URL_TYPE
 
-} UrlTypes;
+    } UrlTypes;
+
+    extern UrlTypes LYCheckForProxyURL(char *filename);
+    extern UrlTypes is_url(char *filename);
 
 /* common URLs */
 #define STR_BIBP_URL         "bibp:"
@@ -472,19 +475,16 @@ typedef enum {
 /*
  *  For change_sug_filename().
  */
-extern HTList *sug_filenames;
+    extern HTList *sug_filenames;
 
 /*
  * syslog() facility
  */
 #if defined(SYSLOG_REQUESTED_URLS)
-#include <syslog.h>
-
-extern void LYOpenlog(const char *banner);
-extern void LYSyslog(char *arg);
-extern void LYCloselog(void);
-
-#endif /* SYSLOG_REQUESTED_URLS */
+    extern void LYOpenlog(const char *banner);
+    extern void LYSyslog(char *arg);
+    extern void LYCloselog(void);
+#endif				/* SYSLOG_REQUESTED_URLS */
 
 /*
  *  Miscellaneous.
@@ -511,4 +511,7 @@ extern void LYCloselog(void);
 #define BIN_W	"wb"
 #define BIN_A	"ab+"
 
-#endif /* LYUTILS_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* LYUTILS_H */

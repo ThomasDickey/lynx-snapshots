@@ -16,47 +16,49 @@
 #include <HTUtils.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
 
 Data structures
 
- */
-typedef struct _HTBTree_element {
-    void *object;		/* User object */
-    struct _HTBTree_element *up;
-    struct _HTBTree_element *left;
-    int left_depth;
-    struct _HTBTree_element *right;
-    int right_depth;
-} HTBTElement;
+ */ typedef struct _HTBTree_element {
+	void *object;		/* User object */
+	struct _HTBTree_element *up;
+	struct _HTBTree_element *left;
+	int left_depth;
+	struct _HTBTree_element *right;
+	int right_depth;
+    } HTBTElement;
 
-typedef int (*HTComparer) (void *a, void *b);
+    typedef int (*HTComparer) (void *a, void *b);
 
-typedef struct _HTBTree_top {
-    HTComparer compare;
-    struct _HTBTree_element *top;
-} HTBTree;
+    typedef struct _HTBTree_top {
+	HTComparer compare;
+	struct _HTBTree_element *top;
+    } HTBTree;
 
 /*
 
 Create a binary tree given its discrimination routine
 
  */
-extern HTBTree *HTBTree_new(HTComparer comp);
+    extern HTBTree *HTBTree_new(HTComparer comp);
 
 /*
 
 Free storage of the tree but not of the objects
 
  */
-extern void HTBTree_free(HTBTree *tree);
+    extern void HTBTree_free(HTBTree *tree);
 
 /*
 
 Free storage of the tree and of the objects
 
  */
-extern void HTBTreeAndObject_free(HTBTree *tree);
+    extern void HTBTreeAndObject_free(HTBTree *tree);
 
 /*
 
@@ -64,7 +66,7 @@ Add an object to a binary tree
 
  */
 
-extern void HTBTree_add(HTBTree *tree, void *object);
+    extern void HTBTree_add(HTBTree *tree, void *object);
 
 /*
 
@@ -73,7 +75,7 @@ Search an object in a binary tree
   returns          Pointer to equivalent object in a tree or NULL if none.
  */
 
-extern void *HTBTree_search(HTBTree *tree, void *object);
+    extern void *HTBTree_search(HTBTree *tree, void *object);
 
 /*
 
@@ -94,6 +96,9 @@ Find next element in depth-first order
   returns                Pointer to element or NULL if none left.
 
  */
-extern HTBTElement *HTBTree_next(HTBTree *tree, HTBTElement *ele);
+    extern HTBTElement *HTBTree_next(HTBTree *tree, HTBTElement *ele);
 
-#endif /* HTBTREE_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTBTREE_H */

@@ -11,16 +11,18 @@
 #include <HTML.h>
 #include <HTStream.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Subclass:
-*/
-/* extern const HTStructuredClass HTMLGeneration; */
+*//* extern const HTStructuredClass HTMLGeneration; *//* Special Creation:
+ */ extern HTStructured *HTMLGenerator(HTStream *output);
 
-/* Special Creation:
-*/
-extern HTStructured *HTMLGenerator(HTStream *output);
+    extern HTStream *HTPlainToHTML(HTPresentation *pres,
+				   HTParentAnchor *anchor,
+				   HTStream *sink);
 
-extern HTStream *HTPlainToHTML(HTPresentation *pres,
-			       HTParentAnchor *anchor,
-			       HTStream *sink);
-
-#endif /* HTMLGEN_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTMLGEN_H */

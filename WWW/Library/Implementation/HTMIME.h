@@ -26,60 +26,65 @@
 #include <HTStream.h>
 #include <HTAnchor.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
  *  This function is for trimming off any paired
  *  open- and close-double quotes from header values.
  *  It does not parse the string for embedded quotes,
  *  and will not modify the string unless both the
  *  first and last characters are double-quotes. - FM
- */
-extern void HTMIME_TrimDoubleQuotes(char *value);
+ */ extern void HTMIME_TrimDoubleQuotes(char *value);
 
 /*
 
   INPUT: LOCAL TEXT
 
  */
-extern HTStream *HTMIMEConvert(HTPresentation *pres,
-			       HTParentAnchor *anchor,
-			       HTStream *sink);
+    extern HTStream *HTMIMEConvert(HTPresentation *pres,
+				   HTParentAnchor *anchor,
+				   HTStream *sink);
 
 /*
 
   INPUT: NET ASCII
 
  */
-extern HTStream *HTNetMIME(HTPresentation *pres,
-			   HTParentAnchor *anchor,
-			   HTStream *sink);
+    extern HTStream *HTNetMIME(HTPresentation *pres,
+			       HTParentAnchor *anchor,
+			       HTStream *sink);
 
 /*
 
   INPUT: Redirection message, parse headers only for Location if present
 
  */
-extern HTStream *HTMIMERedirect(HTPresentation *pres,
-				HTParentAnchor *anchor,
-				HTStream *sink);
+    extern HTStream *HTMIMERedirect(HTPresentation *pres,
+				    HTParentAnchor *anchor,
+				    HTStream *sink);
 
 /*
 
   For handling Japanese headers.
 
 */
-extern void HTmmdec_base64(char *t,
-			   char *s);
+    extern void HTmmdec_base64(char *t,
+			       char *s);
 
-extern void HTmmdec_quote(char *t,
-			  char *s);
+    extern void HTmmdec_quote(char *t,
+			      char *s);
 
-extern void HTmmdecode(char *trg,
-		       char *str);
+    extern void HTmmdecode(char *trg,
+			   char *str);
 
-extern int HTrjis(char *t,
-		  char *s);
+    extern int HTrjis(char *t,
+		      char *s);
 
-extern int HTmaybekanji(int c1,
-			int c2);
+    extern int HTmaybekanji(int c1,
+			    int c2);
 
-#endif /* !HTMIME_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* !HTMIME_H */

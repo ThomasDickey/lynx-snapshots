@@ -88,7 +88,7 @@ typedef struct {
  */
 typedef struct {
     HTAAServer *server;		/* Which server serves this tree             */
-    char *template;		/* Template for this tree                    */
+    char *ctemplate;		/* Template for this tree                    */
     HTList *valid_schemes;	/* Valid authentic.schemes                   */
     HTAssocList **scheme_specifics;	/* Scheme specific params                  */
     BOOL retry;			/* Failed last time -- reprompt (or whatever) */
@@ -340,15 +340,15 @@ static HTAASetup *HTAASetup_lookup(const char *hostname,
 		hostname, portnumber, docname));
 
 	while (NULL != (setup = (HTAASetup *) HTList_nextObject(cur))) {
-	    if (HTAA_templateMatch(setup->template, docname)) {
+	    if (HTAA_templateMatch(setup->ctemplate, docname)) {
 		CTRACE((tfp, "%s `%s' %s `%s'\n",
 			"HTAASetup_lookup:", docname,
-			"matched template", setup->template));
+			"matched template", setup->ctemplate));
 		return setup;
 	    } else {
 		CTRACE((tfp, "%s `%s' %s `%s'\n",
 			"HTAASetup_lookup:", docname,
-			"did NOT match template", setup->template));
+			"did NOT match template", setup->ctemplate));
 	    }
 	}			/* while setups remain */
     }
@@ -366,7 +366,7 @@ static HTAASetup *HTAASetup_lookup(const char *hostname,
  * ON ENTRY:
  *	server		is a pointer to a HTAAServer structure
  *			to which this setup belongs.
- *	template	documents matching this template
+ *	ctemplate	documents matching this template
  *			are protected according to this setup.
  *	valid_schemes	a list containing all valid authentication
  *			schemes for this setup.
@@ -380,13 +380,13 @@ static HTAASetup *HTAASetup_lookup(const char *hostname,
  *	returns		a new HTAASetup node, and also adds it as
  *			part of the HTAAServer given as parameter.
  */
-static HTAASetup *HTAASetup_new(HTAAServer *server, char *template,
+static HTAASetup *HTAASetup_new(HTAAServer *server, char *ctemplate,
 				HTList *valid_schemes,
 				HTAssocList **scheme_specifics)
 {
     HTAASetup *setup;
 
-    if (!server || isEmpty(template))
+    if (!server || isEmpty(ctemplate))
 	return NULL;
 
     if ((setup = typecalloc(HTAASetup)) == 0)
@@ -394,9 +394,9 @@ static HTAASetup *HTAASetup_new(HTAAServer *server, char *template,
 
     setup->retry = NO;
     setup->server = server;
-    setup->template = NULL;
-    if (template)
-	StrAllocCopy(setup->template, template);
+    setup->ctemplate = NULL;
+    if (ctemplate)
+	StrAllocCopy(setup->ctemplate, ctemplate);
     setup->valid_schemes = valid_schemes;
     setup->scheme_specifics = scheme_specifics;
 
@@ -418,7 +418,7 @@ static void HTAASetup_delete(HTAASetup * killme)
     int scheme;
 
     if (killme) {
-	FREE(killme->template);
+	FREE(killme->ctemplate);
 	if (killme->valid_schemes) {
 	    HTList_delete(killme->valid_schemes);
 	    killme->valid_schemes = NULL;
@@ -598,8 +598,8 @@ static char *compose_auth_string(HTAAScheme scheme, HTAASetup * setup, BOOL IsPr
 	 * absolute URL instead of a path.  If we do get a host from this, it
 	 * will include the port.  - FM
 	 */
-	if ((!IsProxy) && using_proxy && setup->template) {
-	    proxiedHost = HTParse(setup->template, "", PARSE_HOST);
+	if ((!IsProxy) && using_proxy && setup->ctemplate) {
+	    proxiedHost = HTParse(setup->ctemplate, "", PARSE_HOST);
 	    if (proxiedHost && *proxiedHost != '\0') {
 		theHost = proxiedHost;
 	    }
@@ -733,12 +733,12 @@ static char *compose_auth_string(HTAAScheme scheme, HTAASetup * setup, BOOL IsPr
  */
 static HTAAScheme HTAA_selectScheme(HTAASetup * setup)
 {
-    HTAAScheme scheme;
+    int scheme;
 
     if (setup && setup->valid_schemes) {
 	for (scheme = HTAA_BASIC; scheme < HTAA_MAX_SCHEMES; scheme++)
 	    if (-1 < HTList_indexOf(setup->valid_schemes, (void *) scheme))
-		return scheme;
+		return (HTAAScheme) scheme;
     }
     return HTAA_BASIC;
 }
@@ -1039,7 +1039,7 @@ BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
     int num_schemes = 0;
     HTList *valid_schemes = HTList_new();
     HTAssocList **scheme_specifics = NULL;
-    char *template = NULL;
+    char *ctemplate = NULL;
     char *temp = NULL;
 
     /*
@@ -1074,10 +1074,10 @@ BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
 		 0 == strcasecomp(fieldname, "WWW-Authenticate:"))) {
 		if (!(arg1 && *arg1 && args && *args)) {
 		    HTSprintf0(&temp, gettext("Invalid header '%s%s%s%s%s'"), line,
-			       ((arg1 && *arg1) ? " " : ""),
-			       ((arg1 && *arg1) ? arg1 : ""),
-			       ((args && *args) ? " " : ""),
-			       ((args && *args) ? args : ""));
+			       (!isEmpty(arg1) ? " " : ""),
+			       (!isEmpty(arg1) ? arg1 : ""),
+			       (!isEmpty(args) ? " " : ""),
+			       (!isEmpty(args) ? args : ""));
 		    HTAlert(temp);
 		    FREE(temp);
 		} else if (HTAA_UNKNOWN != (scheme = HTAAScheme_enum(arg1))) {
@@ -1107,7 +1107,7 @@ BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
 	    else if (!IsProxy &&
 		     0 == strcasecomp(fieldname, "WWW-Protection-Template:")) {
 		CTRACE((tfp, "Protection template set to `%s'\n", arg1));
-		StrAllocCopy(template, arg1);
+		StrAllocCopy(ctemplate, arg1);
 	    }
 
 	} else {
@@ -1167,13 +1167,13 @@ BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
 					proxy_portnumber,
 					IsProxy);
 	    }
-	    if (!template)	/* Proxy matches everything  -AJL */
-		StrAllocCopy(template, "*");
+	    if (!ctemplate)	/* Proxy matches everything  -AJL */
+		StrAllocCopy(ctemplate, "*");
 	    proxy_setup = HTAASetup_new(server,
-					template,
+					ctemplate,
 					valid_schemes,
 					scheme_specifics);
-	    FREE(template);
+	    FREE(ctemplate);
 
 	    HTAlert(gettext("Proxy authorization required -- retrying"));
 	    return YES;
@@ -1225,13 +1225,13 @@ BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
 				    current_portnumber,
 				    IsProxy);
 	}
-	if (!template)
-	    template = HTAA_makeProtectionTemplate(current_docname);
+	if (!ctemplate)
+	    ctemplate = HTAA_makeProtectionTemplate(current_docname);
 	current_setup = HTAASetup_new(server,
-				      template,
+				      ctemplate,
 				      valid_schemes,
 				      scheme_specifics);
-	FREE(template);
+	FREE(ctemplate);
 
 	HTAlert(gettext("Access without authorization denied -- retrying"));
 	return YES;

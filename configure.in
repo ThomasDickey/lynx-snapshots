@@ -5,7 +5,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ask PRCS to plug-in the project-version for the configure-script.
 dnl $Format: "AC_REVISION($ProjectVersion$)"$
-AC_REVISION(2.8.6dev.9)
+AC_REVISION(2.8.6dev.10)
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
 # in the environment, or whether autoconf added -O and -g options:
@@ -37,7 +37,7 @@ AC_ARG_WITH(system-type,
 PACKAGE=lynx
 dnl ask PRCS to plug-in the project-version for the packages.
 # $Format: "VERSION=$ProjectVersion$"$
-VERSION=2.8.6dev.9
+VERSION=2.8.6dev.10
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_SUBST(DESTDIR)
@@ -228,12 +228,15 @@ dgux*)
 	;;
 hpux*)
 	TRY_CFLAGS="$TRY_CFLAGS -DSNAKE"
-	test -z "$GCC" && TRY_CFLAGS="$TRY_CFLAGS -Wp,-H600000"
+	test -z "$GCC" && TRY_CFLAGS="$TRY_CFLAGS -Wp,-H600000 -DSYS_HPUX"
 	;;
 isc*)
 	# -DPOSIX_JC is necessary, else LYBookmark.c never finds out what a mode_t is.
 	TRY_CFLAGS="$TRY_CFLAGS -DISC -DPOSIX_JC"
 	LIBS="$LIBS -linet -lnsl_s -lcposix"
+	;;
+irix6.*) #(vi
+	TRY_CFLAGS="$TRY_CFLAGS -DSYS_IRIX64"
 	;;
 irix*)
 	# The original makefile used the $CFLAGS option -cckr for some form
@@ -256,12 +259,12 @@ openbsd* | ekkobsd* | mirbsd*)
 osf4*)
 	# The -Olimit flag (see below) is no longer available with
 	# Digital C 5.2, which is bundled with Digital UNIX 4.0.
-	TRY_CFLAGS="$TRY_CFLAGS -DDSYS5"
+	TRY_CFLAGS="$TRY_CFLAGS -DDSYS5 -DSYS_TRU64"
 	;;
 osf*)
 	# Increase the maximum size of functions that will be optimized.
 	test -z "$GCC" && TRY_CFLAGS="$TRY_CFLAGS -O -Olimit 4000"
-	TRY_CFLAGS="$TRY_CFLAGS -DDSYS5"
+	TRY_CFLAGS="$TRY_CFLAGS -DDSYS5 -DSYS_TRU64"
 	;;
 sco3.2v5*)
 	test $ac_cv_prog_gcc != yes && TRY_CFLAGS="$TRY_CFLAGS -belf"
@@ -555,6 +558,7 @@ AC_TYPE_GETGROUPS
 AC_TYPE_PID_T
 AC_TYPE_UID_T
 AC_TYPE_MODE_T
+CF_CHECK_TYPE(socklen_t, int, [#include <sys/socket.h>])
 
 dnl --------------------------------------------------------------------------
 dnl Checks for library units

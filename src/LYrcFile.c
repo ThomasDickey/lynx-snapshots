@@ -216,10 +216,10 @@ BOOL LYgetEnum(Config_Enum * table, char *name,
 #define MAYBE_FUN(n,v,w,h) {n,    0, CONF_FUN,   UNION_FUN(v), 0, 0, w, h}
 #define MAYBE_MBM(n,h)     {n,    0, CONF_MBM,   UNION_DEF(0), 0, 0, 0, h}
 
-#define PARSE_NIL          {NULL, 1, 0,          UNION_DEF(0), 0, 0, 0, 0}
+#define PARSE_NIL          {NULL, 1, CONF_NIL,   UNION_DEF(0), 0, 0, 0, 0}
 
 typedef enum {
-    CONF_UNSPECIFIED = 0
+    CONF_NIL = 0
     ,CONF_ARRAY
     ,CONF_BOOL
     ,CONF_FUN
@@ -750,7 +750,7 @@ void read_rc(FILE *fp)
 		StrAllocCopy(*(q->str_value), value);
 	    break;
 
-	case CONF_UNSPECIFIED:
+	case CONF_NIL:
 	    break;
 	}
     }
@@ -936,7 +936,7 @@ It is not this file.\n\
 		    : "");
 	    break;
 
-	case CONF_UNSPECIFIED:
+	case CONF_NIL:
 	    break;
 	}
 	tbl++;

@@ -13,11 +13,14 @@
 
 #include <HTFormat.h>
 
-extern char from_hex(char c);
+#ifdef __cplusplus
+extern "C" {
+#endif
+    extern char from_hex(char c);
 
-extern HTStream *HTWSRCConvert(HTPresentation *pres,
-			       HTParentAnchor *anchor,
-			       HTStream *sink);
+    extern HTStream *HTWSRCConvert(HTPresentation *pres,
+				   HTParentAnchor *anchor,
+				   HTStream *sink);
 
 /*
 
@@ -30,8 +33,11 @@ Escaping Strings
    freed by the caller.
 
  */
-extern char *HTDeSlash(const char *str);
+    extern char *HTDeSlash(const char *str);
 
-extern char *HTEnSlash(const char *str);
+    extern char *HTEnSlash(const char *str);
 
-#endif /* HTWSRC_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTWSRC_H */

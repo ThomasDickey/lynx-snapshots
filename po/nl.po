@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.6-dev8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-12-30 06:03-0500\n"
+"POT-Creation-Date: 2005-01-02 09:33-0500\n"
 "PO-Revision-Date: 2004-11-15 08:49+0100\n"
 "Last-Translator: Luk Claes <luk.claes@ugent.be>\n"
 "Language-Team: Dutch <vertaling@vrijschrift.org>\n"
@@ -2790,7 +2790,7 @@ msgstr "Document met POST inhoud niet gevonden in cache.  Nog eens verzenden?"
 msgid "Loading failed, use a previous copy."
 msgstr "Het laden is mislukt, gebruik een vroegere kopie."
 
-#: WWW/Library/Implementation/HTAccess.c:1045 src/GridText.c:8358
+#: WWW/Library/Implementation/HTAccess.c:1045 src/GridText.c:8351
 msgid "Loading incomplete."
 msgstr "Laden niet voltooid."
 
@@ -2813,7 +2813,7 @@ msgstr "**** HTAccess: Geretourneerde status was: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1085 src/LYMainLoop.c:7673
+#: WWW/Library/Implementation/HTAccess.c:1085 src/LYMainLoop.c:7669
 msgid "Can't Access"
 msgstr "Kan geen toegang krijgen"
 
@@ -2821,20 +2821,20 @@ msgstr "Kan geen toegang krijgen"
 msgid "Unable to access document."
 msgstr "Kan geen toegang krijgen tot document."
 
-#: WWW/Library/Implementation/HTFTP.c:780
+#: WWW/Library/Implementation/HTFTP.c:823
 #, c-format
 msgid "Enter password for user %s@%s:"
 msgstr "Voer wachtwoord in voor gebruiker %s@%s:"
 
-#: WWW/Library/Implementation/HTFTP.c:808
+#: WWW/Library/Implementation/HTFTP.c:851
 msgid "Unable to connect to FTP host."
 msgstr "Kan niet verbinden met FTP host."
 
-#: WWW/Library/Implementation/HTFTP.c:1074
+#: WWW/Library/Implementation/HTFTP.c:1117
 msgid "close master socket"
 msgstr "sluit hoofdsocket af"
 
-#: WWW/Library/Implementation/HTFTP.c:1135
+#: WWW/Library/Implementation/HTFTP.c:1178
 msgid "socket for master socket"
 msgstr "socket voor hoofdsocket"
 
@@ -2842,24 +2842,24 @@ msgstr "socket voor hoofdsocket"
 #. * It's a symbolic link, does the user care about knowing if it is
 #. * symbolic?  I think so since it might be a directory.
 #.
-#: WWW/Library/Implementation/HTFTP.c:1658 WWW/Library/Implementation/HTFTP.c:2275
+#: WWW/Library/Implementation/HTFTP.c:1701 WWW/Library/Implementation/HTFTP.c:2318
 msgid "Symbolic Link"
 msgstr "Symbolische Koppeling"
 
-#: WWW/Library/Implementation/HTFTP.c:2632
+#: WWW/Library/Implementation/HTFTP.c:2675
 msgid "Receiving FTP directory."
 msgstr "Bezig met ophalen van FTP bestandenoverzicht."
 
-#: WWW/Library/Implementation/HTFTP.c:2768
+#: WWW/Library/Implementation/HTFTP.c:2811
 #, c-format
 msgid "Transferred %d bytes (%5d)"
 msgstr "%d bytes overgezet (%5d)"
 
-#: WWW/Library/Implementation/HTFTP.c:3115
+#: WWW/Library/Implementation/HTFTP.c:3158
 msgid "connect for data"
 msgstr "verbinden voor datastroom"
 
-#: WWW/Library/Implementation/HTFTP.c:3779
+#: WWW/Library/Implementation/HTFTP.c:3822
 msgid "Receiving FTP file."
 msgstr "Bezig met ophalen van FTP bestand."
 
@@ -3066,45 +3066,45 @@ msgstr "Lezen uit socket mislukt na 180,000 (!) pogingen."
 msgid "Address contains a username: %s"
 msgstr "Adres bevat een gebruikersnaam: %s"
 
-#: WWW/Library/Implementation/HTTP.c:533
+#: WWW/Library/Implementation/HTTP.c:534
 msgid "This client does not contain support for HTTPS URLs."
 msgstr "Dit programma ondersteunt geen HTTPS URL's."
 
-#: WWW/Library/Implementation/HTTP.c:558
+#: WWW/Library/Implementation/HTTP.c:559
 msgid "Unable to connect to remote host."
 msgstr "Niet in staat om met de andere computer te verbinden."
 
-#: WWW/Library/Implementation/HTTP.c:580
+#: WWW/Library/Implementation/HTTP.c:581
 msgid "Retrying connection without TLS."
 msgstr "Verbinding wordt opnieuw geprobeerd zonder TLS."
 
-#: WWW/Library/Implementation/HTTP.c:623
+#: WWW/Library/Implementation/HTTP.c:624
 msgid "SSL error:Can't find common name in certificate-Continue?"
 msgstr "SSL-fout: kan gemeenschappelijke naam niet vinden in certificaat. Verdergaan?"
 
-#: WWW/Library/Implementation/HTTP.c:640
+#: WWW/Library/Implementation/HTTP.c:641
 #, c-format
 msgid "SSL error:host(%s)!=cert(%s)-Continue?"
 msgstr "SSL-fout: computer (%s) != certificaat (%s). Verdergaan?"
 
-#: WWW/Library/Implementation/HTTP.c:652
+#: WWW/Library/Implementation/HTTP.c:653
 #, c-format
 msgid "Secure %d-bit %s (%s) HTTP connection"
 msgstr "Veilige %d-bit %s (%s) HTTP-verbinding"
 
-#: WWW/Library/Implementation/HTTP.c:1122
+#: WWW/Library/Implementation/HTTP.c:1123
 msgid "Sending HTTP request."
 msgstr "Bezig met zenden van HTTP verzoek."
 
-#: WWW/Library/Implementation/HTTP.c:1161
+#: WWW/Library/Implementation/HTTP.c:1162
 msgid "Unexpected network write error; connection aborted."
 msgstr "Onverwachte fout bij schrijven naar netwerk: verbinding verbroken."
 
-#: WWW/Library/Implementation/HTTP.c:1167
+#: WWW/Library/Implementation/HTTP.c:1168
 msgid "HTTP request sent; waiting for response."
 msgstr "HTTP verzoek verzonden; wacht op antwoord."
 
-#: WWW/Library/Implementation/HTTP.c:1235
+#: WWW/Library/Implementation/HTTP.c:1236
 msgid "Unexpected network read error; connection aborted."
 msgstr "Onverwachte fout bij lezen uit netwerk; verbinding verbroken."
 
@@ -3117,7 +3117,7 @@ msgstr "Onverwachte fout bij lezen uit netwerk; verbinding verbroken."
 #. * line and possibly other headers, so we'll deal with them by
 #. * showing the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1429
+#: WWW/Library/Implementation/HTTP.c:1430
 msgid "Got unexpected Informational Status."
 msgstr "Onverwachte informatieve status ontvangen."
 
@@ -3127,7 +3127,7 @@ msgstr "Onverwachte informatieve status ontvangen."
 #. * content.  We'll instruct the user to do that, and
 #. * restore the current document.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1463
+#: WWW/Library/Implementation/HTTP.c:1464
 msgid "Request fulfilled.  Reset Content."
 msgstr "Verzoek volbracht.  Herstel inhoud."
 
@@ -3137,27 +3137,27 @@ msgstr "Verzoek volbracht.  Herstel inhoud."
 #. * status is inappropriate.  We'll deal with it by showing
 #. * the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1580
+#: WWW/Library/Implementation/HTTP.c:1581
 msgid "Got unexpected 304 Not Modified status."
 msgstr "Kreeg een onverwachte 304 Niet Gewijzigd statusmelding."
 
-#: WWW/Library/Implementation/HTTP.c:1643
+#: WWW/Library/Implementation/HTTP.c:1644
 msgid "Redirection of POST content requires user approval."
 msgstr "Doorverwijzing van POST inhoud vereist toestemming van de gebruiker."
 
-#: WWW/Library/Implementation/HTTP.c:1658
+#: WWW/Library/Implementation/HTTP.c:1659
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr "Heb POST inhoud.  Permanente doorverwijzing wordt behandeld als een tijdelijke.\n"
 
-#: WWW/Library/Implementation/HTTP.c:1700
+#: WWW/Library/Implementation/HTTP.c:1701
 msgid "Retrying with access authorization information."
 msgstr "Bezig opnieuw te proberen met informatie over toegangs-authorisatie."
 
-#: WWW/Library/Implementation/HTTP.c:1712
+#: WWW/Library/Implementation/HTTP.c:1713
 msgid "Show the 401 message body?"
 msgstr "Inhoud van het 401 bericht laten zien?"
 
-#: WWW/Library/Implementation/HTTP.c:1755
+#: WWW/Library/Implementation/HTTP.c:1756
 msgid "Show the 407 message body?"
 msgstr "Inhoud van het 407 bericht laten zien?"
 
@@ -3165,7 +3165,7 @@ msgstr "Inhoud van het 407 bericht laten zien?"
 #. * Bad or unknown server_status number.  Take a chance and hope
 #. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1855
+#: WWW/Library/Implementation/HTTP.c:1856
 msgid "Unknown status reply from server!"
 msgstr "Onbekend status-antwoord van server!"
 
@@ -3353,106 +3353,106 @@ msgstr "Beheerder"
 msgid "Host"
 msgstr "Host"
 
-#: src/GridText.c:700
+#: src/GridText.c:710
 msgid "Memory exhausted, display interrupted!"
 msgstr "Geen geheugen meer beschikbar, beeldweergave onderbroken!"
 
-#: src/GridText.c:705
+#: src/GridText.c:715
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr "Geen geheugen meer beschikbaar, overdracht zal worden afgebroken!"
 
-#: src/GridText.c:3588
+#: src/GridText.c:3590
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr " *** GEHEUGEN VERMOEID ***"
 
-#: src/GridText.c:6002 src/GridText.c:6009 src/LYList.c:248
+#: src/GridText.c:6004 src/GridText.c:6011 src/LYList.c:248
 msgid "unknown field or link"
 msgstr "onbekend veld of link"
 
-#: src/GridText.c:6018
+#: src/GridText.c:6020
 msgid "text entry field"
 msgstr "tekst invoerveld"
 
-#: src/GridText.c:6021
+#: src/GridText.c:6023
 msgid "password entry field"
 msgstr "wachtwoord invoerveld"
 
-#: src/GridText.c:6024
+#: src/GridText.c:6026
 msgid "checkbox"
 msgstr "aanvinkvakje"
 
-#: src/GridText.c:6027
+#: src/GridText.c:6029
 msgid "radio button"
 msgstr "drukknop"
 
-#: src/GridText.c:6030
+#: src/GridText.c:6032
 msgid "submit button"
 msgstr "verzendknop"
 
-#: src/GridText.c:6033
+#: src/GridText.c:6035
 msgid "reset button"
 msgstr "herstelknop"
 
-#: src/GridText.c:6036
+#: src/GridText.c:6038
 msgid "popup menu"
 msgstr "popup menu"
 
-#: src/GridText.c:6039
+#: src/GridText.c:6041
 msgid "hidden form field"
 msgstr "verborgen formulierveld"
 
-#: src/GridText.c:6042
+#: src/GridText.c:6044
 msgid "text entry area"
 msgstr "tekst invoergebied"
 
-#: src/GridText.c:6045
+#: src/GridText.c:6047
 msgid "range entry field"
 msgstr "bereik invoerveld"
 
-#: src/GridText.c:6048
+#: src/GridText.c:6050
 msgid "file entry field"
 msgstr "bestandsnaam invoerveld"
 
-#: src/GridText.c:6051
+#: src/GridText.c:6053
 msgid "text-submit field"
 msgstr "tekst-verzendveld"
 
-#: src/GridText.c:6054
+#: src/GridText.c:6056
 msgid "image-submit button"
 msgstr "afbeelding-verzendknop"
 
-#: src/GridText.c:6057
+#: src/GridText.c:6059
 msgid "keygen field"
 msgstr "sleutelaanmaak veld"
 
-#: src/GridText.c:6060
+#: src/GridText.c:6062
 msgid "unknown form field"
 msgstr "onbekend formulier veld"
 
-#: src/GridText.c:10077
+#: src/GridText.c:10074
 msgid "Can't open file for uploading"
 msgstr "Kan bestand niet openen voor upload"
 
-#: src/GridText.c:11229
+#: src/GridText.c:11227
 #, c-format
 msgid "Submitting %s"
 msgstr "Bezig met verzenden van %s"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12377
+#: src/GridText.c:12375
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr "Ophanging Gedetecteerd: TextAnchor-struct is corrupt - stel voor te onderbreken!"
 
 #. don't show previous state
-#: src/GridText.c:12582
+#: src/GridText.c:12580
 msgid "Wrap lines to fit displayed area?"
 msgstr "Regels omvouwen zodat alles zichtbaar is?"
 
-#: src/GridText.c:12634
+#: src/GridText.c:12632
 msgid "Very long lines have been wrapped!"
 msgstr "Erg lange regels zijn omgevouwen!"
 
-#: src/GridText.c:13075
+#: src/GridText.c:13073
 msgid "Very long lines have been truncated!"
 msgstr "Erg lange regels zijn afgekapt!"
 
@@ -3542,32 +3542,32 @@ msgstr "nee"
 msgid "Y/N/A/V"
 msgstr "Y/N/A/V"
 
-#: src/HTML.c:5915
+#: src/HTML.c:5914
 msgid "Description:"
 msgstr "Omschrijving:"
 
-#: src/HTML.c:5920
+#: src/HTML.c:5919
 msgid "(none)"
 msgstr "(geen)"
 
-#: src/HTML.c:5924
+#: src/HTML.c:5923
 msgid "Filepath:"
 msgstr "Bestandspad:"
 
-#: src/HTML.c:5930
+#: src/HTML.c:5929
 msgid "(unknown)"
 msgstr "(onbekend)"
 
-#: src/HTML.c:7374
+#: src/HTML.c:7373
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr "Document heeft slechts verborgen links.  Gebruik het 'l'ijst commando."
 
 # Source?
-#: src/HTML.c:7867
+#: src/HTML.c:7870
 msgid "Source cache error - disk full?"
 msgstr "Cache fout - schijf vol?"
 
-#: src/HTML.c:7880
+#: src/HTML.c:7883
 msgid "Source cache error - not enough memory!"
 msgstr "Cache fout - niet genoeg geheugen!"
 
@@ -3675,27 +3675,27 @@ msgstr "cookie_domain_flag_set fout, programma wordt afgebroken"
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr "Terminal initialisatie mislukt - onbekend terminal type?"
 
-#: src/LYCurses.c:1442
+#: src/LYCurses.c:1443
 msgid "Terminal ="
 msgstr "Terminal ="
 
-#: src/LYCurses.c:1446
+#: src/LYCurses.c:1447
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "U mout een vt100, 200, enz. terminal gebruiken met dit programma."
 
-#: src/LYCurses.c:1495
+#: src/LYCurses.c:1496
 msgid "Your Terminal type is unknown!"
 msgstr "Uw terminal type is onbekend!"
 
-#: src/LYCurses.c:1496
+#: src/LYCurses.c:1497
 msgid "Enter a terminal type:"
 msgstr "Voer een terminal type in:"
 
-#: src/LYCurses.c:1510
+#: src/LYCurses.c:1511
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "TERMINAL TYPE IS GEZET OP"
 
-#: src/LYCurses.c:2087
+#: src/LYCurses.c:2088
 #, c-format
 msgid ""
 "\n"
@@ -3704,7 +3704,7 @@ msgstr ""
 "\n"
 "Een fatale fout is opgetreden in %s Ver. %s\n"
 
-#: src/LYCurses.c:2090
+#: src/LYCurses.c:2091
 #, c-format
 msgid ""
 "\n"
@@ -3736,39 +3736,39 @@ msgstr "Editor gaf een foutstatus terug, %s"
 msgid "reason unknown."
 msgstr "reden onbekend."
 
-#: src/LYDownload.c:502
+#: src/LYDownload.c:503
 msgid "Downloaded link:"
 msgstr "Gedownloade link:"
 
-#: src/LYDownload.c:507
+#: src/LYDownload.c:508
 msgid "Suggested file name:"
 msgstr "Voorgestelde bestandsnaam:"
 
-#: src/LYDownload.c:512
+#: src/LYDownload.c:513
 msgid "Standard download options:"
 msgstr "Standaard download mogelijkheden:"
 
-#: src/LYDownload.c:513
+#: src/LYDownload.c:514
 msgid "Download options:"
 msgstr "Download mogelijkheden:"
 
-#: src/LYDownload.c:529
+#: src/LYDownload.c:530
 msgid "Save to disk"
 msgstr "Opslaan op schijf"
 
-#: src/LYDownload.c:543
+#: src/LYDownload.c:544
 msgid "View temporary file"
 msgstr "Bekijk tijdelijk bestand"
 
-#: src/LYDownload.c:550
+#: src/LYDownload.c:551
 msgid "Save to disk disabled."
 msgstr "Opslaan op schijf uitgezet."
 
-#: src/LYDownload.c:554 src/LYPrint.c:1319
+#: src/LYDownload.c:555 src/LYPrint.c:1319
 msgid "Local additions:"
 msgstr "Lokale toevoegingen:"
 
-#: src/LYDownload.c:565 src/LYUpload.c:211
+#: src/LYDownload.c:566 src/LYUpload.c:211
 #, c-format
 msgid "No Name Given"
 msgstr "Geen naam opgegeven"
@@ -4184,19 +4184,19 @@ msgstr "Dit bericht is automatisch gegenereerd door"
 msgid "No system mailer configured"
 msgstr "Geen systeemmailer geconfigureerd"
 
-#: src/LYMain.c:999
+#: src/LYMain.c:998
 msgid "No Winsock found, sorry."
 msgstr "Geen Winsock gevonden, sorry."
 
-#: src/LYMain.c:1194
+#: src/LYMain.c:1193
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "U MOET een geldig TMP of TEMP gebied opgeven!"
 
-#: src/LYMain.c:1247 src/LYMainLoop.c:4979
+#: src/LYMain.c:1246 src/LYMainLoop.c:4977
 msgid "No such directory"
 msgstr "Geen dergelijke map"
 
-#: src/LYMain.c:1452
+#: src/LYMain.c:1453
 #, c-format
 msgid ""
 "\n"
@@ -4207,7 +4207,7 @@ msgstr ""
 "Configuratiebestand %s is niet beschikbaar.\n"
 "\n"
 
-#: src/LYMain.c:1462
+#: src/LYMain.c:1463
 #, c-format
 msgid ""
 "\n"
@@ -4218,7 +4218,7 @@ msgstr ""
 "Lynx karaktersets zijn niet opgegeven.\n"
 "\n"
 
-#: src/LYMain.c:1491
+#: src/LYMain.c:1492
 #, c-format
 msgid ""
 "\n"
@@ -4229,7 +4229,7 @@ msgstr ""
 "Lynx edit-kaart niet opgegeven.\n"
 "\n"
 
-#: src/LYMain.c:1517
+#: src/LYMain.c:1518
 #, c-format
 msgid ""
 "\n"
@@ -4240,7 +4240,7 @@ msgstr ""
 "Lynx bestand %s is niet beschikbaar.\n"
 "\n"
 
-#: src/LYMain.c:1758
+#: src/LYMain.c:1761
 msgid "Warning:"
 msgstr "Let op:"
 
@@ -4285,113 +4285,113 @@ msgstr "GEBRUIK: %s [opties] [bestand]\n"
 msgid "Options are:\n"
 msgstr "Opties zijn:\n"
 
-#: src/LYMain.c:4243
+#: src/LYMain.c:4242
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Ongeldige Optie: %s\n"
 
-#: src/LYMainLoop.c:567
+#: src/LYMainLoop.c:572
 #, c-format
 msgid "Internal error: Invalid mouse link %d!"
 msgstr "Interne fout: Ongeldige muis link %d!"
 
-#: src/LYMainLoop.c:684 src/LYMainLoop.c:5001
+#: src/LYMainLoop.c:689 src/LYMainLoop.c:4999
 msgid "A URL specified by the user"
 msgstr "Een door de gebruiker opgegeven URL"
 
-#: src/LYMainLoop.c:1140
+#: src/LYMainLoop.c:1145
 msgid "Enctype multipart/form-data not yet supported!  Cannot submit."
 msgstr "Enctype meerdelig/form-data nog niet ondersteund!  Kan niet verzenden."
 
 #.
 #. * Make a name for this help file.
 #.
-#: src/LYMainLoop.c:3042
+#: src/LYMainLoop.c:3047
 msgid "Help Screen"
 msgstr "Help Scherm"
 
-#: src/LYMainLoop.c:3163
+#: src/LYMainLoop.c:3168
 msgid "System Index"
 msgstr "Systeem Index"
 
-#: src/LYMainLoop.c:3523 src/LYMainLoop.c:5221
+#: src/LYMainLoop.c:3528 src/LYMainLoop.c:5223
 msgid "Entry into main screen"
 msgstr "Ingang naar begin scherm"
 
-#: src/LYMainLoop.c:3793
+#: src/LYMainLoop.c:3791
 msgid "No next document present"
 msgstr "Geen volgend document aanwezig"
 
-#: src/LYMainLoop.c:4091
+#: src/LYMainLoop.c:4089
 msgid "charset for this document specified explicitly, sorry..."
 msgstr "de tekenverzameling voor dit document is expliciet opgegeven, sorry..."
 
-#: src/LYMainLoop.c:4955
+#: src/LYMainLoop.c:4953
 msgid "cd to:"
 msgstr "cd naar:"
 
-#: src/LYMainLoop.c:4982
+#: src/LYMainLoop.c:4980
 msgid "A component of path is not a directory"
 msgstr "Een component van het pad is geen map"
 
-#: src/LYMainLoop.c:4985
+#: src/LYMainLoop.c:4983
 msgid "failed to change directory"
 msgstr "Map wijzigen is mislukt"
 
-#: src/LYMainLoop.c:6143
+#: src/LYMainLoop.c:6144
 msgid "Reparsing document under current settings..."
 msgstr "Document wordt opnieuw ontleed met huidige instellingen..."
 
-#: src/LYMainLoop.c:6429
+#: src/LYMainLoop.c:6433
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Fatale fout - kan uitvoerbestand %s niet openen\n"
 
-#: src/LYMainLoop.c:6773
+#: src/LYMainLoop.c:6777
 msgid "TABLE center enable."
 msgstr "TABLE centreren ingeschakeld."
 
-#: src/LYMainLoop.c:6776
+#: src/LYMainLoop.c:6780
 msgid "TABLE center disable."
 msgstr "TABLE centreren uitgeschakeld."
 
-#: src/LYMainLoop.c:6853
+#: src/LYMainLoop.c:6857
 msgid "Current URL is empty."
 msgstr "Huidige URL is leeg."
 
-#: src/LYMainLoop.c:6855 src/LYUtils.c:1693
+#: src/LYMainLoop.c:6859 src/LYUtils.c:1702
 msgid "Copy to clipboard failed."
 msgstr "Kopiëren naar klembord is mislukt."
 
-#: src/LYMainLoop.c:6857
+#: src/LYMainLoop.c:6861
 msgid "Document URL put to clipboard."
 msgstr "Document URL op klembord geplaatst."
 
-#: src/LYMainLoop.c:6859
+#: src/LYMainLoop.c:6863
 msgid "Link URL put to clipboard."
 msgstr "Link URL op klembord geplaatst."
 
-#: src/LYMainLoop.c:6886
+#: src/LYMainLoop.c:6890
 msgid "No URL in the clipboard."
 msgstr "Geen URL op het klembord."
 
-#: src/LYMainLoop.c:7558 src/LYMainLoop.c:7728
+#: src/LYMainLoop.c:7554 src/LYMainLoop.c:7724
 msgid "-index-"
 msgstr "-index-"
 
-#: src/LYMainLoop.c:7668
+#: src/LYMainLoop.c:7664
 msgid "lynx: Can't access startfile"
 msgstr "lynx: Geen toegang tot startbestand"
 
-#: src/LYMainLoop.c:7680
+#: src/LYMainLoop.c:7676
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: Beginbestand kan niet gevonden worden of is geen tekst/html of tekst/plain"
 
-#: src/LYMainLoop.c:7681
+#: src/LYMainLoop.c:7677
 msgid "      Exiting..."
 msgstr "      Bezig met stoppen..."
 
-#: src/LYMainLoop.c:7722
+#: src/LYMainLoop.c:7718
 msgid "-more-"
 msgstr "-meer-"
 
@@ -5327,11 +5327,11 @@ msgstr "Actie:"
 msgid "(Form field)"
 msgstr "(Formulier veld)"
 
-#: src/LYShowInfo.c:450
+#: src/LYShowInfo.c:448
 msgid "No Links on the current page"
 msgstr "Er zijn geen verwijzingen op de huidige pagina"
 
-#: src/LYShowInfo.c:455
+#: src/LYShowInfo.c:453
 msgid "Server Headers:"
 msgstr "Server Headers:"
 
@@ -5384,33 +5384,33 @@ msgstr "Zenden naar:"
 msgid "Upload options:"
 msgstr "Zend opties:"
 
-#: src/LYUtils.c:1695
+#: src/LYUtils.c:1704
 msgid "Download document URL put to clipboard."
 msgstr "Document afhalings-URL op klembord geplaatst."
 
-#: src/LYUtils.c:2465
+#: src/LYUtils.c:2481
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "Onverwacht toegangsprotocol voor dit URL methode"
 
-#: src/LYUtils.c:3283
+#: src/LYUtils.c:3289
 msgid "Too many tempfiles"
 msgstr "Teveel tijdelijke bestanden"
 
-#: src/LYUtils.c:3587
+#: src/LYUtils.c:3593
 msgid "unknown restriction"
 msgstr "Onbekende beperking"
 
-#: src/LYUtils.c:3617
+#: src/LYUtils.c:3623
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "Er zijn geen beperkingen gesteld.\n"
 
-#: src/LYUtils.c:3620
+#: src/LYUtils.c:3626
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "Gestelde beperkingen:\n"
 
-#: src/LYUtils.c:5002
+#: src/LYUtils.c:5010
 msgid "Cannot find HOME directory"
 msgstr "Kan HOME-map niet vinden"
 

@@ -106,7 +106,7 @@ static void append_close_tag(char *tagname,
     }
 
     subj = typecalloc(HT_tagspec);
-    subj->element = idx;
+    subj->element = (HTMLElement) idx;
     subj->present = typecallocn(BOOL, nattr);
     subj->value = typecallocn(char *, nattr);
 
@@ -335,7 +335,7 @@ void html_src_clean_data(void)
     int i;
 
     for (i = 0; i < HTL_num_lexemes; ++i)
-	html_src_clean_item(i);
+	html_src_clean_item((HTlexeme) i);
 }
 
 void html_src_on_lynxcfg_reload(void)
@@ -361,12 +361,13 @@ void HTMLSRC_init_caches(BOOL dont_exit)
 
 	if ((p = strchr(buf, ':')) != 0)
 	    *p = '\0';
-	if (html_src_parse_tagspec(buf, i, FALSE, TRUE) && !dont_exit) {
+	if (html_src_parse_tagspec(buf, (HTlexeme) i, FALSE, TRUE) && !dont_exit) {
 	    fprintf(stderr,
 		    "internal error while caching 1st tagspec of %d lexeme", i);
 	    exit_immediately(EXIT_FAILURE);
 	}
-	if (html_src_parse_tagspec(p ? p + 1 : NULL, i, FALSE, FALSE) && !dont_exit) {
+	if (html_src_parse_tagspec(p ? p + 1 : NULL, (HTlexeme) i, FALSE,
+				   FALSE) && !dont_exit) {
 	    fprintf(stderr,
 		    "internal error while caching 2nd tagspec of %d lexeme", i);
 	    exit_immediately(EXIT_FAILURE);

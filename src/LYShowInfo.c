@@ -440,9 +440,7 @@ int LYShowInfo(DocInfo *doc,
 		}
 	    } else {
 		ADD_SS("URL:",
-		       (links[doc->link].lname
-			? links[doc->link].lname
-			: ""));
+		       NonNull(links[doc->link].lname));
 	    }
 	    END_DL();
 

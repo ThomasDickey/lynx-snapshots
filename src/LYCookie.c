@@ -2048,7 +2048,7 @@ void LYStoreCookies(char *cookie_file)
     if (cookie_handle == NULL)
 	return;
     for (dl = domain_list; dl != NULL; dl = dl->next) {
-	de = dl->object;
+	de = (domain_entry *) (dl->object);
 	if (de == NULL)
 	    /*
 	     * Fote says the first object is NULL.  Go with that.
@@ -2280,7 +2280,7 @@ static int LYHandleCookies(const char *arg,
 			cl = de->cookie_list;
 			while (cl) {
 			    next = cl->next;
-			    co = cl->object;
+			    co = (cookie *) (cl->object);
 			    if (co) {
 				HTList_removeObject(de->cookie_list, co);
 				freeCookie(co);
@@ -2394,7 +2394,7 @@ static int LYHandleCookies(const char *arg,
     HTSprintf0(&buf, "<dl compact>\n");
     PUTS(buf);
     for (dl = domain_list; dl != NULL; dl = dl->next) {
-	de = dl->object;
+	de = (domain_entry *) (dl->object);
 	if (de == NULL)
 	    /*
 	     * First object always is NULL.  - FM

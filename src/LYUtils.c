@@ -265,6 +265,19 @@ size_t utf8_length(BOOL utf_flag,
 }
 
 /*
+ * Free storage used for the link-highlighting.
+ */
+void LYFreeHilites(int first, int last)
+{
+    int i;
+
+    for (i = first; i < last; i++) {
+	LYSetHilite(i, NULL);
+	FREE(links[i].lname);
+    }
+}
+
+/*
  * Set the initial highlight information for a given link.
  */
 void LYSetHilite(int cur,
@@ -285,12 +298,12 @@ void LYAddHilite(int cur,
     HiliteList *list = &(links[cur].list);
     HiliteInfo *have = list->hl_info;
     unsigned need = (list->hl_len - 1);
-    unsigned want = (list->hl_len += 1) * sizeof(HiliteInfo);
+    unsigned want = (list->hl_len += 1);
 
     if (have != NULL) {
-	have = realloc(have, want);
+	have = typeRealloc(HiliteInfo, have, want);
     } else {
-	have = malloc(want);
+	have = typeMallocn(HiliteInfo, want);
     }
     list->hl_info = have;
     have[need].hl_text = text;
@@ -396,8 +409,7 @@ static BOOL show_whereis_targets(int flag,
 	 * the screen.  -FM
 	 */
 	LYmbcsstrncpy(buffer,
-		      (LYGetHiliteStr(cur, count) ?
-		       LYGetHiliteStr(cur, count) : ""),
+		      NonNull(LYGetHiliteStr(cur, count)),
 		      (sizeof(buffer) - 1),
 		      (LYcolLimit - LYGetHilitePos(cur, count)),
 		      utf_flag);
@@ -1076,8 +1088,7 @@ void LYhighlight(int flag,
 	     * screen.
 	     */
 	    LYmbcsstrncpy(buffer,
-			  (LYGetHiliteStr(cur, 0) ?
-			   LYGetHiliteStr(cur, 0) : ""),
+			  NonNull(LYGetHiliteStr(cur, 0)),
 			  (sizeof(buffer) - 1),
 			  (LYcolLimit - links[cur].lx),
 			  utf_flag);
@@ -1311,7 +1322,7 @@ void statusline(const char *text)
 	/*
 	 * Deal with any newlines or tabs in the string.  - FM
 	 */
-	convert_to_spaces((char *) temp, FALSE);
+	LYReduceBlanks((char *) temp);
 
 	/*
 	 * Handle the Kanji, making sure the text is not longer than the
@@ -1351,7 +1362,7 @@ void statusline(const char *text)
 	/*
 	 * Deal with any newlines or tabs in the string.  - FM
 	 */
-	convert_to_spaces(buffer, FALSE);
+	LYReduceBlanks(buffer);
     }
 
     /*
@@ -1611,12 +1622,10 @@ int HTCheckForInterrupt(void)
     FD_SET(0, &readfds);
 #ifdef SOCKS
     if (socks_flag)
-	ret = Rselect(1, (void *) &readfds, NULL, NULL,
-		      &socket_timeout);
+	ret = Rselect(1, &readfds, NULL, NULL, &socket_timeout);
     else
 #endif /* SOCKS */
-	ret = select(1, (void *) &readfds, NULL, NULL,
-		     &socket_timeout);
+	ret = select(1, &readfds, NULL, NULL, &socket_timeout);
 
     /** Suspended? **/
     if ((ret == -1) && (SOCKET_ERRNO == EINTR))
@@ -1640,7 +1649,7 @@ int HTCheckForInterrupt(void)
 #endif /* PDCURSES */
 
 #else /* VMS: */
-    extern int typeahead();
+    extern int typeahead(void);
 
     if (fake_zap > 0) {
 	fake_zap--;
@@ -1900,22 +1909,28 @@ BOOLEAN LYisLocalHost(const char *filename)
 }
 
 /*
+ * Free an HTList that contains strings.
+ */
+void LYFreeStringList(HTList *list)
+{
+    if (list != NULL) {
+	char *argument;
+	HTList *cur = list;
+
+	while (NULL != (argument = (char *) HTList_nextObject(cur))) {
+	    FREE(argument);
+	}
+	HTList_delete(list);
+    }
+}
+
+/*
  * Utility for freeing the list of local host aliases.  - FM
  */
 void LYLocalhostAliases_free(void)
 {
-    char *alias;
-    HTList *cur = localhost_aliases;
-
-    if (!cur)
-	return;
-
-    while (NULL != (alias = (char *) HTList_nextObject(cur))) {
-	FREE(alias);
-    }
-    HTList_delete(localhost_aliases);
+    LYFreeStringList(localhost_aliases);
     localhost_aliases = NULL;
-    return;
 }
 
 /*
@@ -1986,7 +2001,7 @@ BOOLEAN LYisLocalAlias(const char *filename)
  *  it returns UNKNOWN_URL_TYPE.  Otherwise, it returns
  *  0 (not a URL). - FM
  */
-int LYCheckForProxyURL(char *filename)
+UrlTypes LYCheckForProxyURL(char *filename)
 {
     char *cp = filename;
     char *cp1;
@@ -2009,6 +2024,7 @@ int LYCheckForProxyURL(char *filename)
 	if ((cp2 = strchr((cp + 1), '/')) != NULL && cp2 < cp1)
 	    return (NOT_A_URL_TYPE);
 	*cp1 = '\0';
+	cp2 = NULL;
 	StrAllocCopy(cp2, cp);
 	*cp1 = ':';
 	StrAllocCat(cp2, "_proxy");
@@ -2075,11 +2091,11 @@ static BOOLEAN compare_type(char *tst,
  *  Chains to LYCheckForProxyURL() if a colon
  *  is present but the type is not recognized.
  */
-int is_url(char *filename)
+UrlTypes is_url(char *filename)
 {
     char *cp = filename;
     char *cp1;
-    int result = NOT_A_URL_TYPE;
+    UrlTypes result = NOT_A_URL_TYPE;
     int len;
     int limit;
 
@@ -2877,18 +2893,8 @@ void size_change(int sig GCC_UNUSED)
  */
 void HTSugFilenames_free(void)
 {
-    char *fname;
-    HTList *cur = sug_filenames;
-
-    if (!cur)
-	return;
-
-    while (NULL != (fname = (char *) HTList_nextObject(cur))) {
-	FREE(fname);
-    }
-    HTList_delete(sug_filenames);
+    LYFreeStringList(sug_filenames);
     sug_filenames = NULL;
-    return;
 }
 
 /*
@@ -2897,33 +2903,33 @@ void HTSugFilenames_free(void)
  */
 void HTAddSugFilename(char *fname)
 {
-    char *new = NULL;
+    char *tmp = NULL;
     char *old;
     HTList *cur;
 
     if (!non_empty(fname))
 	return;
 
-    StrAllocCopy(new, fname);
+    StrAllocCopy(tmp, fname);
 
     if (!sug_filenames) {
 	sug_filenames = HTList_new();
 #ifdef LY_FIND_LEAKS
 	atexit(HTSugFilenames_free);
 #endif
-	HTList_addObject(sug_filenames, new);
+	HTList_addObject(sug_filenames, tmp);
 	return;
     }
 
     cur = sug_filenames;
     while (NULL != (old = (char *) HTList_nextObject(cur))) {
-	if (!strcmp(old, new)) {
+	if (!strcmp(old, tmp)) {
 	    HTList_removeObject(sug_filenames, old);
 	    FREE(old);
 	    break;
 	}
     }
-    HTList_addObject(sug_filenames, new);
+    HTList_addObject(sug_filenames, tmp);
 
     return;
 }
@@ -4475,8 +4481,9 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
      * Set the first prefix, making it a zero-length string if the list is NULL
      * or if the potential host field ends with a dot.  - FM
      */
-    StartP = ((prefix_list && Str[strlen(Str) - 1] != '.') ?
-	      prefix_list : "");
+    StartP = ((prefix_list && Str[strlen(Str) - 1] != '.')
+	      ? prefix_list
+	      : "");
     /*
      * If we have a prefix, but the allocated string is one of the common host
      * prefixes, make our prefix a zero-length string.  - FM
@@ -4512,8 +4519,9 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
 	 * Set the first suffix, making it a zero-length string if the list is
 	 * NULL or if the potential host field begins with a dot.  - FM
 	 */
-	StartS = ((suffix_list && *Str != '.') ?
-		  suffix_list : "");
+	StartS = ((suffix_list && *Str != '.')
+		  ? suffix_list
+		  : "");
 	while ((*StartS) && (WHITE(*StartS) || *StartS == ',')) {
 	    StartS++;		/* Skip whitespace and separators */
 	}
@@ -6442,7 +6450,7 @@ BOOL LYIsUIPage3(const char *url,
 		char *p;
 		HTList *l0 = ly_uip[i].alturls;
 
-		while ((p = HTList_nextObject(l0)) != NULL) {
+		while ((p = (char *) HTList_nextObject(l0)) != NULL) {
 		    if ((flagparam & UIP_P_FRAG) ?
 			(!strncmp(p, url, (l = strlen(p)))
 			 && (url[l] == '\0' || url[l] == '#')) :
@@ -6475,7 +6483,7 @@ void LYRegisterUIPage(const char *url,
 		int n = 0;
 		HTList *l0 = ly_uip[i].alturls;
 
-		while ((p = HTList_nextObject(l0)) != NULL) {
+		while ((p = (char *) HTList_nextObject(l0)) != NULL) {
 		    if (!strcmp(p, url))
 			return;
 		    if (!strcmp(p, ly_uip[i].url)) {
@@ -6502,17 +6510,11 @@ void LYRegisterUIPage(const char *url,
 void LYUIPages_free(void)
 {
     unsigned int i;
-    char *p;
-    HTList *l0;
 
     for (i = 0; i < TABLESIZE(ly_uip); i++) {
 	FREE(ly_uip[i].url);
 	FREE(ly_uip[i].file);
-	l0 = ly_uip[i].alturls;
-	while ((p = HTList_nextObject(l0)) != NULL) {
-	    FREE(p);
-	}
-	HTList_delete(ly_uip[i].alturls);
+	LYFreeStringList(ly_uip[i].alturls);
 	ly_uip[i].alturls = NULL;
     }
 }
@@ -7447,7 +7449,8 @@ char *get_clip_grab(void)
 	if (strchr(paste_buf + off, '\r')
 	    || strchr(paste_buf + off, '\n'))
 	    break;
-	paste_buf = realloc(paste_buf, size += PASTE_BUFFER - 1);
+	paste_buf = typeRealloc(char, paste_buf, size += PASTE_BUFFER - 1);
+
 	off += len;
     }
     return paste_buf;

@@ -2550,11 +2550,12 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 		me->inA = FALSE;
 		me->CurrentANum = 0;
 	    }
-	    me->CurrentA = HTAnchor_findChildAndLink(
-							me->node_anchor,	/* Parent */
-							id_string,	/* Tag */
-							href,	/* Addresss */
-							(void *) 0);	/* Type */
+	    me->CurrentA = HTAnchor_findChildAndLink
+		(
+		    me->node_anchor,	/* Parent */
+		    id_string,	/* Tag */
+		    href,	/* Addresss */
+		    (HTLinkType *) 0);	/* Type */
 	    if (id_string)
 		*cp = '#';
 	    FREE(id_string);
@@ -3203,11 +3204,12 @@ void LYCheckForID(HTStructured * me, const BOOL *present,
 	 * Create the link if we still have a non-zero-length string.  - FM
 	 */
 	if ((temp[0] != '\0') &&
-	    (ID_A = HTAnchor_findChildAndLink(
-						 me->node_anchor,	/* Parent */
-						 temp,	/* Tag */
-						 NULL,	/* Addresss */
-						 (void *) 0))) {	/* Type */
+	    (ID_A = HTAnchor_findChildAndLink
+	     (
+		 me->node_anchor,	/* Parent */
+		 temp,		/* Tag */
+		 NULL,		/* Addresss */
+		 (HTLinkType *) 0))) {	/* Type */
 	    HText_beginAnchor(me->text, me->inUnderline, ID_A);
 	    HText_endAnchor(me->text, 0);
 	}
@@ -3231,11 +3233,12 @@ void LYHandleID(HTStructured * me, const char *id)
     /*
      * Create the link if we still have a non-zero-length string.  - FM
      */
-    if ((ID_A = HTAnchor_findChildAndLink(
-					     me->node_anchor,	/* Parent */
-					     id,	/* Tag */
-					     NULL,	/* Addresss */
-					     (void *) 0)) != NULL) {	/* Type */
+    if ((ID_A = HTAnchor_findChildAndLink
+	 (
+	     me->node_anchor,	/* Parent */
+	     id,		/* Tag */
+	     NULL,		/* Addresss */
+	     (HTLinkType *) 0)) != NULL) {	/* Type */
 	HText_beginAnchor(me->text, me->inUnderline, ID_A);
 	HText_endAnchor(me->text, 0);
     }

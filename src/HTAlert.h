@@ -10,8 +10,10 @@
 
 #include <LYCookie.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #define ALERT_PREFIX_LEN 5
-
 /*      Display a message and get the input
  *
  *      On entry,
@@ -19,28 +21,27 @@
  *
  *      On exit,
  *              Return value is malloc'd string which must be freed.
- */
-extern char *HTPrompt(const char *Msg, const char *deflt);
+ */ extern char *HTPrompt(const char *Msg, const char *deflt);
 
 /*      Display a message, don't wait for input
  *
  *      On entry,
  *              The input is a list of parameters for printf.
  */
-extern void HTAlert(const char *Msg);
-extern void HTAlwaysAlert(const char *extra_prefix, const char *Msg);
-extern void HTInfoMsg(const char *Msg);
-extern void HTUserMsg(const char *Msg);
-extern void HTUserMsg2(const char *Msg, const char *Arg);
+    extern void HTAlert(const char *Msg);
+    extern void HTAlwaysAlert(const char *extra_prefix, const char *Msg);
+    extern void HTInfoMsg(const char *Msg);
+    extern void HTUserMsg(const char *Msg);
+    extern void HTUserMsg2(const char *Msg, const char *Arg);
 
 /*      Display a progress message for information (and diagnostics) only
  *
  *      On entry,
  *              The input is a list of parameters for printf.
  */
-extern const char *HTProgressUnits(int kilobytes);
-extern void HTProgress(const char *Msg);
-extern void HTReadProgress(long bytes, long total);
+    extern const char *HTProgressUnits(int kilobytes);
+    extern void HTProgress(const char *Msg);
+    extern void HTReadProgress(long bytes, long total);
 
 #define _HTProgress(msg)	mustshow = TRUE, HTProgress(msg)
 
@@ -48,12 +49,12 @@ extern void HTReadProgress(long bytes, long total);
  *  Indicates whether last HTConfirm was cancelled (^G or ^C) and
  *  resets flag. (so only call once!) - kw
  */
-extern BOOL HTLastConfirmCancelled(void);
+    extern BOOL HTLastConfirmCancelled(void);
 
 /*
  *	Supports logic for forced yes/no prompt results.
  */
-extern int HTForcedPrompt(int Opt, const char *Msg, int Dft);
+    extern int HTForcedPrompt(int Opt, const char *Msg, int Dft);
 
 /*      Display a message, then wait for 'yes' or 'no', allowing default
  *	response if a return or left-arrow is used.
@@ -65,7 +66,7 @@ extern int HTForcedPrompt(int Opt, const char *Msg, int Dft);
  *              If the user enters 'YES', returns TRUE, returns FALSE
  *              otherwise.
  */
-extern int HTConfirmDefault(const char *Msg, int Dft);
+    extern int HTConfirmDefault(const char *Msg, int Dft);
 
 /*      Display a message, then wait for 'yes' or 'no'.
  *
@@ -76,16 +77,16 @@ extern int HTConfirmDefault(const char *Msg, int Dft);
  *              If the user enters 'YES', returns TRUE, returns FALSE
  *              otherwise.
  */
-extern BOOL HTConfirm(const char *Msg);
+    extern BOOL HTConfirm(const char *Msg);
 
-extern BOOL confirm_post_resub(const char *address,
-			       const char *title,
-			       int if_imgmap,
-			       int if_file);
+    extern BOOL confirm_post_resub(const char *address,
+				   const char *title,
+				   int if_imgmap,
+				   int if_file);
 
 /*      Prompt for password without echoing the reply
  */
-extern char *HTPromptPassword(const char *Msg);
+    extern char *HTPromptPassword(const char *Msg);
 
 /*      Prompt both username and password       HTPromptUsernameAndPassword()
  *      ---------------------------------
@@ -108,10 +109,10 @@ extern char *HTPromptPassword(const char *Msg);
  *      are NOT freed.
  *
  */
-extern void HTPromptUsernameAndPassword(const char *Msg,
-					char **username,
-					char **password,
-					BOOL IsProxy);
+    extern void HTPromptUsernameAndPassword(const char *Msg,
+					    char **username,
+					    char **password,
+					    BOOL IsProxy);
 
 /*	Confirm a cookie operation.			HTConfirmCookie()
  *	---------------------------
@@ -127,9 +128,9 @@ extern void HTPromptUsernameAndPassword(const char *Msg,
  *	Returns FALSE on cancel,
  *		TRUE if the cookie should be set.
  */
-extern BOOL HTConfirmCookie(domain_entry * dp, const char *server,
-			    const char *name,
-			    const char *value);
+    extern BOOL HTConfirmCookie(domain_entry * dp, const char *server,
+				const char *name,
+				const char *value);
 
 /*      Confirm redirection of POST.		HTConfirmPostRedirect()
  *	----------------------------
@@ -142,19 +143,22 @@ extern BOOL HTConfirmCookie(domain_entry * dp, const char *server,
  *	  1 for redirect of POST with content,
  *	303 for redirect as GET without content
  */
-extern int HTConfirmPostRedirect(const char *Redirecting_url,
-				 int server_status);
+    extern int HTConfirmPostRedirect(const char *Redirecting_url,
+				     int server_status);
 
-extern void LYSleepAlert(void);
-extern void LYSleepDebug(void);
-extern void LYSleepInfo(void);
-extern void LYSleepMsg(void);
-extern void LYSleepReplay(void);
+    extern void LYSleepAlert(void);
+    extern void LYSleepDebug(void);
+    extern void LYSleepInfo(void);
+    extern void LYSleepMsg(void);
+    extern void LYSleepReplay(void);
 
 #ifdef HAVE_STRERROR
 #define LYStrerror strerror
 #else
-extern char *LYStrerror(int code);
-#endif /* HAVE_STRERROR */
+    extern char *LYStrerror(int code);
+#endif				/* HAVE_STRERROR */
 
-#endif /* HTALERT_H */
+#ifdef __cplusplus
+}
+#endif
+#endif				/* HTALERT_H */

@@ -358,10 +358,10 @@ static int response(char *command)
  *	template must be already in upper case.
  *	unknown may be in upper or lower or mixed case to match.
  */
-static BOOL match(const char *unknown, const char *template)
+static BOOL match(const char *unknown, const char *ctemplate)
 {
     const char *u = unknown;
-    const char *t = template;
+    const char *t = ctemplate;
 
     for (; *u && *t && (TOUPPER(*u) == *t); u++, t++) ;		/* Find mismatch or end */
     return (BOOL) (*t == 0);	/* OK if end of template */

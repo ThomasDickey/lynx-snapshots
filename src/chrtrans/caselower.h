@@ -24,9 +24,9 @@ default mappings listed in the Unicode Character Database.
 typedef struct {
     u16 upper;
     u16 lower;
-} unipair;
+} unipair_case;
 
-static const unipair unicode_to_lower_case[] =
+static const unipair_case unicode_to_lower_case[] =
 /* *INDENT-OFF* */
 {
   {0x0041, 0x0061},  /* LATIN CAPITAL LETTER A */

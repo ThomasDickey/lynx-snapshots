@@ -68,7 +68,7 @@ int HTNoDataOK = 0;
  */
 int getfile(DocInfo *doc, int *target)
 {
-    int url_type = 0;
+    UrlTypes url_type = NOT_A_URL_TYPE;
     char *pound;
     char *cp = NULL;
     char *temp = NULL;
@@ -945,6 +945,7 @@ int getfile(DocInfo *doc, int *target)
 			    "getfile: Adding fragment '%s' to redirection URL.\n",
 			    pound));
 		    StrAllocCat(use_this_url_instead, pound);
+		    doc->link = -1;
 		}
 		CTRACE_SLEEP(MessageSecs);
 		HTUserMsg2(WWW_USING_MESSAGE, use_this_url_instead);
@@ -1064,8 +1065,10 @@ int getfile(DocInfo *doc, int *target)
 		    /*
 		     * May set www_search_result.
 		     */
-		    if (HTFindPoundSelector(pound + 1))
+		    if (HTFindPoundSelector(pound + 1)) {
 			*target = www_search_result;
+			doc->link = -1;
+		    }
 		}
 		return (NORMAL);
 	    }

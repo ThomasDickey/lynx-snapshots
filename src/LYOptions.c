@@ -2522,7 +2522,7 @@ static PostPair *break_data(bstring *data)
 	 * Like I said, screw efficiency.  Sides, realloc is fast on
 	 * Linux ;->
 	 */
-	q = realloc(q, sizeof(PostPair) * (count + 1));
+	q = typeRealloc(PostPair, q, count + 1);
 	if (q == NULL)
 	    outofmem(__FILE__, "break_data(realloc)");
 	q[count].tag = NULL;
@@ -3237,7 +3237,7 @@ static char *NewSecureValue(void)
     static char oops[] = "?";
 
     FREE(secure_value);
-    if ((secure_value = malloc(80)) != 0) {
+    if ((secure_value = typeMallocn(char, 80)) != 0) {
 #if defined(RAND_MAX)
 	long key = lynx_rand();
 

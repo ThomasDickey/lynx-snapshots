@@ -698,9 +698,9 @@ static void addClassName(const char *prefix,
     if ((have + need) >= Style_className_len) {
 	Style_className_len += 1024 + 2 * (have + need);
 	if (Style_className == 0) {
-	    Style_className = malloc(Style_className_len);
+	    Style_className = typeMallocn(char, Style_className_len);
 	} else {
-	    Style_className = realloc(Style_className, Style_className_len);
+	    Style_className = typeRealloc(char, Style_className, Style_className_len);
 	}
 	if (Style_className == NULL)
 	    outofmem(__FILE__, "addClassName");
@@ -920,7 +920,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
     HTChildAnchor *ID_A = NULL;	/* HTML_foo_ID anchor */
     int url_type = 0, i = 0;
     char *cp = NULL;
-    HTMLElement ElementNumber = element_number;
+    HTMLElement ElementNumber = (HTMLElement) element_number;
     BOOL intern_flag = FALSE;
     short stbl_align = HT_ALIGN_NONE;
     int status = HT_OK;
@@ -1842,7 +1842,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		ElementNumber = HTML_LH;
 	    } else {
 		me->new_style = me->sp[0].style;
-		ElementNumber = me->sp[0].tag_number;
+		ElementNumber = (HTMLElement) me->sp[0].tag_number;
 		UPDATE_STYLE;
 	    }
 	    /*
@@ -3149,8 +3149,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 					   VERBOSE_IMG(value, HTML_IMG_SRC,
 						       "[INLINE]"))));
 	    else
-		StrAllocCopy(alt_string, (title ?
-					  title : ""));
+		StrAllocCopy(alt_string, NonNull(title));
 	}
 	if (*alt_string == '\0' && map_href) {
 	    StrAllocCopy(alt_string, (temp = MakeNewMapValue(value, "USEMAP")));
@@ -3750,7 +3749,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		status = HT_PARSER_OTHER_CONTENT;
 		if (me->sp[0].tag_number == HTML_FIG &&
 		    me->objects_figged_open > 0) {
-		    ElementNumber = HTML_OBJECT_M;
+		    ElementNumber = (HTMLElement) HTML_OBJECT_M;
 		} else {
 		    me->objects_mixed_open++;
 		    SET_SKIP_STACK(HTML_OBJECT);
@@ -4287,7 +4286,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    I.align = NULL;
 	    I.accept = NULL;
 	    I.checked = NO;
-	    I.class = NULL;
+	    I.iclass = NULL;
 	    I.disabled = NO;
 	    I.error = NULL;
 	    I.height = NULL;
@@ -4390,7 +4389,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 
 	    if (present && present[HTML_BUTTON_CLASS] &&	/* Not yet used. */
 		non_empty(value[HTML_BUTTON_CLASS]))
-		I.class = value[HTML_BUTTON_CLASS];
+		I.iclass = value[HTML_BUTTON_CLASS];
 
 	    if (present && present[HTML_BUTTON_ID] &&
 		non_empty(value[HTML_BUTTON_ID])) {
@@ -4468,14 +4467,14 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    BOOL HaveSRClink = FALSE;
 	    char *ImageSrc = NULL;
 	    BOOL IsSubmitOrReset = FALSE;
-	    HTkcode kcode = 0;
-	    HTkcode specified_kcode = 0;
+	    HTkcode kcode = NOKANJI;
+	    HTkcode specified_kcode = NOKANJI;
 
 	    /* init */
 	    I.align = NULL;
 	    I.accept = NULL;
 	    I.checked = NO;
-	    I.class = NULL;
+	    I.iclass = NULL;
 	    I.disabled = NO;
 	    I.error = NULL;
 	    I.height = NULL;
@@ -4792,7 +4791,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		I.align = value[HTML_INPUT_ALIGN];
 	    if (present && present[HTML_INPUT_CLASS] &&		/* Not yet used. */
 		non_empty(value[HTML_INPUT_CLASS]))
-		I.class = value[HTML_INPUT_CLASS];
+		I.iclass = value[HTML_INPUT_CLASS];
 	    if (present && present[HTML_INPUT_ERROR] &&		/* Not yet used. */
 		non_empty(value[HTML_INPUT_ERROR]))
 		I.error = value[HTML_INPUT_ERROR];
@@ -5150,7 +5149,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		I.align = NULL;
 		I.accept = NULL;
 		I.checked = NO;
-		I.class = NULL;
+		I.iclass = NULL;
 		I.disabled = NO;
 		I.error = NULL;
 		I.height = NULL;
@@ -6796,7 +6795,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	    I.align = NULL;
 	    I.accept = NULL;
 	    I.checked = NO;
-	    I.class = NULL;
+	    I.iclass = NULL;
 	    I.disabled = NO;
 	    I.error = NULL;
 	    I.height = NULL;
@@ -7072,8 +7071,8 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		    if (*ptr == ' ')
 			HText_appendCharacter(me->text, HT_NON_BREAK_SPACE);
 		    else {
-			HTkcode kcode = 0;
-			HTkcode specified_kcode = 0;
+			HTkcode kcode = NOKANJI;
+			HTkcode specified_kcode = NOKANJI;
 
 			if (HTCJK == JAPANESE) {
 			    kcode = HText_getKcode(me->text);
@@ -7858,10 +7857,14 @@ static void CacheThru_do_free(HTStream *me)
 	    me->status = HT_ERROR;
 	LYCloseTempFP(me->fp);
 	if (me->status == HT_OK) {
+	    char *cp_freeme = 0;
+
 	    me->anchor->source_cache_file = me->filename;
 	    CTRACE((tfp,
 		    "SourceCacheWriter: Committing file %s for URL %s to anchor\n",
-		    me->filename, HTAnchor_address((HTAnchor *) me->anchor)));
+		    me->filename,
+		    cp_freeme = HTAnchor_address((HTAnchor *) me->anchor)));
+	    FREE(cp_freeme);
 	} else {
 	    if (source_cache_file_error == FALSE) {
 		HTAlert(gettext("Source cache error - disk full?"));
@@ -7880,10 +7883,14 @@ static void CacheThru_do_free(HTStream *me)
 	HTAlert(gettext("Source cache error - not enough memory!"));
     }
     if (me->chunk) {
+	char *cp_freeme = NULL;
+
 	me->anchor->source_cache_chunk = me->chunk;
 	CTRACE((tfp,
 		"SourceCacheWriter: Committing memory chunk %p for URL %s to anchor\n",
-		(void *) me->chunk, HTAnchor_address((HTAnchor *) me->anchor)));
+		(void *) me->chunk,
+		cp_freeme = HTAnchor_address((HTAnchor *) me->anchor)));
+	FREE(cp_freeme);
     }
 }
 
@@ -7977,6 +7984,7 @@ static const HTStreamClass PassThruCache =
 static HTStream *CacheThru_new(HTParentAnchor *anchor,
 			       HTStream *target)
 {
+    char *cp_freeme = NULL;
     char filename[LY_MAXPATH];
     HTStream *stream = NULL;
     HTProtocol *p = (HTProtocol *) anchor->protocol;
@@ -8013,6 +8021,7 @@ static HTStream *CacheThru_new(HTParentAnchor *anchor,
     stream->status = HT_OK;
 
     if (LYCacheSource == SOURCE_CACHE_FILE) {
+
 	if (anchor->source_cache_file) {
 	    CTRACE((tfp,
 		    "SourceCacheWriter: If successful, will replace source cache file %s\n",
@@ -8028,8 +8037,9 @@ static HTStream *CacheThru_new(HTParentAnchor *anchor,
 	if (!(stream->fp = LYOpenTemp(filename, HTML_SUFFIX, BIN_W))) {
 	    CTRACE((tfp,
 		    "SourceCacheWriter: Cannot open source cache file for URL %s\n",
-		    HTAnchor_address((HTAnchor *) anchor)));
+		    cp_freeme = HTAnchor_address((HTAnchor *) anchor)));
 	    FREE(stream);
+	    FREE(cp_freeme);
 	    return target;
 	}
 
@@ -8037,7 +8047,9 @@ static HTStream *CacheThru_new(HTParentAnchor *anchor,
 
 	CTRACE((tfp,
 		"SourceCacheWriter: Caching source for URL %s in file %s\n",
-		HTAnchor_address((HTAnchor *) anchor), filename));
+		cp_freeme = HTAnchor_address((HTAnchor *) anchor),
+		filename));
+	FREE(cp_freeme);
     }
 
     if (LYCacheSource == SOURCE_CACHE_MEMORY) {
@@ -8056,8 +8068,9 @@ static HTStream *CacheThru_new(HTParentAnchor *anchor,
 
 	CTRACE((tfp,
 		"SourceCacheWriter: Caching source for URL %s in memory chunk %p\n",
-		HTAnchor_address((HTAnchor *) anchor), (void *) stream->chunk));
-
+		cp_freeme = HTAnchor_address((HTAnchor *) anchor),
+		(void *) stream->chunk));
+	FREE(cp_freeme);
     }
 
     return stream;

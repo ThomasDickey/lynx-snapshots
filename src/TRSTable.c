@@ -451,9 +451,8 @@ static int Stbl_addCellToRow(STable_rowinfo *me, STable_cellinfo *colinfo, int n
 	    if (me->allocated == 0 && !me->cells) {
 		cells = typecallocn(STable_cellinfo, growby);
 	    } else {
-		cells = realloc(me->cells,
-				(me->allocated + growby)
-				* sizeof(STable_cellinfo));
+		cells = typeRealloc(STable_cellinfo, me->cells,
+				      (me->allocated + growby));
 
 		for (i = 0; cells && i < growby; i++) {
 		    cells[me->allocated + i].alignment = HT_ALIGN_NONE;
@@ -520,9 +519,8 @@ static int Stbl_reserveCellsInRow(STable_rowinfo *me, int icell,
 	    (tfp, "TRST:Stbl_reserveCellsInRow(icell=%d, colspan=%d\n",
 	     icell, colspan));
     if (growby > 0) {
-	cells = realloc(me->cells,
-			(me->allocated + growby)
-			* sizeof(STable_cellinfo));
+	cells = typeRealloc(STable_cellinfo, me->cells,
+			      (me->allocated + growby));
 
 	if (cells) {
 	    for (i = 0; i < growby; i++) {
@@ -980,9 +978,8 @@ static int Stbl_reserveCellsInTable(STable_info *me, int icell,
 
     growby = me->nrows + rowspan - 1 - me->allocated_rows;
     if (growby > 0) {
-	rows = realloc(me->rows,
-		       (me->allocated_rows + growby)
-		       * sizeof(STable_rowinfo));
+	rows = typeRealloc(STable_rowinfo, me->rows,
+			     (me->allocated_rows + growby));
 
 	if (!rows)
 	    return 0;		/* ignore silently, no free memory, may be recoverable */
@@ -1079,9 +1076,8 @@ int Stbl_addRowToTable(STable_info *me, int alignment,
 	    if (me->allocated_rows == 0 && !me->rows) {
 		rows = typecallocn(STable_rowinfo, growby);
 	    } else {
-		rows = realloc(me->rows,
-			       (me->allocated_rows + growby)
-			       * sizeof(STable_rowinfo));
+		rows = typeRealloc(STable_rowinfo, me->rows,
+				     (me->allocated_rows + growby));
 
 		for (i = 0; rows && i < growby; i++) {
 		    row = rows + me->allocated_rows + i;
@@ -1334,9 +1330,8 @@ static int Stbl_fakeFinishCellInTable(STable_info *me,
 	       table lines, not displayed lines.  We need to duplicate
 	       the reservation structure when we fake new logical lines.  */
 	    int prev_row_n = prev_row - me->rows;
-	    STable_rowinfo *rows = realloc(me->rows,
-					   (me->allocated_rows + 1)
-					   * sizeof(STable_rowinfo));
+	    STable_rowinfo *rows = typeRealloc(STable_rowinfo, me->rows,
+					       (me->allocated_rows + 1));
 	    int need_cells = prev_reserved_last + 1;
 	    int n;
 
@@ -1482,9 +1477,8 @@ int Stbl_addCellToTable(STable_info *me, int colspan,
 	    if (me->allocated_sumcols == 0 && !me->sumcols) {
 		sumcols = typecallocn(STable_cellinfo, growby);
 	    } else {
-		sumcols = realloc(me->sumcols,
-				  (me->allocated_sumcols + growby)
-				  * sizeof(STable_cellinfo));
+		sumcols = typeRealloc(STable_cellinfo, me->sumcols,
+				        (me->allocated_sumcols + growby));
 
 		for (i = 0; sumcols && i < growby; i++) {
 		    sumcol = sumcols + me->allocated_sumcols + i;
@@ -1675,9 +1669,8 @@ int Stbl_addColInfo(STable_info *me, int colspan,
 	    if (me->allocated_sumcols == 0) {
 		sumcols = typecallocn(STable_cellinfo, growby);
 	    } else {
-		sumcols = realloc(me->sumcols,
-				  (me->allocated_sumcols + growby)
-				  * sizeof(STable_cellinfo));
+		sumcols = typeRealloc(STable_cellinfo, me->sumcols,
+				        (me->allocated_sumcols + growby));
 
 		for (i = 0; sumcols && i < growby; i++) {
 		    sumcol = sumcols + me->allocated_sumcols + i;
