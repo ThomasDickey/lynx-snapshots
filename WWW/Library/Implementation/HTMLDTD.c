@@ -1540,26 +1540,16 @@ static CONST HTTag tags_new[HTML_ELEMENTS] = {
  { P("FORM")	, form_attr,	HTML_FORM_ATTRIBUTES,	SGML_MIXED,T_FORM},
  { P("FRAME")	, frame_attr,	HTML_FRAME_ATTRIBUTES,	SGML_EMPTY,T_FRAME},
  { P("FRAMESET"), frameset_attr,HTML_FRAMESET_ATTRIBUTES, SGML_ELEMENT,T_FRAMESET},
-#ifndef   EBCDIC  /* S/390 -- gil -- 0177 */
  { P("H1")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H1},
  { P("H2")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H2},
  { P("H3")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H3},
  { P("H4")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H4},
  { P("H5")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H5},
  { P("H6")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H6},
-#endif /* EBCDIC  S/390 -- gil -- 0187 */
  { P("HEAD")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_ELEMENT,T_HEAD},
  { P("HR")	, hr_attr,	HTML_HR_ATTRIBUTES,	SGML_EMPTY,T_HR},
  { P("HTML")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_HTML},
  { P("HY")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_HY},
-#ifdef    EBCDIC
- { P("H1")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H1},
- { P("H2")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H2},
- { P("H3")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H3},
- { P("H4")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H4},
- { P("H5")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H5},
- { P("H6")	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED,T_H6},
-#endif /* EBCDIC <heavy sigh> -- gil */
  { P("I")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_I},
  { P("IFRAME")	, iframe_attr,	HTML_IFRAME_ATTRIBUTES, SGML_MIXED,T_IFRAME},
  { P("IMG")	, img_attr,	HTML_IMG_ATTRIBUTES,	SGML_EMPTY,T_IMG},

@@ -98,9 +98,9 @@ extern void LYCheckMail NOPARAMS;
 extern void LYCleanupTemp NOPARAMS;
 extern void LYCloseTemp PARAMS((char *name));
 extern void LYCloseTempFP PARAMS((FILE *fp));
-extern void LYConvertToURL PARAMS((char **AllocatedString));
+extern void LYConvertToURL PARAMS((char **AllocatedString, int fixit));
 extern void LYDoCSI PARAMS((char *url, CONST char *comment, char **csi));
-extern void LYEnsureAbsoluteURL PARAMS((char **href, CONST char *name));
+extern void LYEnsureAbsoluteURL PARAMS((char **href, CONST char *name, int fixit));
 extern void LYFakeZap PARAMS((BOOL set));
 extern void LYLocalFileToURL PARAMS((char **target, CONST char *source));
 extern void LYLocalhostAliases_free NOPARAMS;
@@ -141,10 +141,11 @@ extern BOOLEAN mustshow;
 /*
  *  For is_url().
  *
- *  Universal document id types.
+ *  Universal document id types (see LYCheckForProxyURL)
  */
 typedef enum {
-    UNKNOWN_URL_TYPE = 0,
+    NOT_A_URL_TYPE = 0,
+    UNKNOWN_URL_TYPE = 1,	/* must be nonzero */
 
     HTTP_URL_TYPE,
     FILE_URL_TYPE,

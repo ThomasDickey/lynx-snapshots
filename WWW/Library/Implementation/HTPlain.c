@@ -167,7 +167,7 @@ PRIVATE void HTPlain_put_character ARGS2(
 		diff < 0 ? (low = i+1) : (high = i)) {
 		/* Binary search */
 		i = (low + (high-low)/2);
-		diff = strncmp(HTML_dtd.entity_names[i], name, len);
+		diff = AS_ncmp(HTML_dtd.entity_names[i], name, len);
 		if (diff == 0) {
 		    HText_appendText(me->text,
 				     LYCharSets[me->outUCLYhndl][i]);

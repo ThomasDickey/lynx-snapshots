@@ -677,6 +677,7 @@ PUBLIC int LYshow_statusline_messages ARGS1(
     fprintf(fp0, "<pre>\n");
     fprintf(fp0, "<ol>\n");
 
+    /* print messages in reverse order: */
     i = topOfStack;
     while (--i >= 0) {
 	if (buffstack[i] != NULL)
@@ -706,6 +707,38 @@ PUBLIC int LYshow_statusline_messages ARGS1(
     if (!HTLoadAbsolute(&WWWDoc))
 	return(NOT_FOUND);
     return(NORMAL);
+}
+
+/*
+ * Dump statusline messages into the buffer.
+ * Called from mainloop() when exit immediately with an error:
+ * can not access startfile (first_file) so a couple of alert messages
+ * will be very useful on exit.
+ * (Don't expect everyone will look a trace log in case of difficulties:))
+ */
+PUBLIC void LYprint_statusline_messages_on_exit ARGS1(
+	char **,	buf)
+{
+    int i;
+
+    StrAllocCat(*buf, "\n");
+    /* print messages in chronological order:
+     * probably a single message but let's do it.
+     */
+    i = topOfStack - 1;
+    while (++i <= STATUSBUFSIZE) {
+	if (buffstack[i] != NULL) {
+	    StrAllocCat(*buf, buffstack[i]);
+	    StrAllocCat(*buf, "\n");
+	}
+    }
+    i = -1;
+    while (++i < topOfStack) {
+	if (buffstack[i] != NULL) {
+	    StrAllocCat(*buf, buffstack[i]);
+	    StrAllocCat(*buf, "\n");
+	}
+    }
 }
 
 

@@ -1556,7 +1556,7 @@ PRIVATE int print_local_dir ARGS5(
 
 
     {
-	HTBTree * bt = HTBTree_new((HTComparer)strcmp);
+	HTBTree * bt = HTBTree_new((HTComparer)AS_cmp);
 	int num_of_entries = 0;	    /* lines counter */
 
 	_HTProgress (gettext("Reading directory..."));

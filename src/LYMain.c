@@ -1369,7 +1369,7 @@ PUBLIC int main ARGS2(
      */
     StrAllocCopy(LynxHome, startfile);
     LYFillLocalFileURL((char **)&LynxHome, "file://localhost");
-    LYEnsureAbsoluteURL((char **)&LynxHome, "LynxHome");
+    LYEnsureAbsoluteURL((char **)&LynxHome, "LynxHome", FALSE);
 
     /*
      *  Process any command line arguments not already handled. - FM
@@ -1692,7 +1692,7 @@ PUBLIC int main ARGS2(
      *	make it one. - FM
      */
     LYFillLocalFileURL((char **)&startfile, "file://localhost");
-    LYEnsureAbsoluteURL((char **)&startfile, "STARTFILE");
+    LYEnsureAbsoluteURL((char **)&startfile, "STARTFILE", FALSE);
 
     /*
      *	If homepage was specified and is a file URL with the
@@ -1701,7 +1701,7 @@ PUBLIC int main ARGS2(
      */
     if (homepage) {
 	LYFillLocalFileURL((char **)&homepage, "file://localhost");
-	LYEnsureAbsoluteURL((char **)&homepage, "HOMEPAGE");
+	LYEnsureAbsoluteURL((char **)&homepage, "HOMEPAGE", FALSE);
     }
 
     /*

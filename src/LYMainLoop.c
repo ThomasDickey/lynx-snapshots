@@ -55,6 +55,7 @@
 #include <LYLeaks.h>
 
 
+PRIVATE void exit_immediately_with_error_message PARAMS((int state, BOOLEAN first_file));
 PRIVATE void print_status_message PARAMS((CONST linkstruct curlink, char **cp));
 PRIVATE BOOL confirm_post_resub PARAMS((
     CONST char*		address,
@@ -647,25 +648,7 @@ try_again:
 			/*
 			 *  If nhist = 0 then it must be the first file.
 			 */
-			if (!dump_output_immediately)
-			    cleanup();
-#ifdef UNIX
-			if (dump_output_immediately)
-			    fprintf(stderr, gettext("\nlynx: Can't access startfile %s\n"),
-				    startfile);
-			else
-#endif /* UNIX */
-			{
-
-			    SetOutputMode( O_TEXT );
-			    printf(gettext("\nlynx: Can't access startfile %s\n"),
-				   startfile);
-			    SetOutputMode( O_BINARY );
-			}
-
-			if (!dump_output_immediately) {
-			    exit_immediately(-1);
-			}
+			exit_immediately_with_error_message(NOT_FOUND, first_file);
 			return(-1);
 		    }
 
@@ -738,28 +721,8 @@ try_again:
 			   newdoc.internal_link = FALSE;
 			   goto try_again;
 			} else {
-			    if (!dump_output_immediately)
-			       cleanup();
-#ifdef UNIX
-			    if (dump_output_immediately) {
-			       fprintf(stderr,
- gettext("\nlynx: Start file could not be found or is not text/html or text/plain\n"));
-				fprintf(stderr, gettext("      Exiting...\n"));
-			    } else
-#endif /* UNIX */
-			    {
-				SetOutputMode( O_TEXT );
-
-				printf(
- gettext("\nlynx: Start file could not be found or is not text/html or text/plain\n"));
-				printf(gettext("      Exiting...\n"));
-
-				SetOutputMode( O_BINARY );
-			    }
-			    if (!dump_output_immediately) {
-				exit_immediately(-1);
-			    }
-			    return(-1);
+			   exit_immediately_with_error_message(NULLFILE, first_file);
+			   return(-1);
 			}
 		    }
 
@@ -3641,7 +3604,7 @@ check_goto_URL:
 		if ( user_input_buffer[1] &&
 		     HTFindPoundSelector(user_input_buffer+1) ) {
 		     /* HTFindPoundSelector will initialize www_search_result,
-		        so we do nothing else. */
+			so we do nothing else. */
 		    HTAddGotoURL(user_input_buffer);
 		}
 		break;
@@ -3651,7 +3614,7 @@ check_goto_URL:
 	     */
 	    StrAllocCopy(temp, user_input_buffer);
 	    LYFillLocalFileURL((char **)&temp, "file://localhost");
-	    LYEnsureAbsoluteURL((char **)&temp, "");
+	    LYEnsureAbsoluteURL((char **)&temp, "", TRUE);
 	    sprintf(user_input_buffer, "%.*s",
 		    (int)(sizeof(user_input_buffer) - 1), temp);
 	    FREE(temp);
@@ -6236,4 +6199,61 @@ PRIVATE void print_status_message ARGS2(
     }
     /* turn off cursor since now it's probably on statusline -HV */
     move((LYlines - 1), (LYcols - 1));
+}
+
+
+PRIVATE void exit_immediately_with_error_message ARGS2(
+	int,		state,
+	BOOLEAN,	first_file)
+{
+    char *buf = 0;
+    char *buf2 = 0;
+
+    if (first_file) {
+	/* print statusline messages as a hint, if any */
+	LYprint_statusline_messages_on_exit(&buf2);
+    }
+
+    if (state == NOT_FOUND)
+    {
+	HTSprintf0(&buf, "%s\n%s %s\n",
+		   buf2,
+		   gettext("lynx: Can't access startfile"),
+		   /*
+		    * hack: if we fail in HTAccess.c
+		    * avoid duplicating URL, oh.
+		    */
+		   strstr(buf2, gettext("Can't Access")) ? "" : startfile);
+    }
+
+    if (state == NULLFILE)
+    {
+	HTSprintf0(&buf, "%s\n%s\n%s\n",
+		   buf2,
+		   gettext("lynx: Start file could not be found or is not text/html or text/plain"),
+		   gettext("      Exiting..."));
+    }
+
+    FREE(buf2);
+
+    if (!dump_output_immediately)
+	cleanup();
+
+#ifdef UNIX
+    if (dump_output_immediately) {
+	fprintf(stderr, buf);
+    } else
+#endif /* UNIX */
+    {
+	SetOutputMode( O_TEXT );
+	printf(buf);
+	SetOutputMode( O_BINARY );
+    }
+
+    FREE(buf);
+
+    if (!dump_output_immediately) {
+	exit_immediately(-1);
+    }
+    /* else: return(-1) in mainloop */
 }
