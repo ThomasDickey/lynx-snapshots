@@ -2122,7 +2122,8 @@ PRIVATE int popup_choice ARGS6(
 #ifndef USE_SLANG
     WINDOW * form_window;
 #endif /* !USE_SLANG */
-    int num_choices = 0, top, bottom, length = -1, width = 0;
+    int num_choices = 0, top, bottom, length = -1;
+    unsigned width = 0;
     char ** Cptr = choices;
     int window_offset = 0;
     int DisplayLines = (LYlines - 2);

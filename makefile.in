@@ -128,11 +128,6 @@ SITE_DEFS = # Your defines here
 # for their inet_addr(host) calls.
 #
 # -DDGUX_OLD
-#
-# if you would like logging of client requests via syslog(), you should
-# define this in SITE_DEFS
-#
-# -DSYSLOG_REQUESTED_URLS
 
 # defines which have configure options   (see INSTALLATION, Section II-1c.):
 # -DARCHIVE_ONLY
@@ -151,6 +146,7 @@ SITE_DEFS = # Your defines here
 # -DOK_TAR
 # -DOK_UUDECODE
 # -DOK_ZIP
+# -DSYSLOG_REQUESTED_URLS
 # -DUNDERLINE_LINKS
 # -DUSE_COLOR_STYLE
 # -DUSE_HASH

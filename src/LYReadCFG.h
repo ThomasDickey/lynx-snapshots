@@ -44,6 +44,7 @@ extern int check_color PARAMS((char * color, int the_default));
 #endif
 
 extern void read_cfg PARAMS((char *cfg_filename, char *parent_filename, int nesting_level));
+extern void free_lynx_cfg NOPARAMS;
 extern BOOLEAN have_read_cfg;
 
 #endif /* LYREADCFG_H */

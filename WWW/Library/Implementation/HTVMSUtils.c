@@ -728,7 +728,7 @@ typedef struct _VMSEntryInfo {
     BOOLEAN      display;  /* show this entry? */
 } VMSEntryInfo;
 
-PRIVATE void free_VMSEntryInfo_struct_contents ARGS1(VMSEntryInfo *,entry_info)
+PRIVATE void free_VMSEntryInfo_contents ARGS1(VMSEntryInfo *,entry_info)
 {
     if (entry_info) {
 	FREE(entry_info->filename);
@@ -1226,7 +1226,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 
 		PUTC('\n'); /* end of this entry */
 
-		free_VMSEntryInfo_struct_contents(entry_info);
+		free_VMSEntryInfo_contents(entry_info);
 	    }
 	}
 

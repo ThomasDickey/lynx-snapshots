@@ -95,6 +95,7 @@ struct _cookie {
     int flags;	   /* Various flags */
     time_t expires;/* The time when this cookie expires */
     BOOL quoted;   /* Was a value quoted in the Set-Cookie header? */
+    BOOL from_file; /* Was this cookie loaded from the file jar? - RP */
 };
 typedef struct _cookie cookie;
 
@@ -103,6 +104,8 @@ typedef struct _cookie cookie;
 #define COOKIE_FLAG_EXPIRES_SET 4  /* If set, an expiry date was set */
 #define COOKIE_FLAG_DOMAIN_SET 8   /* If set, an non-default domain was set */
 #define COOKIE_FLAG_PATH_SET 16    /* If set, an non-default path was set */
+#define COOKIE_FLAG_PERSISTENT 32  /* If set, this cookie was persistent */
+
 struct _HTStream
 {
   HTStreamClass * isa;
@@ -405,7 +408,21 @@ PRIVATE void store_cookie ARGS3(
 	    de = (domain_entry *)calloc(1, sizeof(domain_entry));
 	    if (de == NULL)
 		outofmem(__FILE__, "store_cookie");
-	    de->bv = QUERY_USER;
+#ifdef EXP_PERSISTENT_COOKIES
+	    /*
+	     * Ok, this is a problem.  The first cookie for a domain
+	     * effectively sets the policy for that whole domain - for
+	     * something like Netlink, where there are lots of websites
+	     * under www.netlink.co.uk, this isn't sensible.  However,
+	     * taking this sort of decision down to cookie level also
+	     * isn't sensible.  Perhaps something based on the domain
+	     * and the path in conjunction makes more sense?  - RP
+	     */
+	    if (co->flags & COOKIE_FLAG_PERSISTENT)
+	        de->bv = FROM_FILE;
+	    else
+#endif
+	        de->bv = QUERY_USER;
 	    cookie_list = de->cookie_list = HTList_new();
 	    StrAllocCopy(de->domain, co->domain);
 	    HTList_addObject(domain_list, de);
@@ -486,8 +503,7 @@ PRIVATE void store_cookie ARGS3(
      *	Get confirmation if we need it, and add cookie
      *	if confirmed or 'allow' is set to always. - FM
      */
-    } else if (HTConfirmCookie(de, hostname,
-			       co->domain, co->path, co->name, co->value)) {
+    } else if (HTConfirmCookie(de, hostname, co->name, co->value)) {
 	HTList_insertObjectAt(cookie_list, co, pos);
 	total_cookies++;
     } else {
@@ -1813,6 +1829,151 @@ PUBLIC char * LYCookie ARGS4(
     return(NULL);
 }
 
+/* rjp - experiment cookie loading */
+#ifdef EXP_PERSISTENT_COOKIES
+PUBLIC void LYLoadCookies ARGS1 (
+	CONST char *,	cookie_file)
+{
+    FILE *cookie_handle;
+    char buf[5000]; /* should be long enough for a cookie line */
+    char domain[256], path[256], name[256], value[4100];
+    char what[8], secure[8], expires_a[16];
+    int expires;
+
+    cookie_handle = fopen(cookie_file, "r+");
+    if (!cookie_handle)
+	return;
+
+    while (!feof(cookie_handle)) {
+	cookie *moo;
+	int tok_loop;
+	char *tok_values[] = {domain, what, path, secure, expires_a, name, value, NULL};
+	char *tok_out, *tok_ptr;
+
+	fgets(buf, 4999, cookie_handle); /* test return value */
+
+	/*
+	 * Tokenise the cookie line into it's component parts -
+	 * this only works for Netscape style cookie files at the
+	 * moment.  It may be worth investigating an alternative
+	 * format for Lynx because the Netscape format isn't all
+	 * that useful, or future-proof. - RP
+	 *
+	 * 'fixed' by using strsep instead of strtok.  No idea
+	 * what kind of platform problems this might introduce. - RP
+	 */
+	tok_ptr = buf;
+	tok_out = strsep(&tok_ptr, "\t");
+	for (tok_loop = 0; tok_out && tok_values[tok_loop]; tok_loop++) {
+	if (TRACE)
+	fprintf(stderr, ">%d:%p:%p:[%s]:%s\n",
+	    tok_loop, tok_values[tok_loop], tok_out, tok_out, buf);
+	    strcpy(tok_values[tok_loop], tok_out);
+	    /*
+	     * It looks like strtok ignores a leading delimiter,
+	     * which makes things a bit more interesting.  Something
+	     * like "FALSE\t\tFALSE\t" translates to FALSE,FALSE
+	     * instead of FALSE,,FALSE. - RP
+	     */
+	    tok_out = strsep(&tok_ptr, "\t");
+	}
+	expires = atoi(expires_a);
+
+	/*
+	 * This fails when the path is blank
+	 *
+	 * sscanf(buf, "%s\t%s\t%s\t%s\t%d\t%s\t%[ -~]",
+	 *  domain, what, path, secure, &expires, name, value);
+	 */
+
+	if (TRACE)
+	fprintf(stderr, "%s\t%s\t%s\t%s\t%d\t%s\t%s\tREADCOOKIE\n",
+	    domain, what, path, secure, expires, name, value);
+	moo = newCookie();
+	StrAllocCopy(moo->domain, domain);
+	StrAllocCopy(moo->path, path);
+	StrAllocCopy(moo->name, name);
+	StrAllocCopy(moo->value, value);
+	moo->pathlen = strlen(moo->path);
+	moo->flags |= COOKIE_FLAG_PERSISTENT;
+	/*
+	 * I don't like using this to store the cookies because it's
+	 * designed to store cookies that have been received from an
+	 * HTTP request, not from a persistent cookie jar.  Hence the
+	 * mucking about with the COOKIE_FLAG_PERSISTENT above. - RP
+	 */
+	store_cookie(moo, domain, path);
+    }
+    fclose (cookie_handle);
+}
+
+/* rjp - experimental persistent cookie support */
+PRIVATE void LYStoreCookies ARGS1 (
+	CONST char *,	cookie_fileX)
+{
+    char buf[1024];
+    HTList *dl, *cl;
+    domain_entry *de;
+    cookie *co;
+    FILE *cookie_handle;
+    char *cookie_file = "cookies";
+#ifdef VMS
+    extern BOOLEAN HadVMSInterrupt;
+#endif /* VMS */
+
+    /*
+     *	Check whether we have something to do. - FM
+     */
+    if (HTList_isEmpty(domain_list)) {
+	/* No cookies, so don't bother updating the file */
+	return;
+    }
+
+    cookie_handle = fopen(cookie_file, "w+");
+    for (dl = domain_list; dl != NULL; dl = dl->next) {
+	de = dl->object;
+	if (de == NULL)
+	    /*
+	     *	Fote says the first object is NULL.  Go with that.
+	     */
+	    continue;
+
+	switch (de->bv) {
+	case (ACCEPT_ALWAYS):
+	    sprintf(buf, COOKIES_ALWAYS_ALLOWED);
+	    break;
+	case (REJECT_ALWAYS):
+	    sprintf(buf, COOKIES_NEVER_ALLOWED);
+	    break;
+	case (QUERY_USER):
+	    sprintf(buf, COOKIES_ALLOWED_VIA_PROMPT);
+	    break;
+	case (FROM_FILE):
+	    sprintf(buf, "(From Cookie Jar)");
+	    break;
+	}
+
+	/*
+	 *  Show the domain's cookies. - FM
+	 */
+	for (cl = de->cookie_list; cl != NULL; cl = cl->next) {
+	    /*
+	     *	First object is always NULL. - FM
+	     */
+	    if ((co = (cookie *)cl->object) == NULL)
+		continue;
+
+	    fprintf(cookie_handle, "%s\t%s\t%s\t%s\t%ld\t%s\t%s\n",
+		de->domain,
+		"FALSE", co->path,
+		co->flags & COOKIE_FLAG_SECURE ? "TRUE" : "FALSE",
+		(long) co->expires, co->name, co->value);
+	}
+    }
+    fclose(cookie_handle);
+}
+#endif
+
 /*	LYHandleCookies - F.Macrides (macrides@sci.wfeb.edu)
 **	---------------
 **
@@ -1851,6 +2012,11 @@ PRIVATE int LYHandleCookies ARGS4 (
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
 #endif /* VMS */
+
+#ifdef EXP_PERSISTENT_COOKIES 
+    /* rjp - this can go here for now */
+    LYStoreCookies ("j");
+#endif
 
     /*
      *	Check whether we have something to do. - FM
@@ -2147,7 +2313,10 @@ Delete_all_cookies_in_domain:
 		break;
 	    case (QUERY_USER):
 		sprintf(buf, COOKIES_ALLOWED_VIA_PROMPT);
-	    break;
+		break;
+	    case (FROM_FILE):
+		sprintf(buf, COOKIES_READ_FROM_FILE);
+		break;
 	}
 	(*target->isa->put_block)(target, buf, strlen(buf));
 

@@ -109,8 +109,6 @@ extern void HTPromptUsernameAndPassword PARAMS((
 extern BOOL HTConfirmCookie PARAMS((
 	void *		dp,
 	CONST char *	server,
-	CONST char *	domain,
-	CONST char *	path,
 	CONST char *	name,
 	CONST char *	value));
 

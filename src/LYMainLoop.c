@@ -207,7 +207,7 @@ int mainloop NOARGS
     BOOLEAN emacs_keys_flag = emacs_keys;
     BOOLEAN keypad_mode_flag = keypad_mode;
     BOOLEAN user_mode_flag = user_mode;
-    BOOLEAN HTfileSortMethod_flag = HTfileSortMethod;
+    int HTfileSortMethod_flag = HTfileSortMethod;
     int CurrentCharSet_flag = current_char_set;
     int CurrentAssumeCharSet_flag = UCLYhndl_for_unspec;
     int CurrentAssumeLocalCharSet_flag = UCLYhndl_HTFile_for_unspec;
@@ -642,8 +642,14 @@ try_again:
 			       startfile);
 			else
 #endif /* UNIX */
+			{
+
+			    SetOutputMode( O_TEXT );
 			    printf("\nlynx: Can't access startfile %s\n",
 			       startfile);
+			    SetOutputMode( O_BINARY );
+			}
+
 			if (!dump_output_immediately) {
 #ifndef NOSIGHUP
 			    (void) signal(SIGHUP, SIG_DFL);
@@ -740,9 +746,13 @@ try_again:
 			   } else
 #endif /* UNIX */
 			   {
+			       SetOutputMode( O_TEXT );
+
 			       printf(
  "\nlynx: Start file could not be found or is not text/html or text/plain\n");
 			       printf("      Exiting...\n");
+
+			       SetOutputMode( O_BINARY );
 			   }
 			   if (!dump_output_immediately) {
 #ifndef NOSIGHUP
@@ -1047,7 +1057,7 @@ try_again:
 	    } else if (!dump_output_immediately) {
 		StrAllocCopy(curdoc.title, newdoc.title);
 	    }
-	    owner_address = HText_getOwner();
+	    owner_address = (char *)HText_getOwner();
 	    curdoc.safe = HTLoadedDocumentIsSafe();
 	    if (!dump_output_immediately) {
 		LYAddVisitedLink(&curdoc);
@@ -1558,7 +1568,7 @@ try_again:
 		    addstr(FORM_NOVICELINE_TWO);
 		}
 		c = change_form_link(&links[curdoc.link],
-				     FORM_UP, &newdoc, &refresh_screen,
+				     &newdoc, &refresh_screen,
 				     links[curdoc.link].form->name,
 				     links[curdoc.link].form->value);
 
@@ -2895,7 +2905,7 @@ new_cmd:  /*
 				     links[curdoc.link].hightext);
 		    }
 		    c = change_form_link(&links[curdoc.link],
-					 FORM_UP, &newdoc, &refresh_screen,
+					 &newdoc, &refresh_screen,
 					 links[curdoc.link].form->name,
 					 links[curdoc.link].form->value);
 		    if (HTOutputFormat == HTAtom_for("www/download") &&
@@ -3714,7 +3724,7 @@ check_goto_URL:
 	    if (lynx_mode == FORMS_LYNX_MODE) {
 		if (links[curdoc.link].type == WWW_FORM_LINK_TYPE) {
 		    c = change_form_link(&links[curdoc.link],
-					 FORM_UP, &newdoc, &refresh_screen,
+					 &newdoc, &refresh_screen,
 					 links[curdoc.link].form->name,
 					 links[curdoc.link].form->value);
 		    /*
@@ -3739,7 +3749,7 @@ check_goto_URL:
 	    if (lynx_mode==FORMS_LYNX_MODE) {
 		if (links[curdoc.link].type == WWW_FORM_LINK_TYPE) {
 		    c = change_form_link(&links[curdoc.link],
-					 FORM_DOWN,&newdoc,&refresh_screen,
+					 &newdoc,&refresh_screen,
 					 links[curdoc.link].form->name,
 					 links[curdoc.link].form->value);
 		    goto new_keyboard_input;
@@ -4106,17 +4116,17 @@ check_goto_URL:
 			/*
 			 *  The owner_address is a mailto: URL.
 			 */
-			cp = HText_getRevTitle();
+			CONST char *kp = HText_getRevTitle();
 			if (strchr(owner_address,':')!=NULL)
 			     /*
 			      *  Send a reply.	The address is after the colon.
 			      */
 			     reply_by_mail(strchr(owner_address,':')+1,
 					   curdoc.address,
-					   (cp ? cp : ""));
+					   (kp ? kp : ""));
 			else
 			    reply_by_mail(owner_address, curdoc.address,
-					  (cp ? cp : ""));
+					  (kp ? kp : ""));
 
 			refresh_screen = TRUE;	/* to force a showpage */
 		   }

@@ -550,7 +550,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     me->anchor = anchor;
     me->sink = sink;
 
-    if (LYCachedTemp(fnam, anchor->FileCache)) {
+    if (LYCachedTemp(fnam, &(anchor->FileCache))) {
         me->fp = LYNewBinFile (fnam);
     } else {
 	/*
@@ -703,7 +703,7 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
     /*
      *	Set up a 'D'ownload.
      */
-    if (LYCachedTemp(fnam, anchor->FileCache)) {
+    if (LYCachedTemp(fnam, &(anchor->FileCache))) {
 	ret_obj->fp = LYNewBinFile (fnam);
     } else {
 	/*
@@ -775,8 +775,7 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 		* sizeof (char),1);
 	if (FIXED_RECORD_COMMAND == NULL)
 	    outofmem(__FILE__, "HTSaveToFile");
-	sprintf(FIXED_RECORD_COMMAND,
-		FIXED_RECORD_COMMAND_MASK, fnam, "", "", "", "", "", "");
+	sprintf(FIXED_RECORD_COMMAND, FIXED_RECORD_COMMAND_MASK, fnam);
     } else {
 #endif /* VMS */
     ret_obj->end_command = (char *)calloc (sizeof(char)*12,1);

@@ -313,7 +313,10 @@ PRIVATE int LYAttrset ARGS3(WINDOW*,win,int,color,int,mono)
 	return A_NORMAL;
 }
 
-PUBLIC void curses_w_style ARGS4(WINDOW*,win,int,style,int,dir,int,previous)
+PUBLIC void curses_w_style ARGS3(
+	WINDOW*,	win,
+	int,		style,
+	int,		dir)
 {
 	int YP,XP;
 	bucket* ds=&hashStyles[style];
@@ -399,7 +402,7 @@ PUBLIC void wcurses_css ARGS3(WINDOW *,win,char*,name,int,dir)
 			else		try_again=0;
 		} else {
 			CTRACE(tfp, "ok (%d)\n", hash_code(name));
-			curses_w_style(win, hash_code(name), dir, 0);
+			curses_w_style(win, hash_code(name), dir);
 			try_again=0;
 		}
 	}
@@ -407,12 +410,14 @@ PUBLIC void wcurses_css ARGS3(WINDOW *,win,char*,name,int,dir)
 
 PUBLIC void curses_css ARGS2(char *,name,int,dir)
 {
-	wcurses_css(stdscr, name, dir);
+    wcurses_css(stdscr, name, dir);
 }
 
-PUBLIC void curses_style ARGS3(int,style,int,dir,int,previous)
+PUBLIC void curses_style ARGS2(
+	int,	style,
+	int,	dir)
 {
-    curses_w_style(stdscr, style, dir, previous);
+    curses_w_style(stdscr, style, dir);
 }
 
 #ifdef NOT_USED
@@ -847,6 +852,18 @@ PUBLIC void start_curses NOARGS
 
 PUBLIC void lynx_enable_mouse ARGS1(int,state)
 {
+
+#ifdef __BORLANDC__
+    HANDLE hConIn = INVALID_HANDLE_VALUE;
+    hConIn = GetStdHandle(STD_INPUT_HANDLE);
+    if (LYUseMouse == 0)
+    {
+	SetConsoleMode(hConIn, ENABLE_WINDOW_INPUT);
+	FlushConsoleInputBuffer(hConIn);
+	return;
+    }
+#endif
+
     if (LYUseMouse == 0)
 	return;
 
@@ -854,18 +871,14 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
     SLtt_set_mouse_mode (state, 0);
     SLtt_flush_output ();
 #else
+
 #ifdef NCURSES_MOUSE_VERSION
     /* Inform ncurses that we're interested in knowing when mouse
      * button 1 is clicked */
-#ifndef _WINDOWS
     if (state)
 	mousemask(BUTTON1_CLICKED | BUTTON3_CLICKED, NULL);
     else
 	mousemask(0, NULL);
-#else
-    if (state)
-	mouse_set(BUTTON1_CLICKED && BUTTON2_CLICKED && BUTTON3_CLICKED);
-#endif /* !_WINDOWS */
 #endif /* NCURSES_MOUSE_VERSION */
 
 #if defined(DJGPP) && !defined(USE_SLANG)
@@ -1511,7 +1524,7 @@ again:
  *		 and VMSsignal() is just a "helper", also not a full emulation.
  */
 
-PUBLIC void *VMSsignal (sig,func)
+PUBLIC void VMSsignal (sig,func)
 int sig;
 void (*func)();
 {
@@ -1579,13 +1592,12 @@ void (*func)();
 PRIVATE unsigned int DCLspawn_exception ARGS2(
 	void *, 	sigarr,
 	void *, 	mecharr)
-{
 #else
 PRIVATE int DCLspawn_exception ARGS2(
 	void *, 	sigarr,
 	void *, 	mecharr)
-{
 #endif /* __DECC */
+{
      int status;
 
      status = lib$sig_to_ret(sigarr, mecharr);
@@ -1611,10 +1623,11 @@ PRIVATE int spawn_DCLprocess ARGS1(
 #ifdef __ALPHA /** OpenVMS/AXP lacked the TRUSTED flag before v6.1 **/
      if (VersionVMS[1] > '6' ||
 	 (VersionVMS[1] == '6' && VersionVMS[2] == '.' &&
-	  VersionVMS[3] >= '1')) {
+	  VersionVMS[3] >= '1'))
 #else
-     if (VersionVMS[1] >= '6') {
+     if (VersionVMS[1] >= '6')
 #endif /* __ALPHA */
+     {
 	 /*
 	  *  Include TRUSTED flag.
 	  */
@@ -1716,7 +1729,7 @@ PUBLIC void lynx_start_link_color ARGS2(
 
 PUBLIC void lynx_stop_link_color ARGS2(
 	int,	flag,
-	int,	pending)
+	int,	pending GCC_UNUSED)
 {
 #ifdef USE_COLOR_STYLE
     LynxChangeStyle(flag == ON ? s_alink : s_a, ABS_OFF, 0);

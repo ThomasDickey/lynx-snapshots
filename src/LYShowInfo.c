@@ -40,7 +40,7 @@ PUBLIC int showinfo ARGS4(
     int url_type;
     FILE *fp0;
     char *Address = NULL, *Title = NULL;
-    char *cp;
+    CONST char *cp;
 
 #ifdef DIRED_SUPPORT
     char temp[300];

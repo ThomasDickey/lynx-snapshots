@@ -47,6 +47,7 @@ PUBLIC char *LYNewsPost ARGS2(
     char user_input[1024];
     char CJKinput[1024];
     char *cp = NULL;
+    CONST char *kp = NULL;
     int c = 0;  /* user input */
     FILE *fd = NULL;
     char my_tempfile[256];
@@ -140,15 +141,15 @@ PUBLIC char *LYNewsPost ARGS2(
     addstr("\n\n Please provide or edit the Subject: header\n");
     strcpy(user_input, "Subject: ");
     if ((followup == TRUE && nhist > 0) &&
-        (cp = HText_getTitle()) != NULL) {
+        (kp = HText_getTitle()) != NULL) {
 	/*
 	 *  Add the default subject.
 	 */
-	cp = LYSkipBlanks(cp);
-	if (strncasecomp(cp, "Re:", 3)) {
+	kp = LYSkipCBlanks(kp);
+	if (strncasecomp(kp, "Re:", 3)) {
             strcat(user_input, "Re: ");
 	}
-        strcat(user_input, cp);
+        strcat(user_input, kp);
     }
     cp = NULL;
     if (LYgetstr(user_input, VISIBLE,

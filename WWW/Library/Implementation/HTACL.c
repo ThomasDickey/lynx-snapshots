@@ -173,10 +173,11 @@ PUBLIC GroupDef *HTAA_getAclEntry ARGS3(FILE *, 	acl_file,
 
     while (EOF != HTAAFile_readField(acl_file, buf, len+1)) {
 #ifdef VMS
-	if (HTAA_templateCaseMatch(buf, filename)) {
+	if (HTAA_templateCaseMatch(buf, filename))
 #else /* not VMS */
-	if (HTAA_templateMatch(buf, filename)) {
+	if (HTAA_templateMatch(buf, filename))
 #endif /* not VMS */
+	{
 	    HTList *methods = HTList_new();
 	    HTAAFile_readList(acl_file, methods, MAX_METHODNAME_LEN);
 	    CTRACE(tfp, "Filename '%s' matched template '%s', allowed methods:",

@@ -125,10 +125,6 @@ PUBLIC int HTDirAccess = HT_DIR_OK;
 
 #ifdef DIRED_SUPPORT
 PUBLIC int HTDirReadme = HT_DIR_README_NONE;
-#define FILES_FIRST 1
-#define MIXED_STYLE 2
-extern BOOLEAN lynx_edit_mode;
-extern BOOLEAN dir_list_style;
 #else
 PUBLIC int HTDirReadme = HT_DIR_README_TOP;
 #endif /* DIRED_SUPPORT */

@@ -539,8 +539,8 @@ LYK_DO_NOTHING,
 #endif /* DIRED_SUPPORT && OK_OVERRIDE */
 
 struct rmap {
-	char *name;
-	char *doc;
+	CONST char *name;
+	CONST char *doc;
 };
 PRIVATE struct rmap revmap[] = {
 { "UNMAPPED",		NULL },
@@ -636,7 +636,7 @@ PRIVATE struct rmap revmap[] = {
 { NULL,			"" }
 };
 
-PRIVATE char *funckey[] = {
+PRIVATE CONST char *funckey[] = {
   "Up Arrow",
   "Down Arrow",
   "Right Arrow",

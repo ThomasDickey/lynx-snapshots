@@ -315,7 +315,7 @@ PUBLIC char *LYFindEndOfComment ARGS1(
 */
 PUBLIC void LYFillLocalFileURL ARGS2(
 	char **,	href,
-	char *, 	base)
+	CONST char *, 	base)
 {
     char * temp = NULL;
 
@@ -1510,7 +1510,7 @@ PRIVATE char * UCPutUtf8ToBuffer ARGS3(char *, q, UCode_t, code, BOOL, terminate
 }
 
 	/* as in HTParse.c, saves some calls - kw */
-PRIVATE char *hex = "0123456789ABCDEF";
+PRIVATE CONST char *hex = "0123456789ABCDEF";
 
 /*
  *	  Any raw 8-bit or multibyte characters already have been
@@ -3521,7 +3521,8 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	 *  it, such that the bad partial reference might get corrected
 	 *  by the document provider. - FM
 	 */
-	char *temp = NULL, *path = NULL, *str = "", *cp;
+	char *temp = NULL, *path = NULL, *cp;
+	CONST char *str = "";
 
 	if (((temp = HTParse(*href,
 			     (me->inBASE ?

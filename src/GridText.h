@@ -71,23 +71,23 @@ extern void HText_setIgnoreExcess PARAMS((HText *text, BOOL ignore));
 extern int HText_sourceAnchors PARAMS((HText * text));
 extern void HText_setStale PARAMS((HText * text));
 extern void HText_refresh PARAMS((HText * text));
-extern char * HText_getTitle NOPARAMS;
+extern CONST char * HText_getTitle NOPARAMS;
 extern CONST char * HText_getSugFname NOPARAMS;
 extern void HTCheckFnameForCompression PARAMS((
 	char **			fname,
 	HTParentAnchor *	anchor,
 	BOOLEAN			strip_ok));
-extern char * HText_getLastModified NOPARAMS;
-extern char * HText_getDate NOPARAMS;
-extern char * HText_getServer NOPARAMS;
-extern char * HText_getOwner NOPARAMS;
+extern CONST char * HText_getLastModified NOPARAMS;
+extern CONST char * HText_getDate NOPARAMS;
+extern CONST char * HText_getServer NOPARAMS;
+extern CONST char * HText_getOwner NOPARAMS;
 extern CONST char * HText_getContentBase NOPARAMS;
 extern CONST char * HText_getContentLocation NOPARAMS;
+extern CONST char * HText_getRevTitle NOPARAMS;
 #ifdef USE_HASH
-extern char * HText_getStyle NOPARAMS;
+extern CONST char * HText_getStyle NOPARAMS;
 #endif
 extern void HText_setMainTextOwner PARAMS((CONST char * owner));
-extern char * HText_getRevTitle NOPARAMS;
 extern void print_wwwfile_to_fd PARAMS((FILE * fp, int is_reply));
 extern BOOL HText_select PARAMS((HText *text));
 extern BOOL HText_POSTReplyLoaded PARAMS((document *doc));

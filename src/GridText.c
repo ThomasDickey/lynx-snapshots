@@ -433,10 +433,11 @@ PUBLIC HText *	HText_new ARGS1(
     HTList_addObject(loaded_texts, self);
 #if defined(VMS) && defined(VAXC) && !defined(__DECC)
     while (HTList_count(loaded_texts) > HTCacheSize &&
-	   VMTotal > HTVirtualMemorySize) {
+	   VMTotal > HTVirtualMemorySize)
 #else
-    if (HTList_count(loaded_texts) > HTCacheSize) {
+    if (HTList_count(loaded_texts) > HTCacheSize)
 #endif /* VMS && VAXC && !__DECC */
+    {
 	CTRACE(tfp, "GridText: Freeing off cached doc.\n");
 	HText_free((HText *)HTList_removeFirstObject(loaded_texts));
 #if defined(VMS) && defined (VAXC) && !defined(__DECC)
@@ -3704,17 +3705,17 @@ PUBLIC int HText_getNumOfLines NOARGS
  *  HText_getTitle returns the title of the
  *  current document.
  */
-PUBLIC char * HText_getTitle NOARGS
+PUBLIC CONST char * HText_getTitle NOARGS
 {
     return(HTMainText ?
-	  (char *) HTAnchor_title(HTMainText->node_anchor) : NULL);
+	  HTAnchor_title(HTMainText->node_anchor) : 0);
 }
 
 #ifdef USE_HASH
-PUBLIC char *HText_getStyle NOARGS
+PUBLIC CONST char *HText_getStyle NOARGS
 {
    return(HTMainText ?
-	  (char *) HTAnchor_style(HTMainText->node_anchor) : NULL);
+	  HTAnchor_style(HTMainText->node_anchor) : 0);
 }
 #endif
 
@@ -3924,30 +3925,30 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
  *  HText_getLastModified returns the Last-Modified header
  *  if available, for the current document. - FM
  */
-PUBLIC char * HText_getLastModified NOARGS
+PUBLIC CONST char * HText_getLastModified NOARGS
 {
     return(HTMainText ?
-	  (char *) HTAnchor_last_modified(HTMainText->node_anchor) : NULL);
+	  HTAnchor_last_modified(HTMainText->node_anchor) : 0);
 }
 
 /*
  *  HText_getDate returns the Date header
  *  if available, for the current document. - FM
  */
-PUBLIC char * HText_getDate NOARGS
+PUBLIC CONST char * HText_getDate NOARGS
 {
     return(HTMainText ?
-	  (char *) HTAnchor_date(HTMainText->node_anchor) : NULL);
+	  HTAnchor_date(HTMainText->node_anchor) : 0);
 }
 
 /*
  *  HText_getServer returns the Server header
  *  if available, for the current document. - FM
  */
-PUBLIC char * HText_getServer NOARGS
+PUBLIC CONST char * HText_getServer NOARGS
 {
     return(HTMainText ?
-	  (char *)HTAnchor_server(HTMainText->node_anchor) : NULL);
+	  HTAnchor_server(HTMainText->node_anchor) : 0);
 }
 
 /*
@@ -5202,14 +5203,14 @@ PUBLIC void user_message ARGS2(
  *  HText_getOwner returns the owner of the
  *  current document.
  */
-PUBLIC char * HText_getOwner NOARGS
+PUBLIC CONST char * HText_getOwner NOARGS
 {
     return(HTMainText ?
-	   (char *)HTAnchor_owner(HTMainText->node_anchor) : NULL);
+	   HTAnchor_owner(HTMainText->node_anchor) : 0);
 }
 
 /*
-*   HText_setMainTextOwner sets the owner for the
+ *  HText_setMainTextOwner sets the owner for the
  *  current document.
  */
 PUBLIC void HText_setMainTextOwner ARGS1(
@@ -5226,10 +5227,10 @@ PUBLIC void HText_setMainTextOwner ARGS1(
  *  current document, used as the subject for mailto comments
  *  to the owner.
  */
-PUBLIC char * HText_getRevTitle NOARGS
+PUBLIC CONST char * HText_getRevTitle NOARGS
 {
     return(HTMainText ?
-	   (char *)HTAnchor_RevTitle(HTMainText->node_anchor) : NULL);
+	   HTAnchor_RevTitle(HTMainText->node_anchor) : 0);
 }
 
 /*

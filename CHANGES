@@ -1,14 +1,60 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-07-24 (2.8.1dev.18)
+* improved test for socks5, to account for special cases on AIX (reported by
+  Brian Hauber) - TD
+* several changes to reduce the number of gcc cast-qual warnings, by adding
+  CONST, removing casts - TD
+* add configure option --enable-syslog to enable system logging of requested
+  URL's - TD
+* add RP's experimental persistent-cookie support, and configure option
+  --enable-persistent-cookies, ifdef'd with EXP_PERSISTENT_COOKIES - TD
+* removed references to DOSRAWKEYHACK, which is no longer used.  Modified the
+  dos makefile for libwww and makefile.dsl to default to using display_partial.
+  Modified INSTALLATION to reflect the successful use of slang with the dos
+  port and the now confusing alternatives when compiling the dos port, along
+  with some other updates - DK
+* modify lynx_enable_mouse() for pdcurses configuration so that mouse support
+  is disabled unless -use_mouse is specified.  This is ifdef'd with
+  __BORLANDC__ for the time being (WB).
+* resync build-slang.com, against build.com - TD
+* add $(MMSQUALIFIERS) to top-level descrip.mms, e.g., to use options such as
+  /FROM, /IGNORE, /NOACTION, etc., and $(INCLUDES) definitions to lower-level
+  descrip.mms files.  Improve error-recovery in build.com (patches by Liam
+  Davis <ld@stian.demon.co.uk>)
+* use memset to clear soc_in fields before doing a connect, needed for BSD/OS
+  (patch by Jeffrey C Honig <jch@bsdi.com>).
+* remove spurious sprintf params when using FIXED_RECORD_COMMAND_MASK which has
+  only one parameter, change VMSsignal from void* to void (report by Mike Xun
+  Ma <mike@mira.concordia.ca> ) - TD
+* use open(O_CREAT|O_EXCL) to open new hidden files - TD
+* eliminate_*putenv_cmd variables used by LYReadCFG.c as placeholders for
+  putenv calls - TD
+* disable include of <sys/filio.h> for VMS, from report by Chris Doran) - TD
+* fixes for VMS: mismatched curly brace, etc., from CTRACE and buffer-overflow
+  changes (reported by chris.doran@gblis.mail.abb.com) - TD
+* correct a loop in HTML_start_element that strips 7 leading characters from
+  an href, fixes a core-dump in traversing ".." to "/" - TD
+* use new macro SetOutputMode to reduce some clutter - TD
+* modify interface of LYCachedTemp so fileCache member is reset to null, fixes
+  bug in my recent cleanup of temp-files, which caused a core-dump - TD
+* add kb/sec rate to HTReadProgress message - TD
+* modify computation in HTReadProgress to interpolate rate - LP
+* One more fix for DISP_PARTIAL: to avoid blinking while reloading document
+  with Newline_partial > 1 (say, we press '*' and noproxy) we repaint the page
+  only when Newline_partial <= HText_getNumOfLines(). - LP
+* add "-verbose" command-line switch. - LP
+* DOS fix: open stdout in TEXT mode for -help and startup error message. - LP
+* correct use of $mapname variable in CF_ALT_CHAR_SET (Tomas Vanhala)
 1998-06-25 (2.8.1dev.17)
-+ add configure option --with-socks5 (request by Brian Hauber
+* add configure option --with-socks5 (request by Brian Hauber
   <bhauber@frenzy.com>) - TD
-+ define symbols HAVE_CURSESX_H, HAVE_JCURSES_H (report by Georg Schwarz
+* define symbols HAVE_CURSESX_H, HAVE_JCURSES_H (report by Georg Schwarz
   <schwarz@physik.tu-berlin.de>) - TD
-+ modify logic that reports progress of download to update screen no more than
+* modify logic that reports progress of download to update screen no more than
   once per second, fix an overrun problem (reported by Jacob Poon
-  <a324poon@cdf.toronto.edu>) - TD  
+  <a324poon@cdf.toronto.edu>) - TD
 1998-06-11 (2.8.1dev.16)
 * modify configure script to check for special compiler options which are
   assumed for particular platforms (suggested by BL) - TD
@@ -88,18 +134,18 @@ Changes since Lynx 2.8 release
 * removed conflicting/unused declaration of 'bzero()' from tcp.h (from report
   by Ashraf Zorkani <zorkani@aucegypt.edu>) - TD
 * modify the set/unset/toggle options to allow "on" and "off" values also - TD
-* apply the "partial display" patch, modified from:  
-      http://www.flora.org/lynx-dev/html/month0398/msg00993.html  
+* apply the "partial display" patch, modified from:
+      http://www.flora.org/lynx-dev/html/month0398/msg00993.html
   The behavior is controlled by a compile-time option (DISP_PARTIAL), by a
   command-line argument (-partial), and by a lynx.cfg option (PARTIAL).  - BL
-* extend command-line option processing of set/unset/toggle options 
-      -toggle-     (set that toggle to FALSE) 
-      -toggle+     (set that toggle to TRUE) 
+* extend command-line option processing of set/unset/toggle options
+      -toggle-     (set that toggle to FALSE)
+      -toggle+     (set that toggle to TRUE)
   e.g.,
-      lynx -show_cursor+ -case- 
+      lynx -show_cursor+ -case-
   or with explicit 1/0 values, e.g.,
-      -toggle=0     (set that toggle to FALSE) 
-      -toggle=1     (set that toggle to TRUE)  
+      -toggle=0     (set that toggle to FALSE)
+      -toggle=1     (set that toggle to TRUE)
   NOTE:  this allows you to change a few flags that would previously have been
   controlled by lynx.cfg, and are security-related, such as -locexec or
   -telnet.  I believe there is no issue, because if the user can control the

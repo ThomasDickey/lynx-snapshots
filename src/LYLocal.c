@@ -97,7 +97,7 @@ PRIVATE BOOLEAN permit_location PARAMS((
 #endif /* OK_PERMIT */
 
 PRIVATE char *render_item PARAMS((
-	char *		s,
+	CONST char *	s,
 	char *		path,
 	char *		dir,
 	char *		buf,
@@ -1086,8 +1086,8 @@ PUBLIC BOOLEAN local_remove ARGS1(
  *  Makes the code a bit cleaner.
  */
 static struct {
-    char *string_mode;	/* Key for  value below */
-    long permit_bits;	/* Value for chmod/whatever */
+    CONST char *string_mode;	/* Key for  value below */
+    long permit_bits;		/* Value for chmod/whatever */
 } permissions[] = {
     {"IRUSR", S_IRUSR},
     {"IWUSR", S_IWUSR},
@@ -2078,7 +2078,7 @@ PUBLIC void add_menu_item ARGS1(
  *  Create URL for DIRED HREF value.
  */
 PRIVATE char * render_item ARGS6(
-	char *, 	s,
+	CONST char *, 	s,
 	char *, 	path,
 	char *, 	dir,
 	char *, 	buf,

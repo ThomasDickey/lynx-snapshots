@@ -1459,7 +1459,7 @@ again:
  */
 PUBLIC char * LYstrstr ARGS2(
 	char *, 	chptr,
-	char *, 	tarptr)
+	CONST char *, 	tarptr)
 {
     int len = strlen(tarptr);
 

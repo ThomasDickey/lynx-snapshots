@@ -610,6 +610,7 @@
 #define COOKIES_NEVER_ALLOWED "(Cookies never allowed.)"
 #define COOKIES_ALWAYS_ALLOWED "(Cookies always allowed.)"
 #define COOKIES_ALLOWED_VIA_PROMPT "(Cookies allowed via prompt.)"
+#define COOKIES_READ_FROM_FILE "(Persistent Cookies.)"
 #define NO_NAME "(No name.)"
 #define NO_VALUE "(No value.)"
 #define END_OF_SESSION "(End of session.)"

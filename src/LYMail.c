@@ -35,10 +35,10 @@ PRIVATE void remove_tildes PARAMS((char *string));
 **  mailform() sends form content to the mailto address(es). - FM
 */
 PUBLIC void mailform ARGS4(
-	char *, 	mailto_address,
-	char *, 	mailto_subject,
-	char *, 	mailto_content,
-	char *, 	mailto_type)
+	CONST char *, 	mailto_address,
+	CONST char *, 	mailto_subject,
+	CONST char *, 	mailto_content,
+	CONST char *, 	mailto_type)
 {
     FILE *fd;
     char *address = NULL;
@@ -399,26 +399,26 @@ PUBLIC void mailform ARGS4(
 	i = 0;
 	len = strlen(mailto_content);
 	while (len > 78) {
-	    strncpy(cmd, (char *)&mailto_content[i], 78);
+	    strncpy(cmd, &mailto_content[i], 78);
 	    cmd[78] = '\0';
 	    fprintf(fd, "%s\n", cmd);
 	    i += 78;
-	    len = strlen((char *)&mailto_content[i]);
+	    len = strlen(&mailto_content[i]);
 	}
-	fprintf(fd, "%s\n", (char *)&mailto_content[i]);
+	fprintf(fd, "%s\n", &mailto_content[i]);
 	mailto_content = (cp+1);
     }
     i = 0;
     len = strlen(mailto_content);
     while (len > 78) {
-	strncpy(cmd, (char *)&mailto_content[i], 78);
+	strncpy(cmd, &mailto_content[i], 78);
 	cmd[78] = '\0';
 	fprintf(fd, "%s\n", cmd);
 	i += 78;
-	len = strlen((char *)&mailto_content[i]);
+	len = strlen(&mailto_content[i]);
     }
     if (len)
-	fprintf(fd, "%s\n", (char *)&mailto_content[i]);
+	fprintf(fd, "%s\n", &mailto_content[i]);
 
 #ifdef UNIX
     pclose(fd);
@@ -880,7 +880,7 @@ PUBLIC void reply_by_mail ARGS3(
     CTRACE(tfp, "reply_by_mail(\"%s\", \"%s\", \"%s\")\n",
 	mail_address?mail_address:"<nil>",
 	filename?filename:"<nil>",
-	title?tilde:"<nil>");
+	title?title:"<nil>");
 
     if (!strncasecomp(system_mail, "PMDF SEND", 9)) {
 	isPMDF = TRUE;
@@ -1517,9 +1517,9 @@ PUBLIC void reply_by_mail ARGS3(
      */
     sprintf(buf, "\n");
     StrAllocCat(header, buf);
+    CTRACE(tfp,"**header==\n%s",header);
 #endif /* !VMS */
 
-    CTRACE(tfp,"**header==\n%s",header);
     if (!no_editor && editor && *editor != '\0') {
 	/*
 	 *  Use an external editor for the message.

@@ -22,9 +22,9 @@ extern CONST char * LYchar_set_names[];
 extern int LYCharSetsDeclared NOPARAMS;
 
 
-extern char ** LYCharSets[];
-extern char * SevenBitApproximations[];
-extern char ** p_entity_values;
+extern CONST char ** LYCharSets[];
+extern CONST char * SevenBitApproximations[];
+extern CONST char ** p_entity_values;
 extern int LYlowest_eightbit[];
 extern int LYNumCharsets;
 extern LYUCcharset LYCharSet_UC[];

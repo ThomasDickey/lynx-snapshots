@@ -160,20 +160,20 @@ extern void VMSexit();
 extern int ttopen();
 extern int ttclose();
 extern int ttgetc();
-extern void *VMSsignal PARAMS((int sig, void (*func)()));
+extern void VMSsignal PARAMS((int sig, void (*func)()));
 #endif /* VMS */
 
 #if defined(USE_COLOR_STYLE)
 extern void curses_css PARAMS((char * name, int dir));
-extern void curses_style PARAMS((int style, int dir, int previous));
-extern void curses_w_style PARAMS((WINDOW* win, int style, int dir, int previous));
+extern void curses_style PARAMS((int style, int dir));
+extern void curses_w_style PARAMS((WINDOW* win, int style, int dir));
 extern void setHashStyle PARAMS((int style, int color, int cattr, int mono, char* element));
 extern void setStyle PARAMS((int style, int color, int cattr, int mono));
 extern void wcurses_css PARAMS((WINDOW * win, char* name, int dir));
-#define LynxChangeStyle curses_style
+#define LynxChangeStyle(style,dir,previous) curses_style(style,dir)
 #else
 extern int slang_style PARAMS((int style, int dir, int previous));
-#define LynxChangeStyle slang_style
+#define LynxChangeStyle(style,dir,previous) slang_style(style,dir,previous)
 #endif /* USE_COLOR_STYLE */
 
 #if USE_COLOR_TABLE
@@ -381,5 +381,16 @@ extern void lynx_stop_prompt_color NOPARAMS;
 extern void lynx_start_radio_color NOPARAMS;
 extern void lynx_stop_radio_color NOPARAMS;
 extern void lynx_stop_all_colors NOPARAMS;
+
+/*
+ * To prevent corrupting binary data with _WINDOWS and DJGPP we open files and
+ * stdout in BINARY mode by default.  Where necessary we should open and
+ * (close!) TEXT mode.
+ */
+#if defined(_WINDOWS) || defined(DJGPP)
+#define SetOutputMode(mode) setmode(fileno(stdout), mode)
+#else
+#define SetOutputMode(mode) /* nothing */
+#endif
 
 #endif /* LYCURSES_H */
