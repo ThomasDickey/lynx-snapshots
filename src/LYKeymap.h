@@ -17,7 +17,8 @@ extern void set_numbers_as_arrows NOPARAMS;
 extern void set_vi_keys NOPARAMS;
 extern void set_vms_keys NOPARAMS;
 
-extern unsigned short keymap[]; /* main keymap matrix */
+#define KEYMAP_SIZE 661
+extern unsigned short keymap[KEYMAP_SIZE]; /* main keymap matrix */
 
 #ifdef EXP_KEYBOARD_LAYOUT
 extern int current_layout;
@@ -137,5 +138,7 @@ extern unsigned short key_override[];
 #define       LYK_FORM_UP       82
 #define       LYK_FORM_DOWN     83
 #endif /* NOT_USED */
+
+#define LYK_CHANGE_LINK         90	/* FIXME: make these an enum */
 
 #endif /* LYKEYMAP_H */

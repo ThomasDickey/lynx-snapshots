@@ -99,7 +99,7 @@ do_chartrans_stuff:
 		CC="$(CC)" tables
 
 lint:
-	$(LINT) $(LINTOPTS) $(CPP_OPTS) *.c  > $(top_builddir)
+	$(LINT) $(LINTOPTS) $(CPP_OPTS) *.c  > $(top_builddir)/lint.lynx
 
 clean:
 	rm -f lynx$x core *.[ob] *.bak

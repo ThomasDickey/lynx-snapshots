@@ -14,9 +14,10 @@ CFLAGS = $(MCFLAGS)
 CC = gcc
 MCFLAGS = -O3 -DDOSPATH -DNO_TTYTYP \
 -I. \
--I../../WWW/library/implement \
+-I../../WWW/Library/Implementation \
 -I../../djgpp/tcplib/include \
--I../../djgpp/tcplib/include/tcp
+-I../../djgpp/tcplib/include/tcp \
+-I../..
 
 .SUFFIXES: .tbl
 #

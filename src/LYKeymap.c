@@ -41,7 +41,7 @@ struct _HTStream
 /* the character gets 1 added to it before lookup,
  * so that EOF maps to 0
  */
-unsigned short keymap[] = {
+unsigned short keymap[KEYMAP_SIZE] = {
 
 0,
 /* EOF */
@@ -362,7 +362,7 @@ LYK_DO_NOTHING,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    /* 290...293 */
-   0,                  0,              0,             0,
+   LYK_CHANGE_LINK,    0,              0,             0,
 };
 
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
@@ -372,7 +372,7 @@ LYK_DO_NOTHING,
  * allowed at compile time.
  */
 
-unsigned short key_override[TABLESIZE(keymap)] = {
+unsigned short key_override[KEYMAP_SIZE] = {
 
     0,
 /* EOF */
@@ -606,6 +606,7 @@ PRIVATE struct rmap revmap[] = {
 { "CLEAR_AUTH",		"clear all authorization info for this session" },
 { "SWITCH_DTD",		"switch between two ways of parsing HTML" },
 { "ELGOTO",		"edit the current link's URL or ACTION and go to it" },
+{ "CHANGE_LINK",	"force reset of the current link on the page" },
 #ifdef USE_EXTERNALS
 { "EXTERN",		"run external program with url" },
 #endif
@@ -664,6 +665,8 @@ PRIVATE char *pretty ARGS1 (int, c)
 		sprintf(buf, "^%c", c|0100);
 	else if (c >= 0400 && (c - 0400) < (int) TABLESIZE(funckey))
 		sprintf(buf, "%s", funckey[c-0400]);
+	else if (c >= 0400)
+		sprintf(buf, "%#x", c);
 	else
 		return 0;
 
@@ -745,11 +748,11 @@ PRIVATE int LYLoadKeymap ARGS4 (
 			  i-' ');  /* uppercase mapping is different */
 	}
     }
-    for (i = 1; i < (int) TABLESIZE(keymap); i++) {
+    for (i = 1; i < KEYMAP_SIZE; i++) {
 	/*
 	 *  LYK_PIPE not implemented yet.
 	 */
-	if ((i > (int) TABLESIZE(keymap) || i <= ' ' || !isalpha(i-1)) &&
+	if ((i >= 0400 || i <= ' ' || !isalpha(i-1)) &&
 	    strcmp(revmap[keymap[i]].name, "PIPE")) {
 	    print_binding(target, buf, i);
 	}
@@ -926,7 +929,7 @@ PUBLIC int lookup_keymap ARGS1(
 {
     size_t i;
 
-    for (i = 1; i < TABLESIZE(keymap); i++) {
+    for (i = 1; i < KEYMAP_SIZE; i++) {
 	if (LYisNonAlnumKeyname(i, func)) {
 	    return i;
 	}
@@ -961,7 +964,7 @@ PUBLIC BOOL LYisNonAlnumKeyname ARGS2(
 {
     if ((ch >= '0' && ch <= '9') ||
         (ch >= 'A' && ch <= 'z') ||
-	ch < 0 || ch > 269)
+	ch < 0 || ch >= KEYMAP_SIZE)
 	return (FALSE);
 
     return(keymap[ch+1] == key_name);
@@ -976,7 +979,7 @@ PUBLIC int LYReverseKeymap ARGS1(
 {
     int i;
 
-    for (i = 1; i < (int) TABLESIZE(keymap); i++) {
+    for (i = 1; i < KEYMAP_SIZE; i++) {
 	if (keymap[i] == key_name) {
 	    return(i - 1);
 	}

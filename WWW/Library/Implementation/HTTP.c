@@ -16,7 +16,7 @@
 #define HTTPS_PORT  443
 #define SNEWS_PORT  563
 
-#define INIT_LINE_SIZE		1024	/* Start with line buffer this big */
+#define INIT_LINE_SIZE		1536	/* Start with line buffer this big */
 #define LINE_EXTEND_THRESH	256	/* Minimum read size */
 #define VERSION_LENGTH		20	/* for returned protocol version */
 
@@ -440,6 +440,7 @@ try_again:
 		    FREE(command);
 		    FREE(hostname);
 		    FREE(docname);
+		    FREE(abspath);
 		    FREE(host2);
 		    FREE(path2);
 		    status = HT_NOT_LOADED;

@@ -354,7 +354,8 @@ Try_Redirected_URL:
 			 *  Bug puts slash on end if none is in the string.
 			 */
 			char *last_slash = strrchr(doc->address,'/');
-			if (last_slash-doc->address==strlen(doc->address)-1)
+			if (last_slash - doc->address
+			 == (int)strlen(doc->address) - 1)
 			    doc->address[strlen(doc->address)-1] = '\0';
 
 			p = doc->address;

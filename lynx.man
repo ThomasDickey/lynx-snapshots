@@ -779,15 +779,33 @@ Unsubscribe by sending email to <majordomo@sig.net> with
 "unsubscribe lynx-dev" as the only line in the body of your message.
 Do not send the unsubscribe message to the lynx-dev list, itself.
 .SH SEE ALSO
+.hy 0
+\fIcatgets\fR(3),
+\fIcurses\fR(3),
 \fIenviron\fR(7),
 \fIexecve\fR(2),
 \fIftp\fR(1),
 \fIgettext\fR(GNU),
 \fIlocaleconv\fR(3),
+\fIncurses\fR(3),
 \fIsetlocale\fR(3),
+\fIslang\fR(?),
 \fItermcap\fR(5),
 \fIterminfo\fR(5),
 \fIwget\fR(GNU)
+.hy 1
+.PP
+Note that man page availability and section numbering is somewhat
+platform dependent, and may vary from the above references.
+.PP
+A section shown as (GNU), is intended to denote that the topic
+may be available via an info page, instead of a man page (ie, try
+"info subject", rather than "man subject").
+.PP
+A section shown as (?) denotes that documentation on the topic exists,
+but is not part of an established documentation retrieval system (see
+the distribution files associated with the topic, or contact your
+System Administrator for further information).
 .SH ACKNOWLEDGMENTS
 Lynx has incorporated code from a variety of sources along the way.
 The earliest versions of Lynx included code from Earl Fogel of Computing

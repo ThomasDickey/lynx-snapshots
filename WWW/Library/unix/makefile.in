@@ -34,6 +34,7 @@ CPPOPTS		= $(DEFS) $(CPPFLAGS) $(LYFLAGS) \
 		-I$(top_srcdir)/WWW/Library/Implementation
 LY_CFLAGS	= @CFLAGS@
 CFLAGS		= $(CPPOPTS) $(LY_CFLAGS)
+LINT		= @LINT@
 
 # Directory for installed binary:
 BINDIR		= @bindir@
@@ -56,6 +57,9 @@ WTMP = ../..
 RANLIB	= @RANLIB@
 
 all : $(LOB)/libwww.a
+
+lint:
+	$(LINT) $(LINTOPTS) $(CPPOPTS) $(srcdir)/../Implementation/*.c  > ../../../lint.libwww
 
 .SUFFIXES: .i .h .html
 

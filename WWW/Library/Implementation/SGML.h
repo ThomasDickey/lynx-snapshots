@@ -90,6 +90,8 @@ typedef int TagFlags;
 				      (if found invalid) */
 #define Tgf_strict	0x00008	/* Ignore contained invalid elements,
 				      don't pass them on */
+#define Tgf_nreie	0x00010	/* Not Really Empty If Empty,
+				      used by color style code */
 
 /*              A tag structure describes an SGML element.
 **              -----------------------------------------

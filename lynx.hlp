@@ -756,8 +756,23 @@
  Do not send the unsubscribe message to the lynx-dev list, itself.
 
 2 SEE ALSO
-       environ(7),  execve(2),  ftp(1),   gettext(GNU),   locale-
-       conv(3), setlocale(3), termcap(5), terminfo(5), wget(GNU)
+       catgets(3),   curses(3),  environ(7),  execve(2),  ftp(1),
+       gettext(GNU),  localeconv(3),  ncurses(3),   setlocale(3),
+       slang(?), termcap(5), terminfo(5), wget(GNU)
+
+       Note  that  man page availability and section numbering is
+       somewhat platform dependent, and may vary from  the  above
+       references.
+
+       A  section  shown as (GNU), is intended to denote that the
+       topic may be available via an info page, instead of a  man
+       page  (ie, try "info subject", rather than "man subject").
+
+       A section shown as (?) denotes that documentation  on  the
+       topic exists, but is not part of an established documenta-
+       tion retrieval system (see the distribution files  associ-
+       ated  with the topic, or contact your System Administrator
+       for further information).
 
 2 ACKNOWLEDGMENTS
  Lynx has incorporated code from a variety of sources along the way.

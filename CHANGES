@@ -1,6 +1,101 @@
 Changes since Lynx 2.8.1 release
 ================================================================================
 
+1998-12-16 (2.8.2dev.10)
+* FROM_FILE is not used any more for a domain (although it is currently still
+  defined.  Renamed COOKIE_FLAG_PERSISTENT to COOKIE_FLAG_FROM_FILE.  Don't
+  change a domain's "behaviour" (ACCEPT_ALWAYS, REJECT_ALWAYS, or QUERY_USER)
+  just because there was a persistent cookie for it.  Users who want to always
+  accept cookies from a domain without prompting should use
+  COOKIE_ACCEPT_DOMAINS - KW
+* FREE domain_entry objects when they are not used any more.  Other minor leak
+  removed - KW
+* some (few) changes for draft-ietf-http-state-man-mec-10.txt.  Don't accept
+  invalid port lists (this may need more tweaking).  Added some comments - KW
+* try to preserve cookies (within a domain) in the same order in which they
+  were received, although this is probably not necessary after all.  There is
+  no difference any more w.r.t.  insertion into the list between cookies from
+  the file and cookies from response headers - KW
+* use <= instead of < comparison when checking whether a cookie has expired - KW 
+* don't write expired cookies, cookies with discard attribute, or cookies
+  without expiration date to persistent file - KW
+* don't call HTConfirmCookie for cookies read from file.  This doesn't change
+  the logic since previously HTConfirmCookie allowed all file cookies anyway -
+  KW
+* don't delete the domain_list if it becomes empty.  Doing this could result in
+  unnecessary multiple atexit()'s - KW
+* write the cookie file even if we now have no cookies, if we have previously
+  read cookies from the file.  The file should be updated if all cookies that
+  were in it are expired or superseded or deleted - KW 
+* when reading file cookies, set attributes in a way that (hopefully) makes
+  more sense than just ignoring them.  See comments in LYLoadCookies. 
+  We are restricted a lot by the choice of a netscape-compatible cookie file
+  format, some version 1 properties just cannot be stored in it AFAIK.  Some
+  more tweaking in LYLoadCookies - KW
+* setting a domains behaviour to accept "A)lways" didn't actually work, it had
+  the same effect as "P)rompt".  Corrected this simple (probably cut-and-paste)
+  error - KW
+* some changes in what is displayed on Cookie Jar page:  FROM_FILE is a
+  property of individual cookies, not of domains as previously.  Cookies from
+  file (which haven't been updated) are shown as "(from a previous session)". 
+  Show expiration time ("Max.  Gobble Date") whenever we have one.  The state
+  of the "discard" attribute is already displayed separately - KW
+* made color styles code work much better with TagSoup parsing mode.  A new
+  flag bit is set for some tags in HTMLDTD which indicates that, even though
+  they may be otherwise handled as SGML_EMPTY, this emptiness is fake.  This
+  can only work reasonably for elements that require an end tag (not for LI,
+  for example) - KW
+* added SUMMARY attribute for TABLE element to HTMLDTD (but we don't do
+  anything with it) - KW
+* split_line:  Try to account for changes in anchor position and extent in all
+  possible cases.  This improves some cases where the selectable text could
+  become too short and, in extreme cases, a link could become erroneously
+  "hidden" - KW
+* split_line:  color style changes after the split position are moved to the
+  correct position in the new line - KW
+* set TextAnchor's line_num in HText_beginInput, so that split_line can adjust
+  the input field's position properly if a split moves it to the next line. 
+  Should solve problem reported for www.lycos.com - KW
+* don't refuse to read from file-descriptor 0 in HTDoRead for Unix if it is not
+  a tty.  The socket fd from HTDoConnect can be 0 if fd 0 was not open when
+  lynx was started non-interactively - KW
+* increase INIT_LINE_SIZE in HTTP.c slightly from 1024 to 1536, so that for a
+  typical ethernet MTU the first packet of a response can more often be read in
+  with a single read() - KW
+* add a missing FREE() in HTTP.c - KW
+* use case mapping from ftp.unicode.org /Public/UNIDATA for case-insensitive
+  user search (thanks "Kari E.  Hurtta" <Kari.Hurtta@ozone.FMI.FI>), new file
+  src/chrtrans/caselower.h added.  This is used instead of UPPER8 assumption
+  introduced in 2.8 release (see 1998-02-27).  There is no difference in speed
+  though - LP
+* fix links in History/Visited Links page for documents with blank
+  <TITLE></TITLE>, also remove leading spaces from titles to make output a
+  little better - LP
+* use djgpp's <sys/config.h> file, which contains default values for autoconf
+  style definitions - LP
+* updated lynx.man, lynx.hlp for "SEE ALSO" sections - KED, JS
+* optimize the test commands specified in the mailcap file by remembering which
+  tests have been run already.  (patch by Marc Huber <marc@sixpack.de>)
+* add lint rule to makefile.in, as well as corresponding rule in WWW/... - LV
+* update version in makefile.in to 2-8-2 - PG
+* fix makefiles to build with DJGPP (problem introduced in dev8) - LP
+* use new symbol KEYMAP_SIZE to get rid of various constants relating to the
+  size of keymap[] array, e.g, 0x293, 659 - TD
+* add new mouse and keymap functionality to lynx:
+  a) If one clicks mouse *near* a link, the "point/focus" is moved to this link
+     (without actual activation);
+  b) One can bind keys with ordinals larger than DO_NOTHING;
+  c) Primitive context sensitive menu added to the middle button of a mouse
+     (currently ncurses only);
+  Current micro-problem with "c" is that I do not know how to refresh a screen
+  before triggering the action, so if the action choosen from the menu would
+  not redraw the screen, the menu outline is left on the screen - IZ
+* modify LYKeymap.c so that it can show internal keymaps above 0400 as
+  hexadecimal codes even if they do not appear in the function-key table - IZ
+* add HTOptParam to avoid spurious quoting of blanks in rlogin URLs by
+  HTAddParam - TD
+* correct missing assignment in remote_session(), from dev.9 changes for
+  HTAddParam, which broke telnet/rlogin URLs (reported by IC) - TD
 1998-12-12 (2.8.2dev.9)
 * change location-not-absolute message from an alert to user-message - TD
 * Check for EINTR from read() call in HTDoRead, and retry if necessary.  This
@@ -27,7 +122,7 @@ Changes since Lynx 2.8.1 release
 * add support for content encoding for x-bzip2, bzip2 for suffix "bz2" - HN
 * add po directory to install-bin and uninstall rules - TD
 * modify the environment variable logic to avoid freeing string given to putenv
-  until after giving it a new string - TD 
+  until after giving it a new string - TD
 * add several environment variables to LYPrint.c - KED
 * add ENVIRONMENT section to lynx.man and lynx.hlp - KED
 * add installation note about --enable-gzip-help - KED
@@ -87,7 +182,7 @@ Changes since Lynx 2.8.1 release
 * correct options-message on Print page - IC
 * update installation note about freewais library (reported by Chris Maden
   <crism@oreilly.com>) - TD
-* improvements to mouse code, ncurses-based, from Ilya Zakharevich
+* improvements to mouse code, ncurses-based, from IZ (Ilya Zakharevich)
   a) Mouse navigation inside text entry fields;
   b) Mouse navigation to a text entry field (including an empty one)
   c) Mouse navigation to a specific position of a text field (since I do not
