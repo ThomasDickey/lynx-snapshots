@@ -106,12 +106,10 @@ unsigned long Prv[2], PreviousPrv[2];
    Prv[1] = 0;
    Result = sys$setprv(1,&Prv,0,&PreviousPrv);
 
-   if (TRACE) {
-      if (Result == SS$_NORMAL) {
-         if (!(PreviousPrv[0] & PRV$M_SYSPRV)) {
-            fprintf(stderr, "HTVMS_enableSysPrv: Enabled SYSPRV\n");
-         }
-      }
+   if (Result == SS$_NORMAL) {
+       if (!(PreviousPrv[0] & PRV$M_SYSPRV)) {
+           CTRACE(tfp, "HTVMS_enableSysPrv: Enabled SYSPRV\n");
+       }
    }
 }
 
@@ -134,12 +132,10 @@ unsigned long Prv[2], PreviousPrv[2];
    Prv[1] = 0;
    Result = sys$setprv(0,&Prv,0,&PreviousPrv);
 
-   if (TRACE) {
-      if (Result == SS$_NORMAL) {
-         if (PreviousPrv[0] & PRV$M_SYSPRV) {
-            fprintf(stderr, "HTVMS_disableSysPrv: Disabled SYSPRV\n");
-         }
-      }
+   if (Result == SS$_NORMAL) {
+       if (PreviousPrv[0] & PRV$M_SYSPRV) {
+           CTRACE(tfp, "HTVMS_disableSysPrv: Disabled SYSPRV\n");
+       }
    }
 }
 
@@ -900,7 +896,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
     extern BOOLEAN no_dotfiles, show_dotfiles;
 
     HTUnEscape(pathname);
-    CTRACE(stderr,"HTVMSBrowseDir: Browsing `%s\'\n", pathname);
+    CTRACE(tfp,"HTVMSBrowseDir: Browsing `%s\'\n", pathname);
 
     /*
      *  Require at least two elements (presumably a device and directory)
@@ -1178,7 +1174,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 	    /* Now, update the BTree etc. */
 	    if(entry_info->display)
 	      {
-		 CTRACE(stderr,"Adding file to BTree: %s\n",
+		 CTRACE(tfp,"Adding file to BTree: %s\n",
 						      entry_info->filename);
 	         HTBTree_add(bt, (VMSEntryInfo *)entry_info); 
 	      }

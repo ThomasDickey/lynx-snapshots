@@ -418,14 +418,11 @@ PRIVATE void HTFWriter_abort ARGS2(
 	HTStream *,	me,
 	HTError,	e GCC_UNUSED)
 {
-    if (TRACE)
-	fprintf(stderr,"HTFWriter_abort called\n");
-
+    CTRACE(tfp,"HTFWriter_abort called\n");
     fclose(me->fp);
     FREE(me->viewer_command);
     if (me->end_command) {		/* Temp file */
-	if (TRACE)
-	    fprintf(stderr, "HTFWriter: Aborting: file not executed.\n");
+	CTRACE(tfp, "HTFWriter: Aborting: file not executed.\n");
 	FREE(me->end_command);
 	if (me->remove_command) {
 	    system(me->remove_command);

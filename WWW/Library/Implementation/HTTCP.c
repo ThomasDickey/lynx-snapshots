@@ -334,15 +334,11 @@ PUBLIC int HTParseInet ARGS2(
 #endif /* _WINDOWS_NSL */
 
     if (!str) {
-	if (TRACE) {
-	    fprintf(stderr, "HTParseInet: Can't parse `NULL'.\n");
-	}
+	CTRACE(tfp, "HTParseInet: Can't parse `NULL'.\n");
 	return -1;
     }
     if (HTCheckForInterrupt()) {
-	if (TRACE) {
-	    fprintf (stderr, "HTParseInet: INTERRUPTED for '%s'.\n", str);
-	}
+	CTRACE (tfp, "HTParseInet: INTERRUPTED for '%s'.\n", str);
 	return -1;
     }
 #ifdef _WINDOWS_NSL
@@ -370,8 +366,8 @@ PUBLIC int HTParseInet ARGS2(
 	    struct servent * serv = getservbyname(port, (char*)0);
 	    if (serv) {
 		soc_in->sin_port = serv->s_port;
-	    } else if (TRACE) {
-		fprintf(stderr, "TCP: Unknown service %s\n", port);
+	    } else {
+		CTRACE(tfp, "TCP: Unknown service %s\n", port);
 	    }
 #endif /* SUPPRESS */
 	}
@@ -384,11 +380,8 @@ PUBLIC int HTParseInet ARGS2(
     */
     soc_in->sdn_nam.n_len = min(DN_MAXNAML, strlen(host));  /* <=6 in phase 4 */
     strncpy(soc_in->sdn_nam.n_name, host, soc_in->sdn_nam.n_len + 1);
-    if (TRACE) {
-	fprintf(stderr,
-		"DECnet: Parsed address as object number %d on host %.6s...\n",
+    CTRACE(tfp, "DECnet: Parsed address as object number %d on host %.6s...\n",
 		soc_in->sdn_objnum, host);
-    }
 #else  /* parse Internet host: */
 
     if (*host >= '0' && *host <= '9') {   /* Test for numeric node address: */
@@ -429,10 +422,7 @@ PUBLIC int HTParseInet ARGS2(
 #endif /* _WINDOWS_NSL */
     } else {		    /* Alphanumeric node name: */
 #ifdef MVS	/* Outstanding problem with crash in MVS gethostbyname */
-	if (TRACE) {
-	    fprintf(stderr,
-		    "HTParseInet: Calling gethostbyname(%s)\n", host);
-	}
+	CTRACE(tfp, "HTParseInet: Calling gethostbyname(%s)\n", host);
 #endif /* MVS */
 
 #ifdef NSL_FORK
@@ -488,10 +478,7 @@ PUBLIC int HTParseInet ARGS2(
 		**  Abort if interrupt key pressed.
 		*/
 		if (HTCheckForInterrupt()) {
-		    if (TRACE) {
-			fprintf(stderr,
-				"HTParseInet: INTERRUPTED gethostbyname.\n");
-		    }
+		    CTRACE(tfp, "HTParseInet: INTERRUPTED gethostbyname.\n");
 		    kill(fpid , SIGKILL);
 		    waitpid(fpid, NULL, 0);
 		    FREE(host);
@@ -507,47 +494,34 @@ PUBLIC int HTParseInet ARGS2(
 	    if (waitret <= 0) {
 		waitret = waitpid(fpid, &cst1, WNOHANG);
 	    }
-	    if (TRACE) {
-		if (WIFEXITED(cst1)) {
-		    fprintf(stderr,
-		      "HTParseInet: NSL_FORK child %d exited, status 0x%x.\n",
+	    if (WIFEXITED(cst1)) {
+		CTRACE(tfp, "HTParseInet: NSL_FORK child %d exited, status 0x%x.\n",
 			    (int)waitret, cst1);
-		} else if (WIFSIGNALED(cst1)) {
-		    fprintf(stderr,
-		  "HTParseInet: NSL_FORK child %d got signal, status 0x%x!\n",
+	    } else if (WIFSIGNALED(cst1)) {
+		CTRACE(tfp, "HTParseInet: NSL_FORK child %d got signal, status 0x%x!\n",
 			    (int)waitret, cst1);
 #ifdef WCOREDUMP
-		    if (WCOREDUMP(cst1)) {
-			fprintf(stderr,
-			      "HTParseInet: NSL_FORK child %d dumped core!\n",
+		if (WCOREDUMP(cst1)) {
+		    CTRACE(tfp, "HTParseInet: NSL_FORK child %d dumped core!\n",
 				(int)waitret);
 		    }
 #endif /* WCOREDUMP */
-		} else if (WIFSTOPPED(cst1)) {
-		    fprintf(stderr,
-		  "HTParseInet: NSL_FORK child %d is stopped, status 0x%x!\n",
+	    } else if (WIFSTOPPED(cst1)) {
+		CTRACE(tfp, "HTParseInet: NSL_FORK child %d is stopped, status 0x%x!\n",
 			    (int)waitret, cst1);
-		}
 	    }
 	    /*
 	    **	Read as much as we can - should be the address.
 	    */
 	    IOCTL(pfd[0], FIONREAD, &cstat);
 	    if (cstat < 4) {
-		if (TRACE) {
-		    fprintf(stderr,
-		       "HTParseInet: NSL_FORK child returns only %d bytes.\n",
+		CTRACE(tfp, "HTParseInet: NSL_FORK child returns only %d bytes.\n",
 			    cstat);
-		    fprintf(stderr,
-			"             Trying again without forking.\n");
-		}
+		CTRACE(tfp, "             Trying again without forking.\n");
 		phost = gethostbyname(host);	/* See netdb.h */
 		if (!OK_HOST(phost)) {
-		    if (TRACE) {
-			fprintf(stderr,
-			 "HTParseInet: Can't find internet node name `%s'.\n",
+		    CTRACE(tfp, "HTParseInet: Can't find internet node name `%s'.\n",
 				host);
-		    }
 		    memset((void *)&soc_in->sin_addr, 0, sizeof(soc_in->sin_addr));
 		} else {
 		    memcpy((void *)&soc_in->sin_addr,
@@ -563,11 +537,8 @@ PUBLIC int HTParseInet ARGS2(
 	    close(pfd[1]);
 	}
 	if (soc_in->sin_addr.s_addr == 0) {
-	    if (TRACE) {
-		fprintf(stderr,
-			"HTParseInet: Can't find internet node name `%s'.\n",
+	    CTRACE(tfp, "HTParseInet: Can't find internet node name `%s'.\n",
 			host);
-	    }
 #ifndef _WINDOWS_NSL
 	    FREE(host);
 #endif /* _WINDOWS_NSL */
@@ -577,10 +548,7 @@ PUBLIC int HTParseInet ARGS2(
 	FREE(host);
 #endif /* _WINDOWS_NSL */
 #ifdef MVS
-	if (TRACE) {
-	    fprintf(stderr,
-		    "HTParseInet: gethostbyname() returned %d\n", phost);
-	}
+	CTRACE(tfp, "HTParseInet: gethostbyname() returned %d\n", phost);
 #endif /* MVS */
 
 #else /* Not NSL_FORK: */
@@ -588,10 +556,8 @@ PUBLIC int HTParseInet ARGS2(
 	soc_in->sin_addr.s_addr = htonl(resolve(host));
 	FREE(host);
 	if (soc_in->sin_addr.s_addr == 0) {
-		 if (TRACE)
-			  fprintf(stderr,
-			 "HTTPAccess: Can't find internet node name `%s'.\n",host);
-		 return -1;  /* Fail? */
+	    CTRACE(tfp, "HTTPAccess: Can't find internet node name `%s'.\n",host);
+	    return -1;  /* Fail? */
 	}
 #else
 #ifdef _WINDOWS_NSL
@@ -627,17 +593,11 @@ PUBLIC int HTParseInet ARGS2(
 	phost = gethostbyname(host);	/* See netdb.h */
 #endif /* _WINDOWS_NSL */
 #ifdef MVS
-	if (TRACE) {
-	    fprintf(stderr,
-		    "HTParseInet: gethostbyname() returned %d\n", phost);
-	}
+	CTRACE(tfp, "HTParseInet: gethostbyname() returned %d\n", phost);
 #endif /* MVS */
 	if (!phost) {
-	    if (TRACE) {
-		fprintf(stderr,
-			"HTParseInet: Can't find internet node name `%s'.\n",
+	    CTRACE(tfp, "HTParseInet: Can't find internet node name `%s'.\n",
 			host);
-	    }
 #ifndef _WINDOWS_NSL
 	    FREE(host);
 #endif /* _WINDOWS_NSL */
@@ -663,15 +623,12 @@ PUBLIC int HTParseInet ARGS2(
 #endif /* NSL_FORK */
     }
 
-    if (TRACE) {
-	fprintf(stderr,
-	   "HTParseInet: Parsed address as port %d, IP address %d.%d.%d.%d\n",
+    CTRACE(tfp, "HTParseInet: Parsed address as port %d, IP address %d.%d.%d.%d\n",
 		(int)ntohs(soc_in->sin_port),
 		(int)*((unsigned char *)(&soc_in->sin_addr)+0),
 		(int)*((unsigned char *)(&soc_in->sin_addr)+1),
 		(int)*((unsigned char *)(&soc_in->sin_addr)+2),
 		(int)*((unsigned char *)(&soc_in->sin_addr)+3));
-    }
 #endif	/* Internet vs. Decnet */
 
     return 0;	/* OK */
@@ -729,15 +686,14 @@ PRIVATE void get_host_details NOARGS
 #ifdef NEED_HOST_ADDRESS		/* no -- needs name server! */
     phost = gethostbyname(name);	/* See netdb.h */
     if (!OK_HOST(phost)) {
-	if (TRACE) fprintf(stderr,
-		"TCP: Can't find my own internet node address for `%s'!!\n",
-		name);
+	CTRACE(tfp, "TCP: Can't find my own internet node address for `%s'!!\n",
+		    name);
 	return;  /* Fail! */
     }
     StrAllocCopy(hostname, phost->h_name);
     memcpy(&HTHostAddress, &phost->h_addr, phost->h_length);
-    if (TRACE) fprintf(stderr, "     Name server says that I am `%s' = %s\n",
-	    hostname, HTInetString(&HTHostAddress));
+    CTRACE(tfp, "     Name server says that I am `%s' = %s\n",
+		hostname, HTInetString(&HTHostAddress));
 #endif /* NEED_HOST_ADDRESS */
 
 #endif /* !DECNET */
@@ -995,8 +951,7 @@ PUBLIC int HTDoConnect ARGS4(
 		}
 	    }
 	    if (HTCheckForInterrupt()) {
-		if (TRACE)
-		    fprintf(stderr, "*** INTERRUPTED in middle of connect.\n");
+		CTRACE(tfp, "*** INTERRUPTED in middle of connect.\n");
 		status = HT_INTERRUPTED;
 		SOCKET_ERRNO = EINTR;
 		break;

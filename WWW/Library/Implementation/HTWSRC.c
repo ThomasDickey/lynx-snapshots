@@ -162,9 +162,8 @@ PRIVATE void WSRCParser_put_character ARGS2(HTStream*, me, char, c)
 		}
 	    }
 	    if (!par_name[me->param_number]) {	/* Unknown field */
-		if (TRACE) fprintf(stderr,
-		    "HTWSRC: Unknown field `%s' in source file\n",
-		    me->param);
+		CTRACE(tfp, "HTWSRC: Unknown field `%s' in source file\n",
+			    me->param);
 		me->param_number = PAR_UNKNOWN;
 		me->state = before_value;	/* Could be better ignore */
 		return;

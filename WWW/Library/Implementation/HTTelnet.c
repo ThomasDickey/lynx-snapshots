@@ -91,8 +91,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	    *port++ = '\0';	/* Split */
 
     if (!hostname || *hostname == '\0') {
-	if (TRACE)
-	    fprintf(stderr, "HTTelnet: No host specified!\n");
+	CTRACE(tfp, "HTTelnet: No host specified!\n");
 	return HT_NO_DATA;
     }
 
@@ -149,8 +148,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 		hostname,
 		port ? port : "");
 
-	if (TRACE)
-	    fprintf(stderr, "HTTelnet: Command is: %s\n\n", command);
+	CTRACE(tfp, "HTTelnet: Command is: %s\n\n", command);
 	system(command);
 	return HT_NO_DATA;		/* Ok - it was done but no data */
 #define TELNET_DONE
@@ -176,8 +174,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 		port ? port : "");
 	}
 
-	if (TRACE)
-	    fprintf(stderr, "HTTelnet: Normal: Command is: %s\n\n", command);
+	CTRACE(tfp, "HTTelnet: Normal: Command is: %s\n\n", command);
 #ifdef __DJGPP__
        __djgpp_set_ctrl_c(0);
        _go32_want_ctrl_break(1);
@@ -216,8 +213,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 		hostname);
 	}
 
-	if (TRACE)
-	    fprintf(stderr, "HTTelnet: Command is: %s\n\n", command);
+	CTRACE(tfp, "HTTelnet: Command is: %s\n\n", command);
 	system(command);
 	return HT_NO_DATA;		/* Ok - it was done but no data */
 #define TELNET_DONE
@@ -272,8 +268,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 		}
 	    }
 
-	    if (TRACE)
-		fprintf(stderr, "HTTelnet: Command is: %s\n\n", command);
+	    CTRACE(tfp, "HTTelnet: Command is: %s\n\n", command);
 	    system(command);
 	    return HT_NO_DATA;		/* Ok - it was done but no data */
 	}
@@ -300,8 +295,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 		port ? port : "");
 	}
 
-	if (TRACE)
-	    fprintf(stderr, "HTTelnet: Command is: %s\n\n", command);
+	CTRACE(tfp, "HTTelnet: Command is: %s\n\n", command);
 	system(command);
 	return HT_NO_DATA;		/* Ok - it was done but no data */
 #define TELNET_DONE
@@ -313,8 +307,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 		port ? "/PORT=" : "",
 		port ? port : "",
 		hostname);
-	    if (TRACE)
-		fprintf(stderr, "HTTelnet: Command is: %s\n\n", command);
+	    CTRACE(tfp, "HTTelnet: Command is: %s\n\n", command);
 	    system(command);
 	}
 	else {
@@ -358,8 +351,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 		hostname);
 	}
 
-	if (TRACE)
-	    fprintf(stderr, "HTTelnet: Command is: %s\n\n", command);
+	CTRACE(tfp, "HTTelnet: Command is: %s\n\n", command);
 	system(command);
 	return HT_NO_DATA;		/* Ok - it was done but no data */
     }
@@ -400,8 +392,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	    }
 	}
 
-	if (TRACE)
-	    fprintf(stderr, "HTTelnet: Command is: %s\n\n", command);
+	CTRACE(tfp, "HTTelnet: Command is: %s\n\n", command);
 	system(command);
 	return HT_NO_DATA;		/* Ok - it was done but no data */
     }
@@ -424,8 +415,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 		port ? port : "");
 	}
 
-	if (TRACE)
-	    fprintf(stderr, "HTTelnet: Command is: %s\n\n", command);
+	CTRACE(tfp, "HTTelnet: Command is: %s\n\n", command);
 	system(command);
 	return HT_NO_DATA;		/* Ok - it was done but no data */
     }
@@ -435,8 +425,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 		port ? "/PORT=" : "",
 		port ? port : "",
 		hostname);
-	    if (TRACE)
-		fprintf(stderr, "HTTelnet: Command is: %s\n\n", command);
+	    CTRACE(tfp, "HTTelnet: Command is: %s\n\n", command);
 	    system(command);
 	}
 	else {
@@ -458,8 +447,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 		port ? "/PORT=" : "",
 		port ? port : "",
 		hostname);
-	    if (TRACE)
-		fprintf(stderr, "HTTelnet: Command is: %s\n\n", command);
+	    CTRACE(tfp, "HTTelnet: Command is: %s\n\n", command);
 	    system(command);
 	}
 	else {
@@ -486,8 +474,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	if (login_protocol == telnet) { 		/* telnet only */
 	    sprintf(command, "TELNET  %s",	/* @@ Bug: port ignored */
 		hostname);
-	    if (TRACE)
-		fprintf(stderr, "HTTelnet: Command is: %s\n\n", command);
+	    CTRACE(tfp, "HTTelnet: Command is: %s\n\n", command);
 	    system(command);
 	    return HT_NO_DATA;		/* Ok - it was done but no data */
 	}
@@ -549,9 +536,7 @@ ARGS4
     int status;
 
     if (sink) {
-	if (TRACE)
-	    fprintf(stderr,
-	   "HTTelnet: Can't output a live session -- must be interactive!\n");
+	CTRACE(tfp, "HTTelnet: Can't output a live session -- must be interactive!\n");
 	return HT_NO_DATA;
     }
     acc_method =  HTParse(addr, "file:", PARSE_ACCESS);
@@ -559,8 +544,7 @@ ARGS4
     host = HTParse(addr, "", PARSE_HOST);
     if (!host || *host == '\0') {
 	status = HT_NO_DATA;
-	if (TRACE)
-	    fprintf(stderr, "HTTelnet: No host specified!\n");
+	CTRACE(tfp, "HTTelnet: No host specified!\n");
     } else {
 	status = remote_session(acc_method, host);
     }

@@ -78,7 +78,7 @@ PUBLIC int showlist ARGS2(
 	/*
 	 *  Make the file a URL now.
 	 */
-#if defined (VMS) || defined (DOSPATH)
+#if defined (VMS) || defined (DOSPATH)	|| defined (__EMX__)
 	sprintf(list_filename, "file://localhost/%s", tempfile);
 #else
 	sprintf(list_filename, "file://localhost%s", tempfile);

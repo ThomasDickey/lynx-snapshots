@@ -54,12 +54,12 @@ unsigned int cached_styles[CACHEH][CACHEW];
 #ifdef USE_COLOR_STYLE_UNUSED
 void LynxClearScreenCache NOARGS
 {
-	int i,j;
-if (TRACE)
-	fprintf(stderr, "flushing cached screen styles\n");
-	for (i=0;i<CACHEH;i++)
-		for (j=0;j<CACHEW;j++)
-			cached_styles[i][j]=s_a;
+    int i,j;
+
+    CTRACE(tfp, "flushing cached screen styles\n");
+    for (i=0;i<CACHEH;i++)
+	for (j=0;j<CACHEW;j++)
+	    cached_styles[i][j]=s_a;
 }
 #endif /* USE_COLOR_STYLE */
 
@@ -312,9 +312,8 @@ PRIVATE void * LY_check_calloc ARGS2(
 	HText * t = HTList_objectAt(loaded_texts, i);
 	if (t == HTMainText)
 	    t = NULL;		/* shouldn't happen */
-	if (TRACE) {
-	    fprintf(stderr,
-		    "\r *** Emergency freeing document %d/%d for '%s'%s!\n",
+	{
+	CTRACE(tfp, "\r *** Emergency freeing document %d/%d for '%s'%s!\n",
 		    i + 1, n,
 		    ((t && t->node_anchor &&
 		      t->node_anchor->address) ?
@@ -408,8 +407,7 @@ PUBLIC HText *	HText_new ARGS1(
 
 #if defined(VMS) && defined (VAXC) && !defined(__DECC)
     status = lib$stat_vm(&VMType, &VMTotal);
-    if (TRACE)
-	fprintf(stderr, "GridText: VMTotal = %d\n", VMTotal);
+    CTRACE(tfp, "GridText: VMTotal = %d\n", VMTotal);
 #endif /* VMS && VAXC && !__DECC */
 
     if (!loaded_texts)	{
@@ -425,12 +423,11 @@ PUBLIC HText *	HText_new ARGS1(
      *  and free it before reloading. - Dick Wesseling (ftu@fi.ruu.nl)
      */
     if (anchor->document) {
-       HTList_removeObject(loaded_texts, anchor->document);
-       if (TRACE)
-	   fprintf(stderr, "GridText: Auto-uncaching\n") ;
-       ((HText *)anchor->document)->node_anchor = NULL;
-       HText_free((HText *)anchor->document);
-       anchor->document = NULL;
+	HTList_removeObject(loaded_texts, anchor->document);
+	CTRACE(tfp, "GridText: Auto-uncaching\n") ;
+	((HText *)anchor->document)->node_anchor = NULL;
+	HText_free((HText *)anchor->document);
+	anchor->document = NULL;
     }
 
     HTList_addObject(loaded_texts, self);
@@ -440,13 +437,11 @@ PUBLIC HText *	HText_new ARGS1(
 #else
     if (HTList_count(loaded_texts) > HTCacheSize) {
 #endif /* VMS && VAXC && !__DECC */
-	if (TRACE)
-	    fprintf(stderr, "GridText: Freeing off cached doc.\n");
+	CTRACE(tfp, "GridText: Freeing off cached doc.\n");
 	HText_free((HText *)HTList_removeFirstObject(loaded_texts));
 #if defined(VMS) && defined (VAXC) && !defined(__DECC)
 	status = lib$stat_vm(&VMType, &VMTotal);
-	if (TRACE)
-	    fprintf(stderr, "GridText: VMTotal reduced to %d\n", VMTotal);
+	CTRACE(tfp, "GridText: VMTotal reduced to %d\n", VMTotal);
 #endif /* VMS && VAXC && !__DECC */
     }
 
@@ -1386,8 +1381,8 @@ PRIVATE void display_page ARGS3(
 			    link_dest_intl = HTAnchor_followTypedLink(
 				(HTAnchor *)Anchor_ptr->anchor, LINK_INTERNAL);
 			    if (link_dest_intl && link_dest_intl != link_dest) {
-				if (TRACE)
-				    fprintf(stderr,
+
+				CTRACE(tfp,
 				    "display_page: unexpected typed link to %s!\n",
 					    link_dest_intl->parent->address);
 				link_dest_intl = NULL;
@@ -1478,9 +1473,8 @@ PRIVATE void display_page ARGS3(
 		/*
 		 *  Not showing anchor.
 		 */
-		if (TRACE &&
-		    Anchor_ptr->hightext && *Anchor_ptr->hightext)
-		    fprintf(stderr,
+		if (Anchor_ptr->hightext && *Anchor_ptr->hightext)
+		    CTRACE(tfp,
 			    "\nGridText: Not showing link, hightext=%s\n",
 			    Anchor_ptr->hightext);
 	    }
@@ -1501,8 +1495,7 @@ PRIVATE void display_page ARGS3(
 		_statusline(MAXLINKS_REACHED);
 		sleep(AlertSecs);
 	    }
-	    if (TRACE)
-	        fprintf(stderr, "\ndisplay_page: MAXLINKS reached.\n");
+	    CTRACE(tfp, "\ndisplay_page: MAXLINKS reached.\n");
 	    break;
 	}
     }
@@ -1608,8 +1601,7 @@ PRIVATE void split_line ARGS2(
     ctrl_chars_on_this_line = 0; /*reset since we are going to a new line*/
     text->LastChar = ' ';
 
-    if (TRACE)
-	fprintf(stderr,"GridText: split_line called\n");
+    CTRACE(tfp,"GridText: split_line called\n");
 
     text->Lines++;
 
@@ -1696,8 +1688,8 @@ PRIVATE void split_line ARGS2(
 	}
     }
     if (previous->numstyles > 0 && previous->styles[LastStyle].direction) {
-	if (TRACE)
-	    fprintf(stderr, "%s\n%s%s\n",
+
+	CTRACE(tfp, "%s\n%s%s\n",
 		    "........... Too many character styles on line:",
 		    "........... ", previous->data);
     }
@@ -2005,8 +1997,8 @@ PUBLIC void HText_setStyle ARGS2(
 	return; 			/* Safety */
     after = text->style->spaceAfter;
     before = style->spaceBefore;
-    if (TRACE)
-	fprintf(stderr, "GridText: Change to style %s\n", style->name);
+
+    CTRACE(tfp, "GridText: Change to style %s\n", style->name);
 
     blank_lines (text, ((after > before) ? after : before));
 
@@ -2692,15 +2684,15 @@ PUBLIC void HText_endAnchor ARGS2(
 	    a = text->last_anchor;
 	}
     }
-    if (TRACE)
-	fprintf(stderr, "HText_endAnchor: number:%d link_type:%d\n",
+
+    CTRACE(tfp, "HText_endAnchor: number:%d link_type:%d\n",
 			a->number, a->link_type);
     if (a->link_type == INPUT_ANCHOR) {
 	/*
 	 *  Shouldn't happen, but put test here anyway to be safe. - LE
 	 */
-	if (TRACE)
-	    fprintf(stderr,
+
+	CTRACE(tfp,
 	   "HText_endAnchor: internal error: last anchor was input field!\n");
 	return;
     }
@@ -3139,8 +3131,8 @@ PUBLIC void HText_endAppend ARGS1(
 
     if (!text)
 	return;
-    if (TRACE)
-	fprintf(stderr,"Gridtext: Entering HText_endAppend\n");
+
+    CTRACE(tfp,"Gridtext: Entering HText_endAppend\n");
 
     /*
      *  Create a  blank line at the bottom.
@@ -3171,8 +3163,8 @@ PUBLIC void HText_endAppend ARGS1(
     while (text->last_line->data[0] == '\0' && text->Lines > 2) {
 	HTLine *next_to_the_last_line = text->last_line->prev;
 
-	if (TRACE)
-	    fprintf(stderr, "GridText: Removing bottom blank line: %s\n",
+
+	CTRACE(tfp, "GridText: Removing bottom blank line: %s\n",
 			    text->last_line->data);
 	/*
 	 *  line_ptr points to the first line.
@@ -3183,10 +3175,8 @@ PUBLIC void HText_endAppend ARGS1(
 	text->last_line = next_to_the_last_line;
 	text->Lines--;
 #ifdef NOTUSED_BAD_FOR_SCREEN
-	if (TRACE) {
-	    fprintf(stderr, "GridText: New bottom line: %s\n",
+	CTRACE(tfp, "GridText: New bottom line: %s\n",
 			    text->last_line->data);
-	}
 #endif
     }
 
@@ -3214,8 +3204,8 @@ re_parse:
 	}
 	if (anchor_ptr->line_pos < 0)
 	    anchor_ptr->line_pos = 0;
-	if (TRACE)
-	    fprintf(stderr, "Gridtext: Anchor found on line:%d col:%d\n",
+
+	CTRACE(tfp, "Gridtext: Anchor found on line:%d col:%d\n",
 			    cur_line, anchor_ptr->line_pos);
 
 	/*
@@ -3236,8 +3226,7 @@ re_parse:
 	    anchor_ptr->extent = 0;
 	}
 #ifdef NOTUSED_BAD_FOR_SCREEN
-	if (TRACE)
-	    fprintf(stderr, "anchor text: '%s'   pos: %d\n",
+	CTRACE(tfp, "anchor text: '%s'   pos: %d\n",
 			    line_ptr->data, anchor_ptr->line_pos);
 #endif
 	/*
@@ -3248,14 +3237,12 @@ re_parse:
 	    cur_line < text->Lines) {
 	    anchor_ptr->start += (cur_shift + 1);
 	    cur_shift = 0;
-	    if (TRACE)
-		fprintf(stderr, "found anchor at end of line\n");
+	    CTRACE(tfp, "found anchor at end of line\n");
 	    goto re_parse;
 	}
 	cur_shift = 0;
 #ifdef NOTUSED_BAD_FOR_SCREEN
-	if (TRACE)
-	    fprintf(stderr, "anchor text: '%s'   pos: %d\n",
+	CTRACE(tfp, "anchor text: '%s'   pos: %d\n",
 			    line_ptr->data, anchor_ptr->line_pos);
 #endif
 	/*
@@ -3334,9 +3321,8 @@ re_parse:
 	 */
 	anchor_ptr->line_pos += line_ptr->offset;
 	anchor_ptr->line_num  = cur_line;
-	if (TRACE)
-	    fprintf(stderr,
-		    "GridText: adding link on line %d in HText_endAppend\n",
+
+	CTRACE(tfp, "GridText: adding link on line %d in HText_endAppend\n",
 		    cur_line);
 
 	/*
@@ -3348,12 +3334,12 @@ re_parse:
 }
 
 
-/*	Dump diagnostics to stderr
+/*	Dump diagnostics to tfp
 */
 PUBLIC void HText_dump ARGS1(
 	HText *,	text GCC_UNUSED)
 {
-    fprintf(stderr, "HText: Dump called\n");
+    fprintf(tfp, "HText: Dump called\n");
 }
 
 
@@ -3608,9 +3594,8 @@ PUBLIC int HTGetLinkInfo ARGS6(
 			    link_dest_intl = HTAnchor_followTypedLink(
 				(HTAnchor *)a->anchor, LINK_INTERNAL);
 			    if (link_dest_intl && link_dest_intl != link_dest) {
-				if (TRACE)
-				    fprintf(stderr,
-					    "HTGetLinkInfo: unexpected typed link to %s!\n",
+
+				CTRACE(tfp, "HTGetLinkInfo: unexpected typed link to %s!\n",
 					    link_dest_intl->parent->address);
 				link_dest_intl = NULL;
 			    }
@@ -4197,10 +4182,10 @@ PUBLIC BOOL HTFindPoundSelector ARGS1(
 	if (a->anchor && a->anchor->tag)
 	    if (!strcmp(a->anchor->tag, selector)) {
 
-		 www_search_result = a->line_num+1;
-		 if (TRACE)
-		    fprintf(stderr,
-		"HText: Selecting anchor [%d] at character %d, line %d\n",
+		www_search_result = a->line_num+1;
+
+		CTRACE(tfp,
+		       "HText: Selecting anchor [%d] at character %d, line %d\n",
 				     a->number, a->start, www_search_result);
 		if (!strcmp(selector, LYToolbarName))
 		    --www_search_result;
@@ -4230,7 +4215,7 @@ PUBLIC BOOL HText_selectAnchor ARGS2(
 	if (a->anchor == anchor) break;
     }
     if (!a) {
-	if (TRACE) fprintf(stderr, "HText: No such anchor in this text!\n");
+	CTRACE(tfp, "HText: No such anchor in this text!\n");
 	return NO;
     }
 
@@ -4241,7 +4226,7 @@ PUBLIC BOOL HText_selectAnchor ARGS2(
 
     {
 	 int l = line_for_char(text, a->start);
-	if (TRACE) fprintf(stderr,
+	 CTRACE(tfp,
 	    "HText: Selecting anchor [%d] at character %d, line %d\n",
 	    a->number, a->start, l);
 
@@ -4614,8 +4599,7 @@ get_query:
 	StrAllocCopy(doc->address, cp_freeme);
 	FREE(cp_freeme);
 
-	if (TRACE)
-	    fprintf(stderr,"\ndo_www_search: newfile: %s\n",doc->address);
+	CTRACE(tfp,"\ndo_www_search: newfile: %s\n",doc->address);
 
 	/*
 	 *  Yah, the search succeeded.
@@ -5303,22 +5287,18 @@ PUBLIC void HTuncache_current_document NOARGS
 		FREE(htmain_anchor->UCStages);
 	    }
 	}
-	if (TRACE) {
-	    fprintf(stderr, "\rHTuncache.. freeing document for '%s'%s\n",
+	CTRACE(tfp, "\rHTuncache.. freeing document for '%s'%s\n",
 			    ((htmain_anchor &&
 			      htmain_anchor->address) ?
 			       htmain_anchor->address : "unknown anchor"),
 			    ((htmain_anchor &&
 			      htmain_anchor->post_data) ?
 				      " with POST data" : ""));
-	}
 	HTList_removeObject(loaded_texts, HTMainText);
 	HText_free(HTMainText);
 	HTMainText = NULL;
     } else {
-	if (TRACE) {
-	    fprintf(stderr, "HTuncache.. HTMainText already is NULL!\n");
-	}
+	CTRACE(tfp, "HTuncache.. HTMainText already is NULL!\n");
     }
 }
 
@@ -5779,9 +5759,7 @@ PUBLIC void HText_beginForm ARGS5(
     PerFormInfo_free(HTCurrentForm); /* shouldn't happen here - kw */
     HTCurrentForm = newform;
 
-    if (TRACE)
-	fprintf(stderr,
-		"BeginForm: action:%s Method:%d%s%s%s%s%s%s\n",
+    CTRACE(tfp, "BeginForm: action:%s Method:%d%s%s%s%s%s%s\n",
 		HTFormAction, HTFormMethod,
 		(HTFormTitle ? " Title:" : ""),
 		(HTFormTitle ? HTFormTitle : ""),
@@ -5846,8 +5824,7 @@ PUBLIC void HText_endForm ARGS1(
 	HTList_appendObject(text->forms, HTCurrentForm);
 	HTCurrentForm = NULL;
     } else {
-	if (TRACE)
-	    fprintf(stderr, "endForm:    HTCurrentForm is missing!\n");
+	CTRACE(tfp, "endForm:    HTCurrentForm is missing!\n");
     }
 
     FREE(HTCurSelectGroup);
@@ -5889,18 +5866,16 @@ PUBLIC void HText_beginSelect ARGS4(
      */
     StrAllocCopy(HTCurSelectGroupSize, size);
 
-    if (TRACE) {
-       fprintf(stderr,"HText_beginSelect: name=%s type=%d size=%s\n",
+    CTRACE(tfp,"HText_beginSelect: name=%s type=%d size=%s\n",
 	       ((HTCurSelectGroup == NULL) ?
 				  "<NULL>" : HTCurSelectGroup),
 		HTCurSelectGroupType,
 	       ((HTCurSelectGroupSize == NULL) ?
 				      "<NULL>" : HTCurSelectGroupSize));
-	fprintf(stderr,"HText_beginSelect: name_cs=%d \"%s\"\n",
+    CTRACE(tfp,"HText_beginSelect: name_cs=%d \"%s\"\n",
 		HTCurSelectGroupCharset,
 		(HTCurSelectGroupCharset >= 0 ?
 		 LYCharSet_UC[HTCurSelectGroupCharset].MIMEname : "<UNKNOWN>"));
-    }
 }
 
 /*
@@ -5925,8 +5900,7 @@ PUBLIC int HText_getOptionNum ARGS1(
 
     for (op = a->input_field->select_list; op; op = op->next)
 	n++;
-    if (TRACE)
-	fprintf(stderr, "HText_getOptionNum: Got number '%d'.\n", n);
+    CTRACE(tfp, "HText_getOptionNum: Got number '%d'.\n", n);
     return(n);
 }
 
@@ -6003,16 +5977,12 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 
     if (!(text && text->last_anchor &&
 	  text->last_anchor->link_type == INPUT_ANCHOR)) {
-	if (TRACE)
-	    fprintf(stderr,
-		    "HText_setLastOptionValue: invalid call!  value:%s!\n",
+	CTRACE(tfp, "HText_setLastOptionValue: invalid call!  value:%s!\n",
 		    (value ? value : "<NULL>"));
 	return NULL;
     }
 
-    if (TRACE)
-	fprintf(stderr,
-		"Entering HText_setLastOptionValue: value:%s, checked:%s\n",
+    CTRACE(tfp, "Entering HText_setLastOptionValue: value:%s, checked:%s\n",
 		value, (checked ? "on" : "off"));
 
     /*
@@ -6090,14 +6060,10 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	     *  No option items yet.
 	     */
 	    if (text->last_anchor->input_field->type != F_OPTION_LIST_TYPE) {
-		if (TRACE) {
-		    fprintf(stderr,
-   "HText_setLastOptionValue: last input_field not F_OPTION_LIST_TYPE (%d)\n",
+		CTRACE(tfp, "HText_setLastOptionValue: last input_field not F_OPTION_LIST_TYPE (%d)\n",
 			    F_OPTION_LIST_TYPE);
-		    fprintf(stderr,
-   "                          but %d, ignoring!\n",
+		CTRACE(tfp, "                          but %d, ignoring!\n",
 			    text->last_anchor->input_field->type);
-		}
 		return NULL;
 	    }
 
@@ -6229,15 +6195,15 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
     }
 
     if (TRACE) {
-	fprintf(stderr,"HText_setLastOptionValue:%s value=%s",
+	fprintf(tfp,"HText_setLastOptionValue:%s value=%s",
 		(order == LAST_ORDER) ? " LAST_ORDER" : "",
 		value);
-	fprintf(stderr,"            val_cs=%d \"%s\"",
+	fprintf(tfp,"            val_cs=%d \"%s\"",
 			val_cs,
 			(val_cs >= 0 ?
 			 LYCharSet_UC[val_cs].MIMEname : "<UNKNOWN>"));
 	if (submit_value) {
-	    fprintf(stderr, " (submit_val_cs %d \"%s\") submit_value%s=%s\n",
+	    fprintf(tfp, " (submit_val_cs %d \"%s\") submit_value%s=%s\n",
 		    submit_val_cs,
 		    (submit_val_cs >= 0 ?
 		     LYCharSet_UC[submit_val_cs].MIMEname : "<UNKNOWN>"),
@@ -6246,7 +6212,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 		    submit_value);
 	}
 	else {
-	    fprintf(stderr,"\n");
+	    fprintf(tfp,"\n");
 	}
     }
     return(ret_Value);
@@ -6270,8 +6236,7 @@ PUBLIC int HText_beginInput ARGS3(
     unsigned char *tmp = NULL;
     int i, j;
 
-    if (TRACE)
-	fprintf(stderr,"Entering HText_beginInput\n");
+    CTRACE(tfp,"Entering HText_beginInput\n");
 
     if (a == NULL || f == NULL)
 	outofmem(__FILE__, "HText_beginInput");
@@ -6489,8 +6454,7 @@ PUBLIC int HText_beginInput ARGS3(
 	    /*
 	     *  Error!  NAME must be present.
 	     */
-	    if (TRACE)
-		fprintf(stderr,
+	    CTRACE(tfp,
 		  "GridText: No name present in input field; not displaying\n");
 	    FREE(a);
 	    FREE(f);
@@ -6717,30 +6681,27 @@ PUBLIC int HText_beginInput ARGS3(
 	    text->forms = HTList_new();
 	}
     } else {
-	if (TRACE)
-	    fprintf(stderr, "beginInput: HTCurrentForm is missing!\n");
+	CTRACE(tfp, "beginInput: HTCurrentForm is missing!\n");
     }
 
-    if (TRACE) {
-	fprintf(stderr,"Input link: name=%s\nvalue=%s\nsize=%d\n",
+    CTRACE(tfp, "Input link: name=%s\nvalue=%s\nsize=%d\n",
 			f->name,
 			((f->value != NULL) ? f->value : ""),
 			f->size);
-	fprintf(stderr,"Input link: name_cs=%d \"%s\" (from %d \"%s\")\n",
+    CTRACE(tfp, "Input link: name_cs=%d \"%s\" (from %d \"%s\")\n",
 			f->name_cs,
 			(f->name_cs >= 0 ?
 			 LYCharSet_UC[f->name_cs].MIMEname : "<UNKNOWN>"),
 			I->name_cs,
 			(I->name_cs >= 0 ?
 			 LYCharSet_UC[I->name_cs].MIMEname : "<UNKNOWN>"));
-	fprintf(stderr,"            value_cs=%d \"%s\" (from %d \"%s\")\n",
+    CTRACE(tfp, "            value_cs=%d \"%s\" (from %d \"%s\")\n",
 			f->value_cs,
 			(f->value_cs >= 0 ?
 			 LYCharSet_UC[f->value_cs].MIMEname : "<UNKNOWN>"),
 			I->value_cs,
 			(I->value_cs >= 0 ?
 			 LYCharSet_UC[I->value_cs].MIMEname : "<UNKNOWN>"));
-    }
 
     /*
      *  Return the SIZE of the input field.
@@ -6888,14 +6849,10 @@ PUBLIC void HText_SubmitForm ARGS4(
     thisform = HTList_objectAt(HTMainText->forms, form_number - 1);
     /*  Sanity check */
     if (!thisform) {
-	if (TRACE)
-	    fprintf(stderr,
-		    "SubmitForm: form %d not in HTMainText's list!\n",
+	CTRACE(tfp, "SubmitForm: form %d not in HTMainText's list!\n",
 		    form_number);
     } else if (thisform->number != form_number) {
-	if (TRACE)
-	    fprintf(stderr,
-		    "SubmitForm: failed sanity check, %d!=%d !\n",
+	CTRACE(tfp, "SubmitForm: failed sanity check, %d!=%d !\n",
 		    thisform->number, form_number);
 	thisform = NULL;
     }
@@ -7220,25 +7177,22 @@ PUBLIC void HText_SubmitForm ARGS4(
 	        case F_IMAGE_SUBMIT_TYPE:
 		    if (!(form_ptr->name && *form_ptr->name != '\0' &&
 			  !strcmp(form_ptr->name, link_name))) {
-			if (TRACE) {
-			    fprintf(stderr,
+			CTRACE(tfp,
 				    "SubmitForm: skipping submit field with ");
-			    fprintf(stderr,
-				    "name \"%s\" for link_name \"%s\", %s.",
+			CTRACE(tfp, "name \"%s\" for link_name \"%s\", %s.",
 				    form_ptr->name ? form_ptr->name : "???",
 				    link_name ? link_name : "???",
 				    (form_ptr->name && *form_ptr->name) ?
 				    "not current link" : "no field name");
-			}
 			break;
 		    }
 		    if (!(form_ptr->type == F_TEXT_SUBMIT_TYPE ||
 			(form_ptr->value && *form_ptr->value != '\0' &&
 			 !strcmp(form_ptr->value, link_value)))) {
 			if (TRACE) {
-			    fprintf(stderr,
+			    fprintf(tfp,
 				    "SubmitForm: skipping submit field with ");
-			    fprintf(stderr,
+			    fprintf(tfp,
 				    "name \"%s\" for link_name \"%s\", %s!",
 				    form_ptr->name ? form_ptr->name : "???",
 				    link_name ? link_name : "???",
@@ -7288,9 +7242,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 			success = LYUCTranslateBackFormData(&copied_val_used,
 							form_ptr->value_cs,
 							target_cs, PlainText);
-			if (TRACE) {
-			    fprintf(stderr,
-				    "SubmitForm: field \"%s\" %d %s -> %d %s %s\n",
+			CTRACE(tfp, "SubmitForm: field \"%s\" %d %s -> %d %s %s\n",
 				    form_ptr->name ? form_ptr->name : "",
 				    form_ptr->value_cs,
 				    form_ptr->value_cs >= 0 ?
@@ -7299,18 +7251,14 @@ PUBLIC void HText_SubmitForm ARGS4(
 				    target_cs,
 				    target_csname ? target_csname : "???",
 				    success ? "OK" : "FAILED");
-			}
 			if (success) {
 			    val_used = copied_val_used;
 			}
 		    } else {  /* We can use the value directly. */
-			if (TRACE) {
-			    fprintf(stderr,
-				    "SubmitForm: field \"%s\" %d %s OK\n",
+			CTRACE(tfp, "SubmitForm: field \"%s\" %d %s OK\n",
 				    form_ptr->name ? form_ptr->name : "",
 				    target_cs,
 				    target_csname ? target_csname : "???");
-			}
 			success = YES;
 		    }
 		    if (!success) {
@@ -7384,9 +7332,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 			success = LYUCTranslateBackFormData(&copied_name_used,
 							form_ptr->name_cs,
 							target_cs, PlainText);
-			if (TRACE) {
-			    fprintf(stderr,
-				    "SubmitForm: name \"%s\" %d %s -> %d %s %s\n",
+			CTRACE(tfp, "SubmitForm: name \"%s\" %d %s -> %d %s %s\n",
 				    form_ptr->name ? form_ptr->name : "",
 				    form_ptr->name_cs,
 				    form_ptr->name_cs >= 0 ?
@@ -7395,7 +7341,6 @@ PUBLIC void HText_SubmitForm ARGS4(
 				    target_cs,
 				    target_csname ? target_csname : "???",
 				    success ? "OK" : "FAILED");
-			}
 			if (success) {
 			    name_used = copied_name_used;
 			}
@@ -7409,13 +7354,10 @@ PUBLIC void HText_SubmitForm ARGS4(
 			    }
 			}
 		    } else {  /* We can use the name directly. */
-			if (TRACE) {
-			    fprintf(stderr,
-				    "SubmitForm: name \"%s\" %d %s OK\n",
+			CTRACE(tfp, "SubmitForm: name \"%s\" %d %s OK\n",
 				    form_ptr->name ? form_ptr->name : "",
 				    target_cs,
 				    target_csname ? target_csname : "???");
-			}
 			success = YES;
 			if (Boundary) {
 			    StrAllocCopy(copied_name_used, name_used);
@@ -7449,8 +7391,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 
 		    break;
 		default:
-		    if (TRACE)
-			fprintf(stderr, "SubmitForm: What type is %d?\n",
+		    CTRACE(tfp, "SubmitForm: What type is %d?\n",
 				form_ptr->type);
 		}
 
@@ -7804,17 +7745,15 @@ PUBLIC void HText_SubmitForm ARGS4(
 
     if (submit_item->submit_method == URL_MAIL_METHOD) {
 	_user_message("Submitting %s", submit_item->submit_action);
-	if (TRACE) {
-	    fprintf(stderr, "\nGridText - mailto_address: %s\n",
+	CTRACE(tfp, "\nGridText - mailto_address: %s\n",
 			    (submit_item->submit_action+7));
-	    fprintf(stderr, "GridText - mailto_subject: %s\n",
+	CTRACE(tfp, "GridText - mailto_subject: %s\n",
 			    ((submit_item->submit_title &&
 			      *submit_item->submit_title) ?
 			      (submit_item->submit_title) :
 					(HText_getTitle() ?
 				         HText_getTitle() : "")));
-	    fprintf(stderr,"GridText - mailto_content: %s\n",query);
-	}
+	CTRACE(tfp,"GridText - mailto_content: %s\n",query);
 	sleep(MessageSecs);
 	mailform((submit_item->submit_action+7),
 		 ((submit_item->submit_title &&
@@ -7833,8 +7772,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 
     if (submit_item->submit_method == URL_POST_METHOD || Boundary) {
 	StrAllocCopy(doc->post_data, query);
-	if (TRACE)
-	    fprintf(stderr,"GridText - post_data: %s\n",doc->post_data);
+	CTRACE(tfp,"GridText - post_data: %s\n",doc->post_data);
 	StrAllocCopy(doc->address, submit_item->submit_action);
 	FREE(query);
 	return;

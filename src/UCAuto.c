@@ -83,9 +83,7 @@ PRIVATE void call_setfont ARGS3(
     }
 
     if (*T_setfont_cmd) {
-	if (TRACE) {
-	    fprintf(stderr, "Executing setfont: '%s'\n", T_setfont_cmd);
-	}
+	CTRACE(tfp, "Executing setfont: '%s'\n", T_setfont_cmd);
 	system(T_setfont_cmd);
     }
 }
@@ -339,10 +337,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	int,		newcs,
 	LYUCcharset *,	p)
 {
-    if (TRACE) {
-	fprintf(stderr,
-		"UCChangeTerminalCodepage: Called, but not implemented!");
-    }
+    CTRACE(tfp, "UCChangeTerminalCodepage: Called, but not implemented!");
 }
 #endif /* LINUX */
 
@@ -354,9 +349,6 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	int,		newcs GCC_UNUSED,
 	LYUCcharset *,	p GCC_UNUSED)
 {
-    if (TRACE) {
-	fprintf(stderr,
-		"UCChangeTerminalCodepage: Called, but not implemented!");
-    }
+    CTRACE(tfp, "UCChangeTerminalCodepage: Called, but not implemented!");
 }
 #endif /* EXP_CHARTRANS_AUTOSWITCH */

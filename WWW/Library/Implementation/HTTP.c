@@ -35,8 +35,6 @@
 #include <LYGlobalDefs.h>
 #include <LYLeaks.h>
 
-/* #define TRACE 1 */
-
 struct _HTStream
 {
   HTStreamClass * isa;
@@ -186,17 +184,13 @@ try_again:
       /*
       **  Interrupt cleanly.
       */
-      if (TRACE)
-	  fprintf (stderr,
-		   "HTTP: Interrupted on connect; recovering cleanly.\n");
-      _HTProgress ("Connection interrupted.");
-      status = HT_NOT_LOADED;
-      goto done;
-  }
-  if (status < 0) {
-      if (TRACE)
-	  fprintf(stderr,
-	    "HTTP: Unable to connect to remote host for `%s' (errno = %d).\n",
+       CTRACE (tfp, "HTTP: Interrupted on connect; recovering cleanly.\n");
+       _HTProgress ("Connection interrupted.");
+       status = HT_NOT_LOADED;
+       goto done;
+   }
+   if (status < 0) {
+	CTRACE(tfp, "HTTP: Unable to connect to remote host for `%s' (errno = %d).\n",
 	    url, SOCKET_ERRNO);
       HTAlert("Unable to connect to remote host.");
       status = HT_NOT_LOADED;
@@ -441,8 +435,7 @@ try_again:
 		*/
 		sprintf(line, "%s%c%c", auth, CR, LF);
 		StrAllocCat(command, line);
-		if (TRACE)
-		    fprintf(stderr, "HTTP: Sending authorization: %s\n", auth);
+		CTRACE(tfp, "HTTP: Sending authorization: %s\n", auth);
 	    } else if (auth && *auth == '\0') {
 		/*
 		**  If auth is a zero-length string, the user either
@@ -466,9 +459,7 @@ try_again:
 		    goto done;
 		}
 	    } else {
-		if (TRACE)
-		    fprintf(stderr,
-			    "HTTP: Not sending authorization (yet).\n");
+		CTRACE(tfp, "HTTP: Not sending authorization (yet).\n");
 	    }
 	    /*
 	    **	Add 'Cookie:' header, if it's HTTP or HTTPS
@@ -501,9 +492,7 @@ try_again:
 		*/
 		StrAllocCat(command, "Cookie2: $Version=\"1\"");
 		StrAllocCat(command, crlf);
-		if (TRACE)
-		    fprintf(stderr,
-			    "HTTP: Sending Cookie2: $Version =\"1\"\n");
+		CTRACE(tfp, "HTTP: Sending Cookie2: $Version =\"1\"\n");
 	    }
 	    if (*cookie != '\0') {
 		/*
@@ -514,8 +503,7 @@ try_again:
 		StrAllocCat(command, "Cookie: ");
 		StrAllocCat(command, cookie);
 		StrAllocCat(command, crlf);
-		if (TRACE)
-		    fprintf(stderr, "HTTP: Sending Cookie: %s\n", cookie);
+		CTRACE(tfp, "HTTP: Sending Cookie: %s\n", cookie);
 	    }
 	    FREE(cookie);
 	}
@@ -540,9 +528,7 @@ try_again:
 	    */
 	    sprintf(line, "%s%c%c", auth, CR, LF);
 	    StrAllocCat(command, line);
-	    if (TRACE)
-		fprintf(stderr,
-			(auth_proxy ?
+	    CTRACE(tfp, (auth_proxy ?
 			 "HTTP: Sending proxy authorization: %s\n" :
 			 "HTTP: Sending authorization: %s\n"),
 			auth);
@@ -569,9 +555,7 @@ try_again:
 		goto done;
 	    }
 	} else {
-	    if (TRACE)
-		fprintf(stderr,
-			(auth_proxy ?
+	    CTRACE(tfp, (auth_proxy ?
 			 "HTTP: Not sending proxy authorization (yet).\n" :
 			 "HTTP: Not sending authorization (yet).\n"));
 	}
@@ -581,12 +565,10 @@ try_again:
       auth_proxy = NO;
   }
 
-  if (do_post)
-    {
-      if (TRACE)
-	  fprintf (stderr, "HTTP: Doing post, content-type '%s'\n",
-		   anAnchor->post_content_type ? anAnchor->post_content_type
-					       : "lose");
+    if (do_post) {
+	CTRACE (tfp, "HTTP: Doing post, content-type '%s'\n",
+		     anAnchor->post_content_type ? anAnchor->post_content_type
+						 : "lose");
       sprintf (line, "Content-type: %s%c%c",
 	       anAnchor->post_content_type ? anAnchor->post_content_type
 					   : "lose", CR, LF);
@@ -609,12 +591,9 @@ try_again:
   else
       StrAllocCat(command, crlf);	/* Blank line means "end" of headers */
 
-  if (TRACE) {
-      fprintf (stderr,
-	       "Writing:\n%s%s----------------------------------\n",
+  CTRACE (tfp, "Writing:\n%s%s----------------------------------\n",
 	       command,
 	       (anAnchor->post_data ? crlf : ""));
-  }
 
   _HTProgress ("Sending HTTP request.");
 
@@ -622,8 +601,7 @@ try_again:
   FREE(command);
   if (status <= 0) {
       if (status == 0) {
-	  if (TRACE)
-	      fprintf (stderr, "HTTP: Got status 0 in initial write\n");
+	  CTRACE (tfp, "HTTP: Got status 0 in initial write\n");
 	  /* Do nothing. */
       } else if ((SOCKET_ERRNO == ENOTCONN ||
 		  SOCKET_ERRNO == ECONNRESET ||
@@ -633,18 +611,14 @@ try_again:
 	    /*
 	    **	Arrrrgh, HTTP 0/1 compability problem, maybe.
 	    */
-	    if (TRACE)
-		fprintf (stderr,
-		 "HTTP: BONZO ON WRITE Trying again with HTTP0 request.\n");
+	    CTRACE (tfp, "HTTP: BONZO ON WRITE Trying again with HTTP0 request.\n");
 	    _HTProgress ("Retrying as HTTP0 request.");
 	    HTTP_NETCLOSE(s, handle);
 	    extensions = NO;
 	    already_retrying = TRUE;
 	    goto try_again;
       } else {
-	  if (TRACE)
-	      fprintf (stderr,
-	   "HTTP: Hit unexpected network WRITE error; aborting connection.\n");
+	  CTRACE (tfp, "HTTP: Hit unexpected network WRITE error; aborting connection.\n");
 	  HTTP_NETCLOSE(s, handle);
 	  status = -1;
 	  HTAlert("Unexpected network write error; connection aborted.");
@@ -652,8 +626,7 @@ try_again:
       }
   }
 
-  if (TRACE)
-      fprintf (stderr, "HTTP: WRITE delivered OK\n");
+  CTRACE (tfp, "HTTP: WRITE delivered OK\n");
   _HTProgress ("HTTP request sent; waiting for response.");
 
   /*	Read the first line of the response
@@ -675,21 +648,18 @@ try_again:
 	    line_buffer =
 	      (char *)realloc(line_buffer, (buffer_length * sizeof(char)));
 	}
-	if (TRACE)
-	    fprintf (stderr, "HTTP: Trying to read %d\n",
+	CTRACE (tfp, "HTTP: Trying to read %d\n",
 		     buffer_length - length - 1);
 	status = HTTP_NETREAD(s, line_buffer + length,
 			      buffer_length - length - 1, handle);
-	if (TRACE)
-	    fprintf (stderr, "HTTP: Read %d\n", status);
+	CTRACE (tfp, "HTTP: Read %d\n", status);
 	if (status <= 0) {
 	    /*
 	     *	Retry if we get nothing back too.
 	     *	Bomb out if we get nothing twice.
 	     */
 	    if (status == HT_INTERRUPTED) {
-		if (TRACE)
-		    fprintf (stderr, "HTTP: Interrupted initial read.\n");
+		CTRACE (tfp, "HTTP: Interrupted initial read.\n");
 		_HTProgress ("Connection interrupted.");
 		HTTP_NETCLOSE(s, handle);
 		status = HT_NO_DATA;
@@ -702,9 +672,7 @@ try_again:
 		/*
 		**  Arrrrgh, HTTP 0/1 compability problem, maybe.
 		*/
-		if (TRACE)
-		    fprintf (stderr,
-			"HTTP: BONZO Trying again with HTTP0 request.\n");
+		CTRACE (tfp, "HTTP: BONZO Trying again with HTTP0 request.\n");
 		HTTP_NETCLOSE(s, handle);
 		FREE(line_buffer);
 		FREE(line_kept_clean);
@@ -714,9 +682,7 @@ try_again:
 		_HTProgress ("Retrying as HTTP0 request.");
 		goto try_again;
 	    } else {
-		if (TRACE)
-		    fprintf (stderr,
-  "HTTP: Hit unexpected network read error; aborting connection; status %d.\n",
+		CTRACE (tfp, "HTTP: Hit unexpected network read error; aborting connection; status %d.\n",
 			   status);
 		HTAlert("Unexpected network read error; connection aborted.");
 		HTTP_NETCLOSE(s, handle);
@@ -771,8 +737,7 @@ try_again:
   /*	We now have a terminated unfolded line. Parse it.
   **	-------------------------------------------------
   */
-  if (TRACE)
-      fprintf(stderr, "HTTP: Rx: %s\n", line_buffer);
+  CTRACE(tfp, "HTTP: Rx: %s\n", line_buffer);
 
   /*
   **  Kludge to work with old buggy servers and the VMS Help gateway.
@@ -788,8 +753,7 @@ try_again:
       FREE(line_kept_clean);
       extensions = NO;
       already_retrying = TRUE;
-      if (TRACE)
-	  fprintf(stderr, "HTTP: close socket %d to retry with HTTP0\n", s);
+      CTRACE(tfp, "HTTP: close socket %d to retry with HTTP0\n", s);
       HTTP_NETCLOSE(s, handle);
       /* print a progress message */
       _HTProgress ("Retrying as HTTP0 request.");
@@ -808,8 +772,7 @@ try_again:
 		    server_version,
 		    &server_status);
 
-    if (TRACE)
-	fprintf (stderr, "HTTP: Scanned %d fields from line_buffer\n", fields);
+    CTRACE (tfp, "HTTP: Scanned %d fields from line_buffer\n", fields);
 
     if (http_error_file) {     /* Make the status code externally available */
 	FILE *error_file;
@@ -841,8 +804,7 @@ try_again:
 	 */
 	HTAtom * encoding;
 
-	if (TRACE)
-	    fprintf (stderr, "--- Talking HTTP0.\n");
+	CTRACE (tfp, "--- Talking HTTP0.\n");
 
 	format_in = HTFileFormat(url, &encoding, NULL);
 	/*
@@ -851,27 +813,19 @@ try_again:
 	**  without looking at content.
 	*/
 	if (!strncmp(HTAtom_name(format_in), "text/plain",10)) {
-	    if (TRACE)
-		fprintf(stderr,
-			   "HTTP: format_in being changed to text/HTML\n");
+	    CTRACE(tfp, "HTTP: format_in being changed to text/HTML\n");
 	    format_in = WWW_HTML;
 	}
 	if (!IsUnityEnc(encoding)) {
 	    /*
 	    **	Change the format to that for "www/compressed".
 	    */
-	    if (TRACE) {
-		fprintf(stderr,
-			"HTTP: format_in is '%s',\n", HTAtom_name(format_in));
-	    }
+	    CTRACE(tfp, "HTTP: format_in is '%s',\n", HTAtom_name(format_in));
 	    StrAllocCopy(anAnchor->content_type, HTAtom_name(format_in));
 	    StrAllocCopy(anAnchor->content_encoding, HTAtom_name(encoding));
 	    format_in = HTAtom_for("www/compressed");
-	    if (TRACE) {
-		fprintf(stderr,
-			"        Treating as '%s' with encoding '%s'\n",
+	    CTRACE(tfp, "        Treating as '%s' with encoding '%s'\n",
 			"www/compressed", HTAtom_name(encoding));
-	    }
 	}
 
 	start_of_data = line_kept_clean;
@@ -880,8 +834,7 @@ try_again:
 	**  Set up to decode full HTTP/1.n response. - FM
 	*/
 	format_in = HTAtom_for("www/mime");
-	if (TRACE)
-	    fprintf (stderr, "--- Talking HTTP1.\n");
+	CTRACE (tfp, "--- Talking HTTP1.\n");
 
 	/*
 	**  We set start_of_data to "" when !eol here because there
@@ -1133,8 +1086,7 @@ try_again:
 		  /*
 		   *  Impatient user. - FM
 		   */
-		  if (TRACE)
-		      fprintf (stderr, "HTTP: Interrupted followup read.\n");
+		  CTRACE (tfp, "HTTP: Interrupted followup read.\n");
 		  _HTProgress ("Connection interrupted.");
 		  status = HT_INTERRUPTED;
 		  goto clean_up;
@@ -1147,9 +1099,7 @@ try_again:
 		       *  Don't make the redirection permanent
 		       *  if we have POST content. - FM
 		       */
-		      if (TRACE)
-			  fprintf(stderr,
-	 "HTTP: Have POST content. Treating 301 (Permanent) as Temporary.\n");
+		      CTRACE(tfp, "HTTP: Have POST content. Treating 301 (Permanent) as Temporary.\n");
 		      HTAlert(
 	 "Have POST content. Treating Permanent Redirection as Temporary.\n");
 		  } else {
@@ -1367,9 +1317,7 @@ Cookie2_continuation:
 			     *	thus is probably something in the body, so
 			     *	we'll show the user what was returned. - FM
 			     */
-			    if (TRACE)
-				fprintf(stderr,
-					"HTTP: 'Location:' is zero-length!\n");
+			    CTRACE(tfp, "HTTP: 'Location:' is zero-length!\n");
 			    if (cp1)
 				*cp1 = LF;
 			    if (cp2)
@@ -1388,9 +1336,7 @@ Cookie2_continuation:
 			 *  seek the document at that Location. - FM
 			 */
 			HTProgress(line_buffer);
-			if (TRACE)
-			    fprintf(stderr,
-				    "HTTP: Picked up location '%s'\n",
+			CTRACE(tfp, "HTTP: Picked up location '%s'\n",
 				    redirecting_url);
 			if (cp1)
 			    *cp1 = LF;
@@ -1408,9 +1354,7 @@ Cookie2_continuation:
 			     *	Append our URL. - FM
 			     */
 			    StrAllocCat(redirecting_url, anAnchor->address);
-			    if (TRACE)
-				fprintf(stderr,
-					"HTTP: Proxy URL is '%s'\n",
+			    CTRACE(tfp, "HTTP: Proxy URL is '%s'\n",
 					redirecting_url);
 			}
 			if (!do_post ||
@@ -1474,8 +1418,7 @@ Cookie2_continuation:
 	       *  header, so we'll show the user what we got, if
 	       *  anything. - FM
 	       */
-	      if (TRACE)
-		  fprintf (stderr, "HTTP: Failed to pick up location.\n");
+	      CTRACE (tfp, "HTTP: Failed to pick up location.\n");
 	      doing_redirect = FALSE;
 	      permanent_redirection = FALSE;
 	      start_of_data = line_kept_clean;
@@ -1532,10 +1475,9 @@ Cookie2_continuation:
 			goto clean_up;
 		    }
 
-		    if (TRACE)
-			fprintf(stderr, "%s %d %s\n",
-			      "HTTP: close socket", s,
-			      "to retry with Access Authorization");
+		    CTRACE(tfp, "%s %d %s\n",
+				"HTTP: close socket", s,
+				"to retry with Access Authorization");
 
 		    _HTProgress (
 			"Retrying with access authorization information.");
@@ -1583,10 +1525,9 @@ Cookie2_continuation:
 			goto clean_up;
 		    }
 
-		    if (TRACE)
-			fprintf(stderr, "%s %d %s\n",
-			      "HTTP: close socket", s,
-			      "to retry with Proxy Authorization");
+		    CTRACE(tfp, "%s %d %s\n",
+				"HTTP: close socket", s,
+				"to retry with Proxy Authorization");
 
 		    _HTProgress (
 			"Retrying with proxy authorization information.");
@@ -1779,8 +1720,7 @@ Cookie2_continuation:
       (*target->isa->_abort)(target, NULL);
       HTTP_NETCLOSE(s, handle);
       if (!already_retrying && !do_post) {
-	  if (TRACE)
-	      fprintf (stderr, "HTTP: Trying again with HTTP0 request.\n");
+	  CTRACE (tfp, "HTTP: Trying again with HTTP0 request.\n");
 	  /*
 	  **  May as well consider it an interrupt -- right?
 	  */

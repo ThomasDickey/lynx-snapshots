@@ -2032,19 +2032,15 @@ PUBLIC void LYFakeZap ARGS1(
     BOOL,	set)
 {
     if (set && fake_zap < 1) {
-	if (TRACE) {
-	    fprintf(stderr, "\r *** Set simulated 'Z'");
-	    if (fake_zap)
-		fprintf(stderr, ", %d pending", fake_zap);
-	    fprintf(stderr, " ***\n");
-	}
+	CTRACE(tfp, "\r *** Set simulated 'Z'");
+	if (fake_zap)
+	    CTRACE(tfp, ", %d pending", fake_zap);
+	CTRACE(tfp, " ***\n");
 	fake_zap++;
     } else if (!set && fake_zap) {
-	if (TRACE) {
-	    fprintf(stderr, "\r *** Unset simulated 'Z'");
-	    fprintf(stderr, ", %d pending", fake_zap);
-	    fprintf(stderr, " ***\n");
-	}
+	CTRACE(tfp, "\r *** Unset simulated 'Z'");
+	CTRACE(tfp, ", %d pending", fake_zap);
+	CTRACE(tfp, " ***\n");
 	fake_zap = 0;
     }
 
@@ -2063,8 +2059,8 @@ PUBLIC int HTCheckForInterrupt NOARGS
     if (fake_zap > 0) {
 	fake_zap--;
 	if (TRACE) {
-	    fprintf(stderr, "\r *** Got simulated 'Z' ***\n");
-	    fflush(stderr);
+	    fprintf(tfp, "\r *** Got simulated 'Z' ***\n");
+	    fflush(tfp);
 	    if (!LYTraceLogFP)
 		sleep(AlertSecs);
 	}
@@ -2130,8 +2126,8 @@ PUBLIC int HTCheckForInterrupt NOARGS
     if (fake_zap > 0) {
 	fake_zap--;
 	if (TRACE) {
-	    fprintf(stderr, "\r *** Got simulated 'Z' ***\n");
-	    fflush(stderr);
+	    fprintf(tfp, "\r *** Got simulated 'Z' ***\n");
+	    fflush(tfp);
 	    if (!LYTraceLogFP)
 		sleep(AlertSecs);
 	}
@@ -2422,7 +2418,7 @@ PUBLIC int is_url ARGS1(
     if (*cp == '/')
 	return(0);
 
-#ifdef DOSPATH /* sorry! */
+#if defined (DOSPATH) || defined (__EMX__) /* sorry! */
 	if (strncmp(cp, "file:///", 8) && strlen(cp) == 19 &&
 	    cp[strlen(cp)-1] == ':')
 	    StrAllocCat(cp,"/");
@@ -2878,8 +2874,7 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
 #endif /* LINUX */
 
     } else {
-	if (TRACE)
-	   fprintf(stderr,"Could not get ttyname or open UTMP file");
+	CTRACE(tfp,"Could not get ttyname or open UTMP file");
     }
 
     return(FALSE);
@@ -2971,11 +2966,8 @@ PUBLIC void size_change ARGS1(
     if (LYlines != old_lines || LYcols != old_cols) {
 	recent_sizechange = TRUE;
     }
-    if (TRACE) {
-	fprintf(stderr,
-		"Window size changed from (%d,%d) to (%d,%d)\n",
+    CTRACE(tfp, "Window size changed from (%d,%d) to (%d,%d)\n",
 		old_lines, old_cols, LYlines, LYcols);
-    }
 #ifdef SIGWINCH
     (void)signal (SIGWINCH, size_change);
 #endif /* SIGWINCH */
@@ -3387,9 +3379,7 @@ PUBLIC void tempname ARGS2(
 #endif /* FNAMES_8_3 */
 	    if ((fp = fopen(namebuffer, "r")) != NULL) {
 		fclose(fp);
-		if (TRACE)
-		    fprintf(stderr,
-			    "tempname: file '%s' already exists!\n",
+		CTRACE(tfp, "tempname: file '%s' already exists!\n",
 			    namebuffer);
 		counter++;
 		continue;
@@ -3405,9 +3395,7 @@ PUBLIC void tempname ARGS2(
 #endif /* FNAMES_8_3 */
 	    if ((fp = fopen(namebuffer, "r")) != NULL) {
 		fclose(fp);
-		if (TRACE)
-		    fprintf(stderr,
-			    "tempname: file '%s' already exists!\n",
+		CTRACE(tfp, "tempname: file '%s' already exists!\n",
 			    namebuffer);
 		counter++;
 		continue;
@@ -3423,9 +3411,7 @@ PUBLIC void tempname ARGS2(
 #endif /* FNAMES_8_3 */
 	    if ((fp = fopen(namebuffer, "r")) != NULL) {
 		fclose(fp);
-		if (TRACE)
-		    fprintf(stderr,
-			    "tempname: file '%s' already exists!\n",
+		CTRACE(tfp, "tempname: file '%s' already exists!\n",
 			    namebuffer);
 		continue;
 	    }
@@ -3829,8 +3815,7 @@ PUBLIC void LYEnsureAbsoluteURL ARGS2(
 	StrAllocCat(*href, "/*");
     }
     if (!is_url(*href)) {
-	if (TRACE)
-	    fprintf(stderr, "%s%s'%s' is not a URL\n",
+	CTRACE(tfp, "%s%s'%s' is not a URL\n",
 		    (name ? name : ""), (name ? " " : ""), *href);
 	LYConvertToURL(href);
     }
@@ -3859,7 +3844,7 @@ PUBLIC void LYConvertToURL ARGS1(
     if (!old_string || *old_string == '\0')
 	return;
 
-#ifdef DOSPATH
+#ifdef DOSPATH /* should EMX version do this too? */
     {
 	 char *cp_url = *AllocatedString;
 	 for(; *cp_url != '\0'; cp_url++)
@@ -3879,7 +3864,7 @@ PUBLIC void LYConvertToURL ARGS1(
 
     if (*old_string != '/') {
 	char *fragment = NULL;
-#ifdef DOSPATH
+#ifdef DOSPATH /* Should EMX version do this? */
 	StrAllocCat(*AllocatedString,"/");
 #endif /* DOSPATH */
 #ifdef VMS
@@ -3977,9 +3962,7 @@ PUBLIC void LYConvertToURL ARGS1(
 		     */
 		    strcpy(url_file, "/");
 		    strcat(url_file, old_string);
-		    if (TRACE) {
-			fprintf(stderr,
-			    "Can't find '%s'  Will assume it's a bad path.\n",
+		    CTRACE(tfp, "Can't find '%s'  Will assume it's a bad path.\n",
 				old_string);
 		    }
 		    StrAllocCat(*AllocatedString, url_file);
@@ -4019,11 +4002,8 @@ PUBLIC void LYConvertToURL ARGS1(
 		 */
 		strcpy(url_file, "/");
 		strcat(url_file, old_string);
-		if (TRACE) {
-		    fprintf(stderr,
-			    "Can't find '%s'  Will assume it's a bad path.\n",
-				old_string);
-		}
+		CTRACE(tfp, "Can't find '%s'  Will assume it's a bad path.\n",
+			    old_string);
 		StrAllocCat(*AllocatedString, url_file);
 	    } else {
 		/*
@@ -4041,9 +4021,7 @@ PUBLIC void LYConvertToURL ARGS1(
 	lib$find_file_end(&context);
 	FREE(cur_dir);
 have_VMS_URL:
-	if (TRACE) {
-	    fprintf(stderr, "Trying: '%s'\n", *AllocatedString);
-	}
+	CTRACE(tfp, "Trying: '%s'\n", *AllocatedString);
 #else /* Unix: */
 #ifdef DOSPATH
 	if (strlen(old_string) == 1 && *old_string == '.') {
@@ -4055,10 +4033,8 @@ have_VMS_URL:
 	    StrAllocCopy(temp, HTDOS_wwwName(curdir));
 	    StrAllocCat(*AllocatedString, temp);
 	    FREE(temp);
-	    if (TRACE) {
-		fprintf(stderr, "Converted '%s' to '%s'\n",
-				old_string, *AllocatedString);
-	    }
+	    CTRACE(tfp, "Converted '%s' to '%s'\n",
+			old_string, *AllocatedString);
 	} else
 #endif /* DOSPATH */
 	if (*old_string == '~') {
@@ -4077,10 +4053,8 @@ have_VMS_URL:
 		StrAllocCat(*AllocatedString, temp);
 		FREE(temp);
 	    }
-	    if (TRACE) {
-		fprintf(stderr, "Converted '%s' to '%s'\n",
-				old_string, *AllocatedString);
-	    }
+	    CTRACE(tfp, "Converted '%s' to '%s'\n",
+			old_string, *AllocatedString);
 	} else {
 	    /*
 	     *	Create a full path to the current default directory.
@@ -4097,7 +4071,7 @@ have_VMS_URL:
 	     *	Concatenate and simplify, trimming any
 	     *	residual relative elements. - FM
 	     */
-#ifndef DOSPATH
+#ifndef DOSPATH /* Should EMX version do this? */
 	    StrAllocCopy(temp, curdir);
 	    StrAllocCat(temp, "/");
 	    StrAllocCat(temp, old_string);
@@ -4114,15 +4088,13 @@ have_VMS_URL:
 	    }
 #endif /* DOSPATH */
 	    LYTrimRelFromAbsPath(temp);
-	    if (TRACE) {
-		fprintf(stderr, "Converted '%s' to '%s'\n", old_string, temp);
-	    }
+	    CTRACE(tfp, "Converted '%s' to '%s'\n", old_string, temp);
 	    if ((stat(temp, &st) > -1) ||
 		(fptemp = fopen(temp, "r")) != NULL) {
 		/*
 		 *  It is a subdirectory or file on the local system.
 		 */
-#ifdef DOSPATH
+#if defined (DOSPATH) || defined (__EMX__)
 		/* Don't want to see DOS local paths like c: escaped */
 		/* especially when we really have file://localhost/  */
 		/* at the beginning. To avoid any confusion we allow */
@@ -4135,10 +4107,8 @@ have_VMS_URL:
 		cp = HTEscape(temp, URL_PATH);
 		StrAllocCat(*AllocatedString, cp);
 		FREE(cp);
-		if (TRACE) {
-		    fprintf(stderr, "Converted '%s' to '%s'\n",
-				    old_string, *AllocatedString);
-		}
+		CTRACE(tfp, "Converted '%s' to '%s'\n",
+			    old_string, *AllocatedString);
 		is_local = TRUE;
 	    } else {
 		char *cp2 = NULL;
@@ -4180,10 +4150,8 @@ have_VMS_URL:
 			}
 		    }
 		    StrAllocCat(*AllocatedString, temp);
-		    if (TRACE) {
-			fprintf(stderr, "Converted '%s' to '%s'\n",
-					old_string, *AllocatedString);
-		    }
+		    CTRACE(tfp, "Converted '%s' to '%s'\n",
+				old_string, *AllocatedString);
 		    is_local = TRUE;
 
 		} else if (strchr(curdir, '#') != NULL ||
@@ -4222,10 +4190,8 @@ have_VMS_URL:
 		 *  local system, so assume it's a URL request and guess
 		 *  the scheme with "http://" as the default.
 		 */
-		if (TRACE) {
-		    fprintf(stderr, "Can't stat() or fopen() '%s'\n",
+		CTRACE(tfp, "Can't stat() or fopen() '%s'\n",
 			    temp2 ? temp2 : temp);
-		}
 		if (LYExpandHostForURL((char **)&old_string,
 				       URLDomainPrefixes,
 				       URLDomainSuffixes)) {
@@ -4236,12 +4202,10 @@ have_VMS_URL:
 			StrAllocCopy(*AllocatedString, old_string);
 		    }
 		} else {
-		  /* RW 1998Mar16  Restore AllocatedString to 'old_string' */ 
-		    StrAllocCopy(*AllocatedString, old_string); 
+		  /* RW 1998Mar16  Restore AllocatedString to 'old_string' */
+		    StrAllocCopy(*AllocatedString, old_string);
 		}
-		if (TRACE) {
-		    fprintf(stderr, "Trying: '%s'\n", *AllocatedString);
-		}
+		CTRACE(tfp, "Trying: '%s'\n", *AllocatedString);
 	    }
 	    FREE(temp);
 	    FREE(temp2);
@@ -4273,9 +4237,7 @@ have_VMS_URL:
 	     */
 	    StrAllocCopy(temp, old_string);
 	    LYTrimRelFromAbsPath(temp);
-	    if (TRACE) {
-		fprintf(stderr, "Converted '%s' to '%s'\n", old_string, temp);
-	    }
+	    CTRACE(tfp, "Converted '%s' to '%s'\n", old_string, temp);
 	    cp = HTEscape(temp, URL_PATH);
 	    StrAllocCat(*AllocatedString, cp);
 	    FREE(cp);
@@ -4284,10 +4246,8 @@ have_VMS_URL:
 		fclose(fptemp);
 		fptemp = NULL;
 	    }
-	    if (TRACE) {
-		fprintf(stderr, "Converted '%s' to '%s'\n",
+	    CTRACE(tfp, "Converted '%s' to '%s'\n",
 			old_string, *AllocatedString);
-	    }
 #endif /* VMS */
 	} else if (old_string[1] == '~') {
 	    /*
@@ -4320,10 +4280,8 @@ have_VMS_URL:
 	    StrAllocCat(*AllocatedString, temp);
 	    FREE(temp);
 	}
-	if (TRACE) {
-	    fprintf(stderr, "Converted '%s' to '%s'\n",
-			    old_string, *AllocatedString);
-	}
+	CTRACE(tfp, "Converted '%s' to '%s'\n",
+		    old_string, *AllocatedString);
     }
     FREE(old_string);
     if (TRACE) {
@@ -4446,11 +4404,8 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	 *  Clear any residual interrupt. - FM
 	 */
 	if (LYCursesON && HTCheckForInterrupt()) {
-	    if (TRACE) {
-		fprintf(stderr,
-	 "LYExpandHostForURL: Ignoring interrupt because '%s' resolved.\n",
+	    CTRACE(tfp, "LYExpandHostForURL: Ignoring interrupt because '%s' resolved.\n",
 			host);
-	    }
 	}
 
 	/*
@@ -4465,11 +4420,8 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	/*
 	 *  Give the user chance to interrupt lookup cycles. - KW & FM
 	 */
-	if (TRACE) {
-	    fprintf(stderr,
-	 "LYExpandHostForURL: Interrupted while '%s' failed to resolve.\n",
+	CTRACE(tfp, "LYExpandHostForURL: Interrupted while '%s' failed to resolve.\n",
 		    host);
-	}
 
 	/*
 	 *  Return failure. - FM
@@ -4572,11 +4524,8 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 		 *  Give the user chance to interrupt lookup cycles. - KW
 		 */
 		if (LYCursesON && HTCheckForInterrupt()) {
-		    if (TRACE) {
-			fprintf(stderr,
-	 "LYExpandHostForURL: Interrupted while '%s' failed to resolve.\n",
+		    CTRACE(tfp, "LYExpandHostForURL: Interrupted while '%s' failed to resolve.\n",
 				host);
-			    }
 		    FREE(Str);
 		    FREE(MsgStr);
 		    FREE(Host);
@@ -4641,12 +4590,9 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
      *	Clear any residual interrupt. - FM
      */
     if (LYCursesON && HTCheckForInterrupt()) {
-	if (TRACE) {
-	    fprintf(stderr,
-	 "LYExpandHostForURL: Ignoring interrupt because '%s' %s.\n",
+	CTRACE(tfp, "LYExpandHostForURL: Ignoring interrupt because '%s' %s.\n",
 		    host,
 		    (GotHost ? "resolved" : "timed out"));
-	}
     }
 
     /*
@@ -4916,7 +4862,7 @@ PUBLIC CONST char * Home_Dir NOARGS
 
     if (homedir == NULL) {
 	if ((cp = getenv("HOME")) == NULL || *cp == '\0') {
-#ifdef DOSPATH /* BAD!	WSB */
+#if defined (DOSPATH) || defined (__EMX__) /* BAD!	WSB */
 	    if ((cp = getenv("TEMP")) == NULL || *cp == '\0') {
 		if ((cp = getenv("TMP")) == NULL || *cp == '\0') {
 		    StrAllocCopy(HomeDir, "C:\\");
@@ -5273,8 +5219,7 @@ PUBLIC time_t LYmktime ARGS2(
     if (!(string && *string))
 	return(0);
     s = string;
-    if (TRACE)
-	fprintf(stderr, "LYmktime: Parsing '%s'\n", s);
+    CTRACE(tfp, "LYmktime: Parsing '%s'\n", s);
 
     /*
      *	Skip any lead alphabetic "Day, " field and
@@ -5490,9 +5435,10 @@ PUBLIC time_t LYmktime ARGS2(
 		     seconds);
     if (absolute == FALSE && clock2 <= time(NULL))
 	clock2 = (time_t)0;
-    if (TRACE && clock2 > 0)
-	fprintf(stderr,
-		"LYmktime: clock=%ld, ctime=%s", (long) clock2, ctime(&clock2));
+    if (clock2 > 0)
+	CTRACE(tfp, "LYmktime: clock=%ld, ctime=%s",
+		    (long) clock2,
+		    ctime(&clock2));
 
     return(clock2);
 }

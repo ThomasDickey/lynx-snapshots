@@ -417,11 +417,8 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		   (uck = UCTransUniChar(code,
 					 me->outUCLYhndl)) >= 32 &&
 		   uck < 256) {
-	    if (TRACE) {
-		fprintf(stderr,
-			"UCTransUniChar returned 0x%.2lX:'%c'.\n",
+	    CTRACE(tfp, "UCTransUniChar returned 0x%.2lX:'%c'.\n",
 			uck, FROMASCII((char)uck));
-	    }
 	    HText_appendCharacter(me->text, ((char)(uck & 0xff)));
 	} else if (chk &&
 		   (uck == -4 ||
@@ -494,18 +491,12 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    /*
 	    **	Ignore 8204 (zwnj) or 8205 (zwj), if we get to here. - FM
 	    */
-	    if (TRACE) {
-		fprintf(stderr,
-			"HTPlain_write: Ignoring '%ld'.\n", code);
-	    }
+	    CTRACE(tfp, "HTPlain_write: Ignoring '%ld'.\n", code);
 	} else if (code == 8206 || code == 8207) {
 	    /*
 	    **	Ignore 8206 (lrm) or 8207 (rlm), if we get to here. - FM
 	    */
-	    if (TRACE) {
-		fprintf(stderr,
-			"HTPlain_write: Ignoring '%ld'.\n", code);
-	    }
+	    CTRACE(tfp, "HTPlain_write: Ignoring '%ld'.\n", code);
 #endif /* NOTDEFINED */
 	} else if (me->T.trans_from_uni && code > 255) {
 	    if (PASSHI8BIT && PASSHICTRL && LYRawMode &&

@@ -272,22 +272,20 @@ PRIVATE char * WWW_from_WAIS ARGS1(
     int i, l;
     if (TRACE) {
 	char *p;
-	fprintf(stderr, "WAIS id (%d bytes) is ", (int)docid->size);
+	fprintf(tfp, "WAIS id (%d bytes) is ", (int)docid->size);
 	for (p = docid->bytes; p < docid->bytes+docid->size; p++) {
 	    if ((*p >= ' ') && (*p<= '~')) /* Assume ASCII! */
-		fprintf(stderr, "%c", *p);
+		fprintf(tfp, "%c", *p);
 	    else
-		fprintf(stderr, "<%x>", (unsigned)*p);
+		fprintf(tfp, "<%x>", (unsigned)*p);
 	}
-	fprintf(stderr, "\n");
+	fprintf(tfp, "\n");
     }
     for (p = docid->bytes;
 	 (p < docid->bytes+docid->size) && (q < &buf[BIG]);) {
-	if (TRACE)
-	    fprintf(stderr, "    Record type %d, length %d\n", p[0], p[1]);
+	CTRACE(tfp, "    Record type %d, length %d\n", p[0], p[1]);
 	if (*p > 10) {
-	    if (TRACE)
-		fprintf(stderr, "Eh? DOCID record type of %d!\n", *p);
+	    CTRACE(tfp, "Eh? DOCID record type of %d!\n", *p);
 	    return 0;
 	}
 	{	/* Bug fix -- allow any byte value 15 Apr 93 */
@@ -316,8 +314,7 @@ PRIVATE char * WWW_from_WAIS ARGS1(
 	*q++= ';';		/* Terminate field */
     }
     *q++ = 0;			/* Terminate string */
-    if (TRACE)
-	fprintf(stderr, "WWW form of id: %s\n", buf);
+    CTRACE(tfp, "WWW form of id: %s\n", buf);
     {
 	char * result = (char *)malloc(strlen(buf)+1);
 	if (!result)
@@ -347,8 +344,8 @@ PRIVATE any * WAIS_from_WWW ARGS2(
     char *q;	/* Poisition of "=" */
     char *s;	/* Position of semicolon */
     int n;	/* size */
-    if (TRACE)
-	fprintf(stderr, "WWW id (to become WAIS id): %s\n", docname);
+
+    CTRACE(tfp, "WWW id (to become WAIS id): %s\n", docname);
     for (n = 0, p = docname; *p; p++) { /* Count sizes of strings */
 	n++;
 	if (*p == ';')
@@ -404,14 +401,14 @@ PRIVATE any * WAIS_from_WWW ARGS2(
 
     if (TRACE) {
 	char *p;
-	fprintf(stderr, "WAIS id (%d bytes) is ", (int)docid->size);
+	fprintf(tfp, "WAIS id (%d bytes) is ", (int)docid->size);
 	for (p = docid->bytes; p < docid->bytes+docid->size; p++) {
 	    if ((*p >= ' ') && (*p<= '~')) /* Assume ASCII! */
-		fprintf(stderr, "%c", *p);
+		fprintf(tfp, "%c", *p);
 	    else
-		fprintf(stderr, "<%x>", (unsigned)*p);
+		fprintf(tfp, "<%x>", (unsigned)*p);
 	}
-	fprintf(stderr, "\n");
+	fprintf(tfp, "\n");
     }
     return docid;		/* Ok */
 
@@ -473,8 +470,7 @@ PRIVATE void display_search_response ARGS4(
 
     BOOL archie =  strstr(database, "archie")!=0;	/* Specical handling */
 
-    if (TRACE)
-	fprintf(stderr, "HTWAIS: Displaying search response\n");
+    CTRACE(tfp, "HTWAIS: Displaying search response\n");
     PUTS("Index ");
     START(HTML_EM);
     PUTS(database);
@@ -512,9 +508,7 @@ PRIVATE void display_search_response ARGS4(
 		/*
 		**  Make a printable string out of the document id.
 		*/
-		if (TRACE)
-		    fprintf(stderr,
-			    "HTWAIS:  %2ld: Score: %4ld, lines:%4ld '%s'\n",
+		CTRACE(tfp, "HTWAIS:  %2ld: Score: %4ld, lines:%4ld '%s'\n",
 			    i,
 			    (long int)(info->DocHeaders[k]->Score),
 			    (long int)(info->DocHeaders[k]->Lines),
@@ -706,8 +700,7 @@ PUBLIC int HTLoadWAIS ARGS4(
     if (!ok)
 	return HTLoadError(sink, 500, "Syntax error in WAIS URL");
 
-    if (TRACE)
-	fprintf(stderr, "HTWAIS: Parsed OK\n");
+    CTRACE(tfp, "HTWAIS: Parsed OK\n");
 
     service = strchr(names, ':');
     if (service)
@@ -724,19 +717,16 @@ PUBLIC int HTLoadWAIS ARGS4(
 
     } else if (!(key && !*key)) {
 	int status;
-	if (TRACE)
-	fprintf (stderr, "===WAIS=== calling mosaic_connect_to_server\n");
+	CTRACE (tfp, "===WAIS=== calling mosaic_connect_to_server\n");
 	status = mosaic_connect_to_server(server_name,
 					  atoi(service),
 					  &connection);
 	if (status == 0) {
-	    if (TRACE)
-		fprintf (stderr, "===WAIS=== connection failed\n");
+	    CTRACE (tfp, "===WAIS=== connection failed\n");
 	    FREE(names);
 	    return HT_NOT_LOADED;
 	} else if (status == -1) {
-	    if (TRACE)
-		fprintf (stderr, "===WAIS=== connection interrupted\n");
+	    CTRACE (tfp, "===WAIS=== connection interrupted\n");
 	    FREE(names);
 	    return HT_NOT_LOADED;
 	}
@@ -809,10 +799,9 @@ PUBLIC int HTLoadWAIS ARGS4(
 		server_name, service, www_database);
 
 	fp = fopen(filename, "r");	/* Have we found this already? */
-	if (TRACE) fprintf(stderr,
-		"HTWAIS: Description of server %s %s.\n",
-		filename,
-		fp ? "exists already" : "does NOT exist!");
+	CTRACE(tfp, "HTWAIS: Description of server %s %s.\n",
+		    filename,
+		    fp ? "exists already" : "does NOT exist!");
 
 	if (fp) {
 	    char c;
@@ -865,8 +854,8 @@ PUBLIC int HTLoadWAIS ARGS4(
 	PUTS("\n");
 
 	request_buffer_length = MAX_MESSAGE_LEN; /* Amount left */
-	if (TRACE) fprintf(stderr, "HTWAIS: Search for `%s' in `%s'\n",
-		keywords, wais_database);
+	CTRACE(tfp, "HTWAIS: Search for `%s' in `%s'\n",
+		    keywords, wais_database);
 	if(NULL ==
 	generate_search_apdu(request_message + HEADER_LENGTH,
 				&request_buffer_length,
@@ -924,9 +913,8 @@ PUBLIC int HTLoadWAIS ARGS4(
 	any   doc_chunk;
 	any * docid = &doc_chunk;
 
-	if (TRACE) fprintf(stderr,
-		"HTWAIS: Retrieve document id `%s' type `%s' length %ld\n",
-		docname, doctype, document_length);
+	CTRACE(tfp, "HTWAIS: Retrieve document id `%s' type `%s' length %ld\n",
+		    docname, doctype, document_length);
 
 	format_in =
 	  !strcmp(doctype, "WSRC") ? HTAtom_for("application/x-wais-source") :
@@ -962,8 +950,7 @@ PUBLIC int HTLoadWAIS ARGS4(
 	    char *type = s_strdup(doctype);	/* Gets freed I guess */
 #endif /* VMS */
 	    request_buffer_length = MAX_MESSAGE_LEN; /* Amount left */
-	    if (TRACE)
-		fprintf(stderr, "HTWAIS: Slice number %ld\n", count);
+	    CTRACE(tfp, "HTWAIS: Slice number %ld\n", count);
 
 	    if (HTCheckForInterrupt()) {
 		HTAlert ("Data transfer interrupted.");

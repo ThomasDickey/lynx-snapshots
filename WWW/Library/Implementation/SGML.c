@@ -282,17 +282,15 @@ PRIVATE void handle_attribute_name ARGS2(
 	    FREE(context->value[i]);
 #ifdef USE_COLOR_STYLE
 	    current_is_class=(!strcasecomp("class", s));
-	    if (TRACE)
-		fprintf(stderr, "SGML: found attribute %s, %d\n", s, current_is_class);
+	    CTRACE(tfp, "SGML: found attribute %s, %d\n", s, current_is_class);
 #endif
 	    return;
 	} /* if */
 
     } /* for */
 
-    if (TRACE)
-	fprintf(stderr, "SGML: Unknown attribute %s for tag %s\n",
-	    s, context->current_tag->name);
+    CTRACE(tfp, "SGML: Unknown attribute %s for tag %s\n",
+		s, context->current_tag->name);
     context->current_attribute_number = INVALID;	/* Invalid */
 }
 
@@ -310,18 +308,15 @@ PRIVATE void handle_attribute_value ARGS2(
 	if (current_is_class)
 	{
 	    strncpy (class_string, s, TEMPSTRINGSIZE);
-	    if (TRACE)
-		fprintf(stderr, "SGML: class is '%s'\n", s);
+	    CTRACE(tfp, "SGML: class is '%s'\n", s);
 	}
 	else
 	{
-	    if (TRACE)
-		fprintf(stderr, "SGML: attribute value is '%s'\n", s);
+	    CTRACE(tfp, "SGML: attribute value is '%s'\n", s);
 	}
 #endif
     } else {
-	if (TRACE)
-	    fprintf(stderr, "SGML: Attribute value %s ignored\n", s);
+	CTRACE(tfp, "SGML: Attribute value %s ignored\n", s);
     }
     context->current_attribute_number = INVALID; /* can't have two assignments! */
 }
@@ -512,9 +507,7 @@ PRIVATE void handle_entity ARGS2(
     */
     if (!strcmp(s, "zwnj") ||
 	!strcmp(s, "zwj")) {
-	if (TRACE) {
-	    fprintf(stderr, "handle_entity: Ignoring '%s'.\n", s);
-	}
+	CTRACE(tfp, "handle_entity: Ignoring '%s'.\n", s);
 	FoundEntity = TRUE;
 	return;
     }
@@ -524,9 +517,7 @@ PRIVATE void handle_entity ARGS2(
     */
     if (!strcmp(s, "lrm") ||
 	!strcmp(s, "rlm")) {
-	if (TRACE) {
-	    fprintf(stderr, "handle_entity: Ignoring '%s'.\n", s);
-	}
+	CTRACE(tfp, "handle_entity: Ignoring '%s'.\n", s);
 	FoundEntity = TRUE;
 	return;
     }
@@ -553,8 +544,7 @@ PRIVATE void handle_entity ARGS2(
     /*
     **	If entity string not found, display as text.
     */
-    if (TRACE)
-	fprintf(stderr, "SGML: Unknown entity '%s'\n", s);
+    CTRACE(tfp, "SGML: Unknown entity '%s'\n", s);
     PUTC('&');
     for (p = s; *p; p++) {
 	PUTC(*p);
@@ -572,8 +562,7 @@ PRIVATE void handle_comment ARGS1(
 {
     CONST char *s = context->string->data;
 
-    if (TRACE)
-	fprintf(stderr, "SGML Comment:\n<%s>\n", s);
+    CTRACE(tfp, "SGML Comment:\n<%s>\n", s);
 
     if (context->csi == NULL &&
 	strncmp(s, "!--#", 4) == 0 &&
@@ -593,8 +582,7 @@ PRIVATE void handle_identifier ARGS1(
 {
     CONST char *s = context->string->data;
 
-    if (TRACE)
-	fprintf(stderr, "SGML Identifier\n<%s>\n", s);
+    CTRACE(tfp, "SGML Identifier\n<%s>\n", s);
 
     return;
 }
@@ -608,8 +596,7 @@ PRIVATE void handle_doctype ARGS1(
 {
     CONST char *s = context->string->data;
 
-    if (TRACE)
-	fprintf(stderr, "SGML Doctype\n<%s>\n", s);
+    CTRACE(tfp, "SGML Doctype\n<%s>\n", s);
 
     return;
 }
@@ -623,8 +610,7 @@ PRIVATE void handle_marked ARGS1(
 {
     CONST char *s = context->string->data;
 
-    if (TRACE)
-	fprintf(stderr, "SGML Marked Section:\n<%s>\n", s);
+    CTRACE(tfp, "SGML Marked Section:\n<%s>\n", s);
 
     return;
 }
@@ -638,8 +624,7 @@ PRIVATE void handle_sgmlent ARGS1(
 {
     CONST char *s = context->string->data;
 
-    if (TRACE)
-	fprintf(stderr, "SGML Entity Declaration:\n<%s>\n", s);
+    CTRACE(tfp, "SGML Entity Declaration:\n<%s>\n", s);
 
     return;
 }
@@ -653,8 +638,7 @@ PRIVATE void handle_sgmlele ARGS1(
 {
     CONST char *s = context->string->data;
 
-    if (TRACE)
-	fprintf(stderr, "SGML Element Declaration:\n<%s>\n", s);
+    CTRACE(tfp, "SGML Element Declaration:\n<%s>\n", s);
 
     return;
 }
@@ -668,8 +652,7 @@ PRIVATE void handle_sgmlatt ARGS1(
 {
     CONST char *s = context->string->data;
 
-    if (TRACE)
-	fprintf(stderr, "SGML Attribute Declaration:\n<%s>\n", s);
+    CTRACE(tfp, "SGML Attribute Declaration:\n<%s>\n", s);
 
     return;
 }
@@ -765,8 +748,7 @@ PRIVATE void end_element ARGS2(
 	       (stackpos > 1 || (!extra_action_taken && stackpos == 0))) {
 	    canclose_check = can_close(old_tag, context->element_stack->tag);
 	    if (canclose_check != close_NO) {
-		if (TRACE)
-		    fprintf(stderr, "SGML: End </%s> \t<- %s end </%s>\n",
+		CTRACE(tfp, "SGML: End </%s> \t<- %s end </%s>\n",
 			    context->element_stack->tag->name,
 			    canclose_check == close_valid ? "supplied," : "forced by",
 			    old_tag->name);
@@ -774,8 +756,7 @@ PRIVATE void end_element ARGS2(
 		extra_action_taken = YES;
 		stackpos = is_on_stack(context, old_tag);
 	    } else {
-		if (TRACE)
-		    fprintf(stderr, "SGML: Still open %s \t<- invalid end </%s>\n",
+		CTRACE(tfp, "SGML: Still open %s \t<- invalid end </%s>\n",
 			    context->element_stack->tag->name,
 			    old_tag->name);
 		return;
@@ -783,8 +764,7 @@ PRIVATE void end_element ARGS2(
 	}
 
 	if (stackpos == 0 && old_tag->contents != SGML_EMPTY) {
-	    if (TRACE)
-		fprintf(stderr, "SGML: Still open %s, no open %s for </%s>\n",
+	    CTRACE(tfp, "SGML: Still open %s, no open %s for </%s>\n",
 			context->element_stack ?
 			context->element_stack->tag->name : "none",
 			old_tag->name,
@@ -792,8 +772,7 @@ PRIVATE void end_element ARGS2(
 	    return;
 	}
 	if (stackpos > 1) {
-	    if (TRACE)
-		fprintf(stderr, "SGML: Nesting <%s>...<%s> \t<- invalid end </%s>\n",
+	    CTRACE(tfp, "SGML: Nesting <%s>...<%s> \t<- invalid end </%s>\n",
 			old_tag->name,
 			context->element_stack->tag->name,
 			old_tag->name);
@@ -818,23 +797,18 @@ PRIVATE void end_element ARGS2(
 	    /*
 	    **	Ignore the end tag. - FM
 	    */
-	    if (TRACE) {
-		fprintf(stderr,
-			"SGML: Ignoring end tag </%s> in SELECT block.\n",
+	    CTRACE(tfp, "SGML: Ignoring end tag </%s> in SELECT block.\n",
 			old_tag->name);
-	    }
 	    return;
 	}
     }
     /*
     **	Handle the end tag. - FM
     */
-    if (TRACE)
-	fprintf(stderr, "SGML: End </%s>\n", old_tag->name);
+    CTRACE(tfp, "SGML: End </%s>\n", old_tag->name);
     if (old_tag->contents == SGML_EMPTY) {
-	if (TRACE)
-	    fprintf(stderr, "SGML: Illegal end tag </%s> found.\n",
-			    old_tag->name);
+	CTRACE(tfp, "SGML: Illegal end tag </%s> found.\n",
+		    old_tag->name);
 	return;
     }
 #ifdef WIND_DOWN_STACK
@@ -847,13 +821,11 @@ PRIVATE void end_element ARGS2(
 
 	if (old_tag != t) {		/* Mismatch: syntax error */
 	    if (context->element_stack->next) { /* This is not the last level */
-		if (TRACE) fprintf(stderr,
-		"SGML: Found </%s> when expecting </%s>. </%s> assumed.\n",
-		    old_tag->name, t->name, t->name);
+		CTRACE(tfp, "SGML: Found </%s> when expecting </%s>. </%s> assumed.\n",
+			    old_tag->name, t->name, t->name);
 	    } else {			/* last level */
-		if (TRACE) fprintf(stderr,
-		    "SGML: Found </%s> when expecting </%s>. </%s> Ignored.\n",
-		    old_tag->name, t->name, old_tag->name);
+		CTRACE(tfp, "SGML: Found </%s> when expecting </%s>. </%s> Ignored.\n",
+			    old_tag->name, t->name, old_tag->name);
 		return; 		/* Ignore */
 	    }
 	}
@@ -872,9 +844,8 @@ PRIVATE void end_element ARGS2(
 	/* Syntax error path only */
 
     }
-    if (TRACE)
-	fprintf(stderr, "SGML: Extra end tag </%s> found and ignored.\n",
-			old_tag->name);
+    CTRACE(tfp, "SGML: Extra end tag </%s> found and ignored.\n",
+		old_tag->name);
 }
 
 
@@ -901,8 +872,7 @@ PRIVATE void start_element ARGS1(
 					      direct_container))) {
 	    canclose_check = can_close(new_tag, context->element_stack->tag);
 	    if (canclose_check != close_NO) {
-		if (TRACE)
-		    fprintf(stderr, "SGML: End </%s> \t<- %s start <%s>\n",
+		CTRACE(tfp, "SGML: End </%s> \t<- %s start <%s>\n",
 			    context->element_stack->tag->name,
 			    canclose_check == close_valid ? "supplied," : "forced by",
 			    new_tag->name);
@@ -911,8 +881,7 @@ PRIVATE void start_element ARGS1(
 		if (canclose_check  == close_error)
 		    direct_container = NO;
 	    } else {
-		if (TRACE)
-		    fprintf(stderr, "SGML: Still open %s \t<- invalid start <%s>\n",
+		CTRACE(tfp, "SGML: Still open %s \t<- invalid start <%s>\n",
 			    context->element_stack->tag->name,
 			    new_tag->name);
 	    }
@@ -921,8 +890,7 @@ PRIVATE void start_element ARGS1(
 	    (context->element_stack->tag->flags & Tgf_strict) &&
 	    !(valid = element_valid_within(new_tag, context->element_stack->tag,
 					   direct_container))) {
-	    if (TRACE)
-		fprintf(stderr, "SGML: Still open %s \t<- ignoring start <%s>\n",
+	    CTRACE(tfp, "SGML: Still open %s \t<- ignoring start <%s>\n",
 			context->element_stack->tag->name,
 			new_tag->name);
 	    return;
@@ -935,8 +903,7 @@ PRIVATE void start_element ARGS1(
 	    for (; i< new_tag->number_of_attributes && !has_attributes; i++)
 		has_attributes = context->present[i];
 	    if (!has_attributes) {
-		if (TRACE)
-		    fprintf(stderr, "SGML: Still open %s, converting invalid <%s> to </%s>\n",
+		CTRACE(tfp, "SGML: Still open %s, converting invalid <%s> to </%s>\n",
 			    context->element_stack->tag->name,
 			    new_tag->name,
 			    new_tag->name);
@@ -951,8 +918,7 @@ PRIVATE void start_element ARGS1(
 						   new_tag,
 						   context->element_stack->tag,
 						   direct_container))) {
-	    if (TRACE)
-		fprintf(stderr, "SGML: Still open %s \t<- invalid start <%s>\n",
+	    CTRACE(tfp, "SGML: Still open %s \t<- invalid start <%s>\n",
 			context->element_stack->tag->name,
 			new_tag->name);
 	}
@@ -998,18 +964,14 @@ PRIVATE void start_element ARGS1(
 		**  It is another form-related start tag, so terminate
 		**  the current SELECT block and fall through. - FM
 		*/
-		if (TRACE)
-		    fprintf(stderr,
-		       "SGML: Faking SELECT end tag before <%s> start tag.\n",
+		CTRACE(tfp, "SGML: Faking SELECT end tag before <%s> start tag.\n",
 			    new_tag->name);
 		end_element(context, SGMLFindTag(context->dtd, "SELECT"));
 	    } else {
 		/*
 		**  Ignore the start tag. - FM
 		*/
-		if (TRACE)
-		    fprintf(stderr,
-			  "SGML: Ignoring start tag <%s> in SELECT block.\n",
+		CTRACE(tfp, "SGML: Ignoring start tag <%s> in SELECT block.\n",
 			    new_tag->name);
 		return;
 	    }
@@ -1018,8 +980,7 @@ PRIVATE void start_element ARGS1(
     /*
     **	Handle the start tag. - FM
     */
-    if (TRACE)
-	fprintf(stderr, "SGML: Start <%s>\n", new_tag->name);
+    CTRACE(tfp, "SGML: Start <%s>\n", new_tag->name);
     (*context->actions->start_element)(
 	context->target,
 	new_tag - context->dtd->tags,
@@ -1533,11 +1494,8 @@ top1:
 		   (uck = UCTransUniChar(unsign_c,
 					 context->outUCLYhndl)) >= 32 &&
 		   uck < 256) {
-	    if (TRACE) {
-		fprintf(stderr,
-			"UCTransUniChar returned 0x%.2lX:'%c'.\n",
+	    CTRACE(tfp, "UCTransUniChar returned 0x%.2lX:'%c'.\n",
 			uck, FROMASCII((char)uck));
-	    }
 	    /*
 	    **	We got one octet from the conversions, so use it. - FM
 	    */
@@ -1749,10 +1707,8 @@ top1:
 		*/
 		char temp[8];
 
-		if (TRACE) {
-		    fprintf(stderr,
-		"SGML_character: Handling 'zwnj' entity as 'WBR' element.\n");
-		}
+		CTRACE(tfp, "SGML_character: Handling 'zwnj' entity as 'WBR' element.\n");
+
 		if (c != ';') {
 		    sprintf(temp, "<WBR>%c", c);
 		} else {
@@ -1981,10 +1937,8 @@ top1:
 		    */
 		    char temp[8];
 
-		    if (TRACE) {
-			fprintf(stderr,
-      "SGML_character: Handling '8204' (zwnj) reference as 'WBR' element.\n");
-		    }
+		    CTRACE(tfp, "SGML_character: Handling '8204' (zwnj) reference as 'WBR' element.\n");
+
 		    /*
 		    **	Include the terminator if it is not
 		    **	the standard semi-colon. - FM
@@ -2085,7 +2039,7 @@ top1:
 			LYstrncpy(replace_buf,
 				  string->data,
 				  (string->size < 64 ? string->size : 63));
-			fprintf(stderr,
+			fprintf(tfp,
 				"SGML_character: Ignoring '%s%s'.\n",
 				(context->isHex ? "&#x" : "&#"),
 				replace_buf);
@@ -2266,9 +2220,8 @@ top1:
 	    */
 	    HTTag * t;
 	    if (c == '/') {
-		if (TRACE)
-		    if (string->size!=0)
-			fprintf(stderr,"SGML: `<%s/' found!\n", string->data);
+		if (string->size != 0)
+		    CTRACE(tfp,"SGML: `<%s/' found!\n", string->data);
 		context->state = S_end;
 		break;
 	    }
@@ -2286,21 +2239,18 @@ top1:
 		for (i = 0; i < 3; i++) /* recover */
 		    PUTC(string->data[i]);
 		PUTC(c);
-		if (TRACE)
-		    fprintf(stderr, "SGML: Treating <%s%c as text\n",
+		CTRACE(tfp, "SGML: Treating <%s%c as text\n",
 			    string->data, c);
 		string->size = 0;
 		context->state = S_text;
 		break;
 	    } else if (!t) {
-		if (TRACE)
-		    fprintf(stderr, "SGML: *** Invalid element %s\n",
+		CTRACE(tfp, "SGML: *** Invalid element %s\n",
 			    string->data);
 		context->state = (c == '>') ? S_text : S_junk_tag;
 		break;
 	    } else if (t == context->unknown_tag) {
-		if (TRACE)
-		    fprintf(stderr, "SGML: *** Unknown element %s\n",
+		CTRACE(tfp, "SGML: *** Unknown element %s\n",
 			    string->data);
 		/*
 		**  Fall through and treat like valid
@@ -2655,8 +2605,7 @@ top1:
 	if (WHITE(c))
 	    break;		/* Before attribute value */
 	if (c == '>') { 	/* End of tag */
-	    if (TRACE)
-		fprintf(stderr, "SGML: found = but no value\n");
+	    CTRACE(tfp, "SGML: found = but no value\n");
 	    if (context->current_tag->name)
 		start_element(context);
 	    context->state = S_text;
@@ -2802,8 +2751,7 @@ top1:
 		t = SGMLFindTag(dtd, string->data);
 	    }
 	    if (!t || t == context->unknown_tag) {
-		if (TRACE)
-		    fprintf(stderr, "Unknown end tag </%s>\n", string->data);
+		CTRACE(tfp, "Unknown end tag </%s>\n", string->data);
 	    } else {
 		BOOL tag_OK = (c == '>' || WHITE(c));
 		context->current_tag = t;
@@ -2831,9 +2779,7 @@ top1:
 		    **	Don't treat these end tags as invalid,
 		    **	nor act on them. - FM
 		    */
-		    if (TRACE)
-			fprintf(stderr,
-				"SGML: `</%s%c' found!  Ignoring it.\n",
+		    CTRACE(tfp, "SGML: `</%s%c' found!  Ignoring it.\n",
 				string->data, c);
 		    string->size = 0;
 		    context->current_attribute_number = INVALID;
@@ -2871,27 +2817,19 @@ top1:
 			    /*
 			    **	It is not at FORM end tag, so ignore it. - FM
 			    */
-			    if (TRACE) {
-				fprintf(stderr,
-			    "SGML: Ignoring end tag </%s> in SELECT block.\n",
+			    CTRACE(tfp, "SGML: Ignoring end tag </%s> in SELECT block.\n",
 					string->data);
-			    }
 			} else {
 			    /*
 			    **	End the SELECT block and then
 			    **	handle the FORM end tag. - FM
 			    */
-			    if (TRACE) {
-				fprintf(stderr,
-			"SGML: Faking SELECT end tag before </%s> end tag.\n",
+			    CTRACE(tfp, "SGML: Faking SELECT end tag before </%s> end tag.\n",
 					string->data);
-			    }
 			    end_element(context,
 					SGMLFindTag(context->dtd, "SELECT"));
-			    if (TRACE) {
-				fprintf(stderr,
-					"SGML: End </%s>\n", string->data);
-			    }
+			    CTRACE(tfp, "SGML: End </%s>\n", string->data);
+
 			    (*context->actions->end_element)
 				(context->target,
 				 (context->current_tag - context->dtd->tags),
@@ -2902,9 +2840,7 @@ top1:
 			**  Treat a P end tag like a P start tag (Ugh,
 			**  what a hack! 8-). - FM
 			*/
-			if (TRACE)
-			    fprintf(stderr,
-				    "SGML: `</%s%c' found!  Treating as '<%s%c'.\n",
+			CTRACE(tfp, "SGML: `</%s%c' found!  Treating as '<%s%c'.\n",
 				    string->data, c, string->data, c);
 			{
 			    int i;
@@ -2917,10 +2853,8 @@ top1:
 			if (context->current_tag->name)
 			    start_element(context);
 		    } else {
-			if (TRACE) {
-			    fprintf(stderr,
-				    "SGML: End </%s>\n", string->data);
-			}
+			CTRACE(tfp, "SGML: End </%s>\n", string->data);
+
 			(*context->actions->end_element)
 			    (context->target,
 			     (context->current_tag - context->dtd->tags),
@@ -2945,8 +2879,8 @@ top1:
 	    string->size = 0;
 	    context->current_attribute_number = INVALID;
 	    if (c != '>') {
-		if (TRACE && !WHITE(c))
-		    fprintf(stderr,"SGML: `</%s%c' found!\n", string->data, c);
+		if (!WHITE(c))
+		    CTRACE(tfp,"SGML: `</%s%c' found!\n", string->data, c);
 		context->state = S_junk_tag;
 	    } else {
 		context->state = S_text;

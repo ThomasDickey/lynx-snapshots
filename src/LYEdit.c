@@ -61,7 +61,7 @@ PUBLIC int edit_current_file ARGS3(
      *
      * On VMS, only try the path.
      */
-#if !defined (VMS) && !defined (DOSPATH)
+#if !defined (VMS) && !defined (DOSPATH) && !defined (__EMX__)
     colon = strchr(newfile, ':');
     StrAllocCopy(filename, (colon + 1));
     HTUnEscape(filename);
@@ -70,7 +70,7 @@ PUBLIC int edit_current_file ARGS3(
 #endif /* !VMS */
 	filename = HTParse(newfile, "", PARSE_PATH+PARSE_PUNCTUATION);
 	HTUnEscape(filename);
-#ifdef DOSPATH
+#if defined (DOSPATH) || defined (__EMX__)
 	if (strlen(filename)>1) filename++;
 #endif
 #ifdef DOSPATH
@@ -86,7 +86,7 @@ PUBLIC int edit_current_file ARGS3(
 	    FREE(filename);
 	    goto failure;
 	}
-#if !defined (VMS) && !defined (DOSPATH)
+#if !defined (VMS) && !defined (DOSPATH) && !defined (__EMX__)
     }
 #endif /* !VMS */
     fclose(fp);
@@ -156,10 +156,12 @@ PUBLIC int edit_current_file ARGS3(
 #endif /* __DJGPP__ */
 #endif /* VMS */
     if (TRACE) {
-	fprintf(stderr, "LYEdit: %s\n", command);
+	fprintf(tfp, "LYEdit: %s\n", command);
 	sleep(MessageSecs);
     }
+#ifndef __EMX__
     FREE(filename);
+#endif
 
     /*
      *  Invoke the editor. - FM

@@ -910,11 +910,8 @@ PUBLIC void LYExpandString ARGS2(
 	**  The chartrans procedure failed, so we don't
 	**  do anything, and hope for the best. - FM
 	*/
-	if (TRACE) {
-	    fprintf(stderr,
-		    "LYExpandString: Bad in (%d) or out (%d) handle(s).\n",
+	CTRACE(tfp, "LYExpandString: Bad in (%d) or out (%d) handle(s).\n",
 		    me->inUCLYhndl, me->outUCLYhndl);
-	}
 	return;
     }
 
@@ -1327,10 +1324,7 @@ PUBLIC void LYExpandString ARGS2(
 	*/
 	if (code == 8204 || code == 8205 ||
 	    code == 8206 || code == 8207) {
-	    if (TRACE) {
-		fprintf(stderr,
-			"LYExpandString: Ignoring '%ld'.\n", code);
-	    }
+	    CTRACE(tfp, "LYExpandString: Ignoring '%ld'.\n", code);
 	    if (me->T.decode_utf8 && *utf_buf) {
 		utf_buf[0] == '\0';
 		utf_buf_p = utf_buf;
@@ -2116,10 +2110,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    */
 		} else if (code == 8204 || code == 8205 ||
 			   code == 8206 || code == 8207) {
-		    if (TRACE) {
-			fprintf(stderr,
-				"LYUCFullyTranslateString: Ignoring '%ld'.\n", code);
-		    }
+		    CTRACE(tfp, "LYUCFullyTranslateString: Ignoring '%ld'.\n", code);
 		    replace_buf[0] = '\0';
 		    state = S_got_outstring;
 		    break;
@@ -2430,13 +2421,10 @@ PUBLIC void LYHandleMETA ARGS4(
 	    FREE(content);
 	}
     }
-    if (TRACE) {
-	fprintf(stderr,
-		"LYHandleMETA: HTTP-EQUIV=\"%s\" NAME=\"%s\" CONTENT=\"%s\"\n",
+    CTRACE(tfp, "LYHandleMETA: HTTP-EQUIV=\"%s\" NAME=\"%s\" CONTENT=\"%s\"\n",
 		(http_equiv ? http_equiv : "NULL"),
 		(name ? name : "NULL"),
 		(content ? content : "NULL"));
-    }
 
     /*
      *	Make sure we have META name/value pairs to handle. - FM
@@ -2735,8 +2723,8 @@ PUBLIC void LYHandleMETA ARGS4(
 	    }
 	    FREE(cp3);
 
-	    if (TRACE && me->node_anchor->charset) {
-		fprintf(stderr,
+	    if (me->node_anchor->charset) {
+		CTRACE(tfp,
 			"LYHandleMETA: New charset: %s\n",
 			me->node_anchor->charset);
 	    }
@@ -3096,7 +3084,7 @@ PUBLIC void LYHandleSELECT ARGS5(
 	 */
 	if (!me->inFORM) {
 	    if (TRACE) {
-		fprintf(stderr,
+		fprintf(tfp,
 			"Bad HTML: SELECT start tag not within FORM tag\n");
 	    } else if (!me->inBadHTML) {
 		_statusline(BAD_HTML_USE_TRACE);
@@ -3120,7 +3108,7 @@ PUBLIC void LYHandleSELECT ARGS5(
 	 */
 	if (me->inTEXTAREA) {
 	    if (TRACE) {
-		fprintf(stderr, "Bad HTML: Missing TEXTAREA end tag\n");
+		fprintf(tfp, "Bad HTML: Missing TEXTAREA end tag\n");
 	    } else if (!me->inBadHTML) {
 		_statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -3154,11 +3142,8 @@ PUBLIC void LYHandleSELECT ARGS5(
 	    /*
 	     *	Let the size be determined by the number of OPTIONs. - FM
 	     */
-	    if (TRACE) {
-		fprintf(stderr,
-			"LYHandleSELECT: Ignoring SIZE=\"%s\" for SELECT.\n",
+	    CTRACE(tfp, "LYHandleSELECT: Ignoring SIZE=\"%s\" for SELECT.\n",
 			(char *)value[HTML_SELECT_SIZE]);
-	    }
 #endif /* NOTDEFINED */
 	}
 
@@ -3208,7 +3193,7 @@ PUBLIC void LYHandleSELECT ARGS5(
 	 */
 	if (!me->inSELECT) {
 	    if (TRACE) {
-		fprintf(stderr, "Bad HTML: Unmatched SELECT end tag\n");
+		fprintf(tfp, "Bad HTML: Unmatched SELECT end tag\n");
 	    } else if (!me->inBadHTML) {
 		_statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -3407,10 +3392,10 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 		    str = "s";
 		}
 		if (TRACE) {
-		    fprintf(stderr,
+		    fprintf(tfp,
 			 "LYLegitimizeHREF: Bad value '%s' for http%s URL.\n",
 			   *href, str);
-		    fprintf(stderr,
+		    fprintf(tfp,
 			 "                  Stripping lead dots.\n");
 		} else if (!me->inBadHREF) {
 		    _statusline(BAD_PARTIAL_REFERENCE);

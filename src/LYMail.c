@@ -575,8 +575,7 @@ PUBLIC void mailmsg ARGS4(
     char hdrfile[256];
     FILE *hfd;
 
-    if(TRACE)
-	fprintf(stderr,"mailmsg(%d, \"%s\", \"%s\", \"%s\")\n",cur,
+    CTRACE(tfp, "mailmsg(%d, \"%s\", \"%s\", \"%s\")\n",cur,
 	cur, owner_address?owner_address:"<nil>",
 	filename?filename:"<nil>",
 	linkname?linkname:"<nil>");
@@ -657,11 +656,8 @@ PUBLIC void mailmsg ARGS4(
 	address[(strlen(address) - 1)] = '\0';
     if (*address == '\0') {
 	FREE(address);
-	if (TRACE) {
-	    fprintf(stderr,
-		    "mailmsg: No address in '%s'.\n",
+	CTRACE(tfp, "mailmsg: No address in '%s'.\n",
 		    owner_address);
-	}
 	return;
     }
 
@@ -669,11 +665,8 @@ PUBLIC void mailmsg ARGS4(
     sprintf(cmd, "%s %s", system_mail, system_mail_flags);
     if ((fd = popen(cmd, "w")) == NULL) {
 	FREE(address);
-	if (TRACE) {
-	    fprintf(stderr,
-		    "mailmsg: '%s' failed.\n",
+	CTRACE(tfp, "mailmsg: '%s' failed.\n",
 		    cmd);
-	}
 	return;
     }
 
@@ -694,11 +687,8 @@ PUBLIC void mailmsg ARGS4(
 	strcat(my_tmpfile, ".txt");
     }
     if ((fd = LYNewTxtFile(my_tmpfile)) == NULL) {
-	if (TRACE) {
-	    fprintf(stderr,
-		    "mailmsg: Could not fopen '%s'.\n",
+	CTRACE(tfp, "mailmsg: Could not fopen '%s'.\n",
 		    my_tmpfile);
-	}
 	FREE(address);
 	return;
     }
@@ -711,11 +701,8 @@ PUBLIC void mailmsg ARGS4(
 	    strcat(hdrfile, ".txt");
 	}
 	if ((hfd = LYNewTxtFile(hdrfile)) == NULL) {
-	    if (TRACE) {
-		fprintf(stderr,
-			"mailmsg: Could not fopen '%s'.\n",
+	    CTRACE(tfp, "mailmsg: Could not fopen '%s'.\n",
 			hdrfile);
-	    }
 	    FREE(address);
 	    return;
 	}
@@ -876,8 +863,7 @@ PUBLIC void reply_by_mail ARGS3(
     char hdrfile[256];
     FILE *hfd;
 
-    if(TRACE)
-	fprintf(stderr,"reply_by_mail(\"%s\", \"%s\", \"%s\")\n",
+    CTRACE(tfp, "reply_by_mail(\"%s\", \"%s\", \"%s\")\n",
 	mail_address?mail_address:"<nil>",
 	filename?filename:"<nil>",
 	title?tilde:"<nil>");
@@ -1526,8 +1512,7 @@ PUBLIC void reply_by_mail ARGS3(
     StrAllocCat(header, buf);
 #endif /* !VMS */
 
-    if(TRACE)
-	fprintf(stderr,"**header==\n%s",header);
+    CTRACE(tfp,"**header==\n%s",header);
     if (!no_editor && editor && *editor != '\0') {
 	/*
 	 *  Use an external editor for the message.
@@ -1867,8 +1852,7 @@ PUBLIC void reply_by_mail ARGS3(
 #endif
     fclose(fd); /* Close the tmpfile. */
 
-    if (TRACE)
-	printf("%s\n", cmd);
+    CTRACE(tfp, "%s\n", cmd);
 #endif /* VMS */
 
     /*

@@ -451,10 +451,8 @@ PUBLIC void read_cfg ARGS3(
     char *cp, *cp1;
     int i, j, len;
 
-    if (TRACE) {
-	fprintf(stderr,
-		"Loading cfg file '%s'.\n", cfg_filename);
-    }
+    CTRACE(tfp, "Loading cfg file '%s'.\n", cfg_filename);
+
     /*
      *  Don't get hung up by an include file loop.  Arbitrary max depth
      *  of 10.  - BL
@@ -471,13 +469,11 @@ PUBLIC void read_cfg ARGS3(
      *	Locate and open the file.
      */
     if (!cfg_filename || strlen(cfg_filename) == 0) {
-	if (TRACE)
-	    fprintf(stderr,"No filename following -cfg switch!\n");
+	CTRACE(tfp,"No filename following -cfg switch!\n");
 	return;
     }
     if ((fp = fopen(cfg_filename,"r")) == NULL) {
-	if (TRACE)
-	    fprintf(stderr,"lynx.cfg file not found as %s\n",cfg_filename);
+	CTRACE(tfp,"lynx.cfg file not found as %s\n",cfg_filename);
 	return;
     }
     have_read_cfg=TRUE;
@@ -810,8 +806,7 @@ PUBLIC void read_cfg ARGS3(
 
 	} else if (!strncasecomp(buffer, "JUMPFILE:", 9)) {
 	    if (!LYJumpInit(buffer)) {
-		if (TRACE)
-		    fprintf(stderr, "Failed to register %s\n", buffer);
+		CTRACE(tfp, "Failed to register %s\n", buffer);
 	    }
 	}
 	break;
@@ -882,13 +877,10 @@ PUBLIC void read_cfg ARGS3(
 		StrAllocCopy(LynxSigFile, temp);
 		LYAddPathToHome(temp, 256, LynxSigFile);
 		StrAllocCopy(LynxSigFile, temp);
-		if (TRACE)
-		    fprintf(stderr,
-			    "LYNX_SIG_FILE set to '%s'\n", LynxSigFile);
+		CTRACE(tfp, "LYNX_SIG_FILE set to '%s'\n", LynxSigFile);
 	    } else {
-		if (TRACE)
-		    fprintf(stderr, "LYNX_SIG_FILE '%s' is bad. Ignoring.\n",
-				    LYNX_SIG_FILE);
+		CTRACE(tfp, "LYNX_SIG_FILE '%s' is bad. Ignoring.\n",
+			    LYNX_SIG_FILE);
 	    }
 	}
 	break;

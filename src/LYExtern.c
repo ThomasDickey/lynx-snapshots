@@ -58,7 +58,7 @@ void run_external ARGS1(char *, c)
 		 *  Prevent spoofing of the shell.
 		 *  Dunno how this needs to be modified for VMS or DOS. - kw
 		 */
-#if defined(VMS) || defined(DOSPATH)
+#if defined(VMS) || defined(DOSPATH) || defined(__EMX__)
 		sprintf(command, externals2->command, c);
 #else /* Unix or DOS/Win: */
 		cp = quote_pathname(c);

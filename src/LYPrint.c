@@ -411,9 +411,11 @@ PUBLIC int printfile ARGS1(
 		    strcpy(buffer, filename);
 		}
 #else
+#ifndef __EMX__
 		if (*filename != '/')
 		    cp = getenv("PWD");
 		else
+#endif
 		    cp = NULL;
 		if (cp)
 #ifdef DOSPATH
@@ -969,7 +971,7 @@ PUBLIC int printfile ARGS1(
 		}
 #endif /* VMS */
 		if (Lpansi) {
-		     printf("\n\014");  /* Form feed */
+		     printf("\n\014");	/* Form feed */
 		     printf("\033[4i");
 		     Lpansi = FALSE;
 		} else {
@@ -1206,7 +1208,7 @@ PUBLIC int printfile ARGS1(
 			HTAddSugFilename(filename);
 		    }
 
-#ifdef VMS
+#if defined (VMS) || defined (__EMX__)
 		    sprintf(buffer, cur_printer->command, tempfile, filename,
 				    "", "", "", "", "", "", "", "", "", "");
 #else /* Unix: */
@@ -1232,8 +1234,7 @@ PUBLIC int printfile ARGS1(
 		move(1,1);
 
 		stop_curses();
-		if (TRACE)
-		    fprintf(stderr, "command: %s\n", buffer);
+		CTRACE(tfp, "command: %s\n", buffer);
 		printf(PRINTING_FILE);
 #ifdef VMS
 		/*
@@ -1328,7 +1329,7 @@ PUBLIC int print_options ARGS2(
 
     if (first) {
 	tempname(tempfile, NEW_FILE);
-#if defined (VMS) || defined (DOSPATH)
+#if defined (VMS) || defined (DOSPATH) || defined (__EMX__)
 	sprintf(print_filename, "file://localhost/%s", tempfile);
 #else
 	sprintf(print_filename, "file://localhost%s", tempfile);
