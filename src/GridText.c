@@ -149,16 +149,12 @@ PUBLIC int LYsb_begin = -1;
 PUBLIC int LYsb_end = -1;
 #endif
 
-#ifndef CHAR_BIT
-#define CHAR_BIT 8
-#endif
 
-    /*try to fit in 2 shorts*/
+    /*try to fit in 32bit */
 typedef struct {
-	unsigned int	direction:2;	/* on or off */
-	unsigned int	horizpos: (sizeof(short)*CHAR_BIT-2);
-	    /* horizontal position of this change */
-	unsigned short	style;		/* which style to change to */
+	unsigned int	direction:2;   /* on or off */
+	unsigned int	horizpos:14;   /* horizontal position of this change */
+	unsigned int	style:16;      /* which style to change to */
 } HTStyleChange;
 
 #if defined(USE_COLOR_STYLE)
@@ -167,7 +163,7 @@ typedef struct {
 static HTStyleChange stylechanges_buffers[2][MAX_STYLES_ON_LINE];
 #endif
 
-#define POOL_SIZE (8192 - 4*sizeof(void*) - sizeof(struct _HTPool*) + sizeof(int)) / sizeof(HTStyleChange)
+enum { POOL_SIZE = (8192 - 4*sizeof(void*) - sizeof(struct _HTPool*) - sizeof(int)) / sizeof(HTStyleChange) };
 
 typedef struct _HTPool {
     HTStyleChange   data[POOL_SIZE];
@@ -205,7 +201,7 @@ pool provided their length will never exceed N and is much smaller than N seems
 to be very efficient.
  [Several types of memory-hungry objects are stored in the pool now:  styles,
 lines, anchors, and FormInfo. Arrays of HTStyleChange are stored as is,
-other objects are aligned to sizeof(void*) bytes and stored using a cast.]
+other objects are stored using a cast.]
 
  Pool are referenced by pointer to the chunk that contains free slots. Macros
 that allocate memory in pools update that pointer if needed.
@@ -214,7 +210,7 @@ ALLOC_IN_POOL.
  Here is a description of those macros as C++ functions (with names mentioned
 above and with use of C++ references)
 
-void ALLOC_IN_POOL( P*& pool, pool_type, int toalloc, T*& ptr, int align=1)
+void ALLOC_IN_POOL( P*& pool, pool_type, int toalloc, T*& ptr)
     - allocates 'toalloc' items in the pool of type 'pool_type' pointed by
     'pool', sets the pointer 'ptr' to the "allocated" memory and updates 'pool'
     if necessary. Sets 'ptr' to NULL if fails.
@@ -230,18 +226,16 @@ void POOL_FREE( pool_type , P*& ptr)
 
 *************************************************************************/
 /*
- * void ALLOC_IN_POOL( P*& pool, pool_type, int toalloc, T*& ptr, int align=1)
+ * void ALLOC_IN_POOL( P*& pool, pool_type, int toalloc, T*& ptr)
  *     - allocates 'toalloc' items in the pool of type 'pool_type' pointed by
  *     'pool', sets the pointer 'ptr' to the "allocated" memory and updates
  *     'pool' if necessary.  Sets 'ptr' to NULL if fails.
  */
-#define ALLOC_IN_POOL(pool,pool_type,toalloc,ptr,align) \
+#define ALLOC_IN_POOL(pool,pool_type,toalloc,ptr) \
     if (!pool) {					\
 	ptr = NULL;					\
     } else {						\
-	if (align)					\
-	    pool->used += (pool->used % align);		\
-	if (POOL_SIZE - pool->used >= toalloc) { 	\
+	if (POOL_SIZE - pool->used >= toalloc) {	\
 	    ptr = pool->data + pool->used;		\
 	    pool->used += toalloc;			\
 	} else {					\
@@ -286,27 +280,25 @@ void POOL_FREE( pool_type , P*& ptr)
     }
 /**************************************************************************/
 
-#define _sz_        sizeof(HTStyleChange)      /* 4 */
-#define _align_     (sizeof(void*)/_sz_)       /*64bit OS!*/
-#define _round_(x)  (x%_sz_ ? x/_sz_ + 1: x/_sz_)
+#define _sz_           sizeof(HTStyleChange)      /* 4 */
+#define _round_up_(x)  (x%_sz_ ? x/_sz_ + 1: x/_sz_)
 
 #define POOLallocstyles(ptr, N)     ALLOC_IN_POOL(HTMainText->pool,HTPool,\
 					N,				\
-					ptr,				\
-					1)
+					ptr)
 #define POOLallocHTLine(ptr, size)  { HTStyleChange* _tmp_;		\
+				      int N = _round_up_(LINE_SIZE(size));  \
 				      ALLOC_IN_POOL(HTMainText->pool,HTPool,\
-					_round_(LINE_SIZE(size)),	\
-					_tmp_,				\
-					_align_);			\
-				      ptr = (HTLine*)_tmp_;		\
+					N,      \
+					_tmp_); \
+				      ptr = (HTLine*)_tmp_; \
 				    }
 #define POOLtypecalloc(T,ptr)	    { HTStyleChange* _tmp_;		\
+				      int N = _round_up_(sizeof(T));	\
 				      ALLOC_IN_POOL(HTMainText->pool,HTPool,\
-					_round_(sizeof(T)),		\
-					_tmp_,				\
-					_align_);			\
-				      ptr = (T*)_tmp_;			\
+					N,	\
+					_tmp_);	\
+				      ptr = (T*)_tmp_;	\
 				    }
 
 typedef struct _line {
@@ -1065,6 +1057,24 @@ PUBLIC void HText_free ARGS1(
 	return;
 
     HTAnchor_setDocument(self->node_anchor, (HyperDoc *)0);
+
+    while (YES) {	/* Free off line array */
+	HTLine * l = self->last_line;
+	if (l) {
+	    l->next->prev = l->prev;
+	    l->prev->next = l->next;	/* Unlink l */
+	    self->last_line = l->prev;
+	    if (l != self->last_line) {
+		FREE(l);
+	    } else {
+		free(l);
+	    }
+	}
+	if (l == self->last_line) {	/* empty */
+	    l = self->last_line = NULL;
+	    break;
+	}
+    }
 
     while (self->first_anchor) {		/* Free off anchor array */
 	TextAnchor * l = self->first_anchor;
@@ -2488,7 +2498,7 @@ PRIVATE void move_anchors_in_region ARGS7(
  *  Some necessary changes for anchors starting on this line are also done
  *  here if needed.
  *  Returns a newly allocated HTLine* if changes were made
- *    (lines allocated in pool, caller should not free the old one).
+ *    (caller has to free the old one).
  *  Returns NULL if no changes needed.  (Remove-spaces code may be buggy...)
  * - kw
  */
@@ -2532,7 +2542,7 @@ PRIVATE HTLine * insert_blanks_in_line ARGS7(
     if (!prev_anchor)
 	prev_anchor = text->first_anchor;
     head_processed = (prev_anchor && prev_anchor->line_num < line_number);
-    memcpy(mod_line, line, LINE_SIZE(0));
+    memcpy(mod_line, line, LINE_SIZE(1));
     t = newdata = mod_line->data;
     ip = 0;
     while (ip <= ninserts) {
@@ -2652,12 +2662,10 @@ PRIVATE void split_line ARGS2(
     HTLine * line = (HTLine *)LY_CALLOC(1, LINE_SIZE(MAX_LINE)+2);
 
     /*
-     *  Set new line.
+     *  Make new line.
      */
     if (line == NULL)
 	outofmem(__FILE__, "split_line_1");
-    memset(line, 0, LINE_SIZE(0));
-
     ctrl_chars_on_this_line = 0; /*reset since we are going to a new line*/
     utfxtra_on_this_line = 0;	/*reset too, we'll count them*/
     text->LastChar = ' ';
@@ -2948,7 +2956,7 @@ PRIVATE void split_line ARGS2(
 
     {
     HTLine* temp;
-    POOLallocHTLine(temp, previous->size);
+    temp = allocHTLine(previous->size);
     if (!temp)
 	outofmem(__FILE__, "split_line_2");
     memcpy(temp, previous, LINE_SIZE(previous->size));
@@ -2958,6 +2966,7 @@ PRIVATE void split_line ARGS2(
 	outofmem(__FILE__, "split_line_2");
     memcpy(temp->styles, previous->styles, sizeof(HTStyleChange)*previous->numstyles);
 #endif
+    FREE(previous);
     previous = temp;
     }
 
@@ -3241,6 +3250,8 @@ PRIVATE void split_line ARGS2(
 		outofmem(__FILE__, "split_line_4");
 	    previous->next->prev = jline;
 	    previous->prev->next = jline;
+
+	    FREE(previous);
 
 	    previous = jline;
 	}
@@ -4519,6 +4530,7 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	    lines_changed++;
 	    if (line == first_line)
 		first_line = mod_line;
+	    free(line);
 	    line = mod_line;
 #ifdef DISP_PARTIAL
 	    /*
@@ -5529,6 +5541,7 @@ PUBLIC void HText_endAppend ARGS1(
 	 */
 	next_to_the_last_line->next = line_ptr;
 	line_ptr->prev = next_to_the_last_line;
+	FREE(text->last_line);
 	text->last_line = next_to_the_last_line;
 	text->Lines--;
 	CTRACE((tfp, "GridText: New bottom line: `%s'\n",
@@ -8525,6 +8538,7 @@ PUBLIC void HText_RemovePreviousLine ARGS1(
     previous->next = text->last_line;
     text->last_line->prev = previous;
     text->Lines--;
+    FREE(line);
 }
 
 /*
@@ -11712,7 +11726,7 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
      *  Clone and initialize the struct's needed to add a new TEXTAREA
      *  anchor.
      */
-    POOLallocHTLine(l, MAX_LINE);
+    l = allocHTLine(MAX_LINE);
     POOLtypecalloc(TextAnchor, a);
     POOLtypecalloc(FormInfo, f);
     if (a == NULL || l == NULL || f == NULL)
@@ -12536,7 +12550,7 @@ PUBLIC int HText_InsertFile ARGS1(
 	    break;
     }
 
-    POOLallocHTLine(l, MAX_LINE);
+    l = allocHTLine(MAX_LINE);
     POOLtypecalloc(TextAnchor, a);
     POOLtypecalloc(FormInfo, f);
     if (a == NULL || l == NULL || f == NULL)

@@ -920,7 +920,7 @@ PUBLIC int main ARGS2(
 
 #endif /* _WINDOWS */
 
-#if defined(__CYGWIN__)
+#if 0 /* defined(__CYGWIN__) - does not work with screen */
     if (strcmp(ttyname(fileno(stdout)), "/dev/conout") != 0) {
 	printf("please \"$CYGWIN=notty\"\n");
 	exit(EXIT_SUCCESS);

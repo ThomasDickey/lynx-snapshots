@@ -1790,7 +1790,7 @@ PRIVATE int print_local_dir ARGS5(
 	    LYAddPathSep(&tmpfilename);
 
 	    StrAllocCat(tmpfilename, dirbuf->d_name);
-	    data = malloc(sizeof(DIRED) + strlen(dirbuf->d_name) + 4);
+	    data = (DIRED *)malloc(sizeof(DIRED) + strlen(dirbuf->d_name) + 4);
 	    if (data == NULL) {
 		/* FIXME */
 	    }

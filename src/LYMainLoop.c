@@ -707,14 +707,16 @@ PRIVATE BOOL do_check_recall ARGS7(
 	     && LYIsDosDrive(user_input_buffer + len - 2))
 		LYAddPathSep0(user_input_buffer);
 
-	} else if (len == 2 && LYIsDosDrive(user_input_buffer)) {
-	    LYAddPathSep0(user_input_buffer);
-	} else {
-	    HTUserMsg2(WWW_ILLEGAL_URL_MESSAGE, user_input_buffer);
-	    LYstrncpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
-	    FREE(*old_user_input);
-	    ret = FALSE;
-	    break;
+	} else if (len == 2 && user_input_buffer[1] == ':') {
+		if (LYIsDosDrive(user_input_buffer)) {
+			LYAddPathSep0(user_input_buffer);
+		} else {
+			HTUserMsg2(WWW_ILLEGAL_URL_MESSAGE, user_input_buffer);
+			LYstrncpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
+			FREE(*old_user_input);
+			ret = FALSE;
+			break;
+		}
 	}
 #endif
 	/*
