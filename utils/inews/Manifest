@@ -1,0 +1,11 @@
+   2 -r--r--r--  1 news         1406 Dec 21 18:00 Makefile
+   1 -rw-r--r--  1 news          649 Dec 21 18:00 Manifest
+   3 -r--r--r--  1 news         2391 Dec 21 18:00 README
+   2 -r--r--r--  1 news         1863 Dec 21 18:00 README.NN
+  11 -r--r--r--  1 news        11154 Dec 21 18:00 clientlib.c
+   1 -r--r--r--  1 news          230 Dec 21 18:00 clientlib.h
+   4 -r--r--r--  1 news         3106 Dec 21 18:00 conf.h
+   8 -r--r--r--  1 news         7983 Dec 21 18:00 inews.c
+   3 -r--r--r--  1 news         2530 Dec 21 18:00 nntp.h
+   3 -r--r--r--  1 news         2167 Dec 21 18:00 uname.c
+   1 -r--r--r--  1 news          103 Dec 21 18:00 version.c

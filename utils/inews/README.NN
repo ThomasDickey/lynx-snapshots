@@ -1,0 +1,83 @@
+From: Steve Simmons <scs%itivax@relay.EU.net>
+To: storm@texas.dk (Kim F. Storm)
+Date: Thu, 21 Dec 89 18:02:03 EDT
+Subject: Inews Kit For NN
+
+What Is This:
+
+This is a mini-inews, suitable for building client-only versions of NN
+that use NNTP for remote reading.  Some unknown (to me) person patched
+it to be driven on NNs config.h file.  I have taken those changes, reversed
+most of them and upgraded to NNTP release version 1.5.7.  This inews was
+a co-operative venture when Stan released it, and it's kind of fitting
+that it continues to be worked on by many hands.
+
+If you have a full installation of news where you're installing NN,
+you could care less about this.
+
+Copyrights:
+
+See individual files for authors.  I wrote conf.h and the
+Makefile, and explicitly put them in the public domain.  Other parts
+may have other copyrights, see the individual files.
+
+Maintenance:
+
+My less-than-humble opinion is that as Stan releases nntp patches, you will
+be able to apply them to this code with no changes whatsoever.  As Stan
+releases patches I will attempt to apply them and upgrade this source,
+but no guarantees.
+
+Why A Separate Release From NNTP:
+
+NN and NNTP both use configuration files to let you fit the software
+for your system.  Unfortunately, they used rather different methods.
+This release specificly reconciles NNs 'config.h' and NNTPs '../common/conf.h'
+by creating a local "conf.h" which maps 'config.h' to what NNTP inews needs.
+Result -- once you build the config.h for NN you're 98% done with NNTP inews.
+
+INSTALLATION:
+
+Ideally you went to your nn source directory and created a subdir
+named inews.  Then you unpacked this in that directory (I have already
+done that, ++Kim).
+
+All you should need to do is read conf.h, make any changes you feel
+like, and then type 'make'.  If things work, type 'make install'.  For
+more data on the inews itself, read the file README.  It's slightly
+edited from the NNTP version to reflect its separation from the rest
+of NNTP.
+
+For more data on the inews itself, read the file README.  It's
+slightly edited from the NNTP version to reflect its separation from
+the rest of NNTP.
+
+Steve Simmons
+scs@lokkur.dexter.mi.us
+December 21, 1989
+
+
+--- Changes by Kim Storm, storm@texas.dk
+
+I have edited what Steve sent me a bit further to simplify the
+configuration and installation even more: It now uses nn's code to get
+the hostname, so this is now got for free, and it gets the location of
+the inews program from config.h as well.
+
+Makefile:
+	Added -I../conf to CFLAGS
+	nn's hostname.o is used instead of uname.o to get the hostname.
+	Installation uses nn's inst script (which will use the possible
+	definition of INEWS or NEWS_LIB_DIRECTORY in config.h).
+
+conf.h:
+	#defines to set the proper hostname removed.
+	#include "../config.h" line moved to start of file.
+	Documents optional #define USG to get bcopy function.
+
+clientlib.c, inews.c
+	Added tweaks using a FOR_NN #define to include/exclude
+	code to co-exist with nn's config.h file.
+
+uname.c:
+	Not used (so it is omitted from this distribution).
