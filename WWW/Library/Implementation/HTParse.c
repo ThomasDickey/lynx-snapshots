@@ -8,6 +8,10 @@
 #include <LYUtils.h>
 #include <LYLeaks.h>
 
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
+
 #define HEX_ESCAPE '%'
 
 struct struct_parts {
@@ -131,7 +135,8 @@ PRIVATE void scan ARGS2(
     /*
     **	Check schemes that commonly have unescaped hashes.
     */
-    if (parts->access && parts->anchor) {
+    if (parts->access && parts->anchor &&
+		/* optimize */ strchr("lnsdLNSD", *parts->access) != NULL) {
 	if ((!parts->host && strcasecomp(parts->access, "lynxcgi")) ||
 	    !strcasecomp(parts->access, "nntp") ||
 	    !strcasecomp(parts->access, "snews") ||
@@ -154,6 +159,14 @@ PRIVATE void scan ARGS2(
 } /*scan */
 
 
+#if defined(HAVE_ALLOCA) && !defined(LY_FIND_LEAKS)
+#define LYalloca(x)        alloca(x)
+#define LYalloca_free(x)   x = 0 /*avoid warning*/
+#else
+#define LYalloca(x)        malloc(x)
+#define LYalloca_free(x)   free(x)
+#endif
+
 /*	Parse a Name relative to another name.			HTParse()
 **	--------------------------------------
 **
@@ -166,7 +179,7 @@ PRIVATE void scan ARGS2(
 **	wanted		A mask for the bits which are wanted.
 **
 ** On exit,
-**	returns		A pointer to a calloc'd string which MUST BE FREED
+**     returns         A pointer to a malloc'd string which MUST BE FREED
 */
 PUBLIC char * HTParse ARGS3(
 	CONST char *,	aName,
@@ -175,7 +188,7 @@ PUBLIC char * HTParse ARGS3(
 {
     char * result = NULL;
     char * return_value = NULL;
-    int len;
+    int len, len1, len2;
     char * name = NULL;
     char * rel = NULL;
     char * p;
@@ -193,19 +206,25 @@ PUBLIC char * HTParse ARGS3(
 	    wanted &= ~(PARSE_STRICTPATH | PARSE_QUERY); /* ignore details */
     }
     /*
-    **	Allocate the output string.
+    ** Allocate the temporary string. Optimized.
     */
-    len = strlen(aName) + strlen(relatedName) + 10;
-    result = typecallocn(char, len);	/* Lots of space: more than enough */
+    len1 = strlen(aName) + 1;
+    len2 = strlen(relatedName) + 1;
+    len = len1 + len2 + 8;     /* Lots of space: more than enough */
+
+    result = (char*)LYalloca(len + len1 + len2);
     if (result == NULL) {
 	outofmem(__FILE__, "HTParse");
     }
+    *result = '\0';
+    name = result + len;
+    rel = name + len1;
 
     /*
     **	Make working copies of the input strings to cut up.
     */
-    StrAllocCopy(name, aName);
-    StrAllocCopy(rel, relatedName);
+    memcpy(name, aName, len1);
+    memcpy(rel, relatedName, len2);
 
     /*
     **	Cut up the strings into URL fields.
@@ -309,10 +328,10 @@ PUBLIC char * HTParse ARGS3(
 		    *p2 = '\0'; /* It is the default: ignore it */
 		}
 		if (p2 == NULL) {
-		    int len2 = strlen(tail);
+		    int len3 = strlen(tail);
 
-		    if (len2 > 0) {
-			h = tail + len2 - 1;	/* last char of hostname */
+		    if (len3 > 0) {
+			h = tail + len3 - 1;	/* last char of hostname */
 			if (*h == '.')
 			    *h = '\0';		/* chop final . */
 		    }
@@ -448,14 +467,13 @@ PUBLIC char * HTParse ARGS3(
 			     given.anchor : related.anchor);
 	}
     CTRACE((tfp, "HTParse:      result:%s\n", result));
-    FREE(rel);
-    FREE(name);
 
     StrAllocCopy(return_value, result);
-    FREE(result);
+    LYalloca_free(result);
 
     return return_value;		/* exactly the right length */
 }
+
 
 /*	Simplify a filename.				HTSimplify()
 **	--------------------
@@ -550,7 +568,7 @@ PUBLIC void HTSimplify ARGS1(
 		    q = p;
 		    q1 = (p + 2);
 		    while (*q1 != '\0')
-		       *q++ = *q1++;
+			*q++ = *q1++;
 		    *q = '\0';		/* terminate */
 		    p--;
 		} else if (p[1] == '.' && p[2] == '?') {
@@ -560,7 +578,7 @@ PUBLIC void HTSimplify ARGS1(
 		    q = (p + 1);
 		    q1 = (p + 2);
 		    while (*q1 != '\0')
-		       *q++ = *q1++;
+			*q++ = *q1++;
 		    *q = '\0';		/* terminate */
 		    p--;
 		} else if (p[1] == '.' && p[2] == '\0') {

@@ -649,10 +649,6 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
     char *host = str;
 #endif
 
-#ifdef __DJGPP__
-    _resolve_hook = ResolveYield;
-#endif
-
 #ifdef NSL_FORK
     /* for transfer of result between from child to parent: */
     static AlignedHOSTENT aligned_full_rehostent;
@@ -685,6 +681,10 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 #endif /* NSL_FORK */
 
     struct hostent *result_phost = NULL;
+
+#ifdef __DJGPP__
+    _resolve_hook = ResolveYield;
+#endif
 
     if (!str) {
 	CTRACE((tfp, "LYGetHostByName: Can't parse `NULL'.\n"));
@@ -1565,7 +1565,6 @@ PUBLIC int HTDoConnect ARGS4(
     _HTProgress (line);
 #ifdef INET6
     /* HTParseInet() is useless! */
-    _HTProgress(host);
     res0 = HTGetAddrInfo(host, default_port);
     if (res0 == NULL) {
 	HTSprintf0 (&line, gettext("Unable to locate remote host %s."), host);
@@ -1627,7 +1626,7 @@ PUBLIC int HTDoConnect ARGS4(
     }
 #endif /* INET6 */
 
-#ifndef DOSPATH
+#if !defined(DOSPATH) || defined(__DJGPP__)
 #if !defined(NO_IOCTL) || defined(USE_FCNTL)
     /*
     **	Make the socket non-blocking, so the connect can be canceled.
@@ -1645,7 +1644,7 @@ PUBLIC int HTDoConnect ARGS4(
 	    _HTProgress(gettext("Could not make connection non-blocking."));
     }
 #endif /* !NO_IOCTL || USE_FCNTL */
-#endif /* !DOSPATH */
+#endif /* !DOSPATH || __DJGPP__ */
 
     /*
     **	Issue the connect.  Since the server can't do an instantaneous
@@ -1671,7 +1670,7 @@ PUBLIC int HTDoConnect ARGS4(
 #else
     status = connect(*s, (struct sockaddr*)&soc_address, sizeof(soc_address));
 #endif /* INET6 */
-#ifndef __DJGPP__
+
     /*
     **	According to the Sun man page for connect:
     **	   EINPROGRESS	       The socket is non-blocking and the  con-
@@ -1878,7 +1877,7 @@ PUBLIC int HTDoConnect ARGS4(
 	break;
     }
 #endif /* INET6 */
-#endif /* !__DJGPP__ */
+
 #ifdef INET6
     if (*s < 0)
 #else
@@ -1891,7 +1890,7 @@ PUBLIC int HTDoConnect ARGS4(
 	*/
 	NETCLOSE(*s);
     }
-#ifndef DOSPATH
+#if !defined(DOSPATH) || defined(__DJGPP__)
 #if !defined(NO_IOCTL) || defined(USE_FCNTL)
     else {
 	/*
@@ -1907,7 +1906,7 @@ PUBLIC int HTDoConnect ARGS4(
 	    _HTProgress(gettext("Could not restore socket to blocking."));
     }
 #endif /* !NO_IOCTL || USE_FCNTL */
-#endif /* !DOSPATH */
+#endif /* !DOSPATH || __DJGPP__ */
 
 #ifdef INET6
     FREE(line);

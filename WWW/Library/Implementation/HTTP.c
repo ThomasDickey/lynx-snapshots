@@ -33,6 +33,7 @@
 #include <HTML.h>
 #include <HTInit.h>
 #include <HTAABrow.h>
+#include <HTAccess.h>		/* Are we using an HTTP gateway? */
 
 #include <LYCookie.h>
 #include <LYGlobalDefs.h>
@@ -47,14 +48,7 @@ struct _HTStream
 
 extern char * HTAppName;	/* Application name: please supply */
 extern char * HTAppVersion;	/* Application version: please supply */
-extern char * personal_mail_address;	/* User's name/email address */
-extern char * LYUserAgent;	/* Lynx User-Agent string */
-extern BOOL LYNoRefererHeader;	/* Never send Referer header? */
-extern BOOL LYNoRefererForThis; /* No Referer header for this URL? */
-extern BOOL LYNoFromHeader;	/* Never send From header? */
-extern BOOL LYSetCookies;	/* Act on Set-Cookie headers? */
 
-extern BOOL using_proxy;	/* Are we using an HTTP gateway? */
 PUBLIC BOOL reloading = FALSE;	/* Reloading => send no-cache pragma to proxy */
 PUBLIC char * redirecting_url = NULL;	    /* Location: value. */
 PUBLIC BOOL permanent_redirection = FALSE;  /* Got 301 status? */

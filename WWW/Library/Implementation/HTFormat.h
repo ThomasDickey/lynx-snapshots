@@ -38,7 +38,8 @@ typedef HTAtom * HTFormat;
 
  */
                         /* Internal ones */
-#define WWW_SOURCE HTAtom_for("www/source")     /* Whatever it was originally*/
+/* #define WWW_SOURCE HTAtom_for("www/source") */    /* Whatever it was originally*/
+extern HTAtom * WWW_SOURCE;     /* calculated once, heavy used */
 
 /*
 

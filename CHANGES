@@ -1,6 +1,95 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2002-12-01 (2.8.5dev.11)
+* fix a typo in changelog date -TD
+* add project version & date to lynx.cfg -TD
+* document xxx_PATH variables in lynx.cfg -TD
+
+2002-11-11 (2.8.5dev.10)
+* modify file-upload to provide content-type based on file-suffix.  This is
+  needed to validate local html files with current the W3C validation service
+  webpage -TD
+* modify file-upload to warn but permit the filename or file contents to be
+  missing (report by Clemens Fisher) -TD
+* workaround for compiler bug in fix_httplike_urls() -BL
+* change enumShowColor so SHOW_COLOR_NEVER is zero as in 2.8.3, which makes the
+  result from LYChoosePopup() match the enum values.  This fixes a bug which
+  would make the slang configuration toggle back to color when accepting an
+  options screen (report by Sean McGuire <smcguire@soc.lib.md.us> and Carlton
+  Anderson) -TD
+* add a null-pointer check in content_is_compressed() -TD
+* in partial mode, load document with #fragment on the fly. Long awaited fix.
+  LYMainLoop_pageDisplay() now returns BOOL -LP
+* calculate WWW_SOURCE once, it is now a constant, not a define -LP
+* use malloc instead of calloc in several places, particularly in HTList
+  operations (each field initialized explicitely) -LP
+* fix a few typos in samples/mailcap (Carlton Anderson
+  <canderson1776@yahoo.com>).
+* ifdef'd default_fg and default_bg for PDCURSES to be 15, since that agrees
+  with lynx's use of color names, and works around a bug exposed by the
+  ASSUMED_COLORS change from 2.8.5dev.9 (report by DK) -TD
+* simplify pretty-source code in SGML.c using PUTS(), put_pretty_entity() and
+  put_pretty_number() -TD
+* refine S_attr test in SGML.c to make pretty-source code handle the case where
+  a blank precedes the '='.  The misplaced markers made lynx omit newlines from
+  the pretty-source view (report by LP) -TD
+* rewrote HTStat() to ensure that it does stat() for files on Windows -TD
+* HTTCP.c patch to make djgpp/Watt-32 non-blocking connect in HTDoConnect().
+  This allows pressing 'z' to abort connections.  Removed extra _HTProgress()
+  for INET6; it overwrote previous progress message -GV, DK
+* in SGML.c, element stack now use a pool of 10 elements to avoid most of
+  malloc/free calls -LP
+* in HTParse(), use single alloca instead of three malloc/free pairs -LP
+* in HTParse.c, avoid most strcasecomp calls in scan() - LP
+* modify GridText.c to store lines, anchors, and forms in the same HText memory
+  pool as styles.  This will optimize memory allocation/deallocation by 8Kb
+  units.  The down side:  lines in TRST mode will be stored twice.  Some
+  structs are made a bit more compact -LP
+* add DJGPP to SINGLE_USER_UNIX special cases -DK
+* modify configure script to not strip the -g option from $CFLAGS if it was
+  present in the user's environment rather than autoconf adding it (report by
+  DK) -TD
+* add --with-curses-dir configure script option -TD
+* in SGMLFindTag, we translate string uppercase in-place and launch case
+  insensitive search, add SGMLFindUprTag() to cover the cases where the string
+  is readonly - LP, TD
+* DJGPP build restored.  MV_PATH was undefined long ago by mistake.  Fix recent
+  DJGPP changes in HTTCP.c:  move _resolve_hook few lines below, it will not
+  compile otherwise.  Remove minor warnings -LP
+* optimize parsing html with many relative links, href="#fragment" -
+  HTAnchor_findChildAndLink() and HTML_start_element(), case HTML_A:  now avoid
+  significant overhead when link == HTInternalLink (e.g., resolving against
+  base, lots of reallocations, parent lookup, etc., all are useless).  Two
+  functions affected.  [HTAnchor.c, HTML.c].  The code works both with and
+  without DONT_TRACK_INTERNAL_LINKS symbol -LP
+* optimize parsing of large html files - with thousands of anchors - LP
+  + remove quadratic complexity from split_line() usage [GridText.c].
+    Because of some work with anchors on the last(=split) line,
+    the anchors list was traversed from the beginning for each output line.
+    Now we store last_anchor_before_split  explicitly.
+    With my 800Kb test file (13000 output lines, 3100 anchors) this shows
+    25% speedup: split_line() weight decreased from 26% down to 1%
+  + remove quadratic complexity from HTAnchor_findChild() usage [HTAnchor.c].
+    HTParentAnchor::children list was traversed zillion times, now we
+    split it into a tree (named anchors <a name=...>, fast search required)
+    and a list (just a storage for the rest anchors, no search required).
+    This one gives 11% speedup for 3100 anchors html on my system.
+  + remove quadratic complexity when generating a 'l'ist page,
+    now traverse anchors list only once [LYList.c, GridText.c].
+    Not too much savings but trivial.
+* add a search method to HTBTree implementation. - LP
+* amend check for refresh-URL to avoid adding a link if the retrieved page is
+  compressed, since the link would be added to the compressed file, corrupting
+  it (reported by Michel SUCH and Karl-Heinz Weirich <weirich@de.ibm.com>) -TD
+* correct misspelled $LYNX_LOCALEDIR variable in LYMain.c (reported by Michel
+  Such)
+* change the install procedure for lynx.cfg to attempt to update the file with
+  the user's customizations if any, and to save the old configuration
+  information in a series, e.g., lynx.cfg-1, lynx.cfg-2, etc. -TD
+* re-fix the problem with config.cache not being removed at the beginning of
+  the configure script - see 2.8.5dev.3 (report by Clemens Fisher) -TD
+
 2002-10-06 (2.8.5dev.9)
 * improve ETA data shown in experimental read-progress (from Debian #117476)
 * modify -dump, -source and related options which set dump mode to also set
@@ -457,7 +546,7 @@ Changes since Lynx 2.8 release
 * modify LYtouchline() to avoid using wredrawln() for ncurses, since the
   LYwin variable may be a pad much wider than the screen, which is not handled
   properly (report by Karl Eichwalder <keichwa@gmx.net>) -TD
-* correct beginning configure script, which was supposed to remove
+* correct beginning of configure script, which was supposed to remove
   config.cache, but did not, due to a misplaced line when it was added
   1998-06-04 (prompted by a report by Fr3dY <fr3dy@retemail.es> that the
   checks for srand/rand did not work) -TD

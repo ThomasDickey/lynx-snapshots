@@ -17,7 +17,7 @@ PUBLIC HTList * HTList_new NOARGS
 {
     HTList *newList;
 
-    if ((newList = typecalloc(HTList)) == NULL)
+    if ((newList = typeMalloc(HTList)) == NULL)
 	outofmem(__FILE__, "HTList_new");
 
     newList->object = NULL;
@@ -96,7 +96,7 @@ PUBLIC void HTList_addObject ARGS2(
     HTList *newNode;
 
     if (me) {
-	if ((newNode = typecalloc(HTList)) == NULL)
+	if ((newNode = typeMalloc(HTList)) == NULL)
 	    outofmem(__FILE__, "HTList_addObject");
 	newNode->object = newObject;
 	newNode->next = me->next;
@@ -157,7 +157,7 @@ PUBLIC void HTList_insertObjectAt ARGS3(
     prevNode = temp;
     while ((temp = temp->next)) {
 	if (Pos == 0) {
-	    if ((newNode = typecalloc(HTList)) == NULL)
+	    if ((newNode = typeMalloc(HTList)) == NULL)
 		outofmem(__FILE__, "HTList_addObjectAt");
 	    newNode->object = newObject;
 	    newNode->next = temp;

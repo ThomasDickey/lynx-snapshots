@@ -276,6 +276,54 @@ extern CONST char * HTFileSuffix PARAMS((
                 CONST char* enc));
 
 /*
+ * Enumerate external programs that lynx may assume exists.  Unlike those
+ * given in download scripts, etc., lynx would really like to know their
+ * absolute paths, for better security.
+ */
+typedef enum {
+    ppUnknown = 0
+    ,ppBZIP2
+    ,ppCHMOD
+    ,ppCOMPRESS
+    ,ppCOPY
+    ,ppCSWING
+    ,ppGZIP
+    ,ppINSTALL
+    ,ppMKDIR
+    ,ppMV
+    ,ppRLOGIN
+    ,ppRM
+    ,ppTAR
+    ,ppTELNET
+    ,ppTN3270
+    ,ppTOUCH
+    ,ppUNCOMPRESS
+    ,ppUNZIP
+    ,ppUUDECODE
+    ,ppZCAT
+    ,ppZIP
+    ,pp_Last
+} ProgramPaths;
+
+/*
+ * Given a program number, return its path
+ */
+extern CONST char * HTGetProgramPath PARAMS((
+		ProgramPaths code));
+
+/*
+ * Store a program's path 
+ */
+extern void HTSetProgramPath PARAMS((
+		ProgramPaths code,
+		CONST char *path));
+
+/*
+ * Reset the list of known program paths to the ones that are compiled-in
+ */
+extern void HTInitProgramPaths NOPARAMS;
+
+/*
 **  The Protocols
 */
 #ifdef GLOBALREF_IS_MACRO

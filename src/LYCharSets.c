@@ -4,6 +4,7 @@
 
 #include <LYGlobalDefs.h>
 #include <UCMap.h>
+#include <UCdomap.h>
 #include <UCDefs.h>
 #include <LYCharSets.h>
 #include <GridText.h>
@@ -12,17 +13,11 @@
 
 #include <LYLeaks.h>
 
-extern BOOL HTPassEightBitRaw;
-extern BOOL HTPassEightBitNum;
-extern BOOL HTPassHighCtrlRaw;
-extern BOOL HTPassHighCtrlNum;
 PUBLIC HTkcode kanji_code = NOKANJI;
 PUBLIC BOOLEAN LYHaveCJKCharacterSet = FALSE;
 PUBLIC BOOLEAN DisplayCharsetMatchLocale = TRUE;
 PUBLIC BOOL force_old_UCLYhndl_on_reload = FALSE;
 PUBLIC int forced_UCLYhdnl;
-extern void UCInit NOARGS;
-extern int UCInitialized;
 PUBLIC int LYNumCharsets = 0;  /* Will be initialized later by UC_Register. */
 PUBLIC int current_char_set = -1; /* will be intitialized later in LYMain.c */
 PUBLIC CONST char** p_entity_values = NULL; /* Pointer, for HTML_put_entity()*/

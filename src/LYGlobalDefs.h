@@ -57,10 +57,6 @@ extern BOOLEAN UseFixedRecords; /* convert binary files to FIXED 512 records */
 extern char *list_format;
 #endif /* !VMS */
 
-#ifdef VMS
-extern char *LYCSwingPath;
-#endif /* VMS */
-
 #ifdef DIRED_SUPPORT
 
 typedef enum {
@@ -144,8 +140,8 @@ extern char star_string[MAX_LINE + 1]; /* from GridText.c */
  ((n) >= MAX_LINE ? star_string : &star_string[(MAX_LINE-1)] - (n))
 
 typedef enum {
-    SHOW_COLOR_UNKNOWN = 0
-    , SHOW_COLOR_NEVER
+    SHOW_COLOR_UNKNOWN = -1
+    , SHOW_COLOR_NEVER = 0	/* positive numbers are index in LYOptions.c */
     , SHOW_COLOR_OFF
     , SHOW_COLOR_ON
     , SHOW_COLOR_ALWAYS

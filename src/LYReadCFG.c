@@ -36,8 +36,7 @@
 #include <LYLeaks.h>
 
 #ifndef DISABLE_NEWS
-extern int HTNewsMaxChunk;  /* Max news articles before chunking (HTNews.c) */
-extern int HTNewsChunkSize; /* Number of news articles per chunk (HTNews.c) */
+#include <HTNews.h>
 #endif
 
 PUBLIC BOOLEAN have_read_cfg = FALSE;
@@ -240,8 +239,13 @@ PUBLIC int match_item_by_name ARGS3(
 int default_fg = DEFAULT_COLOR;
 int default_bg = DEFAULT_COLOR;
 #else
+#ifdef PDCURSES
+int default_fg = 15;
+int default_bg = COLOR_BLACK;
+#else
 int default_fg = COLOR_WHITE;
 int default_bg = COLOR_BLACK;
+#endif
 #endif
 
 PRIVATE CONST char *Color_Strings[16] =
@@ -418,6 +422,7 @@ static Config_Enum tbl_abort_source_cache[] = {
 #define PARSE_INT(n,v)   {n, CONF_INT,         UNION_INT(v), 0}
 #define PARSE_TIM(n,v)   {n, CONF_TIME,        UNION_INT(v), 0}
 #define PARSE_STR(n,v)   {n, CONF_STR,         UNION_STR(v), 0}
+#define PARSE_PRG(n,v)   {n, CONF_PRG,         UNION_DEF(v), 0}
 #define PARSE_Env(n,v)   {n, CONF_ENV,         UNION_ENV(v), 0}
 #define PARSE_ENV(n,v)   {n, CONF_ENV2,        UNION_ENV(v), 0}
 #define PARSE_FUN(n,v)   {n, CONF_FUN,         UNION_FUN(v), 0}
@@ -433,6 +438,7 @@ typedef enum {
     ,CONF_ENUM
     ,CONF_INT
     ,CONF_STR
+    ,CONF_PRG
     ,CONF_ENV			/* from environment variable */
     ,CONF_ENV2			/* from environment VARIABLE */
     ,CONF_INCLUDE		/* include file-- handle special */
@@ -1236,6 +1242,7 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_SET(RC_BOLD_H1,              bold_H1),
      PARSE_SET(RC_BOLD_HEADERS,         bold_headers),
      PARSE_SET(RC_BOLD_NAME_ANCHORS,    bold_name_anchors),
+     PARSE_PRG(RC_BZIP2_PATH,           ppBZIP2),
      PARSE_SET(RC_CASE_SENSITIVE_ALWAYS_ON, case_sensitive),
      PARSE_FUN(RC_CHARACTER_SET,        character_set_fun),
 #ifdef CAN_SWITCH_DISPLAY_CHARSET
@@ -1243,10 +1250,13 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_STR(RC_CHARSETS_DIRECTORY,   charsets_directory),
 #endif
      PARSE_SET(RC_CHECKMAIL,            check_mail),
+     PARSE_PRG(RC_CHMOD_PATH,           ppCHMOD),
      PARSE_SET(RC_COLLAPSE_BR_TAGS,     LYCollapseBRs),
 #ifdef USE_COLOR_TABLE
      PARSE_FUN(RC_COLOR,                color_fun),
 #endif
+     PARSE_PRG(RC_COMPRESS_PATH,        ppCOMPRESS),
+     PARSE_PRG(RC_COPY_PATH,            ppCOPY),
 #ifndef __DJGPP__
      PARSE_INT(RC_CONNECT_TIMEOUT,      connect_timeout),
 #endif
@@ -1263,7 +1273,7 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_STR(RC_COOKIE_STRICT_INVALID_DOMAIN, LYCookieSStrictCheckDomains),
      PARSE_Env(RC_CSO_PROXY, 0 ),
 #ifdef VMS
-     PARSE_STR(RC_CSWING_PATH,          LYCSwingPath),
+     PARSE_PRG(RC_CSWING_PATH,          ppCSWING),
 #endif
      PARSE_FUN(RC_DEFAULT_BOOKMARK_FILE, default_bookmark_file_fun),
      PARSE_FUN(RC_DEFAULT_CACHE_SIZE,   default_cache_size_fun),
@@ -1304,6 +1314,7 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_STR(RC_GLOBAL_MAILCAP,       global_type_map),
      PARSE_Env(RC_GOPHER_PROXY,         0 ),
      PARSE_SET(RC_GOTOBUFFER,           goto_buffer),
+     PARSE_PRG(RC_GZIP_PATH,            ppGZIP),
      PARSE_STR(RC_HELPFILE,             helpfile),
 #ifdef MARK_HIDDEN_LINKS
      PARSE_STR(RC_HIDDEN_LINK_MARKER,   hidden_link_marker),
@@ -1317,6 +1328,7 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_Env(RC_HTTPS_PROXY,          0 ),
      PARSE_REQ(RC_INCLUDE,              0),
      PARSE_TIM(RC_INFOSECS,             InfoSecs),
+     PARSE_PRG(RC_INSTALL_PATH,         ppINSTALL),
      PARSE_STR(RC_JUMP_PROMPT,          jumpprompt),
      PARSE_SET(RC_JUMPBUFFER,           jump_buffer),
      PARSE_FUN(RC_JUMPFILE,             jumpfile_fun),
@@ -1358,7 +1370,9 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_SET(RC_MAKE_PSEUDO_ALTS_FOR_INLINES, pseudo_inline_alts),
      PARSE_TIM(RC_MESSAGESECS,          MessageSecs),
      PARSE_SET(RC_MINIMAL_COMMENTS,     minimal_comments),
+     PARSE_PRG(RC_MKDIR_PATH,           ppMKDIR),
      PARSE_ENU(RC_MULTI_BOOKMARK_SUPPORT, LYMultiBookmarks, tbl_multi_bookmarks),
+     PARSE_PRG(RC_MV_PATH,              ppMV),
      PARSE_SET(RC_NCR_IN_BOOKMARKS,     UCSaveBookmarksInUnicode),
 #ifndef DISABLE_NEWS
      PARSE_FUN(RC_NEWS_CHUNK_SIZE,      news_chunk_size_fun),
@@ -1411,6 +1425,8 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_TIM(RC_REPLAYSECS,           ReplaySecs),
 #endif
      PARSE_SET(RC_REUSE_TEMPFILES,      LYReuseTempfiles),
+     PARSE_PRG(RC_RLOGIN_PATH,          ppRLOGIN),
+     PARSE_PRG(RC_RM_PATH,              ppRM),
 #ifndef NO_RULES
      PARSE_FUN(RC_RULE,                 HTSetConfiguration),
      PARSE_FUN(RC_RULESFILE,            cern_rulesfile_fun),
@@ -1443,19 +1459,25 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_STR(RC_SYSTEM_MAIL,          system_mail),
      PARSE_STR(RC_SYSTEM_MAIL_FLAGS,    system_mail_flags),
      PARSE_FUN(RC_TAGSOUP,              get_tagsoup),
+     PARSE_PRG(RC_TAR_PATH,             ppTAR),
+     PARSE_PRG(RC_TELNET_PATH,          ppTELNET),
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
      PARSE_SET(RC_TEXTFIELDS_NEED_ACTIVATION, textfields_activation_option),
 #endif
+     PARSE_PRG(RC_TN3270_PATH,          ppTN3270),
 #if defined(_WINDOWS)
      PARSE_INT(RC_TIMEOUT,              lynx_timeout),
 #endif
-     PARSE_SET(RC_TRIM_INPUT_FIELDS,  LYtrimInputFields),
+     PARSE_PRG(RC_TOUCH_PATH,           ppTOUCH),
+     PARSE_SET(RC_TRIM_INPUT_FIELDS,    LYtrimInputFields),
 #ifdef EXEC_LINKS
      PARSE_DEF(RC_TRUSTED_EXEC,         EXEC_PATH),
 #endif
 #ifdef LYNXCGI_LINKS
      PARSE_DEF(RC_TRUSTED_LYNXCGI,      CGI_PATH),
 #endif
+     PARSE_PRG(RC_UNCOMPRESS_PATH,      ppUNCOMPRESS),
+     PARSE_PRG(RC_UNZIP_PATH,           ppUNZIP),
 #ifdef DIRED_SUPPORT
      PARSE_ADD(RC_UPLOADER,             uploaders),
 #endif
@@ -1468,11 +1490,14 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_SET(RC_USE_MOUSE,            LYUseMouse),
 #endif
      PARSE_SET(RC_USE_SELECT_POPUPS,    LYSelectPopups),
+     PARSE_PRG(RC_UUDECODE_PATH,        ppUUDECODE),
      PARSE_SET(RC_VERBOSE_IMAGES,       verbose_img),
      PARSE_SET(RC_VI_KEYS_ALWAYS_ON,    vi_keys),
      PARSE_FUN(RC_VIEWER,               viewer_fun),
      PARSE_Env(RC_WAIS_PROXY,           0 ),
      PARSE_STR(RC_XLOADIMAGE_COMMAND,   XLoadImageCommand),
+     PARSE_PRG(RC_ZCAT_PATH,            ppZCAT),
+     PARSE_PRG(RC_ZIP_PATH,             ppZIP),
 
      PARSE_NIL
 };
@@ -1624,6 +1649,7 @@ PUBLIC void LYSetConfigValue ARGS2(
 {
     Config_Type *tbl = lookup_config(name);
     ParseUnionPtr q = ParseUnionOf(tbl);
+    char *temp;
 
     switch (tbl->type) {
     case CONF_BOOL:
@@ -1692,6 +1718,12 @@ PUBLIC void LYSetConfigValue ARGS2(
 	add_trusted (value, q->def_value);
 	break;
 #endif
+
+    case CONF_PRG:
+	if (StrAllocCopy(temp, value))
+	    HTSetProgramPath(q->def_value, temp);
+	break;
+
     default:
 	break;
     }
@@ -1997,6 +2029,7 @@ PUBLIC void read_cfg ARGS4(
 	int,	nesting_level,
 	FILE *,	fp0)
 {
+    HTInitProgramPaths();
     do_read_cfg(cfg_filename, parent_filename, nesting_level, fp0, NULL);
 }
 

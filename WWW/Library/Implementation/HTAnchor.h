@@ -15,6 +15,7 @@
 /* Version 1 of 24-Oct-1991 (JFG), written in C, browser-independent */
 
 #include <HTList.h>
+#include <HTBTree.h>
 #include <HTChunk.h>
 #include <HTAtom.h>
 #include <UCDefs.h>
@@ -52,7 +53,8 @@ struct _HTParentAnchor {
   HTParentAnchor * parent;	/* Parent of this anchor (self) */
 
   /* ParentAnchor-specific information */
-  HTList *	children;	/* Subanchors of this, if any */
+  HTList *     children_notag; /* Subanchors <a href=...>, tag is NULL */
+  HTBTree *    children;       /* Subanchors <a name="tag">, sorted by tag */
   HTList *	sources;	/* List of anchors pointing to this, if any */
   HyperDoc *	document;	/* The document within which this is an anchor */
   char *	address;	/* Absolute address of this node */
@@ -129,11 +131,8 @@ typedef struct _DocAddress {
     BOOL   safe;
 } DocAddress;
 
-/* "internal" means "within the same document, with certainty".
-   It includes a space so it cannot conflict with any (valid) "TYPE"
-   attributes on A elements. [According to which DTD, anyway??] - kw */
-
-#define LINK_INTERNAL HTAtom_for("internal link")
+/* "internal" means "within the same document, with certainty". */
+extern HTLinkType * HTInternalLink;
 
 /*	Create new or find old sub-anchor
 **	---------------------------------
@@ -195,15 +194,6 @@ extern void HTAnchor_clearSourceCache PARAMS((
 	HTParentAnchor *	me));
 #endif
 
-/*		Move an anchor to the head of the list of its siblings
-**		------------------------------------------------------
-**
-**	This is to ensure that an anchor which might have already existed
-**	is put in the correct order as we load the document.
-*/
-extern void HTAnchor_makeLastChild PARAMS((
-	HTChildAnchor *		me));
-
 /*	Data access functions
 **	---------------------
 */
@@ -243,9 +233,6 @@ extern BOOL HTAnchor_isIndex PARAMS((
 
 extern BOOL HTAnchor_isISMAPScript PARAMS((
 	HTAnchor *		me));
-
-extern BOOL HTAnchor_hasChildren PARAMS((
-	HTParentAnchor *	me));
 
 #if defined(USE_COLOR_STYLE)
 extern CONST char * HTAnchor_style PARAMS((

@@ -590,9 +590,6 @@ PRIVATE int get_physical ARGS2(
  *  I want the "pop" to occur as soon as possible after loading
  *  has finished. - kw @@@
  */
-
-extern char*UCAssume_MIMEcharset;
-
 PUBLIC void LYUCPushAssumed ARGS1(
     HTParentAnchor *,	anchor)
 {

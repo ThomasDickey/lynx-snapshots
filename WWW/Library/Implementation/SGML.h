@@ -250,9 +250,21 @@ Find a Tag by Name
    Returns a pointer to the tag within the DTD.
 
  */
-extern HTTag * SGMLFindTag PARAMS((
+extern HTTag * SGMLFindUprTag PARAMS((
 	CONST SGML_dtd *	dtd,
 	CONST char *		string));
+
+
+/*
+
+Find a Tag by Name
+
+   Returns a pointer to the tag within the DTD.
+
+ */
+extern HTTag * SGMLFindTag PARAMS((
+	CONST SGML_dtd *	dtd,
+	char *			string));
 
 
 /*
@@ -276,7 +288,3 @@ extern HTStream * SGML_new PARAMS((
 extern CONST HTStreamClass SGMLParser;
 
 #endif	/* SGML_H */
-
-/*
-
-    */

@@ -36,7 +36,7 @@ PRIVATE void terminate_options	PARAMS((int sig));
 #endif
 
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
-PRIVATE BOOLEAN can_do_colors = 0;
+PRIVATE BOOLEAN can_do_colors = FALSE;
 #endif
 
 PUBLIC BOOLEAN LYCheckUserAgent NOARGS
@@ -55,7 +55,7 @@ PUBLIC BOOLEAN LYCheckUserAgent NOARGS
 PRIVATE void SetupChosenShowColor NOARGS
 {
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
-    can_do_colors = 1;
+    can_do_colors = TRUE;
 #if defined(COLOR_CURSES)
     if (LYCursesON)	/* could crash if called before initialization */
 	can_do_colors = (BOOL) has_colors();
@@ -1212,7 +1212,7 @@ draw_options:
 						  choices, 4, FALSE, FALSE);
 			}
 #if defined(COLOR_CURSES)
-			again = (BOOL) (chosen == 2 && !has_colors());
+			again = (BOOL) (chosen == SHOW_COLOR_ON && !has_colors());
 			if (again) {
 			    char * terminal = LYGetEnv("TERM");
 			    if (terminal)
@@ -1246,7 +1246,7 @@ draw_options:
 		}
 		CurrentShowColor = LYShowColor;
 #ifdef USE_SLANG
-		SLtt_Use_Ansi_Colors = (LYShowColor > 1 ? 1 : 0);
+		SLtt_Use_Ansi_Colors = (LYShowColor > SHOW_COLOR_OFF ? TRUE : FALSE);
 #endif
 		response = ' ';
 		if (LYSelectPopups && !no_option_save) {
@@ -2086,7 +2086,6 @@ PUBLIC int popup_choice ARGS7(
  */
 #define SELECTED(flag) (flag) ? selected_string : ""
 #define DISABLED(flag) (flag) ? disabled_string : ""
-#define NOTEMPTY(text) (text && text[0]) ? text : ""
 
 typedef struct {
     int value;
@@ -2691,7 +2690,7 @@ PUBLIC int postoptions ARGS1(
 	    }
 	    CurrentShowColor = LYShowColor;
 #ifdef USE_SLANG
-	    SLtt_Use_Ansi_Colors = (LYShowColor > 1 ? 1 : 0);
+	    SLtt_Use_Ansi_Colors = (LYShowColor > SHOW_COLOR_OFF ? TRUE : FALSE);
 #endif
 	}
 #endif /* USE_SLANG || COLOR_CURSES */
@@ -3254,7 +3253,7 @@ PRIVATE int gen_options ARGS1(
 
     /* Editor: INPUT */
     PutLabel(fp0, gettext("Editor"), editor_string);
-    PutTextInput(fp0, editor_string, NOTEMPTY(editor), text_len,
+    PutTextInput(fp0, editor_string, NonNull(editor), text_len,
 		      DISABLED(no_editor || system_editor));
 
     /* Search Type: SELECT */
@@ -3390,7 +3389,7 @@ PRIVATE int gen_options ARGS1(
 
     /* X Display: INPUT */
     PutLabel(fp0, gettext("X Display"),	x_display_string);
-    PutTextInput(fp0, x_display_string, NOTEMPTY(x_display), text_len, "");
+    PutTextInput(fp0, x_display_string, NonNull(x_display), text_len, "");
 
     /*
      * Document Appearance
@@ -3479,23 +3478,23 @@ PRIVATE int gen_options ARGS1(
     /* Mail Address: INPUT */
     PutLabel(fp0, gettext("Personal mail address"), mail_address_string);
     PutTextInput(fp0, mail_address_string,
-		      NOTEMPTY(personal_mail_address), text_len, "");
+		      NonNull(personal_mail_address), text_len, "");
 
     /* Preferred Document Character Set: INPUT */
     PutLabel(fp0, gettext("Preferred document character set"), preferred_doc_char_string);
     PutTextInput(fp0, preferred_doc_char_string,
-		      NOTEMPTY(pref_charset), cset_len+2, "");
+		      NonNull(pref_charset), cset_len+2, "");
 
     /* Preferred Document Language: INPUT */
     PutLabel(fp0, gettext("Preferred document language"), preferred_doc_lang_string);
     PutTextInput(fp0, preferred_doc_lang_string,
-		      NOTEMPTY(language), cset_len+2, "");
+		      NonNull(language), cset_len+2, "");
 
     /* User Agent: INPUT */
     if (!no_useragent) {
 	PutLabel(fp0, gettext("User-Agent header"), user_agent_string);
 	PutTextInput(fp0, user_agent_string,
-			  NOTEMPTY(LYUserAgent), text_len, "");
+			  NonNull(LYUserAgent), text_len, "");
     }
 
     /*
@@ -3583,7 +3582,7 @@ PRIVATE int gen_options ARGS1(
     } else {
 	PutLabel(fp0, gettext("Bookmarks file"), single_bookmark_string);
 	PutTextInput(fp0, single_bookmark_string,
-			 NOTEMPTY(bookmark_page), text_len, "");
+			 NonNull(bookmark_page), text_len, "");
     }
 
     /* Visited Pages: SELECT */

@@ -11,6 +11,10 @@
 #include <UCMap.h>
 #endif /* !UCMAP_H */
 
+extern BOOL HTPassEightBitRaw;
+extern BOOL HTPassEightBitNum;
+extern BOOL HTPassHighCtrlRaw;
+extern BOOL HTPassHighCtrlNum;
 extern BOOLEAN LYHaveCJKCharacterSet;
 extern BOOLEAN DisplayCharsetMatchLocale;
 

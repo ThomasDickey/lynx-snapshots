@@ -387,8 +387,7 @@ cfg_defs.h : $(srcdir)/cfg_defs.sh $(srcdir)/cfg_edit.sh config.cache lynx_cfg.h
 	$(SHELL) -c '$(srcdir)/cfg_defs.sh $(srcdir)'
 
 install-cfg : $(LIBDIR)
-	-mv -f $(LIBDIR)/lynx.cfg $(LIBDIR)/lynx.oldcfg
-	$(INSTALL_DATA) $(srcdir)/lynx.cfg $(LIBDIR)/lynx.cfg
+	@$(SHELL) -c '$(srcdir)/scripts/install-cfg.sh "$(INSTALL_DATA)" $(srcdir)/lynx.cfg $(LIBDIR)/lynx.cfg'
 
 install-lss : $(LIBDIR)
 	-mv -f $(LIBDIR)/lynx.lss $(LIBDIR)/lynx.oldlss

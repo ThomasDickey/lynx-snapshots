@@ -180,7 +180,7 @@ typedef unsigned short mode_t;
 #endif
 
 #if defined(UNIX)
-#  if (defined(__BEOS__) || defined(__CYGWIN__) || defined(__EMX__))
+#  if (defined(__BEOS__) || defined(__CYGWIN__) || defined(__DJGPP__) || defined(__EMX__))
 #    define SINGLE_USER_UNIX	/* well, at least they try */
 #  else
 #    define MULTI_USER_UNIX
@@ -323,6 +323,8 @@ Macros for declarations
 #define NULL ((void *)0)
 #endif
 
+#define isEmpty(s)   ((s) == 0 || *(s) == 0)
+
 #define NonNull(s) (((s) != 0) ? s : "")
 #define NONNULL(s) (((s) != 0) ? s : "(null)")
 
@@ -331,6 +333,9 @@ Macros for declarations
 
 #define	typecalloc(cast)		(cast *)calloc(1,sizeof(cast))
 #define	typecallocn(cast,ntypes)	(cast *)calloc(ntypes,sizeof(cast))
+
+#define typeMalloc(cast)                (cast *)malloc(sizeof(cast))
+#define typeMallocn(cast,ntypes)        (cast *)malloc(ntypes*sizeof(cast))
 
 /*
 

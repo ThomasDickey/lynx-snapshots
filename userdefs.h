@@ -1347,11 +1347,11 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.5dev.9"
+#define LYNX_VERSION "2.8.5dev.11"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Sun, 06 Oct 2002 17:43:28 -0700"
+#define LYNX_DATE "Sun, 01 Dec 2002 18:19:26 -0800"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 
@@ -1438,6 +1438,7 @@
 #define ZCAT_PATH       "zcat"
 #define GZIP_PATH       "gzip"
 #define BZIP2_PATH      "bzip2"
+#define MV_PATH         "mv"
 #define INSTALL_PATH    "install"
 #define TAR_PATH        "tar"
 #define ZIP_PATH        "zip"
@@ -1447,11 +1448,10 @@
 #define TN3270_PATH     "tn3270"
 #define RLOGIN_PATH     "rlogin"
 /*
- * These are implemented directly:
+ * These are not used:
  * #define COPY_PATH       "cp"
  * #define CHMOD_PATH      "chmod"
  * #define MKDIR_PATH      "mkdir"
- * #define MV_PATH         "mv"
  * #define TOUCH_PATH      "touch"
  */
 #endif /* HAVE_CONFIG_H */

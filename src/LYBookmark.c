@@ -1,5 +1,6 @@
 #include <HTUtils.h>
 #include <HTAlert.h>
+#include <HTFile.h>
 #include <LYUtils.h>
 #include <LYStrings.h>
 #include <LYBookmark.h>
@@ -264,15 +265,18 @@ PUBLIC void save_bookmark_link ARGS2(
      *	If the link will be added to the same
      *	bookmark file, get confirmation. - FM
      */
-    if (LYMultiBookmarks != MBM_OFF &&
-	strstr(HTLoadedDocumentURL(),
-	       (*BookmarkPage == '.' ?
-		    (BookmarkPage+1) : BookmarkPage)) != NULL) {
-	LYMBM_statusline(MULTIBOOKMARKS_SELF);
-	c = LYgetch_single();
-	if (c != 'L') {
-	    FREE(bookmark_URL);
-	    return;
+    if (LYMultiBookmarks != MBM_OFF) {
+	CONST char *url = HTLoadedDocumentURL();
+	CONST char *page = (*BookmarkPage == '.')
+			    ? (BookmarkPage + 1)
+			    : BookmarkPage;
+	if (strstr(url, page) != NULL) {
+	    LYMBM_statusline(MULTIBOOKMARKS_SELF);
+	    c = LYgetch_single();
+	    if (c != 'L') {
+		FREE(bookmark_URL);
+		return;
+	    }
 	}
     }
 
@@ -634,22 +638,25 @@ PUBLIC void remove_bookmark_link ARGS2(
 	if (errno == EXDEV) {
 	    static CONST char MV_FMT[] = "%s %s %s";
 	    char *buffer = 0;
-	    HTAddParam(&buffer, MV_FMT, 1, MV_PATH);
-	    HTAddParam(&buffer, MV_FMT, 2, newfile);
-	    HTAddParam(&buffer, MV_FMT, 3, filename_buffer);
-	    HTEndParam(&buffer, MV_FMT, 3);
-	    if (LYSystem(buffer) == 0) {
+	    CONST char *program;
+
+	    if ((program = HTGetProgramPath(ppMV)) != NULL) {
+		HTAddParam(&buffer, MV_FMT, 1, program);
+		HTAddParam(&buffer, MV_FMT, 2, newfile);
+		HTAddParam(&buffer, MV_FMT, 3, filename_buffer);
+		HTEndParam(&buffer, MV_FMT, 3);
+		if (LYSystem(buffer) == 0) {
 #ifdef MULTI_USER_UNIX
-		if (regular)
-		    chmod(filename_buffer, stat_buf.st_mode & 07777);
+		    if (regular)
+			chmod(filename_buffer, stat_buf.st_mode & 07777);
 #endif
-		FREE(buffer);
-		return;
-	    } else {
-		FREE(buffer);
-		keep_tempfile = TRUE;
-		goto failure;
+		    FREE(buffer);
+		    return;
+		}
 	    }
+	    FREE(buffer);
+	    keep_tempfile = TRUE;
+	    goto failure;
 	}
 	CTRACE((tfp, "rename(): %s", LYStrerror(errno)));
 #endif /* _WINDOWS */

@@ -36,10 +36,6 @@
 PRIVATE int fix_httplike_urls PARAMS((DocInfo *doc, UrlTypes type));
 
 #ifdef VMS
-extern BOOLEAN LYDidRename;
-#endif /* VMS */
-
-#ifdef VMS
 #define STRNADDRCOMP strncasecomp
 #else
 #define STRNADDRCOMP strncmp
@@ -1581,7 +1577,7 @@ PRIVATE int fix_httplike_urls ARGS2(
 	}
 	if (type == HTTP_URL_TYPE ||
 	    type == HTTPS_URL_TYPE) {
-	    if ((slash-2) - strchr(doc->address, ':')) {
+	    if ((slash-2) != strchr(doc->address, ':')) {
 		/*
 		 *  Turns out we were not looking at the right slash after all,
 		 *  there must have been more than one "://" which is valid

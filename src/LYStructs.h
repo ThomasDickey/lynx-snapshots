@@ -6,14 +6,14 @@
 #endif /* HTANCHOR_H */
 
 typedef struct {
-    int hl_x;
     char *hl_text;
+    short hl_x;
 } HiliteInfo;
 
 typedef struct {
-    int hl_len;		/* number of strings in this struct */
-    HiliteInfo hl_base;
     HiliteInfo *hl_info;
+    HiliteInfo hl_base;
+    short hl_len;              /* number of strings in this struct */
 } HiliteList;
 
 typedef struct {

@@ -1963,7 +1963,6 @@ TRACEBACK if it can be captured, and any other relevant information.\n"));
  */
 PUBLIC int ttopen NOARGS
 {
-	extern	void cleanup_sig();
 	int	iosb[2];
 	int	status;
 	static unsigned long condition;
@@ -2281,7 +2280,6 @@ PUBLIC int DCLsystem ARGS1(
 	char *,		command)
 {
      int status;
-     extern void controlc();
 
      VMSsignal(SIGINT, SIG_IGN);
      status = spawn_DCLprocess(command);

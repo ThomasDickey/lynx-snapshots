@@ -38,11 +38,6 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
-extern BOOL HTPassEightBitRaw;
-extern BOOL HTPassEightBitNum;
-extern BOOL HTPassHighCtrlRaw;
-extern BOOL HTPassHighCtrlNum;
-
 /*
  *  Used for nested lists. - FM
  */
