@@ -1,6 +1,331 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-06-11 (2.8.3dev.1)
+(This is KW's patch, with minor corrections)
+* Key handling changes:
+  - Extended lynxkeycodes:  a bit flag is used to indicate that the lower bits
+    of the value already are a lynxactioncode and need not be looked up again. 
+    Reduces need for back and forth forward and reverse binding lookups;
+    currently only used in some places.
+  - Extended lynxkeycodes:  several (currently three) bit flags are used to
+    indicate key modifiers.
+  - Added some macros for manipulating and mapping of these codes, see
+    especially LYKeymap.h, LKC_TO_LAC() etc.  Added some comments about the
+    various kinds of codes.
+  - Added several editaction codes and flags for setting key modifier on next
+    key (i.e.  for declaring keys as prefix keys, for the purposes of line
+    editing); for flagging a key for different action if same key is repeated;
+    for exiting input field line editing and passing a specific lynxactioncode
+    on; and for undoing 8-bit C1 -> 7-bit replacement transformation for some
+    chars.  Added code to line-editor implementation to react to these new
+    editactions.  Note that the mapping of lynxkeycode to lynxactioncode
+    outside of line editing, i.e.  KEYMAP in lynx.cfg etc., ignores the
+    modifiers.  The main loop just drops modifier flags or ignores the modified
+    key; modifier flags cannot be used in lynx.cfg KEYMAP 'keystroke' values.
+  - An ESC not recognized as part of an escape sequence can set the appropriate
+    modifier flag in LYgetch(), except for SLANG which normally uses a
+    different LYgetch() implementation.  Interpreting an ESC prefix as modifier
+    is very useful for situations where a held-down Alt key (or some other key)
+    is encoded this way:  linux console, kermit with emacs key mappings,
+    possibly xterm with '*eightBitInput:  false'.  OTOH it doesn't work for all
+    characters or in all situations.
+  - Extended syntax recognized in .lynx-keymaps file (which is only used if
+    compiling with USE_KEYMAPS defined, which in turn depends on slang and
+    ncurses version):
+    (a) Meta-foo can be used to map an escape sequence to a key + modifier.
+    (b) LAC:foo can be used to map an escape sequence directly to a
+        lynxactioncode (actually, to an extended lynxkeycode that
+        encapsulates a lynxactioncode).
+    See examples added to samples/lynx-keymaps.
+  - Extended syntax of KEYMAP option, additional field can override line-editor
+    behavior.  PASS documented in lynx.cfg.
+  - Extended syntax that can be used for specifying key in KEYMAP, some of the
+    forms allowed in .lynx-keymaps file are now additionally recognized, but
+    only if compiling with USE_KEYMAPS defined.  Left undocumented in lynx.cfg
+    (maybe subject to change).
+  - New "Bash-like" Line Editor binding.  Adds several new emacs-like editing
+    functions.  Adds tables for keys with modifiers (actually the same table is
+    currently used for all modifiers, to save some space).  Most notably, ^X is
+    a prefix key to set a modifier flag.  Keys with second function when
+    pressed twice are ^E^E and ^K^K.  ESC is also recognized as setting a
+    modifier flag, in case it gets through without been having been handled in
+    LYgetch().  See new file keystrokes/bashlike_edit_help.html for more info. 
+    The Bash-like Line Editor Bindings are only compiled in if compiled with
+    -DEXP_ALT_BINDINGS / configured with --enable-alt-bindings (but not subject
+    to a new macro).  Implementation code for the new emacs-like functions
+    additionally ifdef'd with ENHANCED_LINEEDIT. 
+  - Avoid dependency on DNARROW key binding when form field line-editing is
+    ended with Enter or Return key.
+  - Take setting of real_c/old_c into consideration after return from form
+    field line-editing.  Previously there were some strange effects: 
+    statusline messages would sometimes not appear when they should, the KEYMAP
+    command would sometimes not work when invoked with ^Vk while in a form
+    field.
+  - Make NOCACHE ('x') work for TEXT_SUBMIT_TYPE form fields (i.e.  forms with
+    a single text input field where Enter automatically submits).  Of course
+    'x' has to be typed as ^Vx while line-editing the field (or NOCACHE mapped
+    to a different key).  Similarly allow DOWNLOAD, and HEAD to work for such
+    fields.  Try to ensure that all permission checks that apply to other form
+    submissions are also done for TEXT_SUBMIT_TYPE fields, this wasn't the case
+    before.
+  - New key actions LPOS_PREV_LINK and LPOS_NEXT_LINK.  They are like PREV_LINK
+    and NEXT_LINK, with the difference that, when moving to a form input or
+    textarea line, the last column position (relative to the field) is
+    remembered.  They are not mapped by default, but mentioned in lynx.cfg.
+  - New key action DWIMHELP.  It should give some context-sensitive help. 
+    Currentely the appropriate Line Editor Binding help page is shown if a form
+    input field is selected, otherwise it defaults to the main HELP page.
+  - New key action DWIMEDIT.  Revert meaning of EDIT back to previous meaning: 
+    always edit document file, not textarea content.  DWIMEDIT acts like
+    EDITTEXTAREA if the current link is a form textarea or input field and
+    AUTOEXTEDIT was defined, and like EDIT otherwise.  Also added slightly
+    different statusline message if form field external editiong cannot be done
+    because editing is disabled:  it shouldn't refer to "The 'e'dit command".
+  - Summary of reasonable ways to invoke external texarea editing (assuming
+    that it is desired to keep the action of 'e' to edit files at least outside
+    of input fields):
+    1) KEYMAP 'e' to DWIMEDIT, invoke ^Ve.  (if AUTOEXTEDIT is defined,
+       which is the case by default.)
+    1a) KEYMAP <some other key> to DWIMEDIT, invoke ^V<some other key>.
+    1b) KEYMAP <some other key> to EDITTEXTAREA, invoke ^V<some other key>.
+    2) KEYMAP a key (function or control, not printable!) to EDITTEXTAREA
+       or DWIMEDIT, using PASS in the KEYMAP line.
+    2a) Find some key whose LineEdit binding is already LYE_FORM_PASS, and
+        KEYMAP it to EDITTEXTAREA or DWIMEDIT.
+    3) compile with EXP_ALT_BINDINGS defined (--enable-alt-bindings),
+       select Bash-like Bindings,
+       invoke ^E^E or ^X^E (or ESC ^E aka M-C-e), or
+       invoke ^Xe (or ESC e aka M-e), or
+    3a) compile with EXP_ALT_BINDINGS defined (--enable-alt-bindings),
+        and without selecting Bash-like Bindings
+        (invoke ESC ^E aka M-C-e or ESC e aka M-e).
+    Bindings in parentheses under 3/3a may not work with slang unless a
+    tweaked .lynx-keymaps file is used.
+* Other changes related to textarea handling:
+  - More appropriate message statusline message if GROWTEXTAREA or INSERTFILE
+    cannot be done because a textarea is not selected:  it shouldn't refer to
+    "external editor".
+  - Check whether an editor is defined before trying to use it for textarea
+    editing.  Generate message if spawning of external textarea editor failed.
+  - Allow INSERTFILE only if file access is not restricted.
+  - Enforce dotfiles restriction and "show dot files" setting for INSERTFILE.
+* Mouse handling changes, mostly only if mouse support comes via ncurses:
+  - Re-enabled changing link by clicking in area *near* a link (but not on the
+    link text), but limit max.  distance to 2 character positions.
+  - Make mouse popup menu disappear when it should, by applying the right magic
+    touchline() in popup_choice().
+  - Lots of small tweaks to remove glitches in mouse handling, among them:  No
+    left scrolling of long input fields on entering with mouse.  Try to ensure
+    statusline is updated after mouse menu.  Make menu actions work as
+    expected.  Avoid acting on mouse events, especially invoking mouse menu, in
+    wrong context (e.g.  while at a prompt), at least in many places.
+  - Clicking on left or right border of mouse menu now only moves selection.
+  - At right end of top/bottom line, where single click causes HISTORY action,
+    double click now causes VLINKS action.
+  - Allow to distinguish between submitting and just positioning into a
+    TEXT_SUBMIT_TYPE input field.  Single click positions, double click
+    submits, 'activate' from menu also submits.
+  - When initializing ncurses mouse, call mousemask() with only those bits set
+    that we may actually be interested in.
+* Changes relevant for handling window size changes:
+  - For ncurses, changed the way how mainloop() notifies the curses library
+    about a window size change.  The approach taken previously, and still used
+    if we are not using ncurses, has more overhead, can unnecessarily switch
+    out of the alternative screen buffer (and back) under xterm, and didn't
+    really make ncurses update the WINDOW structures for the new size in time.
+  - Other tweaks for size change:  make sure curdoc.link is valid after
+    refresh.
+  - Detection of size changes in more situations:  tolerate EOF from GetChar in
+    the (non-SLANG) LYgetch_for() in more cases if errno is EINTR, if this
+    happens check for a size change and generate trace output.  Recognize
+    KEY_RESIZE from ncurses, check for a size change and generate trace output
+    when it occurs.
+  - Added NONRESTARTING_SIGWINCH lynx.cfg option and -nonrestarting_sigwinch
+    flag.  If set, lynx *may* react more immediately to window size changes
+    when running under xterm or similar.  Whether this actually has an effect
+    depends on the implementation of sigaction() and on the behavior of the
+    curses (or similar) library when a read() (or other system call) is
+    interrupted by signals.
+    Depends on '#if HAVE_SIGACTION', which currently has to be defined by hand,
+    for example by 'make SITE_DEFS="-DHAVE_SIGACTION"'.  The command line flag
+    is only available on systems with HAVE_SIGACTION and SIGWINCH.
+  - Tweaks so that lynx in an xterm can survive when the window size is made
+    (probably temporarily) very small, for example 1x1.  Avoid display_page's
+    work if it wouldn't be displayable anyway.  Make display_title handle very
+    small screen widths, at least to the degree that it doesn't crash.
+* Except for VMS or when DOSPATH is defined, set restore_sigpipe_for_children.
+  Fixes Debian bug #33853, maybe not really a bug but let's be nice.
+* Changes in HTTCP.c:
+  - Added a CTRACE_FLUSH before creation of NSL_FORK child process.
+  - Block certain signals during creation of NSL_FORK child process, if
+    sigprocmask() and friends are available.  This should prevent a rare
+    problem where sometimes the child process could be killed before it has a
+    chance to modify its signal handlers, resulting in screen corruption, a
+    seemingly hanging lynx, and/or other problems.  It is assumed that
+    sigprocmask() etc.  are available if HAVE_SIGACTION is true.  It currently
+    has to be defined by hand, for example by 'make
+    SITE_LYDEFS="-DHAVE_SIGACTION"'.
+  - Generate diagnostic messages for some failures of forked lookup.  Depends
+    on HAVE_H_ERRNO.  In particular, try to detect whether the child process
+    failed because of memory problems, and also fake a 'z' in that case to
+    short-circuit a URL guessing cycle.
+  - For most systems, generate more trace output for connection attempts, close
+    to the actual connect() and select() calls to prevent clobbering errno. 
+    See SOCKET_DEBUG_TRACE.  This should help diagnose some obscure
+    system-dependent problems that have occasionally been reported.
+* Added some missing stuff for color handling to forms Option Menu code.
+* Printing to screen sometimes didn't show anything for short texts, if screen
+  output was buffered (and ncurses makes stdout buffered).  Added another
+  fflush(stdout) in send_file_to_screen().
+* Some checks for specific URLs (helpfilepath, lynxlistfile, and lynxjumpfile)
+  in LYGetFile.c were inappropriately case-insensitive for Unix.  The
+  comparison is now case-sensitive except for VMS.  This may need tweaking for
+  DOS and similar systems.
+* Added additional LYNoRefererForThis check in getfile(), the one in mainloop()
+  could be missed for TEXT_SUBMIT_TYPE form fields.  Also moved other check for
+  whether to send Referer header earlier, and made it apply for URL types that
+  might be proxied.
+* LYAddVisitedLink tried to regard documents with the same address but a
+  different title string as different documents, but this was coded wrong. 
+  Removed ineffective comparison, but keep old title string if new title string
+  is empty.
+* Correct long-standing logic error in MAIL_SYSTEM_ERROR_LOGGING handling.
+  Apparently not many people are using it...
+* Fix for traversal code to put the right address into the TRAVERSE_REJECT_FILE
+  if a request fails after popping a document from the history stack (this can
+  only occur if a previous request for the same document had succeeded).  Also
+  don't try to send mail in such a case if MAIL_SYSTEM_ERROR_LOGGING is on. 
+  Also prevent possible history stack underflow if this occurs on return to the
+  first document.
+* According to lynx.cfg, error logging mail may be sent to ALERTMAIL if no
+  document owner is known, but this was not implemented; now it is.  ALERTMAIL
+  is used if it is defined non-empty in userdefs.h.  Of course normally it
+  should be left undefined.
+* Fix for traversal code to reject form fields a bit earlier.  This prevents
+  unnecessary lookups as well as adding of an empty line to the
+  TRAVERSE_REJECT_FILE for each form field encountered.
+* Format -crawl output as was documented in CRAWL.announce:  with this switch,
+  link numbering is always off by default (userdefs.h and lynx.cfg defaults und
+  saved user preference are ignored) unless -number_links is given, and -crawl
+  -traversal format is now consistent with -crawl -dump with respect to link
+  numbering.  As a side effect, -crawl without either -traversal or -dump now
+  also turns link numbering off unless -number_links is used (the meaning of
+  -crawl without either of these was undocumented), so it then acts effectively
+  as a (less powerful) negation of the -number_links switch.
+* For -crawl -dump, the list of links was appended twice.  Fixed.
+* Check URL as well as title before deciding that a document should not be
+  pushed on the history stack because it looks like a generated special page.
+* Made "Don't waste the cache" optimization in historytarget() subject to
+  additional checks, to avoid uncaching of the wrong document in some cases.
+* LYSafeGets() would drop the last line from a file if it was not terminated. 
+  Changed to return the unterminated line like fgets().
+* Clarifications on restrictions.  "download" does not imply "disk_save" while
+  "print" does, this doesn't seem to make much sense but has been the behavior
+  for a long time.
+* Restrictions inside_news, outside_news now apply to reading as well as
+  posting.  The documentation (except for the corresponding comments in
+  userdefs.h) said that they apply to posting, while in fact they were
+  implemented for reading only.  [Does nobody read this stuff???] Also, the
+  implementation only checked the flag for news:  URLs, but not for nntp: 
+  URLs, which doesn't make much sense given that the latter provide an
+  alternative way for most (if not all) purposes of the first.  So now these
+  restrictions apply to news:, nntp:, newspost:, and newsreply:  (but not to
+  snews:, snewspost:, or snewsreply:).
+* Document -restrictions=externals.
+* Some of the restriction stuff not added to VMS lynx.hlp file, since I'm not
+  quite sure whether the corresponding features work there at all.
+* Changed restriction parsing so that "all" and "default" don't get ignored if
+  they appear as one of several items in the same list.
+* Implement listing of current restrictions to stdout with new -restrictions=? 
+  option.  This should appear as the last command line option, otherwise the
+  effect of options appearing later may not be shown.  The '?' may require
+  quoting.
+* Made -restrictions= (without any option flags) act like -restrictions
+  (without equal sign either) as implied by documentation, i.e.  list
+  recognized restriction options.
+* LYRestricted has been greatly abused.  Once upon a time it was a PRIVATE flag
+  in LYMain.c (then called anon_restrictions_set), used only to get the
+  precedence of various command line options right.  Recently it has been
+  misused as a check (and as the only one) whether "anonymous restrictions" are
+  in effect.  This undermines various assumptions:
+  - that -anonymous is basically an aggregate set of restrictions which could
+    be specified individually with -restrictions=.
+  - that individually listed restrictions (-restrictions=...) act as expected,
+    and can be used to restrict various aspects in a useful manner.
+  - that -validate implies the strongest restrictions, except for what is
+    explicitly exempted (i.e. 'g'oto for http/https URLs).
+  Use specific restrictions instead:
+  - new "compileopts_info" for LYNXCOMPILEOPTS:  - for anonymous default see
+    userdefs.h
+  - new "lynxcfg_info" for LYNXCFG: - for anonymous default see userdefs.h
+  - new "lynxcfg_xinfo" for extended LYNXCFG: - for anonymous default see
+    userdefs.h
+  - new invisible "goto_configinfo" for LYNXCOMPILEOPTS: & LYNXCFG: for
+    anonymous default, see userdefs.h
+  - additionally check existing "option_save" for LYNXCFG://reload/ -
+    always restricted by anonymous default
+  ("invisible" means that this restriction cannot be explicitly listed in a
+  -restrictions=...  list, but has a value derived from userdefs.h that is used
+  with -anonymous and -restrictions=default.)
+* Forms options menu can now be used with -validate.
+* Allow following local help file links, even if "file_url" restriction is set,
+  from LYNXKEYMAP, LYNXCOOKIES.  (Possibly more need to be added.)
+* Apparently realm checking (with -realm option) is bypassed for URLs from
+  (some) form submissions (it seems to be intentional, but why?).  Made sure
+  this at least doesn't weaken -validate restrictions.
+* Apply -localhost check in getfile for news URLs that include a hostname,
+  i.e., that begin with with "news://".
+* Add '&' to nonalphanumeric characters forbidden by exec_ok() for lynxexec and
+  lynxprog URLs, but keep allowing it for lynxcgi.  There's not much point in
+  excluding ';' and so on if '&' is acceptable!
+* Tweaked LYNXMESSAGES:  handling slightly:  don't bypass normal getfile
+  handling.
+* Reset LYforce_no_cache flag in mainloop() after failed access, before popping
+  the previous (or, actually, probably currently still displayed) document.
+* Tweak for 'no data' handling:  it isn't always an error, but was sometimes
+  treated as such.  It mostly doesn't make a difference, except for the message
+  printed when the startfile cannot be accessed and for traversal and mail
+  error logging.  This needs to be revised to apply for all protocols.
+* Added new functionality for rules:  Redirect, UseProxy, various others.  See
+  cernrules.txt in samples directory for details.
+* Prevent crashes in HTNews.c with HEAD.
+* Allow HEAD requests for proxied URLs (checking whether any applicable proxy
+  begins with http:  or lynxcgi:), as far as this can be determined based on
+  regular environment settings (i.e.  unaware of proxying by rules).
+* Modified add_item_to_list() so that if the restriction flag is omitted from a
+  DOWNLOADER/UPLOADER/EXTERNAL line in lynx.cfg, it is assumed FALSE.  This
+  modifies the change of 1998-10-17 to be on the safer side, it is more
+  consistent with how PRINTER lines or lines with the colon separator present
+  but the flag value absent are handled, and it only makes a difference when a
+  -restriction command line option or its equivalent is in effect anyway.
+* Deal with unusual cases where telnet and similar protocols are proxied, or
+  possibly changed to a different type of protocol by rules.  Normally such
+  protocols should never be proxied, but there was no protection against it,
+  and lynx could crash.  The approach now taken does not disallow it, but just
+  tries to deal with the situation in a way that avoids crashing; it is
+  conceivable that one may want to direct e.g.  telnet or rlogin URLs to a HTTP
+  page that explains why theses types are not supported.  A similar problem
+  that occurred when e.g.  telnet was forbidden by a rule is also dealt with.
+* Protect start_curses calls in getfile against being executed if
+  dump_output_immediately is in effect.  Maybe access to telnet, rlogin,
+  lynxexec URLs should be completely disabled for this case; skipping the
+  start_curses at least avoids being left with non-restored tty settings after
+  the program exits, is someone attempts to use -dump or -source with such a
+  URL (the -dump or -source flags is then effectively more or less ignored).
+* Tweaks in fix_http_urls, renamed fix_httplike_urls.
+* Moved LYStrerror from LYStrings.{h,c} to HTAlert.{h,c}, so that it can be
+  used in HT*.c files without pulling in yet more LY*.h headers.
+* Reset 'safe' flag in anchor on parsing "Safe: no" and "Safe: false" headers.
+* The top makefile.in had some 'rm -rf' for whole directories $(helpdir) and
+  $(docdir) in install targets that could potentially wipe out unrelated files;
+  added checks to make sure the directories haven't been changed to something
+  not lynx-specific (they are regarded as lynx-specific if the last component
+  is lynx_help and lynx_doc, respectively).
+* Various doc tweaks.
+* Updated README.defines.  Other contributors should please add their stuff
+  there, too.
+
 1999-06-01 (2.8.2rel.1)
 -----------------------
 1999-06-01 (2.8.2pre.11)

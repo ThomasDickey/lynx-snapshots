@@ -918,6 +918,7 @@ try_again:
 		 */
 		HTAlert(line_buffer);
 		HTTP_NETCLOSE(s, handle);
+		HTNoDataOK = 1;
 		status = HT_NO_DATA;
 		goto clean_up;
 

@@ -471,7 +471,7 @@ draw_options:
 	lynx_stop_prompt_color ();
 
 	refresh();
-	response = LYgetch();
+	response = LYgetch_for(FOR_SINGLEKEY);
 	if (term_options || response == 7 || response == 3)
 	    response = 'R';
 	if (LYisNonAlnumKeyname(response, LYK_REFRESH)) {
@@ -631,7 +631,7 @@ draw_options:
 						     (1 + LYMBMAdvanced)),
 						    L_HOME, (C_MULTI - 1),
 						    choices,
-						    3, FALSE);
+						    3, FALSE, FALSE);
 		}
 		if (LYMultiBookmarks == 2) {
 		    LYMultiBookmarks = TRUE;
@@ -757,7 +757,7 @@ draw_options:
 		    HTfileSortMethod = popup_choice(HTfileSortMethod,
 						    L_FTPSTYPE, -1,
 						    choices,
-						    4, FALSE);
+						    4, FALSE, FALSE);
 #if defined(VMS) || defined(USE_SLANG)
 		    move(L_FTPSTYPE, COL_OPTION_VALUES);
 		    clrtoeol();
@@ -862,7 +862,7 @@ draw_options:
 			UCLYhndl_for_unspec = popup_choice(curval,
 							   L_ASSUME_CHARSET, -1,
 							   assume_list,
-							   0, FALSE);
+							   0, FALSE, FALSE);
 #if defined(VMS) || defined(USE_SLANG)
 			move(L_ASSUME_CHARSET, COL_OPTION_VALUES);
 			clrtoeol();
@@ -926,7 +926,7 @@ draw_options:
 		    current_char_set = popup_choice(current_char_set,
 						    L_Charset, -1,
 						    (char **)LYchar_set_names,
-						    0, FALSE);
+						    0, FALSE, FALSE);
 #if defined(VMS) || defined(USE_SLANG)
 		    move(L_Charset, COL_OPTION_VALUES);
 		    clrtoeol();
@@ -1212,7 +1212,7 @@ draw_options:
 			    chosen = popup_choice(LYChosenShowColor,
 						  L_Color,
 						  C_COLOR,
-						  choices, 4, FALSE);
+						  choices, 4, FALSE, FALSE);
 			}
 #if defined(COLOR_CURSES)
 			again = (chosen == 2 && !has_colors());
@@ -1308,7 +1308,7 @@ draw_options:
 		    keypad_mode = popup_choice(keypad_mode,
 					       L_Keypad, -1,
 					       choices,
-					       3, FALSE);
+					       3, FALSE, FALSE);
 #if defined(VMS) || defined(USE_SLANG)
 		    move(L_Keypad, COL_OPTION_VALUES);
 		    clrtoeol();
@@ -1348,7 +1348,7 @@ draw_options:
 		    current_lineedit = popup_choice(current_lineedit,
 						    L_Lineed, -1,
 						    LYLineeditNames,
-						    0, FALSE);
+						    0, FALSE, FALSE);
 #if defined(VMS) || defined(USE_SLANG)
 		    move(L_Lineed, COL_OPTION_VALUES);
 		    clrtoeol();
@@ -1381,7 +1381,7 @@ draw_options:
 		    current_layout = popup_choice(current_layout,
 						    L_Layout, -1,
 						    LYKbLayoutNames,
-						    0, FALSE);
+						    0, FALSE, FALSE);
 #if defined(VMS) || defined(USE_SLANG)
 		    move(L_Layout, COL_OPTION_VALUES);
 		    clrtoeol();
@@ -1425,7 +1425,7 @@ draw_options:
 		    dir_list_style = popup_choice(dir_list_style,
 						  L_Dired, -1,
 						  choices,
-						  3, FALSE);
+						  3, FALSE, FALSE);
 #if defined(VMS) || defined(USE_SLANG)
 		    move(L_Dired, COL_OPTION_VALUES);
 		    clrtoeol();
@@ -1472,7 +1472,7 @@ draw_options:
 		    user_mode = popup_choice(user_mode,
 					     L_User_Mode, -1,
 					     choices,
-					     3, FALSE);
+					     3, FALSE, FALSE);
 		    use_assume_charset = (user_mode >= 2);
 #if defined(VMS) || defined(USE_SLANG)
 		    if (use_assume_charset == old_use_assume_charset) {
@@ -1526,7 +1526,7 @@ draw_options:
 					     L_VERBOSE_IMAGES,
 					     C_VERBOSE_IMAGES,
 					     choices,
-					     2, FALSE);
+					     2, FALSE, FALSE);
 		}
 		FREE(choices[0]);
 		FREE(choices[1]);
@@ -1766,7 +1766,7 @@ PRIVATE int boolean_choice ARGS4(
     while (1) {
 	move(line, col);
 	if (term_options == FALSE) {
-	    response = LYgetch();
+	    response = LYgetch_for(FOR_SINGLEKEY);
 	}
 	if (term_options || response == 7 || response == 3) {
 	     /*
@@ -1785,7 +1785,7 @@ PRIVATE int boolean_choice ARGS4(
 	}
 #endif /* VMS */
 	if ((response != '\n' && response != '\r') &&
-	    (cmd = keymap[response+1]) != LYK_ACTIVATE) {
+	    (cmd = LKC_TO_LAC(keymap,response)) != LYK_ACTIVATE) {
 	    switch (cmd) {
 		case LYK_HOME:
 		    cur_choice = 0;
@@ -1811,6 +1811,7 @@ PRIVATE int boolean_choice ARGS4(
 		case LYK_UP_HALF:
 		case LYK_UP_TWO:
 		case LYK_PREV_LINK:
+		case LYK_LPOS_PREV_LINK:
 		case LYK_FASTBACKW_LINK:
 		case LYK_UP_LINK:
 		case LYK_LEFT_LINK:
@@ -2005,7 +2006,7 @@ draw_bookmark_list:
 	lynx_stop_prompt_color ();
 
 	refresh();
-	response = (def_response ? def_response : LYgetch());
+	response = (def_response ? def_response : LYgetch_for(FOR_SINGLEKEY));
 	def_response = 0;
 
 	/*
@@ -2216,14 +2217,18 @@ PRIVATE int get_popup_choice_number ARGS1(
  *  This function offers the choices for values of an
  *  option via a popup window which functions like
  *  that for selection of options in a form. - FM
+ *
+ *  Also used for mouse popups with ncurses; this is indicated
+ *  by for_mouse.
  */
-PUBLIC int popup_choice ARGS6(
+PUBLIC int popup_choice ARGS7(
 	int,		cur_choice,
 	int,		line,
 	int,		column,
 	char **,	choices,
 	int,		i_length,
-	int,		disabled)
+	int,		disabled,
+	BOOLEAN,	for_mouse)
 {
     int ly = line;
     int lx = (column >= 0 ? column : (COL_OPTION_VALUES - 1));
@@ -2251,6 +2256,7 @@ PUBLIC int popup_choice ARGS6(
     BOOLEAN ReDraw = FALSE;
     int number;
     char buffer[512];
+    char *popup_status_msg = NULL;
 
     /*
      * Initialize the search string buffer. - FM
@@ -2356,6 +2362,16 @@ PUBLIC int popup_choice ARGS6(
 	top = bottom - length - 2;
     }
 
+    if (for_mouse) {
+	/* shift horizontally to lie within screen width, if possible */
+	if (Lnum + (int)width + 4 < LYcols) {
+	    if (lx - 1 + (Lnum + (int)width + 4) > LYcols)
+		lx = LYcols + 1 - (Lnum + width + 4);
+	    else if (lx <= 0)
+		lx = 1;
+	}
+    }
+	
     /*
      *	Set up the overall window, including the boxing characters ('*'),
      *	if it all fits.  Otherwise, set up the widest window possible. - FM
@@ -2389,10 +2405,16 @@ PUBLIC int popup_choice ARGS6(
     move((LYlines - 2), 0);
     clrtoeol();
     if (disabled) {
-	_statusline(CHOICE_LIST_UNM_MSG);
+	StrAllocCopy(popup_status_msg, CHOICE_LIST_UNM_MSG);
+    } else if (!for_mouse) {
+	StrAllocCopy(popup_status_msg, CHOICE_LIST_MESSAGE);
+#ifdef NCURSES_MOUSE_VERSION
     } else {
-	_statusline(CHOICE_LIST_MESSAGE);
+	StrAllocCopy(popup_status_msg, gettext(
+		"Left mouse button or return to select, arrow keys to scroll."));
+#endif
     }
+    _statusline(popup_status_msg);
 
     /*
      *	Set up the window_offset for choices.
@@ -2533,7 +2555,7 @@ redraw:
 		break;
 #endif
 	} else {
-	    cmd = keymap[c+1];
+	    cmd = LKC_TO_LAC(keymap,c);
 	}
 #ifdef VMS
 	if (HadVMSInterrupt) {
@@ -2571,20 +2593,12 @@ redraw:
 		    if (number <= 1) {
 			if (window_offset == 0) {
 			    HTUserMsg(ALREADY_AT_CHOICE_BEGIN);
-			    if (disabled) {
-				_statusline(CHOICE_LIST_UNM_MSG);
-			    } else {
-				_statusline(CHOICE_LIST_MESSAGE);
-			    }
+			    _statusline(popup_status_msg);
 			    break;
 			}
 			window_offset = 0;
 			cur_choice = 0;
-			if (disabled) {
-			    _statusline(CHOICE_LIST_UNM_MSG);
-			} else {
-			    _statusline(CHOICE_LIST_MESSAGE);
-			}
+			_statusline(popup_status_msg);
 			goto redraw;
 		    }
 
@@ -2595,11 +2609,7 @@ redraw:
 		    if (number >= npages) {
 			if (window_offset >= ((num_choices - length) + 1)) {
 			    HTUserMsg(ALREADY_AT_CHOICE_END);
-			    if (disabled) {
-				_statusline(CHOICE_LIST_UNM_MSG);
-			    } else {
-				_statusline(CHOICE_LIST_MESSAGE);
-			    }
+			    _statusline(popup_status_msg);
 			    break;
 			}
 			window_offset = ((npages - 1) * length);
@@ -2608,11 +2618,7 @@ redraw:
 			}
 			if (cur_choice < window_offset)
 			    cur_choice = window_offset;
-			if (disabled) {
-			    _statusline(CHOICE_LIST_UNM_MSG);
-			} else {
-			    _statusline(CHOICE_LIST_MESSAGE);
-			}
+			_statusline(popup_status_msg);
 			goto redraw;
 		    }
 
@@ -2622,19 +2628,11 @@ redraw:
 		    if (((number - 1) * length) == window_offset) {
 			sprintf(buffer, ALREADY_AT_CHOICE_PAGE, number);
 			HTUserMsg(buffer);
-			if (disabled) {
-			    _statusline(CHOICE_LIST_UNM_MSG);
-			} else {
-			    _statusline(CHOICE_LIST_MESSAGE);
-			}
+			_statusline(popup_status_msg);
 			break;
 		    }
 		    cur_choice = window_offset = ((number - 1) * length);
-		    if (disabled) {
-			_statusline(CHOICE_LIST_UNM_MSG);
-		    } else {
-			_statusline(CHOICE_LIST_MESSAGE);
-		    }
+		    _statusline(popup_status_msg);
 		    goto redraw;
 
 		}
@@ -2672,11 +2670,7 @@ redraw:
 			    sprintf(buffer,
 				    CHOICE_ALREADY_CURRENT, (number + 1));
 			    HTUserMsg(buffer);
-			    if (disabled) {
-				_statusline(CHOICE_LIST_UNM_MSG);
-			    } else {
-				_statusline(CHOICE_LIST_MESSAGE);
-			    }
+			    _statusline(popup_status_msg);
 			    break;
 			}
 
@@ -2698,11 +2692,7 @@ redraw:
 				if (window_offset < 0)
 				    window_offset = 0;
 			    }
-			    if (disabled) {
-				_statusline(CHOICE_LIST_UNM_MSG);
-			    } else {
-				_statusline(CHOICE_LIST_MESSAGE);
-			    }
+			    _statusline(popup_status_msg);
 			    goto redraw;
 			}
 
@@ -2716,14 +2706,11 @@ redraw:
 		/*
 		 *  Restore the popup statusline. - FM
 		 */
-		if (disabled) {
-		    _statusline(CHOICE_LIST_UNM_MSG);
-		} else {
-		    _statusline(CHOICE_LIST_MESSAGE);
-		}
+		_statusline(popup_status_msg);
 		break;
 
 	    case LYK_PREV_LINK:
+	    case LYK_LPOS_PREV_LINK:
 	    case LYK_UP_LINK:
 
 		if (cur_choice > 0)
@@ -2739,6 +2726,7 @@ redraw:
 		break;
 
 	    case LYK_NEXT_LINK:
+	    case LYK_LPOS_NEXT_LINK:
 	    case LYK_DOWN_LINK:
 		if (cur_choice < num_choices)
 		    cur_choice++;
@@ -3163,10 +3151,7 @@ restore_popup_statusline:
 		 *  Restore the popup statusline and
 		 *  reset the search variables. - FM
 		 */
-		if (disabled)
-		    _statusline(CHOICE_LIST_UNM_MSG);
-		else
-		    _statusline(CHOICE_LIST_MESSAGE);
+		_statusline(popup_status_msg);
 		*prev_target = '\0';
 		QueryTotal = (search_queries ? HTList_count(search_queries)
 					     : 0);
@@ -3183,12 +3168,17 @@ restore_popup_statusline:
 	    case LYK_PREV_DOC:
 		cur_choice = orig_choice;
 		term_options = TRUE;
-		HTUserMsg(CANCELLED);
+		if (!for_mouse) {
+		    HTUserMsg(CANCELLED);
+		}
 		cmd = LYK_ACTIVATE; /* to exit */
 		break;
 	}
     }
+    FREE(popup_status_msg);
 #ifndef USE_SLANG
+    /* added touchline() - kw 19990513 */
+    touchline(stdscr, top, bottom - top);
     delwin(form_window);
 #ifdef NCURSES
     LYsubwindow(0);
@@ -3199,7 +3189,9 @@ restore_popup_statusline:
 	_statusline("");
 	return(orig_choice);
     } else {
-	_statusline(VALUE_ACCEPTED);
+	if (!for_mouse) {
+	    _statusline(VALUE_ACCEPTED);
+	}
 	return(cur_choice);
     }
 }
@@ -3932,6 +3924,7 @@ PUBLIC int postoptions ARGS1(
     if (save_all) {
 	_statusline(SAVING_OPTIONS);
 	if (save_rc()) {
+	    LYrcShowColor = LYChosenShowColor;
 	    _statusline(OPTIONS_SAVED);
 	} else {
 	    HTAlert(OPTIONS_NOT_SAVED);
@@ -4106,6 +4099,13 @@ PRIVATE int gen_options ARGS1(
 
     LYLocalFileToURL(newfile, tempfile);
 
+    /* This should not be needed, as long as we regenerate the
+       temp file every time with a new name (which just happened
+       above.  If access to the actual file via getfile()
+       (maybe because of some restrictions), mainloop may leave
+       this flag on after popping the previous doc which is then
+       unnecessarily reloaded.  But I changed mainloop to reset
+       the flag. - kw 1999-05-24 */
     LYforce_no_cache = TRUE;
 
     BeginInternalPage(fp0, OPTIONS_TITLE, NULL); /* help link below */
@@ -4217,7 +4217,8 @@ PRIVATE int gen_options ARGS1(
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
     can_do_colors = 1;
 #if defined(COLOR_CURSES)
-    can_do_colors = has_colors();
+    if (LYCursesON)	/* could crash if called before initialization */
+	can_do_colors = has_colors();
 #endif
     PutLabel(fp0, gettext("Show color"));
     MaybeSelect(fp0, !can_do_colors, show_color_string);
@@ -4472,7 +4473,7 @@ PRIVATE int gen_options ARGS1(
 		     NOTEMPTY(LYUserAgent), text_len, "");
     }
 
-    if (!LYRestricted) {
+    if (!no_lynxcfg_info) {
 	fprintf(fp0,
 		"\n  Check your <a href=\"LYNXCFG:\">lynx.cfg</a> here\n");
     }

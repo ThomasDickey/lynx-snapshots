@@ -2228,10 +2228,11 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	return((int)TRUE);
 
 	/* There is a subset of mainloop() actions available at this stage:
-	** no new getfile() cyrcle possible until the previous finished.
-	** Currently we have scrolling in partial mode and toggling of trace log.
+	** no new getfile() cycle is possible until the previous finished.
+	** Currently we have scrolling in partial mode and toggling of trace
+	** log.
 	*/
-    switch (keymap[c+1])
+    switch (LKC_TO_LAC(keymap,c))
     {
     case LYK_TRACE_TOGGLE :	       /*  Toggle TRACE mode. */
 	WWW_TraceFlag = ! WWW_TraceFlag;
@@ -2245,7 +2246,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	/* OK, we got several lines from new document and want to scroll... */
 	{
 	    int res;
-	    switch (keymap[c+1])
+	    switch (LKC_TO_LAC(keymap,c))
 	    {
 	    case LYK_FASTBACKW_LINK :
 		if (Newline_partial <= (display_lines)+1) {
@@ -2746,7 +2747,7 @@ PUBLIC int is_url ARGS1(
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	(void)is_url(&cp[11]);
+	(void)is_url(&cp[11]);	/* forces lower/uppercase of next part */
 	return(LYNXIMGMAP_URL_TYPE);
 
     } else if (compare_type(cp, "LYNXCOOKIE:", 11)) {
@@ -2823,6 +2824,71 @@ PUBLIC int is_url ARGS1(
 }
 
 /*
+ *  Sometimes it is just expected that curses is on when an alert or
+ *  other statusline message needs to be shown and we are not just
+ *  dumping immediately.  Calling this will 'fix' it, but may not
+ *  always be appropriate. - kw
+ */
+PUBLIC void LYFixCursesOn ARGS1(
+    CONST char *,	reason)
+{
+    if (dump_output_immediately || LYCursesON)
+	return;
+    if (reason) {
+	CTRACE(tfp, "Forcing curses on to %s\n", reason);
+    }
+    start_curses();
+}
+
+/*
+ *  Most protocol modules called through HTLoad* expect that curses is on
+ *  unless dump_output_immediately is set, so that statusline messages
+ *  can be shown.  Some protocols expect the opposite, namely telnet and
+ *  friends.  This function should be called after the 'physical' URL
+ *  for accessing addr has been established.  It does the right thing
+ *  to the degree that curses is turned on for known problem cases.
+ *  In any normal circumstances this should never apply, but proxying
+ *  or rule substitution is not prevented for telnet-like URLs, and
+ *  this 'fix' avoids some crashes that can otherwise occur. - kw
+ */
+PUBLIC BOOLEAN LYFixCursesOnForAccess ARGS2(
+    CONST char *,	addr,
+    CONST char *,	physical)
+{
+    /*
+     *  If curses is off when maybe it shouldn't...
+     */
+    if (!dump_output_immediately && !LYCursesON && physical) {
+	char *cp1;
+	/*
+	 *  If requested resource wants to be accessed with curses off, and
+	 *  getfile() would indeed have turned curses off for it...
+	 */
+	if (strstr(addr, "://") != NULL &&
+	    (!strncmp(addr, "telnet:", 7) ||
+	     !strncmp(addr, "rlogin:", 7) ||
+	     !strncmp(addr, "tn3270:", 7) ||
+	     (strncmp(addr, "gopher:", 7) &&
+	      (cp1 = strchr(addr+11,'/')) != NULL &&
+	      (*(cp1+1) == 'T' || *(cp1+1) == '8')))) {
+	    /*
+	     *  If actual access that will be done is ok with curses off,
+	     *  then do nothing special, else force curses on. - kw
+	     */
+	    if (strncmp(physical, "telnet:", 7) &&
+		strncmp(physical, "rlogin:", 7) &&
+		strncmp(physical, "tn3270:", 7)) {
+		start_curses();
+		HTAlert(
+		    gettext("Unexpected access protocol for this URL scheme."));
+		return TRUE;
+	    }
+	}
+    }
+	return FALSE;
+}
+
+/*
  *  Determine whether we allow HEAD and related flags for a URL. - kw
  */
 PUBLIC BOOLEAN LYCanDoHEAD ARGS1(
@@ -2838,29 +2904,64 @@ PUBLIC BOOLEAN LYCanDoHEAD ARGS1(
     /* Make copy for is_url() since caller may not care for case changes */
     StrAllocCopy(temp0, address);
     isurl = is_url(temp0);
-    FREE(temp0);
-    if (!isurl)
+    if (!isurl) {
+	FREE(temp0);
 	return FALSE;
+    }
     if (isurl == LYNXCGI_URL_TYPE) {
+	FREE(temp0);
 #if defined(LYNXCGI_LINKS) && !defined(VMS)
 	return TRUE;
 #else
 	return FALSE;
 #endif
     }
+    /*
+     *  The idea of the following is to allow HEAD for news URLs that
+     *  identify single articles, not those that identify ranges of
+     *  articles or groups or a list of groups. - kw
+     */
     if (isurl == NEWS_URL_TYPE || isurl == NNTP_URL_TYPE) {
 	char *temp = HTParse(address, "", PARSE_PATH);
 	char *cp = strrchr(temp, '/');
 	if (strchr((cp ? cp : temp), '@') != NULL) {
+	    FREE(temp0);
 	    FREE(temp);
 	    return TRUE;
 	}
 	if (cp && isdigit(cp[1]) && strchr(cp, '-') == NULL) {
+	    FREE(temp0);
 	    FREE(temp);
 	    return TRUE;
 	}
 	FREE(temp);
     }
+
+#define ALLOW_PROXY_HEAD
+/*  If defined, also allow head requests for URLs proxied through the
+ *  "http" or "lynxcgi" protocols, which understand HEAD.  Only the
+ *  proxy environment variables are checked, not the HTRules system. - kw
+ */
+#ifdef ALLOW_PROXY_HEAD
+    if (isurl != FILE_URL_TYPE) {
+	char *acc_method = HTParse(temp0, "", PARSE_ACCESS);
+	if (acc_method && *acc_method) {
+	    char *proxy;
+	    StrAllocCat(acc_method, "_proxy");
+	    proxy = (char *)getenv(acc_method);
+	    if (proxy && (!strncmp(proxy, "http:", 5) ||
+			  !strncmp(proxy, "lynxcgi:", 8)) &&
+		!override_proxy(temp0)) {
+		FREE(temp0);
+		FREE(acc_method);
+		return TRUE;
+	    }
+	}
+	FREE(acc_method);
+    }
+#endif /* ALLOW_PROXY_HEAD */
+
+    FREE(temp0);
     return FALSE;
 }
 
@@ -2934,6 +3035,36 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
     return(FALSE);
 #endif /* !HAVE_UTMP */
 }
+
+#if HAVE_SIGACTION
+/*
+ *  An extended alternative for calling signal(), sets some flags for
+ *  signal handler as we want them if that functionality is available.
+ *  (We don't return anything from this function since the return
+ *  value would currently be ignored anyway.) - kw
+ *
+ */
+PUBLIC void LYExtSignal ARGS2(
+    int,			sig,
+    LYSigHandlerFunc_t *,	handler)
+{
+#ifdef SIGWINCH
+    /* add more cases to if(condition) if required... */
+    if (sig == SIGWINCH && LYNonRestartingSIGWINCH) {
+	struct sigaction act;
+	act.sa_handler = handler;
+	sigemptyset(&act.sa_mask);
+	act.sa_flags = 0;
+#ifdef SA_RESTART
+	if (sig != SIGWINCH)
+	    act.sa_flags |= SA_RESTART;
+#endif /* SA_RESTART */
+	sigaction(sig, &act, NULL);
+    } else
+#endif /* defined(SIGWINCH) */
+	signal(sig, handler);
+}
+#endif /* HAVE_SIGACTION */
 
 /**************
 ** This bit of code catches window size change signals
@@ -3028,7 +3159,7 @@ PUBLIC void size_change ARGS1(
 		old_lines, old_cols, LYlines, LYcols);
     }
 #ifdef SIGWINCH
-    (void)signal (SIGWINCH, size_change);
+    LYExtSignal (SIGWINCH, size_change);
 #endif /* SIGWINCH */
 
     return;
@@ -3471,7 +3602,16 @@ PUBLIC int number2arrows ARGS1(
  *  parse_restrictions takes a string of comma-separated restrictions
  *  and sets the corresponding flags to restrict the facilities available.
  */
+/* The first two are special: we want to record whether "default" or
+ * "all" restrictions were applied, in addition to the detailed effects
+ * of those options. - kw
+ */
+/* skip the special flags when processing "all" and "default": */
+#define N_SPECIAL_RESTRICT_OPTIONS 2
+
 PRIVATE CONST char *restrict_name[] = {
+       "default" ,
+       "all"     ,
        "inside_telnet" ,
        "outside_telnet",
        "telnet_port"   ,
@@ -3512,6 +3652,13 @@ PRIVATE CONST char *restrict_name[] = {
 #ifdef USE_EXTERNALS
        "externals" ,
 #endif
+       "lynxcfg_info" ,
+#ifndef NO_CONFIG_INFO
+       "lynxcfg_xinfo" ,
+#ifdef HAVE_CONFIG_H
+       "compileopts_info",
+#endif
+#endif
        (char *) 0     };
 
 	/* restrict_name and restrict_flag structure order
@@ -3519,6 +3666,8 @@ PRIVATE CONST char *restrict_name[] = {
 	 */
 
 PRIVATE BOOLEAN *restrict_flag[] = {
+       &had_restrictions_default,
+       &had_restrictions_all,
        &no_inside_telnet,
        &no_outside_telnet,
        &no_telnet_port,
@@ -3559,6 +3708,13 @@ PRIVATE BOOLEAN *restrict_flag[] = {
 #ifdef USE_EXTERNALS
        &no_externals ,
 #endif
+       &no_lynxcfg_info ,
+#ifndef NO_CONFIG_INFO
+       &no_lynxcfg_xinfo ,
+#ifdef HAVE_CONFIG_H
+       &no_compileopts_info ,
+#endif
+#endif
        (BOOLEAN *) 0  };
 
 PUBLIC void parse_restrictions ARGS1(
@@ -3568,17 +3724,25 @@ PUBLIC void parse_restrictions ARGS1(
       CONST char *word;
       int i;
 
-      if (STREQ("all", s)) {
-	   /* set all restrictions */
-	  for (i=0; restrict_flag[i]; i++)
-	      *restrict_flag[i] = TRUE;
-	  return;
-      }
+      p = s;
+      while (*p) {
+	  p = LYSkipCBlanks(p);
+	  if (*p == '\0')
+	      break;
+	  word = p;
+	  while (*p != ',' && *p != '\0')
+	      p++;
 
-      if (STREQ("default", s)) {
-	   /* set all restrictions */
-	  for (i=0; restrict_flag[i]; i++)
-	      *restrict_flag[i] = TRUE;
+	  if (STRNEQ(word, "all", p-word)) {
+	      /* set all restrictions */
+	      for (i=N_SPECIAL_RESTRICT_OPTIONS; restrict_flag[i]; i++)
+		  *restrict_flag[i] = TRUE;
+	  }
+
+	  if (STRNEQ(word, "default", p-word)) {
+	      /* set all restrictions */
+	      for (i=N_SPECIAL_RESTRICT_OPTIONS; restrict_flag[i]; i++)
+		  *restrict_flag[i] = TRUE;
 
 	     /* reset these to defaults */
 	     no_inside_telnet = !(CAN_ANONYMOUS_INSIDE_DOMAIN_TELNET);
@@ -3622,20 +3786,18 @@ PUBLIC void parse_restrictions ARGS1(
 		      no_jump = !(CAN_ANONYMOUS_JUMP);
 		      no_mail = !(CAN_ANONYMOUS_MAIL);
 		     no_print = !(CAN_ANONYMOUS_PRINT);
+	      no_lynxcfg_info = !(CAN_ANONYMOUS_VIEW_LYNXCFG_INFO);
+#ifndef NO_CONFIG_INFO
+	     no_lynxcfg_xinfo = !(CAN_ANONYMOUS_VIEW_LYNXCFG_EXTENDED_INFO);
+#ifdef HAVE_CONFIG_H
+	  no_compileopts_info = !(CAN_ANONYMOUS_VIEW_COMPILEOPTS_INFO);
+#endif
+#endif
+	   no_goto_configinfo = !(CAN_ANONYMOUS_GOTO_CONFIGINFO);
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
 		      no_exec = LOCAL_EXECUTION_LINKS_ALWAYS_OFF_FOR_ANONYMOUS;
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
-	  return;
-      }
-
-      p = s;
-      while (*p) {
-	  p = LYSkipCBlanks(p);
-	  if (*p == '\0')
-	      break;
-	  word = p;
-	  while (*p != ',' && *p != '\0')
-	      p++;
+	  }
 
 	  for (i=0; restrict_name[i]; i++) {
 	     if (STRNEQ(word, restrict_name[i], p-word)) {
@@ -3647,6 +3809,26 @@ PUBLIC void parse_restrictions ARGS1(
 	      p++;
       }
       return;
+}
+
+PUBLIC void print_restrictions_to_fd ARGS1(
+    FILE *,	fp)
+{
+    int i, count = 0;
+    for (i=0; restrict_name[i]; i++) {
+	if (*restrict_flag[i] == TRUE)
+	    count++;
+    }
+    if (!count) {
+	fprintf(fp, gettext("No restrictions set.\n"));
+	return;
+    }
+    fprintf(fp, gettext("Restrictions set:\n"));
+    for (i=0; restrict_name[i]; i++) {
+	if (*restrict_flag[i] == TRUE) {
+	    fprintf(fp, "   %s\n", restrict_name[i]);
+	}
+    }
 }
 
 #ifdef VMS
@@ -4010,7 +4192,7 @@ PUBLIC void LYConvertToURL ARGS2(
 	FREE(cur_dir);
 have_VMS_URL:
 	CTRACE(tfp, "Trying: '%s'\n", *AllocatedString);
-#else /* Unix: */
+#else /* not VMS: */
 #ifdef DOSPATH
 	if (strlen(old_string) == 1 && *old_string == '.') {
 	    /*
@@ -6247,7 +6429,7 @@ PUBLIC void BeginInternalPage ARGS3(
 		 Title);
 
     if ((user_mode == NOVICE_MODE)
-     && LYwouldPush(Title)
+     && LYwouldPush(Title, NULL)
      && (HelpURL != 0)) {
 	fprintf(fp0, "<h1>%s (%s%s%s), <a href=\"%s%s\">help</a></h1>\n",
 		Title, LYNX_NAME, VERSION_SEGMENT, LYNX_VERSION,
@@ -6438,7 +6620,11 @@ PUBLIC int LYSystem ARGS1(
 	}
     }
 #  endif
+    if (restore_sigpipe_for_children)
+	signal(SIGPIPE, SIG_DFL); /* Some commands expect the default */
     code = system(command);
+    if (restore_sigpipe_for_children)
+	signal(SIGPIPE, SIG_IGN); /* Ignore it again - kw */
 #endif
 
 #ifdef __DJGPP__

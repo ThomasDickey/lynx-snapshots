@@ -5,7 +5,7 @@
 #include <LYStructs.h>
 #endif /* LYSTRUCTS_H */
 
-extern BOOLEAN LYwouldPush PARAMS((char *title));
+extern BOOLEAN LYwouldPush PARAMS((CONST char *title, CONST char *docurl));
 extern BOOLEAN historytarget PARAMS((document *newdoc));
 extern int LYShowVisitedLinks PARAMS((char **newfile));
 extern int showhistory PARAMS((char **newfile));

@@ -145,4 +145,12 @@ extern int HTConfirmPostRedirect PARAMS((
 	CONST char *	Redirecting_url,
 	int		server_status));
 
+
+#ifdef HAVE_STRERROR
+#define LYStrerror strerror
+#else
+extern char *LYStrerror PARAMS((
+	int		code));
+#endif /* HAVE_STRERROR */
+
 #endif /* HTALERT_H */

@@ -596,6 +596,9 @@ PUBLIC void mailmsg ARGS4(
     char *address = NULL;
     char *searchpart = NULL;
     char *cmd = NULL, *cp, *cp0, *cp1;
+#ifdef ALERTMAIL
+    BOOLEAN skip_parsing = FALSE;
+#endif
 #if defined(VMS) || defined(DOSPATH)
     char my_tmpfile[LY_MAXPATH];
     char *command = NULL;
@@ -615,75 +618,105 @@ PUBLIC void mailmsg ARGS4(
     if (!strncasecomp(system_mail, "PMDF SEND", 9)) {
 	isPMDF = TRUE;
     }
-#endif /* VMS */
+#endif /* VMS || DOSPATH */
+
+#ifdef ALERTMAIL
+    if (owner_address == NULL) {
+	owner_address = ALERTMAIL;
+	skip_parsing = TRUE;
+    }
+#endif
 
     if (owner_address == NULL || *owner_address == '\0') {
 	return;
     }
-    if ((cp = (char *)strchr(owner_address,'\n')) != NULL)
+    if ((cp = (char *)strchr(owner_address,'\n')) != NULL) {
+#ifdef ALERTMAIL
+	if (skip_parsing)
+	    return;		/* invalidly defined - ignore - kw */
+#else
 	*cp = '\0';
+#endif
+    }
+    if (!strncasecomp(owner_address, "lynx-dev@", 9)) {
+	/*
+	 *  Silently refuse sending bad link messages to lynx-dev.
+	 */
+	return;
+    }
     StrAllocCopy(address, owner_address);
 
+#ifdef ALERTMAIL
     /*
-     *	Check for a ?searchpart. - FM
+     *  If we are using a fixed address given by ALERTMAIL, it is
+     *  supposed to already be in usable form, without URL-isms like
+     *  ?-searchpart and URL-escaping.  So skip some code. - kw
      */
-    if ((cp = strchr(address, '?')) != NULL) {
-	StrAllocCopy(searchpart, cp);
-	*cp = '\0';
-	cp = (searchpart + 1);
-	if (*cp != '\0') {
-	    /*
-	     *	Seek and handle to=address(es) fields.
-	     *	Appends to address.  We ignore any other
-	     *	headers in the ?searchpart. - FM
-	     */
+    if (!skip_parsing)
+#endif
+    {
+	/*
+	 *	Check for a ?searchpart. - FM
+	 */
+	if ((cp = strchr(address, '?')) != NULL) {
+	    StrAllocCopy(searchpart, cp);
+	    *cp = '\0';
 	    cp = (searchpart + 1);
-	    while (*cp != '\0') {
-		if ((*(cp - 1) == '?' || *(cp - 1) == '&') &&
-		    !strncasecomp(cp, "to=", 3)) {
-		    cp += 3;
-		    if ((cp1 = strchr(cp, '&')) != NULL) {
-			*cp1 = '\0';
-		    }
-		    while (*cp == ',' || isspace((unsigned char)*cp))
-			cp++;
-		    if (*cp) {
-			if (*address) {
-			    StrAllocCat(address, ",");
+	    if (*cp != '\0') {
+		/*
+		 *	Seek and handle to=address(es) fields.
+		 *	Appends to address.  We ignore any other
+		 *	headers in the ?searchpart. - FM
+		 */
+		cp = (searchpart + 1);
+		while (*cp != '\0') {
+		    if ((*(cp - 1) == '?' || *(cp - 1) == '&') &&
+			!strncasecomp(cp, "to=", 3)) {
+			cp += 3;
+			if ((cp1 = strchr(cp, '&')) != NULL) {
+			    *cp1 = '\0';
 			}
-			StrAllocCat(address, cp);
+			while (*cp == ',' || isspace((unsigned char)*cp))
+			    cp++;
+			if (*cp) {
+			    if (*address) {
+				StrAllocCat(address, ",");
+			    }
+			    StrAllocCat(address, cp);
+			}
+			if (cp1) {
+			    *cp1 = '&';
+			    cp = cp1;
+			    cp1 = NULL;
+			} else {
+			    break;
+			}
 		    }
-		    if (cp1) {
-			*cp1 = '&';
-			cp = cp1;
-			cp1 = NULL;
-		    } else {
-			break;
-		    }
+		    cp++;
 		}
-		cp++;
 	    }
 	}
-    }
 
-    /*
-     *	Convert any Explorer semi-colon Internet address
-     *	separators to commas. - FM
-     */
-    cp = address;
-    while ((cp1 = strchr(cp, '@')) != NULL) {
-	cp1++;
-	if ((cp0 = strchr(cp1, ';')) != NULL) {
-	    *cp0 = ',';
-	    cp1 = cp0 + 1;
+	/*
+	 *	Convert any Explorer semi-colon Internet address
+	 *	separators to commas. - FM
+	 */
+	cp = address;
+	while ((cp1 = strchr(cp, '@')) != NULL) {
+	    cp1++;
+	    if ((cp0 = strchr(cp1, ';')) != NULL) {
+		*cp0 = ',';
+		cp1 = cp0 + 1;
+	    }
+	    cp = cp1;
 	}
-	cp = cp1;
+
+	/*
+	 *	Unescape the address field. - FM
+	 */
+	SafeHTUnEscape(address);
     }
 
-    /*
-     *	Unescape the address field. - FM
-     */
-    SafeHTUnEscape(address);
     if (address[(strlen(address) - 1)] == ',')
 	address[(strlen(address) - 1)] = '\0';
     if (*address == '\0') {

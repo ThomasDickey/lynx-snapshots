@@ -9,7 +9,7 @@
  * There are four sections to this document:
  *  Section 1.  Things you MUST verify.  Unix platforms use a configure
  *		script to provide sensible default values.  If your site
- *		has special requirements, that may not be sufficient. 
+ *		has special requirements, that may not be sufficient.
  *		For non-Unix platforms (e.g., VMS), there is no
  *		configure script, so the defaults here are more
  *		critical.
@@ -424,8 +424,8 @@
  * STARTFILE is the default starting URL if none is specified
  *   on the command line or via a WWW_HOME environment variable;
  *   Lynx will refuse to start without a starting URL of some kind.
- * STARTFILE can be remote, e.g. http://www.w3.org/default.html ,
- *                or local, e.g. file://localhost/PATH_TO/FILENAME ,
+ * STARTFILE can be remote, e.g., http://www.w3.org/default.html ,
+ *                or local, e.g., file://localhost/PATH_TO/FILENAME ,
  *           where PATH_TO is replaced with the complete path to FILENAME
  *           using Unix shell syntax and including the device on VMS.
  *
@@ -435,7 +435,7 @@
 #define STARTFILE "http://lynx.browser.org/"
 /*
  * As an alternative, you may want to use a local URL.  A good choice for this
- * is the user's home directory: 
+ * is the user's home directory:
  *#define STARTFILE "file://localhost/~/"
  *
  * Your choice of STARTFILE should reflect your site's needs, and be a URL that
@@ -934,7 +934,8 @@
  * Note that this is currently not supported with the chartrans code,
  * or rather it doesn't have an effect if translations for a display
  * character set are taken from one of the *.tbl files in src/chrtrans.
- * One would have to modify the corresponding *.tbl file for this.
+ * One would have to modify the corresponding *.tbl file to change the
+ # 7-bit replacements for these characters.
  */
 #define LY_UMLAUT
 
@@ -997,41 +998,6 @@
 /* #define EXEC_LINKS  */
 /* #define EXEC_SCRIPTS  */
 
-/**********
- * UNIX:
- * =====
- * CGI script support.  Defining LYNXCGI_LINKS allows you to use the
- *
- *   lynxcgi:path
- *
- * URL which allows lynx to access a cgi script directly without the need for
- * a http daemon.  Redirection or mime support is not supported but just about
- * everything else is.  If the path is not an executable file then the URL is
- * rewritten as file://localhost and passed to the file loader.  This means
- * that if your http:html files are currently set up to use relative
- * addressing, you should be able to fire up your main page with lynxcgi:path
- * and everything should work as if you were talking to the http daemon.
- *
- * Note that TRUSTED_LYNXCGI directives must be defined in your lynx.cfg file
- * if you wish to place restrictions on source documents and/or paths for
- * lynxcgi links.
- *
- * The cgi scripts are called with a fork()/execve() sequence so you don't
- * have to worry about people trying to abuse the code. :-)
- *
- *     George Lindholm (George.Lindholm@ubc.ca)
- *
- * VMS:
- * ====
- * The lynxcgi scheme, if enabled, yields an informational message regardless
- * of the path, and use of the freeware OSU DECthreads server as a local
- * script server is recommended instead of lynxcgi URLs.  Uncomment the
- * following line to define LYNXCGI_LINKS, and when running Lynx, enter
- * lynxcgi:advice  as a G)oto URL for more information and links to the
- * OSU server distribution.
- */
-/* #define LYNXCGI_LINKS */
-
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
 
 /**********
@@ -1089,6 +1055,41 @@
 
 #endif /*  defined(EXEC_LINKS) || defined(EXEC_SCRIPTS) */
 
+/**********
+ * UNIX:
+ * =====
+ * CGI script support.  Defining LYNXCGI_LINKS allows you to use the
+ *
+ *   lynxcgi:path
+ *
+ * URL which allows lynx to access a cgi script directly without the need for
+ * a http daemon.  Redirection is not supported but just about everything
+ * else is.  If the path is not an executable file then the URL is
+ * rewritten as file://localhost and passed to the file loader.  This means
+ * that if your http:html files are currently set up to use relative
+ * addressing, you should be able to fire up your main page with lynxcgi:path
+ * and everything should work as if you were talking to the http daemon.
+ *
+ * Note that TRUSTED_LYNXCGI directives must be defined in your lynx.cfg file
+ * if you wish to place restrictions on source documents and/or paths for
+ * lynxcgi links.
+ *
+ * The cgi scripts are called with a fork()/execve() sequence so you don't
+ * have to worry about people trying to abuse the code. :-)
+ *
+ *     George Lindholm (George.Lindholm@ubc.ca)
+ *
+ * VMS:
+ * ====
+ * The lynxcgi scheme, if enabled, yields an informational message regardless
+ * of the path, and use of the freeware OSU DECthreads server as a local
+ * script server is recommended instead of lynxcgi URLs.  Uncomment the
+ * following line to define LYNXCGI_LINKS, and when running Lynx, enter
+ * lynxcgi:advice  as a G)oto URL for more information and links to the
+ * OSU server distribution.
+ */
+/* #define LYNXCGI_LINKS */
+
 /*********************************
  *  MAIL_SYSTEM_ERROR_LOGGING will send a message to the owner of
  *  the information if there is one, every time
@@ -1099,6 +1100,16 @@
  *  NOTE: This can generate A LOT of mail, be warned.
  */
 #define MAIL_SYSTEM_ERROR_LOGGING   FALSE  /*mail a message for every error?*/
+
+/*********************************
+ *  If a document cannot be accessed, and MAIL_SYSTEM_ERROR_LOGGING
+ *  is on and would send a message to the owner of the information,
+ *  but no owner is known, then the message will be sent to ALERTMAIL
+ *  instead - if it is defined as a non-empty email address.
+ *
+ *  NOTE: This can generate A REAL LOT of mail, be warned!!!
+ */
+/* #define ALERTMAIL "webmaster@localhost" */ /*error recipient if no owner*/
 
 /*********************************
  * If CHECKMAIL is set to TRUE, the user will be informed (via a status line
@@ -1244,12 +1255,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.2rel.1"
+#define LYNX_VERSION "2.8.3dev.1"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Tue, 01 Jun 1999 19:30:15 -0600"
+#define LYNX_DATE "Fri, 11 Jun 1999 03:34:08 -0600"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1998"
@@ -1404,7 +1415,10 @@
 
 /*******************************
  * set to FALSE if you don't want users of your anonymous
- * account to be able to read news
+ * account to be able to read news OR post news articles.
+ * These flags apply to "news", "nntp", "newspost", and "newsreply"
+ * URLs, but not to "snews", "snewspost", or "snewsreply"
+ * in case they are supported.
  */
 #define CAN_ANONYMOUS_INSIDE_DOMAIN_READ_NEWS	TRUE
 #define CAN_ANONYMOUS_OUTSIDE_DOMAIN_READ_NEWS	FALSE
@@ -1463,6 +1477,48 @@
  * account to be able to print
  */
 #define CAN_ANONYMOUS_PRINT	FALSE
+
+/*******************************
+ * set to FALSE if users with anonymous restrictions should
+ * not be able to view configuration file (lynx.cfg) info
+ * via special LYNXCFG: links.  (This does not control access
+ * to lynx.cfg as a normal file, e.g., through a "file:" URL,
+ * if other restrictions allow that.)
+ */
+#define CAN_ANONYMOUS_VIEW_LYNXCFG_INFO			TRUE
+
+/*******************************
+ * set to FALSE if users with anonymous restrictions should
+ * not be able to view extended configuration file (lynx.cfg)
+ * info @@@ or perform special config info functions (reloading
+ * at run-time) via special LYNXCFG: links @@@.  This only applies
+ * if the lynxcfg_info" restriction controlled by the previous
+ * item is not in effect and if Lynx has been compiled without
+ * NO_CONFIG_INFO defined (--disable-config-info wasn't used
+ * if Lynx was built with the autoconf configure script).
+ * The extended info may include details on configuration file
+ * names and location and links for reading the files, as well
+ * as information on nesting of included configuration files.
+ */
+#define CAN_ANONYMOUS_VIEW_LYNXCFG_EXTENDED_INFO	TRUE
+
+/*******************************
+ * set to FALSE if users with anonymous restrictions should
+ * not be able to view information on compile time configuration
+ * via special LYNXCOMPILEOPTS: links.  This only applies
+ * if the autoconf configure script was used to build Lynx
+ * AND --disable-config-info wasn't used, otherwise this
+ * special URL scheme isn't recognized anyway.
+ */
+#define CAN_ANONYMOUS_VIEW_COMPILEOPTS_INFO		TRUE
+
+/*******************************
+ * set to FALSE if you don't want users of your anonymous
+ * account to be able to 'g'oto special URLs for showing
+ * configuration info (LYNXCFG: and LYNXCOMPILEOPTS:) if
+ * they are otherwise allowed.
+ */
+#define CAN_ANONYMOUS_GOTO_CONFIGINFO		TRUE
 
 /*****************************
  * Be sure you have read about and set defines above in Sections

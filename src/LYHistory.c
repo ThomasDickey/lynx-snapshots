@@ -113,9 +113,10 @@ PUBLIC void LYAddVisitedLink ARGS1(
     cur = Visited_Links;
     while (NULL != (old = (VisitedLink *)HTList_nextObject(cur))) {
 	if (!strcmp((old->address ? old->address : ""),
-		    (new->address ? new->address : "")) &&
-	    !strcmp((old->title ? new->title : ""),
-		    (new->title ? new->title : ""))) {
+		    (new->address ? new->address : ""))) {
+	    if (!(new->title && *new->title) && old->title) {
+		StrAllocCopy(new->title, old->title);
+	    }
 	    FREE(old->address);
 	    FREE(old->title);
 	    HTList_removeObject(Visited_Links, old);
@@ -130,11 +131,26 @@ PUBLIC void LYAddVisitedLink ARGS1(
 
 /*
  *  Returns true if this is a page that we would push onto the stack if not
- *  forced.
+ *  forced.  If docurl is NULL, only the title is considered; otherwise
+ *  also check the URL whether it is (likely to be) a generated special
+ *  page.
  */
-PUBLIC BOOLEAN LYwouldPush ARGS1(
-	char *,	title)
+PUBLIC BOOLEAN LYwouldPush ARGS2(
+	CONST char *,	title,
+	CONST char *,	docurl)
 {
+    /*
+     *  All non-pushable generated pages have URLs that begin with
+     *  "file://localhost/" and end with HTML_SUFFIX. - kw
+     */
+    if (docurl) {
+	size_t ulen;
+	if (strncmp(docurl, "file://localhost/", 17) != 0 ||
+	    (ulen = strlen(docurl)) <= strlen(HTML_SUFFIX) ||
+	    strcmp(docurl + ulen - strlen(HTML_SUFFIX), HTML_SUFFIX) != 0)
+	    return TRUE;
+    }
+
     return (!strcmp(title, HISTORY_PAGE_TITLE)
 	 || !strcmp(title, PRINT_OPTIONS_TITLE)
 	 || !strcmp(title, DOWNLOAD_OPTIONS_TITLE)
@@ -169,7 +185,7 @@ PUBLIC void LYpush ARGS2(
 	/*
 	 *  Don't push the history, printer, or download lists.
 	 */
-	if (!LYwouldPush(doc->title)) {
+	if (!LYwouldPush(doc->title, doc->address)) {
 	    if (!LYforce_no_cache)
 		LYoverride_no_cache = TRUE;
 	    return;
@@ -469,8 +485,17 @@ PUBLIC BOOLEAN historytarget ARGS1(
     /*
      * Optimization: assume we came from the History Page,
      * so never return back - always a new version next time.
+     * But check first whether HTMainText is really the History
+     * Page document - in some obscure situations this may not be
+     * the case.  If HTMainText seems to be a History Page document,
+     * also check that it really hasn't been pushed. - LP, kw
      */
-    HTuncache_current_document();  /* don't waste the cache */
+    if (HTMainText && nhist > 0 &&
+	!strcmp(HTLoadedDocumentTitle(), HISTORY_PAGE_TITLE) &&
+	!LYwouldPush(HTLoadedDocumentURL(), HTLoadedDocumentTitle()) &&
+	strcmp(HTLoadedDocumentURL(), history[nhist-1].address)) {
+	HTuncache_current_document();  /* don't waste the cache */
+    }
 
     LYpop_num(number, newdoc);
     if (((newdoc->internal_link &&
@@ -653,14 +678,13 @@ PRIVATE void to_stack ARGS1(char *, str)
 
 /*
  *  Status line messages list, LYNXMESSAGES:/ internal page,
- *  called from getfile() cyrcle.
+ *  called from getfile().
  */
 PUBLIC int LYshow_statusline_messages ARGS1(
     document *,			      newdoc)
 {
     static char tempfile[LY_MAXPATH];
     static char *info_url;
-    DocAddress WWWDoc;  /* need on exit */
     FILE *fp0;
     int i;
 
@@ -695,17 +719,15 @@ PUBLIC int LYshow_statusline_messages ARGS1(
     LYCloseTempFP(fp0);
 
 
-    /* exit to getfile() cyrcle */
+    /* exit to getfile() cycle */
     StrAllocCopy(newdoc->address, info_url);
-    WWWDoc.address = newdoc->address;
-    WWWDoc.post_data = newdoc->post_data;
-    WWWDoc.post_content_type = newdoc->post_content_type;
-    WWWDoc.bookmark = newdoc->bookmark;
-    WWWDoc.isHEAD = newdoc->isHEAD;
-    WWWDoc.safe = newdoc->safe;
+    FREE(newdoc->post_data);
+    FREE(newdoc->post_content_type);
+    FREE(newdoc->bookmark);
+    newdoc->isHEAD = FALSE;
 
-    if (!HTLoadAbsolute(&WWWDoc))
-	return(NOT_FOUND);
+    /* Leave loading it to getfile - that has the advantage to make
+       this kind of link 'd'ownloadable. - kw */
     return(NORMAL);
 }
 

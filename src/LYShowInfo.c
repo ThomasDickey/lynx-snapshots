@@ -83,14 +83,15 @@ PUBLIC int showinfo ARGS4(
 		 (LYNX_RELEASE ? LYNX_WWW_HOME     : LYNX_WWW_DIST),
 		 (LYNX_RELEASE ? REL_VERSION       : DEV_VERSION) );
 
-    if (!LYRestricted) {
 #if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
+    if (!no_compileopts_info) {
 	fprintf(fp0, " - <a href=\"LYNXCOMPILEOPTS:\">%s</a>\n",
 		COMPILE_OPT_SEGMENT);
-#else
+    } else
+#endif
+    if (!no_lynxcfg_info) {
 	fprintf(fp0, " - <a href=\"LYNXCFG:\">%s lynx.cfg</a>\n",
 		YOUR_SEGMENT);
-#endif
     }
     fprintf(fp0, "</h1>\n");  /* don't forget to close <h1> */
 

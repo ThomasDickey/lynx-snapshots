@@ -14,10 +14,13 @@
 #ifdef HAVE_CONFIG_H
 #include <LYHelp.h>
 #else
+#define ALT_EDIT_HELP		"keystrokes/alt_edit_help.html"
+#define BASHLIKE_EDIT_HELP	"keystrokes/bashlike_edit_help.html"
 #define COOKIE_JAR_HELP		"Lynx_users_guide.html#Cookies"
 #define CURRENT_KEYMAP_HELP	"keystrokes/keystroke_help.html"
 #define DIRED_MENU_HELP		"keystrokes/dired_help.html"
 #define DOWNLOAD_OPTIONS_HELP	"Lynx_users_guide.html#RemoteSource"
+#define EDIT_HELP		"keystrokes/edit_help.html"
 #define HISTORY_PAGE_HELP	"keystrokes/history_help.html"
 #define LIST_PAGE_HELP		"keystrokes/follow_help.html"
 #define LYNXCFG_HELP		"lynx.cfg"
@@ -179,6 +182,9 @@ extern BOOLEAN emacs_keys;        /* TRUE to turn on emacs-like key movement */
 extern int keypad_mode;           /* is set to either NUMBERS_AS_ARROWS *
 				   * or LINKS_ARE_NUMBERED 		*/
 extern BOOLEAN case_sensitive;    /* TRUE to turn on case sensitive search */
+
+extern BOOLEAN had_restrictions_default; /* flags to note whether we have... */
+extern BOOLEAN had_restrictions_all;     /* parsed these restriction options */
 extern BOOLEAN no_inside_telnet;  /* this and following are restrictions */
 extern BOOLEAN no_outside_telnet;
 extern BOOLEAN no_telnet_port;
@@ -220,12 +226,21 @@ extern BOOLEAN no_goto_snews;
 extern BOOLEAN no_goto_telnet;
 extern BOOLEAN no_goto_tn3270;
 extern BOOLEAN no_goto_wais;
+extern BOOLEAN no_goto_configinfo;
 extern BOOLEAN no_jump;
 extern BOOLEAN no_file_url;
 extern BOOLEAN no_newspost;
 extern BOOLEAN no_mail;
 extern BOOLEAN no_dotfiles;
 extern BOOLEAN no_useragent;
+extern BOOLEAN no_lynxcfg_info;
+#ifndef NO_CONFIG_INFO
+extern BOOLEAN no_lynxcfg_xinfo;
+#ifdef HAVE_CONFIG_H
+extern BOOLEAN no_compileopts_info;
+#endif
+#endif
+
 extern BOOLEAN no_statusline;
 extern BOOLEAN no_filereferer;
 extern BOOLEAN local_host_only;
@@ -260,7 +275,7 @@ extern int LYCacheSource;
 #define SOURCE_CACHE_MEMORY	2
 #endif
 extern BOOLEAN LYCancelDownload;
-extern BOOLEAN LYRestricted;
+extern BOOLEAN LYRestricted;	/* whether we had -anonymous option */
 extern BOOLEAN LYValidate;
 extern BOOLEAN LYPermitURL;
 extern BOOLEAN enable_scrollback; /* Clear screen before displaying new page */
@@ -369,9 +384,13 @@ extern BOOLEAN LYPreparsedSource;	/* Show source as preparsed?	 */
 extern BOOLEAN LYPrependBaseToSource;
 extern BOOLEAN LYPrependCharsetToSource;
 extern BOOLEAN LYQuitDefaultYes;
+extern BOOLEAN LYNonRestartingSIGWINCH;
 
 #ifndef VMS
 extern BOOLEAN LYNoCore;
+extern BOOLEAN restore_sigpipe_for_children;
 #endif /* !VMS */
+
+extern int HTNoDataOK;		/* HT_NO_DATA-is-ok hack */
 
 #endif /* LYGLOBALDEFS_H */

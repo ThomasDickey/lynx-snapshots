@@ -13,13 +13,6 @@ extern int peek_mouse_link NOPARAMS;
 extern int peek_mouse_levent NOPARAMS;
 extern int fancy_mouse PARAMS((WINDOW *win, int row, int *position));
 
-#ifdef HAVE_STRERROR
-#define LYStrerror strerror
-#else
-extern char *LYStrerror PARAMS((
-	int		code));
-#endif /* HAVE_STRERROR */
-
 extern char * LYstrncpy PARAMS((
 	char *		dst,
 	CONST char *	src,
@@ -85,6 +78,10 @@ extern char * SNACat PARAMS((
 extern char *LYSafeGets PARAMS((char ** src, FILE * fp));
 
 /* values for LYgetch */
+/* The following are lynxkeycodes, not to be confused with
+   lynxactioncodes (LYK_*) to which they are often mapped.
+   The lynxkeycodes include all single-byte keys as a subset. - kw
+*/
 #define UPARROW		256	/* 0x100 */
 #define DNARROW		257	/* 0x101 */
 #define RTARROW		258	/* 0x102 */
@@ -102,24 +99,53 @@ extern char *LYSafeGets PARAMS((char ** src, FILE * fp));
 #define DO_NOTHING	270	/* 0x10E */
 #define BACKTAB_KEY	271	/* 0x10F */
 #define MOUSE_KEY	0x11d	/* 0x11D */
-/*  *** NOTE: ***
+/*  ***** NOTES: *****
     If you add definitions for new lynxkeycodes to the above list that
     need to be mapped to LYK_* lynxactioncodes -
     - AT LEAST the tables keymap[] and key_override[] in LYKeymap.c
       have to be changed/reviewed, AS WELL AS the lineedit binding
       tables in LYEditmap.c !
     - KEYMAP_SIZE, defined in LYKeymap.h, may need to be changed !
+    - See also table funckey[] in LYKeymap.c for 'pretty' strings
+      for the keys with codes >= 256 (to appear on the 'K'eymap page).
+      New keycodes should probably be assigned consecutively, so their
+      key names can be easily added to funckey[] (but see next point).
+      They should also be documented in lynx.cfg.
+    - The DOS port uses its own native codes for some keys, unless
+      they are remapped by the code in LYgetch().  See *.key files
+      in docs/ directory.  Adding new keys here may conflict with
+      those codes (affecting DOS users), unless/until remapping is
+      added or changed in LYgetch().
+      (N)curses keypad codes (KEY_* from curses.h) can also directly
+      appear as lynxkeycodes and conflict with our assignments, although
+      that shouldn't happen - the useful ones should be recognized in
+      LYgetch().
+    - The actual recognition of raw input keys or escape sequences, and
+      mapping to our lynxkeycodes, take place in LYgetch() and/or its
+      subsidiary functions and/or the curses/slang/etc. libraries.
+    The basic lynxkeycodes can appear combined with various flags in
+    higher-order bits as extended lynxkeycodes; see macros in LYKeymap.h.
+    The range of possible basic values is therefore limited, they have
+    to be less than LKC_ISLKC (even if KEYMAP_SIZE is increased).
 */
 
 
-#  define FOR_PANEL	0
-#  define FOR_CHOICE	1
-#  define FOR_INPUT	2
+#  define FOR_PANEL	0	/* normal screen, also LYgetch default */
+#  define FOR_CHOICE	1	/* mouse menu */
+#  define FOR_INPUT	2	/* form input and textarea field */
+#  define FOR_PROMPT	3	/* string prompt editing */
+#  define FOR_SINGLEKEY	4	/* single key prompt, confirmation */
 
 #define VISIBLE  0
 #define HIDDEN   1
 #define NORECALL 0
 #define RECALL   1
+
+#ifdef EXP_ALT_BINDINGS
+/*  Enable code implementing additional, mostly emacs-like, line-editing
+    functions. - kw */
+#define ENHANCED_LINEEDIT
+#endif
 
 /* EditFieldData preserves state between calls to LYEdit1
  */
@@ -139,6 +165,10 @@ typedef struct _EditFieldData {
         int  xpan;      /* Horizontal scroll offset                  */
         int  pos;       /* Insertion point in string                 */
         int  margin;    /* Number of columns look-ahead/look-back    */
+        int  current_modifiers; /* Modifiers for next input lynxkeycode */
+#ifdef ENHANCED_LINEEDIT
+	int  mark;	/* position of emacs-like mark */
+#endif
 
         char buffer[1024]; /* String buffer                          */
 
@@ -183,8 +213,29 @@ typedef struct _EditFieldData {
 
 #define LYE_SWMAP (LYE_DELEL +1)  /* Switch input keymap   */
 
+#define LYE_TPOS  (LYE_SWMAP +1)  /* Transpose characters  */
+
+#define LYE_SETM1 (LYE_TPOS  +1)  /* Set modifier 1 flag   */
+#define LYE_SETM2 (LYE_SETM1 +1)  /* Set modifier 2 flag   */
+#define LYE_UNMOD (LYE_SETM2 +1)  /* Fall back to no-modifier command */
+
+#define LYE_C1CHAR  (LYE_UNMOD   +1)  /* Insert C1 char if printable */
+
+#define LYE_SETMARK (LYE_C1CHAR  +1)  /* emacs-like set-mark-command */
+#define LYE_XPMARK  (LYE_SETMARK +1)  /* emacs-like exchange-point-and-mark */
+#define LYE_KILLREG (LYE_XPMARK  +1)  /* emacs-like kill-region */
+#define LYE_YANK    (LYE_KILLREG +1)  /* emacs-like yank */
+/* All preceding values must be within 0x00..0x7f - kw */
+
+/*  The following are meant to be bitwise or-ed:  */
+#define LYE_DF       0x80         /* Flag to set modifier 3 AND do other
+				     action */
+#define LYE_FORM_LAC 0x1000       /* Flag to pass lynxactioncode given by
+				     lower bits.  Doesn't fit in a char! */
+
 #if defined(USE_KEYMAPS)
 extern int lynx_initialize_keymaps NOPARAMS;
+extern int map_string_to_keysym PARAMS((char * src, int *lec));
 #endif
 
 extern void LYLowerCase PARAMS((
@@ -214,7 +265,8 @@ extern void LYSetupEdit PARAMS((
 	int		maxdsp));
 extern void LYRefreshEdit PARAMS((
 	EditFieldData *	edit));
-extern int EditBinding PARAMS((int ch));
+extern int EditBinding PARAMS((int ch));		   /* in LYEditmap.c */
+extern int LYRemapEditBinding PARAMS((int xlkc, int lec)); /* in LYEditmap.c */
 extern int LYEdit1 PARAMS((
 	EditFieldData *	edit,
 	int		ch,
@@ -226,14 +278,20 @@ extern void LYCloseCloset NOPARAMS;
 extern int current_lineedit;
 extern char * LYLineeditNames[];
 extern char * LYLineEditors[];
+extern CONST char * LYLineeditHelpURLs[];
 
+extern CONST char * LYLineeditHelpURL NOPARAMS;
+
+#if 0				/* NOT USED, use function instead - kw */
 /* Push a character through the lineedit machinery */
 #ifdef    NOT_ASCII  /* S/390 -- gil -- 2080 */
 #define EditBinding(c) (LYLineEditors[current_lineedit][(c)<256 ? TOASCII(c) : c])
 #else  /* NOT_ASCII */
 #define EditBinding(c) (LYLineEditors[current_lineedit][c])
 #endif /* NOT_ASCII */
-#define LYLineEdit(e,c,m) LYEdit1(e,c,EditBinding(c),m)
+#endif /* 0 */
+
+#define LYLineEdit(e,c,m) LYEdit1(e,c,EditBinding(c)&~LYE_DF,m)
 
 /* Dummy initializer for LYEditmap.c */
 extern int LYEditmapDeclared NOPARAMS;

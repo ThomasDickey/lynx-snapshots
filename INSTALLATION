@@ -166,9 +166,10 @@ II. Compile instructions -- UNIX
 	to the default bindings.
 
   --disable-config-info			(define NO_CONFIG_INFO)
-  	Use this option to disable the browsable configuration information
-	(screens that show the result of the configuration script, as well
-	as a pointer to the lynx.cfg file).
+  	Use this option to disable extended browsable configuration information
+	(a screen that shows the result of the configuration script, as well
+	as extended lynx.cfg viewing with a pointer to the lynx.cfg file and
+	additional functionality).
 
   --disable-dired			(define DIRED_SUPPORT)
 	Use this option to disable the optional directory-editor.
@@ -234,7 +235,7 @@ II. Compile instructions -- UNIX
 	Do not compile-in code used to connect to "finger" URLs.
 
   --disable-ftp				(define DISABLE_FTP)
-	Do not compile-in code used to connect to "ftp" URLs.
+	Do not compile-in code used to connect to FTP servers.
 
   --disable-forms-options		(define NO_OPTION_FORMS)
 	Disable the forms-based options screen.  (See --disable-menu-options).

@@ -642,7 +642,7 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
    "internal".	The flag is set before we start messing around with the
    string (resolution of relative URLs etc.).  This variable only used
    locally here, don't confuse with LYinternal_flag which is for
-   for overriding non-caching similar to LYoverride_no_cache. - kw */
+   overriding non-caching similar to LYoverride_no_cache. - kw */
 #define CHECK_FOR_INTERN(s) intern_flag = (s && (*s=='#' || *s=='\0')) ? TRUE : FALSE;
 
 /* Last argument to pass to HTAnchor_findChildAndLink() calls,

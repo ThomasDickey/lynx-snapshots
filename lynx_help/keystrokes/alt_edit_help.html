@@ -1,24 +1,27 @@
 <!DOCTYPE html public "-//IETF//DTD HTML 3.0//EN">
 <html>
 <head>
-<title>Lynx Line Editor Alternate Key Binding</title>
+<title>Lynx Line Editor Alternative Key Binding</title>
 <link rev="made" href="mailto:lynx-dev@sig.net">
+<link rel="Sibling" title="Default Binding" href="edit_help.html">
+<link rel="Sibling" title="Bash-Like Binding" href="bashlike_edit_help.html">
 </head>
 <body>
-<h1>+++ALTERNATE BINDINGS+++</h1>
+<h1>+++ALTERNATIVE BINDING+++</h1>
 
 Lynx invokes a built-in <em>Line Editor</em> for entering strings in
 response to prompts, in forms, and for email messages if an external editor
-has not been defined.  Administrators can offer additional alternate key
-bindings by adding them in LYEditmap.c before compiling Lynx.  If available,
+has not been defined.  Administrators can offer additional alternative key
+bindings by configuring with --enable-alt-bindings or by adding them in
+LYEditmap.c before compiling Lynx.  If available,
 they may be selected via the 'o'ptions menu, or by editing lineedit_mode in
 the '.lynxrc' file.
 
-<p>Note: setting emacs/vi keys ON has no effect on line-editor bindings.
+<p>Note: setting emacs/vi keys ON has no direct effect on line-editor bindings.
 
-<p>This is the <em>Alternate Bindings</em> keymap:
+<p>This is the <em>Alternative Binding</em> keymap:
 
-<p><pre>
+<pre>
      ENTER  Input complete        -  RETURN
      TAB    Input complete        -  TAB, Do
      ABORT  Input cancelled       -  Ctrl-G, Ctrl-O, (Ctrl-C on some systems)
@@ -47,7 +50,8 @@ the '.lynxrc' file.
      means "to the immediate right of" an I-beam (between characters) type
      cursor.
 
-[2]  Follow Ctrl-V with the key "e" bound to the EDIT function,
+[2]  Follow Ctrl-V with the key "e" bound to the DWIMEDIT function,
+     or with some other key bound to EDITTEXTAREA or DWIMEDIT,
      to edit the form's textarea field using an external editor.
 </pre>
 </body>

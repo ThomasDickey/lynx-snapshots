@@ -200,8 +200,8 @@ PUBLIC BOOL HTLastConfirmCancelled NOARGS
 
 #define DFT_CONFIRM ~(YES|NO)
 
-/*	Seek confirmation.				HTConfirm()
-**	------------------
+/*	Seek confirmation with default answer.		HTConfirmDefault()
+**	--------------------------------------
 */
 PUBLIC BOOL HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 {
@@ -223,7 +223,7 @@ PUBLIC BOOL HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 	FREE(msg);
 
 	while (result < 0) {
-	    int c = LYgetch();
+	    int c = LYgetch_for(FOR_SINGLEKEY);
 #ifdef VMS
 	    if (HadVMSInterrupt) {
 		HadVMSInterrupt = FALSE;
@@ -245,6 +245,9 @@ PUBLIC BOOL HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
     return (result);
 }
 
+/*	Seek confirmation.				HTConfirm()
+**	------------------
+*/
 PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
 {
     return HTConfirmDefault(Msg, DFT_CONFIRM);
@@ -535,7 +538,7 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
     }
     while (1) {
 	if(!LYAcceptAllCookies) {
-	    ch = LYgetch();
+	    ch = LYgetch_for(FOR_SINGLEKEY);
 	} else {
 	    ch = 'A';
 	}
@@ -671,7 +674,7 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 	    case 1:
 		_statusline(show_POST_url);
 	}
-	c = LYgetch();
+	c = LYgetch_for(FOR_SINGLEKEY);
 	switch (TOUPPER(c)) {
 	    case 'P':
 		/*
@@ -730,3 +733,17 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
     FREE(url);
     return (result);
 }
+
+/*
+ *  LYstrerror emulates the ANSI strerror() function.
+ */
+#ifdef LYStrerror
+    /* defined as macro in .h file. */
+#else
+PUBLIC char *LYStrerror ARGS1(int, code)
+{
+    static char temp[80];
+    sprintf(temp, "System errno is %d.\r\n", code);
+    return temp;
+}
+#endif /* HAVE_STRERROR */

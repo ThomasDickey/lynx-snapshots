@@ -771,8 +771,12 @@ PRIVATE void abort_socket NOARGS
 {
     CTRACE(tfp, "HTNews: EOF on read, closing socket %d\n", s);
     NEWS_NETCLOSE(s);	/* End of file, close socket */
-    PUTS("Network Error: connection lost");
-    PUTC('\n');
+    if (rawtext) {
+	RAW_PUTS("Network Error: connection lost\n");
+    } else {
+	PUTS("Network Error: connection lost");
+	PUTC('\n');
+    }
     s = -1;		/* End of file on response */
 }
 
@@ -1299,7 +1303,7 @@ PRIVATE int read_article ARGS1(
 
     if (rawtext) {
 	/*
-	 *  No tags - kw
+	 *  No tags, and never do a PUTC. - kw
 	 */
 	;
     } else if (diagnostic) {
@@ -1308,14 +1312,15 @@ PRIVATE int read_article ARGS1(
 	**  as XMP formatted text. - FM
 	*/
 	START(HTML_XMP);
+	PUTC('\n');
     } else {
 	/*
 	**  Read in the BODY of the Article
 	**  as PRE formatted text. - FM
 	*/
 	START(HTML_PRE);
+	PUTC('\n');
     }
-    PUTC('\n');
 
     p = line;
     while (!done) {
@@ -2783,7 +2788,7 @@ Send_NNTP_command:
 
 /*
 **  This function clears all authorization information by
-**  invoking the free_HTAAGlobals() function, which normally
+**  invoking the free_NNTP_AuthInfo() function, which normally
 **  is invoked at exit.  It allows a browser command to do
 **  this at any time, for example, if the user is leaving
 **  the terminal for a period of time, but does not want

@@ -265,6 +265,17 @@ Macros for declarations
 
 /*
 
+OFTEN USED INTEGER MACROS
+
+  Min and Max functions
+  
+ */
+#ifndef HTMIN
+#define HTMIN(a,b) ((a) <= (b) ? (a) : (b))
+#define HTMAX(a,b) ((a) >= (b) ? (a) : (b))
+#endif
+/*
+
 Booleans
 
  */

@@ -326,7 +326,7 @@ FIX_SED = tr '=' '%'
 #FIX_SED = cat
 
 install-help : $(DOCDIR) $(HELPDIR)
-	(cd $(HELPDIR) && rm -rf *)
+	(cd $(HELPDIR) && WD=`pwd` && HEAD=`echo $$WD|sed -e 's@/lynx_help$$@@'` && test $$WD != $$HEAD && rm -rf *)
 	@echo Constructing sed-script
 	@ECHO_CC@sed	-e '/^#/d' -e '/^$$/d' \
 		-e 's%\(.*\)=\(.*\@.*\)$$%s=@\1@=\2=g%' \
@@ -414,14 +414,20 @@ install-lss : $(LIBDIR)
 	-mv -f $(LIBDIR)/lynx.lss $(LIBDIR)/lynx.oldlss
 	$(INSTALL_DATA) $(srcdir)/samples/lynx.lss $(LIBDIR)/lynx.lss
 
-uninstall:
+uninstall ::
 @MSG_DIR_MAKE@	cd po && $(MAKE) CC="$(CC)" uninstall
 	-rm -f $(BINDIR)/lynx$x
 	-rm -f $(MANDIR)/lynx.1
 	-rm -f $(LIBDIR)/lynx.cfg
 	-rm -f $(LIBDIR)/lynx.lss
-	-rm -rf $(HELPDIR)
-	-rm -rf $(DOCDIR)
+
+uninstall \
+uninstall-help ::
+	-test -d $(HELPDIR) && WD=`cd $(HELPDIR) && pwd` && HEAD=`echo $$WD|sed -e 's@/lynx_help$$@@'` && test $$WD != $$HEAD && rm -rf $(HELPDIR)
+
+uninstall \
+uninstall-doc ::
+	-test -d $(DOCDIR) && WD=`cd $(DOCDIR) && pwd` && HEAD=`echo $$WD|sed -e 's@/lynx_doc$$@@'` && test $$WD != $$HEAD && rm -rf $(DOCDIR)
 
 $(BINDIR) $(MANDIR) $(LIBDIR) $(HELPDIR) $(DOCDIR) :
 	$(srcdir)/mkdirs.sh $@

@@ -9,6 +9,8 @@ extern BOOLEAN LYisNonAlnumKeyname PARAMS((int ch, int key_name));
 extern char *key_for_func PARAMS((int func));
 extern int LYReverseKeymap PARAMS((int key_name));
 extern int lookup_keymap PARAMS((int code));
+extern int lacname_to_lac PARAMS((CONST char *func));
+extern int lkcstring_to_lkc PARAMS((CONST char *src));
 extern int remap PARAMS((char *key, char *func));
 extern void print_keymap PARAMS((char **newfile));
 extern void reset_emacs_keys NOPARAMS;
@@ -30,7 +32,7 @@ extern LYKeymap_t keymap[KEYMAP_SIZE]; /* main keymap matrix */
 
 #ifdef EXP_KEYBOARD_LAYOUT
 extern int current_layout;
-extern LYKeymap_t * LYKbLayouts[];
+extern unsigned short * LYKbLayouts[];
 extern char * LYKbLayoutNames[];
 extern int LYSetKbLayout PARAMS((char *layout_id));
 #endif
@@ -39,6 +41,47 @@ extern int LYSetKbLayout PARAMS((char *layout_id));
 extern LYKeymap_t key_override[];
 #endif
 
+/* * *  LynxKeyCodes  * * */
+#define LKC_MOD1	0x4000	/* a modifier bit - currently for ^x-map */
+#define LKC_MOD2	0x2000	/* another one - currently for esc-map */
+#define LKC_MOD3	0x1000	/* another one - currently for double-map */
+#define LKC_ISLAC	0x0800	/* flag: lynxkeycode already lynxactioncode */
+#define LKC_ISLKC	0x0400	/* flag: already lynxkeycode (not native) */
+		     /* 0x0400  is MOUSE_KEYSYM for slang in LYStrings.c */
+#define LKC_MASK	0x07FF	/* mask for lynxkeycode proper */
+
+#define LKC_DONE	0x07FE	/* special value - operation done, not-a-key */
+
+/* * *  LynxActionCodes  * * */
+#define LAC_MASK	0x00FF	/* mask for lynxactioncode - must cover all
+				   assigned LYK_* values */
+
+
+/*  Convert lynxkeycode to lynxactioncode.  Modifiers are dropped.  */
+#define LKC_TO_LAC(ktab,c) (((c)==-1) ? ktab[0] : \
+			    ((c)&LKC_ISLAC) ? ((c)&LAC_MASK) : \
+			    ktab[((c)&LKC_MASK)+1])
+
+
+/*  Mask lynxactioncode as a lynxkeycode.  */
+#define LAC_TO_LKC0(a) ((a)|LKC_ISLAC)
+
+/*  Convert lynxactioncode to a lynxkeycode, attempting reverse mapping.  */
+#define LAC_TO_LKC(a) ((LYReverseKeymap(a)>=0)?LYReverseKeymap(a):LAC_TO_LKC0(a))
+
+/*  Simplify a lynxkeycode:
+    attempt reverse mapping if a masked lynxactioncode, drop modifiers.  */
+#define LKC_TO_C(c) ((c&LKC_ISLAC)? LAC_TO_LKC(c&LAC_MASK) : (c&LKC_MASK))
+
+#define LKC_HAS_ESC_MOD(c) (c >= 0 && (c&LKC_MOD2))
+
+
+/* *  The defined LynxActionCodes  * */
+
+/*  Variables for holding and passing around lynxactioncodes are
+ *  generally of type int, the types LYKeymap_t and LYKeymapCodes
+ *  are currently only used for the definitions.  That could change. - kw
+ */
 /* The order of this enum must match the 'revmap[]' array in LYKeymap.c */
 typedef enum {
     LYK_UNKNOWN=0
@@ -67,6 +110,8 @@ typedef enum {
   , LYK_END
   , LYK_PREV_LINK
   , LYK_NEXT_LINK
+  , LYK_LPOS_PREV_LINK
+  , LYK_LPOS_NEXT_LINK
   , LYK_FASTBACKW_LINK
   , LYK_FASTFORW_LINK
   , LYK_UP_LINK
@@ -76,9 +121,11 @@ typedef enum {
   , LYK_HISTORY
   , LYK_PREV_DOC
   , LYK_ACTIVATE
+  , LYK_SUBMIT	/* mostly like LYK_ACTIVATE, for mouse use, don't map */
   , LYK_GOTO
   , LYK_ECGOTO
   , LYK_HELP
+  , LYK_DWIMHELP
   , LYK_INDEX
   , LYK_NOCACHE
   , LYK_INTERRUPT
@@ -118,6 +165,7 @@ typedef enum {
   , LYK_SWITCH_DTD
   , LYK_ELGOTO
   , LYK_CHANGE_LINK
+  , LYK_DWIMEDIT
   , LYK_EDIT_TEXTAREA
   , LYK_GROW_TEXTAREA
   , LYK_INSERT_FILE
