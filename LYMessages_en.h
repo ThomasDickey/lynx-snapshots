@@ -651,17 +651,18 @@
  "Modified tail combined with head of form field value."
 
 /* Lynx internal page titles */
-#define COOKIE_JAR_TITLE	"Lynx Cookie Jar"
+#define COOKIE_JAR_TITLE	"Cookie Jar"
+#define CONFIG_DEF_TITLE	"Configuration Definitions"
 #define CURRENT_KEYMAP_TITLE	"Current Key Map"
 #define DIRED_MENU_TITLE	"File Management Options"
 #define PERMIT_OPTIONS_TITLE	"File Permission Options"
-#define DOWNLOAD_OPTIONS_TITLE	"Lynx Download Options"
-#define HISTORY_PAGE_TITLE	"Lynx History Page"
-#define LIST_PAGE_TITLE		"Lynx List Page"
-#define OPTIONS_TITLE		"Lynx Options Page"
-#define PRINT_OPTIONS_TITLE	"Lynx Printing Options"
-#define UPLOAD_OPTIONS_TITLE	"Lynx Upload Options"
-#define VISITED_LINKS_TITLE	"Lynx Visited Links Page"
+#define DOWNLOAD_OPTIONS_TITLE	"Download Options"
+#define HISTORY_PAGE_TITLE	"History Page"
+#define LIST_PAGE_TITLE		"List Page"
+#define OPTIONS_TITLE		"Options Page"
+#define PRINT_OPTIONS_TITLE	"Printing Options"
+#define UPLOAD_OPTIONS_TITLE	"Upload Options"
+#define VISITED_LINKS_TITLE	"Visited Links Page"
 
 #ifdef DIRED_SUPPORT
 #define DIRED_NOVICELINE \

@@ -883,7 +883,9 @@ PUBLIC void reply_by_mail ARGS3(
 #if defined(DOSPATH) || defined(VMS)
     char *command = NULL;
 #endif
+#ifndef NO_ANONYMOUS_EMAIL
     static char *personal_name = NULL;
+#endif
     char subject[80];
 #ifdef VMS
     char *address_ptr1 = NULL, *address_ptr2 = NULL;

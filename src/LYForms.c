@@ -804,8 +804,8 @@ redraw:
 	    SLsmg_gotorc((LYlines - 1), (LYcols - 1));
 	SLsmg_refresh();
 #else
-	wstart_reverse(form_window);
 	wmove(form_window, ((i + 1) - window_offset), 2);
+	wstart_reverse(form_window);
 	paddstr(form_window, width, opt_ptr->name);
 	wstop_reverse(form_window);
 	/*

@@ -56,37 +56,47 @@ PUBLIC int get_mouse_link NOARGS
 
 PRIVATE int set_clicked_link ARGS2(int,x,int,y)
 {
-  int i;
+    int left = 6;
+    int right = LYcols-6;
+    /* yes, I am assuming that my screen will be a certain width. */
+    int i;
+    int c = -1;
 
-  /* Loop over the links and see if we can get a match */
-  for(i=0; i < nlinks && mouse_link == -1; i++) {
-    /* Check the first line of the link */
-    if ( links[i].hightext != NULL &&
-	 links[i].ly == y &&
-	 (x - links[i].lx) < (int)strlen(links[i].hightext ) ) {
-      mouse_link=i;
+    if (y == (LYlines-1)) {
+	if (x < left) c = LTARROW;
+	else if (x > right) c = '\b';
+	else c = PGDOWN;
+    } else if (y == 0) {
+	if (x < left) c = LTARROW;
+	else if (x > right) c = '\b';
+	else c = PGUP;
+    } else {
+	/* Loop over the links and see if we can get a match */
+	for (i = 0; i < nlinks; i++) {
+	    /* Check the first line of the link */
+	    if ( links[i].hightext != NULL &&
+		links[i].ly == y &&
+		(x - links[i].lx) < (int)strlen(links[i].hightext ) ) {
+		mouse_link = i;
+		break;
+	    }
+	    /* Check the second line */
+	    if (links[i].hightext2 != NULL &&
+		1+links[i].ly == y &&
+		(x - links[i].hightext2_offset) < (int)strlen(links[i].hightext2) ) {
+		mouse_link = i;
+		break;
+	    }
+	}
+	/*
+	 * If a link was hit, we must look for a key which will activate
+	 * LYK_ACTIVATE We expect to find LYK_ACTIVATE (it's usually mapped to
+	 * the Enter key).
+	 */
+	if (mouse_link >= 0)
+	    c = lookup_keymap(LYK_ACTIVATE);
     }
-    /* Check the second line */
-    if (links[i].hightext2 != NULL &&
-	1+links[i].ly == y &&
-	(x - links[i].hightext2_offset) < (int)strlen(links[i].hightext2) ) {
-      mouse_link=i;
-    }
-  }
-  /* If no link was found, just return a do-nothing code */
-  if (mouse_link == -1) return -1;
-
-  /* If a link was hit, we must look for a key which will activate LYK_ACTIVATE
-  ** We expect to find LYK_ACTIVATE (it's usually mapped to the Enter key).
-  **/
-  if ((i = lookup_keymap(LYK_ACTIVATE)) >= 0)
-      return i;
-
-    /* Whoops!	Nothing's defined as LYK_ACTIVATE!
-       Well, who are we to argue with the user?
-       Forget about the mouse click */
-  mouse_link = -1;
-  return -1;
+    return c;
 }
 
 
@@ -100,7 +110,7 @@ PUBLIC char *LYstrncpy ARGS3(
 	int,		n)
 {
     char *val;
-    int len=strlen(src);
+    int len = strlen(src);
 
     if (n < 0)
 	n = 0;
@@ -300,9 +310,7 @@ PRIVATE int sl_parse_mouse_event ARGS3(int *, x, int *, y, int *, button)
     *y = SLang_getkey () - 33;
     return 0;
 }
-#endif
 
-#if defined(USE_SLANG_MOUSE)
 PRIVATE int sl_read_mouse_event NOARGS
 {
    int mouse_x, mouse_y, button;
@@ -333,197 +341,438 @@ PUBLIC void ena_csi ARGS1(
     csi_is_csi = flag;
 }
 
-#if defined(USE_SLANG_KEYMAPS)
-static SLKeyMap_List_Type *Keymap_List;
+#if defined(USE_KEYMAPS)
 
+#ifdef USE_SLANG
+#define define_key(string, code) \
+	SLkm_define_keysym (string, code, Keymap_List)
+#define expand_substring(dst, first, last) \
+	SLexpand_escaped_string(dst, first, last)
+static SLKeyMap_List_Type *Keymap_List;
 /* This value should be larger than anything in LYStrings.h */
 #define MOUSE_KEYSYM 0x1000
+#endif
+
+
+#define SQUOTE '\''
+#define DQUOTE '"'
+#define ESCAPE '\\'
+#define LPAREN '('
+#define RPAREN ')'
+
+/*
+ * For ncurses, we use the predefined keysyms, since that lets us also reuse
+ * the CSI logic and other special cases for VMS, NCSA telnet, etc.
+ */
+#ifdef USE_SLANG
+#define DEFINE_KEY(string,lynx,curses) {string,lynx}
+#else
+#define DEFINE_KEY(string,lynx,curses) {string,curses}
+#endif
 
 typedef struct
 {
-   char *name;
-   int keysym;
+   char *string;
+   int value;
 }
 Keysym_String_List;
 
 static Keysym_String_List Keysym_Strings [] =
 {
-   {"UPARROW",		UPARROW},
-   {"DNARROW",		DNARROW},
-   {"RTARROW",		RTARROW},
-   {"LTARROW",		LTARROW},
-   {"PGDOWN",		PGDOWN},
-   {"PGUP",		PGUP},
-   {"HOME",		HOME},
-   {"END",		END_KEY},
-   {"F1",		F1},
-   {"DO_KEY",		DO_KEY},
-   {"FIND_KEY",		FIND_KEY},
-   {"SELECT_KEY",	SELECT_KEY},
-   {"INSERT_KEY",	INSERT_KEY},
-   {"REMOVE_KEY",	REMOVE_KEY},
-   {"DO_NOTHING",	DO_NOTHING},
-   {NULL, -1}
+    DEFINE_KEY( "UPARROW",	UPARROW,	KEY_UP ),
+    DEFINE_KEY( "DNARROW",	DNARROW,	KEY_DOWN ),
+    DEFINE_KEY( "RTARROW",	RTARROW,	KEY_RIGHT ),
+    DEFINE_KEY( "LTARROW",	LTARROW,	KEY_LEFT ),
+    DEFINE_KEY( "PGDOWN",	PGDOWN,		KEY_NPAGE ),
+    DEFINE_KEY( "PGUP",		PGUP,		KEY_PPAGE ),
+    DEFINE_KEY( "HOME",		HOME,		KEY_HOME ),
+    DEFINE_KEY( "END",		END_KEY,	KEY_END ),
+    DEFINE_KEY( "F1",		F1,		KEY_F(1) ),
+    DEFINE_KEY( "DO_KEY",	DO_KEY,		KEY_F(16) ),
+    DEFINE_KEY( "FIND_KEY",	FIND_KEY,	KEY_FIND ),
+    DEFINE_KEY( "SELECT_KEY",	SELECT_KEY,	KEY_SELECT ),
+    DEFINE_KEY( "INSERT_KEY",	INSERT_KEY,	KEY_IC ),
+    DEFINE_KEY( "REMOVE_KEY",	REMOVE_KEY,	KEY_DC ),
+    DEFINE_KEY( "DO_NOTHING",	DO_NOTHING,	0 ),
+    DEFINE_KEY( NULL, 		-1,		ERR )
 };
 
-PRIVATE int map_string_to_keysym (char *str, int *keysym)
+#ifdef NCURSES_VERSION
+/*
+ * Ncurses stores the termcap/terminfo names in arrays sorted to match the
+ * array of strings in the TERMTYPE struct.
+ */
+PRIVATE int lookup_tiname (char *name, NCURSES_CONST char *const *names)
 {
-   Keysym_String_List *k;
+    int code;
 
-   k = Keysym_Strings;
-   while (k->name != NULL)
-     {
-	if (0 == strcmp (k->name, str))
-	  {
-	     *keysym = k->keysym;
-	     return 0;
-	  }
-	k++;
-     }
-   fprintf (stderr, "Keysym %s is unknown\n", str);
-   *keysym = -1;
-   return -1;
+    for (code = 0; names[code] != 0; code++)
+	if (!strcmp(names[code], name))
+	    return code;
+    return -1;
 }
 
-
-/* The second argument may either be a string or and integer */
-PRIVATE int setkey_cmd (int argc GCC_UNUSED, SLcmd_Cmd_Table_Type *table)
+PRIVATE char *expand_tiname (char *first, size_t len, char **result)
 {
-   char *keyseq;
-   int keysym;
+    char name[BUFSIZ];
+    int code;
 
-   keyseq = table->string_args [1];
-   switch (table->arg_type[2])
-     {
-      case SLANG_INT_TYPE:
-	keysym = table->int_args[2];
+    strncpy(name, first, len);
+    name[len] = '\0';
+    if ((code = lookup_tiname(name, strnames)) >= 0
+     || (code = lookup_tiname(name, strfnames)) >= 0) {
+	strcpy(*result, cur_term->type.Strings[code]);
+	(*result) += strlen(*result);
+    }
+    return first + len;
+}
+
+PRIVATE char *expand_tichar (char *first, char **result)
+{
+    int ch;
+    int limit = 0;
+    int radix = 0;
+    int value = 0;
+    char *name = 0;
+
+    switch (ch = *first++) {
+    case 'E': case 'e':	value = 27;			break;
+    case 'a':		name  = "bel";			break;
+    case 'b':		value = '\b';			break;
+    case 'f':		value = '\f';			break;
+    case 'n':		value = '\n';			break;
+    case 'r':		value = '\r';			break;
+    case 't':		value = '\t';			break;
+    case 'v':		value = '\v';			break;
+    case 'd':		radix = 10;	limit = 3;	break;
+    case 'x':		radix = 16;	limit = 2;	break;
+    default:
+	if (isdigit(ch)) {
+	    radix = 8;
+	    limit = 3;
+	    first--;
+	} else {
+	    value = *first;
+	}
 	break;
+    }
 
-      case SLANG_STRING_TYPE:
-	if (-1 == map_string_to_keysym (table->string_args[2], &keysym))
-	  return -1;
-	break;
+    if (radix != 0) {
+	char *last;
+	int save = first[limit];
+	first[limit] = '\0';
+	value = strtol(first, &last, radix);
+	first[limit] = save;
+	first = last;
+    }
 
-      default:
-	return -1;
-     }
+    if (name != 0) {
+	(void) expand_tiname(name, strlen(name), result);
+    } else {
+	**result = value;
+	(*result) += 1;
+    }
 
-   return SLkm_define_keysym (keyseq, keysym, Keymap_List);
+    return first;
 }
 
-PRIVATE int unsetkey_cmd (int argc GCC_UNUSED, SLcmd_Cmd_Table_Type *table)
+PRIVATE void expand_substring (char* dst, char* first, char* last)
 {
-   SLang_undefine_key (table->string_args[1], Keymap_List);
-   if (SLang_Error) return -1;
-   return 0;
+    int ch;
+    while (first < last) {
+	switch (ch = *first++) {
+	case ESCAPE:
+	    first = expand_tichar(first, &dst);
+	    break;
+	case '^':
+	    ch = *first++;
+	    if (ch == LPAREN) {
+		char *s = strchr(first, RPAREN);
+		if (s == 0)
+		    s = first + strlen(first);
+		first = expand_tiname(first, s-first, &dst);
+	    } else if (ch == '?') {		/* ASCII delete? */
+		*dst++ = 127;
+	    } else if ((ch & 0x3f) < 0x20) {	/* ASCII control char? */
+		*dst++ = (ch & 0x1f);
+	    } else {
+		*dst++ = '^';
+		first--;	/* not legal... */
+	    }
+	    break;
+	case 0:					/* convert nulls for terminfo */
+	    ch = 0200;
+	    /* FALLTHRU */
+	default:
+	    *dst++ = ch;
+	    break;
+	}
+    }
+    *dst = '\0';
+}
+#endif
+
+PRIVATE void unescaped_char ARGS2(char*, parse, int*,keysym)
+{
+    size_t len = strlen(parse);
+    char buf[BUFSIZ];
+
+    if (len >= 3) {
+	expand_substring(buf, parse + 1, parse + len - 1);
+	if (strlen(buf) == 1)
+	    *keysym = *buf;
+    }
 }
 
-static SLcmd_Cmd_Type Keymap_Cmd_Table [] =
+PRIVATE BOOLEAN unescape_string ARGS2(char*, src, char *, dst)
 {
-   {setkey_cmd,   "setkey",   "SG"},
-   {unsetkey_cmd, "unsetkey", "S"},
-   {NULL}
-};
+    BOOLEAN ok = FALSE;
+
+    if (*src == SQUOTE) {
+	int keysym;
+	unescaped_char(src, &keysym);
+	if (keysym >= 0) {
+	    dst[0] = keysym;
+	    dst[1] = '\0';
+	    ok = TRUE;
+	}
+    } else if (*src == DQUOTE) {
+	expand_substring(dst, src + 1, src + strlen(src) - 1);
+	ok = TRUE;
+    }
+    return ok;
+}
+
+PRIVATE int map_string_to_keysym ARGS2(char*, str, int*,keysym)
+{
+    *keysym = -1;
+
+    if (*str == SQUOTE) {
+	unescaped_char(str, keysym);
+    } else if (isdigit(*str)) {
+	char *tmp;
+	long value = strtol(str, &tmp, 0);
+	if (!isalnum(*tmp))
+	    *keysym = value;
+    } else {
+	Keysym_String_List *k;
+
+	k = Keysym_Strings;
+	while (k->string != NULL) {
+	    if (0 == strcmp (k->string, str)) {
+		*keysym = k->value;
+		break;
+	    }
+	    k++;
+	}
+    }
+
+    return (*keysym);
+}
+
+/*
+ * Starting at a nonblank character, skip over a token, counting quoted and
+ * escaped characters. 
+ */
+PRIVATE char *skip_keysym ARGS1(char *, parse)
+{
+    int quoted = 0;
+    int escaped = 0;
+
+    while (*parse) {
+	if (escaped) {
+	    escaped = 0;
+	} else if (quoted) {
+	    if (*parse == ESCAPE) {
+		escaped = 1;
+	    } else if (*parse == quoted) {
+		quoted = 0;
+	    }
+	} else if (*parse == ESCAPE) {
+	    escaped = 1;
+	} else if (*parse == DQUOTE || *parse == SQUOTE) {
+	    quoted = *parse;
+	} else if (isspace(*parse)) {
+	    break;
+	}
+	parse++;
+    }
+    return (quoted || escaped) ? 0 : parse;
+}
+
+/*
+ * The first token is the string to define, the second is the name (of the
+ * keysym) to define it to.
+ */
+PRIVATE int setkey_cmd (char *parse)
+{
+    char *s, *t;
+    int keysym;
+    char buf[BUFSIZ];
+
+    if ((s = skip_keysym(parse)) != 0) {
+	if (isspace(*s)) {
+	    *s++ = '\0';
+	    s = LYSkipBlanks(s);
+	    if ((t = skip_keysym(s)) == 0)
+		return -1;
+	    if (t != s)
+		*t = '\0';
+	    if (map_string_to_keysym (s, &keysym) >= 0
+	     && unescape_string(parse, buf)) {
+		return define_key(buf, keysym);
+	    }
+	}
+    }
+    return -1;
+}
+
+PRIVATE int unsetkey_cmd (char *parse)
+{
+    char *s = skip_keysym(parse);
+    if (s != parse) {
+	*s = '\0';
+#ifdef NCURSES_VERSION
+	/*
+	 * This won't work with Slang.  Remove the definition for the given
+	 * keysym.
+	 */
+	{
+	    int keysym;
+	    if (map_string_to_keysym (parse, &keysym) >= 0)
+		define_key((char *)0, keysym);
+	}
+#endif
+#ifdef USE_SLANG
+	/* Slang implements this, for undefining the string which is associated
+	 * with a keysym (the reverse of what we normally want, but may
+	 * occasionally find useful).
+	 */
+	SLang_undefine_key (parse, Keymap_List);
+	if (SLang_Error) return -1;
+#endif
+    }
+    return 0;
+}
+
+#ifdef FNAMES_8_3
+#define FNAME_LYNX_KEYMAPS "_lynxkey.map"
+#else
+#define FNAME_LYNX_KEYMAPS ".lynx-keymaps"
+#endif /* FNAMES_8_3 */
 
 PRIVATE int read_keymap_file NOARGS
 {
-   char line[1024];
-   FILE *fp;
-   char file[1024];
-   char *home;
-   char *keymap_file;
-   int ret;
-   SLcmd_Cmd_Table_Type tbl;
-   int linenum;
+    static struct {
+	CONST char *name;
+	int (*func) PARAMS((char *s));
+    } table[] = {
+	{"setkey",   setkey_cmd },
+	{"unsetkey", unsetkey_cmd },
+    };
 
-#ifdef VMS
-   keymap_file = "lynx.keymaps";
-   home = "SYS$LOGIN:";
-#else
-#ifdef FNAMES_8_3
-   keymap_file = "/_lynxkey.map";
-#else
-   keymap_file = "/.lynx-keymaps";
-#endif /* FNAMES_8_3 */
-   home = getenv ("HOME");
-   if (home == NULL) home = "";
-#endif
+    char line[1024];
+    FILE *fp;
+    char file[LY_MAXPATH];
+    int ret;
+    int linenum;
+    size_t n;
 
-   sprintf (file, "%s%s", home, keymap_file);
+    LYAddPathToHome(file, sizeof(file), FNAME_LYNX_KEYMAPS);
 
-   if (NULL == (fp = fopen (file, "r")))
-     return 0;
+    if ((fp = fopen (file, "r")) == 0)
+	return 0;
 
-   tbl.table = Keymap_Cmd_Table;
-
-   linenum = 0;
-   ret = 0;
-   while (NULL != fgets (line, sizeof (line), fp))
-     {
+    linenum = 0;
+    ret = 0;
+    while ((fgets (line, sizeof (line), fp) != 0) && (ret == 0))
+    {
 	char *s = LYSkipBlanks(line);
 
 	linenum++;
 
 	if ((*s == 0) || (*s == '#'))
-	  continue;
+	    continue;
 
-	if (-1 == SLcmd_execute_string (s, &tbl))
-	  {
-	     ret = -1;
-	     break;
-	  }
-     }
+	for (n = 0; n < TABLESIZE(table); n++) {
+	    size_t len = strlen(table[n].name);
+	    if (strlen(s) > len
+	     && !strncmp(s, table[n].name, len)) {
+		if ((*(table[n].func))(LYSkipBlanks(s+len)) < 0) {
+		    ret = -1;
+		    break;
+		}
+	    }
+	}
+    }
 
-   fclose (fp);
+    fclose (fp);
 
-   if (ret == -1)
-     fprintf (stderr, "Error processing line %d of %s\n", linenum, file);
+    if (ret == -1)
+	fprintf (stderr, "Error processing line %d of %s\n", linenum, file);
 
-   return ret;
+    return ret;
+}
+
+PRIVATE void setup_vtXXX_keymap NOARGS
+{
+    static Keysym_String_List table[] = {
+	DEFINE_KEY( "\033[A",	UPARROW,	KEY_UP ),
+	DEFINE_KEY( "\033OA",	UPARROW,	KEY_UP ),
+	DEFINE_KEY( "\033[B",	DNARROW,	KEY_DOWN ),
+	DEFINE_KEY( "\033OB",	DNARROW,	KEY_DOWN ),
+	DEFINE_KEY( "\033[C",	RTARROW,	KEY_RIGHT ),
+	DEFINE_KEY( "\033OC",	RTARROW,	KEY_RIGHT ),
+	DEFINE_KEY( "\033[D",	LTARROW,	KEY_LEFT ),
+	DEFINE_KEY( "\033OD",	LTARROW,	KEY_LEFT ),
+	DEFINE_KEY( "\033[1~",	FIND_KEY,	KEY_FIND ),
+	DEFINE_KEY( "\033[2~",	INSERT_KEY,	KEY_IC ),
+	DEFINE_KEY( "\033[3~",	REMOVE_KEY,	KEY_DC ),
+	DEFINE_KEY( "\033[4~",	SELECT_KEY,	KEY_SELECT ),
+	DEFINE_KEY( "\033[5~",	PGUP,		KEY_PPAGE ),
+	DEFINE_KEY( "\033[6~",	PGDOWN,		KEY_NPAGE ),
+	DEFINE_KEY( "\033[8~",	END_KEY,	KEY_END ),
+	DEFINE_KEY( "\033[7~",	HOME,		KEY_HOME),
+	DEFINE_KEY( "\033[28~",	F1,		KEY_F(0) ),
+	DEFINE_KEY( "\033[29~",	DO_KEY,		KEY_F(6) ),
+    };
+    size_t n;
+    for (n = 0; n < TABLESIZE(table); n++)
+    	define_key(table[n].string, table[n].value);
 }
 
 PUBLIC int lynx_initialize_keymaps NOARGS
 {
-   int i;
-   char keybuf[2];
+#ifdef USE_SLANG
+    int i;
+    char keybuf[2];
 
-   if (NULL == (Keymap_List = SLang_create_keymap ("Lynx", NULL)))
-     return -1;
+    if (NULL == (Keymap_List = SLang_create_keymap ("Lynx", NULL)))
+	return -1;
 
-   keybuf[1] = 0;
-   for (i = 1; i < 256; i++)
-     {
+    keybuf[1] = 0;
+    for (i = 1; i < 256; i++)
+    {
 	keybuf[0] = (char) i;
-	SLkm_define_keysym (keybuf, i, Keymap_List);
-     }
+	define_key (keybuf, i);
+    }
 
-   SLkm_define_keysym ("\033[A",   UPARROW,    Keymap_List);
-   SLkm_define_keysym ("\033OA",   UPARROW,    Keymap_List);
-   SLkm_define_keysym ("\033[B",   DNARROW,    Keymap_List);
-   SLkm_define_keysym ("\033OB",   DNARROW,    Keymap_List);
-   SLkm_define_keysym ("\033[C",   RTARROW,    Keymap_List);
-   SLkm_define_keysym ("\033OC",   RTARROW,    Keymap_List);
-   SLkm_define_keysym ("\033[D",   LTARROW,    Keymap_List);
-   SLkm_define_keysym ("\033OD",   LTARROW,    Keymap_List);
-   SLkm_define_keysym ("\033[1~",  FIND_KEY,   Keymap_List);
-   SLkm_define_keysym ("\033[2~",  INSERT_KEY, Keymap_List);
-   SLkm_define_keysym ("\033[3~",  REMOVE_KEY, Keymap_List);
-   SLkm_define_keysym ("\033[4~",  SELECT_KEY, Keymap_List);
-   SLkm_define_keysym ("\033[5~",  PGUP,       Keymap_List);
-   SLkm_define_keysym ("\033[6~",  PGDOWN,     Keymap_List);
-   SLkm_define_keysym ("\033[8~",  END_KEY,    Keymap_List);
-   SLkm_define_keysym ("\033[7~",  HOME,       Keymap_List);
-   SLkm_define_keysym ("\033[28~", F1,         Keymap_List);
-   SLkm_define_keysym ("\033[29~", DO_KEY,     Keymap_List);
+    setup_vtXXX_keymap();
+    define_key ("\033[M", MOUSE_KEYSYM);
 
-   SLkm_define_keysym ("\033[M", MOUSE_KEYSYM, Keymap_List);
-
-   if (SLang_Error
-       || (-1 == read_keymap_file ()))
-     SLang_exit_error ("Unable to initialize keymaps");
-
-   return 0;
+    if (SLang_Error
+    || (-1 == read_keymap_file ()))
+    SLang_exit_error ("Unable to initialize keymaps");
+    return 0;
+#else
+    setup_vtXXX_keymap();
+    return read_keymap_file();
+#endif
 }
+
+#endif				       /* USE_KEYMAPS */
+
+#if defined(USE_KEYMAPS) && defined(USE_SLANG)
 
 /* We cannot guarantee the type for 'GetChar', and should not use a cast. */
 PRIVATE int myGetChar NOARGS
@@ -552,11 +801,14 @@ PUBLIC int LYgetch NOARGS
 
    return keysym;
 }
-#else
+
+#else /* !USE_KEYMAPS */
 
 /*
  *  LYgetch() translates some escape sequences and may fake noecho.
  */
+#define found_CSI(first,second) ((second) == '[' || (first) == 155)
+
 PUBLIC int LYgetch NOARGS
 {
     int a, b, c, d = -1;
@@ -583,7 +835,7 @@ re_read:
 #endif /* IGNORE_CTRL_C */
 	    return(7); /* use ^G to cancel whatever called us. */
 	}
-   }
+    }
 #endif /* !USE_SLANG || VMS */
 
 #ifdef USE_GETCHAR
@@ -657,7 +909,7 @@ re_read:
 	case 'q': c = END_KEY; break;  /* keypad on pc ncsa telnet */
 	case 'M':
 #ifdef USE_SLANG_MOUSE
-	   if ((c == 27) && (b == '['))
+	   if (found_CSI(c,b))
 	     {
 		c = sl_read_mouse_event ();
 	     }
@@ -701,11 +953,11 @@ re_read:
 		c = '0';  /* keypad 0 */
 	    break;
 	case '1':			    /** VTxxx  Find  **/
-	    if ((b == '[' || c == 155) && (d=GetChar()) == '~')
+	    if (found_CSI(c,b) && (d=GetChar()) == '~')
 		c = FIND_KEY;
 	    break;
 	case '2':
-	    if (b == '[' || c == 155) {
+	    if (found_CSI(c,b)) {
 		if ((d=GetChar())=='~')     /** VTxxx Insert **/
 		    c = INSERT_KEY;
 		else if ((d == '8' ||
@@ -721,23 +973,23 @@ re_read:
 	    }
 	    break;
 	case '3':			     /** VTxxx Delete **/
-	    if ((b == '[' || c == 155) && (d=GetChar()) == '~')
+	    if (found_CSI(c,b) && (d=GetChar()) == '~')
 		c = REMOVE_KEY;
 	    break;
 	case '4':			     /** VTxxx Select **/
-	    if ((b == '[' || c == 155) && (d=GetChar()) == '~')
+	    if (found_CSI(c,b) && (d=GetChar()) == '~')
 		c = SELECT_KEY;
 	    break;
 	case '5':			     /** VTxxx PrevScreen **/
-	    if ((b == '[' || c == 155) && (d=GetChar()) == '~')
+	    if (found_CSI(c,b) && (d=GetChar()) == '~')
 		c = PGUP;
 	    break;
 	case '6':			     /** VTxxx NextScreen **/
-	    if ((b == '[' || c == 155) && (d=GetChar()) == '~')
+	    if (found_CSI(c,b) && (d=GetChar()) == '~')
 		c = PGDOWN;
 	    break;
 	case '[':			     /** Linux F1-F5: ^[[[A etc. **/
-	    if (b == '[' || c == 155) {
+	    if (found_CSI(c,b)) {
 		if ((d=GetChar()) == 'A')
 		    c = F1;
 		break;
@@ -747,7 +999,7 @@ re_read:
 	    CTRACE_SLEEP(MessageSecs);
 	    break;
 	}
-	if (isdigit(a) && (b == '[' || c == 155) && d != -1 && d != '~')
+	if (isdigit(a) && found_CSI(c,b) && d != -1 && d != '~')
 	    d = GetChar();
     }
 #if HAVE_KEYPAD
@@ -852,43 +1104,31 @@ re_read:
 #endif /* KEY_DC */
 #ifdef NCURSES_MOUSE_VERSION
 	case KEY_MOUSE:
-	  {
+	    {
 #ifndef DOSPATH
-	   MEVENT event;
-	   int err;
+		MEVENT event;
+		int err;
 
-	   c = -1;
-	   mouse_link = -1;
-	   err=getmouse(&event);
-	   if (event.bstate & BUTTON1_CLICKED) {
-	     c = set_clicked_link(event.x, event.y);
-	   } else if (event.bstate & BUTTON3_CLICKED) {
-	     c = LYReverseKeymap (LYK_PREV_DOC);
-	   }
-#else /* pdcurses version */
-	      int left,right;
-	      /* yes, I am assuming that my screen will be a certain width. */
-	      left = 6;
-	      right = LYcols-6;
-	      c = -1;
-	      mouse_link = -1;
-	      request_mouse_pos();
-	      if (Mouse_status.button[0] & BUTTON_CLICKED) {
-		if (Mouse_status.y == (LYlines-1)) {
-		       if (Mouse_status.x < left) c=LTARROW;
-		       else if (Mouse_status.x > right) c='\b';
-		       else c = PGDOWN;
-		} else if (Mouse_status.y == 0) {
-		       if (Mouse_status.x < left) c=LTARROW;
-		       else if (Mouse_status.x > right) c='\b';
-		       else c = PGUP;
-		} else {
-		    c = set_clicked_link(Mouse_status.x, Mouse_status.y);
+		c = -1;
+		mouse_link = -1;
+		err = getmouse(&event);
+		if (event.bstate & BUTTON1_CLICKED) {
+		    c = set_clicked_link(event.x, event.y);
+		} else if (event.bstate & BUTTON3_CLICKED) {
+		    c = LYReverseKeymap (LYK_PREV_DOC);
 		}
-	      }
+#else /* pdcurses version */
+		c = -1;
+		mouse_link = -1;
+		request_mouse_pos();
+		if (BUTTON_STATUS(1) & BUTTON_CLICKED) {
+		    c = set_clicked_link(MOUSE_X_POS, MOUSE_Y_POS);
+		} else if (BUTTON_STATUS(3) & BUTTON_CLICKED) {
+		    c = LYReverseKeymap (LYK_PREV_DOC);
+		}
 #endif /* DOSPATH */
-	  }
-	  break;
+	    }
+	    break;
 #endif /* NCURSES_MOUSE_VERSION */
 	}
     }
@@ -931,7 +1171,7 @@ re_read:
 	}
     }
 #endif /* DGJPP_KEYHANDLER */
-#if defined(USE_SLANG) && defined(__DJGPP__) && !defined(DJGPP_KEYHANDLER)  && !defined(USE_SLANG_KEYMAPS)
+#if defined(USE_SLANG) && defined(__DJGPP__) && !defined(DJGPP_KEYHANDLER)  && !defined(USE_KEYMAPS)
     else {
 	switch(c) {
 	case SL_KEY_DOWN:	   /* The four arrow keys ... */
@@ -964,7 +1204,7 @@ re_read:
 	   break;
 	}
     }
-#endif /* USE_SLANG && __DJGPP__ && !DJGPP_KEYHANDLER && !USE_SLANG_KEYMAPS */
+#endif /* USE_SLANG && __DJGPP__ && !DJGPP_KEYHANDLER && !USE_KEYMAPS */
 
 #if (defined(__DJGPP__) || defined(_WINDOWS))
     if (c > 659)
@@ -983,7 +1223,7 @@ re_read:
     }
 }
 
-#endif				       /* NOT USE_SLANG_KEYMAPS */
+#endif				       /* NOT USE_KEYMAPS */
 
 /*
  * Convert a null-terminated string to lowercase

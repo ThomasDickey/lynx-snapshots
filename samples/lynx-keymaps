@@ -1,4 +1,7 @@
-# This is a sample key sequence definition file.
+# This is a sample key sequence definition file.  It is used by Lynx when built
+# with ncurses or slang, to augment the definitions from your terminal's
+# termcap or terminfo description.
+
 # Lines that start with a '#' are comment lines.  Blank lines are ignored.
 
 # The 'setkey' function may be used in two ways:
@@ -80,3 +83,21 @@ setkey "^[[K"		END
 #
 setkey "^[<"		HOME
 setkey "^[>"		END
+#
+# Other special escapes:
+#	\a		bell
+#	\b		backspace
+#	\f		form-feed
+#	\n		newline (line-feed)
+#	\r		carriage-return
+#	\t		tab
+#	\v		vertical tab
+#	\<number>	octal number, up to 3 digits, e.g., "\033".
+#	\d<number>	decimal number, up to 3 digits, e.g., "\d99"
+#	\x<number>	hexidecimal number, up to 2 digits, e.g., "\xFF"
+#
+# For Unix-systems (which have termcap or terminfo) you may also use symbols
+# that refer to the termcap/terminfo, by referencing the name bracketed by
+# "^(" and ")", e.g.,
+setkey "^(cuu1)"	UPARROW
+setkey "^(up)"		UPARROW

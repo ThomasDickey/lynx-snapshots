@@ -1179,7 +1179,7 @@ PUBLIC LYUCcharset * HTAnchor_getUCInfoStage ARGS2(
 {
     if (me && !me->UCStages) {
 	int i;
-	int chndl = UCLYhndl_for_unspec;
+	int chndl = UCLYhndl_for_unspec;  /* always >= 0 */
 	UCAnchorInfo * stages = (UCAnchorInfo*)calloc(1,
 						      sizeof(UCAnchorInfo));
 	if (stages == NULL)
@@ -1190,21 +1190,18 @@ PUBLIC LYUCcharset * HTAnchor_getUCInfoStage ARGS2(
 	}
 	if (me->charset) {
 	    chndl = UCGetLYhndl_byMIME(me->charset);
-	    if (chndl < 0) {
+	    if (chndl < 0)
 		chndl = UCLYhndl_for_unrec;
-	    }
+	    if (chndl < 0)
+		/*
+		**  UCLYhndl_for_unrec not defined :-(
+		**  fallback to UCLYhndl_for_unspec which always valid.
+		*/
+		chndl = UCLYhndl_for_unspec;  /* always >= 0 */
 	}
-	if (chndl >= 0) {
-	    memcpy(&stages->s[UCT_STAGE_MIME].C, &LYCharSet_UC[chndl],
-		   sizeof(LYUCcharset));
-	    stages->s[UCT_STAGE_MIME].lock = UCT_SETBY_DEFAULT;
-	} else {
-	    /*
-	     *	Should not happen...
-	     */
-	    stages->s[UCT_STAGE_MIME].C.UChndl = -1;
-	    stages->s[UCT_STAGE_MIME].lock = UCT_SETBY_NONE;
-	}
+	memcpy(&stages->s[UCT_STAGE_MIME].C, &LYCharSet_UC[chndl],
+	       sizeof(LYUCcharset));
+	stages->s[UCT_STAGE_MIME].lock = UCT_SETBY_DEFAULT;
 	stages->s[UCT_STAGE_MIME].LYhndl = chndl;
 	me->UCStages = stages;
     }

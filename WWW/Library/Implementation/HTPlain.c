@@ -155,7 +155,7 @@ PRIVATE void HTPlain_put_character ARGS2(
 	HText_appendCharacter(me->text, c);
     } else if ((unsigned char)c > 160) {
 	if (!HTPassEightBitRaw &&
-	    !((me->outUCLYhndl == 0) ||
+	    !((me->outUCLYhndl == LATIN1) ||
 	      (me->outUCI->enc & (UCT_CP_SUPERSETOF_LAT1)))) {
 	    int len, high, low, i, diff = 1;
 	    CONST char * name;

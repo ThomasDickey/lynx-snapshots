@@ -837,7 +837,6 @@ draw_options:
 		 *  character set if changed. - FM
 		 */
 		if (CurrentCharSet != current_char_set) {
-		    HTMLSetRawModeDefault(current_char_set);
 		    LYUseDefaultRawMode = TRUE;
 		    HTMLUseCharacterSet(current_char_set);
 		    CurrentCharSet = current_char_set;
@@ -2237,7 +2236,7 @@ PRIVATE int popup_choice ARGS6(
     if (!(form_window = newwin(bottom - top, (Lnum + width + 4),
 			       top, (lx - 1))) &&
 	!(form_window = newwin(bottom - top, 0, top, 0))) {
-	_statusline(POPUP_FAILED);
+	HTAlert(POPUP_FAILED);
 	return(orig_choice);
     }
     scrollok(form_window, TRUE);
@@ -2395,9 +2394,6 @@ redraw:
 	term_options = FALSE;
 	c = LYgetch();
 	if (term_options || c == 3 || c == 7) {
-	     /*
-	      *  Control-C or Control-G
-	      */
 	    cmd = LYK_QUIT;
 	} else {
 	    cmd = keymap[c+1];
@@ -3115,9 +3111,10 @@ static char * cookies_string		= "cookies";
 static char * cookies_ignore_all_string = "ignore";
 static char * cookies_up_to_user_string = "ask user";
 static char * cookies_accept_all_string = "accept all";
-static char * display_string		= "display";
+static char * x_display_string		= "display";
 static char * editor_string		= "editor";
 static char * emacs_keys_string 	= "emacs_keys";
+
 #ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
 #define EXEC_ALWAYS 2
 #define EXEC_LOCAL  1
@@ -3131,6 +3128,7 @@ static OptValues exec_links_values[]	= {
 #endif
 	{ 0, 0, 0 }};
 #endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
+
 static char * keypad_mode_string	= "keypad_mode";
 static OptValues keypad_mode_values[]	= {
 	{ NUMBERS_AS_ARROWS,  "Numbers act as arrows", "number_arrows" },
@@ -3415,8 +3413,8 @@ PUBLIC int postoptions ARGS1(
 	    }
 	}
 
-	/* Display: INPUT */
-	if (!strcmp(data[i].tag, display_string)) {
+	/* X Display: INPUT */
+	if (!strcmp(data[i].tag, x_display_string)) {
 	    LYsetXDisplay(data[i].value);
 	}
 
@@ -3487,9 +3485,14 @@ PUBLIC int postoptions ARGS1(
 	    LYShowCursor = GetOptValues(bool_values, data[i].value);
 	}
 
-	/* User Mode: Default: */
+	/* User Mode: SELECT */
 	if (!strcmp(data[i].tag, user_mode_string)) {
 	    user_mode = GetOptValues(user_mode_values, data[i].value);
+	    if (user_mode == NOVICE_MODE) {
+		display_lines = (LYlines - 4);
+	    } else {
+		display_lines = LYlines-2;
+	    }
 	}
 
 	/* Verbose Images: ON/OFF */
@@ -3611,7 +3614,6 @@ PUBLIC int postoptions ARGS1(
 		 *  Set the LYUseDefaultRawMode value and character
 		 *  handling if LYRawMode was changed. - FM
 		 */
-		HTMLSetRawModeDefault(current_char_set);
 		LYUseDefaultRawMode = TRUE;
 		HTMLUseCharacterSet(current_char_set);
 	    }
@@ -3651,6 +3653,16 @@ PUBLIC int postoptions ARGS1(
     return(NULLFILE);
 }
 
+PRIVATE char *NewSecureValue NOARGS
+{
+    FREE(secure_value);
+    if ((secure_value = malloc(80)) != 0) {
+	sprintf(secure_value, "%ld", (long)secure_value + (long)time(0));
+	return secure_value;
+    }
+    return "?";
+}
+
 /*
  * Okay, someone wants to change options.  So, lets gen up a form for them
  * and pass it around.  Gor, this is ugly.  Be a lot easier in Bourne with
@@ -3685,7 +3697,7 @@ PUBLIC int gen_options ARGS1(
     StrAllocCopy(*newfile, any_filename);
     LYforce_no_cache = TRUE;
 
-    BeginInternalPage(fp0, OPTIONS_TITLE, OPTIONS_HELP);
+    BeginInternalPage(fp0, OPTIONS_TITLE, NULL); /* help link below */
 
     /*
      * I do C, not HTML.  Feel free to pretty this up.
@@ -3696,10 +3708,8 @@ PUBLIC int gen_options ARGS1(
      * (or was it CUTE?) telnet one shot password to allow ftp to self.
      * to prevent spoofing.
      */
-    FREE(secure_value);
-    StrAllocCopy(secure_value, "FIXMEtest=the&encoding");
     fprintf(fp0,"<input name=\"%s\" type=\"hidden\" value=\"%s\">\n",
-	    secure_string, secure_value);
+	    secure_string, NewSecureValue());
 
     /*
      * visible text begins here
@@ -3740,11 +3750,7 @@ PUBLIC int gen_options ARGS1(
 	      cookies_accept_all_string);
     EndSelect(fp0);
 
-    /* Display: Input */
-    PutLabel(fp0, "Display");
-    PutTextInput(fp0, display_string, NOTEMPTY(x_display), text_len, "");
-
-    /* Editor: Input */
+    /* Editor: INPUT */
     PutLabel(fp0, "Editor");
     PutTextInput(fp0, editor_string, NOTEMPTY(editor), text_len,
 		DISABLED(no_editor || system_editor));
@@ -3848,7 +3854,7 @@ PUBLIC int gen_options ARGS1(
     PutOptValues(fp0, LYShowCursor, bool_values);
     EndSelect(fp0);
 
-    /* User Mode: Default: */
+    /* User Mode: SELECT */
     PutLabel(fp0, "User mode");
     BeginSelect(fp0, user_mode_string);
     PutOptValues(fp0, user_mode, user_mode_values);
@@ -3866,6 +3872,10 @@ PUBLIC int gen_options ARGS1(
     PutOptValues(fp0, vi_keys, bool_values);
     EndSelect(fp0);
 
+
+    /* X Display: INPUT */
+    PutLabel(fp0, "X Display");
+    PutTextInput(fp0, x_display_string, NOTEMPTY(x_display), text_len, "");
 
     /*
      * Bookmark Options
@@ -4003,7 +4013,7 @@ PUBLIC int gen_options ARGS1(
     PutTextInput(fp0, preferred_doc_lang_string,
 	    NOTEMPTY(language), cset_len+2, "");
 
-	/* User Agent: INPUT */
+    /* User Agent: INPUT */
     if (!no_useragent) {
 	PutLabel(fp0, "User-Agent header");
 	PutTextInput(fp0, user_agent_string,

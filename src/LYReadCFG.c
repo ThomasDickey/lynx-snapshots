@@ -489,27 +489,27 @@ Config_Type;
 static int assume_charset_fun ARGS1(
 	char *, 	value)
 {
+    UCLYhndl_for_unspec = safeUCGetLYhndl_byMIME(value);
+    StrAllocCopy(UCAssume_MIMEcharset,
+			LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
+/*    this may be a memory for bogus typo -
     StrAllocCopy(UCAssume_MIMEcharset, value);
-    LYLowerCase(UCAssume_MIMEcharset);
-    UCLYhndl_for_unspec = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
+    LYLowerCase(UCAssume_MIMEcharset);    */
+
     return 0;
 }
 
 static int assume_local_charset_fun ARGS1(
 	char *, 	value)
 {
-    StrAllocCopy(UCAssume_localMIMEcharset, value);
-    LYLowerCase(UCAssume_localMIMEcharset);
-    UCLYhndl_HTFile_for_unspec = UCGetLYhndl_byMIME(UCAssume_localMIMEcharset);
+    UCLYhndl_HTFile_for_unspec = safeUCGetLYhndl_byMIME(value);
     return 0;
 }
 
 static int assume_unrec_charset_fun ARGS1(
 	char *, 	value)
 {
-    StrAllocCopy(UCAssume_unrecMIMEcharset, value);
-    LYLowerCase(UCAssume_unrecMIMEcharset);
-    UCLYhndl_for_unrec = UCGetLYhndl_byMIME(UCAssume_unrecMIMEcharset);
+    UCLYhndl_for_unrec = safeUCGetLYhndl_byMIME(value);
     return 0;
 }
 
@@ -523,13 +523,11 @@ static int character_set_fun ARGS1(
     for (i = 0; LYchar_set_names[i]; i++) { /* search by name, compatibility */
 	if (!strncmp(value, LYchar_set_names[i], len)) {
 	    current_char_set = i;
-	    HTMLSetRawModeDefault(current_char_set);
 	    return 0;
 	}
     }
 
-    current_char_set = UCGetLYhndl_byMIME(value); /* by MIME */
-    HTMLSetRawModeDefault(current_char_set);
+    current_char_set = safeUCGetLYhndl_byMIME(value); /* by MIME */
     return 0;
 }
 

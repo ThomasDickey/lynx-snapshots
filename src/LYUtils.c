@@ -1,4 +1,5 @@
 #include <HTUtils.h>
+#include <HTTCP.h>
 #include <HTParse.h>
 #include <HTAccess.h>
 #include <HTCJK.h>
@@ -4147,7 +4148,8 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
     char *Host = NULL, *HostColon = NULL, *host = NULL;
     char *Path = NULL;
     char *Fragment = NULL;
-    struct hostent  *phost;
+    int hoststat;
+    SockA sock;
     BOOLEAN GotHost = FALSE;
     BOOLEAN Startup = (helpfilepath == NULL);
 
@@ -4222,7 +4224,8 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	fprintf(stdout, "Looking up '%s' first.\n", host);
     }
 #ifndef DJGPP
-    if ((phost = gethostbyname(host)) != NULL)
+    sock.sin_port = htons(80);
+    if ((hoststat = HTParseInet(&sock, host)) == 0)
 #else
     if (resolve(host) != 0)
 #endif /* DJGPP */
@@ -4243,7 +4246,11 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	FREE(Str);
 	FREE(MsgStr);
 	return GotHost;
+#ifndef DJGPP
+    } else if (LYCursesON && ((hoststat == HT_INTERRUPTED) || HTCheckForInterrupt())) {
+#else /* DJGPP */
     } else if (LYCursesON && HTCheckForInterrupt()) {
+#endif /* DJGPP */
 	/*
 	 *  Give the user chance to interrupt lookup cycles. - KW & FM
 	 */
@@ -4339,7 +4346,8 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 		fprintf(stdout, "Looking up '%s', guessing...\n", host);
 	    }
 #ifndef DJGPP
-	    GotHost = ((phost = gethostbyname(host)) != NULL);
+	    sock.sin_port = htons(80);
+	    GotHost = ((hoststat = HTParseInet(&sock, host)) == 0);
 #else
 	    GotHost = (resolve(host) != 0);
 #endif /* DJGPP */
@@ -4350,7 +4358,12 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 		/*
 		 *  Give the user chance to interrupt lookup cycles. - KW
 		 */
-		if (LYCursesON && HTCheckForInterrupt()) {
+#ifndef DJGPP
+		if (LYCursesON && ((hoststat == HT_INTERRUPTED) || HTCheckForInterrupt()))
+#else /* DJGPP */
+		if (LYCursesON && HTCheckForInterrupt())
+#endif /* DJGPP */
+		{
 		    CTRACE(tfp, "LYExpandHostForURL: Interrupted while '%s' failed to resolve.\n",
 				host);
 		    FREE(Str);
@@ -5827,6 +5840,26 @@ PUBLIC void LYLocalFileToURL ARGS2(
 #endif /* DOSPATH */
 }
 
+PUBLIC int LYOpenInternalPage ARGS2(
+	FILE *,  fp0,
+	char **, newfile)
+{
+    static char tempfile[256];
+    static char local_address[256];
+
+    LYRemoveTemp(tempfile);
+    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
+	HTAlert(CANNOT_OPEN_TEMP);
+	return(-1);
+    }
+
+    LYLocalFileToURL(local_address, tempfile);
+    StrAllocCopy(*newfile, local_address);
+    LYforce_no_cache = TRUE;  /* don't cache this doc */
+
+    return(0);  /* OK */
+}
+
 PUBLIC void BeginInternalPage ARGS3(
 	FILE *, fp0,
 	char*, Title,
@@ -5854,15 +5887,14 @@ PUBLIC void BeginInternalPage ARGS3(
     if ((user_mode == NOVICE_MODE)
      && LYwouldPush(Title)
      && (HelpURL != 0)) {
-        fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
-		LYNX_NAME, LYNX_VERSION,
-		helpfilepath, HelpURL, Title);
+	fprintf(fp0, "<h1>%s (%s Version %s), <a href=\"%s%s\">help</a></h1>\n",
+		Title, LYNX_NAME, LYNX_VERSION,
+		helpfilepath, HelpURL);
     } else {
-        fprintf(fp0, "<h1>%s (%s Version %s)</h1>\n",
+	fprintf(fp0, "<h1>%s (%s Version %s)</h1>\n",
 		Title, LYNX_NAME, LYNX_VERSION);
     }
 }
-
 
 PUBLIC void EndInternalPage ARGS1(
 	FILE *, fp0)

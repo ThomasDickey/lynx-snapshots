@@ -900,6 +900,12 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	    **	Got something but we don't recognize it.
 	    */
 	    chndl = UCLYhndl_for_unrec;
+	    if (chndl < 0)
+	    /*
+	    **  UCLYhndl_for_unrec not defined :-(
+	    **  fallback to UCLYhndl_for_unspec which always valid.
+	    */
+	    chndl = UCLYhndl_for_unspec;  /* always >= 0 */
 	    if (UCCanTranslateFromTo(chndl, current_char_set)) {
 		chartrans_ok = YES;
 		HTAnchor_setUCInfoStage(anchor, chndl,
@@ -944,35 +950,9 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 		    HTPassEightBitRaw = TRUE;
 		}
 	    } else if (p_out->enc == UCT_ENC_CJK) {
-		if (LYRawMode) {
-		    if ((!strcmp(p_in->MIMEname, "euc-jp") ||
-			 !strcmp(p_in->MIMEname, "shift_jis")) &&
-			(!strcmp(p_out->MIMEname, "euc-jp") ||
-			 !strcmp(p_out->MIMEname, "shift_jis"))) {
-			HTCJK = JAPANESE;
-		    } else if (!strcmp(p_in->MIMEname, "euc-cn") &&
-			       !strcmp(p_out->MIMEname, "euc-cn")) {
-			HTCJK = CHINESE;
-		    } else if (!strcmp(p_in->MIMEname, "big-5") &&
-			       !strcmp(p_out->MIMEname, "big-5")) {
-			HTCJK = TAIPEI;
-		    } else if (!strcmp(p_in->MIMEname, "euc-kr") &&
-			       !strcmp(p_out->MIMEname, "euc-kr")) {
-			HTCJK = KOREAN;
-		    } else {
-			HTCJK = NOCJK;
-		    }
-		} else {
-		    HTCJK = NOCJK;
-		}
+		Set_HTCJK(p_in->MIMEname, p_out->MIMEname);
 	    }
-	/*
-	**  Check for an iso-8859-# we don't know. - FM
-	*/
-	} else if (!strncmp(cp4, "iso-8859-", 9) &&
-		   isdigit((unsigned char)cp4[9]) &&
-		   !strncmp(LYchar_set_names[current_char_set],
-			    "Other ISO Latin", 15)) {
+	} else {
 	    /*
 	    **	Hope it's a match, for now. - FM
 	    */

@@ -79,6 +79,10 @@
 
 #endif /* HAVE_CONFIG_H */ 
 
+#ifndef LY_MAXPATH
+#define LY_MAXPATH 256
+#endif
+
 #ifndef	GCC_UNUSED
 #define	GCC_UNUSED /* nothing */
 #endif

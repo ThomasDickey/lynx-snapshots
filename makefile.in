@@ -16,8 +16,6 @@ CFLAGS		= @CFLAGS@
 DEFS		= @DEFS@
 CPPFLAGS	= @CPPFLAGS@
 
-AWK		= @AWK@
-
 LIBS		= @LIBS@
 
 INSTALL		= @INSTALL@
@@ -41,6 +39,9 @@ mandir= @mandir@/man1
 
 ## Where you want the lynx.cfg file installed
 libdir= @libdir@
+
+## Where you want the doc-files installed
+docdir= @libdir@/lynx_doc
 
 ## Where you want the help-files installed
 helpdir= @libdir@/lynx_help
@@ -129,11 +130,20 @@ SITE_DEFS = # Your defines here
 # defines which have configure options   (see INSTALLATION, Section II-1c.):
 # -DARCHIVE_ONLY
 # -DDIRED_SUPPORT
+# -DDISP_PARTIAL
+# -DDONT_TRACK_INTERNAL_LINKS
+# -DEXEC_LINKS
+# -DEXEC_SCRIPTS
 # -DEXP_CHARTRANS_AUTOSWITCH
+# -DEXP_FORMS_OPTIONS
+# -DEXP_PERSISTENT_COOKIES
 # -DLINKEDSTYLES
 # -DLONG_LIST
+# -DLYNXCGI_LINKS
 # -DLY_FIND_LEAKS
+# -DNCURSES
 # -DNO_CHANGE_EXECUTE_PERMS
+# -DNO_EXTENDED_HTMLDTD
 # -DNO_PARENT_DIR_REFERENCE
 # -DNSL_FORK
 # -DOK_GZIP
@@ -142,17 +152,21 @@ SITE_DEFS = # Your defines here
 # -DOK_TAR
 # -DOK_UUDECODE
 # -DOK_ZIP
+# -DSOCKS
 # -DSYSLOG_REQUESTED_URLS
 # -DUNDERLINE_LINKS
 # -DUSE_COLOR_STYLE
+# -DUSE_DEFAULT_COLORS
+# -DUSE_EXTERNALS
 # -DUSE_HASH
 # -DUSE_SLANG
+# -DUSE_SOCKS5
 # -DUSE_ZLIB
 #
 # for installation of local execution links, please see the file userdefs.h
 
 # TESTED: Linux FreeBSD SunOS Solaris IRIX CLIX HP-UX AIX SCO
-all lynx$x: LYHelp.h
+all lynx$x: cfg_defs.h LYHelp.h
 	cd WWW/Library/unix && $(MAKE) CC="$(CC)" \
 		LY_CFLAGS="$(CFLAGS)" \
 		CPPFLAGS="$(CPPFLAGS)" \
@@ -181,9 +195,9 @@ clean:
 	rm -f WWW/Library/*/*.[aob]
 	rm -f WWW/Library/*/.created
 	cd src && $(MAKE) clean
-	rm -f *.b src/lynx$x core Lynx.leaks LYHelp.h
+	rm -f *.b src/lynx$x core Lynx.leaks cfg_defs.h LYHelp.h
 
-depend: LYHelp.h
+depend: cfg_defs.h LYHelp.h
 	cd WWW/Library/unix && $(MAKE) $@
 	cd src && $(MAKE) $@
 
@@ -229,9 +243,10 @@ save:
 compress: tar
 	cd ..; rm -f $(lynxname).tar.Z; compress -f -v $(lynxname).tar
 
-install: lynx$x install-bin install-man install-cfg @INSTALL_LSS@ install-log
+install: lynx$x install-bin install-man install-cfg @INSTALL_LSS@
 	@echo
 	@echo "Use $(MAKE) install-help to install the help-files"
+	@echo "Use $(MAKE) install-doc to install extra documentation files"
 	@echo
 
 install-bin: $(bindir)
@@ -240,6 +255,12 @@ install-bin: $(bindir)
 
 install-man : $(mandir)
 	$(INSTALL_DATA) $(srcdir)/lynx.man $(mandir)/lynx.1
+
+install-doc : $(docdir)
+	@echo Copying sample files
+	(cd $(srcdir) && tar cf - C[HO]* PROBLEMS README samples test ) | \
+			       ( cd $(docdir) && tar xf - )
+	-rm -f $(libdir)/lynx.tmp
 
 install-help : $(helpdir)
 	(cd $(helpdir) && rm -rf *)
@@ -269,10 +290,6 @@ install-help : $(helpdir)
 		fi ; \
 		)'
 	-rm -f $(helpdir)/help_files.sed
-	@echo Copying sample files
-	(cd $(srcdir) && tar cf - C[HO]* PROBLEMS README samples test ) | \
-			       ( cd $(helpdir) && tar xf - )
-	-rm -f $(libdir)/lynx.tmp
 	@echo Updating $(libdir)/lynx.cfg 
 	sh -c 'if test -f $(libdir)/lynx.cfg ; then \
 		mv $(libdir)/lynx.cfg $(libdir)/lynx.tmp ; \
@@ -309,6 +326,10 @@ LYHelp.h : LYHelp.hin
 	@echo
 	@echo '**********************************************'
 
+cfg_defs.h : $(srcdir)/cfg_defs.sh
+	@rm -f $@
+	sh $(srcdir)/cfg_defs.sh >$@
+
 install-cfg : $(libdir)
 	-mv -f $(libdir)/lynx.cfg $(libdir)/lynx.oldcfg
 	$(INSTALL_DATA) $(srcdir)/lynx.cfg $(libdir)/lynx.cfg
@@ -317,18 +338,13 @@ install-lss : $(libdir)
 	-mv -f $(libdir)/lynx.lss $(libdir)/lynx.oldlss
 	$(INSTALL_DATA) $(srcdir)/samples/lynx.lss $(libdir)/lynx.lss
 
-install-log : $(libdir) config.cache
-	-@sed	-e '/^#/d' \
-		-e 's/^.._cv_\(.*\)=.*=\(.*\)\}/\1=\2/g' \
-		config.cache | \
-	$(AWK) -F= '{printf "%-30s = %s\n",$$1,$$2}' |sort > $(libdir)/lynx_site.txt
-
 uninstall:
 	-rm -f $(bindir)/lynx$x
 	-rm -f $(mandir)/lynx.1
 	-rm -f $(libdir)/lynx.cfg
 	-rm -f $(libdir)/lynx.lss
-	-rm -rf $(libdir)/lynx_help
+	-rm -rf $(helpdir)
+	-rm -rf $(docdir)
 
-$(bindir) $(mandir) $(libdir) $(helpdir) :
+$(bindir) $(mandir) $(libdir) $(helpdir) $(docdir) :
 	$(srcdir)/mkdirs.sh $@

@@ -1832,8 +1832,21 @@ PUBLIC void LYLoadCookies ARGS1 (
 {
     FILE *cookie_handle;
     char buf[5000]; /* should be long enough for a cookie line */
-    static char domain[256], path[256], name[256], value[4100];
+    static char domain[256], path[LY_MAXPATH], name[256], value[4100];
     static char what[8], secure[8], expires_a[16];
+    static struct {
+	char *s;
+	size_t n;
+    } tok_values[] = {
+	{ domain,	sizeof(domain) },
+	{ what,		sizeof(what) },
+	{ path,		sizeof(path) },
+	{ secure,	sizeof(secure) },
+	{ expires_a,	sizeof(expires_a) },
+	{ name,		sizeof(name) },
+	{ value,	sizeof(value) },
+	{ NULL, 0 }
+	};
     time_t expires;
 
     cookie_handle = fopen(cookie_file, "r+");
@@ -1843,13 +1856,17 @@ PUBLIC void LYLoadCookies ARGS1 (
     while (!feof(cookie_handle)) {
 	cookie *moo;
 	int tok_loop;
-	char *tok_values[] = {domain, what, path, secure, expires_a, name, value, NULL};
 	char *tok_out, *tok_ptr;
+	char *j;
 
-	fgets(buf, 4999, cookie_handle); /* test return value */
+	j = fgets(buf, sizeof(buf)-1, cookie_handle);
+
+	if((j == NULL) || (buf[0] == '\0' || buf[0] == '\n')) {
+	    continue;
+	}
 
 	/*
-	 * Tokenise the cookie line into it's component parts -
+	 * Tokenise the cookie line into its component parts -
 	 * this only works for Netscape style cookie files at the
 	 * moment.  It may be worth investigating an alternative
 	 * format for Lynx because the Netscape format isn't all
@@ -1860,10 +1877,10 @@ PUBLIC void LYLoadCookies ARGS1 (
 	 */
 	tok_ptr = buf;
 	tok_out = LYstrsep(&tok_ptr, "\t");
-	for (tok_loop = 0; tok_out && tok_values[tok_loop]; tok_loop++) {
+	for (tok_loop = 0; tok_out && tok_values[tok_loop].s; tok_loop++) {
 	CTRACE(tfp, ">%d:%p:%p:[%s]:%s\n",
-	    tok_loop, tok_values[tok_loop], tok_out, tok_out, buf);
-	    strcpy(tok_values[tok_loop], tok_out);
+	    tok_loop, tok_values[tok_loop].s, tok_out, tok_out, buf);
+	    LYstrncpy(tok_values[tok_loop].s, tok_out, tok_values[tok_loop].n);
 	    /*
 	     * It looks like strtok ignores a leading delimiter,
 	     * which makes things a bit more interesting.  Something
@@ -1873,7 +1890,7 @@ PUBLIC void LYLoadCookies ARGS1 (
 	    tok_out = LYstrsep(&tok_ptr, "\t");
 	}
 	expires = atol(expires_a);
-	fprintf(stderr, "COOKIE: expires %s\n", ctime(&expires));
+	CTRACE(tfp, "COOKIE: expires %s\n", ctime(&expires));
 
 	/*
 	 * This fails when the path is blank
@@ -2438,7 +2455,8 @@ PUBLIC void cookie_add_acceptlist ARGS1(
     domain_entry *de2 = NULL;
     HTList *hl;
     char **str = (char **)calloc(1, sizeof(acceptstr));
-    char *strsmall = (char *)calloc(1, sizeof(acceptstr));
+    char *astr = NULL;
+    char *strsmall = NULL;
     int isexisting = FALSE;
 
     /* is this the first cookie we're handling? if so, initialize the
@@ -2451,7 +2469,9 @@ PUBLIC void cookie_add_acceptlist ARGS1(
 	total_cookies = 0;
     }
 
-    *str = acceptstr;
+    StrAllocCopy(astr, acceptstr);
+
+    *str = astr;
 
     for(; (strsmall = LYstrsep(str, ","));) {
 	if(strsmall == NULL)
@@ -2490,6 +2510,7 @@ PUBLIC void cookie_add_acceptlist ARGS1(
 
     FREE(str);
     FREE(strsmall);
+    FREE(astr);
 }
 
 
@@ -2505,7 +2526,8 @@ PUBLIC void cookie_add_rejectlist ARGS1(
     domain_entry *de2 = NULL;
     HTList *hl;
     char **str = (char **)calloc(1, sizeof(rejectstr));
-    char *strsmall = (char *)calloc(1, sizeof(rejectstr));
+    char *rstr = NULL;
+    char *strsmall = NULL;
     int isexisting = FALSE;
 
     /* is this the first cookie we're handling? if so, initialize the
@@ -2518,7 +2540,9 @@ PUBLIC void cookie_add_rejectlist ARGS1(
 	total_cookies = 0;
     }
 
-    *str = rejectstr;
+    StrAllocCopy(rstr, rejectstr);
+
+    *str = rstr;
 
     for(; (strsmall = LYstrsep(str, ","));) {
 	if(strsmall == NULL)
@@ -2557,6 +2581,7 @@ PUBLIC void cookie_add_rejectlist ARGS1(
 
     FREE(str);
     FREE(strsmall);
+    FREE(rstr);
 }
 
 #ifdef GLOBALDEF_IS_MACRO

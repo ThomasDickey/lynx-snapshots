@@ -250,10 +250,13 @@ extern BOOLEAN enable_scrollback; /* Clear screen before displaying new page */
 extern BOOLEAN keep_mime_headers; /* Include mime headers and *
 				   * force source dump	      */
 extern BOOLEAN no_url_redirection;   /* Don't follow URL redirections */
+#ifdef DISP_PARTIAL
 extern BOOLEAN display_partial;      /* Display document during download */
 extern int Newline_partial;          /* -//- "current" newline position */
 extern int NumOfLines_partial;       /* -//- "current" number of lines */
 extern BOOLEAN debug_display_partial;  /* show with MessageSecs delay */
+extern BOOLEAN detected_forms_input_partial; /* trimHightext temp fix */
+#endif
 extern char *form_post_data;         /* User data for post form */
 extern char *form_get_data;          /* User data for get form */
 extern char *http_error_file;        /* Place HTTP status code in this file */
@@ -287,8 +290,6 @@ extern BOOLEAN LYRawMode;
 extern BOOLEAN LYDefaultRawMode;
 extern BOOLEAN LYUseDefaultRawMode;
 extern char *UCAssume_MIMEcharset;
-extern char *UCAssume_localMIMEcharset;
-extern char *UCAssume_unrecMIMEcharset;
 extern BOOLEAN UCSaveBookmarksInUnicode; /* in titles,  chars >127 save as &#xUUUU */
 extern BOOLEAN UCForce8bitTOUPPER; /* disable locale case-conversion for >127 */
 extern BOOLEAN LYisConfiguredForX;

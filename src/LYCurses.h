@@ -99,6 +99,11 @@
 extern void LYsubwindow PARAMS((WINDOW * param));
 # endif /* NCURSES */
 
+#if defined(NCURSES_VERSION) && defined(HAVE_DEFINE_KEY)
+#include <term.h>
+#define USE_KEYMAPS		1
+#endif
+
 #else
 # if defined(VMS) && defined(__GNUC__)
 #  include <LYGCurses.h>
@@ -186,17 +191,19 @@ extern unsigned int Lynx_Color_Flags;
 #endif
 
 #ifdef USE_SLANG
+
 #if !defined(VMS) && !defined(DJGPP)
 #define USE_SLANG_MOUSE		1
-#endif /* USE_SLANG */
+#endif
 
-#if ((SLANG_VERSION >= 10000) && !defined(__DJGPP__))
-#define USE_SLANG_KEYMAPS	1
-#endif /* SLANG_VERSION >= 10000 */
+#if !defined(__DJGPP__)
+#define USE_KEYMAPS		1
+#endif
 
 #define SL_LYNX_USE_COLOR	1
 #define SL_LYNX_USE_BLINK	2
 #define SL_LYNX_OVERRIDE_COLOR	4
+
 #define start_bold()      	LYaddAttr(1)
 #define start_reverse()   	LYaddAttr(2)
 #define start_underline() 	LYaddAttr(4)

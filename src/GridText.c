@@ -3200,7 +3200,6 @@ PRIVATE void remove_special_attr_chars ARGS1(
 PUBLIC void HText_endAppend ARGS1(
 	HText *,	text)
 {
-    int cur_line, cur_char, cur_shift;
     HTLine *line_ptr;
 
     if (!text)
@@ -3227,9 +3226,6 @@ PUBLIC void HText_endAppend ARGS1(
      *  Get the first line.
      */
     line_ptr = text->last_line->next;
-    cur_char = line_ptr->size;
-    cur_line = 0;
-    cur_shift = 0;
 
     /*
      *  Remove the blank lines at the end of document.
@@ -3256,8 +3252,9 @@ PUBLIC void HText_endAppend ARGS1(
      *  Fix up the anchor structure values and
      *  create the hightext strings. - FM
      */
-    HText_trimHightext(HTMainText, FALSE);
+    HText_trimHightext(text, FALSE);
 }
+
 
 /*
 **  This function gets the hightext from the text by finding the char
@@ -4071,15 +4068,19 @@ PUBLIC void HText_pageDisplay ARGS2(
     CTRACE(tfp, "GridText: HText_pageDisplay at line %d started\n", line_num);
 
 #ifdef DISP_PARTIAL
-    if (display_partial && !debug_display_partial)
+    if (display_partial && detected_forms_input_partial) {
 	/*
 	**  Garbage is reported from forms input fields in incremental mode.
 	**  So we start HText_trimHightext() to forget this side effect.
 	**  This function was split-out from HText_endAppend().
 	**  It may not be the best solution but it works. - LP
 	**  (TRUE =  to disable annoying repeated trace messages)
+	**
+	**  Side effect is reported from multiply call of HText_trimHightext.
 	*/
 	HText_trimHightext(HTMainText, TRUE);
+    }
+    detected_forms_input_partial = FALSE;
 #endif
 
     display_page(HTMainText, line_num-1, target);
@@ -6343,6 +6344,11 @@ PUBLIC int HText_beginInput ARGS3(
 
     CTRACE(tfp,"Entering HText_beginInput\n");
 
+#ifdef DISP_PARTIAL
+    if (display_partial)
+	detected_forms_input_partial = TRUE; /* trimHightext temp fix */
+#endif
+
     if (a == NULL || f == NULL)
 	outofmem(__FILE__, "HText_beginInput");
 
@@ -7043,16 +7049,10 @@ PUBLIC void HText_SubmitForm ARGS4(
 	HTMainText->node_anchor->charset &&
 	*HTMainText->node_anchor->charset) {
 	target_cs = UCGetLYhndl_byMIME(HTMainText->node_anchor->charset);
-	if (target_cs >= 0) {
-	    target_csname = HTMainText->node_anchor->charset;
-	} else {
-	    target_cs = UCLYhndl_for_unspec;
-	    if (target_cs >= 0)
-		target_csname = LYCharSet_UC[target_cs].MIMEname;
+	if (target_cs < 0) {
+	    target_cs = UCLYhndl_for_unspec; /* always >= 0 */
 	}
-    }
-    if (target_cs < 0) {
-	target_cs = UCLYhndl_for_unspec;
+	target_csname = LYCharSet_UC[target_cs].MIMEname;
     }
 
     /*

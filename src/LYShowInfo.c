@@ -21,6 +21,44 @@
 #include <LYLocal.h>
 #endif /* DIRED_SUPPORT */
 
+#ifdef HAVE_CONFIG_H
+#define HAVE_CFG_DEFS_H
+
+#define PutDefs(table, n) fprintf(fp0, "%-35s %s\n", table[n].name, table[n].value)
+
+PRIVATE char *lynx_compile_opts NOARGS
+{
+    static char tempfile[256];
+#include <cfg_defs.h>
+    unsigned n;
+    FILE *fp0;
+
+    if (strlen(tempfile) == 0) {
+	if ((fp0 = LYOpenTemp (tempfile, HTML_SUFFIX, "w")) == 0) {
+	    HTAlert(CANNOT_OPEN_TEMP);
+	    tempfile[0] = '\0';
+	    return(0);
+	}
+	BeginInternalPage (fp0, CONFIG_DEF_TITLE, (char *)0);
+	fprintf(fp0, "<pre>\n");
+	fprintf(fp0, "\n<em>config.cache</em>\n");
+	for (n = 0; n < TABLESIZE(config_cache); n++) {
+	    PutDefs(config_cache, n);
+	}
+	fprintf(fp0, "\n<em>lynx_cfg.h</em>\n");
+	for (n = 0; n < TABLESIZE(config_defines); n++) {
+	    PutDefs(config_defines, n);
+	}
+	fprintf(fp0, "</pre>\n");
+	EndInternalPage(fp0);
+	LYCloseTempFP(fp0);
+    }
+    return tempfile;
+}
+#else
+#undef HAVE_CFG_DEFS_H
+#endif
+
 /*
  *  Showinfo prints a page of info about the current file and the link
  *  that the cursor is on.
@@ -49,7 +87,7 @@ PUBLIC int showinfo ARGS4(
     LYRemoveTemp(tempfile);
     if ((fp0 = LYOpenTemp (tempfile, HTML_SUFFIX, "w")) == 0) {
 	HTAlert(CANNOT_OPEN_TEMP);
-	return(0);
+	return(-1);
     }
 
     LYLocalFileToURL(info_url, tempfile);
@@ -76,12 +114,12 @@ PUBLIC int showinfo ARGS4(
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 SHOWINFO_TITLE);
 
-#ifdef LYNX_COMPILE_OPTS
+#ifdef HAVE_CFG_DEFS_H
     fprintf(fp0, "<h1>%s %s (<a href=\"%s\">%s</a>) - <a href=\"%s\">compile time settings</a></h1>\n",
 		 LYNX_NAME, LYNX_VERSION,
 		 (LYNX_RELEASE ? LYNX_WWW_HOME   : LYNX_WWW_DIST),
 		 (LYNX_RELEASE ? "major release" : "development version"),
-		 LYNX_COMPILE_OPTS);
+		 lynx_compile_opts());
 #else
     fprintf(fp0, "<h1>%s %s (<a href=\"%s\">%s</a>)</h1>\n",
 		 LYNX_NAME, LYNX_VERSION,
@@ -354,5 +392,5 @@ PUBLIC int showinfo ARGS4(
     FREE(Address);
     FREE(Title);
 
-    return(1);
+    return(0);
 }

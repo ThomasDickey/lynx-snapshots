@@ -148,7 +148,7 @@ II. Compile instructions -- UNIX
     order shown by the -help option is different.  See "docs/README.defines"
     for information on defines for which there are no option switches.
 
-  --disable-dired			(defines DIRED_SUPPORT)
+  --disable-dired			(define DIRED_SUPPORT)
 	Use this option to disable the optional directory-editor.
 
 	Lynx supports directory editing (DirEd) for local directories.

@@ -22,7 +22,6 @@ AC_PROG_RANLIB
 AC_PROG_MAKE_SET
 CF_MAKE_INCLUDE
 AC_PROG_INSTALL
-AC_PROG_AWK
 AC_CHECK_PROGS(LINT, lint alint lclint tdlint, [])
 
 AC_AIX
@@ -351,11 +350,6 @@ LYNX_CFG_FILE=$cf_libdir/lynx.cfg
 AC_DEFINE_UNQUOTED(LYNX_CFG_FILE,"$LYNX_CFG_FILE")
 AC_MSG_RESULT($LYNX_CFG_FILE)
 
-AC_MSG_CHECKING(for location of site specific options-file)
-LYNX_COMPILE_OPTS=$cf_libdir/lynx_site.txt
-AC_DEFINE_UNQUOTED(LYNX_COMPILE_OPTS,"$LYNX_COMPILE_OPTS")
-AC_MSG_RESULT($LYNX_COMPILE_OPTS)
-
 dnl --------------------------------------------------------------------------
 dnl Checks for standard headers
 dnl --------------------------------------------------------------------------
@@ -434,6 +428,7 @@ if test $cf_cv_screen != slang ; then
 	CF_TTYTYPE
 	AC_CHECK_FUNCS( \
 		cbreak \
+		define_key \
 		keypad \
 		use_default_colors \
 		wborder \

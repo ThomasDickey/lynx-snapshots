@@ -1,6 +1,77 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-09-12 (2.8.1dev.26)
+* change behavior of NSL_FORK and related I/O (patch by BL)
+  - Make URL guessing (www.huh.com?  www.huh.org?  www.huh.net?) interruptible. 
+  - Make URL guessing from the command line interruptible.  
+  - Use select() instead of FIONREAD.  This makes it work on OSes where
+    previously it only *looked* like it was working. 
+  - select() on stdin as well as the child pipe, when using [n]curses (not
+    SLANG).  This allows interrupt to be processed instantly, without
+    up-to-1-second delay. 
+  - While looping, 1 second at a time, bail out after "too many" (currently 50)
+    loops:  just in case something weird happens, like select() returning some
+    unexpected error that we ignore. 
+  - Make sure child processes are always killed and reaped.  
+  - Close pipe ends as soon as possible.  
+  - Now write the length down the pipe (using a known-to-the-program length of
+    sizeof(int)) first -- this both helps workaround old CMU TCP bugs and the
+    fact that select() doesn't let us get number of bytes ready, like FIONREAD
+    does. 
+* change default for NO_ANONYMOUS_EMAIL to TRUE (patch by HN)
+* use url for "W3C HTML Validation Service" rather than "A Kinder, Gentler HTML
+  Validator"
+* update url for HTML Quick Reference Guide (report by LE) - TE
+* modify verbose images to show ISMAPs and USEMAPs (patch by LE). 
+* fix typos in AttrList.h, LYStrings.h (reported by LV & HN) - TD
+* Chartrans recovery and cleanup:  by introducing an invariant
+  "current_char_set and UCLYhndl_for_unspec always valid charsets" we solve
+  possible problems with invalid/undeclared charsets.  Use
+  'safeUCGetLYhndl_byMIME()' for reading charset information from
+  lynx.cfg/userdefs.h/command line switches to recover possible typos by
+  fallback to ISO-8859-1; If UCLYhndl_for_unrec or UCLYhndl_HTFile_for_unspec
+  not set explicitely - now fallback to UCLYhndl_for_unspec (was before, but
+  not clear in certain places).  Add comments to UCMap.h, add comments on
+  chartrans initialization in LYMain.c.  UCAssume_localMIMEcharset and
+  UCAssume_unrecMIMEcharset now removed (UCLYhandl_* do all the stuff).  - LP
+* LYCharSets.c:  LYRawMode code simplified and comments added.  It was realized
+  that UCAssume_MIMEcharset may differ from its handler as LYRawMode history.
+  Also:  HTMLSetRawModeDefault() moved into HTMLUseCharacterSet() to reduce
+  clutter, declare HTMLSetCJKCharacterSet() as PRIVATE.  - LP
+* more "big5" bugs fixed (in HTMIME.c and HTFile.c); function Set_HTCJK() added
+  to LYCharSets.c - LP
+* LYCharUtils.c:  META charset code corrected against 2.7.2, obsolete code
+  removed - LP
+* partial mode now repaint the screen in one stage with a complete display
+  ('display_lines' received, fix in HTPartialDisplay()).  Incremental rendering
+  of the first page may be annoying on slow connection (reported by Nelson
+  Henry Eric <nelsonhe@nara.kindai.ac.jp>) - LP
+* temp fix for HText_trimHightext side effect from partial mode by introducing
+  a flag in HText_beginInput(), so this side effect still only happens for long
+  documents with forms input mixed with normal href= link.  - LP
+* print menu: fixed document URL near the top (was temp file name) - LP
+* forms-options menu: fixed screen size in Novice mode - LP
+* limit length of strings copied via tok_values[] in LYCookies.c - TD
+* clean up a few memory leaks in cookie_add_acceptlist() and
+  cookie_add_rejectlist() in LYCookie.c.  These were leaking 4 bytes for each
+  entry in COOKIE_ACCEPT_DOMAINS - BJC
+* fix to LYLoadCookies() which was causing duplicate invalid cookies to be
+  loaded - BJC
+* split out install-doc rule in top-level makefile to install extra documentation
+  files in $(libdir)/lynx_doc (request by HN) - TD
+* improved algorithm to set 'secure_value', used in forms-options to circumvent
+  spoofing (based on comments from Mike Castle) - TD
+* integrate WB's mouse changes (see 1997-04-24) for page-up/down into the Unix
+  flavors of mouse support (e.g., ncurses and slang) - TD
+* use ncurses define_key to implement lynx-keymaps (see dev.10) - TD
+* modify slang keymap code to work with slang 0.99-38 - TD
+* replace several ifdef'd pathname constructions to use LYAddPathToHome() - TD
+* make keymaps file consistently named on Unix and VMS - TD
+* remove redundant "Lynx" from internal-page titles (suggested by LP) - TD
+* remove install-log makefile target, generate cfg_defs.h file directly from
+  lynx_cfg.h and config.cache, to compile-in the configuration-definitions
+  rather than rely on external file lynx_site.txt - TD
 1998-09-06 (2.8.1dev.25)
 * corrected compiled-in path for lynx_site.txt - TD
 * implement logic for exec-links in forms-options page - TD
@@ -24,7 +95,7 @@ Changes since Lynx 2.8 release
 * Fixed: forms input in display_partial mode! Previously hightext was printed
   at wrong positions while loading was in process (try -debug_partial to see
   the bug).  Fix made in HText_pageDisplay:  we call HText_trimHightext() which
-  was the main part of HText_endAppend() before.  People, no more problems
+  was the main part of HText_endAppend() before.  Seems no more problems
   reported from incremental rendering mode!  - LP
 * set PARTIAL mode ON by default, unless it disabled in lynx.cfg or by
   configure --disable-partial option - LP
@@ -54,7 +125,7 @@ Changes since Lynx 2.8 release
   it is started from one of the root directories of a disk drive, since it is
   trying to write to "c:\\file.ext", rather than "c:\file.ext" - DK
 * correct a comment in userdefs.h; commercial Japanese sites are named with
-  co.jp, not com.jp (Larry Virden).
+  co.jp, not com.jp (LV).
 * correct some debug messages in LYCookie.c - BJP
 * fix a missing </h1> in ShowInfo.c - SKY
 * modified '+'->' ' conversion to allow Unix commands to have '+' beginning
@@ -95,7 +166,7 @@ Changes since Lynx 2.8 release
 * Al's convention of '#<number>' into '#<id name>' in Lynx_users_guide.html is
   included - SKY
 1998-08-31 (2.8.1dev.24)
-* re-correct DH's patch for COLLAPSE_BR_TAGS (reported by Larry Virden) - TD
+* re-correct DH's patch for COLLAPSE_BR_TAGS (reported by LV) - TD
 1998-08-29 (2.8.1dev.23)
 * make interim fix for gzip'd html files until we can resolve portability
   issues raised by SKY's renaming - TD
@@ -305,7 +376,7 @@ Changes since Lynx 2.8 release
 * add option -eat_all_cookies and corresponding config variable
   EAT_ALL_COOKIES (Brian J Pardy <posterkid@psnw.com>).
 * correct spurious 'Content' string versus newline after X-URL in LYMail.c
-  (Bela Lubkin and Larry Virden).
+  (Bela Lubkin and LV).
 * updated versions of config.guess and config.sub based on automake 1.3 - TD
 * updated experimental persistent-cookie support based on RP's patch:  Replaced
   the call to strsep with a home-rolled one for those people who don't have it.
@@ -567,7 +638,7 @@ Changes since Lynx 2.8 release
   local file if the original string omits scheme:// prefix but guessing fails.
 * tweak formatting of .message in HTFTP.c so it has leading/trailing blank
   lines (patch by Ismael Cordeiro <ismael@CAM.ORG>)
-* retested 'make depend' rule (for Larry Virden) - TD
+* retested 'make depend' rule (for LV (Larry Virden)) - TD
 * eliminate (except for absolute pathnames, as in VMS) quoted includes - TD
 * remove WWW/Library/Implementation/HTAlert.[ch], since they conflict with
   src/HTAlert.[ch], and are not used - TD

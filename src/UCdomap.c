@@ -23,6 +23,7 @@
 #include <UCMap.h>
 #include <UCDefs.h>
 #include <LYCharSets.h>
+#include <LYStrings.h>
 
 /*
  *  Include tables & parameters.
@@ -1274,7 +1275,7 @@ PUBLIC long int UCTransToUni ARGS2(
 
   ch_iu = (unsigned char)ch_in;
 #ifndef UC_NO_SHORTCUTS
-    if (charset_in == 0)
+    if (charset_in == LATIN1)
 	return ch_iu;
     if ((unsigned char)ch_in < 128 && (unsigned char)ch_in >= 32)
 	return ch_iu;
@@ -1502,27 +1503,34 @@ PUBLIC int UCGetRawUniMode_byLYhndl ARGS1(
 }
 
 /*
- *  Currently the charset name has to match exactly -- not substring
- *  matching as was done before (see HTMIME.c, HTML.c).
+ *  Get Lynx internal charset handler from MIME name,
+ *  return -1 if we got NULL or did not recognize value.
+ *  According to RFC, MIME headers should match case-insensitively.
  */
 PUBLIC int UCGetLYhndl_byMIME ARGS1(
-	CONST char *,	UC_MIMEcharset)
+	CONST char *,	value)
 {
   int i;
   int LYhndl = -1;
+  char *UC_MIMEcharset = NULL;
 
-    if (!UC_MIMEcharset || !(*UC_MIMEcharset))
+    if (!value || !(*value)) {
+	CTRACE(tfp, "UCGetLYhndl_byMIME: NULL argument instead of MIME name.\n");
 	return -1;
+    }
+
+    StrAllocCopy(UC_MIMEcharset, value);
+    LYLowerCase(UC_MIMEcharset);
 
     for (i = 0;
 	 (i < MAXCHARSETS && i < LYNumCharsets &&
-	  LYchar_set_names[i] && LYhndl < 0); i++) {
+	  LYchar_set_names[i]); i++) {
 	if (LYCharSet_UC[i].MIMEname &&
 	    !strcmp(UC_MIMEcharset, LYCharSet_UC[i].MIMEname)) {
-	    LYhndl = i;
+	    return i;
 	}
     }
-    if (LYhndl < 0) {
+    {
 	/*
 	 *  Not yet found, try synonyms. - FM
 	 */
@@ -1625,9 +1633,12 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	}
 	if (!strcmp(UC_MIMEcharset, "koi-8")) { /* accentsoft bugosity */
 	  return UCGetLYhndl_byMIME("koi8-r");
-  }
+	}
     }
-  return LYhndl;	/* returns -1 if no charset found by that MIME name */
+    /* no more synonyms if come here... */
+
+    CTRACE(tfp, "UCGetLYhndl_byMIME: unrecognized MIME name \"%s\"\n", value);
+    return -1;	/* returns -1 if no charset found by that MIME name */
 }
 
 /*
@@ -2058,4 +2069,20 @@ PUBLIC void UCInit NOARGS
  *  To add synonyms for any charset name
  *  check function UCGetLYhndl_byMIME in this file.
  */
+}
+
+/*
+ *  Safe variant of UCGetLYhndl_byMIME, with blind recovery from typo
+ *  in user input: lynx.cfg, userdefs.h, switches from command line.
+ */
+PUBLIC int safeUCGetLYhndl_byMIME ARGS1 (CONST char *, value)
+{
+    int i = UCGetLYhndl_byMIME(value);
+
+    if (i == -1) {	/* was user's typo or not yet recognized value */
+	i = LATIN1;	/* error recovery? */
+	CTRACE(tfp, "safeUCGetLYhndl_byMIME: ISO-8859-1 assumed.\n");
+    }
+
+    return(i);
 }

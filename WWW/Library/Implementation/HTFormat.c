@@ -503,9 +503,11 @@ PRIVATE void HTDisplayPartial NOARGS
 		/* new hypertext document available  */
 	&& ((Newline_partial + display_lines) > NumOfLines_partial)
 		/* current page not complete... */
-	&& ((Newline_partial + 2)  < HText_getNumOfLines())) {
-		/* and we MAY display at least a couple of lines on the top.
-		 *
+	&& ((Newline_partial + display_lines)  < HText_getNumOfLines())) {
+		/*             ^^^^^^^^^^^^^
+		 * and we MAY display the page in one stage:
+		 * incremental rendering of the first page reported annoying
+		 * on slow network connection.
 		 */
 	    NumOfLines_partial = HText_getNumOfLines();
 	    HText_pageDisplay(Newline_partial, "");

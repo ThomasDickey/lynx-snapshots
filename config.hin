@@ -29,6 +29,7 @@
 #undef HAVE_CBREAK
 #undef HAVE_CURSESX_H
 #undef HAVE_CUSERID
+#undef HAVE_DEFINE_KEY
 #undef HAVE_DIRENT_H		/* defined by AC_HEADER_DIRENT */
 #undef HAVE_FCNTL_H		/* have <fcntl.h> */
 #undef HAVE_GETBKGD		/* defined by CF_COLOR_CURSES */
@@ -69,7 +70,6 @@
 #undef LONG_LIST		/* CF_ARG_DISABLE(long-list) */
 #undef LYNXCGI_LINKS		/* CF_ARG_ENABLE(cgi-links) */
 #undef LYNX_CFG_FILE		/* $libdir/lynx.cfg */
-#undef LYNX_COMPILE_OPTS	/* $libdir/lynx_help/lynx_site.txt */
 #undef LYNX_LSS_FILE		/* $libdir/lynx.lss */
 #undef LY_FIND_LEAKS		/* configure --disable-leaks */
 #undef MKDIR_PATH		/* CF_PATH_PROG(mkdir) */

@@ -13,6 +13,8 @@
 
 #define LYIsHtmlSep(ch) ((ch) == '/')
 
+#define TABLESIZE(v) (sizeof(v)/sizeof(v[0]))
+
 extern BOOLEAN LYAddSchemeForURL PARAMS((char **AllocatedString, char *default_scheme));
 extern BOOLEAN LYCachedTemp PARAMS((char *result, char **cached));
 extern BOOLEAN LYCanDoHEAD PARAMS((CONST char *address));
@@ -40,6 +42,7 @@ extern int LYSystem PARAMS((char *command));
 extern int is_url PARAMS((char *filename));
 extern int number2arrows PARAMS((int number));
 extern time_t LYmktime PARAMS((char *string, BOOL absolute));
+extern int LYOpenInternalPage PARAMS((FILE *fp0, char **newfile));
 extern void BeginInternalPage PARAMS((FILE *fp0, char *Title, char *HelpURL));
 extern void EndInternalPage PARAMS((FILE *fp0));
 extern void HTAddSugFilename PARAMS((char *fname));
