@@ -127,11 +127,10 @@ PUBLIC int showlist ARGS2(
 	    continue;
 	}
 #ifndef DONT_TRACK_INTERNAL_LINKS
-	dest_intl = HTAnchor_followTypedLink((HTAnchor *)child,
-						       HTInternalLink);
+	dest_intl = HTAnchor_followTypedLink(child, HTInternalLink);
 #endif
 	dest = dest_intl ?
-	    dest_intl : HTAnchor_followMainLink((HTAnchor *)child);
+	    dest_intl : HTAnchor_followLink(child);
 	parent = HTAnchor_parent(dest);
 	if (!intern_w_post && dest_intl &&
 	    HTMainAnchor && HTMainAnchor->post_data &&
@@ -150,11 +149,11 @@ PUBLIC int showlist ARGS2(
 	title = titles ? HTAnchor_title(parent) : NULL;
 	if (dest_intl) {
 	    HTSprintf0(&LinkTitle, "(internal)");
-	} else if (titles && child->mainLink.type &&
-		   dest == child->mainLink.dest &&
-		   !strncmp(HTAtom_name(child->mainLink.type),
+	} else if (titles && child->type &&
+		   dest == child->dest &&
+		   !strncmp(HTAtom_name(child->type),
 			    "RelTitle: ", 10)) {
-	    HTSprintf0(&LinkTitle, "(%s)", HTAtom_name(child->mainLink.type)+10);
+	    HTSprintf0(&LinkTitle, "(%s)", HTAtom_name(child->type)+10);
 	} else {
 	    FREE(LinkTitle);
 	}
@@ -288,7 +287,7 @@ PUBLIC void printlist ARGS2(
 		}
 		continue;
 	    }
-	    dest = HTAnchor_followMainLink((HTAnchor *)child);
+	    dest = HTAnchor_followLink(child);
 	    /*
 	     *	Ignore if child anchor points to itself, i.e., we had
 	     *	something like <A NAME=xyz HREF="#xyz"> and it is not

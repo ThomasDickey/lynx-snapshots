@@ -99,9 +99,21 @@ PUBLIC void HTList_linkObject ARGS3(
 	HTList *,	newNode)
 {
     if (me) {
-	newNode->object = newObject;
-	newNode->next = me->next;
-	me->next = newNode;
+	if (newNode->object == 0 && newNode->next == 0) {
+	    /*  It is safe: */
+	    newNode->object = newObject;
+	    newNode->next = me->next;
+	    me->next = newNode;
+
+	} else {
+	    /*
+	     *  This node was already linked to some list (probably this one),
+	     *  so refuse changing node pointers to keep the list valid!!!
+	     */
+	    CTRACE((tfp, "*** HTList: Refuse linking already linked obj "));
+	    CTRACE((tfp, "%p, node %p, list %p\n",
+			newObject, newNode, me));
+	}
 
     } else {
 	CTRACE((tfp, "HTList: Trying to link object %p to a nonexisting list\n",

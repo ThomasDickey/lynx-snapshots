@@ -31,25 +31,13 @@ typedef struct _HTParentAnchor HTParentAnchor;
 /*	After definition of HTFormat: */
 #include <HTFormat.h>
 
-typedef HTAtom HTLinkType;
 
-typedef struct {
-  HTAnchor *	dest;		/* The anchor to which this leads */
-  HTLinkType *	type;		/* Semantics of this link */
-} HTLink;
-
-struct _HTAnchor {		/* Generic anchor : just links */
-  HTLink	mainLink;	/* Main (or default) destination of this */
-  HTList *	links;		/* List of extra links from this, if any */
-  /* We separate the first link from the others to avoid too many small mallocs
-     involved by a list creation.  Most anchors only point to one place. */
+struct _HTAnchor {		/* Generic anchor */
   HTParentAnchor * parent;	/* Parent of this anchor (self for adults) */
 };
 
 struct _HTParentAnchor {
   /* Common part from the generic anchor structure */
-  HTLink	mainLink;	/* Main (or default) destination of this */
-  HTList *	links;		/* List of extra links from this, if any */
   HTParentAnchor * parent;	/* Parent of this anchor (self) */
 
   /* ParentAnchor-specific information */
@@ -110,14 +98,17 @@ struct _HTParentAnchor {
   HTList *	imaps;			/* client side image maps */
 };
 
+typedef HTAtom HTLinkType;
+
 typedef struct {
   /* Common part from the generic anchor structure */
-  HTLink	mainLink;	/* Main (or default) destination of this */
-  HTList *	links;		/* List of extra links from this, if any */
   HTParentAnchor * parent;	/* Parent of this anchor */
 
   /* ChildAnchor-specific information */
   char *	tag;		/* #fragment,  relative to the parent */
+
+  HTAnchor *	dest;		/* The anchor to which this leads */
+  HTLinkType *	type;		/* Semantics of this link */
 
   HTList	_add_children_notag;	/* - just a memory for list entry:) */
   HTList	_add_sources;		/* - just a memory for list entry:) */
@@ -375,16 +366,12 @@ extern BOOL HTAnchor_link PARAMS((
 /*	Manipulation of links
 **	---------------------
 */
-extern HTAnchor * HTAnchor_followMainLink PARAMS((
-	HTAnchor *		me));
+extern HTAnchor * HTAnchor_followLink PARAMS((
+	HTChildAnchor *		me));
 
 extern HTAnchor * HTAnchor_followTypedLink PARAMS((
-	HTAnchor *		me,
+	HTChildAnchor *		me,
 	HTLinkType *		type));
-
-extern BOOL HTAnchor_makeMainLink PARAMS((
-	HTAnchor *		me,
-	HTLink *		movingLink));
 
 /*	Read and write methods
 **	----------------------

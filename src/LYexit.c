@@ -78,7 +78,7 @@ PRIVATE void LYCompleteExit NOPARAMS
 }
 
 /*
- *  Purpose:		Terminates program.
+ *  Purpose:		Terminates program, reports memory not freed.
  *  Arguments:		status	Exit code.
  *  Return Value:	void
  *  Remarks/Portability/Dependencies/Restrictions:

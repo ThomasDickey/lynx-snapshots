@@ -196,7 +196,9 @@ typedef struct AllocationList_tag	{
 **	Function declarations
 **	See the appropriate source file for usage.
 */
+#ifndef LYLeakSequence 
 extern long LYLeakSequence NOPARAMS;
+#endif
 extern void LYLeaks NOPARAMS;
 #ifdef LY_FIND_LEAKS_EXTENDED
 extern AllocationList *LYLeak_mark_malloced PARAMS((

@@ -13,7 +13,7 @@
 #ifndef HTUTILS_H
 #include <HTUtils.h>
 #endif
- 
+
 #include <UCMap.h>
 
 typedef struct {
@@ -100,6 +100,25 @@ extern void HTChunkClear PARAMS((HTChunk * ch));
 
 /*
  *
+ * Realloc a chunk
+ *
+ *   ON ENTRY,
+ *
+ *   ch 		A valid chunk pointer made by HTChunkCreate()
+ *
+ *   growby		growby
+ *
+ *   ON EXIT,
+ *
+ *   *ch		Expanded by growby
+ *
+ */
+
+extern BOOL HTChunkRealloc PARAMS((HTChunk * ch, int growby));
+
+
+/*
+ *
  * Ensure a chunk has a certain space in
  *
  *   ON ENTRY,
@@ -145,7 +164,7 @@ extern void HTChunkPutUtf8Char PARAMS((HTChunk * ch, UCode_t code));
  *
  *   ch 		A valid chunk pointer made by HTChunkCreate()
  *
- *   str		Tpoints to a zero-terminated string to be appended
+ *   str		Points to a zero-terminated string to be appended
  *
  *   ON EXIT,
  *

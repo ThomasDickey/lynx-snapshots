@@ -60,19 +60,36 @@ PRIVATE void fake_put_character ARGS2(
 
 #endif
 
- /* will use an inlined version */
-#ifdef USE_INLINE_PUTC
+ /* will use partially inlined version */
+#define orig_HTChunkPutUtf8Char HTChunkPutUtf8Char
+#undef HTChunkPutUtf8Char
+
+/* ...used for comments and attributes value like href... */
+#define HTChunkPutUtf8Char(ch,x) \
+    { \
+    if ((TOASCII(x) < 128)  && (ch->size < ch->allocated)) \
+	ch->data[ch->size++] = (char)x; \
+    else \
+	orig_HTChunkPutUtf8Char(ch,x); \
+    }
+
+#if 0
+#define orig_HTChunkPutc HTChunkPutc
 #undef HTChunkPutc
-#define HTChunkPutc(ch,c)\
-    if (ch->size >= ch->allocated) {\
-	ch->allocated = ch->allocated + ch->growby;\
-	ch->data = ch->data ? (char *)realloc(ch->data, ch->allocated)\
-			    : typecallocn(char, ch->allocated);\
-	if (!ch->data)\
-	    outofmem(__FILE__, "HTChunkPutc");\
-    }\
-    ch->data[ch->size++] = c;
-#endif
+
+#define HTChunkPutc(ch,x) \
+    { \
+    if (ch->size < ch->allocated) \
+	ch->data[ch->size++] = x; \
+    else \
+	orig_HTChunkPutc(ch,x); \
+    }
+
+#undef HTChunkTerminate
+
+#define HTChunkTerminate(ch) \
+    HTChunkPutc(ch, (char)0)
+#endif /* */
 
 #define PUTS(str) ((*context->actions->put_string)(context->target, str))
 #define PUTC(ch)  ((*context->actions->put_character)(context->target, ch))
@@ -277,7 +294,7 @@ PRIVATE char *state_name ARGS1(sgml_state, n)
 static HTElement pool[DEPTH];
 static int depth = 0;
 
-PRIVATE HTElement* pool_get NOARGS
+PRIVATE HTElement* pool_alloc NOARGS
 {
     depth++;
     if (depth > DEPTH)
@@ -1332,7 +1349,7 @@ PRIVATE void start_element ARGS1(
     if (status == HT_PARSER_OTHER_CONTENT)
 	new_tag = ALT_TAGP(new_tag);	/* this is only returned for OBJECT */
     if (new_tag->contents != SGML_EMPTY) {		/* i.e., tag not empty */
-	HTElement * N = pool_get();
+	HTElement * N = pool_alloc();
 	if (N == NULL)
 	    outofmem(__FILE__, "start_element");
 	N->next = context->element_stack;

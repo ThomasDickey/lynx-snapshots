@@ -2436,30 +2436,44 @@ PUBLIC BOOLEAN LYRemoveNewlines ARGS1(
 	char *,		buffer)
 {
     if (buffer != 0) {
-	size_t i, j;
-	for (i = j = 0; buffer[i]; i++)
-	    if (buffer[i] != '\n' && buffer[i] != '\r')
-		buffer[j++] = buffer[i];
-	buffer[j] = 0;
-	return (i != j);
+	register char* buf = buffer;
+	for ( ; *buf && *buf != '\n' && *buf != '\r'; buf++)
+	    ;
+	if (*buf) {
+	    /* runs very seldom */
+	    char * old = buf;
+	    for ( ; *old; old++) {
+		if (*old != '\n' && *old != '\r')
+		    *buf++ = *old;
+	    }
+	    *buf = '\0';
+	    return TRUE;
+	}
     }
     return FALSE;
 }
 
 /*
- * Remove ALL whitespace from a string (including embedded blanks).
+ * Remove ALL whitespace from a string (including embedded blanks), and returns
+ * a pointer to the end of the trimmed string.
  */
 PUBLIC char * LYRemoveBlanks ARGS1(
 	char *,		buffer)
 {
     if (buffer != 0) {
-	size_t i, j;
-	for (i = j = 0; buffer[i]; i++) {
-	    if (!isspace(UCH((buffer[i]))))
-		buffer[j++] = buffer[i];
+	register char* buf = buffer;
+	for ( ; *buf && !isspace(UCH(*buf)); buf++)
+	    ;
+	if (*buf) {
+	    /* runs very seldom */
+	    char * old = buf;
+	    for ( ; *old; old++) {
+		if (!isspace(UCH(*old)))
+		    *buf++ = *old;
+	    }
+	    *buf = '\0';
 	}
-	buffer[j] = 0;
-	return buffer+j;
+	return buf;
     }
     return NULL;
 }

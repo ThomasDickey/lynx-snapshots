@@ -1,6 +1,38 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2003-02-04 (2.8.5dev.14)
+* correct a missing ">" at the beginning of page sent as response to mailto -TD
+* simplify (clarify) anchor structure:  links now moved from HTAnchor to
+  HTChildAnchor (the only place they were used).  By this we avoid unneeded
+  casting in calls to HTAnchor_followMainLink, HTAnchor_followTypedLink,
+  deleteLinks. [GridText.c, HTML.c, LYList.c, HTAnchor.c] -LP
+* as of 1998-11-21 "workaround for multiple anchors in the same (invalid) HTML
+  document with the same NAME and different destinations (HTAnchor.c) - KW",
+  along with skipping HTAnchor_link() call in this case now, we realize that
+  HTChildAnchor may have only a single link.  (Previously implemented by
+  mainLink and links list).  This simplifies HTAnchor.c -LP
+* simplify HTChunk.c -LP
+* optimize LYRemoveNewlines() and LYRemoveBlanks() -LP
+* check for no common name (CN) in certificate when connecting via SSL, fixes
+  a SIGSEGV with
+    https://web-shokai.tokyo-denwa.net/
+  (patch by patakuti@t3.rim.or.jp)
+* add uk.po (Ukranian) from
+  http://www.iro.umontreal.ca/contrib/po/maint/lynx/
+* modify HTList_linkObject to avoid an infinite loop in HTList_unlinkObject due
+  to relinking some node several times, corrupting the previous list chain -LP
+* increase ATEXITSIZE to 50, 40 was not enough -TD
+* ifdef-out call to Cygwin_Shell() in LYMainLoop.c, which does not work
+  properly for some environments (report by Corinna Vinschen
+  <vinschen@redhat.com>, forwarded by Frederic L W Meunier) -TD
+* correct a bug in HTAnchor_findChildAndLink() introduced in dev.13 handling
+  USEMAP, e.g.,
+    http://www.sendas-delivery.com.br/topo_sendas.asp
+  (reported by Frederic L W Meunier) -LP
+* minor fixes for K&R compiler on SunOS: prototype of HTDOS_slashes(),
+  definition of LYLeakSequence -TD
+
 2003-01-22 (2.8.5dev.13)
 * change new memory-allocation in HTString.c and GridText.c to provide pointers
   to data aligned to the host's pointer-size, to work on Tru64 where this

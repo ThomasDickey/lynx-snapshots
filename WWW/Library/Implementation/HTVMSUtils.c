@@ -1027,7 +1027,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 	      {
 		 CTRACE((tfp,"Adding file to BTree: %s\n",
 						      entry_info->filename));
-		 HTBTree_add(bt, (VMSEntryInfo *)entry_info);
+		 HTBTree_add(bt, entry_info);
 	      }
 
 	} /* End while HTVMSreaddir() */

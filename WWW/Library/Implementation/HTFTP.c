@@ -2767,7 +2767,7 @@ AgainForMultiNet:
 		FREE(spilledname);
 		CTRACE((tfp, "Adding file to BTree: %s\n",
 			    entry_info->filename));
-		HTBTree_add(bt, (EntryInfo *)entry_info);
+		HTBTree_add(bt, entry_info);
 	    } else {
 		free_entryinfo_struct_contents(entry_info);
 		FREE(entry_info);

@@ -234,7 +234,7 @@ lines, anchors, and FormInfo. Arrays of HTStyleChange are stored as is,
 other objects are stored using a cast.]
 
  Pool is referenced by the pointer to the last chunk that contains free slots.
-Functions that allocate memory in pool update that pointer if needed.
+Functions that allocate memory in the pool update that pointer if needed.
 There are 3 functions - POOL_NEW, POOL_FREE, and ALLOC_IN_POOL.
 
       - VH
@@ -271,6 +271,7 @@ PRIVATE pool_data* ALLOC_IN_POOL ARGS2(
 	if (j != 0)
 	    n += (ALIGN_SIZE - j);
 	n /= sizeof(pool_data);
+
 	if (POOL_SIZE >= (pool->used + n)) {
 	    ptr = pool->data + pool->used;
 	    pool->used += n;
@@ -282,11 +283,10 @@ PRIVATE pool_data* ALLOC_IN_POOL ARGS2(
 		newpool->prev = pool;
 		newpool->used = n;
 		ptr = newpool->data;
-		pool = newpool;
+		*ppoolptr = newpool;
 	   }
 	}
     }
-    *ppoolptr = pool;
     return ptr;
 }
 
@@ -297,8 +297,8 @@ PRIVATE HTPool* POOL_NEW NOARGS
 {
     HTPool* poolptr = (HTPool*)LY_CALLOC(1, sizeof(HTPool));
     if (poolptr) {
-	(poolptr)->prev = NULL;
-	(poolptr)->used = 0;
+	poolptr->prev = NULL;
+	poolptr->used = 0;
     }
     return poolptr;
 }
@@ -2171,8 +2171,7 @@ PRIVATE void display_page ARGS3(
 		links[nlinks].anchor_number = Anchor_ptr->number;
 		links[nlinks].anchor_line_num = Anchor_ptr->line_num;
 
-		link_dest = HTAnchor_followMainLink(
-					     (HTAnchor *)Anchor_ptr->anchor);
+		link_dest = HTAnchor_followLink(Anchor_ptr->anchor);
 		{
 		    /*
 		     *	Memory leak fixed 05-27-94
@@ -2185,7 +2184,7 @@ PRIVATE void display_page ARGS3(
 #ifndef DONT_TRACK_INTERNAL_LINKS
 			if (Anchor_ptr->link_type == INTERNAL_LINK_ANCHOR) {
 			    link_dest_intl = HTAnchor_followTypedLink(
-				(HTAnchor *)Anchor_ptr->anchor, HTInternalLink);
+				Anchor_ptr->anchor, HTInternalLink);
 			    if (link_dest_intl && link_dest_intl != link_dest) {
 
 				CTRACE((tfp,
@@ -4978,12 +4977,12 @@ PUBLIC int HText_beginAnchor ARGS3(
     text->last_anchor = a;
 
 #ifndef DONT_TRACK_INTERNAL_LINKS
-    if (HTAnchor_followTypedLink((HTAnchor*)anc, HTInternalLink)) {
+    if (HTAnchor_followTypedLink(anc, HTInternalLink)) {
 	a->number = ++(text->last_anchor_number);
 	a->link_type = INTERNAL_LINK_ANCHOR;
     } else
 #endif
-    if (HTAnchor_followMainLink((HTAnchor*)anc)) {
+    if (HTAnchor_followLink(anc)) {
 	a->number = ++(text->last_anchor_number);
     } else {
 	a->number = 0;
@@ -5053,7 +5052,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 	      (LYNoISMAPifUSEMAP &&
 	       !(text->node_anchor && text->node_anchor->bookmark) &&
 	       HTAnchor_isISMAPScript(
-		   HTAnchor_followMainLink((HTAnchor *)a->anchor))))));
+		   HTAnchor_followLink(a->anchor))))));
 	HTLine *last = text->last_line;
 	HTLine *prev = text->last_line->prev;
 	HTLine *start = last;
@@ -6180,7 +6179,7 @@ PUBLIC int HTGetLinkInfo ARGS6(
 		return(LINK_LINE_FOUND);
 	    } else {
 		*hightext = LYGetHiTextStr(a, 0);
-		link_dest = HTAnchor_followMainLink((HTAnchor *)a->anchor);
+		link_dest = HTAnchor_followLink(a->anchor);
 		{
 		    char *cp_freeme = NULL;
 		    if (traversal) {
@@ -6189,7 +6188,7 @@ PUBLIC int HTGetLinkInfo ARGS6(
 #ifndef DONT_TRACK_INTERNAL_LINKS
 			if (a->link_type == INTERNAL_LINK_ANCHOR) {
 			    link_dest_intl = HTAnchor_followTypedLink(
-				(HTAnchor *)a->anchor, HTInternalLink);
+				a->anchor, HTInternalLink);
 			    if (link_dest_intl && link_dest_intl != link_dest) {
 
 				CTRACE((tfp, "HTGetLinkInfo: unexpected typed link to %s!\n",
@@ -7565,7 +7564,12 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 
     line = FirstHTLine(HTMainText);
     for (;; line = line->next) {
-	if (!first && line->data[0] != LY_SOFT_NEWLINE) {
+	if (first) {
+	    first = FALSE;
+	    if (is_reply) {
+		fputc('>',fp);
+	    }
+	} else if (line->data[0] != LY_SOFT_NEWLINE) {
 	    fputc('\n',fp);
 	    /*
 	     *  Add news-style quotation if requested. -FM
@@ -7575,7 +7579,6 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 	    }
 	}
 
-	first = FALSE;
 	write_offset(fp, line);
 
 	/*
@@ -8764,7 +8767,7 @@ PRIVATE void HText_AddHiddenLink ARGS2(
      *  so that first in will be first out on
      *  retrievals. -FM
      */
-    if ((dest = HTAnchor_followMainLink((HTAnchor *)textanchor->anchor)) &&
+    if ((dest = HTAnchor_followLink(textanchor->anchor)) &&
 	(text->hiddenlinkflag != HIDDENLINKS_IGNORE ||
 	 HTList_isEmpty(text->hidden_links)))
 	HTList_appendObject(text->hidden_links, HTAnchor_address(dest));

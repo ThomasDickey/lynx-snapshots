@@ -4257,10 +4257,12 @@ PRIVATE void handle_LYK_SHELL ARGS3(
 	stop_curses();
 	printf("%s\r\n", SPAWNING_MSG);
 #if defined(__CYGWIN__)
-	Cygwin_Shell();
-#else
-	LYSystem(LYSysShell());
+	/* handling "exec $SHELL" does not work if $SHELL is null */
+	if (LYGetEnv("SHELL") == NULL) {
+	    Cygwin_Shell();
+	} else
 #endif
+	LYSystem(LYSysShell());
 	start_curses();
 	*refresh_screen = TRUE;	/* for an HText_pageDisplay() */
     } else {
