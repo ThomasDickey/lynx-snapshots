@@ -1,6 +1,50 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-03-31 (2.8.3pre.1)
+* remove annoying trailing period from two statusline messages ending with host
+  name ("Looking up host.foo:81." and "Making HTTP connection to foo.bar.") -LP
+* lynx.cfg: use two lines to separate options description in this
+  configuration file (it looks more readable, for such a huge text) -LP
+* lynx.cfg:  make a few corrections to reorganize .h1 sections to improve
+  htmlized cattoc.html logic.  More corrections welcome -LP
+* fix some compiler warnings for DECC dealing with time_t being unsigned in
+  that environment (reported by Jerome Lauret) -TD
+* suppress Multinet prototypes in socket.h, to work around some places where
+  Multinet declares parameters a void* while DECC uses char * (patch by Jerome
+  Lauret <JLAURET@mail.chem.sunysb.edu>).
+* undo side-effect of config_enum() function in LYReadCFG.c from cleanup in
+  dev.22 which made default_user_mode and source_cache values not set properly
+  (reported by Alexei Anatski <alexei.anatski@srm.ru>) -TD
+* correct ifdef's in LYStrings.c for NCURSES_MOUSE_VERSION versus PDCURSES
+  adding new PDCURSES_MOUSE_VERSION to cover special case of DJGPP (reported by
+  LP, DK) -TD
+* add PRETTYSRC to lynx.cfg, supplementing -prettysrc commandline option -TD
+* add call to LYStoreCookies() from HTFWriter.c to save cookies when -source is
+  used (patch by KW)
+* remove const from LYGetHostByName() parameter -TD
+* modify makefile.in to ensure links within htmlized lynx.cfg are updated
+  if gzip-help is configured (reported by Ari Moisio) -TD
+* remove -DEXP_CHARTRANS from makefile.msc, makefile.bcb (reported by LP) -TD
+* trim trailing path-separator from lynx_temp_space before removing that
+  directory, on exit -TD
+* ifdef'd IsOurFile() to perform only an ownership check on single-user DOS
+  and OS/2 systems, so user can overwrite files -TD
+* simplified some initialization in LYMain.c with tildeExpand() -TD
+* change prototypes of HTSetPresentation(), HTSetSuffix5() to use double rather
+  than float, since this is the default promotion, working better with some
+  compilers -TD
+* add comments to makefile.msc to show how to build color-style version -TD
+* add fallback definition for getattrs(), move fallback definitions for
+  getbegy() and getbegx() in LYCurses.h to allow building color-style version
+  with PDCurses -TD
+* correct a call on lib$find_file() in HTVMSUtils.c which broke by not
+  supplying it with a fixed-size buffer, from dev.23 changes -TD
+* correct an out-of-range indexing error in LYstatusline_messages_on_exit(),
+  and add a check in to_stack() for a similar problem -TD
+* add definitions and description of USE_TH_JP_AUTO_DETECT,
+  CONV_JISX0201KANA_JISX0208KANA, and KANJI_CODE_OVERRIDE to userdefs.h, along
+  with a new file README.jp -TH
 2000-03-26 (2.8.3dev.23)
 * make -nounderline option apply to overloading of colors 4 & 5 with
   underlines, in slang configuration -TD
@@ -8,13 +52,13 @@ Changes since Lynx 2.8 release
   we cannot easily determine if someone could alter our temp-files.  If so,
   make a subdirectory of that, with appropriate permissions -TD
 * disable setuid on initialization -TD
-* add a definition USE_MKSTEMP in userdefs.h which supercedes EXP_RAND_TEMPNAME
+* add a definition USE_MKSTEMP in userdefs.h which supersedes EXP_RAND_TEMPNAME
   for sys-admins who believe in mkstemp() -TD
 * change logic for EXP_RAND_TEMPNAME to avoid allowing fmt_tempname() to return
   the same name during a session.  Define EXP_NAME_TEMPNAME in userdefs.h -TD
 * add Last-Modified header into the printed/downloaded source, in addition to
   the Date header (it is there for years).  (Last-Modified field will not be
-  printed if it is vanished from Date or equal to 1 Jan 1970 (i.e., ctime(0)),
+  printed if it is not present, or equal to 1 Jan 1970 (i.e., ctime(0)),
   a common mistake in scripts) -LP
 * defined DIRED_SUPPORT in makefile.msc -TD
 * several small fixes in LYLocal.c for dired support, mostly win32-specific -TD
@@ -69,7 +113,7 @@ Changes since Lynx 2.8 release
 * add configure option --enable-htmlized-cfg to install the htmlized lynx.cfg
   in the help directory (request by LP) -TD
 * suppress sleep's in crawl or traversal mode (request by LV) -TD
-* cleanup LYrcFile.c a little, using new functions putBool, getBool, putEnum
+* cleanup LYReadCFG.c, LYrcFile.c a little, using new functions putBool, getBool, putEnum
   and getEnum -TD
 * change default mode for visited-links-page to match original behavior, add
   visited_links to .lynxrc file (requests by KD, LP) -TD

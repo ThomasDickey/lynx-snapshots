@@ -462,11 +462,11 @@ again:
 	    ch = 7;
 	}
 #endif /* VMS */
-#  if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES)
+#  if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES_MOUSE_VERSION)
 	if (ch != -1 && (ch & LKC_ISLAC) && !(ch & LKC_ISLECLAC)) /* already lynxactioncode? */
 	    break;	/* @@@ maybe move these 2 lines outside ifdef -kw */
 	if (ch == MOUSE_KEY) {		/* Need to process ourselves */
-#if defined(PDCURSES)
+#if defined(PDCURSES_MOUSE_VERSION)
 	    int curx, cury;
 
 	    request_mouse_pos();
@@ -493,7 +493,7 @@ again:
 		} else
 		    ch = RTARROW;
 	    }
-#endif /* PDCURSES */
+#endif /* PDCURSES_MOUSE_VERSION */
 	    else {
 		/*  Mouse event passed to us as MOUSE_KEY, and apparently
 		 *  not on this field's line?  Something is not as it
@@ -506,7 +506,7 @@ again:
 	    }
 	    last_xlkc = -1;
 	} else
-#  endif	/* defined NCURSES_MOUSE_VERSION || PDCURSES */
+#  endif	/* defined NCURSES_MOUSE_VERSION || PDCURSES_MOUSE_VERSION */
 	{
 	    if (!(ch & LKC_ISLECLAC))
 		ch |= MyEdit.current_modifiers;

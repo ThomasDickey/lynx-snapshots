@@ -756,20 +756,6 @@ V. Compile instructions -- 386 DOS
     you wish to use PDCurses 2.4, you need to first apply the following
     patch:
 
-    --- curses.h.ori	Mon Jan 17 13:35:36 2000
-    +++ curses.h	Fri Mar  3 00:18:30 2000
-    @@ -1949,9 +1949,11 @@
-     #define echochar(c)             (addch((chtype)c)==ERR?ERR:refresh())
-     #define erase()                 werase( stdscr )
-     #define fixterm()               reset_prog_mode()
-    +#define getattrs(w)             (w)->_attrs
-     #define getbegx(w)              (w)->_begx
-     #define getbegy(w)              (w)->_begy
-     #define getbegyx(w,y,x)         ( y = (w)->_begy, x = (w)->_begx )
-    +#define getbkgd(w)              (w)->_bkgd
-     #define getch()                 wgetch(stdscr)
-     #define getmaxx(w)              (w)->_maxx
-     #define getmaxy(w)              (w)->_maxy
     --- dos/pdckbd.c.ori	Sun Dec 26 23:15:04 1999
     +++ dos/pdckbd.c	Fri Mar  3 00:20:14 2000
     @@ -336,7 +336,7 @@

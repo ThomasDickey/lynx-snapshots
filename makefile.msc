@@ -11,13 +11,18 @@ WWW_DIR = WWW\Library\Implementation
 # pdcurses.lib panel.lib dirent.obj curses.h panel.h dirent.h
 ETC_LIB = lib
 
+# Uncomment the CS_DEFS and CS_OBJS lines if you wish to build the color-style
+# configuration.
+#CS_DEFS = /D "CHAR_BIT=8" /D "USE_HASH" /D "USE_COLOR_STYLE" /D "LINKEDSTYLES"
+#CS_OBJS = "LYHash.obj" "LYStyle.obj"
+
 INCLUDES = \
  /I "." \
  /I "$(SRC_DIR)" \
  /I "$(SRC_DIR)\chrtrans" \
  /I "$(WWW_DIR)" \
  /I "$(ETC_LIB)"
-DEFS = \
+DEFS = $(CS_DEFS) \
  /D "__WIN32__" \
  /D "_CONSOLE" \
  /D "_MBCS" \
@@ -69,7 +74,7 @@ LIBS     = kernel32.lib user32.lib wsock32.lib /NODEFAULTLIB:libc\
 COMPILE = $(CC) $(CFLAGS) $(INCLUDES) $(DEFS)
 LINK    = $(LD) $(LDFLAGS) /out:$@
 
-OBJS = \
+OBJS = $(CS_OBJS) \
 	"DefaultStyle.obj" \
 	"GridText.obj" \
 	"HTAABrow.obj" \

@@ -90,9 +90,9 @@ PRIVATE void HTFreePresentations NOPARAMS;
 PUBLIC void HTSetPresentation ARGS6(
 	CONST char *,	representation,
 	CONST char *,	command,
-	float,		quality,
-	float,		secs,
-	float,		secs_per_byte,
+	double,		quality,
+	double,		secs,
+	double,		secs_per_byte,
 	long int,	maxbytes)
 {
     HTPresentation * pres = (HTPresentation *)malloc(sizeof(HTPresentation));
@@ -102,9 +102,9 @@ PUBLIC void HTSetPresentation ARGS6(
     pres->rep = HTAtom_for(representation);
     pres->rep_out = WWW_PRESENT;		/* Fixed for now ... :-) */
     pres->converter = HTSaveAndExecute;		/* Fixed for now ...	 */
-    pres->quality = quality;
-    pres->secs = secs;
-    pres->secs_per_byte = secs_per_byte;
+    pres->quality = (float) quality;
+    pres->secs = (float) secs;
+    pres->secs_per_byte = (float) secs_per_byte;
     pres->maxbytes = maxbytes;
     pres->command = NULL;
     StrAllocCopy(pres->command, command);

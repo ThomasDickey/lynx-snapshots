@@ -944,7 +944,7 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
     SLtt_flush_output ();
 #else
 
-#if defined(WIN_EX) && defined(PDCURSES)
+#if defined(WIN_EX) && defined(PDCURSES_MOUSE_VERSION)
     if (state)
     {
 	SetConsoleMode(hConIn, ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT);
@@ -984,9 +984,9 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
     } else
 	mousemask(0, NULL);
 #endif /* NCURSES_MOUSE_VERSION */
-#endif /* WIN_EX and PDCURSES */
+#endif /* WIN_EX and PDCURSES_MOUSE_VERSION */
 
-#if defined(PDCURSES)
+#if defined(PDCURSES_MOUSE_VERSION)
     if (state)
 	mouse_set(
 	    	BUTTON1_CLICKED | BUTTON1_PRESSED | BUTTON1_RELEASED |

@@ -6098,7 +6098,7 @@ PUBLIC time_t LYmktime ARGS2(
 		     (hour * 60 * 60) +
 		     (minutes * 60) +
 		     seconds);
-    if (absolute == FALSE && clock2 <= time(NULL))
+    if (absolute == FALSE && (long)(time((time_t *)0) - clock2) >= 0)
 	clock2 = (time_t)0;
     if (clock2 > 0)
 	CTRACE((tfp, "LYmktime: clock=%ld, ctime=%s",
@@ -6220,7 +6220,11 @@ PRIVATE BOOL IsOurFile ARGS1(char *, name)
     && data.st_nlink == 1
     && data.st_uid == getuid()) {
 	int linked = FALSE;
-#if HAVE_LSTAT
+	/*
+	 * ( If this is not a single-user system, the other user is presumed by
+	 * some people busy trying to use a symlink attack on our files ;-)
+	 */
+#if defined(HAVE_LSTAT) && !(defined(DOSPATH) || defined(__EMX__))
 	char *path = 0;
 	char *leaf;
 
@@ -6778,8 +6782,13 @@ PUBLIC void LYCleanupTemp NOARGS
 	LYRemoveTemp(ly_temp->name);
     }
 #ifdef UNIX
-    if (lynx_temp_subspace)
-	rmdir(lynx_temp_space);
+    if (lynx_temp_subspace) {
+	char result[LY_MAXPATH];
+	LYstrncpy(result, lynx_temp_space, sizeof(result)-1);
+	LYTrimPathSep(result);
+	CTRACE((tfp, "LYCleanupTemp removing %s\n", result));
+	rmdir(result);
+    }
 #endif
 }
 

@@ -37,6 +37,10 @@ extern int exec_command(char * cmd, int wait_flag); /* xsystem.c */
 #include <LYLeaks.h>
 #include <LYKeymap.h>
 
+#ifdef EXP_PERSISTENT_COOKIES 
+#include <LYCookie.h>
+#endif
+
 PUBLIC char * WWW_Download_File=NULL; /* contains the name of the temp file
 				      ** which is being downloaded into
 				      */
@@ -421,6 +425,14 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	if (me->anchor->FileCache)
 	    remove(me->anchor->FileCache);
 	FREE(me);
+#ifdef EXP_PERSISTENT_COOKIES 
+	/* 
+	 *  We want to save cookies picked up when in source 
+	 *  mode.  ... 
+	 */ 
+	if (persistent_cookies) 
+	    LYStoreCookies(LYCookieSaveFile); 
+#endif /* EXP_PERSISTENT_COOKIES */ 
 	exit_immediately(0);
     }
 

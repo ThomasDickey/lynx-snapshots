@@ -343,7 +343,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(
     mc->printcommand = NULL;
     mc->contenttype = NULL;
     StrAllocCopy(mc->contenttype, rawentry);
-    mc->quality = 1.0;
+    mc->quality = (float) 1.0;
     mc->maxbytes = 0;
     t = GetCommand(s, &mc->command);
     if (!t) {

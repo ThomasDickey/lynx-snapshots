@@ -1,4 +1,4 @@
-/* @Id: Xsystem.c 1.6 Sun, 26 Mar 2000 19:14:00 -0800 dickey @
+/* @Id: Xsystem.c 1.7 Fri, 31 Mar 2000 16:33:40 -0800 dickey @
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -34,6 +34,8 @@
 #include <dos.h>
 #endif
 
+#include <LYStrings.h>
+
 #ifndef USECMDLINE
 #define USECMDLINE	0
 #endif
@@ -57,10 +59,12 @@ extern char *mktemp(char *);
 #define issep2(c) (issep(c) || (c) == '.' || (c) == '\\' || (c) == '/')
 #define isdeg(c) ('0' <= (c) && (c) <= '9')
 
+#ifndef NEAR
 #if 0	/* MS-C */
 #define NEAR	_near
 #else
 #define NEAR
+#endif
 #endif
 
 typedef struct _proc {

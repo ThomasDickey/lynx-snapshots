@@ -105,13 +105,6 @@
 #define USE_KEYMAPS		1
 #endif
 
-#ifndef getbegx
-#define getbegx(win) ((win)->_begx)
-#endif
-#ifndef getbegy
-#define getbegy(win) ((win)->_begy)
-#endif
-
 #else
 # if defined(VMS) && defined(__GNUC__)
 #  include <LYGCurses.h>
@@ -128,6 +121,13 @@
 extern void LYsubwindow PARAMS((WINDOW * param));
 #endif /* NCURSES */
 
+/*
+ * PDCurses' mouse code does nothing in the DJGPP configuration.
+ */
+#if defined(PDCURSES) && !defined(__DJGPP__)
+#define PDCURSES_MOUSE_VERSION 1
+#endif
+
 #ifdef VMS
 extern void VMSbox PARAMS((WINDOW *win, int height, int width));
 #else
@@ -135,6 +135,21 @@ extern void LYbox PARAMS((WINDOW *win, BOOLEAN formfield));
 #endif /* VMS */
 #endif /* USE_SLANG */
 
+/*
+ * Useful macros not in PDCurses or very old ncurses headers.
+ */
+#ifndef getattrs
+#define getattrs(win) ((win)->_attrs)
+#endif
+#ifndef getbegx
+#define getbegx(win) ((win)->_begx)
+#endif
+#ifndef getbegy
+#define getbegy(win) ((win)->_begy)
+#endif
+#ifndef getbkgd
+#define getbkgd(win) ((win)->_bkgd)
+#endif
 
 /* Both slang and curses: */
 #ifndef TRUE

@@ -517,16 +517,19 @@ typedef struct
 }
 Config_Enum;
 
-static int config_enum ARGS2(
+static BOOLEAN config_enum ARGS3(
     Config_Enum *,	table,
-    CONST char *,	name)
+    CONST char *,	name,
+    int *,		result)
 {
     while (table->name != 0) {
-	if (!strcasecomp(table->name, name))
+	if (!strncasecomp(table->name, name, strlen(table->name))) {
+	    *result = table->value;
 	    break;
+	}
 	table++;
     }
-    return table->value;
+    return (table->name != 0);
 }
 
 static int assume_charset_fun ARGS1(
@@ -682,10 +685,9 @@ static int default_user_mode_fun ARGS1(
     	{ "NOVICE",	NOVICE_MODE },
 	{ "INTER",	INTERMEDIATE_MODE },
 	{ "ADVANCE",	ADVANCED_MODE },
-	{ NULL,		NOVICE_MODE }
+	{ NULL,		-1 }
     };
-    user_mode = config_enum(table, value);
-
+    config_enum(table, value, &user_mode);
     return 0;
 }
 
@@ -949,10 +951,9 @@ static int source_cache_fun ARGS1(
 	{ "FILE",	SOURCE_CACHE_FILE },
 	{ "MEM",	SOURCE_CACHE_MEMORY },
 	{ "NONE",	SOURCE_CACHE_NONE },
-	{ NULL,		SOURCE_CACHE_NONE },
+	{ NULL,		-1 },
     };
-    LYCacheSource = config_enum(table, value);
-
+    config_enum(table, value, &LYCacheSource);
     return 0;
 }
 #endif
@@ -962,7 +963,7 @@ static int suffix_fun ARGS1(
 {
     char *mime_type, *p;
     char *encoding = NULL, *sq = NULL, *description = NULL;
-    float q = 1.0;
+    double q = 1.0;
 
     if ((strlen (value) < 3)
     || (NULL == (mime_type = strchr (value, ':')))) {
@@ -1027,7 +1028,7 @@ static int suffix_fun ARGS1(
 		   sq, value));
 	    q = -1.0;
 	} else {
-	    q = (float) df;
+	    q = df;
 	}
     }
     HTSetSuffix5(value, mime_type, encoding, description, q);
@@ -1287,7 +1288,7 @@ PRIVATE int psrcspec_fun ARGS1(char*,s)
 	return 0;
     }
     *e = '\0';
-    if ((found = config_enum(lexemnames, s)) < 0) {
+    if (!config_enum(lexemnames, s, &found)) {
 	CTRACE((tfp,"bad format of PRETTYSRC_SPEC setting value, ignored %s:%s\n",s,e+1));
 	return 0;
     }
@@ -1326,7 +1327,7 @@ static int read_htmlsrc_tagname_xform ARGS1( char*,str)
 }
 #endif
 
-/* This table should be sorted alphabetically */
+/* This table should be sorted alphabetically, ignoring case */
 static Config_Type Config_Table [] =
 {
      PARSE_SET("accept_all_cookies", CONF_BOOL, &LYAcceptAllCookies),
@@ -1503,7 +1504,8 @@ static Config_Type Config_Table [] =
      PARSE_SET("prepend_base_to_source", CONF_BOOL, &LYPrependBaseToSource),
      PARSE_SET("prepend_charset_to_source", CONF_BOOL, &LYPrependCharsetToSource),
 #ifdef USE_PRETTYSRC
-     PARSE_FUN("prettysrc_spec" ,CONF_FUN, psrcspec_fun),
+     PARSE_SET("prettysrc", CONF_BOOL, &LYpsrc),
+     PARSE_FUN("prettysrc_spec", CONF_FUN, psrcspec_fun),
      PARSE_SET("prettysrc_view_no_anchor_numbering", CONF_BOOL, &psrcview_no_anchor_numbering),
 #endif
      PARSE_FUN("printer", CONF_FUN, printer_fun),
@@ -1561,7 +1563,7 @@ static Config_Type Config_Table [] =
 #ifdef VMS
      PARSE_SET("use_fixed_records", CONF_BOOL, &UseFixedRecords),
 #endif
-#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES) || defined(USE_SLANG_MOUSE)
+#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES_MOUSE_VERSION) || defined(USE_SLANG_MOUSE)
      PARSE_SET("use_mouse", CONF_BOOL, &LYUseMouse),
 #endif
      PARSE_SET("use_select_popups", CONF_BOOL, &LYSelectPopups),

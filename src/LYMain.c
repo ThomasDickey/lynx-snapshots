@@ -773,6 +773,29 @@ PRIVATE int argncmp ARGS2(
 #endif
 }
 
+PRIVATE void tildeExpand ARGS2(
+	char **,	pathname,
+	BOOLEAN,	embedded)
+{
+    char *temp = embedded
+		? (*pathname != 0
+		    ? strchr(*pathname, '~')
+		    : 0)
+		: *pathname;
+
+    if (temp != NULL
+     && temp[0] == '~'
+     && temp[1] == '/'
+     && temp[2] != '\0') {
+	temp = NULL;
+	StrAllocCopy(temp, *pathname + 2);
+	StrAllocCopy(*pathname, wwwName(Home_Dir()));
+	LYAddPathSep(pathname);
+	StrAllocCat(*pathname, temp);
+	FREE(temp);
+    }
+}
+
 /*
  * Wow!  Someone wants to start up Lynx.
  */
@@ -1007,19 +1030,11 @@ PUBLIC int main ARGS2(
     }
 #endif
 
-    if ((cp = strchr(lynx_temp_space, '~')) != 0
 #ifdef WIN_EX	/* for Windows 2000 ... 1999/08/23 (Mon) 08:24:35 */
-	 && (access(lynx_temp_space, 0) != 0)
+    if (access(lynx_temp_space, 0) != 0)
 #endif
-      ) {
-	*(cp++) = '\0';
-	StrAllocCopy(temp, lynx_temp_space);
-	LYTrimPathSep(temp);
-	StrAllocCat(temp, wwwName(Home_Dir()));
-	StrAllocCat(temp, cp);
-	StrAllocCopy(lynx_temp_space, temp);
-	FREE(temp);
-    }
+	tildeExpand(&lynx_temp_space, TRUE);
+
     if ((cp = strstr(lynx_temp_space, "$USER")) != NULL) {
 	char *cp1;
 
@@ -1408,22 +1423,8 @@ PUBLIC int main ARGS2(
     if (!lynx_cfg_file)
 	StrAllocCopy(lynx_cfg_file, LYNX_CFG_FILE);
 
-    /*
-     *	Convert a '~' in the configuration file path to $HOME.
-     */
 #ifndef _WINDOWS /* avoid the whole ~ thing for now */
-   /* I think this should only be performed if lynx_cfg_file starts with ~/ */
-   if ((lynx_cfg_file[0] == '~') && LYIsPathSep(lynx_cfg_file[1]))
-     {
-#ifdef VMS
-	StrAllocCopy(temp, HTVMS_wwwName(Home_Dir()));
-#else
-	StrAllocCopy(temp, Home_Dir());
-#endif /* VMS */
-	StrAllocCat(temp, lynx_cfg_file + 1);
-	StrAllocCopy(lynx_cfg_file, temp);
-	FREE(temp);
-     }
+    tildeExpand(&lynx_cfg_file, FALSE);
 #endif
 
     /*
@@ -1493,22 +1494,8 @@ PUBLIC int main ARGS2(
     if (!lynx_lss_file)
 	StrAllocCopy(lynx_lss_file, LYNX_LSS_FILE);
 
-    /*
-     *	Convert a '~' in the lynx-style file path to $HOME.
-     */
-    if ((cp = strchr(lynx_lss_file, '~'))) {
-	*(cp++) = '\0';
-	StrAllocCopy(temp, lynx_lss_file);
-	LYTrimPathSep(temp);
-#ifdef VMS
-	StrAllocCat(temp, HTVMS_wwwName(Home_Dir()));
-#else
-	StrAllocCat(temp, Home_Dir());
-#endif /* VMS */
-	StrAllocCat(temp, cp);
-	StrAllocCopy(lynx_lss_file, temp);
-	FREE(temp);
-    }
+    tildeExpand(&lynx_lss_file, TRUE);
+
     /*
      *	If the lynx-style file is not available,
      *	inform the user and exit.
@@ -1632,32 +1619,16 @@ PUBLIC int main ARGS2(
      */
     if (persistent_cookies) {
 	if(LYCookieFile == NULL) {
-	   LYAddPathToHome(LYCookieFile = malloc(LY_MAXPATH), LY_MAXPATH, COOKIE_FILE);
+	    LYAddPathToHome(LYCookieFile = malloc(LY_MAXPATH), LY_MAXPATH, COOKIE_FILE);
 	} else {
-	    if (LYCookieFile[0] == '~' && LYCookieFile[1] == '/' &&
-		LYCookieFile[2] != '\0') {
-		temp = NULL;
-		StrAllocCopy(temp, LYCookieFile + 2);
-		StrAllocCopy(LYCookieFile, wwwName(Home_Dir()));
-		LYAddPathSep(&LYCookieFile);
-		StrAllocCat(LYCookieFile, temp);
-		FREE(temp);
-	    }
+	    tildeExpand(&LYCookieFile, FALSE);
 	}
 	LYLoadCookies(LYCookieFile);
     }
 
     /* tilde-expand LYCookieSaveFile */
     if (LYCookieSaveFile != NULL) {
-	if (LYCookieSaveFile[0] == '~' && LYCookieSaveFile[1] == '/' &&
-	  LYCookieSaveFile[2] != '\0') {
-	    temp = NULL;
-	    StrAllocCopy(temp, LYCookieSaveFile + 2);
-	    StrAllocCopy(LYCookieSaveFile, wwwName(Home_Dir()));
-	    LYAddPathSep(&LYCookieSaveFile);
-	    StrAllocCat(LYCookieSaveFile, temp);
-	    FREE(temp);
-	}
+	tildeExpand(&LYCookieSaveFile, FALSE);
     }
 
     /*
@@ -1697,15 +1668,7 @@ PUBLIC int main ARGS2(
 	FREE(lynx_save_space);
     }
     if (lynx_save_space) {
-	if ((cp = strchr(lynx_save_space, '~')) != NULL) {
-	    *(cp++) = '\0';
-	    StrAllocCopy(temp, lynx_save_space);
-	    LYTrimPathSep(temp);
-	    StrAllocCat(temp, wwwName(Home_Dir()));
-	    StrAllocCat(temp, cp);
-	    StrAllocCopy(lynx_save_space, temp);
-	    FREE(temp);
-	}
+	tildeExpand(&lynx_save_space, TRUE);
 #ifdef VMS
 	LYLowerCase(lynx_save_space);
 	if (strchr(lynx_save_space, '/') != NULL) {
@@ -3654,7 +3617,7 @@ treated '>' as a co-terminator for double-quotes and tags"
       "underscore",	TOGGLE_ARG,		&use_underscore,
       "toggles use of _underline_ format in dumps"
    ),
-#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES) || defined(USE_SLANG_MOUSE)
+#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES_MOUSE_VERSION) || defined(USE_SLANG_MOUSE)
    PARSE_SET(
       "use_mouse",	SET_ARG,		&LYUseMouse,
       "turn on mouse support"
