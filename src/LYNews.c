@@ -51,6 +51,7 @@ PUBLIC int LYNewsPost ARGS2(document *,newdoc, BOOLEAN,followup)
 	WWWDoc.post_content_type = newdoc->post_content_type;
 	WWWDoc.bookmark = newdoc->bookmark;
 	WWWDoc.isHEAD = newdoc->isHEAD;
+	WWWDoc.safe = newdoc->safe;
         if(!HTLoadAbsolute(&WWWDoc)) {
 	    FREE(newsgroups);
             return(NOT_FOUND);

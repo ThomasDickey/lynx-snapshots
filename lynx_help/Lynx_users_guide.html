@@ -1,12 +1,12 @@
 <!DOCTYPE html public "-//IETF//DTD HTML 3.0//EN">
 <html>
 <head>
-<title>Lynx Users Guide v2.6</title>
+<title>Lynx Users Guide v2.6FM</title>
 <link rev="made" href="mailto:lynx-dev@sig.net">
 </head>
 
 <body>
-<h1>Lynx Users Guide Version 2.6</h1>
+<h1>Lynx Users Guide v2.6FM</h1>
 
 Lynx is a fully-featured <em>World Wide Web</em> (<em>WWW</em>) client
 for users running cursor-addressable, character-cell display devices (e.g.,
@@ -18,7 +18,7 @@ well as files on remote systems running <em>http</em>, <em>gopher</em>,
 <em>cso</em>/<em>ph</em>/<em>qi</em> servers, and services accessible via
 logins to <em>telnet</em>, <em>tn3270</em> or <em>rlogin</em> accounts (see
 <a href="lynx_url_support.html">URL Schemes Supported by Lynx</a>).
-<a href="#31">Current</a> versions of Lynx run on Unix and VMS.
+<a href="#32">Current</a> versions of Lynx run on Unix and VMS.
 
 <p>Lynx can be used to access information on the <em>WWW</em>, or to build
 information systems intended primarily for local access.  For example, Lynx
@@ -58,8 +58,9 @@ within a single LAN.
 <li><a href="#27">Lynx and HTML Quotes</a>
 <li><a href="#28">Lynx and Client-Side-Image-Maps</a>
 <li><a href="#29">Lynx and Client-Side-Pull</a>
-<li><A HREF="#30">The Lynx command line</A>
-<li><A HREF="#31">Lynx development history</A>
+<li><a href="#30">Lynx and State Management</a> (Me want <em>cookie</em>!)
+<li><A HREF="#31">The Lynx command line</A>
+<li><A HREF="#32">Lynx development history</A>
 </ul>
 
 <h2><A NAME="1"><em>Lynx online help</em></A></h2>
@@ -261,23 +262,28 @@ Control and Function keys used for navigation within the current document
 are described in <A
 HREF="#18"><em>Scrolling and Other useful commands</em></A>.  Some
 additional commands depend on the fact that Lynx keeps a list of each
-file you visit called the <a href="keystroke_commands/history_help.html"
->History Page</a>.  The <em>Backspace</em>
-or <em>Delete</em> key will show you the <em>History Page</em> of links
-preceding your access to the current document.  Any of the previous
-documents shown in the list may be revisited by selecting them from the
-history screen.  The '<em>m</em>' key command will take you back to the
-starting document unless you specified the <em>-homepage=URL</em> 
-option at the command line.  Also, the LIST keystroke command, normally
-mapped to '<em>l</em>' and <em>L</em>', will create a compact list of
-all the links in the current document, and they can be activated via
-that list. 
+link you visited to reach the current document, called the <a
+href="keystroke_commands/history_help.html">History Page</a>, and a
+list of all links visited during the current Lynx session, called the <a
+href="keystroke_commands/visited_help.html">Visited Links Page</a>.  The
+HISTORY keystroke command, normally mapped to <em>Backspace</em> or
+<em>Delete</em>, will show you the <em>History Page</em> of links leading to
+your access of the current document.  Any of the previous documents shown in
+the list may be revisited by selecting them from the history screen.  The
+VLINKS keystroke command, normally mapped to uppercase '<em>V</em>', will
+show the <em>Visited Links Page</em>, and you similarly can select links in
+that list.  The MAIN_MENU keystroke command, normally mapped to '<em>m</em>'
+and '<em>M</em>', will take you back to the starting document unless you
+specified the <em>-homepage=URL</em> option at the command line.  Also, the
+LIST keystroke command, normally mapped to '<em>l</em>' and <em>L</em>',
+will create a compact list of all the links in the current document, and
+they can be selected via that list. 
 
 <p>The '<em>i</em>' key presents an index of documents.  The default index
 is usually a document pointing to servers around the world, but the index
-can be  changed by the system administrator or on the command line using
-the <em>-index</em> switch, and therefore depends on how the Lynx program
-you are using was configured.
+can be changed by the system administrator or on the command line using
+the <em>-index=URL</em> switch, and therefore depends on how the Lynx
+program you are using was configured.
 
 <p>If you choose a link to a server with active access authorization, Lynx
 will automatically prompt for a username and a password. If you give the
@@ -449,7 +455,7 @@ options.
 
      E)ditor                      : emacs
      D)ISPLAY variable            : aixtest.cc.ukans.edu:0.0
-     B)ookmark file               : home_page
+     mu(L)ti-bookmarks: OFF       B)ookmark file: lynx_bookmarks.html
      F)TP sort criteria           : By Filename
      P)ersonal mail address       : montulli@ukanaix.cc.ukans.edu
      S)earching type              : CASE INSENSITIVE
@@ -457,14 +463,14 @@ options.
      raw 8-bit or CJK m(O)de      : ON
      preferred document lan(G)uage: en
      preferred document c(H)arset : NONE
-     V)I keys                     : OFF
-     e(M)acs keys                 : OFF
+     V)I keys: OFF    e(M)acs keys: OFF     sho(W) dot files: OFF
+     popups for selec(T) fields   : ON
      K)eypad mode                 : Numbers act as arrows
+     li(N)e edit style            : Default Binding
      l(I)st directory style	  : Mixed style
-     sho(W) dot files             : OFF
      U)ser mode                   : Advanced
      user (A)gent                 : [User-Agent header]
-     L)ocal execution links       : Always off
+     local e(X)ecution links	  : FOR LOCAL FILES ONLY
 </pre>
 
 An option can be changed by entering the capital letter of the option
@@ -497,13 +503,44 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    (Unix) or DECW$DISPLAY (VMS) variable is picked up automatically
 	    from the environment if it has been previously set.
 
+   <dt>Multi-bookmarks
+   	<dd>Lynx supports a default bookmark file, and up to 26 total
+	    bookmark files (see below).  When multi-bookmarks is OFF,
+	    the default bookmark file is used for the '<em>v</em>'iew
+	    bookmarks and '<em>a</em>'dd bookmark link commands.  If
+	    multi-bookmark support is available in your account, the
+	    setting can be changed to STANDARD or ADVANCED.  In STANDARD
+	    mode, a menu of available bookmarks always is invoked when
+	    you seek to view a bookmark file or add a link, and you select
+	    the bookmark file by its letter token (see
+	    <em>Bookmark file</em>, below) in that menu.  In ADVANCED mode,
+	    you instead are prompted for the letter of the desired bookmark
+	    file, but can enter '<em>=</em>' to invoke the STANDARD selection
+	    menu, or <em>RETURN</em> for the default bookmark file.
+
    <dt>Bookmark file
-	<dd>This is the filename and location of your personal bookmark
-	    file.  The bookmark file allows frequently traveled links to
-	    be stored in a personal easy to access file.  Using the
-	    '<em>a</em>' command (see below) you may save any link into
-	    your bookmark file.  If the path specified does not begin with
-	    a slash then the path will reference your home directory.
+	<dd>When multi-bookmarks is OFF, this is the filename and location
+	    of your default personal bookmark file.  Enter '<em>B</em>' to
+	    modify the filename and/or location via the <a
+	    href="keystroke_commands/edit_help.html">Line Editor</a>.
+	    Bookmark files allow frequently traveled links to be stored in
+	    personal easy to access files.  Using the '<em>a</em>'dd bookmark
+	    link command (see <a href="#15">Lynx bookmarks</a>) you may save
+	    any link that does not have associated POST content into a
+	    bookmark file.  All bookmark files must be in or under your
+	    account's home directory.  If the location specified does not
+	    begin with a dot-slash (./), its presence will still be assumed,
+	    and referenced to the home directory.  When multi-bookmarks is
+	    STANDARD or ADVANCED, entering '<em>B</em>' will invoke a menu
+	    of up to 26 bookmark files (associated with the letters of the
+	    English alphabet), for editing their filenames and locations
+	    (<em>filepath</em>), and descriptions.  Lynx will create bookmark
+	    files, if they don't already exist, when you first '<em>a</em>'dd
+	    a bookmark link to them.  However, if you've specifed a
+	    subdirectory (e.g., ./BM/lynx_bookmarks.html), that subdirectory
+	    must already exist.  Note that on VMS you should use the URL
+	    syntax for the filepath (e.g., <em>not</em>
+	    [.BM]lynx_bookmarks.html).
 
    <dt>FTP sort criteria
 	<dd>This option allows you to specify how files will be sorted
@@ -575,10 +612,29 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    their configured bindings (normally UP_TWO lines, DOWN_TWO
 	    lines, NEXT_PAGE, and PREV_PAGE, respectively).
 	
+   <dt>Show dot files
+	<dd>If display/creation of hidden (dot) files/directories is
+	    enabled, you can turn the feature on or off via this setting.
+
+   <dt>Popups for select fields
+	<dd>Lynx normally uses a popup window for the OPTIONs in form
+	SELECT fields when the field does not have the MULTIPLE attribute
+	specified, and thus only one OPTION can be selected.  The use of
+	popup windows can be disabled by changing this setting to OFF, in
+	which case the OPTIONs will be rendered as a list of radio buttons.
+	Note that if the SELECT field does have the MULTIPLE attribute
+	specified, the OPTIONs always are rendered as a list of checkboxes. 
+
    <dt>Keypad as arrows or numbered links
 	<dd>This option gives the choice between navigating with the arrow
 	    keys or having every link numbered so that the links may be
 	    selected by numbers as well as using the arrow keys.
+
+   <dt>Line edit style
+   	<dd>This option allows you to set alternate key bindings for the
+	    built-in line editor, if your system administrator has installed
+	    alternates.  Otherwise, Lynx uses the <a
+	    href="keystroke_commands/edit_help.html">Default Binding</a>.
 
    <dt>List directory style
 	<dd>Applies to Directory Editing.  Files and directories can be 
@@ -594,10 +650,6 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 		<dd>Files and directories are separated into two alphabetical
 		    lists.  Files are listed first.
 	  </dl>
-
-   <dt>Show dot files
-	<dd>If display/creation of hidden (dot) files/directories is
-	    enabled, you can turn the feature on or off via this setting.
 
    <dt>User Mode
        <dd>There are three possible choices: Novice, Intermediate, and
@@ -722,13 +774,11 @@ a document.  To use the bookmark feature you must first use the
 <em>Options Menu</em> to specify a bookmark filename.
 
 <p>To save a bookmark to the document you wish to place in the
-bookmark file press the '<em>a</em>' key and you will be asked
+bookmark file press the '<em>a</em>' key and you will be asked:
 
-<dl>
-<dt>
-	<dd><code>Save D)ocument or L)ink to bookmark 
-	    file or C)ancel? (d,l,c):</code>
-</dl>
+<blockquote>
+	Save D)ocument or L)ink to bookmark file or C)ancel? (d,l,c):
+</blockquote>
 
 Answer '<em>d</em>' to save a link to the document you are currently
 viewing or '<em>l</em>' to save the link that is currently selected on
@@ -739,6 +789,14 @@ your bookmark file.
 saved.  While viewing the bookmark list you may select a bookmark as you
 would any other link.  You can remove a link from the bookmark list by
 pressing the '<em>r</em>' key when positioned on that link.
+
+<p>When multi-bookmarks (see <a href="#12">Options Menu</a>) is OFF,
+you will always view or add links to the default bookmark file.  When
+it is STANDARD, a menu of up to 26 bookmark files will be invoked,
+and you select the bookmark file by entering its letter token.  When
+it is ADVANCED, you will be prompted for the letter token, but can
+enter '<em>=</em>' to invoke the STANDARD selection menu, or
+<em>RETURN</em> for the default bookmark file.
 [<A HREF="#TOC">ToC</A>]
 
 <h2><A NAME="16"><em>Jump Command</em></a></h2>
@@ -916,6 +974,10 @@ commands.
 	    Note that for form submissions, http servers vary in whether
 	    they'll treat HEAD requests as valid and return the CGI script's
 	    headers, or treat it as invalid and return an error message. 
+   <dt><em>^K</em>
+  	<dd><em>Control-K</em> invokes the <a
+	    href="keystroke_commands/cookie_help.html">Cookie Jar Page</a>
+	    if it contains cookies.
    <dt><em>z</em>
 	<dd>Lynx supports completely interruptible I/O processes. Press the
 	    '<em>z</em>' key at any time during a connect or transfer process
@@ -939,7 +1001,9 @@ options from a list, and fields for entering text.
 <dt>Buttons:
 <dd>Buttons are displayed in the same way that Lynx displays links in
     a document. To "push" the button press the <em>right-arrow</em> or
-    <em>Return</em> key.
+    <em>Return</em> key.  If it is a form submission button, you also can
+    use the RESUBMIT ('<em>x</em>') or DOWNLOAD ('<em>d</em>') keystroke
+    commands to "push" the button (see below).
 
 <dt>Checkboxes and Radio buttons
 <dd>Checkboxes are displayed as square brackets: <em>[ ]</em> and radio
@@ -962,9 +1026,10 @@ options from a list, and fields for entering text.
     <a href="#11">searching</a> commands for navigating to options which
     contain particular strings.  <em>NOTE</em> that the popup menu
     feature can be disabled via compilation and/or configuration options,
-    in which case the options will be converted to a list of radio buttons.
-    The default setting for use of popups or radio button lists can be
-    toggled via the <em>-popup</em> command line switch.
+    or via the <a href="#12">Options Menu</a>, in which case the selection
+    field options will be converted to a list of radio buttons.  The default
+    setting for use of popups or radio button lists can be toggled via the
+    <em>-popup</em> command line switch.
 
 <dt> Text Entry Fields
 <dd>Text entry (INPUT) fields are displayed as a row of underscores the
@@ -1011,12 +1076,19 @@ session, have not changed any of the form content, and the METHOD was
 previous submission.  If you wish to resubmit that form to the server with
 the same content as previously, use the RESUBMIT command ('<em>x</em>') when
 positioned on the submit button.  The <em>right-arrow</em> and <em>Return</em>
-keys also will invoke a no-cache resubmission if the form's source included a
-META tag with a no-cache Pragma or Cache-Control directive:<BR>
+keys also will invoke a no-cache resubmission if the reply from a form
+submission included a META element with a no-cache Pragma or Cache-Control
+directive:<BR>
 <tab indent="12"
 ><em>&lt;META HTTP-EQUIV="Pragma" CONTENT="no-cache"&gt;</em><BR>
 <tab indent="12"
 ><em>&lt;META HTTP-EQUIV="Cache-Control" CONTENT="no-cache"&gt;</em><BR>
+or the server sent a "Pragma" or "Cache-Control" MIME header with a
+no-cache directive.
+
+<p>You also can use the DOWNLOAD ('<em>d</em>') keystroke command when
+positioned on a form submit button if you wish to download the server's
+reply to the submission instead of having Lynx render and display it.
 
 <p>Forms which have <em>POST</em> as the METHOD, or a <a
 href="lynx_url_support.html#mailto">mailto:</a> URL as the ACTION, are always
@@ -1055,12 +1127,29 @@ markup Lynx sends a 0,0 coordinate pair in the form content.  Document
 authors who use images as submit buttons, but have at least some concern
 for text clients and sight-challenged Webizens, should include VALUEs for
 the buttons in such markup.  Lynx will then display the string assigned
-to the VALUE, as it would for a normal submit button, and will send that
-instead of an artificial 0,0 coordinate pair if that button is NAME-ed and
-is used to submit the form.  The script which analyzes the form content
-thus can be made aware whether the submission was by a user with a graphic
-client, or by a user who did not see the image nor make a conscious choice
-within it.
+to the VALUE, as it would for a normal submit button.  Some document
+authors incorrectly use an ALT instead of VALUE attribute for this purpose.
+Lynx "cooperates" by treating ALT as a synonym for VALUE when present in
+an INPUT tag with TYPE="image".  If neither a VALUE nor an ALT attribute
+is present, Lynx dispays "[IMAGE]-Submit" as the string for such buttons.
+If clickable images is set, the "[IMAGE]" portion of the string is a link
+for the image, and the "Submit" portion is the button for submitting the
+form.  Otherwise, the entire string is treated as a submit button.  If
+a VALUE or ALT attribute is present and clickable images is set, Lynx
+prepends "[IMAGE]" as a link for the image, followed by '-' and then
+the attribute's value as the dispayed string for the submit button.
+Note that earlier versions of Lynx would send a name=value pair instead of
+a 0,0 coordinate pair if a TYPE="image" submit button was NAME-ed, had a
+VALUE attribute in the INPUT tag, and was used to submit the form.  The
+script which analyzes the form content thus could be made aware whether
+the submission was by a user with a graphic client and had image loading
+turned on, or by a user who did not see the image nor make a conscious
+choice within it.  However, requests that this be included in HTML
+specifications consistently have fallen on deaf ears, and thus Lynx now
+"fakes" a 0,0 coordinate pair whether or not a VALUE or ALT attribute is
+present in the INPUT tag.  Ideally, the script which analyzes the submitted
+content will treat the 0,0 coordinate pair as an indicator that the user
+did not see the image and make a conscious choice within it.
 
 <p>Forms can have <em>hidden</em> INPUT fields, which are not displayed,
 but have NAMEs and VALUEs included in the content.  These often are used
@@ -1077,7 +1166,7 @@ be included in the submission.
 <p>Forms most commonly are submitted to http servers with the content encoded
 as <em>ENCTYPE="application/x-www-form-urlencoded"</em> for analysis by a
 script, and Lynx treats that as the default if no ENCTYPE is specified in the
-FORM tag.  However, you can specify a <a
+FORM start tag.  However, you can specify a <a
 href="lynx_url_support.html#mailto">mailto</a> URL as the form's ACTION to
 have the form content sent, instead, to an email address.  In such cases, you
 may wish to specify <em>ENCTYPE="text/plain"</em> in the form markup, so that
@@ -1119,21 +1208,26 @@ by Lynx for '<em>d</em>'ownload and '<em>p</em>'rint menu options to save
 or mail the body returned by the script following submission of a FORM.
 Otherwise, Lynx uses the last symbolic element in the path for the FORM's
 ACTION, which is normally the script, itself, or a PATH_INFO field, and
-thus might be misleading. [<A HREF="#TOC">ToC</A>]
+thus might be misleading.  This also can be done via a META element in
+any document:
+<tab indent="12"
+><em>&lt;META <tab id="cdis">HTTP-EQUIV="Content-Disposition"<BR>
+<tab to="cdis">CONTENT="file;&nbsp;filename=name.suffix"&gt;</em><BR>
+[<A HREF="#TOC">ToC</A>]
 
 <h2><A NAME="20"><em>Lynx and HTML Tables</em></a></h2>
 
 HTML includes markup for creating <em>tables</em> structured as arrays of
 cells aligned by columns and rows on the displayed page.
 
-<p>Lynx recognizes the TABLE tag and all of its associated tags as described
-in <a href="ftp://ds.internic.net/rfc/rfc1942.txt"
+<p>Lynx recognizes the TABLE element and all of its associated elements
+as described in <a href="ftp://ds.internic.net/rfc/rfc1942.txt"
 >ftp://ds.internic.net/rfc/rfc1942.txt</a>
-and will process any ID attributes in these tags for handling as NAME-ed
+and will process any ID attributes in the start tags for handling as NAME-ed
 anchors, but does not create actual <em>tables</em>.  Instead, it treats
-the TR tag as a collapsible BR (line break), and inserts a collapsible
-space before the content of each TH and TD tag.  This generally makes all
-of the content of the <em>table</em> readable, preserves most of the
+the TR start tag as a collapsible BR (line break), and inserts a collapsible
+space before the content of each TH and TD start tag.  This generally makes
+all of the content of the <em>table</em> readable, preserves most of the
 intra-cell organization, and makes all of the links in the <em>table</em>
 accessible, but any information critically dependent on the column and row
 alignments intended for the <em>table</em> will be missed. 
@@ -1175,7 +1269,7 @@ independently scrolling windows.  Such windows have been termed
 <em>frames</em>.
 
 <p>Lynx recognizes the Netscape and MicroSoft Explorer FRAME, FRAMESET,
-and NOFRAMES tags, but is not capable of windowing to create the
+and NOFRAMES elements, but is not capable of windowing to create the
 intended positioning of <em>frames</em>.  Instead, Lynx creates labeled
 links to the <em>frame</em> sources, typically positioned in the upper
 left corner of the display, and renders the NOFRAMES section.  If the
@@ -1196,29 +1290,64 @@ Such windows have been termed <em>banners</em>.
 
 <p>Lynx recognizes and processes all of the <a
 href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
-REL attribute tokens in LINK tags for creating a <em>banner</em>.  The
-LINK tokens are <em>Home</em>, <em>ToC</em>, <em>Index</em>,
-<em>Glossary</em>, <em>Copyright</em>, <em>Up</em>, <em>Next</em>,
-<em>Previous</em>, and <em>Help</em>.  Any LINK tags with those tokens
+REL attribute tokens in LINK elements for creating a <em>banner</em>, and
+a number of others which have subsequently been proposed.  These
+<em>banner</em> tokens are <em>Home</em>, <em>ToC</em>, <em>Contents</em>,
+<em>Index</em>, <em>Glossary</em>, <em>Copyright</em>, <em>Up</em>,
+<em>Next</em>, <em>Previous</em>, <em>Prev</em>, <em>Help</em>,
+<em>Search</em>, <em>Top</em>, <em>Origin</em>, <em>Navigator</em>,
+<em>Child</em>, <em>Disclaimer</em>, <em>Sibling</em>, <em>Parent</em>,
+<em>Author</em>, <em>Editor</em>, <em>Publisher</em>, <em>Trademark</em>,
+<em>Meta</em>, <em>URC</em>, <em>Hotlist</em>, <em>Begin</em>,
+<em>First</em>, <em>End</em>, <em>Last</em>, <em>Pointer</em>,
+<em>Translation</em>, <em>Definition</em>, <em>Chapter</em>,
+<em>Documentation</em>, <em>Biblioentry</em>, <em>Bibliography</em>,
+<em>Bookmark</em> and <em>Banner</em>.  Any LINK elements with those
+tokens as the REL attribute value, and an HREF attribute value in the LINK,
 will invoke creation of a <em>banner</em> at the top of the first page,
-with the tag's HREF as the link, and the token as the link name.  In
-addition, a <em>Bookmark</em> token in conjunction with a TITLE attribute
-will invoke a <em>banner</em> link with the value of the TITLE attribute
-as the link name.  Lynx does not waste screen real estate maintaining the
-<em>banner</em> at the top of every page, but the Lynx TOOLBAR keystroke
-command ('<em>#</em>') will, any time it is pressed, position you on the
-<em>banner</em> so that any of its links can be activated, and pressing
-the <em>left-arrow</em> when in the <em>banner</em> will return you to
-where you were in the current document.
+with the element's HREF as the link, and the token as the default link
+name.  If a TITLE attribute is included in the LINK, it's value will be
+used as the link name instead of the default.  <em>Bookmark</em> and
+<em>Banner</em> are intended to be accompanied by a TITLE attribute,
+which in effect makes the namespace for REL <em>banner</em> tokens
+infinite.
+
+<p>If the special token <em>Help</em> is used as the REL value and no HREF
+is included in the LINK, Lynx will use it own <em>HELPFILE</em> URL for that
+link.  For the special token <em>Home</em> without an HREF, Lynx will use
+the default <em>STARTFILE</em> (i.e., derived from the configuration files
+or the WWW_HOME environment variable, <em>not</em> the command line
+<em>startfile</em> if one was used).  However, if a <em>-homepage=URL</em>
+was specified on the command line, it's URL will be used as the HREF.
+For the special token <em>Index</em> without an HREF, Lynx will use the
+<em>DEFAULT_INDEX_FILE</em> derived from the configuration files, or if an
+<em>-index=URL</em> was specified on the command line, it's URL will be used
+as the HREF.
+
+<p>Lynx does not waste screen real estate maintaining the <em>banner</em> at
+the top of every page, but the Lynx TOOLBAR keystroke command ('<em>#</em>')
+will, any time it is pressed, position you on the <em>banner</em> so that
+any of its links can be activated, and pressing the <em>left-arrow</em> when
+in the <em>banner</em> will return you to where you were in the current
+document.  The toolbar is indicated by a '<em>#</em>" preceding its first
+link when present on the screen, that is, when the first page of the
+document is being displayed.  The availability of a toolbar is indicated by
+a '<em>#</em>' at the top, left-hand corner of the screen when the second
+or subsequent pages of the document are being displayed.
 
 <p>Lynx also recognizes the <a
 href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
-BANNER container tag, and will create a <em>banner</em> based on its content
-if one has not already been created based on LINK tags.  Lynx treats the
-MicroSoft MARQUEE tag as a synonym for BANNER (i.e., presenting it's
-markup as a static <em>banner</em>, without any horizontal scrolling of
-its content). [<A HREF="#TOC">ToC</A>]
-
+BANNER container element, and will create a <em>banner</em> based on its
+content if one has not already been created based on LINK elements.  Lynx
+treats the MicroSoft MARQUEE element as a synonym for BANNER (i.e.,
+presenting it's markup as a static <em>banner</em>, without any horizontal
+scrolling of its content).  Lynx does not prefix the BANNER or MARQUEE
+content with a '<em>#</em>' because the content need not be only a series
+of links with brief, descriptive links names, but does add a '<em>#</em>'
+at the top, left-hand corner of the screen when the content is not being
+displayed, to indicate it's accessibility via the TOOLBAR keystroke command.
+[<A HREF="#TOC">ToC</A>]
+ 
 <h2><A NAME="24"><em>Lynx and HTML Footnotes</em></a></h2>
 
 Lynx implements the <a
@@ -1341,10 +1470,10 @@ appropriate quotation mark.
 <p>Lynx renders block quotes with a greater than normal left and right
 indentation.  Lynx does not support italics, and normally substitutes
 underlining, but does not underline block quotes so as not to obscure any
-explicit emphasis tags within the quotation.  The BLOCKQUOTE or BQ block
-can include a CREDIT block, whose content will be rendered as an implied
-new paragraph with a <em>CREDIT:</em> label at the beginning of its first
-line.
+explicit emphasis elements within the quotation.  The BLOCKQUOTE or BQ
+block can include a CREDIT container element, whose content will be rendered
+as an implied new paragraph with a <em>CREDIT:</em> label at the beginning of
+its first line.
 
 <p>Lynx respects nested Q start and end tags, and will use ASCII double-quotes
 (<em>&quot;</em>) versus grave accent (<em>`</em>) and apostrophe
@@ -1372,26 +1501,26 @@ to process alternative markup and allow the user to make choices based
 on textual information.  These have been termed
 <em>client-side-image-maps</em>.
 
-<p>Lynx recognizes and processes the MAP container tag and its AREA tags,
-and will create a menu of links for the HREF of each AREA tag when the
-link created for the IMG tag with a USEMAP attribute is activated.  The
-menu uses the ALT attributes of the AREA tags as the link names, or, if
-the document's author has disregard for text clients and sight-challenged
-Webizens, and thus did not include ALT attributes, Lynx uses the resolved
-URLs pointed to by the HREF attributes as the link names.  Lynx uses the
-TITLE attribute of the IMG tag, or the TITLE attribute of the MAP, if
-either was present in the markup, as the title and main header of the
-menu.  Otherwise, it uses the ALT attribute of the IMG tag.  If neither
-TITLE nor ALT attributes were present in the markup, Lynx creates and
-uses a <em>[USEMAP]</em> pseudo-ALT.  The MAPs need not be in the same
-document as the IMG tags.  If not in the same document, Lynx will fetch
+<p>Lynx recognizes and processes the MAP container element and its AREA
+elements, and will create a menu of links for the HREF of each AREA when
+the link created for the IMG element with a USEMAP attribute is activated.
+The menu uses the ALT attributes of the AREA elements as the link names,
+or, if the document's author has disregard for text clients and
+sight-challenged Webizens, and thus did not include ALT attributes, Lynx
+uses the resolved URLs pointed to by the HREF attributes as the link names.
+Lynx uses the TITLE attribute of the IMG element, or the TITLE attribute of
+the MAP, if either was present in the markup, as the title and main header
+of the menu.  Otherwise, it uses the ALT attribute of the IMG element.  If
+neither TITLE nor ALT attributes were present in the markup, Lynx creates
+and uses a <em>[USEMAP]</em> pseudo-ALT.  The MAPs need not be in the same
+document as the IMG elements.  If not in the same document, Lynx will fetch
 the document which contains the referenced MAP, and locate it based on
 its NAME or ID attribute.  All MAPs encountered in documents during a
 Lynx session are cached, so that they need not be retrieved repeatedly
 when referenced in different documents.
 
-<p>If the IMG tag also indicates a <em>server-side-image-map</em> via
-an ISMAP attribute, Lynx will create a link for that as well, rather
+<p>If the IMG element also indicates a <em>server-side-image-map</em>
+via an ISMAP attribute, Lynx will create a link for that as well, rather
 than ignoring it, and will submit a 0,0 coordinate pair if that link is
 activated.  However, the <em>client-side-image-map</em> is much more
 useful for a client such as Lynx, because all of the URLs associated
@@ -1400,28 +1529,29 @@ attributes.
 
 <p>Lynx also recognizes the <a
 href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
-FIG and OVERLAY tags, and will handle them as intended for text clients.
+FIG and OVERLAY elements, and will handle them as intended for text clients.
 These are the ideal way to handle <em>client-side-image-maps</em>, because
 the FIG content provides complete alternative markup, rather than relying
 on the client to construct a relatively meager list of links with link
 names based on ALT strings.
 
-<p>The presently experimental OBJECT tag encompasses much of the
-functionality of the FIG tag for <em>client-side-image-maps</em>.  Lynx
-will render and display the content of OBJECT tags which have the SHAPES
-attribute equivalently to its handling of FIG.  Lynx also handles
-OBJECT tags with the USEMAP and/or ISMAP attributes equivalently to
-its handling of IMG tags with <em>client-side-image-maps</em> and/or
-<em>server-side-image-maps</em>. [<A HREF="#TOC">ToC</A>]
+<p>The presently experimental OBJECT element encompasses much of the
+functionality of the FIG element for <em>client-side-image-maps</em>.
+Lynx will render and display the content of OBJECT elements which have
+the SHAPES attribute equivalently to its handling of FIG.  Lynx also
+handles OBJECT elements with the USEMAP and/or ISMAP attributes
+equivalently to its handling of IMG elements with
+<em>client-side-image-maps</em> and/or <em>server-side-image-maps</em>.
+[<A HREF="#TOC">ToC</A>]
 
 <h2><A NAME="29"><em>Lynx and Client-Side-Pull</em></a></h2>
 
 HTML includes provision for passing instructions to clients via directives
-in META tags, and one such instruction, via the token <em>Refresh</em>,
+in META elements, and one such instruction, via the token <em>Refresh</em>,
 should invoke reloading of the document, fetched from a server with the
 same URL or a new URL, at a specified number of seconds following receipt
 of the current document.  This procedure has been termed
-<em>client-side-pull</em>.  An example of such a tag is:<BR>
+<em>client-side-pull</em>.  An example of such an element is:<BR>
 <tab indent="12"><em>&lt;META HTTP-EQUIV="Refresh" CONTENT="3;
 URL="http://host/path"&gt;</em><BR>
 which instructs a client to fetch the indicated URL in 3 seconds after
@@ -1429,10 +1559,10 @@ receiving the current document.  If the <em>URL=</em> field is omitted,
 the URL defaults to that of the current document.  A <em>no-cache</em>
 directive is implied when the <em>Refresh</em> if for the same URL.
 
-<p>Lynx recognizes and processes <em>Refresh</em> directives in META tags,
-but puts up a labeled link, typically in the upper left corner of the
-display, indicating the number of seconds intended before a refresh,
-and the URL for the refresh, instead of making the request
+<p>Lynx recognizes and processes <em>Refresh</em> directives in META
+elements, but puts up a labeled link, typically in the upper left corner
+of the display, indicating the number of seconds intended before a
+refresh, and the URL for the refresh, instead of making the request
 automatically after the indicated number of seconds.  This allows
 people using a braille interface any amount of time to examine the
 current document before activating the link for the next URL.  In
@@ -1443,7 +1573,68 @@ new documents or images at that interval, and you would be wasting
 bandwidth by activating the link at a shorter interval.
 [<A HREF="#TOC">ToC</A>]
 
-<h2><A NAME="30"><em>The Lynx command line</em></A></h2>
+<h2><A NAME="30"><em>Lynx State Management</em></A>
+(Me want <em>cookie</em>!)</h2>
+
+HTTP provides a means to carry state information across successive
+connections between a browser and an http server.  Normally, http servers
+respond to each browser request without relating that request to previous
+or subsequent requests.  Though the inclusion of INPUT fields with
+TYPE="hidden" can be used as a sort of state management by <a href="#19"
+>HTML Forms</a>, a more general approach involves exchanges of MIME
+headers between the server and browser.  When replying to a request,
+the server can send a <em>Set-Cookie</em> MIME header which contains
+information (<em>cookies</em>) relevent to the browser's request, and in
+subsequent requests the browser can send a <em>Cookie</em> MIME header
+with information derived from previously received cookies.
+
+<p>State Management via cookie exchanges originally was implemented by
+Netscape, and such cookies are now designated as <em>Version 0</em>.  A
+more elaborate format for cookies, designated as <em>Version 1</em>, is
+being standardized by the IETF (Internet Engineering Task Force).  Lynx
+supports both <em>Version 0</em> and <em>Version 1</em> cookie exchanges.
+This support can be disabled by default via the SET_COOKIES symbol in the
+compilation (<em>userdefs.h</em>) and/or run time (<em>lynx.cfg</em>)
+configuration files, and that default setting can be toggled via the
+<em>-cookies</em> command line switch.
+
+<p>When cookie support is enabled, <em>Set-Cookie</em> MIME headers
+received from an http server invoke confirmation prompts with possible
+replies of '<em>Y</em>'es or '<em>N</em>'o for acceptance of the cookie,
+'<em>A</em>'lways to accept the cookie and to allow all subsequent
+cookies from that <em>domain</em> (server's Fully Qualified Domain Name,
+or site-identifying portion of the FQDN) without further confirmation
+prompts, or ne'<em>V</em>'er to never allow cookies from that
+<em>domain</em> to be accepted (silently ignore its <em>Set-Cookie</em>
+MIME headers).  All unexpired cookies are held in a hypothetical
+<em>Cookie Jar</em> which can be examined via the COOKIE_JAR keystroke
+command, normally mapped to <em>Ctrl-K</em>, for invoking the <a
+href="keystroke_commands/cookie_help.html">Cookie Jar Page</a>.  The
+<em>Cookie Jar</em>, and any '<em>A</em>'lways or ne'<em>V</em>'er
+'allow' settings, do not presently outlast the Lynx session.
+
+<p>A common use of cookies by http servers is simply to track the
+documents visited by individual users.  Though this can be useful to the
+site's WebMaster for evaluating and improving the organization of links
+in the various documents of the site, if the user has configured Lynx
+to include a <em>From</em> MIME header with the user's email address in
+http requests, or has passed personal information to the server via a
+form submission, the tracking might be used to draw inferences, possibly
+incorrect, about that user, and may be considered by some as an invasion
+of privacy.
+
+<p>An example of worthwhile State Management via cookies is the setting
+of personal preferences, typically via a form submission to the site,
+which will then apply to all documents visited at that site.
+
+<p>If you accept cookies when accessing a site, but are given no indication
+about how they will be used in subsequent requests to that site, nor can
+infer how they will be used, you can <em>Gobble</em> (delete) the cookies
+and/or change the 'allow' setting for its <em>domain</em> via the <a
+href="keystroke_commands/cookie_help.html">Cookie Jar Page</a>.
+[<A HREF="#TOC">ToC</A>]
+
+<h2><A NAME="31"><em>The Lynx command line</em></A></h2>
 
 A summary of the Lynx command line options (switches) is returned to
 stdout if Lynx is invoked with the <em>-help</em> switch.  A description
@@ -1512,6 +1703,8 @@ where
     		    lynx.cfg.
              <dt><code>-child</code>
     		<dd>exit on left-arrow in startfile, and disable save to disk.
+             <dt><code>-cookies</code>
+    		<dd>toggles handling of Set-Cookie headers.
              <dt><code>-crawl</code>
     		<dd>with <em>-traversal</em>, output each page to a file.<br>
     		    with <em>-dump</em>, format output as with
@@ -1595,6 +1788,8 @@ where
     		<dd>disable the link list feature in dumps.
              <dt><code>-nolog</code>
     		<dd>disable mailing of error messages to document owners.
+             <dt><code>-nopause</code>
+    		<dd>disable forced pauses for statusline messages.
              <dt><code>-noprint</code>
     		<dd>disable print functions.
 	     <dt><code>-noredir</code>
@@ -1685,9 +1880,11 @@ where
 		<dt>jump
 			<dd>disable the '<em>j</em>' (jump) command.
 		<dt>mail
-			<dd>disable mailing feature.
+			<dd>disallow mailing feature.
+		<dt>multibook
+			<dd>disallow multiple bookmarks.
 		<dt>news_post
-			<dd>disable USENET News posting.
+			<dd>disallow USENET News posting.
 		<dt>options_save 
         		<dd>disallow saving options in .lynxrc.
 		<dt>outside_ftp
@@ -1727,9 +1924,10 @@ where
 	     <dt><code>-show_cursor </code>
       		<dd>If enabled the cursor will not be hidden in the right hand
           	    corner but will instead be positioned at the start of the
-          	    currently selected link.  show_cursor is the default for
-		    systems without FANCY_CURSES capabilities, and the default
-          	    configuration can be changed in userdefs.h.
+          	    currently selected link.  Show cursor is the default for
+		    systems without FANCY_CURSES capabilities.  The default
+          	    configuration can be changed in userdefs.h or lynx.cfg.
+                    The command line switch toggles the default.
              <dt><code>-soft_dquotes</code>
     		<dd>toggles emulation of the old Netscape and Mosaic bug which
 		    treated '<em>&gt;</em>' as a co-terminator for
@@ -1770,7 +1968,7 @@ where
 White space may be substituted for any equal sign ('<em>=</em>')
 appearing in the option list above. [<A HREF="#TOC">ToC</A>]
 
-<h2><A NAME="31"><em>Lynx development history</em></A></h2>
+<h2><A NAME="32"><em>Lynx development history</em></A></h2>
 
 Lynx grew out of efforts to build a campus-wide information system
 at The University of Kansas.  The earliest versions of Lynx provided a

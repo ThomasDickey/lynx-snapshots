@@ -55,16 +55,14 @@ extern HTCJKlang HTCJK;
 extern HTStyleSheet * styleSheet;	/* Default or overridden */
 
 extern int display_lines; /* number of lines in display */
-extern BOOLEAN ignore_excess; /* flag to ignore chararcters at wrap column */
-extern char HTML_Last_Char;
 
 /*	Exports
 */ 
 PUBLIC HText * HTMainText = NULL;		/* Equivalent of main window */
 PUBLIC HTParentAnchor * HTMainAnchor = NULL;	/* Anchor for HTMainText */
 
-PUBLIC char * HTAppName = "Lynx";      /* Application name */
-PUBLIC char * HTAppVersion = LYNX_VERSION;        /* Application version */
+PUBLIC char * HTAppName = "Lynx";		/* Application name */
+PUBLIC char * HTAppVersion = LYNX_VERSION;	/* Application version */
 
 PUBLIC int HTFormNumber = 0;
 PUBLIC int HTFormFields = 0;
@@ -91,21 +89,21 @@ typedef struct _line {
 	char	data[1];		/* Space for terminator at least! */
 } HTLine;
 
-#define LINE_SIZE(l) (sizeof(HTLine)+(l))	/* allow for terminator */
+#define LINE_SIZE(l) (sizeof(HTLine)+(l))	/* Allow for terminator */
 
 typedef struct _TextAnchor {
 	struct _TextAnchor *	next;
 	int			number;		/* For user interface */
 	int			start;		/* Characters */
-        int			line_pos;       /* position in text */
+        int			line_pos;	/* Position in text */
 	int			extent;		/* Characters */
-	int			line_num;       /* place in document */
-	char *		        hightext;       /* the link text */
-	char *		        hightext2;       /* a second line*/
-        int 		    	hightext2offset; /* offset from left */
-	int			link_type;	/* normal or form? */
-	FormInfo *		input_field;	/* info for form links */
-	BOOL			show_anchor;    /* show the anchor? */
+	int			line_num;	/* Place in document */
+	char *		        hightext;	/* The link text */
+	char *		        hightext2;	/* A second line*/
+        int 		    	hightext2offset;/* offset from left */
+	int			link_type;	/* Normal or form? */
+	FormInfo *		input_field;	/* Info for form links */
+	BOOL			show_anchor;	/* Show the anchor? */
 	HTChildAnchor *		anchor;
 } TextAnchor;
 
@@ -123,15 +121,18 @@ typedef struct _HTTabID {
 struct _HText {
 	HTParentAnchor *	node_anchor;
 	HTLine * 		last_line;
-	int			lines;		/* Number of them */
+	int			Lines;		/* Number of them */
 	int			chars;		/* Number of them */
 	TextAnchor *		first_anchor;	/* Singly linked list */
 	TextAnchor *		last_anchor;
 	int			last_anchor_number;	/* user number */
-	BOOL			source;		/* is the text source? */
+	BOOL			source;		/* Is the text source? */
 	BOOL			toolbar;	/* Toolbar set? */
 	HTList *		tabs;		/* TAB IDs */
 	BOOL			no_cache;	/* Always refresh? */
+	char			LastChar;	/* For aborbing white space */
+	BOOL			IgnoreExcess;	/* Ignore chars at wrap point */
+
 /* For Internal use: */	
 	HTStyle *		style;			/* Current style */
 	int			display_on_the_fly;	/* Lines left */
@@ -186,7 +187,8 @@ PRIVATE int HText_TrueLineSize PARAMS((HTLine *line));
 /*			Creation Method
 **			---------------
 */
-PUBLIC HText *	HText_new ARGS1(HTParentAnchor *,anchor)
+PUBLIC HText *	HText_new ARGS1(
+	HTParentAnchor *,	anchor)
 {
 #if defined(VMS) && defined(VAXC) && !defined(__DECC)
 #include <lib$routines.h>
@@ -194,7 +196,8 @@ PUBLIC HText *	HText_new ARGS1(HTParentAnchor *,anchor)
 #endif /* VMS && VAXC && !__DECC */
     HTLine * line = NULL;
     HText * self = (HText *) calloc(1, sizeof(*self));
-    if (!self) return self;
+    if (!self)
+        return self;
     
 #if defined(VMS) && defined (VAXC) && !defined(__DECC)
     status = lib$stat_vm(&VMType, &VMTotal);
@@ -245,7 +248,7 @@ PUBLIC HText *	HText_new ARGS1(HTParentAnchor *,anchor)
         outofmem(__FILE__, "HText_New");
     line->next = line->prev = line;
     line->offset = line->size = 0;
-    self->lines = self->chars = 0;
+    self->Lines = self->chars = 0;
     self->first_anchor = self->last_anchor = NULL;
     self->style = &default_style;
     self->top_of_screen = 0;
@@ -256,6 +259,9 @@ PUBLIC HText *	HText_new ARGS1(HTParentAnchor *,anchor)
     self->tabs = NULL;
     self->no_cache = ((anchor->no_cache || anchor->post_data) ?
     							  YES : NO);
+    self->LastChar = '\0';
+    self->IgnoreExcess = FALSE;
+
     if (HTOutputFormat == WWW_SOURCE)
         self->source = YES;
     else
@@ -285,13 +291,13 @@ PUBLIC HText *	HText_new ARGS1(HTParentAnchor *,anchor)
     if (underscore_string[0] != '.') {
         char *p;
 	/*
-	 * Create and array of dots for the UNDERSCORES macro. - FM
+	 *  Create and array of dots for the UNDERSCORES macro. - FM
 	 */
 	memset(underscore_string, '.', (MAX_LINE-1));
         underscore_string[(MAX_LINE-1)] = '\0';
         underscore_string[MAX_LINE] = '\0';
 	/*
-	 * Create and array of underscores for the STARS macro. - FM
+	 *  Create and array of underscores for the STARS macro. - FM
 	 */
 	memset(star_string, '_', (MAX_LINE-1));
         star_string[(MAX_LINE-1)] = '\0';
@@ -310,8 +316,8 @@ PUBLIC HText *	HText_new ARGS1(HTParentAnchor *,anchor)
 **      Stream is assumed open and left open.
 */
 PUBLIC HText *  HText_new2 ARGS2(
-                HTParentAnchor *,       anchor,
-                HTStream*,              stream)
+	HTParentAnchor *,	anchor,
+	HTStream *,		stream)
 
 {
     HText * this = HText_new(anchor);
@@ -326,7 +332,8 @@ PUBLIC HText *  HText_new2 ARGS2(
 /*	Free Entire Text
 **	----------------
 */
-PUBLIC void HText_free ARGS1(HText *,self)
+PUBLIC void HText_free ARGS1(
+	HText *,	self)
 {
     if (!self)
         return;
@@ -406,11 +413,11 @@ PUBLIC void HText_free ARGS1(HText *,self)
      *  Free the tabs list. - FM
      */
     if (self->tabs) {
-        HTTabID * tab = NULL;
+        HTTabID * Tab = NULL;
 	HTList * cur = self->tabs;
 
-	while (NULL != (tab = (HTTabID *)HTList_nextObject(cur))) {
-	    FREE(tab->name);
+	while (NULL != (Tab = (HTTabID *)HTList_nextObject(cur))) {
+	    FREE(Tab->name);
 	}
 	HTList_delete(self->tabs);
     }
@@ -434,7 +441,8 @@ PUBLIC void HText_free ARGS1(HText *,self)
 /*	Output a line
 **	-------------
 */
-PRIVATE int display_line ARGS1(HTLine *,line)
+PRIVATE int display_line ARGS1(
+	HTLine *,	line)
 {
     register int i,j;
     char buffer[3];
@@ -533,7 +541,8 @@ PRIVATE int display_line ARGS1(HTLine *,line)
 /*	Output the title line
 **	---------------------
 */
-PRIVATE void display_title ARGS1(HText *,text)
+PRIVATE void display_title ARGS1(
+	HText *,	text)
 {
     char *title = NULL;
     char percent[20], format[20];
@@ -564,7 +573,7 @@ PRIVATE void display_title ARGS1(HText *,text)
     /*
      *  Generate the page indicator (percent) string.
      */
-    if ((text->lines + 1) > (display_lines)) {
+    if ((text->Lines + 1) > (display_lines)) {
 	/*
 	 *  In a small attempt to correct the number of pages counted....
 	 *    GAB 07-14-94
@@ -573,10 +582,10 @@ PRIVATE void display_title ARGS1(HText *,text)
 	 *    FM 02-08-95
 	 */
 	int total_pages =
-	 	(((text->lines + 1) + (display_lines - 1))/(display_lines));
+	 	(((text->Lines + 1) + (display_lines - 1))/(display_lines));
 	int start_of_last_page =
-		((text->lines + 1) < display_lines) ? 0 :
-		((text->lines + 1) - display_lines);	
+		((text->Lines + 1) < display_lines) ? 0 :
+		((text->Lines + 1) - display_lines);	
 
 	sprintf(percent, " (p%d of %d)",
 		((text->top_of_screen >= start_of_last_page) ?
@@ -590,9 +599,12 @@ PRIVATE void display_title ARGS1(HText *,text)
     /*
      *  Generate format string.
      */
-    sprintf(format, "%%%d.%ds%%s\n",
-		    (LYcols-1)-strlen(percent),
-		    (LYcols-1)-strlen(percent));
+    sprintf(format, "%s%%%d.%ds%%s\n",
+    		    ((text->top_of_screen > 0 &&
+		      HText_hasToolbar(text)) ?
+		      			  "#" : " "),
+		    (LYcols-2)-strlen(percent),
+		    (LYcols-2)-strlen(percent));
 
     /*
      *  Generate and display the complete title string.
@@ -633,7 +645,10 @@ PRIVATE void display_title ARGS1(HText *,text)
 /*	Output a page
 **	-------------
 */
-PRIVATE void display_page ARGS3(HText *,text, int,line_number, char *, target)
+PRIVATE void display_page ARGS3(
+	HText *,	text,
+	int,		line_number,
+	char *,		target)
 {
     HTLine * line = NULL;
     int i;
@@ -643,6 +658,7 @@ PRIVATE void display_page ARGS3(HText *,text, int,line_number, char *, target)
     FormInfo *FormInfo_ptr;
     BOOL display_flag = FALSE;
     HTAnchor *link_dest;
+    static int last_nlinks = 0;
 
     lynx_mode = NORMAL_LYNX_MODE;
  
@@ -664,15 +680,15 @@ PRIVATE void display_page ARGS3(HText *,text, int,line_number, char *, target)
     }
 
     tmp[0] = tmp[1] = tmp[2] = '\0';
-    last_screen = text->lines - (display_lines-2);
+    last_screen = text->Lines - (display_lines-2);
     line = text->last_line->prev;
 
     /*
      *  Constrain the line number to be within the document.
      */
-    if (text->lines < (display_lines))
+    if (text->Lines < (display_lines))
         line_number = 0;
-    else if (line_number > text->lines)
+    else if (line_number > text->Lines)
         line_number = last_screen;
     else if (line_number < 0)
         line_number = 0;
@@ -783,7 +799,7 @@ PRIVATE void display_page ARGS3(HText *,text, int,line_number, char *, target)
     text->stale = NO;		/* Display is up-to-date */
 
     /*
-     *  Add the anchors to lynx structures.
+     *  Add the anchors to Lynx structures.
      */
     nlinks = 0;
     for (Anchor_ptr=text->first_anchor;  Anchor_ptr != NULL &&
@@ -886,9 +902,34 @@ PRIVATE void display_page ARGS3(HText *,text, int,line_number, char *, target)
 	    }
 	} 
 
-	if (Anchor_ptr == text->last_anchor || nlinks == MAXLINKS)
+	if (Anchor_ptr == text->last_anchor)
+	    /*
+	     *  No more links in document. - FM
+	     */
 	    break;
+
+	if (nlinks == MAXLINKS) {
+	    /*
+	     *  Links array is full.  If interactive, tell user
+	     *  to use half-page or two-line scrolling. - FM
+	     */
+	    if (LYCursesON) {
+		_statusline(MAXLINKS_REACHED);
+		sleep(AlertSecs);
+	    } 
+	    if (TRACE)
+	        fprintf(stderr, "\ndisplay_page: MAXLINKS reached.\n");
+	    break;
+	}
     }
+
+    /*
+     *  Free any un-reallocated links[] entries
+     *  from the previous page draw. - FM
+     */
+    for (i = nlinks; i < last_nlinks; i++)
+        FREE(links[i].lname);
+    last_nlinks = nlinks;
 
     /*
      *  If Anchor_ptr is not NULL and is not pointing to the last
@@ -918,7 +959,8 @@ PRIVATE void display_page ARGS3(HText *,text, int,line_number, char *, target)
 **
 **	These are used by a parser to build the text in an object
 */
-PUBLIC void HText_beginAppend ARGS1(HText *,text)
+PUBLIC void HText_beginAppend ARGS1(
+	HText *,	text)
 {
     text->permissible_split = 0;
     text->in_line_1 = YES;
@@ -945,12 +987,12 @@ PUBLIC void HText_beginAppend ARGS1(HText *,text)
 */
 #define new_line(text) split_line(text, 0)
 
-PRIVATE void split_line ARGS2(HText *,text, int,split)
+PRIVATE void split_line ARGS2(
+	HText *,	text,
+	int,		split)
 {
     HTStyle * style = text->style;
-#if defined(AIX) || defined(ultrix)
-    HTLine * temp; /* for realloc() substitute. */
-#endif /* AIX || ultrix */	
+    HTLine * temp;
     int spare;
     int indent = text->in_line_1 ?
     	  text->style->indent1st : text->style->leftIndent;
@@ -964,14 +1006,14 @@ PRIVATE void split_line ARGS2(HText *,text, int,split)
     HTLine * line = (HTLine *)calloc(1, LINE_SIZE(MAX_LINE));
 
     ctrl_chars_on_this_line = 0; /*reset since we are going to a new line*/
-    HTML_Last_Char = ' ';
+    text->LastChar = ' ';
 
     if (TRACE)
 	fprintf(stderr,"GridText: split_line called\n");
     
     if (line == NULL)
         outofmem(__FILE__, "split_line");
-    text->lines++;
+    text->Lines++;
     
     previous->next->prev = line;
     line->prev = previous;
@@ -1116,31 +1158,24 @@ PRIVATE void split_line ARGS2(HText *,text, int,split)
 	strcat(linedata, p);
 	line->size += plen;
     }
-    
+
     /*
      *  Economize on space.
      */
     while ((previous->size > 0) &&
-    	(previous->data[previous->size-1] == ' '))	/* Strip trailers */
+    	(previous->data[previous->size-1] == ' ')) {
+	/*
+	 *  Strip trailers.
+	 */
+	previous->data[previous->size-1] = '\0';
         previous->size--;
-	
-#if !defined(AIX) && !defined(ultrix)	
-    previous = (HTLine *) realloc (previous, LINE_SIZE(previous->size));
-    if (previous == NULL)
-        outofmem(__FILE__, "split_line");
-#else
-    /*
-     *  RS6000 has a chaotic bug in realloc argument passing.  Same
-     *  problem with Ultrix (4.2) : realloc() is not declared properly.
-     *  So we'll use a substitute for realloc.
-     */
+    }
     temp = (HTLine *)calloc(1, LINE_SIZE(previous->size));
     if (temp == NULL)
         outofmem(__FILE__, "split_line");
     memcpy(temp, previous, LINE_SIZE(previous->size));
     FREE(previous);
     previous = temp;
-#endif /* !AIX && !ultrix */
 
     previous->prev->next = previous;	/* Link in new line */
     previous->next->prev = previous;	/* Could be same node of course */
@@ -1194,13 +1229,16 @@ PRIVATE void split_line ARGS2(HText *,text, int,split)
 /*	Allow vertical blank space
 **	--------------------------
 */
-PRIVATE void blank_lines ARGS2(HText *,text, int,newlines)
+PRIVATE void blank_lines ARGS2(
+	HText *,	text,
+	int,		newlines)
 {
     if (!HText_LastLineSize(text)) {	/* No text on current line */
 	HTLine * line = text->last_line->prev;
 	while ((line != text->last_line) &&
 	       (HText_TrueLineSize(line) == 0)) {
-	    if (newlines == 0) break;
+	    if (newlines == 0)
+	        break;
 	    newlines--;		/* Don't bother: already blank */
 	    line = line->prev;
 	}
@@ -1219,7 +1257,8 @@ PRIVATE void blank_lines ARGS2(HText *,text, int,newlines)
 **	------------------------------
 ** See also: setStyle.
 */
-PUBLIC void HText_appendParagraph ARGS1(HText *,text)
+PUBLIC void HText_appendParagraph ARGS1(
+	HText *,	text)
 {
     int after = text->style->spaceAfter;
     int before = text->style->spaceBefore;
@@ -1232,7 +1271,9 @@ PUBLIC void HText_appendParagraph ARGS1(HText *,text)
 **
 **	Does not filter unnecessary style changes.
 */
-PUBLIC void HText_setStyle ARGS2(HText *,text, HTStyle *,style)
+PUBLIC void HText_setStyle ARGS2(
+	HText *,	text,
+	HTStyle *,	style)
 {
     int after, before;
 
@@ -1251,7 +1292,9 @@ PUBLIC void HText_setStyle ARGS2(HText *,text, HTStyle *,style)
 /*	Append a character to the text object
 **	-------------------------------------
 */
-PUBLIC void HText_appendCharacter ARGS2(HText *,text, char,ch)
+PUBLIC void HText_appendCharacter ARGS2(
+	HText *,	text,
+	char,		ch)
 {
     HTLine * line;
     HTStyle * style;
@@ -1394,7 +1437,7 @@ PUBLIC void HText_appendCharacter ARGS2(HText *,text, char,ch)
 	        }
 	    }
 	} else {
-	    goto check_ignore_excess;
+	    goto check_IgnoreExcess;
 	}
     } else if (ch == '\033') {
 	return;
@@ -1463,7 +1506,7 @@ PUBLIC void HText_appendCharacter ARGS2(HText *,text, char,ch)
      *  Tabs.
      */
     if (ch == '\t') {
-        HTTabStop * tab;
+        HTTabStop * Tab;
 	int target;	/* Where to tab to */
 	int here;
 
@@ -1478,14 +1521,14 @@ PUBLIC void HText_appendCharacter ARGS2(HText *,text, char,ch)
 	here = (((int)line->size + (int)line->offset) + indent)
 		- ctrl_chars_on_this_line; /* Consider special chars GAB */
         if (style->tabs) {	/* Use tab table */
-	    for (tab = style->tabs;
-	    	tab->position <= here;
-		tab++)
-		if (!tab->position) {
+	    for (Tab = style->tabs;
+	    	Tab->position <= here;
+		Tab++)
+		if (!Tab->position) {
 		    new_line(text);
 		    return;
 		}
-	    target = tab->position;
+	    target = Tab->position;
 	} else if (text->in_line_1) {	/* Use 2nd indent */
 	    if (here >= (int)style->leftIndent) {
 	        new_line(text); /* wrap */
@@ -1537,8 +1580,8 @@ PUBLIC void HText_appendCharacter ARGS2(HText *,text, char,ch)
     /*
      *  Check if we should ignore characters at the wrap point.
      */    
-check_ignore_excess:
-    if (ignore_excess &&
+check_IgnoreExcess:
+    if (text->IgnoreExcess &&
         ((indent + (int)line->offset + (int)line->size) + 
 	(int)style->rightIndent - ctrl_chars_on_this_line) >= (LYcols-1))
         return;
@@ -1638,12 +1681,53 @@ check_ignore_excess:
     }
 }
 
+/*	Set LastChar element in the text object.
+**	----------------------------------------
+*/
+PUBLIC void HText_setLastChar ARGS2(
+	HText *,	text,
+	char,		ch)
+{
+    if (!text)
+        return;
+
+    text->LastChar = ch;
+}
+
+/*	Get LastChar element in the text object.
+**	----------------------------------------
+*/
+PUBLIC char HText_getLastChar ARGS1(
+	HText *,	text)
+{
+    if (!text)
+        return('\0');
+
+    return((char)text->LastChar);
+}
+
+/*	Set IgnoreExcess element in the text object.
+**	--------------------------------------------
+*/
+PUBLIC void HText_setIgnoreExcess ARGS2(
+	HText *,	text,
+	BOOL,		ignore)
+{
+    if (!text)
+        return;
+
+    text->IgnoreExcess = ignore;
+}
+
 /*		Anchor handling
 **		---------------
 */
+
 /*	Start an anchor field
 */
-PUBLIC void HText_beginAnchor ARGS2(HText *,text, HTChildAnchor *,anc)
+PUBLIC void HText_beginAnchor ARGS2(
+	HText *,		text,
+	HTChildAnchor *,	anc)
 {
     char marker[16];
 
@@ -1682,17 +1766,18 @@ PUBLIC void HText_beginAnchor ARGS2(HText *,text, HTChildAnchor *,anc)
 }
 
 
-PUBLIC void HText_endAnchor ARGS1(HText *,text)
+PUBLIC void HText_endAnchor ARGS1(
+	HText *,	text)
 {
     TextAnchor * a = text->last_anchor;
     if (a->number) {
         /*
-	 * If it goes somewhere...
+	 *  If it goes somewhere...
 	 */
         a->extent += text->chars + text->last_line->size - a->start;
 	if (a->extent <= 2) {
 	    /*
-	     * Might be a blank anchor from an ALT="". - FM
+	     *  Might be a blank anchor from an ALT="". - FM
 	     */
     	    int j;
 	    a->show_anchor = NO;
@@ -1714,7 +1799,9 @@ PUBLIC void HText_endAnchor ARGS1(HText *,text)
 }
 
 
-PUBLIC void HText_appendText ARGS2(HText *,text, CONST char *,str)
+PUBLIC void HText_appendText ARGS2(
+	HText *,	text,
+	CONST char *,	str)
 {
     CONST char *p;
 
@@ -1727,7 +1814,8 @@ PUBLIC void HText_appendText ARGS2(HText *,text, CONST char *,str)
 }
 
 
-PRIVATE void remove_special_attr_chars ARGS1(char *,buf)
+PRIVATE void remove_special_attr_chars ARGS1(
+	char *,		buf)
 {
     register char *cp;
 
@@ -1744,11 +1832,12 @@ PRIVATE void remove_special_attr_chars ARGS1(char *,buf)
 
 /*
 **  This function trims blank lines from the end of the document, and
-**  then get the hightext from the text by finding the char position,
+**  then gets the hightext from the text by finding the char position,
 **  and brings the anchors in line with the text by adding the text
 **  offset to each of the anchors
 */
-PUBLIC void HText_endAppend ARGS1(HText *,text)
+PUBLIC void HText_endAppend ARGS1(
+	HText *,	text)
 {
     int cur_line, cur_char;
     TextAnchor *anchor_ptr;
@@ -1770,7 +1859,7 @@ PUBLIC void HText_endAppend ARGS1(HText *,text)
     /*
      *  Remove the blank lines at the end of document.
      */
-    while (text->last_line->data[0] == '\0' && text->lines > 2) {
+    while (text->last_line->data[0] == '\0' && text->Lines > 2) {
         HTLine *next_to_the_last_line;
 
         if (TRACE)
@@ -1784,7 +1873,7 @@ PUBLIC void HText_endAppend ARGS1(HText *,text)
         line_ptr->prev = next_to_the_last_line;
 	FREE(text->last_line);
         text->last_line = next_to_the_last_line;
-        text->lines--;
+        text->Lines--;
 
         if (TRACE)
             fprintf(stderr, "GridText: New bottom line: %s\n",
@@ -1846,7 +1935,7 @@ re_parse:
 	 *  lines, then start the highlighting on the next line.
 	 */
 	if (anchor_ptr->line_pos >= strlen(line_ptr->data) &&
-	    cur_line < text->lines) {
+	    cur_line < text->Lines) {
 	    anchor_ptr->start++;
 
 	    if (TRACE)
@@ -1917,7 +2006,8 @@ re_parse:
 
 /* 	Dump diagnostics to stderr
 */
-PUBLIC void HText_dump ARGS1(HText *,text)
+PUBLIC void HText_dump ARGS1(
+	HText *,	text)
 {
     fprintf(stderr, "HText: Dump called\n");
 }
@@ -1925,7 +2015,8 @@ PUBLIC void HText_dump ARGS1(HText *,text)
 
 /*	Return the anchor associated with this node
 */
-PUBLIC HTParentAnchor * HText_nodeAnchor ARGS1(HText *,text)
+PUBLIC HTParentAnchor * HText_nodeAnchor ARGS1(
+	HText *,	text)
 {
     return text->node_anchor;
 }
@@ -1937,7 +2028,8 @@ PUBLIC HTParentAnchor * HText_nodeAnchor ARGS1(HText *,text)
 **
 **	The index corresponds to the number we print in the anchor.
 */
-PUBLIC HTChildAnchor * HText_childNumber ARGS1(int,number)
+PUBLIC HTChildAnchor * HText_childNumber ARGS1(
+	int,		number)
 {
     TextAnchor * a;
     for (a = HTMainText->first_anchor; a; a = a->next) {
@@ -1949,7 +2041,10 @@ PUBLIC HTChildAnchor * HText_childNumber ARGS1(int,number)
 /*
  *  HTGetLinkInfo returns some link info based on the number.
  */
-PUBLIC int HTGetLinkInfo ARGS3(int, number, char **, hightext, char **, lname)
+PUBLIC int HTGetLinkInfo ARGS3(
+	int,		number,
+	char **,	hightext,
+	char **,	lname)
 {
     TextAnchor * a;
     HTAnchor *link_dest;
@@ -1984,7 +2079,7 @@ PUBLIC int HTGetLinkInfo ARGS3(int, number, char **, hightext, char **, lname)
  */
 PUBLIC int HText_getNumOfLines NOARGS
 {
-     return(HTMainText->lines);
+     return(HTMainText->Lines);
 }
 
 /*
@@ -2038,7 +2133,9 @@ PUBLIC char * HText_getServer NOARGS
  *  starting from the line 'line_num'-1
  *  this is the primary call for lynx
  */
-PUBLIC void HText_pageDisplay ARGS2(int,line_num, char *, target)
+PUBLIC void HText_pageDisplay ARGS2(
+	int,		line_num,
+	char *,		target)
 {
     display_page(HTMainText, line_num-1, target);
 
@@ -2047,13 +2144,16 @@ PUBLIC void HText_pageDisplay ARGS2(int,line_num, char *, target)
 
 /*
  *  HText_LinksInLines returns the number of links in the
- *  'lines' number of lines beginning with 'line_num'-1. - FM
+ *  'Lines' number of lines beginning with 'line_num'-1. - FM
  */
-PUBLIC int HText_LinksInLines ARGS3(HText *,text, int,line_num, int,lines)
+PUBLIC int HText_LinksInLines ARGS3(
+	HText *,	text,
+	int,		line_num,
+	int,		Lines)
 {
     int total = 0;
     int start = (line_num - 1);
-    int end = (start + lines);
+    int end = (start + Lines);
     TextAnchor *Anchor_ptr = NULL;
 
     if (!text)
@@ -2073,23 +2173,27 @@ PUBLIC int HText_LinksInLines ARGS3(HText *,text, int,line_num, int,lines)
     return total;
 }
 
-PUBLIC void HText_setStale ARGS1(HText *,text)
+PUBLIC void HText_setStale ARGS1(
+	HText *,	text)
 {
     text->stale = YES;
 }
 
-PUBLIC void HText_refresh ARGS1(HText *,text)
+PUBLIC void HText_refresh ARGS1(
+	HText *,	text)
 {
     if (text->stale)
         display_page(text, text->top_of_screen, "");
 }
 
-PUBLIC int HText_sourceAnchors ARGS1(HText *,text)
+PUBLIC int HText_sourceAnchors ARGS1(
+	HText *,	text)
 {
     return (text ? text->last_anchor_number : -1);
 }
 
-PUBLIC BOOL HText_canScrollUp ARGS1(HText *,text)
+PUBLIC BOOL HText_canScrollUp ARGS1(
+	HText *,	text)
 {
     return (text->top_of_screen != 0);
 }
@@ -2098,29 +2202,33 @@ PUBLIC BOOL HText_canScrollDown NOARGS
 {
     HText * text = HTMainText;
 
-    return ((text->top_of_screen + display_lines) < text->lines+1);
+    return ((text->top_of_screen + display_lines) < text->Lines+1);
 }
 
 /*		Scroll actions
 */
-PUBLIC void HText_scrollTop ARGS1(HText *,text)
+PUBLIC void HText_scrollTop ARGS1(
+	HText *,	text)
 {
     display_page(text, 0, "");
 }
 
-PUBLIC void HText_scrollDown ARGS1(HText *,text)
+PUBLIC void HText_scrollDown ARGS1(
+	HText *,	text)
 {
     display_page(text, text->top_of_screen + display_lines, "");
 }
 
-PUBLIC void HText_scrollUp ARGS1(HText *,text)
+PUBLIC void HText_scrollUp ARGS1(
+	HText *,	text)
 {
     display_page(text, text->top_of_screen - display_lines, "");
 }
 
-PUBLIC void HText_scrollBottom ARGS1(HText *,text)
+PUBLIC void HText_scrollBottom ARGS1(
+	HText *,	text)
 {
-    display_page(text, text->lines - display_lines, "");
+    display_page(text, text->Lines - display_lines, "");
 }
 
 
@@ -2130,7 +2238,9 @@ PUBLIC void HText_scrollBottom ARGS1(HText *,text)
 
 /* Bring to front and highlight it
 */
-PRIVATE int line_for_char ARGS2(HText *,text, int,char_num)
+PRIVATE int line_for_char ARGS2(
+	HText *,	text,
+	int,		char_num)
 {
     int line_number = 0;
     int characters = 0;
@@ -2144,13 +2254,14 @@ PRIVATE int line_for_char ARGS2(HText *,text, int,char_num)
     }
 }
 
-PUBLIC BOOL HText_select ARGS1(HText *,text)
+PUBLIC BOOL HText_select ARGS1(
+	HText *,	text)
 {
     if (text != HTMainText) {
         HTMainText = text;
 	HTMainAnchor = text->node_anchor;
 	/*
-	 * Make this text the most current in the loaded texts list. - FM
+	 *  Make this text the most current in the loaded texts list. - FM
 	 */
 	if (loaded_texts && HTList_removeObject(loaded_texts, text))
 	    HTList_addObject(loaded_texts, text);
@@ -2160,7 +2271,53 @@ PUBLIC BOOL HText_select ARGS1(HText *,text)
     return YES;
 }
 
-PUBLIC BOOL HTFindPoundSelector ARGS1(char *,selector)
+/*
+ *  This function returns TRUE if doc's post_data, address
+ *  and isHEAD elements are identical to those of a loaded
+ *  (memory cached) text. - FM
+ */
+PUBLIC BOOL HText_POSTReplyLoaded ARGS1(
+	document *,	doc)
+{
+    HText *text = NULL;
+    HTList *cur = loaded_texts;
+    char *post_data, *address;
+    BOOL is_head;
+
+    /*
+     *  Make sure we have the structures. - FM
+     */
+    if (!cur || !doc)
+	return(FALSE);
+
+    /*
+     *  Make sure doc is for a POST reply. - FM
+     */
+    if ((post_data = doc->post_data) == NULL ||
+        (address = doc->address) == NULL)
+	return(FALSE);
+    is_head = doc->isHEAD;
+
+    /*
+     *  Loop through the loaded texts looking for a
+     *  POST reply match. - FM
+     */
+    while (NULL != (text = (HText *)HTList_nextObject(cur))) {
+	if (text->node_anchor &&
+	    text->node_anchor->post_data &&
+	    !strcmp(post_data, text->node_anchor->post_data) &&
+	    text->node_anchor->address &&
+	    !strcmp(address, text->node_anchor->address) &&
+	    is_head == text->node_anchor->isHEAD) {
+	    return(TRUE);
+	}
+    }
+
+    return(FALSE);
+}
+
+PUBLIC BOOL HTFindPoundSelector ARGS1(
+	char *,		selector)
 {
     TextAnchor * a;
 
@@ -2185,7 +2342,9 @@ PUBLIC BOOL HTFindPoundSelector ARGS1(char *,selector)
 
 }
 
-PUBLIC BOOL HText_selectAnchor ARGS2(HText *,text, HTChildAnchor *,anchor)
+PUBLIC BOOL HText_selectAnchor ARGS2(
+	HText *,		text,
+	HTChildAnchor *,	anchor)
 {
     TextAnchor * a;
 
@@ -2238,7 +2397,9 @@ PUBLIC BOOL HText_selectAnchor ARGS2(HText *,text, HTChildAnchor *,anchor)
 */
 /*	Apply this style to the selection
 */
-PUBLIC void HText_applyStyle ARGS2(HText *, me, HTStyle *,style)
+PUBLIC void HText_applyStyle ARGS2(
+	HText *,	me,
+	HTStyle *,	style)
 {
     
 }
@@ -2246,7 +2407,9 @@ PUBLIC void HText_applyStyle ARGS2(HText *, me, HTStyle *,style)
 
 /*	Update all text with changed style.
 */
-PUBLIC void HText_updateStyle ARGS2(HText *, me, HTStyle *,style)
+PUBLIC void HText_updateStyle ARGS2(
+	HText *,	me,
+	HTStyle *,	style)
 {
     
 }
@@ -2255,8 +2418,8 @@ PUBLIC void HText_updateStyle ARGS2(HText *, me, HTStyle *,style)
 /*	Return style of  selection
 */
 PUBLIC HTStyle * HText_selectionStyle ARGS2(
-	HText *,me,
-	HTStyleSheet *,sheet)
+	HText *,		me,
+	HTStyleSheet *,		sheet)
 {
     return 0;
 }
@@ -2265,9 +2428,9 @@ PUBLIC HTStyle * HText_selectionStyle ARGS2(
 /*	Paste in styled text
 */
 PUBLIC void HText_replaceSel ARGS3(
-	HText *,me,
-	CONST char *,aString, 
-	HTStyle *,aStyle)
+	HText *,	me,
+	CONST char *,	aString,
+	HTStyle *,	aStyle)
 {
 }
 
@@ -2275,7 +2438,9 @@ PUBLIC void HText_replaceSel ARGS3(
 /*	Apply this style to the selection and all similarly formatted text
 **	(style recovery only)
 */
-PUBLIC void HTextApplyToSimilar ARGS2(HText *,me, HTStyle *,style)
+PUBLIC void HTextApplyToSimilar ARGS2(
+	HText *,	me,
+	HTStyle *,	style)
 {
     
 }
@@ -2284,7 +2449,9 @@ PUBLIC void HTextApplyToSimilar ARGS2(HText *,me, HTStyle *,style)
 /*	Select the first unstyled run.
 **	(style recovery only)
 */
-PUBLIC void HTextSelectUnstyled ARGS2(HText *,me, HTStyleSheet *,sheet)
+PUBLIC void HTextSelectUnstyled ARGS2(
+	HText *,		me,
+	HTStyleSheet *,		sheet)
 {
     
 }
@@ -2292,12 +2459,14 @@ PUBLIC void HTextSelectUnstyled ARGS2(HText *,me, HTStyleSheet *,sheet)
 
 /*	Anchor handling:
 */
-PUBLIC void		HText_unlinkSelection ARGS1(HText *,me)
+PUBLIC void HText_unlinkSelection ARGS1(
+	HText *,	me)
 {
     
 }
 
-PUBLIC HTAnchor *	HText_referenceSelected ARGS1(HText *,me)
+PUBLIC HTAnchor * HText_referenceSelected ARGS1(
+	HText *,	me)
 {
      return 0;   
 }
@@ -2309,18 +2478,21 @@ PUBLIC int HText_getTopOfScreen NOARGS
       return text->top_of_screen;
 }
 
-PUBLIC int HText_getLines ARGS1(HText *,text)
+PUBLIC int HText_getLines ARGS1(
+	HText *,	text)
 {
-      return text->lines;
+      return text->Lines;
 }
 
-PUBLIC HTAnchor * HText_linkSelTo ARGS2(HText *,me, HTAnchor *,anchor)
+PUBLIC HTAnchor * HText_linkSelTo ARGS2(
+	HText *,	me,
+	HTAnchor *,	anchor)
 {
     return 0;
 }
 
 /* 
- * Utility for freeing the list of previous isindex and whereis queries. - FM
+ *  Utility for freeing the list of previous isindex and whereis queries. - FM
  */
 PUBLIC void HTSearchQueries_free NOARGS
 {
@@ -2339,10 +2511,11 @@ PUBLIC void HTSearchQueries_free NOARGS
 }
 
 /* 
- * Utility for listing isindex and whereis queries, making
- * any repeated queries the most current in the list. - FM
+ *  Utility for listing isindex and whereis queries, making
+ *  any repeated queries the most current in the list. - FM
  */
-PUBLIC void HTAddSearchQuery ARGS1(char *, query)
+PUBLIC void HTAddSearchQuery ARGS1(
+	char *,		query)
 {
     char *new;
     char *old;
@@ -2375,7 +2548,8 @@ PUBLIC void HTAddSearchQuery ARGS1(char *, query)
     return;
 }
 
-PUBLIC int do_www_search ARGS1(document *,doc)
+PUBLIC int do_www_search ARGS1(
+	document *,	doc)
 {
     char searchstring[256], temp[256], *cp, *tmpaddress = NULL;
     int ch, recall, i;
@@ -2384,12 +2558,12 @@ PUBLIC int do_www_search ARGS1(document *,doc)
     BOOLEAN PreviousSearch = FALSE;
 
     /*
-     * Load the default query buffer
+     *  Load the default query buffer
      */
     if ((cp=strchr(doc->address, '?')) != NULL) {
         /*
-	 * This is an index from a previous search.
-	 * Use its query as the default.
+	 *  This is an index from a previous search.
+	 *  Use its query as the default.
 	 */
 	PreviousSearch = TRUE;
 	strcpy(searchstring, ++cp);
@@ -2399,19 +2573,19 @@ PUBLIC int do_www_search ARGS1(document *,doc)
 	HTUnEscape(searchstring);
 	strcpy(temp, searchstring);
 	/*
-	 * Make sure it's treated as the most recent query. - FM
+	 *  Make sure it's treated as the most recent query. - FM
 	 */
 	HTAddSearchQuery(searchstring);
     } else {
         /*
-	 * New search; no default.
+	 *  New search; no default.
 	 */
         searchstring[0] = '\0';
 	temp[0] = '\0';
     }
 
     /*
-     * Prompt for a query string.
+     *  Prompt for a query string.
      */
     if (searchstring[0] == '\0') {
         if (HTMainAnchor->isIndexPrompt)
@@ -2431,19 +2605,19 @@ get_query:
 	if (recall && ch == UPARROW) {
 	    if (PreviousSearch) {
 	        /*
-		 * Use the second to last query in the list. - FM
+		 *  Use the second to last query in the list. - FM
 		 */
 	        QueryNum = 1;
 		PreviousSearch = FALSE;
 	    } else {
 	        /*
-		 * Go back to the previous query in the list. - FM
+		 *  Go back to the previous query in the list. - FM
 		 */
 	        QueryNum++;
 	    }
 	    if (QueryNum >= QueryTotal)
 	        /*
-		 * Roll around to the last query in the list. - FM
+		 *  Roll around to the last query in the list. - FM
 		 */
 	        QueryNum = 0;
 	    if ((cp=(char *)HTList_objectAt(search_queries,
@@ -2462,19 +2636,19 @@ get_query:
 	} else if (recall && ch == DNARROW) {
 	    if (PreviousSearch) {
 	        /*
-		 * Use the first query in the list. - FM
+		 *  Use the first query in the list. - FM
 		 */
 	        QueryNum = QueryTotal - 1;
 		PreviousSearch = FALSE;
 	    } else {
 	        /*
-		 * Advance to the next query in the list. - FM
+		 *  Advance to the next query in the list. - FM
 		 */
 	        QueryNum--;
 	    }
 	    if (QueryNum < 0)
 	        /*
-		 * Roll around to the first query in the list. - FM
+		 *  Roll around to the first query in the list. - FM
 		 */
 		QueryNum = QueryTotal - 1;
 	    if ((cp=(char *)HTList_objectAt(search_queries,
@@ -2493,7 +2667,7 @@ get_query:
 	}
 
         /*
-	 * Search cancelled.
+	 *  Search cancelled.
 	 */
         _statusline(CANCELLED);
         sleep(InfoSecs);
@@ -2501,7 +2675,7 @@ get_query:
     }
 
     /*
-     * Strip leaders and trailers. - FM
+     *  Strip leaders and trailers. - FM
      */
     cp = searchstring;
     while (*cp && isspace((unsigned char)*cp))
@@ -2521,7 +2695,7 @@ get_query:
         *cp-- = '\0';
 
     /*
-     * Don't resubmit the same query unintentionally.
+     *  Don't resubmit the same query unintentionally.
      */
     if (!LYforce_no_cache && 0 == strcmp(temp, searchstring)) {
 	_statusline(USE_C_R_TO_RESUB_CUR_QUERY);
@@ -2530,13 +2704,13 @@ get_query:
     }
 
     /*
-     * Add searchstring to the query list,
-     * or make it the most current. - FM
+     *  Add searchstring to the query list,
+     *  or make it the most current. - FM
      */
     HTAddSearchQuery(searchstring);
 
     /*
-     * Show the URL with the new query.
+     *  Show the URL with the new query.
      */
     if ((cp=strchr(doc->address, '?')) != NULL)
         *cp = '\0';
@@ -2554,7 +2728,7 @@ get_query:
         *cp = '?';
 
     /*
-     * OK, now we do the search.
+     *  OK, now we do the search.
      */
     if (HTSearch(searchstring, HTMainAnchor)) {
 	/*
@@ -2573,27 +2747,30 @@ get_query:
 	    fprintf(stderr,"\ndo_www_search: newfile: %s\n",doc->address);
 
         /*
-	 * Yah, the search succeeded.
+	 *  Yah, the search succeeded.
 	 */
 	return(NORMAL);
     }
 
     /*
-     * Either the search failed (Yuk), or we got redirection.
-     * If it's redirection, use_this_url_instead is set, and
-     * mainloop() will deal with it such that security features
-     * and restrictions are checked before acting on the URL, or
-     * rejecting it. - FM
+     *  Either the search failed (Yuk), or we got redirection.
+     *  If it's redirection, use_this_url_instead is set, and
+     *  mainloop() will deal with it such that security features
+     *  and restrictions are checked before acting on the URL, or
+     *  rejecting it. - FM
      */
     return(NOT_FOUND);
 }
 
-/* print the contents of the file in HTMainText to
- * the file descripter fp.
- * if is_reply is true add ">" to the beginning of each
- * line to specify the file is a replied to message
+/*
+ *  Print the contents of the file in HTMainText to
+ *  the file descripter fp.
+ *  If is_reply is TRUE add ">" to the beginning of each
+ *  line to specify the file is a reply to message.
  */
-PUBLIC void print_wwwfile_to_fd ARGS2(FILE *,fp, int,is_reply)
+PUBLIC void print_wwwfile_to_fd ARGS2(
+	FILE *,		fp,
+	int,		is_reply)
 {
       register int i;
       HTLine * line = HTMainText->last_line->next;
@@ -2640,12 +2817,15 @@ PUBLIC void print_wwwfile_to_fd ARGS2(FILE *,fp, int,is_reply)
 
 }
 
-/* print the contents of the file in HTMainText to
- * the file descripter fp.
- * First output line is "thelink", ie, the URL for this file
+/*
+ *  Print the contents of the file in HTMainText to
+ *  the file descripter fp.
+ *  First output line is "thelink", ie, the URL for this file.
  */
-PUBLIC void print_crawl_to_fd ARGS3(FILE *, fp, char *, thelink,
-				    char *, thetitle)
+PUBLIC void print_crawl_to_fd ARGS3(
+	FILE *,		fp,
+	char *,		thelink,
+	char *,		thetitle)
 {
     register int i;
     HTLine * line = HTMainText->last_line->next;
@@ -2682,7 +2862,9 @@ PUBLIC void print_crawl_to_fd ARGS3(FILE *, fp, char *, thelink,
 #endif /* VMS */
 }
 
-PUBLIC void www_user_search ARGS2(int,start_line, char *,target)
+PUBLIC void www_user_search ARGS2(
+	int,		start_line,
+	char *,		target)
 {
     register HTLine * line = HTMainText->last_line->next;
     register int count;
@@ -2738,7 +2920,9 @@ PUBLIC void www_user_search ARGS2(int,start_line, char *,target)
 
 }
 
-PUBLIC  void  user_message ARGS2(char *,message, char *,argument) 
+PUBLIC void user_message ARGS2(
+	char *,		message,
+	char *,		argument) 
 {
     char *temp = NULL;
     char temp_arg[256];
@@ -2762,18 +2946,21 @@ PUBLIC  void  user_message ARGS2(char *,message, char *,argument)
     return;
 }
 
-/* HText_getOwner returns the owner of the
- * current document
+/*
+ *  HText_getOwner returns the owner of the
+ *  current document.
  */
 PUBLIC char * HText_getOwner NOARGS
 {
     return((char *)HTAnchor_owner(HTMainText->node_anchor));
 }
 
-/* HText_setMainTextOwner sets the owner for the
- * current document
+/*
+*   HText_setMainTextOwner sets the owner for the
+ *  current document.
  */
-PUBLIC void HText_setMainTextOwner ARGS1(CONST char *, owner)
+PUBLIC void HText_setMainTextOwner ARGS1(
+	CONST char *,	owner)
 {
     if (!HTMainText)
         return;
@@ -2781,13 +2968,32 @@ PUBLIC void HText_setMainTextOwner ARGS1(CONST char *, owner)
     HTAnchor_setOwner(HTMainText->node_anchor, owner);
 }
 
-/* HText_getRevTitle returns the RevTitle element of the
- * current document, used as the subject for mailto comments
- * to the owner.
+/*
+ *  HText_getRevTitle returns the RevTitle element of the
+ *  current document, used as the subject for mailto comments
+ *  to the owner.
  */
 PUBLIC char * HText_getRevTitle NOARGS
 {
     return((char *)HTAnchor_RevTitle(HTMainText->node_anchor));
+}
+
+/*
+ *  HText_getContentBase returns the Content-Base header
+ *  of the current document.
+ */
+PUBLIC char * HText_getContentBase NOARGS
+{
+    return((char *)HTAnchor_content_base(HTMainText->node_anchor));
+}
+
+/*
+ *  HText_getContentLocation returns the Content-Location header
+ *  of the current document.
+ */
+PUBLIC char * HText_getContentLocation NOARGS
+{
+    return((char *)HTAnchor_content_location(HTMainText->node_anchor));
 }
 
 PUBLIC void HTuncache_current_document NOARGS
@@ -2847,6 +3053,17 @@ PUBLIC BOOLEAN HTLoadedDocumentIsHEAD NOARGS
 	return (FALSE);
 }
 
+PUBLIC BOOLEAN HTLoadedDocumentIsSafe NOARGS
+{
+    if (!HTMainText)
+	return (FALSE);
+
+    if (HTMainText->node_anchor && HTMainText->node_anchor->safe) 
+       	return(HTMainText->node_anchor->safe);
+    else
+	return (FALSE);
+}
+
 PUBLIC char * HTLoadedDocumentCharset NOARGS
 {
     if (!HTMainText)
@@ -2879,14 +3096,16 @@ PUBLIC char * HTLoadedDocumentBookmark NOARGS
 	return (NULL);
 }
 
-PUBLIC int HText_LastLineSize ARGS1(HText *,text)
+PUBLIC int HText_LastLineSize ARGS1(
+	HText *,	text)
 {
     if (!text || !text->last_line || !text->last_line->size)
         return 0;
     return HText_TrueLineSize(text->last_line);
 }
 
-PUBLIC int HText_PreviousLineSize ARGS1(HText *,text)
+PUBLIC int HText_PreviousLineSize ARGS1(
+	HText *,	text)
 {
     HTLine * line;
 
@@ -2897,7 +3116,8 @@ PUBLIC int HText_PreviousLineSize ARGS1(HText *,text)
     return HText_TrueLineSize(line);
 }
 
-PRIVATE int HText_TrueLineSize ARGS1(HTLine *,line)
+PRIVATE int HText_TrueLineSize ARGS1(
+	HTLine *,	line)
 {
     int i, true_size = 0;
 
@@ -2912,7 +3132,8 @@ PRIVATE int HText_TrueLineSize ARGS1(HTLine *,line)
     return true_size;
 }
 
-PUBLIC void HText_NegateLineOne ARGS1(HText *,text)
+PUBLIC void HText_NegateLineOne ARGS1(
+	HText *,	text)
 {
     if (text) {
         text->in_line_1 = NO;
@@ -2921,13 +3142,44 @@ PUBLIC void HText_NegateLineOne ARGS1(HText *,text)
 }
 
 /*
- * NOTE: This function presently is correct only if the
- *	 alignment is HT_LEFT.  The offset is still zero,
- *	 because that's not determined for HT_CENTER or
- *	 HT_RIGHT until subsequent characters are received
- *	 and split_line() is called. - FM
+ *  This function is for removing the first of two
+ *  successive blank lines.  It should be called after
+ *  checking the situation with HText_LastLineSize()
+ *  and HText_PreviousLineSize().  Any characters in
+ *  the removed line (i.e., control characters, or it
+ *  wouldn't have tested blank) should have been
+ *  reiterated by split_line() in the retained blank
+ *  line. - FM
  */
-PUBLIC int HText_getCurrentColumn ARGS1(HText *,text)
+PUBLIC void HText_RemovePreviousLine ARGS1(
+	HText *,	text)
+{
+    HTLine *line, *previous;
+    char *data;
+
+    if (!(text && text->Lines > 1))
+        return;
+
+    line = text->last_line->prev;
+    data = line->data;
+    previous = line->prev;
+    previous->next = text->last_line;
+    text->last_line->prev = previous;
+    text->chars -= ((data && *data == '\0') ?
+    					  1 : strlen(line->data) + 1);
+    text->Lines--;
+    FREE(line);
+}
+
+/*
+ *  NOTE: This function presently is correct only if the
+ *	  alignment is HT_LEFT.  The offset is still zero,
+ *	  because that's not determined for HT_CENTER or
+ *	  HT_RIGHT until subsequent characters are received
+ *	  and split_line() is called. - FM
+ */
+PUBLIC int HText_getCurrentColumn ARGS1(
+	HText *,	text)
 {
     int column = 0;
 
@@ -2939,7 +3191,8 @@ PUBLIC int HText_getCurrentColumn ARGS1(HText *,text)
     return column;
 }
 
-PUBLIC int HText_getMaximumColumn ARGS1(HText *,text)
+PUBLIC int HText_getMaximumColumn ARGS1(
+	HText *,	text)
 {
     int column = (LYcols-2);
     if (text) {
@@ -2950,13 +3203,15 @@ PUBLIC int HText_getMaximumColumn ARGS1(HText *,text)
 }
 
 /*
- * NOTE: This function uses HText_getCurrentColumn() which
- *	 presently is correct only if the alignment is
- *	 HT_LEFT. - FM
+ *  NOTE: This function uses HText_getCurrentColumn() which
+ *	  presently is correct only if the alignment is
+ *	  HT_LEFT. - FM
  */
-PUBLIC void HText_setTabID ARGS2(HText *,text, CONST char *,name)
+PUBLIC void HText_setTabID ARGS2(
+	HText *,	text,
+	CONST char *,	name)
 {
-    HTTabID * tab = NULL;
+    HTTabID * Tab = NULL;
     HTList * cur = text->tabs;
     HTList * last = NULL;
 
@@ -2966,43 +3221,46 @@ PUBLIC void HText_setTabID ARGS2(HText *,text, CONST char *,name)
     if (!cur) {
         cur = text->tabs = HTList_new();
     } else {
-        while (NULL != (tab = (HTTabID *)HTList_nextObject(cur))) {
-	    if (tab->name && !strcmp(tab->name, name))
+        while (NULL != (Tab = (HTTabID *)HTList_nextObject(cur))) {
+	    if (Tab->name && !strcmp(Tab->name, name))
 	        return; /* Already set.  Keep the first value. */
 	    last = cur;
 	}
 	cur = last;
     }
-    if (!tab) { /* New name.  Create a new node */
-	tab = (HTTabID *)calloc(1, sizeof(HTTabID));
-	if (tab == NULL)
+    if (!Tab) { /* New name.  Create a new node */
+	Tab = (HTTabID *)calloc(1, sizeof(HTTabID));
+	if (Tab == NULL)
 	    outofmem(__FILE__, "HText_setTabID");
-	HTList_addObject(cur, tab);
-	StrAllocCopy(tab->name, name);
+	HTList_addObject(cur, Tab);
+	StrAllocCopy(Tab->name, name);
     }
-    tab->column = HText_getCurrentColumn(text);
+    Tab->column = HText_getCurrentColumn(text);
     return;
 }
 
-PUBLIC int HText_getTabIDColumn ARGS2(HText *,text, CONST char *,name)
+PUBLIC int HText_getTabIDColumn ARGS2(
+	HText *,	text,
+	CONST char *,	name)
 {
     int column = 0;
-    HTTabID * tab;
+    HTTabID * Tab;
     HTList * cur = text->tabs;
 
     if (text && name && *name && cur) {
-        while (NULL != (tab = (HTTabID *)HTList_nextObject(cur))) {
-	    if (tab->name && !strcmp(tab->name, name))
+        while (NULL != (Tab = (HTTabID *)HTList_nextObject(cur))) {
+	    if (Tab->name && !strcmp(Tab->name, name))
 	        break;
 	}
-	if (tab)
-	    column = tab->column;
+	if (Tab)
+	    column = Tab->column;
     }
     return column;
 }
 
 
-/*  Form methods
+/*
+ *  Form methods
  *    These routines are used to build forms consisting
  *    of input fields 
  */
@@ -3072,23 +3330,24 @@ PUBLIC void HText_beginForm ARGS4(
 		(HTFormEnctype ? HTFormEnctype : ""));
 }
 
-PUBLIC void HText_endForm ARGS1(HText *,text)
+PUBLIC void HText_endForm ARGS1(
+	HText *,	text)
 {
     if (HTFormFields == 1 && text && text->first_anchor) {
         /*
-	 * Support submission of a single text input field in
-	 * the form via <return> instead of a submit botton. - FM
+	 *  Support submission of a single text input field in
+	 *  the form via <return> instead of a submit botton. - FM
 	 */
         TextAnchor * a = text->first_anchor;
 	/*
-	 * Go through list of anchors and get our input field. - FM
+	 *  Go through list of anchors and get our input field. - FM
 	 */
 	while (1) {
 	    if (a->link_type == INPUT_ANCHOR &&
 	        a->input_field->number == HTFormNumber &&
 		a->input_field->type == F_TEXT_TYPE) {
 		/*
-		 * Got it.  Make it submitting. - FM
+		 *  Got it.  Make it submitting. - FM
 		 */
 		a->input_field->submit_action = NULL;
 		StrAllocCopy(a->input_field->submit_action, HTFormAction);
@@ -3118,7 +3377,10 @@ PUBLIC void HText_endForm ARGS1(HText *,text)
     HTFormDisabled = FALSE;
 }
 
-PUBLIC void HText_beginSelect ARGS3(char *,name, BOOLEAN,multiple, char *, size)
+PUBLIC void HText_beginSelect ARGS3(
+	char *,		name,
+	BOOLEAN,	multiple,
+	char *,		size)
 {
    /*
     *  Save the group name.
@@ -3137,7 +3399,7 @@ PUBLIC void HText_beginSelect ARGS3(char *,name, BOOLEAN,multiple, char *, size)
       HTCurSelectGroupType = F_RADIO_TYPE;
 
     /*
-     * Length of an option list.
+     *  Length of an option list.
      */
     StrAllocCopy(HTCurSelectGroupSize, size);
 
@@ -3155,9 +3417,12 @@ PUBLIC void HText_beginSelect ARGS3(char *,name, BOOLEAN,multiple, char *, size)
 **  tag so we have to do it now.  Assume that the last anchor
 **  was the previous options tag.
 */
-PUBLIC char * HText_setLastOptionValue ARGS5(HText *, text, char *, value,
-						char*, submit_value,
-						int, order, BOOLEAN, checked)
+PUBLIC char * HText_setLastOptionValue ARGS5(
+	HText *,	text,
+	char *,		value,
+	char*,		submit_value,
+	int,		order,
+	BOOLEAN,	checked)
 {
     char *cp;
     unsigned char *tmp = NULL;
@@ -3345,7 +3610,9 @@ PUBLIC char * HText_setLastOptionValue ARGS5(HText *, text, char *, value,
  *  returns the number of charactors to leave blank
  *  so that the input field can fit
  */
-PUBLIC int HText_beginInput ARGS2(HText *,text, InputFieldData *,I)
+PUBLIC int HText_beginInput ARGS2(
+	HText *,		text,
+	InputFieldData *,	I)
 {
 	
     TextAnchor * a = (TextAnchor *) calloc(1, sizeof(*a));
@@ -3488,7 +3755,8 @@ PUBLIC int HText_beginInput ARGS2(HText *,text, InputFieldData *,I)
      */
     if (I->size != NULL) {
 	f->size = atoi(I->size);
-	/* Leave at zero for option lists.
+	/*
+	 *  Leave at zero for option lists.
 	 */
 	if (f->size == 0 && cp_option == NULL) {
 	   f->size = 20;  /* default */
@@ -3528,15 +3796,7 @@ PUBLIC int HText_beginInput ARGS2(HText *,text, InputFieldData *,I)
 	} else if (!strcasecomp(I->type,"submit")) {
 	    f->type = F_SUBMIT_TYPE;
 	} else if (!strcasecomp(I->type,"image")) {
-	    /*
-	     *  Ugh, we have a clickable image submit button.
-	     *  Set the type to submit, and fake an ALT string.
-	     *  If the user activates it, we'll send a 0,0
-	     *  coordinate pair, which typically will return
-	     *  the image's default. FM
-	     */
-	    f->type = F_SUBMIT_TYPE;
-	    StrAllocCopy(f->value, "[IMAGE]-Submit");
+	    f->type = F_IMAGE_SUBMIT_TYPE;
 	} else if (!strcasecomp(I->type,"reset")) {
 	    f->type = F_RESET_TYPE;
 	} else if (!strcasecomp(I->type,"OPTION_LIST")) {
@@ -3552,7 +3812,9 @@ PUBLIC int HText_beginInput ARGS2(HText *,text, InputFieldData *,I)
 	} else if (!strcasecomp(I->type,"file")) {
 	    f->type = F_FILE_TYPE;
 	} else {
-	    /* Note that TYPE="scribble" defaults to TYPE="text". - FM */
+	    /*
+	     *  Note that TYPE="scribble" defaults to TYPE="text". - FM
+	     */
 	    f->type = F_TEXT_TYPE; /* default */
 	}
     } else {
@@ -3565,11 +3827,17 @@ PUBLIC int HText_beginInput ARGS2(HText *,text, InputFieldData *,I)
     if (I->name != NULL) {
         StrAllocCopy(f->name,I->name);
     } else {
-	if (f->type == F_RESET_TYPE || f->type == F_SUBMIT_TYPE) {
-	    /* set name to empty string */
+	if (f->type == F_RESET_TYPE ||
+	    f->type == F_SUBMIT_TYPE ||
+	    f->type == F_IMAGE_SUBMIT_TYPE) {
+	    /*
+	     *  Set name to empty string.
+	     */
 	    StrAllocCopy(f->name, "");
 	} else {
-	    /* error! name must be present */
+	    /*
+	     *  Error!  NAME must be present.
+	     */
 	    if (TRACE)
 		fprintf(stderr,
 		  "GridText: No name present in input field; not displaying\n");
@@ -3581,46 +3849,49 @@ PUBLIC int HText_beginInput ARGS2(HText *,text, InputFieldData *,I)
     }
 
     /* 
-     *  Set VALUE (if it exists).
+     *  Set VALUE, if it exists.  Otherwise, if it's not
+     *  an option list make it a zero-length string. - FM
      */
     if (IValue != NULL) {
 	/*
 	 *  OPTION VALUE is not actually the value to be seen but is to
 	 *    be sent....
 	 */
-	if (f->type != F_OPTION_LIST_TYPE && f->type != F_CHECKBOX_TYPE) {
-	    StrAllocCopy(f->value, IValue);
-	} else {
+	if (f->type == F_OPTION_LIST_TYPE ||
+	    f->type == F_CHECKBOX_TYPE) {
 	    /*
 	     *  Fill both with the value.  The f->value may be
 	     *  overwritten in HText_setLastOptionValue....
 	     */
-	    if (!f->value || strcmp(f->value, "[IMAGE]-Submit"))
-		StrAllocCopy(f->value, IValue);
+	    StrAllocCopy(f->value, IValue);
 	    StrAllocCopy(f->cp_submit_value, IValue);
+	} else {
+	    StrAllocCopy(f->value, IValue);
 	}
-    } else if (!f->value || strcmp(f->value, "[IMAGE]-Submit")) {
-        if (f->type != F_OPTION_LIST_TYPE) {
-	    StrAllocCopy(f->value, "");
-	}
+    } else if (f->type != F_OPTION_LIST_TYPE) {
+	StrAllocCopy(f->value, "");
     }
 
     /*
      *  Run checks and fill in neccessary values.
      */
     if (f->type == F_RESET_TYPE) {
-	if (IValue != NULL) {
-	    f->size = strlen(IValue);
+	if (f->value && *f->value != '\0') {
+	    f->size = strlen(f->value);
 	} else {
 	    StrAllocCopy(f->value, "Reset");
 	    f->size = 5;
 	}
-    } else if (f->type == F_SUBMIT_TYPE) {
-        if (f->value && !strcmp(f->value, "[IMAGE]-Submit")) {
+    } else if (f->type == F_IMAGE_SUBMIT_TYPE ||
+    	       f->type == F_SUBMIT_TYPE) {
+        if (f->value && *f->value != '\0') {
 	    f->size = strlen(f->value);
-	} else if (IValue != NULL) {
-	    f->size = strlen(IValue);
+	} else if (f->type == F_IMAGE_SUBMIT_TYPE) {
+	    StrAllocCopy(f->value, "[IMAGE]-Submit");
+	    f->size = 14;
 	} else {
+	    StrAllocCopy(f->value, "[IMAGE]-Submit");
+	    f->size = 14;
 	    StrAllocCopy(f->value, "Submit");
 	    f->size = 6;
 	}
@@ -3678,8 +3949,11 @@ PUBLIC int HText_beginInput ARGS2(HText *,text, InputFieldData *,I)
 }
 
 
-PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
-				   char *,link_name, char *, link_value)
+PUBLIC void HText_SubmitForm ARGS4(
+	FormInfo *,	submit_item,
+	document *,	doc,
+	char *,		link_name,
+	char *,		link_value)
 {
     TextAnchor *anchor_ptr = HTMainText->first_anchor;
     int form_number = submit_item->number;
@@ -3754,7 +4028,7 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 	
 	        len += (strlen(form_ptr->name) + (Boundary ? 100 : 10));
 		/*
-		 *	Calculate by the option submit value if present.
+		 *  Calculate by the option submit value if present.
 		 */
 		if (form_ptr->cp_submit_value != NULL) {
 		    len += (strlen(form_ptr->cp_submit_value) + 10);
@@ -3874,12 +4148,15 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 
 	        case F_SUBMIT_TYPE:
 	        case F_TEXT_SUBMIT_TYPE:
+	        case F_IMAGE_SUBMIT_TYPE:
 		    /*
 		     *  If it has a non-zero length name (e.g., because
-		     *  it's really a type="image" that's been converted
-		     *  to SUBMIT_TYPE, or one of multiple submit buttons,
-		     *  or a single type="text" that's been converted to
-		     *  a TEXT_SUBMIT_TYPE), include the name=value pair. - FM
+		     *  it's IMAGE_SUBMIT_TYPE to be handled homologously
+		     *  to an image map, or a SUBMIT_TYPE in a set of
+		     *  multiple submit buttons, or a single type="text"
+		     *  that's been converted to a TEXT_SUBMIT_TYPE),
+		     *  include the name=value pair, or fake name.x=0 and
+		     *  name.y=0 pairs for IMAGE_SUBMIT_TYPE. - FM
 		     */
 		    if ((form_ptr->name && *form_ptr->name != '\0' &&
 		        !strcmp(form_ptr->name, link_name)) &&
@@ -3921,7 +4198,8 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 			}
 
 		        /*
-		         * Be sure to actually look at the option submit value.
+		         *  Be sure to actually look at
+			 *  the option submit value.
 		         */
 		        if (form_ptr->cp_submit_value != NULL) {
 			    for (i = 0; form_ptr->cp_submit_value[i]; i++) {
@@ -3972,11 +4250,11 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 			    }
 		        }
 
-			if (!strcmp(form_ptr->value, "[IMAGE]-Submit")) {
+			if (form_ptr->type == F_IMAGE_SUBMIT_TYPE) {
 			    /*
-			     * It's a clickable image submit button.
-			     * Fake a 0,0 coordinate pair, which
-			     * typically returns the image's default. - FM
+			     *  It's a clickable image submit button.
+			     *  Fake a 0,0 coordinate pair, which
+			     *  typically returns the image's default. - FM
 			     */
 			    if (Boundary) {
 			        escaped1[(strlen(escaped1) - 4)] = '\0';
@@ -3998,8 +4276,8 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 			    }
 			} else {
 			    /*
-			     * It's a standard submit button.
-			     * Use the name=value pair. = FM
+			     *  It's a standard submit button.
+			     *  Use the name=value pair. = FM
 			     */
 			    sprintf(&query[strlen(query)],
 				    "%s%s%s%s%s",
@@ -4019,7 +4297,9 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 
 	        case F_RADIO_TYPE:
                 case F_CHECKBOX_TYPE:
-		    /* only add if selected */
+		    /*
+		     *  Only add if selected.
+		     */
 		    if (form_ptr->num_value) {
 	                if (first_one) {
 			    if (Boundary) {
@@ -4056,7 +4336,7 @@ PUBLIC void HText_SubmitForm ARGS4(FormInfo *,submit_item, document *,doc,
 		            escaped1 = HTEscape(form_ptr->name, URL_XALPHAS);
 			}
 			/*
-			 *	Be sure to use the submit option value.
+			 *  Be sure to use the submit option value.
 			 */
 			if (form_ptr->cp_submit_value != NULL) {
 			    for (i = 0; form_ptr->cp_submit_value[i]; i++) {
@@ -4418,7 +4698,8 @@ PUBLIC void HText_DisableCurrentForm NOARGS
     return;
 }
 
-PUBLIC void HText_ResetForm ARGS1(FormInfo *,form)
+PUBLIC void HText_ResetForm ARGS1(
+	FormInfo *,	form)
 {
     TextAnchor * anchor_ptr = HTMainText->first_anchor;
 
@@ -4465,7 +4746,8 @@ PUBLIC void HText_ResetForm ARGS1(FormInfo *,form)
     }
 }
 
-PUBLIC void HText_activateRadioButton ARGS1(FormInfo *,form)
+PUBLIC void HText_activateRadioButton ARGS1(
+	FormInfo *,	form)
 {
     TextAnchor * anchor_ptr = HTMainText->first_anchor;
     int form_number = form->number;
@@ -4550,7 +4832,8 @@ PRIVATE void free_all_texts NOARGS
 **  of N internal links.  Since the parent link has already been taken,
 **  it won't go again, hence the (incorrect) links won't cause problems.
 */
-PUBLIC char * stub_HTAnchor_address ARGS1 (HTAnchor *,me)
+PUBLIC char * stub_HTAnchor_address ARGS1(
+	HTAnchor *,	me)
 {
     char *addr = NULL;
     if (me)
@@ -4558,26 +4841,30 @@ PUBLIC char * stub_HTAnchor_address ARGS1 (HTAnchor *,me)
     return addr;
 }
 
-PUBLIC void HText_setToolbar ARGS1 (HText *, text)
+PUBLIC void HText_setToolbar ARGS1(
+	HText *,	text)
 {
     if (text)
         text->toolbar = TRUE;
     return;
 }
 
-PUBLIC BOOL HText_hasToolbar ARGS1 (HText *, text)
+PUBLIC BOOL HText_hasToolbar ARGS1(
+	HText *,	text)
 {
     return ((text && text->toolbar) ? TRUE : FALSE);
 }
 
-PUBLIC void HText_setNoCache ARGS1 (HText *, text)
+PUBLIC void HText_setNoCache ARGS1(
+	HText *,	text)
 {
     if (text)
         text->no_cache = TRUE;
     return;
 }
 
-PUBLIC BOOL HText_hasNoCacheSet ARGS1 (HText *, text)
+PUBLIC BOOL HText_hasNoCacheSet ARGS1(
+	HText *,	text)
 {
     return ((text && text->no_cache) ? TRUE : FALSE);
 }

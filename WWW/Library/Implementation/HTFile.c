@@ -8,7 +8,7 @@
 **	 creates a major impediment for hopes of adapting Lynx to
 **	 a newer version of the library.
 **
-** History:
+**  History:
 **	   Feb 91	Written Tim Berners-Lee CERN/CN
 **	   Apr 91	vms-vms access included using DECnet syntax
 **	26 Jun 92 (JFG) When running over DECnet, suppressed FTP.
@@ -101,11 +101,9 @@ struct _HTStructured {
 	/* ... */
 };
 
-
-/*                   Controlling globals
-**
+/*
+**  Controlling globals.
 */
-
 PUBLIC int HTDirAccess = HT_DIR_OK;
 
 #ifdef DIRED_SUPPORT
@@ -125,24 +123,24 @@ extern HTCJKlang HTCJK;
 
 PRIVATE char *HTMountRoot = "/Net/";		/* Where to find mounts */
 #ifdef VMS
-PRIVATE char *HTCacheRoot = "/WWW$SCRATCH";   /* Where to cache things */
+PRIVATE char *HTCacheRoot = "/WWW$SCRATCH";	/* Where to cache things */
 #else
-PRIVATE char *HTCacheRoot = "/tmp/W3_Cache_";   /* Where to cache things */
+PRIVATE char *HTCacheRoot = "/tmp/W3_Cache_";	/* Where to cache things */
 #endif /* VMS */
 
-/* PRIVATE char *HTSaveRoot  = "$(HOME)/WWW/";*/    /* Where to save things */
+/*PRIVATE char *HTSaveRoot  = "$(HOME)/WWW/";*/	/* Where to save things */
 
-
-/*	Suffix registration
+/*
+**  Suffix registration.
 */
-
 PRIVATE HTList * HTSuffixes = 0;
 PRIVATE HTSuffix no_suffix = { "*", NULL, NULL, 1.0 };
 PRIVATE HTSuffix unknown_suffix = { "*.*", NULL, NULL, 1.0};
 
-/*
- *	To free up the suffixes at program exit.
- */
+
+/*	To free up the suffixes at program exit.
+**	----------------------------------------
+*/
 PRIVATE void free_suffixes NOPARAMS;
 
 #ifdef LONG_LIST
@@ -230,10 +228,14 @@ PRIVATE void LYListFmtParse ARGS5(
 			now = time(0);
 			datestr = ctime(&st.st_mtime);
 			if ((now - st.st_mtime) < SEC_PER_YEAR/2)
-				/* MMM DD HH:MM */
+				/*
+				**  MMM DD HH:MM
+				*/
 				sprintf(buf, "%.12s", datestr + 4);
 			else
-				/* MMM DD  YYYY */
+				/*
+				**  MMM DD  YYYY
+				*/
 				sprintf(buf, "%.7s %.4s ", datestr + 4,
 				  datestr + 20);
 			sprintf(fmt, "%%%ss", start);
@@ -322,8 +324,8 @@ PRIVATE void LYListFmtParse ARGS5(
 }
 #endif /* LONG_LIST */
 
-/*	Define the representation associated with a file suffix
-**	-------------------------------------------------------
+/*	Define the representation associated with a file suffix.
+**	--------------------------------------------------------
 **
 **	Calling this with suffix set to "*" will set the default
 **	representation.
@@ -358,9 +360,9 @@ PUBLIC void HTSetSuffix ARGS4(
 	        outofmem(__FILE__, "HTSetSuffix");
 
 	    /*
-             *	Memory leak fixed.
-	     *	05-28-94 Lynx 2-3-1 Garrett Arch Blythe
-	     */	
+            **	Memory leak fixed.
+	    **	05-28-94 Lynx 2-3-1 Garrett Arch Blythe
+	    */	
 	    if (!HTSuffixes)	{
 		HTSuffixes = HTList_new();
 		atexit(free_suffixes);
@@ -375,10 +377,10 @@ PUBLIC void HTSetSuffix ARGS4(
     suff->rep = HTAtom_for(representation);
    
     /*
-     *	Memory leak fixed.
-     *	05-28-94 Lynx 2-3-1 Garrett Arch Blythe
-     *	Invariant code removed.
-     */
+    **	Memory leak fixed.
+    **	05-28-94 Lynx 2-3-1 Garrett Arch Blythe
+    **	Invariant code removed.
+    */
     suff->encoding = HTAtom_for(encoding);
     
     suff->quality = value;
@@ -398,25 +400,25 @@ PRIVATE void free_suffixes NOARGS
     HTSuffix * suff = NULL;
 
     /*
-     *  Loop through all suffixes.
-     */
+    **  Loop through all suffixes.
+    */
     while (!HTList_isEmpty(HTSuffixes)) {
 	/*
-	 *  Free off each item and its members if need be.
-	 */
+	**  Free off each item and its members if need be.
+	*/
 	suff = (HTSuffix *)HTList_removeLastObject(HTSuffixes);
 	FREE(suff->suffix);
 	FREE(suff);
     }
     /*
-     *  Free off the list itself.
-     */
+    **  Free off the list itself.
+    */
     HTList_delete(HTSuffixes);
     HTSuffixes = NULL;
 }
 
-
-/*	Send README file
+/*	Send README file.
+**	-----------------
 **
 **  If a README file exists, then it is inserted into the document here.
 */
@@ -467,16 +469,15 @@ Bug removed thanks to joe@athena.mit.edu */
 }
 #endif /* GOT_READ_DIR */
 
-
-/*	Make the cache file name for a W3 document
-**	------------------------------------------
+/*	Make the cache file name for a W3 document.
+**	-------------------------------------------
 **	Make up a suitable name for saving the node in
 **
 **	E.g.	/tmp/WWW_Cache_news/1234@cernvax.cern.ch
 **		/tmp/WWW_Cache_http/crnvmc/FIND/xx.xxx.xx
 **
-** On exit,
-**	returns	a malloc'ed string which must be freed by the caller.
+**  On exit:
+**	Returns	a malloc'ed string which must be freed by the caller.
 */
 PUBLIC char * HTCacheFileName ARGS1(
 	CONST char *,	name)
@@ -498,9 +499,8 @@ PUBLIC char * HTCacheFileName ARGS1(
     return result;
 }
 
-
-/*	Open a file for write, creating the path
-**	----------------------------------------
+/*	Open a file for write, creating the path.
+**	-----------------------------------------
 */
 #ifdef NOT_IMPLEMENTED
 PRIVATE int HTCreatePath ARGS1(CONST char *,path)
@@ -509,15 +509,15 @@ PRIVATE int HTCreatePath ARGS1(CONST char *,path)
 }
 #endif /* NOT_IMPLEMENTED */
 
-/*	Convert filenames between local and WWW formats
-**	-----------------------------------------------
+/*	Convert filenames between local and WWW formats.
+**	------------------------------------------------
 **	Make up a suitable name for saving the node in
 **
 **	E.g.	$(HOME)/WWW/news/1234@cernvax.cern.ch
 **		$(HOME)/WWW/http/crnvmc/FIND/xx.xxx.xx
 **
-** On exit,
-**	returns	a malloc'ed string which must be freed by the caller.
+**  On exit:
+**	Returns	a malloc'ed string which must be freed by the caller.
 */
 PUBLIC char * HTLocalName ARGS1(
 	CONST char *,	name)
@@ -573,15 +573,14 @@ PUBLIC char * HTLocalName ARGS1(
     }
 }
 
-
-/*	Make a WWW name from a full local path name
+/*	Make a WWW name from a full local path name.
+**	--------------------------------------------
 **
-** Bugs:
+**  Bugs:
 **	At present, only the names of two network root nodes are hand-coded
 **	in and valid for the NeXT only. This should be configurable in
 **	the general case.
 */
-
 PUBLIC char * WWW_nameOfFile ARGS1(
 	CONST char *,	name)
 {
@@ -610,16 +609,15 @@ PUBLIC char * WWW_nameOfFile ARGS1(
     return result;
 }
 
-
-/*	Determine a suitable suffix, given the representation
-**	-----------------------------------------------------
+/*	Determine a suitable suffix, given the representation.
+**	------------------------------------------------------
 **
-** On entry,
+**  On entry,
 **	rep	is the atomized MIME style representation
 **
-** On exit,
-**	returns	a pointer to a suitable suffix string if one has been
-**		found, else "".
+**  On exit:
+**	Returns	a pointer to a suitable suffix string if one has been
+**	found, else "".
 */
 PUBLIC CONST char * HTFileSuffix ARGS1(
 	HTAtom*,	rep)
@@ -628,7 +626,7 @@ PUBLIC CONST char * HTFileSuffix ARGS1(
     int n;
     int i;
 
-#define NO_INIT  /* dont init anymore since I do it in Lynx at startup */
+#define NO_INIT  /* don't init anymore since I do it in Lynx at startup */
 #ifndef NO_INIT    
     if (!HTSuffixes)
         HTFileInit();
@@ -643,16 +641,14 @@ PUBLIC CONST char * HTFileSuffix ARGS1(
     return "";		/* Dunno */
 }
 
-
-/*	Determine file format from file name
-**	------------------------------------
+/*	Determine file format from file name.
+**	-------------------------------------
 **
 **	This version will return the representation and also set
 **	a variable for the encoding.
 **
 **	It will handle for example  x.txt, x.txt,Z, x.Z
 */
-
 PUBLIC HTFormat HTFileFormat ARGS2(
 	CONST char *,	filename,
 	HTAtom **,	pencoding)
@@ -673,10 +669,10 @@ PUBLIC HTFormat HTFileFormat ARGS2(
 
 #ifdef VMS
     /*
-     * Trim at semicolon if a version number was
-     * included, so it doesn't interfere with the
-     * code for getting the MIME type. - FM
-     */
+    **  Trim at semicolon if a version number was
+    **  included, so it doesn't interfere with the
+    **  code for getting the MIME type. - FM
+    */
     if ((semicolon = strchr(filename, ';')) != NULL)
         *semicolon = '\0';
 #endif /* VMS */
@@ -727,7 +723,9 @@ PUBLIC HTFormat HTFileFormat ARGS2(
     	 ( unknown_suffix.rep ? &unknown_suffix : &no_suffix)
 	 : &no_suffix;
 	 
-    /* set default encoding unless found with suffix already */
+    /*
+    **  Set default encoding unless found with suffix already.
+    */
     if (!*pencoding)
         *pencoding = suff->encoding ? suff->encoding
 				    : HTAtom_for("binary");
@@ -737,7 +735,6 @@ PUBLIC HTFormat HTFileFormat ARGS2(
 #endif /* VMS */
     return suff->rep ? suff->rep : WWW_BINARY;
 }
-
 
 /*	Revise the file format in relation to the Lynx charset. - FM
 **	-------------------------------------------------------
@@ -859,12 +856,10 @@ PUBLIC HTFormat HTCharsetFormat ARGS2(
     return format;
 }
 
-
-/*	Determine value from file name
-**	------------------------------
+/*	Determine value from file name.
+**	-------------------------------
 **
 */
-
 PUBLIC float HTFileValue ARGS1(
 	CONST char *,	filename)
 {
@@ -892,18 +887,16 @@ PUBLIC float HTFileValue ARGS1(
     return 0.3;		/* Dunno! */
 }
 
-
-/*	Determine write access to a file
-**	--------------------------------
+/*	Determine write access to a file.
+**	---------------------------------
 **
-** On exit,
-**	return value	YES if file can be accessed and can be written to.
+**  On exit:
+**	Returns YES if file can be accessed and can be written to.
 **
-** Bugs:
+**  Bugs:
 **	1.	No code for non-unix systems.
 **	2.	Isn't there a quicker way?
 */
-
 #ifdef VMS
 #define NO_GROUPS
 #endif /* VMS */
@@ -943,7 +936,8 @@ PUBLIC BOOL HTEditable ARGS1(
     	    (unsigned int) fileStatus.st_mode, fileStatus.st_uid,
 	    fileStatus.st_gid,
 	    myUid, ngroups);
-	for (i=0; i<ngroups; i++) fprintf(stderr, " %d", groups[i]);
+	for (i = 0; i < ngroups; i++)
+	    fprintf(stderr, " %d", groups[i]);
 	fprintf(stderr, ")\n");
     }
     
@@ -956,7 +950,7 @@ PUBLIC BOOL HTEditable ARGS1(
 
     if (fileStatus.st_mode & 0020)		/* Group I am in can write? */
     {
-   	for (i=0; i<ngroups; i++) {
+   	for (i = 0; i < ngroups; i++) {
             if (groups[i] == fileStatus.st_gid)
 	        return YES;
 	}
@@ -967,9 +961,8 @@ PUBLIC BOOL HTEditable ARGS1(
 #endif /* NO_GROUPS */
 }
 
-
-/*	Make a save stream
-**	------------------
+/*	Make a save stream.
+**	-------------------
 **
 **	The stream must be used for writing back the file.
 **	@@@ no backup done
@@ -977,20 +970,18 @@ PUBLIC BOOL HTEditable ARGS1(
 PUBLIC HTStream * HTFileSaveStream ARGS1(
 	HTParentAnchor *,	anchor)
 {
-
     CONST char * addr = HTAnchor_address((HTAnchor*)anchor);
     char *  localname = HTLocalName(addr);
-    
+
     FILE* fp = fopen(localname, "w");
     if (!fp)
         return NULL;
-    
+
     return HTFWriter_new(fp);
-    
 }
 
-/*      Output one directory entry
-**
+/*      Output one directory entry.
+**	---------------------------
 */
 PUBLIC void HTDirEntry ARGS3(
 	HTStructured *,	target,
@@ -999,46 +990,88 @@ PUBLIC void HTDirEntry ARGS3(
 {
     char * relative = NULL;
     char * escaped = NULL;
+    int len;
 
-    if (0 == strcmp(entry,"../"))
+    if (0 == strcmp(entry,"../")) {
         /*
-	 *  Undo slash appending for anchor creation.
-	 */
+	**  Undo slash appending for anchor creation.
+	*/
 	StrAllocCopy(escaped,"..");
-    else
+    } else {
 	escaped = HTEscape(entry, URL_XPALPHAS);
-
+	if (((len = strlen(escaped)) > 2) &&
+	    escaped[(len - 3)] == '%' &&
+	    escaped[(len - 2)] == '2' &&
+	    TOUPPER(escaped[(len - 1)]) == 'F') {
+	    escaped[(len - 3)] = '\0';
+	}
+    }
 
     if (tail == NULL || *tail == '\0') {
-        /* handle extra slash at end of path */
-        HTStartAnchor(target, NULL, escaped);
+        /*
+	**  Handle extra slash at end of path.
+	*/
+        HTStartAnchor(target, NULL, (escaped[0] != '\0' ? escaped : "/"));
     } else {
-        /* If empty tail, gives absolute ref below */
+        /*
+	**  If empty tail, gives absolute ref below.
+	*/
         relative = (char*)malloc(strlen(tail) + strlen(escaped)+2);
         if (relative == NULL)
-	    outofmem(__FILE__, "DirRead");
-        sprintf(relative, "%s/%s", tail, escaped);
+	    outofmem(__FILE__, "HTDirEntry");
+        sprintf(relative, "%s%s%s",
+			   tail,
+			   (*escaped != '\0' ? "/" : ""),
+			   escaped);
         HTStartAnchor(target, NULL, relative);
         FREE(relative);
     }
     FREE(escaped);
 }
  
-/*      Output parent directory entry
+/*      Output parent directory entry.
+**	------------------------------
 **
 **    This gives the TITLE and H1 header, and also a link
-**    to the parent directory if appropriate.
+/**    to the parent directory if appropriate.
+**
+**  On exit:
+**	Returns TRUE if an "Up to <parent>" link was not created
+**	for a readable local directiory because LONG_LIST is defined
+**	and NO_PARENT_DIR_REFERENCE is not defined, such that the
+**	calling function use LYListFmtParse() to create a link to
+**	the parent directory.  Otherwise, it returns FALSE. - FM
 */
-PUBLIC void HTDirTitles ARGS2(
+PUBLIC BOOL HTDirTitles ARGS3(
 	HTStructured *,	target,
-	HTAnchor * ,	anchor)
+	HTAnchor *,	anchor,
+	BOOL,		tildeIsTop)
 {
     char * logical = HTAnchor_address(anchor);
     char * path = HTParse(logical, "", PARSE_PATH + PARSE_PUNCTUATION);
     char * current;
     char * cp = NULL;
+    BOOL need_parent_link = FALSE;
+    int i;
 
-    /* Trim out the ;type= parameter, if present. - FM */
+    /*
+    **  Check tildeIsTop for treating home directory as Welcome
+    **  (assume the tilde is not followed by a username). - FM
+    */ 
+    if (tildeIsTop && !strncmp(path, "/~", 2)) {
+        if (path[2] == '\0') {
+	    path[1] = '\0';
+	} else {
+	    for (i = 0; path[(i + 2)]; i++) {
+	        path[i] = path[(i + 2)];
+	    }
+	    path[i] = '\0';
+	}
+    }
+
+    /*
+    **  Trim out the ;type= parameter, if present. - FM
+    */
     if ((cp = strrchr(path, ';')) != NULL) {
 	if (!strncasecomp((cp+1), "type=", 5)) {
 	    if (TOUPPER(*(cp+6)) == 'D' ||
@@ -1099,15 +1132,15 @@ PUBLIC void HTDirTitles ARGS2(
 	  FREE(printable);
 	  FREE(logical);
 	  FREE(path);
-	  return;
+	  return(need_parent_link);
       }
       FREE(printable);
     }
 
 #ifndef NO_PARENT_DIR_REFERENCE
-    /*  Make link back to parent directory
-     */
-
+    /*
+    **  Make link back to parent directory.
+    */
     if (current && current[1]) {   /* was a slash AND something else too */
         char * parent = NULL;
 	char * relative = NULL;
@@ -1115,48 +1148,50 @@ PUBLIC void HTDirTitles ARGS2(
 	*current++ = '\0';
         parent = strrchr(path, '/');  /* penultimate slash */
 
-	if ((parent && 0 == strncasecomp(parent, "/%2F", 4)) ||
-	    0 == strncasecomp(current, "%2F", 3)) {
+	if ((parent &&
+	     (!strcmp(parent, "/..") ||
+	      !strncasecomp(parent, "/%2F", 4))) ||
+	    !strncasecomp(current, "%2F", 3)) {
 	    FREE(logical);
 	    FREE(path);
-	    return;
+	    return(need_parent_link);
 	} 
 
 	relative = (char*) malloc(strlen(current) + 4);
 	if (relative == NULL)
-	    outofmem(__FILE__, "DirRead");
+	    outofmem(__FILE__, "HTDirTitles");
 	sprintf(relative, "%s/..", current);
 #ifndef VMS
 	{
 	    /*
-	     *  On Unix, if it's not ftp and the directory cannot
-	     *  be read, don't put out a link.
-	     *
-	     *  On VMS, this problem is dealt with internally by
-	     *  HTVMSBrowseDir().
-	     */
+	    **  On Unix, if it's not ftp and the directory cannot
+	    **  be read, don't put out a link.
+	    **
+	    **  On VMS, this problem is dealt with internally by
+	    **  HTVMSBrowseDir().
+	    */
 	    extern BOOLEAN LYisLocalFile PARAMS((char *logical));
 	    DIR  * dp = NULL;
 
 	    if (LYisLocalFile(logical)) {
 		/*
-		 *  We need an absolute file path for the opendir.
-		 *  We also need to unescape for this test.
-		 *  Don't worry about %2F now, they presumably have been
-		 *  dealt with above, and shouldn't appear for local
-		 *  files anyway...  Assume OS / filesystem will just
-		 *  ignore superfluous slashes. - KW
-		 */
+		**  We need an absolute file path for the opendir.
+		**  We also need to unescape for this test.
+		**  Don't worry about %2F now, they presumably have been
+		**  dealt with above, and shouldn't appear for local
+		**  files anyway...  Assume OS / filesystem will just
+		**  ignore superfluous slashes. - KW
+		*/
 		char * fullparentpath = NULL;
 
 		/*
-		 *  Path has been shortened above
-		 */
-		StrAllocCopy(fullparentpath, path);
+		**  Path has been shortened above.
+		*/
+		StrAllocCopy(fullparentpath, *path ? path : "/");
 
 		/*
-		 *  Guard against weirdness.
-		 */
+		**  Guard against weirdness.
+		*/
 		if (0 == strcmp(current,"..")) {
 		    StrAllocCat(fullparentpath,"/../..");
 		} else if (0 == strcmp(current,".")) {
@@ -1169,64 +1204,59 @@ PUBLIC void HTDirTitles ARGS2(
 	            FREE(logical);
 	            FREE(relative);
 	            FREE(path);
-	            return;
+	            return(need_parent_link);
 		}
-		if (dp)
-	    	    closedir(dp);
+	    	closedir(dp);
 		FREE(fullparentpath);
+#ifdef LONG_LIST
+		need_parent_link = TRUE;
+		FREE(logical);
+		FREE(path);
+		FREE(relative);
+		return(need_parent_link);
+#endif /* LONG_LIST */
 	    }
 	}
 #endif /* !VMS */
 	HTStartAnchor(target, "", relative);
 	FREE(relative);
 
-#ifdef DIRED_SUPPORT
-	if (dir_list_style != MIXED_STYLE)
-#endif /* DIRED_SUPPORT */
-	    PUTS("Up to ");
+	PUTS("Up to ");
 	if (parent) {
-#ifdef DIRED_SUPPORT
-	   if (dir_list_style == MIXED_STYLE) {
-	      PUTS("../");
-	   } else
-#endif /* DIRED_SUPPORT */
-	   if ((0 == strcmp(current,".")) ||
-	       (0 == strcmp(current,".."))) {
-	       /*
-	        *  Should not happen, but if it does.
-		*  at least avoid giving misleading info. - KW
+	    if ((0 == strcmp(current,".")) ||
+	        (0 == strcmp(current,".."))) {
+		/*
+		**  Should not happen, but if it does,
+		**  at least avoid giving misleading info. - KW
 		*/
-	       PUTS("..");
-	   } else {
-	      char * printable = NULL;
-	      StrAllocCopy(printable, parent + 1);
-	      HTUnEscape(printable);
-	      PUTS(printable);
-	      FREE(printable);
-	   }
+		PUTS("..");
+	    } else {
+		char * printable = NULL;
+		StrAllocCopy(printable, parent + 1);
+		HTUnEscape(printable);
+		PUTS(printable);
+		FREE(printable);
+	    }
 	} else {
-	  PUTS("/");
+	    PUTS("/");
 	}
-
 	END(HTML_A);
     }
-#endif /* NO_PARENT_DIR_REFERENCE */
+#endif /* !NO_PARENT_DIR_REFERENCE */
 
     FREE(logical);
     FREE(path);
-    return;
+    return(need_parent_link);
 }
 		
-
-
-/*	Load a document
-**	---------------
+/*	Load a document.
+**	----------------
 **
-** On entry,
+**  On entry:
 **	addr		must point to the fully qualified hypertext reference.
 **			This is the physical address of the file
 **
-** On exit,
+**  On exit:
 **	returns		<0		Error has occured.
 **			HTLOADED	OK 
 **
@@ -1250,7 +1280,7 @@ PUBLIC int HTLoadFile ARGS4(
 #endif /* VMS */
 
     /*
-    **  Reduce the filename to a basic form (hopefully unique!)
+    **  Reduce the filename to a basic form (hopefully unique!).
     */
     StrAllocCopy(newname, addr);
     filename=HTParse(newname, "", PARSE_PATH|PARSE_PUNCTUATION);
@@ -1282,7 +1312,7 @@ PUBLIC int HTLoadFile ARGS4(
 #endif /* VMS */
 
     /*
-    ** Determine the format and encoding mapped to any suffix.
+    **  Determine the format and encoding mapped to any suffix.
     */
     format = HTFileFormat(filename, &encoding);
 
@@ -1338,7 +1368,7 @@ PUBLIC int HTLoadFile ARGS4(
 
     /*
     **  Assume that the file is in Unix-style syntax if it contains a '/'
-    **  after the leading one @@
+    **  after the leading one. @@
     */
     {
         FILE * fp;
@@ -1347,7 +1377,7 @@ PUBLIC int HTLoadFile ARGS4(
 	fp = fopen(vmsname, "r", "shr=put", "shr=upd");
 	
         /*
-	**  If the file wasn't VMS syntax, then perhaps it is ultrix
+	**  If the file wasn't VMS syntax, then perhaps it is ultrix.
 	*/
 	if (!fp) {
 	    char ultrixname[INFINITY];
@@ -1374,10 +1404,10 @@ PUBLIC int HTLoadFile ARGS4(
 	        }
 	    }
 	    /*
-	     * Trim vmsname at semicolon if a version number was
-	     * included, so it doesn't interfere with the check
-	     * for a compressed file. - FM
-	     */
+	    **  Trim vmsname at semicolon if a version number was
+	    **  included, so it doesn't interfere with the check
+	    **  for a compressed file. - FM
+	    */
 	    if ((semicolon = strchr(vmsname, ';')) != NULL)
 	        *semicolon = '\0';
 	    /*
@@ -1433,20 +1463,21 @@ PUBLIC int HTLoadFile ARGS4(
     **  For unix, we try to translate the name into the name of a
     **  transparently mounted file.
     **
-    **  Not allowed in secure (HTClienntHost) situations TBL 921019
+    **  Not allowed in secure (HTClienntHost) situations. TBL 921019
     */
 #ifndef NO_UNIX_IO
-    /*  Need protection here for telnet server but not httpd server */
+    /*  Need protection here for telnet server but not httpd server. */
 	 
     if (!HTSecure) {		/* try local file system */
 	char * localname = HTLocalName(addr);
 	struct stat dir_info;
 	
 #ifdef GOT_READ_DIR
-        /*		  Multiformat handling
+        /*
+	**  Multiformat handling.
 	**
 	**  If needed, scan directory to find a good file.
-	**  Bug:  we don't stat the file to find the length
+	**  Bug:  We don't stat the file to find the length.
 	*/
 	if ((strlen(localname) > strlen(MULTI_SUFFIX)) &&
 	    (0 == strcmp(localname + strlen(localname) - strlen(MULTI_SUFFIX),
@@ -1458,14 +1489,14 @@ PUBLIC int HTLoadFile ARGS4(
 	    HTFormat best_rep = NULL;	/* Set when rep found */
 	    STRUCT_DIRENT best_dirbuf;	/* Best dir entry so far */
 
-	    char * base = strrchr(localname, '/');
+	    char *base = strrchr(localname, '/');
 	    int baselen;
 
 	    if (!base || base == localname)
 	        goto forget_multi;
-	    *base++ = 0;		/* Just got directory name */
+	    *base++ = '\0';		/* Just got directory name */
 	    baselen = strlen(base)- strlen(MULTI_SUFFIX);
-	    base[baselen] = 0;	/* Chop off suffix */
+	    base[baselen] = '\0';	/* Chop off suffix */
 
 	    dp = opendir(localname);
 	    if (!dp) {
@@ -1476,8 +1507,10 @@ forget_multi:
 			"Multiformat: directory scan failed.");
 	    }
 	    
-	    while ((dirbuf = readdir(dp))!=0) {
-		/* while there are directory entries to be read */
+	    while ((dirbuf = readdir(dp)) != NULL) {
+		/*
+		**  While there are directory entries to be read...
+		*/
 		if (dirbuf->d_ino == 0)
 		    continue;	/* if the entry is not being used, skip it */
 
@@ -1506,7 +1539,7 @@ forget_multi:
 	    if (best_rep) {
 		format = best_rep;
 		base[-1] = '/';		/* Restore directory name */
-		base[0] = 0;
+		base[0] = '\0';
 		StrAllocCat(localname, best_dirbuf.d_name);
 		goto open_file;
 		
@@ -1536,30 +1569,28 @@ forget_multi:
 	}  else {		/* Stat was OK */
 		
 	    if (((dir_info.st_mode) & S_IFMT) == S_IFDIR) {
-		/* if localname is a directory */	
-
-		HTStructured* target;		/* HTML object */
+		/*
+		**  If localname is a directory.
+		*/	
+		HTStructured *target;		/* HTML object */
 		HTStructuredClass targetClass;
-
 		DIR *dp;
 		STRUCT_DIRENT * dirbuf;
-		
-		char * logical=0;
-		char * pathname=0;
-		char * tail=0;
-		
+		char *logical = NULL;
+		char *pathname = NULL;
+		char *tail = NULL;
 		BOOL present[HTML_A_ATTRIBUTES];
-		
 		char * tmpfilename = NULL;
+                BOOL need_parent_link = FALSE;
 		struct stat file_info;
 		
 		if (TRACE)
-		    fprintf(stderr,"%s is a directory\n",localname);
+		    fprintf(stderr, "%s is a directory\n", localname);
 			
 		/*
 		**  Check directory access.
 		**  Selective access means only those directories containing
-		**  a marker file can be browsed
+		**  a marker file can be browsed.
 		*/
 		if (HTDirAccess == HT_DIR_FORBID) {
 		    FREE(localname);
@@ -1572,7 +1603,7 @@ forget_multi:
 		if (HTDirAccess == HT_DIR_SELECTIVE) {
 		    char * enable_file_name = 
 			malloc(strlen(localname)+ 1 +
-			 strlen(HT_DIR_ENABLE_FILE) + 1);
+				      strlen(HT_DIR_ENABLE_FILE) + 1);
 		    strcpy(enable_file_name, localname);
 		    strcat(enable_file_name, "/");
 		    strcat(enable_file_name, HT_DIR_ENABLE_FILE);
@@ -1584,14 +1615,13 @@ forget_multi:
 		    }
 		}
 
- 
 		dp = opendir(localname);
 		if (!dp) {
 		    FREE(localname);
 		    FREE(nodename);
-		    return HTLoadError(sink, 403, "This directory is not readable.");
+		    return HTLoadError(sink, 403, 
+		    		       "This directory is not readable.");
 		}
-
 
 		/*
 		**  Directory access is allowed and possible.
@@ -1602,11 +1632,10 @@ forget_multi:
 
     		if (!strcmp(pathname,"/"))  /* root path */
         	    StrAllocCopy (tail, "/foo/..");
-    	    	else
-    		  {
-        	    char * p = strrchr(pathname, '/');  /* find lastslash */
+    	    	else {
+        	    char *p = strrchr(pathname, '/');  /* find lastslash */
         	    StrAllocCopy(tail, p+1); /* take slash off the beginning */
-    		  }
+    		}
     		FREE(pathname);
 		
 		target = HTML_new(anchor, format_out, sink);
@@ -1614,10 +1643,19 @@ forget_multi:
 		    
   		{ int i;
 			for (i = 0; i < HTML_A_ATTRIBUTES; i++)
-				present[i] = (i==HTML_A_HREF);
+				present[i] = (i == HTML_A_HREF);
 		}
 		
-                HTDirTitles(target, (HTAnchor *)anchor);
+		/*
+		**  The need_parent_link flag will be set if an
+		**  "Up to <parent>" link was not created for a
+		**  readable parent in HTDirTitles() because
+		**  LONG_LIST is defined and NO_PARENT_DIR_REFERENCE
+		**  is not defined so that need we to create the
+		**  link via an LYListFmtParse() call. - FM
+		*/
+                need_parent_link = HTDirTitles(target,
+					       (HTAnchor *)anchor, FALSE);
 
 #ifdef DIRED_SUPPORT
 		HTAnchor_setFormat((HTParentAnchor *) anchor, WWW_DIRED);
@@ -1628,62 +1666,77 @@ forget_multi:
 		{
 		    HTBTree * bt = HTBTree_new((HTComparer)strcmp);
 
-		    while ((dirbuf = readdir(dp))!=0)
-		    {
-			/* while there are directory entries to be read */
+		    while ((dirbuf = readdir(dp)) != NULL) {
+			/*
+			**  While there are directory entries to be read...
+			*/
 		        char * dirname = NULL;
 			extern BOOLEAN no_dotfiles, show_dotfiles;
 
 		        if (dirbuf->d_ino == 0)
-			    /* if the entry is not being used, skip it */
+			    /*
+			    **  If the entry is not being used, skip it.
+			    */
 			    continue;
 
-			if (strcmp(dirbuf->d_name, ".") == 0  /* skip self */
-#ifdef NO_PARENT_DIR_REFERENCE
-			    || strcmp(dirbuf->d_name, "..") == 0 ||
-#else
-			    || strcmp(dirbuf->d_name, "..") != 0 &&
-#endif
-			    ((no_dotfiles || !show_dotfiles) &&
-			     dirbuf->d_name[0] == '.'))
-			    /* skip those files whose name
-			     * begins with '.' */
+			/*
+			**  Skip self, parent if handled in HTDirTitles()
+			**  or if NO_PARENT_DIR_REFERENCE is not defined,
+			**  and any dot files if no_dotfiles is set or
+			**  show_dotfiles is not set. - FM
+			*/
+			if (!strcmp(dirbuf->d_name, ".")   /* self   */ ||
+			    (!strcmp(dirbuf->d_name, "..") /* parent */ &&
+			     need_parent_link == FALSE) ||
+			    ((strcmp(dirbuf->d_name, "..")) &&
+			     (dirbuf->d_name[0] == '.' &&
+			      (no_dotfiles || !show_dotfiles))))
 			    continue;
 
 			dirname = (char *)malloc(strlen(dirbuf->d_name) + 4);
 			if (dirname == NULL)
-			    outofmem(__FILE__,"DirRead");
-			StrAllocCopy(tmpfilename,localname);
-			if (strcmp(localname,"/")) 
-			    /* if filename is not root directory */
-			    StrAllocCat(tmpfilename,"/"); 
+			    outofmem(__FILE__, "HTLoadFile");
+			StrAllocCopy(tmpfilename, localname);
+			if (strcmp(localname, "/"))
+			    /*
+			    **  If filename is not root directory.
+			    */
+			    StrAllocCat(tmpfilename, "/"); 
 
-			StrAllocCat(tmpfilename,dirbuf->d_name);
+			StrAllocCat(tmpfilename, dirbuf->d_name);
 			stat(tmpfilename, &file_info);
 			if (((file_info.st_mode) & S_IFMT) == S_IFDIR)
 #ifndef DIRED_SUPPORT
-		            sprintf((char *)dirname,"D%s",dirbuf->d_name);
+		            sprintf((char *)dirname, "D%s",dirbuf->d_name);
 			else
-			    sprintf((char *)dirname,"F%s",dirbuf->d_name);
+			    sprintf((char *)dirname, "F%s",dirbuf->d_name);
 			    /* D & F to have first directories, then files */
 #else
 			    if (dir_list_style == MIXED_STYLE)
-			        sprintf((char *)dirname," %s/",dirbuf->d_name);
+			        sprintf((char *)dirname,
+					" %s/", dirbuf->d_name);
+			    else if (!strcmp(dirbuf->d_name, ".."))
+			        sprintf((char *)dirname,
+					"A%s", dirbuf->d_name);
 			    else
-			        sprintf((char *)dirname,"D%s",dirbuf->d_name);
+			        sprintf((char *)dirname,
+					"D%s", dirbuf->d_name);
 			else if (dir_list_style == MIXED_STYLE)
-			    sprintf((char *)dirname," %s",dirbuf->d_name);
+			    sprintf((char *)dirname, " %s", dirbuf->d_name);
 			else if (dir_list_style == FILES_FIRST)
-			    sprintf((char *)dirname,"C%s",dirbuf->d_name);
+			    sprintf((char *)dirname, "C%s", dirbuf->d_name);
 			    /* C & D to have first files, then directories */
 			else
-			    sprintf((char *)dirname,"F%s",dirbuf->d_name);
+			    sprintf((char *)dirname, "F%s", dirbuf->d_name);
 #endif /* !DIRED_SUPPORT */
-			HTBTree_add(bt,dirname); /* Sort dirname in the tree bt */
+			/*
+			**  Sort dirname in the tree bt.
+			*/
+			HTBTree_add(bt, dirname);
 		    }
 
 		    /*
-		    **  Run through tree printing out in order
+		    **  Run through tree printing out in order.
 		    */
 		    {
 		        HTBTElement * next_element = HTBTree_next(bt,NULL);
@@ -1698,28 +1751,35 @@ forget_multi:
 #endif /* DIRED_SUPPORT */
 			state = 'I';
 
-			while (next_element != NULL)
-		        {
+			while (next_element != NULL) {
 			    char *entry, *file_extra;
 
 			    StrAllocCopy(tmpfilename,localname);
-			    if (strcmp(localname,"/")) 
-
-					/* if filename is not root directory */
-			        StrAllocCat(tmpfilename,"/"); 
+			    if (strcmp(localname, "/")) 
+				/*
+				**  If filename is not root directory.
+				*/
+			        StrAllocCat(tmpfilename, "/"); 
 
 			    StrAllocCat(tmpfilename,
 					(char *)HTBTree_object(next_element)+1);
-			    /* append the current entry's filename to the path */
+			    /*
+			    **  Append the current entry's filename
+			    **  to the path.
+			    */
 			    HTSimplify(tmpfilename);
-			    /* Output the directory entry */
+			    /*
+			    **  Output the directory entry.
+			    */
 			    if (strcmp((char *)
-				       (HTBTree_object(next_element)),"D.."))
+				       (HTBTree_object(next_element)), "D..") &&
+			        strcmp((char *)
+				       (HTBTree_object(next_element)), "A.."))
 			    {			    
 #ifdef DIRED_SUPPORT
-			        test = *(char *)(HTBTree_object(next_element))=='D'?'D':'F';
-				if (state != test)
-				{
+			        test = (*(char *)(HTBTree_object(next_element))
+				        == 'D' ? 'D' : 'F');
+				if (state != test) {
 #ifndef LONG_LIST
 				    if (dir_list_style == FILES_FIRST) {
 				       if (state == 'F')
@@ -1728,22 +1788,31 @@ forget_multi:
 				       if (state == 'D')
   					  END(HTML_DIR); 
 #endif /* !LONG_LIST */
-				    state = *(char *)
-				        (HTBTree_object(next_element))=='D'?'D':'F';
+				    state = 
+				       (*(char *)(HTBTree_object(next_element))
+				        == 'D' ? 'D' : 'F');
 				    START(HTML_H2);
-				    if (dir_list_style != MIXED_STYLE)
-				       PUTS(state == 'D'?"Directories:":"Files");
+				    if (dir_list_style != MIXED_STYLE) {
+				       START(HTML_EM);
+				       PUTS(state == 'D' ?
+				          "Subirectories:" : "Files:");
+				       END(HTML_EM);
+				    }
 #else
-				if (state != *(char *)(HTBTree_object(next_element))) 
-				{
+				if (state != *(char *)(HTBTree_object(
+							 next_element))) {
 #ifndef LONG_LIST
 				    if (state == 'D')
 				        END(HTML_DIR);
 #endif /* !LONG_LIST */
-				    state = *(char *)
-				        (HTBTree_object(next_element))=='D'?'D':'F';
+				    state =
+				      (*(char *)(HTBTree_object(next_element))
+				       == 'D' ? 'D' : 'F');
 				    START(HTML_H2);
-				    PUTS(state == 'D'?"Subdirectories:":"Files");
+				    START(HTML_EM);
+				    PUTS(state == 'D' ?
+				    "Subdirectories:" : "Files:");
+				    END(HTML_EM);
 #endif /* DIRED_SUPPORT */
 				    END(HTML_H2);
 #ifndef LONG_LIST
@@ -1770,12 +1839,11 @@ forget_multi:
 			    }
 #endif /* LONG_LIST */
 
-			    next_element = HTBTree_next(bt,next_element);
+			    next_element = HTBTree_next(bt, next_element);
 			        /* pick up the next element of the list; 
 				 if none, return NULL*/
 			}
-			if (state == 'I')
-			{
+			if (state == 'I') {
 			    START(HTML_P);
 			    PUTS("Empty Directory");
 			}
@@ -1784,7 +1852,6 @@ forget_multi:
 			    END(HTML_DIR);
 #endif /* !LONG_LIST */
 		    }
-
 		        /* end while directory entries left to read */
 		    closedir(dp);
 		    FREE(logical);
@@ -1809,7 +1876,7 @@ forget_multi:
 #endif /* GOT_READ_DIR */
 open_file:
 	{
-	    FILE * fp = fopen(localname,"r");
+	    FILE * fp = fopen(localname, "r");
 
 	    if (TRACE)
 	        fprintf (stderr, "HTLoadFile: Opening `%s' gives %p\n",
@@ -1865,10 +1932,13 @@ open_file:
 #endif /* VMS */
 
 #ifndef DECNET
-/*	Now, as transparently mounted access has failed, we try FTP.
-*/
+    /*
+    **  Now, as transparently mounted access has failed, we try FTP.
+    */
     {
-	/** Deal with case-sensitivity differences on VMS verus Unix **/
+	/*
+	**  Deal with case-sensitivity differences on VMS verus Unix.
+	*/
 #ifdef VMS
         if (strcasecomp(nodename, HTHostName()) != 0)
 #else
@@ -1888,8 +1958,9 @@ open_file:
     }
 #endif /* !DECNET */
 
-/*	All attempts have failed.
-*/
+    /*
+    **  All attempts have failed.
+    */
     {
     	if (TRACE)
 	    fprintf(stderr, "Can't open `%s', errno=%d\n", addr, SOCKET_ERRNO);
@@ -1900,7 +1971,8 @@ open_file:
  
 }
 
-/*		Protocol descriptors
+/*
+**	Protocol descriptors
 */
 #ifdef GLOBALDEF_IS_MACRO
 #define _HTFILE_C_1_INIT { "ftp", HTLoadFile, 0 }

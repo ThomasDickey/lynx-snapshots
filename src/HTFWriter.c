@@ -710,14 +710,31 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
     StrAllocCopy(anchor->FileCache, fnam);
     if (!strncasecomp(pres->rep->name, "text/html", 9)) {
         /*
-	 *  Add the document's URL as a BASE tag at the top of the file,
+	 *  Add the document's base as a BASE tag at the top of the file,
 	 *  so that any partial or relative URLs within it will be resolved
 	 *  relative to that if no BASE tag is present and replaces it.
 	 *  Note that the markup will be technically invalid if a DOCTYPE
 	 *  declaration, or HTML or HEAD tags, are present, and thus the
 	 *  file may need editing for perfection. - FM
 	 */
-        fprintf(ret_obj->fp, "<BASE HREF=\"%s\">\n\n", anchor->address);
+	char *temp = NULL;
+
+	if (anchor->content_base && *anchor->content_base) {
+	    StrAllocCopy(temp, anchor->content_base);
+	} else if (anchor->content_location && *anchor->content_location) {
+	    StrAllocCopy(temp, anchor->content_location);
+	}
+	if (temp) {
+	    collapse_spaces(temp);
+	    if (!is_url(temp)) {
+	        FREE(temp);
+	    }
+	}
+
+        fprintf(ret_obj->fp,
+		"<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
+		anchor->address, (temp ? temp : anchor->address));
+	FREE(temp);
     }
     return ret_obj;
 }

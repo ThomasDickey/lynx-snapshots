@@ -887,7 +887,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
     char *parent = NULL;
     char *relative = NULL;
     char *cp, *cp1;
-    int  pathend;
+    int  pathend, len;
     DIR *dp;
     struct stat file_info;
     time_t NowTime;
@@ -1093,8 +1093,8 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 	    if(!strncmp(HTAtom_name(format), "application",11)) 
 	      {
 		   cp = HTAtom_name(format) + 12;
-		   if(!strncmp(cp,"x-",2))
-			cp+=2;
+		   if(!strncmp(cp,"x-", 2))
+			cp += 2;
 	      }
 	    else
 		cp = HTAtom_name(format);
@@ -1107,7 +1107,39 @@ PUBLIC int HTVMSBrowseDir ARGS4(
                 dot = strstr(entry_info->filename, ".DIR");
                 if (dot)
                    *dot = '\0';
+		cp = entry_info->filename;
+		while (cp && *cp) {
+		    *cp = TOLOWER(*cp);
+		    cp++;
+		}
 		StrAllocCopy(entry_info->type, "Directory");
+	    } else {
+	        if ((cp = strstr(entry_info->filename, "READ")) == NULL) {
+	            cp = entry_info->filename;
+		} else {
+		    cp += 4;
+		    if (!strncmp(cp, "ME", 2)) {
+		        cp += 2;
+			while (cp && *cp && *cp != '.') {
+			    cp++;
+			}
+		    } else if (!strncmp(cp, ".ME", 3)) {
+		        cp = (entry_info->filename +
+			      strlen(entry_info->filename));
+		    } else {
+		        cp = entry_info->filename;
+		    }
+		}
+		while (cp && *cp) {
+		    *cp = TOLOWER(*cp);
+		    cp++;
+		}
+		if (((len = strlen(entry_info->filename)) > 2) &&
+		    entry_info->filename[len-1] == 'z') {
+		    if (entry_info->filename[len-2] == '.' ||
+		        entry_info->filename[len-2] == '_')
+			entry_info->filename[len-1] = 'Z';
+		}
 	    }
 
 	    /* Get the date */

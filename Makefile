@@ -7,7 +7,10 @@ SHELL = /bin/sh
 
 ##this is the name of the directory the lynx source code is in.
 ##(e.g. lynx2-6, not the full path)
-lynxdir= lynx2-6
+lynxdir= lynx2-6FM
+
+##this is the filename for .zip, .tar and .tar.Z archives.
+lynxname= lynx2-6fm
 
 ##change the next line if you want lynx installed somewhere
 ##besides /usr/local/bin
@@ -192,6 +195,7 @@ all:
 	@echo "dgux       -- for DGUX "
 	@echo "freebsd    -- for FreeBSD"
 	@echo "freebsd-ncurses -- for FreeBSD using ncurses package"
+	@echo "freebsd-slang -- for FreeBSD with color slang package"
 	@echo "generic    -- for generic UNIX"
 	@echo "isc        -- for Interactive Machines (untested)"
 	@echo "linux      -- for PC linux"
@@ -243,6 +247,7 @@ all:
 	@echo "clean      -- removes all '.o' and 'core' files"
 	@echo "tar        -- runs clean, removes executable, and tars the whole directory"
 	@echo "compress   -- runs tar, then compresses the result"
+	@echo "zip        -- runs clean, removes executable, and zips the whole directory"
 	@echo
 
 # Map some extra commands to existing ones
@@ -366,9 +371,9 @@ convex-ncurses:
 		-I/usr/local/include \
 		-DNCURSES -DFANCY_CURSES \
 		-D__STDC__ \
-		-DNO_PUTENV -DNO_CBREAK -DNO_KEYPAD -DUSE_DIRENT -DUNIX \
+		-DNO_PUTENV -DNO_CBREAK -DUSE_DIRENT -DUNIX \
 		-DSTDC_HEADERS -I../$(WWWINC) $(SITE_DEFS)" \
-		LIBS="-L/usr/local/lib -lncurses -ltermcap \
+		LIBS="-L/usr/local/lib -lncurses \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		WWWLIB="../WWW/Library/convex/libwww.a"
 
@@ -402,12 +407,23 @@ freebsd:
 # FreeBSD doesn't have or need ranlib. (ignore the error message about that :)
 freebsd-ncurses:
 	cd WWW/Library/freebsd; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
-	cd src; $(MAKE) all MCFLAGS="$(CFLAGS) -DFANCY_CURSES -DNCURSES -DUNIX \
-		-DNO_TTYTYPE -DNO_CUSERID -DLOCALE \
+	cd src; $(MAKE) all MCFLAGS="$(CFLAGS) -DFANCY_CURSES -DNCURSES \
+		-DNCURSESHEADER -DUNIX -DNO_TTYTYPE -DNO_CUSERID -DLOCALE \
 		-I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lncurses -lmytinfo \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		WWWLIB="../WWW/Library/freebsd/libwww.a"
+
+# FreeBSD doesn't have or need ranlib. (ignore the error message about that :)
+freebsd-slang:
+	cd WWW/Library/freebsd; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
+	cd src; $(MAKE) all MCFLAGS="$(CFLAGS) -DUSE_SLANG -DUNIX \
+		-DNO_TTYTYPE -DNO_CUSERID -DLOCALE \
+		-I../$(WWWINC) $(SITE_DEFS)" \
+		LIBS="$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
+		WWWLIB="../WWW/Library/freebsd/libwww.a" \
+		SLANGLIB="$(SLANGLIB) -lslang -ltermcap -lm" \
+		SLANGINC="$(SLANGINC)"
 
 # NetBSD doesn't have or need ranlib. (ignore the error message about that :)
 netbsd:
@@ -421,10 +437,10 @@ netbsd:
 # NetBSD doesn't have or need ranlib. (ignore the error message about that :)
 netbsd-ncurses:
 	cd WWW/Library/netbsd; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
-	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -DFANCY_CURSES -DNCURSES -DUNIX \
-		-DNO_KEYPAD -DNO_CUSERID -I../$(WWWINC) $(SITE_DEFS) \
+	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -DFANCY_CURSES -DNCURSES \
+		-DUNIX -DNO_CUSERID -I../$(WWWINC) $(SITE_DEFS) \
 		-I/usr/include/ncurses" \
-		LIBS="-lncurses -lcompat -ltermcap \
+		LIBS="-lncurses -lcompat \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		WWWLIB="../WWW/Library/netbsd/libwww.a"
 
@@ -629,7 +645,7 @@ bsdi-ncurses:
 	cd WWW/Library/Implementation; $(MAKE) -f BSDI_Makefile CC="gcc" \
 		LYFLAGS="-DBSDI $(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="gcc" MCFLAGS="-O -DNO_CUSERID -DUNIX -DNCURSES \
-		-DFANCY_CURSES -DNO_KEYPAD -DBSDI -DSVR4 \
+		-DFANCY_CURSES -DBSDI -DSVR4 \
 		-I/usr/include/ncurses -I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lncurses \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
@@ -692,17 +708,18 @@ solaris2-slangcc:
 		SLANGINC="$(SLANGINC)"
   
 osf:
-	cd WWW/Library/osf; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
-	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -DFANCY_CURSES -DUNIX \
-		$(ADDFLAGS) \
+	cd WWW/Library/osf; $(MAKE) LYFLAGS="-Olimit 2000 $(SITE_LYDEFS)"
+	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -Olimit 4000 -DUNIX \
+		-DFANCY_CURSES $(ADDFLAGS) \
 		-I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lcurses -ltermcap \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		WWWLIB="../WWW/Library/osf/libwww.a"
 
 osf-slang:
-	cd WWW/Library/osf; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
-	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -DUNIX -DUSE_SLANG $(ADDFLAGS) \
+	cd WWW/Library/osf; $(MAKE) LYFLAGS="-Olimit 2000 $(SITE_LYDEFS)"
+	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -Olimit 4000 -DUNIX \
+		-DUSE_SLANG $(ADDFLAGS) \
 		-I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lcurses -ltermcap \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
@@ -746,7 +763,7 @@ linux:
 linux-ncurses:
 	cd WWW/Library/unix; $(MAKE) CC="gcc" LYFLAGS="-DLINUX $(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="gcc" MCFLAGS="-O -DUNIX -DLINUX -DNCURSES \
-		-DFANCY_CURSES -DNO_KEYPAD -DNO_TTYTYPE \
+		-DFANCY_CURSES -DNO_TTYTYPE \
 		-I/usr/include/ncurses -I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lncurses \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
@@ -842,7 +859,7 @@ sun4-ncurses:
 		MCFLAGS="-O -DUNIX -DFANCY_CURSES -DNCURSES \
 		-I/usr/local/include -I../$(WWWINC) -DSUN -DSUN4 \
 		-DLOCALE $(SITE_DEFS)" \
-		LIBS="-L/usr/local/lib -lncurses -ltermcap \
+		LIBS="-L/usr/local/lib -lncurses \
 		$(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		WWWLIB="../WWW/Library/sun4/libwww.a"
 
@@ -885,10 +902,10 @@ news:
 news-ncurses:
 	@echo "You must first compile the WWW library in WWW/Library"
 	cd WWW/Library/unix; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
-	cd src; $(MAKE) all CC="gcc -O" MCFLAGS="-O -DUNIX -DNO_KEYPAD \
+	cd src; $(MAKE) all CC="gcc -O" MCFLAGS="-O -DUNIX \
 		-DNO_CUSERID -DNCURSES -DFANCY_CURSES \
 		-I../$(WWWINC) $(SITE_DEFS)" \
-		LIBS="-lncurses -ltermcap $(WAISLIB) $(SOCKSLIB)" \
+		LIBS="-lncurses $(WAISLIB) $(SOCKSLIB)" \
 		WWWLIB="../WWW/Library/unix/libwww.a"
 
 news-slang:
@@ -915,9 +932,9 @@ next-ncurses:
 	cd WWW/Library/next; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -DUNIX -DNEXT -DNO_UNISTD_H \
 		-DNCURSES -DFANCY_CURSES \
-		-DNO_CUSERID -DNO_GETCWD -DNO_PUTENV -DNO_KEYPAD \
+		-DNO_CUSERID -DNO_GETCWD -DNO_PUTENV \
 		-I/usr/local/include -I../$(WWWINC) $(SITE_DEFS)" \
-		LIBS="-L/usr/local/lib -lncurses -ltermcap \
+		LIBS="-L/usr/local/lib -lncurses \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		WWWLIB="../WWW/Library/next/libwww.a"
 
@@ -956,14 +973,14 @@ zip:  clean
 	rm -f src/lynx
 	rm -f lynx
 	rm -f src/a.out
-	rm -f ../$(lynxdir).zip
-	cd ..; rm -f $(lynxdir).zip; zip -r $(lynxdir).zip $(lynxdir)
+	rm -f ../$(lynxname).zip
+	cd ..; rm -f $(lynxname).zip; zip -r $(lynxname).zip $(lynxdir)
 
 save:
-	cd ..; rm -f $(lynxdir).tar; tar -cf - $(lynxdir) > $(lynxdir).tar
+	cd ..; rm -f $(lynxname).tar; tar -cf - $(lynxdir) > $(lynxname).tar
 
 compress: tar
-	cd ..; rm -f $(lynxdir).tar.Z; compress -f -v $(lynxdir).tar
+	cd ..; rm -f $(lynxname).tar.Z; compress -f -v $(lynxname).tar
 
 install:
 	-mv -f $(exec)/lynx $(exec)/lynx.old

@@ -57,10 +57,14 @@ extern char * HTCacheFileName PARAMS((CONST char * name));
 **
 ** This is (like the next one) used by HTFTP. It is common code to generate
 ** the title and heading 1 and the parent directory link for any anchor.
+**
+** changed to return TRUE if parent directory link was generated,
+** FALSE otherwise - KW
 */
-extern void HTDirTitles PARAMS((
+extern BOOL HTDirTitles PARAMS((
         HTStructured *  target,
-        HTAnchor *      anchor));
+        HTAnchor *      anchor,
+	BOOL		tildeIsTop));
 
 /*
 **  Output a directory entry

@@ -81,6 +81,10 @@ PUBLIC char *syslog_txt = NULL;		/* syslog arb text for session */
 #endif /* SYSLOG_REQUESTED_URLS */
 #endif /* !VMS */
 
+#ifdef VMS
+PUBLIC char *LYCSwingPath = NULL;
+#endif /* VMS */
+
 #ifdef DIRED_SUPPORT
 PUBLIC BOOLEAN lynx_edit_mode = FALSE;
 PUBLIC BOOLEAN no_dired_support = FALSE;
@@ -225,13 +229,14 @@ PUBLIC char *jumpfile = NULL;	/* the name of the default jumps file */
 PUBLIC char *jumpprompt = NULL;	/* the default jumps prompt */
 PUBLIC char *bookmark_page = NULL; /* the name of the default bookmark page */
 PUBLIC char *BookmarkPage = NULL;  /* the name of the current bookmark page */
+PUBLIC char *LynxHome = NULL;	/* the default Home HREF. */
 PUBLIC char *startfile = NULL;	/* the first file */
 PUBLIC char *helpfile = NULL; 	/* the main help file */
 PUBLIC char *helpfilepath = NULL;   /* the path to the help file set */
 PUBLIC char *aboutfilepath = NULL;  /* the path to the about lynx file */
 PUBLIC char *lynxjumpfile = NULL;   /* the current jump file URL */
 PUBLIC char *lynxlistfile = NULL;   /* the current list file URL */
-PUBLIC char *lynxbookfile = NULL;   /* the current bookmark file URL */
+PUBLIC char *lynxlinksfile = NULL;  /* the current visited links file URL */
 PUBLIC char *startrealm = NULL;     /* the startfile realm */
 PUBLIC char *indexfile = NULL;	    /* an index file if there is one */
 PUBLIC char *personal_mail_address = NULL; /* the users mail address */
@@ -296,7 +301,10 @@ PUBLIC BOOLEAN LYSelectPopups = USE_SELECT_POPUPS;
 PUBLIC BOOLEAN LYUseDefSelPop = TRUE;	/* Command line -popup toggle */
 PUBLIC int LYMultiBookmarks = MULTI_BOOKMARK_SUPPORT;
 PUBLIC BOOLEAN LYMBMBlocked = BLOCK_MULTI_BOOKMARKS;
-PUBLIC BOOLEAN LYMBMAdvanced = ADVANCED_MULTI_BOOKMARKS;
+PUBLIC BOOLEAN LYMBMAdvanced = TRUE;
+PUBLIC int LYStatusLine = -1;		 /* Line for statusline() if > -1 */
+PUBLIC BOOLEAN LYCollapseBRs = COLLAPSE_BR_TAGS;  /* Collapse serial BRs? */
+PUBLIC BOOLEAN LYSetCookies = SET_COOKIES; /* Process Set-Cookie headers? */
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
 #ifdef DECLARE_WAIS_LOGFILES
@@ -310,12 +318,11 @@ extern int HTNewsMaxChunk;  /* Max news articles before chunking (HTNews.c) */
 
 extern int mainloop NOPARAMS;
 
-
-PRIVATE BOOLEAN anon_restrictions_set=FALSE;
-PRIVATE BOOLEAN stack_dump=FALSE;
-PRIVATE char *terminal=NULL;
+PRIVATE BOOLEAN anon_restrictions_set = FALSE;
+PRIVATE BOOLEAN stack_dump = FALSE;
+PRIVATE char *terminal = NULL;
 PRIVATE char *pgm;
-PRIVATE BOOLEAN number_links=FALSE;
+PRIVATE BOOLEAN number_links = FALSE;
 
 PRIVATE void parse_arg PARAMS((char **arg, int *i, int argc));
 #ifndef VMS
@@ -349,8 +356,10 @@ PRIVATE void free_lynx_globals NOARGS
 #ifdef VMS
     Define_VMSLogical("LYNX_VERSION", "");
     FREE(mail_adrs);
+    FREE(LYCSwingPath);
 #endif /* VMS */
 
+    FREE(LynxHome);
     FREE(startfile);
     FREE(helpfile);
     FREE(jumpprompt);
@@ -366,7 +375,6 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(pref_charset);
     FREE(inews_path);
     FREE(system_mail);
-    FREE(lynx_temp_space);
     FREE(LYUserAgent);
     FREE(LYUserAgentDefault);
     FREE(LYHostName);
@@ -389,28 +397,26 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(personal_mail_address);
     FREE(URLDomainPrefixes);
     FREE(URLDomainSuffixes);
-    for (i = 0; i < MAXLINKS; i++) {
+    for (i = 0; i < nlinks; i++) {
         FREE(links[i].lname);
     }
-    for (i = 0; i < nhist; i++) {
-        FREE(history[i].title);
-        FREE(history[i].address);
-        FREE(history[i].post_data);
-        FREE(history[i].post_content_type);
-    }
+    nlinks = 0;
 
     return;
 }
 
-
 /*
  * Wow!  Someone wants to start up Lynx.
  */
-PUBLIC int main ARGS2(int,argc, char **,argv)
+PUBLIC int main ARGS2(
+	int,		argc,
+	char **,	argv)
 {
-    int  i;	/* indexing variable */
-    int status=0;	/* exit status */
-    char *lynx_cfg_file=NULL;
+    int  i;		/* indexing variable */
+    int status = 0;	/* exit status */
+    int len;
+    char *lynx_cfg_file = NULL;
+    char *temp = NULL;
     char *cp;
     FILE *fp;
 
@@ -477,7 +483,7 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
 #ifdef JUMPFILE
     StrAllocCopy(jumpfile, JUMPFILE);
     {
-        char *temp = (char *)malloc(strlen(jumpfile) + 10);
+        temp = (char *)malloc(strlen(jumpfile) + 10);
 	if (!temp) {
 	    outofmem(__FILE__, "main");
 	} else {
@@ -499,16 +505,14 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
     StrAllocCopy(pref_charset, PREFERRED_CHARSET);
     StrAllocCopy(inews_path, INEWS);
     StrAllocCopy(system_mail, SYSTEM_MAIL);
-    if ((cp=getenv("LYNX_TEMP_SPACE")) != NULL)
+    if ((cp = getenv("LYNX_TEMP_SPACE")) != NULL)
         StrAllocCopy(lynx_temp_space, cp);
     else
         StrAllocCopy(lynx_temp_space, TEMP_SPACE);
     if ((cp = strchr(lynx_temp_space, '~'))) {
-	char *temp = NULL;
-	int len;
 	*(cp++) = '\0';
 	StrAllocCopy(temp, lynx_temp_space);
-	if ((len=strlen(temp)) > 0 && temp[len-1] == '/')
+	if (((len = strlen(temp)) > 0) && temp[len-1] == '/')
 	    temp[len-1] = '\0';
 #ifdef VMS
 	StrAllocCat(temp, HTVMS_wwwName((char *)Home_Dir()));
@@ -523,7 +527,7 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
     StrAllocCat(LYUserAgent, "/");
     StrAllocCat(LYUserAgent, LYNX_VERSION);
     if (HTLibraryVersion) {
-        StrAllocCat(LYUserAgent, "  libwww-FM/");
+        StrAllocCat(LYUserAgent, " libwww-FM/");
 	StrAllocCat(LYUserAgent, HTLibraryVersion);
     }
     StrAllocCopy(LYUserAgentDefault, LYUserAgent);
@@ -538,10 +542,7 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
     for (i = 0; lynx_temp_space[i]; i++)
         lynx_temp_space[i] = TOLOWER(lynx_temp_space[i]);
     if (strchr(lynx_temp_space, '/') != NULL) {
-        char *temp = NULL;
-	int len = strlen(lynx_temp_space);
-
-	if (len == 1) {
+	if ((len = strlen(lynx_temp_space)) == 1) {
 	    StrAllocCopy(lynx_temp_space, "sys$scratch:");
 	} else {
 	    if (lynx_temp_space[len-1] != '/')
@@ -557,14 +558,18 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
     }
 #else
     {
-        int len = strlen(lynx_temp_space);
-	if (len > 1 && lynx_temp_space[len-1] != '/') {
+        len;
+	if (((len = strlen(lynx_temp_space)) > 1) &&
+	    lynx_temp_space[len-1] != '/') {
 	    StrAllocCat(lynx_temp_space, "/");
 	}
     }
 #endif /* VMS */
 #ifdef VMS
     StrAllocCopy(mail_adrs, MAIL_ADRS);
+#ifdef CSWING_PATH
+    StrAllocCopy(LYCSwingPath, CSWING_PATH);
+#endif /* CSWING_PATH */
 #endif /* VMS */
 #ifdef LYNX_HOST_NAME
     StrAllocCopy(LYHostName, LYNX_HOST_NAME);
@@ -665,12 +670,9 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
      *  Convert a '~' in the configuration file path to $HOME.
      */
     if ((cp = strchr(lynx_cfg_file, '~'))) {
-	char *temp = NULL;
-	int len;
-
 	*(cp++) = '\0';
 	StrAllocCopy(temp, lynx_cfg_file);
-	if ((len=strlen(temp)) > 0 && temp[len-1] == '/')
+	if (((len = strlen(temp)) > 0) && temp[len-1] == '/')
 	    temp[len-1] = '\0';
 #ifdef VMS
 	StrAllocCat(temp, HTVMS_wwwName((char *)Home_Dir()));
@@ -730,12 +732,9 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
     }
     if (lynx_save_space) {
         if ((cp = strchr(lynx_save_space, '~')) != NULL) {
-	    char *temp = NULL;
-	    int len;
-
 	    *(cp++) = '\0';
 	    StrAllocCopy(temp, lynx_save_space);
-	    if ((len=strlen(temp)) > 0 && temp[len-1] == '/')
+	    if (((len = strlen(temp)) > 0) && temp[len-1] == '/')
 	        temp[len-1] = '\0';
 #ifdef VMS
 	    StrAllocCat(temp, HTVMS_wwwName((char *)Home_Dir()));
@@ -750,11 +749,8 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
         for (i = 0; lynx_save_space[i]; i++)
             lynx_save_space[i] = TOLOWER(lynx_save_space[i]);
         if (strchr(lynx_save_space, '/') != NULL) {
-            char *temp = NULL;
-	    int len = strlen(lynx_save_space);
-
-	    if (len == 1) {
-	        StrAllocCopy(lynx_save_space, "sys$scratch:");
+	    if ((len = strlen(lynx_save_space)) == 1) {
+	        StrAllocCopy(lynx_save_space, "sys$login:");
 	    } else {
 	        if (lynx_save_space[len-1] != '/')
 	            StrAllocCat(lynx_save_space, "/");
@@ -769,9 +765,8 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
 	}
 #else
     {
-        int len = strlen(lynx_save_space);
-
-	if (len > 1 && lynx_save_space[len-1] != '/') {
+	if (((len = strlen(lynx_save_space)) > 1) &&
+	    lynx_save_space[len-1] != '/') {
 	    StrAllocCat(lynx_save_space, "/");
 	}
     }
@@ -793,6 +788,15 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
      */
     if ((cp = getenv("WWW_HOME")) != NULL)
 	StrAllocCopy(startfile, cp);
+
+    /*
+     *  Set the LynxHome URL.  If it's a file URL and the
+     *  host is defaulted, force in "//localhost", and if
+     *  it's not an absolute URL, make it one. - FM
+     */
+    StrAllocCopy(LynxHome, startfile);
+    LYFillLocalFileURL((char **)&LynxHome, "file://localhost");
+    LYEnsureAbsoluteURL((char **)&LynxHome, "LynxHome");
 
     /*
      *  Process arguments - with none, look for the database in STARTDIR,
@@ -823,7 +827,7 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
 	    parse_arg(argv, NULL, -1);
 	}
     } else {
-	for (i=1; i<argc; i++) {
+	for (i = 1; i < argc; i++) {
 	    parse_arg(&argv[i], &i, argc);
 	}
     }
@@ -933,136 +937,32 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
 
     /*
      *  If startfile is a file URL and the host is defaulted,
-     *  force in "//localhost".  We need this until all the
-     *  other Lynx code which performs security checks based
-     *  on the "localhost" string is changed to assume
-     *  "//localhost" when a host field is not present in file
-     *  URLs - FM
+     *  force in "//localhost", and if it's not an absolute URL,
+     *  make it one. - FM
      */
-    if (!strncmp(startfile, "file:", 5)) {
-	char *temp=NULL;
-        if (startfile[5] == '\0') {
-            StrAllocCat(startfile, "//localhost");
-        } else if (!strcmp(startfile, "file://")) {
-            StrAllocCat(startfile, "localhost");
-        } else if (!strncmp(startfile, "file:///", 8)) {
-	    StrAllocCopy(temp, (startfile+7));
-	    StrAllocCopy(startfile, "file://localhost");
-	    StrAllocCat(startfile, temp);
-	    FREE(temp);
-        } else if (!strncmp(startfile, "file:/", 6) && startfile[6] != '/') {
-	    StrAllocCopy(temp, (startfile+5));
-	    StrAllocCopy(startfile, "file://localhost");
-	    StrAllocCat(startfile, temp);
-	    FREE(temp);
-	}
-    }
+    LYFillLocalFileURL((char **)&startfile, "file://localhost");
+    LYEnsureAbsoluteURL((char **)&startfile, "STARTFILE");
 
     /*
-     *  No path in a file://localhost URL for startfile means
-     *  a directory listing for the current default. - FM
+     *  If homepage was specified and is a file URL with the
+     *  host defaulted, force in "//localhost", and if it's
+     *  not an absolute URL, make it one. - FM
      */
-    if (!strcmp(startfile, "file://localhost")) {
-#ifdef VMS
-	StrAllocCat(startfile, HTVMS_wwwName(getenv("PATH")));
-#else
-        char curdir[DIRNAMESIZE];
-#ifdef NO_GETCWD
-      	getwd (curdir);
-#else
-    	getcwd (curdir, DIRNAMESIZE);
-#endif /* NO_GETCWD */
-	StrAllocCat(startfile, curdir);
-#endif /* VMS */
-    }
-
-#ifdef VMS
-    /*
-     *  On VMS, a file://localhost/ URL for startfile
-     *  means a listing for the login directory. - FM
-     */
-    if (!strcmp(startfile, "file://localhost/"))
-	StrAllocCat(startfile, (HTVMS_wwwName((char *)Home_Dir())+1));
-#endif /* VMS */
-
-    /*
-     *  If it is not a URL then make it one.
-     */
-    if (!is_url(startfile)) {
-	if (TRACE)
-	    fprintf(stderr, "STARTFILE '%s' is not a URL\n", startfile);
-        LYConvertToURL(&startfile);
-    }
-
-    /*
-     *  If homepage is a file URL and the host is defaulted,
-     *  force in "//localhost".  We need this until all the
-     *  other Lynx code which performs security checks based
-     *  on the "localhost" string is changed to assume
-     *  "//localhost" when a host field is not present in file
-     *  URLs - FM
-     */
-    if (homepage && !strncmp(homepage, "file:", 5)) {
-	char *temp=NULL;
-        if (homepage[5] == '\0') {
-            StrAllocCat(homepage, "//localhost");
-        } else if (!strcmp(homepage, "file://")) {
-            StrAllocCat(homepage, "localhost");
-        } else if (!strncmp(homepage, "file:///", 8)) {
-	    StrAllocCopy(temp, (homepage+7));
-	    StrAllocCopy(homepage, "file://localhost");
-	    StrAllocCat(homepage, temp);
-	    FREE(temp);
-        } else if (!strncmp(homepage, "file:/", 6) && homepage[6] != '/') {
-	    StrAllocCopy(temp, (homepage+5));
-	    StrAllocCopy(homepage, "file://localhost");
-	    StrAllocCat(homepage, temp);
-	    FREE(temp);
-	}
-    }
-
-    /*
-     *  No path in a file://localhost URL for homepage means
-     *  a directory listing for the current default. - FM
-     */
-    if (homepage && !strcmp(homepage, "file://localhost")) {
-#ifdef VMS
-	StrAllocCat(homepage, HTVMS_wwwName(getenv("PATH")));
-#else
-        char curdir[DIRNAMESIZE];
-#ifdef NO_GETCWD
-      	getwd (curdir);
-#else
-    	getcwd (curdir, DIRNAMESIZE);
-#endif /* NO_GETCWD */
-	StrAllocCat(homepage, curdir);
-#endif /* VMS */
-    }
-
-#ifdef VMS
-    /*
-     *  On VMS, a file://localhost/ URL for homepage
-     *  means a listing for the login directory. - FM
-     */
-    if (homepage && !strcmp(homepage, "file://localhost/"))
-	StrAllocCat(homepage, (HTVMS_wwwName((char *)Home_Dir())+1));
-#endif /* VMS */
-
-    /*
-     *  If it is not a URL then make it one.
-     */
-    if (homepage && !is_url(homepage)) {
-	if (TRACE)
-	    fprintf(stderr, "HOMEPAGE '%s' is not a URL\n", homepage);
-        LYConvertToURL(&homepage);
+    if (homepage) {
+        LYFillLocalFileURL((char **)&homepage, "file://localhost");
+	LYEnsureAbsoluteURL((char **)&homepage, "HOMEPAGE");
     }
 
     /*
      *  If we don't have a homepage specified,
-     *  set it to startfile.
+     *  set it to startfile.  Otherwise, reset
+     *  LynxHome. - FM
      */
-    if (!homepage)
+    if (!(homepage && *homepage)) {
 	StrAllocCopy(homepage, startfile);
+    } else {
+        StrAllocCopy(LynxHome, homepage);
+    }
 
     /*
      *  Set up the inside/outside domain restriction flags. - FM
@@ -1233,16 +1133,18 @@ PUBLIC int main ARGS2(int,argc, char **,argv)
 /*
  *  Called by HTAccessInit to register any protocols supported by lynx.
  *  Protocols added by lynx:
- *    LYNXKEYMAP, lynxcgi, LYNXIMGMAP
+ *    LYNXKEYMAP, lynxcgi, LYNXIMGMAP, LYNXCOOKIE
  */
 #ifdef GLOBALREF_IS_MACRO
 extern GLOBALREF (HTProtocol,LYLynxKeymap);
 extern GLOBALREF (HTProtocol,LYLynxCGI);
 extern GLOBALREF (HTProtocol,LYLynxIMGmap);
+extern GLOBALREF (HTProtocol,LYLynxCookies);
 #else
 GLOBALREF  HTProtocol LYLynxKeymap;
 GLOBALREF  HTProtocol LYLynxCGI;
 GLOBALREF  HTProtocol LYLynxIMGmap;
+GLOBALREF  HTProtocol LYLynxCookies;
 #endif /* GLOBALREF_IS_MACRO */
 
 PUBLIC void LYRegisterLynxProtocols NOARGS
@@ -1250,6 +1152,7 @@ PUBLIC void LYRegisterLynxProtocols NOARGS
     HTRegisterProtocol(&LYLynxKeymap);
     HTRegisterProtocol(&LYLynxCGI);
     HTRegisterProtocol(&LYLynxIMGmap);
+    HTRegisterProtocol(&LYLynxCookies);
 }
 
 /*
@@ -1257,7 +1160,9 @@ PUBLIC void LYRegisterLynxProtocols NOARGS
  *  appropriate).
  */
 
-PRIVATE char * scan3D ARGS2(char **,argv, int *,i)
+PRIVATE char * scan3D ARGS2(
+	char **,	argv,
+	int *,		i)
 {
     char *result;
 
@@ -1268,7 +1173,10 @@ PRIVATE char * scan3D ARGS2(char **,argv, int *,i)
     return argv[1];
 }
 
-PRIVATE void parse_arg ARGS3(char **, argv, int *, i, int, argc)
+PRIVATE void parse_arg ARGS3(
+	char **,	argv,
+	int *,		i,
+	int,		argc)
 {
     char *cp;
 #ifndef VMS
@@ -1276,6 +1184,17 @@ PRIVATE void parse_arg ARGS3(char **, argv, int *, i, int, argc)
 #endif /* !VMS */
 #define nextarg ((cp=scan3D(&argv[0], i))!=NULL)
 
+    /*
+     *  Check for a command line startfile. - FM
+     */
+    if (argv[0][0] != '-') {
+	StrAllocCopy(startfile, argv[0]);
+	return;
+    }
+
+    switch (TOLOWER(argv[0][1])) {
+
+    case 'a':
     if (strncmp(argv[0], "-anonymous", 10) == 0) {
         /*
 	 *  Should already have been set, so we don't
@@ -1285,7 +1204,454 @@ PRIVATE void parse_arg ARGS3(char **, argv, int *, i, int, argc)
 	if (!anon_restrictions_set)
 	    parse_restrictions("default");
 	    anon_restrictions_set = TRUE;
+
+    } else if (strncmp(argv[0], "-auth", 5) == 0) {
+        /*
+	 *  Authentication information for protected forms.
+	 */
+	char *auth_info = NULL;
 	
+	if (nextarg) {
+	    StrAllocCopy(auth_info, cp);
+	    memset(cp, ' ', strlen(cp));/* Let's not show too much */
+	}
+        if (auth_info != NULL)  {
+	    if ((cp = strchr(auth_info, ':')) != NULL) { /* Pw */
+		*cp++ = '\0';	/* Terminate ID */
+		if (*cp) {
+		    HTUnEscape(cp);
+		    StrAllocCopy(authentication_info[1], cp);
+		}
+	    }
+	    if (*auth_info) { /* Id */
+	        HTUnEscape(auth_info);
+		StrAllocCopy(authentication_info[0], auth_info);
+	    }
+	    FREE(auth_info);
+	}
+
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
+
+    case 'b':
+    if (strcmp(argv[0], "-book") == 0) {
+        /*
+	 *  Use bookmarks as startfile.
+	 */
+	bookmark_start = TRUE;
+
+    } else if (strcmp(argv[0], "-buried_news") == 0) {
+        /*
+	 *  Toggle scans for buried news references.
+	 */
+        if (scan_for_buried_news_references)
+	    scan_for_buried_news_references = FALSE;
+	else
+	    scan_for_buried_news_references = TRUE;
+
+#ifdef USE_SLANG
+    } else if (strncmp(argv[0], "-blink", 6) == 0) {
+        Lynx_Color_Flags |= SL_LYNX_USE_BLINK;
+#endif /* USE_SLANG */
+
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
+
+    case 'c':
+    if (strncmp(argv[0], "-cache", 6) == 0) {
+	if (nextarg)
+	    HTCacheSize = atoi(cp);
+	/*
+	 *  Limit size.
+	 */
+	if (HTCacheSize < 2) HTCacheSize = 2;
+
+    } else if (strncmp(argv[0], "-case", 5) == 0) {
+	case_sensitive = TRUE;
+
+    } else if (strncmp(argv[0], "-cfg", 4) == 0) {
+	/*
+	 *  Already read the alternate configuration file 
+	 *  so just check whether we need to increment i
+	 */
+	if (nextarg)
+	    ; /* do nothing */
+
+    } else if (strncmp(argv[0], "-child", 6) == 0) {
+	child_lynx = TRUE;
+	no_disk_save = TRUE;
+
+#ifdef USE_SLANG
+    } else if (strncmp(argv[0], "-color", 6) == 0) {
+        Lynx_Color_Flags |= SL_LYNX_USE_COLOR;
+#endif /* USE_SLANG */
+
+    } else if (strncmp(argv[0], "-crawl", 6) == 0) {
+	crawl = TRUE;
+	LYcols = 80;
+
+    } else if (strncmp(argv[0], "-cookies", 8) == 0) {
+        if (LYSetCookies)
+	    LYSetCookies = FALSE;
+	else
+	    LYSetCookies = TRUE;
+
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
+
+    case 'd':
+    if (strncmp(argv[0], "-display", 8) == 0) {
+	if (nextarg) {
+#ifdef VMS
+	    int j;
+	    for (j = 0; cp[j]; j++)
+	        cp[j] = TOUPPER(cp[j]);
+	    Define_VMSLogical(DISPLAY, cp ? cp : "");
+#else
+	    sprintf(display_putenv_command, "DISPLAY=%s", cp ? cp : "");
+	    putenv(display_putenv_command);
+#endif /* VMS */
+	    if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0') {
+		display = cp;
+	    }
+	}
+
+    } else if (strncmp(argv[0], "-dump", 5) == 0) {
+	dump_output_immediately = TRUE;
+	LYcols=80;
+
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
+
+    case 'e':
+    if (strncmp(argv[0], "-editor", 7) == 0) {
+	if (nextarg)
+	    StrAllocCopy(editor,cp);
+	system_editor = TRUE;
+
+    } else if (strncmp(argv[0], "-emacskeys", 10) == 0) {
+	emacs_keys = TRUE;
+
+    } else if (strncmp(argv[0], "-enable_scrollback", 18) == 0) {
+        if (enable_scrollback)
+	    enable_scrollback = FALSE;
+	else
+	    enable_scrollback = TRUE;
+
+    } else if (strncmp(argv[0], "-error_file", 11) == 0) {
+        /*
+	 *  Output return (success/failure) code
+	 *  of an HTTP transaction.
+	 */
+	if (nextarg)
+	    http_error_file = cp;
+
+#if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
+    } else if (strncmp(argv[0], "-exec", 5) == 0) {
+#ifndef NEVER_ALLOW_REMOTE_EXEC
+	local_exec = TRUE;
+#else
+	local_exec_on_local_files = TRUE;
+#endif /* NEVER_ALLOW_REMOTE_EXEC */
+#endif /* EXEC_LINKS || EXEC_SCRIPTS */
+
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
+
+    case 'f':
+    if (strncmp(argv[0], "-force_html", 11) == 0) {
+	LYforce_HTML_mode = TRUE;
+
+    } else if (strncmp(argv[0], "-fileversions", 13) == 0) {
+#ifdef VMS
+	HTVMSFileVersions = TRUE;
+#else
+	break;;
+#endif /* VMS */
+	
+    } else if (strncmp(argv[0], "-ftp", 4) == 0) {
+	ftp_ok = FALSE;
+
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
+
+    case 'g':
+    if (strcmp(argv[0], "-get_data") == 0) {
+        /*
+	 *  User data for GET form.
+	 */
+	char **get_data;
+	char buf[1024];
+
+        /*
+	 *  On Unix, conflicts with curses when interactive
+         *  so let's force a dump.  - CL
+	 *
+	 *  On VMS, mods have been made in LYCurses.c to deal with
+	 *  potential conflicts, so don't force the dump here. - FM
+         */
+#ifndef VMS
+	dump_output_immediately = TRUE;
+        LYcols = 80;
+#endif /* VMS */
+
+	StrAllocCopy(form_get_data, "?");   /* Prime the pump */
+	get_data = &form_get_data;
+
+	/*
+	 *  Build GET data for later.  Stop reading when we see a line
+	 *  with "---" as its first three characters.
+	 */
+	while (fgets(buf, sizeof(buf), stdin) &&
+	       strncmp(buf, "---", 3) != 0) {
+	    int j;
+
+	    for (j = strlen(buf) - 1; j >= 0 && /* Strip line terminators */
+		(buf[j] == CR || buf[j] == LF); j--) {
+		buf[j] = '\0';
+	    }
+	    StrAllocCat(*get_data, buf);
+	}
+
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
+
+    case 'h':
+    if (strcmp(argv[0], "-help") == 0) {
+        goto Output_Help_List;
+
+    } else if (strcmp(argv[0], "-head") == 0) {
+        /*
+	 *  Return mime headers.
+	 */
+	HEAD_request = TRUE;
+
+    } else if (strncmp(argv[0], "-historical", 11) == 0) {
+        if (historical_comments)
+	    historical_comments = FALSE;
+	else
+	    historical_comments = TRUE;
+
+    } else if (strncmp(argv[0], "-homepage", 9) == 0) {
+	if (nextarg)
+	    StrAllocCopy(homepage,cp);
+
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
+
+    case 'i':
+    if (strncmp(argv[0], "-image_links", 12) == 0) {
+	if (clickable_images)
+	    clickable_images = FALSE;
+	else
+	    clickable_images = TRUE;
+
+    } else if (strncmp(argv[0], "-index", 6) == 0) {
+	if (nextarg)
+	    StrAllocCopy(indexfile, cp);
+
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
+
+    case 'l':
+    if (strncmp(argv[0], "-link", 5) == 0) {
+        if (nextarg)
+	    ccount = atoi(cp);
+
+    } else if (strncmp(argv[0], "-localhost", 10) == 0) {
+	local_host_only = TRUE;
+
+#if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
+    } else if (strncmp(argv[0], "-locexec", 8) == 0) {
+	local_exec_on_local_files = TRUE;
+#endif /* EXEC_LINKS || EXEC_SCRIPTS */
+
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
+
+    case 'm':
+    if (strcmp(argv[0], "-mime_header") == 0) {
+        /*
+	 *  Include mime headers and force source dump.
+	 */
+	keep_mime_headers = TRUE;
+	dump_output_immediately = TRUE;
+	HTOutputFormat = HTAtom_for("www/dump");
+	LYcols=999;
+
+    } else if (strncmp(argv[0], "-minimal", 11) == 0) {
+        if (minimal_comments)
+	    minimal_comments = FALSE;
+	else
+	    minimal_comments = TRUE;
+
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
+
+    case 'n':
+    if (strncmp(argv[0], "-newschunksize", 14) == 0) {
+        if (nextarg) {
+	    HTNewsChunkSize = atoi(cp);
+	    /*
+	     * If the new HTNewsChunkSize exceeds the maximum,
+	     * increase HTNewsMaxChunk to this size. - FM
+	     */
+	    if (HTNewsChunkSize > HTNewsMaxChunk) {
+	        HTNewsMaxChunk = HTNewsChunkSize; 
+	    }
+	}
+
+    } else if (strncmp(argv[0], "-newsmaxchunk", 13) == 0) {
+        if (nextarg) {
+	    HTNewsMaxChunk = atoi(cp);
+	    /*
+	     * If HTNewsChunkSize exceeds the new maximum,
+	     * reduce HTNewsChunkSize to this maximum. - FM
+	     */
+	    if (HTNewsChunkSize > HTNewsMaxChunk) {
+	        HTNewsChunkSize = HTNewsMaxChunk;
+	    }
+	}
+
+    } else if (strncmp(argv[0], "-nobrowse", 9) == 0) {
+	HTDirAccess = HT_DIR_FORBID;
+
+#if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
+    } else if (strncmp(argv[0], "-noexec", 7) == 0) {
+	local_exec = FALSE;
+#endif /* EXEC_LINKS || EXEC_SCRIPTS */
+
+    } else if (strncmp(argv[0], "-nofilereferer", 14) == 0) {
+	no_filereferer = TRUE;
+
+    } else if (strncmp(argv[0], "-nofrom", 7) == 0) {
+	LYNoFromHeader = TRUE;
+
+    } else if (strncmp(argv[0], "-nolist", 7) == 0) {
+	nolist = TRUE;
+
+    } else if (strncmp(argv[0], "-nolog", 6) == 0) {
+	error_logging = FALSE;
+
+    } else if (strcmp(argv[0], "-nopause") == 0) { /* No statusline pauses */
+        InfoSecs = 0;
+	MessageSecs = 0;
+	AlertSecs = 0;
+
+    } else if (strncmp(argv[0], "-noprint", 8) == 0) {
+	no_print = TRUE;
+
+    } else if (strcmp(argv[0], "-noredir") == 0) {
+        /*
+	 *  Don't follow URL redirections.
+	 */
+	no_url_redirection = TRUE;
+
+    } else if (strncmp(argv[0], "-noreferer", 10) == 0) {
+	LYNoRefererHeader = TRUE;
+
+#ifdef SOCKS	
+    } else if (strncmp(argv[0], "-nosocks", 8) == 0) {
+	socks_flag = FALSE;
+#endif /* SOCKS */
+
+    } else if (strncmp(argv[0], "-nostatus", 9) == 0)	{
+	no_statusline = TRUE;
+
+    } else if (strncmp(argv[0], "-number_links", 9) == 0) {
+        number_links = TRUE;
+
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
+
+    case 'p':
+    if (strncmp(argv[0], "-popup", 6) == 0) {
+	LYUseDefSelPop = FALSE;
+
+    } else if (strcmp(argv[0], "-post_data") == 0) {
+        /*
+	 *  User data for POST form.
+	 */
+	char **post_data;
+	char buf[1024];
+
+        /*
+	 *  On Unix, conflicts with curses when interactive
+         *  so let's force a dump.  - CL
+	 *
+	 *  On VMS, mods have been made in LYCurses.c to deal with
+	 *  potential conflicts, so don't force a dump here. - FM
+         */
+#ifndef VMS
+	dump_output_immediately = TRUE;
+        LYcols = 80;
+#endif /* VMS */
+
+	post_data = &form_post_data;
+
+	/*
+	 *  Build post data for later.  Stop reading when we see a line
+	 *  with "---" as its first three characters.
+	 */
+	while (fgets(buf, sizeof(buf), stdin) &&
+	       strncmp(buf, "---", 3) != 0) {
+	    int j;
+
+	    for (j = strlen(buf) - 1; j >= 0 && /* Strip line terminators */
+		(buf[j] == CR || buf[j] == LF); j--) {
+		buf[j] = '\0';
+	    }
+	    StrAllocCat(*post_data, buf);
+	}
+
+    } else if (strncmp(argv[0], "-print", 6) == 0) {
+	no_print=FALSE;
+
+    } else if (strncmp(argv[0], "-pseudo_inlines", 15) == 0) {
+	if (pseudo_inline_alts)
+	    pseudo_inline_alts = FALSE;
+	else
+	    pseudo_inline_alts = TRUE;
+
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
+
+    case 'r':
+    if (strncmp(argv[0], "-raw", 4) == 0) {
+        LYUseDefaultRawMode = FALSE;
+
+    } else if (strncmp(argv[0], "-realm", 6) == 0) {
+	check_realm = TRUE;
+
+    } else if (strncmp(argv[0], "-reload", 7) == 0) {
+        reloading = TRUE;
+
     } else if (strncmp(argv[0], "-restrictions", 13) == 0) {
 	if ((cp=strchr(argv[0],'=')) != NULL)
 	    parse_restrictions(cp+1);
@@ -1378,110 +1744,29 @@ PRIVATE void parse_arg ARGS3(char **, argv, int *, i, int, argc)
 		exit(0);
 	    }
 
-    } else if (strncmp(argv[0], "-homepage", 9) == 0) {
-	if (nextarg)
-	    StrAllocCopy(homepage,cp);
-	
-    } else if (strncmp(argv[0], "-editor", 7) == 0) {
-	if (nextarg)
-	    StrAllocCopy(editor,cp);
-	system_editor = TRUE;
-	
-#ifndef VMS
-#ifdef SYSLOG_REQUESTED_URLS
-    } else if (strncmp(argv[0], "-syslog", 7) == 0) {
-	if (nextarg) 
-	    StrAllocCopy(syslog_txt, cp);
-#endif /* SYSLOG_REQUESTED_URLS */
-#endif /* !VMS */
-	
-    } else if (strncmp(argv[0], "-display", 8) == 0) {
-	if (nextarg) {
-#ifdef VMS
-	    int j;
-	    for (j = 0; cp[j]; j++)
-	        cp[j] = TOUPPER(cp[j]);
-	    Define_VMSLogical(DISPLAY, cp ? cp : "");
-#else
-	    sprintf(display_putenv_command, "DISPLAY=%s", cp ? cp : "");
-	    putenv(display_putenv_command);
-#endif /* VMS */
-	    if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0') {
-		display = cp;
-	    }
-	}
-	
-    } else if (strncmp(argv[0], "-index", 6) == 0) {
-	if (nextarg)
-	    StrAllocCopy(indexfile, cp);
-	
-    } else if (strncmp(argv[0], "-cfg", 4) == 0) {
-	/*
-	 *  Already read the alternate configuration file 
-	 *  so just check whether we need to increment i
-	 */
-	if (nextarg)
-	    ; /* do nothing */
-	
-    } else if (strncmp(argv[0], "-stack_dump", 11) == 0) {
-	stack_dump = TRUE;
-	
-    } else if (strncmp(argv[0], "-cache", 6) == 0) {
-	if (nextarg)
-	    HTCacheSize = atoi(cp);
-	
-	/* limit size */
-	if (HTCacheSize < 2) HTCacheSize = 2;
-	
-    } else if (strncmp(argv[0], "-vikeys", 7) == 0) {
-	vi_keys = TRUE;
-	
-    } else if (strncmp(argv[0], "-emacskeys", 10) == 0) {
-	emacs_keys = TRUE;
-	
-    } else if (strncmp(argv[0], "-version", 8) == 0) {
-	printf("\n%s Version %s\n(c)1996 GNU General Public License\n\
-<URL:http://lynx.browser.org/>\n\n",
-		LYNX_NAME, LYNX_VERSION);
-	exit(0);
-	
-    } else if (strncmp(argv[0], "-case", 5) == 0) {
-	case_sensitive = TRUE;
-	
-    } else if (strncmp(argv[0], "-dump", 5) == 0) {
-	dump_output_immediately = TRUE;
-	LYcols=80;
-	
-    } else if (strncmp(argv[0], "-nofrom", 7) == 0) {
-	LYNoFromHeader = TRUE;
-	
-    } else if (strncmp(argv[0], "-nofilereferer", 14) == 0) {
-	no_filereferer = TRUE;
-	
-    } else if (strncmp(argv[0], "-nolist", 7) == 0) {
-	nolist = TRUE;
-	
-    } else if (strncmp(argv[0], "-noreferer", 10) == 0) {
-	LYNoRefererHeader = TRUE;
-	
-    } else if (strncmp(argv[0], "-popup", 6) == 0) {
-	LYUseDefSelPop = FALSE;
-
-    } else if (strncmp(argv[0], "-crawl", 6) == 0) {
-	crawl = TRUE;
-	LYcols=80;
-
-    } else if (strncmp(argv[0], "-historical", 11) == 0) {
-        if (historical_comments)
-	    historical_comments = FALSE;
+    } else if (strncmp(argv[0], "-resubmit_posts", 14) == 0) {
+	if (LYresubmit_posts)
+	    LYresubmit_posts = FALSE;
 	else
-	    historical_comments = TRUE;
+	    LYresubmit_posts = TRUE;
 
-    } else if (strncmp(argv[0], "-minimal", 11) == 0) {
-        if (minimal_comments)
-	    minimal_comments = FALSE;
+    } else if (strncmp(argv[0], "-rlogin", 7) == 0) {
+	rlogin_ok = FALSE;
+
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
+
+    case 's':
+    if (strncmp(argv[0], "-selective", 10) == 0) {
+	HTDirAccess = HT_DIR_SELECTIVE;
+
+    } else if (strncmp(argv[0], "-show_cursor", 12) == 0) {
+	if (LYShowCursor)
+	    LYShowCursor = FALSE;
 	else
-	    minimal_comments = TRUE;
+	    LYShowCursor = TRUE;
 
     } else if (strncmp(argv[0], "-soft_dquotes", 13) == 0) {
         if (soft_dquotes)
@@ -1489,15 +1774,40 @@ PRIVATE void parse_arg ARGS3(char **, argv, int *, i, int, argc)
 	else
 	    soft_dquotes = TRUE;
 
-    } else if (strncmp(argv[0], "-enable_scrollback", 18) == 0) {
-        if (enable_scrollback)
-	    enable_scrollback = FALSE;
-	else
-	    enable_scrollback = TRUE;
+    } else if (strncmp(argv[0], "-source", 7) == 0) {
+	dump_output_immediately = TRUE;
+	HTOutputFormat = HTAtom_for("www/dump");
+	LYcols=999;
 
-    } else if (strncmp(argv[0], "-link", 5) == 0) {
-        if (nextarg)
-	    ccount = atoi(cp);
+    } else if (strncmp(argv[0], "-stack_dump", 11) == 0) {
+	stack_dump = TRUE;
+
+    } else if (strncmp(argv[0], "-startfile_ok", 13) == 0) {
+        startfile_ok = TRUE;
+
+#ifndef VMS
+#ifdef SYSLOG_REQUESTED_URLS
+    } else if (strncmp(argv[0], "-syslog", 7) == 0) {
+	if (nextarg) 
+	    StrAllocCopy(syslog_txt, cp);
+#endif /* SYSLOG_REQUESTED_URLS */
+#endif /* !VMS */
+
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
+
+    case 't':
+    if (strncmp(argv[0], "-telnet", 7) == 0) {
+	telnet_ok = FALSE;
+
+    } else if (strncmp(argv[0], "-term", 5) == 0) {
+	if (nextarg)
+	    terminal = cp;
+
+    } else if (strncmp(argv[0], "-trace", 6) == 0) {
+	WWW_TraceFlag = TRUE;
 
     } else if (strncmp(argv[0], "-traversal", 10) == 0) {
 	traversal = TRUE;
@@ -1507,407 +1817,234 @@ PRIVATE void parse_arg ARGS3(char **, argv, int *, i, int, argc)
 	LYcols=999;
 #endif /* USE_SLANG */
 
-    } else if (strncmp(argv[0], "-realm", 6) == 0) {
-	check_realm = TRUE;
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
 
-    } else if (strncmp(argv[0], "-source", 7) == 0) {
-	dump_output_immediately = TRUE;
-	HTOutputFormat = HTAtom_for("www/dump");
-	LYcols=999;
-	
-    } else if (strncmp(argv[0], "-reload", 7) == 0) {
-        reloading = TRUE;
-
-    } else if (strncmp(argv[0], "-force_html", 11) == 0) {
-	LYforce_HTML_mode = TRUE;
-	
-#ifdef SOCKS	
-    } else if (strncmp(argv[0], "-nosocks", 8) == 0) {
-	socks_flag = FALSE;
-#endif /* SOCKS */
-
-    } else if (strncmp(argv[0], "-trace", 6) == 0) {
-	WWW_TraceFlag = TRUE;
-	
-    } else if (strncmp(argv[0], "-number_links", 9) == 0) {
-        number_links = TRUE;
-	
-    } else if (strncmp(argv[0], "-image_links", 12) == 0) {
-	if (clickable_images)
-	    clickable_images = FALSE;
-	else
-	    clickable_images = TRUE;
-
-    } else if (strncmp(argv[0], "-pseudo_inlines", 15) == 0) {
-	if (pseudo_inline_alts)
-	    pseudo_inline_alts = FALSE;
-	else
-	    pseudo_inline_alts = TRUE;
-
-    } else if (strncmp(argv[0], "-resubmit_posts", 14) == 0) {
-	if (LYresubmit_posts)
-	    LYresubmit_posts = FALSE;
-	else
-	    LYresubmit_posts = TRUE;
-
-    } else if (strncmp(argv[0], "-underscore", 15) == 0) {
+    case 'u':
+    if (strncmp(argv[0], "-underscore", 15) == 0) {
 	if (use_underscore)
 	    use_underscore = FALSE;
 	else
 	    use_underscore = TRUE;
 
-    } else if (strncmp(argv[0], "-localhost", 10) == 0) {
-	local_host_only = TRUE;
-	
-    } else if (strncmp(argv[0], "-nobrowse", 9) == 0) {
-	HTDirAccess = HT_DIR_FORBID;
-	
-    } else if (strncmp(argv[0], "-selective", 10) == 0) {
-	HTDirAccess = HT_DIR_SELECTIVE;
-	
-    } else if (strncmp(argv[0], "-noprint", 8) == 0) {
-	no_print=TRUE;
-	
-    } else if (strncmp(argv[0], "-print", 6) == 0) {
-	no_print=FALSE;
-	
-#if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
-    } else if (strncmp(argv[0], "-exec", 5) == 0) {
-#ifndef NEVER_ALLOW_REMOTE_EXEC
-	local_exec=TRUE;
-#else
-	local_exec_on_local_files=TRUE;
-#endif /* NEVER_ALLOW_REMOTE_EXEC */
-	
-    } else if (strncmp(argv[0], "-locexec", 8) == 0) {
-	local_exec_on_local_files=TRUE;
-	
-    } else if (strncmp(argv[0], "-noexec", 7) == 0) {
-	local_exec=FALSE;
-#endif /* EXEC_LINKS || EXEC_SCRIPTS */
-	
-    } else if (strncmp(argv[0], "-child", 6) == 0) {
-	child_lynx=TRUE;
-	no_disk_save=TRUE;
-	
-    } else if (strncmp(argv[0], "-nolog", 6) == 0) {
-	error_logging=FALSE;
-	
-    } else if (strncmp(argv[0], "-nostatus", 9) == 0)	{
-	no_statusline = TRUE;
-	
-    } else if (strncmp(argv[0], "-show_cursor", 12) == 0) {
-	LYShowCursor = TRUE;
-	
-    } else if (strncmp(argv[0], "-term", 5) == 0) {
-	if (nextarg)
-	    terminal = cp;
-	
-    } else if (strncmp(argv[0], "-telnet", 7) == 0) {
-	telnet_ok=FALSE;
-	
-    } else if (strncmp(argv[0], "-ftp", 4) == 0) {
-	ftp_ok=FALSE;
-	
-    } else if (strncmp(argv[0], "-rlogin", 7) == 0) {
-	rlogin_ok=FALSE;
-	
-#ifdef USE_SLANG
-    } else if (strncmp(argv[0], "-color", 6) == 0) {
-        Lynx_Color_Flags |= SL_LYNX_USE_COLOR;
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
 
-    } else if (strncmp(argv[0], "-blink", 6) == 0) {
-        Lynx_Color_Flags |= SL_LYNX_USE_BLINK;
-#endif /* USE_SLANG */
-
-    } else if (strncmp(argv[0], "-fileversions", 13) == 0) {
-#ifdef VMS
-	HTVMSFileVersions=TRUE;
-#else
-	return;
-#endif /* VMS */
-	
-    } else if (strcmp(argv[0], "-post_data") == 0 ||
- 	       strcmp(argv[0], "-get_data") == 0) { 	/* User data for post
- 							   or get form. */
-	char **post_data;
-	char buf[1024];
-
-        /* -post_data and -get_data conflict with curses when interactive
-         * so let's force them to dump.  - CL
-	 *
-	 * On VMS, mods have been made in LYCurses.c to deal with
-	 * potential conflicts, so don't force them to dump here. - FM
-         */
-#ifndef VMS
-	dump_output_immediately = TRUE;
-        LYcols = 80;
-#endif /* VMS */
-        
-	if (strcmp(argv[0], "-get_data") == 0) {
-	    StrAllocCopy(form_get_data, "?");   /* Prime the pump */
-	    post_data = &form_get_data;
-	} else {
-	    post_data = &form_post_data;
-	}
-	
-	/* Build post data for later. Stop reading when we see a line with
-	 * "---" as its first three characters.
+    case 'v':
+    if (strcmp(argv[0], "-validate") == 0) {
+        /*
+	 *  Follow only http URLs.
 	 */
-	while (fgets(buf, sizeof(buf), stdin) && strncmp(buf, "---", 3) != 0) {
-	    int j;
-	    
-	    for (j = strlen(buf) - 1; j >= 0 && /* Strip line terminators */
-		(buf[j] == CR || buf[j] == LF); j--) {
-		buf[j] = '\0';
-	    }
-	    StrAllocCat(*post_data, buf);
-	}
-	
-    } else if (strcmp(argv[0], "-head") == 0) {/* Return mime headers */
-	HEAD_request = TRUE;
-	
-    } else if (strcmp(argv[0], "-book") == 0) {/* Use bookmarks as startfile */
-	bookmark_start = TRUE;
-	
-    } else if (strcmp(argv[0], "-buried_news") == 0) {
-        /* Toggle scans for buried news references */
-        if (scan_for_buried_news_references)
-	    scan_for_buried_news_references = FALSE;
-	else
-	    scan_for_buried_news_references = TRUE;
-	
-    } else if (strcmp(argv[0], "-mime_header") == 0) {
-        /* Include mime headers and force source dump */
-	keep_mime_headers = TRUE;
-	dump_output_immediately = TRUE;
-	HTOutputFormat = HTAtom_for("www/dump");
-	LYcols=999;
-
-    } else if (strncmp(argv[0], "-error_file", 11) == 0) { /* Output return
-							      (success/failure)
-							      code of an HTTP
-							      transaction */
-	if (nextarg)
-	    http_error_file = cp;
-
-	
-    } else if (strncmp(argv[0], "-auth", 5) == 0) { /* Authentication
-						       information for
-						       protected forms */
-	char *auth_info = NULL;
-	
-	if (nextarg) {
-	    StrAllocCopy(auth_info, cp);
-	    memset(cp, ' ', strlen(cp));/* Let's not show too much */
-	}
-        if (auth_info != NULL)  {
-	    if ((cp = strchr(auth_info, ':')) != NULL) { /* Pw */
-		*cp++ = '\0';	/* Terminate ID */
-		if (*cp) {
-		    HTUnEscape(cp);
-		    StrAllocCopy(authentication_info[1], cp);
-		}
-	    }
-	    if (*auth_info) { /* Id */
-	        HTUnEscape(auth_info);
-		StrAllocCopy(authentication_info[0], auth_info);
-	    }
-	    FREE(auth_info);
-	}
-	
-    } else if (strcmp(argv[0], "-noredir") == 0) { /* Don't follow URL
-						      Redirections */
-	no_url_redirection = TRUE;
-	 
-    } else if (strcmp(argv[0], "-validate") == 0) { /* Follow only http URLs */
 	LYValidate = TRUE;
 	parse_restrictions("all");
 
-    } else if (strncmp(argv[0], "-raw", 4) == 0) {
-        LYUseDefaultRawMode = FALSE;
+    } else if (strncmp(argv[0], "-version", 8) == 0) {
+	printf("\n%s Version %s\n(c)1996 GNU General Public License\n\
+<URL:http://lynx.browser.org/>\n\n",
+		LYNX_NAME, LYNX_VERSION);
+	exit(0);
 
-    } else if (strncmp(argv[0], "-newschunksize", 14) == 0) {
-        if (nextarg) {
-	    HTNewsChunkSize = atoi(cp);
-	    /*
-	     * If the new HTNewsChunkSize exceeds the maximum,
-	     * increase HTNewsMaxChunk to this size. - FM
-	     */
-	    if (HTNewsChunkSize > HTNewsMaxChunk) {
-	        HTNewsMaxChunk = HTNewsChunkSize; 
-	    }
-	}
+    } else if (strncmp(argv[0], "-vikeys", 7) == 0) {
+	vi_keys = TRUE;
 
-    } else if (strncmp(argv[0], "-newsmaxchunk", 13) == 0) {
-        if (nextarg) {
-	    HTNewsMaxChunk = atoi(cp);
-	    /*
-	     * If HTNewsChunkSize exceeds the new maximum,
-	     * reduce HTNewsChunkSize to this maximum. - FM
-	     */
-	    if (HTNewsChunkSize > HTNewsMaxChunk) {
-	        HTNewsChunkSize = HTNewsMaxChunk;
-	    }
-	}
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
 
-    } else if (strncmp(argv[0], "-startfile_ok", 13) == 0) {
-        startfile_ok = TRUE;
-
-    } else if (strncmp(argv[0], "-", 1) == 0) {
-	if (strncmp(argv[0], "-help", 5) != 0) 
+    default:
+Output_Error_and_Help_List:
 #ifdef VMS
-	    printf(" LYNX: Invalid Option: %s\n", argv[0]);
-	printf("USAGE: lynx [options] [file]\n");
+    printf(" LYNX: Invalid Option: %s\n", argv[0]);
 #else
-	    printf("%s: Invalid Option: %s\n", pgm, argv[0]);
-	printf("USAGE: %s [options] [file]\n",pgm);
+    printf("%s: Invalid Option: %s\n", pgm, argv[0]);
 #endif /* VMS */
-	printf("Options are:\n");
-	printf("    -                receive the arguments from stdin (enclose\n");
-	printf("                     in double-quotes (\"-\") on VMS)\n");
-	printf("    -anonymous       used to specify the anonymous account\n");
- 	printf("    -auth=id:pw      authentication information for protected forms\n");
- 	printf("    -book            use the bookmark page as the startfile\n");
- 	printf("    -buried_news     toggles scanning of news articles for buried references\n");
-	printf("    -cache=NUMBER    NUMBER of documents cached in memory (default is %d)\n",DEFAULT_CACHE_SIZE);
-	printf("    -case            enable case sensitive user searching\n");
-	printf("    -cfg=FILENAME    specifies a lynx.cfg file other than the default\n");
-	printf("    -child           exit on left-arrow in startfile, and disable save to disk\n");
+Output_Help_List:
+#ifdef VMS
+    printf("USAGE: lynx [options] [file]\n");
+#else
+    printf("USAGE: %s [options] [file]\n",pgm);
+#endif /* VMS */
+    printf("Options are:\n");
+    printf("    -                receive the arguments from stdin (enclose\n");
+    printf("                     in double-quotes (\"-\") on VMS)\n");
+    printf("    -anonymous       used to specify the anonymous account\n");
+    printf("    -auth=id:pw      authentication information for protected forms\n");
+    printf("    -book            use the bookmark page as the startfile\n");
+    printf("    -buried_news     toggles scanning of news articles for buried references\n");
+    printf("    -cache=NUMBER    NUMBER of documents cached in memory (default is %d)\n",DEFAULT_CACHE_SIZE);
+    printf("    -case            enable case sensitive user searching\n");
+    printf("    -cfg=FILENAME    specifies a lynx.cfg file other than the default\n");
+    printf("    -child           exit on left-arrow in startfile, and disable save to disk\n");
 #ifdef USE_SLANG
-	printf("    -color           force color mode on with standard bg colors\n");
-	printf("    -blink           force color mode on with high intensity bg colors\n");
+    printf("    -color           force color mode on with standard bg colors\n");
+    printf("    -blink           force color mode on with high intensity bg colors\n");
 #endif /* USE_SLANG */
-	printf("    -crawl           with -traversal, output each page to a file\n");
-	printf("                     with -dump, format output as with -traversal, but to stdout\n");
-	printf("    -display=DISPLAY set the display variable for X execed programs\n");
-	printf("    -dump            dump the first file to stdout and exit\n");
-	printf("    -editor=EDITOR   enable edit mode with specified editor\n");
-	printf("    -emacskeys       enable emacs-like key movement\n");
-	printf("    -enable_scrollback  toggle compatibility with comm programs' scrollback\n");
-	printf("                        keys (may be incompatible with some curses packages)\n");
- 	printf("    -error_file=FILE write the HTTP status code here\n");
+    printf("    -cookies         toggles handling of Set-Cookie headers\n");
+    printf("    -crawl           with -traversal, output each page to a file\n");
+    printf("                     with -dump, format output as with -traversal, but to stdout\n");
+    printf("    -display=DISPLAY set the display variable for X execed programs\n");
+    printf("    -dump            dump the first file to stdout and exit\n");
+    printf("    -editor=EDITOR   enable edit mode with specified editor\n");
+    printf("    -emacskeys       enable emacs-like key movement\n");
+    printf("    -enable_scrollback  toggles compatibility with comm programs' scrollback\n");
+    printf("                        keys (may be incompatible with some curses packages)\n");
+     printf("    -error_file=FILE write the HTTP status code here\n");
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
 #ifndef NEVER_ALLOW_REMOTE_EXEC
-	printf("    -exec            enable local program execution\n");
+    printf("    -exec            enable local program execution\n");
 #endif /* !NEVER_ALLOW_REMOTE_EXEC */
-	printf("    -locexec         enable local program execution from local files only\n");
-	printf("    -noexec          disable local program execution (DEFAULT)\n");
+    printf("    -locexec         enable local program execution from local files only\n");
+    printf("    -noexec          disable local program execution (DEFAULT)\n");
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
-	printf("    -fileversions    include all versions of files in local VMS directory\n");
-	printf("                     listings\n");
-	printf("    -force_html      forces the first document to be interpreted as HTML\n");
-	printf("    -ftp             disable ftp access\n");
- 	printf("    -get_data        user data for get forms, read from stdin,\n");
-        printf("                     terminated by '---' on a line\n");
- 	printf("    -head            send a HEAD request\n");
-	printf("    -help            print this usage message\n");
-	printf("    -historical      toggles use of '>' or '-->' as a terminator for comments\n");
-	printf("    -homepage=URL    set homepage separate from start page\n");
-	printf("    -image_links     toggles inclusion of links for all images\n");
-	printf("    -index=URL       set the default index file to URL\n");
-	printf("    -link=NUMBER     starting count for lnk#.dat files produced by -crawl\n");
-	printf("    -localhost       disable URLs that point to remote hosts\n");
- 	printf("    -mime_header     include mime headers and force source dump\n");
-	printf("    -minimal         toggles minimal versus valid comment parsing\n");
- 	printf("    -newschunksize=NUMBER  number of articles in chunked news listings\n");
- 	printf("    -newsmaxchunk=NUMBER   maximum news articles in listings before chunking\n");
-	printf("    -nobrowse        disable directory browsing\n");
-	printf("    -nofilereferer   disable transmissions of Referer headers for file URLs\n");
-	printf("    -nofrom          disable transmissions of From headers\n");
-	printf("    -nolist          disable the link list feature in dumps\n");
-	printf("    -nolog           disable mailing of error messages to document owners\n");
-	printf("    -noprint         disable print functions\n");
- 	printf("    -noredir         don't follow Location: redirection\n");
-	printf("    -noreferer       disable transmissions of Referer headers\n");
+    printf("    -fileversions    include all versions of files in local VMS directory\n");
+    printf("                     listings\n");
+    printf("    -force_html      forces the first document to be interpreted as HTML\n");
+    printf("    -ftp             disable ftp access\n");
+    printf("    -get_data        user data for get forms, read from stdin,\n");
+    printf("                     terminated by '---' on a line\n");
+    printf("    -head            send a HEAD request\n");
+    printf("    -help            print this usage message\n");
+    printf("    -historical      toggles use of '>' or '-->' as a terminator for comments\n");
+    printf("    -homepage=URL    set homepage separate from start page\n");
+    printf("    -image_links     toggles inclusion of links for all images\n");
+    printf("    -index=URL       set the default index file to URL\n");
+    printf("    -link=NUMBER     starting count for lnk#.dat files produced by -crawl\n");
+    printf("    -localhost       disable URLs that point to remote hosts\n");
+    printf("    -mime_header     include mime headers and force source dump\n");
+    printf("    -minimal         toggles minimal versus valid comment parsing\n");
+    printf("    -newschunksize=NUMBER  number of articles in chunked news listings\n");
+    printf("    -newsmaxchunk=NUMBER   maximum news articles in listings before chunking\n");
+    printf("    -nobrowse        disable directory browsing\n");
+    printf("    -nofilereferer   disable transmissions of Referer headers for file URLs\n");
+    printf("    -nofrom          disable transmissions of From headers\n");
+    printf("    -nolist          disable the link list feature in dumps\n");
+    printf("    -nolog           disable mailing of error messages to document owners\n");
+    printf("    -nopause         disable forced pauses for statusline messages\n");
+    printf("    -noprint         disable print functions\n");
+    printf("    -noredir         don't follow Location: redirection\n");
+    printf("    -noreferer       disable transmissions of Referer headers\n");
 #ifdef SOCKS
-	printf("    -nosocks         don't use SOCKS proxy for this session\n");
+    printf("    -nosocks         don't use SOCKS proxy for this session\n");
 #endif /* SOCKS */
-	printf("    -nostatus        disable the miscellaneous information messages\n");
-	printf("    -number_links    force numbering of links\n");
-	printf("    -popup           toggles handling of single-choice SELECT options via\n");
-        printf("                     popup windows or as lists of radio buttons\n");
- 	printf("    -post_data       user data for post forms, read from stdin,\n");
-        printf("                     terminated by '---' on a line\n");
-	printf("    -print           enable print functions (DEFAULT)\n");
-	printf("    -pseudo_inlines  toggles pseudo-ALTs for inlines with no ALT string\n");
-	printf("    -raw             toggles default setting of 8-bit character translations\n");
-	printf("                     or CJK mode for the startup character set\n");
-	printf("    -realm           restricts access to URLs in the starting realm\n");
-	printf("    -reload          flushes the cache on a proxy server\n");
-	printf("                     (only the first document affected)\n");
-	printf("    -restrictions=[options]  use -restrictions to see list\n");
-	printf("    -resubmit_posts  toggles forced resubmissions (no-cache) of forms with\n");
-	printf("                     method POST when the documents they returned are sought\n");
-	printf("                     with the PREV_DOC command or from the History List\n");
-	printf("    -rlogin          disable rlogins\n");
-	printf("    -selective       require .www_browsable files to browse directories\n");
-	printf("    -show_cursor     don't hide the curser in the lower right corner\n");
-	printf("    -soft_dquotes    toggles emulation of the old Netscape and Mosaic bug which\n");
-	printf("                     treated '>' as a co-terminator for double-quotes and tags\n");
-	printf("    -source          dump the source of the first file to stdout and exit\n");
-	printf("    -startfile_ok    allow non-http startfile and homepage with -validate\n");
+    printf("    -nostatus        disable the miscellaneous information messages\n");
+    printf("    -number_links    force numbering of links\n");
+    printf("    -popup           toggles handling of single-choice SELECT options via\n");
+    printf("                     popup windows or as lists of radio buttons\n");
+    printf("    -post_data       user data for post forms, read from stdin,\n");
+    printf("                     terminated by '---' on a line\n");
+    printf("    -print           enable print functions (DEFAULT)\n");
+    printf("    -pseudo_inlines  toggles pseudo-ALTs for inlines with no ALT string\n");
+    printf("    -raw             toggles default setting of 8-bit character translations\n");
+    printf("                     or CJK mode for the startup character set\n");
+    printf("    -realm           restricts access to URLs in the starting realm\n");
+    printf("    -reload          flushes the cache on a proxy server\n");
+    printf("                     (only the first document affected)\n");
+    printf("    -restrictions=[options]  use -restrictions to see list\n");
+    printf("    -resubmit_posts  toggles forced resubmissions (no-cache) of forms with\n");
+    printf("                     method POST when the documents they returned are sought\n");
+    printf("                     with the PREV_DOC command or from the History List\n");
+    printf("    -rlogin          disable rlogins\n");
+    printf("    -selective       require .www_browsable files to browse directories\n");
+    printf("    -show_cursor     toggles hiding of the curser in the lower right corner\n");
+    printf("    -soft_dquotes    toggles emulation of the old Netscape and Mosaic bug which\n");
+    printf("                     treated '>' as a co-terminator for double-quotes and tags\n");
+    printf("    -source          dump the source of the first file to stdout and exit\n");
+    printf("    -startfile_ok    allow non-http startfile and homepage with -validate\n");
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
-	printf("    -syslog=text     information for syslog call\n");
+    printf("    -syslog=text     information for syslog call\n");
 #endif /* SYSLOG_REQUESTED_URLS */
 #endif /* !VMS */
-	printf("    -telnet          disable telnets\n");
-	printf("    -term=TERM       set terminal type to TERM\n");
-	printf("    -trace           turns on WWW trace mode\n");
-	printf("    -traversal       traverse all http links derived from startfile\n");
-	printf("    -underscore      toggles use of _underline_ format in dumps\n");
-	printf("    -validate        accept only http URLs (for validation)\n");
-	printf("    -version         print Lynx version information\n");
-	printf("    -vikeys          enable vi-like key movement\n");
-	if (strncmp(argv[0], "-help", 5) != 0)
-	    exit(-1);
-	exit(0);
-    } else {	/* alternate database path */
-	
-	StrAllocCopy(startfile, argv[0]);
-    }
+    printf("    -telnet          disable telnets\n");
+    printf("    -term=TERM       set terminal type to TERM\n");
+    printf("    -trace           turns on WWW trace mode\n");
+    printf("    -traversal       traverse all http links derived from startfile\n");
+    printf("    -underscore      toggles use of _underline_ format in dumps\n");
+    printf("    -validate        accept only http URLs (for validation)\n");
+    printf("    -version         print Lynx version information\n");
+    printf("    -vikeys          enable vi-like key movement\n");
+    if (strncmp(argv[0], "-help", 5) != 0)
+	exit(-1);
+    exit(0);
+    break;
+
+    } /* end of switch. */
 }
 
 #ifndef VMS
-static void FatalProblem ARGS1(int,sig)
+PRIVATE void FatalProblem ARGS1(
+	int,		sig)
 {
-    fprintf (stderr, "\r\n\
+    /*
+     *  Ignore further interrupts. - mhc: 11/2/91
+     */
+    (void) signal (SIGHUP, SIG_IGN);
+    (void) signal (SIGTERM, SIG_IGN);
+    (void) signal (SIGINT, SIG_IGN);
+#ifndef __linux__
+    (void) signal(SIGBUS, SIG_IGN);
+#endif /* !__linux__ */
+    (void) signal(SIGSEGV, SIG_IGN);
+    (void) signal(SIGILL, SIG_IGN);
+
+    /*
+     *  Flush all messages. - FM
+     */
+    fflush(stderr);
+    fflush(stdout);
+
+    /*
+     *  Deal with curses, if on, and clean up. - FM
+     */
+    if (LYOutOfMemory && LYCursesON) {
+	sleep(AlertSecs);
+    }
+    cleanup_sig(0);
+#ifndef __linux__
+    signal(SIGBUS, SIG_DFL);
+#endif /* !__linux__ */
+    signal(SIGSEGV, SIG_DFL);
+    signal(SIGILL, SIG_DFL);
+
+    /*
+     *  Issue appropriate messages and abort or exit. - FM
+     */
+    if (LYOutOfMemory == FALSE) {
+        fprintf (stderr, "\r\n\
 A Fatal error has occurred in %s Ver. %s\r\n", LYNX_NAME, LYNX_VERSION);
 
-    fprintf(stderr, "\r\n\
+        fprintf(stderr, "\r\n\
 Please notify your system administrator to confirm a bug, and\r\n\
 if confirmed, to notify the lynx-dev list.  Bug reports should\r\n\
 have concise descriptions of the command and/or URL which causes\r\n\
 the problem, the operating system name with version number, the\r\n\
 TCPIP implementation, and any other relevant information.\r\n");
 
-    fprintf(stderr, "\r\n\
+        fprintf(stderr, "\r\n\
 Do NOT mail the core file if one was generated.\r\n");
 
-    fprintf(stderr, "\r\n\
+        fprintf(stderr, "\r\n\
 Lynx now exiting with signal:  %d\r\n\r\n", sig);
 
-    /* ignore further interrupts */     /*  mhc: 11/2/91 */
-    (void) signal (SIGHUP, SIG_IGN);
-    (void) signal (SIGTERM, SIG_IGN);
-#ifndef VMS  /* use ttclose() from cleanup() for VMS */
-    (void) signal (SIGINT, SIG_IGN);
-#endif /* !VMS */
-#ifndef __linux__
-     (void) signal(SIGBUS, SIG_IGN);
-#endif /* !__linux__ */
-     (void) signal(SIGSEGV, SIG_IGN);
-     (void) signal(SIGILL, SIG_IGN);
+	/*
+	 *  Exit and dump core.
+	 */
+	abort();
 
-  if (LYCursesON)
-      sleep(AlertSecs);
-  cleanup_sig(0);
-#ifndef __linux__
-  signal(SIGBUS, 0);
-#endif /* !__linux__ */
-  signal(SIGSEGV, 0);
-  signal(SIGILL, 0);
-  abort();  /* exit and dump core */
+    } else {
+	LYOutOfMemory = FALSE;
+	printf("\r\n%s\r\n\r\n", MEMORY_EXHAUSTED_ABORT);
+	fflush(stdout);
+
+	/*
+	 *  Exit without dumping core.
+	 */
+	exit(0);
+    }
 }
 #endif /* !VMS */

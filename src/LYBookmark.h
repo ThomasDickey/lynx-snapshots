@@ -12,8 +12,7 @@ extern void remove_bookmark_link PARAMS((int cur, char *cur_bookmark_page));
 extern int select_multi_bookmarks NOPARAMS;
 extern int select_menu_multi_bookmarks NOPARAMS;
 extern BOOLEAN LYHaveSubBookmarks NOPARAMS;
-
-extern void edit_bookmarks NOPARAMS; /* in LYOptions.c */
+extern void LYMBM_statusline PARAMS((char *text));
 
 #define BOOKMARK_TITLE "Bookmark file"
 #define MOSAIC_BOOKMARK_TITLE "Converted Mosaic Hotlist"

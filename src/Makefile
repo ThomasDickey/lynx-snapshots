@@ -5,7 +5,7 @@ LYOptions.o LYReadCFG.o LYSearch.o LYHistory.o \
 LYForms.o LYPrint.o LYrcFile.o LYDownload.o LYNews.o LYKeymap.o \
 HTML.o HTFWriter.o HTInit.o DefaultStyle.o LYLocal.o LYUpload.o \
 LYLeaks.o LYexit.o LYJump.o LYList.o LYCgi.o LYTraversal.o \
-LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o
+LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o
 
 CFLAGS= $(MCFLAGS) -I.. $(SLANGINC)
 
@@ -45,3 +45,4 @@ HTInit.o: ../userdefs.h
 LYTraversal.o: ../userdefs.h
 LYMail.o: ../userdefs.h
 LYCharSets.o: ../userdefs.h
+LYCookie.o: ../userdefs.h

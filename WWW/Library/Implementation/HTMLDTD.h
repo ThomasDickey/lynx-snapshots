@@ -91,6 +91,7 @@ typedef enum _HTMLElement {
         HTML_INS,
 	HTML_ISINDEX,
         HTML_KBD,
+        HTML_KEYGEN,
 	HTML_LABEL,
 	HTML_LH,
 	HTML_LI,
@@ -142,7 +143,7 @@ typedef enum _HTMLElement {
         HTML_VAR,
 	HTML_XMP } HTMLElement;
 
-#define HTML_ELEMENTS 111
+#define HTML_ELEMENTS 112
 
 /*
 
@@ -489,35 +490,36 @@ Attribute numbers
 
 #define HTML_INPUT_ACCEPT       0
 #define HTML_INPUT_ALIGN        1
-#define HTML_INPUT_CHECKED      2
-#define HTML_INPUT_CLASS        3
-#define HTML_INPUT_CLEAR        4
-#define HTML_INPUT_DIR          5
-#define HTML_INPUT_DISABLED     6
-#define HTML_INPUT_ERROR        7
-#define HTML_INPUT_HEIGHT       8
-#define HTML_INPUT_ID           9
-#define HTML_INPUT_LANG        10
-#define HTML_INPUT_MAX         11
-#define HTML_INPUT_MAXLENGTH   12
-#define HTML_INPUT_MD          13
-#define HTML_INPUT_MIN         14
-#define HTML_INPUT_NAME        15
-#define HTML_INPUT_NOTAB       16
-#define HTML_INPUT_ONBLUR      17
-#define HTML_INPUT_ONCHANGE    18
-#define HTML_INPUT_ONCLICK     19
-#define HTML_INPUT_ONFOCUS     20
-#define HTML_INPUT_ONSELECT    21
-#define HTML_INPUT_SIZE        22
-#define HTML_INPUT_SRC         23
-#define HTML_INPUT_STYLE       24
-#define HTML_INPUT_TABINDEX    25
-#define HTML_INPUT_TITLE       26
-#define HTML_INPUT_TYPE        27
-#define HTML_INPUT_VALUE       28
-#define HTML_INPUT_WIDTH       29
-#define HTML_INPUT_ATTRIBUTES  30
+#define HTML_INPUT_ALT          2
+#define HTML_INPUT_CHECKED      3
+#define HTML_INPUT_CLASS        4
+#define HTML_INPUT_CLEAR        5
+#define HTML_INPUT_DIR          6
+#define HTML_INPUT_DISABLED     7
+#define HTML_INPUT_ERROR        8
+#define HTML_INPUT_HEIGHT       9
+#define HTML_INPUT_ID          10
+#define HTML_INPUT_LANG        11
+#define HTML_INPUT_MAX         12
+#define HTML_INPUT_MAXLENGTH   13
+#define HTML_INPUT_MD          14
+#define HTML_INPUT_MIN         15
+#define HTML_INPUT_NAME        16
+#define HTML_INPUT_NOTAB       17
+#define HTML_INPUT_ONBLUR      18
+#define HTML_INPUT_ONCHANGE    19
+#define HTML_INPUT_ONCLICK     20
+#define HTML_INPUT_ONFOCUS     21
+#define HTML_INPUT_ONSELECT    22
+#define HTML_INPUT_SIZE        23
+#define HTML_INPUT_SRC         24
+#define HTML_INPUT_STYLE       25
+#define HTML_INPUT_TABINDEX    26
+#define HTML_INPUT_TITLE       27
+#define HTML_INPUT_TYPE        28
+#define HTML_INPUT_VALUE       29
+#define HTML_INPUT_WIDTH       30
+#define HTML_INPUT_ATTRIBUTES  31
 
 #define HTML_ISINDEX_ACTION     0  /* Treat as synonym for HREF. - FM */
 #define HTML_ISINDEX_DIR        1
@@ -525,6 +527,15 @@ Attribute numbers
 #define HTML_ISINDEX_LANG       3
 #define HTML_ISINDEX_PROMPT     4  /* HTML 3.0 "prompt". - FM */
 #define HTML_ISINDEX_ATTRIBUTES 5
+
+#define HTML_KEYGEN_CHALLENGE   0
+#define HTML_KEYGEN_CLASS       1
+#define HTML_KEYGEN_DIR         2
+#define HTML_KEYGEN_ID          3
+#define HTML_KEYGEN_LANG        4
+#define HTML_KEYGEN_NAME        5
+#define HTML_KEYGEN_STYLE       6
+#define HTML_KEYGEN_ATTRIBUTES  7
 
 #define HTML_LINK_CLASS         0
 #define HTML_LINK_HREF          1

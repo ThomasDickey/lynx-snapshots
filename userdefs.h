@@ -143,6 +143,25 @@
 #define INEWS "NEWS"
 
 /*********************************
+ * On VMS, CSwing (an XTree emulation for VTxxx terminals) is intended for
+ * use as the Directory/File Manager (sources, objects, or executables are
+ * available from ftp://narnia.memst.edu/).  CSWING_PATH should be defined
+ * here or in lynx.cfg to your foreign command for CSwing, with any
+ * regulatory switches you want included.  If not defined, or defined as
+ * a zero-length string ("") or "none" (case-insensitive), the support
+ * will be disabled.  It will also be disabled if the -nobrowse or
+ * -selective switches are used, or if the file_url restriction is set.
+ *
+ * When enabled, the DIRED_MENU command (normally 'f' or 'F') will invoke
+ * CSwing, normally with the current default directory as an argument to
+ * position the user on that node of the directory tree.  However, if the
+ * current document is a local directory listing, or a local file and not
+ * one of the temporary menu or list files, the associated directory will
+ * be passed as an argument, to position the user on that node of the tree.
+ */
+/* #define CSWING_PATH "swing" */
+
+/*********************************
  * If USE_FIXED_RECORDS is set to TRUE here and/or in lynx.cfg, Lynx will
  * convert 'd'ownloaded binary files to FIXED 512 record format before saving
  * them to disk or acting on a DOWNLOADER option.  If set to FALSE, the
@@ -558,15 +577,23 @@
 
 /*****************************
 * If MULTI_BOOKMARK_SUPPORT is set TRUE, and BLOCK_MULTI_BOOKMARKS (see
-* below) is FALSE, and sub-bookmarks exist, all bookmark-operations will
+* below) is FALSE, and sub-bookmarks exist, all bookmark operations will
 * first prompt the user to select an active sub-bookmark file or the
 * default bookmark file.  FALSE is the default so that one (the default)
 * bookmark file will be available initially.  The default set here can
 * be overridden in lynx.cfg.  The user can turn on multiple bookmark
 * support via the 'o'ptions menu, and can save that choice as the startup
-* default via the .lynxrc file.   The startup default, however set, can
-* be overridden on the command line via the -restrictions=multibook or
-* the -anonymous or -validate switches.
+* default via the .lynxrc file.  When on, the setting can be STANDARD or
+* ADVANCED.  If support is set to the latter, and the user mode also is
+* ADVANCED, the VIEW_BOOKMARK command will invoke a statusline prompt at
+* which the user can enter the letter token (A - Z) of the desired bookmark,
+* or '=' to get a menu of available bookmark files.  The menu always is
+* presented in NOVICE or INTERMEDIATE mode, or if the support is set to
+* STANDARD.  No prompting or menu display occurs if only one (the startup
+* default) bookmark file has been defined (define additional ones via the
+* 'o'ptions menu).  The startup default, however set, can be overridden on
+* the command line via the -restrictions=multibook or the -anonymous or
+* -validate switches.
 */
 #ifndef MULTI_BOOKMARK_SUPPORT
 #define MULTI_BOOKMARK_SUPPORT FALSE
@@ -574,27 +601,12 @@
 
 /*****************************
 * If BLOCK_MULTI_BOOKMARKS is set TRUE, multiple bookmark support will
-* be forced off, and cannot to toggled on via the 'o'ptions menu.  This
+* be forced off, and cannot be toggled on via the 'o'ptions menu.  This
 * compilation setting can be overridden via lynx.cfg.
 */
 #ifndef BLOCK_MULTI_BOOKMARKS
 #define BLOCK_MULTI_BOOKMARKS FALSE
 #endif /* BLOCK_MULTI_BOOKMARKS */
-
-/*****************************
-* If ADVANCED_MULTI_BOOKMARKS is set FALSE, the associated prompting
-* feature will be disabled.  When it is TRUE, multiple bookmark support
-* is on, and the user mode is ADVANCED, the VIEW_BOOKMARK command will
-* invoke a statusline prompt at which the user can enter the letter token
-* of the desired bookmark, or '=' to get a menu of available bookmark
-* files.  The menu always is presented in NOVICE or INTERMEDIATE mode.
-* No prompting or menu display occurs if only one (the startup default)
-* bookmark file has been defined (define additional ones via the 'o'ptions
-* menu).  This compilation setting can be overridden via lynx.cfg.
-*/
-#ifndef ADVANCED_MULTI_BOOKMARKS
-#define ADVANCED_MULTI_BOOKMARKS TRUE
-#endif /* ADVANCED_MULTI_BOOKMARKS */
 
 /********************************
  * URL_DOMAIN_PREFIXES and URL_DOMAIN_SUFFIXES are strings which will be
@@ -651,6 +663,24 @@
  */
 #define USE_SELECT_POPUPS TRUE
 
+/********************************
+ * If COLLAPSE_BR_TAGS is set FALSE, Lynx will not collapse serial
+ * BR tags.  Note that the valid way to insert extra blank lines in
+ * HTML is via a PRE block with only newlines in the block.
+ *
+ * The default defined here can be changed in lynx.cfg.
+ */
+#define COLLAPSE_BR_TAGS TRUE
+
+/********************************
+ * If SET_COOKIES is set FALSE, Lynx will ignore Set-Cookie headers
+ * in http server replies.
+ *
+ * The default defined here can be changed in lynx.cfg, and can be toggled
+ * via the -cookies command line switch.
+ */
+#define SET_COOKIES TRUE
+
 
 /****************************************************************
  *   Section 2.   Things that you probably want to change or review
@@ -696,11 +726,13 @@
 #define ANONYMOUS_USER ""
 
 /******************************
- * SHOW_CURSOR controls whether or not the cursor is hidden
- * or appears over the link.  This is just the default, it
- * can be turned on with the -show_cursor command line option.
- * Showing the cursor is handy if you have really stupid terminals
- * that can't do bold and reverse video at the same time or at all.
+ * SHOW_CURSOR controls whether or not the cursor is hidden or appears
+ * over the link.  The default set here can be changed in lynx.cfg,
+ * and can be toggled with the -show_cursor command line option.
+ * Showing the cursor is handy if you are a sighted user with a poor
+ * terminal that can't do bold and reverse video at the same time or
+ * at all.  It also can be useful to blind users, as an alternative
+ * or supplement to setting LINKS_ARE_NUMBERED.
  */
 #define SHOW_CURSOR FALSE
 
@@ -1076,13 +1108,13 @@
 #define MAKE_PSEUDO_ALTS_FOR_INLINES	TRUE /* Use "[INLINE]" pseudo-ALTs */
 
 /********************************
- * If SUBSTITUTE_UNDERSCORES is FALSE, the _underline_ format will not be
- * used in dumps.
+ * If SUBSTITUTE_UNDERSCORES is TRUE, the _underline_ format will be used
+ * for emphasis tags in dumps.
  *
  * The default defined here can be changed in lynx.cfg, and the user can
  * toggle the default via a "-underscore" command line switch.
  */
-#define SUBSTITUTE_UNDERSCORES	TRUE /* Use _underline_ format in dumps */
+#define SUBSTITUTE_UNDERSCORES	FALSE /* Use _underline_ format in dumps */
 
 /********************************
  * If QUIT_DEFAULT_YES is defined then when the QUIT command is entered,
@@ -1108,7 +1140,7 @@
  */
 
 #define LYNX_NAME "Lynx"
-#define LYNX_VERSION "2.6"
+#define LYNX_VERSION "2.6FM"
 
 /****************************************************************
  * The LYMessages_en.h header defines default, English strings
@@ -1129,28 +1161,56 @@
 #define LINESIZE 1024		/* max length of line to read from file */
 #define MAXFNAME 1280		/* max filename length DDD/FILENAME.EXT */
 #define MAXCOMMAND MAXFNAME	/* max length of command should be the same */
-#define MAXHIST  512		/* number of links we remember in history */
-#define MAXLINKS 256		/* max links on one screen */
+#define MAXHIST  1024		/* max links we remember in history */
+#define MAXLINKS 1024		/* max links on one screen */
 
 #ifdef VMS
-/* Use the VMS port of gzip for uncompressing both .Z and .gz files. */
+/*
+**  Use the VMS port of gzip for uncompressing both .Z and .gz files.
+*/
 #define UNCOMPRESS_PATH  "gzip -d"
 #define GZIP_PATH "gzip"
 #else
-/* Check these paths on Unix. */
+/*
+**  Check these paths on Unix!
+**  ==========================
+*/
+#if defined(__FreeBSD__)||defined(__NetBSD__)||defined(__bsdi__)||defined(LINUX)
+/*
+**  FreeBSD, NetBSD, BSDI, or Linux:
+**  ================================
+*/
+#define	COMPRESS_PATH	"/usr/bin/compress"
+#define	UNCOMPRESS_PATH	"/usr/bin/gunzip"
+#define	UUDECODE_PATH	"/usr/bin/uudecode"
+#define	ZCAT_PATH	"/usr/bin/zcat"
+#define	GZIP_PATH	"/usr/bin/gzip"
+#define	INSTALL_PATH	"/usr/bin/install"
+#define	TAR_PATH	"/usr/bin/tar"
+#define	TOUCH_PATH	"/usr/bin/touch"
+#else
+/*
+**  Other Unix:
+**  ===========
+*/
 #define	COMPRESS_PATH	"/usr/ucb/compress"
 #define	UNCOMPRESS_PATH	"/usr/ucb/uncompress"
 #define UUDECODE_PATH   "/bin/uudecode"
 #define	ZCAT_PATH	"/usr/local/bin/zcat"
 #define	GZIP_PATH	"/usr/local/bin/gzip"
+#define	INSTALL_PATH	"/bin/install"
+#define	TAR_PATH	"/bin/tar"
+#define	TOUCH_PATH	"/bin/touch"
+#endif /* __FreeBSD__ || __NetBSD__ || __bsdi__ || LINUX */
+/*
+**  All Unix:
+**  =========
+*/
 #define	ZIP_PATH	"/usr/local/bin/zip"
 #define	UNZIP_PATH	"/usr/local/bin/unzip"
-#define	INSTALL_PATH	"/bin/install"
 #define	MKDIR_PATH	"/bin/mkdir"
 #define	MV_PATH		"/bin/mv"
 #define	RM_PATH		"/bin/rm"
-#define	TAR_PATH	"/bin/tar"
-#define	TOUCH_PATH	"/bin/touch"
 #define COPY_PATH	"/bin/cp"
 #define CHMOD_PATH	"/bin/chmod"
 #endif /* VMS */

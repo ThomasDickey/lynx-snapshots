@@ -247,6 +247,10 @@ PUBLIC int showinfo ARGS4(
     fprintf(fp0,
     	    "<dt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>URL:</em> %s\n", Address);
 
+    if (HTLoadedDocumentCharset())
+        fprintf(fp0, "<dt><em>&nbsp;Charset:</em> %s\n",
+		     HTLoadedDocumentCharset());
+
     if ((cp = HText_getServer()) != NULL && *cp != '\0')
         fprintf(fp0, "<dt><em>&nbsp;&nbsp;Server:</em> %s\n", cp);
 

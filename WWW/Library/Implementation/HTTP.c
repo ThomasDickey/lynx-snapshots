@@ -47,6 +47,7 @@ extern char * LYUserAgent;	/* Lynx User-Agent string */
 extern BOOL LYNoRefererHeader;	/* Never send Referer header? */
 extern BOOL LYNoRefererForThis;	/* No Referer header for this URL? */
 extern BOOL LYNoFromHeader;	/* Never send From header? */
+extern BOOL LYSetCookies;	/* Act on Set-Cookie headers? */
 
 extern BOOL using_proxy;	/* Are we using an HTTP gateway? */
 PUBLIC BOOL reloading = FALSE;	/* Reloading => send no-cache pragma to proxy */
@@ -64,6 +65,14 @@ extern BOOL dump_output_immediately;  /* TRUE if no interactive user */
 
 extern char * HTLoadedDocumentURL NOPARAMS;
 extern int HTCheckForInterrupt NOPARAMS;
+extern void LYSetCookie PARAMS((
+	CONST char *	header,
+	CONST char *	address));
+extern char * LYCookie PARAMS((
+	CONST char *	hostname,
+	CONST char *	path,
+	int		port,
+	BOOL		secure));
 
 #define HTTP_NETREAD(a, b, c, d)   NETREAD(a, b, c)
 #define HTTP_NETWRITE(a, b, c, d)  NETWRITE(a, b, c)
@@ -76,10 +85,10 @@ extern int HTCheckForInterrupt NOPARAMS;
 **	Given a hypertext address, this routine loads a document.
 **
 **
-** On entry,
+**  On entry,
 **	arg	is the hypertext reference of the article to be loaded.
 **
-** On exit,
+**  On exit,
 **	returns	>=0	If no error, a good socket number
 **		<0	Error.
 **
@@ -103,21 +112,21 @@ PUBLIC int HTLoadHTTP ARGS4 (
   char crlf[3];			/* A CR LF equivalent string */
   HTStream *target;		/* Unconverted data */
   HTFormat format_in;		/* Format arriving in the message */
-  int do_head = 0;		/* Whether or not we should do a head */
-  int do_post = 0;		/* ARE WE posting ? */
+  BOOL do_head = FALSE;		/* Whether or not we should do a head */
+  BOOL do_post = FALSE;		/* ARE WE posting ? */
   char *METHOD;
 
   BOOL had_header;		/* Have we had at least one header? */
   char *line_buffer;
   char *line_kept_clean;
   BOOL extensions;		/* Assume good HTTP server */
-  int compressed;
   char line[INIT_LINE_SIZE];
   char temp[80];
   BOOL first_Accept = TRUE;
+  BOOL show_401 = FALSE;
 
-  int length, doing_redirect, rv;
-  int already_retrying = 0;
+  int length, rv;
+  BOOL doing_redirect, already_retrying = FALSE;
   int len = 0;
 
   void * handle = NULL;
@@ -127,35 +136,36 @@ PUBLIC int HTLoadHTTP ARGS4 (
   else if (anAnchor->post_data)
       do_post = TRUE;
 
-  if (!url)
-    {
+  if (!url) {
       status = -3;
       _HTProgress ("Bad request.");
       goto done;
-    }
-  if (!*url) 
-    {
+  }
+  if (!*url) {
       status = -2;
       _HTProgress ("Bad request.");
       goto done;
-    }
+  }
 
   sprintf(crlf, "%c%c", CR, LF);
 
-  /* At this point, we're talking HTTP/1.0. */
+  /*
+  **  At this point, we're talking HTTP/1.0.
+  */
   extensions = YES;
 
- try_again:
-  /* All initializations are moved down here from up above,
-     so we can start over here... */
+try_again:
+  /*
+  **  All initializations are moved down here from up above,
+  **  so we can start over here...
+  */
   eol = 0;
   bytes_already_read = 0;
   had_header = NO;
   length = 0;
-  doing_redirect = 0;
+  doing_redirect = FALSE;
   permanent_redirection = FALSE;
   redirect_post_content = FALSE;
-  compressed = 0;
   target = NULL;
   line_buffer = NULL;
   line_kept_clean = NULL;
@@ -163,30 +173,30 @@ PUBLIC int HTLoadHTTP ARGS4 (
   if (!strncmp(url, "https", 5))
     {
       HTAlert("This client does not contain support for HTTPS URLs.");
-      status = HT_NO_DATA;
+      status = HT_NOT_LOADED;
       goto done;
     }
   status = HTDoConnect (arg, "HTTP", HTTP_PORT, &s);
-  if (status == HT_INTERRUPTED)
-    {
-      /* Interrupt cleanly. */
+  if (status == HT_INTERRUPTED) {
+      /*
+      **  Interrupt cleanly.
+      */
       if (TRACE)
           fprintf (stderr,
                    "HTTP: Interrupted on connect; recovering cleanly.\n");
       _HTProgress ("Connection interrupted.");
-      /* status already == HT_INTERRUPTED */
+      status = HT_NOT_LOADED;
       goto done;
-    }
-  if (status < 0) 
-    {
+  }
+  if (status < 0) {
       if (TRACE) 
           fprintf(stderr, 
             "HTTP: Unable to connect to remote host for `%s' (errno = %d).\n",
 	    url, SOCKET_ERRNO);
       HTAlert("Unable to connect to remote host.");
-      status = HT_NO_DATA;
+      status = HT_NOT_LOADED;
       goto done;
-    }
+  }
 
   /*	Ask that node for the document,
   **	omitting the host name & anchor
@@ -205,26 +215,25 @@ PUBLIC int HTLoadHTTP ARGS4 (
         StrAllocCopy(command, "GET ");
     }
 
-    /* if we are using a proxy gateway don't copy in the first slash
-     * of say: /gopher://a;lkdjfl;ajdf;lkj/;aldk/adflj
-     * so that just gopher://.... is sent.
-     */
+    /*
+    **  If we are using a proxy gateway don't copy in the first slash
+    **  of say: /gopher://a;lkdjfl;ajdf;lkj/;aldk/adflj
+    **  so that just gopher://.... is sent.
+    */
     if (using_proxy)
         StrAllocCat(command, p1+1);
     else
         StrAllocCat(command, p1);
     FREE(p1);
   }
-  if (extensions) 
-    {
+  if (extensions) {
       StrAllocCat(command, " ");
       StrAllocCat(command, HTTP_VERSION);
-    }
+  }
 
   StrAllocCat(command, crlf);	/* CR LF, as in rfc 977 */
 
-  if (extensions) 
-    {
+  if (extensions) {
       int n, i;
       char * host = NULL;
       extern char * language; /* Lynx's preferred language - FM */
@@ -312,11 +321,20 @@ PUBLIC int HTLoadHTTP ARGS4 (
       }
 
       /*
-       * When reloading give no-cache pragma to proxy server to make
-       * it refresh its cache. -- Ari L. <luotonen@dxcern.cern.ch>
-       *
-       * Also send it as a Cache-Control header for HTTP/1.1. - FM
-       */
+      **  Promote 300 (Multiple Choices) replies, if supported,
+      **  over 406 (Not Acceptable) replies. - FM
+      */
+      if (!do_post) {
+          sprintf(line, "Negotiate: trans%c%c", CR, LF);
+          StrAllocCat(command, line);
+      }
+      
+      /*
+      **  When reloading give no-cache pragma to proxy server to make
+      **  it refresh its cache. -- Ari L. <luotonen@dxcern.cern.ch>
+      **
+      **  Also send it as a Cache-Control header for HTTP/1.1. - FM
+      */
       if (reloading) {
           sprintf(line, "Pragma: no-cache%c%c", CR, LF);
           StrAllocCat(command, line);
@@ -350,51 +368,100 @@ PUBLIC int HTLoadHTTP ARGS4 (
       }
 
       {
-        char *docname;
+        char *abspath;
+	char *docname;
         char *hostname;
         char *colon;
         int portnumber;
-        char *auth;
+        char *auth, *cookie = NULL;
+	BOOL secure = (strncmp(anAnchor->address, "https", 5) ?
+							FALSE : TRUE);
 
-        docname = HTParse(url, "", PARSE_PATH);
+        abspath = HTParse(url, "", PARSE_PATH|PARSE_PUNCTUATION);
+	docname = HTParse(url, "", PARSE_PATH);
         hostname = HTParse(url, "", PARSE_HOST);
         if (hostname &&
-            NULL != (colon = strchr(hostname, ':'))) 
-          {
+            NULL != (colon = strchr(hostname, ':'))) {
             *(colon++) = '\0';	/* Chop off port number */
             portnumber = atoi(colon);
-          }
-        else if (!strncmp(url, "https", 5))
-	  {
+        } else if (!strncmp(url, "https", 5)) {
 	    portnumber = HTTPS_PORT;
-	  }
-        else 
-	  {
+	} else  {
 	    portnumber = HTTP_PORT;
-	  }
+	}
 
-        if ((auth=HTAA_composeAuth(hostname, portnumber, docname)) != NULL &&
-	     *auth != '\0') {
+	/*
+	**  Add 'Cookie:' header, if applicable.
+	*/
+	if (using_proxy) {
 	    /*
-	     *  If auth is not NULL nor zero-length, it's
-	     *  an Authorization header to be included. - FM
-	     */ 
+	    **  If it's not an HTTP or HTTPS document being proxied,
+	    **  forget about cookies.
+	    */
+	    if (!strncmp(docname, "http", 4)) {
+		char *host2 = NULL, *path2 = NULL;
+		int port = (strncmp(docname, "https", 5) ?
+					       HTTP_PORT : HTTPS_PORT);
+
+		host2 = HTParse(docname, "", PARSE_HOST);
+		path2 = HTParse(docname, "", PARSE_PATH|PARSE_PUNCTUATION);
+		if (host2) {
+		    if ((colon = strchr(host2, ':')) != NULL) {
+		        /*
+			**  Use non-default port number.
+			*/
+		        *colon = '\0';
+			colon++;
+			port = atoi(colon);
+		    }
+		}
+		cookie = LYCookie(host2, path2, port, secure);
+		FREE(host2);
+		FREE(path2);
+	    }
+	} else {
+	    cookie = LYCookie(hostname, abspath, portnumber, secure);
+	}
+	if (cookie != NULL) {
+	    if (*cookie != '\0') {
+	        StrAllocCat(command, "Cookie: ");
+	        StrAllocCat(command, cookie);
+		StrAllocCat(command, crlf);
+	        if (TRACE)
+	            fprintf(stderr, "HTTP: Sending Cookie: %s\n", cookie);
+	    }
+	    FREE(cookie);
+	}
+	FREE(abspath);
+
+        if ((auth = HTAA_composeAuth(hostname, portnumber, docname)) != NULL &&
+	    *auth != '\0') {
+	    /*
+	    **  If auth is not NULL nor zero-length, it's
+	    **  an Authorization header to be included. - FM
+	    */ 
             sprintf(line, "%s%c%c", auth, CR, LF);
             StrAllocCat(command, line);
 	    if (TRACE)
                 fprintf(stderr, "HTTP: Sending authorization: %s\n", auth);
 	} else if (auth && *auth == '\0') {
 	    /*
-	     *  If auth is a zero-length string, the user either
-	     *  cancelled or goofed at the username and password
-	     *  prompt. - FM
-	     */
-	    HTAlert("Can't proceed without a username and password.");
-	    FREE(command);
-	    FREE(hostname);
-	    FREE(docname);
-	    status = HT_NO_DATA;
-	    goto done;
+	    **  If auth is a zero-length string, the user either
+	    **  cancelled or goofed at the username and password
+	    **  prompt. - FM
+	    */
+	    if (!(traversal || dump_output_immediately) &&
+	    	HTConfirm("Proceed without a username and password?")) {
+	        show_401 = TRUE;
+	    } else {
+	        if (traversal || dump_output_immediately)
+		    HTAlert("Can't proceed without a username and password.");
+		FREE(command);
+		FREE(hostname);
+		FREE(docname);
+		status = HT_NOT_LOADED;
+		goto done;
+	    }
         } else {
 	    if (TRACE)
                 fprintf(stderr, "HTTP: Not sending authorization (yet)\n");
@@ -402,7 +469,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
         FREE(hostname);
         FREE(docname);
       }
-    }
+  }
 
   if (do_post)
     {
@@ -440,32 +507,28 @@ PUBLIC int HTLoadHTTP ARGS4 (
 
   status = HTTP_NETWRITE(s, command, (int)strlen(command), handle);
   FREE(command);
-  if (status <= 0) 
-    {
-      if (status == 0)
-        {
+  if (status <= 0) {
+      if (status == 0) {
           if (TRACE)
               fprintf (stderr, "HTTP: Got status 0 in initial write\n");
           /* Do nothing. */
-        }
-      else if 
-        ((SOCKET_ERRNO == ENOTCONN || SOCKET_ERRNO == ECONNRESET ||
-	  SOCKET_ERRNO == EPIPE) &&
-         !already_retrying &&
-         /* Don't retry if we're posting. */ !do_post)
-          {
-            /* Arrrrgh, HTTP 0/1 compability problem, maybe. */
+      } else if ((SOCKET_ERRNO == ENOTCONN ||
+      		  SOCKET_ERRNO == ECONNRESET ||
+		  SOCKET_ERRNO == EPIPE) &&
+		 !already_retrying &&
+		 /* Don't retry if we're posting. */ !do_post) {
+            /*
+	    **  Arrrrgh, HTTP 0/1 compability problem, maybe.
+	    */
             if (TRACE)
                 fprintf (stderr, 
                  "HTTP: BONZO ON WRITE Trying again with HTTP0 request.\n");
             _HTProgress ("Retrying as HTTP0 request.");
             HTTP_NETCLOSE(s, handle);
             extensions = NO;
-            already_retrying = 1;
+            already_retrying = TRUE;
             goto try_again;
-          }
-      else
-        {
+      } else {
           if (TRACE)
               fprintf (stderr,
 	   "HTTP: Hit unexpected network WRITE error; aborting connection.\n");
@@ -473,17 +536,16 @@ PUBLIC int HTLoadHTTP ARGS4 (
           status = -1;
           HTAlert("Unexpected network write error; connection aborted.");
           goto done;
-        }
-    }
+      }
+  }
 
   if (TRACE)
       fprintf (stderr, "HTTP: WRITE delivered OK\n");
   _HTProgress ("HTTP request sent; waiting for response.");
 
   /*	Read the first line of the response
-   **	-----------------------------------
-   */
-  
+  **	-----------------------------------
+  */
   {
     /* Get numeric status etc */
     BOOL end_of_file = NO;
@@ -491,15 +553,15 @@ PUBLIC int HTLoadHTTP ARGS4 (
 
     line_buffer = (char *) malloc(buffer_length * sizeof(char));
 
-    do 
-      {	/* Loop to read in the first line */
-        /* Extend line buffer if necessary for those crazy WAIS URLs ;-) */
-        if (buffer_length - length < LINE_EXTEND_THRESH) 
-          {
+    do {/* Loop to read in the first line */
+        /*
+	**  Extend line buffer if necessary for those crazy WAIS URLs ;-)
+	*/
+        if (buffer_length - length < LINE_EXTEND_THRESH) {
             buffer_length = buffer_length + buffer_length;
             line_buffer = 
               (char *) realloc(line_buffer, buffer_length * sizeof(char));
-          }
+        }
         if (TRACE)
             fprintf (stderr, "HTTP: Trying to read %d\n",
                      buffer_length - length - 1);
@@ -507,24 +569,23 @@ PUBLIC int HTLoadHTTP ARGS4 (
                               buffer_length - length - 1, handle);
         if (TRACE)
             fprintf (stderr, "HTTP: Read %d\n", status);
-        if (status <= 0)
-          {
+        if (status <= 0) {
             /* Retry if we get nothing back too; 
                bomb out if we get nothing twice. */
-            if (status == HT_INTERRUPTED)
-              {
+            if (status == HT_INTERRUPTED) {
                 if (TRACE)
                     fprintf (stderr, "HTTP: Interrupted initial read.\n");
                 _HTProgress ("Connection interrupted.");
                 status = HT_INTERRUPTED;
                 goto clean_up;
-              }
-            else if 
-              (status < 0 &&
-               (SOCKET_ERRNO == ENOTCONN || SOCKET_ERRNO == ECONNRESET || 
-		     SOCKET_ERRNO == EPIPE) && !already_retrying && !do_post)
-              {
-                /* Arrrrgh, HTTP 0/1 compability problem, maybe. */
+            } else if  (status < 0 &&
+			(SOCKET_ERRNO == ENOTCONN ||
+			 SOCKET_ERRNO == ECONNRESET || 
+			 SOCKET_ERRNO == EPIPE) &&
+			!already_retrying && !do_post) {
+                /*
+		**  Arrrrgh, HTTP 0/1 compability problem, maybe.
+		*/
                 if (TRACE)
                     fprintf (stderr,
 		    	"HTTP: BONZO Trying again with HTTP0 request.\n");
@@ -533,12 +594,10 @@ PUBLIC int HTLoadHTTP ARGS4 (
                 FREE(line_kept_clean);
 
                 extensions = NO;
-                already_retrying = 1;
+                already_retrying = TRUE;
                 _HTProgress ("Retrying as HTTP0 request.");
                 goto try_again;
-              }
-            else
-              {
+            } else {
                 if (TRACE)
                     fprintf (stderr,
   "HTTP: Hit unexpected network read error; aborting connection; status %d.\n",
@@ -547,8 +606,8 @@ PUBLIC int HTLoadHTTP ARGS4 (
                 HTTP_NETCLOSE(s, handle);
                 status = -1;
                 goto clean_up;
-              }
-          }
+            }
+        }
 
         bytes_already_read += status;
         sprintf (line, "Read %d bytes of data.", bytes_already_read);
@@ -559,18 +618,17 @@ PUBLIC int HTLoadHTTP ARGS4 (
 #else
         if (status == 0)
 #endif
-          {
+        {
             end_of_file = YES;
             break;
-          }
+        }
         line_buffer[length+status] = 0;
 
-        if (line_buffer)
-          {
+        if (line_buffer) {
             FREE(line_kept_clean);
             line_kept_clean = (char *)malloc (buffer_length * sizeof (char));
             memcpy(line_kept_clean, line_buffer, buffer_length);
-          }
+        }
 
         eol = strchr(line_buffer + length, LF);
         /* Do we *really* want to do this? */
@@ -582,25 +640,28 @@ PUBLIC int HTLoadHTTP ARGS4 (
         /* Do we really want to do *this*? */
         if (eol) 
             *eol = 0;		/* Terminate the line */
-      }
-    /* All we need is the first line of the response.  If it's a HTTP/1.0
-       response, then the first line will be absurdly short and therefore
-       we can safely gate the number of bytes read through this code
-       (as opposed to below) to ~1000. */
-    /* Well, let's try 100. */
+    }
+    /*  All we need is the first line of the response.  If it's a HTTP/1.0
+    **  response, then the first line will be absurdly short and therefore
+    **  we can safely gate the number of bytes read through this code
+    **  (as opposed to below) to ~1000.
+    **
+    **  Well, let's try 100.
+    */
     while (!eol && !end_of_file && bytes_already_read < 100);
   } /* Scope of loop variables */
 
 
   /*	We now have a terminated unfolded line. Parse it.
-   **	-------------------------------------------------
-   */
+  **	-------------------------------------------------
+  */
   if (TRACE)
       fprintf(stderr, "HTTP: Rx: %s\n", line_buffer);
 
-/* Kludge to work with old buggy servers and the VMS Help gateway.
-** They can't handle the third word, so we try again without it.
-*/
+  /*
+  **  Kludge to work with old buggy servers and the VMS Help gateway.
+  **  They can't handle the third word, so we try again without it.
+  */
   if (extensions &&       /* Old buggy server or Help gateway? */
       (0==strncmp(line_buffer,"<TITLE>Bad File Request</TITLE>",31) ||
        0==strncmp(line_buffer,"Address should begin with",25) ||
@@ -610,7 +671,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
       FREE(line_buffer);
       FREE(line_kept_clean);
       extensions = NO;
-      already_retrying = 1;
+      already_retrying = TRUE;
       if (TRACE)
           fprintf(stderr, "HTTP: close socket %d to retry with HTTP0\n", s);
       HTTP_NETCLOSE(s, handle);
@@ -651,8 +712,8 @@ PUBLIC int HTLoadHTTP ARGS4 (
     }
 
     /*
-     *  Rule out a non-HTTP/1.n reply as best we can.
-     */
+    **  Rule out a non-HTTP/1.n reply as best we can.
+    */
     if (fields < 2 || !server_version[0] || server_version[0] != 'H' ||
         server_version[1] != 'T' || server_version[2] != 'T' ||
         server_version[3] != 'P' || server_version[4] != '/' ||
@@ -667,10 +728,10 @@ PUBLIC int HTLoadHTTP ARGS4 (
 
         format_in = HTFileFormat(url, &encoding);
 	/*
-	 *  Treat all plain text as HTML.
-         *  This sucks but its the only solution without
-         *  without looking at content.
-         */
+	**  Treat all plain text as HTML.
+        **  This sucks but its the only solution without
+        **  without looking at content.
+        */
         if (!strncmp(HTAtom_name(format_in), "text/plain",10)) {
             if (TRACE)
                 fprintf(stderr,
@@ -681,53 +742,53 @@ PUBLIC int HTLoadHTTP ARGS4 (
         start_of_data = line_kept_clean;
     } else {
         /*
-	 *  Set up to decode full HTTP/1.n response. - FM
-	 */
+	**  Set up to decode full HTTP/1.n response. - FM
+	*/
         format_in = HTAtom_for("www/mime");
         if (TRACE)
             fprintf (stderr, "--- Talking HTTP1.\n");
 
         /*
-	 *  We set start_of_data to "" when !eol here because there
-         *  will be a put_block done below; we do *not* use the value
-         *  of start_of_data (as a pointer) in the computation of
-         *  length (or anything else) when !eol.  Otherwise, set the
-	 *  value of length to what we have beyond eol (i.e., beyond
-	 *  the status line). - FM
-	 */
+	**  We set start_of_data to "" when !eol here because there
+        **  will be a put_block done below; we do *not* use the value
+        **  of start_of_data (as a pointer) in the computation of
+        **  length (or anything else) when !eol.  Otherwise, set the
+	**  value of length to what we have beyond eol (i.e., beyond
+	**  the status line). - FM
+	*/
         start_of_data = eol ? eol + 1 : "";
         length = eol ? length - (start_of_data - line_buffer) : 0;
 
 	/*
-	 *  Trim trailing spaces in line_buffer so that we can use
-	 *  it in messages which include the status line. - FM
-	 */
+	**  Trim trailing spaces in line_buffer so that we can use
+	**  it in messages which include the status line. - FM
+	*/
 	while (line_buffer[strlen(line_buffer)-1] == ' ')
 	       line_buffer[strlen(line_buffer)-1] = '\0';
 
 	/*
-	 *  Take appropriate actions based on the status. - FM
-	 */
+	**  Take appropriate actions based on the status. - FM
+	*/
         switch (server_status/100) {
 	  case 1:
 	    /*
-	     *  HTTP/1.1 Informational statuses.
-	     *  100 Continue.
-	     *  101 Switching Protocols.
-	     *  > 101 is unknown.
-	     *  We should never get these, and they have only
-	     *  the status line and possibly other headers,
-	     *  so we'll deal with them by showing the full
-	     *  header to the user as text/plain. - FM
-	     */
+	    **  HTTP/1.1 Informational statuses.
+	    **  100 Continue.
+	    **  101 Switching Protocols.
+	    **  > 101 is unknown.
+	    **  We should never get these, and they have only
+	    **  the status line and possibly other headers,
+	    **  so we'll deal with them by showing the full
+	    **  header to the user as text/plain. - FM
+	    */
 	    HTAlert("Got unexpected Informational Status.");
 	    do_head = TRUE;
 	    break;
 
           case 2:
 	    /*
-	     *  Good: Got MIME object! (Successful) - FM
-	     */
+	    **  Good: Got MIME object! (Successful) - FM
+	    */
 	    switch (server_status) {
 	      case 204:
 	        /*
@@ -779,15 +840,15 @@ PUBLIC int HTLoadHTTP ARGS4 (
 
           case 3:
 	    /*
-	     *  Various forms of Redirection. - FM
-	     *  300 Multiple Choices.
-	     *  301 Moved Permanently.
-	     *  302 Moved Temporarily.
-	     *  303 See Other.
-	     *  304 Not Modified.
-	     *  305 Use Proxy.
-	     *  > 305 is unknown.
-	     */
+	    **  Various forms of Redirection. - FM
+	    **  300 Multiple Choices.
+	    **  301 Moved Permanently.
+	    **  302 Moved Temporarily.
+	    **  303 See Other.
+	    **  304 Not Modified.
+	    **  305 Use Proxy.
+	    **  > 305 is unknown.
+	    */
 	    if (no_url_redirection || do_head || keep_mime_headers) {
 	        /*
 		 *  If any of these flags are set, we do not redirect,
@@ -907,7 +968,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
                   status = HT_INTERRUPTED;
                   goto clean_up;
               }
-	      doing_redirect = 1;
+	      doing_redirect = TRUE;
 	      if (server_status == 301) { /* Moved Permanently */
 	          HTProgress(line_buffer);
 		  if (do_post) {
@@ -926,11 +987,87 @@ PUBLIC int HTLoadHTTP ARGS4 (
 	      }
 
 	      /*
+	      **  Look for "Set-Cookie:" headers. - FM
+	      */
+	      if (LYSetCookies == TRUE) {
+	          char *value = NULL;
+	          cp = line_kept_clean;
+		  while (*cp) {
+		      /*
+		      **  Assume a CRLF pair terminates
+		      **  the header section. - FM
+		      */
+		      if (*cp == CR) {
+		          if (*(cp+1) == LF &&
+			      *(cp+2) == CR && *(cp+3) == LF) {
+			      break;
+			  } 
+		      }
+		      if (TOUPPER(*cp) != 'S') {
+		          cp++;
+		      } else if (!strncasecomp(cp, "Set-Cookie:", 11))  {
+		          char *cp1 = NULL, *cp2 = NULL;
+			  cp += 11;
+Cookie_continuation:
+			  /*
+			   *  Trim leading spaces. - FM
+			   */
+			  while (*cp == ' ')
+			      cp++;
+			  /*
+			  **  Accept CRLF, LF, or CR as end of line. - FM
+			  */
+			  if (((cp1 = strchr(cp, LF)) != NULL) ||
+			      (cp2 = strchr(cp, CR)) != NULL) {
+			      if (*cp1) {
+			          *cp1 = '\0';
+				  if ((cp2 = strchr(cp, CR)) != NULL)
+				      *cp2 = '\0';
+			      } else {
+			          *cp2 = '\0';
+			      }
+			  }
+			  if (*cp == '\0') {
+			      if (cp1)
+				  *cp1 = LF;
+			      if (cp2)
+				  *cp2 = CR;
+			      if (value != NULL) {
+			          LYSetCookie(value, anAnchor->address);
+				  FREE(value);
+			      }
+			      break;
+			  }
+			  StrAllocCat(value, cp);
+			  cp += strlen(cp);
+			  if (cp1) {
+			      *cp1 = LF;
+			      cp1 = NULL;
+			  }
+			  if (cp2) {
+			      *cp2 = CR;
+			      cp1 = NULL;
+			  }
+			  if (*cp == ' ' || *cp == '\t') {
+			      StrAllocCat(value, " ");
+			      cp++;
+			      goto Cookie_continuation;
+			  }
+			  LYSetCookie(value, anAnchor->address);
+			  FREE(value);
+		      } else {
+		          cp++;
+		      }
+		  }
+		  FREE(value);
+	      }
+
+	      /*
 	       *  Look for the "Location:" in the headers. - FM
 	       */
 	      cp = line_kept_clean;
 	      while (*cp) {
-	        if (*cp != 'l' && *cp != 'L') {
+	        if (TOUPPER(*cp) != 'L') {
 		    cp++;
 	        } else if (!strncasecomp(cp, "Location:", 9)) {
 	            char *cp1 = NULL, *cp2 = NULL;
@@ -965,7 +1102,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
 			        *cp1 = LF;
 			    if (cp2)
 			        *cp2 = CR;
-			    doing_redirect = 0;
+			    doing_redirect = FALSE;
 			    permanent_redirection = FALSE;
 			    start_of_data = line_kept_clean;
 			    length = strlen(start_of_data);
@@ -1027,7 +1164,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
 			     *  Abort the fetch.
 			     */
 			    case 0:
-			        doing_redirect = 0;
+			        doing_redirect = FALSE;
 				FREE(redirecting_url);
 				status = HT_NO_DATA;
 				goto clean_up;
@@ -1067,7 +1204,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
 	       */
               if (TRACE)
                   fprintf (stderr, "HTTP: Failed to pick up location.\n");
-	      doing_redirect = 0;
+	      doing_redirect = FALSE;
 	      permanent_redirection = FALSE;
 	      start_of_data = line_kept_clean;
 	      length = strlen(start_of_data);
@@ -1078,21 +1215,24 @@ PUBLIC int HTLoadHTTP ARGS4 (
 
           case 4:
 	    /*
-	     *  "I think I goofed!" (Client Error) - FM
-	     */
+	    **  "I think I goofed!" (Client Error) - FM
+	    */
             switch (server_status) {
               case 401:  /* Unauthorized */
 	        /*
 		 *  Authorization for orgin server required.
-		 *  If we can set up authorization based on
-		 *  the WWW-Authenticate header, and the user
-		 *  provides a username and password, try again.
-		 *  Otherwise, issue a statusline message and
-		 *  restore the current document.  - FM
+		 *  If show_401 is set, proceed to showing the
+		 *  401 body.  Otherwise, if we can set up
+		 *  authorization based on the WWW-Authenticate
+		 *  header, and the user provides a username and
+		 *  password, try again.  Otherwise, check whether
+		 *  to show the 401 body or restore the current
+		 *  document. - FM
 		 */
+		if (show_401)
+		    break;
 		if (HTAA_shouldRetryWithAuth(start_of_data, length,
-					     (void *)handle, s))
-                  {
+					     (void *)handle, s)) {
  		    extern char *authentication_info[2];
 
                     HTTP_NETCLOSE(s, handle);
@@ -1116,15 +1256,18 @@ PUBLIC int HTLoadHTTP ARGS4 (
 		    FREE(line_kept_clean);
                     goto try_again;
                     break;
-                  }
-		else
-		  {
-		    HTAlert(
+		} else if (!(traversal || dump_output_immediately) &&
+		           HTConfirm("Show the 401 message body?")) {
+		    break;
+                } else {
+		    if (traversal || dump_output_immediately)
+		        HTAlert(
 	"Can't retry with authorization!  Contact the server's WebMaster.");
 		    HTTP_NETCLOSE(s, handle);
                     status = -1;
                     goto clean_up;
-		  }
+		}
+		break;
 
 	      case 407:
 	        /*
@@ -1185,26 +1328,26 @@ PUBLIC int HTLoadHTTP ARGS4 (
 
           case 5:
 	    /*
-	     *  "I think YOU goofed!" (server error)
-	     *  500 Internal Server Error
-	     *  501 Not Implemented
-	     *  502 Bad Gateway
-	     *  503 Service Unavailable
-	     *  504 Gateway Timeout
-	     *  505 HTTP Version Not Supported
-	     *  > 505 is unknown.
-	     *  Should always include a message, which
-	     *  we always should display. - FM
-	     */
+	    **  "I think YOU goofed!" (server error)
+	    **  500 Internal Server Error
+	    **  501 Not Implemented
+	    **  502 Bad Gateway
+	    **  503 Service Unavailable
+	    **  504 Gateway Timeout
+	    **  505 HTTP Version Not Supported
+	    **  > 505 is unknown.
+	    **  Should always include a message, which
+	    **  we always should display. - FM
+	    */
 	    HTAlert(line_buffer);
             break;
 
           default:
 	    /*
-	     *  Bad or unknown server_status number.
-	     *  Take a chance and hope there is
-	     *  something to display. - FM
-	     */
+	    **  Bad or unknown server_status number.
+	    **  Take a chance and hope there is
+	    **  something to display. - FM
+	    */
             HTAlert("Unknown status reply from server!");
 	    HTAlert(line_buffer);
 	    if (traversal) {
@@ -1218,9 +1361,13 @@ PUBLIC int HTLoadHTTP ARGS4 (
       }	/* Full HTTP reply */
   } /* scope of fields */
 
-  /* Set up the stream stack to handle the body of the message */
+  /*
+  **  Set up the stream stack to handle the body of the message.
+  */
   if (do_head || keep_mime_headers) {
-      /* It was a HEAD request, or we want the headers and source */
+      /*
+      **  It was a HEAD request, or we want the headers and source.
+      */
       start_of_data = line_kept_clean;
       length = strlen(start_of_data);
       format_in = HTAtom_for("text/plain");
@@ -1230,8 +1377,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
                          format_out,
                          sink, anAnchor);
 
-  if (!target || target == NULL) 
-    {
+  if (!target || target == NULL) {
       char buffer[1024];	/* @@@@@@@@ */
 
       HTTP_NETCLOSE(s, handle);
@@ -1240,18 +1386,22 @@ PUBLIC int HTLoadHTTP ARGS4 (
       _HTProgress (buffer);
       status = -1;
       goto clean_up;
-    }
+  }
 
-  /* Recycle the first chunk of data, in all cases. */
+  /*
+  **  Recycle the first chunk of data, in all cases.
+  */
   (*target->isa->put_block)(target, start_of_data, length);
 
-  /* Go pull the bulk of the data down. */
-  rv = HTCopy(s, (void *)handle, target);
+  /*
+  **  Go pull the bulk of the data down.
+  */
+  rv = HTCopy(anAnchor, s, (void *)handle, target);
 
   if (rv == -1) {
       /*
-       *  Intentional interrupt before data were received, not an error
-       */
+      **  Intentional interrupt before data were received, not an error
+      */
       /* (*target->isa->_abort)(target, NULL); */ /* already done in HTCopy */
       status = HT_INTERRUPTED;
       HTTP_NETCLOSE(s, handle);
@@ -1260,32 +1410,32 @@ PUBLIC int HTLoadHTTP ARGS4 (
 
   if (rv == -2) { 
       /*
-       *  Aw hell, a REAL error, maybe cuz it's a dumb HTTP0 server
-       */
+      **  Aw hell, a REAL error, maybe cuz it's a dumb HTTP0 server
+      */
       (*target->isa->_abort)(target, NULL);
       HTTP_NETCLOSE(s, handle);
       if (!already_retrying && !do_post) {
           if (TRACE)
               fprintf (stderr, "HTTP: Trying again with HTTP0 request.\n");
           /*
-           *  May as well consider it an interrupt -- right?
-           */
+          **  May as well consider it an interrupt -- right?
+          */
           FREE(line_buffer);
           FREE(line_kept_clean);
           extensions = NO;
-          already_retrying = 1;
+          already_retrying = TRUE;
           _HTProgress ("Retrying as HTTP0 request.");
           goto try_again;
       } else {
-          status = HT_NO_DATA;
+          status = HT_NOT_LOADED;
 	  goto clean_up;
       }
   }
 
   /* 
-   *  Free if complete transmission (socket was closed before return).
-   *  Close socket if partial transmission (was freed on abort).
-   */
+  **  Free if complete transmission (socket was closed before return).
+  **  Close socket if partial transmission (was freed on abort).
+  */
   if (rv != HT_INTERRUPTED) {
       (*target->isa->_free)(target);
   } else {
@@ -1294,9 +1444,9 @@ PUBLIC int HTLoadHTTP ARGS4 (
 
   if (doing_redirect) {
       /*
-       *  We already jumped over all this if the "case 3:" code worked
-       *  above, but we'll check here as a backup in case it fails. - FM
-       */
+      **  We already jumped over all this if the "case 3:" code worked
+      **  above, but we'll check here as a backup in case it fails. - FM
+      */
       /* Lou's old comment:  - FM */
       /* OK, now we've got the redirection URL temporarily stored
          in external variable redirecting_url, exported from HTMIME.c,
@@ -1305,28 +1455,29 @@ PUBLIC int HTLoadHTTP ARGS4 (
       status = HT_REDIRECTING;
   } else {
       /*
-       *  If any data were received, treat as a complete transmission
-       */
+      **  If any data were received, treat as a complete transmission
+      */
       status = HT_LOADED;
   }
 
-  /*	Clean up
-   */
+  /*
+  **  Clean up
+  */
 clean_up:
   FREE(line_buffer);
   FREE(line_kept_clean);
 
 done:
-  /* Clear out on exit, just in case. */
-  do_head = 0;
-  do_post = 0;
+  /*
+  **  Clear out on exit, just in case.
+  */
+  do_head = FALSE;
+  do_post = FALSE;
   return status;
 }
 
-
 /*	Protocol descriptor
 */
-
 #ifdef GLOBALDEF_IS_MACRO
 #define _HTTP_C_GLOBALDEF_1_INIT { "http", HTLoadHTTP, 0}
 GLOBALDEF (HTProtocol,HTTP,_HTTP_C_GLOBALDEF_1_INIT);

@@ -18,11 +18,36 @@
      DISPLAY variable   -  If non-empty it specifies your <A HREF="xterm_help.html">X terminal</A>
                            display address.
 
-     Bookmark file      -  If non-empty it specifies the name of your
-                           '<A HREF="bookmark_help.html">Bookmark file</A>'.  If the filename is not
-                           absolute, then the path begins from your
-		           home directory.
+     Multi-bookmarks    -  When OFF, the default bookmark file is used
+                           for the 'v'iew bookmarks and 'a'dd bookmark
+                           link commands.  If set to STANDARD, a menu
+                           of available bookmarks always is invoked
+                           when you seek to view a bookmark file or add
+                           a link, and you select the bookmark file by
+                           its letter token in that menu.  If set to
+                           ADVANCED, you instead are prompted for the
+                           letter of the desired bookmark file, but can
+                           enter '=' to invoke the STANDARD selection
+                           menu, or RETURN for the default bookmark file.
+          
+     Bookmark file      -  If non-empty and multi-bookmarks is OFF, it
+                           specifies your default '<A HREF="bookmark_help.html">Bookmark file</A>'.
+                           If multi-bookmarks is STANDARD or ADVANCED,
+                           entering 'B' will invoke a menu in which you
+                           can specify the filepaths and descriptions
+                           of up to 26 bookmark files.  The filepaths
+                           must be from your home directory, and begin
+                           with dot-slash (./) if subdirectories are
+                           included (e.g, ./BM/lynx_bookmarks.html).
+                           Lynx will create bookmark files when you
+                           first 'a'dd a link, but any subdirectories
+                           in the filepath must already exist.
 
+     FTP sort criteria  -  This option allows you to specify how files
+                           will be sorted within FTP listings.  The
+                           current options include "By Filename",
+                           "By Size", "By Type", and "By Date".
+          
      Personal Mail      -  You may set your mail address here so that
      Address               when mailing messages to other people or
                            mailing files to yourself, your email address
@@ -91,6 +116,21 @@
                            lines, DOWN_TWO lines, NEXT_PAGE, and PREV_PAGE,
                            respectively).
 
+     Show dot files    -   If display/creation of hidden (dot)
+                           files/directories is enabled, you can turn
+                           the feature on or off via this setting.
+
+     Popups for select -   Lynx normally uses a popup window for the
+     fields                OPTIONs in form SELECT fields when the field
+                           does not have the MULTIPLE attribute specified,
+                           and thus only one OPTION can be selected.  The
+                           use of popup windows can be disabled by changing
+                           this setting to OFF, in which case the OPTIONs
+                           will be rendered as a list of radio buttons.
+                           Note that if the SELECT field does have the
+                           MULTIPLE attribute specified, the OPTIONs always
+                           are rendered as a list of checkboxes.
+
      Keypad mode  -        This option gives the choice between navigating 
                            with the keypad (as arrows; see Lynx Navigation)
                            and having every link numbered (numbered links)
@@ -115,10 +155,6 @@
                             Files first
                               Files and directories are separated into two
                               alphabetical lists.  Files are listed first.
-
-     Show dot files    -   If display/creation of hidden (dot)
-                           files/directories is enabled, you can turn
-                           the feature on or off via this setting.
 
      User Mode         -   Beginner 
                               Shows two extra lines of help at the bottom 
@@ -151,13 +187,13 @@
                            changed to one which does not include "Lynx" or
                            "lynx".
 
-     Local execution   -   If set to 'ON', Lynx will locally execute
-     links                 commands contained inside of links.  This
+     Local execution   -   If set to 'ALWAYS ON', Lynx will locally execute
+     links                 commands contained inside of any links.  This
                            can be HIGHLY DANGEROUS so it is recommended
-                           that they remain 'ALWAYS OFF' unless
-                           otherwise set by your system administrator.
-                           This option may not be available on most
-                           versions of Lynx.
+                           that they remain 'ALWAYS OFF' or 'FOR LOCAL
+                           FILES ONLY' unless otherwise set by your system
+                           administrator.  This option may not be available
+                           on most versions of Lynx.
 
 </PRE>
 </BODY>

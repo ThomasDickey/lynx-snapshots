@@ -22,18 +22,17 @@ struct struct_parts {
 };
 
 
-/*	Strip white space off a string
-**	------------------------------
+/*	Strip white space off a string.				HTStrip()
+**	-------------------------------
 **
 ** On exit,
 **	Return value points to first non-white character, or to 0 if none.
 **	All trailing white space is OVERWRITTEN with zero.
 */
-
 PUBLIC char * HTStrip ARGS1(
 	char *,		s)
 {
-#define SPACE(c) ((c==' ')||(c=='\t')||(c=='\n')) 
+#define SPACE(c) ((c == ' ') || (c == '\t') || (c == '\n')) 
     char * p = s;
     for (p = s; *p; p++)
         ;		        /* Find end of string */
@@ -48,9 +47,8 @@ PUBLIC char * HTStrip ARGS1(
     return s;
 }
 
-
-/*	Scan a filename for its consituents
-**	-----------------------------------
+/*	Scan a filename for its consituents.			scan()
+**	------------------------------------
 **
 ** On entry,
 **	name	points to a document name which may be incomplete.
@@ -73,43 +71,58 @@ PRIVATE void scan ARGS2(
     parts->relative = NULL;
     parts->anchor = NULL;
     
+    /*
+    **  Scan left-to-right for a scheme (access).
+    */
     after_access = name;
     for (p = name; *p; p++) {
 	if (*p==':') {
 	    *p = '\0';
 	    parts->access = name;	/* Access name has been specified */
-	    after_access = p+1;
+	    after_access = (p + 1);
 	    break;
 	}
-	if (*p=='/')
-	    break;
-	if (*p=='#')
+	if (*p == '/' || *p == '#' || *p == ';' || *p == '?')
 	    break;
     }
     
-    for (p = (name+length-1); p >= name; p--) {
+#ifdef NOTDEFINED
+    for (p = (name + length-1); p >= name; p--) {
+#endif /* NOTDEFINED */
+    /*
+    **  Scan left-to-right for a fragment (anchor).
+    */
+    for (p = after_access; *p; p++) {
 	if (*p =='#') {
-	    parts->anchor = p + 1;
+	    parts->anchor = (p + 1);
 	    *p = '\0';			/* terminate the rest */
 	}
     }
+
+    /*
+    **  Scan left-to-right for a host or absolute path.
+    */
     p = after_access;
     if (*p == '/') {
 	if (p[1] == '/') {
-	    parts->host = p+2;		 /* host has been specified 	*/
-	    *p = '\0';			 /* Terminate access 		*/
-	    p = strchr(parts->host,'/'); /* look for end of host name if any */
-	    if (p) {
+	    parts->host = (p + 2);	  /* host has been specified 	*/
+	    *p = '\0';			  /* Terminate access 		*/
+	    p = strchr(parts->host, '/'); /* look for end of host name if any */
+	    if (p != NULL) {
 	        *p = '\0';			/* Terminate host */
-	        parts->absolute = p+1;		/* Root has been found */
+	        parts->absolute = (p + 1);	/* Root has been found */
 	    }
 	} else {
-	    parts->absolute = p+1;		/* Root found but no host */
+	    parts->absolute = (p + 1);		/* Root found but no host */
 	}	    
     } else {
-        parts->relative = (*after_access) ? after_access : 0;	/* zero for "" */
+        parts->relative = (*after_access) ?
+			     after_access : NULL; /* NULL for "" */
     }
 
+    /*
+    **  Check schemes that commonly have unescaped hashes.
+    */
     if (parts->access && parts->anchor) {
         if ((!parts->host && strcasecomp(parts->access, "lynxcgi")) ||
 	    !strcasecomp(parts->access, "nntp") ||
@@ -129,12 +142,12 @@ PRIVATE void scan ARGS2(
 
 #ifdef NOT_DEFINED	/* search is just treated as part of path */
     {
-        char *p = relative ? relative : absolute;
-	if (p) {
-	    char * q = strchr(p, '?');	/* Any search string? */
-	    if (q) {
-	    	*q = '\0';			/* If so, chop that off. */
-		parts->search = q+1;
+        char *p = (relative ? relative : absolute);
+	if (p != NULL) {
+	    char *q = strchr(p, '?');	/* Any search string? */
+	    if (q != NULL) {
+	    	*q = '\0';		/* If so, chop that off. */
+		parts->search = (q + 1);
 	    }
 	}
     }
@@ -142,8 +155,8 @@ PRIVATE void scan ARGS2(
 } /*scan */    
 
 
-/*	Parse a Name relative to another name
-**	-------------------------------------
+/*	Parse a Name relative to another name.			HTParse()
+**	--------------------------------------
 **
 **	This returns those parts of a name which are given (and requested)
 **	substituting bits from the related name where necessary.
@@ -169,90 +182,119 @@ PUBLIC char * HTParse ARGS3(
     char * p;
     char * access;
     struct struct_parts given, related;
-    
-    /* Make working copies of input strings to cut up:
-    */
-    len = strlen(aName)+strlen(relatedName)+10;
-    result = (char *)malloc(len);	/* Lots of space: more than enough */
-    if (result == NULL)
-        outofmem(__FILE__, "HTParse");
 
     if (TRACE)
 	fprintf(stderr,
-		"HTParse: aName:%s   relatedName:%s\n",aName,relatedName);
-    
+		"HTParse: aName:%s   relatedName:%s\n", aName, relatedName);
+
+    /*
+    **  Allocate the output string.
+    */
+    len = strlen(aName) + strlen(relatedName) + 10;
+    result = (char *)malloc(len);	/* Lots of space: more than enough */
+    if (result == NULL)
+        outofmem(__FILE__, "HTParse");
+    result[0] = '\0';		/* Clear string  */
+
+    /*
+    **  Make working copies of the input strings to cut up.
+    */
     StrAllocCopy(name, aName);
     StrAllocCopy(rel, relatedName);
 
+    /*
+    **  Cut up the strings into URL fields.
+    */
     scan(name, &given);
     scan(rel,  &related); 
-    result[0] = '\0';		/* Clear string  */
+
+    /*
+    **  Handle the scheme (access) field.
+    */
     if (given.access && given.host && !given.relative && !given.absolute) {
         if (!strcmp(given.access, "http") ||
 	    !strcmp(given.access, "https") ||
 	    !strcmp(given.access, "ftp"))
-	    given.absolute = "";	/* Assume root */
+	    /*
+	    **  Assume root.
+	    */
+	    given.absolute = "";
     }
     access = given.access ? given.access : related.access;
-    if (wanted & PARSE_ACCESS)
+    if (wanted & PARSE_ACCESS) {
         if (access) {
 	    strcat(result, access);
 	    if (wanted & PARSE_PUNCTUATION)
 	        strcat(result, ":");
 	}
+    }
 
-    /* If different, inherit nothing. */
-    if (given.access && related.access && strcmp(given.access,related.access)) {
+    /*
+    **  If different schemes, inherit nothing.
+    **
+    **  We'll try complying with RFC 1808 and
+    **  the Fielding draft, and inherit nothing
+    **  if both schemes are given, rather than
+    **  only when they differ, except for
+    **  file URLs - FM
+    **
+    **  After trying it for a while, it's still
+    **  premature, IHMO, to go along with it, so
+    **  this is back to inheriting for identical
+    **  schemes whether or not they are "file".
+    **  If you want to try it again yourself,
+    **  uncomment the strncasecomp() below. - FM
+    */
+    if ((given.access && related.access) &&
+        (/* strcasecomp(given.access, "file") || */
+         strcmp(given.access, related.access))) {
 	related.host = NULL;
 	related.absolute = NULL;
 	related.relative = NULL;
 	related.anchor = NULL;
     }
-	
+
+    /*
+    **  Handle the host field.
+    */
     if (wanted & PARSE_HOST)
         if (given.host || related.host) {
-	    char * tail = result + strlen(result);
+	    char *tail = result + strlen(result);
 	    if (wanted & PARSE_PUNCTUATION)
 	        strcat(result, "//");
 	    strcat(result, given.host ? given.host : related.host);
 #define CLEAN_URLS
 #ifdef CLEAN_URLS
-	    /* Ignore default port numbers, and trailing dots on FQDNs
-	       which will only cause identical addresses to look different */
+	    /*
+	    **  Ignore default port numbers, and trailing dots on FQDNs,
+	    **  which will only cause identical addresses to look different.
+	    */
 	    {
-	    	char * p, * h;
+	    	char *p, *h;
 		p = strchr(tail, ':');
-		if (p && access) {		/* Port specified */
-		    if ( (    strcmp(access, "http") == 0
-		    	   && strcmp(p, ":80") == 0 )
-			||
-		          (   strcmp(access, "gopher") == 0
-		    	   && strcmp(p, ":70") == 0 )
-			||
-		          (   strcmp(access, "ftp") == 0
-		    	   && strcmp(p, ":21") == 0 )
-			||
-		          (   strcmp(access, "wais") == 0
-		    	   && strcmp(p, ":210") == 0 )
-		    	||
-		          (   (strcmp(access, "nntp") == 0 ||
-			       strcmp(access, "news") == 0)
-		    	   && strcmp(p, ":119") == 0 )
-		    	||
-		          (   strcmp(access, "snews") == 0
-		    	   && strcmp(p, ":563") == 0 )
-		    	||
-		          (   strcmp(access, "finger") == 0
-		    	   && strcmp(p, ":79") == 0 )
-		    	||
-		          (   strcmp(access, "cso") == 0
-		    	   && strcmp(p, ":105") == 0 )
-		    	)
+		if (p != NULL && !isdigit((unsigned char)p[1]))
+		    /*
+		    **  Colon not followed by a port number.
+		    */
+		    *p = '\0';
+		if (p != NULL && p != '\0' && access != NULL) {
+		    /*
+		    **  Port specified.
+		    */
+		    if ((!strcmp(access, "http"  ) && !strcmp(p, ":80" )) ||
+		        (!strcmp(access, "gopher") && !strcmp(p, ":70" )) ||
+		        (!strcmp(access, "ftp"   ) && !strcmp(p, ":21" )) ||
+		        (!strcmp(access, "wais"  ) && !strcmp(p, ":210")) ||
+		        (!strcmp(access, "nntp"  ) && !strcmp(p, ":119")) ||
+			(!strcmp(access, "news"  ) && !strcmp(p, ":119")) ||
+		        (!strcmp(access, "snews" ) && !strcmp(p, ":563")) ||
+		        (!strcmp(access, "finger") && !strcmp(p, ":79" )) ||
+		        (!strcmp(access, "cso"   ) && !strcmp(p, ":105")))
 		    *p = '\0';	/* It is the default: ignore it */
 		}
-		if (!p) { 
+		if (p == NULL) { 
 		    int len = strlen(tail);
-	
+
 		    if (len > 0) {
 		        h = tail + len - 1;	/* last char of hostname */
 		        if (*h == '.') 
@@ -261,20 +303,32 @@ PUBLIC char * HTParse ARGS3(
 		} else { 
 		    h = p;
 		    h--;		/* End of hostname */
-		    if (*h == '.') 
-			strcpy(h, p);  /* slide p over h */
+		    if (*h == '.') {
+		        /*
+			**  Slide p over h.
+			*/
+		        while (*p != '\0')
+			    *h++ = *p++;
+			*h = '\0';	/* terminate */
+		    }
 		}
 	    }
 #endif /* CLEAN_URLS */
 	}
-	
-    if (given.host && related.host)  /* If different hosts, inherit no path. */
+
+    /*
+    **  If different hosts, inherit no path.
+    */
+    if (given.host && related.host)
         if (strcmp(given.host, related.host) != 0) {
 	    related.absolute = NULL;
 	    related.relative = NULL;
 	    related.anchor = NULL;
 	}
-	
+
+    /*
+    **  Handle the path.
+    */
     if (wanted & PARSE_PATH) {
         if (access && !given.absolute && given.relative) {
 	    if (!strcasecomp(access, "nntp") ||
@@ -282,75 +336,80 @@ PUBLIC char * HTParse ARGS3(
 		(!strcasecomp(access, "news") &&
 		 !strncasecomp(result, "news://", 7))) {
 		/*
-		 * Treat all given nntp or snews paths,
-		 * or given paths for news URLs with a host,
-		 * as absolute.
+		 *  Treat all given nntp or snews paths,
+		 *  or given paths for news URLs with a host,
+		 *  as absolute.
 		 */
 		given.absolute = given.relative;
 		given.relative = NULL;
 	    }
 	}
-        if (given.absolute) {				/* All is given */
+        if (given.absolute) {			/* All is given */
 	    if (wanted & PARSE_PUNCTUATION)
 	        strcat(result, "/");
 	    strcat(result, given.absolute);
 	    if (TRACE)
-	        fprintf(stderr,"1\n");
-	} else if (related.absolute) {	/* Adopt path not name */
+	        fprintf(stderr, "1\n");
+	} else if (related.absolute) {		/* Adopt path not name */
 	    strcat(result, "/");
 	    strcat(result, related.absolute);
 	    if (given.relative) {
 		p = strchr(result, '?');	/* Search part? */
-		if (!p)
-		    p = result+strlen(result)-1;
-		for (; *p!='/'; p--)
+		if (p == NULL)
+		    p = (result + strlen(result) - 1);
+		for (; *p != '/'; p--)
 		    ;				/* last / */
 		p[1] = '\0';			/* Remove filename */
 		strcat(result, given.relative);	/* Add given one */
 		HTSimplify (result);
 	    }
 	    if (TRACE)
-	        fprintf(stderr,"2\n");
+	        fprintf(stderr, "2\n");
 	} else if (given.relative) {
 	    strcat(result, given.relative);		/* what we've got */
 	    if (TRACE)
-	        fprintf(stderr,"3\n");
+	        fprintf(stderr, "3\n");
 	} else if (related.relative) {
 	    strcat(result, related.relative);
 	    if (TRACE)
-	        fprintf(stderr,"4\n");
+	        fprintf(stderr, "4\n");
 	} else {  /* No inheritance */
 	    strcat(result, "/");
+	    if (!strcmp(result, "news:/"))
+	        result[5] = '*';
 	    if (TRACE)
-	        fprintf(stderr,"5\n");
+	        fprintf(stderr, "5\n");
 	}
     }
-		
-    if (TRACE)
-	fprintf(stderr,"HTParse: result:%s\n",result);
 
+    /*
+    **  Handle the fragment (anchor).
+    */
     if (wanted & PARSE_ANCHOR)
-        if (given.anchor || related.anchor) {
+        if ((given.anchor && *given.anchor) ||
+	    (!given.anchor && related.anchor)) {
 	    if (wanted & PARSE_PUNCTUATION)
 	        strcat(result, "#");
-	    strcat(result, given.anchor ? given.anchor : related.anchor);
+	    strcat(result, (given.anchor) ?
+	    		     given.anchor : related.anchor);
 	}
+    if (TRACE)
+	fprintf(stderr, "HTParse: result:%s\n", result);
     FREE(rel);
     FREE(name);
-    
+
     StrAllocCopy(return_value, result);
     FREE(result);
 
     return return_value;		/* exactly the right length */
 }
 
-
-/*	        Simplify a filename
-**		-------------------
+/*	Simplify a filename.				HTSimplify()
+**	--------------------
 **
-** A unix-style file is allowed to contain the seqeunce xxx/../ which may be
-** replaced by "" , and the seqeunce "/./" which may be replaced by "/".
-** Simplification helps us recognize duplicate filenames.
+**  A unix-style file is allowed to contain the seqeunce xxx/../ which may
+**  be replaced by "" , and the seqeunce "/./" which may be replaced by "/".
+**  Simplification helps us recognize duplicate filenames.
 **
 **	Thus, 	/etc/junk/../fred 	becomes	/etc/fred
 **		/etc/junk/./fred	becomes	/etc/junk/fred
@@ -363,40 +422,73 @@ PUBLIC char * HTParse ARGS3(
 PUBLIC void HTSimplify ARGS1(
 	char *,		filename)
 {
-    char * p;
-    char * q;
+    char *p;
+    char *q, *q1;
 
     if (filename == NULL)
 	return;
 
-    if (filename[0] && filename[1])	/* Bug fix 12 Mar 93 TBL */
-     for (p = filename+2; *p; p++) {
-        if (*p == '/') {
-	    if ((p[1] == '.') && (p[2]=='.') && (p[3] == '/' || !p[3])) {
-		for (q = (p-1); (q >= filename) && (*q != '/'); q--)
-		    ;			/* prev slash */
-		if (q[0] == '/' && 0 != strncmp(q, "/../", 4) &&
-		    !(q-1 > filename && q[-1] == '/')) {
-	            strcpy(q, p+3);	/* Remove  /xxx/.. */
-		    if (!(*filename))
-		        strcpy(filename, "/");
-		    p = q-1;		/* Start again with prev slash 	*/
-		} else {		/*   xxx/.. leave it! */
-#ifdef BUG_CODE
-		    strcpy(filename, p[3] ? p+4 : p+3); /* rm  xxx/../	*/
-		    p = filename;	/* Start again */
-#endif /* BUG_CODE */
+    if ((filename[0] && filename[1]) && strchr(filename, '/') != NULL) {
+        for (p = (filename + 2); *p; p++) {
+	    if (*p == '/') {
+		if ((p[1] == '.') && (p[2] == '.') &&
+		    (p[3] == '/' || p[3] == '\0')) {
+		    /*
+		    **  Handle "/../" or "/..".
+		    */
+		    for (q = (p - 1); (q >= filename) && (*q != '/'); q--)
+			/*
+			**  Back up to previous slash or beginning of string.
+			*/
+		        ;
+		    if ((q[0] == '/') && strncmp(q, "/../", 4) &&
+		        !((q - 1) > filename && q[-1] == '/')) {
+			/*
+			**  Not at beginning of string or in a
+			**  host field, so remove the "/xxx/..".
+			*/
+			q1 = (p + 3);
+			p = q;
+			while (*q1 != '\0')
+			    *p++ = *q1++;
+			*p = '\0';		/* terminate */
+#ifdef NOTDEFINED
+			/*
+			**  Make sure filename has at least one slash.
+			*/
+			if (*filename == '\0') {
+			    *filename = '/';
+			    *(filename + 1) = '\0';
+			}
+#endif /* NOTDEFINED */
+			/*
+			**  Start again with previous slash.
+			*/
+			p = (q - 1);
+		    }
+		} else if (p[1] == '.' && p[2] == '/') {
+		    /*
+		    **  Handle "./" by removing the characters.
+		    */
+		    q = p;
+		    q1 = (p + 2);
+		    while (*q1 != '\0')
+		       *q++ = *q1++;
+		    *q = '\0';		/* terminate */
+		    p--;
+		} else if (p[1] == '.' && p[2] == '\0') {
+		    /*
+		    **  Handle terminal "." by removing the character.
+		    */
+		    p[1] = '\0';
 		}
-	    } else if ((p[1] == '.') && (p[2] == '/' || !p[2])) {
-	        strcpy(p, p+2);		/* Remove a slash and a dot */
 	    }
 	}
     }
 }
 
-
-/*		Make Relative Name
-**		------------------
+/*	Make Relative Name.					HTRelative()
+**	-------------------
 **
 ** This function creates and returns a string which gives an expression of
 ** one address as related to another. Where there is no relation, an absolute
@@ -447,8 +539,8 @@ PUBLIC char * HTRelative ARGS2(
         StrAllocCopy(result, path);
     } else {					/* Some path in common */
         int levels = 0;
-        for (; *q && (*q!='#'); q++)
-	    if (*q=='/')
+        for (; *q && (*q != '#'); q++)
+	    if (*q == '/')
 	        levels++;
 	result = (char *)malloc(3*levels + strlen(last_slash) + 1);
         if (result == NULL)
@@ -464,7 +556,6 @@ PUBLIC char * HTRelative ARGS2(
     return result;
 }
 
-
 /*		Escape undesirable characters using %		HTEscape()
 **		-------------------------------------
 **
@@ -475,7 +566,6 @@ PUBLIC char * HTRelative ARGS2(
 **
 **	Unlike HTUnEscape(), this routine returns a malloced string.
 */
-
 PRIVATE CONST unsigned char isAcceptable[96] =
 
 /*	Bit 0		xalpha		-- see HTFile.h
@@ -520,15 +610,14 @@ PUBLIC char * HTEscape ARGS2(
     return result;
 }
 
-
-/*		Escape undesirable characters using %		HTEscapeSP()
-**		-------------------------------------
+/*	Escape undesirable characters using % but space to +.	HTEscapeSP()
+**	-----------------------------------------------------
 **
 **	This function takes a pointer to a string in which
 **	some characters may be unacceptable unescaped.
 **	It returns a string which has these characters
 **	represented by a '%' character followed by two hex digits,
-**	except that spaces are converted to '+'.
+**	except that spaces are converted to '+' instead of %2B.
 **
 **	Unlike HTUnEscape(), this routine returns a malloced string.
 */
@@ -562,16 +651,14 @@ PUBLIC char * HTEscapeSP ARGS2(
     return result;
 }
 
-
-/*		Decode %xx escaped characters			HTUnEscape()
-**		-----------------------------
+/*	Decode %xx escaped characters.				HTUnEscape()
+**	------------------------------
 **
 **	This function takes a pointer to a string in which some
 **	characters may have been encoded in %xy form, where xy is
 **	the acsii hex code for character 16x+y.
 **	The string is converted in place, as it will never grow.
 */
-
 PRIVATE char from_hex ARGS1(
 	char,		c)
 {
@@ -589,7 +676,7 @@ PUBLIC char * HTUnEscape ARGS1(
     if (!(p && *p))
         return str;
 
-    while (*p) {
+    while (*p != '\0') {
         if (*p == HEX_ESCAPE) {
 	    p++;
 	    if (*p)
@@ -607,8 +694,8 @@ PUBLIC char * HTUnEscape ARGS1(
     
 } /* HTUnEscape */
 
-/*		Decode some %xx escaped characters	      HTUnEscapeSome()
-**		----------------------------------	      Klaus Weide
+/*	Decode some %xx escaped characters.		      HTUnEscapeSome()
+**	-----------------------------------			Klaus Weide
 **							    (kweide@tezcat.com)
 **	This function takes a pointer to a string in which some
 **	characters may have been encoded in %xy form, where xy is
@@ -625,10 +712,10 @@ PUBLIC char * HTUnEscapeSome ARGS2(
     char * q = str;
     char testcode;
 
-    if (!(p && *p) || !(do_trans && *do_trans))
+    if (p == NULL || *p == '\0' || do_trans == NULL || *do_trans == '\0')
         return str;
 
-    while (*p) {
+    while (*p != '\0') {
         if (*p == HEX_ESCAPE &&
 	    p[1] && p[2] &&	/* tests shouldn't be needed, but.. */
 	    isxdigit((unsigned char)p[1]) &&
@@ -646,4 +733,3 @@ PUBLIC char * HTUnEscapeSome ARGS2(
     return str;
     
 } /* HTUnEscapeSome */
-

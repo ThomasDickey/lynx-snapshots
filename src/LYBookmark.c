@@ -10,6 +10,7 @@
 #include "LYKeymap.h"
 #include "LYCharUtils.h"
 #include "LYCurses.h"
+#include "GridText.h"
 
 #ifdef VMS
 #include "HTVMSUtils.h"
@@ -25,22 +26,29 @@ PRIVATE BOOLEAN is_mosaic_hotlist=FALSE;
 PRIVATE char * convert_mosaic_bookmark_file PARAMS((char *filename_buffer));
 
 /*
- *  Tries to open the bookmark file for reading.
- *  if successful the file is closed and the filename
- *  is returned and the URL is given in name.
- *
- *  Returns a zero-length pointer to flag a cancel,
- *  a space to flag an undefined selection, and
- *  NULL for a failure (processing error). - FM
+ *  Tries to open a bookmark file for reading, which may be
+ *  the default, or based on offering the user a choice from
+ *  the MBM_A_subbookmark[] array.  If successful the file is
+ *  closed, and the filename in system path specs is returned,
+ *  the URL is allocated into *URL, and the MBM_A_subbookmark[]
+ *  filepath is allocated into the BookmarkPage global.  Returns
+ *  a zero-length pointer to flag a cancel, or a space to flag
+ *  an undefined selection, without allocating into *URL or
+ *  BookmarkPage.  Returns NULL with allocating into BookmarkPage
+ *  but not *URL is the selection is valid but the file doesn't
+ *  yet exist. - FM
  */
 PUBLIC char * get_bookmark_filename ARGS1(
-	char **, URL)
+	char **,	URL)
 {
     char URL_buffer[256];
     static char filename_buffer[256];
     char string_buffer[256];
     FILE *fp;
     int MBM_tmp;
+#ifndef VMS
+    int len;
+#endif /* !VMS */
 
     /*
      *  Multi_Bookmarks support. - FMG & FM
@@ -49,7 +57,7 @@ PUBLIC char * get_bookmark_filename ARGS1(
     MBM_tmp = select_multi_bookmarks();
     if (MBM_tmp == -2)
         /*
-	 *  Zero-length pointer flags a cancel.
+	 *  Zero-length pointer flags a cancel. - FM
 	*/
         return("");
     if (MBM_tmp == -1) {
@@ -59,23 +67,28 @@ PUBLIC char * get_bookmark_filename ARGS1(
 	_statusline(string_buffer);
 	sleep(AlertSecs);
 	/*
-	 *  Space flags an undefined selection.
-	*/
+	 *  Space flags an undefined selection. - FMG
+	 */
 	return(" ");
     } else {
+        /*
+	 *  Save the filepath as a global.  The system path will be
+	 *  loaded into to the (static) filename_buffer as the return
+	 *  value, the URL will be allocated into *URL, and we also
+	 *  need the filepath available to calling functions.  This
+	 *  is all pitifully non-reentrant, a la the original Lynx,
+	 *  and should be redesigned someday. - FM
+	 */
 	StrAllocCopy(BookmarkPage, MBM_A_subbookmark[MBM_tmp]);
     }
 
     /*
-     *  Seek it in the home path.
+     *  Seek it in the home path. - FM
      */
-#ifdef VMS
-    LYVMS_HomePathAndFilename(filename_buffer,
-			      sizeof(filename_buffer),
-			      BookmarkPage);
-#else
-    sprintf(filename_buffer,"%s/%s", Home_Dir(), BookmarkPage);
-#endif /* VMS */
+    filename_buffer[255] = '\0';
+    LYAddPathToHome(filename_buffer,
+		    sizeof(filename_buffer),
+		    BookmarkPage);
     if (TRACE)
         fprintf(stderr, "\nget_bookmark_filename: SEEKING %s\n   AS %s\n\n",
 		BookmarkPage, filename_buffer);
@@ -124,8 +137,12 @@ success:
 
 } /* big end */
 
+/*
+ *  Converts a Mosaic hotlist file into an HTML
+ *  file for handling as a Lynx bookmark file. - FM
+ */
 PRIVATE char * convert_mosaic_bookmark_file ARGS1(
-	char *,	filename_buffer)
+	char *,		filename_buffer)
 {
     static char newfile[256];
     static BOOLEAN first = TRUE;
@@ -144,7 +161,7 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
     }
 
     if ((nfp = fopen(newfile, "w")) == NULL) {
-	_statusline(NO_TEMP_FOR_HOTLIST);
+        LYMBM_statusline(NO_TEMP_FOR_HOTLIST);
 	sleep(AlertSecs);
 	return ("");
     }
@@ -181,87 +198,130 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
     return(newfile);
 }
 
+/*
+ *  Adds a link to a bookmark file, creating the file
+ *  if it doesn't already exist, and making sure that
+ *  no_cache is set for a pre-existing, cached file,
+ *  so that the change will be evident on return to
+ *  to that file. - FM
+ */
 PUBLIC void save_bookmark_link ARGS2(
-	char *,	address,
-	char *,	title)
+	char *,		address,
+	char *,		title)
 {
     FILE *fp;
     BOOLEAN first_time = FALSE;
     char *filename;
     char *bookmark_URL = NULL;
     char filename_buffer[256];
+    char string_buffer[256];
     char *Address = NULL;
     char *Title = NULL;
+    int i, c;
+    DocAddress WWWDoc;
+    HTParentAnchor *tmpanchor;
+    HText *text;
 
+    /*
+     *  Make sure we were passed something to save. - FM
+     */
     if (!(address && *address)) {
         HTAlert(MALFORMED_ADDRESS);
 	return;
     }
 
+    /*
+     *  Offer a choice of bookmark files,
+     *  or get the default. - FMG
+     */
     filename = get_bookmark_filename(&bookmark_URL);
 
     /*
-     *  If filename is a space, invalid bookmark
-     *  file was selected.  If zero-length, user
-     *  cancelled.  Ignore request in both cases!
+     *  If filename is NULL, must create a new file.  If
+     *  filename is a space, an invalid bookmark file was
+     *  selected, or if zero-length, the user cancelled.
+     *  Ignore request in both cases.  Otherwise, make
+     *  a copy before anything might change the static
+     *  get_bookmark_filename() buffer. - FM
      */
-    if (filename)
-      if (*filename == '\0' || !strcmp(filename," "))
-	return;
-    /*
-     *  If BookmarkPage didn't get loaded, something
-     *  went wrong, so ignore the request.
-     */
-    if (!BookmarkPage)
-	return;
+    if (filename == NULL) {
+        first_time = TRUE;
+	filename_buffer[0] = '\0';
+    } else {
+        if (*filename == '\0' || !strcmp(filename," ")) {
+	    FREE(bookmark_URL);
+	    return;
+	}
+	strcpy(filename_buffer, filename);
+    }
 
-     /*
-      *  We don't need the full URL.
-      */
-    FREE(bookmark_URL);
-
     /*
-     *  Allow user to change the title. - FM
+     *  If BookmarkPage is NULL, something went
+     *  wrong, so ignore the request. - FM
      */
-    filename_buffer[255] = '\0';
-    LYstrncpy(filename_buffer, title, 255);
-    convert_to_spaces(filename_buffer);
-    _statusline(TITLE_PROMPT); 
-    LYgetstr(filename_buffer, VISIBLE, sizeof(filename_buffer), NORECALL);
-    if (*filename_buffer == '\0') {
-	_statusline(CANCELLED);
-	sleep(MessageSecs);
+    if (BookmarkPage == NULL) {
+        FREE(bookmark_URL);
 	return;
     }
 
     /*
-     *  Create the Title with any left-angle-brackets converted to &lt;
-     *  entities and any ampersands converted to &amp; entities.  - FM
+     *  If the link will be added to the same
+     *  bookmark file, get confirmation. - FM
      */
-    StrAllocCopy(Title, filename_buffer);
+    if (LYMultiBookmarks == TRUE &&
+        strstr(HTLoadedDocumentURL(),
+    	       (*BookmarkPage == '.' ?
+	            (BookmarkPage+1) : BookmarkPage)) != NULL) {
+	LYMBM_statusline(MULTIBOOKMARKS_SELF);
+	c = LYgetch();
+	if (TOUPPER(c) != 'L') {
+	    FREE(bookmark_URL);
+	    return;
+	}
+    }
+
+    /*
+     *  Allow user to change the title. - FM
+     */
+    string_buffer[255] = '\0';
+    LYstrncpy(string_buffer, title, 255);
+    convert_to_spaces(string_buffer);
+    LYMBM_statusline(TITLE_PROMPT);
+    LYgetstr(string_buffer, VISIBLE, sizeof(string_buffer), NORECALL);
+    if (*string_buffer == '\0') {
+	LYMBM_statusline(CANCELLED);
+	sleep(MessageSecs);
+	FREE(bookmark_URL);
+	return;
+    }
+
+    /*
+     *  Create the Title with any left-angle-brackets
+     *  converted to &lt; entities and any ampersands
+     *  converted to &amp; entities.  - FM
+     */
+    StrAllocCopy(Title, string_buffer);
     LYEntify(&Title, TRUE);
 
     /*
-     *  Open the bookmark file. - FM
+     *  Create the bookmark file, if it doesn't exist already,
+     *  Otherwise, open the pre-existing bookmark file. - FM
      */
-    if (filename == NULL)
-	first_time = TRUE;
-    /*
-     *  Try in the home directory.
-     */
-#ifdef VMS
-    LYVMS_HomePathAndFilename(filename_buffer,
-			      sizeof(filename_buffer),
-			      BookmarkPage);
-#else
-    sprintf(filename_buffer, "%s/%s", Home_Dir(), BookmarkPage);
-#endif /* VMS */
+    if (first_time) {
+        /*
+	 *  Seek it in the home path. - FM
+	 */
+	LYAddPathToHome(filename_buffer,
+			sizeof(filename_buffer),
+			BookmarkPage);
+    }
     if (TRACE)
         fprintf(stderr, "\nsave_bookmark_link: SEEKING %s\n   AS %s\n\n",
 		BookmarkPage, filename_buffer);
     if ((fp = fopen(filename_buffer, (first_time ? "w" : "a+"))) == NULL) {
-	_statusline(BOOKMARK_OPEN_FAILED);
+	LYMBM_statusline(BOOKMARK_OPEN_FAILED);
 	sleep(AlertSecs);
+	FREE(bookmark_URL);
 	return;
     }
 
@@ -300,15 +360,51 @@ PUBLIC void save_bookmark_link ARGS2(
     } else {
 	fprintf(fp,"<LI><a href=\"%s\">%s</a>\n", Address, Title);
     }
-
     fclose(fp);
+
+    /*
+     *  If this is a cached bookmark file, set nocache for
+     *  it so we'll see the new bookmark link when that
+     *  cache is retrieved. - FM
+     */
+    if (!first_time && nhist > 0 && bookmark_URL) {
+    	for (i = 0; i < nhist; i++) {
+	    if (history[i].bookmark &&
+	    	!strcmp(history[i].address, bookmark_URL)) {
+		WWWDoc.address = history[i].address;
+		WWWDoc.post_data = NULL;
+		WWWDoc.post_content_type = NULL;
+		WWWDoc.bookmark = history[i].bookmark;
+		WWWDoc.isHEAD = FALSE;
+		WWWDoc.safe = FALSE;
+		if (((tmpanchor = HTAnchor_parent(
+					HTAnchor_findAddress(&WWWDoc)
+				    		 )) != NULL) &&
+		    (text = (HText *)HTAnchor_document(tmpanchor)) != NULL) {
+		    HText_setNoCache(text);
+		}
+		break;
+	    }
+	}
+    }
+
+    /*
+     *  Clean up and report success.
+     */
     FREE(Title);
     FREE(Address);
-
-    _statusline(OPERATION_DONE);
+    FREE(bookmark_URL);
+    LYMBM_statusline(OPERATION_DONE);
     sleep(MessageSecs);
 }
 	
+/*
+ *  Remove a link from a bookmark file.  The calling
+ *  function is expected to have used get_filename_link(),
+ *  pass us the link number as cur, the MBM_A_subbookmark[]
+ *  string as cur_bookmark_page, and to have set up no_cache
+ *  itself. - FM
+ */
 PUBLIC void remove_bookmark_link ARGS2(
 	int,		cur,
 	char *,		cur_bookmark_page)
@@ -332,13 +428,9 @@ PUBLIC void remove_bookmark_link ARGS2(
 
     if (!cur_bookmark_page)
 	return;
-#ifdef VMS
-    LYVMS_HomePathAndFilename(filename_buffer,
-			      sizeof(filename_buffer),
-			      cur_bookmark_page);
-#else
-    sprintf(filename_buffer,"%s/%s", Home_Dir(), cur_bookmark_page);
-#endif /* VMS */
+    LYAddPathToHome(filename_buffer,
+		    sizeof(filename_buffer),
+		    cur_bookmark_page);
     if (TRACE)
         fprintf(stderr, "\nremove_bookmark_link: SEEKING %s\n   AS %s\n\n",
 		cur_bookmark_page, filename_buffer);
@@ -407,7 +499,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 		seen++;
                 if (++n == cur) {
 		    if (seen != 1 || !LYstrstr(buf, "</a>") ||
-			LYstrstr(cp+1, "<a href=")) {
+			LYstrstr((cp + 1), "<a href=")) {
 			_statusline(BOOKMARK_LINK_NOT_ONE_LINE);
 			sleep(AlertSecs);
 			goto failure;
@@ -507,13 +599,7 @@ PUBLIC int select_multi_bookmarks NOARGS
      *  still show the screen and let them do it the "long" way.
      */
     if (LYMBMAdvanced && user_mode == ADVANCED_MODE) {
-	move(LYlines-1, 0);
-	clrtoeol();
-	start_reverse();
-	addstr("Select subbookmark, '=' for menu, or ^G to cancel: ");
-	stop_reverse();
-	refresh();
-
+	LYMBM_statusline(MULTIBOOKMARKS_SELECT);
 get_advanced_choice:
 	c = LYgetch();
 #ifdef VMS
@@ -581,6 +667,7 @@ PUBLIC int select_menu_multi_bookmarks NOARGS
     int c, MBM_counter, MBM_tmp_count, MBM_allow;
     int MBM_screens, MBM_from, MBM_to, MBM_current;
     char string_buffer[256];
+    char shead_buffer[256];
     char *cp, *cp1;
 
     /*
@@ -626,7 +713,7 @@ PUBLIC int select_menu_multi_bookmarks NOARGS
 	return (-2);
     }
     /*
-     *  Load the bad choice message.
+     *  Load the bad choice message buffer.
      */
     sprintf(string_buffer,
     	    BOOKMARK_FILE_NOT_DEFINED,
@@ -648,29 +735,36 @@ draw_bookmark_choices:
 	MBM_to = MBM_V_MAXFILES;
 
     /*
-     * Display menu of bookmarks.
+     *  Display menu of bookmarks.  NOTE that we avoid printw()'s
+     *  to increase the chances that any non-ASCII or multibyte/CJK
+     *  characters will be handled properly. - FM
      */
     clear();
     move(1, 5);
     if (bold_H1 || bold_headers)
 	start_bold();
-    if (MBM_screens > 1)
-	printw(" Select Bookmark (screen %d of %d)", MBM_current, MBM_screens);
-    else
-	printw("       Select Bookmark");
+    if (MBM_screens > 1) {
+        sprintf(shead_buffer,
+		MULTIBOOKMARKS_SHEAD_MASK, MBM_current, MBM_screens);
+	addstr(shead_buffer);
+    } else {
+        addstr(MULTIBOOKMARKS_SHEAD);
+    }
     if (bold_H1 || bold_headers)
 	stop_bold();
 
     MBM_tmp_count = 0;
     for (c = MBM_from; c <= MBM_to; c++) {
 	move(3+MBM_tmp_count, 5);
-	printw("%c : %s",(c+'A'),
-	       (!MBM_A_subdescript[c] ? "" : MBM_A_subdescript[c]));
-
+	addch((unsigned char)(c + 'A'));
+	addstr(" : ");
+	if (MBM_A_subdescript[c])
+	    addstr(MBM_A_subdescript[c]);
 	move(3+MBM_tmp_count,36);
-	printw("(%s)",
-	       (!MBM_A_subbookmark[c] ? "" : MBM_A_subbookmark[c]));
-
+	addch('(');
+	if (MBM_A_subbookmark[c])
+	    addstr(MBM_A_subbookmark[c]);
+	addch(')');
 	MBM_tmp_count++;
     }
 
@@ -679,16 +773,21 @@ draw_bookmark_choices:
      */
     if (MBM_screens > 1) {
 	move(LYlines-2, 0);
-	addstr(MULTIBOOKMARKS_MOVE);
+	addstr("'");
+	standout();
+	addstr("[");
+	standend();
+	addstr("' ");
+	addstr(PREVIOUS);
+	addstr(", '");
+	standout();
+	addstr("]");
+	standend();
+	addstr("' ");
+	addstr(NEXT_SCREEN);
     }
 
-    move(LYlines-1, 0);
-    clrtoeol();
-    start_reverse();
-    addstr(MULTIBOOKMARKS_SAVE);
-    stop_reverse();
-    refresh();
-
+    LYMBM_statusline(MULTIBOOKMARKS_SAVE);
 get_bookmark_choice:
     c = LYgetch();
 #ifdef VMS
@@ -749,19 +848,9 @@ get_bookmark_choice:
     if (c < 0 || c > MBM_V_MAXFILES) {
 	goto get_bookmark_choice;
     } else if (!MBM_A_subbookmark[c]) {
-	move(LYlines-1, 0);
-	clrtoeol();
-	start_reverse();
- 	addstr(string_buffer);
-	stop_reverse();
-	refresh();
+ 	LYMBM_statusline(string_buffer);
 	sleep(AlertSecs);
-	move(LYlines-1, 0);
-	clrtoeol();
-	start_reverse();
-	addstr(MULTIBOOKMARKS_SAVE);
-	stop_reverse();
-	refresh();
+	LYMBM_statusline(MULTIBOOKMARKS_SAVE);
 	goto get_bookmark_choice;
     } else {
 	return(c);
@@ -783,4 +872,24 @@ PUBLIC BOOLEAN LYHaveSubBookmarks NOARGS
     }
 
     return(FALSE);
+}
+
+/*
+ *  This function passes a string to _statusline(), making
+ *  sure it is at the bottom of the screen if LYMultiBookmarks
+ *  is TRUE, otherwise, letting it go to the normal statusline
+ *  position based on the current user mode.  We want to use
+ *  _statusline() so that any multibyte/CJK characters in the
+ *  string will be handled properly. - FM
+ */
+ PUBLIC void LYMBM_statusline  ARGS1(
+ 	char *,		text)
+{
+    if (LYMultiBookmarks == TRUE && user_mode == NOVICE_MODE) {
+	LYStatusLine = (LYlines - 1);
+        _statusline(text);
+	LYStatusLine = -1;
+    } else {
+        _statusline(text);
+    }
 }

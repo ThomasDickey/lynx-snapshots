@@ -9,7 +9,6 @@
 **
 */
 
-
 #include "HTUtils.h"
 #include "tcp.h"
 #include "HTAlert.h"
@@ -19,15 +18,20 @@
 #include "LYUtils.h"
 #include "LYSignal.h"
 #include "GridText.h"
+#include "LYCookie.h"
 
 #include "LYLeaks.h"
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
 
-PUBLIC void HTAlert ARGS1(CONST char *, Msg)
+/*	Issue a message about a problem.		HTAlert()
+**	--------------------------------
+*/
+PUBLIC void HTAlert ARGS1(
+	CONST char *,	Msg)
 {
-    if(TRACE) {
+    if (TRACE) {
         fprintf(stderr, "\nAlert!: %s", (char *)Msg);
 	fflush(stderr);
         _user_message("Alert!: %s", (char *)Msg);
@@ -39,16 +43,21 @@ PUBLIC void HTAlert ARGS1(CONST char *, Msg)
     sleep(AlertSecs);
 }
 
-
-PUBLIC void HTProgress ARGS1(CONST char *, Msg)
+/*	Issue a progress message.			HTProgress()
+**	-------------------------
+*/
+PUBLIC void HTProgress ARGS1(
+	CONST char *,	Msg)
 {
-    if(TRACE)
+    if (TRACE)
         fprintf(stderr, "%s\n", (char *)Msg);
     else
         statusline((char *)Msg);
 }
 
-
+/*	Seek confirmation.				HTConfirm()
+**	------------------
+*/
 PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
 {
     if (dump_output_immediately) { /* Non-interactive, can't respond */
@@ -59,27 +68,30 @@ PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
 	extern BOOLEAN HadVMSInterrupt;
 #endif /* VMS */
 	
-	_user_message("WWW: %s (y/n) ", (char *) Msg);
+	_user_message("%s (y/n) ", (char *)Msg);
 	
-	while(1) {
+	while (1) {
 	    c = LYgetch();
 #ifdef VMS
-	    if(HadVMSInterrupt) {
+	    if (HadVMSInterrupt) {
 		HadVMSInterrupt = FALSE;
 		c = 'N';
 	    }
 #endif /* VMS */
-	    if(TOUPPER(c)=='Y')
+	    if (TOUPPER(c) == 'Y')
 		return(YES);
-	    if(TOUPPER(c)=='N' || c == 7 || c == 3) /* ^G or ^C cancels */
+	    if (TOUPPER(c) == 'N' || c == 7 || c == 3) /* ^G or ^C cancels */
 		return(NO);
 	}
     }
 }
 
-/*	Prompt for answer and get text back
+/*	Prompt for answer and get text back.		HTPrompt()
+**	------------------------------------
 */
-PUBLIC char * HTPrompt ARGS2(CONST char *, Msg, CONST char *, deflt)
+PUBLIC char * HTPrompt ARGS2(
+	CONST char *,	Msg,
+	CONST char *,	deflt)
 {
     char * rep = NULL;
     char Tmp[200];
@@ -99,14 +111,17 @@ PUBLIC char * HTPrompt ARGS2(CONST char *, Msg, CONST char *, deflt)
     return rep;
 }
 
-/*      Prompt for password without echoing the reply
+/*
+**	Prompt for password without echoing the reply.	HTPromptPassword()
+**	----------------------------------------------
 */
-PUBLIC char * HTPromptPassword ARGS1(CONST char *, Msg)
+PUBLIC char * HTPromptPassword ARGS1(
+	CONST char *,	Msg)
 {
     char *result = NULL;
     char pw[120];
 
-    pw[0]='\0';
+    pw[0] = '\0';
 
     if (!dump_output_immediately) {
         _statusline(Msg ? (char *)Msg : PASSWORD_PROMPT);
@@ -119,10 +134,10 @@ PUBLIC char * HTPromptPassword ARGS1(CONST char *, Msg)
     return result;
 }
 
-
-/*      Prompt both username and password       HTPromptUsernameAndPassword()
-**      ---------------------------------
-** On entry,
+/*     	Prompt both username and password.       HTPromptUsernameAndPassword()
+**      ----------------------------------
+**
+**  On entry,
 **      Msg             is the prompting message.
 **      *username and
 **      *password       are char pointers; they are changed
@@ -133,22 +148,23 @@ PUBLIC char * HTPromptPassword ARGS1(CONST char *, Msg)
 **                      Initial value of *password is
 **                      completely discarded.
 **
-** On exit,
+**  On exit,
 **      *username and *password point to newly allocated
 **      strings -- original strings pointed to by them
 **      are NOT freed.
 **
 */
-PUBLIC void HTPromptUsernameAndPassword ARGS3(CONST char *,     Msg,
-                                              char **,          username,
-                                              char **,          password)
+PUBLIC void HTPromptUsernameAndPassword ARGS3(
+	CONST char *,	Msg,
+	char **,	username,
+	char **,	password)
 {
     if (authentication_info[0] && authentication_info[1]) {
 	/* 
-	 *  -auth parameter gave us both the username and password
-	 *  to use for the first realm, so just use them without
-	 *  any prompting. - FM
-	 */
+	**  -auth parameter gave us both the username and password
+	**  to use for the first realm, so just use them without
+	**  any prompting. - FM
+	*/
  	StrAllocCopy(*username, authentication_info[0]);
 	FREE(authentication_info[0]);
 	StrAllocCopy(*password, authentication_info[1]);
@@ -156,79 +172,204 @@ PUBLIC void HTPromptUsernameAndPassword ARGS3(CONST char *,     Msg,
     } else if (dump_output_immediately) {
         if (authentication_info[0]) {
 	    /*
-	     *  Use the command line username. - FM
-	     */
+	    **  Use the command line username. - FM
+	    */
 	    StrAllocCopy(*username, authentication_info[0]);
 	    FREE(authentication_info[0]);
 	} else {
 	    /*
-	     *  Default to "WWWuser". - FM
-	     */
+	    **  Default to "WWWuser". - FM
+	    */
             StrAllocCopy(*username, "WWWuser");
 	}
 	if (authentication_info[1]) {
 	    /*
-	     *  Use the command line password. - FM
-	     */
+	    **  Use the command line password. - FM
+	    */
 	    StrAllocCopy(*password, authentication_info[1]);
 	    FREE(authentication_info[1]);
 	} else {
 	    /*
-	     *  Default to a zero-length string. - FM
-	     */
+	    **  Default to a zero-length string. - FM
+	    */
 	    StrAllocCopy(*password, "");
 	}
 	printf("\n%s\n", USERNAME_PASSWORD_REQUIRED);
     } else {
         if (authentication_info[0]) {
 	    /*
-	     *  Offer command line username in the prompt
-	     *  for the first realm. - FM
-	     */
+	    **  Offer command line username in the prompt
+	    **  for the first realm. - FM
+	    */
 	    StrAllocCopy(*username, authentication_info[0]);
 	    FREE(authentication_info[0]);
 	}
-	if (Msg) {
+	if (Msg != NULL) {
 	    *username = HTPrompt(Msg, *username);
 	} else {
 	    *username = HTPrompt(USERNAME_PROMPT, *username);
 	}
 	if (authentication_info[1]) {
 	    /*
-	     *  Use the command line password for the first realm. - FM
-	     */
+	    **  Use the command line password for the first realm. - FM
+	    */
 	    StrAllocCopy(*password, authentication_info[1]);
 	    FREE(authentication_info[1]);
 	} else if (*username != NULL && *username[0] != '\0') {
 	    /*
-	     *  If we have a non-zero length username,
-	     *  prompt for the password. - FM
-	     */
+	    **  If we have a non-zero length username,
+	    **  prompt for the password. - FM
+	    */
 	    *password = HTPromptPassword(PASSWORD_PROMPT);
 	} else {
 	    /*
-	     *  Return a zero-length password. - FM
-	     */
-	     StrAllocCopy(*password, "");
+	    **  Return a zero-length password. - FM
+	    */
+	    StrAllocCopy(*password, "");
 	}
 	
     }
 }
 
-
-#define	SERVER_ASKED_FOR_REDIRECTION \
- "Server asked for redirection of POST content to"
-#define	PROCEED_GET_CANCEL "P)roceed, use G)ET or C)ancel "
-#define	ADVANCED_POST_REDIRECT \
- "Redirection of POST content. P)roceed, see U)RL, use G)ET or C)ancel"
-#define	LOCATION_HEADER "Location: "
-
-/*      Confirm redirection of POST		HTConfirmPostRedirect()
+/*	Confirm a cookie operation.			HTConfirmCookie()
+**	---------------------------
 **
-** On entry,
+**  On entry,
+**	server			is the server sending the Set-Cookie.
+**	domain			is the domain of the cookie.
+**	path			is the path of the cookie.
+**	name			is the name of the cookie.
+**	value			is the value of the cookie.
+**
+**  On exit,
+**	Returns FALSE on cancel,
+**		TRUE if the cookie should be set.
+*/
+PUBLIC BOOL HTConfirmCookie ARGS6(
+	void *,		dp,
+	CONST char *,	server,
+	CONST char *,	domain,
+	CONST char *,	path,
+	CONST char *,	name,
+	CONST char *,	value)
+{
+    char message[256];
+    HTList *hl;
+    domain_entry *de;
+    int ch, namelen, valuelen, space_free;
+
+#ifdef VMS
+    extern BOOLEAN HadVMSInterrupt;
+#endif /* VMS */
+
+    if ((de = (domain_entry *)dp) == NULL)
+        return FALSE;
+  
+    /*
+    **  If the user has specified a constant action, don't prompt at all.
+    */
+    if (de->bv == ACCEPT_ALWAYS)
+        return TRUE;
+    if (de->bv == REJECT_ALWAYS)
+        return FALSE;
+
+    if (dump_output_immediately) {
+        /*
+	**  Non-interactive, can't respond.  Use the LYSetCookies value
+	*   based on its compilation or configuration setting, or on the
+	**  command line toggle. - FM
+	*/
+        return LYSetCookies;
+    }
+
+    /*
+    **  Figure out how much of the cookie we can show.
+    **  The '37' is the length of ADVANCED_COOKIE_CONFIRMATION,
+    **  minus the length of the %s directives (10 chars)
+    */
+    if (de != NULL) {
+        if (de->bv == ACCEPT_ALWAYS) 
+	    return TRUE;
+	if (de->bv == REJECT_ALWAYS) 
+	    return FALSE;
+    }
+    space_free = (((LYcols - 1) - 37) - strlen(server));
+    if (space_free < 0)
+        space_free = 0;
+    namelen = strlen(name);
+    valuelen = strlen(value);
+    if ((namelen + valuelen) > space_free) {
+        /*
+	**  Argh... there isn't enough space on our single line for
+	**  the whole cookie.  Reduce them both by a percentage.
+	**  This should be smarter.
+	*/
+        float percentage;
+        percentage = (float)space_free/(float)(namelen + valuelen);
+        namelen = (int)(percentage*(float)namelen);
+        valuelen = (int)(percentage*(float)valuelen);
+    }
+    sprintf(message, ADVANCED_COOKIE_CONFIRMATION,
+    	    server, namelen, name, valuelen, value);
+    _user_message(message, "");
+    while (1) {
+	ch = LYgetch();
+#ifdef VMS
+	if (HadVMSInterrupt) {
+	    HadVMSInterrupt = FALSE;
+	    ch = 'N';
+	}
+#endif /* VMS */
+	switch(TOUPPER(ch)) {
+	    case 'A':
+	        /*
+		**  Set to accept all cookies for this domain.
+		*/
+		de->bv = ACCEPT_ALWAYS;
+		_user_message(ALWAYS_ALLOWING_COOKIES, de->domain);
+		sleep(MessageSecs);
+		return TRUE;
+
+	    case 'N':
+	    case 7:	/* Ctrl-G */
+	    case 3:	/* Ctrl-C */
+	        /*
+		**  Reject the cookie.
+		*/
+		_statusline(REJECTING_COOKIE);
+		sleep(MessageSecs);
+		return FALSE;
+
+    	    case 'V':
+	        /*
+		**  Set to reject all cookies from this domain.
+		*/
+		de->bv = REJECT_ALWAYS;
+		_user_message(NEVER_ALLOWING_COOKIES, de->domain);
+		sleep(MessageSecs);
+		return FALSE;
+
+	    case 'Y':
+	        /*
+		**  Accept the cookie.
+		*/
+		_statusline(ALLOWING_COOKIE);
+		sleep(InfoSecs);
+		return TRUE;
+
+	    default:
+	        continue;
+	}
+    }
+}
+
+/*      Confirm redirection of POST.		HTConfirmPostRedirect()
+**	----------------------------
+**
+**  On entry,
 **      redirecting_url             is the Location.
 **
-** On exit,
+**  On exit,
 **      Returns 0 on cancel,
 **	  1 for redirect of POST with content,
 **	303 for redirect as GET without content
@@ -244,8 +385,8 @@ PUBLIC int HTConfirmPostRedirect ARGS1(
 
     if (dump_output_immediately)
 	/*
-	 *  Treat as 303 (GET without content) if not interactive.
-	 */
+	**  Treat as 303 (GET without content) if not interactive.
+	*/
         return 303;
 
     if (user_mode == NOVICE_MODE) {
@@ -277,31 +418,31 @@ PUBLIC int HTConfirmPostRedirect ARGS1(
 	switch (TOUPPER(c)) {
 	    case 'P':
 		/*
-		 *  Proceed with 301 or 302 redirect of POST
-		 *  (we check only for 0 and 303 in HTTP.c).
-		 */
+		**  Proceed with 301 or 302 redirect of POST
+		**  (we check only for 0 and 303 in HTTP.c).
+		*/
 	        FREE(show_POST_url);
 		return 1;	
 
  	    case 7:
  	    case 'C':
 	        /*
-		 * Cancel request.
-		 */
+		** Cancel request.
+		*/
 	        FREE(show_POST_url);
 		return 0;
 
 	    case 'G':
 	        /*
-		 *  Treat as 303 (GET without content).
-		 */
+		**  Treat as 303 (GET without content).
+		*/
 	        FREE(show_POST_url);
 		return 303;
 
 	    case 'U':
 	        /*
-		 *  Show URL for intermediate or advanced mode.
-		 */
+		**  Show URL for intermediate or advanced mode.
+		*/
 	        if (user_mode != NOVICE_MODE)
 		    if (on_screen == 1)
 			on_screen = 0;
@@ -311,8 +452,8 @@ PUBLIC int HTConfirmPostRedirect ARGS1(
 
 	    default:
 	        /*
-		 *  Get another character.
-		 */
+		**  Get another character.
+		*/
 		if (on_screen == 1)
 		    on_screen = 0;
 		else
@@ -320,4 +461,3 @@ PUBLIC int HTConfirmPostRedirect ARGS1(
 	}
     }
 }
-

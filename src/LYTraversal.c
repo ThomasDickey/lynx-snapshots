@@ -100,18 +100,12 @@ PUBLIC void dump_traversal_history NOARGS
     int x;
     FILE *ifp;
 
+    if (nhist <= 0)
+        return;
+
     if ((ifp = fopen(TRAVERSE_FILE,"a+")) == NULL) {
         perror("unable to open traversal file");
-	(void) signal(SIGHUP, SIG_DFL);
-	(void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-	(void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-	if (no_suspend)
-	    (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-        exit(-1);
+	return;
     }
 
     fprintf(ifp, "\n\nTRAVERSAL WAS INTERUPTED\n\n\

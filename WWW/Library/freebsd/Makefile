@@ -8,7 +8,7 @@ WWW_MACH = freebsd
 ASIS_MACH = i386/FreeBSD
 
 
-CFLAGS += -O -DDEBUG
+CFLAGS += -DDEBUG
 LFLAGS =
 
 # Directory for installed binary:

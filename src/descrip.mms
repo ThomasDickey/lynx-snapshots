@@ -52,11 +52,11 @@
 
 OBJS = 	DefaultStyle.obj, GridText.obj, HTAlert.obj, HTFWriter.obj, -
 	HTInit.obj, HTML.obj, LYBookmark.obj, LYCgi.obj, LYCharSets.obj, -
-	LYCharUtils.obj, LYClean.obj, LYCurses.obj, LYDownload.obj, -
-	LYEdit.obj, LYEditmap.obj, LYexit.obj, LYForms.obj, LYGetFile.obj, -
-	LYHistory.obj, LYJump.obj, LYKeymap.obj, LYLeaks.obj, LYList.obj, -
-	LYMail.obj, LYMain.obj, LYMainLoop.obj, LYMap.obj, LYNews.obj, -
-	LYOptions.obj, LYPrint.obj, LYrcFile.obj, LYReadCFG.obj, -
+	LYCharUtils.obj, LYClean.obj, LYCookie.obj, LYCurses.obj, -
+	LYDownload.obj, LYEdit.obj, LYEditmap.obj, LYexit.obj, LYForms.obj, -
+	LYGetFile.obj, LYHistory.obj, LYJump.obj, LYKeymap.obj, LYLeaks.obj, -
+	LYList.obj, LYMail.obj, LYMain.obj, LYMainLoop.obj, LYMap.obj, -
+	LYNews.obj, LYOptions.obj, LYPrint.obj, LYrcFile.obj, LYReadCFG.obj, -
 	LYSearch.obj, LYShowInfo.obj, LYStrings.obj, LYTraversal.obj, -
 	LYUpload.obj, LYUtils.obj
 

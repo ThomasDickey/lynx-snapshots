@@ -67,6 +67,7 @@ PUBLIC int printfile ARGS1(document *,newdoc)
     int FnameTotal;
     int FnameNum;
     BOOLEAN FirstRecall = TRUE;
+    char *content_base = NULL, *content_location = NULL;
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
 #endif /* VMS */
@@ -85,9 +86,41 @@ PUBLIC int printfile ARGS1(document *,newdoc)
     WWWDoc.post_content_type = newdoc->post_content_type;
     WWWDoc.bookmark = newdoc->bookmark;
     WWWDoc.isHEAD = newdoc->isHEAD;
-    if(!HTLoadAbsolute(&WWWDoc))
+    WWWDoc.safe = newdoc->safe;
+    if (!HTLoadAbsolute(&WWWDoc))
         return(NOT_FOUND);
   
+    /*
+     *  If document is source, load the content_base
+     *  and content_location strings. - FM
+     */
+    if (HTisDocumentSource()) {
+    	if (HText_getContentBase()) {
+	    StrAllocCopy(content_base, HText_getContentBase());
+	    collapse_spaces(content_base);
+	    if (!(content_base && *content_base)) {
+	        FREE(content_base);
+	    }
+	}
+    	if (HText_getContentLocation()) {
+	    StrAllocCopy(content_location, HText_getContentLocation());
+	    collapse_spaces(content_location);
+	    if (!(content_location && *content_location)) {
+	        FREE(content_location);
+	    }
+	}
+	if (!content_base) {
+	    if ((content_location) && is_url(content_location)) {
+	        StrAllocCopy(content_base, content_location);
+	    } else {
+	        StrAllocCopy(content_base, newdoc->address);
+	    }
+	}
+	if (!content_location) {
+	    StrAllocCopy(content_location, newdoc->address);
+	}
+    }
+
     /*
      *  Load the suggested filename string. - FM
      */
@@ -113,7 +146,6 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 	pages = lines_in_file/66;
     }
 	
-
     /*
      *  Determine the type.
      */
@@ -141,7 +173,6 @@ PUBLIC int printfile ARGS1(document *,newdoc)
         }
     }
 
-
     /*
      *  Set up the sug_filenames recall buffer.
      */
@@ -149,7 +180,9 @@ PUBLIC int printfile ARGS1(document *,newdoc)
     recall = ((FnameTotal >= 1) ? RECALL : NORECALL);
     FnameNum = FnameTotal;
 
-
+    /*
+     *  Act on the request. - FM
+     */
     switch (type) {
 	case TO_FILE:
 		_statusline(FILENAME_PROMPT);
@@ -343,15 +376,16 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 
 		if (HTisDocumentSource()) {
 		    /*
-		     *  Added the document's URL as a BASE tag
+		     *  Added the document's base as a BASE tag
 		     *  to the top of the file.  May create
 		     *  technically invalid HTML, but will help
 		     *  get any partial or relative URLs resolved
 		     *  properly if no BASE tag is present to
 		     *  replace it. - FM
 		     */
-		    fprintf(outfile_fp, "<BASE HREF=\"%s\">\n",
-		    			newdoc->address);
+		    fprintf(outfile_fp,
+		    	    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n",
+			    newdoc->address, content_base);
 		}
 		print_wwwfile_to_fd(outfile_fp,0);
 		if (keypad_mode)
@@ -419,18 +453,21 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 		    break;
 		}
 
-		/* write the contents to a temp file */
+		/*
+		 *  Write the contents to a temp file.
+		 */
 		if (HTisDocumentSource()) {
 		    /*
-		     *  Added the document's URL as a BASE tag to
+		     *  Added the document's base as a BASE tag to
 		     *  the top of the message body.  May create
 		     *  technically invalid HTML, but will help
 		     *  get any partial or relative URLs resolved
 		     *  properly if no BASE tag is present to
 		     *  replace it. - FM
 		     */
-		    fprintf(outfile_fp, "<BASE HREF=\"%s\">\n\n",
-		    			newdoc->address);
+		    fprintf(outfile_fp,
+		    	    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
+			    newdoc->address, content_base);
 		} else {
 		    fprintf(outfile_fp, "X-URL: %s\n\n", newdoc->address);
 		}
@@ -445,7 +482,9 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 
         	stop_curses();
 		printf(MAILING_FILE);
+		fflush(stdout);
         	system(buffer);
+		fflush(stdout);
 		sleep(MessageSecs);
         	start_curses();
 #else /* Unix: */
@@ -475,30 +514,26 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 		    } else {
 		        fprintf(outfile_fp, "\n");
 		    }
-		    fprintf(outfile_fp, "Content-Location: %s\n",
-		    			newdoc->address);
 		    fprintf(outfile_fp, "Content-Base: %s\n",
-		    			newdoc->address);
-		} else {
-		    /*
-		     *  Add an X-URL header for rendered HTML or
-		     *  plain text. - FM
-		     */
-		    fprintf(outfile_fp, "X-URL: %s\n", newdoc->address);
+		    			content_base);
+		    fprintf(outfile_fp, "Content-Location: %s\n",
+		    			content_location);
 		}
+		fprintf(outfile_fp, "X-URL: %s\n", newdoc->address);
 		fprintf(outfile_fp, "To: %s\nSubject:%s\n\n",
 				     user_response, sug_filename);
 		if (HTisDocumentSource()) {
 		    /*
-		     *  Added the document's URL as a BASE tag to
+		     *  Added the document's base as a BASE tag to
 		     *  the top of the message body.  May create
 		     *  technically invalid HTML, but will help
 		     *  get any partial or relative URLs resolved
 		     *  properly if no BASE tag is present to
 		     *  replace it. - FM
 		     */
-		    fprintf(outfile_fp, "<BASE HREF=\"%s\">\n\n",
-		    			newdoc->address);
+		    fprintf(outfile_fp,
+		    	    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
+			    newdoc->address, content_base);
 		}
 		print_wwwfile_to_fd(outfile_fp, 0);
 		if (keypad_mode)
@@ -553,15 +588,16 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 
 		if (HTisDocumentSource()) {
 		    /*
-		     *  Added the document's URL as a BASE tag
+		     *  Added the document's base as a BASE tag
 		     *  to the top of the file.  May create
 		     *  technically invalid HTML, but will help
 		     *  get any partial or relative URLs resolved
 		     *  properly if no BASE tag is present to
 		     *  replace it. - FM
 		     */
-		    fprintf(outfile_fp, "<BASE HREF=\"%s\">\n\n",
-		    			newdoc->address);
+		    fprintf(outfile_fp,
+		    	    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
+			    newdoc->address, content_base);
 		}
 		print_wwwfile_to_fd(outfile_fp, 0);
 		if (keypad_mode)
@@ -639,15 +675,16 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 
 		if (HTisDocumentSource()) {
 		    /*
-		     *  Added the document's URL as a BASE tag
+		     *  Added the document's base as a BASE tag
 		     *  to the top of the file.  May create
 		     *  technically invalid HTML, but will help
 		     *  get any partial or relative URLs resolved
 		     *  properly if no BASE tag is present to
 		     *  replace it. - FM
 		     */
-		    fprintf(outfile_fp, "<BASE HREF=\"%s\">\n\n",
-		    			newdoc->address);
+		    fprintf(outfile_fp,
+		    	    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
+			    newdoc->address, content_base);
 		}
 		print_wwwfile_to_fd(outfile_fp, 0);
 		if (keypad_mode)
@@ -816,6 +853,7 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 		if (TRACE)
 		    fprintf(stderr, "command: %s\n", buffer);
 		printf(PRINTING_FILE);
+		fflush(stdout);
 		system(buffer);
 		fflush(stdout);
 #ifndef VMS
@@ -828,6 +866,8 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 
     FREE(link_info);
     FREE(sug_filename);
+    FREE(content_base);
+    FREE(content_location);
     return(NORMAL);
 }	
 

@@ -5,12 +5,15 @@
 #include "LYGlobalDefs.h"
 #include "LYSignal.h"
 #include "LYClean.h"
+#include "LYStrings.h"
 #ifdef USE_SLANG
 #include "LYCharSets.h"
 #endif /* USE_SLANG */
 
 #include "LYexit.h"
 #include "LYLeaks.h"
+
+#define FREE(x) if (x) {free(x); x = NULL;}
 
 #ifdef VMS
 #define DISPLAY "DECW$DISPLAY"
@@ -29,9 +32,8 @@ extern int _NOSHARE(COLS);
 #endif /* VMS && __GNUC__ */
 
 /*
- * These are routines to start and stop curses and to cleanup
- * the screen at the end
- *
+ *  These are routines to start and stop curses and to cleanup
+ *  the screen at the end.
  */
 
 PRIVATE int dumbterm PARAMS((char *terminal));
@@ -63,13 +65,15 @@ PUBLIC void VTHome NOARGS
 }
 #endif /* VMS */
 
-PUBLIC void sl_add_attr ARGS1(int, a)
+PUBLIC void sl_add_attr ARGS1(
+	int,		a)
 {
     Current_Attr |= a;
     SLsmg_set_color(Current_Attr);
 }
 
-PUBLIC void sl_sub_attr ARGS1(int, a)
+PUBLIC void sl_sub_attr ARGS1(
+	int,		a)
 {
     Current_Attr &= ~a;
     SLsmg_set_color(Current_Attr);
@@ -81,13 +85,17 @@ PUBLIC void lynx_setup_colors NOARGS
     SLtt_set_color(1, NULL, "blue", "white");	 /* bold */
     SLtt_set_color(2, NULL, "yellow", "blue");	 /* reverse */
     SLtt_set_color(4, NULL, "magenta", "white"); /* underline */
-    /* The other objects are '|'ed together to get rest */
+    /*
+     *  The other objects are '|'ed together to get rest.
+     */
     SLtt_set_color(3, NULL, "green", "white");	 /* bold-reverse */
     SLtt_set_color(5, NULL, "blue", "white");    /* bold-underline */
     SLtt_set_color(6, NULL, "red", "white");	 /* reverse-underline */
     SLtt_set_color(7, NULL, "magenta", "cyan");	 /* reverse-underline-bold */
 
-    /* Now set monchrome attributes */
+    /*
+     *  Now set monchrome attributes.
+     */
     SLtt_set_mono(1, NULL, SLTT_BOLD_MASK);
     SLtt_set_mono(2, NULL, SLTT_REV_MASK);
     SLtt_set_mono(3, NULL, SLTT_REV_MASK | SLTT_BOLD_MASK);
@@ -97,7 +105,8 @@ PUBLIC void lynx_setup_colors NOARGS
     SLtt_set_mono(7, NULL, SLTT_ULINE_MASK | SLTT_BOLD_MASK | SLTT_REV_MASK);
 }
 
-PRIVATE void sl_suspend ARGS1(int, sig)
+PRIVATE void sl_suspend ARGS1(
+	int,		sig)
 {
 #ifndef VMS
 #ifdef SIGSTOP
@@ -116,7 +125,9 @@ PRIVATE void sl_suspend ARGS1(int, sig)
     SLtty_set_suspend_state(1);
     if (sig == SIGTSTP)
         SLsmg_resume_smg();
-    /* Get new window size in case it changed. */
+    /*
+     *  Get new window size in case it changed.
+     */
     r = SLtt_Screen_Rows;
     c = SLtt_Screen_Cols;
     size_change(0);
@@ -147,8 +158,8 @@ PUBLIC void start_curses NOARGS
 	SLtt_add_color_attribute(4, SLTT_ULINE_MASK);
 	SLtt_add_color_attribute(5, SLTT_ULINE_MASK);
 	/*
-	 * If set, the blink escape sequence will turn on high
-	 * intensity background (rxvt and maybe Linux console).
+	 *  If set, the blink escape sequence will turn on high
+	 *  intensity background (rxvt and maybe Linux console).
 	 */
 	if (Lynx_Color_Flags & SL_LYNX_USE_BLINK)
 	    SLtt_Blink_Mode = 1;	       
@@ -262,7 +273,8 @@ PUBLIC void stop_curses NOARGS
 /*
  *  Check terminal type, start curses & setup terminal.
  */
-PUBLIC BOOLEAN setup ARGS1(char *,terminal)
+PUBLIC BOOLEAN setup ARGS1(
+	char *,		terminal)
 {
     int c;
     int status;
@@ -333,9 +345,10 @@ PUBLIC BOOLEAN setup ARGS1(char *,terminal)
 #else	/* Not VMS: */
 
 /*
- * check terminal type, start curses & setup terminal
+ *  Check terminal type, start curses & setup terminal.
  */
-PUBLIC BOOLEAN setup ARGS1(char *,terminal)
+PUBLIC BOOLEAN setup ARGS1(
+	char *,		terminal)
 {
     static char term_putenv[120];
     char buffer[120];
@@ -352,7 +365,9 @@ PUBLIC BOOLEAN setup ARGS1(char *,terminal)
 	(void) putenv(term_putenv);
     }
 
-	/* query the terminal type */
+    /*
+     *  Query the terminal type.
+     */
     if (dumbterm(getenv("TERM"))) {
 	char *s;
 
@@ -367,7 +382,7 @@ PUBLIC BOOLEAN setup ARGS1(char *,terminal)
 	    strcpy(buffer,"vt100"); 
 	
 	sprintf(term_putenv,"TERM=%s", buffer);
-	putenv(term_putenv);  /* */
+	putenv(term_putenv);
 	printf("\nTERMINAL TYPE IS SET TO %s\n",getenv("TERM"));
 	sleep(MESSAGESECS);
     }
@@ -389,7 +404,8 @@ PUBLIC BOOLEAN setup ARGS1(char *,terminal)
     return(1);
 }
 
-PRIVATE int dumbterm ARGS1(char *,terminal)
+PRIVATE int dumbterm ARGS1(
+	char *,		terminal)
 {
     int dumb = FALSE;
 
@@ -491,7 +507,9 @@ static	short	trap_flag = FALSE;	/* TRUE if AST is set		*/
 BOOLEAN DidCleanup = FALSE;		/* Exit handler flag		*/
 static char VersionVMS[20];		/* Version of VMS		*/
 
-PUBLIC int VMSVersion ARGS2(char *,VerString, int,VerLen)
+PUBLIC int VMSVersion ARGS2(
+	char *,		VerString,
+	int,		VerLen)
 {
      unsigned long status, itm_cod = SYI$_VERSION;
      int i, verlen = 0;
@@ -507,8 +525,10 @@ PUBLIC int VMSVersion ARGS2(char *,VerString, int,VerLen)
      if (!(status&1) || verlen == 0)
 	  return 0;
 
-     /* Cut out trailing spaces */
-     for (m=VerString+verlen, i=verlen-1; i > 0 && VerString[i] == ' '; --i)
+     /*
+      *  Cut out trailing spaces
+      */
+     for (m = VerString+verlen, i = verlen-1; i > 0 && VerString[i] == ' '; --i)
 	  *(--m) = '\0';
 
      return strlen(VerString)+1;	/* Transmit ending 0 too */
@@ -517,28 +537,37 @@ PUBLIC int VMSVersion ARGS2(char *,VerString, int,VerLen)
 PUBLIC void VMSexit NOARGS
 {
     /*
-     * If we get here and DidCleanup is not set, it was via an
-     *  ACCVIO, so make *sure* we attempt a cleanup and reset
-     *  the terminal.
+     *  If we get here and DidCleanup is not set, it was via an
+     *  ACCVIO, or outofmemory forced exit, so make *sure* we
+     *  attempt a cleanup and reset the terminal.
      */
-     if (!DidCleanup) {
-          fprintf(stderr,
+    if (!DidCleanup) {
+        if (LYOutOfMemory == FALSE) {
+            fprintf(stderr,
 "\nA Fatal error has occured in %s Ver. %s\n", LYNX_NAME, LYNX_VERSION);
-	  fprintf(stderr,
+	    fprintf(stderr,
 "\nPlease notify your system administrator to confirm a bug, and if\n");
-	  fprintf(stderr,
+	    fprintf(stderr,
 "confirmed, to notify the lynx-dev list.  Bug reports should have concise\n");
-	  fprintf(stderr,
+	    fprintf(stderr,
 "descriptions of the command and/or URL which causes the problem, the\n");
-	  fprintf(stderr,
+	    fprintf(stderr,
 "operating system name with version number, the TCPIP implementation, the\n");
-	  fprintf(stderr,
+	    fprintf(stderr,
 "TRACEBACK if it can be captured, and any other relevant information.\n");
 
-          fprintf(stderr,"\nPress RETURN to clean up: ");
-	  (void) getchar();
-          cleanup();
-     }
+            fprintf(stderr,"\nPress RETURN to clean up: ");
+	    (void) getchar();
+	} else if (LYCursesON) {
+	    _statusline(MEMORY_EXHAUSTED_ABORT);
+	    sleep(AlertSecs);
+	}
+        cleanup();
+    }
+    if (LYOutOfMemory == TRUE) {
+	printf("\r\n%s\r\n\r\n", MEMORY_EXHAUSTED_ABORT);
+	fflush(stdout);
+    }
 }
 
 /*
@@ -549,7 +578,6 @@ PUBLIC void VMSexit NOARGS
  *		to EDIT, and sets up the Ctrl-C and Ctrl-Y interrupt
  *		handling.
  */
-
 PUBLIC int ttopen NOARGS
 {
 	extern	void cleanup_sig();
@@ -589,7 +617,9 @@ PUBLIC int ttopen NOARGS
 	if( status != SS$_NORMAL )
 		exit( status );
 
-	/* declare the exit handler block */
+	/*
+	 *  Declare the exit handler block.
+	 */
 	exit_handler_block.forward   = 0;
 	exit_handler_block.address   = (unsigned long) &VMSexit;
 	exit_handler_block.zero      = 0;
@@ -598,7 +628,9 @@ PUBLIC int ttopen NOARGS
 	if (status != SS$_NORMAL)
 		exit( status );
 
-	/* set the AST */
+	/*
+	 *  Set the AST.
+	 */
 	lib$disable_ctrl(&mask, &old_msk);
 	trap_flag = TRUE;
 	status = sys$qiow ( EFN, iochan,
@@ -610,9 +642,13 @@ PUBLIC int ttopen NOARGS
 		exit ( status );
 	}
 
-	/* Get the version of VMS */
+	/*
+	 *  Get the version of VMS.
+	 */
 	if (VMSVersion(VersionVMS, 20) < 3)
-		/* Load zeros on error */
+		/*
+		 *  Load zeros on error.
+		 */
 		strcpy(VersionVMS, "V0.0-0");
 
 	return(0);
@@ -624,7 +660,6 @@ PUBLIC int ttopen NOARGS
  *		to the command interpreter.  It puts the terminal back
  *		in a reasonable state.
  */
-
 PUBLIC int ttclose NOARGS
 {
 	int	status;
@@ -648,30 +683,31 @@ PUBLIC int ttclose NOARGS
  *	TTGETC --
  *		Read a character from the terminal, with NOECHO and NOFILTR.
  */
-
 PUBLIC int ttgetc NOARGS
 {
-     int status;
-     unsigned short iosb[4];
-     
-     if (in_pos < in_len)
-          return(buffer[in_pos++]);
+    int status;
+    unsigned short iosb[4];
 
-     status = sys$qiow (EFN, iochan,
-     			IO$_READVBLK|IO$M_NOECHO|IO$M_NOFILTR,
-     			&iosb, 0, 0,
-			&buffer, 1, 0, 0, 0, 0);
-     if ((status&1) == 1)
-          status = iosb[0];
-     if (status == SS$_PARTESCAPE) {
-	  /* escape sequence in progress, fake a successful read */
-	  status = 1;
-     }
-     if ((status&1) != 1)
-          exit(status);
-     in_pos = 1;
-     in_len = iosb[1] + iosb[3];
-     return (buffer[0]);
+    if (in_pos < in_len)
+        return(buffer[in_pos++]);
+
+    status = sys$qiow(EFN, iochan,
+		      IO$_READVBLK|IO$M_NOECHO|IO$M_NOFILTR,
+		      &iosb, 0, 0,
+		      &buffer, 1, 0, 0, 0, 0);
+    if ((status&1) == 1)
+        status = iosb[0];
+    if (status == SS$_PARTESCAPE) {
+	/*
+	 *  Escape sequence in progress.  Fake a successful read.
+	 */
+	status = 1;
+    }
+    if ((status&1) != 1 && status != SS$_DATAOVERUN)
+        exit(status);
+    in_pos = 1;
+    in_len = iosb[1] + iosb[3];
+    return(buffer[0]);
 }
 
 /*
@@ -679,35 +715,36 @@ PUBLIC int ttgetc NOARGS
  *		Check whether a keystroke has been entered, and return
  *		 it, or -1 if none was entered.
  */
-
 PUBLIC int typeahead NOARGS
 {
-     int status;
-     unsigned short iosb[4];
-     
-     if (dump_output_immediately)
-         return -1;
+    int status;
+    unsigned short iosb[4];
 
-     if (in_pos < in_len)
-          return(buffer[in_pos++]);
+    if (dump_output_immediately)
+        return -1;
+
+    if (in_pos < in_len)
+        return(buffer[in_pos++]);
 
 again:
-     status = sys$qiow (EFN, iochan,
-     			IO$_READVBLK|IO$M_TIMED|IO$M_NOECHO|IO$M_NOFILTR,
-     			&iosb, 0, 0,
-			&buffer, 1, 0, 0, 0, 0);
-     if ((status&1) == 1)
-          status = iosb[0];
-     if (status == SS$_PARTESCAPE) {
-	  /* escape sequence in progress, finish reading it */
-	  goto again;
-     }
+    status = sys$qiow (EFN, iochan,
+		       IO$_READVBLK|IO$M_TIMED|IO$M_NOECHO|IO$M_NOFILTR,
+		       &iosb, 0, 0,
+		       &buffer, 1, 0, 0, 0, 0);
+    if ((status&1) == 1)
+        status = iosb[0];
+    if (status == SS$_PARTESCAPE) {
+	/*
+	 *  Escape sequence in progress, finish reading it.
+	 */
+	goto again;
+    }
 
-     in_pos = 1;
-     in_len = iosb[1] + iosb[3];
-     if (status == SS$_TIMEOUT)
-         return(-1);
-     return (buffer[0]);
+    in_pos = 1;
+    in_len = iosb[1] + iosb[3];
+    if (status == SS$_TIMEOUT || status == SS$_DATAOVERUN)
+        return(-1);
+    return (buffer[0]);
 }
 
 /*
@@ -735,32 +772,42 @@ void (*func)();
 	short iosb[4];
 	static int SIG_IGN_flag;
 
-	/* Pass all signals other than SIGINT to signal() */
-	/* Also pass SIGINT to signal() if we're dumping  */
+	/*
+	 *  Pass all signals other than SIGINT to signal().
+	 *  Also pass SIGINT to signal() if we're dumping.
+	 */
 	if (sig != SIGINT || dump_output_immediately) {
 	    signal(sig, func);
 	    return;
 	}
 
-	/* If func is SIG_DFL, treat it as ttclose() */
+	/*
+	 *  If func is SIG_DFL, treat it as ttclose().
+	 */
 	if (func == SIG_DFL) {
 	    ttclose();
 	    return;
 	}
 
-	/* Clear any previous AST */
+	/*
+	 *  Clear any previous AST.
+	 */
 	if (trap_flag) {
 	    status = sys$dassgn (iochan);
 	    status = lib$enable_ctrl(&old_msk);
 	    trap_flag = FALSE;
 	}
 
-	/* If func is SIG_IGN, leave the TT channel closed and the  */
-	/* system response to interrupts enabled for system() calls */
+	/*
+	 *  If func is SIG_IGN, leave the TT channel closed and the
+	 *  system response to interrupts enabled for system() calls.
+	 */
 	if (func == SIG_IGN)
 	    return;
 
-	/* If we get to here, we have a LYNX func, so set the AST */
+	/*
+	 *  If we get to here, we have a LYNX func, so set the AST.
+	 */
 	lib$disable_ctrl(&mask, &old_msk);
 	trap_flag = TRUE;
 	status = sys$assign (&term_nam_dsc, &iochan, 0, 0 );
@@ -781,12 +828,15 @@ void (*func)();
  *	to Lynx instead of breaking out to DCL if a user issues interrupts
  *	or generates an ACCVIO during spawns.
  */
-
 #ifdef __DECC
-PRIVATE unsigned int DCLspawn_exception ARGS2(void *,sigarr, void *,mecharr)
+PRIVATE unsigned int DCLspawn_exception ARGS2(
+	void *,		sigarr,
+	void *,		mecharr)
 {
 #else
-PRIVATE int DCLspawn_exception ARGS2(void *,sigarr, void *,mecharr)
+PRIVATE int DCLspawn_exception ARGS2(
+	void *,		sigarr,
+	void *,		mecharr)
 {
 #endif /* __DECC */
      int status;
@@ -795,11 +845,14 @@ PRIVATE int DCLspawn_exception ARGS2(void *,sigarr, void *,mecharr)
      return(SS$_UNWIND);
 }
 
-PRIVATE int spawn_DCLprocess ARGS1(char *,command)
+PRIVATE int spawn_DCLprocess ARGS1(
+	char *,		command)
 {
      int status;
      unsigned long Status = 0;
-     /** Keep DECC from complaining **/
+     /*
+      *  Keep DECC from complaining.
+      */
      struct dsc$descriptor_s  command_desc;
      command_desc.dsc$w_length  = strlen(command);
      command_desc.dsc$b_class   = DSC$K_CLASS_S;
@@ -815,25 +868,34 @@ PRIVATE int spawn_DCLprocess ARGS1(char *,command)
 #else
      if (VersionVMS[1] >= '6') {
 #endif /* __ALPHA */
-	 /** Include TRUSTED flag **/
+	 /*
+	  *  Include TRUSTED flag.
+	  */
 	 unsigned long trusted = CLI$M_TRUSTED;
          status = lib$spawn(&command_desc,0,0,&trusted,
 	 		    0,0,&Status);
-	 /** If it was invalid, try again without the flag **/
+	 /*
+	  *  If it was invalid, try again without the flag.
+	  */
          if (status == LIB$_INVARG)
             status = lib$spawn(&command_desc,0,0,0,
 	    		       0,0,&Status );
      } else
 	 status = lib$spawn(&command_desc,0,0,0,
 	 		    0,0,&Status);
-     /** Return -1 on error. **/
+     /*
+      *  Return -1 on error.
+      */
      if ((status&1) != 1 || (Status&1) != 1)
          return(-1);
-     /** Return 0 on success. **/
+     /*
+      *  Return 0 on success.
+      */
      return(0);
 }
 
-PUBLIC int DCLsystem ARGS1(char *,command)
+PUBLIC int DCLsystem ARGS1(
+	char *,		command)
 {
      int status;
      extern void controlc();
@@ -841,7 +903,9 @@ PUBLIC int DCLsystem ARGS1(char *,command)
      VMSsignal(SIGINT, SIG_IGN);
      status = spawn_DCLprocess(command);
      VMSsignal(SIGINT, cleanup_sig);
-     /** Returns 0 on success, -1 any error. **/
+     /*
+      *  Returns 0 on success, -1 any error.
+      */
      return(status);
 }
 
@@ -851,9 +915,9 @@ PUBLIC int DCLsystem ARGS1(char *,command)
 **  Pass it the window, it's height, and it's width. - FM
 */
 PUBLIC void VMSbox ARGS3(
-    WINDOW *,	win,
-    int,	height,
-    int,	width)
+	WINDOW *,	win,
+	int,		height,
+	int,		width)
 {
     int i;
 
@@ -876,4 +940,3 @@ PUBLIC void VMSbox ARGS3(
 }
 #endif /* !USE_SLANG */
 #endif /* VMS */
-

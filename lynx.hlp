@@ -64,6 +64,9 @@
   -child
        exit on left-arrow in startfile, and disable save to disk.
 
+  -cookies
+       toggles handling of Set-Cookie headers.
+
   -crawl
        with -traversal, output each page to a file.
        with -dump, format output as with -traversal, but to stdout.
@@ -84,7 +87,7 @@
        enable emacs-like key movement.
 
   -enable_scrollback
-       toggle compatibility with comm programs' scrollback keys
+       toggles compatibility with comm programs' scrollback keys
        (may be incompatible with some curses packages).
 
   -error_file=FILE
@@ -160,6 +163,9 @@
 
   -nolog
        disable mailing of error messages to document owners.
+
+  -nopause
+       disable forced pauses for statusline messages.
 
   -noprint
        disable print functions.
@@ -299,11 +305,12 @@
        require .www_browsable files to browse directories.
 
   -show_cursor
-       If enabled the cursor will not be hidden in the right hand corner but
-       will instead be positioned at the start of the currently selected
-       link.  show cursor is the default for systems without FANCY_CURSES
-       capabilities, and the default configuration can be changed in
-       userdefs.h.
+       If enabled the cursor will not be hidden in the right hand corner
+       but will instead be positioned at the start of the currently
+       selected link.  Show cursor is the default for systems without
+       FANCY_CURSES capabilities.  The default configuration can be
+       changed in userdefs.h or lynx.cfg.  The command line switch
+       toggles the default.
 
   -source
        works the same as dump but outputs HTML source instead of formatted

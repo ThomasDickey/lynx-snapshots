@@ -206,6 +206,8 @@ Booleans
 #define NO (BOOLEAN)0
 #endif
 
+extern BOOL LYOutOfMemory;	/* Declared in LYexit.c - FM */
+
 #define TCP_PORT 80     /* Allocated to http by Jon Postel/ISI 24-Jan-92 */
 #define OLD_TCP_PORT 2784       /* Try the old one if no answer on 80 */
 #define DNP_OBJ 80      /* This one doesn't look busy, but we must check */
@@ -257,9 +259,10 @@ Out Of Memory checking for malloc() return:
 
 #include "LYexit.h"
 
-#define outofmem(file, func) \
- { fprintf(stderr, "%s %s: out of memory.\nProgram aborted.\n", file, func); \
-  exit(-1);}
+#define outofmem(file, func)\
+ { fprintf(stderr,\
+  "\r\n\r\n\r\n%s %s: out of memory.  Aborting...\r\n", file, func);\
+  LYOutOfMemory = TRUE; exit(-1);}
 /* extern void outofmem PARAMS((const char *fname, const char *func)); */
 
 

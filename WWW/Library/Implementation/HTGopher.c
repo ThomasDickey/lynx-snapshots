@@ -1,7 +1,7 @@
 /*			GOPHER ACCESS				HTGopher.c
 **			=============
 **
-** History:
+**  History:
 **	26 Sep 90	Adapted from other accesses (News, HTTP) TBL
 **	29 Nov 91	Downgraded to C, for portable implementation.
 **	10 Mar 96	Foteos Macrides (macrides@sci.wfbr.edu).  Added a
@@ -22,7 +22,8 @@
 #include "HTTCP.h"
 #include "HTFinger.h"
 
-/* Implements:
+/*
+**  Implements.
 */
 #include "HTGopher.h"
 
@@ -33,7 +34,8 @@
 #define BIG 1024		/* Bug */
 #define LINE_LENGTH 256		/* Bug */
 
-/*	Gopher entity types:
+/*
+**  Gopher entity types.
 */
 #define GOPHER_TEXT		'0'
 #define GOPHER_MENU		'1'
@@ -67,7 +69,8 @@
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
-/*		Hypertext object building machinery
+/*
+**  Hypertext object building machinery.
 */
 #include "HTML.h"
 
@@ -83,8 +86,8 @@
 
 #define NEXT_CHAR HTGetCharacter() 
 
-
-/*	Module-wide variables
+/*
+**  Module-wide variables.
 */
 PRIVATE int s;				/* Socket for gopher or CSO host */
 
@@ -135,7 +138,6 @@ typedef struct _CSOformgen_context {	 /* For form-based CSO gateway - FM */
     int			field_select;
 } CSOformgen_context;
 
-
 /*	Matrix of allowed characters in filenames
 **	=========================================
 */
@@ -154,7 +156,6 @@ PRIVATE void init_acceptable NOARGS
     acceptable_inited = YES;
 }
 
-
 /*	Decode one hex character
 **	========================
 */
@@ -167,7 +168,6 @@ PRIVATE char from_hex ARGS1(char, c)
 			: (c>='a')&&(c<='f') ? c-'a'+10
 			:		       0;
 }
-
 
 /*	Paste in an Anchor
 **	==================
@@ -206,7 +206,6 @@ PRIVATE void write_anchor ARGS2(CONST char *,text, CONST char *,addr)
     PUTS(text);
     END(HTML_A);
 }
-
 
 /*	Parse a Gopher Menu document
 **	============================
@@ -455,9 +454,8 @@ end_html:
     return;
 }
 
-
-/*	Parse a Gopher CSO document from and ISINDEX query.
-**	===================================================
+/*	Parse a Gopher CSO document from an ISINDEX query.
+**	==================================================
 **
 **   Accepts an open socket to a CSO server waiting to send us
 **   data and puts it on the screen in a reasonable manner.
@@ -501,7 +499,9 @@ PRIVATE void parse_cso ARGS2(
     PUTS("\n");
     START(HTML_PRE);
 
-    /* start grabbing chars from the network */
+    /*
+    **  Start grabbing chars from the network.
+    */
     while ((ch=NEXT_CHAR) != (char)EOF) 
 	{
 	    if (ch != LF) 
@@ -513,19 +513,22 @@ PRIVATE void parse_cso ARGS2(
 		{
 		    *p = '\0';		/* Terminate line */
 		    p = line;		/* Scan it to parse it */
+		    /*
+		    **  OK we now have a line in 'p'.
+		    **  Lets parse it and print it.
+		    */
 		    
-		    /* OK we now have a line in 'p' lets parse it and 
-		       print it */
-		    
-		    /* Break on line that begins with a 2. It's the end of
-		     * data.
-		     */
+		    /*
+		    **  Break on line that begins with a 2.
+		    **  It's the end of data.
+		    */
 		    if (*p == '2')
 			break;
 		    
-		    /*  lines beginning with 5 are errors, 
-		     *  print them and quit
-		     */
+		    /*
+		    **  Lines beginning with 5 are errors.
+		    **  Print them and quit.
+		    */
 		    if (*p == '5') {
 			START(HTML_H2);
 			PUTS(p+4);
@@ -533,17 +536,20 @@ PRIVATE void parse_cso ARGS2(
 			break;
 		    }
 		    
-		    if(*p == '-') {
-			/*  data lines look like  -200:#:
-			 *  where # is the search result number and can be  
-			 *  multiple digits (infinate?)
-			 *  find the second colon and check the digit to the
-			 *  left of it to see if they are diferent
-			 *  if they are then a different person is starting. 
-			 *  make this line an <h2>
-			 */
+		    if (*p == '-') {
+			/*
+			**  Data lines look like  -200:#:
+			**  where # is the search result number and can be  
+			**  multiple digits (infinite?).
+			**  Find the second colon and check the digit to the
+			**  left of it to see if they are diferent.
+			**  If they are then a different person is starting. 
+			**  Make this line an <h2>.
+			*/
 			
-			/* find the second_colon */
+			/*
+			**  Find the second_colon.
+			*/
 			second_colon = strchr( strchr(p,':')+1, ':');
 			
 			if(second_colon != NULL) {  /* error check */
@@ -556,22 +562,24 @@ PRIVATE void parse_cso ARGS2(
 			    }
 				
 			    
-			    /* right now the record appears with the alias 
-			     * (first line)
-			     * as the header and the rest as <pre> text
-			     * It might look better with the name as the
-			     * header and the rest as a <ul> with <li> tags
-			     * I'm not sure whether the name field comes in any
-			     * special order or if its even required in a 
-			     * record,
-			     * so for now the first line is the header no 
-			     * matter
-			     * what it is (it's almost always the alias)
-			     * A <dl> with the first line as the <DT> and
-			     * the rest as some form of <DD> might good also?
-			     */
+			    /*
+			    **  Right now the record appears with the alias 
+			    **  (first line) as the header and the rest as
+			    **  <pre> text.
+			    **  It might look better with the name as the
+			    **  header and the rest as a <ul> with <li> tags.
+			    **  I'm not sure whether the name field comes in
+			    **  any special order or if its even required in
+			    **  a record, so for now the first line is the
+			    **  header no matter what it is (it's almost
+			    **  always the alias).
+			    **  A <dl> with the first line as the <DT> and
+			    **  the rest as some form of <DD> might good also?
+			    */
 			    
-			    /* print data */
+			    /*
+			    **  Print data.
+			    */
 			    PUTS(second_colon+1);
 			    PUTS("\n");
 			    
@@ -582,9 +590,10 @@ PRIVATE void parse_cso ARGS2(
 				START(HTML_PRE);
 			    }
 							    
-			    /* save the char before the second colon
-			     * for comparison on the next pass
-			     */
+			    /*
+			    **  Save the char before the second colon
+			    **  for comparison on the next pass.
+			    */
 			    last_char =  *(second_colon-1) ;
 			    
 			} /* end if second_colon */
@@ -602,9 +611,8 @@ PRIVATE void parse_cso ARGS2(
     return;  /* all done */
 } /* end of procedure */
 
-
-/*      Display a Gopher CSO ISINDEX cover page
-**	=======================================
+/*      Display a Gopher CSO ISINDEX cover page.
+**	========================================
 */
 PRIVATE void display_cso ARGS2(
         CONST char *,   	arg,
@@ -647,9 +655,8 @@ PRIVATE void display_cso ARGS2(
     return;
 }
 
-
-/*	Display a Gopher Index document
-**	===============================
+/*	Display a Gopher Index document.
+**	================================
 */
 PRIVATE void display_index ARGS2(
 				  CONST char *,	arg,
@@ -690,9 +697,8 @@ PRIVATE void display_index ARGS2(
     return;
 }
 
-
-/*	De-escape a selector into a command
-**	===================================
+/*	De-escape a selector into a command.
+**	====================================
 **
 **	The % hex escapes are converted. Otheriwse, the string is copied.
 */
@@ -757,8 +763,8 @@ PRIVATE int interpret_cso_key ARGS5(
 
     if (fld = ctx->fld) {
 	/*
-	 * Most substitutions only recognized inside of loops.
-	 */
+	**  Most substitutions only recognized inside of loops.
+	*/
 	int error = 0;
 	if (0 == strncmp(key, "$(FID)", 6)) {
 	    sprintf(buf, "%d", fld->id); 
@@ -784,8 +790,6 @@ PRIVATE int interpret_cso_key ARGS5(
 	    return -1;
 	}
     }
-    /*
-     */
     buf[0] = '\0';
     if (0 == strncmp(key, "$(NEXTFLD)", 10)) {
 	if (!ctx->fld)
@@ -794,25 +798,33 @@ PRIVATE int interpret_cso_key ARGS5(
 	    fld = ctx->fld->next;
 	switch (ctx->field_select) {
 	  case 0:
-	    /* 'Query' fields, public and lookup attributes */
+	    /*
+	    **  'Query' fields, public and lookup attributes.
+	    */
 	    for (; fld; fld = fld->next)
 		 if (fld->public && (fld->lookup==1))
 		     break;
 	    break;
 	  case 1:
-	    /* 'Query' fields, accept lookup attribute */
+	    /*
+	    **  'Query' fields, accept lookup attribute.
+	    */
 	    for (; fld; fld = fld->next)
 	        if (fld->lookup == 1)
 		    break;
 	    break;
 	  case 2:
-	    /* 'Return' fields, public only */
+	    /*
+	    **  'Return' fields, public only.
+	    */
 	    for (; fld; fld = fld->next)
 	        if (fld->public)
 		    break;
 	    break;
 	  case 3:
-	    /* all fields */
+	    /*
+	    **  All fields.
+	    */
 	    break;
 	}
 	if (fld) { 
@@ -824,8 +836,8 @@ PRIVATE int interpret_cso_key ARGS5(
     } else if ((0 == strncmp(key, "$(QFIELDS)", 10)) ||
 	       (0 == strncmp(key, "$(RFIELDS)", 10))) {
 	/*
-	 * Begin interation sequence.
-	 */
+	**  Begin iteration sequence.
+	*/
 	ctx->rep_line = ctx->cur_line;
 	ctx->rep_off = ctx->cur_off;
 	ctx->fld = (CSOfield_info *) 0;
@@ -836,8 +848,8 @@ PRIVATE int interpret_cso_key ARGS5(
 
     } else if (0 == strncmp(key, "$(NAMEFLD)", 10)) {
 	/*
-	 * Special, locate name field.  Flag lookup so QFIELDS will skip it.
-	 */
+	**  Special, locate name field.  Flag lookup so QFIELDS will skip it.
+	*/
 	for (fld = CSOfields; fld; fld = fld->next)
 	    if (strcmp(fld->name, "name") == 0 ||
 	    	strcmp(fld->name, "Name") == 0) { 
@@ -852,8 +864,8 @@ PRIVATE int interpret_cso_key ARGS5(
 	sprintf(buf, "%d", ctx->port); 
     } else {
 	/*
-	 * No match, dump key to buffer so client sees it for debugging.
-	 */
+	**  No match, dump key to buffer so client sees it for debugging.
+	*/
 	int out = 0;
 	while (*key && (*key != ')')) {
 	    buf[out++] = (*key++);
@@ -872,7 +884,6 @@ PRIVATE int interpret_cso_key ARGS5(
     return 0;
 }
 
-
 /*	Parse the elements in a CSO/PH fields structure. - FM
 **	=====================================================
 */
@@ -883,15 +894,15 @@ PRIVATE int parse_cso_field_info ARGS1(
     char *info, *max_spec;
 
     /*
-     * initialize all fields to default values.  
-     */
+    ** Initialize all fields to default values.  
+    */
     blk->indexed = blk->lookup = blk->reserved = blk->max_size = blk->url = 0;
     blk->defreturn = blk->explicit_return = blk->public = 0;
 
     /*
-     * Search for keywords in info string and set values.  Attributes
-     * are converted to all lower-case for comparison.
-     */
+    **  Search for keywords in info string and set values.  Attributes
+    **  are converted to all lower-case for comparison.
+    */
     info = blk->attributes;
     for (i = 0; info[i]; i++)
         info[i] = TOLOWER(info[i]);
@@ -917,7 +928,6 @@ PRIVATE int parse_cso_field_info ARGS1(
     return 0;
 }
 
-
 /*	Parse a reply from a CSO/PH fields request. - FM
 **	================================================
 */
@@ -936,9 +946,10 @@ PRIVATE int parse_cso_fields ARGS2(
     prev_code = -2555;
     buf[0] = '\0';
 
-    /* start grabbing chars from the network */
-    while ((ch=NEXT_CHAR) != (char)EOF) {
-
+    /*
+    **  Start grabbing chars from the network.
+    */
+    while ((ch = NEXT_CHAR) != (char)EOF) {
 	if (interrupted_in_htgetcharacter) {
 	    if (TRACE) {
 	        fprintf(stderr,
@@ -961,35 +972,38 @@ PRIVATE int parse_cso_fields ARGS2(
 	    /* OK we now have a line in 'p' lets parse it.
 	     */
 	    
-	    /* Break on line that begins with a 2.
-	     * It's the end of data.
-	     */
+	    /*
+	    **  Break on line that begins with a 2.
+	    **  It's the end of data.
+	    */
 	    if (*p == '2')
 		break;
 
-	    /*  lines beginning with 5 are errors, 
-	     *  print them and quit
-	     */
+	    /*
+	    **  Lines beginning with 5 are errors.
+	    **  Print them and quit.
+	    */
 	    if (*p == '5') {
 	        strcpy (buf, p);
 		return 5;
 	    }
 
 	    if (*p == '-') {
-		/*  data lines look like  -200:#:
-		 *  where # is the search result number and can be  
-		 *  multiple digits (infinite?).
-		 */
+		/*
+		**  Data lines look like  -200:#:
+		**  where # is the search result number and can be  
+		**  multiple digits (infinite?).
+		*/
 
 	    /*
-             * Check status, ignore any non-success.
-             */
+            **  Check status, ignore any non-success.
+            */
 	    if (p[1] != '2' )
 	        continue;
 
 	    /*
-	     * Parse fields within returned line into status, ndx, name, data.
-	     */
+	    **  Parse fields within returned line into status, ndx, name, data.
+	    */
 	    index = NULL;
 	    name = NULL;
 	    for (i = 0; p[i]; i++)
@@ -1006,14 +1020,14 @@ PRIVATE int parse_cso_fields ARGS2(
 		    }
                 }
 	        /*
-	         * Add data to field structure.
-	         */
+	        **  Add data to field structure.
+	        */
 	        if (name) {
 	            if (code == prev_code) {
 		        /*
-		         * Remaining data is description,
-			 * save in current info block.
-		         */
+		        **  Remaining data are description.
+			**  Save in current info block.
+		        */
 		        alen = strlen((char *)&p[i]) + 1;
 		        if (alen > sizeof(last->desc_buf)) {
 			    if (last->description != last->desc_buf)
@@ -1025,9 +1039,9 @@ PRIVATE int parse_cso_fields ARGS2(
 		        strcpy(last->description, (char *)&p[i]);
 	            } else {
 		        /*
-		         * Initialize new block, append to end of list
-		         * to preserve order.
-		         */
+		        **  Initialize new block, append to end of list
+		        **  to preserve order.
+		        */
 		        new = (CSOfield_info *)calloc(1, sizeof(CSOfield_info));
 		        if (!new) {
 			    outofmem(__FILE__, "HTLoadCSO");
@@ -1061,8 +1075,8 @@ PRIVATE int parse_cso_fields ARGS2(
 		        new->desc_buf[0] = '\0';
 		        new->id = atoi(index);
 		        /*
-		         * Scan for keywords.
-		         */
+		        **  Scan for keywords.
+		        */
 		        parse_cso_field_info(new);
 	            }
 	            prev_code = code;
@@ -1081,7 +1095,6 @@ PRIVATE int parse_cso_fields ARGS2(
     buf[0] = '\0';
     return 0;  /* all done */
 } /* end of procedure */
-
 
 /*	Generate a form for submitting CSO/PH searches. - FM
 **	====================================================
@@ -1130,21 +1143,21 @@ PRIVATE int generate_cso_form ARGS4(
     ctx.fld = (CSOfield_info *) 0;
     ctx.public_override = full_flag;
     /*
-     * Parse the strings in the template array to produce HTML document
-     * to send to client.  First line is skipped for 'full' lists.
-     */
+    **  Parse the strings in the template array to produce HTML document
+    **  to send to client.  First line is skipped for 'full' lists.
+    */
     out = 0;
     buf[out] = '\0';
     for (i = full_flag ? /***1***/ 0 : 0; template[i]; i++) {
 	/*
-	 * Search the current string for substitution, flagged by $(
-	 */
+	**  Search the current string for substitution, flagged by $(
+	*/
 	for (line=template[i], j = 0; line[j]; j++) {
 	    if ((line[j] == '$') && (line[j+1] == '(')) {
 		/*
-		 * Command detected, flush output buffer and find closing ')'
-		 * that delimits the command.
-		 */
+		** Command detected, flush output buffer and find closing ')'
+		** that delimits the command.
+		*/
 		buf[out] = '\0'; 
 		if (out > 0)
 		    (*Target->isa->put_block)(Target, buf, strlen(buf));
@@ -1152,8 +1165,8 @@ PRIVATE int generate_cso_form ARGS4(
 		for (key = &line[j]; line[j+1] && (line[j] != ')'); j++)
 		    ;
 		/*
-		 * Save context, interpet command and restore updated context.
-		 */
+		**  Save context, interpet command and restore updated context.
+		*/
 		ctx.cur_line = i;
 		ctx.cur_off = j;
 		interpret_cso_key(key, buf, &length, &ctx, Target);
@@ -1164,9 +1177,9 @@ PRIVATE int generate_cso_form ARGS4(
 
 		if (ctx.seek) {
 		    /*
-		     * command wants us to skip (forward) to indicated token.
-		     * Start at current position.
-		     */
+		    **  Command wants us to skip (forward) to indicated token.
+		    **  Start at current position.
+		    */
 		    int slen = strlen(ctx.seek);
 		    for (; template[i]; i++) {
 			for (line = template[i]; line[j]; j++) {
@@ -1197,8 +1210,8 @@ PRIVATE int generate_cso_form ARGS4(
 		}
 	    } else {
 		/*
-		 * Non-command text, add to output buffer.
-		 */
+		**  Non-command text, add to output buffer.
+		*/
 		buf[out++] = line[j];
 		if (out > (sizeof(buf)-3)) {
 		    buf[out] = '\0';
@@ -1215,7 +1228,6 @@ PRIVATE int generate_cso_form ARGS4(
 
     return 0;
 }
-
 
 /*	Generate a results report for CSO/PH form-based searches. - FM
 **	==============================================================
@@ -1234,12 +1246,13 @@ PRIVATE int generate_cso_report ARGS2(
     extern int interrupted_in_htgetcharacter;
 
     /*
-     * Read lines until non-negative status.
-     */
+    **  Read lines until non-negative status.
+    */
     prev_ndx = -100;
-    /* start grabbing chars from the network */
-    while (!stop && (ch=NEXT_CHAR) != (char)EOF) {
-
+    /*
+    **  Start grabbing chars from the network.
+    */
+    while (!stop && (ch = NEXT_CHAR) != (char)EOF) {
 	if (interrupted_in_htgetcharacter) {
 	    buf[0] = '\0';
 	    if (TRACE) {
@@ -1258,9 +1271,9 @@ PRIVATE int generate_cso_report ARGS2(
 	} else {
 	    *p = '\0';		/* Terminate line */
 	    /*
-	     * OK we now have a line.
-	     * Load it as 'p' and parse it.
-	     */
+	    **  OK we now have a line.
+	    **  Load it as 'p' and parse it.
+	    */
 	    p = line;
 	    if (p[0] != '-' && p[0] != '1') {
 	        stop = TRUE;
@@ -1451,7 +1464,6 @@ end_CSOreport:
     return 0;
 }
 
-
 /*      CSO/PH form-based search gateway - FM			HTLoadCSO
 **	=====================================
 */
@@ -1473,9 +1485,6 @@ PUBLIC int HTLoadCSO ARGS4(
     HTFormat format_in = WWW_HTML;
     HTStream *Target = NULL;
  
-    struct sockaddr_in soc_address;	/* Binary network address */
-    struct sockaddr_in* sin = &soc_address;
-
     if (!acceptable_inited)
          init_acceptable();
 
@@ -1486,32 +1495,19 @@ PUBLIC int HTLoadCSO ARGS4(
     if (TRACE)
         fprintf(stderr, "HTLoadCSO: Looking for %s\n", arg);
 
-    /*  Set up defaults:
-    */
-    sin->sin_family = AF_INET;	    		/* Family, host order  */
-    sin->sin_port = htons(CSO_PORT);	    	/* Default: new port,  */
-
-    /* Get node name and optional port number:
-    */
-    {
-	char *p1 = HTParse(arg, "", PARSE_HOST);
-	int status = HTParseInet(sin, p1);
-        FREE(p1);
-        if (status) {
-	    return status;   /* Bad */
-	}
-    }
-
-    /*	Set up a socket to the server for the data:
+    /*
+    **  Set up a socket to the server for the data.
     */      
     status = HTDoConnect (arg, "cso", CSO_PORT, &s);
     if (status == HT_INTERRUPTED) {
-        /* Interrupt cleanly. */
+        /*
+	**  Interrupt cleanly.
+	*/
 	if (TRACE)
 	    fprintf(stderr,
                  "HTLoadCSO: Interrupted on connect; recovering cleanly.\n");
 	_HTProgress ("Connection interrupted.");
-	return HT_INTERRUPTED;
+	return HT_NOT_LOADED;
     }
     if (status < 0) {
 	if (TRACE)
@@ -1540,7 +1536,8 @@ PUBLIC int HTLoadCSO ARGS4(
     }
     _HTProgress ("CSO/PH request sent; waiting for response.");
 
-    /*	Now read the data from the socket:
+    /*
+    **  Now read the data from the socket.
     */
     status = parse_cso_fields(buf, sizeof(buf));
     if (status) {
@@ -1608,23 +1605,23 @@ PUBLIC int HTLoadCSO ARGS4(
     for (i = 0; i < len; i++) {
         if (!content[i] || content[i] == '&') {
 	    /*
-	     * Value parsed.  Unescape characters and look for first '='
-	     * to delimit field name from value.
-	     */
+	    **  Value parsed.  Unescape characters and look for first '='
+	    **  to delimit field name from value.
+	    */
 	    flen = i - start;
 	    finish = start + flen;
 	    content[finish] = '\0';
 	    for (j = start; j < finish; j++) {
 	        if (content[j] == '=') {
 	            /*
-	             * content[start..j-1] is field name,
-		     * [j+1..finish-1] is value.
-	             */
+	            **  content[start..j-1] is field name,
+		    **  [j+1..finish-1] is value.
+	            */
 	            if ((content[start+1] == '_') &&
 		        ((content[start] == 'r') || (content[start] == 'q'))) {
 		        /*
-		         * Decode fields number and lookup field info.
-		         */
+		        **  Decode fields number and lookup field info.
+		        */
 		        sscanf (&content[start+2], "%d=", &ndx);
 		        for (fld = CSOfields; fld; fld = fld->next) {
 		            if (ndx==fld->id) {
@@ -1686,8 +1683,8 @@ PUBLIC int HTLoadCSO ARGS4(
 	return HT_LOADED;
     }
     /*
-     * Append return fields.
-     */
+    **  Append return fields.
+    */
     if (return_type == 1) {
 	StrAllocCat(command, " return all");
 	clen += 11;
@@ -1732,11 +1729,10 @@ PUBLIC int HTLoadCSO ARGS4(
     return HT_LOADED;
 }
 
-
-/*		Load by name					HTLoadGopher
-**		============
+/*	Load by name.						HTLoadGopher
+**	=============
 **
-**	 Bug:	No decoding of strange data types as yet.
+**  Bug:  No decoding of strange data types as yet.
 **
 */
 PUBLIC int HTLoadGopher ARGS4(
@@ -1750,9 +1746,6 @@ PUBLIC int HTLoadGopher ARGS4(
     char gtype;				/* Gopher Node type */
     char * selector;			/* Selector string */
 
-    struct sockaddr_in soc_address;	/* Binary network address */
-    struct sockaddr_in* sin = &soc_address;
-
     if (!acceptable_inited)
          init_acceptable();
     
@@ -1763,7 +1756,8 @@ PUBLIC int HTLoadGopher ARGS4(
     if (TRACE)
         fprintf(stderr, "HTGopher: Looking for %s\n", arg);
 
-    /*  If it's a port 105 GOPHER_CSO gtype with no ISINDEX token ('?'),
+    /*
+    **  If it's a port 105 GOPHER_CSO gtype with no ISINDEX token ('?'),
     **  use the form-based CSO gateway (otherwise, return an ISINDEX
     **  cover page or do the ISINDEX search). - FM
     */
@@ -1780,7 +1774,8 @@ PUBLIC int HTLoadGopher ARGS4(
 	}
     }
 
-    /* If it's a port 79/0[/...] URL, use the finger gateway. - FM
+    /*
+    **  If it's a port 79/0[/...] URL, use the finger gateway. - FM
     */
     if (strstr(arg, ":79/0") != NULL) {
         if (TRACE)
@@ -1788,23 +1783,9 @@ PUBLIC int HTLoadGopher ARGS4(
 	return HTLoadFinger(arg, anAnchor, format_out, sink);
     }
     
-/*  Set up defaults:
-*/
-    sin->sin_family = AF_INET;	    		/* Family, host order  */
-    sin->sin_port = htons(GOPHER_PORT);	    	/* Default: new port,  */
-
-/* Get node name and optional port number:
-*/
-    {
-	char *p1 = HTParse(arg, "", PARSE_HOST);
-	int status = HTParseInet(sin, p1);
-        FREE(p1);
-        if (status)
-	    return status;   /* Bad */
-    }
-
-/* Get entity type, and selector string.
-*/        
+    /*
+    **  Get entity type, and selector string.
+    */        
     {
 	char * p1 = HTParse(arg, "", PARSE_PATH|PARSE_PUNCTUATION);
         gtype = '1';		/* Default = menu */
@@ -1814,7 +1795,9 @@ PUBLIC int HTLoadGopher ARGS4(
 	}
 	if (gtype == GOPHER_INDEX) {
 	    char * query;
-	    /* Search is allowed */
+	    /*
+	    **  Search is allowed.
+	    */
             HTAnchor_setIndex(anAnchor, anAnchor->address);	
 	    query = strchr(selector, '?');	/* Look for search string */
 	    if (!query || !query[1]) {		/* No search required */
@@ -1843,7 +1826,9 @@ PUBLIC int HTLoadGopher ARGS4(
 	    de_escape(&command[strlen(command)], query);/* bug fix LJM 940415 */
         } else if (gtype == GOPHER_CSO) {
             char * query;
-	    /* Search is allowed */
+	    /*
+	    **  Search is allowed.
+	    */
             query = strchr(selector, '?');	/* Look for search string */
             if (!query || !query[1]) {		/* No search required */
 		target = HTML_new(anAnchor, format_out, sink);
@@ -1869,7 +1854,6 @@ PUBLIC int HTLoadGopher ARGS4(
             }
 	    de_escape(&command[strlen(command)], query);/* bug fix LJM 940415 */
 
-	    
 	} else {				/* Not index */
 	    command = (char *)malloc(strlen(selector)+2+1);
 	    de_escape(command, selector);
@@ -1882,30 +1866,31 @@ PUBLIC int HTLoadGopher ARGS4(
 	*p++ = CR;		/* Macros to be correct on Mac */
 	*p++ = LF;
 	*p++ = '\0';
-	/* strcat(command, "\r\n");	*/	/* CR LF, as in rfc 977 */
     }
 
-/*	Set up a socket to the server for the data:
-*/      
-
-  status = HTDoConnect (arg, "gopher", GOPHER_PORT, &s);
-  if (status == HT_INTERRUPTED)
-    {
-      /* Interrupt cleanly. */
-      if (TRACE)
-        fprintf(stderr,
-        	"HTGopher: Interrupted on connect; recovering cleanly.\n");
-      _HTProgress ("Connection interrupted.");
-      return HT_INTERRUPTED;
+    /*
+    **  Set up a socket to the server for the data.
+    */
+    status = HTDoConnect (arg, "gopher", GOPHER_PORT, &s);
+    if (status == HT_INTERRUPTED) {
+	/*
+	**  Interrupt cleanly.
+	*/
+	if (TRACE)
+	    fprintf(stderr,
+        	    "HTGopher: Interrupted on connect; recovering cleanly.\n");
+	_HTProgress ("Connection interrupted.");
+	FREE(command);
+	return HT_NOT_LOADED;
     }
-  if (status < 0) {
+    if (status < 0) {
 	if (TRACE)
 	    fprintf(stderr,
 	    	    "HTGopher: Unable to connect to remote host for `%s'.\n",
 	    	    arg);
 	FREE(command);
 	return HTInetStatus("connect");
-  }
+    }
     
     HTInitInput(s);		/* Set up input buffering */
     
@@ -1917,7 +1902,7 @@ PUBLIC int HTLoadGopher ARGS4(
 #ifdef NOT_ASCII
     {
     	char * p;
-	for(p = command; *p; p++) {
+	for (p = command; *p; p++) {
 	    *p = TOASCII(*p);
 	}
     }
@@ -1935,8 +1920,9 @@ PUBLIC int HTLoadGopher ARGS4(
 
     _HTProgress ("Gopher request sent; waiting for response.");
 
-/*	Now read the data from the socket:
-*/    
+    /*
+    **  Now read the data from the socket.
+    */    
     switch (gtype) {
     
     case GOPHER_TEXT :
@@ -1987,7 +1973,9 @@ PUBLIC int HTLoadGopher ARGS4(
     case GOPHER_UUENCODED:
     case GOPHER_BINARY:
     default:
-        /* Specifying WWW_UNKNOWN forces dump to local disk. */
+        /*
+	**  Specifying WWW_UNKNOWN forces dump to local disk.
+	*/
         HTParseSocket (WWW_UNKNOWN, format_out, anAnchor, s, sink);
 	break;
 

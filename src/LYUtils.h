@@ -8,13 +8,15 @@
 #include "HTList.h"
 #endif /* HTLIST_H */
 
-/* for tempname */
-#define NEW_FILE     0
-#define REMOVE_FILES 1
-
+extern void highlight PARAMS((int flag, int cur));
+extern void free_and_clear PARAMS((char **obj));
+extern void collapse_spaces PARAMS((char *string));
+extern void convert_to_spaces PARAMS((char *string));
+extern char * strip_trailing_slash PARAMS((char * dirname));
 extern void statusline PARAMS((char *text));
-extern void noviceline PARAMS((int more));
 extern void toggle_novice_line NOPARAMS;
+extern void noviceline PARAMS((int more));
+extern int HTCheckForInterrupt NOPARAMS;
 extern BOOLEAN LYisLocalFile PARAMS((char *filename));
 extern BOOLEAN LYisLocalHost PARAMS((char *filename));
 extern void LYLocalhostAliases_free NOPARAMS;
@@ -23,43 +25,49 @@ extern BOOLEAN LYisLocalAlias PARAMS((char *filename));
 extern int LYCheckForProxyURL PARAMS((char *filename));
 extern int is_url PARAMS((char *filename));
 extern void remove_backslashes PARAMS((char *buf));
-extern void collapse_spaces PARAMS((char *string));
-extern void convert_to_spaces PARAMS((char *string));
+extern char *quote_pathname PARAMS((char *pathname));
 extern BOOLEAN inlocaldomain NOPARAMS;
 extern void size_change PARAMS((int sig));
-extern HTList * sug_filenames;
 extern void HTSugFilenames_free NOPARAMS;
 extern void HTAddSugFilename PARAMS((char *fname));
 extern void change_sug_filename PARAMS((char *fname));
 extern void tempname PARAMS((char *namebuffer, int action));
-extern int HTCheckForInterrupt NOPARAMS;
 extern int number2arrows PARAMS((int number));
-extern void highlight PARAMS((int flag, int cur));
-extern CONST char * Home_Dir NOPARAMS;
 extern void parse_restrictions PARAMS((char *s));
-extern void free_and_clear PARAMS((char **obj));
-extern char * quote_pathname PARAMS((char *pathname));
 extern void checkmail NOPARAMS;
 extern int LYCheckMail NOPARAMS;
+extern void LYEnsureAbsoluteURL PARAMS((char **href, char *name));
 extern void LYConvertToURL PARAMS((char **AllocatedString));
 extern BOOLEAN LYExpandHostForURL PARAMS((
 	char **AllocatedString, char *prefix_list, char *suffix_list));
 extern BOOLEAN LYAddSchemeForURL PARAMS((
 	char **AllocatedString, char *default_scheme));
+extern void LYTrimRelFromAbsPath PARAMS((char *path));
+extern void LYDoCSI PARAMS((char *url, CONST char *comment, char **csi));
 #ifdef VMS
 extern void Define_VMSLogical PARAMS((
 	char *LogicalName, char *LogicalValue));
-extern void LYVMS_HomePathAndFilename PARAMS((
-	char *fbuffer, int fbuffer_size, char * fname));
 #endif /* VMS */
+extern CONST char *Home_Dir NOPARAMS;
+extern BOOLEAN LYPathOffHomeOK PARAMS((char *fbuffer, int fbuffer_size));
+extern void LYAddPathToHome PARAMS((
+	char *fbuffer, int fbuffer_size, char *fname));
+extern time_t LYmktime PARAMS((char *string));
+#ifdef NO_PUTENV
+extern int putenv PARAMS((CONST char *string));
+#endif /* NO_PUTENV */
 
-/*	Whether or not the status line must be shown.
+/*
+ *  Whether or not the status line must be shown.
  */
 extern BOOLEAN mustshow;
 #define _statusline(msg)	mustshow = TRUE, statusline(msg)
 
-/* for is_url */
-/* universal document id types */
+/*
+ *  For is_url().
+ *
+ *  Universal document id types.
+ */
 #define HTTP_URL_TYPE		 1
 #define FILE_URL_TYPE		 2
 #define FTP_URL_TYPE		 3
@@ -95,12 +103,27 @@ extern BOOLEAN mustshow;
 #define LYNXDOWNLOAD_URL_TYPE	29
 #define LYNXKEYMAP_URL_TYPE	30
 #define LYNXIMGMAP_URL_TYPE	31
-#define LYNXDIRED_URL_TYPE	32
+#define LYNXCOOKIE_URL_TYPE	32
+#define LYNXDIRED_URL_TYPE	33
 
-#define PROXY_URL_TYPE		33
+#define PROXY_URL_TYPE		34
 
-#define UNKNOWN_URL_TYPE	34
+#define UNKNOWN_URL_TYPE	35
 
+/*
+ *  For change_sug_filename().
+ */
+extern HTList *sug_filenames;
+
+/*
+ *  For tempname().
+ */
+#define NEW_FILE     0
+#define REMOVE_FILES 1
+
+/*
+ *  Miscellaneous.
+ */
 #define ON      1
 #define OFF     0
 #define STREQ(a,b) (strcmp(a,b) == 0)

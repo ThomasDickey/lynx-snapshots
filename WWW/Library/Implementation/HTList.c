@@ -91,6 +91,58 @@ PUBLIC void HTList_appendObject ARGS2(
 }
 
 
+/*	Insert an object into the list at a specified position.
+**      If position is 0, this places the object at the head of the list
+**      and is equivalent to HTList_addObject().
+*/
+PUBLIC void HTList_insertObjectAt ARGS3(
+	HTList *,	me,
+	void *,		newObject,
+	int,		pos)
+{
+    HTList * newNode;
+    HTList * temp = me;
+    HTList * prevNode;
+    int Pos = pos;
+
+    if (!temp) {
+	if (TRACE) {
+	    fprintf(stderr,
+		    "HTList: Trying to add object %p to a nonexisting list\n",
+		    newObject);
+	}
+	return;
+    }
+    if (Pos < 0) {
+	Pos = 0;
+	if (TRACE) {
+	    fprintf(stderr,
+		    "HTList: Treating negative object position %i as %i.\n",
+		    pos, Pos);
+	}
+    }
+
+    prevNode = temp;
+    while ((temp = temp->next)) {
+	if (Pos == 0) {
+	    if ((newNode = (HTList *)calloc(1, sizeof(HTList))) == NULL)
+	        outofmem(__FILE__, "HTList_addObjectAt");
+	    newNode->object = newObject;
+	    newNode->next = temp;
+	    if (prevNode)
+	        prevNode->next = newNode;
+	    return;
+	}
+	prevNode = temp; 
+	Pos--;
+    }
+    if (Pos >= 0)
+        HTList_addObject(prevNode, newObject);
+
+    return;
+}
+
+
 /*	Remove specified object from list.
 */
 PUBLIC BOOL HTList_removeObject ARGS2(

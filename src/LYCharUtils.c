@@ -1,22 +1,39 @@
 /*
-** Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
-** ==========================================================================
-**
-** These functions should be prototyped in the Lynx version of HTML.c.
+**  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
+**  ==========================================================================
 */
 #include "HTUtils.h"
 #include "tcp.h"
 
+#define Lynx_HTML_Handler
+#include "HTChunk.h"
+#include "HText.h"
+#include "HTStyle.h"
 #include "HTML.h"
-#include "HTFont.h"
+
 #include "HTCJK.h"
+#include "HTAtom.h"
+#include "HTMLGen.h"
 #include "HTParse.h"
 
 #include "LYGlobalDefs.h"
-#include "LYCharSets.h"
 #include "LYCharUtils.h"
-#include "LYUtils.h"
+#include "LYCharSets.h"
+
+#include "HTAlert.h"
+#include "HTFont.h"
+#include "HTForms.h"
+#include "HTNestedList.h"
 #include "GridText.h"
+#include "LYSignal.h"
+#include "LYUtils.h"
+#include "LYMap.h"
+#include "LYBookmark.h"
+
+#ifdef VMS
+#include "LYCurses.h"
+#include "HTVMSUtils.h"
+#endif /* VMS */
 
 #include "LYexit.h"
 #include "LYLeaks.h"
@@ -29,6 +46,16 @@ extern BOOL HTPassHighCtrlRaw;
 extern BOOL HTPassHighCtrlNum;
 extern HTkcode kanji_code;
 extern HTCJKlang HTCJK;
+
+extern void LYSetCookie PARAMS((
+	CONST char *	header,
+	CONST char *	address));
+
+/*
+ *  Used for nested lists. - FM
+ */
+PUBLIC int OL_CONTINUE = -29999;     /* flag for whether CONTINUE is set */
+PUBLIC int OL_VOID = -29998;	     /* flag for whether a count is set */
 
 
 /*
@@ -787,7 +814,6 @@ PUBLIC void LYUnEscapeToLatinOne ARGS2(
         StrAllocCopy(*str, url);
 	FREE(url);
     }
-    return;
 }
 
 /*
@@ -868,7 +894,6 @@ PUBLIC void LYExpandString ARGS1(
     }
     StrAllocCat(*str, q);
     free_and_clear(&p);
-    return;
 }
 
 /*
@@ -952,8 +977,6 @@ PUBLIC void LYEntify ARGS2(
 	}
     }
     StrAllocCopy(*str, cp);
-
-    return;
 }
 
 /*
@@ -977,8 +1000,6 @@ PUBLIC void LYTrimHead ARGS1(
 	}
 	str[j] = '\0';
     }
-    
-    return;
 }
 
 /*
@@ -1002,8 +1023,6 @@ PUBLIC void LYTrimTail ARGS1(
 	    break;
 	i--;
     }
-
-    return;
 }
 
 /*
@@ -1114,6 +1133,78 @@ PUBLIC char *LYFindEndOfComment ARGS1(
      *  '>' from the start of the string. - FM
      */
     return cp1;
+}
+
+/*
+**  If an HREF, itself or if resolved against a base,
+**  represents a file URL, and the host is defaulted,
+**  force in "//localhost".  We need this until
+**  all the other Lynx code which performs security
+**  checks based on the "localhost" string is changed
+**  to assume "//localhost" when a host field is not
+**  present in file URLs - FM
+*/
+PUBLIC void LYFillLocalFileURL ARGS2(
+	char **,	href,
+	char *,		base)
+{
+    char * temp = NULL;
+
+    if (*href == NULL || *(*href) == '\0')
+        return;
+
+    if (!strcmp(*href, "//") || !strncmp(*href, "///", 3)) {
+	if (base != NULL && !strncmp(base, "file:", 5)) {
+	    StrAllocCopy(temp, "file:");
+	    StrAllocCat(temp, *href);
+	    StrAllocCopy(*href, temp);
+	}
+    }
+    if (!strncmp(*href, "file:", 5)) {
+	if (*(*href+5) == '\0') {
+	    StrAllocCat(*href, "//localhost");
+	} else if (!strcmp(*href, "file://")) {
+	    StrAllocCat(*href, "localhost");
+	} else if (!strncmp(*href, "file:///", 8)) {
+	    StrAllocCopy(temp, (*href+7));
+	    StrAllocCopy(*href, "file://localhost");
+	    StrAllocCat(*href, temp);
+	} else if (!strncmp(*href, "file:/", 6) && *(*href+6) != '/') {
+	    StrAllocCopy(temp, (*href+5));
+	    StrAllocCopy(*href, "file://localhost");
+	    StrAllocCat(*href, temp);
+	}
+    }
+
+    /*
+     * No path in a file://localhost URL means a
+     * directory listing for the current default. - FM
+     */
+    if (!strcmp(*href, "file://localhost")) {
+#ifdef VMS
+	StrAllocCat(*href, HTVMS_wwwName(getenv("PATH")));
+#else
+	char curdir[DIRNAMESIZE];
+#ifdef NO_GETCWD
+	getwd (curdir);
+#else
+	getcwd (curdir, DIRNAMESIZE);
+#endif /* NO_GETCWD */
+	StrAllocCat(*href, curdir);
+#endif /* VMS */
+    }
+
+#ifdef VMS
+    /*
+     * On VMS, a file://localhost/ URL means
+     * a listing for the login directory. - FM
+     */
+    if (!strcmp(*href, "file://localhost/"))
+	StrAllocCat(*href, (HTVMS_wwwName((char *)Home_Dir())+1));
+#endif /* VMS */
+
+    FREE(temp);
+    return;
 }
 
 /*
@@ -1448,3 +1539,748 @@ PUBLIC char *LYLowercaseI_OL_String ARGS1(
     return OLstring;
 }
 
+/*
+**  This function initializes the Ordered List counter. - FM
+*/
+PUBLIC void LYZero_OL_Counter ARGS1(
+	HTStructured *, 	me)
+{
+    int i;
+
+    if (!me)
+        return;
+
+    for (i = 0; i < 7; i++) {
+        me->OL_Counter[i] = OL_VOID;
+	me->OL_Type[i] = '1';
+    }
+	
+    me->Last_OL_Count = 0;
+    me->Last_OL_Type = '1';
+    
+    return;
+}
+
+/*
+**  This function processes META tags in HTML streams. - FM
+*/
+PUBLIC void LYHandleMETA ARGS4(
+	HTStructured *, 	me,
+	CONST BOOL*,	 	present,
+	CONST char **,		value,
+	char **,		include)
+{
+    char *http_equiv = NULL, *name = NULL, *content = NULL;
+    char *href = NULL, *id_string = NULL, *temp = NULL;
+    char *cp, *cp0, *cp1;
+    int url_type = 0, i;
+
+    if (!me || !present)
+        return;
+
+    /*
+     *  Load the attributes for possible use by Lynx. - FM
+     */
+    if (present[HTML_META_HTTP_EQUIV] &&
+	value[HTML_META_HTTP_EQUIV] && *value[HTML_META_HTTP_EQUIV]) {
+	StrAllocCopy(http_equiv, value[HTML_META_HTTP_EQUIV]);
+	convert_to_spaces(http_equiv);
+	LYUnEscapeToLatinOne(&http_equiv, FALSE);
+	LYTrimHead(http_equiv);
+	LYTrimTail(http_equiv);
+	if (*http_equiv == '\0') {
+	    FREE(http_equiv);
+	}
+    }
+    if (present[HTML_META_NAME] &&
+	value[HTML_META_NAME] && *value[HTML_META_NAME]) {
+	StrAllocCopy(name, value[HTML_META_NAME]);
+	convert_to_spaces(name);
+	LYUnEscapeToLatinOne(&name, FALSE);
+	LYTrimHead(name);
+	LYTrimTail(name);
+	if (*name == '\0') {
+	    FREE(name);
+	}
+    }
+    if (present[HTML_META_CONTENT] &&
+	value[HTML_META_CONTENT] && *value[HTML_META_CONTENT]) {
+	/*
+	 *  Technically, we should be creating a comma-separated
+	 *  list, but META tags come one at a time, and we'll
+	 *  handle (or ignore) them as each is received.  Also,
+	 *  at this point, we only trim leading and trailing
+	 *  blanks from the CONTENT value, without translating
+	 *  any named entities or numeric character references,
+	 *  because how we should do that depends on what type
+	 *  of information it contains, and whether or not any
+	 *  of it might be sent to the screen. - FM
+	 */
+	StrAllocCopy(content, value[HTML_META_CONTENT]);
+	convert_to_spaces(content);
+	LYTrimHead(content);
+	LYTrimTail(content);
+	if (*content == '\0') {
+	    FREE(content);
+	}
+    }
+    if (TRACE) {
+	fprintf(stderr,
+	        "LYHandleMETA: HTTP-EQUIV=\"%s\" NAME=\"%s\" CONTENT=\"%s\"\n",
+		(http_equiv ? http_equiv : "NULL"),
+		(name ? name : "NULL"),
+		(content ? content : "NULL"));
+    }
+
+    /*
+     *  Make sure we have META name/value pairs to handle. - FM
+     */
+    if (!(http_equiv || name) || !content)
+        goto free_META_copies;
+		
+    /*
+     * Check for a no-cache Pragma
+     * or Cache-Control directive. - FM
+     */
+    if (!strcasecomp((name ? name : http_equiv), "Pragma") ||
+        !strcasecomp((name ? name : http_equiv), "Cache-Control")) {
+	LYUnEscapeToLatinOne(&content, FALSE);
+	LYTrimHead(content);
+	LYTrimTail(content);
+	if (!strcasecomp(content, "no-cache")) {
+	    me->node_anchor->no_cache = TRUE;
+	    HText_setNoCache(me->text);
+	}
+
+	/*
+	 *  If we didn't get a Cache-Control MIME header,
+	 *  and the META has one, convert to lowercase,
+	 *  store it in the anchor element, and if we
+	 *  haven't yet set no_cache, check whether we
+	 *  should. - FM
+	 */
+	if ((!me->node_anchor->cache_control) &&
+	    !strcasecomp((name ? name : http_equiv), "Cache-Control")) {
+	    for (i = 0; content[i]; i++)
+		 content[i] = TOLOWER(content[i]);
+	    StrAllocCopy(me->node_anchor->cache_control, content);
+	    if (me->node_anchor->no_cache == FALSE) {
+	        cp0 = content;
+		while ((cp = strstr(cp0, "no-cache")) != NULL) {
+		    cp += 8;
+		    while (*cp != '\0' && WHITE(*cp))
+			cp++;
+		    if (*cp == '\0' || *cp == ';') {
+			me->node_anchor->no_cache = TRUE;
+			HText_setNoCache(me->text);
+			break;
+		    }
+		    cp0 = cp;
+		}
+		if (me->node_anchor->no_cache == TRUE)
+		    goto free_META_copies;
+		cp0 = content;
+		while ((cp = strstr(cp0, "max-age")) != NULL) {
+		    cp += 7;
+		    while (*cp != '\0' && WHITE(*cp))
+			cp++;
+		    if (*cp == '=') {
+			cp++;
+			while (*cp != '\0' && WHITE(*cp))
+			    cp++;
+			if (isdigit((unsigned char)*cp)) {
+			    cp0 = cp;
+			    while (isdigit((unsigned char)*cp))
+				cp++;
+			    if (*cp0 == '0' && cp == (cp0 + 1)) {
+			        me->node_anchor->no_cache = TRUE;
+				HText_setNoCache(me->text);
+				break;
+			    }
+			}
+		    }
+		    cp0 = cp;
+		}
+	    }
+	}
+
+    /*
+     * Check for an Expires directive. - FM
+     */
+    } else if (!strcasecomp((name ? name : http_equiv), "Expires")) {
+	/*
+	 *  If we didn't get a Expires MIME header,
+	 *  store it in the anchor element, and if we
+	 *  haven't yet set no_cache, check whether we
+	 *  should. - FM
+	 */
+	LYUnEscapeToLatinOne(&content, FALSE);
+	LYTrimHead(content);
+	LYTrimTail(content);
+	StrAllocCopy(me->node_anchor->expires, content);
+	if (me->node_anchor->no_cache == FALSE) {
+	    if ((content[0] == '0' && content[1] == '\0') ||
+		LYmktime(content) <= 0) {
+		me->node_anchor->no_cache = TRUE;
+		HText_setNoCache(me->text);
+	    }
+	}
+
+    /*
+     *  Check for a text/html Content-Type with a
+     *  charset directive, if we didn't already set
+     *  the charset via a server's header. - AAC & FM
+     */
+    } else if (!(me->node_anchor->charset && *me->node_anchor->charset) && 
+	       !strcasecomp((name ? name : http_equiv), "Content-Type")) {
+	LYUnEscapeToLatinOne(&content, FALSE);
+	LYTrimHead(content);
+	LYTrimTail(content);
+	/*
+	 *  Force the Content-type value to all lower case. - FM
+	 */
+	for (cp = content; *cp; cp++)
+	    *cp = TOLOWER(*cp);
+
+	if ((cp = strstr(content, "text/html;")) != NULL &&
+	    (cp1 = strstr(content, "charset")) != NULL &&
+	    cp1 > cp) {
+	    cp1 += 7;
+	    while (*cp1 == ' ' || *cp1 == '=')
+	        cp1++;
+
+	    if (!strncmp(cp1, "us-ascii", 8) ||
+		!strncmp(cp1, "iso-8859-1", 10)) {
+		StrAllocCopy(me->node_anchor->charset, "iso-8859-1");
+		HTCJK = NOCJK;
+
+	    } else if (!strncmp(cp1, "iso-8859-2", 10) &&
+		       !strncmp(LYchar_set_names[current_char_set],
+				"ISO Latin 2", 11)) {
+		StrAllocCopy(me->node_anchor->charset, "iso-8859-2");
+		HTPassEightBitRaw = TRUE;
+
+	    } else if (!strncmp(cp1, "iso-8859-", 9) &&
+		       !strncmp(LYchar_set_names[current_char_set],
+				"Other ISO Latin", 15)) {
+		/*
+		 *  Hope it's a match, for now. - FM
+		 */
+		StrAllocCopy(me->node_anchor->charset, "iso-8859- ");
+		me->node_anchor->charset[9] = cp1[9];
+		HTPassEightBitRaw = TRUE;
+		HTAlert(me->node_anchor->charset);
+
+	    } else if (!strncmp(cp1, "koi8-r", 6) &&
+		       !strncmp(LYchar_set_names[current_char_set],
+				"KOI8-R character set", 20)) {
+		StrAllocCopy(me->node_anchor->charset, "koi8-r");
+		HTPassEightBitRaw = TRUE;
+
+	    } else if (!strncmp(cp1, "euc-jp", 6) && HTCJK == JAPANESE) {
+		StrAllocCopy(me->node_anchor->charset, "euc-jp");
+
+	    } else if (!strncmp(cp1, "shift_jis", 9) && HTCJK == JAPANESE) {
+		StrAllocCopy(me->node_anchor->charset, "shift_jis");
+
+	    } else if (!strncmp(cp1, "iso-2022-jp", 11) &&
+	    			HTCJK == JAPANESE) {
+		StrAllocCopy(me->node_anchor->charset, "iso-2022-jp");
+
+	    } else if (!strncmp(cp1, "iso-2022-jp-2", 13) &&
+	    			HTCJK == JAPANESE) {
+		StrAllocCopy(me->node_anchor->charset, "iso-2022-jp-2");
+
+	    } else if (!strncmp(cp1, "euc-kr", 6) && HTCJK == KOREAN) {
+		StrAllocCopy(me->node_anchor->charset, "euc-kr");
+
+	    } else if (!strncmp(cp1, "iso-2022-kr", 11) && HTCJK == KOREAN) {
+		StrAllocCopy(me->node_anchor->charset, "iso-2022-kr");
+
+	    } else if ((!strncmp(cp1, "big5", 4) ||
+			!strncmp(cp1, "cn-big5", 7)) &&
+		       HTCJK == TAIPEI) {
+		StrAllocCopy(me->node_anchor->charset, "big5");
+
+	    } else if (!strncmp(cp1, "euc-cn", 6) && HTCJK == CHINESE) {
+		StrAllocCopy(me->node_anchor->charset, "euc-cn");
+
+	    } else if ((!strncmp(cp1, "gb2312", 6) ||
+			!strncmp(cp1, "cn-gb", 5)) &&
+		       HTCJK == CHINESE) {
+		StrAllocCopy(me->node_anchor->charset, "gb2312");
+
+	    } else if (!strncmp(cp1, "iso-2022-cn", 11) && HTCJK == CHINESE) {
+		StrAllocCopy(me->node_anchor->charset, "iso-2022-cn");
+	    }
+
+	    if (TRACE && me->node_anchor->charset) {
+		fprintf(stderr,
+			"HTML: New charset: %s\n",
+			me->node_anchor->charset);
+	    }
+	}
+	/*
+	 *  Set the kcode element based on the charset. - FM
+	 */
+	HText_setKcode(me->text, me->node_anchor->charset);
+
+    /*
+     *  Check for a Refresh directive. - FM
+     */
+    } else if (!strcasecomp((name ? name : http_equiv), "Refresh")) {
+	char *Seconds = NULL;
+
+	/*
+	 *  Look for the Seconds field. - FM
+	 */
+	cp = content;
+	while (*cp && isspace((unsigned char)*cp))
+	    cp++;
+	if (*cp && isdigit(*cp)) {
+	    cp1 = cp;
+	    while (*cp1 && isdigit(*cp1))
+		cp1++;
+	    *cp1 = '\0';
+	    StrAllocCopy(Seconds, cp);
+	    cp1++;
+	}
+	if (Seconds) {
+	    /*
+	     *  We have the seconds field.
+	     *  Now look for a URL field - FM
+	     */
+	    while (*cp1) {
+		if (!strncasecomp(cp1, "URL", 3)) {
+		    cp = (cp1 + 3);
+		    while (*cp && (*cp == '=' || isspace((unsigned char)*cp)))
+			cp++;
+		    cp1 = cp;
+		    while (*cp1 && !isspace((unsigned char)*cp1))
+			cp1++;
+		    *cp1 = '\0';
+		    if (*cp)
+			StrAllocCopy(href, cp);
+		    break;
+		}
+		cp1++;
+	    }
+	    if (href) {
+		/*
+		 *  We found a URL field, so check it out. - FM
+		 */
+		if (!(url_type = LYLegitimizeHREF(me, (char**)&href, TRUE))) {
+		    /*
+		     *  The specs require a complete URL,
+		     *  but this is a Netscapism, so don't
+		     *  expect the author to know that. - FM
+		     */
+		    HTAlert(REFRESH_URL_NOT_ABSOLUTE);
+		    /*
+		     *  Use the document's address
+		     *  as the base. - FM
+		     */
+		    if (*href != '\0') {
+			temp = HTParse(href,
+				       me->node_anchor->address, PARSE_ALL);
+			StrAllocCopy(href, temp);
+			FREE(temp);
+		    } else {
+			StrAllocCopy(href, me->node_anchor->address);
+			HText_setNoCache(me->text);
+		    }
+		}
+		/*
+		 *  Check whether to fill in localhost. - FM
+		 */
+		LYFillLocalFileURL((char **)&href,
+				   (me->inBASE ?
+				 me->base_href : me->node_anchor->address));
+		/*
+		 *  Set the no_cache flag if the Refresh URL
+		 *  is the same as the document's address. - FM
+		 */
+		if (!strcmp(href, me->node_anchor->address)) {
+		    HText_setNoCache(me->text);
+		} 
+	    } else {
+		/*
+		 *  We didn't find a URL field, so use
+		 *  the document's own address and set
+		 *  the no_cache flag. - FM
+		 */
+		StrAllocCopy(href, me->node_anchor->address);
+		HText_setNoCache(me->text);
+	    }
+	    /*
+	     *  Check for an anchor in http or https URLs. - FM
+	     */
+	    if ((strncmp(href, "http", 4) == 0) &&
+		(cp = strrchr(href, '#')) != NULL) {
+		StrAllocCopy(id_string, cp);
+		*cp = '\0';
+	    }
+	    me->CurrentA = HTAnchor_findChildAndLink(
+				me->node_anchor,	/* Parent */
+				id_string,		/* Tag */
+				href,			/* Addresss */
+				(void *)0);		/* Type */
+	    if (id_string)
+		*cp = '#';
+	    FREE(id_string);
+	    LYEnsureSingleSpace(me);
+	    if (me->inUnderline == FALSE)
+		HText_appendCharacter(me->text, LY_UNDERLINE_START_CHAR);
+	    HTML_put_string(me, "REFRESH(");
+	    HTML_put_string(me, Seconds);
+	    HTML_put_string(me, " sec):");
+	    FREE(Seconds);
+	    if (me->inUnderline == FALSE)
+		HText_appendCharacter(me->text, LY_UNDERLINE_END_CHAR);
+	    HTML_put_character(me, ' ');
+	    me->in_word = NO;
+	    HText_beginAnchor(me->text, me->CurrentA);
+	    if (me->inBoldH == FALSE)
+		HText_appendCharacter(me->text, LY_BOLD_START_CHAR);
+	    HTML_put_string(me, href);
+	    FREE(href);
+	    if (me->inBoldH == FALSE)
+		HText_appendCharacter(me->text, LY_BOLD_END_CHAR);
+	    HText_endAnchor(me->text);
+	    LYEnsureSingleSpace(me);
+	}
+
+    /*
+     *  Check for a suggested filename via a Content-Disposition with
+     *  file; filename=name.suffix in it, if we don't already have it
+     *  via a server header. - FM
+     */
+    } else if (!(me->node_anchor->SugFname && *me->node_anchor->SugFname) &&
+    	       !strcasecomp((name ?
+    			     name : http_equiv), "Content-Disposition")) {
+	cp = content;
+	while (*cp != '\0' && strncasecomp(cp, "file;", 5))
+	    cp++;
+	if (*cp != '\0') {
+	    cp += 5;
+	    while (*cp != '\0' && WHITE(*cp))
+	        cp++;
+	    if (*cp != '\0') {
+	        while (*cp != '\0' && strncasecomp(cp, "filename=", 9))
+		    cp++;
+		if (*cp != '\0') {
+		    StrAllocCopy(me->node_anchor->SugFname, (cp + 9));
+		    cp = me->node_anchor->SugFname;
+		    while (*cp != '\0' && !WHITE(*cp))
+			cp++;
+		    *cp = '\0';
+		    if (*me->node_anchor->SugFname == '\0')
+		        FREE(me->node_anchor->SugFname);
+		}
+	    }
+	}
+    /*
+     *  Check for a Set-Cookie directive. - AK
+     */
+    } else if (!strcasecomp((name ? name : http_equiv), "Set-Cookie")) {
+	/*
+	 *  We're using the Request-URI as the second argument,
+	 *  regardless of whether a Content-Base header or BASE
+	 *  tag are present.
+	 */
+	LYSetCookie(content, me->node_anchor->address);
+    }
+
+    /*
+     *  Free the copies. - FM
+     */
+free_META_copies:
+    FREE(http_equiv);
+    FREE(name);
+    FREE(content);
+}
+
+/*
+**  This function strips white characters and
+**  generally fixes up attribute values that
+**  were received from the SGML parser and
+**  are to be treated as partial or absolute
+**  URLs. - FM
+*/
+PUBLIC int LYLegitimizeHREF ARGS3(
+	HTStructured *, 	me,
+	char **,		href,
+	BOOL,			force_slash)
+{
+    int url_type = 0;
+
+    if (!me || !href || *href == NULL || *(*href) == '\0')
+        return(url_type);
+
+    collapse_spaces(*href);
+    LYUnEscapeToLatinOne(&(*href), TRUE);
+    url_type = is_url(*href);
+    if (!url_type && force_slash &&
+	(!strcmp(*href, ".") || !strcmp(*href, "..")) &&
+	 strncmp((me->inBASE ?
+	       me->base_href : me->node_anchor->address),
+		 "file:", 5)) {
+        /*
+	 *  The Fielding RFC/ID for resolving partial HREFs says
+	 *  that a slash should be on the end or the preceding
+	 *  symbolic element for "." and "..", but all tested
+	 *  browsers only do that for an explicit "./" or "../",
+	 *  so we'll respect the RFC/ID only if force_slash was
+	 *  TRUE and it's not a file URL. - FM
+	 */
+	StrAllocCat(*href, "/");
+    }
+    return(url_type); 
+}
+
+/*
+**  This function checks for a Content-Base header,
+**  and if not present, a Content-Location header
+**  which is an absolute URL, and sets the BASE
+**  accordingly.  If set, it will be replaced by
+**  any BASE tag in the HTML stream, itself. - FM
+*/
+PUBLIC void LYCheckForContentBase ARGS1(
+	HTStructured *,		me)
+{
+    char *cp = NULL;
+    BOOL present[HTML_BASE_ATTRIBUTES];
+    CONST char *value[HTML_BASE_ATTRIBUTES];
+    int i;
+
+    if (!(me && me->node_anchor))
+        return;
+
+    if (me->node_anchor->content_base != NULL) {
+        /*
+	 *  We have a Content-Base value.  Use it
+	 *  if it's non-zero length. - FM
+	 */
+        if (*me->node_anchor->content_base == '\0')
+	    return;
+	StrAllocCopy(cp, me->node_anchor->content_base);
+	collapse_spaces(cp);
+    } else if (me->node_anchor->content_location != NULL) {
+        /*
+	 *  We didn't have a Content-Base value, but do
+	 *  have a Content-Location value.  Use it if
+	 *  it's an absolute URL. - FM
+	 */
+        if (*me->node_anchor->content_location == '\0')
+	    return;
+	StrAllocCopy(cp, me->node_anchor->content_location);
+	collapse_spaces(cp);
+	if (!is_url(cp)) {
+	    FREE(cp);
+	    return;
+	}
+    } else {
+        /*
+	 *  We had neither a Content-Base nor
+	 *  Content-Location value. - FM
+	 */
+        return;
+    }
+
+    /*
+     *  If we collapsed to a zero-length value,
+     *  ignore it. - FM
+     */
+    if (*cp == '\0') {
+        FREE(cp);
+	return;
+    }
+
+    /*
+     *  Pass the value to HTML_start_element as
+     *  the HREF of a BASE tag. - FM
+     */
+    for (i = 0; i < HTML_BASE_ATTRIBUTES; i++)
+	 present[i] = NO;
+    present[HTML_BASE_HREF] = YES;
+    value[HTML_BASE_HREF] = (CONST char *)cp;
+    (*me->isa->start_element)(me, HTML_BASE, present, value, 0);
+    FREE(cp);
+}
+
+/*
+**  This function creates NAMEd Anchors if a non-zero-length NAME
+**  or ID attribute was present in the tag. - FM
+*/
+PUBLIC void LYCheckForID ARGS4(
+	HTStructured *,		me,
+	CONST BOOL *,		present,
+	CONST char **,		value,
+	int,			attribute)
+{
+    HTChildAnchor *ID_A = NULL;
+    char *temp = NULL;
+
+    if (!(me && me->text))
+        return;
+
+    if (present && present[attribute]
+	&& value[attribute] && *value[attribute]) {
+	/*
+	 *  Translate any named or numeric character references. - FM
+	 */
+	StrAllocCopy(temp, value[attribute]);
+	LYUnEscapeToLatinOne(&temp, TRUE);
+
+	/*
+	 *  Create the link if we still have a non-zero-length string. - FM
+	 */
+	if ((temp[0] != '\0') &&
+	    (ID_A = HTAnchor_findChildAndLink(
+				me->node_anchor,	/* Parent */
+				temp,			/* Tag */
+				NULL,			/* Addresss */
+				(void *)0))) {		/* Type */
+	    HText_beginAnchor(me->text, ID_A);
+	    HText_endAnchor(me->text);
+	}
+	FREE(temp);
+    }
+}
+
+/*
+**  This function creates a NAMEd Anchor for the ID string
+**  passed to it directly as an argument.  It assumes the
+**  does not need checking for character references. - FM
+*/
+PUBLIC void LYHandleID ARGS2(
+	HTStructured *,		me,
+	char *,			id)
+{
+    HTChildAnchor *ID_A = NULL;
+
+    if (!(me && me->text) ||
+        !(id && *id))
+        return;
+
+    /*
+     *  Create the link if we still have a non-zero-length string. - FM
+     */
+    if (ID_A = HTAnchor_findChildAndLink(
+				me->node_anchor,	/* Parent */
+				id,			/* Tag */
+				NULL,			/* Addresss */
+				(void *)0)) {		/* Type */
+	HText_beginAnchor(me->text, ID_A);
+	HText_endAnchor(me->text);
+    }
+}
+
+/*
+**  This function checks whether we want to overrride
+**  the current default alignment for parargraphs and
+**  instead use that specified in the element's style
+**  sheet. - FM
+*/
+PUBLIC BOOLEAN LYoverride_default_alignment ARGS1(
+	HTStructured *, me)
+{
+    if (!me)
+        return NO;
+
+    switch(me->sp[0].tag_number) {
+	case HTML_BLOCKQUOTE:
+	case HTML_BQ:
+	case HTML_NOTE:
+	case HTML_FN:
+        case HTML_ADDRESS:
+	    me->sp->style->alignment = HT_LEFT;
+	    return YES;
+	    break;
+
+	default:
+	    break;
+    }
+    return NO;
+}
+
+/*
+**  This function inserts newlines if needed to create double spacing,
+**  and sets the left margin for subsequent text to the second line
+**  indentation of the current style. - FM
+*/
+PUBLIC void LYEnsureDoubleSpace ARGS1(
+	HTStructured *, me)
+{
+    if (!me || !me->text)
+        return;
+
+    if (HText_LastLineSize(me->text)) {
+	HText_appendCharacter(me->text, '\r');
+	HText_appendCharacter(me->text, '\r');
+    } else if (HText_PreviousLineSize(me->text)) {
+	HText_appendCharacter(me->text, '\r');
+    } else if (me->List_Nesting_Level >= 0) {
+	HText_NegateLineOne(me->text);
+    }
+    me->in_word = NO;
+    return;
+}
+
+/*
+**  This function inserts a newline if needed to create single spacing,
+**  and sets the left margin for subsequent text to the second line
+**  indentation of the current style. - FM
+*/
+PUBLIC void LYEnsureSingleSpace ARGS1(
+	HTStructured *, me)
+{
+    if (!me || !me->text)
+        return;
+
+    if (HText_LastLineSize(me->text)) {
+	HText_appendCharacter(me->text, '\r');
+    } else if (me->List_Nesting_Level >= 0) {
+	HText_NegateLineOne(me->text);
+    }
+    me->in_word = NO;
+    return;
+}
+
+/*
+**  This function resets paragraph alignments for block
+**  elements which do not have a defined style sheet. - FM
+*/
+PUBLIC void LYResetParagraphAlignment ARGS1(
+	HTStructured *, me)
+{
+    if (!me)
+        return;
+
+    if (me->List_Nesting_Level >= 0 ||
+	((me->Division_Level < 0) &&
+	 (!strcmp(me->sp->style->name, "Normal") ||
+	  !strcmp(me->sp->style->name, "Preformatted")))) {
+	me->sp->style->alignment = HT_LEFT;
+    } else {
+	me->sp->style->alignment = me->current_default_alignment;
+    }
+    return;
+}
+
+PUBLIC BOOLEAN LYCheckForCSI ARGS2(
+	HTStructured *, 	me,
+	char **,		url)
+{
+    if (!(me && me->node_anchor && me->node_anchor->address))
+        return FALSE;
+
+    if (strncasecomp(me->node_anchor->address, "file:", 5))
+        return FALSE;
+
+    if (!LYisLocalHost(me->node_anchor->address))
+        return FALSE;
+     
+    StrAllocCopy(*url, me->node_anchor->address);
+    return TRUE;
+}

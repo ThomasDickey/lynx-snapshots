@@ -44,7 +44,7 @@ PRIVATE int HASH_FUNCTION ARGS1(
     unsigned char *p;
 
     for (p = (unsigned char *)cp_address, hash = 0; *p; p++)
-    	hash = (int) (hash * 3 + (*(unsigned char*)p)) % HASH_SIZE;
+    	hash = (int) (hash * 3 + (*(unsigned char *)p)) % HASH_SIZE;
 
     return hash;
 }
@@ -73,6 +73,7 @@ PRIVATE HTParentAnchor * HTParentAnchor_new NOARGS
     newAnchor->bookmark = NULL;		/* Bookmark filename. - FM */
     newAnchor->isISMAPScript = FALSE;	/* Lynx appends ?0,0 if TRUE. - FM */
     newAnchor->isHEAD = FALSE;		/* HEAD request if TRUE. - FM */
+    newAnchor->safe = FALSE;		/* Safe. - FM */
     newAnchor->FileCache = NULL;	/* Path to a disk-cached copy. - FM */
     newAnchor->SugFname = NULL;		/* Suggested filename. - FM */
     newAnchor->RevTitle = NULL;		/* TITLE for a LINK with REV. - FM */
@@ -85,6 +86,7 @@ PRIVATE HTParentAnchor * HTParentAnchor_new NOARGS
     newAnchor->content_disposition = NULL; /* Content-Disposition. - FM */
     newAnchor->content_location = NULL;	/* Content-Location. - FM */
     newAnchor->content_md5 = NULL;	/* Content-MD5. - FM */
+    newAnchor->content_length = 0;	/* Content-Length. - FM */
     newAnchor->date = NULL;		/* Date. - FM */
     newAnchor->expires = NULL;		/* Expires. - FM */
     newAnchor->last_modified = NULL;	/* Last-Modified. - FM */
@@ -173,7 +175,7 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
     }
     if (kids = parent->children) {  /* parent has children : search them */
         if (tag && *tag) {		/* TBL */
-	    while (NULL != (child=(HTChildAnchor*)HTList_nextObject(kids))) {
+	    while (NULL != (child=(HTChildAnchor *)HTList_nextObject(kids))) {
 #ifdef CASE_INSENSITIVE_ANCHORS
 	        if (HTEquivalent(child->tag, tag)) { /* Case insensitive */
 #else
@@ -182,7 +184,7 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
 		    if (TRACE)
 		        fprintf(stderr,
 	      "Child anchor %p of parent %p with name `%s' already exists.\n",
-		    		(void*)child, (void*)parent, tag);
+		    		(void *)child, (void *)parent, tag);
 		    return child;
 	        }
 	    }
@@ -195,9 +197,9 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
     if (TRACE)
         fprintf(stderr,
 		"new Anchor %p named `%s' is child of %p\n",
-       		(void*)child, 
-		(int)tag ? tag : (CONST char *)"" ,
-		(void*)parent); /* int for apollo */
+       		(void *)child, 
+		tag ? tag : (CONST char *)"",
+		(void *)parent); /* int for apollo */
     HTList_addObject (parent->children, child);
     child->parent = parent;
     StrAllocCopy(child->tag, tag);
@@ -233,9 +235,10 @@ PUBLIC HTChildAnchor * HTAnchor_findChildAndLink ARGS4(
         parsed_doc.post_content_type = NULL;
         parsed_doc.bookmark = NULL;
         parsed_doc.isHEAD = FALSE;
+        parsed_doc.safe = FALSE;
         dest = HTAnchor_findAddress(&parsed_doc);
 
-        HTAnchor_link((HTAnchor *) child, dest, ltype);
+        HTAnchor_link((HTAnchor *)child, dest, ltype);
         FREE(parsed_doc.address);
         FREE(relative_to);
     }
@@ -305,12 +308,13 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
         parsed_doc.post_content_type = newdoc->post_content_type;
         parsed_doc.bookmark = newdoc->bookmark;
         parsed_doc.isHEAD = newdoc->isHEAD;
+        parsed_doc.safe = newdoc->safe;
 
-        foundParent = (HTParentAnchor *) HTAnchor_findAddress (&parsed_doc);
+        foundParent = (HTParentAnchor *)HTAnchor_findAddress(&parsed_doc);
         foundAnchor = HTAnchor_findChild (foundParent, tag);
         FREE(parsed_doc.address);
         FREE(tag);
-        return (HTAnchor *) foundAnchor;
+        return (HTAnchor *)foundAnchor;
     } else {
         /*
 	**  If the address has no anchor tag, 
@@ -328,7 +332,7 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 	*/
         hash = HASH_FUNCTION(newdoc->address);
         if (!adult_table) {
-            adult_table = (HTList**) calloc(HASH_SIZE, sizeof(HTList*));
+            adult_table = (HTList **)calloc(HASH_SIZE, sizeof(HTList *));
 	    atexit(free_adult_table);
         }
         if (!adult_table[hash])
@@ -340,7 +344,7 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 	*/
         grownups = adults;
         while (NULL != (foundAnchor =
-			(HTParentAnchor*)HTList_nextObject(grownups))) {
+			(HTParentAnchor *)HTList_nextObject(grownups))) {
 #ifdef CASE_INSENSITIVE_ANCHORS
             if (HTEquivalent(foundAnchor->address, newdoc->address) &&
 	        HTEquivalent(foundAnchor->post_data, newdoc->post_data) &&
@@ -354,8 +358,8 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 	        if (TRACE)
 		    fprintf(stderr,
 		    	    "Anchor %p with address `%s' already exists.\n",
-			    (void*)foundAnchor, newdoc->address);
-	         return (HTAnchor *) foundAnchor;
+			    (void *)foundAnchor, newdoc->address);
+	         return (HTAnchor *)foundAnchor;
              }
         }
     
@@ -366,7 +370,7 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
         if (TRACE)
 	    fprintf(stderr,
 	    	    "New anchor %p has hash %d and address `%s'\n",
-    	    	    (void*)foundAnchor, hash, newdoc->address);
+    	    	    (void *)foundAnchor, hash, newdoc->address);
         StrAllocCopy(foundAnchor->address, newdoc->address);
         if (newdoc->post_data)
 	    StrAllocCopy(foundAnchor->post_data, newdoc->post_data);
@@ -376,8 +380,9 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
         if (newdoc->bookmark)
 	    StrAllocCopy(foundAnchor->bookmark, newdoc->bookmark);
         foundAnchor->isHEAD = newdoc->isHEAD;
+        foundAnchor->safe = newdoc->safe;
         HTList_addObject (adults, foundAnchor);
-        return (HTAnchor *) foundAnchor;
+        return (HTAnchor *)foundAnchor;
     }
 }
 
@@ -684,7 +689,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
 PUBLIC void HTAnchor_makeLastChild ARGS1(
 	HTChildAnchor *,	me)
 {
-    if (me->parent != (HTParentAnchor *) me) {  /* Make sure it's a child */
+    if (me->parent != (HTParentAnchor *)me) {  /* Make sure it's a child */
         HTList * siblings = me->parent->children;
 	HTList_removeObject (siblings, me);
 	HTList_addObject (siblings, me);
@@ -926,6 +931,30 @@ PUBLIC CONST char * HTAnchor_server ARGS1(
     return me ? me->server : NULL;
 }
 
+/*	Safe header handling. - FM
+*/
+PUBLIC BOOL HTAnchor_safe ARGS1(
+	HTParentAnchor *,	me)
+{
+    return me ? me->safe : FALSE;
+}
+
+/*	Content-Base header handling. - FM
+*/
+PUBLIC CONST char * HTAnchor_content_base ARGS1(
+	HTParentAnchor *,	me)
+{
+    return me ? me->content_base : NULL;
+}
+
+/*	Content-Location header handling. - FM
+*/
+PUBLIC CONST char * HTAnchor_content_location ARGS1(
+	HTParentAnchor *,	me)
+{
+    return me ? me->content_location : NULL;
+}
+
 /*	Link me Anchor to another given one
 **	-------------------------------------
 */
@@ -943,7 +972,7 @@ PUBLIC BOOL HTAnchor_link ARGS3(
         source->mainLink.dest = destination;
         source->mainLink.type = type;
     } else {
-        HTLink * newLink = (HTLink *) calloc (1, sizeof (HTLink));
+        HTLink * newLink = (HTLink *)calloc (1, sizeof (HTLink));
         if (newLink == NULL)
 	    outofmem(__FILE__, "HTAnchor_link");
         newLink->dest = destination;
@@ -977,7 +1006,7 @@ PUBLIC HTAnchor * HTAnchor_followTypedLink ARGS2(
     if (me->links) {
         HTList *links = me->links;
         HTLink *link;
-        while (NULL != (link=(HTLink*)HTList_nextObject(links))) {
+        while (NULL != (link=(HTLink *)HTList_nextObject(links))) {
             if (link->type == type) {
 	        return link->dest;
 	    }
@@ -998,7 +1027,7 @@ PUBLIC BOOL HTAnchor_makeMainLink ARGS2(
         return NO;  /* link not found or NULL anchor */
     } else {
         /* First push current main link onto top of links list */
-        HTLink *newLink = (HTLink*) calloc (1, sizeof (HTLink));
+        HTLink *newLink = (HTLink *)calloc (1, sizeof (HTLink));
         if (newLink == NULL)
 	    outofmem(__FILE__, "HTAnchor_makeMainLink");
         memcpy((void *)newLink,

@@ -20,6 +20,8 @@ extern char keymap[]; /* main keymap matrix */
 extern char override[];
 #endif
 
+#define CURRENT_KEYMAP_TITLE "Current Key Map"
+
 #define       LYK_1     	1
 #define       LYK_2     	2
 #define       LYK_3     	3
@@ -69,36 +71,41 @@ extern char override[];
 #define       LYK_ADD_BOOKMARK  47
 #define       LYK_DEL_BOOKMARK  48
 #define       LYK_VIEW_BOOKMARK 49
-#define       LYK_SHELL 	50
-#define       LYK_DOWNLOAD      51
-#define       LYK_TRACE_TOGGLE  52
-#define       LYK_IMAGE_TOGGLE  53
-#define       LYK_INLINE_TOGGLE 54
-#define       LYK_HEAD          55
-#define       LYK_DO_NOTHING    56
-#define       LYK_TOGGLE_HELP	57
-#define       LYK_JUMP		58
-#define       LYK_KEYMAP	59
-#define       LYK_LIST		60
-#define       LYK_TOOLBAR	61
-#define       LYK_HISTORICAL	62
-#define       LYK_MINIMAL	63
-#define       LYK_SOFT_DQUOTES	64
-#define       LYK_RAW_TOGGLE	65
+#define       LYK_VLINKS	50
+#define       LYK_SHELL 	51
+#define       LYK_DOWNLOAD      52
+#define       LYK_TRACE_TOGGLE  53
+#define       LYK_IMAGE_TOGGLE  54
+#define       LYK_INLINE_TOGGLE 55
+#define       LYK_HEAD          56
+#define       LYK_DO_NOTHING    57
+#define       LYK_TOGGLE_HELP	58
+#define       LYK_JUMP		59
+#define       LYK_KEYMAP	60
+#define       LYK_LIST		61
+#define       LYK_TOOLBAR	62
+#define       LYK_HISTORICAL	63
+#define       LYK_MINIMAL	64
+#define       LYK_SOFT_DQUOTES	65
+#define       LYK_RAW_TOGGLE	66
+#define       LYK_COOKIE_JAR    67
 
+#ifdef VMS
+#define       LYK_DIRED_MENU    68
+#endif /* VMS */
 #ifdef DIRED_SUPPORT
-#define       LYK_CREATE        66
-#define       LYK_REMOVE        67
-#define       LYK_MODIFY        68
-#define       LYK_TAG_LINK      69
-#define       LYK_DIRED_MENU    70
-#define       LYK_UPLOAD        71
-#define       LYK_INSTALL       72
+#define       LYK_DIRED_MENU    68
+#define       LYK_CREATE        69
+#define       LYK_REMOVE        70
+#define       LYK_MODIFY        71
+#define       LYK_TAG_LINK      72
+#define       LYK_UPLOAD        73
+#define       LYK_INSTALL       74
 #endif /* DIRED_SUPPORT */
 #ifdef NOT_USED
-#define       LYK_VERSION	73
-#define       LYK_FORM_UP       74
-#define       LYK_FORM_DOWN     75
+#define       LYK_VERSION	75
+#define       LYK_FORM_UP       76
+#define       LYK_FORM_DOWN     77
 #endif /* NOT_USED */
 
 #endif /* LYKEYMAP_H */

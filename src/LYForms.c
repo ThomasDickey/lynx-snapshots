@@ -181,6 +181,7 @@ PUBLIC int change_form_link ARGS6(struct link *, form_link, int, mode,
 	    break;
 
 	case F_SUBMIT_TYPE:
+	case F_IMAGE_SUBMIT_TYPE:
 	    if (form->disabled == YES)
 	        break;
 	    if (form->no_cache &&
