@@ -6,7 +6,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTTP.h>
 #include <HTAnchor.h>
 #include <HTAccess.h>
@@ -20,6 +19,7 @@
 #include <LYGlobalDefs.h>
 #include <LYKeymap.h>
 #include <LYCharUtils.h>
+#include <LYCharSets.h>
 
 #ifdef DIRED_SUPPORT
 #include <LYUpload.h>
@@ -28,8 +28,6 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x=NULL;}
 
 typedef struct _LYMapElement {
    char * address;
@@ -171,6 +169,8 @@ PUBLIC BOOL LYAddImageMap ARGS3(
     if (theList) {
 	cur = theList;
 	while (NULL != (old = (LYImageMap *)HTList_nextObject(cur))) {
+	    if (old->address == 0)	/* shouldn't happen */
+	    	continue;
 	    if (!strcmp(old->address, address)) {
 		FREE(old->address);
 		FREE(old->title);
@@ -193,7 +193,7 @@ PUBLIC BOOL LYAddImageMap ARGS3(
     new = (old != NULL) ?
 		    old : (LYImageMap *)calloc(1, sizeof(LYImageMap));
     if (new == NULL) {
-	perror("Out of memory in LYAddImageMap");
+	perror(gettext("Out of memory in LYAddImageMap"));
 	return FALSE;
     }
     StrAllocCopy(new->address, address);
@@ -433,12 +433,8 @@ PRIVATE int LYLoadIMGmap ARGS4 (
     if (!theList) {
 	if (anAnchor->post_data && !WWWDoc.safe &&
 	    ((underlying && underlying->document && !LYforce_no_cache) ||
-	     HTConfirm(
-#if __STDC__
-		"LYNXIMGMAP: "
-#endif
-		CONFIRM_POST_RESUBMISSION) != TRUE)) {
-	    HTAlert("Image map from POST response not available!");
+	     HTConfirm(CONFIRM_POST_RESUBMISSION) != TRUE)) {
+	    HTAlert(gettext("Image map from POST response not available!"));
 	    return(HT_NOT_LOADED);
 	}
 	LYforce_no_cache = TRUE;
@@ -474,12 +470,8 @@ PRIVATE int LYLoadIMGmap ARGS4 (
     if (!(theMap && theMap->elements)) {
 	if (anAnchor->post_data && !WWWDoc.safe &&
 	    ((underlying && underlying->document && !LYforce_no_cache) ||
-	    HTConfirm(
-#if __STDC__
-		"LYNXIMGMAP: "
-#endif
-		CONFIRM_POST_RESUBMISSION) != TRUE)) {
-	    HTAlert("Image map from POST response not available!");
+	    HTConfirm(CONFIRM_POST_RESUBMISSION) != TRUE)) {
+	    HTAlert(gettext("Image map from POST response not available!"));
 	    return(HT_NOT_LOADED);
 	}
 	LYforce_no_cache = TRUE;
@@ -541,7 +533,21 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	LYEntify(&MapTitle, TRUE);
     }
 
-    sprintf(buf,"<head>\n<title>%s</title>\n</head>\n<body>\n", MapTitle);
+    sprintf(buf, "<html>\n<head>\n");
+    (*target->isa->put_block)(target, buf, strlen(buf));
+    sprintf(buf, "<META %s content=\"text/html;charset=%s\">\n",
+		"http-equiv=\"content-type\"",
+		LYCharSet_UC[current_char_set].MIMEname);
+    (*target->isa->put_block)(target, buf, strlen(buf));
+	/*
+	 *  This page is a list of titles and anchors for them.
+	 *  Since titles already passed SGML/HTML stage
+	 *  they converted to current_char_set.
+	 *  That is why we insist on META charset for this page.
+	 */
+    sprintf(buf, "<title>%s</title>\n", MapTitle);
+    (*target->isa->put_block)(target, buf, strlen(buf));
+    sprintf(buf, "</head>\n<body>\n");
     (*target->isa->put_block)(target, buf, strlen(buf));
 
     sprintf(buf,"<h1><em>%s</em></h1>\n", MapTitle);
@@ -572,7 +578,7 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	(*target->isa->put_block)(target, MapTitle, strlen(MapTitle));
 	(*target->isa->put_block)(target, "</a>\n", 5);
     }
-    sprintf(buf,"</%s>\n</body>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
+    sprintf(buf,"</%s>\n</body>\n</html>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
 				     "ol" : "ul"));
     (*target->isa->put_block)(target, buf, strlen(buf));
 

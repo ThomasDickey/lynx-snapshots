@@ -5,11 +5,8 @@
 
 #include <HTUtils.h>
 #include <HTChunk.h>
-/*#include <stdio.h> included by HTUtils.h -- FM */
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*	Create a chunk with a certain allocation unit
 **	--------------

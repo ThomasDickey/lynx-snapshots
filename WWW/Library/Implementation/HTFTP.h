@@ -10,9 +10,6 @@
 #ifndef HTFTP_H
 #define HTFTP_H
 
-#ifndef HTUTILS_H
-#include <HTUtils.h>
-#endif /* HTUTILS_H */
 #include <HTAnchor.h>
 #include <HTStream.h>
 #include <HTParse.h>
@@ -21,7 +18,7 @@
 #define FILE_BY_TYPE 1
 #define FILE_BY_SIZE 2
 #define FILE_BY_DATE 3
-extern BOOLEAN HTfileSortMethod;  /* specifies the method of sorting */
+extern int HTfileSortMethod;  /* specifies the method of sorting */
 
 
 /* PUBLIC						 HTMake_VMS_name()

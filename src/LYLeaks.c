@@ -10,14 +10,9 @@
 #define NO_MEMORY_TRACKING
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <LYexit.h>
 #include <LYLeaks.h>
 #include <LYUtils.h>
-#include <ctype.h>
-/*#include <stdio.h> included by HTUtils.h -- FM */
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 PRIVATE AllocationList *ALp_RunTimeAllocations = NULL;
 
@@ -79,10 +74,10 @@ PUBLIC void LYLeaks NOARGS
 	     *	bad request, then it was a bad pointer
 	     *	value in a realloc statement.
 	     */
-	    fprintf(Fp_leakagesink,
-		    "Invalid pointer detected.\n");
-	    fprintf(Fp_leakagesink,
-		    "Pointer:\t%p\n", ALp_head->vp_BadRequest);
+	    fprintf(Fp_leakagesink, "%s.\n",
+		    gettext("Invalid pointer detected."));
+	    fprintf(Fp_leakagesink, "%s\t%p\n",
+		    gettext("Pointer:"), ALp_head->vp_BadRequest);
 
 	    /*
 	     *	Don't free the bad request, it is an invalid pointer.
@@ -92,15 +87,19 @@ PUBLIC void LYLeaks NOARGS
 	     *	values also.
 	     */
 	    if (ALp_head->SL_memory.cp_FileName == NULL) {
-		fprintf(Fp_leakagesink, "FileName:\t%s\n",
+		fprintf(Fp_leakagesink, "%s\t%s\n",
+			gettext("FileName:"),
 			ALp_head->SL_realloc.cp_FileName);
-		fprintf(Fp_leakagesink, "LineCount:\t%d\n",
+		fprintf(Fp_leakagesink, "%s\t%d\n",
+			gettext("LineCount:"),
 			ALp_head->SL_realloc.ssi_LineNumber);
 	    } else {
-		fprintf(Fp_leakagesink, "FileName:\t%s\n",
-				ALp_head->SL_memory.cp_FileName);
-		fprintf(Fp_leakagesink, "LineCount:\t%d\n",
-				ALp_head->SL_memory.ssi_LineNumber);
+		fprintf(Fp_leakagesink, "%s\t%s\n",
+			gettext("FileName:"),
+			ALp_head->SL_memory.cp_FileName);
+		fprintf(Fp_leakagesink, "%s\t%d\n",
+			gettext("LineCount:"),
+			ALp_head->SL_memory.ssi_LineNumber);
 	    }
 	} else {
 	    size_t i_counter;
@@ -111,9 +110,13 @@ PUBLIC void LYLeaks NOARGS
 	     */
 	    st_total += ALp_head->st_Bytes;
 
-	    fprintf(Fp_leakagesink, "Memory leak detected.\n");
-	    fprintf(Fp_leakagesink, "Pointer:\t%p\n", ALp_head->vp_Alloced);
-	    fprintf(Fp_leakagesink, "Contains:\t");
+	    fprintf(Fp_leakagesink, "%s\n",
+		    gettext("Memory leak detected."));
+	    fprintf(Fp_leakagesink, "%s\t%p\n",
+		    gettext("Pointer:"),
+		    ALp_head->vp_Alloced);
+	    fprintf(Fp_leakagesink, "%s:\t",
+		    gettext("Contains:"));
 	    for (i_counter = 0;
 		 i_counter < ALp_head->st_Bytes &&
 		 i_counter < MAX_CONTENT_LENGTH;
@@ -127,20 +130,25 @@ PUBLIC void LYLeaks NOARGS
 	    }
 	    fprintf(Fp_leakagesink, "\n");
 	    FREE(ALp_head->vp_Alloced);
-	    fprintf(Fp_leakagesink, "ByteSize:\t%d\n",
+	    fprintf(Fp_leakagesink, "%s\t%d\n",
+				    gettext("ByteSize:"),
 				    (int)(ALp_head->st_Bytes));
-	    fprintf(Fp_leakagesink, "FileName:\t%s\n",
+	    fprintf(Fp_leakagesink, "%s\t%s\n",
+				    gettext("FileName:"),
 				    ALp_head->SL_memory.cp_FileName);
-	    fprintf(Fp_leakagesink, "LineCount:\t%d\n",
+	    fprintf(Fp_leakagesink, "%s\t%d\n",
+				    gettext("LineCount:"),
 				    ALp_head->SL_memory.ssi_LineNumber);
 	    /*
 	     *	Give the last time the pointer was realloced
 	     *	if it happened also.
 	     */
 	    if (ALp_head->SL_realloc.cp_FileName != NULL) {
-		fprintf(Fp_leakagesink, "realloced:\t%s\n",
+		fprintf(Fp_leakagesink, "%s\t%s\n",
+			gettext("realloced:"),
 			ALp_head->SL_realloc.cp_FileName);
-		fprintf(Fp_leakagesink, "LineCount:\t%d\n",
+		fprintf(Fp_leakagesink, "%s\t%d\n",
+			gettext("LineCount:"),
 			ALp_head->SL_realloc.ssi_LineNumber);
 	    }
 	}
@@ -157,25 +165,12 @@ PUBLIC void LYLeaks NOARGS
      *	Give a grand total of the leakage.
      *	Close the output file.
      */
-    fprintf(Fp_leakagesink, "\nTotal memory leakage this run:\t%u\n",
-		(unsigned)st_total);
+    fprintf(Fp_leakagesink, "\n%s\t%u\n",
+	    gettext("Total memory leakage this run:"),
+	    (unsigned)st_total);
     fclose(Fp_leakagesink);
-#ifdef VMS
-    {
-	char VMSfilename[256];
-	/*
-	 *  Purge lower versions of the file.
-	 */
-	sprintf(VMSfilename, "%s;-1", LEAKAGE_SINK);
-	while (remove(VMSfilename) == 0)
-	    ;
-	/*
-	 *  Reset version number.
-	 */
-	sprintf(VMSfilename, "%s;1", LEAKAGE_SINK);
-	rename(LEAKAGE_SINK, VMSfilename);
-    }
-#endif /* VMS */
+
+    HTSYS_purge(LEAKAGE_SINK);
 }
 
 /*

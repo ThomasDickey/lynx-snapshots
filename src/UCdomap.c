@@ -15,7 +15,6 @@
  * aeb, 950210
  */
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTMLDTD.h>
 
 #include <LYGlobalDefs.h>
@@ -24,6 +23,7 @@
 #include <UCMap.h>
 #include <UCDefs.h>
 #include <LYCharSets.h>
+#include <LYStrings.h>
 
 /*
  *  Include tables & parameters.
@@ -66,8 +66,6 @@
 #ifdef NOTDEFINED
 #include <mnem_suni.h>
 #endif /* NOTDEFINED */
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
  *  Some of the code below, and some of the comments, are left in for
@@ -265,7 +263,7 @@ PRIVATE int con_insert_unipair PARAMS((
 	int		fordefault));
 PRIVATE int con_insert_unipair_str PARAMS((
 	u16		unicode,
-	char *		replace_str,
+	CONST char *	replace_str,
 	int		fordefault));
 PRIVATE void con_clear_unimap PARAMS((
 	int		fordefault));
@@ -306,7 +304,7 @@ PRIVATE int UC_FindGN_byMIME PARAMS((
 	CONST char *	UC_MIMEcharset));
 PRIVATE void UCreset_allocated_LYCharSets NOPARAMS;
 PRIVATE void UCfree_allocated_LYCharSets NOPARAMS;
-PRIVATE char ** UC_setup_LYCharSets_repl PARAMS((
+PRIVATE CONST char ** UC_setup_LYCharSets_repl PARAMS((
 	int		UC_charset_in_hndl,
 	unsigned	lowest8));
 PRIVATE int UC_Register_with_LYCharSets PARAMS((
@@ -473,8 +471,7 @@ PRIVATE void UC_con_set_trans ARGS3(
   u16 *ptrans;
 
     if (!UC_valid_UC_charset(UC_charset_in_hndl)) {
-	if (TRACE)
-	    fprintf(stderr, "UC_con_set_trans: Invalid charset handle %d.\n",
+	CTRACE(tfp, "UC_con_set_trans: Invalid charset handle %d.\n",
 		    UC_charset_in_hndl);
 	return;
     }
@@ -603,11 +600,12 @@ PRIVATE int con_insert_unipair ARGS3(
 
 PRIVATE int con_insert_unipair_str ARGS3(
 	u16,		unicode,
-	char *, 	replace_str,
+	CONST char *, 	replace_str,
 	int,		fordefault)
 {
     int i, n;
-    char ***p1, **p2;
+    char ***p1;
+    CONST char **p2;
 
     if(fordefault)
 	p1 = unidefault_pagedir_str[n = unicode >> 11];
@@ -627,15 +625,18 @@ PRIVATE int con_insert_unipair_str ARGS3(
 	}
     }
 
-    if (!(p2 = p1[n = (unicode >> 6) & 0x1f])) {
-	p2 = p1[n] = (char* *)malloc(64*sizeof(char *));
-	if (!p2)
+    n = ((unicode >> 6) & 0x1f);
+    if (!p1[n]) {
+	p1[n] = (char **)malloc(64*sizeof(char *));
+	if (!p1[n])
 	    return -ENOMEM;
 
+	p2 = (CONST char **)p1[n];
 	for (i = 0; i < 64; i++) {
 	    p2[i] = NULL;	/* No replace string this character (yet) */
 	}
     }
+    p2 = (CONST char **)p1[n];
 
     p2[unicode & 0x3f] = replace_str;
 
@@ -782,8 +783,7 @@ PRIVATE int UC_con_set_unimap ARGS2(
     u16 *p;
 
     if (!UC_valid_UC_charset(UC_charset_out_hndl)) {
-	if (TRACE)
-	    fprintf(stderr, "UC_con_set_unimap: Invalid charset handle %d.\n",
+	CTRACE(tfp, "UC_con_set_unimap: Invalid charset handle %d.\n",
 		    UC_charset_out_hndl);
 	return -1;
     }
@@ -896,7 +896,7 @@ PRIVATE int conv_uni_to_pc ARGS2(
 	 *  Not a printable character.
 	 */
 	return -1;
-    } else if (ucs == 0xfeff || (ucs >= 0x200a && ucs <= 0x200f)) {
+    } else if (ucs == 0xfeff || (ucs >= 0x200b && ucs <= 0x200f)) {
 	/*
 	 *  Zero-width space.
 	 */
@@ -961,7 +961,7 @@ PRIVATE int conv_uni_to_str ARGS4(
 	 *  Not a printable character.
 	 */
 	return -1;
-    } else if (ucs == 0xfeff || (ucs >= 0x200a && ucs <= 0x200f)) {
+    } else if (ucs == 0xfeff || (ucs >= 0x200b && ucs <= 0x200f)) {
 	/*
 	 *  Zero-width space.
 	 */
@@ -1190,11 +1190,8 @@ PRIVATE int UC_MapGN ARGS2(
 	UCInfo[UChndl].GN = Gn;
 	UC_GNhandles[Gn] = UChndl;
     }
-    if (TRACE) {
-	fprintf(stderr,
-		"UC_MapGN: Using %d <- %d (%s)\n",
+    CTRACE(tfp, "UC_MapGN: Using %d <- %d (%s)\n",
 		Gn, UChndl, UCInfo[UChndl].MIMEname);
-    }
     UC_con_set_trans(UChndl,Gn,update_flag);
     return Gn;
 }
@@ -1278,7 +1275,7 @@ PUBLIC long int UCTransToUni ARGS2(
 
   ch_iu = (unsigned char)ch_in;
 #ifndef UC_NO_SHORTCUTS
-    if (charset_in == 0)
+    if (charset_in == LATIN1)
 	return ch_iu;
     if ((unsigned char)ch_in < 128 && (unsigned char)ch_in >= 32)
 	return ch_iu;
@@ -1506,27 +1503,34 @@ PUBLIC int UCGetRawUniMode_byLYhndl ARGS1(
 }
 
 /*
- *  Currently the charset name has to match exactly -- not substring
- *  matching as was done before (see HTMIME.c, HTML.c).
+ *  Get Lynx internal charset handler from MIME name,
+ *  return -1 if we got NULL or did not recognize value.
+ *  According to RFC, MIME headers should match case-insensitively.
  */
 PUBLIC int UCGetLYhndl_byMIME ARGS1(
-	CONST char *,	UC_MIMEcharset)
+	CONST char *,	value)
 {
   int i;
   int LYhndl = -1;
+  char *UC_MIMEcharset = NULL;
 
-    if (!UC_MIMEcharset || !(*UC_MIMEcharset))
+    if (!value || !(*value)) {
+	CTRACE(tfp, "UCGetLYhndl_byMIME: NULL argument instead of MIME name.\n");
 	return -1;
+    }
+
+    StrAllocCopy(UC_MIMEcharset, value);
+    LYLowerCase(UC_MIMEcharset);
 
     for (i = 0;
 	 (i < MAXCHARSETS && i < LYNumCharsets &&
-	  LYchar_set_names[i] && LYhndl < 0); i++) {
+	  LYchar_set_names[i]); i++) {
 	if (LYCharSet_UC[i].MIMEname &&
 	    !strcmp(UC_MIMEcharset, LYCharSet_UC[i].MIMEname)) {
-	    LYhndl = i;
+	    return i;
 	}
     }
-    if (LYhndl < 0) {
+    {
 	/*
 	 *  Not yet found, try synonyms. - FM
 	 */
@@ -1629,9 +1633,12 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	}
 	if (!strcmp(UC_MIMEcharset, "koi-8")) { /* accentsoft bugosity */
 	  return UCGetLYhndl_byMIME("koi8-r");
-  }
+	}
     }
-  return LYhndl;	/* returns -1 if no charset found by that MIME name */
+    /* no more synonyms if come here... */
+
+    CTRACE(tfp, "UCGetLYhndl_byMIME: unrecognized MIME name \"%s\"\n", value);
+    return -1;	/* returns -1 if no charset found by that MIME name */
 }
 
 /*
@@ -1654,7 +1661,7 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 /*
  *  We need to remember which ones were allocated and which are static.
  */
-PRIVATE char ** remember_allocated_LYCharSets[MAXCHARSETS];
+PRIVATE CONST char ** remember_allocated_LYCharSets[MAXCHARSETS];
 
 PRIVATE void UCreset_allocated_LYCharSets NOARGS
 {
@@ -1676,17 +1683,17 @@ PRIVATE void UCfree_allocated_LYCharSets NOARGS
     }
 }
 
-PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
+PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
 	int,		UC_charset_in_hndl,
 	unsigned,	lowest8)
 {
-    char **ISO_Latin1 = LYCharSets[0];
-    char **p;
+    CONST char **ISO_Latin1 = LYCharSets[0];
+    CONST char **p;
     char **prepl;
     u16 *pp;
-    char **tp;
-    char *s7;
-    char *s8;
+    CONST char **tp;
+    CONST char *s7;
+    CONST char *s8;
     size_t i;
     int j, changed;
     u16 k;
@@ -1695,7 +1702,7 @@ PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
     /*
      *	Create a temporary table for reverse lookup of latin1 codes:
      */
-    tp = (char **)malloc(96 * sizeof(char *));
+    tp = (CONST char **)malloc(96 * sizeof(CONST char *));
     if (!tp)
 	return NULL;
     for (i = 0; i < 96; i++)
@@ -1749,12 +1756,14 @@ PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
      *	Now allocate a new table compatible with LYCharSets[]
      *	and with the HTMLDTD for entities.
      *	We don't know yet whether we'll keep it around. */
-    p = prepl = (char **)malloc(HTML_dtd.number_of_entities * sizeof(char *));
-    if (!p) {
+    prepl = (char **)malloc(HTML_dtd.number_of_entities * sizeof(char *));
+    if (!prepl) {
 	FREE(tp);
 	FREE(ti);
-	return NULL;
+	return 0;
     }
+
+    p = (CONST char **)prepl;
     changed = 0;
     for (i = 0; i < HTML_dtd.number_of_entities; i++, p++) {
 	/*
@@ -1825,7 +1834,7 @@ PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
 	FREE(prepl);
 	return NULL;
     }
-    return prepl;
+    return (CONST char **)prepl;
 }
 
 /*
@@ -1837,29 +1846,23 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
 	CONST char *,	UC_LYNXcharset,
 	int,		lowest_eightbit)
 {
-  int i, LYhndl, found;
-  char **repl;
+    int i, LYhndl, found;
+    CONST char **repl;
 
-  LYhndl = -1;
+    LYhndl = -1;
     if (LYNumCharsets == 0) {
 	/*
 	 *  Initialize here; so whoever changes
 	 *  LYCharSets.c doesn't have to count...
 	 */
 	for (i = 0; (i < MAXCHARSETS) && LYchar_set_names[i]; i++) {
-      LYNumCharsets = i+1;
+	    LYNumCharsets = i+1;
 	}
     }
 
     /*
-     *	Do different kinds of searches...
-     *	Normally the first should find the match if there is one!
+     *	Search by MIME name, (LYchar_set_names may differ...)
      */
-    for (i = 0; i < MAXCHARSETS && LYchar_set_names[i] && LYhndl < 0; i++) {
-	if (!strcmp(UC_LYNXcharset, LYchar_set_names[i])) {
-	    LYhndl = i;
-	}
-    }
     for (i = 0; i < MAXCHARSETS && LYchar_set_names[i] && LYhndl < 0; i++) {
 	if (LYCharSet_UC[i].MIMEname &&
 	    !strcmp(UC_MIMEcharset, LYCharSet_UC[i].MIMEname)) {
@@ -1867,40 +1870,37 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
 	}
     }
 
-  if (LYhndl < 0) {		/* not found */
-    found = 0;
-    if (LYNumCharsets >= MAXCHARSETS) {
-	    if (TRACE) {
-		fprintf(stderr,
-		    "UC_Register_with_LYCharSets: Too many. Ignoring %s/%s.",
+    if (LYhndl < 0) {		/* not found */
+	found = 0;
+	if (LYNumCharsets >= MAXCHARSETS) {
+	    CTRACE(tfp, "UC_Register_with_LYCharSets: Too many. Ignoring %s/%s.",
 			UC_MIMEcharset, UC_LYNXcharset);
-	    }
-      return -1;
-    }
+	    return -1;
+	}
 	/*
 	 *  Add to LYCharSets.c lists.
 	 */
 	LYhndl = LYNumCharsets;
 	LYNumCharsets ++;
-    LYlowest_eightbit[LYhndl] = 999;
-    LYCharSets[LYhndl] = SevenBitApproximations;
+	LYlowest_eightbit[LYhndl] = 999;
+	LYCharSets[LYhndl] = SevenBitApproximations;
 	/*
 	 *  Hmm, try to be conservative here.
 	 */
 	LYchar_set_names[LYhndl] = UC_LYNXcharset;
 	LYchar_set_names[LYhndl+1] = NULL;
 	/*
-	 *  Terminating NULL may be looked for by Lynx code.
-	 */
+	*  Terminating NULL may be looked for by Lynx code.
+	*/
     } else {
 	found = 1;
     }
-  LYCharSet_UC[LYhndl].UChndl = s;
+    LYCharSet_UC[LYhndl].UChndl = s;
     /*
      *	Can we just copy the pointer?  Hope so...
      */
-  LYCharSet_UC[LYhndl].MIMEname = UC_MIMEcharset;
-  LYCharSet_UC[LYhndl].enc = UCInfo[s].enc;
+    LYCharSet_UC[LYhndl].MIMEname = UC_MIMEcharset;
+    LYCharSet_UC[LYhndl].enc = UCInfo[s].enc;
 
     /*
      *	@@@ We really SHOULD get more info from the table files,
@@ -1908,22 +1908,22 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
      *	that info...  For now, let's try it without. - KW
      */
     if (lowest_eightbit < LYlowest_eightbit[LYhndl]) {
-    LYlowest_eightbit[LYhndl] = lowest_eightbit;
+	LYlowest_eightbit[LYhndl] = lowest_eightbit;
     } else if (lowest_eightbit > LYlowest_eightbit[LYhndl]) {
-    UCInfo[s].lowest_eight = LYlowest_eightbit[LYhndl];
+	UCInfo[s].lowest_eight = LYlowest_eightbit[LYhndl];
     }
 
-  if (!found && LYhndl > 0) {
-    repl = UC_setup_LYCharSets_repl(s,UCInfo[s].lowest_eight);
-    if (repl) {
-      LYCharSets[LYhndl] = repl;
+    if (!found && LYhndl > 0) {
+	repl = UC_setup_LYCharSets_repl(s,UCInfo[s].lowest_eight);
+	if (repl) {
+	    LYCharSets[LYhndl] = repl;
 	    /*
 	     *	Remember to FREE at exit.
 	     */
-      remember_allocated_LYCharSets[LYhndl]=repl;
+	    remember_allocated_LYCharSets[LYhndl] = repl;
+	}
     }
-  }
-  return LYhndl;
+    return LYhndl;
 }
 
 /*
@@ -1956,10 +1956,8 @@ PUBLIC void UC_Charset_Setup ARGS8(
 	s = found;
     } else {
 	if (UCNumCharsets >= MAXCHARSETS) {
-	    if (TRACE) {
-		fprintf(stderr, "UC_Charset_Setup: Too many. Ignoring %s/%s.",
-				UC_MIMEcharset, UC_LYNXcharset);
-	    }
+	    CTRACE(tfp, "UC_Charset_Setup: Too many. Ignoring %s/%s.",
+			UC_MIMEcharset, UC_LYNXcharset);
 	    return;
 	}
 	s = UCNumCharsets;
@@ -2065,4 +2063,20 @@ PUBLIC void UCInit NOARGS
  *  To add synonyms for any charset name
  *  check function UCGetLYhndl_byMIME in this file.
  */
+}
+
+/*
+ *  Safe variant of UCGetLYhndl_byMIME, with blind recovery from typo
+ *  in user input: lynx.cfg, userdefs.h, switches from command line.
+ */
+PUBLIC int safeUCGetLYhndl_byMIME ARGS1 (CONST char *, value)
+{
+    int i = UCGetLYhndl_byMIME(value);
+
+    if (i == -1) {	/* was user's typo or not yet recognized value */
+	i = LATIN1;	/* error recovery? */
+	CTRACE(tfp, "safeUCGetLYhndl_byMIME: ISO-8859-1 assumed.\n");
+    }
+
+    return(i);
 }

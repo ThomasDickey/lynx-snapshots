@@ -5,9 +5,6 @@
 #ifndef HTAAPROT_H
 #define HTAAPROT_H
 
-#ifndef HTUTILS_H
-#include <HTUtils.h>
-#endif /* HTUTILS_H */
 #include <HTGroup.h>
 #include <HTAssoc.h>
 

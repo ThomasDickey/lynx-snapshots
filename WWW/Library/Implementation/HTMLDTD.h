@@ -12,9 +12,6 @@
 #ifndef HTMLDTD_H
 #define HTMLDTD_H
 
-#ifndef HTUTILS_H
-#include <HTUtils.h>
-#endif /* HTUTILS_H */
 #include <SGML.h>
 
 /*
@@ -956,7 +953,7 @@ extern CONST SGML_dtd HTML_dtd;
 extern void HTSwitchDTD PARAMS((
     BOOL new));
 
-extern CONST HTTag HTTag_unrecognized;
+extern HTTag HTTag_unrecognized;
 
 /*
 

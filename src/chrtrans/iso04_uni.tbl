@@ -2,7 +2,7 @@
 Miso-8859-4
 
 #Name as a Display Charset (used on Options screen)
-OISO Latin 4
+OLatin 4 (ISO-8859-4)
  
 #
 #	Name:             ISO 8859-4 (1988) to Unicode

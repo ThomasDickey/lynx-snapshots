@@ -26,7 +26,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTAlert.h>
 #include <HTML.h>
 #include <HTParse.h>
@@ -35,14 +34,11 @@
 #include <HTString.h>
 #include <HTFinger.h>
 
+#include <LYUtils.h>
 #include <LYLeaks.h>
-
-/* #define TRACE 1 */
 
 #define FINGER_PORT 79		/* See rfc742 */
 #define BIG 1024		/* Bug */
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 #define PUTC(c) (*targetClass.put_character)(target, c)
 #define PUTS(s) (*targetClass.put_string)(target, s)
@@ -129,13 +125,10 @@ PRIVATE int response ARGS5(
 
     /* Send the command.
     */
-    if (TRACE) 
-        fprintf(stderr, "HTFinger command to be sent: %s", command);
+    CTRACE(tfp, "HTFinger command to be sent: %s", command);
     status = NETWRITE(s, (char *)command, length);
     if (status < 0) {
-        if (TRACE)
-	    fprintf(stderr,
-                    "HTFinger: Unable to send command. Disconnecting.\n");
+	CTRACE(tfp, "HTFinger: Unable to send command. Disconnecting.\n");
         NETCLOSE(s);
         s = -1;
         return status;
@@ -148,8 +141,7 @@ PRIVATE int response ARGS5(
 
     /* Create the results report.
     */
-    if (TRACE)
-	fprintf(stderr,"HTFinger: Reading finger information\n");
+    CTRACE(tfp,"HTFinger: Reading finger information\n");
     START(HTML_HTML);
     PUTS("\n");
     START(HTML_HEAD);
@@ -190,11 +182,8 @@ PRIVATE int response ARGS5(
     while ((ch=NEXT_CHAR) != (char)EOF) {
 
 	if (interrupted_in_htgetcharacter) {
-	    if (TRACE) {
-	        fprintf(stderr,
-		  "HTFinger: Interrupted in HTGetCharacter, apparently.\n");
-	    }
-	    _HTProgress ("Connection interrupted.");
+	    CTRACE(tfp, "HTFinger: Interrupted in HTGetCharacter, apparently.\n");
+	    _HTProgress (gettext("Connection interrupted."));
 	    goto end_html;
         }
 
@@ -270,19 +259,17 @@ PUBLIC int HTLoadFinger ARGS4(
     int port;				/* Port number from URL */
     int status;				/* tcp return */
   
-    if (TRACE) {
-        fprintf(stderr, "HTFinger: Looking for %s\n", (arg ? arg : "NULL"));
-    }
+    CTRACE(tfp, "HTFinger: Looking for %s\n", (arg ? arg : "NULL"));
   
     if (!(arg && *arg)) {
-        HTAlert("Could not load data.");
+        HTAlert(gettext("Could not load data."));
 	return HT_NOT_LOADED;			/* Ignore if no name */
     }
   
     if (!initialized) 
         initialized = initialize();
     if (!initialized) {
-        HTAlert ("Could not set up finger connection.");
+        HTAlert (gettext("Could not set up finger connection."));
 	return HT_NOT_LOADED;	/* FAIL */
     }
     
@@ -305,7 +292,7 @@ PUBLIC int HTLoadFinger ARGS4(
 	HTUnEscape(slash);
 	if (IsGopherURL) {
 	    if (*slash != '0') {
-	        HTAlert("Could not load data.");
+	        HTAlert(gettext("Could not load data."));
 		return HT_NOT_LOADED;	/* FAIL */
 	    }
 	    *slash++ = '\0';
@@ -313,7 +300,7 @@ PUBLIC int HTLoadFinger ARGS4(
     }
     if ((at_sign = strchr(sitename, '@')) != NULL) {
         if (IsGopherURL) {
-            HTAlert("Could not load data.");
+            HTAlert(gettext("Could not load data."));
 	    return HT_NOT_LOADED;	/* FAIL */
 	}
         *at_sign++ = '\0';
@@ -327,7 +314,7 @@ PUBLIC int HTLoadFinger ARGS4(
     }
     
     if (*sitename == '\0') {
-        HTAlert("Could not load data (no sitename in finger URL)");
+        HTAlert(gettext("Could not load data (no sitename in finger URL)"));
 	return HT_NOT_LOADED;		/* Ignore if no name */
     }
 
@@ -335,7 +322,7 @@ PUBLIC int HTLoadFinger ARGS4(
         *colon++ = '\0';
 	port = atoi(colon);
 	if (port != 79) {
-	    HTAlert("Invalid port number - will only use port 79!");
+	    HTAlert(gettext("Invalid port number - will only use port 79!"));
 	    return HT_NOT_LOADED;	/* Ignore if wrong port */
 	}
     }
@@ -391,18 +378,14 @@ PUBLIC int HTLoadFinger ARGS4(
     /* Now, let's get a stream setup up from the FingerHost:
     ** CONNECTING to finger host
     */
-    if (TRACE)
-        fprintf(stderr, "HTFinger: doing HTDoConnect on '%s'\n", str);
+    CTRACE(tfp, "HTFinger: doing HTDoConnect on '%s'\n", str);
     status = HTDoConnect(str, "finger", FINGER_PORT, &s);
-    if (TRACE)
-        fprintf(stderr, "HTFinger: Done DoConnect; status %d\n", status);
+    CTRACE(tfp, "HTFinger: Done DoConnect; status %d\n", status);
 
     if (status == HT_INTERRUPTED) {
         /* Interrupt cleanly */
-	if (TRACE)
-	    fprintf(stderr,
-	    	  "HTFinger: Interrupted on connect; recovering cleanly.\n");
-	HTProgress ("Connection interrupted.");
+	CTRACE(tfp, "HTFinger: Interrupted on connect; recovering cleanly.\n");
+	HTProgress (gettext("Connection interrupted."));
 	FREE(str);
 	FREE(command);
 	return HT_NOT_LOADED;
@@ -410,21 +393,19 @@ PUBLIC int HTLoadFinger ARGS4(
     if (status < 0) {
         NETCLOSE(s);
 	s = -1;
-	if (TRACE) 
-	    fprintf(stderr, "HTFinger: Unable to connect to finger host.\n");
-        HTAlert("Could not access finger host.");
+	CTRACE(tfp, "HTFinger: Unable to connect to finger host.\n");
+        HTAlert(gettext("Could not access finger host."));
 	FREE(str);
 	FREE(command);
 	return HT_NOT_LOADED;	/* FAIL */
     }
-    if (TRACE)
-        fprintf(stderr, "HTFinger: Connected to finger host '%s'.\n", str);
+    CTRACE(tfp, "HTFinger: Connected to finger host '%s'.\n", str);
     FREE(str);
 
     /* Send the command, and process response if successful.
     */
     if (response(command, sitename, anAnchor, format_out, stream) != 0) {
-        HTAlert("No response from finger server.");
+        HTAlert(gettext("No response from finger server."));
 	FREE(command);
 	return HT_NOT_LOADED;
     }

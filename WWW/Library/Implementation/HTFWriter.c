@@ -16,9 +16,8 @@
 #include <HTAlert.h>
 #include <HTFile.h>
 
+#include <LYUtils.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*		Stream Object
 **		------------
@@ -153,8 +152,7 @@ PRIVATE void HTFWriter_abort ARGS2(HTStream *, me, HTError, e)
 {
     fclose(me->fp);
     if (me->end_command) {		/* Temp file */
-	if (TRACE) fprintf(stderr,
-		"HTFWriter: Aborting: file not executed.\n");
+	CTRACE(tfp, "HTFWriter: Aborting: file not executed.\n");
 	FREE(me->end_command);
 	if (me->remove_command) {
 	    system(me->remove_command);
@@ -240,7 +238,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     HTStream* me;
     
     if (HTClientHost) {
-        HTAlert("Can't save data to file -- please run WWW locally");
+        HTAlert(gettext("Can't save data to file -- please run WWW locally"));
 	return HTBlackHole();
     }
     
@@ -250,7 +248,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     
     /* Save the file under a suitably suffixed name */
     
-    suffix = HTFileSuffix(pres->rep);
+    suffix = HTFileSuffix(pres->rep, anchor->content_encoding);
 
     fnam = (char *)malloc (L_tmpnam + 16 + strlen(suffix));
     tmpnam (fnam);
@@ -258,7 +256,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     
     me->fp = fopen (fnam, "w");
     if (!me->fp) {
-	HTAlert("Can't open temporary file!");
+	HTAlert(gettext("Can't open temporary file!"));
         FREE(fnam);
 	FREE(me);
 	return NULL;
@@ -315,7 +313,7 @@ PUBLIC HTStream* HTSaveLocally ARGS3(
     HTStream* me;
     
     if (HTClientHost) {
-        HTAlert("Can't save data to file -- please run WWW locally");
+        HTAlert(gettext("Can't save data to file -- please run WWW locally"));
 	return HTBlackHole();
     }
     
@@ -328,20 +326,20 @@ PUBLIC HTStream* HTSaveLocally ARGS3(
     
     /* Save the file under a suitably suffixed name */
     
-    suffix = HTFileSuffix(pres->rep);
+    suffix = HTFileSuffix(pres->rep, anchor->content_encoding);
 
     fnam = (char *)malloc (L_tmpnam + 16 + strlen(suffix));
     tmpnam (fnam);
     if (suffix) strcat(fnam, suffix);
     
     /*	Save Panel */
-    answer = HTPrompt("Give name of file to save in", fnam);
+    answer = HTPrompt(gettext("Give name of file to save in", fnam));
     
     FREE(fnam);
     
     me->fp = fopen (answer, "w");
     if (!me->fp) {
-	HTAlert("Can't open local file to write into.");
+	HTAlert(gettext("Can't open local file to write into."));
         FREE(answer);
 	FREE(me);
 	return NULL;

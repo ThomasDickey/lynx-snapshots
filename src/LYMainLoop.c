@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTAccess.h>
 #include <HTParse.h>
 #include <HTList.h>
@@ -28,7 +27,6 @@
 #include <LYEdit.h>
 #include <LYShowInfo.h>
 #include <LYBookmark.h>
-#include <LYSystem.h>
 #include <LYKeymap.h>
 #include <LYJump.h>
 #include <LYDownload.h>
@@ -39,17 +37,14 @@
 #include <LYCharUtils.h>
 #include <LYCookie.h>
 #include <LYMainLoop.h>
-#ifdef DOSPATH
-#include <HTDOS.h>
-#endif
 
 #ifdef USE_EXTERNALS
 #include <LYExtern.h>
 #endif
 
-#ifdef VMS
-#include <HTVMSUtils.h>
-#endif /* VMS */
+#ifdef __EMX__
+#include <io.h>
+#endif
 
 #ifdef DIRED_SUPPORT
 #include <LYLocal.h>
@@ -84,11 +79,14 @@ PRIVATE int sametext ARGS2(
 }
 #endif /* FASTTAB */
 
-#define FREE(x) if (x) {free(x); x = NULL;}
-
 PUBLIC	HTList * Goto_URLs = NULL;  /* List of Goto URLs */
 
 PUBLIC char * LYRequestTitle = NULL; /* newdoc.title in calls to getfile() */
+
+#ifdef DISP_PARTIAL
+PUBLIC int Newline_partial = 0;     /* required for display_partial mode */
+PUBLIC int NumOfLines_partial = -1; /* required for display_partial mode */
+#endif
 
 PRIVATE document newdoc;
 PRIVATE document curdoc;
@@ -129,6 +127,45 @@ PRIVATE void free_mainloop_variables NOARGS
     return;
 }
 
+PUBLIC FILE *TraceFP NOARGS
+{
+    if (LYTraceLogFP != 0) {
+	return LYTraceLogFP;
+    }
+    return stderr;
+}
+
+PRIVATE void TracelogOpenFailed NOARGS
+{
+    WWW_TraceFlag = FALSE;
+    HTUserMsg(TRACELOG_OPEN_FAILED);
+}
+
+PUBLIC void LYCloseTracelog NOARGS
+{
+    if (LYTraceLogFP != 0) {
+	fflush(stdout);
+	fflush(stderr);
+	fclose(LYTraceLogFP);
+	LYTraceLogFP = 0;
+    }
+}
+
+PRIVATE BOOLEAN LYReopenTracelog ARGS1(BOOLEAN *, trace_flag_ptr)
+{
+    CTRACE(tfp, "\nTurning off TRACE for fetch of log.\n");
+    LYCloseTracelog();
+    if ((LYTraceLogFP = LYAppendToTxtFile(LYTraceLogPath)) == NULL) {
+	TracelogOpenFailed();
+	return FALSE;
+    }
+    if (TRACE) {
+	WWW_TraceFlag = FALSE;
+	*trace_flag_ptr = TRUE;
+    }
+    return TRUE;
+}
+
 /*
  *  Here's where we do all the work.
  *  mainloop is basically just a big switch dependent on the users input.
@@ -160,15 +197,22 @@ int mainloop NOARGS
     BOOLEAN rlink_allowed;
     BOOLEAN vi_keys_flag = vi_keys;
     BOOLEAN emacs_keys_flag = emacs_keys;
-    BOOLEAN keypad_mode_flag = keypad_mode;
-    BOOLEAN user_mode_flag = user_mode;
-    BOOLEAN HTfileSortMethod_flag = HTfileSortMethod;
-    int CurrentCharSet_flag = current_char_set;
-    BOOLEAN show_dotfiles_flag = show_dotfiles;
     BOOLEAN LYRawMode_flag = LYRawMode;
+#ifndef NO_OPTION_MENU
     BOOLEAN LYSelectPopups_flag = LYSelectPopups;
+    BOOLEAN verbose_img_flag = verbose_img;
+    BOOLEAN keypad_mode_flag = keypad_mode;
+    BOOLEAN show_dotfiles_flag = show_dotfiles;
+    BOOLEAN user_mode_flag = user_mode;
+    int CurrentAssumeCharSet_flag = UCLYhndl_for_unspec;
+    int CurrentCharSet_flag = current_char_set;
+    int HTfileSortMethod_flag = HTfileSortMethod;
+#endif
     BOOLEAN trace_mode_flag = FALSE;
     BOOLEAN forced_HTML_mode = LYforce_HTML_mode;
+#ifdef DISP_PARTIAL
+    BOOLEAN display_partial_flag = display_partial;
+#endif
     char cfile[128];
     FILE *cfp;
     char *cp, *toolbar;
@@ -227,7 +271,7 @@ int mainloop NOARGS
 initialize:
     StrAllocCopy(newdoc.address, startfile);
     StrAllocCopy(startrealm, startfile);
-    StrAllocCopy(newdoc.title, "Entry into main screen");
+    StrAllocCopy(newdoc.title, gettext("Entry into main screen"));
     newdoc.isHEAD = FALSE;
     newdoc.safe = FALSE;
     newdoc.internal_link = FALSE;
@@ -240,8 +284,7 @@ initialize:
 	refresh();
     }
 #endif /* USE_SLANG */
-    if (TRACE)
-	fprintf(stderr,"Entering mainloop, startfile=%s\n",startfile);
+    CTRACE(tfp,"Entering mainloop, startfile=%s\n",startfile);
 
     if (form_post_data) {
 	StrAllocCopy(newdoc.post_data, form_post_data);
@@ -253,13 +296,11 @@ initialize:
 
     if (bookmark_start) {
 	if (LYValidate) {
-	    _statusline(BOOKMARKS_DISABLED);
-	    sleep(AlertSecs);
+	    HTAlert(BOOKMARKS_DISABLED);
 	    bookmark_start = FALSE;
 	    goto initialize;
 	} else if (traversal) {
-	    _statusline(BOOKMARKS_NOT_TRAVERSED);
-	    sleep(AlertSecs);
+	    HTAlert(BOOKMARKS_NOT_TRAVERSED);
 	    traversal = FALSE;
 	    crawl = FALSE;
 	    bookmark_start = FALSE;
@@ -278,11 +319,9 @@ initialize:
 		FREE(newdoc.post_content_type);
 		newdoc.isHEAD = FALSE;
 		newdoc.safe = FALSE;
-		if (TRACE)
-		    fprintf(stderr, "Using bookmarks=%s\n", newdoc.address);
+		CTRACE(tfp, "Using bookmarks=%s\n", newdoc.address);
 	    } else {
-		_statusline(BOOKMARKS_NOT_OPEN);
-		sleep(MessageSecs);
+		HTUserMsg(BOOKMARKS_NOT_OPEN);
 		bookmark_start = FALSE;
 		goto initialize;
 	    }
@@ -330,7 +369,8 @@ try_again:
 		     *	elements to the curdoc structure elements
 		     *	under case NORMAL.  - FM
 		     */
-		    if (strncmp(newdoc.address, "LYNXDOWNLOAD:", 13)) {
+		    if (strncmp(newdoc.address, "LYNXDOWNLOAD:", 13))
+		    {
 			LYpush(&curdoc, ForcePush);
 		    }
 		} else if (!newdoc.address) {
@@ -432,25 +472,10 @@ try_again:
 		    WWWDoc.safe = newdoc.safe;
 		    tmpanchor = HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
 		    if ((HText *)HTAnchor_document(tmpanchor) == NULL) {
-			if (TRACE)
-			    fprintf(stderr,
-				    "\nTurning off TRACE for fetch of log.\n");
-			fflush(stdout);
-			fflush(stderr);
-			fclose(LYTraceLogFP);
-			*stderr = LYOrigStderr;
-			if ((LYTraceLogFP = LYAppendToTxtFile(LYTraceLogPath)) == NULL) {
-			    WWW_TraceFlag = FALSE;
-			    _statusline(TRACELOG_OPEN_FAILED);
-			    sleep(MessageSecs);
+			if (!LYReopenTracelog(&trace_mode_flag)) {
 			    old_c = 0;
 			    cmd = LYK_PREV_DOC;
 			    goto new_cmd;
-			}
-			*stderr = *LYTraceLogFP;
-			if (TRACE) {
-			    WWW_TraceFlag = FALSE;
-			    trace_mode_flag = TRUE;
 			}
 		    }
 		}
@@ -465,6 +490,29 @@ try_again:
 		     !strcmp(newdoc.address, homepage))) {
 		    LYPermitURL = TRUE;
 		}
+
+#ifdef DISP_PARTIAL
+		display_partial = display_partial_flag; /* restore */
+		Newline_partial = newdoc.line; /* initialize */
+		NumOfLines_partial = -1;       /* initialize to -1 */
+				/* -1 restrict HTDisplayPartial()   */
+				/* until HText_new() start new HTMainText */
+				/* and set the flag to 0  */
+		if (display_partial) {
+		    /*
+		     * Disable display_partial if requested URL has #fragment
+		     * and we are not popped from the history stack
+		     * so can't calculate correct newline position for fragment.
+		     * Otherwise user got the new document from the first page
+		     * and be moved to #fragment later after download
+		     * completed, but only if s/he did not mess screen up by
+		     * scrolling before...  So fall down to old behavior here.
+		     */
+		    if (!LYCursesON ||
+			       (Newline_partial == 1 && strchr(newdoc.address, '#')))
+			display_partial = FALSE;
+		}
+#endif /* DISP_PARTIAL */
 
 #ifndef DONT_TRACK_INTERNAL_LINKS
 		if (try_internal) {
@@ -530,7 +578,7 @@ try_again:
 		    if (trace_mode_flag == TRUE) {
 			WWW_TraceFlag = TRUE;
 			trace_mode_flag = FALSE;
-			fprintf(stderr, "Turning TRACE back on.\n\n");
+			fprintf(tfp, "Turning TRACE back on.\n\n");
 		    }
 		    if (error_logging &&
 			first_file && owner_address && !LYCancelledFetch) {
@@ -588,12 +636,18 @@ try_again:
 			    cleanup();
 #ifdef UNIX
 			if (dump_output_immediately)
-			    fprintf(stderr,"\nlynx: Can't access startfile %s\n",
+			    fprintf(stderr,gettext("\nlynx: Can't access startfile %s\n"),
 			       startfile);
 			else
 #endif /* UNIX */
-			    printf("\nlynx: Can't access startfile %s\n",
+			{
+
+			    SetOutputMode( O_TEXT );
+			    printf(gettext("\nlynx: Can't access startfile %s\n"),
 			       startfile);
+			    SetOutputMode( O_BINARY );
+			}
+
 			if (!dump_output_immediately) {
 #ifndef NOSIGHUP
 			    (void) signal(SIGHUP, SIG_DFL);
@@ -621,7 +675,7 @@ try_again:
 		    if (trace_mode_flag == TRUE) {
 			WWW_TraceFlag = TRUE;
 			trace_mode_flag = FALSE;
-			fprintf(stderr, "Turning TRACE back on.\n\n");
+			fprintf(tfp, "Turning TRACE back on.\n\n");
 		    }
 		    FREE(newdoc.address); /* to pop last doc */
 		    FREE(newdoc.bookmark);
@@ -685,14 +739,18 @@ try_again:
 #ifdef UNIX
 			   if (dump_output_immediately) {
 			       fprintf(stderr,
- "\nlynx: Start file could not be found or is not text/html or text/plain\n");
-			       fprintf(stderr,"      Exiting...\n");
+ gettext("\nlynx: Start file could not be found or is not text/html or text/plain\n"));
+			       fprintf(stderr,gettext("      Exiting...\n"));
 			   } else
 #endif /* UNIX */
 			   {
+			       SetOutputMode( O_TEXT );
+
 			       printf(
  "\nlynx: Start file could not be found or is not text/html or text/plain\n");
 			       printf("      Exiting...\n");
+
+			       SetOutputMode( O_BINARY );
 			   }
 			   if (!dump_output_immediately) {
 #ifndef NOSIGHUP
@@ -757,10 +815,9 @@ try_again:
 		       }
 		       cmd = LYK_PREV_DOC;
 		       goto new_cmd;
-		       }
+		    }
 		    override_LYresubmit_posts = TRUE;
 		    goto try_again;
-		    break;
 
 		case NORMAL:
 		    /*
@@ -771,7 +828,7 @@ try_again:
 		    if (trace_mode_flag == TRUE) {
 			WWW_TraceFlag = TRUE;
 			trace_mode_flag = FALSE;
-			fprintf(stderr, "Turning TRACE back on.\n\n");
+			fprintf(tfp, "Turning TRACE back on.\n\n");
 		    }
 		    *prev_target = '\0';    /* Reset for this document. - FM */
 
@@ -788,15 +845,7 @@ try_again:
 				  BOOKMARK_TITLE))) &&
 			(temp = HTParse(newdoc.address, "",
 				     PARSE_PATH+PARSE_PUNCTUATION)) != NULL) {
-#ifdef DOSPATH
-			cp = HTDOS_wwwName((char *)Home_Dir());
-#else
-#ifdef VMS
-			cp = HTVMS_wwwName((char *)Home_Dir());
-#else
-			cp = (char *)Home_Dir();
-#endif /* VMS */
-#endif /* DOSPATH */
+			cp = wwwName(Home_Dir());
 			len = strlen(cp);
 #ifdef VMS
 			if (!strncasecomp(temp, cp, len) &&
@@ -843,8 +892,7 @@ try_again:
 			    if (i <= MBM_V_MAXFILES) {
 				FREE(temp);
 				if (LYValidate) {
-				    _statusline(BOOKMARKS_DISABLED);
-				    sleep(AlertSecs);
+				    HTAlert(BOOKMARKS_DISABLED);
 				    return(-1);
 				}
 				if ((temp = HTParse(newdoc.address, "",
@@ -852,17 +900,8 @@ try_again:
 				    StrAllocCopy(newdoc.address, temp);
 				    HTuncache_current_document();
 				    FREE(curdoc.address);
-#ifdef DOSPATH
 				    StrAllocCat(newdoc.address,
-					    HTDOS_wwwName((char *)Home_Dir()));
-#else
-#ifdef VMS
-				    StrAllocCat(newdoc.address,
-					    HTVMS_wwwName((char *)Home_Dir()));
-#else
-				    StrAllocCat(newdoc.address, Home_Dir());
-#endif /* VMS */
-#endif /* DOSPATH */
+					    wwwName(Home_Dir()));
 				    StrAllocCat(newdoc.address, "/");
 				    StrAllocCat(newdoc.address,
 					(strncmp(BookmarkPage, "./", 2) ?
@@ -883,9 +922,7 @@ try_again:
 				    if (!strcmp(homepage, startfile))
 					StrAllocCopy(homepage, newdoc.address);
 				    StrAllocCopy(startfile, newdoc.address);
-				    if (TRACE)
-					fprintf(stderr,
-						"Reloading as bookmarks=%s\n",
+				    CTRACE(tfp, "Reloading as bookmarks=%s\n",
 						newdoc.address);
 				    goto try_again;
 				}
@@ -939,6 +976,22 @@ try_again:
 		     *	before, or it is 1 if this is a new file.
 		     */
 		    Newline = newdoc.line;
+#ifdef DISP_PARTIAL
+		    if (display_partial) {
+			/*
+			 *  Override newdoc.line with a new value if user
+			 *  scrolled the document while downloading.
+			 */
+			if (Newline_partial != newdoc.line
+			 && NumOfLines_partial > 0)
+			    Newline = Newline_partial;
+
+			/*
+			 *  End of incremental rendering stage here.
+			 */
+			display_partial = FALSE;
+		    }
+#endif /* DISP_PARTIAL */
 
 		    /*
 		     *	If we are going to a target line or
@@ -992,7 +1045,7 @@ try_again:
 	    } else if (!dump_output_immediately) {
 		StrAllocCopy(curdoc.title, newdoc.title);
 	    }
-	    owner_address = HText_getOwner();
+	    owner_address = (char *)HText_getOwner();
 	    curdoc.safe = HTLoadedDocumentIsSafe();
 	    if (!dump_output_immediately) {
 		LYAddVisitedLink(&curdoc);
@@ -1070,15 +1123,13 @@ try_again:
 	    temp = HTParse(curdoc.address, "",
 			   PARSE_ACCESS+PARSE_HOST+PARSE_PUNCTUATION);
 	    if (!temp || *temp == '\0') {
-		StrAllocCopy(startrealm, "None");
+		StrAllocCopy(startrealm, gettext("None"));
 	    } else {
 		StrAllocCopy(startrealm, temp);
 		FREE(temp);
 		if (!(temp = HTParse(curdoc.address, "",
 				     PARSE_PATH+PARSE_PUNCTUATION))) {
-		    if (startrealm[strlen(startrealm)-1] != '/') {
-			StrAllocCat(startrealm, "/");
-		    }
+		    LYAddHtmlSep(&startrealm);
 		} else {
 		    if (forced_HTML_mode &&
 			!dump_output_immediately &&
@@ -1111,9 +1162,7 @@ try_again:
 		}
 	    }
 	    FREE(temp);
-	    if (TRACE) {
-		fprintf(stderr, "Starting realm is '%s'\n\n", startrealm);
-	    }
+	    CTRACE(tfp, "Starting realm is '%s'\n\n", startrealm);
 	    if (traversal) {
 		/*
 		 *  Set up the crawl output stuff.
@@ -1128,26 +1177,21 @@ try_again:
 		 */
 		if (strncmp((curdoc.address ? curdoc.address : "NULL"),
 			    "http", 4)) {
-		    StrAllocCopy(traversal_host, "None");
+		    StrAllocCopy(traversal_host, gettext("None"));
 		} else if (check_realm) {
 		    StrAllocCopy(traversal_host, startrealm);
 		} else {
 		    temp = HTParse(curdoc.address, "",
 				   PARSE_ACCESS+PARSE_HOST+PARSE_PUNCTUATION);
 		    if (!temp || *temp == '\0') {
-			StrAllocCopy(traversal_host, "None");
+			StrAllocCopy(traversal_host, gettext("None"));
 		    } else {
 			StrAllocCopy(traversal_host, temp);
-			if (traversal_host[strlen(traversal_host)-1] != '/') {
-			    StrAllocCat(traversal_host, "/");
-			}
+			LYAddHtmlSep(&traversal_host);
 		    }
 		    FREE(temp);
 		}
-		if (TRACE) {
-		    fprintf(stderr,
-			    "Traversal host is '%s'\n\n", traversal_host);
-		}
+		CTRACE(tfp, "Traversal host is '%s'\n\n", traversal_host);
 	    }
 	    if (startfile) {
 		/*
@@ -1265,8 +1309,8 @@ try_again:
 	/*
 	 *  Report unread or new mail, if appropriate.
 	 */
-	if (check_mail && !no_mail && LYCheckMail())
-	    sleep(MessageSecs);
+	if (check_mail && !no_mail)
+	    LYCheckMail();
 
 	/*
 	 *  If help is not on the screen,
@@ -1303,7 +1347,7 @@ try_again:
 			 (links[curdoc.link].type & WWW_LINK_TYPE))) {
 #endif /* NORMAL_NON_FORM_LINK_STATUSLINES_FOR_ALL_USER_MODES */
 #endif /* INDICATE_FORMS_MODE_FOR_ALL_LINKS_ON_PAGE */
-		if (links[curdoc.link].type == WWW_FORM_LINK_TYPE)
+		if (links[curdoc.link].type == WWW_FORM_LINK_TYPE) {
 		    switch(links[curdoc.link].form->type) {
 		    case F_PASSWORD_TYPE:
 			if (links[curdoc.link].form->disabled == YES)
@@ -1335,8 +1379,7 @@ try_again:
 			} else if (links[curdoc.link].form->submit_method ==
 				 URL_MAIL_METHOD) {
 			    if (no_mail)
-				statusline(
-				       FORM_LINK_TEXT_SUBMIT_MAILTO_DIS_MSG);
+				statusline(FORM_LINK_TEXT_SUBMIT_MAILTO_DIS_MSG);
 			    else
 				statusline(FORM_LINK_TEXT_SUBMIT_MAILTO_MSG);
 			} else if (links[curdoc.link].form->no_cache) {
@@ -1376,14 +1419,15 @@ try_again:
 			    statusline(FORM_LINK_TEXT_MESSAGE);
 			break;
 		    }
-		else
+		} else {
 		    statusline(NORMAL_LINK_MESSAGE);
+		}
 
 		/*
 		 *  Let them know if it's an index -- very rare.
 		 */
 		if (is_www_index) {
-		    move(LYlines-1,LYcols-8);
+		    move(LYlines-1, LYcols-8);
 		    start_reverse();
 		    addstr("-index-");
 		    stop_reverse();
@@ -1400,17 +1444,18 @@ try_again:
 		}
 		if (!cp)
 		    cp = links[curdoc.link].lname;
-		if (more)
+		if (more) {
 		    if (is_www_index)
 			_user_message("-more- -index- %s",
 						 cp);
 		    else
 			_user_message("-more- %s",cp);
-		else
+		} else {
 		    if (is_www_index)
 			_user_message("-index- %s",cp);
 		    else
 			statusline(cp);
+		}
 	    } else if (is_www_index && more) {
 		char buf[128];
 
@@ -1464,11 +1509,11 @@ try_again:
 #ifdef UNIX
 		    if (dump_output_immediately)
 			fprintf(stderr,
-			"Fatal error - could not open output file %s\n",cfile);
+			gettext("Fatal error - could not open output file %s\n"),cfile);
 		    else
 #endif
 			printf(
-			"Fatal error - could not open output file %s\n",cfile);
+			gettext("Fatal error - could not open output file %s\n"),cfile);
 		    if (!dump_output_immediately) {
 #ifndef NOSIGHUP
 			(void) signal(SIGHUP, SIG_DFL);
@@ -1506,7 +1551,7 @@ try_again:
 		    addstr(FORM_NOVICELINE_TWO);
 		}
 		c = change_form_link(&links[curdoc.link],
-				     FORM_UP, &newdoc, &refresh_screen,
+				     &newdoc, &refresh_screen,
 				     links[curdoc.link].form->name,
 				     links[curdoc.link].form->value);
 
@@ -1659,8 +1704,8 @@ new_keyboard_input:
 	cmd = keymap[c+1];  /* add 1 to map EOF to 0 */
 
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
-	if (lynx_edit_mode && override[c+1] && !no_dired_support)
-	  cmd = override[c+1];
+	if (lynx_edit_mode && key_override[c+1] && !no_dired_support)
+	  cmd = key_override[c+1];
 #endif /* DIRED_SUPPORT && OK_OVERRIDE */
 
 	real_cmd = cmd;
@@ -1776,8 +1821,7 @@ new_cmd:  /*
 				    StrAllocCopy(newdoc.address, curdoc.address);
 				    StrAllocCopy(newdoc.title, curdoc.title);
 				    newdoc.internal_link = curdoc.internal_link;
-				    _statusline(CANCELLED);
-				    sleep(InfoSecs);
+				    HTInfoMsg(CANCELLED);
 				    if (nlinks > 0)
 					HText_pageDisplay(curdoc.line, prev_target);
 				    break;
@@ -1795,8 +1839,7 @@ new_cmd:  /*
 				    FREE(newdoc.post_data);
 				    FREE(newdoc.post_content_type);
 				    newdoc.internal_link = FALSE;
-				    _statusline(DISCARDING_POST_DATA);
-				    sleep(AlertSecs);
+				    HTAlert(DISCARDING_POST_DATA);
 				}
 			    }
 			}
@@ -1855,8 +1898,7 @@ new_cmd:  /*
 			    StrAllocCopy(temp, user_input_buffer);
 			    sprintf(user_input_buffer,
 				    LINK_ALREADY_CURRENT, number);
-			    _statusline(user_input_buffer);
-			    sleep(MessageSecs);
+			    HTUserMsg(user_input_buffer);
 			    strcpy(user_input_buffer, temp);
 			    FREE(temp);
 			} else {
@@ -1888,26 +1930,23 @@ new_cmd:  /*
 		     *	users (like me 8-). - FM
 		     */
 		    if (Newline <= 1) {
-			_statusline(ALREADY_AT_BEGIN);
+			HTInfoMsg(ALREADY_AT_BEGIN);
 		    } else if (!more) {
-			_statusline(ALREADY_AT_END);
+			HTInfoMsg(ALREADY_AT_END);
 		    } else {
 			StrAllocCopy(temp, user_input_buffer);
 			sprintf(user_input_buffer,
 				ALREADY_AT_PAGE, number);
-			_statusline(user_input_buffer);
-			sleep(MessageSecs);
+			HTUserMsg(user_input_buffer);
 			strcpy(user_input_buffer, temp);
 			FREE(temp);
 		    }
-		    sleep(MessageSecs);
 		}
 		break;
 
 	    case PRINT_ERROR:
 		old_c = real_c;
-		_statusline(BAD_LINK_NUM_ENTERED);
-		sleep(MessageSecs);
+		HTUserMsg(BAD_LINK_NUM_ENTERED);
 		break;
 	    }
 	    break;
@@ -1922,8 +1961,7 @@ new_cmd:  /*
 		 curdoc.safe != TRUE) &&
 		confirm_post_resub(curdoc.address, curdoc.title,
 				   1, 1) == FALSE) {
-		_statusline(CANCELLED);
-		sleep(InfoSecs);
+		HTInfoMsg(CANCELLED);
 		break;
 	    }
 
@@ -1947,8 +1985,7 @@ new_cmd:  /*
 	    if ((curdoc.post_data != NULL &&
 		 curdoc.safe != TRUE) &&
 		HTConfirm(CONFIRM_POST_RESUBMISSION) == FALSE) {
-		_statusline(CANCELLED);
-		sleep(InfoSecs);
+		HTInfoMsg(CANCELLED);
 		break;
 	    }
 
@@ -1979,13 +2016,10 @@ new_cmd:  /*
 		 *  page, lynx_mode won't have this setting and we won't
 		 *  know that this warning should be issued. - FM
 		 */
-		_statusline(RELOADING_FORM);
-		sleep(AlertSecs);
+		HTAlert(RELOADING_FORM);
 	    }
-	    newdoc.line = ((curdoc.line > 0) ?
-				 curdoc.line : 1);
-	    newdoc.link = ((curdoc.link > -1) ?
-				  curdoc.link : 0);
+	    newdoc.line = curdoc.line;
+	    newdoc.link = curdoc.link;
 #endif /* NO_ASSUME_SAME_DOC */
 	    FREE(curdoc.address); /* so it doesn't get pushed */
 #ifdef VMS
@@ -2003,7 +2037,7 @@ new_cmd:  /*
 		reloading = TRUE;
 	    break;
 
-	case LYK_HISTORICAL:
+	case LYK_HISTORICAL:	/* toggle 'historical' comments parsing */
 	    /*
 	     *	Check if this is a reply from a POST, and if so,
 	     *	seek confirmation of reload if the safe element
@@ -2013,28 +2047,28 @@ new_cmd:  /*
 		 curdoc.safe != TRUE) &&
 		confirm_post_resub(curdoc.address, NULL,
 				   0, 0) == FALSE) {
-		_statusline(WILL_NOT_RELOAD_DOC);
-		sleep(InfoSecs);
+		HTInfoMsg(WILL_NOT_RELOAD_DOC);
 	    } else {
 		HTuncache_current_document();
 		StrAllocCopy(newdoc.address, curdoc.address);
 		FREE(curdoc.address);
+		newdoc.line = curdoc.line;
+		newdoc.link = curdoc.link;
 	    }
 	    if (historical_comments)
 		historical_comments = FALSE;
 	    else
 		historical_comments = TRUE;
 	    if (minimal_comments) {
-		_statusline(historical_comments ?
-		      HISTORICAL_ON_MINIMAL_OFF : HISTORICAL_OFF_MINIMAL_ON);
+		HTAlert(historical_comments ?
+		        HISTORICAL_ON_MINIMAL_OFF : HISTORICAL_OFF_MINIMAL_ON);
 	    } else {
-		_statusline(historical_comments ?
+		HTAlert(historical_comments ?
 			HISTORICAL_ON_VALID_OFF : HISTORICAL_OFF_VALID_ON);
 	    }
-	    sleep(AlertSecs);
 	    break;
 
-	case LYK_MINIMAL:
+	case LYK_MINIMAL:	/* toggle 'minimal' comments parsing */
 	    if (!historical_comments) {
 		/*
 		 *  Check if this is a reply from a POST, and if so,
@@ -2045,12 +2079,13 @@ new_cmd:  /*
 		     curdoc.safe != TRUE) &&
 		    confirm_post_resub(curdoc.address, NULL,
 				       0, 0) == FALSE) {
-		    _statusline(WILL_NOT_RELOAD_DOC);
-		    sleep(InfoSecs);
+		    HTInfoMsg(WILL_NOT_RELOAD_DOC);
 		} else {
 		    HTuncache_current_document();
 		    StrAllocCopy(newdoc.address, curdoc.address);
 		    FREE(curdoc.address);
+		    newdoc.line = curdoc.line;
+		    newdoc.link = curdoc.link;
 		}
 	    }
 	    if (minimal_comments)
@@ -2058,13 +2093,12 @@ new_cmd:  /*
 	    else
 		minimal_comments = TRUE;
 	    if (!historical_comments) {
-		_statusline(minimal_comments ?
+		HTAlert(minimal_comments ?
 			MINIMAL_ON_IN_EFFECT : MINIMAL_OFF_VALID_ON);
 	    } else {
-		_statusline(minimal_comments ?
-		   MINIMAL_ON_BUT_HISTORICAL : MINIMAL_OFF_HISTORICAL_ON);
+		HTAlert(minimal_comments ?
+		        MINIMAL_ON_BUT_HISTORICAL : MINIMAL_OFF_HISTORICAL_ON);
 	    }
-	    sleep(AlertSecs);
 	    break;
 
 	case LYK_SOFT_DQUOTES:
@@ -2077,20 +2111,20 @@ new_cmd:  /*
 		 curdoc.safe != TRUE) &&
 		confirm_post_resub(curdoc.address, NULL,
 				   1, 1) == FALSE) {
-		_statusline(WILL_NOT_RELOAD_DOC);
-		sleep(InfoSecs);
+		HTInfoMsg(WILL_NOT_RELOAD_DOC);
 	    } else {
 		HTuncache_current_document();
 		StrAllocCopy(newdoc.address, curdoc.address);
 		FREE(curdoc.address);
+		newdoc.line = curdoc.line;
+		newdoc.link = curdoc.link;
 	    }
 	    if (soft_dquotes)
 		soft_dquotes = FALSE;
 	    else
 		soft_dquotes = TRUE;
-	    _statusline(soft_dquotes ?
-		SOFT_DOUBLE_QUOTE_ON : SOFT_DOUBLE_QUOTE_OFF);
-	    sleep(MessageSecs);
+	    HTUserMsg(soft_dquotes ?
+		      SOFT_DOUBLE_QUOTE_ON : SOFT_DOUBLE_QUOTE_OFF);
 	    break;
 
 	case LYK_SWITCH_DTD:
@@ -2103,8 +2137,7 @@ new_cmd:  /*
 		 curdoc.safe != TRUE) &&
 		confirm_post_resub(curdoc.address, NULL,
 				   1, 1) == FALSE) {
-		_statusline(WILL_NOT_RELOAD_DOC);
-		sleep(InfoSecs);
+		HTInfoMsg(WILL_NOT_RELOAD_DOC);
 	    } else {
 		/*
 		 *  If currently viewing preparsed source, switching
@@ -2119,19 +2152,18 @@ new_cmd:  /*
 		FREE(curdoc.address);
 	    }
 #ifdef NO_ASSUME_SAME_DOC
-	    newdoc.line=1;
-	    newdoc.link=0;
+	    newdoc.line = 1;
+	    newdoc.link = 0;
 #else
-	    newdoc.line = ((curdoc.line > 0) ? curdoc.line : 1);
-	    newdoc.link = ((curdoc.link > -1) ? curdoc.link : 0);
+	    newdoc.line = curdoc.line;
+	    newdoc.link = curdoc.link;
 #endif /* NO_ASSUME_SAME_DOC */
 	    if (New_DTD)
 		New_DTD = NO;
 	    else
 		New_DTD = YES;
 	    HTSwitchDTD(New_DTD);
-	    _statusline(New_DTD ? USING_DTD_1 : USING_DTD_0);
-	    sleep(MessageSecs);
+	    HTUserMsg(New_DTD ? USING_DTD_1 : USING_DTD_0);
 	    break;
 
 #ifdef NOT_DONE_YET
@@ -2152,20 +2184,17 @@ new_cmd:  /*
 		    c != 7) {
 		    return(0);
 		} else {
-		    statusline(NO_CANCEL);
-		    sleep(InfoSecs);
+		    HTInfoMsg(NO_CANCEL);
 		}
 	    } else if (TOUPPER(c) == 'Y') {
 		return(0);
 	    } else {
-		statusline(NO_CANCEL);
-		sleep(InfoSecs);
+		HTInfoMsg(NO_CANCEL);
 	    }
 	    break;
 
 	case LYK_ABORT: 	/* don't ask the user about quitting */
 	    return(0);
-	    break;
 
 	case LYK_NEXT_PAGE:	/* next page */
 	    if (more) {
@@ -2175,8 +2204,7 @@ new_cmd:  /*
 		curdoc.link = nlinks-1;  /* put on last link */
 	    } else if (old_c != real_c) {
 		   old_c = real_c;
-		   _statusline(ALREADY_AT_END);
-		   sleep(MessageSecs);
+		   HTInfoMsg(ALREADY_AT_END);
 	    }
 	    break;
 
@@ -2188,8 +2216,7 @@ new_cmd:  /*
 		curdoc.link = 0;  /* put on first link */
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		_statusline(ALREADY_AT_BEGIN);
-		sleep(MessageSecs);
+		HTInfoMsg(ALREADY_AT_BEGIN);
 	    }
 	    break;
 
@@ -2208,8 +2235,7 @@ new_cmd:  /*
 		}
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		_statusline(ALREADY_AT_BEGIN);
-		sleep(MessageSecs);
+		HTInfoMsg(ALREADY_AT_BEGIN);
 	    }
 	    break;
 
@@ -2224,8 +2250,7 @@ new_cmd:  /*
 		}
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		_statusline(ALREADY_AT_END);
-		sleep(MessageSecs);
+		HTInfoMsg(ALREADY_AT_END);
 	    }
 	    break;
 
@@ -2247,8 +2272,7 @@ new_cmd:  /*
 		}
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		_statusline(ALREADY_AT_BEGIN);
-		sleep(MessageSecs);
+		HTInfoMsg(ALREADY_AT_BEGIN);
 	    }
 	    break;
 
@@ -2263,8 +2287,7 @@ new_cmd:  /*
 		}
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		_statusline(ALREADY_AT_END);
-		sleep(MessageSecs);
+		HTInfoMsg(ALREADY_AT_END);
 	    }
 	    break;
 
@@ -2284,7 +2307,7 @@ new_cmd:  /*
 
 	case LYK_END:
 	    if (more) {
-	       Newline = MAXINT; /* go to end of file */
+	       Newline = lines_in_file - display_lines + 3;  /* go to end of file */
 	       arrowup = TRUE;	 /* position on last link */
 	    } else {
 		cmd = LYK_NEXT_PAGE;
@@ -2330,8 +2353,7 @@ new_cmd:  /*
 
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		_statusline(ALREADY_AT_BEGIN);
-		sleep(MessageSecs);
+		HTInfoMsg(ALREADY_AT_BEGIN);
 	    }
 	    break;
 
@@ -2373,8 +2395,7 @@ new_cmd:  /*
 
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		_statusline(ALREADY_AT_END);
-		sleep(MessageSecs);
+		HTInfoMsg(ALREADY_AT_END);
 	    }
 	    break;
 
@@ -2403,8 +2424,7 @@ new_cmd:  /*
 #else
 		} else if (old_c != real_c) {
 		    old_c = real_c;
-		    _statusline(NO_LINKS_ABOVE);
-		    sleep(MessageSecs);
+		    HTUserMsg(NO_LINKS_ABOVE);
 #endif /* NOTDEFINED */
 		}
 
@@ -2434,8 +2454,7 @@ new_cmd:  /*
 
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		_statusline(ALREADY_AT_BEGIN);
-		sleep(MessageSecs);
+		HTInfoMsg(ALREADY_AT_BEGIN);
 	    }
 	    break;
 
@@ -2461,8 +2480,7 @@ new_cmd:  /*
 			Newline += (display_lines);
 		} else if (old_c != real_c) {
 		    old_c = real_c;
-		    _statusline(NO_LINKS_BELOW);
-		    sleep(MessageSecs);
+		    HTUserMsg(NO_LINKS_BELOW);
 		    break;
 		}
 #ifdef NOTDEFINED
@@ -2479,8 +2497,7 @@ new_cmd:  /*
 
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		_statusline(ALREADY_AT_END);
-		sleep(MessageSecs);
+		HTInfoMsg(ALREADY_AT_END);
 	    }
 	    break;
 
@@ -2630,14 +2647,12 @@ new_cmd:  /*
 			    goto new_cmd;
 			}
 			if (nhist == 1) {
-			    _statusline(CANCELLED);
-			    sleep(InfoSecs);
+			    HTInfoMsg(CANCELLED);
 			    old_c = 0;
 			    cmd = LYK_DO_NOTHING;
 			    goto new_cmd;
 			} else {
-			    _user_message(WWW_SKIP_MESSAGE, WWWDoc.address);
-			    sleep(MessageSecs);
+			    HTUserMsg2(WWW_SKIP_MESSAGE, WWWDoc.address);
 			    do {
 				LYpop(&curdoc);
 			    } while (nhist > 1 && !are_different(
@@ -2675,8 +2690,7 @@ new_cmd:  /*
 
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		_statusline(ALREADY_AT_FIRST);
-		sleep(MessageSecs);
+		HTUserMsg(ALREADY_AT_FIRST);
 	    }
 	    break;
 
@@ -2688,8 +2702,7 @@ new_cmd:  /*
 		    if (old_c == real_c)
 			break;
 		    old_c = real_c;
-		    _statusline(NOT_ON_SUBMIT_OR_LINK);
-		    sleep(MessageSecs);
+		    HTUserMsg(NOT_ON_SUBMIT_OR_LINK);
 		    break;
 		} else {
 		    LYforce_no_cache = TRUE;
@@ -2728,8 +2741,7 @@ new_cmd:  /*
 			if (!links[curdoc.link].form->submit_action ||
 			    *links[curdoc.link].form->submit_action
 								== '\0') {
-			    _statusline(NO_FORM_ACTION);
-			    sleep(MessageSecs);
+			    HTUserMsg(NO_FORM_ACTION);
 			    HTOutputFormat = WWW_PRESENT;
 			    LYforce_no_cache = FALSE;
 			    reloading = FALSE;
@@ -2808,11 +2820,8 @@ new_cmd:  /*
 				    links[curdoc.link].form->submit_action,
 					  "lynxprog:", 9)) {
 			    HTAlert(SPECIAL_ACTION_DISALLOWED);
-			    if (TRACE) {
-				fprintf(stderr,
-					"LYMainLoop: Rejected '%s'\n",
+			    CTRACE(tfp, "LYMainLoop: Rejected '%s'\n",
 					links[curdoc.link].form->submit_action);
-			    }
 			    HTOutputFormat = WWW_PRESENT;
 			    LYforce_no_cache = FALSE;
 			    reloading = FALSE;
@@ -2828,7 +2837,7 @@ new_cmd:  /*
 				     links[curdoc.link].form->submit_enctype,
 					"multipart/form-data")) {
 				HTAlert(
-	"Enctype multipart/form-data not yet supported!  Cannot submit.");
+	gettext("Enctype multipart/form-data not yet supported!  Cannot submit."));
 				HTOutputFormat = WWW_PRESENT;
 				LYforce_no_cache = FALSE;
 				reloading = FALSE;
@@ -2847,7 +2856,7 @@ new_cmd:  /*
 				     links[curdoc.link].hightext);
 		    }
 		    c = change_form_link(&links[curdoc.link],
-					 FORM_UP, &newdoc, &refresh_screen,
+					 &newdoc, &refresh_screen,
 					 links[curdoc.link].form->name,
 					 links[curdoc.link].form->value);
 		    if (HTOutputFormat == HTAtom_for("www/download") &&
@@ -2855,8 +2864,7 @@ new_cmd:  /*
 			newdoc.safe == FALSE) {
 			if ((HText_POSTReplyLoaded(&newdoc) == TRUE) &&
 			    HTConfirm(CONFIRM_POST_RESUBMISSION) == FALSE) {
-			    _statusline(CANCELLED);
-			    sleep(InfoSecs);
+			    HTInfoMsg(CANCELLED);
 			    HTOutputFormat = WWW_PRESENT;
 			    LYforce_no_cache = FALSE;
 			    StrAllocCopy(newdoc.address, curdoc.address);
@@ -3012,8 +3020,7 @@ new_cmd:  /*
 					StrAllocCopy(newdoc.address, curdoc.address);
 					StrAllocCopy(newdoc.title, curdoc.title);
 					newdoc.internal_link = curdoc.internal_link;
-					_statusline(CANCELLED);
-					sleep(InfoSecs);
+					HTInfoMsg(CANCELLED);
 					break;
 				    } else if (LYresubmit_posts &&
 					       cmd != LYK_NOCACHE) {
@@ -3031,8 +3038,7 @@ new_cmd:  /*
 					FREE(newdoc.post_data);
 					FREE(newdoc.post_content_type);
 					newdoc.internal_link = FALSE;
-					_statusline(DISCARDING_POST_DATA);
-					sleep(AlertSecs);
+					HTAlert(DISCARDING_POST_DATA);
 				    }
 				}
 			    }
@@ -3109,8 +3115,7 @@ new_cmd:  /*
 		 */
 		if (old_c != real_c) {
 		    old_c = real_c;
-		    _statusline(GOTO_DISALLOWED);
-		    sleep(MessageSecs);
+		    HTUserMsg(GOTO_DISALLOWED);
 		}
 		break;
 	    }
@@ -3125,8 +3130,7 @@ new_cmd:  /*
 		 */
 		if (old_c != real_c) {
 		    old_c = real_c;
-		    _statusline(NOT_ON_SUBMIT_OR_LINK);
-		    sleep(MessageSecs);
+		    HTUserMsg(NOT_ON_SUBMIT_OR_LINK);
 		}
 		break;
 	    }
@@ -3138,8 +3142,7 @@ new_cmd:  /*
 		 */
 		if (old_c != real_c) {
 		    old_c = real_c;
-		    _statusline(NO_FORM_ACTION);
-		    sleep(MessageSecs);
+		    HTUserMsg(NO_FORM_ACTION);
 		}
 		break;
 	    }
@@ -3160,8 +3163,7 @@ new_cmd:  /*
 		 */
 		if (old_c != real_c) {
 		    old_c = real_c;
-		    _statusline(EDIT_FM_MENU_URLS_DISALLOWED);
-		    sleep(MessageSecs);
+		    HTUserMsg(EDIT_FM_MENU_URLS_DISALLOWED);
 		}
 		break;
 	    }
@@ -3202,7 +3204,7 @@ new_cmd:  /*
 		    HTUnEscapeSome(user_input_buffer, " \r\n\t");
 		    convert_to_spaces(user_input_buffer, TRUE);
 		} else {
-		    collapse_spaces(user_input_buffer);
+		    LYRemoveBlanks(user_input_buffer);
 		}
 		if (user_input_buffer[0] != '\0') {
 		    goto check_goto_URL;
@@ -3212,8 +3214,7 @@ new_cmd:  /*
 	     *	User cancelled via ^G, a full deletion,
 	     *	or not modifying the URL. - FM
 	     */
-	    _statusline(CANCELLED);
-	    sleep(InfoSecs);
+	    HTInfoMsg(CANCELLED);
 	    strcpy(user_input_buffer, temp);
 	    FREE(temp);
 	    break;
@@ -3225,8 +3226,7 @@ new_cmd:  /*
 		 */
 		if (old_c != real_c) {
 		    old_c = real_c;
-		    _statusline(GOTO_DISALLOWED);
-		    sleep(MessageSecs);
+		    HTUserMsg(GOTO_DISALLOWED);
 		}
 		break;
 	    }
@@ -3245,8 +3245,7 @@ new_cmd:  /*
 		 */
 		if (old_c != real_c) {
 		    old_c = real_c;
-		    _statusline(EDIT_FM_MENU_URLS_DISALLOWED);
-		    sleep(MessageSecs);
+		    HTUserMsg(EDIT_FM_MENU_URLS_DISALLOWED);
 		}
 		break;
 	    }
@@ -3289,7 +3288,7 @@ new_cmd:  /*
 		    HTUnEscapeSome(user_input_buffer, " \r\n\t");
 		    convert_to_spaces(user_input_buffer, TRUE);
 		} else {
-		    collapse_spaces(user_input_buffer);
+		    LYRemoveBlanks(user_input_buffer);
 		}
 		if (user_input_buffer[0] != '\0') {
 		    goto check_goto_URL;
@@ -3299,8 +3298,7 @@ new_cmd:  /*
 	     *	User cancelled via ^G, a full deletion,
 	     *	or not modifying the URL. - FM
 	     */
-	    _statusline(CANCELLED);
-	    sleep(InfoSecs);
+	    HTInfoMsg(CANCELLED);
 	    strcpy(user_input_buffer, temp);
 	    FREE(temp);
 	    break;
@@ -3309,8 +3307,7 @@ new_cmd:  /*
 	    if (no_goto && !LYValidate) {
 		if (old_c != real_c) {
 		    old_c = real_c;
-		    _statusline(GOTO_DISALLOWED);
-		    sleep(MessageSecs);
+		    HTUserMsg(GOTO_DISALLOWED);
 		}
 		break;
 	    }
@@ -3342,8 +3339,7 @@ new_cmd:  /*
 		 */
 		strcpy(user_input_buffer, temp);
 		FREE(temp);
-		_statusline(CANCELLED);
-		sleep(InfoSecs);
+		HTInfoMsg(CANCELLED);
 		break;
 	    }
 
@@ -3364,14 +3360,13 @@ check_recall:
 		HTUnEscapeSome(user_input_buffer, " \r\n\t");
 		convert_to_spaces(user_input_buffer, TRUE);
 	    } else {
-		collapse_spaces(user_input_buffer);
+		LYRemoveBlanks(user_input_buffer);
 	    }
 	    if (*user_input_buffer == '\0' &&
 		!(recall && (ch == UPARROW || ch == DNARROW))) {
 		strcpy(user_input_buffer, temp);
 		FREE(temp);
-		_statusline(CANCELLED);
-		sleep(InfoSecs);
+		HTInfoMsg(CANCELLED);
 		break;
 	    }
 	    if (recall && ch == UPARROW) {
@@ -3413,8 +3408,7 @@ check_recall:
 			 */
 			strcpy(user_input_buffer, temp);
 			FREE(temp);
-			_statusline(CANCELLED);
-			sleep(InfoSecs);
+			HTInfoMsg(CANCELLED);
 			break;
 		    }
 		    goto check_recall;
@@ -3458,8 +3452,7 @@ check_recall:
 			 */
 			strcpy(user_input_buffer, temp);
 			FREE(temp);
-			_statusline(CANCELLED);
-			sleep(InfoSecs);
+			HTInfoMsg(CANCELLED);
 			break;
 		    }
 		    goto check_recall;
@@ -3478,8 +3471,7 @@ check_goto_URL:
 	    FREE(temp);
 	    if ((no_file_url || no_goto_file) &&
 		!strncmp(user_input_buffer,"file:",5)) {
-		_statusline(GOTO_FILE_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_FILE_DISALLOWED);
 
 	    } else if ((no_shell || no_goto_lynxexec
 #ifdef EXEC_LINKS
@@ -3487,8 +3479,7 @@ check_goto_URL:
 #endif /* EXEC_LINKS */
 			) &&
 		       !strncmp(user_input_buffer, "lynxexec:",9)) {
-		_statusline(GOTO_EXEC_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_EXEC_DISALLOWED);
 
 	    } else if ((no_shell || no_goto_lynxprog
 #ifdef EXEC_LINKS
@@ -3496,96 +3487,79 @@ check_goto_URL:
 #endif /* EXEC_LINKS */
 			) &&
 		       !strncmp(user_input_buffer, "lynxprog:",9)) {
-		_statusline(GOTO_PROG_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_PROG_DISALLOWED);
 
 	    } else if ((no_shell || no_goto_lynxcgi) &&
 		       !strncmp(user_input_buffer, "lynxcgi:", 8)) {
-		_statusline(GOTO_CGI_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_CGI_DISALLOWED);
 
 	    } else if (LYValidate &&
 		       strncmp(user_input_buffer, "http:", 5) &&
 		       strncmp(user_input_buffer, "https:", 6)) {
-		_statusline(GOTO_NON_HTTP_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_NON_HTTP_DISALLOWED);
 
 	    } else if (no_goto_cso &&
 		       !strncmp(user_input_buffer, "cso:", 4)) {
-		_statusline(GOTO_CSO_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_CSO_DISALLOWED);
 
 	    } else if (no_goto_finger &&
 		       !strncmp(user_input_buffer, "finger:", 7)) {
-		_statusline(GOTO_FINGER_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_FINGER_DISALLOWED);
 
 	    } else if (no_goto_ftp &&
 		       !strncmp(user_input_buffer, "ftp:", 4)) {
-		_statusline(GOTO_FTP_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_FTP_DISALLOWED);
 
-	     } else if (no_goto_gopher &&
+	    } else if (no_goto_gopher &&
 		       !strncmp(user_input_buffer, "gopher:", 7)) {
-		_statusline(GOTO_GOPHER_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_GOPHER_DISALLOWED);
 
 	    } else if (no_goto_http &&
 		       !strncmp(user_input_buffer, "http:", 5)) {
-		_statusline(GOTO_HTTP_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_HTTP_DISALLOWED);
 
 	    } else if (no_goto_https &&
 		       !strncmp(user_input_buffer, "https:", 6)) {
-		_statusline(GOTO_HTTPS_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_HTTPS_DISALLOWED);
 
 	    } else if (no_goto_mailto &&
 		       !strncmp(user_input_buffer, "mailto:", 7)) {
-		_statusline(GOTO_MAILTO_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_MAILTO_DISALLOWED);
 
 	    } else if (no_goto_news &&
 		       !strncmp(user_input_buffer, "news:", 5)) {
-		_statusline(GOTO_NEWS_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_NEWS_DISALLOWED);
 
 	    } else if (no_goto_nntp &&
 		       !strncmp(user_input_buffer, "nntp:", 5)) {
-		_statusline(GOTO_NNTP_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_NNTP_DISALLOWED);
 
 	    } else if (no_goto_rlogin &&
 		       !strncmp(user_input_buffer, "rlogin:", 7)) {
-		_statusline(GOTO_RLOGIN_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_RLOGIN_DISALLOWED);
 
 	    } else if (no_goto_snews &&
 		       !strncmp(user_input_buffer, "snews:", 6)) {
-		_statusline(GOTO_SNEWS_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_SNEWS_DISALLOWED);
 
 	    } else if (no_goto_telnet &&
 		       !strncmp(user_input_buffer, "telnet:", 7)) {
-		_statusline(GOTO_TELNET_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_TELNET_DISALLOWED);
 
 	    } else if (no_goto_tn3270 &&
 		       !strncmp(user_input_buffer, "tn3270:", 7)) {
-		_statusline(GOTO_TN3270_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_TN3270_DISALLOWED);
 
 	    } else if (no_goto_wais &&
 		       !strncmp(user_input_buffer, "wais:", 5)) {
-		_statusline(GOTO_WAIS_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_WAIS_DISALLOWED);
 
 	    } else if (!strncmp(user_input_buffer, "LYNXCOOKIE:", 11) ||
 		       !strncmp(user_input_buffer, "LYNXDIRED:", 10) ||
 		       !strncmp(user_input_buffer, "LYNXDOWNLOAD:", 13) ||
+		       !strncmp(user_input_buffer, "LYNXOPTIONS:", 12) ||
 		       !strncmp(user_input_buffer, "LYNXPRINT:", 10)) {
-		_statusline(GOTO_SPECIAL_DISALLOWED);
-		sleep(MessageSecs);
+		HTUserMsg(GOTO_SPECIAL_DISALLOWED);
 
 	   } else {
 		StrAllocCopy(newdoc.address, user_input_buffer);
@@ -3598,7 +3572,7 @@ check_goto_URL:
 		    /*
 		     *	Make a name for this new URL.
 		     */
-		    StrAllocCopy(newdoc.title, "A URL specified by the user");
+		    StrAllocCopy(newdoc.title, gettext("A URL specified by the user"));
 		    FREE(newdoc.post_data);
 		    FREE(newdoc.post_content_type);
 		    FREE(newdoc.bookmark);
@@ -3624,7 +3598,7 @@ check_goto_URL:
 		/*
 		 *  Make a name for this help file.
 		 */
-		StrAllocCopy(newdoc.title, "Help Screen");
+		StrAllocCopy(newdoc.title, gettext("Help Screen"));
 		FREE(newdoc.post_data);
 		FREE(newdoc.post_content_type);
 		FREE(newdoc.bookmark);
@@ -3643,13 +3617,12 @@ check_goto_URL:
 		if (indexfile[0]=='\0') { /* no defined index */
 			if (old_c != real_c)	{
 			    old_c = real_c;
-			    _statusline(NO_INDEX_FILE);
-			    sleep(MessageSecs);
+			    HTUserMsg(NO_INDEX_FILE);
 			}
 
 		} else {
 		    StrAllocCopy(newdoc.address, indexfile);
-		    StrAllocCopy(newdoc.title, "System Index"); /* name it */
+		    StrAllocCopy(newdoc.title, gettext("System Index")); /* name it */
 		    FREE(newdoc.post_data);
 		    FREE(newdoc.post_content_type);
 		    FREE(newdoc.bookmark);
@@ -3666,7 +3639,7 @@ check_goto_URL:
 	    if (lynx_mode == FORMS_LYNX_MODE) {
 		if (links[curdoc.link].type == WWW_FORM_LINK_TYPE) {
 		    c = change_form_link(&links[curdoc.link],
-					 FORM_UP, &newdoc, &refresh_screen,
+					 &newdoc, &refresh_screen,
 					 links[curdoc.link].form->name,
 					 links[curdoc.link].form->value);
 		    /*
@@ -3679,10 +3652,10 @@ check_goto_URL:
 		     */
 		    goto new_keyboard_input;
 		} else {
-		    _statusline("'X' can only toggle a form link");
+		    _statusline(gettext("'X' can only toggle a form link"));
 		}
 	    } else {
-		_statusline("'X' only toggles in forms mode");
+		_statusline(gettext("'X' only toggles in forms mode"));
 	    }
 	    break;
 
@@ -3691,15 +3664,15 @@ check_goto_URL:
 	    if (lynx_mode==FORMS_LYNX_MODE) {
 		if (links[curdoc.link].type == WWW_FORM_LINK_TYPE) {
 		    c = change_form_link(&links[curdoc.link],
-					 FORM_DOWN,&newdoc,&refresh_screen,
+					 &newdoc,&refresh_screen,
 					 links[curdoc.link].form->name,
 					 links[curdoc.link].form->value);
 		    goto new_keyboard_input;
 		} else {
-		    _statusline("'Z' can only toggle a form link");
+		    _statusline(gettext("'Z' can only toggle a form link"));
 		}
 	    } else {
-		_statusline("'Z' only toggles in forms mode");
+		_statusline(gettext("'Z' only toggles in forms mode"));
 	    }
 	    break;
 #endif /* NOT_USED */
@@ -3714,7 +3687,7 @@ check_goto_URL:
 		c = LYgetch();
 		if (TOUPPER(c)=='Y') {
 		    StrAllocCopy(newdoc.address, homepage);
-		    StrAllocCopy(newdoc.title, "Entry into main screen");
+		    StrAllocCopy(newdoc.title, gettext("Entry into main screen"));
 		    FREE(newdoc.post_data);
 		    FREE(newdoc.post_content_type);
 		    FREE(newdoc.bookmark);
@@ -3734,8 +3707,7 @@ check_goto_URL:
 	    } else {
 		if (old_c != real_c)	{
 			old_c = real_c;
-			_statusline(IN_MAIN_SCREEN);
-			sleep(MessageSecs);
+			HTUserMsg(IN_MAIN_SCREEN);
 		}
 	    }
 	    break;
@@ -3744,7 +3716,10 @@ check_goto_URL:
 #ifdef DIRED_SUPPORT
 	    c = dir_list_style;
 #endif /* DIRED_SUPPORT */
-	    options(); /* do the options stuff */
+#ifndef NO_OPTION_MENU
+if (!LYUseFormsOptions) {
+
+	    LYoptions(); /* do the old-style options stuff */
 
 	    if (keypad_mode_flag != keypad_mode ||
 		(user_mode_flag != user_mode &&
@@ -3758,6 +3733,8 @@ check_goto_URL:
 		 (!strncmp(curdoc.address, "file:", 5) ||
 		  !strncmp(curdoc.address, "ftp:", 4))) ||
 		CurrentCharSet_flag != current_char_set ||
+		CurrentAssumeCharSet_flag != UCLYhndl_for_unspec ||
+		verbose_img_flag != verbose_img ||
 		LYRawMode_flag != LYRawMode ||
 		LYSelectPopups_flag != LYSelectPopups ||
 		((strcmp(CurrentUserAgent, (LYUserAgent ?
@@ -3777,9 +3754,7 @@ check_goto_URL:
 		     curdoc.safe != TRUE) &&
 		    confirm_post_resub(curdoc.address, curdoc.title,
 				       2, 1) == FALSE) {
-		    _statusline(WILL_NOT_RELOAD_DOC);
-		    sleep(InfoSecs);
-
+		    HTInfoMsg(WILL_NOT_RELOAD_DOC);
 		} else {
 		    StrAllocCopy(newdoc.address, curdoc.address);
 		    if (((strcmp(CurrentUserAgent, (LYUserAgent ?
@@ -3804,8 +3779,7 @@ check_goto_URL:
 			reloading = TRUE;
 		    }
 		    if (lynx_mode == FORMS_LYNX_MODE) {
-			_statusline(RELOADING_FORM);
-			sleep(AlertSecs);
+			HTAlert(RELOADING_FORM);
 		    }
 		    if (HTisDocumentSource()) {
 			HTOutputFormat = WWW_SOURCE;
@@ -3816,10 +3790,8 @@ check_goto_URL:
 		    newdoc.line = 1;
 		    newdoc.link = 0;
 #else
-		    newdoc.line = ((curdoc.line > 0) ?
-					 curdoc.line : 1);
-		    newdoc.link = ((curdoc.link > -1) ?
-					  curdoc.link : 0);
+		    newdoc.line = curdoc.line;
+		    newdoc.link = curdoc.link;
 #endif /* NO_ASSUME_SAME_DOC */
 		    LYforce_no_cache = TRUE;
 		    FREE(curdoc.address); /* So it doesn't get pushed. */
@@ -3829,7 +3801,9 @@ check_goto_URL:
 	    user_mode_flag = user_mode;
 	    HTfileSortMethod_flag = HTfileSortMethod;
 	    CurrentCharSet_flag = current_char_set;
+	    CurrentAssumeCharSet_flag = UCLYhndl_for_unspec;
 	    show_dotfiles_flag = show_dotfiles;
+	    verbose_img_flag = verbose_img;
 	    LYRawMode_flag = LYRawMode;
 	    LYSelectPopups_flag = LYSelectPopups;
 	    StrAllocCopy(CurrentUserAgent, (LYUserAgent ?
@@ -3839,6 +3813,42 @@ check_goto_URL:
 	    StrAllocCopy(CurrentNegoCharset, (pref_charset ?
 					      pref_charset : ""));
 	    refresh_screen = TRUE; /* to repaint screen */
+	    break;
+} /* end if !LYUseFormsOptions */
+#endif /* !NO_OPTION_MENU */
+#ifndef NO_OPTION_FORMS
+	    /*
+	     * FIXME: Blatantly stolen from LYK_PRINT below.
+	     * how much is really valid here?  I don't know the
+	     * innards well enough. MRC
+	     */
+	    /*
+	     *	Don't do if already viewing options page.
+	     */
+	    if (strcmp((curdoc.title ? curdoc.title : ""),
+		       OPTIONS_TITLE)) {
+
+		if (gen_options(&newdoc.address) < 0)
+		    break;
+		StrAllocCopy(newdoc.title, OPTIONS_TITLE);
+		FREE(newdoc.post_data);
+		FREE(newdoc.post_content_type);
+		FREE(newdoc.bookmark);
+		newdoc.isHEAD = FALSE;
+		newdoc.safe = FALSE;
+		if (check_realm)
+		    LYPermitURL = TRUE;
+		refresh_screen = TRUE;	/* redisplay */
+
+		/*
+		 * FIXME:  this is a temporary solution until we find the
+		 * correct place for this command to reload the document
+		 * before the 'options menu' only when (few) important options
+		 * were changed.
+		 */
+		HTuncache_current_document();
+	    }
+#endif /* !NO_OPTION_FORMS */ 
 	    break;
 
 	case LYK_INDEX_SEARCH: /* search for a user string */
@@ -3913,8 +3923,7 @@ check_goto_URL:
 		}
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		_statusline(NOT_ISINDEX);
-		sleep(MessageSecs);
+		HTUserMsg(NOT_ISINDEX);
 	    }
 	    break;
 
@@ -3991,14 +4000,12 @@ check_goto_URL:
 		strncasecomp(curdoc.address, "http", 4)) {
 		if (old_c != real_c)	{
 		    old_c = real_c;
-		    _statusline(NO_OWNER);
-		    sleep(MessageSecs);
+		    HTUserMsg(NO_OWNER);
 		}
 	    } else if (no_mail) {
 		if (old_c != real_c) {
 		    old_c = real_c;
-		    _statusline(MAIL_DISALLOWED);
-		    sleep(MessageSecs);
+		    HTUserMsg(MAIL_DISALLOWED);
 		}
 	    } else {
 		_statusline(CONFIRM_COMMENT);
@@ -4054,17 +4061,17 @@ check_goto_URL:
 			/*
 			 *  The owner_address is a mailto: URL.
 			 */
-			cp = HText_getRevTitle();
+			CONST char *kp = HText_getRevTitle();
 			if (strchr(owner_address,':')!=NULL)
 			     /*
 			      *  Send a reply.	The address is after the colon.
 			      */
 			     reply_by_mail(strchr(owner_address,':')+1,
 					   curdoc.address,
-					   (cp ? cp : ""));
+					   (kp ? kp : ""));
 			else
 			    reply_by_mail(owner_address, curdoc.address,
-					  (cp ? cp : ""));
+					  (kp ? kp : ""));
 
 			refresh_screen = TRUE;	/* to force a showpage */
 		   }
@@ -4167,8 +4174,7 @@ check_goto_URL:
 	    if (no_editor) {
 		if (old_c != real_c)	{
 		    old_c = real_c;
-		    _statusline(EDIT_DISABLED);
-		    sleep(MessageSecs);
+		    HTUserMsg(EDIT_DISABLED);
 		}
 		break;
 	    }
@@ -4183,23 +4189,15 @@ check_goto_URL:
 		if (nlinks > 0) {
 		    cp = links[curdoc.link].lname;
 		    if (is_url(cp) == FILE_URL_TYPE) {
-			if (!strncmp(cp, "file://localhost", 16)) {
-			    /*
-			     *	This is the only case that should occur. - kw
-			     */
-			    StrAllocCopy(tp, cp + 16);
-			} else if (!strncmp(cp, "file:", 5)) {
-			    StrAllocCopy(tp, cp + 5);
-			} else {
-			    StrAllocCopy(tp, cp);
-			}
-			HTUnEscape(tp);
+			cp = HTfullURL_toFile(cp);
+			StrAllocCopy(tp, cp);
+			free(cp);
+
 			if (stat(tp, &dir_info) == -1) {
-			    _statusline(NO_STATUS);
-			    sleep(AlertSecs);
+			    HTAlert(NO_STATUS);
 			} else {
-			    if (((dir_info.st_mode) & S_IFMT) == S_IFREG) {
-				StrAllocCopy(tp, cp);
+			    if (S_ISREG(dir_info.st_mode)) {
+				StrAllocCopy(tp, links[curdoc.link].lname);
 				HTUnEscapeSome(tp, "/");
 				if (edit_current_file(tp,
 						      curdoc.link, Newline)) {
@@ -4218,10 +4216,8 @@ check_goto_URL:
 				     *	Seek old position,
 				     *	which probably changed.
 				     */
-				    newdoc.line =
-					((curdoc.line > 0) ? curdoc.line : 1);
-				    newdoc.link =
-					((curdoc.link > -1) ? curdoc.link : 0);
+				    newdoc.line = curdoc.line;
+				    newdoc.link = curdoc.link;
 #endif /* NO_SEEK_OLD_POSITION */
 				    clear();  /* clear the screen */
 				}
@@ -4256,8 +4252,7 @@ check_goto_URL:
 	    } else {
 		if (old_c != real_c) {
 		    old_c = real_c;
-		    _statusline(NO_EDITOR);
-		    sleep(MessageSecs);
+		    HTUserMsg(NO_EDITOR);
 		}
 	    }
 	    break;
@@ -4315,8 +4310,8 @@ check_goto_URL:
 	     */
 	    if (strcmp((curdoc.title ? curdoc.title : ""),
 		       SHOWINFO_TITLE)) {
-		if (!showinfo(&curdoc, lines_in_file,
-			      &newdoc, owner_address))
+		if (showinfo(&curdoc, lines_in_file,
+			      &newdoc, owner_address) < 0)
 		    break;
 		StrAllocCopy(newdoc.title, SHOWINFO_TITLE);
 		FREE(newdoc.post_data);
@@ -4341,8 +4336,7 @@ check_goto_URL:
 	    if (LYValidate) {
 		if (old_c != real_c)	{
 		    old_c = real_c;
-		    _statusline(PRINT_DISABLED);
-		    sleep(MessageSecs);
+		    HTUserMsg(PRINT_DISABLED);
 		}
 		break;
 	    }
@@ -4353,7 +4347,8 @@ check_goto_URL:
 	    if (strcmp((curdoc.title ? curdoc.title : ""),
 		       PRINT_OPTIONS_TITLE)) {
 
-		if (print_options(&newdoc.address, lines_in_file) < 0)
+		if (print_options(&newdoc.address,
+				&curdoc.address, lines_in_file) < 0)
 		    break;
 		StrAllocCopy(newdoc.title, PRINT_OPTIONS_TITLE);
 		FREE(newdoc.post_data);
@@ -4361,7 +4356,7 @@ check_goto_URL:
 		FREE(newdoc.bookmark);
 		newdoc.isHEAD = FALSE;
 		newdoc.safe = FALSE;
-		ForcePush = TRUE;
+		ForcePush = TRUE;  /* see LYpush() and print_options() */
 		if (check_realm)
 		    LYPermitURL = TRUE;
 		refresh_screen = TRUE;	/* redisplay */
@@ -4415,8 +4410,7 @@ check_goto_URL:
 	     *	Print visited links page to file.
 	     */
 	    if (LYShowVisitedLinks(&newdoc.address) < 0) {
-		_statusline(VISITED_LINKS_EMPTY);
-		sleep(MessageSecs);
+		HTUserMsg(VISITED_LINKS_EMPTY);
 		break;
 	    }
 	    StrAllocCopy(newdoc.title, VISITED_LINKS_TITLE);
@@ -4437,8 +4431,7 @@ check_goto_URL:
 	    if (!HText_hasToolbar(HTMainText)) {
 		if (old_c != real_c) {
 		    old_c = real_c;
-		    _statusline(NO_TOOLBAR);
-		    sleep(MessageSecs);
+		    HTUserMsg(NO_TOOLBAR);
 		}
 	    } else if (old_c != real_c) {
 		old_c = real_c;
@@ -4475,8 +4468,7 @@ check_goto_URL:
 		HTDirAccess == HT_DIR_SELECTIVE) {
 		if (old_c != real_c)	{
 		    old_c = real_c;
-		    _statusline(DFM_NOT_AVAILABLE);
-		    sleep(MessageSecs);
+		    HTUserMsg(DFM_NOT_AVAILABLE);
 		}
 		break;
 	    }
@@ -4502,8 +4494,7 @@ check_goto_URL:
 		cp = HTParse(curdoc.address, "", PARSE_PATH|PARSE_PUNCTUATION);
 		HTUnEscape(cp);
 		if (HTStat(cp, &stat_info) == -1) {
-		    if (TRACE)
-			fprintf(stderr, "mainloop: Can't stat %s\n", cp);
+		    CTRACE(tfp, "mainloop: Can't stat %s\n", cp);
 		    FREE(cp);
 		    temp = (char *)calloc(1, (strlen(LYCSwingPath) + 4));
 		    if (temp == NULL)
@@ -4513,13 +4504,12 @@ check_goto_URL:
 		} else {
 		    char *VMSdir = NULL;
 
-		    if (((stat_info.st_mode) & S_IFMT) == S_IFDIR) {
+		    if (S_ISDIR(stat_info.st_mode)) {
 			/*
 			 *  We're viewing a local directory.  Make
 			 *  that the CSwing argument. - FM
 			 */
-			if (cp[(strlen(cp) - 1)] != '/')
-			    StrAllocCat(cp, "/");
+			LYAddPathSep(&cp);
 			StrAllocCopy(VMSdir, HTVMS_name("", cp));
 			FREE(cp);
 		    } else {
@@ -4573,7 +4563,7 @@ check_goto_URL:
 		refresh_screen = TRUE;	/* redisplay */
 	    }
 	    stop_curses();
-	    system(temp);
+	    LYSystem(temp);
 	    start_curses();
 	    FREE(temp);
 	    break;
@@ -4594,8 +4584,11 @@ check_goto_URL:
 
 #ifdef USE_EXTERNALS
 	case LYK_EXTERN:  /* use external program on url */
-	    run_external(links[curdoc.link].lname);
-	    refresh_screen = TRUE;
+	    if  ((nlinks > 0) && (links[curdoc.link].lname != NULL))
+	    {
+	       run_external(links[curdoc.link].lname);
+	       refresh_screen = TRUE;
+	    }
 	    break;
 #endif /* USE_EXTERNALS */
 
@@ -4603,8 +4596,7 @@ check_goto_URL:
 	    if (LYValidate) {
 		if (old_c != real_c)	{
 		    old_c = real_c;
-		    _statusline(BOOKMARKS_DISABLED);
-		    sleep(MessageSecs);
+		    HTUserMsg(BOOKMARKS_DISABLED);
 		}
 		break;
 	    }
@@ -4642,6 +4634,8 @@ check_goto_URL:
 			 "LYNXDOWNLOAD:", 13) &&
 		  strncmp(links[curdoc.link].lname,
 			 "LYNXCOOKIE:", 11) &&
+		  strncmp(links[curdoc.link].lname,
+			 "LYNXOPTIONS:", 12) &&
 		  strncmp(links[curdoc.link].lname,
 			 "LYNXLIST:", 9)))) {
 		if (nlinks > 0) {
@@ -4683,8 +4677,7 @@ check_goto_URL:
 			    /*
 			     *	Internal link, and document has POST content.
 			     */
-			    _statusline(NOBOOK_POST_FORM);
-			    sleep(MessageSecs);
+			    HTUserMsg(NOBOOK_POST_FORM);
 			    break;
 			} else {
 			    /*
@@ -4703,8 +4696,7 @@ check_goto_URL:
 			    /*
 			     *	Internal link, and document has POST content.
 			     */
-			    _statusline(NOBOOK_POST_FORM);
-			    sleep(MessageSecs);
+			    HTUserMsg(NOBOOK_POST_FORM);
 			    break;
 			}
 			/*
@@ -4715,8 +4707,7 @@ check_goto_URL:
 					       links[curdoc.link].hightext);
 			    refresh_screen = TRUE; /* MultiBookmark support */
 			} else {
-			    _statusline(NOBOOK_FORM_FIELD);
-			    sleep(MessageSecs);
+			    HTUserMsg(NOBOOK_FORM_FIELD);
 			    break;
 			}
 		    } else {
@@ -4726,16 +4717,14 @@ check_goto_URL:
 		    /*
 		     *	No links, and document has POST content. - FM
 		     */
-		    _statusline(NOBOOK_POST_FORM);
-		    sleep(MessageSecs);
+		    HTUserMsg(NOBOOK_POST_FORM);
 		    break;
 		} else if (curdoc.bookmark != NULL) {
 		    /*
 		     *	It's a bookmark file from which all
 		     *	of the links were deleted. - FM
 		     */
-		    _statusline(BOOKMARKS_NOLINKS);
-		    sleep(MessageSecs);
+		    HTUserMsg(BOOKMARKS_NOLINKS);
 		    break;
 		} else {
 		    _statusline(BOOK_D_OR_CANCEL);
@@ -4762,8 +4751,7 @@ check_add_bookmark_to_self:
 	    } else {
 		if (old_c != real_c)	{
 			old_c = real_c;
-			_statusline(NOBOOK_HSML);
-			sleep(MessageSecs);
+			HTUserMsg(NOBOOK_HSML);
 		}
 	    }
 	    break;
@@ -4772,8 +4760,7 @@ check_add_bookmark_to_self:
 	    if (LYValidate) {
 		if (old_c != real_c)	{
 		    old_c = real_c;
-		    _statusline(BOOKMARKS_DISABLED);
-		    sleep(MessageSecs);
+		    HTUserMsg(BOOKMARKS_DISABLED);
 		}
 		break;
 	    }
@@ -4813,48 +4800,13 @@ check_add_bookmark_to_self:
 	    if (!no_shell) {
 		stop_curses();
 		printf(SPAWNING_MSG);
-		fflush(stdout);
-		fflush(stderr);
-		if (LYTraceLogFP)
-		    /*
-		     *	Set stderr back to its original value
-		     *	during the shell escape. - FM
-		     */
-		    *stderr = LYOrigStderr;
-#ifdef DOSPATH
-#ifdef __DJGPP__
-		__djgpp_set_ctrl_c(0);
-		_go32_want_ctrl_break(1);
-#endif /* __DJGPP__ */
-		if (getenv("SHELL") != NULL) {
-		    system(getenv("SHELL"));
-		} else {
-		    system(getenv("COMSPEC") == NULL ? "command.com" : getenv("COMSPEC"));
-		}
-#ifdef __DJGPP__
-		__djgpp_set_ctrl_c(1);
-		_go32_want_ctrl_break(0);
-#endif /* __DJGPP__ */
-#else
-#ifdef VMS
-		system("");
-#else
-		system("exec $SHELL");
-#endif /* VMS */
-#endif /* DOSPATH */
-		if (LYTraceLogFP)
-		    /*
-		     *	Set stderr back to the log file on
-		     *	return from the shell escape. - FM
-		     */
-		    *stderr = *LYTraceLogFP;
+		LYSystem(LYSysShell());
 		start_curses();
 		refresh_screen = TRUE;	/* for an HText_pageDisplay() */
 	    } else {
 		if (old_c != real_c)	{
 			old_c = real_c;
-			_statusline(SPAWNING_DISABLED);
-			sleep(MessageSecs);
+			HTUserMsg(SPAWNING_DISABLED);
 		}
 	    }
 	    break;
@@ -4867,8 +4819,7 @@ check_add_bookmark_to_self:
 		(no_download && !override_no_download && no_disk_save)) {
 		if (old_c != real_c)	{
 		    old_c = real_c;
-		    _statusline(DOWNLOAD_DISABLED);
-		    sleep(MessageSecs);
+		    HTUserMsg(DOWNLOAD_DISABLED);
 		}
 		break;
 	    }
@@ -4888,8 +4839,7 @@ check_add_bookmark_to_self:
 				 URL_MAIL_METHOD) {
 			    if (old_c != real_c) {
 				old_c = real_c;
-				_statusline(NO_DOWNLOAD_MAILTO_ACTION);
-				sleep(MessageSecs);
+				HTUserMsg(NO_DOWNLOAD_MAILTO_ACTION);
 			    }
 			    break;
 			}
@@ -4900,24 +4850,21 @@ check_add_bookmark_to_self:
 		    }
 		    if (old_c != real_c) {
 			old_c = real_c;
-			_statusline(NO_DOWNLOAD_INPUT);
-			sleep(MessageSecs);
+			HTUserMsg(NO_DOWNLOAD_INPUT);
 		    }
 
 		} else if (!strcmp((curdoc.title ? curdoc.title : ""),
 				   COOKIE_JAR_TITLE)) {
 		    if (old_c != real_c)	{
 			old_c = real_c;
-			_statusline(NO_DOWNLOAD_COOKIES);
-			sleep(MessageSecs);
+			HTUserMsg(NO_DOWNLOAD_COOKIES);
 		    }
 
 		} else if (!strcmp((curdoc.title ? curdoc.title : ""),
 				   PRINT_OPTIONS_TITLE)) {
 		    if (old_c != real_c)	{
 			old_c = real_c;
-			_statusline(NO_DOWNLOAD_PRINT_OP);
-			sleep(MessageSecs);
+			HTUserMsg(NO_DOWNLOAD_PRINT_OP);
 		    }
 
 #ifdef DIRED_SUPPORT
@@ -4926,8 +4873,7 @@ check_add_bookmark_to_self:
 				   UPLOAD_OPTIONS_TITLE)) {
 		    if (old_c != real_c)	{
 			old_c = real_c;
-			_statusline(NO_DOWNLOAD_UPLOAD_OP);
-			sleep(MessageSecs);
+			HTUserMsg(NO_DOWNLOAD_UPLOAD_OP);
 		    }
 
 		} else if (!strcmp(curdoc.address, LYPermitFileURL) ||
@@ -4935,8 +4881,7 @@ check_add_bookmark_to_self:
 				   PERMIT_OPTIONS_TITLE)) {
 		    if (old_c != real_c)	{
 			old_c = real_c;
-			_statusline(NO_DOWNLOAD_PERMIT_OP);
-			sleep(MessageSecs);
+			HTUserMsg(NO_DOWNLOAD_PERMIT_OP);
 		    }
 
 		} else if (lynx_edit_mode && !no_dired_support) {
@@ -4960,10 +4905,12 @@ check_add_bookmark_to_self:
 		    if ((history[number].post_data != NULL &&
 			 history[number].safe != TRUE) &&
 			HTConfirm(CONFIRM_POST_RESUBMISSION) == FALSE) {
-			_statusline(CANCELLED);
-			sleep(InfoSecs);
+			HTInfoMsg(CANCELLED);
 			break;
 		    }
+		    /*
+		     *  OK, we download from history page, restore URL from stack.
+		     */
 		    StrAllocCopy(newdoc.address, history[number].address);
 		    StrAllocCopy(newdoc.title, links[curdoc.link].hightext);
 		    StrAllocCopy(newdoc.bookmark, history[number].bookmark);
@@ -5001,12 +4948,30 @@ check_add_bookmark_to_self:
 			   !strncmp(links[curdoc.link].lname,
 				    "LYNXPRINT:", 10) ||
 			   !strncmp(links[curdoc.link].lname,
+				    "LYNXOPTIONS:", 12) ||
+			   !strncmp(links[curdoc.link].lname,
 				    "lynxexec:", 9) ||
 			   !strncmp(links[curdoc.link].lname,
 				    "lynxprog:", 9)) {
-		    _statusline(NO_DOWNLOAD_SPECIAL);
-		    sleep(MessageSecs);
+		    HTUserMsg(NO_DOWNLOAD_SPECIAL);
 
+		} else if (!strncmp(links[curdoc.link].lname,
+				    "mailto:", 7)) {
+		    HTUserMsg(NO_DOWNLOAD_MAILTO_LINK);
+
+		/*
+		 *  From here on we could have a remote host, so check if
+		 *  that's allowed.
+		 *
+		 *  We copy all these checks from getfile() to LYK_DOWNLOAD
+		 *  here because LYNXDOWNLOAD:// will NOT be pushing the
+		 *  previous document into the history stack so preserve
+		 *  getfile() from returning a wrong status (NULLFILE).
+		 */
+		} else if (local_host_only &&
+			   !(LYisLocalHost(links[curdoc.link].lname) ||
+			     LYisLocalAlias(links[curdoc.link].lname))) {
+		    HTUserMsg(ACCESS_ONLY_LOCALHOST);
 		} else {   /* Not a forms, options or history link */
 		    /*
 		     *	Follow a normal link or anchor.  Note that
@@ -5045,8 +5010,7 @@ check_add_bookmark_to_self:
 		}
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		_statusline(NO_DOWNLOAD_CHOICE);
-		sleep(MessageSecs);
+		HTUserMsg(NO_DOWNLOAD_CHOICE);
 	    }
 	    break;
 
@@ -5086,9 +5050,6 @@ check_add_bookmark_to_self:
 	    else
 		WWW_TraceFlag = TRUE;
 
-	    _statusline(WWW_TraceFlag ? TRACE_ON : TRACE_OFF);
-	    sleep(MessageSecs);
-
 	    if (TRACE && LYUseTraceLog && LYTraceLogFP == NULL) {
 		/*
 		 *  We haven't yet started a TRACE log for this
@@ -5102,25 +5063,20 @@ check_add_bookmark_to_self:
 		 *  command. - FM
 		 */
 		if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
-		    WWW_TraceFlag = FALSE;
-		    _statusline(TRACELOG_OPEN_FAILED);
-		    sleep(MessageSecs);
+		    TracelogOpenFailed();
 		    break;
 		}
 #ifdef VMS
-		fclose(LYTraceLogFP);
-		while (remove(LYTraceLogPath) == 0)
-		    ;
+		LYCloseTracelog();
+		HTSYS_remove(LYTraceLogPath);
 		if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
-		    WWW_TraceFlag == FALSE;
-		    _statusline(TRACELOG_OPEN_FAILED);
-		    sleep(MessageSecs);
+		    TracelogOpenFailed();
 		    break;
 		}
 #endif /* VMS */
-		*stderr = *LYTraceLogFP;
-		fprintf(stderr, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
+		fprintf(tfp, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
 	    }
+	    HTUserMsg(WWW_TraceFlag ? TRACE_ON : TRACE_OFF);
 	    break;
 
 	case LYK_TRACE_LOG:	/*  View TRACE log. */
@@ -5129,8 +5085,7 @@ check_add_bookmark_to_self:
 	     *	in this session. - FM
 	     */
 	    if (LYTraceLogFP == NULL) {
-		_statusline(NO_TRACELOG_STARTED);
-		sleep(MessageSecs);
+		HTUserMsg(NO_TRACELOG_STARTED);
 		break;
 	    }
 
@@ -5152,29 +5107,10 @@ check_add_bookmark_to_self:
 	     *	and open it again, to make sure all stderr messages thus
 	     *	far will be in the log. - FM
 	     */
-	    if (TRACE)
-		fprintf(stderr, "\nTurning off TRACE for fetch of log.\n");
-	    fflush(stdout);
-	    fflush(stderr);
-	    fclose(LYTraceLogFP);
-	    *stderr = LYOrigStderr;
-	    if ((LYTraceLogFP = LYAppendToTxtFile(LYTraceLogPath)) == NULL) {
-		WWW_TraceFlag = FALSE;
-		_statusline(TRACELOG_OPEN_FAILED);
-		sleep(MessageSecs);
+	    if (!LYReopenTracelog(&trace_mode_flag))
 		break;
-	    }
-	    *stderr = *LYTraceLogFP;
-	    if (TRACE) {
-		WWW_TraceFlag = FALSE;
-		trace_mode_flag = TRUE;
-	    }
-	    StrAllocCopy(newdoc.address, "file://localhost");
-#ifdef VMS
-	    StrAllocCat(newdoc.address, HTVMS_wwwName(LYTraceLogPath));
-#else
-	    StrAllocCat(newdoc.address, LYTraceLogPath);
-#endif /* VMS */
+
+	    LYLocalFileToURL (&(newdoc.address), LYTraceLogPath);
 	    StrAllocCopy(newdoc.title, LYNX_TRACELOG_TITLE);
 	    FREE(newdoc.post_data);
 	    FREE(newdoc.post_content_type);
@@ -5194,12 +5130,10 @@ check_add_bookmark_to_self:
 	    else
 		clickable_images = TRUE;
 
-	    _statusline(clickable_images ?
+	    HTUserMsg(clickable_images ?
 		     CLICKABLE_IMAGES_ON : CLICKABLE_IMAGES_OFF);
-	    sleep(MessageSecs);
 	    cmd = LYK_RELOAD;
 	    goto new_cmd;
-	    break;
 
 	case LYK_INLINE_TOGGLE:
 	    if (pseudo_inline_alts)
@@ -5207,25 +5141,21 @@ check_add_bookmark_to_self:
 	    else
 		pseudo_inline_alts = TRUE;
 
-	    _statusline(pseudo_inline_alts ?
-		     PSEUDO_INLINE_ALTS_ON : PSEUDO_INLINE_ALTS_OFF);
-	    sleep(MessageSecs);
+	    HTUserMsg(pseudo_inline_alts ?
+		      PSEUDO_INLINE_ALTS_ON : PSEUDO_INLINE_ALTS_OFF);
 	    cmd = LYK_RELOAD;
 	    goto new_cmd;
-	    break;
 
 	case LYK_RAW_TOGGLE:
 	    if (LYUseDefaultRawMode)
 		LYUseDefaultRawMode = FALSE;
 	    else
 		LYUseDefaultRawMode = TRUE;
-	    _statusline(LYRawMode ? RAWMODE_OFF : RAWMODE_ON);
+	    HTUserMsg(LYRawMode ? RAWMODE_OFF : RAWMODE_ON);
 	    HTMLSetCharacterHandling(current_char_set);
 	    LYRawMode_flag = LYRawMode;
-	    sleep(MessageSecs);
 	    cmd = LYK_RELOAD;
 	    goto new_cmd;
-	    break;
 
 	case LYK_HEAD:
 	    if (nlinks > 0 &&
@@ -5242,8 +5172,7 @@ check_add_bookmark_to_self:
 		    char *scheme = strncmp(curdoc.address, "LYNXIMGMAP:", 11) ?
 			curdoc.address : curdoc.address + 11;
 		    if (LYCanDoHEAD(scheme) != TRUE) {
-			_statusline(DOC_NOT_HTTP_URL);
-			sleep(MessageSecs);
+			HTUserMsg(DOC_NOT_HTTP_URL);
 		    } else {
 			/*
 			 *  Check if this is a reply from a POST,
@@ -5253,8 +5182,7 @@ check_add_bookmark_to_self:
 			if ((curdoc.post_data != NULL &&
 			     curdoc.safe != TRUE) &&
 			    HTConfirm(CONFIRM_POST_DOC_HEAD) == FALSE) {
-			    _statusline(CANCELLED);
-			    sleep(InfoSecs);
+			    HTInfoMsg(CANCELLED);
 			    break;
 			}
 			HEAD_request = TRUE;
@@ -5277,25 +5205,21 @@ check_add_bookmark_to_self:
 			(links[curdoc.link].type != WWW_INTERN_LINK_TYPE ||
 			 !curdoc.address ||
 			 strncmp(curdoc.address, "http", 4))) {
-			_statusline(LINK_NOT_HTTP_URL);
-			sleep(MessageSecs);
+			HTUserMsg(LINK_NOT_HTTP_URL);
 		    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
 			       links[curdoc.link].form->disabled) {
-			_statusline(FORM_ACTION_DISABLED);
-			sleep(MessageSecs);
+			HTUserMsg(FORM_ACTION_DISABLED);
 		    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
 			       strncmp(links[curdoc.link].form->submit_action,
 							      "lynxcgi:", 8) &&
 			       strncmp(links[curdoc.link].form->submit_action,
 								 "http", 4)) {
-			_statusline(FORM_ACTION_NOT_HTTP_URL);
-			sleep(MessageSecs);
+			HTUserMsg(FORM_ACTION_NOT_HTTP_URL);
 		    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
 			       links[curdoc.link].form->submit_method ==
 							  URL_POST_METHOD &&
 			       HTConfirm(CONFIRM_POST_LINK_HEAD) == FALSE) {
-			_statusline(CANCELLED);
-			sleep(InfoSecs);
+			HTInfoMsg(CANCELLED);
 		    } else {
 			HEAD_request = TRUE;
 			LYforce_no_cache = TRUE;
@@ -5314,8 +5238,7 @@ check_add_bookmark_to_self:
 		if ((curdoc.post_data != NULL &&
 		     curdoc.safe != TRUE) &&
 		    HTConfirm(CONFIRM_POST_DOC_HEAD) == FALSE) {
-		    _statusline(CANCELLED);
-		    sleep(InfoSecs);
+		    HTInfoMsg(CANCELLED);
 		    break;
 		} else if (nlinks > 0) {
 		    /*
@@ -5343,8 +5266,7 @@ check_add_bookmark_to_self:
 		     *	current document. - FM
 		     */
 		    if (LYCanDoHEAD(scheme) != TRUE) {
-			_statusline(DOC_NOT_HTTP_URL);
-			sleep(MessageSecs);
+			HTUserMsg(DOC_NOT_HTTP_URL);
 		    } else {
 			HEAD_request = TRUE;
 			LYforce_no_cache = TRUE;
@@ -5409,10 +5331,9 @@ check_add_bookmark_to_self:
 		    if (old_c != real_c) {
 			old_c = real_c;
 			if (no_jump)
-			    _statusline(JUMP_DISALLOWED);
+			    HTUserMsg(JUMP_DISALLOWED);
 			else
-			    _statusline(NO_JUMPFILE);
-			sleep(MessageSecs);
+			    HTUserMsg(NO_JUMPFILE);
 		    }
 		} else {
 		    LYJumpFileURL = TRUE;
@@ -5432,8 +5353,7 @@ check_add_bookmark_to_self:
 				    goto check_recall;
 				}
 				FREE(temp);
-				statusline(NO_RANDOM_URLS_YET);
-				sleep(MessageSecs);
+				HTUserMsg(NO_RANDOM_URLS_YET);
 				break;
 			    }
 			    ret = HTParse((ret+3), startfile, PARSE_ALL);
@@ -5457,7 +5377,7 @@ check_add_bookmark_to_self:
 			    HTUnEscapeSome(ret, " \r\n\t");
 			    convert_to_spaces(ret, TRUE);
 			} else {
-			    collapse_spaces(user_input_buffer);
+			    LYRemoveBlanks(user_input_buffer);
 			}
 			StrAllocCopy(newdoc.address, ret);
 			StrAllocCopy(lynxjumpfile, ret);
@@ -5487,11 +5407,10 @@ check_add_bookmark_to_self:
 		    HTClearHTTPAuthInfo();
 		    HTClearNNTPAuthInfo();
 		    HTClearFTPPassword();
-		    _statusline(AUTH_INFO_CLEARED);
+		    HTUserMsg(AUTH_INFO_CLEARED);
 		} else {
-		    _statusline(CANCELLED);
+		    HTUserMsg(CANCELLED);
 		}
-		sleep(MessageSecs);
 	    }
 	    break;
 
@@ -5500,7 +5419,7 @@ check_add_bookmark_to_self:
 	    if (old_c != real_c) {
 		char version[128];
 		old_c = real_c;
-		sprintf(version, "*** %s Version %s ***",
+		sprintf(version, gettext("*** %s Version %s ***"),
 				 LYNX_NAME, LYNX_VERSION);
 		statusline(version);
 		sleep(AlertMessage);

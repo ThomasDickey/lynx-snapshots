@@ -2,7 +2,7 @@
 Miso-8859-5
 
 #Name as a Display Charset (used on Options screen)
-OISO 8859-5 Cyrillic
+OCyrillic (ISO-8859-5)
 
 #
 #	Name:             ISO 8859-5 (1988) to Unicode

@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTAlert.h>
 #include <LYUtils.h>
 #include <LYStrings.h>
@@ -14,8 +13,6 @@
 #ifdef VMS
 #include <fab.h>
 #endif /* VMS */
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 struct JumpTable *JThead = NULL;
 
@@ -90,7 +87,7 @@ PUBLIC BOOL LYJumpInit ARGS1 (char *, config)
      */
     jtp = (struct JumpTable *) calloc(1, sizeof(*jtp));
     if (jtp == NULL) {
-	perror("Out of memory in LYJumpInit");
+	perror(gettext("Out of memory in LYJumpInit"));
 	return FALSE;
     }
 
@@ -149,7 +146,7 @@ PUBLIC BOOL LYJumpInit ARGS1 (char *, config)
 	    StrAllocCopy(jumpfile, JThead->file);
 	jtp = (struct JumpTable *) calloc(1, sizeof(*jtp));
 	if (jtp == NULL) {
-	    perror("Out of memory in LYJumpInit");
+	    perror(gettext("Out of memory in LYJumpInit"));
 	    return FALSE;
 	}
 	StrAllocCopy(jtp->file, JThead->file);
@@ -228,8 +225,7 @@ PUBLIC char *LYJump ARGS1(int, key)
 	/*
 	 * User cancelled the Jump via ^G. - FM
 	 */
-	_statusline(CANCELLED);
-	sleep(InfoSecs);
+	HTInfoMsg(CANCELLED);
 	return NULL;
     }
 
@@ -237,8 +233,7 @@ check_recall:
     bp = buf;
     if (toupper(key) == 'G' && strncmp(buf, "o ", 2) == 0)
 	bp++;
-    while (isspace(*bp))
-	bp++;
+    bp = LYSkipBlanks(bp);
     if (*bp == '\0' &&
 	!(recall && (ch == UPARROW || ch == DNARROW))) {
 	/*
@@ -246,8 +241,7 @@ check_recall:
 	 */
 	*buf = '\0';
 	StrAllocCopy(jtp->shortcut, buf);
-	_statusline(CANCELLED);
-	sleep(InfoSecs);
+	HTInfoMsg(CANCELLED);
 	return NULL;
     }
 #ifdef PERMIT_GOTO_FROM_JUMP
@@ -258,8 +252,7 @@ check_recall:
 	if (no_goto) {
 	    *buf = '\0';
 	    StrAllocCopy(jtp->shortcut, buf);
-	    _statusline(RANDOM_URL_DISALLOWED);
-	    sleep(MessageSecs);
+	    HTUserMsg(RANDOM_URL_DISALLOWED);
 	    return NULL;
 	}
 	StrAllocCopy(temp, "Go ");
@@ -305,8 +298,7 @@ check_recall:
 		/*
 		 * User cancelled the jump via ^G.
 		 */
-		_statusline(CANCELLED);
-		sleep(InfoSecs);
+		HTInfoMsg(CANCELLED);
 		return NULL;
 	    }
 	    goto check_recall;
@@ -346,8 +338,7 @@ check_recall:
 		/*
 		 * User cancelled the jump via ^G.
 		 */
-		_statusline(CANCELLED);
-		sleep(InfoSecs);
+		HTInfoMsg(CANCELLED);
 		return NULL;
 	    }
 	    goto check_recall;
@@ -403,10 +394,11 @@ PRIVATE unsigned LYRead_Jumpfile ARGS1(struct JumpTable *,jtp)
 	    return 0;
 	}
     } else
-    if ((fd=open(jtp->file, O_RDONLY, "mbc=32")) < 0) {
+    if ((fd=open(jtp->file, O_RDONLY, "mbc=32")) < 0)
 #else
-    if ((fd=open(jtp->file, O_RDONLY)) < 0) {
+    if ((fd=open(jtp->file, O_RDONLY)) < 0)
 #endif /* VMS */
+    {
 	HTAlert(CANNOT_OPEN_JUMP_FILE);
 	FREE(mp);
 	return 0;

@@ -15,17 +15,15 @@
  See lynx.cfg for other info.
 */
 
-#include <tcp.h>
-#include <LYGlobalDefs.h>
 #include <LYUtils.h>
+#include <HTAlert.h>
+#include <LYGlobalDefs.h>
 #include <LYExtern.h>
 #include <LYCurses.h>
 
 #include <LYLeaks.h>
 
 #ifdef USE_EXTERNALS
-#define FREE(x) if (x) {free(x); x = NULL;}
-
 void run_external ARGS1(char *, c)
 {
 	char command[1024];
@@ -37,18 +35,14 @@ void run_external ARGS1(char *, c)
 		 externals2=externals2->next)
 	{
 
-#ifdef _WINDOWS
-	 if (!strnicmp(externals2->name,c,strlen(externals2->name)))
-#else
-	 if (!strncasecomp(externals2->name,c,strlen(externals2->name)))
-#endif
+	 if (externals2->command != 0
+	  && !strncasecomp(externals2->name,c,strlen(externals2->name)))
 	 {
 	     char *cp;
 
 		if(no_externals && !externals2->always_enabled)
 		{
-		  statusline(EXTERNALS_DISABLED);
-		  sleep(MessageSecs);
+		  HTUserMsg(EXTERNALS_DISABLED);
 		  return;
 		}
 
@@ -58,9 +52,9 @@ void run_external ARGS1(char *, c)
 		 *  Prevent spoofing of the shell.
 		 *  Dunno how this needs to be modified for VMS or DOS. - kw
 		 */
-#if defined(VMS) || defined(DOSPATH)
+#if defined(VMS) || defined(DOSPATH) || defined(__EMX__)
 		sprintf(command, externals2->command, c);
-#else /* Unix or DOS/Win: */
+#else /* Unix: */
 		cp = quote_pathname(c);
 		sprintf(command, externals2->command, cp);
 		FREE(cp);
@@ -69,22 +63,10 @@ void run_external ARGS1(char *, c)
 		if (*command != '\0')
 		{
 
-		 statusline(command);
-		 sleep(MessageSecs);
+		 HTUserMsg(command);
 
 		 stop_curses();
-		 fflush(stdout);
-#ifdef __DJGPP__
-		__djgpp_set_ctrl_c(0);
-		_go32_want_ctrl_break(1);
-#endif /* __DJGPP__ */
-		 system(command);
-#ifdef __DJGPP__
-		__djgpp_set_ctrl_c(1);
-		_go32_want_ctrl_break(0);
-#endif /* __DJGPP__ */
-
-		 fflush(stdout);
+		 LYSystem(command);
 		 start_curses();
 		}
 

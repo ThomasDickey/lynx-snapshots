@@ -3,12 +3,9 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTParse.h>
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 #define HEX_ESCAPE '%'
 
@@ -190,9 +187,7 @@ PUBLIC char * HTParse ARGS3(
     char * acc_method;
     struct struct_parts given, related;
 
-    if (TRACE)
-	fprintf(stderr,
-		"HTParse: aName:%s   relatedName:%s\n", aName, relatedName);
+    CTRACE(tfp, "HTParse: aName:%s   relatedName:%s\n", aName, relatedName);
 
     /*
     **	Allocate the output string.
@@ -250,7 +245,7 @@ PUBLIC char * HTParse ARGS3(
     **	this is back to inheriting for identical
     **	schemes whether or not they are "file".
     **	If you want to try it again yourself,
-    **	uncomment the strncasecomp() below. - FM
+    **	uncomment the strcasecomp() below. - FM
     */
     if ((given.access && related.access) &&
 	(/* strcasecomp(given.access, "file") || */
@@ -365,8 +360,7 @@ PUBLIC char * HTParse ARGS3(
 	    if (wanted & PARSE_PUNCTUATION)
 		strcat(result, "/");
 	    strcat(result, given.absolute);
-	    if (TRACE)
-		fprintf(stderr, "1\n");
+	    CTRACE(tfp, "1\n");
 	} else if (related.absolute) {		/* Adopt path not name */
 	    strcat(result, "/");
 	    strcat(result, related.absolute);
@@ -380,16 +374,13 @@ PUBLIC char * HTParse ARGS3(
 		strcat(result, given.relative); /* Add given one */
 		HTSimplify (result);
 	    }
-	    if (TRACE)
-		fprintf(stderr, "2\n");
+	    CTRACE(tfp, "2\n");
 	} else if (given.relative) {
 	    strcat(result, given.relative);		/* what we've got */
-	    if (TRACE)
-		fprintf(stderr, "3\n");
+	    CTRACE(tfp, "3\n");
 	} else if (related.relative) {
 	    strcat(result, related.relative);
-	    if (TRACE)
-		fprintf(stderr, "4\n");
+	    CTRACE(tfp, "4\n");
 	} else {  /* No inheritance */
 	    if (strncasecomp(aName, "lynxcgi:", 8) &&
 		strncasecomp(aName, "lynxexec:", 9) &&
@@ -398,8 +389,7 @@ PUBLIC char * HTParse ARGS3(
 	    }
 	    if (!strcmp(result, "news:/"))
 		result[5] = '*';
-	    if (TRACE)
-		fprintf(stderr, "5\n");
+	    CTRACE(tfp, "5\n");
 	}
     }
 
@@ -414,8 +404,7 @@ PUBLIC char * HTParse ARGS3(
 	    strcat(result, (given.anchor) ?
 			     given.anchor : related.anchor);
 	}
-    if (TRACE)
-	fprintf(stderr, "HTParse: result:%s\n", result);
+    CTRACE(tfp, "HTParse: result:%s\n", result);
     FREE(rel);
     FREE(name);
 
@@ -647,8 +636,7 @@ PUBLIC char * HTRelative ARGS2(
 	    strcat(result, "../");
 	strcat(result, last_slash+1);
     }
-    if (TRACE)
-	fprintf(stderr, "HT: `%s' expressed relative to\n    `%s' is\n   `%s'.",
+    CTRACE(tfp, "HT: `%s' expressed relative to\n    `%s' is\n   `%s'.",
 		aName, relatedName, result);
     return result;
 }

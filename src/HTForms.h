@@ -7,7 +7,7 @@
 #endif /* LYSTRUCTS_H */
 
 /* in LYForms.c */
-extern int change_form_link PARAMS((struct link *form_link, int mode,
+extern int change_form_link PARAMS((struct link *form_link,
                                     document *newdoc, BOOLEAN *refresh_screen,
 				    char *link_name, char *link_value));
 
@@ -59,7 +59,7 @@ typedef struct _FormInfo {
 	char *			value;	   /* user entered string data */
 	char *			orig_value;/* the original value */
 	int			size;	   /* width on the screen */
-	int			maxlength; /* max width of data */
+	unsigned		maxlength; /* max width of data */
 	int			group;	   /* a group associated with the link
 					    *  this is used for select's
 					    */
@@ -129,9 +129,6 @@ typedef struct _PerFormInfo
 /* #define different lynx modes */
 #define NORMAL_LYNX_MODE 1
 #define FORMS_LYNX_MODE  2
-
-#define FORM_UP   1
-#define FORM_DOWN 2
 
 #define FIRST_ORDER  1
 #define MIDDLE_ORDER 2

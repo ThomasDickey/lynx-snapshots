@@ -1,5 +1,3 @@
-/*  */
-
 /*      Displaying messages and getting input for WWW Library
 **      =====================================================
 **
@@ -7,10 +5,10 @@
 **         Feb 93 Portablized etc TBL
 */
 
-#ifndef HTUTILS_H
+#ifndef HTALERT_H
+#define HTALERT_H 1
+
 #include <HTUtils.h>
-#endif /* HTUTILS_H */
-#include <tcp.h>
 
 /*      Display a message and get the input
 **
@@ -29,6 +27,9 @@ extern char * HTPrompt PARAMS((CONST char * Msg, CONST char * deflt));
 **              The input is a list of parameters for printf.
 */
 extern void HTAlert PARAMS((CONST char * Msg));
+extern void HTInfoMsg PARAMS((CONST char * Msg));
+extern void HTUserMsg PARAMS((CONST char * Msg));
+extern void HTUserMsg2 PARAMS((CONST char * Msg, CONST char * Arg));
 
 
 /*      Display a progress message for information (and diagnostics) only
@@ -37,7 +38,7 @@ extern void HTAlert PARAMS((CONST char * Msg));
 **              The input is a list of parameters for printf.
 */
 extern void HTProgress PARAMS((CONST char * Msg));
-extern BOOLEAN mustshow;
+extern void HTReadProgress PARAMS((long bytes, long total));
 #define _HTProgress(msg)	mustshow = TRUE, HTProgress(msg)
 
 /*
@@ -107,8 +108,6 @@ extern void HTPromptUsernameAndPassword PARAMS((
 extern BOOL HTConfirmCookie PARAMS((
 	void *		dp,
 	CONST char *	server,
-	CONST char *	domain,
-	CONST char *	path,
 	CONST char *	name,
 	CONST char *	value));
 
@@ -128,6 +127,4 @@ extern int HTConfirmPostRedirect PARAMS((
 	CONST char *	Redirecting_url,
 	int		server_status));
 
-/*
-
-    */
+#endif /* HTALERT_H */

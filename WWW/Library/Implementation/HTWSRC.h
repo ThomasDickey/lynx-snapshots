@@ -11,10 +11,6 @@
 #ifndef HTWSRC_H
 #define HTWSRC_H
 
-#ifndef HTUTILS_H
-#include <HTUtils.h>
-#endif /* HTUTILS_H */
-
 #include <HTFormat.h>
 
 extern  char from_hex PARAMS((char c));

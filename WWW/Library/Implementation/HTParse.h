@@ -8,9 +8,7 @@
 #ifndef HTPARSE_H
 #define HTPARSE_H
 
-#ifndef HTUTILS_H
 #include <HTUtils.h>
-#endif /* HTUTILS_H */
 
 /*
 **  The following are flag bits which may be ORed together to form

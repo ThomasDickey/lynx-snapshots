@@ -15,10 +15,6 @@ extern char * use_this_url_instead;
 
 /*      Definition uses:
 */
-#ifndef HTUTILS_H
-#include <HTUtils.h>
-#endif /* HTUTILS_H */
-#include <tcp.h>
 #include <HTAnchor.h>
 #include <HTFormat.h>
 
@@ -263,7 +259,7 @@ Search Given Indexname
  */
 extern BOOL HTSearchAbsolute PARAMS((
         CONST char *    keywords,
-        CONST char *    indexname));
+        char *    	indexname));
 
 
 /*

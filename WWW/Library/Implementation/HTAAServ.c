@@ -43,9 +43,6 @@
 
 #include <HTUtils.h>
 
-/*#include <stdio.h> included by HTUtils.h -- FM *//* FILE */
-#include <string.h>		/* strchr() */
-
 #include <HTString.h>
 #include <HTAccess.h>		/* HTSecure			*/
 #include <HTFile.h>		/* HTLocalName			*/
@@ -92,45 +89,34 @@ PUBLIC char *HTAA_statusMessage NOARGS
     /* 401 cases */
       case HTAA_NO_AUTH:
 	return "Unauthorized -- authentication failed";
-	break;
       case HTAA_NOT_MEMBER:
 	return "Unauthorized to access the document";
-	break;
 
     /* 403 cases */
       case HTAA_BY_RULE:
 	return "Forbidden -- by rule";
-	break;
       case HTAA_IP_MASK:
 	return "Forbidden -- server refuses to serve to your IP address";
-	break;
       case HTAA_NO_ACL:
       case HTAA_NO_ENTRY:
 	return "Forbidden -- access to file is never allowed";
-	break;
       case HTAA_SETUP_ERROR:
 	return "Forbidden -- server protection setup error";
-	break;
       case HTAA_DOTDOT:
 	return "Forbidden -- URL containing /../ disallowed";
-	break;
       case HTAA_HTBIN:
 	return "Forbidden -- /htbin feature not enabled on this server";
-	break;
 
     /* 404 cases */
       case HTAA_NOT_FOUND:
 	return "Not found -- file doesn't exist or is read protected";
-	break;
 
     /* Success */
       case HTAA_OK:
 	return "AA: Access should be ok but something went wrong";
-	break;
 
       case HTAA_OK_GATEWAY:
 	return "AA check bypassed (gatewaying) but something went wrong";
-	break;
 
     /* Others */
       default:
@@ -147,46 +133,34 @@ PRIVATE char *status_name ARGS1(HTAAFailReasonType, reason)
     /* 401 cases */
       case HTAA_NO_AUTH:
 	return "NO-AUTHENTICATION";
-	break;
       case HTAA_NOT_MEMBER:
 	return "NOT-AUTHORIZED";
-	break;
 
     /* 403 cases */
       case HTAA_BY_RULE:
 	return "FORB-RULE";
-	break;
       case HTAA_IP_MASK:
 	return "FORB-IP";
-	break;
       case HTAA_NO_ACL:
 	return "NO-ACL-FILE";
-	break;
       case HTAA_NO_ENTRY:
 	return "NO-ACL-ENTRY";
-	break;
       case HTAA_SETUP_ERROR:
 	return "SETUP-ERROR";
-	break;
       case HTAA_DOTDOT:
 	return "SLASH-DOT-DOT";
-	break;
       case HTAA_HTBIN:
 	return "HTBIN-OFF";
-	break;
 
     /* 404 cases */
       case HTAA_NOT_FOUND:
 	return "NOT-FOUND";
-	break;
 
     /* Success */
       case HTAA_OK:
 	return "OK";
-	break;
       case HTAA_OK_GATEWAY:
 	return "OK-GATEWAY";
-	break;
 
     /* Others */
       default:
@@ -229,14 +203,12 @@ PRIVATE HTAAFailReasonType check_authorization ARGS4(CONST char *,  pathname,
     htaa_user = NULL;
 
     if (!pathname) {
-	if (TRACE)
-	    fprintf(stderr, "HTAA_checkAuthorization: Forbidden by rule\n");
+	CTRACE(tfp, "HTAA_checkAuthorization: Forbidden by rule\n");
 	return HTAA_BY_RULE;
     }
-    if (TRACE)
-	fprintf(stderr, "%s `%s' %s %s\n",
-			"HTAA_checkAuthorization: translated path:",
-			pathname, "method:", HTAAMethod_name(method));
+    CTRACE(tfp, "%s `%s' %s %s\n",
+		"HTAA_checkAuthorization: translated path:",
+		pathname, "method:", HTAAMethod_name(method));
 
     /*
     ** Get protection setting (set up by callbacks from rule system)
@@ -263,10 +235,9 @@ PRIVATE HTAAFailReasonType check_authorization ARGS4(CONST char *,  pathname,
 		    htaa_user = HTAA_authenticate(scheme,
 						  scheme_specifics,
 						  prot);
-		    if (TRACE)
-			fprintf(stderr, "Authentication returned: %s\n",
-					(htaa_user ? htaa_user->username
-						   : "NOT-AUTHENTICATED"));
+		    CTRACE(tfp, "Authentication returned: %s\n",
+				(htaa_user ? htaa_user->username
+					   : "NOT-AUTHENTICATED"));
 		}
 		HTAA_resolveGroupReferences(prot->mask_group, group_def_list);
 		reason = HTAA_userAndInetInGroup(prot->mask_group,
@@ -274,14 +245,13 @@ PRIVATE HTAAFailReasonType check_authorization ARGS4(CONST char *,  pathname,
 						  ? htaa_user->username : "",
 						 HTClientHost,
 						 NULL);
-		if (TRACE) {
-		    if (reason != HTAA_OK)
-			fprintf(stderr, "%s %s %s %s\n",
+		if (reason != HTAA_OK) {
+		    CTRACE(tfp, "%s %s %s %s\n",
 				"HTAA_checkAuthorization: access denied",
 				"by mask (no ACL, only Protect rule)",
 				"host", HTClientHost);
-		    else
-			fprintf(stderr, "%s %s %s %s\n",
+		} else {
+		    CTRACE(tfp, "%s %s %s %s\n",
 				"HTAA_checkAuthorization: request from",
 				HTClientHost,
 				"accepted by only mask match (no ACL, only",
@@ -290,17 +260,15 @@ PRIVATE HTAAFailReasonType check_authorization ARGS4(CONST char *,  pathname,
 		return reason;
 	    }
 	    else {	/* 403 Forbidden */
-		if (TRACE)
-		    fprintf(stderr, "%s %s\n",
-				    "HTAA_checkAuthorization: Protected, but",
-				    "no mask group nor ACL -- forbidden");
+		CTRACE(tfp, "%s %s\n",
+			    "HTAA_checkAuthorization: Protected, but",
+			    "no mask group nor ACL -- forbidden");
 		return HTAA_NO_ACL;
 	    }
 	}
 	else { /* No protect rule and no ACL => OK 200 */
-	    if (TRACE)
-		fprintf(stderr, "HTAA_checkAuthorization: %s\n",
-				"no protect rule nor ACL -- ok\n");
+	    CTRACE(tfp, "HTAA_checkAuthorization: %s\n",
+			"no protect rule nor ACL -- ok\n");
 	    return HTAA_OK;
 	}
     }
@@ -309,15 +277,13 @@ PRIVATE HTAAFailReasonType check_authorization ARGS4(CONST char *,  pathname,
     ** Now we know that ACL exists
     */
     if (!prot) {		/* Not protected by "protect" rule */
-	if (TRACE)
-	    fprintf(stderr, "HTAA_checkAuthorization: default protection\n");
+	CTRACE(tfp, "HTAA_checkAuthorization: default protection\n");
 	prot = HTAA_getDefaultProtection(); /* Also sets current protection */
 
 	if (!prot) {		/* @@ Default protection not set ?? */
-	    if (TRACE)
-		fprintf(stderr, "%s %s\n",
-				"HTAA_checkAuthorization: default protection",
-				"not set (internal server error)!!");
+	    CTRACE(tfp, "%s %s\n",
+			"HTAA_checkAuthorization: default protection",
+			"not set (internal server error)!!");
 	    return HTAA_SETUP_ERROR;
 	}
     }
@@ -337,10 +303,9 @@ PRIVATE HTAAFailReasonType check_authorization ARGS4(CONST char *,  pathname,
 	    htaa_user = HTAA_authenticate(scheme,
 					  scheme_specifics,
 					  prot);
-	    if (TRACE)
-		fprintf(stderr, "Authentication returned: %s\n",
-				(htaa_user
-				 ? htaa_user->username : "NOT-AUTHENTICATED"));
+	    CTRACE(tfp, "Authentication returned: %s\n",
+			(htaa_user
+			 ? htaa_user->username : "NOT-AUTHENTICATED"));
 	}
 	/*
 	** Check mask group
@@ -352,20 +317,18 @@ PRIVATE HTAAFailReasonType check_authorization ARGS4(CONST char *,  pathname,
 					   HTClientHost,
 					   NULL);
 	    if (reason != HTAA_OK) {
-		if (TRACE)
-		    fprintf(stderr, "%s %s %s\n",
-				    "HTAA_checkAuthorization: access denied",
-				    "by mask, host:", HTClientHost);
+		CTRACE(tfp, "%s %s %s\n",
+			    "HTAA_checkAuthorization: access denied",
+			    "by mask, host:", HTClientHost);
 		return reason;
 	    }
 	    else {
-		if (TRACE)
-		    fprintf(stderr, "%s %s %s %s %s\n",
-				    "HTAA_checkAuthorization: request from",
-				    HTClientHost,
-				    "accepted by just mask group match",
-				    "(no ACL, only Protect rule, and only",
-				    "mask enabled)");
+		CTRACE(tfp, "%s %s %s %s %s\n",
+			    "HTAA_checkAuthorization: request from",
+			    HTClientHost,
+			    "accepted by just mask group match",
+			    "(no ACL, only Protect rule, and only",
+			    "mask enabled)");
 		/* And continue authorization checking */
 	    }
 	}
@@ -376,9 +339,8 @@ PRIVATE HTAAFailReasonType check_authorization ARGS4(CONST char *,  pathname,
 	*/
 	allowed_groups = HTAA_getAclEntry(acl_file, pathname, method);
 	if (!allowed_groups) {
-	    if (TRACE)
-		fprintf(stderr, "%s `%s' %s\n",
-				"No entry for file", pathname, "in ACL");
+	    CTRACE(tfp, "%s `%s' %s\n",
+			"No entry for file", pathname, "in ACL");
 	    HTAA_closeAcl(acl_file);
 	    return HTAA_NO_ENTRY;  /* Forbidden -- no entry in the ACL */
 	}
@@ -458,9 +420,8 @@ PUBLIC int HTAA_checkAuthorization ARGS4(CONST char *,	url,
     ** be a security hole.
     */
     if (strstr(local_copy, "/../")) {
-	if (TRACE)
-	    fprintf(stderr, "HTAA_checkAuthorization: %s (`%s')\n",
-			    "Illegal attempt to use /../", url);
+	CTRACE(tfp, "HTAA_checkAuthorization: %s (`%s')\n",
+		    "Illegal attempt to use /../", url);
 	HTAAFailReason = HTAA_DOTDOT;
     }
     else {
@@ -482,8 +443,7 @@ PUBLIC int HTAA_checkAuthorization ARGS4(CONST char *,	url,
 	}
 
 	if (!pathname) {		/* Forbidden by rule */
-	    if (TRACE)
-		fprintf(stderr, "HTAA_checkAuthorization: Forbidden by rule\n");
+	    CTRACE(tfp, "HTAA_checkAuthorization: Forbidden by rule\n");
 	    HTAAFailReason = HTAA_BY_RULE;
 	}
 	else if (HTAAFailReason != HTAA_HTBIN) {
@@ -500,9 +460,7 @@ PUBLIC int HTAA_checkAuthorization ARGS4(CONST char *,	url,
 	    }
 	    else {  /* Not local access */
 		HTAAFailReason = HTAA_OK_GATEWAY;
-		if (TRACE)
-		    fprintf(stderr,
-			    "HTAA_checkAuthorization: %s (%s access)\n",
+		CTRACE(tfp, "HTAA_checkAuthorization: %s (%s access)\n",
 			    "Gatewaying -- skipping authorization check",
 			    acc_method);
 	    }
@@ -521,15 +479,14 @@ PUBLIC int HTAA_checkAuthorization ARGS4(CONST char *,	url,
 		htaa_user && htaa_user->username
 		? htaa_user->username : "");
 	fflush(htaa_logfile);	/* Actually update it on disk */
-	if (TRACE)
-	    fprintf(stderr, "Log: %24.24s %s %s %s %s %s\n",
-			    ctime(&theTime),
-			    HTClientHost ? HTClientHost : "local",
-			    method_name,
-			    url,
-			    status_name(HTAAFailReason),
-			    htaa_user && htaa_user->username
-			    ? htaa_user->username : "");
+	CTRACE(tfp, "Log: %24.24s %s %s %s %s %s\n",
+		    ctime(&theTime),
+		    HTClientHost ? HTClientHost : "local",
+		    method_name,
+		    url,
+		    status_name(HTAAFailReason),
+		    htaa_user && htaa_user->username
+		    ? htaa_user->username : "");
     }
 
     switch (HTAAFailReason) {
@@ -537,7 +494,6 @@ PUBLIC int HTAA_checkAuthorization ARGS4(CONST char *,	url,
       case HTAA_NO_AUTH:
       case HTAA_NOT_MEMBER:
 	return 401;
-	break;
 
       case HTAA_BY_RULE:
       case HTAA_IP_MASK:
@@ -547,16 +503,13 @@ PUBLIC int HTAA_checkAuthorization ARGS4(CONST char *,	url,
       case HTAA_DOTDOT:
       case HTAA_HTBIN:
 	return 403;
-	break;
 
       case HTAA_NOT_FOUND:
 	return 404;
-	break;
 
       case HTAA_OK:
       case HTAA_OK_GATEWAY:
 	return 200;
-	break;
 
       default:
 	return 500;
@@ -593,7 +546,6 @@ PRIVATE char *compose_scheme_specifics ARGS2(HTAAScheme,	scheme,
 		    (realm ? realm : "UNKNOWN"));
 	    return result;
 	}
-	break;
 
       case HTAA_PUBKEY:
 	{
@@ -604,7 +556,6 @@ PRIVATE char *compose_scheme_specifics ARGS2(HTAAScheme,	scheme,
 		    "PUBKEY-NOT-IMPLEMENTED");
 	    return result;
 	}
-	break;
       default:
 	return NULL;
     }
@@ -630,28 +581,28 @@ PRIVATE char *compose_scheme_specifics ARGS2(HTAAScheme,	scheme,
 PUBLIC char *HTAA_composeAuthHeaders NOARGS
 {
     static char *result = NULL;
-    HTAAScheme scheme;
+    int  n;
     char *scheme_name;
     char *scheme_params;
     HTAAProt *prot = HTAA_getCurrentProtection();
 
     if (!prot) {
-	if (TRACE)
-	    fprintf(stderr, "%s %s\n",
-			    "HTAA_composeAuthHeaders: Document not protected",
-			    "-- why was this function called??");
+	CTRACE(tfp, "%s %s\n",
+		    "HTAA_composeAuthHeaders: Document not protected",
+		    "-- why was this function called??");
 	return NULL;
+    } else {
+	CTRACE(tfp, "HTAA_composeAuthHeaders: for file `%s'\n",
+		    prot->filename);
     }
-    else if (TRACE)
-	fprintf(stderr, "HTAA_composeAuthHeaders: for file `%s'\n",
-			prot->filename);
 
     FREE(result);	/* From previous call */
     if (!(result = (char*)malloc(4096)))	/* @@ */
 	outofmem(__FILE__, "HTAA_composeAuthHeaders");
     *result = '\0';
 
-    for (scheme=0; scheme < HTAA_MAX_SCHEMES; scheme++) {
+    for (n = 0; n < (int) HTAA_MAX_SCHEMES; n++) {
+	HTAAScheme scheme = (HTAAScheme) n;
 	if (-1 < HTList_indexOf(prot->valid_schemes, (void*)scheme)) {
 	    if ((scheme_name = HTAAScheme_name(scheme))) {
 		scheme_params = compose_scheme_specifics(scheme,prot);
@@ -663,9 +614,10 @@ PUBLIC char *HTAA_composeAuthHeaders NOARGS
 		}
 		strcat(result, "\r\n");
 	    } /* scheme name found */
-	    else if (TRACE)
-		fprintf(stderr, "HTAA_composeAuthHeaders: %s %d\n",
-				"No name found for scheme number", scheme);
+	    else {
+		CTRACE(tfp, "HTAA_composeAuthHeaders: %s %d\n",
+			    "No name found for scheme number", scheme);
+	    }
 	} /* scheme valid for requested document */
     } /* for every scheme */
 

@@ -8,12 +8,11 @@
 **	translation necessary to
 **	represent a document. It is a linked list of styles.
 */
+
 #include <HTUtils.h>
 #include <HTStyle.h>
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*	Create a new style
 */
@@ -142,7 +141,7 @@ HTStyle * HTStyleDump (HTStyle * style)
 {
     int tab;
     NXTextStyle *p = style->paragraph;
-    printf("Style %d `%s' SGML:%s. Font %s %.1f point.\n",
+    printf(gettext("Style %d `%s' SGML:%s. Font %s %.1f point.\n"),
 	style,
 	style->name,
 	style->SGMLTag,
@@ -150,8 +149,8 @@ HTStyle * HTStyleDump (HTStyle * style)
 	style->fontSize);
     if (p) {
 	printf(
-	"\tIndents: first=%.0f others=%.0f, Height=%.1f Desc=%.1f\n"
-	"\tAlign=%d, %d tabs. (%.0f before, %.0f after)\n",
+	gettext("\tIndents: first=%.0f others=%.0f, Height=%.1f Desc=%.1f\n"
+	"\tAlign=%d, %d tabs. (%.0f before, %.0f after)\n"),
 	    p->indent1st,
 	    p->indent2nd,
 	    p->lineHt,
@@ -162,7 +161,7 @@ HTStyle * HTStyleDump (HTStyle * style)
 	    style->spaceAfter);
 
 	for (tab=0; tab < p->numTabs; tab++) {
-	    printf("\t\tTab kind=%d at %.0f\n",
+	    printf(gettext("\t\tTab kind=%d at %.0f\n"),
 		    p->tabs[tab].kind,
 		    p->tabs[tab].x);
 	}
@@ -184,7 +183,7 @@ HTStyle * HTStyleNamed ARGS2 (HTStyleSheet *,self, CONST char *,name)
     HTStyle * scan;
     for (scan=self->styles; scan; scan=scan->next)
 	if (0==strcmp(scan->name, name)) return scan;
-    if (TRACE) fprintf(stderr, "StyleSheet: No style named `%s'\n", name);
+    CTRACE(tfp, "StyleSheet: No style named `%s'\n", name);
     return NULL;
 }
 
@@ -235,8 +234,8 @@ HTStyle * HTStyleForRun (HTStyleSheet *self, NXRun *run)
 	    }
 	}
     }
-    if (TRACE) fprintf(stderr, "HTStyleForRun: Best match for style is %d out of 18\n",
-			 bestMatch);
+    CTRACE(tfp, "HTStyleForRun: Best match for style is %d out of 18\n",
+		 bestMatch);
     return best;
 }
 #endif /* NEXT_SUPRESS */
@@ -325,7 +324,7 @@ HTStyleSheet * HTStyleSheetRead(HTStyleSheet * self, NXStream * stream)
     HTStyle * style;
     char styleName[80];
     NXScanf(stream, " %d ", &numStyles);
-    if (TRACE) fprintf(stderr, "Stylesheet: Reading %d styles\n", numStyles);
+    CTRACE(tfp, "Stylesheet: Reading %d styles\n", numStyles);
     for (i=0; i<numStyles; i++) {
 	NXScanf(stream, "%s", styleName);
 	style = HTStyleNamed(self, styleName);
@@ -353,7 +352,7 @@ HTStyleSheet * HTStyleSheetWrite(HTStyleSheet * self, NXStream * stream)
     for(style=self->styles; style; style=style->next) numStyles++;
     NXPrintf(stream, "%d\n", numStyles);
 
-    if (TRACE) fprintf(stderr, "StyleSheet: Writing %d styles\n", numStyles);
+    CTRACE(tfp, "StyleSheet: Writing %d styles\n", numStyles);
     for (style=self->styles; style; style=style->next) {
 	NXPrintf(stream, "%s ", style->name);
 	(void) HTStyleWrite(style, stream);

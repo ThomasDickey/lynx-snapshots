@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTParse.h>
 #include <HTList.h>
 #include <HTAlert.h>
@@ -11,18 +10,9 @@
 #include <LYClean.h>
 #include <LYGetFile.h>
 #include <LYDownload.h>
-#include <LYSystem.h>
-#ifdef VMS
-#include <HTVMSUtils.h>
-#endif /* VMS */
-#ifdef DOSPATH
-#include <HTDOS.h>
-#endif
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
  *  LYDownload takes a URL and downloads it using a user selected
@@ -37,7 +27,7 @@
 PUBLIC BOOLEAN LYDidRename = FALSE;
 #endif /* VMS */
 
-PRIVATE char LYValidDownloadFile[256] = "\0";
+PRIVATE char LYValidDownloadFile[LY_MAXPATH] = "\0";
 
 PUBLIC void LYDownload ARGS1(
 	char *, 	line)
@@ -49,7 +39,7 @@ PUBLIC void LYDownload ARGS1(
     char command[512];
     char *cp, *cp1;
     lynx_html_item_type *download_command = 0;
-    int c, len;
+    int c;
     FILE *fp;
     int ch, recall;
     int FnameTotal;
@@ -85,6 +75,7 @@ PUBLIC void LYDownload ARGS1(
 	 *  Go past "SugFile=".
 	 */
 	sug_file += 8;
+	HTUnEscape(sug_file);
     }
 
     if ((file = (char *)strstr(Line, "File=")) == NULL)
@@ -104,6 +95,7 @@ PUBLIC void LYDownload ARGS1(
     }
 
 #ifdef DIRED_SUPPORT
+    /* FIXME: use HTLocalName */
     if (!strncmp(file, "file://localhost", 16))
 	file += 16;
     else if (!strncmp(file, "file:", 5))
@@ -215,12 +207,7 @@ check_recall:
 	}
 
 	if (no_dotfiles || !show_dotfiles) {
-	  if (*buffer == '.' ||
-#ifdef VMS
-	      ((cp = strrchr(buffer, ':')) && *(cp+1) == '.') ||
-	      ((cp = strrchr(buffer, ']')) && *(cp+1) == '.') ||
-#endif /* VMS */
-	      ((cp = strrchr(buffer, '/')) && *(cp+1) == '.')) {
+	  if (*LYPathLeaf(buffer) == '.') {
 		HTAlert(FILENAME_CANNOT_BE_DOT);
 		_statusline(NEW_FILENAME_PROMPT);
 		FirstRecall = TRUE;
@@ -244,17 +231,8 @@ check_recall:
 	if ((cp = strchr(buffer, '~'))) {
 	    *(cp++) = '\0';
 	    strcpy(command, buffer);
-	    if ((len = strlen(command)) > 0 && command[len-1] == '/')
-		command[len-1] = '\0';
-#ifdef DOSPATH
-	    strcat(command, HTDOS_wwwName((char *)Home_Dir()));
-#else
-#ifdef VMS
-	    strcat(command, HTVMS_wwwName((char *)Home_Dir()));
-#else
-	    strcat(command, Home_Dir());
-#endif /* VMS */
-#endif /* DOSPATH */
+	    LYTrimPathSep(command);
+	    strcat(command, wwwName(Home_Dir()));
 	    strcat(command, cp);
 	    strcpy(buffer, command);
 	}
@@ -271,17 +249,25 @@ check_recall:
 	    strcpy(buffer, command);
 	}
 #else
-	if (*buffer != '/')
+
+#ifndef __EMX__
+	if (!LYIsPathSep(*buffer)) {
+#if defined(__DJGPP__) || defined(_WINDOWS)
+	    if (strchr(buffer, ':') != NULL)
+		cp = NULL;
+	    else
+#endif /*  __DJGPP__ || _WINDOWS */
 	    cp = getenv("PWD");
+	}
 	else
+#endif /* __EMX__*/
 	    cp = NULL;
+
+	LYTrimPathSep(cp);
+
 	if (cp) {
 	    sprintf(command, "%s/%s", cp, buffer);
-#ifdef DOSPATH
-	    strcpy(buffer, HTDOS_name(command));
-#else
-	    strcpy(buffer, command);
-#endif
+	    strcpy(buffer, HTSYS_name(command));
 	}
 #endif /* VMS */
 
@@ -322,6 +308,8 @@ check_recall:
 	/*
 	 *  See if we can write to it.
 	 */
+	CTRACE(tfp, "LYDownload: filename is %s", buffer);
+
 	if ((fp = fopen(buffer, "w")) != NULL) {
 	    fclose(fp);
 	    remove(buffer);
@@ -334,29 +322,21 @@ check_recall:
 	}
 	SecondS = TRUE;
 
-	_statusline(SAVING);
-	sleep(InfoSecs);
+	HTInfoMsg(SAVING);
 #ifdef VMS
 	/*
 	 *  Try rename() first. - FM
 	 */
-	if (TRACE)
-	    fprintf(stderr, "command: rename(%s, %s)\n", file, buffer);
+	CTRACE(tfp, "command: rename(%s, %s)\n", file, buffer);
 	if (rename(file, buffer)) {
 	    /*
 	     *	Failed.  Use spawned COPY_COMMAND. - FM
 	     */
-	    if (TRACE)
-		fprintf(stderr, "         FAILED!\n");
+	    CTRACE(tfp, "         FAILED!\n");
 	    sprintf(command, COPY_COMMAND, file, buffer);
-	    if (TRACE)
-		fprintf(stderr, "command: %s\n", command);
-	    fflush(stderr);
-	    fflush(stdout);
+	    CTRACE(tfp, "command: %s\n", command);
 	    stop_curses();
-	    system(command);
-	    fflush(stdout);
-	    fflush(stderr);
+	    LYSystem(command);
 	    start_curses();
 	} else {
 	    /*
@@ -368,6 +348,8 @@ check_recall:
 	}
 	chmod(buffer, HIDE_CHMOD);
 #else /* Unix: */
+
+#if !( defined(__EMX__) || defined(__DJGPP__) )
 	/*
 	 *  Prevent spoofing of the shell.
 	 */
@@ -376,14 +358,15 @@ check_recall:
 	sprintf(command, "%s %s %s", COPY_PATH, cp, cp1);
 	FREE(cp);
 	FREE(cp1);
-	if (TRACE)
-	    fprintf(stderr, "command: %s\n", command);
-	fflush(stderr);
-	fflush(stdout);
+#else
+	/* DJGPP: no " or space possible in 8+3 dos filenames.     */
+	/* (but EMX probably allows spaces which should be quoted, */
+	/* like Win32 LFN does...)                                 */
+	sprintf(command, "%s %s %s", COPY_PATH, file, buffer);
+#endif /* __EMX__ */
+	CTRACE(tfp, "command: %s\n", command);
 	stop_curses();
-	system(command);
-	fflush(stdout);
-	fflush(stderr);
+	LYSystem(command);
 	start_curses();
 #if defined(UNIX)
 	LYRelaxFilePermissions(buffer);
@@ -496,12 +479,7 @@ check_recall:
 		}
 
 		if (no_dotfiles || !show_dotfiles) {
-		    if (*buffer == '.' ||
-#ifdef VMS
-		       ((cp = strrchr(buffer, ':')) && *(cp+1) == '.') ||
-		       ((cp = strrchr(buffer, ']')) && *(cp+1) == '.') ||
-#endif /* VMS */
-		       ((cp = strrchr(buffer, '/')) && *(cp+1) == '.')) {
+		    if (*LYPathLeaf(buffer) == '.') {
 			HTAlert(FILENAME_CANNOT_BE_DOT);
 			_statusline(NEW_FILENAME_PROMPT);
 			goto again;
@@ -546,19 +524,13 @@ check_recall:
 #endif /* VMS */
 
 	} else {
-	    _statusline(MISCONF_DOWNLOAD_COMMAND);
-	    sleep(AlertSecs);
+	    HTAlert(MISCONF_DOWNLOAD_COMMAND);
 	    goto failed;
 	}
 
-	if (TRACE)
-	    fprintf(stderr, "command: %s\n", command);
+	CTRACE(tfp, "command: %s\n", command);
 	stop_curses();
-	fflush(stderr);
-	fflush(stdout);
-	system(command);
-	fflush(stderr);
-	fflush(stdout);
+	LYSystem(command);
 	start_curses();
 	/* don't remove(file); */
     }
@@ -582,21 +554,19 @@ check_recall:
     return;
 
 failed:
-    _statusline(CANNOT_DOWNLOAD_FILE);
-    sleep(AlertSecs);
+    HTAlert(CANNOT_DOWNLOAD_FILE);
     FREE(Line);
     return;
 
 cancelled:
-    _statusline(CANCELLING);
-    sleep(InfoSecs);
+    HTInfoMsg(CANCELLING);
     FREE(Line);
     return;
 }
 
 /*
  *  LYdownload_options writes out the current download choices to
- *  a file so that the user can select printers in the same way that
+ *  a file so that the user can select downloaders in the same way that
  *  they select all other links.  Download links look like:
  *  LYNXDOWNLOAD://Method=<#>/File=<STRING>/SugFile=<STRING>
  */
@@ -604,90 +574,85 @@ PUBLIC int LYdownload_options ARGS2(
 	char **,	newfile,
 	char *, 	data_file)
 {
-    static char tempfile[256];
-    static BOOLEAN first = TRUE;
-    static char download_filename[256];
+    static char tempfile[LY_MAXPATH];
+    char *downloaded_url = NULL;
     char *sug_filename = NULL;
     FILE *fp0;
     lynx_html_item_type *cur_download;
     int count;
 
-    if (first) {
-	tempname(tempfile, NEW_FILE);
-	first = FALSE;
-#if defined (VMS) || defined (DOSPATH)
-    sprintf(download_filename, "file://localhost/%s", tempfile);
-#else
-    sprintf(download_filename, "file://localhost%s", tempfile);
-#endif /* VMS */
-#ifdef VMS
-    } else {
-	remove(tempfile);   /* Remove duplicates on VMS. */
-#endif /* VMS */
-    }
-
     /*
      *	Get a suggested filename.
      */
+    StrAllocCopy(downloaded_url, *newfile);
     StrAllocCopy(sug_filename, *newfile);
     change_sug_filename(sug_filename);
 
-    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
+    LYRemoveTemp(tempfile);
+    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
+    LYLocalFileToURL(newfile, tempfile);
 
     LYstrncpy(LYValidDownloadFile,
 	      data_file,
 	      (sizeof(LYValidDownloadFile) - 1));
-    StrAllocCopy(*newfile, download_filename);
     LYforce_no_cache = TRUE;  /* don't cache this doc */
 
-    fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
-		 DOWNLOAD_OPTIONS_TITLE);
 
-    fprintf(fp0,"<h1>Download Options (%s Version %s)</h1><pre>\n",
-				       LYNX_NAME, LYNX_VERSION);
+    BeginInternalPage(fp0, DOWNLOAD_OPTIONS_TITLE, DOWNLOAD_OPTIONS_HELP);
 
+    fprintf(fp0, "<pre>\n");
+    fprintf(fp0, "<em>%s</em> %s\n",
+    	    gettext("Downloaded link:"),
+	    downloaded_url);
 
-    fprintf(fp0, "   You have the following download choices.\n");
-    fprintf(fp0, "   Please select one:\n\n");
+    fprintf(fp0, "<em>%s</em> %s\n",
+    	    gettext("Suggested file name:"),
+	    sug_filename);
 
-    if(!no_disk_save && !child_lynx)
+    fprintf(fp0, "\n%s\n",
+	    (user_mode == NOVICE_MODE)
+	    ? gettext("Standard download options:")
+	    : gettext("Download options:"));
+
+    if (!no_disk_save && !child_lynx) {
 #ifdef DIRED_SUPPORT
 	/*
 	 *  Disable save to disk option for local files.
 	 */
 	if (!lynx_edit_mode)
 #endif /* DIRED_SUPPORT */
-	    fprintf(fp0,"   \
-<a href=\"LYNXDOWNLOAD://Method=-1/File=%s/SugFile=%s%s\">Save to disk</a>\n",
-	   data_file, (lynx_save_space ? lynx_save_space : ""), sug_filename);
-#ifdef DIRED_SUPPORT
-	else {}
-#endif /* DIRED_SUPPORT */
-    else
-	fprintf(fp0,"   Save to disk disabled.\n");
+	fprintf(fp0,
+		"  <a href=\"LYNXDOWNLOAD://Method=-1/File=%s/SugFile=%s%s\">%s</a>\n",
+		data_file,
+		(lynx_save_space ? lynx_save_space : ""),
+		sug_filename,
+		gettext("Save to disk"));
+    } else {
+	fprintf(fp0, "   <em>%s</em>\n", gettext("Save to disk disabled."));
+    }
+
+    if (user_mode == NOVICE_MODE)
+	fprintf(fp0, "\n%s\n", gettext("Local additions:"));
 
     if (downloaders != NULL) {
 	for (count = 0, cur_download = downloaders; cur_download != NULL;
 			cur_download = cur_download->next, count++) {
 	    if (!no_download || cur_download->always_enabled) {
-		fprintf(fp0,"   \
-<a href=\"LYNXDOWNLOAD://Method=%d/File=%s/SugFile=%s\">",
-				count,data_file, sug_filename);
-		fprintf(fp0, (cur_download->name ?
-				cur_download->name : "No Name Given"));
+		fprintf(fp0, "   <a href=\"LYNXDOWNLOAD://Method=%d/File=%s/SugFile=%s\">",
+			count,data_file, sug_filename);
+		fprintf(fp0, "%s", (cur_download->name ?
+			cur_download->name : gettext("No Name Given")));
 		fprintf(fp0,"</a>\n");
 	    }
 	}
-    } else {
-	fprintf(fp0, "\n\
-No other download methods have been defined yet.  You may define\n\
-an unlimited number of download methods using the lynx.cfg file.\n");
     }
-    fprintf(fp0, "</pre>\n</body>\n");
-    fclose(fp0);
+
+    fprintf(fp0, "</pre>\n");
+    EndInternalPage(fp0);
+    LYCloseTempFP(fp0);
 
     /*
      *	Free off temp copy.

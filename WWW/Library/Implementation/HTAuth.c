@@ -14,7 +14,6 @@
 */
 
 #include <HTUtils.h>
-#include <string.h>
 #include <HTPasswd.h>	/* Password file routines	*/
 #include <HTAssoc.h>
 #include <HTAuth.h>	/* Implemented here		*/
@@ -99,8 +98,7 @@ PRIVATE HTAAUser *decompose_auth_string ARGS2(char *,		authstring,
 */
     username = cleartext;
     if (!(password = strchr(cleartext, ':'))) {
-	if (TRACE)
-	    fprintf(stderr, "%s %s\n",
+	CTRACE(tfp, "%s %s\n",
 		    "decompose_auth_string: password field",
 		    "missing in authentication string.\n");
 	return NULL;
@@ -116,9 +114,9 @@ PRIVATE HTAAUser *decompose_auth_string ARGS2(char *,		authstring,
 	    (*(timestamp++)   ='\0'), !(browsers_key=strchr(timestamp,':')) ||
 	    (*(browsers_key++)='\0')) {
 
-	    if (TRACE) fprintf(stderr, "%s %s\n",
-			       "decompose_auth_string: Pubkey scheme",
-			       "fields missing in authentication string");
+	    CTRACE(tfp, "%s %s\n",
+		        "decompose_auth_string: Pubkey scheme",
+		        "fields missing in authentication string");
 	    return NULL;
 	}
     }
@@ -132,13 +130,12 @@ PRIVATE HTAAUser *decompose_auth_string ARGS2(char *,		authstring,
     user->timestamp  = timestamp;
     user->secret_key = browsers_key;
 
-    if (TRACE) {
-	if (scheme==HTAA_BASIC)
-	    fprintf(stderr, "decompose_auth_string: %s (%s,%s)\n",
+    if (scheme == HTAA_BASIC) {
+	CTRACE(tfp, "decompose_auth_string: %s (%s,%s)\n",
 		    "Basic scheme authentication string:",
 		    username, password);
-	else
-	    fprintf(stderr, "decompose_auth_string: %s (%s,%s,%s,%s,%s)\n",
+    } else {
+	CTRACE(tfp, "decompose_auth_string: %s (%s,%s,%s,%s,%s)\n",
 		    "Pubkey scheme authentication string:",
 		    username, password, i_net_adr, timestamp, browsers_key);
     }
@@ -148,13 +145,13 @@ PRIVATE HTAAUser *decompose_auth_string ARGS2(char *,		authstring,
 
 
 
-PRIVATE BOOL HTAA_checkTimeStamp ARGS1(CONST char *, timestamp)
+PRIVATE BOOL HTAA_checkTimeStamp ARGS1(CONST char *, timestamp GCC_UNUSED)
 {
     return NO;		/* This is just a stub */
 }
 
 
-PRIVATE BOOL HTAA_checkInetAddress ARGS1(CONST char *, i_net_adr)
+PRIVATE BOOL HTAA_checkInetAddress ARGS1(CONST char *, i_net_adr GCC_UNUSED)
 {
     return NO;		/* This is just a stub */
 }
@@ -201,7 +198,6 @@ PUBLIC HTAAUser *HTAA_authenticate ARGS3(HTAAScheme,	scheme,
 	    else
 		return NULL;
 	}
-	break;
       default:
 	/* Other authentication routines go here */
 	return NULL;

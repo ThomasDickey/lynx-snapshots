@@ -1,10 +1,9 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.17 Wed, 25 Mar 1998 06:58:54 -0700 dickey @
+ * @Id: LYStyle.c 1.20 Tue, 10 Nov 1998 12:47:38 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
-#include <tcp.h>
 #include <LYSignal.h>
 #include <LYGlobalDefs.h>
 
@@ -50,9 +49,6 @@ PUBLIC int	s_alink  = NOSTYLE, s_a     = NOSTYLE, s_status = NOSTYLE,
 PRIVATE int colorPairs = 0;
 PRIVATE int last_fA = COLOR_WHITE, last_bA = COLOR_BLACK;
 
-
-#define FREE(x) if (x) {free(x); x = NULL;}
-
 /* icky parsing of the style options */
 PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*,element)
 {
@@ -60,8 +56,7 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
     int mA = 0, fA = default_fg, bA = default_bg, cA = A_NORMAL;
     int newstyle = hash_code(element);
 
-    if (TRACE)
-	fprintf(stderr, "CSS(PA):style d=%d / h=%d, e=%s\n", style, newstyle,element);
+    CTRACE(tfp, "CSS(PA):style d=%d / h=%d, e=%s\n", style, newstyle,element);
 
     for (i = 0; i <7; i++)
     {
@@ -70,8 +65,7 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
 	    mA = ncursesMono[i];
 	}
     }
-    if (TRACE)
-	fprintf(stderr, "CSS(CP):%d\n", colorPairs);
+    CTRACE(tfp, "CSS(CP):%d\n", colorPairs);
 
     fA = check_color(fg, default_fg);
     bA = check_color(bg, default_bg);
@@ -125,12 +119,12 @@ PRIVATE void parse_style ARGS1(char*,buffer)
 
     if(!tmp)
     {
-	fprintf (stderr, "\
+	fprintf (stderr, gettext("\
 Syntax Error parsing style in lss file:\n\
 [%s]\n\
 The line must be of the form:\n\
 OBJECT:MONO:COLOR (ie em:bold:brightblue:white)\n\
-where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n", buffer);
+where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
 	if (!dump_output_immediately) {
 #ifndef NOSIGHUP
 	    (void) signal(SIGHUP, SIG_DFL);
@@ -177,13 +171,9 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n", buffer);
 	}
     }
 
-    if (TRACE)
-    {
-	int bkt = hash_code(element);
-	fprintf(stderr, "CSSPARSE:%s => %d %s\n",
-	    element, bkt,
-	    (hashStyles[bkt].name ? "used" : ""));
-    }
+    CTRACE(tfp, "CSSPARSE:%s => %d %s\n",
+		element, hash_code(element),
+		(hashStyles[hash_code(element)].name ? "used" : ""));
 
     strtolower(element);
 
@@ -235,8 +225,7 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n", buffer);
 	{
 	    if (!strcasecomp (HTML_dtd.tags[i].name, element))
 	    {
-		if (TRACE)
-		    fprintf(stderr, "PARSECSS:applying style <%s,%s,%s> for HTML_%s\n",mono,fg,bg,HTML_dtd.tags[i].name);
+		CTRACE(tfp, "PARSECSS:applying style <%s,%s,%s> for HTML_%s\n",mono,fg,bg,HTML_dtd.tags[i].name);
 			parse_attributes(mono,fg,bg,i+STARTAT,element);
 		break;
 	    }
@@ -318,8 +307,7 @@ PUBLIC void parse_userstyles NOARGS
 
 	while ((name = HTList_nextObject(cur)) != NULL)
 	{
-		if (TRACE)
-			fprintf(stderr, "LSS:%s\n", name ? name : "!?! empty !?!");
+		CTRACE(tfp, "LSS:%s\n", name ? name : "!?! empty !?!");
 		if (name != NULL)
 		    parse_style(name);
 	}
@@ -334,8 +322,7 @@ PUBLIC void HStyle_addStyle ARGS1(char*,buffer)
 	if (lss_styles == NULL)
 		lss_styles = HTList_new();
 	strtolower(name);
-	if (TRACE)
-		fprintf(stderr, "READCSS:%s\n", name ? name : "!?! empty !?!");
+	CTRACE(tfp, "READCSS:%s\n", name ? name : "!?! empty !?!");
 	HTList_addObject (lss_styles, name);
 }
 
@@ -366,16 +353,14 @@ PUBLIC int style_readFromFile ARGS1(char*, file)
     char buffer[1024];
     int len;
 
-    if (TRACE)
-	fprintf(stderr, "CSS:Reading styles from file: %s\n", file ? file : "?!? empty ?!?");
+    CTRACE(tfp, "CSS:Reading styles from file: %s\n", file ? file : "?!? empty ?!?");
     if (file == NULL || *file == '\0')
 	return -1;
     fh = fopen(file, "r");
     if (!fh)
     {
 	/* this should probably be an alert or something */
-	if (TRACE)
-	    fprintf(stderr, "CSS:Can't open style file %s, using defaults\n", file);
+	CTRACE(tfp, "CSS:Can't open style file %s, using defaults\n", file);
 	return -1;
     }
 
