@@ -14,6 +14,7 @@
 #include <LYClean.h>
 #include <LYCharSets.h>
 #include <LYCharUtils.h>
+#include <LYMainLoop.h>
 
 #ifdef DJGPP_KEYHANDLER
 #include <bios.h>
@@ -2188,6 +2189,11 @@ PUBLIC int HTCheckForInterrupt NOARGS
     else if (display_partial && (NumOfLines_partial > 2))
     /* OK, we got several lines from new document and want to scroll... */
     {
+	/* There is a subset of mainloop() actions available at this stage:
+	** no new getfile() cyrcle possible until the previous finished.
+	** Currently we have scrolling and toggling of trace log here.
+	*/
+
 	int res;
 	switch (keymap[c+1])
 	{
@@ -2252,6 +2258,11 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	    break;
 	case LYK_REFRESH :
 	    break ;
+	case LYK_TRACE_TOGGLE:	/*  Toggle TRACE mode. */
+	    WWW_TraceFlag = ! WWW_TraceFlag;
+	    if (LYOpenTraceLog())
+		HTUserMsg(WWW_TraceFlag ? TRACE_ON : TRACE_OFF);
+	    break;
 	default :
 	    return ((int)FALSE) ;
 	}
@@ -5457,7 +5468,7 @@ PUBLIC int putenv ARGS1(
       new_environ[size] = (char *) string;
       new_environ[size + 1] = NULL;
       if (last_environ != NULL)
-	FREE ((char *) last_environ);
+	FREE (last_environ);
       last_environ = new_environ;
       environ = new_environ;
     }
@@ -5876,12 +5887,12 @@ PUBLIC void LYRemoveTemp ARGS1(
 		} else {
 		    ly_temp = p->next;
 		}
+		if (p->file != 0)
+		    fclose(p->file);
 		code = HTSYS_remove(name);
 		CTRACE(tfp, "...LYRemoveTemp done(%d)%s\n", code,
 		       (p->file != 0) ? ", closed" : "");
 		CTRACE_FLUSH(tfp);
-		if (p->file != 0)
-		    fclose(p->file);
 		FREE(p->name);
 		FREE(p);
 		break;
@@ -6111,7 +6122,7 @@ PUBLIC void BeginInternalPage ARGS3(
 {
     fprintf(fp0, "<html>\n<head>\n");
     LYAddMETAcharsetToFD(fp0, -1);
-    if (!strcmp(Title, LIST_PAGE_TITLE)) {
+    if (LYIsListpageTitle(Title)) {
 	if (strchr(HTLoadedDocumentURL(), '"') == NULL) {
 	    char *Address = NULL;
 	    /*

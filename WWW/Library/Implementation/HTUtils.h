@@ -5,9 +5,9 @@
 
  */
 
-#ifndef DEBUG
-#define DEBUG   /* Noone ever turns this off as trace is too important */
-#endif          /* Keep option for really small memory applications tho */
+#ifndef NO_LYNX_TRACE
+#define DEBUG   /* Turns on trace; turn off for smaller binary */
+#endif
 
 #ifndef HTUTILS_H
 #define HTUTILS_H

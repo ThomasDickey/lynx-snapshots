@@ -901,11 +901,21 @@ PUBLIC void HTAnchor_setTitle ARGS2(
     int i;
 
     if (me) {
-	StrAllocCopy(me->title, title);
-	for (i = 0; me->title[i]; i++) {
-	    if ((unsigned char)me->title[i] == 1 ||
-		(unsigned char)me->title[i] == 2) {
-		me->title[i] = ' ';
+	if (title) {
+	    StrAllocCopy(me->title, title);
+	    for (i = 0; me->title[i]; i++) {
+		if ((unsigned char)me->title[i] == 1 ||
+		    (unsigned char)me->title[i] == 2) {
+		    me->title[i] = ' ';
+		}
+	    }
+	} else {
+	    CTRACE(tfp,"HTAnchor_setTitle: New title is NULL! ");
+	    if (me->title) {
+		CTRACE(tfp,"Old title was \"%s\".\n", me->title);
+		FREE(me->title);
+	    } else {
+		CTRACE(tfp,"Old title was NULL.\n");
 	    }
 	}
     }

@@ -8,7 +8,6 @@
 #include <LYGlobalDefs.h>
 #include <LYEdit.h>
 #include <LYStrings.h>
-#include <LYUtils.h>
 #ifdef VMS
 #include <unixio.h>
 #endif /* VMS */
@@ -21,16 +20,19 @@ PUBLIC BOOLEAN editor_can_position NOARGS
     return (strstr(editor, "sedt") || strstr(editor, "SEDT"));
 #else
     return (strstr(editor, "emacs") || strstr(editor, "vi") ||
-	strstr(editor, "pico") || strstr(editor, "jove") ||
-	strstr(editor, "jed"));
+	strstr(editor, "pico")  || strstr(editor, "jove")   ||
+ 	strstr(editor, "jed")   || strstr(editor, "joe")    ||
+ 	strstr(editor, "jstar") || strstr(editor, "jmacs")  ||
+ 	strstr(editor, "rjoe")  || strstr(editor, "jpico"));
 #endif
 }
 
 /*
- *  In edit mode invoke either emacs, vi, pico, jove, jed sedt or the
- *  default editor to display and edit the current file.
- *  For emacs, vi, pico, jove and jed, Lynx will open the file to the
- *  same line that the screen cursor is on when editing is invoked.
+ *  In edit mode invoke the given (or default) editor to display and edit the
+ *  current file.  For editors listed in 'editor_can_position()', Lynx
+ *  will open the file to the same line that the screen cursor is on (or
+ *  close...) when editing is invoked.
+ *
  *  Returns FALSE if file is uneditable.
  */
 PUBLIC int edit_current_file ARGS3(

@@ -6,6 +6,10 @@ dnl
 dnl Created: 1997/1/28
 dnl Updated: 1998/12/11
 dnl
+dnl The autoconf used in Lynx development is GNU autoconf, patched
+dnl by Tom Dickey.  See your local GNU archives, and this URL:
+dnl http://www.clark.net/pub/dickey/autoconf/autoconf.html
+dnl
 dnl ---------------------------------------------------------------------------
 dnl ---------------------------------------------------------------------------
 dnl
@@ -82,9 +86,11 @@ __argz_count __argz_stringify __argz_next])
        sed -e '/^#/d' $srcdir/intl/$msgformat-msg.sed > intl/po2msg.sed
      fi
      dnl po2tbl.sed is always needed.
-     rm -f intl/po2tbl.sed
-     sed -e '/^#.*[^\\]$/d' -e '/^#$/d' \
-       $srcdir/intl/po2tbl.sed.in > intl/po2tbl.sed
+     if test -f $srcdir/intl/po2tbl.sed.in ; then
+       rm -f intl/po2tbl.sed
+       sed -e '/^#.*[^\\]$/d' -e '/^#$/d' \
+         $srcdir/intl/po2tbl.sed.in > intl/po2tbl.sed
+     fi
    fi
 
    dnl In the intl/makefile.in we have a special dependency which only
@@ -128,11 +134,13 @@ __argz_count __argz_stringify __argz_next])
    else
      posrcprefix="../"
    fi
+   if test -f $srcdir/po/POTFILES.in ; then
    if test "$USE_NLS" = "yes"; then
      test -d po || mkdir po
      rm -f po/POTFILES
      sed -e "/^#/d" -e "/^\$/d" -e "s,.*,	$posrcprefix& \\\\," -e "\$s/\(.*\) \\\\/\1/" \
 	  < $srcdir/po/POTFILES.in > po/POTFILES
+   fi
    fi
 ])dnl
 dnl ---------------------------------------------------------------------------
@@ -832,7 +840,7 @@ AC_CACHE_VAL(cf_cv_ebcdic,[
    Use compile-time rather than run-time tests for cross-compiler
    tolerance.  */
 #if '0'!=240
-#error "Character set is not EBCDIC"
+make an error "Character set is not EBCDIC"
 #endif ],
 [ # TryCompile action if true
 cf_cv_ebcdic=yes ],
@@ -1163,7 +1171,7 @@ dnl
 dnl FIXME: the inner cases will probably need work on the header files.
 AC_DEFUN([CF_INET_ADDR],[
 AC_CACHE_CHECK(for inet_aton function,cf_cv_have_inet_aton,[
-AC_TRY_LINK([
+AC_TRY_LINK([#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -1174,7 +1182,7 @@ if test "$cf_cv_have_inet_aton" = yes ; then
     AC_DEFINE(HAVE_INET_ATON)
 else
     AC_CACHE_CHECK(for inet_addr function,cf_cv_have_inet_addr,[
-    AC_TRY_LINK([
+    AC_TRY_LINK([#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -1187,7 +1195,7 @@ else
 	    for cf_inetlib in -lbind -lresolv
 	    do
 		LIBS="$cf_save_LIBS $cf_inetlib"
-		AC_TRY_LINK([
+		AC_TRY_LINK([#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>

@@ -76,6 +76,9 @@ PUBLIC void LYAddVisitedLink ARGS1(
 #endif /* DIRED_SUPPORT */
 	!strcmp((doc->title ? doc->title : ""), CURRENT_KEYMAP_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), LIST_PAGE_TITLE) ||
+#ifdef EXP_ADDRLIST_PAGE
+	!strcmp((doc->title ? doc->title : ""), ADDRLIST_PAGE_TITLE) ||
+#endif
 	!strcmp((doc->title ? doc->title : ""), SHOWINFO_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), COOKIE_JAR_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), VISITED_LINKS_TITLE) ||

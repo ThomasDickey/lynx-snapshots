@@ -141,8 +141,10 @@ extern GLOBALREF (HTProtocol, HTNewsReply);
 extern GLOBALREF (HTProtocol, HTSNews);
 extern GLOBALREF (HTProtocol, HTSNewsPost);
 extern GLOBALREF (HTProtocol, HTSNewsReply);
+#ifndef DISABLE_GOPHER
 extern GLOBALREF (HTProtocol, HTGopher);
 extern GLOBALREF (HTProtocol, HTCSO);
+#endif /* not DISABLE_GOPHER */
 extern GLOBALREF (HTProtocol, HTFinger);
 #ifdef DIRECT_WAIS
 extern GLOBALREF (HTProtocol, HTWAIS);
@@ -153,7 +155,10 @@ GLOBALREF HTProtocol HTTP, HTTPS, HTFile, HTTelnet, HTTn3270, HTRlogin;
 #ifndef DECNET
 GLOBALREF HTProtocol HTFTP, HTNews, HTNNTP, HTNewsPost, HTNewsReply;
 GLOBALREF HTProtocol HTSNews, HTSNewsPost, HTSNewsReply;
-GLOBALREF HTProtocol HTGopher, HTCSO, HTFinger;
+#ifndef DISABLE_GOPHER
+GLOBALREF HTProtocol HTGopher, HTCSO;
+#endif /* not DISABLE_GOPHER */
+GLOBALREF HTProtocol HTFinger;
 #ifdef DIRECT_WAIS
 GLOBALREF  HTProtocol HTWAIS;
 #endif /* DIRECT_WAIS */
@@ -177,8 +182,10 @@ PRIVATE void HTAccessInit NOARGS			/* Call me once */
     HTRegisterProtocol(&HTSNews);
     HTRegisterProtocol(&HTSNewsPost);
     HTRegisterProtocol(&HTSNewsReply);
+#ifndef DISABLE_GOPHER
     HTRegisterProtocol(&HTGopher);
     HTRegisterProtocol(&HTCSO);
+#endif /* not DISABLE_GOPHER */
     HTRegisterProtocol(&HTFinger);
 #ifdef DIRECT_WAIS
     HTRegisterProtocol(&HTWAIS);

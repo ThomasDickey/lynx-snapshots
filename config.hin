@@ -17,16 +17,19 @@
 #undef DECL_STRSTR
 #undef DECL_SYS_ERRLIST
 #undef DIRED_SUPPORT		/* AC_ARG_WITH(dired) */
+#undef DISABLE_GOPHER		/* CF_ARG_DISABLE(gopher) */
 #undef DISP_PARTIAL		/* CF_ARG_ENABLE(partial) */
 #undef DONT_TRACK_INTERNAL_LINKS /* CF_ARG_DISABLE(internal-links) */
 #undef EBCDIC			/* CF_EBCDIC */
 #undef ENABLE_NLS		/* defined if NLS is requested */
 #undef EXEC_LINKS		/* CF_ARG_ENABLE(exec-links) */
 #undef EXEC_SCRIPTS		/* CF_ARG_ENABLE(exec-scripts) */
-#undef EXP_ALT_BINDINGS		/* AC_ARG_ENABLE(alt-bindings) */
-#undef EXP_CHARTRANS_AUTOSWITCH	/* AC_ARG_ENABLE(font-switch) */
-#undef EXP_KEYBOARD_LAYOUT	/* AC_ARG_ENABLE(kbd-layout) */
-#undef EXP_PERSISTENT_COOKIES	/* AC_ARG_ENABLE(persistent-cookies) */
+#undef EXP_ADDRLIST_PAGE	/* CF_ARG_ENABLE(addrlist-page) */
+#undef EXP_ALT_BINDINGS		/* CF_ARG_ENABLE(alt-bindings) */
+#undef EXP_CHARTRANS_AUTOSWITCH	/* CF_ARG_ENABLE(font-switch) */
+#undef EXP_KEYBOARD_LAYOUT	/* CF_ARG_ENABLE(kbd-layout) */
+#undef EXP_LIBJS		/* CF_ARG_ENABLE(libjs) */
+#undef EXP_PERSISTENT_COOKIES	/* CF_ARG_ENABLE(persistent-cookies) */
 #undef FANCY_CURSES		/* defined by CF_FANCY_CURSES */
 #undef GCC_PRINTF		/* CF_GCC_ATTRIBUTES */
 #undef GCC_UNUSED		/* CF_GCC_ATTRIBUTES */
@@ -118,6 +121,7 @@
 #undef NO_CHANGE_EXECUTE_PERMS	/* CF_ARG_DISABLE(dired-xpermit) */
 #undef NO_CONFIG_INFO		/* CF_ARG_DISABLE(config-info) */
 #undef NO_EXTENDED_HTMLDTD	/* CF_ARG_DISABLE(extended-dtd) */
+#undef NO_LYNX_TRACE		/* CF_ARG_DISABLE(trace) */
 #undef NO_OPTION_FORMS		/* CF_ARG_DISABLE(forms-options) */
 #undef NO_OPTION_MENU		/* CF_ARG_DISABLE(option-menu) */
 #undef NO_PARENT_DIR_REFERENCE	/* configure --disable-parent-dir */

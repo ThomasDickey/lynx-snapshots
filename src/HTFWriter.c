@@ -18,7 +18,6 @@
 #include <HTAlert.h>
 #include <HTFile.h>
 #include <HTPlain.h>
-#include <HTFile.h>
 
 #include <LYStrings.h>
 #include <LYUtils.h>

@@ -16,3 +16,6 @@ Translation in <msgstr>, empty string assume english default.
 Do not forget to include %s properly in your contributed translation! 
  
 A good place to start is with the messages derived from LYMessages_en.h 
+ 
+We are collecting Lynx user contributed message translation files at 
+http://www.slcc.edu/lynx/po/ to avoid increasing the distribution size. 

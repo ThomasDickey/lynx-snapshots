@@ -45,8 +45,9 @@ extern int UCLYhndl_HTFile_for_unspec;
 extern int UCLYhndl_HTFile_for_unrec;
 
 /* easy to type: */
-#define LATIN1   UCGetLYhndl_byMIME("iso-8859-1")
-#define US_ASCII UCGetLYhndl_byMIME("us-ascii")
+extern int LATIN1;     /* UCGetLYhndl_byMIME("iso-8859-1") */
+extern int US_ASCII;   /* UCGetLYhndl_byMIME("us-ascii")   */
+extern int UTF8;       /* UCGetLYhndl_byMIME("utf-8")      */
 
 /*
 In general, Lynx translates letters from document charset to display charset.

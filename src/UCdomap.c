@@ -28,7 +28,7 @@
 #include <LYLeaks.h>
 
 /*
- *  Include tables & parameters.
+ *  Include chartrans tables:
  */
 #include <cp1250_uni.h> 	/* WinLatin2 (cp1250)	*/
 #include <cp1251_uni.h> 	/* WinCyrillic (cp1251) */
@@ -65,9 +65,9 @@
 #include <mnem2_suni.h> 	/* RFC 1345 Mnemonic	*/
 #include <next_uni.h>		/* NeXT character set	*/
 #include <rfc_suni.h>		/* RFC 1345 w/o Intro	*/
-#include <utf8_uni.h>		/* UNICODE UTF 8	*/
+/* #include <utf8_uni.h> */     /* UNICODE UTF 8        */
 #include <viscii_uni.h> 	/* Vietnamese (VISCII)	*/
-#include <iso9945_uni.h>	/* Ukrainian Cyrillic (ISO 9945-2) */
+#include <iso9945uni.h>		/* Ukrainian Cyrillic (ISO 9945-2) */
 #include <cp866u_uni.h>		/* Ukrainian Cyrillic (866) */
 #include <koi8u_uni.h>		/* Ukrainian Cyrillic (koi8-u */
 #ifdef NOTDEFINED
@@ -490,10 +490,11 @@ PRIVATE void UC_con_set_trans ARGS3(
   }
     /*
      *	The font is always 256 characters - so far.
+     *  (fake 0 for built-in charsets like CJK or x-transparent, use .num_n256)
      */
   con_clear_unimap();
 #endif
-    for (i = 0; i < 256; i++) {
+    for (i = 0; i < UCInfo[UC_charset_in_hndl].num_n256; i++) {
 	if ((j = UCInfo[UC_charset_in_hndl].unicount[i])) {
 	    ptrans[i] = *p;
 	    for (; j; j--) {
@@ -782,6 +783,12 @@ PUBLIC int UCLYhndl_HTFile_for_unrec = -1;
 PUBLIC int UCLYhndl_for_unspec = -1;
 PUBLIC int UCLYhndl_for_unrec = -1;
 
+ /* easy to type, will initialize later */
+PUBLIC int LATIN1 = -1;        /* UCGetLYhndl_byMIME("iso-8859-1") */
+PUBLIC int US_ASCII = -1;      /* UCGetLYhndl_byMIME("us-ascii")   */
+PUBLIC int UTF8 = -1;          /* UCGetLYhndl_byMIME("utf-8")      */
+
+
 PRIVATE int UC_con_set_unimap ARGS2(
 	int,		UC_charset_out_hndl,
 	int,		update_flag)
@@ -803,10 +810,11 @@ PRIVATE int UC_con_set_unimap ARGS2(
 
     /*
      *	The font is always 256 characters - so far.
+     *  (fake 0 for built-in charsets like CJK or x-transparent, use .num_n256)
      */
     con_clear_unimap(0);
 
-    for (i = 0; i < 256; i++) {
+    for (i = 0; i < UCInfo[UC_charset_out_hndl].num_n256; i++) {
 	for (j = UCInfo[UC_charset_out_hndl].unicount[i]; j; j--) {
 	    con_insert_unipair(*(p++), i, 0);
 	}
@@ -1964,6 +1972,7 @@ PUBLIC void UC_Charset_Setup ARGS9(
     }
     UCInfo[s].LYNXname = UC_LYNXcharset;
     UCInfo[s].unicount = unicount;
+    UCInfo[s].num_n256 = (unicount == NULL) ? 0 : 256 ; /* hack */
     UCInfo[s].unitable = unitable;
     UCInfo[s].num_uni = nnuni;
     UCInfo[s].replacedesc = replacedesc;
@@ -2005,16 +2014,18 @@ PRIVATE void UCcleanup_mem NOARGS
 
 PUBLIC void UCInit NOARGS
 {
+
     UCreset_allocated_LYCharSets();
     atexit(UCcleanup_mem);
     UCconsole_map_init();
 
-    UC_CHARSET_SETUP;	/* us-ascii */	  /* 7 bit approximations */
-
 /*
  *  The order of charset names visible in Lynx Options menu
  *  correspond to the order of lines below,
- *  except for CJK and others described in LYCharSet.c
+ *  except the first two described in LYCharSet.c
+ *
+ *  Entries whose comment is marked with *** are declared in UCdomap.h,
+ *  others are based on the included tables - UCdomap.c, near the top.
  */
 
     UC_CHARSET_SETUP_iso_8859_1;	  /* ISO Latin 1	  */
@@ -2028,7 +2039,16 @@ PUBLIC void UCInit NOARGS
     UC_CHARSET_SETUP_next;		  /* NeXT character set   */
     UC_CHARSET_SETUP_hp_roman8;		  /* HP Roman8		  */
 
+    UC_CHARSET_SETUP_euc_cn;		  /*** Chinese		    */
+    UC_CHARSET_SETUP_euc_jp;		  /*** Japanese (EUC_JP)    */
+    UC_CHARSET_SETUP_shift_jis; 	  /*** Japanese (Shift_JIS) */
+    UC_CHARSET_SETUP_euc_kr;		  /*** Korean		    */
+    UC_CHARSET_SETUP_big5;		  /*** Taipei (Big5)	    */
+
     UC_CHARSET_SETUP_viscii;		  /* Vietnamese (VISCII)  */
+    UC_CHARSET_SETUP;	/* us-ascii */	  /* 7 bit approximations */
+
+    UC_CHARSET_SETUP_x_transparent;	  /*** Transparent	  */
 
     UC_CHARSET_SETUP_iso_8859_2;	  /* ISO Latin 2	  */
     UC_CHARSET_SETUP_cp852;		  /* DosLatin2 (cp852)	  */
@@ -2054,7 +2074,7 @@ PUBLIC void UCInit NOARGS
     UC_CHARSET_SETUP_iso_8859_9;	  /* ISO 8859-9 (Latin 5) */
     UC_CHARSET_SETUP_iso_8859_10;	  /* ISO 8859-10	  */
 
-    UC_CHARSET_SETUP_utf_8;		  /* UNICODE UTF-8	  */
+    UC_CHARSET_SETUP_utf_8;		  /*** UNICODE UTF-8	  */
     UC_CHARSET_SETUP_mnemonic_ascii_0;	  /* RFC 1345 w/o Intro   */
     UC_CHARSET_SETUP_mnemonic;		  /* RFC 1345 Mnemonic	  */
     UC_CHARSET_SETUP_iso_9945_2;	  /* Ukrainian Cyrillic (ISO 9945-2) */
@@ -2068,6 +2088,11 @@ PUBLIC void UCInit NOARGS
  *  To add synonyms for any charset name
  *  check function UCGetLYhndl_byMIME in this file.
  */
+
+/* easy to type: */
+    LATIN1   = UCGetLYhndl_byMIME("iso-8859-1");
+    US_ASCII = UCGetLYhndl_byMIME("us-ascii");
+    UTF8     = UCGetLYhndl_byMIME("utf-8");
 }
 
 /*

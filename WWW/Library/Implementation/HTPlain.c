@@ -21,8 +21,6 @@
 
 #define BUFFER_SIZE 4096;	/* Tradeoff */
 
-#include <HText.h>
-#include <HTStyle.h>
 #include <HTMLDTD.h>
 #include <HTCJK.h>
 #include <UCMap.h>

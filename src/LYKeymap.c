@@ -17,7 +17,7 @@
 #ifdef EXP_KEYBOARD_LAYOUT
 PUBLIC int current_layout = 0;  /* Index into LYKbLayouts[]   */
 
-PUBLIC unsigned short * LYKbLayouts[]={
+PUBLIC LYKeymap_t * LYKbLayouts[]={
 	kb_layout_rot13,
 	kb_layout_jcuken,
 	kb_layout_yawerty
@@ -31,7 +31,8 @@ PUBLIC char * LYKbLayoutNames[]={
 };
 #endif
 
-PRIVATE CONST DocAddress keymap_anchor = {"LYNXKEYMAP", NULL, NULL};
+PRIVATE CONST DocAddress keymap_anchor = {"LYNXKEYMAP", NULL, NULL,
+	NULL, FALSE, FALSE};
 
 struct _HTStream
 {
@@ -41,7 +42,7 @@ struct _HTStream
 /* the character gets 1 added to it before lookup,
  * so that EOF maps to 0
  */
-unsigned short keymap[KEYMAP_SIZE] = {
+LYKeymap_t keymap[KEYMAP_SIZE] = {
 
 0,
 /* EOF */
@@ -99,7 +100,7 @@ LYK_8,               LYK_9,             0,          LYK_TRACE_LOG,
 LYK_UP_LINK,         LYK_INFO,     LYK_DOWN_LINK,   LYK_HELP,
 /* < */              /* = */         /* > */        /* ? */
 
-LYK_RAW_TOGGLE,  LYK_ADD_BOOKMARK, LYK_PREV_PAGE,   LYK_COMMENT,
+LYK_RAW_TOGGLE,      LYK_ADDRLIST, LYK_PREV_PAGE,   LYK_COMMENT,
 /* @ */              /* A */         /* B */        /* C */
 
 LYK_DOWNLOAD,        LYK_ELGOTO,
@@ -371,7 +372,7 @@ LYK_UP_TWO,       LYK_DOWN_TWO,     LYK_DO_NOTHING, LYK_FASTBACKW_LINK,
  * allowed at compile time.
  */
 
-unsigned short key_override[KEYMAP_SIZE] = {
+LYKeymap_t key_override[KEYMAP_SIZE] = {
 
     0,
 /* EOF */
@@ -632,6 +633,8 @@ struct rmap {
 	CONST char *name;
 	CONST char *doc;
 };
+
+/* The order of this array must match the LYKeymapCode enum in LYKeymap.h */
 PRIVATE struct rmap revmap[] = {
 { "UNMAPPED",		NULL },
 { "1",			NULL },
@@ -711,6 +714,11 @@ PRIVATE struct rmap revmap[] = {
 { "ELGOTO",		"edit the current link's URL or ACTION and go to it" },
 { "CHANGE_LINK",	"force reset of the current link on the page" },
 { "EDITTEXTAREA",	"use an external editor to edit a form's textarea" },
+{ "GROWTEXTAREA",	"add 5 new blank lines to the bottom of a textarea" },
+{ "INSERTFILE",		"insert file into a textarea (just above cursorline)" },
+#ifdef EXP_ADDRLIST_PAGE
+{ "ADDRLIST",		"like LIST command, but always shows the links URL's" },
+#endif
 #ifdef USE_EXTERNALS
 { "EXTERN",		"run external program with url" },
 #endif
@@ -784,8 +792,8 @@ PRIVATE char *pretty ARGS1 (int, c)
 }
 
 PRIVATE char * format_binding ARGS2(
-	unsigned short *,	table,
-	int,			i)
+	LYKeymap_t *,	table,
+	int,		i)
 {
     unsigned the_key = table[i];
     char *buf = 0;

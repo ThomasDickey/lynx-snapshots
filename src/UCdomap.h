@@ -41,6 +41,7 @@ struct UC_charset {
 	CONST char *MIMEname;
 	CONST char *LYNXname;
 	CONST u8* unicount;
+	int num_n256;	/* 256 for *.tbl, 0 for CJK and x-transparent (hack) */
 	CONST u16* unitable;
 	int num_uni;
 	struct unimapdesc_str replacedesc;
@@ -55,5 +56,52 @@ struct UC_charset {
 extern int UCNumCharsets;
 
 extern void UCInit NOARGS;
+
+
+/*
+ *  INSTRUCTIONS for adding new character sets which do not have
+ *              Unicode tables.
+ *
+ *  Several #defines below are declarations for charsets which need no
+ *  tables for mapping to Unicode - CJK multibytes, x-transparent, UTF8 -
+ *  Lynx care of them internally.
+ *
+ *  The declaration's format is kept in chrtrans/XXX_uni.h -
+ *  keep this in mind when changing ucmaketbl.c,
+ *  see also UC_Charset_Setup() above for details.
+ */
+
+  /*
+   *  There is no strict correlation for the next five, since the transfer
+   *  charset gets decoded into Display Char Set by the CJK code (separate
+   *  from Unicode mechanism).  For now we use the MIME name that describes
+   *  what is output to the terminal. - KW
+   */
+#define UC_CHARSET_SETUP_euc_cn UC_Charset_Setup("euc-cn","Chinese",\
+       NULL,NULL,0,(struct unimapdesc_str){0,NULL,0,1},\
+       128,UCT_ENC_CJK,0)
+#define UC_CHARSET_SETUP_euc_jp UC_Charset_Setup("euc-jp","Japanese (EUC-JP)",\
+       NULL,NULL,0,(struct unimapdesc_str){0,NULL,0,1},\
+       128,UCT_ENC_CJK,0)
+#define UC_CHARSET_SETUP_shift_jis UC_Charset_Setup("shift_jis","Japanese (Shift_JIS)",\
+       NULL,NULL,0,(struct unimapdesc_str){0,NULL,0,1},\
+       128,UCT_ENC_CJK,0)
+#define UC_CHARSET_SETUP_euc_kr UC_Charset_Setup("euc-kr","Korean",\
+       NULL,NULL,0,(struct unimapdesc_str){0,NULL,0,1},\
+       128,UCT_ENC_CJK,0)
+#define UC_CHARSET_SETUP_big5 UC_Charset_Setup("big5","Taipei (Big5)",\
+       NULL,NULL,0,(struct unimapdesc_str){0,NULL,0,1},\
+       128,UCT_ENC_CJK,0)
+  /*
+   *  Placeholder for non-translation mode. - FM
+   */
+#define UC_CHARSET_SETUP_x_transparent UC_Charset_Setup("x-transparent","Transparent",\
+       NULL,NULL,0,(struct unimapdesc_str){0,NULL,0,0},\
+       128,1,0)
+
+#define UC_CHARSET_SETUP_utf_8 UC_Charset_Setup("utf-8","UNICODE (UTF-8)",\
+       NULL,NULL,0,(struct unimapdesc_str){0,NULL,0,0},\
+       128,UCT_ENC_UTF8,0)
+
 
 #endif /* UCDOMAP_H */

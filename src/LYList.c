@@ -81,6 +81,11 @@ PUBLIC int showlist ARGS2(
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
     LYforce_no_cache = TRUE;	/* force this file to be new */
 
+#ifdef EXP_ADDRLIST_PAGE
+    if (titles != TRUE)
+        BeginInternalPage(fp0, ADDRLIST_PAGE_TITLE, LIST_PAGE_HELP);
+    else
+#endif
     BeginInternalPage(fp0, LIST_PAGE_TITLE, LIST_PAGE_HELP);
 
     StrAllocCopy(Address, HTLoadedDocumentURL());

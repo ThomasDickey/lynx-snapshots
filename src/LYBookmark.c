@@ -89,7 +89,7 @@ PUBLIC char * get_bookmark_filename ARGS1(
     /*
      *	Seek it in the home path. - FM
      */
-    LYAddPathToHome(filename_buffer,
+    LYAddPathToHome(filename_buffer, 
 		    sizeof(filename_buffer),
 		    BookmarkPage);
     CTRACE(tfp, "\nget_bookmark_filename: SEEKING %s\n   AS %s\n\n",
@@ -309,9 +309,9 @@ PUBLIC void save_bookmark_link ARGS2(
 	/*
 	 *  Seek it in the home path. - FM
 	 */
-	LYAddPathToHome(filename_buffer,
-			sizeof(filename_buffer),
-			BookmarkPage);
+	LYAddPathToHome(filename_buffer, 
+			sizeof(filename_buffer), 
+			BookmarkPage); 
     }
     CTRACE(tfp, "\nsave_bookmark_link: SEEKING %s\n   AS %s\n\n",
 		BookmarkPage, filename_buffer);

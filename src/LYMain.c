@@ -18,7 +18,6 @@
 #include <LYClean.h>
 #include <LYCharSets.h>
 #include <LYCharUtils.h>
-#include <UCMap.h>
 #include <LYReadCFG.h>
 #include <LYrcFile.h>
 #include <LYKeymap.h>
@@ -559,7 +558,7 @@ PUBLIC void exit_immediately ARGS1(
     exit(code);
 }
 
-#ifdef  EBCDIC  /* S/390 -- gil -- 1958 */
+#ifdef  EBCDIC
       char un_IBM1047[ 256 ] = "";
 unsigned char IBM1047[ 256 ] = /* ATOE OEMVS311 */
 {
@@ -584,14 +583,18 @@ unsigned char IBM1047[ 256 ] = /* ATOE OEMVS311 */
 static void FixCharacters(void)
 {
     int c;
-    int work[256];
+    int work1[256],
+	work2[256];
 
     for (c = 0; c < 256; c++) {
 	un_IBM1047[IBM1047[c]] = c;
-	work[c] = keymap[c+1];
+	work1[c] = keymap[c+1];
+	work2[c] = key_override[c+1];
     }
-    for (c = 0; c < 256; c++)
-	keymap[IBM1047[c]+1] = work[c];
+    for (c = 0; c < 256; c++) {
+	keymap      [IBM1047[c]+1] = work1[c];
+	key_override[IBM1047[c]+1] = work2[c];
+    }
 }
 #endif /* EBCDIC */
 
@@ -610,7 +613,7 @@ PUBLIC int main ARGS2(
     char filename[LY_MAXPATH];
     BOOL LYGetStdinArgs = FALSE;
 
-#ifdef    NOT_ASCII  /* S/390 -- gil -- 2002 */
+#ifdef    NOT_ASCII
     FixCharacters();
 #endif /* NOT_ASCII */
 
@@ -1120,14 +1123,6 @@ PUBLIC int main ARGS2(
      */
     LYAddPathToHome(LYTraceLogPath = malloc(LY_MAXPATH), LY_MAXPATH, "Lynx.trace");
     LYOpenTraceLog();
-
-    /*
-     *	If TRACE is on, indicate whether the
-     *	anonymous restrictions are set. - FM
-     */
-    if (LYRestricted) {
-	CTRACE(tfp, "LYMain: Anonymous restrictions set.\n");
-    }
 
     /*
      *	Set up the default jump file stuff. - FM
@@ -2820,7 +2815,7 @@ keys (may be incompatible with some curses packages)"
 #ifdef DISP_PARTIAL
    PARSE_SET(
       "partial",	TOGGLE_ARG,		&display_partial,
-      "display partial pages while downloading"
+      "toggles display partial pages while downloading"
    ),
    PARSE_INT(
       "partial_thres",  IGNORE_ARG|INT_ARG,     partial_threshold,
@@ -2842,7 +2837,8 @@ with partial-display logic"
    ),
    PARSE_SET(
       "preparsed",	SET_ARG,		&LYPreparsedSource,
-      "show parsed text/html with -source and in source view"
+      "show parsed text/html with -source and in source view\n\
+       to visualize how lynx behave with invalid HTML"
    ),
    PARSE_SET(
       "print",		UNSET_ARG,		&no_print,
@@ -2969,7 +2965,7 @@ treated '>' as a co-terminator for double-quotes and tags"
       "width",		NEED_FUNCTION_ARG,	width_fun,
       "=NUMBER\nscreen width for formatting of dumps (default is 80)"
    ),
-   {NULL}
+   {NULL, 0, 0, NULL}
 };
 
 static void print_help_strings ARGS3(

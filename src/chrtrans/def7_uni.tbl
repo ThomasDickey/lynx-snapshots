@@ -1,9 +1,12 @@
 # Default 7bit replacements.  If the MIME name is set to us-ascii,
-# this will be identified with the "7 bit approximations" Display
+# this will be identified with the "7 bit approximations (US-ASCII)" Display 
 # character set.
 
 #The MIME name of this charset.
 Mus-ascii
+ 
+#Name as a Display Charset (used on Options screen)
+O7 bit approximations (US-ASCII)
 
 # Shall this become the "default" translation table?  YES!
 # There has to be exactly one table marked as "default".

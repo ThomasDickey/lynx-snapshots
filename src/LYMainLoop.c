@@ -168,6 +168,13 @@ PUBLIC BOOLEAN LYOpenTraceLog NOARGS
 	fflush(stdout);
 	fflush(stderr);
 	fprintf(tfp, "\t\t%s (%s)\n\n", LYNX_TRACELOG_TITLE, LYNX_VERSION);
+	/*
+	 *  If TRACE is on, indicate whether the
+	 *  anonymous restrictions are set. - FM
+	 */
+	if (LYRestricted) {
+	    CTRACE(tfp, "Anonymous restrictions are set.\n");
+	}
     }
     return TRUE;
 }
@@ -1586,7 +1593,60 @@ try_again:
 				     links[curdoc.link].form->name,
 				     links[curdoc.link].form->value);
 
-		if (c == '\n' || c == '\r')
+		if (c == '\n' || c == '\r') {
+#ifdef AUTOGROW
+		    /*
+		     *  If on the bottom line of a TEXTAREA, and the user hit
+		     *  the ENTER key, we add a new line/anchor automatically,
+		     *  positioning the cursor on it.
+		     *
+		     *  If at the bottom of the screen, we effectively perform
+		     *  an LYK_DOWN_HALF-like operation, then move down to the
+		     *  new line we just added.  --KED  02/14/99
+		     *
+		     *  [There is some redundancy and non-standard indentation
+		     *   in the monster-if() below.  This is intentional ... to
+		     *   try and improve the "readability" (such as it is).
+		     *   Caveat emptor to anyone trying to change it.]
+		     */
+		    if ((links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
+			 links[curdoc.link].form->type == F_TEXTAREA_TYPE)
+			&&
+			 ((curdoc.link == nlinks-1)
+			 ||
+			 ((curdoc.link <  nlinks-1) &&
+			  !(links[curdoc.link+1].type == WWW_FORM_LINK_TYPE  &&
+			    links[curdoc.link+1].form->type == F_TEXTAREA_TYPE))
+			 ||
+			 ((curdoc.link <  nlinks-1) &&
+			  ((links[curdoc.link+1].type == WWW_FORM_LINK_TYPE  &&
+			    links[curdoc.link+1].form->type == F_TEXTAREA_TYPE)
+			    &&
+			    ((links[curdoc.link].form->number	       !=
+				      links[curdoc.link+1].form->number)     ||
+			     (strcmp (links[curdoc.link].form->name,
+				      links[curdoc.link+1].form->name) != 0)))))) {
+
+			HText_ExpandTextarea (&links[curdoc.link], 1);
+			lines_in_file = HText_getNumOfLines();
+
+			if (links[curdoc.link].ly < display_lines) {
+			    refresh_screen = TRUE;
+
+			} else {
+
+			    Newline += (display_lines/2);
+			    if (nlinks > 0 && curdoc.link > -1 &&
+				links[curdoc.link].ly > display_lines/2) {
+				    newdoc.link = curdoc.link;
+				    for (i = 0; links[i].ly <= (display_lines/2); i++)
+					--newdoc.link;
+				    newdoc.link++;
+			    }
+			}
+		   }
+#endif /* AUTOGROW */
+
 #ifdef FASTTAB
 		    /*
 		     *	Make return act like down-arrow.
@@ -1598,6 +1658,7 @@ try_again:
 		     */
 		    c = '\t';
 #endif /* FASTTAB */
+		}
 	    } else {
 		/*
 		 *  Get a keystroke from the user.
@@ -1766,6 +1827,10 @@ new_cmd:  /*
 	    int lindx = ((nlinks > 0) ? curdoc.link : 0);
 	    int number;
 
+	    /* pass cur line num for use in follow_link_number()
+	     * Note: Current line may not equal links[cur].line
+	     */
+	    newdoc.line = curdoc.line;
 	    switch (follow_link_number(c, lindx, &newdoc, &number)) {
 	    case DO_LINK_STUFF:
 		/*
@@ -1784,8 +1849,7 @@ new_cmd:  /*
 		if (links[lindx].type == WWW_INTERN_LINK_TYPE) {
 		    LYinternal_flag = TRUE;
 		    newdoc.internal_link = TRUE;
-		    if (0==strcmp((curdoc.title ? curdoc.title : ""),
-				      LIST_PAGE_TITLE) &&
+		    if (LYIsListpageTitle(curdoc.title ? curdoc.title : "") &&
 			0==strcmp(HTLoadedDocumentURL(), LYlist_temp_url())) {
 			if (!curdoc.post_data ||
 			    /*
@@ -3153,9 +3217,8 @@ new_cmd:  /*
 			 *  for an internal link within the document the
 			 *  List Page is about. - kw
 			 */
-			if (0==strcmp(curdoc.address, LYlist_temp_url()) &&
-			    0==strcmp((curdoc.title ? curdoc.title : ""),
-				      LIST_PAGE_TITLE)) {
+			if ( 0==strcmp(curdoc.address, LYlist_temp_url()) &&
+			    (LIsListpageTitle(curdoc.title ? curdoc.title : ""))) {
 			    if (!curdoc.post_data ||
 				/*
 				 *  Normal case - List Page is not associated
@@ -4330,9 +4393,11 @@ if (!LYUseFormsOptions) {
 		}
 		break;
 	    }
-
+#ifdef AUTOEXTEDIT
 	    /*
-	     *  If we're in a forms TEXTAREA, invoke the editor on it.
+	     *  If we're in a forms TEXTAREA, invoke the editor on *its*
+	     *  contents, rather than attempting to edit the html source
+	     *  document.  KED
 	     */
 	    if (links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
 		links[curdoc.link].form->type == F_TEXTAREA_TYPE)   {
@@ -4346,12 +4411,17 @@ if (!LYUseFormsOptions) {
 	     *  document with the TEXT field is local, the editor *would*
 	     *  be invoked on the source .html file; eg, the o(ptions)
 	     *  form tempfile).
+	     *
+	     *  [This is done to avoid possible user confusion, due to
+	     *   auto invocation of the editor on the TEXTAREA's contents
+	     *   via the above if() statement.]
 	     */
 	    if (links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
 		links[curdoc.link].form->type == F_TEXT_TYPE)       {
-	       HTUserMsg(CANNOT_EDIT_FIELD);
-	       break;
+		HTUserMsg (CANNOT_EDIT_FIELD);
+		break;
 	    }
+#endif /* AUTOEXTEDIT */
 
 #ifdef DIRED_SUPPORT
 	    /*
@@ -4530,11 +4600,11 @@ if (!LYUseFormsOptions) {
 
 		/*
 		 *  TODO: Move cursor "n" lines from the current line to
-		 *        position it on the 1st trailing blank line in
-		 *        the now edited TEXTAREA.  If the target line/
-		 *        anchor requires us to scroll up/down, position
-		 *        the target in the approximate center of the
-		 *        screen.
+		 *	  position it on the 1st trailing blank line in
+		 *	  the now edited TEXTAREA.  If the target line/
+		 *	  anchor requires us to scroll up/down, position
+		 *	  the target in the approximate center of the
+		 *	  screen.
 		 */
 
 		/* curdoc.link += n;*/	/* works, except for page crossing, */
@@ -4542,6 +4612,56 @@ if (!LYUseFormsOptions) {
 
 		/* start screen */
 		start_curses();
+		refresh_screen = TRUE;
+
+	    } else {
+
+		HTInfoMsg (NOT_IN_TEXTAREA);
+	    }
+	    break;
+
+	case LYK_GROW_TEXTAREA: /* add new lines to bottom of TEXTAREA - KED */
+	    /*
+	     *  See if the current link is in a form TEXTAREA.
+	     */
+	    if (links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
+		links[curdoc.link].form->type == F_TEXTAREA_TYPE)   {
+
+		HText_ExpandTextarea (&links[curdoc.link], TEXTAREA_EXPAND_SIZE);
+
+		lines_in_file  = HText_getNumOfLines();
+		refresh_screen = TRUE;
+
+	    } else {
+
+		HTInfoMsg (NOT_IN_TEXTAREA);
+	    }
+	    break;
+
+	case LYK_INSERT_FILE: /* insert file in TEXTAREA, above cursor - KED */
+	    /*
+	     *  See if the current link is in a form TEXTAREA.
+	     */
+	    if (links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
+		links[curdoc.link].form->type == F_TEXTAREA_TYPE)   {
+
+		n = HText_InsertFile (&links[curdoc.link]);
+
+		lines_in_file = HText_getNumOfLines();
+
+		/*
+		 *  TODO: Move cursor "n" lines from the current line to
+		 *	  position it on the 1st line following the text
+		 *	  that was inserted.  If the target line/anchor
+		 *	  requires us to scroll up/down, position the
+		 *	  target in the approximate center of the screen.
+		 *
+		 *  [Current behavior leaves cursor on the same line relative
+		 *   to the start of the TEXTAREA that it was on before the
+		 *   insertion.  This is the same behavior that occurs with
+		 *   (my) editor, so this TODO will stay unimplemented.]
+		 */
+
 		refresh_screen = TRUE;
 
 	    } else {
@@ -4613,6 +4733,41 @@ if (!LYUseFormsOptions) {
 		StrAllocCopy(lynxlistfile, newdoc.address);
 	    }
 	    break;
+
+#ifdef EXP_ADDRLIST_PAGE
+	case LYK_ADDRLIST:   /* always list URL's (only) */
+	    /*
+	     *	Don't do if already viewing list addresses page.
+	     */
+	    if (!strcmp((curdoc.title ? curdoc.title : ""),
+			ADDRLIST_PAGE_TITLE)) {
+		/*
+		 *  Already viewing list page, so get out.
+		 */
+		cmd = LYK_PREV_DOC;
+		goto new_cmd;
+	    }
+
+	    /*
+	     *	Print address list page to file.
+	     */
+	    if (showlist(&newdoc, FALSE) < 0)
+		break;
+	    StrAllocCopy(newdoc.title, ADDRLIST_PAGE_TITLE);
+	    /*
+	     *	showlist will set newdoc's other fields.  It may leave
+	     *	post_data intact so the list can be used to follow
+	     *	internal links in the current document even if it is
+	     *	a POST response. - kw
+	     */
+
+	    refresh_screen = TRUE;  /* redisplay */
+	    if (LYValidate || check_realm) {
+		LYPermitURL = TRUE;
+		StrAllocCopy(lynxlistfile, newdoc.address);
+	    }
+	    break;
+#endif /* EXP_ADDRLIST_PAGE */
 
 	case LYK_VLINKS:  /* list links visited during the current session */
 	    if (!strcmp((curdoc.title ? curdoc.title : ""),
@@ -4862,8 +5017,7 @@ if (!LYUseFormsOptions) {
 		if (nlinks > 0) {
 		    if (curdoc.post_data == NULL &&
 			curdoc.bookmark == NULL &&
-			strcmp((curdoc.title ? curdoc.title : ""),
-			       LIST_PAGE_TITLE) &&
+			!LYIsListpageTitle(curdoc.title ? curdoc.title : "") &&
 			strcmp((curdoc.title ? curdoc.title : ""),
 			       VISITED_LINKS_TITLE)) {
 			/*

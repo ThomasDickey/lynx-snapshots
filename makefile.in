@@ -111,6 +111,7 @@ SITE_DEFS = # Your defines here
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
 # -DNOPORT         if you must use PASV instead of PORT for FTP
 # -DNO_CPU_LIMIT   Disables Max CPU timeout (includes CLOCKS_PER_SECOND)
+# -DNO_RULES       Disables CERN-style access rules (see lynx.cfg).
 # -DSHORTENED_RBIND  For a SOCKSified lynx with the short version of Rbind.
 # -DSLANG_MBCS_HACK prevent cutoff lines when using UTF8 console (slang only)
 #
@@ -150,8 +151,6 @@ SITE_DEFS = # Your defines here
 # -DNCURSES
 # -DNO_CHANGE_EXECUTE_PERMS
 # -DNO_EXTENDED_HTMLDTD
-# -DOPTIONS_FORMS
-# -DOPTIONS_MENU
 # -DNO_PARENT_DIR_REFERENCE
 # -DNSL_FORK
 # -DOK_GZIP
@@ -160,6 +159,8 @@ SITE_DEFS = # Your defines here
 # -DOK_TAR
 # -DOK_UUDECODE
 # -DOK_ZIP
+# -DOPTIONS_FORMS
+# -DOPTIONS_MENU
 # -DSOCKS
 # -DSYSLOG_REQUESTED_URLS
 # -DUNDERLINE_LINKS
@@ -241,14 +242,14 @@ distclean: clean
 @MSG_DIR_MAKE@	-rmdir po
 	-rm -f *~ *.bak *.sav
 	-rm -f WWW/Library/unix/makefile src/makefile src/chrtrans/makefile
-@SRCDIR_CLEAN@	-find . -type f -name '*.rej' -exec rm -f {} \;
-@SRCDIR_CLEAN@	-find . -type f -name '*.orig' -exec rm -f {} \;
 @SRCDIR_CLEAN@	-rmdir WWW/Library/unix && rmdir WWW/Library && rmdir WWW
 @SRCDIR_CLEAN@	-rmdir src/chrtrans && rmdir src
 	-rm -f makefile lynx_cfg.h config.status config.log config.cache
 	-rm -f lynx$x install-*
 
 maintainer-clean: distclean
+	-find . -type f -name '*.rej' -exec rm -f {} \;
+	-find . -type f -name '*.orig' -exec rm -f {} \;
 	-rm -rf WWW/Library/*/obsolete
 	-rm -f Lynx.prj .*_aux
 
@@ -350,9 +351,9 @@ install-help : $(helpdir)
 LYHelp.h : LYHelp.hin
 	@echo Constructing sed-script
 	@ECHO_CC@sed	-e '/^#/d' -e '/^$$/d' \
-		-e 's%\(.*\)=\(.*\@.*\)%s=@\1@=\2=g%' \
-		-e 's%\(.*\)=\(http:.*\)%s=@\1@=\2=g%' \
-		-e 's%\(.*\)=\(ftp:.*\)%s=@\1@=\2=g%' \
+              -e 's%\(.*\)=\(.*\@.*\)$$%s=@\1@=\2=g%' \
+              -e 's%\(.*\)=\(http:.*\)$$%s=@\1@=\2=g%' \
+              -e 's%\(.*\)=\(ftp:.*\)$$%s=@\1@=\2=g%' \
 		-e 's%\(.*\)=\(.*\.html\)$$%s=@\1@=\2$(COMPRESS_EXT)=g%' \
 		$(srcdir)/lynx_help/help_files.txt | $(FIX_SED) > \
 		help_files.sed

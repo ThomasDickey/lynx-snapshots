@@ -39,6 +39,15 @@
 #define LYIsPathSep(ch) ((ch) == '/')
 #endif
 
+#ifdef EXP_ADDRLIST_PAGE
+#define LYIsListpageTitle(name) \
+    (!strcmp((name), LIST_PAGE_TITLE) || \
+     !strcmp((name), ADDRLIST_PAGE_TITLE))
+#else
+#define LYIsListpageTitle(name) \
+    (!strcmp((name), LIST_PAGE_TITLE))
+#endif
+
 #define LYIsHtmlSep(ch) ((ch) == '/')
 
 #define TABLESIZE(v) (sizeof(v)/sizeof(v[0]))

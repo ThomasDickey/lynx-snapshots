@@ -154,15 +154,15 @@
  gettext("Unable to open temporary file for mailto URL!")
 #define COMMENT_REQUEST_CANCELLED gettext("Comment request cancelled!!!")
 #define INC_ORIG_MSG_PROMPT \
- gettext("Do you wish to include the original message? (y/n) ")
+ gettext("Do you wish to include the original message?")
 #define INC_PREPARSED_MSG_PROMPT \
- gettext("Do you wish to include the preparsed source? (y/n) ")
+ gettext("Do you wish to include the preparsed source?")
 #define SPAWNING_EDITOR_FOR_MAIL \
  gettext("Spawning your selected editor to edit mail message")
 #define ERROR_SPAWNING_EDITOR \
  gettext("Error spawning editor, check your editor definition in the options menu")
-#define SEND_COMMENT_PROMPT gettext("Send this comment? (y/n) ")
-#define SEND_MESSAGE_PROMPT gettext("Send this message? (y/n) ")
+#define SEND_COMMENT_PROMPT gettext("Send this comment?")
+#define SEND_MESSAGE_PROMPT gettext("Send this message?")
 #define SENDING_YOUR_MSG gettext("Sending your message...")
 #define SENDING_COMMENT gettext("Sending your comment:")
 
@@ -269,7 +269,7 @@
 #define NOBOOK_HSML \
  gettext("History, showinfo, menu and list files cannot be saved as bookmarks.")
 #define CONFIRM_BOOKMARK_DELETE \
- gettext("Do you really want to delete this link from your bookmark file? (y/n)")
+ gettext("Do you really want to delete this link from your bookmark file?")
 #define MALFORMED_ADDRESS gettext("Malformed address.")
 #define HISTORICAL_ON_MINIMAL_OFF \
  gettext("Historical comment parsing ON (Minimal is overridden)!")
@@ -358,7 +358,7 @@
 #define OUTOF_MEM_FOR_JUMP_TABLE gettext("Out of memory reading jump table!")
 #define NO_INDEX_FILE gettext("No index is currently available.")
 #define CONFIRM_MAIN_SCREEN \
- gettext("Do you really want to go to the Main screen? (y/n) [n] ")
+ gettext("Do you really want to go to the Main screen? [n] ")
 #define IN_MAIN_SCREEN gettext("You are already at main screen!")
 #define NOT_ISINDEX \
  gettext("Not a searchable indexed document -- press '/' to search for a text string")
@@ -418,9 +418,9 @@
 #define NEW_FILENAME_PROMPT gettext("Enter a new filename: ")
 #define FILENAME_CANNOT_BE_DOT gettext("File name may not begin with a dot.")
 #ifdef VMS
-#define FILE_EXISTS_HPROMPT gettext("File exists.  Create higher version? (y/n)")
+#define FILE_EXISTS_HPROMPT gettext("File exists.  Create higher version?")
 #else
-#define FILE_EXISTS_OPROMPT gettext("File exists.  Overwrite? (y/n)")
+#define FILE_EXISTS_OPROMPT gettext("File exists.  Overwrite?")
 #endif /* VMS */
 #define CANNOT_WRITE_TO_FILE gettext("Cannot write to file.")
 #define MISCONF_DOWNLOAD_COMMAND gettext("ERROR! - download command is misconfigured.")
@@ -477,8 +477,8 @@
 #define NEWS_POST_CANCELLED gettext("News Post Cancelled!!!")
 #define SPAWNING_EDITOR_FOR_NEWS \
  gettext("Spawning your selected editor to edit news message")
-#define POST_MSG_PROMPT gettext("Post this message? (y/n) ")
-#define APPEND_SIG_FILE gettext("Append '%s'?  (y/n) ")
+#define POST_MSG_PROMPT gettext("Post this message?")
+#define APPEND_SIG_FILE gettext("Append '%s'?")
 #define POSTING_TO_NEWS gettext("Posting to newsgroup(s)...")
 #ifdef VMS
 #define HAVE_UNREAD_MAIL_MSG gettext("*** You have unread mail. ***")
@@ -486,6 +486,12 @@
 #define HAVE_MAIL_MSG gettext("*** You have mail. ***")
 #endif /* VMS */
 #define HAVE_NEW_MAIL_MSG gettext("*** You have new mail. ***")
+#define FILE_INSERT_CANCELLED gettext("File insert cancelled!!!")
+#define FILE_DOES_NOT_EXIST gettext("File does not exist.")
+#define FILE_DOES_NOT_EXIST_RE gettext("File does not exist - reenter or cancel:")
+#define FILE_NOT_READABLE gettext("File is not readable.")
+#define FILE_NOT_READABLE_RE gettext("File is not readable - reenter or cancel:")
+#define FILE_INSERT_0_LENGTH gettext("Nothing to insert - file is 0-length.")
 #define SAVE_REQUEST_CANCELLED gettext("Save request cancelled!!!")
 #define MAIL_REQUEST_CANCELLED gettext("Mail request cancelled!!!")
 #define CONFIRM_MAIL_SOURCE_PREPARSED \
@@ -772,6 +778,8 @@
 #define FAILED_READING_KEYMAP   gettext("Error processing line %d of %s\n")
 
 /* Lynx internal page titles */
+#define ADDRLIST_PAGE_TITLE	gettext("Address List Page")
+#define BOOKMARK_TITLE		gettext("Bookmark file")
 #define CONFIG_DEF_TITLE	gettext("Configuration Definitions")
 #define COOKIE_JAR_TITLE	gettext("Cookie Jar")
 #define CURRENT_KEYMAP_TITLE	gettext("Current Key Map")
@@ -780,14 +788,13 @@
 #define HISTORY_PAGE_TITLE	gettext("History Page")
 #define LIST_PAGE_TITLE		gettext("List Page")
 #define LYNXCFG_TITLE		gettext("Lynx.cfg Information")
+#define MOSAIC_BOOKMARK_TITLE	gettext("Converted Mosaic Hotlist")
 #define OPTIONS_TITLE		gettext("Options Menu")
 #define PERMIT_OPTIONS_TITLE	gettext("File Permission Options")
 #define PRINT_OPTIONS_TITLE	gettext("Printing Options")
 #define SHOWINFO_TITLE		gettext("Information about the current document")
 #define UPLOAD_OPTIONS_TITLE	gettext("Upload Options")
 #define VISITED_LINKS_TITLE	gettext("Visited Links Page")
-#define BOOKMARK_TITLE		gettext("Bookmark file")
-#define MOSAIC_BOOKMARK_TITLE	gettext("Converted Mosaic Hotlist")
 
 /* CONFIG_DEF_TITLE subtitles */
 #define SEE_ALSO gettext("See also")
