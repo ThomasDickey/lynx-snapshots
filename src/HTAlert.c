@@ -93,7 +93,7 @@ PUBLIC void HTReadProgress ARGS2(
     static long kb_units = 1024;
     static time_t first, last;
     static long bytes_last;
-    long transfer_rate;
+    long transfer_rate, divisor;
     char line[80];
     time_t now = time((time_t *)0);  /* once per second */
     char *units = "bytes";
@@ -115,18 +115,21 @@ PUBLIC void HTReadProgress ARGS2(
 		last = now;
 		bytes_last = bytes;
 	    }
-	    if (total >= kb_units || bytes >= kb_units) {
-		bytes /= 1024;
-		if (total > 0) total /= 1024;
+	    divisor = 1;
+	    if (LYshow_kb_rate
+	     && (total >= kb_units || bytes >= kb_units)) {
+		divisor = 1024;
+		bytes /= divisor;
+		if (total > 0) total /= divisor;
 		units = "KB";
 	    }
 
 	    if (total >  0)
 		sprintf (line, "Read %ld of %ld %s of data.", bytes, total, units);
-	    if (total <= 0)
+	    else
 		sprintf (line, "Read %ld %s of data.", bytes, units);
-	     if (transfer_rate > 0)
-		sprintf (line + strlen(line), " %ld KB/sec.", transfer_rate / 1024);
+	    if (transfer_rate > 0)
+		sprintf (line + strlen(line), ", %ld %s/sec.", transfer_rate / divisor, units);
 	    if (total <  0) {
 		if (total < -1)
 		    strcat(line, " (Press 'z' to abort)");

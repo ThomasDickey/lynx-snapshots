@@ -1,6 +1,18 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-09-22 (2.8.1pre.1)
+* correct logic error in parse_restrictions() which caused infinite loop,
+  probably from changes in dev.8 (reported by HN) - TD
+* add SHOW_KB_RATE symbol to lynx.cfg to allow user to control whether
+  HTReadProgress should show KB/sec or bytes/sec - TD
+* modify HTReadProgress to allow user to display KB/sec or bytes/sec - BL
+* add/use new function LYstyles(), to force initialization of styles[] array
+  when it is used outside HTML.c; fixes a problem with Lynx not using styles
+  for files listed on the command line - TD
+* correct keymap strings for F1 and DO_KEY - TD
+* add keymap table entries for F1, to accommodate slang which appears to ignore
+  terminal description when keymaps are defined - TD
 1998-09-20 (2.8.1dev.29)
 * add checks/warnings for user agent string in forms-options menu - TD
 * change render_item to force a '/' before substituted path or directory strings

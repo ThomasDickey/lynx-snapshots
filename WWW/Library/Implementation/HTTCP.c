@@ -324,7 +324,6 @@ PUBLIC int HTParseInet ARGS2(
 {
     char *port;
     int dotcount_ip = 0;	/* for dotted decimal IP addr */
-    int success = 0;
 #ifndef _WINDOWS_NSL
     char *host = NULL;
 #endif /* _WINDOWS_NSL */
@@ -428,6 +427,7 @@ PUBLIC int HTParseInet ARGS2(
 	**  checks for interrupts. - Tom Zerucha (tz@execpc.com) & FM
 	*/
 	{
+	    int success = 0;
 	    /*
 	    **	Pipe, child pid, status buffers, cycle count, select()
 	    **	control variables.
