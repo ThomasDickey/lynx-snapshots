@@ -24,6 +24,7 @@
 #include "LYKeymap.h"
 #include "LYBookmark.h"
 #include "LYMap.h"
+#include "LYList.h"
 #ifdef VMS
 #include "HTVMSUtils.h"
 #endif /* VMS */
@@ -251,6 +252,27 @@ Try_Redirected_URL:
 			return(NULLFILE);
 		    }
 		}
+		if (WWWDoc.post_data &&
+		    url_type != HTTP_URL_TYPE &&
+		    url_type != HTTPS_URL_TYPE &&
+		    url_type != LYNXCGI_URL_TYPE &&
+		    url_type != LYNXIMGMAP_URL_TYPE &&
+		    url_type != GOPHER_URL_TYPE &&
+		    url_type != CSO_URL_TYPE &&
+		    url_type != PROXY_URL_TYPE &&
+		    !(url_type == FILE_URL_TYPE &&
+		      *(LYlist_temp_url()) &&
+		      !strncmp(WWWDoc.address, LYlist_temp_url(),
+			       strlen(LYlist_temp_url())))) {
+		    if (TRACE)
+			fprintf(stderr,
+				"getfile: dropping post_data!\n");
+		    HTAlert("POST not supported for this URL - ignoring POST data!");
+		    FREE(doc->post_data);
+		    FREE(doc->post_content_type);
+		    WWWDoc.post_data = NULL;
+		    WWWDoc.post_content_type = NULL;
+		}
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
 		syslog(LOG_INFO|LOG_LOCAL5, "%s", doc->address);
@@ -350,7 +372,7 @@ Try_Redirected_URL:
 		    WWWDoc.safe = doc->safe;
 #ifndef DONT_TRACK_INTERNAL_LINKS
 		    if (doc->internal_link && !reloading) {
-			LYoverride_no_cache = TRUE;
+			LYinternal_flag = TRUE;
 		    }
 #endif
 

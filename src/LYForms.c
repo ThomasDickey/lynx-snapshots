@@ -88,7 +88,7 @@ PUBLIC int change_form_link ARGS6(
 #if defined(VMS) && !defined(USE_SLANG)
 		    c = DO_NOTHING;
 #else
-		    c = 23;  /* CTRL-W for repaint */
+		    c = 23;  /* CTRL-W refresh without clearok */
 #endif /* VMS && !USE_SLANG */
 		else
 #endif /* FANCY_CURSES || USE_SLANG */
@@ -119,16 +119,17 @@ PUBLIC int change_form_link ARGS6(
 		form->value_cs = opt_ptr->value_cs;
 	    }
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
-	    if (!enable_scrollback && form->num_value == OrigNumValue)
+            if (!enable_scrollback)
 #if defined(VMS) && !defined(USE_SLANG)
-		c = DO_NOTHING;
-#else
-		c = 23;  /* CTRL-W for repaint */
-#endif /* VMS && !USE_SLANG */
-	    else
+                if (form->num_value == OrigNumValue)
+                    c = DO_NOTHING;
+                else
+#endif /* VMS && !USE_SLANG*/
+		c = 23;	 /* CTRL-W refresh without clearok */
+            else
 #endif /* FANCY_CURSES || USE_SLANG */
-		c = 12;  /* CTRL-L for repaint */
-	    break;
+                c = 12;  /* CTRL-L for repaint */
+            break;
 
 	case F_RADIO_TYPE:
 	    if (form->disabled == YES)

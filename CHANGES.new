@@ -1,15 +1,216 @@
 	Changes in the development code based on Lynx v2.7.
 	===================================================
-[ This file might finally become the CHANGES file for a new Lynx release.
-More detailed change information may be in separate files, which could
-later disappear.  Currently included are changes from Foteos Macrides'
-bugfixes, changes in chartrans code (see also CHANGES.chartrans), changes
-for compilation on Win32 and DOS platforms (see also README.win-386),
-changes for auto-configure and simple curses color (see also
-README.configure), and miscellaneous other changes.  Note that the 2.7 ->
-2.7.1 changes (which are listed at the beginning of the current CHANGES
-file) are duplicated here. - KW]
+[ This file will become the CHANGES file for a new Lynx release.
+(More detailed change information may be in separate files, which could
+later disappear.  For some early changes for compilation on Win32 and DOS
+platforms see also README.win-386, for some changes for auto-configure and
+simple curses color see also README.configure).  Note that the 2.7 -> 2.7.1
+changes are included here. - KW]
 
+97-11-07
+* add logic to make install-directories as needed. - TD
+* remove --disable-char-trans option (ifdef's still remain). - TD
+* correct type used in first compile-test for union wait. - TD
+* correct order of deletions in "make distclean" rule. - TD
+* new versions of macros used to check for ncurses version. - TD
+* don't suppress -I/usr/local/include when checking -I/usr/local/include/*,
+  to accommodate older versions of gcc. - TD
+1997-11-06
+* Use erase() instead of clear() in some places, to avoid unnecessary full
+  screen repainting even for UNIX (and similar) curses.  Renamed LY_SLclear
+  to LY_SLerase, but it is used for erase() and clear() now, so there should
+  be no change in behavior for slang introduced by this. - KW
+* Added new format for lines in chartrans .tbl files: U+NNNN "a string" where
+  the string can have C backslash-escaped characters.  This allows to write
+  replacement strings with 8-bit characters that won't be garbled when the
+  .tbl files are transferred in some non-binary way.  Note there is no ':'
+  between the Unicode value and the beginning quote character. - KW
+* Changes to HTMLDTD.c (for SortaSGML parsing) and HTML.c (second line of
+  defense) for dealing with invalid SELECT tags.  Also tolerate SELECT
+  outside of forms. - KW
+* Change in HTLocalName for DOSPATH so that it doesn't depend on whether
+  HTDOS_name returns a pointer to static memory or not. - KW
+* Started new file docs/README.defines.  Renamed CHANGES to CHANGES2-7,
+  removed duplicate 2-7-1 entries.  Minor changes to INSTALLATION, other
+  files.  CHANGES.chartrans is gone. - KW
+* Tweaked color style stuff again.  Statusline may behave better. - KW
+* Don't use memmove for HEAD in HTNews.c. - KW
+* For UNIX, use normal umask permissions, instead of the extra-cautious temp
+  file permissions, for files saved to disk by the default actions for PRINT
+  and DOWNLOAD. - KW
+* Changes (untested) in the code dealing with reading of compressed files in
+  HTFile.c, in parallel to the code for other systems. - KW
+1997-11-05
+* Change in LYForms.c to avoid full screen repaint after popup is retracted
+  for slang. - KW & FM
+1997-11-03
+* Internal links code revised.  Some details follow, but first a summary
+  of the basic premises.  Links in a document given as href="#fragment" or
+  href="" (empty, but href attribute is present) mean something different
+  from href="url#fragment" or href="url" (where url is a non-empty absolute
+  or relative URL not including a fragment), they are internal links pointing
+  to an element or a location within the same copy of the document (or to the
+  document itself, for href="").  In contrast, a URL-Reference with a non-
+  empty URL refers to a (generally...) external resource.  If the "url"
+  happens to coincide with (or, if it is relative, resolve to) the URL from
+  which the current document was retrieved, the current document is a 
+  representation of the resource, but not the same thing.  In most such cases
+  we can treat href="#fragment" and href="url#fragment" the same way, i.e.
+  activating such a link is interpreted as a request to reposition within
+  the current document; we are using the current document as a cache copy
+  of the resource (like we would other documents in the memory cache).  But
+  if we have marked our copy as no-cache, it seems more consistent to treat
+  activation of a href="url#fragment" link as a request for retrieving a
+  new copy and _then_ locating #fragment in it, as we do for "any-other-url
+  #fragment" if we have cached a document which represents "any-other-url"
+  and which is marked no-cache.  Following a href="" link should just result
+  in repositioning to the start of the document, not in a new retrieval for
+  no-cache documents.
+  If the current document is the result of a POST submission, there is in
+  general no way to refer to its underlying resource with a URL, since there
+  is no URL notation for "url+post_data".  Internal links can be used within
+  the context of this document, but there is no way to hyperlink to it or
+  parts of it from "outside".  A link to a href="url" or href="url#fragment"
+  target should always imply a GET retrieval, whether it occurs within a
+  document from a POST submission or not, for consistency.
+  This understanding also applies to other than <A href=..> uses of URL-
+  References in documents, for example the link implied between a USEMAP
+  attribute and a MAP element; but not to all uses, for example a FORM's
+  ACTION requires an external resource and not an internal reference, so
+  ACTION="" is resolved to an absolute URL (using a base URL if one is
+  given).
+  The semantics for URL-less URL-References are given in Internet Draft
+  <http://www.ics.uci.edu/~fielding/url/draft-fielding-url-syntax-09.txt>,
+  including that "Traversal of such a reference should not result in an 
+  additional retrieval action."  No comparable prescriptions are made for
+  references which have a URL, in particular it is not stated that they
+  should be treated as equivalent when the URL coincides with or resolves
+  to the current document's retrieval URL.
+  The changes to the Lynx code attempt to implement what is outlined above,
+  by keeping track of how a link destination was originally specified. href=
+  "#fragment" and href="" links are still "resolved" into a "url#fragment"
+  and "url" form, for use internally, and if an explicit NOCACHE action is
+  requested, and for generating lists of links etc., and in general for use
+  outside of the context of the current document.
+  To the best of my knowledge they do not lead to unwanted (or misdirected)
+  resubmission of POST content without prompting the user for confirmation
+  (although the prompt texts probably need improvement). - KW
+* The notion of the context of the "current document" is extended, so that
+  auxiliary LYNXIMGMAP documents generated by Lynx are within the scope of
+  the underlying document, i.e. the document containing the MAP and AREA
+  elements.  Although they are treated as separate documents for display
+  and internal handling, following links between the underlying document
+  and its LYNXIMGMAP documents will result in display from cached data
+  (if available) even for no-cache documents, if a fragment-only (or empty)
+  URL-Reference was used in the HTML.  This includes the link generated for
+  pointing from the IMG to the LYNXIMGMAP if the USEMAP attribute value was
+  was fragment-only; the LYNXIMGMAP is normally regenerated from the list
+  of MAP and AREA elements kept internally when a link to it is activated.
+  (Note that a LYNXIMGMAP screen is still not reloaded from external sources
+  even when RELOAD or NOCACHE keys are used, if data for the MAP is found
+  in the internal list; but that reloading the underlying document will
+  refresh the internal lists.) - KW
+* List Page screens are also in the context of the underlying document, so
+  that internal links in the underlying document can be listed and activated
+  from the List Page.  Wen following an internal link from a List Page, it
+  is not pushed on the history stack (similar to the History List Page), to
+  reduce the chance of confusion when walking back through history. - KW
+* LYNXIMGMAP and List Page auxiliary documents can now be associated with
+  POST data.  This does not mean that the data is posted to a "LYNXIMGMAP:"
+  or "file:" URL, which is impossible; but that the underlying document is
+  associated with the POST data.  This way these aux documents can still
+  have links regarded as "internal" pointing to the document of which they
+  are logically a part, keeping track of what POST data are applicable if
+  several form submissions have occurred.  Normally the underlying document
+  should be in the document cache when such a link is activated, so that
+  resubmission of the POST can be overridden.  If it is not found,
+  resubmission may happen after user confirmation.  Although the POST data
+  content is not shown on such aux pages, it can be inspected with the INFO
+  ('=') command.  Note that the association of LYNXIMGMAPs and List Pages
+  with POST data automatically excludes them from various operations which
+  may otherwise be possible, such as bookmarking or inclusion in the
+  'V'isited Links Page.  Note also that such aux pages are treated internally
+  as different documents from their POST-free counterparts with the same
+  address, which might be generated for example after typing the address
+  at a 'g'oto prompt while viewing a different text.  It may be possible to
+  generate confusing situations, but regenerating the displayed data (by
+  invoking 'L'IST again, or by following a LYNXIMGMAP: link) will always
+  show the currently applicable information.
+  For image maps, the change implements link-following capabilities which
+  come naturally to graphical UAs, which can handle IMG USEMAP and the
+  corresponding MAP elements from the same data stream as objects within
+  the same document instance. - KW
+* To implement the above, MAP and AREA information from a POST response is
+  not kept in the global list shared by all other documents, but in a separate
+  list specific to the underlying (containing) document and the POST data.
+  The specific lists are managed with the underlying document's anchor
+  structure so that they can automatically expire after the anchor is removed
+  from memory and will not stay around and accumulate until session end. - KW
+* POST data is kept in mainloop when following an internal link, but is now
+  always dropped for links that were given with a URL.  This removes the
+  limitation by which a link in a POST response to the URL of the POST
+  submission script would be inappropriately converted to a resubmission of
+  the POST data.  (example: search form from <http://www.marshall.edu/htbin/
+  calendar>) - KW
+* Changes to the PREV_DOC handling in mainloop.  When encountering documents
+  that may need to be reloaded while walking back in history, because they
+  have POST data associated and are not marked "safe" and are either not found
+  in the memory cache or -resubmit_posts has been set, the user is prompted
+  for confirmation as before; if the reply is 'n' the document will be skipped
+  but if the user cancels with ^G the walkback operation is cancelled and the
+  currently viewed document remains loaded.  Some of the aux documents which
+  can new be associated with POST data may be automatically skipped if their
+  document structures are not any more in memory. - KW
+* When following a link marked internal from a List Page and confirmation is
+  required, ^G may also have the different effect of cancelling the operation
+  while responding 'n' may attempt to follow the link as a GET request (i.e.
+  with POST data dropped). - KW
+* In some situations, automatic popping from the history stack in mainloop
+  after getfile fails to load a new document could lead to resubmission of
+  a previous POST request without prompting.  This is now avoided by jumping
+  to the code handling PREV_DOC. - KW
+* Use new LYinternal_flag variable for propagating info to HTAccess, rather
+  than overloading LYoverride_no_cache. - KW
+* Tweaks for bad form tag soup with crashes on unclosed SELECT.  Changes in
+  HTML.c and GridText.c to prevent memory leaks resulting from insanely
+  placed or unclosed form field tags, hopefully not introducing other
+  problems... - KW
+1997-11-02
+* Changes in HTParse's scan to leave additional '#' characters alone after
+  the first has been found when scanning (from left) for fragments, and
+  to apply the "don't treat '#' as start of a fragment for some kinds of
+  URLs" hack only when the '#' will become part of what has been scanned
+  as a path.  NNTP articles with more than '#' in the message-id are now
+  accessible with the "news:" or "nntp:" schemes.  We should actually always
+  escape when generating URLs and unescape when parsing them instead. - KW
+* Changed HTUnEscape to leave '%' alone if not followed by two valid hex
+  digits. - KW
+* Allow the HEAD key and -head and -mime_header flags for "lynxcgi:" URLs
+  and for "news:" and "nntp:" URLs that specify a single news article. - KW
+* Change to writing of POST data in LYCgi.c, to close file descriptor after
+  done writing and before reading as suggested by mhw@bcs.org.uk (Mark
+  H. Wilkinson), and to check status from the write() call and retry if
+  neeeded.  Note that the code is not appropriate for handling large
+  amounts of POST data, since it still first does all the writing and
+  then all the reading. - KW
+1997-10-30
+* Get numbering of links on List Page right, by faking hidden links for
+  form fields which get counted but are not selectable. - KW
+* Allow LYNXHIST: links in List Page since the History Page may get 
+  'L'isted... - KW
+1997-10-29
+* Tweak of SortaSGML DTD for insane HTML with FORM start before HEAD. - KW
+* Prevent memory leaks from HTChunks for option and textarea with very
+  bad markup, added TRACE and BAD_HTML_USE_TRACE warnings for those. - KW
+* Don't call tigetnum("ncv") for _WINDOWS - BD
+1997-10-28
+* Disable setting of the `reloading' flag in HTLoadDocument which would
+  generate no-cache headers for request where this is not appropriate. - KW
+* Memory leak for first OPTION in SELECT removed. - KW
+* Changed HTDOS_name to not return pointer to static area. - Binh Do
+  <bdo@mailman.epnet.com>
+* Changes to INSTALLATION file. - NHE
+* Fix in HTMIME.c to recognize Content-location. - KW
 1997-10-27
 * Updated links to www.w3.org in help files. - KW
 * Some changes for DOS compilation. - DK
@@ -21,7 +222,7 @@ file) are duplicated here. - KW]
 1997-10-26
 * If compiled with -DDONT_TRACK_INTERNAL_LINKS, behavior with respect to
   internal links as in FM's code. - KW
-*  Some chartrans tweaks. - KW
+* Some chartrans tweaks. - KW
 1997-10-25
 * Changes to INSTALLATION file. - NHE
 * Make temp file names conform to 8+3 naming convention for DOS, and
@@ -2278,13 +2479,14 @@ file) are duplicated here. - KW]
   safe (hopefully as safe as the vanilla v2.7.1), but there are no
   guarantees. - FM
 1997-04-04
-=======================================================================
----  Release of Lynx2-7 + BUGFIXES as Lynx v2.7.1 (April 4, 1997)   ---
------------------------------------------------------------------------
-  Changes listed below were made to the development code in parallel 
-  to the bugfixes which resulted in 2.7.1, and include those bugfixes
-  (or equivalent changes).
-=======================================================================
+============================================================================
+---  Release of Lynx2-7 + BUGFIXES as Lynx v2.7.1 (April 4, 1997) by FM  ---
+============================================================================
+* Note that 2.7.1 was not a release from this code set, but all 2.7 -> 2.7.1
+  bugfixes and other changes are also included in this code set, in either
+  identical or equivalent form.  Therefore the entries below this point
+  comprise the 2.7 -> 2.7.1 changes, and additionally other changes made to
+  the development code set during that time. - KW
 1997-04-02
 * add Andrew Kuchling's patch to support mouse-clicks with ncurses. - TD
 * refine tests that address porting problems to SCO (detecting struct winsize,
@@ -2468,9 +2670,14 @@ file) are duplicated here. - KW]
 * Merged with patches and makefiles from Wayne Buttles 
   (buttles@wsb.champlain.edu) to enable compilation in two new environments: 
   Win32 (95/NT) with Borland C++ 4.52 compiler, and 386 DOS with DJGPP 
-  compiler.  See README.win-386 for more info.  Separate utility programs
-  needed for compiling and running Lynx on those platforms are available
-  from Wayne at <http://www.fdisk.com/doslynx/wlynx/>. - WB, KW
+  compiler.  To add ports for Win32 (95/NT) and 386 DOS computers with a
+  packet driver, four new defines were created: _WINDOWS (Defined for Win32
+  specific code - Mostly TCP related), DJGPP (Defined for 386 specific code -
+  Mostly TCP related), DOSPATH (Defined for any DOS'ish computer), and
+  NOSIGHUP (Defined for computers not supporting sighup signal calls).
+  Separate utility programs needed for compiling and running Lynx on those
+  platforms are available from Wayne at
+  <http://www.fdisk.com/doslynx/wlynx/>. - WB, KW
 * Fixed Telnet for Win32 - WB
 * (chartrans) Small correction in SGML.c (set_chartrans_handling) - KW
 1997-02-26
@@ -2505,7 +2712,10 @@ file) are duplicated here. - KW]
   -DSLANG_MBCS_HACK (for raw unicode console).  
   New command line options when compiled with -DEXP_CHARTRANS: 
   -assume_charset, -assume_local_charset, -assume_unrec_charset.  
-  See README.chartrans and README files in src/chrtrans for more info. - KW
+  See README.chartrans and README files in src/chrtrans for more info.
+  INFO screen shows of effective charset even if not given explicitly.
+  Translation routines in LYCharUtils.c not chartrans-ified at this point.
+  - KW
 * No showing of &trade; or &#8482; as (R) any more, use (TM) instead. - KW
 * Prefer HTTP-EQUIV over NAME in META tags. - KW
 1997-02-22

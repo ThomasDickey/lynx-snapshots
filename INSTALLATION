@@ -36,7 +36,10 @@ Step 2. (define run-time variables -- See the lynx.cfg file for details.)
     the LYNX_CFG_FILE define in userdefs.h, specified with an environment
     variable, LYNX_CFG, or specified with the "-cfg" command line option.
 
-Step 3. (Skip this step if you only use English: iso-8859-1 or US-ASCII.)
+Step 3. (You can skip this step only if you only use English and are not
+    interested in any special characters, or if the display and local files
+    will all use the ISO-8859-1 "ISO Latin 1" Western European character
+    set.)
     People who will be running Lynx in an environment with different and
     incompatible character sets should configure CHARACTER_SET (the Display
     character set) and ASSUME_LOCAL_CHARSET to work correctly for them
@@ -50,7 +53,7 @@ Step 4. (optional -- news for UNIX and VMS)
     environment variables which affect Lynx.)  For news posting ability
     to be enabled in Lynx, in userdefs.h (and optionally in lynx.cfg) the
     NEWS_POSTING symbol must be defined to TRUE.  Also define LYNX_SIG_FILE
-    in usersdefs.h or lynx.cfg so that it points to users' signature files
+    in userdefs.h or lynx.cfg so that it points to users' signature files
     for appending to posted messages.
 
 Step 5. (optional -- UNIX only)
@@ -202,8 +205,8 @@ II. Compile instructions -- UNIX
   	Use this option to disable "Up-to" parent-links in directory listings.
 
   --enable-color-style			(define USE_COLOR_STYLE)
-  	Use this option to enable optional/experimental color style.
-	(Also defines USEHASH, UNPAINT_CACHE, LINKEDSTYLES)
+  	Use this option to enable optional and *experimental* color style.
+	(Also defines USE_HASH, LINKEDSTYLES)
 
   --enable-debug
   	Use this option to compile-in support for debugging.
@@ -218,6 +221,13 @@ II. Compile instructions -- UNIX
   --with-cfg-file=XXX			(defines LYNX_CFG_FILE)
 	Use this option to override the location of the site
 	configuration file's pathname.  It defaults to $libdir/lynx.cfg,
+	where $libdir is set in the configure script, e.g., to
+	/usr/local/lib.
+
+  --with-lss-file=XXX			(defines LYNX_LSS_FILE)
+	Only for optional and *experimental* color style code.
+	Use this option to override the location of the site
+	style-sheet file's pathname.  It defaults to $libdir/lynx.lss,
 	where $libdir is set in the configure script, e.g., to
 	/usr/local/lib.
 
@@ -269,6 +279,8 @@ II. Compile instructions -- UNIX
     top-level Makefile, and instructions on how to compile are given in
     "docs/INSTALLATION.old".  Compilation symbols for which there are no
     configure options are listed and explained in "docs/Makefile.old".
+    However, rather than maintain two types of build-mechanisms, we prefer
+    to fix bugs in the autoconf script.
 
 
 III. Compile instructions -- VMS
@@ -375,14 +387,14 @@ IV. Compile instructions -- Win32 (Windows95/NT)
         NOSIGHUP Defined for computers not supporting sighup signal calls.
 
     The original Win32 port was built with Borland C++ 4.52.  Later versions
-    of Borland C++ reportedly can be used, but this is not documented, and no
-    other compilers have been tested.  Before compiling the Lynx sources, you
-    need a curses library, and you are recommended to have the zlib library.
-    Get pdcurses2.3 from "http://www.lightlink.com/hessling/".  I have
-    modified it so that mouse support is no longer broken for Lynx (available
-    from "http://www.fdisk.com/doslynx/").  You will want to get zlib from
-    "http://www.cdrom.com/pub/infozip/zlib/".  Compile these libraries, and
-    put them in a convenient place (pdcurses inside the Lynx directory).
+    of Borland C++ reportedly can be used, but no other compilers have been
+    tested.  Before compiling the Lynx sources, you need a curses library, and
+    it is recommended that you have the zlib library.  Get pdcurses2.3 from
+    "http://www.lightlink.com/hessling/".  I have modified it so that mouse
+    support is no longer broken for Lynx (see "http://www.fdisk.com/doslynx/").
+    You will want to get zlib from "http://www.cdrom.com/pub/infozip/zlib/".
+    Compile these libraries, and put them in a convenient place (pdcurses
+    inside the Lynx directory).
 
     Unpack the latest Lynx source distribution, and make an obj directory
     under the source root to contain the compile output.  Copy in your
@@ -415,16 +427,15 @@ V. Compile instructions -- 386 DOS
     Or do it interactively with the command: "stubedit cc1.exe".
     (see "http://www.flora.org/lynx-dev/html/month0897/msg00145.html").
 
-    Unpack the source code using a DOS "unzip" program like UNZIP386, DOS
-    port of GNU "gzip" or "gunzip", or the command line zip available from
-    "http://www.itribe.net/virtunix/".  If you must use PKUNZIP to unpack the
-    .zip archive, be sure to use the -d command line switch to restore the
-    directory structure contained in the archive ("pkunzip -d lynx-cur.zip").
-    This is not necessary if you use UNZIP386, as it will automatically create
-    the necessary directories.  If you are doing development with DJGPP under
-    a Win95 or NT DOS shell, DO NOT USE Winzip, because that will create long
-    long filenames that will not be recognized by DJGPP tools like 'make' and
-    'gcc'.  In order to compile, all filenames MUST be in DOS 8.3 format.
+    Unpack the source code using a DOS program like UNZIP386.  If you are
+    using PKUNZIP to unpack the .zip archive, you must use the -d command
+    line switch to restore the directory structure contained in the archive,
+    i.e., do "pkunzip -d lynx-cur.zip".  No switch is required if you use
+    unzip386 or unzip.  If you are trying to compile the 386DOS port under a
+    Win95/NT DOS shell, be sure to unpack the source with a DOS program so
+    that all directories will be adjusted to the DOS 8.3 file format necessary
+    for compiling with DJGPP.  Do NOT use Winzip, because that will create
+    long filenames that will not be recognized by DJGPP tools.
 
     If you wish to compile with "USE_ZLIB" (recommended), you must have the
     zlib library.  Get the source from "http://www.cdrom.com/pub/infozip/zlib/"
@@ -662,4 +673,4 @@ VIII. Acknowledgment
    Thanks to the many volunteers who offered suggestions for making this
    installation manual as accurate and complete as possible.
 
--- 1997/10/27 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
+-- 1997/10/28 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>

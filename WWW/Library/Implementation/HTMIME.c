@@ -15,11 +15,9 @@
 #include "HTMIME.h"		/* Implemented here */
 #include "HTAlert.h"
 #include "HTCJK.h"
-#ifdef EXP_CHARTRANS
 #include "UCMap.h"
 #include "UCDefs.h"
 #include "UCAux.h"
-#endif
 
 #include "LYLeaks.h"
 
@@ -27,6 +25,7 @@
 
 extern int current_char_set;
 extern CONST char *LYchar_set_names[];
+extern BOOLEAN LYRawMode;
 extern BOOL HTPassEightBitRaw;
 extern HTCJKlang HTCJK;
 
@@ -370,28 +369,26 @@ PRIVATE void HTMIME_put_character ARGS2(
 			    cp2 += 7;
 			    while (*cp2 == ' ' || *cp2 == '=' || *cp2 == '\"')
 			        cp2++;
-#ifdef EXP_CHARTRANS
 			    StrAllocCopy(cp3, cp2); /* copy to mutilate more */
-			    for (cp4=cp3; (*cp4 != '\0' && *cp4 != '\"' &&
-					   *cp4 != ';'  && *cp4 != ':' &&
-					   !WHITE(*cp4));	cp4++)
-				/* nothing */ ;
+			    for (cp4 = cp3; (*cp4 != '\0' && *cp4 != '\"' &&
+					     *cp4 != ';'  && *cp4 != ':' &&
+					     !WHITE(*cp4));	cp4++)
+				; /* do nothing */
 			    *cp4 = '\0';
 			    cp4 = cp3;
 			    chndl = UCGetLYhndl_byMIME(cp3);
 			    if (chndl < 0) {
-				if (0==strcmp(cp4, "cn-big5")) {
+				if (!strcmp(cp4, "cn-big5")) {
 				    cp4 += 3;
 				    chndl = UCGetLYhndl_byMIME(cp4);
-				}
-				else if (0==strncmp(cp4, "cn-gb", 5)) {
+				} else if (!strncmp(cp4, "cn-gb", 5)) {
 				    StrAllocCopy(cp3, "gb2312");
 				    cp4 = cp3;
 				    chndl = UCGetLYhndl_byMIME(cp4);
 				}
 			    }
-			    if (UCCanTranslateFromTo(chndl, current_char_set))
-			    {
+			    if (UCCanTranslateFromTo(chndl,
+						     current_char_set)) {
 				chartrans_ok = YES;
 				*cp1 = '\0';
 				me->format = HTAtom_for(cp);
@@ -403,8 +400,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 						 recognize it */
 				chndl = UCLYhndl_for_unrec;
 				if (UCCanTranslateFromTo(chndl,
-							 current_char_set))
-				{
+							 current_char_set)) {
 				    chartrans_ok = YES;
 				    *cp1 = '\0';
 				    me->format = HTAtom_for(cp);
@@ -416,42 +412,97 @@ PRIVATE void HTMIME_put_character ARGS2(
 			    if (chartrans_ok) {
 				LYUCcharset * p_in =
 				    HTAnchor_getUCInfoStage(me->anchor,
-							     UCT_STAGE_MIME);
+							    UCT_STAGE_MIME);
 				LYUCcharset * p_out =
 				    HTAnchor_setUCInfoStage(me->anchor,
 							    current_char_set,
-					 UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
-				if (!p_out) /* try again */
+					 		    UCT_STAGE_HTEXT,
+							    UCT_SETBY_DEFAULT);
+				if (!p_out)
+				    /*
+				    **  Try again.
+				    */
 				    p_out =
 				      HTAnchor_getUCInfoStage(me->anchor,
-							     UCT_STAGE_HTEXT);
+							      UCT_STAGE_HTEXT);
 
-				if (0==strcmp(p_in->MIMEname,"x-transparent"))
-				{
+				if (!strcmp(p_in->MIMEname,
+					    "x-transparent")) {
 				    HTPassEightBitRaw = TRUE;
 				    HTAnchor_setUCInfoStage(me->anchor,
 				       HTAnchor_getUCLYhndl(me->anchor,
 							    UCT_STAGE_HTEXT),
 				       UCT_STAGE_MIME, UCT_SETBY_DEFAULT);
 				}
-				if (0==strcmp(p_out->MIMEname,"x-transparent"))
-				{
+				if (!strcmp(p_out->MIMEname,
+					    "x-transparent")) {
 				    HTPassEightBitRaw = TRUE;
 				    HTAnchor_setUCInfoStage(me->anchor,
-				       HTAnchor_getUCLYhndl(me->anchor,
-							    UCT_STAGE_MIME),
-				       UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
+					 HTAnchor_getUCLYhndl(me->anchor,
+							      UCT_STAGE_MIME),
+							    UCT_STAGE_HTEXT,
+							    UCT_SETBY_DEFAULT);
 				}
-				if ((p_in->enc != UCT_ENC_CJK) &&
-				    (p_in->codepoints &
-				     UCT_CP_SUBSETOF_LAT1)) {
+				if (p_in->enc != UCT_ENC_CJK) {
 				    HTCJK = NOCJK;
-				} else if (chndl == current_char_set) {
-				HTPassEightBitRaw = TRUE;
+				    if (!(p_in->codepoints &
+					  UCT_CP_SUBSETOF_LAT1) &&
+					chndl == current_char_set) {
+					HTPassEightBitRaw = TRUE;
+				    }
+				} else if (p_out->enc == UCT_ENC_CJK) {
+				    if (LYRawMode) {
+					if ((!strcmp(p_in->MIMEname,
+						     "euc-jp") ||
+					     !strcmp(p_in->MIMEname,
+						     "shift_jis")) &&
+					    (!strcmp(p_out->MIMEname,
+						     "euc-jp") ||
+					     !strcmp(p_out->MIMEname,
+						     "shift_jis"))) {
+					    HTCJK = JAPANESE;
+					} else if (!strcmp(p_in->MIMEname,
+							   "euc-cn") &&
+						   !strcmp(p_out->MIMEname,
+							   "euc-cn")) {
+					    HTCJK = CHINESE;
+					} else if (!strcmp(p_in->MIMEname,
+							   "big-5") &&
+						   !strcmp(p_out->MIMEname,
+							   "big-5")) {
+					    HTCJK = TAIPEI;
+					} else if (!strcmp(p_in->MIMEname,
+							   "euc-kr") &&
+						   !strcmp(p_out->MIMEname,
+							   "euc-kr")) {
+					    HTCJK = KOREAN;
+					} else {
+					    HTCJK = NOCJK;
+					}
+				    } else {
+					HTCJK = NOCJK;
+				    }
 				}
-			} else  /* Fall through to old behavior */
-#endif /* EXP_CHARTRANS */
-			    if (!strncmp(cp2, "us-ascii", 8) ||
+			} else if
+			       (!strncmp(cp4, "iso-8859-", 9) &&
+				isdigit((unsigned char)cp4[9]) &&
+				!strncmp(LYchar_set_names[current_char_set],
+				 	 "Other ISO Latin", 15)) {
+			        /*
+			        **  Hope it's a match, for now. - FM
+			        */
+				*cp1 = '\0';
+				me->format = HTAtom_for(cp);
+				cp1 = &cp4[10];
+				while (*cp1 &&
+				       isdigit((unsigned char)(*cp1)))
+				    cp1++;
+				*cp1 = '\0';
+				StrAllocCopy(me->anchor->charset, cp4);
+				HTPassEightBitRaw = TRUE;
+				HTAlert(me->anchor->charset);
+#ifdef NOT_USED			/* pre-chartrans */
+			} else if (!strncmp(cp2, "us-ascii", 8) ||
 			        !strncmp(cp2, "iso-8859-1", 10)) {
 				*cp1 = '\0';
 				me->format = HTAtom_for(cp);
@@ -562,7 +613,9 @@ PRIVATE void HTMIME_put_character ARGS2(
 				me->format = HTAtom_for(cp);
 				StrAllocCopy(me->anchor->charset,
 					     "iso-2022-cn");
+#endif /* NOT_USED */
 			    }
+			    FREE(cp3);
 			} else {
 			    /*
 			    **  No charset parameter is present.
@@ -1324,6 +1377,16 @@ PRIVATE void HTMIME_put_character ARGS2(
             if (TRACE)
                 fprintf(stderr,
                    "HTMIME: Was CONTENT_L, found E, checking for 'ngth:'\n");
+	    break;
+	    
+	case 'o':
+	case 'O':
+	    me->check_pointer = "cation:";
+	    me->if_ok = miCONTENT_LOCATION;
+	    me->state = miCHECK;
+            if (TRACE)
+                fprintf(stderr,
+                   "HTMIME: Was CONTENT_L, found O, checking for 'cation:'\n");
 	    break;
 	    
 	default:
@@ -2207,6 +2270,8 @@ PUBLIC HTStream* HTNetMIME ARGS3(
 **
 **	Written by S. Ichikawa,
 **	partially inspired by encdec.c of <jh@efd.lth.se>.
+**
+**	Generalized HTmmdecode for chartrans - K. Weide 1997-03-06
 */
 #define	BUFLEN	1024
 #ifdef ESC
@@ -2292,8 +2357,6 @@ PUBLIC void HTmmdec_quote ARGS2(
     strcpy(t, buf);
 }
 
-/* Generalized HTmmdecode for chartrans - kweide 1997-03-06 */
-
 PUBLIC void HTmmdecode ARGS2(
 	char *,		trg,
 	char *,		str)
@@ -2304,8 +2367,10 @@ PUBLIC void HTmmdecode ARGS2(
 
     buf[0] = '\0';
 
-/* encoded-words look like  =?ISO-8859-1?B?SWYgeW91IGNhbiByZWFkIHRoaXMgeW8=?=  */
-
+    /*
+    **  Encoded-words look like
+    **		=?ISO-8859-1?B?SWYgeW91IGNhbiByZWFkIHRoaXMgeW8=?=
+    */
     for (s = str, u = buf; *s; ) {
 	base64 = quote = 0;
 	if (*s == '=' && s[1] == '?' &&
@@ -2313,7 +2378,8 @@ PUBLIC void HTmmdecode ARGS2(
 	{ /* must be beginning of word */
 	    qm2 = strchr(s+2, '?'); /* 2nd question mark */
 	    if (qm2 &&
-		(qm2[1] == 'B' || qm2[1] == 'b' || qm2[1] == 'Q' || qm2[1] == 'q') &&
+		(qm2[1] == 'B' || qm2[1] == 'b' || qm2[1] == 'Q' ||
+		 qm2[1] == 'q') &&
 		qm2[2] == '?') { /* 3rd question mark */
 		char * qm4 = strchr(qm2 + 3, '?'); /* 4th question mark */
 		if (qm4 && qm4 - s < 74 &&  /* RFC 2047 length restriction */
@@ -2327,15 +2393,13 @@ PUBLIC void HTmmdecode ARGS2(
 			}
 		    if (!invalid) {
 			int LYhndl;
+
 			*qm2 = '\0';
-#ifdef EXP_CHARTRANS
 			for (p = s+2; *p; p++)
 			    *p = TOLOWER(*p);
 			invalid = ((LYhndl = UCGetLYhndl_byMIME(s+2)) < 0 ||
-				   !UCCanTranslateFromTo(LYhndl, current_char_set));
-#else
-			invalid = (0!=strncasecomp(s+2, "ISO-2022-JP", 11));
-#endif
+				   !UCCanTranslateFromTo(LYhndl,
+							 current_char_set));
 			*qm2 = '?';
 		    }
 		    if (!invalid) {

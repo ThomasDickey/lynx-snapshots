@@ -96,11 +96,14 @@ d) string replacement definitions:
  * Syntax accepted:
  *      <unicode>	:<replace>
  *      <unicode range>	:<replace>
+ *      <unicode>	"<C replace>"
+ *      <unicode range>	"<C replace>"
  *
  * where <unicode range> ::= <unicode>-<unicode>
  * and <unicode> ::= U+<h><h><h><h>
  * and <h> ::= <hexadecimal digit>
- * and <replace> any string not containing '\n' or '\0'
+ * and <replace> any string not containing '\n' or '\0', taken verbatim
+ * and <C replace> any string, with backslash having the usual C meaning
 
 Motivation:
 

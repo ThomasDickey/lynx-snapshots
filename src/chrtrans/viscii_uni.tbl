@@ -210,7 +210,7 @@ U+001a:^Z
 0x86	U+1ea8
 0xa6	U+1ea9
 0x06	U+1eaa
-U+1eaa:Â~
+U+1eaa "\302~"  # A with circumflex (same code as in iso-8859-1) and tilde
 0xe7	U+1eab
 0x87	U+1eac
 0xa7	U+1ead

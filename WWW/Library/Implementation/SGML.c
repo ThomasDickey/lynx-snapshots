@@ -792,6 +792,16 @@ PRIVATE void start_element ARGS1(
 			    new_tag->name);
 	    }
 	}
+	if (context->element_stack && !valid &&
+	    (context->element_stack->tag->flags & Tgf_strict) &&
+	    !(valid = element_valid_within(new_tag, context->element_stack->tag,
+					   direct_container))) {
+	    if (TRACE)
+		fprintf(stderr, "SGML: Still open %s \t<- ignoring start <%s>\n",
+			context->element_stack->tag->name,
+			new_tag->name);
+	    return;
+	}
 
 	if (context->element_stack && !extra_action_taken &&
 	    canclose_check == close_NO && !valid && (new_tag->flags & Tgf_mafse)) {

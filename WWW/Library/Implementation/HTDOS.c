@@ -51,7 +51,7 @@ char * HTDOS_wwwName (char *dosname)
 ** ON EXIT:
 **      returns         dos file specification
 **
-** Bug:	Returns pointer to static -- non-reentrant
+** Bug(?):	Returns pointer to input string, which is modified
 */
 char * HTDOS_name(char *dosname)	{
 
@@ -82,13 +82,15 @@ char * HTDOS_name(char *dosname)	{
 		printf("\n\n%s = i%\n\n",cp_url,strlen(cp_url));
 		sleep(5);
 /**/
-		return(cp_url);
+      strcpy(dosname, cp_url);
+      return(dosname); /* return(cp_url); */
 	} else {
 /*
 		printf("\n\n%s = %i\n\n",cp_url+1,strlen(cp_url));
 		sleep(5);
 /**/
-		return(cp_url+1);
+		strcpy(dosname, cp_url+1);
+      return(dosname); /* return(cp_url+1);  */
 	}
 }
 

@@ -632,6 +632,8 @@ PUBLIC HTStream *HTSaveStream ARGS1(
     return (*p->saveStream)(anchor);
 }
 
+extern char LYinternal_flag;		       /* from LYMainLoop.c */
+
 /*	Load a document - with logging etc		HTLoadDocument()
 **	----------------------------------
 **
@@ -692,6 +694,26 @@ PRIVATE BOOL HTLoadDocument ARGS4(
         redirection_attempts = 0;
 	HTAlert("Redirection limit of 5 URL's reached.");
         return NO;
+    }
+
+    /*
+     *  If this is marked as an internal link but we don't have the
+     *  document loaded any more, and we haven't explicitly flagged
+     *  that we want to reload with LYforce_no_cache, then something
+     *  has disappeared from the cache when we expected it to be still
+     *  there.  The user probably doesn't expect a new network access.
+     *  So if we have POST data and safe is not set in the anchor,
+     *  ask for confirmation, and fail if not granted.  The exception
+     *  are LYNXIMGMAP documents, for which we defer to LYLoadIMGmap
+     *  for prompting if necessary. - kw
+     */
+    if (LYinternal_flag && !LYforce_no_cache &&
+	anchor->post_data && !anchor->safe &&
+	(text = (HText *)HTAnchor_document(anchor)) == NULL &&
+	strncmp(full_address, "LYNXIMGMAP:", 11) &&
+	HTConfirm("Document with POST content not found in cache.  Resubmit?")
+	!= TRUE) {
+	return NO;
     }
 
     /*
@@ -783,13 +805,16 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	*    testing whether we are just repositioning.  For an internal
 	*    link, the potential callers of this function from mainloop()
 	*    down will either avoid making the call (and do the repositioning
-	*    differently) or set LYoverride_no_cache.
+	*    differently) or set LYinternal_flag (or LYoverride_no_cache).
 	*    Note that (a) LYNXIMGMAP pseudo-documents and (b) The "List Page"
 	*    document are treated logically as being part of the document on
 	*    which they are based, for the purpose of whether to treat a link
-	*    as internal, but the logic for this (by setting LYoverride_no_cache
-	*    as necessary) is implemented elsewhere.  For LYNXIMGMAP the same
-	*    caveat as above applies.
+	*    as internal, but the logic for this (by setting LYinternal_flag
+	*    as necessary) is implemented elsewhere.  There is a specific
+	*    test for LYNXIMGMAP here so that the generated pseudo-document
+	*    will not be re-used unless LYoverride_no_cache is set.  The same
+	*    caveat as above applies w.r.t. reloading of the underlying
+	*    resource.
 	*
 	**  We also should be checking other aspects of cache
 	**  regulation (e.g., based on an If-Modified-Since check,
@@ -800,7 +825,9 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	if (LYoverride_no_cache || !HText_hasNoCacheSet(text) ||
 	    !HText_AreDifferent(anchor, full_address))
 #else
-	if (LYoverride_no_cache || !HText_hasNoCacheSet(text))
+	if (LYoverride_no_cache ||
+	    ((LYinternal_flag || !HText_hasNoCacheSet(text)) &&
+	     strncmp(full_address, "LYNXIMGMAP:", 11)))
 #endif /* TRACK_INTERNAL_LINKS */
 	{
             if (TRACE)
@@ -814,7 +841,12 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	    redirection_attempts = 0;
 	    return YES;
 	} else {
+#if NOT_USED_CODE
+	    /* disabled 1997-10-28 - kw
+	       callers already do this when requested
+	    */
 	    reloading = TRUE;
+#endif
 	    ForcingNoCache = YES;
             if (TRACE)
 	        fprintf(stderr, "HTAccess: Auto-reloading document.\n");

@@ -175,7 +175,8 @@ struct _HText {
 	BOOL			source;		/* Is the text source? */
 	BOOL			toolbar;	/* Toolbar set? */
 	HTList *		tabs;		/* TAB IDs */
-	HTList *		hidden_links;	/* Content-less links */
+	HTList *		hidden_links;	/* Content-less links ... */
+        int			hiddenlinkflag;	/*  ... and how to treat them */
 	BOOL			no_cache;	/* Always refresh? */
 	char			LastChar;	/* For aborbing white space */
 	BOOL			IgnoreExcess;	/* Ignore chars at wrap point */
@@ -472,6 +473,15 @@ PUBLIC HText *	HText_new ARGS1(
     self->stale = YES;
     self->toolbar = NO;
     self->tabs = NULL;
+    /*
+     *  If we are going to render the List Page, always merge in hidden
+     *  links to get the numbering consistent if form fields are numbered
+     *  and show up as hidden links in the list of links. - kw
+     */
+    if (anchor->address && !strcmp(anchor->address, LYlist_temp_url()))
+	self->hiddenlinkflag = HIDDENLINKS_MERGE;
+    else
+	self->hiddenlinkflag = LYHiddenLinks;
     self->hidden_links = NULL;
     self->no_cache = ((anchor->no_cache || anchor->post_data) ?
     							  YES : NO);
@@ -588,9 +598,14 @@ PUBLIC void HText_free ARGS1(
 	    /*
 	     *  Free form fields.
 	     */
-	    if (l->input_field->type == F_OPTION_LIST_TYPE) {
+	    if (l->input_field->type == F_OPTION_LIST_TYPE &&
+		l->input_field->select_list != NULL) {
 		/*
-		 *  Free off option lists.
+		 *  Free off option lists if present.
+		 *  It should always be present for F_OPTION_LIST_TYPE
+		 *  unless we had invalid markup which prevented
+		 *  HText_setLastOptionValue from finishing its job
+		 *  and left the input field in an insane state. - kw
 		 */
 		OptionType *optptr = l->input_field->select_list;
 		OptionType *tmp;
@@ -603,7 +618,7 @@ PUBLIC void HText_free ARGS1(
 		}
 		l->input_field->select_list = NULL;
 		/* 
-		 *  Don't free the value field on option
+		 *  Don't free the value field on sane option
 		 *  lists since it points to a option value
 		 *  same for orig value.
 		 */
@@ -1561,6 +1576,54 @@ PRIVATE void display_page ARGS3(
 
 }
 
+#ifdef NOT_USED
+/*
+ *  Refresh a form link on the current page after it may have changed.
+ *  Could be used after change_form_link after a popup was opened, IF
+ *  refresh of the rest of the screen is not necessary, instead of a
+ *  full display_page - probably only for VMS curses. - kw
+ */
+PUBLIC void refresh_form_link ARGS2(
+    int,		linkno,
+    char *,		target)
+{
+    FormInfo *FormInfo_ptr;
+    /*
+     *  Update links[] for one input link, and call refresh.
+     *  basically redo some things display_page did.
+     */
+    if (linkno >= 0 && linkno < nlinks &&
+	links[linkno].type == WWW_FORM_LINK_TYPE) {
+	FormInfo_ptr = links[linkno].form;
+
+	if (FormInfo_ptr->type == F_RADIO_TYPE) {
+	    if (FormInfo_ptr->num_value)
+		links[linkno].hightext = checked_radio;
+	    else
+		links[linkno].hightext = unchecked_radio;
+
+	} else if (FormInfo_ptr->type == F_CHECKBOX_TYPE) {
+	    if (FormInfo_ptr->num_value)
+		links[linkno].hightext = checked_box;
+	    else
+		links[linkno].hightext = unchecked_box;
+
+	} else if (FormInfo_ptr->type == F_PASSWORD_TYPE) {
+	    links[linkno].hightext = STARS(strlen(FormInfo_ptr->value));
+
+	} else if (FormInfo_ptr->type == F_HIDDEN_TYPE) {
+	    ;			/* should never happen. */
+	} else {  /* TEXT type */
+	    links[linkno].hightext = FormInfo_ptr->value;
+	}
+	/*
+	 *  Bold the link, then update the screen
+	 */
+	highlight(OFF, linkno, target);
+	refresh();
+    }
+}
+#endif /* NOT_USED */
 
 /*			Object Building methods
 **			-----------------------
@@ -2724,7 +2787,7 @@ PUBLIC void HText_endAnchor ARGS2(
 	BOOL remove_numbers_on_empty =
 	    ((keypad_mode == LINKS_ARE_NUMBERED ||
 	      keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED) &&
-	     (LYHiddenLinks != HIDDENLINKS_MERGE ||
+	     (text->hiddenlinkflag != HIDDENLINKS_MERGE ||
 	      (LYNoISMAPifUSEMAP &&
 	       HTAnchor_isISMAPScript(
 		   HTAnchor_followMainLink((HTAnchor *)a->anchor)))));
@@ -3072,7 +3135,7 @@ PUBLIC void HText_endAnchor ARGS2(
 	     *  to the hidden links list. - FM
 	     */
 	    a->extent = 0;
-	    if (LYHiddenLinks != HIDDENLINKS_MERGE) {
+	    if (text->hiddenlinkflag != HIDDENLINKS_MERGE) {
 		a->number = 0;
 		HText_AddHiddenLink(text, a);
 	        text->last_anchor_number--;
@@ -5665,7 +5728,7 @@ PRIVATE void HText_AddHiddenLink ARGS2(
      *  retrievals. - FM
      */
     if ((dest = HTAnchor_followMainLink((HTAnchor *)textanchor->anchor)) &&
-	(LYHiddenLinks != HIDDENLINKS_IGNORE ||
+	(text->hiddenlinkflag != HIDDENLINKS_IGNORE ||
 	 HTList_isEmpty(text->hidden_links)))
 	HTList_appendObject(text->hidden_links, HTAnchor_address(dest));
 
@@ -6111,6 +6174,15 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	    /*
 	     *  No option items yet.
 	     */
+	    if (text->last_anchor->input_field->type != F_OPTION_LIST_TYPE) {
+		if (TRACE)
+		    fprintf(stderr,
+   "HText_setLastOptionValue: last input_field not OPTION_LIST_TYPE but %d, ignoring!\n",
+			    text->last_anchor->input_field->type);
+		return NULL;
+	    }
+
+
 	    new_ptr = text->last_anchor->input_field->select_list = 
 				(OptionType *) calloc(1, sizeof(OptionType));
 	    if (new_ptr == NULL)
@@ -6173,6 +6245,15 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	if (first_option) {
 	    StrAllocCopy(HTCurSelectedOptionValue, new_ptr->name);
 	    text->last_anchor->input_field->num_value = 0;
+	    /*
+	     *  If this is the first option in a popup select list,
+	     *  HText_beginInput may have allocated the value and
+	     *  cp_submit_value fields, so free them now to avoid
+	     *  a memory leak. - kw
+	     */
+            FREE(text->last_anchor->input_field->value);
+            FREE(text->last_anchor->input_field->cp_submit_value);
+
 	    text->last_anchor->input_field->value = 
 		text->last_anchor->input_field->select_list->name;
 	    text->last_anchor->input_field->orig_value = 

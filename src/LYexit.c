@@ -107,6 +107,7 @@ PUBLIC void LYexit ARGS1(
 #endif /* exit */
 
 #ifndef VMS	/*  On VMS, the VMSexit() handler does these. - FM */
+    fflush(stderr);
     if (LYOutOfMemory == TRUE) {
 	LYOutOfMemory = FALSE;
 	printf("\r\n%s\r\n\r\n", MEMORY_EXHAUSTED_ABORT);

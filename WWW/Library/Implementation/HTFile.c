@@ -74,11 +74,9 @@
 #include "HTBTree.h"
 #include "HTAlert.h"
 #include "HTCJK.h"
-#ifdef EXP_CHARTRANS
 #include "UCDefs.h"
 #include "UCMap.h"
 #include "UCAux.h"
-#endif /* EXP_CHARTRANS */
 
 #include "LYexit.h"
 #include "LYLeaks.h"
@@ -130,11 +128,9 @@ PUBLIC int HTDirReadme = HT_DIR_README_TOP;
 
 extern int current_char_set;
 extern CONST char *LYchar_set_names[];
+extern BOOLEAN LYRawMode;
 extern BOOL HTPassEightBitRaw;
 extern HTCJKlang HTCJK;
-#ifndef EXP_CHARTRANS
-#define UCLYhndl_HTFile_for_unspec 0 /* a dummy define */
-#endif
 
 PRIVATE char *HTMountRoot = "/Net/";		/* Where to find mounts */
 #ifdef VMS
@@ -573,7 +569,16 @@ PUBLIC char * HTLocalName ARGS1(
 	    if (TRACE)
 	        fprintf(stderr, "Node `%s' means path `%s'\n", name, path);
 #ifdef DOSPATH
-		 return(HTDOS_name(path));
+	    {
+		char *ret_path = NULL;
+		StrAllocCopy(ret_path, HTDOS_name(path));
+		if (TRACE) {
+		    fprintf(stderr, "HTDOS_name changed `%s' to `%s'\n",
+			    path, ret_path);
+		}
+		FREE(path);
+		return(ret_path);
+	    }
 #else
 	    return(path);
 #endif /* DOSPATH */
@@ -686,12 +691,12 @@ PUBLIC CONST char * HTFileSuffix ARGS2(
 	suff = (HTSuffix *)HTList_objectAt(HTSuffixes, i);
 	if (suff->rep == rep &&
 #if defined(VMS) || defined(FNAMES_8_3)
-	    /*  Don't return a suffix whose first char is a dot and which
-		has more dots or with asterisks, for
+	    /*  Don't return a suffix whose first char is a dot, and which
+		has more dots or asterisks after that, for
 		these systems - kw */
 	    (!suff->suffix || !suff->suffix[0] || suff->suffix[0] != '.' ||
 	     (strchr(suff->suffix + 1, '.') == NULL &&
-	      strchr(suff->suffix + 1, '.') == NULL)) &&
+	      strchr(suff->suffix + 1, '*') == NULL)) &&
 #endif
 	    ((trivial_enc && IsUnityEnc(suff->encoding)) ||
 	     (!trivial_enc && !IsUnityEnc(suff->encoding) &&
@@ -859,7 +864,6 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	cp2 += 7;
 	while (*cp2 == ' ' || *cp2 == '=')
 	    cp2++;
-#ifdef EXP_CHARTRANS
 	StrAllocCopy(cp3, cp2); /* copy to mutilate more */
 	for (cp4 = cp3; (*cp4 != '\0' && *cp4 != '"' &&
 			 *cp4 != ';'  && *cp4 != ':' &&
@@ -885,7 +889,8 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	    format = HTAtom_for(cp);
 	    StrAllocCopy(anchor->charset, cp4);
 	    HTAnchor_setUCInfoStage(anchor, chndl,
-				    UCT_STAGE_MIME, UCT_SETBY_MIME);
+				    UCT_STAGE_MIME,
+				    UCT_SETBY_MIME);
 	} else if (chndl < 0) {
 	    /*
 	    **  Got something but we don't recognize it.
@@ -894,10 +899,10 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	    if (UCCanTranslateFromTo(chndl, current_char_set)) {
 		chartrans_ok = YES;
 		HTAnchor_setUCInfoStage(anchor, chndl,
-					UCT_STAGE_MIME, UCT_SETBY_DEFAULT);
+					UCT_STAGE_MIME,
+					UCT_SETBY_DEFAULT);
 	    }
 	}
-	FREE(cp3);
 	if (chartrans_ok) {
 	    LYUCcharset *p_in = HTAnchor_getUCInfoStage(anchor,
 							UCT_STAGE_MIME);
@@ -927,18 +932,58 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 					UCT_STAGE_HTEXT,
 					UCT_SETBY_DEFAULT);
 	    }
-	    if ((p_in->enc != UCT_ENC_CJK) &&
-		(p_in->codepoints & UCT_CP_SUBSETOF_LAT1)) {
+	    if (p_in->enc != UCT_ENC_CJK) {
 		HTCJK = NOCJK;
-	    } else if (chndl == current_char_set) {
-		HTPassEightBitRaw = TRUE;
+		if (!(p_in->codepoints &
+		      UCT_CP_SUBSETOF_LAT1) &&
+		    chndl == current_char_set) {
+		    HTPassEightBitRaw = TRUE;
+		}
+	    } else if (p_out->enc == UCT_ENC_CJK) {
+		if (LYRawMode) {
+		    if ((!strcmp(p_in->MIMEname, "euc-jp") ||
+			 !strcmp(p_in->MIMEname, "shift_jis")) &&
+			(!strcmp(p_out->MIMEname, "euc-jp") ||
+			 !strcmp(p_out->MIMEname, "shift_jis"))) {
+			HTCJK = JAPANESE;
+		    } else if (!strcmp(p_in->MIMEname, "euc-cn") &&
+			       !strcmp(p_out->MIMEname, "euc-cn")) {
+			HTCJK = CHINESE;
+		    } else if (!strcmp(p_in->MIMEname, "big-5") &&
+			       !strcmp(p_out->MIMEname, "big-5")) {
+			HTCJK = TAIPEI;
+		    } else if (!strcmp(p_in->MIMEname, "euc-kr") &&
+			       !strcmp(p_out->MIMEname, "euc-kr")) {
+			HTCJK = KOREAN;
+		    } else {
+			HTCJK = NOCJK;
+		    }
+		} else {
+		    HTCJK = NOCJK;
+		}
 	    }
 	/*
-	**  Fall through to old behavior.
+	**  Check for an iso-8859-# we don't know. - FM
 	*/
-	} else
-#endif /* EXP_CHARTRANS */
-	    if (!strncmp(cp2, "us-ascii", 8) ||
+	} else if (!strncmp(cp4, "iso-8859-", 9) &&
+		   isdigit((unsigned char)cp4[9]) &&
+		   !strncmp(LYchar_set_names[current_char_set],
+			    "Other ISO Latin", 15)) {
+	    /*
+	    **  Hope it's a match, for now. - FM
+	    */
+	    *cp1 = '\0';
+	    format = HTAtom_for(cp);
+	    cp1 = &cp4[10];
+	    while (*cp1 &&
+		   isdigit((unsigned char)(*cp1)))
+		cp1++;
+	    *cp1 = '\0';
+	    StrAllocCopy(anchor->charset, cp4);
+	    HTPassEightBitRaw = TRUE;
+	    HTAlert(anchor->charset);
+#ifdef NOT_USED			/* pre chartrans */
+	} else if (!strncmp(cp2, "us-ascii", 8) ||
 	    !strncmp(cp2, "iso-8859-1", 10)) {
 	    *cp1 = '\0';
 	    format = HTAtom_for(cp);
@@ -1022,7 +1067,9 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	    *cp1 = '\0';
 	    format = HTAtom_for(cp);
 	    StrAllocCopy(anchor->charset, "iso-2022-cn");
+#endif /* NOT_USED */
 	}
+	FREE(cp3);
     } else if (cp1 != NULL) {
 	/*
 	**  No charset parameter is present.
@@ -1034,15 +1081,14 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
     }
     FREE(cp);
 
-#ifdef EXP_CHARTRANS
     if (!chartrans_ok && !anchor->charset && default_LYhndl >= 0) {
 	HTAnchor_setUCInfoStage(anchor, default_LYhndl,
-				UCT_STAGE_MIME, UCT_SETBY_DEFAULT);
+				UCT_STAGE_MIME,
+				UCT_SETBY_DEFAULT);
     }
     HTAnchor_copyUCInfoStage(anchor,
 			    UCT_STAGE_PARSER, UCT_STAGE_MIME,
 			    -1);
-#endif
 
     return format;
 }
@@ -1628,6 +1674,7 @@ PUBLIC int HTLoadFile ARGS4(
 	   	    HTList_addObject(methods, put);
 	        }
 	    }
+
 	    /*
 	    **  Trim vmsname at semicolon if a version number was
 	    **  included, so it doesn't interfere with the check
@@ -1638,7 +1685,34 @@ PUBLIC int HTLoadFile ARGS4(
 	    /*
 	    **  Fake a Content-Encoding for compressed files. - FM
 	    */
-	    if ((len = strlen(vmsname)) > 2) {
+	    if (!IsUnityEnc(myEncoding)) {
+		/*
+		 *  We already know from the call to HTFileFormat above
+		 *  that this is a compressed file, no need to look at
+		 *  the filename again. - kw
+		 */
+#ifdef USE_ZLIB
+		if (strcmp(format_out->name, "www/download") != 0 &&
+		    (!strcmp(HTAtom_name(myEncoding), "gzip") ||
+		     !strcmp(HTAtom_name(myEncoding), "x-gzip"))) {
+		    fclose(fp);
+		    if (semicolon != NULL)
+			*semicolon = ';';
+		    gzfp = gzopen(vmsname, "rb");
+
+		    if (TRACE)
+			fprintf(stderr,
+				"HTLoadFile: gzopen of `%s' gives %p\n",
+				vmsname, (void*)gzfp);
+		    use_gzread = YES;
+		} else
+#endif  /* USE_ZLIB */
+		{
+		    StrAllocCopy(anchor->content_type, format->name);
+		    StrAllocCopy(anchor->content_encoding, HTAtom_name(myEncoding));
+		    format = HTAtom_for("www/compressed");
+		}
+	    } else if ((len = strlen(vmsname)) > 2) {
 	        if ((vmsname[len - 1] == 'Z') &&
 		    (vmsname[len - 2] == '.' ||
 		     vmsname[len - 2] == '-' ||
@@ -1670,12 +1744,14 @@ PUBLIC int HTLoadFile ARGS4(
 #ifdef USE_ZLIB
 			if (strcmp(format_out->name, "www/download") != 0) {
 			    fclose(fp);
-			    gzfp = gzopen(localname, "rb");
+			    if (semicolon != NULL)
+				*semicolon = ';';
+			    gzfp = gzopen(vmsname, "rb");
 
 			    if (TRACE)
 				fprintf(stderr,
 				       "HTLoadFile: gzopen of `%s' gives %p\n",
-					localname, (void*)gzfp);
+					vmsname, (void*)gzfp);
 			    use_gzread = YES;
 			}
 #else  /* USE_ZLIB */
@@ -1990,15 +2066,14 @@ PUBLIC int HTLoadFile ARGS4(
 		    }
     		}
     		FREE(pathname);
-
-#ifdef EXP_CHARTRANS
+		
 		if (UCLYhndl_HTFile_for_unspec >= 0) {
 		    HTAnchor_setUCInfoStage(anchor,
 					    UCLYhndl_HTFile_for_unspec,
 					    UCT_STAGE_PARSER,
 					    UCT_SETBY_DEFAULT);
 		}
-#endif		
+
 		target = HTML_new(anchor, format_out, sink);
 		targetClass = *target->isa;	/* Copy routine entry points */
 		    

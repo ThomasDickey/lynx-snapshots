@@ -8,7 +8,8 @@ dnl
 dnl ---------------------------------------------------------------------------
 dnl ---------------------------------------------------------------------------
 dnl Add an include-directory to $CPPFLAGS.  Don't add /usr/include, since it's
-dnl redundant.  Also, don't add /usr/local/include if we're using gcc.
+dnl redundant.  We don't normally need to add -I/usr/local/include for gcc,
+dnl but old versions (and some misinstalled ones) need that.
 AC_DEFUN([CF_ADD_INCDIR],
 [
 for cf_add_incdir in $1
@@ -17,9 +18,6 @@ do
 	do
 		case $cf_add_incdir in
 		/usr/include) # (vi
-			;;
-		/usr/local/include) # (vi
-			test -z "$GCC" && CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
 			;;
 		*) # (vi
 			CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
@@ -614,7 +612,7 @@ AC_CACHE_VAL(cf_cv_ncurses_header,[
 printf("%s\n", NCURSES_VERSION);
 #else
 #ifdef __NCURSES_H
-printf("maybe 1.8.7\n");
+printf("old\n");
 #else
 make an error
 #endif
@@ -629,12 +627,14 @@ make an error
 			curses.h \
 			ncurses.h
 		do
-			if egrep "NCURSES" $cf_incdir/$cf_header 1>&5 2>&1; then
+changequote(,)dnl
+			if egrep "NCURSES_[VH]" $cf_incdir/$cf_header 1>&AC_FD_CC 2>&1; then
+changequote([,])dnl
 				cf_cv_ncurses_header=$cf_incdir/$cf_header
-				test -n "$verbose" && echo $ac_n "	... found $ac_c" 1>&6
+				test -n "$verbose" && echo $ac_n "	... found $ac_c" 1>&AC_FD_MSG
 				break
 			fi
-			test -n "$verbose" && echo "	... tested $cf_incdir/$cf_header" 1>&6
+			test -n "$verbose" && echo "	... tested $cf_incdir/$cf_header" 1>&AC_FD_MSG
 		done
 		test -n "$cf_cv_ncurses_header" && break
 	done
@@ -661,6 +661,7 @@ predefined) # (vi
 	CF_ADD_INCDIR($cf_incdir)
 	;;
 esac
+CF_NCURSES_VERSION
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Look for the ncurses library.  This is a little complicated on Linux,
@@ -711,25 +712,54 @@ AC_DEFUN([CF_NCURSES_VERSION],
 [AC_MSG_CHECKING(for ncurses version)
 AC_CACHE_VAL(cf_cv_ncurses_version,[
 	cf_cv_ncurses_version=no
+	cf_tempfile=out$$
+	AC_TRY_RUN([
+#include <$cf_cv_ncurses_header>
+int main()
+{
+	FILE *fp = fopen("$cf_tempfile", "w");
+#ifdef NCURSES_VERSION
+# ifdef NCURSES_VERSION_PATCH
+	fprintf(fp, "%s.%d\n", NCURSES_VERSION, NCURSES_VERSION_PATCH);
+# else
+	fprintf(fp, "%s\n", NCURSES_VERSION);
+# endif
+#else
+# ifdef __NCURSES_H
+	fprintf(fp, "old\n");
+# else
+	make an error
+# endif
+#endif
+	exit(0);
+}],[
+	cf_cv_ncurses_version=`cat $cf_tempfile`
+	rm -f $cf_tempfile],,[
+
+	# This will not work if the preprocessor splits the line after the
+	# Autoconf token.  The 'unproto' program does that.
 	cat > conftest.$ac_ext <<EOF
 #include <$cf_cv_ncurses_header>
+#undef Autoconf
 #ifdef NCURSES_VERSION
 Autoconf NCURSES_VERSION
 #else
 #ifdef __NCURSES_H
 Autoconf "old"
 #endif
+;
 #endif
 EOF
-	cf_try="$ac_cpp conftest.$ac_ext 2>&5 | grep '^Autoconf ' >conftest.out"
+	cf_try="$ac_cpp conftest.$ac_ext 2>&AC_FD_CC | grep '^Autoconf ' >conftest.out"
 	AC_TRY_EVAL(cf_try)
 	if test -f conftest.out ; then
 changequote(,)dnl
-		cf_out=`cat conftest.out | sed -e 's@^[^\"]*\"@@' -e 's@\".*@@'`
+		cf_out=`cat conftest.out | sed -e 's@^Autoconf @@' -e 's@^[^"]*"@@' -e 's@".*@@'`
 changequote([,])dnl
 		test -n "$cf_out" && cf_cv_ncurses_version="$cf_out"
+		rm -f conftest.out
 	fi
-])
+])])
 AC_MSG_RESULT($cf_cv_ncurses_version)
 ])
 dnl ---------------------------------------------------------------------------
@@ -1140,11 +1170,13 @@ AC_REQUIRE([CF_WAIT_HEADERS])
 AC_MSG_CHECKING([for union wait])
 AC_CACHE_VAL(cf_cv_type_unionwait,[
 	AC_TRY_COMPILE($cf_wait_headers,
-	[union wait x;
+	[int x;
 	 int y = WEXITSTATUS(x);
 	 int z = WTERMSIG(x);
 	],
-	[cf_cv_type_unionwait=no],[
+	[cf_cv_type_unionwait=no
+	 echo compiles ok w/o union wait 1>&AC_FD_CC
+	],[
 	AC_TRY_COMPILE($cf_wait_headers,
 	[union wait x;
 #ifdef WEXITSTATUS
@@ -1154,7 +1186,9 @@ AC_CACHE_VAL(cf_cv_type_unionwait,[
 	 int z = WTERMSIG(x);
 #endif
 	],
-	[cf_cv_type_unionwait=yes],
+	[cf_cv_type_unionwait=yes
+	 echo compiles ok with union wait and possibly macros too 1>&AC_FD_CC
+	],
 	[cf_cv_type_unionwait=no])])])
 AC_MSG_RESULT($cf_cv_type_unionwait)
 test $cf_cv_type_unionwait = yes && AC_DEFINE(HAVE_TYPE_UNIONWAIT)

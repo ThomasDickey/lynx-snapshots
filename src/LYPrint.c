@@ -16,16 +16,14 @@
 #include "LYHistory.h"
 #include "LYSystem.h"
 #include "LYList.h"
+#include "LYCharSets.h"  /* To get current charset for mail header. */
 #ifdef VMS
 #include "HTVMSUtils.h"
 #endif /* VMS */
 #ifdef DOSPATH
 #include "HTDOS.h"
 #endif
-#ifdef EXP_CHARTRANS
-#include "LYCharSets.h"  /* to get current charset for mail header */
 extern BOOLEAN LYHaveCJKCharacterSet;
-#endif
 
 #include "LYLeaks.h"
 
@@ -104,19 +102,23 @@ PUBLIC int printfile ARGS1(
     WWWDoc.safe = newdoc->safe;
     if (!HTLoadAbsolute(&WWWDoc))
         return(NOT_FOUND);
-  
+
+    /*
+     *  If we have an explicit content-base, we may use it even
+     *  if not in source mode. - kw
+     */
+    if (HText_getContentBase()) {
+	StrAllocCopy(content_base, HText_getContentBase());
+	collapse_spaces(content_base);
+	if (!(content_base && *content_base)) {
+	    FREE(content_base);
+	}
+    }
     /*
      *  If document is source, load the content_base
      *  and content_location strings. - FM
      */
     if (HTisDocumentSource()) {
-    	if (HText_getContentBase()) {
-	    StrAllocCopy(content_base, HText_getContentBase());
-	    collapse_spaces(content_base);
-	    if (!(content_base && *content_base)) {
-	        FREE(content_base);
-	    }
-	}
     	if (HText_getContentLocation()) {
 	    StrAllocCopy(content_location, HText_getContentLocation());
 	    collapse_spaces(content_location);
@@ -433,13 +435,16 @@ PUBLIC int printfile ARGS1(
 		    }
 		}
 
-                if ((outfile_fp = LYNewTxtFile(buffer)) == NULL) {
+                if ((outfile_fp = fopen(buffer,"w")) == NULL) {
 		    HTAlert(CANNOT_WRITE_TO_FILE);
 		    _statusline(NEW_FILENAME_PROMPT);
 		    FirstRecall = TRUE;
 		    FnameNum = FnameTotal;
 		    goto retry;
                 }
+#ifdef VMS
+		chmod(buffer, 0600);
+#endif
 
 		if (HTisDocumentSource()) {
 		    /*
@@ -611,7 +616,6 @@ PUBLIC int printfile ARGS1(
 		 *  if the document has 8-bit characters and we we seem
 		 *  to have a valid charset.  - kw
 		 */
-#ifdef EXP_CHARTRANS
 		use_cte = HTLoadedDocumentEightbit();
 		disp_charset = LYCharSet_UC[current_char_set].MIMEname;
 		/*
@@ -623,10 +627,12 @@ PUBLIC int printfile ARGS1(
 		    strncasecomp(disp_charset, "x-", 2) == 0) {
 		    disp_charset = NULL;
 		}
-#else
-		use_cte = NO;
-		disp_charset = NULL;
-#endif /* EXP_CHARTRANS */
+#ifdef NOTDEFINED
+		/*  Enable this if indicating an 8-bit transfer without
+                 *  also indicating the charset causes problems. - kw */
+		if (use_cte && !disp_charse)
+		    use_cte = FALSE;
+#endif /* NOTDEFINED */
 		use_type =  (disp_charset || HTisDocumentSource());
 		use_mime = (use_cte || use_type);
 
@@ -648,10 +654,6 @@ PUBLIC int printfile ARGS1(
 		    } else {
 		        fprintf(outfile_fp, "\n");
 		    }
-		    fprintf(outfile_fp, "Content-Base: %s\n",
-		    			content_base);
-		    fprintf(outfile_fp, "Content-Location: %s\n",
-		    			content_location);
 		} else {
 		    /*
 		     *  Add Content-Type: text/plain if we have 8-bit
@@ -664,6 +666,20 @@ PUBLIC int printfile ARGS1(
 				disp_charset);
 		    }
 		}
+		/*
+		 *  If we are using MIME headers, add content-base and
+		 *  content-location if we have them.  This will always
+		 *  be the case if the document is source. - kw
+		 */
+		if (use_mime) {
+		    if (content_base)
+		        fprintf(outfile_fp, "Content-Base: %s\n",
+				content_base);
+		    if (content_location)
+			fprintf(outfile_fp, "Content-Location: %s\n",
+				content_location);
+		}
+
 		/*
 		 *  Add the To, Subject, and X-URL headers. - FM
 		 */

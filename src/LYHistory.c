@@ -507,7 +507,7 @@ PUBLIC BOOLEAN historytarget ARGS1(
 	&& !(LYforce_no_cache == TRUE && LYoverride_no_cache == FALSE)) {
 #ifndef DONT_TRACK_INTERNAL_LINKS
 	LYforce_no_cache = FALSE;
-	LYoverride_no_cache = TRUE;
+	LYinternal_flag = TRUE;
 	newdoc->internal_link = TRUE;
 	treat_as_intern = TRUE;
 #endif
@@ -533,7 +533,8 @@ PUBLIC BOOLEAN historytarget ARGS1(
 		LYoverride_no_cache == FALSE)) &&
 	      !(treat_as_intern && !reloading)) ||
 	     text == NULL) &&
-	    HTConfirm(CONFIRM_POST_RESUBMISSION) == TRUE) {
+	    (!strncmp(newdoc->address, "LYNXIMGMAP:", 11) ||
+	     HTConfirm(CONFIRM_POST_RESUBMISSION) == TRUE)) {
 	    LYforce_no_cache = TRUE;
 	    LYoverride_no_cache = FALSE;
 	} else if (text != NULL) {
