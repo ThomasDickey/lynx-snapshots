@@ -1,6 +1,6 @@
 /*                       ASSOCIATION LIST FOR STORING NAME-VALUE PAIRS
                                              
-   Lookups from assosiation list are not case-sensitive.
+   Lookups from association list are not case-sensitive.
    
  */
 

@@ -4090,11 +4090,11 @@ PUBLIC void HText_pageDisplay ARGS2(
 	int,		line_num,
 	char *,		target)
 {
+#ifdef DISP_PARTIAL
     if (debug_display_partial || (LYTraceLogFP != NULL)) {
 	CTRACE(tfp, "GridText: HText_pageDisplay at line %d started\n", line_num);
     }
 
-#ifdef DISP_PARTIAL
     if (display_partial && detected_forms_input_partial) {
 	/*
 	**  Garbage is reported from forms input fields in incremental mode.
@@ -4119,9 +4119,11 @@ PUBLIC void HText_pageDisplay ARGS2(
 
     is_www_index = HTAnchor_isIndex(HTMainAnchor);
 
+#ifdef DISP_PARTIAL
     if (debug_display_partial || (LYTraceLogFP != NULL)) {
 	CTRACE(tfp, "GridText: HText_pageDisplay finished\n");
     }
+#endif
 }
 
 /*

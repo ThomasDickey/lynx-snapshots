@@ -1,8 +1,30 @@
 Changes since Lynx 2.8.1 release
 ================================================================================
 
+1998-11-23 (2.8.2dev.7)
+* convert KEY_ENTER to newline in LYgetch() to make Lynx work with IRIX's
+  iris-ansi terminfo description, which equates the kent capability with
+  carriage return.  Doing this will allow lynx to use the keypad "enter" key as
+  an alias for carriage return on most terminals - KW
+* correct a few missing ifdef's for disabling the partial-display logic - TD
+* add/use new functions HTAA_UidToName(), HTAA_NameToUid(), HTAA_GidToName()
+  and HTAA_NameToGid() to hide details of code which uses pwd.h and grp.h,
+  as well as to cache the returned user/group names, improving performance
+  in the dired screen - TD
+* modify HTCheckForInterrupt() to check for interrupt no more than one per
+  second, since this check is comparatively slow - TD
+* modify ANSI_VARARGS case for HTSprintf() and HTSprintf0() to always use
+  ANSI prototypes, since __STDC__ may not necessarily be defined on some
+  systems, resulting in an inconsistent definition - PG
+* add install-full rule to makefile.in - LV
+* modify PutDefs macro in LYShowInfo.c to check for nonnull table[N].value,
+  which may be null due to limitations of cfg_defs.sh script on some
+  platforms where an empty string was intended (reported by LV, PG, applies
+  to 2.8.1rel.2) - TD
+* correct typo in 'make distclean' rule; an extra '-' prevented removal of
+  .orig and .rej files (patch by LV).
 1998-11-21 (2.8.2dev.6)
-+ add call on dbug_init to LYMain.c, allowing use of the debugging code built
+* add call on dbug_init to LYMain.c, allowing use of the debugging code built
   into the WATTCP code which is included in the DJGPP port of lynx.  This is
   activated by placing lines in the WATTCP.CFG file for:
     DEBUG.MODE= (choices are HEADERS, DUMP, or ALL)
