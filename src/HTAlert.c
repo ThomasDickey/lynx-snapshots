@@ -69,9 +69,7 @@ PUBLIC void HTAlwaysAlert ARGS2(
 	    LYstore_message2(ALERT_FORMAT, Msg);
 	    LYSleepAlert();
 	} else {
-	    fprintf(((TRACE) ? stdout : stderr),
-		    ALERT_FORMAT,
-		    (Msg == 0) ? "" : Msg);
+	    fprintf(((TRACE) ? stdout : stderr), ALERT_FORMAT, NonNull(Msg));
 	    fflush(stdout);
 	    LYstore_message2(ALERT_FORMAT, Msg);
 	    LYSleepAlert();
@@ -179,6 +177,22 @@ PRIVATE char *sprint_bytes ARGS3(
     return u;
 }
 
+#ifdef EXP_READPROGRESS
+#define TIME_HMS_LENGTH (16)
+PRIVATE char *sprint_tbuf ARGS2(
+       char *,         s,
+       long,           t)
+{
+    if (t > 3600)
+       sprintf (s, "%ldh%ldm%lds", t / 3600, (t / 60) % 60, t % 60);
+    else if (t > 60)
+       sprintf (s, "%ldm%lds", t / 60, t % 60);
+    else
+       sprintf (s, "%ld sec", t);
+    return s;
+}
+#endif /* EXP_READPROGRESS */
+
 /*	Issue a read-progress message.			HTReadProgress()
 **	------------------------------
 */
@@ -198,6 +212,7 @@ PUBLIC void HTReadProgress ARGS2(
     int dummy = gettimeofday(&tv, (struct timezone *)0);
     double now = tv.tv_sec + tv.tv_usec/1000000. ;
     static double first, last, last_active;
+    (void)dummy;		/* quiet unused-assignment warning */
 #else
 #if defined(HAVE_FTIME) && defined(HAVE_SYS_TIMEB_H)
     static double now, first, last, last_active;
@@ -271,10 +286,15 @@ PUBLIC void HTReadProgress ARGS2(
 #ifdef EXP_READPROGRESS
 	    if (LYTransferRate == rateEtaBYTES
 	     || LYTransferRate == rateEtaKB) {
+                char tbuf[TIME_HMS_LENGTH];
 		if (now - last_active >= 5)
-		    HTSprintf (&line, gettext(" (stalled for %ld sec)"), (long)(now - last_active));
+                    HTSprintf (&line,
+			       gettext(" (stalled for %s)"),
+			       sprint_tbuf (tbuf, (long)(now - last_active)));
 		if (total > 0 && transfer_rate)
-		    HTSprintf (&line, gettext(", ETA %ld sec"), (long)((total - bytes)/transfer_rate));
+                    HTSprintf (&line,
+			       gettext(", ETA %s"),
+			       sprint_tbuf (tbuf, (long)((total - bytes)/transfer_rate)));
 	    }
 #endif
 
@@ -440,14 +460,14 @@ PUBLIC BOOL confirm_post_resub ARGS4(
     size_t maxlen = LYcols - 6;
     if (!address) {
 	return(NO);
-    } else if (!strncmp(address, "LYNXIMGMAP:", 11)) {
+    } else if (isLYNXIMGMAP(address)) {
 	if (if_imgmap <= 0)
 	    return(NO);
 	else if (if_imgmap == 1)
 	    return(YES);
 	else
 	    msg = CONFIRM_POST_LIST_RELOAD;
-    } else if (!strncmp(address, "file:", 5)) {
+    } else if (isFILE_URL(address)) {
 	if (if_file <= 0)
 	    return(NO);
 	else if (if_file == 1)
@@ -1037,6 +1057,14 @@ PUBLIC void LYSleepMsg NOARGS
     if (okToSleep())
 	LYSleep(MessageSecs);
 }
+
+#ifdef EXP_CMD_LOGGING
+PUBLIC void LYSleepReplay NOARGS
+{
+    if (okToSleep())
+	LYSleep(ReplaySecs);
+}
+#endif /* EXP_CMD_LOGGING */
 
 /*
  *  LYstrerror emulates the ANSI strerror() function.

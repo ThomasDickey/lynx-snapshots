@@ -1,12 +1,12 @@
 # Swedish translation for Lynx
-# Copyright © 2000, 2001 Free Software Foundation, Inc.
-# Peter Karlsson <peter@softwolves.pp.se>, 2000-2001.
+# Copyright © 2000, 2001, 2002 Free Software Foundation, Inc.
+# Peter Karlsson <peter@softwolves.pp.se>, 2000-2002.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.4.pre2\n"
+"Project-Id-Version: lynx 2.8.4\n"
 "POT-Creation-Date: 2001-06-01 18:55-0400\n"
-"PO-Revision-Date: 2001-06-25 21:00+0200\n"
+"PO-Revision-Date: 2002-07-05 19:30+0100\n"
 "Last-Translator: Peter Karlsson <peter@softwolves.pp.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -4833,7 +4833,7 @@ msgstr "Senaste ändring:"
 
 #: src/LYShowInfo.c:309
 msgid "&nbsp;Expires:"
-msgstr "Utgår:"
+msgstr "&nbsp;Utgår:"
 
 #: src/LYShowInfo.c:313
 msgid "Cache-Control:"
@@ -4998,7 +4998,7 @@ msgstr "Ignorerar ogiltig HOME"
 
 #: src/LYrcFile.c:20
 msgid "Normally disabled.  See ENABLE_LYNXRC in lynx.cfg\n"
-msgstr ""
+msgstr "Vanligtvis avstängd. Se ENABLE_LYNXRC i lynx.cfg\n"
 
 #: src/LYrcFile.c:242
 msgid ""
@@ -5226,7 +5226,7 @@ msgid ""
 "fr, may be a comma-separated list in decreasing preference)\n"
 "which Lynx will indicate you prefer in requests to http servers.\n"
 "If a file in that language is available, the server will send it.\n"
-"Otherwise, the server will send the file in it's default language.\n"
+"Otherwise, the server will send the file in its default language.\n"
 msgstr ""
 "preferred_language anger de språk som Lynx kommer att ange att du önskar\n"
 "ta emot i frågor till webbservrar i MIME-notation (t.ex en,fr, kan vara\n"
@@ -5521,3 +5521,113 @@ msgstr ""
 "Om du letar efter den generella konfigurationsfilen heter den normalt\n"
 "lynx.cfg, och har annat innehåll och ett annat format. Det är inte denna\n"
 "fil.\n"
+
+#~ msgid "(From Cookie Jar)"
+#~ msgstr "(Från kakburk)"
+
+#~ msgid ""
+#~ "partial_thres specifies the number of lines Lynx should download and render\n"
+#~ "before we redraw the screen in Partial Display logic\n"
+#~ "e.g., partial_thres=2\n"
+#~ "would have Lynx redraw every 2 lines that it renders\n"
+#~ "partial_thres=-1 would use the entire screensize\n"
+#~ msgstr ""
+#~ "partial_thres anger antalet rader Lynx skall hämta och tolka innan skärmen\n"
+#~ "ritas om. partial_thres=2 gör att Lynx ritar om skärmen för varannan rad\n"
+#~ "som tolkas. partial_thres=-1 använder skärmstorleken\n"
+
+#~ msgid "Comment request cancelled!!!"
+#~ msgstr "Kommentaren avbruten!!!"
+
+#~ msgid "You are not allowed to goto \"file:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"file:\"-adresser"
+
+#~ msgid "You are not allowed to goto \"finger:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"finger:\"-adresser"
+
+#~ msgid "You are not allowed to goto \"ftp:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"ftp:\"-adresser"
+
+#~ msgid "You are not allowed to goto \"gopher:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"gopher:\"-adresser"
+
+#~ msgid "You are not allowed to goto \"http:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"http:\"-adresser"
+
+#~ msgid "You are not allowed to goto \"https:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"https:\"-adresser"
+
+#~ msgid "You are not allowed to goto \"lynxcgi:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"lynxcgi:\"-adresser"
+
+#~ msgid "You are not allowed to goto \"lynxexec:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"lynxexec:\"-adresser"
+
+#~ msgid "You are not allowed to goto \"lynxprog:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"lynxprog:\"-adresser"
+
+#~ msgid "You are not allowed to goto \"mailto:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"mailto:\"-adresser"
+
+#~ msgid "You are not allowed to goto \"news:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"news:\"-adresser"
+
+#~ msgid "You are not allowed to goto \"nntp:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"nntp:\"-adresser"
+
+#~ msgid "You are not allowed to goto \"rlogin:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"rlogin:\"-adresser"
+
+#~ msgid "You are not allowed to goto \"snews:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"snews:\"-adresser"
+
+#~ msgid "You are not allowed to goto \"telnet:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"telnet:\"-adresser"
+
+#~ msgid "You are not allowed to goto \"tn3270:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"tn3270:\"-adresser"
+
+#~ msgid "You are not allowed to goto \"wais:\" URLs"
+#~ msgstr "Du tillåts inte gå till \"wais:\"-adresser"
+
+#~ msgid "This special URL is not allowed as a goto!"
+#~ msgstr "Denna specialadress tillåts inte gås till!"
+
+#~ msgid "Option choice (or page) number: "
+#~ msgstr "Välj alternativ- (eller sid-)nummer: "
+
+#~ msgid "Choice number %d already is current."
+#~ msgstr "Val %d är redan markerat."
+
+#~ msgid "You are already at the end of this choice list."
+#~ msgstr "Du är redan i slutet av vallistan."
+
+#~ msgid "You are already at the beginning of this choice list."
+#~ msgstr "Du är redan i början av vallistan."
+
+#~ msgid "You are already at page %d of this choice list."
+#~ msgstr "Du är redan på sida %d i vallistan."
+
+#~ msgid "You have entered an invalid choice number."
+#~ msgstr "Du har angett ett felaktigt valnummer."
+
+#~ msgid "Read %ld of %ld %s of data"
+#~ msgstr "Läste %ld av %ld%s data"
+
+#~ msgid "Read %ld %s of data"
+#~ msgstr "Läste %ld%s data"
+
+#~ msgid ", %ld %s/sec."
+#~ msgstr ", %ld%s/s"
+
+#~ msgid "Lynx ver. %s"
+#~ msgstr "Lynx ver. %s"
+
+#~ msgid "Personal Name: "
+#~ msgstr "Namn: "
+
+#~ msgid "Inactive text input, activate to edit (e.g., press ENTER)"
+#~ msgstr "Inaktiv textindata, aktivera för att redigera (tryck Enter)"
+
+#~ msgid "Left mouse button or return to select, arrow keys to scroll."
+#~ msgstr "Vänster musknapp eller Enter väljer, piltangenter rullar."

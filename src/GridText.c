@@ -1318,14 +1318,14 @@ PRIVATE int display_line ARGS4(
 		} else {
 		    inunderline = YES;
 		    if (!intarget) {
-#if (defined(DOSPATH) || defined(WIN_EX)) && !defined(USE_SLANG)
+#if defined(PDCURSES)
 			if (LYShowColor == SHOW_COLOR_NEVER)
 			    start_bold();
 			else
 			    start_underline();
 #else
 			start_underline();
-#endif	/* DOSPATH ... */
+#endif	/* PDCURSES */
 		    }
 		}
 		break;
@@ -1337,14 +1337,14 @@ PRIVATE int display_line ARGS4(
 		} else {
 		    inunderline = NO;
 		    if (!intarget) {
-#if (defined(DOSPATH) || defined(WIN_EX)) && !defined(USE_SLANG)
+#if defined(PDCURSES)
 		    if (LYShowColor == SHOW_COLOR_NEVER)
 			stop_bold();
 		    else
 			stop_underline();
 #else
 		    stop_underline();
-#endif	/* DOSPATH ... */
+#endif	/* PDCURSES */
 		    }
 		}
 		break;
@@ -1366,6 +1366,9 @@ PRIVATE int display_line ARGS4(
 		if (!dump_output_immediately) {
 		    LYaddch('+');
 		    i++;
+#if defined(SHOW_WHEREIS_TARGETS) && !defined(USE_COLOR_STYLE)
+		    i_after_tgt++;
+#endif
 		}
 		break;
 
@@ -1621,11 +1624,9 @@ PRIVATE void display_title ARGS1(
 	LYmove(0, i);
     } else {
 	/*
-	 *  Note that this truncation is not taking into
-	 *  account the possibility that multibyte
-	 *  characters might be present. -FM
+	 *  Truncation takes into account the possibility that
+	 *  multibyte characters might be present. -HS (H. Senshu)
 	 */
-#ifdef SH_EX	/* 1999/06/15 (Tue) 10:17:28 */
 	int last;
 	last = (int)strlen(percent) + CHAR_WIDTH;
 	if (limit - 3 >= last) {
@@ -1635,10 +1636,6 @@ PRIVATE void display_title ARGS1(
 	} else {
 	    title[(limit - 1) - last] = '\0';
 	}
-#else
-	if ((i = ((limit - 2) - strlen(percent)) - CHAR_WIDTH) >= 0)
-	    title[i] = '\0';
-#endif
 	LYmove(0, CHAR_WIDTH);
     }
     LYaddstr(title);
@@ -3118,7 +3115,7 @@ PRIVATE void split_line ARGS2(
 		    CTRACE_SPLITLINE((tfp, "anchor %d: no relocation", n));
 		    if (end > s_post) {
 			CTRACE_SPLITLINE((tfp, " of the start.\n"));
-			a->extent += -(TailTrim + HeadTrim) - SpecialAttrChars;
+			a->extent += -(TailTrim + HeadTrim) + SpecialAttrChars;
 		    } else {
 			CTRACE_SPLITLINE((tfp, ", cut the end.\n"));
 			a->extent = s_pre - start;
@@ -6975,7 +6972,7 @@ PUBLIC BOOL HText_select ARGS1(
  *  (memory cached) text. -FM
  */
 PUBLIC BOOL HText_POSTReplyLoaded ARGS1(
-	document *,	doc)
+	DocInfo *,	doc)
 {
     HText *text = NULL;
     HTList *cur = loaded_texts;
@@ -7019,21 +7016,21 @@ PUBLIC BOOL HTFindPoundSelector ARGS1(
 {
     TextAnchor * a;
 
-    for (a=HTMainText->first_anchor; a; a=a->next) {
+    for (a = HTMainText->first_anchor; a != 0; a = a->next) {
 
-	if (a->anchor && a->anchor->tag)
+	if (a->anchor && a->anchor->tag) {
 	    if (!strcmp(a->anchor->tag, selector)) {
 
 		www_search_result = a->line_num+1;
 
-		CTRACE((tfp,
-		       "HText: Selecting anchor [%d] at line %d\n",
-				     a->number, www_search_result));
+		CTRACE((tfp, "FindPound: Selecting anchor [%d] at line %d\n",
+			     a->number, www_search_result));
 		if (!strcmp(selector, LYToolbarName)) {
 		    --www_search_result;
 		}
 		return(YES);
 	    }
+	}
     }
 
     return(NO);
@@ -7068,9 +7065,8 @@ PUBLIC BOOL HText_selectAnchor ARGS2(
 
     {
 	 int l = a->line_num;
-	 CTRACE((tfp,
-	    "HText: Selecting anchor [%d] at line %d\n",
-	    a->number, l));
+	 CTRACE((tfp, "HText: Selecting anchor [%d] at line %d\n",
+		      a->number, l));
 
 	if ( !text->stale &&
 	     (l >= text->top_of_screen) &&
@@ -7247,7 +7243,7 @@ PUBLIC void HTAddSearchQuery ARGS1(
 }
 
 PUBLIC int do_www_search ARGS1(
-	document *,	doc)
+	DocInfo *,	doc)
 {
     char searchstring[256], temp[256], *cp, *tmpaddress = NULL;
     int ch, recall;
@@ -7641,7 +7637,7 @@ PUBLIC void print_crawl_to_fd ARGS3(
 }
 
 PRIVATE void adjust_search_result ARGS3(
-    document *,	doc,
+    DocInfo *,	doc,
     int,	tentative_result,
     int,	start_line)
 {
@@ -7853,7 +7849,7 @@ PRIVATE TextAnchor *get_prev_anchor ARGS1(
 
 PRIVATE int www_search_forward ARGS5(
 	int,		start_line,
-	document *,	doc,
+	DocInfo *,	doc,
 	char *,		target,
 	HTLine *,	line,
 	int,		count)
@@ -7896,7 +7892,7 @@ PRIVATE int www_search_forward ARGS5(
 
 PRIVATE int www_search_backward ARGS5(
 	int,		start_line,
-	document *,	doc,
+	DocInfo *,	doc,
 	char *,		target,
 	HTLine *,	line,
 	int,		count)
@@ -7939,7 +7935,7 @@ PRIVATE int www_search_backward ARGS5(
 
 PUBLIC void www_user_search ARGS4(
 	int,		start_line,
-	document *,	doc,
+	DocInfo *,	doc,
 	char *,		target,
 	int,		direction)
 {
@@ -7984,7 +7980,7 @@ PUBLIC void user_message ARGS2(
 	return;
     }
 
-    HTSprintf0(&temp, message, (argument == 0) ? "" : argument);
+    HTSprintf0(&temp, message, NonNull(argument));
 
     statusline(temp);
 
@@ -8717,7 +8713,7 @@ PUBLIC void HText_beginForm ARGS5(
      *  Check the ACTION. -FM
      */
     if (action != NULL) {
-	if (!strncmp(action, "mailto:", 7)) {
+	if (isMAILTO_URL(action)) {
 	    HTFormMethod = URL_MAIL_METHOD;
 	}
 	StrAllocCopy(HTFormAction, action);
@@ -8782,11 +8778,11 @@ PUBLIC void HText_beginForm ARGS5(
     CTRACE((tfp, "BeginForm: action:%s Method:%d%s%s%s%s%s%s\n",
 		HTFormAction, HTFormMethod,
 		(HTFormTitle ? " Title:" : ""),
-		(HTFormTitle ? HTFormTitle : ""),
+		NonNull(HTFormTitle),
 		(HTFormEnctype ? " Enctype:" : ""),
-		(HTFormEnctype ? HTFormEnctype : ""),
+		NonNull(HTFormEnctype),
 		(HTFormAcceptCharset ? " Accept-charset:" : ""),
-		(HTFormAcceptCharset ? HTFormAcceptCharset : "")));
+		NonNull(HTFormAcceptCharset)));
 }
 
 PUBLIC void HText_endForm ARGS1(
@@ -9177,7 +9173,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	    last_input->value_cs          = new_ptr->value_cs;
 	} else {
 	    int newlen = strlen(new_ptr->name);
-	    int curlen = strlen(HTCurSelectedOptionValue);
+	    int curlen = HTCurSelectedOptionValue ? strlen(HTCurSelectedOptionValue) : 0;
 		/*
 		 *  Make the selected Option Value as long as
 		 *  the longest option.
@@ -9707,7 +9703,7 @@ PUBLIC int HText_beginInput ARGS3(
 
     CTRACE((tfp, "Input link: name=%s\nvalue=%s\nsize=%d\n",
 			f->name,
-			((f->value != NULL) ? f->value : ""),
+			NonNull(f->value),
 			f->size));
     CTRACE((tfp, "Input link: name_cs=%d \"%s\" (from %d \"%s\")\n",
 			f->name_cs,
@@ -9971,7 +9967,7 @@ PRIVATE unsigned check_form_specialchars ARGS1(
  */
 PUBLIC int HText_SubmitForm ARGS4(
 	FormInfo *,	submit_item,
-	document *,	doc,
+	DocInfo *,	doc,
 	char *,		link_name,
 	char *,		link_value)
 {
@@ -9981,7 +9977,6 @@ PUBLIC int HText_SubmitForm ARGS4(
     BOOLEAN PlainText = FALSE;
     BOOLEAN SemiColon = FALSE;
     BOOLEAN first_one = TRUE;
-    BOOLEAN use_mime;
     CONST char *out_csname;
     CONST char *target_csname = NULL;
     PerFormInfo *thisform;
@@ -10004,6 +9999,9 @@ PUBLIC int HText_SubmitForm ARGS4(
     int target_cs = -1;
     int textarea_lineno = 0;
     unsigned form_is_special = 0;
+#ifdef EXP_FILE_UPLOAD
+    BOOLEAN use_mime;
+#endif
 
     CTRACE((tfp, "SubmitForm\n  link_name=%s\n  link_value=%s\n", link_name, link_value));
     if (!HTMainText)
@@ -10025,7 +10023,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 	 *  If we're mailing, make sure it's a mailto ACTION. -FM
 	 */
 	if ((submit_item->submit_method == URL_MAIL_METHOD) &&
-	    strncmp(submit_item->submit_action, "mailto:", 7)) {
+	    !isMAILTO_URL(submit_item->submit_action)) {
 	    HTAlert(BAD_FORM_MAILTO);
 	    return 0;
 	}
@@ -10285,8 +10283,8 @@ PUBLIC int HText_SubmitForm ARGS4(
 		break;
 #ifdef EXP_FILE_UPLOAD
 	    case F_FILE_TYPE:
-		name_used = (form_ptr->name ? form_ptr->name : "");
-		val_used = (form_ptr->value ? form_ptr->value : "");
+		name_used = NonNull(form_ptr->name);
+		val_used = NonNull(form_ptr->value);
 		CTRACE((tfp, "SubmitForm[%d/%d]: I'd submit %s (from %s), but you've not finished it\n",
 			     anchor_count, anchor_limit,
 			     val_used, name_used));
@@ -10346,7 +10344,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 							target_cs, PlainText);
 		    CTRACE((tfp, "SubmitForm[%d/%d]: field \"%s\" %d %s -> %d %s %s\n",
 				 anchor_count, anchor_limit,
-				 form_ptr->name ? form_ptr->name : "",
+				 NonNull(form_ptr->name),
 				 form_ptr->value_cs,
 				 form_ptr->value_cs >= 0
 				     ? LYCharSet_UC[form_ptr->value_cs].MIMEname
@@ -10360,7 +10358,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		} else {  /* We can use the value directly. */
 		    CTRACE((tfp, "SubmitForm[%d/%d]: field \"%s\" %d %s OK\n",
 				 anchor_count, anchor_limit,
-				 form_ptr->name ? form_ptr->name : "",
+				 NonNull(form_ptr->name),
 				 target_cs,
 				 target_csname ? target_csname : "???"));
 		    success = YES;
@@ -10413,7 +10411,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 							target_cs, PlainText);
 		    CTRACE((tfp, "SubmitForm[%d/%d]: name \"%s\" %d %s -> %d %s %s\n",
 				 anchor_count, anchor_limit,
-				 form_ptr->name ? form_ptr->name : "",
+				 NonNull(form_ptr->name),
 				 form_ptr->name_cs,
 				 form_ptr->name_cs >= 0
 				     ? LYCharSet_UC[form_ptr->name_cs].MIMEname
@@ -10436,7 +10434,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		} else {  /* We can use the name directly. */
 		    CTRACE((tfp, "SubmitForm[%d/%d]: name \"%s\" %d %s OK\n",
 				anchor_count, anchor_limit,
-				form_ptr->name ? form_ptr->name : "",
+				NonNull(form_ptr->name),
 				target_cs,
 				target_csname ? target_csname : "???"));
 		    success = YES;
@@ -10804,17 +10802,15 @@ PUBLIC int HText_SubmitForm ARGS4(
     }
 
     if (submit_item->submit_method == URL_POST_METHOD || Boundary) {
-	StrAllocCopy(doc->post_data, query);
-	FREE(doc->post_content_type);
+	LYFreePostData(doc);
+	doc->post_data = query;
 	doc->post_content_type = content_type_out; /* don't free c_t_out */
 	CTRACE((tfp,"GridText - post_data: %s\n",doc->post_data));
 	StrAllocCopy(doc->address, submit_item->submit_action);
-	FREE(query);
 	return 1;
     } else { /* GET_METHOD */
 	StrAllocCopy(doc->address, query);
-	FREE(doc->post_data);
-	FREE(doc->post_content_type);
+	LYFreePostData(doc);
 	FREE(content_type_out);
 	FREE(query);
 	return 1;
@@ -11217,7 +11213,6 @@ PUBLIC BOOL HText_AreDifferent ARGS2(
     HTParentAnchor *MTanc;
     char *MTaddress;
     char *MTpound;
-    char *TargetPound;
 
     /*
      *  Do we have a loaded document and both
@@ -11236,7 +11231,7 @@ PUBLIC BOOL HText_AreDifferent ARGS2(
     /*
      *  Do we have a fragment associated with the target?
      */
-    if ((TargetPound = strchr(full_address, '#')) == NULL)
+    if (findPoundSelector(full_address) == NULL)
 	return (TRUE);
 
     /*
@@ -11244,7 +11239,7 @@ PUBLIC BOOL HText_AreDifferent ARGS2(
      *  as potentially stale, so we'll create a
      *  fresh menu from the LynxMaps HTList.
      */
-    if (!strncasecomp(anchor->address, "LYNXIMGMAP:", 11))
+    if (isLYNXIMGMAP(anchor->address))
 	return (TRUE);
 
     /*
@@ -11258,20 +11253,15 @@ PUBLIC BOOL HText_AreDifferent ARGS2(
      *  out a "LYNXIMGMAP:" leader in the MainText URL
      *  and its fragment, if present?
      */
-    MTaddress = (strncasecomp(MTanc->address,
-			      "LYNXIMGMAP:", 11) ?
-				  MTanc->address : (MTanc->address + 11));
-    if ((MTpound = strchr(MTaddress, '#')) != NULL)
-	*MTpound = '\0';
+    MTaddress = (isLYNXIMGMAP(MTanc->address)
+		? MTanc->address + LEN_LYNXIMGMAP
+		: MTanc->address);
+    MTpound = trimPoundSelector(MTaddress);
     if (strcmp(MTaddress, anchor->address)) {
-	if (MTpound != NULL) {
-	    *MTpound = '#';
-	}
+	restorePoundSelector(MTpound);
 	return(TRUE);
     }
-    if (MTpound != NULL) {
-	*MTpound = '#';
-    }
+    restorePoundSelector(MTpound);
 
     /*
      *  If the MainText is not an image map menu,

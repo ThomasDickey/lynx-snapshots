@@ -155,7 +155,7 @@ PRIVATE int check_prev_target_in_links ARGS2(
  *  variable
  */
 PUBLIC BOOL textsearch ARGS4(
-	document *,	cur_doc,
+	DocInfo *,	cur_doc,
 	char *,		prev_target,
 	int,		target_size,
 	int,		direction)

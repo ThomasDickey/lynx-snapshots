@@ -3,6 +3,7 @@
  */
 
 #include <HTUtils.h>
+#include <LYUtils.h>
 #include <HTDOS.h>
 #include <LYStrings.h>
 
@@ -72,6 +73,21 @@ char * HTDOS_wwwName ARGS1(CONST char *, dosname)
 }
 
 
+/*
+ * Convert slashes from Unix to DOS
+ */
+char * HTDOS_slashes (char * path)
+{
+    char *s;
+
+    for (s = path; *s != '\0'; ++s)	{
+	if (*s == '/')	{
+	    *s = '\\';
+	}
+    }
+    return path;
+}
+
 /* PUBLIC							HTDOS_name()
 **		CONVERTS WWW name into a DOS name
 ** ON ENTRY:
@@ -101,11 +117,7 @@ char * HTDOS_name ARGS1(char *, wwwname)
     }
 #endif /* __DJGPP__ */
 
-    for (joe = 0; result[joe] != '\0'; joe++)	{
-	if (result[joe] == '/')	{
-	    result[joe] = '\\';	/* convert slashes to dos-style */
-	}
-    }
+    (void) HTDOS_slashes(result);
 
     /* pesky leading slash, rudiment from file://localhost/  */
     /* the rest of path may be with or without drive letter  */
@@ -115,26 +127,20 @@ char * HTDOS_name ARGS1(char *, wwwname)
     }
 
 #ifdef _WINDOWS	/* 1998/04/02 (Thu) 08:59:48 */
-    if (strchr(result, '\\') != NULL
-     && strchr(result, ':') == NULL) {
+    if (LYLastPathSep(result) != NULL
+     && !LYIsDosDrive(result)) {
 	sprintf(temp_buff, "%.3s\\%.*s", windows_drive,
 		(int)(sizeof(temp_buff) - 5), result);
 	StrAllocCopy(result, temp_buff);
-    } else {
-	char *p = strchr(result, ':');
-	if (p && (strcmp(p, ":\\") == 0)) {
-	    p[2] = '.';
-	    p[3] = '\0';
-	}
     }
 #endif
     /*
      * If we have only a device, add a trailing slash.  Otherwise it just
      * refers to the current directory on the given device.
      */
-    if (strchr(result, '\\') == 0
-     && result[1] == ':')
-	StrAllocCat(result, "\\");
+    if (LYLastPathSep(result) == NULL
+     && LYIsDosDrive(result))
+	LYAddPathSep0(result);
 
     CTRACE((tfp, "HTDOS_name changed `%s' to `%s'\n", wwwname, result));
     return (result);

@@ -421,8 +421,8 @@ PRIVATE int LYLoadIMGmap ARGS4 (
     BOOL old_reloading = reloading;
     HTFormat old_format_out = HTOutputFormat;
 
-    if (!strncasecomp(arg, "LYNXIMGMAP:", 11)) {
-	address = (char * )(arg + 11);
+    if (isLYNXIMGMAP(arg)) {
+	address = (char *)(arg + LEN_LYNXIMGMAP);
     }
     if (!(address && strchr(address, ':'))) {
 	HTAlert(MISDIRECTED_MAP_REQUEST);

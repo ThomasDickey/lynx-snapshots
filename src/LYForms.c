@@ -60,7 +60,7 @@ PRIVATE char ** options_list ARGS1(
 
 PUBLIC int change_form_link_ex ARGS6(
 	int,		cur,
-	document *,	newdoc,
+	DocInfo *,	newdoc,
 	BOOLEAN *,	refresh_screen,
 	BOOLEAN,	use_last_tfpos,
 	BOOLEAN,	immediate_submit,
@@ -276,7 +276,7 @@ PUBLIC int change_form_link_ex ARGS6(
 		    break;
 		} else if (!immediate_submit &&
 			   ((no_file_url &&
-			     !strncasecomp(form->submit_action, "file:", 5)) ||
+			     isFILE_URL(form->submit_action)) ||
 			    !strncasecomp(form->submit_action, "lynx", 4))) {
 		    c = LAC_TO_LKC0(LYK_SUBMIT);
 		    break;
@@ -344,7 +344,7 @@ PUBLIC int change_form_link_ex ARGS6(
 
 PUBLIC int change_form_link ARGS5(
 	int,		cur,
-	document *,	newdoc,
+	DocInfo *,	newdoc,
 	BOOLEAN *,	refresh_screen,
 	BOOLEAN,	use_last_tfpos,
 	BOOLEAN,	immediate_submit)

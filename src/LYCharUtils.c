@@ -399,13 +399,13 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 	return;
 
     if (!strcmp(*href, "//") || !strncmp(*href, "///", 3)) {
-	if (base != NULL && !strncmp(base, "file:", 5)) {
-	    StrAllocCopy(temp, "file:");
+	if (base != NULL && isFILE_URL(base)) {
+	    StrAllocCopy(temp, STR_FILE_URL);
 	    StrAllocCat(temp, *href);
 	    StrAllocCopy(*href, temp);
 	}
     }
-    if (!strncmp(*href, "file:", 5)) {
+    if (isFILE_URL(*href)) {
 	if (*(*href+5) == '\0') {
 	    StrAllocCat(*href, "//localhost");
 	} else if (!strcmp(*href, "file://")) {
@@ -419,8 +419,8 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 	}
     }
 
-#if defined(DOSPATH) || defined(__EMX__)
-    if (isalpha(*(*href)) && (*(*href+1) == ':'))  {
+#if defined(USE_DOS_DRIVES)
+    if (LYIsDosDrive(*href))  {
 	/*
 	 * If it's a local DOS path beginning with drive letter,
 	 * add file://localhost/ prefix and go ahead.
@@ -432,13 +432,12 @@ PUBLIC void LYFillLocalFileURL ARGS2(
     /* use below: strlen("file://localhost/") = 17 */
     if (!strncmp(*href, "file://localhost/", 17)
 	  && (strlen(*href) == 19)
-	  && isalpha(*(*href+17))
-	  && (*(*href+18) == ':')) {
+	  && LYIsDosDrive(*href+17)) {
 	/*
 	 * Terminate DOS drive letter with a slash to surf root successfully.
 	 * Here seems a proper place to do so.
 	 */
-	StrAllocCat(*href, "/");
+	LYAddPathSep(href);
     }
 #endif /* DOSPATH */
 
@@ -447,9 +446,9 @@ PUBLIC void LYFillLocalFileURL ARGS2(
      * directory listing for the current default. - FM
      */
     if (!strcmp(*href, "file://localhost")) {
-	char *temp2;
+	CONST char *temp2;
 #ifdef VMS
-	temp2 = HTVMS_wwwName(getenv("PATH"));
+	temp2 = HTVMS_wwwName(LYGetEnv("PATH"));
 #else
 	char curdir[LY_MAXPATH];
 	temp2 = wwwName(Current_Dir(curdir));
@@ -2117,8 +2116,8 @@ PUBLIC void LYHandleMETA ARGS4(
      * Check for a no-cache Pragma
      * or Cache-Control directive. - FM
      */
-    if (!strcasecomp((http_equiv ? http_equiv : ""), "Pragma") ||
-	!strcasecomp((http_equiv ? http_equiv : ""), "Cache-Control")) {
+    if (!strcasecomp(NonNull(http_equiv), "Pragma") ||
+	!strcasecomp(NonNull(http_equiv), "Cache-Control")) {
 	LYUCTranslateHTMLString(&content, me->tag_charset, me->tag_charset,
 				 NO, NO, YES, st_other);
 	LYTrimHead(content);
@@ -2136,7 +2135,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	 *  should. - FM
 	 */
 	if ((!me->node_anchor->cache_control) &&
-	    !strcasecomp((http_equiv ? http_equiv : ""), "Cache-Control")) {
+	    !strcasecomp(NonNull(http_equiv), "Cache-Control")) {
 	    LYLowerCase(content);
 	    StrAllocCopy(me->node_anchor->cache_control, content);
 	    if (me->node_anchor->no_cache == FALSE) {
@@ -2182,7 +2181,7 @@ PUBLIC void LYHandleMETA ARGS4(
     /*
      * Check for an Expires directive. - FM
      */
-    } else if (!strcasecomp((http_equiv ? http_equiv : ""), "Expires")) {
+    } else if (!strcasecomp(NonNull(http_equiv), "Expires")) {
 	/*
 	 *  If we didn't get an Expires MIME header,
 	 *  store it in the anchor element, and if we
@@ -2233,7 +2232,7 @@ PUBLIC void LYHandleMETA ARGS4(
      *	the charset via a server's header. - AAC & FM
      */
     } else if (!(me->node_anchor->charset && *me->node_anchor->charset) &&
-	       !strcasecomp((http_equiv ? http_equiv : ""), "Content-Type")) {
+	       !strcasecomp(NonNull(http_equiv), "Content-Type")) {
 	LYUCcharset * p_in = NULL;
 	LYUCcharset * p_out = NULL;
 	LYUCTranslateHTMLString(&content, me->tag_charset, me->tag_charset,
@@ -2417,7 +2416,7 @@ PUBLIC void LYHandleMETA ARGS4(
     /*
      *	Check for a Refresh directive. - FM
      */
-    } else if (!strcasecomp((http_equiv ? http_equiv : ""), "Refresh")) {
+    } else if (!strcasecomp(NonNull(http_equiv), "Refresh")) {
 	char *Seconds = NULL;
 
 	/*
@@ -2600,7 +2599,7 @@ PUBLIC void LYHandleMETA ARGS4(
     /*
      *	Check for a Set-Cookie directive. - AK
      */
-    } else if (!strcasecomp((http_equiv ? http_equiv : ""), "Set-Cookie")) {
+    } else if (!strcasecomp(NonNull(http_equiv), "Set-Cookie")) {
 	/*
 	 *  This will need to be updated when Set-Cookie/Set-Cookie2
 	 *  handling is finalized.  For now, we'll still assume
@@ -2979,7 +2978,7 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	 *  with atrocities inflicted on the Web by
 	 *  authoring tools such as Frontpage. - FM
 	 */
-	if ((pound = strchr(*href, '#')) != NULL) {
+	if ((pound = findPoundSelector(*href)) != NULL) {
 	    StrAllocCopy(fragment, pound);
 	    *pound = '\0';
 	    convert_to_spaces(fragment, FALSE);
@@ -2988,8 +2987,10 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	 * No blanks really belong in the HREF, but if it refers to an actual
 	 * file, it may actually have blanks in the name.  Try to accommodate.
 	 */
-	LYRemoveNewlines(*href);
-	convert_to_spaces(*href, FALSE);
+	if (LYRemoveNewlines(*href) || strchr(*href, '\t') != 0)
+	    LYRemoveBlanks(*href);
+	else
+	    convert_to_spaces(*href, FALSE);
 	LYTrimLeading(*href);
 	LYTrimTrailing(*href);
 	if (fragment != NULL) {
@@ -3004,9 +3005,9 @@ PUBLIC int LYLegitimizeHREF ARGS4(
     url_type = is_url(*href);
     if (!url_type && force_slash &&
 	(!strcmp(*href, ".") || !strcmp(*href, "..")) &&
-	 strncmp((me->inBASE ?
-	       me->base_href : me->node_anchor->address),
-		 "file:", 5)) {
+	 !isFILE_URL((me->inBASE
+		     ? me->base_href
+		     : me->node_anchor->address))) {
 	/*
 	 *  The Fielding RFC/ID for resolving partial HREFs says
 	 *  that a slash should be on the end of the preceding
@@ -3340,7 +3341,7 @@ PUBLIC BOOLEAN LYCheckForCSI ARGS2(
     if (!(anchor && anchor->address))
 	return FALSE;
 
-    if (strncasecomp(anchor->address, "file:", 5))
+    if (!isFILE_URL(anchor->address))
 	return FALSE;
 
     if (!LYisLocalHost(anchor->address))

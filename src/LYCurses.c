@@ -46,17 +46,17 @@ int lynx_has_color = FALSE;
 char *XCursesProgramName = "Lynx";
 #endif
 
-#if defined(USE_COLOR_STYLE) && !USE_COLOR_TABLE
+#if defined(USE_COLOR_STYLE) && !defined(USE_COLOR_TABLE)
 #define COLOR_BKGD ((s_normal != NOSTYLE) ? hashStyles[s_normal].color : A_NORMAL)
 #else
-#define COLOR_BKGD ((COLOR_PAIRS >= 9) ? COLOR_PAIR(9) : A_NORMAL)
+#define COLOR_BKGD ((COLOR_PAIRS >= 9) ? get_color_pair(9) : A_NORMAL)
 #endif
 
 #ifdef USE_CURSES_PADS
 WINDOW *LYwin = 0;
 int LYshiftWin = 0;
 int LYwideLines = FALSE;
-int LYtableCols = 0;			/* in 1/12 of screen width */
+int LYtableCols = 0;		/* in 1/12 of screen width */
 BOOL LYuseCursesPads = TRUE;	/* use pads for left/right shifting */
 #endif
 
@@ -72,7 +72,7 @@ BOOLEAN LYCursesON = FALSE;
 PRIVATE void make_blink_boldbg NOARGS;
 #endif
 
-#if USE_COLOR_TABLE || defined(USE_SLANG)
+#if defined(USE_COLOR_TABLE) || defined(USE_SLANG)
 PUBLIC int Current_Attr, Masked_Attr;
 #endif
 
@@ -553,9 +553,7 @@ PUBLIC void curses_style ARGS2(
 }
 #endif /* USE_COLOR_STYLE */
 
-#ifndef USE_SLANG
 PRIVATE BOOL lynx_called_initscr = FALSE;
-#endif
 
 #if defined(HAVE_USE_DEFAULT_COLORS) && defined(USE_DEFAULT_COLORS)
 /*
@@ -577,7 +575,7 @@ PUBLIC int lynx_default_colors NOARGS
 }
 #endif /* HAVE_USE_DEFAULT_COLORS && USE_DEFAULT_COLORS */
 
-#if USE_COLOR_TABLE && defined(COLOR_CURSES)
+#if defined(USE_COLOR_TABLE) && defined(COLOR_CURSES)
 /*
  * This block of code is designed to produce the same color effects using SVr4
  * curses as the slang library's implementation in this module.  That maps the
@@ -610,6 +608,20 @@ PRIVATE struct {
 } lynx_color_pairs[25];
 
 /*
+ * If we find an exact match for the given default colors, force curses to use
+ * color pair 0, which corresponds to the terminal's default colors.  Normally
+ * curses assumes white-on-black, but we can override the assumption with this
+ * function.
+ */
+PRIVATE int get_color_pair ARGS1(int, n)
+{
+    if (lynx_color_pairs[n].fg == default_fg
+     && lynx_color_pairs[n].bg == default_bg)
+    	return 0;
+    return COLOR_PAIR(n);
+}
+
+/*
  * Map the SGR attributes (0-7) into ANSI colors, modified with the actual BOLD
  * attribute we'll get 16 colors.
  */
@@ -621,15 +633,15 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 	int offs = 1;
 
 	if (Current_Attr & A_BOLD)
-		code |= 1;
+	    code |= 1;
 	if (Current_Attr & A_REVERSE)
-		code |= 2;
+	    code |= 2;
 	if (Current_Attr & A_UNDERLINE)
-		code |= 4;
+	    code |= 4;
 	attr = lynx_color_cfg[code].attr;
 
 	if (code+offs < COLOR_PAIRS) {
-		attr |= COLOR_PAIR(code+offs);
+	    attr |= get_color_pair(code+offs);
 	}
 
 	wattrset(win, attr & ~Masked_Attr);
@@ -689,7 +701,7 @@ PUBLIC void lynx_set_color ARGS1(int, a)
     if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON) {
 	wattrset(LYwin, lynx_color_cfg[a].attr
 		| (((a+1) < COLOR_PAIRS)
-			? COLOR_PAIR(a+1)
+			? get_color_pair(a+1)
 			: A_NORMAL));
     }
 }
@@ -707,7 +719,8 @@ PRIVATE void lynx_init_colors NOARGS
     if (lynx_has_color) {
 	size_t n, m;
 
-	CTRACE((tfp, "lynx_init_colors\n"));
+	CTRACE((tfp, "lynx_init_colors (default %d/%d)\n",
+		     default_fg, default_bg));
 
 	lynx_color_cfg[0].fg = default_fg;
 	lynx_color_cfg[0].bg = default_bg;
@@ -747,7 +760,7 @@ PUBLIC void LYnoVideo ARGS1(
     if (a & 4) Masked_Attr |= SLTT_ULINE_MASK;
     lynx_setup_attrs();
 #else
-#if USE_COLOR_TABLE
+#ifdef USE_COLOR_TABLE
     if (a & 1) Masked_Attr |= A_BOLD;
     if (a & 2) Masked_Attr |= A_REVERSE;
     if (a & 4) Masked_Attr |= A_UNDERLINE;
@@ -909,6 +922,19 @@ PUBLIC void start_curses NOARGS
     initscr();	/* start curses */
 #else  /* Unix: */
 
+#ifdef __CYGWIN__
+    /*
+     * Workaround for buggy Cygwin, which breaks subprocesses of a
+     * full-screen application (tested with cygwin dll, dated
+     * 2002/6/23 -TD)
+     */
+    if (!lynx_called_initscr) {
+	FILE *fp = fopen("/dev/tty", "w");
+	if (fp != 0)
+	    stdout = fp;
+    }
+#endif
+
     if (!LYscreen) {
 	/*
 	 *  If we're not VMS then only do initscr() one time,
@@ -1007,7 +1033,7 @@ PUBLIC void start_curses NOARGS
 	    lynx_has_color = TRUE;
 	    start_color();
 #ifdef USE_DEFAULT_COLORS
-#ifdef EXP_ASSUMED_COLOR
+#if defined(EXP_ASSUMED_COLOR) && defined(USE_COLOR_TABLE)
 	    /*
 	     * Adjust the color mapping table to match the ASSUMED_COLOR
 	     * setting in lynx.cfg
@@ -1016,6 +1042,8 @@ PUBLIC void start_curses NOARGS
 		default_fg = COLOR_WHITE;
 		default_bg = COLOR_BLACK;
 	    }
+	    CTRACE((tfp, "initializing default colors %d/%d\n",
+			 default_fg, default_bg));
 	    if (default_fg >= 0 || default_bg >= 0) {
 		unsigned n;
 		for (n = 0; n < TABLESIZE(lynx_color_cfg); n++) {
@@ -1039,7 +1067,7 @@ PUBLIC void start_curses NOARGS
 #ifdef USE_COLOR_STYLE
 	parse_userstyles();
 #endif
-#if USE_COLOR_TABLE
+#ifdef USE_COLOR_TABLE
 	lynx_init_colors();
 #endif /* USE_COLOR_TABLE */
     }
@@ -1054,7 +1082,7 @@ PUBLIC void start_curses NOARGS
     crmode();
     raw();
 #else
-#if HAVE_CBREAK
+#ifdef HAVE_CBREAK
     cbreak();
 #else
     crmode();
@@ -1064,7 +1092,7 @@ PUBLIC void start_curses NOARGS
 
     noecho();
 
-#if HAVE_KEYPAD
+#ifdef HAVE_KEYPAD
     if (!keypad_on)
 	keypad(LYwin,TRUE);
 #endif /* HAVE_KEYPAD */
@@ -1097,8 +1125,7 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
 
 #if defined(WIN_EX)
 /* modify lynx_enable_mouse() for pdcurses configuration so that mouse support
-   is disabled unless -use_mouse is specified.  This is ifdef'd with
-   __BORLANDC__ for the time being (WB).
+   is disabled unless -use_mouse is specified
 */
     HANDLE hConIn = INVALID_HANDLE_VALUE;
     hConIn = GetStdHandle(STD_INPUT_HANDLE);
@@ -1112,7 +1139,6 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
 
     if (LYUseMouse == 0)
 	return;
-
 
 #if defined(USE_SLANG)
     SLtt_set_mouse_mode (state, 0);
@@ -1240,7 +1266,7 @@ PUBLIC void stop_curses NOARGS
     _eth_release();
 #endif /* __DJGPP__ */
 
-#if defined(DOSPATH) && !(defined(USE_SLANG) || _WIN_CC)
+#if defined(DOSPATH) && !(defined(USE_SLANG) || defined(_WIN_CC))
 #ifdef __DJGPP__
     ScreenClear();
 #else
@@ -1248,15 +1274,11 @@ PUBLIC void stop_curses NOARGS
 #endif
 #else
 
-    /*
-     *	Fixed for better dumb terminal support.
-     *	05-28-94 Lynx 2-3-1 Garrett Arch Blythe
-     */
     if(LYCursesON == TRUE)	{
 	lynx_nl2crlf(TRUE);
 	lynx_enable_mouse (0);
 #if (!defined(WIN_EX) || defined(__CYGWIN__))	/* @@@ */
-	if(LYscreen) {
+	if(LYscreen || lynx_called_initscr) {
 	    endwin();	/* stop curses */
 	    LYDELSCR();
 	}
@@ -1272,7 +1294,7 @@ PUBLIC void stop_curses NOARGS
 #endif
 
     fflush(stdout);
-#endif /* defined(DOSPATH) && !(defined(USE_SLANG) || _WIN_CC) */
+#endif /* defined(DOSPATH) && !(defined(USE_SLANG) || defined(_WIN_CC)) */
     fflush(stderr);
 
     LYCursesON = FALSE;
@@ -1392,7 +1414,7 @@ PUBLIC BOOLEAN setup ARGS1(
     /*
      *	Query the terminal type.
      */
-    if (dumbterm(getenv("TERM"))) {
+    if (dumbterm(LYGetEnv("TERM"))) {
 	printf("\n\n  %s\n\n", gettext("Your Terminal type is unknown!"));
 	printf("  %s [vt100] ", gettext("Enter a terminal type:"));
 
@@ -1408,13 +1430,13 @@ PUBLIC BOOLEAN setup ARGS1(
 	FREE(buffer);
 
 	(void) putenv(term_putenv);
-	printf("\n%s %s\n", gettext("TERMINAL TYPE IS SET TO"), getenv("TERM"));
+	printf("\n%s %s\n", gettext("TERMINAL TYPE IS SET TO"), LYGetEnv("TERM"));
 	LYSleepMsg();
     }
 
     start_curses();
 
-#if HAVE_TTYTYPE
+#ifdef HAVE_TTYTYPE
     /*
      *  Account for lossage on the 'sun' terminal type (80x24) Sun text
      *  console driver. It only supports reverse video, but all SGR
@@ -1456,7 +1478,7 @@ PRIVATE int dumbterm ARGS1(
 
 #ifdef FANCY_CURSES
 #ifndef USE_COLOR_STYLE
-#if USE_COLOR_TABLE
+#ifdef USE_COLOR_TABLE
 PUBLIC void LYaddWAttr ARGS2(
 	WINDOW *,	win,
 	int,		a)
@@ -1681,7 +1703,7 @@ PUBLIC void LYwaddnstr ARGS3(
      * have problems with combining-characters in this version of ncurses
      * (successive calls are not merged), so I'm using them for testing -TD
      */
-#if defined(WIDEC_CURSES) && defined(HAVE_MBSTATE_T)
+#if 0	/* defined(WIDEC_CURSES) && defined(HAVE_MBSTATE_T) */
 #if 1	/* array of wchar_t's */
     {
 	static wchar_t *temp = 0;
@@ -2474,7 +2496,7 @@ PUBLIC void lynx_start_target_color NOARGS
 
 PUBLIC void lynx_start_status_color NOARGS
 {
-#if USE_COLOR_TABLE && defined(COLOR_CURSES)
+#if defined(USE_COLOR_TABLE) && defined(COLOR_CURSES)
     if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
 	lynx_set_color (2);
     else
@@ -2484,7 +2506,7 @@ PUBLIC void lynx_start_status_color NOARGS
 
 PUBLIC void lynx_stop_status_color NOARGS
 {
-#if USE_COLOR_TABLE && defined(COLOR_CURSES)
+#if defined(USE_COLOR_TABLE) && defined(COLOR_CURSES)
     if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
 	lynx_set_color (0);
     else

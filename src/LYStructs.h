@@ -35,42 +35,36 @@ extern LinkInfo links[MAXLINKS];
 extern int nlinks;
 
 typedef struct {
-   char * title;
-   char * address;
-   char * post_data;
-   char * post_content_type;
-   char * bookmark;
-   BOOL   safe;
-   BOOL   isHEAD;
-   int    link;
-   int    line;
-   BOOL   internal_link;	/* whether doc was reached via an internal
+    /* FIXME: see DocAddress */
+    char * title;
+    char * address;
+    char * post_data;
+    char * post_content_type;
+    char * bookmark;
+    BOOL   isHEAD;
+    BOOL   safe;
+
+    int    link;
+    int    line;
+    BOOL   internal_link;	/* whether doc was reached via an internal
 				 (fragment) link. - kw */
 #ifdef USE_COLOR_STYLE
-   char * style;
+    char * style;
 #endif
-} document;
+} DocInfo;
 
 #ifndef HTFORMS_H
 #include <HTForms.h>
 #endif /* HTFORMS_H */
 
 typedef struct {
-    char * title;
-    char * address;
-    char * post_data;
-    char * post_content_type;
-    char * bookmark;
-    BOOL   safe;
-    BOOL   isHEAD;
-    int    link;
-    int    line;
-    BOOL   internal_link;	/* whether doc was reached via an internal
-				 (fragment) link. - kw */
+    DocInfo hdoc;
     int    intern_seq_start;	/* indicates which element on the history
 				   is the start of this sequence of
 				   "internal links", otherwise -1 */
 } HistInfo;
+
+#define HDOC(n) history[n].hdoc
 
 extern int Visited_Links_As;
 

@@ -46,6 +46,12 @@ Environment Variables Used By Lynx:
                            See  the  userdefs.h  file  for   more
                            information.
 
+       LYNX_LOCALEDIR
+                           If  set,  this  variable overrides the
+                           compiled-in  location  of  the  locale
+                           directory  which  contains native lan-
+                           guage (NLS) message text.
+
        LYNX_LSS
                            This  variable,  if set, specifies the
                            location of the default Lynx character
@@ -66,6 +72,19 @@ Environment Variables Used By Lynx:
                            files that was defined during installation,
                            as well as any value that may
                            be assigned to the TMPDIR variable.
+
+       LYNX_TRACE
+                           If  set,  causes Lynx to write a trace
+                           file as if the -trace option were sup-
+                           plied.
+
+       LYNX_TRACE_FILE
+                           If set, overrides the compiled-in name
+                           of the trace  file,  which  is  either
+                           Lynx.trace or LY-TRACE.LOG (the latter
+                           on the DOS platform).  The trace  file
+                           is in either case relative to the home
+                           directory.
 
        MAIL
                            This variable  specifies  the  default

@@ -60,8 +60,10 @@
 
 #ifdef FNAMES_8_3
 #define COOKIE_FILE "cookies"
+#define TRACE_FILE "LY-TRACE.LOG"
 #else
 #define COOKIE_FILE ".lynx_cookies"
+#define TRACE_FILE "Lynx.trace"
 #endif /* FNAMES_8_3 */
 
 /* ahhhhhhhhhh!! Global variables :-< */
@@ -429,6 +431,7 @@ PUBLIC int LYStatusLine = -1;		/* Line for statusline() if > -1 */
 PUBLIC int LYcols = DFT_COLS;
 PUBLIC int LYlines = DFT_ROWS;
 PUBLIC int MessageSecs;			/* time-delay for important Messages   */
+PUBLIC int ReplaySecs;			/* time-delay for command-scripts */
 PUBLIC int ccount = 0;			/* Starting number for lnk#.dat files in crawls */
 PUBLIC int dump_output_width = 0;
 PUBLIC int lynx_temp_subspace = 0;	/* > 0 if we made temp-directory */
@@ -693,9 +696,6 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(URLDomainPrefixes);
     FREE(URLDomainSuffixes);
     FREE(XLoadImageCommand);
-#ifndef VMS
-    FREE(lynx_version_putenv_command);
-#endif
     FREE(lynx_temp_space);
     FREE(LYTraceLogPath);
     FREE(lynx_cfg_file);
@@ -923,7 +923,7 @@ PUBLIC int main ARGS2(
 
 #endif /* _WINDOWS */
 
-#if defined(__CYGWIN__) && defined(DOSPATH)
+#if defined(__CYGWIN__)
     if (strcmp(ttyname(fileno(stdout)), "/dev/conout") != 0) {
 	printf("please \"$CYGWIN=notty\"\n");
 	exit(EXIT_SUCCESS);
@@ -964,7 +964,7 @@ PUBLIC int main ARGS2(
     SetOutputMode(O_BINARY);
 
 #ifdef DOSPATH
-    if (getenv("TERM")==NULL) putenv("TERM=vt100");
+    if (LYGetEnv("TERM")==NULL) putenv("TERM=vt100");
 #endif
 
     LYShowColor = (SHOW_COLOR ? SHOW_COLOR_ON : SHOW_COLOR_OFF);
@@ -973,12 +973,7 @@ PUBLIC int main ARGS2(
      */
     pgm = argv[0];
     cp = NULL;
-#ifdef DOSPATH
-    if ((cp = strrchr(pgm, '\\')) != NULL) {
-	pgm = cp + 1;
-    } else if (cp == NULL)
-#endif
-    if ((cp = strrchr(pgm, '/')) != NULL) {
+    if ((cp = LYLastPathSep(pgm)) != NULL) {
 	pgm = cp + 1;
     }
 
@@ -1016,9 +1011,11 @@ PUBLIC int main ARGS2(
     setlocale(LC_ALL, "");
 #endif /* LOCALE */
     /* Set the text message domain.  */
-#ifdef HAVE_LIBINTL_H
+#if defined(HAVE_LIBINTL_H) || defined(HAVE_LIBGETTEXT_H)
 #ifndef __DJGPP__
-    bindtextdomain ("lynx", LOCALEDIR);
+    if ((cp = LYGetEnv("LYNX_LOCALDIR")) == 0)
+	cp = LOCALEDIR;
+    bindtextdomain ("lynx", cp);
 #endif /* !__DJGPP__ */
     textdomain ("lynx");
 #endif /* HAVE_LIBINTL_H */
@@ -1030,7 +1027,7 @@ PUBLIC int main ARGS2(
     /*
      *	Need this for Ultrix.
      */
-    terminal = getenv("TERM");
+    terminal = LYGetEnv("TERM");
     if ((terminal == NULL) || !strncasecomp(terminal, "xterm", 5))
 	terminal = "vt100";
 #endif /* ULTRIX */
@@ -1048,18 +1045,13 @@ PUBLIC int main ARGS2(
     StrAllocCopy(list_format, LIST_FORMAT);
 #endif /* !VMS */
 
-#ifdef HAVE_NAPMS
-#define SECS2Secs(n) (1000 * (n))
-#else
-#define SECS2Secs(n) (n)
-#endif
     InfoSecs	= SECS2Secs(INFOSECS);
-    MessageSecs = SECS2Secs(MESSAGESECS);
+    MessageSecs	= SECS2Secs(MESSAGESECS);
     AlertSecs	= SECS2Secs(ALERTSECS);
 
     StrAllocCopy(helpfile, HELPFILE);
     StrAllocCopy(startfile, STARTFILE);
-    LYTrimStartfile(startfile);
+    LYEscapeStartfile(&startfile);
     StrAllocCopy(indexfile, DEFAULT_INDEX_FILE);
     StrAllocCopy(global_type_map, GLOBAL_MAILCAP);
     StrAllocCopy(personal_type_map, PERSONAL_MAILCAP);
@@ -1102,16 +1094,16 @@ PUBLIC int main ARGS2(
      */
 #endif /* VMS */
 
-    if ((cp = getenv("LYNX_TEMP_SPACE")) != NULL)
+    if ((cp = LYGetEnv("LYNX_TEMP_SPACE")) != NULL)
 	StrAllocCopy(lynx_temp_space, cp);
 #if defined (UNIX) || defined (__DJGPP__)
-    else if ((cp = getenv("TMPDIR")) != NULL)
+    else if ((cp = LYGetEnv("TMPDIR")) != NULL)
 	StrAllocCopy(lynx_temp_space, cp);
 #endif
 #if defined (DOSPATH) || defined (__EMX__)
-    else if ((cp = getenv("TEMP")) != NULL)
+    else if ((cp = LYGetEnv("TEMP")) != NULL)
 	StrAllocCopy(lynx_temp_space, cp);
-    else if ((cp = getenv("TMP")) != NULL)
+    else if ((cp = LYGetEnv("TMP")) != NULL)
 	StrAllocCopy(lynx_temp_space, cp);
 #endif
     else
@@ -1132,7 +1124,7 @@ PUBLIC int main ARGS2(
     if ((cp = strstr(lynx_temp_space, "$USER")) != NULL) {
 	char *cp1;
 
-	if ((cp1 = getenv("USER")) != NULL) {
+	if ((cp1 = LYGetEnv("USER")) != NULL) {
 	    *cp = '\0';
 	    StrAllocCopy(temp, lynx_temp_space);
 	    *cp = '$';
@@ -1166,7 +1158,7 @@ PUBLIC int main ARGS2(
 #endif /* VMS */
 
     if ((HTStat(lynx_temp_space, &dir_info) < 0
-#ifdef UNIX
+#if defined(MULTI_USER_UNIX)
 	&& mkdir(lynx_temp_space, 0700) < 0
 #endif
 	)
@@ -1224,7 +1216,7 @@ PUBLIC int main ARGS2(
      *	the help menu, output that and exit. - FM
      */
 #ifndef NO_LYNX_TRACE
-    if (getenv("LYNX_TRACE") != 0) {
+    if (LYGetEnv("LYNX_TRACE") != 0) {
 	WWW_TraceFlag = TRUE;
     }
 #endif
@@ -1308,7 +1300,7 @@ PUBLIC int main ARGS2(
     if (!LYValidate && !LYRestricted &&
 	strlen(ANONYMOUS_USER) > 0 &&
 #if defined (VMS) || defined (NOUSERS)
-	!strcasecomp((getenv("USER")==NULL ? " " : getenv("USER")),
+	!strcasecomp((LYGetEnv("USER")==NULL ? " " : LYGetEnv("USER")),
 		     ANONYMOUS_USER)
 #else
 #if HAVE_CUSERID
@@ -1326,13 +1318,9 @@ PUBLIC int main ARGS2(
     /*
      *	Set up the TRACE log path, and logging if appropriate. - FM
      */
-#ifdef FNAMES_8_3
-    LYAddPathToHome(LYTraceLogPath =
-		malloc(LY_MAXPATH), LY_MAXPATH, "LY-TRACE.LOG");
-#else
-    LYAddPathToHome(LYTraceLogPath =
-		malloc(LY_MAXPATH), LY_MAXPATH, "Lynx.trace");
-#endif
+    if ((cp = LYGetEnv("LYNX_TRACE_FILE")) == 0)
+	cp = TRACE_FILE;
+    LYAddPathToHome(LYTraceLogPath = malloc(LY_MAXPATH), LY_MAXPATH, cp);
 
     LYOpenTraceLog();
 
@@ -1374,8 +1362,8 @@ PUBLIC int main ARGS2(
      *	the command line, see if it's in the environment.
      */
     if (!lynx_cfg_file) {
-	if (((cp=getenv("LYNX_CFG")) != NULL) ||
-	    (cp=getenv("lynx_cfg")) != NULL)
+	if (((cp=LYGetEnv("LYNX_CFG")) != NULL) ||
+	    (cp=LYGetEnv("lynx_cfg")) != NULL)
 	    StrAllocCopy(lynx_cfg_file, cp);
     }
 
@@ -1444,8 +1432,8 @@ PUBLIC int main ARGS2(
      *	the command line, see if it's in the environment.
      */
     if (!lynx_lss_file) {
-	if (((cp=getenv("LYNX_LSS")) != NULL) ||
-	    (cp=getenv("lynx_lss")) != NULL)
+	if (((cp=LYGetEnv("LYNX_LSS")) != NULL) ||
+	    (cp=LYGetEnv("lynx_lss")) != NULL)
 	    StrAllocCopy(lynx_lss_file, cp);
     }
 
@@ -1483,7 +1471,7 @@ PUBLIC int main ARGS2(
      *  Set the original directory, used for default download
      */
     if (!strcmp(Current_Dir(filename), ".")) {
-	if ((cp = getenv("PWD")) != 0)
+	if ((cp = LYGetEnv("PWD")) != 0)
 	    StrAllocCopy(original_dir, cp);
     } else {
 	StrAllocCopy(original_dir, filename);
@@ -1520,9 +1508,9 @@ PUBLIC int main ARGS2(
     /*
      * Get WWW_HOME environment variable if it exists.
      */
-    if ((cp = getenv("WWW_HOME")) != NULL) {
+    if ((cp = LYGetEnv("WWW_HOME")) != NULL) {
 	StrAllocCopy(startfile, cp);
-	LYTrimStartfile(startfile);
+	LYEscapeStartfile(&startfile);
     }
 
     /*
@@ -1558,24 +1546,6 @@ PUBLIC int main ARGS2(
 #ifdef CAN_SWITCH_DISPLAY_CHARSET
     if (current_char_set == auto_display_charset) /* Better: explicit option */
 	switch_display_charsets = 1;
-#endif
-
-#undef TTY_DEVICE
-#undef NUL_DEVICE
-
-#ifdef VMS
-#define TTY_DEVICE "tt:"
-#define NUL_DEVICE "nl:"
-#endif
-
-#ifdef _WINDOWS
-#define TTY_DEVICE "con"
-#define NUL_DEVICE "nul"
-#endif
-
-#ifndef TTY_DEVICE
-#define TTY_DEVICE "/dev/tty"
-#define NUL_DEVICE "/dev/null"
 #endif
 
 #if defined (TTY_DEVICE) || defined(HAVE_TTYNAME)
@@ -1657,9 +1627,9 @@ PUBLIC int main ARGS2(
 
     if (LYCookieSaveFile == NULL) {
 	if (dump_output_immediately) {
-		StrAllocCopy(LYCookieSaveFile, "/dev/null");
+	    StrAllocCopy(LYCookieSaveFile, "/dev/null");
 	} else {
-		StrAllocCopy(LYCookieSaveFile, LYCookieFile);
+	    StrAllocCopy(LYCookieSaveFile, LYCookieFile);
 	}
     }
 #endif
@@ -1677,7 +1647,7 @@ PUBLIC int main ARGS2(
      *	If one was set in the configuration file, that
      *	one will be overridden. - FM
      */
-    if ((cp=getenv("LYNX_SAVE_SPACE")) != NULL)
+    if ((cp = LYGetEnv("LYNX_SAVE_SPACE")) != NULL)
 	StrAllocCopy(lynx_save_space, cp);
 
     /*
@@ -1735,7 +1705,7 @@ PUBLIC int main ARGS2(
 	!(Lynx_Color_Flags & SL_LYNX_USE_COLOR)) {
 	Lynx_Color_Flags |= SL_LYNX_USE_COLOR;
     } else if ((Lynx_Color_Flags & SL_LYNX_USE_COLOR) ||
-	       getenv("COLORTERM") != NULL) {
+	       LYGetEnv("COLORTERM") != NULL) {
 	if (LYShowColor != SHOW_COLOR_NEVER &&
 	    LYShowColor != SHOW_COLOR_ALWAYS) {
 	    LYShowColor = SHOW_COLOR_ON;
@@ -1853,8 +1823,9 @@ PUBLIC int main ARGS2(
 #ifdef WIN32
     SetConsoleCtrlHandler((PHANDLER_ROUTINE) cleanup_win32, TRUE);
 #endif
-    if (!dump_output_immediately)
+
 #ifndef NOSIGHUP
+    if (!dump_output_immediately)
 	(void) signal(SIGHUP, cleanup_sig);
 #endif /* NOSIGHUP */
 
@@ -2283,6 +2254,20 @@ PUBLIC void reload_read_cfg NOARGS
 }
 #endif /* !NO_CONFIG_INFO */
 
+PRIVATE void disable_pausing NOARGS
+{
+    InfoSecs = 0;
+    MessageSecs = 0;
+    AlertSecs = 0;
+    ReplaySecs = 0;
+}
+
+PRIVATE void force_dump_mode NOARGS
+{
+    dump_output_immediately = TRUE;
+    disable_pausing();
+    LYcols = DFT_COLS;
+}
 
 /* There are different ways of setting arguments on the command line, and
  * there are different types of arguments.  These include:
@@ -2552,8 +2537,7 @@ PRIVATE int display_charset_fun ARGS1(
 PRIVATE int dump_output_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
-    dump_output_immediately = TRUE;
-    LYcols = DFT_COLS;
+    force_dump_mode();
     return 0;
 }
 
@@ -2612,8 +2596,7 @@ PRIVATE int get_data_fun ARGS1(
      *  potential conflicts, so don't force the dump here. - FM
      */
 #ifndef VMS
-    dump_output_immediately = TRUE;
-    LYcols = DFT_COLS;
+    force_dump_mode();
 #endif /* VMS */
 
     StrAllocCopy(form_get_data, "?");   /* Prime the pump */
@@ -2642,14 +2625,15 @@ PRIVATE int help_fun ARGS1(
 PRIVATE int hiddenlinks_fun ARGS1(
 	char *,			next_arg)
 {
+    static Config_Enum table[] = {
+	{ "merge",	HIDDENLINKS_MERGE },
+	{ "listonly",	HIDDENLINKS_SEPARATE },
+	{ "ignore",	HIDDENLINKS_IGNORE },
+	{ NULL,		-1 },
+    };
+
     if (next_arg != 0) {
-	if (strncasecomp(next_arg, "merge", 1) == 0)
-	    LYHiddenLinks = HIDDENLINKS_MERGE;
-	else if (strncasecomp(next_arg, "listonly", 1) == 0)
-	    LYHiddenLinks = HIDDENLINKS_SEPARATE;
-	else if (strncasecomp(next_arg, "ignore", 1) == 0)
-	    LYHiddenLinks = HIDDENLINKS_IGNORE;
-	else
+	if (!LYgetEnum(table, next_arg, &LYHiddenLinks))
 	    print_help_and_exit (-1);
     } else {
 	LYHiddenLinks = HIDDENLINKS_MERGE;
@@ -2664,7 +2648,7 @@ PRIVATE int homepage_fun ARGS1(
 {
     if (next_arg != 0) {
 	StrAllocCopy(homepage, next_arg);
-	LYTrimStartfile(homepage);
+	LYEscapeStartfile(&homepage);
     }
     return 0;
 }
@@ -2677,7 +2661,7 @@ PRIVATE int mime_header_fun ARGS1(
      *  Include mime headers and force source dump.
      */
     keep_mime_headers = TRUE;
-    dump_output_immediately = TRUE;
+    force_dump_mode();
     HTOutputFormat = (LYPrependBase ?
 		      HTAtom_for("www/download") : HTAtom_for("www/dump"));
     LYcols = MAX_COLS;
@@ -2750,9 +2734,7 @@ PRIVATE int nocolor_fun ARGS1(
 PRIVATE int nopause_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
-    InfoSecs = 0;
-    MessageSecs = 0;
-    AlertSecs = 0;
+    disable_pausing();
     return 0;
 }
 
@@ -2813,8 +2795,7 @@ PRIVATE int post_data_fun ARGS1(
      * conflicts, so don't force a dump here.  - FM
      */
 #ifndef VMS
-    dump_output_immediately = TRUE;
-    LYcols = DFT_COLS;
+    force_dump_mode();
 #endif /* VMS */
 
     post_data = &form_post_data;
@@ -2827,6 +2808,25 @@ PRIVATE int post_data_fun ARGS1(
 	StrAllocCat(*post_data, buf);
     }
     return 0;
+}
+
+PRIVATE char *show_restriction ARGS1(
+	CONST char *,		name)
+{
+    char *value = 0;
+
+    switch (find_restriction(name, -1)) {
+    case TRUE:
+	value = "on";
+	break;
+    case FALSE:
+	value = "off";
+	break;
+    default:
+	value = "?";
+	break;
+    }
+    return value;
 }
 
 /* -restrictions */
@@ -2846,11 +2846,16 @@ disallow changing the eXecute permission on files\n\
 (but still allow it for directories) when local file\n\
 management is enabled." },
 #endif /* DIRED_SUPPORT && OK_PERMIT */
+#ifdef SUPPORT_CHDIR
+	{ "chdir", "\
+disallow changing the working directory of lynx, e.g.,\n\
+to affect the behavior of download command" },
+#endif
 #if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
 	{ "compileopts_info", "\
 disable info on options used to compile the binary" },
 #endif
-{ "default", "\
+	{ "default", "\
 same as commandline option -anonymous.  Sets the\n\
 default service restrictions for anonymous users.  Set to\n\
 all restricted, except for: inside_telnet, outside_telnet,\n\
@@ -2907,6 +2912,8 @@ disable viewing of lynx.cfg configuration file info" },
 	{ "lynxcfg_xinfo", "\
 disable extended lynx.cfg viewing and reloading" },
 #endif
+	{ "lynxcgi", "\
+disallow execution of Lynx CGI URLs" },
 	{ "mail", "disallow mail" },
 	{ "multibook", "disallow multiple bookmark files" },
 	{ "news_post", "disallow USENET News posting." },
@@ -2965,17 +2972,7 @@ G)oto's" },
 	     || !strcmp(table[j].name, "default")) {
 		value = NULL;
 	    } else {
-		switch (find_restriction(table[j].name, -1)) {
-		case TRUE:
-		    value = "on";
-		    break;
-		case FALSE:
-		    value = "off";
-		    break;
-		default:
-		    value = "?";
-		    break;
-		}
+		value = show_restriction(table[j].name);
 	    }
 	    print_help_strings (
 		table[j].name, table[j].help, value, FALSE);
@@ -2995,8 +2992,9 @@ G)oto's" },
 		if (first) {
 		    printf("Other restrictions (see the user's guide):\n");
 		}
-		printf("%s%s", column ? ", " : "  ", name);
-		column += 2 + strlen(name);
+		value = show_restriction(table[j].name);
+		printf("%s%s (%s)", column ? ", " : "  ", name, value);
+		column += 5 + strlen(name) + strlen(value);
 		if (column > 50) {
 		    column = 0;
 		    printf("\n");
@@ -3031,7 +3029,7 @@ PRIVATE int selective_fun ARGS1(
 PRIVATE int source_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
-    dump_output_immediately = TRUE;
+    force_dump_mode();
     HTOutputFormat = (LYPrependBase ?
 		      HTAtom_for("www/download") : HTAtom_for("www/dump"));
     LYcols = MAX_COLS;
@@ -3964,7 +3962,7 @@ PRIVATE BOOL parse_arg ARGS3(
 	had_nonoption = TRUE;
 #endif
 	StrAllocCopy(startfile, arg_name);
-	LYTrimStartfile(startfile);
+	LYEscapeStartfile(&startfile);
 #ifdef _WINDOWS	/* 1998/01/14 (Wed) 20:11:17 */
 	HTUnEscape(startfile);
 	{

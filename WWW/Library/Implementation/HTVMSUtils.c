@@ -752,7 +752,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
     struct stat file_info;
     time_t NowTime;
     static char ThisYear[8];
-    VMSEntryInfo *entry_info=0;
+    VMSEntryInfo *entry_info = 0;
     char string_buffer[64];
     extern BOOLEAN no_dotfiles, show_dotfiles;
 
@@ -766,10 +766,10 @@ PUBLIC int HTVMSBrowseDir ARGS4(
      *  to /sys$sysroot/syshlp) before calling this routine.
      */
     if (((*pathname != '/') ||
-	 (cp=strchr(pathname+1, '/')) == NULL ||
-	 *(cp+1) == '\0' ||
-	 0==strncmp((cp+1), "000000", 6)) ||
-	(dp=HTVMSopendir(pathname)) == NULL) {
+	 (cp = strchr(pathname+1, '/')) == NULL ||
+	 *(cp + 1) == '\0' ||
+	 0 == strncmp((cp + 1), "000000", 6)) ||
+	(dp = HTVMSopendir(pathname)) == NULL) {
 	FREE(pathname);
 	return HTLoadError(sink, 403, COULD_NOT_ACCESS_DIR);
     }

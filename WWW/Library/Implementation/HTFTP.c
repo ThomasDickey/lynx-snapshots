@@ -872,7 +872,7 @@ PRIVATE int get_connection ARGS2(
 		/*
 		 * Use an environment variable and the host global. - FM
 		 */
-		if ((cp=getenv("USER")) != NULL)
+		if ((cp=LYGetEnv("USER")) != NULL)
 		    StrAllocCopy(user, cp);
 		else
 		    StrAllocCopy(user, "WWWuser");
@@ -1786,7 +1786,7 @@ PRIVATE void parse_vms_dir_entry ARGS2(
     /** Wrap it up **/
     CTRACE((tfp, "HTFTP: VMS filename: %s  date: %s  size: %d\n",
 		entry_info->filename,
-		entry_info->date ? entry_info->date : "",
+		NonNull(entry_info->date),
 		entry_info->size));
     return;
 } /* parse_vms_dir_entry() */
@@ -1859,7 +1859,7 @@ PRIVATE void parse_ms_windows_dir_entry ARGS2(
     /** Wrap it up **/
     CTRACE((tfp, "HTFTP: MS Windows filename: %s  date: %s  size: %d\n",
 		entry_info->filename,
-		entry_info->date ? entry_info->date : "",
+		NonNull(entry_info->date),
 		entry_info->size));
     return;
 } /* parse_ms_windows_dir_entry */
@@ -1968,7 +1968,7 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
     /** Wrap it up **/
     CTRACE((tfp, "HTFTP: Windows NT filename: %s  date: %s  size: %d\n",
 		entry_info->filename,
-		entry_info->date ? entry_info->date : "",
+		NonNull(entry_info->date),
 		entry_info->size));
     return;
 } /* parse_windows_nt_dir_entry */
@@ -2109,7 +2109,7 @@ PRIVATE void parse_cms_dir_entry ARGS2(
     /** Wrap it up. **/
     CTRACE((tfp, "HTFTP: VM/CMS filename: %s  date: %s  size: %d\n",
 		entry_info->filename,
-		entry_info->date ? entry_info->date : "",
+		NonNull(entry_info->date),
 		entry_info->size));
     return;
 } /* parse_cms_dir_entry */
@@ -2657,7 +2657,6 @@ PRIVATE int read_directory ARGS4(
     }
     FREE (filename);
 
-
     {
 	HTBTree * bt = HTBTree_new((HTComparer)compare_EntryInfo_structs);
 	int ic;
@@ -3018,7 +3017,7 @@ PUBLIC int HTFTPLoad ARGS4(
 		    return -99;
 		}
 		passive_port = (p0<<8) + p1;
-		snprintf(dst, sizeof(dst), "%d.%d.%d.%d", h0, h1, h2, h3);
+		sprintf(dst, "%d.%d.%d.%d", h0, h1, h2, h3);
 	    } else if (strcmp(p, "EPSV") == 0) {
 		unsigned char c0, c1, c2, c3;
 		struct sockaddr_storage ss;
@@ -3077,10 +3076,10 @@ PUBLIC int HTFTPLoad ARGS4(
 	    /* Open connection for data:  */
 
 #ifdef INET6
-	    HTSprintf0(&command, "ftp://%s:%d/", dst, passive_port);
+	    HTSprintf0(&command, "%s//%s:%d/", STR_FTP_URL, dst, passive_port);
 #else
-	    HTSprintf0(&command, "ftp://%d.%d.%d.%d:%d/",
-		    h0, h1, h2, h3, passive_port);
+	    HTSprintf0(&command, "%s//%d.%d.%d.%d:%d/",
+		    STR_FTP_URL, h0, h1, h2, h3, passive_port);
 #endif
 	    status = HTDoConnect(command, "FTP data", passive_port, &data_soc);
 	    FREE(command);

@@ -1,12 +1,12 @@
 # Перевод сообщений lynx.
 # Copyright (C) 1999, 2000 Free Software Foundation, Inc.
-# Dmitry S. Sivachenko <dima@Chg.RU>, 1999, 2000, 2001.
+# Dmitry S. Sivachenko <dima@Chg.RU>, 1999, 2000, 2001, 2002.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.4.dev20\n"
+"Project-Id-Version: lynx 2.8.4\n"
 "POT-Creation-Date: 2001-06-01 18:55-0400\n"
-"PO-Revision-Date: 2001-06-11 23:22+04:00\n"
+"PO-Revision-Date: 2002-07-06 10:38+0400\n"
 "Last-Translator: Dmitry S. Sivachenko <dima@Chg.RU>\n"
 "Language-Team: Russian <ru@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -515,7 +515,7 @@ msgstr "Запуск вашего выбранного редактора для редактирования почтового сообщени
 #. #define ERROR_SPAWNING_EDITOR
 #: LYMessages.c:202
 msgid "Error spawning editor, check your editor definition in the options menu"
-msgstr "Ошибка при запуске редактора, проверьте определение редактора в меню опций"
+msgstr "Ошибка при запуске редактора, проверьте определение редактора в меню параметров"
 
 #: LYMessages.c:203
 msgid "Send this comment?"
@@ -2720,37 +2720,32 @@ msgstr "Внешняя поддержка сейчас отключена."
 
 #. new with 2.8.4dev.21
 #: LYMessages.c:859
-#, fuzzy
 msgid "Changing working-directory is currently disabled."
-msgstr "Запуск процессов сейчас запрещен."
+msgstr "Изменение рабочего каталога сейчас запрещено."
 
 #: LYMessages.c:860
-#, fuzzy
 msgid "Linewrap OFF!"
-msgstr "Трассировка ВЫКЛЮЧЕНА!"
+msgstr "Перенос строк ОТКЛЮЧЕН!"
 
 #: LYMessages.c:861
 msgid "Linewrap ON!"
-msgstr ""
+msgstr "Перенос строк ВКЛЮЧЕН!"
 
 #: LYMessages.c:862
-#, fuzzy
 msgid "Parsing nested-tables toggled OFF!  Reloading..."
-msgstr "Необработанный 8-битный или CJK-режим ВЫКЛЮЧЕН!  Обновление..."
+msgstr "Разбор вложенных таблиц ОТКЛЮЧЕН!  Обновление..."
 
 #: LYMessages.c:863
-#, fuzzy
 msgid "Parsing nested-tables toggled ON!  Reloading..."
-msgstr "Необработанный 8-битный или CJK-режим ВКЛЮЧЕН!  Обновление..."
+msgstr "Разбор вложенных таблиц ВКЛЮЧЕН!  Обновление..."
 
 #: LYMessages.c:864
 msgid "Shifting is disabled while line-wrap is in effect"
-msgstr ""
+msgstr "Сдвиг запрещен пока действует перенос строк"
 
 #: LYMessages.c:865
-#, fuzzy
 msgid "Trace not supported"
-msgstr "Терминал не поддерживает цвет"
+msgstr "Трассировка не поддерживается"
 
 #: WWW/Library/Implementation/HTAABrow.c:648
 #, c-format
@@ -3035,7 +3030,7 @@ msgstr "Устанавливается %s соединение с %s"
 #: WWW/Library/Implementation/HTTCP.c:1619
 #, c-format
 msgid "socket failed: family %d addr %s port %s."
-msgstr ""
+msgstr "ошибка сокета: семейство %d адрес %s порт %s."
 
 #: WWW/Library/Implementation/HTTCP.c:1628
 msgid "socket failed."
@@ -3408,9 +3403,8 @@ msgstr "неизвестное поле формы"
 
 #. We can't open the file, what do we do?
 #: src/GridText.c:10348
-#, fuzzy
 msgid "Can't open file for uploading"
-msgstr "Не удается открыть файл для чтения!"
+msgstr "Не удается открыть файл для загрузки!"
 
 #. We got an error reading the file, what do we do?
 #: src/GridText.c:10359
@@ -4070,7 +4064,7 @@ msgstr "Установка в выбранный каталог не разрешена."
 
 #: src/LYLocal.c:2146
 msgid "Just a moment, ..."
-msgstr "Минутку, ..."
+msgstr "Минутку ..."
 
 #: src/LYLocal.c:2163
 msgid "Error buiding install args"
@@ -4262,7 +4256,7 @@ msgstr "Вход на главный экран"
 
 #: src/LYMainLoop.c:3897
 msgid "No next document present"
-msgstr ""
+msgstr "Следующий документ отсутствует"
 
 #: src/LYMainLoop.c:4206
 msgid "charset for this document specified explicitly, sorry..."
@@ -4432,13 +4426,12 @@ msgstr "Клавиши VI"
 #. well, at least 2 line edit styles available
 #: src/LYOptions.c:3266
 msgid "Line edit style"
-msgstr ""
+msgstr "Стиль редактирования строк"
 
 #. Keyboard layout: SELECT
 #: src/LYOptions.c:3278
-#, fuzzy
 msgid "Keyboard layout"
-msgstr "Ввод с клавиатуры"
+msgstr "Раскладка клавиатуры"
 
 #.
 #. * Display and Character Set
@@ -4543,7 +4536,7 @@ msgstr "Заголовок User-Agent"
 #.
 #: src/LYOptions.c:3460
 msgid "Listing and Accessing Files"
-msgstr ""
+msgstr "Вывод списка файлов и доступ к ним"
 
 #. ***************************************************************
 #. FTP sort: SELECT
@@ -4880,11 +4873,11 @@ msgstr "режим:"
 
 #: src/LYShowInfo.c:348
 msgid "forms mode"
-msgstr ""
+msgstr "режим с формами"
 
 #: src/LYShowInfo.c:350
 msgid "source"
-msgstr "источник"
+msgstr "исходный текст"
 
 #: src/LYShowInfo.c:350
 msgid "normal"
@@ -4985,12 +4978,11 @@ msgstr "Неожиданный протокол доступа для этой схемы URL."
 
 #: src/LYUtils.c:3915
 msgid "Too many tempfiles"
-msgstr ""
+msgstr "Слишком много временных файлов"
 
 #: src/LYUtils.c:4217
-#, fuzzy
 msgid "unknown restriction"
-msgstr "Ограничений не установлены.\n"
+msgstr "неизвестное ограничение"
 
 #: src/LYUtils.c:4248
 msgid "No restrictions set.\n"
@@ -5006,7 +4998,7 @@ msgstr "Неверное значение HOME игнорировано"
 
 #: src/LYrcFile.c:20
 msgid "Normally disabled.  See ENABLE_LYNXRC in lynx.cfg\n"
-msgstr ""
+msgstr "Обычно отключено.  См. ENABLE_LYNXRC в lynx.cfg\n"
 
 #: src/LYrcFile.c:242
 msgid ""
@@ -5239,7 +5231,7 @@ msgid ""
 "fr, may be a comma-separated list in decreasing preference)\n"
 "which Lynx will indicate you prefer in requests to http servers.\n"
 "If a file in that language is available, the server will send it.\n"
-"Otherwise, the server will send the file in it's default language.\n"
+"Otherwise, the server will send the file in its default language.\n"
 msgstr ""
 "preferred_language определяет язык в нотации MIME (напр. en, fr,\n"
 "может быть список, разделенный запятыми, в убывании приоритета),\n"

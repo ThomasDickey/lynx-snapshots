@@ -1,12 +1,12 @@
 # Estonian translations for lynx
 # Copyright (C) 2001 Free Software Foundation, Inc.
-# Toomas Soome <tsoome@ut.ee>, 2001.
+# Toomas Soome <tsoome@ut.ee>, 2002.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.4.dev20\n"
+"Project-Id-Version: lynx 2.8.4\n"
 "POT-Creation-Date: 2001-06-01 18:55-0400\n"
-"PO-Revision-Date: 2002-01-08 21:45+0200\n"
+"PO-Revision-Date: 2002-07-05 13:27+0300\n"
 "Last-Translator: Toomas Soome <tsoome@ut.ee>\n"
 "Language-Team: Estonian <et@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -2718,37 +2718,32 @@ msgstr "Väline tugi on hetkel blokeeritud."
 
 #. new with 2.8.4dev.21
 #: LYMessages.c:859
-#, fuzzy
 msgid "Changing working-directory is currently disabled."
-msgstr "Alamprotsessi loomine on hetkel blokeeritud."
+msgstr "Töökataloogi muutmine on hetkel blokeeritud."
 
 #: LYMessages.c:860
-#, fuzzy
 msgid "Linewrap OFF!"
-msgstr "Trasseerimine väljas!"
+msgstr "Reamurdmine väljas!"
 
 #: LYMessages.c:861
 msgid "Linewrap ON!"
-msgstr ""
+msgstr "Reamurdmine sees!"
 
 #: LYMessages.c:862
-#, fuzzy
 msgid "Parsing nested-tables toggled OFF!  Reloading..."
-msgstr "Puhas 8-bit või CJK mood on välja lülitatud! Laen uuesti..."
+msgstr "Tabelid tabelites töötlemine on välja lülitatud! Laen uuesti..."
 
 #: LYMessages.c:863
-#, fuzzy
 msgid "Parsing nested-tables toggled ON!  Reloading..."
-msgstr "Puhas 8-bit või CJK mood on sisse lülitatud! Laen uuesti..."
+msgstr "Tabelid tabelites töötlemine on sisse lülitatud! Laen uuesti..."
 
 #: LYMessages.c:864
 msgid "Shifting is disabled while line-wrap is in effect"
-msgstr ""
+msgstr "Kui kasutatakse reamurdmist, on nihutamine blokeeritud"
 
 #: LYMessages.c:865
-#, fuzzy
 msgid "Trace not supported"
-msgstr "Terminal ei toeta värve"
+msgstr "Trasseerimine ei ole toetatud"
 
 #: WWW/Library/Implementation/HTAABrow.c:648
 #, c-format
@@ -3406,14 +3401,13 @@ msgstr "tundmatu vormi väli"
 
 #. We can't open the file, what do we do?
 #: src/GridText.c:10348
-#, fuzzy
 msgid "Can't open file for uploading"
-msgstr "Faili ei õnnestu lugemiseks avada."
+msgstr "Faili ei õnnestu üleslaadimiseks avada"
 
 #. We got an error reading the file, what do we do?
 #: src/GridText.c:10359
 msgid "Short read from file, problem?"
-msgstr ""
+msgstr "Failist loeti vähe, probleem?"
 
 #: src/GridText.c:10721
 #, c-format
@@ -3423,7 +3417,7 @@ msgstr "Postitan %s"
 #. ugliness has happened; inform user and do the best we can
 #: src/GridText.c:11887
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
-msgstr ""
+msgstr "Tuvastati hangumine: TextAnchor struktuur on vigane - soovitan katkestada!"
 
 #. don't show previous state
 #: src/GridText.c:12092
@@ -4261,7 +4255,7 @@ msgstr "Sisenemine põhiekraanile"
 
 #: src/LYMainLoop.c:3897
 msgid "No next document present"
-msgstr ""
+msgstr "Järgmist dokumenti pole"
 
 #: src/LYMainLoop.c:4206
 msgid "charset for this document specified explicitly, sorry..."
@@ -4431,13 +4425,12 @@ msgstr "VI klahvid"
 #. well, at least 2 line edit styles available
 #: src/LYOptions.c:3266
 msgid "Line edit style"
-msgstr ""
+msgstr "Reatoimeti mood"
 
 #. Keyboard layout: SELECT
 #: src/LYOptions.c:3278
-#, fuzzy
 msgid "Keyboard layout"
-msgstr "Sisend klaviatuurilt"
+msgstr "Klaviatuuri asetus"
 
 #.
 #. * Display and Character Set
@@ -4984,12 +4977,11 @@ msgstr "Selle URL skeemiga kasutatakse ootamatut kasutamise protokolli."
 
 #: src/LYUtils.c:3915
 msgid "Too many tempfiles"
-msgstr ""
+msgstr "Liiga palju ajutisi faile"
 
 #: src/LYUtils.c:4217
-#, fuzzy
 msgid "unknown restriction"
-msgstr "Piiranguid pole."
+msgstr "tundmatu piirang"
 
 #: src/LYUtils.c:4248
 msgid "No restrictions set.\n"
@@ -5005,7 +4997,7 @@ msgstr "Ignoreerin vigast HOME muutujat."
 
 #: src/LYrcFile.c:20
 msgid "Normally disabled.  See ENABLE_LYNXRC in lynx.cfg\n"
-msgstr ""
+msgstr "Tavaliselt blokeeritud. Vaadake lynx.cfg failis ENABLE_LYNXRC kohta\n"
 
 #: src/LYrcFile.c:242
 msgid ""
@@ -5232,7 +5224,7 @@ msgid ""
 "fr, may be a comma-separated list in decreasing preference)\n"
 "which Lynx will indicate you prefer in requests to http servers.\n"
 "If a file in that language is available, the server will send it.\n"
-"Otherwise, the server will send the file in it's default language.\n"
+"Otherwise, the server will send the file in its default language.\n"
 msgstr ""
 "preferred_language määrab keele MIME esituses (n., et, en võib\n"
 "olla ka komadega eraldatud kahaneva eelistusega loend),\n"
@@ -5520,18 +5512,3 @@ msgstr ""
 "hoiatatud...\n"
 "Kui te otsite üldist seadete faili - selle nimi on tavaliselt lynx.cfg\n"
 "ja tal on erinev sisu ning vorming. Need ei ole samad failid.\n"
-
-#~ msgid "(From Cookie Jar)"
-#~ msgstr "(Präänikute Jarist)"
-
-#~ msgid ""
-#~ "partial_thres specifies the number of lines Lynx should download and render\n"
-#~ "before we redraw the screen in Partial Display logic\n"
-#~ "e.g., partial_thres=2\n"
-#~ "would have Lynx redraw every 2 lines that it renders\n"
-#~ "partial_thres=-1 would use the entire screensize\n"
-#~ msgstr ""
-#~ "partial_thres määrab ridade arvu, mida Lynx peab alla laadima ja\n"
-#~ "renderdama enne, kui me värskendame ekraani Partial Display logic\n"
-#~ "korral. Näiteks partial_thres=2 sunnib Lynxi uuesti esitama iga\n"
-#~ "renderdatavat 2 rida. partial_thres=-1 tähendab kogu ekraanitäit.\n"

@@ -98,7 +98,7 @@ PRIVATE void format ARGS3(
  * Format the given command into a buffer, returning the resulting string.
  *
  * It is too dangerous to leave any URL that may come along unquoted.  They
- * often contain '&', ';', and '?' chars, and who knows what else may occur. 
+ * often contain '&', ';', and '?' chars, and who knows what else may occur.
  * Prevent spoofing of the shell.  Dunno how this needs to be modified for VMS
  * or DOS.  - kw
  */
@@ -120,7 +120,7 @@ PRIVATE char *format_command ARGS2(
 	decode_string(pram_string);
 	param = pram_string;
 
-	if (strnicmp("mailto:", param, 7) == 0) {
+	if (isMAILTO_URL(param)) {
 	    format(&cmdbuf, command, param + 7);
 	} else if (strnicmp("telnet://", param, 9) == 0) {
 	    char host[sizeof(pram_string)];
@@ -143,10 +143,7 @@ PRIVATE char *format_command ARGS2(
 	    strncat(e_buff, p, sizeof(e_buff) - strlen(e_buff) - 1);
 	    p = strrchr(e_buff, '.');
 	    if (p) {
-		p = strchr(p, '#');
-		if (p) {
-		    *p = '\0';
-		}
+		trimPoundSelector(p);
 	    }
 
 	    /* Less ==> short filename with backslashes,
@@ -261,7 +258,6 @@ BOOL run_external ARGS2(
 {
 #ifdef WIN_EX
     int status;
-    extern int xsystem(char *cmd);
 #endif
     int redraw_flag = TRUE;
     char *cmdbuf = NULL;

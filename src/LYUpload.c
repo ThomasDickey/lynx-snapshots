@@ -108,7 +108,7 @@ retry:
 	}
 	HTSprintf0(&filename, "%s/%s", directory, tmpbuf);
 
-#if HAVE_POPEN
+#ifdef HAVE_POPEN
 	if (LYIsPipeCommand(filename)) {
 	    HTAlert(CANNOT_WRITE_TO_FILE);
 	    _statusline(NEW_FILENAME_PROMPT);
@@ -151,7 +151,7 @@ retry:
 
     FREE(the_command);
     FREE(the_upload);
-#ifdef UNIX
+#if defined(MULTI_USER_UNIX)
     if (filename != 0)
 	chmod(filename, HIDE_CHMOD);
 #endif /* UNIX */

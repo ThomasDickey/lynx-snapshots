@@ -152,6 +152,7 @@
 #define RC_QUIT_DEFAULT_YES             "quit_default_yes"
 #define RC_RAW_MODE                     "raw_mode"
 #define RC_REFERER_WITH_QUERY           "referer_with_query"
+#define RC_REPLAYSECS                   "replaysecs"
 #define RC_REUSE_TEMPFILES              "reuse_tempfiles"
 #define RC_RULE                         "rule"
 #define RC_RULESFILE                    "rulesfile"

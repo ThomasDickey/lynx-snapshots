@@ -181,19 +181,19 @@ PRIVATE char *parse_parameter ARGS2(
     do {
 	if ((string = strchr(string, ';')) == NULL)
 	    return NULL;
-	while (*string != '\0' && (*string == ';' || isspace(*string))) {
+	while (*string != '\0' && (*string == ';' || isspace(UCH(*string)))) {
 	    string++;
 	}
 	if (strlen(string) < len) return NULL;
     } while (strncasecomp(string, name, len) != 0);
     string += len;
-    while (*string != '\0' && (isspace(*string) || *string == '=')) {
+    while (*string != '\0' && (UCH(isspace(*string)) || *string == '=')) {
 	string++;
     }
 
     StrAllocCopy(result, string);
     len = 0;
-    while (isprint(string[len]) && string[len] != ';') {
+    while (isprint(UCH(string[len])) && string[len] != ';') {
 	len++;
     }
     result[len] = '\0';
@@ -387,7 +387,7 @@ PRIVATE int pumpData ARGS1(HTStream *, me)
 		LYmktime(me->anchor->date, TRUE)) {
 		me->anchor->no_cache = TRUE;
 	    }
-	} else if (LYmktime(me->anchor->expires, FALSE) <= 0) {
+	} else if (LYmktime(me->anchor->expires, FALSE) == 0) {
 	    /*
 	    **  We don't have a Date header, and
 	    **  the value is in past for us. - FM
@@ -474,7 +474,7 @@ PRIVATE int pumpData ARGS1(HTStream *, me)
 
 	if (url != NULL) {
 	    CTRACE((tfp, "Formatting refresh-url as first line of result\n"));
-	    while (isdigit(me->refresh_url[num]))
+	    while (isdigit(UCH(me->refresh_url[num])))
 	    	++num;
 	    HTSprintf0(&txt, gettext("Refresh: "));
 	    if (num != 0)

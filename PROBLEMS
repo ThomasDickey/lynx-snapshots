@@ -217,3 +217,11 @@ they will be outlined in this file.
     SOCKETSHR 0.9D sources and offers the fixes as:
        http://alder.cc.kcl.ac.uk/fileserv/zip/socketshr_src_09d-2.zip
        ftp://ftp2.kcl.ac.uk/zip/socketshr_src_09d-2.zip
+
+---------
+
+    On VMS, to build an SSL-capable version, lynx and the ssl library
+    e.g., OpenSSL, must be built using the same network library.  If you
+    build OpenSSL without specifying the network library (the 5th parameter
+    of the makevms.com script), it will guess, possibly not the one you
+    intended.  We have tested only the UCX configuration -TD (2002/9/15).

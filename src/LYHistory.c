@@ -87,7 +87,7 @@ PRIVATE void trace_history ARGS1(
  *  links the most current in the list. - FM
  */
 PUBLIC void LYAddVisitedLink ARGS1(
-	document *,	doc)
+	DocInfo *,	doc)
 {
     VisitedLink *new;
     HTList *cur;
@@ -111,7 +111,7 @@ PUBLIC void LYAddVisitedLink ARGS1(
 	if (	LYIsUIPage(doc->address, UIP_HISTORY) ||
 		LYIsUIPage(doc->address, UIP_VLINKS) ||
 		LYIsUIPage(doc->address, UIP_SHOWINFO) ||
-		!strncmp(doc->address, "LYNXMESSAGES:", 13) ||
+		isLYNXMESSAGES(doc->address) ||
 			(related = 0)	||
 #ifdef DIRED_SUPPORT
 		LYIsUIPage(doc->address, UIP_DIRED_MENU) ||
@@ -121,14 +121,14 @@ PUBLIC void LYAddVisitedLink ARGS1(
 		LYIsUIPage(doc->address, UIP_PRINT_OPTIONS) ||
 		LYIsUIPage(doc->address, UIP_DOWNLOAD_OPTIONS) ||
 		LYIsUIPage(doc->address, UIP_OPTIONS_MENU) ||
-		!strncmp(doc->address, "LYNXKEYMAP:", 11) ||
+		isLYNXKEYMAP(doc->address) ||
 		LYIsUIPage(doc->address, UIP_LIST_PAGE) ||
 #ifdef EXP_ADDRLIST_PAGE
 		LYIsUIPage(doc->address, UIP_ADDRLIST_PAGE) ||
 #endif
 		LYIsUIPage(doc->address, UIP_CONFIG_DEF) ||
 		LYIsUIPage(doc->address, UIP_LYNXCFG) ||
-		!strncmp(doc->address, "LYNXCOOKIE:", 11) ||
+		isLYNXCOOKIE(doc->address) ||
 		LYIsUIPage(doc->address, UIP_TRACELOG)	) {
 	    if (!related)
 		PrevVisitedLink = NULL;
@@ -150,8 +150,8 @@ PUBLIC void LYAddVisitedLink ARGS1(
 
     cur = Visited_Links;
     while (NULL != (new = (VisitedLink *)HTList_nextObject(cur))) {
-	if (!strcmp((new->address ? new->address : ""),
-		    (doc->address ? doc->address : ""))) {
+	if (!strcmp(NonNull(new->address),
+		    NonNull(doc->address))) {
 	    PrevVisitedLink = PrevActiveVisitedLink = new;
 	    /* Already visited.  Update the last-visited info. */
 	    if (new->next_latest == &Latest_last)	/* optimization */
@@ -272,6 +272,28 @@ PUBLIC BOOLEAN LYwouldPush ARGS2(
 }
 
 /*
+ * Free post-data for 'DocInfo'
+ */
+PUBLIC void LYFreePostData ARGS1(
+    DocInfo *,		doc)
+{
+    FREE(doc->post_data);
+    FREE(doc->post_content_type);
+}
+
+/*
+ * Free strings associated with a 'DocInfo' struct.
+ */
+PUBLIC void LYFreeDocInfo ARGS1(
+    DocInfo *,		doc)
+{
+    FREE(doc->title);
+    FREE(doc->address);
+    FREE(doc->bookmark);
+    LYFreePostData(doc);
+}
+
+/*
  *  Free the information in the last history entry.
  */
 PRIVATE void clean_extra NOARGS
@@ -280,34 +302,30 @@ PRIVATE void clean_extra NOARGS
     nhist += nhist_extra;
     while (nhist_extra > 0) {
 	nhist--;
-	FREE(history[nhist].title);
-	FREE(history[nhist].address);
-	FREE(history[nhist].post_data);
-	FREE(history[nhist].post_content_type);
-	FREE(history[nhist].bookmark);
+	LYFreeDocInfo(&HDOC(nhist));
 	nhist_extra--;
     }
     trace_history("...clean_extra");
 }
 
-/* What is the relationship to are_different() from the mainloop?! */
+/* FIXME What is the relationship to are_different() from the mainloop?! */
 PRIVATE int are_identical ARGS2(
 	HistInfo *,	doc,
-	document *,	doc1)
+	DocInfo *,	doc1)
 {
-     return (	STREQ(doc1->address, doc->address)
-		&& !strcmp(doc1->post_data ? doc1->post_data : "",
-			   doc->post_data ?  doc->post_data : "")
-		&& !strcmp(doc1->bookmark ? doc1->bookmark : "",
-			   doc->bookmark ?  doc->bookmark : "")
-		&& doc1->isHEAD == doc->isHEAD );
+     return (	STREQ(doc1->address, doc->hdoc.address)
+		&& !strcmp(NonNull(doc1->post_data),
+			   NonNull(doc->hdoc.post_data))
+		&& !strcmp(NonNull(doc1->bookmark),
+			   NonNull(doc->hdoc.bookmark))
+		&& doc1->isHEAD == doc->hdoc.isHEAD );
 }
 
 /*
  *  Push the current filename, link and line number onto the history list.
  */
 PUBLIC int LYpush ARGS2(
-	document *,	doc,
+	DocInfo *,	doc,
 	BOOLEAN,	force_push)
 {
     /*
@@ -335,11 +353,11 @@ PUBLIC int LYpush ARGS2(
      *	If file is identical to one before it, don't push it.
      */
     if ( nhist > 1 && are_identical(&(history[nhist-1]), doc)) {
-	if (history[nhist-1].internal_link == doc->internal_link) {
+	if (HDOC(nhist-1).internal_link == doc->internal_link) {
 	    /* But it is nice to have the last position remembered!
 	       - kw */
-	    history[nhist-1].link = doc->link;
-	    history[nhist-1].line = doc->line;
+	    HDOC(nhist-1).link = doc->link;
+	    HDOC(nhist-1).line = doc->line;
 	    return 0;
 	}
     }
@@ -348,8 +366,8 @@ PUBLIC int LYpush ARGS2(
      *	If file is identical to the current document, just move the pointer.
      */
     if ( nhist_extra >= 1 && are_identical(&(history[nhist]), doc)) {
-	history[nhist].link = doc->link;
-	history[nhist].line = doc->line;
+	HDOC(nhist).link = doc->link;
+	HDOC(nhist).line = doc->line;
 	nhist_extra--;
 	nhist++;
 	trace_history("LYpush: just move the cursor");
@@ -362,28 +380,28 @@ PUBLIC int LYpush ARGS2(
      *	OK, push it if we have stack space.
      */
     if (nhist < MAXHIST)  {
-	history[nhist].link = doc->link;
-	history[nhist].line = doc->line;
+	HDOC(nhist).link = doc->link;
+	HDOC(nhist).line = doc->line;
 
-	history[nhist].title = NULL;
-	LYformTitle(&(history[nhist].title), doc->title);
+	HDOC(nhist).title = NULL;
+	LYformTitle(&(HDOC(nhist).title), doc->title);
 
-	history[nhist].address = NULL;
-	StrAllocCopy(history[nhist].address, doc->address);
+	HDOC(nhist).address = NULL;
+	StrAllocCopy(HDOC(nhist).address, doc->address);
 
-	history[nhist].post_data = NULL;
-	StrAllocCopy(history[nhist].post_data, doc->post_data);
+	HDOC(nhist).post_data = NULL;
+	StrAllocCopy(HDOC(nhist).post_data, doc->post_data);
 
-	history[nhist].post_content_type = NULL;
-	StrAllocCopy(history[nhist].post_content_type, doc->post_content_type);
+	HDOC(nhist).post_content_type = NULL;
+	StrAllocCopy(HDOC(nhist).post_content_type, doc->post_content_type);
 
-	history[nhist].bookmark = NULL;
-	StrAllocCopy(history[nhist].bookmark, doc->bookmark);
+	HDOC(nhist).bookmark = NULL;
+	StrAllocCopy(HDOC(nhist).bookmark, doc->bookmark);
 
-	history[nhist].isHEAD = doc->isHEAD;
-	history[nhist].safe = doc->safe;
+	HDOC(nhist).isHEAD = doc->isHEAD;
+	HDOC(nhist).safe = doc->safe;
 
-	history[nhist].internal_link = FALSE; /* by default */
+	HDOC(nhist).internal_link = FALSE; /* by default */
 	history[nhist].intern_seq_start = -1; /* by default */
 	if (doc->internal_link) {
 	    /* Now some tricky stuff: if the caller thinks that the doc
@@ -413,49 +431,49 @@ PUBLIC int LYpush ARGS2(
 		    /* If the last-pushed item is a LYNXIMGMAP but THIS one
 		    ** isn't, compare the physical URLs instead. - kw
 		    */
-		    if (0==strncmp(history[nhist-1].address,"LYNXIMGMAP:",11) &&
-			0!=strncmp(doc->address,"LYNXIMGMAP:",11)) {
-			WWWDoc.address = history[nhist-1].address + 11;
+		    if (isLYNXIMGMAP(HDOC(nhist-1).address) &&
+			!isLYNXIMGMAP(doc->address)) {
+			WWWDoc.address = HDOC(nhist-1).address + LEN_LYNXIMGMAP;
 		    /*
 		    ** If THIS item is a LYNXIMGMAP but the last-pushed one
 		    ** isn't, fake it by using THIS item's address for
 		    ** thatparent... - kw
 		    */
-		    } else if ((0==strncmp(doc->address,"LYNXIMGMAP:",11) &&
-		       0!=strncmp(history[nhist-1].address,"LYNXIMGMAP:",11))) {
+		    } else if (isLYNXIMGMAP(doc->address) &&
+		       !isLYNXIMGMAP(HDOC(nhist-1).address)) {
 			char *temp = NULL;
-			StrAllocCopy(temp, "LYNXIMGMAP:");
-			StrAllocCat(temp, doc->address+11);
+			StrAllocCopy(temp, STR_LYNXIMGMAP);
+			StrAllocCat(temp, doc->address + LEN_LYNXIMGMAP);
 			WWWDoc.address = temp;
-			WWWDoc.post_content_type = history[nhist-1].post_content_type;
-			WWWDoc.bookmark = history[nhist-1].bookmark;
-			WWWDoc.isHEAD = history[nhist-1].isHEAD;
-			WWWDoc.safe = history[nhist-1].safe;
+			WWWDoc.post_content_type = HDOC(nhist-1).post_content_type;
+			WWWDoc.bookmark = HDOC(nhist-1).bookmark;
+			WWWDoc.isHEAD = HDOC(nhist-1).isHEAD;
+			WWWDoc.safe = HDOC(nhist-1).safe;
 			thatparent =
 			    HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
 			FREE(temp);
 		    } else {
-			WWWDoc.address = history[nhist-1].address;
+			WWWDoc.address = HDOC(nhist-1).address;
 		    }
 		    if (!thatparent) { /* if not yet done */
-			WWWDoc.post_data = history[nhist-1].post_data;
-			WWWDoc.post_content_type = history[nhist-1].post_content_type;
-			WWWDoc.bookmark = history[nhist-1].bookmark;
-			WWWDoc.isHEAD = history[nhist-1].isHEAD;
-			WWWDoc.safe = history[nhist-1].safe;
+			WWWDoc.post_data = HDOC(nhist-1).post_data;
+			WWWDoc.post_content_type = HDOC(nhist-1).post_content_type;
+			WWWDoc.bookmark = HDOC(nhist-1).bookmark;
+			WWWDoc.isHEAD = HDOC(nhist-1).isHEAD;
+			WWWDoc.safe = HDOC(nhist-1).safe;
 			thatparent =
 			    HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
 		    }
-		/* In addition to equality of the ParentAnchors, require
-		** that IF we have a HTMainText (i.e., it wasn't just
-		** HTuncache'd by mainloop), THEN it has to be consistent
-		** with what we are trying to push.
-		**   This may be overkill... - kw
-		*/
+		    /* In addition to equality of the ParentAnchors, require
+		    ** that IF we have a HTMainText (i.e., it wasn't just
+		    ** HTuncache'd by mainloop), THEN it has to be consistent
+		    ** with what we are trying to push.
+		    **   This may be overkill... - kw
+		    */
 		    if (thatparent == thisparent &&
 			(!HTMainText || HTMainAnchor == thisparent)
 			) {
-			history[nhist].internal_link = TRUE;
+			HDOC(nhist).internal_link = TRUE;
 			history[nhist].intern_seq_start =
 			    history[nhist-1].intern_seq_start >= 0 ?
 			    history[nhist-1].intern_seq_start : nhist-1;
@@ -463,7 +481,7 @@ PUBLIC int LYpush ARGS2(
 		    }
 		}
 	    }
-	    if (!history[nhist].internal_link) {
+	    if (!HDOC(nhist).internal_link) {
 		CTRACE((tfp, "\nLYpush: push as internal link requested, %s\n",
 			    "but didn't check out!"));
 	    }
@@ -485,26 +503,16 @@ PUBLIC int LYpush ARGS2(
  *  Pop the previous filename, link and line number from the history list.
  */
 PUBLIC void LYpop ARGS1(
-	document *,	doc)
+	DocInfo *,	doc)
 {
     if (nhist > 0) {
 	clean_extra();
 	nhist--;
-	doc->link = history[nhist].link;
-	doc->line = history[nhist].line;
-	FREE(doc->title);
-	doc->title = history[nhist].title;	 /* will be freed later */
-	FREE(doc->address);
-	doc->address = history[nhist].address;	 /* will be freed later */
-	FREE(doc->post_data);
-	doc->post_data = history[nhist].post_data;
-	FREE(doc->post_content_type);
-	doc->post_content_type = history[nhist].post_content_type;
-	FREE(doc->bookmark);
-	doc->bookmark = history[nhist].bookmark; /* will be freed later */
-	doc->isHEAD = history[nhist].isHEAD;
-	doc->safe = history[nhist].safe;
-	doc->internal_link = history[nhist].internal_link;
+
+	LYFreeDocInfo(doc);
+
+	*doc = HDOC(nhist);
+
 #ifdef DISP_PARTIAL
 	/* assume we pop the 'doc' to show it soon... */
 	LYSetNewline(doc->line);	/* reinitialize */
@@ -518,7 +526,7 @@ PUBLIC void LYpop ARGS1(
  *  Move to the previous filename, link and line number from the history list.
  */
 PUBLIC void LYhist_prev ARGS1(
-	document *,	doc)
+	DocInfo *,	doc)
 {
     trace_history("LYhist_prev");
     if (nhist > 0 && (nhist_extra || nhist < MAXHIST)) {
@@ -533,14 +541,14 @@ PUBLIC void LYhist_prev ARGS1(
  *  Called before calling LYhist_prev().
  */
 PUBLIC void LYhist_prev_register ARGS1(
-	document *,	doc)
+	DocInfo *,	doc)
 {
     trace_history("LYhist_prev_register");
     if (nhist > 1) {
 	if (nhist_extra) {	/* Make something to return back */
 	    /* Store the new position */
-	    history[nhist].link = doc->link;
-	    history[nhist].line = doc->line;
+	    HDOC(nhist).link = doc->link;
+	    HDOC(nhist).line = doc->line;
 	} else if (nhist < MAXHIST) { /* push will fail */
 	    if (LYpush(doc, 0)) {
 		nhist--;
@@ -552,17 +560,17 @@ PUBLIC void LYhist_prev_register ARGS1(
 }
 
 /*
- *  Move to the next filename, link and line number from the history list.
+ *  Move to the next filename, link and line number from the history.
  */
 PUBLIC int LYhist_next ARGS2(
-	document *,	doc,
-	document *,	newdoc)
+	DocInfo *,	doc,
+	DocInfo *,	newdoc)
 {
     if (nhist_extra <= 1)	/* == 1 when we are the last one */
 	return 0;
     /* Store the new position */
-    history[nhist].link = doc->link;
-    history[nhist].line = doc->line;
+    HDOC(nhist).link = doc->link;
+    HDOC(nhist).line = doc->line;
     nhist++;
     nhist_extra--;
     LYpop_num(nhist, newdoc);
@@ -576,19 +584,19 @@ PUBLIC int LYhist_next ARGS2(
  */
 PUBLIC void LYpop_num ARGS2(
 	int,		number,
-	document *,	doc)
+	DocInfo *,	doc)
 {
     if (number >= 0 && nhist + nhist_extra > number) {
-	doc->link = history[number].link;
-	doc->line = history[number].line;
-	StrAllocCopy(doc->title, history[number].title);
-	StrAllocCopy(doc->address, history[number].address);
-	StrAllocCopy(doc->post_data, history[number].post_data);
-	StrAllocCopy(doc->post_content_type, history[number].post_content_type);
-	StrAllocCopy(doc->bookmark, history[number].bookmark);
-	doc->isHEAD = history[number].isHEAD;
-	doc->safe = history[number].safe;
-	doc->internal_link = history[number].internal_link; /* ?? */
+	doc->link = HDOC(number).link;
+	doc->line = HDOC(number).line;
+	StrAllocCopy(doc->title, HDOC(number).title);
+	StrAllocCopy(doc->address, HDOC(number).address);
+	StrAllocCopy(doc->post_data, HDOC(number).post_data);
+	StrAllocCopy(doc->post_content_type, HDOC(number).post_content_type);
+	StrAllocCopy(doc->bookmark, HDOC(number).bookmark);
+	doc->isHEAD = HDOC(number).isHEAD;
+	doc->safe = HDOC(number).safe;
+	doc->internal_link = HDOC(number).internal_link; /* ?? */
 #ifdef DISP_PARTIAL
 	/* assume we pop the 'doc' to show it soon... */
 	LYSetNewline(doc->line);	/* reinitialize */
@@ -625,8 +633,8 @@ PUBLIC int showhistory ARGS1(
 
     BeginInternalPage(fp0, HISTORY_PAGE_TITLE, HISTORY_PAGE_HELP);
 
-    fprintf(fp0, "<p align=right> <a href=\"LYNXMESSAGES:\">[%s]</a>\n",
-		 STATUSLINES_TITLE);
+    fprintf(fp0, "<p align=right> <a href=\"%s\">[%s]</a>\n",
+		 STR_LYNXMESSAGES, STATUSLINES_TITLE);
 
     fprintf(fp0, "<pre>\n");
 
@@ -636,8 +644,8 @@ PUBLIC int showhistory ARGS1(
 	 *  The number of the document in the hist stack,
 	 *  its title in a link, and its address. - FM
 	 */
-	if (history[x].title != NULL) {
-	    StrAllocCopy(Title, history[x].title);
+	if (HDOC(x).title != NULL) {
+	    StrAllocCopy(Title, HDOC(x).title);
 	    LYEntify(&Title, TRUE);
 	    LYTrimLeading(Title);
 	    LYTrimTrailing(Title);
@@ -647,16 +655,16 @@ PUBLIC int showhistory ARGS1(
 	    StrAllocCopy(Title, NO_TITLE);
 	}
 	fprintf(fp0,
-		"%s<em>%d</em>. <tab id=t%d><a href=\"LYNXHIST:%d\">%s</a>\n",
+		"%s<em>%d</em>. <tab id=t%d><a href=\"%s%d\">%s</a>\n",
 		(x > 99 ? "" : x < 10 ? "  " : " "),
-		x, x, x, Title);
-	if (history[x].address != NULL) {
-	    StrAllocCopy(Title, history[x].address);
+		x, x, STR_LYNXHIST, x, Title);
+	if (HDOC(x).address != NULL) {
+	    StrAllocCopy(Title, HDOC(x).address);
 	    LYEntify(&Title, TRUE);
 	} else {
 	    StrAllocCopy(Title, gettext("(no address)"));
 	}
-	if (history[x].internal_link) {
+	if (HDOC(x).internal_link) {
 	    if (history[x].intern_seq_start == history[nhist-1].intern_seq_start)
 		StrAllocCat(Title, gettext(" (internal)"));
 	    else
@@ -679,7 +687,7 @@ PUBLIC int showhistory ARGS1(
  *  The info looks like:  LYNXHIST:#
  */
 PUBLIC BOOLEAN historytarget ARGS1(
-	document *,	newdoc)
+	DocInfo *,	newdoc)
 {
     int number;
     DocAddress WWWDoc;
@@ -705,7 +713,7 @@ PUBLIC BOOLEAN historytarget ARGS1(
     if (HTMainText && nhist > 0 &&
 	!strcmp(HTLoadedDocumentTitle(), HISTORY_PAGE_TITLE) &&
 	LYIsUIPage3(HTLoadedDocumentURL(), UIP_HISTORY, 0) &&
-	strcmp(HTLoadedDocumentURL(), history[nhist-1].address)) {
+	strcmp(HTLoadedDocumentURL(), HDOC(nhist-1).address)) {
 	HTuncache_current_document();  /* don't waste the cache */
     }
 
@@ -713,7 +721,7 @@ PUBLIC BOOLEAN historytarget ARGS1(
     if (((newdoc->internal_link &&
 	  history[number].intern_seq_start == history[nhist-1].intern_seq_start) ||
 	 (number < nhist-1 &&
-	  history[nhist-1].internal_link &&
+	  HDOC(nhist-1).internal_link &&
 	  number == history[nhist-1].intern_seq_start))
 	&& !(LYforce_no_cache == TRUE && LYoverride_no_cache == FALSE)) {
 #ifndef DONT_TRACK_INTERNAL_LINKS
@@ -744,7 +752,7 @@ PUBLIC BOOLEAN historytarget ARGS1(
 		LYoverride_no_cache == FALSE)) &&
 	      !(treat_as_intern && !reloading)) ||
 	     text == NULL) &&
-	    (!strncmp(newdoc->address, "LYNXIMGMAP:", 11) ||
+	    (isLYNXIMGMAP(newdoc->address) ||
 	     HTConfirm(CONFIRM_POST_RESUBMISSION) == TRUE)) {
 	    LYforce_no_cache = TRUE;
 	    LYoverride_no_cache = FALSE;
@@ -802,7 +810,7 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 
     BeginInternalPage(fp0, VISITED_LINKS_TITLE, VISITED_LINKS_HELP);
 
-    fprintf(fp0, "<form action=\"LYNXOPTIONS:\" method=\"post\">\n");
+    fprintf(fp0, "<form action=\"%s\" method=\"post\">\n", STR_LYNXOPTIONS);
     fprintf(fp0, "<select name=\"visited_pages_type\">\n");
     fprintf(fp0, " <option value=\"first_visited\" %s>Sort By First Visited\n",
 		 (Visited_Links_As == VISITED_LINKS_AS_FIRST_V ? "selected" : ""));
@@ -1017,7 +1025,7 @@ PUBLIC void LYstore_message2 ARGS2(
 
     if (message != NULL) {
 	char *temp = NULL;
-	HTSprintf0(&temp, message, (argument == 0) ? "" : argument);
+	HTSprintf0(&temp, message, NonNull(argument));
 	to_stack(temp);
     }
 }

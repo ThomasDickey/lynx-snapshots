@@ -28,11 +28,9 @@
  */
 #define ALERT_FORMAT gettext("Alert!: %s")
 #define WELCOME_MSG gettext("Welcome")
-#define REALLY_QUIT_Y gettext("Are you sure you want to quit?")
-#define REALLY_QUIT_N gettext("Are you sure you want to quit?")
+#define REALLY_QUIT gettext("Are you sure you want to quit?")
 #ifdef VMS
-#define REALLY_EXIT_Y gettext("Really exit from Lynx?")
-#define REALLY_EXIT_N gettext("Really exit from Lynx?")
+#define REALLY_EXIT gettext("Really exit from Lynx?")
 #endif /* VMS */
 #define CONNECTION_INTERRUPTED gettext("Connection interrupted.")
 #define TRANSFER_INTERRUPTED gettext("Data transfer interrupted.")

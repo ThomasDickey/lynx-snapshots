@@ -1160,7 +1160,7 @@ draw_options:
 		if (no_option_save) {
 #if defined(COLOR_CURSES)
 		    if (!has_colors()) {
-			char * terminal = getenv("TERM");
+			char * terminal = LYGetEnv("TERM");
 			if (terminal)
 			    HTUserMsg2(
 				COLOR_TOGGLE_DISABLED_FOR_TERM,
@@ -1214,7 +1214,7 @@ draw_options:
 #if defined(COLOR_CURSES)
 			again = (BOOL) (chosen == 2 && !has_colors());
 			if (again) {
-			    char * terminal = getenv("TERM");
+			    char * terminal = LYGetEnv("TERM");
 			    if (terminal)
 				HTUserMsg2(
 				    COLOR_TOGGLE_DISABLED_FOR_TERM,
@@ -1984,7 +1984,7 @@ draw_bookmark_list:
 
 		start_bold();
 		LYstrncpy(MBM_tmp_line,
-			  (!MBM_A_subbookmark[a] ? "" : MBM_A_subbookmark[a]),
+			  NonNull(MBM_A_subbookmark[a]),
 			  sizeof(MBM_tmp_line) - 1);
 		ch = LYgetstr(MBM_tmp_line, VISIBLE,
 			      sizeof(MBM_tmp_line), NORECALL);
@@ -2200,14 +2200,12 @@ static OptValues visited_links_values[] = {
 /*
  * Document Layout
  */
-#ifndef SH_EX	/* 1999/01/19 (Tue) */
 static char * DTD_recovery_string      = RC_TAGSOUP;
 static OptValues DTD_type_values[] = {
 	/* Old_DTD variable */
 	{ TRUE,		    "relaxed (TagSoup mode)",	 "tagsoup" },
 	{ FALSE,	    "strict (SortaSGML mode)",	 "sortasgml" },
 	{ 0, 0, 0 }};
-#endif
 
 static char * select_popups_string     = RC_SELECT_POPUPS;
 static char * images_string            = "images";
@@ -2459,7 +2457,7 @@ PRIVATE int gen_options PARAMS((char **newfile));
  */
 
 PUBLIC int postoptions ARGS1(
-    document *,		newdoc)
+    DocInfo *,		newdoc)
 {
     PostPair *data = 0;
     DocAddress WWWDoc;  /* need on exit */
@@ -2665,7 +2663,6 @@ PUBLIC int postoptions ARGS1(
 	    case_sensitive = (BOOL) code;
 	}
 
-#ifndef SH_EX	/* 1999/01/19 (Tue) */
 	/* HTML error tolerance: SELECT */
 	if (!strcmp(data[i].tag, DTD_recovery_string)
 	 && GetOptValues(DTD_type_values, data[i].value, &code)) {
@@ -2675,7 +2672,6 @@ PUBLIC int postoptions ARGS1(
 		need_reload = TRUE;
 	    }
 	}
-#endif
 
 	/* Select Popups: ON/OFF */
 	if (!strcmp(data[i].tag, select_popups_string)
@@ -3002,7 +2998,7 @@ PUBLIC int postoptions ARGS1(
      */
     if ((need_end_reload == TRUE &&
 	 (strncmp(newdoc->address, "http", 4) == 0 ||
-	  strncmp(newdoc->address, "lynxcgi:", 8) == 0))) {
+	  isLYNXCGI(newdoc->address) == 0))) {
 	/*
 	 *  An option has changed which may influence
 	 *  content negotiation, and the resource is from
@@ -3208,7 +3204,7 @@ PRIVATE int gen_options ARGS1(
     /*
      * I do C, not HTML.  Feel free to pretty this up.
      */
-    fprintf(fp0, "<form action=\"LYNXOPTIONS:\" method=\"post\">\n");
+    fprintf(fp0, "<form action=\"%s\" method=\"post\">\n", STR_LYNXOPTIONS);
     /*
      * use following with some sort of one shot secret key akin to NCSA
      * (or was it CUTE?) telnet one shot password to allow ftp to self.
@@ -3225,8 +3221,8 @@ PRIVATE int gen_options ARGS1(
     fprintf(fp0,"<p align=center>\n");
     if (!disable_all) {
 	fprintf(fp0,"<input type=\"submit\" value=\"%s\"> - \n", ACCEPT_CHANGES);
-	fprintf(fp0,"<input type=\"reset\" value=\"%s\">\n", RESET_CHANGES);
-	fprintf(fp0,"%s\n", CANCEL_CHANGES);
+	fprintf(fp0,"<input type=\"reset\" value=\"%s\"> - \n", RESET_CHANGES);
+	fprintf(fp0,"%s - \n", CANCEL_CHANGES);
     }
     fprintf(fp0, "<a href=\"%s%s\">%s</a>\n",
 		 helpfilepath, OPTIONS_HELP, TO_HELP);
@@ -3238,7 +3234,8 @@ PRIVATE int gen_options ARGS1(
 	    fprintf(fp0, "<input type=\"checkbox\" name=\"%s\">\n",
 			 save_options_string);
 	}
-	fprintf(fp0, "<br>(options marked with (!) will not be saved)\n");
+	fprintf(fp0, "<br>%s\n",
+			gettext("(options marked with (!) will not be saved)"));
     }
 
     /*
@@ -3447,13 +3444,11 @@ PRIVATE int gen_options ARGS1(
     PutOptValues(fp0, LYSelectPopups, bool_values);
     EndSelect(fp0);
 
-#ifndef SH_EX  /* 1999/01/19 (Tue) */
     /* HTML error recovery: SELECT */
     PutLabel(fp0, gettext("HTML error recovery"), DTD_recovery_string);
     BeginSelect(fp0, DTD_recovery_string);
     PutOptValues(fp0, Old_DTD, DTD_type_values);
     EndSelect(fp0);
-#endif
 
     /* Show Images: SELECT */
     PutLabel(fp0, gettext("Show images"), will_save_images());
@@ -3583,8 +3578,8 @@ PRIVATE int gen_options ARGS1(
     /* Bookmarks File Menu: LINK/INPUT */
     if (LYMultiBookmarks) {
 	PutLabel(fp0, gettext("Review/edit Bookmarks files"), mbm_string);
-	fprintf(fp0, "<a href=\"LYNXOPTIONS://MBM_MENU\">%s</a>\n",
-		    gettext("Goto multi-bookmark menu"));
+	fprintf(fp0, "<a href=\"%s//MBM_MENU\">%s</a>\n",
+		    STR_LYNXOPTIONS, gettext("Goto multi-bookmark menu"));
     } else {
 	PutLabel(fp0, gettext("Bookmarks file"), single_bookmark_string);
 	PutTextInput(fp0, single_bookmark_string,
@@ -3598,7 +3593,9 @@ PRIVATE int gen_options ARGS1(
     EndSelect(fp0);
 
     if (!no_lynxcfg_info) {
-	fprintf(fp0, "\n  Check your <a href=\"LYNXCFG:\">lynx.cfg</a> here\n");
+	fprintf(fp0, "\n  %s<a href=\"%s\">lynx.cfg</a>.\n",
+		     gettext("View the file "),
+		     STR_LYNXCFG);
     }
 
     fprintf(fp0,"\n</pre>\n");
@@ -3606,8 +3603,8 @@ PRIVATE int gen_options ARGS1(
     /* Submit/Reset */
     if (!disable_all) {
 	fprintf(fp0,"<p align=center>\n");
-	fprintf(fp0,"<input type=\"submit\" value=\"%s\">\n - ", ACCEPT_CHANGES);
-	fprintf(fp0,"<input type=\"reset\" value=\"%s\">\n", RESET_CHANGES);
+	fprintf(fp0,"<input type=\"submit\" value=\"%s\"> - \n", ACCEPT_CHANGES);
+	fprintf(fp0,"<input type=\"reset\" value=\"%s\"> - \n", RESET_CHANGES);
 	fprintf(fp0,"%s\n", CANCEL_CHANGES);
     }
 

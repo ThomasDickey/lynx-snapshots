@@ -110,7 +110,7 @@ extern CONST char * HText_getStyle NOPARAMS;
 extern void HText_setMainTextOwner PARAMS((CONST char * owner));
 extern void print_wwwfile_to_fd PARAMS((FILE * fp, BOOLEAN is_reply));
 extern BOOL HText_select PARAMS((HText *text));
-extern BOOL HText_POSTReplyLoaded PARAMS((document *doc));
+extern BOOL HText_POSTReplyLoaded PARAMS((DocInfo *doc));
 extern BOOL HTFindPoundSelector PARAMS((char *selector));
 extern int HTGetRelLinkNum PARAMS((int num, int rel, int cur));
 extern int HTGetLinkInfo PARAMS((
@@ -147,7 +147,7 @@ extern BOOLEAN HTdocument_settings_changed NOPARAMS;
 extern int HText_getTopOfScreen NOPARAMS;
 extern int HText_getLines PARAMS((HText * text));
 extern int HText_getNumOfLines NOPARAMS;
-extern int do_www_search PARAMS((document *doc));
+extern int do_www_search PARAMS((DocInfo *doc));
 extern char * HTLoadedDocumentURL NOPARAMS;
 extern char * HTLoadedDocumentPost_data NOPARAMS;
 extern char * HTLoadedDocumentTitle NOPARAMS;
@@ -211,7 +211,7 @@ extern void HText_endInput PARAMS((
 	HText *		text));
 extern int HText_SubmitForm PARAMS((
 	FormInfo *	submit_item,
-	document *	doc,
+	DocInfo *	doc,
 	char *		link_name,
 	char *		link_value));
 extern void HText_DisableCurrentForm NOPARAMS;
@@ -231,7 +231,7 @@ extern void user_message PARAMS((
 
 extern void www_user_search PARAMS((
 	int		start_line,
-	document *	doc,
+	DocInfo *	doc,
 	char *		target,
 	int		direction));
 

@@ -33,7 +33,7 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
-PRIVATE int fix_httplike_urls PARAMS((document *doc, UrlTypes type));
+PRIVATE int fix_httplike_urls PARAMS((DocInfo *doc, UrlTypes type));
 
 #ifdef VMS
 extern BOOLEAN LYDidRename;
@@ -71,7 +71,7 @@ PUBLIC int HTNoDataOK = 0;
  *  bogus error mail with MAIL_SYSTEM_ERROR_LOGGING:TRUE. - kw
  */
 PUBLIC int getfile ARGS1(
-	document *,	doc)
+	DocInfo *,	doc)
 {
 	int url_type = 0;
 	char *cp = NULL;
@@ -275,8 +275,7 @@ Try_Redirected_URL:
 		       LYIsUIPage(WWWDoc.address, UIP_ADDRLIST_PAGE)))) {
 		    CTRACE((tfp, "getfile: dropping post_data!\n"));
 		    HTAlert(IGNORED_POST);
-		    FREE(doc->post_data);
-		    FREE(doc->post_content_type);
+		    LYFreePostData(doc);
 		    WWWDoc.post_data = NULL;
 		    WWWDoc.post_content_type = NULL;
 		}
@@ -376,10 +375,9 @@ Try_Redirected_URL:
 		if (LYNoRefererHeader == FALSE &&
 		    LYNoRefererForThis == FALSE) {
 		    char *ref_url = HTLoadedDocumentURL();
-		    if (!strncmp(ref_url, "LYNXIMGMAP:", 11))
-			ref_url += 11;
-		    if (no_filereferer == TRUE &&
-			!strncmp(ref_url, "file:", 5)) {
+		    if (isLYNXIMGMAP(ref_url))
+			ref_url += LEN_LYNXIMGMAP;
+		    if (no_filereferer == TRUE && isFILE_URL(ref_url)) {
 			LYNoRefererForThis = TRUE;
 		    }
 		    if (LYNoRefererForThis == FALSE &&
@@ -555,7 +553,7 @@ Try_Redirected_URL:
 				title = "";
 			    }
 			}
-			cp = (char *)strchr(doc->address,':')+1;
+			cp = strchr(doc->address,':')+1;
 			reply_by_mail(cp,
 				      ((HTMainAnchor && !LYUserSpecifiedURL) ?
 				       (char *)HTMainAnchor->address :
@@ -601,15 +599,14 @@ Try_Redirected_URL:
 		     *  Detect weird case where interactive protocol would
 		     *  be proxied, and to a non-interactive protocol at that.
 		     */
-		    } else if ((proxy = (char *)getenv(
+		    } else if ((proxy = LYGetEnv(
 			(url_type==TN3270_URL_TYPE) ? "tn3270_proxy" :
 			(url_type==TELNET_GOPHER_URL_TYPE) ? "gopher_proxy" :
 			"telnet_proxy")) != NULL &&
-			       *proxy != '\0' &&
 			       !override_proxy(doc->address) &&
-			       (strncmp(proxy, "telnet:", 7) &&
-				strncmp(proxy, "tn3270:", 7) &&
-				strncmp(proxy, "rlogin:", 7))) {
+			       (!isTELNET_URL(proxy) &&
+				!isTN3270_URL(proxy) &&
+				!isRLOGIN_URL(proxy))) {
 			/* Do nothing, fall through to generic code - kw */
 		    } else {
 			stop_curses();
@@ -642,13 +639,12 @@ Try_Redirected_URL:
 		     *  Detect weird case where interactive protocol would
 		     *  be proxied, and to a non-interactive protocol at that.
 		     */
-		    } else if ((proxy = (char *)getenv(
+		    } else if ((proxy = LYGetEnv(
 			"rlogin_proxy")) != NULL &&
-			       *proxy != '\0' &&
 			       !override_proxy(doc->address) &&
-			       (strncmp(proxy, "telnet:", 7) &&
-				strncmp(proxy, "tn3270:", 7) &&
-				strncmp(proxy, "rlogin:", 7))) {
+			       (!isTELNET_URL(proxy) &&
+				!isTN3270_URL(proxy) &&
+				!isRLOGIN_URL(proxy))) {
 			/* Do nothing, fall through to generic code - kw */
 		    } else {
 			stop_curses();
@@ -947,8 +943,8 @@ Try_Redirected_URL:
 				FREE(use_this_url_instead);
 				return(NULLFILE);
 			    }
-			    if ((pound = strchr(doc->address, '#')) != NULL &&
-				strchr(use_this_url_instead, '#') == NULL) {
+			    if ((pound = findPoundSelector(doc->address)) != NULL
+			     && findPoundSelector(use_this_url_instead) == NULL) {
 				/*
 				 *  Our requested URL had a fragment
 				 *  associated with it, and the redirection
@@ -976,8 +972,7 @@ Try_Redirected_URL:
 				 *  Freeing the content also yields
 				 *  a GET request. - FM
 				 */
-				FREE(doc->post_data);
-				FREE(doc->post_content_type);
+				LYFreePostData(doc);
 			    }
 			    /*
 			     *	Go to top to check for URL's which get
@@ -1007,7 +1002,7 @@ Try_Redirected_URL:
 			/*
 			 *  Check for a #fragment selector.
 			 */
-			pound = (char *)strchr(doc->address, '#');
+			pound = findPoundSelector(doc->address);
 
 			/*
 			 *  Check to see if there is a temp
@@ -1049,9 +1044,8 @@ Try_Redirected_URL:
 			    FREE(fname);
 			    doc->internal_link = FALSE;
 			    WWWDoc.address = doc->address;
-			    FREE(doc->post_data);
+			    LYFreePostData(doc);
 			    WWWDoc.post_data = NULL;
-			    FREE(doc->post_content_type);
 			    WWWDoc.post_content_type = NULL;
 			    WWWDoc.bookmark = doc->bookmark = FALSE;
 			    WWWDoc.isHEAD = doc->isHEAD = FALSE;
@@ -1163,7 +1157,7 @@ PUBLIC void srcmode_for_next_retrieval ARGS1(
 PUBLIC int follow_link_number ARGS4(
 	int,		c,
 	int,		cur,
-	document *,	doc,
+	DocInfo *,	doc,
 	int *,		num)
 {
     char temp[120];
@@ -1515,7 +1509,7 @@ check_tp_for_entry:
 #endif /* EXEC_LINKS || LYNXCGI_LINKS */
 
 PRIVATE int fix_httplike_urls ARGS2(
-	document *,	doc,
+	DocInfo *,	doc,
 	UrlTypes,	type)
 {
     char *slash;
@@ -1524,7 +1518,7 @@ PRIVATE int fix_httplike_urls ARGS2(
      *  If there's a fragment present, our simplistic methods won't
      *  work.  - kw
      */
-    if (strchr(doc->address, '#'))
+    if (findPoundSelector(doc->address) != NULL)
 	return 0;
 
 #ifndef DISABLE_FTP
@@ -1550,8 +1544,8 @@ PRIVATE int fix_httplike_urls ARGS2(
 	/*
 	 *  If we're proxying ftp, don't trim anything. - KW
 	 */
-	if (((proxy = (char *)getenv("ftp_proxy")) != NULL) &&
-	    *proxy != '\0' && !override_proxy(doc->address))
+	if (((proxy = LYGetEnv("ftp_proxy")) != NULL) &&
+	    !override_proxy(doc->address))
 	    return 0;
 
 	/*
@@ -1569,7 +1563,7 @@ PRIVATE int fix_httplike_urls ARGS2(
 	CTRACE((tfp, "fix_httplike_urls: URL '%s'\n", doc->address));
 
 	*second++ = '\0';
-	HTSprintf0(&path, "ftp://%s%s", first, second);
+	HTSprintf0(&path, "%s//%s%s", STR_FTP_URL, first, second);
 	FREE(doc->address);
 	doc->address = path;
 

@@ -215,7 +215,7 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
     child = HTChildAnchor_new();
     CTRACE((tfp, "HTAnchor: New Anchor %p named `%s' is child of %p\n",
 		(void *)child,
-		tag ? tag : (CONST char *)"",
+		NonNull(tag),
 		(void *)parent)); /* int for apollo */
     HTList_addObject (parent->children, child);
     child->parent = parent;
