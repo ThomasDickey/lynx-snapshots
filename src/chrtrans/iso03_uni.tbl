@@ -1,9 +1,9 @@
-#The MIME name of this charset. 
+#The MIME name of this charset.
 Miso-8859-3
 
 #Name as a Display Charset (used on Options screen)
 OLatin 3 (ISO-8859-3)
- 
+
 #Codepage number
 C913
 

@@ -25,6 +25,7 @@
 
 PUBLIC HTList * Visited_Links = NULL;	/* List of safe popped docs. */
 
+#ifdef LY_FIND_LEAKS
 /*
  *  Utility for freeing the list of visited links. - FM
  */
@@ -45,6 +46,7 @@ PRIVATE void Visited_Links_free NOARGS
     Visited_Links = NULL;
     return;
 }
+#endif /* LY_FIND_LEAKS */
 
 /*
  *  Utility for listing visited links, making any repeated

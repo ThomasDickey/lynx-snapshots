@@ -181,6 +181,7 @@ CF_ARG_DISABLE(full-paths,
 	[with_full_paths=no],
 	[with_full_paths=yes])
 AC_MSG_RESULT($with_full_paths)
+test $with_full_paths = no && AC_DEFINE(USE_EXECVP)
 
 CF_DEFINE_PROG(system mailer, SYSTEM_MAIL,
 	/usr/mmdf/bin/submit \
@@ -761,7 +762,7 @@ fi
 
 AC_MSG_CHECKING(if you want to exclude FINGER code)
 CF_ARG_DISABLE(finger,
-[  --disable-finger  disable FINGER logic],
+[  --disable-finger        disable FINGER logic],
 	[use_finger=yes],
 	[use_finger=no])
 AC_MSG_RESULT($use_finger)
@@ -769,7 +770,7 @@ test $use_finger != "no" && AC_DEFINE(DISABLE_FINGER)
 
 AC_MSG_CHECKING(if you want to exclude GOPHER code)
 CF_ARG_DISABLE(gopher,
-[  --disable-gopher  disable GOPHER logic],
+[  --disable-gopher        disable GOPHER logic],
 	[use_gopher=yes],
 	[use_gopher=no])
 AC_MSG_RESULT($use_gopher)
@@ -777,11 +778,19 @@ test $use_gopher != "no" && AC_DEFINE(DISABLE_GOPHER)
 
 AC_MSG_CHECKING(if you want to exclude NEWS code)
 CF_ARG_DISABLE(news,
-[  --disable-news  disable NEWS logic],
+[  --disable-news          disable NEWS logic],
       [use_news=yes],
       [use_news=no])
 AC_MSG_RESULT($use_news)
 test $use_news != "no" && AC_DEFINE(DISABLE_NEWS)
+
+AC_MSG_CHECKING(if you want to exclude FTP code)
+CF_ARG_DISABLE(ftp,
+[  --disable-ftp           disable FTP logic],
+      [use_ftp=yes],
+      [use_ftp=no])
+AC_MSG_RESULT($use_ftp)
+test $use_ftp != "no" && AC_DEFINE(DISABLE_FTP)
 
 dnl --------------------------------------------------------------------------
 dnl DirEd (directory-editor) options

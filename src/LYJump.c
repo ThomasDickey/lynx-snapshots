@@ -110,8 +110,10 @@ PUBLIC BOOL LYJumpInit ARGS1 (char *, config)
 	return FALSE;
     }
     StrAllocCopy(jtp->file, cp);
+#ifdef LY_FIND_LEAKS
     if (!JThead)
 	atexit(LYJumpTable_free);
+#endif /* LY_FIND_LEAKS */
 
     /*
      * Get the key, if present.

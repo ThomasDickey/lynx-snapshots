@@ -75,7 +75,9 @@ PUBLIC	HTPresentation * default_presentation = NULL;
 /*
  *	To free off the presentation list.
  */
+#ifdef LY_FIND_LEAKS
 PRIVATE void HTFreePresentations NOPARAMS;
+#endif
 
 /*	Define a presentation system command for a content-type
 **	-------------------------------------------------------
@@ -157,6 +159,7 @@ PUBLIC void HTSetConversion ARGS7(
     HTList_addObject(HTPresentations, pres);
 }
 
+#ifdef LY_FIND_LEAKS
 /*
 **	Purpose:	Free the presentation list.
 **	Arguments:	void
@@ -189,6 +192,7 @@ PRIVATE void HTFreePresentations NOARGS
     HTList_delete(HTPresentations);
     HTPresentations = NULL;
 }
+#endif /* LY_FIND_LEAKS */
 
 /*	File buffering
 **	--------------

@@ -287,18 +287,10 @@ PRIVATE BOOLEAN confirm_by_pages ARGS3(
 	char *msg = 0;
 
 	HTSprintf0(&msg, prompt, pages);
-	_statusline(msg);
+	c = HTConfirmDefault(msg, YES);
 	FREE(msg);
 
-	c = LYgetch();
-#ifdef VMS
-	if (HadVMSInterrupt) {
-	    HadVMSInterrupt = FALSE;
-	    HTInfoMsg(PRINT_REQUEST_CANCELLED);
-	    return FALSE;
-	}
-#endif /* VMS */
-	if (c == RTARROW || c == 'y' || c== 'Y' || c == '\n' || c == '\r') {
+	if (c == YES) {
 	    addstr("   Ok...");
 	} else {
 	    HTInfoMsg(PRINT_REQUEST_CANCELLED);
@@ -495,21 +487,10 @@ PRIVATE void send_file_to_mail ARGS3(
     char *buffer = NULL;
     char *subject = NULL;
     char user_response[LINESIZE];
-    int c;
 
     if (LYPreparsedSource && first_mail_preparsed &&
 	HTisDocumentSource()) {
-	_statusline(CONFIRM_MAIL_SOURCE_PREPARSED);
-	c = 0;
-	while (TOUPPER(c)!='Y' && TOUPPER(c)!='N' && c != 7 && c != 3)
-	    c = LYgetch();
-#ifdef VMS
-	if (HadVMSInterrupt) {
-	    HadVMSInterrupt = FALSE;
-	    CancelPrint(MAIL_REQUEST_CANCELLED);
-	}
-#endif /* VMS */
-	if (c == RTARROW || c == 'y' || c== 'Y' || c == '\n' || c == '\r') {
+	if (HTConfirmDefault(CONFIRM_MAIL_SOURCE_PREPARSED, NO) == YES) {
 	    addstr("   Ok...");
 	    first_mail_preparsed = FALSE;
 	} else	{
@@ -1169,7 +1150,7 @@ PUBLIC int printfile ARGS1(
 
 #ifdef VMS
 PRIVATE int remove_quotes ARGS1(
-	char *, 	string)
+	char *,		string)
 {
    int i;
 
@@ -1191,7 +1172,10 @@ PRIVATE int remove_quotes ARGS1(
  *  MIME define "quoted-printable" which holds charset info
  *  but most mailers still don't support it, on the other hand
  *  many mailers send open 8-bit subjects without charset info
- *  and use local assumption for certain countries.
+ *  and use local assumption for certain countries.  Besides that,
+ *  obsolete SMTP software is not 8bit clean but still in use,
+ *  it strips the characters in 128-160 range from subjects
+ *  which may be a fault outside iso-8859-XX.
  *
  *  We translate subject to "outgoing_mail_charset" (defined in lynx.cfg)
  *  it may correspond to US-ASCII as the safest value or any other
@@ -1211,7 +1195,8 @@ PRIVATE char* subject_translate8bit ARGS1(char *, source)
     int i = outgoing_mail_charset;  /* from lynx.cfg, -1 by default */
 
     if (i < 0
-     || LYHaveCJKCharacterSet
+     || i == current_char_set
+     || LYCharSet_UC[current_char_set].enc == UCT_ENC_CJK
      || LYCharSet_UC[i].enc == UCT_ENC_CJK) {
 	StrAllocCopy(target, source);
 	return(target); /* OK */

@@ -1,13 +1,6 @@
 /* A hash table for the (fake) CSS support in Lynx-rp
 ** (c) 1996 Rob Partington
 */
-
-#include <LYStructs.h>
-#include <LYCurses.h>
-#include <AttrList.h>
-#include <SGML.h>
-#include <HTMLDTD.h>
-
 #include <LYHash.h>
 
 #ifdef NOT_USED
@@ -29,8 +22,8 @@ PUBLIC int hash_code_rp ARGS1(char*,string)
 #endif
 
 /*
- *	This is the same function as the private HASH_FUNCTION() in HTAnchor.c,
- *      but with a different value for HASH_SIZE.
+ *  This is the same function as the private HASH_FUNCTION() in HTAnchor.c,
+ *  but with a different value for HASH_SIZE.
  */
 
 #ifdef NOT_USED
@@ -45,7 +38,7 @@ PUBLIC int hash_code ARGS1 (char*, string)
     unsigned char *p;
 
     for (p = (unsigned char *)string, hash = 0; *p; p++)
-    	hash = (int) (hash * 3 + (*(unsigned char *)p)) % HASH_SIZE;
+	hash = (int) (hash * 3 + (*(unsigned char *)p)) % HASH_SIZE;
 
     return hash;
 }

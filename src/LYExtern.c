@@ -16,14 +16,15 @@
 */
 
 #include <LYUtils.h>
+
+#ifdef USE_EXTERNALS
+
 #include <HTAlert.h>
 #include <LYGlobalDefs.h>
 #include <LYExtern.h>
+#include <LYLeaks.h>
 #include <LYCurses.h>
 
-#include <LYLeaks.h>
-
-#ifdef USE_EXTERNALS
 void run_external ARGS1(char *, cmd)
 {
     char *the_command = 0;

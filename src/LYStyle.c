@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.22 Wed, 17 Mar 1999 20:17:11 -0700 dickey @
+ * @Id: LYStyle.c 1.23 Tue, 30 Mar 1999 10:10:37 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -275,11 +275,13 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
     }
 }
 
+#ifdef LY_FIND_LEAKS
 PRIVATE void free_colorstylestuff NOARGS
 {
     style_initialiseHashTable();
     style_deleteStyleList();
 }
+#endif
 
 /*
  * initialise the default style sheet

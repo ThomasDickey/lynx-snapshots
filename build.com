@@ -201,7 +201,7 @@ $  if option .eqs. "MULTINET" then -
 $  v1 = f$verify(1)
 $! DECC:
 $  cc := cc/decc/prefix=all/nomember'cc_opts' -
-	   /DEFINE=(DEBUG,ACCESS_AUTH,'option''extra',__VMS_CURSES)-
+	   /DEFINE=(ACCESS_AUTH,'option''extra',__VMS_CURSES)-
 	   /INCLUDE=([],[-],[-.WWW.Library.Implementation],[.chrtrans]) 
 $  v1 = 'f$verify(0)'
 $ ELSE
@@ -213,7 +213,7 @@ $   compiler := "GNUC"
 $   v1 = f$verify(1)
 $! GNUC:
 $   cc := gcc'cc_opts' -
-	     /DEFINE=(DEBUG,ACCESS_AUTH,'option''extra')-
+	     /DEFINE=(ACCESS_AUTH,'option''extra')-
 	     /INCLUDE=([],[-],[-.WWW.Library.Implementation],[.chrtrans]) 
 $   v1 = 'f$verify(0)'
 $  ELSE
@@ -221,7 +221,7 @@ $   compiler := "VAXC"
 $   v1 = f$verify(1)
 $! VAXC:
 $   cc := cc'cc_opts' -
-	    /DEFINE=(DEBUG,ACCESS_AUTH,'option''extra')-
+	    /DEFINE=(ACCESS_AUTH,'option''extra')-
 	    /INCLUDE=([],[-],[-.WWW.Library.Implementation],[.chrtrans]) 
 $   v1 = 'f$verify(0)'
 $  ENDIF

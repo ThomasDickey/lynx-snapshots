@@ -133,9 +133,9 @@ CDEF = _DECC_V4_SOURCE,__SOCKET_TYPEDEFS,__VMS_CURSES
 .ifdef DEC_C
 COMPILER = DECC
 .ifdef TCPWARE
-TCPFLAGS = /decc/Prefix=All/NoMember/Define=(DEBUG,ACCESS_AUTH,$(TCP),UCX,$(CDEF))
+TCPFLAGS = /decc/Prefix=All/NoMember/Define=(ACCESS_AUTH,$(TCP),UCX,$(CDEF))
 .else
-TCPFLAGS = /decc/Prefix=All/NoMember/Define=(DEBUG,ACCESS_AUTH,$(TCP),$(CDEF))
+TCPFLAGS = /decc/Prefix=All/NoMember/Define=(ACCESS_AUTH,$(TCP),$(CDEF))
 .endif
 .else
 .ifdef GNU_C
@@ -145,9 +145,9 @@ CC = gcc
 COMPILER = VAXC
 .endif
 .ifdef TCPWARE
-TCPFLAGS = /Define = (DEBUG, ACCESS_AUTH, $(TCP), UCX)
+TCPFLAGS = /Define = (ACCESS_AUTH, $(TCP), UCX)
 .else
-TCPFLAGS = /Define = (DEBUG, ACCESS_AUTH, $(TCP))
+TCPFLAGS = /Define = (ACCESS_AUTH, $(TCP))
 .endif
 .endif
 

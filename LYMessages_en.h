@@ -23,11 +23,11 @@
  */
 #define ALERT_FORMAT gettext("Alert!: %s")
 #define WELCOME_MSG gettext("Welcome")
-#define REALLY_QUIT_Y gettext("Are you sure you want to quit? [Y] ")
-#define REALLY_QUIT_N gettext("Are you sure you want to quit? [N] ")
+#define REALLY_QUIT_Y gettext("Are you sure you want to quit?")
+#define REALLY_QUIT_N gettext("Are you sure you want to quit?")
 #ifdef VMS
-#define REALLY_EXIT_Y gettext("Really exit from Lynx? [Y] ")
-#define REALLY_EXIT_N gettext("Really exit from Lynx? [N] ")
+#define REALLY_EXIT_Y gettext("Really exit from Lynx?")
+#define REALLY_EXIT_N gettext("Really exit from Lynx?")
 #endif /* VMS */
 #define CONNECTION_INTERRUPTED gettext("Connection interrupted.")
 #define TRANSFER_INTERRUPTED gettext("Data transfer interrupted.")
@@ -304,7 +304,7 @@
  gettext("You are not on a form submission button or normal link.")
 #define NEED_CHECKED_RADIO_BUTTON \
  gettext("One radio button must be checked at all times!")
-#define PREV_DOC_QUERY gettext("Do you want to go back to the previous document? [N]")
+#define PREV_DOC_QUERY gettext("Do you want to go back to the previous document?")
 #define ARROWS_OR_TAB_TO_MOVE gettext("Use arrows or tab to move off of field.")
 #define ENTER_TEXT_ARROWS_OR_TAB \
  gettext("Enter text.  Use arrows or tab to move off of field.")
@@ -358,14 +358,14 @@
 #define OUTOF_MEM_FOR_JUMP_TABLE gettext("Out of memory reading jump table!")
 #define NO_INDEX_FILE gettext("No index is currently available.")
 #define CONFIRM_MAIN_SCREEN \
- gettext("Do you really want to go to the Main screen? [n] ")
+ gettext("Do you really want to go to the Main screen?")
 #define IN_MAIN_SCREEN gettext("You are already at main screen!")
 #define NOT_ISINDEX \
  gettext("Not a searchable indexed document -- press '/' to search for a text string")
 #define NO_OWNER \
  gettext("No owner is defined for this file so you cannot send a comment")
-#define NO_OWNER_USE gettext("No owner is defined. Use %s? [N] ")
-#define CONFIRM_COMMENT gettext("Do you wish to send a comment? [N]")
+#define NO_OWNER_USE gettext("No owner is defined. Use %s?")
+#define CONFIRM_COMMENT gettext("Do you wish to send a comment?")
 #define MAIL_DISALLOWED gettext("Mail is disallowed so you cannot send a comment")
 #define EDIT_DISABLED gettext("The 'e'dit command is currently disabled.")
 #define NO_STATUS gettext("System error - failure to get status.")
@@ -495,17 +495,17 @@
 #define SAVE_REQUEST_CANCELLED gettext("Save request cancelled!!!")
 #define MAIL_REQUEST_CANCELLED gettext("Mail request cancelled!!!")
 #define CONFIRM_MAIL_SOURCE_PREPARSED \
- gettext("Viewing preparsed source.  Are you sure you want to mail it? [y]")
+ gettext("Viewing preparsed source.  Are you sure you want to mail it?")
 #define PLEASE_WAIT gettext("Please wait...")
 #define MAILING_FILE gettext("Mailing file.  Please wait...")
 #define MAIL_REQUEST_FAILED gettext("ERROR - Unable to mail file")
 #define CONFIRM_LONG_SCREEN_PRINT \
- gettext("File is %d screens long.  Are you sure you want to print? [y]")
+ gettext("File is %d screens long.  Are you sure you want to print?")
 #define PRINT_REQUEST_CANCELLED gettext("Print request cancelled!!!")
 #define PRESS_RETURN_TO_BEGIN gettext("Press <return> to begin: ")
 #define PRESS_RETURN_TO_FINISH gettext("Press <return> to finish: ")
 #define CONFIRM_LONG_PAGE_PRINT \
- gettext("File is %d pages long.  Are you sure you want to print? [y]")
+ gettext("File is %d pages long.  Are you sure you want to print?")
 #define CHECK_PRINTER \
  gettext("Be sure your printer is on-line.  Press <return> to start printing:")
 #define FILE_ALLOC_FAILED gettext("ERROR - Unable to allocate file space!!!")

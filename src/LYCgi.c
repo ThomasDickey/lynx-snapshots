@@ -71,6 +71,7 @@ PRIVATE void add_environment_value PARAMS((char *env_value));
 
 #define PERROR(msg) CTRACE(tfp, "LYNXCGI: %s: %s\n", msg, LYStrerror(errno))
 
+#ifdef LY_FIND_LEAKS
 PRIVATE void free_alloced_lynxcgi NOARGS
 {
     void *ptr;
@@ -83,6 +84,7 @@ PRIVATE void free_alloced_lynxcgi NOARGS
     FREE(server_software);
 #endif
 }
+#endif /* LY_FIND_LEAKS */
 
 PRIVATE void remember_alloced ARGS1(
     void *,		ptr)

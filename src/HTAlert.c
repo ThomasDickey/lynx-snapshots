@@ -192,10 +192,12 @@ PUBLIC BOOL HTLastConfirmCancelled NOARGS
     }
 }
 
+#define DFT_CONFIRM ~(YES|NO)
+
 /*	Seek confirmation.				HTConfirm()
 **	------------------
 */
-PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
+PUBLIC BOOL HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 {
     char *msg_yes = gettext("yes");
     char *msg_no  = gettext("no");
@@ -207,7 +209,10 @@ PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
     } else {
 	char *msg = NULL;
 
-	HTSprintf0(&msg, "%s (%c/%c) ", Msg, *msg_yes, *msg_no);
+	if (Dft == DFT_CONFIRM)
+	    HTSprintf0(&msg, "%s (%c/%c) ", Msg, *msg_yes, *msg_no);
+	else
+	    HTSprintf0(&msg, "%s (%c) ", Msg, (Dft == YES) ? *msg_yes : *msg_no);
 	_statusline(msg);
 	FREE(msg);
 
@@ -226,10 +231,17 @@ PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
 		result = YES;
 	    } else if (TOUPPER(c) == TOUPPER(*msg_no)) {
 		return(NO);
+	    } else if (Dft != DFT_CONFIRM && (c == '\r' || c == '\n')) {
+		return(Dft);
 	    }
 	}
     }
     return (result);
+}
+
+PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
+{
+    return HTConfirmDefault(Msg, DFT_CONFIRM);
 }
 
 /*	Prompt for answer and get text back.		HTPrompt()

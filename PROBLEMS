@@ -23,6 +23,10 @@ they will be outlined in this file.
       setenv CC cc   (or   set CC=cc; export CC  , depending on the shell)
       ./configure
 
+    If you run into a problem compiling LYMainLoop.c or GridText.c, try
+    omitting -O from the compiler flags; these are very big files and may not
+    compile successfully if you include optimisation.
+
     On a Sun system, the message:
         "Alert!:  Unable to connect to remote host"
     will be displayed every time an attempt is made to access a host

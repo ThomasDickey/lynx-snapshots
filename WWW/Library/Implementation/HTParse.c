@@ -843,9 +843,9 @@ PUBLIC char * HTUnEscapeSome ARGS2(
 	    p[1] && p[2] &&	/* tests shouldn't be needed, but.. */
 	    isxdigit((unsigned char)p[1]) &&
 	    isxdigit((unsigned char)p[2]) &&
-	    (testcode = from_hex(p[1])*16 + from_hex(p[2])) && /* %00 no good*/
+	    (testcode = FROMASCII(from_hex(p[1])*16 + from_hex(p[2]))) && /* %00 no good*/
 	    strchr(do_trans, testcode)) { /* it's one of the ones we want */
-	    *q++ = FROMASCII(testcode);
+	    *q++ = testcode;
 	    p += 3;
 	} else {
 	    *q++ = *p++;

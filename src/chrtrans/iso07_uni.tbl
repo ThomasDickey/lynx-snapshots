@@ -1,9 +1,9 @@
-#The MIME name of this charset. 
+#The MIME name of this charset.
 Miso-8859-7
 
 #Name as a Display Charset (used on Options screen)
 OGreek (ISO-8859-7)
- 
+
 #Codepage number
 C813
 

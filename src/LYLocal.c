@@ -348,7 +348,7 @@ PRIVATE BOOLEAN dir_has_same_owner ARGS2(struct stat *, info, int, owner)
  */
 PRIVATE BOOLEAN remove_tagged NOARGS
 {
-    int c, ans;
+    int ans;
     BOOL will_clear = TRUE;
     char *cp;
     char *tmpbuf = NULL;
@@ -361,13 +361,11 @@ PRIVATE BOOLEAN remove_tagged NOARGS
     if (HTList_isEmpty(tagged))  /* should never happen */
 	return 0;
 
-    _statusline(gettext("Remove all tagged files and directories (y or n): "));
-    c = LYgetch();
-    ans = TOUPPER(c);
+    ans = HTConfirm(gettext("Remove all tagged files and directories "));
 
     count = 0;
     tag = tagged;
-    while (ans == 'Y' && (cp = (char *)HTList_nextObject(tag)) != NULL) {
+    while (ans == YES && (cp = (char *)HTList_nextObject(tag)) != NULL) {
 	if (is_url(cp) == FILE_URL_TYPE) { /* unnecessary check */
 	    testpath = HTfullURL_toFile(cp);
 	    LYTrimPathSep(testpath);
@@ -2058,7 +2056,11 @@ PRIVATE int LYExecv ARGS3(
 	    rc = 0;
 	    break;	/* don't fall thru! - KW */
 	case 0:  /* child */
+#ifdef USE_EXECVP
+	    execvp(path, argv);	/* this uses our $PATH */
+#else
 	    execv(path, argv);
+#endif
 	    exit(-1);	/* execv failed, give wait() something to look at */
 	default:  /* parent */
 #if !HAVE_WAITPID

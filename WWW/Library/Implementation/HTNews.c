@@ -108,6 +108,7 @@ typedef struct _NNTPAuth {
    char * pass;
 } NNTPAuth;
 
+#ifdef LY_FIND_LEAKS
 PRIVATE void free_news_globals NOARGS
 {
     if (s >= 0) {
@@ -121,6 +122,7 @@ PRIVATE void free_news_globals NOARGS
     FREE(address);
     FREE(dbuf);
 }
+#endif /* LY_FIND_LEAKS */
 
 PRIVATE void free_NNTP_AuthInfo NOARGS
 {

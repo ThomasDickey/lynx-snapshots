@@ -1205,12 +1205,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.2dev.20"
+#define LYNX_VERSION "2.8.2dev.21"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Wed, 17 Mar 1999 20:17:11 -0700"
+#define LYNX_DATE "Tue, 30 Mar 1999 10:10:37 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1998"
@@ -1248,7 +1248,8 @@
 /*
 **  Use the VMS port of gzip for uncompressing both .Z and .gz files.
 */
-#define UNCOMPRESS_PATH  "gzip -d"
+#define UNCOMPRESS_PATH "gzip -d"
+#define COPY_PATH	"copy/nolog/noconf"
 #define GZIP_PATH       "gzip"
 #define BZIP2_PATH      "bzip2"
 #define TELNET_PATH     "telnet"

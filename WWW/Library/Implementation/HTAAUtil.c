@@ -61,7 +61,7 @@
 **	name		is a string representing the scheme name.
 **
 ** ON EXIT:
-**	returns 	the enumerated constant for that scheme.
+**	returns		the enumerated constant for that scheme.
 */
 PUBLIC HTAAScheme HTAAScheme_enum ARGS1(CONST char*, name)
 {
@@ -102,7 +102,7 @@ PUBLIC HTAAScheme HTAAScheme_enum ARGS1(CONST char*, name)
 **			HTAA_NONE, HTAA_BASIC, HTAA_PUBKEY, ...
 **
 ** ON EXIT:
-**	returns 	the name of the scheme, i.e.
+**	returns		the name of the scheme, i.e.
 **			"None", "Basic", "Pubkey", ...
 */
 PUBLIC char *HTAAScheme_name ARGS1(HTAAScheme, scheme)
@@ -132,7 +132,7 @@ PUBLIC char *HTAAScheme_name ARGS1(HTAAScheme, scheme)
 **	name		is the method name to translate.
 **
 ** ON EXIT:
-**	returns 	HTAAMethod enumerated value corresponding
+**	returns		HTAAMethod enumerated value corresponding
 **			to the given name.
 */
 PUBLIC HTAAMethod HTAAMethod_enum ARGS1(CONST char *, name)
@@ -156,7 +156,7 @@ PUBLIC HTAAMethod HTAAMethod_enum ARGS1(CONST char *, name)
 **			METHOD_GET, METHOD_PUT, ...
 **
 ** ON EXIT:
-**	returns 	the name of the scheme, i.e.
+**	returns		the name of the scheme, i.e.
 **			"GET", "PUT", ...
 */
 PUBLIC char *HTAAMethod_name ARGS1(HTAAMethod, method)
@@ -181,7 +181,7 @@ PUBLIC char *HTAAMethod_name ARGS1(HTAAMethod, method)
 **	list		is a list of method names.
 **
 ** ON EXIT:
-**	returns 	YES, if method was found.
+**	returns		YES, if method was found.
 **			NO, if not found.
 */
 PUBLIC BOOL HTAAMethod_inList ARGS2(HTAAMethod, method,
@@ -219,7 +219,7 @@ PUBLIC BOOL HTAAMethod_inList ARGS2(HTAAMethod, method,
 **			against the template.
 **
 ** ON EXIT:
-**	returns 	YES, if filename matches the template.
+**	returns		YES, if filename matches the template.
 **			NO, otherwise.
 */
 PUBLIC BOOL HTAA_templateMatch ARGS2(CONST char *, template,
@@ -270,7 +270,7 @@ PUBLIC BOOL HTAA_templateMatch ARGS2(CONST char *, template,
 **			against the template.
 **
 ** ON EXIT:
-**	returns 	YES, if filename matches the template.
+**	returns		YES, if filename matches the template.
 **			NO, otherwise.
 */
 PUBLIC BOOL HTAA_templateCaseMatch ARGS2(CONST char *, template,
@@ -454,6 +454,13 @@ PRIVATE char *start_pointer;
 PRIVATE char *end_pointer;
 PRIVATE int in_soc = -1;
 
+#ifdef LY_FIND_LEAKS
+PRIVATE void FreeHTAAUtil NOARGS
+{
+    FREE(buffer);
+}
+#endif /* LY_FIND_LEAKS */
+
 /* PUBLIC						HTAA_setupReader()
 **		SET UP HEADER LINE READER, i.e., give
 **		the already-read-but-not-yet-processed
@@ -468,14 +475,14 @@ PRIVATE int in_soc = -1;
 **	soc		is the socket to use when start_of_headers
 **			buffer is used up.
 ** ON EXIT:
-**	returns 	nothing.
+**	returns		nothing.
 **			Subsequent calls to HTAA_getUnfoldedLine()
 **			will use this buffer first and then
 **			proceed to read from socket.
 */
 PUBLIC void HTAA_setupReader ARGS3(char *,	start_of_headers,
-				   int, 	length,
-				   int, 	soc)
+				   int,		length,
+				   int,		soc)
 {
     if (!start_of_headers)
 	length = 0;	       /* initialize length (is this reached at all?) */
@@ -491,6 +498,7 @@ PUBLIC void HTAA_setupReader ARGS3(char *,	start_of_headers,
 				(size_t)(sizeof(char)*(buffer_length + 1)));
     }
     if (buffer == NULL) outofmem(__FILE__, "HTAA_setupReader");
+    atexit(FreeHTAAUtil);
     start_pointer = buffer;
     if (start_of_headers) {
 	strncpy(buffer, start_of_headers, length);
@@ -601,5 +609,3 @@ PUBLIC char *HTAA_getUnfoldedLine NOARGS
 
     } /* forever */
 }
-
-

@@ -27,7 +27,6 @@
 #endif /* not VMS */
 
 #include <HTAAUtil.h>
-#include <HTAAFile.h>
 #include <HTLex.h>	/* Lexical analysor	*/
 #include <HTAAProt.h>	/* Implemented here	*/
 
@@ -73,7 +72,7 @@ PRIVATE BOOL isNumber ARGS1(CONST char *, s)
 }
 
 
-#if defined (VMS) || defined (NOUSERS)
+#if defined (NOUSERS)
 /* PUBLIC							HTAA_getUidName()
 **		GET THE USER ID NAME (VMS ONLY)
 ** ON ENTRY:
@@ -579,6 +578,7 @@ PRIVATE HTList *known_grp = NULL;
 PRIVATE HTList *known_pwd = NULL;
 PRIVATE BOOL uidgid_cache_inited = NO;
 
+#ifdef LY_FIND_LEAKS
 PRIVATE void clear_uidgid_cache NOARGS
 {
     USER_DATA *data;
@@ -597,6 +597,7 @@ PRIVATE void clear_uidgid_cache NOARGS
 	FREE(known_pwd);
     }
 }
+#endif /* LY_FIND_LEAKS */
 
 PRIVATE void save_gid_info ARGS2(char *, name, int, user)
 {

@@ -29,7 +29,9 @@ PRIVATE BOOL initialised = NO;
 /*
  *	To free off all atoms.
  */
+#ifdef LY_FIND_LEAKS
 PRIVATE void free_atoms NOPARAMS;
+#endif
 
 /*
  *	Alternate hashing function.
@@ -85,6 +87,7 @@ PUBLIC HTAtom * HTAtom_for ARGS1(CONST char *, string)
     return a;
 }
 
+#ifdef LY_FIND_LEAKS
 /*
  *	Purpose:	Free off all atoms.
  *	Arguments:	void
@@ -116,6 +119,7 @@ PRIVATE void free_atoms NOARGS
 		}
 	}
 }
+#endif /* LY_FIND_LEAKS */
 
 PRIVATE BOOL mime_match ARGS2(CONST char *, name,
 			      CONST char *, templ)

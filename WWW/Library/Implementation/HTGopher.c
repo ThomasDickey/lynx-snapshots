@@ -31,7 +31,7 @@
 #define GOPHER_PORT 70		/* See protocol spec */
 #define CSO_PORT 105		/* See protocol spec */
 #define BIG 1024		/* Bug */
-#define LINE_LENGTH 256 	/* Bug */
+#define LINE_LENGTH 256		/* Bug */
 
 /*
 **  Gopher entity types.
@@ -41,7 +41,7 @@
 #define GOPHER_CSO		'2'
 #define GOPHER_ERROR		'3'
 #define GOPHER_MACBINHEX	'4'
-#define GOPHER_PCBINARY 	'5'
+#define GOPHER_PCBINARY		'5'
 #define GOPHER_UUENCODED	'6'
 #define GOPHER_INDEX		'7'
 #define GOPHER_TELNET		'8'
@@ -58,7 +58,7 @@
 #define GOPHER_PLUS_IMAGE	':'		/* Addition from Gopher Plus */
 #define GOPHER_PLUS_MOVIE	';'
 #define GOPHER_PLUS_SOUND	'<'
-#define GOPHER_PLUS_PDF 	'P'
+#define GOPHER_PLUS_PDF		'P'
 
 #include <HTFormat.h>
 
@@ -99,20 +99,20 @@ struct _HTStream
   HTStreamClass * isa;			/* For form-based CSO  gateway - FM */
 };
 
-typedef struct _CSOfield_info { 	/* For form-based CSO gateway - FM */
+typedef struct _CSOfield_info {		/* For form-based CSO gateway - FM */
     struct _CSOfield_info *	next;
     char *			name;
     char *			attributes;
     char *			description;
-    int 			id;
-    int 			lookup;
-    int 			indexed;
-    int 			url;
-    int 			max_size;
-    int 			defreturn;
-    int 			explicit_return;
-    int 			reserved;
-    int 			public;
+    int				id;
+    int				lookup;
+    int				indexed;
+    int				url;
+    int				max_size;
+    int				defreturn;
+    int				explicit_return;
+    int				reserved;
+    int				public;
     char			name_buf[16];	/* Avoid malloc if we can */
     char			desc_buf[32];	/* Avoid malloc if we can */
     char			attr_buf[80];	/* Avoid malloc if we can */
@@ -124,13 +124,13 @@ typedef struct _CSOformgen_context {	 /* For form-based CSO gateway - FM */
     char *		host;
     char *		seek;
     CSOfield_info *	fld;
-    int 		port;
-    int 		cur_line;
-    int 		cur_off;
-    int 		rep_line;
-    int 		rep_off;
-    int 		public_override;
-    int 		field_select;
+    int			port;
+    int			cur_line;
+    int			cur_off;
+    int			rep_line;
+    int			rep_off;
+    int			public_override;
+    int			field_select;
 } CSOformgen_context;
 
 /*	Matrix of allowed characters in filenames
@@ -744,8 +744,8 @@ PRIVATE void free_CSOfields NOPARAMS
 **	=========================================
 */
 PRIVATE void interpret_cso_key ARGS5(
-	char *, 		key,
-	char *, 		buf,
+	char *,			key,
+	char *,			buf,
 	int *,			length,
 	CSOformgen_context *,	ctx,
 	HTStream *,		Target)
@@ -921,7 +921,7 @@ PRIVATE int parse_cso_field_info ARGS1(
 **	================================================
 */
 PRIVATE int parse_cso_fields ARGS2(
-	char *, 	buf,
+	char *,		buf,
 	int,		size)
 {
     int ich;
@@ -1086,9 +1086,9 @@ PRIVATE int parse_cso_fields ARGS2(
 **	====================================================
 */
 PRIVATE int generate_cso_form ARGS4(
-	char *, 	host,
+	char *,		host,
 	int,		port,
-	char *, 	buf,
+	char *,		buf,
 	HTStream *,	Target)
 {
     int i, j, length;
@@ -1442,7 +1442,7 @@ PRIVATE int HTLoadCSO ARGS4(
     static CONST char end_form[] = "</BODY>\n</HTML>\n";
     char *host, *cp;
     int port = CSO_PORT;
-    int status; 			/* tcp return */
+    int status;				/* tcp return */
     char *command = NULL;
     char *content = NULL;
     int len, i, j, start, finish, flen, ndx;
@@ -1686,8 +1686,8 @@ PRIVATE int HTLoadGopher ARGS4(
 	HTStream*,		sink)
 {
     char *command;			/* The whole command */
-    int status; 			/* tcp return */
-    char gtype; 			/* Gopher Node type */
+    int status;				/* tcp return */
+    char gtype;				/* Gopher Node type */
     char * selector;			/* Selector string */
 
     if (!acceptable_inited)
@@ -1720,8 +1720,13 @@ PRIVATE int HTLoadGopher ARGS4(
     **	If it's a port 79/0[/...] URL, use the finger gateway. - FM
     */
     if (strstr(arg, ":79/0") != NULL) {
+#ifndef DISABLE_FINGER
 	CTRACE(tfp, "HTGopher: Passing to finger gateway.\n");
 	return HTLoadFinger(arg, anAnchor, format_out, sink);
+#else /* finger is disabled */
+	HTAlert(gettext("Unable to access document!"));
+	return HT_NOT_LOADED;
+#endif /* DISABLE_FINGER */
     }
 
     /*

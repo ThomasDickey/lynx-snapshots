@@ -77,7 +77,7 @@ PUBLIC BOOLEAN UseFixedRecords = USE_FIXED_RECORDS;
 PRIVATE char *lynx_version_putenv_command = NULL;
 PUBLIC char *list_format = NULL;	/* LONG_LIST formatting mask */
 #ifdef SYSLOG_REQUESTED_URLS
-PUBLIC char *syslog_txt = NULL; 	/* syslog arb text for session */
+PUBLIC char *syslog_txt = NULL;		/* syslog arb text for session */
 #endif /* SYSLOG_REQUESTED_URLS */
 #endif /* !VMS */
 
@@ -255,13 +255,13 @@ PUBLIC BOOLEAN local_host_only = FALSE;
 PUBLIC BOOLEAN override_no_download = FALSE;
 PUBLIC BOOLEAN show_dotfiles = FALSE; /* From rcfile if no_dotfiles is false */
 PUBLIC BOOLEAN LYforce_HTML_mode = FALSE;
-PUBLIC char *homepage = NULL;	/* home page or main screen */
 PUBLIC char *editor = NULL;	/* the name of the current editor */
 PUBLIC char *jumpfile = NULL;	/* the name of the default jumps file */
 PUBLIC char *jumpprompt = NULL; /* the default jumps prompt */
 PUBLIC char *bookmark_page = NULL; /* the name of the default bookmark page */
 PUBLIC char *BookmarkPage = NULL;  /* the name of the current bookmark page */
 PUBLIC char *LynxHome = NULL;	/* the default Home HREF. */
+PUBLIC char *homepage = NULL;  /* home page or main screen */
 PUBLIC char *startfile = NULL;	/* the first file */
 PUBLIC char *helpfile = NULL;	/* the main help file */
 PUBLIC char *helpfilepath = NULL;   /* the path to the help file set */
@@ -286,7 +286,7 @@ PUBLIC char *system_mail_flags = NULL;	  /* Flags for sending mail */
 PUBLIC char *lynx_cfg_file = NULL;	  /* location of active lynx.cfg */
 PUBLIC char *lynx_temp_space = NULL; /* The prefix for temporary file paths */
 PUBLIC char *lynx_save_space = NULL; /* The prefix for save to disk paths */
-PUBLIC char *LYHostName = NULL; 	/* treat as a local host name */
+PUBLIC char *LYHostName = NULL;		/* treat as a local host name */
 PUBLIC char *LYLocalDomain = NULL;	/* treat as a local domain tail */
 PUBLIC BOOLEAN clickable_images = MAKE_LINKS_FOR_ALL_IMAGES;
 PUBLIC BOOLEAN pseudo_inline_alts = MAKE_PSEUDO_ALTS_FOR_INLINES;
@@ -449,6 +449,7 @@ PRIVATE void reset_break(void)
 }
 #endif /* __DJGPP__ */
 
+#ifdef LY_FIND_LEAKS
 PRIVATE void free_lynx_globals NOARGS
 {
     int i;
@@ -471,8 +472,10 @@ PRIVATE void free_lynx_globals NOARGS
 #endif /* VMS */
 
     FREE(LynxHome);
+    FREE(homepage);
     FREE(startfile);
     FREE(helpfile);
+    FREE(helpfilepath);
     FREE(jumpprompt);
 #ifdef JUMPFILE
     FREE(jumpfile);
@@ -501,8 +504,6 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(LYHostName);
     FREE(LYLocalDomain);
     FREE(lynx_save_space);
-    FREE(homepage);
-    FREE(helpfilepath);
     FREE(bookmark_page);
     FREE(BookmarkPage);
     for (i = 0; i <= MBM_V_MAXFILES; i++) {
@@ -520,7 +521,9 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(URLDomainPrefixes);
     FREE(URLDomainSuffixes);
     FREE(XLoadImageCommand);
+#ifndef VMS
     FREE(lynx_version_putenv_command);
+#endif
     FREE(lynx_temp_space);
     FREE(LYTraceLogPath);
     FREE(lynx_cfg_file);
@@ -542,6 +545,7 @@ PRIVATE void free_lynx_globals NOARGS
 
     return;
 }
+#endif /* LY_FIND_LEAKS */
 
 /*
  *  This function frees the LYStdinArgs list. - FM
@@ -1335,7 +1339,79 @@ PUBLIC int main ARGS2(
      */
     read_rc();
 
+    /*
+     * Get WWW_HOME environment variable if it exists.
+     */
+    if ((cp = getenv("WWW_HOME")) != NULL) {
+	StrAllocCopy(startfile, cp);
+	LYTrimStartfile(startfile);
+    }
+
+    /*
+     * Set the LynxHome URL.  If it's a file URL and the
+     * host is defaulted, force in "//localhost", and if
+     * it's not an absolute URL, make it one. - FM
+     */
+    StrAllocCopy(LynxHome, startfile);
+    LYFillLocalFileURL((char **)&LynxHome, "file://localhost");
+    LYEnsureAbsoluteURL((char **)&LynxHome, "LynxHome");
+
+    /*
+     * Process any command line arguments not already handled. - FM
+     */
+    for (i = 1; i < argc; i++) {
+	parse_arg(&argv[i], &i);
+    }
+
+    /*
+     * Process any stdin-derived arguments for a lone "-"  which we've
+     * loaded into LYStdinArgs. - FM
+     */
+    if (LYStdinArgs != NULL) {
+	char *my_args[2];
+	HTList *cur = LYStdinArgs;
+
+	my_args[1] = NULL;
+	while (NULL != (my_args[0] = (char *)HTList_nextObject(cur))) {
+	     parse_arg(my_args, (int *)0);
+	}
+	LYStdinArgs_free();
+    }
+
+    /*
+     * Set the rest of variables when the configuration have read.
+     */
+
     HTSwitchDTD(!Old_DTD);
+
+    /*
+     * Set up the proper character set with the desired
+     * startup raw 8-bit or CJK mode handling.  - FM
+     */
+    HTMLUseCharacterSet(current_char_set);
+
+#ifdef EXP_PERSISTENT_COOKIES
+    /*
+     * Sod it, this looks like a reasonable place to load the
+     * cookies file, probably.  - RP
+     */
+    if (persistent_cookies) {
+	if(LYCookieFile == NULL) {
+	   LYAddPathToHome(LYCookieFile = malloc(LY_MAXPATH), LY_MAXPATH, COOKIE_FILE);
+	} else {
+	    if ((cp = strchr(LYCookieFile, '~'))) {
+		temp = NULL;
+		*(cp++) = '\0';
+		StrAllocCopy(temp, cp);
+		LYTrimPathSep(temp);
+		StrAllocCopy(LYCookieFile, wwwName(Home_Dir()));
+		StrAllocCat(LYCookieFile, temp);
+		FREE(temp);
+	    }
+	}
+	LYLoadCookies(LYCookieFile);
+    }
+#endif
 
     /*
      *	Check for a save space path in the environment.
@@ -1391,45 +1467,6 @@ PUBLIC int main ARGS2(
      */
     HTFormatInit();
     HTFileInit();
-
-    /*
-     *	Get WWW_HOME environment variable if it exists.
-     */
-    if ((cp = getenv("WWW_HOME")) != NULL) {
-	StrAllocCopy(startfile, cp);
-	LYTrimStartfile(startfile);
-    }
-
-    /*
-     *	Set the LynxHome URL.  If it's a file URL and the
-     *	host is defaulted, force in "//localhost", and if
-     *	it's not an absolute URL, make it one. - FM
-     */
-    StrAllocCopy(LynxHome, startfile);
-    LYFillLocalFileURL((char **)&LynxHome, "file://localhost");
-    LYEnsureAbsoluteURL((char **)&LynxHome, "LynxHome");
-
-    /*
-     *	Process any command line arguments not already handled. - FM
-     */
-    for (i = 1; i < argc; i++) {
-	parse_arg(&argv[i], &i);
-    }
-
-    /*
-     *	Process any stdin-derived arguments for a lone "-"  which we've
-     *	loaded into LYStdinArgs. - FM
-     */
-    if (LYStdinArgs != NULL) {
-	char *my_args[2];
-	HTList *cur = LYStdinArgs;
-
-	my_args[1] = NULL;
-	while (NULL != (my_args[0] = (char *)HTList_nextObject(cur))) {
-	    parse_arg(my_args, (int *)0);
-	}
-	LYStdinArgs_free();
-    }
 
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
@@ -1556,35 +1593,6 @@ PUBLIC int main ARGS2(
 #endif /* DOSPATH */
     }
 #endif /* !VMS */
-
-    /*
-     *	Set up the proper character set with the desired
-     *	startup raw 8-bit or CJK mode handling.  - FM
-     */
-    HTMLUseCharacterSet(current_char_set);
-
-#ifdef EXP_PERSISTENT_COOKIES
-    /*
-     *	Sod it, this looks like a reasonable place to load the
-     *	cookies file, probably.  - RP
-     */
-    if (persistent_cookies) {
-	if(LYCookieFile == NULL) {
-	    LYAddPathToHome(LYCookieFile = malloc(LY_MAXPATH), LY_MAXPATH, COOKIE_FILE);
-	} else {
-	    if ((cp = strchr(LYCookieFile, '~'))) {
-		temp = NULL;
-		*(cp++) = '\0';
-		StrAllocCopy(temp, cp);
-		LYTrimPathSep(temp);
-		StrAllocCopy(LYCookieFile, wwwName(Home_Dir()));
-		StrAllocCat(LYCookieFile, temp);
-		FREE(temp);
-	    }
-	}
-	LYLoadCookies(LYCookieFile);
-    }
-#endif
 
 #ifdef SIGTSTP
     /*
@@ -1797,7 +1805,7 @@ PUBLIC void LYRegisterLynxProtocols NOARGS
 /* There are different ways of setting arguments on the command line, and
  * there are different types of arguments.  These include:
  *
- *   -set_some_variable 	 ==> some_variable  = TRUE
+ *   -set_some_variable		 ==> some_variable  = TRUE
  *   -toggle_some_variable	 ==> some_variable = !some_variable
  *   -some_variable=value	 ==> some_variable = value
  *
@@ -1842,11 +1850,11 @@ typedef struct parse_args_type
    int type;
 #define IGNORE_ARG		0x000
 #define TOGGLE_ARG		0x001
-#define SET_ARG 		0x002
+#define SET_ARG			0x002
 #define UNSET_ARG		0x003
 #define FUNCTION_ARG		0x004
 #define LYSTRING_ARG		0x005
-#define INT_ARG 		0x006
+#define INT_ARG			0x006
 #define STRING_ARG		0x007
 #define ARG_TYPE_MASK		0x0FF
 #define NEED_NEXT_ARG		0x100
@@ -2470,16 +2478,6 @@ static int source_fun ARGS3(
     return 0;
 }
 
-/* -tagsoup */
-static int tagsoup_fun ARGS3(
-	Parse_Args_Type *,	p GCC_UNUSED,
-	char **,		argv GCC_UNUSED,
-	char *,			next_arg GCC_UNUSED)
-{
-    HTSwitchDTD(!(Old_DTD = YES));
-    return 0;
-}
-
 /* -traversal */
 static int traversal_fun ARGS3(
 	Parse_Args_Type *,	p GCC_UNUSED,
@@ -2644,7 +2642,7 @@ with -dump, format output as with -traversal, but to stdout"
       "dump the first file to stdout and exit"
    ),
    PARSE_FUN(
-      "editor", 	NEED_FUNCTION_ARG,	editor_fun,
+      "editor",		NEED_FUNCTION_ARG,	editor_fun,
       "=EDITOR\nenable edit mode with specified editor"
    ),
    PARSE_SET(
@@ -2672,7 +2670,7 @@ keys (may be incompatible with some curses packages)"
       "enable local program execution from local files only"
    ),
    PARSE_SET(
-      "noexec", 	UNSET_ARG,		&local_exec,
+      "noexec",		UNSET_ARG,		&local_exec,
       "disable local program execution (DEFAULT)"
    ),
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
@@ -2789,7 +2787,7 @@ keys (may be incompatible with some curses packages)"
       "disable transmissions of Referer headers for file URLs"
    ),
    PARSE_SET(
-      "nolist", 	SET_ARG,		&nolist,
+      "nolist",		SET_ARG,		&nolist,
       "disable the link list feature in dumps"
    ),
    PARSE_SET(
@@ -2871,7 +2869,7 @@ with partial-display logic"
       "restricts access to URLs in the starting realm"
    ),
    PARSE_SET(
-      "reload", 	SET_ARG,		&reloading,
+      "reload",		SET_ARG,		&reloading,
       "flushes the cache on a proxy server\n(only the first document affected)"
    ),
    PARSE_FUN(
@@ -2885,7 +2883,7 @@ method POST when the documents they returned are sought\n\
 with the PREV_DOC command or from the History List"
    ),
    PARSE_SET(
-      "rlogin", 	UNSET_ARG,		&rlogin_ok,
+      "rlogin",		UNSET_ARG,		&rlogin_ok,
       "disable rlogins"
    ),
    PARSE_FUN(
@@ -2902,7 +2900,7 @@ with the PREV_DOC command or from the History List"
 treated '>' as a co-terminator for double-quotes and tags"
    ),
    PARSE_FUN(
-      "source", 	FUNCTION_ARG,		source_fun,
+      "source",		FUNCTION_ARG,		source_fun,
       "dump the source of the first file to stdout and exit"
    ),
    PARSE_SET(
@@ -2916,17 +2914,17 @@ treated '>' as a co-terminator for double-quotes and tags"
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
    PARSE_STR(
-      "syslog", 	NEED_LYSTRING_ARG, 	&syslog_txt,
+      "syslog",		NEED_LYSTRING_ARG,	&syslog_txt,
       "=text\ninformation for syslog call"
    ),
 #endif
 #endif
    PARSE_FUN(
-      "tagsoup",	FUNCTION_ARG,		tagsoup_fun,
+      "tagsoup",	SET_ARG,		&Old_DTD,
       "use TagSoup rather than SortaSGML parser"
    ),
    PARSE_SET(
-      "telnet", 	UNSET_ARG,		&telnet_ok,
+      "telnet",		UNSET_ARG,		&telnet_ok,
       "disable telnets"
    ),
    PARSE_STR(
@@ -2972,7 +2970,7 @@ treated '>' as a co-terminator for double-quotes and tags"
       "print Lynx version information"
    ),
    PARSE_SET(
-      "vikeys", 	SET_ARG,		&vi_keys,
+      "vikeys",		SET_ARG,		&vi_keys,
       "enable vi-like key movement"
    ),
    PARSE_FUN(

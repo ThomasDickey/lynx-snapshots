@@ -1,6 +1,84 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1999-03-30 (2.8.2dev.21)
+* disable LYatexit if memory-leak testing is not configured.
+* fixes for unhighlighting problems with color-style support (Vlad Harchev)
+* remove '(default: on)' and '(default: off)' strings from configure script
+  help message (much lynx-dev discussion) - TD
+* remove outdated link to the WebTechs HTML Validation Service from help menu
+  and change link to more suitable location for rfc1945 - PW
+* correct logic of --disable-full-paths configure option (reported by Georg
+  Schwarz) - TD
+* fix problems building on OpenVMS with DECC 6.2 (reported by Andy Harper 
+  <Andy.Harper@kcl.ac.uk>)
+  + remove 'DEBUG' definition from build scripts since it is defined in
+    the source code.
+  + turn off code that tries to use getpwuid(), by defining NOUSERS, since
+    those functions are not present on VMS.
+  + provide a dummy location for h_errno for systems without that symbol.
+  + correct string syntax in VMSexit function
+  + ifdef'd use of lynx_version_putenv_command in LYMain.c
+  + correct spurious parenthesis in mailform function
+  + correct missing COPY_PATH definition for LYUtils.c
+* Check for 'z' user interrupt in HTLoadHTTP before setting up the output
+  stream.  This avoids doing unnecessary work, including possible creation of a
+  new HText structure that most likely is never displayed but still pushes
+  another document out of the.  cache.  Most commonly this occurs when a HTTP
+  error response is received and the user presses 'z' while the resulting alert
+  message is shown - LW
+* Fix of HTUnEscapeSome in HTParse.c for non-ASCII - KW, PG
+* tidy up around ed_offset initialization in GridText.c - KED
+  (the patch as given will not compile on a non-ANSI compiler because it uses
+  aggregate initialization, and it's not clear why the ed_offset variable
+  must be initialized since the variable is sprintf'd before use - TD)
+* add samples/mild-colors.lss (Vlad Harchev)
+* add samples/blue-background.lss (from Sergey Svishchev <svs@ropnet.ru>)
+* documentation updates for INSTALLATION and PROBLEMS - PW
+* use HTConfirm and HTConfirmDefault to gettext'ify CONFIRM_BOOKMARK_DELETE,
+  CONFIRM_COMMENT, CONFIRM_LONG_PAGE_PRINT, CONFIRM_LONG_SCREEN_PRINT,
+  CONFIRM_MAIL_SOURCE_PREPARSED, CONFIRM_MAIN_SCREEN, FILE_EXISTS_HPROMPT,
+  FILE_EXISTS_OPROMPT, NO_OWNER_USE, PREV_DOC_QUERY, REALLY_EXIT_N,
+  REALLY_EXIT_Y, REALLY_QUIT_N, REALLY_QUIT_Y (based on report by LP) - TD
+* at LYNXCFG:/ page, add links for every included configuration file so we can
+  read and edit them (no, currently the changes will be active the next session
+  only.  Minor reorganization of LYMain.c done, more required) - LP
+* correct test/spaces.html - it should not be in a <PRE> mode by default - LP
+* undo recent &emsp; changes so it is a single space as before (suggested by
+  KW) - LP
+* add ETag anchor element (currently not used, only for information) - LP
+* assign LYNXCFG:/ and LYNXCOMPILEOPTS:/ for internal pages of parsed lynx.cfg
+  and compile-time info.  Now we will not see a temp file link name in a
+  statusline in advanced mode, also kill overhead since pages created only when
+  really accessed - LP
+* form-based options menu:  the bug described in 1999-03-17 changes now finally
+  fixed - LP
+* fix expanding entities for x-transparent display charset
+  (was broken from 1999-03-04 changes) - LP
+* trimmed trailing blanks from *.tbl, fixed chrtrans/def7_uni.tbl and
+  chrtrans/viscii_uni.tbl, ensure that it produces correct result - TD
+* chrtrans/def7_uni.tbl - entries with trailing spaces now explicitely enclosed
+  in quotes to avoid problems with integrating the patches sent by e-mail,
+  more comments added - LP
+* attempt to implement --disable-ftp (John Bley)
+* fix tiny memory leak in HTAAUtil.c (John Bley)
+* chop useless #includes from LYHash.c, LYExtern.c, LYCurses.h (John Bley)
+* --disable-news was also disabling ftp, --disable-finger without
+  --disable-gopher wasn't right (John Bley)
+* remove a duplicate #include from HTFTP.c (John Bley)
+* remove several obsolete files from the source distribution (John Bley)
+  WWW/Library/Implementation/HTAAServ.*
+  WWW/Library/Implementation/HTAAFile.*
+  WWW/Library/Implementation/HTAuth.*
+  WWW/Library/Implementation/HTACL.*
+  WWW/Library/Implementation/HTPasswd.*
+  WWW/Library/Implementation/HTHistory.*
+* --disable-partial wasn't compiling because of a supressed #include, replace
+  one more free() with FREE() (John Bley)
+* correct typo LIsListpageTitle vs LYIsListpageTitle
+  (reported by Artur Frysiak <wiget@usa.net> and KED)
+* don't append sed expression to help_files.sed if the $(COMPRESS_EXT)
+  variable is empty - TD
 1999-03-17 (2.8.2dev.20)
 * protect a couple of spaces with quotes in def7_uni.tbl (suggested by KW) - TD
 * add ifdef's for NO_RULES to HTAAServ.c - HN
@@ -8,46 +86,46 @@ Changes since Lynx 2.8 release
 * add configure --disable-finger option - JS
 * add malloc checks, remove some #includes that don't need to exist, and
   cleanup where somebody decided to waste instructions setting fields to 0 when
-  he already memset()ed the whole struct to 0 (John Bley). 
+  he already memset()ed the whole struct to 0 (John Bley).
 * remove obsolete/unmaintained SHORT_NAMES ifdef's (John Bley).
 * add/use LYTrimStartfile function (suggested by LP) - TD
 * correct missing null-pointer check in add_printer_to_list function (forwarded
   by BJP from Debian bug-reports) - TD
 * add notes about $CC variable to INSTALLATION and PROBLEMS - JS, PW
-* tweak for TABLE formatting: break line at </TR> end tag (don't wait 
-  for next <TR> start tag), effective in SortaSGML mode only - KW 
+* tweak for TABLE formatting: break line at </TR> end tag (don't wait
+  for next <TR> start tag), effective in SortaSGML mode only - KW
 * lots of color style changes, only effective if compiled with USE_COLOR_STYLE;
   together they seem to make color styles act much more reliably and
   consistently - KW
-  - Moved some extern definitions and declarations. 
-  - Made extra handling for LINK REL (or TITLE) attributes consistent 
-    with example lynx.lss file. 
-  - More complete (and hopefully more consistent) setting of "normal" 
-    attributes, especially background color, on screen refresh and after 
-    statusline messages.  Set normal attributes for statusline prompts. 
-  - Various other small tweaks, mostly to not lose color changes in a 
-    document and to avoid color leaking. 
-  - Attributes for highlighting WHEREIS search targets can be controlled 
-    by setting style for "whereis" in lynx.lss. 
-  - Allow mono attribute field in lynx.lss to be a combination of several 
-    attributes separated by '+' characters. 
-  - Changes of example lynx.lss file: more logical ordering, added some 
-    comments, document new stuff.  Changed a few styles for demonstration 
-    purposes or because text was really hard to read. 
-* apply color styles to HTML source display, using the same methods as 
-  for displaying the rendered version.  This is done if and only if 
-  the -preparsed flag is used (and lynx is compiled with -DUSE_COLOR_STYLE, 
-  of course).  Please remember that the source displayed with -preparsed 
-  is *not* the same as the original text/html document, it has been 
-  mangled by lynx (as the name implies) and may itself not be a valid 
-  HTML document even if the original was - KW 
-* changed some slightly suspicious casts in HText_endAnchor's casting hell: 
+  - Moved some extern definitions and declarations.
+  - Made extra handling for LINK REL (or TITLE) attributes consistent
+    with example lynx.lss file.
+  - More complete (and hopefully more consistent) setting of "normal"
+    attributes, especially background color, on screen refresh and after
+    statusline messages.  Set normal attributes for statusline prompts.
+  - Various other small tweaks, mostly to not lose color changes in a
+    document and to avoid color leaking.
+  - Attributes for highlighting WHEREIS search targets can be controlled
+    by setting style for "whereis" in lynx.lss.
+  - Allow mono attribute field in lynx.lss to be a combination of several
+    attributes separated by '+' characters.
+  - Changes of example lynx.lss file: more logical ordering, added some
+    comments, document new stuff.  Changed a few styles for demonstration
+    purposes or because text was really hard to read.
+* apply color styles to HTML source display, using the same methods as
+  for displaying the rendered version.  This is done if and only if
+  the -preparsed flag is used (and lynx is compiled with -DUSE_COLOR_STYLE,
+  of course).  Please remember that the source displayed with -preparsed
+  is *not* the same as the original text/html document, it has been
+  mangled by lynx (as the name implies) and may itself not be a valid
+  HTML document even if the original was - KW
+* changed some slightly suspicious casts in HText_endAnchor's casting hell:
   prefer to cast a line's size element to (int), rather than various int
   variables to (unsigned) - KW
 * remove some unnecessary use of dynamic buffers where there is no apparent
   benefit for using them, for the sake of performance or to avoid a minor
   memory leak - KW
-* Stuffed small memory leak (MultipartContentType) - KW 
+* Stuffed small memory leak (MultipartContentType) - KW
 * absorb 'len' parameter into logic of argncmp, so it still achieves its
   purpose of comparing prefixes of options without undue maintenance effort - TD
 * retain logic that uses final URL on command-line (request by KW) - TD
@@ -55,9 +133,9 @@ Changes since Lynx 2.8 release
   well as '-' for commandline options.  This means that '-localhost' and
   '--localhost' mean the same thing for lynx.  If EXTENDED_OPTION_LOGIC is
   defined then the extended commandline option logic will be used.  It means
-  that '--' will be accepted and will be treated as an end of options. 
+  that '--' will be accepted and will be treated as an end of options.
   Anything after it will be treated as URL even if begins with '-' or '--'
-  (Vlad Harchev <hvv@hippo.ru>)
+  (Vlad Harchev)
 * correct some typos in docs and in scripts (Vlad Harchev <hvv@hippo.ru>)
 * modify generated sed script to handle special case of alt_edit_help.html,
   which was being rendered in --enable-gzip-help as alt_edit_help.html.gz.gz
@@ -70,26 +148,26 @@ Changes since Lynx 2.8 release
 * add some more pieces of info (if available) to '=' page in advanced user
   mode.  Also show mode as "source" instead of "normal" if viewing SOURCE, in
   all user modes - KW
-* minor FASTBACKW_LINK / FASTFORW_LINK tweaks - KW 
-* Removed documentation for nonimplemented chargen URLs - KW 
+* minor FASTBACKW_LINK / FASTFORW_LINK tweaks - KW
+* Removed documentation for nonimplemented chargen URLs - KW
 * remove num_n256 hack introduced in dev18 UCDomap.* - LP
-* forms-based options menu: fix reloading of previous document *only* when 
+* forms-based options menu: fix reloading of previous document *only* when
   necessary (was always, since early forms-based options menu days).  Still
   have a bug - while submitting the options menu lynx reload menu again, but
   this is much faster to load small local file twice than fetch previous
   (possible large) document over the net.  - LP
-* &mdash; (&#x2014) now display as "--" (popular requests) - LP 
-* &emsp; are now displayed as two &ensp; (popular requests), 
-  previous definition of HT_EM_SPACE now renamed to HT_EN_SPACE. - LP 
-* minor tweaks in postoptions(), new flag added - LP 
+* &mdash; (&#x2014) now display as "--" (popular requests) - LP
+* &emsp; are now displayed as two &ensp; (popular requests),
+  previous definition of HT_EM_SPACE now renamed to HT_EN_SPACE. - LP
+* minor tweaks in postoptions(), new flag added - LP
 * minor changes to make this build with SunOS K&R cc - TD
 * entities.h:  clean HTML4.0 entities table added, it is #ifdef'ed with
   ENTITIES_HTML40_ONLY (may be useful for page validation), file entities.h
   moved to src/chrtrans directory - LP
-* save few KB of static memory by storing unicodes as 'u16' (was 'long') - LP 
-* trace log toggle now really interruptable - LP 
+* save few KB of static memory by storing unicodes as 'u16' (was 'long') - LP
+* trace log toggle now really interruptable - LP
 * move entities.h to src/chrtrans - LP
-* fix display of -help output: (on/off) info was wrong for UNSET_ARG case - LP 
+* fix display of -help output: (on/off) info was wrong for UNSET_ARG case - LP
 * ifdef'd recent changes to LYPrint.c to build with djgpp - LP
 * remove redundant -DDEBUG from djgpp makefiles - LP
 * remove nonstandard ISO-9945-2 - LP
@@ -105,11 +183,11 @@ Changes since Lynx 2.8 release
 * add a rule to makefile.in to generate patches - PG
 * correction to LYCookie.c, to get it to eat all cookies (reported by LV) - BJP
 * corrections/updates to entities.h (Jacob Poon):
-  HTML 4.0 compliance: 
-  - Added support for Euro currency symbol. 
-  - Fixed duplicated &loz; definitions.  
-  Fixes: 
-  - Fixed some typos in the old references. (fixed: b.delta) 
+  HTML 4.0 compliance:
+  - Added support for Euro currency symbol.
+  - Fixed duplicated &loz; definitions.
+  Fixes:
+  - Fixed some typos in the old references. (fixed: b.delta)
 * update follow_help.html for LE's 123g changes - PW
 * further correction to 123g logic - LE
 1999-03-04 (2.8.2dev.19)
@@ -132,9 +210,9 @@ Changes since Lynx 2.8 release
   --disable-trace to remove TRACE code - JS
 * modify trace log header to always inform us if anonymous restrictions are
   set - LP
-* chartrans: old-style declarations of charsets which do not have Unicode 
-  tables (CJK, x-transparent, also UTF-8) now moved from LYCharSets.c to 
-  UCdomap.h and now included with UCInit() in UCdomap.c in a standard way - LP 
+* chartrans: old-style declarations of charsets which do not have Unicode
+  tables (CJK, x-transparent, also UTF-8) now moved from LYCharSets.c to
+  UCdomap.h and now included with UCInit() in UCdomap.c in a standard way - LP
   (Please re-test CJK and UTF-8)
 * add configure --enable-libjs option (Lalo Martins <lalo@webcom.com>)
 * add checks for some more LINK tags as listed in "6.12 Link types" of the HTML

@@ -1,0 +1,40 @@
+# From: Vlad Harchev <hvv@hippo.ru> 
+# Notes:
+# better for eyes - it sets black background with mild colors that
+# have approximately the same intensity.
+#
+# grey normal text on black background with green links and brightgreen  
+# highlighted links. 
+#it's best to put these in a .lss file and use  
+#"lynx -lss=file.lss whatever" for now. 
+# 
+# normal type styles, use bold if mono, otherwise brightblue on  
+#<defaultbackground> 
+#by Vlad Harchev <hvv@hippo.ru> 
+em:bold:cyan 
+strong:bold:cyan 
+b:bold:cyan 
+i:bold:cyan 
+alink:reverse:brightgreen:black 
+a:bold:green 
+img:dim:cyan:black 
+status:reverse:cyan:black 
+fig:normal:gray 
+caption:reverse:cyan 
+hr:normal:gray 
+blockquote:normal:cyan:black 
+#ul:normal:gray 
+address:normal:cyan 
+title:normal:cyan:default 
+tt:normal:white:black 
+h1:bold:cyan:black 
+label:normal:cyan 
+value:normal:green 
+high:bold:cyan 
+q:normal:gray 
+small:dim:gray 
+big:bold:cyan 
+sup:bold:gray 
+sub:dim:gray 
+lh:bold:cyan 
+code:normal:cyan 

@@ -74,6 +74,7 @@ PRIVATE char *find_colon ARGS1(
     return NULL;
 }
 
+#ifdef LY_FIND_LEAKS
 /*
  *  Function for freeing the DOWNLOADER and UPLOADER menus list. - FM
  */
@@ -118,12 +119,13 @@ PRIVATE void free_item_list NOARGS
 
     return;
 }
+#endif /* LY_FIND_LEAKS */
 
 /*
  *  Process string buffer fields for DOWNLOADER or UPLOADER menus.
  */
 PRIVATE void add_item_to_list ARGS2(
-	char *, 		buffer,
+	char *,			buffer,
 	lynx_html_item_type **, list_ptr)
 {
     char *colon, *next_colon;
@@ -195,6 +197,7 @@ PRIVATE void add_item_to_list ARGS2(
 }
 
 
+#ifdef LY_FIND_LEAKS
 /*
  *  Function for freeing the PRINTER menus list. - FM
  */
@@ -214,12 +217,13 @@ PRIVATE void free_printer_item_list NOARGS
 
     return;
 }
+#endif /* LY_FIND_LEAKS */
 
 /*
  *  Process string buffer fields for PRINTER menus.
  */
 PRIVATE void add_printer_to_list ARGS2(
-	char *, 			buffer,
+	char *,				buffer,
 	lynx_printer_item_type **,	list_ptr)
 {
     char *colon, *next_colon;
@@ -370,7 +374,7 @@ PUBLIC int check_color ARGS2(
  *  Exit routine for failed COLOR parsing.
  */
 PRIVATE void exit_with_color_syntax ARGS1(
-	char *, 	error_line)
+	char *,		error_line)
 {
     unsigned int i;
     fprintf (stderr, gettext("\
@@ -493,7 +497,7 @@ typedef struct
 Config_Type;
 
 static int assume_charset_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     UCLYhndl_for_unspec = safeUCGetLYhndl_byMIME(value);
     StrAllocCopy(UCAssume_MIMEcharset,
@@ -506,21 +510,21 @@ static int assume_charset_fun ARGS1(
 }
 
 static int assume_local_charset_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     UCLYhndl_HTFile_for_unspec = safeUCGetLYhndl_byMIME(value);
     return 0;
 }
 
 static int assume_unrec_charset_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     UCLYhndl_for_unrec = safeUCGetLYhndl_byMIME(value);
     return 0;
 }
 
 static int character_set_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     int i = UCGetLYhndl_byAnyName(value); /* by MIME or full name */
     if (i < 0)
@@ -532,7 +536,7 @@ static int character_set_fun ARGS1(
 }
 
 static int outgoing_mail_charset_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     outgoing_mail_charset = UCGetLYhndl_byMIME(value);
     /* -1 if NULL or not recognized value: no translation (compatibility) */
@@ -543,7 +547,7 @@ static int outgoing_mail_charset_fun ARGS1(
 
 #ifdef USE_COLOR_TABLE
 static int color_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     parse_color (value);
     return 0;
@@ -551,7 +555,7 @@ static int color_fun ARGS1(
 #endif
 
 static int default_bookmark_file_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     StrAllocCopy(bookmark_page, value);
     StrAllocCopy(BookmarkPage, bookmark_page);
@@ -561,7 +565,7 @@ static int default_bookmark_file_fun ARGS1(
 }
 
 static int default_cache_size_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     HTCacheSize = atoi(value);
     if (HTCacheSize < 2) HTCacheSize = 2;
@@ -569,14 +573,14 @@ static int default_cache_size_fun ARGS1(
 }
 
 static int default_editor_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     if (!system_editor) StrAllocCopy(editor, value);
     return 0;
 }
 
 static int numbers_as_arrows_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     if (is_true(value))
 	keypad_mode = NUMBERS_AS_ARROWS;
@@ -587,7 +591,7 @@ static int numbers_as_arrows_fun ARGS1(
 }
 
 static int default_user_mode_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     if (!strncasecomp(value, "NOVICE", 6))
 	user_mode = NOVICE_MODE;
@@ -601,7 +605,7 @@ static int default_user_mode_fun ARGS1(
 
 #ifdef DIRED_SUPPORT
 static int dired_menu_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     add_menu_item(value);
     return 0;
@@ -609,7 +613,7 @@ static int dired_menu_fun ARGS1(
 #endif
 
 static int jumpfile_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     char buffer [MAX_LINE_BUFFER_LEN];
 
@@ -622,7 +626,7 @@ static int jumpfile_fun ARGS1(
 
 #ifdef EXP_KEYBOARD_LAYOUT
 static int keyboard_layout_fun ARGS1(
-	char *, 	key)
+	char *,		key)
 {
     if (!LYSetKbLayout(key))
 	CTRACE(tfp, "Failed to set keyboard layout %s\n", key);
@@ -631,7 +635,7 @@ static int keyboard_layout_fun ARGS1(
 #endif /* EXP_KEYBOARD_LAYOUT */
 
 static int keymap_fun ARGS1(
-	char *, 	key)
+	char *,		key)
 {
     char *func;
 
@@ -650,7 +654,7 @@ static int keymap_fun ARGS1(
 }
 
 static int localhost_alias_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     LYAddLocalhostAlias(value);
     return 0;
@@ -658,7 +662,7 @@ static int localhost_alias_fun ARGS1(
 
 #ifdef LYNXCGI_LINKS
 static int lynxcgi_environment_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     add_lynxcgi_environment(value);
     return 0;
@@ -666,7 +670,7 @@ static int lynxcgi_environment_fun ARGS1(
 #endif
 
 static int lynx_sig_file_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     char temp[LY_MAXPATH];
     LYstrncpy(temp, value, sizeof(temp)-1);
@@ -683,7 +687,7 @@ static int lynx_sig_file_fun ARGS1(
 
 #ifndef DISABLE_NEWS
 static int news_chunk_size_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     HTNewsChunkSize = atoi(value);
     /*
@@ -696,7 +700,7 @@ static int news_chunk_size_fun ARGS1(
 }
 
 static int news_max_chunk_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     HTNewsMaxChunk = atoi(value);
     /*
@@ -709,7 +713,7 @@ static int news_max_chunk_fun ARGS1(
 }
 
 static int news_posting_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     LYNewsPosting = is_true(value);
     no_newspost = (LYNewsPosting == FALSE);
@@ -719,7 +723,7 @@ static int news_posting_fun ARGS1(
 
 #ifndef NO_RULES
 static int cern_rulesfile_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     char *rulesfile1 = NULL;
     char *rulesfile2 = NULL;
@@ -753,14 +757,14 @@ static int cern_rulesfile_fun ARGS1(
 #endif /* NO_RULES */
 
 static int printer_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     add_printer_to_list(value, &printers);
     return 0;
 }
 
 static int suffix_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     char *mime_type;
 
@@ -786,7 +790,7 @@ static int suffix_fun ARGS1(
 }
 
 static int system_editor_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     StrAllocCopy(editor, value);
     system_editor = TRUE;
@@ -794,7 +798,7 @@ static int system_editor_fun ARGS1(
 }
 
 static int viewer_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     char *mime_type;
     char *viewer;
@@ -1235,8 +1239,11 @@ PUBLIC void read_cfg ARGS4(
 	    /* include another file */
 #ifndef NO_CONFIG_INFO
 	    if (fp0 != 0) {
-		fprintf(fp0, "%s:%s\n\n", name, value);
+		char *url = 0;
+		LYLocalFileToURL(&url, value);
+		fprintf(fp0, "%s:<a href=\"%s\">%s</a>\n\n", name, url, value);
 		fprintf(fp0, "    #&lt;begin  %s&gt;\n", value);
+		FREE(url);
 	    }
 #endif
 	    read_cfg (value, cfg_filename, nesting_level + 1, fp0);
@@ -1370,20 +1377,36 @@ PUBLIC char *lynx_cfg_infopage NOARGS
 	fprintf(fp0, "<pre>\n");
 
 #ifndef NO_CONFIG_INFO
-	fprintf(fp0, "<em>%s\n", gettext("This is read from your lynx.cfg file,"));
 #if defined(HAVE_CONFIG_H) || defined(VMS)
-	StrAllocCopy(temp, LYNX_CFG_FILE);
-#else
-	StrAllocCopy(temp, helpfilepath); /* no absolute path... */
-	StrAllocCat(temp, LYNXCFG_HELP);  /* for lynx.cfg on DOS/Win32 */
+	if (strcmp(lynx_cfg_file, LYNX_CFG_FILE)) {
+	    StrAllocCopy(temp, LYNX_CFG_FILE);
+	    fprintf(fp0, "<em>%s\n%s",
+			 gettext("This is read from your lynx.cfg file,"),
+			 gettext("please \"read\" distribution's"));
+	    fprintf(fp0, " <a href=\"%s\">lynx.cfg</a> ",
+			 temp);
+	    FREE(temp);
+	    fprintf(fp0, "%s</em>\n\n",
+			 gettext("for more comments."));
+	} else
 #endif /* HAVE_CONFIG_H */
-	fprintf(fp0, "%s <a href=\"%s\">lynx.cfg",
-		     gettext("please \"read\" distribution's"),
-		     temp);
-	fprintf(fp0, "</a> %s</em>\n\n", gettext("for more comments."));
+	{
+	/* no absolute path... for lynx.cfg on DOS/Win32 */
+	    fprintf(fp0, "<em>%s\n%s",
+			 gettext("This is read from your lynx.cfg file,"),
+			 gettext("please \"read\" distribution's"));
+	    fprintf(fp0, " </em>lynx.cfg<em> ");
+	    fprintf(fp0, "%s</em>\n\n",
+			 gettext("for more comments."));
+	}
 
-	fprintf(fp0, "    #<em>%s %s</em>\n", gettext("Your primary configuration"),
-		     lynx_cfg_file);
+	LYLocalFileToURL(&temp, lynx_cfg_file);
+	fprintf(fp0, "    #<em>%s <a href=\"%s\">%s</a></em>\n",
+		    gettext("Your primary configuration"),
+		    temp,
+		    lynx_cfg_file);
+	FREE(temp);
+
 #else
 	fprintf(fp0, "<em>%s</em>\n\n", gettext("This is read from your lynx.cfg file:"));
 #endif /* NO_CONFIG_INFO */
@@ -1393,7 +1416,6 @@ PUBLIC char *lynx_cfg_infopage NOARGS
 	 */
 	read_cfg(lynx_cfg_file, "main program", 1, fp0);
 
-	FREE(temp);
 	fprintf(fp0, "</pre>\n");
 	EndInternalPage(fp0);
 	LYCloseTempFP(fp0);

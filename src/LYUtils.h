@@ -184,10 +184,12 @@ extern BOOLEAN mustshow;
 #define LYNXCOOKIE_URL_TYPE	34
 #define LYNXDIRED_URL_TYPE	35
 #define LYNXOPTIONS_URL_TYPE	36
+#define LYNXCFG_URL_TYPE	37
+#define LYNXCOMPILE_OPTS_URL_TYPE 38
 
-#define PROXY_URL_TYPE		37
+#define PROXY_URL_TYPE		39
 
-#define UNKNOWN_URL_TYPE	38
+#define UNKNOWN_URL_TYPE	40
 
 /*
  *  For change_sug_filename().

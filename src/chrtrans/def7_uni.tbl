@@ -1,10 +1,19 @@
-# Default 7bit replacements.  If the MIME name is set to us-ascii,
-# this will be identified with the "7 bit approximations (US-ASCII)" Display 
-# character set.
+# Default 7bit replacements.
+#
+# This table is very important and should not be excluded from the distribution
+# since this is a default fallback for any 8bit user's "display character set"
+# which (nearly) of 256 chars and could not map a rich Unicode repertoire.
+#
+# Note: there are a few rare replacement strings with trailing spaces
+# which should be enclosed as C strings like "... " to make things obvious
+# (and doing that we should escape \ as \134 and  escape " as \" or \042
+# but this is really rare).
+#
 
 #The MIME name of this charset.
 Mus-ascii
- 
+
+# Like any other charset this may be selected as "display character set":
 #Name as a Display Charset (used on Options screen)
 O7 bit approximations (US-ASCII)
 
@@ -14,7 +23,7 @@ D1
 
 
 # us-ascii characters should not normally pass here,
-# they are always processed directly but let declare it here:
+# they are always processed directly but let declare them here:
 0x20-0x7e  idem
 
 
@@ -421,11 +430,11 @@ U+03cc:o%
 U+03cd:u%
 U+03ce:w%
 # Greek symbols
-U+03d0:beta 
-U+03d1:theta 
-U+03d2:upsi 
-U+03d5:phi 
-U+03d6:pi 
+U+03d0 "beta "
+U+03d1 "theta "
+U+03d2 "upsi "
+U+03d5 "phi "
+U+03d6 "pi "
 U+03da:T3
 U+03db:t3
 U+03dc:M3
@@ -434,8 +443,8 @@ U+03de:K3
 U+03df:k3
 U+03e0:P3
 U+03e1:p3
-U+03f0:kappa 
-U+03f1:rho 
+U+03f0 "kappa "
+U+03f1 "rho "
 U+03f4:'%
 U+03f5:j3
 # Cyrillic capital letters
@@ -1291,7 +1300,7 @@ U+200e:(->)
 U+200f:(<-)
 U+200a:
 0x2d	U+2010	U+2013 U+2015	# hyphen-like
-U+2014:-- 
+U+2014 "--"
 U+2016:||
 U+2017:=2
 0x60	U+2018		# left single quotation mark  <`>
@@ -1299,7 +1308,7 @@ U+2017:=2
 0x22	U+201c-U+201f	# various double quotation marks <">
 U+2020:/-
 U+2021:/=
-U+2022: o 
+U+2022 " o "
 U+2025:..
 U+2026:...
 
@@ -1377,10 +1386,10 @@ U+2126:Ohm
 0x4b	U+212A	# Kelvin sign - K
 U+212b:Ang.
 U+212E:est.
-U+2135:Aleph 
-U+2136:Bet 
-U+2137:Gimel 
-U+2138:Dalet 
+U+2135 "Aleph "
+U+2136 "Bet "
+U+2137 "Gimel "
+U+2138 "Dalet "
 U+2153: 1/3
 U+2154: 2/3
 U+2155: 1/5
@@ -1463,7 +1472,7 @@ U+2214:.+
 U+2217:*
 U+2218:Ob
 U+2219:sb
-U+221a: SQRT 
+U+221a " SQRT "
 U+221d:0(
 U+221e:infty
 U+221f:-L
@@ -1473,7 +1482,7 @@ U+2227:AND
 U+2228:OR
 U+2229:(U
 U+222a:)U
-U+222b:\int 
+U+222b "\134int "
 U+222c:DI
 U+222e:Io
 U+2234:.:
@@ -1758,7 +1767,7 @@ U+266e:Mx
 U+266f:#
 0x58	U+2713	U+2717	# check marks -> x
 U+2720:-X
-#  CJK area: 
+#  CJK area:
 0x20	U+3000	# ideographic space
 U+3001:,_
 U+3002:._
@@ -2029,7 +2038,7 @@ U+33d8:pm
 #   The Surrogates Area (U+D800 - U+DFFF)
 #   The Private Use Area (U+E000 - U+F8FF)
 #
-# 
+#
 U+fb00:ff
 U+fb01:fi
 U+fb02:fl

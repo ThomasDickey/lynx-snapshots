@@ -1469,9 +1469,18 @@ PRIVATE void HTMIME_put_character ARGS2(
 		StrAllocCopy(me->anchor->date, me->value);
 		break;
 	    case miETAG:
-		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP ETag: '%s'\n",
+		/*  Do not trim double quotes:
+		 *  an entity tag consists of an opaque quoted string,
+		 *  possibly prefixed by a weakness indicator.
+		 */
+		CTRACE(tfp, "HTMIME: PICKED UP ETag: %s\n",
 			    me->value);
+		if (!(me->value && *me->value))
+		    break;
+		/*
+		**  Indicate in anchor. - FM
+		*/
+		StrAllocCopy(me->anchor->ETag, me->value);
 		break;
 	    case miEXPIRES:
 		HTMIME_TrimDoubleQuotes(me->value);
@@ -1774,6 +1783,7 @@ PUBLIC HTStream* HTMIMEConvert ARGS3(
     FREE(me->anchor->date);
     FREE(me->anchor->expires);
     FREE(me->anchor->last_modified);
+    FREE(me->anchor->ETag);
     FREE(me->anchor->server);
     me->target	=	NULL;
     me->state	=	miBEGINNING_OF_LINE;

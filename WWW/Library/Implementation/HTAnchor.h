@@ -58,7 +58,7 @@ struct _HTParentAnchor {
   char *	post_data;	/* Posting data */
   char *	post_content_type;  /* Type of post data */
   char *	bookmark;	/* Bookmark filename */
-  HTFormat	format; 	/* Pointer to node format descriptor */
+  HTFormat	format;		/* Pointer to node format descriptor */
   char *	charset;	/* Pointer to character set (kludge, for now */
   BOOL		isIndex;	/* Acceptance of a keyword search */
   char *	isIndexAction;	/* URL of isIndex server */
@@ -75,7 +75,7 @@ struct _HTParentAnchor {
   char *	physical;	/* Physical address */
   BOOL		underway;	/* Document about to be attached to it */
   BOOL		isISMAPScript;	/* Script for clickable image map */
-  BOOL		isHEAD; 	/* Document is headers from a HEAD request */
+  BOOL		isHEAD;		/* Document is headers from a HEAD request */
   BOOL		safe;			/* Safe */
   char *	FileCache;	/* Path to a disk-cached copy */
   char *	SugFname;	/* Suggested filename */
@@ -90,11 +90,12 @@ struct _HTParentAnchor {
   char *	content_md5;		/* Content-MD5 */
   char *	message_id;		/* Message-ID */
   char *	subject;		/* Subject */
-  int		content_length; 	/* Content-Length */
+  int		content_length;		/* Content-Length */
   char *	date;			/* Date */
   char *	expires;		/* Expires */
   char *	last_modified;		/* Last-Modified */
-  char *	server; 		/* Server */
+  char *	ETag;			/* ETag (HTTP1.1 cache validator) */
+  char *	server;			/* Server */
   UCAnchorInfo *UCStages;		/* chartrans stages */
   HTList *	imaps;			/* client side image maps */
 };
@@ -146,10 +147,10 @@ extern HTChildAnchor * HTAnchor_findChild PARAMS((
 **	(Code originally in ParseHTML.h)
 */
 extern HTChildAnchor * HTAnchor_findChildAndLink PARAMS((
-      HTParentAnchor * parent,	/* May not be 0 */
-      CONST char * tag, 	/* May be "" or 0 */
-      CONST char * href,	/* May be "" or 0 */
-      HTLinkType * ltype));	/* May be 0 */
+	HTParentAnchor * parent,	/* May not be 0 */
+	CONST char * tag,		/* May be "" or 0 */
+	CONST char * href,		/* May be "" or 0 */
+	HTLinkType * ltype));		/* May be 0 */
 
 /*	Create new or find old named anchor
 **	-----------------------------------
@@ -181,7 +182,7 @@ extern BOOL HTAnchor_delete PARAMS((
 **	is put in the correct order as we load the document.
 */
 extern void HTAnchor_makeLastChild PARAMS((
-	HTChildAnchor * 	me));
+	HTChildAnchor *		me));
 
 /*	Data access functions
 **	---------------------

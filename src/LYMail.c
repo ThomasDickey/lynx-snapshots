@@ -552,7 +552,7 @@ PUBLIC void mailform ARGS4(
     }
 
     stop_curses();
-    printf("%s\n\n$ %s\n\n%s"), SENDING_FORM_CONTENT, command, PLEASE_WAIT);
+    printf("%s\n\n$ %s\n\n%s", SENDING_FORM_CONTENT, command, PLEASE_WAIT);
     LYSystem(command);
     FREE(command);
     sleep(AlertSecs);

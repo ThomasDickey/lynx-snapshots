@@ -419,12 +419,11 @@ again:
 	     */
 	    case LTARROW:
 		if (MyEdit.pos == 0 && repeat == -1) {
-		    int c = 'Y';    /* Go back immediately if no changes */
+		    int c = YES;    /* Go back immediately if no changes */
 		    if (strcmp(MyEdit.buffer, value)) {
-			_statusline(PREV_DOC_QUERY);
-			c = LYgetch();
+			c = HTConfirmDefault(PREV_DOC_QUERY, NO);
 		    }
-		    if (TOUPPER(c) == 'Y') {
+		    if (c == YES) {
 			return(ch);
 		    } else {
 			if (form->disabled == YES)

@@ -271,4 +271,7 @@ extern void HText_ExpandTextarea PARAMS((
 extern int HText_InsertFile PARAMS((
 	struct link *	form_link));
 
+extern void redraw_lines_of_link PARAMS((int cur));
+extern void HTMark_asSource NOPARAMS;
+
 #endif /* LYGRIDTEXT_H */

@@ -102,7 +102,8 @@ d) string replacement definitions:
   in certain charset table will override ones from the Default table.
 
   Note that everything after the ':' is currently taken VERBATIM, so
-  careful with trailing blanks etc.
+  careful with trailing blanks etc.  Please use <C replace> syntax below
+  when you need trailing spaces.
 
  * Syntax accepted:
  *      <unicode>	:<replace>

@@ -86,6 +86,7 @@ PUBLIC void ImageMapList_free ARGS1(
     return;
 }
 
+#ifdef LY_FIND_LEAKS
 /*
  *  Utility for freeing the global list of MAPs. - kw
  */
@@ -95,6 +96,7 @@ PRIVATE void LYLynxMaps_free NOARGS
     LynxMaps = NULL;
     return;
 }
+#endif /* LY_FIND_LEAKS */
 
 /*
  *  We keep two kinds of lists:

@@ -337,8 +337,8 @@ install-help : $(helpdir)
 		-e 's%\.html=%\\.html=%' \
 		$(srcdir)/lynx_help/help_files.txt | $(FIX_SED) >> \
 		$(helpdir)/help_files.sed
-	echo 's%\$(COMPRESS_EXT)\$(COMPRESS_EXT)%$(COMPRESS_EXT)%g' >> \
-		$(helpdir)/help_files.sed
+	@ECHO_CC@if test -n "$(COMPRESS_EXT)"; then echo 's%\$(COMPRESS_EXT)\$(COMPRESS_EXT)%$(COMPRESS_EXT)%g' >> \
+		$(helpdir)/help_files.sed; fi
 	@echo Translating/copying html files
 	@ECHO_CC@$(SHELL) -c 'cd $(srcdir)/lynx_help && ( \
 		dirs=keystrokes; \

@@ -2,14 +2,14 @@
 #There has to be exactly one table marked as "default".
 D0
 #
-#The MIME name of this charset. 
+#The MIME name of this charset.
 Mwindows-1252
 
 #Name as a Display Charset (used on Options screen)
 OWestern (windows-1252)
 
-#Codepage number 
-C1252 
+#Codepage number
+C1252
 
 #
 #    Name:     cp1252 to Unicode table
