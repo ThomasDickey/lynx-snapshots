@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.26 Tue, 27 Apr 1999 06:59:06 -0600 dickey @
+ * @Id: LYStyle.c 1.27 Wed, 05 May 1999 18:33:59 -0600 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -466,8 +466,8 @@ PUBLIC void TrimColorClass ARGS3(
 	   (styleclassname ? styleclassname : "<null>"), tmp);
 }
 
-/* This function is desgined as faster analog to TrimColorClass.
-   It assumes that tag_name is presentin stylename! -HV
+/* This function is designed as faster analog to TrimColorClass.
+   It assumes that tag_name is present in stylename! -HV
 */
 PUBLIC void FastTrimColorClass ARGS5 (
 	    CONST char*,	 tag_name,
@@ -482,7 +482,7 @@ PUBLIC void FastTrimColorClass ARGS5 (
     {
 	for (; tag_start >= stylename &&  *tag_start!=';' ; --tag_start)
 	    ;
-	if ( !strncasecmp(tag_start+1, tag_name, name_len) ) break;
+	if ( !strncasecomp(tag_start+1, tag_name, name_len) ) break;
 	    --tag_start;
     }
     *tag_start = '\0';

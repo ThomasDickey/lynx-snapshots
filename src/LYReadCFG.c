@@ -1177,7 +1177,7 @@ static Config_Type Config_Table [] =
      PARSE_ENV("wais_proxy", CONF_ENV, 0 ),
      PARSE_STR("xloadimage_command", CONF_STR, &XLoadImageCommand),
 
-     {0}
+     {0, 0, 0}
 };
 
 /*
@@ -1196,6 +1196,21 @@ PUBLIC void free_lynx_cfg NOARGS
 	switch (tbl->type) {
 	case CONF_ENV:
 	    if (q->str_value != 0) {
+		char *name = *(q->str_value);
+		char *eqls = strchr(name, '=');
+		if (eqls != 0) {
+		    *eqls = 0;
+#ifdef VMS
+		    Define_VMSLogical(name, NULL);
+#else
+# ifdef HAVE_UNSETENV
+		    unsetenv(name);
+# else
+		    if (putenv(name))
+		    	break;
+# endif
+#endif
+		}
 		FREE(*(q->str_value));
 		FREE(q->str_value);
 		/* is it enough for reload_read_cfg() to clean up
@@ -1421,9 +1436,16 @@ PRIVATE void do_read_cfg ARGS5(
 
 	    char *url = NULL;
 	    char *cp1 = NULL;
+	    char *sep = NULL;
 
-	    if ((p1 = strchr(value,':')) != 0)
-		*p1++ ='\0';
+	    if ( (p1 = strstr(value, sep=" for ")) != 0
+#if defined(UNIX) && !defined(__EMX__)
+		|| (p1 = strstr(value, sep=":")) != 0
+#endif
+	    ) {
+		*p1 = '\0';
+		p1 += strlen(sep);
+	    }
 
 #ifndef NO_CONFIG_INFO
 	    if (fp0 != 0  &&  !LYRestricted) {
@@ -1434,7 +1456,7 @@ PRIVATE void do_read_cfg ARGS5(
 		}
 
 		fprintf(fp0, "%s:<a href=\"%s\">%s</a>\n\n", name, url, cp1);
-		fprintf(fp0, "	  #&lt;begin  %s&gt;\n", cp1);
+		fprintf(fp0, "    #&lt;begin  %s&gt;\n", cp1);
 	    }
 #endif
 
@@ -1460,7 +1482,10 @@ PRIVATE void do_read_cfg ARGS5(
 			}
 			cur_set[tbl2 - Config_Table] = FALSE;
 		    }
-		    *p2 = savechar;
+		    if (savechar && p2[1])
+			p1 = p2 + 1;
+		    else
+			break;
 		}
 	    }
 	    if (!allowed) {
@@ -1487,13 +1512,13 @@ PRIVATE void do_read_cfg ARGS5(
 		char *buf = NULL;
 		unsigned i;
 
-		fprintf(fp0,"	  Options allowed in this file:\n");
+		fprintf(fp0,"     Options allowed in this file:\n");
 		for (i = 0; i < NOPTS_; ++i) {
 		    if ((*resultant_set)[i])
 			continue;
 		    StrAllocCopy(buf, Config_Table[i].name);
 		    LYUpperCase(buf);
-		    fprintf(fp0,"	  * %s\n", buf);
+		    fprintf(fp0,"         * %s\n", buf);
 		}
 		free(buf);
 	    }
@@ -1502,7 +1527,7 @@ PRIVATE void do_read_cfg ARGS5(
 
 #ifndef NO_CONFIG_INFO
 	    if (fp0 != 0  &&  !LYRestricted) {
-		fprintf(fp0, "	  #&lt;end of %s&gt;\n\n", cp1);
+		fprintf(fp0, "    #&lt;end of %s&gt;\n\n", cp1);
 		FREE(url);
 		FREE(cp1);
 	    }

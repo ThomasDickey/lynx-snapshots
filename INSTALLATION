@@ -300,7 +300,10 @@ II. Compile instructions -- UNIX
   --enable-default-colors		(define USE_DEFAULT_COLORS)
   	Enable use of default-color background (ncurses/slang).  Either
 	configuration supports the use of 'default' for colors even without
-	this option.
+	this option.  That is, 'default' is interpreted as white (foreground)
+	or black (background) according to the context.  When the default
+	colors configuration is built, the actual values for foreground and
+	background colors are determined by the terminal.
 
   --enable-exec-links			(define EXEC_LINKS)
 	Allows lynx to execute programs by accessing a link.

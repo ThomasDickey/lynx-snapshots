@@ -2474,22 +2474,25 @@ Delete_all_cookies_in_domain:
      *	Load HTML strings into buf and pass buf
      *	to the target for parsing and rendering. - FM
      */
+#define PUTS(buf)    (*target->isa->put_block)(target, buf, strlen(buf))
+
+
     HTSprintf0(&buf, "<HEAD>\n<TITLE>%s</title>\n</HEAD>\n<BODY>\n",
 		 COOKIE_JAR_TITLE);
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
     HTSprintf0(&buf, "<h1>%s (%s)%s<a href=\"%s%s\">%s</a></h1>\n",
 	LYNX_NAME, LYNX_VERSION,
 	HELP_ON_SEGMENT,
 	helpfilepath, COOKIE_JAR_HELP, COOKIE_JAR_TITLE);
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
 
     HTSprintf0(&buf, "<NOTE>%s\n", ACTIVATE_TO_GOBBLE);
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
     HTSprintf0(&buf, "%s</NOTE>\n", OR_CHANGE_ALLOW);
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
 
     HTSprintf0(&buf, "<DL COMPACT>\n");
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
     for (dl = domain_list; dl != NULL; dl = dl->next) {
 	de = dl->object;
 	if (de == NULL)
@@ -2503,7 +2506,7 @@ Delete_all_cookies_in_domain:
 	 */
 	HTSprintf0(&buf, "<DT>%s<DD><A HREF=\"LYNXCOOKIE://%s/\">Domain=%s</A>\n",
 		      de->domain, de->domain, de->domain);
-	(*target->isa->put_block)(target, buf, strlen(buf));
+	PUTS(buf);
 	switch (de->bv) {
 	    case (ACCEPT_ALWAYS):
 		HTSprintf0(&buf, COOKIES_ALWAYS_ALLOWED);
@@ -2520,9 +2523,9 @@ Delete_all_cookies_in_domain:
 #endif
 		break;
 	}
-	(*target->isa->put_block)(target, buf, strlen(buf));
+	PUTS(buf);
 	HTSprintf0(&buf, "\n");
-	(*target->isa->put_block)(target, buf, strlen(buf));
+	PUTS(buf);
 
 	/*
 	 *  Show the domain's cookies. - FM
@@ -2553,11 +2556,11 @@ Delete_all_cookies_in_domain:
 			 de->domain, co->lynxID, name, value);
 	    FREE(name);
 	    FREE(value);
-	    (*target->isa->put_block)(target, buf, strlen(buf));
+	    PUTS(buf);
 
 	    if (co->flags & COOKIE_FLAG_FROM_FILE) {
 		HTSprintf0(&buf, "%s\n", gettext("(from a previous session)"));
-		(*target->isa->put_block)(target, buf, strlen(buf));
+	        PUTS(buf);
 	    }
 
 	    /*
@@ -2574,14 +2577,14 @@ Delete_all_cookies_in_domain:
 			 ((co->flags & COOKIE_FLAG_SECURE) ? "YES" : "NO"),
 			 ((co->flags & COOKIE_FLAG_DISCARD) ? "YES" : "NO"));
 	    FREE(path);
-	    (*target->isa->put_block)(target, buf, strlen(buf));
+	    PUTS(buf);
 
 	    /*
 	     *	Show the list of acceptable ports, if present. - FM
 	     */
 	    if (co->PortList) {
 		HTSprintf0(&buf, "<DD>PortList=\"%s\"\n", co->PortList);
-		(*target->isa->put_block)(target, buf, strlen(buf));
+		PUTS(buf);
 	    }
 
 	    /*
@@ -2598,7 +2601,7 @@ Delete_all_cookies_in_domain:
 			Title);
 		FREE(Address);
 		FREE(Title);
-		(*target->isa->put_block)(target, buf, strlen(buf));
+		PUTS(buf);
 	    }
 
 	    /*
@@ -2609,7 +2612,7 @@ Delete_all_cookies_in_domain:
 		LYEntify(&comment, TRUE);
 		HTSprintf0(&buf, "<DD>Comment: %s\n", comment);
 		FREE(comment);
-		(*target->isa->put_block)(target, buf, strlen(buf));
+		PUTS(buf);
 	    }
 
 	    /*
@@ -2623,13 +2626,13 @@ Delete_all_cookies_in_domain:
 			 ((co->flags & COOKIE_FLAG_EXPIRES_SET)
 					    ?
 					 "" : "\n"));
-	    (*target->isa->put_block)(target, buf, strlen(buf));
+	    PUTS(buf);
 	}
 	HTSprintf0(&buf, "</DT>\n");
-	(*target->isa->put_block)(target, buf, strlen(buf));
+	PUTS(buf);
     }
     HTSprintf0(&buf, "</DL>\n</BODY>\n");
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
 
     /*
      *	Free the target to complete loading of the

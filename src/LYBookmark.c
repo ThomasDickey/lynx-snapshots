@@ -88,7 +88,7 @@ PUBLIC char * get_bookmark_filename ARGS1(
     /*
      *	Seek it in the home path. - FM
      */
-    LYAddPathToHome(filename_buffer, 
+    LYAddPathToHome(filename_buffer,
 		    sizeof(filename_buffer),
 		    BookmarkPage);
     CTRACE(tfp, "\nget_bookmark_filename: SEEKING %s\n   AS %s\n\n",
@@ -132,7 +132,7 @@ success:
  *  file for handling as a Lynx bookmark file. - FM
  */
 PRIVATE char * convert_mosaic_bookmark_file ARGS1(
-	char *, 	filename_buffer)
+	char *,		filename_buffer)
 {
     static char newfile[LY_MAXPATH];
     FILE *fp, *nfp;
@@ -191,8 +191,8 @@ PRIVATE  char* title_convert8bit PARAMS((CONST char *Title));
  *  to that file. - FM
  */
 PUBLIC void save_bookmark_link ARGS2(
-	char *, 	address,
-	char *, 	title)
+	char *,		address,
+	char *,		title)
 {
     FILE *fp;
     BOOLEAN first_time = FALSE;
@@ -308,9 +308,9 @@ PUBLIC void save_bookmark_link ARGS2(
 	/*
 	 *  Seek it in the home path. - FM
 	 */
-	LYAddPathToHome(filename_buffer, 
-			sizeof(filename_buffer), 
-			BookmarkPage); 
+	LYAddPathToHome(filename_buffer,
+			sizeof(filename_buffer),
+			BookmarkPage);
     }
     CTRACE(tfp, "\nsave_bookmark_link: SEEKING %s\n   AS %s\n\n",
 		BookmarkPage, filename_buffer);
@@ -334,20 +334,20 @@ PUBLIC void save_bookmark_link ARGS2(
     if (first_time) {
 	fprintf(fp,"<head>\n");
 	LYAddMETAcharsetToFD(fp, -1);
-	fprintf(fp,"<title>%s</title>\n</head>\n",BOOKMARK_TITLE);
-	fprintf(fp,gettext("\
+	fprintf(fp,"<title>%s</title>\n</head>\n", BOOKMARK_TITLE);
+	fprintf(fp, "%s<br>\n%s\n\n<!--\n%s\n-->\n\n<p>\n<ol>",
+		    gettext("\
      You can delete links using the remove bookmark command.  It is usually\n\
      the 'R' key but may have been remapped by you or your system\n\
-     administrator.<br>\n\
+     administrator."),
+		    gettext("\
      This file also may be edited with a standard text editor to delete\n\
-     outdated or invalid links, or to change their order.\n\n\
-<!--\n\
+     outdated or invalid links, or to change their order."),
+		    gettext("\
 Note: if you edit this file manually\n\
       you should not change the format within the lines\n\
       or add other HTML markup.\n\
-      Make sure any bookmark link saved as a single line\n\
--->\n\n\
-     <p>\n<ol>\n"));
+      Make sure any bookmark link is saved as a single line."));
     }
 
     /*
@@ -411,7 +411,7 @@ Note: if you edit this file manually\n\
  */
 PUBLIC void remove_bookmark_link ARGS2(
 	int,		cur,
-	char *, 	cur_bookmark_page)
+	char *,		cur_bookmark_page)
 {
     FILE *fp, *nfp;
     char *buf = NULL;
@@ -867,7 +867,7 @@ PUBLIC BOOLEAN LYHaveSubBookmarks NOARGS
  *  string will be handled properly. - FM
  */
 PUBLIC void LYMBM_statusline  ARGS1(
-	char *, 	text)
+	char *,		text)
 {
     if (LYMultiBookmarks == TRUE && user_mode == NOVICE_MODE) {
 	LYStatusLine = (LYlines - 1);

@@ -601,7 +601,7 @@ PRIVATE void clear_uidgid_cache NOARGS
 
 PRIVATE void save_gid_info ARGS2(char *, name, int, user)
 {
-    USER_DATA *data = calloc(1, sizeof(USER_DATA));
+    USER_DATA *data = (USER_DATA *)calloc(1, sizeof(USER_DATA));
     if (!data)
 	return;
     if (!known_grp) {
@@ -620,7 +620,7 @@ PRIVATE void save_gid_info ARGS2(char *, name, int, user)
 
 PRIVATE void save_uid_info ARGS2(char *, name, int, user)
 {
-    USER_DATA *data = calloc(1, sizeof(USER_DATA));
+    USER_DATA *data = (USER_DATA *)calloc(1, sizeof(USER_DATA));
     if (!data)
 	return;
     if (!known_pwd) {

@@ -44,10 +44,9 @@ CPP_OPTS	= $(DEFS) $(CPPFLAGS) \
 		-Ichrtrans \
 		-I$(srcdir)/chrtrans \
 		-I$(top_srcdir) \
-		-I$(top_srcdir)/intl \
 		-I$(top_srcdir)/src \
 		-I$(top_srcdir)/$(WWWINC) \
-		$(SITE_DEFS)
+		@INTLDIR_CPPFLAGS@ $(SITE_DEFS)
 CC_OPTS		= $(CPP_OPTS) $(CFLAGS)
 
 LINT		= @LINT@

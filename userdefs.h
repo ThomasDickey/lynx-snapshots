@@ -7,7 +7,12 @@
 
 /*******************************************************************
  * There are four sections to this document:
- *  Section 1.  Things you MUST change or verify
+ *  Section 1.  Things you MUST verify.  Unix platforms use a configure
+ *		script to provide sensible default values.  If your site
+ *		has special requirements, that may not be sufficient. 
+ *		For non-Unix platforms (e.g., VMS), there is no
+ *		configure script, so the defaults here are more
+ *		critical.
  *	Section 1a)  VMS specific things
  *	Section 1b)  non-VMS specific things
  *	Section 1c)  ALL Platforms
@@ -416,13 +421,27 @@
  */
 
 /*****************************
- * STARTFILE is the default file if none is specified in lynx.cfg,
- *  on the command line, or via a WWW_HOME environment variable.
+ * STARTFILE is the default starting URL if none is specified
+ *   on the command line or via a WWW_HOME environment variable;
+ *   Lynx will refuse to start without a starting URL of some kind.
+ * STARTFILE can be remote, e.g. http://www.w3.org/default.html ,
+ *                or local, e.g. file://localhost/PATH_TO/FILENAME ,
+ *           where PATH_TO is replaced with the complete path to FILENAME
+ *           using Unix shell syntax and including the device on VMS.
  *
- * note: STARTFILE must be a URL.  See the Lynx online help for more
- *       information on URLs
+ * Normally we expect you will connect to a remote site, e.g., the Lynx starting
+ * site:
  */
 #define STARTFILE "http://lynx.browser.org/"
+/*
+ * As an alternative, you may want to use a local URL.  A good choice for this
+ * is the user's home directory: 
+ *#define STARTFILE "file://localhost/~/"
+ *
+ * Your choice of STARTFILE should reflect your site's needs, and be a URL that
+ * you can connect to reliably.  Otherwise users will become confused and think
+ * that they cannot run Lynx.
+ */
 
 /*****************************
  * HELPFILE must be defined as a URL and must have a
@@ -1225,12 +1244,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.2dev.25"
+#define LYNX_VERSION "2.8.2dev.26"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Tue, 27 Apr 1999 06:59:06 -0600"
+#define LYNX_DATE "Wed, 05 May 1999 18:33:59 -0600"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1998"

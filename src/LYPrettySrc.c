@@ -7,12 +7,12 @@
 #include <LYPrettySrc.h>
 
 #ifdef USE_PSRC
-
+BOOL psrc_convert_string = FALSE;
 PUBLIC BOOL psrc_view = FALSE;/* this is read by SGML_put_character - TRUE
 	when viewing pretty source */
 PUBLIC BOOL LYpsrc = FALSE; /* this tells what will be shown on '\':
   if TRUE, then pretty source, normal source view otherwise. Toggled by
-  -pretty_source commandline option.  */
+  -prettysrc commandline option.  */
 PUBLIC BOOL sgml_in_psrc_was_initialized;
 PUBLIC BOOL psrc_nested_call;
 PUBLIC BOOL psrc_first_tag;

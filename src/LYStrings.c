@@ -998,7 +998,7 @@ PUBLIC int lynx_initialize_keymaps NOARGS
 #ifdef NCURSES_MOUSE_VERSION
 PRIVATE int LYmouse_menu ARGS3(int, x, int, y, int, atlink)
 {
-    char *choices[] = {
+    static char *choices[] = {
 	"Quit",
 	"Home page",
 	"Previous document",
@@ -1024,7 +1024,7 @@ PRIVATE int LYmouse_menu ARGS3(int, x, int, y, int, atlink)
 	"Set Options",
 	NULL
     };
-    char *choices_link[] = {
+    static char *choices_link[] = {
 	"Help",
 	"Do nothing",
 	"Activate this link",
@@ -1032,7 +1032,7 @@ PRIVATE int LYmouse_menu ARGS3(int, x, int, y, int, atlink)
 	"Download",
 	NULL
     };
-    int actions[] = {
+    static int actions[] = {
 	LYK_ABORT,
 	LYK_MAIN_MENU,
 	LYK_PREV_DOC,
@@ -1057,7 +1057,7 @@ PRIVATE int LYmouse_menu ARGS3(int, x, int, y, int, atlink)
 	LYK_INDEX_SEARCH,
 	LYK_OPTIONS
     };
-    int actions_link[] = {
+    static int actions_link[] = {
 	LYK_HELP,
 	LYK_REFRESH,
 	LYK_ACTIVATE,

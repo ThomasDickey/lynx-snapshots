@@ -2121,61 +2121,6 @@ end:
 #endif /* NOTDEFINED */
 
 /*
-**  Modified for Lynx-jp by Takuya ASADA (and K&Rized by FM).
-*/
-#if NOTDEFINED
-PUBLIC int main ARGS2(
-	int,		ac,
-	char **,	av)
-{
-    FILE *fp;
-    char buf[BUFLEN];
-    char header = 1, body = 0, r_jis = 0;
-    int  i, c;
-
-    for (i = 1; i < ac; i++) {
-	if (strcmp(av[i], "-B") == NULL)
-	    body = 1;
-	else if (strcmp(av[i], "-r") == NULL)
-	    r_jis = 1;
-	else
-	    break;
-    }
-
-    if (i >= ac) {
-	fp = stdin;
-    } else {
-	if ((fp = fopen(av[i], "r")) == NULL) {
-	    fprintf(stderr, "%s: cannot open %s\n", av[0], av[i]);
-	    exit(1);
-	}
-    }
-
-    while (fgets(buf, BUFLEN, fp)) {
-	if (buf[0] == '\n' && buf[1] == '\0')
-	    header = 0;
-	if (header) {
-	    c = fgetc(fp);
-	    if (c == ' ' || c == '\t') {
-		buf[strlen(buf)-1] = '\0';
-		ungetc(c, fp);
-	    } else {
-		ungetc(c, fp);
-	    }
-	}
-	if (header || body)
-	    HTmmdecode(buf, buf);
-	if (r_jis)
-	    HTrjis(buf, buf);
-	fprintf(stdout, "%s", buf);
-    }
-
-    close(fp);
-    exit(0);
-}
-#endif /* NOTDEFINED */
-
-/*
 **  Insert ESC where it seems lost.
 **  (The author of this function "rjis" is S. Ichikawa.)
 */

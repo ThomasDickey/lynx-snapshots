@@ -328,7 +328,6 @@ Try_Redirected_URL:
 		     */
 		    if ((historytarget(doc) == FALSE) ||
 			!doc || !doc->address) {
-			HTMLSetCharacterHandling(current_char_set);
 			return(NOT_FOUND);
 		    }
 
@@ -348,10 +347,8 @@ Try_Redirected_URL:
 #endif
 
 		    if (!HTLoadAbsolute(&WWWDoc)) {
-			HTMLSetCharacterHandling(current_char_set);
 			return(NOT_FOUND);
 		    }
-		    HTMLSetCharacterHandling(current_char_set);
 		    return(NORMAL);
 
 		} else if (url_type == LYNXEXEC_URL_TYPE ||
@@ -718,7 +715,6 @@ Try_Redirected_URL:
 				}
 				FREE(temp);
 			    }
-			    HTMLSetCharacterHandling(current_char_set);
 			    url_type = is_url(use_this_url_instead);
 			    if (url_type == LYNXDOWNLOAD_URL_TYPE ||
 				url_type == LYNXEXEC_URL_TYPE ||
@@ -827,7 +823,6 @@ Try_Redirected_URL:
 			     */
 			    goto Try_Redirected_URL;
 			}
-			HTMLSetCharacterHandling(current_char_set);
 			return(NOT_FOUND);
 		    }
 
@@ -857,7 +852,6 @@ Try_Redirected_URL:
 			    HTParentAnchor *tmpanchor;
 			    char *fname = NULL;
 
-			    HTMLSetCharacterHandling(current_char_set);
 			    /*
 			     *	Check for a suggested filename from
 			     *	the Content-Disposition header. - FM
@@ -922,7 +916,6 @@ Try_Redirected_URL:
 				    *  Also check the isHEAD element. - FM
 				    */
 				   doc->isHEAD != HTLoadedDocumentIsHEAD())) {
-			    HTMLSetCharacterHandling(current_char_set);
 			    /*
 			     *	Nothing needed to be shown.
 			     */
@@ -935,7 +928,6 @@ Try_Redirected_URL:
 			 */
 			    if (pound != NULL)
 				HTFindPoundSelector(pound+1);
-			    HTMLSetCharacterHandling(current_char_set);
 			    return(NORMAL);
 			}
 		    }

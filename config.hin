@@ -94,6 +94,7 @@
 #undef HAVE_TTYTYPE
 #undef HAVE_TYPE_UNIONWAIT	/* CF_UNION_WAIT */
 #undef HAVE_UNISTD_H		/* have <unistd.h> */
+#undef HAVE_UNSETENV
 #undef HAVE_USE_DEFAULT_COLORS	/* ncurses extension */
 #undef HAVE_UTMP
 #undef HAVE_VALUES_H		/* defined by AM_GNU_GETTEXT */

@@ -395,7 +395,7 @@ characters expanded to spaces.  Lynx formats the source presentation
 in this mode.  On the other hand, if the DOWNLOAD command is used,
 the only change will be that Lynx optionally puts
 <blockquote>
-&lt;!--X-URL: http://www.site.foo/path/to/file.html --&gt<BR>
+&lt;!--X-URL: http://www.site.foo/path/to/file.html --&gt;<BR>
 &lt;BASE href="http://www.site.foo/path/to/file.html"&gt;
 </blockquote>
 at the start of the file so that relative URLs in the document
@@ -547,7 +547,7 @@ compiled into Lynx, and is accessed by setting FORMS_OPTIONS true in your
      preferred document lan(G)uage: en
      preferred document c(H)arset : NONE
      display (C)haracter set      : ISO Latin 1
-     raw 8-bit or CJK m(O)de      : ON      show color (&)  : OFF
+     raw 8-bit or CJK m(O)de      : ON      show color (&amp;)  : OFF
      V)I keys: OFF    e(M)acs keys: OFF     sho(W) dot files: OFF
      popups for selec(T) fields   : ON      show cursor (@) : OFF
      K)eypad mode                 : Numbers act as arrows
@@ -1045,7 +1045,7 @@ selection menu, or <em>RETURN</em> for the default bookmark file.
 Similar to the bookmarks file is the jumps file: for an example,
 look in the <em>samples</em> subdirectory in the distribution package.
 To use the jumps command, create a <em>jumps file</em> with the same format
-as the sample file, but containing your own URLs & short-cut names.
+as the sample file, but containing your own URLs &amp; short-cut names.
 Once you have done that, typing '<em>j</em>' prompts you to enter
 a short-cut name, which will take you straight to the URL
 associated with the short-cut in the jumps file,
@@ -1381,7 +1381,7 @@ options from a list, and fields for entering text.
     so that hitting <em>Enter</em> with the cursor on the last line
     adds a new line to the TEXTAREA, with the cursor on it.<p>
 
-    Some flavors of UNIX, shells & terminal settings require
+    Some flavors of UNIX, shells &amp; terminal settings require
     that you enter <em>^v^ve</em> in order to start the editor,
     as they also use <em>^v</em> as default command-line quote key
     (called `lnext' in stty man pages and `stty -a' output);

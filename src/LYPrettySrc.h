@@ -5,6 +5,9 @@
 
 #include <HTMLDTD.h>
 
+extern BOOL psrc_convert_string;
+ /*whether HTML_put_string should convert string passed with 
+   TRANSLATE_AND_UNESCAPE_TO_STD */
 extern BOOL psrc_view;
 extern BOOL LYpsrc;
 extern BOOL sgml_in_psrc_was_initialized; 

@@ -961,7 +961,6 @@ try_again:
 			newdoc.line = curdoc.line;
 			newdoc.link = curdoc.link;
 			newdoc.internal_link = FALSE; /* can't be true. - kw */
-			Newline = newdoc.line; /* now here, no partial mode */
 		    }
 
 		    /*
@@ -969,9 +968,22 @@ try_again:
 		     *	line the user was on if s/he has been in the file
 		     *	before, or it is 1 if this is a new file.
 		     */
+#ifdef DISP_PARTIAL
 		    /* Newline = newdoc.line; */
 		    /* - alreary set and probably updated in partial mode */
-		    /*  End of incremental rendering stage here. */
+		    /* incremental rendering stage already closed (but see below) */
+
+		    if (Newline != Newline_partial || display_partial == TRUE) {
+		       /* This is the case when we came from the history stack
+			* _and_ cached HText was used instead of HT*Copy() call.
+			* Set Newline and close partial mode here.
+			*/
+		       Newline = Newline_partial;
+		       display_partial = FALSE;
+		    }
+#else
+		    Newline = newdoc.line; /* now here, no partial mode */
+#endif
 
 		    /*
 		     *	If we are going to a target line or
@@ -1051,6 +1063,8 @@ try_again:
 #ifdef USE_PSRC
 	   psrc_view = FALSE;
 #endif
+
+	   HTMLSetCharacterHandling(current_char_set);	/* restore, for sure? */
 
 	   /*
 	    *  Reset all of the other relevant flags. - FM
@@ -3616,6 +3630,16 @@ check_recall:
 	    }
 
 check_goto_URL:
+	    /* allow going to anchors*/
+	    if (*user_input_buffer == '#' ) {
+		if ( user_input_buffer[1] &&
+		     HTFindPoundSelector(user_input_buffer+1) ) {
+		     /* HTFindPoundSelector will initialize www_search_result,
+		        so we do nothing else. */
+		    HTAddGotoURL(user_input_buffer);
+		}
+		break;
+	    }
 	    /*
 	     *	If its not a URL then make it one.
 	     */
@@ -6012,7 +6036,9 @@ PUBLIC void HTAddGotoURL ARGS1(
  *  put a message on the screen
  *  to tell the user other misc info.
  */
-PRIVATE void print_status_message(CONST linkstruct curlink, char **cp)
+PRIVATE void print_status_message ARGS2(
+	CONST linkstruct,	curlink,
+	char **,		cp)
 {
     /*
      *	Make sure form novice lines are replaced.

@@ -1012,7 +1012,7 @@ WARNING - This is potentially VERY dangerous.  Since you may view\n\
      *  Local execution mode - only links in local files.
      */
     write_list(fp, gettext("\
-If run_execution_links_on_local_files is set \"on\" then all local\n
+If run_execution_links_on_local_files is set \"on\" then all local\n\
 execution links that are found in LOCAL files will be executed when they\n\
 are selected.  This is different from run_all_execution_links in that\n\
 only files that reside on the local system will have execution link\n\

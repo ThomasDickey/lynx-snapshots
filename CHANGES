@@ -1,7 +1,66 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-05-05 (2.8.2dev.26 - 2.8.2pre.1)
+* remove some weird cruft from HTAAUtil.h (yeah, "/home2/luotonen" is a good
+  default path) (John Bley)
+* correct a buffer overflow in LYDownload.c (reported by John Bley) -TD
+* 8bit attribute values are now translated in psrc view (reported by LP) -VH
+* trailing ';' now is shown after HTML entities (reported by LP) -VH
+* split-up/correct typo in text at top of generated bookmark file -JS, -TD
+* allow anchors as input for commands 'g','G','E' -VH
+* correct off-by-one error in pointer to filename in DOSPATH configuration for
+  LYPathLeaf() -DK
+* fix infinite recursion bug in lynx.cfg includes, from dev.25 integraton
+  (reported by LP) -VH
+* implement the following separators in lynx.cfg "include" commands:
+  ":" on Unix
+  " for " on all OS's -VH
+* fixes for LYList.c,  adding title info to the (mostly unused) HTLinkType -KW
+* change remaining <banner>'s to <blockquote> in other html files, fix
+  a few escapes that tidy (15-apr-99) reports.  Leaving <tab>'s alone for the
+  moment because there appears to be no standard equivalent -TD
+* change <banner> in lynx-dev.html to <blockquote> since the latter is
+  standard, correct IEFT version and supply <p>'s as needed (Karl Eichwalder)
+* correct a couple of two documentation inconsistencies in the sources for
+  USE_PSRC and -prettysrc (Karl Eichwalder <ke@gnu.franken.de>)
+* register free_messages_stack with atexit to fix some statusline leakage,
+  explicitly fill out a struct initializer (John Bley)
+* fix a few html nits in the docs (John Bley)
+* cleanup some gcc -Wundef warnings -TD
+* add logic to free_lynx_cfg() to unset environment variables (requested by
+  LP) -TD
+* modify SafeHTUnEscape() to work with EBCDIC (pg@sweng.stortek.com)
+* remove dangling comma in UrlTypes enum (reported by pg@sweng.stortek.com) -TD
+* make description of STARTFILE in userdefs.h agree with lynx.cfg -TD
+* fix:  newline position when we come from the history stack and cached HText
+  is used (say, return from 'p'rint menu), was broken in dev23 -LP
+* remove numerous HTMLSetCharacterHandling() calls from getfile(), use single
+  call in mainloop instead -LP
+* #define PUTS() in LYCookie.c and LYMap.c to make code more readable -LP
+* fix:  LYmouse_menu() in LYStrings.c calls popup_choice(), which is #ifdef'd
+  out when --disable-menu-options is used (patch by Sergey Svishchev)
+* modify generated src/makefile to omit include from intl directory if it is
+  not used.  This in turn required fixing a redefinition of gettext on Solaris
+  when using cc, since the locale.h file includes Sun's libintl.h file which
+  prototypes gettext.  Successfully built/ran using Sun's msgfmt utility, (had
+  to manually add -lintl to src/makefile) though the generated message objects
+  are incompatible, resulting in a core dump if not reinstalled (unnecessary
+  include reported by LP) -TD
+* change VMS WWW descrip.mms file to use prefix=all rather than prefix=ansi, so
+  that POSIX functions such as 'read()' are linked properly (reported by Andy
+  Harper) this is a detail I overlooked in dev.18 -TD
+* fixes to compile with SunOS K&R cc -TD
 1999-04-27 (2.8.2dev.25)
+* fix reload_read_cfg() to avoid persistent cookies mode changing at run time;
+  reload printers list, downloaders list, environments - as expected. - LP
+* fixes for SOURCE_CACHE!=NONE mode, trying to accomodate HTreparse_document()
+  for mainloop() events:
+  - add/use flag "from_source_cache" for better mainloop maintenance
+  - add partial display mode for HTreparse_document() operations
+  - add warning when the reparsed document may lost its forms content
+  - fix options menu staff to use HTreparse_document() when possible - LP
+* fix exit from postoptions() when the reloaded document was in source mode - LP
 * updates to INSTALLATION -HN
 * undo some redundant dev23 changes, in particular the absence of first
   PSRC_TEST responsible for a wrong line breaking in -prettysrc mode (try "lynx
@@ -60,7 +119,7 @@ Changes since Lynx 2.8 release
 	SUFFIX VIEWER INCLUDE
 * change the STARTFILE description in lynx.cfg to offer the user's home
   directory as an alternative to lynx.browser.org (amended this to reflect
-  consensus that l.b.o should be the default -TD) - PW
+  consensus that l.b.o should be the default) -TD
 * move a big chunk of code into print_status_message() -LP
 * also add numerous HTProgress messages to LYNXMESSAGES:/ page (but not
   HTReadProgress) -LP
@@ -69,7 +128,7 @@ Changes since Lynx 2.8 release
   This allows us to decrease the messages delay in lynx.cfg when we feel
   messages too annoying, but have a nice history list for diagnostic purposes.
   Uses a 40-line buffer (suggested by Bela Lubkin) -LP
-* Fix reloading with HTreparse_document() for LYK_MINIMAL, LYK_HISTORICAL,
+* fix reloading with HTreparse_document() for LYK_MINIMAL, LYK_HISTORICAL,
   LYK_SOFT_DQUOTES, LYK_SWITCH_DTD mainloop events (hope we work around replies
   from POST properly) -LP
 * elaborate description in Lynx_users_guide.html for "comments" (Michael
@@ -221,17 +280,17 @@ Changes since Lynx 2.8 release
   is located not on the 1st page.  IMO this is something with style stack.  If
   this will be fixed, then keeping of Style_className:HTML.c can be omitted
   again -VH
-* Fixed the bug in lynx with lss support -when displaying html pieces such as
+* fixed the bug in lynx with lss support -when displaying html pieces such as
   <b> A <b> B </b> C </b>, only 'AB' was drawn in style corresponding to <b>
   -VH
 * added HTML source syntax highlighting (when option -prettysrc that is added
   is given to lynx). It's available for lynx compiled with and without lss
   support (it can be much more beatiful when compiled with lss support - read
-  lynx.cfg for description). The code is ifdef'ed with USE_SRC.
+  lynx.cfg for description). The code is ifdef'ed with USE_PSRC.
   This functionality coexists with old source view and with -preparsed logic
   (ie different commandline options make source view logic different) -VH
 * HTChunkPutc was inlined in SGML.c for better performance -VH
-* Keeping of Style_className was omitted in HTML.c to increase performance of
+* keeping of Style_className was omitted in HTML.c to increase performance of
   lynx compiled with lss support. -VH
 * perfomance of lynx compiled with lss support is increased ~ by 15-20% for
   normal documents, and by up to 50% for documents with a lot of tags VH
@@ -260,13 +319,13 @@ Changes since Lynx 2.8 release
   + ifdef'd use of lynx_version_putenv_command in LYMain.c
   + correct spurious parenthesis in mailform function
   + correct missing COPY_PATH definition for LYUtils.c
-* Check for 'z' user interrupt in HTLoadHTTP before setting up the output
+* check for 'z' user interrupt in HTLoadHTTP before setting up the output
   stream.  This avoids doing unnecessary work, including possible creation of a
   new HText structure that most likely is never displayed but still pushes
   another document out of the.  cache.  Most commonly this occurs when a HTTP
   error response is received and the user presses 'z' while the resulting alert
   message is shown - KW
-* Fix of HTUnEscapeSome in HTParse.c for non-ASCII - KW, PG
+* fix of HTUnEscapeSome in HTParse.c for non-ASCII - KW, PG
 * tidy up around ed_offset initialization in GridText.c - KED
   (the patch as given did not compile on a non-ANSI compiler because it used
   aggregate initialization - TD)
@@ -363,7 +422,7 @@ Changes since Lynx 2.8 release
 * remove some unnecessary use of dynamic buffers where there is no apparent
   benefit for using them, for the sake of performance or to avoid a minor
   memory leak - KW
-* Stuffed small memory leak (MultipartContentType) - KW
+* stuffed small memory leak (MultipartContentType) - KW
 * absorb 'len' parameter into logic of argncmp, so it still achieves its
   purpose of comparing prefixes of options without undue maintenance effort -TD
 * retain logic that uses final URL on command-line (request by KW) - TD
@@ -387,7 +446,7 @@ Changes since Lynx 2.8 release
   mode.  Also show mode as "source" instead of "normal" if viewing SOURCE, in
   all user modes - KW
 * minor FASTBACKW_LINK / FASTFORW_LINK tweaks - KW
-* Removed documentation for nonimplemented chargen URLs - KW
+* removed documentation for nonimplemented chargen URLs - KW
 * remove num_n256 hack introduced in dev18 UCDomap.* - LP
 * forms-based options menu: fix reloading of previous document *only* when
   necessary (was always, since early forms-based options menu days).  Still
@@ -639,7 +698,7 @@ Changes since Lynx 2.8 release
 * minor documentation tweaks for EDITTEXTAREA - LP
 * correct uninitalized buffer variable in send_file_to_mail() which caused
   core dump (reported by LV) - KW
-* Recognize Subject and Message-Id in embedded comments in HTML documents, in
+* recognize Subject and Message-Id in embedded comments in HTML documents, in
   the form generated by MHonArc for mailing list archives (including lynx-dev).
   Use these to generate a default Subject and an In-Reply-To header (currently
   not for VMS) when replying by mail (sending a 'C'omment, or following a
@@ -648,7 +707,7 @@ Changes since Lynx 2.8 release
   apply very rarely.  If no suitable comment strings are found or they are
   regarded as invalid (bad characters, not exactly right format) they are not
   used, and the fallback (URL as Subject, no In-Reply-To) applies - KW
-* Use the Message-Id of a news article to generate a References header when
+* use the Message-Id of a news article to generate a References header when
   posting a reply.  Lynx's new article listing doesn't understand threading,
   but this is nicer for other newsreader that do.  The References header of the
   referenced article is not used, so there will be only one message-id in the
@@ -667,14 +726,14 @@ Changes since Lynx 2.8 release
   especially for message-ids.) Recognize special meaning of "Followup-to:
   poster" (don't treat "poster" as a newsgroup name).  Other small tweaks - KW
 * add samples/cernrules.txt - KW
-* Except for DJGPP, move lookup code for domain names (not dotted-quad IP
+* except for DJGPP, move lookup code for domain names (not dotted-quad IP
   addresses) from HTParseInet into a new function:  LYGetHostByName acts like
   the normal gethostbyname, but includes the NSL_FORK logic.  Interruption is
   indicated in global variable lynx_nsl_status - KW
-* Use LYGetHostByName instead of HTParseInet for URL guessing - KW
-* Select on tty file descriptor in NSL_FORK loop also if compiled with slang.
+* use LYGetHostByName instead of HTParseInet for URL guessing - KW
+* select on tty file descriptor in NSL_FORK loop also if compiled with slang.
   This should make 'z' during lookup more responsive - KW
-* Don't compile in the rules implementation code if NO_RULES is defined
+* don't compile in the rules implementation code if NO_RULES is defined
   (suggested by BL) - KW
 * fix special case of EDITTEXTAREA where the returned file is empty - BJP
 * write to .lynxrc values for COOKIE_ACCEPT_DOMAINS and COOKIE_REJECT_DOMAIN
@@ -847,23 +906,23 @@ Changes since Lynx 2.8 release
   code to something somewhat like what was intended there.  But we don't have
   an "Other ISO Latin" display character set any more; maybe those `else'
   blocks should just have disappeared completely - KW
-* Minor changes to SortaSGML DTD for PARAM, THEAD - KW
-* Make "Alert" statusline prefix localizable - KW
-* Extend fixtext.sh to also change continued lines - KW
-* Changed LYCheckForProxyURL to act more like it appears to have been indended,
+* minor changes to SortaSGML DTD for PARAM, THEAD - KW
+* make "Alert" statusline prefix localizable - KW
+* extend fixtext.sh to also change continued lines - KW
+* changed LYCheckForProxyURL to act more like it appears to have been indended,
   and clarify comment.  Minor change in is_url - KW
-* Prevent removal of hidden link number from bookmark document in a very
+* prevent removal of hidden link number from bookmark document in a very
   obscure case of a bookmarked ISMAP link - KW
 * HText_SubmitForm:  make sure query is always allocated, even if the set of
   form fields to be sent turned out to be empty - KW
-* Some comments corrected in HTML.c, LYCharSets.c - KW
-* Tweak in curses_w_style for display without color - KW
-* Remove minor memory leak in LYDownload.c - KW
-* Changed error handling in LYTraversal.c to make sure terminal gets restored
+* some comments corrected in HTML.c, LYCharSets.c - KW
+* tweak in curses_w_style for display without color - KW
+* remove minor memory leak in LYDownload.c - KW
+* changed error handling in LYTraversal.c to make sure terminal gets restored
   to sane mode before showing error message and exiting - KW
-* Increased VALUE_SIZE for buffer in HTMIME.c from 1024 to 5120.  Someone
+* increased VALUE_SIZE for buffer in HTMIME.c from 1024 to 5120.  Someone
   needed increase for long Set-Cookie headers - KW
-* Two new functions in HTList.c to reverse and to combine lists - KW
+* two new functions in HTList.c to reverse and to combine lists - KW
 * Lynx was using the wrong precedence for entries within a mailcap (relative to
   other entries from the same file):  RFC 1524 says "The configuration
   information will be obtained from the FIRST matching entry in a mailcap
@@ -893,7 +952,7 @@ Changes since Lynx 2.8 release
   Rather than put yet more DOS-specific makefiles in the distribution, I put
   the changes to the makefiles within comments, which can easily be removed to
   enable the changes - DK
-* Add a comment about LYUCcharset struct "UChndl" field.  Tweak trace
+* add a comment about LYUCcharset struct "UChndl" field.  Tweak trace
   messages - LP
 * fix parsing of ALT=value attribute when the value is not quoted.  When the
   first character is not us-ascii it was corrupted by chartrans in all versions
@@ -925,11 +984,11 @@ Changes since Lynx 2.8 release
 * correct handling in getfile() of ~/ expansion - KW
 * modify NSL_FORK logic to prevent child process from running any signal
   handlers the parent may have installed - KW
-* The logic added to display_page for avoiding unnecessary screen redraw with
+* the logic added to display_page for avoiding unnecessary screen redraw with
   partial display (see 1998-12-03) is now disabled if enable_scrollback is set.
   Otherwise displayed pages could appear as empty (or with only the current
   link drawn) - KW
-* Modify conditions under which screen style cache is reset (only relevant for
+* modify conditions under which screen style cache is reset (only relevant for
   color style in combination with partial display) - KW
 * update the INSTALLATION file, reflecting the changes between the two DJGPP
   versions of GCC in use.  Also, change optimization to -O2 in the other two
@@ -966,14 +1025,14 @@ Changes since Lynx 2.8 release
 * added a delete-to-beginning-of-line (for the alt bindings only), and a help
   page that describes the alternate bindings - KED
 * improved description of "HTML error tolerance" - KW
-* Changes for handling lynxcgi:  handle failure of execve(), by showing the
+* changes for handling lynxcgi:  handle failure of execve(), by showing the
   system error and then _exit()ing the child process.  Make sure REQUEST_METHOD
   is always set.  Added checks for EINTR and other errors from read() - KW
 * DOSPATH or EMX:  remove strange code dealing with root of local drive from
   is_url() and HTDOS_name()/HTDOS_wwwname(), add right code at the earlier
   stage in LYFillLocalFileURL() - LP (thanks KW)
-* Relax warning from HTAlert to HTUserMsg on REFRESH_URL_NOT_ABSOLUTE - LP
-* More tweaks on transfer rate calculation - LP
+* relax warning from HTAlert to HTUserMsg on REFRESH_URL_NOT_ABSOLUTE - LP
+* more tweaks on transfer rate calculation - LP
 * modify HTSACopy and HTSACat in case the source and destination are the same
   pointer - TD
 * tested/removed redundant OS/2 EMX adjustement to filename from LYEdit.c - TD
@@ -1138,19 +1197,19 @@ Changes since Lynx 2.8 release
   HTAddParam, which broke telnet/rlogin URLs (reported by IC) - TD
 1998-12-12 (2.8.2dev.9)
 * change location-not-absolute message from an alert to user-message - TD
-* Check for EINTR from read() call in HTDoRead, and retry if necessary.  This
+* check for EINTR from read() call in HTDoRead, and retry if necessary.  This
   change only for Unix.  Interrupted read() system calls should be rare (or
   impossible, depending on the system implementation?) since the read() is only
   done after a successful select(), but checking can't hurt - KW
-* Check for read read() errors in HTDoRead and HTCopy, and generate alert
+* check for read read() errors in HTDoRead and HTCopy, and generate alert
   messages for unexpected errors.  HTCopy still returns HT_LOADED to indicate
   success if any data have been received before an unexpected error or
   disconnection.  Previously this happened without any indication to the user
   that something was wrong and a document or file might be incomplete.  These
   changes currently only for Unix - KW
-* Added/enhanced comments in HTFormat.c to document current behavior of HTCopy,
+* added/enhanced comments in HTFormat.c to document current behavior of HTCopy,
   HTFileCopy, HTGzFileCopy, HTParseSocket, HTParseFile, and HTParseGzFile - KW
-* Moved definition of HT_NO_DATA to HTUtils.h, changed value of some status
+* moved definition of HT_NO_DATA to HTUtils.h, changed value of some status
   codes to libwww5-like values while we're at it - KW
 * correct uninitialized de variable in LYCookie.c when dump_output_immediately
   is set.  Also, made a slight change to this mode in LYMain.c, so that cookies
@@ -1210,12 +1269,12 @@ Changes since Lynx 2.8 release
   don't swallow space after number if line was split, find link number on
   previous line even it it is at the very end, adjust line split position after
   number removal.  Generate TRACE output in interesting cases - KW
-* Prevent havoc (access to already freed memory etc.) caused by multiple
+* prevent havoc (access to already freed memory etc.) caused by multiple
   recursive invocations of HTAnchor_delete on the same HTParentAnchor.  This
   does not seem to actually happen normally during a session, but can occur
   when the HTAnchor structures are cleaned up while handling a terminating
   signal or outofmem condition - KW
-* Reset the HTAnchor "underway" flag during final cleanup, so structures are
+* reset the HTAnchor "underway" flag during final cleanup, so structures are
   not prevented from being freed.  This also should only make a difference when
   handling a terminating signal or outofmem condition - KW
 * show sticky-bit in directory listings - LW
@@ -1251,9 +1310,9 @@ Changes since Lynx 2.8 release
   information - KW
 * color styles:  reset screen style cache to avoid random coloring when a link
   is unhighlighted - KW
-* Tweak in HText_setLastOptionValue:  if an OPTION tag was directly followed by
+* tweak in HText_setLastOptionValue:  if an OPTION tag was directly followed by
   several newlines, characters could be dropped - KW
-* Tweak havevisible() function in LYBookmark.c to compare against Unicode
+* tweak havevisible() function in LYBookmark.c to compare against Unicode
   value rather than ASCII when checking for blanks. - LP
 * ifdef user/group function caching calls so that this builds with djgpp, which
   doesn't need/support this (patch by Gisle Vanem)

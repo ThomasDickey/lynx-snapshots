@@ -305,10 +305,14 @@ extern BOOL LYOutOfMemory;	/* Declared in LYexit.c - FM */
 
 #define WHITE(c) (((unsigned char)(TOASCII(c))) <= 32)
 
+/*     Inline Function LYIsASCII: Is character c a traditional ASCII
+**     character (i.e. <128) after converting from host character set.  */
+
+#define LYIsASCII(c) (TOASCII((unsigned char)(c)) < 128)
 
 /*
 
-Sucess (>=0) and failure (<0) codes
+Success (>=0) and failure (<0) codes
 
 Some of the values are chosen to be HTTP-like, but status return values
 are generally not the response status from any specific protocol.

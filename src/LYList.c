@@ -53,6 +53,7 @@ PUBLIC int showlist ARGS2(
     static char tempfile[LY_MAXPATH];
     FILE *fp0;
     char *Address = NULL, *Title = NULL, *cp = NULL;
+    char *LinkTitle = NULL;  /* Rel stored as property of link, not of dest */
     BOOLEAN intern_w_post = FALSE;
     char *desc = "unknown field or link";
 
@@ -82,7 +83,7 @@ PUBLIC int showlist ARGS2(
 
 #ifdef EXP_ADDRLIST_PAGE
     if (titles != TRUE)
-        BeginInternalPage(fp0, ADDRLIST_PAGE_TITLE, LIST_PAGE_HELP);
+	BeginInternalPage(fp0, ADDRLIST_PAGE_TITLE, LIST_PAGE_HELP);
     else
 #endif
     BeginInternalPage(fp0, LIST_PAGE_TITLE, LIST_PAGE_HELP);
@@ -154,6 +155,16 @@ PUBLIC int showlist ARGS2(
 	}
 	address =  HTAnchor_address(dest);
 	title = titles ? HTAnchor_title(parent) : NULL;
+	if (dest_intl) {
+	    HTSprintf0(&LinkTitle, "(internal)");
+	} else if (titles && child->mainLink.type &&
+		   dest == child->mainLink.dest &&
+		   !strncmp(HTAtom_name(child->mainLink.type),
+			    "RelTitle: ", 10)) {
+	    HTSprintf0(&LinkTitle, "(%s)", HTAtom_name(child->mainLink.type)+10);
+	} else {
+	    FREE(LinkTitle);
+	}
 	StrAllocCopy(Address, address);
 	FREE(address);
 	LYEntify(&Address, TRUE);
@@ -169,7 +180,7 @@ PUBLIC int showlist ARGS2(
 
 	fprintf(fp0, "<li><a href=\"%s\"%s>%s%s%s%s%s</a>\n", Address,
 			dest_intl ? " TYPE=\"internal link\"" : "",
-			dest_intl ? "(internal) " : "",
+			LinkTitle ? LinkTitle : "",
 			((HTAnchor*)parent != dest) && Title ? "in " : "",
 			(char *)(Title ? Title : Address),
 			(Title && cp) ? " - " : "",
@@ -178,6 +189,7 @@ PUBLIC int showlist ARGS2(
 	FREE(Address);
 	FREE(Title);
     }
+    FREE(LinkTitle);
 
     if (hidden_links > 0) {
 	if (refs > 0)

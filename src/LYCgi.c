@@ -320,7 +320,7 @@ PRIVATE int LYLoadCGI ARGS4(
 	int fd1[2], fd2[2];
 	char buf[1024];
 	pid_t pid;
-#if HAVE_TYPE_UNIONWAIT
+#ifdef HAVE_TYPE_UNIONWAIT
 	union wait wstatus;
 #else
 	int wstatus;
