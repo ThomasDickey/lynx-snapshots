@@ -250,13 +250,9 @@ PUBLIC int LYUpload_options ARGS2(
 	    fprintf(fp0, "</a>\n");
 	}
     } else {
-	fprintf(fp0, "   \
-&lt;NONE&gt;\n\n   \
-You may define an unlimited number of upload methods.\n   \
-Please refer to the <a href=\"%s\">lynx.cfg</a> file, \
-sections 'UPLOAD' and 'INCLUDE'.\n",
-	LYNX_CFG_FILE);
+	fprintf(fp0, "   &lt;NONE&gt;\n");
     }
+
     fprintf(fp0, "</pre>\n");
     EndInternalPage(fp0);
     LYCloseTempFP(fp0);

@@ -323,8 +323,10 @@ Sucess (>=0) and failure (<0) codes
 #ifndef va_arg
 #ifdef __STDC__
 #include <stdarg.h>
+#define LYva_start(ap,format) va_start(ap,format)
 #else
 #include <varargs.h>
+#define LYva_start(ap,format) va_start(ap)
 #endif
 #endif
 

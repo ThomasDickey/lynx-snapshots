@@ -1533,7 +1533,7 @@ makeBitMap(unsigned long numBits, ...)
   long i,j;
   bit_map* bm = NULL;
 
-  va_start(ap,numBits);
+  LYva_start(ap,numBits);
 
   bm = (bit_map*)s_malloc((size_t)sizeof(bit_map));
   bm->size = (unsigned long)(ceil((double)numBits / bitsPerByte));
@@ -2266,7 +2266,7 @@ panic(char *format, ...)
   va_list ap;			/* the variable arguments */
 
   fprintf(stderr,PANIC_HEADER);
-  va_start(ap, format);		/* init ap */
+  LYva_start(ap, format);	/* init ap */
   vfprintf(stderr,format,ap);	/* print the contents */
   va_end(ap);			/* free ap */
   fflush(stderr);

@@ -63,7 +63,7 @@
 PRIVATE int remove_quotes PARAMS((char *string));
 #endif /* VMS */
 
-PRIVATE  CONST char* subject_translate8bit PARAMS((char *source));
+PRIVATE  char* subject_translate8bit PARAMS((char *source));
 
 PUBLIC int printfile ARGS1(
 	document *,	newdoc)
@@ -93,7 +93,7 @@ PUBLIC int printfile ARGS1(
     HTAtom *encoding;
     BOOL use_mime, use_cte, use_type;
     CONST char *disp_charset;
-    CONST char *subject;   /* print-to-email */
+    char *subject = NULL;   /* print-to-email */
     static BOOLEAN first_mail_preparsed = TRUE;
     char *envbuffer = NULL;
 #ifdef VMS
@@ -1204,6 +1204,7 @@ PUBLIC int printfile ARGS1(
 
     FREE(link_info);
     FREE(sug_filename);
+    FREE(subject);
     FREE(content_base);
     FREE(content_location);
     return(NORMAL);
@@ -1240,7 +1241,7 @@ PRIVATE int remove_quotes ARGS1(
  *  lynx character handler, -1 for no translation (so display charset).
  *
  */
-PRIVATE  CONST char* subject_translate8bit ARGS1(char *, source)
+PRIVATE char* subject_translate8bit ARGS1(char *, source)
 {
     CONST char *p = source;
     char temp[256];

@@ -1856,6 +1856,7 @@ PUBLIC void LYLoadCookies ARGS1 (
 
     while (!feof(cookie_handle)) {
 	cookie *moo;
+	unsigned i = 0;
 	int tok_loop;
 	char *tok_out, *tok_ptr;
 	char *j;
@@ -1865,6 +1866,17 @@ PUBLIC void LYLoadCookies ARGS1 (
 	if((j == NULL) || (buf[0] == '\0' || buf[0] == '\n')) {
 	    continue;
 	}
+
+
+	/*
+	 * Strip out the newline that fgets() puts at the end of a
+	 * cookie.
+	 */
+
+	while(buf[i] != '\n' && i < sizeof(buf)) {
+	    i++;
+	}
+	buf[i] = '\0';
 
 	/*
 	 * Tokenise the cookie line into its component parts -

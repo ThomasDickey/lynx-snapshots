@@ -1,8 +1,19 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-09-28 (2.8.1pre.4)
+* tentative fix for HPUX sed problems (reported by jones.peter@uqam.ca) - TD
+* update lynx.man and lynx.hlp to reflect new command-line options - TD
+* add PARTIAL_MIN_LINES switch in lynx.cfg to customize incremental rendering 
+  with smaller chunks (requested by Eric <erbrun@bellatlantic.net>) - LP 
+* minor documentation fix - LP 
+* miscellaneous fixes for build on VMS (reported by Tony Bolton) - TD
+* tweak 'const' assignment for VMS (in LYReadCFG.c and LYPrint.c) - LP 
+* clarify discussion of download in Lynx user's guide (Al Gilman).
+* trim trailing newline from lines read from cookie file so that Lynx does
+  not send embedded newlines in the cookie list - BJP
 1998-09-27 (2.8.1pre.3)
-+ fix a place in cookie_add{accept,reject}list() where cookies would be deleted
+* fix a place in cookie_add{accept,reject}list() where cookies would be deleted
   from memory if a persistent cookie had the same domain as an entry in
   COOKIE_{ACCEPT,REJECT}_DOMAINS - BJP
 * move Lynx's writing of persistent cookies to COOKIE_FILE from happening when

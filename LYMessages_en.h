@@ -668,6 +668,8 @@
 #define SHOWINFO_TITLE		"Information about the current document"
 #define UPLOAD_OPTIONS_TITLE	"Upload Options"
 #define VISITED_LINKS_TITLE	"Visited Links Page"
+#define BOOKMARK_TITLE		"Bookmark file"
+#define MOSAIC_BOOKMARK_TITLE	"Converted Mosaic Hotlist"
 
 /* CONFIG_DEF_TITLE subtitles */
 #define AUTOCONF_CONFIG_CACHE \

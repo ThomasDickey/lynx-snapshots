@@ -986,7 +986,6 @@ try_again:
 
 			/*
 			 *  End of incremental rendering stage here.
-			 *  Reset for debugging purpose only.
 			 */
 			display_partial = FALSE;
 		    }

@@ -5803,11 +5803,10 @@ PUBLIC void LYRemoveTemp ARGS1(
 		} else {
 		    ly_temp = p->next;
 		}
+		code = remove(name);
 #ifdef VMS
 		while (remove(name) == 0)
 		    ;
-#else
-		code = remove(name);
 #endif
 		CTRACE(tfp, "...LYRemoveTemp done(%d)%s\n", code,
 		       (p->file != 0) ? ", closed" : "");

@@ -262,6 +262,10 @@ install-doc : $(docdir)
 			       ( cd $(docdir) && tar xf - )
 	-rm -f $(libdir)/lynx.tmp
 
+# HPUX 'sed' does not seem to like '=' as pattern delimiter.
+FIX_SED = tr '=' '%'
+#FIX_SED = cat
+
 install-help : $(helpdir)
 	(cd $(helpdir) && rm -rf *)
 	@echo Constructing sed-script
@@ -270,13 +274,13 @@ install-help : $(helpdir)
 		-e 's%\(.*\)=\(http:.*\)%s=@\1@=\2=g%' \
 		-e 's%\(.*\)=\(ftp:.*\)%s=@\1@=\2=g%' \
 		-e 's%\(.*\)=\(.*\.html\)$$%s=@\1@=\2$(COMPRESS_EXT)=g%' \
-		$(srcdir)/lynx_help/help_files.txt > \
+		$(srcdir)/lynx_help/help_files.txt | $(FIX_SED) > \
 		$(helpdir)/help_files.sed
 	@echo Appending interim-fix for existing html files
 	@ECHO_CC@sed	-e '/^#/d' -e '/[:@]/d' -e '/^$$/d' \
 		-e 's%\(.*\)=\(.*\.html\)$$%s=\2=\2$(COMPRESS_EXT)=g%' \
 		-e 's%\.html=%\\.html=%' \
-		$(srcdir)/lynx_help/help_files.txt >> \
+		$(srcdir)/lynx_help/help_files.txt | $(FIX_SED) >> \
 		$(helpdir)/help_files.sed
 	@echo Translating/copying html files
 	@ECHO_CC@sh -c	'cd $(srcdir)/lynx_help && ( \
@@ -308,13 +312,15 @@ install-help : $(helpdir)
 	-rm -f $(libdir)/lynx.tmp
 
 LYHelp.h : LYHelp.hin
+	@echo Constructing sed-script
 	@ECHO_CC@sed	-e '/^#/d' -e '/^$$/d' \
 		-e 's%\(.*\)=\(.*\@.*\)%s=@\1@=\2=g%' \
 		-e 's%\(.*\)=\(http:.*\)%s=@\1@=\2=g%' \
 		-e 's%\(.*\)=\(ftp:.*\)%s=@\1@=\2=g%' \
 		-e 's%\(.*\)=\(.*\.html\)$$%s=@\1@=\2$(COMPRESS_EXT)=g%' \
-		$(srcdir)/lynx_help/help_files.txt > \
+		$(srcdir)/lynx_help/help_files.txt | $(FIX_SED) > \
 		help_files.sed
+	@echo Creating $@
 	@sed -f help_files.sed $(srcdir)/LYHelp.hin > $@
 	-@rm -f help_files.sed
 	@echo '**********************************************'
