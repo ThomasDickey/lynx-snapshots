@@ -1097,7 +1097,7 @@ PRIVATE int generate_cso_form ARGS4(
     char *key, *line;
     CSOformgen_context ctx;
     static char *template[] = {
-   "<HEAD>\n<TITLE>CSO/PH Query Form for $(HOST)</TITLE>\n</HEAD>\n<BODY>",
+   "<HTML>\n<HEAD>\n<TITLE>CSO/PH Query Form for $(HOST)</TITLE>\n</HEAD>\n<BODY>",
    "<H2><I>CSO/PH Query Form</I> for <EM>$(HOST)</EM></H2>",
    "To search the database for a name, fill in one or more of the fields",
    "in the form below and activate the 'Submit query' button.  At least",

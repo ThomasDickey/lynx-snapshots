@@ -340,6 +340,8 @@ PUBLIC BOOLEAN LYNewsPosting = NEWS_POSTING; /* News posting supported? */
 PUBLIC char *LynxSigFile = NULL;    /* Signature file, in or off home */
 PUBLIC char *system_mail = NULL;	  /* The path for sending mail */
 PUBLIC char *system_mail_flags = NULL;	  /* Flags for sending mail */
+PUBLIC char *lynx_cmd_logfile;	/* file to write keystroke commands, if any */
+PUBLIC char *lynx_cmd_script;	/* file to read keystroke commands, if any */
 PUBLIC char *lynx_cfg_file = NULL;	  /* location of active lynx.cfg */
 PUBLIC char *lynx_temp_space = NULL; /* The prefix for temporary file paths */
 PUBLIC char *lynx_save_space = NULL; /* The prefix for save to disk paths */
@@ -460,6 +462,10 @@ PUBLIC BOOL textfields_need_activation = FALSE;
 #endif
 
 PUBLIC BOOLEAN textfield_prompt_at_left_edge = FALSE;
+
+#ifdef MARK_HIDDEN_LINKS
+PUBLIC char* hidden_link_marker = NULL;
+#endif
 
 
 #ifdef DISP_PARTIAL
@@ -1211,6 +1217,23 @@ PUBLIC int main ARGS2(
 
     LYOpenTraceLog();
 
+#ifdef EXP_CMD_LOGGING
+    /*
+     *	Open command-script, if specified
+     */
+    if (lynx_cmd_script != 0) {
+	tildeExpand(&lynx_cmd_script, TRUE);
+	LYOpenCmdScript();
+    }
+    /*
+     *	Open command-logging, if specified
+     */
+    if (lynx_cmd_logfile != 0) {
+	tildeExpand(&lynx_cmd_logfile, TRUE);
+	LYOpenCmdLogfile(argc, argv);
+    }
+#endif
+
     /*
      *	Set up the default jump file stuff. - FM
      */
@@ -1445,6 +1468,7 @@ PUBLIC int main ARGS2(
 	    StrAllocCopy(startfile, result);
 	    while (GetStdin(&buf)) {
 		fputs(buf, fp);
+		fputc('\n', fp);
 	    }
 	    FREE(buf);
 	    LYCloseTempFP(fp);
@@ -2984,6 +3008,16 @@ PRIVATE Parse_Args_Type Arg_Table [] =
       "cfg",		2|NEED_LYSTRING_ARG,	&lynx_cfg_file,
       "=FILENAME\nspecifies a lynx.cfg file other than the default"
    ),
+#ifdef EXP_CMD_LOGGING
+   PARSE_STR(
+       "cmd_log",	2|NEED_LYSTRING_ARG,	&lynx_cmd_logfile,
+       "=FILENAME\nlog keystroke commands to the given file"
+   ),
+   PARSE_STR(
+       "cmd_script",	2|NEED_LYSTRING_ARG,	&lynx_cmd_script,
+       "=FILENAME\nread keystroke commands from the given file (see -cmd_log)"
+   ),
+#endif
    PARSE_FUN(
       "child",		4|FUNCTION_ARG,		child_fun,
       "exit on left-arrow in startfile, and disable save to disk"

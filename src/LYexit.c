@@ -10,6 +10,7 @@
 #include <LYSignal.h>
 #include <LYMainLoop.h>
 #endif /* !VMS */
+#include <LYStrings.h>
 #include <LYClean.h>
 
 /*
@@ -146,6 +147,8 @@ PUBLIC void LYexit ARGS1(
 #if !defined(VMS) && defined(SYSLOG_REQUESTED_URLS)
     LYCloselog();
 #endif /* !VMS && SYSLOG_REQUESTED_URLS */
+
+    LYCloseCmdLogfile();
 
 #ifdef exit
 /*  Make sure we use stdlib exit and not LYexit. - GAB

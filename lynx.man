@@ -124,6 +124,15 @@ lynx.cfg.
 .B -child
 exit on left-arrow in startfile, and disable save to disk.
 .TP
+.B -cmd_log\fR=\fIFILENAME
+write keystroke commands and related information to the specified file.
+.TP
+.B -cmd_script\fR=\fIFILENAME
+read keystroke commands from the specified file.
+You can use the data written using the \fB\-cmd_log\fR option.
+Lynx will ignore other information which the command-logging may have
+written to the logfile.
+.TP
 .B -color
 forces color mode on, if available.  Default color control sequences
 which work for many terminal types are assumed if the terminal
@@ -782,6 +791,10 @@ It is created for use by an external program, as defined in a
 \fBlynx.cfg PRINTER:\fR definition statement.
 If the field does not exist for the document, the variable is set to a
 null string under \fBUNIX\fR, or "No URL" under \fBVMS\fR.
+.TP 20
+.B LYNX_TRACE
+If set, causes \fILynx\fR to write a trace file as if the \fB-trace\fR
+option were supplied. 
 .TP 20
 .B LYNX_VERSION
 This variable is always set by \fILynx\fR, and may be used by an external

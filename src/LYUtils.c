@@ -7088,9 +7088,16 @@ PUBLIC BOOLEAN LYValidateFilename ARGS2(
 #if defined(__DJGPP__) || defined(_WINDOWS)
     if (strchr(result, ':') != NULL)
 	cp = NULL;
-    else
+    else 
 #endif /*  __DJGPP__ || _WINDOWS */
-	cp = original_dir;
+	{
+#ifdef SUPPORT_CHDIR
+	    static char buf[LY_MAXPATH];
+	    cp = Current_Dir(buf);	    
+#else
+	    cp = original_dir;
+#endif
+	}
     }
     else
 #endif /* __EMX__*/

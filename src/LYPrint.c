@@ -1037,8 +1037,8 @@ PRIVATE void send_file_to_screen ARGS3(
 	Lpansi = FALSE;
     } else {
 	fprintf(stdout,"\n\n%s", PRESS_RETURN_TO_FINISH);
-	fflush(stdout);  /* refresh to screen */
-	LYgetch();  /* grab some user input to pause */
+	fflush(stdout);		/* refresh to screen */
+	(void) LYgetch();	/* grab some user input to pause */
 #ifdef VMS
 	HadVMSInterrupt = FALSE;
 #endif /* VMS */

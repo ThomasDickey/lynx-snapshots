@@ -50,6 +50,22 @@
 #define WINDOW void
 #define waddstr(w,s) addstr(s)
 
+#ifndef ACS_UARROW  
+#define ACS_UARROW  SLSMG_UARROW_CHAR
+#endif
+
+#ifndef ACS_DARROW
+#define ACS_DARROW  SLSMG_DARROW_CHAR
+#endif
+
+#ifndef ACS_CKBOARD
+#define ACS_CKBOARD SLSMG_CKBRD_CHAR
+#endif
+
+#ifndef ACS_BLOCK
+#define ACS_BLOCK   SLSMG_BLOCK_CHAR
+#endif
+
 #else /* Using curses: */
 
 #ifdef VMS
@@ -218,6 +234,11 @@ extern void LYbox PARAMS((WINDOW *win, BOOLEAN formfield));
 extern int LYlines;  /* replaces LINES */
 extern int LYcols;   /* replaces COLS */
 
+#if defined(USE_COLOR_TABLE) || defined(USE_SLANG)
+extern int Current_Attr;
+extern int Masked_Attr;
+#endif
+
 extern void start_curses NOPARAMS;
 extern void stop_curses NOPARAMS;
 extern BOOLEAN setup PARAMS((char *terminal));
@@ -316,9 +337,14 @@ extern void LY_SLerase NOPARAMS;
 #define scrollok(a,b) SLsmg_Newline_Moves = ((b) ? 1 : -1)
 #endif
 
-#define addch SLsmg_write_char
+#define addch(ch)     SLsmg_write_char(ch)
+#define addch_raw(ch) do {                                \
+                        SLsmg_Char_Type buf;              \
+                        buf = (ch) | (Current_Attr << 4); \
+                        SLsmg_write_raw (&buf, 1);        \
+                      } while (0)
 #define echo()
-#define printw SLsmg_printf
+#define printw        SLsmg_printf
 
 extern int curscr;
 extern BOOLEAN FullRefresh;
@@ -453,6 +479,9 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
 #define wstop_reverse(a)	wstandend(a)
 
 #endif /* FANCY_CURSES */
+
+#define addch_raw(ch)           addch(ch)
+
 #endif /* USE_SLANG */
 
 #ifdef USE_SLANG

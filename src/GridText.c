@@ -1649,7 +1649,7 @@ PRIVATE void display_scrollbar ARGS1(
 	}
 #endif /* USE_COLOR_STYLE */
 	move(1, LYcols - 1);
-	addch(ACS_UARROW);
+	addch_raw(ACS_UARROW);
 #ifdef USE_COLOR_STYLE
 	LynxChangeStyle(s, STACK_OFF, 0);
 #endif /* USE_COLOR_STYLE */
@@ -1690,7 +1690,7 @@ PRIVATE void display_scrollbar ARGS1(
 	}
 #endif /* USE_COLOR_STYLE */
 	move(h + 2, LYcols - 1);
-	addch(ACS_DARROW);
+	addch_raw(ACS_DARROW);
 #ifdef USE_COLOR_STYLE
 	LynxChangeStyle(s, STACK_OFF, 0);
 #endif /* USE_COLOR_STYLE */
@@ -2285,9 +2285,11 @@ PRIVATE void display_page ARGS3(
 	/*
 	 *  For non-multibyte curses.
 	 *
-	 *  Is this repainting necessary??  Let's try without.
+	 *  Full repainting is necessary, otherwise only part of a multibyte 
+	 *  character sequence might be written because of curses output 
+	 *  optimizations. 
 	 */
-	/*clearok(curscr, TRUE);*/
+	clearok(curscr, TRUE); 
     }
     refresh();
 }
@@ -5097,6 +5099,191 @@ PUBLIC int HText_beginAnchor ARGS3(
 
     return(a->number);
 }
+
+/*
+    This returns whether the given anchor has blank content. Shamelessly copied
+    from HText_endAnchor. The values returned are meaningful only for "normal"
+    links - like ones produced by <a href=".">foo</a>, no inputs, etc. - VH
+*/
+#ifdef MARK_HIDDEN_LINKS
+PUBLIC BOOL HText_isAnchorBlank ARGS2(
+	HText *,	text,
+	int,		number)
+{
+    TextAnchor *a;
+
+    /*
+     *  The number argument is set to 0 in HTML.c and
+     *  LYCharUtils.c when we want to end the anchor
+     *  for the immediately preceding HText_beginAnchor()
+     *  call.  If it's greater than 0, we want to handle
+     *  a particular anchor.  This allows us to set links
+     *  for positions indicated by NAME or ID attributes,
+     *  without needing to close any anchor with an HREF
+     *  within which that link might be embedded. - FM
+     */
+    if (number <= 0 || number == text->last_anchor->number) {
+	a = text->last_anchor;
+    } else {
+	for (a = text->first_anchor; a; a = a->next) {
+	    if (a->number == number) {
+		break;
+	    }
+	}
+	if (a == NULL) {
+	    /*
+	     *  There's no anchor with that number,
+	     *  so we'll default to the last anchor,
+	     *  and cross our fingers. - FM
+	     */
+	    a = text->last_anchor;
+	}
+    }
+
+    CTRACE((tfp, "GridText:HText_isAnchorBlank: number:%d link_type:%d\n",
+			a->number, a->link_type));
+    if (a->link_type == INPUT_ANCHOR) {
+	/*
+	 *  Shouldn't happen, but put test here anyway to be safe. - LE
+	 */
+
+	CTRACE((tfp,
+	   "HText_isAnchorBlank: internal error: last anchor was input field!\n"));
+	return 0;
+    }
+    if (a->number) {
+	/*
+	 *  If it goes somewhere...
+	 */
+	int i, j, k;
+	HTLine *last = text->last_line;
+	HTLine *prev = text->last_line->prev;
+	HTLine *start = last;
+	int CurBlankExtent = 0;
+	int BlankExtent = 0;
+	
+	int extent_adjust = (text->chars + last->size) - a->start -
+		     (text->Lines - a->line_num);
+
+	/*
+	 *  Check if the anchor content has only
+	 *  white and special characters, starting
+	 *  with the content on the last line. - FM
+	 */
+	a->extent += extent_adjust;
+	if (a->extent > (int)last->size) {
+	    /*
+	     *  The anchor extends over more than one line,
+	     *  so set up to check the entire last line. - FM
+	     */
+	    i = last->size;
+	} else {
+	    /*
+	     *  The anchor is restricted to the last line,
+	     *  so check from the start of the anchor. - FM
+	     */
+	    i = a->extent;
+	}
+	k = j = (last->size - i);
+	while (j < (int)last->size) {
+	    if (!IsSpecialAttrChar(last->data[j]) &&
+		!isspace((unsigned char)last->data[j]) &&
+		last->data[j] != HT_NON_BREAK_SPACE &&
+		last->data[j] != HT_EN_SPACE)
+		break;
+	    i--;
+	    j++;
+	}
+	if (i == 0) {
+	    if (a->extent > (int)last->size) {
+		/*
+		 *  The anchor starts on a preceding line, and
+		 *  the last line has only white and special
+		 *  characters, so declare the entire extent
+		 *  of the last line as blank. - FM
+		 */
+		CurBlankExtent = BlankExtent = last->size;
+	    } else {
+		/*
+		 *  The anchor starts on the last line, and
+		 *  has only white or special characters, so
+		 *  declare the anchor's extent as blank. - FM
+		 */
+		CurBlankExtent = BlankExtent = a->extent;
+	    }
+	}
+	/*
+	 *  While the anchor starts on a line preceding
+	 *  the one we just checked, and the one we just
+	 *  checked has only white and special characters,
+	 *  check whether the anchor's content on the
+	 *  immediately preceding line also has only
+	 *  white and special characters. - FM
+	 */
+	while (i == 0 &&
+	       (a->extent > CurBlankExtent ||
+		(a->extent == CurBlankExtent &&
+		 k == 0 &&
+		 prev != text->last_line &&
+		 (prev->size == 0 ||
+		  prev->data[prev->size - 1] == ']')))) {
+	    start = prev;
+	    k = j = prev->size - a->extent + CurBlankExtent;
+	    if (j < 0) {
+		/*
+		 *  The anchor starts on a preceding line,
+		 *  so check all of this line. - FM
+		 */
+		j = 0;
+		i = prev->size;
+	    } else {
+		/*
+		 *  The anchor starts on this line. - FM
+		 */
+		i = a->extent - CurBlankExtent;
+	    }
+	    while (j < (int)prev->size) {
+		if (!IsSpecialAttrChar(prev->data[j]) &&
+		    !isspace((unsigned char)prev->data[j]) &&
+		    prev->data[j] != HT_NON_BREAK_SPACE &&
+		    prev->data[j] != HT_EN_SPACE)
+		    break;
+		i--;
+		j++;
+	    }
+	    if (i == 0) {
+		if (a->extent > (CurBlankExtent + (int)prev->size) ||
+		    (a->extent == CurBlankExtent + (int)prev->size &&
+		     k == 0 &&
+		     prev->prev != text->last_line &&
+		     (prev->prev->size == 0 ||
+		      prev->prev->data[prev->prev->size - 1] == ']'))) {
+		    /*
+		     *  This line has only white and special
+		     *  characters, so treat its entire extent
+		     *  as blank, and decrement the pointer for
+		     *  the line to be analyzed. - FM
+		     */
+		    CurBlankExtent += prev->size;
+		    BlankExtent = CurBlankExtent;
+		    prev = prev->prev;
+		} else {
+		    /*
+		     *  The anchor starts on this line, and it
+		     *  has only white or special characters, so
+		     *  declare the anchor's extent as blank. - FM
+		     */
+		    BlankExtent = a->extent;
+		    break;
+		}
+	    }
+	}
+	a->extent -= extent_adjust;
+	return i==0;
+    } else
+	return 0;
+}
+#endif /* MARK_HIDDEN_LINKS */
 
 
 PUBLIC void HText_endAnchor ARGS2(

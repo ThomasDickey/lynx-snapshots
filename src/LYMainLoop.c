@@ -1300,6 +1300,10 @@ gettext("Enctype multipart/form-data not yet supported!  Cannot submit."));
 		    reloading = FALSE;
 		    return 0;
 		}
+
+	    if (run_external(links[curdoc.link].lname, TRUE))
+		return 0;
+
 	    /*
 	     *	Follow a normal link or anchor.
 	     */
@@ -1530,8 +1534,7 @@ PRIVATE void handle_LYK_ADD_BOOKMARK ARGS3(
 		 *  save either that or the link. - FM
 		 */
 		_statusline(BOOK_D_L_OR_CANCEL);
-		c = LYgetch_for(FOR_SINGLEKEY);
-		if (TOUPPER(c) == 'D') {
+		if ((c = LYgetch_single()) == 'D') {
 		    save_bookmark_link(curdoc.address, curdoc.title);
 		    *refresh_screen = TRUE; /* MultiBookmark support */
 		    goto check_add_bookmark_to_self;
@@ -1566,9 +1569,9 @@ PRIVATE void handle_LYK_ADD_BOOKMARK ARGS3(
 		     */
 		    _statusline(BOOK_L_OR_CANCEL);
 		}
-		c = LYgetch_for(FOR_SINGLEKEY);
+		c = LYgetch_single();
 	    }
-	    if (TOUPPER(c) == 'L') {
+	    if (c == 'L') {
 		if (curdoc.post_data != NULL &&
 		    links[curdoc.link].type == WWW_INTERN_LINK_TYPE) {
 		    /*
@@ -1606,8 +1609,7 @@ PRIVATE void handle_LYK_ADD_BOOKMARK ARGS3(
 	    return;
 	} else {
 	    _statusline(BOOK_D_OR_CANCEL);
-	    c = LYgetch_for(FOR_SINGLEKEY);
-	    if (TOUPPER(c) == 'D') {
+	    if (LYgetch_single() == 'D') {
 		save_bookmark_link(curdoc.address, curdoc.title);
 		*refresh_screen = TRUE; /* MultiBookmark support */
 	    } else {
@@ -2647,7 +2649,7 @@ PRIVATE void handle_LYK_EXTERN ARGS1(
 {
     if ((nlinks > 0) && (links[curdoc.link].lname != NULL))
     {
-	run_external(links[curdoc.link].lname);
+	run_external(links[curdoc.link].lname, FALSE);
 	*refresh_screen = TRUE;
     }
 }
@@ -2928,8 +2930,8 @@ PRIVATE BOOLEAN handle_LYK_HEAD ARGS1(
 	 * submit button.  - FM
 	 */
 	_statusline(HEAD_D_L_OR_CANCEL);
-	c = LYgetch_for(FOR_SINGLEKEY);
-	if (TOUPPER(c) == 'D') {
+	c = LYgetch_single();
+	if (c == 'D') {
 	    char *scheme = strncmp(curdoc.address, "LYNXIMGMAP:", 11) ?
 		curdoc.address : curdoc.address + 11;
 	    if (LYCanDoHEAD(scheme) != TRUE) {
@@ -2955,7 +2957,7 @@ PRIVATE BOOLEAN handle_LYK_HEAD ARGS1(
 		    }
 		}
 	    }
-	} else if (TOUPPER(c) == 'L') {
+	} else if (c == 'L') {
 	    if (links[curdoc.link].type != WWW_FORM_LINK_TYPE &&
 		strncmp(links[curdoc.link].lname, "http", 4) &&
 		strncmp(links[curdoc.link].lname,
@@ -3004,7 +3006,7 @@ PRIVATE BOOLEAN handle_LYK_HEAD ARGS1(
 		 * the current document, not the form link.  - FM
 		 */
 		_statusline(HEAD_D_OR_CANCEL);
-		c = LYgetch_for(FOR_SINGLEKEY);
+		c = LYgetch_single();
 	    } else {
 		/*
 		 * No links, so we can just assume that the user wants a HEAD
@@ -3012,7 +3014,7 @@ PRIVATE BOOLEAN handle_LYK_HEAD ARGS1(
 		 */
 		c = 'D';
 	    }
-	    if (TOUPPER(c) == 'D') {
+	    if (c == 'D') {
 		char *scheme = strncmp(curdoc.address, "LYNXIMGMAP:", 11) ?
 		    curdoc.address : curdoc.address + 11;
 		/*
@@ -5045,6 +5047,86 @@ PRIVATE void handle_LYK_digit ARGS6(
     return;
 }
 
+#ifdef SUPPORT_CHDIR
+
+/* original implementation by VH */
+PUBLIC void handle_LYK_CHDIR NOARGS
+{
+    static char buf[LY_MAXPATH];
+    char *p = NULL;
+
+    _statusline(gettext("cd to:"));
+    /* some people may prefer automatic clearing of the previous user input,
+       here, to do this, just uncomment next line - VH */
+    /* buf[0]='\0'; */
+    if (LYgetstr(buf, VISIBLE, sizeof(buf)-1, 0) < 0 || !*buf) {
+	HTInfoMsg(CANCELLED);
+	return;
+    }
+
+    if (*buf == '~' && !buf[1]) {
+	StrAllocCopy(p, Home_Dir());
+    } else if (*buf == '~') {
+	HTSprintf0(&p, "%s%s", Home_Dir(), buf+1);
+    } else {
+	StrAllocCopy(p, buf);
+    }
+
+    CTRACE((tfp, "changing directory to '%s'\n", p));
+    if (chdir(p)) {
+	switch (errno) {
+	case EACCES:
+	    HTInfoMsg(COULD_NOT_ACCESS_DIR);
+	    break;
+	case ENOENT:
+	    HTInfoMsg(gettext("No such directory"));
+	    break;
+	case ENOTDIR:
+	    HTInfoMsg(gettext("A component of path is not a directory"));
+	    break;
+	default:
+	    HTInfoMsg(gettext("failed to change directory"));
+	    break;
+	}
+    } else {
+#ifdef DIRED_SUPPORT
+	/*if in dired, load content of other directory*/
+	if (!no_dired_support
+	 && (lynx_edit_mode || (LYIsUIPage(curdoc.address, UIP_DIRED_MENU)))) {
+	    char buf2[LY_MAXPATH];
+	    char* tmp;
+	    char* addr = NULL;
+
+	    strcpy(buf2, p);
+	    Current_Dir(buf2);
+	    tmp = wwwName(buf2);
+
+	    StrAllocCopy(addr, "file://localhost");
+	    StrAllocCat(addr, tmp);
+	    if (tmp != buf2)
+	    /*since wwwName is nop on unix and allocates something on VMS and DOS*/
+		FREE(tmp);
+
+	    newdoc.address = addr;
+	    newdoc.isHEAD = FALSE;
+            StrAllocCopy(newdoc.title, gettext("A URL specified by the user"));
+	    FREE(newdoc.post_data);
+	    FREE(newdoc.post_content_type);
+	    FREE(newdoc.bookmark);
+	    newdoc.safe = FALSE;
+	    newdoc.internal_link = FALSE;
+	    /**force_load = TRUE;*/
+	    if (lynx_edit_mode) {
+		DIRED_UNCACHE_2;
+	    }
+	} else
+#endif
+	    HTInfoMsg(OPERATION_DONE);
+    }
+    FREE(p);
+}
+#endif
+
 /*
  *  Here's where we do all the work.
  *  mainloop is basically just a big switch dependent on the users input.
@@ -5144,7 +5226,7 @@ initialize:
 	refresh();
     }
 #endif /* USE_SLANG */
-    CTRACE((tfp,"Entering mainloop, startfile=%s\n",startfile));
+    CTRACE((tfp, "Entering mainloop, startfile=%s\n", startfile));
 
     if (form_post_data) {
 	StrAllocCopy(newdoc.post_data, form_post_data);
@@ -7168,7 +7250,11 @@ new_cmd:  /*
 
 	case LYK_DO_NOTHING:	/* pretty self explanatory */
 	    break;
-
+#ifdef SUPPORT_CHDIR
+	case LYK_CHDIR:
+	    handle_LYK_CHDIR();
+	    break;
+#endif
 	} /* end of BIG switch */
     }
 }

@@ -170,7 +170,9 @@ PRIVATE void format ARGS3(
     HTEndParam(result, fmt, 1);
 }
 
-void run_external ARGS1(char *, c)
+BOOL run_external ARGS2(
+    char *, 	c,
+    BOOL,	only_overriders)
 {
 #ifdef WIN_EX
     HANDLE handle;
@@ -182,9 +184,10 @@ void run_external ARGS1(char *, c)
 #endif
     char *cmdbuf = NULL;
     lynx_html_item_type *externals2 = 0;
+    int found = 0;
 
     if (externals == NULL)
-	return;
+	return 0;
 
 #ifdef WIN_EX			/* 1998/01/26 (Mon) 09:16:13 */
     if (c == NULL) {
@@ -201,12 +204,14 @@ void run_external ARGS1(char *, c)
 	CTRACE((tfp, "EXTERNAL: '%s' <==> '%s'\n", externals2->name, c));
 #endif
 	if (externals2->command != 0
-	  && !strncasecomp(externals2->name, c, strlen(externals2->name)))
+	  && !strncasecomp(externals2->name, c, strlen(externals2->name))
+	  && (only_overriders ? externals2->override_primary_action : 1))
 	{
-	    if (no_externals && !externals2->always_enabled) {
+	    if (no_externals && !externals2->always_enabled && !only_overriders) {
 		HTUserMsg(EXTERNALS_DISABLED);
 		break;
 	    }
+	    ++found;
 	    /*  Too dangerous to leave any URL that may come along unquoted.
 	     *  They often contain '&', ';', and '?' chars, and who knows
 	     *  what else may occur.
@@ -371,6 +376,6 @@ void run_external ARGS1(char *, c)
     } /* end-for */
 
     FREE(cmdbuf);
-    return;
+    return found;
 }
 #endif	/* USE_EXTERNALS */

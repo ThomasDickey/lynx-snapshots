@@ -165,6 +165,7 @@ PRIVATE void add_item_to_list ARGS2(
     cur_item->name = NULL;
     cur_item->command = NULL;
     cur_item->always_enabled = FALSE;
+    cur_item->override_primary_action = FALSE;
 
     /*
      *	Find first unescaped colon and process fields
@@ -196,7 +197,13 @@ PRIVATE void add_item_to_list ARGS2(
 	    remove_backslashes(cur_item->command);
 	}
 	if (*next_colon++) {
-	    cur_item->always_enabled = is_true(next_colon);
+	    colon = next_colon;
+	    if ((next_colon = strchr(colon,':')) != 0)
+		*next_colon++ = '\0';		
+	    cur_item->always_enabled = is_true(colon);
+	    if (next_colon) {
+		cur_item->override_primary_action = is_true(next_colon);
+	    }
 	}
     }
 }
@@ -1436,6 +1443,9 @@ static Config_Type Config_Table [] =
      PARSE_ENV("gopher_proxy", CONF_ENV, 0 ),
      PARSE_SET("gotobuffer", CONF_BOOL, &goto_buffer),
      PARSE_STR("helpfile", CONF_STR, &helpfile),
+#ifdef MARK_HIDDEN_LINKS
+     PARSE_STR("hidden_link_marker", CONF_STR, &hidden_link_marker),
+#endif     
      PARSE_SET("historical_comments", CONF_BOOL, &historical_comments),
 #ifdef USE_PRETTYSRC
      PARSE_FUN("htmlsrc_attrname_xform", CONF_FUN, read_htmlsrc_attrname_xform),
@@ -1731,7 +1741,7 @@ PRIVATE void do_read_cfg ARGS5(
 	cfg_filename = mypath;
     }
     if ((fp = fopen(cfg_filename, TXT_R)) == 0) {
-	CTRACE((tfp,"lynx.cfg file not found as %s\n",cfg_filename));
+	CTRACE((tfp, "lynx.cfg file not found as '%s'\n", cfg_filename));
 	return;
     }
     have_read_cfg = TRUE;
@@ -1743,7 +1753,7 @@ PRIVATE void do_read_cfg ARGS5(
     if (show_cfg) {
 	time_t t;
 	time(&t);
-	printf("### Lynx %s, at %s", LYNX_VERSION, ctime(&t));
+	printf("### %s %s, at %s", LYNX_NAME, LYNX_VERSION, ctime(&t));
     }
 #endif
     while (LYSafeGets(&buffer, fp) != 0) {

@@ -126,7 +126,7 @@ extern int HText_beginAnchor PARAMS((
 	BOOL		underline,
 	HTChildAnchor *	anc));
 extern void HText_endAnchor PARAMS((HText * text, int number));
-
+extern BOOL HText_isAnchorBlank PARAMS((HText * text, int number));
 
 /*
 

@@ -33,9 +33,9 @@
 #include <LYMainLoop.h>
 #endif
 
+#include <LYShowInfo.h>
 #include <LYLeaks.h>
 
-extern unsigned short *LYKbLayout;
 extern BOOL HTPassHighCtrlRaw;
 
 #if defined(WIN_EX)
@@ -1418,7 +1418,7 @@ PRIVATE int myGetChar NOARGS
     return i;
 }
 
-PUBLIC int LYgetch_for ARGS1(
+PRIVATE int LYgetch_for ARGS1(
 	int,	code)
 {
    SLang_Key_Type *key;
@@ -1463,7 +1463,7 @@ PUBLIC int LYgetch_for ARGS1(
  */
 #define found_CSI(first,second) ((second) == '[' || (first) == 155)
 
-PUBLIC int LYgetch_for ARGS1(
+PRIVATE int LYgetch_for ARGS1(
 	int,	code)
 {
     int a, b, c, d = -1;
@@ -1472,11 +1472,7 @@ PUBLIC int LYgetch_for ARGS1(
 
     have_levent = 0;
 
-#if defined(IGNORE_CTRL_C) || defined(USE_GETCHAR) || !defined(NCURSES) || \
-    (HAVE_KEYPAD && defined(KEY_RESIZE)) || \
-    (defined(NCURSES) && defined(USE_MOUSE) && !defined(DOSPATH))
 re_read:
-#endif /* IGNORE_CTRL_C || USE_GETCHAR etc. */
 #if !defined(UCX) || !defined(VAXC) /* errno not modifiable ? */
     if (errno == EINTR)
 	set_errno(0);		/* reset - kw */
@@ -2074,8 +2070,8 @@ re_read:
 #define HIST_CMD_2	12
 #define V_CMD_AREA	1
 
-		int left,right;
-		extern BOOLEAN system_is_NT;
+		int left = H_CMD_AREA;
+		int right = (LYcols - H_CMD_AREA);
 		/* yes, I am assuming that my screen will be a certain width. */
 
 		int tick_count;
@@ -2083,8 +2079,6 @@ re_read:
 		char mouse_info[128];
 		static int old_click = 0;	/* [m Sec] */
 
-		left = H_CMD_AREA;
-		right = (LYcols - H_CMD_AREA);
 		c = -1;
 		mouse_link = -1;
 
@@ -2295,7 +2289,43 @@ re_read:
 
 PUBLIC int LYgetch NOARGS
 {
-    return LYgetch_for(FOR_PANEL);
+    return LYReadCmdKey(FOR_PANEL);
+}
+
+/*
+ * Read a single keystroke, allows mouse-selection.
+ */
+PUBLIC int LYgetch_choice NOARGS
+{
+    int ch = LYReadCmdKey(FOR_CHOICE);
+    if (ch == 3)
+	ch = 7;			/* treat ^C the same as ^G */
+    return ch;
+}
+
+/*
+ * Read a single keystroke, allows mouse events.
+ */
+PUBLIC int LYgetch_input NOARGS
+{
+    int ch = LYReadCmdKey(FOR_INPUT);
+    if (ch == 3)
+	ch = 7;			/* treat ^C the same as ^G */
+    return ch;
+}
+
+/*
+ * Read a single keystroke, ignoring case by translating it to uppercase.
+ * Ignore mouse events, if any.
+ */
+PUBLIC int LYgetch_single NOARGS
+{
+    int ch = LYReadCmdKey(FOR_SINGLEKEY);
+    if (ch == 3)
+	ch = 7;			/* treat ^C the same as ^G */
+    else if (ch > 0 && ch < 256)
+	ch = TOUPPER(ch);	/* will ignore case of result */
+    return ch;
 }
 
 /*
@@ -3220,7 +3250,7 @@ again:
 	if (refresh_mb)
 	    LYRefreshEdit(&MyEdit);
 #endif /* SUPPORT_MULTIBYTE_EDIT */
-	ch = LYgetch_for(FOR_PROMPT);
+	ch = LYReadCmdKey(FOR_PROMPT);
 #ifdef SUPPORT_MULTIBYTE_EDIT
 #ifdef CJK_EX	/* for SJIS code */
 	if (!refresh_mb
@@ -4260,3 +4290,89 @@ PUBLIC void base64_encode ARGS3(
 }
 
 #endif /* EXP_FILE_UPLOAD */
+
+#ifdef EXP_CMD_LOGGING
+PRIVATE FILE *cmd_logfile;
+PRIVATE FILE *cmd_script;
+
+PUBLIC void LYOpenCmdLogfile ARGS2(
+	int,		argc,
+	char **,	argv)
+{
+    int n;
+
+    if (lynx_cmd_logfile != 0) {
+	cmd_logfile = LYNewTxtFile(lynx_cmd_logfile);
+	if (cmd_logfile != 0) {
+	    fprintf(cmd_logfile, "# Command logfile created by %s %s (%s)\n",
+		LYNX_NAME, LYNX_VERSION, LYVersionDate());
+	    for (n = 0; n < argc; n++) {
+		fprintf(cmd_logfile, "# Arg%d = %s\n", n, argv[n]);
+	    }
+	}
+    }
+}
+
+PUBLIC void LYOpenCmdScript NOARGS
+{
+    if (lynx_cmd_script != 0) {
+	cmd_script = fopen(lynx_cmd_script, "r");
+    }
+}
+
+PUBLIC int LYReadCmdKey ARGS1(
+	int,	mode)
+{
+    int ch = -1;
+
+    if (cmd_script != 0) {
+	char *buffer = 0;
+	char *src;
+	char *tmp;
+
+	while (LYSafeGets(&buffer, cmd_script) != 0) {
+	    LYTrimTrailing(buffer);
+	    src = LYSkipBlanks(buffer);
+	    tmp = LYSkipNonBlanks(src);
+	    if (tmp - src != 3
+	     || strncasecomp(src, "key", 3))
+		continue;
+	    src = LYSkipBlanks(tmp);
+	    if ((ch = LYStringToKeycode(src)) >= 0) {
+		refresh();
+		break;
+	    }
+	}
+	FREE(buffer);
+    } else {
+	ch = LYgetch_for(mode);
+    }
+    LYWriteCmdKey(ch);
+    return ch;
+}
+
+/*
+ * Write a LYKeymapCode 'ch' to the logfile.
+ */
+PUBLIC void LYWriteCmdKey ARGS1(
+	int,	ch)
+{
+    if (cmd_logfile != 0) {
+	fprintf(cmd_logfile, "key %s\n", LYKeycodeToString(ch, FALSE));
+    }
+}
+
+PUBLIC void LYCloseCmdLogfile NOARGS
+{
+    if (cmd_logfile != 0) {
+	fclose(cmd_logfile);
+	cmd_logfile = 0;
+    }
+    if (cmd_script != 0) {
+	fclose(cmd_script);
+	cmd_script = 0;
+    }
+    FREE(lynx_cmd_logfile);
+    FREE(lynx_cmd_script);
+}
+#endif /* EXP_CMD_LOGGING */

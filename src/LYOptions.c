@@ -520,7 +520,7 @@ draw_options:
     addstr("'");
     addstr(TO_RETURN_SEGMENT);
 
-    while (TOUPPER(response) != 'R' &&
+    while (response != 'R' &&
 	   !LYisNonAlnumKeyname(response, LYK_PREV_DOC) &&
 	   response != '>' && !term_options &&
 	   response != 7 &&  response != 3) {
@@ -534,7 +534,7 @@ draw_options:
 	lynx_stop_prompt_color ();
 
 	refresh();
-	response = LYgetch_for(FOR_SINGLEKEY);
+	response = LYgetch_single();
 	if (term_options || response == 7 || response == 3)
 	    response = 'R';
 	if (LYisNonAlnumKeyname(response, LYK_REFRESH)) {
@@ -542,8 +542,7 @@ draw_options:
 	    goto draw_options;
 	}
 	switch (response) {
-	    case 'e':	/* Change the editor. */
-	    case 'E':
+	    case 'E':	/* Change the editor. */
 		if (no_editor) {
 		    _statusline(EDIT_DISABLED);
 		} else if (system_editor ) {
@@ -584,8 +583,7 @@ draw_options:
 		response = ' ';
 		break;
 
-	    case 'd':	/* Change the display. */
-	    case 'D':
+	    case 'D':	/* Change the display. */
 		if (x_display && *x_display) {
 		    LYstrncpy(display_option, x_display, sizeof(display_option) - 1);
 		} else {  /* clear the NONE */
@@ -650,8 +648,7 @@ draw_options:
 		response = ' ';
 		break;
 
-	    case 'l':	/* Change multibookmarks option. */
-	    case 'L':
+	    case 'L':	/* Change multibookmarks option. */
 		if (LYMBMBlocked) {
 		    _statusline(MULTIBOOKMARKS_DISALLOWED);
 		    response = ' ';
@@ -712,8 +709,7 @@ draw_options:
 		}
 		break;
 
-	    case 'b':	/* Change the bookmark page location. */
-	    case 'B':
+	    case 'B':	/* Change the bookmark page location. */
 		/*
 		 *  Anonymous users should not be allowed to
 		 *  change the bookmark page.
@@ -769,8 +765,7 @@ draw_options:
 		response = ' ';
 		break;
 
-	    case 'f':	/* Change ftp directory sorting. */
-	    case 'F':	/*  (also local for non-DIRED)	 */
+	    case 'F':	/* Change ftp directory sorting. */
 		/*
 		 *  Copy strings into choice array.
 		 */
@@ -808,8 +803,7 @@ draw_options:
 		}
 		break;
 
-	    case 'p': /* Change personal mail address for From headers. */
-	    case 'P':
+	    case 'P': /* Change personal mail address for From headers. */
 		if (personal_mail_address && *personal_mail_address) {
 		    LYstrncpy(display_option, personal_mail_address, sizeof(display_option) - 1);
 		} else {  /* clear the NONE */
@@ -845,8 +839,7 @@ draw_options:
 		response = ' ';
 		break;
 
-	    case 's':	/* Change case sensitivity for searches. */
-	    case 'S':
+	    case 'S':	/* Change case sensitivity for searches. */
 		/*
 		 *  Copy strings into choice array.
 		 */
@@ -947,8 +940,7 @@ draw_options:
 		}
 		break;
 
-	    case 'c':	/* Change display charset setting. */
-	    case 'C':
+	    case 'C':	/* Change display charset setting. */
 		if (!LYSelectPopups) {
 #ifndef ALL_CHARSETS_IN_O_MENU_SCREEN
 		    displayed_display_charset_idx = LYChooseBoolean(displayed_display_charset_idx,
@@ -1004,8 +996,7 @@ draw_options:
 		}
 		break;
 
-	    case 'o':	/* Change raw mode setting. */
-	    case 'O':
+	    case 'O':	/* Change raw mode setting. */
 		/*
 		 *  Copy strings into choice array.
 		 */
@@ -1029,8 +1020,7 @@ draw_options:
 		response = ' ';
 		break;
 
-	    case 'g':	/* Change language preference. */
-	    case 'G':
+	    case 'G':	/* Change language preference. */
 		if (language && *language) {
 		    LYstrncpy(display_option, language, sizeof(display_option) - 1);
 		} else {  /* clear the NONE */
@@ -1065,8 +1055,7 @@ draw_options:
 		response = ' ';
 		break;
 
-	    case 'h':	/* Change charset preference. */
-	    case 'H':
+	    case 'H':	/* Change charset preference. */
 		if (pref_charset && *pref_charset) {
 		    LYstrncpy(display_option, pref_charset, sizeof(display_option) - 1);
 		} else {  /* clear the NONE */
@@ -1101,8 +1090,7 @@ draw_options:
 		response = ' ';
 		break;
 
-	    case 'v':	/* Change VI keys setting. */
-	    case 'V':
+	    case 'V':	/* Change VI keys setting. */
 		/*
 		 *  Copy strings into choice array.
 		 */
@@ -1125,7 +1113,6 @@ draw_options:
 		break;
 
 	    case 'M':	/* Change emacs keys setting. */
-	    case 'm':
 		/*
 		 *  Copy strings into choice array.
 		 */
@@ -1148,7 +1135,6 @@ draw_options:
 		break;
 
 	    case 'W':	/* Change show dotfiles setting. */
-	    case 'w':
 		if (no_dotfiles) {
 		    _statusline(DOTFILE_ACCESS_DISABLED);
 		} else {
@@ -1170,8 +1156,7 @@ draw_options:
 		response = ' ';
 		break;
 
-	    case 't':	/* Change select popups setting. */
-	    case 'T':
+	    case 'T':	/* Change select popups setting. */
 		/*
 		 *  Copy strings into choice array.
 		 */
@@ -1315,8 +1300,7 @@ draw_options:
 		response = ' ';
 		break;
 
-	    case 'k':	/* Change keypad mode. */
-	    case 'K':
+	    case 'K':	/* Change keypad mode. */
 		/*
 		 *  Copy strings into choice array.
 		 */
@@ -1359,8 +1343,7 @@ draw_options:
 		}
 		break;
 
-	    case 'n':	/* Change line editor key bindings. */
-	    case 'N':
+	    case 'N':	/* Change line editor key bindings. */
 		if (!LYSelectPopups) {
 		    current_lineedit = LYChooseBoolean(current_lineedit,
 						      L_Lineed, -1,
@@ -1383,8 +1366,7 @@ draw_options:
 		break;
 
 #ifdef EXP_KEYBOARD_LAYOUT
-	    case 'y':	/* Change keyboard layout */
-	    case 'Y':
+	    case 'Y':	/* Change keyboard layout */
 		if (!LYSelectPopups) {
 		    current_layout = LYChooseBoolean(current_layout,
 						      L_Layout, -1,
@@ -1408,8 +1390,7 @@ draw_options:
 #endif /* EXP_KEYBOARD_LAYOUT */
 
 #ifdef DIRED_SUPPORT
-	    case 'i':	/* Change local directory sorting. */
-	    case 'I':
+	    case 'I':	/* Change local directory sorting. */
 		/*
 		 *  Copy strings into choice array.
 		 */
@@ -1445,8 +1426,7 @@ draw_options:
 		break;
 #endif /* DIRED_SUPPORT */
 
-	    case 'u':	/* Change user mode. */
-	    case 'U':
+	    case 'U':	/* Change user mode. */
 		/*
 		 *  Copy strings into choice array.
 		 */
@@ -1519,8 +1499,7 @@ draw_options:
 		}
 		break;
 
-	    case 'a':	/* Change user agent string. */
-	    case 'A':
+	    case 'A':	/* Change user agent string. */
 		if (!no_useragent) {
 		    if (LYUserAgent && *LYUserAgent) {
 			LYstrncpy(display_option, LYUserAgent, sizeof(display_option) - 1);
@@ -1569,8 +1548,7 @@ draw_options:
 		break;
 
 #if defined(ENABLE_OPTS_CHANGE_EXEC) && (defined(EXEC_LINKS) || defined(EXEC_SCRIPTS))
-	    case 'x':	/* Change local exec restriction. */
-	    case 'X':
+	    case 'X':	/* Change local exec restriction. */
 		if (exec_frozen && !LYSelectPopups) {
 		    _statusline(CHANGE_OF_SETTING_DISALLOWED);
 		    response = ' ';
@@ -1665,8 +1643,7 @@ draw_options:
 		}
 		break;
 
-	    case 'r':	/* Return to document (quit options menu). */
-	    case 'R':
+	    case 'R':	/* Return to document (quit options menu). */
 		break;
 
 	    default:
@@ -1732,9 +1709,9 @@ PRIVATE int boolean_choice ARGS4(
     while (1) {
 	move(line, col);
 	if (term_options == FALSE) {
-	    response = LYgetch_for(FOR_SINGLEKEY);
+	    response = LYgetch_single();
 	}
-	if (term_options || response == 7 || response == 3) {
+	if (term_options || response == 7) {
 	     /*
 	      *  Control-C or Control-G.
 	      */
@@ -1972,7 +1949,7 @@ draw_bookmark_list:
 	lynx_stop_prompt_color ();
 
 	refresh();
-	response = (def_response ? def_response : LYgetch_for(FOR_SINGLEKEY));
+	response = (def_response ? def_response : LYgetch_single());
 	def_response = 0;
 
 	/*
@@ -2038,7 +2015,7 @@ draw_bookmark_list:
 	 *  that way.
 	 */
 	for (a = 0; a <= MBM_V_MAXFILES; a++) {
-	    if ((TOUPPER(response) - 'A') == a) {
+	    if ((response - 'A') == a) {
 		if (LYlines < (MBM_V_MAXFILES + MULTI_OFFSET)) {
 		    if (MBM_current == 1 && a > (MBM_V_MAXFILES/2)) {
 			MBM_current = 2;
@@ -2519,8 +2496,8 @@ redraw:
 #endif /* USE_SLANG  */
 
 	term_options = FALSE;
-	c = LYgetch_for(FOR_CHOICE);
-	if (term_options || c == 3 || c == 7) {
+	c = LYgetch_choice();
+	if (term_options || c == 7) {
 	    cmd = LYK_QUIT;
 #ifndef USE_SLANG
 	} else if (c == MOUSE_KEY) {

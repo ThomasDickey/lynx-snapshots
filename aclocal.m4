@@ -685,7 +685,7 @@ AC_CACHE_VAL(cf_cv_dcl_$1,[
 #include <errno.h> ],
     [long x = (long) $1],
     [eval 'cf_cv_dcl_'$1'=yes'],
-    [eval 'cf_cv_dcl_'$1'=no]')
+    [eval 'cf_cv_dcl_'$1'=no'])
 ])
 
 eval 'cf_result=$cf_cv_dcl_'$1

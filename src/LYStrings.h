@@ -19,8 +19,9 @@ extern char * LYstrncpy PARAMS((
 	int		n));
 extern void ena_csi PARAMS((BOOLEAN flag));
 extern int LYgetch NOPARAMS;
-extern int LYgetch_for PARAMS((
-	int		code));
+extern int LYgetch_choice NOPARAMS;
+extern int LYgetch_input NOPARAMS;
+extern int LYgetch_single NOPARAMS;
 extern int LYgetstr PARAMS((
 	char *		inputline,
 	int		hidden,
@@ -80,6 +81,17 @@ extern char * SNACat PARAMS((
 
 extern char *LYSafeGets PARAMS((char ** src, FILE * fp));
 
+#ifdef EXP_CMD_LOGGING
+extern int LYReadCmdKey PARAMS((int mode));
+extern void LYCloseCmdLogfile NOPARAMS;
+extern void LYOpenCmdLogfile PARAMS((int argc, char **argv));
+extern void LYOpenCmdScript NOPARAMS;
+extern void LYWriteCmdKey PARAMS((int ch));
+#else
+#define LYReadCmdKey(mode) LYgetch_for(mode)
+#define LYCloseCmdLogfile() /* nothing */
+#endif
+
 #ifdef EXP_FILE_UPLOAD
 extern void base64_encode PARAMS((char * dest, char * src, int len));
 #endif
@@ -105,7 +117,7 @@ extern void base64_encode PARAMS((char * dest, char * src, int len));
 #define REMOVE_KEY	269	/* 0x10D */
 #define DO_NOTHING	270	/* 0x10E */
 #define BACKTAB_KEY	271	/* 0x10F */
-#define MOUSE_KEY	0x11d	/* 0x11D */
+#define MOUSE_KEY	285	/* 0x11D */
 /*  ***** NOTES: *****
     If you add definitions for new lynxkeycodes to the above list that
     need to be mapped to LYK_* lynxactioncodes -
@@ -135,7 +147,6 @@ extern void base64_encode PARAMS((char * dest, char * src, int len));
     The range of possible basic values is therefore limited, they have
     to be less than LKC_ISLKC (even if KEYMAP_SIZE is increased).
 */
-
 
 #  define FOR_PANEL	0	/* normal screen, also LYgetch default */
 #  define FOR_CHOICE	1	/* mouse menu */
