@@ -62,19 +62,38 @@ extern char *LYCSwingPath;
 #endif /* VMS */
 
 #ifdef DIRED_SUPPORT
+
+typedef enum {
+    DIRS_FIRST = 0
+    , FILES_FIRST
+    , MIXED_STYLE
+} enumDirListStyle;
+
+typedef enum {
+    ORDER_BY_NAME
+    , ORDER_BY_SIZE
+    , ORDER_BY_DATE
+    , ORDER_BY_MODE
+    , ORDER_BY_TYPE
+    , ORDER_BY_USER
+    , ORDER_BY_GROUP
+} enumDirListOrder;
+
 extern BOOLEAN lynx_edit_mode;
 extern BOOLEAN no_dired_support;
-extern int dir_list_style;
 extern HTList *tagged;
-#define FILES_FIRST 1
-#define MIXED_STYLE 2
+extern int LYAutoUncacheDirLists;
+extern int dir_list_style;	/* enumDirListStyle */
+extern int dir_list_order;	/* enumDirListOrder */
+
 #ifdef OK_OVERRIDE
 extern BOOLEAN prev_lynx_edit_mode;
 #endif /* OK_OVERRIDE */
+
 #ifdef OK_PERMIT
 extern BOOLEAN no_change_exec_perms;
 #endif /* OK_PERMIT */
-extern int LYAutoUncacheDirLists;
+
 #endif /* DIRED_SUPPORT */
 
 extern int HTCacheSize;  /* the number of documents cached in memory */

@@ -30,6 +30,13 @@
 #ifndef USERDEFS_H
 #define USERDEFS_H
 
+/*******************************************************************
+ * Insure definition of NOT_ASCII, etc. precedes use below.
+ */
+#ifndef HTUTILS_H
+#include <HTUtils.h>
+#endif
+
 #ifdef HAVE_CONFIG_H
 #include <lynx_cfg.h>
 #endif
@@ -1340,11 +1347,11 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.5dev.4"
+#define LYNX_VERSION "2.8.5dev.5"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Thu, 08 Nov 2001 12:48:35 -0800"
+#define LYNX_DATE "Sun, 18 Nov 2001 17:37:14 -0800"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 
@@ -1433,18 +1440,20 @@
 #define BZIP2_PATH      "bzip2"
 #define INSTALL_PATH    "install"
 #define TAR_PATH        "tar"
-#define TOUCH_PATH      "touch"
 #define ZIP_PATH        "zip"
 #define UNZIP_PATH      "unzip"
-#define MKDIR_PATH      "mkdir"
-#define MV_PATH         "mv"
 #define RM_PATH         "rm"
-/* COPY_PATH is not required for DOSPATH any more (implemented directly) */
-/* #define COPY_PATH       "cp" */
-#define CHMOD_PATH      "chmod"
 #define TELNET_PATH     "telnet"
 #define TN3270_PATH     "tn3270"
 #define RLOGIN_PATH     "rlogin"
+/*
+ * These are implemented directly:
+ * #define COPY_PATH       "cp"
+ * #define CHMOD_PATH      "chmod"
+ * #define MKDIR_PATH      "mkdir"
+ * #define MV_PATH         "mv"
+ * #define TOUCH_PATH      "touch"
+ */
 #endif /* HAVE_CONFIG_H */
 
 #else	/* Unix */
@@ -1458,12 +1467,18 @@
 
 
 /***************************** 
+ * I have not ported multibyte support for EBCDIC.  In fact, some multibyte
+ * code in LYLowerCase() crashes on EBCDIC strings.  -- gil
+ */
+#if       ! defined(NOT_ASCII)
+/***************************** 
  * SUPPORT_MULTIBYTE_EDIT provides better support of CJK characters to
  * Lynx's Line Editor.  JIS X0201 Kana is partially supported.  The
  * reason why I didn't support it fully is I think supporting it is not
  * required so much and I don't have an environment to test it. - TH
  */
 #define SUPPORT_MULTIBYTE_EDIT
+#endif /* ! defined(NOT_ASCII) */
 
 /***************************** 
  * SUPPORT_CHDIR provides CD command (bound to 'C' by default).  It allows

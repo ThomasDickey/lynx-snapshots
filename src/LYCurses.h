@@ -174,6 +174,7 @@ typedef struct {
 # ifdef HAVE_NCURSESW_NCURSES_H
 #  undef GCC_PRINTFLIKE		/* <libutf8.h> may define 'printf' */
 #  include <ncursesw/ncurses.h>
+#  undef printf			/* but we don't want that... */
 # else
 #  ifdef HAVE_NCURSES_NCURSES_H
 #   include <ncurses/ncurses.h>
@@ -285,6 +286,7 @@ extern WINDOW *LYstartPopup PARAMS((int top_y, int left_x, int height, int width
 
 #if defined(PDCURSES)
 #define HAVE_GETBKGD 1	/* can use fallback definition */
+#define HAVE_NAPMS 1	/* can use millisecond-delays */
 #endif
 
 /* Both slang and curses: */

@@ -2296,13 +2296,8 @@ dnl FIXME: we should allow this to be overridden by environment variables
 dnl
 AC_DEFUN([CF_PATH_PROG],[
 test -z "[$]$1" && $1=$2
-if test "$with_full_paths" = yes ; then
-	AC_PATH_PROG($1,$2,[$]$1)
-else
-	AC_MSG_CHECKING(for $2)
-	AC_MSG_RESULT([$]$1)
-	eval 'ac_cv_path_'$1'="'$2'"'
-fi
+AC_PATH_PROG($1,$2,[$]$1)
+
 cf_path_prog=""
 cf_path_args=""
 IFS="${IFS= 	}"; cf_save_ifs="$IFS"
@@ -2314,10 +2309,16 @@ os2*) #(vi
 	IFS="${IFS}:"
 	;;
 esac
+
 for cf_temp in $ac_cv_path_$1
 do
 	if test -z "$cf_path_prog" ; then
-		cf_path_prog="$cf_temp"
+		if test "$with_full_paths" = yes ; then
+			CF_PATH_SYNTAX(cf_temp,break)
+			cf_path_prog="$cf_temp"
+		else
+			cf_path_prog="`basename $cf_temp`"
+		fi
 	elif test -z "$cf_path_args" ; then
 		cf_path_args="$cf_temp"
 	else
@@ -2326,8 +2327,11 @@ do
 done
 IFS="$cf_save_ifs"
 
-AC_DEFINE_UNQUOTED($1_PATH,"$cf_path_prog")
-test -n "$cf_path_args" && AC_DEFINE_UNQUOTED($1_ARGS,"$cf_path_args")
+if test -n "$cf_path_prog" ; then
+	CF_MSG_LOG(defining path for ${cf_path_prog})
+	AC_DEFINE_UNQUOTED($1_PATH,"$cf_path_prog")
+	test -n "$cf_path_args" && AC_DEFINE_UNQUOTED($1_ARGS,"$cf_path_args")
+fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check the argument to see that it looks like a pathname.  Rewrite it if it
@@ -2354,7 +2358,7 @@ case ".[$]$1" in #(vi
   $1=`echo [$]$1 | sed -e s@NONE@$ac_default_prefix@`
   ;;
 *)
-  AC_ERROR([expected a pathname, not \"[$]$1\"])
+  ifelse($2,,[AC_ERROR([expected a pathname, not \"[$]$1\"])],$2)
   ;;
 esac
 ])dnl
@@ -3352,6 +3356,10 @@ if test "$cf_cv_widec_curses" = yes ; then
 
 if test "$cf_cv_widec_mbstate" = yes ; then
 	AC_DEFINE(NEED_WCHAR_H)
+fi
+
+if test "$cf_cv_widec_mbstate" != unknown ; then
+	AC_DEFINE(HAVE_MBSTATE_T)
 fi
 
 fi

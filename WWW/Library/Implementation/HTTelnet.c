@@ -40,13 +40,11 @@
 
 PRIVATE void do_system ARGS1(char *, command)
 {
-    CTRACE((tfp, "HTTelnet: Command is: %s\n\n", command));
-#ifdef UNIX	/* want LYSystem's signal sanitizing - kw */
-    LYSystem(command);
-#else		/* Non-UNIX should use LYSystem too? - left for now - kw */
-    system(command);
-#endif
-    FREE(command);
+    if (command != 0) {
+	CTRACE((tfp, "HTTelnet: Command is: %s\n\n", command));
+	LYSystem(command);
+	FREE(command);
+    }
 }
 
 /*	Telnet or "rlogin" access
@@ -161,13 +159,14 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 #if	!defined(TELNET_DONE) && (defined(NeXT) && defined(NeXTSTEP) && NeXTSTEP<=20100)
 #define FMT_TELNET "%s%s%s %s %s"
 
+#ifdef TELNET_PATH
 	HTAddParam(&command, FMT_TELNET, 1, TELNET_PATH);
 	HTOptParam(&command, FMT_TELNET, 2, user ? " -l " : "");
 	HTAddParam(&command, FMT_TELNET, 3, user);
 	HTAddParam(&command, FMT_TELNET, 4, hostname);
 	HTAddParam(&command, FMT_TELNET, 5, port);
 	HTEndParam(&command, FMT_TELNET, 5);
-
+#endif
 	do_system(command);
 #define TELNET_DONE
 #endif
@@ -179,27 +178,34 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 #define FMT_TN3270 "%s %s %s"
 #define FMT_TELNET "%s %s %s"
 
-	if (login_protocol == rlogin) {
-
+	switch (login_protocol) {
+	case rlogin:
+#ifdef RLOGIN_PATH
 	    HTAddParam(&command, FMT_RLOGIN, 1, RLOGIN_PATH);
 	    HTAddParam(&command, FMT_RLOGIN, 2, hostname);
 	    HTOptParam(&command, FMT_RLOGIN, 3, user ? " -l " : "");
 	    HTAddParam(&command, FMT_RLOGIN, 4, user);
 	    HTEndParam(&command, FMT_RLOGIN, 4);
+#endif
+	    break;
 
-	} else if (login_protocol == tn3270) {
-
+	case tn3270:
+#ifdef TN3270_PATH
 	    HTAddParam(&command, FMT_TN3270, 1, TN3270_PATH);
 	    HTAddParam(&command, FMT_TN3270, 2, hostname);
 	    HTAddParam(&command, FMT_TN3270, 3, port);
 	    HTEndParam(&command, FMT_TN3270, 3);
+#endif
+	    break;
 
-	} else {  /* TELNET */
-
+	case telnet:
+#ifdef TELNET_PATH
 	    HTAddParam(&command, FMT_TELNET, 1, TELNET_PATH);
 	    HTAddParam(&command, FMT_TELNET, 2, hostname);
 	    HTAddParam(&command, FMT_TELNET, 3, port);
 	    HTEndParam(&command, FMT_TELNET, 3);
+#endif
+	    break;
 	}
 
 #ifdef __DJGPP__
