@@ -30,7 +30,7 @@
 #include <LYCharSets.h>
 #include <LYLeaks.h>
 
-int HTPlain_lastraw = -1;
+static int HTPlain_lastraw = -1;
 static int HTPlain_bs_pending = 0;	/* 1:bs 2:underline 3:underline+bs - kw */
 
 /*		HTML Object
@@ -664,7 +664,7 @@ static void HTPlain_abort(HTStream *me, HTError e GCC_UNUSED)
 /*		Structured Object Class
  *		-----------------------
  */
-const HTStreamClass HTPlain =
+static const HTStreamClass HTPlain =
 {
     "PlainPresenter",
     HTPlain_free,

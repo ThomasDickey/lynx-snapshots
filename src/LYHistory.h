@@ -12,6 +12,7 @@ extern int LYhist_next(DocInfo *doc, DocInfo *newdoc);
 extern int LYpush(DocInfo *doc, BOOLEAN force_push);
 extern int showhistory(char **newfile);
 extern void LYAddVisitedLink(DocInfo *doc);
+extern void LYAllocHistory(int entries);
 extern void LYFreePostData(DocInfo *data);
 extern void LYFreeDocInfo(DocInfo *data);
 extern void LYhist_prev(DocInfo *doc);

@@ -83,8 +83,9 @@ typedef struct _VisitedLink {
     struct _VisitedLink *prev_first;
 } VisitedLink;
 
-extern HistInfo history[MAXHIST];
+extern HistInfo *history;
 extern int nhist;
+extern int size_history;
 
 /******************************************************************************/
 

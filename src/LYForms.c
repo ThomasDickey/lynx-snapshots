@@ -162,7 +162,9 @@ int change_form_link_ex(int cur,
 	 * Radio buttons must have one and only one down at a time!
 	 */
 	if (form->num_value) {
-	    HTUserMsg(NEED_CHECKED_RADIO_BUTTON);
+	    if (user_mode == NOVICE_MODE) {
+		HTUserMsg(NEED_CHECKED_RADIO_BUTTON);
+	    }
 	} else {
 	    int i;
 

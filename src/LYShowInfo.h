@@ -9,7 +9,6 @@ extern BOOL LYVersionIsRelease(void);
 extern const char *LYVersionStatus(void);
 extern const char *LYVersionDate(void);
 extern int LYShowInfo(DocInfo *doc,
-		      int size_of_file,
 		      DocInfo *newdoc,
 		      char *owner_address);
 

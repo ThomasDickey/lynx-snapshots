@@ -42,4 +42,11 @@ char *HTDOS_short_name(char *fn);
 #define HTDOS_short_name(fn)  fn
 #endif
 
+#ifdef DJGPP
+/*
+ * Poll tcp/ip lib and yield to DPMI-host while nothing in
+ * keyboard buffer (head = tail) (simpler than kbhit).
+ */
+void djgpp_idle_loop(void);
+#endif
 #endif /*  HTDOS_H */

@@ -66,7 +66,7 @@ int HTNoDataOK = 0;
  * inappropriately with -traversal, and from sending bogus error mail with
  * MAIL_SYSTEM_ERROR_LOGGING:TRUE.  - kw
  */
-int getfile(DocInfo *doc)
+int getfile(DocInfo *doc, int *target)
 {
     int url_type = 0;
     char *pound;
@@ -271,7 +271,7 @@ int getfile(DocInfo *doc)
 	    WWWDoc.post_data = NULL;
 	    WWWDoc.post_content_type = NULL;
 	}
-#if !defined(VMS) && defined(SYSLOG_REQUESTED_URLS)
+#ifdef SYSLOG_REQUESTED_URLS
 	LYSyslog(doc->address);
 #endif
 	if (url_type == UNKNOWN_URL_TYPE ||
@@ -1064,7 +1064,8 @@ int getfile(DocInfo *doc)
 		    /*
 		     * May set www_search_result.
 		     */
-		    HTFindPoundSelector(pound + 1);
+		    if (HTFindPoundSelector(pound + 1))
+			*target = www_search_result;
 		}
 		return (NORMAL);
 	    }

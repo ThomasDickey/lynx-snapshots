@@ -253,7 +253,7 @@ static void TracelogOpenFailed(void)
 	HTUserMsg(TRACELOG_OPEN_FAILED);
     } else {
 	fprintf(stderr, "%s\n", TRACELOG_OPEN_FAILED);
-	exit(EXIT_FAILURE);
+	exit_immediately(EXIT_FAILURE);
     }
 }
 
@@ -520,6 +520,24 @@ static BOOL set_curdoc_link(int nextlink)
 	curdoc.link = nextlink;
     }
     return result;
+}
+
+/*
+ * Setup newdoc to jump to the given line.
+ *
+ * FIXME: prefer to also jump to the link given in a URL fragment, but the
+ * interface of getfile() does not provide that ability yet.
+ */
+static void goto_line(int nextline)
+{
+    int n;
+
+    for (n = 0; n < nlinks; ++n) {
+	if (nextline == links[n].anchor_line_num + 1) {
+	    newdoc.link = n;
+	    break;
+	}
+    }
 }
 
 #ifdef USE_MOUSE
@@ -3238,8 +3256,7 @@ static BOOLEAN handle_LYK_INFO(int *cmd)
      */
     if (!LYIsUIPage(curdoc.address, UIP_SHOWINFO)) {
 	if (do_change_link() != -1
-	    && LYShowInfo(&curdoc, HText_getNumOfLines(),
-			  &newdoc, owner_address) >= 0) {
+	    && LYShowInfo(&curdoc, &newdoc, owner_address) >= 0) {
 	    LYRegisterUIPage(newdoc.address, UIP_SHOWINFO);
 	    StrAllocCopy(newdoc.title, SHOWINFO_TITLE);
 	    LYFreePostData(&newdoc);
@@ -5478,10 +5495,10 @@ int mainloop(void)
 		    newdoc.address = temp;
 		    temp = NULL;
 		}
-		getresult = getfile(&newdoc);
+		getresult = getfile(&newdoc, &Newline);
 	    }
 #else /* TRACK_INTERNAL_LINKS */
-	    getresult = getfile(&newdoc);
+	    getresult = getfile(&newdoc, &Newline);
 #endif /* TRACK_INTERNAL_LINKS */
 
 #ifdef INACTIVE_INPUT_STYLE_VH
@@ -5853,7 +5870,7 @@ int mainloop(void)
 		 * LYHistory.c, but lets leave it as an important comment for
 		 * now.
 		 */
-		Newline = newdoc.line;
+		/* Newline = newdoc.line; */
 #endif
 
 		/*
@@ -6170,6 +6187,7 @@ int mainloop(void)
 	     * If more equals TRUE, then there is more info below this page.
 	     */
 	    more = HText_canScrollDown();
+	    goto_line(Newline);
 	    curdoc.line = Newline = HText_getTopOfScreen() + 1;
 
 	    if (curdoc.title == NULL) {

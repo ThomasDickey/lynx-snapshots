@@ -144,6 +144,14 @@ static char *last_username_and_host = NULL;
 #define BROKEN_PROFTPD 1
 static int ProFTPD_bugs = FALSE;
 
+/*
+ * wu-ftpd 2.6.2(12) is known to have a broken implementation of EPSV.  The
+ * server will hang for a long time when we attempt to connect after issuing
+ * this command - TD 2004/12/28
+ */
+#define BROKEN_WUFTPD 1
+static int WU_FTPD_bugs = FALSE;
+
 typedef enum {
     GENERIC_SERVER
     ,MACHTEN_SERVER
@@ -219,14 +227,12 @@ static void free_FTPGlobals(void)
 char *HTVMS_name(const char *nn,
 		 const char *fn)
 {
-
-/*	We try converting the filename into Files-11 syntax.  That is, we assume
- *	first that the file is, like us, on a VMS node.  We try remote
- *	(or local) DECnet access.  Files-11, VMS, VAX and DECnet
- *	are trademarks of Digital Equipment Corporation.
- *	The node is assumed to be local if the hostname WITHOUT DOMAIN
- *	matches the local one. @@@
- */
+    /* We try converting the filename into Files-11 syntax.  That is, we assume
+     * first that the file is, like us, on a VMS node.  We try remote (or
+     * local) DECnet access.  Files-11, VMS, VAX and DECnet are trademarks of
+     * Digital Equipment Corporation.  The node is assumed to be local if the
+     * hostname WITHOUT DOMAIN matches the local one.  @@@
+     */
     static char *vmsname;
     char *filename = (char *) malloc(strlen(fn) + 1);
     char *nodename = (char *) malloc(strlen(nn) + 2 + 1);	/* Copies to hack */
@@ -395,7 +401,7 @@ static int write_cmd(const char *cmd)
 
     if (!control) {
 	CTRACE((tfp, "HTFTP: No control connection set up!!\n"));
-	return -99;
+	return HT_NO_CONNECTION;
     }
 
     if (cmd) {
@@ -494,6 +500,13 @@ static int response(const char *cmd)
 		    CTRACE((tfp, "This server is broken (RETR)\n"));
 		}
 #endif
+#ifdef BROKEN_WUFTPD
+		if (result == 220 && LYstrstr(response_text,
+					      "(Version wu-2.6.2-12)")) {
+		    WU_FTPD_bugs = TRUE;
+		    CTRACE((tfp, "This server is broken (EPSV)\n"));
+		}
+#endif
 		break;
 	    }
 	    /* if end of line */
@@ -579,7 +592,6 @@ static int set_mac_binary(eServerType ServerType)
 
 static void get_ftp_pwd(eServerType *ServerType, BOOLEAN *UseList)
 {
-
     char *cp;
 
     /* get the working directory (to see what it looks like) */
@@ -634,7 +646,6 @@ static void get_ftp_pwd(eServerType *ServerType, BOOLEAN *UseList)
 
 static void set_unix_dirstyle(eServerType *ServerType, BOOLEAN *UseList)
 {
-
     char *cp;
 
     /* This is a toggle.  It seems we have to toggle in order to see
@@ -866,30 +877,27 @@ static int get_connection(const char *arg,
 	    /*
 	     * Create and send a mail address as the password. - FM
 	     */
+	    char *the_address;
 	    char *user = NULL;
 	    const char *host = NULL;
 	    char *cp;
 
-	    if (personal_mail_address && *personal_mail_address) {
-		/*
-		 * We have a non-zero length personal
-		 * mail address, so use that. - FM
-		 */
-		StrAllocCopy(user, personal_mail_address);
-		if ((cp = strchr(user, '@')) != NULL) {
-		    *cp++ = '\0';
-		    host = cp;
-		} else {
+	    the_address = anonftp_password;
+	    if (isEmpty(the_address))
+		the_address = personal_mail_address;
+	    if (isEmpty(the_address))
+		the_address = LYGetEnv("USER");
+	    if (isEmpty(the_address))
+		the_address = "WWWuser";
+
+	    StrAllocCopy(user, the_address);
+	    if ((cp = strchr(user, '@')) != NULL) {
+		*cp++ = '\0';
+		if (*cp == '\0')
 		    host = HTHostName();
-		}
-	    } else {
-		/*
-		 * Use an environment variable and the host global. - FM
-		 */
-		if ((cp = LYGetEnv("USER")) != NULL)
-		    StrAllocCopy(user, cp);
 		else
-		    StrAllocCopy(user, "WWWuser");
+		    host = cp;
+	    } else {
 		host = HTHostName();
 	    }
 
@@ -1810,7 +1818,7 @@ static void parse_vms_dir_entry(char *line,
     }
 
     /* Wrap it up */
-    CTRACE((tfp, "HTFTP: VMS filename: %s  date: %s  size: %d\n",
+    CTRACE((tfp, "HTFTP: VMS filename: %s  date: %s  size: %u\n",
 	    entry_info->filename,
 	    NonNull(entry_info->date),
 	    entry_info->size));
@@ -1882,7 +1890,7 @@ static void parse_ms_windows_dir_entry(char *line,
     }
 
     /* Wrap it up */
-    CTRACE((tfp, "HTFTP: MS Windows filename: %s  date: %s  size: %d\n",
+    CTRACE((tfp, "HTFTP: MS Windows filename: %s  date: %s  size: %u\n",
 	    entry_info->filename,
 	    NonNull(entry_info->date),
 	    entry_info->size));
@@ -2130,7 +2138,7 @@ static void parse_cms_dir_entry(char *line,
     }
 
     /* Wrap it up. */
-    CTRACE((tfp, "HTFTP: VM/CMS filename: %s  date: %s  size: %d\n",
+    CTRACE((tfp, "HTFTP: VM/CMS filename: %s  date: %s  size: %u\n",
 	    entry_info->filename,
 	    NonNull(entry_info->date),
 	    entry_info->size));
@@ -2790,7 +2798,7 @@ static int read_directory(HTParentAnchor *parent,
 	HTChunkFree(chunk);
 	FREE(spilledname);
 
-	/* print out the handy help message if it exits :) */
+	/* print out the handy help message if it exists :) */
 	if (help_message_cache_non_empty()) {
 	    START(HTML_PRE);
 	    START(HTML_HR);
@@ -2876,10 +2884,10 @@ static int read_directory(HTParentAnchor *parent,
 				entry_info->size / 1024);
 #else
 		    if (entry_info->size < 1024)
-			sprintf(string_buffer, "  %d bytes",
+			sprintf(string_buffer, "  %u bytes",
 				entry_info->size);
 		    else
-			sprintf(string_buffer, "  %dKb",
+			sprintf(string_buffer, "  %uKb",
 				entry_info->size / 1024);
 #endif
 		    PUTS(string_buffer);
@@ -2929,17 +2937,21 @@ static int setup_connection(const char *name,
     int retry;			/* How many times tried? */
     int status;
 
+    CTRACE((tfp, "setup_connection(%s)\n", name));
+
     /* set use_list to NOT since we don't know what kind of server
      * this is yet.  And set the type to GENERIC
      */
     use_list = FALSE;
     server_type = GENERIC_SERVER;
     ProFTPD_bugs = FALSE;
+    WU_FTPD_bugs = FALSE;
 
     for (retry = 0; retry < 2; retry++) {	/* For timed out/broken connections */
 	status = get_connection(name, anchor);
-	if (status < 0)
-	    return status;
+	if (status < 0) {
+	    break;
+	}
 
 	if (!ftp_local_passive) {
 	    status = get_listen_socket();
@@ -2954,7 +2966,7 @@ static int setup_connection(const char *name,
 #endif /* INET6 */
 		/* HT_INTERRUPTED would fall through, if we could interrupt
 		   somehow in the middle of it, which we currently can't. */
-		return status;
+		break;
 	    }
 #ifdef REPEAT_PORT
 	    /*  Inform the server of the port number we will listen on
@@ -2966,18 +2978,20 @@ static int setup_connection(const char *name,
 		NETCLOSE(control->socket);
 		control->socket = -1;
 		close_master_socket();
-		return HT_INTERRUPTED;
+		status = HT_INTERRUPTED;
+		break;
 	    }
 	    if (status != 2) {	/* Could have timed out */
 		if (status < 0)
 		    continue;	/* try again - net error */
-		return -status;	/* bad reply */
+		status = -status;	/* bad reply */
+		break;
 	    }
 	    CTRACE((tfp, "HTFTP: Port defined.\n"));
 #endif /* REPEAT_PORT */
 	} else {		/* Tell the server to be passive */
 	    char *command = NULL;
-	    const char *p;
+	    const char *p = "?";
 	    int h0, h1, h2, h3, p0, p1;		/* Parts of reply */
 
 #ifdef INET6
@@ -2987,39 +3001,51 @@ static int setup_connection(const char *name,
 	    data_soc = status;
 
 #ifdef INET6
-	    status = send_cmd_1(p = "EPSV");
+	    /* see RFC 2428 */
+	    if (WU_FTPD_bugs)
+		status = 1;
+	    else
+		status = send_cmd_1(p = "EPSV");
 	    if (status < 0)	/* retry or Bad return */
 		continue;
 	    else if (status != 2) {
 		status = send_cmd_1(p = "PASV");
-		if (status < 0)	/* retry or Bad return */
+		if (status < 0) {	/* retry or Bad return */
 		    continue;
-		else if (status != 2) {
-		    return -status;	/* bad reply */
+		} else if (status != 2) {
+		    status = -status;	/* bad reply */
+		    break;
 		}
 	    }
 
 	    if (strcmp(p, "PASV") == 0) {
-		for (p = response_text; *p && *p != ','; p++) ;		/* null body */
+		for (p = response_text; *p && *p != ','; p++) {
+		    ;		/* null body */
+		}
 
-		while (--p > response_text && '0' <= *p && *p <= '9') ;		/* null body */
+		while (--p > response_text && '0' <= *p && *p <= '9') {
+		    ;		/* null body */
+		}
 		status = sscanf(p + 1, "%d,%d,%d,%d,%d,%d",
 				&h0, &h1, &h2, &h3, &p0, &p1);
 		if (status < 4) {
 		    fprintf(tfp, "HTFTP: PASV reply has no inet address!\n");
-		    return -99;
+		    status = HT_NO_CONNECTION;
+		    break;
 		}
 		passive_port = (p0 << 8) + p1;
 		sprintf(dst, "%d.%d.%d.%d", h0, h1, h2, h3);
 	    } else if (strcmp(p, "EPSV") == 0) {
-		unsigned char c0, c1, c2, c3;
+		char c0, c1, c2, c3;
 		struct sockaddr_storage ss;
 		int sslen;
 
 		/*
 		 * EPSV bla (|||port|)
 		 */
-		for (p = response_text; *p && !isspace(*p); p++) ;	/* null body */
+		for (p = response_text; *p && !isspace(*p); p++) {
+		    ;		/* null body */
+		}
 		for ( /*nothing */ ;
 		     *p && *p && *p != '(';
 		     p++)	/*) */
@@ -3027,7 +3053,8 @@ static int setup_connection(const char *name,
 		status = sscanf(p, "(%c%c%c%d%c)", &c0, &c1, &c2, &p0, &c3);
 		if (status != 5) {
 		    fprintf(tfp, "HTFTP: EPSV reply has invalid format!\n");
-		    return -99;
+		    status = HT_NO_CONNECTION;
+		    break;
 		}
 		passive_port = p0;
 
@@ -3035,12 +3062,14 @@ static int setup_connection(const char *name,
 		if (getpeername(control->socket, (struct sockaddr *) &ss,
 				&sslen) < 0) {
 		    fprintf(tfp, "HTFTP: getpeername(control) failed\n");
-		    return -99;
+		    status = HT_NO_CONNECTION;
+		    break;
 		}
 		if (getnameinfo((struct sockaddr *) &ss, sslen, dst,
 				sizeof(dst), NULL, 0, NI_NUMERICHOST)) {
 		    fprintf(tfp, "HTFTP: getnameinfo failed\n");
-		    return -99;
+		    status = HT_NO_CONNECTION;
+		    break;
 		}
 	    }
 #else
@@ -3048,17 +3077,23 @@ static int setup_connection(const char *name,
 	    if (status != 2) {
 		if (status < 0)
 		    continue;	/* retry or Bad return */
-		return -status;	/* bad reply */
+		status = -status;	/* bad reply */
+		break;
 	    }
-	    for (p = response_text; *p && *p != ','; p++) ;	/* null body */
+	    for (p = response_text; *p && *p != ','; p++) {
+		;		/* null body */
+	    }
 
-	    while (--p > response_text && '0' <= *p && *p <= '9') ;	/* null body */
+	    while (--p > response_text && '0' <= *p && *p <= '9') {
+		;		/* null body */
+	    }
 
 	    status = sscanf(p + 1, "%d,%d,%d,%d,%d,%d",
 			    &h0, &h1, &h2, &h3, &p0, &p1);
 	    if (status < 4) {
 		fprintf(tfp, "HTFTP: PASV reply has no inet address!\n");
-		return -99;
+		status = HT_NO_CONNECTION;
+		break;
 	    }
 	    passive_port = (PortNumber) ((p0 << 8) + p1);
 #endif /* INET6 */
@@ -3079,7 +3114,7 @@ static int setup_connection(const char *name,
 	    if (status < 0) {
 		(void) HTInetStatus(gettext("connect for data"));
 		NETCLOSE(data_soc);
-		return status;	/* Bad return */
+		break;
 	    }
 
 	    CTRACE((tfp, "FTP data connected, socket %d\n", data_soc));
@@ -3088,6 +3123,7 @@ static int setup_connection(const char *name,
 	break;			/* No more retries */
 
     }				/* for retries */
+    CTRACE((tfp, "setup_connection returns %d\n", status));
     return status;
 }
 
@@ -3126,8 +3162,8 @@ int HTFTPLoad(const char *name,
     if (status < 0)
 	return status;		/* Failed with this code */
 
-/*	Ask for the file:
-*/
+    /*  Ask for the file:
+     */
     {
 	char *filename = HTParse(name, "", PARSE_PATH + PARSE_PUNCTUATION);
 	char *fname = filename;	/* Save for subsequent free() */

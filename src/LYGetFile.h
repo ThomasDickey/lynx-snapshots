@@ -7,7 +7,7 @@
 #define NORMAL 1
 #define NULLFILE 3
 
-extern int getfile(DocInfo *doc);
+extern int getfile(DocInfo *doc, int *target);
 extern void srcmode_for_next_retrieval(int);
 extern int follow_link_number(int c,
 			      int cur,

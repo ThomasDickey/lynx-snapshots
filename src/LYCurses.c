@@ -862,7 +862,7 @@ void start_curses(void)
     if (slinit == 0) {
 #if defined(USE_KEYMAPS)
 	if (-1 == lynx_initialize_keymaps())
-	    exit(EXIT_FAILURE);
+	    exit_immediately(EXIT_FAILURE);
 #else
 	SLtt_get_terminfo();
 #endif
@@ -1052,7 +1052,7 @@ void start_curses(void)
 
 	if (-1 == lynx_initialize_keymaps()) {
 	    endwin();
-	    exit(EXIT_FAILURE);
+	    exit_immediately(EXIT_FAILURE);
 	}
 #endif
 
@@ -1435,13 +1435,7 @@ BOOLEAN setup(char *terminal)
 	if (keypad_mode == NUMBERS_AS_ARROWS)
 	    keypad_mode = LINKS_ARE_NUMBERED;
 	status = mainloop();
-	(void) signal(SIGHUP, SIG_DFL);
-	(void) signal(SIGTERM, SIG_DFL);
-#ifdef SIGTSTP
-	if (no_suspend)
-	    (void) signal(SIGTSTP, SIG_DFL);
-#endif /* SIGTSTP */
-	exit(status);
+	exit_immediately(status);
     }
     LYLowerCase(term);
 
@@ -2137,16 +2131,16 @@ int ttopen(void)
 
     status = sys$assign(&term_nam_dsc, &iochan, 0, 0);
     if (status != SS$_NORMAL)
-	exit(status);
+	exit_immediately(status);
 
     status = sys$qiow(EFN, iochan, IO$_SENSEMODE, &iosb, 0, 0,
 		      &oldmode, sizeof(oldmode), 0, 0, 0, 0);
     if (status != SS$_NORMAL)
-	exit(status);
+	exit_immediately(status);
 
     status = iosb[0] & 0xFFFF;
     if (status != SS$_NORMAL)
-	exit(status);
+	exit_immediately(status);
 
     newmode[0] = oldmode[0];
     newmode[1] = oldmode[1];
@@ -2155,11 +2149,11 @@ int ttopen(void)
     status = sys$qiow(EFN, iochan, IO$_SETMODE, &iosb, 0, 0,
 		      &newmode, sizeof(newmode), 0, 0, 0, 0);
     if (status != SS$_NORMAL)
-	exit(status);
+	exit_immediately(status);
 
     status = iosb[0] & 0xFFFF;
     if (status != SS$_NORMAL)
-	exit(status);
+	exit_immediately(status);
 
     /*
      * Declare the exit handler block.
@@ -2170,7 +2164,7 @@ int ttopen(void)
     exit_handler_block.condition = (unsigned long) &condition;
     status = sys$dclexh(&exit_handler_block);
     if (status != SS$_NORMAL)
-	exit(status);
+	exit_immediately(status);
 
     /*
      * Set the AST.
@@ -2183,7 +2177,7 @@ int ttopen(void)
 		      &cleanup_sig, SIGINT, 0, 0, 0, 0);
     if (status != SS$_NORMAL) {
 	lib$enable_ctrl(&old_msk);
-	exit(status);
+	exit_immediately(status);
     }
 
     /*
@@ -2213,7 +2207,7 @@ int ttclose(void)
 		      &oldmode, sizeof(oldmode), 0, 0, 0, 0);
 
     if (status != SS$_NORMAL || (iosb[0] & 0xFFFF) != SS$_NORMAL)
-	exit(status);
+	exit_immediately(status);
 
     if (trap_flag) {
 	status = sys$dassgn(iochan);
@@ -2248,7 +2242,7 @@ int ttgetc(void)
 	status = 1;
     }
     if ((status & 1) != 1 && status != SS$_DATAOVERUN)
-	exit(status);
+	exit_immediately(status);
     in_pos = 1;
     in_len = iosb[1] + iosb[3];
     return (buffer[0]);

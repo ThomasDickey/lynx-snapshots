@@ -83,10 +83,10 @@
 int auto_display_charset = -1;
 #endif
 
-const char *UC_GNsetMIMEnames[4] =
+static const char *UC_GNsetMIMEnames[4] =
 {"iso-8859-1", "x-dec-graphics", "cp437", "x-transparent"};
 
-int UC_GNhandles[4] =
+static int UC_GNhandles[4] =
 {-1, -1, -1, -1};
 
 /*

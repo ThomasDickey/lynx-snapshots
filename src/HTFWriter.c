@@ -33,6 +33,7 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 #include <LYKeymap.h>
+#include <LYGetFile.h>
 
 #ifdef USE_PERSISTENT_COOKIES
 #include <LYCookie.h>

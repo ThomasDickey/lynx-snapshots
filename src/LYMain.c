@@ -30,6 +30,7 @@
 #include <LYCookie.h>
 #include <LYPrettySrc.h>
 #include <LYShowInfo.h>
+#include <LYHistory.h>
 
 #ifdef VMS
 #include <HTFTP.h>
@@ -91,11 +92,12 @@ BOOLEAN UseFixedRecords = USE_FIXED_RECORDS;
 #ifndef VMS
 static char *lynx_version_putenv_command = NULL;
 char *list_format = NULL;	/* LONG_LIST formatting mask */
+#endif /* !VMS */
 
 #ifdef SYSLOG_REQUESTED_URLS
 char *syslog_txt = NULL;	/* syslog arb text for session */
-#endif /* SYSLOG_REQUESTED_URLS */
-#endif /* !VMS */
+BOOLEAN syslog_requested_urls = TRUE;
+#endif
 
 #ifdef DIRED_SUPPORT
 BOOLEAN lynx_edit_mode = FALSE;
@@ -170,7 +172,6 @@ lynx_list_item_type *externals = NULL;
 #endif
 
 lynx_list_item_type *uploaders = NULL;
-int port_syntax = 1;
 int LYShowColor = SHOW_COLOR_UNKNOWN;	/* to show or not */
 int LYrcShowColor = SHOW_COLOR_UNKNOWN;		/* ... last used */
 
@@ -382,8 +383,9 @@ BOOLEAN no_url_redirection = FALSE;	/* Don't follow URL redirections */
 BOOLEAN pseudo_inline_alts = MAKE_PSEUDO_ALTS_FOR_INLINES;
 BOOLEAN scan_for_buried_news_references = TRUE;
 BOOLEAN startfile_ok = FALSE;
-BOOLEAN startfile_stdin = FALSE;
+static BOOLEAN startfile_stdin = FALSE;
 BOOLEAN traversal = FALSE;	/* Do traversals? */
+
 char *BookmarkPage = NULL;	/* the name of the current bookmark page */
 char *LYCookieAcceptDomains = NULL;	/* domains to accept all cookies */
 char *LYCookieLooseCheckDomains = NULL;		/* check loosely   */
@@ -404,6 +406,7 @@ char *LynxSigFile = NULL;	/* Signature file, in or off home */
 char *UCAssume_MIMEcharset = NULL;
 char *URLDomainPrefixes = NULL;
 char *URLDomainSuffixes = NULL;
+char *anonftp_password = NULL;	/* anonymous ftp password (default: email) */
 char *authentication_info[2] =
 {NULL, NULL};			/* Id:Password for protected documents */
 char *bookmark_page = NULL;	/* the name of the default bookmark page */
@@ -440,7 +443,13 @@ char *startrealm = NULL;	/* the startfile realm */
 char *system_mail = NULL;	/* The path for sending mail */
 char *system_mail_flags = NULL;	/* Flags for sending mail */
 char *x_display = NULL;		/* display environment variable */
-HistInfo history[MAXHIST];
+
+HistInfo *history;
+int nhist = 0;			/* number of used history entries */
+int size_history;		/* number of allocated history entries */
+
+LinkInfo links[MAXLINKS];
+
 int AlertSecs;			/* time-delay for HTAlert() messages   */
 int DebugSecs;			/* time-delay for HTProgress messages */
 int InfoSecs;			/* time-delay for Information messages */
@@ -453,10 +462,11 @@ int ReplaySecs;			/* time-delay for command-scripts */
 int crawl_count = 0;		/* Starting number for lnk#.dat files in crawls */
 int dump_output_width = 0;
 int lynx_temp_subspace = 0;	/* > 0 if we made temp-directory */
-int nhist = 0;			/* number of history entries */
+int max_cookies_domain = 50;
+int max_cookies_global = 500;
+int max_cookies_buffer = 4096;
 int nlinks = 0;			/* number of links in memory */
 int outgoing_mail_charset = -1;	/* translate mail to this charset */
-LinkInfo links[MAXLINKS];
 
 #ifndef DISABLE_BIBP
 BOOLEAN BibP_bibhost_available = FALSE;		/* until check succeeds  */
@@ -657,14 +667,15 @@ static void free_lynx_globals(void)
 
 #ifndef VMS
     FREE(list_format);
-#ifdef SYSLOG_REQUESTED_URLS
-    FREE(syslog_txt);
-#endif /* SYSLOG_REQUESTED_URLS */
 #ifdef LYNXCGI_LINKS		/* WebSter Mods -jkt */
     FREE(LYCgiDocumentRoot);
 #endif /* LYNXCGI_LINKS */
     free_lynx_cfg();
 #endif /* !VMS */
+
+#ifdef SYSLOG_REQUESTED_URLS
+    FREE(syslog_txt);
+#endif
 
 #ifdef VMS
     Define_VMSLogical("LYNX_VERSION", "");
@@ -678,6 +689,7 @@ static void free_lynx_globals(void)
 #endif
 
     FREE(LynxHome);
+    FREE(history);
     FREE(homepage);
     FREE(original_dir);
     FREE(startfile);
@@ -771,7 +783,7 @@ static void LYStdinArgs_free(void)
     return;
 }
 
-void exit_immediately(int code)
+void reset_signals(void)
 {
 #ifndef NOSIGHUP
     (void) signal(SIGHUP, SIG_DFL);
@@ -784,6 +796,14 @@ void exit_immediately(int code)
     if (no_suspend)
 	(void) signal(SIGTSTP, SIG_DFL);
 #endif /* SIGTSTP */
+}
+
+void exit_immediately(int code)
+{
+    reset_signals();
+#ifdef NCURSES_NO_LEAKS
+    _nc_freeall();
+#endif
     exit(code);
 }
 
@@ -991,7 +1011,7 @@ int main(int argc,
 #if 0				/* defined(__CYGWIN__) - does not work with screen */
     if (strcmp(ttyname(fileno(stdout)), "/dev/conout") != 0) {
 	printf("please \"$CYGWIN=notty\"\n");
-	exit(EXIT_SUCCESS);
+	exit_immediately(EXIT_SUCCESS);
     }
 #endif
 
@@ -1096,7 +1116,7 @@ int main(int argc,
      * Zero the links and history struct arrays.
      */
     memset((void *) links, 0, sizeof(LinkInfo) * MAXLINKS);
-    memset((void *) history, 0, sizeof(HistInfo) * MAXHIST);
+    LYAllocHistory(8);
     /*
      * Zero the MultiBookmark arrays.
      */
@@ -1172,7 +1192,7 @@ int main(int argc,
 #else
     {
 	puts(gettext("You MUST define a valid TMP or TEMP area!"));
-	exit(EXIT_FAILURE);
+	exit_immediately(EXIT_FAILURE);
     }
 #endif
 
@@ -1431,7 +1451,7 @@ int main(int argc,
 	fprintf(stderr,
 		gettext("\nConfiguration file %s is not available.\n\n"),
 		lynx_cfg_file);
-	exit(EXIT_FAILURE);
+	exit_immediately(EXIT_FAILURE);
     }
 
     /*
@@ -1440,7 +1460,7 @@ int main(int argc,
      */
     if (!LYCharSetsDeclared()) {
 	fprintf(stderr, gettext("\nLynx character sets not declared.\n\n"));
-	exit(EXIT_FAILURE);
+	exit_immediately(EXIT_FAILURE);
     }
     /*
      * (**) in Lynx, UCLYhndl_HTFile_for_unspec and UCLYhndl_for_unrec may be
@@ -1469,7 +1489,7 @@ int main(int argc,
      */
     if (!LYEditmapDeclared()) {
 	fprintf(stderr, gettext("\nLynx edit map not declared.\n\n"));
-	exit(EXIT_FAILURE);
+	exit_immediately(EXIT_FAILURE);
     }
 #if defined(USE_COLOR_STYLE)
     /*
@@ -1624,7 +1644,7 @@ int main(int argc,
 	    CTRACE((tfp, "cannot open a terminal (%s)\n", tty));
 	    if (!dump_output_immediately) {
 		fprintf(stderr, "cannot open a terminal (%s)\n", tty);
-		exit(1);
+		exit_immediately(1);
 	    }
 	}
     }
@@ -1740,7 +1760,7 @@ int main(int argc,
 #ifdef SH_EX
     if (show_cfg) {
 	cleanup();
-	exit(EXIT_SUCCESS);
+	exit_immediately(EXIT_SUCCESS);
     }
 #endif
 
@@ -2029,7 +2049,7 @@ int main(int argc,
     if (!BookmarkPage || *BookmarkPage == '\0') {
 	set_default_bookmark_page(bookmark_page);
     }
-#if !defined(VMS) && defined(SYSLOG_REQUESTED_URLS)
+#if defined(SYSLOG_REQUESTED_URLS)
     LYOpenlog(syslog_txt);
 #endif
 
@@ -2129,7 +2149,7 @@ int main(int argc,
 	    }
 	}
 #endif
-	exit(status);
+	exit_immediately(status);
     }
 
     return (status);		/* though redundant, for compiler-warnings */
@@ -3047,12 +3067,12 @@ G)oto's" },
 	if (column)
 	    printf("\n");
 	SetOutputMode(O_BINARY);
-	exit(EXIT_SUCCESS);
+	exit_immediately(EXIT_SUCCESS);
     } else if (*next_arg == '?') {
 	SetOutputMode(O_TEXT);
 	print_restrictions_to_fd(stdout);
 	SetOutputMode(O_BINARY);
-	exit(EXIT_SUCCESS);
+	exit_immediately(EXIT_SUCCESS);
     } else {
 	parse_restrictions(next_arg);
     }
@@ -3167,7 +3187,7 @@ static int version_fun(char *next_arg GCC_UNUSED)
 
     SetOutputMode(O_BINARY);
 
-    exit(EXIT_SUCCESS);
+    exit_immediately(EXIT_SUCCESS);
     /* NOT REACHED */
     return 0;
 }
@@ -3749,13 +3769,15 @@ treated '>' as a co-terminator for double-quotes and tags"
       "stdin",		4|SET_ARG,		startfile_stdin,
       "read startfile from standard input"
    ),
-#ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
    PARSE_STR(
       "syslog",		4|NEED_LYSTRING_ARG,	syslog_txt,
       "=text\ninformation for syslog call"
    ),
-#endif
+   PARSE_SET(
+      "syslog-urls",	4|SET_ARG,		syslog_requested_urls,
+      "log requested URLs with syslog"
+   ),
 #endif
    PARSE_SET(
       "tagsoup",	4|SET_ARG,		DTD_recovery,
@@ -3959,7 +3981,7 @@ in double-quotes (\"-\") on VMS)", NULL, TRUE);
 
     SetOutputMode(O_BINARY);
 
-    exit(exit_status);
+    exit_immediately(exit_status);
 }
 
 /*
@@ -4314,7 +4336,7 @@ Lynx now exiting with signal:  %d\r\n\r\n", sig);
 	 * Exit and possibly dump core.
 	 */
 	if (LYNoCore) {
-	    exit(EXIT_FAILURE);
+	    exit_immediately(EXIT_FAILURE);
 	}
 	abort();
 
@@ -4326,7 +4348,7 @@ Lynx now exiting with signal:  %d\r\n\r\n", sig);
 	/*
 	 * Exit without dumping core.
 	 */
-	exit(EXIT_SUCCESS);
+	exit_immediately(EXIT_SUCCESS);
     }
 }
 #endif /* !VMS */

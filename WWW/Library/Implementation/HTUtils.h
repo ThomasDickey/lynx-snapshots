@@ -366,29 +366,27 @@ are generally not the response status from any specific protocol.
 
  */
 
-#define HT_REDIRECTING 399
-#define HT_LOADED 200		/* Instead of a socket */
-#define HT_PARTIAL_CONTENT      206	/* Partial Content */
-#define HT_INTERRUPTED -29998
-#define HT_NOT_LOADED -29999
-#define HT_OK           0	/* Generic success */
+#define HT_PARSER_OTHER_CONTENT  701	/* tells SGML to change content model */
+#define HT_PARSER_REOPEN_ELT     700	/* tells SGML parser to keep tag open */
+#define HT_REDIRECTING           399
+#define HT_PARTIAL_CONTENT       206	/* Partial Content */
+#define HT_LOADED                200	/* Instead of a socket */
 
-#define HT_ERROR                -1	/* Generic failure */
+#define HT_OK                      0	/* Generic success */
 
-#define HT_CANNOT_TRANSLATE -4
-
-#define HT_NO_DATA		-204	/* OK but no data was loaded - */
+#define HT_ERROR                  -1	/* Generic failure */
+#define HT_CANNOT_TRANSLATE       -4
+#define HT_BAD_EOF               -12	/* Premature EOF */
+#define HT_NO_CONNECTION         -99	/* ERR no connection available - */
+#define HT_NO_DATA              -204	/* OK but no data was loaded - */
 					/* possibly other app started or forked */
 #define HT_NO_ACCESS            -401	/* Access not available */
 #define HT_FORBIDDEN            -403	/* Access forbidden */
 #define HT_NOT_ACCEPTABLE       -406	/* Not Acceptable */
-
-#define HT_PARSER_REOPEN_ELT     700	/* tells SGML parser to keep tag open */
-#define HT_PARSER_OTHER_CONTENT  701	/* tells SGML to change content model */
 #define HT_H_ERRNO_VALID        -800	/* see h_errno for resolver error */
-
 #define HT_INTERNAL             -900	/* Weird -- should never happen. */
-#define HT_BAD_EOF      -12	/* Premature EOF */
+#define HT_INTERRUPTED        -29998
+#define HT_NOT_LOADED         -29999
 
 #ifndef va_arg
 # if defined(HAVE_STDARG_H) && defined(ANSI_VARARGS)

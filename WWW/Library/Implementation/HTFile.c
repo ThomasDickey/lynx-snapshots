@@ -1236,7 +1236,7 @@ CompressFileType HTCompressFileType(const char *filename,
     *rootlen = (ftype - filename);
 
     CTRACE((tfp, "HTCompressFileType(%s) returns %d:%s\n",
-	    filename, result, filename + *rootlen));
+	    filename, (int) result, filename + *rootlen));
     return result;
 }
 
@@ -2857,12 +2857,13 @@ void HTSetProgramPath(ProgramPaths code, const char *path)
  */
 void HTInitProgramPaths(void)
 {
-    int code;
+    ProgramPaths code;
+    int n;
     const char *path;
     const char *test;
 
-    for (code = (int) ppUnknown + 1; code < (int) pp_Last; ++code) {
-	switch (code) {
+    for (n = (int) ppUnknown + 1; n < (int) pp_Last; ++n) {
+	switch (code = (ProgramPaths) n) {
 #ifdef BZIP2_PATH
 	case ppBZIP2:
 	    path = BZIP2_PATH;

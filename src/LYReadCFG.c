@@ -47,7 +47,7 @@ BOOLEAN LYUseNoviceLineTwo = TRUE;
  */
 static BOOL is_true(char *string)
 {
-    if (!strncasecomp(string, "TRUE", 4))
+    if (!strcasecomp(string, "TRUE") || !strcasecomp(string, "ON"))
 	return (TRUE);
     else
 	return (FALSE);
@@ -1378,6 +1378,9 @@ static Config_Type Config_Table [] =
      PARSE_SET(RC_MAIL_SYSTEM_ERROR_LOGGING, error_logging),
      PARSE_SET(RC_MAKE_LINKS_FOR_ALL_IMAGES, clickable_images),
      PARSE_SET(RC_MAKE_PSEUDO_ALTS_FOR_INLINES, pseudo_inline_alts),
+     PARSE_INT(RC_MAX_COOKIES_BUFFER,   max_cookies_buffer),
+     PARSE_INT(RC_MAX_COOKIES_DOMAIN,   max_cookies_domain),
+     PARSE_INT(RC_MAX_COOKIES_GLOBAL,   max_cookies_global),
      PARSE_TIM(RC_MESSAGESECS,          MessageSecs),
      PARSE_SET(RC_MINIMAL_COMMENTS,     minimal_comments),
      PARSE_PRG(RC_MKDIR_PATH,           ppMKDIR),
@@ -1469,6 +1472,10 @@ static Config_Type Config_Table [] =
      PARSE_SET(RC_SUBSTITUTE_UNDERSCORES, use_underscore),
      PARSE_FUN(RC_SUFFIX,               suffix_fun),
      PARSE_FUN(RC_SUFFIX_ORDER,         suffix_order_fun),
+#ifdef SYSLOG_REQUESTED_URLS
+     PARSE_SET(RC_SYSLOG_REQUESTED_URLS, syslog_requested_urls),
+     PARSE_SET(RC_SYSLOG_TEXT,		syslog_txt),
+#endif
      PARSE_FUN(RC_SYSTEM_EDITOR,        system_editor_fun),
      PARSE_STR(RC_SYSTEM_MAIL,          system_mail),
      PARSE_STR(RC_SYSTEM_MAIL_FLAGS,    system_mail_flags),
@@ -1776,7 +1783,7 @@ static void do_read_cfg(const char *cfg_filename,
 		nesting_level - 1);
 	fprintf(stderr, gettext("Last attempted include was '%s',\n"), cfg_filename);
 	fprintf(stderr, gettext("included from '%s'.\n"), parent_filename);
-	exit(EXIT_FAILURE);
+	exit_immediately(EXIT_FAILURE);
     }
     /*
      * Locate and open the file.

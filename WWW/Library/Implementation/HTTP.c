@@ -54,7 +54,7 @@ BOOL redirect_post_content = FALSE;	/* Don't convert to GET? */
 #ifdef USE_SSL
 SSL_CTX *ssl_ctx = NULL;	/* SSL ctx */
 SSL *SSL_handle = NULL;
-int ssl_okay;
+static int ssl_okay;
 
 static void free_ssl_ctx(void)
 {

@@ -193,7 +193,7 @@ mostlyclean:
 clean: mostlyclean
 
 distclean: clean
-	rm -f cat-id-tbl.c stamp-cat-id *.gmo
+	rm -f cat-id-tbl.c stamp-cat-id *.gmo *.mo
 	rm -f makefile makefile.in POTFILES *.mo *.msg *.cat *.cat.m
 
 maintainer-clean: distclean

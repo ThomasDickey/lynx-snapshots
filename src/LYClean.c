@@ -27,7 +27,6 @@ BOOLEAN HadVMSInterrupt = FALSE;
  */
 void cleanup_sig(int sig)
 {
-
 #ifdef IGNORE_CTRL_C
     if (sig == SIGINT) {
 	/*
@@ -128,19 +127,10 @@ void cleanup_sig(int sig)
     }
 #endif /* NOSIGHUP */
 
-#ifndef NOSIGHUP
-    (void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-    (void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-    (void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-    if (no_suspend)
-	(void) signal(SIGTSTP, SIG_DFL);
-#endif /* SIGTSTP */
     if (sig != 0) {
-	exit(EXIT_SUCCESS);
+	exit_immediately(EXIT_SUCCESS);
+    } else {
+	reset_signals();
     }
 }
 

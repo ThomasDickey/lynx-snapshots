@@ -54,6 +54,7 @@
 /*
  *	Function declarations
  */
+extern void reset_signals(void);
 extern void exit_immediately(int status) GCC_NORETURN;
 extern void LYexit(int status) GCC_NORETURN;
 extern int LYatexit(void (*function) (void));

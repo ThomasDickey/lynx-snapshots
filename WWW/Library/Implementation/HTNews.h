@@ -42,6 +42,8 @@ extern char *HTNewsHost;
 extern void HTClearNNTPAuthInfo(void);
 
 #ifdef USE_SSL
+extern SSL_CTX *ssl_ctx;
+
 extern int HTNewsProxyConnect(int sock,
 			      const char *url,
 			      HTParentAnchor *anAnchor,

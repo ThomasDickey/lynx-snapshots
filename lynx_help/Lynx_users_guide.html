@@ -535,6 +535,7 @@ HREF="keystrokes/option_help.html">HELP!</A>
 
   Headers Transferred to Remote Servers
   Personal mail address            : __________________________________________
+  Password for anonymous ftp       : __________________________________________
   Preferred media type (!)         : [Accept lynx's internal types]
   Preferred encoding (!)           : [All_____]
   Preferred document character set : _________________________________
@@ -786,6 +787,16 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
             you instead are prompted for the letter of the desired bookmark
             file, but can enter '<em>=</em>' to invoke the STANDARD selection
             menu, or <em>RETURN</em> for the default bookmark file.
+
+   <dt>Password for anonymous ftp
+        <dd>If this is blank, Lynx will use your personal mail address
+            as the anonymous ftp password.  Though that is the convention,
+            some users prefer to use some other string which provides
+            less information.  If the given value lacks a "@", Lynx also
+            will use your computer's hostname as part of the password.
+            If both this field and the personal mail address are blank,
+            Lynx will use your $USER environment variable, or "WWWuser"
+            if even the environment variable is unset.
 
    <dt>Personal mail address
         <dd>This mail address will be used to help you send files to
@@ -2853,6 +2864,8 @@ where
                     (UNIX only).
              <dt><code>-syslog=<em>text</em></code>
                 <dd>information for syslog call.
+             <dt><code>-syslog-urls</code>
+                <dd>log requested URLs with syslog.
              <dt><code>-tagsoup</code>
                 <dd>initialize DTD with "TagSoup" tables,
                     <A HREF="keystrokes/option_help.html#tagsoup">more details</A>.
