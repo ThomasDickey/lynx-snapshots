@@ -16,13 +16,16 @@ ETC_LIB = lib
 #CS_DEFS = /D "CHAR_BIT=8" /D "USE_HASH" /D "USE_COLOR_STYLE" /D "LINKEDSTYLES"
 #CS_OBJS = "LYHash.obj" "LYStyle.obj"
 
+# Uncomment SOCK_DEFS if you wish to build with winsock2.
+#SOCK_DEFS = /D "USE_WINSOCK2_H"
+
 INCLUDES = \
  /I "." \
  /I "$(SRC_DIR)" \
  /I "$(SRC_DIR)\chrtrans" \
  /I "$(WWW_DIR)" \
  /I "$(ETC_LIB)"
-DEFS = $(CS_DEFS) \
+DEFS = $(CS_DEFS) $(SOCK_DEFS) \
  /D "__WIN32__" \
  /D "_CONSOLE" \
  /D "_MBCS" \
@@ -69,7 +72,7 @@ LIBS     = kernel32.lib user32.lib wsock32.lib /NODEFAULTLIB:libc\
  $(ETC_LIB)\pdcurses.lib $(ETC_LIB)\zlib.lib dirent.obj
 
 COMPILE = $(CC) $(CFLAGS) $(INCLUDES) $(DEFS)
-LINK    = $(LD) $(LDFLAGS) /out:$@
+LINK    = $(LD) $(LDFLAGS) /map:lynx.map /out:$@
 
 OBJS = $(CS_OBJS) \
 	"DefaultStyle.obj" \
@@ -159,6 +162,7 @@ OBJS = $(CS_OBJS) \
 all : lynx.exe
 
 clean :
+	-del *.map
 	-del *.obj
 
 lynx.exe: $(OBJS) dirent.obj

@@ -816,7 +816,7 @@ PUBLIC void HTFileInit NOARGS
 
     HTSetSuffix(".bz2",		"application/x-bzip2", "binary", 1.0);
 
-    HTSetSuffix(".bz2",		"application/x-bzip2", "binary", 1.0);
+    HTSetSuffix(".bz2",		"application/bzip2", "binary", 1.0);
 
 #ifdef TRADITIONAL_SUFFIXES
     HTSetSuffix(".uu",		"application/x-UUencoded", "8bit", 1.0);

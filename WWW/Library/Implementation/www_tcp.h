@@ -56,29 +56,6 @@ Default values
 #define INVSOC (-1)             /* Unix invalid socket */
 		/* NB: newer libwww has something different for Windows */
 
-/* IPv6 support */
-#if defined(HAVE_GETADDRINFO) && defined(HAVE_GAI_STRERROR) && defined(ENABLE_IPV6)
-#	define INET6
-#endif /* HAVE_GETADDRINFO && HAVE_GAI_STRERROR && ENABLE_IPV6 */
-
-#if !defined(__MINGW32__)
-#ifdef INET6
-typedef struct sockaddr_storage SockA;  /* See netinet/in.h */
-#else
-typedef struct sockaddr_in SockA;  /* See netinet/in.h */
-#endif /* INET6 */
-#endif
-
-#ifdef INET6
-#ifdef SIN6_LEN
-#define SOCKADDR_LEN(soc_address) ((struct sockaddr *)&soc_address)->sa_len
-#else
-#define SOCKADDR_LEN(soc_address) SA_LEN((struct sockaddr *)&soc_address)
-#endif /* SIN6_LEN */
-#else
-#define SOCKADDR_LEN(soc_address) sizeof(soc_address)
-#endif /* INET6 */
-
 #ifndef VMS
 
 #include <sys/types.h>
@@ -208,9 +185,29 @@ extern int ws_netread(int fd, char *buf, int len);
 #include <direct.h>
 
 /* FIXME: someone might consider porting to winsock2.h */
-#define USE_WINSOCK_H
+#ifdef USE_WINSOCK2_H
+#include <winsock.h>
 
-#ifdef USE_WINSOCK_H
+#undef EINPROGRESS
+#undef EALREADY
+#undef EISCONN
+#undef EINTR
+#undef EAGAIN
+#undef ENOTCONN
+#undef ECONNRESET
+#undef ETIMEDOUT
+
+#define EINPROGRESS  WSAEINPROGRESS
+#define EALREADY     WSAEALREADY
+#define EISCONN      WSAEISCONN
+#define EINTR        WSAEINTR
+/* fine EAGAIN       WSAEAGAIN */
+#define ENOTCONN     WSAENOTCONN
+#define ECONNRESET   WSAECONNRESET
+#define ETIMEDOUT    WSAETIMEDOUT
+
+#else /* USE_WINSOCK_H */
+
 #include <winsock.h>
 typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 
@@ -230,6 +227,7 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 
 #undef  SOCKET_ERRNO	/* 1997/10/19 (Sun) 18:01:46 */
 #define SOCKET_ERRNO          WSAGetLastError()
+
 #endif	/* USE_WINSOCK_H */
 
 #define INCLUDES_DONE
@@ -803,5 +801,28 @@ typedef unsigned int fd_set;
 #else
 #define set_errno(value) /* we do not know how */
 #endif
+
+/* IPv6 support */
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_GAI_STRERROR) && defined(ENABLE_IPV6)
+#	define INET6
+#endif /* HAVE_GETADDRINFO && HAVE_GAI_STRERROR && ENABLE_IPV6 */
+
+#if !defined(__MINGW32__)
+#ifdef INET6
+typedef struct sockaddr_storage SockA;  /* See netinet/in.h */
+#else
+typedef struct sockaddr_in SockA;  /* See netinet/in.h */
+#endif /* INET6 */
+#endif
+
+#ifdef INET6
+#ifdef SIN6_LEN
+#define SOCKADDR_LEN(soc_address) ((struct sockaddr *)&soc_address)->sa_len
+#else
+#define SOCKADDR_LEN(soc_address) SA_LEN((struct sockaddr *)&soc_address)
+#endif /* SIN6_LEN */
+#else
+#define SOCKADDR_LEN(soc_address) sizeof(soc_address)
+#endif /* INET6 */
 
 #endif /* TCP_H */

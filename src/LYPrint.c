@@ -56,9 +56,9 @@
 #define MAIL	  4
 #define PRINTER   5
 
-#ifdef VMS
+#if USE_VMS_MAILER
 PRIVATE int remove_quotes PARAMS((char *string));
-#endif /* VMS */
+#endif /* USE_VMS_MAILER */
 
 PRIVATE  char* subject_translate8bit PARAMS((char *source));
 
@@ -478,17 +478,17 @@ PRIVATE void send_file_to_mail ARGS3(
 {
     static BOOLEAN first_mail_preparsed = TRUE;
 
-#ifdef VMS
-    BOOLEAN isPMDF = !strncasecomp(system_mail, "PMDF SEND", 9);
+#if USE_VMS_MAILER
+    BOOLEAN isPMDF = LYMailPMDF();
     FILE *hfd;
     char hdrfile[LY_MAXPATH];
 #endif
+    BOOL use_mime;
 #if !CAN_PIPE_TO_MAILER
     char my_temp[LY_MAXPATH];
 #endif
 
     BOOL use_cte;
-    BOOL use_mime;
     BOOL use_type;
     CONST char *disp_charset;
     FILE *outfile_fp;
@@ -536,19 +536,19 @@ PRIVATE void send_file_to_mail ARGS3(
      * and 8-bit letters shouldn't be a problem - LP
      */
     /* change_sug_filename(sug_filename); */
-   subject = subject_translate8bit(newdoc->title);
+    subject = subject_translate8bit(newdoc->title);
 
-   if (newdoc->isHEAD) {
-	   /*
-	    * Special case for mailing HEAD responce:  this is rather technical
-	    * information, show URL.
-	    */
-	   FREE(subject);
-	   StrAllocCopy(subject, "HEAD  ");
-	   StrAllocCat(subject, newdoc->address);
+    if (newdoc->isHEAD) {
+	/*
+	 * Special case for mailing HEAD responce:  this is rather technical
+	 * information, show URL.
+	 */
+	FREE(subject);
+	StrAllocCopy(subject, "HEAD  ");
+	StrAllocCat(subject, newdoc->address);
     }
 
-#ifdef VMS
+#if USE_VMS_MAILER
     if (strchr(user_response,'@') && !strchr(user_response,':') &&
        !strchr(user_response,'%') && !strchr(user_response,'"')) {
 	char *temp = 0;
@@ -604,6 +604,11 @@ PRIVATE void send_file_to_mail ARGS3(
 	 *	X-URL header. - FM
 	 */
 	fprintf(hfd, "X-URL: %s\n", newdoc->address);
+	/*
+	 * For PMDF, put the subject in the header file and close it.  - FM
+	 */
+	fprintf(hfd, "Subject: %.70s\n\n", subject);
+	LYCloseTempFP(hfd);
     }
 
     /*
@@ -629,11 +634,6 @@ PRIVATE void send_file_to_mail ARGS3(
 
     buffer = NULL;
     if (isPMDF) {
-	/*
-	 * For PMDF, put the subject in the header file and close it.  - FM
-	 */
-	fprintf(hfd, "Subject: %.70s\n\n", subject);
-	LYCloseTempFP(hfd);
 	/*
 	 * Now set up the command.  - FM
 	 */
@@ -672,8 +672,7 @@ PRIVATE void send_file_to_mail ARGS3(
 #else /* !VMS (Unix or DOS) */
 
 #if CAN_PIPE_TO_MAILER
-    HTSprintf0(&buffer, "%s %s", system_mail, system_mail_flags);
-    outfile_fp = popen(buffer, "w");
+    outfile_fp = LYPipeToMailer();
 #else
     outfile_fp = LYOpenTemp(my_temp, ".txt", "w");
 #endif
@@ -773,30 +772,18 @@ PRIVATE void send_file_to_mail ARGS3(
     if (keypad_mode)
 	printlist(outfile_fp, FALSE);
 
-#if defined(WIN_EX) || defined(__DJGPP__)
-#if USE_BLAT_MAILER
-    if (mail_is_blat)
-	HTSprintf0(&buffer, "%s %s -t \"%s\"",
-		   system_mail, my_temp, user_response);
-    else
-#endif
-	HTSprintf0(&buffer, "%s -t \"%s\" -F %s",
-		   system_mail, user_response, my_temp);
-    LYCloseTempFP(outfile_fp);	/* Close the tmpfile. */
-
-    stop_curses();
-    SetOutputMode(O_TEXT);
-    printf("%s\n\n$ %s\n\n%s", gettext("Sending"), buffer, PLEASE_WAIT);
-    LYSystem(buffer);
-    LYSleepMsg();
-    start_curses();
-    SetOutputMode( O_BINARY );
-
-    LYRemoveTemp(my_temp); /* Delete the tmpfile. */
-#else /* !WIN_EX && !__DJGPP__ */
+#if CAN_PIPE_TO_MAILER
     pclose(outfile_fp);
-#endif /* WIN_EX || __DJGPP__ */
-#endif /* VMS */
+#else
+    LYSendMailFile (
+	    user_response,
+	    my_temp,
+	    subject,
+	    "",
+	    "");
+    LYRemoveTemp(my_temp); /* Delete the tmpfile. */
+#endif /* CAN_PIPE_TO_MAILER */
+#endif /* USE_VMS_MAILER */
 
 done:	/* send_file_to_mail() */
     FREE(buffer);
@@ -1201,7 +1188,7 @@ PUBLIC int printfile ARGS1(
     return(NORMAL);
 }
 
-#ifdef VMS
+#if USE_VMS_MAILER
 PRIVATE int remove_quotes ARGS1(
 	char *,		string)
 {
@@ -1217,7 +1204,7 @@ PRIVATE int remove_quotes ARGS1(
 
    return(0);
 }
-#endif /* VMS */
+#endif /* USE_VMS_MAILER */
 
 /*
  *  Mail subject may have 8-bit characters and they are in display charset.

@@ -192,7 +192,6 @@
 #define NO_ADDRESS_IN_MAILTO_URL gettext("No email address is present in mailto URL!")
 #define MAILTO_URL_TEMPOPEN_FAILED \
  gettext("Unable to open temporary file for mailto URL!")
-#define COMMENT_REQUEST_CANCELLED gettext("Comment request cancelled!!!")
 #define INC_ORIG_MSG_PROMPT \
  gettext("Do you wish to include the original message?")
 #define INC_PREPARSED_MSG_PROMPT \

@@ -1031,7 +1031,7 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
 #if defined(PDCURSES)
     if (state)
 	mouse_set(
-	    	BUTTON1_CLICKED | BUTTON1_PRESSED | BUTTON1_RELEASED |
+		BUTTON1_CLICKED | BUTTON1_PRESSED | BUTTON1_RELEASED |
 		BUTTON2_CLICKED | BUTTON2_PRESSED | BUTTON2_RELEASED |
 		BUTTON3_CLICKED | BUTTON3_PRESSED | BUTTON3_RELEASED);
 #endif
@@ -1066,7 +1066,7 @@ PUBLIC void stop_curses NOARGS
 	if(LYscreen) {
 	    endwin();	/* stop curses */
 	    LYDELSCR();
-	 }
+	}
 #endif
     }
 #ifdef SH_EX
@@ -1102,7 +1102,7 @@ PUBLIC void stop_curses NOARGS
  *  Check terminal type, start curses & setup terminal.
  */
 PUBLIC BOOLEAN setup ARGS1(
-	char *, 	terminal)
+	char *,		terminal)
 {
     int c;
     int status;
@@ -1180,7 +1180,7 @@ PUBLIC BOOLEAN setup ARGS1(
  *  Check terminal type, start curses & setup terminal.
  */
 PUBLIC BOOLEAN setup ARGS1(
-	char *, 	terminal)
+	char *,		terminal)
 {
     char *term_putenv = NULL;
     char *buffer = NULL;
@@ -1310,7 +1310,7 @@ PUBLIC BOOLEAN setup ARGS1(
 }
 
 PRIVATE int dumbterm ARGS1(
-	char *, 	terminal)
+	char *,		terminal)
 {
     int dumb = FALSE;
 
@@ -1547,11 +1547,11 @@ PUBLIC void LYwaddnstr ARGS3(
 
 #define EFN	0			/* Event flag			*/
 
-static	unsigned char buffer[20];	/* Input buffer 		*/
-static	int	in_pos, in_len; 	/* For escape sequences 	*/
+static	unsigned char buffer[20];	/* Input buffer			*/
+static	int	in_pos, in_len;		/* For escape sequences		*/
 static	int	oldmode[3];		/* Old TTY mode bits		*/
 static	int	newmode[3];		/* New TTY mode bits		*/
-static	short	iochan; 		/* TTY I/O channel		*/
+static	short	iochan;			/* TTY I/O channel		*/
 static	$DESCRIPTOR(term_nam_dsc,"TT"); /* Descriptor for iochan	*/
 static	unsigned long mask = LIB$M_CLI_CTRLY|LIB$M_CLI_CTRLT; /* ^Y and ^T */
 static	unsigned long old_msk;		/* Saved control mask		*/
@@ -1560,7 +1560,7 @@ BOOLEAN DidCleanup = FALSE;		/* Exit handler flag		*/
 static char VersionVMS[20];		/* Version of VMS		*/
 
 PUBLIC int VMSVersion ARGS2(
-	char *, 	VerString,
+	char *,		VerString,
 	int,		VerLen)
 {
      unsigned long status, itm_cod = SYI$_VERSION;
@@ -1880,12 +1880,12 @@ void (*func)();
  */
 #ifdef __DECC
 PRIVATE unsigned int DCLspawn_exception ARGS2(
-	void *, 	sigarr,
-	void *, 	mecharr)
+	void *,		sigarr,
+	void *,		mecharr)
 #else
 PRIVATE int DCLspawn_exception ARGS2(
-	void *, 	sigarr,
-	void *, 	mecharr)
+	void *,		sigarr,
+	void *,		mecharr)
 #endif /* __DECC */
 {
      int status;
@@ -1895,7 +1895,7 @@ PRIVATE int DCLspawn_exception ARGS2(
 }
 
 PRIVATE int spawn_DCLprocess ARGS1(
-	char *, 	command)
+	char *,		command)
 {
      int status;
      unsigned long Status = 0;
@@ -1945,7 +1945,7 @@ PRIVATE int spawn_DCLprocess ARGS1(
 }
 
 PUBLIC int DCLsystem ARGS1(
-	char *, 	command)
+	char *,		command)
 {
      int status;
      extern void controlc();

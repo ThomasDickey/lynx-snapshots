@@ -306,7 +306,7 @@ PUBLIC CONST char * HTInetString ARGS1(
 	    hostbuf, sizeof(hostbuf), NULL, 0, NI_NUMERICHOST);
     return hostbuf;
 #else
-    static char string[16];
+    static char string[20];
     sprintf(string, "%d.%d.%d.%d",
 	    (int)*((unsigned char *)(&soc_in->sin_addr)+0),
 	    (int)*((unsigned char *)(&soc_in->sin_addr)+1),
@@ -687,7 +687,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
     }
 
 #ifdef _WINDOWS_NSL
-    strncpy(host, str, (size_t)512);
+    strncpy(host, str, sizeof(host));
 #endif /*  _WINDOWS_NSL */
 
     if (!valid_hostname(host)) {
@@ -1171,21 +1171,23 @@ failed:
 **		field is left unchanged in *soc_in.
 */
 #ifdef INET6
-PUBLIC int HTParseInet ARGS3(
- 	SockA *,	soc_in,
+PRIVATE int HTParseInet ARGS3(
+	SockA *,	soc_in,
 	CONST char *,	str,
-	int, default_port)
-{
-    char portstr[NI_MAXSERV];
+	int,		default_port)
 #else
-PUBLIC int HTParseInet ARGS2(
+PRIVATE int HTParseInet ARGS2(
 	SockA *,	soc_in,
 	CONST char *,	str)
-{
 #endif /* INET6 */
+{
     char *port;
+#ifdef INET6
+    char portstr[NI_MAXSERV];
+#else
     int dotcount_ip = 0;	/* for dotted decimal IP addr */
     char *strptr;
+#endif
 #ifndef _WINDOWS_NSL
     char *host = NULL;
 #endif /* _WINDOWS_NSL */
@@ -1200,7 +1202,7 @@ PUBLIC int HTParseInet ARGS2(
 	return -1;
     }
 #ifdef _WINDOWS_NSL
-    strncpy(host, str, (size_t)512);
+    strncpy(host, str, sizeof(host));
 #else
     StrAllocCopy(host, str);	/* Make a copy we can mutilate */
 #endif /*  _WINDOWS_NSL */
@@ -1214,11 +1216,12 @@ PUBLIC int HTParseInet ARGS2(
 	port = strrchr(strrchr(host, ']'), ':');
 
     if (port) {
-      *port++ = 0;            /* Chop off port */
+	*port++ = 0;		/* Chop off port */
     }
     else {
-      sprintf(portstr,"%d", default_port);
-      port = portstr;
+	sprintf(portstr,"%d", default_port);
+	port = portstr;
+    }
 #else
     if ((port = strchr(host, ':')) != NULL) {
 	*port++ = 0;		/* Chop off port */
@@ -1233,7 +1236,7 @@ PUBLIC int HTParseInet ARGS2(
 	    soc_in->sin_port = htons((unsigned short)strtol(port,&strptr,10));
 #endif /* Decnet */
 #endif /* Unix vs. VMS */
-#ifdef SUPPRESS 	/* 1. crashes!?!.  2. URL syntax has number not name */
+#ifdef SUPPRESS		/* 1. crashes!?!.  2. URL syntax has number not name */
 	} else {
 	    struct servent * serv = getservbyname(port, (char*)0);
 	    if (serv) {
@@ -1250,8 +1253,8 @@ PUBLIC int HTParseInet ARGS2(
 	    HTAlwaysAlert(NULL, gettext("Address has invalid port"));
 	    return -1;
 	}
-#endif /* INET6 */
     }
+#endif /* INET6 */
 
 #ifdef DECNET
     /*
@@ -1424,11 +1427,11 @@ failed:
     FREE(host);
 #endif /* _WINDOWS_NSL */
     switch (lynx_nsl_status) {
-        case HT_NOT_ACCEPTABLE:
-        case HT_INTERRUPTED:
+	case HT_NOT_ACCEPTABLE:
+	case HT_INTERRUPTED:
 	    return lynx_nsl_status;
-        default:
-        return -1;
+	default:
+	return -1;
     }
 }
 
@@ -1589,14 +1592,12 @@ PUBLIC int HTDoConnect ARGS4(
 	int,		default_port,
 	int *,		s)
 {
-    int status;
+    int status = 0;
     char *line = NULL;
     char *p1 = NULL;
     char *at_sign = NULL;
     char *host = NULL;
 #ifdef INET6
-    int error;
-    struct sockaddr *sa;
     struct addrinfo *res, *res0;
 #else
     struct sockaddr_in soc_address;
@@ -1631,11 +1632,12 @@ PUBLIC int HTDoConnect ARGS4(
     _HTProgress(host);
     res0 = HTGetAddrInfo(host, default_port);
     if (res0 == NULL) {
-	sprintf (line, "Unable to locate remote host %s.", host);
+	HTSprintf0 (&line, gettext("Unable to locate remote host %s."), host);
 	_HTProgress(line);
 	FREE(host);
 	FREE(line);
 	return HT_NO_DATA;
+    }
 #else
     status = HTParseInet(soc_in, host);
     if (status) {
@@ -1656,8 +1658,8 @@ PUBLIC int HTDoConnect ARGS4(
 	FREE(host);
 	FREE(line);
 	return status;
-#endif /* INET6 */
     }
+#endif /* INET6 */
 
     HTSprintf0 (&line, gettext("Making %s connection to %s"), protocol, host);
     _HTProgress (line);
@@ -1675,7 +1677,7 @@ PUBLIC int HTDoConnect ARGS4(
 	    getnameinfo(res->ai_addr, res->ai_addrlen,
 		    hostbuf, sizeof(hostbuf), portbuf, sizeof(portbuf),
 		    NI_NUMERICHOST|NI_NUMERICSERV);
-	    HTSprintf0 (&line, "socket failed: family %d addr %s port %s.",
+	    HTSprintf0 (&line, gettext("socket failed: family %d addr %s port %s."),
 		    res->ai_family, hostbuf, portbuf);
 	    _HTProgress (line);
 	    FREE(line);
@@ -1753,7 +1755,11 @@ PUBLIC int HTDoConnect ARGS4(
     **			       the normal case.
     */
     if ((status < 0) &&
-	(SOCKET_ERRNO == EINPROGRESS || SOCKET_ERRNO == EAGAIN)) {
+	(SOCKET_ERRNO == EINPROGRESS
+#ifdef EAGAIN
+	 || SOCKET_ERRNO == EAGAIN
+#endif
+	 )) {
 	struct timeval timeout;
 	int ret;
 	int tries=0;
@@ -1895,7 +1901,11 @@ PUBLIC int HTDoConnect ARGS4(
 				 sizeof(soc_address));
 #endif /* INET6 */
 		if ((status < 0) &&
-		    (SOCKET_ERRNO != EALREADY && SOCKET_ERRNO != EAGAIN) &&
+		    (SOCKET_ERRNO != EALREADY
+#ifdef EAGAIN
+		    && SOCKET_ERRNO != EAGAIN
+#endif
+		    ) &&
 #ifdef UCX
 		    (SOCKET_ERRNO != 18242) &&
 #endif /* UCX */
@@ -1934,10 +1944,11 @@ PUBLIC int HTDoConnect ARGS4(
 #endif /* INET6 */
 #endif /* !__DJGPP__ */
 #ifdef INET6
-    if (*s < 0) {
+    if (*s < 0)
 #else
-    if (status < 0) {
+    if (status < 0)
 #endif /* INET6 */
+    {
 	/*
 	**  The connect attempt failed or was interrupted,
 	**  so close up the socket.
