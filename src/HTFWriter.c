@@ -544,6 +544,8 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 
     if (dump_output_immediately) {
         ret_obj->fp = stdout; /* stdout*/
+	if (HTOutputFormat == HTAtom_for("www/download"))
+	    goto Prepend_BASE;
         return ret_obj;
     }
 
@@ -708,6 +710,7 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
     _statusline(RETRIEVING_FILE);
 
     StrAllocCopy(anchor->FileCache, fnam);
+Prepend_BASE:
     if (!strncasecomp(pres->rep->name, "text/html", 9)) {
         /*
 	 *  Add the document's base as a BASE tag at the top of the file,

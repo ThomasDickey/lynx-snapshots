@@ -41,6 +41,10 @@
        set authorization ID and password for protected documents
        at startup.
 
+  -base
+       prepend a request URL comment and BASE tag to text/html
+       outputs for -source or -mime_header dumps.
+
   -book
        use the bookmark page as the startfile.  The default or command
        line startfile is still set for the Main screen command, and will
@@ -358,7 +362,7 @@
  o Type "k" for a complete list of the current key-stroke command mappings.
 
 2 NOTES
- This is the Lynx v2.6 Release for Unix/VMS
+ This is the Lynx v2.7 Release for Unix/VMS
 
  If you wish to contribute to the further development of Lynx, subscribe
  to our mailing list.  Send email to <majordomo@sig.net> with
@@ -385,7 +389,7 @@
  ported much of Lynx to VMS and did or organized most of its development
  since the departures of Lou Montulli and Garrett Blythe from the
  University of Kansas in the summer of 1994 through the current release
- of v2.6, and to everyone on the net who has contributed to Lynx's
+ of v2.7, and to everyone on the net who has contributed to Lynx's
  development either directly (through patches, comments or bug reports)
  or indirectly (through inspiration and development of other systems).
 

@@ -6,11 +6,11 @@ SHELL = /bin/sh
 #MAKE= make
 
 ##this is the name of the directory the lynx source code is in.
-##(e.g. lynx2-6, not the full path)
-lynxdir= lynx2-6FM
+##(e.g. lynx2-7, not the full path)
+lynxdir= lynx2-7
 
 ##this is the filename for .zip, .tar and .tar.Z archives.
-lynxname= lynx2-6fm
+lynxname= lynx2-7
 
 ##change the next line if you want lynx installed somewhere
 ##besides /usr/local/bin

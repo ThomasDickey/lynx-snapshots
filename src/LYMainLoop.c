@@ -321,18 +321,23 @@ try_again:
 		     *  Do any error logging, if appropriate.
 		     */
 		    LYoverride_no_cache = FALSE; /* Was TRUE if popped. - FM */
-		    if (error_logging && !first_file && owner_address &&
-		        !LYCancelledFetch) {
+		    if (error_logging && 
+		        first_file && owner_address && !LYCancelledFetch) {
 		        /*
-			 *  Send an error message.
+			 *  Email a bad link message to the owner of
+			 *  the document (but NOT to lynx-dev). - FM
 			 */
-		        if (!strncasecomp(owner_address, "mailto:", 7)) {
-			    mailmsg(curdoc.link,
-			    	    (owner_address+7), 
-				    history[nhist-1].address,
-				    history[nhist-1].title);
+		        if (strncasecomp(owner_address, "mailto:", 7)) {
+			    if (strncasecomp((owner_address + 7),
+			    		     "lynx-dev@", 9)) {
+				mailmsg(curdoc.link,
+					(owner_address+7), 
+					history[nhist-1].address,
+					history[nhist-1].title);
+			    }
 		        }
-		    } else if (traversal && !first_file && !LYCancelledFetch) {
+		    }
+		    if (traversal && !first_file && !LYCancelledFetch) {
 		        FILE *ofp;
 
 		        if ((ofp = fopen(TRAVERSE_ERRORS,"a+")) == NULL) {
@@ -2187,7 +2192,21 @@ check_recall:
 	    /*
 	     *  Get rid of leading spaces (and any other spaces).
 	     */
-	    collapse_spaces(user_input_buffer);
+	    LYTrimHead(user_input_buffer);
+	    if (!strncasecomp(user_input_buffer, "lynxexec:", 9) ||
+	        !strncasecomp(user_input_buffer, "lynxprog:", 9)) {
+		/*
+		 *  The original implementions of these schemes expected
+		 *  white space without hex escaping, and did not check
+		 *  for hex escaping, so we'll continue to support that,
+		 *  until that code is redone in conformance with SGML
+		 *  principles.  - FM
+		 */
+		HTUnEscapeSome(user_input_buffer, " \r\n\t");
+		convert_to_spaces(user_input_buffer, TRUE);
+	    } else {
+	        collapse_spaces(user_input_buffer);
+	    }
 	    if (*user_input_buffer == '\0' &&
 	        !(recall && (ch == UPARROW || ch == DNARROW))) {
 		strcpy(user_input_buffer, temp);
@@ -3871,60 +3890,77 @@ check_add_bookmark_to_self:
 
 	case LYK_JUMP:
 	    {
-	      char *ret;
+		char *ret;
 
-	      if (no_jump || JThead == NULL) {
-	          if (old_c != real_c) {
-	   	      old_c = real_c;
-		      if (no_jump)
-	    	          _statusline(JUMP_DISALLOWED);
-		      else
-		          _statusline(NO_JUMPFILE);
-		      sleep(MessageSecs);
-		  }
-	      } else {
-		  LYJumpFileURL = TRUE;
-	          if ((ret = LYJump(c)) != NULL) {
+		if (no_jump || JThead == NULL) {
+		    if (old_c != real_c) {
+			old_c = real_c;
+			if (no_jump)
+			    _statusline(JUMP_DISALLOWED);
+			else
+			    _statusline(NO_JUMPFILE);
+			sleep(MessageSecs);
+		    }
+		} else {
+		    LYJumpFileURL = TRUE;
+		    if ((ret = LYJump(c)) != NULL) {
 #ifdef PERMIT_GOTO_FROM_JUMP
-		      if (!strncasecomp(ret, "Go ", 3)) {
-		          LYJumpFileURL = FALSE;
-			  StrAllocCopy(temp, user_input_buffer);
-			  URLTotal = (Goto_URLs ? HTList_count(Goto_URLs) : 0);
-			  recall = ((URLTotal >= 1) ? RECALL : NORECALL);
-			  URLNum = URLTotal;
-			  FirstURLRecall = TRUE;
-			  if (!strcasecomp(ret, "Go :")) {
-			      if (recall) {
-			          ch = UPARROW;
-				  goto check_recall;
-			      }
-			      FREE(temp);
-			      statusline(NO_RANDOM_URLS_YET);
-			      sleep(MessageSecs);
-			      break;
-			  }
-			  ret = HTParse((ret+3), startfile, PARSE_ALL);
-			  strcpy(user_input_buffer, ret);
-			  FREE(ret);
-			  goto check_recall;
-		      }
+			if (!strncasecomp(ret, "Go ", 3)) {
+			    LYJumpFileURL = FALSE;
+			    StrAllocCopy(temp, user_input_buffer);
+			    URLTotal = (Goto_URLs ?
+			  HTList_count(Goto_URLs) : 0);
+			    recall = ((URLTotal >= 1) ? RECALL : NORECALL);
+			    URLNum = URLTotal;
+			    FirstURLRecall = TRUE;
+			    if (!strcasecomp(ret, "Go :")) {
+				if (recall) {
+				    ch = UPARROW;
+				    goto check_recall;
+			        }
+			        FREE(temp);
+			        statusline(NO_RANDOM_URLS_YET);
+			        sleep(MessageSecs);
+			        break;
+			    }
+			    ret = HTParse((ret+3), startfile, PARSE_ALL);
+			    strcpy(user_input_buffer, ret);
+			    FREE(ret);
+			    goto check_recall;
+			}
 #endif /* PERMIT_GOTO_FROM_JUMP */
-		      ret = HTParse(ret, startfile, PARSE_ALL);
-		      StrAllocCopy(newdoc.address, ret);
-		      StrAllocCopy(lynxjumpfile, ret);
-		      FREE(newdoc.post_data);
-	    	      FREE(newdoc.post_content_type);
-		      FREE(newdoc.bookmark);
-		      newdoc.isHEAD = FALSE;
-		      newdoc.safe = FALSE;
-		      FREE(ret);
-		      LYUserSpecifiedURL = TRUE;
-		  } else {
-		      LYJumpFileURL = FALSE;
-		  }
-	      }
-	      break;
+			ret = HTParse(ret, startfile, PARSE_ALL);
+			LYTrimHead(ret);
+			if (!strncasecomp(ret, "lynxexec:", 9) ||
+			    !strncasecomp(ret, "lynxprog:", 9)) {
+			    /*
+			     *  The original implementions of these schemes
+			     *  expected white space without hex escaping,
+			     *  and did not check for hex escaping, so we'll
+			     *  continue to support that, until that code is
+			     *  redone in conformance with SGML principles.
+			     *  - FM
+			     */
+			    HTUnEscapeSome(ret, " \r\n\t");
+			    convert_to_spaces(ret, TRUE);
+			} else {
+			    collapse_spaces(user_input_buffer);
+			}
+			StrAllocCopy(newdoc.address, ret);
+			StrAllocCopy(lynxjumpfile, ret);
+			FREE(newdoc.post_data);
+			FREE(newdoc.post_content_type);
+			FREE(newdoc.bookmark);
+			newdoc.isHEAD = FALSE;
+			newdoc.safe = FALSE;
+			FREE(ret);
+			LYUserSpecifiedURL = TRUE;
+		    } else {
+			LYJumpFileURL = FALSE;
+		    }
+		}
 	    }
+	    break;
 
 #ifdef NOT_USED
 	case LYK_VERSION:

@@ -11,10 +11,8 @@ they will be outlined in this file.
 
     Screen resizing can be a bit funny.  If you resize the screen, 
     documents that have been cached will be out of whack.  Any further 
-    documents will look fine.  This is a curses program anyway, so 
-    resizeable terminals are not that common.  On some systems 
-    (i.e. HP/UX) terminal resizing does not work at all.
-    You can reload documents to the current window size with CTRL-R
+    documents will look fine.  You can reload documents to the current
+    window size with CTRL-R
 
     On a Sun system, the message:
         "Alert!:  Unable to connect to remote host"
@@ -91,6 +89,8 @@ they will be outlined in this file.
           the select() problem, so that "-lc" is no longer needed, but the
 	  curses glitch is not yet fixed, and you should still include
 	  "-lHcurses". 
+    Updated NOTE (02-03-97): The problems reportedly are fixed with
+    	  patches PHCO_8086 and PHCO_8947 from HP.
 
     Lynx juggles variable abilities of curses packages or emulations to
     display bolding and underlining simultaneously.  One consequence of
@@ -108,8 +108,10 @@ they will be outlined in this file.
     libwww-FM had previously been successful in dealing with this problem
     across all versions of MultiNet and of DECC, VAXC, and Pat Rankin's
     VMS port of GNUC, but are now not 100% successful.  If you get compiler
-    messages about "struct timeval timeout" having no linkage, add this
-    immediately below the inclusion of ioctl.h for MultiNet in tcp.h:
+    messages about "struct timeval timeout" having no linkage, add that
+    declaration immediately below the inclusion of ioctl.h for MultiNet in
+    tcp.h (by deleting the "#ifdef NOT_DEFINED" and "#endif /* NOT_DEFINED */"
+    lines):
     [...]
     #include "multinet_root:[multinet.include.sys]ioctl.h"
     struct timeval {
@@ -117,4 +119,8 @@ they will be outlined in this file.
         long tv_usec;		/* microseconds */
     };
     [...]
+    If you get compiler warnings about incompatible multinet_foo()
+    declarations, delete those where indicated in tcp.h.  For the most
+    current versions of MultiNet, you can modify tcp.h to use the DECC
+    socket and related headers.
 

@@ -1,12 +1,12 @@
 <!DOCTYPE html public "-//IETF//DTD HTML 3.0//EN">
 <html>
 <head>
-<title>Lynx Users Guide v2.6FM</title>
+<title>Lynx Users Guide v2.7</title>
 <link rev="made" href="mailto:lynx-dev@sig.net">
 </head>
 
 <body>
-<h1>Lynx Users Guide v2.6FM</h1>
+<h1>Lynx Users Guide v2.7</h1>
 
 Lynx is a fully-featured <em>World Wide Web</em> (<em>WWW</em>) client
 for users running cursor-addressable, character-cell display devices (e.g.,
@@ -536,7 +536,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    English alphabet), for editing their filenames and locations
 	    (<em>filepath</em>), and descriptions.  Lynx will create bookmark
 	    files, if they don't already exist, when you first '<em>a</em>'dd
-	    a bookmark link to them.  However, if you've specifed a
+	    a bookmark link to them.  However, if you've specified a
 	    subdirectory (e.g., ./BM/lynx_bookmarks.html), that subdirectory
 	    must already exist.  Note that on VMS you should use the URL
 	    syntax for the filepath (e.g., <em>not</em>
@@ -669,7 +669,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	<dd>The header string which Lynx sends to servers to indicate the
 	    User-Agent is displayed here.  Changes may be disallowed via
 	    the <em>-restrictions</em> switch.  Otherwise, the header can be
-	    changed temporarily to a string such as <em>L_y_n_x/2.6</em>
+	    changed temporarily to a string such as <em>L_y_n_x/2.7</em>
 	    for access to sites which discriminate against Lynx based on
 	    checks for the presence of &quot;Lynx&quot; in the header. If
 	    changed during a Lynx session, the default User-Agent header can
@@ -1131,13 +1131,13 @@ to the VALUE, as it would for a normal submit button.  Some document
 authors incorrectly use an ALT instead of VALUE attribute for this purpose.
 Lynx "cooperates" by treating ALT as a synonym for VALUE when present in
 an INPUT tag with TYPE="image".  If neither a VALUE nor an ALT attribute
-is present, Lynx dispays "[IMAGE]-Submit" as the string for such buttons.
+is present, Lynx displays "[IMAGE]-Submit" as the string for such buttons.
 If clickable images is set, the "[IMAGE]" portion of the string is a link
 for the image, and the "Submit" portion is the button for submitting the
 form.  Otherwise, the entire string is treated as a submit button.  If
 a VALUE or ALT attribute is present and clickable images is set, Lynx
 prepends "[IMAGE]" as a link for the image, followed by '-' and then
-the attribute's value as the dispayed string for the submit button.
+the attribute's value as the displayed string for the submit button.
 Note that earlier versions of Lynx would send a name=value pair instead of
 a 0,0 coordinate pair if a TYPE="image" submit button was NAME-ed, had a
 VALUE attribute in the INPUT tag, and was used to submit the form.  The
@@ -1584,7 +1584,7 @@ TYPE="hidden" can be used as a sort of state management by <a href="#19"
 >HTML Forms</a>, a more general approach involves exchanges of MIME
 headers between the server and browser.  When replying to a request,
 the server can send a <em>Set-Cookie</em> MIME header which contains
-information (<em>cookies</em>) relevent to the browser's request, and in
+information (<em>cookies</em>) relevant to the browser's request, and in
 subsequent requests the browser can send a <em>Cookie</em> MIME header
 with information derived from previously received cookies.
 
@@ -1682,6 +1682,9 @@ where
     		<dd>used to specify the anonymous account.
 	     <dt><code>-auth=ID:PW</code>
 		<dd>id and password for protected pages.
+	     <dt><code>-base</code>
+		<dd>prepend a request URL comment and BASE tag to text/html
+		    outputs for -source or -mime_header dumps.
 	     <dt><code>-book</code>
 		<dd>use the bookmark page as the startfile.  The default or
                     command line startfile is still set for the Main screen
@@ -2014,7 +2017,8 @@ Craig Lavender.
 developed and supported Lynx since release of v2.3 in May 1994. The
 Lynx2-3FM code set was released as v2.4 in June 1995. The Lynx2-4FM
 code set was released as v2.5 in May 1996. The Lynx2-5FM code set was
-released as v2.6 in September 1996.
+released as v2.6 in September 1996. The Lynx2-6FM code set was released
+as v2.7 in February 1997.
 
 <p>Lynx has incorporated code from a variety of sources along the
 way.  The earliest versions of Lynx included code from Earl Fogel

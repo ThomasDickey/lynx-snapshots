@@ -57,13 +57,13 @@ PUBLIC void HTFormatInit NOARGS
  if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0') {	/* Must have X11 */
   HTSetPresentation("application/postscript", "ghostview %s&",
   							    1.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/gif",        XLOADIMAGE_COMMAND, 1.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/x-xbm",      XLOADIMAGE_COMMAND, 1.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/x-xbitmap",  XLOADIMAGE_COMMAND, 1.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/x-png",      XLOADIMAGE_COMMAND, 1.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/x-rgb",      XLOADIMAGE_COMMAND, 1.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/x-tiff",     XLOADIMAGE_COMMAND, 1.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/jpeg",       XLOADIMAGE_COMMAND, 1.0, 3.0, 0.0, 0);
+  HTSetPresentation("image/gif",        XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+  HTSetPresentation("image/x-xbm",      XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+  HTSetPresentation("image/x-xbitmap",  XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+  HTSetPresentation("image/x-png",      XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+  HTSetPresentation("image/x-rgb",      XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+  HTSetPresentation("image/x-tiff",     XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+  HTSetPresentation("image/jpeg",       XLoadImageCommand,  1.0, 3.0, 0.0, 0);
   HTSetPresentation("video/mpeg",       "mpeg_play %s &",   1.0, 3.0, 0.0, 0);
 
  }

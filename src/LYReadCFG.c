@@ -987,7 +987,7 @@ PUBLIC void read_cfg ARGS1(
 #endif /* VMS */
 
 	} else if (!strncasecomp(buffer, "USE_SELECT_POPUPS:", 18)) {
-		LYSelectPopups = is_true(buffer+18);
+	    LYSelectPopups = is_true(buffer+18);
 	}
 	break;
 
@@ -1043,6 +1043,12 @@ PUBLIC void read_cfg ARGS1(
 	break;
 
 	case 'W':
+	if (!strncasecomp(buffer, "XLOADIMAGE_COMMAND:", 19)) {
+	    StrAllocCat(XLoadImageCommand, (char *)&buffer[19]);
+	}
+	break;
+
+	case 'X':
 	if (!strncasecomp(buffer, "wais_proxy:", 11)) {
 	    if (getenv("wais_proxy") == NULL) {
 #ifdef VMS

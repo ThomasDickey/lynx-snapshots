@@ -94,12 +94,17 @@
 #define PERSONAL_MAILCAP ".mailcap"
 
 /**************************
- * This define will be used for a default in src/HTInit.c.
- * Make it the full path and name of the xloadimage command.
- * Put 'echo' or something like it here if you don't have it.
- * It can be anything that will handle GIF, TIFF and other
- * popular image formats (xv does).
- * You must also have a "%s" for the filename
+ * XLOADIMAGE_COMMAND will be used as a default in src/HTInit.c
+ * for viewing image/* content types when the DECW$DISPLAY logical
+ * is set.  Make it the foreign command for your system's X image
+ * viewer (commonly, "xv").  Make it "exit" or something like that
+ * if you don't have one.  It can be anything that will handle GIF,
+ * TIFF and other popular image formats.  Freeware ports of xv for
+ * VMS are available in the ftp://ftp.wku.edu/vms/unsupported and
+ * http://www.openvms.digital.com/cd/XV310A/ subdirectories.  You
+ * must also have a "%s" for the filename.  The default defined
+ * here can be overridden in lynx.cfg, or via the global or personal
+ * mailcap files.
  */
 #define XLOADIMAGE_COMMAND "xv %s"
 
@@ -139,6 +144,10 @@
  *
  * Define INEWS as "none" if you do not have access to an ANU-NEWS
  * client with a server for posting to newsgroups from Lynx.
+ *
+ * Note that posting is supported only for news: (not nntp: or snews:)
+ * URLs, and only via the default nntp server defined with the NNTPSERVER
+ * configuration or environment variable.
  */
 #define INEWS "NEWS"
 
@@ -262,23 +271,33 @@
  */
 #define RLOGIN_COMMAND "rlogin"
 
-/*************************
- * This define will be used for a default in src/HTInit.c.
- * Make it the full path and name of the xloadimage command.
- * Put 'echo' or something like it here if you don't have it.
- * It can be anything that will handle GIF, TIFF and other
- * popular image formats (xv does).
- * You must also have a "%s" for the filename; "&" for
- * background is optional
+/**************************
+ * XLOADIMAGE_COMMAND will be used as a default in src/HTInit.c for
+ * viewing image/* content types when the DISPLAY environment variable
+ * is set.  Make it the full path and name of the xli (also known as
+ * xloadimage or xview) command, or other image viewer.  Put 'echo' or
+ * something like it here if you don't have a suitable viewer.  It can
+ * be anything that will handle GIF, TIFF and other popular image formats
+ * (xli does).  The freeware distribution of xli is available in the
+ * ftp://ftp.x.org/contrib/ subdirectory.  The shareware, xv, also is
+ * suitable.  You must also have a "%s" for the filename; "&" for
+ * background is optional.  The default defined here can be overridden
+ * in lynx.cfg, or via the global or personal mailcap files.  Note that
+ * open is used as the default for NeXT, instead of the XLOADIMAGE_COMMAND
+ * definition.
  */
-#define XLOADIMAGE_COMMAND "xv %s &"
+#define XLOADIMAGE_COMMAND "xli %s &"
 
 /*************************
- * The full path and name of the inews program
- *
- * A "mini" inews has been included in the utils directory.
- *
- * set empty or to "none" if you don't have or want it.
+ * Set INEWS to the full path and name of your program for posting to
+ * newsgroups.  A "mini" inews is included in the utils subdirectory of
+ * the Lynx distribution.  You can disable news posting by setting INEWS
+ * to "none", or via -restrictions switches.  The default defined here
+ * can be overridden in lynx.cfg.
+ * Note that some news software, such as INN's inews, requires an -h switch
+ * added to the path.  Also note that posting is supported only for news:
+ * (not nntp: or snews:) URLs, and only via the default nntp server defined
+ * with the NNTPSERVER configuration or environment variable.
  */
 #define INEWS "inews"
 
@@ -1140,7 +1159,7 @@
  */
 
 #define LYNX_NAME "Lynx"
-#define LYNX_VERSION "2.6FM"
+#define LYNX_VERSION "2.7"
 
 /****************************************************************
  * The LYMessages_en.h header defines default, English strings

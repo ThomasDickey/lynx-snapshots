@@ -32,15 +32,9 @@ static char	*sccsid = "@(#)clientlib.c	1.11	(Berkeley) 10/27/89";
 #include <sys/socket.h>
 #ifndef EXCELAN
 # include <netdb.h>
-#endif not EXCELAN
+#endif /* !EXCELAN */
 
-#ifndef FOR_NN
-#ifdef USG
-# define	index	strchr
-# define        bcopy(a,b,c)   memcpy(b,a,c)
-# define        bzero(a,b)     memset(a,'\0',b)
-#endif USG
-#endif
+#include <string.h>
 
 #ifdef EXCELAN
 # define	IPPORT_NNTP	119
@@ -49,7 +43,7 @@ static char	*sccsid = "@(#)clientlib.c	1.11	(Berkeley) 10/27/89";
 #ifdef DECNET
 #include <netdnet/dn.h>
 #include <netdnet/dnetdb.h>
-#endif DECNET
+#endif /* DECNET */
 
 #include "nntp.h"
 
@@ -77,9 +71,7 @@ char	*file;
 	register FILE	*fp;
 	register char	*cp;
 	static char	buf[256];
-	char		*index();
 	char		*getenv();
-	char		*strcpy();
 
 	if (cp = getenv("NNTPSERVER")) {
 		(void) strcpy(buf, cp);
@@ -96,7 +88,7 @@ char	*file;
 	while (fgets(buf, sizeof (buf), fp) != NULL) {
 		if (*buf == '\n' || *buf == '#')
 			continue;
-		cp = index(buf, '\n');
+		cp = strchr(buf, '\n');
 		if (cp)
 			*cp = '\0';
 		(void) fclose(fp);
@@ -126,11 +118,10 @@ char	*machine;
 {
 	int	sockt_rd, sockt_wr;
 	char	line[256];
-	char	*index();
 #ifdef DECNET
 	char	*cp;
 
-	cp = index(machine, ':');
+	cp = strchr(machine, ':');
 
 	if (cp && cp[1] == ':') {
 		*cp = '\0';
@@ -231,14 +222,14 @@ char	*machine;
 		return (-1);
 	}
 
-	bzero((char *) &sin, sizeof(sin));
+	memset((char *) &sin, '\0', sizeof(sin));
 	sin.sin_family = hp->h_addrtype;
 	sin.sin_port = sp->s_port;
-#else EXCELAN
-	bzero((char *) &sin, sizeof(sin));
+#else
+	memset((char *) &sin, '\0', sizeof(sin));
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(IPPORT_NNTP);
-#endif EXCELAN
+#endif /* !EXCELAN */
 
 	/*
 	 * The following is kinda gross.  The name server under 4.3
@@ -260,7 +251,7 @@ char	*machine;
 			perror("socket");
 			return (-1);
 		}
-	        bcopy(*cp, (char *)&sin.sin_addr, hp->h_length);
+	        memcpy(*cp, (char *)&sin.sin_addr, hp->h_length);
 
 		if (x < 0)
 			fprintf(stderr, "trying %s\n", inet_ntoa(sin.sin_addr));
@@ -296,7 +287,7 @@ char	*machine;
 		(void) close(s);
 		return (-1);
 	}
-#else not EXCELAN
+#else
 	if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		perror("socket");
 		return (-1);
@@ -304,14 +295,14 @@ char	*machine;
 
 	/* And then connect */
 
-	bcopy(hp->h_addr, (char *) &sin.sin_addr, hp->h_length);
+	memcpy(hp->h_addr, (char *) &sin.sin_addr, hp->h_length);
 	if (connect(s, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
 		perror("connect");
 		(void) close(s);
 		return (-1);
 	}
 
-#endif not EXCELAN
+#endif /* !EXCELAN */
 #endif
 
 	return (s);
@@ -338,7 +329,7 @@ char	*machine;
 	struct	sockaddr_dn sdn;
 	struct	nodeent *getnodebyname(), *np;
 
-	bzero((char *) &sdn, sizeof(sdn));
+	memset((char *) &sdn, '\0', sizeof(sdn));
 
 	switch (s = sscanf( machine, "%d%*[.]%d", &area, &node )) {
 		case 1:
@@ -357,7 +348,7 @@ char	*machine;
 					"%s: Unknown host.\n", machine);
 				return (-1);
 			} else {
-				bcopy(np->n_addr,
+				memcpy(np->n_addr,
 					(char *) sdn.sdn_add.a_addr,
 					np->n_length);
 				sdn.sdn_add.a_len = np->n_length;
@@ -368,7 +359,7 @@ char	*machine;
 	sdn.sdn_objnum = 0;
 	sdn.sdn_flags = 0;
 	sdn.sdn_objnamel = strlen("NNTP");
-	bcopy("NNTP", &sdn.sdn_objname[0], sdn.sdn_objnamel);
+	memcpy("NNTP", &sdn.sdn_objname[0], sdn.sdn_objnamel);
 
 	if ((s = socket(AF_DECnet, SOCK_STREAM, 0)) < 0) {
 		nerror("socket");
@@ -488,14 +479,13 @@ char	*string;
 int	size;
 {
 	register char *cp;
-	char	*index();
 
 	if (fgets(string, size, ser_rd_fp) == NULL)
 		return (-1);
 
-	if ((cp = index(string, '\r')) != NULL)
+	if ((cp = strchr(string, '\r')) != NULL)
 		*cp = '\0';
-	else if ((cp = index(string, '\n')) != NULL)
+	else if ((cp = strchr(string, '\n')) != NULL)
 		*cp = '\0';
 #ifdef DEBUG
 	fprintf(stderr, "<<< %s\n", string);

@@ -394,7 +394,7 @@ PUBLIC BOOLEAN setup ARGS1(
      *  Get terminal type (strip 'dec-' from vms style types).
      */
     if (strncmp((CONST char*)ttytype, "dec-vt", 6) == 0) {
-	(void) setterm((char *)ttytype + 4);
+	(void) setterm(ttytype + 4);
     }
 #endif /* !NO_TTYTYPE */
 
@@ -485,13 +485,7 @@ PRIVATE int dumbterm ARGS1(
 #undef system
 #endif /* system */
 #include <processes.h>
-
-#ifndef CLI$M_TRUSTED
-#define CLI$M_TRUSTED 64 /* May not be in the compiler's clidef.h	*/
-#endif /* !CLI$M_TRUSTED */
-#ifndef LIB$_INVARG
-#define LIB$_INVARG 1409588
-#endif /* !LIB$_INVARG */
+#include "LYVMSdef.h"
 
 #define EFN	0			/* Event flag			*/
 

@@ -106,6 +106,10 @@ PUBLIC int edit_current_file ARGS3(char *,newfile, int,cur, int,lineno)
 	else
 	    sprintf(command,"%s \"%s\"",editor, filename);
 #endif /* VMS */
+	if (TRACE) {
+	    fprintf(stderr, "LYEdit: %s\n",command);
+	    sleep(MessageSecs);
+	}
 	FREE(filename);
 
 	stop_curses();

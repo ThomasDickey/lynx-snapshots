@@ -2287,7 +2287,7 @@ PRIVATE void HTML_start_element ARGS5(
 		    else if (dest_ismap || present[HTML_IMG_ISMAP]) {
 		        StrAllocCopy(alt_string, (title ?
 						  title : "[ISMAP]"));
-		    } else if (me->inA == TRUE) {
+		    } else if (me->inA == TRUE && dest) {
 		        StrAllocCopy(alt_string, (title ?
 						  title : "[LINK]"));
 		    } else {
@@ -2307,7 +2307,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    StrAllocCopy(alt_string, (title ?
 	    			      title : "[ISMAP]"));
 
-	} else if (me->inA == TRUE) {
+	} else if (me->inA == TRUE && dest) {
 	    StrAllocCopy(alt_string, (title ?
 	    			      title : "[LINK]"));
 
@@ -3728,7 +3728,7 @@ PRIVATE void HTML_start_element ARGS5(
 		     *  Convert any newlines or tabs to spaces,
 		     *  and trim any lead or trailing spaces. - FM
 		     */
-		    convert_to_spaces(I.value);
+		    convert_to_spaces(I.value, FALSE);
 		    while (I.value && I.value[0] == ' ')
 		        I.value++;
 		    len = strlen(I.value) - 1;
