@@ -304,14 +304,10 @@ extern void VMSsignal PARAMS((int sig, void (*func)()));
 #if defined(USE_COLOR_STYLE)
 extern void curses_css PARAMS((char * name, int dir));
 extern void curses_style PARAMS((int style, int dir));
-extern void curses_w_style PARAMS((WINDOW* win, int style, int dir));
 extern void setHashStyle PARAMS((int style, int color, int cattr, int mono, char* element));
 extern void setStyle PARAMS((int style, int color, int cattr, int mono));
 extern void wcurses_css PARAMS((WINDOW * win, char* name, int dir));
-#define LynxChangeStyle(style,dir,previous) curses_style(style,dir)
-#else
-extern int slang_style PARAMS((int style, int dir, int previous));
-#define LynxChangeStyle(style,dir,previous) slang_style(style,dir,previous)
+#define LynxChangeStyle(style,dir) curses_style(style,dir)
 #endif /* USE_COLOR_STYLE */
 
 #if USE_COLOR_TABLE
@@ -430,6 +426,8 @@ extern void VTHome NOPARAMS;
 #define wstop_reverse(w)	wclrattr(w, _REVERSE)
 
 #else /* Not VMS: */
+
+extern int string_to_attr PARAMS((char *name));
 
 /*
  *  For Unix FANCY_FANCY curses we interpose

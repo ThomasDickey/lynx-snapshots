@@ -157,6 +157,7 @@
 #undef LYNXCGI_LINKS		/* CF_ARG_ENABLE(cgi-links) */
 #undef LYNX_CFG_FILE		/* $libdir/lynx.cfg */
 #undef LYNX_LSS_FILE		/* $libdir/lynx.lss */
+#undef LYNX_RAND_MAX		/* CF_SRAND */
 #undef LY_FIND_LEAKS		/* configure --disable-leaks */
 #undef MKDIR_PATH		/* CF_PATH_PROG(mkdir) */
 #undef MV_PATH			/* CF_PATH_PROG(mv) */
@@ -224,9 +225,9 @@
 #undef ZIP_PATH			/* CF_PATH_PROG(zip) */
 #undef _ALL_SOURCE		/* AC_AIX */
 #undef inline			/* defined by AC_C_INLINE */
+#undef lynx_rand		/* CF_SRAND */
+#undef lynx_srand		/* CF_SRAND */
 #undef mode_t			/* defined by AC_TYPE_MODE_T */
-#undef my_rand			/* CF_SRAND */
-#undef my_srand			/* CF_SRAND */
 #undef off_t			/* defined by AC_TYPE_OFF_T */
 #undef pid_t			/* defined by AC_TYPE_PID_T */
 #undef uid_t			/* defined by AC_TYPE_UID_T */

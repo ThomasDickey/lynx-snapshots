@@ -211,7 +211,8 @@ typedef struct _EditFieldData {
 #define LYE_CHAR  (LYE_NOP   +1)  /* Insert printable char */
 #define LYE_ENTER (LYE_CHAR  +1)  /* Input complete, return char/lynxkeycode */
 #define LYE_TAB   (LYE_ENTER +1)  /* Input complete, return TAB  */
-#define LYE_ABORT (LYE_TAB   +1)  /* Input cancelled       */
+#define LYE_STOP  (LYE_TAB   +1)  /* Input complete, deactivate  */
+#define LYE_ABORT (LYE_STOP  +1)  /* Input cancelled       */
 
 #define LYE_FORM_PASS (LYE_ABORT +1)  /* In form fields: input complete,
 					 return char / lynxkeycode;
@@ -327,9 +328,11 @@ extern int LYhandlePopupList PARAMS((
 	BOOLEAN		for_mouse,
 	BOOLEAN		numbered));
 
+typedef unsigned char LYEditCode;
+
 extern int current_lineedit;
 extern char * LYLineeditNames[];
-extern char * LYLineEditors[];
+extern LYEditCode * LYLineEditors[];
 extern CONST char * LYLineeditHelpURLs[];
 
 extern CONST char * LYLineeditHelpURL NOPARAMS;

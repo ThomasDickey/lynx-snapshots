@@ -644,7 +644,7 @@ PRIVATE BOOL do_check_recall ARGS7(
 		LYAddHtmlSep0(user_input_buffer);
 
 	} else if (len == 2 && user_input_buffer[1] == ':') {
-	    if (isalpha(user_input_buffer[0])) {
+	    if (isalpha(UCH(user_input_buffer[0]))) {
 		LYAddHtmlSep0(user_input_buffer);
 	    } else {
 		HTUserMsg2(WWW_ILLEGAL_URL_MESSAGE, user_input_buffer);
@@ -958,8 +958,9 @@ PRIVATE int handle_LYK_ACTIVATE ARGS6(
 		F_TEXTLIKE(links[curdoc.link].form->type)) {
 
 		textinput_activated = TRUE;
-		if (textfields_need_activation)
-		    show_main_statusline(links[curdoc.link], FOR_INPUT);
+		show_main_statusline(links[curdoc.link], FOR_INPUT);
+		textfields_need_activation = global_textfields_need_activation;
+
 		return 0;
 	    }
 #endif
@@ -5453,6 +5454,9 @@ try_again:
 #ifdef USE_PRETTYSRC
 		psrc_first_tag = TRUE;
 #endif
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+		textfields_need_activation = global_textfields_need_activation;
+#endif
 		FREE(LYRequestReferer);
 		/*
 		 *  Don't send Referer if we have to load a document again
@@ -6626,6 +6630,7 @@ try_again:
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 			if (textfields_need_activation) {
 			    textinput_activated = TRUE;
+			    textfields_need_activation = global_textfields_need_activation;
 #ifdef INACTIVE_INPUT_STYLE_VH
 			    textinput_redrawn = TRUE;
 #endif

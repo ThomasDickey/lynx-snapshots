@@ -69,18 +69,17 @@ PUBLIC int Current_Attr, Masked_Attr;
     in HTML.c when lss support is on. 1 to increase performance. The value
     must correspond to the value of macro OMIT_SCN_KEEPING defined in HTML.c*/
 
-
 #ifdef USE_SLANG
 PUBLIC unsigned int Lynx_Color_Flags = 0;
 PUBLIC BOOLEAN FullRefresh = FALSE;
 PUBLIC int curscr = 0;
+
 #ifdef SLANG_MBCS_HACK
 /*
  *  Will be set by size_change. - KW
  */
 PUBLIC int PHYSICAL_SLtt_Screen_Cols = 10;
 #endif /* SLANG_MBCS_HACK */
-
 
 
 PUBLIC void LY_SLrefresh NOARGS
@@ -204,6 +203,71 @@ PRIVATE void sl_suspend ARGS1(
 #endif /* SIGSTOP */
     return;
 }
+#else
+
+#ifdef FANCY_CURSES
+/* definitions for the mono attributes we can use */
+static struct {
+    char *name;
+    int code;
+} Mono_Attrs[7] =
+{
+    { "normal",		A_NORMAL },
+    { "bold",		A_BOLD },
+    { "reverse",	A_REVERSE },
+    { "underline",	A_UNDERLINE },
+    { "standout",	A_STANDOUT },
+    { "blink",		A_BLINK },
+    { "dim",		A_DIM },
+};
+
+PUBLIC int string_to_attr ARGS1(
+    char *,	name)
+{
+    unsigned i;
+
+    for (i = 0; i < TABLESIZE(Mono_Attrs); i++) {
+	if (!strcasecomp(Mono_Attrs[i].name, name)) {
+	    return Mono_Attrs[i].code;
+	}
+    }
+    return 0;
+}
+
+#ifdef USE_COLOR_STYLE
+PRIVATE char *attr_to_string ARGS1(
+    int,	code)
+{
+    static char result[sizeof(Mono_Attrs) + 80];
+    unsigned i;
+    int pair = PAIR_NUMBER(code);
+    int bold = (pair != 0 && (code & A_BOLD) != 0);
+
+    if (bold)
+	code &= ~A_BOLD;
+
+    *result = 0;
+    for (i = 0; i < TABLESIZE(Mono_Attrs); i++) {
+	if (Mono_Attrs[i].code & code) {
+	    if (*result)
+		strcat(result, "+");
+	    strcat(result, Mono_Attrs[i].name);
+	}
+    }
+    if (pair != 0) {
+	short f, b;
+	if (pair_content(pair, &f, &b) != ERR) {
+	    CONST char *fg = lookup_color(bold ? f+COLORS : f);
+	    CONST char *bg = lookup_color(b);
+	    if (*result)
+		strcat(result, "+");
+	    sprintf(result + strlen(result), "%s/%s", fg, bg);
+	}
+    }
+    return result;
+}
+#endif /* USE_COLOR_STYLE */
+#endif /* FANCY_CURSES */
 #endif /* USE_SLANG */
 
 /*
@@ -293,17 +357,28 @@ PUBLIC HTCharStyle displayStyles[DSTYLE_ELEMENTS];
 /*
  * set a style's attributes - RP
  */
-PUBLIC void setStyle ARGS4(int,style,int,color,int,cattr,int,mono)
+PUBLIC void setStyle ARGS4(
+    int,	style,
+    int,	color,
+    int,	cattr,
+    int,	mono)
 {
     displayStyles[style].color = color;
     displayStyles[style].cattr = cattr;
     displayStyles[style].mono = mono;
 }
 
-PUBLIC void setHashStyle ARGS5(int,style,int,color,int,cattr,int,mono,char*,element)
+PUBLIC void setHashStyle ARGS5(
+    int,	style,
+    int,	color,
+    int,	cattr,
+    int,	mono,
+    char *,	element)
 {
     bucket* ds = &hashStyles[style];
+
     CTRACE((tfp, "CSS(SET): <%s> hash=%d, ca=%#x, ma=%#x\n", element, style, color, mono));
+
     ds->color = color;
     ds->cattr = cattr;
     ds->mono = mono;
@@ -315,24 +390,29 @@ PUBLIC void setHashStyle ARGS5(int,style,int,color,int,cattr,int,mono,char*,elem
 /*
  * set the curses attributes to be color or mono - RP
  */
-PRIVATE int LYAttrset ARGS3(WINDOW*,win,int,color,int,mono)
+PRIVATE int LYAttrset ARGS3(
+    WINDOW *,	win,
+    int,	color,
+    int,	mono)
 {
-	CTRACE((tfp, "CSS:LYAttrset (%#x, %#x)\n", color, mono));
-	if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON && color > -1)
-	{
-		wattrset(win,color);
-		return color;
-	}
-	if (mono > -1)
-	{
-		wattrset(win,mono);
-		return mono;
-	}
-	wattrset(win,A_NORMAL);
+    if (lynx_has_color
+     && LYShowColor >= SHOW_COLOR_ON
+     && color >= 0) {
+	CTRACE((tfp, "CSS:LYAttrset color (%s)\n", attr_to_string(color)));
+	wattrset(win, color);
+	return color;
+    } else if (mono >= 0) {
+	CTRACE((tfp, "CSS:LYAttrset mono (%s)\n", attr_to_string(mono)));
+	wattrset(win, mono);
+	return mono;
+    } else {
+	CTRACE((tfp, "CSS:LYAttrset (A_NORMAL)\n"));
+	wattrset(win, A_NORMAL);
 	return A_NORMAL;
+    }
 }
 
-PUBLIC void curses_w_style ARGS3(
+PRIVATE void curses_w_style ARGS3(
 	WINDOW*,	win,
 	int,		style,
 	int,		dir)
@@ -365,7 +445,7 @@ PUBLIC void curses_w_style ARGS3(
 
     if (style == s_normal && dir) {
 	wattrset(win,A_NORMAL);
-	if (win==LYwin) cached_styles[YP][XP]=s_normal;
+	if (win == LYwin) cached_styles[YP][XP] = s_normal;
 	return;
     }
 
@@ -442,7 +522,9 @@ PUBLIC void wcurses_css ARGS3(
     }
 }
 
-PUBLIC void curses_css ARGS2(char *,name,int,dir)
+PUBLIC void curses_css ARGS2(
+    char *,	name,
+    int,	dir)
 {
     wcurses_css(LYwin, name, dir);
 }
@@ -453,13 +535,6 @@ PUBLIC void curses_style ARGS2(
 {
     curses_w_style(LYwin, style, dir);
 }
-
-#ifdef NOT_USED
-void attribute ARGS2(int,style,int,dir)
-{
-    curses_style(style, dir, 0);
-}
-#endif
 #endif /* USE_COLOR_STYLE */
 
 PRIVATE BOOL lynx_called_initscr = FALSE;
@@ -1444,6 +1519,13 @@ PUBLIC void LYwaddnstr ARGS3(
 	CONST char *,	s,
 	size_t,		len)
 {
+#ifdef USE_COLOR_STYLE
+    if (TRACE) {
+	int y, x;
+	LYGetYX(y, x);
+	CTRACE((tfp, "[%2d,%2d] LYwaddnstr(%.*s)\n", y, x, (int) len, s));
+    }
+#endif
     while (len > 0) {
 	char temp[MAX_LINE];
 	size_t use = (len >= MAX_LINE) ? MAX_LINE - 1 : len;
@@ -2082,7 +2164,7 @@ PUBLIC void lynx_stop_link_color ARGS2(
 	int,	pending GCC_UNUSED)
 {
 #ifdef USE_COLOR_STYLE
-    LynxChangeStyle(flag == ON ? s_alink : s_a, ABS_OFF, 0);
+    LynxChangeStyle(flag == ON ? s_alink : s_a, ABS_OFF);
 #else
     if (flag) {
 	stop_reverse();

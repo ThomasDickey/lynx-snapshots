@@ -1,6 +1,45 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2001-02-12 (2.8.4dev.18)
++ change LYLineEditors[] to unsigned char since values are out of range for
+  signed chars on Solaris -TD
++ correct a memory leak in HTStat() from mis-patch for Win32 -TD
+* modify fancy_mouse() logic for ncurses to allow the user to quit a menu by
+  clicking outside the menu -IZ
+* allow a different approach to the problem:  how to enter a keyboard
+  navigation command when you are in an editing mode.  A new EDIT-time action
+  is introduced:  LYE_STOP.  I use it like this:
+	KEYMAP:^[:INTERRUPT:STOP
+  The action behaves as if -tna is temporary switched on:  your edit is
+  commited, and you go into the non-edit mode - until you press Enter on an
+  edit field again (or switch to a different document), when this temporary
+  switch to -tna is terminated.  If the "current" edit field has a different
+  style than the "active" edit field, you get an additional feedback.  Anyway,
+  the status line shows a correct info about the current mode.
+  In -tna mode this behaves as the usual end-of-edit action -IZ
+* make bindings for C-w and C-x C-w do not work for form input fields -IZ
+* add etags target to top-level makefile.in -IZ
+* add some traces to make color style code easier to debug -TD
+* restore commented-out call to HText_cancelStbl() in HTML_TABLE case in
+  HTML_start_element() from IZ's changes, which is needed for nested table
+  alignment.  The colors shown in deja-news are incorrect however because color
+  styles are not picking up the </tr> and </table> tags properly, and a few
+  tables are misaligned relative to dev.16, more analysis needed -TD
+* change LYHash.c to use const, eliminate redundant unsigned's and casts -TD
+* add a limit check for rand()/etc., result in LYUtils.c, which worked for
+  Linux lrand48() but was not portable (report by PG) -TD
+* add missing definitions to make srand/rand code build for non-autoconf'd
+  configurations such as win32 -TD
+* ifdef'd the mkdir() for lynx_temp_space in LYMain.c to make it apply only to
+  Unix, to avoid prototype conflict with non-POSIX compilers (report by Mike
+  Bledig <mikegb@mweb.co.zw>) -TD
+* adapt patch for FTP_PASSIVE from NetBSD CVS, to make it work with INET6 (from
+  comp.unix.bsd.netbsd.misc newsgroup posting which stated that the patch had
+  been forwarded to lynx-dev) -TD
+* remove unused code of HTParseInet() for INET6 from HTTCP.c -TD
+* updated some translations in fr.po and ru.po (report by JS) -TD
+
 2001-02-08 (2.8.4dev.17)
 * implement left/right scrolling and line-wrap toggle using '{', '}' and '|'
   characters, respectively.  This uses SVr4 curses/ncurses pads to make the

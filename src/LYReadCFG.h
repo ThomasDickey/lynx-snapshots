@@ -46,6 +46,7 @@ extern int lynx_default_colors NOPARAMS;
 #endif
 
 extern int check_color PARAMS((char * color, int the_default));
+extern CONST char * lookup_color PARAMS((int code));
 #endif
 
 extern void read_cfg PARAMS((char *cfg_filename, char *parent_filename, int nesting_level, FILE *fp0));

@@ -100,6 +100,14 @@
 #define HAVE_UTMP 1
 #endif
 
+#ifndef lynx_srand
+#define lynx_srand srand
+#endif
+
+#ifndef lynx_rand
+#define lynx_rand rand
+#endif
+
 #endif /* HAVE_CONFIG_H */
 
 #if '0' != 48

@@ -3651,7 +3651,7 @@ top1:
 		  if (string->data[1] == 'B' || string->data[1] == '@') {
 		    jis_buf[0] = '\033';
 		    strcpy(jis_buf + 1, string->data);
-		    TO_EUC(jis_buf, string->data);
+		    TO_EUC((CONST unsigned char *)jis_buf, (unsigned char *)string->data);
 		  }
 		}
 	    }

@@ -119,7 +119,7 @@ extern int BSDselect PARAMS((int nfds, fd_set * readfds, fd_set * writefds,
  * it no longer applies, since it will reuse that filename at a later time.
  */
 #ifdef EXP_RAND_TEMPNAME
-#if defined(RAND_MAX)
+#if defined(LYNX_RAND_MAX)
 #define USE_RAND_TEMPNAME 1
 #define MAX_TEMPNAME 10000
 #ifndef BITS_PER_CHAR
@@ -296,7 +296,7 @@ PUBLIC void highlight ARGS3(
 	    CTRACE((tfp, "STYLE.highlight.on: @(%d,%d).\n", LYP, LXP));
 	}
 	LYmove(LYP, LXP);
-	LynxChangeStyle(s, STACK_ON, 0);
+	LynxChangeStyle(s, STACK_ON);
 #endif
 	}
 
@@ -355,7 +355,7 @@ PUBLIC void highlight ARGS3(
 	    CTRACE((tfp, "STYLE.highlight.line2: @(%d,%d), style=%d.\n",
 		    links[cur].ly + 1, links[cur].hightext2_offset,
 		    flag == ON ? s_alink : s_a));
-	    LynxChangeStyle(flag == ON ? s_alink : s_a, ABS_ON, 0);
+	    LynxChangeStyle(flag == ON ? s_alink : s_a, ABS_ON);
 #endif
 
 	    for (i = 0; (tmp[0] = links[cur].hightext2[i]) != '\0' &&
@@ -2114,7 +2114,7 @@ PUBLIC void statusline ARGS1(
 	{
 		int a=(strncmp(buffer, ALERT_FORMAT, ALERT_PREFIX_LEN) ||
 		       !hashStyles[s_alert].name) ? s_status : s_alert;
-		LynxChangeStyle (a, STACK_ON, 1);
+		LynxChangeStyle (a, STACK_ON);
 		LYaddstr(buffer);
 		wbkgdset(LYwin,
 			 ((lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
@@ -2127,7 +2127,7 @@ PUBLIC void statusline ARGS1(
 		    wbkgdset(LYwin, hashStyles[s_normal].color | ' ');
 		else
 		    wbkgdset(LYwin, displayStyles[DSTYLE_NORMAL].color | ' ');
-		LynxChangeStyle (a, STACK_OFF, 0);
+		LynxChangeStyle (a, STACK_OFF);
 	}
 #endif
     }
@@ -2511,7 +2511,7 @@ PUBLIC BOOLEAN LYisAbsPath ARGS1(
     BOOLEAN result;
 #if defined(DOSPATH) || defined(__EMX__)
     result = (BOOL) (LYIsPathSep(path[0])
-     || (isalpha(path[0])
+     || (isalpha(UCH(path[0]))
       && (path[1] == ':')
        && LYIsPathSep(path[2])));
 #else
@@ -2529,7 +2529,7 @@ PUBLIC BOOLEAN LYisRootPath ARGS1(
 {
 #if defined(DOSPATH) || defined(__EMX__)
     if (strlen(path) == 3
-     && isalpha(path[0])
+     && isalpha(UCH(path[0]))
      && path[1] == ':'
      && LYIsPathSep(path[2]))
 	return TRUE;
@@ -3892,11 +3892,11 @@ PRIVATE int fmt_tempname ARGS3(
      * Prefer a random value rather than a counter.
      */
 #ifdef USE_RAND_TEMPNAME
+#define SIZE_TEMPNAME ((MAX_TEMPNAME / BITS_PER_CHAR) + 1)
     if (first) {
-	my_srand((unsigned)((long)time((time_t *)0) + (long)result));
+	lynx_srand((unsigned)((long)time((time_t *)0) + (long)result));
 	first = FALSE;
-	used_tempname = typecallocn(unsigned char,
-				(MAX_TEMPNAME / BITS_PER_CHAR) + 1);
+	used_tempname = typecallocn(unsigned char, SIZE_TEMPNAME);
 	if (used_tempname == 0)
 	    outofmem(__FILE__, "fmt_tempname");
     }
@@ -3908,7 +3908,8 @@ PRIVATE int fmt_tempname ARGS3(
      */
     counter = MAX_TEMPNAME;
     while (names_used < MAX_TEMPNAME) {
-	counter = ( (float)MAX_TEMPNAME * my_rand() ) / RAND_MAX + 1;
+	counter = ( (float)MAX_TEMPNAME * lynx_rand() ) / LYNX_RAND_MAX + 1;
+	counter %= SIZE_TEMPNAME;	/* just in case... */
 	/*
 	 * Avoid reusing a temporary name, since there are places in the code
 	 * which can refer to a temporary filename even after it has been
@@ -4748,7 +4749,7 @@ have_VMS_URL:
 		    p = (char *)Home_Dir();
 		    q = temp2 ? temp2 : temp;
 
-		    if (strlen(q) == 3 && isalpha(q[0]) && q[1] == ':') {
+		    if (strlen(q) == 3 && isalpha(UCH(q[0])) && q[1] == ':') {
 			sprintf(buff,
 			    "'%s' not exist, Goto LynxHome '%s'.", q, p);
 			_statusline(buff);

@@ -2567,9 +2567,9 @@ AC_MSG_RESULT($cf_use_socks5p_h)
 test "$cf_use_socks5p_h" = yes && AC_DEFINE(INCLUDE_PROTOTYPES)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl srand() and rand() are more standard, but we'll accept other variations
-dnl if they are available.  All return an integer between 0 and RAND_MAX,
-dnl which must be defined for use in scaling.
+dnl Check for functions similar to srand() and rand().  lrand48() and random()
+dnl return a 31-bit value, while rand() returns a value less than RAND_MAX
+dnl which usually is only 16-bits.
 AC_DEFUN([CF_SRAND],[
 AC_CACHE_CHECK(for random-integer functions, cf_cv_srand_func,[
 cf_cv_srand_func=unknown
@@ -2581,16 +2581,42 @@ AC_TRY_LINK([
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 ],[long seed = 1; $cf_srand_func(seed); seed = $cf_rand_func()],
 [cf_cv_srand_func=$cf_func
  break])
 done
 ])
 if test "$cf_cv_srand_func" != unknown ; then
+	AC_CACHE_CHECK(for range of random-integers, cf_cv_rand_max,[
+		case $cf_cv_srand_func in
+		srand/rand)
+			cf_cv_rand_max=RAND_MAX
+			cf_rand_max=16
+			;;
+		*)
+			cf_cv_rand_max=INT_MAX
+			cf_rand_max=31
+			;;
+		esac
+		AC_TRY_COMPILE([
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+		],[long x = $cf_cv_rand_max],,
+		[cf_cv_rand_max="(1L<<$cf_rand_max)-1"])
+	])
 	cf_srand_func=`echo $cf_func | sed -e 's@/.*@@'`
-	cf_rand_func=`echo $cf_func | sed -e 's@.*/@@'`
-	AC_DEFINE_UNQUOTED(my_srand,$cf_srand_func)
-	AC_DEFINE_UNQUOTED(my_rand, $cf_rand_func)
+	cf_rand_func=`echo  $cf_func | sed -e 's@.*/@@'`
+	CF_UPPER(cf_rand_max,ifelse($1,,my_,$1)rand_max)
+	AC_DEFINE_UNQUOTED(ifelse($1,,my_,$1)srand,$cf_srand_func)
+	AC_DEFINE_UNQUOTED(ifelse($1,,my_,$1)rand, $cf_rand_func)
+	AC_DEFINE_UNQUOTED([$]cf_rand_max, $cf_cv_rand_max)
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------

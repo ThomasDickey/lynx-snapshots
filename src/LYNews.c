@@ -240,11 +240,11 @@ PUBLIC char *LYNewsPost ARGS2(
 	    CJKinput[0] = '\0';
 	    switch(kanji_code) {
 	    case EUC:
-		TO_EUC(kp, CJKinput);
+		TO_EUC((CONST unsigned char *)kp, CJKinput);
 		kp = CJKinput;
 		break;
 	    case SJIS:
-		TO_SJIS(kp, CJKinput);
+		TO_SJIS((CONST unsigned char *)kp, CJKinput);
 		kp = CJKinput;
 		break;
 	    default:

@@ -116,11 +116,11 @@ PUBLIC void LYexit ARGS1(
 	(void) signal(SIGSEGV, SIG_IGN);
 	(void) signal(SIGILL, SIG_IGN);
 
-	 /*
-	  *  Flush all messages. - FM
-	  */
-	 fflush(stderr);
-	 fflush(stdout);
+	/*
+	 *  Flush all messages. - FM
+	 */
+	fflush(stderr);
+	fflush(stdout);
 
 	/*
 	 *  Deal with curses, if on, and clean up. - FM
