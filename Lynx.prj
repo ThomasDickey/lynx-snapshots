@@ -1,13 +1,15 @@
 ;; -*- Lisp -*-
 (Created-By-Prcs-Version 1 2 0)
 (Project-Description "PRCS Project for The Lynx browser")
-(Project-Version Lynx 2.7.1ac-0 55)
-(Parent-Version Lynx 2.7.1ac-0 51)
+(Project-Version Lynx 2.7.1ac-0 56)
+(Parent-Version Lynx 2.7.1ac-0 55)
 
-(Version-Log "various tweaks.")
+(Version-Log "minor fixes to configure script that search for netlibs and ncurses/slang
+libraries (test-build on Linux, SunOS, Solaris).
+")
 (New-Version-Log "")
-(Checkin-Time "Fri, 22 Aug 1997 00:01:02 -0600")
-(Checkin-Login kweide)
+(Checkin-Time "Wed, 27 Aug 1997 10:30:34 -0600")
+(Checkin-Login dickey)
 (Populate-Ignore ("\\.o$" "\\.a$" "~$" "^a.out$" "^core$"
                   "\\.dvi$" "\\.aux$" "^\\..*_aux$" "\\.log"
                   "\\.zip$" "^obsolete" "/obsolete"
@@ -103,7 +105,7 @@
   (src/LYMainLoop.h (Lynx/d/19_LYMainLoop 1.2 644))
   (src/LYStrings.h (Lynx/d/20_LYStrings. 1.1.1.4 644))
   (src/LYHistory.c (Lynx/d/21_LYHistory. 1.1.2.1.4.1.1.1.1.4 644))
-  (src/LYCurses.h (Lynx/d/22_LYCurses.h 1.1.4.1.1.1.1.7 644))
+  (src/LYCurses.h (Lynx/d/22_LYCurses.h 1.1.4.1.1.1.1.8 644))
   (src/LYSignal.h (Lynx/d/23_LYSignal.h 1.1 644))
   (src/LYClean.h (Lynx/d/24_LYClean.h 1.1.2.1 644))
   (src/LYGlobalDefs.h (Lynx/d/25_LYGlobalDe 1.1.3.1.2.1.1.1.1.1.1.2.1.4 644))
@@ -325,7 +327,7 @@
   (RELEASE_STATEMENT (Lynx/h/33_RELEASE_ST 1.2 644))
   (README (Lynx/h/34_README 1.1 644))
   (PROBLEMS (Lynx/h/35_PROBLEMS 1.3 644))
-  (Makefile.old (Lynx/h/36_Makefile 1.1.1.1.1.1.1.2.3.1.3.3 644))
+  (Makefile.old (Lynx/h/36_Makefile 1.1.1.1.1.1.1.2.3.1.3.4 644))
   (LYMessages_en.h (Lynx/h/37_LYMessages 1.4.1.4.1.2.1.1.1.1.1.1.3.1.1.1.1.3 644))
   (INSTALLATION (Lynx/h/38_INSTALLATI 1.1 644))
   (IBMPC-charsets.announce (Lynx/h/39_IBMPC-char 1.1 644))
@@ -390,7 +392,7 @@
 
 ;; Files added by populate at Mon, 03 Mar 1997 06:05:56 -0600:
 
-  (CHANGES.new (Lynx/6_CHANGES.ne 1.18.1.4.1.1.2.1.1.2.2.2.1.2.1.1.1.1.1.4.2.7.1.3.1.4.1.17 644))
+  (CHANGES.new (Lynx/6_CHANGES.ne 1.18.1.4.1.1.2.1.1.2.2.2.1.2.1.1.1.1.1.4.2.7.1.3.1.4.1.18 644))
 
 ;; Files added by populate at Tue, 11 Mar 1997 04:22:39 -0600:
 
@@ -398,11 +400,11 @@
   (makefile.in (Lynx/8_makefile.i 1.1.1.12 644))
   (install.sh (Lynx/9_install.sh 1.1 755))
   (configure.in (Lynx/10_configure. 1.12 644))
-  (config.hin (Lynx/11_config.hin 1.11 644))
-  (aclocal.m4 (Lynx/12_aclocal.m4 1.14 644))
-  (configure (Lynx/13_configure 1.14 755))
+  (config.hin (Lynx/11_config.hin 1.12 644))
+  (aclocal.m4 (Lynx/12_aclocal.m4 1.15 644))
+  (configure (Lynx/13_configure 1.15 755))
   (README.configure (Lynx/14_README.con 1.6 644))
-  (CHANGES.configure (Lynx/15_CHANGES.co 1.1.1.8 644))
+  (CHANGES.configure (Lynx/15_CHANGES.co 1.1.1.9 644))
 
 ;; Files added by populate at Wed, 09 Apr 1997 06:18:01 -0600:
 
@@ -456,20 +458,5 @@
 
   (src/chrtrans/cp866_uni.tbl (Lynx/c/0_cp866_uni. 1.1 644))
 )
-(Merge-Parents
-  (2.7.1ac-0.54 complete
-    (src/LYCookie.c src/LYCookie.c src/LYCookie.c r) (src/HTFWriter.c src/HTFWriter.c src/HTFWriter.c r)
-    (src/LYOptions.c src/LYOptions.c src/LYOptions.c r) (src/LYLocal.c src/LYLocal.c src/LYLocal.c r)
-    (src/LYForms.c src/LYForms.c src/LYForms.c r) (WWW/Library/Implementation/HTFile.c WWW/Library/Implementation/HTFile.c WWW/Library/Implementation/HTFile.c r)
-    (WWW/Library/djgpp/makefile WWW/Library/djgpp/makefile WWW/Library/djgpp/makefile r) (src/makefile.dos src/makefile.dos src/makefile.dos r)
-    (src/chrtrans/MAKEW32.BAT src/chrtrans/MAKEW32.BAT src/chrtrans/MAKEW32.BAT r) (CHANGES.new CHANGES.new CHANGES.new m)
-    (makefile.in makefile.in makefile.in r) (configure.in configure.in configure.in r)
-    (config.hin config.hin config.hin r) (aclocal.m4 aclocal.m4 aclocal.m4 r)
-    (configure configure configure r) (CHANGES.configure CHANGES.configure CHANGES.configure r)
-    (WWW/Library/unix/makefile.in WWW/Library/unix/makefile.in WWW/Library/unix/makefile.in r) (src/makefile.in src/makefile.in src/makefile.in r)
-    (src/chrtrans/makefile.in src/chrtrans/makefile.in src/chrtrans/makefile.in r) (src/LYCharUtils.c src/LYCharUtils.c src/LYCharUtils.c r))
-  (2.7.1fm-0.45 incomplete
-    (src/LYNews.c src/LYNews.c src/LYNews.c m) 
-  )
-)
+(Merge-Parents)
 (New-Merge-Parents)

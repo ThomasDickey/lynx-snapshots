@@ -282,7 +282,7 @@ dnl	$4 = corresponding function-name
 AC_DEFUN([CF_FIND_LIBRARY],
 [
 	cf_cv_have_lib_$1=no
-	AC_CHECK_FUNC($4,cf_cv_have_lib_$1=no,[
+	AC_CHECK_FUNC($4,cf_cv_have_lib_$1=yes,[
 		cf_save_LIBS="$LIBS"
 		AC_MSG_CHECKING(for $4 in -l$1)
 		LIBS="-l$1 $LIBS"
@@ -521,7 +521,7 @@ changequote([,])dnl
 
 case $cf_cv_ncurses_header in # (vi
 */ncurses.h)
-	AC_DEFINE(NCURSESHEADER)
+	AC_DEFINE(HAVE_NCURSES_H)
 	;;
 esac
 
@@ -571,7 +571,7 @@ if test -n "$cf_ncurses_LIBS" ; then
 		fi
 	done
 	AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
-		[initscr()],
+		[initscr(); tgoto((char *)0, 0, 0);],
 		[AC_MSG_RESULT(yes)],
 		[AC_MSG_RESULT(no)
 		 LIBS="$cf_ncurses_SAVE"])
@@ -616,44 +616,26 @@ dnl	-lsocket
 dnl	-lbsd
 AC_DEFUN([CF_NETLIBS],[
 NETLIBS=""
-cf_have_lsocket=no
 #
-AC_CHECK_FUNC(gethostname,[AC_DEFINE(HAVE_GETHOSTNAME)],[
-	AC_CHECK_LIB(nsl,gethostname,
-		[AC_DEFINE(HAVE_GETHOSTNAME)
-		NETLIBS="-lnsl $NETLIBS"],
-		AC_CHECK_LIB(socket,gethostname,
-		[AC_DEFINE(HAVE_GETHOSTNAME)
-		NETLIBS="-lsocket $NETLIBS"
-		cf_have_lsocket=yes]),
-		[$NETLIBS])])
+AC_CHECK_FUNCS(gethostname,,[
+	CF_RECHECK_FUNC(gethostname,nsl,NETLIBS,[
+		CF_RECHECK_FUNC(gethostname,socket,NETLIBS)])])
 #
 # FIXME:  sequent needs this library (i.e., -lsocket -linet -lnsl), but
 # I don't know the entrypoints - 97/7/22 TD
 AC_HAVE_LIBRARY(inet,NETLIBS="-linet $NETLIBS")
 #
-if test $cf_have_lsocket = no ; then
-AC_CHECK_FUNC(socket,[AC_DEFINE(HAVE_SOCKET)],[
-	AC_CHECK_LIB(socket,socket,
-		[AC_DEFINE(HAVE_SOCKET)
-		NETLIBS="-lsocket $NETLIBS"],
-		AC_CHECK_LIB(bsd,socket,
-			[AC_DEFINE(HAVE_SOCKET)
-			NETLIBS="-lbsd $NETLIBS"]),
-		[$NETLIBS])])
+if test "$ac_cv_func_lsocket" != no ; then
+AC_CHECK_FUNCS(socket,,[
+	CF_RECHECK_FUNC(socket,socket,NETLIBS,[
+		CF_RECHECK_FUNC(socket,bsd,NETLIBS)])])
 fi
 #
-AC_CHECK_FUNC(gethostbyname,[AC_DEFINE(HAVE_GETHOSTBYNAME)],[
-	AC_CHECK_LIB(nsl,gethostbyname,
-		[AC_DEFINE(HAVE_GETHOSTBYNAME)
-		NETLIBS="-lnsl $NETLIBS"],,
-		[$NETLIBS])])
+AC_CHECK_FUNCS(gethostbyname,,[
+	CF_RECHECK_FUNC(gethostbyname,nsl,NETLIBS)])
 #
-AC_CHECK_FUNC(strcasecmp,[AC_DEFINE(HAVE_STRCASECMP)],[
-	AC_CHECK_LIB(resolv,strcasecmp,
-		[AC_DEFINE(HAVE_STRCASECMP)
-		NETLIBS="-lresolv $NETLIBS"],,
-		[$NETLIBS])])
+AC_CHECK_FUNCS(strcasecmp,,[
+	CF_RECHECK_FUNC(strcasecmp,resolv,NETLIBS)])
 LIBS="$LIBS $NETLIBS"
 ])dnl
 dnl ---------------------------------------------------------------------------
@@ -726,6 +708,30 @@ IFS="$cf_save_ifs"
 
 AC_DEFINE_UNQUOTED($1_PATH,"$cf_path_prog")
 test -n "$cf_path_args" && AC_DEFINE_UNQUOTED($1_ARGS,"$cf_path_args")
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Re-check on a function to see if we can pick it up by adding a library.
+dnl	$1 = function to check
+dnl	$2 = library to check in
+dnl	$3 = environment to update (e.g., $LIBS)
+dnl	$4 = what to do if this fails
+dnl
+dnl This uses 'unset' if the shell happens to support it, but leaves the
+dnl configuration variable set to 'unknown' if not.  This is a little better
+dnl than the normal autoconf test, which gives misleading results if a test
+dnl for the function is made (e.g., with AC_CHECK_FUNC) after this macro is
+dnl used (autoconf does not distinguish between a null token and one that is
+dnl set to 'no').
+AC_DEFUN([CF_RECHECK_FUNC],[
+AC_CHECK_LIB($2,$1,[
+	CF_UPPER(cf_tr_func,$1)
+	AC_DEFINE(HAVE_$cf_tr_func)
+	ac_cv_func_$1=yes
+	$3="-l$2 [$]$3"],
+	ac_cv_func_$1=unknown
+	unset ac_cv_func_$1 2>/dev/null
+	$4,
+	[[$]$3])
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check for broken definition of 'remove()'.  This is (in particular) broken
@@ -857,7 +863,7 @@ dnl ---------------------------------------------------------------------------
 dnl Look for the slang library.
 AC_DEFUN([CF_SLANG_LIBS],
 [
-dnl AC_CHECK_FUNC(acos,,[AC_CHECK_LIB(m,acos,[LIBS="-lm $LIBS"])])
+AC_CHECK_FUNC(acos,,[CF_RECHECK_FUNC(acos,m,LIBS)])
 CF_FIND_LIBRARY(slang,
 	[#include <slang.h>],
 	[SLtt_get_screen_size()],

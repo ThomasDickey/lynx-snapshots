@@ -24,6 +24,7 @@
 #undef HAVE_GETCWD
 #undef HAVE_KEYPAD
 #undef HAVE_LIMITS_H
+#undef HAVE_NCURSES_H		/* defined if we include <ncurses.h> */
 #undef HAVE_PUTENV
 #undef HAVE_READDIR
 #undef HAVE_SIZECHANGE		/* defined by CF_SIZECHANGE */
@@ -46,7 +47,6 @@
 #undef MKDIR_PATH		/* CF_PATH_PROG(mkdir) */
 #undef MV_PATH			/* CF_PATH_PROG(mv) */
 #undef NCURSES			/* defined for ncurses support */
-#undef NCURSESHEADER		/* defined if we include <ncurses.h> */
 #undef NCURSES_BROKEN		/* defined for ncurses color support */
 #undef NEED_PTEM_H		/* defined by CF_SIZECHANGE */
 #undef NEED_REMOVE		/* defined by CF_REMOVE_BROKEN */
