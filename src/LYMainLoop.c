@@ -1151,7 +1151,7 @@ gettext("Enctype multipart/form-data not yet supported!  Cannot submit."));
 				 links[curdoc.link].form->name,
 				 links[curdoc.link].form->value,
 				 FALSE,
-				 (real_cmd==LYK_SUBMIT ||
+				 (BOOLEAN)(real_cmd==LYK_SUBMIT ||
 				  real_cmd==LYK_NOCACHE ||
 				  real_cmd==LYK_DOWNLOAD ||
 				  real_cmd==LYK_HEAD));
@@ -1658,6 +1658,30 @@ PRIVATE void handle_LYK_CLEAR_AUTH ARGS2(
 	    HTUserMsg(CANCELLED);
 	}
     }
+}
+
+PRIVATE int handle_LYK_COMMAND ARGS1(
+    char *,	user_input_buffer)
+{
+    int ch;
+    Kcmd *mp;
+    char *src, *tmp;
+
+    *user_input_buffer = 0;
+    _statusline(": ");
+    if (LYgetstr(user_input_buffer, VISIBLE, MAX_LINE, RECALL_CMD) >= 0) {
+	src = LYSkipBlanks(user_input_buffer);
+	tmp = LYSkipNonBlanks(src);
+	*tmp = 0;
+	ch = ((mp = LYStringToKcmd(src)) != 0) ? mp->code : 0;
+	CTRACE((tfp, "LYK_COMMAND(%s.%s) = %d\n", src, tmp, ch));
+	if (ch == 0) {
+	    return *src ? -1 : 0;
+	}
+	/* FIXME: reuse the rest of the buffer for parameters */
+	return ch;
+    }
+    return 0;
 }
 
 PRIVATE void handle_LYK_COMMENT ARGS4(
@@ -4422,7 +4446,7 @@ PRIVATE void handle_LYK_SWITCH_DTD NOARGS
     } /* end if no bypass */
 #endif
     Old_DTD = !Old_DTD;
-    HTSwitchDTD(!Old_DTD);
+    HTSwitchDTD((BOOLEAN) !Old_DTD);
     HTUserMsg(Old_DTD ? USING_DTD_0 : USING_DTD_1);
 #ifdef SOURCE_CACHE
     if (canreparse) {
@@ -5094,18 +5118,10 @@ PUBLIC void handle_LYK_CHDIR NOARGS
 	if (!no_dired_support
 	 && (lynx_edit_mode || (LYIsUIPage(curdoc.address, UIP_DIRED_MENU)))) {
 	    char buf2[LY_MAXPATH];
-	    char* tmp;
 	    char* addr = NULL;
 
-	    strcpy(buf2, p);
 	    Current_Dir(buf2);
-	    tmp = wwwName(buf2);
-
-	    StrAllocCopy(addr, "file://localhost");
-	    StrAllocCat(addr, tmp);
-	    if (tmp != buf2)
-	    /*since wwwName is nop on unix and allocates something on VMS and DOS*/
-		FREE(tmp);
+	    LYLocalFileToURL(&addr, buf2);
 
 	    newdoc.address = addr;
 	    newdoc.isHEAD = FALSE;
@@ -6748,6 +6764,9 @@ new_cmd:  /*
 	    follow_col = -1;
 
 	switch(cmd) {
+	case -1:
+	    HTUserMsg(COMMAND_UNKNOWN);
+	    break;
 	case 0: /* unmapped character */
 	default:
 	    if (curdoc.link >= 0 && curdoc.link < nlinks &&
@@ -6763,10 +6782,11 @@ new_cmd:  /*
 		} else
 #endif
 		    show_main_statusline(links[curdoc.link], FOR_INPUT);
-	    } else if (more)
+	    } else if (more) {
 		HTInfoMsg(MOREHELP);
-	    else
+	    } else {
 		HTInfoMsg(HELP);
+	    }
 	    show_help = TRUE;
 
 	    if (TRACE) {
@@ -6775,6 +6795,10 @@ new_cmd:  /*
 		cfile[0] = '\0';
 	    }
 	    break;
+
+	case LYK_COMMAND:
+	    cmd = handle_LYK_COMMAND(user_input_buffer);
+	    goto new_cmd;
 
 	case LYK_INTERRUPT:
 	    /*
@@ -7542,14 +7566,6 @@ PRIVATE void show_main_statusline ARGS2(
     } else {
 	_statusline(HELP);
     }
-
-#if 0	/* messages now produced in show_formlink_statusline - kw */
-#ifdef INACTIVE_INPUT_STYLE_VH
-    if (textinput_redrawn) {
-	_statusline(gettext("Inactive text input, activate to edit (e.g., press ENTER)"));
-    }
-#endif
-#endif
 
     /* turn off cursor since now it's probably on statusline -HV */
     /* But not if LYShowCursor is on.  -show_cursor may be used as a

@@ -92,11 +92,11 @@ PUBLIC int change_form_link_ex ARGS8(
 		dummy = popup_options(form->num_value, form->select_list,
 				form_link->ly, form_link->lx, form->size,
 				form->size_l, form->disabled);
-#if defined(FANCY_CURSES) || defined(USE_SLANG)
+#if CTRL_W_HACK != DO_NOTHING
 		if (!enable_scrollback)
 		    c = CTRL_W_HACK;  /* CTRL-W refresh without clearok */
 		else
-#endif /* FANCY_CURSES || USE_SLANG */
+#endif
 		    c = 12;  /* CTRL-L for repaint */
 		break;
 	    }
@@ -123,11 +123,11 @@ PUBLIC int change_form_link_ex ARGS8(
 		  */
 		form->value_cs = opt_ptr->value_cs;
 	    }
-#if defined(FANCY_CURSES) || defined(USE_SLANG)
+#if CTRL_W_HACK != DO_NOTHING
 	    if (!enable_scrollback)
 		c = CTRL_W_HACK;	 /* CTRL-W refresh without clearok */
 	    else
-#endif /* FANCY_CURSES || USE_SLANG */
+#endif
 		c = 12;	 /* CTRL-L for repaint */
 	    break;
 
@@ -445,14 +445,13 @@ again:
 
 	ch = LYgetch_input();
 #ifdef SUPPORT_MULTIBYTE_EDIT
-#ifdef WIN_EX
-	if (!refresh_mb && (EditBinding(ch) != LYE_CHAR))
-	    goto again;
-#else
-	if (!refresh_mb &&
-	    (EditBinding(ch) != LYE_CHAR) && (EditBinding(ch) != LYE_AIX))
-	    goto again;
+	if (!refresh_mb
+	 && (EditBinding(ch) != LYE_CHAR)
+#ifndef WIN_EX
+	 && (EditBinding(ch) != LYE_AIX)
 #endif
+	    )
+	    goto again;
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 #ifdef VMS
 	if (HadVMSInterrupt) {
@@ -854,26 +853,29 @@ PRIVATE int get_popup_option_number ARGS2(
     return num;
 }
 
-/* Use this rather than the 'wprintw()' function to write a blank-padded
- * string to the given window, since someone's asserted that printw doesn't
- * handle 8-bit characters unlike addstr (though more info would be useful).
- *
- * We're blank-filling so that with SVr4 curses, it'll show the background
- * color to a uniform width in the popup-menu.
- */
-#ifndef USE_SLANG
-PRIVATE void paddstr ARGS3(
-	WINDOW *,	the_window,
+PRIVATE void draw_option ARGS5(
+	WINDOW *,	win,
+	int,		entry,
 	int,		width,
-	char *,		the_string)
+	BOOL,		reversed,
+	OptionType *,	opt_ptr)
 {
-    width -= strlen(the_string);
-    waddstr(the_window, the_string);
-    while (width-- > 0)
-	waddstr(the_window, " ");
+#ifdef USE_SLANG
+    if (reversed)
+	SLsmg_gotorc((win->top_y + entry), win->left_x + 2);
+    SLsmg_gotorc(win->top_y + entry, win->left_x + 2);
+    SLsmg_write_nstring(opt_ptr->name, win->width);
+    if (reversed)
+	SLsmg_set_color(0);
+#else
+    wmove(win, entry, 2);
+    if (reversed)
+	wstart_reverse(win);
+    LYpaddstr(win, width, opt_ptr->name);
+    if (reversed)
+	wstop_reverse(win);
+#endif /* USE_SLANG */
 }
-#endif
-
 
 PRIVATE int popup_options ARGS7(
 	int,		cur_selection,
@@ -891,9 +893,7 @@ PRIVATE int popup_options ARGS7(
      */
     int c = 0, cmd = 0, i = 0, j = 0, rel = 0;
     int orig_selection = cur_selection;
-#ifndef USE_SLANG
     WINDOW * form_window;
-#endif /* !USE_SLANG */
     int num_options = 0, top, bottom, length = -1;
     OptionType * opt_ptr = list;
     int window_offset = 0;
@@ -1017,30 +1017,12 @@ PRIVATE int popup_options ARGS7(
      *  Set up the overall window, including the boxing characters ('*'),
      *  if it all fits.  Otherwise, set up the widest window possible. - FM
      */
-#ifdef USE_SLANG
-    if (width + 4 > SLtt_Screen_Cols) {
+    if (width + 4 > LYcols) {
 	lx = 1;
 	width = LYcols - 5; /* avoids a crash? - kw */
     }
-    SLsmg_fill_region(top, lx - 1, bottom - top, width + 4, ' ');
-#else
-    if (!(form_window = newwin(bottom - top, width + 4, top, lx - 1)) &&
-	!(form_window = newwin(bottom - top, 0, top, 0))) {
-	HTAlert(POPUP_FAILED);
+    if ((form_window = LYstartPopup(top, lx, bottom - top, width)) == 0)
 	return(orig_selection);
-    }
-    scrollok(form_window, TRUE);
-#ifdef PDCURSES
-    keypad(form_window, TRUE);
-#endif /* PDCURSES */
-#if defined(NCURSES) || defined(PDCURSES)
-    LYsubwindow(form_window);
-#endif
-#if defined(HAVE_GETBKGD) /* not defined in ncurses 1.8.7 */
-    wbkgd(form_window, getbkgd(stdscr));
-    wbkgdset(form_window, getbkgd(stdscr));
-#endif
-#endif /* USE_SLANG */
 
     /*
      *  Set up the window_offset for options.
@@ -1071,107 +1053,40 @@ redraw:
      */
     for (i = 0; i <= num_options; i++, opt_ptr = opt_ptr->next) {
 	if (i >= window_offset && i - window_offset < length) {
-#ifdef USE_SLANG
-	    SLsmg_gotorc(top + ((i + 1) - window_offset), (lx - 1 + 2));
-	    SLsmg_write_nstring(opt_ptr->name, width);
-#else
-	    wmove(form_window, ((i + 1) - window_offset), 2);
-	    paddstr(form_window, width, opt_ptr->name);
-#endif /* USE_SLANG */
+	    draw_option(form_window, ((i + 1) - window_offset), width, FALSE, opt_ptr);
 	}
     }
-#ifdef USE_SLANG
-    SLsmg_draw_box(top, (lx - 1), (bottom - top), (width + 4));
-#else
-#ifdef VMS
-    VMSbox(form_window, (bottom - top), (width + 4));
-#else
     LYbox(form_window, TRUE);
-#endif /* VMS */
-    wrefresh(form_window);
-#endif /* USE_SLANG */
     opt_ptr = NULL;
 
     /*
      *  Loop on user input.
      */
     while (cmd != LYK_ACTIVATE) {
+	int row = ((i + 1) - window_offset);
 
 	/*
 	 *  Unreverse cur selection.
 	 */
 	if (opt_ptr != NULL) {
-#ifdef USE_SLANG
-	    SLsmg_gotorc((top + ((i + 1) - window_offset)), (lx - 1 + 2));
-	    SLsmg_write_nstring(opt_ptr->name, width);
-#else
-	    wmove(form_window, ((i + 1) - window_offset), 2);
-	    paddstr(form_window, width, opt_ptr->name);
-#endif /* USE_SLANG */
+	    draw_option(form_window, row, width, FALSE, opt_ptr);
 	}
 
 	opt_ptr = list;
 
 	for (i = 0; i < cur_selection; i++, opt_ptr = opt_ptr->next)
 	    ; /* null body */
+	row = ((i + 1) - window_offset);
 
-#ifdef USE_SLANG
-	SLsmg_set_color(2);
-	SLsmg_gotorc((top + ((i + 1) - window_offset)), (lx - 1 + 2));
-	SLsmg_write_nstring(opt_ptr->name, width);
-	SLsmg_set_color(0);
-	/*
-	 *  If LYShowCursor is ON, move the cursor to the left
-	 *  of the current option, so that blind users, who are
-	 *  most likely to have LYShowCursor ON, will have it's
-	 *  string spoken or passed to the braille interface as
-	 *  each option is made current.  Otherwise, move it to
-	 *  the bottom, right column of the screen, to "hide"
-	 *  the cursor as for the main document, and let sighted
-	 *  users rely on the current option's highlighting or
-	 *  color without the distraction of a blinking cursor
-	 *  in the window. - FM
-	 */
-	if (LYShowCursor)
-	    SLsmg_gotorc((top + ((i + 1) - window_offset)), (lx - 1 + 1));
-	else
-	    SLsmg_gotorc((LYlines - 1), (LYcols - 1));
-	SLsmg_refresh();
-#else
-	wmove(form_window, ((i + 1) - window_offset), 2);
-#if defined(WIN_EX)	/* FIX */
-	wattron(form_window, A_REVERSE);
-#else
-	wstart_reverse(form_window);
-#endif
-	paddstr(form_window, width, opt_ptr->name);
-#if defined(WIN_EX)	/* FIX */
-	wattroff(form_window, A_REVERSE);
-#else
-	wstop_reverse(form_window);
-#endif
-	/*
-	 *  If LYShowCursor is ON, move the cursor to the left
-	 *  of the current option, so that blind users, who are
-	 *  most likely to have LYShowCursor ON, will have it's
-	 *  string spoken or passed to the braille interface as
-	 *  each option is made current.  Otherwise, leave it to
-	 *  the right of the current option, since we can't move
-	 *  it out of the window, and let sighted users rely on
-	 *  the highlighting of the current option without the
-	 *  distraction of a blinking cursor preceding it. - FM
-	 */
-	if (LYShowCursor)
-	    wmove(form_window, ((i + 1) - window_offset), 1);
-	wrefresh(form_window);
-#endif /* USE_SLANG  */
+	draw_option(form_window, row, width, TRUE, opt_ptr);
+	LYstowCursor(form_window, row, 1);
 
 	c = LYgetch_choice();
 	if (c == 7) {		/* Control-C or Control-G */
 	    cmd = LYK_QUIT;
 #ifndef USE_SLANG
 	} else if (c == MOUSE_KEY) {
-	    if ((cmd = fancy_mouse(form_window, i + 1 - window_offset, &cur_selection)) < 0)
+	    if ((cmd = fancy_mouse(form_window, row, &cur_selection)) < 0)
 		goto redraw;
 	    if  (cmd == LYK_ACTIVATE)
 		break;
@@ -1852,12 +1767,7 @@ restore_popup_statusline:
 		break;
 	}
     }
-#ifndef USE_SLANG
-    delwin(form_window);
-#if defined(NCURSES) || defined(PDCURSES)
-    LYsubwindow(0);
-#endif
-#endif /* !USE_SLANG */
+    LYstopPopup();
 
     return(disabled ? orig_selection : cur_selection);
 }

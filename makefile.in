@@ -28,16 +28,16 @@ LN_S		= @LN_S@
 
 ## This is the version which we are developing (or, upon release, make this
 ## the same).  Use no dots in the name, since it must work on VMS and MS-DOS.
-VERSION		= 2-8-3
+VERSION		= 2-8-4
 
 ##this is the name of the directory the lynx source code is in.
-##(e.g., lynx2-8-3, not the full path)
+##(e.g., lynx2-8-4, not the full path)
 lynxdir= lynx$(VERSION)
 lynxname= lynx$(VERSION)
 
 ## The 'DESTDIR' variable allows you to install the program into a different
 ## location, e.g., for packaging, without affecting the compiled-in pathnames.
-DESTDIR=
+DESTDIR= @DESTDIR@
 
 ## Where you want lynx installed
 bindir= @bindir@

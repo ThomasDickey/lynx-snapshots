@@ -2164,6 +2164,37 @@ PRIVATE int get_popup_choice_number ARGS1(
 						   " " : ""), \
 			   (choice + 1), value)
 
+PRIVATE void draw_option ARGS7(
+    WINDOW *,		win,
+    int,		entry,
+    int,		width,
+    BOOLEAN,		reverse,
+    int,		num_choices,
+    int,		number,
+    CONST char *,	value)
+{
+    char Cnum[64];
+
+    FormatChoiceNum(Cnum, number, "");
+#ifdef USE_SLANG
+    SLsmg_gotorc(win->top_y + entry, (win->left_x + 2));
+    addstr(Cnum);
+    if (reverse)
+	SLsmg_set_color(2);
+    LYaddnstr(value, width);
+    if (reverse)
+	SLsmg_set_color(0);
+#else
+    wmove(win, entry, 2);
+    waddstr(win, Cnum);
+    if (reverse)
+	wstart_reverse(win);
+    LYpaddstr(win, width, value);
+    if (reverse)
+	wstop_reverse(win);
+#endif /* USE_SLANG */
+}
+
 /*
  *  This function offers the choices for values of an
  *  option via a popup window which functions like
@@ -2185,9 +2216,7 @@ PUBLIC int popup_choice ARGS7(
     int lx = (column >= 0 ? column : (COL_OPTION_VALUES - 1));
     int c = 0, cmd = 0, i = 0, j = 0;
     int orig_choice = cur_choice;
-#ifndef USE_SLANG
     WINDOW * form_window;
-#endif /* !USE_SLANG */
     int num_choices = 0, top, bottom, length = -1;
     unsigned width = 0;
     CONST char ** Cptr = choices;
@@ -2329,27 +2358,8 @@ PUBLIC int popup_choice ARGS7(
      *	Set up the overall window, including the boxing characters ('*'),
      *	if it all fits.  Otherwise, set up the widest window possible. - FM
      */
-#ifdef USE_SLANG
-    SLsmg_fill_region(top, lx - 1, bottom - top, (Lnum + width + 4), ' ');
-#else
-    if (!(form_window = newwin(bottom - top, (Lnum + width + 4),
-			       top, (lx - 1))) &&
-	!(form_window = newwin(bottom - top, 0, top, 0))) {
-	HTAlert(POPUP_FAILED);
+    if ((form_window = LYstartPopup(top, lx, bottom - top, Lnum + width)) == 0)
 	return(orig_choice);
-    }
-    scrollok(form_window, TRUE);
-#ifdef PDCURSES
-    keypad(form_window, TRUE);
-#endif /* PDCURSES */
-#if defined(NCURSES) || defined(PDCURSES)
-    LYsubwindow(form_window);
-#endif
-#if defined(HAVE_GETBKGD)/* not defined in ncurses 1.8.7 */
-    wbkgd(form_window, getbkgd(stdscr));
-    wbkgdset(form_window, getbkgd(stdscr));
-#endif
-#endif /* USE_SLANG */
 
     /*
      *	Clear the command line and write
@@ -2395,105 +2405,32 @@ redraw:
      */
     for (i = 0; i <= num_choices; i++) {
 	if (i >= window_offset && i - window_offset < length) {
-	    FormatChoiceNum(Cnum, i, "");
-#ifdef USE_SLANG
-	    SLsmg_gotorc(top + ((i + 1) - window_offset), (lx - 1 + 2));
-	    addstr(Cnum);
-	    LYaddnstr(Cptr[i], width);
-#else
-	    wmove(form_window, ((i + 1) - window_offset), 2);
-	    wclrtoeol(form_window);
-	    waddstr(form_window, Cnum);
-	    LYwaddstr(form_window, Cptr[i]);
-#endif /* USE_SLANG */
+	    draw_option (form_window, ((i + 1) - window_offset), width, FALSE,
+			 num_choices, i, Cptr[i]);
 	}
     }
-#ifdef USE_SLANG
-    SLsmg_draw_box(top, (lx - 1), (bottom - top), (Lnum + width + 4));
-#else
-#ifdef VMS
-    VMSbox(form_window, (bottom - top), (Lnum + width + 4));
-#else
     LYbox(form_window, FALSE);
-#endif /* VMS */
-    wrefresh(form_window);
-#endif /* USE_SLANG */
     Cptr = NULL;
 
     /*
      *	Loop on user input.
      */
     while (cmd != LYK_ACTIVATE) {
+	int row = ((i + 1) - window_offset);
+
 	/*
 	 *  Unreverse cur choice.
 	 */
 	if (Cptr != NULL) {
-	    FormatChoiceNum(Cnum, i, "");
-#ifdef USE_SLANG
-	    SLsmg_gotorc((top + ((i + 1) - window_offset)), (lx - 1 + 2));
-	    addstr(Cnum);
-	    LYaddnstr(Cptr[i], width);
-#else
-	    wmove(form_window, ((i + 1) - window_offset), 2);
-	    waddstr(form_window, Cnum);
-	    LYwaddstr(form_window, Cptr[i]);
-#endif /* USE_SLANG */
+	    draw_option (form_window, row, width, FALSE,
+			 num_choices, i, Cptr[i]);
 	}
 	Cptr = choices;
 	i = cur_choice;
-	FormatChoiceNum(Cnum, i, "");
-#ifdef USE_SLANG
-	SLsmg_gotorc((top + ((i + 1) - window_offset)), (lx - 1 + 2));
-	addstr(Cnum);
-	SLsmg_set_color(2);
-	LYaddnstr(Cptr[i], width);
-	SLsmg_set_color(0);
-	/*
-	 *  If LYShowCursor is ON, move the cursor to the left
-	 *  of the current choice, so that blind users, who are
-	 *  most likely to have LYShowCursor ON, will have it's
-	 *  string spoken or passed to the braille interface as
-	 *  each choice is made current.  Otherwise, move it to
-	 *  the bottom, right column of the screen, to "hide"
-	 *  the cursor as for the main document, and let sighted
-	 *  users rely on the current choice's highlighting or
-	 *  color without the distraction of a blinking cursor
-	 *  in the window. - FM
-	 */
-	if (LYShowCursor)
-	    SLsmg_gotorc((top + ((i + 1) - window_offset)), (lx - 1 + 1));
-	else
-	    SLsmg_gotorc((LYlines - 1), (LYcols - 1));
-	SLsmg_refresh();
-#else
-	wmove(form_window, ((i + 1) - window_offset), 2);
-	waddstr(form_window, Cnum);
-#if defined(WIN_EX)	/* 1997/10/18 (Sat) 00:10:51 */
-	wattron(form_window, A_REVERSE);
-#else
-	wstart_reverse(form_window);
-#endif
-	LYwaddstr(form_window, Cptr[i]);
-#if defined(WIN_EX)	/* 1997/10/18 (Sat) 00:10:58 */
-	wattroff(form_window, A_REVERSE);
-#else
-	wstop_reverse(form_window);
-#endif
-	/*
-	 *  If LYShowCursor is ON, move the cursor to the left
-	 *  of the current choice, so that blind users, who are
-	 *  most likely to have LYShowCursor ON, will have it's
-	 *  string spoken or passed to the braille interface as
-	 *  each choice is made current.  Otherwise, leave it to
-	 *  the right of the current choice, since we can't move
-	 *  it out of the window, and let sighted users rely on
-	 *  the highlighting of the current choice without the
-	 *  distraction of a blinking cursor preceding it. - FM
-	 */
-	if (LYShowCursor)
-	    wmove(form_window, ((i + 1) - window_offset), 1);
-	wrefresh(form_window);
-#endif /* USE_SLANG  */
+	row = ((i + 1) - window_offset);
+	draw_option (form_window, row, width, TRUE,
+		     num_choices, i, Cptr[i]);
+	LYstowCursor(form_window, row, 1);
 
 	term_options = FALSE;
 	c = LYgetch_choice();
@@ -2501,7 +2438,7 @@ redraw:
 	    cmd = LYK_QUIT;
 #ifndef USE_SLANG
 	} else if (c == MOUSE_KEY) {
-	    if ((cmd = fancy_mouse(form_window, i + 1 - window_offset, &cur_choice)) < 0)
+	    if ((cmd = fancy_mouse(form_window, row, &cur_choice)) < 0)
 		goto redraw;
 	    if  (cmd == LYK_ACTIVATE)
 		break;
@@ -3122,13 +3059,7 @@ restore_popup_statusline:
 	}
     }
     FREE(popup_status_msg);
-#ifndef USE_SLANG
-    touchwin(stdscr);
-    delwin(form_window);
-#if defined(NCURSES) || defined(PDCURSES)
-    LYsubwindow(0);
-#endif
-#endif /* !USE_SLANG */
+    LYstopPopup();
 
     if (disabled || term_options) {
 	_statusline("");

@@ -3,6 +3,12 @@
 
 #include <LYCurses.h>
 
+typedef enum {
+    NORECALL = 0
+    , RECALL
+    , RECALL_CMD
+} RecallType;
+
 /*  UPPER8(ch1,ch2) is an extension of (TOUPPER(ch1) - TOUPPER(ch2))  */
 extern int UPPER8  PARAMS((
 	int		ch1,
@@ -26,7 +32,7 @@ extern int LYgetstr PARAMS((
 	char *		inputline,
 	int		hidden,
 	size_t		bufsize,
-	int		recall));
+	RecallType	recall));
 extern char *LYstrsep PARAMS((
 	char **		stringp,
 	CONST char *	delim));
@@ -156,8 +162,6 @@ extern void base64_encode PARAMS((char * dest, char * src, int len));
 
 #define VISIBLE  0
 #define HIDDEN   1
-#define NORECALL 0
-#define RECALL   1
 
 #ifdef EXP_ALT_BINDINGS
 /*  Enable code implementing additional, mostly emacs-like, line-editing

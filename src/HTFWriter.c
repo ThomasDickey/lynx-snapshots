@@ -740,7 +740,7 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 	    return(NULL);
 	}
 
-	if (((cp=strchr(pres->rep->name, ';')) != NULL) &&
+	if (((cp = strchr(pres->rep->name, ';')) != NULL) &&
 	    strstr((cp+1), "charset") != NULL) {
 	    _user_message(MSG_DOWNLOAD_OR_CANCEL, pres->rep->name);
 	} else if (*(pres->rep->name) != '\0')	{
@@ -749,7 +749,7 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 	    _statusline(CANNOT_DISPLAY_FILE_D_OR_C);
 	}
 
-	while(c != 'D') {
+	while (c != 'D' && c != 'C') {
 	    c = LYgetch_single();
 #ifdef VMS
 	    /*

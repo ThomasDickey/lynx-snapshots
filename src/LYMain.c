@@ -38,6 +38,8 @@
 #ifdef __DJGPP__
 #include <dos.h>
 #include <dpmi.h>
+#include <io.h>
+#include <sys/stat.h>
 #endif /* __DJGPP__ */
 
 #ifdef __EMX__
@@ -382,7 +384,7 @@ PUBLIC linkstruct links[MAXLINKS];
 PUBLIC histstruct history[MAXHIST];
 PUBLIC int nlinks = 0;		/* number of links in memory */
 PUBLIC int nhist = 0;		/* number of history entries */
-PUBLIC int more = FALSE;	/* is there more text to display? */
+PUBLIC BOOLEAN more = FALSE;	/* is there more text to display? */
 PUBLIC int InfoSecs;	/* Seconds to sleep() for Information messages */
 PUBLIC int MessageSecs; /* Seconds to sleep() for important Messages   */
 PUBLIC int AlertSecs;	/* Seconds to sleep() for HTAlert() messages   */
@@ -420,9 +422,9 @@ PUBLIC char *LYCookieSStrictCheckDomains = NULL; /* check strictly  */
 PUBLIC char *LYCookieSLooseCheckDomains = NULL;  /* check loosely   */
 PUBLIC char *LYCookieSQueryCheckDomains = NULL;  /* check w/a query */
 #ifdef EXP_PERSISTENT_COOKIES
-BOOLEAN persistent_cookies = FALSE; 	/* disabled by default! */
-PUBLIC char *LYCookieFile = NULL;	   /* cookie read file */
-PUBLIC char *LYCookieSaveFile = NULL;	   /* cookie save file */
+BOOLEAN persistent_cookies = FALSE;	/* disabled by default! */
+PUBLIC char *LYCookieFile = NULL;	/* cookie read file */
+PUBLIC char *LYCookieSaveFile = NULL;	/* cookie save file */
 #endif /* EXP_PERSISTENT_COOKIES */
 PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 PUBLIC BOOLEAN LYNoISMAPifUSEMAP = FALSE; /* Omit ISMAP link if MAP present? */
@@ -438,7 +440,7 @@ PUBLIC BOOLEAN LYSeekFragAREAinCur = TRUE;
 PUBLIC BOOLEAN LYStripDotDotURLs = TRUE;	/* Try to fix ../ in some URLs? */
 PUBLIC BOOLEAN LYForceSSLCookiesSecure = FALSE;
 PUBLIC BOOLEAN LYNoCc = FALSE;
-PUBLIC BOOLEAN LYPreparsedSource = FALSE;	/* Show source as preparsed?	 */
+PUBLIC BOOLEAN LYPreparsedSource = FALSE;	/* Show source as preparsed? */
 PUBLIC BOOLEAN LYPrependBaseToSource = TRUE;
 PUBLIC BOOLEAN LYPrependCharsetToSource = TRUE;
 PUBLIC BOOLEAN LYQuitDefaultYes = QUIT_DEFAULT_YES;
@@ -662,6 +664,7 @@ PRIVATE void free_lynx_globals NOARGS
 	FREE(links[i].lname);
     }
     nlinks = 0;
+    HTList_delete(LYcommandList());
 
     return;
 }
@@ -1492,7 +1495,7 @@ PUBLIC int main ARGS2(
 #ifdef USE_PRETTYSRC
     if ( (!Old_DTD) != TRUE ) /* skip if they are already initialized -HV */
 #endif
-    HTSwitchDTD(!Old_DTD);
+    HTSwitchDTD((BOOLEAN)!Old_DTD);
 
     /*
      * Set up the proper character set with the desired
@@ -1657,20 +1660,14 @@ PUBLIC int main ARGS2(
      *	Check the -popup command line toggle. - FM
      */
     if (LYUseDefSelPop == FALSE) {
-	if (LYSelectPopups == TRUE)
-	    LYSelectPopups = FALSE;
-	else
-	    LYSelectPopups = TRUE;
+	LYSelectPopups = !LYSelectPopups;
     }
 
     /*
      *	Check the -show_cursor command line toggle. - FM
      */
     if (LYUseDefShoCur == FALSE) {
-	if (LYShowCursor == TRUE)
-	    LYShowCursor = FALSE;
-	else
-	    LYShowCursor = TRUE;
+	LYShowCursor = !LYShowCursor;
     }
 
     /*
@@ -1715,16 +1712,19 @@ PUBLIC int main ARGS2(
 
 #if defined (__DJGPP__)
     if (watt_debug)
-      dbug_init();
+	dbug_init();
     sock_init();
 
     __system_flags =
-	__system_emulate_chdir	      |	/* handle `cd' internally */
-	__system_handle_null_commands |	/* ignore cmds with no effect */
-	__system_allow_long_cmds      |	/* handle commands > 126 chars	 */
-	__system_use_shell	      |	/* use $SHELL if set */
-	__system_allow_multiple_cmds  |	/* allow `cmd1; cmd2; ...' */
+	__system_emulate_chdir	      | /* handle `cd' internally */
+	__system_handle_null_commands | /* ignore cmds with no effect */
+	__system_allow_long_cmds      | /* handle commands > 126 chars	 */
+	__system_use_shell	      | /* use $SHELL if set */
+	__system_allow_multiple_cmds  | /* allow `cmd1; cmd2; ...' */
 	__system_redirect;		/* redirect internally */
+
+    /* This speeds up stat() tremendously */
+    _djstat_flags |= _STAT_INODE | _STAT_EXEC_MAGIC |_STAT_DIRSIZE;
 #endif  /* __DJGPP__ */
 
     /* trap interrupts */

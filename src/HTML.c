@@ -3204,7 +3204,7 @@ PRIVATE int HTML_start_element ARGS6(
 #else
 	/*Close an HREF-less NAMED-ed now if force_empty_hrefless_a was
 	    requested - VH*/
-	if (href == NULL && force_empty_hrefless_a) { 
+	if (href == NULL && force_empty_hrefless_a) {
 	    SET_SKIP_STACK(HTML_A);
 	    HTML_end_element(me, HTML_A, include);
 	}
@@ -5181,7 +5181,11 @@ PRIVATE int HTML_start_element ARGS6(
 	    /* text+file don't go in here */
 	    if ((UseALTasVALUE == TRUE) ||
 		(present && present[HTML_INPUT_VALUE] &&
-		 value[HTML_INPUT_VALUE] && *value[HTML_INPUT_VALUE])) {
+		 value[HTML_INPUT_VALUE] &&
+		(*value[HTML_INPUT_VALUE] ||
+		 (I.type && (!strcasecomp(I.type, "checkbox") ||
+			     !strcasecomp(I.type, "radio")))))) {
+
 		/*
 		 *  Convert any HTML entities or decimal escaping. - FM
 		 */
@@ -6731,11 +6735,11 @@ PRIVATE int HTML_end_element ARGS3(
 	 */
 	me->inA = FALSE;
 #ifdef MARK_HIDDEN_LINKS
-	if (hidden_link_marker && *hidden_link_marker && 
-		HText_isAnchorBlank(me->text, me->CurrentANum) ) {	    
-	    HText_appendText(me->text,hidden_link_marker);	
+	if (hidden_link_marker && *hidden_link_marker &&
+		HText_isAnchorBlank(me->text, me->CurrentANum) ) {
+	    HText_appendText(me->text,hidden_link_marker);
 	}
-#endif	
+#endif
 	UPDATE_STYLE;
 	if (me->inBoldA == TRUE && me->inBoldH == FALSE)
 	    HText_appendCharacter(me->text, LY_BOLD_END_CHAR);

@@ -864,10 +864,14 @@ PUBLIC char *HTQuoteParameter ARGS1(
 	    result[n++] = parameter[i];
 	    result[n++] = D_QUOTE;
 	    result[n++] = S_QUOTE;
-	} else if (parameter[i] == '\\') {
-	    result[n++] = parameter[i];
-	    result[n++] = parameter[i];
 	} else {
+	    /* Note:  No special handling of other characters, including
+	       backslash, since we are constructing a single-quoted string!
+	       Backslash has no special escape meaning within those for sh
+	       and compatible shells, so trying to escape a backslash by
+	       doubling it is unnecessary and would be interpreted by the
+	       shell as an additional data character. - kw 2000-05-02
+	       */
 	    result[n++] = parameter[i];
 	}
     }

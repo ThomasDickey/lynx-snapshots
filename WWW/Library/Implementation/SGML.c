@@ -2163,7 +2163,8 @@ top1:
 	    /*
 	    **	If complete match, end litteral.
 	    */
-	    if ((c == '>') && testtag && !testtag->name[string->size-2]) {
+	    if ((c == '>') && testtag &&
+		string->size > 1 && !testtag->name[string->size-2]) {
 #ifdef USE_PRETTYSRC
 		if (psrc_view) {
 		    PSRCSTART(abracket);PUTC('<');PUTC('/');PSRCSTOP(abracket);

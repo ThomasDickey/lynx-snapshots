@@ -4,7 +4,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2000/5/20
+dnl Updated: 2000/7/11
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf, patched
 dnl by Tom Dickey.  See your local GNU archives, and this URL:
@@ -387,9 +387,15 @@ AC_DEFUN(AM_WITH_NLS,
     if test "$PACKAGE" = gettext; then
       USE_NLS=yes
       USE_INCLUDED_LIBINTL=yes
-
-      AC_LINK_FILES($nls_cv_header_libgt, $nls_cv_header_intl)
     fi
+
+    # If we really do not use included intl, suppress the command that
+    # would attempt to symlink the two copies of its header.
+    if test "$USE_INCLUDED_LIBINTL" != yes; then
+      nls_cv_header_libgt=
+      nls_cv_header_intl=
+    fi
+    AC_LINK_FILES($nls_cv_header_libgt, $nls_cv_header_intl)
 
     AC_OUTPUT_COMMANDS([ #(vi
       case "\$CONFIG_FILES" in
@@ -884,10 +890,17 @@ if test ".$ac_cv_func_initscr" != .yes ; then
 	cf_term_lib=""
 	cf_curs_lib=""
 
+	if test ".$cf_cv_ncurses_version" != .no
+	then
+		cf_check_list="ncurses curses cursesX"
+	else
+		cf_check_list="cursesX curses ncurses"
+	fi
+
 	# Check for library containing tgoto.  Do this before curses library
 	# because it may be needed to link the test-case for initscr.
 	AC_CHECK_FUNC(tgoto,[cf_term_lib=predefined],[
-		for cf_term_lib in termcap termlib unknown
+		for cf_term_lib in $cf_check_list termcap termlib unknown
 		do
 			AC_CHECK_LIB($cf_term_lib,tgoto,[break])
 		done
@@ -895,7 +908,7 @@ if test ".$ac_cv_func_initscr" != .yes ; then
 
 	# Check for library containing initscr
 	test "$cf_term_lib" != predefined && test "$cf_term_lib" != unknown && LIBS="-l$cf_term_lib $cf_save_LIBS"
-	for cf_curs_lib in cursesX curses ncurses xcurses jcurses unknown
+	for cf_curs_lib in $cf_check_list xcurses jcurses unknown
 	do
 		AC_CHECK_LIB($cf_curs_lib,initscr,[break])
 	done

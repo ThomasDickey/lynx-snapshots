@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.36 Fri, 23 Jun 2000 08:15:08 -0700 dickey @
+ * @Id: LYStyle.c 1.37 Sun, 16 Jul 2000 20:16:13 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -25,9 +25,11 @@
 
 #ifdef USE_COLOR_STYLE
 
+PRIVATE void style_initialiseHashTable NOPARAMS;
+
 /* stack of attributes during page rendering */
 PUBLIC int last_styles[128];
-PUBLIC int last_colorattr_ptr=0;
+PUBLIC int last_colorattr_ptr = 0;
 
 PUBLIC bucket hashStyles[CSHASHSIZE];
 PUBLIC bucket special_bucket =
@@ -63,7 +65,6 @@ static char *Mono_Strings[7] =
 
 /* Remember the hash codes for common elements */
 PUBLIC int	s_alink  = NOSTYLE, s_a     = NOSTYLE, s_status = NOSTYLE,
-		s_label  = NOSTYLE, s_value = NOSTYLE, s_high   = NOSTYLE,
 		s_normal = NOSTYLE, s_alert = NOSTYLE, s_title  = NOSTYLE,
 #ifdef USE_SCROLLBAR
 		s_sb_bar = NOSTYLE, s_sb_bg = NOSTYLE,
@@ -80,7 +81,10 @@ PRIVATE unsigned char our_pairs[2][MAX_COLOR][MAX_COLOR];
 PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*,element)
 {
     int i;
-    int mA = 0, fA = default_fg, bA = default_bg, cA = A_NORMAL;
+    int mA = 0;
+    short fA = default_fg;
+    short bA = default_bg;
+    int cA = A_NORMAL;
     int newstyle = hash_code(element);
 
     CTRACE((tfp, "CSS(PA):style d=%d / h=%d, e=%s\n", style, newstyle,element));
@@ -329,43 +333,54 @@ PRIVATE void free_colorstylestuff NOARGS
  */
 PRIVATE void initialise_default_stylesheet NOARGS
 {
+    static CONST char *table[] = {
+	"a:bold:green",
+	"alert:bold:yellow:red",
+	"alink:reverse:yellow:black",
+	"label:normal:magenta",
+	"status:reverse:yellow:blue",
+	"title:normal:magenta",
+	"whereis:reverse+underline:magenta:cyan"
+    };
+    unsigned n;
+    char temp[80];
+    for (n = 0; n < TABLESIZE(table); n++) {
+	parse_style(strcpy(temp, table[n]));
+    }
 }
 
 /* Set all the buckets in the hash table to be empty */
-PUBLIC void style_initialiseHashTable NOARGS
+PRIVATE void style_initialiseHashTable NOARGS
 {
-	int i;
-	static int firsttime = 1;
+    int i;
+    static int firsttime = 1;
 
-	for (i = 0; i <CSHASHSIZE; i++)
-	{
-	    if (firsttime)
-		hashStyles[i].name = NULL;
-	    else
-		FREE(hashStyles[i].name);
-	    hashStyles[i].color = -1;
-	    hashStyles[i].cattr = -1;
-	    hashStyles[i].mono  = -1;
-	}
-	if (firsttime) {
-	    firsttime = 0;
+    for (i = 0; i <CSHASHSIZE; i++)
+    {
+	if (firsttime)
+	    hashStyles[i].name = NULL;
+	else
+	    FREE(hashStyles[i].name);
+	hashStyles[i].color = 0;
+	hashStyles[i].cattr = 0;
+	hashStyles[i].mono  = 0;
+    }
+    if (firsttime) {
+	firsttime = 0;
 #ifdef LY_FIND_LEAKS
-	    atexit(free_colorstylestuff);
+	atexit(free_colorstylestuff);
 #endif
-	}
-	s_high   = hash_code("high");
-	s_alink  = hash_code("alink");
-	s_value  = hash_code("value");
-	s_label  = hash_code("label");
-	s_a      = hash_code("a");
-	s_status = hash_code("status");
-	s_alert  = hash_code("alert");
-	s_title  = hash_code("title");
+    }
+    s_alink  = hash_code("alink");
+    s_a      = hash_code("a");
+    s_status = hash_code("status");
+    s_alert  = hash_code("alert");
+    s_title  = hash_code("title");
 #ifdef USE_SCROLLBAR
-	s_sb_bar = hash_code("scroll.bar");
-	s_sb_bg  = hash_code("scroll.back");
-	s_sb_aa  = hash_code("scroll.arrow");
-	s_sb_naa = hash_code("scroll.noarrow");
+    s_sb_bar = hash_code("scroll.bar");
+    s_sb_bg  = hash_code("scroll.back");
+    s_sb_aa  = hash_code("scroll.arrow");
+    s_sb_naa = hash_code("scroll.noarrow");
 #endif
 }
 
@@ -377,33 +392,35 @@ HTList *lss_styles = NULL;
 
 PUBLIC void parse_userstyles NOARGS
 {
-	char *name;
-	HTList *cur = lss_styles;
-	colorPairs = 0;
-	style_initialiseHashTable();
+    char *name;
+    HTList *cur = lss_styles;
 
-	/* set our styles to be the same as vanilla-curses-lynx */
+    colorPairs = 0;
+    style_initialiseHashTable();
+
+    /* set our styles to be the same as vanilla-curses-lynx */
+    if (HTList_isEmpty(cur)) {
 	initialise_default_stylesheet();
-
-	while ((name = HTList_nextObject(cur)) != NULL)
-	{
-		CTRACE((tfp, "LSS:%s\n", name ? name : "!?! empty !?!"));
-		if (name != NULL)
-		    parse_style(name);
+    } else {
+	while ((name = HTList_nextObject(cur)) != NULL) {
+	    CTRACE((tfp, "LSS:%s\n", name ? name : "!?! empty !?!"));
+	    if (name != NULL)
+		parse_style(name);
 	}
+    }
 }
 
 
 /* Add a STYLE: option line to our list */
-PUBLIC void HStyle_addStyle ARGS1(char*,buffer)
+PRIVATE void HStyle_addStyle ARGS1(char*,buffer)
 {
-	char *name = NULL;
-	StrAllocCopy(name, buffer);
-	if (lss_styles == NULL)
-		lss_styles = HTList_new();
-	strtolower(name);
-	CTRACE((tfp, "READCSS:%s\n", name ? name : "!?! empty !?!"));
-	HTList_addObject (lss_styles, name);
+    char *name = NULL;
+    StrAllocCopy(name, buffer);
+    if (lss_styles == NULL)
+	lss_styles = HTList_new();
+    strtolower(name);
+    CTRACE((tfp, "READCSS:%s\n", name ? name : "!?! empty !?!"));
+    HTList_addObject (lss_styles, name);
 }
 
 PUBLIC void style_deleteStyleList NOARGS
@@ -413,18 +430,6 @@ PUBLIC void style_deleteStyleList NOARGS
 	FREE(name);
     HTList_delete (lss_styles);
     lss_styles = NULL;
-}
-
-char* default_stylesheet[] = {
-	"a:bold", "em:bold", "strong:bold", "b:bold", "i:bold",
-	"alink:reverse", "status:reverse", NULL
-};
-
-PUBLIC void style_defaultStyleSheet NOARGS
-{
-	int i;
-	for (i = 0; default_stylesheet[i]; i++)
-		HStyle_addStyle(default_stylesheet[i]);
 }
 
 PRIVATE int style_readFromFileREC ARGS2(char*, file, int, toplevel)
@@ -440,13 +445,13 @@ PRIVATE int style_readFromFileREC ARGS2(char*, file, int, toplevel)
     if (!fh)
     {
 	/* this should probably be an alert or something */
-	CTRACE((tfp, "CSS:Can't open style file '%s', using defaults\n", file));
+	CTRACE((tfp, "CSS:Can't open style file %s, using defaults\n", file));
 	return -1;
     }
 
     if (toplevel) {
-      style_initialiseHashTable();
-      style_deleteStyleList();
+	style_initialiseHashTable();
+	style_deleteStyleList();
     }
 
     while (LYSafeGets(&buffer, fh) != NULL)
@@ -459,10 +464,6 @@ PRIVATE int style_readFromFileREC ARGS2(char*, file, int, toplevel)
 	else if (buffer[0] != '#' && (len = strlen(buffer)) > 0)
 	    HStyle_addStyle(buffer);
     }
-    /* the default styles are added after the user styles in order
-    ** that they come before them  <grin>  RP
-    */
-    /*	style_defaultStyleSheet(); */
 
     fclose (fh);
     if (toplevel && LYCursesON)
