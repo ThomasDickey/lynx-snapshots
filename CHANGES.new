@@ -1,0 +1,345 @@
+	Changes in the development code based on Lynx v2.7.
+	===================================================
+[ This file might finally become the CHANGES file for a new Lynx release.
+More detailed change information may be in separate files, which could
+later disappear.  Currently included are changes from Foteos Macrides'
+bugfixes, changes in chartrans code (see also CHANGES.chartrans), changes
+for compilation on Win32 and DOS platforms (see also README.win-386),
+changes for auto-configure and simple curses color (see also
+README.configure), and miscellaneous other changes.  Note that the 2.7 ->
+2.7.1 changes (which are listed at the beginning of the current CHANGES
+file) are duplicated here. - KW]
+
+1997-04-15
+----------
+* refined logic of SVr4 curses color support to test the no_color_video
+  attribute - TD
+* ifdef'd NCURSES_MOUSE_VERSION logic to allow build with ncurses 1.9.4 - TD
+* ifdef'd wgetbkgd misspelling to allow build with ncurses prior to 1.9.9g - TD
+* document USE_MOUSE configuration-option - TD
+* modify configure script and makefile.in templates to make BSDI_Makefile
+  obsolete - TD
+* rename config.h to lynx_cfg.h to minimize conflict when configuring against
+  ncurses or slang in nonstandard locations - TD
+* new autoconf macro CF_HEADER_PATH is used to make header-search for slang
+  the same as ncurses - TD
+* modify CF_CURSES_LIBS, CF_NCURSES_LIBS and CF_SLANG_LIBS to accommodate
+  predefinition of $LIBS variable - TD
+* corrected autoconf'd compiler flags for Ultrix - TD
+* add config.guess & config.sub to allow specialized host-type checks - TD
+* guard against redefinition of NO_FILIO_H - TD
+* use new autoconf macro CF_SYSTEM_MAIL_FLAGS /jes
+
+1997-04-09
+* Many changes to further the Win32 and 386 ports.  An emulation of
+  the HTVMS_ calls was used to try and cover all the DOS'izms.
+  A specialized ifdef for pdcurses color mapping added.  Some keypad
+  tweaks.  More generalized process spawing.  .lynrc is lynx.rc for 386.
+  - WB
+* Moved handling for NEWS_POSTING in LYReadCFG.c to the right place,
+  so that it can actually have an effect. - LWV
+1997-04-08
+* New translation table koi8r_uni for KOI8-R charset.  Lynx can now
+  translate between iso-8859-5 and KOI8-R, at least for the cyrillic
+  characters present in both. - KW
+* New translation table def7_uni with default 7-bit mappings 
+  (replacement representation).  Based on RFC1345 and mnemonic,ds
+  from ftp://dkuug.dk/i18n/ and previous Lynx replacements
+  in LYCharSets.c and IPA FAQ convention and stuff for Ethiopic and
+  KOI8-R.  It maps many of the accented Latin characters present in
+  Unicode to their unaccented counterparts.  This table is now
+  used for the "7 bit approximations" display "character set". - KW
+* Entities for Latin2 characters added to HTMLDTD.c  These also
+  include many entity names for ASCII characters, and characters
+  which are in both iso-8859-1 and iso-8859-2. - Hynek Med
+* Changes to the non-chartrans translation tables in LYCharSets.c
+  for &Dstrok;, &ETH;, and &eth;.  Treat &Dstrok; more like
+  an entity for the (Latin-2) Unicode character U+0110, since
+  that seems to be SGML standard usage. - KW
+* Added mappings for some "smart quote" characters to several
+  translation tables. - KW
+* Make makeuctb slightly more flexible (accept unicode range for
+  mapping to single code point). - KW
+1997-04-07
+* Took out special-case handling in the curses-color code for underlining 
+  when lynx is running under linux using the linux console with color.  
+  The code was introduced on 1997-03-12 and would ignore "smul" capability
+  info from terminfo or termcap under those circumstances, always using
+  bold instead of underline. - KW
+* Slightly modified the FORM handling patch of 1997-04-05, as follows:
+  Use a generic test for a non-SGML_EMPTY element for bypassing the
+  stack pop in HTML_end_element() of HTML.c instead of an explicit
+  test for HTML_FORM. - KW
+1997-04-06
+* Patch for IMG elements which have both ISMAP and USEMAP in effect.
+  In HTML_start_element() don't generate the "[ISMAP]-" string for 
+  output in this case, unless clickable_images is set TRUE. - KW
+1997-04-05
+* Patch for Lynx v2.7.1 to handle invalidly interdigitated container
+  elements or spurious container end tags without substitutions of
+  "expected" FORM end tags by the SGML.c stack-based parser, and
+  without messing up the HTML.c stack-based parser.  Reliably succeeds
+  in not closing FORMs before all of the FORM elements, including
+  submit buttons, have been processed.  Should be reasonably crash
+  safe (hopefully as safe as the vanilla v2.7.1), but there are no
+  guarantees. - FM
+=======================================================================
+---  Release of Lynx2-7 + BUGFIXES as Lynx v2.7.1 (April 4, 1997)   ---
+-----------------------------------------------------------------------
+  Changes listed below were made to the development code in parallel 
+  to the bugfixes which resulted in 2.7.1, and include those bugfixes
+  (or equivalent changes).
+=======================================================================
+1997-04-02
+* add Andrew Kuchling's patch to support mouse-clicks with ncurses. - TD
+* refine tests that address porting problems to SCO (detecting struct winsize,
+  workaround for misdefinition of 'remove')
+* refine CF_COLOR_CURSES test to avoid ncurses 1.9.9e bugs. - TD
+* refine CF_PATH_PROG to allow for machines that haven't the given programs,
+  by using only the program name and added configure option
+  --disable-full-paths to enforce this behavior. - TD
+* fixes for some gcc compiler warnings (missing prototypes, unused variables,
+  unintialized variables, shadowed variables). - TD
+* Fixed typos in LYHistory.c, LYMail.c and LYMain.c which caused
+  failures of flag setting in the distributed code. - TD
+* correct cast in HTFWriter.c that may break if atoi() is not prototyped. - TD
+* add top-level makefile target 'maintainer-clean', use this to remove
+  Lynx.prj - TD
+1997-03-31
+* Added a missing check for whether the fragment token is NULL in
+  LYConvertToURL() of LYUtils.c.  Without the check, the for-Unix code
+  could crash if a local file spec was entered as a startfile or goto
+  with escaped characters. - KW
+* Mod in HTML.c to retain "[INLINE]" as the default ALT string if an
+  IMG element has an ISMAP attribute but is not in Anchor content such
+  that it could not in fact function as a server-side image map. - FM
+1997-03-27
+* In mainloop(), after the call to HText_pageDisplay() following a change
+  of the document view, ensure that curdoc.link does not remain set to -1 
+  if there are any links on the screen.  This would otherwise happen if
+  a document is pushed to the history stack while there are no links, and
+  later popped (and refreshed) after one or more links have been created.
+  This change prevents segmentation faults which occurred after creation
+  of a new file in a previously empty directory via the DIRED menu.  The
+  access to invalid memory only occurred if the screen showing the empty
+  directory did not have a parent dir reference link (which is always the
+  case if NO_PARENT_DIR_REFERENCE was specified at compilation time). - KW
+* In LYLocal.c, modified the code handling DIRED_MENU to do more careful
+  checking of the selected file.  In addition to "TAG", "FILE", and "DIR", 
+  DIRED_MENU definitions in lynx.cfg now also recognize LINK as a type.
+  DIRED_MENU definitions with a type field of "LINK" are only used if the
+  current selection is a symbolic link ("FILE" and "DIR" definitions are
+  not used in that case).  The default menu definitions have been updated
+  to reflect this change, and to avoid the showing of menu items whose
+  action would always fail - KW
+* Some cleanup to eliminate compiler warnings, remove some unused 
+  variables - KW
+* Fixed a typo and added comments for the code in LYMainLoop.c which
+  decides whether to load the URLs for homepage and/or startfile into
+  the goto buffer at startup.  The typo in the distributed code caused
+  the startfile URL always to be added to the goto buffer, even if
+  it had POST content such that it could be resent inappropriately
+  as a GET request via the goto buffer. - FM
+* Added a bsdi-slang target to the Makefile. - LE
+1997-03-26
+* Changed highlighting of strings found by a WHEREIS ('/') search.
+  Now uses Christmas tree attribute combination ("all bits are on"),
+  which with color support translates to COLOR:7. - KW
+* Modified the HTStream structure and associated code in src/HTFWriter.c
+  so that we save and use the relevant content of the associated
+  HTPresentation structure as two HTFormat elements rather than via a
+  pointer to the HTPresentation structure itself, because the latter
+  structure might not be valid under some circumstances when
+  HTFWriter_free() is called.  The distributed code might indirectly
+  result in segmentation faults during downloading on linux and some
+  other flavors of Unix (though they don't occur for most flavors, or
+  on VMS). - KW
+1997-03-23
+* Further reduction of top-level makefile.in by moving definitions out of
+  WWW/Implementation/*/Makefile, so only one is needed for autoconfigured
+  build (i.e., WWW/Implementation/unix/Makefile).  This highlights the
+  remaining differences between the top-level targets - TD
+* Make configure script generate Unix makefiles in subdirectories, a step
+  toward being able to run make from any directory, for development - TD
+* Add autoconf tests for paths of programs, including sendmail vs mmdf - TD
+* Add configure script options for development (--disable-echo, --enable-debug,
+  --enable-find-leaks, --enable-warnings) - TD
+* Allow user to override search path for ncurses header by setting $CFLAGS or
+  $CPPFLAGS - TD
+* Correct array limit in LYCurses.c for SVr4 color support - TD
+* Use addstr rather than printw in popup-forms to address concern about 8-bit
+  characters - TD
+1997-03-21
+* Changes in auto config handling of ncurses header location, function
+  used for reading terminal input, some other system dependent tweaks
+  (including SCO broken remove, time.h) - TD
+* Fix for popup handling with late ncurses versions (uses wprintw
+  instead of waddstr in LYForms.c) - TD
+* Mods in LYPrint.c to use ".txt" as the output file extension for
+  all rendered text/html files regardless of their original extension.
+  The distributed code was doing this only for ones with an extension
+  of ".html".  The original extension still is retained if the file
+  is being output as source. - FM
+* Added protection against passing a NULL pointer for path_url to
+  render_item() from dired_options() in LYLocal.c. - GN
+1997-03-20
+* Tweaked the protection against URLs directed to port 19 or port 25 so
+  that it can't be circumvented via lead zeros in the port numbers. - FM
+* Changed the compilation default so as not to send From MIME headers to
+  http or https servers.  The default can still be changed via lynx.cfg.
+  Replaced the -nofrom disabling switch to a -from switch for toggling
+  the compilation or configuration default.  Sending the From header
+  has become widely regarded as an invasion of privacy risk, particularly
+  in conjunction with cookie support. - FM
+* Corrected a typo in the lynx.cfg comments concerning TRUSTED_LYNXCGI
+  rules. - KW
+1997-03-17
+* Mods of LYNews.c and LYMail.c to prepend a "-- " separator before
+  appending the LYNX_SIG_FILE signature file to news and email
+  messages. - FM
+* Made the installation mode 755 in the top-level Makefile.  The
+  distributed code used 555, and some install commands were unable
+  to do the strip. - LWV
+1997-03-14
+* Corrected typos and expanded the comments concerning lynxcgi symbols
+  in userdefs.h and lynx.cfg. - FM
+* Modified SGML.c to handle the numeric character reference &#8482; as
+  the named entity &trade; also in the non-chartrans case.  The
+  trademark character (given by &#8482; or &trade;) will be shown as
+  "(TM)" as the ASCII substitution unless the current display character
+  has a code point for the trademark character or unless overridden by a
+  chartrans translation table. The code of 1997-02-25 prevented showing
+  the trademark sign as "(R)" but did not work in all non-chartrans
+  cases. - KW
+* Include time.h via tcp.h for SVR4 systems.  The tcp.h header does include
+  sys/time.h for Unix systems, but this apparently doesn't get  struct tm 
+  and  extern char * ctime()  declared for SVR4. - FM
+1997-03-13
+* Added protection in LYGetFile.c against connections to the port 25
+  ESMTP service. - FM
+1997-03-12
+* (chartrans) Make compilation in src/chrtrans less verbose, no more 
+  generating automatic *.h_old backup copies. - KW
+* Refinement to the SVr4 (ncurses) color support, allowing it
+  to more closely model the slang support. - TD
+1997-03-11
+* Tweak for command line parsing of files with no URL in LYUtils.c.
+  Also added ability to pass partial domain names in the DJGPP version. - WB
+* Added the closing function for Win32 TCP in LYExit.c (did anyone see a
+  difference?!). - WB
+* Altered LYCurses.c so that the DJGPP version could spawn other programs
+  without certain death. - WB
+* Ignoring the whole ~/lynx.cfg problem (expanding '~') entirely for the 
+  Win32 version for now. - WB
+* Some other tweaks for Win32 and DJGPP - WB
+* Added protection in LYGetFile.c against denial of service attacks via
+  the port 19 CHARGEN service.  The distributed code left Lynx or proxies
+  vulnerable to such attacks via direct or redirection URLs. - FM
+1997-03-10
+* Fixed error in the handling of numeric character references with values
+  greater than 255 in SGML.c.  The distributed code was breaking after
+  substitutions instead of falling through to reset the string chunk and
+  recycle the terminator if not a semi-colon. - FM
+1997-03-09
+* Integrated (simple) color, auto-configure patches with 2.7 following
+  chrtrans patch - T.Dickey, J.Spath.
+1997-03-08
+* Fixed error in the switch positioning of checks for XLOADIMAGE_COMMAND
+  and wais_proxy in LYReadCFG.c.  The distributed code had them reversed
+  under case 'W' versus case 'X'. - PDS
+* Expanded the copyright and licensing statements in the -version
+  output. - FM
+1997-03-04
+* Corrected the offset computation in textsearch() of LYSearch.c so that
+  WHEREIS searches repeated on a page with no links seek the target
+  starting at the line immediately following the last displayed.  The
+  distributed code was setting a greater offset. - JS
+1997-03-02
+* Don't entify post content for the showinfo display, now that we are
+  making it an XMP block in that display to handle all of the supported
+  enctypes. - FM
+* Patches to fix mail and FTP for Win32 (LYMail.c, HTFile.c). - WB
+* Makefiles to compile chartrans code for Win32. - WB
+* (chartrans) Minor cleanups (makeuctb.c, chrtrans/Makefile, HTPlain.c)
+  to enable successful compilation on Win32. - KW
+1997-02-28
+* Changed all references to "image/*" to just "image" in the userdefs.h
+  and lynx.cfg comments about XLOADIMAGE_COMMAND.  The "/*" within the
+  userdefs.h comments was generating warnings from some compilers. - FM
+* Added a snake-slang target to the Makefile, and added -DUNIX to the
+  LYFLAGS for the snake3 and snake3-slang targets (HP-UX apparently does
+  not define "unix" itself with the -Ae switch, and thus needs to have
+  that definition forced via -DUNIX). - HL
+* Merged with patches and makefiles from Wayne Buttles 
+  (buttles@wsb.champlain.edu) to enable compilation in two new environments: 
+  Win32 (95/NT) with Borland C++ 4.52 compiler, and 386 DOS with DJGPP 
+  compiler.  See README.win-386 for more info.  Separate utility programs
+  needed for compiling and running Lynx on those platforms are available
+  from Wayne at <http://www.fdisk.com/doslynx/wlynx/>. - WB, KW
+* Fixed Telnet for Win32 - WB
+* (chartrans) Small correction in SGML.c (set_chartrans_handling) - KW
+1997-02-26
+* Close both descriptors of the pipe() for the NSL_FORK enabled code
+  in HTTCP.c.  The distributed code was closing only one of them on
+  completed gethostbyname() calls, and neither on 'z'aps. - FM
+* Changed the HREF for the "Lynx FAQ" link in the online 'h'elp to
+  its new URL (http://www.slcc.edu/lynx/faq.html). - FM
+1997-02-25
+* More reverse engineering to cope with Netscape's bogus cookie header
+  parsing.  The parser must not require an '=' between the expires
+  attribute name and value, because Set-Cookie headers are being
+  transmitted without it (e.g., by http://law.agps.gov.au).  So Lynx
+  now treats that as another special case. - FM
+* Cope with invalid use of expires attributes in Version 1 cookies.
+  An -06 State Management draft recommends that for "backward
+  compatibility", and has been severely criticized in the HTTP-WG,
+  but it would be foolish not to assume Netscape will do that.  See the
+  expanded comments in LYSetCookie() of LYCookie.c for more information.
+  Note that "expires" thus cannot be used as a Version 1 cookie name, but
+  a provider would be foolish to use that, anyway.  Note also that the
+  possibility of using different header names for Version 1 versus
+  Version 0 (a.k.a., "Netscape") cookies is being discussed in the
+  HTTP-WG, which might have been better to do in the first place, but
+  the -05 draft has been approved as RFC 2109:
+    http://info.internet.isi.edu/in-notes/rfc/files/rfc2109.txt
+  so it would be a while before that were done, if ever. - FM
+* chartrans code for translation of character sets, handling of Unicode,
+  and i18n updated for Lynx 2.7.  Support for CHARSET attribute on A
+  tags.  New directory src/chrtrans with table files.  Compilation flags
+  -DEXP_CHARTRANS, -DEXP_CHARTRANS_AUTOSWITCH (for linux), 
+  -DSLANG_MBCS_HACK (for raw unicode console).  
+  New command line options when compiled with -DEXP_CHARTRANS: 
+  -assume_charset, -assume_local_charset, -assume_unrec_charset.  
+  See README.chartrans and README files in src/chrtrans for more info. - KW
+* No showing of &trade; or &#8482; as (R) any more, use (TM) instead. - KW
+* Prefer HTTP-EQUIV over NAME in META tags. - KW
+1997-02-22
+* Fixed a memory management glitch which could cause a crash if the
+  MIME type of a reply to a FORM submission with METHOD=POST caused a
+  download offer to be invoked. - FM
+* Don't simplify ftp URLs by trimming trailing slashes if the URL is
+  being proxied.  The Netscape proxy server for some unknown reason
+  can return redirection for ftp URLs with the slash appended, and
+  trimming it can result in a redirection loop.  Based on a posted
+  patch from KW. - FM
+* Fixed two typos in the checks for HTPassHighCtrlRaw in LYExpandString()
+  of LYCharUtils.c. - KW
+* Fixed typo in the equality check on line 1553 in HTGopher.c. - AM
+1997-02-19
+* Reset the host string after an '@', if present, when trimming default
+  ":port" fields in the new code aimed at compliance with the Masinter
+  and Fielding URL drafts, expected to replace RFCs 1738 and 1808.  The
+  distributed code neglected to do that, and was ending up on a ":password"
+  field, if present, instead of on the ":port" field, causing the username
+  to be treated as the host name.  - FM
+* Expand the default port trimming so as to include all of the registered
+  URL schemes which support a port field in the v2.7 release. - FM
+* Correctly uncache the current directory listing when invoking an 'u'pload,
+  so that it will be updated to include the uploaded file if placed in the
+  current directory.  The released code attempted to do this in a manner
+  which prevented a pop, so that the directory listing couldn't be restored
+  on return from the uploader menu. - FM
+* Recognize a bookmark file used as the startfile, whether it resides in the
+  home directory or in a subdirectory off home.  The released code failed if
+  the file was in home, and not in a subdirectory, unless the -book switch
+  was used instead of a startfile entry or WWW_HOME variable. - FM

@@ -13,6 +13,7 @@
 #include "LYCurses.h"
 #include "LYSignal.h"
 #include "LYBookmark.h"
+#include "LYReadCFG.h"
 
 #ifdef DIRED_SUPPORT
 #include "LYLocal.h"
@@ -272,7 +273,28 @@ PRIVATE void add_printer_to_list ARGS2(
     }
 }
 
-#ifdef USE_SLANG
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
+#ifdef DOSPATH /* I.E. broken curses */
+static char *Color_Strings[16] =
+{
+	 "black",
+	 "blue",
+	 "green",
+	 "cyan",
+	 "red",
+	 "magenta",
+	 "brown",
+	 "lightgray",
+	 "gray",
+	 "brightblue",
+	 "brightgreen",
+	 "lightcyan",
+	 "brightred",
+	 "brightmagenta",
+	 "yellow",
+	 "white"
+};
+#else
 static char *Color_Strings[16] =
 {
     "black",
@@ -292,6 +314,7 @@ static char *Color_Strings[16] =
     "brightcyan",
     "white"
 };
+#endif /* DOSPATH (broken curses) */
 
 /*
  *  Validator for COLOR fields.
@@ -303,7 +326,7 @@ PRIVATE int check_color ARGS1(
 
     for (i = 0; i < 16; i++) {
 	if (!strcmp(color, Color_Strings[i]))
-	    return 0;
+	    return i;
     }
     return -1;
 }
@@ -327,7 +350,9 @@ Here FOREGROUND and BACKGROUND must be one of:\n"
 		Color_Strings[i + 2], Color_Strings[i + 3]);
     }
 
+#ifndef NOSIGHUP
     (void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
     (void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
     (void) signal(SIGINT, SIG_DFL);
@@ -361,13 +386,18 @@ PRIVATE void parse_color ARGS1(
         exit_with_color_syntax();
     *bg++ = 0;
 
+#if defined(USE_SLANG)
     if ((-1 == check_color(fg)) ||
         (-1 == check_color(bg)))
 	exit_with_color_syntax();
 
     SLtt_set_color(color, NULL, fg, bg);
+#else
+    if (lynx_chg_color(color, check_color(fg), check_color(bg)) < 0)
+	exit_with_color_syntax();
+#endif
 }
-#endif /* USE_SLANG */
+#endif /* defined(USE_SLANG) || defined(COLOR_CURSES) */
 
 /*
  * Process the configuration file (lynx.cfg).
@@ -483,10 +513,10 @@ PUBLIC void read_cfg ARGS1(
 	} else if (!strncasecomp(buffer, "COLLAPSE_BR_TAGS:", 17)) {
 		LYCollapseBRs = is_true(buffer+17);
 
-#ifdef USE_SLANG
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
 	} else if (!strncasecomp(buffer, "COLOR:", 6)) {
 		parse_color(buffer + 6);
-#endif /* USE_SLANG */
+#endif /* defined(USE_SLANG) || defined(COLOR_CURSES) */
 
 	} else if (!strncasecomp(buffer, "cso_proxy:", 10)) {
 	    if (getenv("cso_proxy") == NULL) {
@@ -655,11 +685,7 @@ PUBLIC void read_cfg ARGS1(
 	break;
 
 	case 'I':
-	if (!strncasecomp(buffer, "NEWS_POSTING:", 13)) {
-	    LYNewsPosting = is_true(buffer+13);
-	    no_newspost = (LYNewsPosting == FALSE);
-
-	} else if (!strncasecomp(buffer, "INFOSECS:", 9)) {
+	if (!strncasecomp(buffer, "INFOSECS:", 9)) {
 	    strcpy(temp, buffer+9);
 	    for (i = 0; temp[i]; i++) {
 		if (!isdigit(temp[i])) {
@@ -794,7 +820,11 @@ PUBLIC void read_cfg ARGS1(
 	break;
 
 	case 'N':
-	if (!strncasecomp(buffer, "NEWS_CHUNK_SIZE:", 16)) {
+	if (!strncasecomp(buffer, "NEWS_POSTING:", 13)) {
+	    LYNewsPosting = is_true(buffer+13);
+	    no_newspost = (LYNewsPosting == FALSE);
+
+	} else if (!strncasecomp(buffer, "NEWS_CHUNK_SIZE:", 16)) {
 		HTNewsChunkSize = atoi(buffer+16);
 		/*
 		 * If the new HTNewsChunkSize exceeds the maximum,
@@ -1016,6 +1046,9 @@ PUBLIC void read_cfg ARGS1(
 
 	} else if (!strncasecomp(buffer, "SYSTEM_MAIL:", 12)) {
 	    StrAllocCopy(system_mail, buffer+12);
+
+	} else if (!strncasecomp(buffer, "SYSTEM_MAIL_FLAGS:", 18)) {
+	    StrAllocCopy(system_mail_flags, buffer+18);
 	}
 	break;
 
@@ -1025,7 +1058,6 @@ PUBLIC void read_cfg ARGS1(
 	    add_trusted(&buffer[13], EXEC_PATH); /* Add exec path */
 	}
 #endif /* EXEC_LINKS */
-
 #ifdef LYNXCGI_LINKS
 	if (!strncasecomp(buffer, "TRUSTED_LYNXCGI:", 16)) {
 	    add_trusted(&buffer[16], CGI_PATH); /* Add CGI path */
@@ -1049,6 +1081,11 @@ PUBLIC void read_cfg ARGS1(
 	} else if (!strncasecomp(buffer, "USE_FIXED_RECORDS:", 18)) {
 	    UseFixedRecords = is_true(buffer+18);
 #endif /* VMS */
+
+#ifdef NCURSES_MOUSE_VERSION
+	} else if(!strncasecomp(buffer, "USE_MOUSE:",10)) {
+		LYUseMouse = is_true(buffer+10);
+#endif
 
 	} else if (!strncasecomp(buffer, "USE_SELECT_POPUPS:", 18)) {
 	    LYSelectPopups = is_true(buffer+18);

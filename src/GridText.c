@@ -28,6 +28,13 @@
 #include "LYMail.h"
 #include "LYList.h"
 #include "LYCharSets.h"
+#ifdef EXP_CHARTRANS
+#include "UCDefs.h"
+#include "UCAux.h"
+#ifdef EXP_CHARTRANS_AUTOSWITCH
+#include "UCAuto.h"
+#endif /* EXP_CHARTRANS_AUTOSWITCH */
+#endif /* EXP_CHARTRANS */
 
 #include "LYexit.h"
 #include "LYLeaks.h"
@@ -153,6 +160,11 @@ struct _HText {
 
         HTStream*               target;                 /* Output stream */
         HTStreamClass           targetClass;            /* Output routines */
+#ifdef EXP_CHARTRANS
+    LYUCcharset	* UCI;	/* pointer to node_anchor's UCInfo */
+    int	UCLYhndl;		/* tells us what charset we are fed */
+    UCTransParams T;
+#endif
 };
 
 /*
@@ -182,7 +194,22 @@ PRIVATE HTStyle default_style =
 PRIVATE HTList * loaded_texts = NULL;	 /* A list of all those in memory */
 PUBLIC  HTList * search_queries = NULL;  /* isindex and whereis queries   */
 PRIVATE void free_all_texts NOARGS;
-PRIVATE int HText_TrueLineSize PARAMS((HTLine *line));
+PRIVATE int HText_TrueLineSize PARAMS((HTLine *line, HText *text));
+
+#ifdef EXP_CHARTRANS
+PRIVATE void htext_get_chartrans_info ARGS1(HText *, me)
+{
+    me->UCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,UCT_STAGE_HTEXT);
+    if (me->UCLYhndl < 0) {
+	int chndl = current_char_set;
+	HTAnchor_setUCInfoStage(me->node_anchor, chndl, UCT_STAGE_HTEXT,
+				UCT_SETBY_STRUCTURED);
+	me->UCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,
+					    UCT_STAGE_HTEXT);
+    }
+    me->UCI = HTAnchor_getUCInfoStage(me->node_anchor,UCT_STAGE_HTEXT);
+}
+#endif /* EXP_CHARTRANS */
 
 /*			Creation Method
 **			---------------
@@ -276,6 +303,14 @@ PUBLIC HText *	HText_new ARGS1(
     self->kanji_buf = '\0';
     self->in_sjis = 0;
 
+#ifdef EXP_CHARTRANS
+	htext_get_chartrans_info(self);
+	UCSetTransParams(&self->T,
+		     self->UCLYhndl, self->UCI,
+		     current_char_set,
+		     &LYCharSet_UC[current_char_set]);
+#endif /* EXP_CHARTRANS */
+
     /*
      *  Check the kcode setting if the anchor has a charset element. - FM
      */
@@ -289,7 +324,6 @@ PUBLIC HText *	HText_new ARGS1(
      *		if the underline is not filled with dots.
      */ 
     if (underscore_string[0] != '.') {
-        char *p;
 	/*
 	 *  Create and array of dots for the UNDERSCORES macro. - FM
 	 */
@@ -427,6 +461,12 @@ PUBLIC void HText_free ARGS1(
      *  if it is not a destination of other links. - FM
      */
     if (self->node_anchor) {
+#ifdef EXP_CHARTRANS
+	HTAnchor_resetUCInfoStage(self->node_anchor, -1, UCT_STAGE_STRUCTURED,
+				  UCT_SETBY_NONE);
+	HTAnchor_resetUCInfoStage(self->node_anchor, -1, UCT_STAGE_HTEXT,
+				  UCT_SETBY_NONE);
+#endif /* EXP_CHARTRANS */
         HTAnchor_delete(self->node_anchor);
     }
 
@@ -441,12 +481,16 @@ PUBLIC void HText_free ARGS1(
 /*	Output a line
 **	-------------
 */
-PRIVATE int display_line ARGS1(
-	HTLine *,	line)
+PRIVATE int display_line ARGS2(
+	HTLine *,	line,
+	HText *,	text)
 {
     register int i,j;
-    char buffer[3];
+    char buffer[7];
     char *data;
+#ifdef EXP_CHARTRANS
+    int utf_extra = 0;
+#endif
 
     buffer[0] = buffer[1] = buffer[2] = '\0';
     clrtoeol();
@@ -517,6 +561,33 @@ PRIVATE int display_line ARGS1(
 		}
 
 	    default:
+#ifdef EXP_CHARTRANS
+		    if (text->T.output_utf8 && !isascii(buffer[0])) {
+			if ((*buffer & 0xe0) == 0xc0) {
+			    utf_extra = 1;
+			} else if ((*buffer & 0xf0) == 0xe0) {
+			    utf_extra = 2;
+			} else if ((*buffer & 0xf8) == 0xf0) {
+			    utf_extra = 3;
+			} else if ((*buffer & 0xfc) == 0xf8) {
+			    utf_extra = 4;
+			} else if ((*buffer & 0xfe) == 0xfc) {
+			    utf_extra = 5;
+			} else { /* garbage */
+			    utf_extra = 0;
+			}
+			if (strlen(data) < utf_extra)
+			    utf_extra = 0; /* shouldn't happen */
+		    }
+		    if (utf_extra) {
+			strncpy(&buffer[1], data, utf_extra);
+			buffer[utf_extra+1] = '\0';
+			addstr(buffer);
+			buffer[1] = '\0';
+			data += utf_extra;
+			utf_extra = 0;
+		    } else
+#endif /* EXP_CHARTRANS */
 		/* For CJK strings, by Masanobu Kimura */
 		if (HTCJK != NOCJK && !isascii(buffer[0])) { 
 		    buffer[1] = *data;
@@ -652,13 +723,17 @@ PRIVATE void display_page ARGS3(
 {
     HTLine * line = NULL;
     int i;
-    char *cp, tmp[3];
+    char *cp, tmp[7];
     int last_screen;
     TextAnchor *Anchor_ptr = NULL;
     FormInfo *FormInfo_ptr;
     BOOL display_flag = FALSE;
     HTAnchor *link_dest;
     static int last_nlinks = 0;
+#ifdef EXP_CHARTRANS
+    int utf_found = 0;
+    static int charset_last_displayed = -1;
+#endif /* EXP_CHARTRANS */
 
     lynx_mode = NORMAL_LYNX_MODE;
  
@@ -698,6 +773,25 @@ PRIVATE void display_page ARGS3(
          i++, line = line->next) 			/* Loop */
 	assert(line->next != NULL);
 
+#ifdef EXP_CHARTRANS
+#ifdef EXP_CHARTRANS_AUTOSWITCH
+#ifdef LINUX
+    if (LYlowest_eightbit[current_char_set] <= 255 &&
+	(current_char_set != charset_last_displayed) &&
+	/* current_char_set has changed since last invocation,
+	   and it's not just 7-bit.
+	   Also we don't want to do this for -dump and -source etc. */
+	LYCursesON) {
+	charset_last_displayed = current_char_set;
+	stop_curses();
+	UCChangeTerminalCodepage(current_char_set,
+				&LYCharSet_UC[current_char_set]);
+	start_curses();
+    }
+#endif /* LINUX */
+#endif /* EXP_CHARTRANS_AUTOSWITCH */
+#endif /* EXP_CHARTRANS */
+
     /*
      *  Check whether to force a screen clear to enable scrollback,
      *  or as a hack to fix a reverse clear screen problem for some
@@ -718,25 +812,45 @@ PRIVATE void display_page ARGS3(
      */
     if (line) {
       for (i = 0; i < (display_lines); i++)  {
+#ifdef EXP_CHARTRANS
+	  int len_needed;
+#endif /* EXP_CHARTRANS */
 
         assert(line != NULL);
-        display_line(line);
+        display_line(line, text);
 
         /*
 	 *  If the target is on this line, underline it.
 	 */
         if (strlen(target) > 0 &&
+#ifdef EXP_CHARTRANS
+	    (case_sensitive ?  
+	     (cp = LYno_attr_mbcs_strstr(line->data, target,
+					 text->T.output_utf8,
+					 &len_needed)) != NULL : 
+	     (cp = LYno_attr_mbcs_case_strstr(line->data, target,
+					      text->T.output_utf8,
+					      &len_needed)) != NULL) &&
+            ((int)line->offset + len_needed) < LYcols
+#else
 	    (case_sensitive ?  
 	    (cp = LYno_attr_char_strstr(line->data, target)) != NULL : 
 	    (cp = LYno_attr_char_case_strstr(line->data, target)) != NULL) &&
             ((int)(cp - (char *)line->data) +
-	     (int)line->offset + strlen(target)) < LYcols) {
+	     (int)line->offset + strlen(target)) < LYcols
+#endif /* EXP_CHARTRANS */
+	    ) {
 
 	    int itmp = 0;
 	    int written = 0;
 	    int x_pos=(int)line->offset + (int)(cp - line->data);
 	    int len = strlen(target);
+#ifdef EXP_CHARTRANS
+	    int utf_extra = 0;
+#endif /* EXP_CHARTRANS */
 
+	    start_bold();
+	    start_reverse();
 	    start_underline();
 		/* underline string */
 	    for (; written < len && (tmp[0] = line->data[itmp]) != '\0';
@@ -748,6 +862,35 @@ PRIVATE void display_page ARGS3(
 		} else if (cp == &line->data[itmp]) {
 		    /* first character of target */
             	    move(i+1, x_pos);
+#ifdef EXP_CHARTRANS
+		    if (text->T.output_utf8 && !isascii(tmp[0])) {
+			if ((*tmp & 0xe0) == 0xc0) {
+			    utf_extra = 1;
+			} else if ((*tmp & 0xf0) == 0xe0) {
+			    utf_extra = 2;
+			} else if ((*tmp & 0xf8) == 0xf0) {
+			    utf_extra = 3;
+			} else if ((*tmp & 0xfc) == 0xf8) {
+			    utf_extra = 4;
+			} else if ((*tmp & 0xfe) == 0xfc) {
+			    utf_extra = 5;
+			} else { /* garbage */
+			    utf_extra = 0;
+			}
+			if (strlen(&line->data[1]) < utf_extra)
+			    utf_extra = 0; /* shouldn't happen */
+		    }
+		    if (utf_extra) {
+			strncpy(&tmp[1], &line->data[itmp+1], utf_extra);
+			tmp[utf_extra+1] = '\0';
+			itmp += utf_extra;
+			addstr(tmp);
+			tmp[1] = '\0';
+			written = written + utf_extra + 1;
+			utf_extra = 0;
+			utf_found++;
+		    } else
+#endif /* EXP_CHARTRANS */
 		    if (HTCJK != NOCJK && !isascii(tmp[0])) {
 		        /* For CJK strings, by Masanobu Kimura */
 		        tmp[1] = line->data[++itmp];
@@ -761,6 +904,35 @@ PRIVATE void display_page ARGS3(
 
 		} else if (&line->data[itmp] > cp) { 
 		    /* print all the other target chars */
+#ifdef EXP_CHARTRANS
+		    if (text->T.output_utf8 && !isascii(tmp[0])) {
+			if ((*tmp & 0xe0) == 0xc0) {
+			    utf_extra = 1;
+			} else if ((*tmp & 0xf0) == 0xe0) {
+			    utf_extra = 2;
+			} else if ((*tmp & 0xf8) == 0xf0) {
+			    utf_extra = 3;
+			} else if ((*tmp & 0xfc) == 0xf8) {
+			    utf_extra = 4;
+			} else if ((*tmp & 0xfe) == 0xfc) {
+			    utf_extra = 5;
+			} else { /* garbage */
+			    utf_extra = 0;
+			}
+			if (strlen(&line->data[1]) < utf_extra)
+			    utf_extra = 0; /* shouldn't happen */
+		    }
+		    if (utf_extra) {
+			strncpy(&tmp[1], &line->data[itmp+1], utf_extra);
+			tmp[utf_extra+1] = '\0';
+			itmp += utf_extra;
+			addstr(tmp);
+			tmp[1] = '\0';
+			written = written + utf_extra + 1;
+			utf_extra = 0;
+			utf_found++;
+		    } else
+#endif /* EXP_CHARTRANS */
 		    if (HTCJK != NOCJK && !isascii(tmp[0])) {
 		        /* For CJK strings, by Masanobu Kimura */
 		        tmp[1] = line->data[++itmp];
@@ -775,6 +947,8 @@ PRIVATE void display_page ARGS3(
 	    }
 
 	    stop_underline();
+	    stop_reverse();
+	    stop_bold();
 	    move(i+2, 0);
 	}
 
@@ -945,7 +1119,12 @@ PRIVATE void display_page ARGS3(
     if (!display_flag) /* nothing on the page */
 	addstr("\n     Document is empty");
 
-    if (HTCJK != NOCJK || TRACE) {
+
+    if (HTCJK != NOCJK ||
+#ifdef EXP_CHARTRANS
+	text->T.output_utf8 ||
+#endif /* EXP_CHARTRANS */
+	TRACE) {
         /* for non-multibyte curses ;_; */
         clearok(curscr, TRUE);
     }
@@ -1144,6 +1323,10 @@ PRIVATE void split_line ARGS2(
 	for (i = (plen - 1); i >= 0; i--) {
 	    if (p[i] == LY_BOLD_START_CHAR ||
 	        p[i] == LY_BOLD_END_CHAR ||
+#ifdef EXP_CHARTRANS
+#define IS_UTFEXTRA(ch) (text->T.output_utf8 && ((unsigned char)(ch)&0xc0) == 0x80)
+		IS_UTFEXTRA(p[i]) ||
+#endif /* EXP_CHARTRANS */
 		p[i] == LY_SOFT_HYPHEN) {
 	        ctrl_chars_on_this_line++;
 	    }
@@ -1194,6 +1377,9 @@ PRIVATE void split_line ARGS2(
 	    *cp == LY_UNDERLINE_END_CHAR ||
 	    *cp == LY_BOLD_START_CHAR ||
 	    *cp == LY_BOLD_END_CHAR ||
+#ifdef EXP_CHARTRANS
+	    IS_UTFEXTRA(*cp) ||
+#endif /* EXP_CHARTRANS */
 	    *cp == LY_SOFT_HYPHEN)
 	    ctrl_chars_on_previous_line++;
     }
@@ -1236,9 +1422,8 @@ PRIVATE void blank_lines ARGS2(
     if (!HText_LastLineSize(text)) {	/* No text on current line */
 	HTLine * line = text->last_line->prev;
 	while ((line != text->last_line) &&
-	       (HText_TrueLineSize(line) == 0)) {
-	    if (newlines == 0)
-	        break;
+	       (HText_TrueLineSize(line, text) == 0)) {
+	    if (newlines == 0) break;
 	    newlines--;		/* Don't bother: already blank */
 	    line = line->prev;
 	}
@@ -1319,6 +1504,10 @@ PUBLIC void HText_appendCharacter ARGS2(
 	return;
     if ((unsigned char)ch == 155 && HTCJK == NOCJK) {	/* octal 233 */
         if (!HTPassHighCtrlRaw &&
+#ifdef EXP_CHARTRANS
+	    !text->T.transp && !text->T.output_utf8 &&
+	    (155 < LYlowest_eightbit[current_char_set]) &&
+#endif /* EXP_CHARTRANS */
 	    strncmp(LYchar_set_names[current_char_set],
 		    "IBM PC character set", 20) &&
 	    strncmp(LYchar_set_names[current_char_set],
@@ -1473,6 +1662,14 @@ PUBLIC void HText_appendCharacter ARGS2(
 	}
     }
 
+#ifdef EXP_CHARTRANS
+    if (IS_UTFEXTRA(ch)) {
+	line->data[line->size++] = ch;
+	line->data[line->size] = '\0';
+	ctrl_chars_on_this_line++;
+	return;
+    }
+#endif /* EXP_CHARTRANS */
 
     /*
      *  New Line.
@@ -1984,6 +2181,11 @@ re_parse:
         if (anchor_ptr->line_pos > 0) {
             register int offset = 0, i = 0;
             for (; i < anchor_ptr->line_pos; i++)
+#ifdef EXP_CHARTRANS
+		if (IS_UTFEXTRA(line_ptr->data[i]))
+		    offset++;
+		else
+#endif /* EXP_CHARTRANS */
                 if (IsSpecialAttrChar(line_ptr->data[i]))
                     offset++;
             anchor_ptr->line_pos -= offset;
@@ -3135,7 +3337,7 @@ PUBLIC int HText_LastLineSize ARGS1(
 {
     if (!text || !text->last_line || !text->last_line->size)
         return 0;
-    return HText_TrueLineSize(text->last_line);
+    return HText_TrueLineSize(text->last_line, text);
 }
 
 PUBLIC int HText_PreviousLineSize ARGS1(
@@ -3147,11 +3349,10 @@ PUBLIC int HText_PreviousLineSize ARGS1(
         return 0;
     if (!(line = text->last_line->prev))
         return 0;
-    return HText_TrueLineSize(line);
+    return HText_TrueLineSize(line, text);
 }
 
-PRIVATE int HText_TrueLineSize ARGS1(
-	HTLine *,	line)
+PRIVATE int HText_TrueLineSize ARGS2(HTLine *,line, HText *,text)
 {
     int i, true_size = 0;
 
@@ -3160,6 +3361,10 @@ PRIVATE int HText_TrueLineSize ARGS1(
 
     for (i = 0; i < line->size; i++) {
     	if (!IsSpecialAttrChar(line->data[i])) {
+#ifdef EXP_CHARTRANS
+	  if (!text->T.output_utf8 || (unsigned char)line->data[i] < 128 ||
+    		((unsigned char)(line->data[i] & 0xc0) == 0xc0))
+#endif /* EXP_CHARTRANS */
 	    true_size++;
 	}
     }
@@ -3683,7 +3888,7 @@ PUBLIC int HText_beginInput ARGS2(
 	    I->checked = TRUE;
 	} else {
 	    TextAnchor * b = text->first_anchor;
-	    int i = 0;
+	    int i2 = 0;
 	    while (b) {
 	        if (b->link_type == INPUT_ANCHOR &&
 		    b->input_field->type == F_RADIO_TYPE &&
@@ -3694,11 +3899,11 @@ PUBLIC int HText_beginInput ARGS2(
 			    StrAllocCopy(b->input_field->orig_value, "0");
 			    break;
 			}
-			i++;
+			i2++;
 		    }
 		}
 		if (b == text->last_anchor) {
-		    if (i == 0)
+		    if (i2 == 0)
 		       I->checked = TRUE;
 		    break;
 		}

@@ -14,6 +14,7 @@
 #include "LYSystem.h"
 #include "GridText.h"
 #include "LYSignal.h"
+#include "LYNews.h"
 
 #include "LYGlobalDefs.h"
 
@@ -46,7 +47,7 @@ PUBLIC char *LYNewsPost ARGS2(
     char *cp = NULL;
     int c = 0;  /* user input */
     FILE *fd;
-    char tmpfile[256];
+    char my_tempfile[256];
     char *postfile = NULL;
     char *NewsGroups = NULL;
     char *org = NULL;
@@ -63,8 +64,8 @@ PUBLIC char *LYNewsPost ARGS2(
      *  Open a temporary file for the headers
      *  and message body. - FM
      */ 
-    tempname(tmpfile, NEW_FILE);
-    if ((fd = fopen(tmpfile, "w")) == NULL) {
+    tempname(my_tempfile, NEW_FILE);
+    if ((fd = fopen(my_tempfile, "w")) == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(postfile);
     }
@@ -154,7 +155,7 @@ PUBLIC char *LYNewsPost ARGS2(
     	       *org != '\0') {
 	StrAllocCat(cp, org);
 #ifndef VMS
-    } else if (fp = fopen("/etc/organization", "r")) {
+    } else if ((fp = fopen("/etc/organization", "r")) != 0) {
 	if (fgets(user_input, sizeof(user_input), fp) != NULL) {
 	    if ((cp = strchr(user_input, '\n')) != NULL)
 	        *cp = '\0';
@@ -218,7 +219,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	if (strstr(editor, "pico")) {
 	    editor_arg = " -t"; /* No prompt for filename to use */
 	}
-	sprintf(user_input,"%s%s %s", editor, editor_arg, tmpfile);
+	sprintf(user_input,"%s%s %s", editor, editor_arg, my_tempfile);
 	_statusline(SPAWNING_EDITOR_FOR_NEWS);
 	stop_curses();
 	if (system(user_input)) {
@@ -290,7 +291,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	       !term_message && c != 7   && c != 3)
 	    c = LYgetch();
 	if (TOUPPER(c) == 'Y') {
-	    if ((fd = fopen(tmpfile, "a")) != NULL) {
+	    if ((fd = fopen(my_tempfile, "a")) != NULL) {
 	        fputs("-- \n", fd);
 	        while (fgets(user_input, sizeof(user_input), fp) != NULL) {
 		    fputs(user_input, fd);
@@ -301,7 +302,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	fclose(fp);
     }
     clear();  /* clear the screen */
-    StrAllocCopy(postfile, tmpfile);
+    StrAllocCopy(postfile, my_tempfile);
     if (!followup)
         /*
 	 *  If it's not a followup, the current document
@@ -328,10 +329,10 @@ cleanup:
     term_message = FALSE;
     if (!postfile) {
 #ifdef VMS
-        while (remove(tmpfile) == 0)
+        while (remove(my_tempfile) == 0)
 	    ; /* loop through all versions */
 #else
-	remove(tmpfile);
+	remove(my_tempfile);
 #endif /* VMS */
     }
     FREE(NewsGroups);

@@ -211,7 +211,7 @@ PRIVATE void store_cookie ARGS3(
     HTList *hl, *next;
     cookie *c2;
     time_t now = time(NULL);
-    int pathlen, pos;
+    int pos;
     CONST char *ptr;
     domain_entry *de = NULL;
 

@@ -16,6 +16,9 @@
 
 #include "HTList.h"
 #include "HTAtom.h"
+#ifdef EXP_CHARTRANS
+#include "UCDefs.h"
+#endif
 
 #ifdef SHORT_NAMES
 #define HTAnchor_findChild                      HTAnFiCh
@@ -119,6 +122,9 @@ struct _HTParentAnchor {
   char *	expires;		/* Expires */
   char *	last_modified;		/* Last-Modified */
   char *	server;			/* Server */
+#ifdef EXP_CHARTRANS
+  UCAnchorInfo *	UCStages;
+#endif
 };
 
 typedef struct {
@@ -372,6 +378,29 @@ extern void HTAnchor_setPhysical PARAMS((
 
 #endif /* HTANCHOR_H */
 
+#ifdef EXP_CHARTRANS
+
+extern LYUCcharset * HTAnchor_getUCInfoStage PARAMS((HTParentAnchor * me,
+						     int which_stage));
+extern int HTAnchor_getUCLYhndl PARAMS((HTParentAnchor * me,
+						     int which_stage));
+extern LYUCcharset * HTAnchor_setUCInfoStage PARAMS((HTParentAnchor * me,
+						     int LYhndl,
+						     int which_stage,
+						     int set_by));
+extern LYUCcharset * HTAnchor_setUCInfoStage PARAMS((HTParentAnchor * me,
+						     int LYhndl,
+						     int which_stage,
+						     int set_by));
+extern LYUCcharset * HTAnchor_resetUCInfoStage PARAMS((HTParentAnchor * me,
+						     int LYhndl,
+						     int which_stage,
+						     int set_by));
+extern LYUCcharset * HTAnchor_copyUCInfoStage PARAMS((HTParentAnchor * me,
+						     int to_stage,
+						     int from_stage,
+						     int set_by));
+#endif
 /*
 
     */

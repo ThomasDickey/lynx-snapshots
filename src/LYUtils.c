@@ -10,7 +10,13 @@
 #include "LYGlobalDefs.h"
 #include "LYSignal.h"
 #include "GridText.h"
+#ifdef EXP_CHARTRANS
+#include "LYCharSets.h"
+#endif /* EXP_CHARTRANS */
 
+#ifdef DOSPATH
+#include "HTDOS.h"
+#endif
 #ifdef VMS
 #include <descrip.h>
 #include <libclidef.h>
@@ -31,6 +37,14 @@
 #include <utmp.h>
 #endif /* UTMPX_FOR_UTMP */
 #endif /* UNIX */
+
+#if NEED_PTEM_H
+/* they neglected to define struct winsize in termios.h -- it's only in
+ * termio.h and ptem.h (the former conflicts with other definitions).
+ */
+#include        <sys/stream.h>
+#include        <sys/ptem.h>
+#endif
 
 #include "LYLeaks.h"
 
@@ -99,7 +113,7 @@ PUBLIC void highlight ARGS2(
 	     */
 	    /* start_bold();  */
 	    start_reverse();
-#ifdef USE_SLANG
+#if defined(USE_SLANG) || defined(FANCY_CURSES)
 	    start_underline ();
 #endif /* USE_SLANG */
 	} else {
@@ -126,10 +140,17 @@ PUBLIC void highlight ARGS2(
 	    /* copy into the buffer only what will fit within the
 	     * width of the screen
 	     */
+#ifdef EXP_CHARTRANS
+	    LYmbcsstrncpy(buffer,(links[cur].hightext ?
+				  links[cur].hightext : ""), 199,
+			  LYcols - links[cur].lx - 1,
+		       (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8));
+#else
 	    LYstrncpy(buffer,
 	    	      (links[cur].hightext ?
 		       links[cur].hightext : ""),
 		      LYcols-links[cur].lx-1);
+#endif /* EXP_CHARTRANS */
 	    addstr(buffer);  
 	}
 
@@ -137,7 +158,7 @@ PUBLIC void highlight ARGS2(
 	if (links[cur].hightext2 && links[cur].ly < display_lines) {
 	    if (flag == ON) {
 	        stop_reverse();
-#ifdef USE_SLANG
+#if defined(USE_SLANG) || defined(FANCY_CURSES)
 		stop_underline ();
 #endif /* USE_SLANG */
 	    } else {
@@ -150,7 +171,7 @@ PUBLIC void highlight ARGS2(
 
 	    if (flag == ON) {
 	        start_reverse();
-#ifdef USE_SLANG
+#if defined(USE_SLANG) || defined(FANCY_CURSES)
 		start_underline ();
 #endif /* USE_SLANG */
 	    } else {
@@ -174,7 +195,7 @@ PUBLIC void highlight ARGS2(
 
 	if (flag == ON) {
 	    stop_reverse();
-#ifdef USE_SLANG
+#if defined(USE_SLANG) || defined(FANCY_CURSES)
 	    stop_underline ();
 #endif /* USE_SLANG */
 	} else {
@@ -295,7 +316,7 @@ PUBLIC char * strip_trailing_slash ARGS1(
 BOOLEAN mustshow = FALSE;
 
 PUBLIC void statusline ARGS1(
-	char *,		text)
+	CONST char *,	text)
 {
     char buffer[256];
     unsigned char *temp = NULL;
@@ -303,7 +324,7 @@ PUBLIC void statusline ARGS1(
     int max_length, len, i, j;
     unsigned char k;
 
-    if (!text || text==NULL)
+    if (text == NULL)
 	return;
 
     /*
@@ -406,9 +427,15 @@ PUBLIC void statusline ARGS1(
     }
     clrtoeol();
     if (text != NULL) {
+#ifdef COLOR_CURSES
+	lynx_set_color(2);
+	addstr(buffer);
+	lynx_set_color(0);
+#else
 	start_reverse();
 	addstr(buffer);
 	stop_reverse();
+#endif
     }
     refresh();
 
@@ -437,7 +464,7 @@ PUBLIC void toggle_novice_line NOARGS
 }
 
 PUBLIC void noviceline ARGS1(
-	int,		more)
+	int,		more_flag)
 {
 
     if (dump_output_immediately)
@@ -461,7 +488,7 @@ PUBLIC void noviceline ARGS1(
         addstr(novice_lines[lineno]);
 
 #ifdef NOTDEFINED
-    if (is_www_index && more) {
+    if (is_www_index && more_flag) {
         addstr("This is a searchable index.  Use ");
 	addstr(key_for_func(LYK_INDEX_SEARCH));
 	addstr(" to search:");
@@ -477,7 +504,7 @@ PUBLIC void noviceline ARGS1(
     } else {
         addstr("Type a command or ? for help:");                   
 
-        if (more) {
+        if (more_flag) {
 	    stop_reverse();
 	    addstr("                       ");
 	    start_reverse();
@@ -534,7 +561,13 @@ PUBLIC int HTCheckForInterrupt NOARGS
 #endif /* USE_SLANG */
 
     /** Keyboard 'Z' or 'z', or Control-G or Control-C **/
+#if defined (DOSPATH) && defined (NCURSES)
+		  nodelay(stdscr,TRUE);
+#endif /* DOSPATH */
     c = LYgetch();
+#if defined (DOSPATH) && defined (NCURSES)
+		  nodelay(stdscr,FALSE);
+#endif /* DOSPATH */
     if (TOUPPER(c) == 'Z' || c == 7 || c == 3)
 	return((int)TRUE);
 
@@ -821,6 +854,12 @@ PUBLIC int is_url ARGS1(
      */
     while (isspace((unsigned char)*cp))
         cp++;
+
+#ifdef DOSPATH /* sorry! */
+	 if (strncmp(cp, "file:///", 8) && strlen(cp) == 19 &&
+		  cp[strlen(cp)-1] == ':')
+			  StrAllocCat(cp,"/");
+#endif
 
     if (!strncasecomp(cp, "news:", 5)) {
         if (strncmp(cp, "news", 4)) {
@@ -1193,22 +1232,16 @@ PUBLIC char * quote_pathname ARGS1(
  * local domain
  *
  */
-#ifdef VMS
-#ifndef NO_UTMP
-#define NO_UTMP
-#endif /* NO_UTMP */
-#endif /* VMS */
-
 PUBLIC BOOLEAN inlocaldomain NOARGS
 {
-#ifdef NO_UTMP
+#if ! HAVE_UTMP
     return(TRUE);
 #else
     int n;
     FILE *fp;
     struct utmp me;
     char *cp, *mytty = NULL;
-    char *ttyname();
+    extern char *ttyname PARAMS((int fd));
 
     if ((cp=ttyname(0)))
 	mytty = strrchr(cp, '/');
@@ -1237,28 +1270,29 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
     }
 
     return(FALSE);
-#endif /* NO_UTMP */
+#endif /* !HAVE_UTMP */
 }
 
 /**************
 ** This bit of code catches window size change signals
 **/
 
-#if defined(VMS) || defined(SNAKE)
-#define NO_SIZECHANGE
-#endif /* VMS || SNAKE */
-
-#if !defined(VMS) && !defined(ISC)
+#if !defined(VMS) && !defined(ISC) && !defined(DOSPATH)
 #include <sys/ioctl.h>
 #endif /* !VMS && !ISC */
 
-#ifdef HAVE_TERMIOS_H
-#include <termios.h>
+/* For systems that have both, but both can't be included, duh */
+#ifdef TERMIO_AND_TERMIOS
+# include <termio.h>
 #else
-#ifdef HAVE_TERMIO_H
-#include <termio.h>
-#endif /* HAVE_TERMIO_H */
-#endif /* HAVE_TERMIOS_H */
+# ifdef HAVE_TERMIOS_H
+#  include <termios.h>
+# else
+#  ifdef HAVE_TERMIO_H
+#   include <termio.h>
+#  endif /* HAVE_TERMIO_H */
+# endif /* HAVE_TERMIOS_H */
+#endif  /* TERMIO_AND_TERMIOS */
 
 PUBLIC void size_change ARGS1(
 	int,		sig)
@@ -1267,13 +1301,17 @@ PUBLIC void size_change ARGS1(
     SLtt_get_screen_size();
     LYlines = SLtt_Screen_Rows;
     LYcols  = SLtt_Screen_Cols;
+#ifdef SLANG_MBCS_HACK
+    PHYSICAL_SLtt_Screen_Cols = LYcols;
+    SLtt_Screen_Cols = LYcols * 6;
+#endif /* SLANG_MBCS_HACK */
     if (sig == 0)
         /*
 	 *  Called from start_curses().
 	 */
 	return;
 #else /* Curses: */
-#ifndef NO_SIZECHANGE
+#if HAVE_SIZECHANGE
 #ifdef TIOCGSIZE
     struct ttysize win;
 #else
@@ -1303,7 +1341,7 @@ PUBLIC void size_change ARGS1(
     }
 #endif /* TIOCGWINSZ */
 #endif /* TIOCGSIZE */
-#endif /* !NO_SIZECHANGE */
+#endif /* HAVE_SIZECHANGE */
 
     if (LYlines <= 0)
         LYlines = 24;
@@ -1399,9 +1437,9 @@ PUBLIC void change_sug_filename ARGS1(
      /*** rename any temporary files ***/
      temp = (char *)calloc(1, (strlen(lynx_temp_space) + 60));
      if (*lynx_temp_space == '/')
-         sprintf(temp, "file://localhost%sL%d", lynx_temp_space, getpid());
+         sprintf(temp, "file://localhost%sL%d", lynx_temp_space, (int)getpid());
      else
-         sprintf(temp, "file://localhost/%sL%d", lynx_temp_space, getpid());
+         sprintf(temp, "file://localhost/%sL%d", lynx_temp_space, (int)getpid());
      len = strlen(temp);
      if (0==strncmp(fname, temp, len)) {
          cp = strrchr(fname, '.');
@@ -1603,10 +1641,10 @@ PUBLIC void tempname ARGS2(
 	if (action == REMOVE_FILES) { /* REMOVE ALL FILES */ 
 	    for (; counter > 0; counter--) {
 	        sprintf(namebuffer, "%sL%d%uTMP.txt", lynx_temp_space,
-						      getpid(), counter-1);
+						      (int)getpid(), counter-1);
 		remove(namebuffer);
 	        sprintf(namebuffer, "%sL%d%uTMP.html", lynx_temp_space,
-						       getpid(), counter-1);
+						       (int)getpid(), counter-1);
 		remove(namebuffer);
 	    }
 	} else /* add a file */ {
@@ -1614,7 +1652,7 @@ PUBLIC void tempname ARGS2(
 	 * 	Create name
 	 */
 	    sprintf(namebuffer, "%sL%d%uTMP.html", lynx_temp_space,
-	    					   getpid(), counter++);
+	    					   (int)getpid(), counter++);
 	}
 	return;
 }
@@ -2010,11 +2048,30 @@ PUBLIC void LYConvertToURL ARGS1(
     if (!old_string || *old_string == '\0')
         return;
 
-    *AllocatedString = NULL;  /* so StrAllocCopy doesn't free it */
+#ifdef DOSPATH
+{
+	 char *cp_url = *AllocatedString;
+	 for(; *cp_url != '\0'; cp_url++)
+		if(*cp_url == '\\') *cp_url = '/';
+	 cp_url--;
+	 if(*cp_url == ':')
+		 StrAllocCat(*AllocatedString,"/");
+#ifdef NOTDEFINED
+	 if(strlen(old_string) > 3 && *cp_url == '/')
+		*cp_url = '\0';
+#endif
+}
+#endif
+
+	 *AllocatedString = NULL;  /* so StrAllocCopy doesn't free it */
+
     StrAllocCopy(*AllocatedString,"file://localhost");
 
     if (*old_string != '/') {
 	char *fragment = NULL;
+#ifdef DOSPATH
+	  StrAllocCat(*AllocatedString,"/");
+#endif /* DOSPATH */
 #ifdef VMS
 	/*
 	 *  Not a SHELL pathspec.  Get the full VMS spec and convert it.
@@ -2178,6 +2235,22 @@ have_VMS_URL:
 	    fprintf(stderr, "Trying: '%s'\n", *AllocatedString);
 	}
 #else /* Unix: */
+#ifdef DOSPATH
+	if (strlen(old_string) == 1 && *old_string == '.') {
+		 /*
+		  *  They want .
+		  */
+		char curdir[DIRNAMESIZE];
+		getcwd (curdir, DIRNAMESIZE);
+		StrAllocCopy(temp, HTDOS_wwwName(curdir));
+		StrAllocCat(*AllocatedString, temp);
+		FREE(temp);
+		if (TRACE) {
+			fprintf(stderr, "Converted '%s' to '%s'\n",
+					old_string, *AllocatedString);
+		}
+	} else
+#endif /* DOSPATH */
 	if (*old_string == '~') {
 	    /*
 	     *  On Unix, covert '~' to Home_Dir().
@@ -2206,18 +2279,28 @@ have_VMS_URL:
 	    struct stat st;
 	    FILE *fptemp = NULL;
 	    BOOL is_local = FALSE;
-#ifdef NO_GETCWD
-	    getwd (curdir);
-#else
+#if HAVE_GETCWD
 	    getcwd (curdir, DIRNAMESIZE);
+#else
+	    getwd (curdir);
 #endif /* NO_GETCWD */
 	    /*
 	     *  Concatenate and simplify, trimming any
 	     *  residual relative elements. - FM
 	     */
+#ifndef DOSPATH
 	    StrAllocCopy(temp, curdir);
 	    StrAllocCat(temp, "/");
 	    StrAllocCat(temp, old_string);
+#else
+	if (old_string[1] != ':' && old_string[1] != '|')
+	{
+		 StrAllocCopy(temp, HTDOS_wwwName(curdir));
+		 if(curdir[strlen(curdir)-1] != '/')
+					 StrAllocCat(temp, "/");
+		 StrAllocCat(temp, old_string);
+	} else StrAllocCopy(temp, old_string);
+#endif /* DOSPATH */
 	    LYTrimRelFromAbsPath(temp);
 	    if (TRACE) {
 		fprintf(stderr, "Converted '%s' to '%s'\n", old_string, temp);
@@ -2246,7 +2329,7 @@ have_VMS_URL:
 		     *  appended to the URL. - FM
 		     */
 		    if (fragment != NULL) {
-		        *fragment = '#';
+			*fragment = '#';
 			fragment = NULL;
 		    }
 		    StrAllocCat(*AllocatedString, temp);
@@ -2454,7 +2537,11 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
     } else if (Startup && !dump_output_immediately) {
 	fprintf(stdout, "Looking up '%s' first.\n", host);
     }
+#ifndef DJGPP
     if ((phost = gethostbyname(host)) != NULL) {
+#else
+    if (resolve(host) != 0) {
+#endif /* DJGPP */
         GotHost = TRUE;
 	FREE(host);
         FREE(Str);
@@ -2541,7 +2628,11 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	    } else if (Startup && !dump_output_immediately) {
 	        fprintf(stdout, "Looking up '%s', guessing...\n", host);
 	    }
+#ifndef DJGPP
 	    GotHost = ((phost = gethostbyname(host)) != NULL);
+#else
+		 GotHost = (resolve(host) != 0);
+#endif /* DJGPP */
 	    if (HostColon != NULL) {
 	        *HostColon = ':';
 	    }
@@ -2876,6 +2967,12 @@ PUBLIC CONST char * Home_Dir NOARGS
 
     if (!homedir) {
 	if ((homedir = getenv("HOME")) == NULL) {
+#ifdef DOSPATH /* BAD!  WSB */
+		if ((homedir = getenv("TEMP")) == NULL) {
+			if ((homedir = getenv("TMP")) == NULL)
+				homedir = "C:\\";
+		}
+#else
 #ifdef VMS
 	    if ((homedir = getenv("SYS$LOGIN")) == NULL) {
 	        if ((homedir = getenv("SYS$SCRATCH")) == NULL)
@@ -2895,6 +2992,7 @@ PUBLIC CONST char * Home_Dir NOARGS
 		homedir = "/tmp";
 	    }
 #endif /* VMS */
+#endif /* DOSPATH */
 	}
     }
     return homedir;
@@ -3192,7 +3290,7 @@ PUBLIC time_t LYmktime ARGS1(
 	char *,		string)
 {
     char *s;
-    time_t now, clock;
+    time_t now, clock2;
     int day, month, year, hour, minutes, seconds;
     char *start;
     char temp[8];
@@ -3394,20 +3492,20 @@ PUBLIC time_t LYmktime ARGS1(
     }
     day += (year - 1968)*1461/4;
     day += ((((month*153) + 2)/5) - 672);
-    clock = (time_t)((day * 60 * 60 * 24) +
+    clock2 = (time_t)((day * 60 * 60 * 24) +
     		     (hour * 60 * 60) +
     		     (minutes * 60) +
 		     seconds);
-    if (clock <= time(NULL))
-        clock = (time_t)0;
-    if (TRACE && clock > 0)
+    if (clock2 <= time(NULL))
+        clock2 = (time_t)0;
+    if (TRACE && clock2 > 0)
         fprintf(stderr,
-		"LYmktime: clock=%i, ctime=%s", clock, ctime(&clock));
+		"LYmktime: clock=%i, ctime=%s", clock2, ctime(&clock2));
 
-    return(clock);
+    return(clock2);
 }
 
-#ifdef NO_PUTENV
+#if ! HAVE_PUTENV
 /* no putenv on the next so we use this code instead!
  */
 
@@ -3506,4 +3604,11 @@ PUBLIC int putenv ARGS1(
 
   return 0;
 }
-#endif /* NO_PUTENV */
+#endif /* !HAVE_PUTENV */
+
+#ifdef NEED_REMOVE
+int remove ARGS1(char *, name)
+{
+	return unlink(name);
+}
+#endif

@@ -311,7 +311,7 @@ PUBLIC int showhistory ARGS1(
     /*
      *  Make the file a URL now.
      */
-#ifdef VMS
+#if defined (VMS) || defined (DOSPATH)
     sprintf(hist_filename,"file://localhost/%s", tempfile);
 #else
     sprintf(hist_filename,"file://localhost%s", tempfile);
@@ -366,7 +366,7 @@ PUBLIC int showhistory ARGS1(
 PUBLIC BOOLEAN historytarget ARGS1(
 	document *,	newdoc)
 {
-    int number, c;
+    int number;
     DocAddress WWWDoc;
     HTParentAnchor *tmpanchor;
     HText *text;
@@ -453,7 +453,7 @@ PUBLIC int LYShowVisitedLinks ARGS1(
     /*
      *  Make the file a URL now.
      */
-#ifdef VMS
+#if defined (VMS) || defined (DOSPATH)
     sprintf(vl_filename,"file://localhost/%s", tempfile);
 #else
     sprintf(vl_filename,"file://localhost%s", tempfile);

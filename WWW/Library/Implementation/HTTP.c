@@ -260,13 +260,13 @@ try_again:
 		  strcasecomp(HTAtom_name(pres->rep), "www/compressed")) {
 		  if (pres->quality < 1.0) {
 		      if (pres->maxbytes > 0) {
-		          sprintf(temp, ";q=%4.3f;mxb=%d",
+		          sprintf(temp, ";q=%4.3f;mxb=%ld",
 			  		pres->quality, pres->maxbytes);
 		      } else {
 		          sprintf(temp, ";q=%4.3f", pres->quality);
 		      }
 		  } else if (pres->maxbytes > 0) {
-		      sprintf(temp, ";mxb=%d", pres->maxbytes);
+		      sprintf(temp, ";mxb=%ld", pres->maxbytes);
 		  } else {
 		      temp[0] = '\0';
 		  }

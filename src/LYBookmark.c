@@ -12,6 +12,9 @@
 #include "LYCurses.h"
 #include "GridText.h"
 
+#ifdef DOSPATH
+#include "HTDOS.h"
+#endif
 #ifdef VMS
 #include "HTVMSUtils.h"
 #include <nam.h>
@@ -46,9 +49,6 @@ PUBLIC char * get_bookmark_filename ARGS1(
     char string_buffer[256];
     FILE *fp;
     int MBM_tmp;
-#ifndef VMS
-    int len;
-#endif /* !VMS */
 
     /*
      *  Multi_Bookmarks support. - FMG & FM
@@ -115,21 +115,31 @@ success:
 	is_mosaic_hotlist = TRUE;
 	fclose(fp);
 	newname = convert_mosaic_bookmark_file(filename_buffer);
+#ifdef DOSPATH
+		  sprintf(URL_buffer,"file://localhost/%s",
+				HTDOS_wwwName((char *)newname));
+#else
 #ifdef VMS
 	sprintf(URL_buffer,"file://localhost%s",
 		HTVMS_wwwName((char *)newname));
 #else
 	sprintf(URL_buffer,"file://localhost%s", newname);
 #endif /* VMS */
+#endif /* DOSPATH */
     } else {
 	fclose(fp);
 	is_mosaic_hotlist = FALSE;
+#ifdef DOSPATH
+        sprintf(URL_buffer,"file://localhost/%s",
+				HTDOS_wwwName((char *)filename_buffer));
+#else
 #ifdef VMS
 	sprintf(URL_buffer,"file://localhost%s",
     		HTVMS_wwwName((char *)filename_buffer));
 #else
 	sprintf(URL_buffer,"file://localhost%s", filename_buffer);
 #endif /* VMS */
+#endif /* DOSPATH */ 
     }
 
     StrAllocCopy(*URL, URL_buffer);
@@ -524,7 +534,9 @@ PUBLIC void remove_bookmark_link ARGS2(
     fp = NULL;
     fclose(nfp);
     nfp = NULL;
- 	
+#ifdef DOSPATH
+	 remove(filename_buffer);
+#endif /* DOSPATH */
     if (rename(newfile, filename_buffer) != -1) {
 #ifdef VMS
 	char VMSfilename[256];
@@ -548,7 +560,11 @@ PUBLIC void remove_bookmark_link ARGS2(
 	 *  Check if this is the case and do something appropriate.
 	 *  Used to be ODD_RENAME
 	 */
+#ifdef _WINDOWS
+        if (errno == ENOTSAM) {
+#else
 	if (errno == EXDEV) {
+#endif /* WINDOWS */ 
 	    char buffer[2048];
 	    sprintf(buffer, "%s %s %s", MV_PATH, newfile, filename_buffer);
 	    system(buffer);
@@ -663,12 +679,10 @@ get_advanced_choice:
  */
 PUBLIC int select_menu_multi_bookmarks NOARGS
 {
-    FILE *fp;
-    int c, MBM_counter, MBM_tmp_count, MBM_allow;
+    int c, MBM_tmp_count, MBM_allow;
     int MBM_screens, MBM_from, MBM_to, MBM_current;
     char string_buffer[256];
     char shead_buffer[256];
-    char *cp, *cp1;
 
     /*
      *  If not enabled, pick the "default" (0).

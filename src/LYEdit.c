@@ -14,6 +14,9 @@
 #include <unixio.h>
 #include "HTVMSUtils.h"
 #endif /* VMS */
+#ifdef DOSPATH
+#include "HTDOS.h"
+#endif
 
 #include "LYLeaks.h"
 
@@ -54,7 +57,7 @@ PUBLIC int edit_current_file ARGS3(char *,newfile, int,cur, int,lineno)
 	  *
 	  * On VMS, only try the path.
 	  */
-#ifndef VMS
+#if !defined (VMS) && !defined (DOSPATH)
 	colon = strchr(newfile,':');
 	StrAllocCopy(filename, colon+1);
 	HTUnEscape(filename);
@@ -63,31 +66,40 @@ PUBLIC int edit_current_file ARGS3(char *,newfile, int,cur, int,lineno)
 #endif /* !VMS */
 	    filename = HTParse(newfile,"",PARSE_PATH+PARSE_PUNCTUATION);
 	    HTUnEscape(filename);
+#ifdef DOSPATH
+		 if (strlen(filename)>1) filename++;
+#endif
+#ifdef DOSPATH
+		 if ((fp = fopen(HTDOS_name(filename),"r")) == NULL) {
+#else
 #ifdef VMS
 	    if ((fp = fopen(HTVMS_name("",filename),"r")) == NULL) {
 #else
 	    if ((fp = fopen(filename,"r")) == NULL) {
-		    
 #endif /* VMS */
+#endif /* DOSPATH */
 	        HTAlert(COULD_NOT_ACCESS_FILE);
 		FREE(filename);
 		goto failure;
 	    }
-#ifndef VMS
+#if !defined (VMS) && !defined (DOSPATH)
 	}
 #endif /* !VMS */
 	fclose(fp);
 		
-
 #if defined(VMS) || defined(CANT_EDIT_UNWRITABLE_FILES)
         /*
 	 * Don't allow editing if user lacks append access.
 	 */
+#ifdef DOSPATH
+	if ((fp = fopen(HTDOS_name("",filename),"a")) == NULL) {
+#else
 #ifdef VMS
 	if ((fp = fopen(HTVMS_name("",filename),"a")) == NULL) {
 #else
 	if ((fp = fopen(filename,"a")) == NULL) {
 #endif /* VMS */
+#endif /* DOSPATH */
 		_statusline(NOAUTH_TO_EDIT_FILE);
 		sleep(MessageSecs);
 		goto failure;
@@ -102,9 +114,18 @@ PUBLIC int edit_current_file ARGS3(char *,newfile, int,cur, int,lineno)
 	    strstr(editor, "pico") || strstr(editor,"jove") ||
 	    strstr(editor, "jed"))
 	    sprintf(command,"%s +%d \"%s\"",editor, lineno+links[cur].ly, 
+#ifdef DOSPATH
+																	 HTDOS_name(filename));
+#else
                                                                 filename);
+#endif /* DOSPATH */
 	else
-	    sprintf(command,"%s \"%s\"",editor, filename);
+		 sprintf(command,"%s \"%s\"",editor,
+#ifdef DOSPATH
+				 HTDOS_name(filename));
+#else
+				 filename);
+#endif /* DOSPATH */
 #endif /* VMS */
 	if (TRACE) {
 	    fprintf(stderr, "LYEdit: %s\n",command);

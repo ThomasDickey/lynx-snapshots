@@ -18,18 +18,22 @@ PUBLIC void read_rc NOPARAMS
     char *cp, *cp2;
     int number_sign;
     char MBM_line[256];
-    int  MBM_counter, MBM_counter2;
-    char *MBM_cp, *MBM_cp2, *MBM_cp1;
-    int  MBM_i1, MBM_i2;
+    int  MBM_counter;
+    char *MBM_cp2, *MBM_cp1;
+    int  MBM_i2;
 
     /*
      *  Make an RC file name.
      */
+#ifdef DJGPP
+	 sprintf(rcfile, "%s/lynx.rc", Home_Dir());
+#else
 #ifdef VMS
     sprintf(rcfile, "sys$login:.lynxrc");
 #else
     sprintf(rcfile, "%s/.lynxrc", Home_Dir());
 #endif /* VMS */
+#endif /* DJGPP */
 
     /*
      *  Open the RC file for reading.
@@ -471,11 +475,15 @@ PUBLIC int save_rc NOPARAMS
     /*
      *  Make a name.
      */
+#ifdef DJGPP
+	 sprintf(rcfile, "%s/lynx.rc", Home_Dir());
+#else
 #ifdef VMS
     sprintf(rcfile, "sys$login:.lynxrc");
 #else
     sprintf(rcfile, "%s/.lynxrc", Home_Dir());
 #endif /* VMS */
+#endif /* DJGPP */
     
     /*
      *  Open the file for write.

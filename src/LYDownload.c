@@ -15,6 +15,9 @@
 #ifdef VMS
 #include "HTVMSUtils.h"
 #endif /* VMS */
+#ifdef DOSPATH
+#include "HTDOS.h"
+#endif
 
 #include "LYexit.h"
 #include "LYLeaks.h"
@@ -197,11 +200,15 @@ check_recall:
 	    strcpy(command, buffer);
 	    if ((len=strlen(command)) > 0 && command[len-1] == '/')
 	        command[len-1] = '\0';
+#ifdef DOSPATH
+		 strcat(command, HTDOS_wwwName((char *)Home_Dir()));
+#else
 #ifdef VMS
 	    strcat(command, HTVMS_wwwName((char *)Home_Dir()));
 #else
 	    strcat(command, Home_Dir());
 #endif /* VMS */
+#endif /* DOSPATH */
 	    strcat(command, cp);
 	    strcpy(buffer, command);
 	}
@@ -224,7 +231,11 @@ check_recall:
 	    cp = NULL;
 	if (cp) {
             sprintf(command,"%s/%s", cp, buffer);
+#ifdef DOSPATH
+		 strcpy(buffer, HTDOS_name(command));
+#else
 	    strcpy(buffer, command);
+#endif
 	}
 #endif /* VMS */
 
@@ -532,7 +543,7 @@ PUBLIC int LYdownload_options ARGS2(char **,newfile, char *,data_file)
     }
 
     /* make the file a URL now */
-#ifdef VMS
+#if defined (VMS) || defined (DOSPATH)
     sprintf(download_filename,"file://localhost/%s",tempfile);
 #else
     sprintf(download_filename,"file://localhost%s",tempfile);

@@ -21,6 +21,12 @@
 
 #include "LYLeaks.h"
 
+#ifdef EXP_CHARTRANS
+#include "UCMap.h"
+#include "UCDefs.h"
+#include "UCAux.h"
+#endif
+
 #define INVALID (-1)
 
 #define FREE(x) if (x) {free(x); x = NULL;}
@@ -103,10 +109,80 @@ struct _HTStream {
     char *			url;
     char *			csi;
     int				csi_index;
+#ifdef EXP_CHARTRANS
+    HTParentAnchor * node_anchor;
+    LYUCcharset	* UCI;	/* pointer into anchor's UCInfo */
+    int	in_char_set;		/* tells us what charset we are fed */
+    LYUCcharset	* htmlUCI; /* pointer into anchor's UCInfo for target*/
+    int	html_char_set;		/* tells us what we feed to target stream */
+    char                utf_count;
+    long                utf_char;
+    char	utf_buf[7];
+    char *	utf_buf_p;
+    UCTransParams T;
+#endif /* EXP_CHARTRANS */
 } ;
+
+#ifdef EXP_CHARTRANS
+
+PRIVATE void set_chartrans_handling ARGS3(
+	HTStream *,	context,
+	HTParentAnchor *, anchor,
+	int,	chndl)
+{
+    extern int current_char_set;
+
+    if (chndl < 0) {
+	chndl = HTAnchor_getUCLYhndl(anchor, UCT_STAGE_STRUCTURED);
+	if (chndl < 0)
+	    chndl = HTAnchor_getUCLYhndl(anchor, UCT_STAGE_HTEXT);
+	if (chndl < 0)
+	    chndl = current_char_set;
+	HTAnchor_setUCInfoStage(anchor, chndl, UCT_STAGE_HTEXT,
+			    UCT_SETBY_DEFAULT);
+	HTAnchor_setUCInfoStage(anchor, chndl, UCT_STAGE_STRUCTURED,
+			    UCT_SETBY_DEFAULT);
+	context->htmlUCI = HTAnchor_getUCInfoStage(
+		                              anchor,UCT_STAGE_STRUCTURED);
+	context->html_char_set = HTAnchor_getUCLYhndl(
+		                context->node_anchor,UCT_STAGE_STRUCTURED);
+    }
+    UCSetTransParams(&context->T,
+		     context->in_char_set, context->UCI,
+		     context->html_char_set, context->htmlUCI);
+}
+
+PRIVATE void change_chartrans_handling ARGS1(
+	HTStream *,	context)
+{
+    int new_LYhndl = HTAnchor_getUCLYhndl(context->node_anchor,
+					  UCT_STAGE_PARSER);
+    if (new_LYhndl != context->in_char_set &&
+	new_LYhndl >= 0) {	/* something changed. but ignore if a META
+				 wants an unknown charset. */
+	LYUCcharset * new_UCI = HTAnchor_getUCInfoStage(context->node_anchor,
+							UCT_STAGE_PARSER);
+	if (new_UCI) {
+            LYUCcharset * next_UCI = HTAnchor_getUCInfoStage(
+		                context->node_anchor,UCT_STAGE_STRUCTURED);
+	    int next_LYhndl = HTAnchor_getUCLYhndl(
+                                context->node_anchor,UCT_STAGE_STRUCTURED);
+	    context->UCI = new_UCI;
+	    context->in_char_set = new_LYhndl;
+	    context->htmlUCI = next_UCI;
+	    context->html_char_set = next_LYhndl;
+	    set_chartrans_handling(context, context->node_anchor, next_LYhndl);
+	}
+    }
+}
+#endif /* EXP_CHARTRANS */
 
 
 #define PUTC(ch) ((*context->actions->put_character)(context->target, ch))
+#ifdef EXP_CHARTRANS
+#define PUTUTF8(code) (UCPutUtf8_charstring((HTStream *)context->target, \
+		      (putc_func_t*)(context->actions->put_character), code))
+#endif
 
 extern BOOL historical_comments;
 extern BOOL minimal_comments;
@@ -163,6 +239,32 @@ PRIVATE void handle_attribute_value ARGS2(
     context->current_attribute_number = INVALID; /* can't have two assignments! */
 }
 
+#ifdef EXP_CHARTRANS
+/* translate some Unicodes to Lynx special codes and output them. */
+PRIVATE BOOL put_special_unicodes ARGS2(
+	HTStream *,	context,
+	long, code)
+{
+    if (code == 160) {
+	PUTC(1);
+    } else  if (code==173) {
+	PUTC(7);
+    } else if (code == 8194 || code == 8195 || code == 8201) {
+		        /*
+			**  ensp, emsp or thinsp.
+			*/
+	PUTC(2);
+    } else if (code == 8211 || code == 8212) {
+		        /*
+			**  ndash or mdash.
+			*/
+			PUTC('-');
+    } else {
+	return NO;		/* return NO if nothing done */
+    }
+    return YES;			/* we have handled it */
+}
+#endif
 
 /*	Handle entity
 **	-------------
@@ -175,7 +277,13 @@ PRIVATE void handle_attribute_value ARGS2(
 ** Bug-fix:
 **	Modified SGML_character() so we only come here with terminator
 **	as '\0' and check a FoundEntity flag. -- Foteos Macrides
+**
+** Modified more (for use with CHARTRANS):
 */
+
+#ifdef EXP_CHARTRANS
+PRIVATE char replace_buf [61];        /* buffer for replacement strings */
+#endif
 
 PRIVATE BOOL FoundEntity = FALSE;
 
@@ -184,6 +292,11 @@ PRIVATE void handle_entity ARGS2(
 	char,		term)
 {
     CONST char ** entities = context->dtd->entity_names;
+#ifdef EXP_CHARTRANS
+    CONST UC_entity_info * extra_entities = context->dtd->extra_entity_info;
+    extern int current_char_set;
+    int rc;
+#endif
     CONST char *s = context->string->data;
     int high, low, i, diff;
 
@@ -223,6 +336,48 @@ PRIVATE void handle_entity ARGS2(
 	    return;
 	}
     }
+#ifdef EXP_CHARTRANS
+    /* repeat for extra entities if not found... hack... -kw */
+    if (TRACE)
+       fprintf(stderr, "SGML: Unknown entity %s so far, checking extra...\n", s); 
+    for (low = 0, high = context->dtd->number_of_extra_entities;
+    	 high > low;
+	 diff < 0 ? (low = i+1) : (high = i)) {  /* Binary serach */
+	i = (low + (high-low)/2);
+	diff = strcmp(extra_entities[i].name, s);	/* Case sensitive! */
+	if (diff==0) {			/* success: found it */
+	  if (put_special_unicodes(context, extra_entities[i].code)) {  
+	    FoundEntity = TRUE;
+	    return;
+	  } else if (context->T.output_utf8 &&
+		     PUTUTF8(extra_entities[i].code)) {
+	    FoundEntity = TRUE;
+	    return;
+	  }
+	  if ((rc = UCTransUniChar(extra_entities[i].code,current_char_set))
+	      > 0) {   /* Could do further checks here... -kw */
+	    PUTC(rc);
+	    FoundEntity = TRUE;
+	    return;
+	  } else if ((rc == -4) && /* Not found; look for replacement string */
+		     (rc = UCTransUniCharStr(replace_buf,60,
+					     extra_entities[i].code,
+					     current_char_set, 0)   >= 0 ) ) { 
+	    CONST char *p;
+	    for (p=replace_buf; *p; p++)
+	      PUTC(*p);
+	    FoundEntity = TRUE;
+	    return;
+	  } 
+	  rc = (*context->actions->put_entity)(context->target,
+					  i+context->dtd->number_of_entities);
+	  if (rc != HT_CANNOT_TRANSLATE) {
+	      FoundEntity = TRUE;
+	      return;
+	  }
+	}
+    }
+#endif
     /*
     **  If entity string not found, display as text.
     */
@@ -430,6 +585,11 @@ PRIVATE void start_element ARGS1(
 	N->tag = new_tag;
 	context->element_stack = N;
     }
+#ifdef EXP_CHARTRANS
+    else {			/* check for result of META tag. */
+	change_chartrans_handling(context);
+    }
+#endif /* EXP_CHARTRANS */
 }
 
 
@@ -475,7 +635,6 @@ PUBLIC void SGML_free  ARGS1(
 {
     int i;
     HTElement * cur;
-    HTElement * next;
     HTTag * t;
 
     /*
@@ -567,7 +726,7 @@ PUBLIC void SGML_setCallerData ARGS2(
 
 PUBLIC void SGML_character ARGS2(
 	HTStream *,	context,
-	char,		c)
+	char,		c_in)
 {
     CONST SGML_dtd *dtd	=	context->dtd;
     HTChunk	*string = 	context->string;
@@ -576,12 +735,114 @@ PUBLIC void SGML_character ARGS2(
     extern char *LYchar_set_names[];
     extern CONST char * HTMLGetEntityName PARAMS((int i));
 
+#ifdef EXP_CHARTRANS
+    extern int LYlowest_eightbit[];
+    char * p;
+    BOOLEAN chk;  /* helps (?) walk through all the else ifs... */
+    long clong,uck;			/* enough bits for UCS4 ... */
+    char c;
+    char saved_char_in = '\0';
+
+    /* Now some fun with the preprocessor...
+       for EXP_CHARTRANS, use copies for c an unsign_c==clong, so that we
+       can revert back to the unchanged c_in.
+       if EXP_CHARTRANS is undefined, these all are the same variable. */
+#define unsign_c clong
+
+#else
+#define c c_in
+#define unsign_c (unsigned char)c
+#endif    
+
+#ifdef EXP_CHARTRANS
+    c = c_in;
+    clong = (unsigned char)c;	/* a.k.a. unsign_c */
+
+    if (context->T.decode_utf8) {
+      		    /* Combine UTF-8 into Unicode */
+		    /* Incomplete characters silently ignored */
+                    /* from Linux kernel's console.c */
+		    if((unsigned char)c > 0x7f) {
+			if (context->utf_count > 0 && (c & 0xc0) == 0x80) {
+				context->utf_char = (context->utf_char << 6) | (c & 0x3f);
+				context->utf_count--;
+				*(context->utf_buf_p++) = c;
+				if (context->utf_count == 0) {
+				  *(context->utf_buf_p) = '\0';
+				  clong = context->utf_char;
+				  if (clong<256) c = (char)clong;
+				  goto top1;
+				}
+				else return;  /* wait for more */
+			} else {
+				context->utf_buf_p = context->utf_buf;
+				*(context->utf_buf_p++) = c;
+				if ((c & 0xe0) == 0xc0) {
+				    context->utf_count = 1;
+				    context->utf_char = (c & 0x1f);
+				} else if ((c & 0xf0) == 0xe0) {
+				    context->utf_count = 2;
+				    context->utf_char = (c & 0x0f);
+				} else if ((c & 0xf8) == 0xf0) {
+				    context->utf_count = 3;
+				    context->utf_char = (c & 0x07);
+				} else if ((c & 0xfc) == 0xf8) {
+				    context->utf_count = 4;
+				    context->utf_char = (c & 0x03);
+				} else if ((c & 0xfe) == 0xfc) {
+				    context->utf_count = 5;
+				    context->utf_char = (c & 0x01);
+				} else { /* garbage */
+				    context->utf_count = 0;
+				    context->utf_buf_p = context->utf_buf;
+				    *(context->utf_buf_p) = '\0';
+				}
+				return; /* wait for more */
+			      }
+		    } else {	/* got an ASCII char */
+		      context->utf_count = 0;
+		      context->utf_buf_p = context->utf_buf;
+		      *(context->utf_buf_p) = '\0';
+		    /*  goto top;  */
+		    }
+		  }
+
+    if (context->T.strip_raw_char_in)
+	saved_char_in = c;
+
+    if (context->T.trans_to_uni && unsign_c >= 127) {
+	clong = UCTransToUni(c, context->in_char_set);
+	if (clong > 0) {
+	    saved_char_in = c;
+	    if (clong < 256) {
+		c = (char)clong;
+	    }
+	}
+	goto top1;
+    } else {
+	goto top0a;
+    }
+
+    /* At this point we have either unsign_c a.k.a. clong in Unicode
+       (and c in latin1 if clong is in the latin1 range),
+       or unsign_c and c will have to be passed raw. */
+
+#endif /* EXP_CHARTRANS */
+
+
 top:
+#ifdef EXP_CHARTRANS
+    saved_char_in = '\0';
+top0a:
+    *(context->utf_buf) = '\0';
+    clong = (unsigned char)c;
+#endif
+top1:
     /*
     **  Ignore low ISO 646 7-bit control characters
     **  if HTCJK is not set. - FM
     */
-    if ((unsigned char)c < 32 &&
+    if (unsign_c < 32 &&
 	c != 9 && c != 10 && c != 13 &&
 	HTCJK == NOCJK)
         return;
@@ -590,16 +851,21 @@ top:
     **  Ignore 127 if we don't have HTPassHighCtrlRaw
     **  or HTCJK set. - FM
     */
+#ifndef EXP_CHARTRANS
+#define PASSHICTRL HTPassHighCtrlRaw
+#else
+#define PASSHICTRL (context->T.transp || unsign_c >= LYlowest_eightbit[context->in_char_set])
+#endif /* EXP_CHARTRANS */
     if (c == 127 &&
-        !(HTPassHighCtrlRaw || HTCJK != NOCJK))
+        !(PASSHICTRL || HTCJK != NOCJK))
         return;
 
     /*
     **  Ignore 8-bit control characters 128 - 159 if
     **  neither HTPassHighCtrlRaw nor HTCJK is set. - FM
     */
-    if ((unsigned char)c > 127 && (unsigned char)c < 160 &&
-	!(HTPassHighCtrlRaw || HTCJK != NOCJK))
+    if (unsign_c > 127 && unsign_c < 160 &&
+	!(PASSHICTRL || HTCJK != NOCJK))
         return;
 
     /*
@@ -630,7 +896,7 @@ top:
 	    PUTC(c);
 	    break;
 	}
-	if (c == '&' && (!context->element_stack ||
+	if (c == '&' && unsign_c < 127 && (!context->element_stack ||
 			 (context->element_stack->tag  &&
 	    		  (context->element_stack->tag->contents ==
 			  		SGML_MIXED ||
@@ -641,7 +907,7 @@ top:
 	    */
 	    string->size = 0;
 	    context->state = S_ero;
-	} else if (c == '<') {
+	} else if (c == '<' && unsign_c < 127) {
 	    /*
 	    **  Setting up for possible tag. - FM
 	    */
@@ -651,35 +917,74 @@ top:
 			context->element_stack->tag->contents == SGML_LITTERAL)
 	      				 ?
 	    		      S_litteral : S_tag;
+#ifndef EXP_CHARTRANS
+#define PASS8859SPECL HTPassHighCtrlRaw
+#else
+#define PASS8859SPECL context->T.pass_160_173_raw
+#endif /* EXP_CHARTRANS */
 	/*
 	**  Convert 160 (nbsp) to Lynx special character if
 	**  neither HTPassHighCtrlRaw nor HTCJK is set. - FM
 	*/
-	} else if ((unsigned char)c == 160 &&
-		   !(HTPassHighCtrlRaw || HTCJK != NOCJK)) {
+	} else if (unsign_c == 160 &&
+		   !(PASS8859SPECL || HTCJK != NOCJK)) {
             PUTC(1);
 	/*
 	**  Convert 173 (shy) to Lynx special character if
 	**  neither HTPassHighCtrlRaw nor HTCJK is set. - FM
 	*/
-	} else if ((unsigned char)c == 173 &&
-		   !(HTPassHighCtrlRaw || HTCJK != NOCJK)) {
+	} else if (unsign_c == 173 &&
+		   !(PASS8859SPECL || HTCJK != NOCJK)) {
             PUTC(7);
+
+#ifdef EXP_CHARTRANS
+	} else if (context->T.use_raw_char_in && saved_char_in) {
+	    /* only if the original character is still in saved_char_in,
+	       otherwise we may be iterating from a goto top */
+	    PUTC(saved_char_in);
+	    saved_char_in = '\0';
+/******************************************************************
+ *   I. LATIN-1 OR UCS2  TO  DISPLAY CHARSET
+ ******************************************************************/  
+	} else if ((chk = (context->T.trans_from_uni && unsign_c >= 160)) &&
+		   (uck = UCTransUniChar(unsign_c, context->html_char_set)) >= 32 &&
+		   uck < 256) {
+	    if (TRACE)
+	      fprintf(stderr,"UCTransUniChar returned 0x%lx:'%c'.\n",uck,(char)uck);
+	    c = (char)(uck & 0xff);
+	    PUTC(c);
+	} else if (chk && (uck == -4) &&
+		                 /* Not found; look for replacement string */
+		(uck = UCTransUniCharStr(replace_buf,60, clong,
+					 context->html_char_set, 0) >= 0 ) ) { 
+	      CONST char *p;
+	      /* No further tests for valididy - assume that whoever
+		 defined replacement strings knew what she was doing. */
+		 
+	      for (p=replace_buf; *p; p++)
+		PUTC(*p);
+#endif /* EXP_CHARTRANS */
+
 	/*
 	**  If it's any other (> 160) 8-bit chararcter, and
 	**  we have not set HTPassEightBitRaw nor HTCJK, nor
 	**  have the "ISO Latin 1" character set selected,
 	**  back translate for our character set. - FM
 	*/
-	} else if ((unsigned char)c > 160 &&
-		   !(HTPassEightBitRaw || HTCJK != NOCJK) &&
+#ifndef EXP_CHARTRANS
+#define PASSHI8BIT HTPassEightBitRaw
+#else
+#define PASSHI8BIT (HTPassEightBitRaw || (context->T.do_8bitraw && !context->T.trans_from_uni))
+#endif /* EXP_CHARTRANS */
+	} else if (unsign_c > 160 && unsign_c < 256 &&
+		   !(PASSHI8BIT || HTCJK != NOCJK) &&
 		   strncmp(LYchar_set_names[current_char_set],
 		   	   "ISO Latin 1", 11)) {
 	    int i;
 	    int value;
 
 	    string->size = 0;
-	    value = (int)((unsigned char)c - 160);
+	    value = (int)(unsign_c - 160);
 	    EntityName = HTMLGetEntityName(value);
 	    for (i = 0; EntityName[i]; i++)
 	        HTChunkPutc(string, EntityName[i]);
@@ -688,6 +993,37 @@ top:
 	    string->size = 0;
 	    if (!FoundEntity)
 	        PUTC(';');
+#ifdef EXP_CHARTRANS
+	/*
+	**  If we get to here and have an ASCII char, pass the character.
+	*/
+	} else if (unsign_c < 127 && unsign_c > 0) {
+	    PUTC(c);
+	/*
+	**  If we get to here, and should have translated, translation has
+	**  failed so far.  
+	*/
+	} else if (context->T.output_utf8 &&
+	    *context->utf_buf) {
+	    for (p=context->utf_buf; *p; p++)
+		PUTC(*p);
+	    context->utf_buf_p = context->utf_buf;
+	    *(context->utf_buf_p) = '\0';
+
+	} else if (context->T.strip_raw_char_in && saved_char_in &&
+		   ((unsigned char)saved_char_in >= 0xc0) &&
+		   ((unsigned char)saved_char_in < 255)) {
+	    /* KOI8 special: strip high bit, gives (somewhat) readable ASCII
+	     or KOI7 - it was constructed that way! */
+	    PUTC((char)(saved_char_in & 0x7f));
+	    saved_char_in = '\0';
+	    
+	} else if ((unsigned char)c<LYlowest_eightbit[context->html_char_set]
+		   || (context->T.trans_from_uni && !HTPassEightBitRaw)) {
+	    sprintf(replace_buf,"U%.2lx",unsign_c);
+	    for (p=replace_buf; *p; p++)
+		PUTC(*p);
+#endif /* EXP_CHARTRANS */
 	/*
 	**  If we get to here, pass the character. - FM
 	*/
@@ -746,7 +1082,7 @@ top:
     **  Handle possible named entity.
     */
     case S_entity:
-	if ((unsigned char)c < 127 && isalnum((unsigned char)c)) {
+	if (unsign_c < 127 && isalnum((unsigned char)c)) {
 	    /*
 	    **  Accept valid ASCII character. - FM
 	    */
@@ -758,7 +1094,7 @@ top:
 	    */
 	    PUTC('&');
 	    context->state = S_text;
-	    goto top;
+	    goto top1;
 	} else {
 	    /*
 	    **  Terminate entity name and try to handle it. - FM
@@ -774,7 +1110,7 @@ top:
 	    **  not the "standard" semi-colon for HTML. - FM
 	    */
 	    if (!FoundEntity || c != ';')
-	        goto top;
+	        goto top1;
 	}
 	break;
 
@@ -782,7 +1118,7 @@ top:
     **  Handle possible numeric entity.
     */
     case S_cro:
-	if ((unsigned char)c < 127 && isdigit((unsigned char)c)) {
+	if (unsign_c < 127 && isdigit((unsigned char)c)) {
 	    /*
 	    **  Accept only valid ASCII digits. - FM
 	    */
@@ -795,8 +1131,8 @@ top:
 	    PUTC('&');
 	    PUTC('#');
 	    context->state = S_text;
-	    goto top;
-	} else if ((unsigned char)c > 127 || isalnum((unsigned char)c)) {
+	    goto top1;
+	} else if (unsign_c > 127 || isalnum((unsigned char)c)) {
 	    /*
 	    **  We have digit(s), but not a valid terminator,
 	    **  so recover the "&#" and digit(s) and recycle
@@ -809,7 +1145,7 @@ top:
 	       PUTC(string->data[i]);
 	    string->size = 0;
 	    context->state = S_text;
-	    goto top;
+	    goto top1;
 	} else {
 	    /*
 	    **  Terminate the numeric entity and try to handle it. - FM
@@ -817,6 +1153,40 @@ top:
 	    int value, i;
 	    HTChunkTerminate(string);
 	    if (sscanf(string->data, "%d", &value) == 1) {
+#ifdef EXP_CHARTRANS
+	      if (value==160) {
+		    /* we *always* should interpret this as Latin1 here! */
+		PUTC(1);
+		string->size = 0;
+		context->state = S_text;
+		if (c != ';')
+		    goto top1;
+		break;
+	      }
+	      if ((uck = UCTransUniChar(value,current_char_set)) >= 32 &&
+		    uck < 256 &&
+		      (uck < 127 ||
+		        uck >= LYlowest_eightbit[context->html_char_set])
+		       ) {
+		  if (uck==160 && current_char_set==0) 
+		      PUTC(1); /* would only happen if some other unicode
+				  is mapped to Latin-1 160 */
+		  else if (uck==173 && current_char_set==0) 
+		      PUTC(7); /* would only happen if some other unicode
+				  is mapped to Latin-1 173 */
+		  else
+		      PUTC(FROMASCII((char)uck));
+	      } else
+	      if ((uck == -4) && /* Not found; look for replacement string */
+		(uck = UCTransUniCharStr(replace_buf,60,value,
+				      current_char_set, 0)   >= 0 ) ) { 
+		for (p=replace_buf; *p; p++)
+		  PUTC(*p);
+	      } else if (context->T.output_utf8 &&
+			 PUTUTF8(value)) {
+		  /* do nothing more */ ;
+	      } else 
+#endif /* EXP_CHARTRANS */
 	        if (value == 8482) {
 		    /*
 		    **  trade  Handle as named entity. - FM
@@ -828,8 +1198,8 @@ top:
 		    HTChunkPutc(string, 'd');
 		    HTChunkPutc(string, 'e');
 		    context->state = S_entity;
-		    goto top;
-		}
+		    goto top1;
+		} else
 	        /*
 		** Show the numeric entity if the value:
 		**  (1) Is greater than 255 (until we support Unicode).
@@ -871,7 +1241,7 @@ top:
 			    PUTC(string->data[i]);
 			string->size = 0;
 			context->state = S_text;
-			goto top;
+			goto top1;
 		    }
 		} else if (value == 160) {
 		    /*
@@ -921,7 +1291,7 @@ top:
 			    PUTC(string->data[i]);
 			string->size = 0;
 			context->state = S_text;
-			goto top;
+			goto top1;
 		    }
 		}
 		/*
@@ -934,7 +1304,7 @@ top:
 		**  the "standard" semi-colon for HTML. - FM
 		*/
 		if (c != ';')
-		    goto top;
+		    goto top1;
 	    } else {
 	        /*
 		**  Not an entity, and don't know why not, so add the
@@ -963,7 +1333,7 @@ top:
     **  Tag
     */	    
     case S_tag:					/* new tag */
-	if ((unsigned char)c < 127 && isalnum((unsigned char)c)) {
+	if (unsign_c < 127 && isalnum((unsigned char)c)) {
 	    /*
 	    **  Add valid ASCII character. - FM
 	    */
@@ -985,7 +1355,7 @@ top:
 	    */
 	    context->state = S_text;
 	    PUTC('<');
-	    goto top;
+	    goto top1;
 	} else {				/* End of tag name */
 	    /*
 	    **  Try to handle tag. - FM
@@ -1436,7 +1806,7 @@ top:
 	    string->size = 0;
 	    context->state = S_tag_gap;
 	    if (c == '>')	/* We emulated the Netscape bug, so we go  */
-	        goto top;	/* back and treat it as the tag terminator */
+	        goto top1;	/* back and treat it as the tag terminator */
 	} else if (c == '\033') {
 	    /*
 	    **  Setting up for possible double quotes in CJK escape
@@ -1450,7 +1820,7 @@ top:
 	break;
 	
     case S_end:					/* </ */
-	if ((unsigned char)c < 127 && isalnum((unsigned char)c))
+	if (unsign_c < 127 && isalnum((unsigned char)c))
 	    HTChunkPutc(string, c);
 	else {				/* End of end tag name */
 	    HTTag * t=0;
@@ -1548,6 +1918,29 @@ top:
 		    context->current_attribute_number = INVALID;
 		    if (context->current_tag->name)
 			start_element(context);
+		    if (c != '>') {
+			context->state = S_junk_tag;
+		    } else {
+			context->state = S_text;
+		    }
+		    break;
+		} else if (tag_OK &&
+			   !strcasecomp(string->data, "FORM")) {
+		    /*
+		    **  Handle a FORM end tag.  We declared FORM
+		    **  as SGML_EMPTY to prevent "expected tag
+		    **  substitution" and avoid throwing the
+		    **  HTML.c stack out of whack (Wow, what
+		    **  a hack! 8-). - FM
+		    */
+		    if (TRACE)
+		        fprintf(stderr, "SGML: End </%s>\n", string->data);
+		    (*context->actions->end_element)
+			(context->target,
+			 (context->current_tag - context->dtd->tags),
+			 (char **)&context->include);
+		    string->size = 0;
+		    context->current_attribute_number = INVALID;
 		    if (c != '>') {
 			context->state = S_junk_tag;
 		    } else {
@@ -1814,8 +2207,9 @@ PUBLIC CONST HTStreamClass SGMLParser =
 **
 */
 
-PUBLIC HTStream* SGML_new  ARGS2(
+PUBLIC HTStream* SGML_new  ARGS3(
 	CONST SGML_dtd *,	dtd,
+	HTParentAnchor *,	anchor,
 	HTStructured *,		target)
 {
     int i;
@@ -1851,6 +2245,26 @@ PUBLIC HTStream* SGML_new  ARGS2(
     context->url = NULL;
     context->csi = NULL;
     context->csi_index = 0;
+#ifdef EXP_CHARTRANS
+    context->node_anchor = anchor; /*only for chartrans info. could be NULL? */
+
+    context->utf_count = 0;
+    context->utf_char = 0;
+    context->utf_buf[0] = context->utf_buf[6] = '\0';
+    context->utf_buf_p = context->utf_buf;
+
+    UCTransParams_clear(&context->T);
+    context->in_char_set =
+	HTAnchor_getUCLYhndl(anchor, UCT_STAGE_PARSER);
+    if (context->in_char_set < 0) {
+	HTAnchor_copyUCInfoStage(anchor, UCT_STAGE_PARSER, UCT_STAGE_MIME,
+				         -1);
+	context->in_char_set =
+	    HTAnchor_getUCLYhndl(anchor, UCT_STAGE_PARSER);
+    }
+    context->UCI=HTAnchor_getUCInfoStage(anchor, UCT_STAGE_PARSER);
+    set_chartrans_handling(context, anchor, -1);
+#endif /* EXP_CHARTRANS */
 
     return context;
 }

@@ -54,7 +54,7 @@ PUBLIC BOOL LYMapsOnly = FALSE;
 /* 
  * Utility for freeing the list of MAPs. - FM
  */
-PUBLIC void LYLynxMaps_free NOARGS
+PRIVATE void LYLynxMaps_free NOARGS
 {
     ImageMap *map;
     MapElement *element;

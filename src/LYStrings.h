@@ -7,6 +7,7 @@
 extern char *strstr();
 #endif /* __STRICT_BSD__ */
 
+extern int get_mouse_link NOPARAMS;
 extern char * LYstrncpy PARAMS((char *dst, char *src, int n));
 extern int LYgetch NOPARAMS;
 extern int LYgetstr PARAMS((char *inputline, int hidden,
@@ -14,6 +15,14 @@ extern int LYgetstr PARAMS((char *inputline, int hidden,
 extern char * LYstrstr PARAMS((char *chptr, char *tarptr));
 extern char * LYno_attr_char_strstr PARAMS((char *chptr, char *tarptr));
 extern char * LYno_attr_char_case_strstr PARAMS((char *chptr, char *tarptr));
+#ifdef EXP_CHARTRANS
+extern char * LYmbcsstrncpy PARAMS((char *dst, char *src, int n_bytes,
+				    int n_glyphs,	int enc));
+extern char * LYno_attr_mbcs_strstr PARAMS((char *chptr, char *tarptr,
+					    BOOL utf_flag, int *nendp));
+extern char * LYno_attr_mbcs_case_strstr PARAMS((char *chptr, char *tarptr,
+					    BOOL utf_flag, int *nendp));
+#endif
 
 extern char * SNACopy PARAMS((char **dest, CONST char *src, int n));
 extern char * SNACat PARAMS((char **dest, CONST char *src, int n));

@@ -12,8 +12,12 @@
 #include "tcp.h"
 #include "LYCurses.h"
 #include "HTFWriter.h"
+#include "HTSaveToFile.h"
 
 #include "HTFormat.h"
+#ifdef EXP_CHARTRANS
+#include "UCDefs.h"
+#endif /* EXP_CHARTRANS */
 #include "HTAlert.h"
 #include "HTFile.h"
 #include "HTPlain.h"
@@ -21,6 +25,9 @@
 #ifdef VMS
 #include "HTVMSUtils.h"
 #endif /* VMS */
+#ifdef DOSPATH
+#include "HTDOS.h"
+#endif
 
 #include "LYStrings.h"
 #include "LYUtils.h"
@@ -37,7 +44,8 @@ PUBLIC char * WWW_Download_File=NULL; /* contains the name of the temp file
 				      */
 PUBLIC char LYCancelDownload=FALSE;   /* exported to HTFormat.c in libWWW */
 
-extern char dump_output_immediately;  /* if true dump to stdout and quit */
+/* Type mismatch found here - char != BOOLEAN - WSB */
+extern BOOLEAN dump_output_immediately;  /* if true dump to stdout and quit */
 
 #ifdef VMS
 extern BOOLEAN HadVMSInterrupt;      /* flag from cleanup_sig()		*/
@@ -201,14 +209,28 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		     *  HTLoadFile() to handle it. - FM
 		     */
 		    StrAllocCopy(addr, "file://localhost");
+#ifdef DOSPATH
+			 StrAllocCat(addr, "/");
+			 StrAllocCat(addr, HTDOS_wwwName(path));
+#else
 #ifdef VMS
 		    StrAllocCat(addr, HTVMS_wwwName(path));
 #else
 		    StrAllocCat(addr, path);
 #endif /* VMS */
+#endif /* DOSPATH */
 		    StrAllocCopy(me->anchor->FileCache, path);
 		    FREE(path);
 		    FREE(me->anchor->content_encoding);
+#ifdef EXP_CHARTRANS
+		    /* lock the chartrans info we may possibly have,
+		       so HTCharSetFormat will not apply the default for
+		       local files */
+		    HTAnchor_copyUCInfoStage(me->anchor,
+					     UCT_STAGE_PARSER,
+					     UCT_STAGE_MIME,
+					     UCT_SETBY_PARSER);
+#endif
 		    status = HTLoadFile(addr,
 			    		me->anchor,
 			    		me->output_format,
@@ -271,7 +293,9 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
         if (me->anchor->FileCache)
             remove(me->anchor->FileCache);
 	FREE(me);
+#ifndef NOSIGHUP
         (void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
         (void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
         (void) signal(SIGINT, SIG_DFL);
@@ -761,7 +785,7 @@ PUBLIC HTStream* HTCompressed ARGS3(
     char fnam[256];
     CONST char *suffix;
     char *uncompress_mask = NULL;
-    char *compress_suffix;
+    char *compress_suffix = "";
     char *cp;
     FILE *fp = NULL;
 

@@ -21,6 +21,7 @@
 #include "HTAccess.h"
 #include "HTParse.h"
 #include "HTAlert.h"
+#include "HTTCP.h"
 
 #ifdef NSL_FORK
 #include <signal.h>
@@ -103,18 +104,14 @@ extern int errno;
 
 #ifndef VM
 #ifndef VMS
-#ifndef NeXT
 #ifndef THINK_C
-#ifndef __NetBSD__
-#ifndef __FreeBSD__
-#ifndef BSDI
+
+#ifdef DECL_SYS_ERRLIST
 extern char *sys_errlist[];		/* see man perror on cernvax */
 extern int sys_nerr;
-#endif /* BSDI */
-#endif /* !__FreeBSD__ */
-#endif /* !__NetBSD__ */
+#endif /* DECL_SYS_ERRLIST */
+
 #endif /* !THINK_C */
-#endif /* !NeXT */
 #endif /* !VMS */
 #endif /* !VM */
 
@@ -390,6 +387,10 @@ PUBLIC int HTParseInet ARGS2(
     **  Parse host number if present.
     */  
     if (dotcount_ip == 3) {   /* Numeric node address: */
+
+#ifdef DJGPP
+	sin->sin_addr.s_addr = htonl(aton(host));
+#else
 #ifdef DGUX_OLD
 	sin->sin_addr.s_addr = inet_addr(host).s_addr;	/* See arpa/inet.h */
 #else
@@ -399,6 +400,7 @@ PUBLIC int HTParseInet ARGS2(
 	sin->sin_addr.s_addr = inet_addr(host);		/* See arpa/inet.h */
 #endif /* GUSI */
 #endif /* DGUX_OLD */
+#endif /* DJGPP */
 	FREE(host);
     } else {		    /* Alphanumeric node name: */
 #ifdef MVS	/* Oustanding problem with crash in MVS gethostbyname */
@@ -498,7 +500,16 @@ PUBLIC int HTParseInet ARGS2(
 #endif /* MVS */
 
 #else /* Not NSL_FORK: */
-
+#ifdef DJGPP
+        sin->sin_addr.s_addr = htonl(resolve(host));  
+	FREE(host);
+	if (sin->sin_addr.s_addr == 0) {
+		 if (TRACE)
+			  fprintf(stderr,
+			 "HTTPAccess: Can't find internet node name `%s'.\n",host);
+		 return -1;  /* Fail? */
+	}
+#else
 	phost = gethostbyname(host);	/* See netdb.h */
 #ifdef MVS
 	if (TRACE)
@@ -525,6 +536,7 @@ PUBLIC int HTParseInet ARGS2(
 #else
 	memcpy((void *)&sin->sin_addr, phost->h_addr, phost->h_length);
 #endif /* VMS && CMU_TCP */
+#endif /* DJGPP */
 #endif /* NSL_FORK */
     }
 
@@ -687,6 +699,7 @@ PUBLIC int HTDoConnect ARGS4(
 	return HT_NO_DATA;
     }
    
+#ifndef DOSPATH
 #if !defined(NO_IOCTL) || defined(USE_FCNTL)
     /*
     **  Make the socket non-blocking, so the connect can be canceled.
@@ -702,8 +715,9 @@ PUBLIC int HTDoConnect ARGS4(
 #endif /* USE_FCNTL */
         if (ret == -1)
             _HTProgress("Could not make connection non-blocking.");
-#endif /* !NO_IOCTL || USE_FCNTL */
     }
+#endif /* !NO_IOCTL || USE_FCNTL */
+#endif /* DOSPATH */
 
     /*
     **  Issue the connect.  Since the server can't do an instantaneous
@@ -721,6 +735,7 @@ PUBLIC int HTDoConnect ARGS4(
     } else
 #endif /* SOCKS */
     status = connect(*s, (struct sockaddr*)&soc_address, sizeof(soc_address));
+#ifndef DJGPP
     /*
     **  According to the Sun man page for connect:
     **     EINPROGRESS         The socket is non-blocking and the  con-
@@ -856,7 +871,7 @@ PUBLIC int HTDoConnect ARGS4(
             }
         }
     }
-
+#endif /* DJGPP */
     if (status < 0) {
         /*
         **  The connect attempt failed or was interrupted,
@@ -864,6 +879,7 @@ PUBLIC int HTDoConnect ARGS4(
         */
         NETCLOSE(*s);
     }
+#ifndef DOSPATH
 #if !defined(NO_IOCTL) || defined(USE_FCNTL)
     else {
         /*
@@ -879,6 +895,7 @@ PUBLIC int HTDoConnect ARGS4(
             _HTProgress("Could not restore socket to blocking.");
     }
 #endif /* !NO_IOCTL || USE_FCNTL */
+#endif /* DOSPATH */
 
     FREE(line);
     return status;

@@ -1,0 +1,113 @@
+#undef ALT_CHAR_SET
+#undef CHMOD_PATH		/* CF_PATH_PROG(chmod) */
+#undef COLOR_CURSES		/* defined by CF_COLOR_CURSES */
+#undef COMPRESS_PATH		/* CF_PATH_PROG(compress) */
+#undef COPY_PATH		/* CF_PATH_PROG(cp) */
+#undef CURS_PERFORMANCE
+#undef DEBUG			/* configure --enable-debug */
+#undef DECL_SYS_ERRLIST
+#undef FANCY_CURSES		/* defined by CF_FANCY_CURSES */
+#undef GZIP_PATH		/* CF_PATH_PROG(gzip) */
+#undef HAVE_CBREAK
+#undef HAVE_CUSERID
+#undef HAVE_DIRENT_H		/* defined by AC_HEADER_DIRENT */
+#undef HAVE_FCNTL_H		/* have <fcntl.h> */
+#undef HAVE_GETCWD
+#undef HAVE_KEYPAD
+#undef HAVE_LIMITS_H
+#undef HAVE_PUTENV
+#undef HAVE_SIZECHANGE		/* defined by CF_SIZECHANGE */
+#undef HAVE_STRING_H
+#undef HAVE_SYS_DIR_H		/* defined by AC_HEADER_DIRENT */
+#undef HAVE_SYS_FCNTL_H		/* have <sys/fcntl.h> */
+#undef HAVE_SYS_FILIO_H		/* have <sys/filio.h> */
+#undef HAVE_SYS_NDIR_H		/* defined by AC_HEADER_DIRENT */
+#undef HAVE_TERMIOS
+#undef HAVE_TERMIOS_H		/* have <termios.h> */
+#undef HAVE_TTYTYPE
+#undef HAVE_UNISTD_H		/* have <unistd.h> */
+#undef HAVE_UTMP
+#undef IGNORE_CTRL_C		/* FIXME: make tests? */
+#undef INSTALL_ARGS		/* CF_PATH_PROG(install) */
+#undef INSTALL_PATH		/* CF_PATH_PROG(install) */
+#undef LINUX			/* FIXME: make tests? */
+#undef LOCALE			/* for locale support */
+#undef LY_FIND_LEAKS		/* configure --disable-leaks */
+#undef MKDIR_PATH		/* CF_PATH_PROG(mkdir) */
+#undef MV_PATH			/* CF_PATH_PROG(mv) */
+#undef NCURSES			/* defined for ncurses support */
+#undef NCURSESHEADER		/* defined if we include <ncurses.h> */
+#undef NEED_PTEM_H		/* defined by CF_SIZECHANGE */
+#undef NEED_REMOVE		/* defined by CF_REMOVE_BROKEN */
+#undef NO_PARENT_DIR_REFERENCE	/* configure --disable-parent-dir */
+#undef RM_PATH			/* CF_PATH_PROG(rm) */
+#undef STDC_HEADERS
+#undef SYSTEM_MAIL		/* CF_DEFINE_PROG */
+#undef SYSTEM_MAIL_FLAGS	/* defined by CF_SYSTEM_MAIL_FLAGS */
+#undef SYS_IOCTL_H		/* have <sys/ioctl.h> */
+#undef TAR_PATH			/* CF_PATH_PROG(tar) */
+#undef TERMIO_AND_TERMIOS	/* termio.h and termios.h combo bug */
+#undef TOUCH_PATH		/* CF_PATH_PROG(touch) */
+#undef ULTRIX			/* config.sub */
+#undef UNCOMPRESS_PATH		/* CF_PATH_PROG(gunzip) */
+#undef UNIX
+#undef UNZIP_PATH		/* CF_PATH_PROG(unzip) */
+#undef USE_SLANG
+#undef UTMPX_FOR_UTMP		/* use <utmpx.h> since <utmp.h> not found */
+#undef UUDECODE_PATH		/* CF_PATH_PROG(uudecode) */
+#undef ZCAT_PATH		/* CF_PATH_PROG(zcat) */
+#undef ZIP_PATH			/* CF_PATH_PROG(zip) */
+#undef const			/* defined by AC_C_CONST */
+#undef vfork			/* defined by AC_FUNC_FORK */
+/* FIXME:AIX4 */
+/* FIXME:ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
+/* FIXME:ARCHIVE_ONLY */
+/* FIXME:BSDI */
+/* FIXME:CLIX */
+/* FIXME:DECLARE_WAIS_LOGFILES */
+/* FIXME:DGUX */
+/* FIXME:DGUX_OLD */
+/* FIXME:DIRED_SUPPORT */
+/* FIXME:EXEC_LINKS */
+/* FIXME:FALSE=0 */
+/* FIXME:HP_TERMINAL */
+/* FIXME:ISC */
+/* FIXME:LONG_LIST */
+/* FIXME:LY_FIND_LEAKS */
+/* FIXME:NEXT */
+/* FIXME:NOPORT */
+/* FIXME:NO_CHANGE_EXECUTE_PERMS */
+/* FIXME:NO_CPU_LIMIT */
+/* FIXME:NSL_FORK */
+/* FIXME:OK_GZIP */
+/* FIXME:OK_OVERRIDE */
+/* FIXME:OK_PERMIT */
+/* FIXME:OK_TAR */
+/* FIXME:OK_UUDECODE */
+/* FIXME:OK_ZIP */
+/* FIXME:PERFORMANCE */
+/* FIXME:POSIX_JC */
+/* FIXME:PTX2 */
+/* FIXME:REVERSE_CLEAR_SCREEN_PROBLEM */
+/* FIXME:SCO */
+/* FIXME:SGI */
+/* FIXME:SHORTENED_RBIND */
+/* FIXME:SNAKE */
+/* FIXME:SOCKS */
+/* FIXME:SVR4_BSDSELECT */
+/* FIXME:SYSLOG_REQUESTED_URLS */
+/* FIXME:TRUE=1 */
+/* FIXME:UNDERLINE_LINKS */
+/* FIXME:UNIXWARE */
+/* FIXME:USG */
+/* FIXME:_BSD=44 */
+/* FIXME:_BUILTINS */
+/* FIXME:_INCLUDE_AES_SOURCE */
+/* FIXME:_INCLUDE_HPUX_SOURCE */
+/* FIXME:_INCLUDE_POSIX_SOURCE */
+/* FIXME:_INCLUDE_XOPEN_SOURCE */
+/* FIXME:_SYSV3 */
+/* FIXME:__STDC__ */
+/* FIXME:_locp=__lc_locale */
+/* FIXME:loc_t=_LC_locale_t */
+/* This is a template for the configure script, which produces config.h */

@@ -21,8 +21,10 @@
 
 #include <string.h>
 #ifndef VMS
+#ifndef NOUSERS
 #include <pwd.h>	/* Unix password file routine: getpwnam()	*/
 #include <grp.h>	/* Unix group file routine: getgrnam()		*/
+#endif /* NOUSERS */
 #endif /* not VMS */
 
 #include "HTAAUtil.h"
@@ -70,7 +72,7 @@ PRIVATE BOOL isNumber ARGS1(CONST char *, s)
 }
 
 
-#ifdef VMS
+#if defined (VMS) || defined (NOUSERS)
 /* PUBLIC							HTAA_getUidName()
 **		GET THE USER ID NAME (VMS ONLY)
 ** ON ENTRY:

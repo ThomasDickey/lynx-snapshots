@@ -79,7 +79,7 @@ extern void JISx0201TO0208_SJIS PARAMS((
 extern unsigned char * SJIS_TO_EUC1 PARAMS((
 	unsigned char		HI,
 	unsigned char		LO,
-	unsigned char *		EUC));
+	unsigned char *		EUCp));
 
 extern unsigned char * SJIS_TO_EUC PARAMS((
 	unsigned char *		src,

@@ -9,7 +9,7 @@
 extern BOOLEAN getfile PARAMS((document *doc));
 extern int follow_link_number PARAMS((int c, int cur));
 extern void add_trusted PARAMS((char *str, int type));
-extern BOOLEAN exec_ok PARAMS((CONST char *source, CONST char *link, int type));
+extern BOOLEAN exec_ok PARAMS((CONST char *source, CONST char *linkpath, int type));
 
 /* values for follow_link_number.c */
 #define DO_FORMS_STUFF 1

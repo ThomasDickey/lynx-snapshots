@@ -117,7 +117,7 @@ PUBLIC void add_lynxcgi_environment ARGS1(
     }
 }
 
-PUBLIC int LYLoadCGI ARGS4(
+PRIVATE int LYLoadCGI ARGS4(
 	CONST char *, 		arg,
 	HTParentAnchor *,	anAnchor,
 	HTFormat,		format_out,

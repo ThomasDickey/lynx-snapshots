@@ -1,0 +1,234 @@
+dnl Process this file with autoconf to produce a configure script.
+dnl written jan/1997
+dnl by T.E.Dickey <dickey@clark.net>
+dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
+
+AC_PREREQ(2.12)
+AC_INIT(userdefs.h)
+AC_CONFIG_HEADER(lynx_cfg.h:config.hin)
+
+AC_PREFIX_DEFAULT(/usr/local)
+AC_CANONICAL_HOST
+
+dnl --------------------------------------------------------------------------
+dnl Checks for location of programs
+dnl --------------------------------------------------------------------------
+
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_RANLIB
+AC_PROG_MAKE_SET
+CF_MAKE_INCLUDE
+AC_PROG_INSTALL
+
+AC_MSG_CHECKING(if you want full utility pathnames)
+CF_ARG_DISABLE(full-paths,
+	[  --disable-full-paths    control whether full utility pathnames are used],
+	[with_full_paths=no],
+	[with_full_paths=yes])
+AC_MSG_RESULT($with_full_paths)
+
+CF_DEFINE_PROG(system mailer, SYSTEM_MAIL,
+	/usr/mmdf/bin/submit \
+	/usr/sbin/sendmail \
+	/usr/lib/sendmail  \
+	)
+CF_SYSTEM_MAIL_FLAGS
+
+CF_PATH_PROG(CHMOD,	chmod)
+CF_PATH_PROG(COMPRESS,	compress)
+CF_PATH_PROG(COPY,	cp)
+CF_PATH_PROG(GZIP,	gzip)
+CF_PATH_PROG(INSTALL,	install)
+CF_PATH_PROG(MKDIR,	mkdir)
+CF_PATH_PROG(MV,	mv)
+CF_PATH_PROG(RM,	rm)
+CF_PATH_PROG(TAR,	tar)
+CF_PATH_PROG(TOUCH,	touch)
+CF_PATH_PROG(UNCOMPRESS,gunzip)
+CF_PATH_PROG(UNZIP,	unzip)
+CF_PATH_PROG(UUDECODE,	uudecode)
+CF_PATH_PROG(ZCAT,	zcat)
+CF_PATH_PROG(ZIP,	zip)
+
+dnl --------------------------------------------------------------------------
+dnl Checks for compiler & standard-library characteristics
+dnl --------------------------------------------------------------------------
+
+dnl If we're able to run this script, this is true!
+AC_DEFINE(UNIX)
+
+AC_C_CONST
+
+case $host_os in
+linux*)
+	CFLAGS="$CFLAGS -DLINUX" 
+	;;
+ultrix*)
+	# Increase the maximum size of functions that will be optimized.
+	test -z "$GCC" && CFLAGS="$CFLAGS -O -Olimit 600"
+	CFLAGS="$CFLAGS -DULTRIX" 
+	;;
+esac
+
+dnl --------------------------------------------------------------------------
+dnl Checks for library configuration (added right-to-left)
+dnl --------------------------------------------------------------------------
+
+CF_NETLIBS
+
+AC_MSG_CHECKING(for screen type)
+AC_CACHE_VAL(cf_cv_screen,[
+AC_ARG_WITH(screen,
+[  --with-screen=XXX       select screen type
+                          (XXX is curses (default), ncurses or slang)],
+	[
+case $withval in
+curses|ncurses|slang)
+	cf_cv_screen=$withval
+	;;
+*)	AC_ERROR(Unexpected value)
+	;;
+esac],
+	[cf_cv_screen=curses])])
+AC_MSG_RESULT($cf_cv_screen)
+
+case $cf_cv_screen in
+curses)
+	CF_CURSES_LIBS
+	CF_CURS_PERFORMANCE
+	;;
+ncurses)
+	CF_NCURSES_CPPFLAGS
+	CF_NCURSES_LIBS
+	;;
+slang)
+	CF_TERMCAP_LIBS
+	CF_SLANG_CPPFLAGS
+	CF_SLANG_LIBS
+	;;
+esac
+
+dnl --------------------------------------------------------------------------
+dnl Checks for standard headers
+dnl --------------------------------------------------------------------------
+
+AC_HEADER_STDC
+AC_HEADER_TIME
+AC_HEADER_DIRENT
+AC_CHECK_HEADERS( \
+	fcntl.h \
+	limits.h \
+	string.h \
+	sys/fcntl.h \
+	sys/filio.h \
+	sys/ioctl.h \
+	sys/time.h \
+	termio.h \
+	termios.h \
+	unistd.h \
+)
+CF_TERMIO_AND_TERMIOS
+
+dnl --------------------------------------------------------------------------
+dnl Checks for library units
+dnl --------------------------------------------------------------------------
+
+AC_FUNC_VFORK
+CF_REMOVE_BROKEN
+AC_CHECK_FUNCS( \
+	cuserid \
+	getcwd \
+	putenv \
+)
+
+dnl --------------------------------------------------------------------------
+dnl Checks for external-data
+dnl --------------------------------------------------------------------------
+
+CF_ERRNO
+CF_SYS_ERRLIST
+CF_LOCALE
+CF_UTMP
+
+### These tests must be run after establishing the curses library.
+if test $cf_cv_screen != slang ; then
+	CF_ALT_CHAR_SET
+	CF_FANCY_CURSES
+	CF_COLOR_CURSES
+	CF_SIZECHANGE
+	CF_TTYTYPE
+	AC_CHECK_FUNCS( \
+		cbreak \
+		keypad \
+	)
+fi
+
+dnl --------------------------------------------------------------------------
+dnl Miscellaneous options that don't need to test system features
+dnl --------------------------------------------------------------------------
+
+AC_MSG_CHECKING(if parent-directory references are permitted)
+AC_CACHE_VAL(cf_cv_parent_dir,[
+cf_cv_parent_dir=yes
+AC_ARG_ENABLE(parent-dir-refs,
+[  --disable-parent-dir-refs
+                          disable \"Up-to\" parent-links in directory listings],
+	[test "$enableval" = no && cf_cv_parent_dir=no])
+])
+AC_MSG_RESULT($cf_cv_parent_dir)
+test $cf_cv_parent_dir = no && AC_DEFINE(NO_PARENT_DIR_REFERENCE)
+
+dnl --------------------------------------------------------------------------
+dnl Debug/development/test
+dnl --------------------------------------------------------------------------
+
+AC_MSG_CHECKING(if you want to see long compiling messages)
+CF_ARG_DISABLE(echo,
+	[  --disable-echo          develop: display \"compiling\" commands],
+	[SHOW_CC='	@echo compiling $@'
+    ECHO_CC='@'],
+	[SHOW_CC='# compiling'
+    ECHO_CC=''])
+AC_MSG_RESULT($enableval)
+AC_SUBST(SHOW_CC)
+AC_SUBST(ECHO_CC)
+
+AC_MSG_CHECKING(if you want to check memory-leaks)
+CF_ARG_ENABLE(find-leaks,
+	[  --enable-find-leaks     develop: logic for testing memory leaks],
+	[with_leak_checks=yes],
+	[with_leak_checks=no])
+AC_MSG_RESULT($with_leak_checks)
+test "$with_leak_checks" = "yes" && AC_DEFINE(LY_FIND_LEAKS)
+
+AC_MSG_CHECKING(if you want to enable debug-code)
+CF_ARG_ENABLE(debug,
+	[  --enable-debug          develop: logic for testing memory leaks],
+	[with_debug=yes],
+	[with_debug=no])
+AC_MSG_RESULT($with_debug)
+test "$with_debug" = "yes" && AC_DEFINE(DEBUG)
+
+if test -n "$GCC"
+then
+AC_MSG_CHECKING(if you want to turn on gcc warnings)
+CF_ARG_ENABLE(warnings,
+	[  --enable-warnings       develop: GCC compiler warnings],
+	[with_warnings=yes],
+	[with_warnings=no])
+AC_MSG_RESULT($with_warnings)
+if test "$with_warnings" = "yes"
+then
+	CF_GCC_WARNINGS
+fi
+fi
+
+### Finally, build config.h and the makefiles
+CFLAGS="$CFLAGS $EXTRA_CFLAGS"
+AC_OUTPUT(
+	makefile \
+	WWW/Library/unix/makefile \
+	src/makefile \
+	src/chrtrans/makefile \
+	)

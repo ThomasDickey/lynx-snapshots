@@ -26,10 +26,12 @@
 **           returns a pointer to a static string which must be copied if
 **                it is to be kept.
 */
+#ifndef _WINDOWS
 #ifdef __STDC__
-        extern const char * HTInetString(struct sockaddr_in* sin);
+        extern const char * HTInetString(struct sockaddr_in* mysin);
 #else
         extern char * HTInetString();
+#endif
 #endif
 
 
@@ -88,7 +90,7 @@ extern unsigned int HTCardinal PARAMS((int *pstatus,
 **               field is left unchanged in *sin.
 */
 #ifdef __STDC__
-        extern int HTParseInet(struct sockaddr_in * sin, CONST char * str);
+        extern int HTParseInet(struct sockaddr_in * mysin, CONST char * str);
         /*!! had to change this to get it to compile. CTB */
 #else
         extern int HTParseInet();

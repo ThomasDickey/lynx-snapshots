@@ -1,11 +1,11 @@
-#  Make WWW under svr4
+#  Make WWW under unix
 #
 
 # For W3 distribution, machine type for subdirectories
-WWW_MACH = svr4
+WWW_MACH = unix
 
 # The ASIS repository's name for the machine we are on
-ASIS_MACH = generic/svr4
+ASIS_MACH = generic/unix
 
 
 CFLAGS =  -O -DDEBUG -DUSE_DIRENT -DSVR4 -DNO_FILIO_H

@@ -7,6 +7,11 @@
 #ifndef HTML_H
 #define HTML_H
 
+#ifdef EXP_CHARTRANS
+#include "UCDefs.h"
+#include "UCAux.h"
+#endif
+
 #ifndef HTUTILS_H
 #include "HTUtils.h"
 #endif /* HTUTILS_H */
@@ -132,6 +137,12 @@ struct _HTStructured {
     BOOL		inUnderline;
 
     BOOL		needBoldH;
+
+#ifdef EXP_CHARTRANS
+    LYUCcharset	* UCI;	/* pointer to node_anchor's UCInfo */
+    int	UCLYhndl;		/* tells us what charset we are fed */
+    UCTransParams T;
+#endif
 };
 
 struct _HTStream {
@@ -145,7 +156,7 @@ struct _HTStream {
 extern void HTML_put_character PARAMS((HTStructured *me, char c));
 extern void HTML_put_string PARAMS((HTStructured *me, CONST char *s));
 extern void HTML_write PARAMS((HTStructured *me, CONST char *s, int l));
-extern void HTML_put_entity PARAMS((HTStructured *me, int entity_number));
+extern int HTML_put_entity PARAMS((HTStructured *me, int entity_number));
 #endif /* Lynx_HTML_Handler */
 
 /*				P U B L I C

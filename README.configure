@@ -1,0 +1,35 @@
+-- 1997/3/20 - T.Dickey <dickey@clark.net>
+
+This is the first pass of an auto-configure script which I and Jim Spath
+have been working on.  It uses autoconf 2.12 to generate a Bourne shell
+script (configure), which can be run on a UNIX platform to generate:
+
+	lynx_cfg.h
+	makefile
+
+to replace the top-level Makefile of Lynx.  Ultimately the generated
+makefile will have a single target (rather than the multitude of specific
+platforms).  At this stage, we've gotten as far as combining several of the
+more common configurations (noted in makefile according to when they were
+tested).
+
+To use the configure script, simply type
+
+	configure
+or	configure --with-screen=ncurses
+or	configure --with-screen=slang
+
+and
+	make <platform>
+
+e.g., one of
+
+	make linux
+	make sgi
+	make solaris
+	make sun4
+
+Since the linux target has only a minor special case #ifdef, I've also built
+AIX (cc), CLIX (cc), SCO (cc) and HP-UX (K&R c, gcc) configurations using that
+target.  Jim has tested additionally the FreeBSD, NetBSD configurations, and
+will investigate DGUX.

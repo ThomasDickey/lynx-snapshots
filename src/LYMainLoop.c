@@ -34,6 +34,9 @@
 #include "LYCharSets.h"
 #include "LYCharUtils.h"
 #include "LYCookie.h"
+#ifdef DOSPATH
+#include "HTDOS.h"
+#endif
 
 #ifdef VMS
 #include "HTVMSUtils.h"
@@ -148,7 +151,8 @@ int mainloop NOARGS
     BOOLEAN FirstURLRecall = TRUE;
     char *temp = NULL;
     BOOLEAN ForcePush = FALSE;
-    int i, len;
+    unsigned int len;
+    int i;
 
 #ifdef DIRED_SUPPORT
     char *tp;
@@ -343,7 +347,9 @@ try_again:
 		        if ((ofp = fopen(TRAVERSE_ERRORS,"a+")) == NULL) {
  			    if ((ofp = fopen(TRAVERSE_ERRORS,"w")) == NULL) {
 			        perror(NOOPEN_TRAV_ERR_FILE);
+#ifndef NOSIGHUP
 				(void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
 				(void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
 				(void) signal(SIGINT, SIG_DFL);
@@ -376,7 +382,9 @@ try_again:
 		        printf("\nlynx: Can't access startfile %s\n",
 			       startfile);
 			if (!dump_output_immediately) {
+#ifndef NOSIGHUP
 			    (void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
 			    (void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
 			    (void) signal(SIGINT, SIG_DFL);
@@ -455,7 +463,9 @@ try_again:
  "\nlynx: Start file could not be found or is not text/html or text/plain\n");
 			   printf("      Exiting...\n");
 		           if (!dump_output_immediately) {
+#ifndef NOSIGHUP
 				(void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
 				(void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
 				(void) signal(SIGINT, SIG_DFL);
@@ -493,11 +503,15 @@ try_again:
 				  BOOKMARK_TITLE))) &&
 			(temp = HTParse(newdoc.address, "",
 		    		     PARSE_PATH+PARSE_PUNCTUATION)) != NULL) {
+#ifdef DOSPATH
+			cp = HTDOS_wwwName((char *)Home_Dir());
+#else
 #ifdef VMS
 			cp = HTVMS_wwwName((char *)Home_Dir());
 #else
 			cp = (char *)Home_Dir();
 #endif /* VMS */
+#endif /* DOSPATH */
 			len = strlen(cp);
 #ifdef VMS
 			if (!strncasecomp(temp, cp, len) &&
@@ -546,17 +560,22 @@ try_again:
 				    sleep(AlertSecs);
 				    return(-1);
 				}
-				if (temp = HTParse(newdoc.address, "",
-				 PARSE_ACCESS+PARSE_HOST+PARSE_PUNCTUATION)) {
+				if ((temp = HTParse(newdoc.address, "",
+				 PARSE_ACCESS+PARSE_HOST+PARSE_PUNCTUATION))) {
 				    StrAllocCopy(newdoc.address, temp);
 				    HTuncache_current_document();
 				    FREE(curdoc.address);
+#ifdef DOSPATH
+					 StrAllocCat(newdoc.address,
+							 HTDOS_wwwName((char *)Home_Dir()));
+#else
 #ifdef VMS
 				    StrAllocCat(newdoc.address,
 			    		    HTVMS_wwwName((char *)Home_Dir()));
 #else
 				    StrAllocCat(newdoc.address, Home_Dir());
 #endif /* VMS */
+#endif /* DOSPATH */
 				    StrAllocCat(newdoc.address, "/");
 				    StrAllocCat(newdoc.address,
 			    		(strncmp(BookmarkPage, "./", 2) ?
@@ -1090,7 +1109,9 @@ try_again:
 	            printf(
 		        "Fatal error - could not open output file %s\n",cfile);
 		    if (!dump_output_immediately) {
+#ifndef NOSIGHUP
 			(void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
 			(void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
 			(void) signal(SIGINT, SIG_DFL);
@@ -1141,7 +1162,6 @@ try_again:
 		    c = '\t';
 #endif /* FASTTAB */
 	    } else {
-get_keyboard_input:
 	        /*
 		 *  Get a keystroke from the user.
 	         *  Save the last keystroke to avoid
@@ -1215,7 +1235,9 @@ new_keyboard_input:
 			    (nhist <= 0 )) {
 			    if (!dump_output_immediately) {
 			        cleanup();
+#ifndef NOSIGHUP
 				(void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
 				(void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
 				(void) signal(SIGINT, SIG_DFL);
@@ -1253,7 +1275,9 @@ new_keyboard_input:
 	                (nhist <= 0 )) {
 			if (!dump_output_immediately) {
 			    cleanup();
+#ifndef NOSIGHUP
 			    (void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
 			    (void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
 			    (void) signal(SIGINT, SIG_DFL);
@@ -2001,7 +2025,13 @@ new_cmd:  /*
 	    } /* fall through to LYK_ACTIVATE */
 
 	case LYK_ACTIVATE:			/* follow a link */
-	    if (nlinks > 0) {
+	    {
+	     /* Is there a mouse-clicked link waiting? */
+	     int mouse_tmp = get_mouse_link();
+	     /* If yes, use it as the link */
+	     if (mouse_tmp != -1) curdoc.link = mouse_tmp;
+	    }
+	     if (nlinks > 0) {
 	        if (links[curdoc.link].type == WWW_FORM_LINK_TYPE) {
 		    /*
 		     *  Don't try to submit forms with bad actions. - FM
@@ -2139,8 +2169,8 @@ new_cmd:  /*
 		        !strcmp(lynxjumpfile, curdoc.address)) {
 			LYJumpFileURL = TRUE;
 			LYUserSpecifiedURL = TRUE;
-		    } else if (curdoc.title &&
-		    	       !strcmp(curdoc.title, HISTORY_PAGE_TITLE) ||
+		    } else if ((curdoc.title &&
+		    	       !strcmp(curdoc.title, HISTORY_PAGE_TITLE)) ||
 			       curdoc.bookmark != NULL ||
 			       (lynxjumpfile &&
 			        !strcmp(lynxjumpfile, curdoc.address))) {
@@ -2402,7 +2432,7 @@ check_goto_URL:
 	    LYFillLocalFileURL((char **)&temp, "file://localhost");
 	    LYEnsureAbsoluteURL((char **)&temp, "");
 	    sprintf(user_input_buffer, "%.*s",
-	    	    (sizeof(user_input_buffer) - 1), temp);
+	    	    (int)(sizeof(user_input_buffer) - 1), temp);
 	    FREE(temp);
 	    if ((no_file_url || no_goto_file) &&
 	        !strncmp(user_input_buffer,"file:",5)) {
@@ -3600,11 +3630,17 @@ check_add_bookmark_to_self:
 	        stop_curses();
 		printf(SPAWNING_MSG);
 	        fflush(stdout);
+#ifdef DOSPATH	
+	system("cls");	
+	system("echo Type EXIT to return to Lynx.");
+	system(getenv("COMSPEC") == NULL ? "command.com" : getenv("COMSPEC"));
+#else
 #ifdef VMS
 		system("");
 #else
 	        system("exec $SHELL");
 #endif /* VMS */
+#endif /* DOSPATH */
 	        start_curses();
 	        refresh_screen=TRUE;  /* for a showpage */
 	    } else {

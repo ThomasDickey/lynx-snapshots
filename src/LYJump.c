@@ -55,13 +55,13 @@ PUBLIC void LYJumpTable_free NOARGS
  * Utility for listing shortcuts, making any repeated
  * shortcut the most current in the list. - FM
  */
-PUBLIC void LYAddJumpShortcut ARGS2(HTList *,history, char *,shortcut)
+PUBLIC void LYAddJumpShortcut ARGS2(HTList *, historyp, char *,shortcut)
 {
     char *new;
     char *old;
-    HTList *cur = history;
+    HTList *cur =  historyp;
 
-    if (!history || !(shortcut && *shortcut))
+    if (! historyp || !(shortcut && *shortcut))
         return;
 
     if ((new = (char *)calloc(1, (strlen(shortcut) + 1))) == NULL)
@@ -70,12 +70,12 @@ PUBLIC void LYAddJumpShortcut ARGS2(HTList *,history, char *,shortcut)
  
     while (NULL != (old = (char *)HTList_nextObject(cur))) {
 	if (!strcmp(old, new)) {
-	    HTList_removeObject(history, old);
+	    HTList_removeObject(historyp, old);
 	    FREE(old);
 	    break;
 	}
     }
-    HTList_addObject(history, new);
+    HTList_addObject(historyp, new);
 
     return;
 }

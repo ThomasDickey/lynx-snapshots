@@ -1,3 +1,6 @@
+SHELL = /bin/sh
+
+CHARTRANS_OBJS=UCdomap.o UCAux.o UCAuto.o
 OBJS=  LYClean.o LYShowInfo.o LYEdit.o LYStrings.o \
 LYMail.o HTAlert.o GridText.o LYGetFile.o \
 LYMain.o LYMainLoop.o LYCurses.o LYBookmark.o LYUtils.o \
@@ -5,13 +8,14 @@ LYOptions.o LYReadCFG.o LYSearch.o LYHistory.o \
 LYForms.o LYPrint.o LYrcFile.o LYDownload.o LYNews.o LYKeymap.o \
 HTML.o HTFWriter.o HTInit.o DefaultStyle.o LYLocal.o LYUpload.o \
 LYLeaks.o LYexit.o LYJump.o LYList.o LYCgi.o LYTraversal.o \
-LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o
+LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o \
+ $(CHARTRANS_OBJS)
 
 CFLAGS= $(MCFLAGS) -I.. $(SLANGINC)
 
 all: lynx
 
-lynx:   message $(OBJS) $(WWWLIB)
+lynx:   message do_chartrans_stuff $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
 	$(CC) $(CFLAGS) -o lynx  $(OBJS) $(WWWLIB) $(SLANGLIB) $(LIBS)
 	@echo "Copying Lynx executable into this directory"
@@ -20,6 +24,9 @@ lynx:   message $(OBJS) $(WWWLIB)
 
 message:
 	@echo "Compiling Lynx sources"
+
+do_chartrans_stuff:
+	-cd chrtrans; $(MAKE) MCFLAGS="$(MCFLAGS)" CC="$(CC)" tables
 
 dbg:	$(OBJS) $(WWWLIB)
 	@echo "Making Lynx code"
@@ -30,6 +37,7 @@ lint:
 
 clean:
 	rm -f lynx core *.[ob]
+	cd chrtrans && $(MAKE) clean
 
 LYMain.o: ../userdefs.h
 LYMainLoop.o: ../userdefs.h
@@ -45,4 +53,37 @@ HTInit.o: ../userdefs.h
 LYTraversal.o: ../userdefs.h
 LYMail.o: ../userdefs.h
 LYCharSets.o: ../userdefs.h
+
+CHRTR= chrtrans/
+
+TABLES= $(CHRTR)iso02_uni.h \
+ $(CHRTR)iso01_uni.h \
+ $(CHRTR)def7_uni.h \
+ $(CHRTR)iso03_uni.h \
+ $(CHRTR)iso04_uni.h \
+ $(CHRTR)iso05_uni.h \
+ $(CHRTR)iso07_uni.h \
+ $(CHRTR)iso09_uni.h \
+ $(CHRTR)iso10_uni.h \
+ $(CHRTR)koi8r_uni.h \
+ $(CHRTR)cp437_uni.h \
+ $(CHRTR)cp850_uni.h \
+ $(CHRTR)cp852_uni.h \
+ $(CHRTR)cp1250_uni.h \
+ $(CHRTR)cp1252_uni.h \
+ $(CHRTR)utf8_uni.h \
+ $(CHRTR)rfc_suni.h \
+ $(CHRTR)mnemonic_suni.h \
+ $(CHRTR)mnem_suni.h
+
+CMN=../WWW/Library/Implementation/
+
+$(TABLES):
+	-cd chrtrans; $(MAKE) tables
+
+UCdomap.o: UCdomap.c chrtrans/UCkd.h chrtrans/makeuctb chrtrans/makeuctb.c \
+                 UCdomap.h $(CMN)UCMap.h $(TABLES) ../userdefs.h
+	$(CC) -c $(CFLAGS) -o $@ $<
+
+UCAux.o : UCAux.c $(CMN)UCAux.h $(CMN)UCDefs.h
 LYCookie.o: ../userdefs.h

@@ -122,7 +122,9 @@ PUBLIC void HTSetNewsHost ARGS1(CONST char *, value)
 PRIVATE BOOL initialized = NO;
 PRIVATE BOOL initialize NOARGS
 {
+#ifdef NeXTStep
     char *cp = NULL;
+#endif
 
     /*
     **  Get name of Host.
@@ -994,7 +996,7 @@ PRIVATE int read_article NOARGS
 		    char *l = line;
 		    char *p;
 
-		    while (p=strstr(l, "rticle <")) {
+		    while ((p = strstr(l, "rticle <")) != 0) {
 		        char *q  = strchr(p,'>');
 		        char *at = strchr(p, '@');
 		        if (q && at && at<q) {
@@ -1642,7 +1644,7 @@ PUBLIC int HTLoadNews ARGS4(
     BOOL spost_wanted;		/* Flag: new SSL post to group was asked for */
     BOOL sreply_wanted;		/* Flag: followup SSL post was asked for */
     int first, last;		/* First and last articles asked for */
-    char *cp;
+    char *cp = 0;
     char *ListArg = NULL;
     char *ProxyHost = NULL;
     char *ProxyHREF = NULL;

@@ -26,5 +26,5 @@ WWW = ../..
 WTMP = ../..
 
 
+include $(WWW)/Library/Implementation/Version.make
 include $(WWW)/Library/Implementation/CommonMakefile
-

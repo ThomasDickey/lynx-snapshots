@@ -130,7 +130,7 @@ PUBLIC int HTUU_decode ARGS3(char *,		bufcoded,
 			     int,		outbufsize)
 {
 /* single character decode */
-#define DEC(c) pr2six[c]
+#define DEC(c) pr2six[(int)c]
 #define MAXVAL 63
 
    static int first = 1;

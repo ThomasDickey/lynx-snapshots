@@ -20,6 +20,12 @@
 #include "LYCharUtils.h"
 #include "LYCharSets.h"
 
+#ifdef EXP_CHARTRANS
+#include "UCMap.h"
+#include "UCDefs.h"
+#include "UCAux.h"
+#endif
+
 #include "HTAlert.h"
 #include "HTFont.h"
 #include "HTForms.h"
@@ -34,6 +40,9 @@
 #include "LYCurses.h"
 #include "HTVMSUtils.h"
 #endif /* VMS */
+#ifdef DOSPATH
+#include "HTDOS.h"
+#endif
 
 #include "LYexit.h"
 #include "LYLeaks.h"
@@ -330,39 +339,25 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		    continue;
 		/*
 		**  For 8482 (trade) use the character reference if it's
-		**  a hidden INPUT, otherwise handle as named entify. - FM
+		**  a hidden INPUT, otherwise use whatever the tables have
+		**  for &trade;. - FM, kw
 		*/
-	        } else if (value == 8482) {
-		    if (hidden) {
+	        } else if (value == 8482 && hidden) {
 		        *q++ = '&';
 		        *q++ = '#';
 			if (cpe != '\0')
 			    *(p-1) = cpe;
 			p = cp;
 			continue;
-		    } else {
-			if (cpe != '\0') {
-			    p--;
-			    *p = cpe;
-			}
-			cp = (p - 6);
-			*cp++ = '&';
-			*cp++ = 't';
-			*cp++ = 'r';
-			*cp++ = 'a';
-			*cp++ = 'd';
-			*cp++ = 'e';
-			p -= 6;
-			continue;
-		    }
 		/*
 		**  If it's ASCII, or is 8-bit but HTPassEightBitNum
 		**  is set or the character set is "ISO Latin 1",
 		**  use it's value. - FM
 		*/
-		} else if (value < 161 || HTPassEightBitNum ||
+		} else if (value < 161 || 
+			   (value < 256 && (HTPassEightBitNum ||
 			   !strncmp(LYchar_set_names[current_char_set],
-			   	    "ISO Latin 1", 11)) {
+			   	    "ISO Latin 1", 11)))) {
 		    /*
 		    **  No conversion needed.
 		    */
@@ -378,8 +373,12 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		*/
 		} else {
 		    CONST char * name;
-		    value -= 160;
-		    name = HTMLGetEntityName(value);
+		    if (value == 8482) { /* trade mark sign falls through to here -kw */
+		      name = "trade";
+		    } else {
+		      value -= 160;
+		      name = HTMLGetEntityName(value);
+		    }
 		    for(low = 0, high = HTML_dtd.number_of_entities;
 		        high > low;
 			diff < 0 ? (low = i+1) : (high = i)) {
@@ -761,7 +760,30 @@ PUBLIC void LYUnEscapeToLatinOne ARGS2(
 			**  is set and it's 8-bit. - FM
 			*/
 			buf[0] = HTMLGetLatinOneValue(i);
-		        if ((unsigned char)buf[0] > 159 && isURL == TRUE) {
+                        if (buf[0] == '\0') {
+                            /*
+                            **  The entity does not have an 8859-1 representation
+                            **  of exactly one char length.  Try to deal with it
+                            **  anyway - either HTEscape the whole mess, or pass
+                            **  through raw.  So make sure the ISO_Latin1 table,
+                            **  which is the first table in LYCharSets, has resonable
+			    **  substitution strings! (if it really must have any
+			    **  longer than one char..) -kw
+                            */
+			    if (!LYCharSets[0][i][0]) /* totally empty, skip - kw */
+			        /* do nothing */ ;
+			    else if (isURL) {
+			      /* *All* will be HTEscape'd - kw */
+			      esc = HTEscape(LYCharSets[0][i], URL_XALPHAS);
+			      for (e = 0; esc[e]; e++)
+				*q++ = esc[e];
+			      FREE(esc);
+			    } else {
+			      /* *Nothing* will be HTEscape'd - kw */
+			      for (e = 0; LYCharSets[0][i][e]; e++)
+                                *q++ = (unsigned char)(LYCharSets[0][i][e]);
+			    }
+                        } else if ((unsigned char)buf[0] > 159 && isURL == TRUE) {
 			    esc = HTEscape(buf, URL_XALPHAS);
 			    for (e = 0; esc[e]; e++)
 			    *q++ = esc[e];
@@ -1186,12 +1208,16 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 	StrAllocCat(*href, HTVMS_wwwName(getenv("PATH")));
 #else
 	char curdir[DIRNAMESIZE];
-#ifdef NO_GETCWD
-	getwd (curdir);
-#else
+#if HAVE_GETCWD
 	getcwd (curdir, DIRNAMESIZE);
+#else
+	getwd (curdir);
 #endif /* NO_GETCWD */
+#ifdef DOSPATH
+	StrAllocCat(*href, HTDOS_wwwName(curdir));
+#else
 	StrAllocCat(*href, curdir);
+#endif /* DOSPATH */
 #endif /* VMS */
     }
 
@@ -1562,6 +1588,29 @@ PUBLIC void LYZero_OL_Counter ARGS1(
     return;
 }
 
+#ifdef EXP_CHARTRANS
+/*
+**  This function is used by the HTML Structured object. - kw
+*/
+PUBLIC void html_get_chartrans_info ARGS1(HTStructured *, me)
+{
+    me->UCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,UCT_STAGE_STRUCTURED);
+    if (me->UCLYhndl < 0) {
+	int chndl = HTAnchor_getUCLYhndl(me->node_anchor, UCT_STAGE_HTEXT);
+	if (chndl < 0) {
+	    chndl = current_char_set;
+	    HTAnchor_setUCInfoStage(me->node_anchor, chndl, UCT_STAGE_HTEXT,
+			    UCT_SETBY_STRUCTURED);
+	}
+	HTAnchor_setUCInfoStage(me->node_anchor, chndl,
+				UCT_STAGE_STRUCTURED, UCT_SETBY_STRUCTURED);
+	me->UCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,
+					    UCT_STAGE_STRUCTURED);
+    }
+    me->UCI = HTAnchor_getUCInfoStage(me->node_anchor,UCT_STAGE_STRUCTURED);
+}
+#endif /* EXP_CHARTRANS */
+
 /*
 **  This function processes META tags in HTML streams. - FM
 */
@@ -1573,7 +1622,7 @@ PUBLIC void LYHandleMETA ARGS4(
 {
     char *http_equiv = NULL, *name = NULL, *content = NULL;
     char *href = NULL, *id_string = NULL, *temp = NULL;
-    char *cp, *cp0, *cp1;
+    char *cp, *cp0, *cp1 = 0;
     int url_type = 0, i;
 
     if (!me || !present)
@@ -1643,8 +1692,8 @@ PUBLIC void LYHandleMETA ARGS4(
      * Check for a no-cache Pragma
      * or Cache-Control directive. - FM
      */
-    if (!strcasecomp((name ? name : http_equiv), "Pragma") ||
-        !strcasecomp((name ? name : http_equiv), "Cache-Control")) {
+    if (!strcasecomp((http_equiv ? http_equiv : name), "Pragma") ||
+        !strcasecomp((http_equiv ? http_equiv : name), "Cache-Control")) {
 	LYUnEscapeToLatinOne(&content, FALSE);
 	LYTrimHead(content);
 	LYTrimTail(content);
@@ -1661,7 +1710,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	 *  should. - FM
 	 */
 	if ((!me->node_anchor->cache_control) &&
-	    !strcasecomp((name ? name : http_equiv), "Cache-Control")) {
+	    !strcasecomp((http_equiv ? http_equiv : name), "Cache-Control")) {
 	    for (i = 0; content[i]; i++)
 		 content[i] = TOLOWER(content[i]);
 	    StrAllocCopy(me->node_anchor->cache_control, content);
@@ -1708,7 +1757,7 @@ PUBLIC void LYHandleMETA ARGS4(
     /*
      * Check for an Expires directive. - FM
      */
-    } else if (!strcasecomp((name ? name : http_equiv), "Expires")) {
+    } else if (!strcasecomp((http_equiv ? http_equiv : name), "Expires")) {
 	/*
 	 *  If we didn't get a Expires MIME header,
 	 *  store it in the anchor element, and if we
@@ -1733,7 +1782,7 @@ PUBLIC void LYHandleMETA ARGS4(
      *  the charset via a server's header. - AAC & FM
      */
     } else if (!(me->node_anchor->charset && *me->node_anchor->charset) && 
-	       !strcasecomp((name ? name : http_equiv), "Content-Type")) {
+	       !strcasecomp((http_equiv ? http_equiv : name), "Content-Type")) {
 	LYUnEscapeToLatinOne(&content, FALSE);
 	LYTrimHead(content);
 	LYTrimTail(content);
@@ -1746,10 +1795,90 @@ PUBLIC void LYHandleMETA ARGS4(
 	if ((cp = strstr(content, "text/html;")) != NULL &&
 	    (cp1 = strstr(content, "charset")) != NULL &&
 	    cp1 > cp) {
-	    cp1 += 7;
-	    while (*cp1 == ' ' || *cp1 == '=')
-	        cp1++;
+			BOOL chartrans_ok = NO;
+			char *cp3 = NULL, *cp4;
+			int chndl;
 
+	    cp1 += 7;
+			while (*cp1 == ' ' || *cp1 == '=' || *cp1 == '"')
+	        cp1++;
+#ifdef EXP_CHARTRANS
+			    StrAllocCopy(cp3, cp1); /* copy to mutilate more */
+			    for (cp4=cp3; (*cp4 != '\0' && *cp4 != '"' &&
+					   *cp4 != ';'  && *cp4 != ':' &&
+					   !WHITE(*cp4));	cp4++)
+				/* nothing */ ;
+			    *cp4 = '\0';
+			    cp4 = cp3;
+			    chndl = UCGetLYhndl_byMIME(cp3);
+			    if (chndl < 0) {
+				if (0==strcmp(cp4, "cn-big5")) {
+				    cp4 += 3;
+				    chndl = UCGetLYhndl_byMIME(cp4);
+				}
+				else if (0==strncmp(cp4, "cn-gb", 5)) {
+				    StrAllocCopy(cp3, "gb2312");
+				    cp4 = cp3;
+				    chndl = UCGetLYhndl_byMIME(cp4);
+				}
+			    }
+			    if (UCCanTranslateFromTo(chndl, current_char_set))
+			    {
+				chartrans_ok = YES;
+				StrAllocCopy(me->node_anchor->charset, cp4);
+				HTAnchor_setUCInfoStage(me->node_anchor, chndl,
+				   UCT_STAGE_PARSER, UCT_SETBY_STRUCTURED);
+			    }
+			    else if (chndl < 0)	{/* got something but we don't
+						 recognize it */
+				chndl = UCLYhndl_for_unrec;
+				if (UCCanTranslateFromTo(chndl,
+							 current_char_set))
+				{
+				    chartrans_ok = YES;
+				    HTAnchor_setUCInfoStage(me->node_anchor,
+							    chndl,
+				       UCT_STAGE_PARSER, UCT_SETBY_STRUCTURED);
+				}
+			    }
+			    FREE(cp3);
+			    if (chartrans_ok) {
+				LYUCcharset * p_in =
+				    HTAnchor_getUCInfoStage(me->node_anchor,
+							     UCT_STAGE_PARSER);
+				LYUCcharset * p_out =
+				    HTAnchor_setUCInfoStage(me->node_anchor,
+							    current_char_set,
+					 UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
+				if (!p_out) /* try again */
+				    p_out =
+				      HTAnchor_getUCInfoStage(me->node_anchor,
+							     UCT_STAGE_HTEXT);
+				if (0==strcmp(p_in->MIMEname,"x-transparent"))
+				{
+				    HTPassEightBitRaw = TRUE;
+				    HTAnchor_setUCInfoStage(me->node_anchor,
+				       HTAnchor_getUCLYhndl(me->node_anchor,
+							    UCT_STAGE_HTEXT),
+				       UCT_STAGE_PARSER, UCT_SETBY_DEFAULT);
+				}
+				if (0==strcmp(p_out->MIMEname,"x-transparent"))
+				{
+				    HTPassEightBitRaw = TRUE;
+				    HTAnchor_setUCInfoStage(me->node_anchor,
+				       HTAnchor_getUCLYhndl(me->node_anchor,
+							    UCT_STAGE_PARSER),
+				       UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
+				}
+				if (!(p_in->enc & UCT_ENC_CJK) &&
+				    (p_in->codepoints & UCT_CP_SUBSETOF_LAT1)){
+				    HTCJK = NOCJK;
+				} else if (chndl == current_char_set) {
+				HTPassEightBitRaw = TRUE;
+				}
+				html_get_chartrans_info(me);
+			} else  /* Fall through to old behavior */
+#endif /* EXP_CHARTRANS */
 	    if (!strncmp(cp1, "us-ascii", 8) ||
 		!strncmp(cp1, "iso-8859-1", 10)) {
 		StrAllocCopy(me->node_anchor->charset, "iso-8859-1");
@@ -1829,7 +1958,7 @@ PUBLIC void LYHandleMETA ARGS4(
     /*
      *  Check for a Refresh directive. - FM
      */
-    } else if (!strcasecomp((name ? name : http_equiv), "Refresh")) {
+    } else if (!strcasecomp((http_equiv ? http_equiv : name), "Refresh")) {
 	char *Seconds = NULL;
 
 	/*
@@ -1957,8 +2086,8 @@ PUBLIC void LYHandleMETA ARGS4(
      *  via a server header. - FM
      */
     } else if (!(me->node_anchor->SugFname && *me->node_anchor->SugFname) &&
-    	       !strcasecomp((name ?
-    			     name : http_equiv), "Content-Disposition")) {
+    	       !strcasecomp((http_equiv ?
+    			     http_equiv : name), "Content-Disposition")) {
 	cp = content;
 	while (*cp != '\0' && strncasecomp(cp, "file;", 5))
 	    cp++;
@@ -1983,7 +2112,7 @@ PUBLIC void LYHandleMETA ARGS4(
     /*
      *  Check for a Set-Cookie directive. - AK
      */
-    } else if (!strcasecomp((name ? name : http_equiv), "Set-Cookie")) {
+    } else if (!strcasecomp((http_equiv ? http_equiv : name), "Set-Cookie")) {
 	/*
 	 *  We're using the Request-URI as the second argument,
 	 *  regardless of whether a Content-Base header or BASE
@@ -2183,11 +2312,11 @@ PUBLIC void LYHandleID ARGS2(
     /*
      *  Create the link if we still have a non-zero-length string. - FM
      */
-    if (ID_A = HTAnchor_findChildAndLink(
+    if ((ID_A = HTAnchor_findChildAndLink(
 				me->node_anchor,	/* Parent */
 				id,			/* Tag */
 				NULL,			/* Addresss */
-				(void *)0)) {		/* Type */
+				(void *)0)) != 0) {	/* Type */
 	HText_beginAnchor(me->text, ID_A);
 	HText_endAnchor(me->text);
     }

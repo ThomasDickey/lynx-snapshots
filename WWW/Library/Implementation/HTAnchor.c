@@ -173,7 +173,7 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
 	    fprintf(stderr, "HTAnchor_findChild called with NULL parent.\n");
         return NULL;
     }
-    if (kids = parent->children) {  /* parent has children : search them */
+    if ((kids = parent->children) != 0) {  /* parent has children : search them */
         if (tag && *tag) {		/* TBL */
 	    while (NULL != (child=(HTChildAnchor *)HTList_nextObject(kids))) {
 #ifdef CASE_INSENSITIVE_ANCHORS
@@ -465,7 +465,7 @@ PRIVATE void deleteLinks ARGS1(
 	 *  their parents to know that they are no longer
 	 *  the destination of me's anchor.
 	 */
-	while (target = (HTLink *)HTList_removeLastObject(me->links)) {
+	while ((target = (HTLink *)HTList_removeLastObject(me->links)) != 0) {
 	    parent = target->dest->parent;
 	    if (!HTList_isEmpty(parent->sources)) {
 	        /*
@@ -555,7 +555,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
 	 */
 	if (!HTList_isEmpty(me->children)) {
 	    cur = me->children; 
-	    while (child = (HTChildAnchor *)HTList_nextObject(cur)) {
+	    while ((child = (HTChildAnchor *)HTList_nextObject(cur)) != 0) {
 		if (child != NULL) {
 		    deleteLinks((HTAnchor *)child);
 		}
@@ -573,8 +573,8 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
      *  First, recursively delete children and their links.
      */
     if (!HTList_isEmpty(me->children)) {
-	while (child = (HTChildAnchor *)HTList_removeLastObject(
-							me->children)) {
+	while ((child = (HTChildAnchor *)HTList_removeLastObject(
+							me->children)) != 0) {
 	    if (child) {
 		deleteLinks((HTAnchor *)child);
 		if (child->tag) {
@@ -628,7 +628,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
     FREE(me->RevTitle);
     if (me->FileCache) {
 	FILE *fd;
-	if (fd = fopen(me->FileCache, "r")) {
+	if ((fd = fopen(me->FileCache, "r")) != 0) {
 	    fclose(fd);
 	    remove(me->FileCache);
 	}
@@ -670,6 +670,10 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
      *  Free the address.
      */
     FREE(me->address);
+
+#ifdef EXP_CHARTRANS
+    FREE (me->UCStages);
+#endif
 
     /*
      *  Finally, kill the parent anchor passed in.
@@ -1088,3 +1092,155 @@ PUBLIC void HTAnchor_setPhysical ARGS2(
         StrAllocCopy(me->physical, physical);
     }
 }
+
+#ifdef EXP_CHARTRANS
+
+#include "UCMap.h"
+extern LYUCcharset LYCharSet_UC[];
+
+/* We store charset info in the HTParentAnchor object, for several
+** "stages".  (See UCDefs.h)
+** A stream method is supposed to know what stage in the model it is.
+** 
+** General model       MIME     ->  parser  ->  structured  ->  HText
+** e.g. text/html
+**     from HTTP:      HTMIME.c ->  SGML.c  ->  HTML.c      ->  GridText.c
+**   text/plain  
+**     from file:      HTFile.c ->  HTPlain.c               ->  GridText.c
+**
+** The lock/set_by is used to lock e.g. a charset set by an explicit
+** HTTP MIME header against overriding by a HTML META tag - the MIME 
+** header has higher priority.  Defaults (from -assume_.. options etc.) 
+** will not override charset explicitly given by server.
+**
+** Some advantages of keeping this in the HTAnchor:
+** - Global variables are bad.
+** - Can remember a charset given by META tag when toggling to SOURCE view.
+** - Can remember a charset given by <A CHARSET=...> href in another doc.
+**
+** We don't modify the HTParentAnchor's charset element
+** here, that one will only be set when explicitly given.
+*/
+PUBLIC LYUCcharset * HTAnchor_getUCInfoStage ARGS2(
+    HTParentAnchor *, me,
+    int, 	which_stage)
+{
+    if (me && !me->UCStages) {
+	int i;
+	int chndl = UCLYhndl_for_unspec;
+	UCAnchorInfo * stages =
+	    (UCAnchorInfo*) calloc(1, sizeof(UCAnchorInfo));
+	if (stages == NULL)
+            outofmem(__FILE__, "HTAnchor_getUCInfoStage");
+	for(i = 0; i < UCT_STAGEMAX; i++) {
+	    stages->s[i].C.MIMEname = "";
+	    stages->s[i].LYhndl = -1;
+	}
+	if (me->charset) {
+	    chndl = UCGetLYhndl_byMIME(me->charset);
+	    if (chndl < 0) {
+		chndl = UCLYhndl_for_unrec;
+	    }
+	}
+	if (chndl >= 0) {
+	    memcpy(&stages->s[UCT_STAGE_MIME].C, &LYCharSet_UC[chndl],
+		   sizeof(LYUCcharset));
+	    stages->s[UCT_STAGE_MIME].lock = UCT_SETBY_DEFAULT;
+	}
+	else {			/* should not happen... */
+	    stages->s[UCT_STAGE_MIME].C.UChndl = -1;
+	    stages->s[UCT_STAGE_MIME].lock = UCT_SETBY_NONE;
+	}
+	stages->s[UCT_STAGE_MIME].LYhndl = chndl;
+	me->UCStages = stages;
+    }
+    if (me) {
+	return &me->UCStages->s[which_stage].C;
+    }
+    return NULL;
+}
+
+PUBLIC int HTAnchor_getUCLYhndl ARGS2(
+    HTParentAnchor *, me,
+    int,	 which_stage)
+{
+    if (me) {
+	if (!me->UCStages) {
+	    /* this will allocate and initialize, if not yet done */
+	    (void) HTAnchor_getUCInfoStage(me, which_stage);
+	}
+	if (me->UCStages->s[which_stage].lock > UCT_SETBY_NONE)
+	    return me->UCStages->s[which_stage].LYhndl;
+    }
+    return -1;
+}
+
+PUBLIC LYUCcharset * HTAnchor_setUCInfoStage ARGS4(
+    HTParentAnchor *, me,
+    int,	 LYhndl,
+    int,	 which_stage,
+    int,	 set_by)
+{
+    if (me) {
+	/* this will allocate and initialize, if not yet done */
+	LYUCcharset * p = HTAnchor_getUCInfoStage(me, which_stage);
+	/* Can we override? */
+	if (set_by >= me->UCStages->s[which_stage].lock) {
+	    me->UCStages->s[which_stage].lock = set_by;
+	    me->UCStages->s[which_stage].LYhndl = LYhndl;
+	    if (LYhndl >= 0) {
+		memcpy(p, &LYCharSet_UC[LYhndl],
+		       sizeof(LYUCcharset));
+	    }
+	    else {
+		p->UChndl = -1;
+	    }
+	    return p;
+	}
+    }
+    return NULL;
+}
+PUBLIC LYUCcharset * HTAnchor_resetUCInfoStage ARGS4(
+    HTParentAnchor *, me,
+    int,	 LYhndl,
+    int,	 which_stage,
+    int,	 set_by)
+{
+    if (!me || !me->UCStages)
+	return NULL;
+    me->UCStages->s[which_stage].lock = set_by;
+    me->UCStages->s[which_stage].LYhndl = LYhndl;
+    return &me->UCStages->s[which_stage].C;
+}
+
+/* A set_by of (-1) means use the lock value from the from_stage */
+PUBLIC LYUCcharset * HTAnchor_copyUCInfoStage ARGS4(
+    HTParentAnchor *, me,
+    int,	 to_stage,
+    int,	 from_stage,
+    int,	 set_by)
+{
+    if (me) {
+	/* this will allocate and initialize, if not yet done */
+	LYUCcharset * p_from = HTAnchor_getUCInfoStage(me, from_stage);
+	LYUCcharset * p_to = HTAnchor_getUCInfoStage(me, to_stage);
+	/* Can we override? */
+	if (set_by == -1)
+	    set_by = me->UCStages->s[from_stage].lock;
+	if (set_by == UCT_SETBY_NONE)
+	    set_by = UCT_SETBY_DEFAULT;
+	if (set_by >= me->UCStages->s[to_stage].lock) {
+	    me->UCStages->s[to_stage].lock = set_by;
+	    me->UCStages->s[to_stage].LYhndl =
+		me->UCStages->s[from_stage].LYhndl;
+
+	    memcpy(p_to, p_from,
+		       sizeof(LYUCcharset));
+
+	    return p_to;
+	}
+    }
+    return NULL;
+}
+
+#endif /* EXP_CHARTRANS */

@@ -216,7 +216,11 @@
  * mailcap files (see the examples in the samples directory).
  */
 #ifndef LYNX_CFG_FILE
+#ifdef DOSPATH
+#define LYNX_CFG_FILE "./lynx.cfg"
+#else
 #define LYNX_CFG_FILE "/usr/local/lib/lynx.cfg"
+#endif /* DOSPATH */
 #endif /* LYNX_CFG_FILE */
 
 /**************************
@@ -283,15 +287,18 @@
  * the mailmsg() and reply_by_mail() functions in LYMail.c, or
  * interposition of a script, may be required.
  */
+#ifndef HAVE_CONFIG_H
 #ifdef MMDF
 #define SYSTEM_MAIL "/usr/mmdf/bin/submit" 
 #else
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
 #define SYSTEM_MAIL "/usr/sbin/sendmail"
-#else /* everthing else: */
+#else /* everything else: */
 #define SYSTEM_MAIL "/usr/lib/sendmail" 
 #endif /* __FreeBSD || __NetBSD__ || __bsdi__ */
 #endif /* MMDF */
+#define SYSTEM_MAIL_FLAGS ""
+#endif	/* !HAVE_CONFIG_H */
 
 /**************************
  * A place to put temporary files, it's almost always "/tmp/" on
@@ -302,7 +309,7 @@
 #define TEMP_SPACE "/tmp/"
 
 /********************************
- * Don't let the user enter his/hers email address when sending a message.
+ * Don't let the user enter his/her email address when sending a message.
  * Anonymous mail makes it far too easy for a user to spoof someone elses
  * email address.
  * This requires that your mailer agent put in the From: field for you.
@@ -751,10 +758,17 @@
  * curses supports line-drawing characters, set to '*' or any other character
  * to not use line-drawing (e.g., '|' for vertical and '-' for horizontal).
  */
+#ifndef HAVE_CONFIG_H
+#ifdef DOSPATH
+#define BOXVERT 0
+#define BOXHORI 0
+#else
 #define BOXVERT '*'
 /* #define BOXVERT 0 */
 #define BOXHORI '*'
 /* #define BOXHORI 0 */
+#endif /* DOSPATH */
+#endif	/* !HAVE_CONFIG_H */
 
 /******************************
  * LY_UMLAUT controls the 7-bit expansion of characters with dieresis or
@@ -1155,7 +1169,11 @@
  */
 
 #define LYNX_NAME "Lynx"
-#define LYNX_VERSION "2.7.1"
+/* The strange-looking comment on the next line tells PRCS to replace
+ * the version definition with the Project Version on checkout. Just
+ * ignore it. - kw */
+/* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
+#define LYNX_VERSION "2.7.1ac-0.5"
 
 /****************************************************************
  * The LYMessages_en.h header defines default, English strings
@@ -1179,17 +1197,53 @@
 #define MAXHIST  1024		/* max links we remember in history */
 #define MAXLINKS 1024		/* max links on one screen */
 
+#ifdef EXP_CHARTRANS
+#define MAX_CHARSETS 40
+#define MAX_CHARSETSP 41	/* always one more */
+#endif
+
 #ifdef VMS
 /*
 **  Use the VMS port of gzip for uncompressing both .Z and .gz files.
 */
 #define UNCOMPRESS_PATH  "gzip -d"
 #define GZIP_PATH "gzip"
+
 #else
+
+#ifdef DOSPATH
+/*
+**    WINDOWS
+**  ===========
+*/
+#define COMPRESS_PATH   "compress"
+#define UNCOMPRESS_PATH "uncompress"
+#define UUDECODE_PATH   "uudecode"
+#define ZCAT_PATH       "zcat"
+#define GZIP_PATH       "gzip"
+#define INSTALL_PATH    "install"
+#define TAR_PATH        "tar"
+#define TOUCH_PATH      "touch"
+
+/*
+**    WINDOWS/DOS
+**  ===========
+*/
+#define ZIP_PATH        "zip"
+#define UNZIP_PATH      "unzip"
+#define MKDIR_PATH      "mkdir"
+#define MV_PATH         "mv"
+#define RM_PATH         "rm"
+#define COPY_PATH       "cp"
+#define CHMOD_PATH      "chmod"
+
+#else	/* Unix */
+
 /*
 **  Check these paths on Unix!
 **  ==========================
 */
+#ifndef HAVE_CONFIG_H
 #if defined(__FreeBSD__)||defined(__NetBSD__)||defined(__bsdi__)||defined(LINUX)
 /*
 **  FreeBSD, NetBSD, BSDI, or Linux:
@@ -1216,7 +1270,9 @@
 #define	INSTALL_PATH	"/bin/install"
 #define	TAR_PATH	"/bin/tar"
 #define	TOUCH_PATH	"/bin/touch"
+
 #endif /* __FreeBSD__ || __NetBSD__ || __bsdi__ || LINUX */
+
 /*
 **  All Unix:
 **  =========
@@ -1228,6 +1284,9 @@
 #define	RM_PATH		"/bin/rm"
 #define COPY_PATH	"/bin/cp"
 #define CHMOD_PATH	"/bin/chmod"
+
+#endif /* HAVE_CONFIG_H */
+#endif /* DOSPATH */
 #endif /* VMS */
 
 #endif /* USERDEFS_H */

@@ -6,6 +6,8 @@
 #include "LYStructs.h"
 #endif /* LYSTRUCTS_H */
 
+extern BOOLEAN term_letter;
+
 extern void mailform PARAMS((
 	char *	mailto_address,
 	char *	mailto_subject,

@@ -36,12 +36,12 @@ PRIVATE int boolean_choice PARAMS((int status, int line,
 #define MAXCHOICES 10
 
 PRIVATE void option_statusline ARGS1(
-	char *,		text)
+	CONST char *,		text)
 {
     /*
      *  Make sure we have a pointer to a string.
      */
-    if (text == NULL)
+    if (text == 0)
         return;
 
     /*
@@ -956,6 +956,7 @@ PRIVATE int boolean_choice ARGS4(
 	char **,	choices)
 {
     int response = 0;
+    int respcmd;
     int number = 0;
     int col = (column >= 0 ? column : COL_OPTION_VALUES);
 	
@@ -982,10 +983,50 @@ PRIVATE int boolean_choice ARGS4(
 	if (term_options || response == 7 || response == 3)
 	    response = '\n';
 	if (response != '\n' && response != '\r') {
+	     respcmd = keymap[response+1];
+#if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
+                     /* does this make sense here? dunno.. - kw */
+	     if (!respcmd && override[response+1] && !no_dired_support)
+	       respcmd = override[response+1];
+#endif /* DIRED_SUPPORT && OK_OVERRIDE */
+	     switch (respcmd) {
+	     case LYK_PREV_PAGE:
+	     case LYK_UP_TWO:
+	     case LYK_PREV_LINK:
+	     case LYK_UP_LINK:
+	     case LYK_LEFT_LINK:
+	     case LYK_PREV_DOC:
+		if(status == 0)
+		    status = number;  /* go back to end */
+		else
+		    status--;
+		break;
+	     case LYK_END:
+		status = number;
+		break;
+		
+	     case LYK_HOME:
+		status = 0;
+		break;
+	     case LYK_1:
+	     case LYK_2:
+	     case LYK_3:
+	     case LYK_4:
+	     case LYK_5:
+	     case LYK_6:
+	     case LYK_7:
+	     case LYK_8:
+	     case LYK_9:
+	       if((respcmd - LYK_1 + 1) <= number) {
+		 status = respcmd -LYK_1 + 1;
+		 break;
+	       }  /* else fall through! */
+	     default:
 	    if (status == number)
 		status = 0;  /* go over the top and around */
 	    else
 		status++;
+	      }  /* end of switch */
 	    addstr(choices[status]);
 	    refresh();
 	} else {

@@ -30,6 +30,8 @@
 #  If this env var is set to something else Some makes will use that instead
 SHELL = /bin/sh
 
+RANLIB	= ranlib
+
 #	.h files are distributed but originally are made from the
 #	self-documenting hypertext files.
 
@@ -59,12 +61,6 @@ LOB = $(WTMP)/Library/$(WWW_MACH)
 #WAISINC = -I../../../../freeWAIS-0.202/ir
 #WAISCFLAGS = -DDIRECT_WAIS 
 #
-
-# This path, if relative, is taken relative to the directory
-# in which this makefile is, not the pwd.  This screws up the 
-# recursive invocation
-# include $(CMN)Version.make
-include $(ABS)$(WWW)/Library/Implementation/Version.make
 
 # XMOsAIC hack is only for server to cope with xmosaic kludge for mmedia
 #
@@ -142,7 +138,7 @@ SPECIFIC = $(WWW)/All/*/Makefile.include $(WWW)/All/Implementation/Makefile* \
 # for that step
 $(LOB)/libwww.a : $(COMMON)
 	ar r $(LOB)/libwww.a $(COMMON)
-	-ranlib $(LOB)/libwww.a
+	-$(RANLIB) $(LOB)/libwww.a
 
 #	Clean up everything generatable except final products
 clean :

@@ -15,6 +15,11 @@
 #include "HTMIME.h"		/* Implemented here */
 #include "HTAlert.h"
 #include "HTCJK.h"
+#ifdef EXP_CHARTRANS
+#include "UCMap.h"
+#include "UCDefs.h"
+#include "UCAux.h"
+#endif
 
 #include "LYLeaks.h"
 
@@ -332,7 +337,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    {
 	        me->net_ascii = NO;
 		if (strchr(HTAtom_name(me->format), ';') != NULL) {
-		    char *cp = NULL, *cp1, *cp2, *cp3;
+		    char *cp = NULL, *cp1, *cp2, *cp3 = NULL, *cp4;
 
 		    if (TRACE)
 		        fprintf(stderr,
@@ -351,10 +356,92 @@ PRIVATE void HTMIME_put_character ARGS2(
 		    for (i = 0; cp[i]; i++)
 		        cp[i] = TOLOWER(cp[i]);
 		    if ((cp1=strchr(cp, ';')) != NULL) {
+			BOOL chartrans_ok = NO;
 		        if ((cp2=strstr(cp1, "charset")) != NULL) {
+			    int chndl;
 			    cp2 += 7;
 			    while (*cp2 == ' ' || *cp2 == '=' || *cp2 == '\"')
 			        cp2++;
+#ifdef EXP_CHARTRANS
+			    StrAllocCopy(cp3, cp2); /* copy to mutilate more */
+			    for (cp4=cp3; (*cp4 != '\0' && *cp4 != '\"' &&
+					   *cp4 != ';'  && *cp4 != ':' &&
+					   !WHITE(*cp4));	cp4++)
+				/* nothing */ ;
+			    *cp4 = '\0';
+			    cp4 = cp3;
+			    chndl = UCGetLYhndl_byMIME(cp3);
+			    if (chndl < 0) {
+				if (0==strcmp(cp4, "cn-big5")) {
+				    cp4 += 3;
+				    chndl = UCGetLYhndl_byMIME(cp4);
+				}
+				else if (0==strncmp(cp4, "cn-gb", 5)) {
+				    StrAllocCopy(cp3, "gb2312");
+				    cp4 = cp3;
+				    chndl = UCGetLYhndl_byMIME(cp4);
+				}
+			    }
+			    if (UCCanTranslateFromTo(chndl, current_char_set))
+			    {
+				chartrans_ok = YES;
+				*cp1 = '\0';
+				me->format = HTAtom_for(cp);
+				StrAllocCopy(me->anchor->charset, cp4);
+				HTAnchor_setUCInfoStage(me->anchor, chndl,
+				   UCT_STAGE_MIME, UCT_SETBY_MIME);
+			    }
+			    else if (chndl < 0)	{/* got something but we don't
+						 recognize it */
+				chndl = UCLYhndl_for_unrec;
+				if (UCCanTranslateFromTo(chndl,
+							 current_char_set))
+				{
+				    chartrans_ok = YES;
+				    *cp1 = '\0';
+				    me->format = HTAtom_for(cp);
+				    HTAnchor_setUCInfoStage(me->anchor, chndl,
+				       UCT_STAGE_MIME, UCT_SETBY_DEFAULT);
+				}
+			    }
+			    FREE(cp3);
+			    if (chartrans_ok) {
+				LYUCcharset * p_in =
+				    HTAnchor_getUCInfoStage(me->anchor,
+							     UCT_STAGE_MIME);
+				LYUCcharset * p_out =
+				    HTAnchor_setUCInfoStage(me->anchor,
+							    current_char_set,
+					 UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
+				if (!p_out) /* try again */
+				    p_out =
+				      HTAnchor_getUCInfoStage(me->anchor,
+							     UCT_STAGE_HTEXT);
+
+				if (0==strcmp(p_in->MIMEname,"x-transparent"))
+				{
+				    HTPassEightBitRaw = TRUE;
+				    HTAnchor_setUCInfoStage(me->anchor,
+				       HTAnchor_getUCLYhndl(me->anchor,
+							    UCT_STAGE_HTEXT),
+				       UCT_STAGE_MIME, UCT_SETBY_DEFAULT);
+				}
+				if (0==strcmp(p_out->MIMEname,"x-transparent"))
+				{
+				    HTPassEightBitRaw = TRUE;
+				    HTAnchor_setUCInfoStage(me->anchor,
+				       HTAnchor_getUCLYhndl(me->anchor,
+							    UCT_STAGE_MIME),
+				       UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
+				}
+				if (!(p_in->enc & UCT_ENC_CJK) &&
+				    (p_in->codepoints & UCT_CP_SUBSETOF_LAT1)){
+				    HTCJK = NOCJK;
+				} else if (chndl == current_char_set) {
+				HTPassEightBitRaw = TRUE;
+				}
+			} else  /* Fall through to old behavior */
+#endif /* EXP_CHARTRANS */
 			    if (!strncmp(cp2, "us-ascii", 8) ||
 			        !strncmp(cp2, "iso-8859-1", 10)) {
 				*cp1 = '\0';
@@ -1958,6 +2045,12 @@ PUBLIC HTStream* HTMIMEConvert ARGS3(
     me->encoding  =	0;		/* Not set yet */
     me->compression_encoding = NULL;	/* Not set yet */
     me->net_ascii =	NO;		/* Local character set */
+#ifdef EXP_CHARTRANS
+    HTAnchor_setUCInfoStage(me->anchor, current_char_set,
+			     UCT_STAGE_STRUCTURED, UCT_SETBY_DEFAULT);
+    HTAnchor_setUCInfoStage(me->anchor, current_char_set,
+			     UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
+#endif /* EXP_CHARTRANS */
     return me;
 }
 

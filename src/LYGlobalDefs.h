@@ -123,6 +123,7 @@ extern char *pref_charset;	/* Lynx's preferred character set - MM */
 extern BOOLEAN LYNewsPosting;	/* News posting supported if TRUE */
 extern char *LynxSigFile;	/* Signature file, in or off home */
 extern char *system_mail;
+extern char *system_mail_flags;
 extern char *lynx_temp_space;
 extern char *lynx_save_space;
 extern BOOLEAN LYforce_HTML_mode;
@@ -253,10 +254,16 @@ extern BOOLEAN LYNoRefererHeader;	/* Never send Referer header? */
 extern BOOLEAN LYNoRefererForThis;	/* No Referer header for this URL? */
 extern BOOLEAN LYNoFromHeader;		/* Never send From header?    */
 extern BOOLEAN LYListNewsNumbers;
+extern BOOLEAN LYUseMouse;
 extern BOOLEAN LYListNewsDates;
 extern BOOLEAN LYRawMode;
 extern BOOLEAN LYDefaultRawMode;
 extern BOOLEAN LYUseDefaultRawMode;
+#ifdef EXP_CHARTRANS
+extern char *UCAssume_MIMEcharset;
+extern char *UCAssume_localMIMEcharset;
+extern char *UCAssume_unrecMIMEcharset;
+#endif /* EXP_CHARTRANS */
 extern BOOLEAN LYisConfiguredForX;
 extern char *URLDomainPrefixes;
 extern char *URLDomainSuffixes;
@@ -270,4 +277,14 @@ extern int LYStatusLine;		/* Line for statusline() or -1   */
 extern BOOLEAN LYCollapseBRs;		/* Collapse serial BRs?		 */
 extern BOOLEAN LYSetCookies;		/* Process Set-Cookie headers?	 */
 extern char *XLoadImageCommand;		/* Default image viewer for X	 */
+
+#define BOOKMARK_TITLE "Bookmark file"
+#define MOSAIC_BOOKMARK_TITLE "Converted Mosaic Hotlist"
+#define MBM_V_MAXFILES  25	/* Max number of sub-bookmark files */
+/*
+ *  Arrays that holds the names of sub-bookmark files
+ *  and their descriptions.
+ */
+extern char *MBM_A_subbookmark[MBM_V_MAXFILES+1];
+extern char *MBM_A_subdescript[MBM_V_MAXFILES+1];
 #endif /* LYGLOBALDEFS_H */

@@ -2,6 +2,8 @@
 #ifndef LYOPTIONS_H
 #define LYOPTIONS_H
 
+extern BOOLEAN term_options;
+
 extern void options NOPARAMS;
 extern void edit_bookmarks NOPARAMS;
 

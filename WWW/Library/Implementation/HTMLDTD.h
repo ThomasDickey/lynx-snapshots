@@ -158,30 +158,31 @@ Attribute numbers
    
  */
 #define HTML_A_ACCESSKEY        0
-#define HTML_A_CLASS            1
-#define HTML_A_CLEAR            2
-#define HTML_A_COORDS           3
-#define HTML_A_DIR              4
-#define HTML_A_HREF             5
-#define HTML_A_ID               6
-#define HTML_A_ISMAP            7
-#define HTML_A_LANG             8
-#define HTML_A_MD               9
-#define HTML_A_NAME            10
-#define HTML_A_NOTAB           11
-#define HTML_A_ONCLICK         12
-#define HTML_A_ONMOUSEOUT      13
-#define HTML_A_ONMOUSEOVER     14
-#define HTML_A_REL             15
-#define HTML_A_REV             16
-#define HTML_A_SHAPE           17
-#define HTML_A_STYLE           18
-#define HTML_A_TABINDEX        19
-#define HTML_A_TARGET          20
-#define HTML_A_TITLE           21
-#define HTML_A_TYPE            22
-#define HTML_A_URN             23
-#define HTML_A_ATTRIBUTES      24
+#define HTML_A_CHARSET          1 /* i18n draft, added tentatively - kw */
+#define HTML_A_CLASS            2
+#define HTML_A_CLEAR            3
+#define HTML_A_COORDS           4
+#define HTML_A_DIR              5
+#define HTML_A_HREF             6
+#define HTML_A_ID               7
+#define HTML_A_ISMAP            8
+#define HTML_A_LANG             9
+#define HTML_A_MD              10
+#define HTML_A_NAME            11
+#define HTML_A_NOTAB           12
+#define HTML_A_ONCLICK         13
+#define HTML_A_ONMOUSEOUT      14
+#define HTML_A_ONMOUSEOVER     15
+#define HTML_A_REL             16
+#define HTML_A_REV             17
+#define HTML_A_SHAPE           18
+#define HTML_A_STYLE           19
+#define HTML_A_TABINDEX        20
+#define HTML_A_TARGET          21
+#define HTML_A_TITLE           22
+#define HTML_A_TYPE            23
+#define HTML_A_URN             24
+#define HTML_A_ATTRIBUTES      25
 
 #define HTML_ADDRESS_CLASS      0
 #define HTML_ADDRESS_CLEAR      1

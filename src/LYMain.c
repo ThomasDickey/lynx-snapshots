@@ -18,12 +18,18 @@
 #include "LYClean.h"
 #include "LYCharSets.h"
 #include "LYCharUtils.h"
+#ifdef EXP_CHARTRANS
+#include "UCMap.h"
+#endif /* EXP_CHARTRANS */
 #include "LYReadCFG.h"
 #include "LYrcFile.h"
 #include "LYKeymap.h"
 #include "LYList.h"
 #include "LYJump.h"
 #include "LYBookmark.h"
+#ifdef DOSPATH
+#include "HTDOS.h"
+#endif
 
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
@@ -254,6 +260,7 @@ PUBLIC char *pref_charset = NULL;   /* preferred character set */
 PUBLIC BOOLEAN LYNewsPosting = NEWS_POSTING; /* News posting supported? */
 PUBLIC char *LynxSigFile = NULL;    /* Signature file, in or off home */
 PUBLIC char *system_mail = NULL;    /* The path for sending mail */
+PUBLIC char *system_mail_flags = NULL;    /* The flags for sending mail */
 PUBLIC char *lynx_temp_space = NULL; /* The prefix for temporary file paths */
 PUBLIC char *lynx_save_space = NULL; /* The prefix for save to disk paths */
 PUBLIC char *LYHostName = NULL;		/* treat as a local host name */
@@ -275,11 +282,20 @@ PUBLIC char *form_get_data = NULL;   /* User data for get form */
 PUBLIC char *http_error_file = NULL; /* Place HTTP status code in this file */
 	     /* Id:Password for protected forms */
 PUBLIC char *authentication_info[2] = {NULL, NULL};
+
+PUBLIC char *MBM_A_subbookmark[MBM_V_MAXFILES+1];
+PUBLIC char *MBM_A_subdescript[MBM_V_MAXFILES+1];
+
 PUBLIC BOOLEAN HEAD_request = FALSE;
 PUBLIC BOOLEAN scan_for_buried_news_references = TRUE;
 PUBLIC BOOLEAN LYRawMode;
 PUBLIC BOOLEAN LYDefaultRawMode;
 PUBLIC BOOLEAN LYUseDefaultRawMode = TRUE;
+#ifdef EXP_CHARTRANS
+PUBLIC char *UCAssume_MIMEcharset = NULL;
+PUBLIC char *UCAssume_localMIMEcharset = NULL;
+PUBLIC char *UCAssume_unrecMIMEcharset = NULL;
+#endif /* EXP_CHARTRANS */
 PUBLIC int LYlines = 24;
 PUBLIC int LYcols = 80;
 PUBLIC linkstruct links[MAXLINKS];
@@ -293,6 +309,7 @@ PUBLIC int AlertSecs;	/* Seconds to sleep() for HTAlert() messages   */
 PUBLIC BOOLEAN bookmark_start = FALSE;
 PUBLIC char *LYUserAgent = NULL;	/* Lynx User-Agent header          */
 PUBLIC char *LYUserAgentDefault = NULL;	/* Lynx default User-Agent header  */
+PUBLIC BOOLEAN LYUseMouse = FALSE;
 PUBLIC BOOLEAN LYNoRefererHeader=FALSE;	/* Never send Referer header?      */
 PUBLIC BOOLEAN LYNoRefererForThis=FALSE;/* No Referer header for this URL? */
 PUBLIC BOOLEAN LYNoFromHeader = TRUE;	/* Never send From header?         */
@@ -321,8 +338,6 @@ PUBLIC FILE *logfile = NULL;	   /* for WAIS log file output  in libWWW */
 extern BOOL reloading;	    /* For Flushing Cache on Proxy Server (HTTP.c)  */
 extern int HTNewsChunkSize; /* Number of news articles per chunk (HTNews.c) */
 extern int HTNewsMaxChunk;  /* Max news articles before chunking (HTNews.c) */
-
-extern int mainloop NOPARAMS;
 
 PRIVATE BOOLEAN anon_restrictions_set = FALSE;
 PRIVATE BOOLEAN stack_dump = FALSE;
@@ -386,6 +401,7 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(pref_charset);
     FREE(LynxSigFile);
     FREE(system_mail);
+    FREE(system_mail_flags);
     FREE(LYUserAgent);
     FREE(LYUserAgentDefault);
     FREE(LYHostName);
@@ -432,6 +448,34 @@ PUBLIC int main ARGS2(
     char *cp;
     FILE *fp;
     char filename[256];
+
+#ifdef _WINDOWS 
+WSADATA WSAData;
+ {
+                int err;
+                WORD wVerReq;
+
+                _fmode = O_BINARY;
+
+                wVerReq = MAKEWORD(1,1);
+
+                err = WSAStartup(wVerReq, &WSAData);
+                if (err != 0)
+                {
+                        printf("No Winsock found, sorry.");
+                        sleep(5);
+                        return;
+                }
+ }
+#endif /* _WINDOWS */
+
+#ifdef DJGPP
+        sock_init();
+#endif
+
+#ifdef DOSPATH
+	 terminal = "vt100";
+#endif
 
     /*
      *  Set up the argument list.
@@ -530,6 +574,14 @@ PUBLIC int main ARGS2(
     StrAllocCopy(language, PREFERRED_LANGUAGE);
     StrAllocCopy(pref_charset, PREFERRED_CHARSET);
     StrAllocCopy(system_mail, SYSTEM_MAIL);
+    StrAllocCopy(system_mail_flags, SYSTEM_MAIL_FLAGS);
+#ifdef DOSPATH
+       if ((cp = getenv("TEMP")) != NULL)
+                StrAllocCopy(lynx_temp_space, cp);
+       else if ((cp = getenv("TMP")) != NULL)
+                StrAllocCopy(lynx_temp_space, cp);
+       else
+#endif
     if ((cp = getenv("LYNX_TEMP_SPACE")) != NULL)
         StrAllocCopy(lynx_temp_space, cp);
     else
@@ -539,11 +591,15 @@ PUBLIC int main ARGS2(
 	StrAllocCopy(temp, lynx_temp_space);
 	if (((len = strlen(temp)) > 0) && temp[len-1] == '/')
 	    temp[len-1] = '\0';
+#ifdef DOSPATH
+	StrAllocCat(temp, HTDOS_wwwName((char *)Home_Dir()));
+#else
 #ifdef VMS
 	StrAllocCat(temp, HTVMS_wwwName((char *)Home_Dir()));
 #else
 	StrAllocCat(temp, Home_Dir());
 #endif /* VMS */
+#endif /* DOSPATH */
 	StrAllocCat(temp, cp);
 	StrAllocCopy(lynx_temp_space, temp);
 	FREE(temp);
@@ -583,7 +639,6 @@ PUBLIC int main ARGS2(
     }
 #else
     {
-        len;
 	if (((len = strlen(lynx_temp_space)) > 1) &&
 	    lynx_temp_space[len-1] != '/') {
 	    StrAllocCat(lynx_temp_space, "/");
@@ -665,15 +720,15 @@ PUBLIC int main ARGS2(
      *  set the default restrictions for that account NOW. - FM
      */
     if (!anon_restrictions_set && strlen((char *)ANONYMOUS_USER) > 0 &&
-#ifdef VMS
+#if defined (VMS) || defined (NOUSERS)
 	!strcasecomp(((char *)getenv("USER")==NULL ? " " : getenv("USER")),
 		     ANONYMOUS_USER)) {
 #else
-#ifdef NO_CUSERID
-        STREQ(((char *)getlogin()==NULL ? " " : getlogin()), ANONYMOUS_USER)) {
-#else
+#if HAVE_CUSERID
         STREQ((char *)cuserid((char *) NULL), ANONYMOUS_USER)) {
-#endif /* NO_CUSERID */
+#else
+        STREQ(((char *)getlogin()==NULL ? " " : getlogin()), ANONYMOUS_USER)) {
+#endif /* HAVE_CUSERID */
 #endif /* VMS */
 	parse_restrictions("default");
 	anon_restrictions_set = TRUE;
@@ -702,20 +757,26 @@ PUBLIC int main ARGS2(
     /*
      *  Convert a '~' in the configuration file path to $HOME.
      */
+#ifndef _WINDOWS /* avoid the whole ~ thing for now */
     if ((cp = strchr(lynx_cfg_file, '~'))) {
 	*(cp++) = '\0';
 	StrAllocCopy(temp, lynx_cfg_file);
 	if (((len = strlen(temp)) > 0) && temp[len-1] == '/')
 	    temp[len-1] = '\0';
+#ifdef DOSPATH
+	StrAllocCat(temp, HTDOS_wwwName((char *)Home_Dir()));
+#else
 #ifdef VMS
 	StrAllocCat(temp, HTVMS_wwwName((char *)Home_Dir()));
 #else
 	StrAllocCat(temp, Home_Dir());
 #endif /* VMS */
+#endif /* DOSPATH */
 	StrAllocCat(temp, cp);
 	StrAllocCopy(lynx_cfg_file, temp);
 	FREE(temp);
     }
+#endif /* _WINDOWS */
 
     /*
      *  If the configuration file is not available,
@@ -728,6 +789,17 @@ PUBLIC int main ARGS2(
     }
     fclose(fp);
 
+#ifdef EXP_CHARTRANS
+    /*
+     * Make sure we have the character sets declared.
+     * This will initialize the CHARTRANS handling. - kw
+     */
+    if (!LYCharSetsDeclared()) {
+        fprintf(stderr, "\nLynx character sets not declared.\n\n");
+	exit(-1);
+    }
+#endif /* EXP_CHARTRANS */
+
     /*
      *  Make sure we have the edit map declared. - FM
      */
@@ -736,7 +808,7 @@ PUBLIC int main ARGS2(
 	exit(-1);
     }
 
-#ifdef USE_SLANG
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
     /*
      *  Set up default foreground and background colors.
      */
@@ -785,11 +857,15 @@ PUBLIC int main ARGS2(
 	    StrAllocCopy(temp, lynx_save_space);
 	    if (((len = strlen(temp)) > 0) && temp[len-1] == '/')
 	        temp[len-1] = '\0';
+#ifdef DOSPATH
+	StrAllocCat(temp, HTDOS_wwwName((char *)Home_Dir()));
+#else
 #ifdef VMS
 	    StrAllocCat(temp, HTVMS_wwwName((char *)Home_Dir()));
 #else
 	    StrAllocCat(temp, Home_Dir());
 #endif /* VMS */
+#endif /* DOSPATH */
 	    StrAllocCat(temp, cp);
 	    StrAllocCopy(lynx_save_space, temp);
 	    FREE(temp);
@@ -875,10 +951,10 @@ PUBLIC int main ARGS2(
      */
     if (argc == 2 && strcmp(argv[1], "-") == 0) {
 	char buf[1025];
-	char *argv[2];
+	char *my_args[2];
  
-	argv[0] = buf;
-	argv[1] = NULL;
+	my_args[0] = buf;
+	my_args[1] = NULL;
  
 	while (fgets(buf, sizeof(buf) - 1, stdin)) {
 	    int j;
@@ -887,7 +963,7 @@ PUBLIC int main ARGS2(
 		(buf[j] == CR || buf[j] == LF); j--) {
 		buf[j] = '\0';
 	    }
-	    parse_arg(argv, NULL, -1);
+	    parse_arg(my_args, NULL, -1);
 	}
     } else {
 	for (i = 1; i < argc; i++) {
@@ -960,7 +1036,9 @@ PUBLIC int main ARGS2(
 
     /* trap interrupts */    
     if (!dump_output_immediately)
+#ifndef NOSIGHUP
         (void) signal(SIGHUP, cleanup_sig);
+#endif /* NOSIGHUP */
     (void) signal(SIGTERM, cleanup_sig);
 #ifdef SIGWINCH
     (void) signal(SIGWINCH, size_change);
@@ -969,7 +1047,9 @@ PUBLIC int main ARGS2(
     if (!TRACE && !dump_output_immediately && !stack_dump) {
         (void) signal(SIGINT, cleanup_sig);
 #ifndef __linux__
+#ifndef DOSPATH
         (void) signal(SIGBUS, FatalProblem);
+#endif /* DOSPATH */
 #endif /* !__linux__ */
         (void) signal(SIGSEGV, FatalProblem);
         (void) signal(SIGILL, FatalProblem);
@@ -982,7 +1062,9 @@ PUBLIC int main ARGS2(
 	 *  So the runaway CPU time problem on Unix should not occur any
 	 *   more.
 	 */
+#ifndef DOSPATH
         (void) signal(SIGPIPE, SIG_IGN);
+#endif /* DOSPATH */
     }
 #endif /* !VMS */
 
@@ -1025,7 +1107,7 @@ PUBLIC int main ARGS2(
      *  Set up the inside/outside domain restriction flags. - FM
      */
     if (inlocaldomain()) {
-#if defined(NO_UTMP) || defined(VMS) /* not selective */
+#if !defined(HAVE_UTMP) || defined(VMS) /* not selective */
         telnet_ok = !no_inside_telnet && !no_outside_telnet && telnet_ok;
 	news_ok = !no_inside_news && !no_outside_news && news_ok;
 	ftp_ok = !no_inside_ftp && !no_outside_ftp && ftp_ok;
@@ -1037,7 +1119,7 @@ PUBLIC int main ARGS2(
 	news_ok = !no_inside_news && news_ok;
 	ftp_ok = !no_inside_ftp && ftp_ok;
 	rlogin_ok = !no_inside_rlogin && rlogin_ok;
-#endif /* NO_UTMP || VMS */
+#endif /* !HAVE_UTMP || VMS */
     } else {
 	if (TRACE)
 	   fprintf(stderr,"LYMain.c: User in REMOTE domain\n");
@@ -1062,7 +1144,9 @@ PUBLIC int main ARGS2(
         fprintf(stderr,
  "The '-head' switch is for http HEAD requests and cannot be used for\n'%s'.\n",
 		startfile);
+#ifndef NOSIGHUP
         (void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
         (void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
         (void) signal(SIGINT, SIG_DFL);
@@ -1081,7 +1165,9 @@ PUBLIC int main ARGS2(
         fprintf(stderr,
  "The '-mime_header' switch is for http URLs and cannot be used for\n'%s'.\n",
 		startfile);
+#ifndef NOSIGHUP
         (void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
         (void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
         (void) signal(SIGINT, SIG_DFL);
@@ -1100,7 +1186,9 @@ PUBLIC int main ARGS2(
         fprintf(stderr,
  "The '-traversal' switch is for http URLs and cannot be used for\n'%s'.\n",
 		startfile);
+#ifndef NOSIGHUP
         (void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
         (void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
         (void) signal(SIGINT, SIG_DFL);
@@ -1161,7 +1249,9 @@ PUBLIC int main ARGS2(
 	status = mainloop();
         if (!nolist && keypad_mode == LINKS_ARE_NUMBERED)
 	    printlist(stdout,FALSE);
+#ifndef NOSIGHUP
         (void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
         (void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
         (void) signal(SIGINT, SIG_DFL);
@@ -1274,6 +1364,44 @@ PRIVATE void parse_arg ARGS3(
 	if (!anon_restrictions_set)
 	    parse_restrictions("default");
 	    anon_restrictions_set = TRUE;
+
+#ifdef EXP_CHARTRANS
+    } else if ((strncmp(argv[0], "-assume_charset", 15) == 0) ||
+	       (strncmp(argv[0], "-assume_local_charset", 21) == 0) ||
+	       (strncmp(argv[0], "-assume_unrec_charset", 21) == 0)) {
+	BOOL local_flag = (argv[0][8] == 'l');
+	BOOL unrec_flag = (argv[0][8] == 'u');
+	if (nextarg) {
+	    int j;
+	    for (j = 0; cp[j]; j++)
+	        cp[j] = TOLOWER(cp[j]);
+	    if (local_flag) {
+		StrAllocCopy(UCAssume_localMIMEcharset, cp);
+		if (UCAssume_localMIMEcharset && *UCAssume_localMIMEcharset)
+		    UCLYhndl_HTFile_for_unspec =
+			UCGetLYhndl_byMIME(UCAssume_localMIMEcharset);
+	    } else if (unrec_flag) {
+		StrAllocCopy(UCAssume_unrecMIMEcharset, cp);
+		if (UCAssume_unrecMIMEcharset && *UCAssume_unrecMIMEcharset)
+		    UCLYhndl_for_unrec =
+			UCGetLYhndl_byMIME(UCAssume_unrecMIMEcharset);
+	    } else {
+		StrAllocCopy(UCAssume_MIMEcharset, cp);
+		if (UCAssume_MIMEcharset && *UCAssume_MIMEcharset)
+		    UCLYhndl_for_unspec =
+			UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
+	    }
+	} else {
+	    if (local_flag)
+		UCLYhndl_HTFile_for_unspec = 0;
+	    else if (unrec_flag)
+		UCLYhndl_for_unrec = 0;
+	    else
+		UCLYhndl_for_unspec = 0;
+	}
+
+
+#endif
 
     } else if (strncmp(argv[0], "-auth", 5) == 0) {
         /*
@@ -1789,7 +1917,7 @@ PRIVATE void parse_arg ARGS3(
    file_url        disallow using G)oto, served links or bookmarks for\n\
                    file: URL's\n\
    goto            disable the 'g' (goto) command\n");
-#if defined(NO_UTMP) || defined(VMS) /* not selective */
+#if !defined(HAVE_UTMP) || defined(VMS) /* not selective */
 	        printf("\
    inside_ftp      disallow ftps for people coming from inside your\n\
                    domain (utmp required for selectivity)\n\
@@ -1806,14 +1934,14 @@ PRIVATE void parse_arg ARGS3(
                    your domain\n\
    inside_rlogin   disallow rlogins for people coming from inside your domain\n\
    inside_telnet   disallow telnets for people coming from inside your domain\n");
-#endif /* NO_UTMP || VMS */
+#endif /* HAVE_UTMP || VMS */
 	        printf("\
    jump            disable the 'j' (jump) command\n\
    mail            disallow mail\n\
    multibook       disallow multiple bookmark files\n\
    news_post       disallow USENET News posting.\n\
    option_save     disallow saving options in .lynxrc\n");
-#if defined(NO_UTMP) || defined(VMS) /* not selective */
+#if !defined(HAVE_UTMP) || defined(VMS) /* not selective */
 	        printf("\
    outside_ftp     disallow ftps for people coming from outside your\n\
                    domain (utmp required for selectivity)\n\
@@ -1830,7 +1958,7 @@ PRIVATE void parse_arg ARGS3(
                    your domain\n\
    outside_rlogin  disallow rlogins for people coming from outside your domain\n\
    outside_telnet  disallow telnets for people coming from outside your domain\n");
-#endif /* NO_UTMP || VMS */
+#endif /* !HAVE_UTMP || VMS */
 		printf("\
    print           disallow most print options\n\
    shell           disallow shell escapes, and lynxexec, lynxprog or lynxcgi\n\
@@ -1927,6 +2055,10 @@ PRIVATE void parse_arg ARGS3(
 	else
 	    use_underscore = TRUE;
 
+#ifdef NCURSES_MOUSE_VERSION
+    } else if (strncmp(argv[0], "-use_mouse", 9) == 0) {
+        LYUseMouse = TRUE;
+#endif
     } else {
         goto Output_Error_and_Help_List;
     }
@@ -1976,6 +2108,11 @@ Output_Help_List:
     printf("    -                receive the arguments from stdin (enclose\n");
     printf("                     in double-quotes (\"-\") on VMS)\n");
     printf("    -anonymous       used to specify the anonymous account\n");
+#ifdef EXP_CHARTRANS
+    printf("    -assume_charset  charset for documents that don't specify it\n");
+    printf("    -assume_local_charset  charset assumed for local files\n");
+    printf("    -assume_unrec_charset  use this instead of unrecognized charsets\n");
+#endif /* EXP_CHARTRANS */
     printf("    -auth=id:pw      authentication information for protected forms\n");
     printf("    -base            prepend a request URL comment and BASE tag to text/html\n");
     printf("                     outputs for -source or -mime_header dumps\n");
@@ -2070,6 +2207,9 @@ Output_Help_List:
     printf("    -trace           turns on WWW trace mode\n");
     printf("    -traversal       traverse all http links derived from startfile\n");
     printf("    -underscore      toggles use of _underline_ format in dumps\n");
+#ifdef NCURSES_MOUSE_VERSION
+    printf("    -use_mouse       enable use of the mouse\n");
+#endif
     printf("    -validate        accept only http URLs (for validation)\n");
     printf("    -version         print Lynx version information\n");
     printf("    -vikeys          enable vi-like key movement\n");
@@ -2088,11 +2228,15 @@ PRIVATE void FatalProblem ARGS1(
     /*
      *  Ignore further interrupts. - mhc: 11/2/91
      */
-    (void) signal (SIGHUP, SIG_IGN);
+#ifndef NOSIGHUP
+				(void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
     (void) signal (SIGTERM, SIG_IGN);
     (void) signal (SIGINT, SIG_IGN);
 #ifndef __linux__
+#ifndef DOSPATH
     (void) signal(SIGBUS, SIG_IGN);
+#endif /* ! DOSPATH */
 #endif /* !__linux__ */
     (void) signal(SIGSEGV, SIG_IGN);
     (void) signal(SIGILL, SIG_IGN);
@@ -2111,7 +2255,9 @@ PRIVATE void FatalProblem ARGS1(
     }
     cleanup_sig(0);
 #ifndef __linux__
+#ifndef DOSPATH
     signal(SIGBUS, SIG_DFL);
+#endif /* DOSPATH */
 #endif /* !__linux__ */
     signal(SIGSEGV, SIG_DFL);
     signal(SIGILL, SIG_DFL);

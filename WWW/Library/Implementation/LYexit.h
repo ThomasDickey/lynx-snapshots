@@ -25,6 +25,10 @@
 /*
  *	Constant defines
  */
+#ifdef _WINDOWS
+#undef exit
+#endif /* _WINDOWS */
+
 #define exit LYexit
 #define atexit LYatexit
 #define ATEXITSIZE 32
@@ -46,7 +50,7 @@
  */
 extern void LYexit PARAMS((int status));
 #ifdef __STDC__
-extern int LYatexit(void (*function)());
+extern int LYatexit(void (*function)(void));
 #else
 extern int LYatexit();
 #endif /* __STDC__ */

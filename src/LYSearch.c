@@ -17,7 +17,7 @@
  * in not found do not reset cur and return false.
  */
 
-PUBLIC int check_for_target_in_links ARGS2(int *,cur, char *,new_target)
+PRIVATE int check_for_target_in_links ARGS2(int *,cur, char *,new_target)
 {
     int i = *cur+1;
 

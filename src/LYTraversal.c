@@ -3,12 +3,12 @@
 #include "LYGlobalDefs.h"
 #include "LYUtils.h"
 #include "LYSignal.h"
+#include "LYTraversal.h"
 
 #include "LYexit.h"
 #include "LYLeaks.h"
 
 /* routines to handle special traversal feature */
-extern char *HText_getTitle();
 
 PUBLIC BOOLEAN lookup ARGS1(char *,target)
 {
@@ -18,7 +18,9 @@ PUBLIC BOOLEAN lookup ARGS1(char *,target)
     if ((ifp = fopen(TRAVERSE_FILE,"r")) == NULL) {
         if ((ifp = fopen(TRAVERSE_FILE,"w")) == NULL) {
             perror("unable to open or create a traversal file");
+#ifndef NOSIGHUP
 	    (void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
 	    (void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
 	    (void) signal(SIGINT, SIG_DFL);
@@ -54,7 +56,9 @@ PUBLIC void add_to_table ARGS1(char *,target)
 
     if ((ifp = fopen(TRAVERSE_FILE,"a+")) == NULL) {
 	perror("unable to open traversal file");
+#ifndef NOSIGHUP
 	(void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
 	(void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
 	(void) signal(SIGINT, SIG_DFL);
@@ -78,7 +82,9 @@ PUBLIC void add_to_traverse_list ARGS2(char *,fname, char *,prev_link_name)
 
     if ((ifp = fopen(TRAVERSE_FOUND_FILE,"a+")) == NULL) {
 	perror("unable to open traversal found file");
+#ifndef NOSIGHUP
 	(void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
 	(void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
 	(void) signal(SIGINT, SIG_DFL);
@@ -125,7 +131,9 @@ PUBLIC void add_to_reject_list ARGS1(char *,target)
 
     if ((ifp = fopen(TRAVERSE_REJECT_FILE,"a+")) == NULL) {
 	perror("unable to open reject file");
+#ifndef NOSIGHUP
 	(void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
 	(void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
 	(void) signal(SIGINT, SIG_DFL);

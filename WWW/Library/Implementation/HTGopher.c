@@ -761,7 +761,7 @@ PRIVATE int interpret_cso_key ARGS5(
 {
     CSOfield_info *fld;
 
-    if (fld = ctx->fld) {
+    if ((fld = ctx->fld) != 0) {
 	/*
 	**  Most substitutions only recognized inside of loops.
 	*/
@@ -937,8 +937,8 @@ PRIVATE int parse_cso_fields ARGS2(
 {
     char ch;
     char *p = buf;
-    int i, code, prev_code, alen;
-    char *index, *name;
+    int i, code = 0, prev_code, alen;
+    char *indx, *name;
     CSOfield_info *last, *new;
     extern int interrupted_in_htgetcharacter;
     
@@ -1004,14 +1004,14 @@ PRIVATE int parse_cso_fields ARGS2(
 	    /*
 	    **  Parse fields within returned line into status, ndx, name, data.
 	    */
-	    index = NULL;
+	    indx = NULL;
 	    name = NULL;
 	    for (i = 0; p[i]; i++)
 	        if (p[i] == ':' ) {
 		    p[i] = '\0';
-		    if (!index) {
-		        index = (char *)&p[i+1];
-			code = atoi (index);
+		    if (!indx) {
+		        indx = (char *)&p[i+1];
+			code = atoi (indx);
 		    } else if (!name) {
 		        name = (char *)&p[i+1];
 		    } else {
@@ -1073,7 +1073,7 @@ PRIVATE int parse_cso_fields ARGS2(
 		        strcpy((char *)&new->attributes[alen-2], " ");
 		        new->description = new->desc_buf; 
 		        new->desc_buf[0] = '\0';
-		        new->id = atoi(index);
+		        new->id = atoi(indx);
 		        /*
 		        **  Scan for keywords.
 		        */

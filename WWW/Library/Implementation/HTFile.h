@@ -127,7 +127,8 @@ extern HTFormat HTFileFormat PARAMS((
 */
 extern HTFormat HTCharsetFormat PARAMS((
 	HTFormat		format,
-	HTParentAnchor *	anchor));
+	HTParentAnchor *	anchor,
+	int			default_LYhndl));
 
 /*
 **  Determine file value from file name.

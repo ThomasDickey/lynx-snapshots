@@ -25,6 +25,13 @@
 /* #define NO_PARENT_DIR_REFERENCE */ /* Define this for no parent links */
 #endif /* !VMS */
 
+#ifdef DOSPATH
+#define GOT_READ_DIR
+#include <dirent.h>
+#define USE_DIRENT
+#include "HTDOS.h"
+#endif
+
 #include "HTUtils.h"
 #include "tcp.h"
 #include "HTFile.h"		/* Implemented here */
@@ -63,6 +70,11 @@
 #include "HTBTree.h"
 #include "HTAlert.h"
 #include "HTCJK.h"
+#ifdef EXP_CHARTRANS
+#include "UCDefs.h"
+#include "UCMap.h"
+#include "UCAux.h"
+#endif /* EXP_CHARTRANS */
 
 #include "LYexit.h"
 #include "LYLeaks.h"
@@ -81,13 +93,6 @@ typedef struct _HTSuffix {
 #define NGROUPS 32
 #endif /* NGROUPS_MAX */
 #endif /* NGROUPS */
-
-
-#ifdef USE_DIRENT		/* Set this for Sys V systems */
-#define STRUCT_DIRENT struct dirent
-#else
-#define STRUCT_DIRENT struct direct
-#endif /* USE_DIRENT */
 
 #include "HTML.h"		/* For directory object building */
 
@@ -120,6 +125,9 @@ extern int current_char_set;
 extern char *LYchar_set_names[];
 extern BOOL HTPassEightBitRaw;
 extern HTCJKlang HTCJK;
+#ifndef EXP_CHARTRANS
+#define UCLYhndl_HTFile_for_unspec 0 /* a dummy define */
+#endif
 
 PRIVATE char *HTMountRoot = "/Net/";		/* Where to find mounts */
 #ifdef VMS
@@ -136,6 +144,14 @@ PRIVATE char *HTCacheRoot = "/tmp/W3_Cache_";	/* Where to cache things */
 PRIVATE HTList * HTSuffixes = 0;
 PRIVATE HTSuffix no_suffix = { "*", NULL, NULL, 1.0 };
 PRIVATE HTSuffix unknown_suffix = { "*.*", NULL, NULL, 1.0};
+
+
+#ifdef _WINDOWS
+int exists(char *filename)
+{
+ return (access(filename,0)==0);
+}
+#endif
 
 
 /*	To free up the suffixes at program exit.
@@ -535,7 +551,11 @@ PUBLIC char * HTLocalName ARGS1(
 	    FREE(host);
 	    if (TRACE)
 	        fprintf(stderr, "Node `%s' means path `%s'\n", name, path);
+#ifdef DOSPATH
+		 return(HTDOS_name(path));
+#else
 	    return(path);
+#endif /* DOSPATH */
 	} else {
 	    char * result = (char *)malloc(
 	    			strlen("/Net/")+strlen(host)+strlen(path)+1);
@@ -606,6 +626,7 @@ PUBLIC char * WWW_nameOfFile ARGS1(
     }
     if (TRACE)
         fprintf(stderr, "File `%s'\n\tmeans node `%s'\n", name, result);
+
     return result;
 }
 
@@ -744,12 +765,15 @@ PUBLIC HTFormat HTFileFormat ARGS2(
 **	indicated, sets Lynx up for proper handling in relation
 **	to the currently selected character set. - FM
 */
-PUBLIC HTFormat HTCharsetFormat ARGS2(
+PUBLIC HTFormat HTCharsetFormat ARGS3(
 	HTFormat,		format,
-	HTParentAnchor *,	anchor)
+	HTParentAnchor *,	anchor,
+	int,			default_LYhndl)
 
 {
-    char *cp = NULL, *cp1, *cp2;
+    char *cp = NULL, *cp1, *cp2, *cp3 = NULL, *cp4;
+    BOOL chartrans_ok = FALSE;
+    int chndl = -1;
     int i;
 
     FREE(anchor->charset);
@@ -765,6 +789,84 @@ PUBLIC HTFormat HTCharsetFormat ARGS2(
 	cp2 += 7;
 	while (*cp2 == ' ' || *cp2 == '=')
 	    cp2++;
+#ifdef EXP_CHARTRANS
+			    StrAllocCopy(cp3, cp2); /* copy to mutilate more */
+			    for (cp4=cp3; (*cp4 != '\0' && *cp4 != '"' &&
+					   *cp4 != ';'  && *cp4 != ':' &&
+					   !WHITE(*cp4));	cp4++)
+				/* nothing */ ;
+			    *cp4 = '\0';
+			    cp4 = cp3;
+			    chndl = UCGetLYhndl_byMIME(cp3);
+			    if (chndl < 0) {
+				if (0==strcmp(cp4, "cn-big5")) {
+				    cp4 += 3;
+				    chndl = UCGetLYhndl_byMIME(cp4);
+				}
+				else if (0==strncmp(cp4, "cn-gb", 5)) {
+				    StrAllocCopy(cp3, "gb2312");
+				    cp4 = cp3;
+				    chndl = UCGetLYhndl_byMIME(cp4);
+				}
+			    }
+			    if (UCCanTranslateFromTo(chndl, current_char_set))
+			    {
+				chartrans_ok = YES;
+				*cp1 = '\0';
+				format = HTAtom_for(cp);
+				StrAllocCopy(anchor->charset, cp4);
+				HTAnchor_setUCInfoStage(anchor, chndl,
+				   UCT_STAGE_MIME, UCT_SETBY_MIME);
+			    }
+			    else if (chndl < 0)	{/* got something but we don't
+						 recognize it */
+				chndl = UCLYhndl_for_unrec;
+				if (UCCanTranslateFromTo(chndl,
+							 current_char_set))
+				{
+				    chartrans_ok = YES;
+				    HTAnchor_setUCInfoStage(anchor, chndl,
+				       UCT_STAGE_MIME, UCT_SETBY_DEFAULT);
+				}
+			    }
+			    FREE(cp3);
+			    if (chartrans_ok) {
+				LYUCcharset * p_in =
+				    HTAnchor_getUCInfoStage(anchor,
+							     UCT_STAGE_MIME);
+				LYUCcharset * p_out =
+				    HTAnchor_setUCInfoStage(anchor,
+							    current_char_set,
+					 UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
+				if (!p_out) /* try again */
+				    p_out =
+				      HTAnchor_getUCInfoStage(anchor,
+							     UCT_STAGE_HTEXT);
+
+				if (0==strcmp(p_in->MIMEname,"x-transparent"))
+				{
+				    HTPassEightBitRaw = TRUE;
+				    HTAnchor_setUCInfoStage(anchor,
+				       HTAnchor_getUCLYhndl(anchor,
+							    UCT_STAGE_HTEXT),
+				       UCT_STAGE_MIME, UCT_SETBY_DEFAULT);
+				}
+				if (0==strcmp(p_out->MIMEname,"x-transparent"))
+				{
+				    HTPassEightBitRaw = TRUE;
+				    HTAnchor_setUCInfoStage(anchor,
+				       HTAnchor_getUCLYhndl(anchor,
+							    UCT_STAGE_MIME),
+				       UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
+				}
+				if (!(p_in->enc & UCT_ENC_CJK) &&
+				    (p_in->codepoints & UCT_CP_SUBSETOF_LAT1)){
+				    HTCJK = NOCJK;
+				} else if (chndl == current_char_set) {
+				HTPassEightBitRaw = TRUE;
+				}
+			} else  /* Fall through to old behavior */
+#endif /* EXP_CHARTRANS */
 	if (!strncmp(cp2, "us-ascii", 8) ||
 	    !strncmp(cp2, "iso-8859-1", 10)) {
 	    *cp1 = '\0';
@@ -853,6 +955,16 @@ PUBLIC HTFormat HTCharsetFormat ARGS2(
     }
     FREE(cp);
 
+#ifdef EXP_CHARTRANS
+    if (!chartrans_ok && !anchor->charset && default_LYhndl >= 0) {
+	HTAnchor_setUCInfoStage(anchor, default_LYhndl,
+				UCT_STAGE_MIME, UCT_SETBY_DEFAULT);
+    }
+    HTAnchor_copyUCInfoStage(anchor,
+			    UCT_STAGE_PARSER, UCT_STAGE_MIME,
+			    -1);
+#endif
+
     return format;
 }
 
@@ -904,6 +1016,9 @@ PUBLIC float HTFileValue ARGS1(
 #define NO_GROUPS
 #endif /* NO_UNIX_IO */
 #ifdef PCNFS
+#define NO_GROUPS
+#endif /* PCNFS */
+#ifdef NOUSERS
 #define NO_GROUPS
 #endif /* PCNFS */
 
@@ -1033,7 +1148,7 @@ PUBLIC void HTDirEntry ARGS3(
 **	------------------------------
 **
 **    This gives the TITLE and H1 header, and also a link
-/**    to the parent directory if appropriate.
+**    to the parent directory if appropriate.
 **
 **  On exit:
 **	Returns TRUE if an "Up to <parent>" link was not created
@@ -1054,6 +1169,10 @@ PUBLIC BOOL HTDirTitles ARGS3(
     BOOL need_parent_link = FALSE;
     int i;
 
+#ifdef DOSPATH
+	 BOOL local_link = FALSE;
+	 if (logical[18] == ':') local_link = TRUE;
+#endif
     /*
     **  Check tildeIsTop for treating home directory as Welcome
     **  (assume the tilde is not followed by a username). - FM
@@ -1160,8 +1279,19 @@ PUBLIC BOOL HTDirTitles ARGS3(
 	relative = (char*) malloc(strlen(current) + 4);
 	if (relative == NULL)
 	    outofmem(__FILE__, "HTDirTitles");
+
 	sprintf(relative, "%s/..", current);
-#ifndef VMS
+
+#ifdef DOSPATH
+		if(local_link)
+	  if (strlen(parent) == 3 )
+		StrAllocCat(relative, "/.");
+#endif
+
+#if !defined (VMS)
+#ifdef DOSPATH
+	if(!local_link)
+#endif
 	{
 	    /*
 	    **  On Unix, if it's not ftp and the directory cannot
@@ -1324,7 +1454,7 @@ PUBLIC int HTLoadFile ARGS4(
     **  using that, Lynx users should make the current character
     **  set "ISO Latin 1" so that 8-bit characters are passed raw.
     */
-    format = HTCharsetFormat(format, anchor);
+    format = HTCharsetFormat(format, anchor, UCLYhndl_HTFile_for_unspec);
 
 #ifdef VMS
     /*
@@ -1424,7 +1554,8 @@ PUBLIC int HTLoadFile ARGS4(
 		    cp[len - 2] = '\0';
 		    format = HTFileFormat(cp, &encoding);
 		    FREE(cp);
-		    format = HTCharsetFormat(format, anchor);
+		    format = HTCharsetFormat(format, anchor,
+					     UCLYhndl_HTFile_for_unspec);
 		    StrAllocCopy(anchor->content_type, format->name);
 		    StrAllocCopy(anchor->content_encoding, "x-compress");
 		    format = HTAtom_for("www/compressed");
@@ -1437,7 +1568,8 @@ PUBLIC int HTLoadFile ARGS4(
 			cp[len - 3] = '\0';
 			format = HTFileFormat(cp, &encoding);
 			FREE(cp);
-			format = HTCharsetFormat(format, anchor);
+			format = HTCharsetFormat(format, anchor,
+						 UCLYhndl_HTFile_for_unspec);
 			StrAllocCopy(anchor->content_type, format->name);
 			StrAllocCopy(anchor->content_encoding, "x-gzip");
 			format = HTAtom_for("www/compressed");
@@ -1511,9 +1643,10 @@ forget_multi:
 		/*
 		**  While there are directory entries to be read...
 		*/
+#ifndef DOSPATH
 		if (dirbuf->d_ino == 0)
 		    continue;	/* if the entry is not being used, skip it */
-
+#endif
 		if ((int)strlen(dirbuf->d_name) > baselen &&     /* Match? */
 		    !strncmp(dirbuf->d_name, base, baselen)) {	
 		    HTFormat rep = HTFileFormat(dirbuf->d_name, &encoding);
@@ -1561,13 +1694,21 @@ forget_multi:
 	**  will hold the directory entry, and a type 'DIR' which is used
 	**  to point to the current directory being read.
 	*/
+#ifdef _WINDOWS
+	if (!exists(localname)) {
+#else
 	if (stat(localname,&dir_info) == -1) {     /* get file information */
+#endif
 	                               /* if can't read file information */
 	    if (TRACE)
 	        fprintf(stderr, "HTLoadFile: can't stat %s\n", localname);
 
 	}  else {		/* Stat was OK */
 		
+#ifdef _WINDOWS
+	if (stat(localname,&dir_info) == -1) dir_info.st_mode = S_IFDIR;
+#endif
+
 	    if (((dir_info.st_mode) & S_IFMT) == S_IFDIR) {
 		/*
 		**  If localname is a directory.
@@ -1637,7 +1778,15 @@ forget_multi:
         	    StrAllocCopy(tail, p+1); /* take slash off the beginning */
     		}
     		FREE(pathname);
-		
+
+#ifdef EXP_CHARTRANS
+		if (UCLYhndl_HTFile_for_unspec >= 0) {
+		    HTAnchor_setUCInfoStage(anchor,
+					    UCLYhndl_HTFile_for_unspec,
+					    UCT_STAGE_PARSER,
+					    UCT_SETBY_DEFAULT);
+		}
+#endif		
 		target = HTML_new(anchor, format_out, sink);
 		targetClass = *target->isa;	/* Copy routine entry points */
 		    
@@ -1673,12 +1822,13 @@ forget_multi:
 		        char * dirname = NULL;
 			extern BOOLEAN no_dotfiles, show_dotfiles;
 
+#ifndef DOSPATH
 		        if (dirbuf->d_ino == 0)
 			    /*
 			    **  If the entry is not being used, skip it.
 			    */
 			    continue;
-
+#endif
 			/*
 			**  Skip self, parent if handled in HTDirTitles()
 			**  or if NO_PARENT_DIR_REFERENCE is not defined,
@@ -1902,7 +2052,8 @@ open_file:
 			cp[len - 2] = '\0';
 			format = HTFileFormat(cp, &encoding);
 			FREE(cp);
-			format = HTCharsetFormat(format, anchor);
+			format = HTCharsetFormat(format, anchor,
+						 UCLYhndl_HTFile_for_unspec);
 			StrAllocCopy(anchor->content_type, format->name);
 			StrAllocCopy(anchor->content_encoding, "x-compress");
 			format = HTAtom_for("www/compressed");
@@ -1914,7 +2065,8 @@ open_file:
 			cp[len - 3] = '\0';
 			format = HTFileFormat(cp, &encoding);
 			FREE(cp);
-			format = HTCharsetFormat(format, anchor);
+			format = HTCharsetFormat(format, anchor,
+						 UCLYhndl_HTFile_for_unspec);
 			StrAllocCopy(anchor->content_type, format->name);
 			StrAllocCopy(anchor->content_encoding, "x-gzip");
 			format = HTAtom_for("www/compressed");

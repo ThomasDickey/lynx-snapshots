@@ -63,7 +63,9 @@ PRIVATE void scan ARGS2(
 {
     char * after_access;
     char * p;
+#ifdef NOTDEFINED
     int length = strlen(name);
+#endif
     
     parts->access = NULL;
     parts->host = NULL;
