@@ -372,6 +372,9 @@
   -startfile_ok
        allow non-http startfile and homepage with -validate.
 
+  -tagsoup
+       initialize parser, using Tag Soup DTD rather than SortaSGML.
+
   -telnet
        disable recognition of telnet commands.
 

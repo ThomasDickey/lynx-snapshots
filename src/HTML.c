@@ -11,6 +11,8 @@
 **   Being Overidden
 **
 */
+#define DICKEY_TEST
+
 #include <HTUtils.h>
 #include <tcp.h>
 
@@ -63,6 +65,8 @@ char Style_className[16384];
 #include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
+
+#define STACKLEVEL(me) ((me->stack + MAX_NESTING - 1) - me->sp)
 
 extern BOOL HTPassEightBitRaw;
 extern HTCJKlang HTCJK;
@@ -5223,7 +5227,10 @@ PRIVATE void HTML_start_element ARGS6(
 
     } /* end switch */
 
-    if (HTML_dtd.tags[ElementNumber].contents != SGML_EMPTY) {
+#if defined(DICKEY_TEST)
+    if (HTML_dtd.tags[ElementNumber].contents != SGML_EMPTY)
+#endif
+    {
 	if (me->skip_stack > 0) {
 	    if (TRACE)
 		fprintf(stderr,
@@ -5247,16 +5254,16 @@ PRIVATE void HTML_start_element ARGS6(
 	    return;
 	}
 
+	if (TRACE)
+	    fprintf(stderr,"HTML:begin_element[%d]: adding style to stack - %s\n",
+	    						STACKLEVEL(me),
+							me->new_style->name);
 	(me->sp)--;
 	me->sp[0].style = me->new_style;	/* Stack new style */
 	me->sp[0].tag_number = ElementNumber;
-
-	if (TRACE)
-	    fprintf(stderr,"HTML:begin_element: adding style to stack - %s\n",
-							me->new_style->name);
     }
 
-#if defined(USE_COLOR_STYLE)
+#if defined(DICKEY_TEST) && defined(USE_COLOR_STYLE)
 /* end empty tags straight away */
 	if (HTML_dtd.tags[ElementNumber].contents == SGML_EMPTY)
 	{
@@ -5421,7 +5428,8 @@ PRIVATE void HTML_end_element ARGS3(
 	    (me->sp)++;
 	    if (TRACE)
 		fprintf(stderr,
-			"HTML:end_element: Popped style off stack - %s\n",
+			"HTML:end_element[%d]: Popped style off stack - %s\n",
+	    		STACKLEVEL(me),
 			me->sp->style->name);
 	} else {
 	    if (TRACE)
@@ -6689,7 +6697,9 @@ End_Object:
 	    fprintf(stderr, "CSS:%s (trimmed %s, END_ELEMENT)\n", Style_className, tmp);
     }
 
+#if defined(DICKEY_TEST)
     if (HTML_dtd.tags[element_number].contents != SGML_EMPTY)
+#endif
     {
 	if (TRACE)
 	    fprintf(stderr, "STYLE:end_element: ending non-EMPTY style\n");

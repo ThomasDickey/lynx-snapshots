@@ -575,6 +575,12 @@ PUBLIC void mailmsg ARGS4(
     char hdrfile[256];
     FILE *hfd;
 
+    if(TRACE)
+	fprintf(stderr,"mailmsg(%d, \"%s\", \"%s\", \"%s\")\n",cur,
+	cur, owner_address?owner_address:"<nil>",
+	filename?filename:"<nil>",
+	linkname?linkname:"<nil>");
+
     if (!strncasecomp(system_mail, "PMDF SEND", 9)) {
 	isPMDF = TRUE;
     }
@@ -869,6 +875,12 @@ PUBLIC void reply_by_mail ARGS3(
     BOOLEAN isPMDF = FALSE;
     char hdrfile[256];
     FILE *hfd;
+
+    if(TRACE)
+	fprintf(stderr,"reply_by_mail(\"%s\", \"%s\", \"%s\")\n",
+	mail_address?mail_address:"<nil>",
+	filename?filename:"<nil>",
+	title?tilde:"<nil>");
 
     if (!strncasecomp(system_mail, "PMDF SEND", 9)) {
 	isPMDF = TRUE;
@@ -1466,7 +1478,7 @@ PUBLIC void reply_by_mail ARGS3(
 	addstr("\n");
     }
     remove_tildes(user_input);
-#if defined (VMS) || defined (DOSPATH)
+
     if (*user_input) {
 	cp = user_input;
 	while (*cp == ',' || isspace((unsigned char)*cp))
@@ -1480,7 +1492,7 @@ PUBLIC void reply_by_mail ARGS3(
 	    }
 	}
     }
-#endif
+
 #ifdef DOSPATH
     if (*address) {
 	sprintf(buf, "To: %s\n", address);
@@ -1514,6 +1526,8 @@ PUBLIC void reply_by_mail ARGS3(
     StrAllocCat(header, buf);
 #endif /* !VMS */
 
+    if(TRACE)
+	fprintf(stderr,"**header==\n%s",header);
     if (!no_editor && editor && *editor != '\0') {
 	/*
 	 *  Use an external editor for the message.

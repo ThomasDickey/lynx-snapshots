@@ -39,9 +39,6 @@ libdir= @libdir@
 ## Where you want the help-files installed
 helpdir= @libdir@/lynx_help
 
-installbin= @INSTALL_PROGRAM@ -s -m 755
-installdoc= @INSTALL_DATA@
-
 ##set the relative location of the WWW library Implementation directory,
 ##from this directory
 ##do not set this to be an absolute path!!!
@@ -247,10 +244,10 @@ install: lynx$x install-bin install-man install-cfg @INSTALL_LSS@
 
 install-bin: $(bindir)
 	-mv -f $(bindir)/lynx$x $(bindir)/lynx.old
-	$(installbin) lynx$x $(bindir)/
+	$(INSTALL_PROGRAM) lynx$x $(bindir)/
 
 install-man : $(mandir) 
-	$(installdoc) $(srcdir)/lynx.man $(mandir)/lynx.1
+	$(INSTALL_DATA) $(srcdir)/lynx.man $(mandir)/lynx.1
 
 install-help : $(helpdir)
 	(cd $(helpdir) && rm -rf *)

@@ -300,7 +300,7 @@ PUBLIC void setHashStyle ARGS5(int,style,int,color,int,cattr,int,mono,char*,elem
 PRIVATE int LYAttrset ARGS3(WINDOW*,win,int,color,int,mono)
 {
 	if (TRACE)
-		fprintf(stderr, "CSS:LYAttrset (%d, %d)\n", color, mono);
+		fprintf(stderr, "CSS:LYAttrset (%#x, %#x)\n", color, mono);
 	if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON && color > -1)
 	{
 		wattrset(win,color);
@@ -475,7 +475,7 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 	int attr = A_NORMAL;
 	int offs = 1;
 	static int have_underline = -1;
-	static int no_color_video = -1;
+	static int NoColorVideo = -1;
 
 	if (have_underline < 0) {
 #ifndef DOSPATH
@@ -486,11 +486,11 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 	}
 
 #if ( !defined(__DJGPP__) && !defined(_WINDOWS) )
-	if (no_color_video < 0) {
-		no_color_video = tigetnum("ncv");
+	if (NoColorVideo < 0) {
+		NoColorVideo = tigetnum("ncv");
 	}
-	if (no_color_video < 0)
-		no_color_video = 0;
+	if (NoColorVideo < 0)
+		NoColorVideo = 0;
 #endif /* !__DJGPP__ and !_WINDOWS */
 
 	if (Current_Attr & A_BOLD)
@@ -505,11 +505,11 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 	 * FIXME:  no_color_video isn't implemented (97/4/14) in ncurses 4.x,
 	 * but may be in SVr4 (which would make this redundant for the latter).
 	 */
-	if ((Current_Attr & A_BOLD) && !(no_color_video & 33)) {
+	if ((Current_Attr & A_BOLD) && !(NoColorVideo & 33)) {
 		attr |= A_BOLD;
 	}
 
-	if ((Current_Attr == A_UNDERLINE) && !(no_color_video & 2)) {
+	if ((Current_Attr == A_UNDERLINE) && !(NoColorVideo & 2)) {
 		attr |= A_UNDERLINE;
 	}
 

@@ -3634,7 +3634,7 @@ fi
 
 	# Check for library containing initscr
 	test "$cf_term_lib" != predefined && test "$cf_term_lib" != unknown && LIBS="-l$cf_term_lib $cf_save_LIBS"
-	for cf_curs_lib in curses ncurses xcurses cursesX jcurses unknown
+	for cf_curs_lib in cursesX curses ncurses xcurses jcurses unknown
 	do
 		echo $ac_n "checking for initscr in -l$cf_curs_lib""... $ac_c" 1>&6
 echo "configure:3641: checking for initscr in -l$cf_curs_lib" >&5

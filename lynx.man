@@ -457,6 +457,9 @@ formatted text.
 .B -startfile_ok
 allow non-http startfile and homepage with -validate.
 .TP
+.B -tagsoup
+initialize parser, using Tag Soup DTD rather than SortaSGML.
+.TP
 .B -telnet
 disable recognition of telnet commands.
 .TP
