@@ -338,9 +338,9 @@ PRIVATE int HTMLGen_start_element ARGS6(
 	strcpy (myHash, HTML_dtd.tags[element_number].name);
 	if (class_string[0])
 	{
+	    int len = strlen(myHash);
+	    sprintf (myHash + len, ".%.*s", (int) sizeof(myHash) - len - 2, class_string);
 	    HTSprintf (&Style_className, ".%s", class_string);
-	    strcat (myHash, ".");
-	    strcat (myHash, class_string);
 	}
 	class_string[0] = '\0';
 	strtolower(myHash);

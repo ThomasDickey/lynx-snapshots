@@ -16,7 +16,6 @@ extern BOOL HTPassEightBitRaw;
 extern BOOL HTPassEightBitNum;
 extern BOOL HTPassHighCtrlRaw;
 extern BOOL HTPassHighCtrlNum;
-extern HTCJKlang HTCJK;
 PUBLIC HTkcode kanji_code = NOKANJI;
 PUBLIC BOOLEAN LYHaveCJKCharacterSet = FALSE;
 PUBLIC BOOLEAN DisplayCharsetMatchLocale = TRUE;

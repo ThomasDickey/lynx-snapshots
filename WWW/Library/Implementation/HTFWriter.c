@@ -254,7 +254,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     if (fnam == NULL)
 	outofmem(__FILE__, "HTSaveAndExecute");
     tmpnam (fnam);
-    if (suffix) strcat(fnam, suffix);
+    strcat(fnam, suffix);
 
     me->fp = fopen (fnam, "wb");
     if (!me->fp) {
@@ -326,7 +326,7 @@ PUBLIC HTStream* HTSaveLocally ARGS3(
     if (fnam == NULL)
 	outofmem(__FILE__, "HTSaveLocally");
     tmpnam (fnam);
-    if (suffix) strcat(fnam, suffix);
+    strcat(fnam, suffix);
 
     /*	Save Panel */
     answer = HTPrompt(GIVE_FILENAME, fnam);

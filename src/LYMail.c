@@ -1462,7 +1462,7 @@ PUBLIC void reply_by_mail ARGS4(
 	*user_input = '\0';
     else {
 	addstr(CTRL_U_TO_ERASE);
-	strcpy(user_input, personal_name);
+	LYstrncpy(user_input, personal_name, sizeof(user_input)-1);
     }
 #ifdef VMS
     if (isPMDF) {
@@ -1890,7 +1890,7 @@ PUBLIC void reply_by_mail ARGS4(
 	    if (!first) {
 		StrAllocCat(command, ",");
 	    }
-	    HTSprintf(command, mail_adrs, address_ptr1);
+	    HTSprintf(&command, mail_adrs, address_ptr1);
 	    first = FALSE;
 	}
 	address_ptr1 = address_ptr2;

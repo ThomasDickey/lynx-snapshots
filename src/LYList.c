@@ -13,6 +13,7 @@
 #include <LYClean.h>
 #include <LYGlobalDefs.h>
 #include <LYCharUtils.h>
+#include <LYCharSets.h>
 
 #ifdef DIRED_SUPPORT
 #include <LYUpload.h>
@@ -166,7 +167,7 @@ PUBLIC int showlist ARGS2(
 	FREE(address);
 	LYEntify(&Address, TRUE);
 	if (title && *title) {
-	    StrAllocCopy(Title, title);
+	    LYformTitle(&Title, title);
 	    LYEntify(&Title, TRUE);
 	    if (*Title) {
 		cp = strchr(Address, '#');

@@ -11,6 +11,7 @@
 #include <LYCharUtils.h>
 #include <GridText.h>
 #include <LYReadCFG.h>
+#include <LYCharSets.h>
 
 #include <LYLeaks.h>
 
@@ -42,7 +43,6 @@ PUBLIC int showinfo ARGS4(
 #ifdef ADVANCED_INFO
     BOOLEAN LYInfoAdvanced = (BOOL) (user_mode == ADVANCED_MODE);
 #endif
-
 #ifdef DIRED_SUPPORT
     struct stat dir_info;
 #endif /* DIRED_SUPPORT */
@@ -229,7 +229,7 @@ PUBLIC int showinfo ARGS4(
     fprintf(fp0, "<h2>%s</h2>\n<dl compact>",
 	    gettext("File that you are currently viewing"));
 
-    StrAllocCopy(Title, doc->title);
+    LYformTitle(&Title, doc->title);
     LYEntify(&Title, TRUE);
     fprintf(fp0, "<dt><em>%s</em> %s%s\n",
 		 gettext("Linkname:"),

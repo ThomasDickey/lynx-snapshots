@@ -25,8 +25,6 @@ PUBLIC char *MBM_A_subdescript[MBM_V_MAXFILES+1];
 PRIVATE BOOLEAN is_mosaic_hotlist = FALSE;
 PRIVATE char * convert_mosaic_bookmark_file PARAMS((char *filename_buffer));
 
-extern HTCJKlang HTCJK;
-
 PRIVATE void
 show_bookmark_not_defined NOARGS
 {
@@ -246,7 +244,7 @@ PUBLIC void save_bookmark_link ARGS2(
 	    FREE(bookmark_URL);
 	    return;
 	}
-	strcpy(filename_buffer, filename);
+	LYstrncpy(filename_buffer, filename, sizeof(filename_buffer)-1);
     }
 
     /*
@@ -313,22 +311,7 @@ PUBLIC void save_bookmark_link ARGS2(
      *  from display character set which may need changing.
      *  Do NOT convert any 8-bit chars if we have CJK display. - LP
      */
-    if (HTCJK == JAPANESE) {
-	switch(kanji_code) {	/* 1997/11/22 (Sat) 09:28:00 */
-	case EUC:
-	    TO_EUC((CONST unsigned char *) string_buffer, (unsigned char *) tmp_buffer);
-	    break;
-	case SJIS:
-	    TO_SJIS((CONST unsigned char *) string_buffer, (unsigned char *) tmp_buffer);
-	    break;
-	default:
-	    TO_JIS((CONST unsigned char *) string_buffer, (unsigned char *) tmp_buffer);
-	    break;
-	}
-	StrAllocCopy(Title, tmp_buffer);
-    } else {
-	StrAllocCopy(Title, string_buffer);
-    }
+    LYformTitle(&Title, string_buffer);
     LYEntify(&Title, TRUE);
     if (UCSaveBookmarksInUnicode &&
 	have8bit(Title) && (!LYHaveCJKCharacterSet)) {

@@ -2436,16 +2436,16 @@ PRIVATE int compare_EntryInfo_structs ARGS2(
 		    }
 		}
 		strcat(date1, time1);
-		    if (entry2->date[9] == ':') {
-			strcpy(date2, "9999");
-			strcpy(time2, &entry2->date[7]);
-			if (time2[0] == ' ') {
-			    time2[0] = '0';
-			}
-		    } else {
-			strcpy(date2, &entry2->date[8]);
-			strcpy(time2, "00:00");
+		if (entry2->date[9] == ':') {
+		    strcpy(date2, "9999");
+		    strcpy(time2, &entry2->date[7]);
+		    if (time2[0] == ' ') {
+			time2[0] = '0';
 		    }
+		} else {
+		    strcpy(date2, &entry2->date[8]);
+		    strcpy(time2, "00:00");
+		}
 		strncpy(month, entry2->date, 3);
 		month[3] = '\0';
 		for (i = 0; i < 12; i++) {

@@ -175,15 +175,15 @@ CC = gcc
 !	HTFinger.h, HTAABrow.h, -
 !	HTAAProt.h, HTAAUtil.h, -
 !	HTAssoc.h, HTUU.h, -
-!	HTVMSUtils.h, ufc-crypt.h, patchlevel.h
+!	HTVMSUtils.h,
 
 MODULES = HTParse, HTAccess, HTTP, HTFile, HTBTree, HTFTP, HTTCP, HTString, -
 	SGML, HTMLDTD, HTChunk, HTPlain, HTMLGen, -
 	HTAtom, HTAnchor, HTStyle, HTList, HTRules, HTFormat, -
 	HTMIME, HTNews, HTGopher, HTTelnet, HTFinger, -
 	HTWSRC, HTAAUtil, HTAABrow, HTGroup, -
-	HTAAProt, HTAssoc, HTLex, HTUU, HTVMSUtils, getpass, -
-	getline, crypt, crypt_util, HTWAIS, HTVMS_WaisUI, HTVMS_WaisProt
+	HTAAProt, HTAssoc, HTLex, HTUU, HTVMSUtils, -
+	HTWAIS, HTVMS_WaisUI, HTVMS_WaisProt
 
 !.ifdef DECNET  ! Strip FTP, Gopher, News, WAIS
 !HEADERS = $(COMMON_HEADERS)
@@ -245,6 +245,4 @@ clean :
 !HTLex.obj :	HTLex.c HTUtils.h
 !HTAssoc.obj :	HTAssoc.c HTAssoc.h HTAAUtil.h HTString.h
 !HTUU.obj :	HTUU.c HTUU.h HTUtils.h
-!crypt.obj :	crypt.c ufc-crypt.h
 !HTVMSUtils.obj :	HTVMSUtils.c HTVMSUtils.h HTUtils.h
-!crypt_util.obj :	crypt_util.c ufc-crypt.h patchlevel.h

@@ -164,9 +164,10 @@ PRIVATE int check_for_target_in_links ARGS2(
  *
  */
 
-PUBLIC BOOL textsearch ARGS3(
+PUBLIC BOOL textsearch ARGS4(
 	document *,	cur_doc,
 	char *,		prev_target,
+	int,		target_size,
 	BOOL,		next)
 {
     int offset;
@@ -196,7 +197,7 @@ PUBLIC BOOL textsearch ARGS3(
 	 *  LYK_NEXT was pressed, so copy the
 	 *  buffer into prev_target. - FM
 	 */
-	strcpy(prev_target, prev_target_buffer);
+	LYstrncpy(prev_target, prev_target_buffer, target_size);
 
     if (strlen(prev_target) == 0 ) {
 	/*
@@ -207,13 +208,12 @@ PUBLIC BOOL textsearch ARGS3(
 	 */
 	_statusline(ENTER_WHEREIS_QUERY);
 
-	if ((ch = LYgetstr(prev_target, VISIBLE,
-			   sizeof(prev_target_buffer), recall)) < 0) {
+	if ((ch = LYgetstr(prev_target, VISIBLE, target_size, recall)) < 0) {
 	    /*
 	     *  User cancelled the search via ^G.
 	     *  Restore prev_target and return. - FM
 	     */
-	    strcpy(prev_target, prev_target_buffer);
+	    LYstrncpy(prev_target, prev_target_buffer, target_size);
 	    HTInfoMsg(CANCELLED);
 	    return(FALSE);
 	}
@@ -262,7 +262,7 @@ check_recall:
 	    QueryNum = 0;
 	if ((cp = (char *)HTList_objectAt(search_queries,
 					  QueryNum)) != NULL) {
-	    strcpy(prev_target, cp);
+	    LYstrncpy(prev_target, cp, target_size);
 	    if (*prev_target_buffer &&
 		!strcmp(prev_target_buffer, prev_target)) {
 		_statusline(EDIT_CURRENT_QUERY);
@@ -272,13 +272,12 @@ check_recall:
 	    } else {
 		_statusline(EDIT_A_PREV_QUERY);
 	    }
-	    if ((ch = LYgetstr(prev_target, VISIBLE,
-			       sizeof(prev_target_buffer), recall)) < 0) {
+	    if ((ch = LYgetstr(prev_target, VISIBLE, target_size, recall)) < 0) {
 		/*
 		 *  User canceled the search via ^G.
 		 *  Restore prev_target and return. - FM
 		 */
-		strcpy(prev_target, prev_target_buffer);
+		LYstrncpy(prev_target, prev_target_buffer, target_size);
 		HTInfoMsg(CANCELLED);
 		return(FALSE);
 	    }
@@ -314,7 +313,7 @@ check_recall:
 	    QueryNum = QueryTotal - 1;
 	if ((cp = (char *)HTList_objectAt(search_queries,
 					  QueryNum)) != NULL) {
-	    strcpy(prev_target, cp);
+	    LYstrncpy(prev_target, cp, target_size);
 	    if (*prev_target_buffer &&
 		!strcmp(prev_target_buffer, prev_target)) {
 		_statusline(EDIT_CURRENT_QUERY);
@@ -324,13 +323,12 @@ check_recall:
 	    } else {
 		_statusline(EDIT_A_PREV_QUERY);
 	    }
-	    if ((ch = LYgetstr(prev_target, VISIBLE,
-			       sizeof(prev_target_buffer), recall)) < 0) {
+	    if ((ch = LYgetstr(prev_target, VISIBLE, target_size, recall)) < 0) {
 		/*
 		 *  User cancelled the search via ^G.
 		 *  Restore prev_target and return. - FM
 		 */
-		strcpy(prev_target, prev_target_buffer);
+		LYstrncpy(prev_target, prev_target_buffer, target_size);
 		HTInfoMsg(CANCELLED);
 		return(FALSE);
 	    }
@@ -340,7 +338,7 @@ check_recall:
     /*
      *  Replace the search string buffer with the new target. - FM
      */
-    strcpy(prev_target_buffer, prev_target);
+    LYstrncpy(prev_target_buffer, prev_target, sizeof(prev_target_buffer)-1);
     HTAddSearchQuery(prev_target_buffer);
 
     /*

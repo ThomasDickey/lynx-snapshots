@@ -43,7 +43,7 @@ PUBLIC void unlex ARGS1(LexItem, lex_item)
 
 PUBLIC LexItem lex ARGS1(FILE *, fp)
 {
-    int ch;
+    int ch = 0;
 
     if (fp != cache) {	/* This cache doesn't work ok because the system  */
 	cache = fp;	/* often assign same FILE structure the next open */

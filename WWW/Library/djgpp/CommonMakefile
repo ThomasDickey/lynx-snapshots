@@ -130,9 +130,6 @@ SOURCES = $(CFILES) $(HFILES) $(CMN)Version.make \
 SPECIFIC = $(WWW)/All/*/Makefile.include $(WWW)/All/Implementation/Makefile* \
 	$(VMS)/descrip.mms $(VMS)/build_multinet.com \
 	$(VMS)/COPYING.LIB $(VMS)/setup.com $(VMS)/multinet.opt \
-	$(VMS)/patchlevel.h $(VMS)/ufc-crypt.h \
-	$(VMS)/crypt.c $(VMS)/crypt_util.c \
-	$(VMS)/getline.c $(VMS)/getpass.c \
 	$(VMS)/HTVMSUtils.h $(VMS)/HTVMSUtils.c
 
 

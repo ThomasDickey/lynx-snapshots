@@ -104,7 +104,7 @@ char host[512];
 struct hostent  *phost;	/* Pointer to host - See netdb.h */
 int donelookup;
 
-unsigned long _fork_func (void *arglist)
+static unsigned long _fork_func (void *arglist)
 {
 #ifdef SH_EX
     unsigned long addr;
@@ -1405,7 +1405,7 @@ PRIVATE void get_host_details NOARGS
 
 #ifndef DECNET	/* Decnet ain't got no damn name server 8#OO */
 #ifdef NEED_HOST_ADDRESS		/* no -- needs name server! */
-    phost = gethostbyname(name);	/* See netdb.h */
+    phost = gethostbyname((CONST char *)name);	/* See netdb.h */
     if (!OK_HOST(phost)) {
 	CTRACE((tfp, "TCP: Can't find my own internet node address for `%s'!!\n",
 		    name));

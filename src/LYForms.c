@@ -26,8 +26,6 @@
 #define CTRL_W_HACK 23  /* CTRL-W refresh without clearok */
 #endif /* VMS && !USE_SLANG */
 
-extern HTCJKlang HTCJK;
-
 PRIVATE int form_getstr PARAMS((
 	struct link *	form_link,
 	BOOLEAN		use_last_tfpos,
@@ -464,11 +462,11 @@ again:
 	    ch = 7;
 	}
 #endif /* VMS */
-#  ifdef NCURSES_MOUSE_VERSION
+#  if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES)
 	if (ch != -1 && (ch & LKC_ISLAC) && !(ch & LKC_ISLECLAC)) /* already lynxactioncode? */
 	    break;	/* @@@ maybe move these 2 lines outside ifdef -kw */
 	if (ch == MOUSE_KEY) {		/* Need to process ourselves */
-#if defined(WIN_EX)
+#if defined(PDCURSES)
 	    int curx, cury;
 
 	    request_mouse_pos();
@@ -495,7 +493,7 @@ again:
 		} else
 		    ch = RTARROW;
 	    }
-#endif /* WIN_EX */
+#endif /* PDCURSES */
 	    else {
 		/*  Mouse event passed to us as MOUSE_KEY, and apparently
 		 *  not on this field's line?  Something is not as it
@@ -508,7 +506,7 @@ again:
 	    }
 	    last_xlkc = -1;
 	} else
-#  endif	/* defined NCURSES_MOUSE_VERSION */
+#  endif	/* defined NCURSES_MOUSE_VERSION || PDCURSES */
 	{
 	    if (!(ch & LKC_ISLECLAC))
 		ch |= MyEdit.current_modifiers;
@@ -1600,7 +1598,7 @@ redraw:
 		     */
 		    if ((cp = (char *)HTList_objectAt(search_queries,
 						      0)) != NULL) {
-			strcpy(prev_target_buffer, cp);
+			LYstrncpy(prev_target_buffer, cp, sizeof(prev_target_buffer));
 			QueryNum = 0;
 			FirstRecall = FALSE;
 		    }
@@ -1665,7 +1663,7 @@ check_recall:
 		    }
 		    if ((cp = (char *)HTList_objectAt(search_queries,
 						      QueryNum)) != NULL) {
-			strcpy(prev_target, cp);
+			LYstrncpy(prev_target, cp, sizeof(prev_target)-1);
 			if (*prev_target_buffer &&
 			    !strcmp(prev_target_buffer, prev_target)) {
 			    _statusline(EDIT_CURRENT_QUERY);
@@ -1720,7 +1718,7 @@ check_recall:
 		    }
 		    if ((cp = (char *)HTList_objectAt(search_queries,
 						      QueryNum)) != NULL) {
-			strcpy(prev_target, cp);
+			LYstrncpy(prev_target, cp, sizeof(prev_target)-1);
 			if (*prev_target_buffer &&
 			    !strcmp(prev_target_buffer, prev_target)) {
 			    _statusline(EDIT_CURRENT_QUERY);

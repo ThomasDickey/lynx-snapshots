@@ -270,6 +270,7 @@ convex*)
 	;;
 cygwin*)
 	PROG_EXT=".exe"
+	LIBS="$LIBS -luser32"
 	;;
 dgux*)
 	CFLAGS="$CFLAGS -DDGUX"
@@ -503,6 +504,7 @@ AC_CHECK_HEADERS( \
 	sys/ioctl.h \
 	sys/param.h \
 	sys/time.h \
+	syslog.h \
 	termio.h \
 	termios.h \
 	unistd.h \
@@ -529,10 +531,14 @@ AC_CHECK_FUNCS( \
 	getcwd \
 	getgroups \
 	gettimeofday \
+	getuid \
+	mkstemp \
+	mktemp \
 	popen \
 	putenv \
 	rand \
 	readdir \
+	setuid \
 	srand \
 	strerror \
 	truncate \
@@ -556,6 +562,7 @@ dnl --------------------------------------------------------------------------
 
 CF_BOOL_DEFS
 CF_ERRNO
+CF_SET_ERRNO
 CF_LOCALE
 CF_NGROUPS
 CF_SYS_ERRLIST
@@ -918,6 +925,20 @@ AC_ARG_WITH(zlib,
 AC_MSG_RESULT($use_zlib)
 
 if test ".$use_zlib" != ".no" ; then
+	AC_MSG_CHECKING(if we need to add -I option to get zlib.h)
+	AC_TRY_COMPILE([#include <zlibx.h>],[],[AC_MSG_RESULT(no)],[
+	AC_MSG_RESULT(yes)
+	CF_HEADER_PATH(cf_search,zlib)
+	for cf_incdir in $cf_search
+	do
+		if test -f $cf_incdir/zlib.h ; then
+			CFLAGS="$CFLAGS -I$cf_incdir"
+			CF_VERBOSE(... found in $cf_incdir)
+			break
+		fi
+		CF_VERBOSE(... tested $cf_incdir)
+	done
+	])
 	CF_FIND_LIBRARY(z,
 		[#include <zlib.h>],
 		[gzopen("name","mode")],

@@ -27,7 +27,6 @@
 #include <LYLeaks.h>
 
 extern BOOL HTPassEightBitRaw;
-extern HTCJKlang HTCJK;
 
 /*		MIME Object
 **		-----------
@@ -1969,8 +1968,10 @@ PUBLIC HTStream* HTMIMERedirect ARGS3(
 **
 **	Written by S. Ichikawa,
 **	partially inspired by encdec.c of <jh@efd.lth.se>.
+**	Assume caller's buffer is LINE_LENGTH bytes, these decode to
+**	no longer than the input strings.
 */
-#define BUFLEN	1024
+#define LINE_LENGTH 512		/* Maximum length of line of ARTICLE etc */
 #ifdef ESC
 #undef ESC
 #endif /* ESC */
@@ -1987,7 +1988,7 @@ PUBLIC void HTmmdec_base64 ARGS2(
 	char *, 	s)
 {
     int   d, count, j, val;
-    char  buf[BUFLEN], *bp, nw[4], *p;
+    char  buf[LINE_LENGTH], *bp, nw[4], *p;
 
     for (bp = buf; *s; s += 4) {
 	val = 0;
@@ -2025,7 +2026,7 @@ PUBLIC void HTmmdec_quote ARGS2(
 	char *, 	t,
 	char *, 	s)
 {
-    char  buf[BUFLEN], cval, *bp, *p;
+    char  buf[LINE_LENGTH], cval, *bp, *p;
 
     for (bp = buf; *s; ) {
 	if (*s == '=') {
@@ -2055,102 +2056,6 @@ PUBLIC void HTmmdec_quote ARGS2(
     strcpy(t, buf);
 }
 
-#ifdef NOTDEFINED
-/*
-**	Generalized HTmmdecode for chartrans - K. Weide 1997-03-06
-*/
-PUBLIC void HTmmdecode ARGS2(
-	char *, 	trg,
-	char *, 	str)
-{
-    char buf[BUFLEN], mmbuf[BUFLEN];
-    char *s, *t, *u, *qm2;
-    int  base64, quote;
-
-    buf[0] = '\0';
-
-    /*
-    **	Encoded-words look like
-    **		=?ISO-8859-1?B?SWYgeW91IGNhbiByZWFkIHRoaXMgeW8=?=
-    */
-    for (s = str, u = buf; *s; ) {
-	base64 = quote = 0;
-	if (*s == '=' && s[1] == '?' &&
-	    (s == str || *(s-1) == '(' || WHITE(*(s-1))))
-	{ /* must be beginning of word */
-	    qm2 = strchr(s+2, '?'); /* 2nd question mark */
-	    if (qm2 &&
-		(qm2[1] == 'B' || qm2[1] == 'b' || qm2[1] == 'Q' ||
-		 qm2[1] == 'q') &&
-		qm2[2] == '?') { /* 3rd question mark */
-		char * qm4 = strchr(qm2 + 3, '?'); /* 4th question mark */
-		if (qm4 && qm4 - s < 74 &&  /* RFC 2047 length restriction */
-		    qm4[1] == '=') {
-		    char *p;
-		    BOOL invalid = NO;
-		    for (p = s+2; p < qm4; p++)
-			if (WHITE(*p)) {
-			    invalid = YES;
-			    break;
-			}
-		    if (!invalid) {
-			int LYhndl;
-
-			*qm2 = '\0';
-			invalid = ((LYhndl = UCGetLYhndl_byMIME(s+2)) < 0 ||
-				   UCCanTranslateFromTo(LYhndl,
-						 current_char_set));
-			*qm2 = '?';
-		    }
-		    if (!invalid) {
-			if (qm2[1] == 'B' || qm2[1] == 'b')
-			    base64 = 1;
-			else if (qm2[1] == 'Q' || qm2[1] == 'q')
-			    quote = 1;
-		    }
-		}
-	    }
-	}
-	if (base64 || quote) {
-	    if (HTmmcont) {
-		for (t = s - 1;
-		    t >= str && (*t == ' ' || *t == '\t'); t--) {
-			u--;
-		}
-	    }
-	    for (s = qm2 + 3, t = mmbuf; *s; ) {
-		if (s[0] == '?' && s[1] == '=') {
-		    break;
-		} else {
-		    *t++ = *s++;
-		}
-	    }
-	    if (s[0] != '?' || s[1] != '=') {
-		goto end;
-	    } else {
-		s += 2;
-		*t = '\0';
-	    }
-	    if (base64)
-		HTmmdec_base64(mmbuf, mmbuf);
-	    if (quote)
-		HTmmdec_quote(mmbuf, mmbuf);
-	    for (t = mmbuf; *t; )
-		*u++ = *t++;
-	    HTmmcont = 1;
-	    /* if (*s == ' ' || *s == '\t') *u++ = *s; */
-	    /* for ( ; *s == ' ' || *s == '\t'; s++) ; */
-	} else {
-	    if (*s != ' ' && *s != '\t')
-		HTmmcont = 0;
-	    *u++ = *s++;
-	}
-    }
-    *u = '\0';
-end:
-    strcpy(trg, buf);
-}
-#else
 /*
 **	HTmmdecode for ISO-2022-JP - FM
 */
@@ -2158,7 +2063,7 @@ PUBLIC void HTmmdecode ARGS2(
 	char *, 	trg,
 	char *, 	str)
 {
-    char buf[BUFLEN], mmbuf[BUFLEN];
+    char buf[LINE_LENGTH], mmbuf[LINE_LENGTH];
     char *s, *t, *u;
     int  base64, quote;
 
@@ -2214,7 +2119,6 @@ PUBLIC void HTmmdecode ARGS2(
 end:
     strcpy(trg, buf);
 }
-#endif /* NOTDEFINED */
 
 /*
 **  Insert ESC where it seems lost.
@@ -2224,7 +2128,7 @@ PUBLIC int HTrjis ARGS2(
 	char *, 	t,
 	char *, 	s)
 {
-    char *p, buf[BUFLEN];
+    char *p, buf[LINE_LENGTH];
     int kanji = 0;
 
     if (strchr(s, ESC) || !strchr(s, '$')) {

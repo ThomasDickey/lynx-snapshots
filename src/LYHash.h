@@ -37,11 +37,6 @@ extern int hash_code_lowercase_on_fly PARAMS((char* string));
 extern int hash_code_aggregate_char PARAMS((char c,int hash));
 extern int hash_code_aggregate_lower_str  PARAMS((char* c,int hash_was));
 
-
-#ifdef NOT_USED
-extern int hash_table[CSHASHSIZE]; /* 32K should be big enough */
-#endif
-
 extern int	s_alink, s_a, s_status,
 		s_label, s_value, s_high,
 		s_normal, s_alert, s_title,

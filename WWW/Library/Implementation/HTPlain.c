@@ -32,7 +32,6 @@
 
 extern BOOL HTPassEightBitRaw;
 extern BOOL HTPassHighCtrlRaw;
-extern HTCJKlang HTCJK;
 
 PUBLIC int HTPlain_lastraw = -1;
 PRIVATE int HTPlain_bs_pending = 0; /* 1:bs 2:underline 3:underline+bs - kw */

@@ -402,9 +402,17 @@ check_recall:
 
 	fprintf(outfile_fp,
 		"<!-- X-URL: %s -->\n", newdoc->address);
-	if (HText_getDate() != NULL)
-	     fprintf(outfile_fp,
+	if (HText_getDate() != NULL) {
+	    fprintf(outfile_fp,
 		"<!-- Date: %s -->\n", HText_getDate());
+	    if (HText_getLastModified() != NULL
+			&& !strcmp(HText_getLastModified(), HText_getDate())
+			&& !strcmp(HText_getLastModified(), ctime((time_t)0))) {
+		fprintf(outfile_fp,
+		    "<!-- Last-Modified: %s -->\n", HText_getLastModified());
+	    }
+	}
+
 	fprintf(outfile_fp,
 		"<BASE HREF=\"%s\">\n", content_base);
     }
@@ -474,9 +482,8 @@ PRIVATE void send_file_to_mail ARGS3(
     BOOLEAN isPMDF = !strncasecomp(system_mail, "PMDF SEND", 9);
     FILE *hfd;
     char hdrfile[LY_MAXPATH];
-    char my_temp[LY_MAXPATH];
 #endif
-#if !CAN_PIPE_TO_MAILER 
+#if !CAN_PIPE_TO_MAILER
     char my_temp[LY_MAXPATH];
 #endif
 
@@ -664,7 +671,7 @@ PRIVATE void send_file_to_mail ARGS3(
     LYRemoveTemp(my_temp);
 #else /* !VMS (Unix or DOS) */
 
-#if CAN_PIPE_TO_MAILER 
+#if CAN_PIPE_TO_MAILER
     HTSprintf0(&buffer, "%s %s", system_mail, system_mail_flags);
     outfile_fp = popen(buffer, "w");
 #else

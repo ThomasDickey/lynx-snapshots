@@ -76,9 +76,6 @@
 ../obj/UCAuto.obj
 ../obj/UCAux.obj
 ../obj/UCdomap.obj
-../obj/crypt.obj
-../obj/crypt_util.obj
-../obj/getline.obj
 ../obj/lyutils.obj
 ../obj/xsystem.obj
 ../curses/PDCURSES.LIB

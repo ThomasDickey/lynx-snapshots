@@ -306,13 +306,21 @@ PRIVATE void add_printer_to_list ARGS2(
 
 #if defined(USE_COLOR_STYLE) || defined(USE_COLOR_TABLE)
 
-#ifdef USE_SLANG
+#ifndef COLOR_WHITE
 #define COLOR_WHITE 7
+#endif
+
+#ifndef COLOR_BLACK
 #define COLOR_BLACK 0
 #endif
 
+#if USE_DEFAULT_COLORS
+int default_fg = DEFAULT_COLOR;
+int default_bg = DEFAULT_COLOR;
+#else
 int default_fg = COLOR_WHITE;
 int default_bg = COLOR_BLACK;
+#endif
 
 static CONST char *Color_Strings[16] =
 {
@@ -334,7 +342,7 @@ static CONST char *Color_Strings[16] =
     "white"
 };
 
-#if defined(DOSPATH) || defined(WIN_EX)
+#if defined(PDCURSES)
 /*
  * PDCurses (and possibly some other implementations) use a non-ANSI set of
  * codes for colors.
@@ -362,26 +370,8 @@ PUBLIC int check_color ARGS2(
 
     CTRACE((tfp, "check_color(%s,%d)\n", color, the_default));
     if (!strcasecomp(color, "default")) {
-#if HAVE_USE_DEFAULT_COLORS && USE_DEFAULT_COLORS
-#if HAVE_ASSUME_DEFAULT_COLORS	/* ncurses 5.1 */
-	/*
-	 * This may be invoked before ncurses is initialized, depending on
-	 * whether color-style is used or not.
-	 *
-	 * If we have assume_default_colors(), we can leave the global fg/bg
-	 * colors with the standard white/black until we find a color specified
-	 * as "default".
-	 */
-	static int found = 0;
-	if (!found)
-	    found = lynx_default_colors();
-	if (found >= 0)
-	    the_default = DEFAULT_COLOR;
-#else
+#if USE_DEFAULT_COLORS
 	the_default = DEFAULT_COLOR;
-#endif	/* HAVE_ASSUME_DEFAULT_COLORS */
-	default_fg = DEFAULT_COLOR;
-	default_bg = DEFAULT_COLOR;
 #endif	/* USE_DEFAULT_COLORS */
 	CTRACE((tfp, "=> %d\n", the_default));
 	return the_default;
@@ -587,6 +577,44 @@ static int outgoing_mail_charset_fun ARGS1(
     return 0;
 }
 
+#ifdef EXP_ASSUMED_COLOR
+/*
+ *  Process string buffer fields for ASSUMED_COLOR setting.
+ */
+PRIVATE void assumed_color_fun ARGS1(
+	char *, buffer)
+{
+    char *fg = buffer, *bg;
+    char *temp = 0;
+
+    StrAllocCopy(temp, buffer);	/* save a copy, for error messages */
+
+    /*
+     *	We are expecting a line of the form:
+     *	  FOREGROUND:BACKGROUND
+     */
+    if (NULL == (bg = find_colon(fg)))
+	exit_with_color_syntax(temp);
+    *bg++ = '\0';
+
+    default_fg = check_color(fg, default_fg);
+    default_bg = check_color(bg, default_bg);
+
+    if (default_fg == ERR_COLOR
+     || default_bg == ERR_COLOR)
+	exit_with_color_syntax(temp);
+#if USE_SLANG
+    /*
+     * Sorry - the order of initialization of slang precludes setting the
+     * default colors from the lynx.cfg file, since slang is already
+     * initialized before the file is read, and there is no interface defined
+     * for setting it from the application (that's one of the problems with
+     * using environment variables rather than a programmable interface) -TD
+     */
+#endif
+    FREE(temp);
+}
+#endif /* EXP_ASSUMED_COLOR */
 
 #ifdef USE_COLOR_TABLE
 static int color_fun ARGS1(
@@ -1310,6 +1338,9 @@ static Config_Type Config_Table [] =
      PARSE_FUN("assume_charset", CONF_FUN, assume_charset_fun),
      PARSE_FUN("assume_local_charset", CONF_FUN, assume_local_charset_fun),
      PARSE_FUN("assume_unrec_charset", CONF_FUN, assume_unrec_charset_fun),
+#ifdef EXP_ASSUMED_COLOR
+     PARSE_FUN("assumed_color", CONF_FUN, assumed_color_fun),
+#endif
 #ifdef EXP_CHARSET_CHOICE
      PARSE_FUN("assumed_doc_charset_choice",CONF_FUN,parse_assumed_doc_charset_choice),
 #endif
@@ -1530,7 +1561,7 @@ static Config_Type Config_Table [] =
 #ifdef VMS
      PARSE_SET("use_fixed_records", CONF_BOOL, &UseFixedRecords),
 #endif
-#if defined(NCURSES_MOUSE_VERSION) || defined(USE_SLANG_MOUSE)
+#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES) || defined(USE_SLANG_MOUSE)
      PARSE_SET("use_mouse", CONF_BOOL, &LYUseMouse),
 #endif
      PARSE_SET("use_select_popups", CONF_BOOL, &LYSelectPopups),
@@ -1645,8 +1676,8 @@ PRIVATE void do_read_cfg ARGS5(
 	FILE *,	fp0,
 	optidx_set_t*, allowed)
 {
+    static char *mypath = NULL;
     FILE *fp;
-    char mypath[LY_MAXPATH];
     char *buffer = 0;
 
     CTRACE((tfp, "Loading cfg file '%s'.\n", cfg_filename));
@@ -1671,8 +1702,7 @@ PRIVATE void do_read_cfg ARGS5(
 	return;
     }
     if (!strncmp(cfg_filename, "~/", 2)) {
-	strcpy(mypath, Home_Dir());
-	strcat(mypath, cfg_filename+1);
+	HTSprintf0(&mypath, "%s%s", Home_Dir(), cfg_filename+1);
 	cfg_filename = mypath;
     }
     if ((fp = fopen(cfg_filename, TXT_R)) == 0) {

@@ -61,6 +61,8 @@
 typedef enum _HTkcode {NOKANJI, EUC, SJIS, JIS} HTkcode;
 typedef enum _HTCJKlang {NOCJK, JAPANESE, CHINESE, KOREAN, TAIPEI} HTCJKlang;
 
+extern HTCJKlang HTCJK;
+
 /*
 **  Function prototypes.
 */

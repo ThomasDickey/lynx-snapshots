@@ -5,6 +5,7 @@
 #include <HTUtils.h>
 #include <LYHash.h>
 #include <LYPrettySrc.h>
+#include <LYStrings.h>
 
  /* This file creates too many "leak detected" entries in Lynx.leaks. */
 #define NO_MEMORY_TRACKING
@@ -331,8 +332,12 @@ PUBLIC void HTMLSRC_init_caches ARGS1(
 
     for (i = 0; i < HTL_num_lexemes; ++i) {
 	/*we assume that HT_tagspecs was NULLs at when program started*/
-	strcpy(buf, HTL_tagspecs[i] ? HTL_tagspecs[i] : HTL_tagspecs_defaults[i]);
-	StrAllocCopy(HTL_tagspecs[i],buf);
+	LYstrncpy(buf,
+		  HTL_tagspecs[i]
+		  ? HTL_tagspecs[i]
+		  : HTL_tagspecs_defaults[i],
+		  sizeof(buf) - 1);
+	StrAllocCopy(HTL_tagspecs[i], buf);
 
 	if ((p = strchr(buf, ':')) != 0)
 	    *p = '\0';

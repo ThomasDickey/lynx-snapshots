@@ -64,8 +64,6 @@
 #include <LYUtils.h>
 #include <LYLeaks.h>
 
-extern HTCJKlang HTCJK;
-
 /*
 **  These flags may be set to modify the operation of this module
 */
@@ -491,18 +489,13 @@ PRIVATE int get_physical ARGS2(
     }
 
     if (!override_flag && !using_proxy) {
-	char * gateway_parameter, *gateway, *proxy;
+	char * gateway_parameter = NULL, *gateway, *proxy;
 
 	/*
 	**  Search for gateways.
 	*/
-	gateway_parameter = (char *)calloc(1, (strlen(acc_method) + 20));
-	if (gateway_parameter == NULL)
-	    outofmem(__FILE__, "HTLoad");
-	strcpy(gateway_parameter, "WWW_");
-	strcat(gateway_parameter, acc_method);
-	strcat(gateway_parameter, "_GATEWAY");
-	gateway = (char *)getenv(gateway_parameter); /* coerce for decstation */
+	HTSprintf0(&gateway_parameter, "WWW_%s_GATEWAY", acc_method);
+	gateway = getenv(gateway_parameter); /* coerce for decstation */
 
 	/*
 	**  Search for proxy servers.
@@ -511,11 +504,10 @@ PRIVATE int get_physical ARGS2(
 	    /*
 	    ** If we got to here, a file URL is for ftp on a remote host. - FM
 	    */
-	    strcpy(gateway_parameter, "ftp");
+	    strcpy(gateway_parameter, "ftp_proxy");
 	else
-	    strcpy(gateway_parameter, acc_method);
-	strcat(gateway_parameter, "_proxy");
-	proxy = (char *)getenv(gateway_parameter);
+	    sprintf(gateway_parameter, "%s_proxy", acc_method);
+	proxy = getenv(gateway_parameter);
 	FREE(gateway_parameter);
 
 	if (gateway)
@@ -620,6 +612,9 @@ PUBLIC void LYUCPushAssumed ARGS1(
 	if (anchor_UCI && anchor_UCI->MIMEname) {
 	    pushed_assume_MIMEname = UCAssume_MIMEcharset;
 	    UCAssume_MIMEcharset = NULL;
+	    if (HTCJK == JAPANESE)
+		StrAllocCopy(UCAssume_MIMEcharset, pushed_assume_MIMEname);
+	    else
 	    StrAllocCopy(UCAssume_MIMEcharset, anchor_UCI->MIMEname);
 	    pushed_assume_LYhndl = anchor_LYhndl;
 	    /* some diagnostics */

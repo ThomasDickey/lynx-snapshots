@@ -177,6 +177,7 @@ extern BOOLEAN is_www_index;
 extern BOOLEAN jump_buffer;     /* TRUE if offering default shortcut */
 extern BOOLEAN long_url_ok;
 extern BOOLEAN lynx_mode;
+extern BOOLEAN lynx_temp_subspace;
 extern BOOLEAN news_ok;
 extern BOOLEAN recent_sizechange;
 extern BOOLEAN rlogin_ok;
@@ -184,8 +185,8 @@ extern BOOLEAN system_editor;	  /* True if locked-down editor */
 extern BOOLEAN telnet_ok;
 extern BOOLEAN verbose_img;	/* display filenames of images?     */
 extern BOOLEAN vi_keys;		/* TRUE to turn on vi-like key movement */
-extern char *LYRequestTitle;	/* newdoc.title in calls to getfile() */
 extern char *LYRequestReferer;	/* Referer, may be set in getfile() */
+extern char *LYRequestTitle;	/* newdoc.title in calls to getfile() */
 extern char *LynxHome;
 extern char *LynxSigFile;	/* Signature file, in or off home */
 extern char *checked_box;	/* form boxes */

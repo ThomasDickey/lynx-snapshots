@@ -24,13 +24,11 @@
 
 #include <LYLeaks.h>
 
-extern HTCJKlang HTCJK;
-
 BOOLEAN term_options;
 
 PRIVATE void terminate_options	PARAMS((int sig));
 
-#if !defined(NO_OPTION_MENU) || defined(NCURSES_MOUSE_VERSION)
+#if !defined(NO_OPTION_MENU) || (defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES))
 #define COL_OPTION_VALUES 36  /* display column where option values start */
 #endif
 
@@ -552,7 +550,7 @@ draw_options:
 		    _statusline(EDITOR_LOCKED);
 		} else {
 		    if (editor && *editor)
-			strcpy(display_option, editor);
+			LYstrncpy(display_option, editor, sizeof(display_option) - 1);
 		    else {  /* clear the NONE */
 			move(L_EDITOR, COL_OPTION_VALUES);
 			addstr("    ");
@@ -589,7 +587,7 @@ draw_options:
 	    case 'd':	/* Change the display. */
 	    case 'D':
 		if (x_display && *x_display) {
-		    strcpy(display_option, x_display);
+		    LYstrncpy(display_option, x_display, sizeof(display_option) - 1);
 		} else {  /* clear the NONE */
 		    move(L_DISPLAY, COL_OPTION_VALUES);
 		    addstr("    ");
@@ -727,7 +725,7 @@ draw_options:
 			goto draw_options;
 		    }
 		    if (bookmark_page && *bookmark_page) {
-			strcpy(display_option, bookmark_page);
+			LYstrncpy(display_option, bookmark_page, sizeof(display_option) - 1);
 		    } else {  /* clear the NONE */
 			move(L_HOME, C_DEFAULT);
 			clrtoeol();
@@ -813,7 +811,7 @@ draw_options:
 	    case 'p': /* Change personal mail address for From headers. */
 	    case 'P':
 		if (personal_mail_address && *personal_mail_address) {
-		    strcpy(display_option, personal_mail_address);
+		    LYstrncpy(display_option, personal_mail_address, sizeof(display_option) - 1);
 		} else {  /* clear the NONE */
 		    move(L_MAIL_ADDRESS, COL_OPTION_VALUES);
 		    addstr("    ");
@@ -1034,7 +1032,7 @@ draw_options:
 	    case 'g':	/* Change language preference. */
 	    case 'G':
 		if (language && *language) {
-		    strcpy(display_option, language);
+		    LYstrncpy(display_option, language, sizeof(display_option) - 1);
 		} else {  /* clear the NONE */
 		    move(L_LANGUAGE, COL_OPTION_VALUES);
 		    addstr("    ");
@@ -1070,7 +1068,7 @@ draw_options:
 	    case 'h':	/* Change charset preference. */
 	    case 'H':
 		if (pref_charset && *pref_charset) {
-		    strcpy(display_option, pref_charset);
+		    LYstrncpy(display_option, pref_charset, sizeof(display_option) - 1);
 		} else {  /* clear the NONE */
 		    move(L_PREF_CHARSET, COL_OPTION_VALUES);
 		    addstr("    ");
@@ -1525,7 +1523,7 @@ draw_options:
 	    case 'A':
 		if (!no_useragent) {
 		    if (LYUserAgent && *LYUserAgent) {
-			strcpy(display_option, LYUserAgent);
+			LYstrncpy(display_option, LYUserAgent, sizeof(display_option) - 1);
 		    } else {  /* clear the NONE */
 			move(L_HOME, COL_OPTION_VALUES);
 			addstr("    ");
@@ -2063,9 +2061,10 @@ draw_bookmark_list:
 			     9);
 		    else
 			move((3 + a), 9);
-		    strcpy(MBM_tmp_line,
+		    LYstrncpy(MBM_tmp_line,
 			   (!MBM_A_subdescript[a] ?
-					       "" : MBM_A_subdescript[a]));
+					       "" : MBM_A_subdescript[a]),
+			      sizeof(MBM_tmp_line) - 1);
 		    ch = LYgetstr(MBM_tmp_line, VISIBLE,
 				  sizeof(MBM_tmp_line), NORECALL);
 		    stop_bold();
@@ -2097,8 +2096,9 @@ draw_bookmark_list:
 		addstr("| ");
 
 		start_bold();
-		strcpy(MBM_tmp_line,
-		       (!MBM_A_subbookmark[a] ? "" : MBM_A_subbookmark[a]));
+		LYstrncpy(MBM_tmp_line,
+			  (!MBM_A_subbookmark[a] ? "" : MBM_A_subbookmark[a]),
+			  sizeof(MBM_tmp_line) - 1);
 		ch = LYgetstr(MBM_tmp_line, VISIBLE,
 			      sizeof(MBM_tmp_line), NORECALL);
 		stop_bold();
@@ -2138,7 +2138,7 @@ draw_bookmark_list:
     signal(SIGINT, cleanup_sig);
 }
 
-#if !defined(NO_OPTION_MENU) || defined(NCURSES_MOUSE_VERSION)
+#if !defined(NO_OPTION_MENU) || (defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES))
 /*
 **  This function prompts for a choice or page number.
 **  If a 'g' or 'p' suffix is included, that will be
@@ -2384,7 +2384,7 @@ PUBLIC int popup_choice ARGS7(
 	StrAllocCopy(popup_status_msg, CHOICE_LIST_UNM_MSG);
     } else if (!for_mouse) {
 	StrAllocCopy(popup_status_msg, CHOICE_LIST_MESSAGE);
-#ifdef NCURSES_MOUSE_VERSION
+#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES)
     } else {
 	StrAllocCopy(popup_status_msg, gettext(
 		"Left mouse button or return to select, arrow keys to scroll."));
@@ -2893,7 +2893,7 @@ redraw:
 		     */
 		    if ((cp = (char *)HTList_objectAt(search_queries,
 						      0)) != NULL) {
-			strcpy(prev_target_buffer, cp);
+			LYstrncpy(prev_target_buffer, cp, sizeof(prev_target_buffer) - 1);
 			QueryNum = 0;
 			FirstRecall = FALSE;
 		    }
@@ -2957,7 +2957,7 @@ check_recall:
 			QueryNum = 0;
 		    if ((cp = (char *)HTList_objectAt(search_queries,
 						      QueryNum)) != NULL) {
-			strcpy(prev_target, cp);
+			LYstrncpy(prev_target, cp, sizeof(prev_target) - 1);
 			if (*prev_target_buffer &&
 			    !strcmp(prev_target_buffer, prev_target)) {
 			    _statusline(EDIT_CURRENT_QUERY);
@@ -3011,7 +3011,7 @@ check_recall:
 			QueryNum = (QueryTotal - 1);
 		    if ((cp = (char *)HTList_objectAt(search_queries,
 						      QueryNum)) != NULL) {
-			strcpy(prev_target, cp);
+			LYstrncpy(prev_target, cp, sizeof(prev_target) - 1);
 			if (*prev_target_buffer &&
 			    !strcmp(prev_target_buffer, prev_target)) {
 			    _statusline(EDIT_CURRENT_QUERY);

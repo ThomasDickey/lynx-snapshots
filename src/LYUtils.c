@@ -118,13 +118,15 @@ extern int BSDselect PARAMS((int nfds, fd_set * readfds, fd_set * writefds,
 #if defined(HAVE_RAND) && defined(HAVE_SRAND) && defined(RAND_MAX)
 #define USE_RAND_TEMPNAME 1
 #define MAX_TEMPNAME 10000
+#ifndef BITS_PER_CHAR
+#define BITS_PER_CHAR 8
+#endif
 #endif
 #endif
 
 #define COPY_COMMAND "%s %s %s"
 
 extern BOOLEAN LYHaveCJKCharacterSet;
-extern HTCJKlang HTCJK;
 
 PRIVATE HTList * localhost_aliases = NULL;	/* Hosts to treat as local */
 PRIVATE char *HomeDir = NULL;			/* HOME directory */
@@ -1928,13 +1930,12 @@ BOOLEAN mustshow = FALSE;
 PUBLIC void statusline ARGS1(
 	CONST char *,	text)
 {
-    char buffer[256];
+    char buffer[MAX_LINE];
     unsigned char *temp = NULL;
     int max_length, len, i, j;
     unsigned char k;
     char *p;
-    char text_buff[256];
-    int text_len;
+    char text_buff[MAX_LINE];
 
     if (text == NULL)
 	return;
@@ -1956,33 +1957,10 @@ PUBLIC void statusline ARGS1(
     mustshow = FALSE;
 
     /* "LYNXDOWNLOAD://Method=-1/File=%s/SugFile=%s%s\">Save to disk</a>\n" */
-    /* 1997/12/23 (Tue) 15:58:58 */
-    text_len = strlen(text);
-    if (text_len < 256) {
-	strcpy(text_buff, text);
-    } else {
-	strncpy(text_buff, text, 255);
-	text_buff[255] = '\0';
-	p = strchr(text_buff, '\n');
-	if (p)
-	    p= '\0';
-    }
-#if 0
-    /* This is broken.  It shows a truncated name if the complete URL is
-     * so long that it has already been shortened by the caller to fit.
-     * Moreover it doesn't belong here.  This function should just display
-     * what it's asked to and not second-guess its caller.  If you want
-     * a different message displayed, pass it a different message.
-     * Finally, I dislike the intended change anyway.  It shows less
-     * information, it is a dumbed down interface. - kw
-     */
-    if (strncmp(text, "LYNXDOWNLOAD:", 13) == 0) {
-	p = strstr(text + 13, "SugFile=");
-	if (p != NULL) {
-	    strcpy(text_buff, p + 3);
-	}
-    }
-#endif
+    LYstrncpy(text_buff, text, sizeof(text_buff)-1);
+    p = strchr(text_buff, '\n');
+    if (p)
+	p= '\0';
 
     /*
      *	Deal with any CJK escape sequences and Kanji if we have a CJK
@@ -1996,7 +1974,7 @@ PUBLIC void statusline ARGS1(
 	/*
 	 *  Translate or filter any escape sequences. - FM
 	 */
-	if ((temp = (unsigned char *)calloc(1, strlen(text_buff) + 1)) == NULL)
+	if ((temp = typecallocn(unsigned char, strlen(text_buff) + 1)) == NULL)
 	    outofmem(__FILE__, "statusline");
 	if (kanji_code == EUC) {
 	    TO_EUC((CONST unsigned char *)text_buff, temp);
@@ -2489,7 +2467,7 @@ PUBLIC BOOLEAN LYisAbsPath ARGS1(
     return TRUE;
 #else
     BOOLEAN result;
-#ifdef DOSPATH
+#if defined(DOSPATH) || defined(__EMX__)
     result = (BOOL) (LYIsPathSep(path[0])
      || (isalpha(path[0])
       && (path[1] == ':')
@@ -2507,7 +2485,7 @@ PUBLIC BOOLEAN LYisAbsPath ARGS1(
 PUBLIC BOOLEAN LYisRootPath ARGS1(
 	char *,		path)
 {
-#ifdef DOSPATH
+#if defined(DOSPATH) || defined(__EMX__)
     if (strlen(path) == 3
      && isalpha(path[0])
      && path[1] == ':'
@@ -2626,7 +2604,7 @@ PUBLIC void LYLocalhostAliases_free NOARGS
 PUBLIC void LYAddLocalhostAlias ARGS1(
 	char *,		alias)
 {
-    char *LocalAlias;
+    char *LocalAlias = NULL;
 
     if (!(alias && *alias))
 	return;
@@ -2638,9 +2616,7 @@ PUBLIC void LYAddLocalhostAlias ARGS1(
 #endif
     }
 
-    if ((LocalAlias = (char *)calloc(1, (strlen(alias) + 1))) == NULL)
-	outofmem(__FILE__, "HTAddLocalhosAlias");
-    strcpy(LocalAlias, alias);
+    StrAllocCopy(LocalAlias, alias);
     HTList_addObject(localhost_aliases, LocalAlias);
 
     return;
@@ -3438,16 +3414,14 @@ PUBLIC void HTSugFilenames_free NOARGS
 PUBLIC void HTAddSugFilename ARGS1(
 	char *,		fname)
 {
-    char *new;
+    char *new = NULL;
     char *old;
     HTList *cur;
 
     if (!(fname && *fname))
 	return;
 
-    if ((new = (char *)calloc(1, (strlen(fname) + 1))) == NULL)
-	outofmem(__FILE__, "HTAddSugFilename");
-    strcpy(new, fname);
+    StrAllocCopy(new, fname);
 
     if (!sug_filenames) {
 	sug_filenames = HTList_new();
@@ -3780,9 +3754,30 @@ PRIVATE int fmt_tempname ARGS3(
 	CONST char *,	prefix,
 	CONST char *,	suffix)
 {
+    int code;
+#if defined(USE_MKSTEMP) && defined(HAVE_MKSTEMP)
+    int fd;
+    char interim[LY_MAXPATH];
+    sprintf(interim, "%.*sXXXXXX", LY_MAXPATH - 8, prefix);
+    if (strlen(interim) + strlen(suffix) < LY_MAXPATH - 2
+    && (fd = mkstemp(interim)) >= 0) {
+	sprintf(result, "%s%s", interim, suffix);
+	rename(interim, result);
+	chmod(result, HIDE_CHMOD); /* (yes, some mkstemps are broken ;-) */
+	close(fd);
+	code = TRUE;
+    } else {
+	code = FALSE;
+    }
+#else
+#ifdef USE_RAND_TEMPNAME
+    static BOOL first = TRUE;
+    static int names_used = 0;
+    static unsigned char *used_tempname;
+    unsigned offset, mask;
+#endif
     static unsigned counter;
     char leaf[LY_MAXPATH];
-    int code;
 
     if (prefix == 0)
 	prefix = "";
@@ -3792,16 +3787,38 @@ PRIVATE int fmt_tempname ARGS3(
      * Prefer a random value rather than a counter.
      */
 #ifdef USE_RAND_TEMPNAME
-    do {
-	int uninit;	/* ( intentionally uninitialized ;-) */
-    if (counter == 0)
-	srand(time((time_t *)0) + uninit);
+    if (first) {
+	srand((unsigned)((long)time((time_t *)0) + (long)result));
+	first = FALSE;
+	used_tempname = typecallocn(unsigned char,
+				(MAX_TEMPNAME / BITS_PER_CHAR) + 1);
+	if (used_tempname == 0)
+	    outofmem(__FILE__, "fmt_tempname");
+    }
+
     /* We don't really need all of the bits from rand().  The high-order bits
      * are the more-random portion in any case, but limiting the width of the
      * generated name is done partly to avoid problems on systems that may not
      * support long filenames.
      */
-    counter = ( (float)MAX_TEMPNAME * rand() ) / RAND_MAX + 1;
+    counter = MAX_TEMPNAME;
+    while (names_used < MAX_TEMPNAME) {
+	counter = ( (float)MAX_TEMPNAME * rand() ) / RAND_MAX + 1;
+	/*
+	 * Avoid reusing a temporary name, since there are places in the code
+	 * which can refer to a temporary filename even after it has been
+	 * closed and removed from the filesystem.
+	 */
+	offset = counter / BITS_PER_CHAR;
+	mask = 1 << (counter % BITS_PER_CHAR);
+	if ((used_tempname[offset] & mask) == 0) {
+	    names_used++;
+	    used_tempname[offset] |= mask;
+	    break;
+	}
+    }
+    if (counter >= MAX_TEMPNAME)
+	HTAlert("Too many tempfiles");
 #else
     counter++;
 #endif
@@ -3841,9 +3858,6 @@ PRIVATE int fmt_tempname ARGS3(
 	sprintf(result, "%.*s", LY_MAXPATH-1, leaf);
 	code = FALSE;
     }
-#ifdef USE_RAND_TEMPNAME
-    /* If we really have 10000 files open, there's no point in returning... */
-    } while (FindTempfileByName(result) != 0);
 #endif
     CTRACE((tfp, "-> '%s'\n", result));
     return (code);
@@ -4409,7 +4423,7 @@ PUBLIC void LYConvertToURL ARGS2(
 	} else {
 	    if ((fragment = strchr(old_string, '#')) != NULL)
 		*fragment = '\0';
-	    strcpy(url_file, old_string);
+	    LYstrncpy(url_file, old_string, sizeof(url_file)-1);
 	}
 	url_file_dsc.dsc$w_length = (short) strlen(url_file);
 	if (1&lib$find_file(&url_file_dsc, &file_name_dsc, &context,
@@ -4467,8 +4481,7 @@ PUBLIC void LYConvertToURL ARGS2(
 		     *	sure).	Use original pathspec for the
 		     *	error message that will result.
 		     */
-		    strcpy(url_file, "/");
-		    strcat(url_file, old_string);
+		    sprintf(url_file, "/%.*s", sizeof(url_file)-2, old_string);
 		    CTRACE((tfp, "Can't find '%s'  Will assume it's a bad path.\n",
 				old_string));
 		    StrAllocCat(*AllocatedString, url_file);
@@ -4506,8 +4519,7 @@ PUBLIC void LYConvertToURL ARGS2(
 		 *  sure).  Use original pathspec for the
 		 *  error message that will result.
 		 */
-		strcpy(url_file, "/");
-		strcat(url_file, old_string);
+		sprintf(url_file, "/%.*s", sizeof(url_file)-2, old_string);
 		CTRACE((tfp, "Can't find '%s'  Will assume it's a bad path.\n",
 			    old_string));
 		StrAllocCat(*AllocatedString, url_file);
@@ -5611,12 +5623,6 @@ PUBLIC BOOLEAN LYPathOffHomeOK ARGS2(
 		return(FALSE);
 	    }
 	}
-#ifdef _WINDOWS		/* 1997/10/16 (Thu) 22:08:17 */
-	strcpy(buff, homedir);
-	p = buff;
-	while (*p++) if (*p == '\\') *p = '/';
-	homedir = buff;
-#endif
     }
 #endif /* VMS */
     if (*cp == '~') {
@@ -6403,7 +6409,7 @@ PUBLIC BOOLEAN LYCachedTemp ARGS2(
     FILE *fp;
 
     if (*cached) {
-	strcpy(result, *cached);
+	LYstrncpy(result, *cached, LY_MAXPATH);
 	FREE(*cached);
 	if ((fp = fopen(result, "r")) != NULL) {
 	    fclose(fp);
@@ -6474,7 +6480,7 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 #endif
     } while (fp == 0);
 
-    if ((p = (LY_TEMP *)calloc(1, sizeof(LY_TEMP))) != 0) {
+    if ((p = typecalloc(LY_TEMP)) != 0) {
 	p->next = ly_temp;
 	StrAllocCopy((p->name), result);
 	p->file = fp;
@@ -6681,7 +6687,7 @@ PUBLIC FILE *LYOpenScratch ARGS2(
 	return 0;
 
     if ((fp = LYNewTxtFile (result)) != 0) {
-	if ((p = (LY_TEMP *)calloc(1, sizeof(LY_TEMP))) != 0) {
+	if ((p = typecalloc(LY_TEMP)) != 0) {
 	    p->next = ly_temp;
 	    StrAllocCopy((p->name), result);
 	    p->file = fp;
@@ -6771,6 +6777,10 @@ PUBLIC void LYCleanupTemp NOARGS
     while (ly_temp != 0) {
 	LYRemoveTemp(ly_temp->name);
     }
+#ifdef UNIX
+    if (lynx_temp_subspace)
+	rmdir(lynx_temp_space);
+#endif
 }
 
 /*
@@ -6839,7 +6849,7 @@ static uip_entry ly_uip[] =
 
 };
 
-/*  Public entry points for User Interface Page mamagement: */
+/*  Public entry points for User Interface Page management: */
 
 PUBLIC BOOL LYIsUIPage3 ARGS3(
     CONST char *,	url,
@@ -6963,12 +6973,14 @@ PUBLIC  char * wwwName ARGS1(
  * Given a user-specified filename, e.g., for download or print, validate and
  * expand it.  Expand home-directory expressions in the given string.  Only
  * allow pipes if the user can spawn shell commands.
+ *
+ * Both strings are fixed buffer sizes, LY_MAXPATH.
  */
 PUBLIC BOOLEAN LYValidateFilename ARGS2(
 	char *,		result,
 	char *,		given)
 {
-    char *cp;
+    char *cp, *cp2;
 
     /*
      *  Cancel if the user entered "/dev/null" on Unix,
@@ -6990,15 +7002,17 @@ PUBLIC BOOLEAN LYValidateFilename ARGS2(
 	    HTUserMsg(SPAWNING_DISABLED);
 	    return FALSE;
 	}
-	strcpy(result, given);
+	LYstrncpy(result, given, LY_MAXPATH);
 	return TRUE;
     }
 #endif
-    if ((cp = strchr(given, '~'))) {
+    if ((cp = strchr(given, '~')) != 0
+     && (cp2 = wwwName(Home_Dir())) != 0
+     && strlen(cp2) + strlen(given) < LY_MAXPATH) {
 	*(cp++) = '\0';
 	strcpy(result, given);
 	LYTrimPathSep(result);
-	strcat(result, wwwName(Home_Dir()));
+	strcat(result, cp2);
 	strcat(result, cp);
 	strcpy(given, result);
     }
@@ -7007,7 +7021,9 @@ PUBLIC BOOLEAN LYValidateFilename ARGS2(
 	strcpy(result, HTVMS_name("", given));
 	strcpy(given, result);
     }
-    if (given[0] != '/' && strchr(given, ':') == NULL) {
+    if (given[0] != '/'
+     && strchr(given, ':') == NULL
+     && strlen(given) < LY_MAXPATH - 13) {
 	strcpy(result, "sys$disk:");
 	if (strchr(given, ']') == NULL)
 	    strcat(result, "[]");
@@ -7226,6 +7242,7 @@ PUBLIC void LYAddPathSep0 ARGS1(
 
     if ((path != 0)
      && (len = strlen(path)) != 0
+     && (len < LY_MAXPATH - 2)
      && !LYIsPathSep(path[len-1])) {
 	strcat(path, PATHSEP_STR);
     }
@@ -7291,6 +7308,7 @@ PUBLIC void LYAddHtmlSep0 ARGS1(
 
     if ((path != 0)
      && (len = strlen(path)) != 0
+     && (len < LY_MAXPATH - 2)
      && !LYIsHtmlSep(path[len-1])) {
 	strcat(path, "/");
     }
@@ -7480,7 +7498,7 @@ PUBLIC int LYSystem ARGS1(
     if (do_free)
 	FREE(command);
 #if !defined(UCX) || !defined(VAXC) /* errno not modifiable ?? */
-    errno = saved_errno;	/* may have been clobbered */
+    set_errno(saved_errno);	/* may have been clobbered */
 #endif
     return code;
 }

@@ -7,6 +7,7 @@
 #undef ANSI_VARARGS		/* CF_VARARGS */
 #undef ARCHIVE_ONLY		/* CF_ARG_DISABLE(dired-archive) */
 #undef BZIP2_PATH		/* CF_PATH_PROG(bzip2) */
+#undef CAN_SET_ERRNO		/* CF_SET_ERRNO */
 #undef CHMOD_PATH		/* CF_PATH_PROG(chmod) */
 #undef CJK_EX			/* CF_ARG_ENABLE(cjk) */
 #undef COLOR_CURSES		/* defined by CF_COLOR_CURSES */
@@ -66,6 +67,7 @@
 #undef HAVE_GETGROUPS
 #undef HAVE_GETTEXT		/* defined if you want to use non-GNU gettext */
 #undef HAVE_GETTIMEOFDAY
+#undef HAVE_GETUID
 #undef HAVE_H_ERRNO
 #undef HAVE_INET_ATON		/* CF_INET_ADDR */
 #undef HAVE_JCURSES_H
@@ -76,6 +78,8 @@
 #undef HAVE_LOCALE_H
 #undef HAVE_LSTAT		/* defined by CF_FUNC_LSTAT */
 #undef HAVE_MALLOC_H		/* defined by AM_GNU_GETTEXT */
+#undef HAVE_MKSTEMP
+#undef HAVE_MKTEMP
 #undef HAVE_MMAP		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_MUNMAP		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_NCURSES_H		/* defined if we include <ncurses.h> */
@@ -88,6 +92,7 @@
 #undef HAVE_RESOLV_H
 #undef HAVE_SETENV		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_SETLOCALE
+#undef HAVE_SETUID
 #undef HAVE_SIGACTION		/* CF_FUNC_SIGACTION */
 #undef HAVE_SIZECHANGE		/* defined by CF_SIZECHANGE */
 #undef HAVE_SRAND
@@ -98,6 +103,7 @@
 #undef HAVE_STRCHR		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_STRERROR
 #undef HAVE_STRING_H
+#undef HAVE_SYSLOG_H
 #undef HAVE_SYS_DIR_H		/* defined by AC_HEADER_DIRENT */
 #undef HAVE_SYS_FCNTL_H		/* have <sys/fcntl.h> */
 #undef HAVE_SYS_FILIO_H		/* have <sys/filio.h> */
@@ -163,7 +169,6 @@
 #undef SOCKS			/* CF_SOCKS, CF_SOCKS5 */
 #undef SOURCE_CACHE		/* CF_ARG_ENABLE(source-cache) */
 #undef STDC_HEADERS
-#undef SYSLOG_REQUESTED_URLS	/* CF_ARG_ENABLE(syslog) */
 #undef SYSTEM_MAIL		/* CF_DEFINE_PROG */
 #undef SYSTEM_MAIL_FLAGS	/* defined by CF_SYSTEM_MAIL_FLAGS */
 #undef SYSTEM_NAME		/* CF_CHECK_CACHE */
@@ -217,8 +222,6 @@
 /* FIXME:DGUX */
 /* FIXME:DGUX_OLD */
 /* FIXME:HP_TERMINAL */
-/* FIXME:NOPORT */
-/* FIXME:POSIX_JC */
 /* FIXME:REVERSE_CLEAR_SCREEN_PROBLEM */
 /* FIXME:SHORTENED_RBIND */
 /* FIXME:SNAKE */
@@ -234,6 +237,10 @@
 #undef listen
 #undef recvfrom
 #undef select
+#endif
+
+#ifdef HAVE_SYSLOG_H
+#undef SYSLOG_REQUESTED_URLS	/* CF_ARG_ENABLE(syslog) */
 #endif
 
 #ifndef HAVE_LSTAT

@@ -82,25 +82,23 @@ PUBLIC char *string_short ARGS2(
 	char *,		str,
 	int,		cut_pos)
 {
-    char buff[STRING_MAX];
+    char buff[STRING_MAX], *s, *d;
     static char s_str[STRING_MAX];
-    char *p;
     int len;
 
-    p = str;
-    len = strlen(p);
-
-    if (len > STRING_MAX) {
-	strncpy(buff, p, STRING_MAX - 1);
-	buff[STRING_MAX - 1] = '\0';
-	len = STRING_MAX - 1;
-    } else {
-	strcpy(buff, p);
-    }
+    LYstrncpy(buff, str, sizeof(buff)-1);
+    len = strlen(buff);
     if (len > (LYcols - 10)) {
 	buff[cut_pos] = '.';
 	buff[cut_pos + 1] = '.';
-	strcpy(buff + cut_pos + 2, (buff + len) - (LYcols - 10) + cut_pos + 1);
+	for (s = (buff + len) - (LYcols - 10) + cut_pos + 1,
+	     d = (buff + cut_pos) + 2;
+	     s >= buff &&
+	     d >= buff &&
+	     d < buff + LYcols &&
+	     (*d++ = *s++) != 0; )
+	    ;
+	buff[LYcols] = 0;
     }
     strcpy(s_str, buff);
     return (s_str);
@@ -117,22 +115,12 @@ PUBLIC char *string_short ARGS2(
 PUBLIC char * quote_pathname ARGS1(
 	char *, 	pathname)
 {
-    size_t n = 0;
-    char * result;
+    char * result = NULL;
 
     if (strchr(pathname, ' ') != NULL) {
-	n = strlen(pathname);
-	result = (char *)malloc(n + 3);
-	if (result == NULL)
-	    outofmem(__FILE__, "quote_pathname");
-	result[0] = '"';
-	strcpy(result + 1, pathname);
-	result[n+1] = '"';
-	result[n+2] = '\0';
+	HTSprintf0(&result, "\"%s\"", pathname);
     } else {
-	result = strdup(pathname);
-	if (result == NULL)
-	    outofmem(__FILE__, "quote_pathname");
+	StrAllocCopy(result, pathname);
     }
     return result;
 }
@@ -268,7 +256,7 @@ void run_external ARGS1(char *, c)
 		    }
 		    if (*e_buff != '\"' && strchr(e_buff, ' ') != NULL) {
 			p = quote_pathname(e_buff);
-			strcpy(e_buff, p);
+			LYstrncpy(e_buff, p, sizeof(e_buff)-1);
 			FREE(p);
 		    }
 
@@ -287,9 +275,7 @@ void run_external ARGS1(char *, c)
 	    }
 #else	/* Unix */
 	    {
-		char *cp = HTQuoteParameter(c);
-		format(&cmdbuf, externals2->command, cp);
-		FREE(cp);
+		format(&cmdbuf, externals2->command, c);
 	    }
 #endif
 #endif	/* VMS */
