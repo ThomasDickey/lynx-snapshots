@@ -275,6 +275,7 @@ install-help : $(helpdir)
 	@echo Appending interim-fix for existing html files
 	@ECHO_CC@sed	-e '/^#/d' -e '/[:@]/d' -e '/^$$/d' \
 		-e 's%\(.*\)=\(.*\.html\)$$%s=\2=\2$(COMPRESS_EXT)=%g' \
+		-e 's%\.html=%\\.html=%' \
 		$(srcdir)/lynx_help/help_files.txt >> \
 		$(helpdir)/help_files.sed
 	@echo Translating/copying html files

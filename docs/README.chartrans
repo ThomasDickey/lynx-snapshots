@@ -29,9 +29,10 @@ Lynx CHARTRANS
    can (attempt to) automatically switch terminal mode and load new
    code pages on change of display character set.
 
- - some minor changes: sometimes invalid characters are displayed in a hex
+ - some minor changes: sometimes invalid characters were displayed in a hex
    notation Uxxxx (helps debugging, but I also regard it as at least not
-   worse than showing the wrong char without warning).
+   worse than showing the wrong char without warning), now they are not
+   displayed to reduce garbage.
 
 Additions/changes to user interface:
 

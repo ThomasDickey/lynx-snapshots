@@ -655,7 +655,6 @@
 
 /* Lynx internal page titles */
 #define CONFIG_DEF_TITLE	"Configuration Definitions"
-#define CONFIG_LYNXCFG_TITLE	"Lynx.cfg Information"
 #define COOKIE_JAR_TITLE	"Cookie Jar"
 #define CURRENT_KEYMAP_TITLE	"Current Key Map"
 #define DIRED_MENU_TITLE	"File Management Options"
@@ -669,6 +668,15 @@
 #define SHOWINFO_TITLE		"Information about the current document"
 #define UPLOAD_OPTIONS_TITLE	"Upload Options"
 #define VISITED_LINKS_TITLE	"Visited Links Page"
+
+/* CONFIG_DEF_TITLE subtitles */
+#define AUTOCONF_CONFIG_CACHE \
+ "The following data were derived during the automatic configuration/build\n\
+process of this copy of Lynx.  When reporting a bug, please include a copy\n\
+of this page."
+#define AUTOCONF_LYNXCFG_H \
+ "The following data were used as automatically-configured compile-time\n\
+definitions when this copy of Lynx was built."
 
 #ifdef DIRED_SUPPORT
 #define DIRED_NOVICELINE \

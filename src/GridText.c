@@ -63,7 +63,7 @@ void LynxClearScreenCache NOARGS
 }
 #endif /* USE_COLOR_STYLE */
 
-struct _HTStream {                      /* only know it as object */
+struct _HTStream {			/* only know it as object */
     CONST HTStreamClass *       isa;
     /* ... */
 };
@@ -244,7 +244,7 @@ PRIVATE int HText_TrueLineSize PARAMS((
 
 /*
  *  text->halted = 1: have set fake 'Z' and output a message
- *                 2: next time when HText_appendCharacter is called
+ *		   2: next time when HText_appendCharacter is called
  *		      it will append *** MEMORY EXHAUSTED ***, then set
  *		      to 3.
  *		   3: normal text output will be suppressed (but not anchors,
@@ -533,7 +533,7 @@ PUBLIC HText *	HText_new ARGS1(
      * so we may start displaying the document while downloading. - LP
      */
     if (display_partial)
-         NumOfLines_partial = 0;  /* enable HTDisplayPartial() */
+	 NumOfLines_partial = 0;  /* enable HTDisplayPartial() */
 #endif
 
     CTRACE(tfp, "GridText: start HText_new\n");
@@ -541,8 +541,8 @@ PUBLIC HText *	HText_new ARGS1(
     return self;
 }
 
-/*                      Creation Method 2
-**                      ---------------
+/*			Creation Method 2
+**			---------------
 **
 **      Stream is assumed open and left open.
 */
@@ -578,9 +578,9 @@ PUBLIC void HText_free ARGS1(
 	    l->prev->next = l->next;	/* Unlink l */
 	    self->last_line = l->prev;
 	    if (l != self->last_line) {
-	        FREE(l);
+		FREE(l);
 	    } else {
-	        free(l);
+		free(l);
 	    }
 	}
 	if (l == self->last_line) {	/* empty */
@@ -768,7 +768,7 @@ PRIVATE int display_line ARGS2(
 
 #ifndef USE_COLOR_STYLE
 	    case LY_UNDERLINE_START_CHAR:
-	        if (dump_output_immediately && use_underscore) {
+		if (dump_output_immediately && use_underscore) {
 		    addch('_');
 		    i++;
 		} else {
@@ -777,7 +777,7 @@ PRIVATE int display_line ARGS2(
 		break;
 
 	    case LY_UNDERLINE_END_CHAR:
-	        if (dump_output_immediately && use_underscore) {
+		if (dump_output_immediately && use_underscore) {
 		    addch('_');
 		    i++;
 		} else {
@@ -800,7 +800,7 @@ PRIVATE int display_line ARGS2(
 		break;
 
 	    case LY_SOFT_HYPHEN:
-	        if (*data != '\0' ||
+		if (*data != '\0' ||
 		    isspace((unsigned char)LastDisplayChar) ||
 		    LastDisplayChar == '-') {
 		    /*
@@ -964,7 +964,7 @@ PRIVATE void display_title ARGS1(
 	sprintf(percent, " (p%d of %d)",
 		((text->top_of_screen >= start_of_last_page) ?
 						 total_pages :
-	            ((text->top_of_screen + display_lines)/(display_lines))),
+		    ((text->top_of_screen + display_lines)/(display_lines))),
 		total_pages);
     } else {
 	percent[0] = '\0';	/* Null string */
@@ -979,13 +979,13 @@ PRIVATE void display_title ARGS1(
 	if (*title &&
 	    (tmp = (unsigned char *)calloc(1, (strlen(title) + 1)))) {
 	    if (kanji_code == EUC) {
-	        TO_EUC((unsigned char *)title, tmp);
+		TO_EUC((unsigned char *)title, tmp);
 	    } else if (kanji_code == SJIS) {
-	        TO_SJIS((unsigned char *)title, tmp);
+		TO_SJIS((unsigned char *)title, tmp);
 	    } else {
-	        for (i = 0, j = 0; title[i]; i++) {
+		for (i = 0, j = 0; title[i]; i++) {
 		    if (title[i] != '\033') {
-		        tmp[j++] = title[i];
+			tmp[j++] = title[i];
 		    }
 		}
 		tmp[j] = '\0';
@@ -1387,9 +1387,9 @@ PRIVATE void display_page ARGS3(
 		     *	Memory leak fixed 05-27-94
 		     *	Garrett Arch Blythe
 		     */
-	            auto char *cp_AnchorAddress = NULL;
+		    auto char *cp_AnchorAddress = NULL;
 		    if (traversal)
-		        cp_AnchorAddress = stub_HTAnchor_address(link_dest);
+			cp_AnchorAddress = stub_HTAnchor_address(link_dest);
 		    else {
 #ifndef DONT_TRACK_INTERNAL_LINKS
 			if (Anchor_ptr->link_type == INTERNAL_LINK_ANCHOR) {
@@ -1428,7 +1428,7 @@ PRIVATE void display_page ARGS3(
 		links[nlinks].target = empty_string;
 		links[nlinks].form = NULL;
 
-	        nlinks++;
+		nlinks++;
 		display_flag = TRUE;
 
 	    } else if (Anchor_ptr->link_type == INPUT_ANCHOR
@@ -1477,7 +1477,7 @@ PRIVATE void display_page ARGS3(
 		links[nlinks].hightext2_offset = 0;
 
 		nlinks++;
-	        /*
+		/*
 		 *  Bold the link after incrementing nlinks.
 		 */
 		highlight(OFF, (nlinks - 1), target);
@@ -1796,7 +1796,7 @@ PRIVATE void split_line ARGS2(
 	     *  Act on the global flag if set above. - FM
 	     */
 	    if (underline_on && *p != LY_UNDERLINE_END_CHAR) {
-	        linedata[line->size++] = LY_UNDERLINE_START_CHAR;
+		linedata[line->size++] = LY_UNDERLINE_START_CHAR;
 		linedata[line->size] = '\0';
 		ctrl_chars_on_this_line++;
 		SpecialAttrChars++;
@@ -1958,7 +1958,7 @@ PRIVATE void split_line ARGS2(
 			   (unsigned)(a->line_pos + a->extent) >= split) {
 		    a->extent -= (TailTrim + HeadTrim);
 		    if (a->extent < 0) {
-		        a->extent = 0;
+			a->extent = 0;
 		    }
 		}
 	    }
@@ -1981,7 +1981,7 @@ PRIVATE void blank_lines ARGS2(
 	while ((line != text->last_line) &&
 	       (HText_TrueLineSize(line, text, IgnoreSpaces) == 0)) {
 	    if (newlines == 0)
-	        break;
+		break;
 	    newlines--;		/* Don't bother: already blank */
 	    line = line->prev;
 	}
@@ -2254,7 +2254,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		/*
 		 *  JIS X0201 Kana in SJIS support. - by ASATAKU
 		 */
-	        if ((text->kcode == SJIS) &&
+		if ((text->kcode == SJIS) &&
 		    ((unsigned char)ch >= 0xA1) &&
 		    ((unsigned char)ch <= 0xDF)) {
 		    unsigned char c = (unsigned char)ch;
@@ -2264,14 +2264,14 @@ PUBLIC void HText_appendCharacter ARGS2(
 					(unsigned char *)&c);
 		    ch = (char)c;
 		    text->kanji_buf = (char)kb;
-	        } else {
+		} else {
 		    text->kanji_buf = ch;
 		    /*
 		     *  Can split here. - FM
 		     */
 		    text->permissible_split = text->last_line->size;
 		    return;
-	        }
+		}
 	    }
 	} else {
 	    goto check_IgnoreExcess;
@@ -2282,7 +2282,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 
     if (IsSpecialAttrChar(ch)) {
 #ifndef USE_COLOR_STYLE
-        if (line->size >= (MAX_LINE-1)) return;
+	if (line->size >= (MAX_LINE-1)) return;
 	if (ch == LY_UNDERLINE_START_CHAR) {
 	    line->data[line->size++] = LY_UNDERLINE_START_CHAR;
 	    line->data[line->size] = '\0';
@@ -2420,10 +2420,10 @@ PUBLIC void HText_appendCharacter ARGS2(
 	    target = Tab->position;
 	} else if (text->in_line_1) {	/* Use 2nd indent */
 	    if (here >= (int)style->leftIndent) {
-	        new_line(text); /* wrap */
+		new_line(text); /* wrap */
 		return;
 	    } else {
-	        target = (int)style->leftIndent;
+		target = (int)style->leftIndent;
 	    }
 	} else {		/* Default tabs align with left indent mod 8 */
 #ifdef DEFAULT_TABS_8
@@ -2444,13 +2444,13 @@ PUBLIC void HText_appendCharacter ARGS2(
 	     */
 	    text->permissible_split = line->size;
 	    if (line->size == 0) {
-	        line->offset = line->offset + target - here;
+		line->offset = line->offset + target - here;
 	    } else {
-	        for (; here<target; here++) {
+		for (; here<target; here++) {
 		    /* Put character into line */
 		    line->data[line->size++] = ' ';
 		    line->data[line->size] = '\0';
-	        }
+		}
 	    }
 	}
 	return;
@@ -2754,7 +2754,7 @@ PUBLIC void HText_endAnchor ARGS2(
     } else {
 	for (a = text->first_anchor; a; a = a->next) {
 	    if (a->number == number) {
-	        break;
+		break;
 	    }
 	}
 	if (a == NULL) {
@@ -2818,7 +2818,7 @@ PUBLIC void HText_endAnchor ARGS2(
 	j = (last->size - i);
 	while (j < last->size) {
 	    if (!IsSpecialAttrChar(last->data[j]) &&
-	        !isspace((unsigned char)last->data[j]) &&
+		!isspace((unsigned char)last->data[j]) &&
 		last->data[j] != HT_NON_BREAK_SPACE &&
 		last->data[j] != HT_EM_SPACE)
 		break;
@@ -2854,20 +2854,20 @@ PUBLIC void HText_endAnchor ARGS2(
 	while (i == 0 && a->extent > CurBlankExtent) {
 	    j = prev->size - a->extent + CurBlankExtent;
 	    if (j < 0) {
-	        /*
+		/*
 		 *  The anchor starts on a preceding line,
 		 *  so check all of this line. - FM
 		 */
-	        j = 0;
+		j = 0;
 		i = prev->size;
 	    } else {
-	        /*
+		/*
 		 *  The anchor starts on this line. - FM
 		 */
-	        i = a->extent - CurBlankExtent;
+		i = a->extent - CurBlankExtent;
 	    }
 	    while (j < prev->size) {
-	        if (!IsSpecialAttrChar(prev->data[j]) &&
+		if (!IsSpecialAttrChar(prev->data[j]) &&
 		    !isspace((unsigned char)prev->data[j]) &&
 		    prev->data[j] != HT_NON_BREAK_SPACE &&
 		    prev->data[j] != HT_EM_SPACE)
@@ -2958,15 +2958,15 @@ PUBLIC void HText_endAnchor ARGS2(
 		    j--;
 		    NumSize++;
 		    while (j >= 0 && isdigit((unsigned char)start->data[j])) {
-		        j--;
+			j--;
 			NumSize++;
 		    }
 		    while (j < 0) {
-		        j++;
+			j++;
 			NumSize--;
 		    }
 		    if (start->data[j] == '[') {
-		        /*
+			/*
 			 *  The numbered bracket is entirely
 			 *  on this line. - FM
 			 */
@@ -2980,16 +2980,16 @@ PUBLIC void HText_endAnchor ARGS2(
 			    anc->start -= NumSize;
 			    anc->line_pos -= NumSize;
 			}
-		        start->size = j;
+			start->size = j;
 			start->data[j++] = '\0';
 			while (j < k)
 			     start->data[j++] = '\0';
 		    } else if (prev && prev->size > 1) {
 			k = (i + 1);
 			j = (prev->size - 1);
-		        while ((j >= 0) && IsSpecialAttrChar(prev->data[j]))
+			while ((j >= 0) && IsSpecialAttrChar(prev->data[j]))
 			    j--;
-		        i = (j + 1);
+			i = (j + 1);
 			while (j >= 0 &&
 			       isdigit((unsigned char)prev->data[j])) {
 			    j--;
@@ -3020,9 +3020,9 @@ PUBLIC void HText_endAnchor ARGS2(
 			    j = 0;
 			    i = k;
 			    while (k < start->size)
-			        start->data[j++] = start->data[k++];
+				start->data[j++] = start->data[k++];
 			    if (start != last)
-			        text->chars -= i;
+				text->chars -= i;
 			    for (anc = a; anc; anc = anc->next) {
 				anc->start -= i;
 				anc->line_pos -= i;
@@ -3030,7 +3030,7 @@ PUBLIC void HText_endAnchor ARGS2(
 			    start->size = j;
 			    start->data[j++] = '\0';
 			    while (j < k)
-			        start->data[j++] = '\0';
+				start->data[j++] = '\0';
 			} else {
 			    /*
 			     *  Shucks!  We didn't find the
@@ -3048,16 +3048,16 @@ PUBLIC void HText_endAnchor ARGS2(
 		} else if (prev && prev->size > 2) {
 		    j = (prev->size - 1);
 		    while ((j >= 0) && IsSpecialAttrChar(prev->data[j]))
-		        j--;
+			j--;
 		    if (j < 0)
-		        j = 0;
+			j = 0;
 		    i = (j + 1);
 		    if ((j > 2) &&
-		        (prev->data[j] == ']' &&
+			(prev->data[j] == ']' &&
 			 isdigit((unsigned char)prev->data[j - 1]))) {
-		        j--;
+			j--;
 			NumSize++;
-		        k = (j + 1);
+			k = (j + 1);
 			while (j >= 0 &&
 			       isdigit((unsigned char)prev->data[j])) {
 			    j--;
@@ -3097,7 +3097,7 @@ PUBLIC void HText_endAnchor ARGS2(
 			 *  Shucks!  We didn't find the
 			 *  numbered bracket. - FM
 			 */
-		        a->show_anchor = YES;
+			a->show_anchor = YES;
 		    }
 		} else {
 		    /*
@@ -3126,7 +3126,7 @@ PUBLIC void HText_endAnchor ARGS2(
 	    a->extent = 0;
 	    if (text->hiddenlinkflag != HIDDENLINKS_MERGE) {
 		a->number = 0;
-	        text->last_anchor_number--;
+		text->last_anchor_number--;
 		HText_AddHiddenLink(text, a);
 	    }
 	} else {
@@ -3277,6 +3277,9 @@ PUBLIC void HText_trimHightext ARGS2(
 
     CTRACE(tfp,"Gridtext: Entering HText_trimHightext\n");
 
+    if (disable_trace)
+    CTRACE(tfp,"HText_trimHightext: trace disabled in display_partial mode\n");
+
     /*
      *  Get the first line.
      */
@@ -3321,7 +3324,7 @@ re_parse:
 	if (anchor_ptr->link_type & HYPERTEXT_ANCHOR) {
 	    ch = (unsigned char)line_ptr->data[anchor_ptr->line_pos];
 	    while (isspace(ch) ||
-	           IsSpecialAttrChar(ch)) {
+		   IsSpecialAttrChar(ch)) {
 		anchor_ptr->line_pos++;
 		anchor_ptr->extent--;
 		cur_shift++;
@@ -3333,8 +3336,8 @@ re_parse:
 	}
 
 	if (!disable_trace)
-	CTRACE(tfp, "anchor text: '%s'   col: %d\n",
-			    line_ptr->data, anchor_ptr->line_pos);
+	CTRACE(tfp, "anchor text: '%s'\n",
+					   line_ptr->data);
 	/*
 	 *  If the link begins with an end of line and we have more
 	 *  lines, then start the highlighting on the next line. - FM
@@ -3375,7 +3378,7 @@ re_parse:
 			      line_ptr2->data,
 			      (anchor_ptr->extent -
 			       strlen(anchor_ptr->hightext)));
-	        anchor_ptr->hightext2offset = line_ptr2->offset;
+		anchor_ptr->hightext2offset = line_ptr2->offset;
 		remove_special_attr_chars(anchor_ptr->hightext2);
 		if (anchor_ptr->link_type & HYPERTEXT_ANCHOR) {
 		    LYTrimTrailing(anchor_ptr->hightext2);
@@ -3411,8 +3414,8 @@ re_parse:
 	anchor_ptr->line_num  = cur_line;
 
 	if (!disable_trace)
-	CTRACE(tfp, "GridText:     add link on line %d in HText_trimHightext\n",
-		    cur_line);
+	CTRACE(tfp, "GridText:     add link on line %d col %d in HText_trimHightext\n",
+		    cur_line, anchor_ptr->line_pos);
 
 	/*
 	 *  If this is the last anchor, we're done!
@@ -3484,7 +3487,7 @@ PUBLIC void HText_FormDescNumber ARGS2(
     for (a = HTMainText->first_anchor; a; a = a->next) {
 	if (a->number == number) {
 	    if (!(a->input_field && a->input_field->type)) {
-	        *desc = "unknown field or link";
+		*desc = "unknown field or link";
 		return;
 	    }
 	    break;
@@ -3627,7 +3630,7 @@ PUBLIC int HTGetLinkInfo ARGS6(
 		     */
 		    return(NO);
 		}
-	        if (anchors_this_screen > 0 &&
+		if (anchors_this_screen > 0 &&
 		    anchors_this_screen <= nlinks &&
 		    a->line_num >= HTMainText->top_of_screen &&
 		    a->line_num < HTMainText->top_of_screen+(display_lines)) {
@@ -3639,7 +3642,7 @@ PUBLIC int HTGetLinkInfo ARGS6(
 		     */
 		    *go_line = HTMainText->top_of_screen;
 		    if (linknum)
-		        *linknum = anchors_this_screen - 1;
+			*linknum = anchors_this_screen - 1;
 		} else {
 		    /*
 		     *  if the requested anchor is not within the currently
@@ -3663,13 +3666,13 @@ PUBLIC int HTGetLinkInfo ARGS6(
 			max_offset = display_lines - 1;
 		    *go_line = prev_anchor_line - max_offset;
 		    if (*go_line <= prev_prev_anchor_line)
-		        *go_line = prev_prev_anchor_line + 1;
+			*go_line = prev_prev_anchor_line + 1;
 		    if (*go_line < 0)
-		        *go_line = 0;
+			*go_line = 0;
 		    if (linknum)
-		        *linknum = anchors_this_line - 1;
-	        }
-	        return(LINK_LINE_FOUND);
+			*linknum = anchors_this_line - 1;
+		}
+		return(LINK_LINE_FOUND);
 	    } else {
 		*hightext= a->hightext;
 		link_dest = HTAnchor_followMainLink((HTAnchor *)a->anchor);
@@ -3921,12 +3924,12 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
 	    !strcasecomp(dot, ".gz") ||
 	    !strcasecomp(dot, ".Z")) {
 	    if (!method) {
-	        /*
+		/*
 		 *  It has a suffix which signifies a gzipped
 		 *  or compressed file for us, but the anchor
 		 *  claims otherwise, so tweak the suffix. - FM
 		 */
-	        cp = (dot + 1);
+		cp = (dot + 1);
 		*dot = '\0';
 		if (!strcasecomp(cp, "tgz")) {
 		    StrAllocCat(*fname, ".tar");
@@ -3939,7 +3942,7 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
 	    if (!strcasecomp(cp, "-gz") ||
 		!strcasecomp(cp, "_gz")) {
 		if (!method) {
-	            /*
+		    /*
 		     *  It has a tail which signifies a gzipped
 		     *  file for us, but the anchor claims otherwise,
 		     *  so tweak the suffix. - FM
@@ -3969,7 +3972,7 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
 	    if (!strcasecomp(cp, "-Z") ||
 		!strcasecomp(cp, "_Z")) {
 		if (!method) {
-	            /*
+		    /*
 		     *  It has a tail which signifies a compressed
 		     *  file for us, but the anchor claims otherwise,
 		     *  so tweak the suffix. - FM
@@ -4348,7 +4351,7 @@ PUBLIC BOOL HText_selectAnchor ARGS2(
 	if ( !text->stale &&
 	     (l >= text->top_of_screen) &&
 	     ( l < text->top_of_screen + display_lines+1))
-	         return YES;
+		 return YES;
 
 	www_search_result = l - (display_lines/3); /* put in global variable */
     }
@@ -4540,7 +4543,7 @@ PUBLIC int do_www_search ARGS1(
 	strcpy(searchstring, ++cp);
 	for (cp=searchstring; *cp; cp++)
 	    if (*cp == '+')
-	        *cp = ' ';
+		*cp = ' ';
 	HTUnEscape(searchstring);
 	strcpy(temp, searchstring);
 	/*
@@ -4575,22 +4578,22 @@ get_query:
 	*searchstring == '\0' || ch == UPARROW || ch == DNARROW) {
 	if (recall && ch == UPARROW) {
 	    if (PreviousSearch) {
-	        /*
+		/*
 		 *  Use the second to last query in the list. - FM
 		 */
-	        QueryNum = 1;
+		QueryNum = 1;
 		PreviousSearch = FALSE;
 	    } else {
-	        /*
+		/*
 		 *  Go back to the previous query in the list. - FM
 		 */
-	        QueryNum++;
+		QueryNum++;
 	    }
 	    if (QueryNum >= QueryTotal)
-	        /*
+		/*
 		 *  Roll around to the last query in the list. - FM
 		 */
-	        QueryNum = 0;
+		QueryNum = 0;
 	    if ((cp=(char *)HTList_objectAt(search_queries,
 					    QueryNum)) != NULL) {
 		strcpy(searchstring, cp);
@@ -4606,19 +4609,19 @@ get_query:
 	    }
 	} else if (recall && ch == DNARROW) {
 	    if (PreviousSearch) {
-	        /*
+		/*
 		 *  Use the first query in the list. - FM
 		 */
-	        QueryNum = QueryTotal - 1;
+		QueryNum = QueryTotal - 1;
 		PreviousSearch = FALSE;
 	    } else {
-	        /*
+		/*
 		 *  Advance to the next query in the list. - FM
 		 */
-	        QueryNum--;
+		QueryNum--;
 	    }
 	    if (QueryNum < 0)
-	        /*
+		/*
 		 *  Roll around to the first query in the list. - FM
 		 */
 		QueryNum = QueryTotal - 1;
@@ -4754,7 +4757,7 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 	    fputc('>',fp);
 	}
 
-        /*
+	/*
 	 *  Add offset.
 	 */
 	for (i = 0; i < (int)line->offset; i++) {
@@ -5013,7 +5016,7 @@ PUBLIC void www_user_search ARGS3(
 		if ((a->input_field != NULL && a->input_field->value != NULL) &&
 		    a->input_field->type != F_HIDDEN_TYPE) {
 		    if (a->input_field->type == F_PASSWORD_TYPE) {
-		        /*
+			/*
 			 *  Check the actual, hidden password, and then
 			 *  the displayed string. - FM
 			 */
@@ -5062,7 +5065,7 @@ PUBLIC void www_user_search ARGS3(
 			/*
 			 *  Search for checked or unchecked parens. - FM
 			 */
-		        if (a->input_field->num_value) {
+			if (a->input_field->num_value) {
 			    cp = checked_radio;
 			} else {
 			    cp = unchecked_radio;
@@ -5079,7 +5082,7 @@ PUBLIC void www_user_search ARGS3(
 			 *  Search for checked or unchecked
 			 *  square brackets. - FM
 			 */
-		        if (a->input_field->num_value) {
+			if (a->input_field->num_value) {
 			    cp = checked_box;
 			} else {
 			    cp = unchecked_box;
@@ -5092,7 +5095,7 @@ PUBLIC void www_user_search ARGS3(
 			    return;
 			}
 		    } else {
-		        /*
+			/*
 			 *  Check the values intended for display.
 			 *  May have been found already via the
 			 *  hightext search, but make sure here
@@ -5172,7 +5175,7 @@ PUBLIC void www_user_search ARGS3(
 		if ((a->input_field != NULL && a->input_field->value != NULL) &&
 		    a->input_field->type != F_HIDDEN_TYPE) {
 		    if (a->input_field->type == F_PASSWORD_TYPE) {
-		        /*
+			/*
 			 *  Check the actual, hidden password, and then
 			 *  the displayed string. - FM
 			 */
@@ -5221,7 +5224,7 @@ PUBLIC void www_user_search ARGS3(
 			/*
 			 *  Search for checked or unchecked parens. - FM
 			 */
-		        if (a->input_field->num_value) {
+			if (a->input_field->num_value) {
 			    cp = checked_radio;
 			} else {
 			    cp = unchecked_radio;
@@ -5238,7 +5241,7 @@ PUBLIC void www_user_search ARGS3(
 			 *  Search for checked or unchecked
 			 *  square brackets. - FM
 			 */
-		        if (a->input_field->num_value) {
+			if (a->input_field->num_value) {
 			    cp = checked_box;
 			} else {
 			    cp = unchecked_box;
@@ -5251,7 +5254,7 @@ PUBLIC void www_user_search ARGS3(
 			    return;
 			}
 		    } else {
-		        /*
+			/*
 			 *  Check the values intended for display.
 			 *  May have been found already via the
 			 *  hightext search, but make sure here
@@ -5276,17 +5279,17 @@ PUBLIC void www_user_search ARGS3(
 	}
 
 	    if (case_sensitive && LYno_attr_char_strstr(line->data, target)) {
-	        tentative_result=count;
+		tentative_result=count;
 		break;
 	    } else if (!case_sensitive &&
 		       LYno_attr_char_case_strstr(line->data, target)) {
-	        tentative_result = count;
+		tentative_result = count;
 		break;
 	    } else if (count > start_line) {  /* next line */
 		HTUserMsg2(STRING_NOT_FOUND, target);
-	        return;			/* end */
+		return; 		/* end */
 	    } else {
-	        line = line->next;
+		line = line->next;
 		count++;
 	}
     }
@@ -5544,7 +5547,7 @@ PRIVATE int HText_TrueLineSize ARGS3(
 		(!(text && text->T.output_utf8) ||
 		 (unsigned char)line->data[i] < 128 ||
 		 ((unsigned char)(line->data[i] & 0xc0) == 0xc0)) &&
-	        !isspace((unsigned char)line->data[i]) &&
+		!isspace((unsigned char)line->data[i]) &&
 		(unsigned char)line->data[i] != HT_NON_BREAK_SPACE &&
 		(unsigned char)line->data[i] != HT_EM_SPACE) {
 		true_size++;
@@ -5656,7 +5659,7 @@ PUBLIC void HText_setTabID ARGS2(
     } else {
 	while (NULL != (Tab = (HTTabID *)HTList_nextObject(cur))) {
 	    if (Tab->name && !strcmp(Tab->name, name))
-	        return; /* Already set.  Keep the first value. */
+		return; /* Already set.  Keep the first value. */
 	    last = cur;
 	}
 	if (last)
@@ -5684,7 +5687,7 @@ PUBLIC int HText_getTabIDColumn ARGS2(
     if (text && name && *name && cur) {
 	while (NULL != (Tab = (HTTabID *)HTList_nextObject(cur))) {
 	    if (Tab->name && !strcmp(Tab->name, name))
-	        break;
+		break;
 	}
 	if (Tab)
 	    column = Tab->column;
@@ -5884,7 +5887,7 @@ PUBLIC void HText_endForm ARGS1(
 	 */
 	while (a) {
 	    if (a->link_type == INPUT_ANCHOR &&
-	        a->input_field->number == HTFormNumber &&
+		a->input_field->number == HTFormNumber &&
 		a->input_field->type == F_TEXT_TYPE) {
 		/*
 		 *  Got it.  Make it submitting. - FM
@@ -5903,7 +5906,7 @@ PUBLIC void HText_endForm ARGS1(
 		break;
 	    }
 	    if (a == text->last_anchor)
-	        break;
+		break;
 	    a = a->next;
 	}
     }
@@ -6032,13 +6035,13 @@ PRIVATE char * HText_skipOptionNumPrefix ARGS1(
 	if ((cp && *cp && *cp++ == '(') &&
 	    *cp && isdigit(*cp++)) {
 	    while (*cp && isdigit(*cp))
-	        ++cp;
+		++cp;
 	    if (*cp && *cp++ == ')') {
 		int i = (cp - opname);
 
 		while (i < 5) {
 		    if (*cp != '_')
-		        break;
+			break;
 		    i++;
 		    cp++;
 		}
@@ -6046,7 +6049,7 @@ PRIVATE char * HText_skipOptionNumPrefix ARGS1(
 		    cp = opname;
 		}
 	    } else {
-	        cp = opname;
+		cp = opname;
 	    }
 	} else {
 	    cp = opname;
@@ -6171,7 +6174,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	    new_ptr = text->last_anchor->input_field->select_list =
 				(OptionType *)calloc(1, sizeof(OptionType));
 	    if (new_ptr == NULL)
-	        outofmem(__FILE__, "HText_setLastOptionValue");
+		outofmem(__FILE__, "HText_setLastOptionValue");
 
 	    first_option = TRUE;
 	} else {
@@ -6184,7 +6187,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	    op_ptr->next = new_ptr =
 				(OptionType *)calloc(1, sizeof(OptionType));
 	    if (new_ptr == NULL)
-	        outofmem(__FILE__, "HText_setLastOptionValue");
+		outofmem(__FILE__, "HText_setLastOptionValue");
 	}
 
 	new_ptr->name = NULL;
@@ -6192,7 +6195,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	new_ptr->next = NULL;
 	for (i = 0, j = 0; cp[i]; i++) {
 	    if (cp[i] == HT_NON_BREAK_SPACE ||
-	        cp[i] == HT_EM_SPACE) {
+		cp[i] == HT_EM_SPACE) {
 		cp[j++] = ' ';
 	    } else if (cp[i] != LY_SOFT_HYPHEN &&
 		       !IsSpecialAttrChar((unsigned char)cp[i])) {
@@ -6202,7 +6205,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	cp[j] = '\0';
 	if (HTCJK != NOCJK) {
 	    if (cp &&
-	        (tmp = (unsigned char *)calloc(1, strlen(cp)+1))) {
+		(tmp = (unsigned char *)calloc(1, strlen(cp)+1))) {
 		if (kanji_code == EUC) {
 		    TO_EUC((unsigned char *)cp, tmp);
 		    val_cs = current_char_set;
@@ -6211,7 +6214,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 		    val_cs = current_char_set;
 		} else {
 		    for (i = 0, j = 0; cp[i]; i++) {
-		        if (cp[i] != '\033') {
+			if (cp[i] != '\033') {
 			    tmp[j++] = cp[i];
 			}
 		    }
@@ -6309,7 +6312,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 		    (submit_val_cs >= 0 ?
 		     LYCharSet_UC[submit_val_cs].MIMEname : "<UNKNOWN>"),
 		    (HTCurSelectGroupType == F_CHECKBOX_TYPE) ?
-		                                  "(ignored)" : "",
+						  "(ignored)" : "",
 		    submit_value);
 	}
 	else {
@@ -6372,7 +6375,7 @@ PUBLIC int HText_beginInput ARGS3(
 	    TextAnchor * b = text->first_anchor;
 	    int i2 = 0;
 	    while (b) {
-	        if (b->link_type == INPUT_ANCHOR &&
+		if (b->link_type == INPUT_ANCHOR &&
 		    b->input_field->type == F_RADIO_TYPE &&
 		    b->input_field->number == HTFormNumber) {
 		    if (!strcmp(b->input_field->name, I->name)) {
@@ -6434,7 +6437,7 @@ PUBLIC int HText_beginInput ARGS3(
 	    } else {
 		for (i = 0, j = 0; IValue[i]; i++) {
 		    if (IValue[i] != '\033') {
-		        tmp[j++] = IValue[i];
+			tmp[j++] = IValue[i];
 		    }
 		}
 	    }
@@ -6740,9 +6743,9 @@ PUBLIC int HText_beginInput ARGS3(
 	     *  account as well. - FM
 	     */
 	    if (keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED)
-	        MaximumSize -= ((a->number/10) + 3);
+		MaximumSize -= ((a->number/10) + 3);
 	    if (f->size > MaximumSize)
-	        f->size = MaximumSize;
+		f->size = MaximumSize;
 
 	    /*
 	     *  Save value for submit/reset buttons so they
@@ -7044,10 +7047,15 @@ PUBLIC void HText_SubmitForm ARGS4(
 	HTMainText->node_anchor->charset &&
 	*HTMainText->node_anchor->charset) {
 	target_cs = UCGetLYhndl_byMIME(HTMainText->node_anchor->charset);
-	if (target_cs < 0) {
+	if (target_cs >= 0) {
+	    target_csname = HTMainText->node_anchor->charset;
+	} else {
 	    target_cs = UCLYhndl_for_unspec; /* always >= 0 */
+	    target_csname = LYCharSet_UC[target_cs].MIMEname;
 	}
-	target_csname = LYCharSet_UC[target_cs].MIMEname;
+    }
+    if (target_cs < 0) {
+	target_cs = UCLYhndl_for_unspec;  /* always >= 0 */
     }
 
     /*
@@ -7063,22 +7071,22 @@ PUBLIC void HText_SubmitForm ARGS4(
 
 		char *p;
 		char * val;
-	        form_ptr = anchor_ptr->input_field;
+		form_ptr = anchor_ptr->input_field;
 		val = form_ptr->cp_submit_value != NULL ?
-			            form_ptr->cp_submit_value : form_ptr->value;
+				    form_ptr->cp_submit_value : form_ptr->value;
 		field_has_8bit = NO;
 		field_has_special = NO;
 
-	        len += (strlen(form_ptr->name) + (Boundary ? 100 : 10));
+		len += (strlen(form_ptr->name) + (Boundary ? 100 : 10));
 		/*
 		 *  Calculate by the option submit value if present.
 		 */
 		if (form_ptr->cp_submit_value != NULL) {
 		    len += (strlen(form_ptr->cp_submit_value) + 10);
 		} else {
-	            len += (strlen(form_ptr->value) + 10);
+		    len += (strlen(form_ptr->value) + 10);
 		}
-	        len += 32; /* plus and ampersand + safety net */
+		len += 32; /* plus and ampersand + safety net */
 
 		for (p = val;
 		     p && *p && !(field_has_8bit && field_has_special);
@@ -7146,7 +7154,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 		}
 
 	    } else if (anchor_ptr->input_field->number > form_number) {
-	        break;
+		break;
 	    }
 	}
 
@@ -7269,16 +7277,16 @@ PUBLIC void HText_SubmitForm ARGS4(
 		    textarea_lineno = 0;
 
 		switch(form_ptr->type) {
-	        case F_RESET_TYPE:
+		case F_RESET_TYPE:
 		    break;
-	        case F_SUBMIT_TYPE:
-	        case F_TEXT_SUBMIT_TYPE:
-	        case F_IMAGE_SUBMIT_TYPE:
+		case F_SUBMIT_TYPE:
+		case F_TEXT_SUBMIT_TYPE:
+		case F_IMAGE_SUBMIT_TYPE:
 		    if (!(form_ptr->name && *form_ptr->name != '\0' &&
 			  !strcmp(form_ptr->name, link_name))) {
 			CTRACE(tfp,
 				    "SubmitForm: skipping submit field with ");
-			CTRACE(tfp, "name \"%s\" for link_name \"%s\", %s.",
+			CTRACE(tfp, "name \"%s\" for link_name \"%s\", %s.\n",
 				    form_ptr->name ? form_ptr->name : "???",
 				    link_name ? link_name : "???",
 				    (form_ptr->name && *form_ptr->name) ?
@@ -7292,7 +7300,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 			    fprintf(tfp,
 				    "SubmitForm: skipping submit field with ");
 			    fprintf(tfp,
-				    "name \"%s\" for link_name \"%s\", %s!",
+				    "name \"%s\" for link_name \"%s\", %s!\n",
 				    form_ptr->name ? form_ptr->name : "???",
 				    link_name ? link_name : "???",
 				    "values are different");
@@ -7300,11 +7308,11 @@ PUBLIC void HText_SubmitForm ARGS4(
 			break;
 		    }
 		    /*  fall through  */
-	        case F_RADIO_TYPE:
+		case F_RADIO_TYPE:
 		case F_CHECKBOX_TYPE:
 		case F_TEXTAREA_TYPE:
 		case F_PASSWORD_TYPE:
-	        case F_TEXT_TYPE:
+		case F_TEXT_TYPE:
 		case F_OPTION_LIST_TYPE:
 		case F_HIDDEN_TYPE:
 		    /*
@@ -7825,9 +7833,9 @@ PUBLIC void HText_SubmitForm ARGS4(
 		    FREE(copied_name_used);
 		    FREE(copied_val_used);
 		    break;
-	        }
+		}
 	    } else if (anchor_ptr->input_field->number > form_number) {
-	        break;
+		break;
 	    }
 	}
 
@@ -7851,7 +7859,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 			      *submit_item->submit_title) ?
 			      (submit_item->submit_title) :
 					(HText_getTitle() ?
-				         HText_getTitle() : "")));
+					 HText_getTitle() : "")));
 	CTRACE(tfp,"GridText - mailto_content: %s\n",query);
 	mailform((submit_item->submit_action+7),
 		 ((submit_item->submit_title &&
@@ -7933,9 +7941,9 @@ PUBLIC void HText_ResetForm ARGS1(
 		     anchor_ptr->input_field->type == F_CHECKBOX_TYPE) {
 
 		    if (anchor_ptr->input_field->orig_value[0] == '0')
-		        anchor_ptr->input_field->num_value = 0;
+			anchor_ptr->input_field->num_value = 0;
 		    else
-		        anchor_ptr->input_field->num_value = 1;
+			anchor_ptr->input_field->num_value = 1;
 
 		 } else if (anchor_ptr->input_field->type ==
 			    F_OPTION_LIST_TYPE) {
@@ -7945,7 +7953,7 @@ PUBLIC void HText_ResetForm ARGS1(
 		    anchor_ptr->input_field->cp_submit_value =
 				anchor_ptr->input_field->orig_submit_value;
 
-	         } else {
+		 } else {
 		    StrAllocCopy(anchor_ptr->input_field->value,
 					anchor_ptr->input_field->orig_value);
 		 }
@@ -7979,13 +7987,13 @@ PUBLIC void HText_activateRadioButton ARGS1(
 	    if (anchor_ptr->input_field->number == form_number) {
 
 		    /* if it has the same name and its on */
-	         if (!strcmp(anchor_ptr->input_field->name, form->name) &&
+		 if (!strcmp(anchor_ptr->input_field->name, form->name) &&
 		     anchor_ptr->input_field->num_value) {
 		    anchor_ptr->input_field->num_value = 0;
 		    break;
-	         }
+		 }
 	    } else if (anchor_ptr->input_field->number > form_number) {
-	            break;
+		    break;
 	    }
 
 	}

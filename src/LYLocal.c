@@ -240,6 +240,7 @@ PRIVATE BOOLEAN ok_stat ARGS2(char *, name, struct stat*, sb)
 {
     char tmpbuf[LY_MAXPATH+80];
 
+    CTRACE(tfp, "testing ok_stat(%s)\n", name);
     if (stat(name, sb) < 0) {
 	sprintf(tmpbuf, "Unable to get status of '%s'.", name);
 	HTAlert(tmpbuf);
@@ -253,6 +254,7 @@ PRIVATE BOOLEAN ok_lstat ARGS2(char *, name, struct stat*, sb)
 {
     char tmpbuf[LY_MAXPATH+80];
 
+    CTRACE(tfp, "testing ok_lstat(%s)\n", name);
     if (lstat(name, sb) < 0) {
 	sprintf(tmpbuf, "Unable to get status of '%s'.", name);
 	HTAlert(tmpbuf);
@@ -638,7 +640,8 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	/*
 	 *  Allow ~/ references to the home directory.
 	 */
-	if (!strncmp(tmpbuf,"~/",2)) {
+	if (!strncmp(tmpbuf, "~/", 2)
+	 || !strcmp(tmpbuf,"~")) {
 	    strcpy(newpath, Home_Dir());
 	    strcat(newpath, (tmpbuf + 1));
 	    strcpy(tmpbuf, newpath);
@@ -665,7 +668,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	if (!ok_stat(newpath, &dir_info)) {
 	    return 0;
 	}
-	if (S_ISDIR(dir_info.st_mode)) {
+	if (!S_ISDIR(dir_info.st_mode)) {
 	    HTAlert("Destination is not a valid directory! Request denied.");
 	    return 0;
 	}

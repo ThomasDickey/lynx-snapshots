@@ -246,12 +246,12 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    cp = LYSkipBlanks(cp);
-	    for (; LYchar_set_names[i]; i++) {
-		if (!strncmp(cp, LYchar_set_names[i], strlen(cp))) {
-		    current_char_set=i;
-		    break;
-		}
-	    }
+
+	    i = UCGetLYhndl_byAnyName(cp); /* by MIME or full name */
+	    if (i < 0)
+		; /* do nothing here: so fallback to lynx.cfg */
+	    else
+		current_char_set = i;
 
 	/*
 	 *  Preferred language.

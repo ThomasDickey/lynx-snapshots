@@ -1,6 +1,32 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-09-25 (2.8.1pre.2)
+* fixed forms submission charset: was broken by me in dev26 (HText_SubmitForm()
+  in GridText.c) - LP
+* documentation updates for verbose images - LP
+* minor fix for trace message in TrimHightext() -LP
+* add compatibility with 2.8/2.7.2 lynx.cfg and (especially) .lynxrc - old
+  "character_set" parameter now acceptable - LP
+* add OUTGOING_MAIL_CHARSET symbol to lynx.cfg to make mail more recognizable
+  by remote recipient, it may be "US-ASCII" for 7 bit approximation as the
+  safest case or any other value.  If blank, use display character set
+  (default, compatibility).  Currently implemented only for "subject" in
+  "print-to-email" - LP
+* fix SGML.c so invalid characters are not dispalayed in hex UHHHH but just
+  omitted as already done for plain/text mode - LP
+* fix download' suggested file name (8bit) - LP
+* correct logic error in "Change Location" command, and allow "~" there in
+  addition to the existing "~/" prefix (reported by Ismael Cordeiro) - TD
+* ifdef'd out "don't replace '\n' with ' ' if Chinese or Japanese" from dev.23,
+  with symbol EXP_JAPANESE_SPACES, FIX_JAPANESE_SPACES based on discussion with
+  HN, LP - TD
+* correct missing '\' in generated sed-script for "make install-help" rule,
+  which changed a couple of "/html" substrings to ".html" (reported by BL) - TD
+* modify cfg_defs.sh script to handle empty token in config.cache, e.g., a line
+  such as "foo=${foo=}" (reported by Philip Chong <pchong@boopsie.ml.org>) - TD
+* modify so that lynx_cfg_infopage() and lynx_compile_opts() pages are not
+  invoked when Lynx is running -anonymous - TD
 1998-09-22 (2.8.1pre.1)
 * correct logic error in parse_restrictions() which caused infinite loop,
   probably from changes in dev.8 (reported by HN) - TD
@@ -23,8 +49,11 @@ Changes since Lynx 2.8 release
 * make download and print menus a little more compact in intermediate/advanced
   user modes - TD
 * correct filename shown in download menu - LP
-* change behavior of configure --enable-forms-options switch so that both old
-  and new forms are available via a command-line toggle, "-forms_options" - LP
+* change behavior of configure --enable-forms-options switch.  By default, both
+  old and new options menu are available via a command-line toggle
+  "-forms_options" or lynx.cfg statement "FORMS_OPTIONS:TRUE/FALSE".  Configure
+  --enable-forms-options now _disables_ old-style code, which is
+  ifdef'ed with "#ifndef EXP_FORMS_OPTIONS" - LP
 * add more pointer-checks in GridText.c so that "lynx LYNXDOWNLOAD://" does
   not crash (reported by Wilson Cheung) - TD
 * add special case to handle NNTPSERVER environment variable, which had been
@@ -34,8 +63,11 @@ Changes since Lynx 2.8 release
   lines from lynx.cfg - LP, TD
 * use function wwwName to reduce clutter - LP
 * create "lynx.cfg Information" page, comments skipped, "include" OK.
-  The link is available from '='InfoPage and 'O'ptions menu.  It is assumed
-  that distribution's "lynx.cfg" now in lynx_help/ as most advanced info. - LP
+  The link is available from '='InfoPage and 'O'ptions menu.
+  Since DJGPP/Win32 binary have no built-in absolute path for distributions
+  lynx.cfg those ports will look for a copy of lynx.cfg in lynx_help/
+  for most advanced info/comments (if you made http:// depository for lynx help
+  please care of it) - LP
 * tweak helpfilepath URL (for DOSPATH only) - LP
 * some cleanup of cp852, cp850, cp775 - LP
 1998-09-17 (2.8.1dev.28)

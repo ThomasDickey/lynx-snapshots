@@ -168,6 +168,7 @@ PUBLIC BOOLEAN nolist = FALSE;
 PUBLIC BOOLEAN historical_comments = FALSE;
 PUBLIC BOOLEAN minimal_comments = FALSE;
 PUBLIC BOOLEAN soft_dquotes = FALSE;
+PUBLIC BOOLEAN LYRestricted = FALSE;
 PUBLIC BOOLEAN LYValidate = FALSE;
 PUBLIC BOOLEAN LYPermitURL = FALSE;
 PUBLIC BOOLEAN child_lynx = FALSE;
@@ -253,6 +254,7 @@ PUBLIC char *lynxlistfile = NULL;   /* the current list file URL */
 PUBLIC char *lynxlinksfile = NULL;  /* the current visited links file URL */
 PUBLIC char *startrealm = NULL;     /* the startfile realm */
 PUBLIC char *indexfile = NULL;	    /* an index file if there is one */
+PUBLIC int outgoing_mail_charset = -1;     /* translate mail to this charset */
 PUBLIC char *personal_mail_address = NULL; /* the users mail address */
 PUBLIC char *x_display = NULL;	    /* display environment variable */
 PUBLIC char *personal_type_map = NULL;	   /* .mailcap */
@@ -369,7 +371,6 @@ PUBLIC FILE *logfile = NULL;	   /* for WAIS log file output	in libWWW */
 extern int HTNewsChunkSize; /* Number of news articles per chunk (HTNews.c) */
 extern int HTNewsMaxChunk;  /* Max news articles before chunking (HTNews.c) */
 
-PRIVATE BOOLEAN anon_restrictions_set = FALSE;
 PRIVATE BOOLEAN stack_dump = FALSE;
 PRIVATE char *terminal = NULL;
 PRIVATE char *pgm;
@@ -772,7 +773,7 @@ PUBLIC int main ARGS2(
 	} else if (strncmp(argv[i], "-anonymous", 10) == 0) {
 	    if (!LYValidate)
 		parse_restrictions("default");
-	    anon_restrictions_set = TRUE;
+	    LYRestricted = TRUE;
 	} else if (strcmp(argv[i], "-validate") == 0) {
 	    /*
 	     *	Follow only http URLs.
@@ -844,9 +845,9 @@ PUBLIC int main ARGS2(
 		    LYUseTraceLog = TRUE;
 		}
 	    } else if (strncmp(buf, "-anonymous", 10) == 0) {
-		if (!LYValidate && !anon_restrictions_set)
+		if (!LYValidate && !LYRestricted)
 		    parse_restrictions("default");
-		anon_restrictions_set = TRUE;
+		LYRestricted = TRUE;
 	    } else if (strcmp(buf, "-validate") == 0) {
 		/*
 		 *  Follow only http URLs.
@@ -988,7 +989,7 @@ PUBLIC int main ARGS2(
      *	set the default restrictions for that account and disallow
      *	a TRACE log NOW. - FM
      */
-    if (!LYValidate && !anon_restrictions_set &&
+    if (!LYValidate && !LYRestricted &&
 	strlen((char *)ANONYMOUS_USER) > 0 &&
 #if defined (VMS) || defined (NOUSERS)
 	!strcasecomp(((char *)getenv("USER")==NULL ? " " : getenv("USER")),
@@ -1002,7 +1003,7 @@ PUBLIC int main ARGS2(
 #endif /* VMS */
     {
 	parse_restrictions("default");
-	anon_restrictions_set = TRUE;
+	LYRestricted = TRUE;
 	LYUseTraceLog = FALSE;
     }
 
@@ -1050,7 +1051,7 @@ PUBLIC int main ARGS2(
      *	If TRACE is on, indicate whether the
      *	anonymous restrictions are set. - FM
      */
-    if (anon_restrictions_set) {
+    if (LYRestricted) {
 	CTRACE(tfp, "LYMain: Anonymous restrictions set.\n");
     }
 
@@ -1847,9 +1848,9 @@ static int anonymous_fun ARGS3(
     *  override or replace any additional
     *  restrictions from the command line. - FM
     */
-   if (!anon_restrictions_set)
+   if (!LYRestricted)
       parse_restrictions("default");
-   anon_restrictions_set = TRUE;
+   LYRestricted = TRUE;
    return 0;
 }
 

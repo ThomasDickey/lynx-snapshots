@@ -461,7 +461,7 @@ to the net.bio.net WAIS server. [<A HREF="#ToC-Search">ToC</A>]
 <h2 ID="InteractiveOptions"><A NAME="InteractiveOptions"><em>Lynx Options Menu</em></A></h2>
 
 The Lynx <em>Options Menu</em> may be accessed by pressing the '<em>o</em>'
-key.  The current <em>Options Menu</em> contains the following configurable
+key.  The current Options Menu contains the following configurable
 options.
 
 <pre>
@@ -482,7 +482,7 @@ options.
      K)eypad mode                 : Numbers act as arrows
      li(N)e edit style            : Default Binding
      l(I)st directory style       : Mixed style
-     U)ser mode                   : Advanced
+     U)ser mode                   : Advanced      verbose images (!) : ON
      user (A)gent                 : [User-Agent header]
      local e(X)ecution links      : FOR LOCAL FILES ONLY
 </pre>
@@ -776,6 +776,14 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 		    link at the bottom of the screen.
 	 </dl>
 
+   <dt>Verbose Images
+	<dd>Controls whether or not Lynx replaces the [LINK], [INLINE] and
+	    [IMAGE] comments (for images without ALT) with filenames of these
+	    images.  This is extremely useful because now we can determine
+	    immediately what images are just decorations (button.gif, line.gif)
+	    and what images are important.  This setting can also be toggled
+	    on startup via the <em>-verbose</em> switch.
+
    <dt>User Agent
 	<dd>The header string which Lynx sends to servers to indicate the
 	    User-Agent is displayed here.  Changes may be disallowed via
@@ -785,14 +793,14 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    checks for the presence of &quot;Lynx&quot; in the header. If
 	    changed during a Lynx session, the default User-Agent header can
 	    be restored by deleting the modified string in the
-	    <em>Options Menu</em>.  Whenever the User-Agent header is
+	    Options Menu.  Whenever the User-Agent header is
 	    changed, the current document is reloaded, with the no-cache
-	    flags set, on exit from the <em>Options Menu</em>.	Changes of
+	    flags set, on exit from the Options Menu.	Changes of
 	    the header are not saved in the RC file.
 	<dd><em>NOTE</em> that Netscape Communications Corp. has claimed
 	    that false transmissions of "Mozilla" as the User-Agent are a
 	    copyright infringement, which will be prosecuted. <em>DO NOT</em>
-	    misrepresent Lynx as Mozilla.  The <em>Options Menu</em> issues
+	    misrepresent Lynx as Mozilla.  The Options Menu issues
 	    a warning about possible copyright infringement whenever the
 	    header is changed to one which does not include &quot;Lynx&quot;
 	    or &quot;lynx&quot;.

@@ -39,7 +39,7 @@ PUBLIC BOOL HTPassEightBitNum = FALSE;	/* Pass ^ numeric entities raw. */
 PUBLIC BOOL HTPassHighCtrlRaw = FALSE;	/* Pass 127-160,173,&#127; raw. */
 PUBLIC BOOL HTPassHighCtrlNum = FALSE;	/* Pass &#128;-&#159; raw.	*/
 
-extern int LYlowest_eightbit[];
+/*  extern int LYlowest_eightbit[];  for completeness here  */
 
 /*	The State (context) of the parser
 **
@@ -353,10 +353,7 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 	**  in the context of line wrapping.  Unfortunately, if we use
 	**  HT_EM_SPACE we override the chartrans tables for those spaces
 	**  (e.g., emsp= double space) with a single '32' for all (but do line
-	**  wrapping more fancy).  In the future we need HT_SPACE with a
-	**  transferred parameter (Unicode number) which falls back to
-	**  chartrans if line wrapping is not the case.
-	**
+	**  wrapping more fancy).  So we probably need HT_EN_SPACE etc...
 	*/
 	PUTC(HT_EM_SPACE);
 #ifdef NOTUSED_FOTEMODS
@@ -394,11 +391,6 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 */
 PRIVATE char replace_buf [64];	      /* buffer for replacement strings */
 PRIVATE BOOL FoundEntity = FALSE;
-
-#define IncludesLatin1Enc \
-		(context->outUCLYhndl == LATIN1 || \
-		 (context->outUCI && \
-		  (context->outUCI->enc & (UCT_CP_SUPERSETOF_LAT1))))
 
 PRIVATE void handle_entity ARGS2(
 	HTStream *,	context,
@@ -1473,8 +1465,14 @@ top1:
 	**  have the "ISO Latin 1" character set selected,
 	**  back translate for our character set. - FM
 	*/
+#define IncludesLatin1Enc \
+		(context->outUCLYhndl == LATIN1 || \
+		 (context->outUCI && \
+		  (context->outUCI->enc & (UCT_CP_SUPERSETOF_LAT1))))
+
 #define PASSHI8BIT (HTPassEightBitRaw || \
 		    (context->T.do_8bitraw && !context->T.trans_from_uni))
+
 	} else if (unsign_c > 160 && unsign_c < 256 &&
 		   !(PASSHI8BIT || HTCJK != NOCJK) &&
 		   !IncludesLatin1Enc) {
@@ -1555,14 +1553,16 @@ top1:
 		for (p = replace_buf; *p; p++)
 		    PUTC(*p);
 	    } else {
+#endif /* NOTUSED_FOTEMODS */
 		/*
 		**  Out of luck, so use the UHHH notation (ugh). - FM
 		*/
-#endif /* NOTUSED_FOTEMODS */
+			/* do not print UHHH for now
 		sprintf(replace_buf, "U%.2lX", unsign_c);
 		for (p = replace_buf; *p; p++) {
 		    PUTC(*p);
 		}
+			 */
 #ifdef NOTUSED_FOTEMODS
 	    }
 #endif /* NOTUSED_FOTEMODS */

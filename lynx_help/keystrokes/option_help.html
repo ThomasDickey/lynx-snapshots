@@ -98,24 +98,26 @@
 			   computers, and windows-xxxx within native MS-Windows
 			   applications).
 
-     Raw 8-bit or CJK   -  Toggles whether 8-bit characters are assumed to
-     mode                  correspond with the display character set and
+     Raw 8-bit or CJK   -  This option set automatically but can be toggled
+     mode                  manually in certain special cases:
+                           it toggles whether 8-bit characters are assumed to
+                           correspond with the display character set and
                            therefore are processed without translation via the
-                           chartrans conversion tables. Should be ON by
-                           default when the display character set is one of
-                           the Asian (CJK) sets and the 8-bit characters are
-                           Kanji multibytes. Should be OFF for the other
-                           display character sets, but can be turned ON when
-                           the document's charset is unknown (e.g., is not
-                           ISO-8859-1 and no charset parameter was specified
-                           in a reply header from an HTTP server to indicate
-                           what it is) but you know by some means that you
-                           have the matching display character set selected.
-                           Should be OFF when an Asian (CJK) set is selected
-                           but the document is ISO-8859-1 or another 'assumed
-                           document character set'. The setting also can be
-                           toggled via the RAW_TOGGLE command, normally mapped
-                           to '@', and at startup via the -raw switch.
+                           chartrans conversion tables. ON by default when the
+                           display character set is one of the Asian (CJK)
+                           sets and the 8-bit characters are Kanji multibytes.
+                           OFF for the other display character sets, but can
+                           be turned ON when the document's charset is unknown
+                           (e.g., is not ISO-8859-1 and no charset parameter
+                           was specified in a reply header from an HTTP server
+                           to indicate what it is) but you have no better idea
+                           than viewing it as from display character set (see
+                           also 'assumed document character set' for best
+                           choice).  Should be OFF when an Asian (CJK) set is
+                           selected but the document is ISO-8859-1 or another
+                           'assumed document character set'. The setting also
+                           can be toggled via the RAW_TOGGLE command, normally
+                           mapped to '@', and at startup via the -raw switch.
 
      Assumed document   -  This option changes the handling of documents
      character set         which do not explicitly specify a charset.
@@ -238,13 +240,21 @@
                               Files and directories are separated into two
                               alphabetical lists.  Files are listed first.
 
-     User Mode         -   Beginner
+     User Mode         -   Novice
                               Shows two extra lines of help at the bottom
-                              of the screen
+                              of the screen for beginners
                            Intermediate (normal mode)
                               The "normal" statusline messages appear.
                            Advanced
                               The URL is shown on the statusline.
+
+     Verbose Images    -   Controls whether or not Lynx replaces the [LINK],
+                           [INLINE] and [IMAGE] comments (for images without
+                           ALT) with filenames of these images.  This is
+                           extremely useful because now we can determine
+                           immediately what images are just decorations
+                           (button.gif, line.gif) and what images are
+                           important.
 
      User Agent        -   The header string which Lynx sends to servers
                            to indicate the User-Agent is displayed here.
