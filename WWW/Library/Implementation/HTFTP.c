@@ -2757,7 +2757,7 @@ unload_btree:
 		}
 
 		if (entry_info->type) {
-		    for (i = 0; entry_info->type[i] != '\0' && i < 15; i++)
+		    for (i = 0; entry_info->type[i] != '\0' && i < 16; i++)
 			PUTC(entry_info->type[i]);
 		    for (; i < 17; i++)
 			PUTC(' ');
@@ -3565,7 +3565,7 @@ listen:
 	/* Reset buffering to control connection DD 921208 */
 
 	if (rv < 0) {
-#if 0
+#if 0	/* any known servers where ABOR would work this way? */
 	    if (rv == HT_INTERRUPTED || rv == -501)
 		if (send_cmd_nowait("ABOR") == 1) {
 		    outstanding++;
@@ -3586,7 +3586,6 @@ listen:
 
 	if (status < 0 && rv != HT_INTERRUPTED && rv != -1) {
 	    (void) HTInetStatus("close");	/* Comment only */
-	    data_soc = -1;			/* invalidate it */
 	} else {
 	    if (rv != HT_LOADED && outstanding--) {
 		status = response(NIL);		/* Pick up final reply */

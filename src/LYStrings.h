@@ -47,13 +47,13 @@ extern int LYmbcsstrlen PARAMS((
 	BOOL		utf_flag));
 extern char * LYno_attr_mbcs_strstr PARAMS((
 	char *		chptr,
-	char *		tarptr,
+	CONST char *	tarptr,
 	BOOL		utf_flag,
 	int *		nstartp,
 	int *		nendp));
 extern char * LYno_attr_mbcs_case_strstr PARAMS((
 	char *		chptr,
-	char *		tarptr,
+	CONST char *	tarptr,
 	BOOL		utf_flag,
 	int *		nstartp,
 	int *		nendp));

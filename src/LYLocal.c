@@ -2324,7 +2324,7 @@ PRIVATE int LYExecv ARGS3(
 	char **,	argv,
 	char *, 	msg)
 {
-#if defined(VMS) || defined(SH_EX) || defined(_WINDOWS)
+#if defined(VMS) || defined(_WINDOWS)
     CTRACE((tfp, "LYExecv:  Called inappropriately!\n"));
     return(0);
 #else

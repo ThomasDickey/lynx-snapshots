@@ -128,7 +128,7 @@
 # result of applied Map rules.  case-sensitive (!) string comparison is used,
 # in addition URL1 can contain one '*' which is interpreted as a wildcard
 # matching 0 or more characters.  So if for example
-# "http://example.com/dir/doc.html" is requested, it would matches any of
+# "http://example.com/dir/doc.html" is requested, it would match any of
 # the following:
 #   Pass  http:*
 #   Pass  http://example.com/*.html
@@ -344,7 +344,7 @@
 # directly but always force redirection via some intermediate URL.  The
 # delay imposed by this, especially for users with slower connections and
 # for overloaded servers, can be avoided if the intermediate URLs always
-# follow som simple pattern: we can then anticipate the redirect that will
+# follow some simple pattern: we can then anticipate the redirect that will
 # inevitably follow and generate it internally.  For example,
 #   Redirect http://lwn.net/cgi-bin/vr/*    http://*
 #
@@ -510,7 +510,7 @@
 # links to man:<something> appear in HTML text, the user could retype them
 # manually or use the ELGOTO ('E') command with some trivial editing (like
 # adding a space) to "confirm" the URL.  Even if the precautions outlined
-# above are followed: THIS TEXT DOESN NOT IMPLY ANY PROMISE THAT, BY FOLLOWING
+# above are followed: THIS TEXT DOES NOT IMPLY ANY PROMISE THAT, BY FOLLOWING
 # THE EXAMPLES, LYNX WILL BE SAFE.  On the other hand, some of the precautions
 # *may* not be necessary: it is possible that careful use of TRUSTED_EXEC
 # options in lynx.cfg could offer enough protection while making the new
@@ -554,7 +554,7 @@
 # it allows specific exceptions.  Of course it means that users for
 # whom any restrictions must be enforced cannot have write access to a
 # personal rules file, but that should be obvious anyway!
-# This limitiation does not applies if "Redirect" is used, in that case
+# This limitation does not applies if "Redirect" is used, in that case
 # the new URL will always be re-examined.
 #
 # 3. Mappings are invisible

@@ -118,6 +118,13 @@ PUBLIC char *LYNewsPost ARGS2(
 	return(postfile);
 
     /*
+     *  Return immediately if we do get called, maybe by some quirk
+     *  of HTNews.c, when we shouldn't. - kw
+     */
+    if (no_newspost)
+	return(postfile);
+
+    /*
      *  Open a temporary file for the headers
      *  and message body. - FM
      */

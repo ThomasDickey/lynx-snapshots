@@ -87,7 +87,8 @@ PUBLIC char *LYCSwingPath = NULL;
 #endif /* VMS */
 
 #if HAVE_CUSERID && !defined(_XOPEN_SOURCE)
-extern char *cuserid();		/* workaround for Redhat 6.0 */
+/*extern char *cuserid();*/		/* workaround for Redhat 6.0 */
+		/* for the price of screwing up legitimate systems? Nah. */
 #endif
 
 #ifdef DIRED_SUPPORT
@@ -461,6 +462,7 @@ PUBLIC int partial_threshold = -1;  /* # of lines to be d/l'ed until we repaint 
 
 PUBLIC BOOLEAN LYNonRestartingSIGWINCH = FALSE;
 PUBLIC BOOLEAN LYReuseTempfiles = FALSE;
+PUBLIC BOOLEAN LYUseBuiltinSuffixes = TRUE;
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
 #ifdef DECLARE_WAIS_LOGFILES
@@ -472,6 +474,8 @@ PUBLIC FILE *logfile = NULL;	   /* for WAIS log file output	in libWWW */
 extern int HTNewsChunkSize; /* Number of news articles per chunk (HTNews.c) */
 extern int HTNewsMaxChunk;  /* Max news articles before chunking (HTNews.c) */
 #endif
+
+PUBLIC BOOLEAN FileInitAlreadyDone = FALSE;
 
 PRIVATE BOOLEAN stack_dump = FALSE;
 PRIVATE char *terminal = NULL;
@@ -545,9 +549,9 @@ PUBLIC int is_windows_nt(void)
 
     version = GetVersion();
     if ((version & 0x80000000) == 0)
-    	return 1;
+	return 1;
     else
-    	return 0;
+	return 0;
 }
 #endif
 
@@ -1664,8 +1668,16 @@ PUBLIC int main ARGS2(
      *	file, if they overlap.
      */
     HTFormatInit();
-    HTFileInit();
+    if (!FileInitAlreadyDone)
+	HTFileInit();
 
+    if (LYUserAgent && *LYUserAgent &&
+		   !strstr(LYUserAgent, "Lynx") &&
+		   !strstr(LYUserAgent, "lynx") &&
+		   !strstr(LYUserAgent, "L_y_n_x") &&
+		   !strstr(LYUserAgent, "l_y_n_x")) {
+	HTAlwaysAlert(gettext("Warning:"), UA_NO_LYNX_WARNING);
+    }
 #ifdef SH_EX
     if (show_cfg) {
 	cleanup();
@@ -1811,7 +1823,7 @@ PUBLIC int main ARGS2(
 	 */
 #ifndef DOSPATH
 	if (signal(SIGPIPE, SIG_IGN) != SIG_IGN)
-    	     restore_sigpipe_for_children = TRUE;
+	     restore_sigpipe_for_children = TRUE;
 #endif /* DOSPATH */
     }
 #endif /* !VMS */
@@ -2039,18 +2051,20 @@ PUBLIC int main ARGS2(
 /*
  *  Called by HTAccessInit to register any protocols supported by lynx.
  *  Protocols added by lynx:
- *    LYNXKEYMAP, lynxcgi, LYNXIMGMAP, LYNXCOOKIE
+ *    LYNXKEYMAP, lynxcgi, LYNXIMGMAP, LYNXCOOKIE, LYNXMESSAGES
  */
 #ifdef GLOBALREF_IS_MACRO
 extern GLOBALREF (HTProtocol, LYLynxKeymap);
 extern GLOBALREF (HTProtocol, LYLynxCGI);
 extern GLOBALREF (HTProtocol, LYLynxIMGmap);
 extern GLOBALREF (HTProtocol, LYLynxCookies);
+extern GLOBALREF (HTProtocol, LYLynxStatusMessages);
 #else
 GLOBALREF  HTProtocol LYLynxKeymap;
 GLOBALREF  HTProtocol LYLynxCGI;
 GLOBALREF  HTProtocol LYLynxIMGmap;
 GLOBALREF  HTProtocol LYLynxCookies;
+GLOBALREF  HTProtocol LYLynxStatusMessages;
 #endif /* GLOBALREF_IS_MACRO */
 
 PUBLIC void LYRegisterLynxProtocols NOARGS
@@ -2059,13 +2073,14 @@ PUBLIC void LYRegisterLynxProtocols NOARGS
     HTRegisterProtocol(&LYLynxCGI);
     HTRegisterProtocol(&LYLynxIMGmap);
     HTRegisterProtocol(&LYLynxCookies);
+    HTRegisterProtocol(&LYLynxStatusMessages);
 }
 
 #ifndef NO_CONFIG_INFO
 /*
  *  Some stuff to reload lynx.cfg without restarting new lynx session,
  *  also load options menu items and command-line options
- *  to make things consistent.  Not implemented yet.
+ *  to make things consistent.
  *  Warning: experimental, more main() reorganization required.
  *
  *  Called by user of interactive session by LYNXCFG://reload/ link.
@@ -2112,7 +2127,7 @@ PUBLIC void reload_read_cfg NOARGS
 	custom_display_charset = FALSE;
 	memset((char*)charset_subsets, 0, sizeof(charset_subset_t)*MAXCHARSETS);
 #endif
-	free_lynx_cfg(); /* free downloaders, printers, not always environments */
+	free_lynx_cfg(); /* free downloaders, printers, environments */
 	/*
 	 *  Process the configuration file.
 	 */
@@ -2392,6 +2407,49 @@ static int color_fun ARGS1(
     if (LYShowColor != SHOW_COLOR_ALWAYS)
 	LYShowColor = SHOW_COLOR_ON;
 
+    return 0;
+}
+#endif
+
+#ifdef MISC_EXP
+/* -convert_to */
+static int convert_to_fun ARGS1(
+	char *,			next_arg)
+{
+    if (next_arg != 0) {
+	char *outformat = NULL;
+	char *cp1, *cp2, *cp4;
+	int chndl;
+	StrAllocCopy(outformat, next_arg);
+	/* not lowercased, to allow for experimentation - kw */
+	/*LYLowerCase(outformat);*/
+	if ((cp1 = strchr(outformat, ';')) != NULL) {
+	    if ((cp2 = LYstrstr(cp1, "charset")) != NULL) {
+		cp2 += 7;
+		while (*cp2 == ' ' || *cp2 == '=' || *cp2 == '\"')
+		    cp2++;
+		for (cp4 = cp2; (*cp4 != '\0' && *cp4 != '\"' &&
+				 *cp4 != ';'  &&
+				 !WHITE(*cp4));	cp4++)
+		    ; /* do nothing */
+		*cp4 = '\0';
+		/* This is intentionally not the "safe" version,
+		   to allow for experimentation. */
+		chndl = UCGetLYhndl_byMIME(cp2);
+		if (chndl < 0) chndl = UCLYhndl_for_unrec;
+		if (chndl < 0) {
+		    fprintf(stderr,
+		    gettext("Lynx: ignoring unrecognized charset=%s\n"), cp2);
+		} else {
+		    current_char_set = chndl;
+		}
+		*cp1 = '\0';	/* truncate outformat */
+	    }
+	}
+	HTOutputFormat = HTAtom_for(outformat);
+    } else {
+	HTOutputFormat = NULL;
+    }
     return 0;
 }
 #endif
@@ -2985,6 +3043,12 @@ static Parse_Args_Type Arg_Table [] =
    PARSE_FUN(
       "color",		FUNCTION_ARG,		color_fun,
       "force color mode on with standard bg colors"
+   ),
+#endif
+#ifdef MISC_EXP
+   PARSE_SET(
+      "convert_to",	FUNCTION_ARG,		convert_to_fun,
+      "=FORMAT\nconvert input, FORMAT is in MIME type notation (experimental)"
    ),
 #endif
    PARSE_SET(

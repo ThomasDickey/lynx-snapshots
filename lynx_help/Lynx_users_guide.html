@@ -865,25 +865,29 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
             on startup via the <em>-verbose</em> switch.
 
    <dt>User Agent
-        <dd>The header string which Lynx sends to servers to indicate the
+        <dd>The header string which Lynx sends to HTTP servers to indicate the
             User-Agent is displayed here.  Changes may be disallowed via
             the <em>-restrictions</em> switch.  Otherwise, the header can be
             changed temporarily to a string such as <em>L_y_n_x/2.8.2</em>
             for access to sites which discriminate against Lynx based on
             checks for the presence of &quot;Lynx&quot; in the header.  If
-            changed during a Lynx session, the default User-Agent header can
-            be restored by deleting the modified string in the
+            the User-Agent header has been changed, it can
+            be restored to the built-in default value
+            by deleting the modified string in the
             Options Menu.  Whenever the User-Agent header is
             changed, the current document is reloaded, with the no-cache
             flags set, on exit from the Options Menu.   Changes of
             the header are not saved in the RC file.
-        <dd><em>NOTE</em> that Netscape Communications Corp. has claimed
-            that false transmissions of "Mozilla" as the User-Agent are a
-            copyright infringement, which will be prosecuted. <em>DO NOT</em>
-            misrepresent Lynx as Mozilla.  The Options Menu issues
-            a warning about possible copyright infringement whenever the
+        <dd><em ID="note_ua">NOTE:</em> Some sites may regard misrepresenting
+            the browser
+            as fraudulent deception, or as gaining unauthorized access, if
+            it is used to circumvent blocking that was intentionally put in
+            place.  Some browser manufacturers may find the transmission of
+            their product's name objectionable.  If you change the User-Agent
+            string, it is your responsibility.  The Options Menu issues
+            a reminder whenever the
             header is changed to one which does not include &quot;Lynx&quot;
-            or &quot;lynx&quot;.
+            or &quot;L_y_n_x&quot;.
 
    <dt>Local execution scripts or links
         <dd>Local execution can be activated by the system administrator.
@@ -2539,8 +2543,11 @@ where
                     indexing.  See CRAWL.announce for more information.
              <dt><code>-underscore</code>
                 <dd>toggles use of _underline_ format in dumps.
-             <dt><code>-useragent=NAME</code>
-               <dd>set different Lynx User-Agent header.
+             <dt><code>-useragent=STRING</code>
+                <dd>set different Lynx User-Agent header.  Lynx produces a
+                    warning on startup if the STRING does not contain "Lynx"
+                    or "L_y_n_x", see the <A HREF="#note_ua">note</A> in the
+                    Options Menu section for rationale.
              <dt><code>-use_mouse</code>
                <dd>turn on mouse support, if available.
              <dt><code>-validate</code>

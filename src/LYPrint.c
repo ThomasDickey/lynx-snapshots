@@ -1232,38 +1232,27 @@ PRIVATE int remove_quotes ARGS1(
  *
  *  Always returns a new allocated string which has to be freed.
  */
+#include <LYCharUtils.h>
 PRIVATE char* subject_translate8bit ARGS1(char *, source)
 {
-    CONST char *p = source;
-    char temp[2];
     char *target = NULL;
 
     int charset_in, charset_out;
-    char replace_buf [10];
 
     int i = outgoing_mail_charset;  /* from lynx.cfg, -1 by default */
 
+    StrAllocCopy(target, source);
     if (i < 0
      || i == current_char_set
      || LYCharSet_UC[current_char_set].enc == UCT_ENC_CJK
      || LYCharSet_UC[i].enc == UCT_ENC_CJK) {
-	StrAllocCopy(target, source);
 	return(target); /* OK */
     } else {
 	charset_out = i;
 	charset_in  = current_char_set;
     }
 
-    for ( ; *p; p++) {
-	LYstrncpy(temp, p, sizeof(temp)-1);
-	if ((unsigned char)*temp <= 127) {
-	    StrAllocCat(target, temp);
-	} else {
-	    if (UCTransCharStr(replace_buf, sizeof(replace_buf), *temp,
-				charset_in, charset_out, YES) > 0)
-		StrAllocCat(target, replace_buf);
-	}
-    }
+    LYUCTranslateBackHeaderText(&target, charset_in, charset_out, YES);
 
     return(target);
 }

@@ -30,12 +30,18 @@ typedef enum _SGMLContent {
     SGML_EMPTY,	   /* No content. */
     SGML_LITTERAL, /* Literal character data.  Recognize exact close tag only.
 		      Old www server compatibility only!  Not SGML */
-    SGML_CDATA,	   /* Character data.  Recognize </ only. */
-    SGML_RCDATA,   /* Replaceable character data.  Recognize </ and &ref; */
+    SGML_CDATA,	   /* Character data.  Recognize </ only.
+		      (But we treat it just as SGML_LITTERAL.) */
+    SGML_RCDATA,   /* Replaceable character data. Should recognize </ and &ref;
+		      (but we treat it like SGML_MIXED for old times' sake). */
     SGML_MIXED,	   /* Elements and parsed character data.
 		      Recognize all markup. */
-    SGML_ELEMENT,  /* Any data found will be returned as an error. */
-    SGML_PCDATA	   /* Added by KW. */
+    SGML_ELEMENT,  /* Any data found should be regarded as an error.
+		      (But we treat it just like SGML_MIXED.) */
+    SGML_PCDATA	   /* Should contain no elements but &ref; is parsed.
+		      (We treat it like SGML_CDATA wrt. contained tags
+		      i.e. pass them on literally, i.e. like we should
+		      treat SGML_RCDATA) (added by KW). */
 } SGMLContent;
 
 
@@ -70,7 +76,7 @@ typedef int TagClass;
 				    text directly */
     /* insertions */
 #define Tgc_BRlike	0x01000 /* BR,IMG,TAB allowed in any text */
-#define Tgc_APPLETlike	0x02000 /* APPLET,OBJECT,EMBED,SCRIPT */
+#define Tgc_APPLETlike	0x02000 /* APPLET,OBJECT,EMBED,SCRIPT;BUTTON */
 #define Tgc_HRlike	0x04000 /* HR,MARQUEE can contain all kinds of things
 				    and/or are not allowed (?) in running text */
 #define Tgc_MAPlike	0x08000 /* MAP,AREA some specials that never contain
@@ -90,9 +96,14 @@ typedef int TagFlags;
 #define Tgf_mafse	0x00004 /* Make Attribute-Free Start-tag End instead
 				      (if found invalid) */
 #define Tgf_strict	0x00008 /* Ignore contained invalid elements,
-				      don't pass them on */
+				   don't pass them on; or other variant
+				   handling for some content types */
 #define Tgf_nreie	0x00010 /* Not Really Empty If Empty,
 				      used by color style code */
+#define Tgf_frecyc	0x00020 /* Pass element content on in a form that
+				   allows recycling, i.e. don't translate to
+				   output (display) character set yet (treat
+				   content similar to attribute values) */
 
 /*		A tag structure describes an SGML element.
 **		-----------------------------------------
@@ -200,7 +211,7 @@ typedef struct _HTStructuredClass{
 		CONST char *	str,
 		int		len));
 
-	void (*start_element) PARAMS((
+	int (*start_element) PARAMS((
 		HTStructured*	me,
 		int		element_number,
 		CONST BOOL*	attribute_present,
@@ -208,7 +219,7 @@ typedef struct _HTStructuredClass{
 		int		charset,
 		char **		include));
 
-	void (*end_element) PARAMS((
+	int (*end_element) PARAMS((
 		HTStructured*	me,
 		int		element_number,
 		char **		include));

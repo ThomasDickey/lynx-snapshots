@@ -45,15 +45,17 @@ PUBLIC void HTFormatInit NOARGS
  if (LYgetXDisplay() != 0) {	/* Must have X11 */
   HTSetPresentation("application/postscript", "ghostview %s&",
   							    1.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/gif",        XLoadImageCommand,  1.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/x-xbm",      XLoadImageCommand,  1.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/x-xbitmap",  XLoadImageCommand,  1.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/x-png",      XLoadImageCommand,  2.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/png",        XLoadImageCommand,  1.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/x-rgb",      XLoadImageCommand,  1.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/x-tiff",     XLoadImageCommand,  2.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/tiff",       XLoadImageCommand,  1.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/jpeg",       XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+  if (XLoadImageCommand && *XLoadImageCommand) {
+      HTSetPresentation("image/gif",	XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+      HTSetPresentation("image/x-xbm",	XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+      HTSetPresentation("image/x-xbitmap",XLoadImageCommand,1.0, 3.0, 0.0, 0);
+      HTSetPresentation("image/x-png",	XLoadImageCommand,  2.0, 3.0, 0.0, 0);
+      HTSetPresentation("image/png",	XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+      HTSetPresentation("image/x-rgb",	XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+      HTSetPresentation("image/x-tiff", XLoadImageCommand,  2.0, 3.0, 0.0, 0);
+      HTSetPresentation("image/tiff",	XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+      HTSetPresentation("image/jpeg",	XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+  }
   HTSetPresentation("video/mpeg",       "mpeg_play %s &",   1.0, 3.0, 0.0, 0);
 
  }
@@ -693,16 +695,45 @@ PRIVATE int HTLoadTypesConfigFile ARGS1(
 **	which are of the same format but are originals or regenerated,
 **	with different values.
 */
-
+/*
+ *  Additional notes: the encoding parameter may be taken into account when
+ *  looking for a match; for that purpose "7bit", "8bit", and "binary" are
+ *  equivalent.
+ *  Use of mixed case and of pseudo MIME types with embedded spaces should
+ *  be avoided.  It was once necessary for getting the fancy strings into
+ *  type labels in FTP directory listings, but that can now be done with
+ *  the description field (using HTSetSuffix5).  AFAIK the only effect of
+ *  such "fancy" (and mostly invalid) types that cannot be reproduced by
+ *  using a description fields is some statusline messages in SaveToFile
+ *  (HTFWriter.c).  And showing the user an invalid MIME type as the
+ *  'Content-type:' is not such a hot idea anyway, IMO.  Still, if you
+ *  want it, it is still possible (even in lynx.cfg now), but use of it
+ *  in the defaults below has been reduced.
+ *  Case variations rely on peculiar behavior of HTAtom.c for matching.
+ *  They lead to surprising behavior, Lynx retains the case of a string
+ *  in the form first encountered after starting up.  So while later suffix
+ *  rules generally override or modify earlier ones, the case used for a
+ *  MIME time is determined by the first suffix rule (or other occurrence).
+ *  Matching in HTAtom_for is effectively case insensitive, except for the
+ *  first character of the string which is treated as case-sensitive by the
+ *  hash function there; best not to rely on that, rather convert MIME types
+ *  to lowercase on input as is already done in most places (And HTAtom could
+ *  become consistently case-sensitive, as in newer W3C libwww).
+ *  - kw 1999-10-12
+ */
 PUBLIC void HTFileInit NOARGS
 {
     FILE *fp;
 
+#ifdef BUILTIN_SUFFIX_MAPS
+    if (LYUseBuiltinSuffixes)
+    {
     CTRACE((tfp, "HTFileInit: Loading default (HTInit) extension maps.\n"));
 
     /* default suffix interpretation */
-    HTSetSuffix("*",		"text/plain", "7bit", 1.0);
-    HTSetSuffix("*.*",		"text/plain", "7bit", 1.0);
+    HTSetSuffix("*",		"text/plain", "8bit", 1.0);
+    HTSetSuffix("*.*",		"text/plain", "8bit", 1.0);
+
 
 #ifdef EXEC_SCRIPTS
     /*
@@ -718,7 +749,15 @@ PUBLIC void HTFileInit NOARGS
 #endif /* !VMS */
 #endif /* EXEC_SCRIPTS */
 
-
+    /*
+     *  Some of the old incarnation of the mappings is preserved
+     *  and can be had by defining TRADITIONAL_SUFFIXES.  This
+     *  is for some cases where I felt the old rules might be preferred
+     *  by someone, for some reason.  It's not done consistently.
+     *  A lot more of this stuff could probably be changed too or
+     *  omitted, now that nearly the equivalent functionality is
+     *  available in lynx.cfg. - kw 1999-10-12
+     */
     HTSetSuffix(".saveme",	"application/x-Binary", "binary", 1.0);
     HTSetSuffix(".dump",	"application/x-Binary", "binary", 1.0);
     HTSetSuffix(".bin",		"application/x-Binary", "binary", 1.0);
@@ -731,61 +770,104 @@ PUBLIC void HTFileInit NOARGS
     HTSetSuffix(".AXP_exe",	"application/x-Executable", "binary", 1.0);
     HTSetSuffix(".VAX-exe",	"application/x-Executable", "binary", 1.0);
     HTSetSuffix(".VAX_exe",	"application/x-Executable", "binary", 1.0);
-    HTSetSuffix(".exe",		"application/x-Executable", "binary", 1.0);
+    HTSetSuffix5(".exe",	"application/octet-stream", "binary", "Executable", 1.0);
 
+#ifdef TRADITIONAL_SUFFIXES
     HTSetSuffix(".exe.Z",	"application/x-Comp. Executable",
     							     "binary", 1.0);
-
     HTSetSuffix(".Z",	        "application/UNIX Compressed", "binary", 1.0);
-
     HTSetSuffix(".tar_Z",	"application/UNIX Compr. Tar", "binary", 1.0);
     HTSetSuffix(".tar.Z",	"application/UNIX Compr. Tar", "binary", 1.0);
+#else
+    HTSetSuffix5(".Z",	        "application/x-compress", "binary", "UNIX Compressed", 1.0);
+    HTSetSuffix5(".Z",	        NULL, "compress",      "UNIX Compressed", 1.0);
+    HTSetSuffix5(".exe.Z",	"application/octet-stream", "compress",
+    						       "Executable", 1.0);
+    HTSetSuffix5(".tar_Z",	"application/x-tar", "compress",
+						       "UNIX Compr. Tar", 1.0);
+    HTSetSuffix5(".tar.Z",	"application/x-tar", "compress",
+						       "UNIX Compr. Tar", 1.0);
+#endif
 
+#ifdef TRADITIONAL_SUFFIXES
     HTSetSuffix("-gz",		"application/GNU Compressed", "binary", 1.0);
     HTSetSuffix("_gz",		"application/GNU Compressed", "binary", 1.0);
     HTSetSuffix(".gz",		"application/GNU Compressed", "binary", 1.0);
 
     HTSetSuffix5(".tar.gz",	"application/x-tar", "binary", "GNU Compr. Tar", 1.0);
     HTSetSuffix5(".tgz",	"application/x-tar", "gzip", "GNU Compr. Tar", 1.0);
+#else
+    HTSetSuffix5("-gz",		"application/x-gzip", "binary", "GNU Compressed", 1.0);
+    HTSetSuffix5("_gz",		"application/x-gzip", "binary", "GNU Compressed", 1.0);
+    HTSetSuffix5(".gz",		"application/x-gzip", "binary", "GNU Compressed", 1.0);
+    HTSetSuffix5("-gz",		NULL, "gzip", "GNU Compressed", 1.0);
+    HTSetSuffix5("_gz",		NULL, "gzip", "GNU Compressed", 1.0);
+    HTSetSuffix5(".gz",		NULL, "gzip", "GNU Compressed", 1.0);
 
+    HTSetSuffix5(".tar.gz",	"application/x-tar", "gzip", "GNU Compr. Tar", 1.0);
+    HTSetSuffix5(".tgz",	"application/x-tar", "gzip", "GNU Compr. Tar", 1.0);
+#endif
+
+#ifdef TRADITIONAL_SUFFIXES
     HTSetSuffix(".src",		"application/x-WAIS-source", "8bit", 1.0);
     HTSetSuffix(".wsrc",	"application/x-WAIS-source", "8bit", 1.0);
+#else
+    HTSetSuffix5(".wsrc",	"application/x-wais-source", "8bit", "WAIS-source", 1.0);
+#endif
 
-    HTSetSuffix(".zip",		"application/x-Zip File", "binary", 1.0);
+    HTSetSuffix5(".zip",	"application/zip", "binary", "Zip File", 1.0);
 
     HTSetSuffix(".bz2",		"application/x-bzip2", "binary", 1.0);
 
     HTSetSuffix(".bz2",		"application/x-bzip2", "binary", 1.0);
 
+#ifdef TRADITIONAL_SUFFIXES
     HTSetSuffix(".uu",		"application/x-UUencoded", "8bit", 1.0);
 
     HTSetSuffix(".hqx",		"application/x-Binhex", "8bit", 1.0);
 
     HTSetSuffix(".o",		"application/x-Prog. Object", "binary", 1.0);
     HTSetSuffix(".a",		"application/x-Prog. Library", "binary", 1.0);
+#else
+    HTSetSuffix5(".uu",		"application/x-uuencoded", "7bit", "UUencoded", 1.0);
+
+    HTSetSuffix5(".hqx",	"application/mac-binhex40", "8bit", "Mac BinHex", 1.0);
+
+    HTSetSuffix5(".o",		"application/octet-stream", "binary", "Prog. Object", 0.5);
+    HTSetSuffix5(".a",		"application/octet-stream", "binary", "Prog. Library", 0.5);
+    HTSetSuffix5(".so",		"application/octet-stream", "binary", "Shared Lib", 0.5);
+#endif
 
     HTSetSuffix5(".oda",	"application/oda", "binary", "ODA", 1.0);
 
     HTSetSuffix5(".pdf",	"application/pdf", "binary", "PDF", 1.0);
 
-    HTSetSuffix(".eps",		"application/Postscript", "8bit", 1.0);
-    HTSetSuffix(".ai",		"application/Postscript", "8bit", 1.0);
-    HTSetSuffix(".ps",		"application/Postscript", "8bit", 1.0);
+    HTSetSuffix5(".eps",	"application/postscript", "8bit", "Postscript", 1.0);
+    HTSetSuffix5(".ai",		"application/postscript", "8bit", "Postscript", 1.0);
+    HTSetSuffix5(".ps",		"application/postscript", "8bit", "Postscript", 1.0);
 
-    HTSetSuffix(".rtf",		"application/RTF", "8bit", 1.0);
+    HTSetSuffix5(".rtf",	"application/rtf", "8bit", "RTF", 1.0);
 
-    HTSetSuffix(".dvi",		"application/x-DVI", "8bit", 1.0);
+    HTSetSuffix5(".dvi",	"application/x-dvi", "8bit", "DVI", 1.0);
 
-    HTSetSuffix(".hdf",		"application/x-HDF", "8bit", 1.0);
+    HTSetSuffix5(".hdf",	"application/x-hdf", "8bit", "HDF", 1.0);
 
     HTSetSuffix(".cdf",		"application/x-netcdf", "8bit", 1.0);
     HTSetSuffix(".nc",		"application/x-netcdf", "8bit", 1.0);
 
+#ifdef TRADITIONAL_SUFFIXES
     HTSetSuffix(".latex",	"application/x-Latex", "8bit", 1.0);
     HTSetSuffix(".tex",  	"application/x-Tex", "8bit", 1.0);
     HTSetSuffix(".texinfo",	"application/x-Texinfo", "8bit", 1.0);
     HTSetSuffix(".texi",	"application/x-Texinfo", "8bit", 1.0);
+#else
+    HTSetSuffix5(".latex",	"application/x-latex", "8bit", "LaTeX", 1.0);
+    HTSetSuffix5(".tex",  	"text/x-tex", "8bit", "TeX", 1.0);
+    HTSetSuffix5(".texinfo",	"application/x-texinfo", "8bit", "Texinfo", 1.0);
+    HTSetSuffix5(".texi",	"application/x-texinfo", "8bit", "Texinfo", 1.0);
+#endif
 
+#ifdef TRADITIONAL_SUFFIXES
     HTSetSuffix(".t",		"application/x-Troff", "8bit", 1.0);
     HTSetSuffix(".tr",		"application/x-Troff", "8bit", 1.0);
     HTSetSuffix(".roff",	"application/x-Troff", "8bit", 1.0);
@@ -793,51 +875,80 @@ PUBLIC void HTFileInit NOARGS
     HTSetSuffix(".man",		"application/x-Troff-man", "8bit", 1.0);
     HTSetSuffix(".me",		"application/x-Troff-me", "8bit", 1.0);
     HTSetSuffix(".ms",		"application/x-Troff-ms", "8bit", 1.0);
+#else
+    HTSetSuffix5(".t",		"application/x-troff", "8bit", "Troff", 1.0);
+    HTSetSuffix5(".tr",		"application/x-troff", "8bit", "Troff", 1.0);
+    HTSetSuffix5(".roff",	"application/x-troff", "8bit", "Troff", 1.0);
+
+    HTSetSuffix5(".man",	"application/x-troff-man", "8bit", "Man Page", 1.0);
+    HTSetSuffix5(".me",		"application/x-troff-me", "8bit", "Troff me", 1.0);
+    HTSetSuffix5(".ms",		"application/x-troff-ms", "8bit", "Troff ms", 1.0);
+#endif
 
     HTSetSuffix(".zoo",		"application/x-Zoo File", "binary", 1.0);
 
+#if defined(TRADITIONAL_SUFFIXES) || defined(VMS)
     HTSetSuffix(".bak",		"application/x-VMS BAK File", "binary", 1.0);
     HTSetSuffix(".bkp",		"application/x-VMS BAK File", "binary", 1.0);
     HTSetSuffix(".bck",		"application/x-VMS BAK File", "binary", 1.0);
 
-    HTSetSuffix(".bkp_gz",	"application/x-GNU BAK File", "binary", 1.0);
-    HTSetSuffix(".bkp-gz",	"application/x-GNU BAK File", "binary", 1.0);
-    HTSetSuffix(".bck_gz",	"application/x-GNU BAK File", "binary", 1.0);
-    HTSetSuffix(".bck-gz",	"application/x-GNU BAK File", "binary", 1.0);
+    HTSetSuffix(".bkp_gz",	"application/octet-stream", "gzip", "GNU BAK File", 1.0);
+    HTSetSuffix(".bkp-gz",	"application/octet-stream", "gzip", "GNU BAK File", 1.0);
+    HTSetSuffix(".bck_gz",	"application/octet-stream", "gzip", "GNU BAK File", 1.0);
+    HTSetSuffix(".bck-gz",	"application/octet-stream", "gzip", "GNU BAK File", 1.0);
 
-    HTSetSuffix(".bkp-Z",	"application/x-Comp. BAK File", "binary", 1.0);
-    HTSetSuffix(".bkp_Z",	"application/x-Comp. BAK File", "binary", 1.0);
-    HTSetSuffix(".bck-Z",	"application/x-Comp. BAK File", "binary", 1.0);
-    HTSetSuffix(".bck_Z",	"application/x-Comp. BAK File", "binary", 1.0);
+    HTSetSuffix(".bkp-Z",	"application/octet-stream", "compress", "Comp. BAK File", 1.0);
+    HTSetSuffix(".bkp_Z",	"application/octet-stream", "compress", "Comp. BAK File", 1.0);
+    HTSetSuffix(".bck-Z",	"application/octet-stream", "compress", "Comp. BAK File", 1.0);
+    HTSetSuffix(".bck_Z",	"application/octet-stream", "compress", "Comp. BAK File", 1.0);
+#else
+    HTSetSuffix5(".bak",	NULL, "binary", "Backup", 0.5);
+    HTSetSuffix5(".bkp",	"application/octet-stream", "binary", "VMS BAK File", 1.0);
+    HTSetSuffix5(".bck",	"application/octet-stream", "binary", "VMS BAK File", 1.0);
+#endif
 
+#if defined(TRADITIONAL_SUFFIXES) || defined(VMS)
     HTSetSuffix(".hlb",		"application/x-VMS Help Libr.", "binary", 1.0);
     HTSetSuffix(".olb",		"application/x-VMS Obj. Libr.", "binary", 1.0);
     HTSetSuffix(".tlb",		"application/x-VMS Text Libr.", "binary", 1.0);
     HTSetSuffix(".obj",		"application/x-VMS Prog. Obj.", "binary", 1.0);
     HTSetSuffix(".decw$book",	"application/x-DEC BookReader", "binary", 1.0);
     HTSetSuffix(".mem",		"application/x-RUNOFF-MANUAL", "8bit", 1.0);
+#else
+    HTSetSuffix5(".hlb",	"application/octet-stream", "binary", "VMS Help Libr.", 1.0);
+    HTSetSuffix5(".olb",	"application/octet-stream", "binary", "VMS Obj. Libr.", 1.0);
+    HTSetSuffix5(".tlb",	"application/octet-stream", "binary", "VMS Text Libr.", 1.0);
+    HTSetSuffix5(".obj",	"application/octet-stream", "binary", "Prog. Object", 1.0);
+    HTSetSuffix5(".decw$book",	"application/octet-stream", "binary", "DEC BookReader", 1.0);
+    HTSetSuffix5(".mem",	"text/x-runoff-manual", "8bit", "RUNOFF-MANUAL", 1.0);
+#endif
 
     HTSetSuffix(".vsd",		"application/visio", "binary", 1.0);
 
-    HTSetSuffix(".lha",		"application/x-lha File", "binary", 1.0);
-    HTSetSuffix(".lzh",		"application/x-lzh File", "binary", 1.0);
-
-    HTSetSuffix(".sea",		"application/x-sea File", "binary", 1.0);
-    HTSetSuffix(".sit",		"application/x-sit File", "binary", 1.0);
-
-    HTSetSuffix(".dms",		"application/x-dms File", "binary", 1.0);
-
-    HTSetSuffix(".iff",		"application/x-iff File", "binary", 1.0);
+    HTSetSuffix5(".lha",	"application/x-lha", "binary", "lha File", 1.0);
+    HTSetSuffix5(".lzh",	"application/x-lzh", "binary", "lzh File", 1.0);
+    HTSetSuffix5(".sea",	"application/x-sea", "binary", "sea File", 1.0);
+#ifdef TRADITIONAL_SUFFIXES
+    HTSetSuffix5(".sit",	"application/x-sit", "binary", "sit File", 1.0);
+#else
+    HTSetSuffix5(".sit",	"application/x-stuffit", "binary", "StuffIt", 1.0);
+#endif
+    HTSetSuffix5(".dms",	"application/x-dms", "binary", "dms File", 1.0);
+    HTSetSuffix5(".iff",	"application/x-iff", "binary", "iff File", 1.0);
 
     HTSetSuffix(".bcpio",	"application/x-bcpio", "binary", 1.0);
     HTSetSuffix(".cpio",	"application/x-cpio", "binary", 1.0);
 
+#ifdef TRADITIONAL_SUFFIXES
     HTSetSuffix(".gtar",	"application/x-gtar", "binary", 1.0);
+#endif
 
     HTSetSuffix(".shar",	"application/x-shar", "8bit", 1.0);
     HTSetSuffix(".share",	"application/x-share", "8bit", 1.0);
 
+#ifdef TRADITIONAL_SUFFIXES
     HTSetSuffix(".sh",		"application/x-sh", "8bit", 1.0); /* xtra */
+#endif
 
     HTSetSuffix(".sv4cpio",	"application/x-sv4cpio", "binary", 1.0);
     HTSetSuffix(".sv4crc",	"application/x-sv4crc", "binary", 1.0);
@@ -907,6 +1018,31 @@ PUBLIC void HTFileInit NOARGS
     HTSetSuffix(".htmlx",	"text/html", "8bit", 1.0);
     HTSetSuffix(".htm",		"text/html", "8bit", 1.0);
     HTSetSuffix(".html",	"text/html", "8bit", 1.0);
+
+    } else { /* LYSuffixRules */
+    /*
+     *  Note that even .html -> text/html, .htm -> text/html are omitted
+     *  if default maps are compiled in but then skipped because of a
+     *  configuration file directive.  Whoever changes the config file
+     *  in this way can easily also add the SUFFIX rules there. - kw
+     */
+    CTRACE((tfp, "HTFileInit: Skipping all default (HTInit) extension maps!\n"));
+    } /* LYSuffixRules */
+
+#else /* BUILTIN_SUFFIX_MAPS */
+
+    CTRACE((tfp, "HTFileInit: Default (HTInit) extension maps not compiled in.\n"));
+    /*
+     *  The followin two are still used if BUILTIN_SUFFIX_MAPS was
+     *  undefined.  Without one of them, lynx would always need to
+     *  have a mapping specified in a lynx.cfg or mime.types file
+     *  to be usable for local HTML files at all.  That includes
+     *  many of the generated user interface pages. - kw
+     */
+    HTSetSuffix(".htm",		"text/html", "8bit", 1.0);
+    HTSetSuffix(".html",	"text/html", "8bit", 1.0);
+#endif /* BUILTIN_SUFFIX_MAPS */
+
 
     /* These should override the default extensions as necessary. */
     HTLoadExtensionsConfigFile(global_extension_map);

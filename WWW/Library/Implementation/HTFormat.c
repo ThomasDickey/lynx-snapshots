@@ -275,6 +275,8 @@ PRIVATE int half_match ARGS2(char *,trial_type, char *,target)
     return 0;
 }
 
+#define WWW_WILDCARD_REP_OUT HTAtom_for("*")
+
 /*		Look up a presentation
 **		----------------------
 **
@@ -291,7 +293,7 @@ PRIVATE HTPresentation * HTFindPresentation ARGS3(
 	HTFormat,		rep_out,
 	HTPresentation*,	fill_in)
 {
-    HTAtom * wildcard = HTAtom_for("*");
+    HTAtom * wildcard = NULL; /* = HTAtom_for("*"); lookup when needed - kw */
 
     CTRACE((tfp, "HTFormat: Looking up presentation for %s to %s\n",
 		HTAtom_name(rep_in), HTAtom_name(rep_out)));
@@ -318,12 +320,15 @@ PRIVATE HTPresentation * HTFindPresentation ARGS3(
 
 		} else if (!fill_in) {
 		    continue;
-		} else if (pres->rep_out == wildcard) {
-		    if (!strong_wildcard_match)
-			strong_wildcard_match = pres;
-		    /* otherwise use the first one */
-		    CTRACE((tfp, "StreamStack: found strong wildcard match: %s\n",
-				HTAtom_name(pres->rep)));
+		} else {
+		    if (!wildcard) wildcard = WWW_WILDCARD_REP_OUT;
+		    if (pres->rep_out == wildcard) {
+			if (!strong_wildcard_match)
+			    strong_wildcard_match = pres;
+			/* otherwise use the first one */
+			CTRACE((tfp, "StreamStack: found strong wildcard match: %s\n",
+				    HTAtom_name(pres->rep)));
+		    }
 		}
 
 	    } else if (!fill_in) {
@@ -347,9 +352,10 @@ PRIVATE HTPresentation * HTFindPresentation ARGS3(
 		    /* otherwise use the first one */
 		    CTRACE((tfp, "StreamStack: found weak wildcard match: %s\n",
 				HTAtom_name(pres->rep_out)));
-		}
-		if (pres->rep_out == wildcard) {
-		    if (!last_default_match)
+
+		} else if (!last_default_match) {
+		    if (!wildcard) wildcard = WWW_WILDCARD_REP_OUT;
+		    if (pres->rep_out == wildcard)
 			 last_default_match = pres;
 		    /* otherwise use the first one */
 		}
@@ -390,6 +396,7 @@ PUBLIC HTStream * HTStreamStack ARGS4(
 {
     HTPresentation temp;
     HTPresentation *match;
+    HTStream *result;
 
     CTRACE((tfp, "HTFormat: Constructing stream stack for %s to %s\n",
 		HTAtom_name(rep_in), HTAtom_name(rep_out)));
@@ -402,20 +409,31 @@ PUBLIC HTStream * HTStreamStack ARGS4(
 	return sink;	/*  LJM */
 #endif
 
-    if (rep_out == rep_in)
-	return sink;
+    if (rep_out == rep_in) {
+	result = sink;
 
-    if ((match = HTFindPresentation(rep_in, rep_out, &temp))) {
+    } else if ((match = HTFindPresentation(rep_in, rep_out, &temp))) {
 	if (match == &temp) {
 	    CTRACE((tfp, "StreamStack: Using %s\n", HTAtom_name(temp.rep_out)));
 	} else {
 	    CTRACE((tfp, "StreamStack: found exact match: %s\n",
 			HTAtom_name(match->rep)));
 	}
-	return (*match->converter)(match, anchor, sink);
+	result = (*match->converter)(match, anchor, sink);
     } else {
-	return NULL;
+	result = NULL;
     }
+    if (TRACE) {
+	if (result && result->isa && result->isa->name) {
+	    CTRACE((tfp, "StreamStack: Returning \"%s\"\n", result->isa->name));
+	} else if (result) {
+	    CTRACE((tfp, "StreamStack: Returning *unknown* stream!\n"));
+	} else {
+	    CTRACE((tfp, "StreamStack: Returning NULL!\n"));
+	    CTRACE_FLUSH(tfp);	/* a crash may be imminent... - kw */
+	}
+    }
+    return result;
 }
 
 /*		Put a presentation near start of list
@@ -448,7 +466,7 @@ PUBLIC float HTStackValue ARGS4(
 	float,			initial_value,
 	long int,		length)
 {
-    HTAtom * wildcard = HTAtom_for("*");
+    HTAtom * wildcard = WWW_WILDCARD_REP_OUT;
 
     CTRACE((tfp, "HTFormat: Evaluating stream stack for %s worth %.3f to %s\n",
 		HTAtom_name(rep_in), initial_value, HTAtom_name(rep_out)));

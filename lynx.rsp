@@ -72,6 +72,7 @@
 ../obj/LYUpload.obj
 ../obj/LYrcFile.obj
 ../obj/SGML.obj
+../obj/TRSTable.obj
 ../obj/UCAuto.obj
 ../obj/UCAux.obj
 ../obj/UCdomap.obj

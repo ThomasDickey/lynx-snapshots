@@ -225,13 +225,29 @@ PUBLIC int change_form_link_ex ARGS8(
 	     *  If c indicates that line editing ended with Enter, we still
 	     *  defer to mainloop() for further checking if the submit
 	     *  action URL could require more checks than we do here.
-	     *  call HText_SubmitForm() directly before returning.
-	     *  Only in the remaining cases do we proceed directly. - kw
+	     *  Only in the remaining cases do we proceed to call
+	     *  HText_SubmitForm() directly before returning. - kw
 	     */
 	    if (immediate_submit ||
 		((c == '\r' || c == '\n' || c == LAC_TO_LKC0(LYK_SUBMIT)) &&
 		 peek_mouse_link() == -1)) {
 		form_link->hightext = form->value;
+#ifdef TEXT_SUBMIT_CONFIRM_WANTED
+		if (!immediate_submit && (c == '\r' || c == '\n') &&
+		    !HTConfirmDefault(
+	gettext("No submit button for this form, submit single text field?"),
+			YES)) {
+		    /* User was prompted and declined; if canceled with ^G
+		     * let mainloop stay on this field, otherwise move on to
+		     * the next field or link. - kw
+		     */
+		    if (HTLastConfirmCancelled())
+			c = DO_NOTHING;
+		    else
+			c = LAC_TO_LKC(LYK_NEXT_LINK);
+		    break;
+		}
+#endif
 		if (!form->submit_action || *form->submit_action == '\0') {
 		    HTUserMsg(NO_FORM_ACTION);
 		    c = DO_NOTHING;
@@ -965,6 +981,10 @@ PRIVATE int popup_options ARGS7(
      *  if it all fits.  Otherwise, set up the widest window possible. - FM
      */
 #ifdef USE_SLANG
+    if (width + 4 > SLtt_Screen_Cols) {
+	lx = 1;
+	width = LYcols - 5; /* avoids a crash? - kw */
+    }
     SLsmg_fill_region(top, lx - 1, bottom - top, width + 4, ' ');
 #else
     if (!(form_window = newwin(bottom - top, width + 4, top, lx - 1)) &&
@@ -979,7 +999,7 @@ PRIVATE int popup_options ARGS7(
 #if defined(NCURSES)
     LYsubwindow(form_window);
 #endif
-#if defined(HAVE_GETBKGD) && !defined(PDCURSES)/* not defined in ncurses 1.8.7 */
+#if defined(HAVE_GETBKGD) /* not defined in ncurses 1.8.7 */
     wbkgd(form_window, getbkgd(stdscr));
     wbkgdset(form_window, getbkgd(stdscr));
 #endif

@@ -32,7 +32,7 @@
 #ifndef LY_SOFT_HYPHEN
 #define LY_SOFT_HYPHEN		((char)7)
 #endif /* !LY_SOFT_HYPHEN */
-#define LY_SOFT_NEWLINE 	((char)8)
+#define LY_SOFT_NEWLINE		((char)8)
 
 #ifdef EBCDIC
 #define IsSpecialAttrChar(a)  (((a) > '\002') && ((a) <= '\011') && ((a)!='\t'))
@@ -196,6 +196,15 @@ extern int HText_getTabIDColumn PARAMS((HText *text, CONST char *name));
 extern int HText_HiddenLinkCount PARAMS((HText *text));
 extern char * HText_HiddenLinkAt PARAMS((HText *text, int number));
 
+/* "simple table" stuff */
+extern void HText_cancelStbl PARAMS((HText *));
+extern void HText_startStblTABLE PARAMS((HText *, short));
+extern void HText_endStblTABLE PARAMS((HText *));
+extern void HText_startStblTR PARAMS((HText *, short));
+extern void HText_endStblTR PARAMS((HText *));
+extern void HText_startStblTD PARAMS((HText *, int, short, BOOL));
+extern void HText_endStblTD PARAMS((HText *));
+
 /* forms stuff */
 extern void HText_beginForm PARAMS((
 	char *		action,
@@ -213,17 +222,18 @@ extern char * HText_setLastOptionValue PARAMS((
 	HText *		text,
 	char *		value,
 	char *		submit_value,
-	int 		order,
+	int		order,
 	BOOLEAN		checked,
-	int 		val_cs,
-	int 		submit_val_cs));
+	int		val_cs,
+	int		submit_val_cs));
 extern int HText_beginInput PARAMS((
 	HText *		text,
 	BOOL		underline,
 	InputFieldData *I));
 extern void HText_trimHightext PARAMS((
 	HText *		text,
-	BOOLEAN 	final));
+	BOOLEAN		final,
+	int		stop_before));
 extern int HText_SubmitForm PARAMS((
 	FormInfo *	submit_item,
 	document *	doc,
@@ -279,6 +289,14 @@ extern int HText_InsertFile PARAMS((
 	struct link *	form_link));
 
 extern void redraw_lines_of_link PARAMS((int cur));
+extern void LYMoveToLink PARAMS((
+	int		cur,
+	CONST char *	target,
+	char *		hightext,
+	int		flag,
+	BOOL		inU,
+	BOOL		utf_flag));
+
 
 #ifdef USE_PSRC
 extern void HTMark_asSource NOPARAMS;

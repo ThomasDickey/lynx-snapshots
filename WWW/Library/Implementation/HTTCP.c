@@ -1180,6 +1180,7 @@ PUBLIC int HTParseInet ARGS2(
 {
     char *port;
     int dotcount_ip = 0;	/* for dotted decimal IP addr */
+    char *strptr;
 #ifndef _WINDOWS_NSL
     char *host = NULL;
 #endif /* _WINDOWS_NSL */
@@ -1203,17 +1204,18 @@ PUBLIC int HTParseInet ARGS2(
     */
     if ((port = strchr(host, ':')) != NULL) {
 	*port++ = 0;		/* Chop off port */
+	strptr = port;
 	if (port[0] >= '0' && port[0] <= '9') {
 #ifdef UNIX
-	    soc_in->sin_port = htons(atol(port));
+	    soc_in->sin_port = htons(strtol(port, &strptr, 10));
 #else /* VMS: */
 #ifdef DECNET
-	    soc_in->sdn_objnum = (unsigned char)(strtol(port, (char**)0, 10));
+	    soc_in->sdn_objnum = (unsigned char)(strtol(port, &strptr, 10));
 #else
-	    soc_in->sin_port = htons((unsigned short)strtol(port,(char**)0,10));
+	    soc_in->sin_port = htons((unsigned short)strtol(port,&strptr,10));
 #endif /* Decnet */
 #endif /* Unix vs. VMS */
-#ifdef SUPPRESS		/* 1. crashes!?!.  2. Not recommended */
+#ifdef SUPPRESS 	/* 1. crashes!?!.  2. URL syntax has number not name */
 	} else {
 	    struct servent * serv = getservbyname(port, (char*)0);
 	    if (serv) {
@@ -1222,6 +1224,13 @@ PUBLIC int HTParseInet ARGS2(
 		CTRACE((tfp, "TCP: Unknown service %s\n", port));
 	    }
 #endif /* SUPPRESS */
+	}
+	if (strptr && *strptr != '\0') {
+#ifndef _WINDOWS_NSL
+	    FREE(host);
+#endif /* _WINDOWS_NSL */
+	    HTAlwaysAlert(NULL, gettext("Address has invalid port"));
+	    return -1;
 	}
     }
 
@@ -1237,7 +1246,7 @@ PUBLIC int HTParseInet ARGS2(
 #else  /* parse Internet host: */
 
     if (*host >= '0' && *host <= '9') {   /* Test for numeric node address: */
-	char *strptr = host;
+	strptr = host;
 	while (*strptr) {
 	    if (*strptr == '.') {
 		dotcount_ip++;

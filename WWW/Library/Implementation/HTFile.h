@@ -158,6 +158,35 @@ extern HTFormat HTCharsetFormat PARAMS((
 	HTParentAnchor *	anchor,
 	int			default_LYhndl));
 
+/*	Get various pieces of meta info from file name.
+**	-----------------------------------------------
+**
+**  LYGetFileInfo fills in information that can be determined without
+**  an actual (new) access to the filesystem, based on current suffix
+**  and character set configuration.  If the file has been loaded and
+**  parsed before  (with the same URL generated here!) and the anchor
+**  is still around, some results may be influenced by that (in
+**  particular, charset info from a META tag - this is not actually
+**  tested!).
+**  The caller should not keep pointers to the returned objects around
+**  for too long, the valid lifetimes vary. In particular, the returned
+**  charset string should be copied if necessary.  If return of the
+**  file_anchor is requested, that one can be used to retrieve
+**  additional bits of info that are stored in the anchor object and
+**  are not covered here; as usual, don't keep pointers to the
+**  file_anchor longer than necessary since the object may disappear
+**  through HTuncache_current_document or at the next document load.
+**  - kw
+*/
+extern void LYGetFileInfo PARAMS((
+	CONST char *		filename,
+	HTParentAnchor **	pfile_anchor,
+	HTFormat *		pformat,
+	HTAtom **		pencoding,
+	CONST char**		pdesc,
+	CONST char**		pcharset,
+	int *			pfile_cs));
+
 /*
 **  Determine file value from file name.
 */

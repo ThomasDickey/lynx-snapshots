@@ -385,6 +385,7 @@ extern BOOLEAN LYPrependCharsetToSource;
 extern BOOLEAN LYQuitDefaultYes;
 extern BOOLEAN LYNonRestartingSIGWINCH;
 extern BOOLEAN LYReuseTempfiles;
+extern BOOLEAN LYUseBuiltinSuffixes;
 extern BOOLEAN dont_wrap_pre;
 
 #ifdef EXP_JUSTIFY_ELTS
@@ -412,6 +413,7 @@ extern BOOLEAN restore_sigpipe_for_children;
 #endif /* !VMS */
 
 extern int HTNoDataOK;		/* HT_NO_DATA-is-ok hack */
+extern BOOLEAN FileInitAlreadyDone;
 
 #ifdef WIN_EX
 /* LYMain.c */

@@ -127,15 +127,17 @@ PUBLIC void highlight ARGS3(
     char buffer[200];
     int i;
     char tmp[7];
-#if defined(FANCY_CURSES) || defined(USE_SLANG)
+#ifdef SHOW_WHEREIS_TARGETS
     char *cp;
     char *theData = NULL;
     char *Data = NULL;
     int Offset, HitOffset, tLen;
     int LenNeeded;
     BOOL TargetEmphasisON = FALSE;
+    BOOL target1_drawn = NO;
 #endif
     BOOL utf_flag = (BOOL)(LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8);
+    BOOL hl1_drawn = NO;
 #if defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
     BOOL hl2_drawn=FALSE;	/* whether links[cur].hightext2 is already drawn
 				   properly */
@@ -165,10 +167,22 @@ PUBLIC void highlight ARGS3(
 #define LXP (links[cur].lx)
 #define LYP (links[cur].ly)
 #endif
-	move(links[cur].ly, links[cur].lx);
 #ifndef USE_COLOR_STYLE
-	lynx_start_link_color (flag == ON, links[cur].inUnderline);
+	if (links[cur].type == WWW_FORM_LINK_TYPE ||
+	    !links[cur].hightext) {
+	    LYMoveToLink(cur, target, NULL,
+			 flag, links[cur].inUnderline, utf_flag);
+	    lynx_start_link_color (flag == ON, links[cur].inUnderline);
+	} else {
+	    LYMoveToLink(cur, target, links[cur].hightext,
+			 flag, links[cur].inUnderline, utf_flag);
+	    hl1_drawn = YES;
+#ifdef SHOW_WHEREIS_TARGETS
+	    target1_drawn = YES;
+#endif
+	}
 #else
+	move(links[cur].ly, links[cur].lx);
 	if (flag == ON) {
 	    LynxChangeStyle(s_alink, STACK_ON, 0);
 	} else {
@@ -227,18 +241,18 @@ PUBLIC void highlight ARGS3(
 		redraw_lines_of_link(cur);
 	    } else
 #endif
-	    {
+	    if (!hl1_drawn) {
 	    /*
 	     *	Copy into the buffer only what will fit
 	     *	within the width of the screen.
 	     */
-	    LYmbcsstrncpy(buffer,
-			  (links[cur].hightext ?
-			   links[cur].hightext : ""),
-			  (sizeof(buffer) - 1),
-			  ((LYcols - 1) - links[cur].lx),
-			  utf_flag);
-	    addstr(buffer);
+		LYmbcsstrncpy(buffer,
+			      (links[cur].hightext ?
+			       links[cur].hightext : ""),
+			      (sizeof(buffer) - 1),
+			      ((LYcols - 1) - links[cur].lx),
+			      utf_flag);
+		addstr(buffer);
 	    }
 	}
 
@@ -279,7 +293,8 @@ PUBLIC void highlight ARGS3(
 #endif
 	lynx_stop_link_color (flag == ON, links[cur].inUnderline);
 
-#if defined(FANCY_CURSES) || defined(USE_SLANG)
+#ifdef SHOW_WHEREIS_TARGETS
+	if (!target1_drawn)
 	/*
 	 *  If we have an emphasized WHEREIS hit in the highlighted
 	 *  text, restore the emphasis.  Note that we never emphasize
@@ -1759,7 +1774,7 @@ highlight_search_done:
 	     */
 	    LYHideCursor();
 	else
-#endif /* FANCY CURSES || USE_SLANG */
+#endif /* SHOW_WHEREIS_TARGETS */
 	    /*
 	     *	Never hide the cursor if there's no FANCY CURSES or SLANG.
 	     */
@@ -1893,12 +1908,21 @@ PUBLIC void statusline ARGS1(
 	if (p)
 	    p= '\0';
     }
+#if 0
+    /* This is broken.  It shows a truncated name if the complete URL is
+       so long that it has already been shortened by the caller to fit.
+       Moreover it doesn't belong here.  This function should just display
+       what it's asked to and not second-guess its caller.  If you want
+       a different message displayed, pass it a different message.
+       Finally, I dislike the intended change anyway.  It shows less
+       information, it is a dumbed down interface. - kw */
     if (strncmp(text, "LYNXDOWNLOAD:", 13) == 0) {
 	p = strstr(text + 13, "SugFile=");
 	if (p != NULL) {
 	    strcpy(text_buff, p + 3);
 	}
     }
+#endif
 
     /*
      *	Deal with any CJK escape sequences and Kanji if we have a CJK
@@ -3240,7 +3264,13 @@ PUBLIC void size_change ARGS1(
     LYcols  = SLtt_Screen_Cols;
 #ifdef SLANG_MBCS_HACK
     PHYSICAL_SLtt_Screen_Cols = LYcols;
-    SLtt_Screen_Cols = (LYcols * 6);
+#ifdef SLANG_NO_LIMIT		/* define this if slang has been fixed */
+    SLtt_Screen_Cols = (LYcols-1) * 6;
+#else
+    /* Needs to be limited: fixed buffer bugs in slang can cause crash,
+       see slang's SLtt_smart_puts - kw */
+    SLtt_Screen_Cols = HTMIN((LYcols-1) * 6, 255);
+#endif
 #endif /* SLANG_MBCS_HACK */
     if (sig == 0)
 	/*
@@ -7617,9 +7647,9 @@ PUBLIC void LYSyslog ARGS1(
 	    CTRACE((tfp, "...alter %s\n", buf));
 	    FREE(buf);
 	    return;
-        }
+	}
     }
-    syslog (LOG_INFO|LOG_LOCAL5, arg);
+    syslog (LOG_INFO|LOG_LOCAL5, "%s", arg ? arg : "(null-URL)");
 }
 
 PUBLIC void LYCloselog NOARGS

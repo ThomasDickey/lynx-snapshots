@@ -166,8 +166,9 @@ Dep_lynxdexe = \
    $(OBJ)/LYStrings.obj\
    $(OBJ)/LYTraversal.obj\
    $(OBJ)/LYUpload.obj\
-   $(OBJ)/lyutils.obj\
-   $(OBJ)/xsystem.obj
+   $(OBJ)/LYUtils.obj\
+   $(OBJ)/TRSTable.obj\
+   $(OBJ)/XSystem.obj
 
 
 lynx.exe : $(Dep_lynxdexe)

@@ -14,7 +14,7 @@
 #include <LYShowInfo.h>
 #include <LYStrings.h>
 #include <LYCharUtils.h>
-#include <LYGetFile.h>
+#include <LYCharSets.h>
 
 #ifdef DIRED_SUPPORT
 #include <LYUpload.h>
@@ -687,73 +687,6 @@ PRIVATE void to_stack ARGS1(char *, str)
 
 
 /*
- *  Status line messages list, LYNXMESSAGES:/ internal page,
- *  called from getfile().
- */
-PUBLIC int LYshow_statusline_messages ARGS1(
-    document *,			      newdoc)
-{
-    static char tempfile[LY_MAXPATH] = "\0";
-    static char *info_url;
-    FILE *fp0;
-    int i;
-    char *temp = NULL;
-
-    if (LYReuseTempfiles) {
-	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
-    } else {
-	LYRemoveTemp(tempfile);
-	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
-    }
-    if (fp0 == NULL) {
-	HTAlert(CANNOT_OPEN_TEMP);
-	return(NOT_FOUND);
-    }
-    LYLocalFileToURL(&info_url, tempfile);
-
-    LYforce_no_cache = TRUE;  /* don't cache this doc */
-
-    BeginInternalPage (fp0, STATUSLINES_TITLE, NULL);
-    fprintf(fp0, "<pre>\n");
-    fprintf(fp0, "<ol>\n");
-
-    /* print messages in reverse order: */
-    i = topOfStack;
-    while (--i >= 0) {
-	if (buffstack[i] != NULL) {
-	    StrAllocCopy(temp, buffstack[i]);
-	    LYEntify(&temp, TRUE);
-	    fprintf(fp0,  "<li> <em>%s</em>\n",	 temp);
-	}
-    }
-    i = STATUSBUFSIZE;
-    while (--i >= topOfStack) {
-	if (buffstack[i] != NULL) {
-	    StrAllocCopy(temp, buffstack[i]);
-	    LYEntify(&temp, TRUE);
-	    fprintf(fp0,  "<li> <em>%s</em>\n",	 temp);
-	}
-    }
-
-    fprintf(fp0, "</ol>\n");
-    fprintf(fp0, "</pre>\n");
-    EndInternalPage(fp0);
-    LYCloseTempFP(fp0);
-
-
-    /* exit to getfile() cycle */
-    StrAllocCopy(newdoc->address, info_url);
-    FREE(newdoc->post_data);
-    FREE(newdoc->post_content_type);
-    FREE(newdoc->bookmark);
-    newdoc->isHEAD = FALSE;
-
-    /* Leave loading it to getfile - that has the advantage to make
-       this kind of link 'd'ownloadable. - kw */
-    return(NORMAL);
-}
-
-/*
  * Dump statusline messages into the buffer.
  * Called from mainloop() when exit immediately with an error:
  * can not access startfile (first_file) so a couple of alert messages
@@ -794,7 +727,6 @@ PUBLIC void LYstore_message2 ARGS2(
     if (message != NULL) {
 	char *temp = NULL;
 	HTSprintf(&temp, message, (argument == 0) ? "" : argument);
-	LYEntify(&temp, TRUE);
 	to_stack(temp);
     }
 }
@@ -805,7 +737,97 @@ PUBLIC void LYstore_message ARGS1(
     if (message != NULL) {
 	char *temp = NULL;
 	StrAllocCopy(temp, message);
-	LYEntify(&temp, TRUE);
 	to_stack(temp);
     }
 }
+
+/*     LYLoadMESSAGES
+**     --------------
+**     Create a text/html stream with a list of recent statusline messages.
+**     LYNXMESSAGES:/ internal page.
+**     [implementation based on LYLoadKeymap()].
+*/
+
+struct _HTStream
+{
+    HTStreamClass * isa;
+};
+
+PRIVATE int LYLoadMESSAGES ARGS4 (
+	CONST char *,		arg GCC_UNUSED,
+	HTParentAnchor *,	anAnchor,
+	HTFormat,		format_out,
+	HTStream*,		sink)
+{
+    HTFormat format_in = WWW_HTML;
+    HTStream *target = NULL;
+    char *buf = NULL;
+
+    int i;
+    char *temp = NULL;
+
+    /*
+     *  Set up the stream. - FM
+     */
+    target = HTStreamStack(format_in, format_out, sink, anAnchor);
+
+    if (!target || target == NULL) {
+	HTSprintf0(&buf, CANNOT_CONVERT_I_TO_O,
+			 HTAtom_name(format_in), HTAtom_name(format_out));
+	HTAlert(buf);
+	FREE(buf);
+	return(HT_NOT_LOADED);
+    }
+    anAnchor->no_cache = TRUE;
+
+#define PUTS(buf)    (*target->isa->put_block)(target, buf, strlen(buf))
+
+    HTSprintf0(&buf, "<html>\n<head>\n");
+    PUTS(buf);
+	/*
+	 *  This page is a list of messages in display character set.
+	 */
+    HTSprintf0(&buf, "<META %s content=\"text/html;charset=%s\">\n",
+	       "http-equiv=\"content-type\"",
+	       LYCharSet_UC[current_char_set].MIMEname);
+    PUTS(buf);
+    HTSprintf0(&buf, "<title>%s</title>\n", STATUSLINES_TITLE);
+    PUTS(buf);
+    HTSprintf0(&buf, "</head>\n<body>\n<pre>\n<ol>\n");
+    PUTS(buf);
+
+    /* print messages in reverse order: */
+    i = topOfStack;
+    while (--i >= 0) {
+	if (buffstack[i] != NULL) {
+	    StrAllocCopy(temp, buffstack[i]);
+	    LYEntify(&temp, TRUE);
+	    HTSprintf0(&buf, "<li> <em>%s</em>\n",  temp);
+	    PUTS(buf);
+	}
+    }
+    i = STATUSBUFSIZE;
+    while (--i >= topOfStack) {
+	if (buffstack[i] != NULL) {
+	    StrAllocCopy(temp, buffstack[i]);
+	    LYEntify(&temp, TRUE);
+	    HTSprintf0(&buf, "<li> <em>%s</em>\n",  temp);
+	    PUTS(buf);
+	}
+    }
+    FREE(temp);
+
+    HTSprintf0(&buf, "</ol>\n</pre>\n</body>\n</html>\n");
+    PUTS(buf);
+
+    (*target->isa->_free)(target);
+    FREE(buf);
+    return(HT_LOADED);
+}
+
+#ifdef GLOBALDEF_IS_MACRO
+#define _LYMESSAGES_C_GLOBALDEF_1_INIT { "LYNXMESSAGES", LYLoadMESSAGES, 0}
+GLOBALDEF (HTProtocol,LYLynxStatusMessages,_LYMESSAGES_C_GLOBALDEF_1_INIT);
+#else
+GLOBALDEF PUBLIC HTProtocol LYLynxStatusMessages = {"LYNXMESSAGES", LYLoadMESSAGES, 0};
+#endif /* GLOBALDEF_IS_MACRO */

@@ -320,9 +320,10 @@ PUBLIC char * HTParse ARGS3(
 			if (*h == '.')
 			    *h = '\0';		/* chop final . */
 		    }
-		} else {
+		} else if (p2 != result) {
 		    h = p2;
-		    h--;		/* End of hostname */
+		    if (h != result)
+			h--;		/* End of hostname */
 		    if (*h == '.') {
 			/*
 			**  Slide p2 over h.

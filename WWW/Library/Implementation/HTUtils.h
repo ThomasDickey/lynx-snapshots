@@ -384,6 +384,8 @@ are generally not the response status from any specific protocol.
 #define HT_FORBIDDEN            -403    /* Access forbidden */
 #define HT_NOT_ACCEPTABLE       -406    /* Not Acceptable */
 
+#define HT_PARSER_REOPEN_ELT	 700	/* tells SGML parser to keep tag open */
+#define HT_PARSER_OTHER_CONTENT	 701	/* tells SGML to change content model */
 #define HT_H_ERRNO_VALID 	-800	/* see h_errno for resolver error */
 
 #define HT_INTERNAL             -900    /* Weird -- should never happen. */

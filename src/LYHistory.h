@@ -16,7 +16,6 @@ extern void LYpush PARAMS((document *doc, BOOLEAN force_push));
 
 extern void LYstore_message2 PARAMS((CONST char *message, CONST char *argument));
 extern void LYstore_message PARAMS((CONST char *message));
-extern int LYshow_statusline_messages PARAMS((document *newdoc));
 extern void LYstatusline_messages_on_exit PARAMS((char **buf));
 
 #endif /* LYHISTORY_H */

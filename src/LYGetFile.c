@@ -14,7 +14,6 @@
 #include <LYGetFile.h>
 #include <LYPrint.h>
 #include <LYOptions.h>
-#include <LYHistory.h>
 #include <LYStrings.h>
 #include <LYClean.h>
 #include <LYDownload.h>
@@ -28,12 +27,13 @@
 #include <LYLocal.h>
 #endif /* DIRED_SUPPORT */
 #include <LYReadCFG.h>
+#include <LYHistory.h>
 
 #include <LYexit.h>
 #include <LYLeaks.h>
 
 PRIVATE int fix_httplike_urls PARAMS((document *doc, UrlTypes type));
-extern char * WWW_Download_File;
+
 #ifdef VMS
 extern BOOLEAN LYDidRename;
 #endif /* VMS */
@@ -317,6 +317,11 @@ Try_Redirected_URL:
 		    /* show compile-time settings */
 		    return(lynx_compile_opts(doc));
 #endif
+		} else if (url_type == LYNXMESSAGES_URL_TYPE) {
+			/* Uh! */
+			LYforce_no_cache = TRUE;
+			LYoverride_no_cache = FALSE;
+			/* continue */
 
 #ifndef DISABLE_NEWS
 		} else if (url_type == NEWSPOST_URL_TYPE ||
@@ -776,23 +781,9 @@ Try_Redirected_URL:
 			}
 			FREE(cp);
 		    }
-		    if (url_type == LYNXMESSAGES_URL_TYPE) {
-			int rv;
-		    /* show list of recent statusline messages */
-			if ((rv = LYshow_statusline_messages(doc)) != NORMAL) {
-			    return rv;
-			}
-			WWWDoc.address = doc->address;
-			WWWDoc.post_data = doc->post_data;
-			WWWDoc.post_content_type = doc->post_content_type;
-			WWWDoc.bookmark = doc->bookmark;
-			WWWDoc.isHEAD = doc->isHEAD;
-			WWWDoc.safe = doc->safe;
-		    } else {
+		    CTRACE_SLEEP(MessageSecs);
+		    user_message(WWW_WAIT_MESSAGE, doc->address);
 
-			CTRACE_SLEEP(MessageSecs);
-			user_message(WWW_WAIT_MESSAGE, doc->address);
-		    }
 		    if (TRACE) {
 #ifdef USE_SLANG
 			if (LYCursesON) {
@@ -851,6 +842,7 @@ Try_Redirected_URL:
 				url_type == LYNXCOMPILE_OPTS_URL_TYPE ||
 				url_type == LYNXHIST_URL_TYPE ||
 				url_type == LYNXCOOKIE_URL_TYPE ||
+			        url_type == LYNXMESSAGES_URL_TYPE ||
 				(LYValidate &&
 				 url_type != HTTP_URL_TYPE &&
 				 url_type != HTTPS_URL_TYPE) ||

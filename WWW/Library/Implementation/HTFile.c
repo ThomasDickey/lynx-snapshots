@@ -607,7 +607,7 @@ PUBLIC char * HTURLPath_toFile ARGS2(
 
     StrAllocCopy(path, name);
     if (expand_all)
-    	HTUnEscape(path);		/* Interpret all % signs */
+	HTUnEscape(path);		/* Interpret all % signs */
     else
 	HTUnEscapeSome(path, "/");	/* Interpret % signs for path delims */
 
@@ -886,6 +886,10 @@ PUBLIC HTFormat HTFileFormat ARGS3(
 		    if (suff->rep) {
 			if (pdesc && !(*pdesc))
 			    *pdesc = suff->desc;
+			if (pencoding && IsUnityEnc(*pencoding) &&
+			    *pencoding != WWW_ENC_7BIT &&
+			    !IsUnityEnc(suff->encoding))
+			    *pencoding = suff->encoding;
 #ifdef VMS
 			if (semicolon != NULL)
 			    *semicolon = ';';
@@ -1086,6 +1090,85 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 
     return format;
 }
+
+
+
+/*	Get various pieces of meta info from file name.
+**	-----------------------------------------------
+**
+**  LYGetFileInfo fills in information that can be determined without
+**  an actual (new) access to the filesystem, based on current suffix
+**  and character set configuration.  If the file has been loaded and
+**  parsed before  (with the same URL generated here!) and the anchor
+**  is still around, some results may be influenced by that (in
+**  particular, charset info from a META tag - this is not actually
+**  tested!).
+**  The caller should not keep pointers to the returned objects around
+**  for too long, the valid lifetimes vary. In particular, the returned
+**  charset string should be copied if necessary.  If return of the
+**  file_anchor is requested, that one can be used to retrieve
+**  additional bits of info that are stored in the anchor object and
+**  are not covered here; as usual, don't keep pointers to the
+**  file_anchor longer than necessary since the object may disappear
+**  through HTuncache_current_document or at the next document load.
+**  - kw
+*/
+PUBLIC void LYGetFileInfo ARGS7(
+	CONST char *,		filename,
+	HTParentAnchor **,	pfile_anchor,
+	HTFormat *,		pformat,
+	HTAtom **,		pencoding,
+	CONST char**,		pdesc,
+	CONST char**,		pcharset,
+	int *,			pfile_cs)
+{
+	char *Afn;
+	char *Aname = NULL;
+	HTFormat format;
+	HTAtom * myEnc = NULL;
+	HTParentAnchor *file_anchor;
+	CONST char *file_csname = file_anchor->charset;
+	int file_cs;
+
+	/*
+	 *  Convert filename to URL.  Note that it is always supposed to
+	 *  be a filename, not maybe-filename-maybe-URL, so we don't
+	 *  use LYFillLocalFileURL and LYEnsureAbsoluteURL. - kw
+	 */
+	Afn = HTEscape(filename, URL_PATH);
+	LYLocalFileToURL(&Aname, Afn);
+	file_anchor = HTAnchor_parent(HTAnchor_findSimpleAddress(Aname));
+
+	file_csname = file_anchor->charset;
+	format = HTFileFormat(filename, &myEnc, pdesc);
+	format = HTCharsetFormat(format, file_anchor, UCLYhndl_HTFile_for_unspec);
+	file_cs = HTAnchor_getUCLYhndl(file_anchor, UCT_STAGE_MIME);
+	if (!file_csname) {
+	    if (file_cs >= 0)
+		file_csname = LYCharSet_UC[file_cs].MIMEname;
+	    else file_csname = "display character set";
+	}
+	CTRACE((tfp, "GetFileInfo: '%s' is a%s %s %s file, charset=%s (%d).\n",
+	       filename,
+	       ((myEnc && *HTAtom_name(myEnc) == '8') ? "n" : myEnc ? "" :
+		*HTAtom_name(format) == 'a' ? "n" : ""),
+	       myEnc ? HTAtom_name(myEnc) : "",
+	       HTAtom_name(format),
+	       file_csname,
+	       file_cs));
+	FREE(Afn);
+	FREE(Aname);
+	if (pfile_anchor)
+	    *pfile_anchor = file_anchor;
+	if (pformat)
+	    *pformat = format;
+	if (pencoding)
+	    *pencoding = myEnc;
+	if (pcharset)
+	    *pcharset = file_csname;
+	if (pfile_cs)
+	    *pfile_cs = file_cs;
+    }
 
 /*	Determine value from file name.
 **	-------------------------------

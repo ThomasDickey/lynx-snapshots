@@ -2134,11 +2134,12 @@ PRIVATE int HTLoadNews ARGS4(
 	HTFormat,		format_out,
 	HTStream*,		stream)
 {
-    char command[260];			/* The whole command */
+    char command[262];			/* The whole command */
     char proxycmd[260];			/* The proxy command */
     char groupName[GROUP_NAME_LENGTH];	/* Just the group name */
     int status;				/* tcp return */
     int retries;			/* A count of how hard we have tried */
+    BOOL normal_url;		/* Flag: "news:" or "nntp:" (physical) URL */
     BOOL group_wanted;		/* Flag: group was asked for, not article */
     BOOL list_wanted;		/* Flag: list was asked for, not article */
     BOOL post_wanted;		/* Flag: new post to group was asked for */
@@ -2183,12 +2184,13 @@ PRIVATE int HTLoadNews ARGS4(
 	**	xxxxx			News group (no "@")
 	**	group/n1-n2		Articles n1 to n2 in group
 	*/
-	spost_wanted = (BOOL) (strstr(arg, "snewspost:") != NULL);
-	sreply_wanted = (BOOL) (!(spost_wanted) &&
+	normal_url = (!strncmp(arg, "news:", 5) || !strncmp(arg, "nntp:", 5));
+	spost_wanted = (BOOL) (!normal_url && strstr(arg, "snewspost:") != NULL);
+	sreply_wanted = (BOOL) (!(normal_url || spost_wanted) &&
 			 strstr(arg, "snewsreply:") != NULL);
-	post_wanted = (BOOL) (!(spost_wanted || sreply_wanted) &&
+	post_wanted = (BOOL) (!(normal_url || spost_wanted || sreply_wanted) &&
 			strstr(arg, "newspost:") != NULL);
-	reply_wanted = (BOOL) (!(spost_wanted || sreply_wanted ||
+	reply_wanted = (BOOL) (!(normal_url || spost_wanted || sreply_wanted ||
 			  post_wanted) &&
 			strstr(arg, "newsreply:") != NULL);
 	group_wanted = (BOOL) ((!(spost_wanted || sreply_wanted ||
@@ -2377,7 +2379,7 @@ PRIVATE int HTLoadNews ARGS4(
 		}
 	    } else {
 		/*
-		**  Reset p1 so that it points to the newgroup
+		**  Reset p1 so that it points to the newsgroup
 		**  (or a wildcard), or the article.
 		*/
 		if (!(cp = strrchr((p1 + 6), '/')) || *(cp + 1) == '\0') {
@@ -2396,6 +2398,12 @@ PRIVATE int HTLoadNews ARGS4(
 	if (post_wanted || reply_wanted || spost_wanted || sreply_wanted) {
 	    strcpy(command, "POST");
 	} else if (list_wanted) {
+	    if (strlen(p1) > 249) {
+		FREE(ProxyHost);
+		FREE(ProxyHREF);
+		HTAlert(URL_TOO_LONG);
+		return -400;
+	    }
 	    SnipIn(command, "XGTITLE %.*s", 11, p1);
 	} else if (group_wanted) {
 	    char * slash = strchr(p1, '/');
@@ -2403,7 +2411,13 @@ PRIVATE int HTLoadNews ARGS4(
 	    last = 0;
 	    if (slash) {
 		*slash = '\0';
-		LYstrncpy(groupName, p1, sizeof(groupName)-1);
+		if (strlen(p1) >= sizeof(groupName)) {
+		    FREE(ProxyHost);
+		    FREE(ProxyHREF);
+		    HTAlert(URL_TOO_LONG);
+		    return -400;
+		}
+		strcpy(groupName, p1);
 		*slash = '/';
 		(void)sscanf(slash+1, "%d-%d", &first, &last);
 		if ((first > 0) && (isdigit(*(slash+1))) &&
@@ -2419,17 +2433,29 @@ PRIVATE int HTLoadNews ARGS4(
 		    last = -1;
 		}
 	    } else {
-		LYstrncpy(groupName, p1, sizeof(groupName)-1);
+		if (strlen(p1) >= sizeof(groupName)) {
+		    FREE(ProxyHost);
+		    FREE(ProxyHREF);
+		    HTAlert(URL_TOO_LONG);
+		    return -400;
+		}
+		strcpy(groupName, p1);
 	    }
 	    SnipIn(command, "GROUP %.*s", 9, groupName);
 	} else {
-	    char *left = (strrchr(p1, '<') == 0) ? "<" : "";
-	    char *right = (strrchr(p1, '>') == 0) ? ">" : "";
+	    int add_open=(strchr(p1, '<') == 0);
+	    int add_close=(strchr(p1, '>') == 0);
+	    if (strlen(p1) + add_open + add_close >= 252) {
+		FREE(ProxyHost);
+		FREE(ProxyHREF);
+		HTAlert(URL_TOO_LONG);
+		return -400;
+	    }
 	    sprintf(command, "ARTICLE %s%.*s%s",
-		    left,
-		    (int) (sizeof(command) - (11 + strlen(left) + strlen(right))),
+		    add_open ? "<" : "",
+		    (int) (sizeof(command) - (11 + add_open + add_close)),
 		    p1,
-		    right);
+		    add_close ? ">" : "");
 	}
 
 	{
@@ -2455,7 +2481,7 @@ PRIVATE int HTLoadNews ARGS4(
     if (!(post_wanted || reply_wanted || spost_wanted || sreply_wanted ||
 	  (group_wanted && last != -1) || list_wanted)) {
 	head_wanted = anAnchor->isHEAD;
-	if (head_wanted && !strncmp(command, "ARTICLE_", 8)) {
+	if (head_wanted && !strncmp(command, "ARTICLE ", 8)) {
 	    /* overwrite "ARTICLE" - hack... */
 	    strcpy(command, "HEAD ");
 	    for (cp = command + 5; ; cp++)
@@ -2581,13 +2607,23 @@ PRIVATE int HTLoadNews ARGS4(
 			}
 			if (retries < 1)
 			    continue;
+			FREE(ProxyHost);
+			FREE(ProxyHREF);
+			FREE(ListArg);
+			FREE(postfile);
 			if (!(post_wanted || reply_wanted ||
 			      spost_wanted || sreply_wanted)) {
 			    ABORT_TARGET;
 			}
-			HTSprintf0(&dbuf,
+			if (response_text[0]) {
+			    HTSprintf0(&dbuf,
 				gettext("Can't read news info.  News host %.20s responded: %.200s"),
 				NewsHost, response_text);
+			} else {
+			    HTSprintf0(&dbuf,
+				gettext("Can't read news info, empty response from host %s"),
+				NewsHost);
+			}
 			return HTLoadError(stream, 500, dbuf);
 		}
 		if (status == 200) {

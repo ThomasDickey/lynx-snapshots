@@ -109,6 +109,7 @@ OBJS = \
 	"LYUpload.obj" \
 	"LYUtils.obj" \
 	"SGML.obj" \
+	"TRSTable.obj" \
 	"UCAuto.obj" \
 	"UCAux.obj" \
 	"UCdomap.obj" \
@@ -253,6 +254,9 @@ LYUpload.obj : $(SRC_DIR)\LYUpload.c
 
 LYUtils.obj : $(SRC_DIR)\LYUtils.c
 	$(COMPILE) $(SRC_DIR)\LYUtils.c
+
+TRSTable.obj : $(SRC_DIR)\TRSTable.c
+	$(COMPILE) $(SRC_DIR)\TRSTable.c
 
 mktime.obj : $(SRC_DIR)\mktime.c
 	$(COMPILE) $(SRC_DIR)\mktime.c

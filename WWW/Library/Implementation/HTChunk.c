@@ -37,6 +37,8 @@ PUBLIC HTChunk * HTChunkCreate2 ARGS2 (int,grow, size_t, needed)
     if (needed > 0) {
 	ch->allocated = needed-1 - ((needed-1) % ch->growby)
 	    + ch->growby; /* Round up */
+	CTRACE((tfp, "HTChunkCreate2: requested %d, allocate %d\n",
+	       needed, ch->allocated));
 	ch->data = (char *)calloc(1, ch->allocated);
 	if (!ch->data)
 	    outofmem(__FILE__, "HTChunkCreate2 data");

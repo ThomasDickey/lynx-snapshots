@@ -89,7 +89,7 @@ PUBLIC int strncasecomp ARGS3(
     CONST char *q = b;
 
     for (p = a, q = b; ; p++, q++) {
-        int diff;
+	int diff;
 	if (p == (a+n))
 	    return 0;	/*   Match up to n characters */
 	if (!(*p && *q))
@@ -136,6 +136,8 @@ PRIVATE int Raw_found = 0;		/* whether explicit R directive found */
 PRIVATE int CodePage = 0;
 PRIVATE int CodePage_found = 0;		/* whether explicit C directive found */
 
+#define MAX_UNIPAIRS 2500
+
 PRIVATE void addpair_str ARGS2(
 	char *,		str,
 	int,		un)
@@ -147,8 +149,8 @@ PRIVATE void addpair_str ARGS2(
 	    /*
 	     *  Initialize the map for replacement strings.
 	     */
-	    themap_str.entries =
-	  (struct unipair_str *) malloc (2000 * sizeof (struct unipair_str));
+	    themap_str.entries = (struct unipair_str *) malloc (MAX_UNIPAIRS
+				* sizeof (struct unipair_str));
 	    if (!themap_str.entries) {
 		fprintf(stderr,
 			"%s: Out of memory\n", tblname);
@@ -169,9 +171,10 @@ PRIVATE void addpair_str ARGS2(
 	/*
 	 *  Add to list.
 	 */
-	if (themap_str.entry_ct > 1999) {
+	if (themap_str.entry_ct > MAX_UNIPAIRS-1) {
 	    fprintf(stderr,
-		"ERROR: Only 2000 unicode replacement strings permitted!\n");
+		    "ERROR: Only %d unicode replacement strings permitted!\n",
+		    MAX_UNIPAIRS);
 	    done(EX_DATAERR);
 	}
 	themap_str.entries[themap_str.entry_ct].unicode = un;
@@ -187,7 +190,7 @@ PRIVATE void addpair ARGS2(
 {
     int i;
 
-    if (!Raw_found) {       /* enc not (yet) explicitly given with 'R' */
+    if (!Raw_found) {	/* enc not (yet) explicitly given with 'R' */
 	if (fp >= 128) {
 	    if (RawOrEnc != UCT_ENC_8BIT && RawOrEnc <= UCT_ENC_8859) {
 		if (fp < 160) {	/* cannot be 8859 */
@@ -391,7 +394,7 @@ PUBLIC int main ARGS2(
 		}
 		p++;
 		while (*p == ' ' || *p == '\t') {
-	  	    p++;
+		    p++;
 		}
 		RawOrEnc = strtol(p,0,10);
 		Raw_found = 1;
@@ -400,7 +403,7 @@ PUBLIC int main ARGS2(
 	    /*
 	     *  Is this the default table?
 	     */
- 	    case 'D':
+	    case 'D':
 		if (p[1] == 'e' || p[1] == 'E') {
 		    buffer[sizeof(buffer) - 1] = '\0';
 		    if (!strncasecomp(p, "Default", 7)) {
@@ -417,7 +420,7 @@ PUBLIC int main ARGS2(
 	    /*
 	     *  Is this the default table?
 	     */
- 	    case 'F':
+	    case 'F':
 		if (p[1] == 'a' || p[1] == 'A') {
 		    buffer[sizeof(buffer) - 1] = '\0';
 		    if (!strncasecomp(p, "FallBack", 8)) {
@@ -477,7 +480,7 @@ PUBLIC int main ARGS2(
 		}
 		p++;
 		while (*p == ' ' || *p == '\t') {
-	  	    p++;
+		    p++;
 		}
 		CodePage = strtol(p,0,10);
 		CodePage_found = 1;
@@ -587,7 +590,7 @@ PUBLIC int main ARGS2(
 	if (p1 == p) {
 	    fprintf(stderr, "Bad input line: %s\n", buffer);
 	    done(EX_DATAERR);
-        }
+	}
 	p = p1;
 
 	while (*p == ' ' || *p == '\t') {
@@ -601,7 +604,7 @@ PUBLIC int main ARGS2(
 		done(EX_DATAERR);
 	    }
 	    p = p1;
-        } else {
+	} else {
 	    fp1 = 0;
 	}
 
@@ -643,7 +646,7 @@ PUBLIC int main ARGS2(
 		    fprintf(stderr,
 			    " there should be a Unicode range.\n");
 		    done(EX_DATAERR);
-	        }
+		}
 		p++;
 		un1 = getunicode(&p);
 		if (un0 < 0 || un1 < 0) {
@@ -651,7 +654,7 @@ PUBLIC int main ARGS2(
      "%s: Bad Unicode range corresponding to font position range 0x%x-0x%x\n",
 			    tblname, fp0, fp1);
 		    done(EX_DATAERR);
-	        }
+		}
 		if (un1 - un0 != fp1 - fp0) {
 		    fprintf(stderr,
 			"%s: Unicode range U+%x-U+%x not of the same length",
@@ -660,7 +663,7 @@ PUBLIC int main ARGS2(
 			    " as font position range 0x%x-0x%x\n",
 			    fp0, fp1);
 		    done(EX_DATAERR);
-	        }
+		}
 		for (i = fp0; i <= fp1; i++) {
 		    addpair(i,un0-fp0+i);
 		}
@@ -752,8 +755,8 @@ PUBLIC int main ARGS2(
 	this_isDefaultMap = !strncmp(this_MIMEcharset,"iso-8859-1", 10);
     }
     fprintf(stderr,
-    	    "makeuctb: %s: %stranslation map",
- 	    this_MIMEcharset, (this_isDefaultMap ? "default " : ""));
+	    "makeuctb: %s: %stranslation map",
+	    this_MIMEcharset, (this_isDefaultMap ? "default " : ""));
     if (this_isDefaultMap == 1) {
 	*id_append = '\0';
     } else {
@@ -808,7 +811,7 @@ static CONST u8 dfont_unicount%s[%d] = \n\
 
     if (nuni) {
 	fprintf(chdr, "\nstatic CONST u16 dfont_unitable%s[%d] = \n{\n\t",
-	       id_append, nuni);
+		id_append, nuni);
     } else {
 	fprintf(chdr, "\nstatic CONST u16 dfont_unitable%s[1]; /* dummy */\n", id_append);
     }
@@ -841,8 +844,8 @@ static struct unipair_str repl_map%s[%d] = \n\
 
     for (i = 0; i < themap_str.entry_ct; i++) {
 	fprintf(chdr, "{0x%x,\"%s\"}",
-	       themap_str.entries[i].unicode,
-	       themap_str.entries[i].replace_str);
+		themap_str.entries[i].unicode,
+		themap_str.entries[i].replace_str);
 	if (i == (themap_str.entry_ct - 1)) {
 	    fprintf(chdr, "\n};\n");
 	} else if ((i % 4) == 3) {

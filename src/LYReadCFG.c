@@ -4,6 +4,7 @@
 #include <HTUtils.h>
 #endif
 #include <HTFile.h>
+#include <HTInit.h>
 #include <UCMap.h>
 
 #include <LYUtils.h>
@@ -822,26 +823,106 @@ static int source_cache_fun ARGS1(
 static int suffix_fun ARGS1(
 	char *,		value)
 {
-    char *mime_type;
+    char *mime_type, *p;
+    char *encoding = NULL, *sq = NULL, *description = NULL;
+    float q = 1.0;
 
     if ((strlen (value) < 3)
-    || (NULL == (mime_type = strchr (value, ':'))))
+    || (NULL == (mime_type = strchr (value, ':')))) {
+	CTRACE((tfp, "Invalid SUFFIX:%s ignored.\n", value));
 	return 0;
+    }
 
     *mime_type++ = '\0';
+    if (*mime_type) {
+	if ((encoding = strchr(mime_type, ':')) != NULL) {
+	    *encoding++ = '\0';
+	    if ((sq = strchr(encoding, ':')) != NULL) {
+		*sq++ = '\0';
+		if ((description = strchr(sq, ':')) != NULL) {
+		    *description++ = '\0';
+		    if ((p = strchr(sq, ':')) != NULL)
+			*p = '\0';
+		    LYTrimTail(description);
+		}
+		LYRemoveBlanks(sq);
+		if (!*sq)
+		    sq = NULL;
+	    }
+	    LYRemoveBlanks(encoding);
+	    LYLowerCase(encoding);
+	    if (!*encoding)
+		encoding = NULL;
+	}
+    }
 
     LYRemoveBlanks(mime_type);
-    LYLowerCase(mime_type);
+    /*
+     *  Not converted to lowercase on input, to make it possible to
+     *  reproduce the equivalent of some of the HTInit.c defaults
+     *  that use mixed case, although that is not recomended. - kw
+     */ /*LYLowerCase(mime_type);*/
 
-    if (strstr(mime_type, "tex") != NULL ||
-	strstr(mime_type, "postscript") != NULL ||
-	strstr(mime_type, "sh") != NULL ||
-	strstr(mime_type, "troff") != NULL ||
-	strstr(mime_type, "rtf") != NULL)
-	HTSetSuffix(value, mime_type, "8bit", 1.0);
-    else
-	HTSetSuffix(value, mime_type, "binary", 1.0);
+    if (!*mime_type) { /* that's ok now, with an encoding!  */
+	CTRACE((tfp, "SUFFIX:%s without MIME type for %s\n", value,
+	       encoding ? encoding : "what?"));
+	mime_type = NULL; /* that's ok now, with an encoding!  */
+	if (!encoding)
+	    return 0;
+    }
 
+    if (!encoding) {
+	if (strstr(mime_type, "tex") != NULL ||
+	    strstr(mime_type, "postscript") != NULL ||
+	    strstr(mime_type, "sh") != NULL ||
+	    strstr(mime_type, "troff") != NULL ||
+	    strstr(mime_type, "rtf") != NULL)
+	    encoding = "8bit";
+	else
+	    encoding = "binary";
+    }
+    if (!sq) {
+	q = 1.0;
+    } else {
+	double df = strtod(sq, &p);
+	if (p == sq && df == 0.0) {
+	    CTRACE((tfp, "Invalid q=%s for SUFFIX:%s, using -1.0\n",
+		   sq, value));
+	    q = -1.0;
+	} else {
+	    q = df;
+	}
+    }
+    HTSetSuffix5(value, mime_type, encoding, description, q);
+
+    return 0;
+}
+
+static int suffix_order_fun ARGS1(
+	char *,		value)
+{
+    char *p = value;
+    char *optn;
+    BOOLEAN want_file_init_now = FALSE;
+
+    LYUseBuiltinSuffixes = TRUE;
+    while ((optn = HTNextTok(&p, ", ", "", NULL)) != NULL) {
+	if (!strcasecomp(optn, "NO_BUILTIN")) {
+	    LYUseBuiltinSuffixes = FALSE;
+	} else if (!strcasecomp(optn, "PRECEDENCE_HERE")) {
+	    want_file_init_now = TRUE;
+	} else if (!strcasecomp(optn, "PRECEDENCE_OTHER")) {
+	    want_file_init_now = FALSE;
+	} else {
+	    CTRACE((tfp, "Invalid SUFFIX_ORDER:%s\n", optn));
+	    break;
+	}
+    }
+
+    if (want_file_init_now && !FileInitAlreadyDone) {
+	HTFileInit();
+	FileInitAlreadyDone = TRUE;
+    }
     return 0;
 }
 
@@ -1329,6 +1410,7 @@ static Config_Type Config_Table [] =
      PARSE_SET("strip_dotdot_urls", CONF_BOOL, &LYStripDotDotURLs),
      PARSE_SET("substitute_underscores", CONF_BOOL, &use_underscore),
      PARSE_FUN("suffix", CONF_FUN, suffix_fun),
+     PARSE_FUN("suffix_order", CONF_FUN, suffix_order_fun),
      PARSE_FUN("system_editor", CONF_FUN, system_editor_fun),
      PARSE_STR("system_mail", CONF_STR, &system_mail),
      PARSE_STR("system_mail_flags", CONF_STR, &system_mail_flags),

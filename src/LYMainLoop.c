@@ -241,6 +241,7 @@ PRIVATE void free_mainloop_variables NOARGS
 #ifdef DIRED_SUPPORT
     clear_tags();
 #endif /* DIRED_SUPPORT */
+    FREE(WWW_Download_File);	/* LYGetFile.c/HTFWriter.c */
 
     return;
 }
@@ -500,7 +501,7 @@ PRIVATE void do_check_goto_URL ARGS3(
 		   !strncmp(user_input_buffer, "LYNXPRINT:", 10)) {
 	    HTUserMsg(GOTO_SPECIAL_DISALLOWED);
 
-       } else {
+	} else {
 	    StrAllocCopy(newdoc.address, user_input_buffer);
 	    newdoc.isHEAD = FALSE;
 	    /*
@@ -1314,9 +1315,8 @@ gettext("Enctype multipart/form-data not yet supported!  Cannot submit."));
 }
 
 #ifdef EXP_ADDRLIST_PAGE
-PRIVATE BOOLEAN handle_LYK_ADDRLIST ARGS2(
-    int *,	cmd,
-    BOOLEAN *,	refresh_screen)
+PRIVATE BOOLEAN handle_LYK_ADDRLIST ARGS1(
+    int *,     cmd)
 {
     /*
      *	Don't do if already viewing list addresses page.
@@ -1343,7 +1343,6 @@ PRIVATE BOOLEAN handle_LYK_ADDRLIST ARGS2(
      *	a POST response. - kw
      */
 
-    refresh_screen = TRUE;  /* redisplay */
     if (LYValidate || check_realm) {
 	LYPermitURL = TRUE;
 	StrAllocCopy(lynxlistfile, newdoc.address);
@@ -2189,7 +2188,7 @@ PRIVATE int handle_LYK_DWIMEDIT ARGS3(
 	    HTUserMsg(ANYEDIT_DISABLED);
 	}
 	return 1;
-    } 
+    }
 #endif /* AUTOEXTEDIT */
     return 0;
 }
@@ -2991,8 +2990,7 @@ PRIVATE void handle_LYK_HISTORICAL NOARGS
     return;
 }
 
-PRIVATE BOOLEAN handle_LYK_HISTORY ARGS2(
-    BOOLEAN *,	refresh_screen,
+PRIVATE BOOLEAN handle_LYK_HISTORY ARGS1(
     BOOLEAN,	ForcePush)
 {
     if (curdoc.title && strcmp(curdoc.title, HISTORY_PAGE_TITLE)) {
@@ -3029,7 +3027,6 @@ PRIVATE BOOLEAN handle_LYK_HISTORY ARGS2(
 	newdoc.link = 1; /*@@@ bypass "recent statusline messages" link */
 	FREE(curdoc.address);  /* so it doesn't get pushed */
 
-	*refresh_screen = TRUE;
 	if (LYValidate || check_realm) {
 	    LYPermitURL = TRUE;
 	}
@@ -3090,10 +3087,9 @@ PRIVATE void handle_LYK_INDEX ARGS2(
     }  /* end if */
 }
 
-PRIVATE void handle_LYK_INDEX_SEARCH ARGS5(
+PRIVATE void handle_LYK_INDEX_SEARCH ARGS4(
     BOOLEAN *,	force_load,
     BOOLEAN,	ForcePush,
-    BOOLEAN *,	refresh_screen,
     int *,	old_c,
     int,	real_c)
 {
@@ -3132,7 +3128,6 @@ PRIVATE void handle_LYK_INDEX_SEARCH ARGS5(
 	    newdoc.internal_link = FALSE;
 	    curdoc.line = -1;
 	    Newline = 0;
-	    *refresh_screen = TRUE; /* redisplay it */
 	} else if (use_this_url_instead != NULL) {
 	    /*
 	     *	Got back a redirecting URL.  Check it out.
@@ -3411,9 +3406,8 @@ PRIVATE void handle_LYK_LEFT_LINK ARGS1(
     }
 }
 
-PRIVATE BOOLEAN handle_LYK_LIST ARGS2(
-    int *,	cmd,
-    BOOLEAN *,	refresh_screen)
+PRIVATE BOOLEAN handle_LYK_LIST ARGS1(
+    int *,     cmd)
 {
     /*
      *	Don't do if already viewing list page.
@@ -3440,7 +3434,6 @@ PRIVATE BOOLEAN handle_LYK_LIST ARGS2(
      *	a POST response. - kw
      */
 
-    *refresh_screen = TRUE;  /* redisplay */
     if (LYValidate || check_realm) {
 	LYPermitURL = TRUE;
 	StrAllocCopy(lynxlistfile, newdoc.address);
@@ -3776,7 +3769,7 @@ PRIVATE void handle_LYK_NEXT_PAGE ARGS3(
 	highlight(OFF, curdoc.link, prev_target);
 	curdoc.link = nlinks-1;  /* put on last link */
     } else if (*old_c != real_c) {
-        *old_c = real_c;
+	*old_c = real_c;
 	HTInfoMsg(ALREADY_AT_END);
     }
 }
@@ -3799,7 +3792,7 @@ PRIVATE BOOLEAN handle_LYK_NOCACHE ARGS2(
 	    LYforce_no_cache = TRUE;
 	    reloading = TRUE;
 	}
-    } 
+    }
     return TRUE;
 }
 
@@ -3976,8 +3969,7 @@ PRIVATE void handle_LYK_PREV_PAGE ARGS3(
     }
 }
 
-PRIVATE void handle_LYK_PRINT ARGS4(
-    BOOLEAN *,	refresh_screen,
+PRIVATE void handle_LYK_PRINT ARGS3(
     BOOLEAN *,	ForcePush,
     int *,	old_c,
     int,	real_c)
@@ -4005,7 +3997,6 @@ PRIVATE void handle_LYK_PRINT ARGS4(
 	*ForcePush = TRUE;  /* see LYpush() and print_options() */
 	if (check_realm)
 	    LYPermitURL = TRUE;
-	*refresh_screen = TRUE;	/* redisplay */
     }
 }
 
@@ -4071,8 +4062,8 @@ PRIVATE void handle_LYK_RELOAD ARGS1(
      */
 
     if (HTisDocumentSource()) {
-	force_old_UCLYhndl_on_reload = TRUE;
-	forced_UCLYhdnl = HTMainText_Get_UCLYhndl();
+	if ((forced_UCLYhdnl = HTMainText_Get_UCLYhndl()) >= 0)
+	    force_old_UCLYhndl_on_reload = TRUE;
 #ifndef USE_PSRC
 	HTOutputFormat = WWW_SOURCE;
 #else
@@ -4628,7 +4619,7 @@ PRIVATE void handle_LYK_VIEW_BOOKMARK ARGS3(
 	}
 #if defined(CJK_EX)	/* 1997/12/13 (Sat) 15:20:18 */
 	if (HTCJK == JAPANESE) {
-	    *last_kcode = NOKANJI;	/* AUTO */
+	    last_kcode = NOKANJI;	/* AUTO */
 	}
 #endif
 	LYforce_no_cache = TRUE;  /*force the document to be reloaded*/
@@ -4651,9 +4642,8 @@ PRIVATE void handle_LYK_VIEW_BOOKMARK ARGS3(
     }
 }
 
-PRIVATE BOOLEAN handle_LYK_VLINKS ARGS2(
-    int *,	cmd,
-    BOOLEAN *,	refresh_screen)
+PRIVATE BOOLEAN handle_LYK_VLINKS ARGS1(
+    int *,     cmd)
 {
     if (!strcmp((curdoc.title ? curdoc.title : ""),
 		VISITED_LINKS_TITLE)) {
@@ -4678,7 +4668,6 @@ PRIVATE BOOLEAN handle_LYK_VLINKS ARGS2(
     newdoc.isHEAD = FALSE;
     newdoc.safe = FALSE;
     newdoc.internal_link = FALSE;
-    *refresh_screen = TRUE;
     if (LYValidate || check_realm) {
 	LYPermitURL = TRUE;
 	StrAllocCopy(lynxlinksfile, newdoc.address);
@@ -6004,7 +5993,7 @@ try_again:
 	 */
 	if (HTdocument_settings_changed()) {
 	   if (HTcan_reparse_document()) {
-	       HTUserMsg(gettext("Reparsing document under current settings..."));
+	       HTInfoMsg(gettext("Reparsing document under current settings..."));
 	       if (HTreparse_document()) {}
 	   } else {
 		/*
@@ -6734,7 +6723,7 @@ new_cmd:  /*
 	    break;
 
 	case LYK_HISTORY:	/* show the history page */
-	    if (handle_LYK_HISTORY(&refresh_screen, ForcePush))
+	    if (handle_LYK_HISTORY(ForcePush))
 		break;
 
 	    /* FALLTHRU */
@@ -6790,7 +6779,7 @@ new_cmd:  /*
 	    handle_LYK_HELP(&cshelpfile);
 	    break;
 
-	case LYK_INDEX:  	/* index file */
+	case LYK_INDEX:		/* index file */
 	    handle_LYK_INDEX(&old_c, real_c);
 	    break;
 
@@ -6804,7 +6793,7 @@ new_cmd:  /*
 	    break;
 
 	case LYK_INDEX_SEARCH:	/* search for a user string */
-	    handle_LYK_INDEX_SEARCH(&force_load, ForcePush, &refresh_screen, &old_c, real_c);
+	    handle_LYK_INDEX_SEARCH(&force_load, ForcePush, &old_c, real_c);
 	    break;
 
 	case LYK_WHEREIS: /* search within the document */
@@ -6812,7 +6801,7 @@ new_cmd:  /*
 	    handle_LYK_WHEREIS(cmd, prev_target, &refresh_screen);
 	    break;
 
-	case LYK_COMMENT: 	/* reply by mail */
+	case LYK_COMMENT:	/* reply by mail */
 	    handle_LYK_COMMENT(&refresh_screen, owner_address, &old_c, real_c);
 	    break;
 
@@ -6821,11 +6810,11 @@ new_cmd:  /*
 	    handle_LYK_TAG_LINK(prev_target);
 	    break;
 
-	case LYK_MODIFY:  	/* rename a file or directory */
+	case LYK_MODIFY:	/* rename a file or directory */
 	    handle_LYK_MODIFY(&refresh_screen);
 	    break;
 
-	case LYK_CREATE:  	/* create a new file or directory */
+	case LYK_CREATE:	/* create a new file or directory */
 	    handle_LYK_CREATE();
 	    break;
 #endif /* DIRED_SUPPORT */
@@ -6877,23 +6866,23 @@ new_cmd:  /*
 	    break;
 
 	case LYK_PRINT:  /* print the file */
-	    handle_LYK_PRINT(&refresh_screen, &ForcePush, &old_c, real_c);
+	    handle_LYK_PRINT(&ForcePush, &old_c, real_c);
 	    break;
 
 	case LYK_LIST:	/* list links in the current document */
-	    if (handle_LYK_LIST(&cmd, &refresh_screen))
+	    if (handle_LYK_LIST(&cmd))
 		goto new_cmd;
 	    break;
 
 #ifdef EXP_ADDRLIST_PAGE
 	case LYK_ADDRLIST:   /* always list URL's (only) */
-	    if (handle_LYK_ADDRLIST(&cmd, &refresh_screen))
+	    if (handle_LYK_ADDRLIST(&cmd))
 		goto new_cmd;
 	    break;
 #endif /* EXP_ADDRLIST_PAGE */
 
 	case LYK_VLINKS:  /* list links visited during the current session */
-	    if (handle_LYK_VLINKS(&cmd, &refresh_screen))
+	    if (handle_LYK_VLINKS(&cmd))
 		goto new_cmd;
 	    break;
 
@@ -7109,14 +7098,13 @@ PRIVATE int are_different ARGS2(
     /*
      *	Are the base addresses different?
      */
-    if (strcmp(doc1->address, doc2->address))
-      {
+    if (strcmp(doc1->address, doc2->address)) {
 	if (cp1)
 	    *cp1 = '#';
 	if (cp2)
 	    *cp2 = '#';
 	return(TRUE);
-      }
+    }
     if (cp1)
 	*cp1 = '#';
     if (cp2)
@@ -7125,19 +7113,14 @@ PRIVATE int are_different ARGS2(
     /*
      *	Do the docs have different contents?
      */
-    if (doc1->post_data)
-      {
-	if (doc2->post_data)
-	  {
+    if (doc1->post_data) {
+	if (doc2->post_data) {
 	    if (strcmp(doc1->post_data, doc2->post_data))
 		return(TRUE);
-	  }
-	else
+	} else
 	    return(TRUE);
-      }
-    else
-	if (doc2->post_data)
-	    return(TRUE);
+    } else if (doc2->post_data)
+	return(TRUE);
 
     /*
      *	We'll assume the two documents in fact are the same.
@@ -7194,14 +7177,13 @@ PRIVATE int are_phys_different ARGS2(
     /*
      *	Are the base addresses different?
      */
-    if (strcmp(ap1, ap2))
-      {
+    if (strcmp(ap1, ap2)) {
 	if (cp1)
 	    *cp1 = '#';
 	if (cp2)
 	    *cp2 = '#';
 	return(TRUE);
-      }
+    }
     if (cp1)
 	*cp1 = '#';
     if (cp2)
@@ -7210,19 +7192,14 @@ PRIVATE int are_phys_different ARGS2(
     /*
      *	Do the docs have different contents?
      */
-    if (doc1->post_data)
-      {
-	if (doc2->post_data)
-	  {
+    if (doc1->post_data) {
+	if (doc2->post_data) {
 	    if (strcmp(doc1->post_data, doc2->post_data))
 		return(TRUE);
-	  }
-	else
+	} else
 	    return(TRUE);
-      }
-    else
-	if (doc2->post_data)
-	    return(TRUE);
+    } else if (doc2->post_data)
+	return(TRUE);
 
     /*
      *	We'll assume the two documents in fact are the same.
