@@ -84,16 +84,6 @@ WWWINC= WWW/Library/Implementation
 # Also be sure to check out the compilation symbols in userdefs.h
 # before building Lynx!
 
-all:
-	@echo
-	@echo "Please run make with one of the following arguments"
-	@echo "lynx       -- to make the executable, put it in this directory"
-	@echo "clean      -- removes all '.o' and 'core' files"
-	@echo "tar        -- runs clean, removes executable, and tars the whole directory"
-	@echo "compress   -- runs tar, then compresses the result"
-	@echo "zip        -- runs clean, removes executable, and zips the whole directory"
-	@echo
-
 # If you apply patches which require linking to site-specific libraries, set
 # SITE_LIBS to those libraries.
 SITE_LIBS= # Your libraries here
@@ -105,16 +95,35 @@ SITE_LYDEFS = # Your defines here
 SITE_DEFS = # Your defines here
 
 # defines include:
+# -DARCHIVE_ONLY   (see README.configure)
+# -DDIRED_SUPPORT  (see README.configure)
+# -DEXP_CHARTRANS  (see README.configure)
+# -DEXP_CHARTRANS_AUTOSWITCH also let lynx switch term mode(Linux console only)
 # -DHP_TERMINAL    For DIM workaround to REVERSE problems on HP terminals.
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
+# -DLINKEDSTYLES   (see README.configure)
+# -DLONG_LIST      (see README.configure)
+# -DLY_FIND_LEAKS  (see README.configure)
+# -DNCURSES        (see README.configure)
 # -DNOPORT         if you must use PASV instead of PORT for FTP
+# -DNO_CHANGE_EXECUTE_PERMS (see README.configure)
 # -DNO_CPU_LIMIT   Disables Max CPU timeout (includes CLOCKS_PER_SECOND)
-# -DNSL_FORK	   For fork-based name server lookups that can be 'z'apped.
+# -DNO_PARENT_DIR_REFERENCE (see README.configure)
+# -DNSL_FORK       For fork-based name server lookups that can be 'z'apped.
+# -DOK_GZIP        (see README.configure)
+# -DOK_OVERRIDE    (see README.configure)
+# -DOK_PERMIT      (see README.configure)
+# -DOK_TAR         (see README.configure)
+# -DOK_UUDECODE    (see README.configure)
+# -DOK_ZIP         (see README.configure)
 # -DSHORTENED_RBIND  For a SOCKSified lynx with the short version of Rbind.
-# -DSOCKS	   For making a SOCKSified lynx.
-# -DUNDERLINE_LINKS  Define if you want links underlined instead of bold.
-# -DEXP_CHARTRANS_AUTOSWITCH also let lynx switch term mode(Linux console only)
 # -DSLANG_MBCS_HACK prevent cutoff lines when using UTF8 console (slang only)
+# -DSOCKS          For making a SOCKSified lynx.
+# -DUNDERLINE_LINKS  Define if you want links underlined instead of bold.
+# -DUNPAINT_CACHE  (see README.configure)
+# -DUSEHASH        (see README.configure)
+# -DUSE_COLOR_STYLE (see README.configure)
+# -DUSE_SLANG      (see README.configure)
 #
 # if you are linking to freeWAIS-0.202 or older, you should define this
 # in MCFLAGS (SITE_DEFS)
@@ -144,7 +153,7 @@ SITE_DEFS = # Your defines here
 # for installation of local execution links, please see the file userdefs.h
 #
 # TESTED: Linux FreeBSD SunOS Solaris IRIX CLIX HP-UX AIX SCO
-lynx:
+all:
 	cd WWW/Library/unix && $(MAKE) CC="$(CC)" \
 		LYFLAGS="$(SITE_LYDEFS)"
 	cd src && $(MAKE) all CC="$(CC)" \
@@ -153,6 +162,16 @@ lynx:
 		SITE_DEFS="$(SITE_DEFS)" \
 		WWWINC=$(WWWINC) \
 		WWWLIB="../WWW/Library/unix/libwww.a"
+
+help:
+	@echo
+	@echo "Please run make with one of the following arguments"
+	@echo "all        -- to make the executable, put it in this directory"
+	@echo "clean      -- removes all '.o' and 'core' files"
+	@echo "tar        -- runs clean, removes executable, and tars the whole directory"
+	@echo "compress   -- runs tar, then compresses the result"
+	@echo "zip        -- runs clean, removes executable, and zips the whole directory"
+	@echo
 
 ##Miscellaneous actions
 clean:

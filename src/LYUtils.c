@@ -1893,9 +1893,11 @@ PUBLIC void statusline ARGS1(
 		int a=(strncmp(buffer, "Alert", 5) || !hashStyles[s_alert].name ? s_status : s_alert);
 		LynxChangeStyle (a, ABS_ON, 1);
 		addstr(buffer);
-		wbkgdset(stdscr, has_color ? hashStyles[a].color : hashStyles[a].mono);
+		wbkgdset(stdscr, (has_color
+			? hashStyles[a].color
+			: hashStyles[a].mono) | ' ');
 		clrtoeol();
-		wbkgdset(stdscr, hashStyles[s_normal].color);
+		wbkgdset(stdscr, hashStyles[s_normal].color | ' ');
 		LynxChangeStyle (a, ABS_OFF, 0);
 	}
 #endif

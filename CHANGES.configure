@@ -1,3 +1,19 @@
+1997-08-07
+----------
+* Refine configure tests for acs_map, ttytype to accommodate broken linker
+  on FreeBSD 2.1.5
+* Modify README.configure to indicate the associated definitions for
+  each configure option, as suggested by Klaus Weide. - TD
+* Add -G7 option to Ultrix compiler options (request by Hynek Med
+  <xmedh02@lada.vse.cz>). - TD
+* Add include for <sys/types.h> to utmp configure test (reported by Andrey
+  A. Chernov). - TD
+* Add check for FreeBSD library mytinfo (reported by Andrey A. Chernov
+  <ache@null.net>). - TD
+* Modify ./makefile.in so that 'all', the default target, will build the
+  Lynx executable. The old 'all' target is retained as "make help". - TD
+* Modify src/makefile.in to allow development compiles within the src
+  directory. - TD
 1997-07-27
 ----------
 * Rename top-level Makefile to Makefile.old (it's obsolete) - TD

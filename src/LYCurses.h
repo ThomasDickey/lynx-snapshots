@@ -110,23 +110,6 @@ extern void LYsubwindow PARAMS((WINDOW * param));
 #define BOXHORI '*'	/* character for popup window horizontal borders */
 #endif
 
-#if defined(BROKEN_CURSES_8BIT_ACS) && defined(ALT_CHAR_SET)
-#define FIX_ACS(cht_acs) ((cht_acs & 0x80) ? ((cht_acs & 0xff) | A_ALTCHARSET) : cht_acs)
-#ifdef box
-#undef box
-#endif
-#define box(win,verch,horch) \
-	wborder(win,\
-	       FIX_ACS((verch ? verch : ACS_VLINE)),\
-	       FIX_ACS((verch ? verch : ACS_VLINE)),\
-	       FIX_ACS((horch ? horch : ACS_HLINE)),\
-	       FIX_ACS((horch ? horch : ACS_HLINE)),\
-	       FIX_ACS(ACS_ULCORNER),\
-	       FIX_ACS(ACS_URCORNER),\
-	       FIX_ACS(ACS_LLCORNER),\
-	       FIX_ACS(ACS_LRCORNER))
-#endif /* BROKEN_CURSES_8BIT_ACS */
-
 extern int LYlines;  /* replaces LINES */
 extern int LYcols;   /* replaces COLS */
 

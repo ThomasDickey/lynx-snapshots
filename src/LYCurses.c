@@ -46,13 +46,12 @@ int has_color = 0;
 PRIVATE int dumbterm PARAMS((char *terminal));
 BOOLEAN LYCursesON = FALSE;
 
-#if USE_COLOR_TABLE || USE_SLANG
+#if USE_COLOR_TABLE || defined(USE_SLANG)
 PRIVATE int Current_Attr;
 #endif
 
 #ifdef USE_SLANG
 PUBLIC unsigned int Lynx_Color_Flags = 0;
-PRIVATE int Current_Attr;
 PUBLIC BOOLEAN FullRefresh = FALSE;
 PUBLIC int curscr = 0;
 #ifdef SLANG_MBCS_HACK
@@ -463,7 +462,7 @@ PRIVATE void lynx_map_color ARGS1(int, n)
 		lynx_color_pairs[n+m+1].bg);
 	}
 	if (n == 0 && LYShowColor >= SHOW_COLOR_ON)
-	    bkgd(COLOR_PAIR(9));
+	    bkgd(COLOR_PAIR(9) | ' ');
     }
 }
 
@@ -518,7 +517,7 @@ PRIVATE void lynx_init_colors NOARGS
 			lynx_color_pairs[n+m+1].bg);
 	    }
 	    if (n == 0 && LYShowColor >= SHOW_COLOR_ON)
-		bkgd(COLOR_PAIR(9));
+		bkgd(COLOR_PAIR(9) | ' ');
 	}
     } else if (LYShowColor != SHOW_COLOR_NEVER) {
 	LYShowColor = SHOW_COLOR_OFF;
@@ -676,6 +675,26 @@ PUBLIC void start_curses NOARGS
 #endif /* SIGTSTP */
 	    exit (-1);
 	}
+
+	/*
+	 * This is a workaround for a bug in SVr4 curses, observed on Solaris
+	 * 2.4:  if your terminal's alternate-character set contains codes in
+	 * the range 128-255, they'll be sign-extended in the acs_map[] table,
+	 * which in turn causes their values to be emitted as 255 (0xff). 
+	 * "Fix" this by forcing the table to 8-bit codes (it has to be
+	 * anyway).
+	 */
+#if defined(ALT_CHAR_SET) && !defined(NCURSES_VERSION)
+	{
+	    int n;
+	    for (n = 0; n < 128; n++)
+	    	if (acs_map[n] & 0x80) {
+	    	    acs_map[n] &= 0xff;
+	    	    acs_map[n] |= A_ALTCHARSET;
+		}
+	}
+#endif
+
 #ifdef USE_COLOR_STYLE
 	has_color = has_colors();
 	if (has_color)
@@ -760,7 +779,7 @@ PUBLIC void stop_curses NOARGS
 #ifdef DJGPP
 		  sock_exit();
 #endif
-#if defined (DOSPATH) && !defined (USE_SLANG)
+#if defined (DOSPATH) && !defined(USE_SLANG)
 	 clrscr();
 #else
 

@@ -32,10 +32,10 @@ extern int UCGetLYhndl_byMIME PARAMS((
 extern int UCGetRawUniMode_byLYhndl PARAMS((
 	int		i));
 
-PUBLIC int UCLYhndl_for_unspec;
-PUBLIC int UCLYhndl_for_unrec;
-PUBLIC int UCLYhndl_HTFile_for_unspec;
-PUBLIC int UCLYhndl_HTFile_for_unrec;
+extern int UCLYhndl_for_unspec;
+extern int UCLYhndl_for_unrec;
+extern int UCLYhndl_HTFile_for_unspec;
+extern int UCLYhndl_HTFile_for_unrec;
 
 #define UCTRANS_NOTFOUND (-4)
 

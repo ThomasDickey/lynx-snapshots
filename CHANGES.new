@@ -11,6 +11,28 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 file) are duplicated here. - KW]
 
 1997-08-07
+* Correct storage class of variables in UCMap.h, from -warn-common linker
+  option.
+* Refine configure tests for acs_map, ttytype to accommodate broken linker
+  on FreeBSD 2.1.5
+* Modify README.configure to indicate the associated definitions for
+  each configure option, as suggested by Klaus Weide. - TD
+* Correct duplicate declaration of Current_Attr, which Linux linker ignores
+  (reported by Hynek Med). - TD
+* Add -G7 option to Ultrix compiler options (request by Hynek Med
+  <xmedh02@lada.vse.cz>). - TD
+* Add include for <sys/types.h> to utmp configure test (reported by Andrey
+  A. Chernov). - TD
+* Add check for FreeBSD library mytinfo (reported by Andrey A. Chernov
+  <ache@null.net>). - TD
+* Modify ./makefile.in so that 'all', the default target, will build the
+  Lynx executable. The old 'all' target is retained as "make help". - TD
+* Modify src/makefile.in to allow development compiles within the src
+  directory. - TD
+* Mask spaces in the bkgd (background attribute) calls for color curses to
+  make the color-style code work better with SVr4 curses. - TD
+* Change workaround for 8-bit acs characters by adding to the initialization
+  a loop forcing the entries of acs_map[] to 8-bits. - TD
 * Many minor tweaks for the DJGPP version by DK - WB
 * A rename of about_lynx_dev.html to lynx_dev.html for 8.3 systems - WB
 1997-08-04
