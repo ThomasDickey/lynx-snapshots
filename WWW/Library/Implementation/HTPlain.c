@@ -18,11 +18,9 @@
 #include "HTStyle.h"
 #include "HTMLDTD.h"
 #include "HTCJK.h"
-#ifdef EXP_CHARTRANS
 #include "UCMap.h"
 #include "UCDefs.h"
 #include "UCAux.h"
-#endif /* EXP_CHARTRANS */
 
 #include "LYCharSets.h"
 #include "LYLeaks.h"
@@ -88,7 +86,6 @@ PRIVATE void HTPlain_getChartransInfo ARGS2(
 **			A C T I O N 	R O U T I N E S
 */
 
-#ifdef EXP_CHARTRANS
         /* for forward reference to HTPlain_write - kw */
 #ifdef _WINDOWS
 PRIVATE void HTPlain_write (HTStream * me, CONST char* s, int l);
@@ -98,7 +95,6 @@ PRIVATE void HTPlain_write PARAMS((
 	CONST char *		s,
 	int			l));
 #endif /* _WINDOWS */
-#endif /* EXP_CHARTRANS */
 
 /*	Character handling
 **	------------------
@@ -329,17 +325,11 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	if (HTCJK != NOCJK) {
 	    HText_appendCharacter(me->text, c_p);
 
-#ifndef EXP_CHARTRANS
-#define PASSHICTRL HTPassHighCtrlRaw
-#define PASS8859SPECL HTPassHighCtrlRaw
-#define PASSHI8BIT HTPassEightBitRaw
-#else
 #define PASSHICTRL (me->T.transp || \
 		    code >= LYlowest_eightbit[me->in_char_set])
 #define PASS8859SPECL me->T.pass_160_173_raw
 #define PASSHI8BIT (HTPassEightBitRaw || \
 		    (me->T.do_8bitraw && !me->T.trans_from_uni))
-#endif /* EXP_CHARTRANS */
 
 	/*
 	**  If HTPassHighCtrlRaw is set (e.g., for KOI8-R) assume the
@@ -529,7 +519,6 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		    **  either output as UTF8 or a hex representation or
 		    **  pass the raw character and hope it's OK.
 		    */
-#ifdef EXP_CHARTRANS
 		    if (!PASSHI8BIT)
 			c_p = FROMASCII((char)code);
 		    if (me->T.output_utf8 &&
@@ -542,7 +531,6 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 			sprintf(replace_buf, "U%.2lX", code);
 			HText_appendText(me->text, replace_buf);
 		    } else
-#endif /* EXP_CHARTRANS */
 		    HText_appendCharacter(me->text, c_p);
 		}
 	    } else {
@@ -624,7 +612,6 @@ PUBLIC HTStream* HTPlainPresent ARGS3(
 
     HTPlain_lastraw = -1;
 
-#ifdef EXP_CHARTRANS
     me->utf_count = 0;
     me->utf_char = 0;
     me->utf_buf[0] = me->utf_buf[6] =me->utf_buf[7] = '\0';
@@ -637,7 +624,6 @@ PUBLIC HTStream* HTPlainPresent ARGS3(
 		     me->in_char_set, me->UCI,
 		     me->htext_char_set,
 		     HTAnchor_getUCInfoStage(anchor,UCT_STAGE_HTEXT));
-#endif /* EXP_CHARTRANS */
     me->text = HText_new(anchor);
     HText_setStyle(me->text, HTStyleNamed(styleSheet, "Example"));
     HText_beginAppend(me->text);

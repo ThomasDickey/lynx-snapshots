@@ -7,10 +7,8 @@
 #ifndef HTML_H
 #define HTML_H
 
-#ifdef EXP_CHARTRANS
 #include "UCDefs.h"
 #include "UCAux.h"
-#endif
 
 #ifndef HTUTILS_H
 #include "HTUtils.h"

@@ -108,7 +108,7 @@ $ define/user sys$output 'CHRwhere'cp775_uni.h	!DosBlatRim (cp775)
 $ makeuctb cp775_uni.tbl
 $ define/user sys$output 'CHRwhere'cp1257_uni.h	!WinBlatRim (cp1257)
 $ makeuctb cp1257_uni.tbl
-$ define/user sys$output 'CHRwhere'iso05_uni.h	!ISO Latin 5 Cyrillic
+$ define/user sys$output 'CHRwhere'iso05_uni.h	!ISO 8859-5 Cyrillic
 $ makeuctb iso05_uni.tbl
 $ define/user sys$output 'CHRwhere'cp866_uni.h	!DosCyrillic (cp866)
 $ makeuctb cp866_uni.tbl
@@ -140,7 +140,7 @@ $ define/user sys$output 'CHRwhere'iso09_uni.h	!ISO 8859-9 (Latin 5)
 $ makeuctb iso09_uni.tbl
 $ define/user sys$output 'CHRwhere'iso10_uni.h	!ISO 8859-10
 $ makeuctb iso10_uni.tbl
-$ define/user sys$output 'CHRwhere'utf8_uni.h	!UNICODE UTF 8
+$ define/user sys$output 'CHRwhere'utf8_uni.h	!UNICODE UTF-8
 $ makeuctb utf8_uni.tbl
 $ define/user sys$output 'CHRwhere'rfc_suni.h	!RFC 1345 w/o Intro
 $ makeuctb rfc_suni.tbl

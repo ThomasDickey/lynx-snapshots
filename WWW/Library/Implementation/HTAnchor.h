@@ -16,9 +16,7 @@
 
 #include "HTList.h"
 #include "HTAtom.h"
-#ifdef EXP_CHARTRANS
 #include "UCDefs.h"
-#endif
 
 #ifdef SHORT_NAMES
 #define HTAnchor_findChild                      HTAnFiCh

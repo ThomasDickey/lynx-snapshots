@@ -87,13 +87,13 @@ $!
 $ cc/decc/prefix=all /nomember 'cc_opts'-
     /warning=(disable=implicitfunc)-
     /DEFINE=(DEBUG,ACCESS_AUTH,'transport''extra',VC="""2.14""")-
-    /INCLUDE=([-.Implementation]) -
+    /INCLUDE=([-.Implementation],[---.src],[---.src.chrtrans],[---]) -
     [-.Implementation]HTString.c
 $!
 $ cc := cc/decc/prefix=all /nomember 'cc_opts'-
 	  /warning=(disable=implicitfunc)-
 	  /DEFINE=(DEBUG,ACCESS_AUTH,'transport''extra')-
-	  /INCLUDE=([-.Implementation])
+	  /INCLUDE=([-.Implementation],[---.src],[---.src.chrtrans],[---])
 $!
 $  v1 = 'f$verify(0)'
 $  Else
@@ -104,13 +104,13 @@ $!
 $ cc/decc/prefix=ansi /nomember 'cc_opts'-
     /warning=(disable=implicitfunc)-
     /DEFINE=(DEBUG,ACCESS_AUTH,'transport''extra',VC="""2.14""")-
-    /INCLUDE=([-.Implementation]) -
+    /INCLUDE=([-.Implementation],[---.src],[---.src.chrtrans],[---]) -
     [-.Implementation]HTString.c
 $!
 $ cc := cc/decc/prefix=ansi /nomember 'cc_opts'-
 	  /warning=(disable=implicitfunc)-
 	  /DEFINE=(DEBUG,ACCESS_AUTH,'transport''extra')-
-	  /INCLUDE=([-.Implementation])
+	  /INCLUDE=([-.Implementation],[---.src],[---.src.chrtrans],[---])
 $!
 $  v1 = 'f$verify(0)'
 $  EndIf
@@ -121,11 +121,11 @@ $   v1 = f$verify(1)
 $! GNUC:
 $!
 $   gcc/DEFINE=(DEBUG,ACCESS_AUTH,'transport''extra',VC="""2.14""") 'cc_opts'-
-       /INCLUDE=([-.Implementation]) -
+       /INCLUDE=([-.Implementation],[---.src],[---.src.chrtrans],[---]) -
        [-.Implementation]HTString.c
 $!
 $   cc := gcc/DEFINE=(DEBUG,ACCESS_AUTH,'transport''extra') 'cc_opts'-
-	     /INCLUDE=([-.Implementation])
+	     /INCLUDE=([-.Implementation],[---.src],[---.src.chrtrans],[---])
 $!
 $   v1 = 'f$verify(0)'
 $  ELSE
@@ -133,11 +133,11 @@ $   v1 = f$verify(1)
 $! VAXC:
 $!
 $   cc/DEFINE=(DEBUG,ACCESS_AUTH,'transport''extra',VC="""2.14""") 'cc_opts'-
-      /INCLUDE=([-.Implementation]) -
+      /INCLUDE=([-.Implementation],[---.src],[---.src.chrtrans],[---]) -
       [-.Implementation]HTString.c
 $!
 $   cc := cc/DEFINE=(DEBUG,ACCESS_AUTH,'transport''extra') 'cc_opts'-
-	    /INCLUDE=([-.Implementation])
+	    /INCLUDE=([-.Implementation],[---.src],[---.src.chrtrans],[---])
 $!
 $   v1 = 'f$verify(0)'
 $  ENDIF

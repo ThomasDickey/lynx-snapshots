@@ -431,9 +431,7 @@ PUBLIC int showhistory ARGS1(
     LYforce_no_cache = TRUE;	/* force this file to be new */
 
     fprintf(fp0, "<head>\n");
-#ifdef EXP_CHARTRANS
     LYAddMETAcharsetToFD(fp0, -1);
-#endif
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 HISTORY_PAGE_TITLE);
     fprintf(fp0, "<h1>You have reached the History Page</h1>\n");

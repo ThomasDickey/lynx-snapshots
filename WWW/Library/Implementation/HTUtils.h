@@ -23,7 +23,6 @@
 #ifdef VMS
 #define NO_SIZECHANGE
 #define NO_UNISTD_H
-#define EXP_CHARTRANS
 #define NO_KEYPAD
 #define NO_UTMP
 #endif

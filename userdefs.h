@@ -649,7 +649,7 @@
  *   ISO Latin 2			iso-8859-2
  *   ISO Latin 3			iso-8859-3
  *   ISO Latin 4			iso-8859-4
- *   ISO Latin 5 Cyrillic		iso-8859-5
+ *   ISO 8859-5 Cyrillic		iso-8859-5
  *   Japanese (EUC)			euc-jp
  *   Japanese (SJIS)			shift_jis
  *   KOI8-R Cyrillic			koi8-r
@@ -661,7 +661,7 @@
  *   RFC 1345 w/o Intro			mnemonic+ascii+0
  *   Taipei (Big5)			big5
  *   Transparent			x-transparent
- *   UNICODE UTF 8			utf-8
+ *   UNICODE UTF-8			utf-8
  *   Vietnamese (VISCII)		viscii
  *   WinArabic (cp1256)			windows-1256
  *   WinBaltRim (cp1257)		windows-1257
@@ -1206,7 +1206,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.110"
+#define LYNX_VERSION "2.7.1ac-0.111"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */

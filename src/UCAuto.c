@@ -3,7 +3,7 @@
 **  Currently some names for font files are hardwired in here.
 **  You have to change this code if it needs accomodation for your
 **  system (or get the required files...).
-** 
+**
 **  Depending on the Display Character Set switched to, and the previous
 **  one as far as it is known, system("setfont ...") and/or output of
 **  escape sequences to switch console mode are done.  Curses will be
@@ -50,9 +50,9 @@ static char T_setfont_cmd[200] = "\0";
 #define NOOUTPUT "2>/dev/null >/dev/null"
 
 PRIVATE void call_setfont ARGS3(
-	char *,		font,
-	char *,		fnsuffix,
-	char *,		umap)
+	char *, 	font,
+	char *, 	fnsuffix,
+	char *, 	umap)
 {
     if (font && *font && umap && *umap &&
 	!strcmp(font, T_font_fn) && !strcmp(umap, T_umap_fn)) {
@@ -71,13 +71,13 @@ PRIVATE void call_setfont ARGS3(
 
     if (umap &&*umap && font && *font) {
 	sprintf(T_setfont_cmd, "%s %s%s -u %s %s",
-		SETFONT, font, fnsuffix, 	umap, 	NOOUTPUT);
+		SETFONT, font, fnsuffix,	umap,	NOOUTPUT);
     } else if (font && *font) {
 	sprintf(T_setfont_cmd, "%s %s%s %s",
-		SETFONT, font, fnsuffix, 		NOOUTPUT);
+		SETFONT, font, fnsuffix,		NOOUTPUT);
     } else if (umap && *umap) {
 	sprintf(T_setfont_cmd, "%s -u %s %s",
-		SETFONT, 			umap, 	NOOUTPUT);
+		SETFONT,			umap,	NOOUTPUT);
     } else {
 	*T_setfont_cmd = '\0';
     }
@@ -107,7 +107,7 @@ PRIVATE int nonempty_file ARGS1(
     struct stat sb;
 
     return (stat(p, &sb) == 0 &&
-	    (sb.st_mode & S_IFMT) == S_IFREG && 
+	    (sb.st_mode & S_IFMT) == S_IFREG &&
 	    (sb.st_size != 0));
 }
 
@@ -136,7 +136,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
     char *cp;
 
     /*
-     *  Restore the original character set.
+     *	Restore the original character set.
      */
     if (newcs < 0 || p == 0) {
 	if (old_font && *old_font &&
@@ -175,7 +175,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
     name = p->MIMEname;
 
     /*
-     *  Font sizes are currently hardwired here.
+     *	Font sizes are currently hardwired here.
      */
 #define SUFF1 ".f16"
 #define SUFF2 "-16.psf"
@@ -183,9 +183,10 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 #define SUFF4 "8x16"
 
     /*
-     *  Use this for output of escape sequences.
+     *	Use this for output of escape sequences.
      */
-    if (display || (cp = getenv(DISPLAY)) != NULL) {
+    if ((display != NULL) ||
+	((cp = getenv(DISPLAY)) != NULL && *cp != '\0')) {
 	/*
 	 *  We won't do anything in an xterm.  Better that way...
 	 */
@@ -200,14 +201,14 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
     } else if (!strncmp(name, "iso-8859-1", 10)) {
 	if ((lastHasUmap == Is_Set) && !strcmp(lastname, "cp850")) {
 	    /*
-	     *  cp850 already contains all latin1 characters.
+	     *	cp850 already contains all latin1 characters.
 	     */
 	    if (lastTransT != GN_Blat1) {
 		TransT = GN_Blat1;
 	    }
 	} else {
 	    /*
-	     *  "setfont lat1u-16.psf -u lat1u.uni"
+	     *	"setfont lat1u-16.psf -u lat1u.uni"
 	     */
 	    call_setfont("lat1u", SUFF2, "lat1u.uni");
 	    HasUmap = Is_Set;
@@ -236,7 +237,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	/*
 	 *  "setfont iso0N.f16 -u iso0N.uni"
 	 */
-        call_setfont(tmpbuf1, SUFF1, tmpbuf2);
+	call_setfont(tmpbuf1, SUFF1, tmpbuf2);
 	TransT = GN_Kuser;
 	HasUmap = Is_Set;
 	Utf = Is_Unset;
@@ -278,7 +279,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
     if (TransT != lastTransT) {
 	if (TransT == GN_Blat1) {
 	    /*
-	     *  Switch Linux console to lat1 table.
+	     *	Switch Linux console to lat1 table.
 	     */
 	    write_esc("\033(B");
 	} else if (TransT == GN_0decgraf) {
@@ -300,7 +301,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	    TransT = lastTransT;
 	}
     }
-    
+
     if (HasUmap != Dont_Care && HasUmap != Dunno)
 	lastHasUmap = HasUmap;
 
@@ -308,7 +309,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	if (lastUtf != Is_Set) {
 	    Utf = Is_Set;
 	    /*
-	     *  Turn Linux console UTF8 mode ON.
+	     *	Turn Linux console UTF8 mode ON.
 	     */
 	    write_esc("\033%G");
 	    lastUtf = Utf;

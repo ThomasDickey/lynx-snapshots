@@ -88,9 +88,7 @@ PUBLIC int showinfo ARGS4(
     }
 
     fprintf(fp0, "<head>\n");
-#ifdef EXP_CHARTRANS
     LYAddMETAcharsetToFD(fp0, -1);
-#endif
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 SHOWINFO_TITLE);
     fprintf(fp0,"<h1>You have reached the Information Page</h1>\n");
@@ -247,23 +245,22 @@ PUBLIC int showinfo ARGS4(
     fprintf(fp0,
     	    "<dt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>URL:</em> %s\n", Address);
 
-    if (HTLoadedDocumentCharset())
+    if (HTLoadedDocumentCharset()) {
         fprintf(fp0, "<dt><em>&nbsp;Charset:</em> %s\n",
 		     HTLoadedDocumentCharset());
-#ifdef EXP_CHARTRANS
-    else {
+    } else {
       LYUCcharset * p_in = HTAnchor_getUCInfoStage(HTMainAnchor,
                                                              UCT_STAGE_PARSER);
       if (!p_in || !(p_in->MIMEname) || !*(p_in->MIMEname) ||
-	  HTAnchor_getUCLYhndl(HTMainAnchor, UCT_STAGE_PARSER) < 0)
-	p_in = HTAnchor_getUCInfoStage(HTMainAnchor, UCT_STAGE_MIME);
+	   HTAnchor_getUCLYhndl(HTMainAnchor, UCT_STAGE_PARSER) < 0) {
+	   p_in = HTAnchor_getUCInfoStage(HTMainAnchor, UCT_STAGE_MIME);
+      }
       if (p_in && p_in->MIMEname && *(p_in->MIMEname) &&
 	  HTAnchor_getUCLYhndl(HTMainAnchor, UCT_STAGE_MIME) >= 0) {
         fprintf(fp0, "<dt><em>&nbsp;Charset:</em> %s (assumed)\n",
 		     p_in->MIMEname);
       }
     }
-#endif /* EXP_CHARTRANS */
 
     if ((cp = HText_getServer()) != NULL && *cp != '\0')
         fprintf(fp0, "<dt><em>&nbsp;&nbsp;Server:</em> %s\n", cp);

@@ -53,12 +53,10 @@
 #include "HTParse.h"
 #include "HTAccess.h"		/* We implement a protocol */
 #include "HTML.h"		/* The object we will generate */
-#include "HTFormat.h"
+#include "HTWSRC.h"
 #include "HTTCP.h"
 #include "HTCJK.h"
 #include "HTAlert.h"
-/* #include "HTWSRC.h"	*/	/* Need some bits from here */
-/* #include "ParseWSRC.h" */
 
 /*			From WAIS
 **			---------

@@ -135,7 +135,6 @@ a sequence of styles.
 PRIVATE void actually_set_style ARGS1(HTStructured *, me)
 {
     if (!me->text) {			/* First time through */
-#ifdef EXP_CHARTRANS
 	LYGetChartransInfo(me);
 	UCSetTransParams(&me->T,
 		     me->UCLYhndl, me->UCI,
@@ -143,7 +142,6 @@ PRIVATE void actually_set_style ARGS1(HTStructured *, me)
 			 		      UCT_STAGE_HTEXT),
 			 HTAnchor_getUCInfoStage(me->node_anchor,
 			 			 UCT_STAGE_HTEXT));
-#endif /* EXP_CHARTRANS */
 	me->text = HText_new2(me->node_anchor, me->target);
 	HText_beginAppend(me->text);
 	HText_setStyle(me->text, me->new_style);
@@ -591,81 +589,6 @@ char prevailing_class[TEMPSTRINGSIZE];
     int hcode;
 #endif
 
-#ifdef EXP_CHARTRANS
-/* #define ATTR_CS_IN (me->T.output_utf8 ? me->UCLYhndl : 0) */
-#define ATTR_CS_IN me->tag_charset
-
-#define TRANSLATE_AND_UNESCAPE_ENTITIES(s, p, h) \
-	LYUCFullyTranslateString(s, ATTR_CS_IN, current_char_set, YES, p, h, st_HTML)
-
-#define TRANSLATE_AND_UNESCAPE_ENTITIES4(s, cs_to, p, h) \
-	LYUCFullyTranslateString(s, ATTR_CS_IN, cs_to, YES, p, h, st_HTML) /* not used */
-
-#define TRANSLATE_AND_UNESCAPE_ENTITIES5(s,cs_from,cs_to,p,h) \
-	LYUCFullyTranslateString(s, cs_from, cs_to, YES, p, h, st_HTML)
-
-#define TRANSLATE_AND_UNESCAPE_ENTITIES6(s,cs_from,cs_to,spcls,p,h) \
-	LYUCFullyTranslateString(s, cs_from, cs_to, spcls, p, h, st_HTML)
-
-/*
- *  Strings from attributes which should be converted to some kind
- *  of "standard" representation (character encoding), was Latin-1,
- *  esp. URLs (incl. #fragments) and HTML NAME and ID stuff.
- */
-#define TRANSLATE_AND_UNESCAPE_TO_STD(s) \
-	LYUCFullyTranslateString(s, ATTR_CS_IN, ATTR_CS_IN, NO, NO, YES, st_URL)
-#define UNESCAPE_FIELDNAME_TO_STD(s) \
-	LYUCFullyTranslateString(s, ATTR_CS_IN, ATTR_CS_IN, NO, NO, YES, st_HTML)
-
-#else  /* !EXP_CHARTRANS */
-
-#ifdef OLDSTUFF
-#define ATTR_CS_IN 0
-
-#define TRANSLATE_AND_UNESCAPE_ENTITIES(s, p, h) \
-	if (current_char_set) LYExpandString(s); LYUnEscapeEntities(*(s), p, h)
-/*	if (current_char_set) LYExpandString(s); LYUnEscapeEntities(*(s), p, FALSE) */
-
-#define TRANSLATE_AND_UNESCAPE_ENTITIES5(s,cs_from,cs_to,p,h) \
-	LYUnEscapeEntities(*(s), p, h)
-/*	LYUnEscapeEntities(*(s), TRUE, h) */
-/*	LYUnEscapeEntities(*(s), TRUE, FALSE) */
-
-
-#define TRANSLATE_AND_UNESCAPE_ENTITIES6(s,cs_from,cs_to,spcls,p,h) \
-	if (me->UsePlainSpace && !me->HiddenValue) LYExpandString(me, s);\
-	LYUnEscapeEntities(*(s), me->UsePlainSpace, me->HiddenValue)
-/*	if (current_char_set && (p && !h)) LYExpandString(me, *(s));\
-	LYUnEscapeEntities(*(s), p, h) */
-
-#define TRANSLATE_AND_UNESCAPE_TO_STD(s) \
-    			LYUnEscapeToLatinOne(s, TRUE) /* for now */
-#define UNESCAPE_FIELDNAME_TO_STD(s) ; /* no-op */
-#endif /* OLDSTUFF */
-
-#ifdef NOTUSED_FOTEMODS
-/* Roughly (and untested!), the equivalents if one would use the
- * LYCharUtils.c from FOTEMODS 1997-10-06 instead: */
-#define TRANSLATE_AND_UNESCAPE_ENTITIES(s, p, h) \
-	LYExpandString(me, s); LYUnEscapeEntities(me, s)
-	LYUCFullyTranslateString(s, ATTR_CS_IN, current_char_set, YES, p, h, st_HTML)
-
-#define TRANSLATE_AND_UNESCAPE_ENTITIES5(s,cs_from,cs_to,p,h) \
-	LYUnEscapeEntities(me, s)
-
-#define TRANSLATE_AND_UNESCAPE_ENTITIES6(s,cs_from,cs_to,spcls,p,h) \
-	if (me->UsePlainSpace && !me->HiddenValue) LYExpandString(me, s);\
-	LYUnEscapeEntities(me, s)
-
-#define TRANSLATE_AND_UNESCAPE_TO_STD(s) \
-	LYUnEscapeToLatinOne(me, s, TRUE)
-
-#define UNESCAPE_FIELDNAME_TO_STD(s) ; /* no-op (?) */
-
-#endif /* NOTUSED_FOTEMODS */
-
-#endif  /* !EXP_CHARTRANS */
-
 #define CHECK_ID(code) LYCheckForID(me, present, value, (int)code)
 
 /*	Start Element
@@ -705,12 +628,10 @@ PRIVATE void HTML_start_element ARGS6(
 	UPDATE_STYLE;
     }
 
-#ifdef EXP_CHARTRANS
     if (tag_charset < 0)
 	me->tag_charset = me->UCLYhndl;
     else
 	me->tag_charset = tag_charset;
-#endif
 
 /* this should be done differently */
 #if defined(USE_COLOR_STYLE)
@@ -975,17 +896,7 @@ PRIVATE void HTML_start_element ARGS6(
 		        value[HTML_LINK_TITLE] &&
 			*value[HTML_LINK_TITLE] != '\0') {
 			StrAllocCopy(title, value[HTML_LINK_TITLE]);
-#ifdef EXP_CHARTRANS
 			TRANSLATE_AND_UNESCAPE_ENTITIES(&title, TRUE, FALSE);
-#else  /* !EXP_CHARTRANS */
-			if (current_char_set)
-			    LYExpandString(&title);
-			/*
-			 *  Convert any HTML entities
-			 *  or decimal escaping. - FM
-			 */
-			LYUnEscapeEntities(title, TRUE, FALSE);
-#endif  /* !EXP_CHARTRANS */
 			LYTrimHead(title);
 			LYTrimTail(title);
 			if (*title != '\0')
@@ -1136,16 +1047,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (present && present[HTML_LINK_TITLE] &&
 		value[HTML_LINK_TITLE] && *value[HTML_LINK_TITLE] != '\0') {
 		StrAllocCopy(title, value[HTML_LINK_TITLE]);
-#ifdef EXP_CHARTRANS
 		TRANSLATE_AND_UNESCAPE_ENTITIES(&title, TRUE, FALSE);
-#else  /* !EXP_CHARTRANS */
-		if (current_char_set)
-		    LYExpandString(&title);
-		/*
-		 *  Convert any HTML entities or decimal escaping. - FM
-		 */
-		LYUnEscapeEntities(title, TRUE, FALSE);
-#endif  /* !EXP_CHARTRANS */
 		LYTrimHead(title);
 		LYTrimTail(title);
 	    }
@@ -1181,7 +1083,6 @@ PRIVATE void HTML_start_element ARGS6(
 		if (!HTAnchor_title(dest))
 		    HTAnchor_setTitle(dest, title);
 		dest = NULL;
-#ifdef EXP_CHARTRANS
 	        if (present[HTML_LINK_CHARSET] &&
 		    value[HTML_LINK_CHARSET] && *value[HTML_LINK_CHARSET] != '\0') {
 		    dest_char_set = UCGetLYhndl_byMIME(value[HTML_LINK_CHARSET]);
@@ -1193,7 +1094,6 @@ PRIVATE void HTML_start_element ARGS6(
 					    UCT_STAGE_PARSER,
 					    UCT_SETBY_LINK);
 		dest_char_set = -1;
-#endif /* EXP_CHARTRANS */
 	    }
 	    UPDATE_STYLE;
 	    if (!HText_hasToolbar(me->text) &&
@@ -1296,16 +1196,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    present[HTML_ISINDEX_PROMPT] &&
 	    value[HTML_ISINDEX_PROMPT] && *value[HTML_ISINDEX_PROMPT]) {
 	    StrAllocCopy(temp, value[HTML_ISINDEX_PROMPT]);
-#ifdef EXP_CHARTRANS
 	    TRANSLATE_AND_UNESCAPE_ENTITIES(&temp, TRUE, FALSE);
-#else  /* !EXP_CHARTRANS */
-	    if (current_char_set)
-		LYExpandString(&temp);
-	    /*
-	     *  Convert any HTML entities or decimal escaping. - FM
-	     */
-	    LYUnEscapeEntities(temp, TRUE, FALSE);
-#endif  /* !EXP_CHARTRANS */
 	    LYTrimHead(temp);
 	    LYTrimTail(temp);
 	    if (*temp != '\0') {
@@ -1355,16 +1246,7 @@ PRIVATE void HTML_start_element ARGS6(
 	if (present && present[HTML_FRAME_NAME] &&
 	    value[HTML_FRAME_NAME] && *value[HTML_FRAME_NAME]) {
 	    StrAllocCopy(id_string, value[HTML_FRAME_NAME]);
-#ifdef EXP_CHARTRANS
-		TRANSLATE_AND_UNESCAPE_ENTITIES(&id_string, TRUE, FALSE);
-#else  /* !EXP_CHARTRANS */
-	    if (current_char_set)
-		LYExpandString(&id_string);
-	    /*
-	     *  Convert any HTML entities or decimal escaping. - FM
-	     */
-	    LYUnEscapeEntities(id_string, TRUE, FALSE);
-#endif  /* !EXP_CHARTRANS */
+	    TRANSLATE_AND_UNESCAPE_ENTITIES(&id_string, TRUE, FALSE);
 	    LYTrimHead(id_string);
 	    LYTrimTail(id_string);
 	}
@@ -1436,16 +1318,7 @@ PRIVATE void HTML_start_element ARGS6(
 	if (present && present[HTML_IFRAME_NAME] &&
 	    value[HTML_IFRAME_NAME] && *value[HTML_IFRAME_NAME]) {
 	    StrAllocCopy(id_string, value[HTML_IFRAME_NAME]);
-#ifdef EXP_CHARTRANS
 	    TRANSLATE_AND_UNESCAPE_ENTITIES(&id_string, TRUE, FALSE);
-#else  /* !EXP_CHARTRANS */
-	    if (current_char_set)
-		LYExpandString(&id_string);
-	    /*
-	     *  Convert any HTML entities or decimal escaping. - FM
-	     */
-	    LYUnEscapeEntities(id_string, TRUE, FALSE);
-#endif  /* !EXP_CHARTRANS */
 	    LYTrimHead(id_string);
 	    LYTrimTail(id_string);
 	}
@@ -2712,16 +2585,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (present[HTML_A_TITLE] &&
 	        value[HTML_A_TITLE] && *value[HTML_A_TITLE] != '\0') {
 		StrAllocCopy(title, value[HTML_A_TITLE]);
-#ifdef EXP_CHARTRANS
 		TRANSLATE_AND_UNESCAPE_ENTITIES(&title, TRUE, FALSE);
-#else  /* !EXP_CHARTRANS */
-		if (current_char_set)
-		    LYExpandString(&title);
-		/*
-		 *  Convert any HTML entities or decimal escaping. - FM
-		 */
-		LYUnEscapeEntities(title, TRUE, FALSE);
-#endif  /* !EXP_CHARTRANS */
 		LYTrimHead(title);
 		LYTrimTail(title);
 		if (*title == '\0') {
@@ -2909,16 +2773,7 @@ PRIVATE void HTML_start_element ARGS6(
 	if (present && present[HTML_IMG_TITLE] &&
 	    value[HTML_IMG_TITLE] && *value[HTML_IMG_TITLE]) {
 	    StrAllocCopy(title, value[HTML_IMG_TITLE]);
-#ifdef EXP_CHARTRANS
-		TRANSLATE_AND_UNESCAPE_ENTITIES(&title, TRUE, FALSE);
-#else  /* !EXP_CHARTRANS */
-	    if (current_char_set)
-		LYExpandString(&title);
-	    /*
-	     *  Convert any HTML entities or decimal escaping. - FM
-	     */
-	    LYUnEscapeEntities(title, TRUE, FALSE);
-#endif  /* !EXP_CHARTRANS */
+	    TRANSLATE_AND_UNESCAPE_ENTITIES(&title, TRUE, FALSE);
 	    LYTrimHead(title);
 	    LYTrimTail(title);
 	    if (*title == '\0') {
@@ -2937,18 +2792,8 @@ PRIVATE void HTML_start_element ARGS6(
 	     ((clickable_images || map_href) &&
 	      *value[HTML_IMG_ALT] != '\0'))) {
 	    StrAllocCopy(alt_string, value[HTML_IMG_ALT]);
-#ifdef EXP_CHARTRANS
 	    TRANSLATE_AND_UNESCAPE_ENTITIES(&alt_string,
 						   me->UsePlainSpace, me->HiddenValue);
-#else  /* !EXP_CHARTRANS */
-	    if (current_char_set)
-	        LYExpandString(&alt_string);
-	    /*
-	     *  Convert any HTML entities or decimal escaping. - FM
-	     */
-	    LYUnEscapeEntities(alt_string,
-	    		       me->UsePlainSpace, me->HiddenValue);
-#endif  /* !EXP_CHARTRANS */
 	    /*
 	     *  If it's all spaces and we are making SRC or
 	     *  USEMAP links, treat it as zero-length. - FM
@@ -3062,8 +2907,12 @@ PRIVATE void HTML_start_element ARGS6(
 		 */
 		if (map_href) {
 		    if (dest_ismap) {
+			HTML_put_character(me, ' ');
+			me->in_word = NO;
 			HTML_put_string(me, "[ISMAP]");
 		    } else if (dest) {
+			HTML_put_character(me, ' ');
+			me->in_word = NO;
 			HTML_put_string(me, "[LINK]");
 		    }
 		    if (me->inBoldA == TRUE && me->inBoldH == FALSE) {
@@ -3104,6 +2953,9 @@ PRIVATE void HTML_start_element ARGS6(
 		        HText_appendCharacter(me->text, LY_BOLD_START_CHAR);
 		    }
 		    me->inBoldA = TRUE;
+		} else {
+		    HTML_put_character(me, ' ');/* space char may be ignored */
+		    me->in_word = NO;
 		}
 	        HTML_put_string(me, alt_string);
 		if (me->inBoldA == TRUE && me->inBoldH == FALSE) {
@@ -3210,6 +3062,8 @@ PRIVATE void HTML_start_element ARGS6(
 		HTML_put_character(me, ' ');  /* space char may be ignored */
 		me->in_word = NO;
 	    } else {
+		HTML_put_character(me, ' ');  /* space char may be ignored */
+		me->in_word = NO;
 	        me->inBoldA = TRUE;
 	    }
 	} else if (map_href) {
@@ -3219,8 +3073,12 @@ PRIVATE void HTML_start_element ARGS6(
 		 *  and start a new one for the client-side MAP. - FM
 		 */
 		if (dest_ismap) {
+		    HTML_put_character(me, ' ');/* space char may be ignored */
+		    me->in_word = NO;
 		    HTML_put_string(me, "[ISMAP]");
 		} else if (dest) {
+		    HTML_put_character(me, ' ');/* space char may be ignored */
+		    me->in_word = NO;
 		    HTML_put_string(me, "[LINK]");
 		}
 		if (me->inBoldA == TRUE && me->inBoldH == FALSE) {
@@ -3229,8 +3087,9 @@ PRIVATE void HTML_start_element ARGS6(
 		me->inBoldA = FALSE;
 		HText_endAnchor(me->text, me->CurrentANum);
 		me->CurrentANum = 0;
-		if (dest_ismap || dest)
+		if (dest_ismap || dest) {
 		    HTML_put_character(me, '-');
+		}
 	    } else {
 	        HTML_put_character(me, ' ');
 	        me->in_word = NO;
@@ -3270,10 +3129,8 @@ PRIVATE void HTML_start_element ARGS6(
 	     *  for the current anchor or inline, with an
 	     *  ID link if indicated. - FM
 	     */
-	    if (!me->inA) {
-	        HTML_put_character(me, ' ');  /* space char may be ignored */
-		me->in_word = NO;
-	    }
+	    HTML_put_character(me, ' ');  /* space char may be ignored */
+	    me->in_word = NO;
 	    if (id_string) {
 		if ((ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
@@ -3285,10 +3142,8 @@ PRIVATE void HTML_start_element ARGS6(
 		}
 	    }
 	    HTML_put_string(me, alt_string);
-	    if (!me->inA) {
-	        HTML_put_character(me, ' ');  /* space char may be ignored */
-		me->in_word = NO;
-	    }
+	    HTML_put_character(me, ' ');  /* space char may be ignored */
+	    me->in_word = NO;
 	}
 	FREE(map_href);
 	FREE(alt_string);
@@ -3337,16 +3192,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (present && present[HTML_MAP_TITLE] &&
 	        value[HTML_MAP_TITLE] && *value[HTML_MAP_TITLE] != '\0') {
 	        StrAllocCopy(title, value[HTML_MAP_TITLE]);
-#ifdef EXP_CHARTRANS
 		TRANSLATE_AND_UNESCAPE_ENTITIES(&title, TRUE, FALSE);
-#else  /* !EXP_CHARTRANS */
-		if (current_char_set)
-		    LYExpandString(&title);
-		/*
-		 *  Convert any HTML entities or decimal escaping. - FM
-		 */
-		LYUnEscapeEntities(title, TRUE, FALSE);
-#endif  /* !EXP_CHARTRANS */
 		LYTrimHead(title);
 		LYTrimTail(title);
 		if (*title == '\0') {
@@ -3420,18 +3266,8 @@ PRIVATE void HTML_start_element ARGS6(
 	        StrAllocCopy(alt_string, value[HTML_AREA_TITLE]);
 	    }
 	    if (alt_string != NULL) {
-#ifdef EXP_CHARTRANS
 		TRANSLATE_AND_UNESCAPE_ENTITIES(&alt_string,
 						       me->UsePlainSpace, me->HiddenValue);
-#else  /* !EXP_CHARTRANS */
-		if (current_char_set)
-	            LYExpandString(&alt_string);
-		/*
-		 *  Convert any HTML entities or decimal escaping. - FM
-		 */
-		LYUnEscapeEntities(alt_string,
-				   me->UsePlainSpace, me->HiddenValue);
-#endif  /* !EXP_CHARTRANS */
 		/*
 		 *  Make sure it's not just space(s). - FM
 		 */
@@ -3578,13 +3414,7 @@ PRIVATE void HTML_start_element ARGS6(
 		if (present[HTML_OBJECT_TITLE] &&
 		    value[HTML_OBJECT_TITLE] && *value[HTML_OBJECT_TITLE]) {
 		    StrAllocCopy(me->object_title, value[HTML_OBJECT_TITLE]);
-#ifdef EXP_CHARTRANS
-		TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_title, TRUE, FALSE);
-#else  /* !EXP_CHARTRANS */
-		    if (current_char_set)
-		        LYExpandString(&me->object_title);
-		    LYUnEscapeEntities(me->object_title, TRUE, FALSE);
-#endif  /* !EXP_CHARTRANS */
+		    TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_title, TRUE, FALSE);
 		    LYTrimHead(me->object_title);
 		    LYTrimTail(me->object_title);
 		    if (me->object_title == '\0') {
@@ -3602,13 +3432,7 @@ PRIVATE void HTML_start_element ARGS6(
 		if (present[HTML_OBJECT_TYPE] &&
 		    value[HTML_OBJECT_TYPE] && *value[HTML_OBJECT_TYPE]) {
 		    StrAllocCopy(me->object_type, value[HTML_OBJECT_TYPE]);
-#ifdef EXP_CHARTRANS
 		    TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_type, TRUE, FALSE);
-#else  /* !EXP_CHARTRANS */
-		    if (current_char_set)
-		        LYExpandString(&me->object_type);
-		    LYUnEscapeEntities(me->object_type, TRUE, FALSE);
-#endif  /* !EXP_CHARTRANS */
 		    LYTrimHead(me->object_type);
 		    LYTrimTail(me->object_type);
 		    if (me->object_type == '\0') {
@@ -3620,13 +3444,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    *value[HTML_OBJECT_CLASSID]) {
 		    StrAllocCopy(me->object_classid,
 		    		 value[HTML_OBJECT_CLASSID]);
-#ifdef EXP_CHARTRANS
 		    TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_classid, TRUE, FALSE);
-#else  /* !EXP_CHARTRANS */
-		    if (current_char_set)
-		        LYExpandString(&me->object_classid);
-		    LYUnEscapeEntities(me->object_classid, TRUE, FALSE);
-#endif  /* !EXP_CHARTRANS */
 		    LYTrimHead(me->object_classid);
 		    LYTrimTail(me->object_classid);
 		    if (me->object_classid == '\0') {
@@ -3648,13 +3466,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    *value[HTML_OBJECT_CODETYPE]) {
 		    StrAllocCopy(me->object_codetype,
 		    		 value[HTML_OBJECT_CODETYPE]);
-#ifdef EXP_CHARTRANS
 		    TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_codetype, TRUE, FALSE);
-#else  /* !EXP_CHARTRANS */
-		    if (current_char_set)
-		        LYExpandString(&me->object_codetype);
-		    LYUnEscapeEntities(me->object_codetype, TRUE, FALSE);
-#endif  /* !EXP_CHARTRANS */
 		    LYTrimHead(me->object_codetype);
 		    LYTrimTail(me->object_codetype);
 		    if (me->object_codetype == '\0') {
@@ -3664,13 +3476,7 @@ PRIVATE void HTML_start_element ARGS6(
 		if (present[HTML_OBJECT_NAME] &&
 		    value[HTML_OBJECT_NAME] && *value[HTML_OBJECT_NAME]) {
 		    StrAllocCopy(me->object_name, value[HTML_OBJECT_NAME]);
-#ifdef EXP_CHARTRANS
 		    TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_name, TRUE, FALSE);
-#else  /* !EXP_CHARTRANS */
-		    if (current_char_set)
-		        LYExpandString(&me->object_name);
-		    LYUnEscapeEntities(me->object_name, TRUE, FALSE);
-#endif  /* !EXP_CHARTRANS */
 		    LYTrimHead(me->object_name);
 		    LYTrimTail(me->object_name);
 		    if (me->object_name == '\0') {
@@ -3769,18 +3575,8 @@ PRIVATE void HTML_start_element ARGS6(
 	    (!clickable_images ||
 	     (clickable_images && *value[HTML_APPLET_ALT] != '\0'))) {
 	    StrAllocCopy(alt_string, value[HTML_APPLET_ALT]);
-#ifdef EXP_CHARTRANS
 	    TRANSLATE_AND_UNESCAPE_ENTITIES(&alt_string,
 						   me->UsePlainSpace, me->HiddenValue);
-#else  /* !EXP_CHARTRANS */
-	    if (current_char_set)
-	        LYExpandString(&alt_string);
-	    /*
-	     *  Convert any HTML entities or decimal escaping. - FM
-	     */
-	    LYUnEscapeEntities(alt_string,
-	    		       me->UsePlainSpace, me->HiddenValue);
-#endif  /* !EXP_CHARTRANS */
 	    /*
 	     *  If it's all spaces and we are making sources links,
 	     *  treat it as zero-length. - FM
@@ -3994,18 +3790,8 @@ PRIVATE void HTML_start_element ARGS6(
 	    (!clickable_images ||
 	     (clickable_images && *value[HTML_EMBED_ALT] != '\0'))) {
 	    StrAllocCopy(alt_string, value[HTML_EMBED_ALT]);
-#ifdef EXP_CHARTRANS
 	    TRANSLATE_AND_UNESCAPE_ENTITIES(&alt_string,
 						   me->UsePlainSpace, me->HiddenValue);
-#else  /* !EXP_CHARTRANS */
-	    if (current_char_set)
-	        LYExpandString(&alt_string);
-	    /*
-	     *  Convert any HTML entities or decimal escaping. - FM
-	     */
-	    LYUnEscapeEntities(alt_string,
-	    		       me->UsePlainSpace, me->HiddenValue);
-#endif  /* !EXP_CHARTRANS */
 	    /*
 	     *  If it's all spaces and we are making sources links,
 	     *  treat it as zero-length. - FM
@@ -4281,16 +4067,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    StrAllocCopy(title, value[HTML_FORM_SUBJECT]);
 		}
 		if (title != NULL && *title != '\0') {
-#ifdef EXP_CHARTRANS
 		    TRANSLATE_AND_UNESCAPE_ENTITIES(&title, TRUE, FALSE);
-#else  /* !EXP_CHARTRANS */
-		    if (current_char_set)
-		        LYExpandString(&title);
-		    /*
-		     *  Convert any HTML entities or decimal escaping. - FM
-		     */
-		    LYUnEscapeEntities(title, TRUE, FALSE);
-#endif  /* !EXP_CHARTRANS */
 		    LYTrimHead(title);
 		    LYTrimTail(title);
 		    if (*title == '\0') {
@@ -4419,15 +4196,7 @@ PRIVATE void HTML_start_element ARGS6(
 
 		StrAllocCopy(I_value, value[HTML_BUTTON_VALUE]);
 		me->UsePlainSpace = TRUE;
-#ifdef EXP_CHARTRANS
 		TRANSLATE_AND_UNESCAPE_ENTITIES(&I_value, TRUE, me->HiddenValue);
-#else  /* !EXP_CHARTRANS */
-		if (current_char_set) {
-		    LYExpandString(&I_value);
-		}
-	        LYUnEscapeEntities(I_value,
-				   me->UsePlainSpace, me->HiddenValue);
-#endif /* EXP_CHARTRANS */
 		me->UsePlainSpace = FALSE;
 		I.value = I_value;
 		/*
@@ -4774,7 +4543,6 @@ PRIVATE void HTML_start_element ARGS6(
 			     ((UseALTasVALUE == TRUE) ?
 				value[HTML_INPUT_ALT] :
 				value[HTML_INPUT_VALUE]));
-#ifdef EXP_CHARTRANS
 		if (me->UsePlainSpace && !me->HiddenValue) {
 		    I.value_cs = current_char_set;
 		}
@@ -4784,12 +4552,6 @@ PRIVATE void HTML_start_element ARGS6(
 		    I.value_cs,
 		    (me->UsePlainSpace && !me->HiddenValue),
 		    me->UsePlainSpace, me->HiddenValue);
-#else  /* !EXP_CHARTRANS */
-		if (current_char_set && me->UsePlainSpace)
-		    LYExpandString(&I_value);
-	        LYUnEscapeEntities(I_value,
-				   me->UsePlainSpace, me->HiddenValue);
-#endif  /* !EXP_CHARTRANS */
 		I.value = I_value;
 		if (me->UsePlainSpace == TRUE) {
 		    /*
@@ -5103,122 +4865,13 @@ PRIVATE void HTML_start_element ARGS6(
 	    }
 	    HTML_end_element(me, HTML_SELECT, (char **)&include);
 	}
-	{
-	    char *name = NULL;
-	    BOOLEAN multiple = NO;
-	    char *size = NULL;
-
-            /*
-	     *  Initialize the disable attribute.
-	     */
-	    me->select_disabled = FALSE;
-
-	    /*
-	     *  Make sure we're in a form.
-	     */
-	    if (!me->inFORM) {
-	        if (TRACE) {
-		    fprintf(stderr,
-			    "Bad HTML: SELECT start tag not within FORM element *****\n");
-		} else if (!me->inBadHTML) {
-		    _statusline(BAD_HTML_USE_TRACE);
-		    me->inBadHTML = TRUE;
-		    sleep(MessageSecs);
-		}
-
-	        /*
-		 *  We should have covered all crash possibilities with the
-		 *  current TagSoup parser, so we'll allow it because some
-		 *  people with other browsers use SELECT for "information"
-		 *  popups, outside of FORM blocks, though no Lynx user
-		 *  would do anything that awful, right? - FM
-		 *//***
-		break;
-		***/
-	    }
-
-	    /*
-	     *  Check for unclosed TEXTAREA.
-	     */
-	    if (me->inTEXTAREA) {
-	        if (TRACE) {
-		    fprintf(stderr, "Bad HTML: Missing TEXTAREA end tag *****\n");
-		} else if (!me->inBadHTML) {
-		    _statusline(BAD_HTML_USE_TRACE);
-		    me->inBadHTML = TRUE;
-		    sleep(MessageSecs);
-		}
-	    }
-
-	    /*
-	     *  Set to know we are in a select tag.
-	     */
-	    me->inSELECT = TRUE;
-
-	    if (!(present && present[HTML_SELECT_NAME] &&
-		  value[HTML_SELECT_NAME]  && *value[HTML_SELECT_NAME])) {
-	        StrAllocCopy(name, "");
-	    } else if (strchr(value[HTML_SELECT_NAME], '&') == NULL) {
-		StrAllocCopy(name, value[HTML_SELECT_NAME]);
-	    } else {
-		StrAllocCopy(name, value[HTML_SELECT_NAME]);
-		UNESCAPE_FIELDNAME_TO_STD(&name);
-	    }
-	    if (present && present[HTML_SELECT_MULTIPLE])
-		multiple=YES;
-	    if (present && present[HTML_SELECT_DISABLED])
-		me->select_disabled = TRUE;
-	    if (present && present[HTML_SELECT_SIZE] &&
-	        value[HTML_SELECT_SIZE] && *value[HTML_SELECT_SIZE]) {
-#ifdef NOTDEFINED
-		StrAllocCopy(size, value[HTML_SELECT_SIZE]);
-#else
-		/*
-		 *  Let the size be determined by the number of OPTIONs. - FM
-		 */
-		if (TRACE)
-		    fprintf(stderr,
-		    	    "HTML: Ignoring SIZE=\"%s\" for SELECT.\n",
-		    	    value[HTML_SELECT_SIZE]);
-#endif /* NOTDEFINED */
-	    }
-
-	    if (me->inBoldH == TRUE &&
-	        (multiple == NO || LYSelectPopups == FALSE)) {
-	        HText_appendCharacter(me->text, LY_BOLD_END_CHAR);
-		me->inBoldH = FALSE;
-		me->needBoldH = TRUE;
-	    }
-	    if (me->inUnderline == TRUE &&
-	        (multiple == NO || LYSelectPopups == FALSE)) {
-	        HText_appendCharacter(me->text, LY_UNDERLINE_END_CHAR);
-		me->inUnderline = FALSE;
-	    }
-
-	if ((multiple == NO && LYSelectPopups == TRUE) &&
-	    (me->sp[0].tag_number == HTML_PRE || me->inPRE == TRUE ||
-	     !me->sp->style->freeFormat) &&
-	        HText_LastLineSize(me->text, FALSE) > (LYcols - 8)) {
-		/*
-		 *  Force a newline when we're using a popup in
-		 *  a PRE block and are within 7 columns from the
-		 *  right margin.  This will allow for the '['
-		 *  popup designater and help avoid a wrap in the
-		 *  underscore placeholder for the retracted popup
-		 *  entry in the HText structure. - FM
-		 */
-		HTML_put_character(me, '\n');
-		me->in_word = NO;
-	    }
-
-	    CHECK_ID(HTML_SELECT_ID);
-
-	    HText_beginSelect(name, ATTR_CS_IN, multiple, size);
-	    FREE(name);
-	    FREE(size);
-
-	    me->first_option = TRUE;
-	}
+	/*
+	 * Start a new SELECT block. - FM
+	 */
+        LYHandleSELECT(me,
+	    	       present, (CONST char **)value,
+		       (char **)&include,
+		       TRUE);
 	break;
 
     case HTML_OPTION:
@@ -5234,7 +4887,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (!me->inSELECT) {
 	        if (TRACE) {
 		    fprintf(stderr,
-			    "Bad HTML: OPTION tag not within SELECT element *****\n");
+			    "Bad HTML: OPTION tag not within SELECT tag\n");
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -5311,38 +4964,14 @@ PRIVATE void HTML_start_element ARGS6(
 	            /*
 		     *  Convert any HTML entities or decimal escaping. - FM
 		     */
-#ifndef EXP_CHARTRANS
-		    int CurrentCharSet = current_char_set;
-		    BOOL CurrentEightBitRaw = HTPassEightBitRaw;
-		    BOOLEAN CurrentUseDefaultRawMode = LYUseDefaultRawMode;
-		    HTCJKlang CurrentHTCJK = HTCJK;
-#endif
-
 		    StrAllocCopy(I_value, value[HTML_OPTION_VALUE]);
 		    me->HiddenValue = TRUE;
-#ifdef EXP_CHARTRANS
 		    TRANSLATE_AND_UNESCAPE_ENTITIES6(&I_value,
 						       ATTR_CS_IN,
 						       ATTR_CS_IN,
 							NO,
 						       me->UsePlainSpace, me->HiddenValue);
 		    I.value_cs = ATTR_CS_IN;
-#else  /* !EXP_CHARTRANS */
-		    if (CurrentCharSet) {
-		        current_char_set = 0;	/* Default ISO-Latin1 */
-			LYUseDefaultRawMode = TRUE;
-			HTMLSetCharacterHandling(current_char_set);
-		    }
-	            LYUnEscapeEntities(I_value,
-		    		       me->UsePlainSpace, me->HiddenValue);
-		    if (CurrentCharSet) {
-		        current_char_set = CurrentCharSet;
-			LYUseDefaultRawMode = CurrentUseDefaultRawMode;
-			HTMLSetCharacterHandling(current_char_set);
-			HTPassEightBitRaw = CurrentEightBitRaw;
-			HTCJK = CurrentHTCJK;
-		    }
-#endif  /* !EXP_CHARTRANS */
 		    me->HiddenValue = FALSE;
 
 		    I.value = I_value;
@@ -5413,36 +5042,13 @@ PRIVATE void HTML_start_element ARGS6(
 	            /*
 		     *  Convert any HTML entities or decimal escaping. - FM
 		     */
-#ifndef EXP_CHARTRANS
-		    int CurrentCharSet = current_char_set;
-		    BOOL CurrentEightBitRaw = HTPassEightBitRaw;
-		    BOOLEAN CurrentUseDefaultRawMode = LYUseDefaultRawMode;
-		    HTCJKlang CurrentHTCJK = HTCJK;
-#endif
-
 		    StrAllocCopy(I_value, value[HTML_OPTION_VALUE]);
 		    me->HiddenValue = TRUE;
-#ifdef EXP_CHARTRANS
 		    TRANSLATE_AND_UNESCAPE_ENTITIES6(&I_value,
 						       ATTR_CS_IN,
 						       ATTR_CS_IN,
 							NO,
 						       me->UsePlainSpace, me->HiddenValue);
-#else  /* !EXP_CHARTRANS */
-		    if (CurrentCharSet) {
-		        current_char_set = 0;	/* Default ISO-Latin1 */
-			LYUseDefaultRawMode = TRUE;
-			HTMLSetCharacterHandling(current_char_set);
-		    }
-	            LYUnEscapeEntities(I_value, me->UsePlainSpace, me->HiddenValue);
-		    if (CurrentCharSet) {
-		        current_char_set = CurrentCharSet;
-			LYUseDefaultRawMode = CurrentUseDefaultRawMode;
-			HTMLSetCharacterHandling(current_char_set);
-			HTPassEightBitRaw = CurrentEightBitRaw;
-			HTCJK = CurrentHTCJK;
-		    }
-#endif  /* !EXP_CHARTRANS */
 		    me->HiddenValue = FALSE;
 		}
 	        StrAllocCopy(me->LastOptionValue, I_value);
@@ -6799,6 +6405,7 @@ End_Object:
         {
             InputFieldData I;
             int chars;
+	    char *data;
 
 	    /*
 	     *  Make sure we had a textarea start tag.
@@ -6844,6 +6451,8 @@ End_Object:
 	     *  Finish the data off.
 	     */
             HTChunkTerminate(&me->textarea);
+	    data = me->textarea.data;
+	    FREE(temp);
 
 	    I.type = "textarea";
 	    I.size = me->textarea_cols;
@@ -6864,26 +6473,45 @@ End_Object:
 	     */
 	    me->UsePlainSpace = TRUE;
 
-#ifndef EXP_CHARTRANS
-	    if (current_char_set)
-	        LYExpandString(&me->textarea.data);
-#else
 	    TRANSLATE_AND_UNESCAPE_ENTITIES5(&me->textarea.data,
 						    me->UCLYhndl,
 						    current_char_set,
 						    me->UsePlainSpace, me->HiddenValue);
-#define CHUNK_TRANSLATED 1
-#endif
 
-	    if ((cp = strtok(me->textarea.data, "\n")) != NULL) {
-		StrAllocCopy(temp, cp);
-#if ! CHUNK_TRANSLATED
-		LYUnEscapeEntities(temp,
-				   me->UsePlainSpace, me->HiddenValue);
-#endif
-	    } else {
-		FREE(temp);
+	    /*
+	     *	Trim any trailing newlines and
+	     *	skip any lead newlines. - FM
+	     */
+	    if (*data != '\0') {
+		cp = (data + strlen(data)) - 1;
+		while (cp >= data && *cp == '\n') {
+		    *cp-- = '\0';
+		}
+		while (*data == '\n') {
+		    data++;
+		}
 	    }
+	    /*
+	     *	Load the first text line, or set
+	     *	up for all blank rows. - FM
+	     */
+	    if ((cp = strchr(data, '\n')) != NULL) {
+		*cp = '\0';
+		StrAllocCopy(temp, data);
+		*cp = '\n';
+		data = (cp + 1);
+	    } else {
+		if (*data != '\0') {
+		    StrAllocCopy(temp, data);
+		} else {
+		    FREE(temp);
+		}
+		data = "";
+	    }
+	    /*
+	     *	Display at least the requested number
+	     *	of text lines and/or blank rows. - FM
+	     */
 	    for (i = 0; i < me->textarea_rows; i++) {
 		int j;
 		for (j = 0; temp && temp[j]; j++) {
@@ -6891,28 +6519,33 @@ End_Object:
 			temp[j] = (temp[j+1] ? ' ' : '\0');
 		}
 		I.value = temp;
-                chars = HText_beginInput(me->text, me->inUnderline, &I);
-	        for (; chars > 0; chars--)
-	    	    HTML_put_character(me, '_');
-	        HText_appendCharacter(me->text, '\r');
-		if (cp) {
-		    if ((cp = strtok(NULL, "\n")) != NULL) {
-			StrAllocCopy(temp, cp);
-#if ! CHUNK_TRANSLATED
-			LYUnEscapeEntities(temp,
-					   me->UsePlainSpace,
-					   me->HiddenValue);
-#endif
-		    } else {
+		chars = HText_beginInput(me->text, me->inUnderline, &I);
+		for (; chars > 0; chars--)
+		    HTML_put_character(me, '_');
+		HText_appendCharacter(me->text, '\r');
+		if (*data != '\0') {
+		    if (*data == '\n') {
 			FREE(temp);
+			data++;
+		    } else if ((cp = strchr(data, '\n')) != NULL) {
+			*cp = '\0';
+			StrAllocCopy(temp, data);
+			*cp = '\n';
+			data = (cp + 1);
+		    } else {
+			StrAllocCopy(temp, data);
+			data = "";
 		    }
+		} else {
+		    FREE(temp);
 		}
 	    }
-
 	    /*
-	     *  Check for more data lines than the rows attribute.
-   	     */
-	    while (cp) {
+	     *	Check for more data lines than the rows attribute.
+	     *	We add them to the display, because we support only
+	     *	horizontal and not also vertical scrolling. - FM
+	     */
+	    while (*data != '\0' || temp != NULL) {
 		int j;
 		for (j = 0; temp && temp[j]; j++) {
 		    if (temp[j] == '\r')
@@ -6923,18 +6556,23 @@ End_Object:
 		for (chars = atoi(me->textarea_cols); chars > 0; chars--)
 		    HTML_put_character(me, '_');
 		HText_appendCharacter(me->text, '\r');
-		if ((cp = strtok(NULL, "\n")) != NULL) {
-		    StrAllocCopy(temp, cp);
-#if ! CHUNK_TRANSLATED
-		    LYUnEscapeEntities(temp,
-				       me->UsePlainSpace,
-				       me->HiddenValue);
-#endif
+		if (*data == '\n') {
+		    FREE(temp);
+		    data++;
+		} else if ((cp = strchr(data, '\n')) != NULL) {
+		    *cp = '\0';
+		    StrAllocCopy(temp, data);
+		    *cp = '\n';
+		    data = (cp + 1);
+		} else if (*data != '\0') {
+		    StrAllocCopy(temp, data);
+		    data = "";
 		} else {
 		    FREE(temp);
 		}
-            }
+	    }
 	    FREE(temp);
+	    cp = NULL;
 	    me->UsePlainSpace = FALSE;
 
 	    HTChunkClear(&me->textarea);
@@ -7199,7 +6837,6 @@ PUBLIC int HTML_put_entity ARGS2(HTStructured *, me, int, entity_number)
     if (entity_number < nent) {
 	HTML_put_string(me, p_entity_values[entity_number]);
 	return HT_OK;
-#ifdef EXP_CHARTRANS
     } else if (me->UCLYhndl < 0) {
 	return HT_CANNOT_TRANSLATE;
     } else {
@@ -7217,7 +6854,6 @@ PUBLIC int HTML_put_entity ARGS2(HTStructured *, me, int, entity_number)
 	    }
 	}
 	return HT_CANNOT_TRANSLATE;
-#endif /* EXP_CHARTRANS */
     }
     return HT_OK;
 }
@@ -7778,8 +7414,6 @@ PUBLIC HTStructured* HTML_new ARGS3(
     prevailing_class[0] = '\0';
 #endif
 
-#ifdef EXP_CHARTRANS
-
 #ifdef NOTUSED_FOTEMODS
     /*
     **  If the anchor already has stage info, make sure that it is
@@ -7836,7 +7470,6 @@ PUBLIC HTStructured* HTML_new ARGS3(
     */
     LYGetChartransInfo(me);
     UCTransParams_clear(&me->T);
-#endif /* EXP_CHARTRANS */
 
     /*
     **  Load the existing or default input charset info
@@ -7903,7 +7536,6 @@ PUBLIC HTStream* HTMLParsedPresent ARGS3(
 {
     HTStream * intermediate = sink;
     if (!intermediate) {
-#ifdef EXP_CHARTRANS
 	/*
 	 *  Trick to prevent HTPlainPresent from translating again.
 	 *  Temporarily change UCT_STAGE_PARSER setting in anchor
@@ -7918,7 +7550,6 @@ PUBLIC HTStream* HTMLParsedPresent ARGS3(
 	    structured_cset = current_char_set;
 	HTAnchor_setUCInfoStage(anchor, structured_cset,
 				UCT_STAGE_PARSER, UCT_SETBY_MIME);
-#endif /* EXP_CHARTRANS */
 	if (pres->rep_out == WWW_SOURCE) {
 /*	    intermediate = HTPlainPresent(pres, anchor, NULL); */
 	    intermediate = HTStreamStack(WWW_PLAINTEXT, WWW_PRESENT,
@@ -7927,7 +7558,6 @@ PUBLIC HTStream* HTMLParsedPresent ARGS3(
 	    intermediate = HTStreamStack(WWW_PLAINTEXT, pres->rep_out,
 					 NULL, anchor);
 	}
-#ifdef EXP_CHARTRANS
 	if (old_parser_cset != structured_cset) {
 	    HTAnchor_resetUCInfoStage(anchor, old_parser_cset,
 				      UCT_STAGE_PARSER, UCT_SETBY_NONE);
@@ -7937,7 +7567,6 @@ PUBLIC HTStream* HTMLParsedPresent ARGS3(
 					UCT_SETBY_DEFAULT+1);
 	    }
 	}
-#endif /* EXP_CHARTRANS */
     }
     if (!intermediate)
 	return NULL;

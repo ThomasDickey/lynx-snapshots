@@ -23,7 +23,6 @@
 #ifdef DOSPATH
 #include "HTDOS.h"
 #endif
-extern BOOLEAN LYHaveCJKCharacterSet;
 
 #include "LYLeaks.h"
 
@@ -44,7 +43,7 @@ extern BOOLEAN LYHaveCJKCharacterSet;
 
 #define TO_FILE   1
 #define TO_SCREEN 2
-#define MAIL      3
+#define MAIL	  3
 #define PRINTER   4
 
 #ifdef VMS
@@ -92,12 +91,12 @@ PUBLIC int printfile ARGS1(
 #endif /* VMS */
 
     /*
-     *  Extract useful info from URL.
+     *	Extract useful info from URL.
      */
     StrAllocCopy(link_info, newdoc->address+12);
 
     /*
-     *  Reload the file we want to print into memory.
+     *	Reload the file we want to print into memory.
      */
     LYpop(newdoc);
     WWWDoc.address = newdoc->address;
@@ -110,8 +109,8 @@ PUBLIC int printfile ARGS1(
 	return(NOT_FOUND);
 
     /*
-     *  If we have an explicit content-base, we may use it even
-     *  if not in source mode. - kw
+     *	If we have an explicit content-base, we may use it even
+     *	if not in source mode. - kw
      */
     if (HText_getContentBase()) {
 	StrAllocCopy(content_base, HText_getContentBase());
@@ -121,8 +120,8 @@ PUBLIC int printfile ARGS1(
 	}
     }
     /*
-     *  If document is source, load the content_base
-     *  and content_location strings. - FM
+     *	If document is source, load the content_base
+     *	and content_location strings. - FM
      */
     if (HTisDocumentSource()) {
 	if (HText_getContentLocation()) {
@@ -145,14 +144,14 @@ PUBLIC int printfile ARGS1(
     }
 
     /*
-     *  Load the suggested filename string. - FM
+     *	Load the suggested filename string. - FM
      */
     if (HText_getSugFname() != NULL)
 	StrAllocCopy(sug_filename, HText_getSugFname()); /* must be freed */
     else
 	StrAllocCopy(sug_filename, newdoc->address); /* must be freed */
     /*
-     *  Strip any gzip or compress suffix, if present. - FM
+     *	Strip any gzip or compress suffix, if present. - FM
      */
     cp = NULL;
     if (strlen(sug_filename) > 3) {
@@ -174,7 +173,7 @@ PUBLIC int printfile ARGS1(
     cp = NULL;
 
     /*
-     *  Get the number of lines in the file.
+     *	Get the number of lines in the file.
      */
     if ((cp = (char *)strstr(link_info, "lines=")) != NULL) {
 	/*
@@ -191,7 +190,7 @@ PUBLIC int printfile ARGS1(
     }
 
     /*
-     *  Determine the type.
+     *	Determine the type.
      */
     if (strstr(link_info, "LOCAL_FILE")) {
 	type = TO_FILE;
@@ -218,14 +217,14 @@ PUBLIC int printfile ARGS1(
     }
 
     /*
-     *  Set up the sug_filenames recall buffer.
+     *	Set up the sug_filenames recall buffer.
      */
     FnameTotal = (sug_filenames ? HTList_count(sug_filenames) : 0);
     recall = ((FnameTotal >= 1) ? RECALL : NORECALL);
     FnameNum = FnameTotal;
 
     /*
-     *  Act on the request. - FM
+     *	Act on the request. - FM
      */
     switch (type) {
 	case TO_FILE:
@@ -258,20 +257,20 @@ PUBLIC int printfile ARGS1(
 			if (FirstRecall) {
 			    FirstRecall = FALSE;
 			    /*
-			     *  Use the last Fname in the list. - FM
+			     *	Use the last Fname in the list. - FM
 			     */
 			    FnameNum = 0;
 			} else {
 			    /*
-			     *  Go back to the previous Fname
-			     *  in the list. - FM
+			     *	Go back to the previous Fname
+			     *	in the list. - FM
 			     */
 			    FnameNum++;
 			}
 			if (FnameNum >= FnameTotal) {
 			    /*
-			     *  Reset the FirstRecall flag,
-			     *  and use sug_file or a blank. - FM
+			     *	Reset the FirstRecall flag,
+			     *	and use sug_file or a blank. - FM
 			     */
 			    FirstRecall = TRUE;
 			    FnameNum = FnameTotal;
@@ -303,8 +302,8 @@ PUBLIC int printfile ARGS1(
 			}
 			if (FnameNum < 0) {
 			    /*
-			     *  Set the FirstRecall flag,
-			     *  and use sug_file or a blank. - FM
+			     *	Set the FirstRecall flag,
+			     *	and use sug_file or a blank. - FM
 			     */
 			    FirstRecall = TRUE;
 			    FnameNum = FnameTotal;
@@ -324,7 +323,7 @@ PUBLIC int printfile ARGS1(
 		    }
 
 		    /*
-		     *  Save cancelled.
+		     *	Save cancelled.
 		     */
 		    _statusline(SAVE_REQUEST_CANCELLED);
 		    sleep(InfoSecs);
@@ -366,7 +365,7 @@ PUBLIC int printfile ARGS1(
 		    if ((len=strlen(buffer)) > 0 && buffer[len-1] == '/')
 			buffer[len-1] = '\0';
 #ifdef DOSPATH
-			 strcat(buffer, HTDOS_wwwName((char *)Home_Dir()));
+		    strcat(buffer, HTDOS_wwwName((char *)Home_Dir()));
 #else
 #ifdef VMS
 		    strcat(buffer, HTVMS_wwwName((char *)Home_Dir()));
@@ -454,12 +453,12 @@ PUBLIC int printfile ARGS1(
 
 		if (LYPrependBaseToSource && HTisDocumentSource()) {
 		    /*
-		     *  Added the document's base as a BASE tag
-		     *  to the top of the file.  May create
-		     *  technically invalid HTML, but will help
-		     *  get any partial or relative URLs resolved
-		     *  properly if no BASE tag is present to
-		     *  replace it. - FM
+		     *	Added the document's base as a BASE tag
+		     *	to the top of the file.  May create
+		     *	technically invalid HTML, but will help
+		     *	get any partial or relative URLs resolved
+		     *	properly if no BASE tag is present to
+		     *	replace it. - FM
 		     */
 		    fprintf(outfile_fp,
 			    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n",
@@ -508,7 +507,7 @@ PUBLIC int printfile ARGS1(
 		    || c == '\n' || c == '\r') {
 		    addstr("   Ok...");
 		    first_mail_preparsed = FALSE;
-		} else  {
+		} else	{
 		    _statusline(MAIL_REQUEST_CANCELLED);
 		    sleep(InfoSecs);
 		    break;
@@ -529,7 +528,7 @@ PUBLIC int printfile ARGS1(
 		/*
 		 *  Determine which mail headers should be sent.
 		 *  Use Content-Type and MIME-Version headers only
-		 *  if needed.  We need them if we are mailing HTML
+		 *  if needed.	We need them if we are mailing HTML
 		 *  source, or if we have 8-bit characters and will
 		 *  be sending Content-Transfer-Encoding to indicate
 		 *  this.  We will append a charset parameter to the
@@ -570,7 +569,7 @@ PUBLIC int printfile ARGS1(
 		    }
 		    first = FALSE;
 		} else {
-		    remove(tempfile);   /* remove duplicates */
+		    remove(tempfile);	/* remove duplicates */
 		}
 		if (HTisDocumentSource()) {
 		    if ((len = strlen(tempfile)) > 3) {
@@ -636,21 +635,22 @@ PUBLIC int printfile ARGS1(
 			}
 		    }
 		    /*
-		     *  X-URL header. - FM
+		     *	X-URL header. - FM
 		     */
 		    fprintf(hfd, "X-URL: %s\n", newdoc->address);
 		}
+
 		/*
 		 *  Write the contents to a temp file.
 		 */
 		if (LYPrependBaseToSource && HTisDocumentSource()) {
 		    /*
-		     *  Added the document's base as a BASE tag to
-		     *  the top of the message body.  May create
-		     *  technically invalid HTML, but will help
-		     *  get any partial or relative URLs resolved
-		     *  properly if no BASE tag is present to
-		     *  replace it. - FM
+		     *	Added the document's base as a BASE tag to
+		     *	the top of the message body.  May create
+		     *	technically invalid HTML, but will help
+		     *	get any partial or relative URLs resolved
+		     *	properly if no BASE tag is present to
+		     *	replace it. - FM
 		     */
 		    fprintf(outfile_fp,
 			    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
@@ -665,13 +665,13 @@ PUBLIC int printfile ARGS1(
 
 		if (isPMDF) {
 		    /*
-		     *  For PMDF, put the subject in the
-		     *  header file and close it. - FM
+		     *	For PMDF, put the subject in the
+		     *	header file and close it. - FM
 		     */
 		    fprintf(hfd, "Subject: %.70s\n\n", sug_filename);
 		    fclose(hfd);
 		    /*
-		     *  Now set up the command. - FM
+		     *	Now set up the command. - FM
 		     */
 		    sprintf(buffer,
 			    "%s %s %s,%s %s",
@@ -682,8 +682,8 @@ PUBLIC int printfile ARGS1(
 			    user_response);
 		} else {
 		    /*
-		     *  For "generic" VMS MAIL, include
-		     *  the subject in the command. - FM
+		     *	For "generic" VMS MAIL, include
+		     *	the subject in the command. - FM
 		     */
 		    remove_quotes(sug_filename);
 		    sprintf(buffer,
@@ -704,7 +704,7 @@ PUBLIC int printfile ARGS1(
 		start_curses();
 		if (isPMDF) {
 		    /*
-		     *  Delete the header file. - FM
+		     *	Delete the header file. - FM
 		     */
 		    remove(hdrfile);
 		}
@@ -729,7 +729,7 @@ PUBLIC int printfile ARGS1(
 		/*
 		 *  Determine which mail headers should be sent.
 		 *  Use Content-Type and MIME-Version headers only
-		 *  if needed.  We need them if we are mailing HTML
+		 *  if needed.	We need them if we are mailing HTML
 		 *  source, or if we have 8-bit characters and will
 		 *  be sending Content-Transfer-Encoding to indicate
 		 *  this.
@@ -769,8 +769,8 @@ PUBLIC int printfile ARGS1(
 
 		if (HTisDocumentSource()) {
 		    /*
-		     *  Add Content-Type, Content-Location, and
-		     *  Content-Base headers for HTML source. - FM
+		     *	Add Content-Type, Content-Location, and
+		     *	Content-Base headers for HTML source. - FM
 		     */
 		    fprintf(outfile_fp, "Content-Type: text/html");
 		    if (disp_charset != NULL) {
@@ -781,9 +781,9 @@ PUBLIC int printfile ARGS1(
 		    }
 		} else {
 		    /*
-		     *  Add Content-Type: text/plain if we have 8-bit
-		     *  characters and a valid charset for non-source
-		     *  documents. - KW
+		     *	Add Content-Type: text/plain if we have 8-bit
+		     *	characters and a valid charset for non-source
+		     *	documents. - KW
 		     */
 		    if (disp_charset != NULL) {
 			fprintf(outfile_fp,
@@ -813,12 +813,12 @@ PUBLIC int printfile ARGS1(
 		fprintf(outfile_fp, "X-URL: %s\n\n", newdoc->address);
 		if (LYPrependBaseToSource && HTisDocumentSource()) {
 		    /*
-		     *  Added the document's base as a BASE tag to
-		     *  the top of the message body.  May create
-		     *  technically invalid HTML, but will help
-		     *  get any partial or relative URLs resolved
-		     *  properly if no BASE tag is present to
-		     *  replace it. - FM
+		     *	Added the document's base as a BASE tag to
+		     *	the top of the message body.  May create
+		     *	technically invalid HTML, but will help
+		     *	get any partial or relative URLs resolved
+		     *	properly if no BASE tag is present to
+		     *	replace it. - FM
 		     */
 		    fprintf(outfile_fp,
 			    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
@@ -888,12 +888,12 @@ PUBLIC int printfile ARGS1(
 
 		if (LYPrependBaseToSource && HTisDocumentSource()) {
 		    /*
-		     *  Added the document's base as a BASE tag
-		     *  to the top of the file.  May create
-		     *  technically invalid HTML, but will help
-		     *  get any partial or relative URLs resolved
-		     *  properly if no BASE tag is present to
-		     *  replace it. - FM
+		     *	Added the document's base as a BASE tag
+		     *	to the top of the file.  May create
+		     *	technically invalid HTML, but will help
+		     *	get any partial or relative URLs resolved
+		     *	properly if no BASE tag is present to
+		     *	replace it. - FM
 		     */
 		    fprintf(outfile_fp,
 			    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
@@ -951,7 +951,7 @@ PUBLIC int printfile ARGS1(
 		    tempname(tempfile, NEW_FILE);
 		    first = FALSE;
 		} else {
-		    remove(tempfile);   /* Remove previous tempfile. */
+		    remove(tempfile);	/* Remove previous tempfile. */
 		}
 		if (((cp = strrchr(tempfile, '.')) != NULL) &&
 #ifdef VMS
@@ -975,12 +975,12 @@ PUBLIC int printfile ARGS1(
 
 		if (LYPrependBaseToSource && HTisDocumentSource()) {
 		    /*
-		     *  Added the document's base as a BASE tag
-		     *  to the top of the file.  May create
-		     *  technically invalid HTML, but will help
-		     *  get any partial or relative URLs resolved
-		     *  properly if no BASE tag is present to
-		     *  replace it. - FM
+		     *	Added the document's base as a BASE tag
+		     *	to the top of the file.  May create
+		     *	technically invalid HTML, but will help
+		     *	get any partial or relative URLs resolved
+		     *	properly if no BASE tag is present to
+		     *	replace it. - FM
 		     */
 		    fprintf(outfile_fp,
 			    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
@@ -1008,8 +1008,8 @@ PUBLIC int printfile ARGS1(
 		 */
 		if (cur_printer->command != NULL) {
 		    /*
-		     *  Check for two '%s' and ask for the second filename
-		     *  argument if there is.
+		     *	Check for two '%s' and ask for the second filename
+		     *	argument if there is.
 		     */
 		    char *first_s = strstr(cur_printer->command, "%s");
 		    if (first_s && strstr(first_s+1, "%s")) {
@@ -1034,20 +1034,20 @@ PUBLIC int printfile ARGS1(
 				if (FirstRecall) {
 				    FirstRecall = FALSE;
 				    /*
-				     *  Use the last Fname in the list. - FM
+				     *	Use the last Fname in the list. - FM
 				     */
 				    FnameNum = 0;
 				} else {
 				    /*
-				     *  Go back to the previous Fname
-				     *  in the list. - FM
+				     *	Go back to the previous Fname
+				     *	in the list. - FM
 				     */
 				    FnameNum++;
 				}
 				if (FnameNum >= FnameTotal) {
 				    /*
-				     *  Reset the FirstRecall flag,
-				     *  and use sug_file or a blank. - FM
+				     *	Reset the FirstRecall flag,
+				     *	and use sug_file or a blank. - FM
 				     */
 				    FirstRecall = TRUE;
 				    FnameNum = FnameTotal;
@@ -1068,20 +1068,20 @@ PUBLIC int printfile ARGS1(
 				if (FirstRecall) {
 				    FirstRecall = FALSE;
 				    /*
-				     *  Use the first Fname in the list. - FM
+				     *	Use the first Fname in the list. - FM
 				     */
 				    FnameNum = FnameTotal - 1;
 				} else {
 				    /*
-				     *  Advance to the next Fname
-				     *  in the list. - FM
+				     *	Advance to the next Fname
+				     *	in the list. - FM
 				     */
 				    FnameNum--;
 				}
 				if (FnameNum < 0) {
 				    /*
-				     *  Set the FirstRecall flag,
-				     *  and use sug_file or a blank. - FM
+				     *	Set the FirstRecall flag,
+				     *	and use sug_file or a blank. - FM
 				     */
 				    FirstRecall = TRUE;
 				    FnameNum = FnameTotal;
@@ -1101,7 +1101,7 @@ PUBLIC int printfile ARGS1(
 			    }
 
 			    /*
-			     *  Printer cancelled.
+			     *	Printer cancelled.
 			     */
 			    _statusline(PRINT_REQUEST_CANCELLED);
 			    sleep(InfoSecs);
@@ -1148,7 +1148,7 @@ PUBLIC int printfile ARGS1(
 				    "", "", "", "", "", "", "", "", "", "");
 #else /* Unix: */
 		    /*
-		     *  Prevent spoofing of the shell.
+		     *	Prevent spoofing of the shell.
 		     */
 		    cp = quote_pathname(filename);
 		    sprintf(buffer, cur_printer->command, tempfile, cp,
@@ -1221,7 +1221,7 @@ PUBLIC int printfile ARGS1(
 
 #ifdef VMS
 PRIVATE int remove_quotes ARGS1(
-	char *,		string)
+	char *, 	string)
 {
    int i;
 
@@ -1242,9 +1242,9 @@ PRIVATE int remove_quotes ARGS1(
  * so that the user can select printers in the same way that
  * they select all other links
  * printer links look like
- *  LYNXPRINT://LOCAL_FILE/lines=#  	     print to a local file
- *  LYNXPRINT://TO_SCREEN/lines=#   	     print to the screen
- *  LYNXPRINT://MAIL_FILE/lines=#   	     mail the file
+ *  LYNXPRINT://LOCAL_FILE/lines=#	     print to a local file
+ *  LYNXPRINT://TO_SCREEN/lines=#	     print to the screen
+ *  LYNXPRINT://MAIL_FILE/lines=#	     mail the file
  *  LYNXPRINT://PRINTER/lines=#/number=#   print to printer number #
  */
 PUBLIC int print_options ARGS2(

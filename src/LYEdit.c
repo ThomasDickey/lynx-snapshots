@@ -68,13 +68,13 @@ PUBLIC int edit_current_file ARGS3(
     if ((fp = fopen(filename, "r")) == NULL) {
 	FREE(filename);
 #endif /* !VMS */
-	    filename = HTParse(newfile,"",PARSE_PATH+PARSE_PUNCTUATION);
-	    HTUnEscape(filename);
+	filename = HTParse(newfile, "", PARSE_PATH+PARSE_PUNCTUATION);
+	HTUnEscape(filename);
 #ifdef DOSPATH
-		 if (strlen(filename)>1) filename++;
+	if (strlen(filename)>1) filename++;
 #endif
 #ifdef DOSPATH
-		 if ((fp = fopen(HTDOS_name(filename),"r")) == NULL) {
+	if ((fp = fopen(HTDOS_name(filename),"r")) == NULL) {
 #else
 #ifdef VMS
 	if ((fp = fopen(HTVMS_name("", filename), "r")) == NULL) {
@@ -92,11 +92,11 @@ PUBLIC int edit_current_file ARGS3(
     fclose(fp);
 
 #if defined(VMS) || defined(CANT_EDIT_UNWRITABLE_FILES)
-        /*
-	 * Don't allow editing if user lacks append access.
-	 */
+    /*
+     *  Don't allow editing if user lacks append access.
+     */
 #ifdef DOSPATH
-	if ((fp = fopen(HTDOS_name("",filename),"a")) == NULL) {
+    if ((fp = fopen(HTDOS_name("", filename), "a")) == NULL) {
 #else
 #ifdef VMS
     if ((fp = fopen(HTVMS_name("", filename), "a")) == NULL) {
@@ -139,13 +139,13 @@ PUBLIC int edit_current_file ARGS3(
 			 editor,
 			 (lineno + (nlinks ? links[cur].ly : 0)),
 #ifdef DOSPATH
-		HTDOS_name(filename));
+			 HTDOS_name(filename));
 #else
-                                                                filename);
+			 filename);
 #endif /* DOSPATH */
     else
 #ifdef __DJGPP__
-        sprintf(command, "%s %s", editor, HTDOS_name(filename));
+	sprintf(command, "%s %s", editor, HTDOS_name(filename));
 #else
 	sprintf(command, "%s \"%s\"", editor,
 #ifdef DOSPATH

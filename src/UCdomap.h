@@ -4,24 +4,21 @@
 
 /*
  *  [old comments: - KW ]
- * consolemap.h
+ *  consolemap.h
  *
- * Interface between console.c, selection.c  and UCmap.c
+ *  Interface between console.c, selection.c  and UCmap.c
  */
 #define LAT1_MAP 0
 #define GRAF_MAP 1
 #define IBMPC_MAP 2
 #define USER_MAP 3
 
-#ifndef MAXCHARSETS
-#define MAXCHARSETS
-#endif
-
-/* Some conventions i try to follow (loosely):
-   [a-z]* only internal, names from linux driver code.
-   UC_* to be only known internally.
-   UC[A-Z]* to be exported to other parts of Lynx. -kw
-*/
+/*
+ *  Some conventions I try to follow (loosely):
+ *	[a-z]* only internal, names from linux driver code.
+ *	UC_* to be only known internally.
+ *	UC[A-Z]* to be exported to other parts of Lynx. -KW
+ */
 extern void UC_Charset_Setup PARAMS((
 	CONST char *		UC_MIMEcharset,
 	CONST char *		UC_LYNXcharset,
@@ -33,7 +30,8 @@ extern void UC_Charset_Setup PARAMS((
 	int			UC_rawuni));
 
 char *UC_GNsetMIMEnames[4] =
-           {"iso-8859-1","x-dec-graphics","cp437","x-transparent"};
+	{"iso-8859-1", "x-dec-graphics", "cp437", "x-transparent"};
+
 int UC_GNhandles[4] = {-1, -1, -1, -1};
 
 struct UC_charset {

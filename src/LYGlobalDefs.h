@@ -282,11 +282,9 @@ extern BOOLEAN LYListNewsDates;
 extern BOOLEAN LYRawMode;
 extern BOOLEAN LYDefaultRawMode;
 extern BOOLEAN LYUseDefaultRawMode;
-#ifdef EXP_CHARTRANS
 extern char *UCAssume_MIMEcharset;
 extern char *UCAssume_localMIMEcharset;
 extern char *UCAssume_unrecMIMEcharset;
-#endif /* EXP_CHARTRANS */
 extern BOOLEAN LYisConfiguredForX;
 extern char *URLDomainPrefixes;
 extern char *URLDomainSuffixes;

@@ -6,6 +6,8 @@
 #include "UCMap.h"
 #endif /* !UCMAP_H */
 
+extern BOOLEAN LYHaveCJKCharacterSet;
+
 /*
  *  LYchar_set_name[current_char_set] points to the currently active set.
  */

@@ -7,7 +7,45 @@ platforms see also INSTALLATION, for some changes for auto-configure and
 simple curses color see also README.configure).  Note that the 2.7 -> 2.7.1
 changes are included here. - KW]
 
+1998-01-27
+* correct lynx.man to reference section "1" (one), not "l", since it is
+  not installed in the latter (reported by Jason Castonguay
+  <jcast@ntplx.net>) - TD
+* fix for VMS declarations of mainloop() and from_hex() (reported by FM) - TD
+* add to include-paths in libmake.com, build.com (reported by FM, citing
+  Brian Tillman) - TD
+* revert HTML.c to use LYHandleSELECT() - TD
+* align cases for function keys in LYStrings.c with 2.7.2 - TD
+* remove EXP_CHARTRANS ifdef's - TD
+* remove symbol USE_SIZECHANGEHACK
+* adjust formatting, comments & some messages in most remaining ./src files to
+  simplify comparison with 2.7.2 version.  - TD
+1998-01-25
+* Changed the utf-8 Display Character Set string to "UNICODE UTF-8"
+  (i.e., added the hyphen between UTF and 8), and fixed typos in
+  the comments about iso-8859-5. LP & FM
+* Modified HTML.c to add collapsible spaces before and after IMG ALT
+  strings or pseudo-ALTs whether or not the IMG element is within
+  Anchor content.  The occassional absence of such spaces due to poor
+  HTML was problematic for blind users.  Note that markup which uses
+  an image for a fancy letter with the ASCII letter as an ALT will
+  have that letter separated from the rest of the word.  Also note
+  that these spaces will not be collapsed in PRE blocks, but IMG is
+  invalid in PRE blocks.  The spaces could be omitted when IMG is
+  used invalidly in PRE blocks, but that would revive the problem
+  for blind users that they might not be present at all, so it seems
+  better to suffer extra spaces in such cases. - FM 
+1998-01-24
+* Tweak in HTAccess.c to reset the title element in anchors on forced
+  reloads. - FM
 1998-01-22
+* Tweaks in HTML.c to prevent collapsing of blank lines within TEXTAREA
+  default values.  Note that we still strip any leading or trailing
+  blank lines (reported by Edward S. Marshall <emarshal@xnet.com>). - FM
+* Tweaks of LYCurses.c, LYMain.c, LYOptions.c, LYReadCFG.c, LYUtils.c
+  and LYAuto.c to ensure properly setting, with internal buffering, and
+  avoid memory leaks for the display and homedir values (reported by
+  pg@sweng.stortek.com). - FM
 * include userdefs.h in LYCurses.h to address redefinition warnings for
   curses-related configuration. - TD
 * adjust formatting, comments & some messages in recently-modified files to
@@ -64,7 +102,7 @@ from the lynx code.  I think the following patch does this.
 1998-01-06
 * work around for 'keypad()' function w/o corresponding key defines
   (reported by Francisco A. Tomei Torres for NeXTstep 4.0). - TD
-* quote message in install rule, just in case (from HEN). - TD
+* quote message in install rule, just in case (from HN). - TD
 * correct expression to supply default value of .cfg file's pathname
   (reported by LE & Ambrose Li <acli@acli.interlog.com>). - TD
 * correct dependency of .cfg files upon $(libdir) in makefile.in - TD
@@ -89,7 +127,7 @@ from the lynx code.  I think the following patch does this.
   Doug Kaufman). - TD
 * add LYNX_LSS_FILE to config.hin, reported by Ambrose Li
   <acli@acli.interlog.com>. - TD
-* new copy of INSTALLATION file from HEN. - TD
+* new copy of INSTALLATION file from HN. - TD
 * add COPY* to install rule. - TD
 * simplify includes in UCdomap.c by using include-path in makefiles. - TD
 * build configure script with patched autoconf to workaround limited
@@ -128,7 +166,7 @@ from the lynx code.  I think the following patch does this.
 * add start_color() call to DOSPATH version of start_curses() to
   fix problem reported by Doug Kaufman - TD
 * correct typo in ColorCode() function (reported by Doug Kaufman) - TD
-* modify comments in makefile.in (patch by HEN) - TD
+* modify comments in makefile.in (patch by HN) - TD
 * minor fixes for CF_CHECK_ERRNO, CF_SIZECHANGE, CF_SLANG_CPPFLAGS
   macros. - TD
 * add configure option --enable-nsl-fork to turn on code defined by
@@ -398,7 +436,7 @@ from the lynx code.  I think the following patch does this.
   still a dead key under other circumstances in the line editor. - FM
 * remove options --with-lss-file and --with-cfg-file, since the corresponding
   files will always be installed under $(libdir), reported by Henry Eric
-  Nelson (HEN).  - TD
+  Nelson (HN).  - TD
 * modify configure script and makefile templates to permit builds with the
   --srcdir option, noted by Philippe De Muyter. - TD
 1997-11-08
@@ -1609,7 +1647,7 @@ from the lynx code.  I think the following patch does this.
   cases. - FM
 * Modified HTNews.c to use HTmmdecode() and HTrjis() for the Subject and
   Author strings in listings of news articles when using a Japanese display
-  character set. - HEN
+  character set. - HN
 1997-07-09
 * Massive updating and revamping of the cookie support in accordance with
   http://www.ics.uci.edu/pub/ietf/http/draft-ietf-http-state-man-mec-02.txt

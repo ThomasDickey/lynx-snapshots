@@ -132,22 +132,18 @@ struct _tag{
 **
 **  Not the whole DTD, but all this parser uses of it.
 */
-#ifdef EXP_CHARTRANS
 typedef struct {
     char* name;
     long code;
 } UC_entity_info;
-#endif
 
 typedef struct {
     HTTag *             tags;           /* Must be in strcmp order by name */
     int                 number_of_tags;
     CONST char **       entity_names;   /* Must be in strcmp order by name */
     int                 number_of_entities;
-#ifdef EXP_CHARTRANS
     CONST UC_entity_info * extra_entity_info; /* strcmp order by name */
     int                 number_of_extra_entities;
-#endif
 } SGML_dtd;
 
 
