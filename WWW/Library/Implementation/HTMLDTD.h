@@ -40,7 +40,7 @@ Element Numbers
    These include tables in HTMLDTD.c and code in HTML.c.
 
  */
-typedef enum _HTMLElement {
+typedef enum {
 	HTML_A,
 	HTML_ABBREV,
 	HTML_ACRONYM,
@@ -168,10 +168,11 @@ typedef enum _HTMLElement {
 
 /* HTML_ELEMENTS:     number of elements visible to Lynx code in general,
                       alphabetic (ASCII) order. */
+#define HTML_ELEMENTS 118
+
 /* HTML_ALL_ELEMENTS: number of elements visible to SGML parser,
                       additional variant(s) at end. */
 #define HTML_ALL_ELEMENTS 119
-#define HTML_ELEMENTS 118
 
 
 /*

@@ -26,6 +26,11 @@ typedef struct {
 
 
 /*
+ * Initialize a chunk's allocation data and allocation-increment.
+ */
+extern void HTChunkInit PARAMS((HTChunk * ch, int grow));
+
+/*
  *
  * Create new chunk
  *

@@ -120,6 +120,51 @@ struct _HTElement {
 	HTTag*		tag;	/* The tag at this level  */
 };
 
+typedef enum {
+    S_text = 0
+    ,S_attr
+    ,S_attr_gap
+    ,S_comment
+    ,S_cro
+    ,S_doctype
+    ,S_dollar
+    ,S_dollar_dq
+    ,S_dollar_paren
+    ,S_dollar_paren_dq
+    ,S_dollar_paren_sq
+    ,S_dollar_sq
+    ,S_dquoted
+    ,S_end
+    ,S_entity
+    ,S_equals
+    ,S_ero
+    ,S_esc
+    ,S_esc_dq
+    ,S_esc_sq
+    ,S_exclamation
+    ,S_in_kanji
+    ,S_incro
+    ,S_junk_pi
+    ,S_junk_tag
+    ,S_litteral
+    ,S_marked
+    ,S_nonascii_text
+    ,S_nonascii_text_dq
+    ,S_nonascii_text_sq
+    ,S_paren
+    ,S_paren_dq
+    ,S_paren_sq
+    ,S_pcdata
+    ,S_script
+    ,S_sgmlatt
+    ,S_sgmlele
+    ,S_sgmlent
+    ,S_squoted
+    ,S_tag
+    ,S_tag_gap
+    ,S_tagname_slash
+    ,S_value
+} sgml_state;
 
 /*	Internal Context Data Structure
 **	-------------------------------
@@ -140,19 +185,7 @@ struct _HTStream {
     int				current_attribute_number;
     HTChunk			*string;
     HTElement			*element_stack;
-    enum sgml_state { S_text, S_tagname_slash, S_pcdata, S_litteral,
-		S_tag, S_tag_gap, S_attr, S_attr_gap, S_equals, S_value,
-		S_ero, S_cro, S_incro,
-		S_exclamation, S_comment, S_doctype, S_marked,
-		S_sgmlent, S_sgmlele, S_sgmlatt,
-		S_squoted, S_dquoted, S_end, S_entity,
-		S_esc,	  S_dollar,    S_paren,	   S_nonascii_text,
-		S_dollar_paren,
-		S_esc_sq, S_dollar_sq, S_paren_sq, S_nonascii_text_sq,
-		S_dollar_paren_sq,
-		S_esc_dq, S_dollar_dq, S_paren_dq, S_nonascii_text_dq,
-		S_dollar_paren_dq,
-		S_in_kanji, S_junk_tag, S_junk_pi} state;
+    sgml_state			state;
     unsigned char kanji_buf;
 #ifdef CALLERDATA
     void *			callerData;
@@ -194,6 +227,59 @@ struct _HTStream {
     BOOL			seen_nonwhite_in_junk_tag;
 #endif
 };
+
+#ifndef NO_LYNX_TRACE
+PRIVATE char *state_name ARGS1(sgml_state, n)
+{
+    char *result = "?";
+    switch (n) {
+    case S_attr:                result = "S_attr";              break;
+    case S_attr_gap:            result = "S_attr_gap";          break;
+    case S_comment:             result = "S_comment";           break;
+    case S_cro:                 result = "S_cro";               break;
+    case S_doctype:             result = "S_doctype";           break;
+    case S_dollar:              result = "S_dollar";            break;
+    case S_dollar_dq:           result = "S_dollar_dq";         break;
+    case S_dollar_paren:        result = "S_dollar_paren";      break;
+    case S_dollar_paren_dq:     result = "S_dollar_paren_dq";   break;
+    case S_dollar_paren_sq:     result = "S_dollar_paren_sq";   break;
+    case S_dollar_sq:           result = "S_dollar_sq";         break;
+    case S_dquoted:             result = "S_dquoted";           break;
+    case S_end:                 result = "S_end";               break;
+    case S_entity:              result = "S_entity";            break;
+    case S_equals:              result = "S_equals";            break;
+    case S_ero:                 result = "S_ero";               break;
+    case S_esc:                 result = "S_esc";               break;
+    case S_esc_dq:              result = "S_esc_dq";            break;
+    case S_esc_sq:              result = "S_esc_sq";            break;
+    case S_exclamation:         result = "S_exclamation";       break;
+    case S_in_kanji:            result = "S_in_kanji";          break;
+    case S_incro:               result = "S_incro";             break;
+    case S_junk_pi:             result = "S_junk_pi";           break;
+    case S_junk_tag:            result = "S_junk_tag";          break;
+    case S_litteral:            result = "S_litteral";          break;
+    case S_marked:              result = "S_marked";            break;
+    case S_nonascii_text:       result = "S_nonascii_text";     break;
+    case S_nonascii_text_dq:    result = "S_nonascii_text_dq";  break;
+    case S_nonascii_text_sq:    result = "S_nonascii_text_sq";  break;
+    case S_paren:               result = "S_paren";             break;
+    case S_paren_dq:            result = "S_paren_dq";          break;
+    case S_paren_sq:            result = "S_paren_sq";          break;
+    case S_pcdata:              result = "S_pcdata";            break;
+    case S_script:              result = "S_script";            break;
+    case S_sgmlatt:             result = "S_sgmlatt";           break;
+    case S_sgmlele:             result = "S_sgmlele";           break;
+    case S_sgmlent:             result = "S_sgmlent";           break;
+    case S_squoted:             result = "S_squoted";           break;
+    case S_tag:                 result = "S_tag";               break;
+    case S_tag_gap:             result = "S_tag_gap";           break;
+    case S_tagname_slash:       result = "S_tagname_slash";     break;
+    case S_text:                result = "S_text";              break;
+    case S_value:               result = "S_value";             break;
+    }
+    return result;
+}
+#endif
 
 #ifdef USE_PRETTYSRC
 
@@ -1073,6 +1159,7 @@ PRIVATE void end_element ARGS2(
 	}
 
 	e = NORMAL_TAGNUM(TAGNUM_OF_TAGP(t));
+	CTRACE2(TRACE_SGML, (tfp, "tagnum(%p) = %d\n", t, e));
 #ifdef USE_PRETTYSRC
 	if (!psrc_view) /* Don't actually pass call on if viewing psrc - kw */
 #endif
@@ -1716,6 +1803,10 @@ top1:
     /*
     **	Handle character based on context->state.
     */
+    CTRACE2(TRACE_SGML, (tfp, "SGML before %s|%.*s|%c\n",
+	    state_name(context->state),
+	    string->size,
+	    string->data != NULL ? string->data : "", UCH(c)));
     switch(context->state) {
 
     case S_in_kanji:
@@ -1777,8 +1868,10 @@ top1:
 		testtag = context->current_tag;
 	    } else
 #endif
+	    {
 		testtag = context->element_stack ?
 		     context->element_stack->tag : NULL;
+	    }
 	}
 
 	if (c == '&' && TOASCII(unsign_c) < 127	 &&  /* S/390 -- gil -- 0898 */
@@ -1800,13 +1893,16 @@ top1:
 	    **	Setting up for possible tag. - FM
 	    */
 	    string->size = 0;
-	    if (testtag && testtag->contents == SGML_PCDATA)
+	    if (testtag && testtag->contents == SGML_PCDATA) {
 		context->state = S_pcdata;
-	    else if (testtag && (testtag->contents == SGML_LITTERAL ||
-				 testtag->contents == SGML_CDATA))
+	    } else if (testtag && (testtag->contents == SGML_LITTERAL
+	    			|| testtag->contents == SGML_CDATA)) {
 		context->state = S_litteral;
-	    else
+	    } else if (testtag && (testtag->contents == SGML_SCRIPT)) {
+		context->state = S_script;
+	    } else {
 		context->state = S_tag;
+	    }
 	    context->slashedtag = NULL;
 	} else if (context->slashedtag &&
 		   (c == '/' ||
@@ -2099,12 +2195,36 @@ top1:
 		break;
 	    }
 	}
-	/* Fall through to S_litteral - kw */
+	goto case_S_litteral;
+
+    /*
+    **  Found '<' in SGML_SCRIPT content; treat this mode nearly like
+    **  S_litteral, but recognize '<!' to allow the content to be treated
+    **  as a comment by lynx.
+    */
+    case S_script:
+	if (!string->size && TOASCII(unsign_c) < 127) { /* first after '<' */
+	    if (c == '!') { /* <! */
+		/*
+		**	Terminate and set up for possible comment,
+		**	identifier, declaration, or marked section
+		**  as under S_tag. - kw
+		*/
+		context->state = S_exclamation;
+		context->lead_exclamation = TRUE;
+		context->doctype_bracket = FALSE;
+		context->first_bracket = FALSE;
+		HTChunkPutc(string, c);
+		break;
+	    }
+	}
+	goto case_S_litteral;
 
     /*
     **	In litteral mode, waits only for specific end tag (for
     **	compatibility with old servers, and for Lynx). - FM
     */
+    case_S_litteral:
     case S_litteral: /*PSRC:this case not understood completely by HV, not done*/
 	HTChunkPutc(string, c);
 #ifdef USE_PRETTYSRC
@@ -3028,8 +3148,9 @@ top1:
 			PUTC(c);
 			PSRCSTOP(abracket);
 			context->state = (c == '>') ? S_text : S_tagname_slash;
-		    } else
+		    } else {
 			context->state = S_tag;
+		    }
 		} else {
 		    if (!WHITE(c))
 			PUTC(c);
@@ -3495,10 +3616,11 @@ top1:
 	if (c == '>') {		/* End of tag */
 #ifdef USE_PRETTYSRC
 	    if (psrc_view) {
-		if (context->current_attribute_number == INVALID)
+		if (context->current_attribute_number == INVALID) {
 		    PSRCSTOP(badattr);
-		else
+		} else {
 		    PSRCSTOP(attrib);
+		}
 		PSRCSTART(abracket);
 		PUTC('>');
 		PSRCSTOP(abracket);
@@ -3512,10 +3634,11 @@ top1:
 #ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		PUTC('=');
-		if (context->current_attribute_number == INVALID)
+		if (context->current_attribute_number == INVALID) {
 		    PSRCSTOP(badattr);
-		else
+		} else {
 		    PSRCSTOP(attrib);
+		}
 	    }
 #endif
 	    context->state = S_equals;
@@ -3526,14 +3649,6 @@ top1:
 	break;
 
     case S_equals:		/* After attr = */
-	if (WHITE(c)) {
-	    CTRACE((tfp, "SGML: found = but no value\n"));
-	    HTChunkTerminate(string) ;
-	    handle_attribute_value(context, string->data);
-	    string->size = 0;
-	    PUTC(c);
-	    break;		/* Before attribute value */
-	}
 	if (c == '>') {		/* End of tag */
 	    CTRACE((tfp, "SGML: found = but no value\n"));
 #ifdef USE_PRETTYSRC
@@ -3573,7 +3688,7 @@ top1:
 	    PSRCSTART(attrval);
 #endif
 	context->state = S_value;
-	/*  no break!  fall through to S_value and proccess current `c`	 */
+	/*  no break!  fall through to S_value and process current `c`	 */
 
     case S_value:
 	if (WHITE(c) || (c == '>')) {		/* End of word */
@@ -4213,6 +4328,10 @@ top1:
 #endif
 
     } /* switch on context->state */
+    CTRACE2(TRACE_SGML, (tfp, "SGML after  %s|%.*s|%c\n",
+	    state_name(context->state),
+	    string->size,
+	    string->data != NULL ? string->data : "", UCH(c)));
 
 after_switch:
     /*

@@ -1,5 +1,5 @@
 dnl Macros for auto-configure script.
-dnl by T.E.Dickey <dickey@clark.net>
+dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
@@ -8,7 +8,7 @@ dnl Updated: 2001/4/15
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf, patched
 dnl by Tom Dickey.  See your local GNU archives, and this URL:
-dnl http://www.clark.net/pub/dickey/autoconf/autoconf.html
+dnl http://invisible-island.net/autoconf/autoconf.html
 dnl
 dnl ---------------------------------------------------------------------------
 dnl ---------------------------------------------------------------------------

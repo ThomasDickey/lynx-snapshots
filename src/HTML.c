@@ -754,7 +754,7 @@ PRIVATE void LYStartArea ARGS5(
 	int,			tag_charset)
 {
     BOOL		new_present[HTML_AREA_ATTRIBUTES];
-    CONST char *		new_value[HTML_AREA_ATTRIBUTES];
+    CONST char *	new_value[HTML_AREA_ATTRIBUTES];
     int i;
 
     for (i = 0; i < HTML_AREA_ATTRIBUTES; i++)
@@ -946,20 +946,20 @@ PRIVATE int HTML_start_element ARGS6(
 	    char buf[200];
 	    CONST char* p;
 	    if (psrc_first_tag) {
-		psrc_first_tag=FALSE;
+		psrc_first_tag = FALSE;
 		/* perform the special actions on the begining of the document.
 		   It's assumed that all lynx modules start generating html
 		   from tag (ie not a text) so we are able to trap this moment
 		   and initialize.
 		*/
-		psrc_nested_call=TRUE;
-		HTML_start_element(me,HTML_BODY, NULL,NULL,tag_charset,NULL);
-		HTML_start_element(me,HTML_PRE, NULL,NULL,tag_charset,NULL);
+		psrc_nested_call = TRUE;
+		HTML_start_element(me, HTML_BODY, NULL, NULL, tag_charset, NULL);
+		HTML_start_element(me, HTML_PRE, NULL, NULL, tag_charset, NULL);
 		PSRCSTART(entire);
-		psrc_nested_call=FALSE;
+		psrc_nested_call = FALSE;
 	    }
 
-	    psrc_nested_call=TRUE;
+	    psrc_nested_call = TRUE;
 	    /*write markup for tags and exit*/
 	    PSRCSTART(abracket); PUTC('<'); PSRCSTOP(abracket);
 	    PSRCSTART(tag);
@@ -1441,7 +1441,7 @@ PRIVATE int HTML_start_element ARGS6(
 #endif /* ! USE_COLOR_STYLE */
 
 		/*
-		 *  Ignore anything not registered in the the 28-Mar-95
+		 *  Ignore anything not registered in the 28-Mar-95
 		 *  IETF HTML 3.0 draft and W3C HTML 3.2 draft, or not
 		 *  appropriate for Lynx banner links in the expired
 		 *  Maloney and Quin relrev draft.  We'll make this more
@@ -1727,8 +1727,6 @@ PRIVATE int HTML_start_element ARGS6(
 	break;
 
     case HTML_NEXTID:
-	/* if (present && present[NEXTID_N] && value[NEXTID_N])
-		HText_setNextId(me->text, atoi(value[NEXTID_N])); */
 	break;
 
     case HTML_STYLE:
@@ -6004,9 +6002,10 @@ PRIVATE int HTML_start_element ARGS6(
 	    return HT_ERROR;
 	}
 
-	CTRACE((tfp,"HTML:begin_element[%d]: adding style to stack - %s\n",
-							(int) STACKLEVEL(me),
-							NONNULL(me->new_style->name)));
+	CTRACE((tfp, "HTML:begin_element[%d]: adding style to stack - %s (%s)\n",
+		     (int) STACKLEVEL(me),
+		     NONNULL(me->new_style->name),
+		     HTML_dtd.tags[ElementNumber].name));
 	(me->sp)--;
 	me->sp[0].style = me->new_style;	/* Stack new style */
 	me->sp[0].tag_number = ElementNumber;
@@ -8116,15 +8115,9 @@ PUBLIC HTStructured* HTML_new ARGS3(
     me->base_href = NULL;
     me->map_address = NULL;
 
-    me->title.size = 0;
-    me->title.growby = 128;
-    me->title.allocated = 0;
-    me->title.data = NULL;
+    HTChunkInit(&me->title, 128);
 
-    me->object.size = 0;
-    me->object.growby = 128;
-    me->object.allocated = 0;
-    me->object.data = NULL;
+    HTChunkInit(&me->object, 128);
     me->object_started = FALSE;
     me->object_declare = FALSE;
     me->object_shapes = FALSE;
@@ -8139,19 +8132,13 @@ PUBLIC HTStructured* HTML_new ARGS3(
     me->object_usemap = NULL;
     me->object_name = NULL;
 
-    me->option.size = 0;
-    me->option.growby = 128;
-    me->option.allocated = 0;
-    me->option.data = NULL;
+    HTChunkInit(&me->option, 128);
     me->first_option = TRUE;
     me->LastOptionValue = NULL;
     me->LastOptionChecked = FALSE;
     me->select_disabled = FALSE;
 
-    me->textarea.size = 0;
-    me->textarea.growby = 128;
-    me->textarea.allocated = 0;
-    me->textarea.data = NULL;
+    HTChunkInit(&me->textarea, 128);
     me->textarea_name = NULL;
     me->textarea_name_cs = -1;
     me->textarea_accept_cs = NULL;
@@ -8160,20 +8147,11 @@ PUBLIC HTStructured* HTML_new ARGS3(
     me->textarea_disabled = NO;
     me->textarea_id = NULL;
 
-    me->math.size = 0;
-    me->math.growby = 128;
-    me->math.allocated = 0;
-    me->math.data = NULL;
+    HTChunkInit(&me->math, 128);
 
-    me->style_block.size = 0;
-    me->style_block.growby = 128;
-    me->style_block.allocated = 0;
-    me->style_block.data = NULL;
+    HTChunkInit(&me->style_block, 128);
 
-    me->script.size = 0;
-    me->script.growby = 128;
-    me->script.allocated = 0;
-    me->script.data = NULL;
+    HTChunkInit(&me->script, 128);
 
     me->text = 0;
     me->style_change = YES;	/* Force check leading to text creation */

@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl written jan/1997
-dnl by T.E.Dickey <dickey@clark.net>
+dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 
 AC_PREREQ(2.12.971222)

@@ -84,6 +84,13 @@ enum ended_state {
 	ROW_ended_by_splitline
 };
 
+#define HAS_END_OF_CELL			1
+#define HAS_BEG_OF_CELL			2
+#define IS_CONTINUATION_OF_CELL		4
+#define OFFSET_IS_VALID			8
+#define OFFSET_IS_VALID_LAST_CELL	0x10
+#define BELIEVE_OFFSET			0x20
+
 typedef struct _STable_rowinfo {
     /* Each row may be displayed on many display lines, but we fix up
        positions of cells on this display line only: */
@@ -113,7 +120,9 @@ typedef struct _STable_rowinfo {
        reset to the line of icell_core.
      */
 	BOOL	fixed_line;	/* if we have a 'core' line of cells */
-	BOOL	ended;		/* if we saw </tr> */
+	enum ended_state ended;	/* if we saw </tr> etc */
+	int	content;	/* Whether contains end-of-cell etc */
+	int	offset;		/* >=0 after line break in a multiline cell */
 	int	allocated;	/* number of table cells allocated */
 	STable_cellinfo * cells;
 	int	alignment;	/* global align attribute for this row */
@@ -970,6 +979,8 @@ PRIVATE int Stbl_reserveCellsInTable ARGS4(
 	for (i = 0; i < growby; i++) {
 	    row = rows + me->allocated_rows + i;
 	    row->allocated = 0;
+	    row->offset = 0;
+	    row->content = 0;
 	    if (!me->rowspans2eog.allocated) {
 		row->cells = NULL;
 	    } else {
@@ -1078,6 +1089,8 @@ PUBLIC int Stbl_addRowToTable ARGS3(
 		    row->ncells = 0;
 		    row->fixed_line = NO;
 		    row->alignment = HT_ALIGN_NONE;
+		    row->offset = 0;
+		    row->content = 0;
 		}
 	    }
 	    if (rows) {
@@ -1268,7 +1281,7 @@ PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
 	   are needed. */
 	if (finishing) {
 	    /* Fake </TD> at BOL */
-	    if (Stbl_finishCellInTable(me, end_td, lineno, 0) < 0) {
+	    if (Stbl_finishCellInTable(me, end_td, lineno, 0, 0) < 0) {
 		return -1;
 	    }
 	}
@@ -1281,6 +1294,7 @@ PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
 	    return -1;
 	}
 	lastrow = me->rows + (me->nrows - 1);
+	lastrow->content = IS_CONTINUATION_OF_CELL;
 	for (i = 0; i < lastrow->allocated; i++) {
 	    if (lastrow->cells[i].alignment == RESERVEDCELL) {
 		need_reserved = 1;
@@ -1355,9 +1369,10 @@ PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
 	while (++i <= ncells) {
 	    /* XXXX A lot of args may be wrong... */
 	    if (Stbl_addCellToTable(me, (i==ncells ? cs : 1), rs, al,
-				    ih, lineno, 0) < 0) {
+				    ih, lineno, 0, 0) < 0) {
 		return -1;
 	    }
+	    lastrow->content &= ~HAS_BEG_OF_CELL; /* BEG_OF_CELL was fake */
 	    /* We cannot run out of width here, so it is safe to not
 	       call Stbl_finishCellInTable(), but Stbl_finishCellInRow. */
 	    if (!finishing || (i != ncells)) {
@@ -1378,13 +1393,14 @@ PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
 /*
  * Returns -1 on error, otherwise 0.
  */
-PUBLIC int Stbl_addCellToTable ARGS7(
+PUBLIC int Stbl_addCellToTable ARGS8(
     STable_info *,	me,
     int,		colspan,
     int,		rowspan,
     int,		alignment,
     int,		isheader,
     int,		lineno,
+    int,		offset_not_used_yet GCC_UNUSED,
     int,		pos)
 {
     STable_states * s = &me->s;
@@ -1398,9 +1414,9 @@ PUBLIC int Stbl_addCellToTable ARGS7(
     if (!me->rows || !me->nrows)
 	return -1;		/* no row started! */
 				/* ##850_fail_if_fail?? */
-    if (me->rows[me->nrows - 1].ended)
+    if (me->rows[me->nrows - 1].ended != ROW_not_ended)
 	Stbl_addRowToTable(me, alignment, lineno);
-    Stbl_finishCellInTable(me, TRST_ENDCELL_ENDTD, lineno, pos);
+    Stbl_finishCellInTable(me, TRST_ENDCELL_ENDTD, lineno, 0, pos);
     lastrow = me->rows + (me->nrows - 1);
 
 #ifdef EXP_NESTED_TABLES
@@ -1436,6 +1452,7 @@ PUBLIC int Stbl_addCellToTable ARGS7(
 	/* me->rows may now have been realloc'd, make lastrow valid pointer */
 	lastrow = me->rows + (me->nrows - 1);
     }
+    lastrow->content |= HAS_BEG_OF_CELL;
 
     {
 	int growby = 0;
@@ -1486,10 +1503,11 @@ PUBLIC int Stbl_addCellToTable ARGS7(
 /*
  * Returns -1 on error, otherwise 0.
  */
-PUBLIC int Stbl_finishCellInTable ARGS4(
+PUBLIC int Stbl_finishCellInTable ARGS5(
     STable_info *,	me,
     int,		end_td,
     int,		lineno,
+    int,		offset,
     int,		pos)
 {
     STable_states * s = &me->s;
@@ -1498,15 +1516,15 @@ PUBLIC int Stbl_finishCellInTable ARGS4(
     int i;
 
     CTRACE2(TRACE_TRST,
-	    (tfp, "TRST:Stbl_finishCellInTable(lineno=%d, pos=%d, end_td=%d)\n",
-		  lineno, pos, (int)end_td));
+	    (tfp, "TRST:Stbl_finishCellInTable(lineno=%d, pos=%d, off=%d, end_td=%d)\n",
+		  lineno, pos, offset, (int)end_td));
     if (me->nrows == 0)
 	return -1;
     lastrow = me->rows + (me->nrows - 1);
     icell = lastrow->ncells - 1;
     if (icell < 0)
 	return icell;
-    if (s->x_td == -1) {	/* Stray </TD> or safety-call */
+    if (s->x_td == -1) {	/* Stray </TD> or just-in-case, as on </TR> */
 	if ((end_td & TRST_ENDCELL_MASK) == TRST_ENDCELL_LINEBREAK)
 	    lastrow->ended = ROW_ended_by_splitline;
 	return 0;
@@ -1570,8 +1588,12 @@ PUBLIC int Stbl_finishCellInTable ARGS4(
 	me->maxpos = me->sumcols[me->allocated_sumcols-1].pos;
     }
 
-    if ((end_td & TRST_ENDCELL_MASK) == TRST_ENDCELL_LINEBREAK)
+    if ((end_td & TRST_ENDCELL_MASK) == TRST_ENDCELL_LINEBREAK) {
 	lastrow->ended = ROW_ended_by_splitline;
+	lastrow->content |= BELIEVE_OFFSET;
+	lastrow->offset = offset;
+    }
+
 #ifdef EXP_NESTED_TABLES /* maxlen may already include contribution of a cell in this column */
     if (nested_tables) {
 	if (me->maxlen > MAX_STBL_POS)
@@ -1705,6 +1727,99 @@ PUBLIC int Stbl_finishTABLE ARGS1(
 	s->pending_len = 0;
     }
     Stbl_finishRowInTable(me);
+    /* take into account offsets on multi-line cells.
+       XXX We cannot do it honestly, since two cells on the same row may
+       participate in multi-line table entries, and we preserve only
+       one offset per row.  This implementation may ignore
+       horizontal offsets for the last row of a multirow table entry.  */
+    for (i = 0; i < me->nrows - 1; i++) {
+	int j = i + 1, leading = i, non_empty = 0;
+	STable_rowinfo *nextrow = me->rows + j;
+	int minoffset, have_offsets;
+	int foundcell = -1, max_width;
+
+	if ((nextrow->content & (IS_CONTINUATION_OF_CELL | HAS_BEG_OF_CELL | BELIEVE_OFFSET))
+	    != (IS_CONTINUATION_OF_CELL | BELIEVE_OFFSET))
+	    continue;			/* Not a continuation line */
+	minoffset = nextrow[-1].offset;	/* Line before first continuation */
+	CTRACE2(TRACE_TRST, (tfp, "TRST:Stbl_finishTABLE, l=%d, offset=%d, ended=%d.\n",
+			     i, nextrow[-1].offset, nextrow[-1].ended));
+
+	/* Find the common part of the requested offsets */
+	while (j < me->nrows
+	       && ((nextrow->content & (IS_CONTINUATION_OF_CELL | HAS_BEG_OF_CELL | BELIEVE_OFFSET))
+		   == (IS_CONTINUATION_OF_CELL | BELIEVE_OFFSET))) {
+	    if (minoffset > nextrow->offset)
+		minoffset = nextrow->offset;
+	    CTRACE2(TRACE_TRST, (tfp, "TRST:Stbl_finishTABLE, l=%d, offset=%d, ended=%d.\n",
+				 j, nextrow->offset, nextrow[-1].ended));
+	    nextrow++;
+	    j++;
+	}
+	i = j - 1;			/* Continue after this line */
+	/* Cancel the common part of offsets */
+	j = leading;			/* Restart */
+	nextrow = me->rows + j;		/* Line before first continuation */
+	have_offsets = 0;
+	nextrow->content |= OFFSET_IS_VALID_LAST_CELL;
+	while (j <= i) {		/* A continuation line */
+	    nextrow->offset -= minoffset;
+	    nextrow->content |= OFFSET_IS_VALID;
+	    if (nextrow->offset)
+		have_offsets = 1;
+	    nextrow++;
+	    j++;
+	}
+	if (!have_offsets)
+	    continue;			/* No offsets to deal with */
+
+	/* Find the cell number */
+	foundcell = -1;
+	j = leading + 1;		/* Restart */
+	nextrow = me->rows + j;		/* First continuation line */
+	while (foundcell == -1 && j <= i) { /* A continuation line */
+	    int curcell = -1;
+
+	    while (foundcell == -1 && ++curcell < nextrow->ncells)
+		if (nextrow->cells[curcell].len)
+		    foundcell = curcell, non_empty = j;
+	    nextrow++;
+	    j++;
+	}
+	if (foundcell == -1)		/* Can it happen? */
+	    continue;
+	/* Find the max width */
+	max_width = 0;
+	j = leading;			/* Restart */
+	nextrow = me->rows + j;		/* Include the pre-continuation line */
+	while (j <= i) {		/* A continuation line */
+	    if (nextrow->ncells > foundcell) {
+		int curwid = nextrow->cells[foundcell].len + nextrow->offset;
+
+		if (curwid > max_width)
+		    max_width = curwid;
+	    }
+	    nextrow++;
+	    j++;
+	}
+	/* Update the widths */
+	j = non_empty;			/* Restart from the first nonempty */
+	nextrow = me->rows + j;
+	/* Register the increase of the width */
+	update_sumcols0(me->sumcols, me->rows + non_empty,
+			0 /* width only */, max_width,
+			foundcell, nextrow->cells[foundcell].colspan,
+			me->allocated_sumcols);
+	j = leading;			/* Restart from pre-continuation */
+	nextrow = me->rows + j;
+	while (j <= i) {		/* A continuation line */
+	    if (nextrow->ncells > foundcell)
+		nextrow->cells[foundcell].len = max_width;
+	    nextrow++;
+	    j++;
+	}
+    }					/* END of Offsets processing */
+
     for (i = 0; i < me->ncols; i++) {
 	if (me->sumcols[i].pos < curpos) {
 	    me->sumcols[i].pos = curpos;
@@ -1739,6 +1854,8 @@ PRIVATE int get_fixup_positions ARGS4(
     if (!me)
 	return -1;
     while (i < me->ncells) {
+	int offset;
+
 	next_i = i + HTMAX(1, me->cells[i].colspan);
 	if (me->cells[i].cLine != me->Line) {
 	    if (me->cells[i].cLine > me->Line)
@@ -1747,7 +1864,13 @@ PRIVATE int get_fixup_positions ARGS4(
 	    continue;
 	}
 	oldpos[ip] = me->cells[i].pos;
-	newpos[ip] = sumcols[i].pos;
+	if ((me->content & OFFSET_IS_VALID)
+	    && (i == me->ncells - 1
+		|| !((me->content & OFFSET_IS_VALID_LAST_CELL))))
+	    offset = me->offset;
+	else
+	    offset = 0;
+	newpos[ip] = sumcols[i].pos + offset;
 	if ((me->cells[i].alignment == HT_CENTER ||
 	     me->cells[i].alignment == HT_RIGHT) &&
 	    me->cells[i].len > 0) {
@@ -1829,7 +1952,7 @@ PUBLIC void Stbl_update_enclosing ARGS3(
 	    max_width, me->startline, last_lineno));
     for (l = me->startline; l <= last_lineno; l++) {
 	/* Fake <BR> in appropriate positions */
-	if (Stbl_finishCellInTable(me->enclosing, TRST_ENDCELL_LINEBREAK, l, max_width) < 0) {
+	if (Stbl_finishCellInTable(me->enclosing, TRST_ENDCELL_LINEBREAK, l, 0, max_width) < 0) {
 	    /* It is not handy to let the caller delete me->enclosing,
 	       and it does not buy us anything.	 Do it directly. */
 	    STable_info *stbl = me->enclosing;

@@ -168,6 +168,7 @@ PUBLIC BOOLEAN LYforce_no_cache = FALSE;
 PUBLIC BOOLEAN LYoverride_no_cache = FALSE;/*override no-cache b/c history etc*/
 PUBLIC BOOLEAN LYinternal_flag = FALSE; /* override no-cache b/c internal link*/
 PUBLIC BOOLEAN LYresubmit_posts = ALWAYS_RESUBMIT_POSTS;
+PUBLIC BOOLEAN LYtrimInputFields = FALSE;
 PUBLIC BOOLEAN LYUserSpecifiedURL = TRUE;/* always TRUE  the first time */
 PUBLIC BOOLEAN LYJumpFileURL = FALSE;	 /* always FALSE the first time */
 PUBLIC BOOLEAN jump_buffer = JUMPBUFFER; /* TRUE if offering default shortcut */
@@ -3197,6 +3198,10 @@ PRIVATE Config_Type Arg_Table [] =
       "cfg",		2|NEED_LYSTRING_ARG,	lynx_cfg_file,
       "=FILENAME\nspecifies a lynx.cfg file other than the default"
    ),
+   PARSE_FUN(
+      "child",		4|FUNCTION_ARG,		child_fun,
+      "exit on left-arrow in startfile, and disable save to disk"
+   ),
 #ifdef EXP_CMD_LOGGING
    PARSE_STR(
        "cmd_log",	2|NEED_LYSTRING_ARG,	lynx_cmd_logfile,
@@ -3207,10 +3212,6 @@ PRIVATE Config_Type Arg_Table [] =
        "=FILENAME\nread keystroke commands from the given file\n(see -cmd_log)"
    ),
 #endif
-   PARSE_FUN(
-      "child",		4|FUNCTION_ARG,		child_fun,
-      "exit on left-arrow in startfile, and disable save to disk"
-   ),
 #ifdef USE_SLANG
    PARSE_FUN(
       "color",		4|FUNCTION_ARG,		color_fun,
@@ -3254,6 +3255,12 @@ PRIVATE Config_Type Arg_Table [] =
       "with -traversal, output each page to a file\n\
 with -dump, format output as with -traversal, but to stdout"
    ),
+#ifdef USE_CURSES_PADS
+   PARSE_SET(
+      "curses_pads",	4|TOGGLE_ARG,		LYuseCursesPads,
+      "uses curses pad feature to support left/right shifting"
+   ),
+#endif
 #ifdef DISP_PARTIAL
    PARSE_SET(
       "debug_partial",	4|TOGGLE_ARG,		debug_display_partial,
@@ -3660,8 +3667,8 @@ treated '>' as a co-terminator for double-quotes and tags"
    ),
 #ifdef _WINDOWS
    PARSE_INT(
-      "timeout",	4|SET_ARG,		lynx_timeout,
-      "set TCP/IP timeout"
+      "timeout",	4|INT_ARG,		lynx_timeout,
+      "=NUMBER\nset TCP/IP timeout"
    ),
 #endif
    PARSE_SET(
@@ -3687,6 +3694,10 @@ treated '>' as a co-terminator for double-quotes and tags"
    PARSE_FUN(
       "traversal",	4|FUNCTION_ARG,		traversal_fun,
       "traverse all http links derived from startfile"
+   ),
+   PARSE_SET(
+      "trim_input_fields", 2|SET_ARG,		LYtrimInputFields,
+      "trim input text/textarea fields in forms"
    ),
    PARSE_SET(
       "underscore",	4|TOGGLE_ARG,		use_underscore,

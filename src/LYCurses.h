@@ -316,6 +316,7 @@ extern WINDOW *LYwin;
 extern int LYshiftWin;
 extern int LYwideLines;
 extern int LYtableCols;
+extern BOOL LYuseCursesPads;
 #else
 #define LYwin stdscr
 #define LYshiftWin	0

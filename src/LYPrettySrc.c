@@ -77,8 +77,7 @@ PRIVATE int html_src_tag_index ARGS1(
     return (tag && tag != &HTTag_unrecognized ) ? tag - HTML_dtd.tags : -1;
 }
 
-typedef enum _html_src_check_state
-{
+typedef enum {
     HTSRC_CK_normal,
     HTSRC_CK_seen_excl,
     HTSRC_CK_after_tagname,

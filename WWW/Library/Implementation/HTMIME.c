@@ -32,7 +32,7 @@ extern BOOL HTPassEightBitRaw;
 **		-----------
 */
 
-typedef enum _MIME_state {
+typedef enum {
 	MIME_TRANSPARENT,	/* put straight through to target ASAP! */
 	miBEGINNING_OF_LINE,	/* first character and not a continuation */
 	miA,

@@ -158,6 +158,7 @@ extern BOOL HTLoadedDocumentEightbit NOPARAMS;
 extern void HText_setNodeAnchorBookmark PARAMS((CONST char *bookmark));
 extern char * HTLoadedDocumentBookmark NOPARAMS;
 extern int HText_LastLineSize PARAMS((HText *me, BOOL IgnoreSpaces));
+extern int HText_LastLineOffset PARAMS((HText *me));
 extern int HText_PreviousLineSize PARAMS((HText *me, BOOL IgnoreSpaces));
 extern void HText_NegateLineOne PARAMS((HText *text));
 extern BOOL HText_inLineOne PARAMS((HText *text));

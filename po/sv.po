@@ -1,13 +1,14 @@
 # Swedish translation for Lynx
-# Peter Karlsson <peter@softwolves.pp.se>, 2000.
+# Copyright © 2000, 2001 Free Software Foundation, Inc.
+# Peter Karlsson <peter@softwolves.pp.se>, 2000-2001.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.3.rel1\n"
+"Project-Id-Version: lynx 2.8.4.pre2\n"
 "POT-Creation-Date: 2001-06-01 18:55-0400\n"
-"PO-Revision-Date: 2000-09-30 17:38+0200\n"
+"PO-Revision-Date: 2001-06-25 21:00+0200\n"
 "Last-Translator: Peter Karlsson <peter@softwolves.pp.se>\n"
-"Language-Team: svenska <sv@li.org>\n"
+"Language-Team: Swedish <sv@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=iso-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1654,7 +1655,7 @@ msgstr "Kommando: "
 
 #: LYMessages.c:554
 msgid "Unknown or ambiguous command"
-msgstr ""
+msgstr "Okänt eller tvetydigt kommando"
 
 #: LYMessages.c:555
 msgid " Version "
@@ -2177,7 +2178,7 @@ msgstr ""
 #: LYMessages.c:697
 #, c-format
 msgid "%s cookie: %.*s=%.*s  Allow? (Y/N/Always/neVer)"
-msgstr "%s kaka: %.*=%.*s  Tillåta? (J/N/Alltid/V=aldrig)"
+msgstr "%s kaka: %.*s=%.*s  Tillåta? (J/N/Alltid/V=aldrig)"
 
 #. #define INVALID_COOKIE_DOMAIN_CONFIRMATION
 #: LYMessages.c:699
@@ -2671,7 +2672,7 @@ msgstr "senaste utgåva"
 
 #: LYMessages.c:835
 msgid "pre-release version"
-msgstr "utvecklingsversion"
+msgstr "förhandsversion"
 
 #: LYMessages.c:836
 msgid "development version"
@@ -2717,37 +2718,32 @@ msgstr "Externt stöd är just nu deaktiverat."
 
 #. new with 2.8.4dev.21
 #: LYMessages.c:859
-#, fuzzy
 msgid "Changing working-directory is currently disabled."
-msgstr "Start av externa program tillåts ej just nu."
+msgstr "Byte av arbetskatalog tillåts ej just nu."
 
 #: LYMessages.c:860
-#, fuzzy
 msgid "Linewrap OFF!"
-msgstr "Spårning INAKTIV!"
+msgstr "Radbrytning AV!"
 
 #: LYMessages.c:861
 msgid "Linewrap ON!"
-msgstr ""
+msgstr "Radbrytning PÅ!"
 
 #: LYMessages.c:862
-#, fuzzy
 msgid "Parsing nested-tables toggled OFF!  Reloading..."
-msgstr "Rått 8-bitars- eller CJK-läge AV! Hämtar om..."
+msgstr "Tolkning av nästlade tabeller AV! Hämtar om..."
 
 #: LYMessages.c:863
-#, fuzzy
 msgid "Parsing nested-tables toggled ON!  Reloading..."
-msgstr "Rått 8-bitars- eller CJK-läge PÅ! Hämtar om..."
+msgstr "Tolkning av nästlade tabeller PÅ! Hämtar om..."
 
 #: LYMessages.c:864
 msgid "Shifting is disabled while line-wrap is in effect"
-msgstr ""
+msgstr "Skiftning är deaktiverad när radbrytning är aktiv"
 
 #: LYMessages.c:865
-#, fuzzy
 msgid "Trace not supported"
-msgstr "Terminalen stöder inte färg"
+msgstr "Spårning stöds ej"
 
 #: WWW/Library/Implementation/HTAABrow.c:648
 #, c-format
@@ -3032,7 +3028,7 @@ msgstr "Kopplar upp %s-anslutning till %s"
 #: WWW/Library/Implementation/HTTCP.c:1619
 #, c-format
 msgid "socket failed: family %d addr %s port %s."
-msgstr ""
+msgstr "uttag misslyckades: familj %d adress %s port %s."
 
 #: WWW/Library/Implementation/HTTCP.c:1628
 msgid "socket failed."
@@ -3167,7 +3163,7 @@ msgstr "Index "
 #: WWW/Library/Implementation/HTWAIS.c:467
 #, c-format
 msgid " contains the following %d item%s relevant to \""
-msgstr " innehåller följande %d poster relevanta för \""
+msgstr " innehåller följande %d%s poster relevanta för \""
 
 #: WWW/Library/Implementation/HTWAIS.c:475
 msgid "The first figure after each entry is its relative score, "
@@ -3405,14 +3401,13 @@ msgstr "okänt formulärfält"
 
 #. We can't open the file, what do we do?
 #: src/GridText.c:10348
-#, fuzzy
 msgid "Can't open file for uploading"
-msgstr "Kan inte öppna fil för läsning."
+msgstr "Kan inte öppna fil för sändning"
 
 #. We got an error reading the file, what do we do?
 #: src/GridText.c:10359
 msgid "Short read from file, problem?"
-msgstr ""
+msgstr "Filen tog slut tidigt, problem?"
 
 #: src/GridText.c:10721
 #, c-format
@@ -3422,7 +3417,7 @@ msgstr "Skickar %s"
 #. ugliness has happened; inform user and do the best we can
 #: src/GridText.c:11887
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
-msgstr ""
+msgstr "Hängning upptäckt: TextAnchor-struktur förstörd - föreslår avbrott!"
 
 #. don't show previous state
 #: src/GridText.c:12092
@@ -4131,7 +4126,7 @@ msgstr "Du MÅSTE ange ett giltigt TMP- eller TEMP-område!\n"
 
 #: src/LYMain.c:1156 src/LYMainLoop.c:5117
 msgid "No such directory"
-msgstr " katalog"
+msgstr "Katalogen finns ej"
 
 #: src/LYMain.c:1378
 #, c-format
@@ -4181,7 +4176,7 @@ msgstr "Varning:"
 
 #: src/LYMain.c:2247
 msgid "persistent cookies state will be changed in next session only."
-msgstr "persistenta kakinställningar ändras endast i nästa session."
+msgstr "varaktiga kakinställningar ändras endast i nästa session."
 
 #: src/LYMain.c:2477 src/LYMain.c:2525
 #, c-format
@@ -4231,7 +4226,7 @@ msgstr "%s: Okänd flagga: %s\n"
 #: src/LYMainLoop.c:512
 #, c-format
 msgid "Internal error: Invalid mouse link %d!"
-msgstr "Internt fel: Ogiltig muslänk %s!"
+msgstr "Internt fel: Ogiltig muslänk %d!"
 
 #.
 #. * Make a name for this new URL.
@@ -4261,7 +4256,7 @@ msgstr "Ingång till huvudskärm"
 
 #: src/LYMainLoop.c:3897
 msgid "No next document present"
-msgstr ""
+msgstr "Det finns inget nästa dokument"
 
 #: src/LYMainLoop.c:4206
 msgid "charset for this document specified explicitly, sorry..."
@@ -4269,15 +4264,15 @@ msgstr "teckenuppsättning för detta dokumentet explicit deklarerat, ursäkta..."
 
 #: src/LYMainLoop.c:5093
 msgid "cd to:"
-msgstr " till "
+msgstr "byt katalog till:"
 
 #: src/LYMainLoop.c:5120
 msgid "A component of path is not a directory"
-msgstr ""
+msgstr "En del av sökvägen är inte en katalog"
 
 #: src/LYMainLoop.c:5123
 msgid "failed to change directory"
-msgstr "Kan inte komma åt katalog."
+msgstr "lyckades inte byta katalog"
 
 #: src/LYMainLoop.c:6291
 msgid "Reparsing document under current settings..."
@@ -4431,13 +4426,12 @@ msgstr "VI-tangenter"
 #. well, at least 2 line edit styles available
 #: src/LYOptions.c:3266
 msgid "Line edit style"
-msgstr ""
+msgstr "Radredigeringsstil"
 
 #. Keyboard layout: SELECT
 #: src/LYOptions.c:3278
-#, fuzzy
 msgid "Keyboard layout"
-msgstr "Tangentbordsindata"
+msgstr "Tangentbordsmall"
 
 #.
 #. * Display and Character Set
@@ -4566,7 +4560,7 @@ msgstr "Exekveringslänkar"
 #. Local Directory Sort: SELECT
 #: src/LYOptions.c:3507
 msgid "Show transfer rate"
-msgstr "Dataöverföring färdig"
+msgstr "Visa överföringshastighet"
 
 #.
 #. * Special Files and Screens
@@ -4984,12 +4978,11 @@ msgstr "Oväntat åtkomstprotokoll för denna adresstyp."
 
 #: src/LYUtils.c:3915
 msgid "Too many tempfiles"
-msgstr ""
+msgstr "För många temporärfiler"
 
 #: src/LYUtils.c:4217
-#, fuzzy
 msgid "unknown restriction"
-msgstr "Inga begränsningar satta.\n"
+msgstr "okänd begränsning"
 
 #: src/LYUtils.c:4248
 msgid "No restrictions set.\n"
@@ -5071,7 +5064,7 @@ msgid ""
 "cookie_file specifies the file from which to read persistent cookies.\n"
 "The default is ~/.lynx_cookies.\n"
 msgstr ""
-"cookie_file anger filen som persistenta kakor skall läsas från.\n"
+"cookie_file anger filen som varaktiga kakor skall läsas från.\n"
 "Förval är ~/.lynx_cookies.\n"
 
 #: src/LYrcFile.c:279
@@ -5160,7 +5153,7 @@ msgid ""
 msgstr ""
 "lineedit_mode ange tangentbordsfunktioner som används för att skriva\n"
 "in strängar i frågor och formulär. Om lineedit_mode sätts till\n"
-"\"Default Bidning\" kommer följande kontrolltecken användas för att\n"
+"\"Default Binding\" kommer följande kontrolltecken användas för att\n"
 "flytta och ta bort:\n"
 "\n"
 "              Bakåt Framåt      Enter = Bekräfta indata\n"
@@ -5179,7 +5172,7 @@ msgid ""
 msgstr ""
 "Följande gör det möjligt för dig att definiera underbokmärkesfiler och\n"
 "tillhörande beskrivningar. Formatet är:\n"
-"multi_bookmark<stor bokstav>=<filnamn,<beskrivning>\n"
+"multi_bookmark<stor bokstav>=<filnamn>,<beskrivning>\n"
 "Upp till 26 bokmärkesfiler (de stora bokstäverna A-Z) tillåts.\n"
 "Vi börjar med \"multi_bookmarkB\" eftersom \"A\" är förvalet (se ovan).\n"
 
@@ -5260,7 +5253,7 @@ msgstr ""
 "VARNING - Detta kan vara MYCKET farligt. Eftersom du kan visa information\n"
 "          som skrivits av okända och otillförlitliga källor är det möjligt\n"
 "          att trojanska hästlänkar kan skrivas. Trojanska hästlänkar kan\n"
-"          skrivas å att de raderar filer eller komprometterar säkerheten.\n"
+"          skrivas så att de raderar filer eller komprometterar säkerheten.\n"
 "          Detta bör endast aktiveras (\"on\") om du visar information från\n"
 "          tillförlitliga källor.\n"
 

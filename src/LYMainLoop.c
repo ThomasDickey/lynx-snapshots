@@ -5233,6 +5233,9 @@ PRIVATE BOOLEAN handle_LYK_LINEWRAP_TOGGLE ARGS2(
     };
     int c;
 
+    if (LYwin == stdscr)
+	return FALSE;
+
     /* Somehow the mouse is over the number instead of being over the
        name, so we decrease x. */
     c = LYChoosePopup(!LYwideLines, LYlines /2 - 2, LYcols/2-6,

@@ -51,7 +51,7 @@ VC = 2.14
 # (originally CommonMakefile)
 
 #  If this env var is set to something else Some makes will use that instead
-SHELL = /bin/sh
+SHELL = @CONFIG_SHELL@
 
 RANLIB	= @RANLIB@
 

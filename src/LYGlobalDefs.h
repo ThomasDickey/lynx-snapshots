@@ -166,6 +166,7 @@ extern BOOLEAN LYforce_no_cache;
 extern BOOLEAN LYinternal_flag; /* don't need fresh copy, was internal link */
 extern BOOLEAN LYoverride_no_cache;  /* don't need fresh copy, from history */
 extern BOOLEAN LYresubmit_posts;
+extern BOOLEAN LYtrimInputFields;
 extern BOOLEAN bold_H1;
 extern BOOLEAN bold_headers;
 extern BOOLEAN bold_name_anchors;

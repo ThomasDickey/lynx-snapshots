@@ -4,9 +4,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.3\n"
+"Project-Id-Version: lynx 2.8.4.pre2\n"
 "POT-Creation-Date: 2001-06-01 18:55-0400\n"
-"PO-Revision-Date: 2000-10-26 19:40+02:00\n"
+"PO-Revision-Date: 2001-07-01 17:46+0200\n"
 "Last-Translator: Morten Bo Johansen <mojo@image.dk>\n"
 "Language-Team: Danish <dansk@klid.dk>\n"
 "MIME-Version: 1.0\n"
@@ -43,7 +43,7 @@ msgstr "Velkommen"
 
 #: LYMessages.c:31 LYMessages.c:32
 msgid "Are you sure you want to quit?"
-msgstr "Er du sikker på, at du vil afslutte?"
+msgstr "Er du sikker på du vil afslutte?"
 
 #: LYMessages.c:34 LYMessages.c:35
 msgid "Really exit from Lynx?"
@@ -71,7 +71,7 @@ msgstr "Glimrende!"
 
 #: LYMessages.c:42
 msgid "OK"
-msgstr "Ok"
+msgstr "O.k."
 
 #: LYMessages.c:43
 msgid "Done!"
@@ -141,7 +141,7 @@ msgstr "(Formularfelt) inaktivt. Tast <retur> for at aktivere."
 #: LYMessages.c:68
 #, c-format
 msgid "(Form field) Inactive.  Use <return> to edit (%s to submit with no cache)."
-msgstr "(Formularfelt> inaktivt. <retur> aktiverer (%s for at indsende uden cache)."
+msgstr "(Formularfelt> inaktivt. <retur> aktiverer (%s for at indsende udenom cache)."
 
 #. #define FORM_TEXT_RESUBMIT_MESSAGE_INA
 #: LYMessages.c:70
@@ -198,7 +198,7 @@ msgstr "(Formularfelt) indtast tekst. Tast <retur> for at indsende."
 #: LYMessages.c:91
 #, c-format
 msgid "(Form field) Enter text.  Use <return> to submit (%s for no cache)."
-msgstr "(Formularfelt) Anfør tekst. <retur> indsender (%s sender uden cache)"
+msgstr "(Formularfelt) Anfør tekst. <retur> indsender (%s sender udenom cache)"
 
 #. #define FORM_LINK_TEXT_RESUBMIT_MESSAGE
 #: LYMessages.c:93
@@ -253,7 +253,7 @@ msgstr "UKORRIGERBAR formular-radioknap. Brug pil OP/NED el. TAB for at komme væ
 #. #define FORM_LINK_SUBMIT_PREFIX
 #: LYMessages.c:113
 msgid "Submit ('x' for no cache) to "
-msgstr "Indsend ('x' sender uden cache) til "
+msgstr "Indsend ('x' sender udenom cache) til "
 
 #. #define FORM_LINK_RESUBMIT_PREFIX
 #: LYMessages.c:115
@@ -464,7 +464,7 @@ msgstr "     %s sletter tekst i feltet, [Backspace] sletter et tegn   "
 #. mailto
 #: LYMessages.c:186
 msgid "Malformed mailto form submission!  Cancelled!"
-msgstr "Formatteringsfejl i mailto-formular under afsendelse!  Afbryder!"
+msgstr "Formateringsfejl i mailto-formular under afsendelse!  Afbryder!"
 
 #: LYMessages.c:187
 msgid "Warning!  Control codes in mail address replaced by ?"
@@ -710,7 +710,7 @@ msgstr "Filhåndteringsfunktioner er sat ud af kraft!"
 
 #: LYMessages.c:270
 msgid "No jump file is currently available."
-msgstr "Ingen 'jump'-fil er tilgængelig i øjeblikket."
+msgstr "Ingen genvejsfil er tilgængelig i øjeblikket."
 
 #: LYMessages.c:271
 msgid "Jump to (use '?' for list): "
@@ -1077,7 +1077,7 @@ msgstr "Ikke nok hukommelse til læsning af genvejstabel!"
 
 #: LYMessages.c:383
 msgid "No index is currently available."
-msgstr "Ingen fortegnelse er tilgængelig for øjeblikket."
+msgstr "Ingen fortegnelse er tilgængelig i øjeblikket."
 
 #. #define CONFIRM_MAIN_SCREEN
 #: LYMessages.c:385
@@ -1426,7 +1426,7 @@ msgstr "Postsystemet er spærret!"
 #. #define ACCESS_ONLY_LOCALHOST
 #: LYMessages.c:484
 msgid "Only files and servers on the local host can be accessed."
-msgstr "Kun filer og tjenere på den lokale værtsmaskine kan tilgås."
+msgstr "Kun filer og servere på den lokale værtsmaskine kan tilgås."
 
 #: LYMessages.c:485
 msgid "Telnet access is disabled!"
@@ -1655,7 +1655,7 @@ msgstr "Kommando: "
 
 #: LYMessages.c:554
 msgid "Unknown or ambiguous command"
-msgstr ""
+msgstr "Ukendt eller tvetydig kommando"
 
 #: LYMessages.c:555
 msgid " Version "
@@ -1671,7 +1671,7 @@ msgstr ", gætter..."
 
 #: LYMessages.c:558
 msgid "Permissions for "
-msgstr "Tilladelser for "
+msgstr "Rettigheder for "
 
 #: LYMessages.c:559
 msgid "Select "
@@ -1837,13 +1837,13 @@ msgstr "Grænse for omdirigering på 10 url'er er nået."
 
 #: LYMessages.c:606
 msgid "Illegal redirection URL received from server!"
-msgstr "Tjener sendte ugyldig url til omdirigering!"
+msgstr "Server sendte ugyldig url til omdirigering!"
 
 #. #define SERVER_ASKED_FOR_REDIRECTION
 #: LYMessages.c:608
 #, c-format
 msgid "Server asked for %d redirection of POST content to"
-msgstr "Tjener spurgte efter %d omdirigering af 'POST'-indholdet til"
+msgstr "Server spurgte efter %d omdirigering af 'POST'-indholdet til"
 
 #: LYMessages.c:611
 msgid "P)roceed, use G)ET or C)ancel "
@@ -2031,7 +2031,7 @@ msgid ""
 "You are sending a message with body to:\n"
 "  "
 msgstr ""
-"Du sender en meddelelse med brødtekst til:\n"
+"Du sender en meddelelse med indhold til:\n"
 "  "
 
 #: LYMessages.c:670
@@ -2125,7 +2125,6 @@ msgid ""
 msgstr ""
 "\n"
 " Kig venligst brevets indhold igennem:\n"
-"\n"
 
 #: LYMessages.c:686
 msgid ""
@@ -2207,7 +2206,7 @@ msgstr "Cookiekrukken er tom."
 #. #define ACTIVATE_TO_GOBBLE
 #: LYMessages.c:706
 msgid "Activate links to gobble up cookies or entire domains,"
-msgstr "Aktiver links for at sluge cookier eller hele domæner,"
+msgstr "Aktiver links for at slette cookier eller hele domæner,"
 
 #: LYMessages.c:707
 msgid "or to change a domain's 'allow' setting."
@@ -2255,7 +2254,7 @@ msgstr "Slet denne cookie?"
 
 #: LYMessages.c:718
 msgid "The cookie has been eaten!"
-msgstr "Cookier er blevet spist!"
+msgstr "Cookier er blevet slettet!"
 
 #: LYMessages.c:719
 msgid "Delete this empty domain?"
@@ -2263,7 +2262,7 @@ msgstr "Slet dette tomme domæne?"
 
 #: LYMessages.c:720
 msgid "The domain has been eaten!"
-msgstr "Domænet er blevet spist!"
+msgstr "Domænet er blevet slettet!"
 
 #. #define DELETE_COOKIES_SET_ALLOW_OR_CANCEL
 #: LYMessages.c:722
@@ -2277,7 +2276,7 @@ msgstr "D=slet domæne, sæt tillad: A=altid/P=spørg/V=aldrig el. C=afbryd? "
 
 #: LYMessages.c:725
 msgid "All cookies in the domain have been eaten!"
-msgstr "Alle cookier i domænet er blevet spist!"
+msgstr "Alle cookier i domænet er blevet slettet!"
 
 #: LYMessages.c:726
 #, c-format
@@ -2300,7 +2299,7 @@ msgstr "Slet alle cookier under dette domæne?"
 
 #: LYMessages.c:730
 msgid "All of the cookies in the jar have been eaten!"
-msgstr "Alle cookier i krukken er blevet spist!"
+msgstr "Alle cookier i krukken er blevet slettet!"
 
 #: LYMessages.c:732
 msgid "Port 19 not permitted in URLs."
@@ -2352,7 +2351,7 @@ msgstr "Formularfeltets værdi overstiger bufferlængde! Gør den kortere. "
 #. #define FORM_TAIL_COMBINED_WITH_HEAD
 #: LYMessages.c:746
 msgid "Modified tail combined with head of form field value."
-msgstr "Ændret \"hale\" kombineret med \"hovede\" i værdi for formularfelt."
+msgstr "Ændret \"hale\" kombineret med \"hoved\" i værdi for formularfelt."
 
 #. HTFile.c
 #: LYMessages.c:749
@@ -2369,7 +2368,7 @@ msgstr "Selektiv adgang til dette filkatalog er ikke muliggjort"
 
 #: LYMessages.c:752
 msgid "Multiformat: directory scan failed."
-msgstr "Multiformat: Scanning af filkatalog mislykkedes."
+msgstr "Multiformat: Skanning af filkatalog mislykkedes."
 
 #: LYMessages.c:753
 msgid "This directory is not readable."
@@ -2410,7 +2409,7 @@ msgstr "Aktuelle filkatalog er "
 #. HTGopher.c
 #: LYMessages.c:764
 msgid "No response from server!"
-msgstr "Tjeneren svarede ikke!"
+msgstr "Serveren svarede ikke!"
 
 #: LYMessages.c:765
 msgid "CSO index"
@@ -2538,11 +2537,11 @@ msgstr "Kan ikke fortsætte uden et brugernavn og en adgangskode."
 
 #: LYMessages.c:795
 msgid "Can't retry with authorization!  Contact the server's WebMaster."
-msgstr "Kan genprøve med autorisation!  Kontakt tjenerens WebMaster."
+msgstr "Kan ikke prøve igen med autorisation!  Kontakt serverens WebMaster."
 
 #: LYMessages.c:796
 msgid "Can't retry with proxy authorization!  Contact the server's WebMaster."
-msgstr "Kan ikke genprøve m. proxy-autorisation!  Kontakt tjenerens WebMaster."
+msgstr "Kan ikke prøve igen m. proxy-autorisation!  Kontakt serverens WebMaster."
 
 #: LYMessages.c:797
 msgid "Retrying with proxy authorization information."
@@ -2627,7 +2626,7 @@ msgstr "Opsætningsmenu"
 
 #: LYMessages.c:822
 msgid "File Permission Options"
-msgstr "Valgmuligheder for filtilladelser"
+msgstr "Valgmuligheder for filrettigheder"
 
 #: LYMessages.c:823
 msgid "Printing Options"
@@ -2672,7 +2671,7 @@ msgstr "seneste udgave"
 
 #: LYMessages.c:835
 msgid "pre-release version"
-msgstr "udviklingsudgave"
+msgstr "pre-release version"
 
 #: LYMessages.c:836
 msgid "development version"
@@ -2705,50 +2704,45 @@ msgstr "C=Opret D=Hent  E=rediger  F=fuld menu  M=ret  R=slet  T=marker  U=uploa
 
 #: LYMessages.c:848
 msgid "Failed to obtain status of current link!"
-msgstr "Indhentning af aktuelle links status slog fejl!"
+msgstr "Kunne ikke fremskaffe status på aktuelle link!"
 
 #. #define INVALID_PERMIT_URL
 #: LYMessages.c:851
 msgid "Special URL only valid from current File Permission menu!"
-msgstr "Særlig URL er kun gyldig fra menu over aktuelle fil-tilladelser!"
+msgstr "Særlig url er kun gyldig fra menu over aktuelle filrettigheder!"
 
 #: LYMessages.c:855
 msgid "External support is currently disabled."
-msgstr "Ekstern understøtning er aktuelt slået fra."
+msgstr "Ekstern understøttelse er slået fra i øjeblikket."
 
 #. new with 2.8.4dev.21
 #: LYMessages.c:859
-#, fuzzy
 msgid "Changing working-directory is currently disabled."
-msgstr "Åbning af eksterne programmer er ikke tilladt for øjeblikket."
+msgstr "Ændring af arbejdskatalog er sat ud af kraft i øjeblikket."
 
 #: LYMessages.c:860
-#, fuzzy
 msgid "Linewrap OFF!"
-msgstr "Sporing slået FRA!"
+msgstr "Linjeombrydning slået FRA!"
 
 #: LYMessages.c:861
 msgid "Linewrap ON!"
-msgstr ""
+msgstr "Linjeombrydning slået TIL!"
 
 #: LYMessages.c:862
-#, fuzzy
 msgid "Parsing nested-tables toggled OFF!  Reloading..."
-msgstr "Rå 8-bit eller CJK-tilstand slået FRA!  Genindlæser..."
+msgstr "Indlejrede tabeller fortolkes IKKE!  Genindlæser..."
 
 #: LYMessages.c:863
-#, fuzzy
 msgid "Parsing nested-tables toggled ON!  Reloading..."
-msgstr "Rå 8-bit el. CJK-tilstand slået TIL!  Genindlæser..."
+msgstr "Indlejrede tabeller fortolkes!  Genindlæser..."
 
 #: LYMessages.c:864
 msgid "Shifting is disabled while line-wrap is in effect"
-msgstr ""
+msgstr "Panorering er slået fra, når linjeombrydning er virksom."
 
 #: LYMessages.c:865
-#, fuzzy
 msgid "Trace not supported"
-msgstr "Terminal understøtter ikke farve"
+msgstr "Sporing ikke understøttet"
 
 #: WWW/Library/Implementation/HTAABrow.c:648
 #, c-format
@@ -2940,7 +2934,6 @@ msgid ""
 msgstr ""
 "\n"
 "Der er i øjeblikket ca. %d artikler i %s, ID'er som følger:\n"
-"\n"
 
 #: WWW/Library/Implementation/HTNews.c:1865
 msgid "All available articles in "
@@ -3001,7 +2994,7 @@ msgstr "Læser nyhedsartikel."
 
 #: WWW/Library/Implementation/HTNews.c:2978
 msgid "Sorry, could not load requested news."
-msgstr "Beklager, kunne ikke indlæse nyheder."
+msgstr "Beklager, kunne ikke indlæse artikler."
 
 #: WWW/Library/Implementation/HTTCP.c:1233
 msgid "Address has invalid port"
@@ -3033,7 +3026,7 @@ msgstr "Foretager %s-forbindelse til %s"
 #: WWW/Library/Implementation/HTTCP.c:1619
 #, c-format
 msgid "socket failed: family %d addr %s port %s."
-msgstr ""
+msgstr "'socket' fejlede: familie %d adr. %s port %s."
 
 #: WWW/Library/Implementation/HTTCP.c:1628
 msgid "socket failed."
@@ -3142,7 +3135,7 @@ msgstr "Vis indhold af 407-meddelelse?"
 #.
 #: WWW/Library/Implementation/HTTP.c:1748
 msgid "Unknown status reply from server!"
-msgstr "Ukendt statussvar fra tjener!"
+msgstr "Ukendt statussvar fra server!"
 
 #: WWW/Library/Implementation/HTTelnet.c:101
 #, c-format
@@ -3151,7 +3144,7 @@ msgstr "fremmed %s session:"
 
 #: WWW/Library/Implementation/HTWAIS.c:161
 msgid "Could not connect to WAIS server."
-msgstr "Kunne ikke forbinde til WAIS-tjener."
+msgstr "Kunne ikke forbinde til WAIS-server."
 
 #: WWW/Library/Implementation/HTWAIS.c:170
 msgid "Could not open WAIS connection for reading."
@@ -3318,7 +3311,7 @@ msgstr "Direkte adgang"
 #. * Proxy will be used if defined, so let user know that - FM *
 #: WWW/Library/Implementation/HTWSRC.c:348
 msgid " (or via proxy server, if defined)"
-msgstr " (eller via proxy-tjener, hvis fastsat)"
+msgstr " (eller via proxy-server, hvis fastsat)"
 
 #: WWW/Library/Implementation/HTWSRC.c:363
 msgid "Maintainer"
@@ -3406,14 +3399,13 @@ msgstr "ukendt formularfelt"
 
 #. We can't open the file, what do we do?
 #: src/GridText.c:10348
-#, fuzzy
 msgid "Can't open file for uploading"
-msgstr "Kan ikke åbne fil for læsning."
+msgstr "Kan ikke åbne fil for uploadning"
 
 #. We got an error reading the file, what do we do?
 #: src/GridText.c:10359
 msgid "Short read from file, problem?"
-msgstr ""
+msgstr "Kort læsning fra fil, problem?"
 
 #: src/GridText.c:10721
 #, c-format
@@ -3423,7 +3415,7 @@ msgstr "Indsender %s"
 #. ugliness has happened; inform user and do the best we can
 #: src/GridText.c:11887
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
-msgstr ""
+msgstr "Program hænger: TextAnchor-struktur ødelagt - det er bedst at afbryde!"
 
 #. don't show previous state
 #: src/GridText.c:12092
@@ -3624,7 +3616,7 @@ msgstr "(fra en foregående session)"
 
 #: src/LYCookie.c:2719
 msgid "Maximum Gobble Date:"
-msgstr "Maximum \"slugnings-dato\":"
+msgstr "Udløbsdato for cookie:"
 
 #: src/LYCookie.c:2764
 msgid "Internal"
@@ -4069,7 +4061,7 @@ msgstr "Lige et øjeblik, ..."
 
 #: src/LYLocal.c:2163
 msgid "Error buiding install args"
-msgstr "Fejl ved tilvirkning af installerings-argumenter"
+msgstr "Kunne ikke lave installeringsparametre"
 
 #: src/LYLocal.c:2178 src/LYLocal.c:2210
 #, c-format
@@ -4130,7 +4122,7 @@ msgstr "Du SKAL definere et gyldigt TMP eller TEMP-område!\n"
 
 #: src/LYMain.c:1156 src/LYMainLoop.c:5117
 msgid "No such directory"
-msgstr " filkatalog"
+msgstr "Intet sådant filkatalog"
 
 #: src/LYMain.c:1378
 #, c-format
@@ -4141,7 +4133,6 @@ msgid ""
 msgstr ""
 "\n"
 "Opsætningsfil %s er ikke tilgængelig.\n"
-"\n"
 
 #: src/LYMain.c:1388
 msgid ""
@@ -4151,7 +4142,6 @@ msgid ""
 msgstr ""
 "\n"
 "Lynx tegnsæt er ikke angivet.\n"
-"\n"
 
 #: src/LYMain.c:1417
 msgid ""
@@ -4161,7 +4151,6 @@ msgid ""
 msgstr ""
 "\n"
 "Lynx \"edit map\" er ikke angivet.\n"
-"\n"
 
 #: src/LYMain.c:1446
 #, c-format
@@ -4172,7 +4161,6 @@ msgid ""
 msgstr ""
 "\n"
 "Lynx-fil %s er ikke tilgængelig.\n"
-"\n"
 
 #: src/LYMain.c:1704
 msgid "Warning:"
@@ -4260,23 +4248,23 @@ msgstr "Indgang til hovedskærm"
 
 #: src/LYMainLoop.c:3897
 msgid "No next document present"
-msgstr ""
+msgstr "Intet \"næste dokument\" indlæst"
 
 #: src/LYMainLoop.c:4206
 msgid "charset for this document specified explicitly, sorry..."
-msgstr "dette dokuments tegnsæt er eksplicit angivet, beklager..."
+msgstr "dette dokuments tegnsæt er udtrykkeligt angivet, beklager..."
 
 #: src/LYMainLoop.c:5093
 msgid "cd to:"
-msgstr " til "
+msgstr "cd til:"
 
 #: src/LYMainLoop.c:5120
 msgid "A component of path is not a directory"
-msgstr ""
+msgstr "En del af stien er ikke et filkatalog"
 
 #: src/LYMainLoop.c:5123
 msgid "failed to change directory"
-msgstr "Kunne ikke tilgå filkatalog."
+msgstr "Kunne ikke skifte filkatalog."
 
 #: src/LYMainLoop.c:6291
 msgid "Reparsing document under current settings..."
@@ -4339,7 +4327,7 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-" Indtast eller ret venligst Subject:-linjen\n"
+" Indtast eller ret venligst emnelinjen\n"
 
 #: src/LYNews.c:322
 msgid ""
@@ -4430,13 +4418,12 @@ msgstr "VI-taster"
 #. well, at least 2 line edit styles available
 #: src/LYOptions.c:3266
 msgid "Line edit style"
-msgstr ""
+msgstr "Linjeredigeringsstil"
 
 #. Keyboard layout: SELECT
 #: src/LYOptions.c:3278
-#, fuzzy
 msgid "Keyboard layout"
-msgstr "Tastaturindstillinger"
+msgstr "Tastatur-layout"
 
 #.
 #. * Display and Character Set
@@ -4514,7 +4501,7 @@ msgstr "Billedtekst"
 #.
 #: src/LYOptions.c:3432
 msgid "Headers Transferred to Remote Servers"
-msgstr "Information til fremmede tjenere"
+msgstr "Information til fremmede servere"
 
 #. ***************************************************************
 #. Mail Address: INPUT
@@ -4565,7 +4552,7 @@ msgstr "(program-)udførelseslinks"
 #. Local Directory Sort: SELECT
 #: src/LYOptions.c:3507
 msgid "Show transfer rate"
-msgstr "Dataoverførsel fuldført"
+msgstr "Vis overførselshastighed"
 
 #.
 #. * Special Files and Screens
@@ -4826,7 +4813,7 @@ msgstr "Tegnsæt:"
 
 #: src/LYShowInfo.c:297
 msgid "Server:"
-msgstr "Tjener:"
+msgstr "Server:"
 
 #: src/LYShowInfo.c:300
 msgid "Date:"
@@ -4842,7 +4829,7 @@ msgstr "&nbsp;udløber:"
 
 #: src/LYShowInfo.c:313
 msgid "Cache-Control:"
-msgstr "Cache-kontrol:"
+msgstr "Cache-styring:"
 
 #: src/LYShowInfo.c:317
 msgid "Content-Length:"
@@ -4983,12 +4970,11 @@ msgstr "Uventet adgangsprotokol for denne URL-type."
 
 #: src/LYUtils.c:3915
 msgid "Too many tempfiles"
-msgstr ""
+msgstr "For mange tempfiler"
 
 #: src/LYUtils.c:4217
-#, fuzzy
 msgid "unknown restriction"
-msgstr "Ingen begrænsninger sat.\n"
+msgstr "ukendt begrænsning"
 
 #: src/LYUtils.c:4248
 msgid "No restrictions set.\n"
@@ -5220,14 +5206,14 @@ msgid ""
 msgstr ""
 "\"preferred_charset\" angiver det tegnsæt i MIME-notation (f.eks.\n"
 "ISO-8859-2, ISO-8859-5), som Lynx vil tilkendegive er dit foretrukne,\n"
-"i forespørgsler til http-tjenere og ved brug af en \"Accept-Charset header\".\n"
+"i forespørgsler til http-servere og ved brug af en \"Accept-Charset header\".\n"
 "Værdien bør IKKE indbefatte ISO-8859-1 eller US-ASCII, idet disse altid er\n"
 "underforståede som standard. Værdierne kan anføres på en kommasepareret liste.\n"
-"Hvis en fil i dette tegnsæt er tilgængelig, vil tjeneren sende den.\n"
+"Hvis en fil i dette tegnsæt er tilgængelig, vil serveren sende den.\n"
 "Hvis ingen \"Accept-Charset\" header er til stede, er standarden at ethvert\n"
 "tegnsæt er acceptabelt. Hvis en \"Accept-Charset\" header er til stede,\n"
-"og hvis tjeneren ikke kan sende et acceptabelt svar i henhold til denne\n"
-"header, da BØR tjeneren sende en fejlmeddelelse, omend afgivelse af et\n"
+"og hvis serveren ikke kan sende et acceptabelt svar i henhold til denne\n"
+"header, da BØR serveren sende en fejlmeddelelse, omend afgivelse af et\n"
 "ikke-acceptabelt svar også er tilladt.\n"
 
 #: src/LYrcFile.c:368
@@ -5241,8 +5227,8 @@ msgstr ""
 "\"preferred_language\" angiver det sprog i MIME-notation (f.eks. en,\n"
 "fr, - kan være en komma-separeret liste af faldende præference)\n"
 "som Lynx vil tilkendegive er dit foretrukne i sine forespørgsler \n"
-"til http-tjenere. Hvis en fil på dette sprog er tilgængelig, vil\n"
-"tjeneren sende den. I modsat fald vil den sende filen på sit\n"
+"til http-servere. Hvis en fil på dette sprog er tilgængelig, vil\n"
+"serveren sende den. I modsat fald vil den sende filen på sit\n"
 "standardsprog.\n"
 
 #: src/LYrcFile.c:377

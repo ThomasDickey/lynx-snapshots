@@ -10,8 +10,8 @@ extern STable_info * Stbl_startTABLE PARAMS((short));
 extern int Stbl_finishTABLE PARAMS((STable_info *));
 extern void Stbl_free PARAMS((STable_info *));
 extern int Stbl_addRowToTable PARAMS((STable_info *, int, int));
-extern int Stbl_addCellToTable PARAMS((STable_info *, int, int, int, int, int, int));
-extern int Stbl_finishCellInTable PARAMS((STable_info *, int, int, int));
+extern int Stbl_addCellToTable PARAMS((STable_info *, int, int, int, int, int, int, int));
+extern int Stbl_finishCellInTable PARAMS((STable_info *, int, int, int, int));
 extern int Stbl_addColInfo PARAMS((STable_info *, int, short, BOOL));
 extern int Stbl_finishColGroup PARAMS((STable_info *));
 extern int Stbl_addRowGroup PARAMS((STable_info *, short));
@@ -20,7 +20,7 @@ extern int Stbl_addRowGroup PARAMS((STable_info *, short));
 #define TRST_ENDCELL_LINEBREAK	0
 #define TRST_ENDCELL_MASK	1
 #define TRST_FAKING_CELLS	2
-#define Stbl_lineBreak(stbl,l,pos) Stbl_finishCellInTable(stbl, TRST_ENDCELL_LINEBREAK, l, pos)
+#define Stbl_lineBreak(stbl,l,off,pos) Stbl_finishCellInTable(stbl, TRST_ENDCELL_LINEBREAK, l, off, pos)
 
 extern int Stbl_getStartLine PARAMS((STable_info *));
 extern int Stbl_getFixupPositions PARAMS((
