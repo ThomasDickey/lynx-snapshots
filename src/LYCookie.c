@@ -12,6 +12,10 @@
 **   http://www.ics.uci.edu/pub/ietf/http/draft-ietf-http-state-man-mec-02.txt
 **		- FM					1997-07-09
 **
+**	Updated for:
+**   ftp://ds.internic.net/internet-drafts/draft-ietf-http-state-man-mec-03.txt
+**		- FM					1997-08-02
+**
 **  TO DO: (roughly in order of decreasing priority)
       * A means to specify "always allow" and "never allow" domains via
         a configuration file is needed.
@@ -34,8 +38,8 @@
 	collections to bring us back down under the limits, rather than
 	actively removing cookies and/or domains based on age or frequency
 	of use.
-      * If the a cookie has the secure flag set, we presently treat only
-        SSL connections as secure.  This may need to be expanded for other
+      * If a cookie has the secure flag set, we presently treat only SSL
+        connections as secure.  This may need to be expanded for other
         secure communication protocols that become standarized.
       * Cookies could be optionally stored in a file from session to session.
 */
@@ -309,7 +313,9 @@ PRIVATE void store_cookie ARGS3(
 	/*
 	 *  Section 4.3.2, condition 2: The value for the Domain attribute
 	 *  contains no embedded dots or does not start with a dot. 
-	 *  (A dot is embedded if it's neither the first nor last character.) 
+	 *  (A dot is embedded if it's neither the first nor last character.)
+	 *  Note that we added a lead dot ourselves if a domain attribute
+	 *  value otherwise qualified. - FM
 	 */
 	if (co->domain[0] != '.' || co->domain[1] == '\0') {
 	    if (TRACE)
@@ -682,31 +688,24 @@ PRIVATE void LYProcessSetCookies ARGS6(
 
     /*
      *  If we have both Set-Cookie and Set-Cookie2 headers.
-     *  process the Set-Cookie2 header, then the Set-Cookie
-     *  header.  The most current draft has abandoned the
-     *  the earlier requirement to combine them, but we'll
-     *  keep doing that for now, until we're sure that holds
-     *  up, since we never replace anything that was in the
-     *  Set-Cookie2 headers with it's equivalent in the
-     *  Set-Cookie header.  If we have only a Set-Cookie2
-     *  or only a Set-Cookie header, that's what we use.  So
-     *  set up a list for the cookies we process out of the
-     *  header(s).  Note that if more than one instance of a
-     *  valued attribute for the same cookie is encountered,
-     *  even within the same header, the value for the first
-     *  instance is retained, with consequent preference to
-     *  that in a Set-Cookie2 header, since that was processed
-     *  first.  We only accept up to 50 cookies from either
-     *  header, and only if a cookie's values do not exceed
-     *  the 4096 byte limit on overall size. - FM
+     *  process the Set-Cookie2 header.  Otherwise, process
+     *  whichever of the two headers we do have.  Note that
+     *  if more than one instance of a valued attribute for
+     *  the same cookie is encountered, the value for the
+     *  first instance is retained.  We only accept up to 50
+     *  cookies from the header, and only if a cookie's values
+     *  do not exceed the 4096 byte limit on overall size. - FM
      */
     CombinedCookies = HTList_new();
 
     /*
-     *  First process the Set-Cookie2 header, if present, adding
-     *  each cookie to the CombinedCookies list. - FM
+     *  Process the Set-Cookie2 header, if present and not zero-length,
+     *  adding each cookie to the CombinedCookies list. - FM
      */
     p = (SetCookie2 ? SetCookie2 : "");
+    if (TRACE && SetCookie && *p) {
+	fprintf(stderr, "LYProcessSetCookies: Using Set-Cookie2 header.\n");
+    }
     while (NumCookies <= 50 && *p) {
 	attr_start = attr_end = value_start = value_end = NULL;
 	while (*p != '\0' && isspace((unsigned char)*p)) {
@@ -955,23 +954,17 @@ PRIVATE void LYProcessSetCookies ARGS6(
 						     address,
 						     PARSE_ALL);
 		    /*
-		     *  Accept only URLs for servers. - FM
+		     *  Accept only URLs for http or https servers. - FM
 		     */
 		    if ((url_type = is_url(cur_cookie->commentURL)) &&
 		        (url_type == HTTP_URL_TYPE ||
-		    	 url_type == HTTPS_URL_TYPE ||
-			 url_type == FTP_URL_TYPE ||
-			 url_type == GOPHER_URL_TYPE ||
-			 url_type == HTML_GOPHER_URL_TYPE ||
-			 url_type == INDEX_GOPHER_URL_TYPE ||
-			 url_type == NEWS_URL_TYPE ||
-			 url_type == NNTP_URL_TYPE ||
-			 url_type == SNEWS_URL_TYPE ||
-			 url_type == WAIS_URL_TYPE ||
-			 url_type == CSO_URL_TYPE ||
-			 url_type == FINGER_URL_TYPE)) {
+		    	 url_type == HTTPS_URL_TYPE)) {
 		        length += strlen(cur_cookie->commentURL);
 		    } else {
+			if (TRACE)
+			    fprintf(stderr,
+		     "LYProcessSetCookies: Rejecting commentURL value '%s'\n",
+				    cur_cookie->commentURL);
 			FREE(cur_cookie->commentURL);
 		    }
 		}
@@ -983,7 +976,38 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		     */
 		    !(cur_cookie->flags & COOKIE_FLAG_DOMAIN_SET)) {
 		    length -= strlen(cur_cookie->domain);
-		    StrAllocCopy(cur_cookie->domain, value);
+		    /*
+		     *  If the value does not have a lead dot,
+		     *  but does have an embedded dot, and is
+		     *  not an exact match to the hostname, nor
+		     *  is a numeric IP address, add a lead dot.
+		     *  Otherwise, use the value as is. - FM
+		     */
+		    if (value[0] != '.' && value[0] != '\0' &&
+			value[1] != '\0' && strcmp(value, hostname)) {
+			char *ptr = strchr(value, '.');
+			if (ptr != NULL && ptr[1] != '\0') {
+			    ptr = value;
+			    while (*ptr == '.' ||
+				   isdigit((unsigned char)*ptr))
+				ptr++;
+			    if (*ptr != '\0') {
+			        if (TRACE) {
+				    fprintf(stderr,
+	       "LYProcessSetCookies: Adding lead dot for domain value '%s'\n",
+					    value);
+				}
+				StrAllocCopy(cur_cookie->domain, ".");
+				StrAllocCat(cur_cookie->domain, value);
+			    } else {
+				StrAllocCopy(cur_cookie->domain, value);
+			    }
+			} else {
+			    StrAllocCopy(cur_cookie->domain, value);
+			}
+		    } else {
+			StrAllocCopy(cur_cookie->domain, value);
+		    }
 		    length += strlen(cur_cookie->domain);
 		    cur_cookie->flags |= COOKIE_FLAG_DOMAIN_SET;
 		}
@@ -1091,7 +1115,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	    }
 
 	    /*
-	     *  If none of the above comparisions succeeded, and we have
+	     *  If none of the above comparisons succeeded, and we have
 	     *  a value, then we have an unknown pair of the form 'foo=bar',
 	     *  which means it's time to create a new cookie.  If we don't
 	     *  have a non-zero-length value, assume it's an error or a
@@ -1111,6 +1135,19 @@ PRIVATE void LYProcessSetCookies ARGS6(
 			cur_cookie->version = 1;
 		    }
 		    HTList_appendObject(CombinedCookies, cur_cookie);
+		} else if (cur_cookie != NULL) {
+		    if (TRACE) {
+			fprintf(stderr,
+			"LYProcessSetCookies: Rejecting Set-Cookie2: %s=%s\n",
+				(cur_cookie->name ?
+				 cur_cookie->name : "[no name]"),
+				(cur_cookie->value ?
+				 cur_cookie->value : "[no value]"));
+			fprintf(stderr,
+			"                     due to excessive length!\n");
+		    }
+        	    freeCookie(cur_cookie);
+		    cur_cookie = NULL;
 		}
 		/*
 		 *  Start a new cookie. - FM
@@ -1160,14 +1197,16 @@ PRIVATE void LYProcessSetCookies ARGS6(
     }
 
     /*
-     *  Now process the Set-Cookie header, if present, checking the
-     *  CombinedCookies list for a corresponding cookie and supplementing
-     *  that if one is present, otherwise, adding the new cookie. - FM
+     *  Process the Set-Cookie header, if no non-zero-length Set-Cookie2
+     *  header was present. - FM
      */
     length = 0;
     NumCookies = 0;
     cur_cookie = NULL;
-    p = (SetCookie ? SetCookie : "");
+    p = ((SetCookie && !(SetCookie2 && *SetCookie2)) ? SetCookie : "");
+    if (TRACE && SetCookie2 && *p) {
+	fprintf(stderr, "LYProcessSetCookies: Using Set-Cookie header.\n");
+    }
     while (NumCookies <= 50 && *p) {
 	attr_start = attr_end = value_start = value_end = NULL;
 	while (*p != '\0' && isspace((unsigned char)*p)) {
@@ -1413,25 +1452,17 @@ PRIVATE void LYProcessSetCookies ARGS6(
 						     address,
 						     PARSE_ALL);
 		    /*
-		     *  Accept only URLs for servers.  The most
-		     *  recent draft says just http, so the others
-		     *  are commented out here. - FM
+		     *  Accept only URLs for http or https servers. - FM
 		     */
 		    if ((url_type = is_url(cur_cookie->commentURL)) &&
 		        (url_type == HTTP_URL_TYPE ||
-		    	 url_type == HTTPS_URL_TYPE/* ||
-			 url_type == FTP_URL_TYPE ||
-			 url_type == GOPHER_URL_TYPE ||
-			 url_type == HTML_GOPHER_URL_TYPE ||
-			 url_type == INDEX_GOPHER_URL_TYPE ||
-			 url_type == NEWS_URL_TYPE ||
-			 url_type == NNTP_URL_TYPE ||
-			 url_type == SNEWS_URL_TYPE ||
-			 url_type == WAIS_URL_TYPE ||
-			 url_type == CSO_URL_TYPE ||
-			 url_type == FINGER_URL_TYPE */)) {
+		    	 url_type == HTTPS_URL_TYPE)) {
 		        length += strlen(cur_cookie->commentURL);
 		    } else {
+			if (TRACE)
+			    fprintf(stderr,
+		     "LYProcessSetCookies: Rejecting commentURL value '%s'\n",
+				    cur_cookie->commentURL);
 			FREE(cur_cookie->commentURL);
 		    }
 		}
@@ -1443,7 +1474,38 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		     */
 		    !(cur_cookie->flags & COOKIE_FLAG_DOMAIN_SET)) {
 		    length -= strlen(cur_cookie->domain);
-		    StrAllocCopy(cur_cookie->domain, value);
+		    /*
+		     *  If the value does not have a lead dot,
+		     *  but does have an embedded dot, and is
+		     *  not an exact match to the hostname, nor
+		     *  is a numeric IP address, add a lead dot.
+		     *  Otherwise, use the value as is. - FM
+		     */
+		    if (value[0] != '.' && value[0] != '\0' &&
+			value[1] != '\0' && strcmp(value, hostname)) {
+			char *ptr = strchr(value, '.');
+			if (ptr != NULL && ptr[1] != '\0') {
+			    ptr = value;
+			    while (*ptr == '.' ||
+				   isdigit((unsigned char)*ptr))
+				ptr++;
+			    if (*ptr != '\0') {
+			        if (TRACE) {
+				    fprintf(stderr,
+	       "LYProcessSetCookies: Adding lead dot for domain value '%s'\n",
+					    value);
+				}
+				StrAllocCopy(cur_cookie->domain, ".");
+				StrAllocCat(cur_cookie->domain, value);
+			    } else {
+				StrAllocCopy(cur_cookie->domain, value);
+			    }
+			} else {
+			    StrAllocCopy(cur_cookie->domain, value);
+			}
+		    } else {
+			StrAllocCopy(cur_cookie->domain, value);
+		    }
 		    length += strlen(cur_cookie->domain);
 		    cur_cookie->flags |= COOKIE_FLAG_DOMAIN_SET;
 		}
@@ -1534,7 +1596,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	    }
 
 	    /*
-	     *  If none of the above comparisions succeeded, and we have
+	     *  If none of the above comparisons succeeded, and we have
 	     *  a value, then we have an unknown pair of the form 'foo=bar',
 	     *  which means it's time to create a new cookie.  If we don't
 	     *  have a non-zero-length value, assume it's an error or a
@@ -1542,132 +1604,40 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	     *  ignore it. - FM
 	     */
 	    if (!known_attr && value_end > value_start) {
-		if (cur_cookie) {
+		/*
+		 *  If we've started a cookie, and it's not too big,
+		 *  save it in the CombinedCookies list. - FM
+		 */
+		if (length <= 4096 && cur_cookie != NULL) {
+		    /*
+		     *  If we had a Set-Cookie2 header, make sure
+		     *  the version is at least 1, and mark it for
+		     *  quoting. - FM
+		     */
 		    if (SetCookie2 != NULL) {
-		        /*
-			 *  If we had a Set-Cookie2 header, make sure
-			 *  the version is at least 1, and mark it for
-			 *  quoting. - FM
-			 */
 			if (cur_cookie->version < 1) {
 			    cur_cookie->version = 1;
 			}
 			cur_cookie->quoted = TRUE;
 		    }
-		    cl = CombinedCookies;
-		    while (NULL != (co = (cookie *)HTList_nextObject(cl))) {
-			/*
-			 *  Check whether the cookie from the Set-Cookie2
-			 *  header has the same name and value as this one
-			 *  from the Set-Cookie header.  If they both had a
-			 *  domain attribute, make sure those match, and
-			 *  similarly if they both had a path attribute. - FM
-			 */
-			if ((!strcmp(co->name, cur_cookie->name) &&
-			     !strcmp(co->value, cur_cookie->value)) &&
-			    !(((co->flags & COOKIE_FLAG_DOMAIN_SET) &&
-			       (cur_cookie->flags &
-					    COOKIE_FLAG_DOMAIN_SET)) &&
-			      strcmp(co->domain, cur_cookie->domain)) &&
-			    !(((co->flags & COOKIE_FLAG_PATH_SET) &&
-			       (cur_cookie->flags &
-					    COOKIE_FLAG_PATH_SET)) &&
-			      strcmp(co->path, cur_cookie->path))) {
-			    /*
-			     *  If the Set-Cookie2 header didn't include
-			     *  a domain attribute and the Set-Cookie
-			     *  header did, add it. - FM
-			     */
-			    if (!(co->flags & COOKIE_FLAG_DOMAIN_SET) &&
-				(cur_cookie->flags & COOKIE_FLAG_DOMAIN_SET)) {
-				StrAllocCopy(co->domain, cur_cookie->domain);
-				co->flags |= COOKIE_FLAG_DOMAIN_SET;
-			    }
-			    /*
-			     *  If the Set-Cookie2 header didn't include
-			     *  a path attribute and the Set-Cookie
-			     *  header did, add it. - FM
-			     */
-			    if (!(co->flags & COOKIE_FLAG_PATH_SET) &&
-				(cur_cookie->flags & COOKIE_FLAG_PATH_SET)) {
-				StrAllocCopy(co->path, cur_cookie->path);
-				co->pathlen = cur_cookie->pathlen;
-				co->flags |= COOKIE_FLAG_PATH_SET;
-			    }
-			    /*
-			     *  If the Set-Cookie2 header didn't include
-			     *  a comment attribute and the Set-Cookie
-			     *  header did, add it. - FM
-			     */
-			    if (!co->comment && cur_cookie->comment) {
-				StrAllocCopy(co->comment,
-					     cur_cookie->comment);
-			    }
-			    /*
-			     *  If the Set-Cookie2 header didn't include
-			     *  a commentURL attribute and the Set-Cookie
-			     *  header did, add it. - FM
-			     */
-			    if (!co->commentURL && cur_cookie->commentURL) {
-				StrAllocCopy(co->commentURL,
-					     cur_cookie->commentURL);
-			    }
-			    /*
-			     *  If the Set-Cookie2 header didn't include
-			     *  a port attribute and the Set-Cookie
-			     *  header did, add it. - FM
-			     */
-			    if (!co->PortList && cur_cookie->PortList) {
-				StrAllocCopy(co->PortList,
-					     cur_cookie->PortList);
-			    }
-			    /*
-			     *  If the Set-Cookie2 header didn't include
-			     *  a secure attribute and the Set-Cookie
-			     *  header did, add it. - FM
-			     */
-			    if (!(co->flags & COOKIE_FLAG_SECURE) &&
-				(cur_cookie->flags & COOKIE_FLAG_SECURE)) {
-				co->flags |= COOKIE_FLAG_SECURE;
-			    }
-			    /*
-			     *  If the Set-Cookie2 header didn't set an
-			     *  expiration and the Set-Cookie header did,
-			     *  add it. - FM
-			     */
-			    if (!(co->flags & COOKIE_FLAG_EXPIRES_SET) &&
-				(cur_cookie->flags &
-				 COOKIE_FLAG_EXPIRES_SET)) {
-				co->expires = cur_cookie->expires;
-				co->flags |= COOKIE_FLAG_EXPIRES_SET;
-			    }
-			    /*
-			     *  If the Set-Cookie2 header didn't set
-			     *  discard and the Set-Cookie header did,
-			     *  add it. - FM
-			     */
-			    if (!(co->flags & COOKIE_FLAG_DISCARD) &&
-				(cur_cookie->flags & COOKIE_FLAG_DISCARD)) {
-				co->flags |= COOKIE_FLAG_DISCARD;
-			    }
-			    /*
-			     *  If the cookie from the Set-Cookie2 header
-			     *  has a lower version than this cookie, use
-			     *  this cookie's version (though it should
-			     *  not have a version number). - FM
-			     */
-			    if (co->version < cur_cookie->version) {
-				co->version = cur_cookie->version;
-			    }
-			    freeCookie(cur_cookie);
-			    cur_cookie = NULL;
-			    break;
-			}
+		    HTList_appendObject(CombinedCookies, cur_cookie);
+		} else if (cur_cookie != NULL) {
+		    if (TRACE) {
+			fprintf(stderr,
+			"LYProcessSetCookies: Rejecting Set-Cookie: %s=%s\n",
+				(cur_cookie->name ?
+				 cur_cookie->name : "[no name]"),
+				(cur_cookie->value ?
+				 cur_cookie->value : "[no value]"));
+			fprintf(stderr,
+			"                     due to excessive length!\n");
 		    }
-		    if (co == NULL) {
-			HTList_appendObject(CombinedCookies, cur_cookie);
-		    }
+        	    freeCookie(cur_cookie);
+		    cur_cookie = NULL;
 		}
+		/*
+		 *  Start a new cookie. - FM
+		 */
 		cur_cookie = newCookie();
 		length = 0;
 		MemAllocCopy(&(cur_cookie->name), attr_start, attr_end);
@@ -1697,113 +1667,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	    }
 	    cur_cookie->quoted = TRUE;
 	}
-	cl = CombinedCookies;
-	while (NULL != (co = (cookie *)HTList_nextObject(cl))) {
-	    /*
-	     *  Check whether the cookie from the Set-Cookie2
-	     *  header has the same name and value as this one
-	     *  from the Set-Cookie header.  If they both had a
-	     *  domain attribute, make sure those match, and
-	     *  similarly if they both had a path attribute. - FM
-	     */
-	    if ((!strcmp(co->name, cur_cookie->name) &&
-		 !strcmp(co->value, cur_cookie->value)) &&
-		!(((co->flags & COOKIE_FLAG_DOMAIN_SET) &&
-		   (cur_cookie->flags & COOKIE_FLAG_DOMAIN_SET)) &&
-		  strcmp(co->domain, cur_cookie->domain)) &&
-		!(((co->flags & COOKIE_FLAG_PATH_SET) &&
-		   (cur_cookie->flags & COOKIE_FLAG_PATH_SET)) &&
-		  strcmp(co->path, cur_cookie->path))) {
-		/*
-		 *  If the Set-Cookie2 header didn't include
-		 *  a domain attribute and the Set-Cookie
-		 *  header did, add it. - FM
-		 */
-		if (!(co->flags & COOKIE_FLAG_DOMAIN_SET) &&
-		    (cur_cookie->flags & COOKIE_FLAG_DOMAIN_SET)) {
-		    StrAllocCopy(co->domain, cur_cookie->domain);
-		    co->flags |= COOKIE_FLAG_DOMAIN_SET;
-		}
-		/*
-		 *  If the Set-Cookie2 header didn't include
-		 *  a path attribute and the Set-Cookie
-		 *  header did, add it. - FM
-		 */
-		if (!(co->flags & COOKIE_FLAG_PATH_SET) &&
-		    (cur_cookie->flags & COOKIE_FLAG_PATH_SET)) {
-		    StrAllocCopy(co->path, cur_cookie->path);
-		    co->pathlen = cur_cookie->pathlen;
-		    co->flags |= COOKIE_FLAG_PATH_SET;
-		}
-		/*
-		 *  If the Set-Cookie2 header didn't include
-		 *  a comment attribute and the Set-Cookie
-		 *  header did, add it. - FM
-		 */
-		if (!co->comment && cur_cookie->comment) {
-		    StrAllocCopy(co->comment, cur_cookie->comment);
-		}
-		/*
-		 *  If the Set-Cookie2 header didn't include
-		 *  a commentURL attribute and the Set-Cookie
-		 *  header did, add it. - FM
-		 */
-		if (!co->commentURL && cur_cookie->commentURL) {
-		    StrAllocCopy(co->commentURL, cur_cookie->commentURL);
-		}
-		/*
-		 *  If the Set-Cookie2 header didn't include
-		 *  a port attribute and the Set-Cookie
-		 *  header did, add it. - FM
-		 */
-		if (!co->PortList && cur_cookie->PortList) {
-		    StrAllocCopy(co->PortList, cur_cookie->PortList);
-		}
-		/*
-		 *  If the Set-Cookie2 header didn't include
-		 *  a secure attribute and the Set-Cookie
-		 *  header did, add it. - FM
-		 */
-		if (!(co->flags & COOKIE_FLAG_SECURE) &&
-		    (cur_cookie->flags & COOKIE_FLAG_SECURE)) {
-		    co->flags |= COOKIE_FLAG_SECURE;
-		}
-		/*
-		 *  If the Set-Cookie2 header didn't set an
-		 *  expiration and the Set-Cookie header did,
-		 *  add it. - FM
-		 */
-		if (!(co->flags & COOKIE_FLAG_EXPIRES_SET) &&
-		    (cur_cookie->flags & COOKIE_FLAG_EXPIRES_SET)) {
-		    co->expires = cur_cookie->expires;
-		    co->flags |= COOKIE_FLAG_EXPIRES_SET;
-		}
-		/*
-		 *  If the Set-Cookie2 header didn't set
-		 *  discard and the Set-Cookie header did,
-		 *  add it. - FM
-		 */
-		if (!(co->flags & COOKIE_FLAG_DISCARD) &&
-		    (cur_cookie->flags & COOKIE_FLAG_DISCARD)) {
-		    co->flags |= COOKIE_FLAG_DISCARD;
-		}
-		/*
-		 *  If the cookie from the Set-Cookie2 header
-		 *  has a lower version than this cookie, use
-		 *  this cookie's version (though it should
-		 *  not have a version number). - FM
-		 */
-		if (co->version < cur_cookie->version) {
-		    co->version = cur_cookie->version;
-		}
-		freeCookie(cur_cookie);
-		cur_cookie = NULL;
-		break;
-	    }
-	}
-	if (co == NULL) {
-	    HTList_appendObject(CombinedCookies, cur_cookie);
-	}
+	HTList_appendObject(CombinedCookies, cur_cookie);
     } else if (cur_cookie != NULL) {
 	if (TRACE) {
 	    fprintf(stderr,
@@ -1869,8 +1733,8 @@ PUBLIC void LYSetCookie ARGS3(
 
     /*
      *  Get the hostname, port and path of the address, and report
-     *  the Set-Cookie request if trace mode is on, but set the cookie
-     *  only if LYSetCookies is TRUE. - FM
+     *  the Set-Cookie and/or Set-Cookie2 header(s) if trace mode is
+     *  on, but set the cookie(s) only if LYSetCookies is TRUE. - FM
      */
     if (((hostname = HTParse(address, "", PARSE_HOST)) != NULL) &&
 	(ptr = strchr(hostname, ':')) != NULL)  {

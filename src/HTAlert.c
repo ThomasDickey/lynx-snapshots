@@ -421,39 +421,75 @@ PUBLIC BOOL HTConfirmCookie ARGS6(
 **
 **  On entry,
 **      Redirecting_url             is the Location.
+**	server_status		    is the server status code.
 **
 **  On exit,
 **      Returns 0 on cancel,
 **	  1 for redirect of POST with content,
 **	303 for redirect as GET without content
 */
-PUBLIC int HTConfirmPostRedirect ARGS1(
-	CONST char *,	Redirecting_url)
+PUBLIC int HTConfirmPostRedirect ARGS2(
+	CONST char *,	Redirecting_url,
+	int,		server_status)
 {
     char *show_POST_url = NULL;
+    char StatusInfo[256];
     char url[256];
     int on_screen = 0;	/* 0 - show menu
    			 * 1 - show url
 			 * 2 - menu is already on screen */
 
-    if (dump_output_immediately)
+    if (server_status == 303 ||
+        server_status == 302) {
 	/*
-	**  Treat as 303 (GET without content) if not interactive.
-	*/
-        return 303;
+	 *  HTTP.c should not have called us for either of
+	 *  these because we're treating 302 as historical,
+	 *  so just return 303. - FM
+	 */
+	return 303;
+    }
 
+    if (dump_output_immediately)
+        if (server_status == 301) {
+	    /*
+	    **  Treat 301 as historical, i.e., like 303 (GET
+	    **  without content), when not interactive. - FM
+	    */
+            return 303;
+        } else {
+	    /*
+	    **  Treat anything else (e.g., 305, 306 or 307) as too
+	    **  dangerous to redirect without confirmation, and thus
+	    **  cancel when not interactive. - FM
+	    */
+	    return 0;
+	}
+
+    StatusInfo[254] = StatusInfo[255] = '\0';
+    url[254] = url[(LYcols < 250 ? LYcols-1 : 255)] = '\0';
     if (user_mode == NOVICE_MODE) {
         on_screen = 2;
         move(LYlines-2, 0);
-        addstr(SERVER_ASKED_FOR_REDIRECTION);
+        sprintf(StatusInfo, SERVER_ASKED_FOR_REDIRECTION, server_status);
+	addstr(StatusInfo);
 	clrtoeol();
         move(LYlines-1, 0);
 	sprintf(url, "URL: %.*s",
 		    (LYcols < 250 ? LYcols-6 : 250), Redirecting_url);
         addstr(url);
 	clrtoeol();
-        _statusline(PROCEED_GET_CANCEL);
+	if (server_status == 301) {
+	    _statusline(PROCEED_GET_CANCEL);
+	} else {
+	    _statusline(PROCEED_OR_CANCEL);
+	}
     } else {
+	sprintf(StatusInfo, "%d %.*s",
+			    server_status,
+			    251,
+			    ((server_status == 301) ?
+			 ADVANCED_POST_GET_REDIRECT :
+			 ADVANCED_POST_REDIRECT));
 	StrAllocCopy(show_POST_url, LOCATION_HEADER);
 	StrAllocCat(show_POST_url, Redirecting_url);
     }
@@ -462,7 +498,7 @@ PUBLIC int HTConfirmPostRedirect ARGS1(
 
 	switch (on_screen) {
 	    case 0:
-	        _statusline(ADVANCED_POST_REDIRECT);
+		_statusline(StatusInfo);
 		break;
 	    case 1:
 	        _statusline(show_POST_url);
@@ -471,8 +507,8 @@ PUBLIC int HTConfirmPostRedirect ARGS1(
 	switch (TOUPPER(c)) {
 	    case 'P':
 		/*
-		**  Proceed with 301 or 302 redirect of POST
-		**  (we check only for 0 and 303 in HTTP.c).
+		**  Proceed with 301 or 307 redirect of POST
+		**  with same method and POST content. - FM
 		*/
 	        FREE(show_POST_url);
 		return 1;	
@@ -480,37 +516,43 @@ PUBLIC int HTConfirmPostRedirect ARGS1(
  	    case 7:
  	    case 'C':
 	        /*
-		** Cancel request.
+		**  Cancel request.
 		*/
 	        FREE(show_POST_url);
 		return 0;
-
-	    case 'G':
-	        /*
-		**  Treat as 303 (GET without content).
-		*/
-	        FREE(show_POST_url);
-		return 303;
 
 	    case 'U':
 	        /*
 		**  Show URL for intermediate or advanced mode.
 		*/
-	        if (user_mode != NOVICE_MODE)
-		    if (on_screen == 1)
+	        if (user_mode != NOVICE_MODE) {
+		    if (on_screen == 1) {
 			on_screen = 0;
-		    else
+		    } else {
 			on_screen = 1;
+		    }
+		}
 		break;
+
+	    case 'G':
+		if (server_status == 301) {
+		    /*
+		    **  Treat as 303 (GET without content).
+		    */
+		    FREE(show_POST_url);
+		    return 303;
+		}
+		/* fall through to default */
 
 	    default:
 	        /*
 		**  Get another character.
 		*/
-		if (on_screen == 1)
+		if (on_screen == 1) {
 		    on_screen = 0;
-		else
+		} else {
 		    on_screen = 2;
+		}
 	}
     }
 }

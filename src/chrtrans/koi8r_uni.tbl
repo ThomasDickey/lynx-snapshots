@@ -1,11 +1,10 @@
-
-
 # Options screen name for this character set
-O KOI8-R character set
+OKOI8-R character set
 
 # MIME name for this charset
-M koi8-r
+Mkoi8-r
 
+0x20-0x7f       idem
 # Based on a table received from "Glenn E. Thobe" <thobe@lafn.org>
 #hex unicode # description     
 #--- U+---- # ---------------     
@@ -137,3 +136,10 @@ M koi8-r
 0xFD U+0429 # CAP SHCHA    
 0xFE U+0427 # CAP CHE    
 0xFF U+042A # CAP HARD SIGN   
+
+# TRADE MARK SIGN:
+U+2122:(TM)
+
+0x60    U+2018          # left single quotation mark <`>
+0x27    U+2019-U+201b   # various single quotation marks <'>
+0x22    U+201c-U+201f   # various double quotation marks <">

@@ -44,9 +44,11 @@
 #include "LYSystem.h"
 
 #ifndef VMS
+#ifndef _WINDOWS
 #include <sys/wait.h>
 #include <errno.h>
 #include <grp.h>
+#endif /*_WINDOWS */
 #endif /* VMS */
 
 #include "LYLeaks.h"
@@ -2192,7 +2194,7 @@ PUBLIC int LYExecv ARGS3(
 	char **,	argv,
 	char *,		msg)
 {
-#ifdef VMS
+#if defined(VMS) || defined(_WINDOWS)
     if (TRACE) {
 	fprintf(stderr, "LYExecv:  Called inappropriately!\n");
     }

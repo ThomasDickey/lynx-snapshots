@@ -240,7 +240,8 @@ PUBLIC int showinfo ARGS4(
 
     StrAllocCopy(Title, doc->title);
     LYEntify(&Title, TRUE);
-    fprintf(fp0,"<dt><em>Linkname:</em> %s\n", Title);
+    fprintf(fp0, "<dt><em>Linkname:</em> %s%s\n",
+    		 Title, (doc->isHEAD ? " (HEAD)" : ""));
 
     StrAllocCopy(Address, doc->address);
     LYEntify(&Address, TRUE);

@@ -191,7 +191,12 @@ PUBLIC void highlight ARGS3(
 	if (links[cur].hightext2 && links[cur].ly < display_lines) {
 	    lynx_stop_link_color (flag == ON, links[cur].inUnderline);
 
-	    addch('\n');
+#ifndef USE_SLANG
+	    if ((char)(inch() & A_CHARTEXT) == '-')
+		move(links[cur].ly + 1, 0);
+	    else
+#endif
+		addch('\n');
 	    for (i = 0; i < links[cur].hightext2_offset; i++)
 	        addch(' ');
 
@@ -660,8 +665,8 @@ highlight_hit_within_hightext:
 		/*
 		 *  Start emphasis immediately if we are making
 		 *  the link non-current, or we are making it
-		 *  current but this is not the first character
-		 *  of the hightext. - FM
+		 *  current but this is not the first or last
+		 *  character of the hightext. - FM
 		 */
 		if (flag != ON ||
 		    (offset > hoffset && data[itmp+1] != '\0')) {
@@ -1329,10 +1334,11 @@ highlight_hit_within_hightext2:
 		/*
 		 *  Start emphasis immediately if we are making
 		 *  the link non-current, or we are making it
-		 *  current but this is not the first character
-		 *  of the hightext2. - FM
+		 *  current but this is not the first or last
+		 *  character of the hightext2. - FM
 		 */
-		if (flag != ON || offset > hoffset) {
+		if (flag != ON ||
+		    (offset > hoffset && data[itmp+1] != '\0')) {
 		    LYstartTargetEmphasis();
 		    TargetEmphasisON = TRUE;
 		    addstr(tmp);
@@ -1350,10 +1356,11 @@ highlight_hit_within_hightext2:
 		/*
 		 *  Start emphasis immediately if we are making
 		 *  the link non-current, or we are making it
-		 *  current but this is not the first character
-		 *  of the hightext2. - FM
+		 *  current but this is not the first or last
+		 *  character of the hightext2. - FM
 		 */
-		if (flag != ON || offset > hoffset) {
+		if (flag != ON ||
+		    (offset > hoffset && data[itmp+1] != '\0')) {
 		    LYstartTargetEmphasis();
 		    TargetEmphasisON = TRUE;
 		    addstr(tmp);
@@ -1366,10 +1373,11 @@ highlight_hit_within_hightext2:
 		/*
 		 *  Start emphasis immediately if we are making
 		 *  the link non-current, or we are making it
-		 *  current but this is not the first character
-		 *  of the hightext2. - FM
+		 *  current but this is not the first or last
+		 *  character of the hightext2. - FM
 		 */
-		if (flag != ON || offset > hoffset) {
+		if (flag != ON ||
+		    (offset > hoffset && data[itmp+1] != '\0')) {
 		    LYstartTargetEmphasis();
 		    TargetEmphasisON = TRUE;
 		    addstr(tmp);
@@ -4182,29 +4190,61 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	fprintf(stdout, "Looking up '%s' first.\n", host);
     }
 #ifndef DJGPP
-    if ((phost = gethostbyname(host)) != NULL) {
+    if ((phost = gethostbyname(host)) != NULL)
 #else
-    if (resolve(host) != 0) {
+    if (resolve(host) != 0)
 #endif /* DJGPP */
+    {
+	/*
+	 *  Clear any residual interrupt. - FM
+	 */
+	if (LYCursesON && HTCheckForInterrupt()) {
+	    if (TRACE) {
+		fprintf(stderr,
+	 "LYExpandHostForURL: Ignoring interrupt because '%s' resolved.\n",
+			host);
+	    }
+	}
+
+	/*
+	 *  Return success. - FM
+	 */
         GotHost = TRUE;
 	FREE(host);
         FREE(Str);
         FREE(MsgStr);
 	return GotHost;
+    } else if (LYCursesON && HTCheckForInterrupt()) {
+	/*
+	 *  Give the user chance to interrupt lookup cycles. - KW & FM
+	 */
+	if (TRACE) {
+	    fprintf(stderr,
+	 "LYExpandHostForURL: Interrupted while '%s' failed to resolve.\n",
+		    host);
+	}
+
+	/*
+	 *  Return failure. - FM
+	 */
+	FREE(host);
+	FREE(Str);
+	FREE(MsgStr);
+	return FALSE;
     }
 
     /*
-    **  Set the first prefix, making it a zero-length string
-    **  if the list is NULL or if the potential host field
-    **  ends with a dot. - FM
-    */
+     *  Set the first prefix, making it a zero-length string
+     *  if the list is NULL or if the potential host field
+     *  ends with a dot. - FM
+     */
     StartP = ((prefix_list && Str[strlen(Str)-1] != '.') ?
     					     prefix_list : "");
     /*
-    **  If we have a prefix, but the allocated string is
-    **  one of the common host prefixes, make our prefix
-    **  a zero-length string. - FM
-    */
+     *  If we have a prefix, but the allocated string is
+     *  one of the common host prefixes, make our prefix
+     *  a zero-length string. - FM
+     */
     if (*StartP && *StartP != '.') {
         if (!strncasecomp(*AllocatedString, "www.", 4) ||
 	    !strncasecomp(*AllocatedString, "ftp.", 4) ||
@@ -4229,14 +4269,14 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
     LYstrncpy(DomainPrefix, StartP, (EndP - StartP));
 
     /*
-    **  Test each prefix with each suffix. - FM
-    */
+     *  Test each prefix with each suffix. - FM
+     */
     do {
         /*
-	**  Set the first suffix, making it a zero-length string
-	**  if the list is NULL or if the potential host field
-	**  begins with a dot. - FM
-	*/
+	 *  Set the first suffix, making it a zero-length string
+	 *  if the list is NULL or if the potential host field
+	 *  begins with a dot. - FM
+	 */
 	StartS = ((suffix_list && *Str != '.') ?
 				   suffix_list : "");
 	while ((*StartS) && (WHITE(*StartS) || *StartS == ',')) {
@@ -4249,8 +4289,8 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	LYstrncpy(DomainSuffix, StartS, (EndS - StartS));
 
 	/*
-	**  Create domain names and do DNS tests. - FM
-	*/
+	 *  Create domain names and do DNS tests. - FM
+	 */
 	do {
 	    StrAllocCopy(Host, DomainPrefix);
 	    StrAllocCat(Host, ((*Str == '.') ? (Str + 1) : Str));
@@ -4287,7 +4327,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 		if (LYCursesON && HTCheckForInterrupt()) {
 		    if (TRACE) {
 			fprintf(stderr,
-	 "*** LYExpandHostForURL interrupted while %s failed to resolve\n",
+	 "LYExpandHostForURL: Interrupted while '%s' failed to resolve.\n",
 				host);
 			    }
 		    FREE(Str);
@@ -4298,8 +4338,8 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 		}
 
 	        /*
-		**  Advance to the next suffix, or end of suffix list. - FM
-		*/
+		 *  Advance to the next suffix, or end of suffix list. - FM
+		 */
 		StartS = ((*EndS == '\0') ? EndS : (EndS + 1));
 		while ((*StartS) && (WHITE(*StartS) || *StartS == ',')) {
 		    StartS++;	/* Skip whitespace and separators */
@@ -4314,8 +4354,8 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 
 	if (GotHost == FALSE) {
 	   /*
-	   **  Advance to the next prefix, or end of prefix list. - FM
-	   */
+	    *  Advance to the next prefix, or end of prefix list. - FM
+	    */
 	   StartP = ((*EndP == '\0') ? EndP : (EndP + 1));
 	   while ((*StartP) && (WHITE(*StartP) || *StartP == ',')) {
 	       StartP++;	/* Skip whitespace and separators */
@@ -4348,6 +4388,18 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	    StrAllocCat(Host, Fragment);
 	}
 	StrAllocCopy(*AllocatedString, Host);
+    }
+
+    /*
+     *  Clear any residual interrupt. - FM
+     */
+    if (LYCursesON && HTCheckForInterrupt()) {
+	if (TRACE) {
+	    fprintf(stderr,
+	 "LYExpandHostForURL: Ignoring interrupt because '%s' %s.\n",
+		    host,
+		    (GotHost ? "resolved" : "timed out"));
+	}
     }
 
     /*

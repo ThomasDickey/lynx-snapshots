@@ -230,7 +230,7 @@ PRIVATE int ctrl_chars_on_this_line = 0; /* num of ctrl chars in current line */
 
 PRIVATE HTStyle default_style =
 	{ 0,  "(Unstyled)", "",
-	(HTFont)0, 1.0, HT_BLACK,		0, 0,
+	(HTFont)0, 1, HT_BLACK,		0, 0,
 	0, 0, 0, HT_LEFT,		1, 0,	0, 
 	NO, NO, 0, 0,			0 };	
 
@@ -1834,10 +1834,18 @@ PRIVATE void split_line ARGS2(
      */
     if (split > 0) {
 	for (a = text->first_anchor; a; a = a->next) {
-	    if (a->line_num == CurLine && a->line_pos >= split) {
-		a->start += (1 + SpecialAttrChars - HeadTrim - TailTrim);
-		a->line_pos -= (split - SpecialAttrChars + HeadTrim);
-		a->line_num = text->Lines;
+	    if (a->line_num == CurLine) {
+		if (a->line_pos >= split) {
+		    a->start += (1 + SpecialAttrChars - HeadTrim - TailTrim);
+		    a->line_pos -= (split - SpecialAttrChars + HeadTrim);
+		    a->line_num = text->Lines;
+		} else if ((a->link_type & HYPERTEXT_ANCHOR) &&
+			   (a->line_pos + a->extent) >= split) {
+		    a->extent -= (TailTrim + HeadTrim);
+		    if (a->extent < 0) {
+		        a->extent = 0;
+		    }
+		}
 	    }
 	}
     }
@@ -2431,8 +2439,8 @@ PUBLIC int HText_beginAnchor ARGS3(
     
     if (a == NULL)
         outofmem(__FILE__, "HText_beginAnchor");
-    a->hightext  = 0;
-    a->hightext2 = 0;
+    a->hightext  = NULL;
+    a->hightext2 = NULL;
     a->start = text->chars + text->last_line->size;
     a->inUnderline = underline;
 
@@ -2946,7 +2954,7 @@ PRIVATE void remove_special_attr_chars ARGS1(
 PUBLIC void HText_endAppend ARGS1(
 	HText *,	text)
 {
-    int cur_line, cur_char, cur_shift;
+    int cur_line, cur_char, cur_shift, len;
     TextAnchor *anchor_ptr;
     HTLine *line_ptr;
     unsigned char ch;
@@ -3084,16 +3092,41 @@ re_parse:
 	     *  Double check that we have a line pointer,
 	     *  and if so, copy into hightext2.
 	     */
-	    if (line_ptr) {
+	    if (line_ptr2) {
 		StrnAllocCopy(anchor_ptr->hightext2,
 			      line_ptr2->data,
 			      (anchor_ptr->extent -
 			       strlen(anchor_ptr->hightext)));
 	        anchor_ptr->hightext2offset = line_ptr2->offset;
 	 	remove_special_attr_chars(anchor_ptr->hightext2);
+		if (anchor_ptr->link_type & HYPERTEXT_ANCHOR) {
+		    if ((len = strlen(anchor_ptr->hightext2)) > 0) {
+			len--;
+			while (len >= 0 &&
+			       isspace((unsigned char)
+				       anchor_ptr->hightext2[len])) {
+			    anchor_ptr->hightext2[len] = '\0';
+			    len--;
+			}
+		    }
+		    if (len <= 0 && anchor_ptr->hightext2[0] == '\0') {
+			FREE(anchor_ptr->hightext2);
+			anchor_ptr->hightext2offset = 0;
+		    }
+		}
 	    }
-	}   
+	}
 	remove_special_attr_chars(anchor_ptr->hightext);
+	if (anchor_ptr->link_type & HYPERTEXT_ANCHOR) {
+	    if ((len = strlen(anchor_ptr->hightext)) > 0) {
+		len--;
+		while (len >= 0 &&
+		       isspace((unsigned char)anchor_ptr->hightext[len])) {
+		    anchor_ptr->hightext[len] = '\0';
+		    len--;
+	        }
+	    }
+	}
 
         /*
 	 *  Subtract any formatting characters from the x position
@@ -3511,7 +3544,7 @@ PUBLIC BOOL HText_getFirstTargetInLine ARGS7(
  */
 PUBLIC int HText_getNumOfLines NOARGS
 {
-     return(HTMainText ? HTMainText->Lines : 0);
+    return(HTMainText ? HTMainText->Lines : 0);
 }
 
 /*
@@ -3520,7 +3553,7 @@ PUBLIC int HText_getNumOfLines NOARGS
  */
 PUBLIC char * HText_getTitle NOARGS
 {
-   return(HTMainText ?
+    return(HTMainText ?
    	  (char *) HTAnchor_title(HTMainText->node_anchor) : NULL);
 }
 
@@ -3535,12 +3568,203 @@ PUBLIC char *HText_getStyle NOARGS
 /*
  *  HText_getSugFname returns the suggested filename of the current
  *  document (normally derived from a Content-Disposition header with
- *  file; filename=name.suffix). - FM
+ *  attachment; filename=name.suffix). - FM
  */
 PUBLIC char * HText_getSugFname NOARGS
 {
-   return(HTMainText ?
+    return(HTMainText ?
    	  (char *) HTAnchor_SugFname(HTMainText->node_anchor) : NULL);
+}
+
+/*
+ *  HTCheckFnameForCompression receives the address of an allocated
+ *  string containing a filename, and an anchor pointer, and expands
+ *  or truncates the string's suffix if appropriate, based on whether
+ *  the anchor indicates that the file is compressed.  We assume
+ *  that the file was not uncompressed (as when downloading), and
+ *  believe the headers about whether it's compressed or not. - FM
+ *
+ *  Added third arg - if strip_ok is FALSE, we don't trust the anchor
+ *  info enough to remove a compression suffix if the anchor object
+ *  does not indicate compression. - kw
+ */
+PUBLIC void HTCheckFnameForCompression ARGS3(
+	char **,		fname,
+	HTParentAnchor *,	anchor,
+	BOOL,			strip_ok)
+{
+    char *fn = *fname;
+    char *dot = NULL, *cp = NULL;
+    CONST char *ct = NULL;
+    CONST char *ce = NULL;
+    BOOLEAN method = 0;
+
+    /*
+     *  Make sure we have a string and anchor. - FM
+     */
+    if (!(fn && *fn && anchor))
+        return;
+
+    /*
+     *  Make sure we have a file, not directory, name. -FM
+     */
+    if ((cp = strrchr(fn, '/')) != NULL) {
+	fn = (cp +1);
+	if (*fn == '\0') {
+	    return;
+	}
+    } 
+
+    /*
+     *  Check the anchor's content_type and content_encoding
+     *  elements for a gzip or Unix compressed file. - FM
+     */
+    ct = HTAnchor_content_type(anchor);
+    ce = HTAnchor_content_encoding(anchor);
+    if (ce == NULL) {
+        /*
+	 *  No Content-Encoding, so check
+	 *  the Content-Type. - FM
+	 */
+        if (!strncasecomp((ct ? ct : ""), "application/gzip", 16) ||
+	    !strncasecomp((ct ? ct : ""), "application/x-gzip", 18)) {
+	    method = 1;
+	} else if (!strncasecomp((ct ? ct : ""),
+				 "application/compress", 20) ||
+		   !strncasecomp((ct ? ct : ""),
+				 "application/x-compress", 22)) {
+	    method = 2;
+	}
+    } else if (!strcasecomp(ce, "gzip") ||
+	       !strcasecomp(ce, "x-gzip")) {
+	    /*
+	     *  It's gzipped. - FM
+	     */
+	    method = 1;
+    } else if (!strcasecomp(ce, "compress") ||
+	       !strcasecomp(ce, "x-compress")) {
+	    /*
+	     *  It's Unix compressed. - FM
+	     */
+	    method = 2;
+    }
+
+    /*
+     *  If no Content-Encoding has been detected via the anchor
+     *  pointer, but strip_ok is not set, there is nothing left
+     *  to do. - kw
+     */
+    if (method == 0 && !strip_ok)
+	return;
+
+    /*
+     *  Seek the last dot, and check whether
+     *  we have a gzip or compress suffix. - FM
+     */
+    if ((dot = strrchr(fn, '.')) != NULL) {
+	if (!strcasecomp(dot, ".tgz") ||
+	    !strcasecomp(dot, ".gz") ||
+	    !strcasecomp(dot, ".Z")) {
+	    if (!method) {
+	        /*
+		 *  It has a suffix which signifies a gzipped
+		 *  or compressed file for us, but the anchor
+		 *  claims otherwise, so tweak the suffix. - FM
+		 */
+	        cp = (dot + 1);
+		*dot = '\0';
+		if (!strcasecomp(cp, "tgz")) {
+		    StrAllocCat(*fname, ".tar");
+		}
+	    }
+	    return;
+	}
+	if (strlen(dot) > 4) {
+	    cp = ((dot + strlen(dot)) - 3);
+	    if (!strcasecomp(cp, "-gz") ||
+		!strcasecomp(cp, "_gz")) {
+		if (!method) {
+	            /*
+		     *  It has a tail which signifies a gzipped
+		     *  file for us, but the anchor claims otherwise,
+		     *  so tweak the suffix. - FM
+		     */
+		    *dot = '\0';
+		} else {
+		    /*
+		     *  The anchor claims it's gzipped, and we
+		     *  believe it, so force this tail to the
+		     *  conventional suffix. - FM
+		     */
+#ifdef VMS
+		    *cp = '-';
+#else
+		    *cp = '.';
+#endif /* VMS */
+		    cp++;
+		    *cp = TOLOWER(*cp);
+		    cp++;
+		    *cp = TOLOWER(*cp);
+		}
+		return;
+	    }
+	}
+	if (strlen(dot) > 3) {
+	    cp = ((dot + strlen(dot)) - 2);
+	    if (!strcasecomp(cp, "-Z") ||
+		!strcasecomp(cp, "_Z")) {
+		if (!method) {
+	            /*
+		     *  It has a tail which signifies a compressed
+		     *  file for us, but the anchor claims otherwise,
+		     *  so tweak the suffix. - FM
+		     */
+		    *dot = '\0';
+		} else {
+		    /*
+		     *  The anchor claims it's compressed, and
+		     *  we believe it, so force this tail to the
+		     *  conventional suffix. - FM
+		     */
+#ifdef VMS
+		    *cp = '-';
+#else
+		    *cp = '.';
+#endif /* VMS */
+		    cp++;
+		    *cp = TOUPPER(*cp);
+		}
+		return;
+	    }
+	}
+    }
+    if (!method) {
+        /*
+	 *  Don't know what compression method
+	 *  was used, if any, so we won't do
+	 *  anything. - FM
+	 */
+	return;
+    }
+
+    /*
+     *  Add the appropriate suffix. - FM
+     */
+    if (!dot) {
+	StrAllocCat(*fname, ((method == 1) ? ".gz" : ".Z"));
+	return;
+    }
+    dot++;
+    if (*dot == '\0') {
+	StrAllocCat(*fname, ((method == 1) ? "gz" : "Z"));
+	return;
+    }
+#ifdef VMS
+    StrAllocCat(*fname, ((method == 1) ? "-gz" : "-Z"));
+#else
+    StrAllocCat(*fname, ((method == 1) ? ".gz" : ".Z"));
+#endif /* !VMS */
+    return;
 }
 
 /*
@@ -3549,7 +3773,7 @@ PUBLIC char * HText_getSugFname NOARGS
  */
 PUBLIC char * HText_getLastModified NOARGS
 {
-   return(HTMainText ?
+    return(HTMainText ?
    	  (char *) HTAnchor_last_modified(HTMainText->node_anchor) : NULL);
 }
 
@@ -3559,7 +3783,7 @@ PUBLIC char * HText_getLastModified NOARGS
  */
 PUBLIC char * HText_getDate NOARGS
 {
-   return(HTMainText ?
+    return(HTMainText ?
    	  (char *) HTAnchor_date(HTMainText->node_anchor) : NULL);
 }
 
@@ -3569,7 +3793,7 @@ PUBLIC char * HText_getDate NOARGS
  */
 PUBLIC char * HText_getServer NOARGS
 {
-   return(HTMainText ?
+    return(HTMainText ?
    	  (char *)HTAnchor_server(HTMainText->node_anchor) : NULL);
 }
 
@@ -4258,10 +4482,22 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
              fputc(' ',fp);
 
             /* add data */
-          for (i = 0; line->data[i] != '\0'; i++)
-             if (!IsSpecialAttrChar(line->data[i]))
+          for (i = 0; line->data[i] != '\0'; i++) {
+	      if (!IsSpecialAttrChar(line->data[i])) {
                  fputc(line->data[i],fp);
-	     else if (dump_output_immediately && use_underscore) {
+	     } else if (line->data[i] == LY_SOFT_HYPHEN &&
+		 line->data[i + 1] == '\0') { /* last char on line */
+		 if (dump_output_immediately &&
+		     LYRawMode &&
+		     LYlowest_eightbit[current_char_set] <= 173 &&
+		     (current_char_set == 0 ||
+		      LYCharSet_UC[current_char_set].enc == UCT_ENC_8859 ||
+		      LYCharSet_UC[current_char_set].like8859 & UCT_R_8859SPECL)) {
+		     fputc(0xad, fp); /* the iso8859 byte for SHY */
+		 } else {
+		     fputc('-', fp);
+		 }
+	     } else if (dump_output_immediately && use_underscore) {
 		switch (line->data[i]) {
 		    case LY_UNDERLINE_START_CHAR:
 		    case LY_UNDERLINE_END_CHAR:
@@ -4271,7 +4507,9 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 		    case LY_BOLD_END_CHAR:
 			break;
 		}
-	     } 
+	     }
+	  }
+
 
          /* add the return */
          fputc('\n',fp);
@@ -4320,10 +4558,23 @@ PUBLIC void print_crawl_to_fd ARGS3(
         /*
 	 *  Add data.
 	 */
-        for (i = 0; line->data[i] != '\0'; i++)
-            if (!IsSpecialAttrChar(line->data[i]))
+        for (i = 0; line->data[i] != '\0'; i++) {
+            if (!IsSpecialAttrChar(line->data[i])) {
                 fputc(line->data[i],fp);
-
+	     } else if (line->data[i] == LY_SOFT_HYPHEN &&
+		 line->data[i + 1] == '\0') { /* last char on line */
+		 if (dump_output_immediately &&
+		     LYRawMode &&
+		     LYlowest_eightbit[current_char_set] <= 173 &&
+		     (current_char_set == 0 ||
+		      LYCharSet_UC[current_char_set].enc == UCT_ENC_8859 ||
+		      LYCharSet_UC[current_char_set].like8859 & UCT_R_8859SPECL)) {
+		     fputc(0xad, fp); /* the iso8859 byte for SHY */
+		 } else {
+		     fputc('-', fp);
+		 }
+	     }
+	}
         /*
 	 *  Add the return.
 	 */

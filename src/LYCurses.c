@@ -575,6 +575,12 @@ PUBLIC void start_curses NOARGS
 
     if (slinit == 0) {
 	SLtt_get_terminfo();
+#ifdef UNIX
+#if SLANG_VERSION >= 9935
+	SLang_TT_Read_FD = fileno(stdin);
+#endif /* SLANG_VERSION >= 9935 */
+#endif /* UNIX */
+
 	/*
 	 *  Check whether a saved show_color:off override is in effect. - kw
 	 */

@@ -261,7 +261,8 @@ try_again:
           if (pres->rep_out == WWW_PRESENT) {
 	      if (pres->rep != WWW_SOURCE &&
 		  strcasecomp(HTAtom_name(pres->rep), "www/mime") &&
-		  strcasecomp(HTAtom_name(pres->rep), "www/compressed")) {
+		  strcasecomp(HTAtom_name(pres->rep), "www/compressed") &&
+		  pres->quality <= 1.0 && pres->quality >= 0.0) {
 		  if (pres->quality < 1.0) {
 		      if (pres->maxbytes > 0) {
 		          sprintf(temp, ";q=%4.3f;mxb=%ld",
@@ -459,7 +460,7 @@ try_again:
 	    } else {
 		if (TRACE)
 		    fprintf(stderr,
-		    	    "HTTP: Not sending authorization (yet)\n");
+			    "HTTP: Not sending authorization (yet).\n");
 	    }
 	    /*
 	    **  Add 'Cookie:' header, if it's HTTP or HTTPS
@@ -802,14 +803,16 @@ try_again:
 	error_file = fopen(http_error_file, "w");
 	if (error_file) {		/* Managed to open the file */
 	    fprintf(error_file, "error=%d\n", server_status);
+	    fclose(error_file);
+	}
 #else
 	error_file = fopen(http_error_file, "a");
 	if (error_file) {		/* Managed to open the file */
 	    fprintf(error_file, "   URL=%s (%s)\n", url, METHOD);
 	    fprintf(error_file, "STATUS=%s\n", line_buffer);
-#endif /* SERVER_STATUS_ONLY */
 	    fclose(error_file);
 	}
+#endif /* SERVER_STATUS_ONLY */
     }
 
     /*
@@ -944,11 +947,13 @@ try_again:
 	    **  Various forms of Redirection. - FM
 	    **  300 Multiple Choices.
 	    **  301 Moved Permanently.
-	    **  302 Moved Temporarily.
-	    **  303 See Other.
+	    **  302 General (temporary) Redirection (we can, and do, use GET).
+	    **  303 See Other (always use GET).
 	    **  304 Not Modified.
 	    **  305 Use Proxy.
-	    **  > 305 is unknown.
+	    **  306 Set Proxy.
+	    **  307 Temporary Redirect with method retained.
+	    **  > 308 is unknown.
 	    */
 	    if (no_url_redirection || do_head || keep_mime_headers) {
 	        /*
@@ -973,6 +978,20 @@ try_again:
 		 *  choices (i.e., we use the latter, for now). - FM
 		 */
 		HTAlert(line_buffer);
+		if (traversal) {
+		    HTTP_NETCLOSE(s, handle);
+		    status = -1;
+		    goto clean_up;
+		}
+		if (!dump_output_immediately &&
+		    format_out == HTAtom_for("www/download")) {
+		    /*
+		     *  Convert a download request to
+		     *  a presentation request for
+		     *  interactive users. - FM
+		     */
+		    format_out = WWW_PRESENT;
+		}
 		break;
 	    }
 
@@ -992,18 +1011,36 @@ try_again:
 		/*
 		 *  We don't want to compound proxying, so if we
 		 *  got this from a proxy, just show any message
-		 *  to the user. - FM
+		 *  to the user.  Otherwise, we look for a Location:
+		 *  header and use that if present.  We should also
+		 *  look for a Set-Proxy: header, but that's not yet
+		 *  implemented. - FM
 		 */
 		if (using_proxy) {
 		    HTAlert("Got redirection to a proxy from the proxy!");
 		    break;
 		}
-	    } else if (server_status > 305) {
+	    } else if (server_status == 306 || server_status > 307) {
 	        /*
-		 *  Show user the content, if any, for redirection
-		 *  statuses we don't know. - FM
+		 *  Show user the content, if any, for 306 until we
+		 *  implement Set-Proxy: header handling, and for
+		 *  redirection statuses we don't know. - FM
 		 */
 		HTAlert(line_buffer);
+		if (traversal) {
+		    HTTP_NETCLOSE(s, handle);
+		    status = -1;
+		    goto clean_up;
+		}
+		if (!dump_output_immediately &&
+		    format_out == HTAtom_for("www/download")) {
+		    /*
+		     *  Convert a download request to
+		     *  a presentation request for
+		     *  interactive users. - FM
+		     */
+		    format_out = WWW_PRESENT;
+		}
 		break;
 	    }
 
@@ -1015,14 +1052,15 @@ try_again:
 	     *  If that's another redirecting_url, we'll repeat the
 	     *  checks, and fetch initiations if acceptible, until
 	     *  we reach the actual URL, or the redirection limit
-	     *  set in HTAccess.c is exceeded.  If the status was 301,
+	     *  set in HTAccess.c is exceeded.  If the status was 301
 	     *  indicating that the relocation is permanent, we set
 	     *  the permanent_redirection flag to make it permanent
 	     *  for the current anchor tree (i.e., will persist until
 	     *  the tree is freed or the client exits).  If the
 	     *  redirection would include POST content, we seek
-	     *  confirmation from an interactive user, and otherwise
-	     *  refuse the redirection.  We also don't allow permanent
+	     *  confirmation from an interactive user, with option to
+	     *  use 303 for 301 (but not for 307), and otherwise refuse
+	     *  the redirection.  We also don't allow permanent
 	     *  redirection if we keep POST content.  If we don't find
 	     *  the Location header or it's value is zero-length, we
 	     *  display whatever the server returned, and the user
@@ -1034,7 +1072,10 @@ try_again:
 	      char *cp;
 
 	      if ((dump_output_immediately || traversal) &&
-	      	  do_post && server_status != 303) {
+	      	  do_post &&
+		  server_status != 303 &&
+		  server_status != 302 &&
+		  server_status != 301) {
 		  /*
 		   *  Don't redirect POST content without approval
 		   *  from an interactive user. - FM
@@ -1079,7 +1120,7 @@ try_again:
 		       */
 		      if (TRACE)
 		          fprintf(stderr,
-   "HTTP: Have POST content. Treating 301 (Permanent) as 302 (Temporary).\n");
+	 "HTTP: Have POST content. Treating 301 (Permanent) as Temporary.\n");
 		      HTAlert(
 	 "Have POST content. Treating Permanent Redirection as Temporary.\n");
 		  } else {
@@ -1347,12 +1388,14 @@ Cookie2_continuation:
 					"HTTP: Proxy URL is '%s'\n",
 					redirecting_url);
 			}
-			if (!do_post || server_status == 303) {
+			if (!do_post ||
+			    server_status == 303 ||
+			    server_status == 302) {
 			    /*
 			     *  We don't have POST content (nor support PUT
-			     *  or DELETE), or the status is "See Other" and
-			     *  we can convert to GET, so go back and check
-			     *  out the new URL. - FM
+			     *  or DELETE), or the status is "See Other"  or
+			     *  "General Redirection" and we can convert to
+			     *  GET, so go back and check out the new URL. - FM
 			     */
 		            status = HT_REDIRECTING;
 		            goto clean_up;
@@ -1361,7 +1404,8 @@ Cookie2_continuation:
 			 *  Make sure the user wants to redirect
 			 *  the POST content, or treat as GET - FM & DK
 			 */
-			switch (HTConfirmPostRedirect(redirecting_url)) {
+			switch (HTConfirmPostRedirect(redirecting_url,
+						      server_status)) {
 			    /*
 			     *  User failed to confirm.
 			     *  Abort the fetch.
@@ -1413,6 +1457,20 @@ Cookie2_continuation:
 	      length = strlen(start_of_data);
 	      HTAlert("Got redirection with no Location header.");
 	      HTProgress(line_buffer);
+	      if (traversal) {
+		  HTTP_NETCLOSE(s, handle);
+		  status = -1;
+		  goto clean_up;
+	      }
+	      if (!dump_output_immediately &&
+		  format_out == HTAtom_for("www/download")) {
+		  /*
+		   *  Convert a download request to
+		   *  a presentation request for
+		   *  interactive users. - FM
+		   */
+		  format_out = WWW_PRESENT;
+	      }
 	      break;
 	   }
 
@@ -1513,6 +1571,15 @@ Cookie2_continuation:
                     break;
 		} else if (!(traversal || dump_output_immediately) &&
 		           HTConfirm("Show the 407 message body?")) {
+		    if (!dump_output_immediately &&
+			format_out == HTAtom_for("www/download")) {
+			/*
+			 *  Convert a download request to
+			 *  a presentation request for
+			 *  interactive users. - FM
+			 */
+			format_out = WWW_PRESENT;
+		    }
 		    break;
                 } else {
 		    if (traversal || dump_output_immediately)
@@ -1562,6 +1629,15 @@ Cookie2_continuation:
 		    status = -1;
 		    goto clean_up;
 		}
+		if (!dump_output_immediately &&
+		    format_out == HTAtom_for("www/download")) {
+		    /*
+		     *  Convert a download request to
+		     *  a presentation request for
+		     *  interactive users. - FM
+		     */
+		    format_out = WWW_PRESENT;
+		}
                 break;
             } /* case 4 switch */
             break;
@@ -1580,6 +1656,20 @@ Cookie2_continuation:
 	    **  we always should display. - FM
 	    */
 	    HTAlert(line_buffer);
+	    if (traversal) {
+		HTTP_NETCLOSE(s, handle);
+		status = -1;
+		goto clean_up;
+	    }
+	    if (!dump_output_immediately &&
+		format_out == HTAtom_for("www/download")) {
+		/*
+		 *  Convert a download request to
+		 *  a presentation request for
+		 *  interactive users. - FM
+		 */
+		format_out = WWW_PRESENT;
+	    }
             break;
 
           default:
@@ -1594,6 +1684,15 @@ Cookie2_continuation:
 		HTTP_NETCLOSE(s, handle);
 		status = -1;
 		goto clean_up;
+	    }
+	    if (!dump_output_immediately &&
+		format_out == HTAtom_for("www/download")) {
+		/*
+		 *  Convert a download request to
+		 *  a presentation request for
+		 *  interactive users. - FM
+		 */
+		format_out = WWW_PRESENT;
 	    }
             break;
         } /* Switch on server_status/100 */

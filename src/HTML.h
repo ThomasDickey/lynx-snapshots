@@ -88,8 +88,8 @@ struct _HTStructured {
      *  Used for nested lists. - FM
      */
     int		List_Nesting_Level;	/* counter for list nesting level */
-    int 	OL_Counter[7];		/* counter for ordered lists */
-    char 	OL_Type[7];		/* types for ordered lists */
+    int 	OL_Counter[12];		/* counter for ordered lists */
+    char 	OL_Type[12];		/* types for ordered lists */
     int 	Last_OL_Count;		/* last count in ordered lists */
     char 	Last_OL_Type;		/* last type in ordered lists */
 

@@ -325,9 +325,15 @@ PUBLIC int HTParseInet ARGS2(
     struct hostent  *phost;	/* Pointer to host - See netdb.h */
 
     if (!str) {
-    	if (TRACE)
-	    fprintf(stderr, 
-		    "HTParseInet: Can't parse `NULL'.\n");
+    	if (TRACE) {
+	    fprintf(stderr, "HTParseInet: Can't parse `NULL'.\n");
+	}
+	return -1;
+    }
+    if (HTCheckForInterrupt()) {
+	if (TRACE) {
+	    fprintf (stderr, "HTParseInet: INTERRUPTED for '%s'.\n", str);
+	}
 	return -1;
     }
     StrAllocCopy(host, str);	/* Make a copy we can mutilate */
@@ -350,8 +356,11 @@ PUBLIC int HTParseInet ARGS2(
 	} else {
 #ifdef SUPPRESS		/* 1. crashes!?!.  2. Not recommended */
 	    struct servent * serv = getservbyname(port, (char*)0);
-	    if (serv) sin->sin_port = serv->s_port;
-	    else if (TRACE) fprintf(stderr, "TCP: Unknown service %s\n", port);
+	    if (serv) {
+		sin->sin_port = serv->s_port;
+	    } else if (TRACE) {
+		fprintf(stderr, "TCP: Unknown service %s\n", port);
+	    }
 #endif /* SUPPRESS */
 	}
     }
@@ -363,11 +372,11 @@ PUBLIC int HTParseInet ARGS2(
     */
     sin->sdn_nam.n_len = min(DN_MAXNAML, strlen(host));  /* <=6 in phase 4 */
     strncpy (sin->sdn_nam.n_name, host, sin->sdn_nam.n_len + 1);
-    if (TRACE)
+    if (TRACE) {
         fprintf(stderr,  
 		"DECnet: Parsed address as object number %d on host %.6s...\n",
 		sin->sdn_objnum, host);
-
+    }
 #else  /* parse Internet host */
 
     if (*host >= '0' && *host <= '9') {   /* Test for numeric node address: */
@@ -404,8 +413,10 @@ PUBLIC int HTParseInet ARGS2(
 	FREE(host);
     } else {		    /* Alphanumeric node name: */
 #ifdef MVS	/* Oustanding problem with crash in MVS gethostbyname */
-	if (TRACE)
-	    fprintf(stderr, "HTTCP: Calling gethostbyname(%s)\n", host);
+	if (TRACE) {
+	    fprintf(stderr,
+		    "HTParseInet: Calling gethostbyname(%s)\n", host);
+	}
 #endif /* MVS */
 
 #ifdef NSL_FORK
@@ -462,8 +473,10 @@ PUBLIC int HTParseInet ARGS2(
 		**  Abort if interrupt key pressed.
 		*/
 		if (HTCheckForInterrupt()) {
-		    if (TRACE)
-			fprintf (stderr, "*** INTERRUPTED gethostbyname.\n");
+		    if (TRACE) {
+			fprintf(stderr,
+				"HTParseInet: INTERRUPTED gethostbyname.\n");
+		    }
 		    kill(fpid , SIGKILL);
 		    FREE(host);
 		    close(pfd[0]);
@@ -475,26 +488,28 @@ PUBLIC int HTParseInet ARGS2(
 		*/
 		sleep(1);
 	    }
-	    if (waitret <= 0)
+	    if (waitret <= 0) {
 		waitret = waitpid(fpid, &cst1, WNOHANG);
+	    }
 	    if (TRACE) {
 		if (WIFEXITED(cst1)) {
 		    fprintf(stderr,
-			    "NSL_FORK: Child %d exited, status 0x%x.\n",
+		      "HTParseInet: NSL_FORK child %d exited, status 0x%x.\n",
 			    (int)waitret, cst1);
 		} else if (WIFSIGNALED(cst1)) {
 		    fprintf(stderr,
-			    "NSL_FORK: Child %d got signal, status 0x%x!\n",
+		  "HTParseInet: NSL_FORK child %d got signal, status 0x%x!\n",
 			    (int)waitret, cst1);
 #ifdef WCOREDUMP
 		    if (WCOREDUMP(cst1)) {
-		    fprintf(stderr,
-			    "NSL_FORK: Child %d dumped core!\n",(int)waitret);
+			fprintf(stderr,
+			      "HTParseInet: NSL_FORK child %d dumped core!\n",
+				(int)waitret);
 		    }
-#endif
+#endif /* WCOREDUMP */
 		} else if (WIFSTOPPED(cst1)) {
 		    fprintf(stderr,
-			    "NSL_FORK: Child %d is stopped, status 0x%x!\n",
+		  "HTParseInet: NSL_FORK child %d is stopped, status 0x%x!\n",
 			    (int)waitret, cst1);
 		}
 	    }
@@ -503,22 +518,28 @@ PUBLIC int HTParseInet ARGS2(
 	    */
 	    IOCTL(pfd[0], FIONREAD, &cstat);
 	    if (cstat < 4) {
-		if (TRACE)
+		if (TRACE) {
 		    fprintf(stderr, 
-			    "NSL_FORK: Child returns only %d bytes, \
-trying again without forking...\n", cstat);
+		       "HTParseInet: NSL_FORK child returns only %d bytes.\n",
+			    cstat);
+		    fprintf(stderr,
+		       "             Trying again without forking.\n");
+		}
 		phost = gethostbyname(host);	/* See netdb.h */
 		if (!phost) {
-		    if (TRACE)
+		    if (TRACE) {
 			fprintf(stderr, 
-				"HTParseInet: Can't find internet node name `%s'.\n",host);
+			 "HTParseInet: Can't find internet node name `%s'.\n",
+				host);
+		    }
 		    memset((void *)&sin->sin_addr, 0, sizeof(sin->sin_addr));
 		} else {
-		    memcpy((void *)&sin->sin_addr, phost->h_addr, phost->h_length);
+		    memcpy((void *)&sin->sin_addr,
+		    	   phost->h_addr, phost->h_length);
 		}
-#if 0		
+#ifdef NOTDEFINED
 	        cstat = read(pfd[0], (void *)&sin->sin_addr , 4);
-#endif
+#endif /* NOTDEFINED */
 	    } else {
 	        cstat = read(pfd[0], (void *)&sin->sin_addr , cstat);
 	    }
@@ -526,16 +547,20 @@ trying again without forking...\n", cstat);
 	    close(pfd[1]);
 	}
 	if (sin->sin_addr.s_addr == 0) {
-	    if (TRACE)
+	    if (TRACE) {
 	        fprintf(stderr, 
-		    "HTTPAccess: Can't find internet node name `%s'.\n",host);
-	      FREE(host);
-	      return -1;
+			"HTParseInet: Can't find internet node name `%s'.\n",
+			host);
+	    }
+	    FREE(host);
+	    return -1;
 	}
 	FREE(host);
 #ifdef MVS
-	if (TRACE)
-	    fprintf(stderr, "HTTCP: gethostbyname() returned %d\n", phost);
+	if (TRACE) {
+	    fprintf(stderr,
+		    "HTParseInet: gethostbyname() returned %d\n", phost);
+	}
 #endif /* MVS */
 
 #else /* Not NSL_FORK: */
@@ -551,13 +576,17 @@ trying again without forking...\n", cstat);
 #else
 	phost = gethostbyname(host);	/* See netdb.h */
 #ifdef MVS
-	if (TRACE)
-	    fprintf(stderr, "HTTCP: gethostbyname() returned %d\n", phost);
+	if (TRACE) {
+	    fprintf(stderr,
+		    "HTParseInet: gethostbyname() returned %d\n", phost);
+	}
 #endif /* MVS */
 	if (!phost) {
-	    if (TRACE)
+	    if (TRACE) {
 	        fprintf(stderr, 
-		    "HTTPAccess: Can't find internet node name `%s'.\n",host);
+			"HTParseInet: Can't find internet node name `%s'.\n",
+			host);
+	    }
 	    FREE(host);
 	    return -1;  /* Fail? */
 	}
@@ -579,15 +608,15 @@ trying again without forking...\n", cstat);
 #endif /* NSL_FORK */
     }
 
-    if (TRACE)
+    if (TRACE) {
         fprintf(stderr,  
-		"TCP: Parsed address as port %d, IP address %d.%d.%d.%d\n",
+	   "HTParseInet: Parsed address as port %d, IP address %d.%d.%d.%d\n",
 		(int)ntohs(sin->sin_port),
 		(int)*((unsigned char *)(&sin->sin_addr)+0),
 		(int)*((unsigned char *)(&sin->sin_addr)+1),
 		(int)*((unsigned char *)(&sin->sin_addr)+2),
 		(int)*((unsigned char *)(&sin->sin_addr)+3));
-
+    }
 #endif  /* Internet vs. Decnet */
 
     return 0;	/* OK */

@@ -156,6 +156,7 @@ int mainloop NOARGS
     BOOLEAN LYRawMode_flag = LYRawMode;
     BOOLEAN LYSelectPopups_flag = LYSelectPopups;
     BOOLEAN trace_mode_flag = FALSE;
+    BOOLEAN forced_HTML_mode = LYforce_HTML_mode;
     char cfile[128];
     FILE *cfp;
     char *cp, *toolbar;
@@ -963,6 +964,11 @@ try_again:
 	     */
 	    first_file = FALSE; 
 
+	    /*
+	     *  Set the startrealm, and deal as best we can
+	     *  with preserving forced HTML mode for a local
+	     *  startfile. - FM
+	     */
 	    temp = HTParse(curdoc.address, "",
 			   PARSE_ACCESS+PARSE_HOST+PARSE_PUNCTUATION);
 	    if (!temp || *temp == '\0') {
@@ -976,6 +982,30 @@ try_again:
 			StrAllocCat(startrealm, "/");
 		    }
 		} else {
+		    if (forced_HTML_mode &&
+			!dump_output_immediately &&
+			!curdoc.bookmark &&
+			!strncasecomp(curdoc.address, "file:", 5) &&
+			strlen(temp) > 1) {
+			/*
+			 *  We forced HTML for a local startfile which
+			 *  is not a bookmark file and has a path of at
+			 *  least two letters.  It it doesn't have a
+			 *  suffix mapped to text/html, we'll set the
+			 *  entire path (including the lead slash) as a
+			 *  "suffix" mapped to text/html to ensure it is
+			 *  always treated as an HTML source file.  We
+			 *  are counting on a tail match to this full path
+			 *  for some other URL fetched during the session
+			 *  having too low a probability to worry about,
+			 *  but it could happen. - FM
+			 */
+			HTAtom *encoding;
+
+			if (HTFileFormat(temp, &encoding) != WWW_HTML) {
+			    HTSetSuffix(temp, "text/html", "8bit", 1.0);
+			}
+		    }
 		    if ((cp = strrchr(temp, '/')) != NULL) {
 			*(cp+1) = '\0';
 			StrAllocCat(startrealm, temp);
@@ -2520,6 +2550,8 @@ new_cmd:  /*
 			    !strncmp(curdoc.address, "file:", 5)) {
 			    LYNoRefererForThis = TRUE;
 			}
+			StrAllocCopy(newdoc.title,
+				     links[curdoc.link].hightext);
 		    }
 		    c = change_form_link(&links[curdoc.link],
 					 FORM_UP, &newdoc, &refresh_screen,
@@ -4641,6 +4673,10 @@ check_add_bookmark_to_self:
 	        (links[curdoc.link].type != WWW_FORM_LINK_TYPE ||
 	    	 links[curdoc.link].form->type == F_SUBMIT_TYPE ||
 		 links[curdoc.link].form->type == F_IMAGE_SUBMIT_TYPE)) {
+		/*
+		 *  We have links, and the current link is a
+		 *  normal link or a form's submit button. - FM
+		 */
 	        _statusline(HEAD_D_L_OR_CANCEL);
 		c = LYgetch();
 		if (TOUPPER(c) == 'D') {
@@ -4662,6 +4698,7 @@ check_add_bookmark_to_self:
 			} 
 		        HEAD_request = TRUE;
 			LYforce_no_cache = TRUE;
+			StrAllocCopy(newdoc.title, curdoc.title);
 			if (HTLoadedDocumentIsHEAD()) {
 	            	    HTuncache_current_document();
 			    FREE(curdoc.address);
@@ -4688,14 +4725,16 @@ check_add_bookmark_to_self:
 			_statusline(FORM_ACTION_NOT_HTTP_URL);
 			sleep(MessageSecs);
 		    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-		    	       links[curdoc.link].form->submit_method == URL_POST_METHOD &&
+		    	       links[curdoc.link].form->submit_method ==
+							  URL_POST_METHOD &&
 			       HTConfirm(CONFIRM_POST_LINK_HEAD) == FALSE) {
 			_statusline(CANCELLED);
 			sleep(InfoSecs);
 		    } else {
 			HEAD_request = TRUE;
 			LYforce_no_cache = TRUE;
-			StrAllocCat(newdoc.title, " - HEAD");
+			StrAllocCopy(newdoc.title, links[curdoc.link].hightext);
+			StrAllocCat(newdoc.title, " - (HEAD)");
 			cmd = LYK_ACTIVATE;
 			goto new_cmd;
 		    }
@@ -4704,6 +4743,7 @@ check_add_bookmark_to_self:
 		break;
 	    } else {
 		/*
+		 *  We can offer only this document for a HEAD request.
 		 *  Check if this is a reply from a POST, and if so,
 		 *  seek confirmation if the safe element is not set. - FM
 		 */
@@ -4714,18 +4754,35 @@ check_add_bookmark_to_self:
 		    sleep(InfoSecs);
 		    break;
 		} else if (nlinks > 0) {
+		    /*
+		     *  The current link is a non-submittable form
+		     *  link, so prompt the user to make it clear
+		     *  that the HEAD request would be for the
+		     *  current document, not the form link. - FM
+		     */
 		    _statusline(HEAD_D_OR_CANCEL);
 	            c = LYgetch();
 		} else {
+		    /*
+		     *  No links, so we can just assume that
+		     *  the user wants a HEAD request for the
+		     *  current document. - FM
+		     */
 		    c = 'D';
 		}
 		if (TOUPPER(c) == 'D') {
+		    /*
+		     *  The user didn't cancel, so check if
+		     *  a HEAD request is appropriate for the
+		     *  current document. - FM
+		     */ 
 		    if (strncmp(curdoc.address, "http", 4)) {
 		        _statusline(DOC_NOT_HTTP_URL);
 			sleep(MessageSecs);
 		    } else {
 		        HEAD_request = TRUE;
 			LYforce_no_cache = TRUE;
+			StrAllocCopy(newdoc.title, curdoc.title);
 			if (HTLoadedDocumentIsHEAD()) {
 	            	    HTuncache_current_document();
 			    FREE(curdoc.address);
@@ -4738,7 +4795,7 @@ check_add_bookmark_to_self:
 	    break;	
 
 	case LYK_TOGGLE_HELP:
-    	    if (user_mode==NOVICE_MODE) {
+    	    if (user_mode == NOVICE_MODE) {
 	        toggle_novice_line();
 	        noviceline(more);
 	    }

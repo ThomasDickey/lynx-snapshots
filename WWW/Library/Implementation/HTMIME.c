@@ -972,7 +972,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	} /* switch on character */
 	break;
 
-    case miS:				/* Check for 'a; or 'e' */
+    case miS:				/* Check for 'a' or 'e' */
         switch (c) {
 	case 'a':
 	case 'A':
@@ -1565,25 +1565,24 @@ PRIVATE void HTMIME_put_character ARGS2(
 		*/
 		StrAllocCopy(me->anchor->content_disposition, me->value);
 		/*
-		**  If it includes file; filename=name.suffix
-		**  load the me->SugFname element. - FM
+		**  It's not clear yet from existing RFCs and IDs
+		**  whether we should be looking for file;, attachment;,
+		**  and/or inline; before the filename=value, so we'll
+		**  just search for "filename" followed by '=' and just
+		**  hope we get the intended value.  It is purely a
+		**  suggested name, anyway. - FM
 		*/
 		cp = me->anchor->content_disposition;
-		while (*cp != '\0' && strncasecomp(cp, "file;", 5))
-		    cp++;
-		if (*cp == '\0')
-		    break;
-		cp += 5;
-		while (*cp != '\0' && WHITE(*cp))
-		    cp++;
-		if (*cp == '\0')
-		    break;
 		while (*cp != '\0' && strncasecomp(cp, "filename", 8))
 		    cp++;
 		if (*cp == '\0')
 		    break;
 		cp += 8;
-		while (*cp == ' ' || *cp == '=')
+		while ((*cp != '\0') && (WHITE(*cp) || *cp == '='))
+		    cp++;
+		if (*cp == '\0')
+		    break;
+		while (*cp != '\0' && WHITE(*cp)) 
 		    cp++;
 		if (*cp == '\0')
 		    break;

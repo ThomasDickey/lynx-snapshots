@@ -124,6 +124,7 @@ SITE_DEFS = # Your defines here
 # -DUSEHASH        (see README.configure)
 # -DUSE_COLOR_STYLE (see README.configure)
 # -DUSE_SLANG      (see README.configure)
+# -DUSE_ZLIB       To use some functions from zlib library if you have it.
 #
 # if you are linking to freeWAIS-0.202 or older, you should define this
 # in MCFLAGS (SITE_DEFS)

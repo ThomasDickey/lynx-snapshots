@@ -1192,6 +1192,10 @@ PUBLIC int main ARGS2(
     /*
      *  Process the configuration file.
      */
+    if (TRACE) {
+	fprintf(stderr,
+		"Loading cfg file '%s'.\n", lynx_cfg_file);
+    }
     read_cfg(lynx_cfg_file);
     FREE(lynx_cfg_file);
 

@@ -102,6 +102,8 @@ $ define/user sys$output 'CHRwhere'cp850_uni.h
 $ makeuctb cp850_uni.tbl
 $ define/user sys$output 'CHRwhere'cp852_uni.h
 $ makeuctb cp852_uni.tbl
+$ define/user sys$output 'CHRwhere'cp866_uni.h
+$ makeuctb cp866_uni.tbl
 $ define/user sys$output 'CHRwhere'cp1250_uni.h
 $ makeuctb cp1250_uni.tbl
 $ define/user sys$output 'CHRwhere'cp1251_uni.h

@@ -104,7 +104,7 @@ typedef struct _HTStyle {
 */
     HTFont              font;           /* Font id */
     HTCoord             fontSize;       /* The size of font, not independent */
-    HTColor             color;  /* text gray of current run */
+    HTColor             color;		/* text gray of current run */
     int                 superscript;    /* superscript (-sub) in points */
 
     HTAnchor            *anchor;        /* Anchor id if any, else zero */

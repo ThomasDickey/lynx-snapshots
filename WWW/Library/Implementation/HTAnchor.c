@@ -949,13 +949,31 @@ PUBLIC void HTAnchor_setRevTitle ARGS2(
 }
 
 /*	Suggested filename handling. - FM
-**	(will be loaded if we had a Content-disposition
-**	 header with file; filename=name.suffix)
+**	(will be loaded if we had a Content-Disposition
+**	 header or META element with filename=name.suffix)
 */
 PUBLIC CONST char * HTAnchor_SugFname ARGS1(
 	HTParentAnchor *,	me)
 {
     return me ? me->SugFname : NULL;
+}
+
+/*	Content-Encoding handling. - FM
+**	(will be loaded if we had a Content-Encoding
+**	 header.)
+*/
+PUBLIC CONST char * HTAnchor_content_encoding ARGS1(
+	HTParentAnchor *,	me)
+{
+    return me ? me->content_encoding : NULL;
+}
+
+/*	Content-Type handling. - FM
+*/
+PUBLIC CONST char * HTAnchor_content_type ARGS1(
+	HTParentAnchor *,	me)
+{
+    return me ? me->content_type : NULL;
 }
 
 /*	Last-Modified header handling. - FM

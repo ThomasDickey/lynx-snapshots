@@ -78,6 +78,7 @@ PRIVATE HTStructured * target;			/* The output sink */
 PRIVATE HTStructuredClass targetClass;		/* Copy of fn addresses */
 PRIVATE HTParentAnchor *node_anchor;		/* Its anchor */
 PRIVATE int	diagnostic;			/* level: 0=none 2=source */
+PRIVATE HTList *NNTP_AuthInfo = NULL;		/* AUTHINFO database */
 
 #define PUTC(c) (*targetClass.put_character)(target, c)
 #define PUTS(s) (*targetClass.put_string)(target, s)
@@ -86,11 +87,40 @@ PRIVATE int	diagnostic;			/* level: 0=none 2=source */
 #define MAYBE_END(e) if (HTML_dtd.tags[e].contents != SGML_EMPTY) \
                         (*targetClass.end_element)(target, e, 0)
 
+typedef struct _NNTPAuth {
+   char * host;
+   char * user;
+   char * pass;
+} NNTPAuth;
+
 PRIVATE void free_news_globals NOARGS
 {
+    if (s >= 0) {
+	NEWS_NETCLOSE(s);
+	s = -1;
+    }
     FREE(HTNewsHost);
     FREE(NewsHost);
     FREE(NewsHREF);
+}
+
+PRIVATE void free_NNTP_AuthInfo NOARGS
+{
+    HTList *cur = NNTP_AuthInfo;
+    NNTPAuth *auth = NULL;
+
+    if (!cur)
+        return;
+
+    while (NULL != (auth = (NNTPAuth *)HTList_nextObject(cur))) {
+        FREE(auth->host);
+	FREE(auth->user);
+	FREE(auth->pass);
+	FREE(auth);
+    }
+    HTList_delete(NNTP_AuthInfo);
+    NNTP_AuthInfo = NULL;
+    return;
 }
 
 PUBLIC CONST char * HTGetNewsHost NOARGS
@@ -258,6 +288,239 @@ PRIVATE BOOL match ARGS2 (CONST char *,unknown, CONST char *,template)
     for (; *u && *t && (TOUPPER(*u) == *t); u++, t++)
         ; /* Find mismatch or end */
     return (BOOL)(*t == 0);		/* OK if end of template */
+}
+
+typedef enum {
+    NNTPAUTH_ERROR =	  0,	/* general failure */
+    NNTPAUTH_OK =	281,	/* authenticated successfully */
+    NNTPAUTH_CLOSE =	502	/* server probably closed connection */
+} NNTPAuthResult;
+/*
+**  This function handles nntp authentication. - FM
+*/
+PRIVATE NNTPAuthResult HTHandleAuthInfo ARGS1(
+	char *,		host)
+{
+    HTList *cur = NULL;
+    NNTPAuth *auth = NULL;
+    char *UserName = NULL;
+    char *PassWord = NULL;
+    char *msg = NULL;
+    char buffer[512];
+    int status, tries;
+    extern BOOL dump_output_immediately;
+
+    /*
+    **  Make sure we have an interactive user and a host. - FM
+    */
+    if (dump_output_immediately || !(host && *host))
+        return NNTPAUTH_ERROR;
+
+    /*
+    **  Check for an existing authorization entry. - FM
+    */
+    if (NNTP_AuthInfo != NULL) {
+        cur = NNTP_AuthInfo;
+	while (NULL != (auth = (NNTPAuth *)HTList_nextObject(cur))) {
+	    if (!strcmp(auth->host, host)) {
+		UserName = auth->user;
+		PassWord = auth->pass;
+		break;
+	    }
+	}
+    } else {
+	NNTP_AuthInfo = HTList_new();
+	atexit(free_NNTP_AuthInfo);
+    }
+
+    /*
+    **  Handle the username. - FM
+    */
+    buffer[511] = '\0';
+    tries = 3;
+
+    while (tries) {
+	if (UserName == NULL) {
+	    if ((msg = (char *)calloc(1, (strlen(host) + 30))) == NULL) {
+		outofmem(__FILE__, "HTHandleAuthInfo");
+	    }
+	    sprintf(msg, "Username for news host '%s':", host);
+	    UserName = HTPrompt(msg, NULL);
+	    FREE(msg);
+	    if (!(UserName && *UserName)) {
+		FREE(UserName);
+		return NNTPAUTH_ERROR;
+	    }
+	}
+	sprintf(buffer, "AUTHINFO USER %.*s%c%c", 495, UserName, CR, LF);
+	if ((status = response(buffer)) < 0) {
+	    if (status == HT_INTERRUPTED)
+		_HTProgress("Connection interrupted.");
+	    else
+		HTAlert("Connection closed ???");
+	    if (auth) {
+		if (auth->user != UserName) {
+		    FREE(auth->user);
+		    auth->user = UserName;
+		}
+	    } else {
+		FREE(UserName);
+	    }
+	    return NNTPAUTH_CLOSE;
+	}
+	if (status == 281) {
+	    /*
+	    **  Username is OK and no Password is required. - FM
+	    */
+	    if (auth) {
+		if (auth->user != UserName) {
+		    FREE(auth->user);
+		    auth->user = UserName;
+		}
+	    } else {
+		if ((auth =
+		    (NNTPAuth *)calloc(1, sizeof(NNTPAuth))) != NULL) {
+		    StrAllocCopy(auth->host, host);
+		    auth->user = UserName;
+		    HTList_appendObject(NNTP_AuthInfo, auth);
+		}
+	    }
+	    return NNTPAUTH_OK;
+	}
+	if (status != 381) {
+	    /*
+	    **  Not a request for the password, so it must be an error. - FM
+	    */
+	    HTAlert(response_text);
+	    tries--;
+	    if ((tries > 0) && HTConfirm("Change username?")) {
+		if (!auth || auth->user != UserName) {
+		    FREE(UserName);
+		}
+		if ((UserName = HTPrompt("Username:", UserName)) != NULL &&
+		    *UserName) {
+		    continue;
+		}
+	    }
+	    if (auth) {
+		if (auth->user != UserName) {
+		    FREE(auth->user);
+		}
+		FREE(auth->pass);
+	    }
+	    FREE(UserName);
+	    return NNTPAUTH_ERROR;
+	}
+	break;
+    }
+
+    if (status == 381) {
+	/*
+	**  Username is OK, and a password is required. - FM
+	*/
+	tries = 3;
+	while (tries) {
+	    if (PassWord == NULL) {
+		if ((msg = (char *)calloc(1, (strlen(host) + 30))) == NULL) {
+		    outofmem(__FILE__, "HTHandleAuthInfo");
+		}
+		sprintf(msg, "Password for news host '%s':", host);
+		PassWord = HTPromptPassword(msg);
+		FREE(msg);
+		if (!(PassWord && *PassWord)) {
+		    FREE(PassWord);
+		    return NNTPAUTH_ERROR;
+		}
+	    }
+	    sprintf(buffer, "AUTHINFO PASS %.*s%c%c", 495, PassWord, CR, LF);
+	    if ((status = response(buffer)) < 0) {
+		if (status == HT_INTERRUPTED) {
+		    _HTProgress("Connection interrupted.");
+		} else {
+		    HTAlert("Connection closed ???");
+		}
+		if (auth) {
+		    if (auth->user != UserName) {
+			FREE(auth->user);
+			auth->user = UserName;
+		    }
+		    if (auth->pass != PassWord) {
+			FREE(auth->pass);
+			auth->pass = PassWord;
+		    }
+		} else {
+		    FREE(UserName);
+		    FREE(PassWord);
+		}
+		return NNTPAUTH_CLOSE;
+	    }
+	    if (status == 502) {
+		/*
+		 *  That's what INN's nnrpd returns.
+		 *  It closes the connection after this. - kw
+		 */
+		HTAlert(response_text);
+		if (auth) {
+		    if (auth->user == UserName)
+			UserName = NULL;
+		    FREE(auth->user);
+		    if (auth->pass == PassWord)
+			PassWord = NULL;
+		    FREE(auth->pass);
+		}
+		FREE(UserName);
+		FREE(PassWord);
+		return NNTPAUTH_CLOSE;
+	    }
+	    if (status == 281) {
+		/*
+		**  Password is OK. - FM
+		*/
+		if (auth) {
+		    if (auth->user != UserName) {
+			FREE(auth->user);
+			auth->user = UserName;
+		    }
+		    if (auth->pass != PassWord) {
+			FREE(auth->pass);
+			auth->pass = PassWord;
+		    }
+		} else {
+		    if ((auth =
+			(NNTPAuth *)calloc(1, sizeof(NNTPAuth))) != NULL) {
+			StrAllocCopy(auth->host, host);
+			auth->user = UserName;
+			auth->pass = PassWord;
+			HTList_appendObject(NNTP_AuthInfo, auth);
+		    }
+		}
+		return NNTPAUTH_OK;
+	    }
+	    /*
+	    **  Show the error message and see if we should try again. - FM
+	    */
+	    HTAlert(response_text);
+	    if (!auth || auth->pass != PassWord) {
+		FREE(PassWord);
+	    } else {
+		PassWord = NULL;
+	    }
+	    tries--;
+	    if ((tries > 0) && HTConfirm("Change password?")) {
+		continue;
+	    }
+	    if (auth) {
+		if (auth->user == UserName)
+		    UserName = NULL;
+		FREE(auth->user);
+		FREE(auth->pass);
+	    }
+	    FREE(UserName);
+	    break;
+	}
+    }
+
+    return NNTPAUTH_ERROR;
 }
 
 /*	Find Author's name in mail address
@@ -1919,7 +2182,7 @@ PUBLIC int HTLoadNews ARGS4(
 	if (post_wanted || reply_wanted || spost_wanted || sreply_wanted) {
 	    strcpy(command, "POST");
 	} else if (list_wanted) {
-	    strcpy(command, "LIST NEWSGROUPS");
+	    sprintf(command, "XGTITLE %.*s", 249, p1);
 	} else if (group_wanted) {
 	    char * slash = strchr(p1, '/');
 	    strcpy(command, "GROUP ");
@@ -2170,10 +2433,10 @@ PUBLIC int HTLoadNews ARGS4(
         } else {
 	    /*
 	    **  Ensure reader mode, but don't bother checking the
-	    **  status for anything but HT_INERRUPTED, because if
-	    **  the reader mode command is not needed, the server
-	    **  probably return a 500, which is irrelevant at
-	    **  this point. - FM
+	    **  status for anything but HT_INTERRUPTED or a 480
+	    **  Authorization request, because if the reader mode
+	    **  command is not needed, the server probably returned
+	    **  a 500, which is irrelevant at this point. - FM
 	    */
 	    char buffer[20];
 
@@ -2181,6 +2444,22 @@ PUBLIC int HTLoadNews ARGS4(
 	    if ((status = response(buffer)) == HT_INTERRUPTED) {
 		_HTProgress("Connection interrupted.");
 		break;
+	    }
+	    if (status == 480) {
+		NNTPAuthResult auth_result = HTHandleAuthInfo(NewsHost);
+		if (auth_result == NNTPAUTH_CLOSE) {
+		    if (s != -1 && !(ProxyHost || ProxyHREF)) {
+			NEWS_NETCLOSE(s);
+			s = -1;
+		    }
+		}
+	        if (auth_result != NNTPAUTH_OK) {
+		    break;
+	        }
+		if ((status = response(buffer)) == HT_INTERRUPTED) {
+		    _HTProgress("Connection interrupted.");
+		    break;
+		}
 	    }
 	}
 
@@ -2196,12 +2475,41 @@ Send_NNTP_command:
 	        break;
 	    }
 	}
+	/*
+	 *  For some well known error responses which are expected
+	 *  to occur in normal use, break from the loop without retrying
+	 *  and without closing the connection.  It is unlikely that
+	 *  these are leftovers from a timed-out connection (but we do
+	 *  some checks to see whether the response rorresponds to the
+	 *  last command), or that they will give anything else when
+	 *  automatically retried.  - kw
+	 */
+	if (status == 411 && group_wanted &&
+	    !strncmp(command, "GROUP ", 6) &&
+	    !strncasecomp(response_text + 3, " No such group ", 15) &&
+	    !strcmp(response_text + 18, groupName)) {
+
+	    HTAlert(response_text);
+	    break;
+	} else if (status == 430 && !group_wanted && !list_wanted &&
+	    !strncmp(command, "ARTICLE <", 9) &&
+	    !strcasecomp(response_text + 3, " No such article")) {
+
+	    HTAlert(response_text);
+	    break;
+	}
 	if ((status/100) != 2 &&
-	    status != 340) {
-	    if (retries)
+	    status != 340 &&
+	    status != 480) {
+	    if (retries) {
+		if (list_wanted && !strncmp(command, "XGTITLE", 7)) {
+		    sprintf(command, "LIST NEWSGROUPS%c%c", CR, LF);
+		    goto Send_NNTP_command;
+		}
 	        HTAlert(response_text);
-	    else
+	    } else {
 	        _HTProgress(response_text);
+	    }
 	    NEWS_NETCLOSE(s);
 	    s = -1;
 	    /*
@@ -2215,7 +2523,36 @@ Send_NNTP_command:
 	/*
 	**  Post or load a group, article, etc
 	*/
-	if (post_wanted || reply_wanted || spost_wanted || sreply_wanted) {
+	if (status == 480) {
+	    NNTPAuthResult auth_result;
+	    /*
+	     *  Some servers return 480 for a failed XGTITLE. - FM
+	     */
+	    if (list_wanted && !strncmp(command, "XGTITLE", 7) &&
+	        strstr(response_text, "uthenticat") == NULL &&
+	        strstr(response_text, "uthor") == NULL) {
+		sprintf(command, "LIST NEWSGROUPS%c%c", CR, LF);
+		goto Send_NNTP_command;
+	    }
+	    /*
+	    **  Handle Authorization. - FM
+	    */
+	    if ((auth_result = HTHandleAuthInfo(NewsHost)) == NNTPAUTH_OK) {
+		goto Send_NNTP_command;
+	    } else if (auth_result == NNTPAUTH_CLOSE) {
+		if (s != -1 && !(ProxyHost || ProxyHREF)) {
+		    NEWS_NETCLOSE(s);
+		    s = -1;
+		}
+		if (retries < 1)
+		    continue;
+	    }
+	    status = HT_NOT_LOADED;
+	} else if (post_wanted || reply_wanted ||
+		   spost_wanted || sreply_wanted) {
+	    /*
+	    **  Handle posting of an article. - FM
+	    */
 	    if (status != 340) {
 		HTAlert("Cannot POST to this host.");
 		if (postfile) {
@@ -2232,9 +2569,15 @@ Send_NNTP_command:
 	    FREE(postfile);
 	    status = HT_NOT_LOADED;
 	} else if (list_wanted) {
+	    /*
+	    **  List available newsgroups. - FM
+	    */
 	    _HTProgress("Reading list of available newsgroups.");
 	    status = read_list(ListArg);
 	} else if (group_wanted) {
+	    /*
+	    **  List articles in a news group. - FM
+	    */
 	    if (last < 0) {
 	        /*
 		**  We got one article number rather than a range
@@ -2252,6 +2595,9 @@ Send_NNTP_command:
 	    _HTProgress("Reading list of articles in newsgroup.");
 	    status = read_group(groupName, first, last);
         } else {
+	    /*
+	    **  Get an article from a news group. - FM
+	    */
 	    _HTProgress("Reading news article.");
 	    status = read_article();
 	}
@@ -2260,8 +2606,13 @@ Send_NNTP_command:
 	    status = HT_LOADED;
 	}
 	if (!(post_wanted || reply_wanted ||
-	      spost_wanted || sreply_wanted))
-	    (*targetClass._free)(target);
+	      spost_wanted || sreply_wanted)) {
+	    if (status == HT_NOT_LOADED) {
+		(*targetClass._abort)(target, NULL);
+	    } else {
+		(*targetClass._free)(target);
+	    }
+	}
 	FREE(NewsHREF);
 	if (ProxyHREF) {
 	    StrAllocCopy(NewsHost, ProxyHost);

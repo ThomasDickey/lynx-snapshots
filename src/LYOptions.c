@@ -2133,6 +2133,9 @@ PRIVATE int popup_choice ARGS6(
 	return(orig_choice);
     }
     scrollok(form_window, TRUE);
+#ifdef PDCURSES
+       keypad(form_window, TRUE);
+#endif /* PDCURSES */
 #ifdef NCURSES
 #ifdef wgetbkgd
 #define getbkgd(w) wgetbkgd(w)	/* workaround pre-1.9.9g bug */
