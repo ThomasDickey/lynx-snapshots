@@ -156,6 +156,7 @@ PUBLIC int edit_current_file ARGS3(
 	sprintf(position, "%d", lineno);
 
     edit_temporary_file(filename, position, NULL);
+    result = TRUE;
 
 done:
     /*
@@ -165,6 +166,7 @@ done:
 	*number_sign = '#';
 
     FREE(filename);
+    CTRACE((tfp, "edit_current_file returns %d\n", result));
     return (result);
 }
 
@@ -173,7 +175,9 @@ PUBLIC void edit_temporary_file ARGS3(
 	char *,		position,
 	char *,		message)
 {
+#ifdef UNIX
     struct stat stat_info;
+#endif
     char *format = "%s %s";
     char *command = NULL;
     char *editor_arg = "";

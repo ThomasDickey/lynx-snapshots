@@ -1,6 +1,23 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2001-07-24 (2.8.5dev.1)
+* modify GetChar() definition for PDCurses to ignore key-modifiers which are
+  passed back from getch() as if they were key codes.  Those interfere with
+  shifted commands such as 'Q' -TD
+* modify parse_style() function to operate on a copy of its parameter, to avoid
+  changing it.  Otherwise, when parse_style() is executed as a side effect of
+  start_curses(), its data is modified and not valid on successive calls.
+  This bug existed prior to 2.8.4dev.17 -TD
+* set return value of edit_current_file() to true if the file is edited.  This
+  forces a reload for example if one edits the current html file, and is needed
+  to make PDCurses repaint the screen as well (report by vtailor@gte.net,
+  bug introduced in 2.8.4dev.21) -TD
+* add ifdef for wresize() to accommodate FreeBSD 3.x which has resizeterm() but
+  not wresize().  Also, use a 'long' rather than 'attr_t'.  These changes are
+  needed to build with the 1.8.6ache patches to ncurses (report by Matt
+  <matt@greenviolet.net>) -TD
+
 2001-07-17 (2.8.4rel.1)
 * remove comment in README.ssl directing people to
   http://www.moxienet.com/lynx/, since that page is moot with 2.8.4 (report by

@@ -150,6 +150,7 @@
 #undef HAVE_WAITPID
 #undef HAVE_WBORDER
 #undef HAVE_WREDRAWLN
+#undef HAVE_WRESIZE
 #undef HAVE_XCURSES		/* CF_PDCURSES_X11 */
 #undef HAVE___ARGZ_COUNT	/* defined by AM_GNU_GETTEXT */
 #undef HAVE___ARGZ_NEXT		/* defined by AM_GNU_GETTEXT */

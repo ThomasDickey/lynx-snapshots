@@ -692,7 +692,7 @@ fi
 
 
 PACKAGE=lynx
-VERSION=2.8.4
+VERSION=2.8.5
 
 
 
@@ -12241,7 +12241,7 @@ for cf_func in \
 		newpad \
 		newterm \
 		pnoutrefresh \
-		resizeterm \
+		wresize resizeterm \
 		touchline \
 		touchwin \
 		use_default_colors \

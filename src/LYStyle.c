@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.46 Sat, 07 Jul 2001 18:30:13 -0700 dickey @
+ * @Id: LYStyle.c 1.47 Tue, 24 Jul 2001 17:54:30 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -190,7 +190,7 @@ PRIVATE void parse_attributes ARGS5(
 	    curPair = our_pairs[!!(cA & A_BOLD)][!!(cA & M_BLINK)][fA][bA] - 1;
 	else {
 	    curPair = ++colorPairs;
-	    init_pair(curPair, fA, bA);
+	    init_pair((short)curPair, (short)fA, (short)bA);
 	    if (fA < MAX_COLOR
 	     && bA < MAX_COLOR
 	     && curPair < 255)
@@ -216,7 +216,7 @@ PRIVATE void parse_attributes ARGS5(
 /* parse a style option of the format
  * STYLE:<OBJECT>:FG:BG
  */
-PRIVATE void parse_style ARGS1(char*,buffer)
+PRIVATE void parse_style ARGS1(char*, param)
 {
     static struct {
 	char *name;
@@ -254,6 +254,7 @@ PRIVATE void parse_style ARGS1(char*,buffer)
     unsigned n;
     BOOL found = FALSE;
 
+    char *buffer = strdup(param);
     char *tmp = strchr(buffer, ':');
     char *element, *mono, *fg, *bg;
 
@@ -339,6 +340,7 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
 	else
 	    parse_attributes(mono,fg,bg, DSTYLE_ELEMENTS,element);
     }
+    FREE(buffer);
 }
 
 #ifdef LY_FIND_LEAKS
@@ -366,6 +368,7 @@ PRIVATE void initialise_default_stylesheet NOARGS
     };
     unsigned n;
     char temp[80];
+    CTRACE((tfp, "initialize_default_stylesheet\n"));
     for (n = 0; n < TABLESIZE(table); n++) {
 	parse_style(strcpy(temp, table[n]));
     }
@@ -410,10 +413,11 @@ PRIVATE void style_initialiseHashTable NOARGS
  * need to remember the STYLE: lines we encounter and parse them
  * after curses has started
  */
-HTList *lss_styles = NULL;
+PRIVATE HTList *lss_styles = NULL;
 
 PUBLIC void parse_userstyles NOARGS
 {
+    static BOOL first = TRUE;
     char *name;
     HTList *cur = lss_styles;
 
@@ -453,9 +457,11 @@ PUBLIC void parse_userstyles NOARGS
 /* Add a STYLE: option line to our list.  Process "default:" early
    for it to have the same semantic as other lines: works at any place
    of the style file, the first line overrides the later ones. */
-PRIVATE void HStyle_addStyle ARGS1(char*,buffer)
+PRIVATE void HStyle_addStyle ARGS1(char*, buffer)
 {
     char *name = NULL;
+
+    CTRACE((tfp, "HStyle_addStyle(%s)\n", buffer));
     StrAllocCopy(name, buffer);
     if (lss_styles == NULL)
 	lss_styles = HTList_new();
