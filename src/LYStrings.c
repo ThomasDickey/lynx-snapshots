@@ -737,8 +737,10 @@ PRIVATE void setup_vtXXX_keymap NOARGS
 	DEFINE_KEY( "\033[6~",	PGDOWN,		KEY_NPAGE ),
 	DEFINE_KEY( "\033[8~",	END_KEY,	KEY_END ),
 	DEFINE_KEY( "\033[7~",	HOME,		KEY_HOME),
-	DEFINE_KEY( "\033[28~",	F1,		KEY_F(0) ),
-	DEFINE_KEY( "\033[29~",	DO_KEY,		KEY_F(6) ),
+	DEFINE_KEY( "\033[28~",	F1,		KEY_F(1) ),
+	DEFINE_KEY( "\033OP",	F1,		KEY_F(1) ),
+	DEFINE_KEY( "\033[OP",	F1,		KEY_F(1) ),
+	DEFINE_KEY( "\033[29~",	DO_KEY,		KEY_F(16) ),
     };
     size_t n;
     for (n = 0; n < TABLESIZE(table); n++)

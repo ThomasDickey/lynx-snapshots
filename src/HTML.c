@@ -83,7 +83,7 @@ PRIVATE HTStyleSheet * styleSheet;	/* Application-wide */
 
 /*	Module-wide style cache
 */
-PUBLIC	HTStyle *styles[HTML_ELEMENTS+31]; /* adding 24 nested list styles  */
+PRIVATE HTStyle *styles[HTML_ELEMENTS+31]; /* adding 24 nested list styles  */
 					   /* and 3 header alignment styles */
 					   /* and 3 div alignment styles    */
 PRIVATE HTStyle *default_style;
@@ -100,12 +100,6 @@ PRIVATE int i_prior_style = -1;
 PRIVATE void HTML_end_element PARAMS((HTStructured *me,
 				      int element_number,
 				      char **include));
-
-/*		Forward declarations of routines
-*/
-PRIVATE void get_styles NOPARAMS;
-PRIVATE void change_paragraph_style PARAMS((HTStructured * me,
-					    HTStyle * style));
 
 /*
  * If we have verbose_img set, display labels for images.
@@ -6972,6 +6966,7 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
 */
 PRIVATE void get_styles NOARGS
 {
+    styleSheet = DefaultStyle();
     default_style =		HTStyleNamed(styleSheet, "Normal");
 
     styles[HTML_H1] =		HTStyleNamed(styleSheet, "Heading1");
@@ -7038,6 +7033,17 @@ PRIVATE void get_styles NOARGS
     styles[HTML_LISTING] =	HTStyleNamed(styleSheet, "Listing");
 }
 
+/*
+ * If we're called from another module, make sure we've initialized styles
+ * array first.
+ */
+PUBLIC  HTStyle *LYstyles ARGS1(int, style_number)
+{
+    if (styles[style_number] == 0)
+	get_styles();
+    return styles[style_number];
+}
+
 /*				P U B L I C
 */
 
@@ -7099,7 +7105,6 @@ PUBLIC HTStructured* HTML_new ARGS3(
      * array is not necessarily the same as it was from 'get_styles()'.  So
      * we reinitialize the whole thing.
      */
-    styleSheet = DefaultStyle();
     get_styles();
 
     me->isa = &HTMLPresentation;

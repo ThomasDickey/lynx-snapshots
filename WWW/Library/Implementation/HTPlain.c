@@ -650,7 +650,7 @@ PUBLIC HTStream* HTPlainPresent ARGS3(
 		     HTAnchor_getUCInfoStage(anchor,UCT_STAGE_HTEXT));
 
     me->text = HText_new(anchor);
-    HText_setStyle(me->text, styles[HTML_XMP] );
+    HText_setStyle(me->text, LYstyles(HTML_XMP) );
     HText_beginAppend(me->text);
 
     return (HTStream*) me;

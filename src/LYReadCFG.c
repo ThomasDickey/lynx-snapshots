@@ -913,6 +913,7 @@ static Config_Type Config_Table [] =
      PARSE_SET("seek_frag_map_in_cur", CONF_BOOL, LYSeekFragMAPinCur),
      PARSE_SET("set_cookies", CONF_BOOL, LYSetCookies),
      PARSE_SET("show_cursor", CONF_BOOL, LYShowCursor),
+     PARSE_SET("show_kb_rate", CONF_BOOL, LYshow_kb_rate),
      PARSE_ENV("snews_proxy", CONF_ENV, 0 ),
      PARSE_ENV("snewspost_proxy", CONF_ENV, 0 ),
      PARSE_ENV("snewsreply_proxy", CONF_ENV, 0 ),

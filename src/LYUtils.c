@@ -3485,11 +3485,14 @@ PUBLIC void parse_restrictions ARGS1(
 	  while (*p != ',' && *p != '\0')
 	      p++;
 
-	  for (i=0; restrict_name[i]; i++)
+	  for (i=0; restrict_name[i]; i++) {
 	     if (STRNEQ(word, restrict_name[i], p-word)) {
 		 *restrict_flag[i] = TRUE;
 		 break;
 	     }
+	  }
+	  if (*p)
+	      p++;
       }
       return;
 }

@@ -3121,7 +3121,7 @@ PUBLIC void LYHandleP ARGS5(
 	me->in_word = NO;
 
 	if (LYoverride_default_alignment(me)) {
-	    me->sp->style->alignment = styles[me->sp[0].tag_number]->alignment;
+	    me->sp->style->alignment = LYstyles(me->sp[0].tag_number)->alignment;
 	} else if (me->List_Nesting_Level >= 0 ||
 		   ((me->Division_Level < 0) &&
 		    (!strcmp(me->sp->style->name, "Normal") ||

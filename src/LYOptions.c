@@ -3145,6 +3145,7 @@ static OptValues search_type_values[] = {
 	{ TRUE, 	    "Case sensitive",	 "case_sensitive" },
 	{ 0, 0, 0 }};
 static char * select_popups_string	= "select_popups";
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
 static char * show_color_string		= "show_color";
 static OptValues show_color_values[] = {
 	{ SHOW_COLOR_NEVER,  	never_string,	never_string },
@@ -3152,6 +3153,7 @@ static OptValues show_color_values[] = {
 	{ SHOW_COLOR_ON,     	on_string, 	on_string },
 	{ SHOW_COLOR_ALWAYS, 	always_string,	always_string },
 	{ 0, 0, 0 }};
+#endif
 static char * show_cursor_string	= "show_cursor";
 static char * user_mode_string		= "user_mode";
 static OptValues user_mode_values[] = {
@@ -3363,7 +3365,9 @@ PUBLIC int postoptions ARGS1(
     BOOLEAN raw_mode_changed = FALSE;
     BOOLEAN assume_char_set_changed = FALSE;
     BOOLEAN need_reload = FALSE;
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
     int CurrentShowColor = LYShowColor;
+#endif
 
     /*-------------------------------------------------
      * kludge a link from mbm_menu, the URL was:
@@ -3685,7 +3689,9 @@ PUBLIC int gen_options ARGS1(
 	char **,	newfile)
 {
     int i;
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
     BOOLEAN can_do_colors;
+#endif
     static char tempfile[LY_MAXPATH];
     FILE *fp0;
     size_t cset_len = 0;

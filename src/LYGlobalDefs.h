@@ -154,7 +154,8 @@ extern BOOLEAN LYforce_no_cache;
 extern BOOLEAN LYoverride_no_cache;  /* don't need fresh copy, from history */
 extern BOOLEAN LYinternal_flag; /* don't need fresh copy, was internal link */
 extern BOOLEAN LYresubmit_posts;
-extern int user_mode; /* novice or advanced */
+extern BOOLEAN LYshow_kb_rate;	/* show KB/sec in HTReadProgress */
+extern int user_mode;		/* novice or advanced */
 extern BOOLEAN is_www_index;
 extern BOOLEAN dump_output_immediately;
 extern int dump_output_width;
@@ -167,9 +168,9 @@ extern BOOLEAN telnet_ok;
 extern BOOLEAN news_ok;
 extern BOOLEAN ftp_ok;
 extern BOOLEAN rlogin_ok;
-extern BOOLEAN no_print;    /* TRUE to disable printing */
-extern BOOLEAN system_editor; /* True if locked-down editor */
-extern BOOLEAN child_lynx;	  /* TRUE to exit with an arrow */
+extern BOOLEAN no_print;          /* TRUE to disable printing */
+extern BOOLEAN system_editor;     /* True if locked-down editor */
+extern BOOLEAN child_lynx;        /* TRUE to exit with an arrow */
 extern BOOLEAN error_logging;     /* TRUE to mail error messages */
 extern BOOLEAN check_mail;        /* TRUE to report unread/new mail messages */
 extern BOOLEAN vi_keys;           /* TRUE to turn on vi-like key movement */
