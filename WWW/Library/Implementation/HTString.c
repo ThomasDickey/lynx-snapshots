@@ -813,14 +813,19 @@ PUBLIC void HTAddParam ARGS4(
 
 /*
  * Append the remaining command-string to a system command (compare with
- * HTAddParam).  Any remaining "%s" tokens are copied as-is.
+ * HTAddParam).  Any remaining "%s" tokens are copied as empty strings.
  */
 PUBLIC void HTEndParam ARGS3(
     char **,		result,
     CONST char *,	command,
     int,		number)
 {
-    CONST char *last = HTAfterCommandArg(command, number);
+    CONST char *last;
+    int count;
+    count = HTCountCommandArgs (command);
+    if (count < number)
+	number = count;
+    last = HTAfterCommandArg(command, number);
     if (last[0] != 0) {
 	HTSACat(result, last);
     }

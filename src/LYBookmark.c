@@ -34,7 +34,7 @@ show_bookmark_not_defined NOARGS
 	    BOOKMARK_FILE_NOT_DEFINED,
 	    key_for_func(LYK_OPTIONS));
     LYMBM_statusline(string_buffer);
-    free(string_buffer);
+    FREE(string_buffer);
 }
 
 /*
@@ -521,7 +521,7 @@ PUBLIC void remove_bookmark_link ARGS2(
      *	it is writable by the current process.
      *	Changed to copy  1998-04-26 -- gil
      */
-    if (LYCopyFile(newfile, filename_buffer) == 0) 
+    if (LYCopyFile(newfile, filename_buffer) == 0)
 	return;
     HTAlert(BOOKTEMP_COPY_FAIL);
 #else  /* !UNIX */
@@ -731,7 +731,7 @@ draw_bookmark_choices:
 	HTSprintf0(&shead_buffer,
 		MULTIBOOKMARKS_SHEAD_MASK, MBM_current, MBM_screens);
 	addstr(shead_buffer);
-	free(shead_buffer);
+	FREE(shead_buffer);
     } else {
 	addstr(MULTIBOOKMARKS_SHEAD);
     }

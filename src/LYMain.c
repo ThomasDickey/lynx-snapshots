@@ -344,6 +344,11 @@ PUBLIC char *LYCookieRejectDomains = NULL; /* domains to reject all cookies */
 PUBLIC char *LYCookieStrictCheckDomains = NULL; /* check strictly  */
 PUBLIC char *LYCookieLooseCheckDomains = NULL;  /* check loosely   */
 PUBLIC char *LYCookieQueryCheckDomains = NULL;  /* check w/a query */
+PUBLIC char *LYCookieSAcceptDomains = NULL; /* domains to accept all cookies */
+PUBLIC char *LYCookieSRejectDomains = NULL; /* domains to reject all cookies */
+PUBLIC char *LYCookieSStrictCheckDomains = NULL; /* check strictly  */
+PUBLIC char *LYCookieSLooseCheckDomains = NULL;  /* check loosely   */
+PUBLIC char *LYCookieSQueryCheckDomains = NULL;  /* check w/a query */
 #ifdef EXP_PERSISTENT_COOKIES
 BOOLEAN persistent_cookies = TRUE;
 PUBLIC char *LYCookieFile = NULL;          /* default cookie file */
@@ -466,6 +471,11 @@ PRIVATE void free_lynx_globals NOARGS
 #ifdef EXP_PERSISTENT_COOKIES
     FREE(LYCookieFile);
 #endif
+    FREE(LYCookieAcceptDomains);
+    FREE(LYCookieRejectDomains);
+    FREE(LYCookieLooseCheckDomains);
+    FREE(LYCookieStrictCheckDomains);
+    FREE(LYCookieQueryCheckDomains);
     FREE(LYUserAgent);
     FREE(LYUserAgentDefault);
     FREE(LYHostName);
@@ -491,6 +501,7 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(URLDomainSuffixes);
     FREE(XLoadImageCommand);
     FREE(lynx_version_putenv_command);
+    FREE(lynx_temp_space);
     FREE(LYTraceLogPath);
     FREE(lynx_cfg_file);
 #if defined(USE_HASH)

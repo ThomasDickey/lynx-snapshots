@@ -4,13 +4,14 @@
 
 #include <HTUtils.h>
 #include <LYStrings.h>
+#include <LYKeymap.h>		/* only for KEYMAP_SIZE - kw */
 
 PUBLIC int current_lineedit = 0;  /* Index into LYLineEditors[]   */
 
 /*
  * See LYStrings.h for the LYE definitions.
  */
-PRIVATE char DefaultEditBinding[]={
+PRIVATE char DefaultEditBinding[KEYMAP_SIZE-1]={
 
 LYE_NOP,        LYE_BOL,        LYE_DELPW,      LYE_ABORT,
 /* nul          ^A              ^B              ^C      */
@@ -100,17 +101,141 @@ LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 
 /* 100..10F function key definitions in LYStrings.h */
-LYE_NOP,        LYE_NOP,        LYE_FORW,       LYE_BACK,
+LYE_FORM_PASS,  LYE_FORM_PASS,  LYE_FORW,       LYE_BACK,
 /* UPARROW      DNARROW         RTARROW         LTARROW     */
 
-LYE_NOP,        LYE_NOP,        LYE_BOL,        LYE_EOL,
+LYE_FORM_PASS,  LYE_FORM_PASS,  LYE_BOL,        LYE_EOL,
 /* PGDOWN       PGUP            HOME            END         */
+
+#if (defined(_WINDOWS) || defined(__DJGPP__))
+
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+/* F1 */
+
+#else
 
 LYE_NOP,        LYE_TAB,        LYE_BOL,        LYE_EOL,
 /* F1           Do key          Find key        Select key  */
 
-LYE_NOP,        LYE_DELP,       LYE_NOP,        LYE_NOP,
-/* Insert key   Remove key      MOUSE_KEY       DO_NOTHING  */
+#endif /* _WINDOWS || __DJGPP__ */
+
+LYE_NOP,        LYE_DELP,       LYE_NOP,        LYE_FORM_PASS,
+/* Insert key   Remove key      DO_NOTHING      Back tab */
+
+/* 110..18F */
+#if (defined(_WINDOWS) || defined(__DJGPP__)) && defined(USE_SLANG) && !defined(DJGPP_KEYHANDLER)
+
+LYE_DELP,       LYE_ENTER,      LYE_NOP,        LYE_NOP,
+/* Backspace    Enter */
+
+#else
+
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+
+#endif /* USE_SLANG &&(_WINDOWS || __DJGPP) && !DJGPP_KEYHANDLER */
+
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+/*             MOUSE_KEY  */
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+/* 190..20F */
+
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+/* 210..28F */
+
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+/* 290..293 */
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
 };
 
 /*
@@ -121,9 +246,10 @@ LYE_NOP,        LYE_DELP,       LYE_NOP,        LYE_NOP,
              /*                 ^K=delete-to-EOL,    ^X=delete-to-BOL,    */
              /*                 ^R=delete-prev-word, ^T=delete-next-word, */
              /*                 ^^=upper-case-line,  ^_=lower-case-line   */
+/* Why the difference for tab? - kw */
 
 #ifdef EXP_ALT_BINDINGS
-PRIVATE char BetterEditBinding[]={
+PRIVATE char BetterEditBinding[KEYMAP_SIZE-1]={
 
 LYE_NOP,        LYE_BOL,        LYE_BACK,       LYE_ABORT,
 /* nul          ^A              ^B              ^C      */
@@ -213,17 +339,141 @@ LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 
 /* 100..10E function key definitions in LYStrings.h */
-LYE_NOP,        LYE_NOP,        LYE_FORW,       LYE_BACK,
+LYE_FORM_PASS,  LYE_FORM_PASS,  LYE_FORW,       LYE_BACK,
 /* UPARROW      DNARROW         RTARROW         LTARROW     */
 
-LYE_NOP,        LYE_NOP,        LYE_BOL,        LYE_EOL,
+LYE_FORM_PASS,  LYE_FORM_PASS,  LYE_BOL,        LYE_EOL,
 /* PGDOWN       PGUP            HOME            END         */
+
+#if (defined(_WINDOWS) || defined(__DJGPP__))
+
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+/* F1 */
+
+#else
 
 LYE_NOP,        LYE_TAB,        LYE_BOL,        LYE_EOL,
 /* F1           Do key          Find key        Select key  */
 
-LYE_NOP,        LYE_DELP,       LYE_NOP,        LYE_NOP,
-/* Insert key   Remove key      MOUSE_KEY       DO_NOTHING  */
+#endif /* _WINDOWS || __DJGPP__ */
+
+LYE_NOP,        LYE_DELP,       LYE_NOP,        LYE_FORM_PASS,
+/* Insert key   Remove key      DO_NOTHING      Back tab */
+
+/* 110..18F */
+#if (defined(_WINDOWS) || defined(__DJGPP__)) && defined(USE_SLANG) && !defined(DJGPP_KEYHANDLER)
+
+LYE_DELP,       LYE_ENTER,      LYE_NOP,        LYE_NOP,
+/* Backspace    Enter */
+
+#else
+
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+
+#endif /* USE_SLANG &&(_WINDOWS || __DJGPP) && !DJGPP_KEYHANDLER */
+
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+/*             MOUSE_KEY  */
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+/* 190..20F */
+
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+/* 210..28F */
+
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+/* 290..293 */
+LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
 };
 #endif
 

@@ -205,7 +205,7 @@ PUBLIC int LYUpload_options ARGS2(
     cp = HTfullURL_toFile(directory);
     strcpy(curloc,cp);
     LYTrimPathSep(curloc);
-    free(cp);
+    FREE(cp);
 #endif /* VMS */
 
     LYLocalFileToURL(newfile, tempfile);

@@ -855,14 +855,14 @@ static Config_Type Config_Table [] =
 #ifdef USE_COLOR_TABLE
      PARSE_FUN("color", CONF_FUN, color_fun),
 #endif
-     PARSE_STR("cookie_accept_domains", CONF_STR, LYCookieAcceptDomains),
+     PARSE_STR("cookie_accept_domains", CONF_STR, LYCookieSAcceptDomains),
 #ifdef EXP_PERSISTENT_COOKIES
      PARSE_STR("cookie_file", CONF_STR, LYCookieFile),
 #endif /* EXP_PERSISTENT_COOKIES */
-     PARSE_STR("cookie_loose_invalid_domains", CONF_STR, LYCookieLooseCheckDomains),
-     PARSE_STR("cookie_query_invalid_domains", CONF_STR, LYCookieQueryCheckDomains),
-     PARSE_STR("cookie_reject_domains", CONF_STR, LYCookieRejectDomains),
-     PARSE_STR("cookie_strict_invalid_domains", CONF_STR, LYCookieStrictCheckDomains),
+     PARSE_STR("cookie_loose_invalid_domains", CONF_STR, LYCookieSLooseCheckDomains),
+     PARSE_STR("cookie_query_invalid_domains", CONF_STR, LYCookieSQueryCheckDomains),
+     PARSE_STR("cookie_reject_domains", CONF_STR, LYCookieSRejectDomains),
+     PARSE_STR("cookie_strict_invalid_domains", CONF_STR, LYCookieSStrictCheckDomains),
      PARSE_ENV("cso_proxy", CONF_ENV, 0 ),
 #ifdef VMS
      PARSE_STR("CSWING_PATH", CONF_STR, LYCSwingPath),
@@ -1040,7 +1040,7 @@ PUBLIC void free_lynx_cfg NOARGS
 	case CONF_ENV:
 	    if (q->str_value != 0) {
 		FREE(*(q->str_value));
-		free((char *)q->str_value);
+		FREE((char *)q->str_value);
 	    }
 	    break;
 	default:
@@ -1292,24 +1292,49 @@ PUBLIC void read_cfg ARGS4(
      * And for query/strict/loose invalid cookie checking. - BJP
      */
 
+    if (LYCookieSAcceptDomains != NULL) {
+	cookie_domain_flag_set(LYCookieSAcceptDomains, FLAG_ACCEPT_ALWAYS);
+	FREE(LYCookieSAcceptDomains);
+    }
+
+    if (LYCookieSRejectDomains != NULL) {
+	cookie_domain_flag_set(LYCookieSRejectDomains, FLAG_REJECT_ALWAYS);
+	FREE(LYCookieSRejectDomains);
+    }
+
+    if (LYCookieSStrictCheckDomains != NULL) {
+	cookie_domain_flag_set(LYCookieSStrictCheckDomains, FLAG_INVCHECK_STRICT);
+	FREE(LYCookieSStrictCheckDomains);
+    }
+
+    if (LYCookieSLooseCheckDomains != NULL) {
+	cookie_domain_flag_set(LYCookieSLooseCheckDomains, FLAG_INVCHECK_LOOSE);
+	FREE(LYCookieSLooseCheckDomains);
+    }
+
+    if (LYCookieSQueryCheckDomains != NULL) {
+	cookie_domain_flag_set(LYCookieSQueryCheckDomains, FLAG_INVCHECK_QUERY);
+	FREE(LYCookieSQueryCheckDomains);
+    }
+
     if (LYCookieAcceptDomains != NULL) {
-	cookie_add_acceptlist(LYCookieAcceptDomains);
+	cookie_domain_flag_set(LYCookieAcceptDomains, FLAG_ACCEPT_ALWAYS);
     }
 
     if (LYCookieRejectDomains != NULL) {
-	cookie_add_rejectlist(LYCookieRejectDomains);
+	cookie_domain_flag_set(LYCookieRejectDomains, FLAG_REJECT_ALWAYS);
     }
 
     if (LYCookieStrictCheckDomains != NULL) {
-	cookie_set_invcheck(LYCookieStrictCheckDomains, INVCHECK_STRICT);
+	cookie_domain_flag_set(LYCookieStrictCheckDomains, FLAG_INVCHECK_STRICT);
     }
 
     if (LYCookieLooseCheckDomains != NULL) {
-	cookie_set_invcheck(LYCookieLooseCheckDomains, INVCHECK_LOOSE);
+	cookie_domain_flag_set(LYCookieLooseCheckDomains, FLAG_INVCHECK_LOOSE);
     }
 
     if (LYCookieQueryCheckDomains != NULL) {
-	cookie_set_invcheck(LYCookieQueryCheckDomains, INVCHECK_QUERY);
+	cookie_domain_flag_set(LYCookieQueryCheckDomains, FLAG_INVCHECK_QUERY);
     }
 
 }

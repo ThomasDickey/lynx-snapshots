@@ -317,6 +317,11 @@ extern char *LYCookieRejectDomains;     /* domains to reject all cookies */
 extern char *LYCookieStrictCheckDomains; /* domains to check strictly    */
 extern char *LYCookieLooseCheckDomains; /* domains to check loosely      */
 extern char *LYCookieQueryCheckDomains; /* domains to check w/a query    */
+extern char *LYCookieSAcceptDomains;    /* domains to accept all cookies */
+extern char *LYCookieSRejectDomains;    /* domains to reject all cookies */
+extern char *LYCookieSStrictCheckDomains;/* domains to check strictly    */
+extern char *LYCookieSLooseCheckDomains;/* domains to check loosely      */
+extern char *LYCookieSQueryCheckDomains;/* domains to check w/a query    */
 #ifdef EXP_PERSISTENT_COOKIES
 extern BOOLEAN persistent_cookies;
 extern char *LYCookieFile;              /* file to store cookies in      */

@@ -15,7 +15,7 @@
 
 #include <LYLeaks.h>
 
-PRIVATE BOOLEAN editor_can_position NOARGS
+PUBLIC BOOLEAN editor_can_position NOARGS
 {
 #ifdef VMS
     return (strstr(editor, "sedt") || strstr(editor, "SEDT"));

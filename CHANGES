@@ -1,6 +1,103 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1999-02-16 (2.8.2dev.17)
+* modify LYReadCFG.c to avoid duplicating data for cookies - BJP
+* modify HTConfirm to use gettext values for yes/no.  Use HTConfirm in a few
+  more places, though completing this will require more work - TD
+* add note about resolv library to PROBLEMS - PW
+* minor clarification about DOS/Windows binaries in README - PW
+* modify ./makefile.in so that portions which are commented-out will be done
+  without a leading tab, since that confuses the make program on Digital Unix
+  3.2 - TD
+* Unix: Don't accept HOME variable with valid if it does not begin with
+  a slash - KW
+* changed HTGetCharacter to be 8-bit clean, it could not distinguish between a
+  character value 255 and EOF.  Changes affect several protocols:  nntp,
+  gopher, finger, ftp.  Most notably, news articles containing byte value 255
+  could not be completely read - KW
+* removed a memory leak in HTFTP.c for some directory data, added a few gettext
+  calls - KW
+* added ability to show file type description in local Unix directory listings:
+  new format codes for use in LIST_FORMAT %t, %T, they are not used by default
+  - KW
+* modify "clean" makefile rule to allow for FreeBSD, which generates core
+  files such as lynx.core - KED, TD
+* correct sign-extension when converting characters after edit of TEXTAREA
+  (upper-128 characters were being translated to dots, reported by IC) - KED
+* worked with some pathological/boundary-case pages, and fixed some some edges
+  that could fail (eg, last line of document is also last line of a TEXTAREA,
+  and lines are being added; page containing *only* a one-line TEXTAREA field;
+  etc).  While it was unlikely one would run into such beasts in real life,
+  they all work correctly now.  Thanks to Greg Marr and Serge Munhov for
+  providing some very basic pages that I was able to easily modify for various
+  test cases - KED
+* added a few flags to the TextAnchor and HTLine struct's, to indicate an
+  expansion line.  These were added to allow for line deletion when a TEXTAREA
+  is "reset" or shrinks (when we get around to tackling those tasks) - KED
+* the editor's cursor is now positioned on the same line in the edit file, as
+  it was on when the editor was invoked (relative to the beginning of the
+  TEXTAREA).  At least for those editors that lynx knows support initial
+  positioning (emacs, vi, pico, jove, and jed for non-VMS platforms; sedt for
+  VMS) - KED
+* cleaned up and corrected a few comments; simplified a few small bits of
+  code - KED
+* added cookie_domain_flags enum to LYCookie.h, usage should be apparent with
+  patch applied - BJP
+* updated free_lynx_globals() for cookie variables - BJP
+* replaced cookie_add_acceptlist, cookie_add_rejectlist and
+  cookie_set_invcheck functions with cookie_domain_flag_set - BJP
+* saved a bit of memory by dropping useless pointer memory initialization
+  (exactly WHAT was I thinking?)  - BJP
+* changed LYrcFile.c, LYReadCFG.c to call cookie_domain_flag_set  - BJP
+* new lynxkeycode BACKTAB_KEY with value 0x10F.  DO_NOTHING is and shall remain
+  0x10E, as documented in lynx.cfg.  Moved MOUSE_KEY out of the way - does it
+  need to be in the tables at all?  BACKTAB_KEY will be recognized if the
+  (n)curses keypad() input handling returns KEY_BTAB, which happens if the
+  terminal description has the right kB or kcbt capability string and the
+  terminal actually generates that string (often "^[[Z", generated for
+  shift+tab).  May also work with lynx-keymaps mechanism.  Not tested with
+  slang, maybe this has to be added to some more of the various tables in
+  LYStrings.c - KW
+* new user-visible key commands FASTFORW_LINK and FASTBACKW_LINK, with
+  lynxactionscodes LYK_FASTFORW_LINK and LYK_FASTBACKW_LINK.  By default mapped
+  from <tab> key (^I) and new BACKTAB_KEY, respectively.  Previously <tab> was
+  mapped from NEXT_LINK, which has some special handling if the invoking key
+  was <tab> (and if FASTTAB was defined in LYMainLoop.c, which was the case by
+  default).  The old behavior of <tab> is still available if it is mapped with
+  KEYMAP to NEXT_LINK in lynx.cfg - KW
+* these commands always go to a previous (or next) link if there is one,
+  and skip multiple lines that are part of the same textarea - KW
+* recognize the new key actions also during partial file display, for some
+  roughly corresponding movement - KW
+* new lynxeditactioncode LYE_FORM_PASS, to allow any lynxkeycode to end the
+  editing of a form field and be passed up to the caller - it will then
+  normally be mapped to a lynxactioncode.  LYE_FORM_PASS keys are generally
+  ignored in non-forms line editing.  This is used for BACKTAB_KEY, as well as
+  several other keys that were previously handled specially in form_getstr - KW
+* extended the maps in LYEditmap.c to cover the same range of lynxkeycodes as
+  the LYKeymap.c tables.  Yes, this uses more space, but the tables need to be
+  consistent - KW
+* map lynxkeycode 0x00 to LYK_DO_NOTHING, as lynx.cfg said all the time - KW
+* some tweaks of displayed strings in 'K'ey Map page.  Don't show CHANGE_LINK
+  binding if mouse not enabled (it may not be useful even when -use_mouse is
+  on) - KW
+* function expand_substring used with NCURSES for user-defined mapping keysyms
+  to byte sequences was parsing the "^(...)" construct wrong - KW
+* other small tweaks in key handling code - KW
+* changes to lynx.cfg to better reflect reality. - KW
+* terminology note:  lynxkeycode = what's between the colons in lynx.cfg
+  KEYMAP:...:..., lynxactioncode = LYK_* code for what's right of the second
+  colon, lynxeditactioncode = what's assigned in LYEditmap.c (and which may
+  differ between lineedit_mode Default Binding and alternative bindings) - KW
+* formatting tweak in HTML.c for <DD> not preceded by <DT>:  Don't use wrong
+  indentation in that case - KW
+* changes from DK for DOS up to 1999-02-14 - KW
+* minor documentation tweaks - LP
+* replace most uses of free with FREE (John Bley).
+* correct HTEndParam so that if fewer command-parameters are given than
+  expected, we still terminate the command properly (reported by
+  Michael Warner) - TD
 1999-02-08 (2.8.2dev.16)
 * minor documentation tweaks for EDITTEXTAREA - LP
 * correct uninitalized buffer variable in send_file_to_mail() which caused
@@ -43,19 +140,19 @@ Changes since Lynx 2.8 release
 * Don't compile in the rules implementation code if NO_RULES is defined
   (suggested by BL) - KW
 * fix special case of EDITTEXTAREA where the returned file is empty - BJP
-* write to .lynxrc values for COOKIE_ACCEPT_DOMAINS and COOKIE_REJECT_DOMAINS
-  if they are set on the options screen - BJP
+* write to .lynxrc values for COOKIE_ACCEPT_DOMAINS and COOKIE_REJECT_DOMAIN
+  when options screen is used - BJP
 * add lynx.cfg and .lynxrc support for a few new options:
     COOKIE_STRICT_INVALID_DOMAINS,
     COOKIE_LOOSE_INVALID_DOMAINS,
     COOKIE_QUERY_INVALID_DOMAINS
   They're the same sort as COOKIE_ACCEPT_DOMAINS, comma-delimited lists - BJP
 * modify LYOpenTemp() to report unusual errors, i.e., other than if the
-  temporary file could not be created because it already exists - BJP
+  temporary file could not be created because it already exists - PG
 * more fixes to CF_INET_ADDR - TD
 * modify README to indicate where win32 binaries are found - JS
-* add chrtrans tables for Ukranian Cyrillic (patch by Serhii Hlodin
-  <hlodin@lutsk.bank.gov.ua<)
+* add chrtrans tables for Ukrainian Cyrillic: koi8-u, cp866u, iso-9945-2
+  (patch by Serhii Hlodin <hlodin@lutsk.bank.gov.ua>)
 * patch for TEXTAREA edit feature - KED
   1. Handles the renumbering of link number tags [nnn], when the tag itself is
      split across two lines (see below).

@@ -12,8 +12,18 @@ Mkoi8-u
 # (verified against RFC2319).
 # KOI8-U home page: <http://www.net.ua/KOI8-U>
 #
-#hex unicode # description     
-#--- U+---- # ---------------     
+# Quoted from RFC2319:
+#   The upper part of the KOI8-U Character Set contains all Russian
+#   letters defined in KOI8-R and four Ukrainian letters (#164, #180 -
+#   ukr. ie, #166, #182 - ukr. i, #167, #183 - ukr. yi, #173, #189 - ukr.
+#   ghe  with upturn) which locations are compliant with ISO-IR-111.
+#
+#   BOX DRAWINGS elements in the other positions (that are not used by
+#   Ukrainian letters) are the same as in KOI8-R character set.
+#
+#
+#hex unicode # description
+#--- U+---- # ---------------
 0x80 U+2500 # BOX DRAWINGS  LIGHT HORIZONTAL
 0x81 U+2502 # BOX DRAWINGS  LIGHT VERTICAL
 0x82 U+250C # BOX DRAWINGS  LIGHT DOWN AND RIGHT

@@ -1,5 +1,5 @@
 #
-#The MIME name of this charset. 
+#The MIME name of this charset.
 Mcp866u
 
 #Name as a Display Charset (used on Options screen)
@@ -13,10 +13,8 @@ OUkrainian Cyrillic (cp866u)
 #    Unicode version: 2.0
 #    Table version: 2.00
 #    Table format:  Format A
-#    General notes: based on Cyrillic (cp866) table.
-#                   Original file: cp866_uni.tbl (authors: 
-#                           Lori Brownell <loribr@microsoft.com>
-#                           K.D. Chang    <a-kchang@microsoft.com>
+#    General notes: based on Cyrillic (cp866) table,
+#                   have different mapping in 0xF2-0xF9 region.
 #
 #    Format: Three tab-separated columns
 #        Column #1 is the cp866_DOSCyrillicUkrainian code (in hex)

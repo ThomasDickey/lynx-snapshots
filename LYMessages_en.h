@@ -183,7 +183,7 @@
 #else
 #ifdef DOSPATH
 #define SPAWNING_MSG \
- gettext("Type EXIT to return to Lynx.\r\n")
+ gettext("Type EXIT to return to Lynx.\n")
 #else /* UNIX */
 #define SPAWNING_MSG \
  gettext("Spawning your default shell.  Use 'exit' to return to Lynx.\n")
@@ -662,6 +662,8 @@
  gettext("%s cookie: %.*s=%.*s  Allow? (Y/N/Always/neVer)")
 #define INVALID_COOKIE_DOMAIN_CONFIRMATION \
  gettext("Accept invalid cookie domain=%s for '%s'?")
+#define INVALID_COOKIE_PATH_CONFIRMATION \
+ gettext("Accept invalid cookie path=%s as a prefix of '%s'?")
 #define ALLOWING_COOKIE gettext("Allowing this cookie.")
 #define REJECTING_COOKIE gettext("Rejecting this cookie.")
 #define COOKIE_JAR_IS_EMPTY gettext("The Cookie Jar is empty.")
@@ -709,6 +711,7 @@
  gettext("Modified tail combined with head of form field value.")
 
 /* HTFile.c */
+#define ENTRY_IS_DIRECTORY      gettext("Directory")
 #define DISALLOWED_DIR_SCAN     gettext("Directory browsing is not allowed.")
 #define DISALLOWED_SELECTIVE_ACCESS gettext("Selective access is not enabled for this directory")
 #define FAILED_DIR_SCAN         gettext("Multiformat: directory scan failed.")

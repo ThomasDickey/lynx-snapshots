@@ -197,30 +197,39 @@ PUBLIC BOOL HTLastConfirmCancelled NOARGS
 */
 PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
 {
+    char *msg_yes = gettext("yes");
+    char *msg_no  = gettext("no");
+    int result = -1;
+
     conf_cancelled = NO;
     if (dump_output_immediately) { /* Non-interactive, can't respond */
-	return(NO);
+	result = NO;
     } else {
-	int c;
+	char *msg = NULL;
 
-	_user_message(gettext("%s (y/n) "), Msg);
+	HTSprintf0(&msg, "%s (%c/%c) ", Msg, *msg_yes, *msg_no);
+	_statusline(msg);
+	FREE(msg);
 
-	while (1) {
-	    c = LYgetch();
+	while (result < 0) {
+	    int c = LYgetch();
 #ifdef VMS
 	    if (HadVMSInterrupt) {
 		HadVMSInterrupt = FALSE;
-		c = 'N';
+		c = *msg_no;
 	    }
 #endif /* VMS */
-	    if (TOUPPER(c) == 'Y')
-		return(YES);
-	    if (c == 7 || c == 3) /* remember we had ^G or ^C */
+	    if (c == 7 || c == 3) { /* remember we had ^G or ^C */
 		conf_cancelled = YES;
-	    if (TOUPPER(c) == 'N' || c == 7 || c == 3) /* ^G or ^C cancels */
+		result = NO;
+	    } else if (TOUPPER(c) == TOUPPER(*msg_yes)) {
+		result = YES;
+	    } else if (TOUPPER(c) == TOUPPER(*msg_no)) {
 		return(NO);
+	    }
 	}
     }
+    return (result);
 }
 
 /*	Prompt for answer and get text back.		HTPrompt()
@@ -504,7 +513,7 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 	HTSprintf(&message, ADVANCED_COOKIE_CONFIRMATION,
 		 server, namelen, name, valuelen, value);
 	_statusline(message);
-	free(message);
+	FREE(message);
     }
     while (1) {
 	if(!LYAcceptAllCookies) {

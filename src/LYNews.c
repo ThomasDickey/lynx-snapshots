@@ -283,12 +283,9 @@ PUBLIC char *LYNewsPost ARGS2(
 	    /*
 	     *  Ask if the user wants to include the original message.
 	     */
-	    _statusline(INC_ORIG_MSG_PROMPT);
-	    c = 0;
-	    while (TOUPPER(c) != 'Y' && TOUPPER(c) != 'N' &&
-		   !term_message && c != 7 && c != 3)
-		c = LYgetch();
-	    if (TOUPPER(c) == 'Y')
+	    if (term_message) {
+		_statusline(INC_ORIG_MSG_PROMPT);
+	    } else if (HTConfirm(INC_ORIG_MSG_PROMPT) == YES) {
 		/*
 		 *  The 1 will add the reply ">" in front of every line.
 		 *  We're assuming that if the display character set is
@@ -297,6 +294,7 @@ PUBLIC char *LYNewsPost ARGS2(
 		 *  converted to 7-bit equivalents. - FM
 		 */
 		print_wwwfile_to_fd(fd, 1);
+	    }
 	}
 	LYCloseTempFP(fd);		/* Close the temp file. */
 	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
@@ -367,26 +365,20 @@ PUBLIC char *LYNewsPost ARGS2(
      *  whether to append the sig file. - FM
      */
     LYStatusLine = (LYlines - 1);
-    _statusline(POST_MSG_PROMPT);
-    c = 0;
+    c = HTConfirm(POST_MSG_PROMPT);
     LYStatusLine = -1;
-    while (TOUPPER(c) != 'Y' && TOUPPER(c) != 'N' &&
-	   !term_message && c != 7   && c != 3)
-	c = LYgetch();
-    if (TOUPPER(c) != 'Y') {
+    if (c != YES) {
 	clear();  /* clear the screen */
 	goto cleanup;
     }
-    if ((LynxSigFile != NULL) &&
-	(fp = fopen(LynxSigFile, "r")) != NULL) {
+    if ((LynxSigFile != NULL) && (fp = fopen(LynxSigFile, "r")) != NULL) {
+	char *msg = NULL;
+	HTSprintf0(&msg, APPEND_SIG_FILE, LynxSigFile);
+
 	LYStatusLine = (LYlines - 1);
-	_user_message(APPEND_SIG_FILE, LynxSigFile);
-	c = 0;
-	LYStatusLine = -1;
-	while (TOUPPER(c) != 'Y' && TOUPPER(c) != 'N' &&
-	       !term_message && c != 7   && c != 3)
-	    c = LYgetch();
-	if (TOUPPER(c) == 'Y') {
+	if (term_message) {
+	    _user_message(APPEND_SIG_FILE, LynxSigFile);
+	} else if (HTConfirm(msg) == YES) {
 	    if ((fd = LYAppendToTxtFile (my_tempfile)) != NULL) {
 		fputs("-- \n", fd);
 		while (fgets(user_input, sizeof(user_input), fp) != NULL) {
@@ -396,6 +388,8 @@ PUBLIC char *LYNewsPost ARGS2(
 	    }
 	}
 	fclose(fp);
+	FREE(msg);
+	LYStatusLine = -1;
     }
     clear();  /* clear the screen */
 

@@ -227,7 +227,7 @@ PRIVATE int response ARGS1(CONST char *,command)
 {
     int result;
     char * p = response_text;
-    char ch;
+    int ich;
 
     if (command) {
 	int status;
@@ -255,7 +255,8 @@ PRIVATE int response ARGS1(CONST char *,command)
     } /* if command to be sent */
 
     for (;;) {
-	if (((*p++ = NEXT_CHAR) == LF) ||
+	ich = NEXT_CHAR;
+	if (((*p++ = ich) == LF) ||
 	    (p == &response_text[LINE_LENGTH])) {
 	    *--p = '\0';			/* Terminate the string */
 	    CTRACE(tfp, "NNTP Response: %s\n", response_text);
@@ -263,7 +264,7 @@ PRIVATE int response ARGS1(CONST char *,command)
 	    return result;
 	} /* if end of line */
 
-	if ((ch = *(p-1)) == (char)EOF) {
+	if (ich == EOF) {
 	    *(p-1) = '\0';
 	    if (interrupted_in_htgetcharacter) {
 		CTRACE(tfp, "HTNews: Interrupted on read, closing socket %d\n",
@@ -965,8 +966,9 @@ PRIVATE int read_article ARGS1(
     */
     if (!diagnostic && !rawtext) {
 	while (!done) {
-	    char ch = *p++ = NEXT_CHAR;
-	    if (ch == (char)EOF) {
+	    int ich = NEXT_CHAR;
+	    *p++ = ich;
+	    if (ich == EOF) {
 		if (interrupted_in_htgetcharacter) {
 		    interrupted_in_htgetcharacter = 0;
 		    CTRACE(tfp, "HTNews: Interrupted on read, closing socket %d\n",
@@ -978,7 +980,7 @@ PRIVATE int read_article ARGS1(
 		abort_socket(); 	/* End of file, close socket */
 		return(HT_LOADED);	/* End of file on response */
 	    }
-	    if ((ch == LF) || (p == &line[LINE_LENGTH])) {
+	    if (((char)ich == LF) || (p == &line[LINE_LENGTH])) {
 		*--p = '\0';			/* Terminate the string */
 		CTRACE(tfp, "H %s\n", line);
 
@@ -1309,8 +1311,9 @@ PRIVATE int read_article ARGS1(
 
     p = line;
     while (!done) {
-	char ch = *p++ = NEXT_CHAR;
-	if (ch == (char)EOF) {
+	int ich = NEXT_CHAR;
+	*p++ = ich;
+	if (ich == EOF) {
 	    if (interrupted_in_htgetcharacter) {
 		interrupted_in_htgetcharacter = 0;
 		CTRACE(tfp, "HTNews: Interrupted on read, closing socket %d\n",
@@ -1322,7 +1325,7 @@ PRIVATE int read_article ARGS1(
 	    abort_socket();	/* End of file, close socket */
 	    return(HT_LOADED);	/* End of file on response */
 	}
-	if ((ch == LF) || (p == &line[LINE_LENGTH])) {
+	if (((char)ich == LF) || (p == &line[LINE_LENGTH])) {
 	    *p++ = '\0';			/* Terminate the string */
 	    CTRACE(tfp, "B %s", line);
 	    if (line[0] == '.') {
@@ -1513,8 +1516,9 @@ PRIVATE int read_list ARGS1(char *, arg)
     START(HTML_DLC);
     PUTC('\n');
     while (!done) {
-	char ch = NEXT_CHAR;
-	if (ch == (char)EOF) {
+	int ich = NEXT_CHAR;
+	char ch = ich;
+	if (ich == EOF) {
 	    if (interrupted_in_htgetcharacter) {
 		interrupted_in_htgetcharacter = 0;
 		CTRACE(tfp, "HTNews: Interrupted on read, closing socket %d\n",
@@ -1738,8 +1742,9 @@ PRIVATE int read_group ARGS3(
 	if (status == 221) {
 	    p = line;
 	    while (!done) {
-		char ch = *p++ = NEXT_CHAR;
-		if (ch == (char)EOF) {
+		int ich = NEXT_CHAR;
+		*p++ = ich;
+		if (ich == EOF) {
 		    if (interrupted_in_htgetcharacter) {
 			interrupted_in_htgetcharacter = 0;
 			CTRACE(tfp, "HTNews: Interrupted on read, closing socket %d\n",
@@ -1751,7 +1756,7 @@ PRIVATE int read_group ARGS3(
 		    abort_socket();	/* End of file, close socket */
 		    return(HT_LOADED);	/* End of file on response */
 		}
-		if ((ch == '\n') || (p == &line[LINE_LENGTH])) {
+		if (((char)ich == '\n') || (p == &line[LINE_LENGTH])) {
 		    *p = '\0';		/* Terminate the string */
 		    CTRACE(tfp, "X %s", line);
 		    if (line[0] == '.') {
@@ -1841,8 +1846,9 @@ PRIVATE int read_group ARGS3(
 		p = line;				/* Write pointer */
 		done = NO;
 		while( !done ) {
-		    char ch = *p++ = NEXT_CHAR;
-		    if (ch == (char)EOF) {
+		    int ich = NEXT_CHAR;
+		    *p++ = ich;
+		    if (ich == EOF) {
 			if (interrupted_in_htgetcharacter) {
 			    interrupted_in_htgetcharacter = 0;
 			    CTRACE(tfp, "HTNews: Interrupted on read, closing socket %d\n",
@@ -1854,7 +1860,7 @@ PRIVATE int read_group ARGS3(
 			abort_socket(); 	/* End of file, close socket */
 			return(HT_LOADED);	/* End of file on response */
 		    }
-		    if ((ch == LF) ||
+		    if (((char)ich == LF) ||
 			(p == &line[LINE_LENGTH])) {
 
 			*--p = '\0';		/* Terminate  & chop LF*/

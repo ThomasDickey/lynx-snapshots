@@ -701,6 +701,8 @@ PRIVATE void expand_substring (char* dst, char* first, char* last)
 		if (s == 0)
 		    s = first + strlen(first);
 		first = expand_tiname(first, s-first, &dst);
+		if (*first)
+		    first++;
 	    } else if (ch == '?') {		/* ASCII delete? */
 		*dst++ = 127;
 	    } else if ((ch & 0x3f) < 0x20) {	/* ASCII control char? */
@@ -1091,7 +1093,7 @@ PUBLIC int LYgetch NOARGS
      return sl_read_mouse_event ();
 #endif
 
-   if ((keysym > DO_NOTHING) || (keysym < 0))
+   if ((keysym+1 >= KEYMAP_SIZE) || (keysym < 0))
      return 0;
 
    return keysym;
@@ -1103,7 +1105,7 @@ PUBLIC int LYgetch_for ARGS1(
     return LYgetch();
 }
 
-#else /* !USE_KEYMAPS */
+#else	/* NOT  defined(USE_KEYMAPS) && defined(USE_SLANG) */
 
 /*
  *  LYgetch() translates some escape sequences and may fake noecho.
@@ -1372,10 +1374,10 @@ re_read:
 	   c = CH_DEL;		   /* backspace key (delete, not Ctrl-H)  S/390 -- gil -- 2041 */
 	   break;
 #endif /* KEY_BACKSPACE */
-#if defined(KEY_F) && !defined(__DJGPP__) && !defined(_WINDOWS)
 	case KEY_F(1):
 	   c = F1;		   /* VTxxx Help */
 	   break;
+#if defined(KEY_F) && !defined(__DJGPP__) && !defined(_WINDOWS)
 	case KEY_F(16):
 	   c = DO_KEY;		   /* VTxxx Do */
 	   break;
@@ -1405,6 +1407,33 @@ re_read:
 	   c = REMOVE_KEY;	   /* VTxxx Remove */
 	   break;
 #endif /* KEY_DC */
+#ifdef KEY_BTAB
+	case KEY_BTAB:
+	   c = BACKTAB_KEY;	   /* Back tab, often Shift-Tab */
+	   break;
+#endif /* KEY_BTAB */
+
+/* The following maps PDCurses keys away from lynx reserved values */
+#if (defined(_WINDOWS) || defined(__DJGPP__)) && !defined(USE_SLANG)
+	case KEY_F(2):
+	   c = 0x213;
+	   break;
+	case KEY_F(3):
+	   c = 0x214;
+	   break;
+	case KEY_F(4):
+	   c = 0x215;
+	   break;
+	case KEY_F(5):
+	   c = 0x216;
+	   break;
+	case KEY_F(6):
+	   c = 0x217;
+	   break;
+	case KEY_F(7):
+	   c = 0x218;
+	   break;
+#endif /* PDCurses */
 #ifdef NCURSES_MOUSE_VERSION
 	case KEY_MOUSE:
 	    if (code == FOR_CHOICE) {
@@ -1504,6 +1533,29 @@ re_read:
 	case K_EEnd:
 	   c = END_KEY;
 	   break;
+	case K_F1:		   /* F1 key */
+	   c = F1;
+	   break;
+	case K_Insert:		   /* Insert key */
+	case K_EInsert:
+	   c = INSERT_KEY;
+	   break;
+	case K_Delete:		   /* Delete key */
+	case K_EDelete:
+	   c = REMOVE_KEY;
+	   break;
+	case K_Alt_Escape:	   /* Alt-Escape */
+	   c = 0x1a7;
+	   break;
+	case K_Control_At:	   /* CTRL-@ */
+	   c = 0x1a8;
+	   break;
+	case K_Alt_Backspace:	   /* Alt-Backspace */
+	   c = 0x1a9;
+	   break;
+	case K_BackTab:		   /* BackTab */
+	   c = BACKTAB_KEY;
+	   break;
 	}
     }
 #endif /* DGJPP_KEYHANDLER */
@@ -1538,6 +1590,15 @@ re_read:
 	case SL_KEY_C1:		   /* lower left of keypad */
 	   c = END_KEY;
 	   break;
+	case SL_KEY_F(1):	   /* F1 key */
+	   c = F1;
+	   break;
+	case SL_KEY_IC:		   /* Insert key */
+	   c = INSERT_KEY;
+	   break;
+	case SL_KEY_DELETE:	   /* Delete key */
+	   c = REMOVE_KEY;
+	   break;
 	}
     }
 #endif /* USE_SLANG && __DJGPP__ && !DJGPP_KEYHANDLER && !USE_KEYMAPS */
@@ -1554,7 +1615,7 @@ re_read:
     }
 }
 
-#endif				       /* NOT USE_KEYMAPS */
+#endif	/* NOT  defined(USE_KEYMAPS) && defined(USE_SLANG) */
 
 /*
  * Convert a null-terminated string to lowercase
@@ -1770,7 +1831,8 @@ PUBLIC int LYEdit1 ARGS4(
 	     return(ch);
     case LYE_CHAR:
 #ifdef EXP_KEYBOARD_LAYOUT
-	if (map_active && ch < 128 && LYKbLayouts[current_layout][ch])
+	if (map_active && ch < 128 && ch >= 0 &&
+	    LYKbLayouts[current_layout][ch])
 	    ch = UCTransUniChar((long) LYKbLayouts[current_layout][ch],
 		current_char_set);
 #endif
@@ -2075,7 +2137,8 @@ again:
 	switch (EditBinding(ch)) {
 	case LYE_TAB:
 	    ch = '\t';
-	    /* fall through */
+	    /* This used to fall through to the next case before
+	     tab completion was introduced */
 	    res = LYFindInCloset(MyEdit.buffer);
 	    if (res != 0) {
 		LYEdit1(&MyEdit, '\0', LYE_ERASE, FALSE);
@@ -2120,6 +2183,14 @@ again:
 	     *	Used only in form_getstr() for invoking
 	     *	the LYK_F_LINK_NUM prompt when in form
 	     *	text fields. - FM
+	     */
+	    break;
+
+	case LYE_FORM_PASS:
+	    /*
+	     *	Used in form_getstr() to end line editing and
+	     *	pass on the input char/lynxkeycode.  Here it
+	     *	is just ignored. - kw
 	     */
 	    break;
 

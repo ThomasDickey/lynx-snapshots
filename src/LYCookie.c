@@ -276,99 +276,6 @@ PRIVATE void store_cookie ARGS3(
     if (co == NULL)
 	return;
 
-    if (co->version != 0 || !LYAcceptAllCookies) {
-	/*
-	 * Apply sanity checks.
-	 *
-	 * Section 4.3.2, condition 1:  The value for the Path attribute is
-	 * not a prefix of the request-URI.
-	 */
-	if (strncmp(co->path, path, co->pathlen) != 0) {
-	    CTRACE(tfp, "store_cookie: Rejecting because '%s' is not a prefix of '%s'.\n",
-			co->path, path);
-	    freeCookie(co);
-	    co = NULL;
-	    return;
-	}
-	/*
-	 * The next 4 conditions do NOT apply if the domain is still
-	 * the default of request-host.
-	 */
-	if (strcmp(co->domain, hostname) != 0) {
-	    /*
-	     *  The hostname does not contain a dot.
-	     */
-	    if (strchr(hostname, '.') == NULL) {
-		CTRACE(tfp, "store_cookie: Rejecting because '%s' has no dot.\n",
-			    hostname);
-		freeCookie(co);
-		co = NULL;
-		return;
-	    }
-
-	    /*
-	     *  Section 4.3.2, condition 2: The value for the Domain attribute
-	     *  contains no embedded dots or does not start with a dot.
-	     *  (A dot is embedded if it's neither the first nor last character.)
-	     *  Note that we added a lead dot ourselves if a domain attribute
-	     *  value otherwise qualified. - FM
-	     */
-	    if (co->domain[0] != '.' || co->domain[1] == '\0') {
-		CTRACE(tfp, "store_cookie: Rejecting domain '%s'.\n",
-			    co->domain);
-		freeCookie(co);
-		co = NULL;
-		return;
-	    }
-	    ptr = strchr((co->domain + 1), '.');
-	    if (ptr == NULL || ptr[1] == '\0') {
-		CTRACE(tfp, "store_cookie: Rejecting domain '%s'.\n",
-			    co->domain);
-		freeCookie(co);
-		co = NULL;
-		return;
-	    }
-
-	    /*
-	     *  Section 4.3.2, condition 3: The value for the request-host does
-	     *  not domain-match the Domain attribute.
-	     */
-	    if (!host_matches(hostname, co->domain)) {
-		CTRACE(tfp, "store_cookie: Rejecting domain '%s' for host '%s'.\n",
-			    co->domain, hostname);
-		freeCookie(co);
-		co = NULL;
-		return;
-	    }
-
-	    /*
-	     *  Section 4.3.2, condition 4: The request-host is an HDN (not IP
-	     *  address) and has the form HD, where D is the value of the Domain
-	     *  attribute, and H is a string that contains one or more dots.
-	     */
-	    ptr = ((hostname + strlen(hostname)) - strlen(co->domain));
-	    if (strchr(hostname, '.') < ptr) {
-		if (!LYAcceptAllCookies) {
-		    char *msg = 0;
-		    HTSprintf0(&msg,
-			    INVALID_COOKIE_DOMAIN_CONFIRMATION,
-			    co->domain,
-			    hostname);
-		    if (!HTConfirm(msg)) {
-			CTRACE(tfp, "store_cookie: Rejecting domain '%s' for host '%s'.\n",
-				    co->domain,
-				    hostname);
-			freeCookie(co);
-			co = NULL;
-			FREE(msg);
-			return;
-		    }
-		    FREE(msg);
-		}
-	    }
-	}
-    }
-
     /*
      *	Ensure that the domain list exists.
      */
@@ -387,10 +294,147 @@ PRIVATE void store_cookie ARGS3(
 	de = (domain_entry *)hl->object;
 	if ((de != NULL && de->domain != NULL) &&
 	    !strcmp(co->domain, de->domain)) {
-	    cookie_list = de->cookie_list;
-	    break;
+		cookie_list = de->cookie_list;
+		break;
 	}
     }
+
+    if(hl == NULL) {
+	de = NULL;
+	cookie_list = NULL;
+    }
+
+    /*
+     * Apply sanity checks.
+     *
+     * Section 4.3.2, condition 1:  The value for the Path attribute is
+     * not a prefix of the request-URI.
+     *
+     * If cookie checking for this domain is set to INVCHECK_LOOSE,
+     * then we want to bypass this check.  The user should be queried
+     * if set to INVCHECK_QUERY.
+     */
+    if (strncmp(co->path, path, co->pathlen) != 0) {
+	if((de != NULL && de->invcheck_bv != INVCHECK_LOOSE)
+	    || de == NULL) {
+		if(de != NULL && de->invcheck_bv == INVCHECK_STRICT) {
+		    CTRACE(tfp, "store_cookie: Rejecting because '%s' is not a prefix of '%s'.\n",
+			co->path, path);
+		    freeCookie(co);
+		    co = NULL;
+		    return;
+		} else if ((de != NULL
+		    && de->invcheck_bv == INVCHECK_QUERY)
+		    || de == NULL) {
+			char *msg = 0;
+			HTSprintf0(&msg,
+			    INVALID_COOKIE_PATH_CONFIRMATION,
+			    co->path, path);
+			if (!HTConfirm(msg)) {
+			    CTRACE(tfp, "store_cookie: Rejecting because '%s' is not a prefix of '%s'.\n",
+				co->path, path);
+			    freeCookie(co);
+			    co = NULL;
+			    FREE(msg);
+			    return;
+			}
+		}
+	}
+    }
+    /*
+     * The next 4 conditions do NOT apply if the domain is still
+     * the default of request-host.
+     */
+    if (strcmp(co->domain, hostname) != 0) {
+	/*
+	 *  The hostname does not contain a dot.
+	 */
+	if (strchr(hostname, '.') == NULL) {
+	    CTRACE(tfp, "store_cookie: Rejecting because '%s' has no dot.\n",
+		    hostname);
+	    freeCookie(co);
+	    co = NULL;
+	    return;
+	}
+
+	/*
+	 *  Section 4.3.2, condition 2: The value for the Domain attribute
+	 *  contains no embedded dots or does not start with a dot.
+	 *  (A dot is embedded if it's neither the first nor last character.)
+	 *  Note that we added a lead dot ourselves if a domain attribute
+	 *  value otherwise qualified. - FM
+	 */
+	if (co->domain[0] != '.' || co->domain[1] == '\0') {
+	    CTRACE(tfp, "store_cookie: Rejecting domain '%s'.\n",
+		    co->domain);
+	    freeCookie(co);
+	    co = NULL;
+	    return;
+	}
+	ptr = strchr((co->domain + 1), '.');
+	if (ptr == NULL || ptr[1] == '\0') {
+	    CTRACE(tfp, "store_cookie: Rejecting domain '%s'.\n",
+		    co->domain);
+	    freeCookie(co);
+	    co = NULL;
+	    return;
+	}
+
+	/*
+	 *  Section 4.3.2, condition 3: The value for the request-host does
+	 *  not domain-match the Domain attribute.
+	 */
+	if (!host_matches(hostname, co->domain)) {
+	    CTRACE(tfp, "store_cookie: Rejecting domain '%s' for host '%s'.\n",
+		    co->domain, hostname);
+	    freeCookie(co);
+	    co = NULL;
+	    return;
+	}
+
+	/*
+	 *  Section 4.3.2, condition 4: The request-host is an HDN (not IP
+	 *  address) and has the form HD, where D is the value of the Domain
+	 *  attribute, and H is a string that contains one or more dots.
+	 *
+	 *  If cookie checking for this domain is set to INVCHECK_LOOSE,
+	 *  then we want to bypass this check.  The user should be queried
+	 *  if set to INVCHECK_QUERY.
+	 */
+	ptr = ((hostname + strlen(hostname)) - strlen(co->domain));
+	if (strchr(hostname, '.') < ptr) {
+		if((de != NULL && de->invcheck_bv != INVCHECK_LOOSE)
+		    || de == NULL) {
+			if(de != NULL && de->invcheck_bv == INVCHECK_STRICT) {
+			    CTRACE(tfp, "store_cookie: Rejecting domain '%s' for host '%s'.\n",
+				co->domain,
+				hostname);
+			    freeCookie(co);
+			    co = NULL;
+			    return;
+			} else if ((de != NULL
+			    && de->invcheck_bv == INVCHECK_QUERY)
+			    || de == NULL) {
+				char *msg = 0;
+				HTSprintf0(&msg,
+				    INVALID_COOKIE_DOMAIN_CONFIRMATION,
+				    co->domain,
+				    hostname);
+				if (!HTConfirm(msg)) {
+				    CTRACE(tfp, "store_cookie: Rejecting domain '%s' for host '%s'.\n",
+					co->domain,
+					hostname);
+				    freeCookie(co);
+				    co = NULL;
+				    FREE(msg);
+				    return;
+				}
+				FREE(msg);
+			}
+		}
+	}
+    }
+
     if (hl == NULL) {
 	/*
 	 *	Domain not found; add a new entry for this domain.
@@ -414,7 +458,7 @@ PRIVATE void store_cookie ARGS3(
 	else
 #endif
 	    de->bv = QUERY_USER;
-	de->invcheck_bv = QUERY_USER; /* should this go here? */
+	de->invcheck_bv = INVCHECK_QUERY; /* should this go here? */
 	cookie_list = de->cookie_list = HTList_new();
 	StrAllocCopy(de->domain, co->domain);
 	HTList_addObject(domain_list, de);
@@ -2598,187 +2642,26 @@ Delete_all_cookies_in_domain:
 }
 
 
-/*      cookie_add_acceptlist
-**      ---------------------
-**
-**   Is passed a comma-delimited string of domains to add to the
-**   "always accept" list for cookies.  The domains need to be identical
-**   to the form from which the cookie is received, with or without a
-**   leading ".".  - BJP
+/*      cookie_domain_flag_set
+**      ----------------------
+**      All purpose function to handle setting domain flags for a
+**      comma-delimited list of domains.  cookie_domain_flags handles
+**      invcheck behavior, as well as accept/reject behavior. - BJP
 */
 
-PUBLIC void cookie_add_acceptlist ARGS1(
-	char *, 	acceptstr)
+PUBLIC void cookie_domain_flag_set ARGS2(
+	char *, 	domainstr,
+	int, 	flag)
 {
     domain_entry *de = NULL;
     domain_entry *de2 = NULL;
     HTList *hl = NULL;
-    char **str = (char **)calloc(1, sizeof(acceptstr));
-    char *astr = NULL;
-    char *strsmall = NULL;
-    int isexisting = FALSE;
-
-    if (str == NULL)
-	outofmem(__FILE__, "cookie_add_acceptlist");
-
-    /*
-     * Is this the first domain we're handling?  If so, initialize
-     * domain_list.
-     */
-
-    if (domain_list == NULL) {
-	atexit(LYCookieJar_free);
-	domain_list = HTList_new();
-	total_cookies = 0;
-    }
-
-    StrAllocCopy(astr, acceptstr);
-
-    *str = astr;
-
-    while ((strsmall = LYstrsep(str, ",")) != 0) {
-
-	/*
-	 * Check the list of existing domains to see if this is a
-	 * re-setting of an already existing domains -- if so, just
-	 * change the behavior, if not, create a new domain entry.
-	 */
-
-	for (hl = domain_list; hl != NULL; hl = hl->next) {
-	    de2 = (domain_entry *)hl->object;
-	    if ((de2 != NULL && de2->domain != NULL) &&
-		!strcmp(strsmall, de2->domain)) {
-			isexisting = TRUE;
-			break;
-	    } else {
-		isexisting = FALSE;
-	    }
-	}
-
-	if(!isexisting) {
-	    de = (domain_entry *)calloc(1, sizeof(domain_entry));
-
-	    if (de == NULL)
-		    outofmem(__FILE__, "cookie_add_acceptlist");
-
-	    de->bv = ACCEPT_ALWAYS;
-
-	    StrAllocCopy(de->domain, strsmall);
-	    de->cookie_list = HTList_new();
-	    HTList_addObject(domain_list, de);
-	} else {
-	    de2->bv = ACCEPT_ALWAYS;
-	}
-    }
-
-    FREE(str);
-    FREE(strsmall);
-    FREE(astr);
-}
-
-
-/*      cookie_add_rejectlist
-**      ---------------------
-**
-**   Is passed a comma-delimited string of domains to add to the
-**   "always reject" list for cookies.  The domains need to be identical
-**   to the form from which the cookie is received, with or without a
-**   leading ".".  - BJP
-*/
-
-PUBLIC void cookie_add_rejectlist ARGS1(
-	char *, 	rejectstr)
-{
-    domain_entry *de = NULL;
-    domain_entry *de2 = NULL;
-    HTList *hl = NULL;
-    char **str = (char **)calloc(1, sizeof(rejectstr));
-    char *rstr = NULL;
-    char *strsmall = NULL;
-    int isexisting = FALSE;
-
-    if (str == NULL)
-	outofmem(__FILE__, "cookie_add_rejectlist");
-
-    /*
-     * Is this the first domain we're handling?  If so, initialize
-     * domain_list.
-     */
-
-    if (domain_list == NULL) {
-	atexit(LYCookieJar_free);
-	domain_list = HTList_new();
-	total_cookies = 0;
-    }
-
-    StrAllocCopy(rstr, rejectstr);
-
-    *str = rstr;
-
-    while ((strsmall = LYstrsep(str, ",")) != 0) {
-
-	/*
-	 * Check the list of existing domains to see if this is a
-	 * re-setting of an already existing domains -- if so, just
-	 * change the behavior, if not, create a new domain entry.
-	 */
-
-	for (hl = domain_list; hl != NULL; hl = hl->next) {
-	    de2 = (domain_entry *)hl->object;
-	    if ((de2 != NULL && de2->domain != NULL) &&
-		!strcmp(strsmall, de2->domain)) {
-			isexisting = TRUE;
-			break;
-	    } else {
-		isexisting = FALSE;
-	    }
-	}
-
-	if(!isexisting) {
-	    de = (domain_entry *)calloc(1, sizeof(domain_entry));
-
-	    if (de == NULL)
-		    outofmem(__FILE__, "cookie_add_rejectlist");
-
-	    de->bv = REJECT_ALWAYS;
-
-	    StrAllocCopy(de->domain, strsmall);
-	    de->cookie_list = HTList_new();
-	    HTList_addObject(domain_list, de);
-	} else {
-	    de2->bv = REJECT_ALWAYS;
-	}
-    }
-
-    FREE(str);
-    FREE(strsmall);
-    FREE(rstr);
-}
-
-/*      cookie_set_invcheck
-**      -------------------
-**
-**   Is passed a comma-delimited string of domains and a particular
-**   behaviour to set their invcheck_bv to. - BJP
-*/
-
-PUBLIC void cookie_set_invcheck ARGS2(
-	char *, 	domains,
-        invcheck_behaviour,		setting)
-{
-    domain_entry *de = NULL;
-    domain_entry *de2 = NULL;
-    HTList *hl = NULL;
-    char **str = (char **)calloc(1, sizeof(domains));
     char *dstr = NULL;
     char *strsmall = NULL;
     int isexisting = FALSE;
 
-    if (str == NULL)
-	outofmem(__FILE__, "cookie_set_invcheck");
-
     /*
-     * Is this the first cookie we're handling?  If so, initialize
+     * Is this the first domain we're handling?  If so, initialize
      * domain_list.
      */
 
@@ -2788,45 +2671,80 @@ PUBLIC void cookie_set_invcheck ARGS2(
 	total_cookies = 0;
     }
 
-    StrAllocCopy(dstr, domains);
+    StrAllocCopy(dstr, domainstr);
 
-    *str = dstr;
-
-    while ((strsmall = LYstrsep(str, ",")) != 0) {
+    while ((strsmall = LYstrsep(&dstr, ",")) != 0) {
 
 	/*
-	 * Check the list of existing cookies to see if this is a
-	 * re-setting of an already existing cookie -- if so, just
+	 * Check the list of existing domains to see if this is a
+	 * re-setting of an already existing domains -- if so, just
 	 * change the behavior, if not, create a new domain entry.
 	 */
+
 	for (hl = domain_list; hl != NULL; hl = hl->next) {
 	    de2 = (domain_entry *)hl->object;
-	    if ((de2 != NULL && de2->domain != NULL)
-	     && !strcmp(strsmall, de2->domain)) {
-		isexisting = TRUE;
-		break;
+	    if ((de2 != NULL && de2->domain != NULL) &&
+		!strcmp(strsmall, de2->domain)) {
+			isexisting = TRUE;
+			break;
 	    } else {
 		isexisting = FALSE;
 	    }
 	}
 
-	if (!isexisting) {
+	if(!isexisting) {
 	    de = (domain_entry *)calloc(1, sizeof(domain_entry));
 
 	    if (de == NULL)
-		outofmem(__FILE__, "cookie_set_invcheck");
+		    outofmem(__FILE__, "cookie_domain_flag_set");
 
-	    de->invcheck_bv = setting;
+	    switch(flag) {
+		case (FLAG_ACCEPT_ALWAYS): de->bv = ACCEPT_ALWAYS;
+					   de->invcheck_bv = INVCHECK_QUERY;
+					   break;
+		case (FLAG_REJECT_ALWAYS): de->bv = REJECT_ALWAYS;
+					   de->invcheck_bv = INVCHECK_QUERY;
+					   break;
+		case (FLAG_QUERY_USER):    de->bv = QUERY_USER;
+					   de->invcheck_bv = INVCHECK_QUERY;
+					   break;
+		case (FLAG_FROM_FILE):     de->bv = FROM_FILE;
+					   de->invcheck_bv = INVCHECK_QUERY;
+					   break;
+		case (FLAG_INVCHECK_QUERY): de->invcheck_bv = INVCHECK_QUERY;
+					    de->bv = QUERY_USER;
+					    break;
+		case (FLAG_INVCHECK_STRICT): de->invcheck_bv = INVCHECK_STRICT;
+					     de->bv = QUERY_USER;
+					    break;
+		case (FLAG_INVCHECK_LOOSE): de->invcheck_bv = INVCHECK_LOOSE;
+					    de->bv = QUERY_USER;
+					    break;
+	    }
 
 	    StrAllocCopy(de->domain, strsmall);
 	    de->cookie_list = HTList_new();
 	    HTList_addObject(domain_list, de);
 	} else {
-	    de2->invcheck_bv = setting;
+	    switch(flag) {
+		case (FLAG_ACCEPT_ALWAYS): de2->bv = ACCEPT_ALWAYS;
+					   break;
+		case (FLAG_REJECT_ALWAYS): de2->bv = REJECT_ALWAYS;
+					   break;
+		case (FLAG_QUERY_USER): de2->bv = QUERY_USER;
+					   break;
+		case (FLAG_FROM_FILE): de2->bv = FROM_FILE;
+					   break;
+		case (FLAG_INVCHECK_QUERY): de2->invcheck_bv = INVCHECK_QUERY;
+					   break;
+		case (FLAG_INVCHECK_STRICT): de2->invcheck_bv = INVCHECK_STRICT;
+					   break;
+		case (FLAG_INVCHECK_LOOSE): de2->invcheck_bv = INVCHECK_LOOSE;
+					   break;
+	    }
 	}
     }
 
-    FREE(str);
     FREE(strsmall);
     FREE(dstr);
 }

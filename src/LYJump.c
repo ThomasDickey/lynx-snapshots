@@ -192,7 +192,7 @@ PUBLIC char *LYJump ARGS1(int, key)
 	char *msg = 0;
 	HTSprintf0(&msg, KEY_NOT_MAPPED_TO_JUMP_FILE, key);
 	HTAlert(msg);
-	free(msg);
+	FREE(msg);
 	return NULL;
     }
     if (!jtp->table)

@@ -8,6 +8,13 @@ typedef enum {ACCEPT_ALWAYS, REJECT_ALWAYS, QUERY_USER, FROM_FILE} behaviour;
 typedef enum {INVCHECK_QUERY,
 	      INVCHECK_STRICT,
 	      INVCHECK_LOOSE} invcheck_behaviour;
+typedef enum {FLAG_ACCEPT_ALWAYS,
+	      FLAG_REJECT_ALWAYS,
+	      FLAG_QUERY_USER,
+	      FLAG_FROM_FILE,
+	      FLAG_INVCHECK_QUERY,
+	      FLAG_INVCHECK_STRICT,
+	      FLAG_INVCHECK_LOOSE} cookie_domain_flags;
 
 struct _domain_entry {
     char *	domain;  /* Domain for which these cookies are valid */
@@ -37,5 +44,8 @@ extern void cookie_add_rejectlist PARAMS((
 extern void cookie_set_invcheck PARAMS((
 	char *	 	domains,
         invcheck_behaviour setting));
+extern void cookie_domain_flag_set PARAMS((
+	char * 		domainstr,
+	int 		flag));
 
 #endif /* LYCOOKIES_H */
