@@ -361,7 +361,7 @@ PRIVATE HTAASetup *HTAASetup_lookup ARGS4(
 
     CTRACE((tfp, "%s `%s' %s\n",
 		 "HTAASetup_lookup: No template matched",
-		 (docname ? docname : "(null)"),
+		 NONNULL(docname),
 		 "(so probably not protected)"));
 
     return NULL;	/* NULL in parameters, or not found */
@@ -1117,7 +1117,7 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(
 		    num_schemes++;
 		} else {
 		    CTRACE((tfp, "Unknown scheme `%s' %s\n",
-			    (arg1 ? arg1 : "(null)"),
+			    NONNULL(arg1),
 			    (IsProxy ?
 			     "in Proxy-Authenticate: field" :
 			     "in WWW-Authenticate: field")));

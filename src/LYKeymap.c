@@ -3,6 +3,7 @@
 #include <LYUtils.h>
 #include <LYKeymap.h>
 #include <LYGlobalDefs.h>
+#include <LYCharSets.h>		/* for LYlowest_eightbit - kw */
 #include <HTAccess.h>
 #include <HTFormat.h>
 #include <HTAlert.h>
@@ -19,7 +20,7 @@
 #ifdef EXP_KEYBOARD_LAYOUT
 PUBLIC int current_layout = 0;  /* Index into LYKbLayouts[]   */
 
-PUBLIC LYKeymap_t * LYKbLayouts[]={
+PUBLIC LYKbLayout_t * LYKbLayouts[]={
 	kb_layout_rot13,
 	kb_layout_jcuken,
 	kb_layout_yawerty
@@ -234,11 +235,11 @@ LYK_NEXT_PAGE,    LYK_PREV_PAGE,    LYK_HOME,       LYK_END,
 
 #if (defined(_WINDOWS) || defined(__DJGPP__) || defined(__CYGWIN__))
 
-LYK_HELP,              0,              0,             0,
+LYK_DWIMHELP,          0,              0,             0,
 /* F1*/
 #else
 
-LYK_HELP,         LYK_ACTIVATE,     LYK_HOME,       LYK_END,
+LYK_DWIMHELP,     LYK_ACTIVATE,     LYK_HOME,       LYK_END,
 /* F1*/ 	  /* Do key */      /* Find key */  /* Select key */
 
 #endif /* _WINDOWS || __DJGPP__ || __CYGWIN__ */
@@ -777,6 +778,65 @@ PRIVATE CONST char *funckey[] = {
   "mouse pseudo key",		/* normally not mapped to keymap[] action */
 };
 
+
+struct emap {
+	CONST char *name;
+	CONST int   code;
+	CONST char *descr;
+};
+
+PRIVATE struct emap ekmap[] = {
+  {"NOP",	LYE_NOP,	"Do Nothing"},
+  {"CHAR",	LYE_CHAR,	"Insert printable char"},
+  {"ENTER",	LYE_ENTER,	"Input complete, return char/lynxkeycode"},
+  {"TAB",	LYE_TAB,	"Input complete, return TAB"},
+  {"ABORT",	LYE_ABORT,	"Input cancelled"},
+
+  {"PASS",	LYE_FORM_PASS,  "In fields: input complete, or Do Nothing"},
+
+  {"DELN",	LYE_DELN,	"Delete next/curr char"},
+  {"DELP",	LYE_DELP,	"Delete prev      char"},
+  {"DELNW",	LYE_DELNW,	"Delete next word"},
+  {"DELPW",	LYE_DELPW,	"Delete prev word"},
+
+  {"ERASE",	LYE_ERASE,	"Erase the line"},
+
+  {"BOL",	LYE_BOL,	"Go to begin of line"},
+  {"EOL",	LYE_EOL,	"Go to end   of line"},
+  {"FORW",	LYE_FORW,	"Cursor forwards"},
+  {"BACK",	LYE_BACK,	"Cursor backwards"},
+  {"FORWW",	LYE_FORWW,	"Word forward"},
+  {"BACKW",	LYE_BACKW,	"Word back"},
+
+  {"LOWER",	LYE_LOWER,	"Lower case the line"},
+  {"UPPER",	LYE_UPPER,	"Upper case the line"},
+
+  {"LKCMD",	LYE_LKCMD,	"Invoke command prompt"},
+
+  {"AIX",	LYE_AIX,	"Hex 97"},
+
+  {"DELBL",	LYE_DELBL,	"Delete back to BOL"},
+  {"DELEL",	LYE_DELEL,	"Delete thru EOL"},
+
+  {"SWMAP",	LYE_SWMAP,	"Switch input keymap"},
+
+  {"TPOS",	LYE_TPOS,	"Transpose characters"},
+
+  {"SETM1",	LYE_SETM1,	"Set modifier 1 flag"},
+  {"SETM2",	LYE_SETM2,	"Set modifier 2 flag"},
+  {"UNMOD",	LYE_UNMOD,	"Fall back to no-modifier command"},
+
+  {"C1CHAR",	LYE_C1CHAR,	"Insert C1 char if printable"},
+
+  {"SETMARK",	LYE_SETMARK,	"emacs-like set-mark-command"},
+  {"XPMARK",	LYE_XPMARK,	"emacs-like exchange-point-and-mark"},
+  {"KILLREG",	LYE_KILLREG,	"emacs-like kill-region"},
+  {"YANK",	LYE_YANK,	"emacs-like yank"}
+#if defined(WIN_EX)
+, {"PASTE",	LYE_PASTE,	"ClipBoard to Lynx"}
+#endif
+};
+
 PRIVATE char *pretty ARGS1 (int, c)
 {
 	static char buf[30];
@@ -795,7 +855,10 @@ PRIVATE char *pretty ARGS1 (int, c)
 		sprintf(buf, ">");
 	else if (c == 0177)
 		sprintf(buf, "<delete>");
-	else if (c > ' ' && c <= 0377)
+	else if (c > ' ' && c < 0177)
+		sprintf(buf, "%c", c);
+	else if (c > ' ' && c <= 0377 &&
+		 c <= LYlowest_eightbit[current_char_set])
 		sprintf(buf, "%c", c);
 	else if (c < ' ')
 		sprintf(buf, "^%c", c|0100);
@@ -826,7 +889,10 @@ PRIVATE char *pretty_html ARGS1 (int, c)
 		sprintf(buf, "&gt;          ");
 	else if (c == 0177)
 		sprintf(buf, "&lt;delete&gt;   ");
-	else if (c > ' ' && c <= 0377)
+	else if (c > ' ' && c < 0177)
+		sprintf(buf, "%c", c);
+	else if (c > ' ' && c <= 0377 &&
+		 c <= LYlowest_eightbit[current_char_set])
 		sprintf(buf, "%c", c);
 	else if (c < ' ')
 		sprintf(buf, "^%c", c|0100);
@@ -862,17 +928,45 @@ PRIVATE char * format_binding ARGS2(
     return 0;
 }
 
-PRIVATE void print_binding ARGS2(HTStream *, target, int, i)
+/* if both is true, produce an additional line for the corresponding
+   uppercase key if its binding is different. - kw */
+PRIVATE void print_binding ARGS3(
+    HTStream *,	target,
+    int,	i,
+    BOOLEAN, 	both)
 {
     char *buf;
+    LYKeymapCode lac1 = LYK_UNKNOWN; /* 0 */
+
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
     if (prev_lynx_edit_mode && !no_dired_support &&
-        (buf = format_binding(key_override, i)) != 0) {
-	(*target->isa->put_block)(target, buf, strlen(buf));
-	FREE(buf);
+	(lac1 = key_override[i]) != LYK_UNKNOWN) {
+	if ((buf = format_binding(key_override, i)) != 0) {
+	    (*target->isa->put_block)(target, buf, strlen(buf));
+	    FREE(buf);
+	}
     } else
 #endif /* DIRED_SUPPORT && OK_OVERRIDE */
     if ((buf = format_binding(keymap, i)) != 0) {
+	lac1 = keymap[i];
+	(*target->isa->put_block)(target, buf, strlen(buf));
+	FREE(buf);
+    }
+
+    if (!both)
+	return;
+    i -= ' ';			/* corresponding uppercase key */
+
+#if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
+    if (prev_lynx_edit_mode && !no_dired_support && key_override[i]) {
+	if (key_override[i] != lac1 &&
+	    (buf = format_binding(key_override, i)) != 0) {
+	    (*target->isa->put_block)(target, buf, strlen(buf));
+	    FREE(buf);
+	}
+    } else
+#endif /* DIRED_SUPPORT && OK_OVERRIDE */
+    if (keymap[i] != lac1 && (buf = format_binding(keymap, i)) != 0) {
 	(*target->isa->put_block)(target, buf, strlen(buf));
 	FREE(buf);
     }
@@ -894,6 +988,27 @@ PUBLIC int lacname_to_lac ARGS1(
        for (i = 0, mp = revmap; (*mp).name != NULL; mp++, i++) {
                if (strcmp((*mp).name, func) == 0) {
                        return i;
+               }
+       }
+       return (-1);
+}
+
+/*
+ *  Return editactioncode whose name is the string func.
+ *  func must be present in the ekmap table.
+ *  returns -1 if not found. - kw
+ */
+PUBLIC int lecname_to_lec ARGS1(
+	CONST char *,	func)
+{
+       int i;
+       struct emap *mp;
+
+       if (func == NULL || *func == '\0')
+	       return (-1);
+       for (i = 0, mp = ekmap; (*mp).name != NULL; mp++, i++) {
+               if (strcmp((*mp).name, func) == 0) {
+                       return (*mp).code;
                }
        }
        return (-1);
@@ -966,19 +1081,20 @@ PRIVATE int LYLoadKeymap ARGS4 (
     HTSprintf0(&buf, "<head>\n<title>%s</title>\n</head>\n<body>\n",
 		     CURRENT_KEYMAP_TITLE);
     PUTS(buf);
+#if 0	/* There isn't really a help page *on* the current keymap.
+	   And we don't need a title and version info here, better
+	   make the page as compact as possible. - kw */
     HTSprintf0(&buf, "<h1>%s (%s)%s<a href=\"%s%s\">%s</a></h1>\n",
 	LYNX_NAME, LYNX_VERSION,
 	HELP_ON_SEGMENT,
 	helpfilepath, CURRENT_KEYMAP_HELP, CURRENT_KEYMAP_TITLE);
     PUTS(buf);
+#endif
     HTSprintf0(&buf, "<pre>\n");
     PUTS(buf);
 
     for (i = 'a'+1; i <= 'z'+1; i++) {
-	print_binding(target, i);
-	if (keymap[i - ' '] != keymap[i]) {
-	    print_binding(target, i-' ');  /* uppercase mapping is different */
-	}
+	print_binding(target, i, TRUE);
     }
     for (i = 1; i < KEYMAP_SIZE; i++) {
 	/*
@@ -986,10 +1102,10 @@ PRIVATE int LYLoadKeymap ARGS4 (
 	 *
 	 *  Don't show CHANGE_LINK if mouse not enabled.
 	 */
-	if ((i >= 0400 || i <= ' ' || !isalpha(i-1)) &&
+	if ((i >= 0200 || i <= ' ' || !isalpha(i-1)) &&
 	    strcmp(revmap[keymap[i]].name, "PIPE") &&
 	    (LYUseMouse || strcmp(revmap[keymap[i]].name, "CHANGE_LINK"))) {
-	    print_binding(target, i);
+	    print_binding(target, i, FALSE);
 	}
     }
 
@@ -1009,18 +1125,27 @@ GLOBALDEF PUBLIC HTProtocol LYLynxKeymap = {"LYNXKEYMAP", LYLoadKeymap, 0};
 #endif /* GLOBALDEF_IS_MACRO */
 
 /*
- * install func as the mapping for key.
+ * Install func as the mapping for key.
+ * If for_dired is TRUE, install it in the key_override[] table
+ * for Dired mode, otherwise in the general keymap[] table.
+ * If DIRED_SUPPORT or OK_OVERRIDE is not defined, don't do anything
+ * when for_dired is requested.
  * func must be present in the revmap table.
- * returns TRUE if the mapping was made, FALSE if not.
+ * returns lynxkeycode value != 0 if the mapping was made, 0 if not.
  */
-PUBLIC int remap ARGS2(
-	char *,	key,
-	char *,	func)
+PUBLIC int remap ARGS3(
+	char *,		key,
+	char *,		func,
+	BOOLEAN,	for_dired)
 {
     int i;
     struct rmap *mp;
     int c;
 
+#if !defined(DIRED_SUPPORT) || !defined(OK_OVERRIDE)
+    if (for_dired)
+	return 0;
+#endif
     if (func == NULL)
 	return 0;
     c = lkcstring_to_lkc(key);
@@ -1032,7 +1157,7 @@ PUBLIC int remap ARGS2(
 	 * called for an invalid lynxkeycode, fail or silently ignore
 	 * modifiers. - kw
 	 */
-	if (c & LKC_ISLAC)
+	if (c & (LKC_ISLECLAC|LKC_ISLAC))
 	   return 0;
 	if ((c & LKC_MASK) != c)
 	   c &= LKC_MASK;
@@ -1041,8 +1166,13 @@ PUBLIC int remap ARGS2(
 	return 0;
     for (i = 0, mp = revmap; (*mp).name != NULL; mp++, i++) {
 	if (strcmp((*mp).name, func) == 0) {
-	    keymap[c+1] = (char) i;
-	    return (c ? c : LAC_TO_LKC0(i));
+#if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
+	    if (for_dired)
+		key_override[c+1] = (char) i;
+	    else
+#endif
+		keymap[c+1] = (char) i;
+	    return (c ? c : LAC_TO_LKC0(i)); /* don't return 0, successful */
 	}
     }
     return 0;
@@ -1200,17 +1330,21 @@ PUBLIC char *key_for_func ARGS1 (
 
 /*
  *  Given one or two keys as lynxkeycodes, returns an allocated string
- *  representing the key(s) suitable for statusline messages.
- *  The caller must free the string. - kw
+ *  representing the key(s) suitable for statusline messages, or NULL
+ *  if no valid lynxkeycode is passed in (i.e., lkc_first < 0 or some other
+ *  failure).  The caller must free the string. - kw
  */
-PRIVATE char *fmt_keys ARGS2(
+PUBLIC char *fmt_keys ARGS2(
     int,	lkc_first,
     int,	lkc_second)
 {
     char *buf = NULL;
     BOOLEAN quotes = FALSE;
-    char *fmt_first = pretty(lkc_first);
+    char *fmt_first;
     char *fmt_second;
+    if (lkc_first < 0)
+	return NULL;
+    fmt_first = pretty(lkc_first);
     if (fmt_first && strlen(fmt_first) == 1 && *fmt_first != '\'') {
 	quotes = TRUE;
     }

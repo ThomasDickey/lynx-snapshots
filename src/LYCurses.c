@@ -626,7 +626,7 @@ PUBLIC void LYnoVideo ARGS1(
 	int,		a)
 {
     CTRACE((tfp, "LYnoVideo(%d)\n", a));
-#if USE_SLANG
+#ifdef USE_SLANG
     if (a & 1) Masked_Attr |= SLTT_BOLD_MASK;
     if (a & 2) Masked_Attr |= SLTT_REV_MASK;
     if (a & 4) Masked_Attr |= SLTT_ULINE_MASK;
@@ -1191,7 +1191,7 @@ PUBLIC BOOLEAN setup ARGS1(
     LYlines = LINES;
     LYcols = COLS;
 #endif /* HAVE_SIZECHANGE && !USE_SLANG && USE_NOTDEFINED */
-#if defined(WIN_EX) && defined(CJK_EX) /* 1999/08/26 (Thu) 17:53:38 */
+#if defined(PDCURSES) && defined(WIN_EX) && defined(CJK_EX) /* 1999/08/26 (Thu) 17:53:38 */
     {
 	extern int current_codepage;	/* PDCurses lib. */
 
@@ -1290,6 +1290,25 @@ PUBLIC void LYstopTargetEmphasis NOARGS
     stop_reverse();
     stop_bold();
 #endif /* FANCY_CURSES || USE_SLANG */
+}
+
+/*
+ * Accommodate the different flavors of touchline
+ */
+PUBLIC void LYtouchline ARGS1(
+	int,		row)
+{
+#if defined(HAVE_WREDRAWLN)
+    wredrawln(stdscr, row, 1);
+#else
+#if defined(FANCY_CURSES)
+    touchline(stdscr, row, 1);
+#else
+#if defined(USE_SLANG)
+    SLsmg_touch_lines(row, 1);
+#endif
+#endif
+#endif
 }
 
 /*

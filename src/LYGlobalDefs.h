@@ -11,6 +11,10 @@
 #include <LYStructs.h>
 #endif /* LYSTRUCTS_H */
 
+/* Of the following definitions, currently unused are and could
+   be removed (at least):
+   CURRENT_KEYMAP_HELP
+*/
 #ifdef HAVE_CONFIG_H
 #include <LYHelp.h>
 #else
@@ -284,18 +288,13 @@ extern BOOLEAN keep_mime_headers; /* Include mime headers and *
 				   * force source dump	      */
 extern BOOLEAN no_url_redirection;   /* Don't follow URL redirections */
 #ifdef DISP_PARTIAL
-extern BOOLEAN display_partial;      /* Display document during download */
+extern BOOLEAN display_partial;      /* Display document while loading */
 extern int Newline_partial;          /* -//- "current" newline position */
 extern int NumOfLines_partial;       /* -//- "current" number of lines */
 extern int partial_threshold;
 extern BOOLEAN debug_display_partial;  /* show with MessageSecs delay */
 extern BOOLEAN display_partial_flag; /* permanent flag, not mutable */
-extern int Newline; /* original newline position, from mainloop() */
 #endif
-
-extern char search_target[512];	     /* user search string:                   *
-				      * used by highlight() and display_page(),*
-				      * changed in LYMainLoop.c only          */
 extern char *form_post_data;         /* User data for post form */
 extern char *form_get_data;          /* User data for get form */
 extern char *http_error_file;        /* Place HTTP status code in this file */
@@ -394,6 +393,10 @@ extern BOOLEAN LYReuseTempfiles;
 extern BOOLEAN LYUseBuiltinSuffixes;
 extern BOOLEAN dont_wrap_pre;
 
+#ifdef MISC_EXP
+extern int LYNoZapKey;  /* 0: off (do 'z' checking), 1: full, 2: initially */
+#endif
+
 #ifdef EXP_JUSTIFY_ELTS
 extern BOOL ok_justify;
 #endif
@@ -404,11 +407,16 @@ extern BOOLEAN with_backspaces;
 
 extern BOOL force_empty_hrefless_a;
 
-#ifndef NO_NONSTICKY_INPUTS
-extern BOOL sticky_inputs;
-extern BOOL textinput_drawn;
-extern BOOL textfield_stop_at_left_edge;
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+extern BOOL textfields_need_activation;
+#ifdef INACTIVE_INPUT_STYLE_VH
+extern BOOL textinput_redrawn;
 #endif
+#else
+#define textfields_need_activation FALSE
+#endif /* TEXTFIELDS_MAY_NEED_ACTIVATION */
+
+extern BOOLEAN textfield_prompt_at_left_edge;
 
 
 #ifndef VMS

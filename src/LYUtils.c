@@ -17,7 +17,6 @@
 
 #include <LYMainLoop.h>
 #include <LYKeymap.h>
-#include <LYSearch.h>
 
 #ifdef __DJGPP__
 #include <go32.h>
@@ -121,9 +120,10 @@ PUBLIC	HTList * sug_filenames = NULL;		/* Suggested filenames	 */
 /*
  *  Highlight (or unhighlight) a given link.
  */
-PUBLIC void highlight ARGS2(
+PUBLIC void highlight ARGS3(
 	int,		flag,
-	int,		cur)
+	int,		cur,
+	char *,		target)
 {
     char buffer[200];
     int i;
@@ -143,7 +143,6 @@ PUBLIC void highlight ARGS2(
     BOOL hl2_drawn=FALSE;	/* whether links[cur].hightext2 is already drawn
 				   properly */
 #endif
-    CONST char *target = search_target;  /* search_target is global */
     tmp[0] = tmp[1] = tmp[2] = '\0';
 
     /*
@@ -154,9 +153,9 @@ PUBLIC void highlight ARGS2(
      */
     if (cur < 0)
 	cur = 0;
-#ifndef NO_NONSTICKY_INPUTS
+#if defined(TEXTFIELDS_MAY_NEED_ACTIVATION) && defined(INACTIVE_INPUT_STYLE_VH)
     if (flag == OFF)
-	textinput_drawn = FALSE;
+	textinput_redrawn = FALSE;
 #endif
 
     if (nlinks > 0) {
@@ -2114,7 +2113,7 @@ PUBLIC void noviceline ARGS1(
     return;
 }
 
-#ifdef NSL_FORK
+#if defined(NSL_FORK) || defined(MISC_EXP)
 /*
  *  Returns the file descriptor from which keyboard input is expected,
  *  or INVSOC (-1) if not available.
@@ -2149,7 +2148,7 @@ PUBLIC int LYConsoleInputFD ARGS1(
     }
     return fd;
 }
-#endif /* NSL_FORK */
+#endif /* NSL_FORK || MISC_EXP */
 
 PRIVATE int fake_zap = 0;
 
@@ -2180,6 +2179,10 @@ PRIVATE int DontCheck NOARGS
     if (dump_output_immediately)
 	return(TRUE);
 
+#ifdef MISC_EXP
+    if (LYNoZapKey)
+	return(TRUE);
+#endif
     /*
      * Avoid checking interrupts more than one per second, since it is a slow
      * and expensive operation - TD
@@ -2223,7 +2226,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
     if (DontCheck())
 	return((int)FALSE);
 
-#ifndef _WINDOWS	/* 1998/03/30 (Mon) 17:07:41 */
+#if !defined(_WINDOWS) || defined(__MINGW32__)
 #ifdef USE_SLANG
     /** No keystroke was entered
 	Note that this isn't taking possible SOCKSification
@@ -2325,18 +2328,18 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	if (display_partial && (NumOfLines_partial > 2))
 	/* OK, we got several lines from new document and want to scroll... */
 	{
-	   BOOLEAN do_refresh;
-	   int res;
-	   switch (cmd)
+	    BOOLEAN do_refresh;
+	    int res;
+	    switch (cmd)
 	    {
-	   case LYK_WHEREIS: /* search within the document */
-	   case LYK_NEXT:	 /* search for the next occurrence in the document */
-	       handle_LYK_WHEREIS(cmd, &do_refresh);
-	       if (do_refresh && www_search_result != -1) {
+	    case LYK_WHEREIS: /* search within the document */
+	    case LYK_NEXT:	 /* search for the next occurrence in the document */
+		handle_LYK_WHEREIS(cmd, &do_refresh);
+		if (www_search_result != -1) {
 		    Newline_partial = www_search_result;
 		    www_search_result = -1;	/* reset */
-	       }
-	       break;
+		}
+		break;
 
 	    case LYK_FASTBACKW_LINK :
 		if (Newline_partial <= (display_lines)+1) {
@@ -2406,7 +2409,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	    if (Newline_partial < 1)
 		Newline_partial = 1;
 	    NumOfLines_partial = HText_getNumOfLines();
-	    HText_pageDisplay(Newline_partial);
+	    LYMainLoop_pageDisplay(Newline_partial);
 	}
 #endif /* DISP_PARTIAL */
 	break;
@@ -3724,8 +3727,21 @@ PRIVATE int fmt_tempname ARGS3(
 	prefix = "";
     if (suffix == 0)
 	suffix = "";
+    /*
+     * Prefer a random value rather than a counter.
+     */
+#if defined(HAVE_RAND) && defined(HAVE_SRAND) && defined(RAND_MAX)
+    if (counter == 0)
+	srand(time((time_t *)0));
+    counter = ( 10000.0 * rand() ) / RAND_MAX;
+#else
     counter++;
-#ifdef _WINDOWS	/* 1998/05/25 (Mon) 20:51:22 */
+#endif
+
+#if 0 && defined(_WINDOWS)	/* 1998/05/25 (Mon) 20:51:22 */
+    /*  This is nonsense - result hasn't been filled yet and will
+     *  be overwritten below.  If you mean 'prefix' then say so. - kw
+     */
     {
 	char *p = result;
 	while (*p++) {
@@ -3752,7 +3768,8 @@ PRIVATE int fmt_tempname ARGS3(
 	CONST char *tail = strchr(suffix, '.');
 	if (tail == 0)
 	    tail = suffix + strlen(suffix);
-	leaf[8 - (tail - suffix)] = 0;
+	if (8 - (tail - suffix) >= 0)
+	    leaf[8 - (tail - suffix)] = 0;
     }
     strcat(leaf, suffix);
 #else
@@ -7676,7 +7693,7 @@ PUBLIC void LYSyslog ARGS1(
 	    return;
 	}
     }
-    syslog (LOG_INFO|LOG_LOCAL5, "%s", arg ? arg : "(null-URL)");
+    syslog (LOG_INFO|LOG_LOCAL5, "%s", NONNULL(arg));
 }
 
 PUBLIC void LYCloselog NOARGS

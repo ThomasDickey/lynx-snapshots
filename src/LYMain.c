@@ -13,6 +13,7 @@
 #include <HTML.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
+#include <LYOptions.h>
 #include <LYSignal.h>
 #include <LYGetFile.h>
 #include <LYStrings.h>
@@ -442,10 +443,11 @@ PUBLIC BOOLEAN with_backspaces = FALSE;
 
 PUBLIC BOOL force_empty_hrefless_a = FALSE;
 
-#ifndef NO_NONSTICKY_INPUTS
-PUBLIC BOOL sticky_inputs = TRUE;
-PUBLIC BOOL textfield_stop_at_left_edge=FALSE;
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+PUBLIC BOOL textfields_need_activation = FALSE;
 #endif
+
+PUBLIC BOOLEAN textfield_prompt_at_left_edge = FALSE;
 
 
 #ifdef DISP_PARTIAL
@@ -457,6 +459,10 @@ PUBLIC int partial_threshold = -1;  /* # of lines to be d/l'ed until we repaint 
 PUBLIC BOOLEAN LYNonRestartingSIGWINCH = FALSE;
 PUBLIC BOOLEAN LYReuseTempfiles = FALSE;
 PUBLIC BOOLEAN LYUseBuiltinSuffixes = TRUE;
+
+#ifdef MISC_EXP
+PUBLIC int LYNoZapKey = 0; /* 0: off (do z checking), 1: full, 2: initially */
+#endif
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
 #ifdef DECLARE_WAIS_LOGFILES
@@ -1522,7 +1528,7 @@ PUBLIC int main ARGS2(
     /*
      *	Process the RC file.
      */
-    read_rc();
+    read_rc(NULL);
 
     /*
      * Get WWW_HOME environment variable if it exists.
@@ -1587,12 +1593,12 @@ PUBLIC int main ARGS2(
 	if(LYCookieFile == NULL) {
 	   LYAddPathToHome(LYCookieFile = malloc(LY_MAXPATH), LY_MAXPATH, COOKIE_FILE);
 	} else {
-	    if ((cp = strchr(LYCookieFile, '~'))) {
+	    if (LYCookieFile[0] == '~' && LYCookieFile[1] == '/' &&
+		LYCookieFile[2] != '\0') {
 		temp = NULL;
-		*(cp++) = '\0';
-		StrAllocCopy(temp, cp);
-		LYTrimPathSep(temp);
+		StrAllocCopy(temp, LYCookieFile + 2);
 		StrAllocCopy(LYCookieFile, wwwName(Home_Dir()));
+		LYAddPathSep(&LYCookieFile);
 		StrAllocCat(LYCookieFile, temp);
 		FREE(temp);
 	    }
@@ -2085,6 +2091,8 @@ PUBLIC void LYRegisterLynxProtocols NOARGS
  */
 PUBLIC void reload_read_cfg NOARGS
 {
+    char *tempfile;
+    FILE *rcfp;
     /*
      *  no_option_save is always set for -anonymous and -validate.
      *  It is better to check for one or several specific restriction
@@ -2106,9 +2114,35 @@ PUBLIC void reload_read_cfg NOARGS
 #if 0				/* therefore this isn't needed: */
     if (LYRestricted) return;  /* for sure */
 #endif
+
+    /*
+     *  Current user preferences are saved in a temporary file, to be
+     *  read in again after lynx.cfg has been read.  This avoids
+     *  accidental changing of the preferences file.  The regular
+     *  preferences file doesn't even need to exist, and won't be
+     *  created as a side effect of this function.  Honoring the
+     *  no_option_save restriction may thus be unnecessarily restrictive,
+     *  but the check is currently still left in place. - kw
+     */
+    tempfile = calloc(1, LY_MAXPATH);
+    if (!tempfile) {
+	HTAlwaysAlert(NULL, NOT_ENOUGH_MEMORY);
+	return;
+    }
+    rcfp = LYOpenTemp(tempfile, ".rc" , "w");
+    if (rcfp == NULL) {
+	FREE(tempfile);
+	HTAlwaysAlert(NULL, CANNOT_OPEN_TEMP);
+	return;
+    }
     /* save .lynxrc file in case we change something from Options Menu */
-    if (!save_rc()) {
+    if (LYrcShowColor != SHOW_COLOR_UNKNOWN) {
+	SetupChosenShowColor();
+    }
+    if (!save_rc(rcfp)) {
 	HTAlwaysAlert(NULL, OPTIONS_NOT_SAVED);
+	LYRemoveTemp(tempfile);
+	FREE(tempfile);
 	return;    /* can not write the very own file :( */
     }
 
@@ -2136,9 +2170,12 @@ PUBLIC void reload_read_cfg NOARGS
 	read_cfg(lynx_cfg_file, "main program", 1, (FILE *)0);
 
 	/*
-	 *  Process the RC file.
+	 *  Process the temporary RC file.
 	 */
-	read_rc();
+	rcfp = fopen(tempfile, "r");
+	read_rc(rcfp);
+	LYRemoveTemp(tempfile);
+	FREE(tempfile);		/* done with it - kw */
 
 #ifdef EXP_CHARSET_CHOICE
 	init_charset_subsets();
@@ -2161,6 +2198,11 @@ PUBLIC void reload_read_cfg NOARGS
 	/*
 	 *  Initialize other things based on the configuration read.
 	 */
+	if (user_mode == NOVICE_MODE) {
+	    display_lines = LYlines - 4;
+	} else {
+	    display_lines = LYlines - 2;
+	}
 		/* Not implemented yet here,
 		 * a major problem: file paths
 		 * like lynx_save_space, LYCookieFile etc.
@@ -2712,6 +2754,21 @@ static int nounderline_fun ARGS1(
    return 0;
 }
 
+#ifdef MISC_EXP
+/* -nozap */
+static int nozap_fun ARGS1(
+	char *,			next_arg)
+{
+    LYNoZapKey = 1; /* everything but "initially" treated as "full" - kw */
+    if (next_arg != 0) {
+	if (strcasecomp(next_arg, "initially") == 0)
+	    LYNoZapKey = 2;
+
+    }
+   return 0;
+}
+#endif /* MISC_EXP */
+
 /* -pauth */
 static int pauth_fun ARGS1(
 	char *,			next_arg)
@@ -3054,16 +3111,16 @@ static Parse_Args_Type Arg_Table [] =
       "=FORMAT\nconvert input, FORMAT is in MIME type notation (experimental)"
    ),
 #endif
-   PARSE_SET(
-      "cookies",	TOGGLE_ARG,		&LYSetCookies,
-      "toggles handling of Set-Cookie headers"
-   ),
 #ifdef EXP_PERSISTENT_COOKIES
    PARSE_STR(
       "cookie_file",	LYSTRING_ARG,		&LYCookieFile,
       "=FILENAME\nspecifies a file to use to store cookies"
    ),
 #endif /* EXP_PERSISTENT_COOKIES */
+   PARSE_SET(
+      "cookies",	TOGGLE_ARG,		&LYSetCookies,
+      "toggles handling of Set-Cookie headers"
+   ),
 #ifndef VMS
    PARSE_SET(
       "core",		TOGGLE_ARG,		&LYNoCore,
@@ -3124,14 +3181,6 @@ keys (may be incompatible with some curses packages)"
       "enable local program execution"
    ),
 #endif
-   PARSE_SET(
-      "locexec",	SET_ARG,		&local_exec_on_local_files,
-      "enable local program execution from local files only"
-   ),
-   PARSE_SET(
-      "noexec",		UNSET_ARG,		&local_exec,
-      "disable local program execution (DEFAULT)"
-   ),
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
 #ifdef VMS
    PARSE_SET(
@@ -3140,6 +3189,10 @@ keys (may be incompatible with some curses packages)"
    ),
 #endif
    PARSE_SET(
+      "force_empty_hrefless_a",	SET_ARG,	&force_empty_hrefless_a,
+      "force HREF-less 'A' elements to be empy (close them as soon as they are seen)"
+   ),
+   PARSE_SET(
       "force_html",	SET_ARG,		&LYforce_HTML_mode,
       "forces the first document to be interpreted as HTML"
    ),
@@ -3147,20 +3200,16 @@ keys (may be incompatible with some curses packages)"
       "force_secure",	TOGGLE_ARG,		&LYForceSSLCookiesSecure,
       "toggles forcing of the secure flag for SSL cookies"
    ),
-   PARSE_SET(
-      "from",		TOGGLE_ARG,		&LYNoFromHeader,
-      "toggle transmissions of From headers"
-   ),
-   PARSE_SET(
-      "force_empty_hrefless_a",	SET_ARG,	&force_empty_hrefless_a,
-      "force HREF-less 'A' elements to be empy (close them as soon as they are seen)"
-   ),
 #if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
    PARSE_SET(
       "forms_options",	TOGGLE_ARG,		&LYUseFormsOptions,
       "toggles forms-based vs old-style options menu"
    ),
 #endif
+   PARSE_SET(
+      "from",		TOGGLE_ARG,		&LYNoFromHeader,
+      "toggle transmissions of From headers"
+   ),
    PARSE_SET(
       "ftp",		UNSET_ARG,		&ftp_ok,
       "disable ftp access"
@@ -3215,6 +3264,12 @@ keys (may be incompatible with some curses packages)"
       "localhost",	SET_ARG,		&local_host_only,
       "disable URLs that point to remote hosts"
    ),
+#if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
+   PARSE_SET(
+      "locexec",	SET_ARG,		&local_exec_on_local_files,
+      "enable local program execution from local files only"
+   ),
+#endif /* EXEC_LINKS || EXEC_SCRIPTS */
 #if defined(USE_HASH)
    PARSE_STR(
       "lss",		IGNORE_ARG|NEED_NEXT_ARG,	0,
@@ -3263,6 +3318,12 @@ keys (may be incompatible with some curses packages)"
       "nocolor",	FUNCTION_ARG,		nocolor_fun,
       "turn off color support"
    ),
+#if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
+   PARSE_SET(
+      "noexec",		UNSET_ARG,		&local_exec,
+      "disable local program execution (DEFAULT)"
+   ),
+#endif /* EXEC_LINKS || EXEC_SCRIPTS */
    PARSE_SET(
       "nofilereferer",	SET_ARG,		&no_filereferer,
       "disable transmissions of Referer headers for file URLs"
@@ -3315,6 +3376,12 @@ keys (may be incompatible with some curses packages)"
       "nounderline",	FUNCTION_ARG,		nounderline_fun,
       "disable underline video-attribute"
    ),
+#ifdef MISC_EXP
+   PARSE_FUN(
+      "nozap",		FUNCTION_ARG,		nozap_fun,
+      "=DURATION (\"initially\" or \"full\") disable checks for 'z' key"
+   ),
+#endif
    PARSE_SET(
       "number_fields",	SET_ARG,		&number_fields,
       "force numbering of links as well as form input fields"
@@ -3437,12 +3504,6 @@ treated '>' as a co-terminator for double-quotes and tags"
       "startfile_ok",	SET_ARG,		&startfile_ok,
       "allow non-http startfile and homepage with -validate"
    ),
-#ifndef NO_NONSTICKY_INPUTS
-   PARSE_SET(
-      "sticky_inputs",	SET_ARG,		&sticky_inputs,
-      "don't require activating inputs in order to edit them"
-   ),
-#endif
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
    PARSE_STR(
@@ -3463,14 +3524,20 @@ treated '>' as a co-terminator for double-quotes and tags"
       "term",		NEED_STRING_ARG,	&terminal,
       "=TERM\nset terminal type to TERM"
    ),
-   PARSE_SET(
-      "tlog",		IGNORE_ARG,		0,
-      "toggles use of a Lynx Trace Log for the current session"
-   ),
 #ifdef _WINDOWS
    PARSE_SET(
       "timeout",	SET_ARG,		&lynx_timeout,
       "set TCP/IP timeout"
+   ),
+#endif
+   PARSE_SET(
+      "tlog",		IGNORE_ARG,		0,
+      "toggles use of a Lynx Trace Log for the current session"
+   ),
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+   PARSE_SET(
+      "tna",		SET_ARG,		&textfields_need_activation,
+      "turn on \"Textfields Need Activation\" mode"
    ),
 #endif
    PARSE_SET(
@@ -3591,9 +3658,13 @@ static void print_help_and_exit ARGS1(int, exit_status)
 
     fprintf (stdout, gettext("USAGE: %s [options] [file]\n"), pgm);
     fprintf (stdout, gettext("Options are:\n"));
+#ifdef VMS
     print_help_strings("",
 "receive the arguments from stdin (enclose\n\
 in double-quotes (\"-\") on VMS)", NULL);
+#else
+    print_help_strings("", "receive options and arguments from stdin", NULL);
+#endif /* VMS */
 
     for (p = Arg_Table; p->name != 0; p++) {
 	char temp[LINESIZE], *value = temp;

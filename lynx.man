@@ -95,7 +95,7 @@ prepend a request URL comment and BASE tag to text/html
 outputs for -source dumps.
 .TP
 .B -blink
-forces high intensity bg colors for color mode, if available
+forces high intensity background colors for color mode, if available
 and supported by the terminal.
 Lynx needs to be compiled with the \fBslang\fR library for this flag.
 .TP
@@ -176,7 +176,7 @@ EDITOR. (vi, ed, emacs, etc.)
 enable emacs-like key movement.
 .TP
 .B -enable_scrollback
-toggles compatibility with comm programs' scrollback keys
+toggles compatibility with communication programs' scrollback keys
 (may be incompatible with some curses packages).
 .TP
 .B -error_file\fR=\fIFILE
@@ -534,7 +534,7 @@ require .www_browsable files to browse directories.
 .B -short_url
 show very long URLs in the status line with "___" to represent the
 portion which cannot be displayed.
-The begining and end of the URL are displayed, rather than suppressing the end.
+The beginning and end of the URL are displayed, rather than suppressing the end.
 .TP
 .B -show_cursor
 If enabled the cursor will not be hidden in the right hand
@@ -558,9 +558,6 @@ disable SIGINT cleanup handler
 .B -startfile_ok
 allow non-http startfile and homepage with -validate.
 .TP
-.B -sticky_inputs
-don't require activating inputs in order to edit them.
-.TP
 .B -tagsoup
 initialize parser, using Tag Soup DTD rather than SortaSGML.
 .TP
@@ -576,6 +573,9 @@ in turn, starts another Lynx process.)
 .B -tlog
 toggles between using a Lynx Trace Log and stderr for trace output
 from the session.
+.TP
+.B -tna
+turns on "Textfields Need Activation" mode.
 .TP
 .B -trace
 turns on Lynx trace mode.  Destination of trace output depends
@@ -890,7 +890,7 @@ Note that man page availability and section numbering is somewhat
 platform dependent, and may vary from the above references.
 .PP
 A section shown as (GNU), is intended to denote that the topic
-may be available via an info page, instead of a man page (ie, try
+may be available via an info page, instead of a man page (i.e., try
 "info subject", rather than "man subject").
 .PP
 A section shown as (?) denotes that documentation on the topic exists,

@@ -54,7 +54,7 @@ LYE_UPPER,      LYE_ERASE,      LYE_LKCMD,      LYE_NOP,
 #endif
 /* ^T           ^U              ^V              ^W      */
 
-LYE_ERASE,      LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_SETM1,      LYE_NOP,        LYE_NOP,        LYE_NOP,
 /* ^X           ^Y              ^Z              ESC     */
 
 LYE_NOP,        LYE_NOP,        LYE_SWMAP,      LYE_DELEL,
@@ -136,12 +136,12 @@ LYE_FORM_PASS,  LYE_FORM_PASS,  LYE_BOL,        LYE_EOL,
 
 #if (defined(_WINDOWS) || defined(__DJGPP__))
 
-LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_FORM_PASS,  LYE_NOP,        LYE_NOP,        LYE_NOP,
 /* F1 */
 
 #else
 
-LYE_NOP,        LYE_TAB,        LYE_BOL,        LYE_EOL,
+LYE_FORM_PASS,  LYE_TAB,        LYE_BOL,        LYE_EOL,
 /* F1           Do key          Find key        Select key  */
 
 #endif /* _WINDOWS || __DJGPP__ */
@@ -300,7 +300,7 @@ LYE_DELNW,      LYE_ERASE,      LYE_LKCMD,      LYE_NOP,
 #endif
 /* ^T           ^U              ^V              ^W      */
 
-LYE_DELBL,      LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_SETM1,      LYE_NOP,        LYE_NOP,        LYE_NOP,
 /* ^X           ^Y              ^Z              ESC     */
 
 LYE_NOP,        LYE_NOP,        LYE_UPPER,      LYE_LOWER,
@@ -382,12 +382,12 @@ LYE_FORM_PASS,  LYE_FORM_PASS,  LYE_BOL,        LYE_EOL,
 
 #if (defined(_WINDOWS) || defined(__DJGPP__))
 
-LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_FORM_PASS,  LYE_NOP,        LYE_NOP,        LYE_NOP,
 /* F1 */
 
 #else
 
-LYE_NOP,        LYE_TAB,        LYE_BOL,        LYE_EOL,
+LYE_FORM_PASS,  LYE_TAB,        LYE_BOL,        LYE_EOL,
 /* F1           Do key          Find key        Select key  */
 
 #endif /* _WINDOWS || __DJGPP__ */
@@ -814,7 +814,9 @@ LYE_UNMOD,      LYE_UNMOD,      LYE_UNMOD,      LYE_FORM_PASS,
 LYE_UNMOD,      LYE_UNMOD,      LYE_UNMOD,      LYE_UNMOD,
 LYE_UNMOD,      LYE_UNMOD,      LYE_UNMOD,      LYE_UNMOD,
 LYE_UNMOD,      LYE_UNMOD,      LYE_UNMOD,      LYE_UNMOD,
-LYE_UNMOD,      LYE_UNMOD,      LYE_UNMOD,      LYE_UNMOD,
+LYE_FORM_LAC|LYK_HOME,
+                LYE_UNMOD,      LYE_FORM_LAC|LYK_END,
+                                                LYE_UNMOD,
 
 /* @, A .. Z, [, \, ], ^, _                             */
 LYE_C1CHAR,     LYE_C1CHAR,     LYE_C1CHAR,     LYE_C1CHAR,
@@ -898,7 +900,7 @@ LYE_FORM_LAC|LYK_DWIMHELP,
 LYE_UNMOD,      LYE_NOP,        LYE_UNMOD,      LYE_UNMOD,
 /* Insert key   Remove key      DO_NOTHING      Back tab */
 
-/* 110..18F */
+/* 110..111 */
 #if (defined(_WINDOWS) || defined(__DJGPP__)) && defined(USE_SLANG) && !defined(DJGPP_KEYHANDLER)
 
 LYE_DELPW,      LYE_UNMOD,
@@ -981,7 +983,9 @@ PUBLIC int EditBinding ARGS1(
      *  If we have more than one modifier bits, the first currently
      *  wins. - kw
      */
-    if (xlkc & LKC_MOD1) {
+    if (xlkc & LKC_ISLECLAC) {
+	return LKC2_TO_LEC(xlkc);
+    } else if (xlkc & LKC_MOD1) {
 	xleac = LKC_TO_LEC_M1(c);
     } else if (xlkc & LKC_MOD2) {
 	xleac = LKC_TO_LEC_M2(c);
@@ -1006,17 +1010,25 @@ PUBLIC int EditBinding ARGS1(
 /*
  *  Install lec as the lynxeditaction for lynxkeycode xlkc.
  *  func must be present in the revmap table.
+ *  For normal (non-modifier) lynxkeycodes, select_edi selects which
+ *  of the alternative line-editor binding tables is modified. If
+ *  select_edi is positive, only the table given by it is modified
+ *  (the DefaultEditBinding table is numbered 1).  If select_edi is 0,
+ *  all tables are modified.  If select_edi is negative, all tables
+ *  except the one given by abs(select_edi) are modified.
  *  returns TRUE if the mapping was made, FALSE if not.
  *  Note that this remapping cannot be undone (as might be desirable
  *  as a result of re-parsing lynx.cfg), we don't remember the
  *  original editaction from the Bindings tables anywhere. - kw
  */
-PUBLIC int LYRemapEditBinding ARGS2(
+PUBLIC BOOL LYRemapEditBinding ARGS3(
     int,	xlkc,
-    int,	lec)
+    int,	lec,
+    int,	select_edi)
 {
     int j;
     int c = xlkc & LKC_MASK;
+    BOOLEAN success = FALSE;
     if (xlkc < 0 || (xlkc&LKC_ISLAC) || c >= KEYMAP_SIZE + 1)
 	return FALSE;
 #ifdef EXP_ALT_BINDINGS
@@ -1025,16 +1037,19 @@ PUBLIC int LYRemapEditBinding ARGS2(
 	    return FALSE;
 	else
 	    Mod1Binding[c] = (short) lec;
+	return TRUE;
     } else if (xlkc & LKC_MOD2) {
 	if (c > LAST_MOD2_LKC)
 	    return FALSE;
 	else
 	    Mod2Binding[c] = (short) lec;
+	return TRUE;
     } else if (xlkc & LKC_MOD3) {
 	if (c > LAST_MOD3_LKC)
 	    return FALSE;
 	else
 	    Mod3Binding[c] = (short) lec;
+	return TRUE;
     } else
 #endif /* EXP_ALT_BINDINGS */
     {
@@ -1043,11 +1058,21 @@ PUBLIC int LYRemapEditBinding ARGS2(
 #endif
 	if ((unsigned int)lec > UCHAR_MAX)
 	    return FALSE;	/* cannot do, doesn't fit in a char - kw */
-	for (j = 0; LYLineeditNames[j]; j++) {
-	    LYLineEditors[j][c] = (char) lec;
+	if (select_edi > 0) {
+	    if ((unsigned int)select_edi < TABLESIZE(LYLineEditors)) {
+		LYLineEditors[select_edi - 1][c] = (char) lec;
+		success = TRUE;
+	    }
+	} else {
+	    for (j = 0; LYLineeditNames[j]; j++) {
+		success = TRUE;
+		if (select_edi < 0 && j + 1 + select_edi == 0)
+		    continue;
+		LYLineEditors[j][c] = (char) lec;
+	    }
 	}
     }
-    return TRUE;
+    return success;
 }
 
 /*
@@ -1178,7 +1203,7 @@ PUBLIC int LYEditKeyForAction ARGS2(
 	if (pmodkey) {
 #ifdef NOT_ASCII
 	    if (mod1found < 256) {
-		pmodkey = FROMASCII(mod1found);
+		*pmodkey = FROMASCII(mod1found);
 	    } else
 #endif
 		*pmodkey = mod1found;
@@ -1217,7 +1242,7 @@ PUBLIC int LYEditKeyForAction ARGS2(
 	if (pmodkey) {
 #ifdef NOT_ASCII
 	    if (mod1found < 256) {
-		pmodkey = FROMASCII(mod1found);
+		*pmodkey = FROMASCII(mod1found);
 	    } else
 #endif
 		*pmodkey = mod1found;

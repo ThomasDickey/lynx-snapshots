@@ -3311,13 +3311,9 @@ PUBLIC void LYHandleSELECT ARGS5(
 	 *  Make sure we're in a form.
 	 */
 	if (!me->inFORM) {
-	    if (TRACE) {
-		fprintf(tfp,
-			"Bad HTML: SELECT start tag not within FORM tag\n");
-	    } else if (!me->inBadHTML) {
-		HTUserMsg(BAD_HTML_USE_TRACE);
-		me->inBadHTML = TRUE;
-	    }
+	    if (LYBadHTML(me))
+		CTRACE((tfp,
+			"Bad HTML: SELECT start tag not within FORM tag\n"));
 
 	    /*
 	     *	We should have covered all crash possibilities with the
@@ -3334,12 +3330,8 @@ PUBLIC void LYHandleSELECT ARGS5(
 	 *  Check for unclosed TEXTAREA.
 	 */
 	if (me->inTEXTAREA) {
-	    if (TRACE) {
-		fprintf(tfp, "Bad HTML: Missing TEXTAREA end tag\n");
-	    } else if (!me->inBadHTML) {
-		HTUserMsg(BAD_HTML_USE_TRACE);
-		me->inBadHTML = TRUE;
-	    }
+	    if (LYBadHTML(me))
+		CTRACE((tfp, "Bad HTML: Missing TEXTAREA end tag\n"));
 	}
 
 	/*
@@ -3418,12 +3410,8 @@ PUBLIC void LYHandleSELECT ARGS5(
 	 *  Make sure we had a select start tag.
 	 */
 	if (!me->inSELECT) {
-	    if (TRACE) {
-		fprintf(tfp, "Bad HTML: Unmatched SELECT end tag\n");
-	    } else if (!me->inBadHTML) {
-		HTUserMsg(BAD_HTML_USE_TRACE);
-		me->inBadHTML = TRUE;
-	    }
+	    if (LYBadHTML(me))
+		CTRACE((tfp, "Bad HTML: Unmatched SELECT end tag\n"));
 	    return;
 	}
 

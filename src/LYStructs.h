@@ -72,7 +72,6 @@ typedef struct _VisitedLink {
     char * address;
     int level;
     struct _VisitedLink *next_tree;
-    struct _VisitedLink *prev_tree;
     struct _VisitedLink *prev_latest;
     struct _VisitedLink *next_latest;
     struct _VisitedLink *prev_first;

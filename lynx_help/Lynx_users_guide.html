@@ -81,6 +81,9 @@ through the help files.
 and their key bindings is available by pressing the '<em>K</em>' key (or
 the '<em>k</em>' key if vi-like key movement is not on).
 [<A HREF="#ToC-Help">ToC</A>]
+<p>
+If you want to recall recent status-line messages, you can do so
+by entering the `g' command, followed by `LYNXMESSAGES:'.
 
 <h2 ID="Local"><A NAME="Local"><em>Viewing local files with Lynx</em></A></h2>
 
@@ -111,8 +114,7 @@ all be used to display an arbitrary ASCII text or HTML file:
 specified file as will fit on the screen.  Pressing a <em>down-arrow</em>
 will bring up the next screen, and pressing an <em>up-arrow</em> will bring
 up the previous screen.  If no file is specified at startup, a default file
-will be displayed.  (The default is configured by the system administrator
-when the command is installed.)
+will be displayed, depending on settings e.g., in <em>lynx.cfg</em>.
 
 <p>Lynx will display local files written in the <em>HyperText Markup
 Language</em> (<em>HTML</em>), if the file's name ends with the characters
@@ -293,10 +295,8 @@ LIST and ADDRLIST keystroke commands, normally mapped to '<em>l</em>' and
 the current document, and they can be selected via those lists.
 
 <p>The '<em>i</em>' key presents an index of documents.  The default index
-is usually a document pointing to servers around the world, but the index
-can be changed by the system administrator or on the command line using
-the <em>-index=URL</em> switch, and therefore depends on how the Lynx
-program you are using was configured.
+offered contains many useful links, but can be changed in <em>lynx.cfg</em>
+or on the command line using the <em>-index=URL</em> switch.
 
 <p>If you choose a link to a server with active access authorization, Lynx
 will automatically prompt for a username and a password. If you give the
@@ -479,13 +479,14 @@ to the net.bio.net WAIS server. [<A HREF="#ToC-Search">ToC</A>]
 <h2 ID="InteractiveOptions"><A NAME="InteractiveOptions"><em>Lynx Options Menu</em></A></h2>
 
 The Lynx <em>Options Menu</em> may be accessed by pressing the '<em>o</em>'
-key.  The current Options Menu allows you to change options which are
-useful at runtime.  Most of these are read/saved from your .lynxrc file.
-Other options are stored in the <A HREF="#lynx.cfg">lynx.cfg</A> file.
+key. It allows you to change options at runtime, if you need to.
+Most changes are read from &amp; saved to your .lynxrc file; those which are not
+are marked (!) in the form-based menu (as below). Many other options
+are stored in the <A HREF="#lynx.cfg">lynx.cfg</A> file.
 
-<p>Lynx supports two styles of options menu.  The new style shown below is an HTML
-file generated at runtime:
-
+<p>Lynx supports two styles of Options Menu, key-based &amp; form-based.
+The form-based menu shown below is an HTML file generated at runtime,
+in which the user fills in choices as in any ordinary HTML form.
 <pre>
 
                     Options Menu (Lynx Version 2.8.2pre.6)
@@ -494,9 +495,10 @@ file generated at runtime:
 HREF="keystrokes/option_help.html">HELP!</A>
 
                          Save options to disk: [_]
+                (options marked with (!) will not be saved)
 
   Personal Preferences
-  Cookies                          : [ask user..]
+  Cookies (!)                      : [ask user..]
   Editor                           : __________________________________________
   Emacs keys                       : [OFF]
   Keypad mode                      : [Numbers act as arrows.............]
@@ -508,14 +510,14 @@ HREF="keystrokes/option_help.html">HELP!</A>
   VI keys                          : [OFF]
   Visited Pages                    : [As Visit Tree..........]
   Display character set            : [Western (ISO-8859-1)...........]
-  X Display                        : __________________________________________
+  X Display (!)                    : __________________________________________
 
   Document Layout
-  Assumed document character set   : [iso-8859-1......]
-  Raw 8-bit                        : [ON.]
-  HTML error recovery              : [strict (SortaSGML mode)]
+  Assumed document character set(!): [iso-8859-1......]
+  Raw 8-bit (!)                    : [ON.]
+  HTML error recovery (!)          : [strict (SortaSGML mode)]
   Popups for select fields         : [ON.]
-  Show images                      : [as labels]
+  Show images (!)                  : [as labels]
   Verbose images                   : [show filename]
 
   Bookmark Options
@@ -529,19 +531,19 @@ HREF="keystrokes/option_help.html">HELP!</A>
   Headers transferred to remote server
   Preferred document character set : _________________________________
   Preferred document language      : _________________________________
-  User-Agent header                : __________________________________________
+  User-Agent header (!)            : __________________________________________
 
   Check your lynx.cfg here
 
          Accept Changes - Reset Changes Left Arrow cancels changes
 
 </pre>
-
-<p>The old style of options menu is a fixed form.  Normally this will be
-compiled into Lynx, and is accessed by setting FORMS_OPTIONS true in your
-<A HREF="#lynx.cfg">lynx.cfg</A> file.
-
+<p>The key-based menu depends on key-strokes to identify options
+which the user wants to change.  It is compiled into Lynx
+and is accessed by setting FORMS_OPTIONS to TRUE in
+<A HREF="#lynx.cfg">lynx.cfg</A>.
 <pre>
+
              Options Menu (Lynx Version 2.8.2pre.6)
 
      (E)ditor                     : emacs
@@ -597,7 +599,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
    <dt>Editor
         <dd>The editor to be invoked when editing browsable files, when
             sending mail or comments, when preparing a news article for
-	    posting, and for external TEXTAREA editing.  The full pathname
+            posting, and for external TEXTAREA editing.  The full pathname
             of the editor command should be specified when possible.
 
    <dt>DISPLAY variable
@@ -785,7 +787,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
          <p>Note: this has no direct effect on the line-editor's key bindings.
 
    <dt>Visited Pages
-   	<dd>Enable several different views of the visited links:
+        <dd>Enable several different views of the visited links:
         <dl>
           <dt>By First Visit
           <dt>By First Visit Reversed
@@ -902,7 +904,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
             or &quot;L_y_n_x&quot;.
 
    <dt>Local execution scripts or links
-        <dd>Local execution can be activated by the system administrator.
+        <dd>Local execution is activated when Lynx is first set up.
             If it has not been activated you will not see this option
             in the <em>Options Menu</em>.
         <dd>When a local execution script is encountered Lynx  checks the
@@ -1005,11 +1007,13 @@ received the article supports posting from your site, a link that says
 
 <h2 ID="Bookmarks"><A NAME="Bookmarks"><em>Lynx bookmarks</em></A></h2>
 
-It is often useful to place a bookmark to aid in returning quickly to
-a document.  To use the bookmark feature you must first use the
-<em>Options Menu</em> to specify a bookmark filename.
-
-<p>To save a bookmark to the document you wish to place in the
+Bookmarks are entries in your <em>bookmark file</em>, which record
+the URL of a document you may want to return to easily, with a name
+of your choice to identify the document.  To use bookmarks
+you must first have specified a name for your bookmark file
+in <A HREF="#lynx.cfg">lynx.cfg</A> or via the <em>Options Menu</em>.
+<p>
+To save a bookmark to the document you wish to place in the
 bookmark file press the '<em>a</em>' key and you will be asked:
 
 <blockquote>
@@ -1103,8 +1107,7 @@ on your local system.  The commands available in DIRED mode are
 <dd>Type '<em>c</em>' to create a new file.  New file will be empty.
 
 <dt><code>D)ownload</code>
-<dd>Type '<em>d</em>' to download selection using one of the options defined
-    by your system administrator.
+<dd>Type '<em>d</em>' to download using one of the pre-defined options.
 
 <dt><code>E)dit</code>
 <dd>Type '<em>e</em>' to spawn the editor defined in <em>Options Menu</em>
@@ -1129,8 +1132,9 @@ on your local system.  The commands available in DIRED mode are
     performed on tagged files instead of highlighted ones.
 
 <dt><code>U)pload</code>
-<dd>Type '<em>u</em>' to upload a file to the present directory.  Upload
-    methods are defined by your system administrator.
+<dd>Type '<em>u</em>' to upload a file to the present directory.
+    An uploading method must have been pre-defined in
+    <A HREF="#lynx.cfg">lynx.cfg</A> .
 </dl>
 [<A HREF="#ToC-DirEd">ToC</A>]
 
@@ -1306,13 +1310,11 @@ commands.
             before the interrupt, it will be displayed.
    <dt><em>numbers</em>
         <dd>Lynx offers other, advanced navigation features when numbers
-            are used to invoke the <a
-            href="keystrokes/follow_help.html"
-            >Follow link (or goto link or page) number:</a> or<br>
-            &nbsp;&nbsp;<a
-            href="keystrokes/follow_help.html#select-option"
-            >Select option (or page) number:</a><br>
-            prompts.
+            are used to invoke the
+            <a href="keystrokes/follow_help.html">Follow Link
+            (or goto link or page) number:</a>
+            or <a href="keystrokes/follow_help.html#select-option">Select
+            Pop-up Option Number:</a> prompts.
             [<A HREF="#ToC-MiscKeys">ToC</A>]
 </dl>
 
@@ -1375,57 +1377,22 @@ options from a list, and fields for entering text.
     href="#submit">submit</a> the form if the text entry field is the
     only non-hidden field in the form.
 
-<dt>TEXTAREA Fields
-<dd>TEXTAREA fields are handled as if they were a series of text entry
-    (INPUT) fields for which successive lines imply a newline at the end of
-    the preceding line.  You enter text on each line to construct the overall
-    message.  Any blank lines at the bottom of the TEXTAREA field will be
-    eliminated from the submission.  The <em>up-arrow</em>, and
-    <em>down-arrow</em> or <em>Return</em> keys move you to the preceding,
-    or next line of the overall message, as for INPUT fields, and the
-    <em>TAB</em> key will move you down beyond the bottom of the TEXTAREA
-    field.
+    If <A NAME="tna">"Textfields Need Activation"</A> mode is turned on
+    (with the <kbd>-tna</kbd> command-line option),
+    then text entry fields do not become active immediately upon being
+    selected, as normally.  Keystrokes have their normal command meaning
+    unless the Line Editor gets activated with <em>Return</em> or <em>Right
+    Arrow</em>.  This mode can be used to avoid "getting stuck" in input
+    fields, especially by users who rarely fill out forms.
 
-<dt>Editing TEXTAREA Fields and Special TEXTAREA Functions
-<dd>TEXTAREA fields can be edited using an external editor.
-    The statusline should tell you when this is possible and what
-    key to use, it might for example say
-
-<PRE>          <strong>(Textarea) Enter text. </strong>[...] <strong>(^Ve for editor).</strong></PRE>
-
-    An external editor has to be defined, for example in the <a
-    href="#InteractiveOptions">Options Menu</a>, before you can start
-    using this function.
-
-    <p>To map a key so that it will invoke external TEXTAREA editing, you
-    can either configure Lynx to use the <a
-    href="keystrokes/bashlike_edit_help.html">Bash-like Line-Editor
-    Bindings</a>, or add KEYMAP bindings to your <em>lynx.cfg</em> file,
-    e.g.<br>
-    &nbsp;&nbsp;KEYMAP:e:EDITTEXTAREA<br>
-    or<br>
-    &nbsp;&nbsp;KEYMAP:e:DWIMEDIT<br>
-    (the first is only functional for TEXTAREA editing, while the second
-    allows to use the same key for normal <a href="#FileEdit">file
-    editing</A>).</p>
-
-    You can also use two other special TEXTAREA functions.  Again, these
-    are already bound to key sequences in the <a
-    href="keystrokes/bashlike_edit_help.html#TASpecial">Bash-like Bindings</a>.
-    You can invoke them independently of the line edit style
-    by adding KEYMAP bindings to your <em>lynx.cfg</em> file, e.g.<p>
-
-    &nbsp;&nbsp;KEYMAP:$:GROWTEXTAREA<br>
-    &nbsp;&nbsp;KEYMAP:#:INSERTFILE<p>
-
-    With these bindings -- you can choose other keys -- ,<br>
-    (in a TEXTAREA only) <em>^V$</em> adds 5 lines to the TEXTAREA
-    and <em>^V#</em> prompts for the name of an existing file
-    to be inserted into the TEXTAREA (above the cursorline).
-    An automatic variation is normally compiled in,
-    so that hitting <em>Enter</em> with the cursor on the last line
-    adds a new line to the TEXTAREA, with the cursor on it.<p>
-
+    <DIV ID="CtrlVNote">
+    <p><em>NOTE:</em> If you have a text input field selected you will not
+    have access to most of the Lynx keystroke commands, because they are
+    interpreted by the <a href="keystrokes/edit_help.html"
+    >Line Editor</a> as either text entries or editing commands.  Select a
+    button or box when you want to use Lynx keystrokes; or prefix your
+    keystroke with <em>^V</em> to temporarily escape from line editing.
+    <p>
     Some flavors of UNIX, shells &amp; terminal settings require
     that you enter <em>^V^Ve</em> in order to start the external editor,
     as they also use <em>^V</em> as default command-line quote key
@@ -1444,22 +1411,107 @@ options from a list, and fields for entering text.
     NB when NOT in the Line Editor, <em>^V</em> is by default bound
     to the command
     to switch between SortaSGML and TagSoup HTML parsing
-    (i.e., SWITCH_DTD ).
+    (i.e., SWITCH_DTD).
+    To avoid confusion, either of these separate functions could be changed
+    (mapped away) with a KEYMAP directive in <em>lynx.cfg</em>.  For
+    example,<br>
+    &nbsp;&nbsp;KEYMAP:^V:DO_NOTHING<br>
+    &nbsp;&nbsp;KEYMAP:#:SWITCH_DTD<br>
+    would map SWITCH_DTD away from <em>^V</em> to <em>#</em>, while leaving
+    its default Line Editor function as a command escape in place.  On the
+    other hand,<br>
+    &nbsp;&nbsp;KEYMAP:^V::NOP:1<br>
+    &nbsp;&nbsp;KEYMAP:^_::LKCMD:1<br>
+    would move <em>^V</em>'s Line Editor binding as command escape to
+    <em>^_</em> for the first Line Edit style, letting <em>^V</em> still
+    act as SWITCH_DTD
+    outside of text input fields.
+    </DIV>
 
+<dt>TEXTAREA Fields
+<dd>TEXTAREA fields are for most purposes handled as if they were a series of
+    text entry (INPUT) fields
+    for which successive lines imply a newline at the end of
+    the preceding line.  You enter text on each line to construct the overall
+    message.  Any blank lines at the bottom of the TEXTAREA field will be
+    eliminated from the submission.  The <em>up-arrow</em>, and
+    <em>down-arrow</em> or <em>Return</em> keys move you to the preceding,
+    or next line of the overall message, as for INPUT fields.  The
+    <em>TAB</em> key will move you down beyond the bottom of the TEXTAREA
+    field, and <em>Back Tab</em> (if available, e.g., as Shift-Tab, and
+    correctly mapped in the terminal description) will move backward to
+    a link or field before the TEXTAREA.
+
+<dt>Editing TEXTAREA Fields and Special TEXTAREA Functions
+<dd>TEXTAREA fields can be edited using an external editor.
+    The statusline should tell you when this is possible and what
+    key to use, it might for example say
+
+<PRE>          <strong
+    >(Textarea) Enter text. </strong>[ ..... ]<strong> (^Xe for editor).</strong></PRE>
+
+    An external editor has to be defined, for example in the <a
+    href="#InteractiveOptions">Options Menu</a>, before you can start
+    using this function.
+
+    <p>A key to invoke external TEXTAREA editing is normally provided
+    by the <a href="keystrokes/edit_help.html">Line-Editor Key</a> Bindings.
+    A KEYMAP directive in <em>lynx.cfg</em> can also be used to
+    make a different key invoke external editing; it will then normally
+    be necessary to prefix that key with <em>^V</em> to "escape" from
+    line-editing.  Two variants exist,<br>
+    &nbsp;&nbsp;KEYMAP:e:EDITTEXTAREA<br>
+    or<br>
+    &nbsp;&nbsp;KEYMAP:e:DWIMEDIT<br>
+    (the first is only functional for TEXTAREA editing, while the second
+    allows to use the same key for normal <a href="#FileEdit">file
+    editing</a> <em>as long as both functions don't conflict</em>).
+    <p>Please see the <a href="#CtrlVNote">note above</a> for details
+    about <em>^V</em> behavior.</p>
+
+    You can also use two other special TEXTAREA functions.  Again, these
+    are already bound to key sequences in the <a
+    href="keystrokes/edit_help.html#TASpecial">Line-Editor
+    Bindings</a>, by default <em>^Xg</em> and <em>^Xi</em>.
+    You can use different keys
+    by adding KEYMAP bindings to your <em>lynx.cfg</em> file, e.g.<p>
+
+    &nbsp;&nbsp;KEYMAP:$:GROWTEXTAREA<br>
+    &nbsp;&nbsp;KEYMAP:#:INSERTFILE<p>
+
+    With these bindings,
+    (in a TEXTAREA only) <em>^V$</em> would add 5 lines to the TEXTAREA
+    and <em>^V#</em> would prompt for the name of an existing file
+    to be inserted into the TEXTAREA (above the cursorline).
+    An automatic variation of GROWTEXTAREA is normally compiled in,
+    so that hitting <em>Enter</em> with the cursor on the last line
+    adds a new line to the TEXTAREA, with the cursor on it.<p>
+
+    If you have some single keys (or control keys) to spare that you
+    do not need for their normal purposes, you can dedicated those keys
+    to invoke the special functions (without requiring a prefix key).
+    For example, to use
+    the <em>^E</em> key for the DWIMEDIT action, and
+    the <em>Insert</em> key for the INSERTFILE action,
+    use<br>
+    &nbsp;&nbsp;KEYMAP:^E:DWIMEDIT:PASS<br>
+    &nbsp;&nbsp;KEYMAP:0x10C:INSERTFILE:PASS<br>
+    (see lynx.cfg for other keystroke codes to use).
+
+    <p>Note that the default bindings that use <em>^X</em> as a prefix key
+    <em>may</em> also work by substituting the <kbd>Escape</kbd> key
+    for ^X.  If your keyboard has a modifier (Meta) key that gets
+    transmitted as an ESC prefix, for example <kbd>Alt</kbd>, you can
+    then even use <em>Alt-e</em> instead of <em>^Xe</em>, <em>Alt-g</em>
+    instead of <em>^Xg</em>, and so on.  But this does not work reliably
+    everywhere (it depends on the way Lynx is compiled, including which
+    libraries are used, and behavior of the connection and terminal type).
 </dl>
 
 In general, you can move around the form using the standard Lynx navigation
 keys.  The <em>up-arrow</em> and <em>down-arrow</em> keys, respectively,
 select the previous or next field, box, or button.  The <em>TAB</em> key
 selects the next field, box, or button.
-
-<p><em>NOTE:</em> If you have a text input field selected you will not
-have access to most of the Lynx keystroke commands, because they are
-interpreted by the <a href="keystrokes/edit_help.html"
->Line Editor</a> as either text entries or editing commands.  Select a
-button or box when you want to use Lynx keystrokes; or prefix your
-keystroke with <em>^V</em> to temporarily escape from line editing.
-
 
 <p>To <A name="submit"><em>submit</em></a> the form press
 <em>right-arrow</em> or <em>Return</em> when positioned on the form's
@@ -1621,19 +1673,19 @@ There are 3 choices in <em>lynx.cfg</em>, with 2 corresponding keys:
      MAKE_PSEUDO_ALTS_FOR_INLINES     [  INLINE_TOGGLE
      VERBOSE_IMAGES                   no corresponding key
 </pre><p>
-You can also use the Options Menu, as outlined below:
+You can also use the <em>Options Menu</em>, as outlined below:
 <pre>
-     key  lynx.cfg       FM LM .lynxrc    variable in source
+     key  lynx.cfg       FM KM .lynxrc    variable in source
 
        *  MAKE_LINKS_     Y  N       N    clickable_images
        [  MAKE_PSEUDO_    Y  N       N    pseudo_inline_alts
           VERBOSE_        Y  Y       Y    verbose_img
 
-FM = new Form Menu ; LM = old List Menu ;
+FM = Form-based Menu ; KM = Key-based Menu ;
 in  .lynxrc ,  VERBOSE_IMAGES  is called `verbose_images':
 the other two cannot be saved between sessions.
 </pre><p>
-In the Forms Menu, the 3-way `Show images' selection
+In the Form-based Menu, the 3-way `Show images' selection
 combines the effects of the `*' &amp; `[' keys, as follows:
 <pre>
      Ignore      clickable_images = FALSE, pseudo_inline_alts = FALSE
@@ -1663,6 +1715,50 @@ formatted content, or, if the <em>table</em> includes markup not allowed
 for PRE content, construct the <em>table</em> using <a
 href="#Tabs">HTML Tabs</a>.  An example <em>table</em> using <em>TAB</em>
 elements is included in the test subdirectory of the Lynx distribution.
+
+<DIV ID="TRST">
+<p>Starting with version 2.8.3, Lynx renders some tables in tabular
+form.  This tabular representation for <em>simple</em> tables
+(<dfn>TRST</dfn>) does not attempt to implement full support for any table
+model.  Limitations are:
+<ul>
+    <li>All data constituting a table row generally has to fit within the
+        display width without inserting line breaks.
+    <li>Cell contents have to be simple.  In general, only inline markup is
+        acceptable, no <code>&lt;P&gt;</code>, <code>&lt;BR&gt;</code> etc.
+        (although <code>&lt;BR&gt;</code> may
+        be ignored at the beginning of the first cell or at the end of the
+        last cell of a row).
+    <li>When tables are nested, only the innermost level is a candidate
+        for tabular representation.
+    <li>Most attributes are ignored, including borders, <code>WIDTH</code>,
+        vertical alignment.
+</ul>
+Horizontal alignments (<code>LEFT</code>, <code>CENTER</code>,
+<code>RIGHT</code>), <code>COLSPAN</code>, and <code>ROWSPAN</code> are
+interpreted according to HTML 4.01.  (<code>ROWSPAN</code> can only reserve
+empty space in subsequent rows, because of the limitations above.)  When
+TRST fails because a table is not "simple" enough, the representation falls
+back to the minimal handling described earlier.
+Many (but, unfortunately, by no means all) tables that represent inherently
+tabular material will thus be shown with correct tabular formatting.
+Where table markup is used only for layout purposes (containing whole blocks
+of text and list within table cells) and not essential for understanding
+the textual contents, it remains basically ignored.  Some more information
+on details is available in the file <kbd>README.TRST</kbd> of the source
+distribution.
+</DIV>
+
+<p>For tabular display of more complex tables, Lynx users can make use of
+external scripts or programs.  The normal Lynx distribution currently does
+not provide such scripts, but they can be written locally or downloaded
+from several sources.  It is suggested to use one of Lynx's facilities for
+invoking external programs (see <kbd>DOWNLOADER</kbd>, <kbd>PRINTER</kbd>,
+<kbd>EXTERNAL</kbd>, <kbd>TRUSTED_LYNXCGI</kbd> in <A
+HREF="#lynx.cfg">lynx.cfg</A> and <A HREF="lynx_url_support.html#cgi"><code
+>lynxcgi:</code></A> in <em>Supported URLs</em> for information on various
+ways for setting this up).
+
 [<A HREF="#ToC-Tables">ToC</A>]
 
 <h2 ID="Tabs"><A NAME="Tabs"><em>Lynx and HTML Tabs</em></a></h2>
@@ -2339,7 +2435,7 @@ where
              <dt><code>-number_links</code>
                 <dd>force numbering of links.
              <dt><code>-partial</code>
-                <dd>toggles displaying of partial pages while downloading.
+                <dd>toggles displaying of partial pages while loading.
              <dt><code>-pauth=ID:PW</code>
                 <dd>set authorization ID and password for a protected proxy
                     server at startup.  Be sure to protect any script files
@@ -2562,6 +2658,9 @@ where
                     keystroke command.  If use of a Lynx Trace Log
                     is turned off, any trace output will go to the standard
                     error stream.
+             <dt><code>-tna</code>
+                <dd>turns on <A HREF="#tna">"Textfields Need Activation"</A>
+                    mode.
              <dt><code>-trace</code>
                 <dd>turns on Lynx trace mode.  If a Lynx Trace Log
                     (<em>Lynx.trace</em> in the home directory) has
@@ -2654,10 +2753,11 @@ You may visit an index of options:
 <a href="http://www.hippo.ru/%7Ehvv/lynxcfg_toc.html">by category</a> or
 <a href="http://www.hippo.ru/%7Ehvv/lynxcfg_toc.html#alphatoc">by alphabet</a>.
 
-<p>To see the current lynx.cfg state you may press <em>'o'</em> key
-for <em>Options Menu</em> and follow <em>check your lynx.cfg</em> link
-near the bottom; alternatively, you may also press <em>'='</em> key
-for <em>Lynx Information Page</em> and follow a link from there near the top.
+<p>To view your current configuration derived from lynx.cfg and any
+included configuration files, press <em>'g'</em> and type in
+'<em>lynxcfg:</em>'.  If you are using the forms-based <em>Options
+Menu</em>, you may press <em>'o'</em> for the Options Menu and follow
+the '<em>Check your lynx.cfg</em>' link near the bottom.
 
 <p>However, for those who have a restricted account many Lynx features
 may be disabled by the system administrator, you probably will not see

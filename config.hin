@@ -51,6 +51,7 @@
 #undef HAVE_ALLOCA_H		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_ARGZ_H		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_ARPA_INET_H
+#undef HAVE_ASSUME_DEFAULT_COLORS /* ncurses extension */
 #undef HAVE_CATGETS		/* defined if you want to use non-GNU catgets */
 #undef HAVE_CBREAK
 #undef HAVE_CURSESX_H
@@ -80,6 +81,7 @@
 #undef HAVE_NL_TYPES_H		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_POPEN
 #undef HAVE_PUTENV
+#undef HAVE_RAND
 #undef HAVE_READDIR
 #undef HAVE_RESIZETERM
 #undef HAVE_RESOLV_H
@@ -87,6 +89,7 @@
 #undef HAVE_SETLOCALE
 #undef HAVE_SIGACTION		/* CF_FUNC_SIGACTION */
 #undef HAVE_SIZECHANGE		/* defined by CF_SIZECHANGE */
+#undef HAVE_SRAND
 #undef HAVE_STDARG_H		/* CF_VARARGS */
 #undef HAVE_STDLIB_H
 #undef HAVE_STPCPY		/* defined by AM_GNU_GETTEXT */
@@ -115,6 +118,7 @@
 #undef HAVE_VASPRINTF
 #undef HAVE_WAITPID
 #undef HAVE_WBORDER
+#undef HAVE_WREDRAWLN
 #undef HAVE___ARGZ_COUNT	/* defined by AM_GNU_GETTEXT */
 #undef HAVE___ARGZ_NEXT		/* defined by AM_GNU_GETTEXT */
 #undef HAVE___ARGZ_STRINGIFY	/* defined by AM_GNU_GETTEXT */

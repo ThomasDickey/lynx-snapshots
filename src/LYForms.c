@@ -394,7 +394,7 @@ PRIVATE int form_getstr ARGS3(
 	     *  If we can edit it, report that we are using the tail. - FM
 	     */
 	    HTUserMsg(FORM_VALUE_TOO_LONG);
-	    show_formlink_statusline(form, FOR_INPUT);
+	    show_formlink_statusline(form, redraw_only? FOR_PANEL : FOR_INPUT);
 	    move(startline, startcol);
 	}
     }
@@ -406,17 +406,38 @@ PRIVATE int form_getstr ARGS3(
     MyEdit.pad = '_';
     MyEdit.hidden = (BOOL) (form->type == F_PASSWORD_TYPE);
     if (use_last_tfpos && LastTFPos >= 0 && LastTFPos < MyEdit.strlen) {
-	MyEdit.pos = LastTFPos;
+#if defined(TEXTFIELDS_MAY_NEED_ACTIVATION) && defined(INACTIVE_INPUT_STYLE_VH)
+	if (redraw_only) {
+	    if (!(MyEdit.strlen >= MyEdit.dspwdth &&
+		  LastTFPos >= MyEdit.dspwdth - MyEdit.margin)) {
+		MyEdit.pos = LastTFPos;
+		if (MyEdit.strlen >= MyEdit.dspwdth)
+		    textinput_redrawn = FALSE;
+	    }
+	} else
+#endif /* TEXTFIELDS_MAY_NEED_ACTIVATION && INACTIVE_INPUT_STYLE_VH */
+	    MyEdit.pos = LastTFPos;
 #ifdef ENHANCED_LINEEDIT
 	if (MyEdit.pos == 0)
 	    MyEdit.mark = MyEdit.strlen;
 #endif
     }
     /* Try to prepare for setting position based on the last mouse event */
+#if defined(TEXTFIELDS_MAY_NEED_ACTIVATION) && defined(INACTIVE_INPUT_STYLE_VH)
+    if (!redraw_only) {
+	if (peek_mouse_levent()) {
+	    if (!use_last_tfpos && !textinput_redrawn) {
+		MyEdit.pos = 0;
+	    }
+	}
+	textinput_redrawn = FALSE;
+    }
+#else
     if (peek_mouse_levent()) {
 	if (!use_last_tfpos)
 	    MyEdit.pos = 0;
     }
+#endif /* TEXTFIELDS_MAY_NEED_ACTIVATION && INACTIVE_INPUT_STYLE_VH */
     LYRefreshEdit(&MyEdit);
     if (redraw_only)
 	return 0;		/*return value won't be analysed*/
@@ -447,7 +468,7 @@ again:
 	}
 #endif /* VMS */
 #  ifdef NCURSES_MOUSE_VERSION
-	if (ch != -1 && (ch & LKC_ISLAC)) /* already lynxactioncode? */
+	if (ch != -1 && (ch & LKC_ISLAC) && !(ch & LKC_ISLECLAC)) /* already lynxactioncode? */
 	    break;	/* @@@ maybe move these 2 lines outside ifdef -kw */
 	if (ch == MOUSE_KEY) {		/* Need to process ourselves */
 #if defined(WIN_EX)
@@ -492,7 +513,8 @@ again:
 	} else
 #  endif	/* defined NCURSES_MOUSE_VERSION */
 	{
-	    ch |= MyEdit.current_modifiers;
+	    if (!(ch & LKC_ISLECLAC))
+		ch |= MyEdit.current_modifiers;
 	    MyEdit.current_modifiers = 0;
 	    if (last_xlkc != -1) {
 		if (ch == last_xlkc)
@@ -639,18 +661,12 @@ again:
 	    case LTARROW:	/* 1999/04/14 (Wed) 15:01:33 */
 		if (MyEdit.pos == 0 && repeat == -1) {
 		    int c = YES;    /* Go back immediately if no changes */
-#ifndef NO_NONSTICKY_INPUTS
-		    if (sticky_inputs
-		     && !textfield_stop_at_left_edge)
-#endif
-		    if (strcmp(MyEdit.buffer, value)) {
+		    if (textfield_prompt_at_left_edge) {
+			c = HTConfirmDefault(PREV_DOC_QUERY, NO);
+		    } else if (strcmp(MyEdit.buffer, value)) {
 			c = HTConfirmDefault(PREV_DOC_QUERY, NO);
 		    }
 		    if (c == YES) {
-#ifndef NO_NONSTICKY_INPUTS
-			if (textfield_stop_at_left_edge)
-			    goto again;
-#endif
 			return(ch);
 		    } else {
 			if (form->disabled == YES)
@@ -662,8 +678,31 @@ again:
 		/* fall through */
 
 	    default:
-		if (form->disabled == YES)
-		    goto again;
+		if (form->disabled == YES) {
+		    /*
+		     *  Allow actions that don't modify the contents even
+		     *  in disabled form fields, so the user can scroll
+		     *  through the line for reading if necessary. - kw
+		     */
+		    switch(action) {
+		    case LYE_BOL:
+		    case LYE_EOL:
+		    case LYE_FORW:
+		    case LYE_BACK:
+		    case LYE_FORWW:
+		    case LYE_BACKW:
+#ifdef EXP_KEYBOARD_LAYOUT
+		    case LYE_SWMAP:
+#endif
+#ifdef ENHANCED_LINEEDIT
+		    case LYE_SETMARK:
+		    case LYE_XPMARK:
+#endif
+			break;
+		    default:
+			goto again;
+		    }
+		}
 		/*
 		 *  Make sure the statusline uses editmode help.
 		 */
@@ -1834,6 +1873,11 @@ PUBLIC void show_formlink_statusline ARGS2(
 	if (form->disabled == YES)
 	    statusline(FORM_LINK_PASSWORD_UNM_MSG);
 	else
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+	    if (for_what == FOR_PANEL)
+		statusline(FORM_LINK_PASSWORD_MESSAGE_INA);
+	    else
+#endif
 	    statusline(FORM_LINK_PASSWORD_MESSAGE);
 	break;
     case F_OPTION_LIST_TYPE:
@@ -1862,18 +1906,39 @@ PUBLIC void show_formlink_statusline ARGS2(
 	    if (no_mail)
 		statusline(FORM_LINK_TEXT_SUBMIT_MAILTO_DIS_MSG);
 	    else
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+		if (for_what == FOR_PANEL)
+		    statusline(FORM_TEXT_SUBMIT_MAILTO_MSG_INA);
+		else
+#endif
 		statusline(FORM_LINK_TEXT_SUBMIT_MAILTO_MSG);
 	} else if (form->no_cache) {
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+	    if (for_what == FOR_PANEL)
+		statusline(FORM_TEXT_RESUBMIT_MESSAGE_INA);
+	    else
+#endif
 	    statusline(FORM_LINK_TEXT_RESUBMIT_MESSAGE);
 	} else {
 	    char *submit_str = NULL;
 	    char *xkey_info = key_for_func_ext(LYK_NOCACHE, for_what);
 	    if (xkey_info && *xkey_info) {
-		HTSprintf0(&submit_str, FORM_LINK_TEXT_SUBMIT_MESSAGE_X,
-			   xkey_info);
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+		if (for_what == FOR_PANEL)
+		    HTSprintf0(&submit_str, FORM_TEXT_SUBMIT_MESSAGE_INA_X,
+			       xkey_info);
+		else
+#endif
+		    HTSprintf0(&submit_str, FORM_LINK_TEXT_SUBMIT_MESSAGE_X,
+			       xkey_info);
 		statusline(submit_str);
 		FREE(submit_str);
 	    } else {
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+		if (for_what == FOR_PANEL)
+		    statusline(FORM_LINK_TEXT_SUBMIT_MESSAGE_INA);
+		else
+#endif
 		statusline(FORM_LINK_TEXT_SUBMIT_MESSAGE);
 	    }
 	    FREE(xkey_info);
@@ -1939,27 +2004,44 @@ PUBLIC void show_formlink_statusline ARGS2(
 	if (form->disabled == YES)
 	    statusline(FORM_LINK_TEXT_UNM_MSG);
 	else
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+	    if (for_what == FOR_PANEL)
+		statusline(FORM_LINK_TEXT_MESSAGE_INA);
+	    else
+#endif
 	    statusline(FORM_LINK_TEXT_MESSAGE);
 	break;
     case F_TEXTAREA_TYPE:
-	if (form->disabled == YES)
+	if (form->disabled == YES) {
 	    statusline(FORM_LINK_TEXT_UNM_MSG);
-	else if (no_editor || !editor || !*editor) {
-	    statusline(FORM_LINK_TEXTAREA_MESSAGE);
 	} else {
 	    char *submit_str = NULL;
-	    char *xkey_info = key_for_func_ext(LYK_EDIT_TEXTAREA, for_what);
+	    char *xkey_info = NULL;
+	    if (!no_editor && editor && editor) {
+		xkey_info = key_for_func_ext(LYK_EDIT_TEXTAREA, for_what);
 #ifdef TEXTAREA_AUTOEXTEDIT
-	    if (!xkey_info)
-		xkey_info = key_for_func_ext(LYK_DWIMEDIT, for_what);
+		if (!xkey_info)
+		    xkey_info = key_for_func_ext(LYK_DWIMEDIT, for_what);
 #endif
+	    }
 	    if (xkey_info && *xkey_info) {
-		HTSprintf0(&submit_str, FORM_LINK_TEXTAREA_MESSAGE_E,
-			   xkey_info);
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+		if (for_what == FOR_PANEL)
+		    HTSprintf0(&submit_str, FORM_LINK_TEXTAREA_MESSAGE_INA_E,
+			       xkey_info);
+		else
+#endif
+		    HTSprintf0(&submit_str, FORM_LINK_TEXTAREA_MESSAGE_E,
+			       xkey_info);
 		statusline(submit_str);
 		FREE(submit_str);
 	    } else {
-		statusline(FORM_LINK_TEXTAREA_MESSAGE);
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+		if (for_what == FOR_PANEL)
+		    statusline(FORM_LINK_TEXTAREA_MESSAGE_INA);
+		else
+#endif
+		    statusline(FORM_LINK_TEXTAREA_MESSAGE);
 	    }
 	    FREE(xkey_info);
 	}

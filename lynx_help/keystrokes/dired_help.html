@@ -11,16 +11,10 @@ Lynx changes into Dired mode when you use a URL of the type
 <em>file://localhost/path/</em>.  While in Dired mode, some keys are
 remapped to do the following functions:
 <pre>
+
         C)reate       - Create a new, empty file in the current
                         directory.  You will be prompted to enter
                         a name for the file.
-
-        D)ownload     - Download selection using options listed in
-                        the download options screen.
-
-        E)dit         - Spawn the editor defined in the <a
-                        href="option_help.html">options screen</a>
-                        and load selection for editing.
 
         F)ull menu    - Show a full menu of commands for currently
                         selected file or directory.
@@ -40,12 +34,20 @@ remapped to do the following functions:
                         a file.
 
         U)pload       - Upload a file to the current directory using
-                        one of the options listed in the upload
-                        options screen.
+                        one of the options listed in the upload screen.
+</pre>
+Some other keys useful in Dired mode:
+<pre>
+        D)ownload     - Download selection using options listed in
+                        the download options screen.
+
+        E)dit         - Spawn the editor defined in the <a
+                        href="option_help.html">Options Menu</a>
+                        and load selection for editing.
 </pre>
 
-<em>Note:</em> Dired mode must be activated at compile time by the
-system administrator.  Otherwise, the above commands will not be available
-and lynx will treat a directory listing as a HTML file.
+<em>Note:</em> Dired mode must be activated at compile time.
+Otherwise, the above commands will not be available
+and Lynx will treat a directory listing as an HTML file.
 </body>
 </html>

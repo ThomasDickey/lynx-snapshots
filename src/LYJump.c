@@ -159,7 +159,7 @@ PUBLIC BOOL LYJumpInit ARGS1 (char *, config)
      * Complete the initialization of config.
      */
     if (cp) {
-	jtp->key = remap(cp, "JUMP");	    /* key is present, (re)map it */
+	jtp->key = remap(cp, "JUMP", FALSE);  /* key is present, (re)map it */
 	cp = strtok(NULL, "\n");	    /* get prompt, if present */
 	if (cp && *cp)
 	    StrAllocCopy(jtp->msg, cp);     /* prompt is present, load it */

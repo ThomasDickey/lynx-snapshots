@@ -32,6 +32,46 @@ PRIVATE void terminate_options	PARAMS((int sig));
 #define COL_OPTION_VALUES 36  /* display column where option values start */
 #endif
 
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
+PRIVATE BOOLEAN can_do_colors = 0;
+#endif
+
+PUBLIC int SetupChosenShowColor NOARGS
+{
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
+    can_do_colors = 1;
+#if defined(COLOR_CURSES)
+    if (LYCursesON)	/* could crash if called before initialization */
+	can_do_colors = (BOOL) has_colors();
+#endif
+    if (!no_option_save) {
+	if (LYChosenShowColor == SHOW_COLOR_UNKNOWN) {
+	    switch (LYrcShowColor) {
+	    case SHOW_COLOR_NEVER:
+		LYChosenShowColor =
+		    (LYShowColor >= SHOW_COLOR_ON) ?
+			SHOW_COLOR_ON : SHOW_COLOR_NEVER;
+		break;
+	    case SHOW_COLOR_ALWAYS:
+		if (!can_do_colors)
+		    LYChosenShowColor = SHOW_COLOR_ALWAYS;
+		else
+		    LYChosenShowColor =
+			(LYShowColor >= SHOW_COLOR_ON) ?
+				SHOW_COLOR_ALWAYS : SHOW_COLOR_OFF;
+		break;
+	    default:
+		LYChosenShowColor =
+		    (LYShowColor >= SHOW_COLOR_ON) ?
+			SHOW_COLOR_ON : SHOW_COLOR_OFF;
+	    }
+	}
+    }
+#endif /* USE_SLANG || COLOR_CURSES */
+    return LYChosenShowColor;
+}
+
+
 #ifndef NO_OPTION_MENU
 PRIVATE int boolean_choice PARAMS((
 	int		status,
@@ -214,32 +254,7 @@ PUBLIC void LYoptions NOARGS
 	}
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
     } else {
-	if (LYChosenShowColor == SHOW_COLOR_UNKNOWN) {
-	    switch (LYrcShowColor) {
-	    case SHOW_COLOR_NEVER:
-		LYChosenShowColor =
-		    (LYShowColor >= SHOW_COLOR_ON) ?
-				     SHOW_COLOR_ON :
-				     SHOW_COLOR_NEVER;
-		break;
-	    case SHOW_COLOR_ALWAYS:
-#if defined(COLOR_CURSES)
-		if (!has_colors())
-		    LYChosenShowColor = SHOW_COLOR_ALWAYS;
-		else
-#endif
-		    LYChosenShowColor =
-			(LYShowColor >= SHOW_COLOR_ON) ?
-				     SHOW_COLOR_ALWAYS :
-				     SHOW_COLOR_OFF;
-		break;
-	    default:
-		LYChosenShowColor =
-		    (LYShowColor >= SHOW_COLOR_ON) ?
-				     SHOW_COLOR_ON :
-				     SHOW_COLOR_OFF;
-	    }
-	}
+	SetupChosenShowColor();
 #endif /* USE_SLANG || COLOR_CURSES */
     }
 
@@ -1195,6 +1210,7 @@ draw_options:
 				terminal);
 			else
 			    HTUserMsg(COLOR_TOGGLE_DISABLED);
+			break;
 		    }
 #endif
 		/*
@@ -1718,7 +1734,7 @@ draw_options:
 	    case '>':	/* Save current options to RC file. */
 		if (!no_option_save) {
 		    HTInfoMsg(SAVING_OPTIONS);
-		    if (save_rc()) {
+		    if (save_rc(NULL)) {
 			LYrcShowColor = LYChosenShowColor;
 			HTInfoMsg(OPTIONS_SAVED);
 		    } else {
@@ -2058,7 +2074,7 @@ draw_bookmark_list:
 	if (response == '>') {
 	    if (!no_option_save) {
 		HTInfoMsg(SAVING_OPTIONS);
-		if (save_rc())
+		if (save_rc(NULL))
 		    HTInfoMsg(OPTIONS_SAVED);
 		else
 		    HTAlert(OPTIONS_NOT_SAVED);
@@ -2357,6 +2373,8 @@ PUBLIC int popup_choice ARGS7(
      */
     bottom = top + i_length + 3;
 
+    if (for_mouse && user_mode == NOVICE_MODE && DisplayLines > 2)
+	DisplayLines--;
     /*
      *	Hmm...	If the bottom goes beyond the number of lines available,
      */
@@ -3449,10 +3467,12 @@ PRIVATE void PutOptValues ARGS3(
 	OptValues *,	table)
 {
     while (table->LongName != 0) {
-	PutOption(fp,
-	    value == table->value,
-	    table->HtmlName,
-	    table->LongName);
+	if (table->HtmlName) {
+	    PutOption(fp,
+		      value == table->value,
+		      table->HtmlName,
+		      table->LongName);
+	}
 	table++;
     }
 }
@@ -3463,7 +3483,7 @@ PRIVATE BOOLEAN GetOptValues ARGS3(
 	int *,		result)
 {
     while (table->LongName != 0) {
-	if (!strcmp(value, table->HtmlName)) {
+	if (table->HtmlName && !strcmp(value, table->HtmlName)) {
 	    *result = table->value;
 	    return TRUE;
 	}
@@ -3553,6 +3573,7 @@ PRIVATE PostPair * break_data ARGS1(
 }
 
 PRIVATE int gen_options PARAMS((char **newfile));
+
 /*
  * Handle options from the pseudo-post.  I think we really only need
  * post_data here, but bring along everything just in case.  It's only a
@@ -3641,6 +3662,9 @@ PUBLIC int postoptions ARGS1(
 
 	if (!HTLoadAbsolute(&WWWDoc))
 	    return(NOT_FOUND);
+#ifdef DIRED_SUPPORT
+	lynx_edit_mode = FALSE;
+#endif /* DIRED_SUPPORT */
 	return(NORMAL);
     }
 
@@ -3779,8 +3803,10 @@ PUBLIC int postoptions ARGS1(
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
 	/* Show Color: SELECT */
 	if (!strcmp(data[i].tag, show_color_string)
-	 && GetOptValues(show_color_values, data[i].value, &LYShowColor)) {
-	    LYChosenShowColor = LYShowColor;
+	 && GetOptValues(show_color_values, data[i].value,
+			 &LYChosenShowColor)) {
+	    if (can_do_colors)
+		LYShowColor = LYChosenShowColor;
 	    if (CurrentShowColor != LYShowColor) {
 		lynx_force_repaint();
 	    }
@@ -4001,7 +4027,7 @@ PUBLIC int postoptions ARGS1(
     FREE(data);
     if (save_all) {
 	HTInfoMsg(SAVING_OPTIONS);
-	if (save_rc()) {
+	if (save_rc(NULL)) {
 	    LYrcShowColor = LYChosenShowColor;
 	    HTInfoMsg(OPTIONS_SAVED);
 	} else {
@@ -4139,7 +4165,12 @@ PRIVATE char *NewSecureValue NOARGS
 {
     FREE(secure_value);
     if ((secure_value = malloc(80)) != 0) {
-	sprintf(secure_value, "%ld", (long)secure_value + (long)time(0));
+#if defined(HAVE_RAND) && defined(HAVE_SRAND) && defined(RAND_MAX)
+	long key = rand();
+#else
+	long key = (long)secure_value + (long)time(0);
+#endif
+	sprintf(secure_value, "%ld", key);
 	return secure_value;
     }
     return "?";
@@ -4160,9 +4191,6 @@ PRIVATE int gen_options ARGS1(
 	char **,	newfile)
 {
     int i;
-#if defined(USE_SLANG) || defined(COLOR_CURSES)
-    BOOLEAN can_do_colors;
-#endif
     static char tempfile[LY_MAXPATH] = "\0";
     BOOLEAN disable_all = FALSE;
     FILE *fp0;
@@ -4182,9 +4210,14 @@ PRIVATE int gen_options ARGS1(
 
     LYLocalFileToURL(newfile, tempfile);
 
-    /* This should not be needed, as long as we regenerate the
-       temp file every time with a new name (which just happened
-       above.  If access to the actual file via getfile()
+    /* This should not be needed if we regenerate the temp file every
+       time with a new name, which just happened above in the case
+       LYReuseTempfiles==FALSE.  Even for LYReuseTempfiles=TRUE, code
+       at the end of postoptions() may remove an older cached version
+       from memory if that version of the page was left by submitting
+       changes. (But that code doesn't do that - HTuncache_current_document
+       is currently commented out.) - kw 1999-11-27
+       If access to the actual file via getfile() later fails
        (maybe because of some restrictions), mainloop may leave
        this flag on after popping the previous doc which is then
        unnecessarily reloaded.  But I changed mainloop to reset
@@ -4195,8 +4228,10 @@ PRIVATE int gen_options ARGS1(
      * Without LYUseFormsOptions set we should maybe not even get here.
      * However, it's possible we do; disable the form in that case. - kw
      */
+#ifndef NO_OPTION_MENU
     if (!LYUseFormsOptions)
 	disable_all = TRUE;
+#endif
 
     BeginInternalPage(fp0, OPTIONS_TITLE, NULL); /* help link below */
 
@@ -4312,44 +4347,25 @@ PRIVATE int gen_options ARGS1(
 
     /* Show Color: SELECT */
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
-    can_do_colors = 1;
-#if defined(COLOR_CURSES)
-    if (LYCursesON)	/* could crash if called before initialization */
-	can_do_colors = (BOOL) has_colors();
-#endif
+    SetupChosenShowColor();
     PutLabel(fp0, gettext("Show color"));
-    MaybeSelect(fp0, !can_do_colors, show_color_string);
     if (no_option_save) {
+	MaybeSelect(fp0, !can_do_colors, show_color_string);
 	if (LYShowColor == SHOW_COLOR_NEVER) {
 	    LYShowColor = SHOW_COLOR_OFF;
 	} else if (LYShowColor == SHOW_COLOR_ALWAYS) {
 	    LYShowColor = SHOW_COLOR_ON;
 	}
-	PutOptValues(fp0, LYShowColor, bool_values);
+	PutOptValues(fp0, LYShowColor - SHOW_COLOR_OFF, bool_values);
     } else {
-	if (LYChosenShowColor == SHOW_COLOR_UNKNOWN) {
-	    switch (LYrcShowColor) {
-	    case SHOW_COLOR_NEVER:
-		LYChosenShowColor =
-		    (LYShowColor >= SHOW_COLOR_ON) ?
-			SHOW_COLOR_ON : SHOW_COLOR_NEVER;
-		break;
-	    case SHOW_COLOR_ALWAYS:
-		if (!can_do_colors)
-		    LYChosenShowColor = SHOW_COLOR_ALWAYS;
-		else
-		    LYChosenShowColor =
-			(LYShowColor >= SHOW_COLOR_ON) ?
-				SHOW_COLOR_ALWAYS : SHOW_COLOR_OFF;
-		break;
-	    default:
-		LYChosenShowColor =
-		    (LYShowColor >= SHOW_COLOR_ON) ?
-			SHOW_COLOR_ON : SHOW_COLOR_OFF;
-	    }
+	BeginSelect(fp0, show_color_string);
+	if (can_do_colors) {
+	    show_color_values[2].HtmlName = on_string;
+	    show_color_values[3].LongName = always_string;
+	} else {
+	    show_color_values[2].HtmlName = NULL; /* suppress "ON" - kw */
+	    show_color_values[3].LongName = "Always try";
 	}
-	show_color_values[3].LongName = (can_do_colors) ? always_string
-							: "Always try";
 	PutOptValues(fp0, LYChosenShowColor, show_color_values);
     }
     EndSelect(fp0);

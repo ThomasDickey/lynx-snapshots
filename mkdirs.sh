@@ -22,7 +22,10 @@ for file in ${1+"$@"} ; do
 
      if test ! -d "$pathcomp"; then
         echo "mkdir $pathcomp" 1>&2
-        mkdir "$pathcomp" || errstatus=$?
+        case "$pathcomp" in
+          [a-zA-Z]: )  ;;               # DOSISH systems
+          * )          mkdir "$pathcomp" || errstatus=$? ;;
+        esac
      fi
 
      pathcomp="$pathcomp/"

@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.34 Wed, 13 Oct 1999 08:24:23 -0600 dickey @
+ * @Id: LYStyle.c 1.35 Tue, 30 Nov 1999 20:33:02 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -204,11 +204,7 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
 	}
 	exit(1);
     }
-    {
-	char *i;
-	for (i = buffer; *i; i++)
-	    *i = tolower(*i);
-    }
+    strtolower(buffer);
     *tmp = '\0';
     element = buffer;
 
@@ -507,8 +503,7 @@ PUBLIC void TrimColorClass ARGS3(
 	    *end='\0';
     }
     *phcode = hash_code(lookfrom && *lookfrom ? lookfrom : &tmp[1]);
-    CTRACE((tfp, "CSS:%s (trimmed %s)\n",
-	   (styleclassname ? styleclassname : "<null>"), tmp));
+    CTRACE((tfp, "CSS:%s (trimmed %s)\n", NONNULL(styleclassname), tmp));
 }
 
 /* This function is designed as faster analog to TrimColorClass.

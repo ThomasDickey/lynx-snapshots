@@ -3,6 +3,7 @@
 #else
 #include <HTUtils.h>
 #endif
+#include <HTTP.h>  /* 'reloading' flag */
 #include <HTFile.h>
 #include <HTInit.h>
 #include <UCMap.h>
@@ -139,7 +140,7 @@ PRIVATE void add_item_to_list ARGS2(
 	/*
 	 *  First item.
 	 */
-	cur_item = (lynx_html_item_type *)calloc(sizeof(lynx_html_item_type),1);
+	cur_item = typecalloc(lynx_html_item_type);
 	if (cur_item == NULL)
 	    outofmem(__FILE__, "read_cfg");
 	*list_ptr = cur_item;
@@ -154,7 +155,7 @@ PRIVATE void add_item_to_list ARGS2(
 	     prev_item->next != NULL;
 	     prev_item = prev_item->next)
 	    ;  /* null body */
-	cur_item = (lynx_html_item_type *)calloc(sizeof(lynx_html_item_type),1);
+	cur_item = typecalloc(lynx_html_item_type);
 	if (cur_item == NULL)
 	    outofmem(__FILE__, "read_cfg");
 	else
@@ -172,7 +173,7 @@ PRIVATE void add_item_to_list ARGS2(
 	/*
 	 *  Process name field
 	 */
-	cur_item->name = (char *)calloc((colon-buffer+1),sizeof(char));
+	cur_item->name = typecallocn(char,colon-buffer+1);
 	if (cur_item->name == NULL)
 	    outofmem(__FILE__, "read_cfg");
 	LYstrncpy(cur_item->name, buffer, (int)(colon-buffer));
@@ -188,7 +189,7 @@ PRIVATE void add_item_to_list ARGS2(
 	    next_colon = colon + strlen(colon);
 	}
 	if (next_colon - (colon+1) > 0) {
-	    cur_item->command = (char *)calloc(next_colon-colon, sizeof(char));
+	    cur_item->command = typecallocn(char,next_colon-colon);
 	    if (cur_item->command == NULL)
 		outofmem(__FILE__, "read_cfg");
 	    LYstrncpy(cur_item->command, colon+1, (int)(next_colon-(colon+1)));
@@ -238,7 +239,7 @@ PRIVATE void add_printer_to_list ARGS2(
 	/*
 	 *  First item.
 	 */
-	cur_item = (lynx_printer_item_type *)calloc(sizeof(lynx_printer_item_type),1);
+	cur_item = typecalloc(lynx_printer_item_type);
 	if (cur_item == NULL)
 	    outofmem(__FILE__, "read_cfg");
 	*list_ptr = cur_item;
@@ -254,7 +255,7 @@ PRIVATE void add_printer_to_list ARGS2(
 	     prev_item = prev_item->next)
 	    ;  /* null body */
 
-	cur_item = (lynx_printer_item_type *)calloc(sizeof(lynx_printer_item_type),1);
+	cur_item = typecalloc(lynx_printer_item_type);
 	if (cur_item == NULL)
 	    outofmem(__FILE__, "read_cfg");
 	else
@@ -272,7 +273,7 @@ PRIVATE void add_printer_to_list ARGS2(
 	/*
 	 *  Process name field.
 	 */
-	cur_item->name = (char *)calloc((colon-buffer+1), sizeof(char));
+	cur_item->name = typecallocn(char, colon-buffer+1);
 	if (cur_item->name == NULL)
 	    outofmem(__FILE__, "read_cfg");
 	LYstrncpy(cur_item->name, buffer, (int)(colon-buffer));
@@ -282,7 +283,7 @@ PRIVATE void add_printer_to_list ARGS2(
 	 *  Process TRUE/FALSE field.
 	 */
 	if ((next_colon = find_colon(colon+1)) != NULL) {
-	    cur_item->command = (char *)calloc(next_colon-colon, sizeof(char));
+	    cur_item->command = typecallocn(char, next_colon-colon);
 	    if (cur_item->command == NULL)
 		outofmem(__FILE__, "read_cfg");
 	    LYstrncpy(cur_item->command, colon+1, (int)(next_colon-(colon+1)));
@@ -639,14 +640,23 @@ static int keymap_fun ARGS1(
 {
     char *func, *efunc;
 
-    if ((func = strchr(key, ':')) != NULL)	{
+    if ((func = strchr(key, ':')) != NULL) {
 	*func++ = '\0';
 	efunc = strchr(func, ':');
 	/* Allow comments on the ends of key remapping lines. - DT */
 	/* Allow third field for line-editor action. - kw */
 	if (efunc == func) {	/* have 3rd field, but 2nd field empty */
 	    func = NULL;
-	} else if (!remap(key, strtok(func, " \t\n:#"))) {
+	} else if (efunc && strncasecomp(efunc + 1, "DIRED", 5) == 0) {
+	    if (!remap(key, strtok(func, " \t\n:#"), TRUE)) {
+		fprintf(stderr,
+			gettext("key remapping of %s to %s for %s failed\n"),
+			key, func, efunc + 1);
+	    } else if (func && !strcmp("TOGGLE_HELP", func)) {
+		LYUseNoviceLineTwo = FALSE;
+	    }
+	    return 0;
+	} else if (!remap(key, strtok(func, " \t\n:#"), FALSE)) {
 	    fprintf(stderr, gettext("key remapping of %s to %s failed\n"),
 		    key, func);
 	} else {
@@ -659,6 +669,20 @@ static int keymap_fun ARGS1(
 		BOOLEAN success = FALSE;
 		int lkc = lkcstring_to_lkc(key);
 		int lec = -1;
+		int select_edi = 0;
+		char *sselect_edi = strtok(NULL, " \t\n:#");
+		char **endp = &sselect_edi;
+		if (sselect_edi) {
+		    if (*sselect_edi)
+			select_edi = strtol(sselect_edi, endp, 10);
+		    if (**endp != '\0') {
+			fprintf(stderr,
+				gettext(
+	"invalid line-editor selection %s for key %s, selecting all\n"),
+				sselect_edi, key);
+			select_edi = 0;
+		    }
+		}
 		/*
 		 *  PASS! tries to enter the key into the LYLineEditors
 		 *  bindings in a different way from PASS, namely as
@@ -673,10 +697,10 @@ static int keymap_fun ARGS1(
 		 *  matter subject to change...  At any rate, if
 		 *  PASS! fails try it the same way as for PASS. - kw
 		 */
-		if (strcasecomp(efunc, "PASS!") == 0) {
+		if (!success && strcasecomp(efunc, "PASS!") == 0) {
 		    if (func) {
 			lec = LYE_FORM_LAC|lacname_to_lac(func);
-			success = (BOOL) LYRemapEditBinding(lkc, lec);
+			success = (BOOL) LYRemapEditBinding(lkc, lec, select_edi);
 		    }
 		    if (!success)
 			fprintf(stderr,
@@ -686,9 +710,9 @@ static int keymap_fun ARGS1(
 		    else
 			return 0;
 		}
-		if (!success && strncasecomp(efunc, "PASS", 4) == 0) {
-		    lec = LYE_FORM_PASS;
-		    success = (BOOL) LYRemapEditBinding(lkc, lec);
+		if (!success) {
+		    lec = lecname_to_lec(efunc);
+		    success = (BOOL) LYRemapEditBinding(lkc, lec, select_edi);
 		}
 		if (!success) {
 		    if (lec != -1) {
@@ -1331,6 +1355,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN("keyboard_layout", CONF_FUN, keyboard_layout_fun),
 #endif
      PARSE_FUN("keymap", CONF_FUN, keymap_fun),
+     PARSE_SET("leftarrow_in_textfield_prompt", CONF_BOOL, &textfield_prompt_at_left_edge),
 #ifndef DISABLE_NEWS
      PARSE_SET("list_news_numbers", CONF_BOOL, &LYListNewsNumbers),
      PARSE_SET("list_news_dates", CONF_BOOL, &LYListNewsDates),
@@ -1429,10 +1454,6 @@ static Config_Type Config_Table [] =
      PARSE_SET("source_cache", CONF_FUN, source_cache_fun),
 #endif
      PARSE_STR("startfile", CONF_STR, &startfile),
-#ifndef NO_NONSTICKY_INPUTS
-     PARSE_SET("sticky_fields", CONF_BOOL, &textfield_stop_at_left_edge),
-     PARSE_SET("sticky_inputs", CONF_BOOL, &sticky_inputs),
-#endif
      PARSE_SET("strip_dotdot_urls", CONF_BOOL, &LYStripDotDotURLs),
      PARSE_SET("substitute_underscores", CONF_BOOL, &use_underscore),
      PARSE_FUN("suffix", CONF_FUN, suffix_fun),
@@ -1441,6 +1462,9 @@ static Config_Type Config_Table [] =
      PARSE_STR("system_mail", CONF_STR, &system_mail),
      PARSE_STR("system_mail_flags", CONF_STR, &system_mail_flags),
      PARSE_SET("tagsoup", CONF_BOOL, &Old_DTD),
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+     PARSE_SET("textfields_need_activation", CONF_BOOL, &textfields_need_activation),
+#endif
 #if defined(_WINDOWS)
      PARSE_INT("timeout", CONF_INT, &lynx_timeout),
 #endif
@@ -1470,6 +1494,11 @@ static Config_Type Config_Table [] =
 
      {0, 0, 0}
 };
+
+PRIVATE char *lynxcfginfo_url = NULL;	/* static */
+#if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
+PRIVATE char *configinfo_url = NULL;	/* static */
+#endif
 
 /*
  * Free memory allocated in 'read_cfg()'
@@ -1515,6 +1544,10 @@ PUBLIC void free_lynx_cfg NOARGS
     }
     free_item_list();
     free_printer_item_list();
+    FREE(lynxcfginfo_url);
+#if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
+    FREE(configinfo_url);
+#endif
 }
 
 PRIVATE Config_Type *lookup_config ARGS1(
@@ -1622,7 +1655,7 @@ PRIVATE void do_read_cfg ARGS5(
 	 */
 	name = LYSkipBlanks(buffer);
 
-	if (*name == '#')
+	if (ispunct(*name))
 	    continue;
 
 	LYTrimTrailing(name);
@@ -1722,7 +1755,7 @@ PRIVATE void do_read_cfg ARGS5(
 		Define_VMSLogical(name, value);
 #else
 		if (q->str_value == 0)
-			q->str_value = calloc(1, sizeof(char *));
+			q->str_value = typecalloc(char *);
 		HTSprintf0 (q->str_value, "%s=%s", name, value);
 		putenv (*(q->str_value));
 #endif
@@ -1959,8 +1992,7 @@ PUBLIC void read_cfg ARGS4(
 PUBLIC int lynx_cfg_infopage ARGS1(
     document *,		       newdoc)
 {
-    static char tempfile[LY_MAXPATH];
-    static char *local_url;  /* static! */
+    static char tempfile[LY_MAXPATH] = "\0";
     DocAddress WWWDoc;  /* need on exit */
     char *temp = 0;
     char *cp1 = NULL;
@@ -1985,45 +2017,86 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 	 *  now pop-up and return to updated LYNXCFG:/ page,
 	 *  remind postoptions() but much simpler:
 	 */
-
-	/*  the page was pushed, so pop-up. */
-	LYpop(newdoc);
-	WWWDoc.address = newdoc->address;
-	WWWDoc.post_data = newdoc->post_data;
-	WWWDoc.post_content_type = newdoc->post_content_type;
-	WWWDoc.bookmark = newdoc->bookmark;
-	WWWDoc.isHEAD = newdoc->isHEAD;
-	WWWDoc.safe = newdoc->safe;
-	LYforce_no_cache = FALSE;   /* ! */
-	LYoverride_no_cache = TRUE; /* ! */
-
 	/*
-	 * Working out of getfile() cycle we reset *no_cache manually here so
-	 * HTLoadAbsolute() will return "Document already in memory":  it was
-	 * forced reloading obsolete file again without this (overhead).
-	 *
-	 * Probably *no_cache was set in a wrong position because of
-	 * the internal page...
+	 *  But check whether the top history document is really
+	 *  the expected LYNXCFG: page. - kw
 	 */
-	if (!HTLoadAbsolute(&WWWDoc))
-	    return(NOT_FOUND);
+	if (HTMainText && nhist > 0 &&
+	    !strcmp(HTLoadedDocumentTitle(), LYNXCFG_TITLE) &&
+	    !strcmp(HTLoadedDocumentURL(), history[nhist-1].address) &&
+	    (!lynxcfginfo_url ||
+	     strcmp(HTLoadedDocumentURL(), lynxcfginfo_url))) {
+	    /*  the page was pushed, so pop-up. */
+	    LYpop(newdoc);
+	    WWWDoc.address = newdoc->address;
+	    WWWDoc.post_data = newdoc->post_data;
+	    WWWDoc.post_content_type = newdoc->post_content_type;
+	    WWWDoc.bookmark = newdoc->bookmark;
+	    WWWDoc.isHEAD = newdoc->isHEAD;
+	    WWWDoc.safe = newdoc->safe;
+	    LYforce_no_cache = FALSE;   /* ! */
+	    LYoverride_no_cache = TRUE; /* ! */
 
-	HTuncache_current_document();  /* will never use again */
+	    /*
+	     * Working out of getfile() cycle we reset *no_cache manually here so
+	     * HTLoadAbsolute() will return "Document already in memory":  it was
+	     * forced reloading obsolete file again without this (overhead).
+	     *
+	     * Probably *no_cache was set in a wrong position because of
+	     * the internal page...
+	     */
+	    if (!HTLoadAbsolute(&WWWDoc))
+		return(NOT_FOUND);
+
+	    HTuncache_current_document();  /* will never use again */
+	}
 
 	/*  now set up the flag and fall down to create a new LYNXCFG:/ page */
-	local_url = 0;	/* see below */
+	FREE(lynxcfginfo_url);	/* see below */
     }
 #endif /* !NO_CONFIG_INFO */
 
+    /*
+     * We regenerate the file if reloading has been requested (with
+     * LYK_NOCACHE key).  If we did not regenerate, there would be no
+     * way to recover in a session from a situation where the file is
+     * corrupted (for example truncated because the file system was full
+     * when it was first created - lynx doesn't check for write errors
+     * below), short of manual complete removal or perhaps forcing
+     * regeneration with LYNXCFG://reload.  Similarly, there would be no
+     * simple way to get a different page if user_mode has changed to
+     * Advanced after the file was first generated in a non-Advanced mode
+     * (the difference being in whether the page includes the link to
+     * LYNXCFG://reload or not).
+     * We also try to regenerate the file if lynxcfginfo_url is set,
+     * indicating that tempfile is valid, but the file has disappeared anyway.
+     * This can happen to a long-lived lynx process if for example some system
+     * script periodically cleans up old files in the temp file space. - kw
+     */
 
-    if (local_url == 0) {
+    if (LYforce_no_cache && reloading) {
+	FREE(lynxcfginfo_url); /* flag to code below to regenerate - kw */
+    } else if (lynxcfginfo_url != NULL) {
+	if ((fp0 = fopen(tempfile, "r")) != NULL) { /* check existence */
+	    fclose(fp0);		/* OK */
+	} else {
+	    FREE(lynxcfginfo_url); /* flag to code below to try again - kw */
+	}
+    }
+    if (lynxcfginfo_url == 0) {
 
-	LYRemoveTemp(tempfile);
-	if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
+	if (LYReuseTempfiles) {
+	    fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
+	} else {
+	    if (tempfile[0])
+		LYRemoveTemp(tempfile);
+	    fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
+	}
+	if (fp0 == NULL) {
 	    HTAlert(CANNOT_OPEN_TEMP);
 	    return(NOT_FOUND);
 	}
-	LYLocalFileToURL(&local_url, tempfile);
+	LYLocalFileToURL(&lynxcfginfo_url, tempfile);
 
 	LYforce_no_cache = TRUE;  /* don't cache this doc */
 
@@ -2055,6 +2128,14 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 		fprintf(fp0, "%s</em>\n",
 			     gettext("for more comments."));
 	    }
+
+#if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
+    if (!no_compileopts_info) {
+	fprintf(fp0, "%s <a href=\"LYNXCOMPILEOPTS:\">%s</a>\n\n",
+		SEE_ALSO,
+		COMPILE_OPT_SEGMENT);
+    }
+#endif
 
     /** a new experimental link ... **/
 	    if (user_mode == ADVANCED_MODE)
@@ -2090,7 +2171,7 @@ PUBLIC int lynx_cfg_infopage ARGS1(
     }
 
     /* return to getfile() cycle */
-    StrAllocCopy(newdoc->address, local_url);
+    StrAllocCopy(newdoc->address, lynxcfginfo_url);
     WWWDoc.address = newdoc->address;
     WWWDoc.post_data = newdoc->post_data;
     WWWDoc.post_content_type = newdoc->post_content_type;
@@ -2100,6 +2181,9 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 
     if (!HTLoadAbsolute(&WWWDoc))
 	return(NOT_FOUND);
+#ifdef DIRED_SUPPORT
+    lynx_edit_mode = FALSE;
+#endif /* DIRED_SUPPORT */
     return(NORMAL);
 }
 
@@ -2112,30 +2196,53 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 PUBLIC int lynx_compile_opts ARGS1(
     document *,		       newdoc)
 {
-    char tempfile[LY_MAXPATH];
+    static char tempfile[LY_MAXPATH] = "\0";
 #define PutDefs(table, N) fprintf(fp0, "%-35s %s\n", table[N].name, table[N].value)
 #include <cfg_defs.h>
     unsigned n;
-    static char *info_url;  /* static! */
     DocAddress WWWDoc;  /* need on exit */
     FILE *fp0;
 
-    /* create the page only once - compile-time data will not change... */
+    /* In general, create the page only once - compile-time data will not
+     * change...  But we will regenerate the file anyway, in two situations:
+     * (a) configinfo_url has been FREEd - this can happen if free_lynx_cfg()
+     * was called as part of a LYNXCFG://reload action.
+     * (b) reloading has been requested (with LYK_NOCACHE key).  If we did
+     * not regenerate, there would be no way to recover in a session from
+     * a situation where the file is corrupted (for example truncated because
+     * the file system was full when it was first created - lynx doesn't
+     * check for write errors below), short of manual complete removal or
+     * forcing regeneration with LYNXCFG://reload.
+     * (c) configinfo_url is set, indicating that tempfile is valid, but
+     * the file has disappeared anyway.  This can happen to a long-lived lynx
+     * process if for example some system script periodically cleans up old
+     * files in the temp file space. - kw
+     */
 
-    if (info_url == 0) {
-	if ((fp0 = LYOpenTemp (tempfile, HTML_SUFFIX, "w")) == 0) {
+    if (LYforce_no_cache && reloading) {
+	FREE(configinfo_url); /* flag to code below to regenerate - kw */
+    } else if (configinfo_url != NULL) {
+	if ((fp0 = fopen(tempfile, "r")) != NULL) { /* check existence */
+	    fclose(fp0);		/* OK */
+	} else {
+	    FREE(configinfo_url); /* flag to code below to try again - kw */
+	}
+    }
+    if (configinfo_url == NULL) {
+	if (LYReuseTempfiles) {
+	    fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
+	} else {
+	    LYRemoveTemp(tempfile);
+	    fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
+	}
+	if (fp0 == NULL) {
 	    HTAlert(CANNOT_OPEN_TEMP);
 	    return(NOT_FOUND);
 	}
-	LYLocalFileToURL(&info_url, tempfile);
+	LYLocalFileToURL(&configinfo_url, tempfile);
 
 	BeginInternalPage (fp0, CONFIG_DEF_TITLE, NULL);
 	fprintf(fp0, "<pre>\n");
-
-	fprintf(fp0, "%s %s<a href=\"LYNXCFG:\"> lynx.cfg</a> %s\n\n",
-		     SEE_ALSO,
-		     YOUR_SEGMENT,
-		     RUNTIME_OPT_SEGMENT);
 
 	fprintf(fp0, "\n%s<br>\n<em>config.cache</em>\n", AUTOCONF_CONFIG_CACHE);
 	for (n = 0; n < TABLESIZE(config_cache); n++) {
@@ -2151,7 +2258,7 @@ PUBLIC int lynx_compile_opts ARGS1(
     }
 
     /* exit to getfile() cycle */
-    StrAllocCopy(newdoc->address, info_url);
+    StrAllocCopy(newdoc->address, configinfo_url);
     WWWDoc.address = newdoc->address;
     WWWDoc.post_data = newdoc->post_data;
     WWWDoc.post_content_type = newdoc->post_content_type;
@@ -2161,6 +2268,9 @@ PUBLIC int lynx_compile_opts ARGS1(
 
     if (!HTLoadAbsolute(&WWWDoc))
 	return(NOT_FOUND);
+#ifdef DIRED_SUPPORT
+    lynx_edit_mode = FALSE;
+#endif /* DIRED_SUPPORT */
     return(NORMAL);
 }
 #endif /* !NO_CONFIG_INFO */

@@ -170,9 +170,8 @@ PUBLIC void LYAddVisitedLink ARGS1(
 	while (b && b->level > l)
 	    a = b, b = b->next_tree;
 
-	if (a->next_tree)
-	    a->next_tree->prev_tree = new;
-	new->prev_tree = a;
+	if (!b)			/* a == Latest_tree */
+	    Latest_tree = new;
 	new->next_tree = a->next_tree;
 	a->next_tree = new;
 
@@ -180,12 +179,11 @@ PUBLIC void LYAddVisitedLink ARGS1(
     } else {
 	if (Latest_tree)
 	    Latest_tree->next_tree = new;
-	new->prev_tree = Latest_tree;
 	new->level = 0;
 	new->next_tree = NULL;
+	Latest_tree = new;
     }
     PrevVisitedLink = PrevActiveVisitedLink = new;
-    Latest_tree = new;
     if (!First_tree)
 	First_tree = new;
 
@@ -915,9 +913,16 @@ PRIVATE int LYLoadMESSAGES ARGS4 (
     HTFormat format_in = WWW_HTML;
     HTStream *target = NULL;
     char *buf = NULL;
+    int nummsg = 0;
 
     int i;
     char *temp = NULL;
+
+    i = STATUSBUFSIZE;
+    while (--i >= 0) {
+	if (buffstack[i] != NULL)
+	    nummsg++;
+    }
 
     /*
      *  Set up the stream. - FM
@@ -944,33 +949,40 @@ PRIVATE int LYLoadMESSAGES ARGS4 (
 	       "http-equiv=\"content-type\"",
 	       LYCharSet_UC[current_char_set].MIMEname);
     PUTS(buf);
-    HTSprintf0(&buf, "<title>%s</title>\n", STATUSLINES_TITLE);
-    PUTS(buf);
-    HTSprintf0(&buf, "</head>\n<body>\n<pre>\n<ol>\n");
+    HTSprintf0(&buf, "<title>%s</title>\n</head>\n<body>\n",
+	       STATUSLINES_TITLE);
     PUTS(buf);
 
-    /* print messages in reverse order: */
-    i = topOfStack;
-    while (--i >= 0) {
-	if (buffstack[i] != NULL) {
-	    StrAllocCopy(temp, buffstack[i]);
-	    LYEntify(&temp, TRUE);
-	    HTSprintf0(&buf, "<li> <em>%s</em>\n",  temp);
-	    PUTS(buf);
+    if (nummsg != 0) {
+	HTSprintf0(&buf, "<ol>\n");
+	PUTS(buf);
+	/* print messages in reverse order: */
+	i = topOfStack;
+	while (--i >= 0) {
+	    if (buffstack[i] != NULL) {
+		StrAllocCopy(temp, buffstack[i]);
+		LYEntify(&temp, TRUE);
+		HTSprintf0(&buf, "<li value=%d> <em>%s</em>\n", nummsg, temp);
+		nummsg--;
+		PUTS(buf);
+	    }
 	}
-    }
-    i = STATUSBUFSIZE;
-    while (--i >= topOfStack) {
-	if (buffstack[i] != NULL) {
-	    StrAllocCopy(temp, buffstack[i]);
-	    LYEntify(&temp, TRUE);
-	    HTSprintf0(&buf, "<li> <em>%s</em>\n",  temp);
-	    PUTS(buf);
+	i = STATUSBUFSIZE;
+	while (--i >= topOfStack) {
+	    if (buffstack[i] != NULL) {
+		StrAllocCopy(temp, buffstack[i]);
+		LYEntify(&temp, TRUE);
+		HTSprintf0(&buf, "<li value=%d> <em>%s</em>\n", nummsg, temp);
+		nummsg--;
+		PUTS(buf);
+	    }
 	}
+	FREE(temp);
+	HTSprintf0(&buf, "</ol>\n</body>\n</html>\n");
+    } else {
+	HTSprintf0(&buf, "<p>%s\n</body>\n</html>\n",
+		   gettext("(No messages yet)"));
     }
-    FREE(temp);
-
-    HTSprintf0(&buf, "</ol>\n</pre>\n</body>\n</html>\n");
     PUTS(buf);
 
     (*target->isa->_free)(target);

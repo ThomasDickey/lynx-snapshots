@@ -108,7 +108,7 @@ extern void HText_scrollUp PARAMS((HText * text));	/* One page */
 extern void HText_scrollDown PARAMS((HText * text));	/* One page */
 extern void HText_scrollTop PARAMS((HText * text));
 extern void HText_scrollBottom PARAMS((HText * text));
-extern void HText_pageDisplay PARAMS((int line_num));
+extern void HText_pageDisplay PARAMS((int line_num, char *target));
 extern BOOL HText_pageHasPrevTarget NOPARAMS;
 
 extern int HText_LinksInLines PARAMS((HText *text, int line_num, int Lines));
@@ -150,6 +150,9 @@ extern int HTGetLinkInfo PARAMS((
 	int *		linknum,
 	char **		hightext,
 	char **		lname));
+extern BOOL HText_TAHasMoreLines PARAMS((
+	int		curlink,
+	int		direction));
 extern int HTGetLinkOrFieldStart PARAMS((
 	int		curlink,
 	int *		go_line,

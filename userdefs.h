@@ -1057,6 +1057,9 @@
 #endif /*  defined(EXEC_LINKS) || defined(EXEC_SCRIPTS) */
 
 /**********
+ * *** This is for those -- e.g. DOS users -- who do not have configure;
+ * *** others should use the configure switch --enable-lynxcgi-links .
+ *
  * UNIX:
  * =====
  * CGI script support.  Defining LYNXCGI_LINKS (done by the configure script)
@@ -1241,6 +1244,16 @@
 /* #define TEXT_SUBMIT_CONFIRM_WANTED */
 
 /********************************
+ * If TEXTFIELDS_MAY_NEED_ACTIVATION is defined (to anything),
+ * the option TEXTFIELDS_NEED_ACTIVATION in lynx.cfg or the command
+ * line option -tna can be used to require explicit activation
+ * before text input fields can be changed with the built-in line
+ * editor.
+ */
+
+#define TEXTFIELDS_MAY_NEED_ACTIVATION
+
+/********************************
  * The following three definitions control some aspects of extended
  * textarea handling.  TEXTAREA_EXPAND_SIZE is the number of new empty
  * lines that get appended at the end of a textarea by a GROWTEXTAREA
@@ -1298,12 +1311,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.3dev.15"
+#define LYNX_VERSION "2.8.3dev.16"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Wed, 17 Nov 1999 21:08:08 -0700"
+#define LYNX_DATE "Tue, 30 Nov 1999 20:33:02 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1999"
@@ -1327,6 +1340,9 @@
 #endif
 
 #define MAXCHARSETS 60		/* max character sets supported */
+#define TRST_MAXROWSPAN 10000	/* max rowspan accepted by TRST code */
+#define TRST_MAXCOLSPAN 1000	/* max colspan and COL/COLGROUP span accepted */
+#define SAVE_TIME_NOT_SPACE	/* minimize number of some malloc calls */
 
 /* Win32 may support more, but old win16 helper apps may not. */
 #if defined(__DJGPP__) || defined(_WINDOWS)

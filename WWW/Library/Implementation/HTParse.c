@@ -14,7 +14,7 @@ struct struct_parts {
 	char * host;
 	char * absolute;
 	char * relative;
-/*	char * search;		no - treated as part of path */
+	char * search;		/* treated normally as part of path */
 	char * anchor;
 };
 
@@ -68,6 +68,7 @@ PRIVATE void scan ARGS2(
     parts->host = NULL;
     parts->absolute = NULL;
     parts->relative = NULL;
+    parts->search = NULL;	/* normally not used - kw */
     parts->anchor = NULL;
 
     /*
@@ -111,6 +112,12 @@ PRIVATE void scan ARGS2(
 	    if (p != NULL) {
 		*p = '\0';			/* Terminate host */
 		parts->absolute = (p + 1);	/* Root has been found */
+	    } else {
+		p = strchr(parts->host, '?');
+		if (p != NULL) {
+		    *p = '\0';			/* Terminate host */
+		    parts->search = (p + 1);
+		}
 	    }
 	} else {
 	    parts->absolute = (p + 1);		/* Root found but no host */
@@ -261,6 +268,7 @@ PUBLIC char * HTParse ARGS3(
 	related.host = NULL;
 	related.absolute = NULL;
 	related.relative = NULL;
+	related.search = NULL;
 	related.anchor = NULL;
     }
 
@@ -335,6 +343,23 @@ PUBLIC char * HTParse ARGS3(
 	    }
 #endif /* CLEAN_URLS */
 	}
+
+    /*
+    **	If host in given or related was ended directly with a '?' (no
+    **  slash), fake the search part into absolute.  This is the only
+    **  case search is returned from scan.  A host must have been present.
+    **  this restores the '?' at which the host part had been truncated in
+    **  scan, we have to do this after host part handling is done. - kw
+    **
+    */
+    if (given.search && *(given.search - 1) == '\0') {
+	given.absolute = given.search - 1;
+	given.absolute[0] = '?';
+    } else if (related.search && !related.absolute &&
+	       *(related.search - 1) == '\0') {
+	related.absolute = related.search - 1;
+	related.absolute[0] = '?';
+    }
 
     /*
     **	If different hosts, inherit no path.
