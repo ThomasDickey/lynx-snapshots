@@ -673,7 +673,10 @@ PUBLIC void start_curses NOARGS
     }
 
     if (slinit == 0) {
-#if !defined(USE_KEYMAPS)
+#if defined(USE_KEYMAPS)
+	if (-1 == lynx_initialize_keymaps ())
+	    exit (-1);
+#else
 	SLtt_get_terminfo();
 #endif
 #if (defined(__DJGPP__) && !defined(DJGPP_KEYHANDLER)) || defined(__CYGWIN__)
@@ -759,6 +762,9 @@ PUBLIC void start_curses NOARGS
 	SLsmg_Display_Eight_Bit = 191; /* may print ctrl chars otherwise - kw */
     scrollok(0,0);
     SLsmg_Backspace_Moves = 1;
+#if SLANG_VERSION > 10306
+    SLsmg_touch_screen ();
+#endif
 #ifndef VMS
 #if defined(REAL_UNIX_SYSTEM) && !defined(__CYGWIN__)
     SLtty_set_suspend_state(1);

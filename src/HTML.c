@@ -8403,7 +8403,7 @@ PUBLIC BOOLEAN source_cache_file_error = FALSE;
  * Pass-thru cache HTStream
  */
 
-PRIVATE void CacheThru_free ARGS1(
+PRIVATE void CacheThru_do_free ARGS1(
 	HTStream *,	me)
 {
     if (me->anchor->source_cache_file) {
@@ -8451,6 +8451,12 @@ PRIVATE void CacheThru_free ARGS1(
 		"SourceCacheWriter: Committing memory chunk %p for URL %s to anchor\n",
 		(void *)me->chunk, HTAnchor_address((HTAnchor *)me->anchor)));
     }
+}
+
+PRIVATE void CacheThru_free ARGS1(
+	HTStream *,	me)
+{
+    CacheThru_do_free(me);
     (*me->actions->_free)(me->target);
     FREE(me);
 }
@@ -8461,16 +8467,21 @@ PRIVATE void CacheThru_abort ARGS2(
 {
     if (me->fp)
 	LYCloseTempFP(me->fp);
-    if (me->filename) {
-	CTRACE((tfp, "SourceCacheWriter: Removing active file %s\n",
-		me->filename));
-	LYRemoveTemp(me->filename);
-	FREE(me->filename);
-    }
-    if (me->chunk) {
-	CTRACE((tfp, "SourceCacheWriter: Removing active memory chunk %p\n",
-		(void *)me->chunk));
-	HTChunkFree(me->chunk);
+    if (LYCacheSourceForAborted == SOURCE_CACHE_FOR_ABORTED_DROP) {
+	if (me->filename) {
+	    CTRACE((tfp, "SourceCacheWriter: Removing active file %s\n",
+		    me->filename));
+	    LYRemoveTemp(me->filename);
+	    FREE(me->filename);
+	}
+	if (me->chunk) {
+	    CTRACE((tfp, "SourceCacheWriter: Removing active memory chunk %p\n",
+		    (void *)me->chunk));
+	    HTChunkFree(me->chunk);
+	}
+    } else {
+	me->status = HT_OK;	/*fake it*/
+	CacheThru_do_free(me);
     }
     (*me->actions->_abort)(me->target, e);
     FREE(me);

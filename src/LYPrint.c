@@ -443,7 +443,7 @@ check_recall:
 	}
     }
 
-    print_wwwfile_to_fd(outfile_fp, 0);	/* FILE */
+    print_wwwfile_to_fd(outfile_fp, FALSE);	/* FILE */
     if (keypad_mode)
 	printlist(outfile_fp,FALSE);
 
@@ -622,7 +622,7 @@ PRIVATE void send_file_to_mail ARGS3(
     } else if (!isPMDF) {
 	fprintf(outfile_fp, "X-URL: %s\n\n", newdoc->address);
     }
-    print_wwwfile_to_fd(outfile_fp, 0);	/* MAIL */
+    print_wwwfile_to_fd(outfile_fp, FALSE);	/* MAIL */
     if (keypad_mode)
 	printlist(outfile_fp, FALSE);
     LYCloseTempFP(outfile_fp);
@@ -769,7 +769,7 @@ PRIVATE void send_file_to_mail ARGS3(
 		"<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
 		newdoc->address, content_base);
     }
-    print_wwwfile_to_fd(outfile_fp, 0);	/* MAIL */
+    print_wwwfile_to_fd(outfile_fp, FALSE);	/* MAIL */
     if (keypad_mode)
 	printlist(outfile_fp, FALSE);
 
@@ -838,7 +838,7 @@ PRIVATE void send_file_to_printer ARGS4(
 		"<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
 		newdoc->address, content_base);
     }
-    print_wwwfile_to_fd(outfile_fp, 0);	/* PRINTER */
+    print_wwwfile_to_fd(outfile_fp, FALSE);	/* PRINTER */
     if (keypad_mode)
 	printlist(outfile_fp, FALSE);
 
@@ -1019,7 +1019,7 @@ PRIVATE void send_file_to_screen ARGS3(
     }
     if (Lpansi)
 	printf("\033[5i");
-    print_wwwfile_to_fd(outfile_fp, 0);	/* SCREEN */
+    print_wwwfile_to_fd(outfile_fp, FALSE);	/* SCREEN */
     if (keypad_mode)
 	printlist(outfile_fp, FALSE);
 

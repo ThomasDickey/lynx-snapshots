@@ -3,7 +3,7 @@ dnl written jan/1997
 dnl by T.E.Dickey <dickey@clark.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 
-AC_PREREQ(2.12)
+AC_PREREQ(2.12.971222)
 rm -f config.cache
 
 AC_INIT(userdefs.h)
@@ -512,6 +512,7 @@ AC_CHECK_FUNCS( \
 	srand \
 	strerror \
 	truncate \
+	ttyname \
 	unsetenv \
 	vasprintf \
 	waitpid \
@@ -538,7 +539,6 @@ CF_NGROUPS
 CF_SYS_ERRLIST
 CF_UTMP
 CF_CHECK_EXTERN_DATA(h_errno,int)
-
 CF_EBCDIC
 
 ### These tests must be run after establishing the curses library.

@@ -519,7 +519,7 @@ PRIVATE BOOLEAN no_options_further=FALSE; /* set to TRUE after '--' argument */
 #endif
 
 PRIVATE BOOL parse_arg PARAMS((char **arg, unsigned mask, int *i));
-PRIVATE void print_help_and_exit PARAMS((int exit_status));
+PRIVATE void print_help_and_exit PARAMS((int exit_status)) GCC_NORETURN;
 
 #ifndef VMS
 PUBLIC BOOLEAN LYNoCore = NO_FORCED_CORE_DUMP;
@@ -788,8 +788,10 @@ PRIVATE BOOL GetStdin ARGS1(
     if (LYSafeGets(buf, stdin) != 0
      && strncmp(*buf, "---", 3) != 0) {
 	LYTrimTrailing(*buf);
+	CTRACE((tfp, "...data: %s\n", *buf));
 	return TRUE;
     }
+    CTRACE((tfp, "...mark: %s\n", *buf ? *buf : ""));
     return FALSE;
 }
 
@@ -1098,6 +1100,9 @@ PUBLIC int main ARGS2(
      *	file, if specified, NOW.  Also, if we only want
      *	the help menu, output that and exit. - FM
      */
+    if (getenv("LYNX_TRACE") != 0) {
+	WWW_TraceFlag = TRUE;
+    }
     for (i = 1; i < argc; i++) {
 	parse_arg(&argv[i], 2, &i);
     }
@@ -1126,7 +1131,8 @@ PUBLIC int main ARGS2(
     if (LYGetStdinArgs == TRUE) {
 	char *buf = NULL;
 
-	while (LYSafeGets(&buf, stdin) != 0) {
+	CTRACE((tfp, "processing stdin arguments\n"));
+	while (GetStdin(&buf) != 0) {
 	    char *noargv[2];
 
 	    noargv[0] = buf;
@@ -1145,8 +1151,12 @@ PUBLIC int main ARGS2(
 		}
 		StrAllocCopy(argument, buf);
 		HTList_appendObject(LYStdinArgs, argument);
+		CTRACE((tfp, "...StdinArg:%s\n", argument));
+	    } else {
+		CTRACE((tfp, "...complete:%s\n", buf));
 	    }
 	}
+	CTRACE((tfp, "...done with stdin arguments\n"));
 	FREE(buf);
     }
 
@@ -1249,11 +1259,6 @@ PUBLIC int main ARGS2(
     }
     fclose(fp);
 
-#if defined(USE_KEYMAPS) && defined(USE_SLANG)
-    if (-1 == lynx_initialize_keymaps ())
-	exit (-1);
-#endif
-
     /*
      * Make sure we have the character sets declared.
      *	This will initialize the CHARTRANS handling. - KW
@@ -1277,7 +1282,7 @@ PUBLIC int main ARGS2(
      */
     UCLYhndl_for_unspec = LATIN1;
     StrAllocCopy(UCAssume_MIMEcharset,
-			LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
+		 LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
 
     /*
      *	Make sure we have the edit map declared. - FM
@@ -1406,7 +1411,21 @@ PUBLIC int main ARGS2(
 	LYStdinArgs_free();
     }
 
-#if defined (UNIX)
+#undef TTY_DEVICE
+
+#ifdef VMS
+#define TTY_DEVICE "tt:"
+#endif
+
+#ifdef _WINDOWS
+#define TTY_DEVICE "con"
+#endif
+
+#ifndef TTY_DEVICE
+#define TTY_DEVICE "/dev/tty"
+#endif
+
+#if defined (TTY_DEVICE) || defined(HAVE_TTYNAME)
     /*
      *	If we are told to read the startfile from standard input, do it now,
      *	after we have read all of the option data from standard input.
@@ -1414,12 +1433,14 @@ PUBLIC int main ARGS2(
     if (startfile_stdin) {
 	char result[LY_MAXPATH];
 	char *buf = NULL;
-# if HAVE_TTYNAME
-	char *tty = ttyname(fileno(stderr));
-# else
-	char *tty = "/dev/tty";
+	char *tty = NULL;
+# ifdef HAVE_TTYNAME
+	tty = ttyname(fileno(stderr));
 # endif
+	if (tty == NULL)
+	    tty = TTY_DEVICE;
 
+	CTRACE((tfp, "processing stdin startfile\n"));
 	if ((fp = LYOpenTemp (result, HTML_SUFFIX, "w")) != 0) {
 	    StrAllocCopy(startfile, result);
 	    while (GetStdin(&buf)) {
@@ -1428,10 +1449,14 @@ PUBLIC int main ARGS2(
 	    FREE(buf);
 	    LYCloseTempFP(fp);
 	}
+	CTRACE((tfp, "...done stdin startfile\n"));
 	if ((freopen(tty, "r", stdin)) == 0
 	 || !isatty(fileno(stdin))) {
-	    fprintf(stderr, "cannot open a terminal (%s)\n", tty);
-	    exit(1);
+	    CTRACE((tfp, "cannot open a terminal (%s)\n", tty));
+	    if (!dump_output_immediately) {
+		fprintf(stderr, "cannot open a terminal (%s)\n", tty);
+		exit(1);
+	    }
 	}
     }
 #endif
@@ -3378,12 +3403,10 @@ treated '>' as a co-terminator for double-quotes and tags"
       "startfile_ok",	4|SET_ARG,		&startfile_ok,
       "allow non-http startfile and homepage with -validate"
    ),
-#if defined (UNIX)
    PARSE_SET(
       "stdin",		4|SET_ARG,		&startfile_stdin,
       "read startfile from standard input"
    ),
-#endif
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
    PARSE_STR(
@@ -3601,6 +3624,10 @@ PRIVATE int arg_eqs_parse ARGS3(
 	 || (*b == 0)) {
 	    if (*a == 0) {
 		switch (*b) {
+		case '\t':	/* embedded blank when reading stdin */
+		case ' ':
+		    *c = LYSkipBlanks(b);
+		    return 1;
 		case '=':
 		case ':':
 		    *c = b + 1;
@@ -3671,7 +3698,7 @@ PRIVATE BOOL parse_arg ARGS3(
 	    }
 	}
 #endif
-	return TRUE;
+	return (i != 0);
     }
 #if EXTENDED_OPTION_LOGIC
     if (strcmp(arg_name,"--") == 0) {
@@ -3694,6 +3721,7 @@ PRIVATE BOOL parse_arg ARGS3(
     /* allow GNU-style options with -- prefix*/
     if (*arg_name == '-') ++arg_name;
 
+    CTRACE((tfp, "parse_arg(%s)\n", arg_name));
 
     p = Arg_Table;
     while (p->name != 0) {
@@ -3711,15 +3739,20 @@ PRIVATE BOOL parse_arg ARGS3(
 	    continue;
 	}
 
-	if ((p->type & NEED_NEXT_ARG) && (next_arg == 0)) {
-	    next_arg = argv[1];
-	    if ((i != 0) && (next_arg != 0))
-		(*i)++;
+	if (p->type & NEED_NEXT_ARG) {
+	    if (next_arg == 0) {
+		next_arg = argv[1];
+		if ((i != 0) && (next_arg != 0))
+		    (*i)++;
+	    }
+	    CTRACE((tfp, "...arg:%s\n", next_arg != 0 ? next_arg : "<null>"));
 	}
 
 	/* ignore option if it's not our turn */
-	if ((p->type & mask) == 0)
+	if ((p->type & mask) == 0) {
+	    CTRACE((tfp, "...skip (mask %d/%d)\n", mask, p->type & 7));
 	    return FALSE;
+	}
 
 	switch (p->type & ARG_TYPE_MASK) {
 	case TOGGLE_ARG:	/* FALLTHRU */

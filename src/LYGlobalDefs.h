@@ -306,6 +306,10 @@ extern BOOLEAN source_cache_file_error;
 #define SOURCE_CACHE_NONE	0
 #define SOURCE_CACHE_FILE	1
 #define SOURCE_CACHE_MEMORY	2
+
+extern int LYCacheSourceForAborted;
+#define SOURCE_CACHE_FOR_ABORTED_KEEP 1
+#define SOURCE_CACHE_FOR_ABORTED_DROP 0
 #endif
 extern BOOLEAN LYCancelDownload;
 extern BOOLEAN LYRestricted;	/* whether we had -anonymous option */

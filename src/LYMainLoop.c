@@ -2830,10 +2830,11 @@ PRIVATE void handle_LYK_FASTFORW_LINK ARGS2(
 
 PRIVATE void handle_LYK_FIRST_LINK NOARGS
 {
-    int i;
+    int i = curdoc.link;
 
-    for (i = curdoc.link - 1; i >= 0; i--) {
-	if (links[i].ly != links[curdoc.link].ly) {
+    for (;;) {
+	if (--i < 0
+	 || links[i].ly != links[curdoc.link].ly) {
 	    set_curdoc_link(i + 1);
 	    break;
 	}
@@ -3512,10 +3513,11 @@ PRIVATE void handle_LYK_KEYMAP ARGS4(
 
 PRIVATE void handle_LYK_LAST_LINK NOARGS
 {
-    int i;
+    int i = curdoc.link;
 
-    for (i = curdoc.link; i < nlinks; i++) {
-	if (links[i].ly != links[curdoc.link].ly) {
+    for (;;) {
+	if (++i >= nlinks
+	 || links[i].ly != links[curdoc.link].ly) {
 	    set_curdoc_link(i - 1);
 	    break;
 	}
@@ -5911,7 +5913,7 @@ try_again:
 	    if (crawl) {
 		print_crawl_to_fd(stdout, curdoc.address, curdoc.title);
 	    } else {
-		print_wwwfile_to_fd(stdout,0);
+		print_wwwfile_to_fd(stdout, FALSE);
 	    }
 	    return(0);
 	}

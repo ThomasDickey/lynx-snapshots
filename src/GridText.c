@@ -133,6 +133,7 @@ PUBLIC BOOLEAN bold_on      = OFF;
 
 #ifdef SOURCE_CACHE
 PUBLIC int LYCacheSource = SOURCE_CACHE_NONE;
+PUBLIC int LYCacheSourceForAborted = SOURCE_CACHE_FOR_ABORTED_DROP;
 #endif
 
 #ifdef USE_SCROLLBAR
@@ -7621,6 +7622,33 @@ get_query:
     return(NOT_FOUND);
 }
 
+PRIVATE void write_offset ARGS2(
+	FILE *,		fp,
+	HTLine *,	line)
+{
+    int i;
+
+    if (line->data[0]) {
+	for (i = 0; i < (int)line->offset; i++) {
+	     fputc(' ', fp);
+	}
+    }
+}
+
+PRIVATE void write_hyphen ARGS1(
+	FILE *,		fp)
+{
+    if (dump_output_immediately &&
+	LYRawMode &&
+	LYlowest_eightbit[current_char_set] <= 173 &&
+	(LYCharSet_UC[current_char_set].enc == UCT_ENC_8859 ||
+	 (LYCharSet_UC[current_char_set].like8859 & UCT_R_8859SPECL)) != 0) {
+	fputc(0xad, fp); /* the iso8859 byte for SHY */
+    } else {
+	fputc('-', fp);
+    }
+}
+
 /*
  *  Print the contents of the file in HTMainText to
  *  the file descriptor fp.
@@ -7629,15 +7657,20 @@ get_query:
  */
 PUBLIC void print_wwwfile_to_fd ARGS2(
 	FILE *,		fp,
-	int,		is_reply)
+	BOOLEAN,	is_reply)
 {
     register int i;
     int first = TRUE;
     HTLine * line;
 #ifndef NO_DUMP_WITH_BACKSPACES
     HText* text = HTMainText;
-    BOOL in_b=FALSE,in_u=FALSE,
-	bs=(BOOL)(text && with_backspaces && HTCJK==NOCJK && !text->T.output_utf8);
+    BOOL in_b = FALSE;
+    BOOL in_u = FALSE;
+    BOOL bs = (BOOL)(!is_reply
+		&& text != 0
+		&& with_backspaces
+		&& HTCJK == NOCJK
+		&& !text->T.output_utf8);
 #endif
 
     if (!HTMainText)
@@ -7656,12 +7689,7 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 	}
 
 	first = FALSE;
-	/*
-	 *  Add offset.
-	 */
-	for (i = 0; i < (int)line->offset; i++) {
-	     fputc(' ', fp);
-	}
+	write_offset(fp, line);
 
 	/*
 	 *  Add data.
@@ -7682,16 +7710,7 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 		fputc(line->data[i], fp);
 	    } else if (line->data[i] == LY_SOFT_HYPHEN &&
 		line->data[i + 1] == '\0') { /* last char on line */
-		if (dump_output_immediately &&
-		    LYRawMode &&
-		    LYlowest_eightbit[current_char_set] <= 173 &&
-		    (LYCharSet_UC[current_char_set].enc == UCT_ENC_8859 ||
-		     (LYCharSet_UC[current_char_set].like8859 &
-				  UCT_R_8859SPECL)) != 0) {
-		    fputc(0xad, fp); /* the iso8859 byte for SHY */
-		} else {
-		    fputc('-', fp);
-		}
+		write_hyphen(fp);
 	    } else if (dump_output_immediately && use_underscore) {
 		switch (line->data[i]) {
 		    case LY_UNDERLINE_START_CHAR:
@@ -7751,12 +7770,6 @@ PUBLIC void print_crawl_to_fd ARGS3(
     register int i;
     int first = TRUE;
     HTLine * line;
-#ifndef NO_DUMP_WITH_BACKSPACES
-    HText* text = HTMainText;
-    BOOL in_b=FALSE,in_u=FALSE,
-	bs=(BOOL)(text && with_backspaces && HTCJK==NOCJK && !text->T.output_utf8);
-#endif
-
 
     if (!HTMainText)
 	return;
@@ -7771,12 +7784,7 @@ PUBLIC void print_crawl_to_fd ARGS3(
 	if (!first && line->data[0] != LY_SOFT_NEWLINE)
 	    fputc('\n',fp);
 	first = FALSE;
-	/*
-	 *  Add offset.
-	 */
-	for (i = 0; i < (int)line->offset; i++) {
-	    fputc(' ', fp);
-	}
+	write_offset(fp, line);
 
 	/*
 	 *  Add data.
@@ -7786,39 +7794,8 @@ PUBLIC void print_crawl_to_fd ARGS3(
 		fputc(line->data[i], fp);
 	    } else if (line->data[i] == LY_SOFT_HYPHEN &&
 		line->data[i + 1] == '\0') { /* last char on line */
-		if (dump_output_immediately &&
-		    LYRawMode &&
-		    LYlowest_eightbit[current_char_set] <= 173 &&
-		    (LYCharSet_UC[current_char_set].enc == UCT_ENC_8859 ||
-		     (LYCharSet_UC[current_char_set].like8859 &
-				  UCT_R_8859SPECL)) != 0) {
-		    fputc(0xad, fp); /* the iso8859 byte for SHY */
-		} else {
-		    fputc('-', fp);
-		}
-	     }
-#ifndef NO_DUMP_WITH_BACKSPACES
-	    else if (bs) {
-		switch (line->data[i]) {
-		    case LY_UNDERLINE_START_CHAR:
-			if (!in_b)
-			    in_u = TRUE; /*favor bold over underline*/
-			break;
-		    case LY_UNDERLINE_END_CHAR:
-			in_u = FALSE;
-			break;
-		    case LY_BOLD_START_CHAR:
-			if (in_u)
-			    in_u = FALSE; /* turn it off*/
-			in_b = TRUE;
-			break;
-		    case LY_BOLD_END_CHAR:
-			in_b = FALSE;
-			break;
-		}
+		write_hyphen(fp);
 	    }
-#endif
-
 	}
 
 	if (line == HTMainText->last_line) {
