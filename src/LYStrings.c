@@ -703,7 +703,7 @@ PUBLIC int LYmbcsstrlen ARGS3(
 #define GetChar() wgetch(my_subwindow ? my_subwindow : LYwin)
 #endif
 
-#if !defined(GetChar) && defined(PDCURSES)
+#if !defined(GetChar) && defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
 /* PDCurses sends back key-modifiers that we don't use, but would waste time
  * upon, e.g., repainting the status line
  */
@@ -2538,6 +2538,18 @@ PUBLIC void LYTrimLeading ARGS1(
     char *skipped = LYSkipBlanks(buffer);
     while ((*buffer++ = *skipped++) != 0)
 	;
+}
+
+/*
+ * Trim trailing newline(s) from a string
+ */
+PUBLIC char * LYTrimNewline ARGS1(
+	char *,		buffer)
+{
+    size_t i = strlen(buffer);
+    while (i != 0 && buffer[i-1] == '\n')
+	buffer[--i] = 0;
+    return buffer;
 }
 
 /*
@@ -4761,13 +4773,8 @@ again:
 		    while (cur_choice < num_options
 		     && strcasecomp(data[cur_choice], MyEdit.buffer) < 0)
 			cur_choice++;
-#ifdef USE_SLANG
-		    old_y = SLsmg_get_row();
-		    old_x = SLsmg_get_column();
-#else
-		    getyx(LYwin, old_y, old_x);
-#endif
 
+		    LYGetYX(old_y, old_x);
 		    cur_choice = LYhandlePopupList(
 			cur_choice,
 			0,
@@ -4783,11 +4790,7 @@ again:
 			    _statusline(": ");
 			reinsertEdit(&MyEdit, data[cur_choice]);
 		    }
-#ifdef USE_SLANG
-		    SLsmg_gotorc(old_y, old_x);
-#else
 		    wmove(LYwin, old_y, old_x);
-#endif
 		    FREE(data);
 		}
 	    } else {

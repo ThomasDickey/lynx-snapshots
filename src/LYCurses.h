@@ -59,7 +59,7 @@ typedef struct {
 /* slang doesn't really do windows... */
 #define waddch(w,c)  LYaddch(c)
 #define waddstr(w,s) addstr(s)
-#define wmove(win, row, col) SLsmg_gotorc((win)->top_y + (row), (win)->left_x + (col));
+#define wmove(win, row, col) SLsmg_gotorc(((win)?(win)->top_y:0) + (row), ((win)?(win)->left_x:0) + (col))
 
 #ifndef SLSMG_UARROW_CHAR
 #define SLSMG_UARROW_CHAR '^'
@@ -236,7 +236,7 @@ typedef struct {
 /*
  * If we have pads, use them to implement left/right scrolling.
  */
-#if defined(HAVE_NEWPAD) && defined(HAVE_PNOUTREFRESH)
+#if defined(HAVE_NEWPAD) && defined(HAVE_PNOUTREFRESH) && !defined(PDCURSES)
 #define USE_CURSES_PADS 1
 #endif
 
@@ -407,7 +407,7 @@ extern unsigned int Lynx_Color_Flags;
 /*
  *  Map some curses functions to slang functions.
  */
-#define stdscr NULL
+#define stdscr ((WINDOW *)0)
 #ifdef SLANG_MBCS_HACK
 extern int PHYSICAL_SLtt_Screen_Cols;
 #define COLS PHYSICAL_SLtt_Screen_Cols

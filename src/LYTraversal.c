@@ -151,6 +151,7 @@ PUBLIC BOOLEAN lookup_reject ARGS1(char *,target)
     HTSprintf0(&line, "%s\n", target);
 
     while (LYSafeGets(&buffer, ifp) != NULL && !result) {
+	LYTrimTrailing(buffer);
 	len = strlen(buffer);
 	if (len > 0) { 	   /* if not an empty line */
 	    if (buffer[len-1] == '*') {

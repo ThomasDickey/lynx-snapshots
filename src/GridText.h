@@ -207,10 +207,6 @@ extern int HText_beginInput PARAMS((
 	HText *		text,
 	BOOL		underline,
 	InputFieldData *I));
-extern void HText_trimHightext PARAMS((
-	HText *		text,
-	BOOLEAN		final,
-	int		stop_before));
 extern int HText_SubmitForm PARAMS((
 	FormInfo *	submit_item,
 	document *	doc,

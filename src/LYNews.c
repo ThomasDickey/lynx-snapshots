@@ -44,28 +44,12 @@ PRIVATE BOOLEAN message_has_content ARGS2(
     while (LYSafeGets(&buffer, fp) != NULL) {
 	char *cp = buffer;
 	char firstnonblank = '\0';
-	if (*cp == '\0') {
-	    break;
-	}
+	LYTrimNewline(cp);
 	for (; *cp; cp++) {
-	    if (*cp == '\n') {
-		break;
-	    } else if (*cp != ' ') {
-		if (!firstnonblank && isgraph(UCH(*cp))) {
-		    firstnonblank = *cp;
-		} else if (!isspace(UCH(*cp))) {
-		    *nonspaces = TRUE;
-		}
-	    }
-	}
-	if (*cp != '\n') {
-	    int c;
-	    while ((c = getc(fp)) != EOF && c != '\n') {
-		if (!firstnonblank && isgraph(UCH(c))) {
-		    firstnonblank = (char)c;
-		} else if (!isspace(UCH(*cp))) {
-		    *nonspaces = TRUE;
-		}
+	    if (!firstnonblank && isgraph(UCH(*cp))) {
+		firstnonblank = *cp;
+	    } else if (!isspace(UCH(*cp))) {
+		*nonspaces = TRUE;
 	    }
 	}
 	if (firstnonblank && firstnonblank != '>') {
@@ -283,10 +267,8 @@ PUBLIC char *LYNewsPost ARGS2(
     else if ((fp = fopen("/etc/organization", TXT_R)) != NULL) {
 	char *buffer = 0;
 	if (LYSafeGets(&buffer, fp) != NULL) {
-	    if ((org = strchr(buffer, '\n')) != NULL) {
-		*org = '\0';
-	    }
 	    if (user_input[0] != '\0') {
+		LYTrimNewline(buffer);
 		StrAllocCat(cp, buffer);
 	    }
 	}

@@ -75,6 +75,11 @@ unsigned int cached_styles[CACHEH][CACHEW];
 #define FirstHTLine(text) ((text)->last_line->next)
 #define LastHTLine(text)  ((text)->last_line)
 
+PRIVATE void HText_trimHightext PARAMS((
+	HText *		text,
+	BOOLEAN		final,
+	int		stop_before));
+
 #ifdef USE_COLOR_STYLE
 PRIVATE void LynxResetScreenCache NOARGS
 {
@@ -5257,7 +5262,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 	if (a->show_anchor == NO) {
 	    /*
 	     *  The anchor's content is restricted to white
-	     *  and special characters, so set it's number
+	     *  and special characters, so set its number
 	     *  and extent to zero, decrement the visible
 	     *  anchor number counter, and add this anchor
 	     *  to the hidden links list. - FM
@@ -5272,7 +5277,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 	    /*
 	     *  The anchor's content is not restricted to white
 	     *  and special characters, so we'll display the
-	     *  content, but shorten it's extent by any trailing
+	     *  content, but shorten its extent by any trailing
 	     *  blank lines we've detected. - FM
 	     */
 	    a->extent -= ((BlankExtent < a->extent) ?
@@ -5455,7 +5460,7 @@ PUBLIC void HText_endAppend ARGS1(
 **  This needs to be done so that display_page finds the anchors in the
 **  form it expects when it sets the links[] elements.
 */
-PUBLIC void HText_trimHightext ARGS3(
+PRIVATE void HText_trimHightext ARGS3(
 	HText *,	text,
 	BOOLEAN,	final,
 	int,		stop_before)
@@ -5674,15 +5679,6 @@ re_parse:
 	if (anchor_ptr == text->last_anchor)
 	    break;
     }
-}
-
-
-/*	Dump diagnostics to tfp
-*/
-PUBLIC void HText_dump ARGS1(
-	HText *,	text GCC_UNUSED)
-{
-    CTRACE((tfp, "HText: Dump called\n"));
 }
 
 
@@ -6328,7 +6324,7 @@ PUBLIC int HTGetLinkOrFieldStart ARGS5(
  *  for the first hit with the string indicated by target.  If
  *  there is no hit, FALSE is returned.  If there is a hit, then
  *  a copy of the line starting at that first hit is loaded into
- *  *data with all IsSpecial characters stripped, it's offset and
+ *  *data with all IsSpecial characters stripped, its offset and
  *  the printable target length (without IsSpecial, or extra CJK
  *  or utf8 characters) are loaded into *offset and *tLen, and
  *  TRUE is returned. - FM
@@ -7736,7 +7732,7 @@ PRIVATE int www_search_forward ARGS5(
 	HTLine *,	line,
 	int,		count)
 {
-    BOOL wrapped = FALSE;
+    int wrapped = 0;
     TextAnchor *a = line_num_to_anchor(count - 1);
     int tentative_result = -1;
 
@@ -7756,12 +7752,12 @@ PRIVATE int www_search_forward ARGS5(
 	if (LYno_attr_strstr(line->data, target)) {
 	    tentative_result = count;
 	    break;
-	} else if (count == start_line && wrapped) {
+	} else if ((count == start_line && wrapped) || wrapped > 1) {
 	    HTUserMsg2(STRING_NOT_FOUND, target);
 	    return -1;
 	} else if (line == HTMainText->last_line) {
 	    count = 0;
-	    wrapped = TRUE;
+	    wrapped++;
 	}
 	line = line->next;
 	count++;
@@ -7779,7 +7775,7 @@ PRIVATE int www_search_backward ARGS5(
 	HTLine *,	line,
 	int,		count)
 {
-    BOOL wrapped = FALSE;
+    int wrapped = 0;
     TextAnchor *a = line_num_to_anchor(count - 1);
     int tentative_result = -1;
 
@@ -7799,12 +7795,12 @@ PRIVATE int www_search_backward ARGS5(
 	if (LYno_attr_strstr(line->data, target)) {
 	    tentative_result = count;
 	    break;
-	} else if (count == start_line && wrapped) {
+	} else if ((count == start_line && wrapped) || wrapped > 1) {
 	    HTUserMsg2(STRING_NOT_FOUND, target);
 	    return -1;
 	} else if (line == FirstHTLine(HTMainText)) {
 	    count = line_num_in_text(HTMainText, LastHTLine(HTMainText)) + 1;
-	    wrapped = TRUE;
+	    wrapped++;
 	}
 	line = line->prev;
 	count--;
@@ -11275,6 +11271,8 @@ PUBLIC BOOL HText_AreDifferent ARGS2(
     return(FALSE);
 }
 
+#define CanTrimTextArea(c) \
+    (LYtrimInputFields ? isspace(c) : ((c) == '\r' || (c) == '\n'))
 
 /*
  *  Cleanup new lines coming into a TEXTAREA from an external editor, or a
@@ -11301,13 +11299,11 @@ PRIVATE void cleanup_line_for_textarea ARGS2(
     /*
      *  Whack off trailing whitespace from the line.
      */
-    if (LYtrimInputFields) {
-	for (i = len, p = line + (len - 1); i != 0; p--, i--) {
-	    if (isspace(UCH(*p)))
-		*p = '\0';
-	    else
-		break;
-	}
+    for (i = len, p = line + (len - 1); i != 0; p--, i--) {
+	if (CanTrimTextArea(UCH(*p)))
+	    *p = '\0';
+	else
+	    break;
     }
 
     if (strlen (line) != 0) {
@@ -12057,11 +12053,9 @@ PUBLIC int HText_ExtEditForm ARGS1(
     /*
      *	Nuke any blank lines from the end of the edited data.
      */
-    if (LYtrimInputFields) {
-	while ((size != 0)
-	 && (isspace(UCH(ebuf[size-1])) || (ebuf[size-1] == '\0')))
-	    ebuf[--size] = '\0';
-    }
+    while ((size != 0)
+     && (CanTrimTextArea(UCH(ebuf[size-1])) || (ebuf[size-1] == '\0')))
+	ebuf[--size] = '\0';
 
     /*
      *	Copy each line from the temp file into the corresponding anchor

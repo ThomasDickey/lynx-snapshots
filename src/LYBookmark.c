@@ -118,6 +118,7 @@ PUBLIC char * get_bookmark_filename ARGS1(
 	 * Check if it is a mosaic hotlist.
 	 */
 	if (LYSafeGets(&string_buffer, fp) != 0
+	 && *LYTrimNewline(string_buffer) != '\0'
 	 && !strncmp(string_buffer, "ncsa-xmosaic-hotlist-format-1", 29)) {
 	    char *newname;
 	    /*
@@ -150,7 +151,6 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
     FILE *fp, *nfp;
     char *buf = NULL;
     int line = -2;
-    char *endline;
 
     LYRemoveTemp(newfile);
     if ((nfp = LYOpenTemp(newfile, HTML_SUFFIX, "w")) == NULL) {
@@ -170,16 +170,9 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
      been remapped by you or your system administrator."));
 
     while ((LYSafeGets(&buf, fp)) != NULL) {
-	if(line >= 0) {
-	    endline = &buf[strlen(buf)-1];
-	    if(*endline == '\n')
-		*endline = '\0';
-#ifdef DOSPATH	/* 1998/01/10 (Sat) 15:41:35 */
-	    endline = strchr(buf, '\r');
-	    if (endline == NULL)
-		*endline = '\0';
-#endif
-	    if((line % 2) == 0) { /* even lines */
+	if (line >= 0) {
+	    LYTrimNewline(buf);
+	    if ((line % 2) == 0) { /* even lines */
 		if(*buf != '\0') {
 		    strtok(buf," "); /* kill everything after the space */
 		    fprintf(nfp,"<LI><a href=\"%s\">",buf); /* the URL */
