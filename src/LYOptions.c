@@ -28,6 +28,10 @@ BOOLEAN term_options;
 
 PRIVATE void terminate_options	PARAMS((int sig));
 
+#if !defined(NO_OPTION_MENU) || defined(NCURSES_MOUSE_VERSION)
+#define COL_OPTION_VALUES 36  /* display column where option values start */
+#endif
+
 #ifndef NO_OPTION_MENU
 PRIVATE int boolean_choice PARAMS((
 	int		status,
@@ -97,9 +101,6 @@ PRIVATE int boolean_choice PARAMS((
 #define L_VERBOSE_IMAGES L_USER_MODE
 #define B_VERBOSE_IMAGES 50
 #define C_VERBOSE_IMAGES (B_VERBOSE_IMAGES + 21)
-
-
-#define COL_OPTION_VALUES 36  /* display column where option values start */
 
 /* a kludge to add assume_charset only in ADVANCED mode... */
 #define L_Bool_A (use_assume_charset ? L_BOOL_A + 1 : L_BOOL_A)
@@ -2164,7 +2165,7 @@ draw_bookmark_list:
     signal(SIGINT, cleanup_sig);
 }
 
-#ifndef NO_OPTION_MENU
+#if !defined(NO_OPTION_MENU) || defined(NCURSES_MOUSE_VERSION)
 /*
 **  This function prompts for a choice or page number.
 **  If a 'g' or 'p' suffix is included, that will be
@@ -3962,7 +3963,7 @@ PUBLIC int postoptions ARGS1(
     if (!HTLoadAbsolute(&WWWDoc))
        return(NOT_FOUND);
 
-    reloading = FALSE;  /* set manually */ 
+    reloading = FALSE;  /* set manually */
     /*  force end-to-end reload from remote server if change LYUserAgent
      *  or language or pref_charset (marked by need_end_reload flag above),
      *  from old-style LYK_OPTIONS (mainloop):

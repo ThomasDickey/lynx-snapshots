@@ -612,23 +612,9 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 #define STATUSBUFSIZE   40
 PRIVATE char * buffstack[STATUSBUFSIZE];
 PRIVATE int topOfStack = 0;
-
-PRIVATE void to_stack ARGS1(char *, str)
-{
-    /*
-     *  Cycle buffer:
-     */
-    if (topOfStack == STATUSBUFSIZE) {
-        topOfStack = 0;
-    }
-
-    /*
-     *  Register string.
-     */
-    FREE(buffstack[topOfStack]);
-    buffstack[topOfStack] = str;
-    topOfStack++;
-}
+#ifdef LY_FIND_LEAKS
+PRIVATE int already_registered_free_messages_stack = 0;
+#endif
 
 #ifdef LY_FIND_LEAKS
 PRIVATE void free_messages_stack NOARGS
@@ -640,6 +626,30 @@ PRIVATE void free_messages_stack NOARGS
     }
 }
 #endif
+
+PRIVATE void to_stack ARGS1(char *, str)
+{
+    /*
+     *  Cycle buffer:
+     */
+    if (topOfStack == STATUSBUFSIZE) {
+	topOfStack = 0;
+    }
+
+    /*
+     *  Register string.
+     */
+    FREE(buffstack[topOfStack]);
+    buffstack[topOfStack] = str;
+    topOfStack++;
+#ifdef LY_FIND_LEAKS
+    if(!already_registered_free_messages_stack) {
+	already_registered_free_messages_stack = 1;
+	atexit(free_messages_stack);
+    }
+#endif
+}
+
 
 /*
  *  Status line messages list, LYNXMESSAGES:/ internal page,

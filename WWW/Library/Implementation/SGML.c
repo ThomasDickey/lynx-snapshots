@@ -60,6 +60,8 @@ PRIVATE void fake_put_character ARGS2(
 #define START TRUE
 #define STOP FALSE
 
+#define PUTS_TR(x) psrc_convert_string = TRUE; PUTS(x)
+
 #else
 #  define PSRC(x)
 #  define NPSRC(x)
@@ -1973,6 +1975,13 @@ top1:
 	    **	via handle_entity(), or if the terminator is
 	    **	not the "standard" semi-colon for HTML. - FM
 	    */
+#ifdef USE_PSRC
+	    if (psrc_view && FoundEntity && c == ';') {
+		HTMLSRC_apply_markup(context,HTL_entity, START);
+		PUTC(c);
+		HTMLSRC_apply_markup(context,HTL_entity, STOP);
+	    }
+#endif
 	    if (!FoundEntity || c != ';')
 		goto top1;
 	}
@@ -3249,7 +3258,7 @@ top1:
 		    PSRCSTART(href);
 		    HTStartAnchor(context->target,NULL,string->data);
 		}
-		PUTS(string->data);
+		PUTS_TR(string->data);
 		if (cur_attr_is_href) {
 		    (*context->actions->end_element)(
 			context->target,
@@ -3320,7 +3329,7 @@ top1:
 		    PSRCSTART(href);
 		    HTStartAnchor(context->target,NULL,string->data);
 		}
-		PUTS(string->data);
+		PUTS_TR(string->data);
 		if (cur_attr_is_href) {
 		    (*context->actions->end_element)(
 			context->target,
@@ -3384,7 +3393,7 @@ top1:
 		    PSRCSTART(href);
 		    HTStartAnchor(context->target,NULL,string->data);
 		}
-		PUTS(string->data);
+		PUTS_TR(string->data);
 		if (cur_attr_is_href) {
 		    (*context->actions->end_element)(
 			context->target,
@@ -3996,6 +4005,7 @@ PUBLIC HTStream* SGML_new  ARGS3(
 	SGML_string(context, "<HTML><HEAD><TITLE>source</TITLE></HEAD>"
 			     "<BODY><PRE>") ;
 	psrc_view = TRUE;
+	psrc_convert_string = FALSE;
 	sgml_in_psrc_was_initialized = TRUE;
 	seen_letter_in_junk_tag = FALSE;
     }

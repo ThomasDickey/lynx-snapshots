@@ -537,12 +537,14 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	LYEntify(&MapTitle, TRUE);
     }
 
+#define PUTS(buf)    (*target->isa->put_block)(target, buf, strlen(buf))
+
     HTSprintf0(&buf, "<html>\n<head>\n");
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
     HTSprintf0(&buf, "<META %s content=\"text/html;charset=%s\">\n",
 		"http-equiv=\"content-type\"",
 		LYCharSet_UC[current_char_set].MIMEname);
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
 	/*
 	 *  This page is a list of titles and anchors for them.
 	 *  Since titles already passed SGML/HTML stage
@@ -550,43 +552,43 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	 *  That is why we insist on META charset for this page.
 	 */
     HTSprintf0(&buf, "<title>%s</title>\n", MapTitle);
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
     HTSprintf0(&buf, "</head>\n<body>\n");
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
 
     HTSprintf0(&buf,"<h1><em>%s</em></h1>\n", MapTitle);
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
 
     StrAllocCopy(MapAddress, address);
     LYEntify(&MapAddress, FALSE);
     HTSprintf0(&buf,"<h2><em>MAP:</em>&nbsp;%s</h2>\n", MapAddress);
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
 
     HTSprintf0(&buf, "<%s compact>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
 				    "ol" : "ul"));
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
     cur = theMap->elements;
     while (NULL != (new=(LYMapElement *)HTList_nextObject(cur))) {
 	StrAllocCopy(MapAddress, new->address);
 	LYEntify(&MapAddress, FALSE);
-	(*target->isa->put_block)(target, "<li><a href=\"", 13);
-	(*target->isa->put_block)(target, MapAddress, strlen(MapAddress));
+	PUTS("<li><a href=\"");
+	PUTS(MapAddress);
+	PUTS("\"");
 #ifndef DONT_TRACK_INTERNAL_LINKS
 	if (new->intern_flag)
-	    (*target->isa->put_block)(target, "\" TYPE=\"internal link\"\n>",24);
-	else
+	    PUTS(" TYPE=\"internal link\"");
 #endif
-	    (*target->isa->put_block)(target, "\"\n>", 3);
+	PUTS("\n>");
 	StrAllocCopy(MapTitle, new->title);
 	LYEntify(&MapTitle, TRUE);
-	(*target->isa->put_block)(target, MapTitle, strlen(MapTitle));
-	(*target->isa->put_block)(target, "</a>\n", 5);
+	PUTS(MapTitle);
+	PUTS("</a>\n");
     }
     HTSprintf0(&buf, "</%s>\n</body>\n</html>\n",
 		    ((keypad_mode == NUMBERS_AS_ARROWS)
 		    ? "ol"
 		    : "ul"));
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
 
     (*target->isa->_free)(target);
     FREE(MapAddress);

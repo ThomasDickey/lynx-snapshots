@@ -120,6 +120,7 @@ NLS_DATADIR,
 [PREFIX/DATADIR],
 [$prefix/$DATADIRNAME])
 
+INTLDIR_CPPFLAGS=
 INTLDIR_MAKE=
 MSG_DIR_MAKE=
 SUB_MAKEFILE=
@@ -157,6 +158,12 @@ if test -z "$MSG_DIR_MAKE" ; then
 		SUB_MAKEFILE=
 	fi
 fi
+
+if test -z "$INTLDIR_MAKE" ; then
+	INTLDIR_CPPFLAGS='-I$(top_srcdir)/intl'
+fi
+
+AC_SUBST(INTLDIR_CPPFLAGS)
 AC_SUBST(INTLDIR_MAKE)
 AC_SUBST(MSG_DIR_MAKE)
 
@@ -478,6 +485,7 @@ AC_CHECK_FUNCS( \
 	putenv \
 	readdir \
 	strerror \
+	unsetenv \
 	waitpid \
 )
 AC_REPLACE_FUNCS( \
@@ -704,13 +712,13 @@ AC_MSG_RESULT($enableval)
 
 AC_MSG_CHECKING(if you want exec-links support)
 CF_ARG_ENABLE(exec-links,
-[  --enable-exec-links     support cgi links w/o a http daemon],
+[  --enable-exec-links     allow lynx to execute programs accessed via a link],
 	[AC_DEFINE(EXEC_LINKS)])
 AC_MSG_RESULT($enableval)
 
 AC_MSG_CHECKING(if you want exec-scripts support)
 CF_ARG_ENABLE(exec-scripts,
-[  --enable-exec-scripts   support cgi links w/o a http daemon],
+[  --enable-exec-scripts   allow lynx to execute programs inferred from a link],
 	[AC_DEFINE(EXEC_SCRIPTS)])
 AC_MSG_RESULT($enableval)
 

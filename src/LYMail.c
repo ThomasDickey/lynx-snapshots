@@ -37,8 +37,9 @@ PRIVATE void SafeHTUnEscape ARGS1(
      HTUnEscape(string);
      for (i=0; string[i] != '\0'; i++)
      {
-	/* FIXME: this is explicitly 7-bit ASCII */
-	if (string[i] < ' ' || string[i] >= 127)
+	/* FIXME: this is no longer explicitly 7-bit ASCII,
+	   but are there portability problems? */
+	if ((!LYIsASCII(string[i])) || !isprint(string[i]))
 	{
 	   string[i] = '?';
 	   flg = TRUE;

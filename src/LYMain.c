@@ -44,7 +44,11 @@
 #endif /* !VMS */
 
 #ifdef LOCALE
+#undef gettext		/* Solaris locale.h prototypes gettext() */
 #include <locale.h>
+#ifndef HAVE_GETTEXT
+#define gettext(s) s
+#endif
 #endif /* LOCALE */
 
 #include <LYexit.h>
@@ -1843,9 +1847,9 @@ PUBLIC void LYRegisterLynxProtocols NOARGS
 
 #ifndef NO_CONFIG_INFO
 /*
- *  Some staff to reload lynx.cfg without restarting new lynx session,
+ *  Some stuff to reload lynx.cfg without restarting new lynx session,
  *  also load options menu items and command-line options
- *  to made things consistent.  Not implemented yet.
+ *  to make things consistent.  Not implemented yet.
  *  Warning: experimental, more main() reorganization required.
  *
  *  Called by user of interactive session by LYNXCFG://reload/ link.
@@ -2553,6 +2557,12 @@ static int version_fun ARGS1(
 	  LYNX_RELEASE ? LYNX_RELEASE_DATE : &LYNX_DATE[LYNX_DATE_OFF]
 	  );
 #ifdef SYSTEM_NAME
+#ifndef __DATE__
+#define __DATE__ ""
+#endif
+#ifndef __TIME__
+#define __TIME__ ""
+#endif
     printf(gettext("Built on %s %s %s\n"), SYSTEM_NAME, __DATE__, __TIME__);
 #endif
     printf("\n");

@@ -190,7 +190,7 @@ typedef enum {
     LYNXCOMPILE_OPTS_URL_TYPE,
     LYNXMESSAGES_URL_TYPE,
 
-    PROXY_URL_TYPE,
+    PROXY_URL_TYPE
 
 } UrlTypes;
 

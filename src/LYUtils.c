@@ -45,7 +45,7 @@
 #endif /* UTMPX_FOR_UTMP */
 #endif /* HAVE_UTMP */
 
-#if NEED_PTEM_H
+#ifdef NEED_PTEM_H
 /* they neglected to define struct winsize in termios.h -- it's only in
  * termio.h and ptem.h (the former conflicts with other definitions).
  */
@@ -4931,7 +4931,7 @@ PUBLIC char *LYPathLeaf ARGS1(char *, pathname)
     int n;
     for (leaf = 0, n = strlen(pathname)-1; n >= 0; n--) {
 	if (strchr("\\/:", pathname[n]) != 0) {
-	    leaf = pathname + n;
+	    leaf = pathname + n + 1;
 	    break;
 	}
     }

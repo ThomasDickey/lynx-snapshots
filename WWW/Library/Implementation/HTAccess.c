@@ -865,12 +865,6 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	    redirection_attempts = 0;
 	    return YES;
 	} else {
-#if NOT_USED_CODE
-	    /* disabled 1997-10-28 - kw
-	       callers already do this when requested
-	    */
-	    reloading = TRUE;
-#endif
 	    ForcingNoCache = YES;
 	    CTRACE(tfp, "HTAccess: Auto-reloading document.\n");
 	}

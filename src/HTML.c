@@ -212,7 +212,7 @@ PRIVATE void change_paragraph_style ARGS2(HTStructured *, me, HTStyle *,style)
 /* FIXME:  this should be amended to do the substitution only when not in a
  * multibyte stream.
  */
-#if EXP_JAPANESE_SPACES
+#ifdef EXP_JAPANESE_SPACES
 #define FIX_JAPANESE_SPACES \
 	(HTCJK == CHINESE || HTCJK == JAPANESE || HTCJK == TAIPEI)
 	/* don't replace '\n' with ' ' if Chinese or Japanese - HN
@@ -435,8 +435,19 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 */
 PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 {
-   if (LYMapsOnly || s == NULL)
-      return;
+#ifdef USE_PSRC
+    char* translated_string = NULL;
+#endif
+
+    if (LYMapsOnly || s == NULL)
+	return;
+#ifdef USE_PSRC
+    if (psrc_convert_string) {
+	StrAllocCopy(translated_string,s);
+	TRANSLATE_AND_UNESCAPE_ENTITIES(&translated_string, TRUE, FALSE);
+	s = (CONST char *) translated_string;
+    };
+#endif
 
     switch (me->sp[0].tag_number) {
 
@@ -499,7 +510,7 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 			      (*p == ' ') || (*p == '\t')); p++)
 		    ;	/* Ignore leaders */
 		if (!*p)
-		    return;
+		    break;
 		UPDATE_STYLE;
 	    }
 	    for (; *p; p++) {
@@ -558,6 +569,12 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 	    } /* for */
 	}
     } /* end switch */
+#ifdef USE_PSRC
+    if (psrc_convert_string) {
+	psrc_convert_string = FALSE;
+	FREE(translated_string);
+    }
+#endif
 }
 
 /*	Buffer write
@@ -1365,8 +1382,9 @@ PRIVATE void HTML_start_element ARGS6(
 				me->node_anchor,	/* Parent */
 				NULL,			/* Tag */
 				href,			/* Addresss */
-				temp ?
-       (HTLinkType*)HTAtom_for(temp) : INTERN_LT);	/* Type */
+				temp
+				   ? (HTLinkType*)HTAtom_for(temp)
+				   : INTERN_LT);	/* Type */
 	    FREE(temp);
 	    if ((dest = HTAnchor_parent(
 			    HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
@@ -3515,7 +3533,8 @@ PRIVATE void HTML_start_element ARGS6(
 	    }
 	    if (alt_string != NULL) {
 		TRANSLATE_AND_UNESCAPE_ENTITIES(&alt_string,
-						       me->UsePlainSpace, me->HiddenValue);
+						me->UsePlainSpace,
+						me->HiddenValue);
 		/*
 		 *  Make sure it's not just space(s). - FM
 		 */

@@ -53,7 +53,7 @@
 #endif /* VMS */
 
 #ifndef WEXITSTATUS
-# if HAVE_TYPE_UNIONWAIT
+# ifdef HAVE_TYPE_UNIONWAIT
 #  define	WEXITSTATUS(status)	(status.w_retcode)
 # else
 #  define	WEXITSTATUS(status)	(((status) & 0xff00) >> 8)
@@ -61,7 +61,7 @@
 #endif
 
 #ifndef WTERMSIG
-# if HAVE_TYPE_UNIONWAIT
+# ifdef HAVE_TYPE_UNIONWAIT
 #  define	WTERMSIG(status)	(status.w_termsig)
 # else
 #  define	WTERMSIG(status)	((status) & 0x7f)
@@ -2033,7 +2033,7 @@ PRIVATE int LYExecv ARGS3(
     int rc;
     char *tmpbuf = 0;
     pid_t pid;
-#if HAVE_TYPE_UNIONWAIT
+#ifdef HAVE_TYPE_UNIONWAIT
     union wait wstatus;
 #else
     int wstatus;

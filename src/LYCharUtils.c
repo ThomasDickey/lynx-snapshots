@@ -844,7 +844,7 @@ PUBLIC void LYGetChartransInfo ARGS1(
 				      UCT_STAGE_STRUCTURED);
 }
 
-#if NOTUSED_FOTEMODS
+#ifdef NOTUSED_FOTEMODS
 /*
 **  This function reallocates an allocated string and converts
 **  characters for the current display character set.  It assumes

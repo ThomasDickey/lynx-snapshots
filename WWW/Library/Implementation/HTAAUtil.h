@@ -33,22 +33,6 @@
 #include <HTList.h>
 
 /*
-
-Default filenames
-
- */
-#ifndef PASSWD_FILE
-#define PASSWD_FILE     "/home2/luotonen/passwd"
-#endif
-
-#ifndef GROUP_FILE
-#define GROUP_FILE      "/home2/luotonen/group"
-#endif
-
-#define ACL_FILE_NAME   ".www_acl"
-
-
-/*
 ** Numeric constants
 */
 #define MAX_USERNAME_LEN        16      /* @@ Longest allowed username    */
