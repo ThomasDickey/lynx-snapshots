@@ -1,0 +1,156 @@
+Mike Brown (mike@hyperreal.com)
+-------------------------------
+
+Summary
+=======
+This document describes peculiarities in the way MS-DOS handles character
+sets and provides instructions on how to activate different character sets
+that are ISO-8859 compliant.  This is primarily of utility to people who
+will be using Lynx on a remote UNIX or VMS system via an MS-DOS based
+terminal program.
+
+
+General Information
+===================
+Lynx comes with built-in translation tables to map the 8-bit character codes
+or ISO-8859-x character entities coming in from an HTML document to their
+equivalent codes, where possible, for various character sets, including some
+that are not quite the same as ISO-8859-x.  The translations supported as of
+the 09-02-96 Lynx2-6 code include:
+        "ISO Latin 1         " (ISO-8859-1)
+        "ISO Latin 2         " (ISO-8859-2)
+        "Other ISO Latin     "
+        "DEC Multinational   "
+        "IBM PC character set" (CP 437, standard for US)
+        "IBM PC codepage 850 " (ISO-8859-1, but see below!)
+        "Macintosh (8 bit)   "
+        "NeXT character set  "
+        "KOI8-R character set"
+        "Chinese             "
+        "Japanese (EUC)      "
+        "Japanese (SJIS)     "
+        "Korean              "
+        "Taipei (Big5)       "
+        "7 bit approximations"
+
+Under ideal conditions, when using Lynx through a system that displays one 
+of these character sets, selecting the appropriate character set in the Lynx 
+options will ensure proper display of all characters one might encounter in 
+HTML documents.
+
+Note that all points of the connection between the display at your end and 
+Lynx at the remote end must be 8-bit clean.  If the high bit is being 
+stripped at any point in between, the only character set you can use 
+(effectively) in Lynx will be "7 bit approximations".  More on that later.
+
+
+MS-DOS character set weirdness
+==============================
+MS-DOS uses a bass-ackwards character set in which half the normal 
+characters have been replaced by pseudo-graphic line and box-drawing 
+characters, and in which almost all of the international characters are 
+mapped to nonstandard numbers.  It also contains Greek letters.
+
+Further confusing matters, there is more than one MS-DOS character set. 
+The character sets are referred to as "codepages," each of which has a
+unique number.  IBM PCs and compatibles come with one hardware-based
+default codepage and a keyboard to match.  In the US market the hardware
+codepage is 437.  PCs destined for other regions of the world often have a
+different default codepage which contains characters for other languages
+and keyboards.  Under MS-DOS, one can load different codepages into memory
+and use one of them instead of the hardware default.
+
+If you are using Lynx through an MS-DOS based terminal program or telnet 
+client, you should use the "IBM PC character set" in Lynx.  I believe this 
+was written with codepage 437 in mind.  [ what about console displays for a 
+PC-based UNIX?  what about DOSLynx?  I don't know! ]  Also, the Windows
+font "Terminal" is nearly the same as codepage 437.
+
+Check your display by accessing Martin Ramsch's ISO-8859-1 table
+(iso8859-1.html in the Lynx distribution's test subdirectory).
+
+Ramsch's table describes each entity and shows examples of each.  It should 
+be immediately obvious that you are either seeing what you are supposed to, 
+or you're not.  If you see box and line-drawing characters and mismatched 
+letters and so on, you are likely displaying 7 bit data, not 8.  Ensure that 
+all points of your connection are 8-bit clean:
+
+	On any remote UNIX systems you must pass through, do 
+		'stty cs8 -istrip' or 'stty pass8'.  'stty -a' should list
+		your settings.
+	On any remote VMS systems, do 'set terminal /eightbit'.
+	Make sure your terminal program or telnet client is not filtering
+		8-bit data.  Note: Procomm for DOS has a confusing "Use 7 bit
+		or 8 bit ANSI" setting -- this has to do with ANSI sequences.
+		If set to 8 bit, some 8-bit character sequences, including
+		those passed by Lynx as well as those which are for your
+		terminal type (vt100, etc.) will be processed by Procomm as
+		ANSI screen control codes and will most likely result in a
+		garbled display.  Set it to 7 bit.
+	If going through a dialup terminal server, you may have to set the 
+		terminal server itself to pass 8 bit data.  How to do this
+		varies with the make of the server, and in some cases only a
+		system admin in charge of the box will have the authorization
+		to do that.
+	SLIP or PPP connections should already be 8-bit clean.
+
+
+Displaying true ISO-8859-1 under MS-DOS
+=======================================
+
+Since there are apparently no ISO-8859-1 EGA/VGA soft fonts (I looked) and
+since such fonts tend to cause problems when switching video modes, the
+next-best alternative is to use MS-DOS 5/6's international codepage
+feature.  I'm fuzzy on the why-how-wherefores, but it works great if you
+do it like this:
+
+        In your config.sys, add a line to make codepage switching possible:
+                devicehigh=c:\dos\display.sys con=(ega,437,1)
+
+	This loads the display driver.  437 is the codepage supported by my 
+	hardware.  Check your MS-DOS documentation and help screens for 
+	more info on what these things do.
+
+        In your autoexec.bat, add lines to load the IBM OEM ISO-Latin1 
+	character set from the ega.cpi collection and switch over to it:
+                mode con cp prep=((850) c:\dos\ega.cpi)
+                mode con cp sel=850
+
+Note that the codepage 850 in ega.cpi is IBM/Microsoft's ISO-Latin1,
+which, although it contains all the right characters, does *not* map them
+to the standard numbers as per ISO-8859-1, and it still preserves some of
+the pseudo-graphic characters.  If you run Procomm for DOS (or just about
+any other application), you'll see that some of the line-drawing
+characters in the title screen and on the dialing/help menus appear as
+international letters.  There's no way around this. 
+
+Once you are using codepage 850, you've still got the problem of the 
+characters being mapped to the wrong numbers.  For example, if Lynx sends 
+your terminal a code for a middle dot, you'll see something other than a 
+middle dot -- maybe an upper-left box-corner (regular codepage) or an A with 
+an accent mark (codepage 850).  There are two possible remedies:
+
+	1. If using a terminal program like Procomm, use its Translation Table
+	to process incoming characters.  On my slow 286, even with a speedy
+	screen driver (nansi or nnansi.sys) installed, this results in a
+	slight (20%) slowdown in the screen write time.  If you still want to
+	give it a try, I found a set of translation tables for ISO-8859-1 ->
+	IBM CP 850 for Procomm and Qmodem in the SimTel archives at:
+		http://oak.oakland.edu:8080/SimTel/msdos/modem/xlate.zip
+
+	2. Have Lynx do the work for you.  I used the information in xlate.zip
+	to create a Lynx character set for codepage 850.  Select it via the
+	'o'ptions menu when running Lynx, and save the choice in your .lynxrc
+	file.
+
+There is another option.  There are actually ISO-8859 compliant codepages
+available at:
+		ftp://ftp.informatik.uni-erlangen.de/pub/doc/ISO/charsets/
+		ftp://nic.funet.fi/pub/doc/charsets/
+
+as part of Kosta Kosis' free ISOCP collection.  You have to use a custom
+keyboard driver (supplied) and you may find that sacrificing all of the
+pseudo-graphic characters may make your terminal program (and many other
+DOS applications) look rather ugly, but at least no translations will be
+necessary -- ISO-8859-[1,2] data received will appear on screen exactly as
+it should with the Lynx "ISO Latin" character sets selected. 

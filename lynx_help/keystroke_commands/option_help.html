@@ -1,0 +1,164 @@
+<!DOCTYPE html public "-//IETF//DTD HTML 3.0//EN">
+<HTML>
+<HEAD>
+<TITLE>Options Screen Help</TITLE>
+<LINK rev="made" href="mailto:lynx-dev@sig.net">
+</HEAD>
+<BODY>
+<h1>+++ Options Screen Help +++</h1>
+<PRE>
+        The Options Screen allows you to set and
+        modify many of Lynx's features. The following
+        options may be set.
+
+     Editor             -  If non-empty it defines the editor to spawn
+                           when editing a local file or sending mail.
+			   Any valid text editor may be entered here.
+
+     DISPLAY variable   -  If non-empty it specifies your <A HREF="xterm_help.html">X terminal</A>
+                           display address.
+
+     Bookmark file      -  If non-empty it specifies the name of your
+                           '<A HREF="bookmark_help.html">Bookmark file</A>'.  If the filename is not
+                           absolute, then the path begins from your
+		           home directory.
+
+     Personal Mail      -  You may set your mail address here so that
+     Address               when mailing messages to other people or
+                           mailing files to yourself, your email address
+                           can be automatically filled in.  You email
+                           address will also be sent to HTTP servers in
+                           a from: field.
+
+     Searching type     -  If set to 'case sensitive', user searches
+                           invoked by the '/' command will be case 
+                           sensitive substring searches.  The
+                           default is 'Case Insensitive' substring
+                           searches
+
+     Display Character  -  This option allows you to set up the default
+     set                   character set for your specific terminal.
+                           The character set provides a mapping of 8-bit
+                           ISO Latin character entities and/or Asian (CJK)
+                           characters into viewable characters and should
+                           be set in relation to your terminal's character
+                           set if you will be viewing such characters with
+                           Lynx.  You must have the selected character set
+                           installed on your terminal.
+
+     Raw 8-bit or CJK   -  Toggles whether 8-bit characters are assumed to
+     mode                  correspond with the selected character set and
+                           therefore are processed without translation via
+                           the ISO Latin 1 conversion tables.  Should be
+	                   ON by default when the selected character set is
+                           ISO Latin 1, or is one of the Asian (CJK) sets
+                           and the 8-bit characters are Kanji multibytes.
+                           Should be OFF for the other character sets, but
+                           can be turned ON when there's a match, e.g., the
+                           document's charset is ISO-8859-2 and ISO Latin 2
+                           has been selected.  Should be OFF when an Asian
+                           (CJK) set is selected but the document is
+                           ISO-8850-1.  The setting also can be toggled via
+                           the RAW_TOGGLE command, normally mapped to '@',
+                           and at startup via the -raw switch.
+
+     Preferred Document -  The language you prefer if multi-language files are
+     Language              available from servers.  Use MIME abbreviations,
+                           e.g., en for English, fr for French, etc.  Can be
+                           a comma-separated list in descending order of
+                           preferences.
+	
+     Preferred Document -  The character set you prefer if sets in addition
+     Charset               to ISO-8859-1 and US-ASCII are available from
+                           servers.  Use MIME notation (e.g., ISO-8859-2)
+                           and do not include ISO-8859-1 or US-ASCII, since
+                           those values are always assumed by default.  Can
+                           be a comma-separated list in descending order of
+                           preferences.
+	
+     VI keys           -   If set to 'ON' then the lowercase h, j, k, and l,
+                           keys will be mapped to left-arrow, down-arrow,
+			   up-arrow, and right-arrow, respectively.  The
+                           uppercase H, J, K, and L keys remain mapped to
+                           their configured bindings (normally HELP, JUMP,
+                           KEYMAP, and LIST, respectively).
+
+     Emacs keys        -   If set to 'ON' then the CTRL-P, CTRL-N, CTRL-F, 
+                           and CTRL-B keys will be mapped to up-arrow,
+                           down-arrow, right-arrow,  and left-arrow,
+                           respectively.  Otherwise, they remain mapped
+                           to their configured bindings (normally UP_TWO
+                           lines, DOWN_TWO lines, NEXT_PAGE, and PREV_PAGE,
+                           respectively).
+
+     Keypad mode  -        This option gives the choice between navigating 
+                           with the keypad (as arrows; see Lynx Navigation)
+                           and having every link numbered (numbered links)
+			   so that the links may be selected by numbers
+			   instead of moving to them with the arrow keys.
+
+     Line edit style   -   This option allows you to set alternate key
+                           bindings for the built-in line editor, if your
+                           system administrator has installed alternates.
+                           Otherwise, Lynx uses the <A HREF="edit_help.html">Default Binding</A>.
+
+     List directory    -   Applies to Directory Editing.  Files and
+     style                 directories can be presented in the following
+                           ways:
+                            Mixed style
+                              Files and directories are listed together in
+                              alphabetical order.
+                            Directories first
+                              Files and directories are separated into two
+                              alphabetical lists.  Directories are listed
+                              first.
+                            Files first
+                              Files and directories are separated into two
+                              alphabetical lists.  Files are listed first.
+
+     Show dot files    -   If display/creation of hidden (dot)
+                           files/directories is enabled, you can turn
+                           the feature on or off via this setting.
+
+     User Mode         -   Beginner 
+                              Shows two extra lines of help at the bottom 
+                              of the screen
+                           Intermediate (normal mode) 
+                              The "normal" statusline messages appear. 
+                           Advanced 
+                              The URL is shown on the statusline. 
+
+      User Agent        -  The header string which Lynx sends to servers
+                           to indicate the User-Agent is displayed here.
+                           Changes may be disallowed via the -restrictions
+                           switch.  Otherwise, the header can be changed
+                           temporarily to a string such as L_y_n_x/2.6 for
+                           access to sites which discriminate against Lynx
+                           based on checks for the presence of "Lynx" in the
+                           header. If changed during a Lynx session, the
+                           default User-Agent header can be restored by
+                           deleting the modified string in the Options Menu.
+                           Whenever the User-Agent header is changed, the
+                           current document is reloaded, with the no-cache
+                           flags set, on exit from the Options Menu.  Changes
+                           of the header are not saved in the RC file.
+                           NOTE that Netscape Communications Corp.  has
+                           claimed that false transmissions of "Mozilla" as
+                           the are a copyright infringement, which will be
+                           prosecuted.  DO NOT misrepresent Lynx as Mozilla.
+                           The Options Menu issues a warning about possible
+                           copyright infringement whenever the header is
+                           changed to one which does not include "Lynx" or
+                           "lynx".
+
+     Local execution   -   If set to 'ON', Lynx will locally execute
+     links                 commands contained inside of links.  This
+                           can be HIGHLY DANGEROUS so it is recommended
+                           that they remain 'ALWAYS OFF' unless
+                           otherwise set by your system administrator.
+                           This option may not be available on most
+                           versions of Lynx.
+
+</PRE>
+</BODY>
+</HTML>
