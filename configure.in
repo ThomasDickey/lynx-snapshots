@@ -111,10 +111,10 @@ INTLDIR_MAKE=
 MSG_DIR_MAKE=
 SUB_MAKEFILE=
 if test "$USE_INCLUDED_LIBINTL" = yes ; then
-	SUB_MAKEFILE="intl/makefile po/makefile.in"
+	SUB_MAKEFILE="intl/makefile po/makefile.in:po/makefile.inn"
 elif test "$USE_NLS" = yes ; then
 	AC_CHECK_HEADERS(libintl.h)
-	SUB_MAKEFILE="po/makefile.in"
+	SUB_MAKEFILE="po/makefile.in:po/makefile.inn"
 	INTLDIR_MAKE="#"
 else
 	INTLDIR_MAKE="#"
@@ -453,6 +453,8 @@ CF_LOCALE
 CF_NGROUPS
 CF_SYS_ERRLIST
 CF_UTMP
+
+CF_EBCDIC
 
 ### These tests must be run after establishing the curses library.
 if test $cf_cv_screen != slang ; then

@@ -403,7 +403,7 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 {
     HTFormat format_in = WWW_HTML;
     HTStream *target = NULL;
-    char buf[1024];
+    char *buf = NULL;
     LYMapElement *new = NULL;
     LYImageMap *theMap = NULL;
     char *MapTitle = NULL;
@@ -511,9 +511,10 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 			   sink, anAnchor);
 
     if (!target || target == NULL) {
-	sprintf(buf, CANNOT_CONVERT_I_TO_O,
+	HTSprintf(&buf, CANNOT_CONVERT_I_TO_O,
 		HTAtom_name(format_in), HTAtom_name(format_out));
 	HTAlert(buf);
+	FREE(buf);
 	return(HT_NOT_LOADED);
     }
 
@@ -533,9 +534,9 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	LYEntify(&MapTitle, TRUE);
     }
 
-    sprintf(buf, "<html>\n<head>\n");
+    HTSprintf0(&buf, "<html>\n<head>\n");
     (*target->isa->put_block)(target, buf, strlen(buf));
-    sprintf(buf, "<META %s content=\"text/html;charset=%s\">\n",
+    HTSprintf0(&buf, "<META %s content=\"text/html;charset=%s\">\n",
 		"http-equiv=\"content-type\"",
 		LYCharSet_UC[current_char_set].MIMEname);
     (*target->isa->put_block)(target, buf, strlen(buf));
@@ -545,20 +546,20 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	 *  they converted to current_char_set.
 	 *  That is why we insist on META charset for this page.
 	 */
-    sprintf(buf, "<title>%s</title>\n", MapTitle);
+    HTSprintf0(&buf, "<title>%s</title>\n", MapTitle);
     (*target->isa->put_block)(target, buf, strlen(buf));
-    sprintf(buf, "</head>\n<body>\n");
+    HTSprintf0(&buf, "</head>\n<body>\n");
     (*target->isa->put_block)(target, buf, strlen(buf));
 
-    sprintf(buf,"<h1><em>%s</em></h1>\n", MapTitle);
+    HTSprintf0(&buf,"<h1><em>%s</em></h1>\n", MapTitle);
     (*target->isa->put_block)(target, buf, strlen(buf));
 
     StrAllocCopy(MapAddress, address);
     LYEntify(&MapAddress, FALSE);
-    sprintf(buf,"<h2><em>MAP:</em>&nbsp;%s</h2>\n", MapAddress);
+    HTSprintf0(&buf,"<h2><em>MAP:</em>&nbsp;%s</h2>\n", MapAddress);
     (*target->isa->put_block)(target, buf, strlen(buf));
 
-    sprintf(buf, "<%s compact>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
+    HTSprintf0(&buf, "<%s compact>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
 				    "ol" : "ul"));
     (*target->isa->put_block)(target, buf, strlen(buf));
     cur = theMap->elements;
@@ -578,13 +579,16 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	(*target->isa->put_block)(target, MapTitle, strlen(MapTitle));
 	(*target->isa->put_block)(target, "</a>\n", 5);
     }
-    sprintf(buf,"</%s>\n</body>\n</html>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
-				     "ol" : "ul"));
+    HTSprintf0(&buf, "</%s>\n</body>\n</html>\n",
+		    ((keypad_mode == NUMBERS_AS_ARROWS)
+		    ? "ol"
+		    : "ul"));
     (*target->isa->put_block)(target, buf, strlen(buf));
 
     (*target->isa->_free)(target);
     FREE(MapAddress);
     FREE(MapTitle);
+    FREE(buf);
     return(HT_LOADED);
 }
 

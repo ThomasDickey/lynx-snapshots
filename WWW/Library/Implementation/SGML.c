@@ -28,6 +28,7 @@
 #include <HTChunk.h>
 
 #include <LYCharSets.h>
+#include <LYCharVals.h>  /* S/390 -- gil -- 0635 */
 #include <LYStrings.h>
 #include <LYLeaks.h>
 
@@ -332,12 +333,12 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 	HTStream *,	context,
 	UCode_t,	code)
 {
-    if (code == 160) {
+    if (code == CH_NBSP) {  /* S/390 -- gil -- 0657 */
 	/*
 	**  Use Lynx special character for nbsp.
 	*/
 	PUTC(HT_NON_BREAK_SPACE);
-    } else  if (code == 173) {
+    } else  if (code == CH_SHY) {
 	/*
 	**  Use Lynx special character for shy.
 	*/
@@ -419,6 +420,7 @@ PRIVATE void handle_entity ARGS2(
 	**  Seek a translation from the chartrans tables.
 	*/
 	if ((uck = UCTransUniChar(code, context->outUCLYhndl)) >= 32 &&
+/* =============== work in ASCII below here ===============  S/390 -- gil -- 0672 */
 	    uck < 256 &&
 	    (uck < 127 ||
 	     uck >= LYlowest_eightbit[context->outUCLYhndl])) {
@@ -453,6 +455,7 @@ PRIVATE void handle_entity ARGS2(
 	    FoundEntity = TRUE;
 	    return;
 	}
+/* =============== work in ASCII above here ===============  S/390 -- gil -- 0682 */
 	/*
 	**  Ignore zwnj (8204) and zwj (8205), if we get to here.
 	**  Note that zwnj may have been handled as <WBR>
@@ -478,7 +481,7 @@ PRIVATE void handle_entity ARGS2(
     /*
     **	If entity string not found, display as text.
     */
-    CTRACE(tfp, "SGML: Unknown entity '%s'\n", s);
+    CTRACE(tfp, "SGML: Unknown entity '%s' %d %d\n", s, code, uck); /* S/390 -- gil -- 0695 */
     PUTC('&');
     for (p = s; *p; p++) {
 	PUTC(*p);
@@ -1117,12 +1120,12 @@ PRIVATE void SGML_character ARGS2(
 	**  Incomplete characters silently ignored.
 	**  From Linux kernel's console.c. - KW
 	*/
-	if ((unsigned char)c > 127) {
+	if (TOASCII((unsigned char)c) > 127) { /* S/390 -- gil -- 0710 */
 	    /*
 	    **	We have an octet from a multibyte character. - FM
 	    */
-	    if (context->utf_count > 0 && (c & 0xc0) == 0x80) {
-		context->utf_char = (context->utf_char << 6) | (c & 0x3f);
+	    if (context->utf_count > 0 && (TOASCII(c) & 0xc0) == 0x80) {
+		context->utf_char = (context->utf_char << 6) | (TOASCII(c) & 0x3f);
 		context->utf_count--;
 		*(context->utf_buf_p) = c;
 		(context->utf_buf_p)++;
@@ -1188,7 +1191,7 @@ PRIVATE void SGML_character ARGS2(
 	    *(context->utf_buf_p) = '\0';
 		    /*	goto top;  */
 	}
-    }
+    } /* end of context->T.decode_utf8  S/390 -- gil -- 0726 */
 
 #ifdef NOTDEFINED
     /*
@@ -1206,8 +1209,8 @@ PRIVATE void SGML_character ARGS2(
     **	to Unicode, try that now. - FM
     */
     if (context->T.trans_to_uni &&
-	((unsign_c >= LYlowest_eightbit[context->inUCLYhndl]) ||
-	 (unsign_c < 32 && unsign_c != 0 &&
+	((TOASCII(unsign_c) >= LYlowest_eightbit[context->inUCLYhndl]) ||  /* S/390 -- gil -- 0744 */
+	 (unsign_c < ' ' && unsign_c != 0 &&
 	  context->T.trans_C0_to_uni))) {
 	/*
 	**  Convert the octet to Unicode. - FM
@@ -1220,13 +1223,13 @@ PRIVATE void SGML_character ARGS2(
 	    }
 	}
 	goto top1;
-    } else if (unsign_c < 32 && unsign_c != 0 &&
+    } else if (unsign_c < ' ' && unsign_c != 0 &&  /* S/390 -- gil -- 0768 */
 	       context->T.trans_C0_to_uni) {
 	/*
 	**  This else if may be too ugly to keep. - KW
 	*/
 	if (context->T.trans_from_uni &&
-	    (((clong = UCTransToUni(c, context->inUCLYhndl)) >= 32) ||
+	    (((clong = UCTransToUni(c, context->inUCLYhndl)) >= ' ') ||
 	     (context->T.transp &&
 	      (clong = UCTransToUni(c, context->inUCLYhndl)) > 0))) {
 	    saved_char_in = c;
@@ -1262,7 +1265,7 @@ PRIVATE void SGML_character ARGS2(
 	    }
 	    goto top0a;
 	} /*  Next line end of ugly stuff for C0. - KW */
-    } else {
+    } else {  /* end of context->T.trans_to_uni  S/390 -- gil -- 0791 */
 	goto top0a;
     }
 
@@ -1309,8 +1312,11 @@ top1:
     **	Ignore low ISO 646 7-bit control characters
     **	if HTCJK is not set. - FM
     */
-    if (unsign_c < 32 &&
-	c != 9 && c != 10 && c != 13 &&
+    /*
+    ** Works for both ASCII and EBCDIC. -- gil
+    */  /* S/390 -- gil -- 0811 */
+    if (TOASCII(unsign_c) < 32 &&
+	c != '\t' && c != '\n' && c != '\r' &&
 	HTCJK == NOCJK)
 	return;
 
@@ -1320,7 +1326,7 @@ top1:
     */
 #define PASSHICTRL (context->T.transp || \
 		    unsign_c >= LYlowest_eightbit[context->inUCLYhndl])
-    if (c == 127 &&
+    if (TOASCII(c) == 127 &&  /* S/390 -- gil -- 0830 */
 	!(PASSHICTRL || HTCJK != NOCJK))
 	return;
 
@@ -1328,7 +1334,7 @@ top1:
     **	Ignore 8-bit control characters 128 - 159 if
     **	neither HTPassHighCtrlRaw nor HTCJK is set. - FM
     */
-    if (unsign_c > 127 && unsign_c < 160 &&
+    if (TOASCII(unsign_c) > 127 && TOASCII(unsign_c) < 160 &&  /* S/390 -- gil -- 0847 */
 	!(PASSHICTRL || HTCJK != NOCJK))
 	return;
 
@@ -1353,7 +1359,7 @@ top1:
 	break;
 
     case S_text:
-	if (HTCJK != NOCJK && (c & 0200) != 0) {
+	if (HTCJK != NOCJK && (TOASCII(c) & 0200) != 0) {  /* S/390 -- gil -- 0864 */
 	    /*
 	    **	Setting up for Kanji multibyte handling (based on
 	    **	Takuya ASADA's (asada@three-a.co.jp) CJK Lynx).
@@ -1367,7 +1373,7 @@ top1:
 	    context->state = S_in_kanji;
 	    PUTC(c);
 	    break;
-	} else if (HTCJK != NOCJK && c == '\033') {
+	} else if (HTCJK != NOCJK && TOASCII(c) == '\033') {  /* S/390 -- gil -- 0881 */
 	    /*
 	    **	Setting up for CJK escape sequence handling (based on
 	    **	Takuya ASADA's (asada@three-a.co.jp) CJK Lynx). - FM
@@ -1376,7 +1382,7 @@ top1:
 	    PUTC(c);
 	    break;
 	}
-	if (c == '&' && unsign_c < 127	&&
+	if (c == '&' && TOASCII(unsign_c) < 127  &&  /* S/390 -- gil -- 0898 */
 	    (!context->element_stack ||
 	     (context->element_stack->tag  &&
 	      (context->element_stack->tag->contents == SGML_MIXED ||
@@ -1387,7 +1393,7 @@ top1:
 	    */
 	    string->size = 0;
 	    context->state = S_ero;
-	} else if (c == '<' && unsign_c < 127) {
+	} else if (c == '<' && TOASCII(unsign_c) < 127) {  /* S/390 -- gil -- 0915 */
 	    /*
 	    **	Setting up for possible tag. - FM
 	    */
@@ -1402,14 +1408,14 @@ top1:
 	**  Convert 160 (nbsp) to Lynx special character if
 	**  neither HTPassHighCtrlRaw nor HTCJK is set. - FM
 	*/
-	} else if (unsign_c == 160 &&
+	} else if (unsign_c == CH_NBSP &&  /* S/390 -- gil -- 0932 */
 		   !(PASS8859SPECL || HTCJK != NOCJK)) {
 	    PUTC(HT_NON_BREAK_SPACE);
 	/*
 	**  Convert 173 (shy) to Lynx special character if
 	**  neither HTPassHighCtrlRaw nor HTCJK is set. - FM
 	*/
-	} else if (unsign_c == 173 &&
+	} else if (unsign_c == CH_SHY &&  /* S/390 -- gil -- 0949 */
 		   !(PASS8859SPECL || HTCJK != NOCJK)) {
 	    PUTC(LY_SOFT_HYPHEN);
 	/*
@@ -1427,9 +1433,9 @@ top1:
 /******************************************************************
  *   I. LATIN-1 OR UCS2  TO  DISPLAY CHARSET
  ******************************************************************/
-	} else if ((chk = (context->T.trans_from_uni && unsign_c >= 160)) &&
+	} else if ((chk = (context->T.trans_from_uni && TOASCII(unsign_c) >= 160)) &&  /* S/390 -- gil -- 0968 */
 		   (uck = UCTransUniChar(unsign_c,
-					 context->outUCLYhndl)) >= 32 &&
+					 context->outUCLYhndl)) >= ' ' &&
 		   uck < 256) {
 	    CTRACE(tfp, "UCTransUniChar returned 0x%.2lX:'%c'.\n",
 			uck, FROMASCII((char)uck));
@@ -1491,7 +1497,7 @@ top1:
 	**  If we get to here and have an ASCII char,
 	**  pass the character. - KW
 	*/
-	} else if (unsign_c < 127 && unsign_c > 0) {
+	} else if (TOASCII(unsign_c) < 127 && unsign_c > 0) {  /* S/390 -- gil -- 0987 */
 	    PUTC(c);
 	/*
 	**  If we get to here, and should have translated,
@@ -1523,7 +1529,7 @@ top1:
 	**  If we don't actually want the character,
 	**  make it safe and output that now. - FM
 	*/
-	} else if ((unsigned char)c <
+	} else if (TOASCII((unsigned char)c) <   /* S/390 -- gil -- 0997 */
 			LYlowest_eightbit[context->outUCLYhndl] ||
 		   (context->T.trans_from_uni && !HTPassEightBitRaw)) {
 #ifdef NOTUSED_FOTEMODS
@@ -1537,11 +1543,11 @@ top1:
 			UCGetLYhndl_byMIME("us-ascii"))) &&
 		(uck = UCTransUniChar(unsign_c,
 				      UCGetLYhndl_byMIME("us-ascii")))
-				      >= 32 && uck < 127) {
+				      >= ' ' && TOASCII(uck) < 127) {  /* S/390 -- gil -- 1008 */
 		/*
 		**  Got an ASCII character (yippey). - FM
 		*/
-		PUTC(((char)(uck & 0xff)));
+		PUTC(((char)FROMASCII(TOASCII(uck) & 0xff)));
 	    } else if ((chk && uck == -4) &&
 		       (uck = UCTransUniCharStr(replace_buf,
 						60, clong,
@@ -1557,8 +1563,9 @@ top1:
 		/*
 		**  Out of luck, so use the UHHH notation (ugh). - FM
 		*/
+			/* S/390 -- gil -- 1018 */
 			/* do not print UHHH for now
-		sprintf(replace_buf, "U%.2lX", unsign_c);
+		sprintf(replace_buf, "U%.2lX", TOASCII(unsign_c));
 		for (p = replace_buf; *p; p++) {
 		    PUTC(*p);
 		}
@@ -1624,7 +1631,7 @@ top1:
     **	Handle possible named entity.
     */
     case S_entity:
-	if (unsign_c < 127 && (string->size ?
+	if (TOASCII(unsign_c) < 127 && (string->size ?  /* S/390 -- gil -- 1029 */
 		  isalnum((unsigned char)c) : isalpha((unsigned char)c))) {
 	    /*
 	    **	Accept valid ASCII character. - FM
@@ -1643,6 +1650,8 @@ top1:
 	    **	Terminate entity name and try to handle it. - FM
 	    */
 	    HTChunkTerminate(string);
+	    /* S/390 -- gil -- 1039 */
+	    /* CTRACE(tfp, "%s: %d: %s\n", __FILE__, __LINE__, string->data); */
 	    if (!strcmp(string->data, "zwnj") &&
 		(!context->element_stack ||
 		 (context->element_stack->tag  &&
@@ -1688,10 +1697,10 @@ top1:
     **	Check for a numeric entity.
     */
     case S_cro:
-	if (unsign_c < 127 && TOLOWER((unsigned char)c) == 'x') {
+	if (TOASCII(unsign_c) < 127 && TOLOWER((unsigned char)c) == 'x') {  /* S/390 -- gil -- 1060 */
 	    context->isHex = TRUE;
 	    context->state = S_incro;
-	} else if (unsign_c < 127 && isdigit((unsigned char)c)) {
+	} else if (TOASCII(unsign_c) < 127 && isdigit((unsigned char)c)) {
 	    /*
 	    **	Accept only valid ASCII digits. - FM
 	    */
@@ -1714,7 +1723,9 @@ top1:
     **	Handle a numeric entity.
     */
     case S_incro:
-	if ((unsign_c < 127) &&
+	/* S/390 -- gil -- 1075 */ /* CTRACE(tfp, "%s: %d: numeric %d %d\n",
+			    __FILE__, __LINE__, unsign_c, c); */
+	if ((TOASCII(unsign_c) < 127) &&
 	    (context->isHex ? isxdigit((unsigned char)c) :
 			      isdigit((unsigned char)c))) {
 	    /*
@@ -1741,6 +1752,7 @@ top1:
 	    HTChunkTerminate(string);
 	    if ((context->isHex ? sscanf(string->data, "%lx", &code) :
 				  sscanf(string->data, "%ld", &code)) == 1) {
+/* =============== work in ASCII below here ===============  S/390 -- gil -- 1092 */
 		if ((code == 1) ||
 		    (code > 127 && code < 156)) {
 		    /*
@@ -1963,11 +1975,12 @@ top1:
 				   UCGetLYhndl_byMIME("us-ascii"))) &&
 			   (uck = UCTransUniChar(code,
 				   UCGetLYhndl_byMIME("us-ascii")))
-				  >= 32 && uck < 127) {
+				  >= ' ' && uck < 127) {
 		    /*
 		    **	Got an ASCII character (yippey). - FM
 		    */
-		    PUTC(((char)(uck & 0xff)));
+		    PUTC(((char)FROMASCII(uck & 0xff)));
+/* =============== work in ASCII above here ===============  S/390 -- gil -- 1118 */
 		} else if ((chk && uck == -4) &&
 			   (uck = UCTransUniCharStr(replace_buf,
 						    60, code,
@@ -2016,12 +2029,12 @@ top1:
 		**  - FM
 		*/
 		} else if ((code > 255) ||
-			   (code < 32 &&
-			    code != 9 && code != 10 && code != 13 &&
+			   (code < ' ' &&  /* S/390 -- gil -- 1140 */
+			    code != '\t' && code != '\n' && code != '\r' &&
 			    HTCJK == NOCJK) ||
-			   (code == 127 &&
+			   (TOASCII(code) == 127 &&
 			    !(HTPassHighCtrlRaw || HTCJK != NOCJK)) ||
-			   (code > 127 && code < 160 &&
+			   (TOASCII(code) > 127 && code < 160 &&
 			    !HTPassHighCtrlNum)) {
 			/*
 			**  Unhandled or illegal value.  Recover the
@@ -2041,7 +2054,7 @@ top1:
 			context->isHex = FALSE;
 			context->state = S_text;
 			goto top1;
-		} else if (code < 161 ||
+		} else if (TOASCII(code) < 161 ||  /* S/390 -- gil -- 1162 */
 			   HTPassEightBitNum ||
 			   IncludesLatin1Enc) {
 		    /*
@@ -2134,7 +2147,7 @@ top1:
     **	Tag
     */
     case S_tag: 				/* new tag */
-	if (unsign_c < 127 && (string->size ?
+	if (TOASCII(unsign_c) < 127 && (string->size ?  /* S/390 -- gil -- 1179 */
 		  isalnum((unsigned char)c) : isalpha((unsigned char)c))) {
 	    /*
 	    **	Add valid ASCII character. - FM
@@ -2152,7 +2165,7 @@ top1:
 	    HTChunkPutc(string, c);
 	    break;
 	} else if (!string->size &&
-		   (unsign_c <= 160 &&
+		   (TOASCII(unsign_c) <= 160 &&  /* S/390 -- gil -- 1196 */
 		    (c != '/' && c != '?' && c != '_' && c != ':'))) {
 	    /*
 	    **	'<' must be followed by an ASCII letter to be a valid
@@ -2616,7 +2629,7 @@ top1:
 	    handle_attribute_value(context, string->data);
 	    string->size = 0;
 	    context->state = S_tag_gap;
-	} else if (c == '\033') {
+	} else if (TOASCII(c) == '\033') {  /* S/390 -- gil -- 1213 */
 	    /*
 	    **	Setting up for possible single quotes in CJK escape
 	    **	sequences. - Takuya ASADA (asada@three-a.co.jp)
@@ -2657,7 +2670,7 @@ top1:
 	    context->state = S_tag_gap;
 	    if (c == '>')	/* We emulated the Netscape bug, so we go  */
 		goto top1;	/* back and treat it as the tag terminator */
-	} else if (c == '\033') {
+	} else if (TOASCII(c) == '\033') {  /* S/390 -- gil -- 1230 */
 	    /*
 	    **	Setting up for possible double quotes in CJK escape
 	    **	sequences. - Takuya ASADA (asada@three-a.co.jp)
@@ -2689,7 +2702,7 @@ top1:
 	break;
 
     case S_end: 				/* </ */
-	if (unsign_c < 127 && isalnum((unsigned char)c)) {
+	if (TOASCII(unsign_c) < 127 && isalnum((unsigned char)c)) {  /* S/390 -- gil -- 1247 */
 	    HTChunkPutc(string, c);
 	} else {				/* End of end tag name */
 	    HTTag * t = 0;
@@ -2881,7 +2894,7 @@ top1:
 	break;
 
     case S_nonascii_text: /* Expecting CJK ESC after non-ASCII text. */
-	if (c == '\033') {
+	if (TOASCII(c) == '\033') {  /* S/390 -- gil -- 1264 */
 	    context->state = S_esc;
 	}
 	PUTC(c);
@@ -2928,7 +2941,7 @@ top1:
 	break;
 
     case S_nonascii_text_sq: /* Expecting CJK ESC after non-ASCII text. */
-	if (c == '\033') {
+	if (TOASCII(c) == '\033') {  /* S/390 -- gil -- 1281 */
 	    context->state = S_esc_sq;
 	}
 	HTChunkPutc(string, c);
@@ -2975,7 +2988,7 @@ top1:
 	break;
 
     case S_nonascii_text_dq: /* Expecting CJK ESC after non-ASCII text. */
-	if (c == '\033') {
+	if (TOASCII(c) == '\033') {  /* S/390 -- gil -- 1298 */
 	    context->state = S_esc_dq;
 	}
 	HTChunkPutc(string, c);

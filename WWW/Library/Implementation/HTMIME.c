@@ -190,7 +190,17 @@ PRIVATE void HTMIME_put_character ARGS2(
     **	See NetToText for an implementation which preserves single CR or LF.
     */
     if (me->net_ascii) {
+	/*
+	** <sigh> This is evidence that at one time, this code supported
+	** local character sets other than ASCII.  But there is so much
+	** code in HTTP.c that depends on line_buffer's having been
+	** translated to local character set that I needed to put the
+	** FROMASCII translation there, leaving this translation purely
+	** destructive.  -- gil
+	*/  /* S/390 -- gil -- 0118 */
+#ifndef   NOT_ASCII
 	c = FROMASCII(c);
+#endif /* NOT_ASCII */
 	if (c == CR)
 	    return;
 	else if (c == LF)
@@ -1150,11 +1160,11 @@ PRIVATE void HTMIME_put_character ARGS2(
 	/* Fall through to store first character */
 
     case miGET_VALUE:
-	if (WHITE(c) && c != 32) {			/* End of field */
+    	if (WHITE(c) && c != ' ') {			/* End of field */
 	    char *cp;
 	    *me->value_pointer = '\0';
 	    cp = (me->value_pointer - 1);
-	    while ((cp >= me->value) && *cp == 32)
+	    while ((cp >= me->value) && *cp == ' ')  /* S/390 -- gil -- 0146 */
 		/*
 		**  Trim trailing spaces.
 		*/
@@ -1833,7 +1843,8 @@ PUBLIC HTStream* HTNetMIME ARGS3(
 #ifdef ESC
 #undef ESC
 #endif /* ESC */
-#define ESC	'\033'
+#include "LYCharVals.h"  /* S/390 -- gil -- 0163 */
+#define ESC	CH_ESC
 
 PRIVATE char HTmm64[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=" ;

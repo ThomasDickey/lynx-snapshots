@@ -349,6 +349,13 @@ case $basic_machine in
 		basic_machine=i370-ibm
 		os=-mvs
 		;;
+	s390 | s390-ibm*) 
+# OS/390 support after: 
+#  Linkname: Mortice Kern Systems (MKS) Inc. - OS/390 OpenEdition -- GNU Utilities Downloads 
+#       URL: http://www.mks.com/s390/gnu/download.htm#autoconf 
+		basic_machine=s390-ibm  #  /* S/390 -- gil -- 1419 */ 
+		os=-os390 
+		;; 
 # I'm not sure what "Sysv32" means.  Should this be sysv3.2?
 	i[34567]86v32)
 		basic_machine=`echo $1 | sed -e 's/86.*/86-pc/'`
@@ -707,7 +714,8 @@ case $os in
 	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -solaris* | -sym* \
 	      | -amigaos* | -amigados* | -msdos* | -newsos* | -unicos* | -aof* \
 	      | -aos* \
-	      | -nindy* | -vxsim* | -vxworks* | -ebmon* | -hms* | -mvs* \
+	      | -nindy* | -vxsim* | -vxworks* | -ebmon* \
+	      | -hms* | -mvs* | -os390* \
 	      | -clix* | -riscos* | -uniplus* | -iris* | -rtu* | -xenix* \
 	      | -hiux* | -386bsd* | -netbsd* | -openbsd* | -freebsd* | -riscix* \
 	      | -lynxos* | -bosx* | -nextstep* | -cxux* | -aout* | -elf* \
@@ -826,6 +834,9 @@ case $basic_machine in
 		;;
 	sparc-* | *-sun)
 		os=-sunos4.1.1
+		;;
+	s390-ibm)
+		os=-os390  #  /* S/390 -- gil -- 1451 */
 		;;
 	*-ibm)
 		os=-aix

@@ -1,4 +1,4 @@
-/*                                                                 String handling for libwww
+/*                                                   String handling for libwww
                                          STRINGS
                                              
    Case-independent string comparison and allocations with copies etc
@@ -51,11 +51,16 @@ extern char * HTNextField PARAMS ((char** pstr));
 
 /* A more general parser - kw */
 extern char * HTNextTok PARAMS((char ** pstr,
-		      const char * delims, const char * bracks, char * found));
+		      CONST char * delims, CONST char * bracks, char * found));
 
+#if USE_STDARG_H
+extern char * HTSprintf PARAMS((char ** pstr, CONST char * fmt, ...))
+			GCC_PRINTFLIKE(2,3);
+extern char * HTSprintf0 PARAMS((char ** pstr, CONST char * fmt, ...))
+			 GCC_PRINTFLIKE(2,3);
+#else
+extern char * HTSprintf PARAMS((char ** pstr, CONST char * fmt, va_alist));
+extern char * HTSprintf0 PARAMS((char ** pstr, CONST char * fmt, va_alist));
 #endif
-/*
 
-   end
-   
-    */
+#endif /* HTSTRING_H */

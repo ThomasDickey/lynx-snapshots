@@ -1,13 +1,34 @@
 Changes since Lynx 2.8.1 release
 ================================================================================
 
-1998-11-10
+1998-11-16 (2.8.2dev.3)
+* misc documentation updates for the gettext/internationalization - LP
+* rename po/makefile.in.in to po/makefile.inn, and modify distclean rule to
+  remove the remaining generated files - TD
+* add preliminary changes from: pg@sweng.stortek.com to support port to OS/390,
+  some ifdef'd with __MVS__, some with EBCDIC and NOT_ASCII.
+* modify LYCookies.c to accept cookies with no value, in case the site resets a
+  cookie by nulling out the value (reported by Larry Virden) - BJP
+* modify cookie parsing to ignore comment lines beginning with a '#' (reported
+  by Jonathan Bobin indicates that Netscape adds comments back, confusing Lynx)
+  - BJP
+* highlight option letters in old options screen (adapted from patch by Ismael
+  Cordeiro) - TD
+* use HTSprintf functions in HText_SubmitForm(), user_message(),
+  LYLoadIMGmap(), HTTelnet.c.  (The HTTelnet.c modifications fix a security
+  hole reported by Martin Mokrejs) - TD
+* add HTSprintf, HTSprintf0 functions, to use in resolving potential buffer
+  overflows - TD
+* modify HTVMS_purge() to rename the remaining file to version 1 unless a
+  permissions problem was encountered - TD
+1998-11-10 (2.8.2dev.2)
 * some testing against Solaris gettext implementation, enough to see that it is
   not really compatible either source or binary with GNU gettext.  For the time
-  being, recommend building NLS support only with GNU gettext.  Otherwise, use
-  the --disable-nls configure option - TD
-* various changes to configure script and makefiles to make this build with
-  and without NLS - TD
+  being, I recommend building NLS support only with GNU gettext (and
+  --with-included-gettext to avoid conflict with Solaris' gettext in the
+  standard library).  Otherwise use the --disable-nls configure option - TD
+* various changes to configure script and makefiles to make this build with and
+  without NLS - TD
 * undo spurious substitutions such as gettext("") - TD
 * modify some gettext() expressions to avoid embedding HTML in them - TD
 * restore definitions in LYMessages_en.h - TD

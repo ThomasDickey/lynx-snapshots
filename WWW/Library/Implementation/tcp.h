@@ -115,12 +115,32 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 
 /*
 
-  M ACROS FOR CONVERTING CHARACTERS
+  MACROS FOR CONVERTING CHARACTERS
 
  */
 #ifndef TOASCII
+#ifdef EBCDIC  /* S/390 -- gil -- 1327 */
+
+extern       char un_IBM1047[];
+extern unsigned char IBM1047[];
+/* For debugging
+#include <assert.h>
+#define   TOASCII(c) (assert((c)>=0 && (c)<256), un_IBM1047[c])
+*/ /* for production */
+#define   TOASCII(c) (un_IBM1047[c])
+
+#define FROMASCII(c) (IBM1047[c])
+
+#else  /* EBCDIC */
+
+#if '0' != 48
+#error Host character set is not ASCII.
+#endif
+
 #define TOASCII(c) (c)
 #define FROMASCII(c) (c)
+
+#endif /* EBCDIC */
 #endif /* !TOASCII */
 
 
@@ -505,6 +525,9 @@ Regular BSD unix versions
 #include <string.h>
 #endif /* HAVE_STRING_H */
 #include <errno.h>          /* independent */
+#ifdef __MVS__  /* S/390 -- gil -- 1361 */
+#include <time.h>
+#endif /* __MVS__ */
 #ifdef SCO
 #include <sys/timeb.h>
 #include <time.h>
@@ -514,7 +537,9 @@ Regular BSD unix versions
 #endif /* AIX || SVR4 */
 #include <sys/time.h>       /* independent */
 #include <sys/stat.h>
+#ifndef __MVS__  /* S/390 -- gil -- 1373 */
 #include <sys/param.h>
+#endif /* __MVS__ */
 #include <sys/file.h>       /* For open() etc */
 
 #if defined(NeXT) || defined(sony_news)

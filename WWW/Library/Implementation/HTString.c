@@ -5,6 +5,7 @@
 **	02-Dec-91 (JFG) Added stralloccopy and stralloccat
 **	23 Jan 92 (TBL) Changed strallocc* to 8 char HTSAC* for VM and suchlike
 **	 6 Oct 92 (TBL) Moved WWW_TraceFlag in here to be in library
+**	15 Nov 98 (TD)  Added HTSprintf.
 */
 
 #include <HTUtils.h>
@@ -338,4 +339,246 @@ PUBLIC char * HTNextTok ARGS4(
     if (*p) *p++ = '\0';
     *pstr = p;
     return start;
+}
+
+PRIVATE char *HTAlloc ARGS2(char *, ptr, size_t, length)
+{
+    if (ptr != 0)
+	ptr = (char *)realloc(ptr, length);
+    else
+	ptr = (char *)malloc(length);
+    if (ptr == 0)
+	outofmem(__FILE__, "HTAlloc");
+    return ptr;
+}
+
+/*
+ * Replacement for sprintf, allocates buffer on the fly according to what's needed
+ * for its arguments.  Unlike sprintf, this always concatenates to the destination
+ * buffer, so we do not have to provide both flavors.
+ */
+typedef enum { Flags, Width, Prec, Type, Format } PRINTF;
+
+#define VA_INTGR(type) ival = va_arg(ap, type)
+#define VA_FLOAT(type) fval = va_arg(ap, type)
+#define VA_POINT(type) pval = (void *)va_arg(ap, type)
+
+#define NUM_WIDTH 10	/* allow for width substituted for "*" in "%*s" */
+#define GROW_EXPR(n) (((n) * 3) / 2)
+#define GROW_SIZE 256
+
+PRIVATE char * StrAllocVsprintf ARGS4(
+	char **,	pstr,
+	size_t,		dst_len,
+	CONST char *,	fmt,
+	va_list,	ap)
+{
+    size_t tmp_len = GROW_SIZE;
+    size_t have, need;
+    char *tmp_ptr;
+    char *fmt_ptr;
+    char *dst_ptr = *pstr;
+
+    if (fmt == 0 || *fmt == '\0')
+	return 0;
+
+    need = strlen(fmt) + 1;
+    if ((fmt_ptr = malloc(need*NUM_WIDTH)) == 0
+     || (tmp_ptr = malloc(tmp_len)) == 0) {
+	outofmem(__FILE__, "StrAllocVsprintf");
+    }
+
+    if (dst_ptr == 0) {
+	dst_ptr = HTAlloc(dst_ptr, have = GROW_SIZE + need);
+    } else {
+	have = strlen(dst_ptr) + 1;
+	if (have < need)
+	    dst_ptr = HTAlloc(dst_ptr, have = GROW_SIZE + need);
+    }
+
+    while (*fmt != '\0') {
+	if (*fmt == '%') {
+	    static char dummy[] = "";
+	    PRINTF state = Flags;
+	    char *pval   = dummy;	/* avoid const-cast */
+	    double fval  = 0.0;
+	    int done     = FALSE;
+	    int ival     = 0;
+	    int prec     = -1;
+	    int type     = 0;
+	    int used     = 0;
+	    int width    = -1;
+	    size_t f     = 0;
+
+	    fmt_ptr[f++] = *fmt;
+	    while (*++fmt != '\0' && dst_len != 0 && !done) {
+		fmt_ptr[f++] = *fmt;
+
+		if (isdigit(*fmt)) {
+		    int num = *fmt - '0';
+		    if (state == Flags && num != 0)
+			state = Width;
+		    if (state == Width) {
+			if (width < 0)
+			    width = 0;
+			width = (width * 10) + num;
+		    } else if (state == Prec) {
+			if (prec < 0)
+			    prec = 0;
+			prec = (prec * 10) + num;
+		    }
+		} else if (*fmt == '*') {
+		    VA_INTGR(int);
+		    if (state == Flags)
+			state = Width;
+		    if (state == Width) {
+			width = ival;
+		    } else if (state == Prec) {
+			prec = ival;
+		    }
+		    sprintf(&fmt_ptr[--f], "%d", ival);
+		    f = strlen(fmt_ptr);
+		} else if (isalpha(*fmt)) {
+		    done = TRUE;
+		    switch (*fmt) {
+		    case 'Z': /* FALLTHRU */
+		    case 'h': /* FALLTHRU */
+		    case 'l': /* FALLTHRU */
+		    case 'L': /* FALLTHRU */
+			done = FALSE;
+			type = *fmt;
+			break;
+		    case 'i': /* FALLTHRU */
+		    case 'd': /* FALLTHRU */
+		    case 'u': /* FALLTHRU */
+		    case 'x': /* FALLTHRU */
+		    case 'X': /* FALLTHRU */
+			if (type == 'l')
+			    VA_INTGR(long);
+			else if (type == 'Z')
+			    VA_INTGR(size_t);
+			else
+			    VA_INTGR(int);
+			used = 'i';
+			break;
+		    case 'f': /* FALLTHRU */
+		    case 'e': /* FALLTHRU */
+		    case 'E': /* FALLTHRU */
+		    case 'g': /* FALLTHRU */
+		    case 'G': /* FALLTHRU */
+			if (type == 'L')
+			    VA_FLOAT(long double);
+			else
+			    VA_FLOAT(double);
+			used = 'f';
+			break;
+		    case 'c':
+			VA_INTGR(int);
+			used = 'i';
+			break;
+		    case 's':
+			VA_POINT(char *);
+			if (prec < 0)
+			    prec = strlen(pval);
+			if (prec > (int)tmp_len) {
+			    tmp_len = GROW_EXPR(tmp_len + prec);
+			    tmp_ptr = HTAlloc(tmp_ptr, tmp_len);
+			}
+			used = 'p';
+			break;
+		    case 'p':
+			VA_POINT(void *);
+			used = 'p';
+			break;
+		    case 'n':
+			VA_POINT(int *);
+			used = 0;
+			break;
+		    default:
+			break;
+		    }
+		} else if (*fmt == '.') {
+		    state = Prec;
+		} else if (*fmt == '%') {
+		    done = TRUE;
+		    used = 'p';
+		}
+	    }
+	    fmt_ptr[f] = '\0';
+	    switch (used) {
+	    case 'i':
+		sprintf(tmp_ptr, fmt_ptr, ival);
+		break;
+	    case 'f':
+		sprintf(tmp_ptr, fmt_ptr, fval);
+		break;
+	    default:
+		sprintf(tmp_ptr, fmt_ptr, pval);
+		break;
+	    }
+	    need = dst_len + strlen(tmp_ptr) + 1;
+	    if (need >= have) {
+		dst_ptr = HTAlloc(dst_ptr, have = GROW_EXPR(need));
+	    }
+	    strcpy(dst_ptr + dst_len, tmp_ptr);
+	    dst_len += strlen(tmp_ptr);
+	} else {
+	    dst_ptr[dst_len++] = *fmt++;
+	}
+    }
+
+    free(tmp_ptr);
+    free(fmt_ptr);
+    dst_ptr[dst_len] = '\0';
+    if (pstr)
+    	*pstr = dst_ptr;
+    return (dst_ptr);
+}
+
+/*
+ * Replacement for sprintf, allocates buffer on the fly according to what's needed
+ * for its arguments.  Unlike sprintf, this always concatenates to the destination
+ * buffer.
+ */
+#if USE_STDARG_H
+PUBLIC char * HTSprintf (char ** pstr, CONST char * fmt, ...)
+#else
+PUBLIC char * HTSprintf (pstr, fmt, va_alist)
+    char **		pstr;
+    CONST char *	fmt;
+    va_dcl
+#endif
+{
+    va_list ap;
+
+    LYva_start(ap,fmt);
+    StrAllocVsprintf(pstr, (pstr && *pstr) ? strlen(*pstr) : 0, fmt, ap);
+    va_end(ap);
+
+    return (*pstr);
+}
+
+/*
+ * Replacement for sprintf, allocates buffer on the fly according to what's
+ * needed for its arguments.  Like sprintf, this always resets the destination
+ * buffer.
+ */
+#if USE_STDARG_H
+PUBLIC char * HTSprintf0 (char ** pstr, CONST char * fmt, ...)
+#else
+PUBLIC char * HTSprintf0 (pstr, fmt, va_alist)
+    char **		pstr;
+    CONST char *	fmt;
+    va_dcl
+#endif
+{
+    va_list ap;
+
+    LYva_start(ap,fmt);
+    if (pstr != 0 && *pstr != 0)
+     	*pstr = 0;
+    StrAllocVsprintf(pstr, 0, fmt, ap);
+    va_end(ap);
+
+    return (*pstr);
 }

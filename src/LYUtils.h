@@ -1,6 +1,8 @@
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
+#include <LYCharVals.h>  /* S/390 -- gil -- 2149 */
+
 #ifndef HTLIST_H
 #include <HTList.h>
 #endif /* HTLIST_H */

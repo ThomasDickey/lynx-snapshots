@@ -1267,12 +1267,24 @@ int HTVMS_remove(char *filename)
 void HTVMS_purge(char *filename)
 {
     char *older_file = 0;
+    char *oldest_file = 0;
+    struct stat sb;
 
     StrAllocCopy(older_file, filename);
     StrAllocCat(older_file, ";-1");
 
     while (remove(older_file) == 0)
 	;
+    /*
+     * If we do not have any more older versions, it is safe to rename the
+     * current file to version #1.
+     */
+    if (stat(older_file, &sb) != 0) {
+	StrAllocCopy(oldest_file, filename);
+	StrAllocCat(oldest_file, ";1");
+	rename(older_file, oldest_file);
+	FREE(oldest_file);
+    }
 
     FREE(older_file);
 }
