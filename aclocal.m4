@@ -1,8 +1,11 @@
 dnl Macros for auto-configure script.
-dnl written feb/1997
 dnl by T.E.Dickey <dickey@clark.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
+dnl Created: 1997/1/28
+dnl Updated: 1997/8/28
+dnl
+dnl ---------------------------------------------------------------------------
 dnl ---------------------------------------------------------------------------
 dnl Add an include-directory to $CPPFLAGS.  Don't add /usr/include, since it's
 dnl redundant.  Also, don't add /usr/local/include if we're using gcc.
@@ -725,12 +728,12 @@ dnl set to 'no').
 AC_DEFUN([CF_RECHECK_FUNC],[
 AC_CHECK_LIB($2,$1,[
 	CF_UPPER(cf_tr_func,$1)
-	AC_DEFINE(HAVE_$cf_tr_func)
+	AC_DEFINE_UNQUOTED(HAVE_$cf_tr_func)
 	ac_cv_func_$1=yes
-	$3="-l$2 [$]$3"],
+	$3="-l$2 [$]$3"],[
 	ac_cv_func_$1=unknown
 	unset ac_cv_func_$1 2>/dev/null
-	$4,
+	$4],
 	[[$]$3])
 ])dnl
 dnl ---------------------------------------------------------------------------

@@ -1,3 +1,6 @@
+1997-08-28
+----------
+* Correct a quoting error in CF_RECHECK_FUNC macro. - TD
 1997-08-27
 ----------
 * Further refine/correct configure macros for finding network and curses
