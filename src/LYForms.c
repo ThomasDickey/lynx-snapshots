@@ -5,6 +5,7 @@
 #include "HTAlert.h"
 #include "LYCurses.h"
 #include "GridText.h"
+#include "LYCharSets.h"
 #include "LYUtils.h"
 #include "LYStructs.h"  /* includes HTForms.h */
 #include "LYStrings.h"
@@ -355,7 +356,8 @@ again:
 	action = EditBinding(ch);
 	if (action == LYE_ENTER)
 	    break;
-	if (action == LYE_AIX && HTCJK == NOCJK)
+	if (action == LYE_AIX &&
+	    (HTCJK == NOCJK && LYlowest_eightbit[current_char_set] > 0x97))
 	    break;
 	if (action == LYE_TAB) {
 	    ch = (int)('\t');
@@ -456,6 +458,18 @@ breakfor:
 	while ((p != form->value) && (p[-1] == ' '))
 	    p--;
 	*p = '\0';
+
+	/*
+	 *  If the field has been changed, assume that it is now in
+	 *  current display character set, even if for some reason
+	 *  it wasn't!  Hopefully a user will only submit the form
+	 *  if the non-ASCII characters are displayed correctly, which
+	 *  means (assuming that the display character set has been set
+	 *  truthfully) the user confirms by changing the field that
+	 *  the character encoding is right. - kw
+	 */
+	if (*p)
+	    form->value_cs = current_char_set;
     }
     return(ch);
 }

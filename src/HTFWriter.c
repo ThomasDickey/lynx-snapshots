@@ -1102,7 +1102,7 @@ Compressed_tempname:
     /*
      *  Make command to process file. - FM
      */
-#if USE_ZLIB
+#ifdef USE_ZLIB
     if (compress_suffix[0] == 'g' && /* must be gzip */
 	!me->viewer_command) {
 	/*

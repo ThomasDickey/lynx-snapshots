@@ -27,6 +27,27 @@ PUBLIC HTChunk * HTChunkCreate ARGS1 (int,grow)
     return ch;
 }
 
+/*	Create a chunk with a certain allocation unit and ensured size
+**	--------------
+*/
+PUBLIC HTChunk * HTChunkCreate2 ARGS2 (int,grow, size_t, needed)
+{
+    HTChunk * ch = (HTChunk *) calloc(1, sizeof(HTChunk));
+    if (ch == NULL)
+        outofmem(__FILE__, "HTChunkCreate2");
+
+    ch->growby = grow;
+    if (needed > 0) {
+	ch->allocated = needed-1 - ((needed-1) % ch->growby)
+	    + ch->growby; /* Round up */
+	ch->data = (char *)calloc(1, ch->allocated);
+	if (!ch->data)
+	    outofmem(__FILE__, "HTChunkCreate2 data");
+    }
+    ch->size = 0;
+    return ch;
+}
+
 
 /*	Clear a chunk of all data
 **	--------------------------
@@ -77,6 +98,22 @@ PUBLIC void HTChunkEnsure ARGS2 (HTChunk *,ch, int,needed)
 			: (char *)calloc(1, ch->allocated);
     if (ch->data == NULL)
         outofmem(__FILE__, "HTChunkEnsure");
+}
+
+PUBLIC void HTChunkPutb ARGS3 (HTChunk *,ch, CONST char *,b, int,l)
+{
+    int needed = ch->size + l;
+    if (l <= 0) return;
+    if (needed > ch->allocated) {
+	ch->allocated = needed-1 - ((needed-1) % ch->growby)
+	    + ch->growby; /* Round up */
+        ch->data = ch->data ? (char *)realloc(ch->data, ch->allocated)
+			    : (char *)calloc(1, ch->allocated);
+	if (ch->data == NULL)
+	    outofmem(__FILE__, "HTChunkPutb");
+    }
+    memcpy(ch->data + ch->size, b, l);
+    ch->size += l;
 }
 
 #ifdef EXP_CHARTRANS

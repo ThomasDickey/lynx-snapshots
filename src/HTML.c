@@ -528,7 +528,7 @@ char prevailing_class[TEMPSTRINGSIZE];
 	LYUCFullyTranslateString(s, ATTR_CS_IN, current_char_set, YES, p, h, st_HTML)
 
 #define TRANSLATE_AND_UNESCAPE_ENTITIES4(s, cs_to, p, h) \
-	LYUCFullyTranslateString(s, ATTR_CS_IN, cs_to, YES, p, h, st_HTML)
+	LYUCFullyTranslateString(s, ATTR_CS_IN, cs_to, YES, p, h, st_HTML) /* not used */
 
 #define TRANSLATE_AND_UNESCAPE_ENTITIES5(s,cs_from,cs_to,p,h) \
 	LYUCFullyTranslateString(s, cs_from, cs_to, YES, p, h, st_HTML)
@@ -548,11 +548,51 @@ char prevailing_class[TEMPSTRINGSIZE];
 
 #else  /* !EXP_CHARTRANS */
 
+#ifdef OLDSTUFF
 #define ATTR_CS_IN 0
+
+#define TRANSLATE_AND_UNESCAPE_ENTITIES(s, p, h) \
+	if (current_char_set) LYExpandString(s); LYUnEscapeEntities(*(s), p, h)
+/*	if (current_char_set) LYExpandString(s); LYUnEscapeEntities(*(s), p, FALSE) */
+
+#define TRANSLATE_AND_UNESCAPE_ENTITIES5(s,cs_from,cs_to,p,h) \
+	LYUnEscapeEntities(*(s), p, h)
+/*	LYUnEscapeEntities(*(s), TRUE, h) */
+/*	LYUnEscapeEntities(*(s), TRUE, FALSE) */
+
+
+#define TRANSLATE_AND_UNESCAPE_ENTITIES6(s,cs_from,cs_to,spcls,p,h) \
+	if (me->UsePlainSpace && !me->HiddenValue) LYExpandString(me, s);\
+	LYUnEscapeEntities(*(s), me->UsePlainSpace, me->HiddenValue)
+/*	if (current_char_set && (p && !h)) LYExpandString(me, *(s));\
+	LYUnEscapeEntities(*(s), p, h) */
 
 #define TRANSLATE_AND_UNESCAPE_TO_STD(s) \
     			LYUnEscapeToLatinOne(s, TRUE) /* for now */
 #define UNESCAPE_FIELDNAME_TO_STD(s) ; /* no-op */
+#endif /* OLDSTUFF */
+
+#ifdef NOTUSED_FOTEMODS
+/* Roughly (and untested!), the equivalents if one would use the
+ * LYCharUtils.c from FOTEMODS 1997-10-06 instead: */
+#define TRANSLATE_AND_UNESCAPE_ENTITIES(s, p, h) \
+	LYExpandString(me, s); LYUnEscapeEntities(me, s)
+	LYUCFullyTranslateString(s, ATTR_CS_IN, current_char_set, YES, p, h, st_HTML)
+
+#define TRANSLATE_AND_UNESCAPE_ENTITIES5(s,cs_from,cs_to,p,h) \
+	LYUnEscapeEntities(me, s)
+
+#define TRANSLATE_AND_UNESCAPE_ENTITIES6(s,cs_from,cs_to,spcls,p,h) \
+	if (me->UsePlainSpace && !me->HiddenValue) LYExpandString(me, s);\
+	LYUnEscapeEntities(me, s)
+
+#define TRANSLATE_AND_UNESCAPE_TO_STD(s) \
+	LYUnEscapeToLatinOne(me, s, TRUE)
+
+#define UNESCAPE_FIELDNAME_TO_STD(s) ; /* no-op (?) */
+
+#endif /* NOTUSED_FOTEMODS */
+
 #endif  /* !EXP_CHARTRANS */
 
 #define CHECK_ID(code) LYCheckForID(me, present, value, (int)code)
@@ -653,7 +693,7 @@ PRIVATE void HTML_start_element ARGS6(
                         fprintf(stderr, " ca=%d\n", hashStyles[hcode].color);
         }
 
-    if (displayStyles[element_number].color > -1) /* actually set */
+    if (displayStyles[element_number + STARTAT].color > -2) /* actually set */
     {
         if (TRACE)
                 fprintf(stderr, "CSSTRIM: start_element: top <%s>\n", HTML_dtd.tags[element_number].name);
@@ -1085,7 +1125,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    HText_beginAnchor(me->text, me->inUnderline, me->CurrentA);
 	    if (me->inBoldH == FALSE)
 	        HText_appendCharacter(me->text, LY_BOLD_START_CHAR);
-#if USE_COLOR_STYLE
+#ifdef USE_COLOR_STYLE
 	    if (present && present[HTML_LINK_CLASS] &&
 	    value && *value[HTML_LINK_CLASS]!='\0')
 	    {
@@ -1823,6 +1863,7 @@ PRIVATE void HTML_start_element ARGS6(
 		 */
 	        target = ((1.0 * atoi(value[HTML_TAB_INDENT])) / enval) + 0.5;
 	    }
+	    FREE(temp);
 	    /*
 	     *  If we are being directed to a column too far to the left
 	     *  or right, just add a collapsible space, otherwise, add the
@@ -4936,10 +4977,13 @@ PRIVATE void HTML_start_element ARGS6(
 	    StrAllocCopy(me->textarea_name, "");
 	}
 
-	if (present && present[HTML_TEXTAREA_ACCEPT_CHARSET] &&
-	    value[HTML_TEXTAREA_ACCEPT_CHARSET]) {
-	    StrAllocCopy(me->textarea_accept_cs, value[HTML_TEXTAREA_ACCEPT_CHARSET]);
-	    TRANSLATE_AND_UNESCAPE_TO_STD(&me->textarea_accept_cs);
+	if (present && present[HTML_TEXTAREA_ACCEPT_CHARSET]) {
+	    if (value[HTML_TEXTAREA_ACCEPT_CHARSET]) {
+		StrAllocCopy(me->textarea_accept_cs, value[HTML_TEXTAREA_ACCEPT_CHARSET]);
+		TRANSLATE_AND_UNESCAPE_TO_STD(&me->textarea_accept_cs);
+	    } else {
+		StrAllocCopy(me->textarea_accept_cs, "UNKNOWN");
+	    }
 	} else {
 	    FREE(me->textarea_accept_cs);
 	}
@@ -7030,7 +7074,9 @@ End_Object:
         /* reset the prevailing class to the previous one */
         {
                 char *dot=strrchr(Style_className,'.');
-                strcpy (prevailing_class, dot ? (char*)(dot+1) : "");
+                LYstrncpy(prevailing_class,
+			  dot ? (char*)(dot+1) : "",
+			  (TEMPSTRINGSIZE - 1));
         }
 #endif
     }
@@ -7326,7 +7372,7 @@ PRIVATE void get_styles NOARGS
 */
 PUBLIC CONST HTStructuredClass HTMLPresentation = /* As opposed to print etc */
 {		
-	"text/html",
+	"Lynx_HTML_Handler",
 	HTML_free,
 	HTML_abort,
 	HTML_put_character, 	HTML_put_string,  HTML_write,
@@ -7499,6 +7545,12 @@ PUBLIC HTStructured* HTML_new ARGS3(
  
     me->comment_start = NULL;
     me->comment_end = NULL;
+
+#ifdef USE_COLOR_STYLE
+    Style_className[0] = '\0';
+    class_string[0] = '\0';
+    prevailing_class[0] = '\0';
+#endif
 
 #ifdef EXP_CHARTRANS
     LYGetChartransInfo(me);

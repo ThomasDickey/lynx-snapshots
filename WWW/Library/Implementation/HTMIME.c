@@ -2096,7 +2096,7 @@ PUBLIC HTStream* HTMIMEConvert ARGS3(
     
     me = (HTStream *)calloc(1, sizeof(*me));
     if (me == NULL)
-        outofmem(__FILE__, "HTML_new");
+        outofmem(__FILE__, "HTMIME_new");
     me->isa	=	&HTMIME;       
     me->sink	=	sink;
     me->anchor	=	anchor;

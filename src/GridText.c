@@ -199,6 +199,7 @@ struct _HText {
 				state;			/* Escape sequence? */
 	char			kanji_buf;		/* Lead multibyte */
 	int			in_sjis;		/* SJIS flag */
+        int			halted;			/* emergency halt */
 
 	BOOL			have_8bit_chars;   /* Any non-ASCII chars? */
 #ifdef EXP_CHARTRANS
@@ -244,6 +245,124 @@ PRIVATE int HText_TrueLineSize PARAMS((
 	HTLine *	line,
 	HText *		text,
 	BOOL		IgnoreSpaces));
+
+#ifndef VMS			/* VMS has a better way - right? - kw */
+#define CHECK_FREE_MEM
+#endif
+
+#ifdef CHECK_FREE_MEM
+
+/*
+ *  text->halted = 1: have set fake 'Z' and output a message
+ *                 2: next time when HText_appendCharacter is called
+ *		      it will append *** MEMORY EXHAUSTED ***, then set
+ *		      to 3.
+ *		   3: normal text output will be suppressed (but not anchors,
+ *		      form fields etc.)
+ */
+PRIVATE void HText_halt NOARGS
+{
+    if (HTFormNumber > 0)
+	HText_DisableCurrentForm();
+    if (!HTMainText)
+	return;
+    if (HTMainText->halted < 2)
+	HTMainText->halted = 2;
+}
+
+#define MIN_NEEDED_MEM 5000
+
+/*
+ *  Check whether factor*min(bytes,MIN_NEEDED_MEM) is available,
+ *  or bytes if factor is 0.
+ *  MIN_NEEDED_MEM and factor together represent a security margin,
+ *  to take account of all the memory allocations where we don't check
+ *  and of buffers which may be emptied before HTCheckForInterupt()
+ *  is (maybe) called and other things happening, with some chance of
+ *  success.
+ *  This just tries to malloc() the to-be-checked-for amount of memory,
+ *  which might make the situation worse depending how allocation works.
+ *  There should be a better way... - kw
+ */
+PRIVATE BOOL mem_is_avail ARGS2(
+    size_t,	factor,
+    size_t,	bytes)
+{
+    void *p;
+    if (bytes < MIN_NEEDED_MEM && factor > 0)
+	bytes = MIN_NEEDED_MEM;
+    if (factor == 0)
+	factor = 1;
+    p = malloc(factor * bytes);
+    if (p) {
+	FREE(p);
+	return YES;
+    } else {
+	return NO;
+    }
+}
+
+/*
+ *  Replacement for calloc which checks for "enough" free memory
+ *  (with some security margins) and tries various recovery actions
+ *  if deemed necessary. - kw
+ */
+PRIVATE void * LY_check_calloc ARGS2(
+    size_t,	nmemb,
+    size_t,	size)
+{
+    int i, n;
+    if (mem_is_avail(4, nmemb * size)) {
+	return (calloc(nmemb, size));
+    }
+    n = HTList_count(loaded_texts);
+    for (i = n - 1; i > 0; i--) {
+	HText * t = HTList_objectAt(loaded_texts, i);
+	if (t == HTMainText)
+	    t = NULL;		/* shouldn't happen */
+	if (TRACE) {
+	    fprintf(stderr,
+		    "\r *** Emergeny freeing document %d/%d for '%s'%s!\n",
+		    i + 1, n,
+		    ((t && t->node_anchor &&
+		      t->node_anchor->address) ?
+		     t->node_anchor->address : "unknown anchor"),
+		    ((t && t->node_anchor &&
+		      t->node_anchor->post_data) ?	
+		     " with POST data" : ""));
+	}
+	HTList_removeObjectAt(loaded_texts, i);
+        HText_free(t);
+	if (mem_is_avail(4, nmemb * size)) {
+	    return (calloc(nmemb, size));
+	}
+    }
+    LYFakeZap(YES);
+    if (!HTMainText || HTMainText->halted <= 1) {
+	if (!mem_is_avail(2, nmemb * size)) {
+	    HText_halt();
+	    if (mem_is_avail(0, 700)) {
+		HTAlert("Memory exhausted, display interrupted!");
+	    }
+	} else {
+	    if ((!HTMainText || HTMainText->halted == 0) &&
+		mem_is_avail(0, 700)) {
+		HTAlert("Memory exhausted, will interrupt transfer!");
+		if (HTMainText)
+		    HTMainText->halted = 1;
+	    }
+	}
+    }
+    return (calloc(nmemb, size));
+}
+
+#define LY_CALLOC LY_check_calloc
+
+#else
+
+#define LY_CALLOC calloc
+
+#endif /* CHECK_FREE_MEM */
 
 #ifdef EXP_CHARTRANS
 PRIVATE void HText_getChartransInfo ARGS1(
@@ -369,7 +488,8 @@ PUBLIC HText *	HText_new ARGS1(
      *  Check the kcode setting if the anchor has a charset element. - FM
      */
     if (anchor->charset)
-        HText_setKcode(self, anchor->charset);
+        HText_setKcode(self, anchor->charset,
+		       HTAnchor_getUCInfoStage(anchor, UCT_STAGE_HTEXT));
 
     /*
      *	Memory leak fixed.
@@ -487,6 +607,8 @@ PUBLIC void HText_free ARGS1(
             FREE(l->input_field->submit_action);
             FREE(l->input_field->submit_enctype);
             FREE(l->input_field->submit_title);
+
+            FREE(l->input_field->accept_cs);
 		
 	    FREE(l->input_field);
 	}
@@ -506,6 +628,7 @@ PUBLIC void HText_free ARGS1(
 
 	while (NULL != (Tab = (HTTabID *)HTList_nextObject(cur))) {
 	    FREE(Tab->name);
+	    FREE(Tab);
 	}
 	HTList_delete(self->tabs);
 	self->tabs = NULL;
@@ -1499,9 +1622,9 @@ PRIVATE void split_line ARGS2(
     HTLine * previous = text->last_line;
     int ctrl_chars_on_previous_line = 0;
     char * cp;
-    HTLine * line = (HTLine *)calloc(1, LINE_SIZE(MAX_LINE));
+    HTLine * line = (HTLine *)LY_CALLOC(1, LINE_SIZE(MAX_LINE));
     if (line == NULL)
-        outofmem(__FILE__, "split_line");
+        outofmem(__FILE__, "split_line_1");
 
     ctrl_chars_on_this_line = 0; /*reset since we are going to a new line*/
     text->LastChar = ' ';
@@ -1774,9 +1897,9 @@ PRIVATE void split_line ARGS2(
         previous->size--;
 	TailTrim++;
     }
-    temp = (HTLine *)calloc(1, LINE_SIZE(previous->size));
+    temp = (HTLine *)LY_CALLOC(1, LINE_SIZE(previous->size));
     if (temp == NULL)
-        outofmem(__FILE__, "split_line");
+        outofmem(__FILE__, "split_line_2");
     memcpy(temp, previous, LINE_SIZE(previous->size));
     FREE(previous);
     previous = temp;
@@ -1935,6 +2058,15 @@ PUBLIC void HText_appendCharacter ARGS2(
     if (!text)
 	return;
 
+    if (text->halted > 1) {
+	if (text->halted == 2) {
+	    text->halted = 0;
+	    text->kanji_buf = '\0';
+	    HText_appendText(text, " *** MEMORY EXHAUSTED ***");
+	}
+	text->halted = 3;
+	return;
+    }
     /*
      *  Make sure we don't hang on escape sequences.
      */
@@ -2148,6 +2280,12 @@ PUBLIC void HText_appendCharacter ARGS2(
     if (ch == '\n') {
 	    new_line(text);
 	    text->in_line_1 = YES;	/* First line of new paragraph */
+	    /*
+	     *  There are some pages written in
+	     *  different kanji codes. - TA & kw
+	     */
+	    if (HTCJK == JAPANESE)
+		text->kcode = NOKANJI;
 	    return;
     }
 
@@ -2166,6 +2304,12 @@ PUBLIC void HText_appendCharacter ARGS2(
     if (ch == '\r') {
 	new_line(text);
 	text->in_line_1 = NO;
+	/*
+	 *  There are some pages written in
+	 *  different kanji codes. - TA & kw
+	 */
+	if (HTCJK == JAPANESE)
+	    text->kcode = NOKANJI;
 	return;
     }
 
@@ -2238,7 +2382,7 @@ PUBLIC void HText_appendCharacter ARGS2(
     if (ch == ' ') {
         text->permissible_split = (int)line->size;	/* Can split here */
 	/* 
-	 *  There are some pages witten in
+	 *  There are some pages written in
 	 *  different kanji codes. - TA
 	 */
 	if (HTCJK == JAPANESE)
@@ -2928,6 +3072,9 @@ PUBLIC void HText_appendText ARGS2(
     if (str == NULL)
 	return;
 
+    if (text->halted == 3)
+	return;
+
     for (p = str; *p; p++) {
         HText_appendCharacter(text, *p);
     }
@@ -2976,6 +3123,11 @@ PUBLIC void HText_endAppend ARGS1(
      */
     new_line(text);
     
+    if (text->halted) {
+	LYFakeZap(NO);
+	text->halted = 0;
+    }
+
     /*
      *  Get the first line.
      */
@@ -5404,7 +5556,8 @@ PUBLIC void HText_setTabID ARGS2(
 	        return; /* Already set.  Keep the first value. */
 	    last = cur;
 	}
-	cur = last;
+	if (last)
+	    cur = last;
     }
     if (!Tab) { /* New name.  Create a new node */
 	Tab = (HTTabID *)calloc(1, sizeof(HTTabID));
@@ -6290,6 +6443,11 @@ PUBLIC int HText_beginInput ARGS3(
 	f->value_cs = I->value_cs;
     } else if (f->type != F_OPTION_LIST_TYPE) {
 	StrAllocCopy(f->value, "");
+	/*
+	 *  May be an empty INPUT field.  The text entered will then
+	 *  probably be in the current display character set. - kw
+	 */
+	f->value_cs = current_char_set;
     }
 
     /*
@@ -6341,6 +6499,16 @@ PUBLIC int HText_beginInput ARGS3(
 	f->orig_value = NULL;
     } else {
         StrAllocCopy(f->orig_value, f->value);
+    }
+
+    /*
+     *  Store accept-charset if present. - kw
+     */
+    if (I->accept_cs) {
+	StrAllocCopy(f->accept_cs, I->accept_cs);
+	collapse_spaces(f->accept_cs);
+	for (i = 0; f->accept_cs[i]; i++)
+	    f->accept_cs[i] = TOLOWER(f->accept_cs[i]);
     }
 
     /*
@@ -6494,12 +6662,14 @@ PUBLIC void HText_SubmitForm ARGS4(
     char *Boundary = NULL;
     char *MultipartContentType = NULL;
     int target_cs = -1;
+    CONST char *out_csname;
     CONST char *target_csname = NULL;
     char *name_used;
 #ifdef EXP_CHARTRANS
     BOOL form_has_8bit = NO, form_has_special = NO;
     BOOL field_has_8bit = NO, field_has_special = NO;
     BOOL name_has_8bit = NO, name_has_special = NO;
+    BOOL have_accept_cs = NO;
     BOOL success;
     BOOL had_chartrans_warning = NO;
     char *val_used;
@@ -6558,8 +6728,30 @@ PUBLIC void HText_SubmitForm ARGS4(
 	Boundary = "xnyLAaB03X";
     }
 
+    /*
+     *  Determine in what character encoding (aka. charset) we should
+     *  submit.  We call this target_cs and the MIME name for it
+     *  target_csname.
+     *  TODO:   - actually use ACCEPT-CHARSET stuff from FORM
+     *  TODO:   - deal with list in ACCEPT-CHARSET, find a "best"
+     *		  charset to submit
+     */
 #ifdef EXP_CHARTRANS
-    if (HTMainText->node_anchor->charset &&
+    
+    if (submit_item->accept_cs &&
+	strcasecomp(submit_item->accept_cs, "UNKNOWN"))
+	have_accept_cs = YES;
+    if (submit_item->accept_cs && *submit_item->accept_cs &&
+	strcmp(submit_item->accept_cs, "*") &&
+	strcasecomp(submit_item->accept_cs, "UNKNOWN")) {
+	target_cs = UCGetLYhndl_byMIME(submit_item->accept_cs);
+	if (target_cs >= 0) {
+	    target_csname = submit_item->accept_cs;
+	}
+    }
+
+    if (target_cs < 0 &&
+        HTMainText->node_anchor->charset &&
 	*HTMainText->node_anchor->charset) {
 	target_cs = UCGetLYhndl_byMIME(HTMainText->node_anchor->charset);
 	if (target_cs >= 0) {
@@ -6609,7 +6801,9 @@ PUBLIC void HText_SubmitForm ARGS4(
 	        len += 32; /* plus and ampersand + safety net */
 
 #ifdef EXP_CHARTRANS
-		for (p = val; p && *p && !field_has_8bit; p++)
+		for (p = val;
+		     p && *p && !(field_has_8bit && field_has_special);
+		     p++)
 		    if ((*p == HT_NON_BREAK_SPACE) ||
 			(*p == HT_EM_SPACE) ||
 			(*p == LY_SOFT_HYPHEN)) {
@@ -6617,12 +6811,22 @@ PUBLIC void HText_SubmitForm ARGS4(
 		    } else if ((*p & 0x80) != 0) {
 			field_has_8bit = YES;
 		    }
-		for (p = form_ptr->name; p && *p && !field_has_8bit; p++)
-		    field_has_8bit = ((*p & 0x80) != 0);
-		if (field_has_8bit)
+		for (p = form_ptr->name;
+		     p && *p && !(name_has_8bit && name_has_special);
+		     p++)
+		    if ((*p == HT_NON_BREAK_SPACE) ||
+			(*p == HT_EM_SPACE) ||
+			(*p == LY_SOFT_HYPHEN)) {
+			name_has_special = YES;
+		    } else if ((*p & 0x80) != 0) {
+			name_has_8bit = YES;
+		    }
+
+		if (field_has_8bit || name_has_8bit)
 		    form_has_8bit = YES;
-		if (field_has_special)
+		if (field_has_special || name_has_special)
 		    form_has_special = YES;
+
 		if (!field_has_8bit && !field_has_special) {
 		    /* already ok */
 		} else if (target_cs < 0) {
@@ -6636,6 +6840,26 @@ PUBLIC void HText_SubmitForm ARGS4(
 		} else if (UCCanTranslateFromTo(form_ptr->value_cs, target_cs)) {
 		    /* also ok */
 		} else if (UCCanTranslateFromTo(target_cs, form_ptr->value_cs)) {
+		    target_cs = form_ptr->value_cs; 	/* try this */
+		    target_csname = NULL; /* will be set after loop */
+		} else {
+		    target_cs = -1; /* don't know what to do */
+		}
+
+		/*  Same for name */
+		if (!name_has_8bit && !name_has_special) {
+		    /* already ok */
+		} else if (target_cs < 0) {
+		    /* already confused */
+		} else if (!name_has_8bit &&
+		    (LYCharSet_UC[target_cs].enc == UCT_ENC_8859 ||
+		     (LYCharSet_UC[target_cs].like8859 & UCT_R_8859SPECL))) {
+		    /* those specials will be trivial */
+		} else if (UCNeedNotTranslate(form_ptr->name_cs, target_cs)) {
+		    /* already ok */
+		} else if (UCCanTranslateFromTo(form_ptr->name_cs, target_cs)) {
+		    /* also ok */
+		} else if (UCCanTranslateFromTo(target_cs, form_ptr->name_cs)) {
 		    target_cs = form_ptr->value_cs; 	/* try this */
 		    target_csname = NULL; /* will be set after loop */
 		} else {
@@ -6707,126 +6931,49 @@ PUBLIC void HText_SubmitForm ARGS4(
 			 "application/x-www-form-urlencoded");
 	}
 
-
-#ifndef EXP_CHARTRANS
 	/*
-	 *  Append the exended charset info if known, and it is not
-	 *  ISO-8859-1 or US-ASCII.  We'll assume the user has the
-	 *  matching character set selected, or a download offer would
-	 *  have been forced and we would not be processing the form
-	 *  here.  We don't yet want to do this unless the server
-	 *  indicated the charset in the original transmission, because
-	 *  otherwise it might be an old server and CGI script which
-	 *  will not parse out the extended charset info, and reject
-	 *  the POST Content-Type as invalid.  If the ENCTYPE is
-	 *  multipart/form-data and the charset is known, set up a
-	 *  Content-Type string for the text fields and append the
-	 *  charset even if it is ISO-8859-1 or US-ASCII, but don't
-	 *  append it to the post_content_type header.  Note that we do
-	 *  not yet have a way to vary the charset among multipart form
-	 *  fields, so this code assumes it is the same for all of the
-	 *  text fields. - FM
+	 *  If the ENCTYPE is not multipart/form-data, append the
+	 *  charset we'll be sending to the post_content_type, IF
+	 *  (1) there was an explicit accept-charset attribute, OR
+	 *  (2) we have 8-bit or special chars, AND the document had
+	 *      an explicit (recognized and accepted) charset parameter,
+	 *	AND it or target_csname is different from iso-8859-1,
+	 *      OR
+	 *  (3) we have 8-bit or special chars, AND the document had
+	 *      no explicit (recognized and accepted) charset parameter,
+	 *	AND target_cs is different from the currently effective
+	 *	assumed charset (which should have been set by the user
+	 *	so that it reflects what the server is sending, if the
+	 *	document is rendered correctly).
+	 *  For multipart/form-data the equivalent will be done later,
+	 *  separately for each form field. - kw
 	 */
-	if (HTMainText->node_anchor->charset != NULL &&
-	    *HTMainText->node_anchor->charset != '\0') {
-	    if (Boundary == NULL &&
-	        strcasecomp(HTMainText->node_anchor->charset, "iso-8859-1") &&
-		strcasecomp(HTMainText->node_anchor->charset, "us-ascii")) {
-		StrAllocCat(doc->post_content_type, "; charset=");
-		StrAllocCat(doc->post_content_type,
-			    HTMainText->node_anchor->charset);
-	    } else if (Boundary != NULL) {
-	        MultipartContentType = (char *)calloc(1,
-			     (40 + strlen(HTMainText->node_anchor->charset)));
-		if (query == NULL)
-		    outofmem(__FILE__, "HText_SubmitForm");
-		sprintf(MultipartContentType,
-			"\r\nContent-Type: text/plain; charset=%s",
-			HTMainText->node_anchor->charset);
-		ct_charset_startpos = strchr(MultipartContentType, ';');
-	    }
-	}
-#else  /* EXP_CHARTRANS */
-	if (target_cs >= 0 && (form_has_8bit || form_has_special)) {
-	    if (Boundary == NULL) {
-		if (target_csname &&
-		    (strcasecomp(target_csname, "iso-8859-1") ||
-		     (HTMainText->node_anchor->charset != NULL &&
-		      strcasecomp(HTMainText->node_anchor->charset,
-				  "iso-8859-1")))) {
-		    StrAllocCat(doc->post_content_type, "; charset=");
-		    StrAllocCat(doc->post_content_type, target_csname);
+	if (have_accept_cs ||
+	    (form_has_8bit || form_has_special)) {
+	    if (target_cs >= 0 && target_csname) {
+		if (Boundary == NULL) {
+		    if ((HTMainText->node_anchor->charset &&
+			 (strcmp(HTMainText->node_anchor->charset,
+				 "iso-8859-1") ||
+			  strcmp(target_csname, "iso-8859-1"))) ||
+			(!HTMainText->node_anchor->charset &&
+			 target_cs != UCLYhndl_for_unspec)) {
+			StrAllocCat(doc->post_content_type, "; charset=");
+			StrAllocCat(doc->post_content_type, target_csname);
+		    }
 		}
+	    } else {
+		had_chartrans_warning = YES;
+		_user_message(
+		    CANNOT_TRANSCODE_FORM,
+		    target_csname ? target_csname : "UNKNOWN");
+		sleep(AlertSecs);
 	    }
 	}
-#endif  /* EXP_CHARTRANS */
     }
 
 
-#if 0				/* 000000 */
-    {
-	if (HTMainText->node_anchor->charset != NULL &&
-	    *HTMainText->node_anchor->charset != '\0') {
-#ifdef EXP_CHARTRANS
-	    /*
-	     *  For now, don't send charset if we may have translated.
-	     *  Although this is when it would be most needed (unless
-	     *  we translate back to the server's charset, which is
-	     *  currently not done).  But currently there aren't many
-	     *  servers or scripts which understand it anyway, so at
-	     *  least we try not to lie. - kw
-	     */
-#if 0
-	    if (!UCNeedNotTranslate(current_char_set,
-				    UCGetLYhndl_byMIME(
-					HTMainText->node_anchor->charset)));
-#endif
-	    if (target_cs < 0) {
-		/*  Do nothing */
-	    } else
-#endif
-	    if (Boundary == NULL &&
-#ifdef EXP_CHARTRANS
-		form_has_8bit &&
-		target_cs >= 0 &&
-#endif
-	        (strcasecomp(HTMainText->node_anchor->charset, "iso-8859-1") ||
-		 strcasecomp(target_csname, "iso-8859-1"))) {
-		StrAllocCat(doc->post_content_type, "; charset=");
-		StrAllocCat(doc->post_content_type,
-			    HTMainText->node_anchor->charset);
-	    } else
-	    if (Boundary == NULL &&
-#ifdef EXP_CHARTRANS
-		target_cs >= 0 &&
-#endif
-	        strcasecomp(HTMainText->node_anchor->charset, "iso-8859-1") &&
-		strcasecomp(HTMainText->node_anchor->charset, "us-ascii")) {
-		StrAllocCat(doc->post_content_type, "; charset=");
-		StrAllocCat(doc->post_content_type,
-			    HTMainText->node_anchor->charset);
-	    } else if (Boundary != NULL) {
-	        MultipartContentType = (char *)calloc(1,
-			     (40 + strlen(HTMainText->node_anchor->charset)));
-		if (query == NULL)
-		    outofmem(__FILE__, "HText_SubmitForm");
-		sprintf(MultipartContentType,
-			"\r\nContent-Type: text/plain; charset=%s",
-			HTMainText->node_anchor->charset);
-		ct_charset_startpos = strchr(MultipartContentType, ';');
-	    }
-	}
-#ifdef EXP_CHARTRANS
-    } else if (Boundary == NULL &&
-	       form_has_8bit &&
-	       target_cs >= 0 &&
-	       strcasecomp(target_csname, "iso-8859-1")) {
-	StrAllocCat(doc->post_content_type, "; charset=");
-	StrAllocCat(doc->post_content_type,
-		    HTMainText->node_anchor->charset);
-#endif /* EXP_CHARTRANS */
-    }
-#endif /* 000000 */
+    out_csname = target_csname;
 
     /*
      *  Reset anchor->ptr.
@@ -6840,7 +6987,6 @@ PUBLIC void HText_SubmitForm ARGS4(
 	    if (anchor_ptr->input_field->number == form_number) {
 		char *p;
 		int out_cs;
-		CONST char * out_csname;
                 form_ptr = anchor_ptr->input_field;
 
 		if (form_ptr->type != F_TEXTAREA_TYPE)
@@ -6890,9 +7036,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 		case F_HIDDEN_TYPE:
 #ifdef EXP_CHARTRANS
 		    /*
-		     *  Charset-translate value now, because we need
-		     *  to know the charset parameter for multipart
-		     *  bodyparts. - kw
+		     *	Be sure to actually look at the option submit value.
 		     */
 		    if (form_ptr->cp_submit_value != NULL) {
 			val_used = form_ptr->cp_submit_value;
@@ -6900,9 +7044,16 @@ PUBLIC void HText_SubmitForm ARGS4(
 			val_used = form_ptr->value;
 		    }
 
+		    /*
+		     *  Charset-translate value now, because we need
+		     *  to know the charset parameter for multipart
+		     *  bodyparts. - kw
+		     */
 		    field_has_8bit = NO;
 		    field_has_special = NO;
-		    for (p = val_used; p && *p && !field_has_8bit; p++) {
+		    for (p = val_used;
+			 p && *p && !(field_has_8bit && field_has_special);
+			 p++) {
 			if ((*p == HT_NON_BREAK_SPACE) ||
 			    (*p == HT_EM_SPACE) ||
 			    (*p == LY_SOFT_HYPHEN)) {
@@ -6933,18 +7084,6 @@ PUBLIC void HText_SubmitForm ARGS4(
 			if (success) {
 			    val_used = copied_val_used;
 			}
-			if (Boundary) {
-			    if (!success) {
-				StrAllocCopy(MultipartContentType, "");
-				target_csname = NULL;
-			    } else {
-				if (!target_csname)
-				    target_csname = LYCharSet_UC[target_cs].MIMEname;
-				StrAllocCopy(MultipartContentType,
-					     "\r\nContent-Type: text/plain; charset=");
-				StrAllocCat(MultipartContentType, target_csname);
-			    }
-			}
 		    } else {  /* We can use the value directly. */
 			if (TRACE) {
 			    fprintf(stderr,
@@ -6953,22 +7092,22 @@ PUBLIC void HText_SubmitForm ARGS4(
 				    target_cs,
 				    target_csname ? target_csname : "???");
 			}
-			copied_val_used = NULL;
 			success = YES;
 		    }
 		    if (!success) {
 			if (!had_chartrans_warning) {
 			    had_chartrans_warning = YES;
 			    _user_message(
-				"Cannot convert form data to charset %s!",
+				CANNOT_TRANSCODE_FORM,
 				target_csname ? target_csname : "UNKNOWN");
 			    sleep(AlertSecs);
 			}
 			out_cs = form_ptr->value_cs;
-			out_csname = LYCharSet_UC[out_cs].MIMEname;
 		    } else {
 			out_cs = target_cs;
 		    }
+		    if (out_cs >= 0)
+			out_csname = LYCharSet_UC[out_cs].MIMEname;
 		    if (Boundary) {
 			if (!success && form_ptr->value_cs < 0) {
 			    /*  This is weird. */
@@ -6976,10 +7115,9 @@ PUBLIC void HText_SubmitForm ARGS4(
 					 "\r\nContent-Type: text/plain; charset=");
 			    StrAllocCat(MultipartContentType, "UNKNOWN-8BIT");
 			} else if (!success) {
-			    target_csname = LYCharSet_UC[form_ptr->value_cs].MIMEname;
 			    StrAllocCopy(MultipartContentType,
 					 "\r\nContent-Type: text/plain; charset=");
-			    StrAllocCat(MultipartContentType, target_csname);
+			    StrAllocCat(MultipartContentType, out_csname);
 			    target_csname = NULL;
 			} else {
 			    if (!target_csname) {
@@ -6987,7 +7125,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 			    }
 			    StrAllocCopy(MultipartContentType,
 					 "\r\nContent-Type: text/plain; charset=");
-			    StrAllocCat(MultipartContentType, target_csname);
+			    StrAllocCat(MultipartContentType, out_csname);
 			}
 		    }
 
@@ -7009,7 +7147,9 @@ PUBLIC void HText_SubmitForm ARGS4(
 
 		    name_has_8bit = NO;
 		    name_has_special = NO;
-		    for (p = name_used; p && *p && !name_has_8bit; p++) {
+		    for (p = name_used;
+			 p && *p && !(name_has_8bit && name_has_special);
+			 p++) {
 			if ((*p == HT_NON_BREAK_SPACE) ||
 			    (*p == HT_EM_SPACE) ||
 			    (*p == LY_SOFT_HYPHEN)) {
@@ -7047,9 +7187,6 @@ PUBLIC void HText_SubmitForm ARGS4(
 			    } else {
 				if (!target_csname)
 				    target_csname = LYCharSet_UC[target_cs].MIMEname;
-				StrAllocCopy(MultipartContentType,
-					     "\r\nContent-Type: text/plain; charset=");
-				StrAllocCat(MultipartContentType, target_csname);
 			    }
 			}
 		    } else {  /* We can use the name directly. */
@@ -7069,12 +7206,24 @@ PUBLIC void HText_SubmitForm ARGS4(
 			if (!had_chartrans_warning) {
 			    had_chartrans_warning = YES;
 			    _user_message(
-				"Cannot convert form name to charset %s!",
+				CANNOT_TRANSCODE_FORM,
 				target_csname ? target_csname : "UNKNOWN");
 			    sleep(AlertSecs);
 			}
 		    }
 		    if (Boundary) {
+			/*
+			 *  According to RFC 1867, Non-ASCII field names
+			 *  "should be encoded according to the prescriptions
+			 *  of RFC 1522 [...].  I don't think RFC 1522 actually
+			 *  is meant to apply to parameters like this, and it
+			 *  is unknown wheter any server would make sense of
+			 *  it, so for now just use some quoting/escaping and
+			 *  otherwise leave 8-bit values as they are.
+			 *  Non-ASCII characters in form field names submitted
+			 *  as multipart/form-data can only occur if the form
+			 *  provider specifically asked for it anyway. - kw
+			 */
 			HTMake822Word(&copied_name_used);
 			name_used = copied_name_used;
 		    }
@@ -7109,7 +7258,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 		       (form_ptr->type == F_TEXT_SUBMIT_TYPE ||
 			(form_ptr->value && *form_ptr->value != '\0' &&
 			 !strcmp(form_ptr->value, link_value)))) {
-			int cdisp_name_startpos;
+			int cdisp_name_startpos = 0;
 			if (first_one) {
 			    if (Boundary) {
 				sprintf(&query[strlen(query)],
@@ -7143,60 +7292,6 @@ PUBLIC void HText_SubmitForm ARGS4(
 			    escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
 			}
 
-#ifndef EXP_CHARTRANS
-			/*
-			 *  Be sure to actually look at
-			 *  the option submit value.
-			 */
-			if (form_ptr->cp_submit_value != NULL) {
-			    for (i = 0; form_ptr->cp_submit_value[i]; i++) {
-				if (form_ptr->cp_submit_value[i] ==
-					HT_NON_BREAK_SPACE ||
-				    form_ptr->cp_submit_value[i] ==
-					HT_EM_SPACE) {
-				    if (PlainText) {
-					form_ptr->cp_submit_value[i] = ' ';
-				    } else {
-					form_ptr->cp_submit_value[i] = 160;
-				    }
-				} else if (form_ptr->cp_submit_value[i] ==
-					LY_SOFT_HYPHEN) {
-				    form_ptr->cp_submit_value[i] = 173;
-				}
-			    }
-			    if (PlainText || Boundary) {
-				StrAllocCopy(escaped2,
-					     (form_ptr->cp_submit_value ?
-					      form_ptr->cp_submit_value : ""));
-			    } else {
-				escaped2 = HTEscapeSP(form_ptr->cp_submit_value,
-						      URL_XALPHAS);
-			    }
-			} else {
-			    for (i = 0; form_ptr->value[i]; i++) {
-				if (form_ptr->value[i] ==
-					HT_NON_BREAK_SPACE ||
-				    form_ptr->value[i] ==
-					HT_EM_SPACE) {
-				    if (PlainText) {
-					form_ptr->value[i] = ' ';
-				    } else {
-					form_ptr->value[i] = 160;
-				    }
-				} else if (form_ptr->value[i] ==
-					LY_SOFT_HYPHEN) {
-				    form_ptr->value[i] = 173;
-				}
-			    }
-			    if (PlainText || Boundary) {
-				StrAllocCopy(escaped2, (form_ptr->value ?
-							form_ptr->value : ""));
-			    } else {
-				escaped2 = HTEscapeSP(form_ptr->value,
-						      URL_XALPHAS);
-			    }
-			}
-#else /* EXP_CHARTRANS */
 			if (PlainText || Boundary) {
 			    StrAllocCopy(escaped2,
 					 (val_used ?
@@ -7204,7 +7299,6 @@ PUBLIC void HText_SubmitForm ARGS4(
 			} else {
 			    escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
 			}
-#endif /* EXP_CHARTRANS */
 
 			if (form_ptr->type == F_IMAGE_SUBMIT_TYPE) {
 			    /*
@@ -7293,60 +7387,6 @@ PUBLIC void HText_SubmitForm ARGS4(
 			} else {
 			    escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
 			}
-#ifndef EXP_CHARTRANS
-			/*
-			 *  Be sure to use the submit option value.
-			 */
-			if (form_ptr->cp_submit_value != NULL) {
-			    for (i = 0; form_ptr->cp_submit_value[i]; i++) {
-				if (form_ptr->cp_submit_value[i] ==
-					HT_NON_BREAK_SPACE ||
-				    form_ptr->cp_submit_value[i] ==
-					HT_EM_SPACE) {
-				    if (PlainText) {
-					form_ptr->cp_submit_value[i] = ' ';
-				    } else {
-					form_ptr->cp_submit_value[i] = 160;
-				    }
-				 } else if (form_ptr->cp_submit_value[i] ==
-					LY_SOFT_HYPHEN) {
-				    form_ptr->cp_submit_value[i] = 173;
-				 }
-			    }
-			    if (PlainText || Boundary) {
-				StrAllocCopy(escaped2,
-					     (form_ptr->cp_submit_value ?
-					      form_ptr->cp_submit_value : ""));
-			    } else {
-				escaped2 = HTEscapeSP(form_ptr->cp_submit_value,
-						      URL_XALPHAS);
-			    }
-			} else {
-			    for (i = 0; form_ptr->value[i]; i++) {
-				if (form_ptr->value[i] ==
-					HT_NON_BREAK_SPACE ||
-				    form_ptr->value[i] ==
-					HT_EM_SPACE) {
-				    if (PlainText) {
-					form_ptr->value[i] = ' ';
-				    } else {
-					form_ptr->value[i] = 160;
-				    }
-				} else if (form_ptr->value[i] ==
-					LY_SOFT_HYPHEN) {
-				    form_ptr->value[i] = 173;
-
-				}
-			    }
-			    if (PlainText || Boundary) {
-				StrAllocCopy(escaped2, (form_ptr->value ?
-							form_ptr->value : ""));
-			    } else {
-				escaped2 = HTEscapeSP(form_ptr->value,
-						      URL_XALPHAS);
-			    }
-			}
-#else /* EXP_CHARTRANS */
 			if (PlainText || Boundary) {
 			    StrAllocCopy(escaped2,
 					 (val_used ?
@@ -7354,7 +7394,6 @@ PUBLIC void HText_SubmitForm ARGS4(
 			} else {
 			    escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
 			}
-#endif /* EXP_CHARTRANS */
 
 			sprintf(&query[strlen(query)],
 				"%s%s%s%s%s",
@@ -7376,26 +7415,6 @@ PUBLIC void HText_SubmitForm ARGS4(
 		    break;
 
 		case F_TEXTAREA_TYPE:
-#ifndef EXP_CHARTRANS
-		    for (i = 0; form_ptr->value[i]; i++) {
-			if (form_ptr->value[i] == HT_NON_BREAK_SPACE ||
-			    form_ptr->value[i] == HT_EM_SPACE) {
-			    if (PlainText) {
-				form_ptr->value[i] = ' ';
-			    } else {
-				form_ptr->value[i] = 160;
-			    }
-			} else if (form_ptr->value[i] == LY_SOFT_HYPHEN) {
-			    form_ptr->value[i] = 173;
-			}
-		    }
-		    if (PlainText || Boundary) {
-			StrAllocCopy(escaped2, (form_ptr->value ? 
-						form_ptr->value : ""));
-		    } else {
-			escaped2 = HTEscapeSP(form_ptr->value, URL_XALPHAS);
-		    }
-#else /* EXP_CHARTRANS */
 		    if (PlainText || Boundary) {
 			StrAllocCopy(escaped2,
 				     (val_used ?
@@ -7403,7 +7422,6 @@ PUBLIC void HText_SubmitForm ARGS4(
 		    } else {
 			escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
 		    }
-#endif /* EXP_CHARTRANS */
 
 		    if (!last_textarea_name || 
 			strcmp(last_textarea_name, form_ptr->name)) {
@@ -7532,59 +7550,6 @@ PUBLIC void HText_SubmitForm ARGS4(
 			escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
 		    }
 
-#ifndef EXP_CHARTRANS
-		    /*
-		     *	Be sure to actually look at the option submit value.
-		     */
-		    if (form_ptr->cp_submit_value != NULL) {
-			for (i = 0; form_ptr->cp_submit_value[i]; i++) {
-			    if (form_ptr->cp_submit_value[i] ==
-					HT_NON_BREAK_SPACE ||
-				form_ptr->cp_submit_value[i] ==
-					HT_EM_SPACE) {
-				if (PlainText) {
-				    form_ptr->cp_submit_value[i] = ' ';
-				} else {
-				    form_ptr->cp_submit_value[i] = 160;
-				}
-			    } else if (form_ptr->cp_submit_value[i] ==
-					LY_SOFT_HYPHEN) {
-				form_ptr->cp_submit_value[i] = 173;
-			    }
-			}
-			if (PlainText || Boundary) {
-			    StrAllocCopy(escaped2,
-					 (form_ptr->cp_submit_value ?
-					  form_ptr->cp_submit_value : ""));
-			} else {
-			    escaped2 = HTEscapeSP(form_ptr->cp_submit_value,
-						  URL_XALPHAS);
-			}
-		    } else {
-			for (i = 0; form_ptr->value[i]; i++) {
-			    if (form_ptr->value[i] ==
-					HT_NON_BREAK_SPACE ||
-				form_ptr->value[i] ==
-					HT_EM_SPACE) {
-				if (PlainText) {
-				    form_ptr->value[i] = ' ';
-				} else {
-				    form_ptr->value[i] = 160;
-				}
-			    } else if (form_ptr->value[i] ==
-					LY_SOFT_HYPHEN) {
-				form_ptr->value[i] = 173;
-			    }
-			}
-			if (PlainText || Boundary) {
-			    StrAllocCopy(escaped2, (form_ptr->value ?
-						    form_ptr->value : ""));
-			} else {
-			    escaped2 = HTEscapeSP(form_ptr->value,
-						  URL_XALPHAS);
-			}
-		    }
-#else /* EXP_CHARTRANS */
 		    if (PlainText || Boundary) {
 			StrAllocCopy(escaped2,
 				     (val_used ?
@@ -7592,7 +7557,6 @@ PUBLIC void HText_SubmitForm ARGS4(
 		    } else {
 			escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
 		    }
-#endif /* EXP_CHARTRANS */
 
 		    sprintf(&query[strlen(query)],
 			    "%s%s%s%s%s",
@@ -7892,16 +7856,36 @@ PUBLIC BOOL HText_hasUTF8OutputSet ARGS1(
 
 /*
 **  Check charset and set the kcode element. - FM
+**  Info on the input charset may be passed in in two forms,
+**  as a string (if given explicitly) and as a pointer to
+**  a LYUCcharset (from chartrans mechanism); either can be NULL.
+**  For Japanes the kcode will be reset at a space or explicit
+**  line or paragraph break, so what we set here may not last for
+**  long.  It's potentially more important not to set HTCJK to
+**  NOCJK unless we are sure. - kw
 */
-PUBLIC void HText_setKcode ARGS2(
+PUBLIC void HText_setKcode ARGS3(
 	HText *,	text,
-	CONST char *,	charset)
+	CONST char *,	charset,
+	LYUCcharset *,	p_in)
 {
     if (!text)
         return;
 
     /*
-    **  Check whether we have a sepecified charset. - FM
+    **  Check whether we have some king of info. - kw
+    */
+    if (!charset && !p_in) {
+	return;
+    }
+    /*
+    **  If no explicit charset string, use the implied one. - kw
+    */
+    if (!charset || *charset == '\0') {
+	charset = p_in->MIMEname;
+    }
+    /*
+    **  Check whether we have a specified charset. - FM
     */
     if (!charset || *charset == '\0') {
 	return;
@@ -7915,7 +7899,9 @@ PUBLIC void HText_setKcode ARGS2(
     */
     if (!strcmp(charset, "shift_jis")) {
 	text->kcode = SJIS;
-    } else if (!strcmp(charset, "euc-jp") ||
+    } else if ((p_in && (p_in->enc == UCT_ENC_CJK)) ||
+	       !strcmp(charset, "euc-jp") ||
+	       !strncmp(charset, "x-euc-", 6) ||
 	       !strcmp(charset, "iso-2022-jp") ||
 	       !strcmp(charset, "iso-2022-jp-2") ||
 	       !strcmp(charset, "euc-kr") ||
@@ -7927,10 +7913,14 @@ PUBLIC void HText_setKcode ARGS2(
 	text->kcode = EUC;
     } else {
         /*
-	**  If we get to here, it's not CJK, so disable that. - FM
+	**  If we get to here, it's not CJK, so disable that if
+	**  it is enabled.  But only if we are quite sure. - FM & kw
 	*/
 	text->kcode = NOKANJI;
-	HTCJK = NOCJK;
+	if (HTCJK != NOCJK) {
+	    if (!p_in || p_in->enc != UCT_ENC_CJK)
+		HTCJK = NOCJK;
+	}
     }
 
     return;

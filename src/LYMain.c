@@ -390,6 +390,10 @@ PUBLIC BOOLEAN LYNoCore = NO_FORCED_CORE_DUMP;
 PRIVATE void FatalProblem PARAMS((int sig));
 #endif /* !VMS */
 
+#if defined(USEHASH)
+    char *lynx_lss_file=NULL;
+#endif
+
 PRIVATE void free_lynx_globals NOARGS
 {
     int i;
@@ -470,6 +474,9 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(URLDomainSuffixes);
     FREE(XLoadImageCommand);
     FREE(LYTraceLogPath);
+#if defined(USEHASH)
+    FREE(lynx_lss_file);
+#endif
     for (i = 0; i < nlinks; i++) {
         FREE(links[i].lname);
     }
@@ -477,10 +484,6 @@ PRIVATE void free_lynx_globals NOARGS
 
     return;
 }
-
-#if defined(USEHASH)
-    char *lynx_lss_file=NULL;
-#endif
 
 
 /*
@@ -780,7 +783,7 @@ PUBLIC int main ARGS2(
 	    if (!LYValidate)
 	        parse_restrictions("default");
 	    anon_restrictions_set = TRUE;
-	} else if (strcmp(argv[0], "-validate") == 0) {
+	} else if (strcmp(argv[i], "-validate") == 0) {
 	    /*
 	     *  Follow only http URLs.
 	     */
@@ -796,6 +799,18 @@ PUBLIC int main ARGS2(
                 StrAllocCopy(lynx_cfg_file, argv[i+1]);
                 i++;
             }
+
+#if defined(USEHASH)
+	} else if (strncmp(argv[i], "-lss", 4) == 0) {
+	    if ((cp=strchr(argv[i],'=')) != NULL)
+		StrAllocCopy(lynx_lss_file, cp+1);
+	    else {
+		StrAllocCopy(lynx_lss_file, argv[i+1]);
+		i++;
+	    }
+	    fprintf(stderr, "LYMain found -lss flag, lss file is %s\n",
+		    lynx_lss_file ? lynx_lss_file : "<NONE>");
+#endif
 	}
     }
 
@@ -863,6 +878,22 @@ PUBLIC int main ARGS2(
 		    if (*cp)
 			StrAllocCopy(lynx_cfg_file, cp);
 	        }
+ #if defined(USEHASH)
+	    } else if (strncmp(buf, "-lss", 4) == 0) {
+		if ((cp = strchr(buf,'=')) != NULL) {
+		    StrAllocCopy(lynx_lss_file, cp+1);
+		} else {
+		    cp = buf;
+		    while (*cp && !isspace((unsigned char)*cp))
+			cp++;
+		    while (*cp && isspace((unsigned char)*cp))
+			cp++;
+		    if (*cp)
+			StrAllocCopy(lynx_cfg_file, cp);
+	        }
+		fprintf(stderr, "LYMain found -lss flag, lss file is %s\n",
+			lynx_lss_file ? lynx_lss_file : "<NONE>");
+#endif
 	    } else if (strcmp(buf, "-get_data") == 0) {
 		/*
 		 *  User data for GET form.
@@ -1134,9 +1165,6 @@ PUBLIC int main ARGS2(
      *  Convert a '~' in the lynx-style file path to $HOME.
      */
     if ((cp = strchr(lynx_lss_file, '~'))) {
-        char *temp = NULL;
-        int len;
-
         *(cp++) = '\0';
         StrAllocCopy(temp, lynx_lss_file);
         if ((len=strlen(temp)) > 0 && temp[len-1] == '/')
@@ -1663,6 +1691,7 @@ PUBLIC int main ARGS2(
 	    if (display != NULL && *display != '\0') {
 	        LYisConfiguredForX = TRUE;
 	    }
+	    ena_csi((LYlowest_eightbit[current_char_set] > 155));
 	    status = mainloop();
 	    cleanup();
 	}
@@ -2143,17 +2172,6 @@ PRIVATE void parse_arg ARGS3(
     if (strncmp(argv[0], "-link", 5) == 0) {
         if (nextarg)
 	    ccount = atoi(cp);
-#if defined(USEHASH)
-        } else if (strncmp(argv[0], "-lss", 4) == 0) {
-            if ((cp=strchr(argv[0],'=')) != NULL)
-                StrAllocCopy(lynx_lss_file, cp+1);
-            else {
-                StrAllocCopy(lynx_lss_file, argv[1]);
-                i++;
-            }
-	    fprintf(stderr, "LYMain found -lss flag, lss file is %s\n",
-		    lynx_lss_file ? lynx_lss_file : "<NONE>");
-#endif
 
     } else if (strncmp(argv[0], "-localhost", 10) == 0) {
 	local_host_only = TRUE;
@@ -2162,6 +2180,16 @@ PRIVATE void parse_arg ARGS3(
     } else if (strncmp(argv[0], "-locexec", 8) == 0) {
 	local_exec_on_local_files = TRUE;
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
+
+#if defined(USEHASH)
+    } else if (strncmp(argv[0], "-lss", 4) == 0) {
+        /*
+	 *  Already read the alternate lynx-style file
+         *  so just check whether we need to increment i
+         */
+        if (nextarg)
+            ; /* do nothing */
+#endif
 
     } else {
         goto Output_Error_and_Help_List;
@@ -2496,16 +2524,6 @@ PRIVATE void parse_arg ARGS3(
 	HTOutputFormat = (LYPrependBase ?
 	     HTAtom_for("www/download") : HTAtom_for("www/dump"));
 	LYcols=999;
-
-#if defined(USEHASH)
-    } else if (strncmp(argv[0], "-lss", 4) == 0) {
-        /*
-	 *  Already read the alternate lynx-style file
-         *  so just check whether we need to increment i
-         */
-        if (nextarg)
-            ; /* do nothing */
-#endif
 
     } else if (strncmp(argv[0], "-stack_dump", 11) == 0) {
 	stack_dump = TRUE;

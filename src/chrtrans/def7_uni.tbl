@@ -414,7 +414,7 @@ U+03e1:p3
 U+03f4:'%
 U+03f5:j3
 # Cyrillic capital letters
-0x6e	U+0401
+0x65	U+0401
 U+0402:D%
 U+0403:G%
 U+0404:IE
@@ -1301,10 +1301,14 @@ U+208b:_-
 U+208c:_=
 U+208d:(
 U+208e:)
+# Old euro currency sign glyph:
+U+20A0:CE
 U+20a3:Ff
 U+20a4:Li
 U+20a7:Pt
 U+20a9:W=
+# New euro currency sign glyph ?
+# U+20AC:EUR
 U+2103:oC
 U+2105:c/o
 U+2109:oF
@@ -1314,6 +1318,7 @@ U+211e:Rx
 U+2120:(SM)
 U+2122:(TM)
 U+2126:Ohm
+U+212E:est.
 0x4b	U+212A	# Kelvin sign - K
 U+212b:Ang.
 U+2153: 1/3
@@ -2067,6 +2072,7 @@ U+fef9:lh-
 U+fefa:lh.
 U+fefb:la-
 U+fefc:la.
+# Symbols for C0 and C1 control characters, in case they get through...
 U+0000:NU
 U+0001:SH
 U+0002:SX
@@ -2132,6 +2138,7 @@ U+009c:ST
 U+009d:OC
 U+009e:PM
 U+009f:AC
+# Unassigned stuff in private zone (?)
 U+e000:"3
 U+e001:"1
 U+e002:"!

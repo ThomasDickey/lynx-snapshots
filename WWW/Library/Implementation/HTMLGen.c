@@ -425,7 +425,7 @@ PRIVATE void PlainToHTML_abort ARGS2(
 */
 PRIVATE CONST HTStructuredClass HTMLGeneration = /* As opposed to print etc */
 {		
-	"text/html",
+	"HTMLGen",
 	HTMLGen_free,
 	HTMLGen_abort,
 	HTMLGen_put_character, 	HTMLGen_put_string, HTMLGen_write,

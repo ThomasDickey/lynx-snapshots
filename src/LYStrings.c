@@ -12,6 +12,7 @@
 #include "LYMail.h"
 #include "LYNews.h"
 #include "LYOptions.h"
+#include "LYCharSets.h"
 
 #include <ctype.h>
 
@@ -261,7 +262,7 @@ PRIVATE int sl_parse_mouse_event ARGS3(int *, x, int *, y, int *, button)
 }
 #endif
 
-#ifdef USE_SLANG_MOUSE
+#if defined(USE_SLANG_MOUSE) || defined(NCURSES_MOUSE_VERSION)
 PRIVATE int map_function_to_key ARGS1(char, keysym)
 {
    int i;
@@ -278,6 +279,12 @@ PRIVATE int map_function_to_key ARGS1(char, keysym)
 }
 #endif
 
+PRIVATE BOOLEAN csi_is_csi = TRUE;
+PUBLIC void ena_csi ARGS1(
+    BOOLEAN,	flag)
+{
+    csi_is_csi = flag;
+}
 /*
  *  LYgetch() translates some escape sequences and may fake noecho.
  */
@@ -371,7 +378,7 @@ re_read:
     }
 #endif /* USE_SLANG */
 
-    if (c == 27 || c == 155) {      /* handle escape sequence */
+    if (c == 27 || (csi_is_csi && c == 155)) {      /* handle escape sequence */
         b = GetChar();
 
         if (b == '[' || b == 'O') {
@@ -499,7 +506,8 @@ re_read:
 	default:
 	   if (TRACE) {
 		fprintf(stderr,"Unknown key sequence: %d:%d:%d\n",c,b,a);
-		sleep(MessageSecs);
+		if (!LYTraceLogFP)
+		    sleep(MessageSecs);
 	   }
         }
 	if (isdigit(a) && (b == '[' || c == 155) && d != -1 && d != '~')
@@ -585,6 +593,8 @@ re_read:
 	   err=getmouse(&event);
 	   if (event.bstate & BUTTON1_CLICKED) {
 	     c = set_clicked_link(event.x, event.y);
+	   } else if (event.bstate & BUTTON2_CLICKED) {
+	     c = map_function_to_key (LYK_PREV_DOC);
 	   }
 #else /* pdcurses version */
               int left,right;
@@ -718,10 +728,11 @@ PUBLIC int LYEdit1 ARGS4(
     case LYE_AIX:
         /*
 	 *  Hex 97.
-	 *  Fall through as a character for CJK.
+	 *  Fall through as a character for CJK, or if this is a valid
+	 *  character in the current display character set.
 	 *  Otherwise, we treat this as LYE_ENTER.
 	 */
-	 if (HTCJK == NOCJK)
+	 if (HTCJK == NOCJK && LYlowest_eightbit[current_char_set] > 0x97)
 	     return(ch);
     case LYE_CHAR:
         /*
@@ -930,7 +941,10 @@ PUBLIC void LYRefreshEdit ARGS1(
         for (i = 0; i < nrdisplayed; i++)
 	    if ((buffer[0] = str[i]) == 1 || buffer[0] == 2 ||
 	        ((unsigned char)buffer[0] == 160 &&
-		 !(HTPassHighCtrlRaw || HTCJK != NOCJK))) {
+		 !(HTPassHighCtrlRaw || HTCJK != NOCJK ||
+		   (LYCharSet_UC[current_char_set].enc != UCT_ENC_8859 &&
+		    !(LYCharSet_UC[current_char_set].like8859
+		      & UCT_R_8859SPECL))))) {
 	        addch(' ');
 	    } else {
 		/* For CJK strings, by Masanobu Kimura */
@@ -1013,10 +1027,13 @@ again:
 	case LYE_AIX:
 	    /*
 	     *  Hex 97.
-	     *  Treat as a character for CJK.
+	     *  Treat as a character for CJK, or if this is a valid
+	     *  character in the current display character set.
 	     *  Otherwise, we treat this as LYE_ENTER.
 	     */
-	    if (HTCJK != NOCJK && ch != '\t') {
+	    if (ch != '\t' &&
+		(HTCJK != NOCJK ||
+		 LYlowest_eightbit[current_char_set] <= 0x97)) {
 	        LYLineEdit(&MyEdit,ch, FALSE);
 		break;
 	    }

@@ -4,6 +4,7 @@
 */
 #include "HTUtils.h"
 #include "tcp.h"
+#include "SGML.h"
 
 #define Lynx_HTML_Handler
 #include "HTChunk.h"
@@ -351,8 +352,9 @@ PUBLIC void LYFillLocalFileURL ARGS2(
      * directory listing for the current default. - FM
      */
     if (!strcmp(*href, "file://localhost")) {
+	char *temp2;
 #ifdef VMS
-	StrAllocCat(*href, HTVMS_wwwName(getenv("PATH")));
+	temp2 = HTVMS_wwwName(getenv("PATH"));
 #else
 	char curdir[DIRNAMESIZE];
 #if HAVE_GETCWD
@@ -361,11 +363,24 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 	getwd (curdir);
 #endif /* NO_GETCWD */
 #ifdef DOSPATH
-	StrAllocCat(*href, HTDOS_wwwName(curdir));
+	temp2 = HTDOS_wwwName(curdir);
 #else
-	StrAllocCat(*href, curdir);
+	temp2 = curdir;
 #endif /* DOSPATH */
 #endif /* VMS */
+	if (temp2[0] != '/')
+	    StrAllocCat(*href, "/");
+	/*
+	 *  Check for pathological cases - current dir has chars which
+	 *  MUST BE URL-escaped - kw
+	 */
+	if (strchr(temp2, '%') != NULL || strchr(temp2, '#') != NULL) {
+	    FREE(temp);
+	    temp = HTEscape(temp2, URL_PATH);
+	    StrAllocCat(*href, temp);
+	} else {
+	    StrAllocCat(*href, temp2);
+	}
     }
 
 #ifdef VMS
@@ -823,85 +838,6 @@ PUBLIC void LYGetChartransInfo ARGS1(
 
 #endif /* EXP_CHARTRANS */
 
-/*
-**  This function reallocates an allocated string with
-**  8-bit printable Latin characters (>= 160) converted
-**  to their HTML entity names and then translated for
-**  the current character set. - FM
-*/
-PUBLIC void LYExpandString_old ARGS1(
-	char **, str)
-{
-    char *p = *str;
-    char *q = *str;
-    CONST char *name;
-    int i, j, value, high, low, diff = 0;
-
-    /*
-    **  Don't do anything if we have no string
-    **  or are in CJK mode. - FM
-    */
-    if (!p || *p == '\0' ||
-        HTCJK != NOCJK)
-        return;
-
-    /*
-    **  Start a clean copy of the string, without
-    **  invalidating our pointer to the original. - FM
-    */
-    *str = NULL;
-    StrAllocCopy(*str, "");
-
-    /*
-    **  Check each character in the original string,
-    **  and add the characters or substitutions to
-    **  our clean copy. - FM
-    */
-    for (i = 0; p[i]; i++) {
-	/*
-	**  Substitute Lynx special character for
-	**  160 (nbsp) if HTPassHighCtrlRaw is not
-	**  set. - FM
-	*/
-        if (((unsigned char)p[i]) == 160 &&
-	    !HTPassHighCtrlRaw) {
-	    p[i] = HT_NON_BREAK_SPACE;
-	/*
-	**  Substitute Lynx special character for
-	**  173 (shy) if HTPassHighCtrlRaw is not
-	**  set. - FM
-	*/
-        } else if (((unsigned char)p[i]) == 173 &&
-	    !HTPassHighCtrlRaw) {
-	    p[i] = LY_SOFT_HYPHEN;
-	/*
-	**  Substitute other 8-bit characters based on
-	**  the LYCharsets.c tables if HTPassEightBitRaw
-	**  is not set. - FM
-	*/
-	} else if (((unsigned char)p[i]) > 160 &&
-		   !HTPassEightBitRaw) {
-	    value = (int)(((unsigned char)p[i]) - 160);
-	    p[i] = '\0';
-	    StrAllocCat(*str, q);
-	    q = &p[i+1];
-	    name = HTMLGetEntityName(value);
-	    for (low = 0, high = HTML_dtd.number_of_entities;
-		 high > low;
-		 diff < 0 ? (low = j+1) : (high = j)) {
-		/* Binary search */
-		j = (low + (high-low)/2);
-		diff = strcmp(HTML_dtd.entity_names[j], name);
-		if (diff == 0) {
-		    StrAllocCat(*str, p_entity_values[j]);
-		    break;
-		}
-	    }
-	}
-    }
-    StrAllocCat(*str, q);
-    free_and_clear(&p);
-}
 
 /*
 ** Get UCS character code for one character from UTF-8 encoded string. 
@@ -1017,35 +953,83 @@ PRIVATE char * UCPutUtf8ToBuffer ARGS3(char *, q, UCode_t, code, BOOL, terminate
     }
 }
 
+	/* as in HTParse.c, saves some calls - kw */
 PRIVATE char *hex = "0123456789ABCDEF";
 
 /*
-**  This function converts HTML named entities within a string
-**  to their translations in the active LYCharSets.c array.
-**  It also converts numeric entities to their HTML entity names
-**  and then similarly translates those.  The string is converted
-**  in place, on the assumption that the conversion strings will
-**  not be longer than the entity strings, such that the overall
-**  string will never grow.  This assumption is true for the
-**  current LYCharSets arrays.  Make sure it stays true!  If
-**  plain_space is TRUE, nbsp (160) will be treated as an ASCII
+**  This function translates a string from charset
+**  `cs_from' to charset `cs_to', reallocating it if necessary.
+**  If `do_ent' is YES, it also converts HTML named entities
+**  and numeric character references (NCRs) to their `cs_to'
+**  replacements.
+**  If plain_space is TRUE, nbsp (160) will be treated as an ASCII
 **  space (32).  If hidden is TRUE, entities will be translated
-**  but escape sequences will be passed unaltered. - FM
+**  (if `do_ent' is YES) but escape sequences will be passed unaltered.
+**  If `hidden' is FALSE, some characters are converted to Lynx special
+**  codes (160, 173, .. @@ need list @@) (or ASCII space if `plain_space'
+**  applies).  @@ is `use_lynx_specials' needed, does it have any effect? @@
+**  If `use_lynx_specials' is YES, translate byte values 160 and 173
+**  meaning U+00A0 and U+00AD given as or converted from raw char input
+**  are converted to HT_NON_BREAK_SPACE and LY_SOFT_HYPHEN, respectively
+**  (unless input and output charset are both iso-8859-1, for compatibility
+**  with previous usage in HTML.c) even if `hidden' or `plain_space' is set.
+**
+**  If `Back' is YES, the reverse is done instead i.e. Lynx special codes
+**  in the input are translated back to character values.
+**
+**  If `Back' is YES, an attempt is made to use UCReverseTransChar() for
+**  back translation which may be more efficient. (?)
+**
+**  Named entities may be converted to their translations in the
+**  active LYCharSets.c array for `cs_out' or looked up as a Unicode
+**  value which is then passed to the chartrans functions (see UCdomap.c).
+**  @@ order? @@
+**  NCRs with values in the ISO-8859-1 range 160-255 may be converted
+**  to their HTML entity names and then translated according to the
+**  LYCharSets.c array for `cs_out', in general NCRs are translated
+**  by UCdomap.c chartrans functions if necessary.
+**
+**  If `stype' is st_URL, non-ASCII characters are URL-encoded instead.
+**  The sequence of bytes being URL-encoded is the raw input character if
+**  we couldn't transtate it from `cs_in' (CJK etc.); otherwise it is the
+**  UTF-8 representation if either `cs_to' requires this or if the
+**  character's Unicode value is > 255, otherwise it should be the iso-8859-1
+**  representation.
+**  No general URL-encoding occurs for displayable ASCII characters and
+**  spaces and some C0 controls valid in HTML (LF, TAB), it is expected
+**  that other functions will take care of that as appropriate.
+**
+**  Escape characters (0x1B, '\033') are
+**  - URL-encoded       if `stype'  is st_URL,   otherwise
+**  - dropped           if `stype'  is st_other, otherwise (i.e. st_HTML)
+**  - passed            if `hidden' is TRUE or HTCJK is set, otherwise
+**  - dropped.
 */
-PRIVATE char ** LYUnEscapeEntities ARGS5(
+/*
+**  Returns pointer to the char** passed in
+**               if string translated or translation unnecessary, 
+**          NULL otherwise
+**               (in which case something probably went wrong.)
+*/
+
+PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	char **,	str,
+	int,		cs_from,
 	int,		cs_to,
+	BOOLEAN,	do_ent,
+	BOOL,		use_lynx_specials,
 	BOOLEAN,	plain_space,
 	BOOLEAN, 	hidden,
+	BOOL,		Back,
 	CharUtil_st,	stype)
 {
     char * p;
-    char *q, *Str;
+    char *q, *qs;
+    HTChunk *chunk = NULL;
     char * cp;
     char cpe;
     char *esc = NULL;
-    char buf[2];
-    char replace_buf[61];
+    char replace_buf[64];
     int uck;
     int lowest_8;
     UCode_t code;
@@ -1056,6 +1040,10 @@ PRIVATE char ** LYUnEscapeEntities ARGS5(
     CONST char ** entities = HTML_dtd.entity_names;
     CONST UC_entity_info * extra_entities = HTML_dtd.extra_entity_info;
     CONST char * name;
+    BOOLEAN no_bytetrans;
+    UCTransParams T;
+    BOOL from_is_utf8;
+    char * puni;
     enum _state
         { S_text, S_esc, S_dollar, S_paren, S_nonascii_text, S_dollar_paren,
 	S_trans_byte, S_check_ent, S_ncr, S_check_uni, S_check_name, S_named,
@@ -1072,40 +1060,92 @@ PRIVATE char ** LYUnEscapeEntities ARGS5(
     if (!str || *str == NULL || **str == '\0')
         return str;
     /*
+    **  Don't do byte translation
+    **  if original AND target character sets
+    **  are both iso-8859-1,
+    **  or if we are in CJK mode.
+    */
+    no_bytetrans = ((cs_to <= 0 && cs_from == cs_to) ||
+		    HTCJK != NOCJK);
+
+    /* No need to translate or examine the string any further */
+    if (!no_bytetrans)
+	no_bytetrans = (!use_lynx_specials && !Back &&
+			UCNeedNotTranslate(cs_from, cs_to));
+
+    /*
     **  Save malloc/calloc overhead in simple case - kw
     */
-    if (hidden && (stype != st_URL) && (strchr(*str, '&') == NULL))
+    if (do_ent && hidden && (stype != st_URL) && (strchr(*str, '&') == NULL))
+	do_ent = FALSE;
+
+    /* Can't do, caller should figure out what to do... */
+    if (!UCCanTranslateFromTo(cs_from, cs_to)) {
+	if (cs_to < 0)
+	    return NULL;
+	if (!do_ent && no_bytetrans)
+	    return NULL;
+	no_bytetrans = TRUE;
+    } else if (cs_to < 0) {
+	do_ent = FALSE;
+    }
+
+    if (!do_ent && no_bytetrans)
 	return str;
     p = *str;
 
-    if (cs_to < 0)
-	return NULL;
-    output_utf8 = (LYCharSet_UC[cs_to].enc == UCT_ENC_UTF8 ||
-		   HText_hasUTF8OutputSet(HTMainText));
-#if 0
-    cs_to = current_char_set;	/* for now */
-    lowest_8 = LYlowest_eightbit[HTAnchor_getUCLYhndl(
-					 me->node_anchor,
-					 UCT_STAGE_STRUCTURED)];
-    repl_translated_C0 = me->T.repl_translated_C0;
-#endif
+    if (!no_bytetrans) {
+	UCTransParams_clear(&T);
+	UCSetTransParams(&T, cs_from, &LYCharSet_UC[cs_from],
+			 cs_to, &LYCharSet_UC[cs_to]);
+	from_is_utf8 = (LYCharSet_UC[cs_from].enc == UCT_ENC_UTF8);
+	output_utf8 = T.output_utf8;
+	repl_translated_C0 = T.repl_translated_C0;
+	puni = p;
+    } else if (do_ent) {
+	output_utf8 = (LYCharSet_UC[cs_to].enc == UCT_ENC_UTF8 ||
+		       HText_hasUTF8OutputSet(HTMainText));
+	repl_translated_C0 = (LYCharSet_UC[cs_to].enc == UCT_ENC_8BIT_C0);
+    }
+
     lowest_8 = LYlowest_eightbit[cs_to];
-    repl_translated_C0 = (LYCharSet_UC[cs_to].enc == UCT_ENC_8BIT_C0);
 
     /*
     **  Create a buffer string seven times the length of the original,
     **  so we have plenty of room for expansions. - FM
     */
+#ifdef OLDSTUFF
     len = (strlen(p) * 7) + 1;
     if (len < 16)
 	len = 16;
     if ((Str = (char *)calloc(1, len)) == NULL) {
 	fprintf(stderr,
-		"LYUnEscapeEntities: calloc(1, %lu) failed for '%s'\r\n",
+		"LYUCFullyTranslateString_1: calloc(1, %lu) failed for '%s'\r\n",
 		(unsigned long)len, *str);
-	outofmem(__FILE__, "LYUnEscapeEntities");
+	outofmem(__FILE__, "LYUCFullyTranslateString_1");
     }
     q = Str;
+#else
+    len = strlen(p) + 16;
+    q = p;
+#endif /* OLDSTUFF */
+
+    qs = q;
+
+/*  Create the HTChunk only if we need it */
+#define CHUNK (chunk ? chunk : (chunk = HTChunkCreate2(128, len+1)))
+
+#define REPLACE_STRING(s) \
+		if (q != qs) HTChunkPutb(CHUNK, qs, q-qs); \
+		HTChunkPuts(CHUNK, s); \
+		qs = q = *str
+
+#define REPLACE_CHAR(c) if (q > p) { \
+		HTChunkPutb(CHUNK, qs, q-qs); \
+		qs = q = *str; \
+		*q++ = c; \
+	    } else \
+		*q++ = c
 
     /*
     *  Loop through string, making conversions as needed.
@@ -1123,7 +1163,7 @@ PRIVATE char ** LYUnEscapeEntities ARGS5(
 		if ((HTCJK != NOCJK && !hidden) || stype != st_HTML) {
 		    state = S_esc;
 		    if (stype == st_URL) {
-			*q++ = '%'; *q++ = '1'; *q++ = 'B';
+			REPLACE_STRING("%1B");
 			p++;
 			continue;
 		    } else if (stype != st_HTML) {
@@ -1140,10 +1180,10 @@ PRIVATE char ** LYUnEscapeEntities ARGS5(
 		    */
 		    state = S_next_char;
 		} else {
-		    state = S_check_ent;
+		    state = S_trans_byte;
 		}
 	    } else {
-		state = S_check_ent;
+		state = (do_ent ? S_check_ent : S_trans_byte);
 	    }
 	    break;
 
@@ -1203,7 +1243,7 @@ PRIVATE char ** LYUnEscapeEntities ARGS5(
 		if ((HTCJK != NOCJK && !hidden) || stype != st_HTML) {
 		    state = S_esc;
 		    if (stype == st_URL) {
-			*q++ = '%'; *q++ = '1'; *q++ = 'B';
+			REPLACE_STRING("%1B");
 			p++;
 			continue;
 		    } else if (stype != st_HTML) {
@@ -1216,8 +1256,107 @@ PRIVATE char ** LYUnEscapeEntities ARGS5(
 	    continue;
 
 	case S_trans_byte:
-	    /*  character translation could go here  */
-	    state = S_got_outchar;
+	    /*  character translation goes here  */
+	    /*
+    **  Don't do anything if we have no string,
+    **  or if original AND target character sets
+    **  are both iso-8859-1,
+    **  or if we are in CJK mode.
+    */
+	    if (*p == '\0' || no_bytetrans) {
+		state = S_got_outchar;
+		break;
+	    }
+
+	    if (Back) {
+		int rev_c;
+		if ((*p) == HT_NON_BREAK_SPACE ||
+		    (*p) == HT_EM_SPACE) {
+		    if (plain_space) {
+			code = *p = ' ';
+			state = S_got_outchar;
+			break;
+		    } else {
+			*p = 160;
+			code = 160;
+			if (LYCharSet_UC[cs_to].enc == UCT_ENC_8859 ||
+			    (LYCharSet_UC[cs_to].like8859 & UCT_R_8859SPECL)) {
+			    state = S_got_outchar;
+			    break;
+			}
+		    }
+		} else if ((*p) == LY_SOFT_HYPHEN) {
+		    *p = 173;
+		    code = 173;
+		    if (LYCharSet_UC[cs_to].enc == UCT_ENC_8859 ||
+			(LYCharSet_UC[cs_to].like8859 & UCT_R_8859SPECL)) {
+			state = S_got_outchar;
+			break;
+		    }
+		} else if (code < 127 || T.transp) {
+		    state = S_got_outchar;
+		    break;
+		}
+		rev_c = UCReverseTransChar(*p, cs_to, cs_from);
+		if (rev_c > 127) {
+		    *p = rev_c;
+		    code = rev_c;
+		    state = S_got_outchar;
+		    break;
+		}
+	    } else if (code < 127) {
+		state = S_got_outchar;
+		break;
+	    }
+	
+	    if (from_is_utf8) {
+		if (((*p)&0xc0)==0xc0) {
+		    puni = p;
+		    code = UCGetUniFromUtf8String(&puni);
+		    if (code <= 0) {
+			code = (unsigned char)(*p);
+		    } else {
+			what = P_utf8;
+		    }
+		}
+	    } else if (use_lynx_specials && !Back &&
+		       (code == 160 || code == 173) &&
+		       (LYCharSet_UC[cs_from].enc == UCT_ENC_8859 ||
+			(LYCharSet_UC[cs_from].like8859 & UCT_R_8859SPECL))) {
+		if (code == 160)
+		    code = *p = HT_NON_BREAK_SPACE;
+		else if (code == 173)
+		    code = *p = LY_SOFT_HYPHEN;
+		state = S_got_outchar;
+		break;
+	    } else if (T.trans_to_uni) {
+		code = UCTransToUni(*p, cs_from);
+		if (code <= 0) {
+		    /* What else can we do? */
+		    code = (unsigned char)(*p);
+		}
+	    } else if (T.strip_raw_char_in &&
+		       (unsigned char)(*p) >= 0xc0 &&
+		       (unsigned char)(*p) < 255) {
+		code = ((*p & 0x7f));
+		state = S_got_outchar;
+		break;
+	    } else if (!T.trans_from_uni) {
+		state = S_got_outchar;
+		break;
+	    }
+	    /*
+		    **  Substitute Lynx special character for
+		    **  160 (nbsp) if use_lynx_specials is set.
+		    */
+	    if (use_lynx_specials && !Back &&
+		(code == 160 || code == 173)) {
+		code = ((code==160 ? HT_NON_BREAK_SPACE : LY_SOFT_HYPHEN));
+		state = S_got_outchar;
+		break;
+	    }
+
+	    state = S_check_uni;
 	    break;
 
 	case S_check_ent:
@@ -1281,11 +1420,13 @@ PRIVATE char ** LYUnEscapeEntities ARGS5(
 		      			sscanf(cp, "%ld", &lcode)) != 1) ||
 		    lcode > 0x7fffffffL || lcode < 0) {
 		    state = S_recover;
+		    break;
 		} else {
 		    code = lcode;
 		    state = S_check_uni;
 		}
 		break;
+
 	case S_check_uni:
 	        /*
 		** Show the numeric entity if the value:
@@ -1503,11 +1644,28 @@ PRIVATE char ** LYUnEscapeEntities ARGS5(
 		    if (cpe != '\0')
 			*(p-1) = cpe;
 		    p = cp;
+		    state = S_done;
 	    } else if (what == P_named) {
 		*cp = cpe;
 		*q++ = '&';
+		state = S_done;
+	    } else {
+		if (T.strip_raw_char_in &&
+		    (unsigned char)(*p) >= 0xc0 &&
+		    (unsigned char)(*p) < 255) {
+		    code = (((*p) & 0x7f));
+		    state = S_got_outchar;
+		} else if (!T.output_utf8 && stype == st_HTML && !hidden &&
+		    !(HTPassEightBitRaw &&
+		      (unsigned char)(*p) >= lowest_8)) {
+		    sprintf(replace_buf, "U%.2lX", code);
+		    state = S_got_outstring;
+		} else {
+		    puni = p;
+		    code = (unsigned char)(*p);
+		    state = S_got_outchar;
+		}
 	    }
-	    state = S_done;
 	    break;
 
 	case S_named:
@@ -1661,16 +1819,9 @@ PRIVATE char ** LYUnEscapeEntities ARGS5(
 	    } else if (what == P_named) {
 		*cp = cpe;
 		p = (*cp != ';') ? (cp - 1) : cp;
+	    } else if (what == P_utf8) {
+		p = puni;
 	    }
-#if 0
-	    if (what == P_decimal || what == P_hex) {
-		if (cpe != ';' && cpe != '\0')
-		    *(--p) = cpe;
-	    } else if (what == P_named) {
-		*cp = cpe;
-		p = (*cp != ';') ? cp : (cp + 1);
-	    }
-#endif
 	    if (replace_buf[0] == '\0') {
 		state = S_next_char;
 		break;
@@ -1682,14 +1833,12 @@ PRIVATE char ** LYUnEscapeEntities ARGS5(
 		    state = S_put_urlstring;
 		}
 	    }
-	    for (i = 0; replace_buf[i]; i++)
-		*q++ = replace_buf[i];
+	    REPLACE_STRING(replace_buf);
 	    state = S_next_char;
 	    break;
 	case S_put_urlstring:
 	    esc = HTEscape(replace_buf, URL_XALPHAS);
-	    for (i = 0; esc[i]; i++)
-		*q++ = esc[i];
+	    REPLACE_STRING(esc);
 	    FREE(esc);
 	    state = S_next_char;
 	    break;
@@ -1701,22 +1850,32 @@ PRIVATE char ** LYUnEscapeEntities ARGS5(
 	    } else if (what == P_named) {
 		*cp = cpe;
 		p = (*cp != ';') ? (cp - 1) : cp;
+	    } else if (what == P_utf8) {
+		p = puni;
 	    }
-	    if (stype == st_URL) {
+	    if (stype == st_URL &&
 	    /*  Not a full HTEscape, only for 8bit and ctrl chars */
-		if (code >= 127 ||
-		    (code < 32 && (code != 9 && code != 10))) {
+		(code >= 127 ||
+		 (code < 32 && (code != 9 && code != 10)))) {
 		    state = S_put_urlchar;
 		    break;
-		}
+	    } else if (!hidden && code == 10 && *p == 10
+		       && q != qs && *(q-1) == 13) {
+		/*
+		**  If this is not a hidden string, and the current char is
+		**  the LF ('\n') of a CRLF pair, drop the CR ('\r'). - KW
+		*/
+	        *(q-1) = *p++;
+		state = S_done;
+		break;
 	    }
 	    *q++ = (char)code;
 	    state = S_next_char;
 	    break;
 	case S_put_urlchar:
 	    *q++ = '%';
-	    *q++ = hex[(code >> 4) & 15];
-	    *q++ = hex[(code & 15)];
+	    REPLACE_CHAR(hex[(code >> 4) & 15]);
+	    REPLACE_CHAR(hex[(code & 15)]);
 	    			/* fall through */
 	case S_next_char:
 	    p++;		/* fall through */
@@ -2644,344 +2803,32 @@ PRIVATE char ** LYUnEscapeEntities ARGS5(
 	}
     }
 #endif /* 0 */
-    
+
     *q = '\0';
-    if (stype == st_URL) {
-	LYTrimHead(Str);
-	LYTrimTail(Str);
+    if (chunk) {
+	HTChunkPutb(CHUNK, qs, q-qs + 1); /* also terminates */
+	if (stype == st_URL) {
+	    LYTrimHead(chunk->data);
+	    LYTrimTail(chunk->data);
+	}
+	StrAllocCopy(*str, chunk->data);
+	HTChunkFree(chunk);
+    } else {
+	if (stype == st_URL) {
+	    LYTrimHead(qs);
+	    LYTrimTail(qs);
+	}
     }
-    StrAllocCopy(*str, Str);
-    FREE(Str);
     return str;
 }
 
-/*
-**  This function converts any named or numeric character
-**  references in allocated strings to their ISO-8858-1
-**  values or to our substitutes if they are not part of
-**  that charset.  If the isURL flag is TRUE, it also
-**  hex escapes ESC and any characters greater than 159,
-**  and trims any leading or trailing blanks.  Otherwise,
-**  it strips out ESC, as would be done when the
-**  "ISO Latin 1" Character Set is selected. - FM
-*/
-PRIVATE void LYUnEscapeToLatinOne_unused ARGS2(
-	char **,	str,
-	CharUtil_st,	stype)
-{
-    char *p = *str;
-    char *q = NULL;
-    char *url = NULL;
-    char *esc = NULL;
-    char buf[2];
-    int e;
-    char *cp;
-    char cpe;
-    int len, value;
-    int high, low, diff = 0, i;
-    enum _state
-        { S_text, S_esc, S_dollar, S_paren,
-	  S_nonascii_text, S_dollar_paren } state = S_text;
+#undef REPLACE_CHAR
+#undef REPLACE_STRING
 
-    /*
-    **  Make sure we have a non-empty string. - FM
-    */
-    if (!p || *p == '\0')
-        return;
-    buf[0] = buf[1] = '\0';
-
-    /*
-    **  If the isURL flag is TRUE, set up for hex escaping. - FM
-    */
-    if (stype == st_URL) {
-        if ((url = (char *)calloc(1, ((strlen(p) * 3) + 1))) == NULL) {
-	    outofmem(__FILE__, "LYUnEscapeToLatinOne");
-	}
-	q = url;
-    } else {
-        q = p;
-    }
-
-    /*
-    **  Loop through string, making conversions as needed. - FM
-    */
-    while (*p) {
-	/*
-	**  Handle any CJK escape sequences. - FM
-	*/
-	switch(state) {
-	    case S_text:
-		if (*p == '\033') {
-		    state = S_esc;
-		    if (stype == st_URL) {
-		        buf[0] = *p;
-		        esc = HTEscape(buf, URL_XALPHAS);
-			for (e = 0; esc[e]; e++)
-		            *q++ = esc[e];
-			FREE(esc);
-		    }
-		    p++;
-		    continue;
-		}
-		break;
-
-	    case S_esc:
-		if (*p == '$') {
-		    state = S_dollar;
-		    *q++ = *p++;
-		    continue;
-		} else if (*p == '(') {
-		    state = S_paren;
-		   *q++ = *p++;
-		   continue;
-		} else {
-		    state = S_text;
-		}
-
-	    case S_dollar:
-		if (*p == '@' || *p == 'B' || *p == 'A') {
-		    state = S_nonascii_text;
-		    *q++ = *p++;
-		    continue;
-		} else if (*p == '(') {
-		    state = S_dollar_paren;
-		    *q++ = *p++;
-		    continue;
-		} else {
-		    state = S_text;
-		}
-		break;
-
-	   case S_dollar_paren:
-		if (*p == 'C') {
-		    state = S_nonascii_text;
-		    *q++ = *p++;
-		    continue;
-		} else {
-		    state = S_text;
-		}
-		break;
-
-	    case S_paren:
-		if (*p == 'B' || *p == 'J' || *p == 'T')  {
-		    state = S_text;
-		    *q++ = *p++;
-		    continue;
-		} else if (*p == 'I') {
-		    state = S_nonascii_text;
-		    *q++ = *p++;
-		    continue;
-		} else {
-		    state = S_text;
-		}
-		break;
-
-	    case S_nonascii_text:
-		if (*p == '\033') {
-		    state = S_esc;
-		    if (stype == st_URL) {
-		        buf[0] = *p;
-		        esc = HTEscape(buf, URL_XALPHAS);
-			for (e = 0; esc[e]; e++)
-		            *q++ = esc[e];
-			FREE(esc);
-		    }
-		    p++;
-		} else {
-		    *q++ = *p++;
-		}
-		continue;
-		break;
-
-	    default:
-	        p++;
-		continue;
-	}
-
-	/*
-	**  Check for a numeric or named entity. - FM
-	*/
-        if (*p == '&') {
-	    p++;
-	    len = strlen(p);
-	    /*
-	    **  Check for a numeric entity. - FM
-	    */
-	    if (*p == '#' && len > 2 &&
-	        (unsigned char)*(p+1) < 127 &&
-		isdigit((unsigned char)*(p+1))) {
-		cp = ++p;
-		while (*p && (unsigned char)*p < 127 &&
-		       isdigit((unsigned char)*p))
-		    p++;
-		cpe = *p;
-		if (*p)
-		    *p++ = '\0';
-	        /*
-		** Show the numeric entity if the value:
-		**  (1) Is greater than 255 (until we support Unicode).
-		**  (2) Is less than 32 and not valid.
-		**  (3) Is 127.
-		**  (4) Is 128 - 159.
-		*/
-		if ((sscanf(cp, "%d", &value) != 1) ||
-		    (value > 255) ||
-		    (value < 32 &&
-		     value != 9 && value != 10 && value != 13) ||
-		    (value == 127) ||
-		    (value > 127 && value < 160)) {
-		    /*
-		    **  Illegal or not yet handled value.
-		    **  Recover the "&#" and continue
-		    **  from there. - FM
-		    */
-		    *q++ = '&';
-		    *q++ = '#';
-		    if (cpe != '\0')
-		       *(p-1) = cpe;
-		    p = cp;
-		    continue;
-		}
-		/*
-		**  Convert the value as an unsigned char,
-		**  hex escaped if isURL is set and it's
-		**  8-bit, and then recycle the terminator
-		**  if it is not a semicolon. - FM
-		*/
-		if (value > 159 && stype == st_URL) {
-		    buf[0] = value;
-		    esc = HTEscape(buf, URL_XALPHAS);
-		    for (e = 0; esc[e]; e++)
-		        *q++ = esc[e];
-		    FREE(esc);
-		} else {
-	            *q++ = (unsigned char)value;
-		}
-		if (cpe != ';' && cpe != '\0') {
-		    p--;
-		    *p = cpe;
-		}
-		continue;
-	    /*
-	    **  Check for a named entity. - FM
-	    */
-	    } else if ((unsigned char)*p < 127 &&
-	    	       isalnum((unsigned char)*p)) {
-		cp = p;
-		while (*cp && (unsigned char)*cp < 127 &&
-		       isalnum((unsigned char)*cp))
-		    cp++;
-		cpe = *cp;
-		*cp = '\0';
-		for (low = 0, high = HTML_dtd.number_of_entities;
-		     high > low ;
-		     diff < 0 ? (low = i+1) : (high = i)) {
-		    /*
-		    **  Binary search.
-		    */
-		    i = (low + (high-low)/2);
-		    diff = strcmp(HTML_dtd.entity_names[i], p);
-		    if (diff == 0) {
-		        /*
-			**  Found the entity. Convert it to
-			**  an ISO-8859-1 character, or our
-			**  substitute for any non-ISO-8859-1
-			**  character, hex escaped if isURL
-			**  is set and it's 8-bit. - FM
-			*/
-			buf[0] = HTMLGetLatinOneValue(i);
-                        if (buf[0] == '\0') {
-                            /*
-                            **  The entity does not have an 8859-1
-			    **  representation of exactly one char length.
-			    **  Try to deal with it anyway - either HTEscape
-			    **  the whole mess, or pass through raw.  So
-			    **  make sure the ISO_Latin1 table, which is the
-			    **  first table in LYCharSets, has reasonable
-			    **  substitution strings! (if it really must
-			    **  have any longer than one char) - KW
-                            */
-			    if (!LYCharSets[0][i][0]) {
-				/*
-				**  Totally empty, skip. - KW
-				*/
-			        ; /* do nothing */
-			    } else if (stype == st_URL) {
-				/*
-				**  All will be HTEscape'd. - KW
-				*/
-				esc = HTEscape(LYCharSets[0][i], URL_XALPHAS);
-				for (e = 0; esc[e]; e++)
-				    *q++ = esc[e];
-				FREE(esc);
-			    } else {
-				/*
-				**  Nothing will be HTEscape'd. - KW 
-				*/
-				for (e = 0; LYCharSets[0][i][e]; e++) {
-				    *q++ =
-					(unsigned char)(LYCharSets[0][i][e]);
-				}
-			    }
-		        } else if ((unsigned char)buf[0] > 159 &&
-				   stype == st_URL) {
-			    esc = HTEscape(buf, URL_XALPHAS);
-			    for (e = 0; esc[e]; e++)
-				*q++ = esc[e];
-			    FREE(esc);
-			} else {
-			    *q++ = buf[0];
-			}
-			/*
-			**  Recycle the terminator if it isn't
-			**  the standard ';' for HTML. - FM
-			*/
-			*cp = cpe;
-			if (*cp != ';')
-			    p = cp;
-			else
-			    p = (cp+1);
-			break;
-		    }
-		}
-		*cp = cpe;
-		if (diff != 0) {
-		    /*
-		    **  Entity not found.  Add the '&' and
-		    **  continue processing from there. - FM
-		    */
-		    *q++ = '&';
-		}
-		continue;
-	    /*
-	    **  If we get to here, it's a raw ampersand. - FM
-	    */
-	    } else {
-		*q++ = '&';
-		continue;
-	    }
-	/*
-	**  Not an entity.  Use the character. - FM
-	*/
-	} else {
-	  *q++ = *p++;
-	}
-    }
-    
-    /*
-    **  Clean up and return. - FM
-    */
-    *q = '\0';
-    if (stype == st_URL) {
-        LYTrimHead(url);
-	LYTrimTail(url);
-        StrAllocCopy(*str, url);
-	FREE(url);
-    }
-}
+#ifdef OLDSTUFF
 
 /*
-**  This is a generalized version of LYExpandString.
+**  This is a generalized version of what was previously LYExpandString.
 **
 **  This function translates a string from charset
 **  cs_from to charset cs_to, reallocating it if necessary.
@@ -3208,6 +3055,8 @@ PRIVATE BOOL LYUCTranslateString ARGS7(
     return YES;
 }
 
+#endif /* OLDSTUFF */
+
 PUBLIC BOOL LYUCFullyTranslateString ARGS7(
 	char **, str,
 	int,	cs_from,
@@ -3219,12 +3068,16 @@ PUBLIC BOOL LYUCFullyTranslateString ARGS7(
 {
     BOOL ret = YES;
     /* May reallocate *str even if cs_to == 0 */
+#ifdef OLDSTUFF
     if (!LYUCTranslateString(str, cs_from, cs_to, use_lynx_specials, FALSE, NO, stype)) {
 	LYExpandString_old(str);
 	ret = NO;
     }
+#endif
 
-    if (!LYUnEscapeEntities(str, cs_to, plain_space, hidden, stype)) {
+    if (!LYUCFullyTranslateString_1(str, cs_from, cs_to, TRUE,
+				    use_lynx_specials, plain_space, hidden,
+				    NO, stype)) {
 	ret = NO;
     }
     return ret;
@@ -3236,29 +3089,17 @@ PUBLIC BOOL LYUCTranslateBackFormData ARGS4(
 	int,	cs_to,
 	BOOLEAN,	plain_space)
 {
-    /* May reallocate *str even if cs_to == 0 */
+    char ** ret;
+    /* May reallocate *str */
+#ifdef OLDSTUFF
     return (LYUCTranslateString(str, cs_from, cs_to, NO, plain_space, YES, st_HTML));
-
+#else
+    ret = (LYUCFullyTranslateString_1(str, cs_from, cs_to, FALSE,
+				       NO, plain_space, YES,
+				       YES, st_HTML));
+    return (ret != NULL);
+#endif
 }
-
-#ifdef NOTUSED
-PUBLIC BOOL LYUCFullyTranslateString ARGS6(
-	char **, str,
-	int,	cs_from,
-	int,	cs_to,
-	BOOL,	use_lynx_specials,
-	BOOLEAN,	plain_space,
-	BOOLEAN,	hidden)
-{
-    if (cs_to) {
-	if (!LYUCTranslateString(str, cs_from, cs_to, use_lynx_specials))
-	    LYExpandString_old(str);
-    }
-    /* Note that it is guaranteed that *str is not reallocated
-       if cs_to == 0 */
-    LYUnEscapeEntities(*str, plain_space, hidden);
-}
-#endif /* NOTUSED */
 
 /*
 **  This function processes META tags in HTML streams. - FM
@@ -3478,6 +3319,7 @@ PUBLIC void LYHandleMETA ARGS4(
     } else if (!(me->node_anchor->charset && *me->node_anchor->charset) && 
 	       !strcasecomp((http_equiv ? http_equiv : ""), "Content-Type")) {
 #ifdef EXP_CHARTRANS
+	LYUCcharset * p_in = NULL;
 	LYUCFullyTranslateString(&content, me->tag_charset, me->tag_charset,
 				 NO, NO, YES, st_other);
 #else
@@ -3541,14 +3383,13 @@ PUBLIC void LYHandleMETA ARGS4(
 	    }
 	    FREE(cp3);
 	    if (chartrans_ok) {
-		LYUCcharset * p_in =
-				HTAnchor_getUCInfoStage(me->node_anchor,
-							UCT_STAGE_PARSER);
 		LYUCcharset * p_out =
 				HTAnchor_setUCInfoStage(me->node_anchor,
 							current_char_set,
 							UCT_STAGE_HTEXT,
 							UCT_SETBY_DEFAULT);
+		p_in = HTAnchor_getUCInfoStage(me->node_anchor,
+					       UCT_STAGE_PARSER);
 		if (!p_out) {
 		    /*
 		     *  Try again.
@@ -3658,7 +3499,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	/*
 	 *  Set the kcode element based on the charset. - FM
 	 */
-	HText_setKcode(me->text, me->node_anchor->charset);
+	HText_setKcode(me->text, me->node_anchor->charset, p_in);
 
     /*
      *  Check for a Refresh directive. - FM
@@ -4577,19 +4418,67 @@ PUBLIC void LYResetParagraphAlignment ARGS1(
     return;
 }
 
+/*
+**  This is an example interface for accessing elements of the HTML
+**  parser's HTStructured object by the SGML parser.  The SGML parser
+**  knows the HTML parsers's HTStructured objects as context->target
+**  elements, and, homologously, uses them as an argument in calls to
+**  HTML_start_element() and HTML_end_element(), but should not
+**  manipulate the context->target's elements, itself, because those
+**  are defined in the Lynx_HTML_Handler section of HTML.h, to which
+**  SGML.c is blind.  This *example* function check's whether the
+**  node_anchor element of an HTML parser HTStructured object has
+**  an address with a file scheme, and if so, loads it into the
+**  the SGML parser's context->url element, which was passed as
+**  the second argument.  The handle_comment() calling function in
+**  SGML.c then calls LYDoCSI() in LYUtils.c to insert HTML markup
+**  into the corresponding stream, homologously to an SSI by an
+**  HTTP server. - FM
+**  Since SGML.c is blind to the HTML parsers's HTStructured object
+**  details it may be calling this function inappropriately when
+**  its context->target isn't actually the HTStructured object
+**  implemented in HTML.c but one in HTMLDTD.c.  Therefore this
+**  function checks for the expected HTStructuredClass's signature
+**  in me->isa->name before doing anything else which requires
+**  access to the expected HTStructured object's data fields, and
+**  returns a failure indication if it finds that it has been called
+**  inappropriately. - kw
+**  Functions such as this also could
+**  be used to set the values of elements (existing ones, or any
+**  new ones needed for future development) in the HTML parser's
+**  HTStructured objects, so that they will be accessible to all
+**  Lynx_HTML_Handler utility functions, thus avoiding the need
+**  to increase the number of arguments in the calls to those
+**  functions, and keeping them object-specific via their 'me'
+**  arguments. - FM
+**  But to generalize the SGML.c -> HTStructured calling mechanism
+**  so that it can deal with more than one implementation of what
+**  SGML.c sees as context->target, new functions will either have
+**  to check whether they are called for the expected kind of target
+**  object (such as here), or they have to come in several object-
+**  specific versions to work across all possible target object classes;
+**  in the latter case they should become new member functions of the
+**  Structured Object definition in SGML.h. - kw
+*/
 PUBLIC BOOLEAN LYCheckForCSI ARGS2(
-	HTParentAnchor *, 	anchor,
+	HTStructured *, 	me,
 	char **,		url)
 {
-    if (!(anchor && anchor->address))
+    if (!me)
         return FALSE;
 
-    if (strncasecomp(anchor->address, "file:", 5))
+    if (!me->isa || strcmp(me->isa->name, "Lynx_HTML_Handler"))
+	return FALSE;
+
+    if (!(me->node_anchor && me->node_anchor->address))
         return FALSE;
 
-    if (!LYisLocalHost(anchor->address))
+    if (strncasecomp(me->node_anchor->address, "file:", 5))
         return FALSE;
-     
-    StrAllocCopy(*url, anchor->address);
+
+    if (!LYisLocalHost(me->node_anchor->address))
+        return FALSE;
+
+    StrAllocCopy(*url, me->node_anchor->address);
     return TRUE;
 }

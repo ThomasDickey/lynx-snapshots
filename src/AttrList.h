@@ -48,10 +48,13 @@ typedef struct {
  int cattr; /* attributes to go with the color */
 } HTCharStyle;
 
+#ifdef NOT_USED
+
 typedef struct _linkedlist {
  char name[64];
  struct _linkedlist *next;
 } linked_list;
+#endif
 
 #define HText_characterStyle if(TRACE)fprintf(stderr,"HTC called from %s/%d\n",__FILE__,__LINE__);_internal_HTC
 

@@ -3,6 +3,9 @@ $!			LIBMAKE.COM
 $!
 $!   Command file to build the WWWLibrary on VMS systems.
 $!
+$!   08-Oct-1997	F.Macrides		macrides@sci.wfeb.edu
+$!	Added comments and minor tweaks for convenient addition of
+$!	compiler definitions and compiler and linker options.
 $!   26-Jul-1995	F.Macrides		macrides@sci.wfeb.edu
 $!	Adding support for GNUC.
 $!   03-May-1995	F.Macrides		macrides@sci.wfeb.edu
@@ -27,8 +30,19 @@ $!	Initial version, for WWWLibrary v2.14 with Lynx v2.1
 $!
 $ ON CONTROL_Y THEN GOTO CLEANUP
 $ ON ERROR THEN GOTO CLEANUP
-$ agent = 0
+$!
+$!	Compiler definitions can be added here as a comma separated
+$!	list with a lead comma, e.g., ",HAVE_FOO_H,DO_BLAH".  They
+$!	will apply only to the libwww-FM modules. - FM
+$!
 $ extra = ""
+$!
+$!	If no TCP/IP agent is specified (as the first argument),
+$!	prompt for a number from the list.   Note that the agent
+$!	must be the first argument if the debugger mode is to be
+$!	set via a second argument (see below). - FM
+$!
+$ agent = 0
 $ IF P1 .EQS. ""
 $ THEN
 $ 	write sys$output "Acceptable TCP/IP agents are"
@@ -50,10 +64,14 @@ $ if agent .eq. 5 .or. p1 .eqs. "SOCKETSHR_TCP" then transport = "SOCKETSHR_TCP"
 $ if agent .eq. 6 .or. p1 .eqs. "TCPWARE" then transport = "TCPWARE"
 $ if agent .eq. 7 .or. p1 .eqs. "DECNET" then transport = "DECNET"
 $!
-$ if transport .eqs. "TCPWARE" then extra = ",UCX"
+$ if transport .eqs. "TCPWARE" then extra = extra + ",UCX"
+$!
+$!	Compiler options can be specified here.  If there was
+$!	a second argument (with any value), then debugger mode
+$!	with no optimization will be specified as well. - FM
 $!
 $ cc_opts = ""
-$ if p2 .nes. "" then cc_opts = "/DEBUG/NOOPT"
+$ if p2 .nes. "" then cc_opts = cc_opts + "/DEBUG/NOOPT"
 $!
 $ IF f$trnlnm("VAXCMSG") .eqs. "DECC$MSG" .or. -
      f$trnlnm("DECC$CC_DEFAULT") .eqs. "/DECC" .or. -
@@ -80,7 +98,7 @@ $!
 $  v1 = 'f$verify(0)'
 $  Else
 $  if transport .eqs. "MULTINET" then -
-	extra = ",_DECC_V4_SOURCE,__SOCKET_TYPEDEFS"
+	extra = extra + ",_DECC_V4_SOURCE,__SOCKET_TYPEDEFS"
 $  v1 = f$verify(1)
 $!
 $ cc/decc/prefix=ansi /nomember 'cc_opts'-
@@ -142,7 +160,6 @@ $ cc [-.Implementation]HTAtom.c
 $ cc [-.Implementation]HTAnchor.c
 $ cc [-.Implementation]HTStyle.c
 $ cc [-.Implementation]HTList.c
-$ cc [-.Implementation]HTAlert.c
 $ cc [-.Implementation]HTRules.c
 $ cc [-.Implementation]HTFormat.c
 $ cc [-.Implementation]HTMIME.c

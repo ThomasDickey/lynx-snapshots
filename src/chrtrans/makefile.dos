@@ -1,0 +1,92 @@
+#
+# Makefile for the makeuctb and unicode tables
+# for use with DJGPP.
+#
+# Type make to build makeuctb  and all character translation maps.
+# Type make fontmap to build makeuctb and translation map iso8859-1.
+# Type make makeuctb.exe to build makeuctb only.
+# Type make clean to remove makeuctb and character translation maps.
+# Type make distclean to remove makeuctb, character translation maps
+# and .bak files.
+#
+CFLAGS = $(MCFLAGS)
+
+CC = gcc
+MCFLAGS = -O3 -DEXP_CHARTRANS -DDOSPATH -DNO_TTYTYP \
+-I../../WWW/library/implement -I../../djgpp/tcplib/include \
+-I../../djgpp/tcplib/include/tcp
+
+.SUFFIXES: .tbl
+#
+# This file contains the font map for the default (hardware) font
+#
+
+FONTMAP_INC = iso01_un.h
+
+CHRTR=
+
+TABLES= $(CHRTR)iso01_un.h \
+ $(CHRTR)iso02_un.h \
+ $(CHRTR)def7_uni.h \
+ $(CHRTR)iso03_un.h \
+ $(CHRTR)iso04_un.h \
+ $(CHRTR)iso05_un.h \
+ $(CHRTR)iso06_un.h \
+ $(CHRTR)iso07_un.h \
+ $(CHRTR)iso08_un.h \
+ $(CHRTR)iso09_un.h \
+ $(CHRTR)iso10_un.h \
+ $(CHRTR)koi8r_un.h \
+ $(CHRTR)cp437_un.h \
+ $(CHRTR)cp850_un.h \
+ $(CHRTR)cp852_un.h \
+ $(CHRTR)cp866_un.h \
+ $(CHRTR)cp1250_u.h \
+ $(CHRTR)cp1251_u.h \
+ $(CHRTR)cp1252_u.h \
+ $(CHRTR)viscii_u.h \
+ $(CHRTR)utf8_uni.h \
+ $(CHRTR)rfc_suni.h \
+ $(CHRTR)mnemonic.h \
+ $(CHRTR)mnem_sun.h
+
+default: $(TABLES)
+
+fontmap: $(FONTMAP_INC)
+
+makeuctb.exe: makeuctb.c UCkd.h
+	$(CC) $(CFLAGS) -o makeuctb.exe makeuctb.c
+	strip makeuctb.exe
+
+.tbl.h:
+	./makeuctb $*.tbl > $@
+
+iso01_un.h: iso01_un.tbl makeuctb.exe
+iso02_un.h: iso02_un.tbl makeuctb.exe
+def7_uni.h: def7_uni.tbl makeuctb.exe
+iso03_un.h: iso03_un.tbl makeuctb.exe
+iso04_un.h: iso04_un.tbl makeuctb.exe
+iso05_un.h: iso05_un.tbl makeuctb.exe
+iso06_un.h: iso06_un.tbl makeuctb.exe
+iso07_un.h: iso07_un.tbl makeuctb.exe
+iso08_un.h: iso08_un.tbl makeuctb.exe
+iso09_un.h: iso09_un.tbl makeuctb.exe
+iso10_un.h: iso10_un.tbl makeuctb.exe
+koi8r_un.h: koi8r_un.tbl makeuctb.exe
+cp437_un.h: cp437_un.tbl makeuctb.exe
+cp850_un.h: cp850_un.tbl makeuctb.exe
+cp852_un.h: cp852_un.tbl makeuctb.exe
+cp1250_u.h: cp1250_u.tbl makeuctb.exe
+cp1251_u.h: cp1251_u.tbl makeuctb.exe
+cp1252_u.h: cp1252_u.tbl makeuctb.exe
+utf8_uni.h: utf8_uni.tbl makeuctb.exe
+mnemonic.h: mnemonic.tbl makeuctb.exe
+mnem_sun.h: mnem_sun.tbl makeuctb.exe
+rfc_suni.h: rfc_suni.tbl makeuctb.exe
+
+clean:
+	rm -f makeuctb.exe makeuctb *.o *un.h *u.h *c.h *i.h
+
+distclean: clean
+	-rm -f *.bak
+

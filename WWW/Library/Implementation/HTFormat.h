@@ -256,6 +256,17 @@ extern HTStream * HTStreamStack PARAMS((
         HTParentAnchor*         anchor));
 
 /*
+HTReorderPresentation: put presentation near head of list
+
+    Look up a presentation (exact match only) and, if found, reorder
+    it to the start of the HTPresentations list. - kw
+    */
+
+extern void HTReorderPresentation PARAMS((
+        HTFormat                format_in,
+        HTFormat                format_out));
+
+/*
 
 HTStackValue: Find the cost of a filter stack
 

@@ -63,7 +63,7 @@ LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_DELP,
 
-/* 80..99 ISO-8859-1 8-bit escape characters. */
+/* 80..9F ISO-8859-1 8-bit escape characters. */
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,
 LYE_CHAR,       LYE_CHAR,       LYE_CHAR,       LYE_CHAR,

@@ -47,6 +47,12 @@ Create new chunk
 
 extern HTChunk * HTChunkCreate PARAMS((int growby));
 
+/*
+ *  Like HTChunkCreate but with initial allocation - kw
+ *
+ */
+extern HTChunk * HTChunkCreate2 PARAMS((int growby, size_t needed));
+
 
 /*
 
@@ -117,6 +123,8 @@ Append a character to a  chunk
                          
  */
 extern void HTChunkPutc PARAMS((HTChunk * ch, char c));
+
+extern void HTChunkPutb PARAMS((HTChunk * ch, CONST char *b, int l));
 
 #ifdef EXP_CHARTRANS
 extern void HTChunkPutUtf8Char PARAMS((HTChunk * ch, UCode_t code));

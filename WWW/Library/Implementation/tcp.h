@@ -329,6 +329,7 @@ extern char *vms_errno_string();
 #include "multinet_root:[multinet.include.arpa]inet.h"
 #include "multinet_root:[multinet.include]netdb.h"
 #include "multinet_root:[multinet.include.sys]ioctl.h"
+#define TCP_INCLUDES_DONE
 /*
 **  Uncomment this if you get compiler messages
 **  about struct timeval having no linkage. - FM
@@ -352,6 +353,7 @@ struct timeval {
 #include "dn"
 #include "dnetdb"
 /* #include "vms.h" */
+#define TCP_INCLUDES_DONE
 #endif /* DECNET */
 
 
@@ -369,6 +371,7 @@ struct timeval {
 #include <netdb.h>
 #include <ucx$inetdef.h>
 #endif /* TCPWARE */
+#define TCP_INCLUDES_DONE
 #endif /* UCX */
 
 
@@ -381,6 +384,7 @@ struct timeval {
 #include <inet.h>
 #include <netdb.h>
 #include "cmuip_root:[syslib]ioctl.h"
+#define TCP_INCLUDES_DONE
 #endif /* CMU_TCP */
 
 
@@ -394,6 +398,7 @@ struct timeval {
 #include <netdb.h>
 #include "socketshr_library:socketshr.h"
 #include "socketshr_library:ioctl.h"
+#define TCP_INCLUDES_DONE
 #endif /* SOCKETSHR_TCP */
 
 #ifdef WIN_TCP
@@ -407,10 +412,33 @@ struct timeval {
 #ifndef NO_IOCTL
 #include <ioctl.h>
 #endif /* !NO_IOCTL */
+#define TCP_INCLUDES_DONE
 #endif /* WIN_TCP */
 
-
+#ifndef TCP_INCLUDES_DONE
+#include <types.h>
+#include <errno.h>
+#include <time.h>
+#ifdef VMS_SOCKET_HEADERS
+/*
+**  Not all versions of VMS have the full set of headers
+**  for socket library functions, because the TCP/IP
+**  packages were layered products.  If we want these
+**  specifically, instead of those for the above packages,
+**  the module should be compiled with VMS_SOCKET_HEADERS
+**  defined instead of layered product definitions, above.
+**  If the module is not using socket library functions,
+**  none of the definitions need be used, and we include
+**  only the above three headers. - FM
+*/
+#include <socket.h>
+#include <in.h>
+#include <inet.h>
+#include <netdb.h>
+#include <ioctl.h>
+#endif /* VMS_SOCKET_HEADERS */
 #define TCP_INCLUDES_DONE
+#endif /* !TCP_INCLUDES_DONE */
 
 /*
 

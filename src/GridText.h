@@ -192,7 +192,10 @@ extern void HText_setNoCache PARAMS((HText *text));
 extern BOOL HText_hasNoCacheSet PARAMS((HText *text));
 
 extern BOOL HText_hasUTF8OutputSet PARAMS((HText *text));
-extern void HText_setKcode PARAMS((HText *text, CONST char *charset));
+extern void HText_setKcode PARAMS((
+	HText *		text,
+	CONST char *	charset,
+	LYUCcharset *	p_in));
 
 extern void HText_setBreakPoint PARAMS((HText *text));
 

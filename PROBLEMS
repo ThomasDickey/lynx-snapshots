@@ -8,6 +8,7 @@ they will be outlined in this file.
     problems, use -restrictions=suspend to disable it, and only '!'
     for escapes to shell (on VMS control-Z is unconditional 'Q'uit,
     with no attempt to suspend the Lynx process only temporarily).
+    Control-Z on Unix often works better with slang.
 
     Screen resizing can be a bit funny.  If you resize the screen, 
     documents that have been cached will be out of whack.  Any further 
@@ -95,13 +96,34 @@ they will be outlined in this file.
     	  patches PHCO_8086 and PHCO_8947 from HP.
 
     Lynx juggles variable abilities of curses packages or emulations to
-    display bolding and underlining simultaneously.  One consequence of
-    the current code, affected (fancy) curses and slang implementations,
-    is that if a link is both bolded and underlined based on the markup,
-    the underlining will be lost and only the bolding will be restored
-    following it's being reversed to indicate it as the current link,
-    and the additional underlining will not be restored until/unless
-    the page is refreshed.  
+    display bolding and underlining simultaneously.  This may fail if
+    Lynx thinks that your terminal, in connection with the curses package,
+    supports a capability which the terminal hardware or emulation does not
+    in fact support.  Setting the right TERM environment variable, tweaking
+    terminfo or termcap files, or compiling with a newer version of ncurses
+    or slang may solve problems with missing highlighting or strange
+    characters appearing on the screen.  Also, for a mono terminal, make sure
+    that there is no "show color (&)  : ON" on the Options screen.
+
+    The Wyse 50 and older TeleVideo terminals, among others, are
+    "magic cookie" terminals.  This means that display attributes like
+    reverse, blink, underline, etc. work in a bizarre way that makes them
+    difficult to program.  You may see extra spaces scattered around your
+    screen (separating different sorts of highlight); or sections of the
+    screen may be unexpectedly highlighted.
+    There is a workaround which works by restricting the terminal to a
+    single standout attribute (e.g.  normal and reverse, but no others).
+    Implementing the workaround is specific to your curses implementation.
+    Most versions of curses use one of two terminal databases, called
+    "termcap" and "terminfo".  Updating these databases is system-specific.
+    New databases should be available from the vendor or other sources.
+    For the Wyse 50, try
+       <URL: http://www.wyse.com/text/custserv/faq/wy50faq.htm>;
+    extract the "wy50" (NOT "wy50-mc") entry and use that in place of the
+    existing one.  See `terminfo', `infocmp', `tic' etc. man pages if
+    necessary.
+    Alternatively, compiling Lynx with the slang library may avoid problems
+    with theses terminals.
 
     On VMS, Lynx, and other TCP-IP software, have been experiencing chronic
     problems of incompatibilites between DECC and MultiNet headers whenever

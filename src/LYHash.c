@@ -10,9 +10,10 @@
 
 #include "LYHash.h"
 
-PUBLIC int hash_table[HASHSIZE]; /* 32K should be big enough */
-
 #ifdef NOT_USED
+
+PUBLIC int hash_table[CSHASHSIZE]; /* 32K should be big enough */
+
 PUBLIC int hash_code_rp ARGS1(char*,string)
 {
 	char* hash_ptr = string;
@@ -23,7 +24,7 @@ PUBLIC int hash_code_rp ARGS1(char*,string)
 		hash_tmp ^= (((*hash_ptr)<<4) ^ ((*hash_ptr)<<12));
 		hash_tmp >>= 1;
 	}
-	return (hash_tmp % HASHSIZE);
+	return (hash_tmp % CSHASHSIZE);
 }
 #endif
 
@@ -32,7 +33,11 @@ PUBLIC int hash_code_rp ARGS1(char*,string)
  *      but with a different value for HASH_SIZE.
  */ 
 
+#ifdef NOT_USED
 #define HASH_SIZE 8193		/* Arbitrary prime. Memory/speed tradeoff */
+#else
+#define HASH_SIZE CSHASHSIZE
+#endif
 
 PUBLIC int hash_code ARGS1 (char*, string)
 {

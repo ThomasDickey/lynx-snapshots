@@ -159,7 +159,7 @@ SITE_DEFS = # Your defines here
 # for installation of local execution links, please see the file userdefs.h
 #
 # TESTED: Linux FreeBSD SunOS Solaris IRIX CLIX HP-UX AIX SCO
-all:
+all lynx:
 	cd WWW/Library/unix && $(MAKE) CC="$(CC)" \
 		LYFLAGS="$(SITE_LYDEFS)"
 	cd src && $(MAKE) all CC="$(CC)" \
@@ -229,7 +229,7 @@ save:
 compress: tar
 	cd ..; rm -f $(lynxname).tar.Z; compress -f -v $(lynxname).tar
 
-install: all
+install: lynx
 	-mv -f $(bindir)/lynx $(bindir)/lynx.old
 	-mv -f $(libdir)/lynx.cfg $(libdir)/lynx.oldcfg
 	$(installbin) lynx $(bindir)/lynx

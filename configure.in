@@ -47,7 +47,7 @@ CF_ARG_ENABLE(debug,
 AC_MSG_RESULT($with_debug)
 if test "$with_debug" = "yes" ; then
 	case $host_os in
-	ultrix*)
+	ultrix*|osf4.*)
 		CF_STRIP_O_OPT(CFLAGS)
 		if test -z "$GCC" ; then
 			CFLAGS="$CFLAGS -g3"

@@ -63,6 +63,8 @@
 #include "LYCharUtils.h"
 #include "LYCookie.h"
 
+#include "LYLeaks.h"
+
 #define FREE(x) if (x) {free(x); x = NULL;}
 
 /*

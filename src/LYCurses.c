@@ -200,6 +200,7 @@ PUBLIC void setHashStyle ARGS5(int,style,int,color,int,cattr,int,mono,char*,elem
     ds->cattr=cattr;
     ds->mono=mono;
     ds->code=style;
+    FREE(ds->name);
     ds->name=malloc(sizeof(char)*(strlen(element)+2));
     strcpy(ds->name, element);
 }
@@ -766,7 +767,7 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
       button 1 is clicked */
 #ifndef _WINDOWS
    if (state)
-     mousemask(BUTTON1_CLICKED, NULL);
+     mousemask(BUTTON1_CLICKED | BUTTON2_CLICKED, NULL);
    else
      mousemask(0, NULL);
 #else

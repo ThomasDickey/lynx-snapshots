@@ -296,38 +296,29 @@ PRIVATE int half_match ARGS2(char *,trial_type, char *,target)
     return 0;
 }
 
-/*		Create a filter stack
-**		---------------------
+/*		Look up a presentation
+**		----------------------
 **
-**	If a wildcard match is made, a temporary HTPresentation
-**	structure is made to hold the destination format while the
-**	new stack is generated. This is just to pass the out format to
-**	MIME so far.  Storing the format of a stream in the stream might
-**	be a lot neater.
+**	If fill_in is NULL, only look for an exact match.
+**	If a wildcard match is made, *fill_in is used to store
+**	a possibly modified presentation, and a pointer to it is
+**	returned.  For an exact match, a pointer to the presentation
+**	in the HTPresentations list is returned.  Returns NULL if
+**	nothing found. - kw
 **
 */
-PUBLIC HTStream * HTStreamStack ARGS4(
+PRIVATE HTPresentation * HTFindPresentation ARGS3(
 	HTFormat,		rep_in,
 	HTFormat,		rep_out,
-	HTStream*,		sink,
-	HTParentAnchor*,	anchor)
+	HTPresentation*,	fill_in)
 {
     HTAtom * wildcard = HTAtom_for("*");
 
     if (TRACE)
         fprintf(stderr,
-		"HTFormat: Constructing stream stack for %s to %s\n",
+		"HTFormat: Looking up presentation for %s to %s\n",
 		HTAtom_name(rep_in), HTAtom_name(rep_out));
 		
-    /* don't return on WWW_SOURCE some people might like
-     * to make use of the source!!!!  LJM
-     *//*
-    if (rep_out == WWW_SOURCE || rep_out == rep_in)
-	return sink;  LJM */
-
-    if (rep_out == rep_in)
-        return sink;
-
     /* don't do anymore do it in the Lynx code at startup LJM */
     /* if (!HTPresentations) HTFormatInit(); */	/* set up the list */
     
@@ -346,10 +337,12 @@ PUBLIC HTStream * HTStreamStack ARGS4(
 	        if (pres->rep_out == rep_out) {
 		    if (TRACE)
 			fprintf(stderr,
-				"StreamStack: found exact match: %s\n",
+				"FindPresentation: found exact match: %s\n",
 				HTAtom_name(pres->rep));
-	    	    return (*pres->converter)(pres, anchor, sink);
+	    	    return pres;
 
+		} else if (!fill_in) {
+		    continue;
 		} else if (pres->rep_out == wildcard) {
 		    if (!strong_wildcard_match)
 		        strong_wildcard_match = pres;
@@ -359,6 +352,9 @@ PUBLIC HTStream * HTStreamStack ARGS4(
 			     "StreamStack: found strong wildcard match: %s\n",
 				HTAtom_name(pres->rep));
 		}
+
+	    } else if (!fill_in) {
+		continue;
 
 	    } else if (half_match(HTAtom_name(pres->rep),
 					      HTAtom_name(rep_in))) {
@@ -397,20 +393,82 @@ PUBLIC HTStream * HTStreamStack ARGS4(
 		last_default_match;
 	
 	if (match) {
-	    HTPresentation temp;
-	    temp = *match;		/* Specific instance */
-	    temp.rep = rep_in;		/* yuk */
-	    temp.rep_out = rep_out;	/* yuk */
-	    if (TRACE)
-		fprintf(stderr,
-			"StreamStack: Using %s\n", HTAtom_name(temp.rep_out));
-	    return (*match->converter)(&temp, anchor, sink);
+	    *fill_in = *match;		/* Specific instance */
+	    fill_in->rep = rep_in;		/* yuk */
+	    fill_in->rep_out = rep_out;	/* yuk */
+	    return fill_in;
         }
     }
 
     return NULL;
 }
-	
+
+/*		Create a filter stack
+**		---------------------
+**
+**	If a wildcard match is made, a temporary HTPresentation
+**	structure is made to hold the destination format while the
+**	new stack is generated. This is just to pass the out format to
+**	MIME so far.  Storing the format of a stream in the stream might
+**	be a lot neater.
+**
+*/
+PUBLIC HTStream * HTStreamStack ARGS4(
+	HTFormat,		rep_in,
+	HTFormat,		rep_out,
+	HTStream*,		sink,
+	HTParentAnchor*,	anchor)
+{
+    HTPresentation temp;
+    HTPresentation *match;
+
+    if (TRACE)
+        fprintf(stderr,
+		"HTFormat: Constructing stream stack for %s to %s\n",
+		HTAtom_name(rep_in), HTAtom_name(rep_out));
+		
+    /* don't return on WWW_SOURCE some people might like
+     * to make use of the source!!!!  LJM
+     *//*
+    if (rep_out == WWW_SOURCE || rep_out == rep_in)
+	return sink;  LJM */
+
+    if (rep_out == rep_in)
+        return sink;
+
+    if ((match = HTFindPresentation(rep_in, rep_out, &temp))) {
+	if (match == &temp) {
+	    if (TRACE)
+		fprintf(stderr,
+			"StreamStack: Using %s\n", HTAtom_name(temp.rep_out));
+	} else {
+	    if (TRACE)
+		fprintf(stderr,
+			"StreamStack: found exact match: %s\n",
+			HTAtom_name(match->rep));
+	}
+	return (*match->converter)(match, anchor, sink);
+    } else {
+	return NULL;
+    }
+}
+
+/*		Put a presentation near start of list
+**		-------------------------------------
+**
+**	Look up a presentation (exact match only) and, if found, reorder
+**	it to the start of the HTPresentations list. - kw
+*/
+PUBLIC void HTReorderPresentation ARGS2(
+	HTFormat,		rep_in,
+	HTFormat,		rep_out)
+{
+    HTPresentation *match;
+    if ((match = HTFindPresentation(rep_in, rep_out, NULL))) {
+	HTList_removeObject(HTPresentations, match);
+	HTList_addObject(HTPresentations, match);
+    }
+}    
 /*		Find the cost of a filter stack
 **		-------------------------------
 **

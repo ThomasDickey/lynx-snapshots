@@ -126,6 +126,7 @@
 #define RESETTING_FORM "Resetting form..."
 #define RELOADING_FORM \
  "Reloading document.  Any form entries will be lost!"
+#define CANNOT_TRANSCODE_FORM "Warning: Cannot transcode form data to charset %s!"
 #define BAD_FORM_MAILTO "Malformed mailto form submission!  Cancelled!"
 #define FORM_MAILTO_DISALLOWED "Mail disallowed!  Cannot submit."
 #define FORM_MAILTO_FAILED "Mailto form submission failed!"
@@ -259,6 +260,8 @@
  "Minimal comment parsing OFF (Historical is in effect)!"
 #define SOFT_DOUBLE_QUOTE_ON "Soft double-quote parsing ON!"
 #define SOFT_DOUBLE_QUOTE_OFF "Soft double-quote parsing OFF!"
+#define USING_DTD_0 "Now using TagSoup parsing of HTML."
+#define USING_DTD_1 "Now using SortaSGML parsing of HTML!"
 #define ALREADY_AT_END "You are already at the end of this document."
 #define ALREADY_AT_BEGIN "You are already at the beginning of this document."
 #define ALREADY_AT_PAGE "You are already at page %d of this document."

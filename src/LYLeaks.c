@@ -25,7 +25,8 @@ PRIVATE void AddToList PARAMS((AllocationList *ALp_new));
 PRIVATE AllocationList *FindInList PARAMS((void *vp_find));
 PRIVATE void RemoveFromList PARAMS((AllocationList *ALp_del));
 
-PUBLIC void LYLeaks NOARGS	{
+PUBLIC void LYLeaks NOARGS
+{
 /*
  *	Purpose:	Print a report of all memory left unallocated by
  *				Lynx code or attempted unallocations on
@@ -173,7 +174,8 @@ PUBLIC void LYLeaks NOARGS	{
 }
 
 PUBLIC void *LYLeakMalloc ARGS3(size_t, st_bytes,  CONST char *, cp_File, CONST
-	short, ssi_Line)	{
+	short, ssi_Line)
+{
 /*
  *	Purpose:	Capture allocations using malloc (stdlib.h) and track
  *				the information in a list.
@@ -230,7 +232,8 @@ PUBLIC void *LYLeakMalloc ARGS3(size_t, st_bytes,  CONST char *, cp_File, CONST
 }
 
 PUBLIC void *LYLeakCalloc ARGS4(size_t, st_number, size_t, st_bytes, CONST char
-	*, cp_File, CONST short, ssi_Line)	{
+	*, cp_File, CONST short, ssi_Line)
+{
 /*
  *	Purpose:	Capture allocations by calloc (stdlib.h) and
  *				save relevant information in a list.
@@ -287,7 +290,8 @@ PUBLIC void *LYLeakCalloc ARGS4(size_t, st_number, size_t, st_bytes, CONST char
 }
 
 PUBLIC void *LYLeakRealloc ARGS4(void *, vp_Alloced, size_t, st_newBytes, CONST
-	char *, cp_File, CONST short, ssi_Line)	{
+	char *, cp_File, CONST short, ssi_Line)
+{
 /*
  *	Purpose:	Capture any realloc (stdlib.h) calls in order to
  *				properly keep track of our run time allocation
@@ -378,7 +382,8 @@ PUBLIC void *LYLeakRealloc ARGS4(void *, vp_Alloced, size_t, st_newBytes, CONST
 }
 
 PUBLIC void LYLeakFree ARGS3(void *, vp_Alloced, CONST char *, cp_File, CONST
-	short, ssi_Line)	{
+	short, ssi_Line)
+{
 /*
  *	Purpose:	Capture all requests to free information and also
  *				remove items from the allocation list.
@@ -441,7 +446,61 @@ PUBLIC void LYLeakFree ARGS3(void *, vp_Alloced, CONST char *, cp_File, CONST
 	}
 }
 
-PRIVATE void AddToList ARGS1(AllocationList *, ALp_new)	{
+/*	Allocates a new copy of a string, and returns it.
+ *	Tracks allocations by using other LYLeakFoo functions.
+ *	Equivalent to HTSACopy in HTUtils.c - kw
+ *	
+*/
+PUBLIC char * LYLeakSACopy ARGS4(
+	char **,	dest,
+	CONST char *,	src,
+	CONST char *, 	cp_File,
+	CONST short,	ssi_Line)
+{
+    if (*dest) {
+	LYLeakFree(*dest, cp_File, ssi_Line);
+	*dest = NULL;
+    }
+    if (src) {
+        *dest = (char *) LYLeakMalloc (strlen(src) + 1, cp_File, ssi_Line);
+	if (*dest == NULL)
+	    outofmem(__FILE__, "LYLeakSACopy");
+	strcpy (*dest, src);
+    }
+    return *dest;
+}
+
+/*	String Allocate and Concatenate.
+ *	Tracks allocations by using other LYLeakFoo functions.
+ *	Equivalent to HTSACat in HTUtils.c - kw
+*/
+PUBLIC char * LYLeakSACat ARGS4(
+	char **,	dest,
+	CONST char *,	src,
+	CONST char *, 	cp_File,
+	CONST short,	ssi_Line)
+{
+    if (src && *src) {
+        if (*dest) {
+	    int length = strlen(*dest);
+	    *dest = (char *)LYLeakRealloc(*dest, length + strlen(src) + 1,
+					  cp_File, ssi_Line);
+	    if (*dest == NULL)
+	        outofmem(__FILE__, "LYLeakSACat");
+	    strcpy (*dest + length, src);
+	} else {
+	    *dest = (char *)LYLeakMalloc(strlen(src) + 1,
+					 cp_File, ssi_Line);
+	    if (*dest == NULL)
+	        outofmem(__FILE__, "LYLeakSACat");
+	    strcpy (*dest, src);
+	}
+    }
+    return *dest;
+}
+
+PRIVATE void AddToList ARGS1(AllocationList *, ALp_new)
+{
 /*
  *	Purpose:	Add a new allocation item to the list.
  *	Arguments:	ALp_new	The new item to add.
@@ -460,7 +519,8 @@ PRIVATE void AddToList ARGS1(AllocationList *, ALp_new)	{
 	ALp_RunTimeAllocations = ALp_new;
 }
 
-PRIVATE AllocationList *FindInList ARGS1(void *, vp_find)	{
+PRIVATE AllocationList *FindInList ARGS1(void *, vp_find)
+{
 /*
  *	Purpose:	Find the place in the list where vp_find is currently
  *				tracked.
@@ -491,7 +551,8 @@ PRIVATE AllocationList *FindInList ARGS1(void *, vp_find)	{
 	return(ALp_find);
 }
 
-PRIVATE void RemoveFromList ARGS1(AllocationList *, ALp_del)	{
+PRIVATE void RemoveFromList ARGS1(AllocationList *, ALp_del)
+{
 /*
  *	Purpose:	Remove the specified item from the list.
  *	Arguments:	ALp_del	The item to remove from the list.

@@ -1141,7 +1141,7 @@ fi
 echo "$ac_t""$with_debug" 1>&6
 if test "$with_debug" = "yes" ; then
 	case $host_os in
-	ultrix*)
+	ultrix*|osf4.*)
 		
 CFLAGS=`echo ${CFLAGS} | sed -e 's/-O[1-9]\? //' -e 's/-O[1-9]\?$//'`
 

@@ -78,6 +78,7 @@ typedef struct _FormInfo {
 	int			disabled;  /* If YES, can't change values */
         int 			name_cs;
         int 			value_cs;
+        char *			accept_cs;
 } FormInfo;
 
 #define HYPERTEXT_ANCHOR 1

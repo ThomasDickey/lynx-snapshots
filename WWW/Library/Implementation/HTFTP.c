@@ -162,7 +162,7 @@ extern char *personal_mail_address;
 */
 PRIVATE connection * connections = 0;	/* Linked list of connections */
 PRIVATE char response_text[LINE_LENGTH+1];/* Last response from NewsHost */
-PRIVATE connection * control;		/* Current connection */
+PRIVATE connection * control = NULL;		/* Current connection */
 PRIVATE int data_soc = -1;		/* Socket for data transfer =invalid */
 
 #define GENERIC_SERVER	   0
@@ -178,6 +178,7 @@ PRIVATE int data_soc = -1;		/* Socket for data transfer =invalid */
 #define MS_WINDOWS_SERVER 10
 #define MSDOS_SERVER      11
 #define APPLESHARE_SERVER 12
+#define NETPRESENZ_SERVER 13
 
 PRIVATE int     server_type = GENERIC_SERVER;   /* the type of ftp host */
 PRIVATE int     unsure_type = FALSE;            /* sure about the type? */
@@ -318,8 +319,13 @@ PRIVATE int close_connection ARGS1(
 {
     connection * scan;
     int status = NETCLOSE(con->socket);
-    if (TRACE)
+    if (TRACE) {
         fprintf(stderr, "HTFTP: Closing control socket %d\n", con->socket);
+#ifdef UNIX
+	if (status != 0)
+	    perror("HTFTP:close_connection");
+#endif
+    }
     con->socket = -1;
     if (connections == con) {
         connections = con->next;
@@ -334,6 +340,15 @@ PRIVATE int close_connection ARGS1(
 	} /*if */
     } /* for */
     return -1;		/* very strange -- was not on list. */
+}
+
+PRIVATE void cleanup_ftp NOARGS
+{
+    if (control) {
+	if (control->socket != -1)
+	    close_connection(control);
+	FREE(control);
+    }
 }
 
 PRIVATE char *help_message_buffer = NULL;  /* global :( */
@@ -509,7 +524,8 @@ PRIVATE int set_mac_binary ARGS1(
         int,		server_type)
 {
     /* try to set mac binary mode */
-    if (server_type == APPLESHARE_SERVER) {
+    if (server_type == APPLESHARE_SERVER ||
+	server_type == NETPRESENZ_SERVER) {
 	/*
 	 *  Presumably E means "Enable"  - kw
 	 */
@@ -573,7 +589,8 @@ PRIVATE void get_ftp_pwd ARGS2(
 
         if ((*server_type == NCSA_SERVER) ||
             (*server_type == TCPC_SERVER) ||
-            (*server_type == PETER_LEWIS_SERVER))
+            (*server_type == PETER_LEWIS_SERVER) ||
+            (*server_type == NETPRESENZ_SERVER))
             set_mac_binary(*server_type);
     }
 }
@@ -593,8 +610,9 @@ PRIVATE void get_ftp_pwd ARGS2(
 **	It ensures that all connections are logged in if they exist.
 **	It ensures they have the port number transferred.
 */
-PRIVATE int get_connection ARGS1(
-	CONST char *,	arg)
+PRIVATE int get_connection ARGS2(
+	CONST char *,		arg,
+	HTParentAnchor *,	anchor)
 {
     int status;
     char * command;
@@ -603,14 +621,31 @@ PRIVATE int get_connection ARGS1(
     char * password=NULL;
     static char *user_entered_password=NULL;
     static char *last_username_and_host=NULL;
+    static BOOLEAN firstuse = TRUE;
 
-    /*
-    **  Allocate and init control struct.
-    */
-    con = (connection *)calloc(1, sizeof(connection));
-    
     if (!arg) return -1;		/* Bad if no name sepcified	*/
     if (!*arg) return -1;		/* Bad if name had zero length	*/
+
+    if (control) {
+	/*
+	**  Reuse this object - kw
+	*/
+	if (control->socket != -1)
+	    NETCLOSE(control->socket);
+	con = control;
+    } else {
+	/*
+	**  Allocate and init control struct.
+	*/
+	con = (connection *)calloc(1, sizeof(connection));
+	if (con == NULL)
+	    outofmem(__FILE__, "get_connection");
+	if (firstuse) {
+	    atexit(cleanup_ftp);
+	    firstuse = FALSE;
+	}
+    }
+    con->socket = -1;
 
 /* Get node name:
 */
@@ -691,12 +726,15 @@ PRIVATE int get_connection ARGS1(
         }
 
       FREE(username);
+      if (control == con)
+	  control = NULL;
       FREE(con);
       return status;                    /* Bad return */
     }
 
     if (TRACE) 
- 	fprintf(stderr, "FTP connected, socket %ld\n", (long)con);
+ 	fprintf(stderr, "FTP connected, socket %d  control %ld\n",
+			con->socket, (long)con);
     control = con;		/* Current control connection */
 
     /* Initialise buffering for control connection */
@@ -719,7 +757,23 @@ PRIVATE int get_connection ARGS1(
         control->socket = -1;
         return HT_INTERRUPTED;
       }
+    server_type = GENERIC_SERVER;	/* reset */
     if (status == 2) {		/* Send username */
+	{
+	    char *cp;		/* look at greeting text */
+	    if (strlen(response_text) > 4) {
+		if ((cp = strstr(response_text, " awaits your command")) ||
+		    (cp = strstr(response_text, " ready."))) {
+		    *cp = '\0';
+		}
+		cp = response_text + 4;
+		if (!strncasecomp(cp, "NetPresenz", 10))
+		    server_type = NETPRESENZ_SERVER;
+	    } else {
+		cp = response_text;
+	    }
+	    StrAllocCopy(anchor->server, cp);
+	}
 	if (username && *username) {
 	    command = (char*)malloc(10+strlen(username)+2+1);
 	    if (command == NULL)
@@ -837,7 +891,8 @@ PRIVATE int get_connection ARGS1(
     if (TRACE) fprintf(stderr, "HTFTP: Logged in.\n");
 
     /** Check for host type **/
-    server_type = GENERIC_SERVER;	/* reset */
+    if (server_type != NETPRESENZ_SERVER)
+	server_type = GENERIC_SERVER;	/* reset */
     use_list = FALSE; 			/* reset */
     if ((status=response("SYST\r\n")) == 2) {
         /* we got a line -- what kind of server are we talking to? */
@@ -886,6 +941,13 @@ PRIVATE int get_connection ARGS1(
 	        fprintf(stderr, "HTFTP: Looks like a TCPC server.\n");
             get_ftp_pwd(&server_type, &use_list);
 	    unsure_type = TRUE;
+
+        } else if (server_type == NETPRESENZ_SERVER) { /* already set above */
+            use_list = TRUE;
+            set_mac_binary(server_type);
+	    if (TRACE)
+	        fprintf(stderr,
+	 	 	"HTFTP: Treating as NetPresenz (MACOS) server.\n");
 
         } else if (strncmp(response_text+4, "MACOS Peter's Server", 20) == 0) {
             server_type = PETER_LEWIS_SERVER;
@@ -1924,6 +1986,7 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
 	case MSDOS_SERVER:
         case WINDOWS_NT_SERVER:
         case APPLESHARE_SERVER:
+        case NETPRESENZ_SERVER:
 	    /*
 	    **  Check for EPLF output (local times).
 	    */
@@ -1937,6 +2000,11 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
 	    */
             len = strlen(entry);
 	    if (*first) {
+		if (!strcmp(entry, "can not access directory .")) {
+		    /* don't reset *first, nothing real will follow - kw */
+		    entry_info->display=FALSE;
+		    return(entry_info);
+		}
 	        *first = FALSE;
                 if (!strncmp(entry, "total ", 6) ||
                     strstr(entry, "not available") != NULL) {
@@ -2462,7 +2530,9 @@ AgainForMultiNet:
 		 if (TRACE)
 		     fprintf(stderr, "Adding file to BTree: %s\n",
 		     		     entry_info->filename);
-	         HTBTree_add(bt, (EntryInfo *)entry_info); 
+	         HTBTree_add(bt, (EntryInfo *)entry_info);
+	    } else {
+		FREE(entry_info);
 	    }
 
 	}  /* next entry */
@@ -2532,13 +2602,15 @@ unload_btree:
 		free_entryinfo_struct_contents(entry_info);
 	    }
 	}
+	END(HTML_PRE);
 	FREE_TARGET;
 	HTBTreeAndObject_free(bt);
     }
 
     FREE(lastpath);
 
-    if (server_type == APPLESHARE_SERVER) {
+    if (server_type == APPLESHARE_SERVER ||
+	server_type == NETPRESENZ_SERVER) {
 	/*
 	 *  Without closing the data socket first,
 	 *  the response(NIL) below hangs... - kw
@@ -2590,7 +2662,7 @@ PUBLIC int HTFTPLoad ARGS4(
     server_type = GENERIC_SERVER;
 
     for (retry = 0; retry < 2; retry++) { /* For timed out/broken connections */
-	status = get_connection(name);
+	status = get_connection(name, anchor);
 	if (status < 0)
 	    return status;
 
