@@ -37,6 +37,10 @@
 /* Special return code for LYMainLoop.c */
 #define PERMIT_FORM_RESULT (-99)
 
+extern char LYPermitFileURL[];
+extern char LYDiredFileURL[];
+extern char LYUploadFileURL[];
+
 extern BOOLEAN local_create PARAMS((document *doc));
 extern BOOLEAN local_modify PARAMS((document *doc, char **newpath));
 extern BOOLEAN local_remove PARAMS((document *doc));

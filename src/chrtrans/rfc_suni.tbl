@@ -5,10 +5,10 @@
 # mnemonic,ds
 
 #The MIME name of this charset. 
-M mnemonic+ascii+0
+Mmnemonic+ascii+0
 
 #Name as a Display Charset (used on Options screen)
-O RFC 1345 w/o Intro
+ORFC 1345 w/o Intro
 
 # Don't fall back to default table for unicode -> 8bit
 Fallback NO

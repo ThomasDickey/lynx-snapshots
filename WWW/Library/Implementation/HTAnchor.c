@@ -23,11 +23,10 @@
 #include "UCAux.h"
 #include "UCMap.h"
 
+#include "LYCharSets.h"
 #include "LYLeaks.h"
 
 #define FREE(x) if (x) {free(x); x = NULL;}
-
-extern LYUCcharset LYCharSet_UC[];
 
 #ifdef NOT_DEFINED
 /*
@@ -1084,10 +1083,10 @@ PUBLIC HTAnchor * HTAnchor_followTypedLink ARGS2(
         return me->mainLink.dest;
     if (me->links) {
         HTList *links = me->links;
-        HTLink *link;
-        while (NULL != (link=(HTLink *)HTList_nextObject(links))) {
-            if (link->type == type) {
-	        return link->dest;
+        HTLink *the_link;
+        while (NULL != (the_link=(HTLink *)HTList_nextObject(links))) {
+            if (the_link->type == type) {
+	        return the_link->dest;
 	    }
 	}
     }

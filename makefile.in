@@ -20,9 +20,9 @@ INSTALL_PROGRAM	= @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
 
 ##this is the name of the directory the lynx source code is in.
-##(e.g. lynx2-7-1, not the full path)
-lynxdir= lynx2-7-1
-lynxname= lynx2-7-1
+##(e.g. lynx2-7-2, not the full path)
+lynxdir= lynx2-7-2
+lynxname= lynx2-7-2
 
 ## Where you want lynx installed
 bindir= @bindir@
@@ -101,7 +101,6 @@ SITE_LYDEFS = # Your defines here
 SITE_DEFS = # Your defines here
 
 # defines for which there are no configure options:
-# -DDONT_TRACK_INTERNAL_LINKS - Handle following links to same doc differently.
 # -DHP_TERMINAL    For DIM workaround to REVERSE problems on HP terminals.
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
 # -DNOPORT         if you must use PASV instead of PORT for FTP
@@ -240,7 +239,9 @@ compress: tar
 	cd ..; rm -f $(lynxname).tar.Z; compress -f -v $(lynxname).tar
 
 install: lynx install-bin install-man install-cfg @INSTALL_LSS@
-	@echo Use $(MAKE) install-help to install the help-files
+	@echo
+	@echo "Use $(MAKE) install-help to install the help-files"
+	@echo
 
 install-bin: $(bindir)
 	-mv -f $(bindir)/lynx $(bindir)/lynx.old
@@ -255,7 +256,7 @@ install-help : $(helpdir)
 	(cd $(srcdir) && tar cf - C[HO]* PROBLEMS README samples test ) | \
 			       ( cd $(helpdir) && tar xf - )
 
-install-cfg :
+install-cfg : $(libdir)
 	-mv -f $(libdir)/lynx.cfg $(libdir)/lynx.oldcfg
 	sed	-e '/^HELPFILE:http/s@^@#@' \
 		-e '/^#HELPFILE:file/s@#@@' \
@@ -263,7 +264,7 @@ install-cfg :
 		$(srcdir)/lynx.cfg >$(libdir)/lynx.cfg
 	chmod 0644 $(libdir)/lynx.cfg
 
-install-lss :
+install-lss : $(libdir)
 	-mv -f $(libdir)/lynx.lss $(libdir)/lynx.oldlss
 	$(INSTALL_DATA) $(srcdir)/samples/lynx.lss $(libdir)/lynx.lss
 

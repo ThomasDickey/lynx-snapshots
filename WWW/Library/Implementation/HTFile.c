@@ -79,6 +79,9 @@
 #include "UCAux.h"
 
 #include "LYexit.h"
+#include "LYCharSets.h"
+#include "LYGlobalDefs.h"
+#include "LYUtils.h"
 #include "LYLeaks.h"
 
 typedef struct _HTSuffix {
@@ -126,8 +129,6 @@ extern BOOLEAN dir_list_style;
 PUBLIC int HTDirReadme = HT_DIR_README_TOP;
 #endif /* DIRED_SUPPORT */
 
-extern int current_char_set;
-extern CONST char *LYchar_set_names[];
 extern BOOLEAN LYRawMode;
 extern BOOL HTPassEightBitRaw;
 extern HTCJKlang HTCJK;
@@ -515,19 +516,19 @@ Bug removed thanks to joe@athena.mit.edu */
 PUBLIC char * HTCacheFileName ARGS1(
 	CONST char *,	name)
 {
-    char * access = HTParse(name, "", PARSE_ACCESS);
+    char * acc_method = HTParse(name, "", PARSE_ACCESS);
     char * host = HTParse(name, "", PARSE_HOST);
     char * path = HTParse(name, "", PARSE_PATH+PARSE_PUNCTUATION);
     
     char * result;
     result = (char *)malloc(
-	    strlen(HTCacheRoot)+strlen(access)
+	    strlen(HTCacheRoot)+strlen(acc_method)
 	    +strlen(host)+strlen(path)+6+1);
     if (result == NULL)
         outofmem(__FILE__, "HTCacheFileName");
-    sprintf(result, "%s/WWW/%s/%s%s", HTCacheRoot, access, host, path);
+    sprintf(result, "%s/WWW/%s/%s%s", HTCacheRoot, acc_method, host, path);
     FREE(path);
-    FREE(access);
+    FREE(acc_method);
     FREE(host);
     return result;
 }
@@ -555,14 +556,14 @@ PRIVATE int HTCreatePath ARGS1(CONST char *,path)
 PUBLIC char * HTLocalName ARGS1(
 	CONST char *,	name)
 {
-    char * access = HTParse(name, "", PARSE_ACCESS);
+    char * acc_method = HTParse(name, "", PARSE_ACCESS);
     char * host = HTParse(name, "", PARSE_HOST);
     char * path = HTParse(name, "", PARSE_PATH+PARSE_PUNCTUATION);
     
     HTUnEscape(path);	/* Interpret % signs */
     
-    if (0 == strcmp(access, "file")) { /* local file */
-        FREE(access);	
+    if (0 == strcmp(acc_method, "file")) { /* local file */
+        FREE(acc_method);	
 	if ((0 == strcasecomp(host, HTHostName())) ||
 	    (0 == strcasecomp(host, "localhost")) || !*host) {
 	    FREE(host);
@@ -608,12 +609,12 @@ PUBLIC char * HTLocalName ARGS1(
 	    home = "/tmp"; 
 #endif /* VMS */
 	result = (char *)malloc(
-		strlen(home)+strlen(access)+strlen(host)+strlen(path)+6+1);
+		strlen(home)+strlen(acc_method)+strlen(host)+strlen(path)+6+1);
         if (result == NULL)
             outofmem(__FILE__, "HTLocalName");
-	sprintf(result, "%s/WWW/%s/%s%s", home, access, host, path);
+	sprintf(result, "%s/WWW/%s/%s%s", home, acc_method, host, path);
 	FREE(path);
-	FREE(access);
+	FREE(acc_method);
 	FREE(host);
 	return result;
     }
@@ -748,7 +749,6 @@ PUBLIC HTFormat HTFileFormat ARGS3(
 #ifdef VMS
     char *semicolon = NULL;
 #endif /* VMS */
-    extern BOOLEAN LYforce_HTML_mode;
 
     if (pencoding)
 	*pencoding = NULL;
@@ -1171,14 +1171,14 @@ PUBLIC BOOL HTEditable ARGS1(
     myUid = geteuid();				/* Get my user identifier */
 
     if (TRACE) {
-        int i;
+        int i2;
 	fprintf(stderr, 
 	    "File mode is 0%o, uid=%d, gid=%d. My uid=%d, %d groups (",
     	    (unsigned int) fileStatus.st_mode, fileStatus.st_uid,
 	    fileStatus.st_gid,
 	    myUid, ngroups);
-	for (i = 0; i < ngroups; i++)
-	    fprintf(stderr, " %d", groups[i]);
+	for (i2 = 0; i2 < ngroups; i2++)
+	    fprintf(stderr, " %d", groups[i2]);
 	fprintf(stderr, ")\n");
     }
     
@@ -1426,7 +1426,6 @@ PUBLIC BOOL HTDirTitles ARGS3(
 	    **  On VMS, this problem is dealt with internally by
 	    **  HTVMSBrowseDir().
 	    */
-	    extern BOOLEAN LYisLocalFile PARAMS((char *logical));
 	    DIR  * dp = NULL;
 
 	    if (LYisLocalFile(logical)) {
@@ -1524,7 +1523,7 @@ PUBLIC int HTLoadFile ARGS4(
 	HTStream *,		sink)
 {
     char * filename = NULL;
-    char * access = NULL;
+    char * acc_method = NULL;
     HTFormat format;
     char * nodename = NULL;
     char * newname = NULL;	/* Simplified name of file */
@@ -1533,8 +1532,6 @@ PUBLIC int HTLoadFile ARGS4(
     int status;
 #ifdef VMS
     struct stat stat_info;
-#else
-    extern char *list_format;
 #endif /* VMS */
 #ifdef USE_ZLIB
     gzFile gzfp = 0;
@@ -1551,8 +1548,8 @@ PUBLIC int HTLoadFile ARGS4(
     /*
     **  If access is ftp, or file is on another host, invoke ftp now.
     */
-    access = HTParse(newname, "", PARSE_ACCESS);
-    if (strcmp("ftp", access) == 0 ||
+    acc_method = HTParse(newname, "", PARSE_ACCESS);
+    if (strcmp("ftp", acc_method) == 0 ||
        (strcmp("localhost", nodename) != 0 &&
 #ifdef VMS
         strcasecomp(nodename, HTHostName()) != 0
@@ -1563,11 +1560,11 @@ PUBLIC int HTLoadFile ARGS4(
         FREE(newname);
 	FREE(filename);
 	FREE(nodename);
-        FREE(access);
+        FREE(acc_method);
         return HTFTPLoad(addr, anchor, format_out, sink);
     } else {
         FREE(newname);
-        FREE(access);
+        FREE(acc_method);
     }
 #ifdef VMS
     HTUnEscape(filename);
@@ -2110,7 +2107,6 @@ PUBLIC int HTLoadFile ARGS4(
 			**  While there are directory entries to be read...
 			*/
 		        char * dirname = NULL;
-			extern BOOLEAN no_dotfiles, show_dotfiles;
 
 #ifndef DOSPATH
 		        if (dirbuf->d_ino == 0)
@@ -2235,7 +2231,7 @@ PUBLIC int HTLoadFile ARGS4(
 				    if (dir_list_style != MIXED_STYLE) {
 				       START(HTML_EM);
 				       PUTS(state == 'D' ?
-				          "Subirectories:" : "Files:");
+				          "Subdirectories:" : "Files:");
 				       END(HTML_EM);
 				    }
 				    END(HTML_H2);

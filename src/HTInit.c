@@ -115,13 +115,13 @@ PUBLIC void HTFormatInit NOARGS
  					HTMLPresent,	2.0, 0.0, 0.0, 0);
  HTSetConversion("application/html", "www/source",
  					HTPlainPresent,	1.0, 0.0, 0.0, 0);
- HTSetConversion("application/x-wais-source", "www/source",  	     
+ HTSetConversion("application/x-wais-source", "www/source",
 					HTPlainPresent,	1.0, 0.0, 0.0, 0);
- HTSetConversion("application/x-wais-source", "www/present",  	     
+ HTSetConversion("application/x-wais-source", "www/present",
 				        HTWSRCConvert,	2.0, 0.0, 0.0, 0);
- HTSetConversion("application/x-wais-source", "www/download",  	     
+ HTSetConversion("application/x-wais-source", "www/download",
 					HTWSRCConvert,	1.0, 0.0, 0.0, 0);
- HTSetConversion("application/x-wais-source", "www/dump",  	     
+ HTSetConversion("application/x-wais-source", "www/dump",
 					HTWSRCConvert,	1.0, 0.0, 0.0, 0);
 
  /*
@@ -200,19 +200,19 @@ PUBLIC void HTPreparsedFormatInit NOARGS
 /*
 Copyright (c) 1991 Bell Communications Research, Inc. (Bellcore)
 
-Permission to use, copy, modify, and distribute this material 
-for any purpose and without fee is hereby granted, provided 
-that the above copyright notice and this permission notice 
-appear in all copies, and that the name of Bellcore not be 
-used in advertising or publicity pertaining to this 
-material without the specific, prior written permission 
-of an authorized representative of Bellcore.  BELLCORE 
-MAKES NO REPRESENTATIONS ABOUT THE ACCURACY OR SUITABILITY 
-OF THIS MATERIAL FOR ANY PURPOSE.  IT IS PROVIDED "AS IS", 
+Permission to use, copy, modify, and distribute this material
+for any purpose and without fee is hereby granted, provided
+that the above copyright notice and this permission notice
+appear in all copies, and that the name of Bellcore not be
+used in advertising or publicity pertaining to this
+material without the specific, prior written permission
+of an authorized representative of Bellcore.  BELLCORE
+MAKES NO REPRESENTATIONS ABOUT THE ACCURACY OR SUITABILITY
+OF THIS MATERIAL FOR ANY PURPOSE.  IT IS PROVIDED "AS IS",
 WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
 */
-/****************************************************** 
-    Metamail -- A tool to help diverse mail readers 
+/******************************************************
+    Metamail -- A tool to help diverse mail readers
                 cope with diverse multimedia mail formats.
 
     Author:  Nathaniel S. Borenstein, Bellcore
@@ -248,19 +248,19 @@ PRIVATE char *GetCommand ARGS2(
 
     /* marca -- added + 1 for error case -- oct 24, 1993. */
     s2 = malloc(strlen(s)*2 + 1); /* absolute max, if all % signs */
-    if (!s2) 
-        ExitWithError("Out of memory");
+    if (!s2)
+	ExitWithError("Out of memory");
 
     *t = s2;
     while (s && *s) {
 	if (quoted) {
-            if (*s == '%') *s2++ = '%'; /* Quote through next level, ugh! */
+	    if (*s == '%') *s2++ = '%'; /* Quote through next level, ugh! */
 
-            *s2++ = *s++;
+	    *s2++ = *s++;
 	    quoted = 0;
 	} else {
 	    if (*s == ';') {
-                *s2 = '\0';
+		*s2 = '\0';
 		return(++s);
 	    }
 	    if (*s == '\\') {
@@ -273,25 +273,25 @@ PRIVATE char *GetCommand ARGS2(
     }
     *s2 = '\0';
     return(NULL);
-}	
+}
 
 /* no leading or trailing space, all lower case */
 PRIVATE char *Cleanse ARGS1(
-	char *,		s) 
+	char *,		s)
 {
     char *tmp, *news;
-    
+
     /* strip leading white space */
     while (*s && isspace((unsigned char) *s))
-        ++s;
+	++s;
     news = s;
     /* put in lower case */
     for (tmp=s; *tmp; ++tmp) {
-        *tmp = TOLOWER ((unsigned char)*tmp);
+	*tmp = TOLOWER ((unsigned char)*tmp);
     }
     /* strip trailing white space */
     while ((tmp > news) && *--tmp && isspace((unsigned char) *tmp))
-        *tmp = '\0';
+	*tmp = '\0';
     return(news);
 }
 
@@ -304,19 +304,19 @@ PRIVATE int ProcessMailcapEntry ARGS2(
     char *rawentry, *s, *t, *LineBuf;
 
     LineBuf = (char *)malloc(LINE_BUF_SIZE);
-    if (!LineBuf) 
-        ExitWithError("Out of memory");
+    if (!LineBuf)
+	ExitWithError("Out of memory");
     rawentry = (char *)malloc(1 + rawentryalloc);
-    if (!rawentry) 
-        ExitWithError("Out of memory");
+    if (!rawentry)
+	ExitWithError("Out of memory");
     *rawentry = '\0';
     while (fgets(LineBuf, LINE_BUF_SIZE, fp)) {
-	if (LineBuf[0] == '#') 
+	if (LineBuf[0] == '#')
 	    continue;
-        len = strlen(LineBuf);
-        if (len == 0) 
+	len = strlen(LineBuf);
+	if (len == 0)
 	    continue;
-        if (LineBuf[len-1] == '\n') 
+	if (LineBuf[len-1] == '\n')
 	    LineBuf[--len] = '\0';
 	if ((len + strlen(rawentry)) > rawentryalloc) {
 	    rawentryalloc += 2000;
@@ -325,7 +325,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 	        ExitWithError("Out of memory");
 	}
 	if (len > 0 && LineBuf[len-1] == '\\') {
-            LineBuf[len-1] = '\0';
+	    LineBuf[len-1] = '\0';
 	    strcat(rawentry, LineBuf);
 	} else {
 	    strcat(rawentry, LineBuf);
@@ -336,7 +336,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(
     FREE(LineBuf);
 
     for (s = rawentry; *s && isspace((unsigned char) *s); ++s)
-        ;
+	;
     if (!*s) {
 	/* totally blank entry -- quietly ignore */
 	FREE(rawentry);
@@ -354,7 +354,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(
     }
     *s++ = '\0';
     if (!strncasecomp(rawentry, "text/html", 9) ||
-        !strncasecomp(rawentry, "text/plain", 10)) {
+	!strncasecomp(rawentry, "text/plain", 10)) {
 	--s;
 	*s = ';';
 	if (TRACE) {
@@ -366,7 +366,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 	return(0);
     }
     for (i = 0, j = 0; rawentry[i]; i++) {
-        if (rawentry[i] != ' ') {
+	if (rawentry[i] != ' ') {
 	    rawentry[j++] = TOLOWER(rawentry[i]);
 	}
     }
@@ -379,23 +379,23 @@ PRIVATE int ProcessMailcapEntry ARGS2(
     mc->printcommand = NULL;
     mc->contenttype = (char *)malloc(1 + strlen(rawentry));
     if (!mc->contenttype)
-        ExitWithError("Out of memory");
+	ExitWithError("Out of memory");
     strcpy(mc->contenttype, rawentry);
     mc->quality = 1.0;
     mc->maxbytes = 0;
     t = GetCommand(s, &mc->command);
     if (!t) {
-        goto assign_presentation;
+	goto assign_presentation;
     }
     s = t;
     while (s && *s && isspace((unsigned char) *s)) ++s;
     while (s) {
 	char *arg, *eq, *mallocd_string;
 
-        t = GetCommand(s, &mallocd_string);
+	t = GetCommand(s, &mallocd_string);
 	arg = mallocd_string;
-        eq = strchr(arg, '=');
-        if (eq) {
+	eq = strchr(arg, '=');
+	if (eq) {
 	    *eq++ = '\0';
 	}
 	if (arg && *arg) {
@@ -413,7 +413,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 			    mc->testcommand);
 	    } else if (eq && !strcmp(arg, "description")) {
 		mc->label = eq;
-	    } else if (eq && !strcmp(arg, "label")) { 
+	    } else if (eq && !strcmp(arg, "label")) {
 		mc->label = eq; /* bogus old name for description */
 	    } else if (eq && !strcmp(arg, "print")) {
 		mc->printcommand = eq;
@@ -460,20 +460,20 @@ assign_presentation:
 PRIVATE void BuildCommand ARGS5(
 	char **, 	pBuf,
 	size_t,		Bufsize,
-	char *,		controlstring, 
+	char *,		controlstring,
 	char *,		TmpFileName,
 	size_t,		TmpFileLen)
 {
     char *from, *to;
-    int prefixed = 0; 
+    int prefixed = 0;
 
     for (from = controlstring, to = *pBuf; *from != '\0'; from++) {
-        if (prefixed) {
-            prefixed = 0;
-            switch(*from) {
-                case '%':
-                    *to++ = '%';
-                    break;
+	if (prefixed) {
+	    prefixed = 0;
+	    switch(*from) {
+		case '%':
+		    *to++ = '%';
+		    break;
 		case 'n':
 		case 'F':
 		    if (TRACE) {
@@ -482,37 +482,37 @@ PRIVATE void BuildCommand ARGS5(
 				controlstring);
 		    }
 		case 's':
-                    if (TmpFileLen && TmpFileName) {
+		    if (TmpFileLen && TmpFileName) {
 			if ((to - *pBuf) + TmpFileLen + 1 > Bufsize) {
 			    *to = '\0';
 			    if (TRACE) {
 				fprintf(stderr,
 			"BuildCommand: Too long mailcap \"test\" clause,\n");
 				fprintf(stderr,
-			"	       ignoring: %s%s...\n",
+					"              ignoring: %s%s...\n",
 					*pBuf, TmpFileName);
 			    }
 			    **pBuf = '\0';
 			    return;
 			}
-                        strcpy(to, TmpFileName);
-                        to += strlen(TmpFileName);
-                    }
-                    break;
-                default:
+			strcpy(to, TmpFileName);
+			to += strlen(TmpFileName);
+		    }
+		    break;
+		default:
 		    if (TRACE) {
-                    	fprintf(stderr,
+			fprintf(stderr,
   "BuildCommand: Ignoring unrecognized format code in mailcap file '%%%c'.\n",
 			*from);
 		    }
-                    break;
-            }
-        } else if (*from == '%') {
-            prefixed = 1;
-        } else {
-            *to++ = *from;
-        }
-        if (to >= *pBuf + Bufsize) {
+		    break;
+	    }
+	} else if (*from == '%') {
+	    prefixed = 1;
+	} else {
+	    *to++ = *from;
+	}
+	if (to >= *pBuf + Bufsize) {
 	    (*pBuf)[Bufsize - 1] = '\0';
 	    if (TRACE) {
 		fprintf(stderr,
@@ -521,7 +521,7 @@ PRIVATE void BuildCommand ARGS5(
 			"              ignoring: %s...\n",
 			*pBuf);
 	    }
-            **pBuf = '\0';
+	    **pBuf = '\0';
 	    return;
 	}
     }
@@ -539,38 +539,38 @@ PRIVATE int PassesTest ARGS1(
      *  Make sure we have a command
      */
     if (!mc->testcommand)
-        return(1);
+	return(1);
 
     /*
      *  Save overhead of system() calls by faking these. - FM
      */
     if (0 == strcasecomp(mc->testcommand, "test -n \"$DISPLAY\"")) {
-        FREE(mc->testcommand);
-        if (TRACE)
+	FREE(mc->testcommand);
+	if (TRACE)
 	    fprintf(stderr,
-		    "PassesTest: Testing for XWINDOWS environment - ");
+		    "PassesTest: Testing for XWINDOWS environment.\n");
     	if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0') {
 	    if (TRACE)
-	        fprintf(stderr,"passed!\n");
+	        fprintf(stderr,"PassesTest: Test passed!\n");
 	    return(0 == 0);
 	} else {
 	    if (TRACE)
-	        fprintf(stderr,"failed!\n");
+	        fprintf(stderr,"PassesTest: Test failed!\n");
 	    return(-1 == 0);
 	}
     }
     if (0 == strcasecomp(mc->testcommand, "test -z \"$DISPLAY\"")) {
-        FREE(mc->testcommand);
-        if (TRACE)
+	FREE(mc->testcommand);
+	if (TRACE)
 	    fprintf(stderr,
-		    "PassesTest: Testing for NON_XWINDOWS environment - ");
+		    "PassesTest: Testing for NON_XWINDOWS environment.\n");
     	if (!((cp = getenv(DISPLAY)) != NULL && *cp != '\0')) {
 	    if (TRACE)
-	        fprintf(stderr,"passed!\n");
+	        fprintf(stderr,"PassesTest: Test passed!\n");
 	    return(0 == 0);
 	} else {
 	    if (TRACE)
-	        fprintf(stderr,"failed!\n");
+	        fprintf(stderr,"PassesTest: Test failed!\n");
 	    return(-1 == 0);
 	}
     }
@@ -579,11 +579,11 @@ PRIVATE int PassesTest ARGS1(
      *  Why do anything but return success for this one! - FM
      */
     if (0 == strcasecomp(mc->testcommand, "test -n \"$LYNX_VERSION\"")){
-        FREE(mc->testcommand);
-        if (TRACE) {
+	FREE(mc->testcommand);
+	if (TRACE) {
 	    fprintf(stderr,
-		    "PassesTest: Testing for LYNX environment - ");
-	    fprintf(stderr,"passed, of course!\n");
+		    "PassesTest: Testing for LYNX environment.\n");
+	    fprintf(stderr,"PassesTest: Test passed!\n");
 	}
 	return(0 == 0);
     } else
@@ -591,11 +591,11 @@ PRIVATE int PassesTest ARGS1(
      *  ... or failure for this one! - FM
      */
     if (0 == strcasecomp(mc->testcommand, "test -z \"$LYNX_VERSION\"")) {
-        FREE(mc->testcommand);
-        if (TRACE) {
+	FREE(mc->testcommand);
+	if (TRACE) {
 	    fprintf(stderr,
-		    "PassesTest: Testing for non-LYNX environment - ");
-	    fprintf(stderr,"failed, of course!\n");
+		    "PassesTest: Testing for non-LYNX environment.\n");
+	    fprintf(stderr,"PassesTest: Test failed!\n");
 	}
 	return(-1 == 0);
     }
@@ -606,13 +606,13 @@ PRIVATE int PassesTest ARGS1(
     tempname(TmpFileName, NEW_FILE);
     cmd = (char *)malloc(1024);
     if (!cmd)
-        ExitWithError("Out of memory");
+	ExitWithError("Out of memory");
     BuildCommand(&cmd, 1024,
 		 mc->testcommand,
 		 TmpFileName,
 		 strlen(TmpFileName));
     if (TRACE)
-        fprintf(stderr,"PassesTest: Executing test command: %s\n", cmd);
+	fprintf(stderr,"PassesTest: Executing test command: %s\n", cmd);
     result = system(cmd);
     FREE(cmd);
 
@@ -626,7 +626,7 @@ PRIVATE int PassesTest ARGS1(
 	fprintf(stderr,"PassesTest: Test failed!\n");
     else if (TRACE)
 	fprintf(stderr,"PassesTest: Test passed!\n");
-	
+
     return(result == 0);
 }
 
@@ -637,11 +637,11 @@ PRIVATE int ProcessMailcapFile ARGS1(
     FILE *fp;
 
     if (TRACE)
-        fprintf(stderr,
+	fprintf(stderr,
 		"ProcessMailcapFile: Loading file '%s'.\n",
 		file);
     if ((fp = fopen(file, "r")) == NULL) {
-        if (TRACE)
+	if (TRACE)
 	    fprintf(stderr,
 		"ProcessMailcapFile: Could not open '%s'.\n",
 		    file);
@@ -649,7 +649,7 @@ PRIVATE int ProcessMailcapFile ARGS1(
     }
 
     while (fp && !feof(fp)) {
-        ProcessMailcapEntry(fp, &mc);
+	ProcessMailcapEntry(fp, &mc);
     }
     fclose(fp);
     return(0 == 0);
@@ -659,7 +659,7 @@ PRIVATE int ExitWithError ARGS1(
 	char *,		txt)
 {
     if (txt)
-        fprintf(stderr, "metamail: %s\n", txt);
+	fprintf(stderr, "metamail: %s\n", txt);
 #ifndef NOSIGHUP
     (void) signal(SIGHUP, SIG_DFL);
 #endif /* NOSIGHUP */
@@ -705,7 +705,7 @@ PUBLIC void HTFileInit NOARGS
     FILE *fp;
 
     if (TRACE)
-        fprintf(stderr,
+	fprintf(stderr,
 		"HTFileInit: Loading default (HTInit) extension maps.\n");
 
     /* default suffix interpretation */
@@ -743,7 +743,7 @@ PUBLIC void HTFileInit NOARGS
 
     HTSetSuffix(".exe.Z",	"application/x-Comp. Executable",
     							     "binary", 1.0);
-  
+
     HTSetSuffix(".Z",	        "application/UNIX Compressed", "binary", 1.0);
 
     HTSetSuffix(".tar_Z",	"application/UNIX Compr. Tar", "binary", 1.0);
@@ -761,7 +761,7 @@ PUBLIC void HTFileInit NOARGS
 
     HTSetSuffix(".zip",		"application/x-Zip File", "binary", 1.0);
 
-    HTSetSuffix(".uu",		"application/x-UUencoded", "8bit", 1.0); 
+    HTSetSuffix(".uu",		"application/x-UUencoded", "8bit", 1.0);
 
     HTSetSuffix(".hqx",		"application/x-Binhex", "8bit", 1.0);
 
@@ -775,13 +775,13 @@ PUBLIC void HTFileInit NOARGS
     HTSetSuffix(".eps",		"application/Postscript", "8bit", 1.0);
     HTSetSuffix(".ai",		"application/Postscript", "8bit", 1.0);
     HTSetSuffix(".ps",		"application/Postscript", "8bit", 1.0);
-  
+
     HTSetSuffix(".rtf",		"application/RTF", "8bit", 1.0);
 
     HTSetSuffix(".dvi",		"application/x-DVI", "8bit", 1.0);
 
     HTSetSuffix(".hdf",		"application/x-HDF", "8bit", 1.0);
-  
+
     HTSetSuffix(".cdf",		"application/x-netcdf", "8bit", 1.0);
     HTSetSuffix(".nc",		"application/x-netcdf", "8bit", 1.0);
 
@@ -858,7 +858,7 @@ PUBLIC void HTFileInit NOARGS
     HTSetSuffix(".wav",		"audio/x-wav", "binary", 1.0);
     HTSetSuffix(".midi",	"audio/midi", "binary", 1.0);
     HTSetSuffix(".mod",		"audio/mod", "binary", 1.0);
-  
+
     HTSetSuffix(".gif",		"image/gif", "binary", 1.0);
     HTSetSuffix(".ief",		"image/ief", "binary", 1.0);
     HTSetSuffix(".jfif",	"image/jpeg", "binary", 1.0); /* xtra */
@@ -915,19 +915,19 @@ PUBLIC void HTFileInit NOARGS
     HTLoadExtensionsConfigFile(global_extension_map);
 
     if ((fp = fopen(personal_extension_map,"r")) != NULL) {
-        fclose(fp);
-        /* These should override everything else. */
-        HTLoadExtensionsConfigFile(personal_extension_map);
+	fclose(fp);
+	/* These should override everything else. */
+	HTLoadExtensionsConfigFile(personal_extension_map);
     } else {
-        char buffer[256];
+	char buffer[256];
 #ifdef VMS
-        sprintf(buffer, "sys$login:%s", personal_extension_map);
+	sprintf(buffer, "sys$login:%s", personal_extension_map);
 #else
-        sprintf(buffer, "%s/%s", (Home_Dir() ? Home_Dir() : ""),
+	sprintf(buffer, "%s/%s", (Home_Dir() ? Home_Dir() : ""),
 				  personal_extension_map);
 #endif /* VMS */
-        /* These should override everything else. */
-        HTLoadExtensionsConfigFile(buffer);
+	/* These should override everything else. */
+	HTLoadExtensionsConfigFile(buffer);
     }
 }
 
@@ -946,12 +946,12 @@ PUBLIC void HTFileInit NOARGS
 PRIVATE int HTGetLine ARGS3(
 	char *,		s,
 	int,		n,
-	FILE *,		f) 
+	FILE *,		f)
 {
     register int i = 0, r;
 
     if (!f)
-        return(1);
+	return(1);
 
     while (1) {
 	r = fgetc(f);
@@ -977,21 +977,21 @@ PRIVATE void HTGetWord ARGS4(
 	char *,		word,
 	char *,		line,
 	char ,		stop,
-	char ,		stop2) 
+	char ,		stop2)
 {
     int x = 0, y;
 
     for (x = 0; line[x] && line[x] != stop && line[x] != stop2; x++) {
-        word[x] = line[x];
+	word[x] = line[x];
     }
 
     word[x] = '\0';
-    if (line[x]) 
-        ++x;
+    if (line[x])
+	++x;
     y=0;
 
     while ((line[y++] = line[x++]))
-        ;
+	;
 
     return;
 }
@@ -1004,41 +1004,41 @@ PRIVATE int HTLoadExtensionsConfigFile ARGS1(
     int x, count = 0;
 
     if (TRACE)
-        fprintf(stderr,
+	fprintf(stderr,
 		"HTLoadExtensionsConfigFile: Loading file '%s'.\n", fn);
 
     if ((f = fopen(fn,"r")) == NULL) {
-        if (TRACE)
-            fprintf(stderr,
+	if (TRACE)
+	    fprintf(stderr,
 		    "HTLoadExtensionsConfigFile: Could not open '%s'.\n", fn);
 	    return count;
     }
 
     while (!(HTGetLine(l,MAX_STRING_LEN,f))) {
-        HTGetWord(w, l, ' ', '\t');
-        if (l[0] == '\0' || w[0] == '#')
-            continue;
-        ct = (char *)malloc(sizeof(char) * (strlen(w) + 1));
-        if (!ct)
-            outofmem(__FILE__, "HTLoadExtensionsConfigFile");
-        strcpy(ct,w);
-        for (x = 0; ct[x]; x++)
-            ct[x] = TOLOWER(ct[x]);
+	HTGetWord(w, l, ' ', '\t');
+	if (l[0] == '\0' || w[0] == '#')
+	    continue;
+	ct = (char *)malloc(sizeof(char) * (strlen(w) + 1));
+	if (!ct)
+	    outofmem(__FILE__, "HTLoadExtensionsConfigFile");
+	strcpy(ct,w);
+	for (x = 0; ct[x]; x++)
+	    ct[x] = TOLOWER(ct[x]);
 
-        while(l[0]) {
-            HTGetWord(w, l, ' ', '\t');
-            if (w[0] && (w[0] != ' ')) {
-                char *ext = (char *)malloc(sizeof(char) * (strlen(w)+1+1));
+	while(l[0]) {
+	    HTGetWord(w, l, ' ', '\t');
+	    if (w[0] && (w[0] != ' ')) {
+		char *ext = (char *)malloc(sizeof(char) * (strlen(w)+1+1));
 	        if (!ct)
 	            outofmem(__FILE__, "HTLoadExtensionsConfigFile");
 
-                for (x = 0; w[x]; x++)
-                    ext[x+1] = TOLOWER(w[x]);
-                ext[0] = '.';
-                ext[strlen(w)+1] = '\0';
+		for (x = 0; w[x]; x++)
+		    ext[x+1] = TOLOWER(w[x]);
+		ext[0] = '.';
+		ext[strlen(w)+1] = '\0';
 
-                if (TRACE) {
-                    fprintf (stderr,
+		if (TRACE) {
+		    fprintf (stderr,
 			     "SETTING SUFFIX '%s' to '%s'.\n", ext, ct);
 		}
 
@@ -1050,12 +1050,12 @@ PRIVATE int HTLoadExtensionsConfigFile ARGS1(
 		    HTSetSuffix (ext, ct, "8bit", 1.0);
 	        else
 		    HTSetSuffix (ext, ct, "binary", 1.0);
-                count++;
+		count++;
 
-                FREE(ext);
-            }
-        }
-        FREE(ct);
+		FREE(ext);
+	    }
+	}
+	FREE(ct);
     }
     fclose(f);
 

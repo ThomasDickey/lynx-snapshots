@@ -39,7 +39,7 @@ they will be outlined in this file.
 
         /Tty/Bold_style "Offset_X"
 
-    ought to work just as well, but I you may not get the desired
+    ought to work just as well, but you may not get the desired
     behavior until you modify your .Xdefaults file (and run `xrdb
     ~/.Xdefaults').  Note also that there are other supported values 
     for the boldStyle resource/Bold_style default, all of which begin 
@@ -129,7 +129,7 @@ they will be outlined in this file.
     with theses terminals.
 
     On VMS, Lynx, and other TCP-IP software, have been experiencing chronic
-    problems of incompatibilites between DECC and MultiNet headers whenever
+    problems of incompatibilities between DECC and MultiNet headers whenever
     new versions of either DECC or MultiNet are released.  The Lynx build
     procedure for VMS and a maze of spaghetti #ifdef-ing in tcp.h of the
     libwww-FM had previously been successful in dealing with this problem

@@ -24,6 +24,23 @@ Opening Access Control List File
 
  */
 
+/* PUBLIC						HTAA_getAclFilename()
+**	    RESOLVE THE FULL PATHNAME OF ACL FILE FOR A GIVEN FILE
+** ON ENTRY:
+**	path	is the pathname of the file for which to
+**		ACL file should be found.
+**
+**		ACL filename is computed by replacing
+**		the filename by .www_acl in the pathname
+**		(this is done to a local copy, of course).
+**
+** ON EXIT:
+**	returns	the absolute pathname of ACL file
+**		(which is automatically freed next time
+**		this fuction is called).
+*/
+PUBLIC char *HTAA_getAclFilename PARAMS((CONST char * pathname));
+
 /* PUBLIC                                               HTAA_openAcl()
 **              OPEN THE ACL FILE FOR THE GIVEN DOCUMENT
 ** ON ENTRY:

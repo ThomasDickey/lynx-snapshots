@@ -129,6 +129,9 @@ the script:
   	Use this option to control whether full utility pathnames are used.
 	By default, configure substitutes full pathnames.
 
+  --disable-internal-links		(define DONT_TRACK_INTERNAL_LINKS)
+	handle following links to same document differently.
+
   --disable-long-list			(prevent defining LONG_LIST)
   	Use this option to disable long "ls -l" directory listings.
 

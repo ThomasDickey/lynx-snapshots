@@ -585,7 +585,7 @@ PRIVATE char *compose_auth_string ARGS3(
     char *proxiedHost = NULL;
     char *thePort = NULL;
     HTAARealm *realm;
-    char *inet_addr = "0.0.0.0";	/* Change... @@@@ */
+    char *i_net_addr = "0.0.0.0";	/* Change... @@@@ */
     char *timestamp = "42";		/* ... these @@@@ */
     
 
@@ -713,7 +713,7 @@ PRIVATE char *compose_auth_string ARGS3(
 
     if (scheme == HTAA_PUBKEY) {
 	strcat(cleartext, ":");
-	strcat(cleartext, inet_addr);
+	strcat(cleartext, i_net_addr);
 	strcat(cleartext, ":");
 	strcat(cleartext, timestamp);
 	strcat(cleartext, ":");

@@ -17,6 +17,8 @@
 
 #include "HTFormat.h"
 
+extern  char from_hex PARAMS((char c));
+
 extern  HTStream* HTWSRCConvert PARAMS((
         HTPresentation *        pres,
         HTParentAnchor *        anchor,

@@ -420,7 +420,6 @@ PRIVATE int response ARGS1(
     int result;				/* Three-digit decimal code */
     int	continuation_response = -1;
     int status;
-    extern int interrupted_in_htgetcharacter;
 
     if (!control) {
           if (TRACE)
@@ -535,11 +534,11 @@ PRIVATE int response ARGS1(
  *  Some servers need an additional letter after the MACB command.
  */
 PRIVATE int set_mac_binary ARGS1(
-        int,		server_type)
+        int,		ServerType)
 {
     /* try to set mac binary mode */
-    if (server_type == APPLESHARE_SERVER ||
-	server_type == NETPRESENZ_SERVER) {
+    if (ServerType == APPLESHARE_SERVER ||
+	ServerType == NETPRESENZ_SERVER) {
 	/*
 	 *  Presumably E means "Enable"  - kw
 	 */
@@ -554,8 +553,8 @@ PRIVATE int set_mac_binary ARGS1(
  */
 
 PRIVATE void get_ftp_pwd ARGS2(
-	int *,		server_type,
-	BOOLEAN *,	use_list)
+	int *,		ServerType,
+	BOOLEAN *,	UseList)
 {
 
     char *cp;
@@ -567,45 +566,45 @@ PRIVATE void get_ftp_pwd ARGS2(
 	cp = strchr(response_text+5,'"');
 	if (cp)
 	    *cp = '\0';
-        if (*server_type == TCPC_SERVER) {
-            *server_type = ((response_text[5] == '/') ?
+        if (*ServerType == TCPC_SERVER) {
+            *ServerType = ((response_text[5] == '/') ?
 	    				  NCSA_SERVER : TCPC_SERVER);
 	     if (TRACE)
 	         fprintf(stderr, "HTFTP: Treating as %s server.\n",
-		 	 ((*server_type == NCSA_SERVER) ?
+		 	 ((*ServerType == NCSA_SERVER) ?
 			 			 "NCSA" : "TCPC"));
         } else if (response_text[5] == '/') {
             /* path names beginning with / imply Unix,
 	     * right?
 	     */
-	    if (set_mac_binary(*server_type)) {
-		*server_type = NCSA_SERVER;
+	    if (set_mac_binary(*ServerType)) {
+		*ServerType = NCSA_SERVER;
 		if (TRACE)
 	            fprintf(stderr, "HTFTP: Treating as NCSA server.\n");
 	    } else {
-                 *server_type = UNIX_SERVER;
-                 *use_list = TRUE;
+                 *ServerType = UNIX_SERVER;
+                 *UseList = TRUE;
 		 if (TRACE)
 	             fprintf(stderr, "HTFTP: Treating as Unix server.\n");
 	    }
 	    return;
         } else if (response_text[strlen(response_text)-1] == ']') {
             /* path names ending with ] imply VMS, right? */
-            *server_type = VMS_SERVER;
-	    *use_list = TRUE;
+            *ServerType = VMS_SERVER;
+	    *UseList = TRUE;
 	    if (TRACE)
 	        fprintf(stderr, "HTFTP: Treating as VMS server.\n");
         } else {
-            *server_type = GENERIC_SERVER;
+            *ServerType = GENERIC_SERVER;
 	    if (TRACE)
 	        fprintf(stderr, "HTFTP: Treating as Generic server.\n");
 	}
 
-        if ((*server_type == NCSA_SERVER) ||
-            (*server_type == TCPC_SERVER) ||
-            (*server_type == PETER_LEWIS_SERVER) ||
-            (*server_type == NETPRESENZ_SERVER))
-            set_mac_binary(*server_type);
+        if ((*ServerType == NCSA_SERVER) ||
+            (*ServerType == TCPC_SERVER) ||
+            (*ServerType == PETER_LEWIS_SERVER) ||
+            (*ServerType == NETPRESENZ_SERVER))
+            set_mac_binary(*ServerType);
     }
 }
 
@@ -765,8 +764,7 @@ PRIVATE int get_connection ARGS2(
 
 /*	Now we log in		Look up username, prompt for pw.
 */
-  {
-    int status = response((char *)0);	/* Get greeting */
+    status = response((char *)0);	/* Get greeting */
 
     if (status == HT_INTERRUPTED)
       {
@@ -1026,7 +1024,6 @@ PRIVATE int get_connection ARGS2(
     }
 #endif /* NOTREPEAT_PORT */
     return con->socket;			/* Good return */
-  } /* Scope of con */
 }
 
 
@@ -1069,7 +1066,7 @@ PRIVATE int close_master_socket NOARGS
 PRIVATE int get_listen_socket NOARGS
 {
     struct sockaddr_in soc_address;	/* Binary network address */
-    struct sockaddr_in* sin = &soc_address;
+    struct sockaddr_in* soc_in = &soc_address;
     int new_socket;			/* Will be master_socket */
 
 
@@ -1093,8 +1090,8 @@ PRIVATE int get_listen_socket NOARGS
 
 /*  Search for a free port.
 */
-    sin->sin_family = AF_INET;	    /* Family = internet, host order  */
-    sin->sin_addr.s_addr = INADDR_ANY; /* Any peer address */
+    soc_in->sin_family = AF_INET;	    /* Family = internet, host order  */
+    soc_in->sin_addr.s_addr = INADDR_ANY;   /* Any peer address */
 #ifdef POLL_PORTS
     {
         unsigned short old_port_number = port_number;
@@ -1146,7 +1143,7 @@ PRIVATE int get_listen_socket NOARGS
 			     (void *)&address_length);
 	if (status<0) return HTInetStatus("getsockname");
 	CTRACE(tfp, "HTFTP: This host is %s\n",
-	    HTInetString(sin));
+	    HTInetString(soc_in));
 
 	soc_address.sin_port = 0;	/* Unspecified: please allocate */
 #ifdef SOCKS
@@ -1183,8 +1180,8 @@ PRIVATE int get_listen_socket NOARGS
 #endif /* POLL_PORTS */
 
     CTRACE(tfp, "HTFTP: bound to port %d on %s\n",
-    		(int)ntohs(sin->sin_port),
-		HTInetString(sin));
+    		(int)ntohs(soc_in->sin_port),
+		HTInetString(soc_in));
 
 #ifdef REPEAT_LISTEN
     if (master_socket >= 0)
@@ -1197,12 +1194,12 @@ PRIVATE int get_listen_socket NOARGS
 */
     (void)HTHostName(); 	/* Make address valid - doesn't work*/
     sprintf(port_command, "PORT %d,%d,%d,%d,%d,%d%c%c",
-		    (int)*((unsigned char *)(&sin->sin_addr)+0),
-		    (int)*((unsigned char *)(&sin->sin_addr)+1),
-		    (int)*((unsigned char *)(&sin->sin_addr)+2),
-		    (int)*((unsigned char *)(&sin->sin_addr)+3),
-		    (int)*((unsigned char *)(&sin->sin_port)+0),
-		    (int)*((unsigned char *)(&sin->sin_port)+1),
+		    (int)*((unsigned char *)(&soc_in->sin_addr)+0),
+		    (int)*((unsigned char *)(&soc_in->sin_addr)+1),
+		    (int)*((unsigned char *)(&soc_in->sin_addr)+2),
+		    (int)*((unsigned char *)(&soc_in->sin_addr)+3),
+		    (int)*((unsigned char *)(&soc_in->sin_port)+0),
+		    (int)*((unsigned char *)(&soc_in->sin_port)+1),
 		    CR, LF);
 
 
@@ -2234,22 +2231,22 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
     **  Get real types eventually.
     */
     if (!entry_info->type) {
-	CONST char *cp;
+	CONST char *cp2;
         HTFormat format;
         HTAtom * encoding;  /* @@ not used at all */
-        format = HTFileFormat(entry_info->filename, &encoding, &cp);
+        format = HTFileFormat(entry_info->filename, &encoding, &cp2);
 
-	if (cp == NULL) {
+	if (cp2 == NULL) {
 	    if (!strncmp(HTAtom_name(format), "application",11)) {
-		cp = HTAtom_name(format) + 12;
-		if (!strncmp(cp,"x-",2))
-		    cp += 2;
+		cp2 = HTAtom_name(format) + 12;
+		if (!strncmp(cp2,"x-",2))
+		    cp2 += 2;
 	    } else {
-		cp = HTAtom_name(format);
+		cp2 = HTAtom_name(format);
 	    }
 	}
 
-        StrAllocCopy(entry_info->type, cp);
+        StrAllocCopy(entry_info->type, cp2);
     }
 
     return(entry_info);
@@ -2848,11 +2845,11 @@ PUBLIC int HTFTPLoad ARGS4(
 	    ** Check if translation of HOME as tilde is supported,
 	    ** and adjust filename if so. - FM
 	    */
-	    char *cp = NULL;
+	    char *cp2 = NULL;
 	    char *fn = NULL;
 
-	    if ((cp = strchr((filename+1), '/')) != NULL) {
-		*cp = '\0';
+	    if ((cp2 = strchr((filename+1), '/')) != NULL) {
+		*cp2 = '\0';
 	    }
 	    sprintf(command, "PWD%c%c", CR, LF);
 	    status = response(command);
@@ -2861,39 +2858,39 @@ PUBLIC int HTFTPLoad ARGS4(
 		status = response(command);
 		if (status == 2) {
 		    StrAllocCopy(fn, (filename+1));
-		    if (cp) {
-			*cp = '/';
+		    if (cp2) {
+			*cp2 = '/';
 			if (fn[strlen(fn)-1] != '/') {
-			    StrAllocCat(fn, cp);
+			    StrAllocCat(fn, cp2);
 			} else {
-			    StrAllocCat(fn, (cp+1));
+			    StrAllocCat(fn, (cp2+1));
 			}
-			cp = NULL;
+			cp2 = NULL;
 		    }
 		    FREE(fname);
 		    fname = filename = fn;
 		}
 	    }
-	    if (cp) {
-	        *cp = '/';
+	    if (cp2) {
+	        *cp2 = '/';
 	    }
 	}
 	if (strlen(filename) > 3) {
-	    char *cp;
-	    if (((cp=strrchr(filename, '.')) != NULL &&
-	         0 == strncasecomp(cp, ".me", 3)) &&
-		(cp[3] == '\0' || cp[3] == ';')) {
+	    char *cp2;
+	    if (((cp2=strrchr(filename, '.')) != NULL &&
+	         0 == strncasecomp(cp2, ".me", 3)) &&
+		(cp2[3] == '\0' || cp2[3] == ';')) {
 		/*
 		**  Don't treat this as application/x-Troff-me
 		**  if it's a Unix server but has the string
 		**  "read.me", or if it's not a Unix server. - FM
 		*/
 	        if ((server_type != UNIX_SERVER) ||
-		    (cp > (filename + 3) &&
-	             0 == strncasecomp((cp - 4), "read.me", 7))) {
-		    *cp = '\0';
+		    (cp2 > (filename + 3) &&
+	             0 == strncasecomp((cp2 - 4), "read.me", 7))) {
+		    *cp2 = '\0';
 		    format = HTFileFormat(filename, &encoding, NULL);
-		    *cp = '.';
+		    *cp2 = '.';
 		} else {
 		    format = HTFileFormat(filename, &encoding, NULL);
 		}

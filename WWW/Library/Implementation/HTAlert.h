@@ -120,7 +120,7 @@ extern BOOL HTConfirmCookie PARAMS((
 **	303 for redirect as GET without content
 */
 extern int HTConfirmPostRedirect PARAMS((
-	CONST char *	redirecting_url,
+	CONST char *	redirecting_url_arg,
 	int		server_status));
 
 /*

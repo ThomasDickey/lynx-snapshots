@@ -3,10 +3,10 @@
 D0
 #
 #The MIME name of this charset. 
-Mcp1252
+Mwindows-1252
 
 #Name as a Display Charset (used on Options screen)
-O WinLatin1 (cp1252)
+OWinLatin1 (cp1252)
 
 #
 #    Name:     cp1252_WinLatin1 to Unicode table

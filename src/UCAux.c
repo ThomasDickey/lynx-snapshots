@@ -53,7 +53,6 @@ PUBLIC UCTQ_t UCCanTranslateFromTo ARGS2(
     {
 	CONST char * fromname = LYCharSet_UC[from].MIMEname;
 	CONST char * toname = LYCharSet_UC[to].MIMEname;
-	UCTQ_t tqmin = TQ_NO, tqmax = TQ_GOOD;
 	if (!strcmp(fromname, "x-transparent") ||
 	    !strcmp(toname, "x-transparent")) {
 	    return TQ_GOOD;
@@ -78,36 +77,18 @@ PUBLIC UCTQ_t UCCanTranslateFromTo ARGS2(
 		 !strcmp(fromname, "shift_jis")))
 		return TQ_GOOD;
 	    /*
-	    **  The other charsets for CJK were handled
+	    **  The euc-cn and euc-kr charsets were handled
 	    **  by the (from == to) above, so we need not
 	    **  check those. - FM
 	    **/
 	    return TQ_NO;
 	}
-	if (!strcmp(fromname, "koi8-r")) {
-	    /*
-	     *  Will try to use stripping of high bit...
-	     */
-	    tqmin = TQ_POOR;
-	}
-
-	if (!strcmp(fromname, "koi8-r") || /* from cyrillic */
-	    !strcmp(fromname, "iso-8859-5") ||
-	    !strcmp(fromname, "cp866") ||
-	    !strcmp(fromname, "cp1251") ||
-	    !strcmp(fromname, "koi-8")) {
-	    if (strcmp(toname, "iso-8859-5") &&
-		strcmp(toname, "koi8-r") &&
-		strcmp(toname, "cp866") &&
-		strcmp(toname, "cp1251"))
-		tqmax = TQ_POOR;
-	}
-	return ((LYCharSet_UC[from].UChndl >= 0) ? tqmax : tqmin);
+	return ((LYCharSet_UC[from].UChndl >= 0) ? TQ_GOOD : TQ_NO);
     }
 }
 
 /*
-**  Returns YES if no tranlation necessary (because
+**  Returns YES if no translation necessary (because
 **  charsets are equal, are equivalent, etc.).
 */
 PUBLIC BOOL UCNeedNotTranslate ARGS2(
@@ -167,7 +148,7 @@ PUBLIC BOOL UCNeedNotTranslate ARGS2(
 /*
 **  The idea here is that any stage of the stream pipe which is interested
 **  in some charset dependent processing will call this function.
-**  Given input and ouptput charsets, this function will set various flags
+**  Given input and output charsets, this function will set various flags
 **  in a UCTransParams structure that _suggest_ to the caller what to do.
 **
 **  Should be called once when a stage starts processing text (and the
@@ -274,6 +255,7 @@ PUBLIC void UCSetTransParams ARGS5(
 	    **  We set this, presently, for VISCII. - FM
 	    */
 	    pT->repl_translated_C0 = (p_out->enc == UCT_ENC_8BIT_C0);
+#ifdef NOTDEFINED
 	    /*
 	    **  This is a flag for whether we are dealing with koi8-r
 	    **  as the input, and could do 8th-bit stripping for other
@@ -291,6 +273,9 @@ PUBLIC void UCSetTransParams ARGS5(
 				       UCT_REP_SUBSETOF_LAT1)) &&
 				     cs_in != cs_out &&
 				     !strcmp(p_in->MIMEname, "koi8-r"));
+#else
+	    pT->strip_raw_char_in = FALSE;
+#endif /* NOTDEFINED */
 	    /*
 	    **  use_ucs should be set TRUE if we have or will create
 	    **  Unicode values for input octets or UTF multibytes. - FM
@@ -298,15 +283,15 @@ PUBLIC void UCSetTransParams ARGS5(
 	    use_ucs = (intm_ucs || pT->trans_to_uni);
 	    /*
 	    **  This is set TRUE if use_ucs was set FALSE.  It is
-	    **  parallel to the HTPassEightBitRaw flag, which
+	    **  complementary to the HTPassEightBitRaw flag, which
 	    **  is set TRUE or FALSE elsewhere based on the raw mode
 	    **  setting in relation to the current Display Character
 	    **  Set. - FM
 	    */
 	    pT->do_8bitraw = (!use_ucs);
 	    /*
-	    **  This is set TRUE when 160 and 173 should not be treated
-	    **  specially as nbsp and shy, respectively. - FM
+	    **  This is set TRUE when 160 and 173 should not be
+	    **  treated as nbsp and shy, respectively. - FM
 	    */
 	    pT->pass_160_173_raw = (!use_ucs &&
 				    !(p_in->like8859 & UCT_R_8859SPECL));
@@ -335,7 +320,7 @@ PUBLIC void UCSetTransParams ARGS5(
 }
 
 /*
-**  This function initalizes the transformation
+**  This function initializes the transformation
 **  structure by setting all its elements to
 **  FALSE. - KW
 */
@@ -355,14 +340,15 @@ PUBLIC void UCTransParams_clear ARGS1(
     pT->repl_translated_C0 = FALSE;
     pT->trans_from_uni = FALSE;
 }
+
 /*
- *  If terminal is in UTF-8 mode, it probably cannot understand
- *  box drawing chars as (n)curses handles them.  (This may also
- *  be true for other display character sets, but isn't currently
- *  checked.)  In that case set the chars for hori and vert drawing
- *  chars to displayable ASCII chars if '0' was requested.  They'll
- *  stay as they are otherwise. - kw
- */
+**  If terminal is in UTF-8 mode, it probably cannot understand
+**  box drawing chars as (n)curses handles them.  (This may also
+**  be true for other display character sets, but isn't currently
+**  checked.)  In that case set the chars for hori and vert drawing
+**  chars to displayable ASCII chars if '0' was requested.  They'll
+**  stay as they are otherwise. - kw
+*/
 PUBLIC void UCSetBoxChars ARGS5(
     int,	cset,
     int *,	pvert_out,
@@ -371,25 +357,26 @@ PUBLIC void UCSetBoxChars ARGS5(
     int,	hori_in)
 {
     if (cset >= -1 && LYCharSet_UC[cset].enc == UCT_ENC_UTF8) {
-	*pvert_out = (vert_in ? vert_in : '|'); 
+	*pvert_out = (vert_in ? vert_in : '|');
 	*phori_out = (hori_in ? hori_in : '-');
     } else {
 	*pvert_out = vert_in;
 	*phori_out = hori_in;
     }
 }
+
 /*
- *  Given an output target HTStream* (can also be a HTStructured* via
- *  typecast), the target stream's put_character method, and a unicode
- *  character,  CPutUtf8_charstring() will either output the UTF8
- *  encoding of the unicode and return YES, or do nothing and return
- *  NO (if conversion would be unnecessary or the unicode character is
- *  considered invalid).
- *
- *  [Could be used more generally, but is currently only used for &#nnnnn 
- *  stuff - generation of UTF8 from 8-bit encoded charsets not yet done
- *  by SGML.c etc.]
- */
+**  Given an output target HTStream* (can also be a HTStructured* via
+**  typecast), the target stream's put_character method, and a Unicode
+**  character,  CPutUtf8_charstring() will either output the UTF8
+**  encoding of the Unicode and return YES, or do nothing and return
+**  NO (if conversion would be unnecessary or the Unicode character is
+**  considered invalid).
+**
+**  [Could be used more generally, but is currently only used for &#nnnnn
+**  stuff - generation of UTF8 from 8-bit encoded charsets not yet done
+**  by SGML.c etc.]
+*/
 #define PUTC(ch) ((*myPutc)(target, (char)(ch)))
 #define PUTC2(ch) ((*myPutc)(target,(char)(0x80|(0x3f &(ch)))))
 

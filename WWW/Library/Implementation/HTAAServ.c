@@ -488,8 +488,8 @@ PUBLIC int HTAA_checkAuthorization ARGS4(CONST char *,	url,
 	}
 	else if (HTAAFailReason != HTAA_HTBIN) {
 	    /* pathname != NULL */
-	    char *access = HTParse(pathname, "", PARSE_ACCESS);
-	    if (!*access || 0 == strcmp(access,"file")) { /*Local file, do AA*/
+	    char *acc_method = HTParse(pathname, "", PARSE_ACCESS);
+	    if (!*acc_method || 0 == strcmp(acc_method,"file")) { /*Local file, do AA*/
 		if (!HTSecure && 0 != strncmp(local_copy, "/htbin/", 7)) {
 		    char *localname = HTLocalName(pathname);
 		    FREE(pathname);
@@ -504,7 +504,7 @@ PUBLIC int HTAA_checkAuthorization ARGS4(CONST char *,	url,
 		    fprintf(stderr,
 			    "HTAA_checkAuthorization: %s (%s access)\n",
 			    "Gatewaying -- skipping authorization check",
-			    access);
+			    acc_method);
 	    }
 	} /* pathname */
     }

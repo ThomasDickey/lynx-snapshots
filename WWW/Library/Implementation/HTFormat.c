@@ -1,4 +1,3 @@
-
 /*		Manage different file formats			HTFormat.c
 **		=============================
 **
@@ -48,6 +47,8 @@ PUBLIC long int HTMaxBytes  = 0;	/* No effective limit */
 #include "HTMLGen.h"
 
 #include "LYexit.h"
+#include "LYUtils.h"
+#include "LYGlobalDefs.h"
 #include "LYLeaks.h"
 
 #define FREE(x) if (x) {free(x); x = NULL;}
@@ -549,7 +550,6 @@ PUBLIC int HTCopy ARGS4(
     */
     for (;;) {
 	int status;
-	extern char LYCancelDownload;
 
 	if (LYCancelDownload) {
 	    LYCancelDownload = FALSE;
@@ -871,7 +871,6 @@ PUBLIC int HTParseSocket ARGS5(
     HTStream * stream;
     HTStreamClass targetClass;
     int rv;
-    extern char LYCancelDownload;
 
     stream = HTStreamStack(rep_in, format_out, sink, anchor);
     
@@ -926,7 +925,6 @@ PUBLIC int HTParseFile ARGS5(
     
     if (!stream) {
         char buffer[1024];	/* @@@@@@@@ */
-	extern char LYCancelDownload;
         if (LYCancelDownload) {
 	    LYCancelDownload = FALSE;
 	    return -1;

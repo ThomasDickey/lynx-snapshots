@@ -206,7 +206,7 @@ char * HTTranslate(required)
 	case HT_Protect:
 	    {
 		char *local_copy = NULL;
-		char *p;
+		char *p2;
 		char *eff_ids = NULL;
 		char *prot_file = NULL;
 
@@ -220,9 +220,9 @@ char * HTTranslate(required)
 
 		if (r->equiv) {
 		    StrAllocCopy(local_copy, r->equiv);
-		    p = local_copy;
-		    prot_file = HTNextField(&p);
-		    eff_ids = HTNextField(&p);
+		    p2 = local_copy;
+		    prot_file = HTNextField(&p2);
+		    eff_ids = HTNextField(&p2);
 		}
 
 		if (r->op == HT_Protect)

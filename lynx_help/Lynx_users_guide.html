@@ -1,12 +1,12 @@
 <!DOCTYPE html public "-//IETF//DTD HTML 3.0//EN">
 <html>
 <head>
-<title>Lynx Users Guide v2.7.1</title>
+<title>Lynx Users Guide v2.7.2</title>
 <link rev="made" href="mailto:lynx-dev@sig.net">
 </head>
 
 <body>
-<h1>Lynx Users Guide v2.7.1</h1>
+<h1>Lynx Users Guide v2.7.2</h1>
 
 Lynx is a fully-featured <em>World Wide Web</em> (<em>WWW</em>) client
 for users running cursor-addressable, character-cell display devices (e.g.,
@@ -94,6 +94,10 @@ all be used to display an arbitrary ASCII text or HTML file:
   <dd><code>lynx ~/filename</code>
   <dd><code>lynx sys$login:filename</code>
   <dd><code>lynx /sys$login/filename</code>
+ <dt>Win32/DOS
+  <dd><code>lynx filename [???]</code>
+  <dd><code>lynx C:/dir/filename [???]</code>
+  <dd><code>lynx //n/dir/filename [???]</code>
 </dl>
 
 <p>When executed, Lynx will clear the screen and display as much of the
@@ -231,6 +235,8 @@ environment variable,
      </dl>
    <dt>VMS
       <dd><code>define "WWW_HOME" "http://www.w3.org/"</code>
+   <dt>win32
+      <dd><code>WWW_HOME=http://www.w3.org/ [or in registry]</code>
 </dl>  
 
 Note that on VMS the double-quoting <em>must</em> be included to preserve
@@ -550,6 +556,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    must already exist.  Note that on VMS you should use the URL
 	    syntax for the filepath (e.g., <em>not</em>
 	    [.BM]lynx_bookmarks.html).
+	    For Win32, see [???].
 
    <dt>FTP sort criteria
 	<dd>This option allows you to specify how files will be sorted
@@ -746,7 +753,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	<dd>The header string which Lynx sends to servers to indicate the
 	    User-Agent is displayed here.  Changes may be disallowed via
 	    the <em>-restrictions</em> switch.  Otherwise, the header can be
-	    changed temporarily to a string such as <em>L_y_n_x/2.7.1</em>
+	    changed temporarily to a string such as <em>L_y_n_x/2.7.2</em>
 	    for access to sites which discriminate against Lynx based on
 	    checks for the presence of &quot;Lynx&quot; in the header. If
 	    changed during a Lynx session, the default User-Agent header can
@@ -1035,6 +1042,7 @@ commands.
 	    <em>exit</em> under Unix and <em>logout</em> under VMS).  This
 	    command is usually disabled for anonymous users.  On VMS,
 	    '<em>$</em>' normally is a synonym.
+            On Win32, this has no effect [???].
    <dt><em>g</em>
   	<dd>The '<em>g</em>' command allows any URL to be viewed.  Pressing
   	    the '<em>g</em>' command will bring up a prompt asking for a URL.
@@ -1807,7 +1815,9 @@ href="keystrokes/cookie_help.html">Cookie Jar Page</a>.
 A summary of the Lynx command line options (switches) is returned to
 stdout if Lynx is invoked with the <em>-help</em> switch.  A description
 of the options also should be available via the system man (Unix) pages
-or help (VMS) libraries.  The basic syntax of the Lynx command line can
+or help (VMS) libraries.  On Win32, typing lynx -help in a DOS window
+should display similarly.
+The basic syntax of the Lynx command line can
 be represented as one of the following:
 
 <dl>
@@ -1846,7 +1856,7 @@ where
 		    keyboard input terminated with <em>Control-Z</em> or the
 		    command file input terminated by a line that begins
 		    with '<em>$</em>'.  On Unix, the keyboard input terminator
-		    is <em>Control-D</em>.
+		    is <em>Control-D</em>.  On Win32, [???].
    	     <dt><code>-anonymous</code>
     		<dd>used to specify the anonymous account.
    	     <dt><code>-assume_charset=MIMEname</code>
@@ -2247,12 +2257,20 @@ implemented by Lou Montulli and maintained by Garrett Arch Blythe and
 Craig Lavender.
 
 <p><em>Foteos Macrides</em> and members of the
-<a href="lynx-dev.html">lynx-dev</a> list have developed and supported Lynx since release of v2.3
-in May 1994. The Lynx2-3FM code set was released as v2.4 in June 1995.
-The Lynx2-4FM code set was released as v2.5 in May 1996. The Lynx2-5FM
-code set was released as v2.6 in September 1996. The Lynx2-6FM code set
-was released as v2.7 in February 1997, and v2.7.1 with bug fixes for v2.7
-was released in April 1997.
+<a href="lynx-dev.html">lynx-dev</a> list have developed and supported Lynx
+since release of v2.3 in May 1994.
+The Lynx2-3FM code set was released as v2.4 in June 1995.
+The Lynx2-4FM code set was released as v2.5 in May 1996.
+The Lynx2-5FM code set was released as v2.6 in September 1996.
+The Lynx2-6FM code set was released as v2.7 in February 1997.
+The v2-7FM code set was released as v2.7.1 in April 1997.
+The v2-7-1FM code set was released as v2.7.2 in January 1998.
+
+<p>Since early 1997, the Lynx code has expanded into autoconfigure and
+PC versions.  The branching of the Lynx source base from a single
+source into two sources (FM/Foteos Macrides and ac/autoconfigure)
+should be considered a healthy synergism among groups of computer
+professionals acting in their spare time out of a common goal.
 
 <p>Lynx has incorporated code from a variety of sources along the
 way.  The earliest versions of Lynx included code from Earl Fogel
@@ -2263,8 +2281,12 @@ the University of Minnesota, and the later versions of Lynx rely
 on the WWW client library code developed by Tim Berners-Lee (and
 others) and the WWW community.
 
+<p>Contributors have generally been acknowledged in the CHANGES
+file.  Earlier CHANGES file can be found in the docs/ subdirectory
+of this distribution.
+
 <p>Information on obtaining the most current version of Lynx is available
-via <a href="http://www.crl.com/~subir/lynx.html">Lynx links</a>.
+at <a href="http://www.slcc.edu/lynx/current/index.html">the current distribution page</a>.
 
 <p>[<A HREF="#TOC">ToC</A>]
 </body>

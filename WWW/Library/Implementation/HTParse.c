@@ -187,7 +187,7 @@ PUBLIC char * HTParse ARGS3(
     char * name = NULL;
     char * rel = NULL;
     char * p;
-    char * access;
+    char * acc_method;
     struct struct_parts given, related;
 
     if (TRACE)
@@ -227,10 +227,10 @@ PUBLIC char * HTParse ARGS3(
 	    */
 	    given.absolute = "";
     }
-    access = given.access ? given.access : related.access;
+    acc_method = given.access ? given.access : related.access;
     if (wanted & PARSE_ACCESS) {
-        if (access) {
-	    strcat(result, access);
+        if (acc_method) {
+	    strcat(result, acc_method);
 	    if (wanted & PARSE_PUNCTUATION)
 	        strcat(result, ":");
 	}
@@ -277,55 +277,55 @@ PUBLIC char * HTParse ARGS3(
 	    **  which will only cause identical addresses to look different.
 	    */
 	    {
-	    	char *p, *h;
-		if ((p = strchr(result, '@')) != NULL)
-		   tail = (p + 1);
-		p = strchr(tail, ':');
-		if (p != NULL && !isdigit((unsigned char)p[1]))
+	    	char *p2, *h;
+		if ((p2 = strchr(result, '@')) != NULL)
+		   tail = (p2 + 1);
+		p2 = strchr(tail, ':');
+		if (p2 != NULL && !isdigit((unsigned char)p2[1]))
 		    /*
 		    **  Colon not followed by a port number.
 		    */
-		    *p = '\0';
-		if (p != NULL && p != '\0' && access != NULL) {
+		    *p2 = '\0';
+		if (p2 != NULL && *p2 != '\0' && acc_method != NULL) {
 		    /*
 		    **  Port specified.
 		    */
-		    if ((!strcmp(access, "http"      ) && !strcmp(p, ":80" )) ||
-		        (!strcmp(access, "https"     ) && !strcmp(p, ":443")) ||
-		        (!strcmp(access, "gopher"    ) && !strcmp(p, ":70" )) ||
-		        (!strcmp(access, "ftp"       ) && !strcmp(p, ":21" )) ||
-		        (!strcmp(access, "wais"      ) && !strcmp(p, ":210")) ||
-		        (!strcmp(access, "nntp"      ) && !strcmp(p, ":119")) ||
-			(!strcmp(access, "news"      ) && !strcmp(p, ":119")) ||
-			(!strcmp(access, "newspost"  ) && !strcmp(p, ":119")) ||
-			(!strcmp(access, "newsreply" ) && !strcmp(p, ":119")) ||
-		        (!strcmp(access, "snews"     ) && !strcmp(p, ":563")) ||
-		        (!strcmp(access, "snewspost" ) && !strcmp(p, ":563")) ||
-		        (!strcmp(access, "snewsreply") && !strcmp(p, ":563")) ||
-		        (!strcmp(access, "finger"    ) && !strcmp(p, ":79" )) ||
-		        (!strcmp(access, "telnet"    ) && !strcmp(p, ":23" )) ||
-		        (!strcmp(access, "tn3270"    ) && !strcmp(p, ":23" )) ||
-		        (!strcmp(access, "rlogin"    ) && !strcmp(p, ":513")) ||
-		        (!strcmp(access, "cso"       ) && !strcmp(p, ":105")))
-		    *p = '\0';	/* It is the default: ignore it */
+		    if ((!strcmp(acc_method, "http"      ) && !strcmp(p2, ":80" )) ||
+		        (!strcmp(acc_method, "https"     ) && !strcmp(p2, ":443")) ||
+		        (!strcmp(acc_method, "gopher"    ) && !strcmp(p2, ":70" )) ||
+		        (!strcmp(acc_method, "ftp"       ) && !strcmp(p2, ":21" )) ||
+		        (!strcmp(acc_method, "wais"      ) && !strcmp(p2, ":210")) ||
+		        (!strcmp(acc_method, "nntp"      ) && !strcmp(p2, ":119")) ||
+			(!strcmp(acc_method, "news"      ) && !strcmp(p2, ":119")) ||
+			(!strcmp(acc_method, "newspost"  ) && !strcmp(p2, ":119")) ||
+			(!strcmp(acc_method, "newsreply" ) && !strcmp(p2, ":119")) ||
+		        (!strcmp(acc_method, "snews"     ) && !strcmp(p2, ":563")) ||
+		        (!strcmp(acc_method, "snewspost" ) && !strcmp(p2, ":563")) ||
+		        (!strcmp(acc_method, "snewsreply") && !strcmp(p2, ":563")) ||
+		        (!strcmp(acc_method, "finger"    ) && !strcmp(p2, ":79" )) ||
+		        (!strcmp(acc_method, "telnet"    ) && !strcmp(p2, ":23" )) ||
+		        (!strcmp(acc_method, "tn3270"    ) && !strcmp(p2, ":23" )) ||
+		        (!strcmp(acc_method, "rlogin"    ) && !strcmp(p2, ":513")) ||
+		        (!strcmp(acc_method, "cso"       ) && !strcmp(p2, ":105")))
+		    *p2 = '\0';	/* It is the default: ignore it */
 		}
-		if (p == NULL) { 
-		    int len = strlen(tail);
+		if (p2 == NULL) {
+		    int len2 = strlen(tail);
 
-		    if (len > 0) {
-		        h = tail + len - 1;	/* last char of hostname */
+		    if (len2 > 0) {
+		        h = tail + len2 - 1;	/* last char of hostname */
 		        if (*h == '.') 
 		            *h = '\0';		/* chop final . */
 		    }
 		} else { 
-		    h = p;
+		    h = p2;
 		    h--;		/* End of hostname */
 		    if (*h == '.') {
 		        /*
-			**  Slide p over h.
+			**  Slide p2 over h.
 			*/
-		        while (*p != '\0')
-			    *h++ = *p++;
+		        while (*p2 != '\0')
+			    *h++ = *p2++;
 			*h = '\0';	/* terminate */
 		    }
 		}
@@ -347,10 +347,10 @@ PUBLIC char * HTParse ARGS3(
     **  Handle the path.
     */
     if (wanted & PARSE_PATH) {
-        if (access && !given.absolute && given.relative) {
-	    if (!strcasecomp(access, "nntp") ||
-	        !strcasecomp(access, "snews") ||
-		(!strcasecomp(access, "news") &&
+        if (acc_method && !given.absolute && given.relative) {
+	    if (!strcasecomp(acc_method, "nntp") ||
+	        !strcasecomp(acc_method, "snews") ||
+		(!strcasecomp(acc_method, "news") &&
 		 !strncasecomp(result, "news://", 7))) {
 		/*
 		 *  Treat all given nntp or snews paths,

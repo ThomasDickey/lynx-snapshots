@@ -48,8 +48,6 @@
 
 PRIVATE int fix_http_urls PARAMS((document *doc));
 extern char * WWW_Download_File;
-extern char LYCancelDownload;
-extern BOOL redirect_post_content;
 #ifdef VMS
 extern BOOLEAN LYDidRename;
 #endif /* VMS */

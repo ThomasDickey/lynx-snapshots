@@ -1,6 +1,8 @@
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
+#include "userdefs.h"
+
 /*
  * The simple color scheme maps the 8 combinations of bold/underline/reverse
  * to the standard 8 ANSI colors (with some variations based on context).
@@ -107,6 +109,10 @@ extern void LYbox PARAMS((WINDOW *win, BOOLEAN formfield));
 #endif
 #ifndef BOXHORI
 #define BOXHORI '*'	/* character for popup window horizontal borders */
+#endif
+
+#ifndef KEY_DOWN
+#undef HAVE_KEYPAD	/* avoid confusion with bogus 'keypad()' */
 #endif
 
 extern int LYlines;  /* replaces LINES */

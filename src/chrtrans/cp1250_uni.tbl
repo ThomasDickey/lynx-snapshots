@@ -1,8 +1,8 @@
 #The MIME name of this charset.
-Mcp1250
+Mwindows-1250
 
 #Name as a Display Charset (used on Options screen)
-OptionName WinLatin2 (cp1250)
+OWinLatin2 (cp1250)
 
 #
 #    Name:     cp1250_WinLatin2 to Unicode table

@@ -82,7 +82,6 @@ PUBLIC int printfile ARGS1(
     static BOOLEAN first_mail_preparsed = TRUE;
     char *envbuffer = NULL;
 #ifdef VMS
-    extern BOOLEAN HadVMSInterrupt;
     BOOLEAN isPMDF = FALSE;
     char hdrfile[256];
     FILE *hfd;

@@ -417,7 +417,7 @@ PUBLIC HTAssocList *HTAA_parseArgList ARGS1(char *, str)
     HTAssocList *assoc_list = HTAssocList_new();
     char *cur = NULL;
     char *name = NULL;
-    int index = 0;
+    int n = 0;
 
     if (!str)
         return assoc_list;
@@ -425,7 +425,7 @@ PUBLIC HTAssocList *HTAA_parseArgList ARGS1(char *, str)
     while (*str) {
 	SKIPWS(str);				/* Skip leading whitespace */
 	cur = str;
-	index++;
+	n++;
 
 	while (*cur  &&  *cur != '='  &&  *cur != ',')
 	    cur++;	/* Find end of name (or lonely value without a name) */
@@ -462,7 +462,7 @@ PUBLIC HTAssocList *HTAA_parseArgList ARGS1(char *, str)
 		*(cur++) = '\0';		/* Terminate value */
 	    /* else last value on line (already terminated by NULL) */
 	    StrAllocCopy(name, "nnn");	/* Room for item order number */
-	    sprintf(name, "%d", index); /* Item order number for name */
+	    sprintf(name, "%d", n);	/* Item order number for name */
 	}
 	HTAssocList_add(assoc_list, name, str);
 	str = cur;

@@ -226,7 +226,6 @@ PRIVATE void parse_menu ARGS2(
     int bytes = 0;
     int BytesReported = 0;
     char buffer[128];
-    extern int interrupted_in_htgetcharacter;
 
 #define TAB 		'\t'
 #define HEX_ESCAPE 	'%'
@@ -354,7 +353,7 @@ PRIVATE void parse_menu ARGS2(
 		}
 		else {			/* If parsed ok */
 		    char *q;
-		    char *p;
+		    char *r;
 
 		    switch(gtype) {
                		case GOPHER_TEXT:
@@ -411,12 +410,12 @@ PRIVATE void parse_menu ARGS2(
 		    sprintf(address, "//%s/%c", host, gtype);
 
 		    q = address+ strlen(address);
-		    for(p=selector; *p; p++) {	/* Encode selector string */
-			if (acceptable[(unsigned char)*p]) *q++ = *p;
+		    for(r=selector; *r; r++) {	/* Encode selector string */
+			if (acceptable[(unsigned char)*r]) *q++ = *r;
 			else {
 			    *q++ = HEX_ESCAPE;	/* Means hex coming */
-			    *q++ = hex[(TOASCII(*p)) >> 4];
-			    *q++ = hex[(TOASCII(*p)) & 15];
+			    *q++ = hex[(TOASCII(*r)) >> 4];
+			    *q++ = hex[(TOASCII(*r)) & 15];
 			}
 		    }
 
@@ -940,8 +939,7 @@ PRIVATE int parse_cso_fields ARGS2(
     int i, code = 0, prev_code, alen;
     char *indx, *name;
     CSOfield_info *last, *new;
-    extern int interrupted_in_htgetcharacter;
-    
+
     last = CSOfields = (CSOfield_info *) 0;
     prev_code = -2555;
     buf[0] = '\0';
@@ -1243,7 +1241,6 @@ PRIVATE int generate_cso_report ARGS2(
     char *rcode, *ndx_str, *fname, *fvalue, *l;
     CSOfield_info *fld;
     BOOL stop = FALSE; 
-    extern int interrupted_in_htgetcharacter;
 
     /*
     **  Read lines until non-negative status.
@@ -1475,7 +1472,7 @@ end_CSOreport:
 /*      CSO/PH form-based search gateway - FM			HTLoadCSO
 **	=====================================
 */
-PUBLIC int HTLoadCSO ARGS4(
+PRIVATE int HTLoadCSO ARGS4(
         CONST char *,		arg,
         HTParentAnchor *,	anAnchor,
 	HTFormat,		format_out,
@@ -1744,7 +1741,7 @@ PUBLIC int HTLoadCSO ARGS4(
 **  Bug:  No decoding of strange data types as yet.
 **
 */
-PUBLIC int HTLoadGopher ARGS4(
+PRIVATE int HTLoadGopher ARGS4(
 	CONST char *,		arg,
 	HTParentAnchor *,	anAnchor,
 	HTFormat,		format_out,

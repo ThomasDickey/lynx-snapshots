@@ -91,7 +91,6 @@
 #define LYNX_CFG_FILE "Lynx_Dir:lynx.cfg"
 #endif /* LYNX_CFG_FILE */
 
-
 /**************************
  * The EXTENSION_MAP file allows you to map file suffix's to 
  * mime types.
@@ -638,10 +637,10 @@
  *   DosGreek (cp737)			cp737
  *   DosGreek2 (cp869)			cp869
  *   DosHebrew (cp862)			cp862
- *   IBM PC character set		cp437
- *   IBM PC codepage 850		cp850
+ *   DosLatin1 (cp850)			cp850
+ *   DosLatin2 (cp852)			cp852
+ *   DosLatinUS (cp437)			cp437
  *   ISO 8859-10			iso-8859-10
- *   ISO 8859-5 Cyrillic		iso-8859-5
  *   ISO 8859-6 Arabic			iso-8859-6
  *   ISO 8859-7 Greek			iso-8859-7
  *   ISO 8859-8 Hebrew			iso-8859-8
@@ -650,14 +649,14 @@
  *   ISO Latin 2			iso-8859-2
  *   ISO Latin 3			iso-8859-3
  *   ISO Latin 4			iso-8859-4
+ *   ISO Latin 5 Cyrillic		iso-8859-5
  *   Japanese (EUC)			euc-jp
  *   Japanese (SJIS)			shift_jis
- *   KOI8-R character set		koi8-r
+ *   KOI8-R Cyrillic			koi8-r
  *   Korean				euc-kr
  *   Macintosh (8 bit)			macintosh
- *   NeXT character set			x-next
+ *   NeXT character set			next
  *   Other ISO Latin			x-iso-8859-other
- *   PC Latin2 CP 852			cp852
  *   RFC 1345 Mnemonic			mnemonic
  *   RFC 1345 w/o Intro			mnemonic+ascii+0
  *   Taipei (Big5)			big5
@@ -665,12 +664,12 @@
  *   UNICODE UTF 8			utf-8
  *   Vietnamese (VISCII)		viscii
  *   WinArabic (cp1256)			windows-1256
- *   WinBaltRim (cp1257)		cp1257
- *   WinCyrillic (cp1251)		cp1251
+ *   WinBaltRim (cp1257)		windows-1257
+ *   WinCyrillic (cp1251)		windows-1251
  *   WinGreek (cp1253)			windows-1253
  *   WinHebrew (cp1255)			windows-1255
- *   WinLatin1 (cp1252)			cp1252
- *   WinLatin2 (cp1250)			cp1250
+ *   WinLatin1 (cp1252)			windows-1252
+ *   WinLatin2 (cp1250)			windows-1250
  */
 #define CHARACTER_SET "ISO Latin 1"
 
@@ -1207,7 +1206,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.106"
+#define LYNX_VERSION "2.7.1ac-0.110"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */
@@ -1225,8 +1224,8 @@
 #define SEARCH_GOAL_LINE 4	/* try to position search target there */
 #endif
 
-#define MAXCHARSETS 50		/* max character sets supported */
-#define MAXCHARSETSP 51		/* always one more than MAXCHARSETS */
+#define MAXCHARSETS 60		/* max character sets supported */
+#define MAXCHARSETSP 61		/* always one more than MAXCHARSETS */
 
 #ifdef __DJGPP__
 #define FNAMES_8_3
@@ -1249,6 +1248,10 @@
 
 #ifdef DOSPATH
 /*
+**  Following executables may be sought from your PATH at run-time.
+**  To get those programs look for GNU-port stuff elsewhere.
+**  Currently, if compiled with -DUSE_ZLIB (default), you need only "cp"
+**
 **    WINDOWS
 **  ===========
 */

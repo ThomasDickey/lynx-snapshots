@@ -32,6 +32,7 @@
 #include "HTInit.h"
 #include "HTAABrow.h"
 
+#include "LYGlobalDefs.h"
 #include "LYLeaks.h"
 
 /* #define TRACE 1 */
@@ -98,7 +99,7 @@ extern char * LYCookie PARAMS((
 **	read.
 **
 */
-PUBLIC int HTLoadHTTP ARGS4 (
+PRIVATE int HTLoadHTTP ARGS4 (
 	CONST char *, 		arg,
 	HTParentAnchor *,	anAnchor,
 	HTFormat,		format_out,
@@ -240,8 +241,6 @@ try_again:
   if (extensions) {
       int n, i;
       char * host = NULL;
-      extern char * language; /* Lynx's preferred language - FM */
-      extern char * pref_charset; /* Lynx's preferred character set - MM */
 
       if ((host = HTParse(anAnchor->address, "", PARSE_HOST)) != NULL) {
 	  sprintf(line, "Host: %s%c%c", host, CR,LF);
@@ -1520,7 +1519,6 @@ Cookie2_continuation:
 		    break;
 		if (HTAA_shouldRetryWithAuth(start_of_data, length,
 					     (void *)handle, s, NO)) {
- 		    extern char *authentication_info[2];
 
                     HTTP_NETCLOSE(s, handle);
                     if (dump_output_immediately && !authentication_info[0]) {
@@ -1572,7 +1570,6 @@ Cookie2_continuation:
 		    break;
 		if (HTAA_shouldRetryWithAuth(start_of_data, length,
 					     (void *)handle, s, YES)) {
- 		    extern char *proxyauth_info[2];
 
                     HTTP_NETCLOSE(s, handle);
                     if (dump_output_immediately && !proxyauth_info[0]) {

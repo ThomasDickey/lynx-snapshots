@@ -264,7 +264,6 @@ PRIVATE char * WWW_from_archie ARGS1(
 **			pointer to malloced string (must be freed) if ok
 */
 PRIVATE char hex [17] = "0123456789ABCDEF";
-extern char from_hex PARAMS((char a));			/* In HTWSRC @@ */
 
 PRIVATE char * WWW_from_WAIS ARGS1(
 	any *,		docid)

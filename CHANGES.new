@@ -7,6 +7,67 @@ platforms see also INSTALLATION, for some changes for auto-configure and
 simple curses color see also README.configure).  Note that the 2.7 -> 2.7.1
 changes are included here. - KW]
 
+1998-01-22
+* include userdefs.h in LYCurses.h to address redefinition warnings for
+  curses-related configuration. - TD
+* adjust formatting, comments & some messages in recently-modified files to
+  simplify comparison with 2.7.2 version.  - TD
+* remove obsolete logic from UCCanTranslateFromTo, (recommended by LP). - TD
+* make character set names (e.g., cp437, cp850, next) consistent in lynx.cfg,
+  userdefs.h (reported by LP).  - TD
+* change configure script to check for termcap library before curses, in case
+  it is dependent.  - TD
+* More corrections in the Russian Cyrillic area of def7_uni.tbl. - LP
+1998-01-17
+* correct logic for no_color_video by ensuring that if not defined, it
+  doesn't disable underline with color. - TD
+* remove NSL_CLONE - didn't build. - TD
+1998-01-16
+* eliminate gcc "shadowed variable", "nested declaration", "no previous
+  prototype" warnings. - TD
+* add --disable-internal-links configure option. - TD
+* remove W3C gateway (patch by DK, based on email from Gerald Oskoboiny
+  <gerald@w3.org>). - TD
+* documentation updates (patch by JS). - TD
+* add CONTENT_TYPE to environment of lynxcgi POST documents (reported by
+  Ty Sarna <tsarna@endicor.com> & FM). - TD
+* add NSL_CLONE ifdef that enables use of the linux clone() call instead of
+  fork() for the gethostbyname() calls in HTTCP.c.  (patch by Ryan Nielsen
+  <ran@haxor.com>). - TD
+from the lynx code.  I think the following patch does this.
+1998-01-15
+* Tweak of the NSL_FORK code in HTTCP.c to prevent zombie processes from
+  being created when gethostbyname() is interrupted. - RN
+* Corrected the Russian Cyrillic area of the def7_uni.tbl Unicode to
+  7-bit approximations conversion table. - LP
+* Mods of UCAux.c, LYCharUtils.c, SGML.c and HTPlain.c to use 7-bit
+  approximations instead of 8th bit stripping when the document charset
+  is koi8-r and the Display Character Set does not have the corresponding
+  characters. - FM
+* Tweaks in HTML.c to ignore a newline character immediately following
+  a PRE start tag more consistently.  When PRE blocks are used to create
+  blank lines, you should get only as many as are actually included in
+  the PRE block, unless you include less than the number specifed for
+  "before" the block to which you return, in which case you'll get the
+  latter number of blank lines. - FM
+1998-01-13
+* Fixed a typo in the HTParse() code of HTParse.c for checking whether
+  a colon in the host field indeed delimits a port number. - FM
+* Changed the internal MIME names for all MicroSoft Windows codepages
+  from cp#### to windows-####, since the latter is used more commonly
+  as the charset value in META elements and/or Content-Type headers,
+  and most of them have been registered that way with IANA.  Note,
+  however, that MicroSoft uses cp instead of windows- prefixes in the
+  charset names for the Unicode conversion tables submitted to the
+  Unicode Consortium.  Also note that we still treat cp, cp-, and ibm
+  prefixes as synonyms for the windows- prefix. - FM
+1998-01-06
+* work around for 'keypad()' function w/o corresponding key defines
+  (reported by Francisco A. Tomei Torres for NeXTstep 4.0). - TD
+* quote message in install rule, just in case (from HEN). - TD
+* correct expression to supply default value of .cfg file's pathname
+  (reported by LE & Ambrose Li <acli@acli.interlog.com>). - TD
+* correct dependency of .cfg files upon $(libdir) in makefile.in - TD
 1998-01-04
 * correct temporary filename for -traversal -crawl (patch by Doug Kaufman). - TD
 * correct redefinition of SYSTEM_MAIL_FLAGS. (reported by Doug Kaufman). - TD
@@ -18,7 +79,7 @@ changes are included here. - KW]
 1998-01-02
 * workaround for sed expression when rerunning configure with config.cache
   for slang libraries (reported by Hynek Med). - TD
-* fix indicated by Laura Eaves for LYUCFullyTranslateString_1() - TD
+* fix indicated by Laura Eaves (LE) for LYUCFullyTranslateString_1() - TD
 * modify SPAWNING_MSG for DOSPATH configuration, avoid unnecessary use
   of clear-screen in shell (patch by Doug Kaufman). - TD
 * remove install-help from list for install rule, adding message to
@@ -28,7 +89,7 @@ changes are included here. - KW]
   Doug Kaufman). - TD
 * add LYNX_LSS_FILE to config.hin, reported by Ambrose Li
   <acli@acli.interlog.com>. - TD
-* new copy of INSTALLATION file from Henry Nelson Eric. - TD
+* new copy of INSTALLATION file from HEN. - TD
 * add COPY* to install rule. - TD
 * simplify includes in UCdomap.c by using include-path in makefiles. - TD
 * build configure script with patched autoconf to workaround limited
@@ -67,7 +128,7 @@ changes are included here. - KW]
 * add start_color() call to DOSPATH version of start_curses() to
   fix problem reported by Doug Kaufman - TD
 * correct typo in ColorCode() function (reported by Doug Kaufman) - TD
-* modify comments in makefile.in (patch by Henry Nelson Eric) - TD
+* modify comments in makefile.in (patch by HEN) - TD
 * minor fixes for CF_CHECK_ERRNO, CF_SIZECHANGE, CF_SLANG_CPPFLAGS
   macros. - TD
 * add configure option --enable-nsl-fork to turn on code defined by
@@ -336,8 +397,8 @@ changes are included here. - KW]
   invoking the F_LINK_NUM prompt when in form text fields.  Ctrl-V is
   still a dead key under other circumstances in the line editor. - FM
 * remove options --with-lss-file and --with-cfg-file, since the corresponding
-  files will always be installed under $(libdir), reported by Nelson Henry
-  Eric. - TD
+  files will always be installed under $(libdir), reported by Henry Eric
+  Nelson (HEN).  - TD
 * modify configure script and makefile templates to permit builds with the
   --srcdir option, noted by Philippe De Muyter. - TD
 1997-11-08

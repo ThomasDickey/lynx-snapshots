@@ -19,11 +19,11 @@
 #include "UCDefs.h"
 #include "UCAux.h"
 
+#include "LYCharSets.h"
 #include "LYLeaks.h"
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
-extern int current_char_set;
 extern CONST char *LYchar_set_names[];
 extern BOOLEAN LYRawMode;
 extern BOOL HTPassEightBitRaw;
@@ -1542,40 +1542,40 @@ PRIVATE void HTMIME_put_character ARGS2(
 		**  Check whether to set no_cache for the anchor. - FM
 		*/
 		{
-		    char *cp, *cp0 = me->value;
+		    char *cp1, *cp0 = me->value;
 
-		    while ((cp = strstr(cp0, "no-cache")) != NULL) {
-		        cp += 8;
-		        while (*cp != '\0' && WHITE(*cp))
-			    cp++;
-			if (*cp == '\0' || *cp == ';') {
+		    while ((cp1 = strstr(cp0, "no-cache")) != NULL) {
+		        cp1 += 8;
+		        while (*cp1 != '\0' && WHITE(*cp1))
+			    cp1++;
+			if (*cp1 == '\0' || *cp1 == ';') {
 			    me->anchor->no_cache = TRUE;
 			    break;
 			}
-			cp0 = cp;
+			cp0 = cp1;
 		    }
 		    if (me->anchor->no_cache == TRUE)
 		        break;
 		    cp0 = me->value;
-		    while ((cp = strstr(cp0, "max-age")) != NULL) {
-		        cp += 7;
-		        while (*cp != '\0' && WHITE(*cp))
-			    cp++;
-			if (*cp == '=') {
-			    cp++;
-			    while (*cp != '\0' && WHITE(*cp))
-			        cp++;
-			    if (isdigit((unsigned char)*cp)) {
-			        cp0 = cp;
-				while (isdigit((unsigned char)*cp))
-				    cp++;
-			        if (*cp0 == '0' && cp == (cp0 + 1)) {
+		    while ((cp1 = strstr(cp0, "max-age")) != NULL) {
+		        cp1 += 7;
+		        while (*cp1 != '\0' && WHITE(*cp1))
+			    cp1++;
+			if (*cp1 == '=') {
+			    cp1++;
+			    while (*cp1 != '\0' && WHITE(*cp1))
+			        cp1++;
+			    if (isdigit((unsigned char)*cp1)) {
+			        cp0 = cp1;
+				while (isdigit((unsigned char)*cp1))
+				    cp1++;
+			        if (*cp0 == '0' && cp1 == (cp0 + 1)) {
 			            me->anchor->no_cache = TRUE;
 				    break;
 				}
 			    }
 			}
-			cp0 = cp;
+			cp0 = cp1;
 		    }
 		}
                 break;

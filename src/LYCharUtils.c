@@ -1345,12 +1345,14 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    /* What else can we do? */
 		    code = (unsigned char)(*p);
 		}
+#ifdef NOTUSED_FOTEMODS
 	    } else if (T.strip_raw_char_in &&
 		       (unsigned char)(*p) >= 0xc0 &&
 		       (unsigned char)(*p) < 255) {
 		code = ((*p & 0x7f));
 		state = S_got_outchar;
 		break;
+#endif /* NOTUSED_FOTEMODS */
 	    } else if (!T.trans_from_uni) {
 		state = S_got_outchar;
 		break;
@@ -1680,22 +1682,22 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		*cp = cpe;
 		*q++ = '&';
 		state = S_done;
+#ifdef NOTUSED_FOTEMODS
+	    } else if (T.strip_raw_char_in &&
+		(unsigned char)(*p) >= 0xc0 &&
+		(unsigned char)(*p) < 255) {
+		code = (((*p) & 0x7f));
+		state = S_got_outchar;
+#endif /* NOTUSED_FOTEMODS */
+	    } else if (!T.output_utf8 && stype == st_HTML && !hidden &&
+		!(HTPassEightBitRaw &&
+		 (unsigned char)(*p) >= lowest_8)) {
+		sprintf(replace_buf, "U%.2lX", code);
+		state = S_got_outstring;
 	    } else {
-		if (T.strip_raw_char_in &&
-		    (unsigned char)(*p) >= 0xc0 &&
-		    (unsigned char)(*p) < 255) {
-		    code = (((*p) & 0x7f));
-		    state = S_got_outchar;
-		} else if (!T.output_utf8 && stype == st_HTML && !hidden &&
-		    !(HTPassEightBitRaw &&
-		      (unsigned char)(*p) >= lowest_8)) {
-		    sprintf(replace_buf, "U%.2lX", code);
-		    state = S_got_outstring;
-		} else {
-		    puni = p;
-		    code = (unsigned char)(*p);
-		    state = S_got_outchar;
-		}
+		puni = p;
+		code = (unsigned char)(*p);
+		state = S_got_outchar;
 	    }
 	    break;
 
@@ -3314,11 +3316,13 @@ PRIVATE BOOL LYUCTranslateString ARGS7(
 		    /* What else can we do? */
 		    unsign_c = (unsigned char)p[i];
 		}
+#ifdef NOTUSED_FOTEMODS
 	    } else if (T.strip_raw_char_in &&
 		       (unsigned char)p[i] >= 0xc0 &&
 		       (unsigned char)p[i] < 255) {
 		REPLACE_CHAR((p[i] & 0x7f));
 		done = YES;
+#endif /* NOTUSED_FOTEMODS */
 	    } else if (!T.trans_from_uni) {
 		done = YES;
 	    }
@@ -3371,11 +3375,14 @@ PRIVATE BOOL LYUCTranslateString ARGS7(
 		    REPLACE_STRING(replace_buf);
 		}
 	    } else if (unsign_c > 255) {
+#ifdef NOTUSED_FOTEMODS
 		if (T.strip_raw_char_in &&
 		    (unsigned char)p[i] >= 0xc0 &&
 		    (unsigned char)p[i] < 255) {
 		    REPLACE_CHAR((p[i] & 0x7f));
-		} else {
+		} else
+#endif /* NOTUSED_FOTEMODS */
+		{
 		    sprintf(replace_buf, "U%.2lX", unsign_c);
 		    REPLACE_STRING(replace_buf);
 		}
@@ -4227,13 +4234,12 @@ PUBLIC void LYHandleSELECT ARGS5(
 	 */
 	me->inSELECT = TRUE;
 
-	if (!me->text)
-	    UPDATE_STYLE;
 	if (present && present[HTML_SELECT_NAME] &&
-	    value[HTML_SELECT_NAME] && *value[HTML_SELECT_NAME])  
+	    value[HTML_SELECT_NAME] && *value[HTML_SELECT_NAME]) {
 	    StrAllocCopy(name, value[HTML_SELECT_NAME]);
-	else
+	} else {
 	    StrAllocCopy(name, "");
+	}
 	if (present && present[HTML_SELECT_MULTIPLE])  
 	    multiple=YES;
 	if (present && present[HTML_SELECT_DISABLED])  
@@ -4246,10 +4252,11 @@ PUBLIC void LYHandleSELECT ARGS5(
 	    /*
 	     *  Let the size be determined by the number of OPTIONs. - FM
 	     */
-	    if (TRACE)
+	    if (TRACE) {
 		fprintf(stderr,
 			"LYHandleSELECT: Ignoring SIZE=\"%s\" for SELECT.\n",
 			(char *)value[HTML_SELECT_SIZE]);
+	    }
 #endif /* NOTDEFINED */
 	}
 
@@ -4267,18 +4274,18 @@ PUBLIC void LYHandleSELECT ARGS5(
 
 	if ((multiple == NO && LYSelectPopups == TRUE) &&
 	    me->sp[0].tag_number == HTML_PRE &&
-	        HText_LastLineSize(me->text, FALSE) > (LYcols - 8)) {
-		/*
-		 *  Force a newline when we're using a popup in
-		 *  a PRE block and are within 7 columns from the
-		 *  right margin.  This will allow for the '['
-		 *  popup designater and help avoid a wrap in the
-		 *  underscore placeholder for the retracted popup
-		 *  entry in the HText structure. - FM
-		 */
-		HTML_put_character(me, '\n');
-		me->in_word = NO;
-	    }
+	    HText_LastLineSize(me->text, FALSE) > (LYcols - 8)) {
+	    /*
+	     *  Force a newline when we're using a popup in
+	     *  a PRE block and are within 7 columns from the
+	     *  right margin.  This will allow for the '['
+	     *  popup designater and help avoid a wrap in the
+	     *  underscore placeholder for the retracted popup
+	     *  entry in the HText structure. - FM
+	     */
+	    HTML_put_character(me, '\n');
+	    me->in_word = NO;
+	}
 
 	LYCheckForID(me, present, value, (int)HTML_SELECT_ID);
 
@@ -4292,8 +4299,6 @@ PUBLIC void LYHandleSELECT ARGS5(
 	 *  Handle end tag.
 	 */
 	char *ptr;
-	if (!me->text)
-	    UPDATE_STYLE;
 
 	/*
 	 *  Make sure we had a select start tag.

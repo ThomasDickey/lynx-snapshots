@@ -245,7 +245,7 @@ PUBLIC int LYmbcsstrlen ARGS2(
 #endif
 
 #if !defined(GetChar)
-#ifdef HAVE_KEYPAD
+#if HAVE_KEYPAD
 #define GetChar getch
 #else
 #ifndef USE_GETCHAR
@@ -690,7 +690,7 @@ re_read:
 #endif /* NCURSES_MOUSE_VERSION */
 	}
     }
-#endif /* defined(HAVE_KEYPAD) */
+#endif /* HAVE_KEYPAD */
 
     if (c > DO_NOTHING) {
 	/*

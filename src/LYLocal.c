@@ -76,7 +76,7 @@
 #define FREE(x) if (x) {free(x); x = NULL;}
 
 
-PUBLIC int LYExecv PARAMS((
+PRIVATE int LYExecv PARAMS((
 	char *		path,
 	char **		argv,
 	char *		msg));
@@ -2209,7 +2209,7 @@ PRIVATE char * render_item ARGS6(
 /*
  *  Execute DIRED command.
  */
-PUBLIC int LYExecv ARGS3(
+PRIVATE int LYExecv ARGS3(
 	char *,		path,
 	char **,	argv,
 	char *,		msg)

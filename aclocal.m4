@@ -288,20 +288,22 @@ if test ".$ac_cv_func_initscr" != .yes ; then
 	cf_term_lib=""
 	cf_curs_lib=""
 
-	# Check for library containing initscr
-	for cf_curs_lib in curses ncurses cursesX jcurses unknown
-	do
-		AC_CHECK_LIB($cf_curs_lib,initscr,[break])
-	done
-	test $cf_curs_lib = unknown && AC_ERROR(no curses library found)
-
-	# Check for library containing tgoto
+	# Check for library containing tgoto.  Do this before curses library
+	# because it may be needed to link the test-case for initscr.
 	AC_CHECK_FUNC(tgoto,[cf_term_lib=predefined],[
 		for cf_term_lib in termcap termlib unknown
 		do
 			AC_CHECK_LIB($cf_term_lib,tgoto,[break])
 		done
 	])
+
+	# Check for library containing initscr
+	test "$cf_term_lib" != unknown && LIBS="-l$cf_term_lib $cf_save_LIBS"
+	for cf_curs_lib in curses ncurses cursesX jcurses unknown
+	do
+		AC_CHECK_LIB($cf_curs_lib,initscr,[break])
+	done
+	test $cf_curs_lib = unknown && AC_ERROR(no curses library found)
 
 	LIBS="-l$cf_curs_lib $cf_save_LIBS"
 	if test "$cf_term_lib" = unknown ; then
@@ -581,10 +583,7 @@ test "$prefix" != /usr           && $1="[$]$1 /usr/include /usr/include/$2"
 dnl ---------------------------------------------------------------------------
 dnl Insert text into the help-message, for readability, from AC_ARG_WITH.
 AC_DEFUN([CF_HELP_MESSAGE],
-[AC_DIVERT_PUSH(AC_DIVERSION_NOTICE)dnl
-ac_help="$ac_help
-[$1]"
-AC_DIVERT_POP()dnl
+[AC_DIVERT_HELP([$1])dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Construct a search-list for a nonstandard library-file

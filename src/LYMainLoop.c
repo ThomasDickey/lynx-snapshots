@@ -184,9 +184,6 @@ int mainloop NOARGS
 #ifdef DIRED_SUPPORT
     char *tp = NULL;
     struct stat dir_info;
-    extern char LYPermitFileURL[];
-    extern char LYDiredFileURL[];
-    extern char LYUploadFileURL[];
 #endif /* DIRED_SUPPORT */
 
 /*
