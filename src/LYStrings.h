@@ -298,11 +298,13 @@ extern int map_string_to_keysym PARAMS((CONST char * src, int *lec));
 extern char *LYElideString PARAMS((
 	char *		str,
 	int		cut_pos));
+extern void LYEscapeStartfile PARAMS((
+	char **		buffer));
 extern void LYLowerCase PARAMS((
 	char *		buffer));
 extern void LYUpperCase PARAMS((
 	char *		buffer));
-extern void LYRemoveNewlines PARAMS((
+extern BOOLEAN LYRemoveNewlines PARAMS((
 	char *		buffer));
 extern void LYRemoveBlanks PARAMS((
 	char *		buffer));
@@ -319,6 +321,8 @@ extern void LYTrimLeading PARAMS((
 extern char * LYTrimNewline PARAMS((
 	char *		buffer));
 extern void LYTrimTrailing PARAMS((
+	char *		buffer));
+extern void LYTrimAllStartfile PARAMS((
 	char *		buffer));
 extern BOOLEAN LYTrimStartfile PARAMS((
 	char *		buffer));

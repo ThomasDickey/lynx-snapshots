@@ -139,6 +139,23 @@ read keystroke commands from the specified file.
 You can use the data written using the \fB\-cmd_log\fR option.
 Lynx will ignore other information which the command-logging may have
 written to the logfile.
+Each line of the command script contains either a comment beginning with "#",
+or a keyword:
+.RS 5
+.TP 5
+exit
+causes the script to stop, and forces lynx to exit immediately.
+.TP 5
+key
+the character value, in printable form.
+Cursor and other special keys are given as names, e.g., "Down Arrow".
+Printable 7-bit ASCII codes are given as-is,
+and hexadecimal values represent other 8-bit codes.
+.TP 5
+set
+followed by a "name=value" allows one to override values set in the
+lynx.cfg file.
+.RE
 .TP
 .B -color
 forces color mode on, if available.  Default color control sequences
@@ -749,6 +766,10 @@ the global configuration file (normally, \fBlynx.cfg\fR) that was defined
 by the LYNX_CFG_FILE constant in the userdefs.h file, during installation.
 See the userdefs.h file for more information.
 .TP 20
+.B LYNX_LOCALEDIR
+If set, this variable overrides the compiled-in location of the
+locale directory which contains native language (NLS) message text.
+.TP 20
 .B LYNX_LSS
 This variable, if set, specifies the location of the default \fILynx\fR
 character style sheet file.  [Currently only meaningful if \fILynx\fR was
@@ -849,6 +870,11 @@ null string under \fBUNIX\fR, or "No URL" under \fBVMS\fR.
 .B LYNX_TRACE
 If set, causes \fILynx\fR to write a trace file as if the \fB-trace\fR
 option were supplied. 
+.TP 20
+.B LYNX_TRACE_FILE
+If set, overrides the compiled-in name of the trace file,
+which is either Lynx.trace or LY-TRACE.LOG (the latter on the DOS platform).
+The trace file is in either case relative to the home directory.
 .TP 20
 .B LYNX_VERSION
 This variable is always set by \fILynx\fR, and may be used by an external

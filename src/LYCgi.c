@@ -130,7 +130,7 @@ PUBLIC void add_lynxcgi_environment ARGS1(
 {
     char *env_value;
 
-    env_value = getenv(variable_name);
+    env_value = LYGetEnv(variable_name);
     if (env_value != NULL) {
 	char *add_value = NULL;
 
@@ -178,7 +178,7 @@ PRIVATE int LYLoadCGI ARGS4(
     }
 
     StrAllocCopy(orig_pgm, pgm);
-    if ((cp=strchr(pgm, '#')) != NULL) {
+    if ((cp = trimPoundSelector(pgm)) != NULL) {
 	/*
 	 *  Strip a #fragment from path.  In this case any pgm_args
 	 *  found above will also be bogus, since the '?' came after
@@ -186,7 +186,6 @@ PRIVATE int LYLoadCGI ARGS4(
 	 *  handle the case where a '#' appears after a '?' properly
 	 *  according to URL rules. - kw
 	 */
-	*cp = '\0';
 	pgm_args = NULL;
     }
     HTUnEscape(pgm);
@@ -319,7 +318,7 @@ PRIVATE int LYLoadCGI ARGS4(
 	HTStream *target  = NULL;		/* Unconverted data */
 	int fd1[2], fd2[2];
 	char buf[1024];
-	pid_t pid;
+	int pid;
 #ifdef HAVE_TYPE_UNIONWAIT
 	union wait wstatus;
 #else

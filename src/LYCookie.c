@@ -175,8 +175,10 @@ PRIVATE void LYCookieJar_free NOARGS
     HTList *cl = NULL, *next = NULL;
     cookie *co = NULL;
 
+    CTRACE((tfp, "LYCookieJar_free\n"));
     while (dl) {
 	if ((de = dl->object) != NULL) {
+	    CTRACE((tfp, "...LYCookieJar_free domain %s\n", de->domain));
 	    cl = de->cookie_list;
 	    while (cl) {
 		next = cl->next;
@@ -308,14 +310,23 @@ PRIVATE domain_entry * find_domain_entry ARGS1(
      && *name != '\0') {
 	for (hl = domain_list; hl != NULL; hl = hl->next) {
 	    de = (domain_entry *)hl->object;
-	    if (de != NULL
-	     && de->domain != NULL
-	     && !strcasecomp(name, de->domain)) {
-		break;
+	    if (de != NULL && de->domain != NULL) {
+		CTRACE2(TRACE_CFG,
+			(tfp, "...test_domain_entry(%s) bv:%d, invcheck_bv:%d\n",
+			      de->domain,
+			      de->bv,
+			      de->invcheck_bv));
+		if (!strcasecomp(name, de->domain)) {
+		    break;
+		}
 	    }
 	    de = NULL;
 	}
     }
+    CTRACE((tfp, "find_domain_entry(%s) bv:%d, invcheck_bv:%d\n",
+		 name,
+		 de ? de->bv : -1,
+		 de ? de->invcheck_bv : -1));
     return de;
 }
 
@@ -848,6 +859,8 @@ PRIVATE char *alloc_attr_value ARGS2(
 #define FLAGS_KNOWN_ATTR   2
 #define FLAGS_MAXAGE_ATTR  4
 
+#define is_attr(s, len) attr_len == len && !strncasecomp(attr_start, s, len)
+
 PRIVATE unsigned parse_attribute ARGS9(
 	unsigned,	flags,
 	cookie *,	cur_cookie,
@@ -863,7 +876,7 @@ PRIVATE unsigned parse_attribute ARGS9(
     int url_type;
 
     flags &= ~FLAGS_KNOWN_ATTR;
-    if (attr_len == 6 && !strncasecomp(attr_start, "secure", 6)) {
+    if (is_attr("secure", 6)) {
 	if (value == NULL) {
 	    known_attr = YES;
 	    if (cur_cookie != NULL) {
@@ -876,7 +889,7 @@ PRIVATE unsigned parse_attribute ARGS9(
 	     */
 	    known_attr = NO;
 	}
-    } else if (attr_len == 7 && !strncasecomp(attr_start, "discard", 7)) {
+    } else if (is_attr("discard", 7)) {
 	if (value == NULL) {
 	    known_attr = YES;
 	    if (cur_cookie != NULL) {
@@ -889,7 +902,7 @@ PRIVATE unsigned parse_attribute ARGS9(
 	     */
 	    known_attr = NO;
 	}
-    } else if (attr_len == 7 && !strncasecomp(attr_start, "comment", 7)) {
+    } else if (is_attr("comment", 7)) {
 	known_attr = YES;
 	if (cur_cookie != NULL && value &&
 	    /*
@@ -899,8 +912,7 @@ PRIVATE unsigned parse_attribute ARGS9(
 	    StrAllocCopy(cur_cookie->comment, value);
 	    *cookie_len += strlen(cur_cookie->comment);
 	}
-    } else if (attr_len == 10 && !strncasecomp(attr_start,
-					  "commentURL", 10)) {
+    } else if (is_attr("commentURL", 10)) {
 	known_attr = YES;
 	if (cur_cookie != NULL && value &&
 	    /*
@@ -928,7 +940,7 @@ PRIVATE unsigned parse_attribute ARGS9(
 		FREE(cur_cookie->commentURL);
 	    }
 	}
-    } else if (attr_len == 6 && !strncasecomp(attr_start, "domain", 6)) {
+    } else if (is_attr("domain", 6)) {
 	known_attr = YES;
 	if (cur_cookie != NULL && value &&
 	    /*
@@ -970,7 +982,7 @@ PRIVATE unsigned parse_attribute ARGS9(
 	    *cookie_len += strlen(cur_cookie->domain);
 	    cur_cookie->flags |= COOKIE_FLAG_DOMAIN_SET;
 	}
-    } else if (attr_len == 4 && !strncasecomp(attr_start, "path", 4)) {
+    } else if (is_attr("path", 4)) {
 	known_attr = YES;
 	if (cur_cookie != NULL && value &&
 	    /*
@@ -982,7 +994,7 @@ PRIVATE unsigned parse_attribute ARGS9(
 	    *cookie_len += (cur_cookie->pathlen = strlen(cur_cookie->path));
 	    cur_cookie->flags |= COOKIE_FLAG_PATH_SET;
 	}
-    } else if (attr_len == 4 && !strncasecomp(attr_start, "port", 4)) {
+    } else if (is_attr("port", 4)) {
 	if (cur_cookie != NULL && value &&
 	    /*
 	     *	Don't process a repeat port. - FM
@@ -1015,7 +1027,7 @@ PRIVATE unsigned parse_attribute ARGS9(
 	    }
 	    known_attr = YES;
 	}
-    } else if (attr_len == 7 && !strncasecomp(attr_start, "version", 7)) {
+    } else if (is_attr("version", 7)) {
 	known_attr = YES;
 	if (cur_cookie != NULL && value &&
 	    /*
@@ -1027,7 +1039,7 @@ PRIVATE unsigned parse_attribute ARGS9(
 		cur_cookie->version = temp;
 	    }
 	}
-    } else if (attr_len == 7 && !strncasecomp(attr_start, "max-age", 7)) {
+    } else if (is_attr("max-age", 7)) {
 	known_attr = YES;
 	if (cur_cookie != NULL && value &&
 	    /*
@@ -1046,7 +1058,7 @@ PRIVATE unsigned parse_attribute ARGS9(
 	    }
 	    flags |= FLAGS_MAXAGE_ATTR;
 	}
-    } else if (attr_len == 7 && !strncasecomp(attr_start, "expires", 7)) {
+    } else if (is_attr("expires", 7)) {
 	/*
 	 *  Convert an 'expires' attribute value if we haven't
 	 *  received a 'max-age'.  Note that 'expires' should not
@@ -1118,7 +1130,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
      *	Process the Set-Cookie2 header, if present and not zero-length,
      *	adding each cookie to the CombinedCookies list. - FM
      */
-    p = (SetCookie2 ? SetCookie2 : "");
+    p = NonNull(SetCookie2);
     if (SetCookie && *p) {
 	CTRACE((tfp, "LYProcessSetCookies: Using Set-Cookie2 header.\n"));
     }
@@ -1704,7 +1716,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 			    (long)co->expires,
 			    ctime(&co->expires)));
 	}
-	if (!strncasecomp(address, "https:", 6) &&
+	if (isHTTPS_URL(address) &&
 	    LYForceSSLCookiesSecure == TRUE &&
 	    !(co->flags & COOKIE_FLAG_SECURE)) {
 	    co->flags |= COOKIE_FLAG_SECURE;
@@ -1745,7 +1757,7 @@ PUBLIC void LYSetCookie ARGS3(
 	*ptr = '\0';
 	ptr++;
 	port = atoi(ptr);
-    } else if (!strncasecomp(address, "https:", 6)) {
+    } else if (isHTTPS_URL(address)) {
 	port = 443;
     }
     if (((path = HTParse(address, "",
@@ -1767,15 +1779,13 @@ PUBLIC void LYSetCookie ARGS3(
 	BadHeaders = TRUE;
     }
     CTRACE((tfp, "LYSetCookie called with host '%s', path '%s',\n",
-		(hostname ? hostname : ""),
-		(path ? path : "")));
+		NonNull(hostname),
+		NonNull(path)));
     if (SetCookie) {
-	CTRACE((tfp, "    and Set-Cookie: '%s'\n",
-			 (SetCookie ? SetCookie : "")));
+	CTRACE((tfp, "    and Set-Cookie: '%s'\n", SetCookie));
     }
     if (SetCookie2) {
-	CTRACE((tfp, "    and Set-Cookie2: '%s'\n",
-			 (SetCookie2 ? SetCookie2 : "")));
+	CTRACE((tfp, "    and Set-Cookie2: '%s'\n", SetCookie2));
     }
     if (LYSetCookies == FALSE || BadHeaders == TRUE) {
 	CTRACE((tfp, "    Ignoring this Set-Cookie/Set-Cookie2 request.\n"));
@@ -2076,7 +2086,7 @@ PUBLIC void LYStoreCookies ARGS1 (
 		co->flags & COOKIE_FLAG_SECURE ? "TRUE" : "FALSE",
 		(long) co->expires, co->name,
 		    (co->quoted ? "\"" : ""),
-		    co->value,
+		    NonNull(co->value),
 		    (co->quoted ? "\"" : ""));
 
 	    CTRACE((tfp, "STORED\n"));
@@ -2398,8 +2408,8 @@ Delete_all_cookies_in_domain:
 	/*
 	 *  Show the domain link and 'allow' setting. - FM
 	 */
-	HTSprintf0(&buf, "<dt>%s<dd><a href=\"LYNXCOOKIE://%s/\">Domain=%s</a>\n",
-		      de->domain, de->domain, de->domain);
+	HTSprintf0(&buf, "<dt>%s<dd><a href=\"%s//%s/\">Domain=%s</a>\n",
+		      de->domain, STR_LYNXCOOKIE, de->domain, de->domain);
 	PUTS(buf);
 	switch (de->bv) {
 	case (ACCEPT_ALWAYS):
@@ -2441,8 +2451,8 @@ Delete_all_cookies_in_domain:
 	    } else {
 		StrAllocCopy(value, NO_VALUE);
 	    }
-	    HTSprintf0(&buf, "<dd><a href=\"LYNXCOOKIE://%s/%s\">%s=%s</a>\n",
-			 de->domain, co->lynxID, name, value);
+	    HTSprintf0(&buf, "<dd><a href=\"%s//%s/%s\">%s=%s</a>\n",
+			 STR_LYNXCOOKIE, de->domain, co->lynxID, name, value);
 	    FREE(name);
 	    FREE(value);
 	    PUTS(buf);

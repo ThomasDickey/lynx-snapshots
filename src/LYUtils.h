@@ -16,7 +16,7 @@
 #define HTSYS_remove(path) HTVMS_remove(path)
 #endif /* VMS */
 
-#if defined(DOSPATH) || defined(__EMX__)
+#if defined(USE_DOS_DRIVES)
 #include <HTDOS.h>
 #define HTSYS_name(path) HTDOS_name(path)
 #endif
@@ -35,6 +35,36 @@
 
 #define LYIsPipeCommand(s) ((s)[0] == '|')
 
+#ifdef VMS
+#define TTY_DEVICE "tt:"
+#define NUL_DEVICE "nl:"
+#define LYIsNullDevice(s) (!strncasecomp(s, "nl:", 3) || !strncasecomp(s, "/nl/", 4))
+#define LYSameFilename(a,b) (!strcasecomp(a,b))
+#define LYSameHostname(a,b) (!strcasecomp(a,b))
+#else
+#if defined(DOSPATH) || defined(__EMX__)
+#define TTY_DEVICE "con"
+#define NUL_DEVICE "nul"
+#define LYIsNullDevice(s) LYSameFilename(s,NUL_DEVICE)
+#define LYSameFilename(a,b) (!strcasecomp(a,b))
+#define LYSameHostname(a,b) (!strcasecomp(a,b))
+#else
+#if defined(__CYGWIN__)
+#define TTY_DEVICE "/dev/tty"
+#define NUL_DEVICE "/dev/null"
+#define LYIsNullDevice(s) LYSameFilename(s,NUL_DEVICE)
+#define LYSameFilename(a,b) (!strcasecomp(a,b))
+#define LYSameHostname(a,b) (!strcasecomp(a,b))
+#else
+#define TTY_DEVICE "/dev/tty"
+#define NUL_DEVICE "/dev/null"
+#define LYIsNullDevice(s) LYSameFilename(s,NUL_DEVICE)
+#define LYSameFilename(a,b) (!strcmp(a,b))
+#define LYSameHostname(a,b) (!strcmp(a,b))
+#endif /* __CYGWIN__ */
+#endif /* DOSPATH */
+#endif /* VMS */
+
 /* See definitions in src/LYCharVals.h.  The hardcoded values...
    This prohibits binding C-c and C-g.  Maybe it is better to remove this? */
 #define LYCharIsINTERRUPT_HARD(ch)	\
@@ -46,10 +76,14 @@
 #define LYCharIsINTERRUPT_NO_letter(ch)	\
   (LYCharIsINTERRUPT(ch) && !isprint(ch))
 
-#if defined(DOSPATH) || defined(__EMX__)
+#if defined(USE_DOS_DRIVES)
+#define PATHSEP_STR "\\"
 #define LYIsPathSep(ch) ((ch) == '/' || (ch) == '\\')
+#define LYIsDosDrive(s) (isalpha(UCH((s)[0])) && (s)[1] == ':')
 #else
+#define PATHSEP_STR "/"
 #define LYIsPathSep(ch) ((ch) == '/')
+#define LYIsDosDrive(s) FALSE /* really nothing */
 #endif
 
 #ifdef EXP_ADDRLIST_PAGE
@@ -62,6 +96,9 @@
 #endif
 
 #define LYIsHtmlSep(ch) ((ch) == '/')
+
+#define findPoundSelector(address) strchr(address, '#')
+#define restorePoundSelector(pound) if ((pound) != NULL) *(pound) = '#'
 
 extern BOOL strn_dash_equ PARAMS((CONST char* p1,CONST char* p2,int len));
 extern BOOLEAN LYAddSchemeForURL PARAMS((char **AllocatedString, char *default_scheme));
@@ -91,13 +128,15 @@ extern FILE *LYOpenTemp PARAMS((char *result, CONST char *suffix, CONST char *mo
 extern FILE *LYOpenTempRewrite PARAMS((char *result, CONST char *suffix, CONST char *mode));
 extern FILE *LYReopenTemp PARAMS((char *name));
 extern char *Current_Dir PARAMS((char * pathname));
+extern char *LYGetEnv PARAMS((CONST char * name));
 extern char *LYGetHiliteStr PARAMS(( int cur, int count));
 extern char *LYLastPathSep PARAMS((CONST char *path));
 extern char *LYPathLeaf PARAMS((char * pathname));
 extern char *LYSysShell NOPARAMS;
 extern char *LYgetXDisplay NOPARAMS;
 extern char *strip_trailing_slash PARAMS((char * my_dirname));
-extern char *wwwName PARAMS((CONST char *pathname));
+extern char *trimPoundSelector PARAMS((char * address));
+extern CONST char *wwwName PARAMS((CONST char *pathname));
 extern int HTCheckForInterrupt NOPARAMS;
 extern int LYCheckForProxyURL PARAMS((char *filename));
 extern int LYConsoleInputFD PARAMS((BOOLEAN need_selectable));
@@ -151,6 +190,15 @@ extern void remove_backslashes PARAMS((char *buf));
 extern void size_change PARAMS((int sig));
 extern void statusline PARAMS((CONST char *text));
 extern void toggle_novice_line NOPARAMS;
+
+#ifdef __CYGWIN__
+extern int Cygwin_Shell PARAMS((void));
+#endif
+
+#ifdef _WIN_CC
+extern int exec_command(char * cmd, int wait_flag); /* xsystem.c */
+extern int xsystem(char *cmd);
+#endif
 
 /* Keeping track of User Interface Pages: */
 typedef enum {
@@ -206,8 +254,10 @@ extern void Define_VMSLogical PARAMS((char *LogicalName, char *LogicalValue));
 extern int putenv PARAMS((CONST char *string));
 #endif /* HAVE_PUTENV */
 
-#ifdef UNIX
+#if defined(MULTI_USER_UNIX)
 extern void LYRelaxFilePermissions PARAMS((CONST char * name));
+#else
+#define LYRelaxFilePermissions(name) /* nothing */
 #endif
 
 /*
@@ -275,6 +325,128 @@ typedef enum {
 
 } UrlTypes;
 
+/* common URLs */
+#define STR_BIBP_URL         "bibp:"
+#define LEN_BIBP_URL         5
+#define isBIBP_URL(addr)     !strncasecomp(addr, STR_BIBP_URL, LEN_BIBP_URL)
+
+#define STR_CSO_URL          "cso:"
+#define LEN_CSO_URL          4
+#define isCSO_URL(addr)      !strncasecomp(addr, STR_CSO_URL, LEN_CSO_URL)
+
+#define STR_FILE_URL         "file:"
+#define LEN_FILE_URL         5
+#define isFILE_URL(addr)     !strncasecomp(addr, STR_FILE_URL, LEN_FILE_URL)
+
+#define STR_FINGER_URL       "finger:"
+#define LEN_FINGER_URL       7
+#define isFINGER_URL(addr)   !strncasecomp(addr, STR_FINGER_URL, LEN_FINGER_URL)
+
+#define STR_FTP_URL          "ftp:"
+#define LEN_FTP_URL          4
+#define isFTP_URL(addr)      !strncasecomp(addr, STR_FTP_URL, LEN_FTP_URL)
+
+#define STR_GOPHER_URL       "gopher:"
+#define LEN_GOPHER_URL       7
+#define isGOPHER_URL(addr)   !strncasecomp(addr, STR_GOPHER_URL, LEN_GOPHER_URL)
+
+#define STR_HTTP_URL         "http:"
+#define LEN_HTTP_URL         5
+#define isHTTP_URL(addr)     !strncasecomp(addr, STR_HTTP_URL, LEN_HTTP_URL)
+
+#define STR_HTTPS_URL        "https:"
+#define LEN_HTTPS_URL        6
+#define isHTTPS_URL(addr)    !strncasecomp(addr, STR_HTTPS_URL, LEN_HTTPS_URL)
+
+#define STR_MAILTO_URL       "mailto:"
+#define LEN_MAILTO_URL       7
+#define isMAILTO_URL(addr)   !strncasecomp(addr, STR_MAILTO_URL, LEN_MAILTO_URL)
+
+#define STR_NEWS_URL         "news:"
+#define LEN_NEWS_URL         5
+#define isNEWS_URL(addr)     !strncasecomp(addr, STR_NEWS_URL, LEN_NEWS_URL)
+
+#define STR_NNTP_URL         "nntp:"
+#define LEN_NNTP_URL         5
+#define isNNTP_URL(addr)     !strncasecomp(addr, STR_NNTP_URL, LEN_NNTP_URL)
+
+#define STR_RLOGIN_URL       "rlogin:"
+#define LEN_RLOGIN_URL       7
+#define isRLOGIN_URL(addr)   !strncasecomp(addr, STR_RLOGIN_URL, LEN_RLOGIN_URL)
+
+#define STR_SNEWS_URL        "snews:"
+#define LEN_SNEWS_URL        6
+#define isSNEWS_URL(addr)    !strncasecomp(addr, STR_SNEWS_URL, LEN_SNEWS_URL)
+
+#define STR_TELNET_URL       "telnet:"
+#define LEN_TELNET_URL       7
+#define isTELNET_URL(addr)   !strncasecomp(addr, STR_TELNET_URL, LEN_TELNET_URL)
+
+#define STR_TN3270_URL       "tn3270:"
+#define LEN_TN3270_URL       7
+#define isTN3270_URL(addr)   !strncasecomp(addr, STR_TN3270_URL, LEN_TN3270_URL)
+
+#define STR_WAIS_URL         "wais:"
+#define LEN_WAIS_URL         5
+#define isWAIS_URL(addr)     !strncasecomp(addr, STR_WAIS_URL, LEN_WAIS_URL)
+
+/* internal URLs */
+#define STR_LYNXCFG          "LYNXCFG:"
+#define LEN_LYNXCFG          8
+#define isLYNXCFG(addr)      !strncasecomp(addr, STR_LYNXCFG, LEN_LYNXCFG)
+
+#define STR_LYNXCFLAGS       "LYNXCOMPILEOPTS:"
+#define LEN_LYNXCFLAGS       16
+#define isLYNXCFLAGS(addr)   !strncasecomp(addr, STR_LYNXCFLAGS, LEN_LYNXCFLAGS)
+
+#define STR_LYNXCGI          "lynxcgi:"
+#define LEN_LYNXCGI          8
+#define isLYNXCGI(addr)      !strncasecomp(addr, STR_LYNXCGI, LEN_LYNXCGI)
+
+#define STR_LYNXCOOKIE       "LYNXCOOKIE:"
+#define LEN_LYNXCOOKIE       11
+#define isLYNXCOOKIE(addr)   !strncasecomp(addr, STR_LYNXCOOKIE, LEN_LYNXCOOKIE)
+
+#define STR_LYNXDIRED        "LYNXDIRED:"
+#define LEN_LYNXDIRED        10
+#define isLYNXDIRED(addr)    !strncasecomp(addr, STR_LYNXDIRED, LEN_LYNXDIRED)
+
+#define STR_LYNXEXEC         "lynxexec:"
+#define LEN_LYNXEXEC         9
+#define isLYNXEXEC(addr)     !strncasecomp(addr, STR_LYNXEXEC, LEN_LYNXEXEC)
+
+#define STR_LYNXDOWNLOAD     "LYNXDOWNLOAD:"
+#define LEN_LYNXDOWNLOAD     13
+#define isLYNXDOWNLOAD(addr) !strncasecomp(addr, STR_LYNXDOWNLOAD, LEN_LYNXDOWNLOAD)
+
+#define STR_LYNXHIST         "LYNXHIST:"
+#define LEN_LYNXHIST         9
+#define isLYNXHIST(addr)     !strncasecomp(addr, STR_LYNXHIST, LEN_LYNXHIST)
+
+#define STR_LYNXKEYMAP       "LYNXKEYMAP:"
+#define LEN_LYNXKEYMAP       11
+#define isLYNXKEYMAP(addr)   !strncasecomp(addr, STR_LYNXKEYMAP, LEN_LYNXKEYMAP)
+
+#define STR_LYNXIMGMAP       "LYNXIMGMAP:"
+#define LEN_LYNXIMGMAP       11
+#define isLYNXIMGMAP(addr)   !strncasecomp(addr, STR_LYNXIMGMAP, LEN_LYNXIMGMAP)
+
+#define STR_LYNXMESSAGES     "LYNXMESSAGES:"
+#define LEN_LYNXMESSAGES     13
+#define isLYNXMESSAGES(addr) !strncasecomp(addr, STR_LYNXMESSAGES, LEN_LYNXMESSAGES)
+
+#define STR_LYNXOPTIONS      "LYNXOPTIONS:"
+#define LEN_LYNXOPTIONS      12
+#define isLYNXOPTIONS(addr)  !strncasecomp(addr, STR_LYNXOPTIONS, LEN_LYNXOPTIONS)
+
+#define STR_LYNXPRINT        "LYNXPRINT:"
+#define LEN_LYNXPRINT        10
+#define isLYNXPRINT(addr)    !strncasecomp(addr, STR_LYNXPRINT, LEN_LYNXPRINT)
+
+#define STR_LYNXPROG         "lynxprog:"
+#define LEN_LYNXPROG         9
+#define isLYNXPROG(addr)     !strncasecomp(addr, STR_LYNXPROG, LEN_LYNXPROG)
+
 /*
  *  For change_sug_filename().
  */
@@ -303,7 +475,7 @@ extern void LYCloselog NOPARAMS;
 #define HIDE_CHMOD 0600
 #define HIDE_UMASK 0077
 
-#if defined(DOSPATH) || defined(WIN_EX) || defined(__CYGWIN__)
+#if defined(DOSPATH) || defined(__CYGWIN__)
 #define TXT_R	"rt"
 #define TXT_W	"wt"
 #define TXT_A	"at+"

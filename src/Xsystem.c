@@ -1,4 +1,4 @@
-/* @Id: Xsystem.c 1.10 Sun, 01 Apr 2001 17:51:46 -0700 dickey @
+/* @Id: Xsystem.c 1.11 Sun, 06 Oct 2002 17:43:28 -0700 dickey @
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -24,6 +24,9 @@
  * NEAR for ms-c
  *
  */
+#include <LYUtils.h>
+
+#if 0
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +35,7 @@
 #include <process.h>
 #ifndef __CYGWIN__
 #include <dos.h>
+#endif
 #endif
 
 #include <LYStrings.h>
@@ -161,7 +165,7 @@ csystem(PRO * p, int flag)
     char SW[3];
     int rc;
 
-    if ((cmp = getenv("COMSPEC")) == 0)
+    if ((cmp = LYGetEnv("COMSPEC")) == 0)
 	return -2;
     SW[0] = (char) getswchar();
     SW[1] = 'c';
@@ -348,7 +352,7 @@ prog_go(PRO * p, int flag)
 	return csystem(p, flag);
 
     if (s < p->cmd) {		/* cmd has no PATH nor Drive */
-	ep = getenv("PATH");
+	ep = LYGetEnv("PATH");
 	LYstrncpy(cmdb, p->cmd, sizeof(cmdb) - 1);
 	for (;;) {
 	    if (extp) {		/* has extension */
@@ -398,7 +402,7 @@ tmpf(char *tp)
     char *ev;
     int i;
 
-    if ((ev = getenv("TMP")) != 0) {
+    if ((ev = LYGetEnv("TMP")) != 0) {
 	LYstrncpy(tplate, ev, sizeof(tplate) - 2 - strlen(tp));
 	i = strlen(ev);
 	if (i && ev[i - 1] != '\\' && ev[i - 1] != '/')
@@ -474,9 +478,6 @@ xsystem(char *cmd)
     int rdstdin, rdstdout;
     int rc = 0;
     static char *cmdline = 0;
-#if USECMDLINE
-    char *oldcmdline;
-#endif
 
 #ifdef SH_EX	/* 1997/11/01 (Sat) 10:04:03 add by JH7AYN */
     pif = cmd;
@@ -498,13 +499,10 @@ xsystem(char *cmd)
     psstdin = psstdout = rdstdin = rdstdout = -1;
     while (p) {
 #if USECMDLINE
-	if (!getenv("NOCMDLINE")) {
-	    oldcmdline = cmdline;
+	if (!LYGetEnv("NOCMDLINE")) {
 	    cmdline = xmalloc(strlen(p->cmd) + strlen(p->arg) + 10);
 	    sprintf(cmdline, "CMDLINE=%s %s", p->cmd, p->arg);
 	    putenv(cmdline);
-	    if (oldcmdline)
-		free(oldcmdline);
 	}
 #endif
 	if (p->next)

@@ -23,7 +23,7 @@
 #include <HTUtils.h>
 
 #ifndef VMS
-#ifdef DOSPATH
+#if defined(DOSPATH)
 #undef LONG_LIST
 #define LONG_LIST  /* Define this for long style unix listings (ls -l),
 		     the actual style is configurable from lynx.cfg */
@@ -31,13 +31,17 @@
 /* #define NO_PARENT_DIR_REFERENCE */ /* Define this for no parent links */
 #endif /* !VMS */
 
-#ifdef DOSPATH
+#if defined(DOSPATH)
 #define HAVE_READDIR 1
 #define USE_DIRENT
+#endif
+
+#if defined(USE_DOS_DRIVES)
 #include <HTDOS.h>
-#endif /* DOSPATH */
+#endif
 
 #include <HTFile.h>		/* Implemented here */
+
 #ifdef VMS
 #include <stat.h>
 #endif /* VMS */
@@ -591,9 +595,10 @@ PRIVATE int HTCreatePath ARGS1(CONST char *,path)
 **  On exit:
 **	Returns a malloc'ed string which must be freed by the caller.
 */
-PUBLIC char * HTURLPath_toFile ARGS2(
+PUBLIC char * HTURLPath_toFile ARGS3(
 	CONST char *,	name,
-	BOOL,		expand_all)
+	BOOL,		expand_all,
+	BOOL,		is_remote GCC_UNUSED)
 {
     char * path = NULL;
     char * result = NULL;
@@ -605,21 +610,11 @@ PUBLIC char * HTURLPath_toFile ARGS2(
 	HTUnEscapeSome(path, "/");	/* Interpret % signs for path delims */
 
     CTRACE((tfp, "URLPath `%s' means path `%s'\n", name, path));
-#ifdef DOSPATH
-    StrAllocCopy(result, HTDOS_name(path));
-#else
-#ifdef __EMX__
-    if (path[0] == '/'
-	&& isalpha(path[1])
-	&& path[2] == ':') /* pesky leading slash */
-	StrAllocCopy(result, path+1);
-    else
-	StrAllocCopy(result, path);
-    CTRACE((tfp, "EMX hack changed `%s' to `%s'\n", path, result));
+#if defined(USE_DOS_DRIVES)
+    StrAllocCopy(result, is_remote ? path : HTDOS_name(path));
 #else
     StrAllocCopy(result, path);
-#endif /* __EMX__ */
-#endif /* DOSPATH */
+#endif
 
     FREE(path);
 
@@ -661,21 +656,7 @@ PUBLIC char * HTnameOfFile_WWW ARGS3(
 	if ((0 == strcasecomp(host, HTHostName())) ||
 	    (0 == strcasecomp(host, "localhost")) || !*host) {
 	    CTRACE((tfp, "Node `%s' means path `%s'\n", name, path));
-#ifdef DOSPATH
-	    StrAllocCopy(result, HTDOS_name(path));
-#else
-#ifdef __EMX__
-	    if (path[0] == '/'
-	     && isalpha(path[1])
-	     && path[2] == ':') /* pesky leading slash */
-		StrAllocCopy(result, path+1);
-	    else
-		StrAllocCopy(result, path);
-	    CTRACE((tfp, "EMX hack changed `%s' to `%s'\n", path, result));
-#else
-	    StrAllocCopy(result, path);
-#endif /* __EMX__ */
-#endif /* DOSPATH */
+	    StrAllocCopy(result, HTSYS_name(path));
 	} else if (WWW_prefix) {
 	    HTSprintf0(&result, "%s%s%s", "/Net/", host, path);
 	    CTRACE((tfp, "Node `%s' means file `%s'\n", name, result));
@@ -684,7 +665,7 @@ PUBLIC char * HTnameOfFile_WWW ARGS3(
 	}
     } else if (WWW_prefix) {  /* other access */
 #ifdef VMS
-	if ((home = getenv("HOME")) == 0)
+	if ((home = LYGetEnv("HOME")) == 0)
 	    home = HTCacheRoot;
 	else
 	    home = HTVMS_wwwName(home);
@@ -692,7 +673,7 @@ PUBLIC char * HTnameOfFile_WWW ARGS3(
 #if defined(_WINDOWS)	/* 1997/10/16 (Thu) 20:42:51 */
 	home =  (char *)Home_Dir();
 #else
-	home = getenv("HOME");
+	home = LYGetEnv("HOME");
 #endif
 	if (home == 0)
 	    home = "/tmp";
@@ -726,13 +707,13 @@ PUBLIC char * WWW_nameOfFile ARGS1(
     char * result = NULL;
 #ifdef NeXT
     if (0 == strncmp("/private/Net/", name, 13)) {
-	HTSprintf0(&result, "file://%s", name+13);
+	HTSprintf0(&result, "%s//%s", STR_FILE_URL, name+13);
     } else
 #endif /* NeXT */
     if (0 == strncmp(HTMountRoot, name, 5)) {
-	HTSprintf0(&result, "file://%s", name+5);
+	HTSprintf0(&result, "%s//%s", STR_FILE_URL, name+5);
     } else {
-	HTSprintf0(&result, "file://%s%s", HTHostName(), name);
+	HTSprintf0(&result, "%s//%s%s", STR_FILE_URL, HTHostName(), name);
     }
     CTRACE((tfp, "File `%s'\n\tmeans node `%s'\n", name, result));
     return result;
@@ -1381,11 +1362,15 @@ PUBLIC BOOL HTDirTitles ARGS3(
     char * cp = NULL;
     BOOL need_parent_link = FALSE;
     int i;
-
-#ifdef DOSPATH
-    BOOL local_link = FALSE;
-    if (strlen(logical) > 18 && logical[18] == ':') local_link = TRUE;
+#if defined(USE_DOS_DRIVES)
+    BOOL local_link = (strlen(logical) > 18
+		     && !strncasecomp(logical, "file://localhost/", 17)
+		     && LYIsDosDrive(logical + 17));
+    BOOL is_remote = !local_link;
+#else
+#define is_remote TRUE
 #endif
+
     /*
     **	Check tildeIsTop for treating home directory as Welcome
     **	(assume the tilde is not followed by a username). - FM
@@ -1423,7 +1408,8 @@ PUBLIC BOOL HTDirTitles ARGS3(
 	    (0 == strncasecomp(path, "/%2F", 4))	/* "//" ? */
 	    ? (path+1)
 	    : path,
-	    TRUE);
+	    TRUE,
+	    is_remote);
       if (0 == strncasecomp(printable, "/vmsysu:", 8) ||
 	  0 == strncasecomp(printable, "/anonymou.", 10)) {
 	  StrAllocCopy(cp, (printable+1));
@@ -1474,10 +1460,7 @@ PUBLIC BOOL HTDirTitles ARGS3(
     /*
     **	Make link back to parent directory.
     */
-#ifdef DOSPATH
-    if (current != path)	/* leave "/c:" alone */
-#endif
-    if (current - path > 1
+    if (current - path > 0
       && LYIsPathSep(current[-1])
       && current[0] != '\0') {	/* was a slash AND something else too */
 	char * parent = NULL;
@@ -1498,7 +1481,7 @@ PUBLIC BOOL HTDirTitles ARGS3(
 	relative = 0;
 	HTSprintf0(&relative, "%s/..", current);
 
-#ifdef DOSPATH
+#if defined(DOSPATH) || defined(__EMX__)
 	if (local_link) {
 	    if (parent != 0 && strlen(parent) == 3 ) {
 		StrAllocCat(relative, "/.");
@@ -1761,14 +1744,13 @@ PRIVATE int print_local_dir ARGS5(
 				   (HTAnchor *)anchor, FALSE);
 
 #ifdef DIRED_SUPPORT
-    if (strncmp(anchor->address, "lynxcgi:", 8)) {
+    if (!isLYNXCGI(anchor->address)) {
 	HTAnchor_setFormat((HTParentAnchor *) anchor, WWW_DIRED);
 	lynx_edit_mode = TRUE;
     }
 #endif /* DIRED_SUPPORT */
     if (HTDirReadme == HT_DIR_README_TOP)
 	do_readme(target, localname);
-
 
     {
 	HTBTree * bt = HTBTree_new(dired_cmp);
@@ -1782,7 +1764,7 @@ PRIVATE int print_local_dir ARGS5(
 	    */
 	    DIRED *data = NULL;
 
-#ifndef DOSPATH
+#if !(defined(DOSPATH) || defined(__EMX__))
 	    if (dirbuf->d_ino == 0)
 		/*
 		**  If the entry is not being used, skip it.
@@ -2129,13 +2111,8 @@ PUBLIC int HTLoadFile ARGS4(
     */
     acc_method = HTParse(newname, "", PARSE_ACCESS);
     if (strcmp("ftp", acc_method) == 0 ||
-       (strcmp("localhost", nodename) != 0 &&
-#ifdef VMS
-	strcasecomp(nodename, HTHostName()) != 0
-#else
-	strcmp(nodename, HTHostName()) != 0
-#endif /* VMS */
-    )) {
+       (!LYSameHostname("localhost", nodename) &&
+	!LYSameHostname(nodename, HTHostName()))) {
 	status = -1;
 	FREE(newname);
 	FREE(filename);
@@ -2149,7 +2126,7 @@ PUBLIC int HTLoadFile ARGS4(
 	FREE(newname);
 	FREE(acc_method);
     }
-#if defined(VMS) || defined(DOSPATH)
+#if defined(VMS) || defined(USE_DOS_DRIVES)
     HTUnEscape(filename);
 #endif /* VMS */
 
@@ -2437,7 +2414,7 @@ PUBLIC int HTLoadFile ARGS4(
 		/*
 		**  While there are directory entries to be read...
 		*/
-#ifndef DOSPATH
+#if !(defined(DOSPATH) || defined(__EMX__))
 		if (dirbuf->d_ino == 0)
 		    continue;	/* if the entry is not being used, skip it */
 #endif
@@ -2531,6 +2508,10 @@ PUBLIC int HTLoadFile ARGS4(
 	**  will hold the directory entry, and a type 'DIR' which is used
 	**  to point to the current directory being read.
 	*/
+#if defined(USE_DOS_DRIVES)
+	if (strlen(localname) == 2 && LYIsDosDrive(localname))
+	    LYAddPathSep(&localname);
+#endif
 	if (HTStat(localname,&dir_info) == -1)	   /* get file information */
 	{
 				/* if can't read file information */

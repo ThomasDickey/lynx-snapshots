@@ -61,9 +61,9 @@ PUBLIC char *LYVersionDate NOARGS
  */
 
 PUBLIC int LYShowInfo ARGS4(
-	document *,	doc,
+	DocInfo *,	doc,
 	int,		size_of_file,
-	document *,	newdoc,
+	DocInfo *,	newdoc,
 	char *, 	owner_address)
 {
     static char tempfile[LY_MAXPATH] = "\0";

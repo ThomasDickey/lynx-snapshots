@@ -6,6 +6,7 @@
 #include <LYMainLoop.h>
 #include <LYGlobalDefs.h>
 #include <LYTraversal.h>
+#include <LYHistory.h>
 #include <LYCookie.h>
 #include <UCAuto.h>
 #include <HTAlert.h>
@@ -69,9 +70,9 @@ PUBLIC void cleanup_sig ARGS1(
 	 *  Ask if exit is intended.
 	 */
 	if (LYQuitDefaultYes == TRUE) {
-	    c = HTConfirmDefault(REALLY_EXIT_Y, YES);
+	    c = HTConfirmDefault(REALLY_EXIT, YES);
 	} else {
-	    c = HTConfirmDefault(REALLY_EXIT_N, NO);
+	    c = HTConfirmDefault(REALLY_EXIT, NO);
 	}
 	HadVMSInterrupt = TRUE;
 	if (LYQuitDefaultYes == TRUE) {
@@ -205,11 +206,7 @@ PUBLIC void cleanup NOARGS
 
     cleanup_files();
     for (i = 0; i < nhist; i++) {
-	FREE(history[i].title);
-	FREE(history[i].address);
-	FREE(history[i].post_data);
-	FREE(history[i].post_content_type);
-	FREE(history[i].bookmark);
+	LYFreeDocInfo(&HDOC(i));
     }
     nhist = 0;
 #ifdef VMS

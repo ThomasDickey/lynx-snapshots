@@ -106,7 +106,7 @@ PRIVATE void set_environ ARGS3(
 }
 
 PRIVATE char *suggested_filename ARGS1(
-	document *,	newdoc)
+	DocInfo *,	newdoc)
 {
     char *cp, *sug_filename = 0;
 
@@ -302,7 +302,7 @@ PRIVATE BOOLEAN confirm_by_pages ARGS3(
 }
 
 PRIVATE void send_file_to_file ARGS3(
-	document *,	newdoc,
+	DocInfo *,	newdoc,
 	char *,		content_base,
 	char *,		sug_filename)
 {
@@ -362,7 +362,7 @@ check_recall:
      */
     CTRACE((tfp, "LYPrint: filename is %s, action is `%c'\n", buffer, c));
 
-#if HAVE_POPEN
+#ifdef HAVE_POPEN
     if (*buffer == '|') {
 	if (no_shell) {
 	    HTUserMsg(SPAWNING_DISABLED);
@@ -447,7 +447,7 @@ check_recall:
     if (keypad_mode)
 	printlist(outfile_fp,FALSE);
 
-#if HAVE_POPEN
+#ifdef HAVE_POPEN
     if (LYIsPipeCommand(buffer))
 	pclose(outfile_fp);
     else
@@ -473,7 +473,7 @@ done:
 }
 
 PRIVATE void send_file_to_mail ARGS3(
-	document *,	newdoc,
+	DocInfo *,	newdoc,
 	char *,		content_base,
 	char *,		content_location)
 {
@@ -794,7 +794,7 @@ done:	/* send_file_to_mail() */
 }
 
 PRIVATE void send_file_to_printer ARGS4(
-	document *,	newdoc,
+	DocInfo *,	newdoc,
 	char *,		content_base,
 	char *,		sug_filename,
 	int,		printer_number)
@@ -882,19 +882,9 @@ check_again:
 	}
 	/*
 	 * Cancel if the user entered "/dev/null" on Unix, or an "nl:" path
-	 * (case-insensitive) on VMS.  - FM
+	 * on VMS.  - FM
 	 */
-#ifdef VMS
-	if (!strncasecomp(my_file, "nl:", 3) ||
-	    !strncasecomp(my_file, "/nl/", 4))
-#else
-#if defined(DOSPATH)	/* 1997/10/15 (Wed) 16:41:30 */
-	if (!strcmp(my_file, "nul"))
-#else
-	if (!strcmp(my_file, "/dev/null"))
-#endif /* DOSPATH */
-#endif /* VMS */
-	{
+	if (LYIsNullDevice(my_file)) {
 	    CancelPrint(PRINT_REQUEST_CANCELLED);
 	}
 	HTAddSugFilename(my_file);
@@ -968,7 +958,7 @@ done:	/* send_file_to_printer() */
 }
 
 PRIVATE void send_file_to_screen ARGS3(
-	document *,	newdoc,
+	DocInfo *,	newdoc,
 	char *,		content_base,
 	BOOLEAN,	Lpansi)
 {
@@ -1043,7 +1033,7 @@ done:	/* send_file_to_screen() */
 }
 
 PUBLIC int printfile ARGS1(
-	document *,	newdoc)
+	DocInfo *,	newdoc)
 {
     BOOLEAN Lpansi = FALSE;
     DocAddress WWWDoc;
@@ -1311,7 +1301,8 @@ PUBLIC int print_options ARGS3(
 
     if (child_lynx == FALSE && no_disk_save == FALSE && no_print == FALSE) {
 	fprintf(fp0,
-		"   <a href=\"LYNXPRINT://LOCAL_FILE/lines=%d\">%s</a>\n",
+		"   <a href=\"%s//LOCAL_FILE/lines=%d\">%s</a>\n",
+		STR_LYNXPRINT,
 		lines_in_file,
 		gettext("Save to a local file"));
     } else {
@@ -1319,17 +1310,20 @@ PUBLIC int print_options ARGS3(
     }
     if (child_lynx == FALSE && no_mail == FALSE && local_host_only == FALSE)
 	fprintf(fp0,
-		"   <a href=\"LYNXPRINT://MAIL_FILE/lines=%d\">%s</a>\n",
+		"   <a href=\"%s//MAIL_FILE/lines=%d\">%s</a>\n",
+		STR_LYNXPRINT,
 		lines_in_file,
 		gettext("Mail the file"));
 
-#ifndef DOSPATH
+#if defined(UNIX) || defined(VMS)
     fprintf(fp0,
-	    "   <a href=\"LYNXPRINT://TO_SCREEN/lines=%d\">%s</a>\n",
+	    "   <a href=\"%s//TO_SCREEN/lines=%d\">%s</a>\n",
+	    STR_LYNXPRINT,
 	    lines_in_file,
 	    gettext("Print to the screen"));
     fprintf(fp0,
-	    "   <a href=\"LYNXPRINT://LPANSI/lines=%d\">%s</a>\n",
+	    "   <a href=\"%s//LPANSI/lines=%d\">%s</a>\n",
+	    STR_LYNXPRINT,
 	    lines_in_file,
 	    gettext("Print out on a printer attached to your vt100 terminal"));
 #endif
@@ -1341,7 +1335,8 @@ PUBLIC int print_options ARGS3(
 	cur_printer = cur_printer->next, count++)
     if (no_print == FALSE || cur_printer->always_enabled) {
 	fprintf(fp0,
-		"   <a href=\"LYNXPRINT://PRINTER/number=%d/pagelen=%d/lines=%d\">",
+		"   <a href=\"%s//PRINTER/number=%d/pagelen=%d/lines=%d\">",
+		STR_LYNXPRINT,
 		count, cur_printer->pagelen, lines_in_file);
 	fprintf(fp0, (cur_printer->name ?
 		      cur_printer->name : "No Name Given"));

@@ -2348,10 +2348,30 @@ where
                 <dd>write keystroke commands and related information to the
                     specified file.
              <dt><code>-cmd_script=FILENAME</code>
-                <dd>read keystroke commands from the specified file.  You can
-                    use the data written using the <em>-cmd_log</em> option.
-                    Lynx will ignore other information which the
-                    command-logging may have written to the log-file.
+                <dd>read keystroke commands from  the  specified  file.
+                    You  can  use  the  data written using the <em>-cmd_log</em>
+                    option.  Lynx will ignore other  information  which
+                    the  command-logging  may  have written to the log-
+                    file.  Each line of  the  command  script  contains
+                    either a comment beginning with "#", or a keyword:
+
+                  <dl>
+                  <dt><code>exit</code>
+                   <dd>causes  the  script  to stop, and forces lynx to
+                       exit immediately.
+
+                  <dt><code>key</code>
+                   <dd>the character value, in printable form.   Cursor
+                       and other special keys are given as names, e.g.,
+                       <code>Down Arrow</code>.  Printable 7-bit ASCII  codes  are
+                       given  as-is,  and  hexadecimal values represent
+                       other 8-bit codes.
+
+                  <dt><code>set</code>
+                   <dd>followed by a "name=value" allows one  to  override
+                       values set in the lynx.cfg file.
+                  </dl>
+
              <dt><code>-color</code>
                 <dd>forces color mode on, if available.  Default color control sequences
                        which work for many terminal types are assumed if the terminal
@@ -2820,6 +2840,8 @@ where
                        <dd>color-style
                     <dt>4
                        <dd>TRST (table layout)
+                    <dt>8
+                       <dd>config (lynx.cfg and .lynxrc contents)
                     </dl>
              <dt><code>-traversal</code>
                 <dd>traverse all http links derived from startfile.  When

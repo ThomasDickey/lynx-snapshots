@@ -1806,7 +1806,8 @@ top1:
     CTRACE2(TRACE_SGML, (tfp, "SGML before %s|%.*s|%c\n",
 	    state_name(context->state),
 	    string->size,
-	    string->data != NULL ? string->data : "", UCH(c)));
+	    NonNull(string->data),
+	    UCH(c)));
     switch(context->state) {
 
     case S_in_kanji:
@@ -4333,7 +4334,8 @@ top1:
     CTRACE2(TRACE_SGML, (tfp, "SGML after  %s|%.*s|%c\n",
 	    state_name(context->state),
 	    string->size,
-	    string->data != NULL ? string->data : "", UCH(c)));
+	    NonNull(string->data),
+	    UCH(c)));
 
 after_switch:
     /*

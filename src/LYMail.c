@@ -25,7 +25,7 @@ PRIVATE void terminate_letter ARGS1(int,sig GCC_UNUSED)
     term_letter = TRUE;
     /* Reassert the AST */
     signal(SIGINT, terminate_letter);
-#if USE_VMS_MAILER || defined(DOSPATH) || defined(WIN_EX)
+#if USE_VMS_MAILER || defined(PDCURSES)
     /*
      *	Refresh the screen to get rid of the "interrupt" message.
      */
@@ -350,7 +350,7 @@ PRIVATE char *blat_cmd(
 		subject,
 		system_mail_flags,
 		ccaddr? " -c \"" : "",
-		ccaddr? ccaddr : "",
+		NonNull(ccaddr),
 		ccaddr? "\"" : "");
 
 #else /* !USE_ALT_BLAT_MAILER */
@@ -496,7 +496,7 @@ PUBLIC int LYSendMailFile ARGS5(
     else
 #endif
 #ifdef __DJGPP__
-	if ((shell = getenv("SHELL")) != NULL) {
+	if ((shell = LYGetEnv("SHELL")) != NULL) {
 	    if (strstr(shell, "sh") != NULL) {
 		HTSprintf0(&cmd, "%s -c %s -t \"%s\" -F %s",
 			   shell,
@@ -709,7 +709,7 @@ PUBLIC void mailform ARGS4(
     if (!EMPTY(keywords))
 	fprintf(fd, "Keywords: %s\n", keywords);
     _statusline(SENDING_FORM_CONTENT);
-#else	/* e.g., VMS, DOSPATH */
+#else	/* e.g., VMS, DOS */
     if ((fd = LYOpenTemp(my_tmpfile, ".txt", "w")) == NULL) {
 	HTAlert(FORM_MAILTO_FAILED);
 	goto cleanup;
@@ -848,7 +848,7 @@ PUBLIC void mailform ARGS4(
     LYRemoveTemp(my_tmpfile);
     if (isPMDF)
 	LYRemoveTemp(hdrfile);
-#else /* DOSPATH */
+#else /* DOS */
     LYSendMailFile (
 	address,
 	my_tmpfile,
@@ -1064,7 +1064,7 @@ PUBLIC void mailmsg ARGS4(
     if (isPMDF) {
 	LYRemoveTemp(hdrfile);
     }
-#else /* DOSPATH */
+#else /* DOS */
     LYSendMailFile (
 	address,
 	my_tmpfile,
@@ -1253,7 +1253,7 @@ PUBLIC void reply_by_mail ARGS4(
 	 */
 	fprintf((isPMDF ? hfd : fd),
 		"X-URL: %s%s\n",
-		EMPTY(filename) ? "mailto:" : filename,
+		EMPTY(filename) ? STR_MAILTO_URL : filename,
 		EMPTY(filename) ? to_address : "");
 	fprintf((isPMDF ? hfd : fd),
 		"X-Mailer: %s, Version %s\n", LYNX_NAME, LYNX_VERSION);

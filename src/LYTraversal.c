@@ -107,7 +107,7 @@ PUBLIC void dump_traversal_history NOARGS
 	    gettext("here is a list of the history stack so that you may rebuild"));
 
     for (x = nhist-1; x >= 0; x--) {
-	fprintf(ifp,"%s\t%s\n", history[x].title, history[x].address);
+	fprintf(ifp, "%s\t%s\n", HDOC(x).title, HDOC(x).address);
     }
 
     LYCloseOutput(ifp);

@@ -190,7 +190,7 @@ PRIVATE void add_item_to_list ARGS3(
 	}
 	if (*next_colon++) {
 	    colon = next_colon;
-	    if ((next_colon = strchr(colon,':')) != 0)
+	    if ((next_colon = strchr(colon, ':')) != 0)
 		*next_colon++ = '\0';
 	    cur_item->always_enabled = is_true(colon);
 	    if (next_colon) {
@@ -328,7 +328,7 @@ PUBLIC CONST char *lookup_color ARGS1(
 }
 #endif /* USE_COLOR_STYLE || USE_COLOR_TABLE */
 
-#if defined(USE_COLOR_TABLE)
+#if defined(USE_COLOR_TABLE) || defined(EXP_ASSUMED_COLOR)
 
 /*
  *  Exit routine for failed COLOR parsing.
@@ -353,7 +353,9 @@ The special strings 'nocolor' or 'default', or\n")
     fprintf (stderr, "%s\n%s\n", gettext("Offending line:"), error_line);
     exit_immediately(EXIT_FAILURE);
 }
+#endif /* defined(USE_COLOR_TABLE) || defined(EXP_ASSUMED_COLOR) */
 
+#if defined(USE_COLOR_TABLE)
 /*
  *  Process string buffer fields for COLOR setting.
  */
@@ -529,7 +531,7 @@ PRIVATE int assumed_color_fun ARGS1(
     if (default_fg == ERR_COLOR
      || default_bg == ERR_COLOR)
 	exit_with_color_syntax(temp);
-#if USE_SLANG
+#ifdef USE_SLANG
     /*
      * Sorry - the order of initialization of slang precludes setting the
      * default colors from the lynx.cfg file, since slang is already
@@ -1160,7 +1162,7 @@ PRIVATE int psrcspec_fun ARGS1(char*,s)
     };
     int found;
 
-    e = strchr(s,':');
+    e = strchr(s, ':');
     if (!e) {
 	CTRACE((tfp,"bad format of PRETTYSRC_SPEC setting value, ignored %s\n",s));
 	return 0;
@@ -1405,6 +1407,9 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_FUN(RC_PRINTER,              printer_fun),
      PARSE_SET(RC_QUIT_DEFAULT_YES,     LYQuitDefaultYes),
      PARSE_FUN(RC_REFERER_WITH_QUERY,   referer_with_query_fun),
+#ifdef EXP_CMD_LOGGING
+     PARSE_TIM(RC_REPLAYSECS,           ReplaySecs),
+#endif
      PARSE_SET(RC_REUSE_TEMPFILES,      LYReuseTempfiles),
 #ifndef NO_RULES
      PARSE_FUN(RC_RULE,                 HTSetConfiguration),
@@ -1609,6 +1614,88 @@ typedef BOOL (optidx_set_t) [ NOPTS_ ];
 	    (r)[i1]= (a)[i1] || (b)[i1]; \
     }
 
+/*
+ * For simple (boolean, string, integer, time) values, set the corresponding
+ * configuration variable.
+ */
+PUBLIC void LYSetConfigValue ARGS2(
+    char *,	name,
+    char *,	value)
+{
+    Config_Type *tbl = lookup_config(name);
+    ParseUnionPtr q = ParseUnionOf(tbl);
+
+    switch (tbl->type) {
+    case CONF_BOOL:
+	if (q->set_value != 0)
+	    *(q->set_value) = is_true (value);
+	break;
+
+    case CONF_FUN:
+	if (q->fun_value != 0)
+	    (*(q->fun_value)) (value);
+	break;
+
+    case CONF_TIME:
+	if (q->int_value != 0) {
+	    float ival;
+	    if (1 == sscanf (value, "%f", &ival)) {
+		*(q->int_value) = (int) SECS2Secs(ival);
+	    }
+	}
+	break;
+
+    case CONF_ENUM:
+	if (tbl->table != 0)
+	    LYgetEnum(tbl->table, value, q->int_value);
+	break;
+
+    case CONF_INT:
+	if (q->int_value != 0) {
+	    int ival;
+	    if (1 == sscanf (value, "%d", &ival))
+		*(q->int_value) = ival;
+	}
+	break;
+
+    case CONF_STR:
+	if (q->str_value != 0)
+	    StrAllocCopy(*(q->str_value), value);
+	break;
+
+    case CONF_ENV:
+    case CONF_ENV2:
+
+	if (tbl->type == CONF_ENV)
+	    LYLowerCase(name);
+	else
+	    LYUpperCase(name);
+
+	if (LYGetEnv (name) == 0) {
+#ifdef VMS
+	    Define_VMSLogical(name, value);
+#else
+	    if (q->str_value == 0)
+		q->str_value = typecalloc(char *);
+	    HTSprintf0 (q->str_value, "%s=%s", name, value);
+	    putenv (*(q->str_value));
+#endif
+	}
+	break;
+    case CONF_ADD_ITEM:
+	if (q->add_value != 0)
+	    add_item_to_list (value, q->add_value, FALSE);
+	break;
+
+#if defined(EXEC_LINKS) || defined(LYNXCGI_LINKS)
+    case CONF_ADD_TRUSTED:
+	add_trusted (value, q->def_value);
+	break;
+#endif
+    default:
+	break;
+    }
+}
 
 /*
  * Process the configuration file (lynx.cfg).
@@ -1735,63 +1822,16 @@ PRIVATE void do_read_cfg ARGS5(
 		? CONF_UNSPECIFIED
 		: tbl->type) {
 	case CONF_BOOL:
-	    if (q->set_value != 0)
-		*(q->set_value) = is_true (value);
-	    break;
-
 	case CONF_FUN:
-	    if (q->fun_value != 0)
-		(*(q->fun_value)) (value);
-	    break;
-
 	case CONF_TIME:
-	    if (q->int_value != 0) {
-		float ival;
-		if (1 == sscanf (value, "%f", &ival)) {
-#ifdef HAVE_NAPMS
-		    ival *= 1000;
-#endif
-		    *(q->int_value) = (int) ival;
-		}
-	    }
-	    break;
-
 	case CONF_ENUM:
-	    if (tbl->table != 0)
-		LYgetEnum(tbl->table, value, q->int_value);
-	    break;
-
 	case CONF_INT:
-	    if (q->int_value != 0) {
-		int ival;
-		if (1 == sscanf (value, "%d", &ival))
-		    *(q->int_value) = ival;
-	    }
-	    break;
-
 	case CONF_STR:
-	    if (q->str_value != 0)
-		StrAllocCopy(*(q->str_value), value);
-	    break;
-
 	case CONF_ENV:
 	case CONF_ENV2:
-
-	    if (tbl->type == CONF_ENV)
-		LYLowerCase(name);
-	    else
-		LYUpperCase(name);
-
-	    if (getenv (name) == 0) {
-#ifdef VMS
-		Define_VMSLogical(name, value);
-#else
-		if (q->str_value == 0)
-			q->str_value = typecalloc(char *);
-		HTSprintf0 (q->str_value, "%s=%s", name, value);
-		putenv (*(q->str_value));
-#endif
-	    }
+	case CONF_ADD_ITEM:
+	case CONF_ADD_TRUSTED:
+	    LYSetConfigValue(name, value);
 	    break;
 
 	case CONF_INCLUDE: {
@@ -1805,9 +1845,9 @@ PRIVATE void do_read_cfg ARGS5(
 	    char *cp1 = NULL;
 	    char *sep = NULL;
 
-	    if ( (p1 = strstr(value, sep=" for ")) != 0
-#if defined(UNIX) && !defined(__EMX__)
-		|| (p1 = strstr(value, sep=":")) != 0
+	    if ( (p1 = strstr(value, sep = " for ")) != 0
+#if defined(UNIX) && !defined(USE_DOS_DRIVES)
+		|| (p1 = strstr(value, sep = ":")) != 0
 #endif
 	    ) {
 		*p1 = '\0';
@@ -1903,16 +1943,6 @@ PRIVATE void do_read_cfg ARGS5(
 	    }
 	    break;
 
-	case CONF_ADD_ITEM:
-	    if (q->add_value != 0)
-		add_item_to_list (value, q->add_value, FALSE);
-	    break;
-
-#if defined(EXEC_LINKS) || defined(LYNXCGI_LINKS)
-	case CONF_ADD_TRUSTED:
-	    add_trusted (value, q->def_value);
-	    break;
-#endif
 	default:
 	    if (fp0 != 0) {
 		if (strchr(value, '&') || strchr(value, '<')) {
@@ -1977,7 +2007,7 @@ PUBLIC void read_cfg ARGS4(
  *  we create and load the page just in place and return to mainloop().
  */
 PUBLIC int lynx_cfg_infopage ARGS1(
-    document *,		       newdoc)
+    DocInfo *,		       newdoc)
 {
     static char tempfile[LY_MAXPATH] = "\0";
     DocAddress WWWDoc;  /* need on exit */
@@ -2010,8 +2040,8 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 	 */
 	if (HTMainText && nhist > 0 &&
 	    !strcmp(HTLoadedDocumentTitle(), LYNXCFG_TITLE) &&
-	    !strcmp(HTLoadedDocumentURL(), history[nhist-1].address) &&
-	    LYIsUIPage(history[nhist-1].address, UIP_LYNXCFG) &&
+	    !strcmp(HTLoadedDocumentURL(), HDOC(nhist-1).address) &&
+	    LYIsUIPage(HDOC(nhist-1).address, UIP_LYNXCFG) &&
 	    (!lynxcfginfo_url ||
 	     strcmp(HTLoadedDocumentURL(), lynxcfginfo_url))) {
 	    /*  the page was pushed, so pop-up. */
@@ -2090,7 +2120,6 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 	BeginInternalPage (fp0, LYNXCFG_TITLE, NULL);
 	fprintf(fp0, "<pre>\n");
 
-
 #ifndef NO_CONFIG_INFO
 	if (!no_lynxcfg_xinfo) {
 #if defined(HAVE_CONFIG_H) || defined(VMS)
@@ -2118,15 +2147,17 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 
 #if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
 	    if (!no_compileopts_info) {
-		fprintf(fp0, "%s <a href=\"LYNXCOMPILEOPTS:\">%s</a>\n\n",
+		fprintf(fp0, "%s <a href=\"%s\">%s</a>\n\n",
 			SEE_ALSO,
+			STR_LYNXCFLAGS,
 			COMPILE_OPT_SEGMENT);
 	    }
 #endif
 
 	    /** a new experimental link ... **/
 	    if (user_mode == ADVANCED_MODE)
-		fprintf(fp0, "  <a href=\"LYNXCFG://reload\">%s</a>\n",
+		fprintf(fp0, "  <a href=\"%s//reload\">%s</a>\n",
+			     STR_LYNXCFG,
 			     gettext("RELOAD THE CHANGES"));
 
 
@@ -2182,7 +2213,7 @@ PUBLIC int lynx_cfg_infopage ARGS1(
  *  from getfile() cycle.
  */
 PUBLIC int lynx_compile_opts ARGS1(
-    document *,		       newdoc)
+    DocInfo *,		       newdoc)
 {
     static char tempfile[LY_MAXPATH] = "\0";
 #define PutDefs(table, N) fprintf(fp0, "%-35s %s\n", table[N].name, table[N].value)

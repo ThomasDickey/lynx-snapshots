@@ -1172,9 +1172,9 @@ PUBLIC char *LYKeycodeToString ARGS2 (
 	else if (c < ' ')
 	    sprintf(buf, "^%c", c|0100);
 	else if (c >= 0400)
-	    sprintf(buf, "key-%#x", c);
+	    sprintf(buf, "key-0x%x", c);
 	else
-	    sprintf(buf, "%#x", c);
+	    sprintf(buf, "0x%x", c);
     }
     return buf;
 }
@@ -1186,11 +1186,16 @@ PUBLIC int LYStringToKeycode ARGS1 (
     int key = -1;
     int len = strlen(src);
 
-    if (len == 1)
+    if (len == 1) {
 	key = *src;
-    else if (len == 2 && *src == '^')
+    } else if (len == 2 && *src == '^') {
 	key = src[1] & 0x1f;
-    else if (len > 6 && !strncasecomp(src, "key-", 4)) {
+    } else if (len > 2 && !strncasecomp(src, "0x", 2)) {
+	char *dst = 0;
+	key = strtol(src, &dst, 0);
+	if (dst == 0 || *dst != 0)
+	    key = -1;
+    } else if (len > 6 && !strncasecomp(src, "key-", 4)) {
 	char *dst = 0;
 	key = strtol(src + 4, &dst, 0);
 	if (dst == 0 || *dst != 0)

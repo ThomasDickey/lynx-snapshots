@@ -203,7 +203,7 @@ PRIVATE int response ARGS5(
 	     */
 	    p = l = line;
 	    while (*l) {
-		if (strncmp(l, "news:", 5) &&
+		if (strncmp(l, STR_NEWS_URL, LEN_NEWS_URL) &&
 		    strncmp(l, "snews://", 8) &&
 		    strncmp(l, "nntp://", 7) &&
 		    strncmp(l, "snewspost:", 10) &&
@@ -216,7 +216,7 @@ PRIVATE int response ARGS5(
 		    strncmp(l, "http://", 7) &&
 		    strncmp(l, "https://", 8) &&
 		    strncmp(l, "wais://", 7) &&
-		    strncmp(l, "mailto:", 7) &&
+		    strncmp(l, STR_MAILTO_URL, LEN_MAILTO_URL) &&
 		    strncmp(l, "cso://", 6) &&
 		    strncmp(l, "gopher://", 9))
 		    PUTC(*l++);

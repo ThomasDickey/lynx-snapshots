@@ -327,23 +327,16 @@ PRIVATE void parse_menu ARGS2(
 
 	    } else if (port) {		/* Other types need port */
 		char *address = 0;
+		char *format = *selector ? "%s//%s@%s/" : "%s//%s/";
 
 		if (gtype == GOPHER_TELNET) {
 		    PUTS(" (TEL) ");
-		    if (*selector)
-			HTSprintf0(&address, "telnet://%s@%s/",
-					   selector, host);
-		    else
-			HTSprintf0(&address, "telnet://%s/", host);
+		    HTSprintf0(&address, format, STR_TELNET_URL, selector, host);
 		}
 		else if (gtype == GOPHER_TN3270)
 		{
 		    PUTS("(3270) ");
-		    if (*selector)
-			HTSprintf0(&address, "tn3270://%s@%s/",
-				selector, host);
-		    else
-			HTSprintf0(&address, "tn3270://%s/", host);
+		    HTSprintf0(&address, format, STR_TN3270_URL, selector, host);
 		}
 		else {			/* If parsed ok */
 		    char *r;
@@ -1339,7 +1332,7 @@ PRIVATE int generate_cso_report ARGS1(
 			    } else if (*l == '>') {
 				StrAllocCat(buf, "&gt;");
 				l++;
-			    } else if (strncmp(l, "news:", 5) &&
+			    } else if (strncmp(l, STR_NEWS_URL, LEN_NEWS_URL) &&
 				       strncmp(l, "snews://", 8) &&
 				       strncmp(l, "nntp://", 7) &&
 				       strncmp(l, "snewspost:", 10) &&
@@ -1352,7 +1345,7 @@ PRIVATE int generate_cso_report ARGS1(
 				       strncmp(l, "http://", 7) &&
 				       strncmp(l, "https://", 8) &&
 				       strncmp(l, "wais://", 7) &&
-				       strncmp(l, "mailto:", 7) &&
+				       strncmp(l, STR_MAILTO_URL, LEN_MAILTO_URL) &&
 				       strncmp(l, "cso://", 6) &&
 				       strncmp(l, "gopher://", 9)) {
 				HTSprintf(&buf, "%c", *l++);
@@ -1383,7 +1376,7 @@ PRIVATE int generate_cso_report ARGS1(
 			} else if (*l == '>') {
 			    StrAllocCat(buf, "&gt;");
 			    l++;
-			} else if (strncmp(l, "news:", 5) &&
+			} else if (strncmp(l, STR_NEWS_URL, LEN_NEWS_URL) &&
 				   strncmp(l, "snews://", 8) &&
 				   strncmp(l, "nntp://", 7) &&
 				   strncmp(l, "snewspost:", 10) &&
@@ -1396,7 +1389,7 @@ PRIVATE int generate_cso_report ARGS1(
 				   strncmp(l, "http://", 7) &&
 				   strncmp(l, "https://", 8) &&
 				   strncmp(l, "wais://", 7) &&
-				   strncmp(l, "mailto:", 7) &&
+				   strncmp(l, STR_MAILTO_URL, LEN_MAILTO_URL) &&
 				   strncmp(l, "cso://", 6) &&
 				   strncmp(l, "gopher://", 9)) {
 			    HTSprintf(&buf, "%c", *l++);
@@ -1521,7 +1514,7 @@ PRIVATE int HTLoadCSO ARGS4(
 	return HT_NOT_LOADED;
     }
     host = HTParse(arg, "", PARSE_HOST);
-    if ((cp=strchr(host, ':')) != NULL) {
+    if ((cp = strchr(host, ':')) != NULL) {
 	if (cp[1] >= '0' && cp[1] <= '9') {
 	    port = atoi((cp+1));
 	    if (port == CSO_PORT) {

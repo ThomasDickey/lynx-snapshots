@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.49 Tue, 01 Jan 2002 17:30:08 -0800 dickey @
+ * @Id: LYStyle.c 1.50 Sun, 06 Oct 2002 17:43:28 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -93,7 +93,10 @@ PRIVATE int colorPairs = 0;
 #  define M_BLINK	0
 #endif
 
-PRIVATE unsigned char our_pairs[2][MAX_BLINK][MAX_COLOR][MAX_COLOR];
+PRIVATE unsigned char our_pairs[2]
+				[MAX_BLINK]
+				[MAX_COLOR + 1]
+				[MAX_COLOR + 1];
 
 /*
  * Parse a string containing a combination of video attributes and color.
@@ -180,29 +183,30 @@ PRIVATE void parse_attributes ARGS5(
      * If we have colour, and space to create a new colour attribute,
      * and we have a valid colour description, then add this style
      */
-    if (lynx_has_color && colorPairs < COLOR_PAIRS-1 && fA != NO_COLOR)
-    {
-	int curPair;
+    if (lynx_has_color && colorPairs < COLOR_PAIRS-1 && fA != NO_COLOR) {
+	int curPair = 0;
+	int iFg = (1 + (fA >= 0 ? fA : 0));
+	int iBg = (1 + (bA >= 0 ? bA : 0));
+	int iBold = !!(cA & A_BOLD);
+	int iBlink = !!(cA & M_BLINK);
 
 	if (fA < MAX_COLOR
 	 && bA < MAX_COLOR
-	 && our_pairs[!!(cA & A_BOLD)][!!(cA & A_BLINK)][fA][bA])
-	    curPair = our_pairs[!!(cA & A_BOLD)][!!(cA & M_BLINK)][fA][bA] - 1;
-	else {
-	    curPair = ++colorPairs;
-	    init_pair((short)curPair, (short)fA, (short)bA);
-	    if (fA < MAX_COLOR
-	     && bA < MAX_COLOR
-	     && curPair < 255)
-		our_pairs[!!(cA & A_BOLD)][!!(cA & M_BLINK)][fA][bA] = curPair + 1;
+	 && (fA != default_fg || bA != default_bg)
+	 && curPair < 255) {
+	    if (our_pairs[iBold][iBlink][iFg][iBg] != 0) {
+		curPair = our_pairs[iBold][iBlink][iFg][iBg];
+	    } else {
+		curPair = ++colorPairs;
+		init_pair((short)curPair, (short)fA, (short)bA);
+		our_pairs[iBold][iBlink][iFg][iBg] = curPair;
+	    }
 	}
 	CTRACE2(TRACE_STYLE, (tfp, "CSS(CURPAIR):%d\n", curPair));
 	if (style < DSTYLE_ELEMENTS)
 	    setStyle(style, COLOR_PAIR(curPair)|cA, cA, mA);
 	setHashStyle(newstyle, COLOR_PAIR(curPair)|cA, cA, mA, element);
-    }
-    else
-    {
+    } else {
 	if (lynx_has_color && fA != NO_COLOR) {
 	    CTRACE2(TRACE_STYLE, (tfp, "CSS(NC): maximum of %d colorpairs exhausted\n", COLOR_PAIRS - 1));
 	}
@@ -254,12 +258,17 @@ PRIVATE void parse_style ARGS1(char*, param)
     unsigned n;
     BOOL found = FALSE;
 
-    char *buffer = strdup(param);
-    char *tmp = strchr(buffer, ':');
+    char *buffer = 0;
+    char *tmp = 0;
     char *element, *mono, *fg, *bg;
 
-    if(!tmp)
-    {
+    if (param == 0)
+	return;
+    StrAllocCopy(buffer, param);
+    if (buffer == 0)
+	return;
+
+    if ((tmp = strchr(buffer, ':')) == 0) {
 	fprintf (stderr, gettext("\
 Syntax Error parsing style in lss file:\n\
 [%s]\n\

@@ -1053,7 +1053,7 @@ msgstr "Editovat pøedchozí zkratku: "
 #: LYMessages.c:377
 #, c-format
 msgid "Key '%c' is not mapped to a jump file!"
-msgstr "Klávesa '%s' není svázána se souborem zkratek!"
+msgstr "Klávesa '%c' není svázána se souborem zkratek!"
 
 #: LYMessages.c:378
 msgid "Cannot locate jump file!"
@@ -1182,7 +1182,7 @@ msgstr "Jste na zaèátku seznamu voleb."
 #: LYMessages.c:413
 #, c-format
 msgid "You are already at page %d of this option list."
-msgstr "Ji¾ jste na stranì %s nabídky."
+msgstr "Ji¾ jste na stranì %d nabídky."
 
 #: LYMessages.c:414
 msgid "You have entered an invalid option number."
@@ -5220,7 +5220,7 @@ msgid ""
 "fr, may be a comma-separated list in decreasing preference)\n"
 "which Lynx will indicate you prefer in requests to http servers.\n"
 "If a file in that language is available, the server will send it.\n"
-"Otherwise, the server will send the file in it's default language.\n"
+"Otherwise, the server will send the file in its default language.\n"
 msgstr ""
 "Volba preferred_language udává, v kterých jazycích bude Lynx pøednostnì\n"
 "po¾adovat dokumenty od http serverù. Jazyk musí být zadán v MIME notaci (napø.\n"

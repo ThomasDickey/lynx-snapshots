@@ -19,7 +19,6 @@
 #endif /* FNAMES_8_3 */
 
 #define MSG_ENABLE_LYNXRC N_("Normally disabled.  See ENABLE_LYNXRC in lynx.cfg\n")
-#define NonNull(string) ((string) != 0 ? (string) : "")
 #define putBool(value) ((value) ? "on" : "off")
 
 PUBLIC Config_Enum tbl_DTD_recovery[] = {
@@ -147,17 +146,21 @@ PUBLIC BOOL LYgetEnum ARGS3(
 {
     Config_Enum *found = 0;
     unsigned len = strlen(name);
+    int match = 0;
 
     if (len != 0) {
 	while (table->name != 0) {
 	    if (!strncasecomp(table->name, name, len)) {
-		if (found != 0)
-		    return FALSE; /* ambiguous, don't use this */
 		found = table;
+		if (!strcasecomp(table->name, name)) {
+		    match = 1;
+		    break;
+		}
+		++match;
 	    }
 	    table++;
 	}
-	if (found != 0) {
+	if (match == 1) {	/* if unambiguous */
 	    *result = found->value;
 	    return TRUE;
 	}
@@ -419,7 +422,7 @@ preferred_language specifies the language in MIME notation (e.g., en,\n\
 fr, may be a comma-separated list in decreasing preference)\n\
 which Lynx will indicate you prefer in requests to http servers.\n\
 If a file in that language is available, the server will send it.\n\
-Otherwise, the server will send the file in it's default language.\n\
+Otherwise, the server will send the file in its default language.\n\
 ")),
     MAYBE_SET(RC_RAW_MODE,              LYRawMode,          MSG_ENABLE_LYNXRC),
 #if defined(ENABLE_OPTS_CHANGE_EXEC) && (defined(EXEC_LINKS) || defined(EXEC_SCRIPTS))

@@ -383,9 +383,12 @@ extern BOOLEAN more_links;
 extern int     ccount;
 extern BOOLEAN LYCancelledFetch;
 extern char * LYToolbarName;
+
+extern int AlertSecs;
 extern int InfoSecs;
 extern int MessageSecs;
-extern int AlertSecs;
+extern int ReplaySecs;
+
 extern char * LYUserAgent;		/* Lynx User-Agent header */
 extern char * LYUserAgentDefault;	/* Lynx default User-Agent header */
 extern BOOLEAN LYNoRefererHeader;	/* Never send Referer header? */

@@ -27,7 +27,7 @@
 #include <HTFile.h>
 #endif
 
-#if _WIN_CC
+#ifdef _WIN_CC
 extern int exec_command(char * cmd, int wait_flag); /* xsystem.c */
 #endif
 
@@ -185,7 +185,7 @@ PRIVATE LY_TEMP *FindTempfileByFP ARGS1(FILE *, fp)
 /*
  * Get an environment variable, rejecting empty strings
  */
-PRIVATE char *getenv_text ARGS1(char *, name)
+PUBLIC char *LYGetEnv ARGS1(CONST char *, name)
 {
     char *result = getenv(name);
     return non_empty(result) ? result : 0;
@@ -1014,7 +1014,7 @@ PUBLIC void LYhighlight ARGS3(
 	    if (avail_space > (int) sizeof(buffer) - 1)
 		avail_space = (int) sizeof(buffer) - 1;
 
-	    LYstrncpy(buffer, (text != NULL ? text : ""), avail_space);
+	    LYstrncpy(buffer, NonNull(text), avail_space);
 	    LYaddstr(buffer);
 
 	    len = strlen(buffer);
@@ -1589,14 +1589,14 @@ PUBLIC int HTCheckForInterrupt NOARGS
 
 #if defined(PDCURSES)
     nodelay(LYwin,TRUE);
-#endif /* DOSPATH */
+#endif /* PDCURSES */
     /*
      * 'c' contains whatever character we're able to read from keyboard
      */
     c = LYgetch();
 #if defined(PDCURSES)
     nodelay(LYwin,FALSE);
-#endif /* DOSPATH */
+#endif /* PDCURSES */
 
 #else /* VMS: */
     extern int typeahead();
@@ -1640,23 +1640,20 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	** log. User search now in progress...
 	*/
     cmd = (LKC_TO_LAC(keymap,c));
-    switch (cmd)
-    {
+    switch (cmd) {
     case LYK_TRACE_TOGGLE :	/*  Toggle TRACE mode. */
-	   handle_LYK_TRACE_TOGGLE();
-	   break;
+	handle_LYK_TRACE_TOGGLE();
+	break;
     default :
 
 #ifdef DISP_PARTIAL
-	if (display_partial && (NumOfLines_partial > 2))
 	/* OK, we got several lines from new document and want to scroll... */
-	{
+	if (display_partial && (NumOfLines_partial > 2)) {
 	    BOOLEAN do_refresh;
 	    int res;
 	    int Newline_partial = LYGetNewline();
 
-	    switch (cmd)
-	    {
+	    switch (cmd) {
 	    case LYK_WHEREIS:	/* search within the document */
 	    case LYK_NEXT:	/* search for the next occurrence in the document */
 	    case LYK_PREV:	/* search for the previous occurrence in the document */
@@ -1751,20 +1748,21 @@ PUBLIC int HTCheckForInterrupt NOARGS
 PUBLIC BOOLEAN LYisAbsPath ARGS1(
 	CONST char *,	path)
 {
+    BOOLEAN result = FALSE;
+    if (non_empty(path)) {
 #ifdef VMS
-    return TRUE;
+	result = TRUE;
 #else
-    BOOLEAN result;
-#if defined(DOSPATH) || defined(__EMX__)
-    result = (BOOL) (LYIsPathSep(path[0])
-     || (isalpha(UCH(path[0]))
-      && (path[1] == ':')
-       && LYIsPathSep(path[2])));
+#if defined(USE_DOS_DRIVES)
+	result = (BOOL) (LYIsPathSep(path[0])
+	 || (LYIsDosDrive(path)
+	   && LYIsPathSep(path[2])));
 #else
-    result = (LYIsPathSep(path[0]));
+	result = (LYIsPathSep(path[0]));
 #endif /* DOSPATH */
-    return result;
 #endif
+    }
+    return result;
 }
 
 /*
@@ -1773,10 +1771,9 @@ PUBLIC BOOLEAN LYisAbsPath ARGS1(
 PUBLIC BOOLEAN LYisRootPath ARGS1(
 	char *,		path)
 {
-#if defined(DOSPATH) || defined(__EMX__)
+#if defined(USE_DOS_DRIVES)
     if (strlen(path) == 3
-     && isalpha(UCH(path[0]))
-     && path[1] == ':'
+     && LYIsDosDrive(path)
      && LYIsPathSep(path[2]))
 	return TRUE;
 #endif
@@ -1803,19 +1800,13 @@ PUBLIC BOOLEAN LYisLocalFile ARGS1(
 	return NO;
     }
 
-    if ((cp=strchr(host, ':')) != NULL)
+    if ((cp = strchr(host, ':')) != NULL)
 	*cp = '\0';
 
     if ((acc_method = HTParse(filename, "", PARSE_ACCESS))) {
 	if (0==strcmp("file", acc_method) &&
 	    (0==strcmp(host, "localhost") ||
-#ifdef VMS
-	     0==strcasecomp(host, HTHostName())
-#else
-	     0==strcmp(host, HTHostName())
-#endif /* VMS */
-	    ))
-	{
+	     LYSameFilename(host, HTHostName()))) {
 	    FREE(host);
 	    FREE(acc_method);
 	    return YES;
@@ -1849,18 +1840,11 @@ PUBLIC BOOLEAN LYisLocalHost ARGS1(
     if ((cp = strchr(host, ':')) != NULL)
 	*cp = '\0';
 
-#ifdef VMS
-    if ((0==strcasecomp(host, "localhost") ||
-	 0==strcasecomp(host, LYHostName) ||
-	 0==strcasecomp(host, HTHostName())))
-#else
-    if ((0==strcmp(host, "localhost") ||
-	 0==strcmp(host, LYHostName) ||
-	 0==strcmp(host, HTHostName())))
-#endif /* VMS */
-    {
-	    FREE(host);
-	    return YES;
+    if ((LYSameFilename(host, "localhost") ||
+	 LYSameFilename(host, LYHostName) ||
+	 LYSameFilename(host, HTHostName()))) {
+	FREE(host);
+	return YES;
     }
 
     FREE(host);
@@ -1935,12 +1919,7 @@ PUBLIC BOOLEAN LYisLocalAlias ARGS1(
 	*cp = '\0';
 
     while (NULL != (alias = (char *)HTList_nextObject(cur))) {
-#ifdef VMS
-	if (0==strcasecomp(host, alias))
-#else
-	if (0==strcmp(host, alias))
-#endif /* VMS */
-	{
+	if (LYSameFilename(host, alias)) {
 	    FREE(host);
 	    return YES;
 	}
@@ -1986,14 +1965,14 @@ PUBLIC int LYCheckForProxyURL ARGS1(
 	StrAllocCopy(cp2, cp);
 	*cp1 = ':';
 	StrAllocCat(cp2, "_proxy");
-	if (getenv(cp2) != NULL) {
+	if (LYGetEnv(cp2) != NULL) {
 	    FREE(cp2);
 	    return(PROXY_URL_TYPE);
 	}
 	FREE(cp2);
-#if defined (DOSPATH)
-	if (cp[1] == ':')
-	    return(NOT_A_URL_TYPE);	/* could be drive letter? - kw */
+#if defined (USE_DOS_DRIVES)
+	if (LYIsDosDrive(cp))
+	    return(NOT_A_URL_TYPE);
 #endif
 	cp1++;
 	if (!*cp) {
@@ -2078,13 +2057,13 @@ PUBLIC int is_url ARGS1(
 	result = NOT_A_URL_TYPE;
 
 #ifndef DISABLE_NEWS
-    } else if (compare_type(cp, "news:", 5)) {
+    } else if (compare_type(cp, STR_NEWS_URL, LEN_NEWS_URL)) {
 	result = NEWS_URL_TYPE;
 
-    } else if (compare_type(cp, "nntp:", 5)) {
+    } else if (compare_type(cp, STR_NNTP_URL, LEN_NNTP_URL)) {
 	result = NNTP_URL_TYPE;
 
-    } else if (compare_type(cp, "snews:", 6)) {
+    } else if (compare_type(cp, STR_SNEWS_URL, LEN_SNEWS_URL)) {
 	result = SNEWS_URL_TYPE;
 
     } else if (compare_type(cp, "newspost:", 9)) {
@@ -2112,15 +2091,15 @@ PUBLIC int is_url ARGS1(
 	result = NEWSREPLY_URL_TYPE;
 #endif
 
-    } else if (compare_type(cp, "mailto:", 7)) {
+    } else if (compare_type(cp, STR_MAILTO_URL, LEN_MAILTO_URL)) {
 	result = MAILTO_URL_TYPE;
 
 #ifndef DISABLE_BIBP
-    } else if (compare_type(cp, "bibp:", 5)) {
+    } else if (compare_type(cp, STR_BIBP_URL, LEN_BIBP_URL)) {
 	result = BIBP_URL_TYPE;
 #endif
 
-    } else if (compare_type(cp, "file:", 5)) {
+    } else if (compare_type(cp, STR_FILE_URL, LEN_FILE_URL)) {
 	if (LYisLocalFile(cp)) {
 	    result = FILE_URL_TYPE;
 	} else if (LYIsHtmlSep(cp[5]) && LYIsHtmlSep(cp[6])) {
@@ -2132,7 +2111,7 @@ PUBLIC int is_url ARGS1(
     } else if (compare_type(cp, "data:", 5)) {
 	result = DATA_URL_TYPE;
 
-    } else if (compare_type(cp, "lynxexec:", 9)) {
+    } else if (compare_type(cp, STR_LYNXEXEC, LEN_LYNXEXEC)) {
 	/*
 	 *  Special External Lynx type to handle execution
 	 *  of commands or scripts which require a pause to
@@ -2140,7 +2119,7 @@ PUBLIC int is_url ARGS1(
 	 */
 	result = LYNXEXEC_URL_TYPE;
 
-    } else if (compare_type(cp, "lynxprog:", 9)) {
+    } else if (compare_type(cp, STR_LYNXPROG, LEN_LYNXPROG)) {
 	/*
 	 *  Special External Lynx type to handle execution
 	 *  of commands, scripts or programs with do not
@@ -2148,74 +2127,74 @@ PUBLIC int is_url ARGS1(
 	 */
 	result = LYNXPROG_URL_TYPE;
 
-    } else if (compare_type(cp, "lynxcgi:", 8)) {
+    } else if (compare_type(cp, STR_LYNXCGI, LEN_LYNXCGI)) {
 	/*
 	 *  Special External Lynx type to handle cgi scripts.
 	 */
 	result = LYNXCGI_URL_TYPE;
 
-    } else if (compare_type(cp, "LYNXPRINT:", 10)) {
+    } else if (compare_type(cp, STR_LYNXPRINT, LEN_LYNXPRINT)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
 	result = LYNXPRINT_URL_TYPE;
 
-    } else if (compare_type(cp, "LYNXOPTIONS:", 12)) {
+    } else if (compare_type(cp, STR_LYNXOPTIONS, LEN_LYNXOPTIONS)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
 	result = LYNXOPTIONS_URL_TYPE;
 
-    } else if (compare_type(cp, "LYNXCFG:", 8)) {
+    } else if (compare_type(cp, STR_LYNXCFG, LEN_LYNXCFG)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
 	result = LYNXCFG_URL_TYPE;
 
-    } else if (compare_type(cp, "LYNXMESSAGES:", 13)) {
+    } else if (compare_type(cp, STR_LYNXMESSAGES, LEN_LYNXMESSAGES)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
 	result = LYNXMESSAGES_URL_TYPE;
 
-    } else if (compare_type(cp, "LYNXCOMPILEOPTS:", 16)) {
+    } else if (compare_type(cp, STR_LYNXCFLAGS, LEN_LYNXCFLAGS)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
 	result = LYNXCOMPILE_OPTS_URL_TYPE;
 
-    } else if (compare_type(cp, "LYNXDOWNLOAD:", 13)) {
+    } else if (compare_type(cp, STR_LYNXDOWNLOAD, LEN_LYNXDOWNLOAD)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
 	result = LYNXDOWNLOAD_URL_TYPE;
 
-    } else if (compare_type(cp, "LYNXDIRED:", 10)) {
+    } else if (compare_type(cp, STR_LYNXDIRED, LEN_LYNXDIRED)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
 	result = LYNXDIRED_URL_TYPE;
 
-    } else if (compare_type(cp, "LYNXHIST:", 9)) {
+    } else if (compare_type(cp, STR_LYNXHIST, LEN_LYNXHIST)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
 	result = LYNXHIST_URL_TYPE;
 
-    } else if (compare_type(cp, "LYNXKEYMAP:", 11)) {
+    } else if (compare_type(cp, STR_LYNXKEYMAP, LEN_LYNXKEYMAP)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
 	result = LYNXKEYMAP_URL_TYPE;
 
-    } else if (compare_type(cp, "LYNXIMGMAP:", 11)) {
+    } else if (compare_type(cp, STR_LYNXIMGMAP, LEN_LYNXIMGMAP)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
 	(void)is_url(&cp[11]);	/* forces lower/uppercase of next part */
 	result = LYNXIMGMAP_URL_TYPE;
 
-    } else if (compare_type(cp, "LYNXCOOKIE:", 11)) {
+    } else if (compare_type(cp, STR_LYNXCOOKIE, LEN_LYNXCOOKIE)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
@@ -2237,14 +2216,14 @@ PUBLIC int is_url ARGS1(
 	    result = LYCheckForProxyURL(filename);
 	}
 
-    } else if (compare_type(cp, "http:", 5)) {
+    } else if (compare_type(cp, STR_HTTP_URL, LEN_HTTP_URL)) {
 	result = HTTP_URL_TYPE;
 
-    } else if (compare_type(cp, "https:", 6)) {
+    } else if (compare_type(cp, STR_HTTPS_URL, LEN_HTTPS_URL)) {
 	result = HTTPS_URL_TYPE;
 
 #ifndef DISABLE_GOPHER
-    } else if (compare_type(cp, "gopher:", 7)) {
+    } else if (compare_type(cp, STR_GOPHER_URL, LEN_GOPHER_URL)) {
 	if (strlen(cp) >= 11
 	 && (cp1 = strchr(cp+11,'/')) != NULL) {
 
@@ -2263,27 +2242,27 @@ PUBLIC int is_url ARGS1(
 #endif
 
 #ifndef DISABLE_FTP
-    } else if (compare_type(cp, "ftp:", 4)) {
+    } else if (compare_type(cp, STR_FTP_URL, LEN_FTP_URL)) {
 	result = FTP_URL_TYPE;
 #endif
 
-    } else if (compare_type(cp, "wais:", 5)) {
+    } else if (compare_type(cp, STR_WAIS_URL, LEN_WAIS_URL)) {
 	result = WAIS_URL_TYPE;
 
-    } else if (compare_type(cp, "telnet:", 7)) {
+    } else if (compare_type(cp, STR_TELNET_URL, LEN_TELNET_URL)) {
 	result = TELNET_URL_TYPE;
 
-    } else if (compare_type(cp, "tn3270:", 7)) {
+    } else if (compare_type(cp, STR_TN3270_URL, LEN_TN3270_URL)) {
 	result = TN3270_URL_TYPE;
 
-    } else if (compare_type(cp, "rlogin:", 7)) {
+    } else if (compare_type(cp, STR_RLOGIN_URL, LEN_RLOGIN_URL)) {
 	result = RLOGIN_URL_TYPE;
 
-    } else if (compare_type(cp, "cso:", 4)) {
+    } else if (compare_type(cp, STR_CSO_URL, LEN_CSO_URL)) {
 	result = CSO_URL_TYPE;
 
 #ifndef DISABLE_FINGER
-    } else if (compare_type(cp, "finger:", 7)) {
+    } else if (compare_type(cp, STR_FINGER_URL, LEN_FINGER_URL)) {
 	result = FINGER_URL_TYPE;
 #endif
 
@@ -2345,19 +2324,19 @@ PUBLIC BOOLEAN LYFixCursesOnForAccess ARGS2(
 	 *  getfile() would indeed have turned curses off for it...
 	 */
 	if (strstr(addr, "://") != NULL &&
-	    (!strncmp(addr, "telnet:", 7) ||
-	     !strncmp(addr, "rlogin:", 7) ||
-	     !strncmp(addr, "tn3270:", 7) ||
-	     (strncmp(addr, "gopher:", 7) &&
+	    (isTELNET_URL(addr) ||
+	     isRLOGIN_URL(addr) ||
+	     isTN3270_URL(addr) ||
+	     (!isGOPHER_URL(addr) &&
 	      (cp1 = strchr(addr+11,'/')) != NULL &&
 	      (*(cp1+1) == 'T' || *(cp1+1) == '8')))) {
 	    /*
 	     *  If actual access that will be done is ok with curses off,
 	     *  then do nothing special, else force curses on. - kw
 	     */
-	    if (strncmp(physical, "telnet:", 7) &&
-		strncmp(physical, "rlogin:", 7) &&
-		strncmp(physical, "tn3270:", 7)) {
+	    if (!isTELNET_URL(physical) &&
+		!isRLOGIN_URL(physical) &&
+		!isTN3270_URL(physical)) {
 		start_curses();
 		HTAlert(
 		    gettext("Unexpected access protocol for this URL scheme."));
@@ -2427,9 +2406,9 @@ PUBLIC BOOLEAN LYCanDoHEAD ARGS1(
 	if (non_empty(acc_method)) {
 	    char *proxy;
 	    StrAllocCat(acc_method, "_proxy");
-	    proxy = getenv(acc_method);
-	    if (proxy && (!strncmp(proxy, "http:", 5) ||
-			  !strncmp(proxy, "lynxcgi:", 8)) &&
+	    proxy = LYGetEnv(acc_method);
+	    if (proxy && (isHTTP_URL(proxy) ||
+			  isLYNXCGI(proxy)) &&
 		!override_proxy(temp0)) {
 		FREE(temp0);
 		FREE(acc_method);
@@ -2836,6 +2815,7 @@ PUBLIC void HTAddSugFilename ARGS1(
 PUBLIC void change_sug_filename ARGS1(
 	char *,		fname)
 {
+    CONST char *cp2;
     char *temp = 0, *cp, *cp1, *end;
 #ifdef VMS
     char *dot;
@@ -2855,25 +2835,25 @@ PUBLIC void change_sug_filename ARGS1(
     /*
      *	Rename any temporary files.
      */
-    cp = wwwName(lynx_temp_space);
+    cp2 = wwwName(lynx_temp_space);
 #ifdef FNAMES_8_3
-    if (LYIsHtmlSep(*cp)) {
-	HTSprintf0(&temp, "file://localhost%s%04x", cp, GETPID());
+    if (LYIsHtmlSep(*cp2)) {
+	HTSprintf0(&temp, "file://localhost%s%04x", cp2, GETPID());
     } else {
-	HTSprintf0(&temp, "file://localhost/%s%04x", cp, GETPID());
+	HTSprintf0(&temp, "file://localhost/%s%04x", cp2, GETPID());
     }
 #else
-    if (LYIsHtmlSep(*cp)) {
-	HTSprintf0(&temp, "file://localhost%s%d", cp, (int)getpid());
+    if (LYIsHtmlSep(*cp2)) {
+	HTSprintf0(&temp, "file://localhost%s%d", cp2, (int)getpid());
     } else {
-	HTSprintf0(&temp, "file://localhost/%s%d", cp, (int)getpid());
+	HTSprintf0(&temp, "file://localhost/%s%d", cp2, (int)getpid());
     }
 #endif
     if (!strncmp(fname, temp, strlen(temp))) {
 	cp = strrchr(fname, '.');
 	if (strlen(cp) > (strlen(temp) - 4))
 	    cp = NULL;
-	StrAllocCopy(temp, (cp ? cp : ""));
+	StrAllocCopy(temp, NonNull(cp));
 	sprintf(fname, "temp%.*s", LY_MAXPATH - 10, temp);
     }
     FREE(temp);
@@ -3293,43 +3273,43 @@ PRIVATE CONST struct {
     { "outside_ftp",	&no_outside_ftp,	CAN_ANONYMOUS_OUTSIDE_DOMAIN_FTP },
     { "inside_rlogin",	&no_inside_rlogin,	CAN_ANONYMOUS_INSIDE_DOMAIN_RLOGIN },
     { "outside_rlogin",	&no_outside_rlogin,	CAN_ANONYMOUS_OUTSIDE_DOMAIN_RLOGIN },
-    { "suspend",	&no_suspend,		TRUE },
-    { "editor",		&no_editor,		TRUE },
-    { "shell",		&no_shell,		TRUE },
-    { "bookmark",	&no_bookmark,		TRUE },
-    { "multibook",	&no_multibook,		TRUE },
-    { "bookmark_exec",	&no_bookmark_exec,	TRUE },
-    { "option_save",	&no_option_save,	TRUE },
+    { "suspend",	&no_suspend,		FALSE },
+    { "editor",		&no_editor,		FALSE },
+    { "shell",		&no_shell,		FALSE },
+    { "bookmark",	&no_bookmark,		FALSE },
+    { "multibook",	&no_multibook,		FALSE },
+    { "bookmark_exec",	&no_bookmark_exec,	FALSE },
+    { "option_save",	&no_option_save,	FALSE },
     { "print",		&no_print,		CAN_ANONYMOUS_PRINT },
-    { "download",	&no_download,		TRUE },
-    { "disk_save",	&no_disk_save,		TRUE },
+    { "download",	&no_download,		FALSE },
+    { "disk_save",	&no_disk_save,		FALSE },
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
     { "exec",		&no_exec,		LOCAL_EXECUTION_LINKS_ALWAYS_OFF_FOR_ANONYMOUS },
 #endif
-    { "lynxcgi",	&no_lynxcgi,		TRUE },
-    { "exec_frozen",	&exec_frozen,		TRUE },
+    { "lynxcgi",	&no_lynxcgi,		FALSE },
+    { "exec_frozen",	&exec_frozen,		FALSE },
     { "goto",		&no_goto,		CAN_ANONYMOUS_GOTO },
     { "jump",		&no_jump,		CAN_ANONYMOUS_JUMP },
-    { "file_url",	&no_file_url,		TRUE },
+    { "file_url",	&no_file_url,		FALSE },
 #ifndef DISABLE_NEWS
-    { "news_post",	&no_newspost,		TRUE },
+    { "news_post",	&no_newspost,		FALSE },
     { "inside_news",	&no_inside_news,	CAN_ANONYMOUS_INSIDE_DOMAIN_READ_NEWS },
     { "outside_news",	&no_outside_news,	CAN_ANONYMOUS_OUTSIDE_DOMAIN_READ_NEWS },
 #endif
     { "mail",		&no_mail,		CAN_ANONYMOUS_MAIL },
-    { "dotfiles",	&no_dotfiles,		TRUE },
-    { "useragent",	&no_useragent,		TRUE },
+    { "dotfiles",	&no_dotfiles,		FALSE },
+    { "useragent",	&no_useragent,		FALSE },
 #ifdef SUPPORT_CHDIR
-    { "chdir",		&no_chdir,		TRUE },
+    { "chdir",		&no_chdir,		FALSE },
 #endif
 #ifdef DIRED_SUPPORT
-    { "dired_support",	&no_dired_support,	TRUE },
+    { "dired_support",	&no_dired_support,	FALSE },
 #ifdef OK_PERMIT
-    { "change_exec_perms", &no_change_exec_perms, TRUE },
+    { "change_exec_perms", &no_change_exec_perms, FALSE },
 #endif /* OK_PERMIT */
 #endif /* DIRED_SUPPORT */
 #ifdef USE_EXTERNALS
-    { "externals",	&no_externals,		TRUE },
+    { "externals",	&no_externals,		FALSE },
 #endif
     { "lynxcfg_info",	&no_lynxcfg_info,	CAN_ANONYMOUS_VIEW_LYNXCFG_INFO },
 #ifndef NO_CONFIG_INFO
@@ -3486,7 +3466,7 @@ PUBLIC void parse_restrictions ARGS1(
 	    }
 	}
 	if (!found) {
-	    printf("%s: %.*s", gettext("unknown restriction"), p-word, word);
+	    printf("%s: %.*s\n", gettext("unknown restriction"), p-word, word);
 	    exit(EXIT_FAILURE);
 	}
 	if (*p)
@@ -3633,7 +3613,7 @@ PUBLIC void LYCheckMail NOARGS
     struct stat st;
 
     if (firsttime) {
-	mf = getenv("MAIL");
+	mf = LYGetEnv("MAIL");
 	firsttime = FALSE;
 	time(&lasttime);
     }
@@ -3688,15 +3668,15 @@ PUBLIC void LYEnsureAbsoluteURL ARGS3(
     /*
      *	If it is not a URL then make it one.
      */
-    if (!strcasecomp(*href, "news:")) {
+    if (!strcasecomp(*href, STR_NEWS_URL)) {
 	StrAllocCat(*href, "*");
-    } else if (!strcasecomp(*href, "nntp:") ||
-	       !strcasecomp(*href, "snews:")) {
+    } else if (!strcasecomp(*href, STR_NEWS_URL) ||
+	       !strcasecomp(*href, STR_SNEWS_URL)) {
 	StrAllocCat(*href, "/*");
     }
     if (!is_url(*href)) {
 	CTRACE((tfp, "%s%s'%s' is not a URL\n",
-		    (name ? name : ""), (name ? " " : ""), *href));
+		    NonNull(name), (name ? " " : ""), *href));
 	LYConvertToURL(href, fixit);
     }
     if (non_empty(temp = HTParse(*href, "", PARSE_ALL)))
@@ -3724,14 +3704,15 @@ PUBLIC void LYConvertToURL ARGS2(
     if (!old_string || *old_string == '\0')
 	return;
 
-#if defined(DOSPATH) || defined(__EMX__)
+#if defined(USE_DOS_DRIVES)
     {
-	 char *cp_url = *AllocatedString;
-	 for(; *cp_url != '\0'; cp_url++)
-		if(*cp_url == '\\') *cp_url = '/';
-	 cp_url--;
-	 if(*cp_url == ':')
-		 StrAllocCat(*AllocatedString,"/");
+	char *cp_url = *AllocatedString;
+	for(; *cp_url != '\0'; cp_url++)
+	    if (*cp_url == '\\')
+		*cp_url = '/';
+	    cp_url--;
+	if (LYIsDosDrive(*AllocatedString) && *cp_url == ':')
+	    LYAddPathSep(AllocatedString);
     }
 #endif /* DOSPATH */
 
@@ -3740,7 +3721,7 @@ PUBLIC void LYConvertToURL ARGS2(
 
     if (*old_string != '/') {
 	char *fragment = NULL;
-#if defined(DOSPATH) || defined(__EMX__)
+#if defined(USE_DOS_DRIVES)
 	StrAllocCat(*AllocatedString,"/");
 #endif /* DOSPATH */
 #ifdef VMS
@@ -3772,8 +3753,7 @@ PUBLIC void LYConvertToURL ARGS2(
 	    }
 	    goto have_VMS_URL;
 	} else {
-	    if ((fragment = strchr(old_string, '#')) != NULL)
-		*fragment = '\0';
+	    fragment = trimPoundSelector(old_string);
 	    LYstrncpy(url_file, old_string, sizeof(url_file)-1);
 	}
 	url_file_dsc.dsc$w_length = (short) strlen(url_file);
@@ -3791,7 +3771,7 @@ PUBLIC void LYConvertToURL ARGS2(
 		StrAllocCat(*AllocatedString, cp);
 	    }
 	    if (fragment != NULL) {
-		*fragment = '#';
+		restorePoundSelector(fragment);
 		StrAllocCat(*AllocatedString, fragment);
 		fragment = NULL;
 	    }
@@ -3801,9 +3781,7 @@ PUBLIC void LYConvertToURL ARGS2(
 	     * Probably a directory.  Try converting that.
 	     */
 	    StrAllocCopy(cur_dir, dir_name);
-	    if (fragment != NULL) {
-		*fragment = '#';
-	    }
+	    restorePoundSelector(fragment);
 	    if (NULL != getcwd(dir_name, sizeof(dir_name)-1, 0)) {
 		/*
 		 * Yup, we got it!
@@ -3855,10 +3833,9 @@ PUBLIC void LYConvertToURL ARGS2(
 	     *	with the "http://" defaulted, if we can't
 	     *	rule out a bad VMS path.
 	     */
-	    if (fragment != NULL) {
-		*fragment = '#';
-		fragment = NULL;
-	    }
+	    restorePoundSelector(fragment);
+	    fragment = NULL;
+
 	    if (strchr(old_string, '[') ||
 		((cp = strchr(old_string, ':')) != NULL &&
 		 !isdigit(UCH(cp[1]))) ||
@@ -3892,7 +3869,7 @@ PUBLIC void LYConvertToURL ARGS2(
 have_VMS_URL:
 	CTRACE((tfp, "Trying: '%s'\n", *AllocatedString));
 #else /* not VMS: */
-#if defined(DOSPATH)
+#if defined(USE_DOS_DRIVES)
 #ifdef _WINDOWS
 	if (*old_string == '.') {
 	    char fullpath[MAX_PATH + 1];
@@ -3956,7 +3933,7 @@ have_VMS_URL:
 	     *	Concatenate and simplify, trimming any
 	     *	residual relative elements. - FM
 	     */
-#if defined (DOSPATH) || defined (__EMX__) || defined (WIN_EX)
+#if defined (USE_DOS_DRIVES)
 	    if (old_string[1] != ':' && old_string[1] != '|') {
 		StrAllocCopy(temp, wwwName(curdir));
 		LYAddHtmlSep(&temp);
@@ -3969,8 +3946,8 @@ have_VMS_URL:
 		    old_string[1] = ':';
 		StrAllocCopy(temp, old_string);
 
-		if (strlen(temp) == 2 && temp[1] == ':')
-		    StrAllocCat(temp, "/");
+		if (strlen(temp) == 2 && LYIsDosDrive(temp))
+		    LYAddPathSep(&temp);
 	    }
 #else
 	    StrAllocCopy(temp, curdir);
@@ -3984,7 +3961,7 @@ have_VMS_URL:
 		/*
 		 *  It is a subdirectory or file on the local system.
 		 */
-#if defined (DOSPATH) || defined (__EMX__)
+#if defined (USE_DOS_DRIVES)
 		/* Don't want to see DOS local paths like c: escaped  */
 		/* especially when we really have file://localhost/   */
 		/* at the beginning.  To avoid any confusion we allow */
@@ -4006,8 +3983,7 @@ have_VMS_URL:
 		StrAllocCopy(temp2, curdir);
 		LYAddPathSep(&temp2);
 		StrAllocCopy(cp, old_string);
-		if ((fragment = strchr(cp, '#')) != NULL)
-		    *fragment = '\0';	/* keep as pointer into cp string */
+		fragment = trimPoundSelector(cp);
 		HTUnEscape(cp);   /* unescape given path without fragment */
 		StrAllocCat(temp2, cp);		/* append to current dir  */
 		StrAllocCopy(cp2, temp2);	/* keep a copy in cp2	  */
@@ -4037,7 +4013,7 @@ have_VMS_URL:
 		    } else {
 			temp = HTEscape(temp2, URL_PATH);
 			if (fragment != NULL) {
-			    *fragment = '#';
+			    restorePoundSelector(fragment);
 			    StrAllocCat(temp, fragment);
 			}
 		    }
@@ -4067,7 +4043,7 @@ have_VMS_URL:
 		    } else {
 			temp = HTEscape(temp2, URL_PATH);
 			if (fragment != NULL) {
-			    *fragment = '#';
+			    restorePoundSelector(fragment);
 			    StrAllocCat(temp, fragment);
 			}
 		    }
@@ -4085,12 +4061,13 @@ have_VMS_URL:
 			    temp2 ? temp2 : temp));
 #ifdef WIN_EX  /* 1998/01/13 (Tue) 09:07:37 */
 		{
-		    char *p, *q, buff[LY_MAXPATH + 128];
+		    CONST char *p, *q;
+		    char buff[LY_MAXPATH + 128];
 
-		    p = (char *)Home_Dir();
+		    p = Home_Dir();
 		    q = temp2 ? temp2 : temp;
 
-		    if (strlen(q) == 3 && isalpha(UCH(q[0])) && q[1] == ':') {
+		    if (strlen(q) == 3 && LYIsDosDrive(q)) {
 			sprintf(buff,
 			    "'%s' not exist, Goto LynxHome '%s'.", q, p);
 			_statusline(buff);
@@ -4261,11 +4238,6 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
     int error;
 #endif /* INET6 */
 
-#ifdef _WINDOWS
-    int hoststat;
-    struct hostent  *phost;	/* Pointer to host - See netdb.h */
-#endif
-
     /*
      *	If it's a NULL or zero-length string,
      *	or if it begins with a slash or hash,
@@ -4298,13 +4270,13 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	 *  already be included in Path. - FM
 	 */
 	*Path = '\0';
-    } else if ((Fragment = strchr(Str, '#')) != NULL) {
+    } else {
 	/*
 	 *  No path, so check for a fragment and
 	 *  trim that, to be restored after filling
 	 *  in the Host[:port] field. - FM
 	 */
-	*Fragment = '\0';
+	Fragment = trimPoundSelector(Str);
     }
 
     /*
@@ -4530,7 +4502,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	    StrAllocCat(Host, Path);
 	} else if (Fragment) {
 	    StrAllocCat(Host, "/");
-	    *Fragment = '#';
+	    restorePoundSelector(Fragment);
 	    StrAllocCat(Host, Fragment);
 	}
 	StrAllocCopy(*AllocatedString, Host);
@@ -4820,28 +4792,83 @@ PUBLIC char * Current_Dir ARGS1(
     return pathname;
 }
 
+/*
+ * Verify that the given path refers to an existing directory, returning the
+ * string if the directory exists.  If not, return null.
+ */
+PRIVATE char * CheckDir ARGS1(
+    char *,	path)
+{
+    struct stat stat_info;
+    if (!LYisAbsPath(path)
+	|| (HTStat(path, &stat_info) < 0
+	 || !S_ISDIR(stat_info.st_mode))) {
+	path = NULL;
+    }
+    return path;
+}
+
+/*
+ * Lookup various possibilities for $HOME, and check that the directory exists.
+ */
+PRIVATE char *HomeEnv NOARGS
+{
+    char *result = CheckDir(LYGetEnv("HOME"));
+
+#if defined (USE_DOS_DRIVES)
+    if (result == 0) {
+	char *head;
+	char *leaf;
+	static char *temp = NULL;
+
+	/* Windows 2000 */
+	if ((result = LYGetEnv("USERPROFILE")) != 0) {
+	    HTSprintf0(&temp, "%s%sMy Documents", result, PATHSEP_STR);
+	    result = CheckDir(temp);
+	}
+	/* NT4 */
+	if (result == 0) {
+	    if ((head = LYGetEnv("HOMEDRIVE")) != 0) {
+		if ((leaf = LYGetEnv("HOMEPATH")) != 0) {
+		    HTSprintf0(&temp, "%s%s%s", head, PATHSEP_STR, leaf);
+		    result = CheckDir(temp);
+		}
+	    }
+	}
+	/* General M$ */
+	if (result == 0)
+	    result = CheckDir(LYGetEnv("TEMP"));
+	if (result == 0)
+	    result = CheckDir(LYGetEnv("TMP"));
+	if (result == 0) {
+	    if ((head = LYGetEnv("SystemDrive")) != 0) {
+		HTSprintf0(&temp, "%s%s", head, PATHSEP_STR);
+		result = CheckDir(temp);
+	    }
+	}
+	if (result == 0)
+	    result = CheckDir("C:" PATHSEP_STR);
+    }
+#endif
+
+    return result; 
+}
+
 PUBLIC CONST char * Home_Dir NOARGS
 {
     static CONST char *homedir = NULL;
     char *cp = NULL;
 
     if (homedir == NULL) {
-	if ((cp = getenv_text("HOME")) == NULL
-	 || !LYisAbsPath(cp)) {
-#if defined (DOSPATH) || defined (__EMX__) /* BAD!	WSB */
-	    if ((cp = getenv_text("TEMP")) == NULL
-	     && (cp = getenv_text("TMP")) == NULL) {
-		cp = "C:\\";
-	    }
-	    StrAllocCopy(HomeDir, cp);
-#else
+	if ((cp = HomeEnv()) == NULL) {
 #ifdef VMS
-	    if ((cp = getenv_text("SYS$LOGIN")) == NULL
-	     && (cp = getenv_text("SYS$SCRATCH")) == NULL) {
+	    if ((cp = LYGetEnv("SYS$LOGIN")) == NULL
+	     && (cp = LYGetEnv("SYS$SCRATCH")) == NULL) {
 		cp = "sys$scratch:";
 	    }
 	    StrAllocCopy(HomeDir, cp);
 #else
+#ifdef UNIX
 #ifdef HAVE_UTMP
 	    /*
 	     *	One could use getlogin() and getpwnam() here instead.
@@ -4858,27 +4885,19 @@ PUBLIC CONST char * Home_Dir NOARGS
 		 */
 		StrAllocCopy(HomeDir, "/tmp");
 	    }
-#ifdef UNIX
-	    if (non_empty(cp))
-		HTAlwaysAlert(NULL, gettext("Ignoring invalid HOME"));
 #endif
 #endif /* VMS */
-#endif /* DOSPATH */
 	} else {
-#if defined(_WINDOWS) || defined(DOSPATH)
-	    char *hp = getenv_text("HOMEDRIVE");
-	    if (hp != 0
-	     && (LYIsPathSep(*cp) || !LYisAbsPath(cp))) {
-		StrAllocCopy(HomeDir, hp);
-		StrAllocCat(HomeDir, cp);
-	    } else
-#endif
 	    StrAllocCopy(HomeDir, cp);
 	}
 	homedir = (CONST char *)HomeDir;
 #ifdef LY_FIND_LEAKS
 	atexit(LYHomeDir_free);
 #endif
+    }
+    if (homedir == NULL) {
+	printf("%s\n", gettext("Cannot find HOME directory"));
+	exit(EXIT_FAILURE);
     }
     return homedir;
 }
@@ -5453,7 +5472,7 @@ PUBLIC time_t LYmktime ARGS2(
 
 #if !defined(HAVE_PUTENV) && !defined(_WINDOWS)
 /*
- *  No putenv on the next so we use this code instead!
+ *  No putenv on the NeXT so we use this code instead!
  */
 
 /* Copyright (C) 1991 Free Software Foundation, Inc.
@@ -5548,7 +5567,17 @@ int remove ARGS1(char *, name)
 }
 #endif
 
-#if defined(UNIX)
+/*
+ * Default, for single-user systems such as Cygwin and OS/2 EMX:
+ */
+#define IsOurFile(name) TRUE
+#define OpenHiddenFile(name, mode) fopen(name, mode)
+
+#if defined(MULTI_USER_UNIX)
+
+#undef IsOurFile
+#undef OpenHiddenFile
+
 /*
  * Verify if this is really a file, not accessed by a link, except for the
  * special case of its directory being pointed to by a link from a directory
@@ -5567,7 +5596,7 @@ PRIVATE BOOL IsOurFile ARGS1(char *, name)
 	 * ( If this is not a single-user system, the other user is presumed by
 	 * some people busy trying to use a symlink attack on our files ;-)
 	 */
-#if defined(HAVE_LSTAT) && !(defined(DOSPATH) || defined(__EMX__))
+#if defined(HAVE_LSTAT)
 	char *path = 0;
 	char *leaf;
 
@@ -5669,11 +5698,7 @@ PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
     }
     return fp;
 }
-#else	/* !UNIX */
-# ifndef VMS
-#  define OpenHiddenFile(name, mode) fopen(name, mode)
-# endif
-#endif
+#endif /* MULTI_USER_UNIX */
 
 PUBLIC FILE *LYNewBinFile ARGS1(char *, name)
 {
@@ -5721,7 +5746,7 @@ PUBLIC FILE *LYAppendToTxtFile ARGS1(char *, name)
     return fp;
 }
 
-#ifdef UNIX
+#if defined(MULTI_USER_UNIX)
 /*
  *  Restore normal permissions to a copy of a file that we have created
  *  with temp file restricted permissions.  The normal umask should
@@ -5804,7 +5829,7 @@ PUBLIC FILE *LYOpenTemp ARGS3(
      * Verify if the given space looks secure enough.  Otherwise, make a
      * secure subdirectory of that.
      */
-#if defined(UNIX) && defined(HAVE_MKTEMP)
+#if defined(MULTI_USER_UNIX) && defined(HAVE_MKTEMP)
     if (lynx_temp_subspace == 0)
     {
 	BOOL make_it = FALSE;
@@ -5949,11 +5974,7 @@ PUBLIC FILE *LYOpenTempRewrite ARGS3(
 #endif
 
 	if (writable_exists) {
-#ifdef UNIX
 	    is_ours = IsOurFile(fname);
-#else
-	    is_ours = TRUE;	/* assume ok, if we get to here */
-#endif
 	}
 	CTRACE((tfp, "...%s%s\n",
 	       writable_exists ? CTRACE_EXISTS : "",
@@ -6174,7 +6195,7 @@ PUBLIC void LYCleanupTemp NOARGS
     while (ly_temp != 0) {
 	LYRemoveTemp(ly_temp->name);
     }
-#ifdef UNIX
+#if defined(MULTI_USER_UNIX)
     if (lynx_temp_subspace > 0) {
 	char result[LY_MAXPATH];
 	LYstrncpy(result, lynx_temp_space, sizeof(result)-1);
@@ -6379,18 +6400,18 @@ PUBLIC void LYUIPages_free NOARGS
  *  Convert local pathname to www name
  *  (do not bother about file://localhost prefix at this point).
  */
-PUBLIC  char * wwwName ARGS1(
+PUBLIC  CONST char * wwwName ARGS1(
 	CONST char *,	pathname)
 {
-    char *cp = NULL;
+    CONST char *cp = NULL;
 
-#ifdef DOSPATH
+#if defined(USE_DOS_DRIVES)
     cp = HTDOS_wwwName(pathname);
 #else
 #ifdef VMS
     cp = HTVMS_wwwName(pathname);
 #else
-    cp = (char *)pathname;
+    cp = pathname;
 #endif /* VMS */
 #endif /* DOSPATH */
 
@@ -6408,23 +6429,19 @@ PUBLIC BOOLEAN LYValidateFilename ARGS2(
 	char *,		result,
 	char *,		given)
 {
-    char *cp, *cp2;
+    char *cp;
+    CONST char *cp2;
 
     /*
      *  Cancel if the user entered "/dev/null" on Unix,
-     *  or an "nl:" path (case-insensitive) on VMS. - FM
+     *  or an "nl:" path on VMS. - FM
      */
-#ifdef VMS
-    if (!strncasecomp(given, "nl:", 3) ||
-	!strncasecomp(given, "/nl/", 4))
-#else
-    if (!strcmp(given, "/dev/null"))
-#endif /* VMS */
+    if (LYIsNullDevice(given))
     {
 	/* just ignore it */
 	return FALSE;
     }
-#if HAVE_POPEN
+#ifdef HAVE_POPEN
     if (LYIsPipeCommand(given)) {
 	if (no_shell) {
 	    HTUserMsg(SPAWNING_DISABLED);
@@ -6513,7 +6530,7 @@ PUBLIC int LYValidateOutput ARGS1(
     /*
      * Assume we can write to a pipe
      */
-#if HAVE_POPEN
+#ifdef HAVE_POPEN
     if (LYIsPipeCommand(filename))
 	return 'Y';
 #endif
@@ -6551,7 +6568,7 @@ PUBLIC void LYLocalFileToURL ARGS2(
 	char **,	target,
 	CONST char *,	source)
 {
-    char *leaf;
+    CONST char *leaf;
 
     StrAllocCopy(*target, "file://localhost");
 
@@ -6609,6 +6626,15 @@ PUBLIC void EndInternalPage ARGS1(
     fprintf(fp0, "</body>\n</html>");
 }
 
+PUBLIC char *trimPoundSelector ARGS1(
+	char *,		address)
+{
+    char *pound = findPoundSelector(address);
+    if (pound != 0)
+	*pound = '\0';
+    return pound;
+}
+
 /*
  * Trim a trailing path-separator to avoid confusing other programs when we concatenate
  * to it.  This only applies to local filesystems.
@@ -6623,12 +6649,6 @@ PUBLIC void LYTrimPathSep ARGS1(
      && LYIsPathSep(path[len-1]))
 	path[len-1] = 0;
 }
-
-#if defined(DOSPATH) && !defined(__DJGPP__)
-#define PATHSEP_STR "\\"
-#else
-#define PATHSEP_STR "/"
-#endif
 
 /*
  * Add a trailing path-separator to avoid confusing other programs when we concatenate
@@ -6672,7 +6692,7 @@ PUBLIC char * LYLastPathSep ARGS1(
 	CONST char *,	path)
 {
     char *result;
-#ifdef DOSPATH
+#if defined(USE_DOS_DRIVES)
     if ((result = strrchr(path, '\\')) == 0)
 	result = strrchr(path, '/');
 #else
@@ -6841,6 +6861,11 @@ PUBLIC int LYSystem ARGS1(
     }
 #  endif
 
+    /*
+     * This chunk of code does not work, for two reasons:
+     * a) the Cygwin system() function edits out the backslashes
+     * b) it does not account for more than one parameter, e.g., +number
+     */
 #if defined(__CYGWIN__) && defined(DOSPATH)	/* 1999/02/26 (Fri) */
     {
 	char cmd[LY_MAXPATH];
@@ -6891,7 +6916,7 @@ PUBLIC int LYSystem ARGS1(
     }
 #endif
 
-#if _WIN_CC
+#ifdef _WIN_CC
     code = exec_command(command, TRUE);	/* Wait exec */
 #else
     if (restore_sigpipe_for_children)
@@ -6951,7 +6976,7 @@ PUBLIC int Cygwin_Shell NOARGS
     /* Init a startup structure */
     GetStartupInfo(&startUpInfo);
 
-    shell = getenv_text("COMSPEC");
+    shell = LYGetEnv("COMSPEC");
 
     /* Create the child process, specifying
      inherited handles. Pass the value of the
@@ -6963,7 +6988,7 @@ PUBLIC int Cygwin_Shell NOARGS
 			0, 0, &startUpInfo, &procInfo);
 
 	if (!code) {
-	    printf("shell = [%s], code = %d\n", shell, GetLastError());
+	    printf("shell = [%s], code = %ld\n", shell, GetLastError());
 	}
 
 	/* wait for the child to return (this is not a requirement
@@ -6980,10 +7005,10 @@ PUBLIC char *LYSysShell NOARGS
     char *shell = 0;
 #ifdef DOSPATH
 #ifdef WIN_EX
-    shell = getenv_text("SHELL");
+    shell = LYGetEnv("SHELL");
     if (shell) {
 	if (access(shell, 0) != 0)
-	    shell = getenv_text("COMSPEC");
+	    shell = LYGetEnv("COMSPEC");
     }
     if (shell == NULL) {
 	if (system_is_NT)
@@ -6992,9 +7017,9 @@ PUBLIC char *LYSysShell NOARGS
 	    shell = "command.com";
     }
 #else
-    shell = getenv_text("SHELL");
+    shell = LYGetEnv("SHELL");
     if (shell == NULL) {
-	shell = getenv_text("COMSPEC");
+	shell = LYGetEnv("COMSPEC");
     }
     if (shell == NULL) {
 	shell = "command.com";
@@ -7002,10 +7027,10 @@ PUBLIC char *LYSysShell NOARGS
 #endif /* WIN_EX */
 #else
 #ifdef __EMX__
-    if (getenv_text("SHELL") != NULL) {
-	shell = getenv_text("SHELL");
+    if (LYGetEnv("SHELL") != NULL) {
+	shell = LYGetEnv("SHELL");
     } else {
-	shell = (getenv_text("COMSPEC") == NULL) ? "cmd.exe" : getenv_text("COMSPEC");
+	shell = (LYGetEnv("COMSPEC") == NULL) ? "cmd.exe" : LYGetEnv("COMSPEC");
     }
 #else
 #ifdef VMS
@@ -7029,10 +7054,7 @@ PUBLIC char *LYSysShell NOARGS
  */
 PUBLIC char *LYgetXDisplay NOARGS
 {
-    char *cp;
-    if ((cp = getenv_text(DISPLAY)) == NULL)
-	cp = 0;
-    return cp;
+    return LYGetEnv(DISPLAY);
 }
 
 /*
@@ -7058,6 +7080,7 @@ PUBLIC void LYsetXDisplay ARGS1(
     }
 }
 
+#ifdef CAN_CUT_AND_PASTE
 #ifdef __EMX__
 
 static int proc_type = -1;
@@ -7272,6 +7295,7 @@ PUBLIC void get_clip_release()
     m_locked = 0;
 }
 #endif
+#endif /* CAN_CUT_AND_PASTE */
 
 #if defined(WIN_EX)
 

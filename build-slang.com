@@ -140,6 +140,16 @@ $ cc_opts = ""
 $ link_opts = ""
 $!
 $ if p2 .nes. ""
+$ then
+$   ssl_arg = "openssl"
+$   extra = extra + ",USE_SSL,USE_OPENSSL_INCL"
+$   ssl_libs = ",ssllib:libssl/LIB,ssllib:libcrypto/LIB"
+$ else
+$   ssl_arg = ""
+$   ssl_libs = ""
+$ endif
+$!
+$ if p3 .nes. ""
 $   then
 $      debug_arg = "DEBUG"
 $      cc_opts = cc_opts + "/DEBUG/NOOPT"
@@ -167,7 +177,7 @@ $!	Build the WWWLibrary
 $!
 $ set default [.WWW.Library.VMS]
 $ v1 = 'f$verify(0)'
-$ @libmake 'option' 'debug_arg'
+$ @libmake 'option' 'ssl_arg' 'debug_arg'
 $ v1 = f$verify(1)
 $ set default [-.-.-]
 $ v1 = 'f$verify(0)'
@@ -296,7 +306,7 @@ $ cc UCdomap
 $!
 $!	Link the objects and libaries.
 $!
-$ link/exe=lynx.exe'link_opts' -
+$ link/exe=lynx.exe/map=lynx 'link_opts' -
 DefaultStyle.obj, -
 GridText.obj, -
 HTAlert.obj, -
@@ -342,7 +352,7 @@ UCAux.obj, -
 UCdomap.obj, -
 [-.WWW.Library.Implementation]WWWLib_'option'.olb/library, -
 'SLANGLIB'slang.olb/lib, -
-sys$disk:[]'optfile'.opt/opt, sys$disk:[]'compiler'.opt/opt
+sys$disk:[]'optfile'.opt/opt, sys$disk:[]'compiler'.opt/opt 'ssl_libs'
 $!
 $!	Copy the executable to the top directory and restore the default.
 $!

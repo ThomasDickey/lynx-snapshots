@@ -649,7 +649,7 @@ PRIVATE char *compose_auth_string ARGS3(
 		     realm->realmname,
 		     (IsProxy ? "proxy" : "server"),
 		     (theHost ? theHost : "??"),
-		     (thePort ? thePort : ""));
+		     NonNull(thePort));
 	FREE(proxiedHost);
 	FREE(thePort);
 	username = realm->username;
@@ -676,8 +676,8 @@ PRIVATE char *compose_auth_string ARGS3(
 	}
     }
 
-    len = strlen(realm->username ? realm->username : "") +
-	  strlen(realm->password ? realm->password : "") + 3;
+    len = strlen(NonNull(realm->username)) +
+	  strlen(NonNull(realm->password)) + 3;
 
     if (scheme == HTAA_PUBKEY) {
 #ifdef PUBKEY
@@ -685,7 +685,7 @@ PRIVATE char *compose_auth_string ARGS3(
 	StrAllocCopy(secret_key, HTAA_generateRandomKey());
 #endif /* PUBKEY */
 	/* Room for secret key, timestamp and inet address */
-	len += strlen(secret_key ? secret_key : "") + 30;
+	len += strlen(NonNull(secret_key)) + 30;
     } else {
 	FREE(secret_key);
     }

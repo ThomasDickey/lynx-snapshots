@@ -152,6 +152,7 @@ extern int HTConfirmPostRedirect PARAMS((
 extern void LYSleepAlert NOPARAMS;
 extern void LYSleepInfo NOPARAMS;
 extern void LYSleepMsg NOPARAMS;
+extern void LYSleepReplay NOPARAMS;
 
 #ifdef HAVE_STRERROR
 #define LYStrerror strerror

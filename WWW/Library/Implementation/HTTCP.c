@@ -99,6 +99,13 @@ extern char *sys_errlist[];		/* see man perror on cernvax */
 extern int sys_nerr;
 #endif /* DECL_SYS_ERRLIST */
 
+#ifdef __DJGPP__
+static int ResolveYield (void)
+{
+    return HTCheckForInterrupt() ? 0 : 1;
+}
+#endif
+
 #ifdef _WINDOWS_NSL
 char host[512];
 struct hostent  *phost;	/* Pointer to host - See netdb.h */
@@ -641,6 +648,11 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 #ifndef _WINDOWS_NSL
     char *host = str;
 #endif
+
+#ifdef __DJGPP__
+    _resolve_hook = ResolveYield;
+#endif
+
 #ifdef NSL_FORK
     /* for transfer of result between from child to parent: */
     static AlignedHOSTENT aligned_full_rehostent;
@@ -728,7 +740,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 	**	Pipe, child pid, status buffers, start time, select()
 	**	control variables.
 	*/
-	pid_t fpid, waitret;
+	int fpid, waitret;
 	int pfd[2], selret, readret;
 #ifdef HAVE_TYPE_UNIONWAIT
 	union wait waitstat;
@@ -1074,7 +1086,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 #endif /* WCOREDUMP */
 	    } else if (WIFSTOPPED(waitstat)) {
 		CTRACE((tfp, "LYGetHostByName: NSL_FORK child %d is stopped, status 0x%x!\n",
-			(int)waitret, WEXITSTATUS(waitstat)));
+			(int)waitret, WSTOPSIG(waitstat)));
 	    }
 	}
 	if (!got_rehostent) {
@@ -1368,7 +1380,7 @@ HTGetAddrInfo ARGS2(
     char *p;
     char *s;
     char *host, *port;
-    char pbuf[10];
+    char pbuf[80];
 
     s = strdup(str);
 
@@ -1383,7 +1395,7 @@ HTGetAddrInfo ARGS2(
     if (port) {
 	*port++ = '\0';
     } else {
-	snprintf(pbuf, sizeof(pbuf), "%d", defport);
+	sprintf(pbuf, "%d", defport);
 	port = pbuf;
     }
 
@@ -1449,9 +1461,9 @@ PRIVATE void get_host_details NOARGS
     **	Get rest from UCX$BIND_DOM logical.
     */
     if (strchr(hostname,'.') == NULL) {		  /* Not full address */
-	domain_name = getenv("UCX$BIND_DOMAIN");
+	domain_name = LYGetEnv("UCX$BIND_DOMAIN");
 	if (domain_name == NULL)
-	    domain_name = getenv("TCPIP$BIND_DOMAIN");
+	    domain_name = LYGetEnv("TCPIP$BIND_DOMAIN");
 	if (domain_name != NULL) {
 	    StrAllocCat(hostname, ".");
 	    StrAllocCat(hostname, domain_name);

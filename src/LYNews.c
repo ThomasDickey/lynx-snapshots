@@ -195,7 +195,7 @@ PUBLIC char *LYNewsPost ARGS2(
      */
     LYaddstr(gettext("\n\n Please provide your mail address for the From: header\n"));
     sprintf(user_input, "From: %.*s", (int)sizeof(user_input) - 8,
-	    (personal_mail_address != NULL) ? personal_mail_address : "");
+	    NonNull(personal_mail_address));
     if (LYgetstr(user_input, VISIBLE,
 		 sizeof(user_input), NORECALL) < 0 ||
 	term_message) {
@@ -257,10 +257,9 @@ PUBLIC char *LYNewsPost ARGS2(
      *  Add Organization: header.
      */
     StrAllocCopy(cp, "Organization: ");
-    if (((org = getenv("ORGANIZATION")) != NULL) && *org != '\0') {
+    if ((org = LYGetEnv("ORGANIZATION")) != NULL) {
 	StrAllocCat(cp, org);
-    } else if (((org = getenv("NEWS_ORGANIZATION")) != NULL) &&
-	       *org != '\0') {
+    } else if ((org = LYGetEnv("NEWS_ORGANIZATION")) != NULL) {
 	StrAllocCat(cp, org);
     }
 #ifdef UNIX

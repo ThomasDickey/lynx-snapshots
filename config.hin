@@ -84,7 +84,9 @@
 #undef HAVE_LC_MESSAGES		/* locale messages */
 #undef HAVE_LIBDBMALLOC		/* --with-dbmalloc */
 #undef HAVE_LIBDMALLOC		/* --with-dmalloc */
+#undef HAVE_LIBGETTEXT_H	/* defined if you want to use bundled gettext */
 #undef HAVE_LIBINTL_H		/* AM_GNU_GETTEXT, or cleanup from that */
+#undef HAVE_LIBUTF8_H		/* may be needed for libncursesw */
 #undef HAVE_LIMITS_H
 #undef HAVE_LOCALE_H
 #undef HAVE_LSTAT		/* CF_FUNC_LSTAT */

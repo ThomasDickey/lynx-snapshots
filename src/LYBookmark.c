@@ -413,12 +413,12 @@ Note: if you edit this file manually\n\
      */
     if (!first_time && nhist > 0 && bookmark_URL) {
 	for (i = 0; i < nhist; i++) {
-	    if (history[i].bookmark &&
-		!strcmp(history[i].address, bookmark_URL)) {
-		WWWDoc.address = history[i].address;
+	    if (HDOC(i).bookmark &&
+		!strcmp(HDOC(i).address, bookmark_URL)) {
+		WWWDoc.address = HDOC(i).address;
 		WWWDoc.post_data = NULL;
 		WWWDoc.post_content_type = NULL;
-		WWWDoc.bookmark = history[i].bookmark;
+		WWWDoc.bookmark = HDOC(i).bookmark;
 		WWWDoc.isHEAD = FALSE;
 		WWWDoc.safe = FALSE;
 		if (((tmpanchor = HTAnchor_parent(
@@ -605,10 +605,10 @@ PUBLIC void remove_bookmark_link ARGS2(
 #endif  /* UNIX */
 
     if (rename(newfile, filename_buffer) != -1) {
-#ifdef UNIX
+#ifdef MULTI_USER_UNIX
 	if (regular)
 	    chmod(filename_buffer, stat_buf.st_mode & 07777);
-#endif /* UNIX */
+#endif
 	HTSYS_purge(filename_buffer);
 	return;
     } else {
@@ -639,10 +639,10 @@ PUBLIC void remove_bookmark_link ARGS2(
 	    HTAddParam(&buffer, MV_FMT, 3, filename_buffer);
 	    HTEndParam(&buffer, MV_FMT, 3);
 	    if (LYSystem(buffer) == 0) {
-#ifdef UNIX
+#ifdef MULTI_USER_UNIX
 		if (regular)
 		    chmod(filename_buffer, stat_buf.st_mode & 07777);
-#endif /* UNIX */
+#endif
 		FREE(buffer);
 		return;
 	    } else {

@@ -1,7 +1,7 @@
 # Slovenian translation of Lynx WWW browser.
 # Copyright (C) 1999 Free Software Foundation, Inc.
 # Roman Maurer <roman.maurer@hermes.si>, 1999.
-# @Id: sl.po 1.6 Tue, 17 Jul 2001 14:04:37 -0700 dickey @
+# @Id: sl.po 1.7 Sun, 06 Oct 2002 17:43:28 -0700 dickey @
 # @Source: po/sl.po @
 #
 msgid ""
@@ -5101,7 +5101,7 @@ msgid ""
 "fr, may be a comma-separated list in decreasing preference)\n"
 "which Lynx will indicate you prefer in requests to http servers.\n"
 "If a file in that language is available, the server will send it.\n"
-"Otherwise, the server will send the file in it's default language.\n"
+"Otherwise, the server will send the file in its default language.\n"
 msgstr ""
 
 #: src/LYrcFile.c:377

@@ -17,7 +17,7 @@
 #include <HTParse.h>
 #endif
 
-#if _WIN_CC
+#ifdef _WIN_CC
 extern int exec_command(char * cmd, int wait_flag); /* xsystem.c */
 #endif
 
@@ -322,7 +322,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			    stop_curses();
 #endif
 			}
-#if _WIN_CC
+#ifdef _WIN_CC
 			exec_command(me->end_command, FALSE);
 #else
 			LYSystem(me->end_command);
@@ -378,7 +378,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		stop_curses();
 #endif
 	    }
-#if _WIN_CC
+#ifdef _WIN_CC
 	    exec_command(me->end_command, FALSE);
 #else
 	    LYSystem(me->end_command);

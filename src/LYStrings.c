@@ -34,6 +34,10 @@
 #include <LYMainLoop.h>
 #endif
 
+#ifdef EXP_CMD_LOGGING
+#include <LYReadCFG.h>
+#endif
+
 #include <LYShowInfo.h>
 #include <LYLeaks.h>
 
@@ -242,7 +246,7 @@ PUBLIC int fancy_mouse ARGS3(
 	cmd = LYK_QUIT;
     }
 #endif /* NCURSES */
-#endif	/* _WINDOWS */
+#endif /* PDCURSES */
 
 /************************************************************************/
 #endif  /* USE_MOUSE */
@@ -532,11 +536,22 @@ PRIVATE int set_clicked_link ARGS4(
 	    } else if (mouse_err >= 0)
 		c = LAC_TO_LKC0(LYK_CHANGE_LINK);
 	}
+	else {
+	   if (2*y > LYlines){ 		/* Bottom Half of the screen */
+	      if (4*y < 3*LYlines){
+		c = LAC_TO_LKC0(LYK_DOWN_TWO);	/* Third quarter */
+	      } else
+		c = LAC_TO_LKC0(LYK_DOWN_HALF);	/* Fourth quarter */
+	   } else {			/* Upper Half of the screen */
+	      if (4*y < LYlines){
+		c = LAC_TO_LKC0(LYK_UP_HALF);	/* First quarter */
+	      } else
+		c = LAC_TO_LKC0(LYK_UP_TWO);	/* Second quarter */
+	   }
+	}
     }
     return c;
 }
-
-
 
 /*
  *  LYstrncpy() terminates strings with a null byte.
@@ -744,7 +759,7 @@ PRIVATE int myGetChar NOARGS
 #endif
 
 #if !defined(GetChar)
-#if HAVE_KEYPAD
+#ifdef HAVE_KEYPAD
 #define GetChar() getch()
 #else
 #ifndef USE_GETCHAR
@@ -797,6 +812,9 @@ PRIVATE int sl_read_mouse_event ARGS1(
      {
 	if (button == 0)  /* left */
 	  return set_clicked_link (mouse_x, mouse_y, FOR_PANEL, 1);
+
+        if (button == 1)  /* middle */
+	  return LYReverseKeymap (LYK_VIEW_BOOKMARK);
 
 	if (button == 2)   /* right */
 	  {
@@ -1835,7 +1853,7 @@ re_read:
     if (done_esc) {
 	/* don't do keypad() switches below, we already got it - kw */
     } else {
-#if HAVE_KEYPAD
+#ifdef HAVE_KEYPAD
 	/*
 	 *  Convert keypad() mode keys into Lynx defined keys.
 	 */
@@ -2444,9 +2462,9 @@ PUBLIC void LYUpperCase ARGS1(
 }
 
 /*
- * Remove newlines from a string.
+ * Remove newlines from a string, returning true if we removed any.
  */
-PUBLIC void LYRemoveNewlines ARGS1(
+PUBLIC BOOLEAN LYRemoveNewlines ARGS1(
 	char *,		buffer)
 {
     if (buffer != 0) {
@@ -2455,7 +2473,9 @@ PUBLIC void LYRemoveNewlines ARGS1(
 	    if (buffer[i] != '\n' && buffer[i] != '\r')
 		buffer[j++] = buffer[i];
 	buffer[j] = 0;
+	return (i != j);
     }
+    return FALSE;
 }
 
 /*
@@ -2587,8 +2607,8 @@ PUBLIC BOOLEAN LYTrimStartfile ARGS1(
 	char *,		buffer)
 {
     LYTrimHead(buffer);
-    if (!strncasecomp(buffer, "lynxexec:", 9) ||
-	!strncasecomp(buffer, "lynxprog:", 9)) {
+    if (isLYNXEXEC(buffer) ||
+	isLYNXPROG(buffer)) {
 	/*
 	 *  The original implementations of these schemes expected
 	 *  white space without hex escaping, and did not check
@@ -2601,6 +2621,30 @@ PUBLIC BOOLEAN LYTrimStartfile ARGS1(
 	return TRUE;
     }
     return FALSE;
+}
+
+/*
+ * Escape unsafe characters in startfile, except for lynx internal URLs.
+ */
+PUBLIC void LYEscapeStartfile ARGS1(
+	char **,		buffer)
+{
+    if (!LYTrimStartfile(*buffer)) {
+	char *escaped = HTEscapeUnsafe(*buffer);
+	StrAllocCopy(*buffer, escaped);
+	FREE(escaped);
+    }
+}
+
+/*
+ * Trim all blanks from startfile, except for lynx internal URLs.
+ */
+PUBLIC void LYTrimAllStartfile ARGS1(
+	char *,		buffer)
+{
+    if (!LYTrimStartfile(buffer)) {
+	LYRemoveBlanks(buffer);
+    }
 }
 
 /*
@@ -5680,19 +5724,45 @@ PUBLIC int LYReadCmdKey ARGS1(
 	char *buffer = 0;
 	char *src;
 	char *tmp;
+	unsigned len;
 
-	while (LYSafeGets(&buffer, cmd_script) != 0) {
+	while ((ch < 0) && LYSafeGets(&buffer, cmd_script) != 0) {
 	    LYTrimTrailing(buffer);
 	    src = LYSkipBlanks(buffer);
 	    tmp = LYSkipNonBlanks(src);
-	    if (tmp - src != 3
-	     || strncasecomp(src, "key", 3))
-		continue;
-	    src = LYSkipBlanks(tmp);
-	    if ((ch = LYStringToKeycode(src)) >= 0) {
-		LYrefresh();
+	    switch (len = (tmp - src)) {
+	    case 4:
+		if (!strncasecomp(src, "exit", 4))
+		    exit(0);
+		break;
+	    case 3:
+		if (!strncasecomp(src, "key", 3)) {
+		    ch = LYStringToKeycode(LYSkipBlanks(tmp));
+		} else if (!strncasecomp(src, "set", 3)) {
+		    src = LYSkipBlanks(tmp);
+		    tmp = src;
+		    while (*tmp != '\0') {
+			if (isspace(UCH(*tmp)) || *tmp == '=')
+			    break;
+			++tmp;
+		    }
+		    if (*tmp != '\0') {
+		    	*tmp++ = '\0';
+			tmp = LYSkipBlanks(tmp);
+		    }
+		    CTRACE((tfp, "LYSetConfigValue(%s, %s)\n", src, tmp));
+		    LYSetConfigValue(src, tmp);
+		}
 		break;
 	    }
+	}
+	if (feof(cmd_script)) {
+	    fclose(cmd_script);
+	    cmd_script = 0;    
+	}
+	if (ch >= 0) {
+	    LYSleepReplay();
+	    LYrefresh();
 	}
 	FREE(buffer);
     } else {

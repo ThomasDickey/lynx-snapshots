@@ -175,6 +175,18 @@ typedef unsigned short mode_t;
 #  define USE_BLINK
 #endif
 
+#if defined(DOSPATH) || defined(__EMX__)
+#  define USE_DOS_DRIVES	/* we allow things like "c:" in paths */
+#endif
+
+#if defined(UNIX)
+#  if (defined(__BEOS__) || defined(__CYGWIN__) || defined(__EMX__))
+#    define SINGLE_USER_UNIX	/* well, at least they try */
+#  else
+#    define MULTI_USER_UNIX
+#  endif
+#endif
+
 /*
 
   ERROR TYPE
@@ -311,6 +323,7 @@ Macros for declarations
 #define NULL ((void *)0)
 #endif
 
+#define NonNull(s) (((s) != 0) ? s : "")
 #define NONNULL(s) (((s) != 0) ? s : "(null)")
 
 /* array/table size */
@@ -431,7 +444,7 @@ are generally not the response status from any specific protocol.
  * their parameters).
  */
 #ifndef GCC_PRINTFLIKE
-#if defined(GCC_PRINTF) && !defined(printf)
+#if defined(GCC_PRINTF) && !defined(printf) && !defined(HAVE_LIBUTF8_H)
 #define GCC_PRINTFLIKE(fmt,var) __attribute__((format(printf,fmt,var)))
 #else
 #define GCC_PRINTFLIKE(fmt,var) /*nothing*/
@@ -590,7 +603,7 @@ extern char HTGetSSLCharacter PARAMS((void * handle));
 
 #endif /* USE_SSL */
 
-#if HAVE_LIBDMALLOC
+#ifdef HAVE_LIBDMALLOC
 #include <dmalloc.h>    /* Gray Watson's library */
 #define show_alloc() dmalloc_log_unfreed()
 #else
@@ -598,7 +611,7 @@ extern char HTGetSSLCharacter PARAMS((void * handle));
 #define HAVE_LIBDMALLOC 0
 #endif
 
-#if HAVE_LIBDBMALLOC
+#ifdef HAVE_LIBDBMALLOC
 #include <dbmalloc.h>   /* Conor Cahill's library */
 #define show_alloc() malloc_dump(fileno(stderr))
 #else

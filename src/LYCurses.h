@@ -289,6 +289,12 @@ extern WINDOW *LYstartPopup PARAMS((int top_y, int left_x, int height, int width
 #define HAVE_NAPMS 1	/* can use millisecond-delays */
 #endif
 
+#ifdef HAVE_NAPMS
+#define SECS2Secs(n) (1000 * (n))
+#else
+#define SECS2Secs(n) (n)
+#endif
+
 /* Both slang and curses: */
 #ifndef TRUE
 #define TRUE  1
@@ -381,7 +387,7 @@ extern void curses_w_style PARAMS((WINDOW* win, int style, int	dir));
 #  define LynxWChangeStyle(win,style,dir)	(void)1
 #endif /* USE_COLOR_STYLE */
 
-#if USE_COLOR_TABLE
+#ifdef USE_COLOR_TABLE
 extern void LYaddAttr PARAMS((int a));
 extern void LYsubAttr PARAMS((int a));
 extern void lynx_setup_colors NOPARAMS;
@@ -402,12 +408,21 @@ extern unsigned int Lynx_Color_Flags;
 #define SL_LYNX_USE_COLOR	1
 #define SL_LYNX_OVERRIDE_COLOR	2
 
+#ifdef UNDERLINE_LINKS
+#define start_bold()      	LYaddAttr(4)
+#define start_reverse()   	LYaddAttr(2)
+#define start_underline() 	LYaddAttr(1)
+#define stop_bold()       	LYsubAttr(4)
+#define stop_reverse()    	LYsubAttr(2)
+#define stop_underline()  	LYsubAttr(1)
+#else
 #define start_bold()      	LYaddAttr(1)
 #define start_reverse()   	LYaddAttr(2)
 #define start_underline() 	LYaddAttr(4)
 #define stop_bold()       	LYsubAttr(1)
 #define stop_reverse()    	LYsubAttr(2)
 #define stop_underline()  	LYsubAttr(4)
+#endif
 
 #ifdef FANCY_CURSES
 #undef FANCY_CURSES
@@ -504,7 +519,7 @@ extern int string_to_attr PARAMS((char *name));
  *  our own functions to add or subtract the
  *  A_foo attributes. - FM
  */
-#if USE_COLOR_TABLE
+#ifdef USE_COLOR_TABLE
 extern void LYaddWAttr PARAMS((WINDOW *win, int a));
 extern void LYsubWAttr PARAMS((WINDOW *win, int a));
 extern void LYaddWAttr PARAMS((WINDOW *win, int a));
@@ -526,13 +541,8 @@ extern int  lynx_chg_color PARAMS((int, int, int));
 #ifdef UNDERLINE_LINKS
 #define start_bold()		LYaddAttr(A_UNDERLINE)
 #define stop_bold()		LYsubAttr(A_UNDERLINE)
-#ifdef __CYGWIN__	/* 1999/02/25 (Thu) 01:09:45 */
-#define start_underline()	/* LYaddAttr(A_BOLD) */
-#define stop_underline()	/* LYsubAttr(A_BOLD) */
-#else
 #define start_underline()	LYaddAttr(A_BOLD)
 #define stop_underline()	LYsubAttr(A_BOLD)
-#endif /* __CYGWIN__ */
 #else /* not UNDERLINE_LINKS: */
 #define start_bold()		LYaddAttr(A_BOLD)
 #define stop_bold()		LYsubAttr(A_BOLD)
@@ -621,7 +631,7 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
  * control it.
  */
 #ifdef USE_DEFAULT_COLORS
-#if USE_SLANG || (defined(HAVE_ASSUME_DEFAULT_COLORS) && !defined(USE_COLOR_STYLE))
+#if defined(USE_SLANG) || defined(HAVE_ASSUME_DEFAULT_COLORS)
 #define EXP_ASSUMED_COLOR 1
 #endif
 #endif

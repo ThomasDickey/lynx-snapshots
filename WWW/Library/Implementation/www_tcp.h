@@ -192,10 +192,6 @@ extern int ws_netread(int fd, char *buf, int len);
 #include <errno.h>
 #include <direct.h>
 
-#ifndef pid_t
-typedef int pid_t;
-#endif /* !pid_t */
-
 #ifdef USE_WINSOCK2_H
 #include <winsock2.h>		/* normally included in windows.h */
 
@@ -635,10 +631,6 @@ Regular BSD unix versions
 typedef unsigned short mode_t;
 #endif /* !mode_t */
 
-#ifndef pid_t
-typedef int pid_t;
-#endif /* !pid_t */
-
 #endif /* NeXT || sony_news */
 
 #define INCLUDES_DONE
@@ -686,6 +678,10 @@ typedef int pid_t;
 
 #ifdef HAVE_LIBINTL_H
 #include <libintl.h>
+#endif
+
+#ifdef HAVE_LIBGETTEXT_H
+#include <libgettext.h>
 #endif
 
 #define N_(s) (s)

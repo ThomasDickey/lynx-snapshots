@@ -733,7 +733,7 @@ PRIVATE void HTMLSRC_apply_markup ARGS4(
 #  define START TRUE
 #  define STOP FALSE
 
-#if defined(__STDC__) || _WIN_CC
+#if defined(__STDC__) || defined(_WIN_CC)
 #  define PSRCSTART(x)	HTMLSRC_apply_markup(me,HTL_##x,START,tag_charset)
 #  define PSRCSTOP(x)  HTMLSRC_apply_markup(me,HTL_##x,STOP,tag_charset)
 #else
@@ -1230,7 +1230,7 @@ PRIVATE int HTML_start_element ARGS6(
 	    StrAllocCopy(base, value[HTML_BASE_HREF]);
 	    if (!(url_type = LYLegitimizeHREF(me, &base, TRUE, TRUE))) {
 		CTRACE((tfp, "HTML: BASE '%s' is not an absolute URL.\n",
-			    (base ? base : "")));
+			    NonNull(base)));
 		if (me->inBadBASE == FALSE)
 		    HTAlert(BASE_NOT_ABSOLUTE);
 		me->inBadBASE = TRUE;
@@ -1285,9 +1285,9 @@ PRIVATE int HTML_start_element ARGS6(
 		    StrAllocCat(me->base_href, "localhost");
 		}
 	    } else {
-		if (!strcmp(me->base_href, "file:")) {
+		if (isFILE_URL(me->base_href)) {
 		    StrAllocCat(me->base_href, "//localhost");
-		} else if (strcmp(me->base_href, "news:")) {
+		} else if (strcmp(me->base_href, STR_NEWS_URL)) {
 		    FREE(temp);
 		    StrAllocCat(me->base_href, (temp = HTParse(related, "",
 					    PARSE_HOST+PARSE_PUNCTUATION)));
@@ -1303,11 +1303,11 @@ PRIVATE int HTML_start_element ARGS6(
 				PARSE_PATH+PARSE_PUNCTUATION)) &&
 		*temp != '\0') {
 		StrAllocCat(me->base_href, temp);
-	    } else if (!strcmp(me->base_href, "news:")) {
+	    } else if (!strcmp(me->base_href, STR_NEWS_URL)) {
 		StrAllocCat(me->base_href, "*");
-	    } else if (!strncmp(me->base_href, "news:", 5) ||
-		       !strncmp(me->base_href, "nntp:", 5) ||
-		       !strncmp(me->base_href, "snews:", 6)) {
+	    } else if (isNEWS_URL(me->base_href) ||
+		       isNNTP_URL(me->base_href) ||
+		       isSNEWS_URL(me->base_href)) {
 		StrAllocCat(me->base_href, "/*");
 	    } else {
 		StrAllocCat(me->base_href, "/");
@@ -2390,9 +2390,7 @@ PRIVATE int HTML_start_element ARGS6(
 	break; /* ignore */
 
     case HTML_SUP:
-	if (isxdigit(UCH(HText_getLastChar(me->text)))) {
-	    HText_appendCharacter(me->text, '^');
-	}
+	HText_appendCharacter(me->text, '^');
 	CHECK_ID(HTML_GEN_ID);
 	break;
 
@@ -3058,8 +3056,8 @@ PRIVATE int HTML_start_element ARGS6(
 	     *	Deal with our ftp gateway kludge. - FM
 	     */
 	    if (!url_type && !strncmp(href, "/foo/..", 7) &&
-		(!strncmp(me->node_anchor->address, "ftp:", 4) ||
-		 !strncmp(me->node_anchor->address, "file:", 5))) {
+		(isFTP_URL(me->node_anchor->address) ||
+		 isFILE_URL(me->node_anchor->address))) {
 		for (i = 0; (href[i] = href[i+7]) != 0; i++)
 		    ;
 	    }
@@ -3100,7 +3098,7 @@ PRIVATE int HTML_start_element ARGS6(
 		!strcasecomp(value[HTML_A_TYPE], HTAtom_name(LINK_INTERNAL)) &&
 		!LYIsUIPage3(me->node_anchor->address, UIP_LIST_PAGE, 0) &&
 		!LYIsUIPage3(me->node_anchor->address, UIP_ADDRLIST_PAGE, 0) &&
-		0 != strncmp(me->node_anchor->address, "LYNXIMGMAP:", 11)) {
+		!isLYNXIMGMAP(me->node_anchor->address)) {
 		/* Some kind of spoof?
 		** Found TYPE="internal link" but not in a valid context
 		** where we have written it. - kw
@@ -3242,7 +3240,7 @@ PRIVATE int HTML_start_element ARGS6(
 	     *	If map_href ended up zero-length or otherwise doesn't
 	     *	have a hash, it can't be valid, so ignore it. - FM
 	     */
-	    if (strchr(map_href, '#') == NULL) {
+	    if (findPoundSelector(map_href) == NULL) {
 		FREE(map_href);
 	    }
 	}
@@ -3303,7 +3301,7 @@ PRIVATE int HTML_start_element ARGS6(
 	    /*
 	     *	Prepend our client-side MAP access field. - FM
 	     */
-	    StrAllocCopy(temp, "LYNXIMGMAP:");
+	    StrAllocCopy(temp, STR_LYNXIMGMAP);
 	    StrAllocCat(temp, map_href);
 	    StrAllocCopy(map_href, temp);
 	    FREE(temp);

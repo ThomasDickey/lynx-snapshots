@@ -10,13 +10,13 @@
 /* change_form_link calls change_form_link_ex with all its args and FALSE as
   last arg */
 extern int change_form_link PARAMS((int cur,
-				    document *newdoc,
+				    DocInfo *newdoc,
 				    BOOLEAN *refresh_screen,
 				    BOOLEAN use_last_tfpos,
 				    BOOLEAN immediate_submit));
 
 extern int change_form_link_ex PARAMS((int cur,
-				    document *newdoc,
+				    DocInfo *newdoc,
 				    BOOLEAN *refresh_screen,
 				    BOOLEAN use_last_tfpos,
 				    BOOLEAN immediate_submit,

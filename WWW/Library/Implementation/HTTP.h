@@ -24,6 +24,10 @@ extern char * redirecting_url;
 extern BOOL permanent_redirection;
 extern BOOL redirect_post_content;
 
+#ifdef USE_SSL
+extern SSL * SSL_handle;
+#endif
+
 #endif /* HTTP_H */
 
 /*

@@ -267,16 +267,10 @@ PUBLIC BOOL override_proxy ARGS1(
     }
     Host = (((at = strchr(host, '@')) != NULL) ? (at+1) : host);
 
-#ifdef VMS
-#define CompareHostname(a,b) strcasecomp(a, b)
-#else
-#define CompareHostname(a,b) strcmp(a, b)
-#endif /* VMS */
-
     if ((acc_method = HTParse(addr, "", PARSE_ACCESS))) {
 	if (!strcmp("file", acc_method) &&
-	    (!strcmp(Host, "localhost") ||
-	     !CompareHostname(Host, HTHostName()))) {
+	    (LYSameHostname(Host, "localhost") ||
+	     LYSameHostname(Host, HTHostName()))) {
 	    FREE(host);
 	    FREE(acc_method);
 	    return YES;
@@ -433,7 +427,7 @@ PRIVATE int get_physical ARGS2(
 #endif /* NO_RULES */
 
     acc_method =  HTParse(HTAnchor_physical(anchor),
-		"file:", PARSE_ACCESS);
+		STR_FILE_URL, PARSE_ACCESS);
 
     /*
     **	Check whether gateway access has been set up for this.
@@ -461,9 +455,9 @@ PRIVATE int get_physical ARGS2(
 		    StrAllocCat(Server_addr, ":119/");
 		}
 		FREE(host);
-	    } else if (getenv("NNTPSERVER") != NULL) {
+	    } else if (LYGetEnv("NNTPSERVER") != NULL) {
 		StrAllocCopy(Server_addr, "news://");
-		StrAllocCat(Server_addr, (char *)getenv("NNTPSERVER"));
+		StrAllocCat(Server_addr, LYGetEnv("NNTPSERVER"));
 		StrAllocCat(Server_addr, ":119/");
 	    }
 	} else if (!strcasecomp(acc_method, "wais")) {
@@ -495,7 +489,7 @@ PRIVATE int get_physical ARGS2(
 	**  Search for gateways.
 	*/
 	HTSprintf0(&gateway_parameter, "WWW_%s_GATEWAY", acc_method);
-	gateway = getenv(gateway_parameter); /* coerce for decstation */
+	gateway = LYGetEnv(gateway_parameter); /* coerce for decstation */
 
 	/*
 	**  Search for proxy servers.
@@ -507,7 +501,7 @@ PRIVATE int get_physical ARGS2(
 	    strcpy(gateway_parameter, "ftp_proxy");
 	else
 	    sprintf(gateway_parameter, "%s_proxy", acc_method);
-	proxy = getenv(gateway_parameter);
+	proxy = LYGetEnv(gateway_parameter);
 	FREE(gateway_parameter);
 
 	if (gateway)
@@ -544,8 +538,8 @@ PRIVATE int get_physical ARGS2(
 	    FREE(gatewayed);
 	    FREE(acc_method);
 
-	    acc_method =  HTParse(HTAnchor_physical(anchor),
-		"http:", PARSE_ACCESS);
+	    acc_method = HTParse(HTAnchor_physical(anchor),
+				 STR_HTTP_URL, PARSE_ACCESS);
 
 	} else if (gateway) {
 	    char * path = HTParse(addr, "",
@@ -557,8 +551,8 @@ PRIVATE int get_physical ARGS2(
 	    FREE(gatewayed);
 	    FREE(acc_method);
 
-	    acc_method =  HTParse(HTAnchor_physical(anchor),
-		"http:", PARSE_ACCESS);
+	    acc_method = HTParse(HTAnchor_physical(anchor),
+				 STR_HTTP_URL, PARSE_ACCESS);
 	}
     }
     FREE(Server_addr);
@@ -781,7 +775,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
     if (LYinternal_flag && !LYforce_no_cache &&
 	anchor->post_data && !anchor->safe &&
 	(text = (HText *)HTAnchor_document(anchor)) == NULL &&
-	strncmp(full_address, "LYNXIMGMAP:", 11) &&
+	!isLYNXIMGMAP(full_address) &&
 	HTConfirm(gettext("Document with POST content not found in cache.  Resubmit?"))
 	!= TRUE) {
 	return NO;
@@ -896,7 +890,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 #else
 	if (LYoverride_no_cache ||
 	    ((LYinternal_flag || !HText_hasNoCacheSet(text)) &&
-	     strncmp(full_address, "LYNXIMGMAP:", 11)))
+	     !isLYNXIMGMAP(full_address)))
 #endif /* TRACK_INTERNAL_LINKS */
 	{
 	    CTRACE((tfp, "HTAccess: Document already in memory.\n"));
@@ -1349,7 +1343,7 @@ PUBLIC BOOL HTSearchAbsolute ARGS2(
 PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
 {
     char * my_home_document = NULL;
-    char * home = (char *)getenv(LOGICAL_DEFAULT);
+    char * home = LYGetEnv(LOGICAL_DEFAULT);
     char * ref;
     HTParentAnchor * anchor;
 
@@ -1379,8 +1373,8 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
 #ifdef UNIX
     if (my_home_document == NULL) {
 	FILE * fp = NULL;
-	CONST char * home =  (CONST char*)getenv("HOME");
-	if (home != null) {
+	char * home = LYGetEnv("HOME");
+	if (home != 0) {
 	    HTSprintf0(&my_home_document, "%s/%s", home, PERSONAL_DEFAULT);
 	    fp = fopen(my_home_document, "r");
 	}
@@ -1401,7 +1395,7 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
     ref = HTParse((my_home_document ?
 		   my_home_document : (HTClientHost ?
 				     REMOTE_ADDRESS : LAST_RESORT)),
-		  "file:",
+		  STR_FILE_URL,
 		  PARSE_ACCESS|PARSE_HOST|PARSE_PATH|PARSE_PUNCTUATION);
     if (my_home_document) {
 	CTRACE((tfp, "HTAccess: Using custom home page %s i.e., address %s\n",

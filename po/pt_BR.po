@@ -2565,7 +2565,7 @@ msgstr "Repetindo com requisição HTTPO."
 #: LYMessages.c:805
 #, c-format
 msgid "Transferred %d bytes"
-msgstr "Transferidos %s bytes."
+msgstr "Transferidos %d bytes."
 
 #: LYMessages.c:806
 msgid "Data transfer complete"
@@ -2939,7 +2939,7 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Existem cerca de %s atualmente disponíveis em %s, Como segue:\n"
+"Existem cerca de %d atualmente disponíveis em %s, Como segue:\n"
 "\n"
 
 #: WWW/Library/Implementation/HTNews.c:1865
@@ -5230,7 +5230,7 @@ msgid ""
 "fr, may be a comma-separated list in decreasing preference)\n"
 "which Lynx will indicate you prefer in requests to http servers.\n"
 "If a file in that language is available, the server will send it.\n"
-"Otherwise, the server will send the file in it's default language.\n"
+"Otherwise, the server will send the file in its default language.\n"
 msgstr ""
 "preferred_language especifica a lingua que será informado o formato\n"
 "MIME(ex. en,fr, devem ser separados por vírgulas em ordem decrescente de\n"

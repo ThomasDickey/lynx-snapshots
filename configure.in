@@ -3,7 +3,7 @@ dnl written jan/1997
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 
-AC_PREREQ(2.12.971222)
+AC_PREREQ(2.13.20020210)
 AC_INIT(userdefs.h)
 
 # autoconf 2.5x defaults to no cache file; we need the cache file's information
@@ -436,7 +436,7 @@ esac
 dnl Get the actual value for $libdir, which we will compile into Lynx as part of
 dnl the config pathnames.
 eval cf_libdir=$libdir
-cf_libdir=`echo $cf_libdir | sed -e s@'^NONE/'@$prefix/@ -e s@'^NONE/'@$ac_default_prefix/@`
+cf_libdir=`echo $cf_libdir | sed -e s%'^NONE/'%$prefix/% -e s%'^NONE/'%$ac_default_prefix/%`
 
 AC_MSG_CHECKING(for location of config-file)
 LYNX_CFG_FILE=$cf_libdir/lynx.cfg
@@ -584,39 +584,6 @@ CF_SYS_ERRLIST
 CF_UTMP
 CF_CHECK_EXTERN_DATA(h_errno,int)
 
-### These tests must be run after establishing the curses library.
-if test $cf_cv_screen != slang ; then
-	if test $cf_cv_screen != pdcurses ; then
-		AC_CHECK_HEADERS($cf_cv_screen/term.h term.h)
-	fi
-	CF_ALT_CHAR_SET
-	CF_FANCY_CURSES
-	CF_NCURSES_BROKEN
-	CF_COLOR_CURSES
-	CF_SIZECHANGE
-	CF_TTYTYPE
-	CF_WIDEC_CURSES
-	CF_CURSES_FUNCS( \
-		assume_default_colors \
-		cbreak \
-		define_key \
-		delscreen \
-		getattrs \
-		getbegx \
-		getbegy \
-		keypad \
-		napms \
-		newpad \
-		newterm \
-		pnoutrefresh \
-		wresize resizeterm \
-		touchline \
-		touchwin \
-		use_default_colors \
-		wborder \
-		wredrawln )
-fi
-
 dnl --------------------------------------------------------------------------
 dnl Experimental options that don't need to test system features
 dnl --------------------------------------------------------------------------
@@ -686,15 +653,6 @@ CF_ARG_ENABLE(color-style,
 	[use_color_style=$enableval],
 	[use_color_style=no])
 
-if test $use_color_style != no ; then
-	if test .$cf_cv_color_curses != .yes ; then
-		AC_ERROR(Configuration does not support color-styles)
-	fi
-	if test $cf_cv_screen = slang ; then
-		AC_ERROR(Configuration does not support color-styles)
-	fi
-fi
-
 case $use_color_style in
 no)
 	AC_MSG_RESULT(no)
@@ -714,8 +672,11 @@ esac
 AC_SUBST(INSTALL_LSS)
 
 use_dft_colors=no
-test ".$cf_cv_screen" = ".slang"                && use_dft_colors=maybe
-test ".$cf_cv_func_use_default_colors" = ".yes" && use_dft_colors=maybe
+case $cf_cv_screen in
+slang|ncurses*)
+	use_dft_colors=maybe
+	;;
+esac
 
 if test "$use_dft_colors" != no ; then
 AC_MSG_CHECKING(if you want to use default-colors)
@@ -816,14 +777,6 @@ CF_ARG_ENABLE(scrollbar,
 	[use_scrollbar=$enableval],
 	[use_scrollbar=no])
 AC_MSG_RESULT($use_scrollbar)
-
-if test $use_scrollbar != no ; then
-	if test .$cf_cv_fancy_curses != .yes ; then
-		AC_MSG_WARN(Configuration does not support ACS_xxx definitions)
-	else
-		AC_DEFINE(USE_SCROLLBAR)
-	fi
-fi
 
 AC_MSG_CHECKING(if source caching should be used)
 CF_ARG_ENABLE(source-cache,
@@ -1155,6 +1108,54 @@ else
 	CF_TERMIO_AND_CURSES(LYCurses.h)
 fi
 
+### These tests must be run after establishing the curses library.
+if test $cf_cv_screen != slang ; then
+	AC_CHECK_HEADERS($cf_cv_screen/term.h term.h)
+	CF_ALT_CHAR_SET
+	CF_FANCY_CURSES
+	CF_NCURSES_BROKEN
+	CF_COLOR_CURSES
+	CF_SIZECHANGE
+	CF_TTYTYPE
+	CF_WIDEC_CURSES
+	CF_CURSES_FUNCS( \
+		assume_default_colors \
+		cbreak \
+		define_key \
+		delscreen \
+		getattrs \
+		getbegx \
+		getbegy \
+		keypad \
+		napms \
+		newpad \
+		newterm \
+		pnoutrefresh \
+		wresize resizeterm \
+		touchline \
+		touchwin \
+		use_default_colors \
+		wborder \
+		wredrawln )
+fi
+
+if test $use_color_style != no ; then
+	if test .$cf_cv_color_curses != .yes ; then
+		AC_ERROR(Configuration does not support color-styles)
+	fi
+	if test $cf_cv_screen = slang ; then
+		AC_ERROR(Configuration does not support color-styles)
+	fi
+fi
+
+if test $use_scrollbar != no ; then
+	if test .$cf_cv_fancy_curses != .yes ; then
+		AC_MSG_WARN(Configuration does not support ACS_xxx definitions)
+	else
+		AC_DEFINE(USE_SCROLLBAR)
+	fi
+fi
+
 ### Finally, build config.h and the makefiles
 CFLAGS="$CFLAGS $EXTRA_CFLAGS"
 srcdir="$srcdir"
@@ -1182,7 +1183,7 @@ AC_OUTPUT(
 	if test "$use_our_messages" = yes ; then
 		echo creating po/makefile
 		rm -f	po/temp$$
-		sed	-e 's@^.*LYMessages.c@	../LYMessages.c@' \
+		sed	-e 's%^.*LYMessages.c%	../LYMessages.c%' \
 			-e '$s/\\//' po/POTFILES >po/temp$$
 		sed	-e "/POTFILES =/r po/temp$$" \
 			po/makefile.in > po/makefile

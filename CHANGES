@@ -1,6 +1,164 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2002-10-06 (2.8.5dev.9)
+* improve ETA data shown in experimental read-progress (from Debian #117476)
+* modify -dump, -source and related options which set dump mode to also set
+  -nopause (report by Benjamin Pflugmann <benjamin-mutt@pflugmann.de>) -TD
+* correct indexing in LYStyle.c our_pairs[] array, which did not allow for use
+  of default colors -TD
+* make ASSUMED_COLORS in lynx.cfg apply to normal curses implementations which
+  do not implement assume_default_colors() (prompted by discussion with
+  Bela Lubkin) -TD
+* make permanent an ifdef from HS which provides for truncating a too-long
+  title with an ellipsis -HN
+* gettext'ify a few overlooked strings in LYOptions.c -HN
+* modify LYGetHostByName() for MSDOS/djgpp/Watt-32 to enable terminating it by
+  pressing 'z' (patch by Gisle Vanem)
+* update configure script macros for NLS to gettext 0.10.40 -TD
+* add PRCS version/date to lynx.cfg -TD
+* setup ifdef's for Unix-specific permissions checks to exclude single-user
+  systems such as OS/2 EMX, Cygwin and BeOS, which otherwise act like Unix
+  since we can run the configure script on those platforms -TD
+* re-order some tests in the configure script to allow pdcurses' X11 port to
+  be recognized as supporting color and line-drawing characters -TD
+* work around a Cygwin bug which causes subprocesses of a full-screen program
+  to dump core (perhaps reported by Frederic L W Meunier, but observed in
+  running lynx in a bash shell spawned from my directory editor) -TD
+* fix an inequality in HTDirTitles() which made the "Up to" link omitted for
+  the first level of an ftp listing, making it awkward to visit the parent
+  directory if one first visited a subdirectory -TD
+* change HTURLPath_toFile() to keep local URLs distinct from remote ones, so
+  win32 version will not display misleading drive letter on ftp listings -TD
+* rewrote Home_Dir(), adding checks for "My Documents" on Windows 2000, and
+  ensuring that the resulting directory actually exists -TD
+* change ifdef's in LYwaddnstr() to use waddstr() consistently, since
+  wide-character curses implementation treat the string in the given locale
+  anyway, just like the waddnwstr() call -TD
+* reduce clutter with new macro LYIsDosDrive() -TD
+* add ifdef's for OS/2 EMX to existing DOSPATH code which checks for drive
+  letter (Michel Such)
+* modify definitions of IsOurFile() and OpenHiddenFile() to allow trace file
+  to be written when one already exists -TD
+* use new macros LYSameFilename(), LYSameHostname(), LYIsNullDevice() to hide
+  platform-specific filename comparisons -TD
+* change sed delimiter in configure script to use '%' consistently, to avoid
+  using '@', which may appear in AFS pathnames (report by Martin Mokrejs) -TD
+* narrowed accommodation for paths with embedded blanks in LYLegitimizeHREF()
+  to exclude those containing newlines or tabs (report by Leslie Fairall for
+  http://www.realtor.com) -TD
+* modified VMS build scripts to allow linking with OpenSSL, tested with
+  OpenSSL-0.9.6g using UCX network libraries.  It is reported (by
+  <grant@rigel.cc.wmich.edu>) that one can modify the scripts to also build
+  with Multinet's UCX emulation, but the machine I used for testing has only
+  UCX (comp.os.vms discussion with Christoph Gartmann
+  <gartmann@immunbio.mpg.de>) -TD
+* modify UCSetBoxChars() to assume wide-character curses implementations can
+  draw boxes -TD
+* reduce the number of strncasecomp() calls with associated constants by making
+  macros for the lynx internal URL types, e.g., isLYNXCGI() -TD
+* modify logic that handles goto-fragment (e.g., G #foo) to update the URL
+  shown in the info page (Debian #113734) -TD
+* reduce clutter using new macros findPoundSelector(),
+  restorePoundSelector() and function trimPoundSelector() -TD
+* reduce clutter using functions for updating the strings in DocInfo, mainly in
+  LYMainLoop.c -TD
+* renamed 'document' to 'DocInfo' -TD
+* reduce clutter by using NonNull() macro consistently -TD
+* define HistInfo struct in terms of document, to make it clearer -TD
+* add verification of SSL server certificates.  It requires a "cert.pem" file
+  or cert files in the "certs" subdirectory in your OpenSSL directory for CA
+  verification.  The mod_ssl distribution includes a "ca-bundle.crt" that has a
+  good set of root certifying authority certs and works well for "cert.pem".
+  Adding custom CA root certs can be done by either putting them in the server
+  "cert.pem", or (for a normal user) copying "cert.pem", adding the cert, and
+  setting the SSL_CERT_FILE environment variable before running Lynx (Chris
+  Adams <cmadams@hiwaay.net>).
+* add REPLAYSECS config value to allow slowing command scripts down, for
+  testing -TD
+* implement a "set" command for command-scripts, allowing the script writer
+  to manipulate the sleep-times for messages (prompted by discussion with
+  Ville Herva) -TD
+* implement an "exit" command for command-scripts (Ville Herva)
+* modify logic for -cmd_script to stop reading from the command script when
+  an end-of-file is detected (patch by Ville Herva <vherva@niksula.hut.fi>).
+* fill in a few descriptions of restrictions for the help message, as well
+  as showing the on/off state of the "goto_xxx" restrictions -TD
+* correct inverted logic of restrictions table which made "-restrict=default"
+  provide incorrect values for several items.  This was broken in 2.8.4dev.19
+  (reported by Jeff Long <long@ukans.edu> and RobertM <robm@bob.bofh.org>) -TD
+* add environment variable LYNX_TRACE_FILE which, if given, overrides the
+  compiled-in value of Lynx.trace (or LY-TRACE.LOG).  This specifies the
+  name of the trace file relative to the home directory -TD
+* treat empty string for most environment variables, e.g., those specifying
+  a pathname, as null -TD
+* add environment variable LYNX_LOCALEDIR to simplify configuration on OS/2
+  EMX (from discussion with Michel Such) -TD
+* add alias for charsets "ISO-8859-8-I" and "ISO-8859-8-E" to "iso-8859-8"
+  (request by Atsuhito Kohda) -TD
+* modify handling of HTML_SUP to always append '^'.  It was checking if the
+  preceding character was a valid hexadecimal code (reported by HN and Steve
+  White <swhite@zipcon.net>) -TD
+* correct check for calling endwin() to allow for curses implementations
+  without newterm (report/patch by Brett Lymn).
+* add koi8-r.html as a test for non-ANSI 8-bit displays.
+* construct "Accept-Encoding" gzip/compress parameters based on whether lynx is
+  built with zlib and/or gzip/compress paths are defined.  The latter is
+  assumed on Unix (by the configure script), though non-Unix environments may
+  lack those utilities (report by Roy Langford <rlnopicnodl@geeklife.com>,
+  analysis by Frederic L W Meunier) -TD
+* modify mouse support in slang configuration (Eduardo Chappa):
+  + Middle button takes you to the bookmarks file.
+  + Clicking on empty parts of the screen makes the screen scroll. This is
+    not 100% true, here are the caveats related to this:
+    + When you click in the first line of the screen pine goes back one screen,
+      the same happens when you click in the last line (this is normal Lynx
+      behavior, I did nothing in this respect).  With this patch, intermediate
+      scrolling is enabled, which means that left clicking in different (empty
+      parts) of the screen may move you half a screen or two lines.  The idea
+      is that close to the top you scroll more, close to the center you scroll
+      less and you scroll in the direction up or down according to which half
+      of the screen you click on.
+    + If you click on an empty part of the screen, Lynx changed its behavior
+      from doing nothing to moving the active link to the closest link near the
+      click.  This is not disabled by this patch, instead, if a closest link is
+      not found, the screen will scroll, according to the position of the link.
+* improve check in LYgetEnum() for ambiguous/abbreviated names in the lynx.cfg
+  file, e.g., to match the string "visited_links=first" without confusing it
+  with "visited_links=first_reversed" (report by vortex5 <vortex5@24i.net>,
+  analysis by TH) -TD
+* use StrAllocCopy() rather than strdup() in parse_style() (LYStyle.c) to
+  avoid false report from leak-checking (from report by Martin Mokrejs) -TD
+* share SSL handle between HTTP.c and HTAAUtil.c so that call of
+  HTAA_shouldRetryWithAuth() from HTLoadHTTP() updates the handle used in that
+  function.  This makes lynx able to get the user/password prompt for
+  https://enter.nifty.com/iw/ -TH
+* fix a highlighting problem in view-source mode, which left the final
+  character of the target unhighlighted -TH
+* modify LYStringToKeycode(), which is used by -cmd_script option to decode
+  characters, to handle hexadecimal codes written with -cmd_log option from
+  dev.8 changes (reported by Gleb V Kotelnitskyy <kiz@pth.ntu-kpi.kiev.ua>) -TD
+* modify ifdef's in LYCurses.h to implement underline-links for slang
+  configuration (report by TH) -TD
+* modify checks with WEXITSTATUS() and similar "result" macros to ensure that
+  they consistently use corresponding "test" macros such as WIFEXITED() -TD
+* add a null-pointer check in GridText.c to cover a problem with
+	http://209.1.58.86/store/
+  (reported by Walter Ian Kaye) -TD
+* add some more CTRACE's to LYCookie.c to help diagnose LV problem report -TD
+* updated nl.po (patch by Pieter-Paul Spiertz <pspiertz@sci.kun.nl>) -JS
+* new (cs.po, hu.po, tr.po) and updated (da.po, et.po, it.po, ru.po, sv.po) po
+  files from http://www.iro.umontreal.ca/contrib/po/maint/lynx/, used msgmerge
+  to align with 2.8.4's lynx.pot and corrected some minor issues highlighted by
+  check_po.  Checking for a newer version of check_po (to handle patterns
+  such as "%1$s") found none, but noticed a comment in gettext mailing list
+  stating that msgfmt does checking.  Comparing with "msgfmt -c -v", found
+  that it does useful checks, but misses about 1/4 of what check_po finds.
+  Will use both -TD
+* escape blanks and other non-7bit graphic characters in startfile and similar
+  addresses to guard against interpreting the address as multiple lines
+  during a GET, etc (report by Ulf Harnhammar <ulfh@Update.UU.SE>) -TD
+
 2002-05-28 (2.8.5dev.8)
 * updated makelynx.bat (vtailor@gte.net).
 * recognize charset value in meta description even if content-type is not
@@ -22,12 +180,12 @@ Changes since Lynx 2.8 release
   <ke@suse.de>).
 * change LYCurses.c to not redefine gettext(), and use ScreenClear() instead
   of clrscr() for DJGPP -DK
-* the DJGPP port of Lynx once used to compile with DJ Delorie's tcp/ip library. 
+* the DJGPP port of Lynx once used to compile with DJ Delorie's tcp/ip library.
   It is no longer the case; Watt-32 is required.  Changed to assume WATT32 is
   defined when DJGPP (or __DJGPP__) is defined (patch by Gisle Vanem).
 * change LYKeycodeToString() to provide a default translation for characters
   which are not key-symbols, etc., so they may be used in command scripts
-  with the -cmd_file option (reported by Christoph Fabianek) -TD
+  with the -cmd_script option (reported by Christoph Fabianek) -TD
 * new po files (ca.po, et.po, it.po, zh_TW.po) and updated de.po from
   http://www.iro.umontreal.ca/contrib/po/maint/lynx/, used msgmerge to align
   with 2.8.4's lynx.pot and corrected some minor issues highlighted by
@@ -40,7 +198,7 @@ Changes since Lynx 2.8 release
 * quote field-names used when submitting form-data as suggested in RFC 2068
   (report by Lieven Tomme <lieven@itopia.com>) -TD
 * remove configure-check for mkstemp(), which is redundant given that lynx
-  writes temporary files in a directory which is not readable by other users. 
+  writes temporary files in a directory which is not readable by other users.
   On more than one system (e.g., Solaris), mkstemp() is not usable in the
   manner we attempted, since it does not necessarily choose a distinct name if
   the previously-chosen filename no longer exists (report/analysis by PG) -TD
@@ -219,9 +377,10 @@ Changes since Lynx 2.8 release
 * modify configure test for mkstemp() to check if that function returns
   distinct values (report by Fr3dY indicates that AmigaOS has a broken version
   of mkstemp() which always returns the same value) -TD
-* modify LYwaddstr() to use wide-character curses functions to make UTF-8 output
-  work without relying upon side-effects of narrow-character functions.  Note
-  that this relies on the user having set a UTF-8 locale, e.g., en_US.UTF-8 -TD
+* modify LYwaddstr() to use wide-character curses functions to make UTF-8
+  output work without relying upon side-effects of narrow-character functions.
+  Note that this relies on the user having set a UTF-8 locale, e.g.,
+  en_US.UTF-8 -TD
 * modify HText_appendCharacter() to not use utfxtra_on_this_line when compiling
   with WIDEC_CURSES, since the curses library already does this adjustment -TD
 * correct the following names in LYrcFile.c which were added to allow

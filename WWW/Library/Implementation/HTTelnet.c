@@ -213,22 +213,22 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	if (login_protocol == rlogin) {
 	    HTSprintf0(&command, "RLOGIN%s%s%s%s%s %s",  /*lm 930713 */
 		user ? "/USERNAME=\"" : "",
-		user ? user : "",
+		NonNull(user),
 		user ? "\"" : "",
 		port ? "/PORT=" : "",
-		port ? port : "",
+		NonNull(port),
 		hostname);
 
 	} else if (login_protocol == tn3270) {
 	    HTSprintf0(&command, "TELNET/TN3270 %s%s %s",
 		port ? "/PORT=" : "",
-		port ? port : "",
+		NonNull(port),
 		hostname);
 
 	} else {  /* TELNET */
 	    HTSprintf0(&command, "TELNET %s%s %s",
 		port ? "/PORT=" : "",
-		port ? port : "",
+		NonNull(port),
 		hostname);
 	}
 
@@ -242,22 +242,22 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	    if (login_protocol == rlogin) {
 		HTSprintf0(&command, "RLOGIN%s%s%s%s%s %s",  /*lm 930713 */
 		    user ? "/USERNAME=\"" : "",
-		    user ? user : "",
+		    NonNull(user),
 		    user ? "\"" : "",
 		    port ? "/PORT=" : "",
-		    port ? port : "",
+		    NonNull(port),
 		    hostname);
 
 	    } else if (login_protocol == tn3270) {
 		HTSprintf0(&command, "TELNET/TN3270 %s%s %s",
 		    port ? "/PORT=" : "",
-		    port ? port : "",
+		    NonNull(port),
 		    hostname);
 
 	    } else {  /* TELNET */
 		HTSprintf0(&command, "TELNET %s%s %s",
 		    port ? "/PORT=" : "",
-		    port ? port : "",
+		    NonNull(port),
 		    hostname);
 	    }
 
@@ -267,18 +267,18 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 		   hostname,
 		   user ? " -l " : "",
 		   user ? "\"" : "",
-		   user ? user : "",
+		   NonNull(user),
 		   user ? "\"" : "");
 
 	    } else if (login_protocol == tn3270) {
 		HTSprintf0(&command, "TN3270 %s %s",
 		    hostname,
-		    port ? port : "");
+		    NonNull(port));
 
 	    } else {  /* TELNET */
 		HTSprintf0(&command, "TELNET %s %s",
 		    hostname,
-		    port ? port : "");
+		    NonNull(port));
 	    }
 	}
 
@@ -290,20 +290,20 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	if (login_protocol == rlogin) {
 	    HTSprintf0(&command, "RLOGIN%s%s%s %s %s",
 		user ? "/USERNAME=\"" : "",
-		user ? user : "",
+		NonNull(user),
 		user ? "\"" : "",
 		hostname,
-		port ? port : "");
+		NonNull(port));
 
 	} else if (login_protocol == tn3270) {
 	    HTSprintf0(&command, "TN3270 %s %s",
 		hostname,
-		port ? port : "");
+		NonNull(port));
 
 	} else {  /* TELNET */
 	    HTSprintf0(&command, "TELNET %s %s",
 		hostname,
-		port ? port : "");
+		NonNull(port));
 	}
 
 	do_system(command);
@@ -314,7 +314,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	if (login_protocol == telnet) {
 	    HTSprintf0(&command, "TELNET %s%s %s",
 		port ? "/PORT=" : "",
-		port ? port : "",
+		NonNull(port),
 		hostname);
 	    do_system(command);
 	}
@@ -336,21 +336,21 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	if (login_protocol == rlogin) {
 	    HTSprintf0(&command, "MULTINET RLOGIN%s%s%s%s %s",  /*lm 930713 */
 		user ? "/USERNAME=" : "",
-		user ? user : "",
+		NonNull(user),
 		port ? "/PORT=" : "",
-		port ? port : "",
+		NonNull(port),
 		hostname);
 
 	} else if (login_protocol == tn3270) {
 	    HTSprintf0(&command, "MULTINET TELNET/TN3270 %s%s %s",
 		port ? "/PORT=" : "",
-		port ? port : "",
+		NonNull(port),
 		hostname);
 
 	} else {  /* TELNET */
 	    HTSprintf0(&command, "MULTINET TELNET %s%s %s",
 		port ? "/PORT=" : "",
-		port ? port : "",
+		NonNull(port),
 		hostname);
 	}
 
@@ -362,19 +362,19 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	    if (login_protocol == rlogin) {
 		HTSprintf0(&command, "RLOGIN%s%s%s%s %s",  /*lm 930713 */
 		    user ? "/USERNAME=" : "",
-		    user ? user : "",
+		    NonNull(user),
 		    port ? "/PORT=" : "",
-		    port ? port : "",
+		    NonNull(port),
 		    hostname);
 	    } else if (login_protocol == tn3270) {
 		HTSprintf0(&command, "TELNET/TN3270 %s%s %s",
 		    port ? "/PORT=" : "",
-		    port ? port : "",
+		    NonNull(port),
 		    hostname);
 	    } else {  /* TELNET */
 		HTSprintf0(&command, "TELNET %s%s %s",
 		    port ? "/PORT=" : "",
-		    port ? port : "",
+		    NonNull(port),
 		    hostname);
 	    }
 	} else { /* UNIX command syntax */
@@ -382,15 +382,15 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 		HTSprintf0(&command, "RLOGIN %s%s%s",
 		    hostname,
 		    user ? " -l " : "",
-		    user ? user : "");
+		    NonNull(user));
 	    } else if (login_protocol == tn3270) {
 		HTSprintf0(&command, "TN3270 %s %s",
 		    hostname,
-		    port ? port : "");
+		    NonNull(port));
 	    } else {  /* TELNET */
 		HTSprintf0(&command, "TELNET %s %s",
 		    hostname,
-		    port ? port : "");
+		    NonNull(port));
 	    }
 	}
 
@@ -402,19 +402,19 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	if (login_protocol == rlogin) {
 	    HTSprintf0(&command, "RLOGIN%s%s %s %s",
 		user ? "/USERNAME=" : "",
-		user ? user : "",
+		NonNull(user),
 		hostname,
-		port ? port : "");
+		NonNull(port));
 
 	} else if (login_protocol == tn3270) {
 	    HTSprintf0(&command, "TN3270 %s %s",
 		hostname,
-		port ? port : "");
+		NonNull(port));
 
 	} else {  /* TELNET */
 	    HTSprintf0(&command, "TELNET %s %s",
 		hostname,
-		port ? port : "");
+		NonNull(port));
 	}
 
 	do_system(command);
@@ -424,7 +424,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	if (login_protocol == telnet) {
 	    HTSprintf0(&command, "TELNET %s%s %s",
 		port ? "/PORT=" : "",
-		port ? port : "",
+		NonNull(port),
 		hostname);
 	    do_system(command);
 	}
@@ -443,7 +443,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	if (login_protocol == telnet) {
 	    HTSprintf0(&command, "TELNET %s%s %s",
 		port ? "/PORT=" : "",
-		port ? port : "",
+		NonNull(port),
 		hostname);
 	    do_system(command);
 	}
@@ -528,7 +528,7 @@ ARGS4
 	CTRACE((tfp, "HTTelnet: Can't output a live session -- must be interactive!\n"));
 	return HT_NO_DATA;
     }
-    acc_method =  HTParse(addr, "file:", PARSE_ACCESS);
+    acc_method =  HTParse(addr, STR_FILE_URL, PARSE_ACCESS);
 
     host = HTParse(addr, "", PARSE_HOST);
     if (!host || *host == '\0') {

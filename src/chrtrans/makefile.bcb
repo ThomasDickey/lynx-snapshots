@@ -10,7 +10,7 @@
 # Borland C++ tools
 #
 IMPLIB  = Implib
-BCC32   = Bcc32 +BccW32.cfg 
+BCC32   = Bcc32 +BccW32.cfg
 TLINK32 = TLink32
 TLIB    = TLib
 BRC32   = Brc32
@@ -35,7 +35,7 @@ LNIEAT_dbmakeuctbdexe = -x
 Dep_char = .\makeuctb.exe
 
 char : BccW32.cfg $(Dep_char)
-  echo MakeNode 
+	echo MakeNode
 
 Dep_dbmakeuctbdexe = .\makeuctb.obj
 
@@ -47,8 +47,8 @@ Dep_dbmakeuctbdexe = .\makeuctb.obj
 	$(BCC32) -P- -c $(DEFS) $(INCLUDES) -o$@ makeuctb.c
 
 # Compiler configuration file
-BccW32.cfg : 
-   Copy &&|
+BccW32.cfg :
+	Copy &&|
 -R
 -v
 -vi

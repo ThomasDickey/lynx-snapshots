@@ -344,7 +344,7 @@ PRIVATE int LYExecv ARGS3(
     HTSprintf(&tmpbuf, "\n");
     rc = LYSystem(tmpbuf) ? 0 : 1;
 #else
-    pid_t pid;
+    int pid;
 #ifdef HAVE_TYPE_UNIONWAIT
     union wait wstatus;
 #else
@@ -393,8 +393,10 @@ PRIVATE int LYExecv ARGS3(
 		break;
 	    }
 #endif /* !HAVE_WAITPID */
-	    if (WEXITSTATUS(wstatus) != 0 ||
-		WTERMSIG(wstatus) > 0)	{ /* error return */
+	    if ((WIFEXITED(wstatus)
+	      && (WEXITSTATUS(wstatus) != 0))
+	     || (WIFSIGNALED(wstatus)
+	      && (WTERMSIG(wstatus) > 0)))	{ /* error return */
 		HTSprintf0(&tmpbuf, gettext("Probable failure to %s due to system error!"),
 				   msg);
 		rc = 0;
@@ -668,18 +670,18 @@ PRIVATE int modify_tagged ARGS1(
 	    if (cp) {
 		cp = strip_trailing_slash(cp);
 		cp = HTParse(".", cp, PARSE_PATH+PARSE_PUNCTUATION);
-		savepath = HTURLPath_toFile(cp, TRUE);
+		savepath = HTURLPath_toFile(cp, TRUE, FALSE);
 		FREE(cp);
 	    } else {	/* Last resort, should never happen. */
-		savepath = HTURLPath_toFile(".", TRUE);
+		savepath = HTURLPath_toFile(".", TRUE, FALSE);
 	    }
 	} else {
 	    if (!strncmp(cp, "file://localhost", 16)) {
 		cp += 16;
-	    } else if (!strncmp(cp, "file:", 5)) {
-		cp += 5;
+	    } else if (isFILE_URL(cp)) {
+		cp += LEN_FILE_URL;
 	    }
-	    savepath = HTURLPath_toFile(cp, TRUE);
+	    savepath = HTURLPath_toFile(cp, TRUE, FALSE);
 	}
 
 	if (!ok_stat(savepath, &dir_info)) {
@@ -925,7 +927,7 @@ PRIVATE int modify_location ARGS1(
  *  Modify name or location of a file or directory on localhost.
  */
 PUBLIC int local_modify ARGS2(
-	document *,	doc,
+	DocInfo *,	doc,
 	char **,	newpath)
 {
     int ans;
@@ -1079,7 +1081,7 @@ PRIVATE int create_directory ARGS1(
  *  Create a file or a directory at the current location.
  */
 PUBLIC int local_create ARGS1(
-	document *,	doc)
+	DocInfo *,	doc)
 {
     int ans;
     char *cp;
@@ -1169,7 +1171,7 @@ PRIVATE int remove_single ARGS1(
  *  Remove a file or a directory.
  */
 PUBLIC int local_remove ARGS1(
-	document *,	doc)
+	DocInfo *,	doc)
 {
     char *cp, *tp;
     char testpath[DIRED_MAXBUF];
@@ -1286,8 +1288,8 @@ PRIVATE int permit_location ARGS3(
 	     *	Prevent filenames which include '#' or '?' from messing it up.
 	     */
 	    char * srcpath_url = HTEscape(srcpath, URL_PATH);
-	    fprintf(fp0, "<Form Action=\"LYNXDIRED://PERMIT_LOCATION%s\">\n",
-		    srcpath_url);
+	    fprintf(fp0, "<Form Action=\"%s//PERMIT_LOCATION%s\">\n",
+		    STR_LYNXDIRED, srcpath_url);
 	    FREE(srcpath_url);
 	}
 
@@ -1380,7 +1382,7 @@ PRIVATE int permit_location ARGS3(
 			   start working on the masks. */
 
 	/* Will now operate only on filename part. */
-	if ((destpath = HTURLPath_toFile(destpath, TRUE)) == 0)
+	if ((destpath = HTURLPath_toFile(destpath, TRUE, FALSE)) == 0)
 		return(0);
 	if (strlen(destpath) >= LY_MAXPATH) {
 	    FREE(destpath);
@@ -1536,12 +1538,14 @@ PRIVATE char * DirectoryOf ARGS1(
 	char *,		pathname)
 {
     char *result = 0;
-    char *result1 = 0;
     char *leaf;
 
     StrAllocCopy(result, pathname);
     leaf = LYPathLeaf(result);
+
     if (leaf != result) {
+	CONST char *result1 = 0;
+
 	*leaf = '\0';
 	if (!LYisRootPath(result))
 	    LYTrimPathSep(result);
@@ -1591,7 +1595,7 @@ PRIVATE char * match_op ARGS2(
     if (!strncmp("LYNXDIRED://", data, 12)
      && !strncmp(prefix, data + 12, (unsigned)len)) {
 	len += 12;
-#if defined(DOSPATH) || defined(__EMX__)
+#if defined(USE_DOS_DRIVES)
 	if (data[len] == '/') {	/* this is normal */
 	    len++;
 	}
@@ -1779,7 +1783,7 @@ PRIVATE char *build_command ARGS3(
  *  doesn't look like a clean way.)
  */
 PUBLIC int local_dired ARGS1(
-	document *,	doc)
+	DocInfo *,	doc)
 {
     char *line_url;    /* will point to doc's address, which is a URL */
     char *line = NULL; /* same as line_url, but HTUnEscaped, will be alloced */
@@ -1907,7 +1911,7 @@ PUBLIC int local_dired ARGS1(
  *  Provide a menu of file management options.
  */
 PUBLIC int dired_options ARGS2(
-	document *,	doc,
+	DocInfo *,	doc,
 	char **,	newfile)
 {
     static char tempfile[LY_MAXPATH];
@@ -2107,6 +2111,7 @@ PRIVATE void clear_install_path NOARGS
     FREE(install_path);
 }
 #endif /* LY_FIND_LEAKS */
+
 /*
  *  Fill in args array for execv (or execvp etc.) call, after first
  *  allocating it if necessary.  No fancy parsing, cmd_args is just
@@ -2160,6 +2165,7 @@ PRIVATE int fill_argv_for_execv ARGS5(
     args[n] = (char *)0;
     return(n);
 }
+
 /*
  *  Install the specified file or directory.
  */
@@ -2277,10 +2283,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 	    return(-1);		/* don't do it */
 	} else if (!strncmp(savepath, destpath, strlen(destpath)) &&
 		   LYIsPathSep(savepath[strlen(destpath)]) &&
-#ifdef DOSPATH
-		   !strchr(savepath + strlen(destpath) + 1, '\\') &&
-#endif
-		   !strchr(savepath + strlen(destpath) + 1, '/')) {
+		   LYLastPathSep(savepath + strlen(destpath) + 1) == 0) {
 	    HTUserMsg2(gettext("Already in target directory: %s"),
 		       savepath);
 	    FREE(tmpdest);
@@ -2309,10 +2312,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 		continue;	/* skip this source file */
 	    } else if (!strncmp(args[src], destpath, strlen(destpath)) &&
 		       LYIsPathSep(args[src][strlen(destpath)]) &&
-#ifdef DOSPATH
-		       !strchr(args[src] + strlen(destpath) + 1, '\\') &&
-#endif
-		       !strchr(args[src] + strlen(destpath) + 1, '/')) {
+		       LYLastPathSep(args[src] + strlen(destpath) + 1) == 0) {
 		HTUserMsg2(gettext("Already in target directory: %s"),
 			   args[src]);
 		FREE(args[src]);

@@ -70,11 +70,32 @@ extern BOOL dump_output_immediately;  /* TRUE if no interactive user */
 
 #ifdef USE_SSL
 PUBLIC SSL_CTX * ssl_ctx = NULL;	/* SSL ctx */
+PUBLIC SSL * SSL_handle = NULL;
+PUBLIC int ssl_okay;
 
 PRIVATE void free_ssl_ctx NOARGS
 {
     if (ssl_ctx != NULL)
 	SSL_CTX_free(ssl_ctx);
+}
+
+PRIVATE int HTSSLCallback(int preverify_ok, X509_STORE_CTX *x509_ctx)
+{
+    char *msg = NULL;
+    int result = 1;
+
+    if (!(preverify_ok || ssl_okay)) {
+
+	HTSprintf0(&msg, "SSL error:%s-Continue?",
+		   X509_verify_cert_error_string(X509_STORE_CTX_get_error(x509_ctx)));
+	if (HTConfirmDefault(msg, TRUE))
+	    ssl_okay = 1;
+	else
+	    result = 0;
+
+	FREE(msg);
+    }
+    return result;
 }
 
 PUBLIC SSL * HTGetSSLHandle NOARGS
@@ -91,9 +112,11 @@ PUBLIC SSL * HTGetSSLHandle NOARGS
 	ssl_ctx = SSL_CTX_new(SSLv23_client_method());
 	SSL_CTX_set_options(ssl_ctx, SSL_OP_ALL);
 	SSL_CTX_set_default_verify_paths(ssl_ctx);
+	SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, HTSSLCallback);
 #endif /* SSLEAY_VERSION_NUMBER < 0x0800 */
 	atexit(free_ssl_ctx);
     }
+    ssl_okay = 0;
     return(SSL_new(ssl_ctx));
 }
 
@@ -103,7 +126,7 @@ PUBLIC void HTSSLInitPRNG NOARGS
     if (RAND_status() == 0) {
 	char rand_file[256];
 	time_t t;
-	pid_t pid;
+	int pid;
 	long l,seed;
 
 	t = time(NULL);
@@ -117,7 +140,7 @@ PUBLIC void HTSSLInitPRNG NOARGS
 	/* Seed in time (mod_ssl does this) */
 	RAND_seed((unsigned char *)&t, sizeof(time_t));
 	/* Seed in pid (mod_ssl does this) */
-	RAND_seed((unsigned char *)&pid, sizeof(pid_t));
+	RAND_seed((unsigned char *)&pid, sizeof(pid));
 	/* Initialize system's random number generator */
 	RAND_bytes((unsigned char *)&seed, sizeof(long));
 	lynx_srand(seed);
@@ -140,7 +163,7 @@ PUBLIC void HTSSLInitPRNG NOARGS
 #define HTTP_NETWRITE(sock, buff, size, handle) \
 	(handle ? SSL_write(handle, buff, size) : NETWRITE(sock, buff, size))
 #define HTTP_NETCLOSE(sock, handle)  \
-	{ (void)NETCLOSE(sock); if (handle) SSL_free(handle); handle = NULL; }
+	{ (void)NETCLOSE(sock); if (handle) SSL_free(handle); SSL_handle = handle = NULL; }
 
 #else
 #define HTTP_NETREAD(a, b, c, d)   NETREAD(a, b, c)
@@ -323,7 +346,7 @@ PUBLIC int ws_netread(int fd, char *buf, int len)
 
 /*
  * Strip any username from the given string so we retain only the host.
- * If the 
+ * If the
  */
 PRIVATE void strip_userid ARGS1(
 	char *,		host)
@@ -408,10 +431,15 @@ PRIVATE int HTLoadHTTP ARGS4 (
   CONST char *connect_url = NULL; /* The URL being proxied */
   char *connect_host = NULL;	/* The host being proxied */
   SSL * handle = NULL;		/* The SSL handle */
-  char SSLprogress[256];	/* progress bar message */
+  char ssl_dn[256];
+  char *cert_host;
+  char *ssl_host;
+  char *p;
+  char *msg = NULL;
 #if SSLEAY_VERSION_NUMBER >= 0x0900
   BOOL try_tls = TRUE;
 #endif /* SSLEAY_VERSION_NUMBER >= 0x0900 */
+  SSL_handle = NULL;
 #else
   void * handle = NULL;
 #endif /* USE_SSL */
@@ -528,7 +556,7 @@ use_tunnel:
   ** then do the SSL stuff here
   */
   if (did_connect || !strncmp(url, "https", 5)) {
-      handle = HTGetSSLHandle();
+      SSL_handle = handle = HTGetSSLHandle();
       SSL_set_fd(handle, s);
 #if SSLEAY_VERSION_NUMBER >= 0x0900
       if (!try_tls)
@@ -540,8 +568,7 @@ use_tunnel:
       if (status <= 0) {
 #if SSLEAY_VERSION_NUMBER >= 0x0900
 	  if (try_tls) {
-	      CTRACE((tfp, "HTTP: Retrying connection without TLS\n"));
-	      _HTProgress("Retrying connection.");
+	      _HTProgress(gettext("Retrying connection without TLS."));
 	      try_tls = FALSE;
 	      if (did_connect)
 		  HTTP_NETCLOSE(s, handle);
@@ -577,20 +604,32 @@ use_tunnel:
 	  goto done;
 #endif /* SSLEAY_VERSION_NUMBER >= 0x0900 */
       }
-      sprintf(SSLprogress,"Secure %d-bit %s (%s) HTTP connection",SSL_get_cipher_bits(handle,NULL),SSL_get_cipher_version(handle),SSL_get_cipher(handle));
-      _HTProgress(SSLprogress);
 
-#ifdef NOTDEFINED
-      if (strcmp(HTParse(url, "", PARSE_HOST),
-		 strstr(X509_NAME_oneline(
-			X509_get_subject_name(
-				handle->session->peer)),"/CN=")+4)) {
-	  HTAlert("Certificate is for different host name");
-	  HTAlert(strstr(X509_NAME_oneline(
-			 X509_get_subject_name(
-				handle->session->peer)),"/CN=")+4);
+      X509_NAME_oneline(X509_get_subject_name(SSL_get_peer_certificate(handle)),
+		        ssl_dn, sizeof(ssl_dn));
+      cert_host = strstr(ssl_dn, "/CN=") + 4;
+      if ((p = strchr(cert_host, '/')) != NULL)
+	  *p = '\0';
+      ssl_host = HTParse(url, "", PARSE_HOST);
+      if (strcmp(ssl_host, cert_host)) {
+	  HTSprintf0(&msg,
+		     gettext("SSL error:host(%s)!=cert(%s)-Continue?"),
+		     ssl_host,
+		     cert_host);
+	  if (! HTConfirmDefault(msg, TRUE)) {
+	      status = HT_NOT_LOADED;
+	      FREE(msg);
+	      goto done;
+	  }
       }
-#endif /* NOTDEFINED */
+
+      HTSprintf0(&msg,
+		 gettext("Secure %d-bit %s (%s) HTTP connection"),
+		 SSL_get_cipher_bits(handle, NULL),
+		 SSL_get_cipher_version(handle),
+		 SSL_get_cipher(handle));
+      _HTProgress(msg);
+      FREE(msg);
   }
 #endif /* USE_SSL */
 
@@ -712,8 +751,19 @@ use_tunnel:
       if (LYPrependBaseToSource && dump_output_immediately) {
 	  CTRACE((tfp, "omit Accept-Encoding to work-around interaction with -source\n"));
       } else {
-	  HTSprintf(&command, "Accept-Encoding: %s, %s%c%c",
-		    "gzip", "compress", CR, LF);
+	  char *list = 0;
+#if defined(USE_ZLIB) || defined(GZIP_PATH)
+	  StrAllocCopy(list, "gzip");
+#endif
+#if defined(USE_ZLIB) || defined(COMPRESS_PATH)
+	  if (list != 0)
+	      StrAllocCat(list, ", ");
+	  StrAllocCat(list, "compress");
+#endif
+	  if (list != 0) {
+	      HTSprintf(&command, "Accept-Encoding: %s%c%c", list, CR, LF);
+	      free(list);
+	  }
       }
 
       if (language && *language) {
@@ -796,13 +846,10 @@ use_tunnel:
 	  char *cp = LYRequestReferer;
 	  if (!cp) cp = HTLoadedDocumentURL(); /* @@@ Try both? - kw */
 	  StrAllocCat(command, "Referer: ");
-	  if (!strncasecomp(cp, "LYNXIMGMAP:", 11)) {
-	      char *cp1 = strchr(cp, '#');
-	      if (cp1)
-		  *cp1 = '\0';
-	      StrAllocCat(command, cp + 11);
-	      if (cp1)
-		  *cp1 = '#';
+	  if (isLYNXIMGMAP(cp)) {
+	      char *cp1 = trimPoundSelector(cp);
+	      StrAllocCat(command, cp + LEN_LYNXIMGMAP);
+	      restorePoundSelector(cp1);
 	  } else {
 	      StrAllocCat(command, cp);
 	  }
@@ -2070,7 +2117,7 @@ done:
   FREE(connect_host);
   if (handle) {
     SSL_free(handle);
-    handle = NULL;
+    SSL_handle = handle = NULL;
   }
 #endif /* USE_SSL */
   return status;

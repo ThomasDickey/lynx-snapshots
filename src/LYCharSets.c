@@ -692,6 +692,8 @@ PRIVATE CONST names_pairs OLD_charset_names[] = {
     {"ISO 8859-6 Arabic",   "iso-8859-6"},
     {"ISO 8859-7 Greek",    "iso-8859-7"},
     {"ISO 8859-8 Hebrew",   "iso-8859-8"},
+    {"ISO-8859-8-I",        "iso-8859-8"},
+    {"ISO-8859-8-E",        "iso-8859-8"},
     {"ISO 8859-9 (Latin 5)","iso-8859-9"},
     {"ISO 8859-10",         "iso-8859-10"},
     {"UNICODE UTF 8",       "utf-8"},

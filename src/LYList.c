@@ -14,6 +14,7 @@
 #include <LYGlobalDefs.h>
 #include <LYCharUtils.h>
 #include <LYCharSets.h>
+#include <LYHistory.h>
 
 #ifdef DIRED_SUPPORT
 #include <LYUpload.h>
@@ -35,7 +36,7 @@
 
 
 PUBLIC int showlist ARGS2(
-	document *,	newdoc,
+	DocInfo *,	newdoc,
 	BOOLEAN,	titles)
 {
     int cnt;
@@ -170,7 +171,7 @@ PUBLIC int showlist ARGS2(
 	    LYformTitle(&Title, title);
 	    LYEntify(&Title, TRUE);
 	    if (*Title) {
-		cp = strchr(Address, '#');
+		cp = findPoundSelector(Address);
 	    } else {
 		FREE(Title);
 	    }
@@ -178,7 +179,7 @@ PUBLIC int showlist ARGS2(
 
 	fprintf(fp0, "<li><a href=\"%s\"%s>%s%s%s%s%s</a>\n", Address,
 			dest_intl ? " TYPE=\"internal link\"" : "",
-			LinkTitle ? LinkTitle : "",
+			NonNull(LinkTitle),
 			((HTAnchor*)parent != dest) && Title ? "in " : "",
 			(char *)(Title ? Title : Address),
 			(Title && cp) ? " - " : "",
@@ -230,8 +231,7 @@ PUBLIC int showlist ARGS2(
     if (intern_w_post) {
 	newdoc->internal_link = TRUE;
     } else {
-	FREE(newdoc->post_data);
-	FREE(newdoc->post_content_type);
+	LYFreePostData(newdoc);
 	newdoc->internal_link = FALSE;
     }
     newdoc->isHEAD = FALSE;
