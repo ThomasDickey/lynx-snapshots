@@ -44,6 +44,9 @@ CC_OPTS		= $(CPP_OPTS) $(CFLAGS)
 LINT		= @LINT@
 LINTOPTS	=
 
+COMPRESS_PROG	=@COMPRESS_PROG@
+COMPRESS_EXT	=@COMPRESS_EXT@
+
 CHARTRANS_OBJS=UCdomap.o UCAux.o UCAuto.o
 OBJS=  LYClean.o LYShowInfo.o LYEdit.o LYStrings.o \
 LYMail.o HTAlert.o GridText.o LYGetFile.o \
@@ -69,7 +72,7 @@ all: lynx$x
 @RULE_CC@
 	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $*.c >$@
 
-lynx$x:   message do_chartrans_stuff $(OBJS) $(WWWLIB)
+lynx$x:   message do_chartrans_stuff ../LYHelp.h $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
 	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(WWWLIB) $(LIBS)
 	@echo "Copying Lynx executable into top-level directory"

@@ -241,12 +241,12 @@ PUBLIC int LYUpload_options ARGS2(
 
     fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
 		 UPLOAD_OPTIONS_TITLE);
-
-    fprintf(fp0, "<h1>Upload Options (%s Version %s)</h1><pre>\n",
-				      LYNX_NAME, LYNX_VERSION);
-
-    fputs("   You have the following upload choices.<br>\n", fp0);
-    fputs("   Please select one:<br>\n\n", fp0);
+    fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
+		 LYNX_NAME, LYNX_VERSION,
+		 helpfilepath, UPLOAD_OPTIONS_HELP, UPLOAD_OPTIONS_TITLE);
+    fprintf(fp0, "<pre>\n");
+    fprintf(fp0, "   <em>Upload To:</em> %s\n", curloc);
+    fputs("\nUpload options:\n", fp0);
 
     if (uploaders != NULL) {
 	for (count = 0, cur_upload = uploaders;
@@ -259,10 +259,12 @@ PUBLIC int LYUpload_options ARGS2(
 	    fprintf(fp0, "</a>\n");
 	}
     } else {
-	fprintf(fp0, "\n   \
-No other upload methods have been defined yet.  You may define\n   \
-an unlimited number of upload methods using the lynx.cfg file.\n");
-
+	fprintf(fp0, "   \
+&lt;NONE&gt;\n\n   \
+You may define an unlimited number of upload methods.\n   \
+Please refer to the <a href=\"%s\">lynx.cfg</a> file, \
+sections 'UPLOAD' and 'INCLUDE'.\n",
+	LYNX_CFG_FILE);
     }
     fprintf(fp0, "</pre>\n</body>\n");
     LYCloseTempFP(fp0);

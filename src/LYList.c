@@ -96,14 +96,13 @@ PUBLIC int showlist ARGS2(
     }
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 LIST_PAGE_TITLE);
-    fprintf(fp0, "<h1>You have reached the List Page</h1>\n");
-    fprintf(fp0, "<h2>%s Version %s</h2>\n", LYNX_NAME, LYNX_VERSION);
+    fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
+	LYNX_NAME, LYNX_VERSION,
+	helpfilepath, LIST_PAGE_HELP, LIST_PAGE_TITLE);
     StrAllocCopy(Address, HTLoadedDocumentURL());
     LYEntify(&Address, FALSE);
-    fprintf(fp0,
-	    "  References in %s<p>\n",
-	    ((Address != NULL && *Address != '\0') ?
-					   Address : "this document:"));
+    fprintf(fp0, "References in %s<p>\n",
+	((Address != NULL && *Address != '\0') ? Address : "this document:"));
     FREE(Address);
     if (refs > 0) {
 	fprintf(fp0, "<%s compact>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?

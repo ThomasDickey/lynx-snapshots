@@ -230,7 +230,7 @@
 #else     /* UNIX */
 
 /**************************
- * NOTE: This variable is set by the configure scrip; editing changes will
+ * NOTE: This variable is set by the configure script; editing changes will
  * be ignored.
  *
  * LYNX_CFG_FILE is the location and name of the default lynx
@@ -492,7 +492,7 @@
  * <dt>?<dd><a href="file://localhost/path/jumps.html">This Shortcut List</a>
  *
  * If not defined here or in lynx.cfg, the JUMP command will invoke
- * the NO_JUMPFILE statusline message (see LYMessages_en.h).  The prompt
+ * the NO_JUMPFILE status line message (see LYMessages_en.h).  The prompt
  * associated with the default jumps file is defined as JUMP_PROMPT in
  * LYMessages_en.h and can be modified in lynx.cfg.  Additional, alternate
  * jumps files can be defined and mapped to keystrokes, and alternate
@@ -697,7 +697,7 @@
 * support via the 'o'ptions menu, and can save that choice as the startup
 * default via the .lynxrc file.  When on, the setting can be STANDARD or
 * ADVANCED.  If support is set to the latter, and the user mode also is
-* ADVANCED, the VIEW_BOOKMARK command will invoke a statusline prompt at
+* ADVANCED, the VIEW_BOOKMARK command will invoke a status line prompt at
 * which the user can enter the letter token (A - Z) of the desired bookmark,
 * or '=' to get a menu of available bookmark files.  The menu always is
 * presented in NOVICE or INTERMEDIATE mode, or if the support is set to
@@ -802,10 +802,10 @@
 
 /********************************
  * If COLLAPSE_BR_TAGS is set FALSE, Lynx will not collapse serial
- * BR tags.  If set TRUE, two or more concurrent BRs will be collapsed 
- * into a single blank line.  Note that the valid way to insert extra 
- * blank lines in HTML is via a PRE block with only newlines in the 
- * block. 
+ * BR tags.  If set TRUE, two or more concurrent BRs will be collapsed
+ * into a single blank line.  Note that the valid way to insert extra
+ * blank lines in HTML is via a PRE block with only newlines in the
+ * block.
  *
  * The default defined here can be changed in lynx.cfg.
  */
@@ -837,10 +837,10 @@
 
 /*****************************
  * The following three definitions set the number of seconds for
- * pauses following statusline messages that would otherwise be
+ * pauses following status line messages that would otherwise be
  * replaced immediately, and are more important than the unpaused
  * progress messages.  Those set by INFOSECS are also basically
- * progress messages (e.g., that a prompted input has been cancelled)
+ * progress messages (e.g., that a prompted input has been canceled)
  * and should have the shortest pause.  Those set by MESSAGESECS are
  * informational (e.g., that a function is disabled) and should have
  * a pause of intermediate duration.  Those set by ALERTSECS typically
@@ -1042,7 +1042,7 @@
  * specify the DEFAULT setting of the users execution link
  * options, but the user may still change those options.
  * If you do not wish the user to be able to change the
- * execution link settings you may wish to use the commandline option:
+ * execution link settings you may wish to use the command line option:
  *    -restrictions=exec_frozen
  *
  * LOCAL_EXECUTION_LINKS_ALWAYS_ON will be FALSE
@@ -1076,12 +1076,12 @@
 #define MAIL_SYSTEM_ERROR_LOGGING   FALSE  /*mail a message for every error?*/
 
 /*********************************
- * If CHECKMAIL is set to TRUE, the user will be informed (via a statusline
+ * If CHECKMAIL is set to TRUE, the user will be informed (via a status line
  * message) about the existence of any unread mail at startup of Lynx, and
- * will get statusline messages if subsequent new mail arrives.  If a jumps
+ * will get status line messages if subsequent new mail arrives.  If a jumps
  * file with a lynxprog URL for invoking mail is available, or your html
  * pages include an mail launch file URL, the user thereby can access mail
- * and read the messages.  The checks and statusline reports will not be
+ * and read the messages.  The checks and status line reports will not be
  * performed if Lynx has been invoked with the -restrictions=mail switch.
  *
  *  VMS USERS !!!
@@ -1195,7 +1195,7 @@
 
 /****************************************************************
  * The LYMessages_en.h header defines default, English strings
- * used in statusline prompts, messages, and warnings during
+ * used in status line prompts, messages, and warnings during
  * program execution.  See the comments in LYMessages_en.h for
  * information on translating or customizing them for your site.
  */
@@ -1214,7 +1214,10 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.1dev.22"
+#define LYNX_VERSION "2.8.1dev.23"
+#define LYNX_WWW_HOME "http://lynx.browser.org/"
+#define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
+#define LYNX_RELEASE FALSE
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */
@@ -1292,8 +1295,8 @@
 	/* Standard locations are defined via the configure script.  When
 	 * helper applications are in your home directory or other nonstandard
 	 * locations, you probably will have to preset the path to them with
-	 * environment variables (see INSTALLATION, Section II-1d). 
-	 */ 
+	 * environment variables (see INSTALLATION, Section II-1d).
+	 */
 #endif /* DOSPATH */
 #endif /* VMS */
 

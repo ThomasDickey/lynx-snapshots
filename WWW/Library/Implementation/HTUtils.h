@@ -373,6 +373,7 @@ The local equivalents of CR and LF
 #define CTRACE if(TRACE)fprintf
 #define tfp TraceFP()
 #define CTRACE_SLEEP(secs) if (TRACE && LYTraceLogFP == 0) sleep(secs)
+#define CTRACE_FLUSH(fp) if(TRACE) fflush(fp)
 
 extern FILE *TraceFP NOPARAMS;
 

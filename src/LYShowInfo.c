@@ -75,13 +75,24 @@ PUBLIC int showinfo ARGS4(
     LYAddMETAcharsetToFD(fp0, -1);
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 SHOWINFO_TITLE);
-    fprintf(fp0,"<h1>You have reached the Information Page</h1>\n");
-    fprintf(fp0,"<h2>%s Version %s</h2>\n", LYNX_NAME, LYNX_VERSION);
+
+#ifdef LYNX_COMPILE_OPTS
+    fprintf(fp0, "<h1>%s %s (<a href=\"%s\">%s</a>) - <a href=\"%s\">compile time settings</a>\n",
+		 LYNX_NAME, LYNX_VERSION,
+		 (LYNX_RELEASE ? LYNX_WWW_HOME   : LYNX_WWW_DIST),
+		 (LYNX_RELEASE ? "major release" : "development version"),
+		 LYNX_COMPILE_OPTS);
+#else
+    fprintf(fp0, "<h1>%s %s (<a href=\"%s\">%s</a>)\n",
+		 LYNX_NAME, LYNX_VERSION,
+		 (LYNX_RELEASE ? LYNX_WWW_HOME   : LYNX_WWW_DIST),
+		 (LYNX_RELEASE ? "major release" : "development version") );
+#endif
 
 #ifdef DIRED_SUPPORT
     if (lynx_edit_mode && nlinks > 0) {
-	fprintf(fp0,
-	 "<h2>Directory that you are currently viewing</h2>\n<pre>");
+	fprintf(fp0, "<pre>\n");
+	fprintf(fp0, "\nDirectory that you are currently viewing\n\n");
 
 	cp = doc->address;
 	if (!strncmp(cp, "file://localhost", 16))
@@ -157,7 +168,7 @@ PUBLIC int showinfo ARGS4(
 	    cp = ctime(&dir_info.st_atime);
 	    fprintf(fp0, "   <em>Last accessed:</em>  %s\n", cp);
 
-	    fprintf(fp0, "   <em>Access Permissions</em>\n");
+	    fprintf(fp0, "   Access Permissions\n");
 	    fprintf(fp0, "      <em>Owner:</em>  ");
 	    modes[0] = '\0';
 	    modes[1] = '\0';   /* In case there are no permissions */

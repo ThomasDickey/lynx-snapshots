@@ -260,7 +260,7 @@ PRIVATE int half_match ARGS2(char *,trial_type, char *,target)
 	return 0;
 
     CTRACE(tfp, "HTFormat: comparing %s and %s for half match\n",
-	        trial_type, target);
+		trial_type, target);
 
 	/* main type matches */
     if (!strncmp(trial_type, target, (cp-trial_type)-1))
@@ -486,25 +486,29 @@ PRIVATE void HTDisplayPartial NOARGS
 	**  HText_getNumOfLines() = "current" number of lines received
 	**  NumOfLines_partial = number of lines at the moment of last repaint.
 	**
-	**  Update NumOfLines_partial only if we repaint the display,
-	**  so it corresponds to real number of displayed lines.
-	**  Repaint the page only when necessary:
+	**  We update NumOfLines_partial only when we repaint the display.
+	**  -1 is the special value:
+	**  This is a synchronization flag switched to 0 when HText_new()
+	**  starts a new HTMainText object - all hypertext functions use it,
+	**  lines counter in particular [we call it from HText_getNumOfLines()].
+	**
+	**  Otherwise HTMainText holds info from the previous document
+	**  and we may repaint it instead of the new one:
+	**  prev doc scrolled to the first line (=Newline_partial)
+	**  is not good looking :-)       23 Aug 1998 Leonid Pauzner
+	**
+	**  So repaint the page only when necessary:
 	*/
-	if ((Newline_partial + display_lines) > NumOfLines_partial) {
+	if ((NumOfLines_partial != -1)
+		/* new hypertext document available  */
+	&& ((Newline_partial + display_lines) > NumOfLines_partial)
 		/* current page not complete... */
-	if ((Newline_partial + 2)  < HText_getNumOfLines()) {
+	&& ((Newline_partial + 2)  < HText_getNumOfLines())) {
 		/* and we MAY display at least a couple of lines on the top.
-		**
-		** Note: we check the lines in _rendered_ document
-		** and real HTML source may have several Kb of headers,
-		** Javascript applets etc., which are not visible in lynx
-		** and we got a delay (correct).
-		** We should NOT try to repaint at that early stage
-		** to avoid interfere with previously displayed document. - LP
-		*/
+		 *
+		 */
 	    NumOfLines_partial = HText_getNumOfLines();
 	    HText_pageDisplay(Newline_partial, "");
-	}
 	}
     }
 }
@@ -518,7 +522,7 @@ PRIVATE void HTDisplayPartial NOARGS
 **   This routine is responsible for creating and PRESENTING any
 **   graphic (or other) objects described by the file.
 **
-**   The file number given is assumed to be a TELNET stream ie containing
+**   The file number given is assumed to be a TELNET stream, i.e., containing
 **   CRLF at the end of lines which need to be stripped to LF for unix
 **   when the format is textual.
 **
@@ -579,7 +583,7 @@ PUBLIC int HTCopy ARGS4(
 		       SOCKET_ERRNO == ECONNRESET ||
 		       SOCKET_ERRNO == EPIPE) {
 		/*
-		 *  Arrrrgh, HTTP 0/1 compability problem, maybe.
+		 *  Arrrrgh, HTTP 0/1 compatibility problem, maybe.
 		 */
 		if (bytes <= 0) {
 		    /*
@@ -613,7 +617,7 @@ PUBLIC int HTCopy ARGS4(
 
 	(*targetClass.put_block)(sink, input_buffer, status);
 	bytes += status;
-        HTReadProgress(bytes, anchor ? anchor->content_length : 0);
+	HTReadProgress(bytes, anchor ? anchor->content_length : 0);
 	HTDisplayPartial();
 
     } /* next bufferload */
@@ -707,7 +711,7 @@ PRIVATE int HTGzFileCopy ARGS2(
     */
     targetClass = *(sink->isa); /* Copy pointers to procedures */
 
-    /*	read and inflate gzipped file, and push binary down sink
+    /*	read and inflate gzip'd file, and push binary down sink
     */
     HTReadProgress(bytes = 0, 0);
     for (;;) {

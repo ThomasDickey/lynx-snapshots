@@ -5,6 +5,7 @@
 #include <LYUtils.h>
 #include <LYStrings.h>
 #include <LYGlobalDefs.h>
+#include <LYHistory.h>
 #include <LYOptions.h>
 #include <LYSignal.h>
 #include <LYClean.h>
@@ -320,6 +321,9 @@ draw_options:
     addstr(  (user_mode == NOVICE_MODE) ? "Novice      " :
       ((user_mode == INTERMEDIATE_MODE) ? "Intermediate" :
 					  "Advanced    "));
+
+    addstr("  verbose images (!) : ");
+    addstr( verbose_img ? "ON " : "OFF" );
 
     move(L_User_Agent, 5);
     addstr("user (A)gent                 : ");
@@ -1367,6 +1371,46 @@ draw_options:
 		} else {
 		    display_lines = LYlines-2;
 		}
+		response = ' ';
+		if (LYSelectPopups) {
+#if !defined(VMS) || defined(USE_SLANG)
+		    if (term_options) {
+			term_options = FALSE;
+		    } else {
+			AddValueAccepted = TRUE;
+		    }
+		    goto draw_options;
+#else
+		    term_options = FALSE;
+		    if (use_assume_charset != old_use_assume_charset)
+			goto draw_options;
+#endif /* !VMS || USE_SLANG */
+		}
+		break;
+
+	    case '!':
+		/*
+		 *  Copy strings into choice array.
+		 */
+		choices[0] = NULL;
+		StrAllocCopy(choices[0], "OFF");
+		choices[1] = NULL;
+		StrAllocCopy(choices[1], "ON ");
+		choices[2] = NULL;
+		if (!LYSelectPopups) {
+		    verbose_img = boolean_choice(verbose_img,
+						L_VERBOSE_IMAGES,
+						C_VERBOSE_IMAGES,
+						choices);
+		} else {
+		    verbose_img = popup_choice(verbose_img,
+					     L_VERBOSE_IMAGES,
+					     C_VERBOSE_IMAGES,
+					     choices,
+					     2, FALSE);
+		}
+		FREE(choices[0]);
+		FREE(choices[1]);
 		response = ' ';
 		if (LYSelectPopups) {
 #if !defined(VMS) || defined(USE_SLANG)
@@ -3100,6 +3144,8 @@ static char * raw_mode_string = "raw_mode";
 
 static char * show_color_string = "show_color";
 
+static char * verbose_images_string = "verbose_images";
+
 static char * vi_keys_string = "vi_keys";
 
 static char * emacs_keys_string = "emacs_keys";
@@ -3110,19 +3156,21 @@ static char * select_popups_string = "select_popups";
 
 static char * show_cursor_string = "show_cursor";
 
+static char * user_agent_string = "user_agent";
+
 static OptValues bool_values[] = {
 	{ FALSE,             "OFF",               "OFF"         },
 	{ TRUE,              "ON",                "ON"          },
 	{ 0, 0, 0 }};
 
-#ifdef DIRED_SUPPORT 
+#ifdef DIRED_SUPPORT
 static OptValues dired_values[] = {
 	{ 0,                 "Directories first", "dired_dir"   },
 	{ FILES_FIRST,       "Files first",       "dired_files" },
 	{ MIXED_STYLE,       "Mixed style",       "dired_mixed" },
 	{ 0, 0, 0 }};
 static char * dired_sort_string = "dired_sort";
-#endif /* DIRED_SUPPORT */ 
+#endif /* DIRED_SUPPORT */
 
 static OptValues ftp_sort_values[] = {
 	{ FILE_BY_NAME,      "By Name",           "ftp_by_name" },
@@ -3164,20 +3212,24 @@ static OptValues user_mode_values[] = {
 static char * user_mode_string = "user_mode";
 
 #define PutLabel(fp, text) \
-	fprintf(fp,"<label>%s:</label> ", text)
+	fprintf(fp,"%-35s: ", text)
+
+#define PutTextInput(fp, name, value, size, disable) \
+	fprintf(fp,\
+	"<input size=%d type=\"text\" name=\"%s\" value=\"%s\" %s>\n",\
+		size, name, value, disable)
 
 #define PutOption(fp, flag, html, name) \
-	fprintf(fp, "<option %s value=\"%s\">%s</option>\n", \
-	    SELECTED(flag), html, name)
+	fprintf(fp,"<option value=\"%s\" %s>%s\n", html, SELECTED(flag), name)
 
 #define BeginSelect(fp, text) \
 	fprintf(fp,"<select name=\"%s\">\n", text)
 
 #define MaybeSelect(fp, flag, text) \
-	fprintf(fp,"<select %s name=\"%s\">\n", DISABLED(flag), text)
+	fprintf(fp,"<select name=\"%s\" %s>\n", text, DISABLED(flag))
 
 #define EndSelect(fp)\
-	fprintf(fp, "</select>\n")
+	fprintf(fp,"</select>\n")
 
 PRIVATE void PutOptValues ARGS3(
 	FILE *,		fp,
@@ -3444,6 +3496,13 @@ PUBLIC int postoptions ARGS1(
 	}
 
 	/*
+	 * verbose images mode
+	 */
+	if (!strcmp(data[i].tag, verbose_images_string)) {
+	    verbose_img = GetOptValues(bool_values, data[i].value);
+	}
+
+	/*
 	 * vi_keys
 	 */
 	if (!strcmp(data[i].tag, vi_keys_string)) {
@@ -3510,6 +3569,15 @@ PUBLIC int postoptions ARGS1(
 	}
 
 	/*
+	 * user_agent header
+	 */
+	if (!strcmp(data[i].tag, user_agent_string)) {
+	    FREE(LYUserAgent);
+	    /* ignore Copyright warning ? */
+	    StrAllocCopy(LYUserAgent, data[i].value);
+	}
+
+	/*
 	 * save_options
 	 */
 	if (!strcmp(data[i].tag, save_options_string)) {
@@ -3561,6 +3629,7 @@ PUBLIC int postoptions ARGS1(
 	    HTAlert(OPTIONS_NOT_SAVED);
 	}
     }
+    LYpop(newdoc);  /* return to previous doc, not to options menu! */
     if (need_reload == TRUE)  {
         /* FIXME: currently dummy */
     }
@@ -3583,7 +3652,8 @@ PUBLIC int gen_options ARGS1(
     static char tempfile[256];
     char any_filename[256];
     FILE *fp0;
-    char *leaf;
+    size_t cset_len = 0;
+    size_t text_len = COLS - 38;	/* cf: PutLabel */
 
     LYRemoveTemp(tempfile);
     fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
@@ -3599,9 +3669,9 @@ PUBLIC int gen_options ARGS1(
 
     fprintf(fp0, "<html>\n<head>\n<title>%s</title>\n</head>\n<body>\n",
 	    OPTIONS_TITLE);
-
-    fprintf(fp0,"<h1>Options Menu (%s Version %s)</h1>\n",
-	    LYNX_NAME, LYNX_VERSION);
+    fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
+		 LYNX_NAME, LYNX_VERSION,
+		 helpfilepath, OPTIONS_HELP, OPTIONS_TITLE);
 
     /*
      * I do C, not HTML.  Feel free to pretty this up.
@@ -3618,91 +3688,74 @@ PUBLIC int gen_options ARGS1(
 	    secure_string, secure_value);
 
     /*
-     * visible preformatted text begins here
+     * visible text begins here
      */
-    fprintf(fp0,"<pre>\n\n");
 
     /*
      * save/reset
      */
-    fprintf(fp0,"<input type=\"submit\" value=\"Accept Changes\">");
-    fprintf(fp0," <input type=\"reset\" value=\"Reset\">");
-    fprintf(fp0," Use the back key to cancel changes.");
-
-    strcpy(any_filename, helpfile);
-    if ((leaf = strrchr(any_filename, '/')) != 0)
-    	leaf++;
-    else
-        leaf = any_filename;
-    strcpy(leaf, "keystrokes/option_help.html");
-
-    fprintf(fp0," <a href=\"%s\"> HELP available</a>\n\n", any_filename);
+    fprintf(fp0,"<p align=center>\n");
+    fprintf(fp0,"<input type=\"submit\" value=\"Accept Changes\">\n");
+    fprintf(fp0,"<input type=\"reset\" value=\"Reset Changes\">\n");
+    fprintf(fp0,"Left Arrow cancels changes<br>\n");
 
     /*
-     * editor
+     * save options
      */
-    PutLabel(fp0, "Editor");
-    fprintf(fp0,"<input %s type=\"text\" name=\"%s\" value=\"%s\">\n",
-	    DISABLED(no_editor || system_editor),
-	    editor_string,
-	    NOTEMPTY(editor));
+    if (!no_option_save) {
+	fprintf(fp0, "<p>Save options to disk: ");
+	fprintf(fp0,"<input type=\"checkbox\" name=\"%s\">\n",
+		save_options_string);
+    }
+
+    /*
+     * preformatted text follows
+     */
+    fprintf(fp0,"<pre>\n");
+    fprintf(fp0,"\n<em>Personal Preferences</em>\n");
+
+    /*
+     * user_mode
+     *
+     * This option is here because we come from LYMainLoop() with
+     * newdoc.links = 3, and land on 'save options', however if
+     * no_option_save is set we will land on 'Display' which is an input
+     * field and leaving back to previous document will be annoying.
+     * Thus 'user mode' is the most sensible option to put into the
+     * front lines. - SKY
+     */
+    PutLabel(fp0, "User Mode");
+    BeginSelect(fp0, user_mode_string);
+    PutOptValues(fp0, user_mode, user_mode_values);
+    EndSelect(fp0);
 
     /*
      * display
      */
     PutLabel(fp0, "Display");
-    fprintf(fp0,"<input type=\"text\" name=\"%s\" value=\"%s\">\n",
-	    display_string,
-	    NOTEMPTY(display));
+    PutTextInput(fp0, display_string, NOTEMPTY(display), text_len, "");
 
     /*
-     * multi-bookmarks mode
+     * editor
      */
-    if (!LYMBMBlocked) {
-       PutLabel(fp0, "Multi-bookmarks");
-       BeginSelect(fp0, mbm_string);
-       PutOption(fp0, !LYMultiBookmarks,
-	   mbm_off_string,
-	   mbm_off_string);
-       PutOption(fp0, LYMultiBookmarks && !LYMBMAdvanced,
-	   mbm_standard_string,
-	   mbm_standard_string);
-       PutOption(fp0, LYMultiBookmarks && LYMBMAdvanced,
-	   mbm_advanced_string,
-	   mbm_advanced_string);
-       EndSelect(fp0);
-    }
-
+    PutLabel(fp0, "Editor");
+    PutTextInput(fp0, editor_string, NOTEMPTY(editor), text_len,
+		DISABLED(no_editor || system_editor));
     /*
-     * bookmarks files menu
+     * emacs_keys
      */
-    if (LYMultiBookmarks) {
-
-        PutLabel(fp0, "Review/edit Bookmarks files");
-        fprintf(fp0,"<a href=\"LYNXOPTIONS://MBM_MENU\">go mbm menu</a>\n");
-
-    } else {
-        PutLabel(fp0, "Bookmarks file");
-        fprintf(fp0,"<input type=\"text\" name=\"%s\" value=\"%s\">\n",
-		single_bookmark_string,
-		NOTEMPTY(bookmark_page));
-    }
-
-    /*
-     * ftp sort
-     */
-    PutLabel(fp0, "Ftp sort criteria");
-    BeginSelect(fp0, ftp_sort_string);
-    PutOptValues(fp0, HTfileSortMethod, ftp_sort_values);
+    PutLabel(fp0, "Emacs Keys");
+    BeginSelect(fp0, emacs_keys_string);
+    PutOptValues(fp0, emacs_keys, bool_values);
     EndSelect(fp0);
 
     /*
-     * mail_address
+     * keypad_mode
      */
-    PutLabel(fp0, "Personal mail address");
-    fprintf(fp0,"<input type=\"text\" name=\"%s\" value=\"%s\">\n",
-	    mail_address_string,
-	    NOTEMPTY(personal_mail_address));
+    PutLabel(fp0, "Keypad Mode");
+    BeginSelect(fp0, keypad_mode_string);
+    PutOptValues(fp0, keypad_mode, keypad_mode_values);
+    EndSelect(fp0);
 
     /*
      * search_type
@@ -3713,77 +3766,19 @@ PUBLIC int gen_options ARGS1(
     EndSelect(fp0);
 
     /*
-     * preferred_doc_lang
+     * mail_address
      */
-    PutLabel(fp0, "Preferred document language");
-    fprintf(fp0,"<input type=\"text\" name=\"%s\" value=\"%s\">\n",
-	    preferred_doc_lang_string,
-	    NOTEMPTY(language));
+    PutLabel(fp0, "Personal mail address");
+    PutTextInput(fp0, mail_address_string,
+		NOTEMPTY(personal_mail_address), text_len, "");
 
     /*
-     * preferred_doc_char
+     * select_popups
      */
-    PutLabel(fp0, "Preferred document character set");
-    fprintf(fp0,"<input type=\"text\" name=\"%s\" value=\"%s\">\n",
-	    preferred_doc_char_string,
-	    NOTEMPTY(pref_charset));
-
-    /*
-     * display_char_set
-     */
-    PutLabel(fp0, "Display character set");
-    BeginSelect(fp0, display_char_set_string);
-    for (i = 0; LYchar_set_names[i]; i++) {
-	char temp[10];
-	sprintf(temp, "%d", i);
-        PutOption(fp0, i==current_char_set, temp, LYchar_set_names[i]);
-    }
+    PutLabel(fp0, "Popups for select fields");
+    BeginSelect(fp0, select_popups_string);
+    PutOptValues(fp0, LYSelectPopups, bool_values);
     EndSelect(fp0);
-
-    /*
-     * raw_mode
-     */
-    if  (LYHaveCJKCharacterSet)
-	/*
-	 * Since CJK people hardly mixed with other world
-	 * we split the header to make it more readable:
-	 * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
-	 */
-	PutLabel(fp0, "CJK mode");
-    else
-	PutLabel(fp0, "Raw 8-bit");
-
-    BeginSelect(fp0, raw_mode_string);
-    PutOptValues(fp0, LYRawMode, bool_values);
-    EndSelect(fp0);
-
-    /*
-     * assume_char_set
-     */
-    /*
-     * FIXME: If bogus value in lynx.cfg, then in old way, that is the
-     * string that was displayed.  Now, user will never see that.  Good
-     * or bad?  I don't know.  MRC
-     */
-    /* if (user_mode==ADVANCED_MODE) */ {
-	int curval;
-
-	curval = UCLYhndl_for_unspec;
-	if (curval == current_char_set && UCAssume_MIMEcharset) {
-	    curval = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
-	}
-	if (curval < 0) {
-	    curval = LYRawMode ? current_char_set : 0;
-	}
-	PutLabel(fp0, "Assumed document character set");
-	BeginSelect(fp0, assume_char_set_string);
-	for (i = 0; i < LYNumCharsets; i++) {
-	    PutOption(fp0, i==curval,
-		      LYCharSet_UC[i].MIMEname,
-		      LYCharSet_UC[i].MIMEname);
-	}
-	EndSelect(fp0);
-    }
 
     /*
      * show_color
@@ -3831,37 +3826,11 @@ PUBLIC int gen_options ARGS1(
 #endif /* USE_SLANG || COLOR_CURSES */
 
     /*
-     * vi_keys
+     * verbose images mode
      */
-    PutLabel(fp0, "VI Keys");
-    BeginSelect(fp0, vi_keys_string);
-    PutOptValues(fp0, vi_keys, bool_values);
-    EndSelect(fp0);
-
-    /*
-     * emacs_keys
-     */
-    PutLabel(fp0, "Emacs Keys");
-    BeginSelect(fp0, emacs_keys_string);
-    PutOptValues(fp0, emacs_keys, bool_values);
-    EndSelect(fp0);
-
-    /*
-     * show_dotfiles
-     */
-    if (!no_dotfiles) {
-	PutLabel(fp0, "Show dot files");
-	BeginSelect(fp0, show_dotfiles_string);
-	PutOptValues(fp0, show_dotfiles, bool_values);
-	EndSelect(fp0);
-    }
-
-    /*
-     * select_popups
-     */
-    PutLabel(fp0, "Popups for select fields");
-    BeginSelect(fp0, select_popups_string);
-    PutOptValues(fp0, LYSelectPopups, bool_values);
+    PutLabel(fp0, "Verbose images");
+    BeginSelect(fp0, verbose_images_string);
+    PutOptValues(fp0, verbose_img, bool_values);
     EndSelect(fp0);
 
     /*
@@ -3873,11 +3842,132 @@ PUBLIC int gen_options ARGS1(
     EndSelect(fp0);
 
     /*
-     * keypad_mode
+     * vi_keys
      */
-    PutLabel(fp0, "Keypad Mode");
-    BeginSelect(fp0, keypad_mode_string);
-    PutOptValues(fp0, keypad_mode, keypad_mode_values);
+    PutLabel(fp0, "VI Keys");
+    BeginSelect(fp0, vi_keys_string);
+    PutOptValues(fp0, vi_keys, bool_values);
+    EndSelect(fp0);
+
+    fprintf(fp0,"\n<em>Bookmarks Options</em>\n");
+
+    /*
+     * multi-bookmarks mode
+     */
+    if (!LYMBMBlocked) {
+       PutLabel(fp0, "Multi-bookmarks");
+       BeginSelect(fp0, mbm_string);
+       PutOption(fp0, !LYMultiBookmarks,
+	   mbm_off_string,
+	   mbm_off_string);
+       PutOption(fp0, LYMultiBookmarks && !LYMBMAdvanced,
+	   mbm_standard_string,
+	   mbm_standard_string);
+       PutOption(fp0, LYMultiBookmarks && LYMBMAdvanced,
+	   mbm_advanced_string,
+	   mbm_advanced_string);
+       EndSelect(fp0);
+    }
+
+    /*
+     * bookmarks files menu
+     */
+    if (LYMultiBookmarks) {
+
+        PutLabel(fp0, "Review/edit Bookmarks files");
+        fprintf(fp0,
+	"<a href=\"LYNXOPTIONS://MBM_MENU\">Goto multi-bookmark menu</a>\n");
+
+    } else {
+        PutLabel(fp0, "Bookmarks file");
+        PutTextInput(fp0, single_bookmark_string,
+		NOTEMPTY(bookmark_page), text_len, "");
+    }
+
+    fprintf(fp0,"\n<em>Character Set Options</em>\n");
+
+    /*
+     * assume_char_set
+     */
+    /*
+     * FIXME: If bogus value in lynx.cfg, then in old way, that is the
+     * string that was displayed.  Now, user will never see that.  Good
+     * or bad?  I don't know.  MRC
+     */
+    /* if (user_mode==ADVANCED_MODE) */ {
+	int curval;
+
+	curval = UCLYhndl_for_unspec;
+	if (curval == current_char_set && UCAssume_MIMEcharset) {
+	    curval = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
+	}
+	if (curval < 0) {
+	    curval = LYRawMode ? current_char_set : 0;
+	}
+	PutLabel(fp0, "Assumed document character set");
+	BeginSelect(fp0, assume_char_set_string);
+	for (i = 0; i < LYNumCharsets; i++) {
+	    PutOption(fp0, i==curval,
+		      LYCharSet_UC[i].MIMEname,
+		      LYCharSet_UC[i].MIMEname);
+	}
+	EndSelect(fp0);
+    }
+
+    /*
+     * display_char_set
+     */
+    PutLabel(fp0, "Display character set");
+    BeginSelect(fp0, display_char_set_string);
+    for (i = 0; LYchar_set_names[i]; i++) {
+	char temp[10];
+	size_t len = strlen(LYchar_set_names[i]);
+	if (len > cset_len)
+		cset_len = len;
+	sprintf(temp, "%d", i);
+        PutOption(fp0, i==current_char_set, temp, LYchar_set_names[i]);
+    }
+    EndSelect(fp0);
+
+    /*
+     * preferred_doc_char
+     */
+    PutLabel(fp0, "Preferred document character set");
+    PutTextInput(fp0, preferred_doc_char_string,
+	    NOTEMPTY(pref_charset), cset_len+2, "");
+
+    /*
+     * preferred_doc_lang
+     */
+    PutLabel(fp0, "Preferred document language");
+    PutTextInput(fp0, preferred_doc_lang_string,
+	    NOTEMPTY(language), cset_len+2, "");
+
+    /*
+     * raw_mode
+     */
+    if  (LYHaveCJKCharacterSet)
+	/*
+	 * Since CJK people hardly mixed with other world
+	 * we split the header to make it more readable:
+	 * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
+	 */
+	PutLabel(fp0, "CJK mode");
+    else
+	PutLabel(fp0, "Raw 8-bit");
+
+    BeginSelect(fp0, raw_mode_string);
+    PutOptValues(fp0, LYRawMode, bool_values);
+    EndSelect(fp0);
+
+    fprintf(fp0,"\n<em>File Management Options</em>\n");
+
+    /*
+     * ftp sort
+     */
+    PutLabel(fp0, "Ftp sort criteria");
+    BeginSelect(fp0, ftp_sort_string);
+    PutOptValues(fp0, HTfileSortMethod, ftp_sort_values);
     EndSelect(fp0);
 
 #ifdef DIRED_SUPPORT
@@ -3891,38 +3981,43 @@ PUBLIC int gen_options ARGS1(
 #endif /* DIRED_SUPPORT */
 
     /*
-     * user_mode
+     * show_dotfiles
      */
-    PutLabel(fp0, "User Mode");
-    BeginSelect(fp0, user_mode_string);
-    PutOptValues(fp0, user_mode, user_mode_values);
-    EndSelect(fp0);
+    if (!no_dotfiles) {
+	PutLabel(fp0, "Show dot files");
+	BeginSelect(fp0, show_dotfiles_string);
+	PutOptValues(fp0, show_dotfiles, bool_values);
+	EndSelect(fp0);
+    }
+
+    fprintf(fp0,"\n");
 
     /*
-     * save options
+     * user_agent
      */
-    if (!no_option_save) {
-	PutLabel(fp0, "Save options to disk");
-	fprintf(fp0,"<input type=\"checkbox\" name=\"%s\">\n",
-		save_options_string);
+    if (!no_useragent) {
+	PutLabel(fp0, "User-Agent header");
+	PutTextInput(fp0, user_agent_string, NOTEMPTY(LYUserAgent), text_len, "");
     }
+
+    fprintf(fp0,"\n</pre>\n");
 
     /*
      * save/reset
      */
-    fprintf(fp0,"\n");
-    fprintf(fp0,"<input type=\"submit\" value=\"Accept Changes\">");
-    fprintf(fp0," <input type=\"reset\" value=\"Reset\">");
-    fprintf(fp0," Use the back key to cancel changes.\n");
+    fprintf(fp0,"<p align=center>\n");
+    fprintf(fp0,"<input type=\"submit\" value=\"Accept Changes\">\n ");
+    fprintf(fp0,"<input type=\"reset\" value=\"Reset Changes\">\n");
+    fprintf(fp0,"Left Arrow cancels changes<br>\n");
 
     /*
      * close HTML
      */
-    fprintf(fp0,"</pre>\n");
+    fprintf(fp0,"</form>\n");
     fprintf(fp0,"</body>\n");
     fprintf(fp0,"</html>\n");
 
-    fclose(fp0);
+    LYCloseTempFP(fp0);
     return(0);
 }
 #endif /* EXP_FORMS_OPTIONS */

@@ -223,8 +223,12 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 	    return;
 	if (c != '\n' && c != '\t' && c != '\r')
 	    HTChunkPutc(&me->title, c);
-	else
-	    HTChunkPutc(&me->title, ' ');
+	else if (HTCJK == CHINESE || HTCJK == JAPANESE || HTCJK == TAIPEI)
+	    if (c == '\t')
+		HTChunkPutc(&me->title, ' ');
+	    else return;
+	    /* don't replace '\n' with ' ' if Chinese or Japanese - HN */
+	else HTChunkPutc(&me->title, ' ');
 	return;
 
     case HTML_STYLE:
@@ -336,13 +340,19 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 		UPDATE_STYLE;
 	    }
 	    if (c == '\n') {
-		if (me->in_word) {
-		    if (HText_getLastChar(me->text) != ' ') {
-			me->inP = TRUE;
-			me->inLABEL = FALSE;
-			HText_appendCharacter(me->text, ' ');
+		if (HTCJK == CHINESE || HTCJK == JAPANESE ||
+		    HTCJK == TAIPEI) {
+		    /* don't replace '\n' with ' ' if Chinese or Japanese - HN
+		     */
+		} else {
+		    if (me->in_word) {
+			if (HText_getLastChar(me->text) != ' ') {
+			    me->inP = TRUE;
+			    me->inLABEL = FALSE;
+			    HText_appendCharacter(me->text, ' ');
+			}
+			me->in_word = NO;
 		    }
-		    me->in_word = NO;
 		}
 
 	    } else if (c == ' ' || c == '\t') {
@@ -365,15 +375,15 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
     } /* end second switch */
 
     if (c == '\n' || c == '\t') {
-	HText_setLastChar(me->text, ' '); /* set it to a generic seperater */
+	HText_setLastChar(me->text, ' '); /* set it to a generic separator */
 
 	/*
 	 *  \r's are ignored.  In order to keep collapsing spaces
 	 *  correctly we must default back to the previous
-	 *  seperater if there was one
+	 *  separator if there was one
 	 */
     } else if (c == '\r' && HText_getLastChar(me->text) == ' ') {
-	HText_setLastChar(me->text, ' '); /* set it to a generic seperater */
+	HText_setLastChar(me->text, ' '); /* set it to a generic separator */
     } else {
 	HText_setLastChar(me->text, c);
     }
@@ -471,10 +481,17 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 		    UPDATE_STYLE;
 		}
 		if (c == '\n') {
-		    if (me->in_word) {
-			if (HText_getLastChar(me->text) != ' ')
-			    HText_appendCharacter(me->text, ' ');
-			me->in_word = NO;
+		    if (HTCJK == CHINESE || HTCJK == JAPANESE ||
+			HTCJK == TAIPEI) {
+			/* don't replace '\n' with ' '
+			 * if Chinese or Japanese - HN
+			 */
+		    } else {
+			if (me->in_word) {
+			    if (HText_getLastChar(me->text) != ' ')
+				HText_appendCharacter(me->text, ' ');
+				me->in_word = NO;
+			}
 		    }
 
 		} else if (c == ' ' || c == '\t') {
@@ -490,15 +507,15 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 
 		/* set the Last Character */
 		if (c == '\n' || c == '\t') {
-		    /* set it to a generic seperater */
+		    /* set it to a generic separator */
 		    HText_setLastChar(me->text, ' ');
 		} else if (c == '\r' &&
 			   HText_getLastChar(me->text) == ' ') {
 		    /*
 		     *	\r's are ignored.  In order to keep collapsing
 		     *	spaces correctly, we must default back to the
-		     *	previous seperator, if there was one.  So we
-		     *	set LastChar to a generic seperater.
+		     *	previous separator, if there was one.  So we
+		     *	set LastChar to a generic separator.
 		     */
 		    HText_setLastChar(me->text, ' ');
 		} else {
@@ -1533,15 +1550,15 @@ PRIVATE void HTML_start_element ARGS6(
     case HTML_BR:
 	UPDATE_STYLE;
 	CHECK_ID(HTML_GEN_ID);
-	  /* Add a \r (new line) if one of these three scenarios are true: 
-	   *   1. We are not collapsing BR's, or 
-	   *   2. (we are collapsing and) This line has text on it, or 
-	   *   3. (we are collapsing and) The previous line has text on it. 
-	   * Otherwise, don't do anything. -DH 980814 
-	   */ 
-	if ((LYCollapseBRs == FALSE) ||
-	    HText_LastLineSize(me->text, FALSE) || 
-	    HText_PreviousLineSize(me->text, FALSE)) { 
+	  /* Add a \r (new line) if these three conditions are true:
+	   *   1. We are not collapsing BR's, and
+	   *   2. This line has text on it, or
+	   *   3. The previous line has text on it.
+	   * Otherwise, don't do anything. -DH 980814, TD 980827
+	   */
+	if ((LYCollapseBRs == FALSE) &&
+	    (HText_LastLineSize(me->text, FALSE) ||
+	     HText_PreviousLineSize(me->text, FALSE))) {
 	    HText_setLastChar(me->text, ' ');  /* absorb white space */
 	    HText_appendCharacter(me->text, '\r');
 	}

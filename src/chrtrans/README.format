@@ -82,6 +82,10 @@ c) character translation definitions:
  * where <range> ::= <fontpos>-<fontpos>
  * and <unicode> ::= U+<h><h><h><h>
  * and <h> ::= <hexadecimal digit>
+ *
+  [Note that <fontpos> _without_ targets assumed notdefined,
+  so tables from ftp.unicode.org need no patching.]
+
 
 d) string replacement definitions:
 

@@ -27,14 +27,9 @@
 PUBLIC void HTAlert ARGS1(
 	CONST char *,	Msg)
 {
-    if (TRACE) {
-	fprintf(tfp, "\nAlert!: %s", Msg);
-	fflush(tfp);
-	_user_message("Alert!: %s", Msg);
-	fprintf(tfp, "\n\n");
-	fflush(tfp);
-    } else
-	_user_message("Alert!: %s", Msg);
+    CTRACE(tfp, "\nAlert!: %s\n\n", Msg);
+    CTRACE_FLUSH(tfp);
+    _user_message("Alert!: %s", Msg);
 
     sleep(AlertSecs);
 }

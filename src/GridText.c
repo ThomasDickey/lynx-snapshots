@@ -525,6 +525,17 @@ PUBLIC HText *	HText_new ARGS1(
     underline_on = FALSE; /* reset */
     bold_on = FALSE;
 
+#ifdef DISP_PARTIAL
+    /*
+     * By this function we create HText object and set new Lines counter
+     * so we may start displaying the document while downloading. - LP
+     */
+    if (display_partial)
+         NumOfLines_partial = 0;  /* enable HTDisplayPartial() */
+#endif
+
+    CTRACE(tfp, "GridText: start HText_new\n");
+
     return self;
 }
 
@@ -779,7 +790,12 @@ PRIVATE int display_line ARGS2(
 	    case LY_BOLD_END_CHAR:
 		stop_bold ();
 		break;
+
 #endif
+	    case LY_SOFT_NEWLINE:
+		if (!dump_output_immediately)
+		    addch('+');
+		break;
 
 	    case LY_SOFT_HYPHEN:
 	        if (*data != '\0' ||
@@ -1082,7 +1098,7 @@ PRIVATE void display_page ARGS3(
 #else
 	assert(line->next != NULL);
 #endif /* !VMS */
-    }
+    } /* Loop */
 
     if (LYlowest_eightbit[current_char_set] <= 255 &&
 	(current_char_set != charset_last_displayed) &&
@@ -1312,7 +1328,7 @@ PRIVATE void display_page ARGS3(
 		 *  in it. - FM
 		 */
 		move((i + 2), 0);
-	    }
+	    } /* end while */
 #endif /* FANCY CURSES || USE_SLANG */
 
 	    /*
@@ -1331,8 +1347,8 @@ PRIVATE void display_page ARGS3(
 	    }
 	    display_flag = TRUE;
 	    line = line->next;
-	}
-    }
+	} /* end of "Verify and display each line." loop */
+    } /* end "Output the page." */
 
     text->next_line = line;	/* Line after screen */
     text->stale = NO;		/* Display is up-to-date */
@@ -1494,7 +1510,7 @@ PRIVATE void display_page ARGS3(
 	    CTRACE(tfp, "\ndisplay_page: MAXLINKS reached.\n");
 	    break;
 	}
-    }
+    } /* end of loop "Add the anchors to Lynx structures." */
 
     /*
      *  Free any un-reallocated links[] entries
@@ -2252,6 +2268,11 @@ PUBLIC void HText_appendCharacter ARGS2(
 	    bold_on = OFF;
 	    ctrl_chars_on_this_line++;
 	    return;
+	} else if (ch == LY_SOFT_NEWLINE) {
+	    line->data[line->size++] = LY_SOFT_NEWLINE;
+	    line->data[line->size] = '\0';
+	    ctrl_chars_on_this_line++;
+	    return;
 	} else if (ch == LY_SOFT_HYPHEN) {
 	    int i;
 
@@ -2405,10 +2426,11 @@ PUBLIC void HText_appendCharacter ARGS2(
 		HTisDocumentSource()) {
 	    int gap = line->data[line->size - 1];
 	    new_line(text);
+	    line = text->last_line;
+	    HText_appendCharacter (text, LY_SOFT_NEWLINE);
 	    HText_appendCharacter (text, gap);
 	}
     }
-
 
     if (ch == ' ') {
 	/*
@@ -2536,6 +2558,9 @@ check_IgnoreExcess:
 	     *  Can split here. - FM
 	     */
 	    text->permissible_split = text->last_line->size;
+	}
+	if (ch == LY_SOFT_NEWLINE) {
+	    ctrl_chars_on_this_line++;
 	}
     }
 }
@@ -2925,12 +2950,7 @@ PUBLIC void HText_endAnchor ARGS2(
 		    } else if (prev && prev->size > 1) {
 			k = (i + 1);
 			j = (prev->size - 1);
-			while ((j >= 0) &&
-			       (prev->data[j] == LY_BOLD_START_CHAR ||
-			        prev->data[j] == LY_BOLD_END_CHAR ||
-				prev->data[j] == LY_UNDERLINE_START_CHAR ||
-			        prev->data[j] == LY_UNDERLINE_END_CHAR ||
-				prev->data[j] == LY_SOFT_HYPHEN))
+		        while ((j >= 0) && IsSpecialAttrChar(prev->data[j]))
 			    j--;
 		        i = (j + 1);
 			while (j >= 0 &&
@@ -2990,12 +3010,7 @@ PUBLIC void HText_endAnchor ARGS2(
 		    }
 		} else if (prev && prev->size > 2) {
 		    j = (prev->size - 1);
-		    while ((j >= 0) &&
-			   (prev->data[j] == LY_BOLD_START_CHAR ||
-			    prev->data[j] == LY_BOLD_END_CHAR ||
-			    prev->data[j] == LY_UNDERLINE_START_CHAR ||
-			    prev->data[j] == LY_UNDERLINE_END_CHAR ||
-			    prev->data[j] == LY_SOFT_HYPHEN))
+		    while ((j >= 0) && IsSpecialAttrChar(prev->data[j]))
 		        j--;
 		    if (j < 0)
 		        j = 0;
@@ -3243,7 +3258,7 @@ re_parse:
 	if (anchor_ptr->extent < 0) {
 	    anchor_ptr->extent = 0;
 	}
-	CTRACE(tfp, "anchor text: '%s'   pos: %d\n",
+	CTRACE(tfp, "anchor text: '%s'   col: %d\n",
 			    line_ptr->data, anchor_ptr->line_pos);
 	/*
 	 *  If the link begins with an end of line and we have more
@@ -3257,8 +3272,7 @@ re_parse:
 	    goto re_parse;
 	}
 	cur_shift = 0;
-	CTRACE(tfp, "anchor text: '%s'   pos: %d\n",
-			    line_ptr->data, anchor_ptr->line_pos);
+
 	/*
 	 *  Copy the link name into the data structure.
 	 */
@@ -3321,7 +3335,7 @@ re_parse:
 	anchor_ptr->line_pos += line_ptr->offset;
 	anchor_ptr->line_num  = cur_line;
 
-	CTRACE(tfp, "GridText: adding link on line %d in HText_endAppend\n",
+	CTRACE(tfp, "GridText:     add link on line %d in HText_endAppend\n",
 		    cur_line);
 
 	/*
@@ -3971,7 +3985,16 @@ PUBLIC void HText_pageDisplay ARGS2(
 	int,		line_num,
 	char *,		target)
 {
+    CTRACE(tfp, "GridText: HText_pageDisplay at line %d started\n", line_num);
+
     display_page(HTMainText, line_num-1, target);
+
+    CTRACE(tfp, "GridText: HText_pageDisplay finished\n");
+
+#ifdef DISP_PARTIAL
+	if (display_partial && debug_display_partial)
+	sleep(MessageSecs);
+#endif
 
     is_www_index = HTAnchor_isIndex(HTMainAnchor);
 }
@@ -4615,6 +4638,7 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 	int,		is_reply)
 {
     register int i;
+    int first = TRUE;
     HTLine * line;
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
@@ -4625,6 +4649,12 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 
     line = HTMainText->last_line->next;
     for (;; line = line->next) {
+	if (!first
+	 && line->data[0] != LY_SOFT_NEWLINE
+	 && line->data[0] != '\0')
+	    fputc('\n',fp);
+	first = FALSE;
+
 	/*
 	 *  Add news-style quotation if requested. - FM
 	 */
@@ -4670,11 +4700,6 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 	    }
 	}
 
-	/*
-	 *  Add the return.
-	 */
-	fputc('\n',fp);
-
 	if (line == HTMainText->last_line)
 	    break;
 
@@ -4683,6 +4708,7 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 	    break;
 #endif /* VMS */
     }
+    fputc('\n',fp);
 
 }
 
@@ -4697,6 +4723,7 @@ PUBLIC void print_crawl_to_fd ARGS3(
 	char *,		thetitle)
 {
     register int i;
+    int first = TRUE;
     HTLine * line;
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
@@ -4712,6 +4739,11 @@ PUBLIC void print_crawl_to_fd ARGS3(
     }
 
     for (;; line = line->next) {
+	if (!first
+	 && line->data[0] != LY_SOFT_NEWLINE
+	 && line->data[0] != '\0')
+	    fputc('\n',fp);
+	first = FALSE;
 	/*
 	 *  Add offset.
 	 */
@@ -4740,15 +4772,11 @@ PUBLIC void print_crawl_to_fd ARGS3(
 	     }
 	}
 
-	/*
-	 *  Add the return.
-	 */
-	fputc('\n',fp);
-
 	if (line == HTMainText->last_line) {
 	    break;
 	}
     }
+    fputc('\n',fp);
 
     /*
      *  Add the References list if appropriate

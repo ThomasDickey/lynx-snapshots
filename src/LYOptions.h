@@ -69,8 +69,10 @@ extern void LYoptions NOPARAMS;
 #define L_EXEC		18
 #endif /* DIRED_SUPPORT */
 
-#endif /* EXP_FORMS_OPTIONS */
+#define L_VERBOSE_IMAGES L_USER_MODE
+#define B_VERBOSE_IMAGES 50
+#define C_VERBOSE_IMAGES (B_VERBOSE_IMAGES + 21)
 
-#define OPTIONS_TITLE "Lynx Options Configuration"
+#endif /* EXP_FORMS_OPTIONS */
 
 #endif /* LYOPTIONS_H */
