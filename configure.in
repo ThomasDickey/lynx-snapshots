@@ -347,6 +347,7 @@ elif test "x$cf_cv_use_libsocks5" != xno ; then
 else
 	CF_NETLIBS
 fi
+CF_INET_ADDR
 
 dnl This has to be cached, since there's a lot of interdependent tests.
 AC_CACHE_CHECK(for screen type, cf_cv_screen,[

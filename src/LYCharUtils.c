@@ -2826,16 +2826,39 @@ PUBLIC void LYHandleMETA ARGS4(
 				 me->outUCLYhndl, me->outUCI);
 	    } else {
 		/*
-		 *  Hope it's a match, for now. - FM
+		 *  Cannot translate.
+		 *  If according to some heuristic the given
+		 *  charset and the current display character
+		 *  both are likely to be like ISO-8859 in
+		 *  structure, pretend we have some kind
+		 *  of match.
 		 */
-		cp1 = &cp4[10];
-		while (*cp1 &&
-		       isdigit((unsigned char)(*cp1)))
-		    cp1++;
-		*cp1 = '\0';
-		StrAllocCopy(me->node_anchor->charset, cp4);
-		HTPassEightBitRaw = TRUE;
-		HTAlert(me->node_anchor->charset);
+		BOOL given_is_8859
+		    = (!strncmp(cp4, "iso-8859-", 9) &&
+		       isdigit((unsigned char)cp4[9]));
+		BOOL given_is_8859like
+		    = (given_is_8859 || !strncmp(cp4, "windows-", 8) ||
+			!strncmp(cp4, "cp12", 4) ||
+			!strncmp(cp4, "cp-12", 5));
+		BOOL given_and_display_8859like
+		    = (given_is_8859like &&
+		       (strstr(LYchar_set_names[current_char_set],
+			       "ISO-8859") ||
+			strstr(LYchar_set_names[current_char_set],
+			       "windows-")));
+
+		if (given_is_8859) {
+		    cp1 = &cp4[10];
+		    while (*cp1 &&
+			   isdigit((unsigned char)(*cp1)))
+			cp1++;
+		    *cp1 = '\0';
+		}
+		if (given_and_display_8859like) {
+		    StrAllocCopy(me->node_anchor->charset, cp4);
+		    HTPassEightBitRaw = TRUE;
+		}
+		HTAlert(*cp4 ? cp4 : me->node_anchor->charset);
 
 	    }
 	    FREE(cp3);

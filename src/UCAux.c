@@ -13,11 +13,16 @@ PUBLIC BOOL UCCanUniTranslateFrom ARGS1(
 {
     if (from < 0)
 	return NO;
-    if (LYCharSet_UC[from].enc == UCT_ENC_7BIT ||
-	LYCharSet_UC[from].enc == UCT_ENC_UTF8)
-	return YES;
-    if (LYCharSet_UC[from].codepoints & (UCT_CP_SUBSETOF_LAT1))
-	return YES;
+    if (LYCharSet_UC[from].enc == UCT_ENC_CJK)
+	return NO;
+    if (!strcmp(LYCharSet_UC[from].MIMEname, "x-transparent"))
+	return NO;
+    if (from == LATIN1) {
+	if (LYCharSet_UC[from].codepoints & (UCT_CP_SUPERSETOF_LAT1))
+	    return YES;
+    }
+
+    /* others YES, but check for lost tables to be sure */
     return (LYCharSet_UC[from].UChndl >= 0);
 }
 
@@ -123,7 +128,7 @@ PUBLIC BOOL UCNeedNotTranslate ARGS2(
 	if (HTCJK == JAPANESE &&
 	    (!strcmp(fromname, "euc-jp") ||
 	     !strcmp(fromname, "shift_jis")))
-	    return YES;	/* ??? */
+	    return YES;	/* translate internally by lynx, no unicode */
 	return NO;	/* If not handled by (from == to) above. */
     }
     return NO;
@@ -151,7 +156,9 @@ PUBLIC void UCSetTransParams ARGS5(
     CONST LYUCcharset*,	p_out)
 {
     CTRACE(tfp, "UCSetTransParams: from %s(%d) to %s(%d)\n",
-	   p_in->MIMEname, p_in->UChndl, p_out->MIMEname, p_out->UChndl);
+/*	   p_in->MIMEname, p_in->UChndl, p_out->MIMEname, p_out->UChndl); */
+	   p_in->MIMEname,  UCGetLYhndl_byMIME(p_in->MIMEname),
+	   p_out->MIMEname, UCGetLYhndl_byMIME(p_out->MIMEname));
 
     /*
     **  Initialize this element to FALSE, and set it TRUE

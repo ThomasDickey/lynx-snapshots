@@ -2583,9 +2583,8 @@ top1:
 	    context->state = S_dquoted;
 	    break;
 	}
-	HTChunkPutc(string, c);
 	context->state = S_value;
-	break;
+	/*  no break!  fall through to S_value and proccess current `c`  */
 
     case S_value:
 	if (WHITE(c) || (c == '>')) {		/* End of word */

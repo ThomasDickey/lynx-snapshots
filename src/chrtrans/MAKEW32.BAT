@@ -18,8 +18,9 @@ makeuctb cp862_uni.tbl > cp862_uni.h
 makeuctb cp864_uni.tbl > cp864_uni.h
 makeuctb cp866_uni.tbl > cp866_uni.h
 makeuctb cp869_uni.tbl > cp869_uni.h
-makeuctb def7_uni.tbl > def7_uni.h
+makeuctb def7_uni.tbl  > def7_uni.h
 makeuctb dmcs_uni.tbl > dmcs_uni.h
+makeuctb hpuni.tbl > hpuni.h
 makeuctb iso01_uni.tbl > iso01_uni.h
 makeuctb iso02_uni.tbl > iso02_uni.h
 makeuctb iso03_uni.tbl > iso03_uni.h

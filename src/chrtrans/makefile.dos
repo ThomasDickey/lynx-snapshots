@@ -45,6 +45,7 @@ TABLES= \
  cp869_uni.h \
  def7_uni.h \
  dmcs_uni.h \
+ hp_uni.h \
  iso01_uni.h \
  iso02_uni.h \
  iso03_uni.h \

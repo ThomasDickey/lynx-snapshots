@@ -2603,6 +2603,8 @@ PRIVATE int LYAddToCloset ARGS1(char*, str)
     unsigned len = strlen(str);
 
     LYCloset[LYClosetTop] = malloc(len+1);
+    if (!LYCloset[LYClosetTop])
+	outofmem(__FILE__, "LYAddToCloset");
     strcpy(LYCloset[LYClosetTop], str);
 
     LYClosetTop = (LYClosetTop + 1) % LYClosetSize;

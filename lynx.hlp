@@ -566,10 +566,9 @@
                            the  form  PROTOCOL_proxy  (literally:
                            http_proxy,  ftp_proxy,  gopher_proxy,
                            etc),                               to
-                           "http://some.server.dom:port/".    See
-                           the INSTALLATION file in the Lynx dis-
-                           tribution  for additional details, and
-                           examples.
+                             "http://some.server.dom:port/".
+                           See Lynx Users Guide for additional
+                           details and examples.
 
        WWW_access_GATEWAY  Lynx still  supports  use  of  gateway
                            servers,  with  the  servers specified
@@ -581,8 +580,7 @@
                            include  a  terminal '/' for gateways,
                            but do for proxies specified by PROTO-
                            COL_proxy  environment variables.  See
-                           the INSTALLATION file in the Lynx dis-
-                           tribution for details.
+                           Lynx Users Guide for details.
 
        WWW_HOME            This  variable,  if set, will override
                            the default startup URL  specified  in

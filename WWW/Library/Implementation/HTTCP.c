@@ -425,7 +425,14 @@ PUBLIC int HTParseInet ARGS2(
 #ifdef GUSI
 	soc_in->sin_addr = inet_addr(host);		/* See netinet/in.h */
 #else
+#ifdef HAVE_INET_ATON
+	if (!inet_aton(host, &(soc_in->sin_addr))) {
+	    CTRACE(tfp, "inet_aton(%s) returns error\n", host);
+	    return -1;
+	}
+#else
 	soc_in->sin_addr.s_addr = inet_addr(host);	/* See arpa/inet.h */
+#endif /* HAVE_INET_ATON */
 #endif /* GUSI */
 #endif /* DGUX_OLD */
 #endif /* DJGPP */

@@ -497,6 +497,7 @@ struct timeval {
 #undef NETCLOSE
 #define NETCLOSE close_s
 #define getsockname getsockname_s
+#define gettext gettext__
 #endif
 
 #ifdef HAVE_UNISTD_H

@@ -3082,6 +3082,7 @@ PUBLIC void HText_endAnchor ARGS2(
 	      keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED) &&
 	     (text->hiddenlinkflag != HIDDENLINKS_MERGE ||
 	      (LYNoISMAPifUSEMAP &&
+	       !(text->node_anchor && text->node_anchor->bookmark) &&
 	       HTAnchor_isISMAPScript(
 		   HTAnchor_followMainLink((HTAnchor *)a->anchor)))));
 	HTLine *last = text->last_line;
@@ -8220,6 +8221,8 @@ PUBLIC void HText_SubmitForm ARGS4(
     FREE(copied_name_used);
     if (Boundary) {
 	HTSprintf(&query, "\r\n--%s--\r\n", Boundary);
+    } else if (!query) {
+	StrAllocCopy(query, "");
     }
     FREE(previous_blanks);
 

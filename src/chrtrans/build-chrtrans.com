@@ -84,6 +84,8 @@ $ define/user sys$output 'CHRwhere'cp1252_uni.h	!WinLatin1 (cp1252)
 $ makeuctb cp1252_uni.tbl
 $ define/user sys$output 'CHRwhere'cp437_uni.h	!DosLatinUS (cp437)
 $ makeuctb cp437_uni.tbl
+$ define/user sys$output 'CHRwhere'hp_uni.h	!HP Roman8
+$ makeuctb hp_uni.tbl
 $ define/user sys$output 'CHRwhere'dmcs_uni.h	!DEC Multinational
 $ makeuctb dmcs_uni.tbl
 $ define/user sys$output 'CHRwhere'mac_uni.h	!Macintosh (8 bit)

@@ -21,6 +21,7 @@
  * the header inclusion statement in your userdefs.h to include
  * one of those with a different name.
  */
+#define ALERT_FORMAT gettext("Alert!: %s")
 #define WELCOME_MSG gettext("Welcome")
 #define REALLY_QUIT_Y gettext("Are you sure you want to quit? [Y] ")
 #define REALLY_QUIT_N gettext("Are you sure you want to quit? [N] ")

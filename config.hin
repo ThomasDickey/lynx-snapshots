@@ -48,6 +48,7 @@
 #undef HAVE_GETGROUPS
 #undef HAVE_GETTEXT		/* defined if you want to use non-GNU gettext */
 #undef HAVE_GETTIMEOFDAY
+#undef HAVE_INET_ATON		/* CF_INET_ADDR */
 #undef HAVE_JCURSES_H
 #undef HAVE_KEYPAD
 #undef HAVE_LC_MESSAGES		/* locale messages */

@@ -10,6 +10,8 @@
 
 #include <HTUtils.h>
 
+#define ALERT_PREFIX_LEN 5
+
 /*      Display a message and get the input
 **
 **      On entry,

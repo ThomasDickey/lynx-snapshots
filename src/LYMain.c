@@ -361,7 +361,7 @@ PUBLIC BOOLEAN LYForceSSLCookiesSecure = FALSE;
 PUBLIC BOOLEAN LYNoCc = FALSE;
 PUBLIC BOOLEAN LYPreparsedSource = FALSE;	/* Show source as preparsed?	 */
 PUBLIC BOOLEAN LYPrependBaseToSource = TRUE;
-PUBLIC BOOLEAN LYPrependCharsetToSource = FALSE;
+PUBLIC BOOLEAN LYPrependCharsetToSource = TRUE;
 PUBLIC BOOLEAN LYQuitDefaultYes = QUIT_DEFAULT_YES;
 
 #ifdef DISP_PARTIAL
@@ -680,9 +680,11 @@ PUBLIC int main ARGS2(
 #endif /* LOCALE */
     /* Set the text message domain.  */
 #ifdef HAVE_LIBINTL_H
+#ifndef __DJGPP__
     bindtextdomain ("lynx", LOCALEDIR);
+#endif /* !__DJGPP__ */
     textdomain ("lynx");
-#endif
+#endif /* HAVE_LIBINTL_H */
 
     /*
      *	Initialize our startup and global variables.
@@ -752,6 +754,9 @@ PUBLIC int main ARGS2(
     StrAllocCopy(lynx_version_putenv_command, "LYNX_VERSION=");
     StrAllocCat(lynx_version_putenv_command, LYNX_VERSION);
     (void) putenv(lynx_version_putenv_command);
+    /* Note: you must not free the data passed to 'putenv()' until you give it
+     * a new value for that variable.
+     */
 #endif /* VMS */
 
     if ((cp = getenv("LYNX_TEMP_SPACE")) != NULL)

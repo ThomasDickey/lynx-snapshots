@@ -105,7 +105,7 @@ typedef enum _MIME_state {
 	/* TRANSPARENT and IGNORE are defined as stg else in _WINDOWS */
 } MIME_state;
 
-#define VALUE_SIZE 1024 	/* @@@@@@@ Arbitrary? */
+#define VALUE_SIZE 5120 	/* @@@@@@@ Arbitrary? */
 struct _HTStream {
 	CONST HTStreamClass *	isa;
 
@@ -380,7 +380,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 							    UCT_SETBY_DEFAULT);
 				}
 			    }
-			    FREE(cp3);
 			    if (chartrans_ok) {
 				LYUCcharset * p_in =
 				    HTAnchor_getUCInfoStage(me->anchor,
@@ -428,18 +427,44 @@ PRIVATE void HTMIME_put_character ARGS2(
 				}
 			    } else {
 				/*
-				**  Hope it's a match, for now. - FM
+				**  Cannot translate.
+				**  If according to some heuristic the given
+				**  charset and the current display character
+				**  both are likely to be like ISO-8859 in
+				**  structure, pretend we have some kind
+				**  of match.
 				*/
-				*cp1 = '\0';
-				me->format = HTAtom_for(cp);
-				cp1 = &cp4[10];
-				while (*cp1 &&
-				       isdigit((unsigned char)(*cp1)))
-				    cp1++;
-				*cp1 = '\0';
-				StrAllocCopy(me->anchor->charset, cp4);
-				HTPassEightBitRaw = TRUE;
-				HTAlert(me->anchor->charset);
+				BOOL given_is_8859
+				    = (!strncmp(cp4, "iso-8859-", 9) &&
+				       isdigit((unsigned char)cp4[9]));
+				BOOL given_is_8859like
+				    = (given_is_8859 ||
+				       !strncmp(cp4, "windows-", 8) ||
+				       !strncmp(cp4, "cp12", 4) ||
+				       !strncmp(cp4, "cp-12", 5));
+				BOOL given_and_display_8859like
+				    = (given_is_8859like &&
+				       (strstr(LYchar_set_names[current_char_set],
+					       "ISO-8859") ||
+					strstr(LYchar_set_names[current_char_set],
+					       "windows-")));
+
+				if (given_and_display_8859like) {
+				    *cp1 = '\0';
+				    me->format = HTAtom_for(cp);
+				}
+				if (given_is_8859) {
+				    cp1 = &cp4[10];
+				    while (*cp1 &&
+					   isdigit((unsigned char)(*cp1)))
+					cp1++;
+				    *cp1 = '\0';
+				}
+				if (given_and_display_8859like) {
+				    StrAllocCopy(me->anchor->charset, cp4);
+				    HTPassEightBitRaw = TRUE;
+				}
+				HTAlert(*cp4 ? cp4 : me->anchor->charset);
 			    }
 			    FREE(cp3);
 			} else {
@@ -2281,4 +2306,3 @@ PUBLIC int HTmaybekanji ARGS2(
     }
     return 1;
 }
-

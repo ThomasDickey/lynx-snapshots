@@ -480,7 +480,6 @@ PUBLIC int LYdownload_options ARGS2(
     /*
      *	Get a suggested filename.
      */
-    StrAllocCopy(downloaded_url, *newfile);
     StrAllocCopy(sug_filename, *newfile);
     change_sug_filename(sug_filename);
 
@@ -489,6 +488,7 @@ PUBLIC int LYdownload_options ARGS2(
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
+    StrAllocCopy(downloaded_url, *newfile);
     LYLocalFileToURL(newfile, tempfile);
 
     LYstrncpy(LYValidDownloadFile,
@@ -503,6 +503,7 @@ PUBLIC int LYdownload_options ARGS2(
     fprintf(fp0, "<em>%s</em> %s\n",
     	    gettext("Downloaded link:"),
 	    downloaded_url);
+    FREE(downloaded_url);
 
     fprintf(fp0, "<em>%s</em> %s\n",
     	    gettext("Suggested file name:"),
@@ -554,7 +555,6 @@ PUBLIC int LYdownload_options ARGS2(
      *	Free off temp copy.
      */
     FREE(sug_filename);
-    FREE(downloaded_url);
 
     return(0);
 }

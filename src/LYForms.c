@@ -600,7 +600,6 @@ PRIVATE int popup_options ARGS7(
     OptionType * tmp_ptr;
     BOOLEAN ReDraw = FALSE;
     int number;
-    char buffer[512];
 
     /*
      * Initialize the search string buffer. - FM
@@ -943,8 +942,10 @@ redraw:
 		     *  We want an intermediate page. - FM
 		     */
 		    if (((number - 1) * length) == window_offset) {
-			sprintf(buffer, ALREADY_AT_OPTION_PAGE, number);
-			HTUserMsg(buffer);
+			char *msg = 0;
+			HTSprintf0(&msg, ALREADY_AT_OPTION_PAGE, number);
+			HTUserMsg(msg);
+			FREE(msg);
 			if (disabled) {
 			    _statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
 			} else {
@@ -992,9 +993,10 @@ redraw:
 			    /*
 			     *  The option already is current. - FM
 			     */
-			    sprintf(buffer,
-				    OPTION_ALREADY_CURRENT, (number + 1));
-			    HTUserMsg(buffer);
+			    char *msg = 0;
+			    HTSprintf0(&msg, OPTION_ALREADY_CURRENT, (number + 1));
+			    HTUserMsg(msg);
+			    free(msg);
 			    if (disabled) {
 				_statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
 			    } else {

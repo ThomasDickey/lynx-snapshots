@@ -17,7 +17,7 @@
 
        d      -	Downloads the file pointed to by the current link
 		and displays an option menu allowing the file to
-		be saved or transfered by configurable options.
+		be saved or transferred by configurable options.
 		Can also be used when positioned on a form SUBMIT
 		button to download the reply to a form submission.
 
@@ -57,13 +57,13 @@
 
        p      -	Brings up a list of <A HREF="print_help.html">print commands</A>.
 
-       o      -	Brings up a list of setable <A HREF="option_help.html">options</A>.
+       o      - Brings up a list of settable <A HREF="option_help.html">options</A>.
 
-       q      -	Quits Lynx. ('Q' quits without asking)
+       q      - Quits Lynx. ('Q' quits without asking)
 
-       /      -	Search for a string of characters in the current
-		document case insensitive or case sensitive
-		depending on the options set. (see <A HREF="option_help.html">options)</A>.
+       /      - Search for a string of characters in the current document
+                (case insensitive or case sensitive
+                depending on the <A HREF="option_help.html">options</A> set).
 
        s      -	Search through an external searchable indexed document.
 
@@ -72,12 +72,14 @@
 
        v      -	View a <A HREF="bookmark_help.html">Bookmark file</A>.
 
+       V      - Go to the <A HREF="visited_help.html">Visited Links Page</A>
+
        x      - Force submission of form or link with no-cache.
 
        z      -	Abort a network transfer in progress.  If any partial
-		data has been transfered it will be displayed.
+                data has been transferred it will be displayed.
 
-  &lt;backspace&gt; - displays the <a href="history_help.html">history page</A>.
+  &lt;backspace&gt; - displays the <a href="history_help.html">History Page</A>.
 
        =      -	Show information about the file and link that you
 		are currently viewing.
@@ -110,14 +112,15 @@
        *      -	Toggles image_links mode on and off.  When on, links will
                 be created for all images, including inlines.
 
-       @      -	Toggles raw 8-bit translations or CJK mode on and off.
+       @      - Toggles raw 8-bit translations or CJK mode on and off, only
+                for documents which does not specify character set explicitely.
                 Should be on when the document's charset matches the
-		selected character set, and otherwise off so that 8-bit
-		characters will be reverse translated with respect to the
-		ISO-8859-1 conversion table for the character set (see
-		<A HREF="option_help.html">options)</A>.
+                display character set, and otherwise off so that 8-bit
+                characters will be translated by Lynx with respect to the
+                Assumed document charset, using approximations if necessary
+                (see <A HREF="option_help.html">options</A>).
 
-       [      -	Toggles pseudo_inlines mode on and off.  When on, inline
+       [      - Toggles pseudo_inlines mode on and off.  When on, inline
                 images which have no ALT string specified will have an
                 "[INLINE]" pseudo-ALT string inserted in the Lynx display.
                 When off, they will be treated as having ALT="" (i.e.,
@@ -145,7 +148,8 @@
 
      CTRL-V   -	Switches to an alternative way of parsing HTML documents.
                 This may help to get a more readable rendering of some
-                documents with invalidly placed HTML tags.
+                documents with invalidly placed HTML tags, <A
+                HREF="option_help.html#tagsoup">more details</A>.
 
      CTRL-W   -	Resets or cleans up the display.
 

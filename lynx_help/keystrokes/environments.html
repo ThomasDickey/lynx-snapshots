@@ -97,12 +97,12 @@ Environment Variables Used By Lynx:
                            that  can act as firewall gateways and
                            caching servers.  They are  preferable
                            to  the  older  gateway  servers  (see
-                           WWW_access_GATEWAY, below).  Each protocol
-                           used   by  Lynx,  (http,  ftp,
+                           WWW_access_GATEWAY, below).
+                           Each protocol used by Lynx (http, ftp,
                            gopher, etc), can be mapped separately
-                           by  setting  environment  variables of
-                           the  form  PROTOCOL_proxy  (literally:
-                           http_proxy,  ftp_proxy,  gopher_proxy,
+                           by setting environment variables of
+                           the form PROTOCOL_proxy (literally:
+                           http_proxy, ftp_proxy, gopher_proxy,
                            etc), to "http://some.server.dom:port/".
                            See <a href="#proxy">details and examples</a>.
 
@@ -343,8 +343,11 @@ Proxy:
                  proxying for all clients on your system.)
 
     If you wish to override the use of a proxy server for specific hosts or
-    entire domains you may use the "no_proxy" environment variable. Here is
-    an example use of "no_proxy":
+    entire domains you may use the "no_proxy" environment variable.
+    The no_proxy variable can be a comma-separated list of strings defining
+    no-proxy zones in the DNS domain name space.  If a tail substring of the
+    domain-path for a host matches one of these strings, transactions with that
+    node will not be proxied.  Here is an example use of "no_proxy":
 
         UNIX
                 setenv no_proxy "host.domain.dom, domain1.dom, domain2"
@@ -360,9 +363,13 @@ Proxy:
     and gopher services (if normally proxied) would still be included,
     as would any news or wais services on other hosts.
 
+    Warning:  Note that setting 'il' as an entry in this list
+    will block proxying for the .mil domain as well as the .il domain.
+    If the entry is '.il' this will not happen.
+
     If you wish to override the use of a proxy server completely (i.e.,
     globally override any existing proxy variables), set the value of
-    "no_proxy" to "*".
+    "no_proxy" to "*".  This is the only allowed use of * in no_proxy.
 
     Note that Lynx treats file URLs on the local host as requests for
     direct access to the file, and does not attempt ftp if that fails.
@@ -374,8 +381,9 @@ Proxy:
     Other WWW clients may require that the http server's configuration
     file have "Map file:* ftp:*" in it to perform that conversion.
 
-    The proxy and no_proxy variables also can be set at run time via
-    lynx.cfg.
+    If you have not set NNTPSERVER, proxy or no_proxy environment variables
+    you can set them at run time via the configuration file lynx.cfg
+    (this will not override external settings).
 
 <a name="dos"><em>
 Win32 (95/NT) and 386 DOS

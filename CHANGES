@@ -1,6 +1,90 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-01-18 (2.8.2dev.14)
+* use HTSprint0 in LYCurses.c, LYForms.c, LYGetFile.c, LYJump.c - TD
+* modify LYCheckMail so it does not continue to report new mail when the mail
+  file's modification time differs from its access time (reported by LV) - TD
+* add check for inet_addr function, and (preferred) inet_aton.  The first
+  function is reported to be sometimes in -lresolv, or -lbind when it is not
+  present in the conventional network libraries (from report by
+  mattack@area.com and comments by HN) - TD
+* resync config.sub, config.guess with autoconf 2.13.19990117 (not yet
+  configure, since autoconf 2.13 contains some new bugs) - TD
+* modified handling of untranslatable charsets, after noticingd that a page
+  with charset=ISO-2022-JP produced an alert message with a truncated
+  "iso-2022-j".  Looking more closely, the code could also result in memory
+  corruption in some cases.  Compared with older versions, then changed the
+  code to something somewhat like what was intended there.  But we don't have
+  an "Other ISO Latin" display character set any more; maybe those `else'
+  blocks should just have disappeared completely - KW
+* Minor changes to SortaSGML DTD for PARAM, THEAD - KW 
+* Make "Alert" statusline prefix localizable - KW 
+* Extend fixtext.sh to also change continued lines - KW 
+* Changed LYCheckForProxyURL to act more like it appears to have been indended,
+  and clarify comment.  Minor change in is_url - KW
+* Prevent removal of hidden link number from bookmark document in a very
+  obscure case of a bookmarked ISMAP link - KW
+* HText_SubmitForm:  make sure query is always allocated, even if the set of
+  form fields to be sent turned out to be empty - KW
+* Some comments corrected in HTML.c, LYCharSets.c - KW 
+* Tweak in curses_w_style for display without color - KW 
+* Remove minor memory leak in LYDownload.c - KW 
+* Changed error handling in LYTraversal.c to make sure terminal gets restored
+  to sane mode before showing error message and exiting - KW
+* Increased VALUE_SIZE for buffer in HTMIME.c from 1024 to 5120.  Someone
+  needed increase for long Set-Cookie headers - KW
+* Two new functions in HTList.c to reverse and to combine lists - KW
+* Lynx was using the wrong precedence for entries within a mailcap (relative to
+  other entries from the same file):  RFC 1524 says "The configuration
+  information will be obtained from the FIRST matching entry in a mailcap
+  file[...]", but Lynx effectively gave precedence to the last match.  Recent
+  Debian packages of lynx have had a patch applied to change this, but that
+  patch also seems to affect the precedence order relative to viewers defined
+  in other places, i.e.  lynx.cfg and HTInit.c.  The patch here instead changes
+  the precedence of mailcap entries form the same files to RFC-like behavior,
+  by reordering the list generated from a mailcap file after we have finished
+  reading it in.  It leaves the order relative to viewers from other sources
+  unchanged.  Maybe it should be made configurable whether Lynx's traditional
+  precedence or the new one is used; currently there is just a #define in
+  HTInit.c which could be changed to revert to traditional behavior - KW
+* add checks for null return from malloc to LYCurses.c, LYStrings.c,
+  (patch by John Bley)
+* add support for HP Roman8 as a display character set.  HP Roman8 is used by
+  Hewlett-Packard terminals and hpterm, HP's version of xterm.  The character
+  repertoire is largely similar to ISO Latin 1 but the code points are all
+  mixed up (patch by Christian Weisgerber)
+* modify WWW/Library/Implementation/HTAAUtil.c::HTAA_setupReader():  to use
+  malloc'd buffer rather than static buffer, to avoid overflow (patch by Thomas
+  Braun <Thomas.Braun@link-up.de>)
+* modifications to allow building the DOS lynx port with support of gettext for
+  producing messages in various languages.  The DOS port of the gettext package
+  still needs minor tweaking to get it to function properly, but this shouldn't
+  be a problem for most people trying to compile lynx for DOS themselves.
+  Rather than put yet more DOS-specific makefiles in the distribution, I put
+  the changes to the makefiles within comments, which can easily be removed to
+  enable the changes - DK
+* Add a comment about LYUCcharset struct "UChndl" field.  Tweak trace
+  messages - LP
+* fix parsing of ALT=value attribute when the value is not quoted.  When the
+  first character is not us-ascii it was corrupted by chartrans in all versions
+  of lynx.  Fix case S_equals in SGML_character() - LP
+* chartrans:  ignore RAW_TOGGLE key and do not change LYUseDefaultRawMode if
+  current document's charset specified explicitly, add status message.  (Let
+  user switch toggle only when necessary, to avoid future problems :-) - LP
+* chartrans: change the default value of PREPEND_CHARSET_TO_SOURCE in lynx.cfg
+  from FALSE to TRUE (better safe than sorry) - LP
+* reorder forms-based options menu (cosmetic):  rename "HTML error tolerance"
+  to "HTML error recovery", reorganize "Character Set Options" section -
+  "Display character set" went to "Personal preferences" section, "Assume
+  character set" and "Raw 8-bit or CJK mode" went to "Document Layout" section;
+  "Execution Links" went to "File management" section.  (Hope this helps to
+  reduce confusion) - LP
+* remove "environment variables" section from INSTALLATION, change references
+  to Lynx User Guide in all docs.  Minor tweaks on help files - LP
+* add a comment to mime.types and lynx.cfg on SUFFIX definition:  "This has an
+  effect for ftp and local files only, http server does specify MIME type in
+  the Content-Type header" - LP
 1998-01-13 (2.8.2dev.13)
 * correct a missing trailing newline in caselower.h (this may be a problem
   patching since 'diff' does not like that) - TD
@@ -13,7 +97,7 @@ Changes since Lynx 2.8 release
 * modify NSL_FORK logic to prevent child process from running any signal
   handlers the parent may have installed - KW
 * The logic added to display_page for avoiding unnecessary screen redraw with
-  partial display (see 1998-12-03) is now disabled if enable_scrollback is set. 
+  partial display (see 1998-12-03) is now disabled if enable_scrollback is set.
   Otherwise displayed pages could appear as empty (or with only the current
   link drawn) - KW
 * Modify conditions under which screen style cache is reset (only relevant for

@@ -189,9 +189,10 @@ PUBLIC char *LYJump ARGS1(int, key)
     while (jtp && jtp->key && jtp->key != key)
 	jtp = jtp->next;
     if (!jtp) {
-	char msg[40];
-	sprintf(msg, KEY_NOT_MAPPED_TO_JUMP_FILE, key);
+	char *msg = 0;
+	HTSprintf0(&msg, KEY_NOT_MAPPED_TO_JUMP_FILE, key);
 	HTAlert(msg);
+	free(msg);
 	return NULL;
     }
     if (!jtp->table)

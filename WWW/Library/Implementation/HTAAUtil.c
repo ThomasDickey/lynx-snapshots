@@ -448,9 +448,10 @@ PUBLIC HTAssocList *HTAA_parseArgList ARGS1(char *, str)
 
 #define BUFFER_SIZE	1024
 
-PRIVATE char buffer[BUFFER_SIZE + 1];
-PRIVATE char *start_pointer = buffer;
-PRIVATE char *end_pointer = buffer;
+PRIVATE size_t buffer_length;
+PRIVATE char *buffer = 0;
+PRIVATE char *start_pointer;
+PRIVATE char *end_pointer;
 PRIVATE int in_soc = -1;
 
 /* PUBLIC						HTAA_setupReader()
@@ -476,6 +477,20 @@ PUBLIC void HTAA_setupReader ARGS3(char *,	start_of_headers,
 				   int, 	length,
 				   int, 	soc)
 {
+    if (!start_of_headers)
+	length = 0;	       /* initialize length (is this reached at all?) */
+    if (buffer == NULL) {				       /* first call? */
+	buffer_length = length;
+	if (buffer_length < BUFFER_SIZE)     /* would fall below BUFFER_SIZE? */
+	    buffer_length = BUFFER_SIZE;
+	buffer = (char*)malloc((size_t)(sizeof(char)*(buffer_length + 1)));
+    }
+    else if (length > (int)buffer_length) {		  /* need more space? */
+	buffer_length = length;
+	buffer = (char*)realloc((char*)buffer,
+				(size_t)(sizeof(char)*(buffer_length + 1)));
+    }
+    if (buffer == NULL) outofmem(__FILE__, "HTAA_setupReader");
     start_pointer = buffer;
     if (start_of_headers) {
 	strncpy(buffer, start_of_headers, length);

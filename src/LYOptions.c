@@ -3986,26 +3986,6 @@ PUBLIC int gen_options ARGS1(
     PutOptValues(fp0, emacs_keys, bool_values);
     EndSelect(fp0);
 
-    /* Execution links: SELECT */
-#ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
-    PutLabel(fp0, gettext("Execution links"));
-    BeginSelect(fp0, exec_links_string);
-#ifndef NEVER_ALLOW_REMOTE_EXEC
-    PutOptValues(fp0, local_exec
-			? EXEC_ALWAYS
-			: (local_exec_on_local_files
-				? EXEC_LOCAL
-				: EXEC_NEVER),
-		exec_links_values);
-#else
-    PutOptValues(fp0, local_exec_on_local_files
-			? EXEC_LOCAL
-			: EXEC_NEVER,
-		exec_links_values);
-#endif /* !NEVER_ALLOW_REMOTE_EXEC */
-    EndSelect(fp0);
-#endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
-
     /* Keypad Mode: SELECT */
     PutLabel(fp0, gettext("Keypad mode"));
     BeginSelect(fp0, keypad_mode_string);
@@ -4109,6 +4089,19 @@ PUBLIC int gen_options ARGS1(
     PutOptValues(fp0, vi_keys, bool_values);
     EndSelect(fp0);
 
+    /* Display Character Set: SELECT */
+    PutLabel(fp0, gettext("Display character set"));
+    BeginSelect(fp0, display_char_set_string);
+    for (i = 0; LYchar_set_names[i]; i++) {
+	char temp[10];
+	size_t len = strlen(LYchar_set_names[i]);
+	if (len > cset_len)
+	   cset_len = len;
+	sprintf(temp, "%d", i);
+	PutOption(fp0, i==current_char_set, temp, LYchar_set_names[i]);
+    }
+    EndSelect(fp0);
+
     /* X Display: INPUT */
     PutLabel(fp0, gettext("X Display"));
     PutTextInput(fp0, x_display_string, NOTEMPTY(x_display), text_len, "");
@@ -4118,8 +4111,48 @@ PUBLIC int gen_options ARGS1(
      */
     fprintf(fp0,"\n  <em>%s</em>\n", gettext("Document Layout"));
 
-    /* HTML error tolerance: SELECT */
-    PutLabel(fp0, gettext("HTML error tolerance"));
+    /* Assume Character Set: SELECT */
+    /* if (user_mode==ADVANCED_MODE) */
+    {
+	int curval;
+	curval = UCLYhndl_for_unspec;
+
+	/*
+	 * FIXME: If bogus value in lynx.cfg, then in old way, that is the
+	 * string that was displayed.  Now, user will never see that.  Good
+	 * or bad?  I don't know.  MRC
+	 */
+	if (curval == current_char_set) {
+	    /* ok, LYRawMode, so use UCAssume_MIMEcharset */
+	    curval = safeUCGetLYhndl_byMIME(UCAssume_MIMEcharset);
+	}
+	PutLabel(fp0, gettext("Assumed document character set"));
+	BeginSelect(fp0, assume_char_set_string);
+	for (i = 0; i < LYNumCharsets; i++) {
+	    PutOption(fp0, i==curval,
+		      LYCharSet_UC[i].MIMEname,
+		      LYCharSet_UC[i].MIMEname);
+	}
+	EndSelect(fp0);
+    }
+
+    /* Raw Mode: ON/OFF */
+    if (LYHaveCJKCharacterSet)
+	/*
+	 * Since CJK people hardly mixed with other world
+	 * we split the header to make it more readable:
+	 * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
+	 */
+	PutLabel(fp0, gettext("CJK mode"));
+    else
+	PutLabel(fp0, gettext("Raw 8-bit"));
+
+    BeginSelect(fp0, raw_mode_string);
+    PutOptValues(fp0, LYRawMode, bool_values);
+    EndSelect(fp0);
+
+    /* HTML error recovery: SELECT */
+    PutLabel(fp0, gettext("HTML error recovery"));
     BeginSelect(fp0, DTD_recovery_string);
     PutOptValues(fp0, Old_DTD, DTD_type_values);
     EndSelect(fp0);
@@ -4185,64 +4218,6 @@ PUBLIC int gen_options ARGS1(
     }
 
     /*
-     * Character Set Options
-     */
-    fprintf(fp0,"\n  <em>%s</em>\n", gettext("Character Set Options"));
-
-    /* Assume Character Set: SELECT */
-    /* if (user_mode==ADVANCED_MODE) */
-    {
-	int curval;
-	curval = UCLYhndl_for_unspec;
-
-	/*
-	 * FIXME: If bogus value in lynx.cfg, then in old way, that is the
-	 * string that was displayed.  Now, user will never see that.  Good
-	 * or bad?  I don't know.  MRC
-	 */
-	if (curval == current_char_set) {
-	    /* ok, LYRawMode, so use UCAssume_MIMEcharset */
-	    curval = safeUCGetLYhndl_byMIME(UCAssume_MIMEcharset);
-	}
-	PutLabel(fp0, gettext("Assumed document character set"));
-	BeginSelect(fp0, assume_char_set_string);
-	for (i = 0; i < LYNumCharsets; i++) {
-	    PutOption(fp0, i==curval,
-		      LYCharSet_UC[i].MIMEname,
-		      LYCharSet_UC[i].MIMEname);
-	}
-	EndSelect(fp0);
-    }
-
-    /* Display Character Set: SELECT */
-    PutLabel(fp0, gettext("Display character set"));
-    BeginSelect(fp0, display_char_set_string);
-    for (i = 0; LYchar_set_names[i]; i++) {
-	char temp[10];
-	size_t len = strlen(LYchar_set_names[i]);
-	if (len > cset_len)
-		cset_len = len;
-	sprintf(temp, "%d", i);
-	PutOption(fp0, i==current_char_set, temp, LYchar_set_names[i]);
-    }
-    EndSelect(fp0);
-
-    /* Raw Mode: ON/OFF */
-    if	(LYHaveCJKCharacterSet)
-	/*
-	 * Since CJK people hardly mixed with other world
-	 * we split the header to make it more readable:
-	 * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
-	 */
-	PutLabel(fp0, gettext("CJK mode"));
-    else
-	PutLabel(fp0, gettext("Raw 8-bit"));
-
-    BeginSelect(fp0, raw_mode_string);
-    PutOptValues(fp0, LYRawMode, bool_values);
-    EndSelect(fp0);
-
-    /*
      * File Management Options
      */
     fprintf(fp0,"\n  <em>%s</em>\n", DIRED_MENU_TITLE);
@@ -4268,6 +4243,26 @@ PUBLIC int gen_options ARGS1(
 	PutOptValues(fp0, show_dotfiles, bool_values);
 	EndSelect(fp0);
     }
+
+    /* Execution links: SELECT */
+#ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
+    PutLabel(fp0, gettext("Execution links"));
+    BeginSelect(fp0, exec_links_string);
+#ifndef NEVER_ALLOW_REMOTE_EXEC
+    PutOptValues(fp0, local_exec
+		      ? EXEC_ALWAYS
+		      : (local_exec_on_local_files
+			  ? EXEC_LOCAL
+			  : EXEC_NEVER),
+	       exec_links_values);
+#else
+    PutOptValues(fp0, local_exec_on_local_files
+		      ? EXEC_LOCAL
+		      : EXEC_NEVER,
+	       exec_links_values);
+#endif /* !NEVER_ALLOW_REMOTE_EXEC */
+    EndSelect(fp0);
+#endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
 
     /*
      * Headers transferred to remote server

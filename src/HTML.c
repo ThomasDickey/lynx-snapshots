@@ -681,13 +681,17 @@ PRIVATE void HTML_start_element ARGS6(
 	UPDATE_STYLE;
     }
 
-    CTRACE(tfp, "me->tag_charset: %d -> ", me->tag_charset);
-    if (tag_charset < 0)
-	me->tag_charset = me->UCLYhndl;
-    else
-	me->tag_charset = tag_charset;
-    CTRACE(tfp, "%d (me->UCLYhndl: %d, tag_charset: %d)\n",
-	me->tag_charset, me->UCLYhndl, tag_charset);
+    {
+	/*  me->tag_charset  is charset for attribute values.  */
+	int j = ((tag_charset < 0) ? me->UCLYhndl : tag_charset);
+
+	if ((me->tag_charset != j) || (j < 0  /* for trace entry */)) {
+	    CTRACE(tfp, "me->tag_charset: %d -> %d", me->tag_charset, j );
+	    CTRACE(tfp, " (me->UCLYhndl: %d, tag_charset: %d)\n",
+		   me->UCLYhndl, tag_charset);
+	    me->tag_charset = j;
+	}
+    }
 
 /* this should be done differently */
 #if defined(USE_COLOR_STYLE)
@@ -762,10 +766,10 @@ PRIVATE void HTML_start_element ARGS6(
 
 	    if (url_type == LYNXIMGMAP_URL_TYPE) {
 		/*
-		 *  These have a are non-standard form, basically
+		 *  These have a non-standard form, basically
 		 *  strip the prefix or the code below would insert
 		 *  a nonsense host into the pseudo URL.  These
-		 *  should never occur where they would used for
+		 *  should never occur where they would be used for
 		 *  resolution of relative URLs anyway.  We can
 		 *  also strip the #map part. - kw
 		 */
