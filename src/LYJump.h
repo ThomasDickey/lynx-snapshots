@@ -8,7 +8,7 @@ typedef struct _JumpDatum {
     char *url;
 } JumpDatum;
 
-struct JumpTable { 
+struct JumpTable {
     int key;
     int nel;
     char *msg;
@@ -21,9 +21,9 @@ struct JumpTable {
 };
 
 extern struct JumpTable *JThead;
-extern void LYJumpTable_free (void);
-extern void LYAddJumpShortcut (HTList *the_history, char *shortcut);
-extern BOOL LYJumpInit (char *config);
-extern char *LYJump (int key);
+extern void LYJumpTable_free(void);
+extern void LYAddJumpShortcut(HTList *the_history, char *shortcut);
+extern BOOL LYJumpInit(char *config);
+extern char *LYJump(int key);
 
 #endif /* LYJUMP_H */

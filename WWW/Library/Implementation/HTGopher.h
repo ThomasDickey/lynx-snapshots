@@ -7,7 +7,6 @@
                          
  */
 
-
 #ifndef HTGOPHER_H
 #define HTGOPHER_H
 
@@ -16,6 +15,7 @@
 
 #ifdef GLOBALREF_IS_MACRO
 extern GLOBALREF (HTProtocol, HTGopher);
+
 #else
 GLOBALREF HTProtocol HTGopher;
 #endif /* GLOBALREF_IS_MACRO */

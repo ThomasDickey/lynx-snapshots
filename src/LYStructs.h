@@ -13,7 +13,7 @@ typedef struct {
 typedef struct {
     HiliteInfo *hl_info;
     HiliteInfo hl_base;
-    short hl_len;              /* number of strings in this struct */
+    short hl_len;		/* number of strings in this struct */
 } HiliteList;
 
 typedef struct {
@@ -22,12 +22,12 @@ typedef struct {
     char *l_hightext;
     char *l_hightext2;
     int l_hightext2_offset;
-    BOOL inUnderline;	/* TRUE when this link is in underlined context. */
+    BOOL inUnderline;		/* TRUE when this link is in underlined context. */
     int lx;
     int ly;
-    int type;		/* Type of link, Forms, WWW, etc. */
-    int anchor_number;	/* The anchor number within the HText structure.  */
-    int anchor_line_num;/* The anchor line number in the HText structure. */
+    int type;			/* Type of link, Forms, WWW, etc. */
+    int anchor_number;		/* The anchor number within the HText structure.  */
+    int anchor_line_num;	/* The anchor line number in the HText structure. */
     HiliteList list;
     struct _FormInfo *l_form;	/* Pointer to form info. */
 } LinkInfo;
@@ -36,20 +36,20 @@ extern int nlinks;
 
 typedef struct {
     /* FIXME: see DocAddress */
-    char * title;
-    char * address;
-    bstring * post_data;
-    char * post_content_type;
-    char * bookmark;
-    BOOL   isHEAD;
-    BOOL   safe;
+    char *title;
+    char *address;
+    bstring *post_data;
+    char *post_content_type;
+    char *bookmark;
+    BOOL isHEAD;
+    BOOL safe;
 
-    int    link;
-    int    line;
-    BOOL   internal_link;	/* whether doc was reached via an internal
-				 (fragment) link. - kw */
+    int link;
+    int line;
+    BOOL internal_link;		/* whether doc was reached via an internal
+				   (fragment) link. - kw */
 #ifdef USE_COLOR_STYLE
-    char * style;
+    char *style;
 #endif
 } DocInfo;
 
@@ -59,7 +59,7 @@ typedef struct {
 
 typedef struct {
     DocInfo hdoc;
-    int    intern_seq_start;	/* indicates which element on the history
+    int intern_seq_start;	/* indicates which element on the history
 				   is the start of this sequence of
 				   "internal links", otherwise -1 */
 } HistInfo;
@@ -74,8 +74,8 @@ extern int Visited_Links_As;
 #define VISITED_LINKS_REVERSE    4
 
 typedef struct _VisitedLink {
-    char * title;
-    char * address;
+    char *title;
+    char *address;
     int level;
     struct _VisitedLink *next_tree;
     struct _VisitedLink *prev_latest;
@@ -89,25 +89,26 @@ extern int nhist;
 /******************************************************************************/
 
 typedef struct _lynx_list_item_type {
-    struct _lynx_list_item_type *next;  /* the next item in the linked list */
-    char *name; 			/* a description of the item */
-    char *command;			/* the command to execute */
-    int  always_enabled;		/* a constant to tell whether or
-					* not to disable the printer
-					* when the no_print option is on
-					*/
+    struct _lynx_list_item_type *next;	/* the next item in the linked list */
+    char *name;			/* a description of the item */
+    char *command;		/* the command to execute */
+    int always_enabled;		/* a constant to tell whether or
+				 * not to disable the printer
+				 * when the no_print option is on
+				 */
     /* HTML lists: */
     BOOL override_primary_action;	/* whether primary action will be
-					* overridden by this - e.g. this allows
-					* invoking user's MUA when mailto: link
-					* is activated using normal "activate"
-					* command. This field is only examined
-					* by code that handles EXTERNAL command.
-					*/
+					 * overridden by this - e.g. this
+					 * allows invoking user's MUA when
+					 * mailto:  link is activated using
+					 * normal "activate" command.  This
+					 * field is only examined by code that
+					 * handles EXTERNAL command.
+					 */
     /* PRINTER lists: */
-    int pagelen;			/* an integer to store the printer's
-					* page length
-					*/
+    int pagelen;		/* an integer to store the printer's
+				 * page length
+				 */
 } lynx_list_item_type;
 
 extern lynx_list_item_type *printers;
@@ -125,12 +126,10 @@ extern lynx_list_item_type *externals;
 
 /******************************************************************************/
 
-typedef struct
-{
+typedef struct {
     const char *name;
     int value;
-}
-Config_Enum;
+} Config_Enum;
 
 typedef int (*ParseFunc) (char *);
 
@@ -143,7 +142,7 @@ typedef int (*ParseFunc) (char *);
 	long	  def_value
 
 typedef union {
-	ParseUnionMembers;
+    ParseUnionMembers;
 } ParseUnion;
 
 #ifdef	PARSE_DEBUG

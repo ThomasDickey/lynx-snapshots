@@ -17,18 +17,17 @@
 #include <UCMap.h>
 
 typedef struct {
-	int	size;		/* In bytes			*/
-	int	growby;		/* Allocation unit in bytes	*/
-	int	allocated;	/* Current size of *data	*/
-	char *	data;		/* Pointer to malloced area or 0 */
-	int	failok;		/* allowed to fail without exiting program? */
+    int size;			/* In bytes                     */
+    int growby;			/* Allocation unit in bytes     */
+    int allocated;		/* Current size of *data        */
+    char *data;			/* Pointer to malloced area or 0 */
+    int failok;			/* allowed to fail without exiting program? */
 } HTChunk;
-
 
 /*
  * Initialize a chunk's allocation data and allocation-increment.
  */
-extern void HTChunkInit (HTChunk * ch, int grow);
+extern void HTChunkInit(HTChunk *ch, int grow);
 
 /*
  *
@@ -46,7 +45,7 @@ extern void HTChunkInit (HTChunk * ch, int grow);
  *
  */
 
-extern HTChunk * HTChunkCreate (int growby);
+extern HTChunk *HTChunkCreate(int growby);
 
 /*
  *  Create a chunk for which an allocation error is not a fatal application
@@ -55,14 +54,13 @@ extern HTChunk * HTChunkCreate (int growby);
  *  are ok each time after data have been appended.
  *  The create call may also fail and will reurn NULL in that case. - kw
  */
-extern HTChunk * HTChunkCreateMayFail (int growby, int failok);
+extern HTChunk *HTChunkCreateMayFail(int growby, int failok);
 
 /*
  *  Like HTChunkCreate but with initial allocation - kw
  *
  */
-extern HTChunk * HTChunkCreate2 (int growby, size_t needed);
-
+extern HTChunk *HTChunkCreate2(int growby, size_t needed);
 
 /*
  *
@@ -78,8 +76,7 @@ extern HTChunk * HTChunkCreate2 (int growby, size_t needed);
  *
  */
 
-extern void HTChunkFree (HTChunk * ch);
-
+extern void HTChunkFree(HTChunk *ch);
 
 /*
  *
@@ -95,8 +92,7 @@ extern void HTChunkFree (HTChunk * ch);
  *
  */
 
-extern void HTChunkClear (HTChunk * ch);
-
+extern void HTChunkClear(HTChunk *ch);
 
 /*
  *
@@ -114,8 +110,7 @@ extern void HTChunkClear (HTChunk * ch);
  *
  */
 
-extern BOOL HTChunkRealloc (HTChunk * ch, int growby);
-
+extern BOOL HTChunkRealloc(HTChunk *ch, int growby);
 
 /*
  *
@@ -133,8 +128,7 @@ extern BOOL HTChunkRealloc (HTChunk * ch, int growby);
  *
  */
 
-extern void HTChunkEnsure (HTChunk * ch, int s);
-
+extern void HTChunkEnsure(HTChunk *ch, int s);
 
 /*
  *
@@ -151,11 +145,11 @@ extern void HTChunkEnsure (HTChunk * ch, int s);
  *   *ch		Is one character bigger
  *
  */
-extern void HTChunkPutc (HTChunk * ch, char c);
+extern void HTChunkPutc(HTChunk *ch, char c);
 
-extern void HTChunkPutb (HTChunk * ch, const char *b, int l);
+extern void HTChunkPutb(HTChunk *ch, const char *b, int l);
 
-extern void HTChunkPutUtf8Char (HTChunk * ch, UCode_t code);
+extern void HTChunkPutUtf8Char(HTChunk *ch, UCode_t code);
 
 /*
  * Append a string to a  chunk
@@ -172,9 +166,7 @@ extern void HTChunkPutUtf8Char (HTChunk * ch, UCode_t code);
  *
  */
 
-
-extern void HTChunkPuts (HTChunk * ch, const char *str);
-
+extern void HTChunkPuts(HTChunk *ch, const char *str);
 
 /*
  *
@@ -194,7 +186,6 @@ extern void HTChunkPuts (HTChunk * ch, const char *str);
  *
  */
 
-
-extern void HTChunkTerminate (HTChunk * ch);
+extern void HTChunkTerminate(HTChunk *ch);
 
 #endif /* HTCHUNK_H */

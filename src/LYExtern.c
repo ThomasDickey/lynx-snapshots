@@ -32,12 +32,10 @@
 #define ASC2HEXD(x) (((x) >= '0' && (x) <= '9') ?               \
 		     ((x) - '0') : (toupper(x) - 'A' + 10))
 
-
 /* Decodes the forms %xy in a URL to the character the hexadecimal
    code of which is xy. xy are hexadecimal digits from
    [0123456789ABCDEF] (case-insensitive). If x or y are not hex-digits
    or '%' is near '\0', the whole sequence is inserted literally. */
-
 
 static char *decode_string(char *s)
 {
@@ -56,23 +54,22 @@ static char *decode_string(char *s)
 		*p = *s;
 		continue;
 	    }
-	    *p = (char)((ASC2HEXD(*(s + 1)) << 4) + ASC2HEXD(*(s + 2)));
+	    *p = (char) ((ASC2HEXD(*(s + 1)) << 4) + ASC2HEXD(*(s + 2)));
 	    s += 2;
 	}
     }
     *p = '\0';
     return save_s;
 }
-#endif	/* WIN_EX */
+#endif /* WIN_EX */
 
 #ifdef WIN_EX
 /*
- *  Quote the path to make it safe for shell command processing.
+ * Quote the path to make it safe for shell command processing.
  */
-char * quote_pathname (
-	char * 	pathname)
+char *quote_pathname(char *pathname)
 {
-    char * result = NULL;
+    char *result = NULL;
 
     if (strchr(pathname, ' ') != NULL) {
 	HTSprintf0(&result, "\"%s\"", pathname);
@@ -83,11 +80,9 @@ char * quote_pathname (
 }
 #endif /* WIN_EX */
 
-
-static void format (
-    char **	result,
-    char *	fmt,
-    char *	parm)
+static void format(char **result,
+		   char *fmt,
+		   char *parm)
 {
     *result = NULL;
     HTAddParam(result, fmt, 1, parm);
@@ -102,21 +97,21 @@ static void format (
  * Prevent spoofing of the shell.  Dunno how this needs to be modified for VMS
  * or DOS.  - kw
  */
-static char *format_command (
-    char *	command,
-    char *	param)
+static char *format_command(char *command,
+			    char *param)
 {
     char *cmdbuf = NULL;
 
 #if defined(WIN_EX)
     if (*param != '\"' && strchr(param, ' ') != NULL) {
 	char *cp = quote_pathname(param);
+
 	format(&cmdbuf, command, cp);
 	FREE(cp);
     } else {
 	char pram_string[LY_MAXPATH];
 
-	LYstrncpy(pram_string, param, sizeof(pram_string)-1);
+	LYstrncpy(pram_string, param, sizeof(pram_string) - 1);
 	decode_string(pram_string);
 	param = pram_string;
 
@@ -151,11 +146,11 @@ static char *format_command (
 	     */
 	    if (ISUPPER(command[0])) {
 		format(&cmdbuf,
-			command, HTDOS_short_name(e_buff));
+		       command, HTDOS_short_name(e_buff));
 	    } else {
 		if (*e_buff != '\"' && strchr(e_buff, ' ') != NULL) {
 		    p = quote_pathname(e_buff);
-		    LYstrncpy(e_buff, p, sizeof(e_buff)-1);
+		    LYstrncpy(e_buff, p, sizeof(e_buff) - 1);
 		    FREE(p);
 		}
 		format(&cmdbuf, command, e_buff);
@@ -175,9 +170,8 @@ static char *format_command (
  * more than one possibility, make a popup menu of the matching commands and
  * allow the user to select one.  Return the selected command.
  */
-static char *lookup_external (
-    char * 	param,
-    BOOL	only_overriders)
+static char *lookup_external(char *param,
+			     BOOL only_overriders)
 {
     int pass, num_disabled, num_matched, num_choices, cur_choice;
     int length = 0;
@@ -218,22 +212,21 @@ static char *lookup_external (
     }
 
     if (num_disabled != 0
-     && num_disabled == num_matched) {
+	&& num_disabled == num_matched) {
 	HTUserMsg(EXTERNALS_DISABLED);
     } else if (num_choices > 1) {
 	int old_y, old_x;
 
 	LYGetYX(old_y, old_x);
-	cur_choice = LYhandlePopupList(
-			-1,
-			0,
-			old_x,
-			(const char **)choices,
-			-1,
-			-1,
-			FALSE,
-			TRUE,
-			FALSE);
+	cur_choice = LYhandlePopupList(-1,
+				       0,
+				       old_x,
+				       (const char **) choices,
+				       -1,
+				       -1,
+				       FALSE,
+				       TRUE,
+				       FALSE);
 	wmove(LYwin, old_y, old_x);
 	CTRACE((tfp, "selected choice %d of %d\n", cur_choice, num_choices));
 	if (cur_choice < 0) {
@@ -252,9 +245,8 @@ static char *lookup_external (
     return cmdbuf;
 }
 
-BOOL run_external (
-    char * 	param,
-    BOOL	only_overriders)
+BOOL run_external(char *param,
+		  BOOL only_overriders)
 {
 #ifdef WIN_EX
     int status;
@@ -285,7 +277,7 @@ BOOL run_external (
 	confirmed = MessageBox(GetForegroundWindow(), cmdbuf,
 			       "Lynx (EXTERNAL COMMAND EXEC)",
 			       MB_ICONQUESTION | MB_SETFOREGROUND | MB_OKCANCEL)
-		    != IDCANCEL;
+	    != IDCANCEL;
 #else
 	confirmed = HTConfirm(LYElideString(cmdbuf, 40)) != NO;
 #endif
@@ -334,7 +326,7 @@ BOOL run_external (
 			"'%s'",
 			status, (status / 256), (status & 0xff),
 			cmdbuf);
-#ifdef SH_EX	/* WIN_GUI for ERROR only */
+#ifdef SH_EX			/* WIN_GUI for ERROR only */
 		MessageBox(GetForegroundWindow(), buff,
 			   "Lynx (EXTERNAL COMMAND EXEC)",
 			   MB_ICONSTOP | MB_SETFOREGROUND | MB_OK);
@@ -342,9 +334,9 @@ BOOL run_external (
 		HTConfirm(LYElideString(buff, 40));
 #endif /* 1 */
 	    }
-#else	/* Not WIN_EX */
+#else /* Not WIN_EX */
 	    LYSystem(cmdbuf);
-#endif	/* WIN_EX */
+#endif /* WIN_EX */
 
 #if defined(WIN_EX)
 	    SetConsoleTitle("Lynx for Win32");
@@ -359,4 +351,4 @@ BOOL run_external (
     FREE(cmdbuf);
     return found;
 }
-#endif	/* USE_EXTERNALS */
+#endif /* USE_EXTERNALS */

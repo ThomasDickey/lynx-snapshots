@@ -1,12 +1,12 @@
 /*		Case-independent string comparison		HTString.c
-**
-**	Original version came with listserv implementation.
-**	Version TBL Oct 91 replaces one which modified the strings.
-**	02-Dec-91 (JFG) Added stralloccopy and stralloccat
-**	23 Jan 92 (TBL) Changed strallocc* to 8 char HTSAC* for VM and suchlike
-**	 6 Oct 92 (TBL) Moved WWW_TraceFlag in here to be in library
-**	15 Nov 98 (TD)  Added HTSprintf.
-*/
+ *
+ *	Original version came with listserv implementation.
+ *	Version TBL Oct 91 replaces one which modified the strings.
+ *	02-Dec-91 (JFG) Added stralloccopy and stralloccat
+ *	23 Jan 92 (TBL) Changed strallocc* to 8 char HTSAC* for VM and suchlike
+ *	 6 Oct 92 (TBL) Moved WWW_TraceFlag in here to be in library
+ *	15 Nov 98 (TD)  Added HTSprintf.
+ */
 
 #include <HTUtils.h>
 
@@ -23,256 +23,251 @@ int WWW_TraceMask = 0;		/* Global trace flag for ALL W3 code */
 #endif /* !VC */
 
 #ifdef _WINDOWS
-const char * HTLibraryVersion = "2.14FM"; /* String for help screen etc */
+const char *HTLibraryVersion = "2.14FM";	/* String for help screen etc */
+
 #else
-const char * HTLibraryVersion = VC; /* String for help screen etc */
+const char *HTLibraryVersion = VC;	/* String for help screen etc */
 #endif
 
 /*
-**     strcasecomp8 is a variant of strcasecomp (below)
-**     ------------		    -----------
-**     but uses 8bit upper/lower case information
-**     from the current display charset.
-**     It returns 0 if exact match.
-*/
-int strcasecomp8 (
-       const char*    a,
-       const char *   b)
+ *     strcasecomp8 is a variant of strcasecomp (below)
+ *     ------------		    -----------
+ *     but uses 8bit upper/lower case information
+ *     from the current display charset.
+ *     It returns 0 if exact match.
+ */
+int strcasecomp8(const char *a,
+		 const char *b)
 {
     const char *p = a;
     const char *q = b;
 
-    for ( ; *p && *q; p++, q++) {
+    for (; *p && *q; p++, q++) {
 	int diff = UPPER8(*p, *q);
-	if (diff) return diff;
+
+	if (diff)
+	    return diff;
     }
     if (*p)
-	return 1;	/* p was longer than q */
+	return 1;		/* p was longer than q */
     if (*q)
-	return -1;	/* p was shorter than q */
-    return 0;		/* Exact match */
+	return -1;		/* p was shorter than q */
+    return 0;			/* Exact match */
 }
 
 /*
-**     strncasecomp8 is a variant of strncasecomp (below)
-**     -------------		     ------------
-**     but uses 8bit upper/lower case information
-**     from the current display charset.
-**     It returns 0 if exact match.
-*/
-int strncasecomp8 (
-	const char*	a,
-	const char *	b,
-	int		n)
+ *     strncasecomp8 is a variant of strncasecomp (below)
+ *     -------------		     ------------
+ *     but uses 8bit upper/lower case information
+ *     from the current display charset.
+ *     It returns 0 if exact match.
+ */
+int strncasecomp8(const char *a,
+		  const char *b,
+		  int n)
 {
     const char *p = a;
     const char *q = b;
 
-    for ( ; ; p++, q++) {
+    for (;; p++, q++) {
 	int diff;
-	if (p == (a+n))
-	    return 0;	/*   Match up to n characters */
+
+	if (p == (a + n))
+	    return 0;		/*   Match up to n characters */
 	if (!(*p && *q))
 	    return (*p - *q);
 	diff = UPPER8(*p, *q);
 	if (diff)
 	    return diff;
     }
-    /*NOTREACHED*/
+    /*NOTREACHED */
 }
 
-#ifndef VM		/* VM has these already it seems */
+#ifndef VM			/* VM has these already it seems */
 
-#ifdef SH_EX	/* 1997/12/23 (Tue) 16:40:31 */
+#ifdef SH_EX			/* 1997/12/23 (Tue) 16:40:31 */
 
 /*
  * This array is designed for mapping upper and lower case letter
  * together for a case independent comparison.  The mappings are
  * based upon ascii character sequences.
  */
-static unsigned char charmap[] = {
-	'\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007',
-	'\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
-	'\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027',
-	'\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037',
-	'\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047',
-	'\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057',
-	'\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067',
-	'\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077',
-	'\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147',
-	'\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
-	'\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167',
-	'\170', '\171', '\172', '\133', '\134', '\135', '\136', '\137',
-	'\140', '\141', '\142', '\143', '\144', '\145', '\146', '\147',
-	'\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
-	'\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167',
-	'\170', '\171', '\172', '\173', '\174', '\175', '\176', '\177',
-	'\200', '\201', '\202', '\203', '\204', '\205', '\206', '\207',
-	'\210', '\211', '\212', '\213', '\214', '\215', '\216', '\217',
-	'\220', '\221', '\222', '\223', '\224', '\225', '\226', '\227',
-	'\230', '\231', '\232', '\233', '\234', '\235', '\236', '\237',
-	'\240', '\241', '\242', '\243', '\244', '\245', '\246', '\247',
-	'\250', '\251', '\252', '\253', '\254', '\255', '\256', '\257',
-	'\260', '\261', '\262', '\263', '\264', '\265', '\266', '\267',
-	'\270', '\271', '\272', '\273', '\274', '\275', '\276', '\277',
-	'\340', '\341', '\342', '\343', '\344', '\345', '\346', '\347',
-	'\350', '\351', '\352', '\353', '\354', '\355', '\356', '\357',
-	'\360', '\361', '\362', '\363', '\364', '\365', '\366', '\327',
-	'\370', '\371', '\372', '\373', '\374', '\375', '\376', '\337',
-	'\340', '\341', '\342', '\343', '\344', '\345', '\346', '\347',
-	'\350', '\351', '\352', '\353', '\354', '\355', '\356', '\357',
-	'\360', '\361', '\362', '\363', '\364', '\365', '\366', '\367',
-	'\370', '\371', '\372', '\373', '\374', '\375', '\376', '\377',
+static unsigned char charmap[] =
+{
+    '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007',
+    '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
+    '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027',
+    '\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037',
+    '\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047',
+    '\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057',
+    '\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067',
+    '\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077',
+    '\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147',
+    '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
+    '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167',
+    '\170', '\171', '\172', '\133', '\134', '\135', '\136', '\137',
+    '\140', '\141', '\142', '\143', '\144', '\145', '\146', '\147',
+    '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
+    '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167',
+    '\170', '\171', '\172', '\173', '\174', '\175', '\176', '\177',
+    '\200', '\201', '\202', '\203', '\204', '\205', '\206', '\207',
+    '\210', '\211', '\212', '\213', '\214', '\215', '\216', '\217',
+    '\220', '\221', '\222', '\223', '\224', '\225', '\226', '\227',
+    '\230', '\231', '\232', '\233', '\234', '\235', '\236', '\237',
+    '\240', '\241', '\242', '\243', '\244', '\245', '\246', '\247',
+    '\250', '\251', '\252', '\253', '\254', '\255', '\256', '\257',
+    '\260', '\261', '\262', '\263', '\264', '\265', '\266', '\267',
+    '\270', '\271', '\272', '\273', '\274', '\275', '\276', '\277',
+    '\340', '\341', '\342', '\343', '\344', '\345', '\346', '\347',
+    '\350', '\351', '\352', '\353', '\354', '\355', '\356', '\357',
+    '\360', '\361', '\362', '\363', '\364', '\365', '\366', '\327',
+    '\370', '\371', '\372', '\373', '\374', '\375', '\376', '\337',
+    '\340', '\341', '\342', '\343', '\344', '\345', '\346', '\347',
+    '\350', '\351', '\352', '\353', '\354', '\355', '\356', '\357',
+    '\360', '\361', '\362', '\363', '\364', '\365', '\366', '\367',
+    '\370', '\371', '\372', '\373', '\374', '\375', '\376', '\377',
 };
 
-int strcasecomp (
-	const char*	s1,
-	const char*	s2)
+int strcasecomp(const char *s1,
+		const char *s2)
 {
     register unsigned char *cm = charmap;
-    register unsigned char *us1 = (unsigned char *)s1;
-    register unsigned char *us2 = (unsigned char *)s2;
+    register unsigned char *us1 = (unsigned char *) s1;
+    register unsigned char *us2 = (unsigned char *) s2;
 
     while (cm[*us1] == cm[*us2++])
 	if (*us1++ == '\0')
-	    return(0);
+	    return (0);
     return (cm[*us1] - cm[*--us2]);
 }
 
-int strncasecomp (
-	const char*	a,
-	const char*	b,
-	int		n)
+int strncasecomp(const char *a,
+		 const char *b,
+		 int n)
 {
     register unsigned char *cm = charmap;
-    register unsigned char *us1 = (unsigned char *)a;
-    register unsigned char *us2 = (unsigned char *)b;
+    register unsigned char *us1 = (unsigned char *) a;
+    register unsigned char *us2 = (unsigned char *) b;
 
-    while ((long)(--n) >= 0 && cm[*us1] == cm[*us2++])
+    while ((long) (--n) >= 0 && cm[*us1] == cm[*us2++])
 	if (*us1++ == '\0')
-	    return(0);
-    return ((long)n < 0 ? 0 : cm[*us1] - cm[*--us2]);
+	    return (0);
+    return ((long) n < 0 ? 0 : cm[*us1] - cm[*--us2]);
 }
 
-#else	/* SH_EX */
+#else /* SH_EX */
 
 /*	Strings of any length
-**	---------------------
-*/
-int strcasecomp (
-	const char*	a,
-	const char *	b)
+ *	---------------------
+ */
+int strcasecomp(const char *a,
+		const char *b)
 {
     const char *p = a;
     const char *q = b;
 
-    for ( ; *p && *q; p++, q++) {
+    for (; *p && *q; p++, q++) {
 	int diff = TOLOWER(*p) - TOLOWER(*q);
-	if (diff) return diff;
+
+	if (diff)
+	    return diff;
     }
     if (*p)
-	return 1;	/* p was longer than q */
+	return 1;		/* p was longer than q */
     if (*q)
-	return -1;	/* p was shorter than q */
-    return 0;		/* Exact match */
+	return -1;		/* p was shorter than q */
+    return 0;			/* Exact match */
 }
 
-
 /*	With count limit
-**	----------------
-*/
-int strncasecomp (
-	const char*	a,
-	const char *	b,
-	int		n)
+ *	----------------
+ */
+int strncasecomp(const char *a,
+		 const char *b,
+		 int n)
 {
     const char *p = a;
     const char *q = b;
 
-    for ( ; ; p++, q++) {
+    for (;; p++, q++) {
 	int diff;
-	if (p == (a+n))
-	    return 0;	/*   Match up to n characters */
+
+	if (p == (a + n))
+	    return 0;		/*   Match up to n characters */
 	if (!(*p && *q))
 	    return (*p - *q);
 	diff = TOLOWER(*p) - TOLOWER(*q);
 	if (diff)
 	    return diff;
     }
-    /*NOTREACHED*/
+    /*NOTREACHED */
 }
 
-#endif	/* SH_EX */
+#endif /* SH_EX */
 #endif /* VM */
 
 #ifdef NOT_ASCII
 
 /*	Case-insensitive with ASCII collating sequence
-**	----------------
-*/
-int AS_casecomp (
-	const char*	p,
-	const char*	q)
+ *	----------------
+ */
+int AS_casecomp(const char *p,
+		const char *q)
 {
     int diff;
 
-    for ( ; ; p++, q++) {
+    for (;; p++, q++) {
 	if (!(*p && *q))
-	    return (UCH(*p)  - UCH(*q));
+	    return (UCH(*p) - UCH(*q));
 	diff = TOASCII(TOLOWER(*p))
-	     - TOASCII(TOLOWER(*q));
+	    - TOASCII(TOLOWER(*q));
 	if (diff)
 	    return diff;
     }
-    /*NOTREACHED*/
+    /*NOTREACHED */
 }
 
-
 /*	With count limit and ASCII collating sequence
-**	----------------
-**	AS_cmp uses n == -1 to compare indefinite length.
-*/
-int AS_ncmp (
-	const char *	p,
-	const char *	q,
-	unsigned int	n)
+ *	----------------
+ *	AS_cmp uses n == -1 to compare indefinite length.
+ */
+int AS_ncmp(const char *p,
+	    const char *q,
+	    unsigned int n)
 {
     const char *a = p;
     int diff;
 
-    for ( ; (p-a) < n; p++, q++) {
+    for (; (p - a) < n; p++, q++) {
 	if (!(*p && *q))
 	    return (UCH(*p) - UCH(*q));
 	diff = TOASCII(*p)
-	     - TOASCII(*q);
+	    - TOASCII(*q);
 	if (diff)
 	    return diff;
     }
-    return 0;	/*   Match up to n characters */
+    return 0;			/*   Match up to n characters */
 }
 
-
 /*	With ASCII collating sequence
-**	----------------
-*/
-int AS_cmp (
-	const char *	p,
-	const char *	q)
+ *	----------------
+ */
+int AS_cmp(const char *p,
+	   const char *q)
 {
-    return( AS_ncmp( p, q, -1 ) );
+    return (AS_ncmp(p, q, -1));
 }
 #endif /* NOT_ASCII */
 
-
 /*	Allocate a new copy of a string, and returns it
 */
-char * HTSACopy (
-	char **	dest,
-	const char *	src)
+char *HTSACopy(char **dest,
+	       const char *src)
 {
     if (src != 0) {
 	if (src != *dest) {
 	    size_t size = strlen(src) + 1;
+
 	    FREE(*dest);
 	    *dest = (char *) malloc(size);
 	    if (*dest == NULL)
@@ -287,58 +282,55 @@ char * HTSACopy (
 
 /*	String Allocate and Concatenate
 */
-char * HTSACat (
-	char **	dest,
-	const char *	src)
+char *HTSACat(char **dest,
+	      const char *src)
 {
     if (src && *src && (src != *dest)) {
 	if (*dest) {
 	    size_t length = strlen(*dest);
-	    *dest = (char *)realloc(*dest, length + strlen(src) + 1);
+
+	    *dest = (char *) realloc(*dest, length + strlen(src) + 1);
 	    if (*dest == NULL)
 		outofmem(__FILE__, "HTSACat");
-	    strcpy (*dest + length, src);
+	    strcpy(*dest + length, src);
 	} else {
-	    *dest = (char *)malloc(strlen(src) + 1);
+	    *dest = (char *) malloc(strlen(src) + 1);
 	    if (*dest == NULL)
 		outofmem(__FILE__, "HTSACat");
-	    strcpy (*dest, src);
+	    strcpy(*dest, src);
 	}
     }
     return *dest;
 }
 
-
 /* optimized for heavily realloc'd strings, store length inside */
 
-#define EXTRA_TYPE size_t		/* type we use for length */
+#define EXTRA_TYPE size_t	/* type we use for length */
 #define EXTRA_SIZE sizeof(void *)	/* alignment >= sizeof(EXTRA_TYPE) */
 
-void   HTSAFree_extra (
-	char *		s)
+void HTSAFree_extra(char *s)
 {
     free(s - EXTRA_SIZE);
 }
 
 /* never shrink */
-char * HTSACopy_extra (
-	char **	dest,
-	const char *	src)
+char *HTSACopy_extra(char **dest,
+		     const char *src)
 {
     if (src != 0) {
 	size_t srcsize = strlen(src) + 1;
 	EXTRA_TYPE size = 0;
 
 	if (*dest != 0) {
-	    size = *(EXTRA_TYPE *)((*dest) - EXTRA_SIZE);
+	    size = *(EXTRA_TYPE *) ((*dest) - EXTRA_SIZE);
 	}
 	if (size < srcsize) {
 	    FREE_extra(*dest);
-	    size = srcsize * 2;   /* x2 step */
+	    size = srcsize * 2;	/* x2 step */
 	    *dest = (char *) malloc(size + EXTRA_SIZE);
 	    if (*dest == NULL)
 		outofmem(__FILE__, "HTSACopy_extra");
-	    *(EXTRA_TYPE *)(*dest) = size;
+	    *(EXTRA_TYPE *) (*dest) = size;
 	    *dest += EXTRA_SIZE;
 	}
 	memcpy(*dest, src, srcsize);
@@ -349,42 +341,41 @@ char * HTSACopy_extra (
 }
 
 /*	Find next Field
-**	---------------
-**
-** On entry,
-**	*pstr	points to a string containig white space separated
-**		field, optionlly quoted.
-**
-** On exit,
-**	*pstr	has been moved to the first delimiter past the
-**		field
-**		THE STRING HAS BEEN MUTILATED by a 0 terminator
-**
-**	returns a pointer to the first field
-*/
-char * HTNextField (
-	char **	pstr)
+ *	---------------
+ *
+ * On entry,
+ *	*pstr	points to a string containig white space separated
+ *		field, optionlly quoted.
+ *
+ * On exit,
+ *	*pstr	has been moved to the first delimiter past the
+ *		field
+ *		THE STRING HAS BEEN MUTILATED by a 0 terminator
+ *
+ *	returns a pointer to the first field
+ */
+char *HTNextField(char **pstr)
 {
-    char * p = *pstr;
-    char * start;			/* start of field */
+    char *p = *pstr;
+    char *start;		/* start of field */
 
     while (*p && WHITE(*p))
-	p++;				/* Strip white space */
+	p++;			/* Strip white space */
     if (!*p) {
 	*pstr = p;
 	return NULL;		/* No first field */
     }
-    if (*p == '"') {			/* quoted field */
+    if (*p == '"') {		/* quoted field */
 	p++;
 	start = p;
-	for (; *p && *p!='"'; p++) {
+	for (; *p && *p != '"'; p++) {
 	    if (*p == '\\' && p[1])
-		p++;			/* Skip escaped chars */
+		p++;		/* Skip escaped chars */
 	}
     } else {
 	start = p;
 	while (*p && !WHITE(*p))
-	    p++;			/* Skip first field */
+	    p++;		/* Skip first field */
     }
     if (*p)
 	*p++ = '\0';
@@ -393,140 +384,167 @@ char * HTNextField (
 }
 
 /*	Find next Token
-**	---------------
-**	Finds the next token in a string
-**	On entry,
-**	*pstr	points to a string to be parsed.
-**	delims	lists characters to be recognized as delimiters.
-**		If NULL, default is white space "," ";" or "=".
-**		The word can optionally be quoted or enclosed with
-**		chars from bracks.
-**		Comments surrrounded by '(' ')' are filtered out
-**		unless they are specifically reqested by including
-**		' ' or '(' in delims or bracks.
-**	bracks	lists bracketing chars.  Some are recognized as
-**		special, for those give the opening char.
-**		If NULL, defaults to <"> and "<" ">".
-**	found	points to location to fill with the ending delimiter
-**		found, or is NULL.
-**
-**	On exit,
-**	*pstr	has been moved to the first delimiter past the
-**		field
-**		THE STRING HAS BEEN MUTILATED by a 0 terminator
-**	found	points to the delimiter found unless it was NULL.
-**	Returns a pointer to the first word or NULL on error
-*/
-char * HTNextTok (
-	char **	pstr,
-	const char *	delims,
-	const char *	bracks,
-	char *		found)
+ *	---------------
+ *	Finds the next token in a string
+ *	On entry,
+ *	*pstr	points to a string to be parsed.
+ *	delims	lists characters to be recognized as delimiters.
+ *		If NULL, default is white space "," ";" or "=".
+ *		The word can optionally be quoted or enclosed with
+ *		chars from bracks.
+ *		Comments surrrounded by '(' ')' are filtered out
+ *		unless they are specifically reqested by including
+ *		' ' or '(' in delims or bracks.
+ *	bracks	lists bracketing chars.  Some are recognized as
+ *		special, for those give the opening char.
+ *		If NULL, defaults to <"> and "<" ">".
+ *	found	points to location to fill with the ending delimiter
+ *		found, or is NULL.
+ *
+ *	On exit,
+ *	*pstr	has been moved to the first delimiter past the
+ *		field
+ *		THE STRING HAS BEEN MUTILATED by a 0 terminator
+ *	found	points to the delimiter found unless it was NULL.
+ *	Returns a pointer to the first word or NULL on error
+ */
+char *HTNextTok(char **pstr,
+		const char *delims,
+		const char *bracks,
+		char *found)
 {
-    char * p = *pstr;
-    char * start = NULL;
+    char *p = *pstr;
+    char *start = NULL;
     BOOL get_blanks, skip_comments;
     BOOL get_comments;
     BOOL get_closing_char_too = FALSE;
     char closer;
 
-    if (isEmpty(pstr)) return NULL;
-    if (!delims) delims = " ;,=" ;
-    if (!bracks) bracks = "<\"" ;
+    if (isEmpty(pstr))
+	return NULL;
+    if (!delims)
+	delims = " ;,=";
+    if (!bracks)
+	bracks = "<\"";
 
-    get_blanks = (BOOL) (!strchr(delims,' ') && !strchr(bracks,' '));
-    get_comments = (BOOL) (strchr(bracks,'(') != NULL);
-    skip_comments = (BOOL) (!get_comments && !strchr(delims,'(') && !get_blanks);
+    get_blanks = (BOOL) (!strchr(delims, ' ') && !strchr(bracks, ' '));
+    get_comments = (BOOL) (strchr(bracks, '(') != NULL);
+    skip_comments = (BOOL) (!get_comments && !strchr(delims, '(') && !get_blanks);
 #define skipWHITE(c) (!get_blanks && WHITE(c))
 
     while (*p && skipWHITE(*p))
-	p++;				/* Strip white space */
+	p++;			/* Strip white space */
     if (!*p) {
 	*pstr = p;
-	if (found) *found = '\0';
+	if (found)
+	    *found = '\0';
 	return NULL;		/* No first field */
     }
     while (1) {
 	/* Strip white space and other delimiters */
-	while (*p && (skipWHITE(*p) || strchr(delims,*p))) p++;
+	while (*p && (skipWHITE(*p) || strchr(delims, *p)))
+	    p++;
 	if (!*p) {
 	    *pstr = p;
-	    if (found) *found = *(p-1);
-	    return NULL;					 /* No field */
+	    if (found)
+		*found = *(p - 1);
+	    return NULL;	/* No field */
 	}
 
-	if (*p == '(' && (skip_comments || get_comments)) {	  /* Comment */
+	if (*p == '(' && (skip_comments || get_comments)) {	/* Comment */
 	    int comment_level = 0;
-	    if (get_comments && !start) start = p+1;
-	    for(;*p && (*p!=')' || --comment_level>0); p++) {
-		if (*p == '(') comment_level++;
-		else if (*p == '"') {	      /* quoted field within Comment */
-		    for(p++; *p && *p!='"'; p++)
-			if (*p == '\\' && *(p+1)) p++; /* Skip escaped chars */
-		    if (!*p) break; /* (invalid) end of string found, leave */
+
+	    if (get_comments && !start)
+		start = p + 1;
+	    for (; *p && (*p != ')' || --comment_level > 0); p++) {
+		if (*p == '(')
+		    comment_level++;
+		else if (*p == '"') {	/* quoted field within Comment */
+		    for (p++; *p && *p != '"'; p++)
+			if (*p == '\\' && *(p + 1))
+			    p++;	/* Skip escaped chars */
+		    if (!*p)
+			break;	/* (invalid) end of string found, leave */
 		}
-		if (*p == '\\' && *(p+1)) p++;	       /* Skip escaped chars */
+		if (*p == '\\' && *(p + 1))
+		    p++;	/* Skip escaped chars */
 	    }
 	    if (get_comments)
 		break;
-	    if (*p) p++;
+	    if (*p)
+		p++;
 	    if (get_closing_char_too) {
-		if (!*p || (!strchr(bracks,*p) && strchr(delims,*p))) {
+		if (!*p || (!strchr(bracks, *p) && strchr(delims, *p))) {
 		    break;
 		} else
-		    get_closing_char_too = (BOOL) (strchr(bracks,*p) != NULL);
+		    get_closing_char_too = (BOOL) (strchr(bracks, *p) != NULL);
 	    }
-	} else if (strchr(bracks,*p)) {	       /* quoted or bracketed field */
+	} else if (strchr(bracks, *p)) {	/* quoted or bracketed field */
 	    switch (*p) {
-	       case '<': closer = '>'; break;
-	       case '[': closer = ']'; break;
-	       case '{': closer = '}'; break;
-	       case ':': closer = ';'; break;
-	    default:	 closer = *p;
+	    case '<':
+		closer = '>';
+		break;
+	    case '[':
+		closer = ']';
+		break;
+	    case '{':
+		closer = '}';
+		break;
+	    case ':':
+		closer = ';';
+		break;
+	    default:
+		closer = *p;
 	    }
-	    if (!start) start = ++p;
-	    for(;*p && *p!=closer; p++)
-		if (*p == '\\' && *(p+1)) p++;	       /* Skip escaped chars */
+	    if (!start)
+		start = ++p;
+	    for (; *p && *p != closer; p++)
+		if (*p == '\\' && *(p + 1))
+		    p++;	/* Skip escaped chars */
 	    if (get_closing_char_too) {
 		p++;
-		if (!*p || (!strchr(bracks,*p) && strchr(delims,*p))) {
+		if (!*p || (!strchr(bracks, *p) && strchr(delims, *p))) {
 		    break;
 		} else
-		    get_closing_char_too = (BOOL) (strchr(bracks,*p) != NULL);
+		    get_closing_char_too = (BOOL) (strchr(bracks, *p) != NULL);
 	    } else
-	    break;			    /* kr95-10-9: needs to stop here */
-	} else {					      /* Spool field */
-	    if (!start) start = p;
-	    while(*p && !skipWHITE(*p) && !strchr(bracks,*p) &&
-					  !strchr(delims,*p))
+		break;		/* kr95-10-9: needs to stop here */
+	} else {		/* Spool field */
+	    if (!start)
+		start = p;
+	    while (*p && !skipWHITE(*p) && !strchr(bracks, *p) &&
+		   !strchr(delims, *p))
 		p++;
-	    if (*p && strchr(bracks,*p)) {
+	    if (*p && strchr(bracks, *p)) {
 		get_closing_char_too = TRUE;
 	    } else {
-		if (*p=='(' && skip_comments) {
+		if (*p == '(' && skip_comments) {
 		    *pstr = p;
-		    HTNextTok(pstr, NULL, "(", found);	/*	Advance pstr */
+		    HTNextTok(pstr, NULL, "(", found);	/*      Advance pstr */
 		    *p = '\0';
-		    if (*pstr && **pstr) (*pstr)++;
+		    if (*pstr && **pstr)
+			(*pstr)++;
 		    return start;
 		}
-		    break;					   /* Got it */
+		break;		/* Got it */
 	    }
 	}
     }
-    if (found) *found = *p;
+    if (found)
+	*found = *p;
 
-    if (*p) *p++ = '\0';
+    if (*p)
+	*p++ = '\0';
     *pstr = p;
     return start;
 }
 
-static char *HTAlloc (char *  ptr, size_t  length)
+static char *HTAlloc(char *ptr, size_t length)
 {
     if (ptr != 0)
-	ptr = (char *)realloc(ptr, length);
+	ptr = (char *) realloc(ptr, length);
     else
-	ptr = (char *)malloc(length);
+	ptr = (char *) malloc(length);
     if (ptr == 0)
 	outofmem(__FILE__, "HTAlloc");
     return ptr;
@@ -547,30 +565,36 @@ static char *HTAlloc (char *  ptr, size_t  length)
  * needed for its arguments.  Unlike sprintf, this always concatenates to the
  * destination buffer, so we do not have to provide both flavors.
  */
-typedef enum { Flags, Width, Prec, Type, Format } PRINTF;
+typedef enum {
+    Flags,
+    Width,
+    Prec,
+    Type,
+    Format
+} PRINTF;
 
 #define VA_INTGR(type) ival = va_arg((*ap), type)
 #define VA_FLOAT(type) fval = va_arg((*ap), type)
 #define VA_POINT(type) pval = (void *)va_arg((*ap), type)
 
-#define NUM_WIDTH 10	/* allow for width substituted for "*" in "%*s" */
+#define NUM_WIDTH 10		/* allow for width substituted for "*" in "%*s" */
 		/* also number of chars assumed to be needed in addition
 		   to a given precision in floating point formats */
 
 #define GROW_EXPR(n) (((n) * 3) / 2)
 #define GROW_SIZE 256
 
-PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf (
-	char **	pstr,
-	size_t		dst_len,
-	const char *	fmt,
-	va_list *	ap)
+PUBLIC_IF_FIND_LEAKS char *StrAllocVsprintf(char **pstr,
+					    size_t dst_len,
+					    const char *fmt,
+					    va_list * ap)
 {
 #ifdef SAVE_TIME_NOT_SPACE
     static size_t tmp_len = 0;
     static size_t fmt_len = 0;
     static char *tmp_ptr = NULL;
     static char *fmt_ptr = NULL;
+
 #else
     size_t tmp_len = GROW_SIZE;
     char *tmp_ptr = 0;
@@ -588,23 +612,23 @@ PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf (
 	if (*pstr)
 	    FREE(*pstr);
 	if (vasprintf(pstr, fmt, *ap) >= 0) {
-	    mark_malloced(*pstr, strlen(*pstr)+1);
-	    return(*pstr);
+	    mark_malloced(*pstr, strlen(*pstr) + 1);
+	    return (*pstr);
 	}
     }
 #endif /* USE_VASPRINTF */
 
     need = strlen(fmt) + 1;
 #ifdef SAVE_TIME_NOT_SPACE
-    if (!fmt_ptr || fmt_len < need*NUM_WIDTH) {
-	fmt_ptr = HTAlloc(fmt_ptr, fmt_len = need*NUM_WIDTH);
+    if (!fmt_ptr || fmt_len < need * NUM_WIDTH) {
+	fmt_ptr = HTAlloc(fmt_ptr, fmt_len = need * NUM_WIDTH);
     }
     if (!tmp_ptr || tmp_len < GROW_SIZE) {
 	tmp_ptr = HTAlloc(tmp_ptr, tmp_len = GROW_SIZE);
     }
 #else
-    if ((fmt_ptr = malloc(need*NUM_WIDTH)) == 0
-     || (tmp_ptr = malloc(tmp_len)) == 0) {
+    if ((fmt_ptr = malloc(need * NUM_WIDTH)) == 0
+	|| (tmp_ptr = malloc(tmp_len)) == 0) {
 	outofmem(__FILE__, "StrAllocVsprintf");
     }
 #endif /* SAVE_TIME_NOT_SPACE */
@@ -622,15 +646,15 @@ PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf (
 	if (*fmt == '%') {
 	    static char dummy[] = "";
 	    PRINTF state = Flags;
-	    char *pval   = dummy;	/* avoid const-cast */
-	    double fval  = 0.0;
-	    int done     = FALSE;
-	    int ival     = 0;
-	    int prec     = -1;
-	    int type     = 0;
-	    int used     = 0;
-	    int width    = -1;
-	    size_t f     = 0;
+	    char *pval = dummy;	/* avoid const-cast */
+	    double fval = 0.0;
+	    int done = FALSE;
+	    int ival = 0;
+	    int prec = -1;
+	    int type = 0;
+	    int used = 0;
+	    int width = -1;
+	    size_t f = 0;
 
 	    fmt_ptr[f++] = *fmt;
 	    while (*++fmt != '\0' && !done) {
@@ -638,6 +662,7 @@ PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf (
 
 		if (isdigit(UCH(*fmt))) {
 		    int num = *fmt - '0';
+
 		    if (state == Flags && num != 0)
 			state = Width;
 		    if (state == Width) {
@@ -651,6 +676,7 @@ PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf (
 		    }
 		} else if (*fmt == '*') {
 		    VA_INTGR(int);
+
 		    if (state == Flags)
 			state = Width;
 		    if (state == Width) {
@@ -663,56 +689,63 @@ PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf (
 		} else if (isalpha(UCH(*fmt))) {
 		    done = TRUE;
 		    switch (*fmt) {
-		    case 'Z': /* FALLTHRU */
-		    case 'h': /* FALLTHRU */
-		    case 'l': /* FALLTHRU */
-		    case 'L': /* FALLTHRU */
+		    case 'Z':	/* FALLTHRU */
+		    case 'h':	/* FALLTHRU */
+		    case 'l':	/* FALLTHRU */
+		    case 'L':	/* FALLTHRU */
 			done = FALSE;
 			type = *fmt;
 			break;
-		    case 'o': /* FALLTHRU */
-		    case 'i': /* FALLTHRU */
-		    case 'd': /* FALLTHRU */
-		    case 'u': /* FALLTHRU */
-		    case 'x': /* FALLTHRU */
-		    case 'X': /* FALLTHRU */
+		    case 'o':	/* FALLTHRU */
+		    case 'i':	/* FALLTHRU */
+		    case 'd':	/* FALLTHRU */
+		    case 'u':	/* FALLTHRU */
+		    case 'x':	/* FALLTHRU */
+		    case 'X':	/* FALLTHRU */
 			if (type == 'l')
 			    VA_INTGR(long);
+
 			else if (type == 'Z')
 			    VA_INTGR(size_t);
 			else
 			    VA_INTGR(int);
+
 			used = 'i';
 			break;
-		    case 'f': /* FALLTHRU */
-		    case 'e': /* FALLTHRU */
-		    case 'E': /* FALLTHRU */
-		    case 'g': /* FALLTHRU */
-		    case 'G': /* FALLTHRU */
-			    VA_FLOAT(double);
+		    case 'f':	/* FALLTHRU */
+		    case 'e':	/* FALLTHRU */
+		    case 'E':	/* FALLTHRU */
+		    case 'g':	/* FALLTHRU */
+		    case 'G':	/* FALLTHRU */
+			VA_FLOAT(double);
+
 			used = 'f';
 			break;
 		    case 'c':
 			VA_INTGR(int);
+
 			used = 'c';
 			break;
 		    case 's':
 			VA_POINT(char *);
+
 			if (prec < 0)
 			    prec = strlen(pval);
 			used = 's';
 			break;
 		    case 'p':
 			VA_POINT(void *);
+
 			used = 'p';
 			break;
 		    case 'n':
 			VA_POINT(int *);
+
 			used = 0;
 			break;
 		    default:
 			CTRACE((tfp, "unknown format character '%c' in %s\n",
-				    *fmt, format));
+				*fmt, format));
 			break;
 		    }
 		} else if (*fmt == '.') {
@@ -734,7 +767,7 @@ PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf (
 		    /* FALLTHRU */
 		case 'p':
 		    if (width < prec + 2)
-			width = prec + 2; /* leading sign/space/zero, "0x" */
+			width = prec + 2;	/* leading sign/space/zero, "0x" */
 		    break;
 		case 'c':
 		    break;
@@ -746,7 +779,7 @@ PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf (
 		    break;
 		}
 	    }
-	    if (width >= (int)tmp_len) {
+	    if (width >= (int) tmp_len) {
 		tmp_len = GROW_EXPR(tmp_len + width);
 		tmp_ptr = HTAlloc(tmp_ptr, tmp_len);
 	    }
@@ -799,9 +832,9 @@ PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf (
 #undef HTSprintf
 #endif
 #if ANSI_VARARGS
-char * HTSprintf (char ** pstr, const char * fmt, ...)
+char *HTSprintf(char **pstr, const char *fmt,...)
 #else
-char * HTSprintf (va_alist)
+char *HTSprintf(va_alist)
     va_dcl
 #endif
 {
@@ -809,11 +842,11 @@ char * HTSprintf (va_alist)
     size_t inuse = 0;
     va_list ap;
 
-    LYva_start(ap,fmt);
+    LYva_start(ap, fmt);
     {
 #if !ANSI_VARARGS
-	char **		pstr = va_arg(ap, char **);
-	const char *	fmt  = va_arg(ap, const char *);
+	char **pstr = va_arg(ap, char **);
+	const char *fmt = va_arg(ap, const char *);
 #endif
 	if (pstr != 0 && *pstr != 0)
 	    inuse = strlen(*pstr);
@@ -835,31 +868,31 @@ char * HTSprintf (va_alist)
 #undef HTSprintf0
 #endif
 #if ANSI_VARARGS
-char * HTSprintf0 (char ** pstr, const char * fmt, ...)
+char *HTSprintf0(char **pstr, const char *fmt,...)
 #else
-char * HTSprintf0 (va_alist)
+char *HTSprintf0(va_alist)
     va_dcl
 #endif
 {
     char *result = 0;
     va_list ap;
 
-    LYva_start(ap,fmt);
+    LYva_start(ap, fmt);
     {
 #if !ANSI_VARARGS
-	char **		pstr = va_arg(ap, char **);
-	const char *	fmt  = va_arg(ap, const char *);
+	char **pstr = va_arg(ap, char **);
+	const char *fmt = va_arg(ap, const char *);
 #endif
 #ifdef USE_VASPRINTF
 	if (pstr) {
 	    if (*pstr)
 		FREE(*pstr);
-	    if (vasprintf(pstr, fmt, ap) >= 0) /* else call outofmem?? */
-		mark_malloced(*pstr, strlen(*pstr)+1);
+	    if (vasprintf(pstr, fmt, ap) >= 0)	/* else call outofmem?? */
+		mark_malloced(*pstr, strlen(*pstr) + 1);
 	    result = *pstr;
 	} else
 #endif /* USE_VASPRINTF */
-	result = StrAllocVsprintf(pstr, 0, fmt, &ap);
+	    result = StrAllocVsprintf(pstr, 0, fmt, &ap);
     }
     va_end(ap);
 
@@ -873,25 +906,24 @@ char * HTSprintf0 (va_alist)
 #if USE_QUOTED_PARAMETER
 #define S_QUOTE '\''
 #define D_QUOTE '"'
-char *HTQuoteParameter (
-    const char *	parameter)
+char *HTQuoteParameter(const char *parameter)
 {
     size_t i;
     size_t last;
     size_t n = 0;
     size_t quoted = 0;
-    char * result;
+    char *result;
 
     if (parameter == 0)
 	parameter = "";
 
     last = strlen(parameter);
-    for (i=0; i < last; ++i)
+    for (i = 0; i < last; ++i)
 	if (strchr("\\&#$^*?(){}<>\"';`|", parameter[i]) != 0
-	 || isspace(UCH(parameter[i])))
+	    || isspace(UCH(parameter[i])))
 	    ++quoted;
 
-    result = (char *)malloc(last + 5*quoted + 3);
+    result = (char *) malloc(last + 5 * quoted + 3);
     if (result == NULL)
 	outofmem(__FILE__, "HTQuoteParameter");
 
@@ -912,7 +944,7 @@ char *HTQuoteParameter (
 	       and compatible shells, so trying to escape a backslash by
 	       doubling it is unnecessary and would be interpreted by the
 	       shell as an additional data character. - kw 2000-05-02
-	       */
+	     */
 	    result[n++] = parameter[i];
 	}
     }
@@ -928,10 +960,10 @@ char *HTQuoteParameter (
 /*
  * Returns the number of "%s" tokens in a system command-template.
  */
-int HTCountCommandArgs (
-    const char *	command)
+int HTCountCommandArgs(const char *command)
 {
     int number = 0;
+
     while (command[0] != 0) {
 	if (HTIsParam(command))
 	    number++;
@@ -943,9 +975,8 @@ int HTCountCommandArgs (
 /*
  * Returns a pointer into the given string after the given parameter number
  */
-static const char *HTAfterCommandArg (
-    const char *	command,
-    int		number)
+static const char *HTAfterCommandArg(const char *command,
+				     int number)
 {
     while (number > 0) {
 	if (command[0] != 0) {
@@ -972,11 +1003,10 @@ static const char *HTAfterCommandArg (
  * This is useful only when we quote parameters, of course.
  */
 #if USE_QUOTED_PARAMETER
-void HTAddXpand (
-    char **		result,
-    const char *	command,
-    int		number,
-    const char *	parameter)
+void HTAddXpand(char **result,
+		const char *command,
+		int number,
+		const char *parameter)
 {
     if (number > 0) {
 	const char *last = HTAfterCommandArg(command, number - 1);
@@ -990,7 +1020,8 @@ void HTAddXpand (
 	    if (HTIsParam(next)) {
 		if (next != last) {
 		    size_t len = (next - last)
-				+ ((*result != 0) ? strlen(*result) : 0);
+		    + ((*result != 0) ? strlen(*result) : 0);
+
 		    HTSACat(result, last);
 		    (*result)[len] = 0;
 		}
@@ -1014,11 +1045,10 @@ void HTAddXpand (
  * Parameters are substituted at "%s" tokens, like printf.  Other printf-style
  * tokens are not substituted; they are passed through without change.
  */
-void HTAddToCmd (
-    char **		result,
-    const char *	command,
-    int		number,
-    const char *	string)
+void HTAddToCmd(char **result,
+		const char *command,
+		int number,
+		const char *string)
 {
     if (number > 0) {
 	const char *last = HTAfterCommandArg(command, number - 1);
@@ -1033,7 +1063,8 @@ void HTAddToCmd (
 	    if (HTIsParam(next)) {
 		if (next != last) {
 		    size_t len = (next - last)
-				+ ((*result != 0) ? strlen(*result) : 0);
+		    + ((*result != 0) ? strlen(*result) : 0);
+
 		    HTSACat(result, last);
 		    (*result)[len] = 0;
 		}
@@ -1051,15 +1082,15 @@ void HTAddToCmd (
  * string is a complete parameter (which is a necessary assumption so we can
  * quote it properly).
  */
-void HTAddParam (
-    char **		result,
-    const char *	command,
-    int		number,
-    const char *	parameter)
+void HTAddParam(char **result,
+		const char *command,
+		int number,
+		const char *parameter)
 {
     if (number > 0) {
 #if USE_QUOTED_PARAMETER
 	char *quoted = HTQuoteParameter(parameter);
+
 	HTAddToCmd(result, command, number, quoted);
 	FREE(quoted);
 #else
@@ -1072,15 +1103,14 @@ void HTAddParam (
  * Append the remaining command-string to a system command (compare with
  * HTAddParam).  Any remaining "%s" tokens are copied as empty strings.
  */
-void HTEndParam (
-    char **		result,
-    const char *	command,
-    int		number)
+void HTEndParam(char **result,
+		const char *command,
+		int number)
 {
     const char *last;
     int count;
 
-    count = HTCountCommandArgs (command);
+    count = HTCountCommandArgs(command);
     if (count < number)
 	number = count;
     last = HTAfterCommandArg(command, number);
@@ -1090,17 +1120,14 @@ void HTEndParam (
     CTRACE((tfp, "PARAM-END:%s\n", *result));
 }
 
-
-/*	Binary-strings (may have embedded nulls).
- *	Some modules (HTGopher) assume there is a null on the end, anyway.
+/* Binary-strings (may have embedded nulls).  Some modules (HTGopher) assume
+ * there is a null on the end, anyway.
  */
 
-/*	Allocate a new bstring, and return it.
+/* Allocate a new bstring, and return it.
 */
-void HTSABCopy (
-	bstring**	dest,
-	const char *	src,
-	int		len)
+void HTSABCopy(bstring **dest, const char *src,
+	       int len)
 {
     bstring *t;
     unsigned need = len + 1;
@@ -1113,11 +1140,12 @@ void HTSABCopy (
 	    trace_bstring2(src, len);
 	    CTRACE((tfp, "\n"));
 	}
-	if ((t = (bstring*) malloc(sizeof(bstring))) == NULL)
+	if ((t = (bstring *) malloc(sizeof(bstring))) == NULL)
+	      outofmem(__FILE__, "HTSABCopy");
+
+	if ((t->str = (char *) malloc(need)) == NULL)
 	    outofmem(__FILE__, "HTSABCopy");
-	if ((t->str = (char *) malloc (need)) == NULL)
-	    outofmem(__FILE__, "HTSABCopy");
-	memcpy (t->str, src, len);
+	memcpy(t->str, src, len);
 	t->len = len;
 	t->str[t->len] = '\0';
 	*dest = t;
@@ -1132,9 +1160,7 @@ void HTSABCopy (
 /*
  * Initialize with a null-terminated string (discards the null).
  */
-void HTSABCopy0 (
-	bstring**	dest,
-	const char *	src)
+void HTSABCopy0(bstring **dest, const char *src)
 {
     HTSABCopy(dest, src, strlen(src));
 }
@@ -1142,10 +1168,8 @@ void HTSABCopy0 (
 /*
  * Append a block of memory to a bstring.
  */
-void HTSABCat (
-	bstring **	dest,
-	const char *	src,
-	int		len)
+void HTSABCat(bstring **dest, const char *src,
+	      int len)
 {
     bstring *t = *dest;
 
@@ -1160,16 +1184,18 @@ void HTSABCat (
 	}
 	if (t) {
 	    unsigned length = t->len + need;
-	    if ((t->str = (char *)realloc(t->str, length)) == NULL)
+
+	    if ((t->str = (char *) realloc(t->str, length)) == NULL)
 		outofmem(__FILE__, "HTSACat");
 	} else {
 	    if ((t = typecalloc(bstring)) == NULL)
-		outofmem(__FILE__, "HTSACat");
-	    t->str = (char *)malloc(need);
+		  outofmem(__FILE__, "HTSACat");
+
+	    t->str = (char *) malloc(need);
 	}
 	if (t->str == NULL)
 	    outofmem(__FILE__, "HTSACat");
-	memcpy (t->str + t->len, src, len);
+	memcpy(t->str + t->len, src, len);
 	t->len += len;
 	t->str[t->len] = '\0';
 	*dest = t;
@@ -1184,9 +1210,7 @@ void HTSABCat (
 /*
  * Append a null-terminated string (discards the null).
  */
-void HTSABCat0 (
-	bstring**	dest,
-	const char *	src)
+void HTSABCat0(bstring **dest, const char *src)
 {
     HTSABCat(dest, src, strlen(src));
 }
@@ -1194,16 +1218,14 @@ void HTSABCat0 (
 /*
  * Compare two bstring's for equality
  */
-BOOL HTSABEql   (
-	bstring *	a,
-	bstring *	b)
+BOOL HTSABEql(bstring *a, bstring *b)
 {
     unsigned len_a = (a != 0) ? a->len : 0;
     unsigned len_b = (b != 0) ? b->len : 0;
 
     if (len_a == len_b) {
 	if (len_a == 0
-	 || memcmp(a->str, b->str, a->len) == 0)
+	    || memcmp(a->str, b->str, a->len) == 0)
 	    return TRUE;
     }
     return FALSE;
@@ -1212,8 +1234,7 @@ BOOL HTSABEql   (
 /*
  * Deallocate a bstring.
  */
-void HTSABFree (
-	bstring **	ptr)
+void HTSABFree(bstring **ptr)
 {
     if (*ptr != NULL) {
 	FREE((*ptr)->str);
@@ -1227,9 +1248,9 @@ void HTSABFree (
  * The bstring may contain embedded nulls; the formatted portions must not.
  */
 #ifdef ANSI_VARARGS
-bstring * HTBprintf (bstring ** pstr, const char * fmt, ...)
+bstring *HTBprintf(bstring **pstr, const char *fmt,...)
 #else
-bstring * HTBprintf (va_alist)
+bstring *HTBprintf(va_alist)
     va_dcl
 #endif
 {
@@ -1237,15 +1258,15 @@ bstring * HTBprintf (va_alist)
     char *temp = 0;
     va_list ap;
 
-    LYva_start(ap,fmt);
+    LYva_start(ap, fmt);
     {
 #if !ANSI_VARARGS
-	bstring **	pstr = va_arg(ap, char **);
-	const char *	fmt  = va_arg(ap, const char *);
+	bstring **pstr = va_arg(ap, char **);
+	const char *fmt = va_arg(ap, const char *);
 #endif
 	temp = StrAllocVsprintf(&temp, 0, fmt, &ap);
 	if (!isEmpty(temp)) {
-	    HTSABCat (pstr, temp, strlen(temp));
+	    HTSABCat(pstr, temp, strlen(temp));
 	}
 	FREE(temp);
 	result = *pstr;
@@ -1260,15 +1281,15 @@ bstring * HTBprintf (va_alist)
  * That is most, since we do not restrict line-length.  Nulls and other
  * non-printing characters are addressed.
  */
-void trace_bstring2 (
-	const char *	text,
-	int		size)
+void trace_bstring2(const char *text,
+		    int size)
 {
     int n;
 
     if (text != 0) {
 	for (n = 0; n < size; ++n) {
 	    int ch = UCH(text[n]);
+
 	    switch (ch) {
 	    case '\\':
 		fputs("\\\\", tfp);
@@ -1294,8 +1315,7 @@ void trace_bstring2 (
     }
 }
 
-void trace_bstring (
-	bstring *	data)
+void trace_bstring(bstring *data)
 {
     trace_bstring2(BStrData(data), BStrLen(data));
 }

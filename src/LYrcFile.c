@@ -20,7 +20,7 @@
 
 #define MSG_ENABLE_LYNXRC N_("Normally disabled.  See ENABLE_LYNXRC in lynx.cfg\n")
 #define putBool(value) ((value) ? "on" : "off")
-
+/* *INDENT-OFF* */
 Config_Enum tbl_DTD_recovery[] = {
     { "true",		TRUE },
     { "false",		FALSE },
@@ -127,15 +127,14 @@ Config_Enum tbl_force_prompt[] = {
     { "no",		FORCE_PROMPT_NO		},
     { NULL,		-1			}
 };
+/* *INDENT-ON* */
 
-static BOOL getBool (char * src)
+static BOOL getBool(char *src)
 {
     return (BOOL) (!strncasecomp(src, "on", 2) || !strncasecomp(src, "true", 4));
 }
 
-const char *LYputEnum (
-    Config_Enum *	table,
-    int		value)
+const char *LYputEnum(Config_Enum * table, int value)
 {
     while (table->name != 0) {
 	if (table->value == value) {
@@ -146,10 +145,8 @@ const char *LYputEnum (
     return "?";
 }
 
-BOOL LYgetEnum (
-    Config_Enum *	table,
-    char *		name,
-    int *		result)
+BOOL LYgetEnum(Config_Enum * table, char *name,
+	       int *result)
 {
     Config_Enum *found = 0;
     unsigned len = strlen(name);
@@ -207,24 +204,23 @@ typedef enum {
     ,CONF_STR
 } Conf_Types;
 
-typedef struct config_type
-{
+typedef struct config_type {
     const char *name;
     int enabled;		/* see lynx.cfg ENABLE_LYNXRC "off" lines */
     Conf_Types type;
-    ParseData;
+      ParseData;
     char **strings;
     Config_Enum *table;
-    void (*write_it) (FILE * fp, struct config_type *);
+    void (*write_it) (FILE *fp, struct config_type *);
     char *note;
 } Config_Type;
 
-static int get_assume_charset (char * value)
+static int get_assume_charset(char *value)
 {
     int i;
 
     for (i = 0; i < LYNumCharsets; ++i) {
-    	if (!strcasecomp(value, LYCharSet_UC[i].MIMEname)) {
+	if (!strcasecomp(value, LYCharSet_UC[i].MIMEname)) {
 	    UCLYhndl_for_unspec = i;
 	    break;
 	}
@@ -232,7 +228,7 @@ static int get_assume_charset (char * value)
     return 0;
 }
 
-static void put_assume_charset (FILE * fp, struct config_type * tbl)
+static void put_assume_charset(FILE *fp, struct config_type *tbl)
 {
     int i;
 
@@ -241,17 +237,17 @@ static void put_assume_charset (FILE * fp, struct config_type * tbl)
     fprintf(fp, "%s=%s\n\n", tbl->name, LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
 }
 
-static int get_display_charset (char * value)
+static int get_display_charset(char *value)
 {
     int i = 0;
 
-    i = UCGetLYhndl_byAnyName(value); /* by MIME or full name */
+    i = UCGetLYhndl_byAnyName(value);	/* by MIME or full name */
     if (i >= 0)
 	current_char_set = i;
     return 0;
 }
 
-static void put_display_charset (FILE * fp, struct config_type * tbl)
+static void put_display_charset(FILE *fp, struct config_type *tbl)
 {
     int i;
 
@@ -260,36 +256,37 @@ static void put_display_charset (FILE * fp, struct config_type * tbl)
     fprintf(fp, "%s=%s\n\n", tbl->name, LYchar_set_names[current_char_set]);
 }
 
-static int get_editor (char * value)
+static int get_editor(char *value)
 {
     if (!system_editor)
 	StrAllocCopy(editor, value);
     return 0;
 }
 
-static void put_editor (FILE * fp, struct config_type * tbl)
+static void put_editor(FILE *fp, struct config_type *tbl)
 {
     fprintf(fp, "%s=%s\n\n", tbl->name, NonNull(editor));
 }
 
-int get_tagsoup (char * value)
+int get_tagsoup(char *value)
 {
     int found = Old_DTD;
 
     if (LYgetEnum(tbl_DTD_recovery, value, &found)
-     && Old_DTD != found) {
+	&& Old_DTD != found) {
 	Old_DTD = found;
 	HTSwitchDTD(!Old_DTD);
     }
     return 0;
 }
 
-static void put_tagsoup (FILE * fp, struct config_type * tbl)
+static void put_tagsoup(FILE *fp, struct config_type *tbl)
 {
     fprintf(fp, "%s=%s\n\n", tbl->name, LYputEnum(tbl_DTD_recovery, Old_DTD));
 }
 
 /* This table is searched ignoring case */
+/* *INDENT-OFF* */
 static Config_Type Config_Table [] =
 {
     PARSE_SET(RC_ACCEPT_ALL_COOKIES,    LYAcceptAllCookies, N_("\
@@ -563,9 +560,9 @@ in the Visited Links Page.\n\
 
     PARSE_NIL
 };
+/* *INDENT-ON* */
 
-static Config_Type *lookup_config (
-	char *		name)
+static Config_Type *lookup_config(char *name)
 {
     Config_Type *tbl = Config_Table;
     char ch = (char) TOUPPER(*name);
@@ -575,7 +572,7 @@ static Config_Type *lookup_config (
 	    char ch1 = tbl->name[0];
 
 	    if ((ch == TOUPPER(ch1))
-		&& (0 == strcasecomp (name, tbl->name)))
+		&& (0 == strcasecomp(name, tbl->name)))
 		break;
 	}
 
@@ -584,21 +581,20 @@ static Config_Type *lookup_config (
     return tbl;
 }
 
-/*  Read and process user options.
- *  If the passed-in fp is NULL, open the regular user defaults file
- *  for reading, otherwise use fp which has to be a file open for
- *  reading. - kw
+/* Read and process user options.  If the passed-in fp is NULL, open the
+ * regular user defaults file for reading, otherwise use fp which has to be a
+ * file open for reading.  - kw
  */
-void read_rc (FILE * fp)
+void read_rc(FILE *fp)
 {
     char *buffer = NULL;
     char rcfile[LY_MAXPATH];
     char MBM_line[256];
-    int  n;
+    int n;
 
     if (!fp) {
 	/*
-	 *  Make an RC file name, open it for reading.
+	 * Make an RC file name, open it for reading.
 	 */
 	LYAddPathToHome(rcfile, sizeof(rcfile), FNAME_LYNXRC);
 	if ((fp = fopen(rcfile, TXT_R)) == NULL) {
@@ -610,7 +606,7 @@ void read_rc (FILE * fp)
     }
 
     /*
-     *  Process the entries.
+     * Process the entries.
      */
     while (LYSafeGets(&buffer, fp) != NULL) {
 	char *name, *value, *notes;
@@ -640,6 +636,7 @@ void read_rc (FILE * fp)
 	tbl = lookup_config(name);
 	if (tbl->name == 0) {
 	    char *special = RC_MULTI_BOOKMARK;
+
 	    if (!strncasecomp(name, special, strlen(special))) {
 		tbl = lookup_config(special);
 	    }
@@ -654,7 +651,7 @@ void read_rc (FILE * fp)
 	switch (tbl->type) {
 	case CONF_BOOL:
 	    if (q->set_value != 0)
-		*(q->set_value) = getBool (value);
+		*(q->set_value) = getBool(value);
 	    break;
 
 	case CONF_FUN:
@@ -679,7 +676,8 @@ void read_rc (FILE * fp)
 	case CONF_INT:
 	    if (q->int_value != 0) {
 		int ival;
-		if (1 == sscanf (value, "%d", &ival))
+
+		if (1 == sscanf(value, "%d", &ival))
 		    *(q->int_value) = ival;
 	    }
 	    break;
@@ -722,7 +720,7 @@ void read_rc (FILE * fp)
     }
 
     LYCloseInput(fp);
-    LYConfigCookies();	/* update cookie settings, if any */
+    LYConfigCookies();		/* update cookie settings, if any */
 
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
     /*
@@ -749,13 +747,13 @@ void read_rc (FILE * fp)
  * Write a set of comments.  Doing it this way avoids preprocessor problems
  * with the leading '#', makes it simpler to use gettext.
  */
-static void write_list (
-    	FILE *		fp,
-	char *		list)
+static void write_list(FILE *fp, char *list)
 {
     int first = TRUE;
+
     while (*list != 0) {
 	int ch = *list++;
+
 	if (ch == '\n') {
 	    first = TRUE;
 	} else {
@@ -771,7 +769,7 @@ static void write_list (
 /*
  * This is too long for some compilers.
  */
-static void explain_keypad_mode (FILE * fp)
+static void explain_keypad_mode(FILE *fp)
 {
     write_list(fp, gettext("\
 If keypad_mode is set to \"NUMBERS_AS_ARROWS\", then the numbers on\n\
@@ -802,12 +800,11 @@ enabled.\n\
 "));
 }
 
-/*  Save user options.
- *  If the passed-in fp is NULL, open the regular user defaults file
- *  for writing, otherwise use fp which has to be a temp file open for
- *  writing. - kw
+/* Save user options.  If the passed-in fp is NULL, open the regular user
+ * defaults file for writing, otherwise use fp which has to be a temp file open
+ * for writing.  - kw
  */
-int save_rc (FILE * fp)
+int save_rc(FILE *fp)
 {
     Config_Type *tbl = Config_Table;
     char rcfile[LY_MAXPATH];
@@ -816,12 +813,12 @@ int save_rc (FILE * fp)
 
     if (!fp) {
 	/*
-	 *  Make a name.
+	 * Make a name.
 	 */
 	LYAddPathToHome(rcfile, sizeof(rcfile), FNAME_LYNXRC);
 
 	/*
-	 *  Open the file for write.
+	 * Open the file for write.
 	 */
 	if ((fp = LYNewTxtFile(rcfile)) == NULL) {
 	    return FALSE;
@@ -848,7 +845,8 @@ It is not this file.\n\
 	if (!tbl->enabled) {
 	    tbl++;
 	    continue;
-	} if (tbl->note != NULL) {
+	}
+	if (tbl->note != NULL) {
 	    write_list(fp, gettext(tbl->note));
 	} else if (tbl->table == tbl_keypad_mode) {
 	    explain_keypad_mode(fp);
@@ -886,7 +884,7 @@ It is not this file.\n\
 
 		fprintf(fp, "%s", NonNull(MBM_A_subbookmark[n]));
 		if (MBM_A_subdescript[n] != 0
-		 && *MBM_A_subdescript[n] != 0)
+		    && *MBM_A_subdescript[n] != 0)
 		    fprintf(fp, ",%s", MBM_A_subdescript[n]);
 		fprintf(fp, "\n");
 	    }
@@ -897,9 +895,9 @@ It is not this file.\n\
 	    /* FALLTHRU */
 	case CONF_STR:
 	    fprintf(fp, "%s=%s\n\n", tbl->name,
-			(q->str_value != 0 && *(q->str_value) != 0)
-			    ? *(q->str_value)
-			    : "");
+		    (q->str_value != 0 && *(q->str_value) != 0)
+		    ? *(q->str_value)
+		    : "");
 	    break;
 
 	case CONF_UNSPECIFIED:
@@ -909,7 +907,7 @@ It is not this file.\n\
     }
 
     /*
-     *  Close the RC file.
+     * Close the RC file.
      */
     if (is_tempfile) {
 	LYCloseTempFP(fp);
@@ -924,14 +922,14 @@ It is not this file.\n\
 /*
  * Returns true if the given name would be saved in .lynxrc
  */
-BOOL will_save_rc (char * name)
+BOOL will_save_rc(char *name)
 {
     Config_Type *tbl = lookup_config(name);
+
     return tbl->name != 0;
 }
 
-int enable_lynxrc (
-	char *		value)
+int enable_lynxrc(char *value)
 {
     Config_Type *tbl;
     char *colon = strchr(value, ':');

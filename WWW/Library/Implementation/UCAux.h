@@ -5,15 +5,13 @@
 #include <HTUtils.h>
 #endif
 
-extern BOOL UCCanUniTranslateFrom (int from);
-extern BOOL UCCanTranslateUniTo (int to);
-extern BOOL UCCanTranslateFromTo (int from, int to);
-extern BOOL UCNeedNotTranslate (
-	int		from,
-	int		to);
+extern BOOL UCCanUniTranslateFrom(int from);
+extern BOOL UCCanTranslateUniTo(int to);
+extern BOOL UCCanTranslateFromTo(int from, int to);
+extern BOOL UCNeedNotTranslate(int from,
+			       int to);
 
-struct _UCTransParams
-{
+struct _UCTransParams {
     BOOL transp;
     BOOL do_cjk;
     BOOL decode_utf8;
@@ -33,44 +31,37 @@ typedef struct _UCTransParams UCTransParams;
 #include <UCDefs.h>
 #endif /* UCDEFS_H */
 
-extern void UCSetTransParams (
-	UCTransParams *		pT,
-	int			cs_in,
-	const LYUCcharset *	p_in,
-	int			cs_out,
-	const LYUCcharset *	p_out);
+extern void UCSetTransParams(UCTransParams * pT, int cs_in,
+			     const LYUCcharset *p_in,
+			     int cs_out,
+			     const LYUCcharset *p_out);
 
-extern void UCTransParams_clear (
-	UCTransParams *		pT);
+extern void UCTransParams_clear(UCTransParams * pT);
 
-extern void UCSetBoxChars (
-    int		cset,
-    int *	pvert_out,
-    int *	phori_out,
-    int		vert_in,
-    int		hori_in);
+extern void UCSetBoxChars(int cset,
+			  int *pvert_out,
+			  int *phori_out,
+			  int vert_in,
+			  int hori_in);
 
 #ifndef HTSTREAM_H
 #include <HTStream.h>
 #endif /* HTSTREAM_H */
 
-typedef void putc_func_t (
-	HTStream *	me,
-	char		ch);
+typedef void putc_func_t(HTStream *me,
+			 char ch);
 
 #ifndef UCMAP_H
 #include <UCMap.h>
 #endif /* UCMAP_H */
 
-extern BOOL UCPutUtf8_charstring (
-	HTStream *	target,
-	putc_func_t *	actions,
-	UCode_t		code);
+extern BOOL UCPutUtf8_charstring(HTStream *target,
+				 putc_func_t * actions,
+				 UCode_t code);
 
-extern BOOL UCConvertUniToUtf8 (
-	UCode_t		code,
-	char *		buffer);
+extern BOOL UCConvertUniToUtf8(UCode_t code,
+			       char *buffer);
 
-extern UCode_t UCGetUniFromUtf8String (char ** ppuni);
+extern UCode_t UCGetUniFromUtf8String(char **ppuni);
 
 #endif /* UCAUX_H */

@@ -31,7 +31,7 @@
 #ifndef HTAABROW_H
 #define HTAABROW_H
 
-#include <HTAAUtil.h>           /* Common parts of AA */
+#include <HTAAUtil.h>		/* Common parts of AA */
 
 /*
 
@@ -52,68 +52,65 @@ Routines for Browser Side Recording of AA Info
  */
 
 /* PUBLIC                                               HTAA_composeAuth()
-**
-**      COMPOSE THE ENTIRE AUTHORIZATION HEADER LINE IF WE
-**      ALREADY KNOW, THAT THE HOST MIGHT REQUIRE AUTHORIZATION
-**
-** ON ENTRY:
-**      hostname        is the hostname of the server.
-**      portnumber      is the portnumber in which the server runs.
-**      docname         is the pathname of the document (as in URL)
-**
-** ON EXIT:
-**      returns NULL, if no authorization seems to be needed, or
-**              if it is the entire Authorization: line, e.g.
-**
-**                 "Authorization: basic username:password"
-**
-**              As usual, this string is automatically freed.
-*/
-extern char *HTAA_composeAuth (
-	const char *	hostname,
-	const int	portnumber,
-	const char *	docname,
-	BOOL		IsProxy);
-
+ *
+ *      COMPOSE THE ENTIRE AUTHORIZATION HEADER LINE IF WE
+ *      ALREADY KNOW, THAT THE HOST MIGHT REQUIRE AUTHORIZATION
+ *
+ * ON ENTRY:
+ *      hostname        is the hostname of the server.
+ *      portnumber      is the portnumber in which the server runs.
+ *      docname         is the pathname of the document (as in URL)
+ *
+ * ON EXIT:
+ *      returns NULL, if no authorization seems to be needed, or
+ *              if it is the entire Authorization: line, e.g.
+ *
+ *                 "Authorization: basic username:password"
+ *
+ *              As usual, this string is automatically freed.
+ */
+extern char *HTAA_composeAuth(const char *hostname,
+			      const int portnumber,
+			      const char *docname,
+			      BOOL IsProxy);
 
 /* BROWSER PUBLIC                               HTAA_shouldRetryWithAuth()
-**
-**              DETERMINES IF WE SHOULD RETRY THE SERVER
-**              WITH AUTHORIZATION
-**              (OR IF ALREADY RETRIED, WITH A DIFFERENT
-**              USERNAME AND/OR PASSWORD (IF MISSPELLED))
-** ON ENTRY:
-**      start_of_headers is the first block already read from socket,
-**                      but status line skipped; i.e., points to the
-**                      start of the header section.
-**      length          is the remaining length of the first block.
-**      soc             is the socket to read the rest of server reply.
-**
-**                      This function should only be called when
-**                      server has replied with a 401 (Unauthorized)
-**                      status code.
-** ON EXIT:
-**      returns         YES, if connection should be retried.
-**                           The node containing all the necessary
-**                           information is
-**                              * either constructed if it does not exist
-**                              * or password is reset to NULL to indicate
-**                                that username and password should be
-**                                reprompted when composing Authorization:
-**                                field (in function HTAA_composeAuth()).
-**                      NO, otherwise.
-*/
-extern BOOL HTAA_shouldRetryWithAuth (
-	char *		start_of_headers,
-	int		length,
-	int		soc,
-	BOOL		IsProxy);
+ *
+ *              DETERMINES IF WE SHOULD RETRY THE SERVER
+ *              WITH AUTHORIZATION
+ *              (OR IF ALREADY RETRIED, WITH A DIFFERENT
+ *              USERNAME AND/OR PASSWORD (IF MISSPELLED))
+ * ON ENTRY:
+ *      start_of_headers is the first block already read from socket,
+ *                      but status line skipped; i.e., points to the
+ *                      start of the header section.
+ *      length          is the remaining length of the first block.
+ *      soc             is the socket to read the rest of server reply.
+ *
+ *                      This function should only be called when
+ *                      server has replied with a 401 (Unauthorized)
+ *                      status code.
+ * ON EXIT:
+ *      returns         YES, if connection should be retried.
+ *                           The node containing all the necessary
+ *                           information is
+ *                              * either constructed if it does not exist
+ *                              * or password is reset to NULL to indicate
+ *                                that username and password should be
+ *                                reprompted when composing Authorization:
+ *                                field (in function HTAA_composeAuth()).
+ *                      NO, otherwise.
+ */
+extern BOOL HTAA_shouldRetryWithAuth(char *start_of_headers,
+				     int length,
+				     int soc,
+				     BOOL IsProxy);
 
 /*
-**  Function to allow clearing of all Authorization info
-**  via a browser command. - FM
-*/
-extern void HTClearHTTPAuthInfo (void);
+ *  Function to allow clearing of all Authorization info
+ *  via a browser command. - FM
+ */
+extern void HTClearHTTPAuthInfo(void);
 
 /*
 
@@ -126,9 +123,8 @@ Enabling Gateway httpds to Forward Authorization
 
  */
 
-extern void HTAAForwardAuth_set (
-	const char *	scheme_name,
-	const char *	scheme_specifics);
-extern void HTAAForwardAuth_reset (void);
+extern void HTAAForwardAuth_set(const char *scheme_name,
+				const char *scheme_specifics);
+extern void HTAAForwardAuth_reset(void);
 
-#endif  /* NOT HTAABROW_H */
+#endif /* NOT HTAABROW_H */

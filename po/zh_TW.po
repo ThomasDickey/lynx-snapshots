@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.5pre9\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-04-19 19:39-0400\n"
+"POT-Creation-Date: 2004-05-05 20:33-0400\n"
 "PO-Revision-Date: 2003-02-11 19:44+0800\n"
 "Last-Translator: Abel Cheung <maddog@linux.org.hk>\n"
 "Language-Team: Chinese (traditional) <zh-l10n@linux.org.tw>\n"
@@ -2143,7 +2143,7 @@ msgstr ""
 " 請在以下的地方輸入訊息。"
 
 #. #define ENTER_PERIOD_WHEN_DONE_A
-#: LYMessages.c:689 src/LYNews.c:361
+#: LYMessages.c:689 src/LYNews.c:357
 msgid ""
 "\n"
 " When you are done, press enter and put a single period (.)"
@@ -2152,7 +2152,7 @@ msgstr ""
 " 完成後請按 enter，然後在下一行"
 
 #. #define ENTER_PERIOD_WHEN_DONE_B
-#: LYMessages.c:691 src/LYNews.c:362
+#: LYMessages.c:691 src/LYNews.c:358
 msgid ""
 "\n"
 " on a line and press enter again."
@@ -2728,59 +2728,59 @@ msgstr ""
 msgid "Trace not supported"
 msgstr ""
 
-#: WWW/Library/Implementation/HTAABrow.c:647
+#: WWW/Library/Implementation/HTAABrow.c:626
 #, c-format
 msgid "Username for '%s' at %s '%s%s':"
 msgstr ""
 
-#: WWW/Library/Implementation/HTAABrow.c:913
+#: WWW/Library/Implementation/HTAABrow.c:891
 msgid "This client doesn't know how to compose proxy authorization information for scheme"
 msgstr ""
 
-#: WWW/Library/Implementation/HTAABrow.c:988
+#: WWW/Library/Implementation/HTAABrow.c:968
 msgid "This client doesn't know how to compose authorization information for scheme"
 msgstr ""
 
-#: WWW/Library/Implementation/HTAABrow.c:1096
+#: WWW/Library/Implementation/HTAABrow.c:1076
 #, c-format
 msgid "Invalid header '%s%s%s%s%s'"
 msgstr "無效的標頭內容‘%s%s%s%s%s’"
 
-#: WWW/Library/Implementation/HTAABrow.c:1200
+#: WWW/Library/Implementation/HTAABrow.c:1178
 msgid "Proxy authorization required -- retrying"
 msgstr "使用代理伺服器前需要認證 ─ 重新嘗試"
 
-#: WWW/Library/Implementation/HTAABrow.c:1259
+#: WWW/Library/Implementation/HTAABrow.c:1236
 msgid "Access without authorization denied -- retrying"
 msgstr "仍未認證，無法存取內容 ─ 重新嘗試"
 
-#: WWW/Library/Implementation/HTAccess.c:677
+#: WWW/Library/Implementation/HTAccess.c:685
 msgid "Access forbidden by rule"
 msgstr ""
 
-#: WWW/Library/Implementation/HTAccess.c:779
+#: WWW/Library/Implementation/HTAccess.c:782
 msgid "Document with POST content not found in cache.  Resubmit?"
 msgstr ""
 
-#: WWW/Library/Implementation/HTAccess.c:939
+#: WWW/Library/Implementation/HTAccess.c:936
 msgid "Loading failed, use a previous copy."
 msgstr ""
 
-#: WWW/Library/Implementation/HTAccess.c:1047 src/GridText.c:8317
+#: WWW/Library/Implementation/HTAccess.c:1045 src/GridText.c:8228
 msgid "Loading incomplete."
 msgstr "未完成載入內容。"
 
-#: WWW/Library/Implementation/HTAccess.c:1077
+#: WWW/Library/Implementation/HTAccess.c:1076
 #, c-format
 msgid "**** HTAccess: socket or file number returned by obsolete load routine!\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTAccess.c:1079
+#: WWW/Library/Implementation/HTAccess.c:1078
 #, c-format
 msgid "**** HTAccess: Internal software error.  Please mail lynx-dev@sig.net!\n"
 msgstr "**** HTAccess：內部程式錯誤。請寄電郵至 lynx-dev@sig.net！\n"
 
-#: WWW/Library/Implementation/HTAccess.c:1080
+#: WWW/Library/Implementation/HTAccess.c:1079
 #, c-format
 msgid "**** HTAccess: Status returned was: %d\n"
 msgstr "**** HTAccess：回傳的狀態為：%d\n"
@@ -2789,105 +2789,104 @@ msgstr "**** HTAccess：回傳的狀態為：%d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1086 src/LYMainLoop.c:7735
+#: WWW/Library/Implementation/HTAccess.c:1085 src/LYMainLoop.c:7615
 msgid "Can't Access"
 msgstr "無法存取"
 
-#: WWW/Library/Implementation/HTAccess.c:1094
+#: WWW/Library/Implementation/HTAccess.c:1093
 msgid "Unable to access document."
 msgstr "無法存取文件。"
 
-#: WWW/Library/Implementation/HTFTP.c:766
+#: WWW/Library/Implementation/HTFTP.c:769
 #, c-format
 msgid "Enter password for user %s@%s:"
 msgstr "請輸入使用者 %s@%s 的密碼："
 
-#: WWW/Library/Implementation/HTFTP.c:794
+#: WWW/Library/Implementation/HTFTP.c:797
 msgid "Unable to connect to FTP host."
 msgstr "無法聯絡 FTP 主機。"
 
-#: WWW/Library/Implementation/HTFTP.c:1064
+#: WWW/Library/Implementation/HTFTP.c:1066
 msgid "close master socket"
 msgstr ""
 
-#: WWW/Library/Implementation/HTFTP.c:1126
+#: WWW/Library/Implementation/HTFTP.c:1127
 msgid "socket for master socket"
 msgstr ""
 
 #.
-#. **  It's a symbolic link, does the user care about
-#. **  knowing if it is symbolic?	I think so since
-#. **  it might be a directory.
+#. * It's a symbolic link, does the user care about knowing if it is
+#. * symbolic?  I think so since it might be a directory.
 #.
-#: WWW/Library/Implementation/HTFTP.c:1640 WWW/Library/Implementation/HTFTP.c:2261
+#: WWW/Library/Implementation/HTFTP.c:1648 WWW/Library/Implementation/HTFTP.c:2262
 msgid "Symbolic Link"
 msgstr "符號連結"
 
-#: WWW/Library/Implementation/HTFTP.c:2622
+#: WWW/Library/Implementation/HTFTP.c:2618
 msgid "Receiving FTP directory."
 msgstr "正在接收 FTP 目錄內容。"
 
-#: WWW/Library/Implementation/HTFTP.c:2762
+#: WWW/Library/Implementation/HTFTP.c:2754
 #, c-format
 msgid "Transferred %d bytes (%5d)"
 msgstr "已傳送 %d 位元組 (%5d)"
 
-#: WWW/Library/Implementation/HTFTP.c:3083
+#: WWW/Library/Implementation/HTFTP.c:3071
 msgid "connect for data"
 msgstr ""
 
-#: WWW/Library/Implementation/HTFTP.c:3731
+#: WWW/Library/Implementation/HTFTP.c:3730
 msgid "Receiving FTP file."
 msgstr "正在接收 FTP 目錄。"
 
-#: WWW/Library/Implementation/HTFinger.c:278
+#: WWW/Library/Implementation/HTFinger.c:273
 msgid "Could not set up finger connection."
 msgstr "無法建立 finger 連線。"
 
-#: WWW/Library/Implementation/HTFinger.c:325
+#: WWW/Library/Implementation/HTFinger.c:320
 msgid "Could not load data (no sitename in finger URL)"
 msgstr ""
 
-#: WWW/Library/Implementation/HTFinger.c:331
+#: WWW/Library/Implementation/HTFinger.c:326
 msgid "Invalid port number - will only use port 79!"
 msgstr "無效的連接埠號碼 ─ 只會使用連接埠號 79！"
 
-#: WWW/Library/Implementation/HTFinger.c:396
+#: WWW/Library/Implementation/HTFinger.c:392
 msgid "Could not access finger host."
 msgstr "無法存取 finger 主機上的資料。"
 
-#: WWW/Library/Implementation/HTFinger.c:404
+#: WWW/Library/Implementation/HTFinger.c:400
 msgid "No response from finger server."
 msgstr "finger 伺服器沒有回應。"
 
-#: WWW/Library/Implementation/HTNews.c:372
+#: WWW/Library/Implementation/HTNews.c:380
 #, c-format
 msgid "Username for news host '%s':"
 msgstr "新聞組主機‘%s’的帳戶名稱："
 
-#: WWW/Library/Implementation/HTNews.c:425
+#: WWW/Library/Implementation/HTNews.c:433
 msgid "Change username?"
 msgstr "是否更改帳戶名稱？"
 
-#: WWW/Library/Implementation/HTNews.c:429
+#: WWW/Library/Implementation/HTNews.c:437
 msgid "Username:"
 msgstr "帳戶名稱："
 
-#: WWW/Library/Implementation/HTNews.c:453
+#: WWW/Library/Implementation/HTNews.c:462
 #, c-format
 msgid "Password for news host '%s':"
 msgstr "新聞組主機‘%s’的密碼："
 
-#: WWW/Library/Implementation/HTNews.c:536
+#: WWW/Library/Implementation/HTNews.c:545
 msgid "Change password?"
 msgstr "是否更改密碼？"
 
-#: WWW/Library/Implementation/HTNews.c:1690
+#: WWW/Library/Implementation/HTNews.c:1693
 #, c-format
 msgid "No matches for: %s"
 msgstr ""
 
-#: WWW/Library/Implementation/HTNews.c:1743
+#: WWW/Library/Implementation/HTNews.c:1746
 msgid ""
 "\n"
 "No articles in this group.\n"
@@ -2895,25 +2894,25 @@ msgstr ""
 "\n"
 "此新聞組沒有任何文章。\n"
 
-#: WWW/Library/Implementation/HTNews.c:1756
+#: WWW/Library/Implementation/HTNews.c:1758
 msgid ""
 "\n"
 "No articles in this range.\n"
 msgstr ""
 
 #.
-#. **	Set window title.
+#. * Set window title.
 #.
-#: WWW/Library/Implementation/HTNews.c:1769
+#: WWW/Library/Implementation/HTNews.c:1771
 #, c-format
 msgid "%s,  Articles %d-%d"
 msgstr ""
 
-#: WWW/Library/Implementation/HTNews.c:1791
+#: WWW/Library/Implementation/HTNews.c:1794
 msgid "Earlier articles"
 msgstr ""
 
-#: WWW/Library/Implementation/HTNews.c:1804
+#: WWW/Library/Implementation/HTNews.c:1807
 #, c-format
 msgid ""
 "\n"
@@ -2921,146 +2920,146 @@ msgid ""
 "\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTNews.c:1864
+#: WWW/Library/Implementation/HTNews.c:1869
 msgid "All available articles in "
 msgstr ""
 
-#: WWW/Library/Implementation/HTNews.c:2080
+#: WWW/Library/Implementation/HTNews.c:2090
 msgid "Later articles"
 msgstr ""
 
-#: WWW/Library/Implementation/HTNews.c:2104
+#: WWW/Library/Implementation/HTNews.c:2113
 msgid "Post to "
 msgstr ""
 
-#: WWW/Library/Implementation/HTNews.c:2322
+#: WWW/Library/Implementation/HTNews.c:2334
 msgid "This client does not contain support for SNEWS URLs."
 msgstr "此版本的程式不支援 SNEWS URL。"
 
-#: WWW/Library/Implementation/HTNews.c:2530
+#: WWW/Library/Implementation/HTNews.c:2542
 msgid "No target for raw text!"
 msgstr ""
 
-#: WWW/Library/Implementation/HTNews.c:2560
+#: WWW/Library/Implementation/HTNews.c:2573
 msgid "Connecting to NewsHost ..."
 msgstr "正在聯絡新聞組主機 ..."
 
-#: WWW/Library/Implementation/HTNews.c:2611
+#: WWW/Library/Implementation/HTNews.c:2625
 #, c-format
 msgid "Could not access %s."
 msgstr "無法存取 %s。"
 
-#: WWW/Library/Implementation/HTNews.c:2711
+#: WWW/Library/Implementation/HTNews.c:2731
 #, c-format
 msgid "Can't read news info.  News host %.20s responded: %.200s"
 msgstr "無法讀取新聞組資訊。新聞組伺服器 %.20s 回應：%.200s"
 
-#: WWW/Library/Implementation/HTNews.c:2715
+#: WWW/Library/Implementation/HTNews.c:2735
 #, c-format
 msgid "Can't read news info, empty response from host %s"
 msgstr ""
 
 #.
-#. **	List available newsgroups. - FM
+#. * List available newsgroups.  - FM
 #.
-#: WWW/Library/Implementation/HTNews.c:2919
+#: WWW/Library/Implementation/HTNews.c:2939
 msgid "Reading list of available newsgroups."
 msgstr ""
 
-#: WWW/Library/Implementation/HTNews.c:2941
+#: WWW/Library/Implementation/HTNews.c:2960
 msgid "Reading list of articles in newsgroup."
 msgstr "正在讀取新聞組中的文章清單。"
 
 #.
-#. **	Get an article from a news group. - FM
+#. * Get an article from a news group.  - FM
 #.
-#: WWW/Library/Implementation/HTNews.c:2947
+#: WWW/Library/Implementation/HTNews.c:2966
 msgid "Reading news article."
 msgstr ""
 
-#: WWW/Library/Implementation/HTNews.c:2977
+#: WWW/Library/Implementation/HTNews.c:2996
 msgid "Sorry, could not load requested news."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTCP.c:1239
+#: WWW/Library/Implementation/HTTCP.c:1244
 msgid "Address has invalid port"
 msgstr "地址中的連接埠無效"
 
-#: WWW/Library/Implementation/HTTCP.c:1327
+#: WWW/Library/Implementation/HTTCP.c:1336
 msgid "Address length looks invalid"
 msgstr "地址長度似乎無效"
 
-#: WWW/Library/Implementation/HTTCP.c:1560 WWW/Library/Implementation/HTTCP.c:1578
+#: WWW/Library/Implementation/HTTCP.c:1572 WWW/Library/Implementation/HTTCP.c:1590
 #, c-format
 msgid "Unable to locate remote host %s."
 msgstr "找不到遠端主機 %s。"
 
-#. Not HTProgress, so warning won't be overwritten
-#. *  immediately; but not HTAlert, because typically
-#. *  there will be other alerts from the callers. - kw
+#. Not HTProgress, so warning won't be overwritten immediately;
+#. * but not HTAlert, because typically there will be other
+#. * alerts from the callers.  - kw
 #.
-#: WWW/Library/Implementation/HTTCP.c:1575 WWW/Library/Implementation/HTTelnet.c:103
+#: WWW/Library/Implementation/HTTCP.c:1587 WWW/Library/Implementation/HTTelnet.c:108
 #, c-format
 msgid "Invalid hostname %s"
 msgstr "無效的主機名稱 %s"
 
-#: WWW/Library/Implementation/HTTCP.c:1589
+#: WWW/Library/Implementation/HTTCP.c:1601
 #, c-format
 msgid "Making %s connection to %s"
 msgstr "正在建立 %s 連線，連至 %s"
 
-#: WWW/Library/Implementation/HTTCP.c:1605
+#: WWW/Library/Implementation/HTTCP.c:1612
+msgid "socket failed."
+msgstr ""
+
+#: WWW/Library/Implementation/HTTCP.c:1626
 #, c-format
 msgid "socket failed: family %d addr %s port %s."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTCP.c:1614
-msgid "socket failed."
-msgstr ""
-
-#: WWW/Library/Implementation/HTTCP.c:1634
+#: WWW/Library/Implementation/HTTCP.c:1650
 msgid "Could not make connection non-blocking."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTCP.c:1703
+#: WWW/Library/Implementation/HTTCP.c:1719
 msgid "Connection failed (too many retries)."
 msgstr "連線失敗 (重試次數太多)。"
 
-#: WWW/Library/Implementation/HTTCP.c:1897
+#: WWW/Library/Implementation/HTTCP.c:1918
 msgid "Could not restore socket to blocking."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTCP.c:1964
+#: WWW/Library/Implementation/HTTCP.c:1984
 msgid "Socket read failed for 180,000 tries."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:350
+#: WWW/Library/Implementation/HTTP.c:349
 #, c-format
 msgid "Address contains a username: %s"
 msgstr "地止中含有帳戶名稱：%s"
 
-#: WWW/Library/Implementation/HTTP.c:503
+#: WWW/Library/Implementation/HTTP.c:500
 msgid "This client does not contain support for HTTPS URLs."
 msgstr "此瀏覽器不支援 HTTPS URL。"
 
-#: WWW/Library/Implementation/HTTP.c:528
+#: WWW/Library/Implementation/HTTP.c:525
 msgid "Unable to connect to remote host."
 msgstr "無法聯絡遠端主機。"
 
-#: WWW/Library/Implementation/HTTP.c:557
+#: WWW/Library/Implementation/HTTP.c:554
 msgid "Retrying connection without TLS."
 msgstr "嘗試以不用 TLS 的方式連線。"
 
-#: WWW/Library/Implementation/HTTP.c:598
+#: WWW/Library/Implementation/HTTP.c:597
 msgid "SSL error:Can't find common name in certificate-Continue?"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:615
+#: WWW/Library/Implementation/HTTP.c:614
 #, c-format
 msgid "SSL error:host(%s)!=cert(%s)-Continue?"
 msgstr "SSL 錯誤：主機(%s)不符合證書(%s)。是否繼續？"
 
-#: WWW/Library/Implementation/HTTP.c:627
+#: WWW/Library/Implementation/HTTP.c:626
 #, c-format
 msgid "Secure %d-bit %s (%s) HTTP connection"
 msgstr "%d 位元 %s (%s) 安全 HTTP 連線"
@@ -3069,51 +3068,48 @@ msgstr "%d 位元 %s (%s) 安全 HTTP 連線"
 msgid "Sending HTTP request."
 msgstr "正在送出 HTTP 要求。"
 
-#: WWW/Library/Implementation/HTTP.c:1125
+#: WWW/Library/Implementation/HTTP.c:1130
 msgid "Unexpected network write error; connection aborted."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1131
+#: WWW/Library/Implementation/HTTP.c:1136
 msgid "HTTP request sent; waiting for response."
 msgstr "已進出 HTTP 要求；正在等待回應。"
 
-#: WWW/Library/Implementation/HTTP.c:1195
+#: WWW/Library/Implementation/HTTP.c:1204
 msgid "Unexpected network read error; connection aborted."
 msgstr ""
 
 #.
-#. **	HTTP/1.1 Informational statuses.
-#. **	100 Continue.
-#. **	101 Switching Protocols.
-#. **	> 101 is unknown.
-#. **	We should never get these, and they have only
-#. **	the status line and possibly other headers,
-#. **	so we'll deal with them by showing the full
-#. **	header to the user as text/plain. - FM
+#. * HTTP/1.1 Informational statuses.
+#. * 100 Continue.
+#. * 101 Switching Protocols.
+#. * > 101 is unknown.
+#. * We should never get these, and they have only the status
+#. * line and possibly other headers, so we'll deal with them by
+#. * showing the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1391
+#: WWW/Library/Implementation/HTTP.c:1398
 msgid "Got unexpected Informational Status."
 msgstr ""
 
 #.
-#. *  Reset Content.  The server has fulfilled the
-#. *  request but nothing is returned and we should
-#. *  reset any form content.  We'll instruct the
-#. *  user to do that, and restore the current
-#. *  document. - FM
+#. * Reset Content.  The server has fulfilled the request but
+#. * nothing is returned and we should reset any form
+#. * content.  We'll instruct the user to do that, and
+#. * restore the current document.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1426
+#: WWW/Library/Implementation/HTTP.c:1432
 msgid "Request fulfilled.  Reset Content."
 msgstr ""
 
 #. Not Modified
 #.
-#. *  We didn't send an "If-Modified-Since" header,
-#. *  so this status is inappropriate.  We'll deal
-#. *  with it by showing the full header to the user
-#. *  as text/plain. - FM
+#. * We didn't send an "If-Modified-Since" header, so this
+#. * status is inappropriate.  We'll deal with it by showing
+#. * the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1545
+#: WWW/Library/Implementation/HTTP.c:1549
 msgid "Got unexpected 304 Not Modified status."
 msgstr "出現預料之外的 304 Not Modified 狀態。"
 
@@ -3125,62 +3121,61 @@ msgstr ""
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1672
+#: WWW/Library/Implementation/HTTP.c:1669
 msgid "Retrying with access authorization information."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1684
+#: WWW/Library/Implementation/HTTP.c:1681
 msgid "Show the 401 message body?"
 msgstr "是否顯示 401 錯誤訊息的網頁內容？"
 
-#: WWW/Library/Implementation/HTTP.c:1729
+#: WWW/Library/Implementation/HTTP.c:1724
 msgid "Show the 407 message body?"
 msgstr "是否顯示 407 錯誤訊息的網頁內容？"
 
 #.
-#. **	Bad or unknown server_status number.
-#. **	Take a chance and hope there is
-#. **	something to display. - FM
+#. * Bad or unknown server_status number.  Take a chance and hope
+#. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1834
+#: WWW/Library/Implementation/HTTP.c:1824
 msgid "Unknown status reply from server!"
 msgstr "伺服器發出不明的狀態回應訊息！"
 
-#: WWW/Library/Implementation/HTTelnet.c:101
+#: WWW/Library/Implementation/HTTelnet.c:106
 #, c-format
 msgid "remote %s session:"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:161
+#: WWW/Library/Implementation/HTWAIS.c:159
 msgid "Could not connect to WAIS server."
 msgstr "無法聯絡 WAIS 伺服器。"
 
-#: WWW/Library/Implementation/HTWAIS.c:170
+#: WWW/Library/Implementation/HTWAIS.c:167
 msgid "Could not open WAIS connection for reading."
 msgstr "無法開啟 WAIS 連線來讀取資料。"
 
-#: WWW/Library/Implementation/HTWAIS.c:194
+#: WWW/Library/Implementation/HTWAIS.c:189
 msgid "Diagnostic code is "
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:463
+#: WWW/Library/Implementation/HTWAIS.c:461
 msgid "Index "
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:467
+#: WWW/Library/Implementation/HTWAIS.c:465
 #, c-format
 msgid " contains the following %d item%s relevant to \""
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:475
+#: WWW/Library/Implementation/HTWAIS.c:473
 msgid "The first figure after each entry is its relative score, "
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:476
+#: WWW/Library/Implementation/HTWAIS.c:474
 msgid "the second is the number of lines in the item."
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:517
+#: WWW/Library/Implementation/HTWAIS.c:516
 msgid " (bad file name)"
 msgstr ""
 
@@ -3216,243 +3211,243 @@ msgid ""
 "Code record, can't display\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:689
+#: WWW/Library/Implementation/HTWAIS.c:693
 msgid "Syntax error in WAIS URL"
 msgstr "WAIS URL 中出現語法錯誤"
 
-#: WWW/Library/Implementation/HTWAIS.c:759
+#: WWW/Library/Implementation/HTWAIS.c:765
 msgid " (WAIS Index)"
 msgstr " (WAIS 索引)"
 
-#: WWW/Library/Implementation/HTWAIS.c:766
+#: WWW/Library/Implementation/HTWAIS.c:772
 msgid "WAIS Index: "
 msgstr "WAIS 索引："
 
-#: WWW/Library/Implementation/HTWAIS.c:772
+#: WWW/Library/Implementation/HTWAIS.c:778
 msgid "This is a link for searching the "
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:776
+#: WWW/Library/Implementation/HTWAIS.c:782
 msgid " WAIS Index.\n"
 msgstr " WAIS 索引。\n"
 
-#: WWW/Library/Implementation/HTWAIS.c:803
+#: WWW/Library/Implementation/HTWAIS.c:811
 msgid ""
 "\n"
 "Enter the 's'earch command and then specify search words.\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:825
+#: WWW/Library/Implementation/HTWAIS.c:833
 msgid " (in "
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:834
+#: WWW/Library/Implementation/HTWAIS.c:842
 msgid "WAIS Search of \""
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:838
+#: WWW/Library/Implementation/HTWAIS.c:846
 msgid "\" in: "
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:853
+#: WWW/Library/Implementation/HTWAIS.c:861
 msgid "HTWAIS: Request too large."
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:862
+#: WWW/Library/Implementation/HTWAIS.c:870
 msgid "Searching WAIS database..."
 msgstr "正在搜尋 WAIS 資料庫..."
 
-#: WWW/Library/Implementation/HTWAIS.c:872
+#: WWW/Library/Implementation/HTWAIS.c:880
 msgid "Search interrupted."
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:922
+#: WWW/Library/Implementation/HTWAIS.c:931
 msgid "Can't convert format of WAIS document"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWAIS.c:966
+#: WWW/Library/Implementation/HTWAIS.c:975
 msgid "HTWAIS: Request too long."
 msgstr ""
 
 #.
-#. **	Actually do the transaction given by request_message.
+#. * Actually do the transaction given by request_message.
 #.
-#: WWW/Library/Implementation/HTWAIS.c:980
+#: WWW/Library/Implementation/HTWAIS.c:989
 msgid "Fetching WAIS document..."
 msgstr ""
 
 #. display_search_response(target, retrieval_response,
 #. wais_database, keywords);
-#: WWW/Library/Implementation/HTWAIS.c:1019
+#: WWW/Library/Implementation/HTWAIS.c:1028
 msgid "No text was returned!\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWSRC.c:287
+#: WWW/Library/Implementation/HTWSRC.c:299
 msgid " NOT GIVEN in source file; "
 msgstr ""
 
-#: WWW/Library/Implementation/HTWSRC.c:311
+#: WWW/Library/Implementation/HTWSRC.c:322
 msgid " WAIS source file"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWSRC.c:318
+#: WWW/Library/Implementation/HTWSRC.c:329
 msgid " description"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWSRC.c:328
+#: WWW/Library/Implementation/HTWSRC.c:339
 msgid "Access links"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWSRC.c:346
+#: WWW/Library/Implementation/HTWSRC.c:360
 msgid "Direct access"
 msgstr ""
 
 #. * Proxy will be used if defined, so let user know that - FM *
-#: WWW/Library/Implementation/HTWSRC.c:349
+#: WWW/Library/Implementation/HTWSRC.c:363
 msgid " (or via proxy server, if defined)"
 msgstr ""
 
-#: WWW/Library/Implementation/HTWSRC.c:364
+#: WWW/Library/Implementation/HTWSRC.c:378
 msgid "Maintainer"
 msgstr "維護者"
 
-#: WWW/Library/Implementation/HTWSRC.c:372
+#: WWW/Library/Implementation/HTWSRC.c:386
 msgid "Host"
 msgstr "主機"
 
-#: src/GridText.c:684
+#: src/GridText.c:695
 msgid "Memory exhausted, display interrupted!"
 msgstr "記憶體耗盡，必須中斷顯示！"
 
-#: src/GridText.c:689
+#: src/GridText.c:700
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr "記憶體耗盡，必須中斷傳輸！"
 
-#: src/GridText.c:3574
+#: src/GridText.c:3564
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr "*** 記憶體耗盡 ***"
 
-#: src/GridText.c:6006 src/GridText.c:6013 src/LYList.c:252
+#: src/GridText.c:5961 src/GridText.c:5968 src/LYList.c:246
 msgid "unknown field or link"
 msgstr "不明的欄位或鏈結"
 
-#: src/GridText.c:6022
+#: src/GridText.c:5977
 msgid "text entry field"
 msgstr "文字輸入欄位"
 
-#: src/GridText.c:6025
+#: src/GridText.c:5980
 msgid "password entry field"
 msgstr "密碼輸入欄位"
 
-#: src/GridText.c:6028
+#: src/GridText.c:5983
 msgid "checkbox"
 msgstr ""
 
-#: src/GridText.c:6031
+#: src/GridText.c:5986
 msgid "radio button"
 msgstr ""
 
-#: src/GridText.c:6034
+#: src/GridText.c:5989
 msgid "submit button"
 msgstr ""
 
-#: src/GridText.c:6037
+#: src/GridText.c:5992
 msgid "reset button"
 msgstr ""
 
-#: src/GridText.c:6040
+#: src/GridText.c:5995
 msgid "popup menu"
 msgstr ""
 
-#: src/GridText.c:6043
+#: src/GridText.c:5998
 msgid "hidden form field"
 msgstr ""
 
-#: src/GridText.c:6046
+#: src/GridText.c:6001
 msgid "text entry area"
 msgstr "文字輸入區域"
 
-#: src/GridText.c:6049
+#: src/GridText.c:6004
 msgid "range entry field"
 msgstr ""
 
-#: src/GridText.c:6052
+#: src/GridText.c:6007
 msgid "file entry field"
 msgstr "檔案名稱輸入欄位"
 
-#: src/GridText.c:6055
+#: src/GridText.c:6010
 msgid "text-submit field"
 msgstr ""
 
-#: src/GridText.c:6058
+#: src/GridText.c:6013
 msgid "image-submit button"
 msgstr ""
 
-#: src/GridText.c:6061
+#: src/GridText.c:6016
 msgid "keygen field"
 msgstr ""
 
-#: src/GridText.c:6064
+#: src/GridText.c:6019
 msgid "unknown form field"
 msgstr ""
 
-#: src/GridText.c:10071
+#: src/GridText.c:9956
 msgid "Can't open file for uploading"
 msgstr "無法開啟準備上傳的檔案"
 
-#: src/GridText.c:11223
+#: src/GridText.c:11106
 #, c-format
 msgid "Submitting %s"
 msgstr ""
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12380
+#: src/GridText.c:12240
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr ""
 
 #. don't show previous state
-#: src/GridText.c:12586
+#: src/GridText.c:12445
 msgid "Wrap lines to fit displayed area?"
 msgstr "是否進行自動換行來符合畫面尺寸？"
 
-#: src/GridText.c:12638
+#: src/GridText.c:12497
 msgid "Very long lines have been wrapped!"
 msgstr ""
 
-#: src/GridText.c:13084
+#: src/GridText.c:12938
 msgid "Very long lines have been truncated!"
 msgstr ""
 
-#: src/HTAlert.c:150 src/LYShowInfo.c:318
+#: src/HTAlert.c:142 src/LYShowInfo.c:324
 msgid "bytes"
 msgstr "位元組"
 
-#: src/HTAlert.c:285
+#: src/HTAlert.c:271
 #, c-format
 msgid "Read %s of %s of data"
 msgstr "已讀取 %s (總數 %s) 資料"
 
-#: src/HTAlert.c:287
+#: src/HTAlert.c:273
 #, c-format
 msgid "Read %s of data"
 msgstr "已讀取 %s 資料"
 
-#: src/HTAlert.c:292
+#: src/HTAlert.c:278
 #, c-format
 msgid ", %s/sec"
 msgstr "，每秒 %s"
 
-#: src/HTAlert.c:301
+#: src/HTAlert.c:287
 #, c-format
 msgid " (stalled for %s)"
 msgstr " (停止了 %s)"
 
-#: src/HTAlert.c:305
+#: src/HTAlert.c:291
 #, c-format
 msgid ", ETA %s"
 msgstr "，估計 %s 後完成"
 
-#: src/HTAlert.c:312
+#: src/HTAlert.c:298
 msgid " (Press 'z' to abort)"
 msgstr " (請按‘z’中止)"
 
@@ -3461,64 +3456,64 @@ msgstr " (請按‘z’中止)"
 #. automatically appear in generated lynx.pot files. - kw
 #.
 #. NOTE TO TRANSLATORS:  If you provide a translation for "yes", lynx
-#. *  will take the first byte of the translation as a positive response
-#. *  to Yes/No questions.  If you provide a translation for "no", lynx
-#. *  will take the first byte of the translation as a negative response
-#. *  to Yes/No questions.  For both, lynx will also try to show the
-#. *  first byte in the prompt as a character, instead of (y) or (n),
-#. *  respectively.  This will not work right for multibyte charsets!
-#. *  Don't translate "yes" and "no" for CJK character sets (or translate
-#. *  them to "yes" and "no").  For a translation using UTF-8, don't
-#. *  translate if the translation would begin with anything but a 7-bit
-#. *  (US_ASCII) character.  That also means do not translate if the
-#. *  translation would begin with anything but a 7-bit character, if
-#. *  you use a single-byte character encoding (a charset like ISO-8859-n)
-#. *  but anticipate that the message catalog may be used re-encoded in
-#. *  UTF-8 form.
-#. *  For translations using other character sets, you may also wish to
-#. *  leave "yes" and "no" untranslated, if using (y) and (n) is the
-#. *  preferred behavior.
-#. *  Lynx will also accept y Y n N as responses unless there is a conflict
-#. *  with the first letter of the "yes" or "no" translation.
+#. * will take the first byte of the translation as a positive response
+#. * to Yes/No questions.  If you provide a translation for "no", lynx
+#. * will take the first byte of the translation as a negative response
+#. * to Yes/No questions.  For both, lynx will also try to show the
+#. * first byte in the prompt as a character, instead of (y) or (n),
+#. * respectively.  This will not work right for multibyte charsets!
+#. * Don't translate "yes" and "no" for CJK character sets (or translate
+#. * them to "yes" and "no").  For a translation using UTF-8, don't
+#. * translate if the translation would begin with anything but a 7-bit
+#. * (US_ASCII) character.  That also means do not translate if the
+#. * translation would begin with anything but a 7-bit character, if
+#. * you use a single-byte character encoding (a charset like ISO-8859-n)
+#. * but anticipate that the message catalog may be used re-encoded in
+#. * UTF-8 form.
+#. * For translations using other character sets, you may also wish to
+#. * leave "yes" and "no" untranslated, if using (y) and (n) is the
+#. * preferred behavior.
+#. * Lynx will also accept y Y n N as responses unless there is a conflict
+#. * with the first letter of the "yes" or "no" translation.
 #.
-#: src/HTAlert.c:353 src/HTAlert.c:401
+#: src/HTAlert.c:336 src/HTAlert.c:384
 msgid "yes"
 msgstr "yes"
 
-#: src/HTAlert.c:356 src/HTAlert.c:402
+#: src/HTAlert.c:339 src/HTAlert.c:385
 msgid "no"
 msgstr "no"
 
 # Lynx is very bad, have to use space for indentation..... -- Abel
-#: src/HTML.c:5928
+#: src/HTML.c:5911
 msgid "Description:"
 msgstr "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;描述："
 
-#: src/HTML.c:5933
+#: src/HTML.c:5916
 msgid "(none)"
 msgstr "(無)"
 
-#: src/HTML.c:5937
+#: src/HTML.c:5920
 msgid "Filepath:"
 msgstr "檔案路徑："
 
-#: src/HTML.c:5942
+#: src/HTML.c:5926
 msgid "(unknown)"
 msgstr "(不明)"
 
-#: src/HTML.c:7390
+#: src/HTML.c:7371
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr ""
 
-#: src/HTML.c:7887
+#: src/HTML.c:7865
 msgid "Source cache error - disk full?"
 msgstr ""
 
-#: src/HTML.c:7900
+#: src/HTML.c:7878
 msgid "Source cache error - not enough memory!"
 msgstr ""
 
-#: src/LYBookmark.c:167
+#: src/LYBookmark.c:164
 msgid ""
 "     This file is an HTML representation of the X Mosaic hotlist file.\n"
 "     Outdated or invalid links may be removed by using the\n"
@@ -3526,7 +3521,7 @@ msgid ""
 "     been remapped by you or your system administrator."
 msgstr ""
 
-#: src/LYBookmark.c:379
+#: src/LYBookmark.c:371
 #, c-format
 msgid ""
 "     You can delete links by the 'R' key<br>\n"
@@ -3535,7 +3530,7 @@ msgstr ""
 "     可以用‘R’鍵刪除鏈結<br>\n"
 "<ol>\n"
 
-#: src/LYBookmark.c:382
+#: src/LYBookmark.c:374
 msgid ""
 "     You can delete links using the remove bookmark command.  It is usually\n"
 "     the 'R' key but may have been remapped by you or your system\n"
@@ -3544,7 +3539,7 @@ msgstr ""
 "     閣下可以使用移除書籤的指令來刪除鏈結。通常是用‘R’鍵，但閣下或管理員也\n"
 "     有可能會將之重新定義為其它按鍵。"
 
-#: src/LYBookmark.c:386
+#: src/LYBookmark.c:378
 msgid ""
 "     This file also may be edited with a standard text editor to delete\n"
 "     outdated or invalid links, or to change their order."
@@ -3552,7 +3547,7 @@ msgstr ""
 "     此檔案也可以使用一般的文字編輯器編輯，刪除過時或無效的鏈結，或更改\n"
 "     它們的次序。"
 
-#: src/LYBookmark.c:389
+#: src/LYBookmark.c:381
 msgid ""
 "Note: if you edit this file manually\n"
 "      you should not change the format within the lines\n"
@@ -3560,36 +3555,36 @@ msgid ""
 "      Make sure any bookmark link is saved as a single line."
 msgstr ""
 
-#: src/LYBookmark.c:681
+#: src/LYBookmark.c:677
 #, c-format
 msgid "File may be recoverable from %s during this session"
 msgstr ""
 
 #.
-#. *  Neither the path as given nor any components examined by
-#. *  backing up were stat()able. - kw
+#. * Neither the path as given nor any components examined by backing up
+#. * were stat()able.  - kw
 #.
-#: src/LYCgi.c:241
+#: src/LYCgi.c:238
 msgid "Unable to access cgi script"
 msgstr "無法存取 cgi script。"
 
-#: src/LYCgi.c:664 src/LYCgi.c:667
+#: src/LYCgi.c:665 src/LYCgi.c:668
 msgid "Good Advice"
 msgstr "建議"
 
-#: src/LYCgi.c:670
+#: src/LYCgi.c:672
 msgid "An excellent http server for VMS is available via"
 msgstr ""
 
-#: src/LYCgi.c:677
+#: src/LYCgi.c:679
 msgid "this link"
 msgstr ""
 
-#: src/LYCgi.c:681
+#: src/LYCgi.c:683
 msgid "It provides state of the art CGI script support.\n"
 msgstr ""
 
-#: src/LYClean.c:122
+#: src/LYClean.c:121
 msgid "Exiting via interrupt:"
 msgstr "因以下的中斷訊號而離開程式："
 
@@ -3597,43 +3592,43 @@ msgstr "因以下的中斷訊號而離開程式："
 msgid "(from a previous session)"
 msgstr ""
 
-#: src/LYCookie.c:2522
+#: src/LYCookie.c:2523
 msgid "Maximum Gobble Date:"
 msgstr ""
 
-#: src/LYCookie.c:2564
+#: src/LYCookie.c:2563
 msgid "Internal"
 msgstr "內部"
 
-#: src/LYCookie.c:2565
+#: src/LYCookie.c:2564
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr "cookie_domain_flag_set 錯誤，中止程式"
 
-#: src/LYCurses.c:1006
+#: src/LYCurses.c:1017
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr "無法初始化終端機 ─ 終端機類型不詳？"
 
-#: src/LYCurses.c:1434
+#: src/LYCurses.c:1446
 msgid "Terminal ="
 msgstr "終端機類型 ="
 
-#: src/LYCurses.c:1438
+#: src/LYCurses.c:1450
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "使用本程式時終端機的類型必須是 vt100、200 等等。"
 
-#: src/LYCurses.c:1488
+#: src/LYCurses.c:1499
 msgid "Your Terminal type is unknown!"
 msgstr "終端機類型不明！"
 
-#: src/LYCurses.c:1489
+#: src/LYCurses.c:1500
 msgid "Enter a terminal type:"
 msgstr "請輸入終端機類型："
 
-#: src/LYCurses.c:1503
+#: src/LYCurses.c:1514
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "終端機類型已設定為"
 
-#: src/LYCurses.c:2002
+#: src/LYCurses.c:2006
 #, c-format
 msgid ""
 "\n"
@@ -3642,7 +3637,7 @@ msgstr ""
 "\n"
 "在 %s 版本 %s 出現嚴重錯誤\n"
 
-#: src/LYCurses.c:2004
+#: src/LYCurses.c:2009
 #, c-format
 msgid ""
 "\n"
@@ -3658,261 +3653,260 @@ msgstr ""
 "URL 的準確描述、作業系統及其版本、TCPIP 版本、錯誤的追蹤紀錄 (如果\n"
 "可以獲取的話)，及其它相關資訊。\n"
 
-#: src/LYEdit.c:249
+#: src/LYEdit.c:251
 msgid "Editor killed by signal"
 msgstr "編輯器因訊號而中止"
 
-#: src/LYEdit.c:251
+#: src/LYEdit.c:253
 #, c-format
 msgid "Editor returned with error status, %s"
 msgstr "編輯器的回傳錯誤狀態，%s"
 
-#: src/LYEdit.c:252
+#: src/LYEdit.c:256
 msgid "reason unknown."
 msgstr "原因不詳。"
 
-#: src/LYDownload.c:517
+#: src/LYDownload.c:502
 msgid "Downloaded link:"
 msgstr "已下載的鏈結："
 
-#: src/LYDownload.c:522
+#: src/LYDownload.c:507
 msgid "Suggested file name:"
 msgstr "建議的檔案名稱："
 
-#: src/LYDownload.c:527
+#: src/LYDownload.c:512
 msgid "Standard download options:"
 msgstr "標準的下載處理方式："
 
-#: src/LYDownload.c:528
+#: src/LYDownload.c:513
 msgid "Download options:"
 msgstr "下載選項："
 
-#: src/LYDownload.c:544
+#: src/LYDownload.c:529
 msgid "Save to disk"
 msgstr "儲存至磁碟"
 
-#: src/LYDownload.c:558
+#: src/LYDownload.c:543
 #, fuzzy
 msgid "View temporary file"
 msgstr "無法開啟暫存檔！"
 
-#: src/LYDownload.c:565
+#: src/LYDownload.c:550
 msgid "Save to disk disabled."
 msgstr "禁止將內容儲存至磁碟。"
 
-#: src/LYDownload.c:569 src/LYPrint.c:1327
+#: src/LYDownload.c:554 src/LYPrint.c:1319
 msgid "Local additions:"
 msgstr "額外的處理方式："
 
-#: src/LYDownload.c:578 src/LYUpload.c:216
+#: src/LYDownload.c:565 src/LYUpload.c:211
 #, c-format
 msgid "No Name Given"
 msgstr "未指定名稱"
 
-#: src/LYHistory.c:658
+#: src/LYHistory.c:644
 msgid "You selected:"
 msgstr "請選擇："
 
-#: src/LYHistory.c:682 src/LYHistory.c:912
+#: src/LYHistory.c:668 src/LYHistory.c:897
 msgid "(no address)"
 msgstr ""
 
-#: src/LYHistory.c:686
+#: src/LYHistory.c:672
 msgid " (internal)"
 msgstr ""
 
-#: src/LYHistory.c:688
+#: src/LYHistory.c:674
 msgid " (was internal)"
 msgstr ""
 
-#: src/LYHistory.c:786
+#: src/LYHistory.c:772
 msgid " (From History)"
 msgstr ""
 
-#: src/LYHistory.c:832
+#: src/LYHistory.c:817
 msgid "You visited (POSTs, bookmark, menu and list files excluded):"
 msgstr ""
 
-#: src/LYHistory.c:1128
+#: src/LYHistory.c:1107
 msgid "(No messages yet)"
 msgstr ""
 
-#: src/LYLeaks.c:209
+#: src/LYLeaks.c:206
 msgid "Invalid pointer detected."
 msgstr ""
 
-#: src/LYLeaks.c:211 src/LYLeaks.c:251
+#: src/LYLeaks.c:208 src/LYLeaks.c:246
 msgid "Sequence:"
 msgstr ""
 
-#: src/LYLeaks.c:214 src/LYLeaks.c:254
+#: src/LYLeaks.c:211 src/LYLeaks.c:249
 msgid "Pointer:"
 msgstr "Pointer："
 
-#: src/LYLeaks.c:225 src/LYLeaks.c:232 src/LYLeaks.c:273
+#: src/LYLeaks.c:220 src/LYLeaks.c:227 src/LYLeaks.c:268
 msgid "FileName:"
 msgstr "檔案名稱："
 
-#: src/LYLeaks.c:228 src/LYLeaks.c:235 src/LYLeaks.c:276 src/LYLeaks.c:287
+#: src/LYLeaks.c:223 src/LYLeaks.c:230 src/LYLeaks.c:271 src/LYLeaks.c:282
 msgid "LineCount:"
 msgstr "行數："
 
-#: src/LYLeaks.c:249
+#: src/LYLeaks.c:244
 msgid "Memory leak detected."
 msgstr ""
 
-#: src/LYLeaks.c:257
+#: src/LYLeaks.c:252
 msgid "Contains:"
 msgstr ""
 
-#: src/LYLeaks.c:270
+#: src/LYLeaks.c:265
 msgid "ByteSize:"
 msgstr ""
 
-#: src/LYLeaks.c:284
+#: src/LYLeaks.c:279
 msgid "realloced:"
 msgstr ""
 
-#: src/LYLeaks.c:307
+#: src/LYLeaks.c:300
 msgid "Total memory leakage this run:"
 msgstr ""
 
-#: src/LYLeaks.c:310
+#: src/LYLeaks.c:303
 msgid "Peak allocation"
 msgstr ""
 
-#: src/LYLeaks.c:311
+#: src/LYLeaks.c:304
 msgid "Bytes allocated"
 msgstr ""
 
-#: src/LYLeaks.c:312
+#: src/LYLeaks.c:305
 msgid "Total mallocs"
 msgstr ""
 
-#: src/LYLeaks.c:313
+#: src/LYLeaks.c:306
 msgid "Total frees"
 msgstr ""
 
-#: src/LYList.c:85
+#: src/LYList.c:82
 msgid "References in "
 msgstr "以下的鏈結屬於網頁："
 
-#: src/LYList.c:86
+#: src/LYList.c:84
 msgid "this document:"
 msgstr "(地址不明)"
 
-#: src/LYList.c:92
+#: src/LYList.c:90
 msgid "Visible links:"
 msgstr "不隱藏的鏈結："
 
-#: src/LYList.c:194 src/LYList.c:315
+#: src/LYList.c:191 src/LYList.c:309
 msgid "Hidden links:"
 msgstr "隱藏的鏈結："
 
-#: src/LYList.c:262
+#: src/LYList.c:256
 msgid "References"
 msgstr ""
 
-#: src/LYList.c:264
+#: src/LYList.c:258
 msgid "Visible links"
 msgstr "不隱藏的鏈結"
 
-#: src/LYLocal.c:268
+#: src/LYLocal.c:267
 #, c-format
 msgid "Unable to get status of '%s'."
 msgstr "無法獲取‘%s’的狀態。"
 
-#: src/LYLocal.c:302
+#: src/LYLocal.c:301
 msgid "The selected item is not a file or a directory!  Request ignored."
 msgstr "選取的項目不是檔案或目錄！忽略該要求。"
 
-#: src/LYLocal.c:367
+#: src/LYLocal.c:369
 #, c-format
 msgid "Unable to %s due to system error!"
 msgstr "因為系統錯誤而無法%s！"
 
-#. error return
-#: src/LYLocal.c:401
+#: src/LYLocal.c:403
 #, c-format
 msgid "Probable failure to %s due to system error!"
 msgstr "可能因為系統錯誤而無法%s！"
 
-#: src/LYLocal.c:464 src/LYLocal.c:485
+#: src/LYLocal.c:465 src/LYLocal.c:486
 #, c-format
 msgid "remove %s"
 msgstr "移除 %s"
 
-#: src/LYLocal.c:503
+#: src/LYLocal.c:504
 #, c-format
 msgid "touch %s"
 msgstr ""
 
-#: src/LYLocal.c:530
+#: src/LYLocal.c:532
 #, c-format
 msgid "move %s to %s"
 msgstr "將 %s 移動至 %s"
 
-#: src/LYLocal.c:570
+#: src/LYLocal.c:573
 msgid "There is already a directory with that name!  Request ignored."
 msgstr "同一名稱的目錄已經存在！忽略該要求。"
 
-#: src/LYLocal.c:572
+#: src/LYLocal.c:575
 msgid "There is already a file with that name!  Request ignored."
 msgstr "同一名稱的檔案已經存在！忽略該要求。"
 
-#: src/LYLocal.c:574
+#: src/LYLocal.c:577
 msgid "The specified name is already in use!  Request ignored."
 msgstr "指定的檔案已在使用中！忽略該要求。"
 
-#: src/LYLocal.c:585
+#: src/LYLocal.c:588
 msgid "Destination has different owner!  Request denied."
 msgstr "目的地的擁有者不同！拒絕該要求。"
 
-#: src/LYLocal.c:588
+#: src/LYLocal.c:591
 msgid "Destination is not a valid directory!  Request denied."
 msgstr "目的地不是有效的目錄！拒絕該要求。"
 
-#: src/LYLocal.c:610
+#: src/LYLocal.c:613
 msgid "Remove all tagged files and directories?"
 msgstr "確定移除所有加上標記的檔案及目錄？"
 
-#: src/LYLocal.c:669
+#: src/LYLocal.c:671
 msgid "Enter new location for tagged items: "
 msgstr "輸入加上標記的項目的新位置："
 
-#: src/LYLocal.c:738
+#: src/LYLocal.c:741
 msgid "Path too long"
 msgstr "路徑過長"
 
-#: src/LYLocal.c:769
+#: src/LYLocal.c:772
 msgid "Source and destination are the same location - request ignored!"
 msgstr "來源及目的地位置相同 ─ 忽略該要求！"
 
-#: src/LYLocal.c:827
+#: src/LYLocal.c:829
 msgid "Enter new name for directory: "
 msgstr "輸入目錄的新名稱："
 
-#: src/LYLocal.c:829
+#: src/LYLocal.c:831
 msgid "Enter new name for file: "
 msgstr "輸入檔案的新名稱："
 
-#: src/LYLocal.c:841
+#: src/LYLocal.c:843
 msgid "Illegal character (path-separator) found! Request ignored."
 msgstr "出現不合法的字元 (路徑分隔字元)！忽略該要求。"
 
-#: src/LYLocal.c:890
+#: src/LYLocal.c:892
 msgid "Enter new location for directory: "
 msgstr "輸入目錄的新位置："
 
-#: src/LYLocal.c:896
+#: src/LYLocal.c:898
 msgid "Enter new location for file: "
 msgstr "輸入檔案的新位置："
 
-#: src/LYLocal.c:923
+#: src/LYLocal.c:925
 msgid "Unexpected failure - unable to find trailing path separator"
 msgstr ""
 
-#: src/LYLocal.c:943
+#: src/LYLocal.c:945
 msgid "Source and destination are the same location!  Request ignored!"
 msgstr "來源及目的地位置相同！忽略該要求！"
 
@@ -3925,89 +3919,89 @@ msgid "Modify name or location (n or l): "
 msgstr "修改名稱或位置 (n 或 l)："
 
 #.
-#. *	Code for changing ownership needed here.
+#. * Code for changing ownership needed here.
 #.
 #: src/LYLocal.c:1023
 msgid "This feature not yet implemented!"
 msgstr "此功能仍未完成！"
 
-#: src/LYLocal.c:1041
+#: src/LYLocal.c:1040
 msgid "Enter name of file to create: "
 msgstr "輸入準備建立的檔案名稱："
 
-#: src/LYLocal.c:1049 src/LYLocal.c:1091
+#: src/LYLocal.c:1048 src/LYLocal.c:1089
 msgid "Illegal redirection \"//\" found! Request ignored."
 msgstr "出現不合法的重新導向 \"//\"！忽略該要求。"
 
-#: src/LYLocal.c:1083
+#: src/LYLocal.c:1081
 msgid "Enter name for new directory: "
 msgstr "輸入新目錄的名稱："
 
-#: src/LYLocal.c:1128
+#: src/LYLocal.c:1125
 msgid "Create file or directory (f or d): "
 msgstr "建立檔案或目錄 (f 或 d)："
 
-#: src/LYLocal.c:1169
+#: src/LYLocal.c:1167
 #, fuzzy, c-format
 msgid "Remove directory '%s'?"
 msgstr "是否移除檔案‘%s’？"
 
-#: src/LYLocal.c:1172
+#: src/LYLocal.c:1170
 #, fuzzy
 msgid "Remove directory?"
 msgstr " 目錄"
 
-#: src/LYLocal.c:1177
+#: src/LYLocal.c:1175
 #, c-format
 msgid "Remove file '%s'?"
 msgstr "是否移除檔案‘%s’？"
 
-#: src/LYLocal.c:1179
+#: src/LYLocal.c:1177
 msgid "Remove file?"
 msgstr "是否移除檔案？"
 
-#: src/LYLocal.c:1184
+#: src/LYLocal.c:1182
 #, c-format
 msgid "Remove symbolic link '%s'?"
 msgstr "是否移除符號連結‘%s’？"
 
-#: src/LYLocal.c:1186
+#: src/LYLocal.c:1184
 msgid "Remove symbolic link?"
 msgstr "是否移除符號連結？"
 
-#: src/LYLocal.c:1274
+#: src/LYLocal.c:1279
 msgid "Sorry, don't know how to permit non-UNIX files yet."
 msgstr ""
 
-#: src/LYLocal.c:1304
+#: src/LYLocal.c:1309
 msgid "Unable to open permit options file"
 msgstr ""
 
-#: src/LYLocal.c:1331
+#: src/LYLocal.c:1339
 msgid "Specify permissions below:"
 msgstr "請指定以下的權限："
 
-#: src/LYLocal.c:1332 src/LYShowInfo.c:196
+#: src/LYLocal.c:1340 src/LYShowInfo.c:199
 msgid "Owner:"
 msgstr "擁有者："
 
-#: src/LYLocal.c:1348
+#: src/LYLocal.c:1356
 msgid "Group"
 msgstr "所屬群組"
 
-#: src/LYLocal.c:1364
+#: src/LYLocal.c:1372
 msgid "Others:"
 msgstr "其它："
 
-#: src/LYLocal.c:1382
+#: src/LYLocal.c:1390
 msgid "form to permit"
 msgstr ""
 
-#: src/LYLocal.c:1478
+#: src/LYLocal.c:1485
 msgid "Invalid mode format."
 msgstr ""
 
-#: src/LYLocal.c:1482
+#: src/LYLocal.c:1489
 msgid "Invalid syntax format."
 msgstr "無效的語法格式。"
 
@@ -4015,128 +4009,128 @@ msgstr "無效的語法格式。"
 msgid "Warning!  UUDecoded file will exist in the directory you started Lynx."
 msgstr "警告！已經 UUDecode 的檔案會放在執行 Lynx 時的目錄。"
 
-#: src/LYLocal.c:1862
+#: src/LYLocal.c:1861
 msgid "NULL URL pointer"
 msgstr ""
 
-#: src/LYLocal.c:1945
+#: src/LYLocal.c:1943
 #, c-format
 msgid "Executing %s "
 msgstr "正在執行 %s "
 
-#: src/LYLocal.c:1948
+#: src/LYLocal.c:1946
 msgid "Executing system command. This might take a while."
 msgstr "正在執行系統指令。可能需要稍等一段時間。"
 
-#: src/LYLocal.c:2022
+#: src/LYLocal.c:2018
 msgid "Current directory:"
 msgstr "目前的目錄："
 
-#: src/LYLocal.c:2025 src/LYLocal.c:2043
+#: src/LYLocal.c:2021 src/LYLocal.c:2039
 msgid "Current selection:"
 msgstr "目前選擇的項目："
 
-#: src/LYLocal.c:2029
+#: src/LYLocal.c:2025
 msgid "Nothing currently selected."
 msgstr "未選取任何項目。"
 
-#: src/LYLocal.c:2044
+#: src/LYLocal.c:2041
 msgid "tagged item:"
 msgstr "個加上標記的項目："
 
-#: src/LYLocal.c:2044
+#: src/LYLocal.c:2042
 msgid "tagged items:"
 msgstr "個加上標記的項目："
 
-#: src/LYLocal.c:2142 src/LYLocal.c:2153
+#: src/LYLocal.c:2139 src/LYLocal.c:2150
 msgid "Illegal filename; request ignored."
 msgstr "不合法的檔案名稱；忽略該要求。"
 
 #. directory not writable
-#: src/LYLocal.c:2250 src/LYLocal.c:2308
+#: src/LYLocal.c:2248 src/LYLocal.c:2307
 msgid "Install in the selected directory not permitted."
 msgstr ""
 
-#: src/LYLocal.c:2304
+#: src/LYLocal.c:2303
 msgid "The selected item is not a directory!  Request ignored."
 msgstr "選取的項目不是目錄！忽略該要求。"
 
-#: src/LYLocal.c:2313
+#: src/LYLocal.c:2312
 msgid "Just a moment, ..."
 msgstr "請稍等，..."
 
-#: src/LYLocal.c:2330
+#: src/LYLocal.c:2329
 msgid "Error buiding install args"
 msgstr ""
 
-#: src/LYLocal.c:2345 src/LYLocal.c:2374
+#: src/LYLocal.c:2344 src/LYLocal.c:2375
 #, c-format
 msgid "Source and target are the same: %s"
 msgstr "來源及目的地相同：%s"
 
-#: src/LYLocal.c:2352 src/LYLocal.c:2381
+#: src/LYLocal.c:2351 src/LYLocal.c:2382
 #, c-format
 msgid "Already in target directory: %s"
 msgstr ""
 
-#: src/LYLocal.c:2399
+#: src/LYLocal.c:2400
 msgid "Installation complete"
 msgstr "安裝完成"
 
-#: src/LYLocal.c:2588
+#: src/LYLocal.c:2587
 msgid "Temporary URL or list would be too long."
 msgstr ""
 
-#: src/LYMail.c:534
+#: src/LYMail.c:520
 msgid "Sending"
 msgstr ""
 
-#: src/LYMail.c:1024
+#: src/LYMail.c:1006
 #, c-format
 msgid "The link   %s :?: %s \n"
 msgstr ""
 
-#: src/LYMail.c:1026
+#: src/LYMail.c:1008
 #, c-format
 msgid "called \"%s\"\n"
 msgstr ""
 
-#: src/LYMail.c:1027
+#: src/LYMail.c:1009
 #, c-format
 msgid "in the file \"%s\" called \"%s\"\n"
 msgstr ""
 
-#: src/LYMail.c:1028
+#: src/LYMail.c:1010
 msgid "was requested but was not available."
 msgstr ""
 
-#: src/LYMail.c:1029
+#: src/LYMail.c:1011
 msgid "Thought you might want to know."
 msgstr ""
 
-#: src/LYMail.c:1031
+#: src/LYMail.c:1013
 msgid "This message was automatically generated by"
 msgstr ""
 
-#: src/LYMail.c:1753
+#: src/LYMail.c:1728
 msgid "No system mailer configured"
 msgstr ""
 
-#: src/LYMain.c:976
+#: src/LYMain.c:991
 #, c-format
 msgid "No Winsock found, sorry."
 msgstr "找不到 Winsock，抱歉。"
 
-#: src/LYMain.c:1178
+#: src/LYMain.c:1193
 #, c-format
 msgid "You MUST define a valid TMP or TEMP area!\n"
 msgstr "閣下 *必須* 指定有效的 TMP 或 TEMP 位置！\n"
 
-#: src/LYMain.c:1232 src/LYMainLoop.c:5027
+#: src/LYMain.c:1246 src/LYMainLoop.c:4927
 msgid "No such directory"
 msgstr "該目錄不存在"
 
-#: src/LYMain.c:1444
+#: src/LYMain.c:1451
 #, c-format
 msgid ""
 "\n"
@@ -4147,7 +4141,7 @@ msgstr ""
 "設定檔 %s 不存在。\n"
 "\n"
 
-#: src/LYMain.c:1454
+#: src/LYMain.c:1461
 #, c-format
 msgid ""
 "\n"
@@ -4158,7 +4152,7 @@ msgstr ""
 "未宣告 Lynx 所用的字元集。\n"
 "\n"
 
-#: src/LYMain.c:1483
+#: src/LYMain.c:1490
 #, c-format
 msgid ""
 "\n"
@@ -4166,7 +4160,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1512
+#: src/LYMain.c:1516
 #, c-format
 msgid ""
 "\n"
@@ -4177,40 +4171,40 @@ msgstr ""
 "Lynx 檔案 %s 不存在。\n"
 "\n"
 
-#: src/LYMain.c:1755
+#: src/LYMain.c:1756
 msgid "Warning:"
 msgstr "警告："
 
-#: src/LYMain.c:2305
+#: src/LYMain.c:2296
 msgid "persistent cookies state will be changed in next session only."
 msgstr ""
 
-#: src/LYMain.c:2552 src/LYMain.c:2600
+#: src/LYMain.c:2533 src/LYMain.c:2578
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx：忽略無法識別的字元集 %s\n"
 
-#: src/LYMain.c:3132
+#: src/LYMain.c:3087
 #, fuzzy, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s 版本 %s (%s)\n"
 
-#: src/LYMain.c:3155
+#: src/LYMain.c:3110
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "編譯於 %s %s %s\n"
 
-#: src/LYMain.c:3178
+#: src/LYMain.c:3132
 #, c-format
 msgid "Copyrights held by the University of Kansas, CERN, and other contributors.\n"
 msgstr "版權所有：University of Kansas、CERN 及其它有貢獻者。\n"
 
-#: src/LYMain.c:3180
+#: src/LYMain.c:3134
 #, c-format
 msgid "Distributed under the GNU General Public License.\n"
 msgstr "使用 GNU General Public License 發佈。\n"
 
-#: src/LYMain.c:3182
+#: src/LYMain.c:3135
 #, c-format
 msgid ""
 "See http://lynx.isc.org/ and the online help for more information.\n"
@@ -4219,140 +4213,137 @@ msgstr ""
 "若需要更多資料，請瀏覽 http://lynx.isc.org/ 及網上的說明文件。\n"
 "\n"
 
-#: src/LYMain.c:3935
+#: src/LYMain.c:3889
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "用法：%s [選項] [檔案]\n"
 
-#: src/LYMain.c:3936
+#: src/LYMain.c:3890
 #, c-format
 msgid "Options are:\n"
 msgstr "選項包括：\n"
 
-#: src/LYMain.c:4207
+#: src/LYMain.c:4162
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s：無效的選項：%s\n"
 
-#: src/LYMainLoop.c:538
+#: src/LYMainLoop.c:532
 #, c-format
 msgid "Internal error: Invalid mouse link %d!"
 msgstr ""
 
-#.
-#. * Make a name for this new URL.
-#.
-#: src/LYMainLoop.c:652 src/LYMainLoop.c:5049
+#: src/LYMainLoop.c:649 src/LYMainLoop.c:4949
 msgid "A URL specified by the user"
 msgstr "由使用者指定的 URL"
 
-#: src/LYMainLoop.c:1109
+#: src/LYMainLoop.c:1099
 msgid "Enctype multipart/form-data not yet supported!  Cannot submit."
 msgstr ""
 
 #.
-#. *  Make a name for this help file.
+#. * Make a name for this help file.
 #.
-#: src/LYMainLoop.c:3052
+#: src/LYMainLoop.c:2996
 msgid "Help Screen"
 msgstr "求助說明畫面"
 
-#: src/LYMainLoop.c:3176
+#: src/LYMainLoop.c:3116
 msgid "System Index"
 msgstr ""
 
-#: src/LYMainLoop.c:3548 src/LYMainLoop.c:5269
+#: src/LYMainLoop.c:3477 src/LYMainLoop.c:5169
 msgid "Entry into main screen"
 msgstr ""
 
-#: src/LYMainLoop.c:3823
+#: src/LYMainLoop.c:3747
 msgid "No next document present"
 msgstr ""
 
-#: src/LYMainLoop.c:4130
+#: src/LYMainLoop.c:4045
 msgid "charset for this document specified explicitly, sorry..."
 msgstr "抱歉，該文件已經特地指定了字元集..."
 
-#: src/LYMainLoop.c:5003
+#: src/LYMainLoop.c:4903
 msgid "cd to:"
 msgstr "準備進入的目錄："
 
-#: src/LYMainLoop.c:5030
+#: src/LYMainLoop.c:4930
 msgid "A component of path is not a directory"
 msgstr "路徑中的一部份不是目錄"
 
-#: src/LYMainLoop.c:5033
+#: src/LYMainLoop.c:4933
 msgid "failed to change directory"
 msgstr "無法進入目錄"
 
-#: src/LYMainLoop.c:6203
+#: src/LYMainLoop.c:6089
 msgid "Reparsing document under current settings..."
 msgstr "根據目前的設定重新分析文件..."
 
-#: src/LYMainLoop.c:6488 src/LYMainLoop.c:6492
+#: src/LYMainLoop.c:6369 src/LYMainLoop.c:6372
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "嚴重錯誤 ─ 無法開啟輸出檔 %s\n"
 
-#: src/LYMainLoop.c:6833
+#: src/LYMainLoop.c:6716
 msgid "TABLE center enable."
 msgstr ""
 
-#: src/LYMainLoop.c:6836
+#: src/LYMainLoop.c:6719
 msgid "TABLE center disable."
 msgstr ""
 
-#: src/LYMainLoop.c:6913
+#: src/LYMainLoop.c:6796
 #, fuzzy
 msgid "Current URL is empty."
 msgstr "目前的目錄："
 
-#: src/LYMainLoop.c:6915 src/LYUtils.c:1696
+#: src/LYMainLoop.c:6798 src/LYUtils.c:1697
 msgid "Copy to clipboard failed."
 msgstr ""
 
-#: src/LYMainLoop.c:6917
+#: src/LYMainLoop.c:6800
 msgid "Document URL put to clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:6919
+#: src/LYMainLoop.c:6802
 msgid "Link URL put to clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:6945
+#: src/LYMainLoop.c:6829
 msgid "No URL in the clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:7620 src/LYMainLoop.c:7793
+#: src/LYMainLoop.c:7500 src/LYMainLoop.c:7670
 msgid "-index-"
 msgstr "─索引─"
 
-#: src/LYMainLoop.c:7730
+#: src/LYMainLoop.c:7610
 msgid "lynx: Can't access startfile"
 msgstr "lynx：無法存取開始的網頁"
 
-#: src/LYMainLoop.c:7743
+#: src/LYMainLoop.c:7622
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr ""
 
-#: src/LYMainLoop.c:7744
+#: src/LYMainLoop.c:7623
 msgid "      Exiting..."
 msgstr "      準備離開..."
 
-#: src/LYMainLoop.c:7787
+#: src/LYMainLoop.c:7664
 msgid "-more-"
 msgstr "─還有內容─"
 
 #. Enable scrolling.
-#: src/LYNews.c:187
+#: src/LYNews.c:183
 msgid "You will be posting to:"
 msgstr ""
 
 #.
-#. *  Get the mail address for the From header,
-#. *  offering personal_mail_address as default.
+#. * Get the mail address for the From header, offering personal_mail_address
+#. * as default.
 #.
-#: src/LYNews.c:196
+#: src/LYNews.c:192
 msgid ""
 "\n"
 "\n"
@@ -4363,11 +4354,10 @@ msgstr ""
 " 請在 From: 標頭中提供閣下的電郵地址\n"
 
 #.
-#. *  Get the Subject header, offering the current
-#. *  document's title as the default if this is a
-#. *  followup rather than a new post. - FM
+#. * Get the Subject header, offering the current document's title as the
+#. * default if this is a followup rather than a new post.  - FM
 #.
-#: src/LYNews.c:214
+#: src/LYNews.c:209
 msgid ""
 "\n"
 "\n"
@@ -4377,7 +4367,7 @@ msgstr ""
 "\n"
 " 請提供或修改 Subject: 標頭\n"
 
-#: src/LYNews.c:303
+#: src/LYNews.c:299
 msgid ""
 "\n"
 "\n"
@@ -4388,9 +4378,9 @@ msgstr ""
 " 請提供或修改 Organization: 標頭\n"
 
 #.
-#. *  Use the built in line editior.
+#. * Use the built in line editior.
 #.
-#: src/LYNews.c:360
+#: src/LYNews.c:356
 msgid ""
 "\n"
 "\n"
@@ -4400,318 +4390,318 @@ msgstr ""
 "\n"
 " 請在以下的位置輸入訊息。"
 
-#: src/LYNews.c:406
+#: src/LYNews.c:402
 msgid "Message has no original text!"
 msgstr ""
 
-#: src/LYOptions.c:746
+#: src/LYOptions.c:755
 msgid "review/edit B)ookmarks files"
 msgstr ""
 
-#: src/LYOptions.c:748
+#: src/LYOptions.c:757
 msgid "B)ookmark file: "
 msgstr "B)書籤檔："
 
-#: src/LYOptions.c:2103 src/LYOptions.c:2109
+#: src/LYOptions.c:2120 src/LYOptions.c:2127
 msgid "ON"
 msgstr ""
 
 #. verbose_img variable
-#: src/LYOptions.c:2104 src/LYOptions.c:2108 src/LYOptions.c:2237 src/LYOptions.c:2246
+#: src/LYOptions.c:2121 src/LYOptions.c:2126 src/LYOptions.c:2264 src/LYOptions.c:2274
 msgid "OFF"
 msgstr ""
 
-#: src/LYOptions.c:2105
+#: src/LYOptions.c:2122
 msgid "NEVER"
 msgstr ""
 
-#: src/LYOptions.c:2106
+#: src/LYOptions.c:2123
 msgid "ALWAYS"
 msgstr ""
 
-#: src/LYOptions.c:2120 src/LYOptions.c:2230
+#: src/LYOptions.c:2138 src/LYOptions.c:2256
 msgid "ignore"
 msgstr ""
 
-#: src/LYOptions.c:2121
+#: src/LYOptions.c:2139
 msgid "ask user"
 msgstr ""
 
-#: src/LYOptions.c:2122
+#: src/LYOptions.c:2140
 msgid "accept all"
 msgstr ""
 
-#: src/LYOptions.c:2133
+#: src/LYOptions.c:2152
 msgid "ALWAYS OFF"
 msgstr ""
 
-#: src/LYOptions.c:2134
+#: src/LYOptions.c:2153
 msgid "FOR LOCAL FILES ONLY"
 msgstr ""
 
-#: src/LYOptions.c:2136
+#: src/LYOptions.c:2155
 msgid "ALWAYS ON"
 msgstr ""
 
-#: src/LYOptions.c:2146
+#: src/LYOptions.c:2166
 msgid "Numbers act as arrows"
 msgstr ""
 
-#: src/LYOptions.c:2148
+#: src/LYOptions.c:2168
 msgid "Links are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2151
+#: src/LYOptions.c:2171
 msgid "Links and form fields are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2154
+#: src/LYOptions.c:2174
 msgid "Form fields are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2161
+#: src/LYOptions.c:2182
 msgid "Case insensitive"
 msgstr ""
 
-#: src/LYOptions.c:2162
+#: src/LYOptions.c:2183
 msgid "Case sensitive"
 msgstr ""
 
-#: src/LYOptions.c:2183
+#: src/LYOptions.c:2205
 msgid "prompt normally"
 msgstr ""
 
-#: src/LYOptions.c:2184
+#: src/LYOptions.c:2206
 msgid "force yes-response"
 msgstr ""
 
-#: src/LYOptions.c:2185
+#: src/LYOptions.c:2207
 msgid "force no-response"
 msgstr ""
 
-#: src/LYOptions.c:2200
+#: src/LYOptions.c:2224
 msgid "Novice"
 msgstr ""
 
-#: src/LYOptions.c:2201
+#: src/LYOptions.c:2225
 #, fuzzy
 msgid "Intermediate"
 msgstr "內部"
 
-#: src/LYOptions.c:2202
+#: src/LYOptions.c:2226
 msgid "Advanced"
 msgstr ""
 
-#: src/LYOptions.c:2209
+#: src/LYOptions.c:2234
 msgid "By First Visit"
 msgstr ""
 
-#: src/LYOptions.c:2211
+#: src/LYOptions.c:2236
 msgid "By First Visit Reversed"
 msgstr ""
 
-#: src/LYOptions.c:2212
+#: src/LYOptions.c:2237
 msgid "As Visit Tree"
 msgstr ""
 
-#: src/LYOptions.c:2213
+#: src/LYOptions.c:2238
 msgid "By Last Visit"
 msgstr ""
 
-#: src/LYOptions.c:2215
+#: src/LYOptions.c:2240
 msgid "By Last Visit Reversed"
 msgstr ""
 
 #. Old_DTD variable
-#: src/LYOptions.c:2224
+#: src/LYOptions.c:2250
 msgid "relaxed (TagSoup mode)"
 msgstr ""
 
-#: src/LYOptions.c:2225
+#: src/LYOptions.c:2251
 msgid "strict (SortaSGML mode)"
 msgstr ""
 
-#: src/LYOptions.c:2231
+#: src/LYOptions.c:2257
 msgid "as labels"
 msgstr ""
 
-#: src/LYOptions.c:2232
+#: src/LYOptions.c:2258
 #, fuzzy
 msgid "as links"
 msgstr "不隱藏的鏈結"
 
-#: src/LYOptions.c:2238
+#: src/LYOptions.c:2265
 #, fuzzy
 msgid "show filename"
 msgstr "建議的檔案名稱："
 
-#: src/LYOptions.c:2247
+#: src/LYOptions.c:2275
 msgid "STANDARD"
 msgstr ""
 
-#: src/LYOptions.c:2248
+#: src/LYOptions.c:2276
 msgid "ADVANCED"
 msgstr ""
 
-#: src/LYOptions.c:2272
+#: src/LYOptions.c:2301
 #, fuzzy
 msgid "Directories first"
 msgstr "副目錄："
 
-#: src/LYOptions.c:2273
+#: src/LYOptions.c:2302
 #, fuzzy
 msgid "Files first"
 msgstr " (首先測試)"
 
-#: src/LYOptions.c:2274
+#: src/LYOptions.c:2303
 #, fuzzy
 msgid "Mixed style"
 msgstr "文字編輯模式"
 
-#: src/LYOptions.c:2279 src/LYOptions.c:2294
+#: src/LYOptions.c:2310 src/LYOptions.c:2326
 #, fuzzy
 msgid "By Name"
 msgstr "名稱："
 
-#: src/LYOptions.c:2280 src/LYOptions.c:2295
+#: src/LYOptions.c:2311 src/LYOptions.c:2327
 msgid "By Type"
 msgstr ""
 
-#: src/LYOptions.c:2281 src/LYOptions.c:2296
+#: src/LYOptions.c:2312 src/LYOptions.c:2328
 msgid "By Size"
 msgstr ""
 
-#: src/LYOptions.c:2282 src/LYOptions.c:2297
+#: src/LYOptions.c:2313 src/LYOptions.c:2329
 #, fuzzy
 msgid "By Date"
 msgstr "日期："
 
-#: src/LYOptions.c:2283
+#: src/LYOptions.c:2314
 msgid "By Mode"
 msgstr ""
 
-#: src/LYOptions.c:2285
+#: src/LYOptions.c:2316
 msgid "By User"
 msgstr ""
 
-#: src/LYOptions.c:2286
+#: src/LYOptions.c:2317
 #, fuzzy
 msgid "By Group"
 msgstr "所屬群組"
 
-#: src/LYOptions.c:2303
+#: src/LYOptions.c:2336
 msgid "Do not show rate"
 msgstr ""
 
-#: src/LYOptions.c:2304 src/LYOptions.c:2305
+#: src/LYOptions.c:2337 src/LYOptions.c:2338
 #, fuzzy, c-format
 msgid "Show %s/sec rate"
 msgstr "顯示傳輸速率"
 
-#: src/LYOptions.c:2307 src/LYOptions.c:2308
+#: src/LYOptions.c:2340 src/LYOptions.c:2341
 #, c-format
 msgid "Show %s/sec, ETA"
 msgstr ""
 
-#: src/LYOptions.c:2558 src/LYOptions.c:2582
+#: src/LYOptions.c:2588 src/LYOptions.c:2612
 #, c-format
 msgid "Use %s to invoke the Options menu!"
 msgstr ""
 
-#: src/LYOptions.c:3297
+#: src/LYOptions.c:3326
 msgid "(options marked with (!) will not be saved)"
 msgstr ""
 
-#: src/LYOptions.c:3305
+#: src/LYOptions.c:3334
 msgid "General Preferences"
 msgstr "一般偏好設定"
 
 #. ***************************************************************
 #. User Mode: SELECT
-#: src/LYOptions.c:3309
+#: src/LYOptions.c:3338
 msgid "User mode"
 msgstr "使用者模式"
 
 #. Editor: INPUT
-#: src/LYOptions.c:3315
+#: src/LYOptions.c:3344
 msgid "Editor"
 msgstr "編輯器"
 
 #. Search Type: SELECT
-#: src/LYOptions.c:3320
+#: src/LYOptions.c:3349
 msgid "Type of Search"
 msgstr "搜尋方式"
 
-#: src/LYOptions.c:3325
+#: src/LYOptions.c:3354
 msgid "Security and Privacy"
 msgstr ""
 
 #. ***************************************************************
 #. Cookies: SELECT
-#: src/LYOptions.c:3329
+#: src/LYOptions.c:3358
 msgid "Cookies"
 msgstr "Cookie"
 
 #. Cookie Prompting: SELECT
-#: src/LYOptions.c:3343
+#: src/LYOptions.c:3372
 msgid "Invalid-Cookie Prompting"
 msgstr ""
 
 #. SSL Prompting: SELECT
-#: src/LYOptions.c:3350
+#: src/LYOptions.c:3379
 msgid "SSL Prompting"
 msgstr ""
 
-#: src/LYOptions.c:3356
+#: src/LYOptions.c:3385
 msgid "Keyboard Input"
 msgstr "鍵盤輸入"
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
-#: src/LYOptions.c:3360
+#: src/LYOptions.c:3389
 msgid "Keypad mode"
 msgstr "數字鍵盤模式"
 
 #. Emacs keys: ON/OFF
-#: src/LYOptions.c:3366
+#: src/LYOptions.c:3395
 msgid "Emacs keys"
 msgstr "Emacs 組合鍵"
 
 #. VI Keys: ON/OFF
-#: src/LYOptions.c:3372
+#: src/LYOptions.c:3401
 msgid "VI keys"
 msgstr "VI 組合鍵"
 
 #. Line edit style: SELECT
 #. well, at least 2 line edit styles available
-#: src/LYOptions.c:3379
+#: src/LYOptions.c:3408
 msgid "Line edit style"
 msgstr "文字編輯模式"
 
 #. Keyboard layout: SELECT
-#: src/LYOptions.c:3391
+#: src/LYOptions.c:3420
 msgid "Keyboard layout"
 msgstr "鍵盤配置"
 
 #.
 #. * Display and Character Set
 #.
-#: src/LYOptions.c:3404
+#: src/LYOptions.c:3434
 msgid "Display and Character Set"
 msgstr "顯示及字元集"
 
 #. Use locale-based character set: ON/OFF
-#: src/LYOptions.c:3409
+#: src/LYOptions.c:3439
 #, fuzzy
 msgid "Use locale-based character set"
 msgstr "後備的字元集"
 
 #. Display Character Set: SELECT
-#: src/LYOptions.c:3418
+#: src/LYOptions.c:3448
 msgid "Display character set"
 msgstr "預設顯示的字元集"
 
-#: src/LYOptions.c:3447
+#: src/LYOptions.c:3479
 msgid "Assumed document character set"
 msgstr "後備的字元集"
 
@@ -4720,223 +4710,220 @@ msgstr "後備的字元集"
 #. * we split the header to make it more readable:
 #. * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 #.
-#: src/LYOptions.c:3467
+#: src/LYOptions.c:3499
 msgid "CJK mode"
 msgstr "CJK 模式"
 
-#: src/LYOptions.c:3469
+#: src/LYOptions.c:3501
 msgid "Raw 8-bit"
 msgstr "8-bit 原始模式"
 
 #. X Display: INPUT
-#: src/LYOptions.c:3477
+#: src/LYOptions.c:3509
 msgid "X Display"
 msgstr "X 畫面"
 
 #.
 #. * Document Appearance
 #.
-#: src/LYOptions.c:3483
+#: src/LYOptions.c:3515
 msgid "Document Appearance"
 msgstr "文件外觀"
 
-#: src/LYOptions.c:3489
+#: src/LYOptions.c:3521
 msgid "Show color"
 msgstr "顯示色彩"
 
 #. Show cursor: ON/OFF
-#: src/LYOptions.c:3513
+#: src/LYOptions.c:3545
 msgid "Show cursor"
 msgstr "顯示游標"
 
 #. Underline links: ON/OFF
-#: src/LYOptions.c:3519
+#: src/LYOptions.c:3551
 #, fuzzy
 msgid "Underline links"
 msgstr "隱藏的鏈結："
 
 #. Show scrollbar: ON/OFF
-#: src/LYOptions.c:3526
+#: src/LYOptions.c:3558
 msgid "Show scrollbar"
 msgstr "顯示捲動列"
 
 #. Select Popups: ON/OFF
-#: src/LYOptions.c:3533
+#: src/LYOptions.c:3565
 msgid "Popups for select fields"
 msgstr ""
 
 #. HTML error recovery: SELECT
-#: src/LYOptions.c:3539
+#: src/LYOptions.c:3571
 msgid "HTML error recovery"
 msgstr ""
 
 #. Show Images: SELECT
-#: src/LYOptions.c:3545
+#: src/LYOptions.c:3577
 msgid "Show images"
 msgstr "顯示圖像"
 
 #. Verbose Images: ON/OFF
-#: src/LYOptions.c:3559
+#: src/LYOptions.c:3591
 msgid "Verbose images"
 msgstr "圖像詳細資料"
 
-#.
-#. * Headers Transferred to Remote Servers
-#.
-#: src/LYOptions.c:3567
+#: src/LYOptions.c:3600
 msgid "Headers Transferred to Remote Servers"
 msgstr "傳送至遠端伺服器的標頭資料"
 
 #. ***************************************************************
 #. Mail Address: INPUT
-#: src/LYOptions.c:3571
+#: src/LYOptions.c:3604
 msgid "Personal mail address"
 msgstr "個人電郵地址"
 
 #. Preferred Document Character Set: INPUT
-#: src/LYOptions.c:3576
+#: src/LYOptions.c:3609
 msgid "Preferred document character set"
 msgstr "優先使用的字元集"
 
 #. Preferred Document Language: INPUT
-#: src/LYOptions.c:3581
+#: src/LYOptions.c:3614
 msgid "Preferred document language"
 msgstr "優先使用的語言"
 
-#: src/LYOptions.c:3587
+#: src/LYOptions.c:3620
 msgid "User-Agent header"
 msgstr "User-Agent 標頭"
 
 #.
 #. * Listing and Accessing Files
 #.
-#: src/LYOptions.c:3595
+#: src/LYOptions.c:3628
 msgid "Listing and Accessing Files"
 msgstr "列出及存取檔案"
 
 #. ***************************************************************
 #. FTP sort: SELECT
-#: src/LYOptions.c:3599
+#: src/LYOptions.c:3632
 msgid "FTP sort criteria"
 msgstr "FTP 項目排序條件"
 
 #. Local Directory Sort: SELECT
-#: src/LYOptions.c:3606
+#: src/LYOptions.c:3639
 msgid "Local directory sort criteria"
 msgstr "本地端目錄排序條件"
 
 #. Local Directory Order: SELECT
-#: src/LYOptions.c:3612
+#: src/LYOptions.c:3645
 msgid "Local directory sort order"
 msgstr "本地端目錄排列次序"
 
-#: src/LYOptions.c:3621
+#: src/LYOptions.c:3654
 msgid "Show dot files"
 msgstr "顯示隱藏檔"
 
-#: src/LYOptions.c:3629
+#: src/LYOptions.c:3662
 msgid "Execution links"
 msgstr ""
 
 #. Show transfer rate: SELECT
-#: src/LYOptions.c:3649
+#: src/LYOptions.c:3682
 msgid "Show transfer rate"
 msgstr "顯示傳輸速率"
 
 #.
 #. * Special Files and Screens
 #.
-#: src/LYOptions.c:3668
+#: src/LYOptions.c:3702
 msgid "Special Files and Screens"
 msgstr "特殊檔案及畫面"
 
-#: src/LYOptions.c:3673
+#: src/LYOptions.c:3707
 msgid "Multi-bookmarks"
 msgstr "多書籤檔模式"
 
-#: src/LYOptions.c:3681
+#: src/LYOptions.c:3715
 msgid "Review/edit Bookmarks files"
 msgstr "可瀏覽或編輯書籤檔"
 
-#: src/LYOptions.c:3683
+#: src/LYOptions.c:3717
 msgid "Goto multi-bookmark menu"
 msgstr "進入多書籤檔模式選單"
 
-#: src/LYOptions.c:3685
+#: src/LYOptions.c:3719
 msgid "Bookmarks file"
 msgstr "書籤檔"
 
 #. Visited Pages: SELECT
-#: src/LYOptions.c:3691
+#: src/LYOptions.c:3725
 msgid "Visited Pages"
 msgstr "曾經瀏覽的網頁"
 
-#: src/LYOptions.c:3696
+#: src/LYOptions.c:3730
 msgid "View the file "
 msgstr ""
 
-#: src/LYPrint.c:952
+#: src/LYPrint.c:946
 #, c-format
 msgid " Print job complete.\n"
 msgstr " 完成列印程序。\n"
 
-#: src/LYPrint.c:1281
+#: src/LYPrint.c:1271
 msgid "Document:"
 msgstr "文件："
 
-#: src/LYPrint.c:1282
+#: src/LYPrint.c:1272
 msgid "Number of lines:"
 msgstr "行數："
 
-#: src/LYPrint.c:1283
+#: src/LYPrint.c:1273
 msgid "Number of pages:"
 msgstr "頁數："
 
-#: src/LYPrint.c:1284
+#: src/LYPrint.c:1274
 msgid "pages"
 msgstr "頁"
 
-#: src/LYPrint.c:1284
+#: src/LYPrint.c:1274
 msgid "page"
 msgstr "頁"
 
-#: src/LYPrint.c:1285
+#: src/LYPrint.c:1275
 msgid "(approximately)"
 msgstr "(粗略估計)"
 
-#: src/LYPrint.c:1290
+#: src/LYPrint.c:1282
 msgid "Some print functions have been disabled!"
 msgstr "已禁止使用某部份的列印功能！"
 
-#: src/LYPrint.c:1294
+#: src/LYPrint.c:1286
 msgid "Standard print options:"
 msgstr "標準的列印處理方式："
 
-#: src/LYPrint.c:1295
+#: src/LYPrint.c:1287
 msgid "Print options:"
 msgstr "列印選項："
 
-#: src/LYPrint.c:1302
+#: src/LYPrint.c:1294
 msgid "Save to a local file"
 msgstr "儲存至本機的檔案"
 
-#: src/LYPrint.c:1304
+#: src/LYPrint.c:1296
 msgid "Save to disk disabled"
 msgstr "禁止將內容儲存至磁碟"
 
-#: src/LYPrint.c:1311
+#: src/LYPrint.c:1303
 msgid "Mail the file"
 msgstr "郵寄檔案"
 
-#: src/LYPrint.c:1318
+#: src/LYPrint.c:1310
 msgid "Print to the screen"
 msgstr "在畫面印出資料"
 
-#: src/LYPrint.c:1323
+#: src/LYPrint.c:1315
 msgid "Print out on a printer attached to your vt100 terminal"
 msgstr "在連接 vt100 終端機的印表機列印資料"
 
-#: src/LYReadCFG.c:339
+#: src/LYReadCFG.c:342
 #, c-format
 msgid ""
 "Syntax Error parsing COLOR in configuration file:\n"
@@ -4947,88 +4934,88 @@ msgid ""
 "The special strings 'nocolor' or 'default', or\n"
 msgstr ""
 
-#: src/LYReadCFG.c:352
+#: src/LYReadCFG.c:355
 msgid "Offending line:"
 msgstr ""
 
-#: src/LYReadCFG.c:638
+#: src/LYReadCFG.c:625
 #, c-format
 msgid "key remapping of %s to %s for %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:645
+#: src/LYReadCFG.c:632
 #, c-format
 msgid "key remapping of %s to %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:666
+#: src/LYReadCFG.c:653
 #, c-format
 msgid "invalid line-editor selection %s for key %s, selecting all\n"
 msgstr ""
 
-#: src/LYReadCFG.c:693 src/LYReadCFG.c:706
+#: src/LYReadCFG.c:678 src/LYReadCFG.c:690
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:711
+#: src/LYReadCFG.c:694
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) for %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:816
+#: src/LYReadCFG.c:792
 #, c-format
 msgid "Lynx: cannot start, CERN rules file %s is not available\n"
 msgstr ""
 
-#: src/LYReadCFG.c:818
+#: src/LYReadCFG.c:793
 msgid "(no name)"
 msgstr ""
 
-#: src/LYReadCFG.c:1787
+#: src/LYReadCFG.c:1767
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr ""
 
-#: src/LYReadCFG.c:1789
+#: src/LYReadCFG.c:1769
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr ""
 
-#: src/LYReadCFG.c:1790
+#: src/LYReadCFG.c:1770
 #, c-format
 msgid "included from '%s'.\n"
 msgstr ""
 
-#: src/LYReadCFG.c:2196 src/LYReadCFG.c:2209 src/LYReadCFG.c:2267
+#: src/LYReadCFG.c:2176 src/LYReadCFG.c:2189 src/LYReadCFG.c:2247
 msgid "The following is read from your lynx.cfg file."
 msgstr "以下是從閣下的 lynx.cfg 檔案讀取的設定。"
 
-#: src/LYReadCFG.c:2197 src/LYReadCFG.c:2210
+#: src/LYReadCFG.c:2177 src/LYReadCFG.c:2190
 msgid "Please read the distribution"
 msgstr ""
 
-#: src/LYReadCFG.c:2203 src/LYReadCFG.c:2213
+#: src/LYReadCFG.c:2183 src/LYReadCFG.c:2193
 msgid "for more comments."
 msgstr ""
 
-#: src/LYReadCFG.c:2249
+#: src/LYReadCFG.c:2229
 msgid "RELOAD THE CHANGES"
 msgstr "重新載入更改後的設定"
 
-#: src/LYReadCFG.c:2258
+#: src/LYReadCFG.c:2237
 msgid "Your primary configuration"
 msgstr "主要組態"
 
-#: src/LYShowInfo.c:129
+#: src/LYShowInfo.c:128
 msgid "Directory that you are currently viewing"
 msgstr "目前瀏覽的目錄"
 
-#: src/LYShowInfo.c:132
+#: src/LYShowInfo.c:131
 msgid "Name:"
 msgstr "名稱："
 
-#: src/LYShowInfo.c:135
+#: src/LYShowInfo.c:134
 msgid "URL:"
 msgstr "&nbsp;URL："
 
@@ -5056,155 +5043,155 @@ msgstr "完整名稱："
 msgid "Unable to follow link"
 msgstr ""
 
-#: src/LYShowInfo.c:170
+#: src/LYShowInfo.c:171
 msgid "Points to file:"
 msgstr ""
 
-#: src/LYShowInfo.c:175
+#: src/LYShowInfo.c:177
 msgid "Name of owner:"
 msgstr "&nbsp;&nbsp;擁有者名稱："
 
-#: src/LYShowInfo.c:178
+#: src/LYShowInfo.c:181
 msgid "Group name:"
 msgstr "&nbsp;群組名稱："
 
-#: src/LYShowInfo.c:181
+#: src/LYShowInfo.c:184
 msgid "File size:"
 msgstr "檔案大小："
 
-#: src/LYShowInfo.c:187
+#: src/LYShowInfo.c:190
 msgid "Creation date:"
 msgstr "&nbsp;&nbsp;&nbsp;&nbsp;製作日期："
 
-#: src/LYShowInfo.c:190
+#: src/LYShowInfo.c:193
 msgid "Last modified:"
 msgstr "最後修改時間："
 
-#: src/LYShowInfo.c:193
+#: src/LYShowInfo.c:196
 msgid "Last accessed:"
 msgstr "最後存取時間："
 
-#: src/LYShowInfo.c:195
+#: src/LYShowInfo.c:198
 msgid "Access Permissions"
 msgstr "存取的權限"
 
-#: src/LYShowInfo.c:261
+#: src/LYShowInfo.c:264
 msgid "File that you are currently viewing"
 msgstr "目前正在瀏覽的檔案"
 
-#: src/LYShowInfo.c:266 src/LYShowInfo.c:377
+#: src/LYShowInfo.c:269 src/LYShowInfo.c:384
 msgid "Linkname:"
 msgstr "鏈結名稱："
 
-#: src/LYShowInfo.c:279 src/LYShowInfo.c:291
+#: src/LYShowInfo.c:282 src/LYShowInfo.c:295
 msgid "Charset:"
 msgstr "&nbsp;字元集："
 
-#: src/LYShowInfo.c:297
+#: src/LYShowInfo.c:302
 msgid "Server:"
 msgstr "伺服器："
 
-#: src/LYShowInfo.c:300
+#: src/LYShowInfo.c:306
 msgid "Date:"
 msgstr "日期："
 
-#: src/LYShowInfo.c:303
+#: src/LYShowInfo.c:309
 msgid "Last Mod:"
 msgstr "最後修改："
 
-#: src/LYShowInfo.c:309
+#: src/LYShowInfo.c:315
 msgid "&nbsp;Expires:"
 msgstr ""
 
-#: src/LYShowInfo.c:313
+#: src/LYShowInfo.c:319
 msgid "Cache-Control:"
 msgstr ""
 
-#: src/LYShowInfo.c:317
+#: src/LYShowInfo.c:323
 msgid "Content-Length:"
 msgstr ""
 
-#: src/LYShowInfo.c:322
+#: src/LYShowInfo.c:328
 msgid "Language:"
 msgstr "語言："
 
-#: src/LYShowInfo.c:329
+#: src/LYShowInfo.c:335
 msgid "Post Data:"
 msgstr ""
 
-#: src/LYShowInfo.c:333
+#: src/LYShowInfo.c:339
 msgid "Post Content Type:"
 msgstr ""
 
-#: src/LYShowInfo.c:342
+#: src/LYShowInfo.c:348
 msgid "Owner(s):"
 msgstr "&nbsp;&nbsp;擁有者："
 
-#: src/LYShowInfo.c:345
+#: src/LYShowInfo.c:351
 msgid "size:"
 msgstr "大小："
 
-#: src/LYShowInfo.c:345
+#: src/LYShowInfo.c:351
 msgid "lines"
 msgstr "行"
 
-#: src/LYShowInfo.c:348
+#: src/LYShowInfo.c:354
 msgid "mode:"
 msgstr "模式："
 
-#: src/LYShowInfo.c:350
+#: src/LYShowInfo.c:356
 msgid "forms mode"
 msgstr ""
 
-#: src/LYShowInfo.c:352
+#: src/LYShowInfo.c:358
 msgid "source"
 msgstr ""
 
-#: src/LYShowInfo.c:352
+#: src/LYShowInfo.c:359
 msgid "normal"
 msgstr ""
 
-#: src/LYShowInfo.c:353
+#: src/LYShowInfo.c:360
 msgid ", safe"
 msgstr ""
 
-#: src/LYShowInfo.c:354
+#: src/LYShowInfo.c:361
 msgid ", via internal link"
 msgstr ""
 
-#: src/LYShowInfo.c:360
+#: src/LYShowInfo.c:367
 msgid ", no-cache"
 msgstr ""
 
-#: src/LYShowInfo.c:362
+#: src/LYShowInfo.c:369
 msgid ", ISMAP script"
 msgstr ""
 
-#: src/LYShowInfo.c:364
+#: src/LYShowInfo.c:371
 msgid ", bookmark file"
 msgstr ""
 
-#: src/LYShowInfo.c:373
+#: src/LYShowInfo.c:380
 msgid "Link that you currently have selected"
 msgstr "目前已選取的鏈結"
 
-#: src/LYShowInfo.c:386
+#: src/LYShowInfo.c:393
 msgid "Method:"
 msgstr ""
 
-#: src/LYShowInfo.c:391
+#: src/LYShowInfo.c:398
 msgid "Enctype:"
 msgstr "編碼方式："
 
-#: src/LYShowInfo.c:403
+#: src/LYShowInfo.c:410
 msgid "(Form field)"
 msgstr ""
 
-#: src/LYShowInfo.c:418
+#: src/LYShowInfo.c:425
 msgid "No Links on the current page"
 msgstr "該頁面沒有任何鏈結"
 
-#: src/LYStyle.c:278
+#: src/LYStyle.c:286
 #, c-format
 msgid ""
 "Syntax Error parsing style in lss file:\n"
@@ -5215,65 +5202,65 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYTraversal.c:107
+#: src/LYTraversal.c:108
 msgid "here is a list of the history stack so that you may rebuild"
 msgstr ""
 
-#: src/LYUpload.c:78
+#: src/LYUpload.c:75
 msgid "ERROR! - upload command is misconfigured"
 msgstr "錯誤！─ 未有正確地設定用來上傳檔案的指令"
 
-#: src/LYUpload.c:100
+#: src/LYUpload.c:96
 msgid "Illegal redirection \"../\" found! Request ignored."
 msgstr "出現不合法的重新導向“../”！忽略該要求。"
 
-#: src/LYUpload.c:103
+#: src/LYUpload.c:99
 msgid "Illegal character \"/\" found! Request ignored."
 msgstr "出現不合法的字元“/”！忽略該要求。"
 
-#: src/LYUpload.c:106
+#: src/LYUpload.c:102
 msgid "Illegal redirection using \"~\" found! Request ignored."
 msgstr "出現不合法而且使用“~”的重新導向要求！忽略該要求。"
 
-#: src/LYUpload.c:163
+#: src/LYUpload.c:159
 msgid "Unable to upload file."
 msgstr "無法上傳檔案。"
 
-#: src/LYUpload.c:206
+#: src/LYUpload.c:201
 msgid "Upload To:"
 msgstr "上傳至："
 
-#: src/LYUpload.c:207
+#: src/LYUpload.c:202
 msgid "Upload options:"
 msgstr "上傳選項："
 
-#: src/LYUtils.c:1698
+#: src/LYUtils.c:1699
 msgid "Download document URL put to clipboard."
 msgstr ""
 
-#: src/LYUtils.c:2476
+#: src/LYUtils.c:2467
 msgid "Unexpected access protocol for this URL scheme."
 msgstr ""
 
-#: src/LYUtils.c:3302
+#: src/LYUtils.c:3285
 msgid "Too many tempfiles"
 msgstr "太多暫存檔"
 
-#: src/LYUtils.c:3603
+#: src/LYUtils.c:3589
 msgid "unknown restriction"
 msgstr ""
 
-#: src/LYUtils.c:3634
+#: src/LYUtils.c:3619
 #, c-format
 msgid "No restrictions set.\n"
 msgstr ""
 
-#: src/LYUtils.c:3637
+#: src/LYUtils.c:3622
 #, c-format
 msgid "Restrictions set:\n"
 msgstr ""
 
-#: src/LYUtils.c:5042
+#: src/LYUtils.c:5002
 msgid "Cannot find HOME directory"
 msgstr "找不到個人目錄"
 
@@ -5281,7 +5268,7 @@ msgstr "找不到個人目錄"
 msgid "Normally disabled.  See ENABLE_LYNXRC in lynx.cfg\n"
 msgstr "一般不會啟用。請參考 lynx.cfg 中的 ENABLE_LYNXRC\n"
 
-#: src/LYrcFile.c:295
+#: src/LYrcFile.c:292
 msgid ""
 "accept_all_cookies allows the user to tell Lynx to automatically\n"
 "accept all cookies if desired.  The default is \"FALSE\" which will\n"
@@ -5289,21 +5276,21 @@ msgid ""
 "all cookies.\n"
 msgstr ""
 
-#: src/LYrcFile.c:302
+#: src/LYrcFile.c:299
 msgid ""
 "bookmark_file specifies the name and location of the default bookmark\n"
 "file into which the user can paste links for easy access at a later\n"
 "date.\n"
 msgstr ""
 
-#: src/LYrcFile.c:307
+#: src/LYrcFile.c:304
 msgid ""
 "If case_sensitive_searching is \"on\" then when the user invokes a search\n"
 "using the 's' or '/' keys, the search performed will be case sensitive\n"
 "instead of case INsensitive.  The default is usually \"off\".\n"
 msgstr ""
 
-#: src/LYrcFile.c:312
+#: src/LYrcFile.c:309
 msgid ""
 "The character_set definition controls the representation of 8 bit\n"
 "characters for your terminal.  If 8 bit characters do not show up\n"
@@ -5312,7 +5299,7 @@ msgid ""
 "Current valid characters sets are:\n"
 msgstr ""
 
-#: src/LYrcFile.c:319
+#: src/LYrcFile.c:316
 msgid ""
 "cookie_accept_domains and cookie_reject_domains are comma-delimited\n"
 "lists of domains from which Lynx should automatically accept or reject\n"
@@ -5321,13 +5308,13 @@ msgid ""
 "settings made here.\n"
 msgstr ""
 
-#: src/LYrcFile.c:327
+#: src/LYrcFile.c:324
 msgid ""
 "cookie_file specifies the file from which to read persistent cookies.\n"
 "The default is ~/.lynx_cookies.\n"
 msgstr ""
 
-#: src/LYrcFile.c:332
+#: src/LYrcFile.c:329
 msgid ""
 "cookie_loose_invalid_domains, cookie_strict_invalid_domains, and\n"
 "cookie_query_invalid_domains are comma-delimited lists of which domains\n"
@@ -5338,13 +5325,13 @@ msgid ""
 "querying the user for an invalid path or domain.\n"
 msgstr ""
 
-#: src/LYrcFile.c:346
+#: src/LYrcFile.c:343
 msgid ""
 "dir_list_order specifies the directory list order under DIRED_SUPPORT\n"
 "(if implemented).  The default is \"ORDER_BY_NAME\"\n"
 msgstr ""
 
-#: src/LYrcFile.c:351
+#: src/LYrcFile.c:348
 msgid ""
 "dir_list_styles specifies the directory list style under DIRED_SUPPORT\n"
 "(if implemented).  The default is \"MIXED_STYLE\", which sorts both\n"
@@ -5352,7 +5339,7 @@ msgid ""
 "\"DIRECTORIES_FIRST\" lists directories first.\n"
 msgstr ""
 
-#: src/LYrcFile.c:359
+#: src/LYrcFile.c:356
 msgid ""
 "If emacs_keys is to \"on\" then the normal EMACS movement keys:\n"
 "  ^N = down    ^P = up\n"
@@ -5363,7 +5350,7 @@ msgstr ""
 "  ^N = 下移    ^P = 上移\n"
 "  ^B = 左移    ^F = 右移\n"
 
-#: src/LYrcFile.c:365
+#: src/LYrcFile.c:362
 msgid ""
 "file_editor specifies the editor to be invoked when editing local files\n"
 "or sending mail.  If no editor is specified, then file editing is disabled\n"
@@ -5371,7 +5358,7 @@ msgid ""
 "will be used for sending mail.\n"
 msgstr ""
 
-#: src/LYrcFile.c:371
+#: src/LYrcFile.c:368
 msgid ""
 "The file_sorting_method specifies which value to sort on when viewing\n"
 "file lists such as FTP directories.  The options are:\n"
@@ -5381,7 +5368,7 @@ msgid ""
 "   BY_DATE     -- sorts on the date of the file\n"
 msgstr ""
 
-#: src/LYrcFile.c:389
+#: src/LYrcFile.c:386
 msgid ""
 "lineedit_mode specifies the key binding used for inputting strings in\n"
 "prompts and forms.  If lineedit_mode is set to \"Default Binding\" then\n"
@@ -5396,7 +5383,7 @@ msgid ""
 "Current lineedit modes are:\n"
 msgstr ""
 
-#: src/LYrcFile.c:407
+#: src/LYrcFile.c:404
 msgid ""
 "The following allow you to define sub-bookmark files and descriptions.\n"
 "The format is multi_bookmark<capital_letter>=<filename>,<description>\n"
@@ -5404,7 +5391,7 @@ msgid ""
 "We start with \"multi_bookmarkB\" since 'A' is the default (see above).\n"
 msgstr ""
 
-#: src/LYrcFile.c:413
+#: src/LYrcFile.c:410
 msgid ""
 "personal_mail_address specifies your personal mail address.  The\n"
 "address will be sent during HTTP file transfers for authorization and\n"
@@ -5415,7 +5402,7 @@ msgid ""
 "your mailed comments.\n"
 msgstr ""
 
-#: src/LYrcFile.c:422
+#: src/LYrcFile.c:419
 msgid ""
 "preferred_charset specifies the character set in MIME notation (e.g.,\n"
 "ISO-8859-2, ISO-8859-5) which Lynx will indicate you prefer in requests\n"
@@ -5431,7 +5418,7 @@ msgid ""
 "is also allowed.\n"
 msgstr ""
 
-#: src/LYrcFile.c:436
+#: src/LYrcFile.c:433
 msgid ""
 "preferred_language specifies the language in MIME notation (e.g., en,\n"
 "fr, may be a comma-separated list in decreasing preference)\n"
@@ -5440,7 +5427,7 @@ msgid ""
 "Otherwise, the server will send the file in its default language.\n"
 msgstr ""
 
-#: src/LYrcFile.c:445
+#: src/LYrcFile.c:442
 msgid ""
 "If run_all_execution_links is set \"on\" then all local execution links\n"
 "will be executed when they are selected.\n"
@@ -5453,7 +5440,7 @@ msgid ""
 "          you are viewing trusted source information.\n"
 msgstr ""
 
-#: src/LYrcFile.c:456
+#: src/LYrcFile.c:453
 msgid ""
 "If run_execution_links_on_local_files is set \"on\" then all local\n"
 "execution links that are found in LOCAL files will be executed when they\n"
@@ -5469,7 +5456,7 @@ msgid ""
 "          you are viewing trusted source information.\n"
 msgstr ""
 
-#: src/LYrcFile.c:474
+#: src/LYrcFile.c:471
 msgid ""
 "select_popups specifies whether the OPTIONs in a SELECT block which\n"
 "lacks a MULTIPLE attribute are presented as a vertical list of radio\n"
@@ -5480,7 +5467,7 @@ msgid ""
 "The default can be overridden via the -popup command line toggle.\n"
 msgstr ""
 
-#: src/LYrcFile.c:484
+#: src/LYrcFile.c:481
 msgid ""
 "show_color specifies how to set the color mode at startup.  A value of\n"
 "\"never\" will force color mode off (treat the terminal as monochrome)\n"
@@ -5499,7 +5486,7 @@ msgid ""
 "\"off\" \"show color\" settings will be treated as \"default\".\n"
 msgstr ""
 
-#: src/LYrcFile.c:501
+#: src/LYrcFile.c:498
 msgid ""
 "show_cursor specifies whether to 'hide' the cursor to the right (and\n"
 "bottom, if possible) of the screen, or to place it to the left of the\n"
@@ -5512,7 +5499,7 @@ msgid ""
 "The default can be overridden via the -show_cursor command line toggle.\n"
 msgstr ""
 
-#: src/LYrcFile.c:512
+#: src/LYrcFile.c:509
 msgid ""
 "show_dotfiles specifies that the directory listing should include\n"
 "\"hidden\" (dot) files/directories.  If set \"on\", this will be\n"
@@ -5521,7 +5508,7 @@ msgid ""
 "is disabled, creation of such files via Lynx also is disabled.\n"
 msgstr ""
 
-#: src/LYrcFile.c:523
+#: src/LYrcFile.c:520
 msgid ""
 "If sub_bookmarks is not turned \"off\", and multiple bookmarks have\n"
 "been defined (see below), then all bookmark operations will first\n"
@@ -5534,7 +5521,7 @@ msgid ""
 "presented regardless of user mode.\n"
 msgstr ""
 
-#: src/LYrcFile.c:537
+#: src/LYrcFile.c:534
 msgid ""
 "user_mode specifies the users level of knowledge with Lynx.  The\n"
 "default is \"NOVICE\" which displays two extra lines of help at the\n"
@@ -5544,14 +5531,14 @@ msgid ""
 "bottom of the screen.\n"
 msgstr ""
 
-#: src/LYrcFile.c:546
+#: src/LYrcFile.c:543
 msgid ""
 "If verbose_images is \"on\", lynx will print the name of the image\n"
 "source file in place of [INLINE], [LINK] or [IMAGE]\n"
 "See also VERBOSE_IMAGES in lynx.cfg\n"
 msgstr ""
 
-#: src/LYrcFile.c:551
+#: src/LYrcFile.c:548
 msgid ""
 "If vi_keys is set to \"on\", then the normal VI movement keys:\n"
 "  j = down    k = up\n"
@@ -5561,13 +5548,13 @@ msgid ""
 "and the keymap display, respectively.\n"
 msgstr ""
 
-#: src/LYrcFile.c:559
+#: src/LYrcFile.c:556
 msgid ""
 "The visited_links setting controls how Lynx organizes the information\n"
 "in the Visited Links Page.\n"
 msgstr ""
 
-#: src/LYrcFile.c:776
+#: src/LYrcFile.c:774
 msgid ""
 "If keypad_mode is set to \"NUMBERS_AS_ARROWS\", then the numbers on\n"
 "your keypad when the numlock is on will act as arrow keys:\n"
@@ -5578,13 +5565,13 @@ msgid ""
 "regardless of whether numlock is on.\n"
 msgstr ""
 
-#: src/LYrcFile.c:785
+#: src/LYrcFile.c:783
 msgid ""
 "If keypad_mode is set to \"LINKS_ARE_NUMBERED\", then numbers will\n"
 "appear next to each link and numbers are used to select links.\n"
 msgstr ""
 
-#: src/LYrcFile.c:789
+#: src/LYrcFile.c:787
 msgid ""
 "If keypad_mode is set to \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\", then\n"
 "numbers will appear next to each link and visible form input field.\n"
@@ -5595,14 +5582,14 @@ msgid ""
 "lists and output from the list command also enumerate form inputs.\n"
 msgstr ""
 
-#: src/LYrcFile.c:798
+#: src/LYrcFile.c:796
 msgid ""
 "NOTE: Some fixed format documents may look disfigured when\n"
 "\"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n"
 "enabled.\n"
 msgstr ""
 
-#: src/LYrcFile.c:831
+#: src/LYrcFile.c:828
 msgid ""
 "Lynx User Defaults File\n"
 "\n"

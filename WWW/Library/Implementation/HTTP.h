@@ -8,8 +8,9 @@
 #include <HTAccess.h>
 
 #ifdef GLOBALREF_IS_MACRO
-extern GLOBALREF (HTProtocol,HTTP);
-extern GLOBALREF (HTProtocol,HTTPS);
+extern GLOBALREF (HTProtocol, HTTP);
+extern GLOBALREF (HTProtocol, HTTPS);
+
 #else
 GLOBALREF HTProtocol HTTP;
 GLOBALREF HTProtocol HTTPS;
@@ -21,12 +22,12 @@ GLOBALREF HTProtocol HTTPS;
 
 extern int ws_read_per_sec;
 extern BOOL reloading;
-extern char * redirecting_url;
+extern char *redirecting_url;
 extern BOOL permanent_redirection;
 extern BOOL redirect_post_content;
 
 #ifdef USE_SSL
-extern SSL * SSL_handle;
+extern SSL *SSL_handle;
 #endif
 
 #endif /* HTTP_H */

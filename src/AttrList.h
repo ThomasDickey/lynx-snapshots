@@ -5,31 +5,31 @@
 #include <HTMLDTD.h>
 
 enum {
- ABS_OFF = 0,
- STACK_OFF = 0,
- STACK_ON,
- ABS_ON
+    ABS_OFF = 0,
+    STACK_OFF = 0,
+    STACK_ON,
+    ABS_ON
 };
 
 #define STARTAT 8
 
 enum {
- DSTYLE_LINK = HTML_A+STARTAT,
- DSTYLE_STATUS = HTML_ELEMENTS+STARTAT,
- DSTYLE_ALINK,		/* active link */
- DSTYLE_NORMAL,		/* default attributes */
- DSTYLE_OPTION, 	/* option on the option screen */
- DSTYLE_VALUE, 		/* value on the option screen */
- DSTYLE_HIGH,
- DSTYLE_CANDY,		/* possibly going to vanish */
- DSTYLE_WHEREIS,	/* whereis search target */
- DSTYLE_ELEMENTS
+    DSTYLE_LINK = HTML_A + STARTAT,
+    DSTYLE_STATUS = HTML_ELEMENTS + STARTAT,
+    DSTYLE_ALINK,		/* active link */
+    DSTYLE_NORMAL,		/* default attributes */
+    DSTYLE_OPTION,		/* option on the option screen */
+    DSTYLE_VALUE,		/* value on the option screen */
+    DSTYLE_HIGH,
+    DSTYLE_CANDY,		/* possibly going to vanish */
+    DSTYLE_WHEREIS,		/* whereis search target */
+    DSTYLE_ELEMENTS
 };
 
 typedef struct {
- int color; /* color highlighting to be done */
- int mono; /* mono highlighting to be done */
- int cattr; /* attributes to go with the color */
+    int color;			/* color highlighting to be done */
+    int mono;			/* mono highlighting to be done */
+    int cattr;			/* attributes to go with the color */
 } HTCharStyle;
 
 #define HText_characterStyle CTRACE((tfp,"HTC called from %s/%d\n",__FILE__,__LINE__));_internal_HTC
@@ -38,7 +38,8 @@ typedef struct {
 #define HText_characterStyle _internal_HTC
 
 #if defined(USE_COLOR_STYLE)
-extern void _internal_HTC (HText * text, int style, int dir);
+extern void _internal_HTC(HText *text, int style, int dir);
+
 #define TEMPSTRINGSIZE 256
 extern char class_string[TEMPSTRINGSIZE];
 
