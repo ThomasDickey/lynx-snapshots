@@ -575,14 +575,41 @@ typedef struct {
 	int user;
     	} USER_DATA;
 
-PRIVATE HTList *known_grp;
-PRIVATE HTList *known_pwd;
+PRIVATE HTList *known_grp = NULL;
+PRIVATE HTList *known_pwd = NULL;
+PRIVATE BOOL uidgid_cache_inited = NO;
+
+PRIVATE void clear_uidgid_cache NOARGS
+{
+    USER_DATA *data;
+    if (known_grp) {
+	while ((data = HTList_removeLastObject(known_grp)) != NULL) {
+	    FREE(data->name);
+	    FREE(data);
+	}
+	FREE(known_grp);
+    }
+    if (known_pwd) {
+	while ((data = HTList_removeLastObject(known_pwd)) != NULL) {
+	    FREE(data->name);
+	    FREE(data);
+	}
+	FREE(known_pwd);
+    }
+}
 
 PRIVATE void save_gid_info ARGS2(char *, name, int, user)
 {
     USER_DATA *data = calloc(1, sizeof(USER_DATA));
-    if (HTList_isEmpty(known_grp))
+    if (!data)
+	return;
+    if (!known_grp) {
 	known_grp = HTList_new();
+	if (!uidgid_cache_inited) {
+	    atexit(clear_uidgid_cache);
+	    uidgid_cache_inited = YES;
+	}
+    }
     StrAllocCopy(data->name, name);
     data->user = user;
     HTList_addObject (known_grp, data);
@@ -591,8 +618,15 @@ PRIVATE void save_gid_info ARGS2(char *, name, int, user)
 PRIVATE void save_uid_info ARGS2(char *, name, int, user)
 {
     USER_DATA *data = calloc(1, sizeof(USER_DATA));
-    if (HTList_isEmpty(known_pwd))
+    if (!data)
+	return;
+    if (!known_pwd) {
 	known_pwd = HTList_new();
+	if (!uidgid_cache_inited) {
+	    atexit(clear_uidgid_cache);
+	    uidgid_cache_inited = YES;
+	}
+    }
     StrAllocCopy(data->name, name);
     data->user = user;
     HTList_addObject (known_pwd, data);

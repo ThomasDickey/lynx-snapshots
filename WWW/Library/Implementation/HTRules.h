@@ -79,12 +79,9 @@ HTClearRules: Clear all rules
 
   Rule file               There are no rules
 
-  returns
-                          0 if success, -1 if error.
-
  */
 
-extern int HTClearRules PARAMS((void));
+extern void HTClearRules PARAMS((void));
 
 /*
 

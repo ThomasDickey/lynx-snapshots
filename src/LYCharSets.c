@@ -564,6 +564,8 @@ PUBLIC void Set_HTCJK ARGS2(
 	CONST char *,	inMIMEname,
 	CONST char *,	outMIMEname)
 {
+    /* need not check for synonyms: MIMEname's got from LYCharSet_UC */
+
     if (LYRawMode) {
 	if ((!strcmp(inMIMEname, "euc-jp") ||
 	     !strcmp(inMIMEname, "shift_jis")) &&

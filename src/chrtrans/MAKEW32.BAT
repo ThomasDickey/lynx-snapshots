@@ -20,7 +20,7 @@ makeuctb cp866_uni.tbl > cp866_uni.h
 makeuctb cp869_uni.tbl > cp869_uni.h
 makeuctb def7_uni.tbl  > def7_uni.h
 makeuctb dmcs_uni.tbl > dmcs_uni.h
-makeuctb hpuni.tbl > hpuni.h
+makeuctb hp_uni.tbl > hp_uni.h 
 makeuctb iso01_uni.tbl > iso01_uni.h
 makeuctb iso02_uni.tbl > iso02_uni.h
 makeuctb iso03_uni.tbl > iso03_uni.h
@@ -31,6 +31,7 @@ makeuctb iso07_uni.tbl > iso07_uni.h
 makeuctb iso08_uni.tbl > iso08_uni.h
 makeuctb iso09_uni.tbl > iso09_uni.h
 makeuctb iso10_uni.tbl > iso10_uni.h
+makeuctb iso15_uni.tbl > iso15_uni.h 
 makeuctb koi8r_uni.tbl > koi8r_uni.h
 makeuctb mac_uni.tbl > mac_uni.h
 makeuctb mnem_suni.tbl > mnem_suni.h

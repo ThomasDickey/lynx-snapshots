@@ -248,4 +248,7 @@ extern BOOL HText_AreDifferent PARAMS((
 	HTParentAnchor *	anchor,
 	CONST char *		full_address));
 
+extern void HText_ExtEditForm PARAMS((
+	struct link *	form_link));
+
 #endif /* LYGRIDTEXT_H */

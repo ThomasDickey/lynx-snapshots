@@ -29,6 +29,7 @@ extern char * HTPrompt PARAMS((CONST char * Msg, CONST char * deflt));
 **              The input is a list of parameters for printf.
 */
 extern void HTAlert PARAMS((CONST char * Msg));
+extern void HTAlwaysAlert PARAMS((CONST char * extra_prefix, CONST char * Msg));
 extern void HTInfoMsg PARAMS((CONST char * Msg));
 extern void HTUserMsg PARAMS((CONST char * Msg));
 extern void HTUserMsg2 PARAMS((CONST char * Msg, CONST char * Arg));

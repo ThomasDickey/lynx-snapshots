@@ -414,9 +414,11 @@ check_recall:
 	     *	It actually is not a bug at all and does as it should,
 	     *	putting both names on the command line.
 	     */
-	    HTAddParam(&the_command, download_command->command, 1, file);
-	    HTAddParam(&the_command, download_command->command, 2, buffer);
-	    HTEndParam(&the_command, download_command->command, 2);
+	    count = 1;
+	    HTAddParam(&the_command, download_command->command, count, file);
+	    if (HTCountCommandArgs(download_command->command) > 1) 
+		HTAddParam(&the_command, download_command->command, ++count, buffer);
+	    HTEndParam(&the_command, download_command->command, count);
 
 	} else {
 	    HTAlert(MISCONF_DOWNLOAD_COMMAND);

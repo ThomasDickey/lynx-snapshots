@@ -339,6 +339,7 @@ install-help : $(helpdir)
 	@ECHO_CC@sed	-e '/^HELPFILE:http/s@^@#@' \
 		-e '/^#HELPFILE:file/s@#@@' \
 		-e '/^HELPFILE:file/s@/PATH_TO/lynx_help@$(helpdir)@' \
+		-e '/^[A-Z_]*:/s@/PATH_TO/lynx_doc@$(docdir)@' \
 		-e '/^HELPFILE:file/s@$$@$(COMPRESS_EXT)@' \
 		-e '/^HELPFILE:file/s@$(COMPRESS_EXT)$(COMPRESS_EXT)$$@$(COMPRESS_EXT)@' \
 		$(libdir)/lynx.tmp >$(libdir)/lynx.cfg
@@ -371,7 +372,7 @@ LYHelp.h : LYHelp.hin
 
 cfg_defs.h : $(srcdir)/cfg_defs.sh config.cache lynx_cfg.h
 	@rm -f $@
-	PATH=$(srcdir):$$PATH $(SHELL) -c '$(srcdir)/cfg_defs.sh'
+	PATH=$(srcdir):$$PATH; export PATH; $(SHELL) -c '$(srcdir)/cfg_defs.sh'
 
 install-cfg : $(libdir)
 	-mv -f $(libdir)/lynx.cfg $(libdir)/lynx.oldcfg

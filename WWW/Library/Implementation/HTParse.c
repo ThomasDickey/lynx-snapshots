@@ -189,6 +189,13 @@ PUBLIC char * HTParse ARGS3(
 
     CTRACE(tfp, "HTParse: aName:%s   relatedName:%s\n", aName, relatedName);
 
+    if (wanted & (PARSE_STRICTPATH | PARSE_QUERY)) { /* if detail wanted... */
+	if ((wanted & (PARSE_STRICTPATH | PARSE_QUERY))
+	    == (PARSE_STRICTPATH | PARSE_QUERY)) /* if strictpath AND query */
+	    wanted |= PARSE_PATH; /* then treat as if PARSE_PATH wanted */
+	if (wanted & PARSE_PATH) /* if PARSE_PATH wanted */
+	    wanted &= ~(PARSE_STRICTPATH | PARSE_QUERY); /* ignore details */
+    }
     /*
     **	Allocate the output string.
     */
@@ -341,7 +348,11 @@ PUBLIC char * HTParse ARGS3(
     /*
     **	Handle the path.
     */
-    if (wanted & PARSE_PATH) {
+    if (wanted & (PARSE_PATH | PARSE_STRICTPATH | PARSE_QUERY)) {
+	char *tail = NULL;
+	int want_detail = (wanted & (PARSE_STRICTPATH | PARSE_QUERY));
+	if (want_detail)
+	    tail = result + strlen(result);
 	if (acc_method && !given.absolute && given.relative) {
 	    if (!strcasecomp(acc_method, "nntp") ||
 		!strcasecomp(acc_method, "snews") ||
@@ -390,6 +401,23 @@ PUBLIC char * HTParse ARGS3(
 	    if (!strcmp(result, "news:/"))
 		result[5] = '*';
 	    CTRACE(tfp, "5\n");
+	}
+	if (want_detail) {
+	    p = strchr(tail, '?');	/* Search part? */
+	    if (p) {
+		if (PARSE_STRICTPATH) {
+		    *p = '\0';
+		} else {
+		    if (!(wanted & PARSE_PUNCTUATION))
+			p++;
+		    do {
+			*tail++ = *p;
+		    } while (*p++);
+		}
+	    } else {
+		if (wanted & PARSE_QUERY)
+		    *tail = '\0';
+	    }
 	}
     }
 

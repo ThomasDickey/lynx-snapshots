@@ -69,6 +69,7 @@ extern unsigned int HTCardinal PARAMS((int *pstatus,
                 char            **pp,
                 unsigned int    max_value));
 
+extern BOOL valid_hostname PARAMS((CONST char * name));
 
 /*      Parse an internet node address and port
 **      ---------------------------------------

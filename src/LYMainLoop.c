@@ -1719,6 +1719,8 @@ new_cmd:  /*
 	   *  back through the getch() loop.
 	   */
 
+	CTRACE_FLUSH(tfp);
+
 	switch(cmd) {
 	case 0: /* unmapped character */
 	default:
@@ -4133,7 +4135,7 @@ if (!LYUseFormsOptions) {
 
 	case LYK_EDIT:	/* edit */
 	    if (no_editor) {
-		if (old_c != real_c)	{
+		if (old_c != real_c) {
 		    old_c = real_c;
 		    HTUserMsg(EDIT_DISABLED);
 		}
@@ -4290,6 +4292,38 @@ if (!LYUseFormsOptions) {
 		 */
 		cmd = LYK_PREV_DOC;
 		goto new_cmd;
+	    }
+	    break;
+
+	case LYK_EDIT_TEXTAREA: /* use external editor on a TEXTAREA - KED */
+	    if (no_editor) {
+		if (old_c != real_c) {
+		    old_c = real_c;
+		    HTUserMsg(EDIT_DISABLED);
+		}
+		break;
+	    }
+
+		/* is curent link part of a textarea */
+	    if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
+		links[curdoc.link].form->type == F_TEXTAREA_TYPE) {
+
+		/* stop screen */
+		stop_curses();
+
+		HText_ExtEditForm (&links[curdoc.link]);
+
+		/* start screen */
+		start_curses();
+		refresh_screen = TRUE;
+
+		/*
+		cmd = LYK_REFRESH;
+		goto new_cmd;
+		*/
+
+	    } else {
+		HTInfoMsg (NOT_IN_TEXTAREA);
 	    }
 	    break;
 

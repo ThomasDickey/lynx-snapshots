@@ -497,8 +497,10 @@ struct timeval {
 #undef NETCLOSE
 #define NETCLOSE close_s
 #define getsockname getsockname_s
+#ifdef HAVE_GETTEXT
 #define gettext gettext__
 #endif
+#endif /* DJGPP */
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

@@ -30,7 +30,7 @@
 
 #define exit LYexit
 #define atexit LYatexit
-#define ATEXITSIZE 32
+#define ATEXITSIZE 40
 
 /*
  *	Data structures

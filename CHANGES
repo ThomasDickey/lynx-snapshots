@@ -1,7 +1,100 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
-1998-01-18 (2.8.2dev.14)
+1999-01-28 (2.8.2dev.15)
+* correct calls to HTAddParam() in LYDownLoad.c to handle optional second
+  parameter (reported by KW) - TD
+* change HTAddXpand() to assume its parameter (an environment variable) is
+  already expanded and simply is not quoted (reported by Ryan Hung
+  <rhung@vcn.bc.ca>) - TD
+* add configure --disable-included-msgs option to allow suppressing of bundled
+  ./po directory for the NLS message library contents.  If no ./po directory
+  is found, the configure script assumes it is preinstalled anyway (request
+  by HN) - TD
+* add pattern to script which customizes pathnames in lynx.cfg to support
+    GLOBAL_MAILCAP:/PATH_TO/lynx_doc/samples/mailcap
+  (request by PG) - TD
+* export $PATH when calling cfg_defs.sh - PG
+* add a simple test to check if the temporary directory is actually writable
+  if we cannot create a temporary file in LYOpenTemp (reported by PG) - TD
+* miscellaneous DOS/DJGPP compile/build fixes - LP
+* enabled CERN-style rules, there are two new lynx.cfg options, RULESFILE and
+  RULE.  No example file or documentation yet beyond comments in lynx.cfg.  The
+  rules mechanism itself is unchanged from what was present for a long time
+  (but never used), except for some memory cleanup.  Use -DNO_RULES at compile
+  time to disable - KW
+* add changes to invoke external editor on textarea, can be invoked by adding a
+  KEYMAP entry for EDITTEXT area to lynx.cfg (originally from
+  aldomel@ix.netcom.com, but much rework) - KED
+* use HTSprintf0 in HTTCP.c - TD
+* added PARSE_STRICTPATH and PARSE_QUERY to interface of HTParse(), for
+  requesting only the relevant part of what is returned for PARSE_PATH.  This
+  isn't yet used anywhere - KW
+* changes to StrAllocVsprintf() to take width and precision in most format
+  specifications into account, and to correct the memory allocation logic.
+  This was tested by setting GROW_SIZE to a small value of 8, so far no
+  crashes, but it is certainly not right for all possible formats, especially
+  involving floating point conversions - KW
+* changed HTSprintf0() to pass a string already existing in its output buffer
+  on, this should save a few realloc's in StrAllocVsprintf() - KW
+* changes to code handling LIST_FORMAT to avoid some unnecessary reallocations,
+  to recognize some more format flags, and to treat invalid formats somewhat
+  better - KW
+* corrected recent HTFile.c change for systems without S_ISVTX - KW
+* added memory cleanup for uid/gid cache functions in HTAAProt.c - KW
+* increased ATEXITSIZE to 40 - KW
+* added TRACE output to HTAnchor.c's free_adult_table.  If this shows anything
+  at program exit (if TRACE is on then), it means that HTAnchor structures have
+  been missed by the normal automatic cleanup (walking the history list and
+  following links) - KW
+* changed more status codes in HTUtils.h to libwww5-like values - KW
+* added new function to check for a valid Internet hostname - KW
+  Use it before actually trying to resolve an address, it should
+  a. avoid the overhead of NSL_FORK if it would fail anyway,
+  b. prevent DNS queries for invalid names, which may unnecessarily
+     consume time, bandwidth, and DNS server cache memory, and
+     may confuse some resolver libraries and servers,
+  c. speed up address guessing sometimes if something was mistyped,
+  d. thwart some attempts to crash Lynx with invalid URLs.
+* this time really make "Alert" statusline prefix localizable - KW
+* new function HTAlwaysAlert(), which can be called even when LYCursesON isn't
+  true and should always produce a visible message - KW
+* use new valid_hostname to also check telnet, tn3270, and rlogin hostnames
+  before calling the external program (after most invalid character have
+  already been stripped).  Added a fflush(stdout) to make sure messages are
+  visible before external program is called - KW
+* made changes equivalent to the 1998-12-31 HTSACopy and HTSACat modification
+  to the LY_FIND_LEAKS versions of those functions.  Having source and target
+  string for StrAllocCopy or StrAllocCat overlap (or being equal) should be
+  considered a programming error, but at least one place in LYEdit.c currently
+  seems to do it and rely on the new behavior.  (Editing current file sometimes
+  didn't work with LY_FIND_LEAKS) - KW
+* closed memory leaks in LYKeymap.c, provided for memory cleanup at exit of
+  LYCgi.c environment strings - KW
+* explicitly put HTTP_ACCEPT_LANGUAGE and HTTP_ACCEPT_CHARSET strings into
+  lynxcgi environment only if they are non-empty, i.e., set to something in
+  lynx.cfg or the personal configuration or Options screen.  This makes the
+  environment a lynxcgi scripts sees resemble more closely that of a remote CGI
+  script handling a request from Lynx with the same configuration - HTTP.c also
+  only sends Accept-{Language,Charset} headers if preferred language and
+  preferred charset (respectively) have been set to non-empty strings.
+  (Strictly speaking, an empty Accept-* header has a different meaning from a
+  non-existing one, but it doesn't make much sense to generate empty Accept-*
+  headers, since they mean "nothing is accepted".) There are other differences
+  in the lynxcgi environment (e.g.  HTTP_ACCEPT isn't set, ",iso-8859-1;q=0.01"
+  etc.  isn't appended to HTTP_ACCEPT_CHARSET, apart from missing
+  redirections), but apparently nobody has needed a more exact CGI emulation
+  for real scripts - KW
+* removed sending of "Negotiate: trans" in HTTP.c since it violates transparent
+  content negotiation specs, added comments - KW
+* correct error handling in CF_INET_ADDR, which did not restore $LIBS when no
+  applicable library was found for inet_addr (reported by IC) - TD
+* correction to CF_TERMCAP_LIBS, which used inconsistent spelling for the cache
+  variable, so predefined termcap/terminfo library was not necessarily
+  detected - TD
+* resolved autoconf 2.13 problem, resync configure script with patched
+  autoconf 2.13 - TD
+1999-01-18 (2.8.2dev.14)
 * use HTSprint0 in LYCurses.c, LYForms.c, LYGetFile.c, LYJump.c - TD
 * modify LYCheckMail so it does not continue to report new mail when the mail
   file's modification time differs from its access time (reported by LV) - TD
@@ -18,18 +111,18 @@ Changes since Lynx 2.8 release
   code to something somewhat like what was intended there.  But we don't have
   an "Other ISO Latin" display character set any more; maybe those `else'
   blocks should just have disappeared completely - KW
-* Minor changes to SortaSGML DTD for PARAM, THEAD - KW 
-* Make "Alert" statusline prefix localizable - KW 
-* Extend fixtext.sh to also change continued lines - KW 
+* Minor changes to SortaSGML DTD for PARAM, THEAD - KW
+* Make "Alert" statusline prefix localizable - KW
+* Extend fixtext.sh to also change continued lines - KW
 * Changed LYCheckForProxyURL to act more like it appears to have been indended,
   and clarify comment.  Minor change in is_url - KW
 * Prevent removal of hidden link number from bookmark document in a very
   obscure case of a bookmarked ISMAP link - KW
 * HText_SubmitForm:  make sure query is always allocated, even if the set of
   form fields to be sent turned out to be empty - KW
-* Some comments corrected in HTML.c, LYCharSets.c - KW 
-* Tweak in curses_w_style for display without color - KW 
-* Remove minor memory leak in LYDownload.c - KW 
+* Some comments corrected in HTML.c, LYCharSets.c - KW
+* Tweak in curses_w_style for display without color - KW
+* Remove minor memory leak in LYDownload.c - KW
 * Changed error handling in LYTraversal.c to make sure terminal gets restored
   to sane mode before showing error message and exiting - KW
 * Increased VALUE_SIZE for buffer in HTMIME.c from 1024 to 5120.  Someone
@@ -41,7 +134,7 @@ Changes since Lynx 2.8 release
   file[...]", but Lynx effectively gave precedence to the last match.  Recent
   Debian packages of lynx have had a patch applied to change this, but that
   patch also seems to affect the precedence order relative to viewers defined
-  in other places, i.e.  lynx.cfg and HTInit.c.  The patch here instead changes
+  in other places, i.e., lynx.cfg and HTInit.c.  The patch here instead changes
   the precedence of mailcap entries form the same files to RFC-like behavior,
   by reordering the list generated from a mailcap file after we have finished
   reading it in.  It leaves the order relative to viewers from other sources
@@ -85,7 +178,7 @@ Changes since Lynx 2.8 release
 * add a comment to mime.types and lynx.cfg on SUFFIX definition:  "This has an
   effect for ftp and local files only, http server does specify MIME type in
   the Content-Type header" - LP
-1998-01-13 (2.8.2dev.13)
+1999-01-13 (2.8.2dev.13)
 * correct a missing trailing newline in caselower.h (this may be a problem
   patching since 'diff' does not like that) - TD
 * fix off-by-one alignment download options (reported by LV) - IC

@@ -100,6 +100,9 @@ PUBLIC int HTAddRule ARGS3(
 	CTRACE(tfp, "Rule: For `%s' op %d\n", pattern, op);
     }
 
+    if (!rules) {
+	atexit(HTClearRules);
+    }
 #ifdef PUT_ON_HEAD
     temp->next = rules;
     rules = temp;
@@ -120,12 +123,11 @@ PUBLIC int HTAddRule ARGS3(
 **
 ** On exit,
 **	There are no rules
-**	returns 	0 if success, -1 if error.
 **
 ** See also
 **	HTAddRule()
 */
-int HTClearRules NOARGS
+void HTClearRules NOARGS
 {
     while (rules) {
 	rule * temp = rules;
@@ -137,8 +139,6 @@ int HTClearRules NOARGS
 #ifndef PUT_ON_HEAD
     rule_tail = 0;
 #endif
-
-    return 0;
 }
 
 
@@ -271,6 +271,7 @@ char * HTTranslate ARGS1(
 	case HT_Fail:				/* Unauthorised */
 		CTRACE(tfp, "HTRule: *** FAIL `%s'\n",
 			    current);
+		FREE(current);
 		return (char *)0;
 	} /* if tail matches ... switch operation */
 

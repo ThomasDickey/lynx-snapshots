@@ -311,10 +311,13 @@ extern BOOL LYOutOfMemory;	/* Declared in LYexit.c - FM */
 
 Sucess (>=0) and failure (<0) codes
 
+Some of the values are chosen to be HTTP-like, but status return values
+are generally not the response status from any specific protocol.
+
  */
 
-#define HT_REDIRECTING 29996
-#define HT_LOADED 29997                 /* Instead of a socket */
+#define HT_REDIRECTING 399
+#define HT_LOADED 200                   /* Instead of a socket */
 #define HT_PARTIAL_CONTENT      206     /* Partial Content */
 #define HT_INTERRUPTED -29998
 #define HT_NOT_LOADED -29999
@@ -323,10 +326,13 @@ Sucess (>=0) and failure (<0) codes
 #define HT_ERROR                -1      /* Generic failure */
 
 #define HT_CANNOT_TRANSLATE -4
-#define HT_NO_ACCESS    -10             /* Access not available */
-#define HT_FORBIDDEN    -11             /* Access forbidden */
+
 #define HT_NO_DATA		-204	/* OK but no data was loaded - */
 					/* possibly other app started or forked */
+#define HT_NO_ACCESS            -401    /* Access not available */
+#define HT_FORBIDDEN            -403    /* Access forbidden */
+#define HT_NOT_ACCEPTABLE       -406    /* Not Acceptable */
+
 #define HT_INTERNAL             -900    /* Weird -- should never happen. */
 #define HT_BAD_EOF      -12             /* Premature EOF */
 

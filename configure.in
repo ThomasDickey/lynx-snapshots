@@ -120,11 +120,21 @@ if test "$USE_INCLUDED_LIBINTL" = yes ; then
 	SUB_MAKEFILE="intl/makefile po/makefile.in:po/makefile.inn"
 elif test "$USE_NLS" = yes ; then
 	AC_CHECK_HEADERS(libintl.h)
-	SUB_MAKEFILE="po/makefile.in:po/makefile.inn"
 	INTLDIR_MAKE="#"
+	SUB_MAKEFILE="po/makefile.in:po/makefile.inn"
 else
 	INTLDIR_MAKE="#"
 	MSG_DIR_MAKE="#"
+fi
+
+dnl We might want to use a preinstalled message library rather than the one
+dnl which is bundled with this program.
+if test -z "$MSG_DIR_MAKE" ; then
+	CF_OUR_MESSAGES
+	if test $use_our_messages = no ; then
+		MSG_DIR_MAKE="#"
+		SUB_MAKEFILE=
+	fi
 fi
 AC_SUBST(INTLDIR_MAKE)
 AC_SUBST(MSG_DIR_MAKE)

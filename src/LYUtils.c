@@ -5638,11 +5638,15 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 	CONST char *,	mode)
 {
     FILE *fp = 0;
+    BOOL first = TRUE;
     BOOL txt = TRUE;
     BOOL wrt = 'r';
     LY_TEMP *p;
 
     CTRACE(tfp, "LYOpenTemp(,%s,%s)\n", suffix, mode);
+    if (result == 0)
+    	return 0;
+
     while (*mode != '\0') {
 	switch (*mode++) {
 	case 'w':	wrt = 'w';	break;
@@ -5669,6 +5673,22 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 	} else {
 	    fp = LYNewBinFile (result);
 	}
+	/*
+	 * If we get a failure to make a temporary file, double check if the
+	 * directory is writable.
+	 */
+#ifdef W_OK	/* FIXME (need a better test) in fcntl.h or unistd.h */
+	if (first) {
+	    first = FALSE;
+	    if (fp == 0) {
+		*LYPathLeaf(result) = 0;
+		if (*result == 0)
+		    strcpy(result, ".");
+		if (access(result, W_OK) < 0)
+		    return 0;
+	    }
+	}
+#endif
     } while (fp == 0);
 
     if ((p = (LY_TEMP *)calloc(1, sizeof(LY_TEMP))) != 0) {

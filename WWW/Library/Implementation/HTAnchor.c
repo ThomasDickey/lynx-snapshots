@@ -302,6 +302,11 @@ PRIVATE void free_adult_table NOARGS
 	    adult_table[i_counter] = HTAp_freeme->next;
 	    if (HTAp_freeme->object) {
 		parent = (HTParentAnchor *)HTAp_freeme->object;
+		CTRACE(tfp, "delete anchor:%d/%d,%d,%d %s\n",
+		       i_counter, HTList_count(HTAp_freeme) + 1,
+		       (parent->physical ? 1 : 0),
+		       (int)parent->underway,
+		       (parent->address ? parent->address : "(no address)"));
 		parent->underway = FALSE;
 		HTAnchor_delete(parent);
 	    }

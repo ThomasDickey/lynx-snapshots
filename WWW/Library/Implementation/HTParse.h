@@ -20,6 +20,15 @@
 #define PARSE_ANCHOR             2
 #define PARSE_PUNCTUATION        1
 #define PARSE_ALL               31
+/*
+**  Additional flag bits for more details on components already
+**  covered by the above.  The PARSE_PATH above doesn't really
+**  strictly refer to the path component in the sense of the URI
+**  specs only, but rather to that combined with a possible query
+**  component. - kw
+*/
+#define PARSE_STRICTPATH        32
+#define PARSE_QUERY             64
 
 /*
 **  The following are valid mask values.  The terms are the BNF names
