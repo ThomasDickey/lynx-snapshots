@@ -1262,8 +1262,8 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_SET("case_sensitive_always_on", case_sensitive),
      PARSE_FUN("character_set",        character_set_fun),
 #ifdef CAN_SWITCH_DISPLAY_CHARSET
-     PARSE_SET("charset_switch_rules", charset_switch_rules),
-     PARSE_SET("charsets_directory",   charsets_directory),
+     PARSE_STR("charset_switch_rules", charset_switch_rules),
+     PARSE_STR("charsets_directory",   charsets_directory),
 #endif
      PARSE_SET("checkmail",            check_mail),
      PARSE_SET("collapse_br_tags",     LYCollapseBRs),
@@ -1276,15 +1276,17 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_STR("cookie_accept_domains", LYCookieSAcceptDomains),
 #ifdef EXP_PERSISTENT_COOKIES
      PARSE_STR("cookie_file",          LYCookieFile),
-     PARSE_STR("cookie_save_file",     LYCookieSaveFile),
 #endif /* EXP_PERSISTENT_COOKIES */
      PARSE_STR("cookie_loose_invalid_domains", LYCookieSLooseCheckDomains),
      PARSE_STR("cookie_query_invalid_domains", LYCookieSQueryCheckDomains),
      PARSE_STR("cookie_reject_domains", LYCookieSRejectDomains),
+#ifdef EXP_PERSISTENT_COOKIES
+     PARSE_STR("cookie_save_file",     LYCookieSaveFile),
+#endif /* EXP_PERSISTENT_COOKIES */
      PARSE_STR("cookie_strict_invalid_domains", LYCookieSStrictCheckDomains),
      PARSE_Env("cso_proxy", 0 ),
 #ifdef VMS
-     PARSE_STR("CSWING_PATH", LYCSwingPath),
+     PARSE_STR("cswing_path",          LYCSwingPath),
 #endif
      PARSE_FUN("default_bookmark_file", default_bookmark_file_fun),
      PARSE_FUN("default_cache_size",   default_cache_size_fun),
@@ -1350,31 +1352,31 @@ PRIVATE Config_Type Config_Table [] =
 #endif
      PARSE_FUN("keymap",               keymap_fun),
      PARSE_SET("leftarrow_in_textfield_prompt", textfield_prompt_at_left_edge),
-#ifndef DISABLE_NEWS
-     PARSE_SET("list_news_numbers",    LYListNewsNumbers),
-     PARSE_SET("list_news_dates",      LYListNewsDates),
-#endif
 #ifndef VMS
      PARSE_STR("list_format",          list_format),
 #endif
-     PARSE_FUN("localhost_alias",      localhost_alias_fun),
+#ifndef DISABLE_NEWS
+     PARSE_SET("list_news_dates",      LYListNewsDates),
+     PARSE_SET("list_news_numbers",    LYListNewsNumbers),
+#endif
      PARSE_STR("local_domain",         LYLocalDomain),
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
      PARSE_SET("local_execution_links_always_on", local_exec),
      PARSE_SET("local_execution_links_on_but_not_remote", local_exec_on_local_files),
 #endif
+     PARSE_FUN("localhost_alias",      localhost_alias_fun),
+     PARSE_STR("lynx_host_name",       LYHostName),
+     PARSE_FUN("lynx_sig_file",        lynx_sig_file_fun),
 #ifdef LYNXCGI_LINKS
-     PARSE_FUN("lynxcgi_environment",  lynxcgi_environment_fun),
 #ifndef VMS
      PARSE_STR("lynxcgi_document_root", LYCgiDocumentRoot),
 #endif
+     PARSE_FUN("lynxcgi_environment",  lynxcgi_environment_fun),
 #endif
-     PARSE_STR("lynx_host_name",       LYHostName),
-     PARSE_FUN("lynx_sig_file",        lynx_sig_file_fun),
-     PARSE_SET("mail_system_error_logging", error_logging),
 #if USE_VMS_MAILER
      PARSE_STR("mail_adrs",            mail_adrs),
 #endif
+     PARSE_SET("mail_system_error_logging", error_logging),
      PARSE_SET("make_links_for_all_images", clickable_images),
      PARSE_SET("make_pseudo_alts_for_inlines", pseudo_inline_alts),
      PARSE_TIM("messagesecs",          MessageSecs),
@@ -1391,9 +1393,6 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_Env("nntp_proxy",           0),
      PARSE_ENV("nntpserver",           0), /* actually NNTPSERVER */
 #endif
-#ifdef SH_EX
-     PARSE_SET("no_table_center",      no_table_center),
-#endif
      PARSE_SET("no_dot_files",         no_dotfiles),
      PARSE_SET("no_file_referer",      no_filereferer),
 #ifndef VMS
@@ -1403,6 +1402,9 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_SET("no_ismap_if_usemap",   LYNoISMAPifUSEMAP),
      PARSE_Env("no_proxy",             0 ),
      PARSE_SET("no_referer_header",    LYNoRefererHeader),
+#ifdef SH_EX
+     PARSE_SET("no_table_center",      no_table_center),
+#endif
      PARSE_FUN("nonrestarting_sigwinch", nonrest_sigwinch_fun),
      PARSE_FUN("outgoing_mail_charset", outgoing_mail_charset_fun),
 #ifdef DISP_PARTIAL
@@ -1412,8 +1414,8 @@ PRIVATE Config_Type Config_Table [] =
 #ifdef EXP_PERSISTENT_COOKIES
      PARSE_SET("persistent_cookies",   persistent_cookies),
 #endif /* EXP_PERSISTENT_COOKIES */
-     PARSE_STR("personal_mailcap",     personal_type_map),
      PARSE_STR("personal_extension_map", personal_extension_map),
+     PARSE_STR("personal_mailcap",     personal_type_map),
      PARSE_STR("preferred_charset",    pref_charset),
      PARSE_STR("preferred_language",   language),
      PARSE_SET("prepend_base_to_source", LYPrependBaseToSource),
@@ -1472,11 +1474,11 @@ PRIVATE Config_Type Config_Table [] =
 #ifdef LYNXCGI_LINKS
      PARSE_DEF("trusted_lynxcgi",      CGI_PATH),
 #endif
-     PARSE_STR("url_domain_prefixes",  URLDomainPrefixes),
-     PARSE_STR("url_domain_suffixes",  URLDomainSuffixes),
 #ifdef DIRED_SUPPORT
      PARSE_ADD("uploader",             uploaders),
 #endif
+     PARSE_STR("url_domain_prefixes",  URLDomainPrefixes),
+     PARSE_STR("url_domain_suffixes",  URLDomainSuffixes),
 #ifdef VMS
      PARSE_SET("use_fixed_records",    UseFixedRecords),
 #endif
