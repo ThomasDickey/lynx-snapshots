@@ -3014,16 +3014,19 @@ PUBLIC int HTFTPLoad ARGS4(
 	    /** Otherwise, go to appropriate directory and doctor filename **/
 	    if (!strncmp(filename, "/~", 2))
 		filename += 2;
+	    CTRACE(tfp, "check '%s' to translate x/y/ to x[y]\n", filename);
 	    if (!included_device &&
 		(cp = strchr(filename, '/')) != NULL &&
 		(cp1 = strrchr(cp, '/')) != NULL && cp != cp1) {
 		char *tmp = 0;
 
 		StrAllocCopy(tmp, cp+1);
-		strcpy(tmp + (cp1-cp) + 5, "]");
+		tmp[(cp1-cp)] = 0;
 
+		CTRACE(tfp, "change command '%s'\n", command);
 		while ((cp2 = strrchr(command, '/')) != NULL)
 		    *cp2 = '.';
+		CTRACE(tfp, "...to  command '%s'\n", command);
 
 		status = send_cwd(tmp);
 		FREE(tmp);

@@ -35,7 +35,7 @@ extern bucket nostyle_bucket;/*initialized properly - to be used in CTRACE when
 
 extern int hash_code_lowercase_on_fly PARAMS((char* string));
 extern int hash_code_aggregate_char PARAMS((char c,int hash));
-extern int hash_code_aggregate_lower_on_fly  PARAMS((char* c,int hash_was));
+extern int hash_code_aggregate_lower_str  PARAMS((char* c,int hash_was));
 
 
 #ifdef NOT_USED

@@ -3952,32 +3952,39 @@ if (!LYUseFormsOptions) {
 #endif /* !NO_OPTION_MENU */
 #ifndef NO_OPTION_FORMS
 	    /*
-	     * FIXME: Blatantly stolen from LYK_PRINT below,
-	     * except ForcePush special.
+	     * Generally stolen from LYK_COOKIE_JAR.  Options menu handling is
+	     * done in postoptions(), called from getfile() currently.
+	     *
+	     * postoptions() is also responsible for reloading the document
+	     * before the 'options menu' but only when (a few) important
+	     * options were changed.
+	     *
+	     * It is critical that post_data is freed here since the
+	     * submission of changed options is done via the same protocol as
+	     * LYNXOPTIONS:
 	     */
 	    /*
 	     *	Don't do if already viewing options page.
 	     */
 	    if (strcmp((curdoc.title ? curdoc.title : ""), OPTIONS_TITLE)) {
 
-		if (gen_options(&newdoc.address) < 0)
-		    break;
-		StrAllocCopy(newdoc.title, OPTIONS_TITLE);
+		StrAllocCopy(newdoc.address, "LYNXOPTIONS:/");
 		FREE(newdoc.post_data);
 		FREE(newdoc.post_content_type);
 		FREE(newdoc.bookmark);
 		newdoc.isHEAD = FALSE;
 		newdoc.safe = FALSE;
-		if (check_realm)
+		newdoc.internal_link = FALSE;
+		LYforce_no_cache = TRUE;
+		if (LYValidate || check_realm) {
 		    LYPermitURL = TRUE;
-
+		}
+	   } else {
 		/*
-		 * FIXME:  this was a temporary solution until we find the
-		 * correct place in postoptions() to reload the document
-		 * before the 'options menu' only when (few) important options
-		 * were changed.
+		 *  If already in the options menu, get out.
 		 */
-		/* HTuncache_current_document(); */
+		cmd = LYK_PREV_DOC;
+		goto new_cmd;
 	    }
 #endif /* !NO_OPTION_FORMS */
 	    break;
@@ -4919,6 +4926,8 @@ if (!LYUseFormsOptions) {
 		       DOWNLOAD_OPTIONS_TITLE) &&
 		strcmp((curdoc.title ? curdoc.title : ""),
 		       COOKIE_JAR_TITLE) &&
+		strcmp((curdoc.title ? curdoc.title : ""),
+		       OPTIONS_TITLE) &&
 		((nlinks <= 0) ||
 		 (links[curdoc.link].lname != NULL &&
 		  strncmp(links[curdoc.link].lname,
@@ -6211,7 +6220,7 @@ PRIVATE void exit_immediately_with_error_message ARGS2(
 
     if (first_file) {
 	/* print statusline messages as a hint, if any */
-	LYprint_statusline_messages_on_exit(&buf2);
+	LYstatusline_messages_on_exit(&buf2);
     }
 
     if (state == NOT_FOUND)

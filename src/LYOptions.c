@@ -3493,6 +3493,7 @@ PRIVATE PostPair * break_data ARGS1(
     return q;
 }
 
+PRIVATE int gen_options PARAMS((char **newfile));
 /*
  * Handle options from the pseudo-post.  I think we really only need
  * post_data here, but bring along everything just in case.  It's only a
@@ -3549,13 +3550,36 @@ PUBLIC int postoptions ARGS1(
 
     if (strstr(newdoc->address, "LYNXOPTIONS://MBM_MENU")) {
 	FREE(newdoc->post_data);
-	FREE(data);
 	if (!no_bookmark)
 	   edit_bookmarks();
 	else /* anonymous */
 	   HTAlert(BOOKMARK_CHANGE_DISALLOWED);
 	return(NULLFILE);
     }
+
+
+    /*-------------------------------------------------
+     * kludge gen_options() call:
+     *--------------------------------------------------*/
+
+    if (strstr(newdoc->address, "LYNXOPTIONS:/") && !newdoc->post_data) {
+	int status = gen_options(&newdoc->address);
+	if (status == NOT_FOUND)
+	    return(NOT_FOUND);
+
+	/* exit to getfile() cyrcle */
+	WWWDoc.address = newdoc->address;
+	WWWDoc.post_data = newdoc->post_data;
+	WWWDoc.post_content_type = newdoc->post_content_type;
+	WWWDoc.bookmark = newdoc->bookmark;
+	WWWDoc.isHEAD = newdoc->isHEAD;
+	WWWDoc.safe = newdoc->safe;
+
+	if (!HTLoadAbsolute(&WWWDoc))
+	    return(NOT_FOUND);
+	return(NORMAL);
+    }
+
 
     data = break_data(newdoc->post_data);
 
@@ -4052,7 +4076,7 @@ PRIVATE char *NewSecureValue NOARGS
  * This function is synchronized with postoptions().  Read the comments in
  * postoptions() header if you change something in gen_options().
  */
-PUBLIC int gen_options ARGS1(
+PRIVATE int gen_options ARGS1(
 	char **,	newfile)
 {
     int i;
@@ -4068,7 +4092,7 @@ PUBLIC int gen_options ARGS1(
     fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
     if (fp0 == NULL) {
 	HTAlert(UNABLE_TO_OPEN_TEMPFILE);
-	return(-1);
+	return(NOT_FOUND);
     }
 
     LYLocalFileToURL(newfile, tempfile);
@@ -4459,6 +4483,6 @@ PUBLIC int gen_options ARGS1(
     EndInternalPage(fp0);
 
     LYCloseTempFP(fp0);
-    return(0);
+    return(NORMAL);
 }
 #endif /* !NO_OPTION_FORMS */

@@ -146,7 +146,7 @@ PRIVATE void append_open_tag ARGS4(
 #  endif
 
 	hcode = hash_code_aggregate_char('.', hcode);
-	hcode = hash_code_aggregate_lower_on_fly(classname, hcode);
+	hcode = hash_code_aggregate_lower_str(classname, hcode);
 	StrAllocCopy(subj->class_name, classname);
     } else {
 	subj->class_name = "";
