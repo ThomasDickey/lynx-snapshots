@@ -22,12 +22,12 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
- 
+
 #define FREE(x) if (x) {free(x); x = NULL;}
 
-PUBLIC  HTList * Visited_Links = NULL;  /* List of safe popped docs. */
+PUBLIC HTList * Visited_Links = NULL;	/* List of safe popped docs. */
 
-/* 
+/*
  *  Utility for freeing the list of visited links. - FM
  */
 PRIVATE void Visited_Links_free NOARGS
@@ -36,7 +36,7 @@ PRIVATE void Visited_Links_free NOARGS
     HTList *cur = Visited_Links;
 
     if (!cur)
-        return;
+	return;
 
     while (NULL != (vl = (VisitedLink *)HTList_nextObject(cur))) {
 	FREE(vl->address);
@@ -48,7 +48,7 @@ PRIVATE void Visited_Links_free NOARGS
     return;
 }
 
-/* 
+/*
  *  Utility for listing visited links, making any repeated
  *  links the most current in the list. - FM
  */
@@ -60,11 +60,11 @@ PUBLIC void LYAddVisitedLink ARGS1(
     HTList *cur;
 
     if (!(doc->address && *doc->address))
-        return;
+	return;
 
     /*
-     *  Exclude POST or HEAD replies, and bookmark, menu
-     *  or list files. - FM
+     *	Exclude POST or HEAD replies, and bookmark, menu
+     *	or list files. - FM
      */
     if (doc->post_data || doc->isHEAD || doc->bookmark ||
 	!strcmp((doc->title ? doc->title : ""), HISTORY_PAGE_TITLE) ||
@@ -85,12 +85,12 @@ PUBLIC void LYAddVisitedLink ARGS1(
     }
 
     if ((new = (VisitedLink *)calloc(1, sizeof(*new))) == NULL)
-    	outofmem(__FILE__, "HTAddVisitedLink");
+	outofmem(__FILE__, "HTAddVisitedLink");
     StrAllocCopy(new->address, doc->address);
     StrAllocCopy(new->title, (doc->title ? doc->title : "(no title)"));
 
     if (!Visited_Links) {
-        Visited_Links = HTList_new();
+	Visited_Links = HTList_new();
 	atexit(Visited_Links_free);
 	HTList_addObject(Visited_Links, new);
 	return;
@@ -101,7 +101,7 @@ PUBLIC void LYAddVisitedLink ARGS1(
 	if (!strcmp((old->address ? old->address : ""),
 		    (new->address ? new->address : "")) &&
 	    !strcmp((old->title ? new->title : ""),
-	    	    (new->title ? new->title : ""))) {
+		    (new->title ? new->title : ""))) {
 	    FREE(old->address);
 	    FREE(old->title);
 	    HTList_removeObject(Visited_Links, old);
@@ -122,14 +122,14 @@ PUBLIC void LYpush ARGS2(
 	BOOLEAN,	force_push)
 {
     /*
-     *  Don't push NULL file names.
+     *	Don't push NULL file names.
      */
     if (*doc->address == '\0')
 	return;
 
     /*
-     *  Check whether this is a document we
-     *  don't push unless forced. - FM
+     *	Check whether this is a document we
+     *	don't push unless forced. - FM
      */
     if (!force_push) {
 	/*
@@ -158,17 +158,17 @@ PUBLIC void LYpush ARGS2(
     }
 
     /*
-     *  If file is identical to one before it, don't push it.
+     *	If file is identical to one before it, don't push it.
      */
     if (nhist> 1 &&
-        STREQ(history[nhist-1].address, doc->address) &&
-        !strcmp(history[nhist-1].post_data ?
+	STREQ(history[nhist-1].address, doc->address) &&
+	!strcmp(history[nhist-1].post_data ?
 		history[nhist-1].post_data : "",
-                doc->post_data ?
+		doc->post_data ?
 		doc->post_data : "") &&
-        !strcmp(history[nhist-1].bookmark ?
+	!strcmp(history[nhist-1].bookmark ?
 		history[nhist-1].bookmark : "",
-                doc->bookmark ?
+		doc->bookmark ?
 		doc->bookmark : "") &&
 	history[nhist-1].isHEAD == doc->isHEAD) {
 	if (history[nhist-1].internal_link == doc->internal_link) {
@@ -176,7 +176,7 @@ PUBLIC void LYpush ARGS2(
 	       - kw */
 	    history[nhist-1].link = doc->link;
 	    history[nhist-1].page = doc->line;
- 	    return;
+	    return;
 	}
     }
 
@@ -187,29 +187,29 @@ PUBLIC void LYpush ARGS2(
 **  also to the user.  Moreover, the way it was done seems to cause
 **  a memory leak. - KW
 */  /*
-     *  If file is identical to one two before it, don't push it.
+     *	If file is identical to one two before it, don't push it.
      */
     if (nhist > 2 &&
-        STREQ(history[nhist-2].address, doc->address) &&
-        !strcmp(history[nhist-2].post_data ?
+	STREQ(history[nhist-2].address, doc->address) &&
+	!strcmp(history[nhist-2].post_data ?
 		history[nhist-2].post_data : "",
-                doc->post_data ?
+		doc->post_data ?
 		doc->post_data : "") &&
-        !strcmp(history[nhist-2].bookmark ?
+	!strcmp(history[nhist-2].bookmark ?
 		history[nhist-2].bookmark : "",
-                doc->bookmark ?
+		doc->bookmark ?
 		doc->bookmark : "") &&
 	history[nhist-2].isHEAD == doc->isHEAD) {
 	/*
 	 *  Pop one off the stack.
 	 */
 	nhist--;
-        return;
+	return;
     }
 #endif /* NOTDEFINED */
 
     /*
-     *  OK, push it if we have stack space.
+     *	OK, push it if we have stack space.
      */
     if (nhist < MAXHIST)  {
 	history[nhist].link = doc->link;
@@ -230,7 +230,7 @@ PUBLIC void LYpush ARGS2(
 	history[nhist].internal_link = FALSE; /* by default */
 	history[nhist].intern_seq_start = -1; /* by default */
 	if (doc->internal_link) {
- 	    /* Now some tricky stuff: if the caller thinks that the doc
+	    /* Now some tricky stuff: if the caller thinks that the doc
 	       to push was the result of following an internal
 	       (fragment) link, we check whether we believe it.
 	       It is only accepted as valid if the immediately preceding
@@ -303,37 +303,25 @@ PUBLIC void LYpush ARGS2(
 			history[nhist].intern_seq_start =
 			    history[nhist-1].intern_seq_start >= 0 ?
 			    history[nhist-1].intern_seq_start : nhist-1;
-			if (TRACE) {
-			    fprintf(stderr,
-				"\nLYpush: pushed as internal link, OK\n");
-			}
+			CTRACE(tfp, "\nLYpush: pushed as internal link, OK\n");
 		    }
 		}
 	    }
 	    if (!history[nhist].internal_link) {
-		if (TRACE) {
-		    fprintf(stderr,
-			    "\nLYpush: push as internal link requested, %s\n",
+		CTRACE(tfp, "\nLYpush: push as internal link requested, %s\n",
 			    "but didn't check out!");
-		}
 	    }
 	}
 	nhist++;
-   	if (TRACE) {
-    	    fprintf(stderr,
-		    "\nLYpush: address:%s\n        title:%s\n",
+	CTRACE(tfp, "\nLYpush: address:%s\n        title:%s\n",
 		    doc->address, doc->title);
-	}
     } else {
-        if (LYCursesON) {
+	if (LYCursesON) {
 	    _statusline(MAXHIST_REACHED);
 	    sleep(AlertSecs);
-	} 
-        if (TRACE) {
-    	    fprintf(stderr,
-     "\nLYpush: MAXHIST reached for:\n        address:%s\n        title:%s\n",
-		    doc->address, doc->title);
 	}
+	CTRACE(tfp, "\nLYpush: MAXHIST reached for:\n        address:%s\n        title:%s\n",
+		    doc->address, doc->title);
     }
 }
 
@@ -350,7 +338,7 @@ PUBLIC void LYpop ARGS1(
 	FREE(doc->title);
 	doc->title = history[nhist].title;	 /* will be freed later */
 	FREE(doc->address);
-	doc->address = history[nhist].address;   /* will be freed later */
+	doc->address = history[nhist].address;	 /* will be freed later */
 	FREE(doc->post_data);
 	doc->post_data = history[nhist].post_data;
 	FREE(doc->post_content_type);
@@ -360,11 +348,8 @@ PUBLIC void LYpop ARGS1(
 	doc->isHEAD = history[nhist].isHEAD;
 	doc->safe = history[nhist].safe;
 	doc->internal_link = history[nhist].internal_link;
-        if (TRACE) {
-	    fprintf(stderr,
-	    	    "LYpop: address:%s\n     title:%s\n",
+	CTRACE(tfp, "LYpop: address:%s\n     title:%s\n",
 		    doc->address, doc->title);
-	}
     }
 }
 
@@ -409,7 +394,7 @@ PUBLIC int showhistory ARGS1(
 	/*
 	 *  Make the file a URL now.
 	 */
-#if defined (VMS) || defined (DOSPATH)
+#if defined (VMS) || defined (DOSPATH) || defined (__EMX__)
 	sprintf(hist_filename,"file://localhost/%s", tempfile);
 #else
 	sprintf(hist_filename,"file://localhost%s", tempfile);
@@ -450,7 +435,7 @@ PUBLIC int showhistory ARGS1(
 	}
 	fprintf(fp0,
 		"%s<em>%d</em>. <tab id=t%d><a href=\"LYNXHIST:%d\">%s</a>\n",
-		(x > 99 ? "" : x < 10 ? "  " : " "),  
+		(x > 99 ? "" : x < 10 ? "  " : " "),
 		x, x, x, Title);
 	if (history[x].address != NULL) {
 	    StrAllocCopy(Title, history[x].address);
@@ -474,7 +459,7 @@ PUBLIC int showhistory ARGS1(
     return(0);
 }
 
-/* 
+/*
  *  This function makes the history page seem like any other type of
  *  file since more info is needed than can be provided by the normal
  *  link structure.  We saved out the history number to a special URL.
@@ -490,11 +475,11 @@ PUBLIC BOOLEAN historytarget ARGS1(
     BOOLEAN treat_as_intern = FALSE;
 
     if ((!newdoc || !newdoc->address) ||
-        strlen(newdoc->address) < 10 || !isdigit(*(newdoc->address+9)))
+	strlen(newdoc->address) < 10 || !isdigit(*(newdoc->address+9)))
 	return(FALSE);
 
     if ((number = atoi(newdoc->address+9)) > nhist || number < 0)
-        return(FALSE);
+	return(FALSE);
 
     LYpop_num(number, newdoc);
     if (((newdoc->internal_link &&
@@ -513,20 +498,20 @@ PUBLIC BOOLEAN historytarget ARGS1(
 	newdoc->internal_link = FALSE;
     }
     /*
-     *  If we have POST content, and have LYresubmit_posts set
-     *  or have no_cache set or do not still have the text cached,
-     *  ask the user whether to resubmit the form. - FM
+     *	If we have POST content, and have LYresubmit_posts set
+     *	or have no_cache set or do not still have the text cached,
+     *	ask the user whether to resubmit the form. - FM
      */
     if (newdoc->post_data != NULL) {
 	WWWDoc.address = newdoc->address;
-        WWWDoc.post_data = newdoc->post_data;
-        WWWDoc.post_content_type = newdoc->post_content_type;
-        WWWDoc.bookmark = newdoc->bookmark;
+	WWWDoc.post_data = newdoc->post_data;
+	WWWDoc.post_content_type = newdoc->post_content_type;
+	WWWDoc.bookmark = newdoc->bookmark;
 	WWWDoc.isHEAD = newdoc->isHEAD;
 	WWWDoc.safe = newdoc->safe;
 	tmpanchor = HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
 	text = (HText *)HTAnchor_document(tmpanchor);
-        if (((((LYresubmit_posts == TRUE) ||
+	if (((((LYresubmit_posts == TRUE) ||
 	       (LYforce_no_cache == TRUE &&
 		LYoverride_no_cache == FALSE)) &&
 	      !(treat_as_intern && !reloading)) ||
@@ -568,14 +553,14 @@ PUBLIC int LYShowVisitedLinks ARGS1(
     HTList *cur = Visited_Links;
 
     if (!cur)
-        return(-1);
+	return(-1);
 
     if (first) {
 	tempname(tempfile, NEW_FILE);
 	/*
 	 *  Make the file a URL now.
 	 */
-#if defined (VMS) || defined (DOSPATH)
+#if defined (VMS) || defined (DOSPATH) || defined (__EMX__)
 	sprintf(vl_filename,"file://localhost/%s", tempfile);
 #else
 	sprintf(vl_filename,"file://localhost%s", tempfile);
@@ -602,7 +587,7 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 		 VISITED_LINKS_TITLE);
     fprintf(fp0, "<h1>You have reached the Visited Links Page</h1>\n");
     fprintf(fp0, "<h2>%s Version %s</h2>\n<pre>", LYNX_NAME, LYNX_VERSION);
-    fprintf(fp0, 
+    fprintf(fp0,
   "<em>You visited (POSTs, bookmark, menu and list files excluded):</em>\n");
     x = HTList_count(Visited_Links);
     while (NULL != (vl = (VisitedLink *)HTList_nextObject(cur))) {

@@ -1,6 +1,14 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-04-23 (2.8.1dev.7)
+* fix core-dump when pressing '.' on a page with no links (patch by
+  Jan Hlav\'{a}\v{c}ek <lahvak@math.ohio-state.edu>).
+* initial changes to use macros CTRACE and tfp to replace explicit use of
+  stderr for the trace log.  Remaining work is required for some complex
+  expressions, switching file pointers and for perror-substitute. - TD
+* ifdef's for OS/2 EMX, mostly pathname tweaks (patch by Jason F. McBrayer
+  <jmcbray@mailhost.tcs.tulane.edu>).
 1998-04-18 (2.8.1dev.6)
 * correct misplaced ifdef in LYMail.c, which caused Cc to not work (patch
   by LE).

@@ -271,9 +271,11 @@ check_recall:
 	    strcpy(buffer, command);
 	}
 #else
+#ifndef __EMX__
 	if (*buffer != '/')
 	    cp = getenv("PWD");
 	else
+#endif /* __EMX__*/
 	    cp = NULL;
 	if (cp) {
 	    sprintf(command, "%s/%s", cp, buffer);
@@ -322,6 +324,8 @@ check_recall:
 	/*
 	 *  See if we can write to it.
 	 */
+	CTRACE(tfp, "LYDownload: filename is %s", buffer);
+
 	if ((fp = fopen(buffer, "w")) != NULL) {
 	    fclose(fp);
 	    remove(buffer);
@@ -340,17 +344,14 @@ check_recall:
 	/*
 	 *  Try rename() first. - FM
 	 */
-	if (TRACE)
-	    fprintf(stderr, "command: rename(%s, %s)\n", file, buffer);
+	CTRACE(tfp, "command: rename(%s, %s)\n", file, buffer);
 	if (rename(file, buffer)) {
 	    /*
 	     *	Failed.  Use spawned COPY_COMMAND. - FM
 	     */
-	    if (TRACE)
-		fprintf(stderr, "         FAILED!\n");
+	    CTRACE(tfp, "         FAILED!\n");
 	    sprintf(command, COPY_COMMAND, file, buffer);
-	    if (TRACE)
-		fprintf(stderr, "command: %s\n", command);
+	    CTRACE(tfp, "command: %s\n", command);
 	    fflush(stderr);
 	    fflush(stdout);
 	    stop_curses();
@@ -371,13 +372,16 @@ check_recall:
 	/*
 	 *  Prevent spoofing of the shell.
 	 */
+#ifndef __EMX__
 	cp = quote_pathname(file);
 	cp1 = quote_pathname(buffer);
 	sprintf(command, "%s %s %s", COPY_PATH, cp, cp1);
 	FREE(cp);
 	FREE(cp1);
-	if (TRACE)
-	    fprintf(stderr, "command: %s\n", command);
+#else
+	sprintf(command, "%s %s %s", COPY_PATH, file, buffer);
+#endif __EMX__
+	CTRACE(tfp, "command: %s\n", command);
 	fflush(stderr);
 	fflush(stdout);
 	stop_curses();
@@ -551,8 +555,7 @@ check_recall:
 	    goto failed;
 	}
 
-	if (TRACE)
-	    fprintf(stderr, "command: %s\n", command);
+	CTRACE(tfp, "command: %s\n", command);
 	stop_curses();
 	fflush(stderr);
 	fflush(stdout);
@@ -615,7 +618,7 @@ PUBLIC int LYdownload_options ARGS2(
     if (first) {
 	tempname(tempfile, NEW_FILE);
 	first = FALSE;
-#if defined (VMS) || defined (DOSPATH)
+#if defined (VMS) || defined (DOSPATH) || defined (__EMX__)
     sprintf(download_filename, "file://localhost/%s", tempfile);
 #else
     sprintf(download_filename, "file://localhost%s", tempfile);

@@ -283,8 +283,7 @@ PUBLIC void setStyle ARGS4(int,style,int,color,int,cattr,int,mono)
 PUBLIC void setHashStyle ARGS5(int,style,int,color,int,cattr,int,mono,char*,element)
 {
     bucket* ds=&hashStyles[style];
-    if (TRACE)
-	fprintf(stderr, "CSS(SET): <%s> hash=%d, ca=%d, ma=%d\n", element, style, color, mono);
+    CTRACE(tfp, "CSS(SET): <%s> hash=%d, ca=%d, ma=%d\n", element, style, color, mono);
     ds->color=color;
     ds->cattr=cattr;
     ds->mono=mono;
@@ -299,8 +298,7 @@ PUBLIC void setHashStyle ARGS5(int,style,int,color,int,cattr,int,mono,char*,elem
  */
 PRIVATE int LYAttrset ARGS3(WINDOW*,win,int,color,int,mono)
 {
-	if (TRACE)
-		fprintf(stderr, "CSS:LYAttrset (%#x, %#x)\n", color, mono);
+	CTRACE(tfp, "CSS:LYAttrset (%#x, %#x)\n", color, mono);
 	if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON && color > -1)
 	{
 		wattrset(win,color);
@@ -322,12 +320,10 @@ PUBLIC void curses_w_style ARGS4(WINDOW*,win,int,style,int,dir,int,previous)
 
 	if (!ds->name)
 	{
-		if (TRACE)
-		fprintf(stderr, "CSS.CS:Style %d not configured\n",style);
+		CTRACE(tfp, "CSS.CS:Style %d not configured\n",style);
 		return;
 	}
-	if (TRACE)
-		fprintf(stderr, "CSS.CS:<%s%s> (%d)\n",(dir?"":"/"),ds->name,ds->code);
+	CTRACE(tfp, "CSS.CS:<%s%s> (%d)\n",(dir?"":"/"),ds->name,ds->code);
 
 	getyx (win, YP, XP);
 
@@ -350,8 +346,7 @@ PUBLIC void curses_w_style ARGS4(WINDOW*,win,int,style,int,dir,int,previous)
 
 	case STACK_ON: /* remember the current attributes */
 		if (last_ptr > 127) {
-		    if (TRACE)
-			fprintf(stderr,"........... %s (0x%x) %s\r\n",
+		    CTRACE(tfp,"........... %s (0x%x) %s\r\n",
 				"attribute cache FULL, dropping last",
 				last_styles[last_ptr],
 				"in LynxChangStyle(curses_w_style)");
@@ -361,8 +356,7 @@ PUBLIC void curses_w_style ARGS4(WINDOW*,win,int,style,int,dir,int,previous)
 		/* don't cache style changes for active links */
 		if (style != s_alink)
 		{
-			if (TRACE)
-				fprintf(stderr, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP);
+			CTRACE(tfp, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP);
 			if (win==stdscr) cached_styles[YP][XP]=style;
 			LYAttrset(win, ds->color, ds->mono);
 		}
@@ -376,8 +370,7 @@ PUBLIC void curses_w_style ARGS4(WINDOW*,win,int,style,int,dir,int,previous)
 		/* don't cache style changes for active links */
 		if (style != s_alink)
 		{
-			if (TRACE)
-				fprintf(stderr, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP);
+			CTRACE(tfp, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP);
 			if (win==stdscr) cached_styles[YP][XP]=style;
 			LYAttrset(win, ds->color, ds->mono);
 		}
@@ -398,15 +391,14 @@ PUBLIC void wcurses_css ARGS3(WINDOW *,win,char*,name,int,dir)
 	while (try_again)
 	{
 		int tmpHash=hash_code(name);
-		if (TRACE)
-			fprintf(stderr, "CSSTRIM:trying to set [%s] style - ", name);
+		CTRACE(tfp, "CSSTRIM:trying to set [%s] style - ", name);
 		if (tmpHash==NOSTYLE) {
 			char *class=strrchr(name, '.');
-			if (TRACE) fprintf(stderr, "undefined, trimming at %p\n", class);
+			CTRACE(tfp, "undefined, trimming at %p\n", class);
 			if (class)	*class='\0';
 			else		try_again=0;
 		} else {
-			if (TRACE) fprintf(stderr, "ok (%d)\n", hash_code(name));
+			CTRACE(tfp, "ok (%d)\n", hash_code(name));
 			curses_w_style(win, hash_code(name), dir, 0);
 			try_again=0;
 		}
@@ -756,7 +748,7 @@ PUBLIC void start_curses NOARGS
 	 *  and one time only!
 	 */
 	if (initscr() == NULL) {  /* start curses */
-	    fprintf(stderr,
+	    fprintf(tfp,
 		"Terminal initialisation failed - unknown terminal type?\n");
 #ifndef NOSIGHUP
 	    (void) signal(SIGHUP, SIG_DFL);

@@ -473,8 +473,7 @@ PRIVATE void UC_con_set_trans ARGS3(
   u16 *ptrans;
 
     if (!UC_valid_UC_charset(UC_charset_in_hndl)) {
-	if (TRACE)
-	    fprintf(stderr, "UC_con_set_trans: Invalid charset handle %d.\n",
+	CTRACE(tfp, "UC_con_set_trans: Invalid charset handle %d.\n",
 		    UC_charset_in_hndl);
 	return;
     }
@@ -782,8 +781,7 @@ PRIVATE int UC_con_set_unimap ARGS2(
     u16 *p;
 
     if (!UC_valid_UC_charset(UC_charset_out_hndl)) {
-	if (TRACE)
-	    fprintf(stderr, "UC_con_set_unimap: Invalid charset handle %d.\n",
+	CTRACE(tfp, "UC_con_set_unimap: Invalid charset handle %d.\n",
 		    UC_charset_out_hndl);
 	return -1;
     }
@@ -1190,11 +1188,8 @@ PRIVATE int UC_MapGN ARGS2(
 	UCInfo[UChndl].GN = Gn;
 	UC_GNhandles[Gn] = UChndl;
     }
-    if (TRACE) {
-	fprintf(stderr,
-		"UC_MapGN: Using %d <- %d (%s)\n",
+    CTRACE(tfp, "UC_MapGN: Using %d <- %d (%s)\n",
 		Gn, UChndl, UCInfo[UChndl].MIMEname);
-    }
     UC_con_set_trans(UChndl,Gn,update_flag);
     return Gn;
 }
@@ -1837,17 +1832,17 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
 	CONST char *,	UC_LYNXcharset,
 	int,		lowest_eightbit)
 {
-  int i, LYhndl, found;
-  char **repl;
+    int i, LYhndl, found;
+    char **repl;
 
-  LYhndl = -1;
+    LYhndl = -1;
     if (LYNumCharsets == 0) {
 	/*
 	 *  Initialize here; so whoever changes
 	 *  LYCharSets.c doesn't have to count...
 	 */
 	for (i = 0; (i < MAXCHARSETS) && LYchar_set_names[i]; i++) {
-      LYNumCharsets = i+1;
+	    LYNumCharsets = i+1;
 	}
     }
 
@@ -1867,40 +1862,37 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
 	}
     }
 
-  if (LYhndl < 0) {		/* not found */
-    found = 0;
-    if (LYNumCharsets >= MAXCHARSETS) {
-	    if (TRACE) {
-		fprintf(stderr,
-		    "UC_Register_with_LYCharSets: Too many. Ignoring %s/%s.",
+    if (LYhndl < 0) {		/* not found */
+	found = 0;
+	if (LYNumCharsets >= MAXCHARSETS) {
+	    CTRACE(tfp, "UC_Register_with_LYCharSets: Too many. Ignoring %s/%s.",
 			UC_MIMEcharset, UC_LYNXcharset);
-	    }
-      return -1;
-    }
+	    return -1;
+	}
 	/*
 	 *  Add to LYCharSets.c lists.
 	 */
 	LYhndl = LYNumCharsets;
 	LYNumCharsets ++;
-    LYlowest_eightbit[LYhndl] = 999;
-    LYCharSets[LYhndl] = SevenBitApproximations;
+	LYlowest_eightbit[LYhndl] = 999;
+	LYCharSets[LYhndl] = SevenBitApproximations;
 	/*
 	 *  Hmm, try to be conservative here.
 	 */
 	LYchar_set_names[LYhndl] = UC_LYNXcharset;
 	LYchar_set_names[LYhndl+1] = NULL;
 	/*
-	 *  Terminating NULL may be looked for by Lynx code.
-	 */
+	*  Terminating NULL may be looked for by Lynx code.
+	*/
     } else {
 	found = 1;
     }
-  LYCharSet_UC[LYhndl].UChndl = s;
+    LYCharSet_UC[LYhndl].UChndl = s;
     /*
      *	Can we just copy the pointer?  Hope so...
      */
-  LYCharSet_UC[LYhndl].MIMEname = UC_MIMEcharset;
-  LYCharSet_UC[LYhndl].enc = UCInfo[s].enc;
+    LYCharSet_UC[LYhndl].MIMEname = UC_MIMEcharset;
+    LYCharSet_UC[LYhndl].enc = UCInfo[s].enc;
 
     /*
      *	@@@ We really SHOULD get more info from the table files,
@@ -1908,22 +1900,22 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
      *	that info...  For now, let's try it without. - KW
      */
     if (lowest_eightbit < LYlowest_eightbit[LYhndl]) {
-    LYlowest_eightbit[LYhndl] = lowest_eightbit;
+	LYlowest_eightbit[LYhndl] = lowest_eightbit;
     } else if (lowest_eightbit > LYlowest_eightbit[LYhndl]) {
-    UCInfo[s].lowest_eight = LYlowest_eightbit[LYhndl];
+	UCInfo[s].lowest_eight = LYlowest_eightbit[LYhndl];
     }
 
-  if (!found && LYhndl > 0) {
-    repl = UC_setup_LYCharSets_repl(s,UCInfo[s].lowest_eight);
-    if (repl) {
-      LYCharSets[LYhndl] = repl;
+    if (!found && LYhndl > 0) {
+	repl = UC_setup_LYCharSets_repl(s,UCInfo[s].lowest_eight);
+	if (repl) {
+	    LYCharSets[LYhndl] = repl;
 	    /*
 	     *	Remember to FREE at exit.
 	     */
-      remember_allocated_LYCharSets[LYhndl]=repl;
+	    remember_allocated_LYCharSets[LYhndl]=repl;
+	}
     }
-  }
-  return LYhndl;
+    return LYhndl;
 }
 
 /*
@@ -1956,10 +1948,8 @@ PUBLIC void UC_Charset_Setup ARGS8(
 	s = found;
     } else {
 	if (UCNumCharsets >= MAXCHARSETS) {
-	    if (TRACE) {
-		fprintf(stderr, "UC_Charset_Setup: Too many. Ignoring %s/%s.",
-				UC_MIMEcharset, UC_LYNXcharset);
-	    }
+	    CTRACE(tfp, "UC_Charset_Setup: Too many. Ignoring %s/%s.",
+			UC_MIMEcharset, UC_LYNXcharset);
 	    return;
 	}
 	s = UCNumCharsets;

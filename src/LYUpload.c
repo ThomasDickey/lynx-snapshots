@@ -37,13 +37,13 @@
 PUBLIC char LYUploadFileURL[256] = "\0";
 
 /*
- *  LYUpload uploads a file to a given location using a 
+ *  LYUpload uploads a file to a given location using a
  *  specified upload method.  It parses an incoming link
  *  that looks like:
  *	LYNXDIRED://UPLOAD=<#>/TO=<STRING>
  */
 PUBLIC int LYUpload ARGS1(
-	char *,		line) 
+	char *, 	line)
 {
     char *method, *directory, *dir;
     int method_number;
@@ -60,7 +60,7 @@ PUBLIC int LYUpload ARGS1(
 #endif /* VMS */
 
     /*
-     *  Use configured upload commands.
+     *	Use configured upload commands.
      */
     if((directory = (char *)strstr(line, "TO=")) == NULL)
 	goto failed;
@@ -71,7 +71,7 @@ PUBLIC int LYUpload ARGS1(
     if((method = (char *)strstr(line, "UPLOAD=")) == NULL)
 	goto failed;
     /*
-     *  Go past "Method=".
+     *	Go past "Method=".
      */
     method += 7;
     method_number = atoi(method);
@@ -81,7 +81,7 @@ PUBLIC int LYUpload ARGS1(
       ; /* null body */
 
     /*
-     *  Parsed out the Method and the Location?
+     *	Parsed out the Method and the Location?
      */
     if (upload_command->command == NULL) {
 	_statusline("ERROR! - upload command is misconfigured");
@@ -90,7 +90,7 @@ PUBLIC int LYUpload ARGS1(
     }
 
     /*
-     *  Care about the local name?
+     *	Care about the local name?
      */
     if (strstr(upload_command->command, "%s")) {
 	/*
@@ -178,7 +178,7 @@ retry:
 	    goto retry;
 	}
 
-#ifdef VMS
+#if defined (VMS) || defined (__EMX__)
 	sprintf(tmpbuf, upload_command->command, buffer, "", "", "", "", "");
 #else
 	cp = quote_pathname(buffer); /* to prevent spoofing of the shell */
@@ -193,14 +193,13 @@ retry:
     sprintf(cmd, "cd %s ; %s", dir, tmpbuf);
     FREE(dir);
     stop_curses();
-    if (TRACE)
-	fprintf(stderr, "command: %s\n", cmd);
+    CTRACE(tfp, "command: %s\n", cmd);
     system(cmd);
     fflush(stdout);
     start_curses();
-#ifdef UNIX 
+#ifdef UNIX
     chmod(buffer, HIDE_CHMOD);
-#endif /* UNIX */ 
+#endif /* UNIX */
     /* don't remove(file); */
 
     return 1;
@@ -224,7 +223,7 @@ cancelled:
  */
 PUBLIC int LYUpload_options ARGS2(
 	char **,	newfile,
-	char *,		directory)
+	char *, 	directory)
 {
     static char tempfile[256];
     static BOOLEAN first = TRUE;
@@ -238,17 +237,17 @@ PUBLIC int LYUpload_options ARGS2(
 	/*
 	 *  Get an unused tempfile name. - FM
 	 */
-        tempname(tempfile, NEW_FILE);
+	tempname(tempfile, NEW_FILE);
 #ifdef VMS
     } else {
-        remove(tempfile);   /* Remove duplicates on VMS. */
+	remove(tempfile);   /* Remove duplicates on VMS. */
 #endif /* VMS */
     }
 
     /*
-     *  Open the tempfile for writing and set it's
-     *  protection in case this wasn't done via an
-     *  external umask. - FM
+     *	Open the tempfile for writing and set it's
+     *	protection in case this wasn't done via an
+     *	external umask. - FM
      */
     if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
@@ -260,20 +259,20 @@ PUBLIC int LYUpload_options ARGS2(
 #else
     cp = directory;
     if (!strncmp(cp, "file://localhost", 16))
-        cp += 16;
+	cp += 16;
     else if (!strncmp(cp, "file:", 5))
-        cp += 5;
+	cp += 5;
     strcpy(curloc,cp);
     HTUnEscape(curloc);
     if (curloc[strlen(curloc) - 1] == '/')
-        curloc[strlen(curloc) - 1] = '\0';
+	curloc[strlen(curloc) - 1] = '\0';
 #endif /* VMS */
 
     if (first) {
 	/*
 	 *  Make the tempfile a URL.
- 	 */
-#if defined (VMS) || defined (DOSPATH)
+	 */
+#if defined (VMS) || defined (DOSPATH) || defined (__EMX__)
 	sprintf(LYUploadFileURL, "file://localhost/%s", tempfile);
 #else
 	sprintf(LYUploadFileURL, "file://localhost%s", tempfile);
@@ -283,21 +282,21 @@ PUBLIC int LYUpload_options ARGS2(
     StrAllocCopy(*newfile, LYUploadFileURL);
 
     fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
-    		 UPLOAD_OPTIONS_TITLE);
+		 UPLOAD_OPTIONS_TITLE);
 
     fprintf(fp0, "<h1>Upload Options (%s Version %s)</h1>\n",
-    				      LYNX_NAME, LYNX_VERSION);
+				      LYNX_NAME, LYNX_VERSION);
 
     fputs("You have the following upload choices.<br>\n", fp0);
     fputs("Please select one:<br>\n<pre>\n", fp0);
 
     if (uploaders != NULL) {
 	for (count = 0, cur_upload = uploaders;
-	     cur_upload != NULL; 
+	     cur_upload != NULL;
 	     cur_upload = cur_upload->next, count++) {
 	    fprintf(fp0, "   <a href=\"LYNXDIRED://UPLOAD=%d/TO=%s\">",
 			 count, curloc);
-	    fprintf(fp0, (cur_upload->name ? 
+	    fprintf(fp0, (cur_upload->name ?
 			  cur_upload->name : "No Name Given"));
 	    fprintf(fp0, "</a>\n");
 	}

@@ -275,26 +275,26 @@ PUBLIC void LYsubwindow ARGS1(WINDOW *, param)
 #ifdef USE_SLANG_MOUSE
 PRIVATE int sl_parse_mouse_event ARGS3(int *, x, int *, y, int *, button)
 {
-   /* "ESC [ M" has already been processed.  There more characters are
-    * expected:  BUTTON X Y
-    */
-   *button = SLang_getkey ();
-   switch (*button)
-     {
-      case 040: 		       /* left button */
-      case 041: 		       /* middle button */
-      case 042: 		       /* right button */
+    /* "ESC [ M" has already been processed.  There more characters are
+     * expected:  BUTTON X Y
+     */
+    *button = SLang_getkey ();
+    switch (*button)
+    {
+    case 040:			/* left button */
+    case 041:			/* middle button */
+    case 042:			/* right button */
 	*button -= 040;
 	break;
 
-      default:			       /* Hmmm.... */
+    default:			/* Hmmm.... */
 	SLang_flush_input ();
 	return -1;
-     }
+    }
 
-   *x = SLang_getkey () - 33;
-   *y = SLang_getkey () - 33;
-   return 0;
+    *x = SLang_getkey () - 33;
+    *y = SLang_getkey () - 33;
+    return 0;
 }
 #endif
 
@@ -545,7 +545,7 @@ re_read:
 	    }
 	default:
 	   if (TRACE) {
-		fprintf(stderr,"Unknown key sequence: %d:%d:%d\n",c,b,a);
+		fprintf(tfp,"Unknown key sequence: %d:%d:%d\n",c,b,a);
 		if (!LYTraceLogFP) {
 		    sleep(MessageSecs);
 		}
@@ -1565,8 +1565,7 @@ PUBLIC char * SNACopy ARGS3(
     if (src) {
 	*dest = (char *)calloc(1, n + 1);
 	if (*dest == NULL) {
-	    if (TRACE)
-		fprintf(stderr, "Tried to calloc %d bytes\n", n);
+	    CTRACE(tfp, "Tried to calloc %d bytes\n", n);
 	    outofmem(__FILE__, "SNACopy");
 	}
 	strncpy (*dest, src, n);
@@ -1627,8 +1626,8 @@ PUBLIC char * SNACat ARGS3(
 **   may be interpreted as equal, but this side effect is negligible
 **   if the user search string is more than one character long.  - LP
 **
-**   We enable new technique only if  DisplayCharsetMatchLocale = FALSE 
-**   (see description in LYCharSets.c) 
+**   We enable new technique only if  DisplayCharsetMatchLocale = FALSE
+**   (see description in LYCharSets.c)
 */
 PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
 {
@@ -1640,15 +1639,15 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
     /* case-insensitive match for upper half */
     if ((unsigned char)ch1 > 127 && (unsigned char)ch2 >127)
     {
-	if (DisplayCharsetMatchLocale) 
-	   return(TOUPPER(ch1) - TOUPPER(ch2)); /* old-style */ 
-	else 
+	if (DisplayCharsetMatchLocale)
+	   return(TOUPPER(ch1) - TOUPPER(ch2)); /* old-style */
+	else
 	{
 	/* compare "7bit approximation" for letters >127   */
 	/* BTW, if we remove the check for >127 above	   */
 	/* we get even more "relaxed" insensitive match... */
 
-        CONST char *disp_charset = LYCharSet_UC[current_char_set].MIMEname; 
+	CONST char *disp_charset = LYCharSet_UC[current_char_set].MIMEname;
 	int charset_in, charset_out, uck1, uck2;
 	char replace_buf1 [10], replace_buf2 [10];
 
@@ -1665,7 +1664,7 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
 
 	/* check to be sure we have not lost any strange characters */
 	/* which are not found in def7_uni.tbl but _equal_ in fact. */
-	/* this also applied for "x-transparent" display mode.	    */ 
+	/* this also applied for "x-transparent" display mode.	    */
 	if ((unsigned char)ch1==(unsigned char)ch2)
 	    return(0);	 /* match */
 	}

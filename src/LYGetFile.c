@@ -99,9 +99,7 @@ PUBLIC BOOLEAN getfile ARGS1(
 	 *  Reset LYCancelDownload to prevent unwanted delayed effect. - KW
 	 */
 	if (LYCancelDownload) {
-	    if (TRACE)
-		fprintf(stderr,
-			"getfile:    resetting LYCancelDownload to FALSE\n");
+	    CTRACE(tfp, "getfile:    resetting LYCancelDownload to FALSE\n");
 	    LYCancelDownload = FALSE;
 	}
 
@@ -131,9 +129,7 @@ Try_Redirected_URL:
 	 */
 	redirect_post_content = FALSE;
 
-	if (TRACE) {
-	    fprintf(stderr,"getfile: getting %s\n\n",doc->address);
-	}
+	CTRACE(tfp,"getfile: getting %s\n\n",doc->address);
 
 	/*
 	 *  Protect against denial of service attacks
@@ -262,9 +258,7 @@ Try_Redirected_URL:
 		      *(LYlist_temp_url()) &&
 		      !strncmp(WWWDoc.address, LYlist_temp_url(),
 			       strlen(LYlist_temp_url())))) {
-		    if (TRACE)
-			fprintf(stderr,
-				"getfile: dropping post_data!\n");
+		    CTRACE(tfp, "getfile: dropping post_data!\n");
 		    HTAlert("POST not supported for this URL - ignoring POST data!");
 		    FREE(doc->post_data);
 		    FREE(doc->post_content_type);
@@ -621,9 +615,7 @@ Try_Redirected_URL:
 			if ((cp=strchr(doc->address+9, '/')) != NULL &&
 			   0==strncmp(++cp, "hGET%20/", 8)) {
 			    StrAllocCopy(tmp, "http://");
-			    if (TRACE)
-				fprintf(stderr,
-					"getfile: URL '%s'\n",
+			    CTRACE(tfp, "getfile: URL '%s'\n",
 					doc->address);
 			    *cp = '\0';
 			    StrAllocCat(tmp, doc->address+9);
@@ -637,9 +629,8 @@ Try_Redirected_URL:
 			    if (strlen(cp+7) > 1)
 				StrAllocCat(tmp, cp+8);
 			    StrAllocCopy(doc->address, tmp);
-			    if (TRACE)
-				fprintf(stderr, "  changed to '%s'\n",
-						doc->address);
+			    CTRACE(tfp, "  changed to '%s'\n",
+					doc->address);
 			    FREE(tmp);
 			    url_type = HTTP_URL_TYPE;
 			}
@@ -670,9 +661,8 @@ Try_Redirected_URL:
 			    char *cp1 = strstr(doc->address, "/~");
 			    char *cp2;
 
-			    if (TRACE)
-				fprintf(stderr, "getfile: URL '%s'\n",
-						doc->address);
+			    CTRACE(tfp, "getfile: URL '%s'\n",
+					doc->address);
 			    *cp1 = '\0';
 			    cp1 += 2;
 			    StrAllocCopy(temp, doc->address);
@@ -693,9 +683,8 @@ Try_Redirected_URL:
 			    }
 			    StrAllocCopy(doc->address, temp);
 			    FREE(temp);
-			    if (TRACE)
-				fprintf(stderr, "  changed to '%s'\n",
-						doc->address);
+			    CTRACE(tfp, "  changed to '%s'\n",
+					doc->address);
 			    WWWDoc.address = doc->address;
 			}
 			FREE(cp);
@@ -713,7 +702,7 @@ Try_Redirected_URL:
 			    refresh();
 			}
 #endif /* USE_SLANG */
-			fprintf(stderr,"\n");
+			fprintf(tfp,"\n");
 		    }
 		    if ((LYNoRefererHeader == FALSE &&
 			 LYNoRefererForThis == FALSE) &&
@@ -840,11 +829,9 @@ Try_Redirected_URL:
 				 *  be positioned at the top of that document,
 				 *  so there's no harm done. - FM
 				 */
-				if (TRACE) {
-				    fprintf(stderr,
+				CTRACE(tfp,
 			"getfile: Adding fragment '%s' to redirection URL.\n",
 				    pound);
-				}
 				StrAllocCat(use_this_url_instead, pound);
 			    }
 			    if (TRACE && LYTraceLogFP == NULL)
@@ -852,8 +839,7 @@ Try_Redirected_URL:
 			    _user_message(WWW_USING_MESSAGE,
 					  use_this_url_instead);
 			    sleep(InfoSecs);
-			    if (TRACE)
-				fprintf(stderr, "\n");
+			    CTRACE(tfp, "\n");
 			    StrAllocCopy(doc->address,
 					use_this_url_instead);
 			    FREE(use_this_url_instead);
@@ -989,8 +975,7 @@ Try_Redirected_URL:
 	      if (TRACE && LYTraceLogFP == NULL)
 		  sleep(MessageSecs);
 	      _user_message(WWW_BAD_ADDR_MESSAGE, doc->address);
-	      if (TRACE)
-		  fprintf(stderr,"\n");
+	      CTRACE(tfp,"\n");
 	      sleep(MessageSecs);
 	      return(NULLFILE);
 	  }
@@ -1358,11 +1343,10 @@ PRIVATE int fix_http_urls ARGS1(
 	/*
 	 *  If we get to here, trim the trailing slash. - FM
 	 */
-	if (TRACE)
-	    fprintf(stderr, "fix_http_urls: URL '%s'\n", doc->address);
+	CTRACE(tfp, "fix_http_urls: URL '%s'\n", doc->address);
 	doc->address[strlen(doc->address)-1] = '\0';
 	if (TRACE) {
-	    fprintf(stderr, "        changed to '%s'\n", doc->address);
+	    fprintf(tfp, "        changed to '%s'\n", doc->address);
 	    if (!LYTraceLogFP)
 		sleep(MessageSecs);
 	}
@@ -1376,11 +1360,10 @@ PRIVATE int fix_http_urls ARGS1(
 	    return(0);
 	}
     }
-    if (TRACE)
-	fprintf(stderr, "fix_http_urls: URL '%s'\n", doc->address);
+    CTRACE(tfp, "fix_http_urls: URL '%s'\n", doc->address);
     StrAllocCat(doc->address, "/");
     if (TRACE) {
-	fprintf(stderr, "        changed to '%s'\n",doc->address);
+	fprintf(tfp, "        changed to '%s'\n",doc->address);
 	if (!LYTraceLogFP)
 	    sleep(MessageSecs);
     }

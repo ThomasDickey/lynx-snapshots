@@ -74,7 +74,7 @@
 #define HAVE_UTMP 1
 #endif
 
-#endif
+#endif /* HAVE_CONFIG_H */ 
 
 #ifndef	GCC_UNUSED
 #define	GCC_UNUSED /* nothing */
@@ -88,6 +88,15 @@
 #define popen _popen
 #define pclose _pclose
 #endif /* _WINDOWS */
+ 
+#ifdef __EMX__ 
+#include <unistd.h> /* should be re-include protected under EMX */ 
+#include <stdlib.h> /* should be re-include protected under EMX */ 
+#define getcwd _getcwd2 
+#define chdir _chdir2 
+ 
+#endif 
+ 
 
 #ifdef SHORT_NAMES
 #define WWW_TraceFlag HTTrFlag

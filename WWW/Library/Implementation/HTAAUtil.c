@@ -217,8 +217,7 @@ PUBLIC BOOL HTAAMethod_inList ARGS2(HTAAMethod, method,
     char *item;
 
     while (NULL != (item = (char*)HTList_nextObject(cur))) {
-	if (TRACE)
-	    fprintf(stderr, " %s", item);
+	CTRACE(tfp, " %s", item);
 	if (method == HTAAMethod_enum(item))
 	    return YES;
     }
@@ -367,9 +366,8 @@ PUBLIC char *HTAA_makeProtectionTemplate ARGS1(CONST char *, docname)
     else
 	StrAllocCopy(template, "*");
 
-    if (TRACE)
-	fprintf(stderr, "make_template: made template `%s' for file `%s'\n",
-			template, docname);
+    CTRACE(tfp, "make_template: made template `%s' for file `%s'\n",
+		template, docname);
 
     return template;
 }
@@ -549,10 +547,9 @@ PUBLIC char *HTAA_getUnfoldedLine NOARGS
     BOOL peek_for_folding = NO;
 
     if (in_soc < 0) {
-	if (TRACE)
-	    fprintf(stderr, "%s %s\n",
-			    "HTAA_getUnfoldedLine: buffer not initialized",
-			    "with function HTAA_setupReader()");
+	CTRACE(tfp, "%s %s\n",
+		    "HTAA_getUnfoldedLine: buffer not initialized",
+		    "with function HTAA_setupReader()");
 	return NULL;
     }
 

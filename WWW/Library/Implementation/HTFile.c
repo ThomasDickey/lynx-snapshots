@@ -578,21 +578,32 @@ PUBLIC char * HTLocalName ARGS1(
 	if ((0 == strcasecomp(host, HTHostName())) ||
 	    (0 == strcasecomp(host, "localhost")) || !*host) {
 	    FREE(host);
-	    if (TRACE)
-		fprintf(stderr, "Node `%s' means path `%s'\n", name, path);
+	    CTRACE(tfp, "Node `%s' means path `%s'\n", name, path);
 #ifdef DOSPATH
 	    {
 		char *ret_path = NULL;
 		StrAllocCopy(ret_path, HTDOS_name(path));
-		if (TRACE) {
-		    fprintf(stderr, "HTDOS_name changed `%s' to `%s'\n",
+		CTRACE(tfp, "HTDOS_name changed `%s' to `%s'\n",
 			    path, ret_path);
-		}
+		FREE(path);
+		return(ret_path);
+	    }
+#else
+#ifdef __EMX__
+	    {
+		char *ret_path = NULL;
+		if (path[0] == '/') /* pesky leading slash */
+		    StrAllocCopy(ret_path, path+1);
+		else
+		    StrAllocCopy(ret_path, path);
+		CTRACE(tfp, "EMX hack changed `%s' to `%s'\n",
+			    path, ret_path);
 		FREE(path);
 		return(ret_path);
 	    }
 #else
 	    return(path);
+#endif /* __EMX__ */
 #endif /* DOSPATH */
 	} else {
 	    char * result = (char *)malloc(
@@ -602,8 +613,7 @@ PUBLIC char * HTLocalName ARGS1(
 	    sprintf(result, "%s%s%s", "/Net/", host, path);
 	    FREE(host);
 	    FREE(path);
-	    if (TRACE)
-		fprintf(stderr, "Node `%s' means file `%s'\n", name, result);
+	    CTRACE(tfp, "Node `%s' means file `%s'\n", name, result);
 	    return result;
 	}
     } else {  /* other access */
@@ -662,8 +672,7 @@ PUBLIC char * WWW_nameOfFile ARGS1(
 	    outofmem(__FILE__, "WWW_nameOfFile");
 	sprintf(result, "file://%s%s", HTHostName(), name);
     }
-    if (TRACE)
-	fprintf(stderr, "File `%s'\n\tmeans node `%s'\n", name, result);
+    CTRACE(tfp, "File `%s'\n\tmeans node `%s'\n", name, result);
     return result;
 }
 
@@ -866,9 +875,7 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	cp[i] = TOLOWER(cp[i]);
     if (((cp1 = strchr(cp, ';')) != NULL) &&
 	(cp2 = strstr(cp1, "charset")) != NULL) {
-	if (TRACE)
-	    fprintf(stderr,
-		    "HTCharsetFormat: Extended MIME Content-Type is %s\n",
+	CTRACE(tfp, "HTCharsetFormat: Extended MIME Content-Type is %s\n",
 		    format->name);
 	cp2 += 7;
 	while (*cp2 == ' ' || *cp2 == '=')
@@ -1032,9 +1039,8 @@ PUBLIC float HTFileValue ARGS1(
 	suff = (HTSuffix *)HTList_objectAt(HTSuffixes, i);
 	ls = strlen(suff->suffix);
 	if ((ls <= lf) && 0==strcmp(suff->suffix, filename + lf - ls)) {
-	    if (TRACE)
-		fprintf(stderr, "File: Value of %s is %.3f\n",
-				filename, suff->quality);
+	    CTRACE(tfp, "File: Value of %s is %.3f\n",
+			filename, suff->quality);
 	    return suff->quality;		/* OK -- found */
 	}
     }
@@ -1099,14 +1105,14 @@ PUBLIC BOOL HTEditable ARGS1(
 
     if (TRACE) {
 	int i2;
-	fprintf(stderr,
+	fprintf(tfp,
 	    "File mode is 0%o, uid=%d, gid=%d. My uid=%d, %d groups (",
 	    (unsigned int) fileStatus.st_mode, fileStatus.st_uid,
 	    fileStatus.st_gid,
 	    myUid, ngroups);
 	for (i2 = 0; i2 < ngroups; i2++)
-	    fprintf(stderr, " %d", groups[i2]);
-	fprintf(stderr, ")\n");
+	    fprintf(tfp, " %d", groups[i2]);
+	fprintf(tfp, ")\n");
     }
 
     if (fileStatus.st_mode & 0002)		/* I can write anyway? */
@@ -1123,8 +1129,7 @@ PUBLIC BOOL HTEditable ARGS1(
 		return YES;
 	}
     }
-    if (TRACE)
-	fprintf(stderr, "\tFile is not editable.\n");
+    CTRACE(tfp, "\tFile is not editable.\n");
     return NO;					/* If no excuse, can't do */
 #endif /* NO_GROUPS */
 }
@@ -1527,8 +1532,7 @@ PUBLIC int HTLoadFile ARGS4(
     **	to the directories or files listed.
     */
     if (HTStat(filename, &stat_info) == -1) {
-	if (TRACE)
-	    fprintf(stderr, "HTLoadFile: Can't stat %s\n", filename);
+	CTRACE(tfp, "HTLoadFile: Can't stat %s\n", filename);
     } else {
 	if (((stat_info.st_mode) & S_IFMT) == S_IFDIR) {
 	    if (HTDirAccess == HT_DIR_FORBID) {
@@ -1576,14 +1580,12 @@ PUBLIC int HTLoadFile ARGS4(
 	*/
 	if (!fp) {
 	    char ultrixname[INFINITY];
-	    if (TRACE)
-		fprintf(stderr, "HTLoadFile: Can't open as %s\n", vmsname);
+	    CTRACE(tfp, "HTLoadFile: Can't open as %s\n", vmsname);
 	    sprintf(ultrixname, "%s::\"%s\"", nodename, filename);
 	    fp = fopen(ultrixname, "r", "shr=put", "shr=upd");
 	    if (!fp) {
-		if (TRACE)
-		    fprintf(stderr, "HTLoadFile: Can't open as %s\n",
-				    ultrixname);
+		CTRACE(tfp, "HTLoadFile: Can't open as %s\n",
+			    ultrixname);
 	    }
 	}
 	if (fp) {
@@ -1623,9 +1625,7 @@ PUBLIC int HTLoadFile ARGS4(
 			*semicolon = ';';
 		    gzfp = gzopen(vmsname, "rb");
 
-		    if (TRACE)
-			fprintf(stderr,
-				"HTLoadFile: gzopen of `%s' gives %p\n",
+		    CTRACE(tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
 				vmsname, (void*)gzfp);
 		    use_gzread = YES;
 		} else
@@ -1671,9 +1671,7 @@ PUBLIC int HTLoadFile ARGS4(
 				*semicolon = ';';
 			    gzfp = gzopen(vmsname, "rb");
 
-			    if (TRACE)
-				fprintf(stderr,
-				       "HTLoadFile: gzopen of `%s' gives %p\n",
+			    CTRACE(tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
 					vmsname, (void*)gzfp);
 			    use_gzread = YES;
 			}
@@ -1846,9 +1844,7 @@ PUBLIC int HTLoadFile ARGS4(
 			}
 		    }
 		    if (value != NO_VALUE_FOUND) {
-			if (TRACE)
-			    fprintf(stderr,
-				 "HTLoadFile: value of presenting %s is %f\n",
+			CTRACE(tfp, "HTLoadFile: value of presenting %s is %f\n",
 				    HTAtom_name(rep), value);
 			if  (value > best) {
 			    best_rep = rep;
@@ -1894,8 +1890,7 @@ PUBLIC int HTLoadFile ARGS4(
 #endif
 	{
 				       /* if can't read file information */
-	    if (TRACE)
-		fprintf(stderr, "HTLoadFile: can't stat %s\n", localname);
+	    CTRACE(tfp, "HTLoadFile: can't stat %s\n", localname);
 
 	}  else {		/* Stat was OK */
 
@@ -1919,8 +1914,7 @@ PUBLIC int HTLoadFile ARGS4(
 		BOOL need_parent_link = FALSE;
 		struct stat file_info;
 
-		if (TRACE)
-		    fprintf(stderr, "%s is a directory\n", localname);
+		CTRACE(tfp, "%s is a directory\n", localname);
 
 		/*
 		**  Check directory access.
@@ -2244,8 +2238,7 @@ PUBLIC int HTLoadFile ARGS4(
 	{
 	    FILE * fp = fopen(localname, "r");
 
-	    if (TRACE)
-		fprintf (stderr, "HTLoadFile: Opening `%s' gives %p\n",
+	    CTRACE (tfp, "HTLoadFile: Opening `%s' gives %p\n",
 				 localname, (void*)fp);
 	    if (fp) {		/* Good! */
 		int len;
@@ -2274,9 +2267,7 @@ PUBLIC int HTLoadFile ARGS4(
 			fclose(fp);
 			gzfp = gzopen(localname, "rb");
 
-			if (TRACE)
-			    fprintf(stderr,
-				    "HTLoadFile: gzopen of `%s' gives %p\n",
+			CTRACE(tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
 				    localname, (void*)gzfp);
 			use_gzread = YES;
 		    } else
@@ -2315,9 +2306,7 @@ PUBLIC int HTLoadFile ARGS4(
 			    fclose(fp);
 			    gzfp = gzopen(localname, "rb");
 
-			    if (TRACE)
-				fprintf(stderr,
-				       "HTLoadFile: gzopen of `%s' gives %p\n",
+			    CTRACE(tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
 					localname, (void*)gzfp);
 			    use_gzread = YES;
 			}
@@ -2404,8 +2393,7 @@ PUBLIC int HTLoadFile ARGS4(
     **	All attempts have failed.
     */
     {
-	if (TRACE)
-	    fprintf(stderr, "Can't open `%s', errno=%d\n", addr, SOCKET_ERRNO);
+	CTRACE(tfp, "Can't open `%s', errno=%d\n", addr, SOCKET_ERRNO);
 
 	return HTLoadError(sink, 403, "Can't access requested file.");
     }

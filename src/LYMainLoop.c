@@ -240,8 +240,7 @@ initialize:
 	refresh();
     }
 #endif /* USE_SLANG */
-    if (TRACE)
-	fprintf(stderr,"Entering mainloop, startfile=%s\n",startfile);
+    CTRACE(tfp,"Entering mainloop, startfile=%s\n",startfile);
 
     if (form_post_data) {
 	StrAllocCopy(newdoc.post_data, form_post_data);
@@ -278,8 +277,7 @@ initialize:
 		FREE(newdoc.post_content_type);
 		newdoc.isHEAD = FALSE;
 		newdoc.safe = FALSE;
-		if (TRACE)
-		    fprintf(stderr, "Using bookmarks=%s\n", newdoc.address);
+		CTRACE(tfp, "Using bookmarks=%s\n", newdoc.address);
 	    } else {
 		_statusline(BOOKMARKS_NOT_OPEN);
 		sleep(MessageSecs);
@@ -432,9 +430,7 @@ try_again:
 		    WWWDoc.safe = newdoc.safe;
 		    tmpanchor = HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
 		    if ((HText *)HTAnchor_document(tmpanchor) == NULL) {
-			if (TRACE)
-			    fprintf(stderr,
-				    "\nTurning off TRACE for fetch of log.\n");
+			CTRACE(tfp, "\nTurning off TRACE for fetch of log.\n");
 			fflush(stdout);
 			fflush(stderr);
 			fclose(LYTraceLogFP);
@@ -530,7 +526,7 @@ try_again:
 		    if (trace_mode_flag == TRUE) {
 			WWW_TraceFlag = TRUE;
 			trace_mode_flag = FALSE;
-			fprintf(stderr, "Turning TRACE back on.\n\n");
+			fprintf(tfp, "Turning TRACE back on.\n\n");
 		    }
 		    if (error_logging &&
 			first_file && owner_address && !LYCancelledFetch) {
@@ -621,7 +617,7 @@ try_again:
 		    if (trace_mode_flag == TRUE) {
 			WWW_TraceFlag = TRUE;
 			trace_mode_flag = FALSE;
-			fprintf(stderr, "Turning TRACE back on.\n\n");
+			fprintf(tfp, "Turning TRACE back on.\n\n");
 		    }
 		    FREE(newdoc.address); /* to pop last doc */
 		    FREE(newdoc.bookmark);
@@ -771,7 +767,7 @@ try_again:
 		    if (trace_mode_flag == TRUE) {
 			WWW_TraceFlag = TRUE;
 			trace_mode_flag = FALSE;
-			fprintf(stderr, "Turning TRACE back on.\n\n");
+			fprintf(tfp, "Turning TRACE back on.\n\n");
 		    }
 		    *prev_target = '\0';    /* Reset for this document. - FM */
 
@@ -883,9 +879,7 @@ try_again:
 				    if (!strcmp(homepage, startfile))
 					StrAllocCopy(homepage, newdoc.address);
 				    StrAllocCopy(startfile, newdoc.address);
-				    if (TRACE)
-					fprintf(stderr,
-						"Reloading as bookmarks=%s\n",
+				    CTRACE(tfp, "Reloading as bookmarks=%s\n",
 						newdoc.address);
 				    goto try_again;
 				}
@@ -1111,9 +1105,7 @@ try_again:
 		}
 	    }
 	    FREE(temp);
-	    if (TRACE) {
-		fprintf(stderr, "Starting realm is '%s'\n\n", startrealm);
-	    }
+	    CTRACE(tfp, "Starting realm is '%s'\n\n", startrealm);
 	    if (traversal) {
 		/*
 		 *  Set up the crawl output stuff.
@@ -1144,10 +1136,7 @@ try_again:
 		    }
 		    FREE(temp);
 		}
-		if (TRACE) {
-		    fprintf(stderr,
-			    "Traversal host is '%s'\n\n", traversal_host);
-		}
+		CTRACE(tfp, "Traversal host is '%s'\n\n", traversal_host);
 	    }
 	    if (startfile) {
 		/*
@@ -2808,11 +2797,8 @@ new_cmd:  /*
 				    links[curdoc.link].form->submit_action,
 					  "lynxprog:", 9)) {
 			    HTAlert(SPECIAL_ACTION_DISALLOWED);
-			    if (TRACE) {
-				fprintf(stderr,
-					"LYMainLoop: Rejected '%s'\n",
+			    CTRACE(tfp, "LYMainLoop: Rejected '%s'\n",
 					links[curdoc.link].form->submit_action);
-			    }
 			    HTOutputFormat = WWW_PRESENT;
 			    LYforce_no_cache = FALSE;
 			    reloading = FALSE;
@@ -4502,8 +4488,7 @@ check_goto_URL:
 		cp = HTParse(curdoc.address, "", PARSE_PATH|PARSE_PUNCTUATION);
 		HTUnEscape(cp);
 		if (HTStat(cp, &stat_info) == -1) {
-		    if (TRACE)
-			fprintf(stderr, "mainloop: Can't stat %s\n", cp);
+		    CTRACE(tfp, "mainloop: Can't stat %s\n", cp);
 		    FREE(cp);
 		    temp = (char *)calloc(1, (strlen(LYCSwingPath) + 4));
 		    if (temp == NULL)
@@ -4594,8 +4579,11 @@ check_goto_URL:
 
 #ifdef USE_EXTERNALS
 	case LYK_EXTERN:  /* use external program on url */
-	    run_external(links[curdoc.link].lname);
-	    refresh_screen = TRUE;
+	    if  ((nlinks > 0) && (links[curdoc.link].lname != NULL))
+	    {
+	       run_external(links[curdoc.link].lname);
+	       refresh_screen = TRUE;
+	    }
 	    break;
 #endif /* USE_EXTERNALS */
 
@@ -4836,10 +4824,18 @@ check_add_bookmark_to_self:
 		_go32_want_ctrl_break(0);
 #endif /* __DJGPP__ */
 #else
+#ifdef __EMX__
+		if (getenv("SHELL") != NULL) {
+		    system(getenv("SHELL"));
+		} else {
+		    system(getenv("COMSPEC") == NULL ? "cmd.exe" : getenv("COMSPEC"));
+		}
+#else
 #ifdef VMS
 		system("");
 #else
 		system("exec $SHELL");
+#endif /* __EMX__ */
 #endif /* VMS */
 #endif /* DOSPATH */
 		if (LYTraceLogFP)
@@ -5152,8 +5148,7 @@ check_add_bookmark_to_self:
 	     *	and open it again, to make sure all stderr messages thus
 	     *	far will be in the log. - FM
 	     */
-	    if (TRACE)
-		fprintf(stderr, "\nTurning off TRACE for fetch of log.\n");
+	    CTRACE(tfp, "\nTurning off TRACE for fetch of log.\n");
 	    fflush(stdout);
 	    fflush(stderr);
 	    fclose(LYTraceLogFP);

@@ -344,11 +344,8 @@ PRIVATE int ProcessMailcapEntry ARGS2(
     }
     s = strchr(rawentry, ';');
     if (s == NULL) {
-	if (TRACE) {
-		fprintf(stderr,
-		 "ProcessMailcapEntry: Ignoring invalid mailcap entry: %s\n",
-			rawentry);
-	}
+	CTRACE(tfp, "ProcessMailcapEntry: Ignoring invalid mailcap entry: %s\n",
+		    rawentry);
 	FREE(rawentry);
 	return(0);
     }
@@ -357,11 +354,8 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 	!strncasecomp(rawentry, "text/plain", 10)) {
 	--s;
 	*s = ';';
-	if (TRACE) {
-		fprintf(stderr,
-			"ProcessMailcapEntry: Ignoring mailcap entry: %s\n",
-			rawentry);
-	}
+	CTRACE(tfp, "ProcessMailcapEntry: Ignoring mailcap entry: %s\n",
+		    rawentry);
 	FREE(rawentry);
 	return(0);
     }
@@ -407,9 +401,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 	    } else if (eq && !strcmp(arg, "test")) {
 		mc->testcommand = NULL;
 		StrAllocCopy(mc->testcommand, eq);
-		if (TRACE)
-		    fprintf(stderr,
-		    	    "ProcessMailcapEntry: Found testcommand:%s\n",
+		CTRACE(tfp, "ProcessMailcapEntry: Found testcommand:%s\n",
 			    mc->testcommand);
 	    } else if (eq && !strcmp(arg, "description")) {
 		mc->label = eq;
@@ -429,10 +421,9 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 		if (mc->maxbytes < 0)
 		    mc->maxbytes = 0;
 	    } else if (strcmp(arg, "notes")) { /* IGNORE notes field */
-		if (*arg && TRACE)
-		    fprintf(stderr,
-			"ProcessMailcapEntry: Ignoring mailcap flag '%s'.\n",
-			    arg);
+		if (*arg)
+		    CTRACE(tfp, "ProcessMailcapEntry: Ignoring mailcap flag '%s'.\n",
+			        arg);
 	    }
 
 	}
@@ -444,9 +435,7 @@ assign_presentation:
     FREE(rawentry);
 
     if (PassesTest(mc)) {
-	if (TRACE)
-	    fprintf(stderr,
-	    	    "ProcessMailcapEntry Setting up conversion %s : %s\n",
+	CTRACE(tfp, "ProcessMailcapEntry Setting up conversion %s : %s\n",
 		    mc->contenttype, mc->command);
 	HTSetPresentation(mc->contenttype, mc->command,
 			  mc->quality, 3.0, 0.0, mc->maxbytes);
@@ -476,22 +465,15 @@ PRIVATE void BuildCommand ARGS5(
 		    break;
 		case 'n':
 		case 'F':
-		    if (TRACE) {
-		        fprintf(stderr,
-			     "BuildCommand: Bad mailcap \"test\" clause: %s\n",
+		    CTRACE(tfp, "BuildCommand: Bad mailcap \"test\" clause: %s\n",
 				controlstring);
-		    }
 		case 's':
 		    if (TmpFileLen && TmpFileName) {
 			if ((to - *pBuf) + TmpFileLen + 1 > Bufsize) {
 			    *to = '\0';
-			    if (TRACE) {
-				fprintf(stderr,
-			"BuildCommand: Too long mailcap \"test\" clause,\n");
-				fprintf(stderr,
-					"              ignoring: %s%s...\n",
+			    CTRACE(tfp, "BuildCommand: Too long mailcap \"test\" clause,\n");
+			    CTRACE(tfp, "              ignoring: %s%s...\n",
 					*pBuf, TmpFileName);
-			    }
 			    **pBuf = '\0';
 			    return;
 			}
@@ -500,11 +482,9 @@ PRIVATE void BuildCommand ARGS5(
 		    }
 		    break;
 		default:
-		    if (TRACE) {
-			fprintf(stderr,
+		    CTRACE(tfp,
   "BuildCommand: Ignoring unrecognized format code in mailcap file '%%%c'.\n",
 			*from);
-		    }
 		    break;
 	    }
 	} else if (*from == '%') {
@@ -514,13 +494,9 @@ PRIVATE void BuildCommand ARGS5(
 	}
 	if (to >= *pBuf + Bufsize) {
 	    (*pBuf)[Bufsize - 1] = '\0';
-	    if (TRACE) {
-		fprintf(stderr,
-			"BuildCommand: Too long mailcap \"test\" clause,\n");
-		fprintf(stderr,
-			"              ignoring: %s...\n",
+	    CTRACE(tfp, "BuildCommand: Too long mailcap \"test\" clause,\n");
+	    CTRACE(tfp, "              ignoring: %s...\n",
 			*pBuf);
-	    }
 	    **pBuf = '\0';
 	    return;
 	}
@@ -546,31 +522,23 @@ PRIVATE int PassesTest ARGS1(
      */
     if (0 == strcasecomp(mc->testcommand, "test -n \"$DISPLAY\"")) {
 	FREE(mc->testcommand);
-	if (TRACE)
-	    fprintf(stderr,
-		    "PassesTest: Testing for XWINDOWS environment.\n");
+	CTRACE(tfp, "PassesTest: Testing for XWINDOWS environment.\n");
     	if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0') {
-	    if (TRACE)
-	        fprintf(stderr,"PassesTest: Test passed!\n");
+	    CTRACE(tfp, "PassesTest: Test passed!\n");
 	    return(0 == 0);
 	} else {
-	    if (TRACE)
-	        fprintf(stderr,"PassesTest: Test failed!\n");
+	    CTRACE(tfp, "PassesTest: Test failed!\n");
 	    return(-1 == 0);
 	}
     }
     if (0 == strcasecomp(mc->testcommand, "test -z \"$DISPLAY\"")) {
 	FREE(mc->testcommand);
-	if (TRACE)
-	    fprintf(stderr,
-		    "PassesTest: Testing for NON_XWINDOWS environment.\n");
+	CTRACE(tfp, "PassesTest: Testing for NON_XWINDOWS environment.\n");
     	if (!((cp = getenv(DISPLAY)) != NULL && *cp != '\0')) {
-	    if (TRACE)
-	        fprintf(stderr,"PassesTest: Test passed!\n");
+	    CTRACE(tfp,"PassesTest: Test passed!\n");
 	    return(0 == 0);
 	} else {
-	    if (TRACE)
-	        fprintf(stderr,"PassesTest: Test failed!\n");
+	    CTRACE(tfp,"PassesTest: Test failed!\n");
 	    return(-1 == 0);
 	}
     }
@@ -580,11 +548,8 @@ PRIVATE int PassesTest ARGS1(
      */
     if (0 == strcasecomp(mc->testcommand, "test -n \"$LYNX_VERSION\"")){
 	FREE(mc->testcommand);
-	if (TRACE) {
-	    fprintf(stderr,
-		    "PassesTest: Testing for LYNX environment.\n");
-	    fprintf(stderr,"PassesTest: Test passed!\n");
-	}
+	CTRACE(tfp, "PassesTest: Testing for LYNX environment.\n");
+	CTRACE(tfp, "PassesTest: Test passed!\n");
 	return(0 == 0);
     } else
     /*
@@ -592,11 +557,8 @@ PRIVATE int PassesTest ARGS1(
      */
     if (0 == strcasecomp(mc->testcommand, "test -z \"$LYNX_VERSION\"")) {
 	FREE(mc->testcommand);
-	if (TRACE) {
-	    fprintf(stderr,
-		    "PassesTest: Testing for non-LYNX environment.\n");
-	    fprintf(stderr,"PassesTest: Test failed!\n");
-	}
+	CTRACE(tfp, "PassesTest: Testing for non-LYNX environment.\n");
+	CTRACE(tfp, "PassesTest: Test failed!\n");
 	return(-1 == 0);
     }
 
@@ -611,8 +573,7 @@ PRIVATE int PassesTest ARGS1(
 		 mc->testcommand,
 		 TmpFileName,
 		 strlen(TmpFileName));
-    if (TRACE)
-	fprintf(stderr,"PassesTest: Executing test command: %s\n", cmd);
+    CTRACE(tfp, "PassesTest: Executing test command: %s\n", cmd);
     result = system(cmd);
     FREE(cmd);
 
@@ -622,10 +583,11 @@ PRIVATE int PassesTest ARGS1(
      */
     FREE(mc->testcommand);
 
-    if (TRACE && result)
-	fprintf(stderr,"PassesTest: Test failed!\n");
-    else if (TRACE)
-	fprintf(stderr,"PassesTest: Test passed!\n");
+    if (result) {
+	CTRACE(tfp,"PassesTest: Test failed!\n");
+    } else {
+	CTRACE(tfp,"PassesTest: Test passed!\n");
+    }
 
     return(result == 0);
 }
@@ -636,14 +598,10 @@ PRIVATE int ProcessMailcapFile ARGS1(
     struct MailcapEntry mc;
     FILE *fp;
 
-    if (TRACE)
-	fprintf(stderr,
-		"ProcessMailcapFile: Loading file '%s'.\n",
+    CTRACE(tfp, "ProcessMailcapFile: Loading file '%s'.\n",
 		file);
     if ((fp = fopen(file, "r")) == NULL) {
-	if (TRACE)
-	    fprintf(stderr,
-		"ProcessMailcapFile: Could not open '%s'.\n",
+	CTRACE(tfp, "ProcessMailcapFile: Could not open '%s'.\n",
 		    file);
 	return(-1 == 0);
     }
@@ -659,7 +617,7 @@ PRIVATE int ExitWithError ARGS1(
 	char *,		txt)
 {
     if (txt)
-	fprintf(stderr, "metamail: %s\n", txt);
+	fprintf(tfp, "metamail: %s\n", txt);
 #ifndef NOSIGHUP
     (void) signal(SIGHUP, SIG_DFL);
 #endif /* NOSIGHUP */
@@ -704,9 +662,7 @@ PUBLIC void HTFileInit NOARGS
 {
     FILE *fp;
 
-    if (TRACE)
-	fprintf(stderr,
-		"HTFileInit: Loading default (HTInit) extension maps.\n");
+    CTRACE(tfp, "HTFileInit: Loading default (HTInit) extension maps.\n");
 
     /* default suffix interpretation */
     HTSetSuffix("*",		"text/plain", "7bit", 1.0);
@@ -1003,15 +959,11 @@ PRIVATE int HTLoadExtensionsConfigFile ARGS1(
     FILE *f;
     int x, count = 0;
 
-    if (TRACE)
-	fprintf(stderr,
-		"HTLoadExtensionsConfigFile: Loading file '%s'.\n", fn);
+    CTRACE(tfp, "HTLoadExtensionsConfigFile: Loading file '%s'.\n", fn);
 
     if ((f = fopen(fn,"r")) == NULL) {
-	if (TRACE)
-	    fprintf(stderr,
-		    "HTLoadExtensionsConfigFile: Could not open '%s'.\n", fn);
-	    return count;
+	CTRACE(tfp, "HTLoadExtensionsConfigFile: Could not open '%s'.\n", fn);
+	return count;
     }
 
     while (!(HTGetLine(l,MAX_STRING_LEN,f))) {
@@ -1037,10 +989,7 @@ PRIVATE int HTLoadExtensionsConfigFile ARGS1(
 		ext[0] = '.';
 		ext[strlen(w)+1] = '\0';
 
-		if (TRACE) {
-		    fprintf (stderr,
-			     "SETTING SUFFIX '%s' to '%s'.\n", ext, ct);
-		}
+		CTRACE (tfp, "SETTING SUFFIX '%s' to '%s'.\n", ext, ct);
 
 	        if (strstr(ct, "tex") != NULL ||
 	            strstr(ct, "postscript") != NULL ||

@@ -82,8 +82,7 @@ PRIVATE void syntax_error ARGS3(FILE *,	 fp,
 	if (cnt < 40) buffer[cnt++] = ch;
     buffer[cnt] = (char)0;
 
-    if (TRACE)
-	fprintf(stderr, "%s %d before: '%s'\nHTGroup.c: %s (got %s)\n",
+    CTRACE(tfp, "%s %d before: '%s'\nHTGroup.c: %s (got %s)\n",
 		"HTGroup.c: Syntax error in rule file at line",
 		HTlex_line, buffer, msg, lex_verbose(lex_item));
     HTlex_line++;
@@ -397,7 +396,7 @@ PRIVATE GroupDefList *parse_group_file ARGS1(FILE *, fp)
 PRIVATE void print_item ARGS1(Item *, item)
 {
     if (!item)
-	fprintf(stderr, "\tNULL-ITEM\n");
+	fprintf(tfp, "\tNULL-ITEM\n");
     else {
 	UserDefList *cur1 = item->user_def_list;
 	AddressDefList *cur2 = item->address_def_list;
@@ -405,20 +404,20 @@ PRIVATE void print_item ARGS1(Item *, item)
 	Ref *addr_ref = (Ref*)HTList_nextObject(cur2);
 
 	if (user_ref) {
-	    fprintf(stderr, "\t[%s%s", user_ref->name,
+	    fprintf(tfp, "\t[%s%s", user_ref->name,
 		    (user_ref->translation ? "*REF*" : ""));
 	    while (NULL != (user_ref = (Ref*)HTList_nextObject(cur1)))
-		fprintf(stderr, "; %s%s", user_ref->name,
+		fprintf(tfp, "; %s%s", user_ref->name,
 			(user_ref->translation ? "*REF*" : ""));
-	    fprintf(stderr, "] ");
-	} else fprintf(stderr, "\tANYBODY ");
+	    fprintf(tfp, "] ");
+	} else fprintf(tfp, "\tANYBODY ");
 
 	if (addr_ref) {
-	    fprintf(stderr, "@ [%s", addr_ref->name);
+	    fprintf(tfp, "@ [%s", addr_ref->name);
 	    while (NULL != (addr_ref = (Ref*)HTList_nextObject(cur2)))
-		fprintf(stderr, "; %s", addr_ref->name);
-	    fprintf(stderr, "]\n");
-	} else fprintf(stderr, "@ ANYADDRESS\n");
+		fprintf(tfp, "; %s", addr_ref->name);
+	    fprintf(tfp, "]\n");
+	} else fprintf(tfp, "@ ANYADDRESS\n");
     }
 }
 
@@ -429,7 +428,7 @@ PRIVATE void print_item_list ARGS1(ItemList *, item_list)
     Item *item;
 
     if (!item_list)
-	fprintf(stderr, "EMPTY");
+	fprintf(tfp, "EMPTY");
     else while (NULL != (item = (Item*)HTList_nextObject(cur)))
 	print_item(item);
 }
@@ -438,15 +437,15 @@ PRIVATE void print_item_list ARGS1(ItemList *, item_list)
 PUBLIC void HTAA_printGroupDef ARGS1(GroupDef *, group_def)
 {
     if (!group_def) {
-	fprintf(stderr, "\nNULL RECORD\n");
+	fprintf(tfp, "\nNULL RECORD\n");
 	return;
     }
 
-    fprintf(stderr, "\nGroup %s:\n",
+    fprintf(tfp, "\nGroup %s:\n",
 	    (group_def->group_name ? group_def->group_name : "NULL"));
 
     print_item_list(group_def->item_list);
-    fprintf(stderr, "\n");
+    fprintf(tfp, "\n");
 }
 
 
@@ -483,6 +482,7 @@ PRIVATE BOOL part_match ARGS2(CONST char *, tcur,
     char actual[4];
     CONST char *cur;
     int cnt;
+    BOOL status;
 
     if (!tcur || !icur) return NO;
 
@@ -498,14 +498,11 @@ PRIVATE BOOL part_match ARGS2(CONST char *, tcur,
 	actual[cnt++] = *(cur++);
     actual[cnt] = (char)0;
 
-    if (TRACE) {
-	BOOL status = HTAA_templateMatch(required, actual);
-	fprintf(stderr, "part_match: req: '%s' act: '%s' match: %s\n",
+    status = HTAA_templateMatch(required, actual);
+    CTRACE(tfp, "part_match: req: '%s' act: '%s' match: %s\n",
 		required, actual, (status ? "yes" : "no"));
-	return status;
-    }
 
-    return HTAA_templateMatch(required, actual);
+    return status;
 }
 
 
@@ -656,21 +653,21 @@ PUBLIC GroupDefList *HTAA_readGroupFile ARGS1(CONST char *, filename)
 
 	while (NULL != (group_cache = (GroupCache*)HTList_nextObject(cur))) {
 	    if (!strcmp(filename, group_cache->group_filename)) {
-		if (TRACE) fprintf(stderr, "%s '%s' %s\n",
-				   "HTAA_readGroupFile: group file",
-				   filename, "already found in cache");
+		CTRACE(tfp, "%s '%s' %s\n",
+			    "HTAA_readGroupFile: group file",
+			    filename, "already found in cache");
 		return group_cache->group_list;
 	    } /* if cache match */
 	} /* while cached files remain */
     } /* cache exists */
 
-    if (TRACE) fprintf(stderr, "HTAA_readGroupFile: reading group file `%s'\n",
-		       filename);
+    CTRACE(tfp, "HTAA_readGroupFile: reading group file `%s'\n",
+	        filename);
 
     if (!(fp = fopen(filename, "r"))) {
-	if (TRACE) fprintf(stderr, "%s '%s'\n",
-			   "HTAA_readGroupFile: unable to open group file",
-			   filename);
+	CTRACE(tfp, "%s '%s'\n",
+		    "HTAA_readGroupFile: unable to open group file",
+		    filename);
 	return NULL;
     }
 
@@ -683,10 +680,9 @@ PUBLIC GroupDefList *HTAA_readGroupFile ARGS1(CONST char *, filename)
     HTList_addObject(group_cache_list, (void*)group_cache);
     fclose(fp);
 
-    if (TRACE) {
-	fprintf(stderr, "Read group file '%s', results follow:\n", filename);
+    CTRACE(tfp, "Read group file '%s', results follow:\n", filename);
+    if (TRACE)
 	print_group_def_list(group_cache->group_list);
-    }
 
     return group_cache->group_list;
 }

@@ -1052,15 +1052,25 @@ PUBLIC BOOLEAN local_remove ARGS1(
     cp = links[doc->link].lname;
     if (is_url(cp) == FILE_URL_TYPE) {
 	tp = cp;
+#ifndef __EMX__
 	if (!strncmp(tp, "file://localhost", 16)) {
 	    tp += 16;
 	} else if (!strncmp(tp, "file:", 5)) {
 	    tp += 5;
 	}
+#else
+	if (!strncmp(tp, "file://localhost/", 17)) {
+	    tp += 17;
+	} else if (!strncmp(tp, "file:/", 6)) {
+	    tp +=6;
+	}
+#endif /* !EMX */
+
 	strcpy(testpath, tp);
 	HTUnEscape(testpath);
 	if ((i = strlen(testpath)) && testpath[i - 1] == '/')
 	    testpath[(i - 1)] = '\0';
+
 	if (remove_single(testpath)) {
 	    if (doc->link == (nlinks - 1))
 		--doc->link;
@@ -1277,8 +1287,7 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 		HTAlert(INVALID_PERMIT_URL);
 	    else
 		fprintf(stderr, "%s\n", INVALID_PERMIT_URL);
-	    if (TRACE)
-		fprintf(stderr, "permit_location: called for <%s>.\n",
+	    CTRACE(tfp, "permit_location: called for <%s>.\n",
 			(destpath ?
 			 destpath : "NULL URL pointer"));
 	    return 0;
@@ -1304,8 +1313,7 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 		HTAlert(INVALID_PERMIT_URL);
 	    else
 		fprintf(stderr, "%s\n", INVALID_PERMIT_URL);
-	    if (TRACE)
-		fprintf(stderr, "permit_location: called for file '%s'.\n",
+	    CTRACE(tfp, "permit_location: called for file '%s'.\n",
 			destpath);
 	    return 0;
 	}
@@ -1461,8 +1469,7 @@ PUBLIC int local_dired ARGS1(
     char buffer[512];
 
     line_url = doc->address;
-    if (TRACE)
-	fprintf(stderr, "local_dired: called for <%s>.\n",
+    CTRACE(tfp, "local_dired: called for <%s>.\n",
 		(line_url ?
 		 line_url : "NULL URL pointer"));
     HTUnEscapeSome(line_url, "/");	/* don't mess too much with *doc */
@@ -1896,7 +1903,7 @@ PUBLIC int dired_options ARGS2(
 PRIVATE char *filename ARGS3(
 	char *, 	prompt,
 	char *, 	buf,
-	size_t,		bufsize)
+	size_t, 	bufsize)
 {
     char *cp;
 
@@ -2218,9 +2225,7 @@ PRIVATE int LYExecv ARGS3(
 	char *, 	msg)
 {
 #if defined(VMS) || defined(_WINDOWS)
-    if (TRACE) {
-	fprintf(stderr, "LYExecv:  Called inappropriately!\n");
-    }
+    CTRACE(tfp, "LYExecv:  Called inappropriately!\n");
     return(0);
 #else
     int rc;

@@ -189,17 +189,16 @@ PRIVATE BOOL initialize NOARGS
 #else
     if (getenv("NNTPSERVER")) {
 	StrAllocCopy(HTNewsHost, (char *)getenv("NNTPSERVER"));
-	if (TRACE) fprintf(stderr, "HTNews: NNTPSERVER defined as `%s'\n",
-		HTNewsHost);
+	CTRACE(tfp, "HTNews: NNTPSERVER defined as `%s'\n",
+		    HTNewsHost);
     } else {
 	char server_name[256];
 	FILE* fp = fopen(SERVER_FILE, "r");
 	if (fp) {
 	    if (fscanf(fp, "%s", server_name)==1) {
 		StrAllocCopy(HTNewsHost, server_name);
-		if (TRACE) fprintf(stderr,
-		"HTNews: File %s defines news host as `%s'\n",
-			SERVER_FILE, HTNewsHost);
+		CTRACE(tfp, "HTNews: File %s defines news host as `%s'\n",
+			    SERVER_FILE, HTNewsHost);
 	    }
 	    fclose(fp);
 	}
@@ -232,7 +231,7 @@ PRIVATE int response ARGS1(CONST char *,command)
     if (command) {
 	int status;
 	int length = strlen(command);
-	if (TRACE) fprintf(stderr, "NNTP command to be sent: %s", command);
+	CTRACE(tfp, "NNTP command to be sent: %s", command);
 #ifdef NOT_ASCII
 	{
 	    CONST char	* p;
@@ -247,8 +246,7 @@ PRIVATE int response ARGS1(CONST char *,command)
 	status = NEWS_NETWRITE(s, (char *)command, length);
 #endif /* NOT_ASCII */
 	if (status < 0){
-	    if (TRACE) fprintf(stderr,
-		"HTNews: Unable to send command. Disconnecting.\n");
+	    CTRACE(tfp, "HTNews: Unable to send command. Disconnecting.\n");
 	    NEWS_NETCLOSE(s);
 	    s = -1;
 	    return status;
@@ -259,24 +257,19 @@ PRIVATE int response ARGS1(CONST char *,command)
 	if (((*p++ = NEXT_CHAR) == LF) ||
 	    (p == &response_text[LINE_LENGTH])) {
 	    *--p = '\0';			/* Terminate the string */
-	    if (TRACE)
-		fprintf(stderr, "NNTP Response: %s\n", response_text);
+	    CTRACE(tfp, "NNTP Response: %s\n", response_text);
 	    sscanf(response_text, "%d", &result);
 	    return result;
 	} /* if end of line */
 
 	if ((ch = *(p-1)) == (char)EOF) {
 	    *(p-1) = '\0';
-	    if (TRACE) {
-		if (interrupted_in_htgetcharacter) {
-		    fprintf(stderr,
-			    "HTNews: Interrupted on read, closing socket %d\n",
+	    if (interrupted_in_htgetcharacter) {
+		CTRACE(tfp, "HTNews: Interrupted on read, closing socket %d\n",
 			    s);
-		} else {
-		    fprintf(stderr,
-			    "HTNews: EOF on read, closing socket %d\n",
+	    } else {
+		CTRACE(tfp, "HTNews: EOF on read, closing socket %d\n",
 			    s);
-		}
 	    }
 	    NEWS_NETCLOSE(s);	/* End of file, close socket */
 	    s = -1;
@@ -560,8 +553,7 @@ PRIVATE char * author_name ARGS1 (char *,email)
     char *p, *e;
 
     StrAllocCopy(name, email);
-    if (TRACE)
-	fprintf(stderr,"Trying to find name in: %s\n",name);
+    CTRACE(tfp,"Trying to find name in: %s\n",name);
 
     if ((p = strchr(name, '(')) && (e = strchr(name, ')'))) {
 	if (e > p) {
@@ -598,8 +590,7 @@ PRIVATE char * author_address ARGS1(char *,email)
     char *p, *at, *e;
 
     StrAllocCopy(address, email);
-    if (TRACE)
-	fprintf(stderr,"Trying to find address in: %s\n",address);
+    CTRACE(tfp,"Trying to find address in: %s\n",address);
 
     if ((p = strchr(address, '<'))) {
 	if ((e = strchr(p, '>')) && (at = strchr(p, '@'))) {
@@ -770,9 +761,7 @@ PRIVATE void write_anchors ARGS1 (char *,text)
 */
 PRIVATE void abort_socket NOARGS
 {
-    if (TRACE)
-	fprintf(stderr,
-		"HTNews: EOF on read, closing socket %d\n", s);
+    CTRACE(tfp, "HTNews: EOF on read, closing socket %d\n", s);
     NEWS_NETCLOSE(s);	/* End of file, close socket */
     PUTS("Network Error: connection lost");
     PUTC('\n');
@@ -983,9 +972,7 @@ PRIVATE int read_article NOARGS
 	    if (ch == (char)EOF) {
 		if (interrupted_in_htgetcharacter) {
 		    interrupted_in_htgetcharacter = 0;
-		    if (TRACE)
-			fprintf(stderr,
-			   "HTNews: Interrupted on read, closing socket %d\n",
+		    CTRACE(tfp, "HTNews: Interrupted on read, closing socket %d\n",
 				s);
 		    NEWS_NETCLOSE(s);
 		    s = -1;
@@ -996,8 +983,7 @@ PRIVATE int read_article NOARGS
 	    }
 	    if ((ch == LF) || (p == &line[LINE_LENGTH])) {
 		*--p = '\0';			/* Terminate the string */
-		if (TRACE)
-		    fprintf(stderr, "H %s\n", line);
+		CTRACE(tfp, "H %s\n", line);
 
 		if (line[0] == '\t' || line[0] == ' ') {
 		    int i = 0;
@@ -1253,9 +1239,7 @@ PRIVATE int read_article NOARGS
 	if (ch == (char)EOF) {
 	    if (interrupted_in_htgetcharacter) {
 		interrupted_in_htgetcharacter = 0;
-		if (TRACE)
-		    fprintf(stderr,
-			  "HTNews: Interrupted on read, closing socket %d\n",
+		CTRACE(tfp, "HTNews: Interrupted on read, closing socket %d\n",
 			    s);
 		NEWS_NETCLOSE(s);
 		s = -1;
@@ -1266,8 +1250,7 @@ PRIVATE int read_article NOARGS
 	}
 	if ((ch == LF) || (p == &line[LINE_LENGTH])) {
 	    *p++ = '\0';			/* Terminate the string */
-	    if (TRACE)
-		fprintf(stderr, "B %s", line);
+	    CTRACE(tfp, "B %s", line);
 	    if (line[0] == '.') {
 		/*
 		**  End of article?
@@ -1460,9 +1443,7 @@ PRIVATE int read_list ARGS1(char *, arg)
 	if (ch == (char)EOF) {
 	    if (interrupted_in_htgetcharacter) {
 		interrupted_in_htgetcharacter = 0;
-		if (TRACE)
-		    fprintf(stderr,
-			  "HTNews: Interrupted on read, closing socket %d\n",
+		CTRACE(tfp, "HTNews: Interrupted on read, closing socket %d\n",
 			    s);
 		NEWS_NETCLOSE(s);
 		s = -1;
@@ -1482,9 +1463,7 @@ PRIVATE int read_list ARGS1(char *, arg)
 		continue;
 	    }
 	} else if (p == &line[LINE_LENGTH]) {
-	    if (TRACE) {
-		fprintf(stderr, "b %.*s%c[...]\n", (LINE_LENGTH), line, ch);
-	    }
+	    CTRACE(tfp, "b %.*s%c[...]\n", (LINE_LENGTH), line, ch);
 	    *p = '\0';
 	    if (ch == LF) {
 		;		/* Will be dealt with below */
@@ -1494,9 +1473,7 @@ PRIVATE int read_list ARGS1(char *, arg)
 	    } else if (strchr(line, ' ') == NULL &&
 		       strchr(line, '\t') == NULL) {
 		/* No separator found */
-		if (TRACE)
-		    fprintf(stderr,
-			    "HTNews..... group name too long, discarding.\n");
+		CTRACE(tfp, "HTNews..... group name too long, discarding.\n");
 		skip_this_line = YES; /* ignore whole line */
 		continue;
 	    } else {
@@ -1508,8 +1485,7 @@ PRIVATE int read_list ARGS1(char *, arg)
 	if (ch == LF) {
 	    skip_rest_of_line = NO;	/* done, reset flag */
 	    *p = '\0';			/* Terminate the string */
-	    if (TRACE)
-		fprintf(stderr, "B %s", line);
+	    CTRACE(tfp, "B %s", line);
 	    if (line[0] == '.') {
 		/*
 		**  End of article?
@@ -1617,9 +1593,7 @@ PRIVATE int read_group ARGS3(
     PUTC('\n');
 
     sscanf(response_text, " %d %d %d %d", &status, &count, &first, &last);
-    if (TRACE)
-	fprintf(stderr,
-		"Newsgroup status=%d, count=%d, (%d-%d) required:(%d-%d)\n",
+    CTRACE(tfp, "Newsgroup status=%d, count=%d, (%d-%d) required:(%d-%d)\n",
 		status, count, first, last, first_required, last_required);
     if (last == 0) {
 	PUTS("\nNo articles in this group.\n");
@@ -1642,9 +1616,8 @@ PRIVATE int read_group ARGS3(
     if (last_required-first_required+1 > HTNewsMaxChunk) { /* Trim this block */
 	first_required = last_required-HTNewsChunkSize+1;
     }
-    if (TRACE)
-	fprintf(stderr, "    Chunk will be (%d-%d)\n",
-			first_required, last_required);
+    CTRACE(tfp, "    Chunk will be (%d-%d)\n",
+		first_required, last_required);
 
     /*
     **	Set window title.
@@ -1667,8 +1640,7 @@ PRIVATE int read_group ARGS3(
 	    before = first_required-HTNewsChunkSize;
 	sprintf(buffer, "%s%s/%d-%d", NewsHREF, groupName,
 				      before, first_required-1);
-	if (TRACE)
-	    fprintf(stderr, "    Block before is %s\n", buffer);
+	CTRACE(tfp, "    Block before is %s\n", buffer);
 	PUTC('(');
 	start_anchor(buffer);
 	PUTS("Earlier articles");
@@ -1696,9 +1668,7 @@ PRIVATE int read_group ARGS3(
 		if (ch == (char)EOF) {
 		    if (interrupted_in_htgetcharacter) {
 			interrupted_in_htgetcharacter = 0;
-			if (TRACE)
-			    fprintf(stderr,
-			   "HTNews: Interrupted on read, closing socket %d\n",
+			CTRACE(tfp, "HTNews: Interrupted on read, closing socket %d\n",
 				    s);
 			NEWS_NETCLOSE(s);
 			s = -1;
@@ -1709,8 +1679,7 @@ PRIVATE int read_group ARGS3(
 		}
 		if ((ch == '\n') || (p == &line[LINE_LENGTH])) {
 		    *p = '\0';		/* Terminate the string */
-		    if (TRACE)
-			fprintf(stderr, "X %s", line);
+		    CTRACE(tfp, "X %s", line);
 		    if (line[0] == '.') {
 			/*
 			**  End of article?
@@ -1802,9 +1771,7 @@ PRIVATE int read_group ARGS3(
 		    if (ch == (char)EOF) {
 			if (interrupted_in_htgetcharacter) {
 			    interrupted_in_htgetcharacter = 0;
-			    if (TRACE)
-				fprintf(stderr,
-			   "HTNews: Interrupted on read, closing socket %d\n",
+			    CTRACE(tfp, "HTNews: Interrupted on read, closing socket %d\n",
 					s);
 			    NEWS_NETCLOSE(s);
 			    s = -1;
@@ -1818,8 +1785,7 @@ PRIVATE int read_group ARGS3(
 
 			*--p = '\0';		/* Terminate  & chop LF*/
 			p = line;		/* Restart at beginning */
-			if (TRACE)
-			    fprintf(stderr, "G %s\n", line);
+			CTRACE(tfp, "G %s\n", line);
 			switch(line[0]) {
 
 			case '.':
@@ -1913,9 +1879,7 @@ PRIVATE int read_group ARGS3(
 		*/
 	    } else if (status == HT_INTERRUPTED) {
 		interrupted_in_htgetcharacter = 0;
-		if (TRACE)
-		    fprintf(stderr,
-			  "HTNews: Interrupted on read, closing socket %d\n",
+		CTRACE(tfp, "HTNews: Interrupted on read, closing socket %d\n",
 			    s);
 		NEWS_NETCLOSE(s);
 		s = -1;
@@ -1957,8 +1921,7 @@ PRIVATE int read_group ARGS3(
 	else
 	    sprintf(buffer, "%s%s/%d-%d", NewsHREF, groupName,
 					  last_required+1, after);
-	if (TRACE)
-	    fprintf(stderr, "    Block after is %s\n", buffer);
+	CTRACE(tfp, "    Block after is %s\n", buffer);
 	PUTC('(');
 	start_anchor(buffer);
 	PUTS("Later articles");
@@ -2029,7 +1992,7 @@ PRIVATE int HTLoadNews ARGS4(
 		  format_out == HTAtom_for("www/dump"));
     rawtext = NO;
 
-    if (TRACE) fprintf(stderr, "HTNews: Looking for %s\n", arg);
+    CTRACE(tfp, "HTNews: Looking for %s\n", arg);
 
     if (!initialized)
 	initialized = initialize();
@@ -2230,9 +2193,7 @@ PRIVATE int HTLoadNews ARGS4(
 	    command[258] = '\0';
 	    FREE(cp);
 	    sprintf(proxycmd, "GET %.251s%c%c%c%c", command, CR, LF, CR, LF);
-	    if (TRACE)
-		fprintf(stderr,
-			"HTNews: Proxy command is '%.*s'\n",
+	    CTRACE(tfp, "HTNews: Proxy command is '%.*s'\n",
 			(int)(strlen(proxycmd) - 4), proxycmd);
 	    strcat(command, "/");
 	    StrAllocCopy(ProxyHREF, NewsHREF);
@@ -2374,8 +2335,7 @@ PRIVATE int HTLoadNews ARGS4(
 	    } else {
 		sprintf (url, "%.259s", NewsHREF);
 	    }
-	    if (TRACE)
-		fprintf (stderr, "News: doing HTDoConnect on '%s'\n", url);
+	    CTRACE (tfp, "News: doing HTDoConnect on '%s'\n", url);
 
 	    _HTProgress("Connecting to NewsHost ...");
 
@@ -2384,9 +2344,7 @@ PRIVATE int HTLoadNews ARGS4(
 		/*
 		**  Interrupt cleanly.
 		*/
-		if (TRACE)
-		    fprintf(stderr,
-		     "HTNews: Interrupted on connect; recovering cleanly.\n");
+		CTRACE(tfp, "HTNews: Interrupted on connect; recovering cleanly.\n");
 		_HTProgress("Connection interrupted.");
 		if (!(post_wanted || reply_wanted ||
 		      spost_wanted || sreply_wanted)) {
@@ -2412,9 +2370,7 @@ PRIVATE int HTLoadNews ARGS4(
 		char message[256];
 		NEWS_NETCLOSE(s);
 		s = -1;
-		if (TRACE)
-		    fprintf(stderr,
-			    "HTNews: Unable to connect to news host.\n");
+		CTRACE(tfp, "HTNews: Unable to connect to news host.\n");
 		if (retries < 1)
 		    continue;
 		sprintf(message, "Could not access %s.", NewsHost);
@@ -2434,15 +2390,12 @@ PRIVATE int HTLoadNews ARGS4(
 		}
 		return HTLoadError(stream, 500, message);
 	    } else {
-		if (TRACE)
-		    fprintf(stderr, "HTNews: Connected to news host %s.\n",
-				    NewsHost);
+		CTRACE(tfp, "HTNews: Connected to news host %s.\n",
+			    NewsHost);
 		HTInitInput(s); 	/* set up buffering */
 		if (proxycmd[0]) {
 		    status = NEWS_NETWRITE(s, proxycmd, strlen(proxycmd));
-		    if (TRACE)
-			fprintf(stderr,
-			     "HTNews: Proxy command returned status '%d'.\n",
+		    CTRACE(tfp, "HTNews: Proxy command returned status '%d'.\n",
 				status);
 		}
 		if (((status = response(NULL)) / 100) != 2) {

@@ -63,10 +63,9 @@ PUBLIC void HTList_addObject ARGS2(
 	newNode->next = me->next;
 	me->next = newNode;
 
-    } else if (TRACE) {
-        fprintf(stderr,
-		"HTList: Trying to add object %p to a nonexisting list\n",
-		newObject);
+    } else {
+        CTRACE(tfp, "HTList: Trying to add object %p to a nonexisting list\n",
+		    newObject);
     }
 
     return;
@@ -106,20 +105,14 @@ PUBLIC void HTList_insertObjectAt ARGS3(
     int Pos = pos;
 
     if (!temp) {
-	if (TRACE) {
-	    fprintf(stderr,
-		    "HTList: Trying to add object %p to a nonexisting list\n",
+	CTRACE(tfp, "HTList: Trying to add object %p to a nonexisting list\n",
 		    newObject);
-	}
 	return;
     }
     if (Pos < 0) {
 	Pos = 0;
-	if (TRACE) {
-	    fprintf(stderr,
-		    "HTList: Treating negative object position %d as %d.\n",
+	CTRACE(tfp, "HTList: Treating negative object position %d as %d.\n",
 		    pos, Pos);
-	}
     }
 
     prevNode = temp;

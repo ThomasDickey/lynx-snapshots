@@ -164,7 +164,7 @@ PUBLIC int LYShowColor = SHOW_COLOR_UNKNOWN; /* to show or not to show */
 PUBLIC int LYChosenShowColor = SHOW_COLOR_UNKNOWN; /* whether to show and save */
 PUBLIC int LYrcShowColor = SHOW_COLOR_UNKNOWN;	/* ... as last read or written */
 PUBLIC BOOLEAN LYShowCursor = SHOW_CURSOR; /* to show or not to show */
-PUBLIC BOOLEAN verbose_img = VERBOSE_IMAGES;  /* show filenames or not */ 
+PUBLIC BOOLEAN verbose_img = VERBOSE_IMAGES;  /* show filenames or not */
 PUBLIC BOOLEAN LYUseDefShoCur = TRUE;	/* Command line -show_cursor toggle */
 PUBLIC BOOLEAN LYforce_no_cache = FALSE;
 PUBLIC BOOLEAN LYoverride_no_cache = FALSE;/*override no-cache b/c history etc*/
@@ -387,7 +387,7 @@ PRIVATE BOOLEAN number_links = FALSE;
 PRIVATE BOOLEAN LYPrependBase = FALSE;
 PRIVATE HTList *LYStdinArgs = NULL;
 
-PRIVATE void parse_arg PARAMS((char **arg, int *i, int argc));
+PRIVATE void parse_arg PARAMS((char **arg, int *i));
 #ifndef VMS
 PUBLIC BOOLEAN LYNoCore = NO_FORCED_CORE_DUMP;
 PRIVATE void FatalProblem PARAMS((int sig));
@@ -589,7 +589,7 @@ else {init_ctrl_break[0] = 1;}
      */
     for (i = 1; i < argc; i++) {
 	if (strncmp(argv[i], "-help", 5) == 0) {
-	    parse_arg(&argv[i], &i, argc);
+	    parse_arg(&argv[i], &i);
 	}
     }
 
@@ -684,7 +684,7 @@ else {init_ctrl_break[0] = 1;}
     if ((cp = getenv("LYNX_TEMP_SPACE")) != NULL)
 	StrAllocCopy(lynx_temp_space, cp);
     else
-#ifdef DOSPATH
+#if defined (DOSPATH) || defined (__EMX__)
     if ((cp = getenv("TEMP")) != NULL)
 	StrAllocCopy(lynx_temp_space, cp);
     else if ((cp = getenv("TMP")) != NULL)
@@ -842,8 +842,7 @@ else {init_ctrl_break[0] = 1;}
 		StrAllocCopy(lynx_lss_file, argv[i+1]);
 		i++;
 	    }
-	    if (TRACE)
-		fprintf(stderr, "LYMain found -lss flag, lss file is %s\n",
+	    CTRACE(tfp, "LYMain found -lss flag, lss file is %s\n",
 		    lynx_lss_file ? lynx_lss_file : "<NONE>");
 #endif
 	}
@@ -926,8 +925,7 @@ else {init_ctrl_break[0] = 1;}
 		    if (*cp)
 			StrAllocCopy(lynx_cfg_file, cp);
 		}
-		if (TRACE)
-		    fprintf(stderr, "LYMain found -lss flag, lss file is %s\n",
+		CTRACE(tfp, "LYMain found -lss flag, lss file is %s\n",
 			lynx_lss_file ? lynx_lss_file : "<NONE>");
 #endif
 	    } else if (strcmp(buf, "-get_data") == 0) {
@@ -1092,15 +1090,15 @@ else {init_ctrl_break[0] = 1;}
 	fflush(stdout);
 	fflush(stderr);
 	*stderr = *LYTraceLogFP;
-	fprintf(stderr, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
+	fprintf(tfp, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
     }
 
     /*
      *	If TRACE is on, indicate whether the
      *	anonymous restrictions are set. - FM
      */
-    if (TRACE && anon_restrictions_set) {
-	fprintf(stderr, "LYMain: Anonymous restrictions set.\n");
+    if (anon_restrictions_set) {
+	CTRACE(tfp, "LYMain: Anonymous restrictions set.\n");
     }
 
     /*
@@ -1116,8 +1114,7 @@ else {init_ctrl_break[0] = 1;}
 	} else {
 	    sprintf(temp, "JUMPFILE:%s", jumpfile);
 	    if (!LYJumpInit(temp)) {
-		if (TRACE)
-		    fprintf(stderr, "Failed to register %s\n", temp);
+		CTRACE(tfp, "Failed to register %s\n", temp);
 	    }
 	    FREE(temp);
 	}
@@ -1252,12 +1249,9 @@ else {init_ctrl_break[0] = 1;}
 	StrAllocCopy(LynxSigFile, filename);
 	LYAddPathToHome(filename, sizeof(filename), LynxSigFile);
 	StrAllocCopy(LynxSigFile, filename);
-	if (TRACE)
-	    fprintf(stderr, "LYNX_SIG_FILE set to '%s'\n", LynxSigFile);
+	CTRACE(tfp, "LYNX_SIG_FILE set to '%s'\n", LynxSigFile);
     } else {
-	if (TRACE)
-	    fprintf(stderr, "LYNX_SIG_FILE '%s' is bad. Ignoring.\n",
-			    LYNX_SIG_FILE);
+	CTRACE(tfp, "LYNX_SIG_FILE '%s' is bad. Ignoring.\n", LYNX_SIG_FILE);
     }
 
     /*
@@ -1372,7 +1366,7 @@ else {init_ctrl_break[0] = 1;}
      *	Process any command line arguments not already handled. - FM
      */
     for (i = 1; i < argc; i++) {
-	parse_arg(&argv[i], &i, argc);
+	parse_arg(&argv[i], &i);
     }
 
     /*
@@ -1385,7 +1379,7 @@ else {init_ctrl_break[0] = 1;}
 
 	my_args[1] = NULL;
 	while (NULL != (my_args[0] = (char *)HTList_nextObject(cur))) {
-	    parse_arg(my_args, NULL, -1);
+	    parse_arg(my_args, (int *)0);
 	}
 	LYStdinArgs_free();
     }
@@ -1566,16 +1560,14 @@ else {init_ctrl_break[0] = 1;}
 	ftp_ok = !no_inside_ftp && !no_outside_ftp && ftp_ok;
 	rlogin_ok = !no_inside_rlogin && !no_outside_rlogin && rlogin_ok;
 #else
-	if (TRACE)
-	   fprintf(stderr,"LYMain.c: User in Local domain\n");
+	CTRACE(tfp,"LYMain.c: User in Local domain\n");
 	telnet_ok = !no_inside_telnet && telnet_ok;
 	news_ok = !no_inside_news && news_ok;
 	ftp_ok = !no_inside_ftp && ftp_ok;
 	rlogin_ok = !no_inside_rlogin && rlogin_ok;
 #endif /* !HAVE_UTMP || VMS */
     } else {
-	if (TRACE)
-	   fprintf(stderr,"LYMain.c: User in REMOTE domain\n");
+	CTRACE(tfp,"LYMain.c: User in REMOTE domain\n");
 	telnet_ok = !no_outside_telnet && telnet_ok;
 	news_ok = !no_outside_news && news_ok;
 	ftp_ok = !no_outside_ftp && ftp_ok;
@@ -1736,6 +1728,7 @@ else {init_ctrl_break[0] = 1;}
     }
 
     exit(status);
+    return(status);	/* though redundant, for compiler-warnings */
 }
 
 /*
@@ -1781,10 +1774,9 @@ PRIVATE char * scan3D ARGS2(
     return argv[1];
 }
 
-PRIVATE void parse_arg ARGS3(
+PRIVATE void parse_arg ARGS2(
 	char **,	argv,
-	int *,		i,
-	int,		argc)
+	int *,		i)
 {
     static int ignored;
     char *cp;
@@ -1885,8 +1877,8 @@ PRIVATE void parse_arg ARGS3(
 	if (auth_info != NULL)	{
 	    if ((cp = strchr(auth_info, ':')) != NULL) {	/* Pw */
 		*cp++ = '\0';	/* Terminate ID */
-		HTUnEscape(cp); 
-		StrAllocCopy(authentication_info[1], cp); 
+		HTUnEscape(cp);
+		StrAllocCopy(authentication_info[1], cp);
 	    }
 	    if (*auth_info) {					/* Id */
 		HTUnEscape(auth_info);
@@ -2355,8 +2347,8 @@ PRIVATE void parse_arg ARGS3(
 	if (pauth_info != NULL)  {
 	    if ((cp = strchr(pauth_info, ':')) != NULL) {	/* Pw */
 		*cp++ = '\0';	/* Terminate ID */
-		HTUnEscape(cp); 
-		StrAllocCopy(proxyauth_info[1], cp); 
+		HTUnEscape(cp);
+		StrAllocCopy(proxyauth_info[1], cp);
 	    }
 	    if (*pauth_info) {					/* Id */
 		HTUnEscape(pauth_info);
@@ -2572,7 +2564,7 @@ PRIVATE void parse_arg ARGS3(
 
     case 't':
     if (strncmp(argv[0], "-tagsoup", 8) == 0) {
-        HTSwitchDTD(New_DTD = NO);
+	HTSwitchDTD(New_DTD = NO);
 
     } else if (strncmp(argv[0], "-telnet", 7) == 0) {
 	telnet_ok = FALSE;
