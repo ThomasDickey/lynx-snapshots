@@ -61,6 +61,7 @@ within a single LAN.
 <li><a href="#Refresh" NAME="ToC-Refresh">Lynx and Client-Side-Pull</a>
 <li><a href="#Cookies" NAME="ToC-Cookies">Lynx and State Management</a> (Me want <em>cookie</em>!)
 <li><A HREF="#Invoking" NAME="ToC-Invoking">The Lynx command line</A>
+<li><A HREF="#lynx.cfg" NAME="ToC-lynx.cfg">System-wide configuration in lynx.cfg file</A>
 <li><A HREF="#Hist" NAME="ToC-Hist">Lynx development history</A>
 </ul>
 
@@ -152,8 +153,8 @@ wishes to download the file or cancel. If the user selects '<em>D'</em>
 for download, Lynx will transfer the file into a temporary location and
 present the user with a list of options. The only default option is
 <em>Save to disk</em>, which is disabled if Lynx is running in anonymous
-mode. Any number of additional download methods may be defined in the
-lynx.cfg file by the system administrator. Programs like kermit, zmodem
+mode. Additional download methods may be defined in the
+<A HREF="#lynx.cfg">lynx.cfg</A> file. Programs like kermit, zmodem
 and FTP are some possible options. [<A HREF="#ToC-Local">ToC</A>]
 
 <h2 ID="Leaving"><A NAME="Leaving"><em>Leaving Lynx</em></A></h2>
@@ -318,8 +319,8 @@ mail files to themselves and print the entire file to the screen.
 Lynx from their own accounts (that is, so-called "non-anonymous
 users").  In particular, the <em>Save to a local file</EM>
 option allows you to save the document into a file on your disk
-space.	Any number of additional print options may also be
-available as configured by your system administrator.
+space.	Additional print options may also be
+available as configured in the <A HREF="#lynx.cfg">lynx.cfg</A> file.
 
 <p>Some options, such as <em>Save to a local file</em>, involve prompting
 for an output filename.  All output filename entries are saved in a
@@ -380,9 +381,9 @@ a list of options, as when a link for a binary file of a type for
 which no viewer has been mapped is activated.  As described
 above, the only default <em>Download option</em> is <em>Save to
 disk</em>, which is disabled if Lynx is running in anonymous
-mode, and any number of additional download methods such as
-kermit and zmodem may be defined in the <em>lynx.cfg</em> file by
-the system administrator.  Downloading the sources of HTML and
+mode. Additional download methods such as
+kermit and zmodem may be defined in the <A HREF="#lynx.cfg">lynx.cfg</A> file.
+Downloading the sources of HTML and
 plain text files, instead of toggling to <a
 href="#LocalSource">display the source</a> ('<em>\</em>') and
 then using <a href="#Disposing">Printing</a> options, ensures
@@ -579,7 +580,8 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    yourself and will be included as the From: address in any mail
 	    or comments that you send.	It will also be sent as the From:
 	    field in HTTP or HTTPS requests if inclusion of that header
-	    has been enabled via the NO_FROM_HEADER definition in lynx.cfg
+	    has been enabled via the NO_FROM_HEADER definition in
+	    <A HREF="#lynx.cfg">lynx.cfg</A>
 	    (the compilation default is not to send the header), or via the
 	    <em>-from</em> command line toggle.
 
@@ -858,7 +860,8 @@ scheme will allow you to enter your message.
 using the simple line mode input scheme, type a '<em>.</em>' (period) on
 a line by itself.  You will be asked a final time whether to send the
 message.  If you press '<em>y</em>', you will be prompted whether to
-append your signature file if one was defined in lynx.cfg and is accessible,
+append your signature file if one was defined in 
+<A HREF="#lynx.cfg">lynx.cfg</A> and is accessible,
 and then the message will be sent, whereas if you press '<em>n</em>' the
 message will be deleted.  Entering Control-G in response to any prompts
 also will cancel the mailing.[<A HREF="#ToC-Mail">ToC</A>]
@@ -888,7 +891,7 @@ received the article supports posting from your site, a link that says
 	    Once you have typed in your message, you will be asked for
 	    confirmation of whether to proceed with the posting, and
 	    whether to append your signature file if one was defined in
-	    lynx.cfg and is accessible.  See <a
+	    <A HREF="#lynx.cfg">lynx.cfg</A> and is accessible.  See <a
 	    href="lynx_url_support.html">Supported URLs</a> for more
 	    information about the URL schemes for posting or sending
 	    followups (replies) to nntp servers with Lynx.
@@ -965,7 +968,8 @@ of shortcut names available.
 previous entries can be retrieved for re-use by pressing the
 <em>up-arrow</em> or <em>down-arrow</em> keys at the prompt.
 
-<p>Note to System Administrators:  Read the <em>lynx.cfg</em> file on how
+<p>Note to System Administrators:
+Read the <A HREF="#lynx.cfg">lynx.cfg</A> file on how
 to set up the jump command for your system and how to define shortcut names.
 [<A HREF="#ToC-Jumps">ToC</A>]
 
@@ -1307,7 +1311,7 @@ which you activated, and then you go back via the PREV_DOC
 (<em>left-arrow</em>) command or via the <a
 href="keystrokes/history_help.html">History Page</a>.  Lynx can be
 compiled so that it resubmits the form in those cases as well, and the default
-can be changed via <em>lynx.cfg</em>, and toggled via the
+can be changed via <A HREF="#lynx.cfg">lynx.cfg</A>, and toggled via the
 <em>-resubmit_posts</em> command line switch.
 
 <p>If the form has one <em>text entry</em> field and no other fields except,
@@ -1745,7 +1749,8 @@ map can be accessed, and their nature indicated via ALT attributes,
 Lynx-friendly sites can map 0,0 such that the server returns a
 for-text-client document homologous to the content of FIG elements (see
 below).  Inclusion of such a link for submissions to the server can be
-disabled by default via the configuration file (lynx.cfg), and the
+disabled by default via the configuration file
+(<A HREF="#lynx.cfg">lynx.cfg</A>), and the
 default can be toggled via the <em>-ismap</em> command line switch.
 
 <p>Lynx also recognizes the <a
@@ -1815,7 +1820,8 @@ more elaborate format for cookies, designated as <em>Version 1</em>, is
 being standardized by the IETF (Internet Engineering Task Force).  Lynx
 supports both <em>Version 0</em> and <em>Version 1</em> cookie exchanges.
 This support can be disabled by default via the SET_COOKIES symbol in the
-compilation (<em>userdefs.h</em>) and/or run time (<em>lynx.cfg</em>)
+compilation (<em>userdefs.h</em>) and/or run time
+(<A HREF="#lynx.cfg">lynx.cfg</A>)
 configuration files, and that default setting can be toggled via the
 <em>-cookies</em> command line switch.
 The SET_COOKIES symbol can be further modified by the ACCEPT_ALL_COOKIES mode.
@@ -1945,7 +1951,7 @@ where
 		<dd>enable case-sensitive string searching.
 	     <dt><code>-cfg=FILENAME</code>
 		<dd>specifies a Lynx configuration file other than the default
-		    lynx.cfg.
+		    <A HREF="#lynx.cfg">lynx.cfg</A>.
 	     <dt><code>-child</code>
 		<dd>exit on left-arrow in startfile, and disable save to disk.
 	     <dt><code>-color</code>
@@ -2079,7 +2085,8 @@ where
 	     <dt><code>-popup</code>
 		<dd>toggles handling of single-choice SELECT options via
 		    popup windows or as lists of radio buttons.  The default
-		    configuration can be changed in userdefs.h or lynx.cfg.
+		    configuration can be changed in userdefs.h or
+		    <A HREF="#lynx.cfg">lynx.cfg</A>.
 		    It also can be set and saved via the 'o'ptions menu.
 		    The command line switch toggles the default.
 	     <dt><code>-post_data</code>
@@ -2206,7 +2213,8 @@ where
 		    corner but will instead be positioned at the start of the
 		    currently selected link.  Show cursor is the default for
 		    systems without FANCY_CURSES capabilities.	The default
-		    configuration can be changed in userdefs.h or lynx.cfg.
+		    configuration can be changed in userdefs.h or
+		    <A HREF="#lynx.cfg">lynx.cfg</A>.
 		    It also can be set and saved via the 'o'ptions menu.
 		    The command line switch toggles the default.
 	     <dt><code>-soft_dquotes</code>
@@ -2273,6 +2281,41 @@ where
 <p>No options are required, nor is a startfile argument required.
 White space may be substituted for any equal sign ('<em>=</em>')
 appearing in the option list above. [<A HREF="#ToC-Invoking">ToC</A>]
+
+
+<h2 ID="lynx.cfg"><A NAME="lynx.cfg">
+<em>System-wide configuration in lynx.cfg file</em></A></h2>
+
+Lynx has several levels of customization:
+from the Options Menu (accessible on-line,
+and possibly stored in your local .lynxrc file),
+via command-line switches
+on startup (mainly for batch processing).
+The most important and numerous default settings are stored
+in the Lynx configuration file <em>lynx.cfg</em>.
+
+<p>If you are on a UNIX system you should have
+appropriate permissions to make changes there or ask your
+system administrator to modify lynx.cfg for your needs.
+This file provides default settings for all accounts on your system.
+It may be copied to your shell account and included with -cfg command line
+switch or via an environment variable LYNX_CFG (if you have shell access).
+Starting with version 2.8.1 Lynx has an include facility so you can
+load the system-wide configuration file and easily add one or more settings
+from your local add-on configuration file. It is really cool to read
+lynx.cfg with its comments for hundreds of options,
+most of them commented out because they are built-in defaults.
+
+<p>To see the current lynx.cfg state you may press <em>'='</em> key
+for <em>Lynx Information Page</em> and follow <em>your lynx.cfg</em> link
+from there near the top.
+
+<p>However, for those who have a restricted account many Lynx features
+may be disabled by the system administrator, you probably will not see
+your lynx.cfg.
+
+
+[<A HREF="#ToC-lynx.cfg">ToC</A>]
 
 <h2 ID="Hist"><A NAME="Hist"><em>Lynx development history</em></A></h2>
 

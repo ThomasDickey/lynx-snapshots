@@ -7,6 +7,7 @@
 #include <LYGlobalDefs.h>
 #include <LYStrings.h>
 #include <LYTraversal.h>
+#include <LYCookie.h>
 #include <UCAuto.h>
 
 #include <LYexit.h>
@@ -177,6 +178,17 @@ PUBLIC void cleanup NOARGS
     UCChangeTerminalCodepage(-1, (LYUCcharset*)0);
 #endif /* LINUX */
 #endif /* EXP_CHARTRANS_AUTOSWITCH */
+
+#ifdef EXP_PERSISTENT_COOKIES
+    /*
+     * This can go right here for now. We need to work up a better place
+     * to save cookies for the next release, preferably whenever a new
+     * persistent cookie is received or used. Some sort of protocol to
+     * handle two processes writing to the cookie file needs to be worked
+     * out as well.
+     */
+    LYStoreCookies (LYCookieFile);
+#endif
 
     cleanup_files();
     for (i = 0; i < nhist; i++) {

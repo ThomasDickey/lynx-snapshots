@@ -30,7 +30,7 @@ extern CONST char * LYchar_set_names[];  /* Full name, not MIME */
 extern int LYlowest_eightbit[];
 extern int LYNumCharsets;
 extern LYUCcharset LYCharSet_UC[];
-extern int UCGetLYhndl_byAnyName PARAMS((CONST char *value));
+extern int UCGetLYhndl_byAnyName PARAMS((char *value));
 extern void HTMLSetCharacterHandling PARAMS((int i));
 extern void HTMLSetUseDefaultRawMode PARAMS((int i, BOOLEAN modeflag));
 extern void HTMLUseCharacterSet PARAMS((int i));

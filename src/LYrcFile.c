@@ -559,9 +559,6 @@ PUBLIC int save_rc NOPARAMS
     /*
      *  Open the file for write.
      */
-#if defined(__DJGPP__) || defined(_WINDOWS)
-    _fmode = O_TEXT;
-#endif /* __DJGPP__  or _WINDOWS */
     if ((fp = LYNewTxtFile(rcfile)) == NULL) {
 	return FALSE;
     }
@@ -980,9 +977,6 @@ PUBLIC int save_rc NOPARAMS
      *  Close the RC file.
      */
     fclose(fp);
-#if defined(__DJGPP__) || defined(_WINDOWS)
-    _fmode = O_BINARY;
-#endif /* __DJGPP__ or _WINDOWS */
 
 #ifdef VMS
     /*

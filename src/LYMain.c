@@ -557,6 +557,7 @@ PUBLIC int main ARGS2(
      * To prevent corrupting binary data with _WINDOWS and DJGPP
      * we open files and stdout in BINARY mode by default.
      * Where necessary we should open and (close!) TEXT mode.
+     * (use LYNewTxtFile/LYAppendToTxtFile to open text files for writing)
      */
     _fmode = O_BINARY;
     SetOutputMode( O_BINARY );
@@ -1013,10 +1014,6 @@ PUBLIC int main ARGS2(
     LYAddPathToHome(LYTraceLogPath = malloc(LY_MAXPATH), LY_MAXPATH, "Lynx.trace");
 
     if (TRACE && LYUseTraceLog) {
-#if defined(__DJGPP__) || defined(_WINDOWS)
-	_fmode = O_TEXT;
-#endif /* __DJGPP__  or _WINDOWS */
-
 	/*
 	 *  If we can't open it for writing, give up.
 	 *  Otherwise, on VMS close it, delete it and any
@@ -1026,10 +1023,6 @@ PUBLIC int main ARGS2(
 	if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
 	    WWW_TraceFlag = FALSE;
 	    fprintf(stderr, "%s\n", TRACELOG_OPEN_FAILED);
-
-#if defined(__DJGPP__) || defined(_WINDOWS)
-	    _fmode = O_BINARY;
-#endif /* __DJGPP__ or _WINDOWS */
 	    exit(-1);
 	}
 #ifdef VMS
@@ -2494,7 +2487,7 @@ static Parse_Args_Type Arg_Table [] =
 {
    PARSE_SET(
       "accept_all_cookies", SET_ARG,		&LYAcceptAllCookies,
-      "accepts all cookies"
+      "\naccepts all cookies"
    ),
    PARSE_FUN(
       "anonymous",	FUNCTION_ARG,	anonymous_fun,

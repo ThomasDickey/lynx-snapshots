@@ -3208,7 +3208,7 @@ static char * preferred_doc_lang_string = "preferred_doc_lang";
 static char * user_agent_string		= "user_agent";
 
 #define PutLabel(fp, text) \
-	fprintf(fp,"%-35s: ", text)
+	fprintf(fp,"  %-33s: ", text)
 
 #define PutTextInput(fp, name, value, size, disable) \
 	fprintf(fp,\
@@ -3745,7 +3745,7 @@ PUBLIC int gen_options ARGS1(
      * preformatted text follows
      */
     fprintf(fp0,"<pre>\n");
-    fprintf(fp0,"\n<em>Personal Preferences</em>\n");
+    fprintf(fp0,"\n  <em>Personal Preferences</em>\n");
 
     /* Cookies: SELECT */
     PutLabel(fp0, "Cookies");
@@ -3891,7 +3891,7 @@ PUBLIC int gen_options ARGS1(
     /*
      * Bookmark Options
      */
-    fprintf(fp0,"\n<em>Bookmark Options</em>\n");
+    fprintf(fp0,"\n  <em>Bookmark Options</em>\n");
 
     /* Multi-Bookmark Mode: SELECT */
     if (!LYMBMBlocked) {
@@ -3925,7 +3925,7 @@ PUBLIC int gen_options ARGS1(
     /*
      * Character Set Options
      */
-    fprintf(fp0,"\n<em>Character Set Options</em>\n");
+    fprintf(fp0,"\n  <em>Character Set Options</em>\n");
 
     /* Assume Character Set: SELECT */
     /* if (user_mode==ADVANCED_MODE) */
@@ -3985,7 +3985,7 @@ PUBLIC int gen_options ARGS1(
     /*
      * File Management Options
      */
-    fprintf(fp0,"\n<em>File Management Options</em>\n");
+    fprintf(fp0,"\n  <em>File Management Options</em>\n");
 
     /* FTP sort: SELECT */
     PutLabel(fp0, "Ftp sort criteria");
@@ -4012,7 +4012,7 @@ PUBLIC int gen_options ARGS1(
     /*
      * Headers transferred to remote server
      */
-    fprintf(fp0,"\n<em>Headers transferred to remote server</em>\n");
+    fprintf(fp0,"\n  <em>Headers transferred to remote server</em>\n");
 
     /* Preferred Document Character Set: INPUT */
     PutLabel(fp0, "Preferred document character set");
@@ -4033,7 +4033,7 @@ PUBLIC int gen_options ARGS1(
 
     if (!LYRestricted) {
 	fprintf(fp0,
-		"<a href=\"%s\">lynx.cfg information (read-only)</a>\n",
+		"\n  Check your <a href=\"%s\">lynx.cfg</a> here\n",
 		lynx_cfg_infopage());
     }
 

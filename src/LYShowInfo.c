@@ -134,13 +134,15 @@ PUBLIC int showinfo ARGS4(
 
     if (!LYRestricted) {
 #ifdef HAVE_CFG_DEFS_H
-	fprintf(fp0, " - <a href=\"%s\">compile time settings</a></h1>\n",
+	fprintf(fp0, " - <a href=\"%s\">compile time settings</a>\n",
 		     lynx_compile_opts());
 #else
-	fprintf(fp0, " - <a href=\"%s\">your lynx.cfg</a></h1>\n",
+	fprintf(fp0, " - <a href=\"%s\">your lynx.cfg</a>\n",
 		     lynx_cfg_infopage());
 #endif
     }
+    fprintf(fp0, "</h1>\n");  /* don't forget to close <h1> */
+
 
 #ifdef DIRED_SUPPORT
     if (lynx_edit_mode && nlinks > 0) {

@@ -39,7 +39,6 @@
       * If a cookie has the secure flag set, we presently treat only SSL
 	connections as secure.	This may need to be expanded for other
 	secure communication protocols that become standardized.
-      * Cookies could be optionally stored in a file from session to session.
 */
 
 #include <HTUtils.h>
@@ -67,7 +66,7 @@
 **  list.  Thus, finding the cookies that apply to a given URL is a
 **  two-level scan; first we check each domain to see if it applies,
 **  and if so, then we check the paths of all the cookies on that
-**  list.   We keep a running total of cookies as we add or delete
+**  list.  We keep a running total of cookies as we add or delete
 **  them
 */
 PRIVATE HTList *domain_list = NULL;
@@ -1923,7 +1922,7 @@ PUBLIC void LYLoadCookies ARGS1 (
 }
 
 /* rjp - experimental persistent cookie support */
-PRIVATE void LYStoreCookies ARGS1 (
+PUBLIC void LYStoreCookies ARGS1 (
 	CONST char *,	cookie_file)
 {
     char buf[1024];
@@ -2028,11 +2027,6 @@ PRIVATE int LYHandleCookies ARGS4 (
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
 #endif /* VMS */
-
-#ifdef EXP_PERSISTENT_COOKIES
-    /* rjp - this can go here for now */
-    LYStoreCookies (LYCookieFile);
-#endif
 
     /*
      *	Check whether we have something to do. - FM
@@ -2445,10 +2439,14 @@ Delete_all_cookies_in_domain:
 }
 
 
-/* cookie_add_acceptlist
- *   is passed a string of domains (with leading '.', and comma
- *   delimited) to add to the "always accept" list for cookies. -BJP
- */
+/*      cookie_add_acceptlist
+**      ---------------------
+**
+**   Is passed a comma-delimited string of domains to add to the
+**   "always accept" list for cookies.  The domains need to be identical
+**   to the form from which the cookie is received, with or without a
+**   leading ".".  - BJP
+*/
 
 PUBLIC void cookie_add_acceptlist ARGS1(
 	char *, 	acceptstr)
@@ -2461,7 +2459,8 @@ PUBLIC void cookie_add_acceptlist ARGS1(
     char *strsmall = NULL;
     int isexisting = FALSE;
 
-    /* is this the first cookie we're handling? if so, initialize the
+    /*
+     * Is this the first cookie we're handling?  If so, initialize
      * domain_list.
      */
 
@@ -2479,9 +2478,10 @@ PUBLIC void cookie_add_acceptlist ARGS1(
 	if(strsmall == NULL)
 	    break;
 
-	/* check the list of existing cookies to see if this is a
+	/*
+	 * Check the list of existing cookies to see if this is a
 	 * re-setting of an already existing cookie -- if so, just
-	 * change the behavior, if not, create a new domain entry
+	 * change the behavior, if not, create a new domain entry.
 	 */
 
 	for (hl = domain_list; hl != NULL; hl = hl->next) {
@@ -2504,6 +2504,7 @@ PUBLIC void cookie_add_acceptlist ARGS1(
 	    de->bv = ACCEPT_ALWAYS;
 
 	    StrAllocCopy(de->domain, strsmall);
+	    de->cookie_list = HTList_new();
 	    HTList_addObject(domain_list, de);
 	} else {
 	    de2->bv = ACCEPT_ALWAYS;
@@ -2516,10 +2517,14 @@ PUBLIC void cookie_add_acceptlist ARGS1(
 }
 
 
-/* cookie_add_rejectlist
- *   is passed a string of domains (with leading '.', and comma
- *   delimited) to add to the "always reject" list for cookies. -BJP
- */
+/*      cookie_add_rejectlist
+**      ---------------------
+**
+**   Is passed a comma-delimited string of domains to add to the
+**   "always reject" list for cookies.  The domains need to be identical
+**   to the form from which the cookie is received, with or without a
+**   leading ".".  - BJP
+*/
 
 PUBLIC void cookie_add_rejectlist ARGS1(
 	char *, 	rejectstr)
@@ -2532,7 +2537,8 @@ PUBLIC void cookie_add_rejectlist ARGS1(
     char *strsmall = NULL;
     int isexisting = FALSE;
 
-    /* is this the first cookie we're handling? if so, initialize the
+    /*
+     * Is this the first cookie we're handling?  If so, initialize
      * domain_list.
      */
 
@@ -2550,9 +2556,10 @@ PUBLIC void cookie_add_rejectlist ARGS1(
 	if(strsmall == NULL)
 	    break;
 
-	/* check the list of existing cookies to see if this is a
+	/*
+	 * Check the list of existing cookies to see if this is a
 	 * re-setting of an already existing cookie -- if so, just
-	 * change the behavior, if not, create a new domain entry
+	 * change the behavior, if not, create a new domain entry.
 	 */
 
 	for (hl = domain_list; hl != NULL; hl = hl->next) {
@@ -2575,6 +2582,7 @@ PUBLIC void cookie_add_rejectlist ARGS1(
 	    de->bv = REJECT_ALWAYS;
 
 	    StrAllocCopy(de->domain, strsmall);
+	    de->cookie_list = HTList_new();
 	    HTList_addObject(domain_list, de);
 	} else {
 	    de2->bv = REJECT_ALWAYS;

@@ -624,12 +624,14 @@ PUBLIC int main ARGS2(
     } else if (this_LYNXcharset[0] == '\0') {
 	strncpy(this_LYNXcharset,this_MIMEcharset,UC_MAXLEN_LYNXCSNAME);
     }
+/***** DO NOT produce trailing spaces!
     if ((i = strlen(this_LYNXcharset)) < UC_LEN_LYNXCSNAME) {
 	for (; i < UC_LEN_LYNXCSNAME; i++) {
 	    this_LYNXcharset[i] = ' ';
 	}
 	this_LYNXcharset[i] = '\0';
     }
+*******/
 #ifdef NOTDEFINED
     fprintf(stderr,"this_MIMEcharset: %s.\n",this_MIMEcharset);
     fprintf(stderr,"this_LYNXcharset: %s.\n",this_LYNXcharset);
