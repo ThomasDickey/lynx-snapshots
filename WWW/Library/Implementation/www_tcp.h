@@ -192,6 +192,10 @@ extern int ws_netread(int fd, char *buf, int len);
 #include <errno.h>
 #include <direct.h>
 
+#ifndef pid_t
+typedef int pid_t;
+#endif /* !pid_t */
+
 #ifdef USE_WINSOCK2_H
 #include <winsock2.h>		/* normally included in windows.h */
 

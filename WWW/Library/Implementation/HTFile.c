@@ -1631,6 +1631,7 @@ PRIVATE void do_readme ARGS2(HTStructured *, target, CONST char *, localname)
 
 #define NM_cmp(a,b) ((a) < (b) ? -1 : ((a) > (b) ? 1 : 0))
 
+#if defined(LONG_LIST) && defined(DIRED_SUPPORT)
 PRIVATE char *file_type ARGS1(char *, path)
 {
     char *type;
@@ -1641,13 +1642,14 @@ PRIVATE char *file_type ARGS1(char *, path)
 	type = "";
     return type;
 }
+#endif /* LONG_LIST && DIRED_SUPPORT */
 
 PRIVATE int dired_cmp ARGS2(void *, a, void *, b)
 {
     DIRED *p = (DIRED *)a;
     DIRED *q = (DIRED *)b;
     int code = p->sort_tags - q->sort_tags;
-#ifdef LONG_LIST
+#if defined(LONG_LIST) && defined(DIRED_SUPPORT)
     if (code == 0) {
 	switch (dir_list_order) {
 	case ORDER_BY_SIZE:
@@ -1673,7 +1675,7 @@ PRIVATE int dired_cmp ARGS2(void *, a, void *, b)
 	    break;
 	}
     }
-#endif /* LONG_LIST */
+#endif /* LONG_LIST && DIRED_SUPPORT */
     if (code == 0)
 	code = AS_cmp(p->file_name, q->file_name);
 #if 0

@@ -1250,7 +1250,7 @@ PUBLIC int follow_link_number ARGS4(
     */
    if (*num > 0) {
 	int info;
-	char *text;
+	char *text = NULL;
 
 	/*
 	 *  Get the lname, and hightext, directly from www
@@ -1268,7 +1268,8 @@ PUBLIC int follow_link_number ARGS4(
 			     &new_link,
 			     &text,
 			     &links[cur].lname);
-	LYSetHilite(cur, text);
+	if (text != NULL)
+	    LYSetHilite(cur, text);
 	if (info == WWW_INTERN_LINK_TYPE) {
 	    links[cur].type = WWW_INTERN_LINK_TYPE;
 	    return(DO_LINK_STUFF);
