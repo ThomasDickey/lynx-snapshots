@@ -1603,8 +1603,6 @@ PUBLIC char * SNACat ARGS3(
 }
 
 
-#ifdef EXP_8BIT_TOUPPER
-
 /*
 **   UPPER8 ?
 **   it was "TOUPPER(a) - TOUPPER(b)" in its previous life...
@@ -1629,29 +1627,44 @@ PUBLIC char * SNACat ARGS3(
 **   may be interpreted as equal, but this side effect is negligible
 **   if the user search string is more than one character long.  - LP
 **
+**   Currently we enable new technique only for DOS/WINDOWS display charsets
+**   and also for EXP_8BIT_TOUPPER compilation symbol.
 */
 PUBLIC int UPPER8(int ch1, int ch2)
 {
+
+#ifdef NOTUSED
     /* Try case-Sensitive match for speed, but mostly for stability */
     /* while doing experiments with the remainder of this function. */
     if ((unsigned char)ch1==(unsigned char)ch2)
        return(0);
+#endif /* NOTUSED */
 
     /* case-insensitive match for us-ascii */
     if ((unsigned char)ch1 < 128 && (unsigned char)ch2 < 128)
 	return(TOUPPER(ch1) - TOUPPER(ch2));
 
-    /* compare "7bit approximation" for letters >127   */
+    /* case-insensitive match for upper half */
     if ((unsigned char)ch1 > 127 && (unsigned char)ch2 >127)
     {
+	CONST char *disp_charset;
+	disp_charset = LYCharSet_UC[current_char_set].MIMEname;
+
+#if !defined(EXP_8BIT_TOUPPER)
+	if  (!(strncasecomp(disp_charset, "cp", 2) ||
+		strncasecomp(disp_charset, "windows", 7))) {
+
+	return(TOUPPER(ch1) - TOUPPER(ch2)); /* old-style */
+	} else 
+#endif
+	{
+	/* compare "7bit approximation" for letters >127   */
 	/* BTW, if we remove the check for >127 above	   */
 	/* we get even more "relaxed" insensitive match... */
 
-	CONST char *disp_charset;
 	int charset_in, charset_out, uck1, uck2;
 	char replace_buf1 [10], replace_buf2 [10];
 
-	disp_charset = LYCharSet_UC[current_char_set].MIMEname;
 	charset_in  = UCGetLYhndl_byMIME(disp_charset);
 	charset_out = UCGetLYhndl_byMIME("us-ascii");
 
@@ -1662,9 +1675,8 @@ PUBLIC int UPPER8(int ch1, int ch2)
 
 	if ((uck1 > 0) && (uck2 > 0))  /* both replacement strings found */
 	    return (strcasecomp(replace_buf1, replace_buf2));
+	}
     }
 
     return(-10);  /* mismatch, if we come to here */
 }
-
-#endif /* EXP_8BIT_TOUPPER */

@@ -1,12 +1,10 @@
-	Changes in the development code based on Lynx v2.7.
-	===================================================
-[ This file will become the CHANGES file for a new Lynx release.
-(More detailed change information may be in separate files, which could
-later disappear.  For some early changes for compilation on Win32 and DOS
-platforms see also INSTALLATION, for some changes for auto-configure and
-simple curses color see also README.configure).  Note that the 2.7 -> 2.7.1
-changes are included here. - KW]
+=======================================================================
+---      Release of Lynx2-8pre.5 as Lynx v2.8 (March 7, 1998)       ---
+=======================================================================
 
+1998-03-07
+* move ifdef's for EXP_8BIT_TOUPPER inside UPPER8 function to allow
+  check for DOS/WINDOWS display charsets. - LP
 1998-03-06
 * clarify relationship between the configure script and userdefs.h with
   respect to the LYNX_CFG_FILE definition. - TD
@@ -19,13 +17,12 @@ changes are included here. - KW]
 * restore simple zmodem downloader script, displaced by recent undocumented
   change (there are some concerns about security or permissions with the
   alternate script).  - DK
-* DOSPATH localfile patch: corrected display of file://localhost/c:/,
-  which was displayed as file://localhost/c%3A/ (it looks strange,
-  no escaping is required in this case; tweak LYConvertToUrl() in LYUtils.c).
-  Now we may start "lynx c:" or 'go' c:  and not see these strange letters.
-  On the other hand, % and # symbols are now restricted to be in local file
-  path manually typed from 'go' URL (usually not happend) and interpreted only
-  as URL #fragment (Hex escaping after % done for valid numbers only). - LP
+* DOSPATH localfile patch:  corrected display of file://localhost/c:/,
+  which was displayed as file://localhost/c%3A/ (tweak LYConvertToUrl() in
+  LYUtils.c).  Now we may start "lynx c:" or 'go' c:  and not see these
+  strange letters.  On the other hand, if % and # symbols found in local
+  path it will be escaped as before (note that #fragment is not supposed here
+  to be used from command line...) - LP
 * workaround error in vendor's terminfo description of 'dtterm' by ensuring
   we limit color pair-number accordingly. - TD
 1998-03-04
@@ -57,7 +54,7 @@ changes are included here. - KW]
   Microsoft FrontPage. - LP
 * remove unneeded code for nbsp, ensp, emsp, thinsp and shy from handle_entity()
   in SGML.c - LP
-* ifdef UPPER8 function with EXP_8BIT_TOUPPER, make this the default for DJGPP,
+* ifdef UPPER8 function with EXP_8BIT_TOUPPER,
   add configure option --enable-8bit-toupper to allow testing.  - TD
 * case-insensitive search and 8bit letters:  It was realized that
   information about upper/lower mapping got from TOUPPER which depends on
@@ -110,7 +107,7 @@ changes are included here. - KW]
 * tweaks to HTPlain.c, LYCharUtils.c and SGML.c, remove extra checks for
   Unicode mdash, ndash, trade, as well as "iso-8859-2", "koi8-r", since they
   are done in the chartrans tables - LP
-* add an alias 'H' for F1 when using RAWDOSKEYHACK - DK
+* add an alias 'H' for F1 when using RAWDOSKEYHACK (LYStrings.c) - DK
 * restore -DRAWDOSKEYHACK to src/makefile.dos, reported by DK - TD
 * correct a typo in CF_CURSES_LIBS configure macro, which caused the configure
   script to not add termcap library to the list - TD
