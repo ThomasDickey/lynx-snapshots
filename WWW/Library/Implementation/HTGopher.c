@@ -403,7 +403,7 @@ PRIVATE void parse_menu ARGS2(
 		    HTSprintf0(&address, "//%s/%c", host, gtype);
 
 		    for(r = selector; *r; r++) { /* Encode selector string */
-			if (acceptable[(unsigned char)*r]) {
+			if (acceptable[UCH(*r)]) {
 			    HTSprintf(&address, "%c", *r);
 			} else {
 			    HTSprintf(&address, "%c%c%c",

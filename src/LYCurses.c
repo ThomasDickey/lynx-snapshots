@@ -297,7 +297,7 @@ PUBLIC void setStyle ARGS4(int,style,int,color,int,cattr,int,mono)
 PUBLIC void setHashStyle ARGS5(int,style,int,color,int,cattr,int,mono,char*,element)
 {
     bucket* ds = &hashStyles[style];
-    CTRACE((tfp, "CSS(SET): <%s> hash=%d, ca=%d, ma=%d\n", element, style, color, mono));
+    CTRACE((tfp, "CSS(SET): <%s> hash=%d, ca=%#x, ma=%#x\n", element, style, color, mono));
     ds->color = color;
     ds->cattr = cattr;
     ds->mono = mono;
@@ -393,16 +393,11 @@ PUBLIC void curses_w_style ARGS3(
 	 */
 	if (!ds->name) break;
 #endif
-	if (style != s_alink) {
-	    CTRACE((tfp, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP));
-	    if (win == stdscr) cached_styles[YP][XP] = style;
-	}
-	LYAttrset(win, ds->color, ds->mono);
-	break;
-
+	/* FALL THROUGH */
     case ABS_ON: /* change without remembering the previous style */
-	    /* don't cache style changes for active links */
-	if (style != s_alink) {
+	    /* don't cache style changes for active links and edits */
+	if ( style != s_alink && style != s_aedit
+	     && style != s_aedit_pad && style != s_aedit_arr ) {
 	    CTRACE((tfp, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP));
 	    if (win == stdscr) cached_styles[YP][XP] = style;
 	}
@@ -457,7 +452,7 @@ void attribute ARGS2(int,style,int,dir)
 #endif
 #endif /* USE_COLOR_STYLE */
 
-PRIVATE int lynx_called_initscr;
+PRIVATE BOOL lynx_called_initscr = FALSE;
 
 #if HAVE_USE_DEFAULT_COLORS && USE_DEFAULT_COLORS
 /*
@@ -469,7 +464,7 @@ PUBLIC int lynx_default_colors NOARGS
     int code = 0;
     if (lynx_called_initscr) {
 	code = -1;
-	if (use_default_colors() == OK) {
+	if (!default_color_reset && use_default_colors() == OK) {
 	    default_fg = DEFAULT_COLOR;
 	    default_bg = DEFAULT_COLOR;
 	    code = 1;
@@ -689,6 +684,7 @@ static WINDOW *LYscreen = NULL;
 
 PUBLIC void start_curses NOARGS
 {
+    int keypad_on = 0;
 #ifdef USE_SLANG
     static int slinit;
 
@@ -821,6 +817,11 @@ PUBLIC void start_curses NOARGS
 	 */
 #if defined(HAVE_NEWTERM) && !defined(NCURSES) && !defined(HAVE_RESIZETERM)
 	{
+	    /*
+	     * Put screen geometry in environment variables used by
+	     * XOpen curses before calling newterm().  I believe this
+	     * completes work left unfinished by AJL & FM -- gil
+	     */
 	    static char lines_putenv[] = "LINES=abcde",
 			cols_putenv[]  = "COLUMNS=abcde";
 	    BOOLEAN savesize;
@@ -845,7 +846,15 @@ PUBLIC void start_curses NOARGS
 	size_change(0);
 	recent_sizechange = FALSE; /* prevent mainloop drawing 1st doc twice */
 #endif /* SIGWINCH */
+
 #if defined(USE_KEYMAPS) && defined(NCURSES_VERSION)
+#  if HAVE_KEYPAD
+	/* Need to switch keypad on before initializing keymaps, otherwise
+	   when the keypad is switched on, some keybindings may be overriden. */
+	keypad(stdscr,TRUE);
+	keypad_on = 1;
+#  endif /* HAVE_KEYPAD */
+
 	if (-1 == lynx_initialize_keymaps ()) {
 	    endwin();
 	    exit (-1);
@@ -938,7 +947,8 @@ PUBLIC void start_curses NOARGS
     noecho();
 
 #if HAVE_KEYPAD
-    keypad(stdscr,TRUE);
+    if (!keypad_on)
+	keypad(stdscr,TRUE);
 #endif /* HAVE_KEYPAD */
 
     lynx_enable_mouse (1);
@@ -1185,28 +1195,6 @@ PUBLIC BOOLEAN setup ARGS1(
     char *term_putenv = NULL;
     char *buffer = NULL;
     char *cp;
-#if defined(HAVE_SIZECHANGE) && !defined(USE_SLANG) && defined(NOTDEFINED)
-/*
- *  Hack to deal with a problem in sysV curses, that screen can't be
- *  resized to greater than the size used by initscr, which can only
- *  be called once.  So set environment variables LINES and COLUMNS
- *  to some suitably large size to force initscr to allocate enough
- *  space.  Later we get the real window size for setting LYlines
- *  and LYcols. - AJL & FM
- *
- *  Has problems, so we don't use this hack, but the code is here
- *  if someone wants to play with it some more. - FM
- */
-    char *lines_putenv = NULL;
-    char *cols_putenv = NULL;
-
-    if (getenv("LINES") == NULL && getenv("COLUMNS") == NULL) {
-	StrAllocCopy(lines_putenv, "LINES=120");
-	(void) putenv(lines_putenv);
-	StrAllocCopy(cols_putenv, "COLUMNS=240");
-	(void) putenv(cols_putenv);
-    }
-#endif /* HAVE_SIZECHANGE && !USE_SLANG && NOTDEFINED */
 
    /*
     *  If the display was not set by a command line option then
@@ -1270,29 +1258,6 @@ PUBLIC BOOLEAN setup ARGS1(
     }
 #endif /* HAVE_TTYTYPE */
 
-#if defined(HAVE_SIZECHANGE) && !defined(USE_SLANG) && defined(NOTDEFINED)
-    if (lines_putenv != NULL) {
-	/*
-	 *  Use SIGWINCH handler to set the true window size. - AJL && FM
-	 *
-	 *  Has problems, so we don't use this hack, but the code is here
-	 *  if someone wants to play with it some more. - FM
-	 */
-	size_change(0);
-	lines_putenv[6] = '\0';
-	(void) putenv(lines_putenv);
-	cols_putenv[8] = '\0';
-	(void) putenv(cols_putenv);
-	FREE(lines_putenv);
-	FREE(cols_putenv);
-    } else {
-	LYlines = LINES;
-	LYcols = COLS;
-    }
-#else
-    LYlines = LINES;
-    LYcols = COLS;
-#endif /* HAVE_SIZECHANGE && !USE_SLANG && USE_NOTDEFINED */
 #if defined(PDCURSES_EXP) && defined(WIN_EX) && defined(CJK_EX) /* 1999/08/26 (Thu) 17:53:38 */
     {
 	extern int current_codepage;	/* PDCurses lib. */

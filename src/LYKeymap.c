@@ -1341,7 +1341,7 @@ PUBLIC int lkcstring_to_lkc ARGS1(
 	c = *src;
     else if (strlen(src) == 2 && *src == '^')
 	c = src[1] & 037;
-    else if (strlen(src) >= 2 && isdigit(*src)) {
+    else if (strlen(src) >= 2 && isdigit(UCH(*src))) {
 	if (sscanf(src, "%i", &c) != 1)
 	    return (-1);
 #ifdef USE_KEYMAPS

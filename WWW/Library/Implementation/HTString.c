@@ -215,7 +215,7 @@ PUBLIC int AS_casecomp ARGS2(
 
     for ( ; ; p++, q++) {
 	if (!(*p && *q))
-	    return ((unsigned char) *p - (unsigned char) *q);
+	    return (UCH(*p)  - UCH(*q));
 	diff = TOASCII(TOLOWER(*p))
 	     - TOASCII(TOLOWER(*q));
 	if (diff)
@@ -239,7 +239,7 @@ PUBLIC int AS_ncmp ARGS3(
 
     for ( ; (p-a) < n; p++, q++) {
 	if (!(*p && *q))
-	    return ((unsigned char) *p - (unsigned char) *q);
+	    return (UCH(*p) - UCH(*q));
 	diff = TOASCII(*p)
 	     - TOASCII(*q);
 	if (diff)
@@ -599,7 +599,7 @@ PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf ARGS4(
 	    while (*++fmt != '\0' && !done) {
 		fmt_ptr[f++] = *fmt;
 
-		if (isdigit(*fmt)) {
+		if (isdigit(UCH(*fmt))) {
 		    int num = *fmt - '0';
 		    if (state == Flags && num != 0)
 			state = Width;
@@ -623,7 +623,7 @@ PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf ARGS4(
 		    }
 		    sprintf(&fmt_ptr[--f], "%d", ival);
 		    f = strlen(fmt_ptr);
-		} else if (isalpha(*fmt)) {
+		} else if (isalpha(UCH(*fmt))) {
 		    done = TRUE;
 		    switch (*fmt) {
 		    case 'Z': /* FALLTHRU */
@@ -847,7 +847,7 @@ PUBLIC char *HTQuoteParameter ARGS1(
 
     for (i=0; i < last; ++i)
 	if (strchr("\\&#$^*?(){}<>\"';`|", parameter[i]) != 0
-	 || isspace(parameter[i]))
+	 || isspace(UCH(parameter[i])))
 	    ++quoted;
 
     result = (char *)malloc(last + 5*quoted + 3);

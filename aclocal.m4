@@ -2184,7 +2184,9 @@ AC_DEFUN([CF_PATH_SYNTAX],[
 case ".[$]$1" in #(vi
 ./*) #(vi
   ;;
+changequote(,)dnl
 .[a-zA-Z]:[\\/]*) #(vi OS/2 EMX
+changequote([,])dnl
   ;;
 .\[$]{*prefix}*) #(vi
   eval $1="[$]$1"
@@ -2198,7 +2200,7 @@ case ".[$]$1" in #(vi
   $1=`echo [$]$1 | sed -e s@NONE@$ac_default_prefix@`
   ;;
 *)
-  AC_ERROR(expected a pathname)
+  AC_ERROR(expected a pathname, not "[$]$1")
   ;;
 esac
 ])dnl
@@ -2420,6 +2422,14 @@ cf_slang_LIBS1="$LIBS"
 CF_TERMCAP_LIBS
 cf_slang_LIBS2="$LIBS"
 AC_CHECK_FUNC(acos,,[CF_RECHECK_FUNC(acos,m,LIBS)])
+case $host_os in #(vi
+os2*)
+	CF_FIND_LIBRARY(video,video,
+		[#include <sys/video.h>],
+		[v_init()],
+		v_init)
+	;;
+esac
 CF_FIND_LIBRARY(slang,slang,
 	[#include <slang.h>],
 	[SLtt_get_screen_size()],

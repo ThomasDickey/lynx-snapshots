@@ -285,7 +285,7 @@ PRIVATE int pumpData ARGS1(HTStream *, me)
 		    */
 		    BOOL given_is_8859
 			= (BOOL) (!strncmp(cp4, "iso-8859-", 9) &&
-				  isdigit((unsigned char)cp4[9]));
+				  isdigit(UCH(cp4[9])));
 		    BOOL given_is_8859like
 			= (BOOL) (given_is_8859 ||
 				  !strncmp(cp4, "windows-", 8) ||
@@ -305,7 +305,7 @@ PRIVATE int pumpData ARGS1(HTStream *, me)
 		    if (given_is_8859) {
 			cp1 = &cp4[10];
 			while (*cp1 &&
-			       isdigit((unsigned char)(*cp1)))
+			       isdigit(UCH(*cp1)))
 			    cp1++;
 			*cp1 = '\0';
 		    }
@@ -507,9 +507,9 @@ PRIVATE int dispatchField ARGS1(HTStream *, me)
 		    cp1++;
 		    while (*cp1 != '\0' && WHITE(*cp1))
 			cp1++;
-		    if (isdigit((unsigned char)*cp1)) {
+		    if (isdigit(UCH(*cp1))) {
 			cp0 = cp1;
-			while (isdigit((unsigned char)*cp1))
+			while (isdigit(UCH(*cp1)))
 			    cp1++;
 			if (*cp0 == '0' && cp1 == (cp0 + 1)) {
 			    me->anchor->no_cache = TRUE;

@@ -180,7 +180,7 @@ PRIVATE void HTMLGen_put_character ARGS2(
 	HTStructured *,		me,
 	char,			c)
 {
-    if (me->escape_specials && (unsigned char)c < 32) {
+    if (me->escape_specials && UCH(c) < 32) {
 	if (c == HT_NON_BREAK_SPACE || c == HT_EN_SPACE ||
 	    c == LY_SOFT_HYPHEN) { /* recursion... */
 	    HTMLGen_put_character(me, '&');

@@ -47,7 +47,7 @@ PRIVATE void SafeHTUnEscape ARGS1(
      {
 	/* FIXME: this is no longer explicitly 7-bit ASCII,
 	   but are there portability problems? */
-	if ((!LYIsASCII(string[i])) || !isprint(string[i]))
+	if ((!LYIsASCII(string[i])) || !isprint(UCH(string[i])))
 	{
 	   string[i] = '?';
 	   flg = TRUE;
@@ -72,7 +72,7 @@ PRIVATE void comma_append ARGS2(
     char *,	src)
 {
     if (*src) {
-	while (*src == ',' || isspace((unsigned char)*src))
+	while (*src == ',' || isspace(UCH(*src)))
 	    src++;
 	if (*src) {
 	    if (EMPTY(*dst)) {
@@ -1457,7 +1457,7 @@ PUBLIC void reply_by_mail ARGS4(
 	LYCloseTempFP(fd);	/* Close the tmpfile. */
 	scrollok(stdscr,FALSE); /* Stop scrolling.    */
 
-	if (term_letter || c == 7 || c == 3)
+	if (term_letter || LYCharIsINTERRUPT(c))
 	    goto cleanup;
 
 	/*
@@ -1494,7 +1494,7 @@ PUBLIC void reply_by_mail ARGS4(
 		refresh();
 		c = LYgetch();
 		addstr("\n");
-		if (term_letter || c == 7 || c == 3) {
+		if (term_letter || LYCharIsINTERRUPT(c)) {
 		    goto cancelled;
 		}
 		i = (LYlines - 2);

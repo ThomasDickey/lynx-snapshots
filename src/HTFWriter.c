@@ -826,7 +826,7 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 	    _statusline(CANNOT_DISPLAY_FILE_D_OR_C);
 	}
 
-	while (c != 'D' && c != 'C' && c != 7) {
+	while (c != 'D' && c != 'C' && !LYCharIsINTERRUPT(c)) {
 	    c = LYgetch_single();
 #ifdef VMS
 	    /*
@@ -843,7 +843,7 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 	/*
 	 *  Cancel on 'C', 'c' or Control-G or Control-C.
 	 */
-	if (c == 'C' || c == 7) {
+	if (c == 'C' || LYCharIsINTERRUPT(c)) {
 	    _statusline(CANCELLING_FILE);
 	    LYCancelDownload = TRUE;
 	    FREE(ret_obj);

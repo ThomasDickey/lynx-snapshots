@@ -135,10 +135,10 @@ PRIVATE void HTPlain_put_character ARGS2(
 	HTPlain_write(me, &c, 1);
 	return;
     }
-    HTPlain_lastraw = (unsigned char)c;
+    HTPlain_lastraw = UCH(c);
     if (c == '\r') {
 	HText_appendCharacter(me->text, '\n');
-    } else if (TOASCII((unsigned char)c) >= 127) {  /* S/390 -- gil -- 0305 */
+    } else if (TOASCII(UCH(c)) >= 127) {  /* S/390 -- gil -- 0305 */
 	/*
 	**  For now, don't repeat everything here
 	**  that has been done below - KW
@@ -146,23 +146,23 @@ PRIVATE void HTPlain_put_character ARGS2(
 	HTPlain_write(me, &c, 1);
     } else if (HTCJK != NOCJK) {
 	HText_appendCharacter(me->text, c);
-    } else if (TOASCII((unsigned char)c) >= 127 && TOASCII((unsigned char)c) < 161 &&
+    } else if (TOASCII(UCH(c)) >= 127 && TOASCII(UCH(c)) < 161 &&
 	       HTPassHighCtrlRaw) {
 	HText_appendCharacter(me->text, c);
-    } else if ((unsigned char)c == CH_NBSP) { /* S/390 -- gil -- 0341 */
+    } else if (UCH(c) == CH_NBSP) { /* S/390 -- gil -- 0341 */
 	HText_appendCharacter(me->text, ' ');
-    } else if ((unsigned char)c == CH_SHY) {
+    } else if (UCH(c) == CH_SHY) {
 	return;
-    } else if (((unsigned char)c >= ' ' && TOASCII((unsigned char)c) < 127) ||
+    } else if ((UCH(c) >= ' ' && TOASCII(UCH(c)) < 127) ||
 	       c == '\n' || c == '\t') {
 	HText_appendCharacter(me->text, c);
-    } else if (TOASCII((unsigned char)c) > 160) {
+    } else if (TOASCII(UCH(c)) > 160) {
 	if (!HTPassEightBitRaw &&
 	    !((me->outUCLYhndl == LATIN1) ||
 	      (me->outUCI->enc & (UCT_CP_SUPERSETOF_LAT1)))) {
 	    int len, high, low, i, diff = 1;
 	    CONST char * name;
-	    UCode_t value = (UCode_t)FROMASCII((TOASCII((unsigned char)c) - 160));
+	    UCode_t value = (UCode_t)FROMASCII((TOASCII(UCH(c)) - 160));
 
 	    name = HTMLGetEntityName(value);
 	    len =  strlen(name);
@@ -233,7 +233,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	}
 #else
 	if (*p == '\b') {
-	    if (HTPlain_lastraw >= (unsigned char)' ' &&
+	    if (HTPlain_lastraw >= UCH(' ') &&
 		HTPlain_lastraw != '\r' && HTPlain_lastraw != '\n') {
 		if (!HTPlain_bs_pending) {
 		    HTPlain_bs_pending = 1;
@@ -249,12 +249,12 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	} else if (*p == '_') {
 		if (!HTPlain_bs_pending) {
 		    HTPlain_bs_pending = 2;
-		    HTPlain_lastraw = (unsigned char)*p;
+		    HTPlain_lastraw = UCH(*p);
 		    continue;
 #if 0
 		} else if (HTPlain_bs_pending != 2) {
 		    HTPlain_bs_pending--; /* 1 -> 0, 3 -> 2 */
-		    HTPlain_lastraw = (unsigned char)*p;
+		    HTPlain_lastraw = UCH(*p);
 		    continue;
 #endif
 		}
@@ -272,9 +272,9 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	}
 
 	if (HTPlain_bs_pending &&
-	    !((unsigned char)*p >= ' ' && *p != '\r' && *p != '\n' &&
-	      (HTPlain_lastraw == (unsigned char)*p ||
-	       HTPlain_lastraw == (unsigned char)'_' ||
+	    !(UCH(*p) >= ' ' && *p != '\r' && *p != '\n' &&
+	      (HTPlain_lastraw == UCH(*p) ||
+	       HTPlain_lastraw == UCH('_') ||
 	       *p == '_'))) {
 	    if (HTPlain_bs_pending >= 2)
 		HText_appendCharacter(me->text, '_');
@@ -298,7 +298,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	} else {
 	    HTPlain_bs_pending = 0;
 	}
-	HTPlain_lastraw = (unsigned char)*p;
+	HTPlain_lastraw = UCH(*p);
 	if (*p == '\r') {
 	    HText_appendCharacter(me->text, '\n');
 	    continue;
@@ -308,7 +308,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	**  whenever that's appropriate.  - FM
 	*/
 	c = *p;
-	c_unsign = (unsigned char)c;
+	c_unsign = UCH(c);
 	code = (UCode_t)c_unsign;
 	saved_char_in = '\0';
 	/*
@@ -343,7 +343,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 			code = me->utf_char;
 			if (code > 0 && code < 256) {
 			    c = FROMASCII((char)code);
-			    c_unsign = (unsigned char)c;
+			    c_unsign = UCH(c);
 			}
 		    } else {
 			/*
@@ -409,7 +409,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	**  to Unicode (if appropriate). - FM
 	*/
 	if (!(me->T.decode_utf8 &&
-	      (unsigned char)(*p) > 127)) {
+	      UCH(*p) > 127)) {
 #ifdef NOTDEFINED
 	    if (me->T.strip_raw_char_in)
 		saved_char_in = c;
@@ -426,7 +426,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		    saved_char_in = c;
 		if (code < 256) {
 			c = FROMASCII((char)code);
-			c_unsign = (unsigned char)c;
+			c_unsign = UCH(c);
 		}
 	    }
 	    } else if (code < 32 && code != 0 &&
@@ -442,7 +442,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		    saved_char_in = c;
 		    if (code < 256) {
 			c = FROMASCII((char)code);
-			c_unsign = (unsigned char)c;
+			c_unsign = UCH(c);
 		    }
 		} else {
 		    uck = -1;
@@ -460,7 +460,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 			continue;
 		    } else if (uck < 0) {
 			me->utf_buf[0] = '\0';
-			code = (unsigned char)c;
+			code = UCH(c);
 		    } else {
 			c = replace_buf[0];
 			if (c && replace_buf[1]) {
@@ -469,11 +469,11 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 			}
 		    }
 		    me->utf_buf[0] = '\0';
-		    code = (unsigned char)c;
+		    code = UCH(c);
 		} /*  Next line end of ugly stuff for C0. - KW */
 	    } else {
 		me->utf_buf[0] = '\0';
-		code = (unsigned char)c;
+		code = UCH(c);
 	    }
 	}
 	/*
@@ -588,8 +588,8 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    }
 #ifdef NOTDEFINED
 	} else if (me->T.strip_raw_char_in &&
-		   (unsigned char)*p >= 192 &&
-		   (unsigned char)*p < 255) {
+		   UCH(*p) >= 192 &&
+		   UCH(*p) < 255) {
 	    /*
 	    **	KOI special: strip high bit, gives
 	    **	(somewhat) readable ASCII.

@@ -50,9 +50,9 @@ PRIVATE BOOLEAN message_has_content ARGS2(
 	    if (*cp == '\n') {
 		break;
 	    } else if (*cp != ' ') {
-		if (!firstnonblank && isgraph((unsigned char)*cp)) {
+		if (!firstnonblank && isgraph(UCH(*cp))) {
 		    firstnonblank = *cp;
-		} else if (!isspace((unsigned char)*cp)) {
+		} else if (!isspace(UCH(*cp))) {
 		    *nonspaces = TRUE;
 		}
 	    }
@@ -60,9 +60,9 @@ PRIVATE BOOLEAN message_has_content ARGS2(
 	if (*cp != '\n') {
 	    int c;
 	    while ((c = getc(fp)) != EOF && c != '\n') {
-		if (!firstnonblank && isgraph((unsigned char)c)) {
+		if (!firstnonblank && isgraph(UCH(c))) {
 		    firstnonblank = (char)c;
-		} else if (!isspace((unsigned char)*cp)) {
+		} else if (!isspace(UCH(*cp))) {
 		    *nonspaces = TRUE;
 		}
 	    }
@@ -177,7 +177,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	}
 	HTUnEscape(References);
 	if (!((cp = strchr(References, '@')) && cp > References + 1 &&
-	      isalnum(cp[1]))) {
+	      isalnum(UCH(cp[1])))) {
 	    FREE(References);
 	}
     }
@@ -366,7 +366,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	}
 	LYCloseTempFP(fd);		/* Close the temp file. */
 	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
-	if (term_message || c == 7 || c == 3)
+	if (term_message || LYCharIsINTERRUPT(c))
 	    goto cleanup;
 
 	/*

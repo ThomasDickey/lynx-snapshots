@@ -698,11 +698,10 @@ get_advanced_choice:
 #ifdef VMS
 	if (HadVMSInterrupt) {
 	    HadVMSInterrupt = FALSE;
-	    c = 7;
+	    c = LYCharINTERRUPT2;
 	}
 #endif /* VMS */
-	if (LYisNonAlnumKeyname(c, LYK_PREV_DOC) ||
-	    c == 7 || c == 3) {
+	if (LYisNonAlnumKeyname(c, LYK_PREV_DOC) || LYCharIsINTERRUPT(c)) {
 	    /*
 	     *	Treat left-arrow, ^G, or ^C as cancel.
 	     */
@@ -839,7 +838,7 @@ draw_bookmark_choices:
     MBM_tmp_count = 0;
     for (c = MBM_from; c <= MBM_to; c++) {
 	move(3+MBM_tmp_count, 5);
-	addch((unsigned char)(c + 'A'));
+	addch(UCH((c + 'A')));
 	addstr(" : ");
 	if (MBM_A_subdescript[c])
 	    addstr(MBM_A_subdescript[c]);
@@ -986,7 +985,7 @@ PRIVATE  BOOLEAN havevisible ARGS1(CONST char *, Title)
     long unicode;
 
     for ( ; *p; p++) {
-	c = (unsigned char)(TOASCII(*p));
+	c = UCH(TOASCII(*p));
 	if (c > 32 && c < 127)
 	    return(TRUE);
 	if (c <= 32 || c == 127)
@@ -1013,7 +1012,7 @@ PRIVATE  BOOLEAN have8bit ARGS1(CONST char *, Title)
     CONST char *p = Title;
 
     for ( ; *p; p++) {
-	if ((unsigned char)*p > 127)
+	if (UCH(*p) > 127)
 	return(TRUE);
     }
     return(FALSE); /* if we came here */
@@ -1052,7 +1051,7 @@ PRIVATE  char* title_convert8bit ARGS1(CONST char *, Title)
     for ( ; *p; p++) {
 	char temp[2];
 	LYstrncpy(temp, p, sizeof(temp)-1);
-	if ((unsigned char)*temp <= 127) {
+	if (UCH(*temp) <= 127) {
 	    StrAllocCat(comment, temp);
 	    StrAllocCat(ncr, temp);
 	} else {
@@ -1077,7 +1076,7 @@ PRIVATE  char* title_convert8bit ARGS1(CONST char *, Title)
      *  skip '>'.
      */
     for (q = p0 = comment; *p0; p0++) {
-	if ((unsigned char)(TOASCII(*p0)) >= 32 &&
+	if (UCH(TOASCII(*p0)) >= 32 &&
 	    *p0 != '>' &&
 	    (q == comment || *p0 != '-' || *(q-1) != '-')) {
 	    *q++ = *p0;

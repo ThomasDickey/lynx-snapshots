@@ -36,9 +36,9 @@
 **  The following are valid mask values.  The terms are the BNF names
 **  in the URL document.
 */
-#define URL_XALPHAS     (unsigned char) 1
-#define URL_XPALPHAS    (unsigned char) 2
-#define URL_PATH        (unsigned char) 4
+#define URL_XALPHAS     UCH(1)
+#define URL_XPALPHAS    UCH(2)
+#define URL_PATH        UCH(4)
 
 
 /*	Strip white space off a string.				HTStrip()

@@ -112,6 +112,11 @@ Default values
 #ifdef __CYGWIN__
 #define _WINDOWS_NSL
 #define WIN_EX
+#else
+#ifdef WIN_EX
+#define HAVE_FTIME 1
+#define HAVE_SYS_TIMEB_H 1
+#endif
 #endif /* __CYGWIN__ */
 
 #ifdef HAVE_FCNTL_H
@@ -156,6 +161,8 @@ extern unsigned char IBM1047[];
 #endif /* EBCDIC */
 #endif /* !TOASCII */
 
+/* convert a char to an unsigned, needed if we have signed characters for ctype.h */
+#define UCH(ch) ((unsigned char)(ch))
 
 /*
 IBM-PC running Windows NT

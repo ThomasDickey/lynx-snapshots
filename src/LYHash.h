@@ -42,7 +42,8 @@ extern int	s_alink, s_a, s_status,
 #ifdef USE_SCROLLBAR
 		s_sb_bar, s_sb_bg, s_sb_aa, s_sb_naa,
 #endif
-		s_whereis;
+		s_whereis, s_aedit, s_aedit_pad, s_aedit_arr, 
+		s_prompt_edit, s_prompt_edit_pad, s_prompt_edit_arr;
 #define CACHEW 128
 #define CACHEH 64
 

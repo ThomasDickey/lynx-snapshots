@@ -1482,7 +1482,7 @@ PRIVATE void SGML_character ARGS2(
 #endif
 
     c = c_in;
-    clong = (unsigned char)c;	/* a.k.a. unsign_c */
+    clong = UCH(c);	/* a.k.a. unsign_c */
 
     if (context->T.decode_utf8) {
 	/*
@@ -1490,7 +1490,7 @@ PRIVATE void SGML_character ARGS2(
 	**  Incomplete characters silently ignored.
 	**  From Linux kernel's console.c. - KW
 	*/
-	if (TOASCII((unsigned char)c) > 127) { /* S/390 -- gil -- 0710 */
+	if (TOASCII(UCH(c)) > 127) { /* S/390 -- gil -- 0710 */
 	    /*
 	    **	We have an octet from a multibyte character. - FM
 	    */
@@ -1669,7 +1669,7 @@ top:
 */
 top0a:
     *(context->utf_buf) = '\0';
-    clong = (unsigned char)c;
+    clong = UCH(c);
 /*
 **  We jump to here from above if we have converted
 **  the input, or a multibyte sequence across calls,
@@ -1704,7 +1704,7 @@ top1:
 	    sjis_1st = '\0';
 	} else {
 	    if (context->state == S_text) {
-		if (0xA1 <= (unsigned char)c && (unsigned char)c <= 0xDF) {
+		if (0xA1 <= UCH(c) && UCH(c) <= 0xDF) {
 		    JISx0201TO0208_SJIS(c, &sjis_hi, &sjis_lo);
 		    PUTC(sjis_hi);
 		    PUTC(sjis_lo);
@@ -1739,7 +1739,7 @@ top1:
      * we have to care them here. -- TH
      */
     if ((HTCJK==JAPANESE) && (context->state==S_in_kanji) &&
-	!IS_JAPANESE_2BYTE(context->kanji_buf,(unsigned char)c)) {
+	!IS_JAPANESE_2BYTE(context->kanji_buf, UCH(c))) {
 #ifdef CONV_JISX0201KANA_JISX0208KANA
 	if (IS_SJIS_X0201KANA(context->kanji_buf)) {
 	    unsigned char sjis_hi, sjis_lo;
@@ -1900,9 +1900,9 @@ top1:
 		    PUTC(c);
 		} else if (clong == 0xfffd && saved_char_in &&
 		    HTPassEightBitRaw &&
-		    (unsigned char)saved_char_in >=
+		    UCH(saved_char_in) >=
 		    LYlowest_eightbit[context->outUCLYhndl]) {
-		    PUTUTF8((0xf000 | (unsigned char)saved_char_in));
+		    PUTUTF8((0xf000 | UCH(saved_char_in)));
 		} else {
 		    PUTUTF8(clong);
 		}
@@ -2042,8 +2042,8 @@ top1:
 	**  Check for a strippable koi8-r 8-bit character. - FM
 	*/
 	} else if (context->T.strip_raw_char_in && saved_char_in &&
-		   ((unsigned char)saved_char_in >= 0xc0) &&
-		   ((unsigned char)saved_char_in < 255)) {
+		   (UCH(saved_char_in) >= 0xc0) &&
+		   (UCH(saved_char_in) < 255)) {
 	    /*
 	    **	KOI8 special: strip high bit, gives (somewhat) readable
 	    **	ASCII or KOI7 - it was constructed that way! - KW
@@ -2055,7 +2055,7 @@ top1:
 	**  If we don't actually want the character,
 	**  make it safe and output that now. - FM
 	*/
-	} else if (TOASCII((unsigned char)c) <	 /* S/390 -- gil -- 0997 */
+	} else if (TOASCII(UCH(c)) <	 /* S/390 -- gil -- 0997 */
 			LYlowest_eightbit[context->outUCLYhndl] ||
 		   (context->T.trans_from_uni && !HTPassEightBitRaw)) {
 #ifdef NOTUSED_FOTEMODS
@@ -2245,7 +2245,7 @@ top1:
     */
     case S_entity:
 	if (TOASCII(unsign_c) < 127 && (string->size ?	/* S/390 -- gil -- 1029 */
-		  isalnum((unsigned char)c) : isalpha((unsigned char)c))) {
+		  isalnum(UCH(c)) : isalpha(UCH(c)))) {
 	    /* Should probably use IsNmStart/IsNmChar above (is that right?),
 	       but the world is not ready for that - there's &nbsp: (note
 	       colon!) and stuff around. */
@@ -2331,10 +2331,10 @@ top1:
     **	Check for a numeric entity.
     */
     case S_cro:
-	if (TOASCII(unsign_c) < 127 && TOLOWER((unsigned char)c) == 'x') {  /* S/390 -- gil -- 1060 */
+	if (TOASCII(unsign_c) < 127 && TOLOWER(UCH(c)) == 'x') {  /* S/390 -- gil -- 1060 */
 	    context->isHex = TRUE;
 	    context->state = S_incro;
-	} else if (TOASCII(unsign_c) < 127 && isdigit((unsigned char)c)) {
+	} else if (TOASCII(unsign_c) < 127 && isdigit(UCH(c))) {
 	    /*
 	    **	Accept only valid ASCII digits. - FM
 	    */
@@ -2368,8 +2368,8 @@ top1:
 	/* S/390 -- gil -- 1075 */ /* CTRACE((tfp, "%s: %d: numeric %d %d\n",
 			    __FILE__, __LINE__, unsign_c, c)); */
 	if ((TOASCII(unsign_c) < 127) &&
-	    (context->isHex ? isxdigit((unsigned char)c) :
-			      isdigit((unsigned char)c))) {
+	    (context->isHex ? isxdigit(UCH(c)) :
+			      isdigit(UCH(c)))) {
 	    /*
 	    **	Accept only valid hex or ASCII digits. - FM
 	    */
@@ -3254,7 +3254,7 @@ top1:
 	    break;
 	}
 	context->first_dash = FALSE;
-	if (context->end_comment && !isspace(c))
+	if (context->end_comment && !isspace(UCH(c)))
 	    context->end_comment = FALSE;
 
     S_comment_put_c:
@@ -3268,10 +3268,10 @@ top1:
 		    context->T.trans_from_uni)) {
 	    if (clong == 0xfffd && saved_char_in &&
 		HTPassEightBitRaw &&
-		(unsigned char)saved_char_in >=
+		UCH(saved_char_in) >=
 		LYlowest_eightbit[context->outUCLYhndl]) {
 		HTChunkPutUtf8Char(string,
-				   (0xf000 | (unsigned char)saved_char_in));
+				   (0xf000 | UCH(saved_char_in)));
 	    } else {
 		HTChunkPutUtf8Char(string, clong);
 	    }
@@ -3682,10 +3682,10 @@ top1:
 		    context->T.trans_from_uni)) {
 	    if (clong == 0xfffd && saved_char_in &&
 		HTPassEightBitRaw &&
-		(unsigned char)saved_char_in >=
+		UCH(saved_char_in) >=
 		LYlowest_eightbit[context->outUCLYhndl]) {
 		HTChunkPutUtf8Char(string,
-				   (0xf000 | (unsigned char)saved_char_in));
+				   (0xf000 | UCH(saved_char_in)));
 	    } else {
 		HTChunkPutUtf8Char(string, clong);
 	    }
@@ -3744,10 +3744,10 @@ top1:
 		    context->T.trans_from_uni)) {
 	    if (clong == 0xfffd && saved_char_in &&
 		HTPassEightBitRaw &&
-		(unsigned char)saved_char_in >=
+		UCH(saved_char_in) >=
 		LYlowest_eightbit[context->outUCLYhndl]) {
 		HTChunkPutUtf8Char(string,
-				   (0xf000 | (unsigned char)saved_char_in));
+				   (0xf000 | UCH(saved_char_in)));
 	    } else {
 		HTChunkPutUtf8Char(string, clong);
 	    }
@@ -3811,10 +3811,10 @@ top1:
 		    context->T.trans_from_uni)) {
 	    if (clong == 0xfffd && saved_char_in &&
 		HTPassEightBitRaw &&
-		(unsigned char)saved_char_in >=
+		UCH(saved_char_in) >=
 		LYlowest_eightbit[context->outUCLYhndl]) {
 		HTChunkPutUtf8Char(string,
-				   (0xf000 | (unsigned char)saved_char_in));
+				   (0xf000 | UCH(saved_char_in)));
 	    } else {
 		HTChunkPutUtf8Char(string, clong);
 	    }
@@ -4609,15 +4609,15 @@ PUBLIC unsigned char * SJIS_TO_JIS1 ARGS3(
 	register unsigned char,		LO,
 	register unsigned char *,	JCODE)
 {
-    HI -= (unsigned char) ((HI <= 0x9F) ? 0x71 : 0xB1);
-    HI = (unsigned char) ((HI << 1) + 1);
+    HI -= UCH((HI <= 0x9F) ? 0x71 : 0xB1);
+    HI = UCH((HI << 1) + 1);
     if (0x7F < LO)
 	LO--;
     if (0x9E <= LO) {
-	LO -= (unsigned char) 0x7D;
+	LO -= UCH(0x7D);
 	HI++;
     } else {
-	LO -= (unsigned char) 0x1F;
+	LO -= UCH(0x1F);
     }
     JCODE[0] = HI;
     JCODE[1] = LO;
@@ -4630,15 +4630,15 @@ PUBLIC unsigned char * JIS_TO_SJIS1 ARGS3(
 	register unsigned char *,	SJCODE)
 {
     if (HI & 1)
-	LO += (unsigned char) 0x1F;
+	LO += UCH(0x1F);
     else
-	LO += (unsigned char) 0x7D;
+	LO += UCH(0x7D);
     if (0x7F <= LO)
 	LO++;
 
-    HI = (unsigned char) (((HI - 0x21) >> 1) + 0x81);
+    HI = UCH(((HI - 0x21) >> 1) + 0x81);
     if (0x9F < HI)
-	HI += (unsigned char) 0x40;
+	HI += UCH(0x40);
     SJCODE[0] = HI;
     SJCODE[1] = LO;
     return SJCODE;
@@ -4651,7 +4651,7 @@ PUBLIC unsigned char * EUC_TO_SJIS1 ARGS3(
 {
     if (HI == 0x8E)
 	JISx0201TO0208_EUC(HI, LO, &HI, &LO);
-    JIS_TO_SJIS1((unsigned char) (HI & 0x7F), (unsigned char) (LO & 0x7F), SJCODE);
+    JIS_TO_SJIS1(UCH(HI & 0x7F), UCH(LO & 0x7F), SJCODE);
     return SJCODE;
 }
 
@@ -4663,7 +4663,7 @@ PUBLIC void JISx0201TO0208_SJIS ARGS3(
     unsigned char SJCODE[2];
 
     JISx0201TO0208_EUC(0x8E, I, OHI, OLO);
-    JIS_TO_SJIS1((unsigned char)(*OHI & 0x7F), (unsigned char)(*OLO & 0x7F), SJCODE);
+    JIS_TO_SJIS1(UCH(*OHI & 0x7F), UCH(*OLO & 0x7F), SJCODE);
     *OHI = SJCODE[0];
     *OLO = SJCODE[1];
 }
@@ -4711,7 +4711,7 @@ PUBLIC unsigned char * EUC_TO_SJIS ARGS2(
     for (sp = src, dp = dst; *sp;) {
 	if (*sp & 0x80) {
 	    if (sp[1] && (sp[1] & 0x80)) {
-		JIS_TO_SJIS1((unsigned char)(sp[0] & 0x7F), (unsigned char)(sp[1] & 0x7F), dp);
+		JIS_TO_SJIS1(UCH(sp[0] & 0x7F), UCH(sp[1] & 0x7F), dp);
 		dp += 2;
 		sp += 2;
 	    } else {
@@ -4749,16 +4749,16 @@ PUBLIC unsigned char *EUC_TO_JIS ARGS4(
 		continue;
 	    }
 	    if (!kana_mode) {
-		kana_mode = (unsigned char) ~kana_mode;
+		kana_mode = UCH(~kana_mode);
 		dp = Strcpy(dp, toK);
 	    }
 	    if (*sp & 0x80) {
-		*dp++ = (unsigned char) (cch & ~0x80);
-		*dp++ = (unsigned char) (*sp++ & ~0x80);
+		*dp++ = UCH(cch & ~0x80);
+		*dp++ = UCH(*sp++ & ~0x80);
 	    }
 	} else {
 	    if (kana_mode) {
-		kana_mode = (unsigned char) ~kana_mode;
+		kana_mode = UCH(~kana_mode);
 		dp = Strcpy(dp, toA);
 	    }
 	    *dp++ = cch;
@@ -4797,8 +4797,8 @@ PRIVATE CONST unsigned char *repairJIStoEUC ARGS2(
 	if (!IS_JIS7(ch1, ch2))
 	    return 0;
 
-	*d++ = (unsigned char) (0x80 | ch1);
-	*d++ = (unsigned char) (0x80 | ch2);
+	*d++ = UCH(0x80 | ch1);
+	*d++ = UCH(0x80 | ch2);
     }
     return 0;
 }

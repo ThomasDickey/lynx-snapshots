@@ -236,7 +236,7 @@ PUBLIC void read_rc ARGS1(FILE *, fp)
 				/*
 				 *  Skip spaces.
 				 */
-				if (isspace(*MBM_cp1)) {
+				if (isspace(UCH(*MBM_cp1))) {
 				    MBM_cp1++;
 				    continue;
 				} else {

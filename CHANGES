@@ -1,6 +1,89 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-10-25 (2.8.4dev.12)
+* add a configure check for video library on OS/2 EMX, needed to link with
+  slang.  Arrow keys do not work -TD
+* use macro UCH to fix gcc's char-used-as-subscript warnings, and to replace
+  existing casts to unsigned char, making the code more readable -TD
+* merge variants of HTReadProgress() -TD
+* modify SHOW_KB_RATE in lynx.cfg to allow disabling logic that
+  shows transfer rate during download.  If EXP_READPROGRESS is defined, make
+  this alterable from the command line and options menu as well (from
+  discussion by Karen Lewellen <klewellen@delphi.com>) -TD
+* add the pathname that caused a problem to the error message in
+  CF_PATH_SYNTAX, lest someone be confused when tilde is not expanded
+  (addresses a problem reported by Lawrence Kwan <lawrence@interlog.com>) -TD
+* remove redundant leading newlines in "lynx -version" output (reported by Sven
+  Guckes) -TD
+* add dependency in src/makefile.in for building chrtrans/makeuctb$x, used by
+  UCdomap.o -IZ
+* fix CF_PATH_SYNTAX square brackets for OS/2 EMX case, lost by not disabling
+  m4's quotes for that line (report by IZ) -TD
+* remove older/unused variant of code to set screen size in LYCurses.c by
+  setting environment variables -PG
+* one of the ".po" files is zipped as type binary rather than ASCII, so it does
+  not unzip on OS/390 with the "-a" option.  The "-aa" works better since it
+  forces text conversion regardless of the type of the archived file -PG
+* change definitions of LYCharINTERRUPT1 and LYCharINTERRUPT2 to accommodate
+  EBCDIC -PG
+> the remainder (most of the functional changes in this patch) from IZ:
+* add "typeless" notion to color style logic:
+  a) reverts to the style "foo" (from "foo.classname") if the style
+     "foo.classname" was not configured;
+  b) For input elements of type=typename uses style
+     "input.type.typename" if this style is configured (but
+     "input.classname" is not!);
+  c) Same for typeless elements, with typename="".
+  This allows the following:
+    input.type.submit:normal:blue:black
+    # match "link":
+    input:normal:green
+    textarea:normal:white:cyan
+    # type-less input is the same as type=text (similar to textarea)
+    input.type.:normal:white:cyan
+    input.type.text:normal:white:cyan
+  If your "link" is configured as normal:green, then input elements of types
+  other than typeless, text, or submit will be shown in the same style as link. 
+  The textareas and text input elements are shown in the same style (but
+  different from "link" style), and submit "buttons" are shown yet in another
+  style.
+* implement styles in "dynamic areas" of documents.  Three flavors of them are
+  active text-edit fields, non-active ones, and links/radiobuttons, etc.
+  This patch is concerned with the first flavor only.  Two subflavors are
+  document's text-edit areas, and Lynx's ones (such as where you input the URL
+  after `g').  Each one of them has 3 elements:  scroll symbols ("arrows"),
+  after-the-end padding, and the actual input string. 
+  The patch
+    a) makes styles for these 2*3 elements customizable;
+    b) uses ACS chars (if available) for the arrows (instead of `{'/`}').
+  [It would be nice to make non-active text-areas to have customizable
+   styles for padding, and have scroll arrows too...]
+  Here is my customization for testing:
+    edit.active:normal:red:cyan
+    edit.prompt:normal:green:cyan
+    edit.active.arrow:normal:yellow:cyan
+    edit.prompt.arrow:normal:yellow:gray
+    edit.active.pad:normal:gray:cyan
+    edit.prompt.pad:normal:white:black
+* modify LYSystem() to allow changing size of lynx window with OS/2 EMX
+  at runtime.  Example:
+    !mode 110,30;exit
+* use new macros LYCharINTERRUPT1, LYCharINTERRUPT2 and LYCharIsINTERRUPT() to
+  make it simpler to find uses of ^C and ^G
+* modify key mappings so the keymap file overrides the terminfo/termcap
+  description rather than the reverse
+* make unrecognized keynames emit diagnostic when tracing (but ignores them the
+  same way the older code did).  Trace info about each keycode received
+* provide better tracing of style choices, both when styles are assigned into
+  text-lines, and when lss directives are converted to "numeric colors"
+* add similar tracing for links and contents of user-editable stuff
+* slightly expand the cache of colors to better accomodate 16-color terminals,
+  and fixes a misprint in handling background-color == maxcolor
+* modify logic in color styles initialization using flag default_color_reset to
+  override ncurses use_default_colors() logic if the "default" color style tag
+  is found in lynx.lss
+
 2000-10-18 (2.8.4dev.11)
 * include LYLeaks.h in LYPrettySrc.c to allow leak-checking -TD
 * modify configure script macro CF_RECHECK_FUNC to ensure that we add a given

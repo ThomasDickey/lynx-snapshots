@@ -176,7 +176,7 @@ Try_Redirected_URL:
 			FREE(temp);
 			return(NULLFILE);
 		    }
-		} else if (isdigit((unsigned char)*cp)) {
+		} else if (isdigit(UCH(*cp))) {
 		    HTAlert(URL_PORT_BAD);
 		    FREE(temp);
 		    return(NULLFILE);
@@ -1153,7 +1153,7 @@ PUBLIC int follow_link_number ARGS4(
 	return(DO_NOTHING);
     }
     *num = atoi(p);
-    while ( isdigit(*p) )
+    while ( isdigit(UCH(*p)) )
 	++p;
     c = *p; /* reuse c; 0 or g or p or + or - */
     switch ( c ) {
@@ -1437,7 +1437,7 @@ PUBLIC BOOLEAN exec_ok ARGS3(
     else
 	allowed_extra_chars = " _-:./@~$+=\t";
     for (cp = linktext; *cp != '\0'; cp++) {
-	if (!isalnum(*cp) && !strchr(allowed_extra_chars, *cp)) {
+	if (!isalnum(UCH(*cp)) && !strchr(allowed_extra_chars, *cp)) {
 	    char *buf = 0;
 
 	    HTSprintf0(&buf,

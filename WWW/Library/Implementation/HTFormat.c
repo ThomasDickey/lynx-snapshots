@@ -256,7 +256,7 @@ PUBLIC int HTGetCharacter NOARGS
 	ch = *input_pointer++;
     } while (ch == (char) 13); /* Ignore ASCII carriage return */
 
-    return FROMASCII((unsigned char)ch);
+    return FROMASCII(UCH(ch));
 }
 
 /*  Match maintype to any MIME type starting with maintype,
@@ -1007,7 +1007,7 @@ PUBLIC void HTCopyNoCR ARGS3(
 	character = HTGetCharacter();
 	if (character == EOF)
 	    break;
-	(*targetClass.put_character)(sink, (unsigned char) character);
+	(*targetClass.put_character)(sink, UCH(character));
     }
 }
 

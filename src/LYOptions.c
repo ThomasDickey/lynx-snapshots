@@ -523,7 +523,7 @@ draw_options:
     while (response != 'R' &&
 	   !LYisNonAlnumKeyname(response, LYK_PREV_DOC) &&
 	   response != '>' && !term_options &&
-	   response != 7 &&  response != 3) {
+	   LYCharIsINTERRUPT(response)) {
 	if (AddValueAccepted == TRUE) {
 	    _statusline(VALUE_ACCEPTED);
 	    AddValueAccepted = FALSE;
@@ -535,7 +535,7 @@ draw_options:
 
 	refresh();
 	response = LYgetch_single();
-	if (term_options || response == 7 || response == 3)
+	if (term_options || LYCharIsINTERRUPT(response))
 	    response = 'R';
 	if (LYisNonAlnumKeyname(response, LYK_REFRESH)) {
 	    lynx_force_repaint();
@@ -1711,7 +1711,7 @@ PRIVATE int boolean_choice ARGS4(
 	if (term_options == FALSE) {
 	    response = LYgetch_single();
 	}
-	if (term_options || response == 7) {
+	if (term_options || LYCharIsINTERRUPT(response)) {
 	     /*
 	      *  Control-C or Control-G.
 	      */
@@ -1877,7 +1877,7 @@ draw_bookmark_list:
 	for (a = ((MBM_V_MAXFILES/2 + 1) * (MBM_current - 1));
 		      a <= (MBM_current * MBM_V_MAXFILES/2 ); a++) {
 	    move((3 + a) - ((MBM_V_MAXFILES/2 + 1)*(MBM_current - 1)), 5);
-	    addch((unsigned char)(a + 'A'));
+	    addch(UCH(a + 'A'));
 	    addstr(" : ");
 	    if (MBM_A_subdescript[a])
 		addstr(MBM_A_subdescript[a]);
@@ -1890,7 +1890,7 @@ draw_bookmark_list:
     } else {
 	for (a = 0; a <= MBM_V_MAXFILES; a++) {
 	    move(3 + a, 5);
-	    addch((unsigned char)(a + 'A'));
+	    addch(UCH(a + 'A'));
 	    addstr(" : ");
 	    if (MBM_A_subdescript[a])
 		addstr(MBM_A_subdescript[a]);
@@ -1940,8 +1940,7 @@ draw_bookmark_list:
 
     while (!term_options &&
 	   !LYisNonAlnumKeyname(response, LYK_PREV_DOC) &&
-	   response != 7 && response != 3 &&
-	   response != '>') {
+	   !LYCharIsINTERRUPT(response) && response != '>') {
 
 	move((LYlines - 2), 0);
 	lynx_start_prompt_color ();
@@ -1955,8 +1954,7 @@ draw_bookmark_list:
 	/*
 	 *  Check for a cancel.
 	 */
-	if (term_options ||
-	    response == 7 || response == 3 ||
+	if (term_options || LYCharIsINTERRUPT(response) ||
 	    LYisNonAlnumKeyname(response, LYK_PREV_DOC))
 	    continue;
 
@@ -2057,7 +2055,7 @@ draw_bookmark_list:
 			     5);
 		    else
 			move((3 + a), 5);
-		    addch((unsigned char)(a + 'A'));
+		    addch(UCH(a + 'A'));
 		    addstr(" : ");
 		    if (MBM_A_subdescript[a])
 			addstr(MBM_A_subdescript[a]);
@@ -2336,6 +2334,17 @@ static OptValues ftp_sort_values[] = {
 	{ FILE_BY_DATE,		"By Date",		"ftp_by_date" },
 	{ 0, 0, 0 }};
 
+#ifdef EXP_READPROGRESS
+static char * show_rate_string		= "show_rate";
+static OptValues rate_values[] = {
+	{ rateOFF,		"Do not show rate",	"rate_off" },
+	{ rateBYTES,		"Show Bytes/sec rate",	"rate_bytes" },
+	{ rateKB,		"Show KB/sec rate",	"rate_kb" },
+	{ rateEtaBYTES,		"Show Bytes/sec, ETA",	"rate_eta_bytes" },
+	{ rateEtaKB,		"Show KB/sec, ETA",	"rate_eta_kb" },
+	{ 0, 0, 0 }};
+#endif /* EXP_READPROGRESS */
+
 /*
  * Headers transferred to remote server
  */
@@ -2457,7 +2466,7 @@ PRIVATE PostPair * break_data ARGS1(
 		     */
 		    if (i > 0
 		    && q[count].value[i+1] == '+'
-		    && isalnum(q[count].value[i+2])) {
+		    && isalnum(UCH(q[count].value[i+2]))) {
 			q[count].value[i++] = ' ';
 			i++;
 			continue;
@@ -2889,6 +2898,12 @@ PUBLIC int postoptions ARGS1(
 	if (!strcmp(data[i].tag, show_dotfiles_string) && (!no_dotfiles)
 	 && GetOptValues(bool_values, data[i].value, &code)) {
 	    show_dotfiles = (BOOL) code;
+	}
+
+	/* Show Transfer Rate: enumerated value */
+	if (!strcmp(data[i].tag, show_rate_string)
+	 && GetOptValues(rate_values, data[i].value, &code)) {
+	    LYTransferRate = code;
 	}
 
 	/* Preferred Document Character Set: INPUT */
@@ -3521,6 +3536,14 @@ PRIVATE int gen_options ARGS1(
 #endif /* !NEVER_ALLOW_REMOTE_EXEC */
     EndSelect(fp0);
 #endif /* ENABLE_OPTS_CHANGE_EXEC */
+
+#ifdef EXP_READPROGRESS
+    /* Local Directory Sort: SELECT */
+    PutLabel(fp0, gettext("Show transfer rate"));
+    BeginSelect(fp0, show_rate_string);
+    PutOptValues(fp0, LYTransferRate, rate_values);
+    EndSelect(fp0);
+#endif /* EXP_READPROGRESS */
 
     /*
      * Special Files and Screens

@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.38 Thu, 24 Aug 2000 18:30:11 -0700 dickey @
+ * @Id: LYStyle.c 1.39 Wed, 25 Oct 2000 09:35:28 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -70,10 +70,13 @@ PUBLIC int	s_alink  = NOSTYLE, s_a     = NOSTYLE, s_status = NOSTYLE,
 		s_sb_bar = NOSTYLE, s_sb_bg = NOSTYLE,
 		s_sb_aa = NOSTYLE, s_sb_naa = NOSTYLE,
 #endif
-		s_whereis= NOSTYLE;
+		s_whereis = NOSTYLE, s_aedit = NOSTYLE,
+		s_aedit_pad = NOSTYLE, s_aedit_arr = NOSTYLE, 
+		s_prompt_edit = NOSTYLE, s_prompt_edit_pad = NOSTYLE,
+		s_prompt_edit_arr = NOSTYLE;
 
 /* start somewhere safe */
-#define MAX_COLOR 8
+#define MAX_COLOR 16
 PRIVATE int colorPairs = 0;
 PRIVATE unsigned char our_pairs[2][MAX_COLOR][MAX_COLOR];
 
@@ -133,6 +136,7 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
 	CTRACE((tfp, "CSS(DEF):default_fg=%d, default_bg=%d\n", fA, bA));
 	default_fg = fA;
 	default_bg = bA;
+	default_color_reset = TRUE;
 	return;
     }
     if (fA == NO_COLOR) {
@@ -142,7 +146,7 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
 	    cA = A_BOLD;
 	if (fA >= COLORS)
 	    fA %= COLORS;
-	if (bA > COLORS)
+	if (bA >= COLORS)
 	    bA %= COLORS;
     } else {
 	cA = A_BOLD;
@@ -288,6 +292,36 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
 	parse_attributes(mono,fg,bg,DSTYLE_WHEREIS,"whereis");
 	s_whereis  = hash_code("whereis");
     }
+    else if (!strncasecomp(element, "edit.active.pad", 15))
+    {
+	parse_attributes(mono,fg,bg,DSTYLE_ELEMENTS,"edit.active.pad");
+	s_aedit_pad = hash_code("edit.active.pad");
+    }
+    else if (!strncasecomp(element, "edit.active.arrow", 17))
+    {
+	parse_attributes(mono,fg,bg,DSTYLE_ELEMENTS,"edit.active.arrow");
+	s_aedit_arr  = hash_code("edit.active.arrow");
+    }
+    else if (!strncasecomp(element, "edit.active", 11))
+    {
+	parse_attributes(mono,fg,bg,DSTYLE_ELEMENTS,"edit.active");
+	s_aedit  = hash_code("edit.active");
+    }
+    else if (!strncasecomp(element, "edit.prompt.pad", 15))
+    {
+	parse_attributes(mono,fg,bg,DSTYLE_ELEMENTS,"edit.prompt.pad");
+	s_prompt_edit_pad = hash_code("edit.prompt.pad");
+    }
+    else if (!strncasecomp(element, "edit.prompt.arrow", 17))
+    {
+	parse_attributes(mono,fg,bg,DSTYLE_ELEMENTS,"edit.prompt.arrow");
+	s_prompt_edit_arr  = hash_code("edit.prompt.arrow");
+    }
+    else if (!strncasecomp(element, "edit.prompt", 11))
+    {
+	parse_attributes(mono,fg,bg,DSTYLE_ELEMENTS,"edit.prompt");
+	s_prompt_edit  = hash_code("edit.prompt");
+    }
     /* Ok, it must be a HTML element, so look through the list until we
     * find it
     */
@@ -408,10 +442,24 @@ PUBLIC void parse_userstyles NOARGS
 		parse_style(name);
 	}
     }
+    if (s_prompt_edit == NOSTYLE)
+	s_prompt_edit = s_normal;
+    if (s_prompt_edit_arr == NOSTYLE)
+	s_prompt_edit_arr = s_prompt_edit;
+    if (s_prompt_edit_pad == NOSTYLE)
+	s_prompt_edit_pad = s_prompt_edit;
+    if (s_aedit == NOSTYLE)
+	s_aedit = s_alink;
+    if (s_aedit_arr == NOSTYLE)
+	s_aedit_arr = s_aedit;
+    if (s_aedit_pad == NOSTYLE)
+	s_aedit_pad = s_aedit;
 }
 
 
-/* Add a STYLE: option line to our list */
+/* Add a STYLE: option line to our list.  Process "default:" early
+   for it to have the same semantic as other lines: works at any place
+   of the style file, the first line overrides the later ones. */
 PRIVATE void HStyle_addStyle ARGS1(char*,buffer)
 {
     char *name = NULL;
@@ -419,6 +467,15 @@ PRIVATE void HStyle_addStyle ARGS1(char*,buffer)
     if (lss_styles == NULL)
 	lss_styles = HTList_new();
     strtolower(name);
+    if (!strncasecomp(name, "default:", 8)) /* default fg/bg */
+    {
+	CTRACE( (tfp, "READCSS.default%s:%s\n",
+		 (default_color_reset ? ".ignore" : ""),
+		 name ? name : "!?! empty !?!"));
+	if (!default_color_reset)
+	    parse_style(name);
+	return;				/* do not need to process it again */
+    }
     CTRACE((tfp, "READCSS:%s\n", name ? name : "!?! empty !?!"));
     HTList_addObject (lss_styles, name);
 }
@@ -503,7 +560,6 @@ PUBLIC void TrimColorClass ARGS3(
 	    *end='\0';
     }
     *phcode = hash_code(lookfrom && *lookfrom ? lookfrom : &tmp[1]);
-    CTRACE((tfp, "CSS:%s (trimmed %s)\n", NONNULL(styleclassname), tmp));
 }
 
 /* This function is designed as faster analog to TrimColorClass.
@@ -519,6 +575,7 @@ PUBLIC void FastTrimColorClass ARGS5 (
     char* tag_start = *pstylename_end;
     BOOLEAN found = FALSE;
 
+    CTRACE((tfp, "STYLE.fast-trim: [%s] from [%s]: ", tag_name, stylename));
     while (tag_start >= stylename)
     {
 	for (; (tag_start >= stylename) && (*tag_start != ';') ; --tag_start)
@@ -533,6 +590,7 @@ PUBLIC void FastTrimColorClass ARGS5 (
 	*tag_start = '\0';
 	*pstylename_end = tag_start;
     }
+    CTRACE((tfp, found ? "success.\n" : "failed.\n"));
     *phcode = hash_code(tag_start+1);
 }
 

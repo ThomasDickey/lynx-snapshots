@@ -16,7 +16,7 @@
 #define HASH_SIZE CSHASHSIZE
 #endif
 
-#define HASH_OF(h, v) ((int)((h) * 3 + (unsigned char)(v)) % HASH_SIZE)
+#define HASH_OF(h, v) ((int)((h) * 3 + UCH(v)) % HASH_SIZE)
 
 PUBLIC int hash_code ARGS1 (char*, string)
 {
