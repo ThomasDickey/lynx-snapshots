@@ -440,8 +440,10 @@ PRIVATE void parse_color ARGS1(
 /*
  * Process the configuration file (lynx.cfg).
  */
-PUBLIC void read_cfg ARGS1(
-	char *, cfg_filename)
+PUBLIC void read_cfg ARGS3(
+	char *, cfg_filename,
+	char *, parent_filename,
+	int,    nesting_level)
 {
     FILE *fp;
     char buffer[501];
@@ -449,6 +451,22 @@ PUBLIC void read_cfg ARGS1(
     char *cp, *cp1;
     int i, j, len;
 
+    if (TRACE) {
+	fprintf(stderr,
+		"Loading cfg file '%s'.\n", cfg_filename);
+    }
+    /*
+     *  Don't get hung up by an include file loop.  Arbitrary max depth
+     *  of 10.  - BL
+     */
+    if (nesting_level > 10) {
+	fprintf(stderr,
+                "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n",
+                nesting_level - 1);
+	fprintf(stderr,"Last attempted include was '%s',\n", cfg_filename);
+	fprintf(stderr,"included from '%s'.\n", parent_filename);
+	exit(-1);
+    }
     /*
      *	Locate and open the file.
      */
@@ -620,6 +638,7 @@ PUBLIC void read_cfg ARGS1(
 
 	} else if (!strncasecomp(buffer, "DEFAULT_CACHE_SIZE:", 19)) {
 		HTCacheSize = atoi(buffer+19);
+		if (HTCacheSize < 2) HTCacheSize = 2;
 
 	} else if (!system_editor &&
 		   !strncasecomp(buffer, "DEFAULT_EDITOR:", 15)) {
@@ -766,7 +785,10 @@ PUBLIC void read_cfg ARGS1(
 	break;
 
 	case 'I':
-	if (!strncasecomp(buffer, "INFOSECS:", 9)) {
+	if (!strncasecomp(buffer, "include:", 8)) {
+	    strcpy(temp, buffer+8);
+	    read_cfg(temp, cfg_filename, nesting_level + 1);
+	} else if (!strncasecomp(buffer, "INFOSECS:", 9)) {
 	    strcpy(temp, buffer+9);
 	    for (i = 0; temp[i]; i++) {
 		if (!isdigit(temp[i])) {

@@ -75,7 +75,6 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #else
 # define D_NAMLEN(dirent) (dirent)->d_namlen
 # define STRUCT_DIRENT struct direct
-# define direct dirent	/* FIXME */
 # if HAVE_SYS_NDIR_H
 #  include <sys/ndir.h>
 # endif
@@ -485,9 +484,6 @@ struct timeval {
 #define NETCLOSE close_s
 #endif
 
-/*
-SCO ODT unix version
- */
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
@@ -511,7 +507,6 @@ Regular BSD unix versions
  */
 #ifndef INCLUDES_DONE
 #include <sys/types.h>
-/* #include <streams/streams.h>                 not ultrix */
 #if HAVE_STRING_H
 #include <string.h>
 #endif /* HAVE_STRING_H */
@@ -527,16 +522,20 @@ Regular BSD unix versions
 #include <sys/stat.h>
 #include <sys/param.h>
 #include <sys/file.h>       /* For open() etc */
+
 #if defined(NeXT) || defined(sony_news)
 #ifndef mode_t
 typedef unsigned short mode_t;
 #endif /* !mode_t */
+
 #ifndef pid_t
 typedef int pid_t;
 #endif /* !pid_t */
+
 #ifndef S_ISREG
 #define S_ISREG(m) (((m) & 0170000) == 0100000)
 #endif /* S_ISREG */
+
 #ifndef WEXITSTATUS
 #ifdef sony_news
 #define WEXITSTATUS(s) WIFEXITED(s)
@@ -544,6 +543,7 @@ typedef int pid_t;
 #define WEXITSTATUS(s) (((s).w_status >> 8) & 0377)
 #endif /* sony_news */
 #endif /* !WEXITSTATUS */
+
 #ifndef WTERMSIG
 #ifdef sony_news
 #define WTERMSIG(s) (s).w_termsig
@@ -551,7 +551,9 @@ typedef int pid_t;
 #define WTERMSIG(s) (((s).w_status >> 8) & 0177)
 #endif /* sony_news */
 #endif /* !WTERMSIG */
+
 #endif /* NeXT || sony_news */
+
 #define INCLUDES_DONE
 #endif  /* Normal includes */
 
@@ -592,28 +594,6 @@ typedef int pid_t;
 # endif /* !MAXINT && INT_MAX */
 
 #else
-
-/* FIXME: remove after completing configure-script */
-#ifdef unix                    /* if this is to compile on a UNIX machine */
-#define HAVE_READDIR 1    /* if directory reading functions are available */
-#ifdef USE_DIRENT             /* sys v version */
-#include <dirent.h>
-#define direct dirent
-#else
-#include <sys/dir.h>
-#endif /* USE_DIRENT */
-#if defined(sun) && defined(__svr4__)
-#include <sys/fcntl.h>
-#include <limits.h>
-#else
-#if defined(__hpux) || defined(LINUX) || defined (__FreeBSD__) 
-#include <limits.h>
-#endif /* __hpux || LINUX || __FreeBSD__ */
-#endif /* sun && __svr4__ */
-#if !defined(MAXINT) && defined(INT_MAX)
-#define MAXINT INT_MAX
-#endif /* !MAXINT && INT_MAX */
-#endif /* unix */
 
 #ifndef VM
 #ifndef VMS

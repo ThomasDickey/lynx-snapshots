@@ -8,10 +8,10 @@
    to functions which are called to implement the actual effect of the
    
    text read. When these functions are called, the attribute structures pointed to by the
-   DTD are valid, and the function is passed a pointer to the curent tag structure, and an
+   DTD are valid, and the function is passed a pointer to the current tag structure, and an
    "element stack" which represents the state of nesting within SGML elements.
    
-   The following aspects are from Dan Connolly's suggestions:  Binary search, Strcutured
+   The following aspects are from Dan Connolly's suggestions:  Binary search, Structured
    object scheme basically, SGML content enum type.
    
    (c) Copyright CERN 1991 - See Copyright.html
@@ -49,52 +49,50 @@ typedef struct {
                                 /* Could put type info in here */
 } attr;
 
-typedef enum _TagClass {
+typedef int TagClass;
     /* textflow */
-    Tgc_FONTlike	= 0x00001,/* S,STRIKE,I,B,TT,U,BIG,SMALL,STYLE,BLINK;BR,TAB */
-    Tgc_EMlike		= 0x00002, /* EM,STRONG,DFN,CODE,SAMP,KBD,VAR,CITE,Q,INS,DEL,SPAN,.. */
-    Tgc_MATHlike	= 0x00004, /* SUB,SUP,MATH,COMMENT */
-    Tgc_Alike		= 0x00008, /* A */
-    Tgc_formula		= 0x00010, /* not used until math is supported better... */
+#define Tgc_FONTlike	0x00001	/* S,STRIKE,I,B,TT,U,BIG,SMALL,STYLE,BLINK;BR,TAB */
+#define Tgc_EMlike	0x00002	/* EM,STRONG,DFN,CODE,SAMP,KBD,VAR,CITE,Q,INS,DEL,SPAN,.. */
+#define Tgc_MATHlike	0x00004	/* SUB,SUP,MATH,COMMENT */
+#define Tgc_Alike	0x00008	/* A */
+#define Tgc_formula	0x00010	/* not used until math is supported better... */
     /* used for special structures: forms, tables,... */
-    Tgc_TRlike		= 0x00020,/* TR and similar */
-    Tgc_SELECTlike	= 0x00040,/* SELECT,INPUT,TEXTAREA(,...) */
+#define Tgc_TRlike	0x00020	/* TR and similar */
+#define Tgc_SELECTlike	0x00040	/* SELECT,INPUT,TEXTAREA(,...) */
     /* structure */
-    Tgc_FORMlike	= 0x00080,/* FORM itself */
-    Tgc_Plike		= 0x00100, /* P,H1..H6,... structures containing text or
+#define Tgc_FORMlike	0x00080	/* FORM itself */
+#define Tgc_Plike	0x00100	/* P,H1..H6,... structures containing text or
 				    insertion but not other structures */
-    Tgc_DIVlike		= 0x00200, /* ADDRESS,FIG,BDO,NOTE,FN,DIV,CENTER;FIG
+#define Tgc_DIVlike	0x00200	/* ADDRESS,FIG,BDO,NOTE,FN,DIV,CENTER;FIG
 				    structures which can contain other structures */
-    Tgc_LIlike		= 0x00400, /* LH,LI,DT,DD;TH,TD structure-like, only valid
+#define Tgc_LIlike	0x00400	/* LH,LI,DT,DD;TH,TD structure-like, only valid
 				    within certain other structures */
-    Tgc_ULlike		= 0x00800, /* UL,OL,DL,DIR,MENU;TABLE;XMP,LISTING
+#define Tgc_ULlike	0x00800	/* UL,OL,DL,DIR,MENU;TABLE;XMP,LISTING
 				    special in some way, cannot contain (parsed)
 				    text directly */
     /* insertions */
-    Tgc_BRlike		= 0x01000,/* BR,IMG,TAB allowed in any text */
-    Tgc_APPLETlike	= 0x02000, /* APPLET,OBJECT,EMBED,SCRIPT */
-    Tgc_HRlike		= 0x04000, /* HR,MARQUEE can contain all kinds of things
+#define Tgc_BRlike	0x01000	/* BR,IMG,TAB allowed in any text */
+#define Tgc_APPLETlike	0x02000	/* APPLET,OBJECT,EMBED,SCRIPT */
+#define Tgc_HRlike	0x04000	/* HR,MARQUEE can contain all kinds of things
 				    and/or are not allowed (?) in running text */
-    Tgc_MAPlike		= 0x08000, /* MAP,AREA some specials that never contain
+#define Tgc_MAPlike	0x08000	/* MAP,AREA some specials that never contain
 				    (directly or indirectly) other things than
 				    special insertions */
-    Tgc_outer		= 0x10000, /* HTML,FRAMESET,FRAME,PLAINTEXT; */
-    Tgc_BODYlike	= 0x20000, /* BODY,BODYTEXT,NOFRAMES,TEXTFLOW; */
-    Tgc_HEADstuff	= 0x40000, /* HEAD,BASE,STYLE,TITLE; */
+#define Tgc_outer	0x10000	/* HTML,FRAMESET,FRAME,PLAINTEXT; */
+#define Tgc_BODYlike	0x20000	/* BODY,BODYTEXT,NOFRAMES,TEXTFLOW; */
+#define Tgc_HEADstuff	0x40000	/* HEAD,BASE,STYLE,TITLE; */
     /* special relations */
-    Tgc_same		= 0x80000
-} TagClass;
+#define Tgc_same	0x80000
 
 /* Some more properties of tags (or rather, elements) and rules how
    to deal with them. - kw */
-typedef enum _TagFlags {
-    Tgf_endO		= 0x00001, /* end tag can be Omitted */
-    Tgf_startO		= 0x00002, /* start tag can be Omitted */
-    Tgf_mafse   	= 0x00004, /* Make Attribute-Free Start-tag End instead
+typedef int TagFlags;
+#define Tgf_endO	0x00001	/* end tag can be Omitted */
+#define Tgf_startO	0x00002	/* start tag can be Omitted */
+#define Tgf_mafse   	0x00004	/* Make Attribute-Free Start-tag End instead
 				      (if found invalid) */
-    Tgf_strict		= 0x00008  /* Ignore contained invalid elements,
+#define Tgf_strict	0x00008	/* Ignore contained invalid elements,
 				      don't pass them on */
-} TagFlags;
 
 /*              A tag structure describes an SGML element.
 **              -----------------------------------------
@@ -105,7 +103,7 @@ typedef enum _TagFlags {
 **      attributes      points to a zero-terminated array
 **                      of attribute names.
 **
-**      litteral        determines how the SGML engine parses the charaters
+**      litteral        determines how the SGML engine parses the characters
 **                      within the element. If set, tag openers are ignored
 **                      except for that which opens a matching closing tag.
 **
@@ -166,11 +164,11 @@ typedef struct _HTSGMLContext *HTSGMLContext;   /* Hidden */
 Structured Object definition
 
    A structured object is something which can reasonably be represented
-   in SGML.  I'll rephrase that.  A structured object is am ordered
+   in SGML.  I'll rephrase that.  A structured object is an ordered
    tree-structured arrangement of data which is representable as text.
-   The SGML parer outputs to a Structured object.  A Structured object
+   The SGML parser outputs to a Structured object.  A Structured object
    can output its contents to another Structured Object. It's a kind of
-   typed stream. The architecure is largely Dan Conolly's. Elements and
+   typed stream. The architecture is largely Dan Conolly's. Elements and
    entities are passed to the sob by number, implying a knowledge of the
    DTD.  Knowledge of the SGML syntax is not here, though.
    
@@ -227,7 +225,7 @@ typedef struct _HTStructuredClass{
 
 /*
   Equivalents to the following functions possibly could be generalised
-  into additional HTStructuredClass members.  FOr now they don't do
+  into additional HTStructuredClass members.  For now they don't do
   anything target-specific. - kw
   */
 extern BOOLEAN LYCheckForCSI PARAMS((HTParentAnchor *anchor, char **url));

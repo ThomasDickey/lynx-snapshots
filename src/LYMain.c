@@ -742,7 +742,7 @@ else {init_ctrl_break[0] = 1;}
 	StrAllocCat(lynx_temp_space, ":");
     }
 #else
-#ifndef __DJGPP__
+#if !defined(__DJGPP__) && !defined(_WINDOWS)
     if (((len = strlen(lynx_temp_space)) > 1) &&
 	lynx_temp_space[len-1] != '/') {
 	StrAllocCat(lynx_temp_space, "/");
@@ -752,7 +752,7 @@ else {init_ctrl_break[0] = 1;}
 	lynx_temp_space[len-1] != '\\') {
 	StrAllocCat(lynx_temp_space, "\\");
     }
-#endif /* __DJGPP__ */
+#endif /* !__DJGPP__ && !_WINDOWS */
 #endif /* VMS */
 #ifdef VMS
     StrAllocCopy(mail_adrs, MAIL_ADRS);
@@ -1257,11 +1257,7 @@ else {init_ctrl_break[0] = 1;}
     /*
      *	Process the configuration file.
      */
-    if (TRACE) {
-	fprintf(stderr,
-		"Loading cfg file '%s'.\n", lynx_cfg_file);
-    }
-    read_cfg(lynx_cfg_file);
+    read_cfg(lynx_cfg_file, "main program", 1);
     FREE(lynx_cfg_file);
 
     HTSwitchDTD(New_DTD);

@@ -43,7 +43,7 @@ extern int default_bg;
 extern int check_color PARAMS((char * color, int the_default));
 #endif
 
-extern void read_cfg PARAMS((char *cfg_filename));
+extern void read_cfg PARAMS((char *cfg_filename, char *parent_filename, int nesting_level));
 extern BOOLEAN have_read_cfg;
 
 #endif /* LYREADCFG_H */

@@ -3,9 +3,6 @@
 
 #include <string.h>
 
-#if !defined(EXP_8BIT_TOUPPER) && !defined(LOCALE)
-#define EXP_8BIT_TOUPPER
-#endif
 
 /*  UPPER8(ch1,ch2) is an extension of (TOUPPER(ch1) - TOUPPER(ch2))  */
 extern int UPPER8  PARAMS((
