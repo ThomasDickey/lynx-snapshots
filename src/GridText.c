@@ -137,6 +137,13 @@ PUBLIC int LYCacheSource = SOURCE_CACHE_NONE;
 PUBLIC BOOLEAN from_source_cache = FALSE;  /* mutable */
 #endif
 
+#ifdef USE_SCROLLBAR
+PUBLIC int LYsb = FALSE;
+PUBLIC int LYsb_arrow = TRUE;
+PUBLIC int LYsb_begin = -1;
+PUBLIC int LYsb_end = -1;
+#endif
+
 #if defined(USE_COLOR_STYLE)
 #define MAX_STYLES_ON_LINE 64
 
@@ -298,6 +305,7 @@ static int justified_text_map[MAX_LINE]; /* this is a map - for each index i
     it tells to which position j=justified_text_map[i] in justified text
     i-th character is mapped - it's used for anchor positions fixup and for
     color style's positions adjustment. */
+static BOOL have_raw_nbsps = FALSE;
 
 PUBLIC void ht_justify_cleanup NOARGS
 {
@@ -313,6 +321,7 @@ PUBLIC void ht_justify_cleanup NOARGS
     last_anchor_of_previous_line = NULL;
     this_line_was_splitted = FALSE;
     in_DT = FALSE;
+    have_raw_nbsps = FALSE;
 }
 
 PUBLIC void mark_justify_start_position ARGS1(void*,text)
@@ -1239,6 +1248,139 @@ PRIVATE void display_title ARGS1(
     return;
 }
 
+/*	Output the scrollbar
+**	---------------------
+*/
+#ifdef USE_SCROLLBAR
+PRIVATE void display_scrollbar ARGS1(
+	HText *,	text)
+{
+    int i;
+    int h = display_lines - 2 * (LYsb_arrow!=0); /* Height of the scrollbar */
+    int off = (LYsb_arrow != 0);		 /* Start of the scrollbar */
+    int top_skip, bot_skip, sh;
+
+    LYsb_begin = LYsb_end = -1;
+    if (!LYsb || !text || h <= 2
+	|| (text->Lines + 1) <= display_lines)
+	return;
+
+    /* Each cell of scrollbar represents text->Lines/h lines of text. */
+    /* Always smaller than h */
+    sh = (display_lines*h + text->Lines/2)/(text->Lines + 1);
+    if (sh <= 0)
+	sh = 1;
+    if (sh >= h)
+	sh = h - 1;
+
+    /* Always non-zero if not top, which is text->top_of_screen != 0 . */
+    top_skip = (text->top_of_screen * h + text->Lines)/(text->Lines + 1);
+    if (top_skip >= h)
+	top_skip = h - 1;
+
+    /* End happens when
+       (text->Lines + 1 - (text->top_of_screen + display_lines - 1))
+       is either 0 or 1. */
+    bot_skip =
+	(text->Lines + 1 - (text->top_of_screen + display_lines - 1) - 1);
+    if (bot_skip < 0)
+	bot_skip = 0;
+    bot_skip = (bot_skip * h + text->Lines)/(text->Lines + 1);
+
+    /* Now make sure the height is always sh unless top_skip==bot_skip==1  */
+    if (top_skip + bot_skip + sh != h && !(top_skip == 1 && bot_skip == 1)) {
+	/* One which is smaller takes precedence. */
+	if (top_skip < bot_skip) {
+	    int t = h - top_skip - sh;
+
+	    if (t < top_skip)
+		bot_skip = top_skip;
+	    else
+		bot_skip = t;
+	} else {
+	    int t = h - bot_skip - sh;
+
+	    if (t < bot_skip)
+		top_skip = bot_skip;
+	    else
+		top_skip = t;
+	}
+    }
+    /* Ensure the bar is visible if h >= 3 */
+    if (top_skip + bot_skip >= h)
+	bot_skip = h - top_skip;
+    if (top_skip + bot_skip == h && h >= 3) {
+	if (bot_skip > 1)
+	    bot_skip--;
+	else
+	    top_skip--;
+    }
+    LYsb_begin = top_skip;
+    LYsb_end = h - bot_skip;
+
+    if (LYsb_arrow) {
+#ifdef USE_COLOR_STYLE
+	int s = top_skip ? s_sb_aa : s_sb_naa;
+
+	if (last_colorattr_ptr > 0) {
+	    LynxChangeStyle(s, STACK_ON, 0);
+	} else {
+	    LynxChangeStyle(s, ABS_ON, 0);
+	}
+#endif /* USE_COLOR_STYLE */
+	move(1, LYcols - 1);
+	addch(ACS_UARROW);
+#ifdef USE_COLOR_STYLE
+	LynxChangeStyle(s, STACK_OFF, 0);
+#endif /* USE_COLOR_STYLE */
+    }
+#ifdef USE_COLOR_STYLE
+    if (last_colorattr_ptr > 0) {
+	LynxChangeStyle(s_sb_bg, STACK_ON, 0);
+    } else {
+	LynxChangeStyle(s_sb_bg, ABS_ON, 0);
+    }
+#endif /* USE_COLOR_STYLE */
+
+    for (i=1; i <= h; i++) {
+#ifdef USE_COLOR_STYLE
+	if (i-1 <= top_skip && i > top_skip)
+	    LynxChangeStyle(s_sb_bar, STACK_ON, 0);
+	if (i-1 <= h - bot_skip && i > h - bot_skip)
+	    LynxChangeStyle(s_sb_bar, STACK_OFF, 0);
+#endif /* USE_COLOR_STYLE */
+	move(i + off, LYcols - 1);
+	if (i > top_skip && i <= h - bot_skip)
+	    addch(ACS_BLOCK);
+	else
+	    addch(ACS_CKBOARD);
+    }
+#ifdef USE_COLOR_STYLE
+    LynxChangeStyle(s_sb_bg, STACK_OFF, 0);
+#endif /* USE_COLOR_STYLE */
+
+    if (LYsb_arrow) {
+#ifdef USE_COLOR_STYLE
+	int s = bot_skip ? s_sb_aa : s_sb_naa;
+
+	if (last_colorattr_ptr > 0) {
+	    LynxChangeStyle(s, STACK_ON, 0);
+	} else {
+	    LynxChangeStyle(s, ABS_ON, 0);
+	}
+#endif /* USE_COLOR_STYLE */
+	move(h + 2, LYcols - 1);
+	addch(ACS_DARROW);
+#ifdef USE_COLOR_STYLE
+	LynxChangeStyle(s, STACK_OFF, 0);
+#endif /* USE_COLOR_STYLE */
+    }
+    return;
+}
+#else
+#define display_scrollbar(text) /*nothing*/
+#endif /* USE_SCROLLBAR */
+
 /*	Output a page
 **	-------------
 */
@@ -1811,6 +1953,7 @@ PRIVATE void display_page ARGS3(
 	 */
 	addstr("\n     Document is empty");
     }
+    display_scrollbar(text);
 
 #ifdef DISP_PARTIAL
     if (display_partial && display_flag &&
@@ -1825,7 +1968,7 @@ PRIVATE void display_page ARGS3(
     }
 #endif /* DISP_PARTIAL */
 
-    if (HTCJK != NOCJK || text->T.output_utf8) {
+    if (HTCJK != NOCJK) {
 	/*
 	 *  For non-multibyte curses.
 	 */
@@ -2536,23 +2679,23 @@ PRIVATE void split_line ARGS2(
 		continue;
 	    }
 	    if (text->T.output_utf8 && !isascii(c)) {
-		    int utf_extra = 0;
-		    if ((c & 0xe0) == 0xc0) {
-			utf_extra = 1;
-		    } else if ((c & 0xf0) == 0xe0) {
-			utf_extra = 2;
-		    } else if ((c & 0xf8) == 0xf0) {
-			utf_extra = 3;
-		    } else if ((c & 0xfc) == 0xf8) {
-			utf_extra = 4;
-		    } else if ((c & 0xfe) == 0xfc) {
-			utf_extra = 5;
-		    } else
-			utf_extra = 0;
-		    if ( (int) strlen(jp+1) < utf_extra)
-			utf_extra = 0;
-		    r->byte_len += utf_extra;
-		    jp += utf_extra;
+		int utf_extra = 0;
+		if ((c & 0xe0) == 0xc0) {
+		    utf_extra = 1;
+		} else if ((c & 0xf0) == 0xe0) {
+		    utf_extra = 2;
+		} else if ((c & 0xf8) == 0xf0) {
+		    utf_extra = 3;
+		} else if ((c & 0xfc) == 0xf8) {
+		    utf_extra = 4;
+		} else if ((c & 0xfe) == 0xfc) {
+		    utf_extra = 5;
+		} else
+		    utf_extra = 0;
+		if ( (int) strlen(jp+1) < utf_extra)
+		    utf_extra = 0;
+		r->byte_len += utf_extra;
+		jp += utf_extra;
 	    }
 	}
 	total_byte_len += r->byte_len;
@@ -2577,7 +2720,7 @@ PRIVATE void split_line ARGS2(
 	    r_ = spare % (ht_num_runs-1);
 
 	    m = justified_text_map;
-	    for(jp=previous->data,i=0;i<justify_start_position;++i) {
+	    for(jp = previous->data, i = 0; i < justify_start_position; ++i) {
 		*m++ = i;
 		*jdata++ = ( *prevdata == HT_NON_BREAK_SPACE ? ' ' : *prevdata);
 		++prevdata;
@@ -2640,7 +2783,7 @@ PRIVATE void split_line ARGS2(
 #endif
 	    /* we have to fix anchors*/
 	    {
-		/*a2 is the last anchor on the line preceeding 'previous'*/
+		/*a2 is the last anchor on the line preceding 'previous'*/
 		TextAnchor* a2 = last_anchor_of_previous_line;
 
 		if (!a2)
@@ -2750,7 +2893,7 @@ PRIVATE void split_line ARGS2(
 	    char* p;
 
 	    /* it was permitted to justify line, but this function was called
-	     * to end paragraph - we must subsitute HT_NON_BREAK_SPACEs with
+	     * to end paragraph - we must substitute HT_NON_BREAK_SPACEs with
 	     * spaces in previous line
 	     */
 	    if (line->size) {
@@ -2760,9 +2903,22 @@ PRIVATE void split_line ARGS2(
 	    for (p=previous->data;*p;++p)
 		if (*p == HT_NON_BREAK_SPACE)
 		    *p = ' ';
+	} else if (have_raw_nbsps) {
+	    /* this is very rare case, that can happen in forms placed in
+	       table cells*/
+	    int i;
+
+	    for (i = 0; i< previous->size; ++i)
+		if (previous->data[i] == HT_NON_BREAK_SPACE)
+		    previous->data[i] = ' ';
+
+	    /*next line won't be justified, so substitute nbsps in it too */
+	    for (i = 0; i< line->size; ++i)
+		if (line->data[i] == HT_NON_BREAK_SPACE)
+		    line->data[i] = ' ';
 	}
 
-	/* HT_NON_BREAK_SPACEs were subsituted with spaces in
+	/* else HT_NON_BREAK_SPACEs were substituted with spaces in
 	   HText_appendCharacter */
 	{
 	    /* keep maintaining 'last_anchor_of_previous_line' */
@@ -2779,12 +2935,12 @@ PRIVATE void split_line ARGS2(
 		    last_anchor_of_previous_line = a2, a2 = a2->next);
 	}
     }
-
 	/* cleanup */
     can_justify_this_line = TRUE;
     justify_start_position = 0;
     this_line_was_splitted = FALSE;
-#endif
+    have_raw_nbsps = FALSE;
+#endif /* EXP_JUSTIFY_ELTS */
 } /* split_line */
 
 
@@ -3434,6 +3590,11 @@ check_IgnoreExcess:
 #endif
      )
 	ch = ' ';
+#ifdef EXP_JUSTIFY_ELTS
+    else
+        have_raw_nbsps = TRUE;
+#endif
+
     /* we leave raw HT_NON_BREAK_SPACE otherwise (we'll substitute it later) */
 
     if (ch & 0x80)

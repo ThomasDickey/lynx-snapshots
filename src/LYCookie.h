@@ -32,8 +32,8 @@ extern void LYSetCookie PARAMS((
 	CONST char *	SetCookie2,
 	CONST char *	address));
 extern char *LYCookie PARAMS((
-	CONST char *	hostname,
-	CONST char *	partialpath,
+	char *		hostname,
+	char *		partialpath,
 	int		port,
 	BOOL		secure));
 extern void LYStoreCookies PARAMS((

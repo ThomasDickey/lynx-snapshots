@@ -2751,7 +2751,7 @@ unload_btree:
 					       entry_info->size);
 		    else
 			sprintf(string_buffer, "%6d Kb",
-					        entry_info->size/1024);
+						entry_info->size/1024);
 #else
 		    if (entry_info->size < 1024)
 			sprintf(string_buffer, "  %d bytes",
@@ -2776,10 +2776,13 @@ unload_btree:
     FREE(lastpath);
 
     if (server_type == APPLESHARE_SERVER ||
-	server_type == NETPRESENZ_SERVER) {
+	server_type == NETPRESENZ_SERVER ||
+	WasInterrupted)			    {
 	/*
 	 *  Without closing the data socket first,
 	 *  the response(NIL) below hangs. - KW
+	 *  Seems to also be needed if the xfer
+	 *  was interrupted ("z" or ^G).  - KED
 	 */
 	NETCLOSE(data_soc);
     }
@@ -2819,12 +2822,12 @@ PUBLIC int HTFTPLoad ARGS4(
     int retry;			/* How many times tried? */
     HTFormat format;
 
-
     /* set use_list to NOT since we don't know what kind of server
      * this is yet.  And set the type to GENERIC
      */
     use_list = FALSE;
     server_type = GENERIC_SERVER;
+    HTReadProgress(0,0);
 
     for (retry = 0; retry < 2; retry++) { /* For timed out/broken connections */
 	status = get_connection(name, anchor);

@@ -13,8 +13,11 @@
 #include <HTFWriter.h>
 #include <HTSaveToFile.h>
 
-#if _WIN_CC
+#if WIN_EX
 #include <HTParse.h>
+#endif
+
+#if _WIN_CC
 extern int exec_command(char * cmd, int wait_flag); /* xsystem.c */
 #endif
 

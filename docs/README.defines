@@ -84,8 +84,7 @@ Using curses or ncurses library:
 # -DNO_SIZECHANGE (old) or HAVE_SIZECHANGE (new) whether using code to detect
                    new size after size changes of the terminal (window).
                    for UNIX handled by ./configure, may be set in HTUtils.h
-# -DUSE_SIZECHANGEHACK  gone (was: enable hack to handle increasing the
-                        window size above window size at startup)
+# -DUSE_SCROLLBAR  supports scrollbar when built with ncurses
 
 Using slang library:
 # -DUSE_SLANG      (see INSTALLATION, Section II-1c)

@@ -442,4 +442,12 @@ extern void cygwin_conv_to_full_posix_path(char *dos, char *posix);
 extern int setmode(int handle, int amode);
 #endif
 
+#ifdef USE_SCROLLBAR
+/* GridText.c */
+extern int LYsb;
+extern int LYsb_arrow;
+extern int LYsb_begin;
+extern int LYsb_end;
+#endif
+
 #endif /* LYGLOBALDEFS_H */

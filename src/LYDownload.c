@@ -248,7 +248,7 @@ check_recall:
 	/*
 	 *  See if we can write to it.
 	 */
-	CTRACE(tfp, "LYDownload: filename is %s", buffer);
+	CTRACE(tfp, "LYDownload: filename is %s\n", buffer);
 
 	if ((fp = fopen(buffer, "w")) != NULL) {
 	    fclose(fp);

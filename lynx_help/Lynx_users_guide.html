@@ -2057,8 +2057,15 @@ where
 		 to further accesses.
 	  </ul>
    <dt><code>options</code>
-	<dd>can be selected from the following list, where items in
-	    all-caps indicate that a substitution must be made.
+	<dd>can be selected from the following list, where items in all-caps
+	    indicate that a substitution must be made.  Many options are
+	    "toggles", meaning that they will change the default action,
+	    however it was specified.  To always set the option on, use the
+	    syntax "-option+", "-option=on", or "-option:on".  To always set
+	    the option off, use the syntax "-option-", "-option=off", or
+	    "-option:off".  The syntax with the "=" may not work under DOS
+	    because of operating system constraints.  Use one of the other
+	    forms in that case.
 	   <dl>
 	     <dt><code>-</code>
 		<dd>If the argument is only '<code>-</code>' (dash), then Lynx
@@ -2528,8 +2535,11 @@ where
 </dl>
 
 <p>No options are required, nor is a startfile argument required.
-White space may be substituted for any equal sign ('<em>=</em>')
-appearing in the option list above. [<A HREF="#ToC-Invoking">ToC</A>]
+White space can be used in place of equal sign separators ('<em>=</em>')
+appearing in the option list above.  It can not be used in place of the equal
+signs in forms like "-option=on" and "-option=off" for simple switches and
+toggles, for which "-option" alone (without a value) is valid.
+[<A HREF="#ToC-Invoking">ToC</A>]
 
 
 <h2 ID="Environments"><A NAME="Environment"><em>Environment variables used by Lynx</em></A></h2>

@@ -598,13 +598,17 @@ accept only http URLs (for validation).  Complete security
 restrictions also are implemented.
 .TP
 .B -verbose
-taggles [LINK], [IMAGE] and [INLINE] comments with filenames of these images.
+toggle [LINK], [IMAGE] and [INLINE] comments with filenames of these images.
 .TP
 .B -version
 print version information.
 .TP
 .B -vikeys
 enable vi-like key movement.
+.TP
+.B -wdebug
+enable Waterloo tcp/ip packet debug (print to watt debugfile).
+This applies only to DOS versions compiled with WATTCP or WATT-32.
 .TP
 .B -width\fR=\fINUMBER
 number of columns for formatting of dumps, default is 80.

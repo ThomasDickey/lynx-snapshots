@@ -1211,6 +1211,10 @@ static Config_Type Config_Table [] =
 #endif /* NO_RULES */
      PARSE_STR("save_space", CONF_STR, &lynx_save_space),
      PARSE_SET("scan_for_buried_news_refs", CONF_BOOL, &scan_for_buried_news_references),
+#ifdef USE_SCROLLBAR
+     PARSE_SET("scrollbar", CONF_BOOL, &LYsb),
+     PARSE_SET("scrollbar_arrow", CONF_BOOL, &LYsb_arrow),
+#endif
      PARSE_SET("seek_frag_area_in_cur", CONF_BOOL, &LYSeekFragAREAinCur),
      PARSE_SET("seek_frag_map_in_cur", CONF_BOOL, &LYSeekFragMAPinCur),
      PARSE_SET("set_cookies", CONF_BOOL, &LYSetCookies),
