@@ -104,15 +104,16 @@ extern unsigned short key_override[];
 #define       LYK_CLEAR_AUTH    71
 #define       LYK_SWITCH_DTD    72
 #define       LYK_ELGOTO        73
+#define       LYK_CHANGE_LINK   74
 
 #ifdef USE_EXTERNALS
-#define       LYK_EXTERN        74
+#define       LYK_EXTERN        75
 #if defined(VMS) || defined(DIRED_SUPPORT)
-#define       LYK_DIRED_MENU    75
+#define       LYK_DIRED_MENU    76
 #endif /* VMS || DIRED_SUPPORT */
 #else  /* USE_EXTERNALS */
 #if defined(VMS) || defined(DIRED_SUPPORT)
-#define       LYK_DIRED_MENU    74
+#define       LYK_DIRED_MENU    75
 #endif /* VMS || DIRED_SUPPORT */
 #endif /* !defined(USE_EXTERNALS) */
 
@@ -132,13 +133,5 @@ extern unsigned short key_override[];
 #ifndef LYK_TAG_LINK
 #define       LYK_TAG_LINK      0
 #endif
-
-#ifdef NOT_USED
-#define       LYK_VERSION       81
-#define       LYK_FORM_UP       82
-#define       LYK_FORM_DOWN     83
-#endif /* NOT_USED */
-
-#define LYK_CHANGE_LINK         90	/* FIXME: make these an enum */
 
 #endif /* LYKEYMAP_H */

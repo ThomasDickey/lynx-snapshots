@@ -617,9 +617,9 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 
 	if (((cp=strchr(pres->rep->name, ';')) != NULL) &&
 	    strstr((cp+1), "charset") != NULL) {
-	    _user_message(WRONG_CHARSET_D_OR_C, pres->rep->name);
+	    _user_message(MSG_DOWNLOAD_OR_CANCEL, pres->rep->name);
 	} else if (*(pres->rep->name) != '\0')	{
-	    _user_message(UNMAPPED_TYPE_D_OR_C, pres->rep->name);
+	    _user_message(MSG_DOWNLOAD_OR_CANCEL, pres->rep->name);
 	} else {
 	    _statusline(CANNOT_DISPLAY_FILE_D_OR_C);
 	}

@@ -1,6 +1,34 @@
 Changes since Lynx 2.8.1 release
 ================================================================================
 
+1998-12-24 (2.8.2dev.11)
+* use HTSprintf/HTSprintf0 in about half of the WWW library files where
+  applicable:  HTAABrow.c HTAAServ.c HTAAUtil.c HTAccess.c HTAnchor.c HTDOS.c
+  HTFTP.c HTFWriter.c HTFile.c HTFinger.c HTFormat.c HTGopher.c - TD
+* eliminate most duplicate gettext parameters, reduced the number of files
+  listed in po/POTFILES.in to a size that may allow build with the Solaris
+  xgettext utility - TD
+* correct rule for remaking po/makefile - TD
+* workaround for HPUX sed program, providing '$' anchors for ".*" expressions,
+  which is redundant, but should be harmless (suggested by Jean-Yves Levesque
+  <Jean-Yves.Levesque.jyves@nortelnetworks.com>)
+* add new help file, keystrokes/environments.html - LP
+* fix HTReadProgress():  more accurate transfer rate calculation - LP
+* update slang makefile.dos, and corresponding INSTALLATION notes - DK
+* correct my integration of IZ's LY_CHANGE_LINK code, which resulted in an
+  out-of-bounds index into revmap (reported by LP, LV) - TD
+* add note about sendmail for Win32 to lynx.cfg - JS
+* add note for successful build on NeXT to INSTALLATION (Christian Jensen
+  <cejensen@winternet.com>)
+* add checks for null return from malloc to HTInit.c, LYMainLoop.c, LYUtils.c,
+  (patch by John Bley <jbb6@acpub.duke.edu>)
+* remove reference to 'persistent_cookies' in LYCookie.c which prevented
+  compile when persistent cookies configure option was disabled (report
+  by PG) - KW
+* move assignment to SHELL back from WWW/Library/makefile.in to CommonMakefile,
+  and revert use of $CONFIG_SHELL in configure script, since this appears to
+  stop auto-configure from finding working include feature of 'make' on CLIX
+  (reported by Alex Matulich) - TD
 1998-12-16 (2.8.2dev.10)
 * FROM_FILE is not used any more for a domain (although it is currently still
   defined.  Renamed COOKIE_FLAG_PERSISTENT to COOKIE_FLAG_FROM_FILE.  Don't

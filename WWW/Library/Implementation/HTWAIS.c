@@ -759,7 +759,7 @@ PUBLIC int HTLoadWAIS ARGS4(
 
 	START(HTML_HEAD);
 	PUTS("\n");
-	HTStartIsIndex(target, gettext("Enter WAIS query: "), NULL);
+	HTStartIsIndex(target, HTWAIS_SOLICIT_QUERY , NULL);
 	PUTS("\n");
 
 	{
@@ -825,7 +825,7 @@ PUBLIC int HTLoadWAIS ARGS4(
 
 	START(HTML_HEAD);
 	PUTS("\n");
-	HTStartIsIndex(target, gettext("Enter WAIS query: "), NULL);
+	HTStartIsIndex(target, HTWAIS_SOLICIT_QUERY, NULL);
 	PUTS("\n");
 	START(HTML_TITLE);
 	PUTS(keywords);
@@ -882,7 +882,7 @@ PUBLIC int HTLoadWAIS ARGS4(
 	    goto CleanUp;
 	} else if (!rv) {
 #ifdef VMS
-	    HTAlert (gettext("HTWAIS: Return message too large."));
+	    HTAlert (HTWAIS_MESSAGE_TOO_BIG);
 	    return_status = HT_NOT_LOADED;
 	    FREE_TARGET;
 	    goto CleanUp;
@@ -1001,7 +1001,7 @@ PUBLIC int HTLoadWAIS ARGS4(
 		goto CleanUp;
 	    } else if (!rv) {
 #ifdef VMS
-		HTAlert (gettext("HTWAIS: Return message too large."));
+		HTAlert (HTWAIS_MESSAGE_TOO_BIG);
 		return_status = HT_NOT_LOADED;
 		FREE_TARGET;
 		FREE(type);

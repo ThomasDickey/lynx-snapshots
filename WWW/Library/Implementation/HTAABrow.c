@@ -632,9 +632,7 @@ PRIVATE char *compose_auth_string ARGS3(
 	    theHost = setup->server->hostname;
 	    if (setup->server->portnumber > 0 &&
 		setup->server->portnumber != 80) {
-		if (!(thePort = (char *)calloc(1, sizeof(char) * 40)))
-		    outofmem(__FILE__, "compose_auth_string");
-		sprintf(thePort, ":%d", setup->server->portnumber);
+		HTSprintf0(&thePort, ":%d", setup->server->portnumber);
 	    }
 	/*
 	 *  Set up the message for the username prompt,
@@ -646,9 +644,7 @@ PRIVATE char *compose_auth_string ARGS3(
 	len = strlen(realm->realmname) +
 	      strlen(theHost ?
 	      	     theHost : "??") + 50;
-	if (!(msg = (char *)calloc(1, sizeof(char) * len)))
-	    outofmem(__FILE__, "compose_auth_string");
-	sprintf(msg, gettext("Username for '%s' at %s '%s%s':"),
+	HTSprintf0(&msg, gettext("Username for '%s' at %s '%s%s':"),
 		     realm->realmname,
 		     (IsProxy ? "proxy" : "server"),
 		     (theHost ? theHost : "??"),
@@ -911,11 +907,12 @@ PUBLIC char *HTAA_composeAuth ARGS4(
 	    /* OTHER AUTHENTICATION ROUTINES ARE CALLED HERE */
 	  default:
 	    {
-		char msg[100];
-		sprintf(msg, "%s `%s'",
+		char *msg = NULL;
+		HTSprintf0(&msg, "%s `%s'",
 			gettext("This client doesn't know how to compose proxy authorization information for scheme"),
 			HTAAScheme_name(scheme));
 		HTAlert(msg);
+		FREE(msg);
 		auth_string = NULL;
 	    }
 	} /* switch scheme */
@@ -985,11 +982,12 @@ PUBLIC char *HTAA_composeAuth ARGS4(
 	    /* OTHER AUTHENTICATION ROUTINES ARE CALLED HERE */
 	  default:
 	    {
-		char msg[100];
-		sprintf(msg, "%s `%s'",
+		char *msg = 0;
+		HTSprintf0(&msg, "%s `%s'",
 			gettext("This client doesn't know how to compose authorization information for scheme"),
 			HTAAScheme_name(scheme));
 		HTAlert(msg);
+		FREE(msg);
 		auth_string = NULL;
 	    }
 	} /* switch scheme */
@@ -1092,12 +1090,7 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(
 	        (!IsProxy &&
 		 0==strcasecomp(fieldname, "WWW-Authenticate:"))) {
 	        if (!(arg1 && *arg1 && args && *args)) {
-		    temp = (char *)calloc(1, strlen(line) +
-		    			     (arg1 ? strlen(arg1) : 0) +
-					     (args ? strlen(args) : 0) + 24);
-		    if (!temp)
-		        outofmem(__FILE__, "HTAA_shouldRetryWithAuth");
-		    sprintf(temp, gettext("Invalid header '%s%s%s%s%s'"), line,
+		    HTSprintf0(&temp, gettext("Invalid header '%s%s%s%s%s'"), line,
 				  ((arg1 && *arg1) ? " "  : ""),
 				  ((arg1 && *arg1) ? arg1 : ""),
 				  ((args && *args) ? " "  : ""),

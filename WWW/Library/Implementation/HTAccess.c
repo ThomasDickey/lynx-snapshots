@@ -674,7 +674,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
     */
     if (redirection_attempts > 10) {
 	redirection_attempts = 0;
-	HTAlert(gettext("Redirection limit of 10 URL's reached."));
+	HTAlert(TOO_MANY_REDIRECTIONS);
 	return NO;
     }
 
@@ -718,7 +718,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	    **	Don't exceed the redirection_attempts limit. - FM
 	    */
 	    if (++redirection_attempts > 10) {
-		HTAlert(gettext("Redirection limit of 10 URL's reached."));
+		HTAlert(TOO_MANY_REDIRECTIONS);
 		redirection_attempts = 0;
 		FREE(use_this_url_instead);
 		return NO;
@@ -1290,11 +1290,7 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
 	FILE * fp = NULL;
 	CONST char * home =  (CONST char*)getenv("HOME");
 	if (home != null) {
-	    my_home_document = (char *)calloc(1,
-		(strlen(home) + 1 + strlen(PERSONAL_DEFAULT) + 1));
-	    if (my_home_document == NULL)
-		outofmem(__FILE__, "HTAnchorHome");
-	    sprintf(my_home_document, "%s/%s", home, PERSONAL_DEFAULT);
+	    HTSprintf0(&my_home_document, "%s/%s", home, PERSONAL_DEFAULT);
 	    fp = fopen(my_home_document, "r");
 	}
 

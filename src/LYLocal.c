@@ -237,15 +237,20 @@ struct dired_menu {
 		    NULL, NULL, 				NULL }
 };
 
+PRIVATE BOOLEAN cannot_stat ARGS1(char *, name)
+{
+    char *tmpbuf = 0;
+    HTSprintf(&tmpbuf, gettext("Unable to get status of '%s'."), name);
+    HTAlert(tmpbuf);
+    FREE(tmpbuf);
+    return FALSE;
+}
+
 PRIVATE BOOLEAN ok_stat ARGS2(char *, name, struct stat*, sb)
 {
     CTRACE(tfp, "testing ok_stat(%s)\n", name);
     if (stat(name, sb) < 0) {
-	char *tmpbuf = 0;
-	HTSprintf(&tmpbuf, gettext("Unable to get status of '%s'."), name);
-	HTAlert(tmpbuf);
-	FREE(tmpbuf);
-	return FALSE;
+	return cannot_stat(name);
     }
     return TRUE;
 }
@@ -255,11 +260,7 @@ PRIVATE BOOLEAN ok_lstat ARGS2(char *, name, struct stat*, sb)
 {
     CTRACE(tfp, "testing ok_lstat(%s)\n", name);
     if (lstat(name, sb) < 0) {
-	char *tmpbuf = 0;
-	HTSprintf(&tmpbuf, gettext("Unable to get status of '%s'."), name);
-	HTAlert(tmpbuf);
-	FREE(tmpbuf);
-	return FALSE;
+	return cannot_stat(name);
     }
     return TRUE;
 }
@@ -290,6 +291,56 @@ PRIVATE BOOLEAN ok_localname ARGS2(char*, dst, char*, src)
     strcpy(dst, s);
     free(s);
     return TRUE;
+}
+
+PRIVATE int move_file ARGS2(char *, source, char *, target)
+{
+    int code;
+    char *msg = 0;
+    char *args[5];
+
+    HTSprintf(&msg, gettext("move %s to %s"), source, target);
+    args[0] = "mv";
+    args[1] = source;
+    args[2] = target;
+    args[3] = (char *) 0;
+    code = (LYExecv(MV_PATH, args, msg) <= 0) ? -1 : 1;
+    FREE(msg);
+    return code;
+}
+
+PRIVATE BOOLEAN already_exists ARGS1(char *, name)
+{
+    struct stat dir_info;
+
+    if (stat(name, &dir_info) == -1) {
+	if (errno != ENOENT) {
+	    cannot_stat(name);
+	} else {
+	    return TRUE;
+	}
+    } else if (S_ISDIR(dir_info.st_mode)) {
+	HTAlert(gettext("There is already a directory with that name!  Request ignored."));
+    } else if (S_ISREG(dir_info.st_mode)) {
+	HTAlert(gettext("There is already a file with that name!  Request ignored."));
+    } else {
+	HTAlert(gettext("The specified name is already in use!  Request ignored."));
+    }
+    return FALSE;
+}
+
+PRIVATE BOOLEAN dir_has_same_owner ARGS2(struct stat, *info, int, owner)
+{
+    if (S_ISDIR(info->st_mode)) {
+	if (info->st_uid == owner) {
+	    return TRUE;
+	} else {
+	    HTAlert(gettext("Destination has different owner!  Request denied."));
+	}
+    } else {
+	HTAlert(gettext("Destination is not a valid directory!  Request denied."));
+    }
+    return FALSE;
 }
 
 /*
@@ -369,7 +420,6 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
     char *savepath = NULL;
     char *srcpath = NULL;
     struct stat dir_info;
-    char *args[5];
     int count = 0;
     HTList *tag;
 
@@ -478,47 +528,31 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 	 *  Make sure the target location is a directory which is owned
 	 * by the same uid as the owner of the current location.
 	 */
-	if (S_ISDIR(dir_info.st_mode)) {
-	    if (dir_info.st_uid == owner) {
-		count = 0;
-		tag = tagged;
+	if (dir_has_same_owner(&dir_info, owner)) {
+	    count = 0;
+	    tag = tagged;
 
-		/*
-		 *  Move all tagged items to the target location.
-		 */
-		while ((cp = (char *)HTList_nextObject(tag)) != NULL) {
-		    cp = HTfullURL_toFile(cp);
-		    StrAllocCopy(srcpath, cp);
+	    /*
+	     *  Move all tagged items to the target location.
+	     */
+	    while ((cp = (char *)HTList_nextObject(tag)) != NULL) {
+		cp = HTfullURL_toFile(cp);
+		StrAllocCopy(srcpath, cp);
 
-		    HTSprintf0(&cp, gettext("move %s to %s"), srcpath, savepath);
-		    args[0] = "mv";
-		    args[1] = srcpath;
-		    args[2] = savepath;
-		    args[3] = (char *) 0;
-		    if (LYExecv(MV_PATH, args, cp) <= 0) {
-			FREE(cp);
-			if (count == 0)
-			    count = -1;
-			break;
-		    }
+		if (move_file(srcpath, savepath) < 0) {
 		    FREE(cp);
-		    ++count;
+		    if (count == 0)
+			count = -1;
+		    break;
 		}
-		FREE(srcpath);
-		FREE(savepath);
-		clear_tags();
-		return count;
-	    } else {
-		HTAlert(gettext("Destination has different owner!  Request denied."));
-		FREE(srcpath);
-		FREE(savepath);
-		return 0;
+		FREE(cp);
+		++count;
 	    }
-	} else {
-	    HTAlert(gettext("Destination is not a valid directory!  Request denied."));
-	    FREE(savepath);
-	    return 0;
+	    clear_tags();
+	    FREE(srcpath);
 	}
+	FREE(savepath);
+	return count;
     }
     return 0;
 }
@@ -534,7 +568,6 @@ PRIVATE BOOLEAN modify_name ARGS1(
     char newpath[512];
     char savepath[512];
     struct stat dir_info;
-    char *args[5];
 
     /*
      *	Determine the status of the selected item.
@@ -550,8 +583,7 @@ PRIVATE BOOLEAN modify_name ARGS1(
 	} else if (S_ISREG(dir_info.st_mode)) {
 	     cp = gettext("Enter new name for file: ");
 	} else {
-	     HTAlert(gettext("The selected item is not a file or a directory!  Request ignored."));
-	     return 0;
+	     return ok_file_or_dir(&dir_info);
 	}
 	if (filename(cp, tmpbuf, sizeof(tmpbuf)) == NULL)
 	    return 0;
@@ -571,30 +603,8 @@ PRIVATE BOOLEAN modify_name ARGS1(
 	    /*
 	     *	Make sure the destination does not already exist.
 	     */
-	    if (stat(newpath, &dir_info) == -1) {
-		char *msg = 0;
-		if (errno != ENOENT) {
-		    HTSprintf(&msg,
-			    gettext("Unable to determine status of '%s'."), newpath);
-		    HTAlert(msg);
-		    FREE(msg);
-		} else {
-		    int code;
-		    HTSprintf(&msg, gettext("move %s to %s"), savepath, newpath);
-		    args[0] = "mv";
-		    args[1] = savepath;
-		    args[2] = newpath;
-		    args[3] = (char *) 0;
-		    code = (LYExecv(MV_PATH, args, msg) <= 0) ? -1 : 1;
-		    FREE(msg);
-		    return code;
-		}
-	    } else if (S_ISDIR(dir_info.st_mode)) {
-		HTAlert(gettext("There is already a directory with that name!  Request ignored."));
-	    } else if (S_ISREG(dir_info.st_mode)) {
-		HTAlert(gettext("There is already a file with that name!  Request ignored."));
-	    } else {
-		HTAlert(gettext("The specified name is already in use!  Request ignored."));
+	    if (!already_exists(newpath)) {
+		return move_file(savepath, newpath);
 	    }
 	}
     }
@@ -616,7 +626,6 @@ PRIVATE BOOLEAN modify_location ARGS1(
     char newpath[512];
     char savepath[512];
     struct stat dir_info;
-    char *args[5];
 
     /*
      *	Determine the status of the selected item.
@@ -635,8 +644,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
     } else if (S_ISREG(dir_info.st_mode)) {
 	cp = gettext("Enter new location for file: ");
     } else {
-	HTAlert(gettext("The specified item is not a file or a directory - request ignored."));
-	return 0;
+	return ok_file_or_dir(&dir_info);
     }
     if (filename(cp, tmpbuf, sizeof(tmpbuf)) == NULL)
 	return 0;
@@ -675,10 +683,6 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	if (!ok_stat(newpath, &dir_info)) {
 	    return 0;
 	}
-	if (!S_ISDIR(dir_info.st_mode)) {
-	    HTAlert(gettext("Destination is not a valid directory!  Request denied."));
-	    return 0;
-	}
 
 	/*
 	 *  Make sure the source and target are not the same location.
@@ -687,20 +691,8 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	    HTAlert(gettext("Source and destination are the same location!  Request ignored!"));
 	    return 0;
 	}
-	if (dir_info.st_uid == owner) {
-	    int code;
-	    char *msg = 0;
-	    HTSprintf(&msg,gettext("move %s to %s"),savepath,newpath);
-	    args[0] = "mv";
-	    args[1] = savepath;
-	    args[2] = newpath;
-	    args[3] = (char *) 0;
-	    code = (LYExecv(MV_PATH, args, msg) <= 0) ? -1 : 1;
-	    FREE(msg);
-	    return code;
-	} else {
-	    HTAlert(gettext("Destination has different owner!  Request denied."));
-	    return 0;
+	if (dir_has_same_owner(&dir_info, owner)) {
+	    return move_file(savepath,newpath);
 	}
     }
     return 0;
@@ -783,15 +775,15 @@ PUBLIC BOOLEAN local_modify ARGS2(
 PRIVATE BOOLEAN create_file ARGS1(
 	char *, 	current_location)
 {
+    int code = FALSE;
     char tmpbuf[512];
     char testpath[512];
-    struct stat dir_info;
     char *args[5];
     char *bad_chars = ".~/";
 
     if (filename(gettext("Enter name of file to create: "),
 		 tmpbuf, sizeof(tmpbuf)) == NULL) {
-	return 0;
+	return code;
     }
 
     if (!no_dotfiles && show_dotfiles) {
@@ -812,32 +804,17 @@ PRIVATE BOOLEAN create_file ARGS1(
 	/*
 	 *  Make sure the target does not already exist
 	 */
-	if (stat(testpath, &dir_info) == -1) {
-	    int code;
+	if (!already_exists(testpath)) {
 	    char *msg = 0;
-	    if (errno != ENOENT) {
-		HTSprintf(&msg,
-			gettext("Unable to determine status of '%s'."), testpath);
-		HTAlert(msg);
-		code = 0;
-	    } else {
-		HTSprintf(&msg,gettext("create %s"),testpath);
-		args[0] = "touch";
-		args[1] = testpath;
-		args[2] = (char *) 0;
-		code = (LYExecv(TOUCH_PATH, args, msg) <= 0) ? -1 : 1;
-	    }
+	    HTSprintf(&msg,gettext("create %s"),testpath);
+	    args[0] = "touch";
+	    args[1] = testpath;
+	    args[2] = (char *) 0;
+	    code = (LYExecv(TOUCH_PATH, args, msg) <= 0) ? -1 : 1;
 	    FREE(msg);
-	    return code;
-	} else if (S_ISDIR(dir_info.st_mode)) {
-	    HTAlert(gettext("There is already a directory with that name!  Request ignored."));
-	} else if (S_ISREG(dir_info.st_mode)) {
-	    HTAlert(gettext("There is already a file with that name!  Request ignored."));
-	} else {
-	    HTAlert(gettext("The specified name is already in use!  Request ignored."));
 	}
     }
-    return 0;
+    return code;
 }
 
 /*
@@ -846,15 +823,15 @@ PRIVATE BOOLEAN create_file ARGS1(
 PRIVATE BOOLEAN create_directory ARGS1(
 	char *, 	current_location)
 {
+    int code = FALSE;
     char tmpbuf[512];
     char testpath[512];
-    struct stat dir_info;
     char *args[5];
     char *bad_chars = ".~/";
 
     if (filename(gettext("Enter name for new directory: "),
 		 tmpbuf, sizeof(tmpbuf)) == NULL) {
-	return 0;
+	return code;
     }
 
     if (!no_dotfiles && show_dotfiles) {
@@ -872,32 +849,17 @@ PRIVATE BOOLEAN create_directory ARGS1(
 	/*
 	 *  Make sure the target does not already exist.
 	 */
-	if (stat(testpath, &dir_info) == -1) {
-	    int code;
+	if (!already_exists(testpath)) {
 	    char *msg = 0;
-	    if (errno != ENOENT) {
-		HTSprintf(&msg,
-			  gettext("Unable to determine status of '%s'."), testpath);
-		HTAlert(msg);
-		code = 0;
-	    } else {
-		HTSprintf(&msg,"make directory %s",testpath);
-		args[0] = "mkdir";
-		args[1] = testpath;
-		args[2] = (char *) 0;
-		code = (LYExecv(MKDIR_PATH, args, msg) <= 0) ? -1 : 1;
-	    }
+	    HTSprintf(&msg,"make directory %s",testpath);
+	    args[0] = "mkdir";
+	    args[1] = testpath;
+	    args[2] = (char *) 0;
+	    code = (LYExecv(MKDIR_PATH, args, msg) <= 0) ? -1 : 1;
 	    FREE(msg);
-	    return code;
-	} else if (S_ISDIR(dir_info.st_mode)) {
-	    HTAlert(gettext("There is already a directory with that name!  Request ignored."));
-	} else if (S_ISREG(dir_info.st_mode)) {
-	    HTAlert(gettext("There is already a file with that name!  Request ignored."));
-	} else {
-	    HTAlert(gettext("The specified name is already in use!  Request ignored."));
 	}
     }
-    return 0;
+    return code;
 }
 
 /*
@@ -977,8 +939,7 @@ PRIVATE BOOLEAN remove_single ARGS1(
 	}
 #endif
     } else {
-	HTSprintf0(&tmpbuf, gettext("Unable to determine status of '%s'."), testpath);
-	HTAlert(tmpbuf);
+	cannot_stat(testpath);
 	FREE(tmpbuf);
 	return 0;
     }

@@ -1,5 +1,4 @@
 # List of source files containing translatable strings.
-# Copyright (C) 1995, 1996 Free Software Foundation, Inc.
 
 # Package source files (use 'gettext()' function).
 
@@ -7,16 +6,10 @@ LYMessages.c
 WWW/Library/Implementation/HTAABrow.c
 WWW/Library/Implementation/HTAccess.c
 WWW/Library/Implementation/HTFTP.c
-WWW/Library/Implementation/HTFile.c
 WWW/Library/Implementation/HTFinger.c
-WWW/Library/Implementation/HTFormat.c
-WWW/Library/Implementation/HTGopher.c
 WWW/Library/Implementation/HTNews.c
-WWW/Library/Implementation/HTRules.c
-WWW/Library/Implementation/HTStyle.c
 WWW/Library/Implementation/HTTCP.c
 WWW/Library/Implementation/HTTP.c
-WWW/Library/Implementation/HTVMSUtils.c
 WWW/Library/Implementation/HTWAIS.c
 WWW/Library/Implementation/HTWSRC.c
 src/GridText.c
@@ -28,9 +21,7 @@ src/LYClean.c
 src/LYCookie.c
 src/LYCurses.c
 src/LYDownload.c
-src/LYGetFile.c
 src/LYHistory.c
-src/LYJump.c
 src/LYLeaks.c
 src/LYList.c
 src/LYLocal.c
@@ -42,11 +33,9 @@ src/LYOptions.c
 src/LYPrint.c
 src/LYReadCFG.c
 src/LYShowInfo.c
-src/LYStrings.c
 src/LYStyle.c
 src/LYTraversal.c
 src/LYUpload.c
-src/LYUtils.c
 src/LYrcFile.c
 
 # end of file POTFILE.in

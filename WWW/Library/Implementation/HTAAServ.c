@@ -541,8 +541,7 @@ PRIVATE char *compose_scheme_specifics ARGS2(HTAAScheme,	scheme,
       case HTAA_BASIC:
 	{
 	    char *realm = HTAssocList_lookup(prot->values, "server");
-	    result = (char*)malloc(60);
-	    sprintf(result, "realm=\"%s\"",
+	    HTSprintf0(&result, "realm=\"%s\"",
 		    (realm ? realm : "UNKNOWN"));
 	    return result;
 	}
@@ -550,8 +549,7 @@ PRIVATE char *compose_scheme_specifics ARGS2(HTAAScheme,	scheme,
       case HTAA_PUBKEY:
 	{
 	    char *realm = HTAssocList_lookup(prot->values, "server");
-	    result = (char*)malloc(200);
-	    sprintf(result, "realm=\"%s\", key=\"%s\"",
+	    HTSprintf0(&result, "realm=\"%s\", key=\"%s\"",
 		    (realm ? realm : "UNKNOWN"),
 		    "PUBKEY-NOT-IMPLEMENTED");
 	    return result;

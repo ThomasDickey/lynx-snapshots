@@ -215,7 +215,7 @@ Try_Redirected_URL:
 		      !strncmp(WWWDoc.address, LYlist_temp_url(),
 			       strlen(LYlist_temp_url())))) {
 		    CTRACE(tfp, "getfile: dropping post_data!\n");
-		    HTAlert(gettext("POST not supported for this URL - ignoring POST data!"));
+		    HTAlert(IGNORED_POST);
 		    FREE(doc->post_data);
 		    FREE(doc->post_content_type);
 		    WWWDoc.post_data = NULL;
@@ -737,7 +737,7 @@ Try_Redirected_URL:
 				    sleep(AlertSecs);
 				} else {
 				    fprintf(stderr,
-					    gettext("Illegal Redirection URL: %s"),
+					    WWW_ILLEGAL_URL_MESSAGE,
 					    use_this_url_instead);
 				}
 				FREE(use_this_url_instead);

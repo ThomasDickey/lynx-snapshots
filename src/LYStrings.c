@@ -889,7 +889,7 @@ PRIVATE int read_keymap_file NOARGS
     fclose (fp);
 
     if (ret == -1)
-	fprintf (stderr, gettext("Error processing line %d of %s\n"), linenum, file);
+	fprintf (stderr, FAILED_READING_KEYMAP, linenum, file);
 
     return ret;
 }

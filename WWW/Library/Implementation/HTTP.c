@@ -430,13 +430,11 @@ try_again:
 		**  prompt. - FM
 		*/
 		if (!(traversal || dump_output_immediately) &&
-			HTConfirm(
-			    gettext("Proceed without a username and password?"))) {
+			HTConfirm(CONFIRM_WO_PASSWORD)) {
 		    show_401 = TRUE;
 		} else {
 		    if (traversal || dump_output_immediately)
-			HTAlert(
-			    gettext("Can't proceed without a username and password."));
+			HTAlert(FAILED_NEED_PASSWD);
 		    FREE(command);
 		    FREE(hostname);
 		    FREE(docname);
@@ -526,8 +524,7 @@ try_again:
 	    **	cancelled or goofed at the username and password
 	    **	prompt. - FM
 	    */
-	    if (!(traversal || dump_output_immediately) &&
-		HTConfirm(gettext("Proceed without a username and password?"))) {
+	    if (!(traversal || dump_output_immediately) && HTConfirm(CONFIRM_WO_PASSWORD)) {
 		if (auth_proxy == TRUE) {
 		    show_407 = TRUE;
 		} else {
@@ -535,7 +532,7 @@ try_again:
 		}
 	    } else {
 		if (traversal || dump_output_immediately)
-		    HTAlert(gettext("Can't proceed without a username and password."));
+		    HTAlert(FAILED_NEED_PASSWD);
 		FREE(command);
 		FREE(hostname);
 		FREE(docname);
@@ -607,7 +604,7 @@ try_again:
 	    **	Arrrrgh, HTTP 0/1 compability problem, maybe.
 	    */
 	    CTRACE (tfp, "HTTP: BONZO ON WRITE Trying again with HTTP0 request.\n");
-	    _HTProgress (gettext("Retrying as HTTP0 request."));
+	    _HTProgress (RETRYING_AS_HTTP0);
 	    HTTP_NETCLOSE(s, handle);
 	    extensions = NO;
 	    already_retrying = TRUE;
@@ -675,7 +672,7 @@ try_again:
 
 		extensions = NO;
 		already_retrying = TRUE;
-		_HTProgress (gettext("Retrying as HTTP0 request."));
+		_HTProgress (RETRYING_AS_HTTP0);
 		goto try_again;
 	    } else {
 		CTRACE (tfp, "HTTP: Hit unexpected network read error; aborting connection; status %d.\n",
@@ -759,7 +756,7 @@ try_again:
       CTRACE(tfp, "HTTP: close socket %d to retry with HTTP0\n", s);
       HTTP_NETCLOSE(s, handle);
       /* print a progress message */
-      _HTProgress (gettext("Retrying as HTTP0 request."));
+      _HTProgress (RETRYING_AS_HTTP0);
       goto try_again;
   }
 
@@ -1495,8 +1492,7 @@ Cookie2_continuation:
 		    break;
 		} else {
 		    if (traversal || dump_output_immediately)
-			HTAlert(
-	gettext("Can't retry with authorization!  Contact the server's WebMaster."));
+			HTAlert(FAILED_RETRY_WITH_AUTH);
 		    HTTP_NETCLOSE(s, handle);
 		    status = -1;
 		    goto clean_up;
@@ -1532,8 +1528,7 @@ Cookie2_continuation:
 				"HTTP: close socket", s,
 				"to retry with Proxy Authorization");
 
-		    _HTProgress (
-			gettext("Retrying with proxy authorization information."));
+		    _HTProgress (HTTP_RETRY_WITH_PROXY);
 		    FREE(line_buffer);
 		    FREE(line_kept_clean);
 		    goto try_again;
@@ -1551,8 +1546,7 @@ Cookie2_continuation:
 		    break;
 		} else {
 		    if (traversal || dump_output_immediately)
-			HTAlert(
-    gettext("Can't retry with proxy authorization!  Contact the server's WebMaster."));
+			HTAlert(FAILED_RETRY_WITH_PROXY);
 		    HTTP_NETCLOSE(s, handle);
 		    status = -1;
 		    goto clean_up;
@@ -1728,7 +1722,7 @@ Cookie2_continuation:
 	  FREE(line_kept_clean);
 	  extensions = NO;
 	  already_retrying = TRUE;
-	  _HTProgress (gettext("Retrying as HTTP0 request."));
+	  _HTProgress (RETRYING_AS_HTTP0);
 	  goto try_again;
       } else {
 	  status = HT_NOT_LOADED;

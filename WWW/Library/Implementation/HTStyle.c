@@ -141,27 +141,26 @@ HTStyle * HTStyleDump (HTStyle * style)
 {
     int tab;
     NXTextStyle *p = style->paragraph;
-    printf(gettext("Style %d `%s' SGML:%s.  Font %s %.1f point.\n"),
+    printf(STYLE_DUMP_FONT,
 	style,
 	style->name,
 	style->SGMLTag,
 	[style->font name],
 	style->fontSize);
     if (p) {
-	printf(
-	gettext("\tIndents: first=%.0f others=%.0f, Height=%.1f Desc=%.1f\n"
-	"\tAlign=%d, %d tabs. (%.0f before, %.0f after)\n"),
+	printf(STYLE_DUMP_IDENT,
 	    p->indent1st,
 	    p->indent2nd,
 	    p->lineHt,
-	    p->descentLine,
+	    p->descentLine);
+	printf(STYLE_DUMP_ALIGN,
 	    p->alignment,
 	    p->numTabs,
 	    style->spaceBefore,
 	    style->spaceAfter);
 
 	for (tab=0; tab < p->numTabs; tab++) {
-	    printf(gettext("\t\tTab kind=%d at %.0f\n"),
+	    printf(STYLE_DUMP_TAB,
 		    p->tabs[tab].kind,
 		    p->tabs[tab].x);
 	}

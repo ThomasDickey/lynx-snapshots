@@ -1101,7 +1101,7 @@ try_again:
 	    temp = HTParse(curdoc.address, "",
 			   PARSE_ACCESS+PARSE_HOST+PARSE_PUNCTUATION);
 	    if (!temp || *temp == '\0') {
-		StrAllocCopy(startrealm, gettext("None"));
+		StrAllocCopy(startrealm, NO_NOTHING);
 	    } else {
 		StrAllocCopy(startrealm, temp);
 		FREE(temp);
@@ -1155,14 +1155,14 @@ try_again:
 		 */
 		if (strncmp((curdoc.address ? curdoc.address : "NULL"),
 			    "http", 4)) {
-		    StrAllocCopy(traversal_host, gettext("None"));
+		    StrAllocCopy(traversal_host, NO_NOTHING);
 		} else if (check_realm) {
 		    StrAllocCopy(traversal_host, startrealm);
 		} else {
 		    temp = HTParse(curdoc.address, "",
 				   PARSE_ACCESS+PARSE_HOST+PARSE_PUNCTUATION);
 		    if (!temp || *temp == '\0') {
-			StrAllocCopy(traversal_host, gettext("None"));
+			StrAllocCopy(traversal_host, NO_NOTHING);
 		    } else {
 			StrAllocCopy(traversal_host, temp);
 			LYAddHtmlSep(&traversal_host);
@@ -3609,50 +3609,6 @@ check_goto_URL:
 	    }  /* end if */
 	    break;
 
-#ifdef NOT_USED
-	case LYK_FORM_UP:  /* change form */
-	    break;	   /* not implemented */
-	    if (lynx_mode == FORMS_LYNX_MODE) {
-		if (links[curdoc.link].type == WWW_FORM_LINK_TYPE) {
-		    c = change_form_link(&links[curdoc.link],
-					 &newdoc, &refresh_screen,
-					 links[curdoc.link].form->name,
-					 links[curdoc.link].form->value);
-		    /*
-		     *	Code to handle multiple submit buttons?
-		     *	Taken out due to bug it causes.
-		    if (links[curdoc.link].form->type == F_SUBMIT_TYPE ||
-			links[curdoc.link].form->type == F_IMAGESUBMIT_TYPE) {
-			curdoc.address = NULL;
-		    }
-		     */
-		    goto new_keyboard_input;
-		} else {
-		    _statusline(gettext("'X' can only toggle a form link"));
-		}
-	    } else {
-		_statusline(gettext("'X' only toggles in forms mode"));
-	    }
-	    break;
-
-	case LYK_FORM_DOWN:  /* change form */
-	    break;	     /* not implemented */
-	    if (lynx_mode==FORMS_LYNX_MODE) {
-		if (links[curdoc.link].type == WWW_FORM_LINK_TYPE) {
-		    c = change_form_link(&links[curdoc.link],
-					 &newdoc,&refresh_screen,
-					 links[curdoc.link].form->name,
-					 links[curdoc.link].form->value);
-		    goto new_keyboard_input;
-		} else {
-		    _statusline(gettext("'Z' can only toggle a form link"));
-		}
-	    } else {
-		_statusline(gettext("'Z' only toggles in forms mode"));
-	    }
-	    break;
-#endif /* NOT_USED */
-
 	case LYK_MAIN_MENU:	/* return to main screen */
 	    /*
 	     *	If its already the homepage then don't reload it.
@@ -4415,6 +4371,9 @@ if (!LYUseFormsOptions) {
 		    *cp = '\0';
 		toolbar = (char *)malloc(strlen(curdoc.address) +
 					 strlen(LYToolbarName) + 2);
+		if (!toolbar)
+		    outofmem(__FILE__, "mainloop");
+
 		sprintf(toolbar, "%s#%s", curdoc.address, LYToolbarName);
 		if (cp)
 		    *cp = '#';
@@ -5389,19 +5348,6 @@ check_add_bookmark_to_self:
 		}
 	    }
 	    break;
-
-#ifdef NOT_USED
-	case LYK_VERSION:
-	    if (old_c != real_c) {
-		char version[128];
-		old_c = real_c;
-		sprintf(version, gettext("*** %s Version %s ***"),
-				 LYNX_NAME, LYNX_VERSION);
-		statusline(version);
-		sleep(AlertMessage);
-	    }
-	    break;
-#endif /* NOT_USED */
 
 	case LYK_DO_NOTHING:	/* pretty self explanatory */
 	    break;

@@ -360,7 +360,7 @@ PRIVATE NNTPAuthResult HTHandleAuthInfo ARGS1(
 	    if (status == HT_INTERRUPTED)
 		_HTProgress(CONNECTION_INTERRUPTED);
 	    else
-		HTAlert(gettext("Connection closed ???"));
+		HTAlert(FAILED_CONNECTION_CLOSED);
 	    if (auth) {
 		if (auth->user != UserName) {
 		    FREE(auth->user);
@@ -444,7 +444,7 @@ PRIVATE NNTPAuthResult HTHandleAuthInfo ARGS1(
 		if (status == HT_INTERRUPTED) {
 		    _HTProgress(CONNECTION_INTERRUPTED);
 		} else {
-		    HTAlert(gettext("Connection closed ???"));
+		    HTAlert(FAILED_CONNECTION_CLOSED);
 		}
 		if (auth) {
 		    if (auth->user != UserName) {
@@ -823,7 +823,7 @@ PRIVATE void post_article ARGS1(
     **	nntp headers and message body. - FM
     */
     if ((fd = fopen((postfile ? postfile : ""), "r")) == NULL) {
-	HTAlert(gettext("Cannot open temporary file for news POST."));
+	HTAlert(FAILED_CANNOT_OPEN_POST);
 	return;
     }
 
@@ -2026,7 +2026,7 @@ PRIVATE int HTLoadNews ARGS4(
 
 	if (!strncasecomp(arg, "snewspost:", 10) ||
 	    !strncasecomp(arg, "snewsreply:", 11)) {
-	    HTAlert(gettext("This client does not contain support for posting to news with SSL."));
+	    HTAlert(FAILED_CANNOT_POST_SSL);
 	    return HT_NOT_LOADED;
 	}
 	if (post_wanted || reply_wanted || spost_wanted || sreply_wanted) {

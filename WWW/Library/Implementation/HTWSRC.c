@@ -306,14 +306,14 @@ PRIVATE void WSRC_gen_html ARGS2(HTStream *, me, BOOL, source_file)
 	PUTS("\n");
 	START(HTML_TITLE);
 	PUTS(shortname);
-	PUTS(source_file ? gettext(" WAIS source file") : gettext(" index"));
+	PUTS(source_file ? gettext(" WAIS source file") : INDEX_SEGMENT);
 	END(HTML_TITLE);
 	PUTS("\n");
 	END(HTML_HEAD);
 
 	START(HTML_H1);
 	PUTS(shortname);
-	PUTS(source_file ? gettext(" description") : gettext(" index"));
+	PUTS(source_file ? gettext(" description") : INDEX_SEGMENT);
 	END(HTML_H1);
 	PUTS("\n");
 	FREE(shortname);

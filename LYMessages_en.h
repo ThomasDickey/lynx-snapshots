@@ -21,6 +21,7 @@
  * the header inclusion statement in your userdefs.h to include
  * one of those with a different name.
  */
+#define WELCOME_MSG gettext("Welcome")
 #define REALLY_QUIT_Y gettext("Are you sure you want to quit? [Y] ")
 #define REALLY_QUIT_N gettext("Are you sure you want to quit? [N] ")
 #ifdef VMS
@@ -401,8 +402,7 @@
 #define CANNOT_DISPLAY_FILE gettext("This file cannot be displayed on this terminal.")
 #define CANNOT_DISPLAY_FILE_D_OR_C \
  gettext("This file cannot be displayed on this terminal:  D)ownload, or C)ancel")
-#define WRONG_CHARSET_D_OR_C gettext("%s  D)ownload, or C)ancel")
-#define UNMAPPED_TYPE_D_OR_C gettext("%s  D)ownload, or C)ancel")
+#define MSG_DOWNLOAD_OR_CANCEL gettext("%s  D)ownload, or C)ancel")
 #define CANCELLING_FILE gettext("Cancelling file.")
 #define RETRIEVING_FILE gettext("Retrieving file.  - PLEASE WAIT -")
 #define FILENAME_PROMPT gettext("Enter a filename: ")
@@ -418,10 +418,15 @@
 #define CANNOT_WRITE_TO_FILE gettext("Cannot write to file.")
 #define MISCONF_DOWNLOAD_COMMAND gettext("ERROR! - download command is misconfigured.")
 #define CANNOT_DOWNLOAD_FILE gettext("Unable to download file.")
+#define BUILDING_DIR_LIST gettext("Building directory listing...")
 #define SAVING gettext("Saving...")
 #define COULD_NOT_ACCESS_FILE gettext("Could not access file.")
+#define COULD_NOT_ACCESS_DIR gettext("Could not access directory.")
+#define COULD_NOT_LOAD_DATA gettext("Could not load data.")
 #define CANNOT_EDIT_REMOTE_FILES \
  gettext("Lynx cannot currently (E)dit remote WWW files")
+#define RULE_INCORRECT gettext("Bad rule")
+#define RULE_NEEDS_DATA gettext("Insufficient operands:")
 #define NOAUTH_TO_EDIT_FILE gettext("You are not authorized to edit this file.")
 #define TITLE_PROMPT gettext("Title: ")
 #define SUBJECT_PROMPT gettext("Subject: ")
@@ -520,6 +525,7 @@
 #define TO_SAVE_SEGMENT gettext(" to save,")
 #define TO_SEGMENT gettext(" to ")
 #define OR_SEGMENT gettext(" or ")
+#define INDEX_SEGMENT gettext(" index")
 #define TO_RETURN_SEGMENT gettext(" to return to Lynx.")
 #define ACCEPT_CHANGES gettext("Accept Changes")
 #define RESET_CHANGES gettext("Reset Changes")
@@ -555,6 +561,7 @@
 #define ERROR_UNCOMPRESSING_TEMP gettext("Error uncompressing temporary file!")
 #define UNSUPPORTED_URL_SCHEME gettext("Unsupported URL scheme!")
 #define UNSUPPORTED_DATA_URL gettext("Unsupported data: URL!  Use SHOWINFO, for now.")
+#define TOO_MANY_REDIRECTIONS gettext("Redirection limit of 10 URL's reached.")
 #define ILLEGAL_REDIRECTION_URL gettext("Illegal redirection URL received from server!")
 #define	SERVER_ASKED_FOR_REDIRECTION \
  gettext("Server asked for %d redirection of POST content to")
@@ -574,8 +581,10 @@
  gettext("Document from POST action, HEAD may not be understood.  Proceed?")
 #define CONFIRM_POST_LINK_HEAD \
  gettext("Form submit action is POST, HEAD may not be understood.  Proceed?")
+#define CONFIRM_WO_PASSWORD gettext("Proceed without a username and password?")
 #define CONFIRM_PROCEED gettext("Proceed (%s)?")
 #define CANNOT_POST gettext("Cannot POST to this host.")
+#define IGNORED_POST gettext("POST not supported for this URL - ignoring POST data!")
 #define DISCARDING_POST_DATA gettext("Discarding POST data...")
 #define WILL_NOT_RELOAD_DOC gettext("Document will not be reloaded!")
 #define	LOCATION_HEADER gettext("Location: ")
@@ -654,8 +663,10 @@
 #define COOKIES_ALWAYS_ALLOWED gettext("(Cookies always allowed.)")
 #define COOKIES_ALLOWED_VIA_PROMPT gettext("(Cookies allowed via prompt.)")
 #define COOKIES_READ_FROM_FILE gettext("(Persistent Cookies.)")
+#define NO_TITLE gettext("(No title.)")
 #define NO_NAME gettext("(No name.)")
 #define NO_VALUE gettext("(No value.)")
+#define NO_NOTHING gettext("None")
 #define END_OF_SESSION gettext("(End of session.)")
 #define DELETE_COOKIE_CONFIRMATION gettext("Delete this cookie?")
 #define COOKIE_EATEN gettext("The cookie has been eaten!")
@@ -687,6 +698,66 @@
  gettext("Form field value exceeds buffer length!  Trim the tail.")
 #define FORM_TAIL_COMBINED_WITH_HEAD \
  gettext("Modified tail combined with head of form field value.")
+
+/* HTFile.c */
+#define DISALLOWED_DIR_SCAN     gettext("Directory browsing is not allowed.")
+#define DISALLOWED_SELECTIVE_ACCESS gettext("Selective access is not enabled for this directory")
+#define FAILED_DIR_SCAN         gettext("Multiformat: directory scan failed.")
+#define FAILED_DIR_UNREADABLE   gettext("This directory is not readable.")
+#define FAILED_FILE_UNREADABLE  gettext("Can't access requested file.")
+#define FAILED_NO_REPRESENTATION gettext("Could not find suitable representation for transmission.")
+#define FAILED_OPEN_COMPRESSED_FILE gettext("Could not open file for decompression!")
+#define LABEL_FILES             gettext("Files:")
+#define LABEL_SUBDIRECTORIES    gettext("Subdirectories:")
+#define SEGMENT_DIRECTORY       gettext(" directory")
+#define SEGMENT_UP_TO           gettext("Up to ")
+#define SEGMENT_CURRENT_DIR     gettext("Current directory is ")
+
+/* HTGopher.c */
+#define FAILED_NO_RESPONSE      gettext("No response from server!")
+#define GOPHER_CSO_INDEX        gettext("CSO index")
+#define GOPHER_CSO_INDEX_SUBTITLE gettext("\nThis is a searchable index of a CSO database.\n")
+#define GOPHER_CSO_SEARCH_RESULTS gettext("CSO Search Results")
+#define GOPHER_CSO_SEEK_FAILED  gettext("Seek fail on %s\n")
+#define GOPHER_CSO_SOLICIT_KEYWORDS gettext("\nPress the 's' key and enter search keywords.\n")
+#define GOPHER_INDEX_SUBTITLE   gettext("\nThis is a searchable Gopher index.\n")
+#define GOPHER_INDEX_TITLE      gettext("Gopher index")
+#define GOPHER_MENU_TITLE       gettext("Gopher Menu")
+#define GOPHER_SEARCH_RESULTS   gettext(" Search Results")
+#define GOPHER_SENDING_CSO_REQUEST gettext("Sending CSO/PH request.")
+#define GOPHER_SENDING_REQUEST  gettext("Sending Gopher request.")
+#define GOPHER_SENT_CSO_REQUEST gettext("CSO/PH request sent; waiting for response.")
+#define GOPHER_SENT_REQUEST     gettext("Gopher request sent; waiting for response.")
+#define GOPHER_SOLICIT_KEYWORDS gettext("\nPlease enter search keywords.\n")
+#define SEGMENT_KEYWORDS_WILL   gettext("\nThe keywords that you enter will allow you to search on a")
+#define SEGMENT_PERSONS_DB_NAME gettext(" person's name in the database.\n")
+
+/* HTNews.c */
+#define FAILED_CONNECTION_CLOSED gettext("Connection closed ???")
+#define FAILED_CANNOT_OPEN_POST gettext("Cannot open temporary file for news POST.")
+#define FAILED_CANNOT_POST_SSL  gettext("This client does not contain support for posting to news with SSL.")
+
+/* HTStyle.c */
+#define STYLE_DUMP_FONT         gettext("Style %d `%s' SGML:%s.  Font %s %.1f point.\n")
+#define STYLE_DUMP_INDENT       gettext("\tIndents: first=%.0f others=%.0f, Height=%.1f Desc=%.1f\n"
+#define STYLE_DUMP_ALIGN        gettext("\tAlign=%d, %d tabs. (%.0f before, %.0f after)\n")
+#define STYLE_DUMP_TAB          gettext("\t\tTab kind=%d at %.0f\n")
+
+/* HTTP.c */
+#define FAILED_NEED_PASSWD      gettext("Can't proceed without a username and password.")
+#define FAILED_RETRY_WITH_AUTH  gettext("Can't retry with authorization!  Contact the server's WebMaster.")
+#define FAILED_RETRY_WITH_PROXY gettext("Can't retry with proxy authorization!  Contact the server's WebMaster.")
+#define HTTP_RETRY_WITH_PROXY   gettext("Retrying with proxy authorization information.")
+
+/* HTWAIS.c */
+#define HTWAIS_MESSAGE_TOO_BIG  gettext("HTWAIS: Return message too large.")
+#define HTWAIS_SOLICIT_QUERY    gettext("Enter WAIS query: ")
+
+/* Miscellaneous status */
+#define RETRYING_AS_HTTP0       gettext("Retrying as HTTP0 request.")
+#define TRANSFERRED_X_BYTES     gettext("Transferred %d bytes")
+#define TRANSFER_COMPLETE       gettext("Data transfer complete")
+#define FAILED_READING_KEYMAP   gettext("Error processing line %d of %s\n")
 
 /* Lynx internal page titles */
 #define CONFIG_DEF_TITLE	gettext("Configuration Definitions")

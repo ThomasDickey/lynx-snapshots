@@ -1988,33 +1988,6 @@ PUBLIC void noviceline ARGS1(
     else
 	addstr((char *)novice_lines(lineno));
 
-#ifdef NOTDEFINED
-    if (is_www_index && more_flag) {
-	addstr(gettext("This is a searchable index.  Use "));
-	addstr(key_for_func(LYK_INDEX_SEARCH));
-	addstr(gettext(" to search:"));
-	stop_reverse();
-	addstr("                ");
-	start_reverse();
-	addstr(gettext("space for more"));
-
-    } else if (is_www_index) {
-	addstr(gettext("This is a searchable index.  Use "));
-	addstr(key_for_func(LYK_INDEX_SEARCH));
-	addstr(gettext(" to search:"));
-    } else {
-	addstr(gettext("Type a command or ? for help:"));
-
-	if (more_flag) {
-	    stop_reverse();
-	    addstr("                       ");
-	    start_reverse();
-	    addstr(gettext("Press space for next page"));
-	}
-    }
-
-#endif /* NOTDEFINED */
-
     refresh();
     return;
 }
@@ -6281,6 +6254,8 @@ PUBLIC void LYsetXDisplay ARGS1(
 #else
 	static char *display_putenv_command;
 	display_putenv_command = malloc(strlen(new_display) + 12);
+	if (!display_putenv_command)
+	    outofmem(__FILE__, "LYsetXDisplay");
 
 	sprintf(display_putenv_command, "DISPLAY=%s", new_display);
 	putenv(display_putenv_command);

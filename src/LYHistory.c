@@ -86,7 +86,7 @@ PUBLIC void LYAddVisitedLink ARGS1(
     if ((new = (VisitedLink *)calloc(1, sizeof(*new))) == NULL)
 	outofmem(__FILE__, "LYAddVisitedLink");
     StrAllocCopy(new->address, doc->address);
-    StrAllocCopy(new->title, (doc->title ? doc->title : gettext("(no title)")));
+    StrAllocCopy(new->title, (doc->title ? doc->title : NO_TITLE));
 
     if (!Visited_Links) {
 	Visited_Links = HTList_new();
@@ -397,9 +397,9 @@ PUBLIC int showhistory ARGS1(
 	    LYTrimLeading(Title);
 	    LYTrimTrailing(Title);
 	    if (*Title == '\0')
-		StrAllocCopy(Title , gettext("(no title)"));
+		StrAllocCopy(Title , NO_TITLE);
 	} else {
-	    StrAllocCopy(Title, gettext("(no title)"));
+	    StrAllocCopy(Title, NO_TITLE);
 	}
 	fprintf(fp0,
 		"%s<em>%d</em>. <tab id=t%d><a href=\"LYNXHIST:%d\">%s</a>\n",
@@ -549,9 +549,9 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 	    LYTrimLeading(Title);
 	    LYTrimTrailing(Title);
 	    if (*Title == '\0')
-		StrAllocCopy(Title , gettext("(no title)"));
+		StrAllocCopy(Title , NO_TITLE);
 	} else {
-	    StrAllocCopy(Title , gettext("(no title)"));
+	    StrAllocCopy(Title , NO_TITLE);
 	}
 	if (vl->address != NULL && *vl->address != '\0') {
 	    StrAllocCopy(Address, vl->address);

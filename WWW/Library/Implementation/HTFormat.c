@@ -682,7 +682,7 @@ PUBLIC int HTCopy ARGS4(
 
     } /* next bufferload */
 
-    _HTProgress(gettext("Data transfer complete"));
+    _HTProgress(TRANSFER_COMPLETE);
     (void)NETCLOSE(file_number);
     rv = HT_LOADED;
 
@@ -926,25 +926,25 @@ PUBLIC int HTParseSocket ARGS5(
     stream = HTStreamStack(rep_in, format_out, sink, anchor);
 
     if (!stream) {
-	char buffer[1024];	/* @@@@@@@@ */
+	char *buffer = 0;
 	if (LYCancelDownload) {
 	    LYCancelDownload = FALSE;
 	    return -1;
 	}
-	sprintf(buffer, gettext("Sorry, can't convert from %s to %s."),
+	HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
 		HTAtom_name(rep_in), HTAtom_name(format_out));
 	CTRACE(tfp, "HTFormat: %s\n", buffer);
-	return HTLoadError(sink, 501, buffer); /* returns -501 */
+	rv = HTLoadError(sink, 501, buffer); /* returns -501 */
+	FREE(buffer);
+    } else {
+	/*
+	** Push the data, don't worry about CRLF we can strip them later.
+	*/
+	targetClass = *(stream->isa);	/* Copy pointers to procedures */
+	rv = HTCopy(anchor, file_number, NULL, stream);
+	if (rv != -1 && rv != HT_INTERRUPTED)
+	    (*targetClass._free)(stream);
     }
-
-    /*
-    ** Push the data, don't worry about CRLF we can strip them later.
-    */
-    targetClass = *(stream->isa);	/* Copy pointers to procedures */
-    rv = HTCopy(anchor, file_number, NULL, stream);
-    if (rv != -1 && rv != HT_INTERRUPTED)
-	(*targetClass._free)(stream);
-
     return rv;
     /* Originally:  full: HT_LOADED;  partial: HT_INTERRUPTED;  no bytes: -1 */
 }
@@ -988,15 +988,17 @@ PUBLIC int HTParseFile ARGS5(
 			sink , anchor);
 
     if (!stream) {
-	char buffer[1024];	/* @@@@@@@@ */
+	char *buffer = 0;
 	if (LYCancelDownload) {
 	    LYCancelDownload = FALSE;
 	    return -1;
 	}
-	sprintf(buffer, gettext("Sorry, can't convert from %s to %s."),
+	HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
 		HTAtom_name(rep_in), HTAtom_name(format_out));
 	CTRACE(tfp, "HTFormat(in HTParseFile): %s\n", buffer);
-	return HTLoadError(sink, 501, buffer);
+	rv = HTLoadError(sink, 501, buffer);
+	FREE(buffer);
+	return rv;
     }
 
     /*	Push the data down the stream
@@ -1071,16 +1073,18 @@ PUBLIC int HTParseGzFile ARGS5(
 			sink , anchor);
 
     if (!stream) {
-	char buffer[1024];	/* @@@@@@@@ */
+	char *buffer = 0;
 	HTCloseGzFile(gzfp);
 	if (LYCancelDownload) {
 	    LYCancelDownload = FALSE;
 	    return -1;
 	}
-	sprintf(buffer, gettext("Sorry, can't convert from %s to %s."),
+	HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
 		HTAtom_name(rep_in), HTAtom_name(format_out));
 	CTRACE(tfp, "HTFormat(in HTParseGzFile): %s\n", buffer);
-	return HTLoadError(sink, 501, buffer);
+	rv = HTLoadError(sink, 501, buffer);
+	FREE(buffer);
+	return rv;
     }
 
     /*	Push the data down the stream

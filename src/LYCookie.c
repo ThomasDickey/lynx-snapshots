@@ -524,7 +524,7 @@ PRIVATE void store_cookie ARGS3(
      *  LYCookieAcceptDomains and/or LYCookieRejectDomains and/or
      *  LYAcceptAllCookies and/or some other settings. -kw
      */
-    } else if ((persistent_cookies && (co->flags & COOKIE_FLAG_FROM_FILE))
+    } else if ((co->flags & COOKIE_FLAG_FROM_FILE)
 	       || HTConfirmCookie(de, hostname, co->name, co->value)) {
 	/*
 	 * Insert the new cookie so that more specific paths (longer
@@ -562,18 +562,21 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 	next = hl->next;
 
 	if (co) {
-	    CTRACE(tfp, "Checking cookie %lx %s=%s\n",
-			    (long)hl,
-			    (co->name ? co->name : "(no name)"),
-			    (co->value ? co->value : "(no value)"));
+	    CTRACE(tfp, "Checking cookie %p %s=%s\n",
+			hl,
+			(co->name ? co->name : "(no name)"),
+			(co->value ? co->value : "(no value)"));
 	    CTRACE(tfp, "\t%s %s %d %s %s %d%s\n",
-			    hostname,
-			    (co->domain ? co->domain : "(no domain)"),
-			    host_matches(hostname, co->domain),
-			    path, co->path, ((co->pathlen > 0) ?
-			  strncmp(path, co->path, co->pathlen) : 0),
-			    ((co->flags & COOKIE_FLAG_SECURE) ?
-						   " secure" : ""));
+			hostname,
+			(co->domain ? co->domain : "(no domain)"),
+			host_matches(hostname, co->domain),
+			path, co->path,
+			(co->pathlen > 0)
+			    ? strncmp(path, co->path, co->pathlen)
+			    : 0,
+			(co->flags & COOKIE_FLAG_SECURE)
+			    ? " secure"
+			    : "");
 	}
 	/*
 	 *  Check if this cookie has expired, and if so, delete it.

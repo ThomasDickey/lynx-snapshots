@@ -433,8 +433,7 @@ PUBLIC HTAssocList *HTAA_parseArgList ARGS1(char *, str)
 	    if (*cur == ',')
 		*(cur++) = '\0';		/* Terminate value */
 	    /* else last value on line (already terminated by NULL) */
-	    StrAllocCopy(name, "nnn");	/* Room for item order number */
-	    sprintf(name, "%d", n);	/* Item order number for name */
+	    HTSprintf0(&name, "%d", n);		/* Item order number for name */
 	}
 	HTAssocList_add(assoc_list, name, str);
 	str = cur;
