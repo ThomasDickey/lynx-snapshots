@@ -81,7 +81,7 @@ PUBLIC int getfile ARGS1(
 	 *  Reset LYCancelDownload to prevent unwanted delayed effect. - KW
 	 */
 	if (LYCancelDownload) {
-	    CTRACE(tfp, "getfile:    resetting LYCancelDownload to FALSE\n");
+	    CTRACE((tfp, "getfile:    resetting LYCancelDownload to FALSE\n"));
 	    LYCancelDownload = FALSE;
 	}
 
@@ -137,7 +137,7 @@ Try_Redirected_URL:
 	 */
 	HTNoDataOK = 0;
 
-	CTRACE(tfp,"getfile: getting %s\n\n",doc->address);
+	CTRACE((tfp,"getfile: getting %s\n\n",doc->address));
 
 	/*
 	 *  Protect against denial of service attacks
@@ -273,7 +273,7 @@ Try_Redirected_URL:
 		      *(LYlist_temp_url()) &&
 		      !strncmp(WWWDoc.address, LYlist_temp_url(),
 			       strlen(LYlist_temp_url())))) {
-		    CTRACE(tfp, "getfile: dropping post_data!\n");
+		    CTRACE((tfp, "getfile: dropping post_data!\n"));
 		    HTAlert(IGNORED_POST);
 		    FREE(doc->post_data);
 		    FREE(doc->post_content_type);
@@ -709,8 +709,8 @@ Try_Redirected_URL:
 			if ((cp=strchr(doc->address+9, '/')) != NULL &&
 			   0==strncmp(++cp, "hGET%20/", 8)) {
 			    StrAllocCopy(tmp, "http://");
-			    CTRACE(tfp, "getfile: URL '%s'\n",
-					doc->address);
+			    CTRACE((tfp, "getfile: URL '%s'\n",
+					doc->address));
 			    *cp = '\0';
 			    StrAllocCat(tmp, doc->address+9);
 			   /*
@@ -723,8 +723,8 @@ Try_Redirected_URL:
 			    if (strlen(cp+7) > 1)
 				StrAllocCat(tmp, cp+8);
 			    StrAllocCopy(doc->address, tmp);
-			    CTRACE(tfp, "  changed to '%s'\n",
-					doc->address);
+			    CTRACE((tfp, "  changed to '%s'\n",
+					doc->address));
 			    FREE(tmp);
 			    url_type = HTTP_URL_TYPE;
 			}
@@ -755,8 +755,8 @@ Try_Redirected_URL:
 			    char *cp1 = strstr(doc->address, "/~");
 			    char *cp2;
 
-			    CTRACE(tfp, "getfile: URL '%s'\n",
-					doc->address);
+			    CTRACE((tfp, "getfile: URL '%s'\n",
+					doc->address));
 			    *cp1 = '\0';
 			    cp1 += 2;
 			    StrAllocCopy(temp, doc->address);
@@ -770,8 +770,8 @@ Try_Redirected_URL:
 			    }
 			    StrAllocCopy(doc->address, temp);
 			    FREE(temp);
-			    CTRACE(tfp, "  changed to '%s'\n",
-					doc->address);
+			    CTRACE((tfp, "  changed to '%s'\n",
+					doc->address));
 			    WWWDoc.address = doc->address;
 			}
 			FREE(cp);
@@ -918,16 +918,16 @@ Try_Redirected_URL:
 				 *  be positioned at the top of that document,
 				 *  so there's no harm done. - FM
 				 */
-				CTRACE(tfp,
+				CTRACE((tfp,
 			"getfile: Adding fragment '%s' to redirection URL.\n",
-				    pound);
+				    pound));
 				StrAllocCat(use_this_url_instead, pound);
 			    }
 			    CTRACE_SLEEP(MessageSecs);
 			    _user_message(WWW_USING_MESSAGE,
 					  use_this_url_instead);
 			    sleep(InfoSecs);
-			    CTRACE(tfp, "\n");
+			    CTRACE((tfp, "\n"));
 			    StrAllocCopy(doc->address,
 					use_this_url_instead);
 			    FREE(use_this_url_instead);
@@ -1060,7 +1060,7 @@ Try_Redirected_URL:
 	  } else {
 	      CTRACE_SLEEP(MessageSecs);
 	      HTUserMsg2(WWW_BAD_ADDR_MESSAGE, doc->address);
-	      CTRACE(tfp,"\n");
+	      CTRACE((tfp,"\n"));
 	      return(NULLFILE);
 	  }
 }
@@ -1094,7 +1094,7 @@ PUBLIC int follow_link_number ARGS4(
     BOOL want_go;
     int curline = *num; /* passed in from mainloop() */
 
-    CTRACE(tfp,"follow_link_number(%d,%d,...)\n",c,cur);
+    CTRACE((tfp,"follow_link_number(%d,%d,...)\n",c,cur));
     temp[0] = (char) c;
     temp[1] = '\0';
     *num = -1;
@@ -1122,14 +1122,14 @@ PUBLIC int follow_link_number ARGS4(
     }
     /* don't currently check for errors typing suffix */
 
-    CTRACE(tfp,"  temp=%s, *num=%d, rel='%c'\n",temp,*num,rel);
+    CTRACE((tfp,"  temp=%s, *num=%d, rel='%c'\n",temp,*num,rel));
     /*
      *	Check if we had a 'p' or 'P' following the number as
      *	a flag for displaying the page with that number. - FM
      */
     if (( c == 'p' || c == 'P') && display_lines == 0) {
-	CTRACE(tfp," curline=%d, LYlines=%d, display too small!\n",
-	       curline,LYlines);
+	CTRACE((tfp," curline=%d, LYlines=%d, display too small!\n",
+	       curline,LYlines));
 	return(PRINT_ERROR);
     } else if ( c == 'p' || c == 'P' ) {
 	int nlines = HText_getNumOfLines();
@@ -1139,8 +1139,8 @@ PUBLIC int follow_link_number ARGS4(
 	int curpage = ((curline + 1) > display_lines) ?
 		     (((curline + 1) + (display_lines - 1))/(display_lines))
 						      : 1;
-	CTRACE(tfp," nlines=%d, npages=%d, curline=%d, curpage=%d\n",
-		nlines,npages,curline,curpage);
+	CTRACE((tfp," nlines=%d, npages=%d, curline=%d, curpage=%d\n",
+		nlines,npages,curline,curpage));
 	if (*num < 1)
 	    *num = rel ? 0 : 1;
 	if ( rel == '+' )
@@ -1472,9 +1472,9 @@ PRIVATE int fix_httplike_urls ARGS2(
 	/*
 	 *  If we get to here, trim the trailing slash. - FM
 	 */
-	CTRACE(tfp, "fix_httplike_urls: URL '%s'\n", doc->address);
+	CTRACE((tfp, "fix_httplike_urls: URL '%s'\n", doc->address));
 	LYTrimHtmlSep(doc->address);
-	CTRACE(tfp, "            changed to '%s'\n", doc->address);
+	CTRACE((tfp, "            changed to '%s'\n", doc->address));
 	CTRACE_SLEEP(MessageSecs);
     }
 #endif /* DISABLE_FTP */
@@ -1498,9 +1498,9 @@ PRIVATE int fix_httplike_urls ARGS2(
 	    return(0);
 	}
     }
-    CTRACE(tfp, "fix_httplike_urls: URL '%s'\n", doc->address);
+    CTRACE((tfp, "fix_httplike_urls: URL '%s'\n", doc->address));
     LYAddHtmlSep(&(doc->address));
-    CTRACE(tfp, "            changed to '%s'\n", doc->address);
+    CTRACE((tfp, "            changed to '%s'\n", doc->address));
     CTRACE_SLEEP(MessageSecs);
 
     return(1);

@@ -187,8 +187,8 @@ PUBLIC char * HTParse ARGS3(
     char * acc_method;
     struct struct_parts given, related;
 
-    CTRACE(tfp, "HTParse: aName:`%s'\n", aName);
-    CTRACE(tfp, "   relatedName:`%s'\n", relatedName);
+    CTRACE((tfp, "HTParse: aName:`%s'\n", aName));
+    CTRACE((tfp, "   relatedName:`%s'\n", relatedName));
 
     if (wanted & (PARSE_STRICTPATH | PARSE_QUERY)) { /* if detail wanted... */
 	if ((wanted & (PARSE_STRICTPATH | PARSE_QUERY))
@@ -372,7 +372,7 @@ PUBLIC char * HTParse ARGS3(
 	    if (wanted & PARSE_PUNCTUATION)
 		strcat(result, "/");
 	    strcat(result, given.absolute);
-	    CTRACE(tfp, "HTParse: (ABS)\n");
+	    CTRACE((tfp, "HTParse: (ABS)\n"));
 	} else if (related.absolute) {		/* Adopt path not name */
 	    strcat(result, "/");
 	    strcat(result, related.absolute);
@@ -386,13 +386,13 @@ PUBLIC char * HTParse ARGS3(
 		strcat(result, given.relative); /* Add given one */
 		HTSimplify (result);
 	    }
-	    CTRACE(tfp, "HTParse: (Related-ABS)\n");
+	    CTRACE((tfp, "HTParse: (Related-ABS)\n"));
 	} else if (given.relative) {
 	    strcat(result, given.relative);		/* what we've got */
-	    CTRACE(tfp, "HTParse: (REL)\n");
+	    CTRACE((tfp, "HTParse: (REL)\n"));
 	} else if (related.relative) {
 	    strcat(result, related.relative);
-	    CTRACE(tfp, "HTParse: (Related-REL)\n");
+	    CTRACE((tfp, "HTParse: (Related-REL)\n"));
 	} else {  /* No inheritance */
 	    if (strncasecomp(aName, "lynxcgi:", 8) &&
 		strncasecomp(aName, "lynxexec:", 9) &&
@@ -401,7 +401,7 @@ PUBLIC char * HTParse ARGS3(
 	    }
 	    if (!strcmp(result, "news:/"))
 		result[5] = '*';
-	    CTRACE(tfp, "HTParse: (No inheritance)\n");
+	    CTRACE((tfp, "HTParse: (No inheritance)\n"));
 	}
 	if (want_detail) {
 	    p = strchr(tail, '?');	/* Search part? */
@@ -433,7 +433,7 @@ PUBLIC char * HTParse ARGS3(
 	    strcat(result, (given.anchor) ?
 			     given.anchor : related.anchor);
 	}
-    CTRACE(tfp, "HTParse:      result:%s\n", result);
+    CTRACE((tfp, "HTParse:      result:%s\n", result));
     FREE(rel);
     FREE(name);
 
@@ -665,9 +665,9 @@ PUBLIC char * HTRelative ARGS2(
 	    strcat(result, "../");
 	strcat(result, last_slash+1);
     }
-    CTRACE(tfp,
+    CTRACE((tfp,
         "HTparse: `%s' expressed relative to\n   `%s' is\n   `%s'.\n",
-		aName, relatedName, result);
+		aName, relatedName, result));
     return result;
 }
 

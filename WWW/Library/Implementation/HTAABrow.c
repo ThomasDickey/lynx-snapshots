@@ -340,29 +340,29 @@ PRIVATE HTAASetup *HTAASetup_lookup ARGS4(
 
 	HTList *cur = server->setups;
 
-	CTRACE(tfp, "%s %s (%s:%d:%s)\n",
+	CTRACE((tfp, "%s %s (%s:%d:%s)\n",
 		    "HTAASetup_lookup: resolving setup for",
 		    (IsProxy ? "proxy" : "server"),
-		    hostname, portnumber, docname);
+		    hostname, portnumber, docname));
 
 	while (NULL != (setup = (HTAASetup*)HTList_nextObject(cur))) {
 	    if (HTAA_templateMatch(setup->template, docname)) {
-		CTRACE(tfp, "%s `%s' %s `%s'\n",
+		CTRACE((tfp, "%s `%s' %s `%s'\n",
 			    "HTAASetup_lookup:", docname,
-			    "matched template", setup->template);
+			    "matched template", setup->template));
 		return setup;
 	    } else {
-	        CTRACE(tfp, "%s `%s' %s `%s'\n",
+	        CTRACE((tfp, "%s `%s' %s `%s'\n",
 			    "HTAASetup_lookup:", docname,
-			    "did NOT match template", setup->template);
+			    "did NOT match template", setup->template));
 	    }
 	} /* while setups remain */
     } /* if valid parameters and server found */
 
-    CTRACE(tfp, "%s `%s' %s\n",
+    CTRACE((tfp, "%s `%s' %s\n",
 		 "HTAASetup_lookup: No template matched",
 		 (docname ? docname : "(null)"),
-		 "(so probably not protected)");
+		 "(so probably not protected)"));
 
     return NULL;	/* NULL in parameters, or not found */
 }
@@ -601,9 +601,9 @@ PRIVATE char *compose_auth_string ARGS3(
     	  realm->username && *realm->username &&
 	  realm->password) || setup->retry) {
 	if (!realm) {
-	    CTRACE(tfp, "%s `%s' %s\n",
+	    CTRACE((tfp, "%s `%s' %s\n",
 			"compose_auth_string: realm:", realmname,
-			"not found -- creating");
+			"not found -- creating"));
 	    realm = HTAARealm_new(setup->server->realms,
 				  realmname, NULL, NULL);
 	}
@@ -853,8 +853,8 @@ PUBLIC char *HTAA_composeAuth ARGS4(
     **  on server-side.  Life is hard.)
     */
     if (HTAAForwardAuth) {
-	CTRACE(tfp, "HTAA_composeAuth: %s\n",
-		    "Forwarding received authorization");
+	CTRACE((tfp, "HTAA_composeAuth: %s\n",
+		    "Forwarding received authorization"));
 	StrAllocCopy(HTAA_composeAuthResult, HTAAForwardAuth);
 	HTAAForwardAuth_reset();	/* Just a precaution */
 	return HTAA_composeAuthResult;
@@ -867,8 +867,8 @@ PUBLIC char *HTAA_composeAuth ARGS4(
 	**  Proxy Authorization required. - AJL
 	*/
 
-	CTRACE(tfp, "Composing Proxy Authorization for %s:%d/%s\n",
-		    hostname, portnumber, docname);
+	CTRACE((tfp, "Composing Proxy Authorization for %s:%d/%s\n",
+		    hostname, portnumber, docname));
 
 	if (proxy_portnumber != portnumber ||
 	    !proxy_hostname || !proxy_docname ||
@@ -942,8 +942,8 @@ PUBLIC char *HTAA_composeAuth ARGS4(
 	/*
 	**  Normal WWW authorization.
 	*/
-	CTRACE(tfp, "Composing Authorization for %s:%d/%s\n",
-		    hostname, portnumber, docname);
+	CTRACE((tfp, "Composing Authorization for %s:%d/%s\n",
+		    hostname, portnumber, docname));
 
 	if (current_portnumber != portnumber ||
 	    !current_hostname || !current_docname ||
@@ -1076,11 +1076,11 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(
     /*
     **  Read server reply header lines
     */
-    CTRACE(tfp, "Server reply header lines:\n");
+    CTRACE((tfp, "Server reply header lines:\n"));
 
     HTAA_setupReader(start_of_headers, length, soc);
     while (NULL != (line = HTAA_getUnfoldedLine())  &&  *line != '\0') {
-	CTRACE(tfp, "%s\n", line);
+	CTRACE((tfp, "%s\n", line));
 
 	if (strchr(line, ':')) {	/* Valid header line */
 
@@ -1116,23 +1116,23 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(
 		    scheme_specifics[scheme] = HTAA_parseArgList(args);
 		    num_schemes++;
 		} else {
-		    CTRACE(tfp, "Unknown scheme `%s' %s\n",
+		    CTRACE((tfp, "Unknown scheme `%s' %s\n",
 			    (arg1 ? arg1 : "(null)"),
 			    (IsProxy ?
 			     "in Proxy-Authenticate: field" :
-			     "in WWW-Authenticate: field"));
+			     "in WWW-Authenticate: field")));
 		}
 	    }
 
 	    else if (!IsProxy &&
 		     0==strcasecomp(fieldname, "WWW-Protection-Template:")) {
-		CTRACE(tfp, "Protection template set to `%s'\n", arg1);
+		CTRACE((tfp, "Protection template set to `%s'\n", arg1));
 		StrAllocCopy(template, arg1);
 	    }
 
 	} /* if a valid header line */
 	else {
-	    CTRACE(tfp, "Invalid header line `%s' ignored\n", line);
+	    CTRACE((tfp, "Invalid header line `%s' ignored\n", line));
 	} /* else invalid header line */
 
 	FREE(line);

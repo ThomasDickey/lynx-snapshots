@@ -152,7 +152,7 @@ PRIVATE void HTFWriter_abort ARGS2(HTStream *, me, HTError, e)
 {
     fclose(me->fp);
     if (me->end_command) {		/* Temp file */
-	CTRACE(tfp, "HTFWriter: Aborting: file not executed.\n");
+	CTRACE((tfp, "HTFWriter: Aborting: file not executed.\n"));
 	FREE(me->end_command);
 	if (me->remove_command) {
 	    system(me->remove_command);

@@ -200,7 +200,7 @@ void run_external ARGS1(char *, c)
 
 #ifdef WIN_EX
 	handle = GetForegroundWindow();
-	CTRACE(tfp, "EXTERNAL: '%s' <==> '%s'\n", externals2->name, c);
+	CTRACE((tfp, "EXTERNAL: '%s' <==> '%s'\n", externals2->name, c));
 #endif
 	if (externals2->command != 0
 	  && !strncasecomp(externals2->name, c, strlen(externals2->name)))
@@ -289,7 +289,7 @@ void run_external ARGS1(char *, c)
 		int len;
 		char buff[PATH_MAX];
 
-		CTRACE(tfp, "Lynx EXTERNAL: '%s'\n", cmdbuf);
+		CTRACE((tfp, "Lynx EXTERNAL: '%s'\n", cmdbuf));
 #ifdef WIN_GUI			/* 1997/11/06 (Thu) 14:17:15 */
 		confirmed = MessageBox(handle, cmdbuf,
 				  "Lynx (EXTERNAL COMMAND EXEC)",

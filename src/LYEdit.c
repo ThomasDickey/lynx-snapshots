@@ -84,7 +84,7 @@ PUBLIC int edit_current_file ARGS3(
 #else
 	HTAlert(COULD_NOT_ACCESS_FILE);
 #endif
-	CTRACE(tfp, "filename: '%s'\n", filename);
+	CTRACE((tfp, "filename: '%s'\n", filename));
 	goto done;
     }
 #else	/* !(VMS || !DOSPATH || !__EMX__) == UNIX */
@@ -192,7 +192,7 @@ PUBLIC int edit_current_file ARGS3(
 	HTEndParam(&command, format, params);
     }
 
-    CTRACE(tfp, "LYEdit: %s\n", command);
+    CTRACE((tfp, "LYEdit: %s\n", command));
     CTRACE_SLEEP(MessageSecs);
 
     /*

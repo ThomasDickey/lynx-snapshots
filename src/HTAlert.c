@@ -32,7 +32,7 @@
 PUBLIC void HTAlert ARGS1(
 	CONST char *,	Msg)
 {
-    CTRACE(tfp, "\nAlert!: %s\n\n", Msg);
+    CTRACE((tfp, "\nAlert!: %s\n\n", Msg));
     CTRACE_FLUSH(tfp);
     _user_message(ALERT_FORMAT, Msg);
     LYstore_message2(ALERT_FORMAT, Msg);
@@ -63,7 +63,7 @@ PUBLIC void HTAlwaysAlert ARGS2(
 	    sleep(AlertSecs);
 	    fprintf(((TRACE) ? stdout : stderr), "\n");
 	}
-	CTRACE(tfp, "\nAlert!: %s\n\n", Msg);
+	CTRACE((tfp, "\nAlert!: %s\n\n", Msg));
 	CTRACE_FLUSH(tfp);
     }
 }
@@ -76,7 +76,7 @@ PUBLIC void HTInfoMsg ARGS1(
 {
     _statusline(Msg);
     if (Msg && *Msg) {
-	CTRACE(tfp, "Info message: %s\n", Msg);
+	CTRACE((tfp, "Info message: %s\n", Msg));
 	LYstore_message(Msg);
 	sleep(InfoSecs);
     }
@@ -90,7 +90,7 @@ PUBLIC void HTUserMsg ARGS1(
 {
     _statusline(Msg);
     if (Msg && *Msg) {
-	CTRACE(tfp, "User message: %s\n", Msg);
+	CTRACE((tfp, "User message: %s\n", Msg));
 	LYstore_message(Msg);
 	sleep(MessageSecs);
     }
@@ -102,9 +102,9 @@ PUBLIC void HTUserMsg2 ARGS2(
 {
     _user_message(Msg2, Arg);
     if (Msg2 && *Msg2) {
-	CTRACE(tfp, "User message: ");
-	CTRACE(tfp, Msg2, Arg);
-	CTRACE(tfp, "\n");
+	CTRACE((tfp, "User message: "));
+	CTRACE((tfp, Msg2, Arg));
+	CTRACE((tfp, "\n"));
 	LYstore_message2(Msg2, Arg);
 	sleep(MessageSecs);
     }
@@ -165,7 +165,7 @@ PUBLIC void HTProgress ARGS1(
 {
     statusline(Msg);
     LYstore_message(Msg);
-    CTRACE(tfp, "%s\n", Msg);
+    CTRACE((tfp, "%s\n", Msg));
 #if defined(SH_EX) && defined(WIN_EX)	/* 1997/10/11 (Sat) 12:51:02 */
     {
 	if (debug_delay != 0)
@@ -351,7 +351,7 @@ PUBLIC void HTReadProgress ARGS2(
 
 	    /* do not store the message for history page. */
 	    statusline(line);
-	    CTRACE(tfp, "%s\n", line);
+	    CTRACE((tfp, "%s\n", line));
 	}
     }
 #else /* !EXP_READPROGRESS */
@@ -414,7 +414,7 @@ PUBLIC void HTReadProgress ARGS2(
 
 	    /* do not store the message for history page. */
 	    statusline(line);
-	    CTRACE(tfp, "%s\n", line);
+	    CTRACE((tfp, "%s\n", line));
 	}
     }
 #endif /* EXP_READPROGRESS */
@@ -447,11 +447,11 @@ PUBLIC int HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
     conf_cancelled = NO;
     if (dump_output_immediately) { /* Non-interactive, can't respond */
 	if (Dft == DFT_CONFIRM) {
-	    CTRACE(tfp, "Confirm: %s (%c/%c) ", Msg, *msg_yes, *msg_no);
+	    CTRACE((tfp, "Confirm: %s (%c/%c) ", Msg, *msg_yes, *msg_no));
 	} else {
-	    CTRACE(tfp, "Confirm: %s (%c) ", Msg, (Dft == YES) ? *msg_yes : *msg_no);
+	    CTRACE((tfp, "Confirm: %s (%c) ", Msg, (Dft == YES) ? *msg_yes : *msg_no));
 	}
-	CTRACE(tfp, "- NO, not interactive.\n");
+	CTRACE((tfp, "- NO, not interactive.\n"));
 	result = NO;
     } else {
 	char *msg = NULL;
@@ -461,7 +461,7 @@ PUBLIC int HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 	else
 	    HTSprintf0(&msg, "%s (%c) ", Msg, (Dft == YES) ? *msg_yes : *msg_no);
 	if (LYTraceLogFP) {
-	    CTRACE(tfp, "Confirm: %s", msg);
+	    CTRACE((tfp, "Confirm: %s", msg));
 	}
 	_statusline(msg);
 	FREE(msg);
@@ -486,9 +486,9 @@ PUBLIC int HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 		break;
 	    }
 	}
-	CTRACE(tfp, "- %s%s.\n",
+	CTRACE((tfp, "- %s%s.\n",
 	       (result != NO) ? "YES" : "NO",
-	       conf_cancelled ? ", cancelled" : "");
+	       conf_cancelled ? ", cancelled" : ""));
     }
     return (result);
 }

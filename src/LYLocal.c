@@ -297,7 +297,7 @@ PRIVATE BOOLEAN cannot_stat ARGS1(CONST char *, name)
 
 PRIVATE BOOLEAN ok_stat ARGS2(CONST char *, name, struct stat*, sb)
 {
-    CTRACE(tfp, "testing ok_stat(%s)\n", name);
+    CTRACE((tfp, "testing ok_stat(%s)\n", name));
     if (!OK_STAT(name, sb)) {
 	return cannot_stat(name);
     }
@@ -307,7 +307,7 @@ PRIVATE BOOLEAN ok_stat ARGS2(CONST char *, name, struct stat*, sb)
 #ifdef HAVE_LSTAT
 PRIVATE BOOLEAN ok_lstat ARGS2(char *, name, struct stat*, sb)
 {
-    CTRACE(tfp, "testing ok_lstat(%s)\n", name);
+    CTRACE((tfp, "testing ok_lstat(%s)\n", name));
     if (lstat(name, sb) < 0) {
 	return cannot_stat(name);
     }
@@ -337,7 +337,7 @@ PRIVATE BOOLEAN ok_localname ARGS2(char*, dst, CONST char*, src)
 	return FALSE;
     }
     if (strlen(src) >= DIRED_MAXBUF) {
-	CTRACE(tfp, "filename too long in ok_localname!\n");
+	CTRACE((tfp, "filename too long in ok_localname!\n"));
 	return FALSE;
     }
     strcpy(dst, src);
@@ -1229,9 +1229,9 @@ PRIVATE BOOLEAN permit_location ARGS3(
 		HTAlert(INVALID_PERMIT_URL);
 	    else
 		fprintf(stderr, "%s\n", INVALID_PERMIT_URL);
-	    CTRACE(tfp, "permit_location: called for <%s>.\n",
+	    CTRACE((tfp, "permit_location: called for <%s>.\n",
 			(destpath ?
-			 destpath : "NULL URL pointer"));
+			 destpath : "NULL URL pointer")));
 	    return 0;
 	}
 	cp = destpath;
@@ -1264,8 +1264,8 @@ PRIVATE BOOLEAN permit_location ARGS3(
 		HTAlert(INVALID_PERMIT_URL);
 	    else
 		fprintf(stderr, "%s\n", INVALID_PERMIT_URL);
-	    CTRACE(tfp, "permit_location: called for file '%s'.\n",
-			destpath);
+	    CTRACE((tfp, "permit_location: called for file '%s'.\n",
+			destpath));
 	    return 0;
 	}
 
@@ -1463,9 +1463,9 @@ PUBLIC int local_dired ARGS1(
     char *dirname = NULL;
 
     line_url = doc->address;
-    CTRACE(tfp, "local_dired: called for <%s>.\n",
+    CTRACE((tfp, "local_dired: called for <%s>.\n",
 		(line_url ?
-		 line_url : gettext("NULL URL pointer")));
+		 line_url : gettext("NULL URL pointer"))));
     HTUnEscapeSome(line_url, "/");	/* don't mess too much with *doc */
 
     StrAllocCopy(line, line_url);
@@ -1950,8 +1950,8 @@ PRIVATE int fill_argv_for_execv ARGS5(
 		cp = strtok(NULL, " ");
 	    }
 	    if (cp && (n >= LYEXECV_MAX_ARGC - reserve)) {
-		CTRACE(tfp, "Too many args for '%s' in '%s'!\n",
-		       cmd_path ? cmd_path : "<null>" , cmd_args);
+		CTRACE((tfp, "Too many args for '%s' in '%s'!\n",
+		       cmd_path ? cmd_path : "<null>" , cmd_args));
 		return(-1);
 	    }
 	} else {
@@ -2325,7 +2325,7 @@ PRIVATE int LYExecv ARGS3(
 	char *, 	msg)
 {
 #if defined(VMS) || defined(SH_EX) || defined(_WINDOWS)
-    CTRACE(tfp, "LYExecv:  Called inappropriately!\n");
+    CTRACE((tfp, "LYExecv:  Called inappropriately!\n"));
     return(0);
 #else
     int rc;
@@ -2347,9 +2347,9 @@ PRIVATE int LYExecv ARGS3(
 #endif
 
     if (TRACE) {
-	CTRACE(tfp, "LYExecv path='%s'\n", path);
+	CTRACE((tfp, "LYExecv path='%s'\n", path));
 	for (n = 0; argv[n] != 0; n++)
-	    CTRACE(tfp, "argv[%d] = '%s'\n", n, argv[n]);
+	    CTRACE((tfp, "argv[%d] = '%s'\n", n, argv[n]));
     }
 
     rc = 1;		/* It will work */

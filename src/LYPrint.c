@@ -364,7 +364,7 @@ check_recall:
     /*
      * See if we can write to it.
      */
-    CTRACE(tfp, "LYPrint: filename is %s, action is `%c'\n", buffer, c);
+    CTRACE((tfp, "LYPrint: filename is %s, action is `%c'\n", buffer, c));
 
 #if HAVE_POPEN
     if (*buffer == '|') {
@@ -374,7 +374,7 @@ check_recall:
 	    FnameNum = FnameTotal;
 	    goto retry;
 	} else if ((outfile_fp = popen(buffer+1, "w")) == NULL) {
-	    CTRACE(tfp, "LYPrint: errno is %d\n", errno);
+	    CTRACE((tfp, "LYPrint: errno is %d\n", errno));
 	    HTAlert(CANNOT_WRITE_TO_FILE);
 	    _statusline(NEW_FILENAME_PROMPT);
 	    FirstRecall = TRUE;
@@ -386,7 +386,7 @@ check_recall:
     if ((outfile_fp = (TOUPPER(c) == 'A'
 	    ? LYAppendToTxtFile(buffer)
 	    : LYNewTxtFile(buffer))) == NULL) {
-	CTRACE(tfp, "LYPrint: errno is %d\n", errno);
+	CTRACE((tfp, "LYPrint: errno is %d\n", errno));
 	HTAlert(CANNOT_WRITE_TO_FILE);
 	_statusline(NEW_FILENAME_PROMPT);
 	FirstRecall = TRUE;
@@ -931,7 +931,7 @@ check_again:
     move(1,1);
 
     stop_curses();
-    CTRACE(tfp, "command: %s\n", the_command);
+    CTRACE((tfp, "command: %s\n", the_command));
     SetOutputMode( O_TEXT );
     printf(PRINTING_FILE);
     /*

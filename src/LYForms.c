@@ -1149,14 +1149,14 @@ redraw:
 		number = get_popup_option_number((int *)&c,(int *)&rel);
 
 		/* handle + or - suffix */
-		CTRACE(tfp,"got popup option number %d, ",number);
-		CTRACE(tfp,"rel='%c', c='%c', cur_selection=%d\n",
-				rel,c,cur_selection);
+		CTRACE((tfp,"got popup option number %d, ",number));
+		CTRACE((tfp,"rel='%c', c='%c', cur_selection=%d\n",
+				rel,c,cur_selection));
 		if ( c == 'p' ) {
 		    int curpage = ((cur_selection + 1) > length) ?
 			(((cur_selection + 1) + (length - 1))/(length))
 					  : 1;
-		    CTRACE(tfp,"  curpage=%d\n",curpage);
+		    CTRACE((tfp,"  curpage=%d\n",curpage));
 		    if ( rel == '+' )
 			number = curpage + number;
 		    else if ( rel == '-' )
@@ -1166,7 +1166,7 @@ redraw:
 		} else if ( rel == '-' ) {
 		    number = cur_selection - number + 1;
 		}
-		if ( rel ) CTRACE(tfp,"new number=%d\n",number);
+		if ( rel ) CTRACE((tfp,"new number=%d\n",number));
 		/*
 		 *  Check for a 'p' suffix. - FM
 		 */

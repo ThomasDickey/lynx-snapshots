@@ -372,8 +372,8 @@ PRIVATE void HTMLGen_start_element ARGS6(
 
 	if (displayStyles[element_number + STARTAT].color > -2) /* actually set */
 	{
-	    CTRACE(tfp, "CSSTRIM: start_element: top <%s>\n",
-		   HTML_dtd.tags[element_number].name);
+	    CTRACE((tfp, "CSSTRIM: start_element: top <%s>\n",
+		   HTML_dtd.tags[element_number].name));
 	    do_cstyle_flush(me);
 	    HText_characterStyle(me->text, hcode, 1);
 	}
@@ -412,7 +412,7 @@ PRIVATE void HTMLGen_start_element ARGS6(
 		    if (title && *title) {
 			HTSprintf0(&title_tmp, "link.%s.%s",
 				   value[HTML_LINK_CLASS], title);
-			CTRACE(tfp, "CSSTRIM:link=%s\n", title_tmp);
+			CTRACE((tfp, "CSSTRIM:link=%s\n", title_tmp));
 
 			do_cstyle_flush(me);
 			HText_characterStyle(me->text, hash_code(title_tmp), 1);
@@ -492,7 +492,7 @@ PRIVATE void HTMLGen_start_element ARGS6(
 
     if (LYPreparsedSource && REALLY_EMPTY(element_number))
     {
-	CTRACE(tfp, "STYLE:begin_element:ending EMPTY element style\n");
+	CTRACE((tfp, "STYLE:begin_element:ending EMPTY element style\n"));
 	do_cstyle_flush(me);
 #if !defined(USE_HASH)
 	HText_characterStyle(me->text, element_number+STARTAT, STACK_OFF);
@@ -546,7 +546,7 @@ PRIVATE void HTMLGen_end_element ARGS3(
 
     if (LYPreparsedSource && !REALLY_EMPTY(element_number))
     {
-	CTRACE(tfp, "STYLE:end_element: ending non-EMPTY style\n");
+	CTRACE((tfp, "STYLE:end_element: ending non-EMPTY style\n"));
 	do_cstyle_flush(me);
 #if !defined(USE_HASH)
 	HText_characterStyle(me->text, element_number+STARTAT, STACK_OFF);

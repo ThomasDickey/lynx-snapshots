@@ -997,32 +997,32 @@ PRIVATE int setkey_cmd (char *parse)
     int keysym;
     char buf[BUFSIZ];
 
-    CTRACE(tfp, "KEYMAP(PA): in=%s", parse);	/* \n-terminated */
+    CTRACE((tfp, "KEYMAP(PA): in=%s", parse));	/* \n-terminated */
     if ((s = skip_keysym(parse)) != 0) {
 	if (isspace(*s)) {
 	    *s++ = '\0';
 	    s = LYSkipBlanks(s);
 	    if ((t = skip_keysym(s)) == 0) {
-		CTRACE(tfp, "KEYMAP(SKIP) no key expansion found\n");
+		CTRACE((tfp, "KEYMAP(SKIP) no key expansion found\n"));
 		return -1;
 	    }
 	    if (t != s)
 		*t = '\0';
 	    if (map_string_to_keysym (s, &keysym) >= 0
 	     && unescape_string(parse, buf)) {
-		CTRACE(tfp, "KEYMAP(DEF) keysym=%#x, seq='%s'\n", keysym, buf);
+		CTRACE((tfp, "KEYMAP(DEF) keysym=%#x, seq='%s'\n", keysym, buf));
 		return define_key(buf, keysym);
 	    }
 	    else {
-		CTRACE(tfp, "KEYMAP(SKIP) could not map to keysym\n");
+		CTRACE((tfp, "KEYMAP(SKIP) could not map to keysym\n"));
 	    }
 	}
 	else {
-	    CTRACE(tfp, "KEYMAP(SKIP) junk after key description: '%s'\n", s);
+	    CTRACE((tfp, "KEYMAP(SKIP) junk after key description: '%s'\n", s));
 	}
     }
     else {
-	CTRACE(tfp, "KEYMAP(SKIP) no key description\n");
+	CTRACE((tfp, "KEYMAP(SKIP) no key description\n"));
     }
     return -1;
 }
@@ -1417,15 +1417,15 @@ re_read:
     if (c == EOF && errno == EINTR) {
 
 #if HAVE_SIZECHANGE || defined(USE_SLANG)
-	   CTRACE(tfp, "Got EOF with EINTR, recent_sizechange so far is %d\n",
-		  recent_sizechange);
+	   CTRACE((tfp, "Got EOF with EINTR, recent_sizechange so far is %d\n",
+		  recent_sizechange));
 	   if (!recent_sizechange) { /* not yet detected by ourselves */
 	       size_change(0);
-	       CTRACE(tfp, "Now recent_sizechange is %d\n", recent_sizechange);
+	       CTRACE((tfp, "Now recent_sizechange is %d\n", recent_sizechange));
 	   }
 #else /* HAVE_SIZECHANGE || USE_SLANG */
-	   CTRACE(tfp, "Got EOF with EINTR, recent_sizechange is %d\n",
-		  recent_sizechange);
+	   CTRACE((tfp, "Got EOF with EINTR, recent_sizechange is %d\n",
+		  recent_sizechange));
 #endif /* HAVE_SIZECHANGE || USE_SLANG */
 #if !defined(UCX) || !defined(VAXC) /* errno not modifiable ? */
 	errno = 0;		/* reset - kw */
@@ -1597,7 +1597,7 @@ re_read:
 		done_esc = (BOOL) ((a & ~0xFF) == 0);
 		break;
 	    }
-	    CTRACE(tfp,"Unknown key sequence: %d:%d:%d\n",c,b,a);
+	    CTRACE((tfp,"Unknown key sequence: %d:%d:%d\n",c,b,a));
 	    CTRACE_SLEEP(MessageSecs);
 	    break;
 	}
@@ -1770,13 +1770,13 @@ re_read:
 	   /* Make call to detect new size, if that may be implemented.
 	    * The call may set recent_sizechange (except for USE_SLANG),
 	    * which will tell mainloop() to refresh. - kw */
-	   CTRACE(tfp, "Got KEY_RESIZE, recent_sizechange so far is %d\n",
-		  recent_sizechange);
+	   CTRACE((tfp, "Got KEY_RESIZE, recent_sizechange so far is %d\n",
+		  recent_sizechange));
 	   size_change(0);
-	   CTRACE(tfp, "Now recent_sizechange is %d\n", recent_sizechange);
+	   CTRACE((tfp, "Now recent_sizechange is %d\n", recent_sizechange));
 #else /* HAVE_SIZECHANGE || USE_SLANG */
-	   CTRACE(tfp, "Got KEY_RESIZE, recent_sizechange is %d\n",
-		  recent_sizechange);
+	   CTRACE((tfp, "Got KEY_RESIZE, recent_sizechange is %d\n",
+		  recent_sizechange));
 #endif /* HAVE_SIZECHANGE || USE_SLANG */
 	   if (!recent_sizechange) {
 #if 0			/* assumption seems flawed? */
@@ -1845,7 +1845,7 @@ re_read:
 		mouse_link = -1;
 		err = getmouse(&event);
 		if (err != OK) {
-		    CTRACE(tfp, "Mouse error: no event available!\n");
+		    CTRACE((tfp, "Mouse error: no event available!\n"));
 		    return(code==FOR_PANEL ? 0 : DO_NOTHING);
 		}
 		levent = event;		/* Allow setting pos in entry fields */
@@ -3755,7 +3755,7 @@ PUBLIC char * SNACopy ARGS3(
     if (src) {
 	*dest = (char *)calloc(1, n + 1);
 	if (*dest == NULL) {
-	    CTRACE(tfp, "Tried to calloc %d bytes\n", n);
+	    CTRACE((tfp, "Tried to calloc %d bytes\n", n));
 	    outofmem(__FILE__, "SNACopy");
 	}
 	strncpy (*dest, src, n);

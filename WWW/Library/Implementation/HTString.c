@@ -642,8 +642,8 @@ PRIVATE char * StrAllocVsprintf ARGS4(
 			used = 0;
 			break;
 		    default:
-			CTRACE(tfp, "unknown format character '%c' in %s\n",
-			            *fmt, format);
+			CTRACE((tfp, "unknown format character '%c' in %s\n",
+			            *fmt, format));
 			break;
 		    }
 		} else if (*fmt == '.') {
@@ -893,7 +893,7 @@ PUBLIC void HTAddXpand ARGS4(
 		    (*result)[len] = 0;
 		}
 		HTSACat(result, parameter);
-		CTRACE(tfp, "PARAM-EXP:%s\n", *result);
+		CTRACE((tfp, "PARAM-EXP:%s\n", *result));
 		return;
 	    }
 	    next++;
@@ -946,7 +946,7 @@ PUBLIC void HTAddParam ARGS4(
 #else
 		HTSACat(result, parameter);
 #endif
-		CTRACE(tfp, "PARAM-ADD:%s\n", *result);
+		CTRACE((tfp, "PARAM-ADD:%s\n", *result));
 		return;
 	    }
 	    next++;
@@ -972,7 +972,7 @@ PUBLIC void HTEndParam ARGS3(
     if (last[0] != 0) {
 	HTSACat(result, last);
     }
-    CTRACE(tfp, "PARAM-END:%s\n", *result);
+    CTRACE((tfp, "PARAM-END:%s\n", *result));
 }
 
 
@@ -988,7 +988,7 @@ PUBLIC void HTSABCopy ARGS3(
 	int,		len)
 {
     bstring *t;
-    CTRACE(tfp, "HTSABCopy(%p, %p, %d)\n", dest, src, len);
+    CTRACE((tfp, "HTSABCopy(%p, %p, %d)\n", dest, src, len));
     /* if we already have a bstring ** ... */
     if (dest) {
     	/* ... with a valid bstring *, free it ... */
@@ -998,7 +998,7 @@ PUBLIC void HTSABCopy ARGS3(
     	}
 	*dest = malloc(sizeof(bstring));
 	if (src) {
-	    CTRACE(tfp, "%% [%s]\n", src);
+	    CTRACE((tfp, "%% [%s]\n", src));
 	    t = (bstring*) malloc(sizeof(bstring));
 	    if (t == NULL)
 		outofmem(__FILE__, "HTSABCopy");

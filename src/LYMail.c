@@ -746,10 +746,10 @@ PUBLIC void mailmsg ARGS4(
     char *command = NULL;
     BOOLEAN first = TRUE;
 
-    CTRACE(tfp, "mailmsg(%d, \"%s\", \"%s\", \"%s\")\n", cur,
+    CTRACE((tfp, "mailmsg(%d, \"%s\", \"%s\", \"%s\")\n", cur,
 	owner_address?owner_address:"<nil>",
 	filename?filename:"<nil>",
-	linkname?linkname:"<nil>");
+	linkname?linkname:"<nil>"));
 
     if (!strncasecomp(system_mail, "PMDF SEND", 9)) {
 	isPMDF = TRUE;
@@ -857,7 +857,7 @@ PUBLIC void mailmsg ARGS4(
 	address[(strlen(address) - 1)] = '\0';
     if (*address == '\0') {
 	FREE(address);
-	CTRACE(tfp, "mailmsg: No address in '%s'.\n", owner_address);
+	CTRACE((tfp, "mailmsg: No address in '%s'.\n", owner_address));
 	return;
     }
 
@@ -865,7 +865,7 @@ PUBLIC void mailmsg ARGS4(
     HTSprintf0(&cmd, "%s %s", system_mail, system_mail_flags);
     if ((fd = popen(cmd, "w")) == NULL) {
 	FREE(address);
-	CTRACE(tfp, "mailmsg: '%s' failed.\n", cmd);
+	CTRACE((tfp, "mailmsg: '%s' failed.\n", cmd));
 	return;
     }
 
@@ -879,14 +879,14 @@ PUBLIC void mailmsg ARGS4(
 #endif /* UNIX */
 #if defined(VMS) || defined(DOSPATH) || defined(WIN_EX)
     if ((fd = LYOpenTemp(my_tmpfile, ".txt", "w")) == NULL) {
-	CTRACE(tfp, "mailmsg: Could not fopen '%s'.\n", my_tmpfile);
+	CTRACE((tfp, "mailmsg: Could not fopen '%s'.\n", my_tmpfile));
 	FREE(address);
 	return;
     }
 #ifdef VMS
     if (isPMDF) {
 	if ((hfd = LYOpenTemp(hdrfile, ".txt", "w")) == NULL) {
-	    CTRACE(tfp, "mailmsg: Could not fopen '%s'.\n", hdrfile);
+	    CTRACE((tfp, "mailmsg: Could not fopen '%s'.\n", hdrfile));
 	    FREE(address);
 	    return;
 	}
@@ -1083,11 +1083,11 @@ PUBLIC void reply_by_mail ARGS4(
     int n;
 #endif /* VMS */
 
-    CTRACE(tfp, "reply_by_mail(\"%s\", \"%s\", \"%s\", \"%s\")\n",
+    CTRACE((tfp, "reply_by_mail(\"%s\", \"%s\", \"%s\", \"%s\")\n",
 	mail_address?mail_address:"<nil>",
 	filename?filename:"<nil>",
 	title?title:"<nil>",
-	refid?refid:"<nil>");
+	refid?refid:"<nil>"));
 
     term_letter = FALSE;
 
@@ -1723,7 +1723,7 @@ PUBLIC void reply_by_mail ARGS4(
      */
     sprintf(buf, "\n");
     StrAllocCat(header, buf);
-    CTRACE(tfp,"**header==\n%s",header);
+    CTRACE((tfp,"**header==\n%s",header));
 #endif /* !VMS */
 
     if (!no_editor && editor && *editor != '\0') {
@@ -2092,7 +2092,7 @@ PUBLIC void reply_by_mail ARGS4(
 #endif	/* DOSPATH */
     fclose(fd); /* Close the tmpfile. */
 
-    CTRACE(tfp, "%s\n", cmd);
+    CTRACE((tfp, "%s\n", cmd));
 #endif /* VMS */
 
     /*

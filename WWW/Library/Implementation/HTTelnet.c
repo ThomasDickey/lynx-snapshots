@@ -36,7 +36,7 @@
 
 PRIVATE void do_system ARGS1(char *, command)
 {
-    CTRACE(tfp, "HTTelnet: Command is: %s\n\n", command);
+    CTRACE((tfp, "HTTelnet: Command is: %s\n\n", command));
     system(command);
     FREE(command);
 }
@@ -87,12 +87,12 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	    *port++ = '\0';	/* Split */
 
 	if (!hostname || *hostname == '\0') {
-	    CTRACE(tfp, "HTTelnet: No host specified!\n");
+	    CTRACE((tfp, "HTTelnet: No host specified!\n"));
 	    return HT_NO_DATA;
 	} else if (!valid_hostname(hostname)) {
 	    char *prefix = NULL;
 	    char *line = NULL;
-	    CTRACE(tfp, "HTTelnet: Invalid hostname %s!\n", host);
+	    CTRACE((tfp, "HTTelnet: Invalid hostname %s!\n", host));
 	    HTSprintf0(&prefix,
 		       gettext("remote %s session:"), acc_method);
 	    HTSprintf0(&line,
@@ -548,7 +548,7 @@ ARGS4
     int status;
 
     if (sink) {
-	CTRACE(tfp, "HTTelnet: Can't output a live session -- must be interactive!\n");
+	CTRACE((tfp, "HTTelnet: Can't output a live session -- must be interactive!\n"));
 	return HT_NO_DATA;
     }
     acc_method =  HTParse(addr, "file:", PARSE_ACCESS);
@@ -556,7 +556,7 @@ ARGS4
     host = HTParse(addr, "", PARSE_HOST);
     if (!host || *host == '\0') {
 	status = HT_NO_DATA;
-	CTRACE(tfp, "HTTelnet: No host specified!\n");
+	CTRACE((tfp, "HTTelnet: No host specified!\n"));
     } else {
 	status = remote_session(acc_method, host);
     }

@@ -248,7 +248,7 @@ check_recall:
 	/*
 	 *  See if we can write to it.
 	 */
-	CTRACE(tfp, "LYDownload: filename is %s\n", buffer);
+	CTRACE((tfp, "LYDownload: filename is %s\n", buffer));
 
 	if ((fp = fopen(buffer, "w")) != NULL) {
 	    fclose(fp);
@@ -267,12 +267,12 @@ check_recall:
 	/*
 	 *  Try rename() first. - FM
 	 */
-	CTRACE(tfp, "command: rename(%s, %s)\n", file, buffer);
+	CTRACE((tfp, "command: rename(%s, %s)\n", file, buffer));
 	if (rename(file, buffer)) {
 	    /*
 	     *	Failed.  Use spawned COPY_COMMAND. - FM
 	     */
-	    CTRACE(tfp, "         FAILED!\n");
+	    CTRACE((tfp, "         FAILED!\n"));
 	    LYCopyFile(file, buffer);
 	} else {
 	    /*
@@ -441,7 +441,7 @@ check_recall:
 	    goto failed;
 	}
 
-	CTRACE(tfp, "command: %s\n", the_command);
+	CTRACE((tfp, "command: %s\n", the_command));
 	stop_curses();
 	LYSystem(the_command);
 	FREE(the_command);

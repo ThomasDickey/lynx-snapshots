@@ -234,13 +234,13 @@ PRIVATE void HTMIME_put_character ARGS2(
 	case 'a':
 	case 'A':
 	    me->state = miA;
-	    CTRACE(tfp, "HTMIME: Got 'A' at beginning of line, state now A\n");
+	    CTRACE((tfp, "HTMIME: Got 'A' at beginning of line, state now A\n"));
 	    break;
 
 	case 'c':
 	case 'C':
 	    me->state = miC;
-	    CTRACE (tfp, "HTMIME: Got 'C' at beginning of line, state now C\n");
+	    CTRACE((tfp, "HTMIME: Got 'C' at beginning of line, state now C\n"));
 	    break;
 
 	case 'd':
@@ -248,13 +248,13 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "ate:";
 	    me->if_ok = miDATE;
 	    me->state = miCHECK;
-	    CTRACE (tfp, "HTMIME: Got 'D' at beginning of line, checking for 'ate:'\n");
+	    CTRACE((tfp, "HTMIME: Got 'D' at beginning of line, checking for 'ate:'\n"));
 	    break;
 
 	case 'e':
 	case 'E':
 	    me->state = miE;
-	    CTRACE (tfp, "HTMIME: Got 'E' at beginning of line, state now E\n");
+	    CTRACE((tfp, "HTMIME: Got 'E' at beginning of line, state now E\n"));
 	    break;
 
 	case 'k':
@@ -262,19 +262,19 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "eep-alive:";
 	    me->if_ok = miKEEP_ALIVE;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Got 'K' at beginning of line, checking for 'eep-alive:'\n");
+	    CTRACE((tfp, "HTMIME: Got 'K' at beginning of line, checking for 'eep-alive:'\n"));
 	    break;
 
 	case 'l':
 	case 'L':
 	    me->state = miL;
-	    CTRACE (tfp, "HTMIME: Got 'L' at beginning of line, state now L\n");
+	    CTRACE((tfp, "HTMIME: Got 'L' at beginning of line, state now L\n"));
 	    break;
 
 	case 'p':
 	case 'P':
 	    me->state = miP;
-	    CTRACE (tfp, "HTMIME: Got 'P' at beginning of line, state now P\n");
+	    CTRACE((tfp, "HTMIME: Got 'P' at beginning of line, state now P\n"));
 	    break;
 
 	case 'r':
@@ -282,37 +282,37 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "etry-after:";
 	    me->if_ok = miRETRY_AFTER;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Got 'R' at beginning of line, checking for 'etry-after'\n");
+	    CTRACE((tfp, "HTMIME: Got 'R' at beginning of line, checking for 'etry-after'\n"));
 	    break;
 
 	case 's':
 	case 'S':
 	    me->state = miS;
-	    CTRACE (tfp, "HTMIME: Got 'S' at beginning of line, state now S\n");
+	    CTRACE((tfp, "HTMIME: Got 'S' at beginning of line, state now S\n"));
 	    break;
 
 	case 't':
 	case 'T':
 	    me->state = miT;
-	    CTRACE (tfp, "HTMIME: Got 'T' at beginning of line, state now T\n");
+	    CTRACE((tfp, "HTMIME: Got 'T' at beginning of line, state now T\n"));
 	    break;
 
 	case 'u':
 	case 'U':
 	    me->state = miU;
-	    CTRACE (tfp, "HTMIME: Got 'U' at beginning of line, state now U\n");
+	    CTRACE((tfp, "HTMIME: Got 'U' at beginning of line, state now U\n"));
 	    break;
 
 	case 'v':
 	case 'V':
 	    me->state = miV;
-	    CTRACE (tfp, "HTMIME: Got 'V' at beginning of line, state now V\n");
+	    CTRACE((tfp, "HTMIME: Got 'V' at beginning of line, state now V\n"));
 	    break;
 
 	case 'w':
 	case 'W':
 	    me->state = miW;
-	    CTRACE (tfp, "HTMIME: Got 'W' at beginning of line, state now W\n");
+	    CTRACE((tfp, "HTMIME: Got 'W' at beginning of line, state now W\n"));
 	    break;
 
 	case '\n':			/* Blank line: End of Header! */
@@ -321,8 +321,8 @@ PRIVATE void HTMIME_put_character ARGS2(
 		if (strchr(HTAtom_name(me->format), ';') != NULL) {
 		    char *cp = NULL, *cp1, *cp2, *cp3 = NULL, *cp4;
 
-		    CTRACE(tfp, "HTMIME: Extended MIME Content-Type is %s\n",
-				HTAtom_name(me->format));
+		    CTRACE((tfp, "HTMIME: Extended MIME Content-Type is %s\n",
+				HTAtom_name(me->format)));
 		    StrAllocCopy(cp, HTAtom_name(me->format));
 		    /*
 		    **	Note that the Content-Type value was converted
@@ -514,17 +514,17 @@ PRIVATE void HTMIME_put_character ARGS2(
 		StrAllocCopy(me->anchor->content_type,
 			     HTAtom_name(me->format));
 		if (!me->compression_encoding) {
-		    CTRACE(tfp, "HTMIME: MIME Content-Type is '%s', converting to '%s'\n",
-				HTAtom_name(me->format), HTAtom_name(me->targetRep));
+		    CTRACE((tfp, "HTMIME: MIME Content-Type is '%s', converting to '%s'\n",
+				HTAtom_name(me->format), HTAtom_name(me->targetRep)));
 		} else {
 		    /*
 		    **	Change the format to that for "www/compressed"
 		    **	and set up a stream to deal with it. - FM
 		    */
-		    CTRACE(tfp, "HTMIME: MIME Content-Type is '%s',\n", HTAtom_name(me->format));
+		    CTRACE((tfp, "HTMIME: MIME Content-Type is '%s',\n", HTAtom_name(me->format)));
 		    me->format = HTAtom_for("www/compressed");
-		    CTRACE(tfp, "        Treating as '%s'.  Converting to '%s'\n",
-				HTAtom_name(me->format), HTAtom_name(me->targetRep));
+		    CTRACE((tfp, "        Treating as '%s'.  Converting to '%s'\n",
+				HTAtom_name(me->format), HTAtom_name(me->targetRep)));
 		}
 		if (me->set_cookie != NULL || me->set_cookie2 != NULL) {
 		    LYSetCookie(me->set_cookie,
@@ -536,7 +536,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 		me->target = HTStreamStack(me->format, me->targetRep,
 					   me->sink , me->anchor);
 		if (!me->target) {
-		    CTRACE(tfp, "HTMIME: Can't translate! ** \n");
+		    CTRACE((tfp, "HTMIME: Can't translate! ** \n"));
 		    me->target = me->sink;	/* Cheat */
 		}
 		if (me->target) {
@@ -567,7 +567,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "cept-ranges:";
 	    me->if_ok = miACCEPT_RANGES;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was A, found C, checking for 'cept-ranges:'\n");
+	    CTRACE((tfp, "HTMIME: Was A, found C, checking for 'cept-ranges:'\n"));
 	    break;
 
 	case 'g':
@@ -575,18 +575,18 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "e:";
 	    me->if_ok = miAGE;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was A, found G, checking for 'e:'\n");
+	    CTRACE((tfp, "HTMIME: Was A, found G, checking for 'e:'\n"));
 	    break;
 
 	case 'l':
 	case 'L':
 	    me->state = miAL;
-	    CTRACE(tfp, "HTMIME: Was A, found L, state now AL'\n");
+	    CTRACE((tfp, "HTMIME: Was A, found L, state now AL'\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, "'g' or 'l'");
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'g' or 'l'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -599,7 +599,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "ow:";
 	    me->if_ok = miALLOW;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was AL, found L, checking for 'ow:'\n");
+	    CTRACE((tfp, "HTMIME: Was AL, found L, checking for 'ow:'\n"));
 	    break;
 
 	case 't':
@@ -607,12 +607,12 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "ernates:";
 	    me->if_ok = miALTERNATES;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was AL, found T, checking for 'ernates:'\n");
+	    CTRACE((tfp, "HTMIME: Was AL, found T, checking for 'ernates:'\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, "'l' or 't'");
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'l' or 't'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -625,18 +625,18 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "che-control:";
 	    me->if_ok = miCACHE_CONTROL;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was C, found A, checking for 'che-control:'\n");
+	    CTRACE((tfp, "HTMIME: Was C, found A, checking for 'che-control:'\n"));
 	    break;
 
 	case 'o':
 	case 'O':
 	    me->state = miCO;
-	    CTRACE(tfp, "HTMIME: Was C, found O, state now CO'\n");
+	    CTRACE((tfp, "HTMIME: Was C, found O, state now CO'\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, "'a' or 'o'");
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'a' or 'o'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -647,7 +647,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	case 'n':
 	case 'N':
 	    me->state = miCON;
-	    CTRACE(tfp, "HTMIME: Was CO, found N, state now CON\n");
+	    CTRACE((tfp, "HTMIME: Was CO, found N, state now CON\n"));
 	    break;
 
 	case 'o':
@@ -655,12 +655,12 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "kie:";
 	    me->if_ok = miCOOKIE;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was CO, found O, checking for 'kie:'\n");
+	    CTRACE((tfp, "HTMIME: Was CO, found O, checking for 'kie:'\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, "'n' or 'o'");
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'n' or 'o'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -673,7 +673,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "ection:";
 	    me->if_ok = miCONNECTION;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was CON, found N, checking for 'ection:'\n");
+	    CTRACE((tfp, "HTMIME: Was CON, found N, checking for 'ection:'\n"));
 	    break;
 
 	case 't':
@@ -681,12 +681,12 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "ent-";
 	    me->if_ok = miCONTENT_;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was CON, found T, checking for 'ent-'\n");
+	    CTRACE((tfp, "HTMIME: Was CON, found T, checking for 'ent-'\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, "'n' or 't'");
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'n' or 't'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -699,7 +699,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "ag:";
 	    me->if_ok = miETAG;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was E, found T, checking for 'ag:'\n");
+	    CTRACE((tfp, "HTMIME: Was E, found T, checking for 'ag:'\n"));
 	    break;
 
 	case 'x':
@@ -707,12 +707,12 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "pires:";
 	    me->if_ok = miEXPIRES;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was E, found X, checking for 'pires:'\n");
+	    CTRACE((tfp, "HTMIME: Was E, found X, checking for 'pires:'\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, "'t' or 'x'");
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'t' or 'x'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -725,7 +725,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "st-modified:";
 	    me->if_ok = miLAST_MODIFIED;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was L, found A, checking for 'st-modified:'\n");
+	    CTRACE((tfp, "HTMIME: Was L, found A, checking for 'st-modified:'\n"));
 	    break;
 
 	case 'i':
@@ -733,7 +733,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "nk:";
 	    me->if_ok = miLINK;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was L, found I, checking for 'nk:'\n");
+	    CTRACE((tfp, "HTMIME: Was L, found I, checking for 'nk:'\n"));
 	    break;
 
 	case 'o':
@@ -741,12 +741,12 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "cation:";
 	    me->if_ok = miLOCATION;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was L, found O, checking for 'cation:'\n");
+	    CTRACE((tfp, "HTMIME: Was L, found O, checking for 'cation:'\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, "'a', 'i' or 'o'");
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'a', 'i' or 'o'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -757,7 +757,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	case 'r':
 	case 'R':
 	    me->state = miPR;
-	    CTRACE(tfp, "HTMIME: Was P, found R, state now PR'\n");
+	    CTRACE((tfp, "HTMIME: Was P, found R, state now PR'\n"));
 	    break;
 
 	case 'u':
@@ -765,12 +765,12 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "blic:";
 	    me->if_ok = miPUBLIC;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was P, found U, checking for 'blic:'\n");
+	    CTRACE((tfp, "HTMIME: Was P, found U, checking for 'blic:'\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, "'r' or 'u'");
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'r' or 'u'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -783,7 +783,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "gma:";
 	    me->if_ok = miPRAGMA;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was PR, found A, checking for 'gma'\n");
+	    CTRACE((tfp, "HTMIME: Was PR, found A, checking for 'gma'\n"));
 	    break;
 
 	case 'o':
@@ -791,12 +791,12 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "xy-authenticate:";
 	    me->if_ok = miPROXY_AUTHENTICATE;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was PR, found O, checking for 'xy-authenticate'\n");
+	    CTRACE((tfp, "HTMIME: Was PR, found O, checking for 'xy-authenticate'\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, "'a' or 'o'");
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'a' or 'o'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -809,18 +809,18 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "fe:";
 	    me->if_ok = miSAFE;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was S, found A, checking for 'fe:'\n");
+	    CTRACE((tfp, "HTMIME: Was S, found A, checking for 'fe:'\n"));
 	    break;
 
 	case 'e':
 	case 'E':
 	    me->state = miSE;
-	    CTRACE(tfp, "HTMIME: Was S, found E, state now SE'\n");
+	    CTRACE((tfp, "HTMIME: Was S, found E, state now SE'\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, "'a' or 'e'");
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'a' or 'e'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -833,7 +833,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "ver:";
 	    me->if_ok = miSERVER;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was SE, found R, checking for 'ver'\n");
+	    CTRACE((tfp, "HTMIME: Was SE, found R, checking for 'ver'\n"));
 	    break;
 
 	case 't':
@@ -841,12 +841,12 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "-cookie";
 	    me->if_ok = miSET_COOKIE;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was SE, found T, checking for '-cookie'\n");
+	    CTRACE((tfp, "HTMIME: Was SE, found T, checking for '-cookie'\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, "'r' or 't'");
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'r' or 't'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -857,19 +857,19 @@ PRIVATE void HTMIME_put_character ARGS2(
 	case ':':
 	    me->field = miSET_COOKIE1;		/* remember it */
 	    me->state = miSKIP_GET_VALUE;
-	    CTRACE(tfp, "HTMIME: Was SET_COOKIE, found :, processing\n");
+	    CTRACE((tfp, "HTMIME: Was SET_COOKIE, found :, processing\n"));
 	    break;
 
 	case '2':
 	    me->check_pointer = ":";
 	    me->if_ok = miSET_COOKIE2;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was SET_COOKIE, found 2, checking for ':'\n");
+	    CTRACE((tfp, "HTMIME: Was SET_COOKIE, found 2, checking for ':'\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, "':' or '2'");
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "':' or '2'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -882,7 +882,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "tle:";
 	    me->if_ok = miTITLE;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was T, found I, checking for 'tle:'\n");
+	    CTRACE((tfp, "HTMIME: Was T, found I, checking for 'tle:'\n"));
 	    break;
 
 	case 'r':
@@ -890,12 +890,12 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "ansfer-encoding:";
 	    me->if_ok = miTRANSFER_ENCODING;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was T, found R, checking for 'ansfer-encoding'\n");
+	    CTRACE((tfp, "HTMIME: Was T, found R, checking for 'ansfer-encoding'\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, "'i' or 'r'");
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'i' or 'r'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -908,7 +908,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "grade:";
 	    me->if_ok = miUPGRADE;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was U, found P, checking for 'grade:'\n");
+	    CTRACE((tfp, "HTMIME: Was U, found P, checking for 'grade:'\n"));
 	    break;
 
 	case 'r':
@@ -916,12 +916,12 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "i:";
 	    me->if_ok = miURI;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was U, found R, checking for 'i:'\n");
+	    CTRACE((tfp, "HTMIME: Was U, found R, checking for 'i:'\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, "'p' or 'r'");
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'p' or 'r'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -934,7 +934,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "ry:";
 	    me->if_ok = miVARY;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was V, found A, checking for 'ry:'\n");
+	    CTRACE((tfp, "HTMIME: Was V, found A, checking for 'ry:'\n"));
 	    break;
 
 	case 'i':
@@ -942,12 +942,12 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "a:";
 	    me->if_ok = miVIA;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was V, found I, checking for 'a:'\n");
+	    CTRACE((tfp, "HTMIME: Was V, found I, checking for 'a:'\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, "'a' or 'i'");
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'a' or 'i'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -960,7 +960,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "rning:";
 	    me->if_ok = miWARNING;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was W, found A, checking for 'rning:'\n");
+	    CTRACE((tfp, "HTMIME: Was W, found A, checking for 'rning:'\n"));
 	    break;
 
 	case 'w':
@@ -968,12 +968,12 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "w-authenticate:";
 	    me->if_ok = miWWW_AUTHENTICATE;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was W, found W, checking for 'w-authenticate:'\n");
+	    CTRACE((tfp, "HTMIME: Was W, found W, checking for 'w-authenticate:'\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, "'a' or 'w'");
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'a' or 'w'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -984,14 +984,14 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    if (!*me->check_pointer)
 		me->state = me->if_ok;
 	} else {		/* Error */
-	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
-			c, me->check_pointer - 1);
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, me->check_pointer - 1));
 	    goto bad_field_name;
 	}
 	break;
 
     case miCONTENT_:
-	CTRACE (tfp, "HTMIME: in case CONTENT_\n");
+	CTRACE((tfp, "HTMIME: in case CONTENT_\n"));
 
 	switch(c) {
 	case 'b':
@@ -999,7 +999,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "ase:";
 	    me->if_ok = miCONTENT_BASE;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was CONTENT_, found B, checking for 'ase:'\n");
+	    CTRACE((tfp, "HTMIME: Was CONTENT_, found B, checking for 'ase:'\n"));
 	    break;
 
 	case 'd':
@@ -1007,7 +1007,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "isposition:";
 	    me->if_ok = miCONTENT_DISPOSITION;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was CONTENT_, found D, checking for 'isposition:'\n");
+	    CTRACE((tfp, "HTMIME: Was CONTENT_, found D, checking for 'isposition:'\n"));
 	    break;
 
 	case 'e':
@@ -1015,7 +1015,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "ncoding:";
 	    me->if_ok = miCONTENT_ENCODING;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was CONTENT_, found E, checking for 'ncoding:'\n");
+	    CTRACE((tfp, "HTMIME: Was CONTENT_, found E, checking for 'ncoding:'\n"));
 	    break;
 
 	case 'f':
@@ -1023,13 +1023,13 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "eatures:";
 	    me->if_ok = miCONTENT_FEATURES;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was CONTENT_, found F, checking for 'eatures:'\n");
+	    CTRACE((tfp, "HTMIME: Was CONTENT_, found F, checking for 'eatures:'\n"));
 	    break;
 
 	case 'l':
 	case 'L':
 	    me->state = miCONTENT_L;
-	    CTRACE (tfp, "HTMIME: Was CONTENT_, found L, state now CONTENT_L\n");
+	    CTRACE((tfp, "HTMIME: Was CONTENT_, found L, state now CONTENT_L\n"));
 	    break;
 
 	case 'm':
@@ -1037,7 +1037,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "d5:";
 	    me->if_ok = miCONTENT_MD5;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was CONTENT_, found M, checking for 'd5:'\n");
+	    CTRACE((tfp, "HTMIME: Was CONTENT_, found M, checking for 'd5:'\n"));
 	    break;
 
 	case 'r':
@@ -1045,24 +1045,24 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "ange:";
 	    me->if_ok = miCONTENT_RANGE;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was CONTENT_, found R, checking for 'ange:'\n");
+	    CTRACE((tfp, "HTMIME: Was CONTENT_, found R, checking for 'ange:'\n"));
 	    break;
 
 	case 't':
 	case 'T':
 	    me->state = miCONTENT_T;
-	    CTRACE(tfp, "HTMIME: Was CONTENT_, found T, state now CONTENT_T\n");
+	    CTRACE((tfp, "HTMIME: Was CONTENT_, found T, state now CONTENT_T\n"));
 	    break;
 
 	default:
-	    CTRACE(tfp, "HTMIME: Was CONTENT_, found nothing; bleah\n");
+	    CTRACE((tfp, "HTMIME: Was CONTENT_, found nothing; bleah\n"));
 	    goto bad_field_name;
 
 	} /* switch on character */
 	break;
 
     case miCONTENT_L:
-	CTRACE (tfp, "HTMIME: in case CONTENT_L\n");
+	CTRACE((tfp, "HTMIME: in case CONTENT_L\n"));
 
       switch(c) {
 	case 'a':
@@ -1070,7 +1070,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "nguage:";
 	    me->if_ok = miCONTENT_LANGUAGE;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was CONTENT_L, found A, checking for 'nguage:'\n");
+	    CTRACE((tfp, "HTMIME: Was CONTENT_L, found A, checking for 'nguage:'\n"));
 	    break;
 
 	case 'e':
@@ -1078,7 +1078,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "ngth:";
 	    me->if_ok = miCONTENT_LENGTH;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was CONTENT_L, found E, checking for 'ngth:'\n");
+	    CTRACE((tfp, "HTMIME: Was CONTENT_L, found E, checking for 'ngth:'\n"));
 	    break;
 
 	case 'o':
@@ -1086,18 +1086,18 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "cation:";
 	    me->if_ok = miCONTENT_LOCATION;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was CONTENT_L, found O, checking for 'cation:'\n");
+	    CTRACE((tfp, "HTMIME: Was CONTENT_L, found O, checking for 'cation:'\n"));
 	    break;
 
 	default:
-	    CTRACE (tfp, "HTMIME: Was CONTENT_L, found nothing; bleah\n");
+	    CTRACE((tfp, "HTMIME: Was CONTENT_L, found nothing; bleah\n"));
 	    goto bad_field_name;
 
 	} /* switch on character */
 	break;
 
     case miCONTENT_T:
-	CTRACE (tfp, "HTMIME: in case CONTENT_T\n");
+	CTRACE((tfp, "HTMIME: in case CONTENT_T\n"));
 
       switch(c) {
 	case 'r':
@@ -1105,7 +1105,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "ansfer-encoding:";
 	    me->if_ok = miCONTENT_TRANSFER_ENCODING;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was CONTENT_T, found R, checking for 'ansfer-encoding:'\n");
+	    CTRACE((tfp, "HTMIME: Was CONTENT_T, found R, checking for 'ansfer-encoding:'\n"));
 	    break;
 
 	case 'y':
@@ -1113,11 +1113,11 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    me->check_pointer = "pe:";
 	    me->if_ok = miCONTENT_TYPE;
 	    me->state = miCHECK;
-	    CTRACE(tfp, "HTMIME: Was CONTENT_T, found Y, checking for 'pe:'\n");
+	    CTRACE((tfp, "HTMIME: Was CONTENT_T, found Y, checking for 'pe:'\n"));
 	    break;
 
 	default:
-	    CTRACE (tfp, "HTMIME: Was CONTENT_T, found nothing; bleah\n");
+	    CTRACE((tfp, "HTMIME: Was CONTENT_T, found nothing; bleah\n"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -1197,28 +1197,28 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    switch (me->field) {
 	    case miACCEPT_RANGES:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Accept-Ranges: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Accept-Ranges: '%s'\n",
+			    me->value));
 		break;
 	    case miAGE:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Age: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Age: '%s'\n",
+			    me->value));
 		break;
 	    case miALLOW:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Allow: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Allow: '%s'\n",
+			    me->value));
 		break;
 	    case miALTERNATES:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Alternates: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Alternates: '%s'\n",
+			    me->value));
 		break;
 	    case miCACHE_CONTROL:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Cache-Control: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Cache-Control: '%s'\n",
+			    me->value));
 		if (!(me->value && *me->value))
 		    break;
 		/*
@@ -1269,18 +1269,18 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miCOOKIE:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Cookie: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Cookie: '%s'\n",
+			    me->value));
 		break;
 	    case miCONNECTION:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Connection: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Connection: '%s'\n",
+			    me->value));
 		break;
 	    case miCONTENT_BASE:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Content-Base: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Content-Base: '%s'\n",
+			    me->value));
 		if (!(me->value && *me->value))
 		    break;
 		/*
@@ -1290,8 +1290,8 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miCONTENT_DISPOSITION:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Content-Disposition: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Content-Disposition: '%s'\n",
+			    me->value));
 		if (!(me->value && *me->value))
 		    break;
 		/*
@@ -1340,8 +1340,8 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miCONTENT_ENCODING:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Content-Encoding: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Content-Encoding: '%s'\n",
+			    me->value));
 		if (!(me->value && *me->value) ||
 		    !strcasecomp(me->value, "identity"))
 		    break;
@@ -1358,7 +1358,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 		    **	Some server indicated "8bit", "7bit" or "binary"
 		    **	inappropriately.  We'll ignore it. - FM
 		    */
-		    CTRACE(tfp, "                Ignoring it!\n");
+		    CTRACE((tfp, "                Ignoring it!\n"));
 		} else {
 		    /*
 		    **	Save it to use as a flag for setting
@@ -1369,13 +1369,13 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miCONTENT_FEATURES:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Content-Features: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Content-Features: '%s'\n",
+			    me->value));
 		break;
 	    case miCONTENT_LANGUAGE:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Content-Language: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Content-Language: '%s'\n",
+			    me->value));
 		if (!(me->value && *me->value))
 		    break;
 		/*
@@ -1386,8 +1386,8 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miCONTENT_LENGTH:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Content-Length: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Content-Length: '%s'\n",
+			    me->value));
 		if (!(me->value && *me->value))
 		    break;
 		/*
@@ -1396,13 +1396,13 @@ PRIVATE void HTMIME_put_character ARGS2(
 		me->anchor->content_length = atoi(me->value);
 		if (me->anchor->content_length < 0)
 		    me->anchor->content_length = 0;
-		CTRACE(tfp, "        Converted to integer: '%d'\n",
-			    me->anchor->content_length);
+		CTRACE((tfp, "        Converted to integer: '%d'\n",
+			    me->anchor->content_length));
 		break;
 	    case miCONTENT_LOCATION:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Content-Location: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Content-Location: '%s'\n",
+			    me->value));
 		if (!(me->value && *me->value))
 		    break;
 		/*
@@ -1412,8 +1412,8 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miCONTENT_MD5:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Content-MD5: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Content-MD5: '%s'\n",
+			    me->value));
 		if (!(me->value && *me->value))
 		    break;
 		/*
@@ -1423,13 +1423,13 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miCONTENT_RANGE:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Content-Range: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Content-Range: '%s'\n",
+			    me->value));
 		break;
 	    case miCONTENT_TRANSFER_ENCODING:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Content-Transfer-Encoding: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Content-Transfer-Encoding: '%s'\n",
+			    me->value));
 		if (!(me->value && *me->value))
 		    break;
 		/*
@@ -1441,8 +1441,8 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miCONTENT_TYPE:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Content-Type: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Content-Type: '%s'\n",
+			    me->value));
 		if (!(me->value && *me->value))
 		    break;
 		/*
@@ -1459,8 +1459,8 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miDATE:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Date: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Date: '%s'\n",
+			    me->value));
 		if (!(me->value && *me->value))
 		    break;
 		/*
@@ -1473,8 +1473,8 @@ PRIVATE void HTMIME_put_character ARGS2(
 		 *  an entity tag consists of an opaque quoted string,
 		 *  possibly prefixed by a weakness indicator.
 		 */
-		CTRACE(tfp, "HTMIME: PICKED UP ETag: %s\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP ETag: %s\n",
+			    me->value));
 		if (!(me->value && *me->value))
 		    break;
 		/*
@@ -1484,8 +1484,8 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miEXPIRES:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Expires: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Expires: '%s'\n",
+			    me->value));
 		if (!(me->value && *me->value))
 		    break;
 		/*
@@ -1495,13 +1495,13 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miKEEP_ALIVE:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Keep-Alive: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Keep-Alive: '%s'\n",
+			    me->value));
 		break;
 	    case miLAST_MODIFIED:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Last-Modified: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Last-Modified: '%s'\n",
+			    me->value));
 		if (!(me->value && *me->value))
 		    break;
 		/*
@@ -1511,18 +1511,18 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miLINK:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Link: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Link: '%s'\n",
+			    me->value));
 		break;
 	    case miLOCATION:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Location: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Location: '%s'\n",
+			    me->value));
 		break;
 	    case miPRAGMA:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Pragma: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Pragma: '%s'\n",
+			    me->value));
 		if (!(me->value && *me->value))
 		    break;
 		/*
@@ -1533,23 +1533,23 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miPROXY_AUTHENTICATE:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Proxy-Authenticate: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Proxy-Authenticate: '%s'\n",
+			    me->value));
 		break;
 	    case miPUBLIC:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Public: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Public: '%s'\n",
+			    me->value));
 		break;
 	    case miRETRY_AFTER:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Retry-After: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Retry-After: '%s'\n",
+			    me->value));
 		break;
 	    case miSAFE:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Safe: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Safe: '%s'\n",
+			    me->value));
 		if (!(me->value && *me->value))
 		    break;
 		/*
@@ -1569,8 +1569,8 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miSERVER:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Server: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Server: '%s'\n",
+			    me->value));
 		if (!(me->value && *me->value))
 		    break;
 		/*
@@ -1580,8 +1580,8 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miSET_COOKIE1:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Set-Cookie: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Set-Cookie: '%s'\n",
+			    me->value));
 		if (me->set_cookie == NULL) {
 		    StrAllocCopy(me->set_cookie, me->value);
 		} else {
@@ -1591,8 +1591,8 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miSET_COOKIE2:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Set-Cookie2: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Set-Cookie2: '%s'\n",
+			    me->value));
 		if (me->set_cookie2 == NULL) {
 		    StrAllocCopy(me->set_cookie2, me->value);
 		} else {
@@ -1602,43 +1602,43 @@ PRIVATE void HTMIME_put_character ARGS2(
 		break;
 	    case miTITLE:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Title: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Title: '%s'\n",
+			    me->value));
 		break;
 	    case miTRANSFER_ENCODING:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Transfer-Encoding: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Transfer-Encoding: '%s'\n",
+			    me->value));
 		break;
 	    case miUPGRADE:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Upgrade: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Upgrade: '%s'\n",
+			    me->value));
 		break;
 	    case miURI:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP URI: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP URI: '%s'\n",
+			    me->value));
 		break;
 	    case miVARY:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Vary: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Vary: '%s'\n",
+			    me->value));
 		break;
 	    case miVIA:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Via: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Via: '%s'\n",
+			    me->value));
 		break;
 	    case miWARNING:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP Warning: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP Warning: '%s'\n",
+			    me->value));
 		break;
 	    case miWWW_AUTHENTICATE:
 		HTMIME_TrimDoubleQuotes(me->value);
-		CTRACE(tfp, "HTMIME: PICKED UP WWW-Authenticate: '%s'\n",
-			    me->value);
+		CTRACE((tfp, "HTMIME: PICKED UP WWW-Authenticate: '%s'\n",
+			    me->value));
 		break;
 	    default:		/* Should never get here */
 		break;
@@ -1666,7 +1666,7 @@ PRIVATE void HTMIME_put_character ARGS2(
     return;
 
 value_too_long:
-    CTRACE(tfp, "HTMIME: *** Syntax error. (string too long)\n");
+    CTRACE((tfp, "HTMIME: *** Syntax error. (string too long)\n"));
 
 bad_field_name: 			/* Ignore it */
     me->state = miJUNK_LINE;
@@ -1691,7 +1691,7 @@ PRIVATE void HTMIME_put_string ARGS2(
 	(*me->targetClass.put_string)(me->target,s);
 
     } else if (me->state != MIME_IGNORE) {
-	CTRACE(tfp, "HTMIME:  %s\n", s);
+	CTRACE((tfp, "HTMIME:  %s\n", s));
 
 	for (p=s; *p; p++)
 	    HTMIME_put_character(me, *p);
@@ -1713,7 +1713,7 @@ PRIVATE void HTMIME_write ARGS3(
 	(*me->targetClass.put_block)(me->target, s, l);
 
     } else {
-	CTRACE(tfp, "HTMIME:  %.*s\n", l, s);
+	CTRACE((tfp, "HTMIME:  %.*s\n", l, s));
 
 	for (p = s; p < s+l; p++)
 	    HTMIME_put_character(me, *p);

@@ -237,11 +237,11 @@ PUBLIC int HTGetCharacter NOARGS
 		if (status == 0)
 		    return EOF;
 		if (status == HT_INTERRUPTED) {
-		    CTRACE(tfp, "HTFormat: Interrupted in HTGetCharacter\n");
+		    CTRACE((tfp, "HTFormat: Interrupted in HTGetCharacter\n"));
 		    interrupted_in_htgetcharacter = 1;
 		    return EOF;
 		}
-		CTRACE(tfp, "HTFormat: File read error %d\n", status);
+		CTRACE((tfp, "HTFormat: File read error %d\n", status));
 		return EOF; /* -1 is returned by UCX
 			       at end of HTTP link */
 	    }
@@ -265,8 +265,8 @@ PRIVATE int half_match ARGS2(char *,trial_type, char *,target)
     if (!cp || *(cp+1) != '*')
 	return 0;
 
-    CTRACE(tfp, "HTFormat: comparing %s and %s for half match\n",
-		trial_type, target);
+    CTRACE((tfp, "HTFormat: comparing %s and %s for half match\n",
+		trial_type, target));
 
 	/* main type matches */
     if (!strncmp(trial_type, target, (cp-trial_type)-1))
@@ -293,8 +293,8 @@ PRIVATE HTPresentation * HTFindPresentation ARGS3(
 {
     HTAtom * wildcard = HTAtom_for("*");
 
-    CTRACE(tfp, "HTFormat: Looking up presentation for %s to %s\n",
-		HTAtom_name(rep_in), HTAtom_name(rep_out));
+    CTRACE((tfp, "HTFormat: Looking up presentation for %s to %s\n",
+		HTAtom_name(rep_in), HTAtom_name(rep_out)));
 
     /* don't do anymore do it in the Lynx code at startup LJM */
     /* if (!HTPresentations) HTFormatInit(); */ /* set up the list */
@@ -312,8 +312,8 @@ PRIVATE HTPresentation * HTFindPresentation ARGS3(
 	    pres = (HTPresentation *)HTList_objectAt(HTPresentations, i);
 	    if (pres->rep == rep_in) {
 		if (pres->rep_out == rep_out) {
-		    CTRACE(tfp, "FindPresentation: found exact match: %s\n",
-				HTAtom_name(pres->rep));
+		    CTRACE((tfp, "FindPresentation: found exact match: %s\n",
+				HTAtom_name(pres->rep)));
 		    return pres;
 
 		} else if (!fill_in) {
@@ -322,8 +322,8 @@ PRIVATE HTPresentation * HTFindPresentation ARGS3(
 		    if (!strong_wildcard_match)
 			strong_wildcard_match = pres;
 		    /* otherwise use the first one */
-		    CTRACE(tfp, "StreamStack: found strong wildcard match: %s\n",
-				HTAtom_name(pres->rep));
+		    CTRACE((tfp, "StreamStack: found strong wildcard match: %s\n",
+				HTAtom_name(pres->rep)));
 		}
 
 	    } else if (!fill_in) {
@@ -335,8 +335,8 @@ PRIVATE HTPresentation * HTFindPresentation ARGS3(
 		    if (!strong_subtype_wildcard_match)
 			strong_subtype_wildcard_match = pres;
 		    /* otherwise use the first one */
-		    CTRACE(tfp, "StreamStack: found strong subtype wildcard match: %s\n",
-				HTAtom_name(pres->rep));
+		    CTRACE((tfp, "StreamStack: found strong subtype wildcard match: %s\n",
+				HTAtom_name(pres->rep)));
 		}
 	    }
 
@@ -345,8 +345,8 @@ PRIVATE HTPresentation * HTFindPresentation ARGS3(
 		    if (!weak_wildcard_match)
 			weak_wildcard_match = pres;
 		    /* otherwise use the first one */
-		    CTRACE(tfp, "StreamStack: found weak wildcard match: %s\n",
-				HTAtom_name(pres->rep_out));
+		    CTRACE((tfp, "StreamStack: found weak wildcard match: %s\n",
+				HTAtom_name(pres->rep_out)));
 		}
 		if (pres->rep_out == wildcard) {
 		    if (!last_default_match)
@@ -391,8 +391,8 @@ PUBLIC HTStream * HTStreamStack ARGS4(
     HTPresentation temp;
     HTPresentation *match;
 
-    CTRACE(tfp, "HTFormat: Constructing stream stack for %s to %s\n",
-		HTAtom_name(rep_in), HTAtom_name(rep_out));
+    CTRACE((tfp, "HTFormat: Constructing stream stack for %s to %s\n",
+		HTAtom_name(rep_in), HTAtom_name(rep_out)));
 
     /* don't return on WWW_SOURCE some people might like
      * to make use of the source!!!!  LJM
@@ -407,10 +407,10 @@ PUBLIC HTStream * HTStreamStack ARGS4(
 
     if ((match = HTFindPresentation(rep_in, rep_out, &temp))) {
 	if (match == &temp) {
-	    CTRACE(tfp, "StreamStack: Using %s\n", HTAtom_name(temp.rep_out));
+	    CTRACE((tfp, "StreamStack: Using %s\n", HTAtom_name(temp.rep_out)));
 	} else {
-	    CTRACE(tfp, "StreamStack: found exact match: %s\n",
-			HTAtom_name(match->rep));
+	    CTRACE((tfp, "StreamStack: found exact match: %s\n",
+			HTAtom_name(match->rep)));
 	}
 	return (*match->converter)(match, anchor, sink);
     } else {
@@ -450,8 +450,8 @@ PUBLIC float HTStackValue ARGS4(
 {
     HTAtom * wildcard = HTAtom_for("*");
 
-    CTRACE(tfp, "HTFormat: Evaluating stream stack for %s worth %.3f to %s\n",
-		HTAtom_name(rep_in), initial_value, HTAtom_name(rep_out));
+    CTRACE((tfp, "HTFormat: Evaluating stream stack for %s worth %.3f to %s\n",
+		HTAtom_name(rep_in), initial_value, HTAtom_name(rep_out)));
 
     if (rep_out == WWW_SOURCE || rep_out == rep_in)
 	return 0.0;
@@ -670,10 +670,10 @@ PUBLIC int HTCopy ARGS4(
 		    *  TCP stacks for VMS etc., so this is currently
 		    *  only for UNIX. - kw
 		    */
-		    HTInetStatus("NETREAD");
-		    HTAlert("Unexpected server disconnect.");
-		   CTRACE(tfp,
-	    "HTCopy: Unexpected server disconnect. Treating as completed.\n");
+		   HTInetStatus("NETREAD");
+		   HTAlert("Unexpected server disconnect.");
+		   CTRACE((tfp,
+	    "HTCopy: Unexpected server disconnect. Treating as completed.\n"));
 		   status = 0;
 		   break;
 #else  /* !UNIX */
@@ -681,8 +681,8 @@ PUBLIC int HTCopy ARGS4(
 		    *  Treat what we've gotten already
 		    *  as the complete transmission. - FM
 		    */
-		   CTRACE(tfp,
-	    "HTCopy: Unexpected server disconnect.  Treating as completed.\n");
+		   CTRACE((tfp,
+	    "HTCopy: Unexpected server disconnect.  Treating as completed.\n"));
 		   status = 0;
 		   break;
 #endif /* UNIX */
@@ -778,8 +778,8 @@ PUBLIC int HTFileCopy ARGS2(
 		rv = HT_LOADED;
 		break;
 	    }
-	    CTRACE(tfp, "HTFormat: Read error, read returns %d\n",
-			ferror(fp));
+	    CTRACE((tfp, "HTFormat: Read error, read returns %d\n",
+			ferror(fp)));
 	    if (bytes) {
 		rv = HT_PARTIAL_CONTENT;
 	    } else {
@@ -911,10 +911,10 @@ PRIVATE int HTGzFileCopy ARGS2(
 		rv = HT_LOADED;
 		break;
 	    }
-	    CTRACE(tfp, "HTGzFileCopy: Read error, gzread returns %d\n",
-			status);
-	    CTRACE(tfp, "gzerror   : %s\n",
-			gzerror(gzfp, &gzerrnum));
+	    CTRACE((tfp, "HTGzFileCopy: Read error, gzread returns %d\n",
+			status));
+	    CTRACE((tfp, "gzerror   : %s\n",
+			gzerror(gzfp, &gzerrnum)));
 	    if (TRACE) {
 		if (gzerrnum == Z_ERRNO)
 		    perror("gzerror   ");
@@ -1040,7 +1040,7 @@ PUBLIC int HTParseSocket ARGS5(
 	}
 	HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
 		HTAtom_name(rep_in), HTAtom_name(format_out));
-	CTRACE(tfp, "HTFormat: %s\n", buffer);
+	CTRACE((tfp, "HTFormat: %s\n", buffer));
 	rv = HTLoadError(sink, 501, buffer); /* returns -501 */
 	FREE(buffer);
     } else {
@@ -1105,7 +1105,7 @@ PUBLIC int HTParseFile ARGS5(
 	}
 	HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
 		HTAtom_name(rep_in), HTAtom_name(format_out));
-	CTRACE(tfp, "HTFormat(in HTParseFile): %s\n", buffer);
+	CTRACE((tfp, "HTFormat(in HTParseFile): %s\n", buffer));
 	rv = HTLoadError(sink, 501, buffer);
 	FREE(buffer);
 	return rv;
@@ -1166,7 +1166,7 @@ PUBLIC int HTParseMem ARGS5(
 	char *buffer = 0;
 	HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
 		   HTAtom_name(rep_in), HTAtom_name(format_out));
-	CTRACE(tfp, "HTFormat(in HTParseMem): %s\n", buffer);
+	CTRACE((tfp, "HTFormat(in HTParseMem): %s\n", buffer));
 	rv = HTLoadError(sink, 501, buffer);
 	FREE(buffer);
 	return rv;
@@ -1193,7 +1193,7 @@ PRIVATE int HTCloseGzFile ARGS1(
 	if (gzres == Z_ERRNO) {
 	    perror("gzclose   ");
 	} else if (gzres != Z_OK) {
-	    CTRACE(tfp, "gzclose   : error number %d\n", gzres);
+	    CTRACE((tfp, "gzclose   : error number %d\n", gzres));
 	}
     }
     return(gzres);
@@ -1237,7 +1237,7 @@ PUBLIC int HTParseGzFile ARGS5(
 	}
 	HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
 		HTAtom_name(rep_in), HTAtom_name(format_out));
-	CTRACE(tfp, "HTFormat(in HTParseGzFile): %s\n", buffer);
+	CTRACE((tfp, "HTFormat(in HTParseGzFile): %s\n", buffer));
 	rv = HTLoadError(sink, 501, buffer);
 	FREE(buffer);
 	return rv;

@@ -467,9 +467,9 @@ PUBLIC char * LYLeakSACopy ARGS4(
 	CONST short,	ssi_Line)
 {
     if (src != NULL && src == *dest) {
-	CTRACE(tfp,
+	CTRACE((tfp,
 	       "LYLeakSACopy: *dest equals src, contains \"%s\"\n",
-	       src);
+	       src));
 	return *dest;
     }
     if (*dest) {
@@ -498,9 +498,9 @@ PUBLIC char * LYLeakSACat ARGS4(
 {
     if (src && *src) {
 	if (src == *dest) {
-	    CTRACE(tfp,
+	    CTRACE((tfp,
 		   "LYLeakSACat:  *dest equals src, contains \"%s\"\n",
-		   src);
+		   src));
 	    return *dest;
 	}
 	if (*dest) {

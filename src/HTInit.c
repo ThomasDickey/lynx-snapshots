@@ -311,8 +311,8 @@ PRIVATE int ProcessMailcapEntry ARGS2(
     }
     s = strchr(rawentry, ';');
     if (s == NULL) {
-	CTRACE(tfp, "ProcessMailcapEntry: Ignoring invalid mailcap entry: %s\n",
-		    rawentry);
+	CTRACE((tfp, "ProcessMailcapEntry: Ignoring invalid mailcap entry: %s\n",
+		    rawentry));
 	FREE(rawentry);
 	return(0);
     }
@@ -321,8 +321,8 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 	!strncasecomp(rawentry, "text/plain", 10)) {
 	--s;
 	*s = ';';
-	CTRACE(tfp, "ProcessMailcapEntry: Ignoring mailcap entry: %s\n",
-		    rawentry);
+	CTRACE((tfp, "ProcessMailcapEntry: Ignoring mailcap entry: %s\n",
+		    rawentry));
 	FREE(rawentry);
 	return(0);
     }
@@ -364,8 +364,8 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 	    } else if (eq && !strcmp(arg, "test")) {
 		mc->testcommand = NULL;
 		StrAllocCopy(mc->testcommand, eq);
-		CTRACE(tfp, "ProcessMailcapEntry: Found testcommand:%s\n",
-			    mc->testcommand);
+		CTRACE((tfp, "ProcessMailcapEntry: Found testcommand:%s\n",
+			    mc->testcommand));
 	    } else if (eq && !strcmp(arg, "description")) {
 		mc->label = eq;
 	    } else if (eq && !strcmp(arg, "label")) {
@@ -385,8 +385,8 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 		    mc->maxbytes = 0;
 	    } else if (strcmp(arg, "notes")) { /* IGNORE notes field */
 		if (*arg)
-		    CTRACE(tfp, "ProcessMailcapEntry: Ignoring mailcap flag '%s'.\n",
-			        arg);
+		    CTRACE((tfp, "ProcessMailcapEntry: Ignoring mailcap flag '%s'.\n",
+			        arg));
 	    }
 
 	}
@@ -398,8 +398,8 @@ assign_presentation:
     FREE(rawentry);
 
     if (PassesTest(mc)) {
-	CTRACE(tfp, "ProcessMailcapEntry Setting up conversion %s : %s\n",
-		    mc->contenttype, mc->command);
+	CTRACE((tfp, "ProcessMailcapEntry Setting up conversion %s : %s\n",
+		    mc->contenttype, mc->command));
 	HTSetPresentation(mc->contenttype, mc->command,
 			  mc->quality, 3.0, 0.0, mc->maxbytes);
     }
@@ -428,15 +428,15 @@ PRIVATE void BuildCommand ARGS5(
 		    break;
 		case 'n':
 		case 'F':
-		    CTRACE(tfp, "BuildCommand: Bad mailcap \"test\" clause: %s\n",
-				controlstring);
+		    CTRACE((tfp, "BuildCommand: Bad mailcap \"test\" clause: %s\n",
+				controlstring));
 		case 's':
 		    if (TmpFileLen && TmpFileName) {
 			if ((to - *pBuf) + TmpFileLen + 1 > Bufsize) {
 			    *to = '\0';
-			    CTRACE(tfp, "BuildCommand: Too long mailcap \"test\" clause,\n");
-			    CTRACE(tfp, "              ignoring: %s%s...\n",
-					*pBuf, TmpFileName);
+			    CTRACE((tfp, "BuildCommand: Too long mailcap \"test\" clause,\n"));
+			    CTRACE((tfp, "              ignoring: %s%s...\n",
+					*pBuf, TmpFileName));
 			    **pBuf = '\0';
 			    return;
 			}
@@ -445,9 +445,9 @@ PRIVATE void BuildCommand ARGS5(
 		    }
 		    break;
 		default:
-		    CTRACE(tfp,
+		    CTRACE((tfp,
   "BuildCommand: Ignoring unrecognized format code in mailcap file '%%%c'.\n",
-			*from);
+			*from));
 		    break;
 	    }
 	} else if (*from == '%') {
@@ -457,9 +457,9 @@ PRIVATE void BuildCommand ARGS5(
 	}
 	if (to >= *pBuf + Bufsize) {
 	    (*pBuf)[Bufsize - 1] = '\0';
-	    CTRACE(tfp, "BuildCommand: Too long mailcap \"test\" clause,\n");
-	    CTRACE(tfp, "              ignoring: %s...\n",
-			*pBuf);
+	    CTRACE((tfp, "BuildCommand: Too long mailcap \"test\" clause,\n"));
+	    CTRACE((tfp, "              ignoring: %s...\n",
+			*pBuf));
 	    **pBuf = '\0';
 	    return;
 	}
@@ -534,23 +534,23 @@ PRIVATE int PassesTest ARGS1(
 	0 == strcmp(mc->testcommand, "test \"$DISPLAY\" != \"\"") ||
 	0 == strcasecomp(mc->testcommand, "test -n \"$DISPLAY\"")) {
 	FREE(mc->testcommand);
-	CTRACE(tfp, "PassesTest: Testing for XWINDOWS environment.\n");
+	CTRACE((tfp, "PassesTest: Testing for XWINDOWS environment.\n"));
     	if (LYgetXDisplay() != NULL) {
-	    CTRACE(tfp, "PassesTest: Test passed!\n");
+	    CTRACE((tfp, "PassesTest: Test passed!\n"));
 	    return(0 == 0);
 	} else {
-	    CTRACE(tfp, "PassesTest: Test failed!\n");
+	    CTRACE((tfp, "PassesTest: Test failed!\n"));
 	    return(-1 == 0);
 	}
     }
     if (0 == strcasecomp(mc->testcommand, "test -z \"$DISPLAY\"")) {
 	FREE(mc->testcommand);
-	CTRACE(tfp, "PassesTest: Testing for NON_XWINDOWS environment.\n");
+	CTRACE((tfp, "PassesTest: Testing for NON_XWINDOWS environment.\n"));
     	if (LYgetXDisplay() == NULL) {
-	    CTRACE(tfp,"PassesTest: Test passed!\n");
+	    CTRACE((tfp,"PassesTest: Test passed!\n"));
 	    return(0 == 0);
 	} else {
-	    CTRACE(tfp,"PassesTest: Test failed!\n");
+	    CTRACE((tfp,"PassesTest: Test failed!\n"));
 	    return(-1 == 0);
 	}
     }
@@ -560,8 +560,8 @@ PRIVATE int PassesTest ARGS1(
      */
     if (0 == strcasecomp(mc->testcommand, "test -n \"$LYNX_VERSION\"")){
 	FREE(mc->testcommand);
-	CTRACE(tfp, "PassesTest: Testing for LYNX environment.\n");
-	CTRACE(tfp, "PassesTest: Test passed!\n");
+	CTRACE((tfp, "PassesTest: Testing for LYNX environment.\n"));
+	CTRACE((tfp, "PassesTest: Test passed!\n"));
 	return(0 == 0);
     } else
     /*
@@ -569,8 +569,8 @@ PRIVATE int PassesTest ARGS1(
      */
     if (0 == strcasecomp(mc->testcommand, "test -z \"$LYNX_VERSION\"")) {
 	FREE(mc->testcommand);
-	CTRACE(tfp, "PassesTest: Testing for non-LYNX environment.\n");
-	CTRACE(tfp, "PassesTest: Test failed!\n");
+	CTRACE((tfp, "PassesTest: Testing for non-LYNX environment.\n"));
+	CTRACE((tfp, "PassesTest: Test failed!\n"));
 	return(-1 == 0);
     }
 
@@ -594,7 +594,7 @@ PRIVATE int PassesTest ARGS1(
 		     mc->testcommand,
 		     TmpFileName,
 		     strlen(TmpFileName));
-	CTRACE(tfp, "PassesTest: Executing test command: %s\n", cmd);
+	CTRACE((tfp, "PassesTest: Executing test command: %s\n", cmd));
 	result = LYSystem(cmd);
 	FREE(cmd);
 	LYRemoveTemp(TmpFileName);
@@ -608,9 +608,9 @@ PRIVATE int PassesTest ARGS1(
     FREE(mc->testcommand);
 
     if (result) {
-	CTRACE(tfp,"PassesTest: Test failed!\n");
+	CTRACE((tfp,"PassesTest: Test failed!\n"));
     } else {
-	CTRACE(tfp,"PassesTest: Test passed!\n");
+	CTRACE((tfp,"PassesTest: Test passed!\n"));
     }
 
     return(result == 0);
@@ -622,11 +622,11 @@ PRIVATE int ProcessMailcapFile ARGS1(
     struct MailcapEntry mc;
     FILE *fp;
 
-    CTRACE(tfp, "ProcessMailcapFile: Loading file '%s'.\n",
-		file);
+    CTRACE((tfp, "ProcessMailcapFile: Loading file '%s'.\n",
+		file));
     if ((fp = fopen(file, TXT_R)) == NULL) {
-	CTRACE(tfp, "ProcessMailcapFile: Could not open '%s'.\n",
-		    file);
+	CTRACE((tfp, "ProcessMailcapFile: Could not open '%s'.\n",
+		    file));
 	return(-1 == 0);
     }
 
@@ -642,7 +642,7 @@ PRIVATE int ExitWithError ARGS1(
 	char *,		txt)
 {
     if (txt)
-	fprintf(tfp, "metamail: %s\n", txt);
+	fprintf(tfp, "Lynx: %s\n", txt);
     exit_immediately(-1);
     return(-1);
 }
@@ -698,7 +698,7 @@ PUBLIC void HTFileInit NOARGS
 {
     FILE *fp;
 
-    CTRACE(tfp, "HTFileInit: Loading default (HTInit) extension maps.\n");
+    CTRACE((tfp, "HTFileInit: Loading default (HTInit) extension maps.\n"));
 
     /* default suffix interpretation */
     HTSetSuffix("*",		"text/plain", "7bit", 1.0);
@@ -997,10 +997,10 @@ PRIVATE int HTLoadExtensionsConfigFile ARGS1(
     FILE *f;
     int count = 0;
 
-    CTRACE(tfp, "HTLoadExtensionsConfigFile: Loading file '%s'.\n", fn);
+    CTRACE((tfp, "HTLoadExtensionsConfigFile: Loading file '%s'.\n", fn));
 
     if ((f = fopen(fn, TXT_R)) == NULL) {
-	CTRACE(tfp, "HTLoadExtensionsConfigFile: Could not open '%s'.\n", fn);
+	CTRACE((tfp, "HTLoadExtensionsConfigFile: Could not open '%s'.\n", fn));
 	return count;
     }
 
@@ -1024,7 +1024,7 @@ PRIVATE int HTLoadExtensionsConfigFile ARGS1(
 		sprintf(ext, ".%s", word);
 		LYLowerCase(ext);
 
-		CTRACE (tfp, "SETTING SUFFIX '%s' to '%s'.\n", ext, ct);
+		CTRACE((tfp, "SETTING SUFFIX '%s' to '%s'.\n", ext, ct));
 
 	        if (strstr(ct, "tex") != NULL ||
 	            strstr(ct, "postscript") != NULL ||

@@ -479,8 +479,8 @@ PRIVATE void UC_con_set_trans ARGS3(
     u16 *ptrans;
 
     if (!UC_valid_UC_charset(UC_charset_in_hndl)) {
-	CTRACE(tfp, "UC_con_set_trans: Invalid charset handle %d.\n",
-		    UC_charset_in_hndl);
+	CTRACE((tfp, "UC_con_set_trans: Invalid charset handle %d.\n",
+		    UC_charset_in_hndl));
 	return;
     }
     ptrans = translations[Gn];
@@ -800,8 +800,8 @@ PRIVATE int UC_con_set_unimap ARGS2(
     CONST u16 *p;
 
     if (!UC_valid_UC_charset(UC_charset_out_hndl)) {
-	CTRACE(tfp, "UC_con_set_unimap: Invalid charset handle %d.\n",
-		    UC_charset_out_hndl);
+	CTRACE((tfp, "UC_con_set_unimap: Invalid charset handle %d.\n",
+		    UC_charset_out_hndl));
 	return -1;
     }
 
@@ -1207,8 +1207,8 @@ PRIVATE int UC_MapGN ARGS2(
 	UCInfo[UChndl].GN = Gn;
 	UC_GNhandles[Gn] = UChndl;
     }
-    CTRACE(tfp, "UC_MapGN: Using %d <- %d (%s)\n",
-		Gn, UChndl, UCInfo[UChndl].MIMEname);
+    CTRACE((tfp, "UC_MapGN: Using %d <- %d (%s)\n",
+		Gn, UChndl, UCInfo[UChndl].MIMEname));
     UC_con_set_trans(UChndl,Gn,update_flag);
     return Gn;
 }
@@ -1555,7 +1555,7 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
     int LYhndl = -1;
 
     if (!value || !(*value)) {
-	CTRACE(tfp, "UCGetLYhndl_byMIME: NULL argument instead of MIME name.\n");
+	CTRACE((tfp, "UCGetLYhndl_byMIME: NULL argument instead of MIME name.\n"));
 	return -1;
     }
 
@@ -1677,7 +1677,7 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 #endif
     /* no more synonyms if come here... */
 
-    CTRACE(tfp, "UCGetLYhndl_byMIME: unrecognized MIME name \"%s\"\n", value);
+    CTRACE((tfp, "UCGetLYhndl_byMIME: unrecognized MIME name \"%s\"\n", value));
     return -1;	/* returns -1 if no charset found by that MIME name */
 }
 
@@ -1915,8 +1915,8 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
     if (LYhndl < 0) {		/* not found */
 	found = 0;
 	if (LYNumCharsets >= MAXCHARSETS) {
-	    CTRACE(tfp, "UC_Register_with_LYCharSets: Too many.  Ignoring %s/%s.",
-			UC_MIMEcharset, UC_LYNXcharset);
+	    CTRACE((tfp, "UC_Register_with_LYCharSets: Too many.  Ignoring %s/%s.",
+			UC_MIMEcharset, UC_LYNXcharset));
 	    return -1;
 	}
 	/*
@@ -2000,8 +2000,8 @@ PUBLIC void UC_Charset_Setup ARGS9(
 	s = found;
     } else {
 	if (UCNumCharsets >= MAXCHARSETS) {
-	    CTRACE(tfp, "UC_Charset_Setup: Too many.  Ignoring %s/%s.",
-			UC_MIMEcharset, UC_LYNXcharset);
+	    CTRACE((tfp, "UC_Charset_Setup: Too many.  Ignoring %s/%s.",
+			UC_MIMEcharset, UC_LYNXcharset));
 	    return;
 	}
 	s = UCNumCharsets;
@@ -2073,8 +2073,8 @@ PRIVATE int UC_NoUctb_Register_with_LYCharSets ARGS5(
 
     /* not found */
     if (LYNumCharsets >= MAXCHARSETS) {
-	CTRACE(tfp, "UC_NoUctb_Register_with_LYCharSets: Too many.  Ignoring %s/%s.",
-	       UC_MIMEcharset, UC_LYNXcharset);
+	CTRACE((tfp, "UC_NoUctb_Register_with_LYCharSets: Too many.  Ignoring %s/%s.",
+	       UC_MIMEcharset, UC_LYNXcharset));
 	return -1;
     }
     /*
@@ -2251,7 +2251,7 @@ PUBLIC int safeUCGetLYhndl_byMIME ARGS1 (CONST char *, value)
 
     if (i == -1) {	/* was user's typo or not yet recognized value */
 	i = LATIN1;	/* error recovery? */
-	CTRACE(tfp, "safeUCGetLYhndl_byMIME: ISO-8859-1 assumed.\n");
+	CTRACE((tfp, "safeUCGetLYhndl_byMIME: ISO-8859-1 assumed.\n"));
     }
 
     return(i);
