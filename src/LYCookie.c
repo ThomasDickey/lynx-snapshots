@@ -419,7 +419,8 @@ PRIVATE void store_cookie ARGS3(
 	     * isn't sensible.	Perhaps something based on the domain
 	     * and the path in conjunction makes more sense?  - RP
 	     */
-	    if (co->flags & COOKIE_FLAG_PERSISTENT)
+	    if (persistent_cookies
+	     && (co->flags & COOKIE_FLAG_PERSISTENT))
 		de->bv = FROM_FILE;
 	    else
 #endif
@@ -513,10 +514,12 @@ PRIVATE void store_cookie ARGS3(
 	 * to maintain their order for servers that need cookies in
 	 * a particular order. This is a hack.
 	 */
-	if ((de->bv = FROM_FILE) != 0) {
-	    HTList_appendObject(cookie_list, co);
-	} else {
-	    HTList_insertObjectAt(cookie_list, co, pos);
+	if (persistent_cookies) {
+	    if ((de->bv = FROM_FILE) != 0) {
+		HTList_appendObject(cookie_list, co);
+	    } else {
+		HTList_insertObjectAt(cookie_list, co, pos);
+	    }
 	}
 #else
 	HTList_insertObjectAt(cookie_list, co, pos);
@@ -1873,7 +1876,7 @@ PUBLIC void LYLoadCookies ARGS1 (
 	CONST char *,	cookie_file)
 {
     FILE *cookie_handle;
-    char buf[5000]; /* should be long enough for a cookie line */
+    char buf[max_cookies_buffer+10]; /* should be long enough for a cookie line */
     static char domain[256], path[LY_MAXPATH], name[256], value[4100];
     static char what[8], secure[8], expires_a[16];
     static struct {

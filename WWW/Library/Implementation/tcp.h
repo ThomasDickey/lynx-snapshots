@@ -295,6 +295,7 @@ extern char *vms_errno_string();
 #include <time.h>
 #include <types.h>
 #ifdef __TIME_T
+#undef  __TYPES
 #define __TYPES 1
 #define __TYPES_LOADED 1
 #endif /* __TIME_T */
@@ -307,9 +308,11 @@ extern char *vms_errno_string();
 #endif /* !__SOCKET_TYPEDEFS */
 #include "multinet_root:[multinet.include]errno.h"
 #ifdef __TYPES
+#undef  __TIME_T
 #define __TIME_T 1
 #endif /* __TYPE */
 #ifdef __TIME_LOADED
+#undef  __TIME
 #define __TIME 1  /* to avoid double definitions in in.h */
 #endif /* __TIME_LOADED */
 #include "multinet_root:[multinet.include.sys]time.h"

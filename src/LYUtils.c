@@ -2823,8 +2823,6 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
 /* For systems that have both, but both can't be included, duh (or neither) */
 /* FIXME: this whole chunk may be redundant */
 #ifdef TERMIO_AND_CURSES
-# include <termio.h>
-# else
 # ifdef TERMIO_AND_TERMIOS
 #  include <termio.h>
 # else
@@ -2836,7 +2834,7 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
 #   endif /* HAVE_TERMIO_H */
 #  endif /* HAVE_TERMIOS_H */
 # endif	/* TERMIO_AND_TERMIOS */
-#endif /* USE_TERMIO_H */
+#endif /* TERMIO_AND_CURSES */
 
 PUBLIC void size_change ARGS1(
 	int,		sig GCC_UNUSED)

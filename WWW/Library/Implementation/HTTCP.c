@@ -449,13 +449,11 @@ PUBLIC int HTParseInet ARGS2(
 	    **	control variables.
 	    */
 	    pid_t fpid, waitret;
-	    int pfd[2], cstat, cst1 = 0, cycle = 0;
+	    int pfd[2], h_length, selret, readret, waitstat = 0, cycle = 0;
 	    fd_set readfds;
 	    struct timeval timeout;
 	    int dns_patience = 30; /* how many seconds will we wait for DNS? */
-#ifdef WNOWAIT
 	    int child_exited = 0;
-#endif
 
 	    /*
 	    **  Reap any children that have terminated since last time
@@ -496,12 +494,12 @@ PUBLIC int HTParseInet ARGS2(
 		**  native int).
 		*/
 		if (OK_HOST(phost))
-			cstat = phost->h_length;
+			h_length = phost->h_length;
 		else
-			cstat = 0;
-		write(pfd[1], &cstat, sizeof cstat);
+			h_length = 0;
+		write(pfd[1], &h_length, sizeof h_length);
 
-		if (cstat) {
+		if (h_length) {
 		    /*
 		    **  Return value through pipe...
 		    */
@@ -549,54 +547,56 @@ PUBLIC int HTParseInet ARGS2(
 		*/
 #ifdef SOCKS
 		if (socks_flag)
-		    cst1 = Rselect(pfd[0] + 1, (void *)&readfds, NULL, NULL, &timeout);
+		    selret = Rselect(pfd[0] + 1, (void *)&readfds, NULL, NULL, &timeout);
 		else
 #endif /* SOCKS */
-		    cst1 = select(pfd[0] + 1, (void *)&readfds, NULL, NULL, &timeout);
+		    selret = select(pfd[0] + 1, (void *)&readfds, NULL, NULL, &timeout);
 
-		if ((cst1 > 0) && FD_ISSET(pfd[0], &readfds)) {
+		if ((selret > 0) && FD_ISSET(pfd[0], &readfds)) {
 		    /*
 		    **	First get length of address.  -BL
 		    */
-		    cst1 = read(pfd[0], (void *)&cstat, sizeof cstat);
-		    if (cstat == sizeof soc_in->sin_addr) {
+		    readret = read(pfd[0], (void *)&h_length, sizeof h_length);
+		    if (readret == sizeof h_length &&
+			h_length == sizeof soc_in->sin_addr) {
 			/*
 			**  Then get address itself.  -BL
 			*/
-			cst1 = read(pfd[0], (void *)&soc_in->sin_addr, cstat);
-			if (cst1 == cstat) success = 1;
+			readret = read(pfd[0], (void *)&soc_in->sin_addr, h_length);
+			if (readret == h_length) success = 1;
 	    	    }
 		    /*
 		    **  Make sure child is cleaned up.  -BL
 		    */
-		    waitret = waitpid(fpid, &cst1, WNOHANG);
-		    if (!WIFEXITED(cst1) && !WIFSIGNALED(cst1)) {
+		    if (!child_exited)
+			waitret = waitpid(fpid, &waitstat, WNOHANG);
+		    if (!WIFEXITED(waitstat) && !WIFSIGNALED(waitstat)) {
 			kill(fpid, SIGTERM);
-			waitret = waitpid(fpid, &cst1, WNOHANG);
+			waitret = waitpid(fpid, &waitstat, WNOHANG);
 		    }
 		    break;
 	    	}
 
-#ifdef WNOWAIT
 		/*
 		**  Clean up if child exited before & no data received.  -BL
 		*/
 		if (child_exited) {
-		    waitret = waitpid(fpid, &cst1, WNOHANG);
+		    waitret = waitpid(fpid, &waitstat, WNOHANG);
 		    break;
 		}
 		/*
 		**  If child exited, loop once more looking for data.  -BL
 		*/
-		if ((waitret = waitpid(fpid, &cst1, WNOHANG | WNOWAIT)) > 0)
+		if ((waitret = waitpid(fpid, &waitstat, WNOHANG)) > 0) {
+		    /*
+		    **	Data will be arriving right now, so make sure we
+		    **	don't short-circuit out for too many loops, and
+		    **	skip the interrupt check.  -BL
+		    */
 		    child_exited = 1;
-#else
-		/*
-		**  End loop if child exited.
-		*/
-		if ((waitret = waitpid(fpid, &cst1, WNOHANG)) > 0)
-		    break;
-#endif
+		    cycle--;
+		    continue;
+		}
 
 		/*
 		**  Abort if interrupt key pressed.
@@ -613,24 +613,24 @@ PUBLIC int HTParseInet ARGS2(
 	    close(pfd[0]);
 	    if (waitret <= 0) {
 		kill(fpid, SIGTERM);
-		waitret = waitpid(fpid, &cst1, WNOHANG);
+		waitret = waitpid(fpid, &waitstat, WNOHANG);
 	    }
 	    if (waitret > 0) {
-		if (WIFEXITED(cst1)) {
+		if (WIFEXITED(waitstat)) {
 		    CTRACE(tfp, "HTParseInet: NSL_FORK child %d exited, status 0x%x.\n",
-				(int)waitret, cst1);
-		} else if (WIFSIGNALED(cst1)) {
+				(int)waitret, waitstat);
+		} else if (WIFSIGNALED(waitstat)) {
 		    CTRACE(tfp, "HTParseInet: NSL_FORK child %d got signal, status 0x%x!\n",
-				(int)waitret, cst1);
+				(int)waitret, waitstat);
 #ifdef WCOREDUMP
-		    if (WCOREDUMP(cst1)) {
+		    if (WCOREDUMP(waitstat)) {
 			CTRACE(tfp, "HTParseInet: NSL_FORK child %d dumped core!\n",
 				    (int)waitret);
 		    }
 #endif /* WCOREDUMP */
-		} else if (WIFSTOPPED(cst1)) {
+		} else if (WIFSTOPPED(waitstat)) {
 		    CTRACE(tfp, "HTParseInet: NSL_FORK child %d is stopped, status 0x%x!\n",
-				(int)waitret, cst1);
+				(int)waitret, waitstat);
 		}
 	    }
 	    if (!success) {
