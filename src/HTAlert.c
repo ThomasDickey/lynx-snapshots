@@ -137,12 +137,7 @@ PUBLIC void HTProgress ARGS1(
     statusline(Msg);
     LYstore_message(Msg);
     CTRACE((tfp, "%s\n", Msg));
-#if defined(SH_EX) && defined(WIN_EX)	/* 1997/10/11 (Sat) 12:51:02 */
-    {
-	if (debug_delay != 0)
-	    Sleep(debug_delay);	/* XXX msec */
-    }
-#endif
+    LYSleepDebug();
 }
 
 PRIVATE char *sprint_bytes ARGS3(
@@ -325,6 +320,38 @@ PUBLIC BOOL HTLastConfirmCancelled NOARGS
     } else {
 	return(NO);
     }
+}
+
+/*
+ * Prompt for yes/no response, but let a configuration variable override
+ * the prompt entirely.
+ */
+PUBLIC int HTForcedPrompt ARGS3(
+	int,		option,
+	CONST char *,	msg,
+	int,		dft)
+{
+    int result = FALSE;
+    char *show = NULL;
+    char *msg2 = NULL;
+
+    if (option == FORCE_PROMPT_DFT) {
+	result = HTConfirmDefault(msg, dft);
+    } else {
+	if (option == FORCE_PROMPT_YES) {
+	    show = gettext("yes");
+	    result = YES;
+	} else if (option == FORCE_PROMPT_NO) {
+	    show = gettext("no");
+	    result = NO;
+	} else {
+	    return HTConfirmDefault(msg, dft);	/* bug... */
+	}
+	HTSprintf(&msg2, "%s %s", msg, show);
+	HTUserMsg(msg2);
+	free(msg2);
+    }
+    return result;
 }
 
 #define DFT_CONFIRM ~(YES|NO)
@@ -1047,6 +1074,12 @@ PUBLIC void LYSleepAlert NOARGS
 {
     if (okToSleep())
 	LYSleep(AlertSecs);
+}
+
+PUBLIC void LYSleepDebug NOARGS
+{
+    if (okToSleep())
+	LYSleep(DebugSecs);
 }
 
 PUBLIC void LYSleepInfo NOARGS

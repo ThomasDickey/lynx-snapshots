@@ -4,7 +4,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2002/12/31
+dnl Updated: 2003/05/28
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13, patched
 dnl by Tom Dickey.  See your local GNU archives, and this URL:
@@ -12,6 +12,8 @@ dnl http://invisible-island.net/autoconf/autoconf.html
 dnl
 dnl ---------------------------------------------------------------------------
 dnl ---------------------------------------------------------------------------
+dnl AM_GNU_GETTEXT version: 10 updated: 2002/11/17 17:25:28
+dnl --------------
 dnl Usage: Just like AM_WITH_NLS, which see.
 AC_DEFUN([AM_GNU_GETTEXT],
   [AC_REQUIRE([AC_PROG_MAKE_SET])dnl
@@ -89,6 +91,8 @@ strdup strtoul tsearch __argz_count __argz_stringify __argz_next])
    AC_SUBST(INTL_LIBTOOL_SUFFIX_PREFIX)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl AM_ICONV version: 3 updated: 2002/10/27 23:21:42
+dnl --------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
 dnl iconv.m4
@@ -162,6 +166,8 @@ size_t iconv();
   AC_SUBST(LIBICONV)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl AM_LANGINFO_CODESET version: 3 updated: 2002/10/27 23:21:42
+dnl -------------------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
 dnl codeset.m4
@@ -183,6 +189,8 @@ AC_DEFUN([AM_LANGINFO_CODESET],
   fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl AM_LC_MESSAGES version: 4 updated: 2002/10/27 23:21:42
+dnl --------------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
 dnl lcmessage.m4
@@ -212,6 +220,8 @@ AC_DEFUN([AM_LC_MESSAGES],
     fi
   fi])dnl
 dnl ---------------------------------------------------------------------------
+dnl AM_PATH_PROG_WITH_TEST version: 5 updated: 2002/10/27 23:21:42
+dnl ----------------------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
 dnl progtest.m4
@@ -269,6 +279,8 @@ fi
 AC_SUBST($1)dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl AM_WITH_NLS version: 15 updated: 2002/11/09 16:19:53
+dnl -----------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
 dnl gettext.m4
@@ -1365,12 +1377,13 @@ dnl ----------
 dnl "dirname" is not portable, so we fake it with a shell script.
 AC_DEFUN([CF_DIRNAME],[$1=`echo $2 | sed -e 's%/[[^/]]*$%%'`])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_DISABLE_ECHO version: 9 updated: 1999/09/09 00:28:43
+dnl CF_DISABLE_ECHO version: 10 updated: 2003/04/17 22:27:11
 dnl ---------------
 dnl You can always use "make -n" to see the actual options, but it's hard to
 dnl pick out/analyze warning messages when the compile-line is long.
 dnl
 dnl Sets:
+dnl	ECHO_LT - symbol to control if libtool is verbose
 dnl	ECHO_LD - symbol to prefix "cc -o" lines
 dnl	RULE_CC - symbol to put before implicit "cc -c" lines (e.g., .c.o)
 dnl	SHOW_CC - symbol to put before explicit "cc -c" lines
@@ -1381,17 +1394,20 @@ AC_MSG_CHECKING(if you want to see long compiling messages)
 CF_ARG_DISABLE(echo,
 	[  --disable-echo          display "compiling" commands],
 	[
+    ECHO_LT='--silent'
     ECHO_LD='@echo linking [$]@;'
     RULE_CC='	@echo compiling [$]<'
     SHOW_CC='	@echo compiling [$]@'
     ECHO_CC='@'
 ],[
+    ECHO_LT=''
     ECHO_LD=''
     RULE_CC='# compiling'
     SHOW_CC='# compiling'
     ECHO_CC=''
 ])
 AC_MSG_RESULT($enableval)
+AC_SUBST(ECHO_LT)
 AC_SUBST(ECHO_LD)
 AC_SUBST(RULE_CC)
 AC_SUBST(SHOW_CC)
@@ -1919,7 +1935,21 @@ rm -rf conftest*
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GCC_WARNINGS version: 12 updated: 2002/11/23 16:02:49
+dnl CF_GCC_VERSION version: 2 updated: 2003/05/24 15:01:41
+dnl --------------
+dnl Find version of gcc
+AC_DEFUN([CF_GCC_VERSION],[
+AC_REQUIRE([AC_PROG_CC])
+GCC_VERSION=none
+if test "$GCC" = yes ; then
+	AC_MSG_CHECKING(version of $CC)
+	GCC_VERSION="`${CC} --version|head -1 | sed -e 's/^[[^0-9.]]*//' -e 's/[[^0-9.]].*//'`"
+	test -z "$GCC_VERSION" && GCC_VERSION=unknown
+	AC_MSG_RESULT($GCC_VERSION)
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_GCC_WARNINGS version: 14 updated: 2003/05/24 15:03:15
 dnl ---------------
 dnl Check if the compiler supports useful warning options.  There's a few that
 dnl we don't use, simply because they're too noisy:
@@ -1927,11 +1957,13 @@ dnl
 dnl	-Wconversion (useful in older versions of gcc, but not in gcc 2.7.x)
 dnl	-Wredundant-decls (system headers make this too noisy)
 dnl	-Wtraditional (combines too many unrelated messages, only a few useful)
-dnl	-Wwrite-strings (too noisy, but should review occasionally)
+dnl	-Wwrite-strings (too noisy, but should review occasionally).  This
+dnl		is enabled for ncurses using "--enable-const".
 dnl	-pedantic
 dnl
 AC_DEFUN([CF_GCC_WARNINGS],
 [
+AC_REQUIRE([CF_GCC_VERSION])
 if ( test "$GCC" = yes || test "$GXX" = yes )
 then
 	cat > conftest.$ac_ext <<EOF
@@ -1959,8 +1991,19 @@ EOF
 		CFLAGS="$cf_save_CFLAGS $EXTRA_CFLAGS -$cf_opt"
 		if AC_TRY_EVAL(ac_compile); then
 			test -n "$verbose" && AC_MSG_RESULT(... -$cf_opt)
+			case $cf_opt in #(vi
+			Wcast-qual) #(vi
+				CPPFLAGS="$CPPFLAGS -DXTSTRINGDEFINES"
+				;;
+			Winline) #(vi
+				case $GCC_VERSION in
+				3.3*)
+					CF_VERBOSE(feature is broken in gcc $GCC_VERSION)
+					continue;;
+				esac
+				;;
+			esac
 			EXTRA_CFLAGS="$EXTRA_CFLAGS -$cf_opt"
-			test "$cf_opt" = Wcast-qual && EXTRA_CFLAGS="$EXTRA_CFLAGS -DXTSTRINGDEFINES"
 		fi
 	done
 	rm -f conftest*
@@ -1999,7 +2042,7 @@ make an error
 test "$cf_cv_gnu_source" = yes && CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GNUTLS version: 1 updated: 2003/04/13 17:26:30
+dnl CF_GNUTLS version: 2 updated: 2003/04/28 01:28:08
 dnl ---------
 dnl Check for gnutls library (TLS "is" SSL)
 dnl $1 = the [optional] directory in which the library may be found
@@ -4102,6 +4145,8 @@ to makefile.])
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl jm_GLIBC21 version: 3 updated: 2002/10/27 23:21:42
+dnl ----------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
 dnl glibc21.m4

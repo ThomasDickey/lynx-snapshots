@@ -121,6 +121,13 @@ PRIVATE Config_Enum tbl_visited_links[] = {
     { NULL,		DEFAULT_VISITED_LINKS }
 };
 
+PUBLIC Config_Enum tbl_force_prompt[] = {
+    { "default",	FORCE_PROMPT_DFT	},
+    { "yes",		FORCE_PROMPT_YES	},
+    { "no",		FORCE_PROMPT_NO		},
+    { NULL,		-1			}
+};
+
 PRIVATE BOOL getBool ARGS1(char *, src)
 {
     return (BOOL) (!strncasecomp(src, "on", 2) || !strncasecomp(src, "true", 4));
@@ -203,7 +210,7 @@ typedef enum {
 typedef struct config_type
 {
     CONST char *name;
-    int enabled;		/* see lynx.cfg ENABLE_LYNXRC */
+    int enabled;		/* see lynx.cfg ENABLE_LYNXRC "off" lines */
     Conf_Types type;
     ParseData;
     char **strings;
@@ -369,6 +376,12 @@ file lists such as FTP directories.  The options are:\n\
    BY_SIZE     -- sorts on the size of the file\n\
    BY_DATE     -- sorts on the date of the file\n\
 ")),
+    MAYBE_ENU(RC_FORCE_COOKIE_PROMPT,   cookie_noprompt,    tbl_force_prompt,
+	      MSG_ENABLE_LYNXRC),
+#ifdef USE_SSL
+    MAYBE_ENU(RC_FORCE_SSL_PROMPT,      ssl_noprompt,       tbl_force_prompt,
+	      MSG_ENABLE_LYNXRC),
+#endif
 #ifdef EXP_KEYBOARD_LAYOUT
     PARSE_ARY(RC_KBLAYOUT,              current_layout,     LYKbLayoutNames, NULL),
 #endif

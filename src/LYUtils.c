@@ -109,10 +109,6 @@ extern int BSDselect PARAMS((int nfds, fd_set * readfds, fd_set * writefds,
 #endif /* SOCKS */
 #endif /* SVR4_BSDSELECT */
 
-#ifndef FD_SETSIZE
-#define FD_SETSIZE 256
-#endif /* !FD_SETSIZE */
-
 #ifdef __DJGPP__
 #undef select			/* defined to select_s in www_tcp.h */
 #endif
@@ -1574,16 +1570,16 @@ PUBLIC int HTCheckForInterrupt NOARGS
 #else /* Unix curses: */
 
     socket_timeout.tv_sec = 0;
-    socket_timeout.tv_usec = 100;
+    socket_timeout.tv_usec = 0;
     FD_ZERO(&readfds);
     FD_SET(0, &readfds);
 #ifdef SOCKS
     if (socks_flag)
-	ret = Rselect(FD_SETSIZE, (void *)&readfds, NULL, NULL,
+	ret = Rselect(1, (void *)&readfds, NULL, NULL,
 		      &socket_timeout);
     else
 #endif /* SOCKS */
-	ret = select(FD_SETSIZE, (void *)&readfds, NULL, NULL,
+	ret = select(1, (void *)&readfds, NULL, NULL,
 		     &socket_timeout);
 
     /** Suspended? **/
@@ -1620,7 +1616,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
 
     /** Curses or slang setup was not invoked **/
     if (DontCheck())
-	  return((int)FALSE);
+	return((int)FALSE);
 
     /** Control-C or Control-Y and a 'N'o reply to exit query **/
     if (HadVMSInterrupt) {
@@ -1788,7 +1784,7 @@ PUBLIC BOOLEAN LYisAbsPath ARGS1(
  * Check if the given filename is the root path, e.g., "/" on Unix.
  */
 PUBLIC BOOLEAN LYisRootPath ARGS1(
-	char *,		path)
+	CONST char *,		path)
 {
 #if defined(USE_DOS_DRIVES)
     if (strlen(path) == 3
@@ -1804,7 +1800,7 @@ PUBLIC BOOLEAN LYisRootPath ARGS1(
  *  Return YES only if we're certain it's a local file. - FM
  */
 PUBLIC BOOLEAN LYisLocalFile ARGS1(
-	char *,		filename)
+	CONST char *,		filename)
 {
     char *host = NULL;
     char *acc_method = NULL;
@@ -1842,7 +1838,7 @@ PUBLIC BOOLEAN LYisLocalFile ARGS1(
  *  Return YES only if we're certain it's the local host. - FM
  */
 PUBLIC BOOLEAN LYisLocalHost ARGS1(
-	char *,		filename)
+	CONST char *,		filename)
 {
     char *host = NULL;
     char *cp;
@@ -1918,7 +1914,7 @@ PUBLIC void LYAddLocalhostAlias ARGS1(
  *  Return YES only if we've listed the host as a local alias. - FM
  */
 PUBLIC BOOLEAN LYisLocalAlias ARGS1(
-	char *,		filename)
+	CONST char *,		filename)
 {
     char *host = NULL;
     char *alias;
@@ -6719,6 +6715,8 @@ PUBLIC void BeginInternalPage ARGS3(
 	char*, Title,
 	char*, HelpURL)
 {
+    fprintf(fp0, "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n");
+
     fprintf(fp0, "<html>\n<head>\n");
     LYAddMETAcharsetToFD(fp0, -1);
     if (LYIsListpageTitle(Title)) {

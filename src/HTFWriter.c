@@ -37,7 +37,7 @@ extern int exec_command(char * cmd, int wait_flag); /* xsystem.c */
 #include <LYLeaks.h>
 #include <LYKeymap.h>
 
-#ifdef EXP_PERSISTENT_COOKIES 
+#ifdef EXP_PERSISTENT_COOKIES
 #include <LYCookie.h>
 #endif
 
@@ -48,7 +48,7 @@ PUBLIC BOOLEAN LYCancelDownload=FALSE;   /* exported to HTFormat.c in libWWW */
 
 #ifdef VMS
 PRIVATE char * FIXED_RECORD_COMMAND = NULL;
-#ifdef USE_COMMAND_FILE 	     /* Keep this as an option. - FM	*/
+#ifdef USE_COMMAND_FILE		     /* Keep this as an option. - FM	*/
 #define FIXED_RECORD_COMMAND_MASK "@Lynx_Dir:FIXED512 %s"
 #else
 #define FIXED_RECORD_COMMAND_MASK "%s"
@@ -412,7 +412,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		    status = SetForegroundWindow(cur_handle);
 		}
 #else
-	        start_curses();
+		start_curses();
 #endif
 	    }
 	}
@@ -424,20 +424,26 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	if (me->anchor->FileCache)
 	    remove(me->anchor->FileCache);
 	FREE(me);
-#ifdef EXP_PERSISTENT_COOKIES 
-	/* 
-	 *  We want to save cookies picked up when in source 
-	 *  mode.  ... 
-	 */ 
-	if (persistent_cookies) 
-	    LYStoreCookies(LYCookieSaveFile); 
-#endif /* EXP_PERSISTENT_COOKIES */ 
+#ifdef EXP_PERSISTENT_COOKIES
+	/*
+	 *  We want to save cookies picked up when in source
+	 *  mode.  ...
+	 */
+	if (persistent_cookies)
+	    LYStoreCookies(LYCookieSaveFile);
+#endif /* EXP_PERSISTENT_COOKIES */
 	exit_immediately(EXIT_SUCCESS);
     }
 
     FREE(me);
     return;
 }
+
+#ifdef VMS
+#  define REMOVE_COMMAND "delete/noconfirm/nolog %s;"
+#else
+#  define REMOVE_COMMAND "%s"
+#endif /* VMS */
 
 /*	Abort writing
 **	-------------
@@ -453,7 +459,19 @@ PRIVATE void HTFWriter_abort ARGS2(
 	CTRACE((tfp, "HTFWriter: Aborting: file not executed or saved.\n"));
 	FREE(me->end_command);
 	if (me->remove_command) {
+#ifdef VMS
 	    LYSystem(me->remove_command);
+#else
+	    chmod(me->remove_command, 0600);		/* Ignore errors */
+	    if (0 != unlink(me->remove_command)) {
+		char buf[560];
+
+		sprintf(buf, "%.60s '%.400s': %.60s",
+			gettext("Error deleting file"),
+			me->remove_command, strerror(errno));
+		HTAlert(buf);
+	    }
+#endif
 	    FREE(me->remove_command);
 	}
     }
@@ -587,12 +605,6 @@ PRIVATE char *mailcap_substitute ARGS3(
     return result;
 }
 
-#ifndef VMS
-#define REMOVE_COMMAND "/bin/rm -f %s"
-#else
-#define REMOVE_COMMAND "delete/noconfirm/nolog %s;"
-#endif /* VMS */
-
 /*	Take action using a system command
 **	----------------------------------
 **
@@ -662,10 +674,10 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 	 *  so that the open fp gets registered in the list keeping track of
 	 *  temp files, equivalent to when LYOpenTemp() gets called below.
 	 *  This avoids a file descriptor leak caused by LYCloseTempFP()
-	 *  not being able to find the fp.  The ".bin" suffix is expected
+	 *  not being able to find the fp.  The binary suffix is expected
 	 *  to not be used, it's only for fallback in unusual error cases. - kw
 	 */
-	me->fp = LYOpenTempRewrite(fnam, ".bin", BIN_W);
+	me->fp = LYOpenTempRewrite(fnam, BIN_SUFFIX, BIN_W);
     } else {
 #if defined(WIN_EX) && !defined(__CYGWIN__)	/* 1998/01/04 (Sun) */
 	if (!strncmp(anchor->address,"file://localhost",16)) {
@@ -717,15 +729,13 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 	 */
 	if (!strcasecomp(pres->rep->name, "text/html")) {
 	    suffix = HTML_SUFFIX;
-	} else if (!strcasecomp(pres->rep->name, "text/plain")) {
-	    suffix = ".txt";
-	} else if (!strcasecomp(pres->rep->name,
-				"application/octet-stream")) {
-	    suffix = ".bin";
-	} else if (
-	(suffix = HTFileSuffix(pres->rep, anchor->content_encoding)) == 0
-		   || *suffix != '.')
-	{
+	} else if (!strncasecomp(pres->rep->name, "text/", 5)) {
+	    suffix = TEXT_SUFFIX;
+	} else if (!strncasecomp(pres->rep->name, "application/", 12)) {
+	    suffix = BIN_SUFFIX;
+	} else if ((suffix = HTFileSuffix(pres->rep,
+					  anchor->content_encoding)) == 0
+		    || *suffix != '.') {
 	    suffix = HTML_SUFFIX;
 	}
 	me->fp = LYOpenTemp(fnam, suffix, BIN_W);
@@ -857,10 +867,10 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 	 *  so that the open fp gets registered in the list keeping track of
 	 *  temp files, equivalent to when LYOpenTemp() gets called below.
 	 *  This avoids a file descriptor leak caused by LYCloseTempFP()
-	 *  not being able to find the fp.  The ".bin" suffix is expected
+	 *  not being able to find the fp.  The binary suffix is expected
 	 *  to not be used, it's only for fallback in unusual error cases. - kw
 	 */
-	ret_obj->fp = LYOpenTempRewrite(fnam, ".bin", BIN_W);
+	ret_obj->fp = LYOpenTempRewrite(fnam, BIN_SUFFIX, BIN_W);
     } else {
 	/*
 	 *  Check for a suffix.
@@ -868,11 +878,10 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 	 */
 	if (!strcasecomp(pres->rep->name, "text/html")) {
 	    suffix = HTML_SUFFIX;
-	} else if (!strcasecomp(pres->rep->name, "text/plain")) {
-	    suffix = ".txt";
-	} else if (!strcasecomp(pres->rep->name,
-				    "application/octet-stream")) {
-	    suffix = ".bin";
+	} else if (!strncasecomp(pres->rep->name, "text/", 5)) {
+	    suffix = TEXT_SUFFIX;
+	} else if (!strncasecomp(pres->rep->name, "application/", 12)) {
+	    suffix = BIN_SUFFIX;
 	} else if ((suffix = HTFileSuffix(pres->rep,
 					  anchor->content_encoding)) == 0
 		    || *suffix != '.') {
@@ -1080,10 +1089,10 @@ PUBLIC HTStream* HTCompressed ARGS3(
 	    break;
 	}
     }
-    if (can_present == FALSE || 		 /* no presentation mapping */
+    if (can_present == FALSE ||			 /* no presentation mapping */
 	uncompress_mask == NULL ||		    /* not gzip or compress */
 	strchr(anchor->content_type, ';') ||		   /* wrong charset */
-	HTOutputFormat == HTAtom_for("www/download") || 	/* download */
+	HTOutputFormat == HTAtom_for("www/download") ||		/* download */
 	!strcasecomp(pres->rep_out->name, "www/download") ||	/* download */
 	(traversal &&	   /* only handle html or plain text for traversals */
 	 strcasecomp(anchor->content_type, "text/html") &&
@@ -1144,11 +1153,10 @@ PUBLIC HTStream* HTCompressed ARGS3(
     if (!strcasecomp(anchor->content_type, "text/html")) {
 	middle = HTML_SUFFIX;
 	middle++;		/* point to 'h' of .htm(l) - kw */
-    } else if (!strcasecomp(anchor->content_type, "text/plain")) {
-	middle = "txt";
-    } else if (!strcasecomp(anchor->content_type,
-			    "application/octet-stream")) {
-	middle = "bin";
+    } else if (!strncasecomp(anchor->content_type, "text/", 5)) {
+	middle = TEXT_SUFFIX + 1;
+    } else if (!strncasecomp(anchor->content_type, "application/", 12)) {
+	middle = BIN_SUFFIX + 1;
     } else if ((suffix =
 		HTFileSuffix(HTAtom_for(anchor->content_type), NULL)) &&
 	       *suffix == '.') {
@@ -1350,7 +1358,7 @@ PUBLIC unsigned long LYVMS_FixedLengthRecords ARGS1(char *, filename)
     attr_rqst_list[2].atr$l_addr = 0;
     /* file "record" attributes */
     memset((void *)&recattr, 0, sizeof recattr);
-    fchars = 0; 	/* file characteristics */
+    fchars = 0;		/* file characteristics */
 
     /* get current attributes */
     sts = sys$qiow(0, channel, IO$_ACCESS, iosb, (void(*)())0, 0,

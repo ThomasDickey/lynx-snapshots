@@ -113,10 +113,10 @@ extern BOOLEAN LYFixCursesOnForAccess PARAMS((CONST char* addr, CONST char* phys
 extern BOOLEAN LYPathOffHomeOK PARAMS((char *fbuffer, size_t fbuffer_size));
 extern BOOLEAN LYValidateFilename PARAMS((char * result, char * given));
 extern BOOLEAN LYisAbsPath PARAMS((CONST char *path));
-extern BOOLEAN LYisLocalAlias PARAMS((char *filename));
-extern BOOLEAN LYisLocalFile PARAMS((char *filename));
-extern BOOLEAN LYisLocalHost PARAMS((char *filename));
-extern BOOLEAN LYisRootPath PARAMS((char *path));
+extern BOOLEAN LYisLocalAlias PARAMS((CONST char *filename));
+extern BOOLEAN LYisLocalFile PARAMS((CONST char *filename));
+extern BOOLEAN LYisLocalHost PARAMS((CONST char *filename));
+extern BOOLEAN LYisRootPath PARAMS((CONST char *path));
 extern BOOLEAN inlocaldomain NOPARAMS;
 extern CONST char *Home_Dir NOPARAMS;
 extern CONST char *index_to_restriction PARAMS((int inx));

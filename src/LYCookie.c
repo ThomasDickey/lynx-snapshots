@@ -489,7 +489,7 @@ PRIVATE void store_cookie ARGS3(
 		       INVALID_COOKIE_DOMAIN_CONFIRMATION,
 		       co->domain,
 		       hostname);
-	    if (!HTConfirmDefault(msg, NO)) {
+	    if (!HTForcedPrompt(cookie_noprompt, msg, NO)) {
 		CTRACE((tfp, "store_cookie: Rejecting domain '%s' for host '%s'.\n",
 			co->domain,
 			hostname));
@@ -502,7 +502,7 @@ PRIVATE void store_cookie ARGS3(
 	    HTSprintf0(&msg,
 		       INVALID_COOKIE_PATH_CONFIRMATION,
 		       co->path, path);
-	    if (!HTConfirmDefault(msg, NO)) {
+	    if (!HTForcedPrompt(cookie_noprompt, msg, NO)) {
 		CTRACE((tfp, "store_cookie: Rejecting because '%s' is not a prefix of '%s'.\n",
 		       co->path, path));
 		freeCookie(co);

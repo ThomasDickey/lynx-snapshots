@@ -27,27 +27,49 @@
 typedef struct _HyperDoc HyperDoc;  /* Ready for forward references */
 typedef struct _HTAnchor HTAnchor;
 typedef struct _HTParentAnchor HTParentAnchor;
+typedef struct _HTParentAnchor0 HTParentAnchor0;
 
 /*	After definition of HTFormat: */
 #include <HTFormat.h>
 
 
 struct _HTAnchor {		/* Generic anchor */
-  HTParentAnchor * parent;	/* Parent of this anchor (self for adults) */
+  HTParentAnchor0 * parent;	/* Parent of this anchor (self for adults) */
 };
 
+struct _HTParentAnchor0 {	/* One for adult_table,
+				 * generally not used outside HTAnchor.c */
+  /* Common part from the generic anchor structure */
+  HTParentAnchor0 * parent;	/* (self) */
+
+  /* ParentAnchor0-specific information */
+  char		  * address;	/* Absolute address of this node */
+  HTParentAnchor  * info;	/* additional info, allocated on demand */
+
+  HTBTree *	children;	/* Subanchors <a name="tag">, sorted by tag */
+  HTList	sources;	/* List of anchors pointing to this, if any */
+
+  HTList	_add_adult;	/* - just a memory for list entry:) */
+  short		adult_hash;	/* adult list number */
+  BOOL		underway;	/* Document about to be attached to it */
+};
+
+/*
+ *  Separated from the above to save memory:  allocated on demand,
+ *  it is nearly 1:1 to HText (well, sometimes without HText...),
+ *  available for SGML, HTML, and HText stages.
+ *  [being precise, we currently allocate it before HTLoadDocument(),
+ *  in HTAnchor_findAddress() and HTAnchor_parent()].
+ */
 struct _HTParentAnchor {
   /* Common part from the generic anchor structure */
-  HTParentAnchor * parent;	/* Parent of this anchor (self) */
+  HTParentAnchor0 * parent;	/* Parent of this anchor */
 
   /* ParentAnchor-specific information */
-  HTBTree *	children;	/* Subanchors <a name="tag">, sorted by tag */
   HTList	children_notag;	/* Subanchors <a href=...>, tag is NULL */
-  HTList	sources;	/* List of anchors pointing to this, if any */
-  HTList	_add_adults;	/* - just a memory for list entry:) */
+  HyperDoc *	document;	/* The document within which this is an anchor*/
 
-  HyperDoc *	document;	/* The document within which this is an anchor */
-  char *	address;	/* Absolute address of this node */
+  char *	address;	/* parent->address, a pointer */
   bstring *	post_data;	/* Posting data */
   char *	post_content_type;  /* Type of post data */
   char *	bookmark;	/* Bookmark filename */
@@ -67,7 +89,6 @@ struct _HTParentAnchor {
   HTList*	methods;	/* Methods available as HTAtoms */
   void *	protocol;	/* Protocol object */
   char *	physical;	/* Physical address */
-  BOOL		underway;	/* Document about to be attached to it */
   BOOL		isISMAPScript;	/* Script for clickable image map */
   BOOL		isHEAD;		/* Document is headers from a HEAD request */
   BOOL		safe;			/* Safe */
@@ -103,7 +124,7 @@ typedef HTAtom HTLinkType;
 
 typedef struct {
   /* Common part from the generic anchor structure */
-  HTParentAnchor * parent;	/* Parent of this anchor */
+  HTParentAnchor0 * parent;	/* Parent of this anchor */
 
   /* ChildAnchor-specific information */
   char *	tag;		/* #fragment,  relative to the parent */
@@ -131,16 +152,6 @@ typedef struct _DocAddress {
 /* "internal" means "within the same document, with certainty". */
 extern HTLinkType * HTInternalLink;
 
-/*	Create new or find old sub-anchor
-**	---------------------------------
-**
-**	This one is for a new anchor being edited into an existing
-**	document.  The parent anchor must already exist.
-*/
-extern HTChildAnchor * HTAnchor_findChild PARAMS((
-	HTParentAnchor *	parent,
-	CONST char *		tag));
-
 /*	Create or find a child anchor with a possible link
 **	--------------------------------------------------
 **
@@ -154,15 +165,15 @@ extern HTChildAnchor * HTAnchor_findChildAndLink PARAMS((
 	CONST char * href,		/* May be "" or 0 */
 	HTLinkType * ltype));		/* May be 0 */
 
-/*	Create new or find old named anchor
-**	-----------------------------------
+/*	Create new or find old parent anchor
+**	------------------------------------
 **
 **	This one is for a reference which is found in a document, and might
 **	not be already loaded.
 **	Note: You are not guaranteed a new anchor -- you might get an old one,
 **	like with fonts.
 */
-extern HTAnchor * HTAnchor_findAddress PARAMS((
+extern HTParentAnchor * HTAnchor_findAddress PARAMS((
 	CONST DocAddress *	address));
 
 /*	Create new or find old named anchor - simple form
@@ -171,7 +182,7 @@ extern HTAnchor * HTAnchor_findAddress PARAMS((
 **	Like the previous one, but simpler to use for simple cases.
 **	No post data etc. can be supplied. - kw
 */
-extern HTAnchor * HTAnchor_findSimpleAddress PARAMS((
+extern HTParentAnchor * HTAnchor_findSimpleAddress PARAMS((
 	CONST char *	url));
 
 /*	Delete an anchor and possibly related things (auto garbage collection)
@@ -184,6 +195,14 @@ extern HTAnchor * HTAnchor_findSimpleAddress PARAMS((
 **	If this anchor's sources list is empty, we delete it and its children.
 */
 extern BOOL HTAnchor_delete PARAMS((
+	HTParentAnchor0 *	me));
+
+/*
+ *  Unnamed children (children_notag) have no sense without HText -
+ *  delete them and their links if we are about to free HText.
+ *  Document currently exists.  Called within HText_free().
+ */
+extern void HTAnchor_delete_links PARAMS((
 	HTParentAnchor *	me));
 
 #ifdef SOURCE_CACHE

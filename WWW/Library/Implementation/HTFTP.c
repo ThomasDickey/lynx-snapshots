@@ -2625,7 +2625,7 @@ PRIVATE int read_directory ARGS4(
     **	we could someday set up an equivalent listing
     **	for Unix ftp servers. - FM
     */
-    need_parent_link = HTDirTitles(target, (HTAnchor*)parent, tildeIsTop);
+    need_parent_link = HTDirTitles(target, parent, tildeIsTop);
 
     data_read_pointer = data_write_pointer = data_buffer;
 

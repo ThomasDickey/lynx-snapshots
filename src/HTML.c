@@ -3551,7 +3551,7 @@ PRIVATE int HTML_start_element ARGS6(
 	     *	set. - FM && KW
 	     */
 	    StrAllocCopy(me->map_address, me->node_anchor->address);
-	    if ((cp = strrchr(me->map_address, '#')) != NULL)
+	    if ((cp = strchr(me->map_address, '#')) != NULL)
 		*cp = '\0';
 	    StrAllocCat(me->map_address, "#");
 	    StrAllocCat(me->map_address, id_string);
@@ -5397,7 +5397,6 @@ PRIVATE int HTML_start_element ARGS6(
 	if (present && present[HTML_TABLE_ALIGN] &&
 	    value[HTML_TABLE_ALIGN] && *value[HTML_TABLE_ALIGN]) {
 	    if (!strcasecomp(value[HTML_TABLE_ALIGN], "center")) {
-#ifdef SH_EX	/* 1998/10/09 (Fri) 15:20:09 */
 		if (no_table_center) {
 		    me->DivisionAlignments[me->Division_Level] = HT_LEFT;
 		    change_paragraph_style(me, styles[HTML_DLEFT]);
@@ -5411,12 +5410,7 @@ PRIVATE int HTML_start_element ARGS6(
 		    me->current_default_alignment =
 					styles[HTML_DCENTER]->alignment;
 		}
-#else
-		me->DivisionAlignments[me->Division_Level] = HT_CENTER;
-		change_paragraph_style(me, styles[HTML_DCENTER]);
-		UPDATE_STYLE;
-		me->current_default_alignment = styles[HTML_DCENTER]->alignment;
-#endif
+
 		stbl_align = HT_CENTER;
 
 	    } else if (!strcasecomp(value[HTML_TABLE_ALIGN], "right")) {
@@ -5486,14 +5480,10 @@ PRIVATE int HTML_start_element ARGS6(
 	if (present && present[HTML_TR_ALIGN] && value[HTML_TR_ALIGN]) {
 	    if (!strcasecomp(value[HTML_TR_ALIGN], "center") &&
 		!(me->List_Nesting_Level >= 0 && !me->inP)) {
-#ifdef SH_EX
 		if (no_table_center)
 		    me->sp->style->alignment = HT_LEFT;
 		else
 		    me->sp->style->alignment = HT_CENTER;
-#else
-		me->sp->style->alignment = HT_CENTER;
-#endif
 		stbl_align = HT_CENTER;
 	    } else if (!strcasecomp(value[HTML_TR_ALIGN], "right") &&
 		       !(me->List_Nesting_Level >= 0 && !me->inP)) {
@@ -8098,9 +8088,10 @@ PRIVATE HTStream* CacheThru_new ARGS2(
 	return target;
 
 #ifndef DEBUG_SOURCE_CACHE
-    /*  Only remote HTML documents may benefits from HTreparse_document(), */
+    /*  Only remote HTML documents may benefit from HTreparse_document(),  */
     /*  oh, assume http protocol:                                          */
-    if (strcmp(p->name, "http") != 0) {
+    if (strcmp(p->name, "http") != 0
+     && strcmp(p->name, "https") != 0) {
 	CTRACE((tfp, "SourceCacheWriter: Protocol is \"%s\"; not caching\n", p->name));
 	return target;
     }

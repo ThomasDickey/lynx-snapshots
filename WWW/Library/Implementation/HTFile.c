@@ -1112,7 +1112,7 @@ PUBLIC void LYGetFileInfo ARGS7(
 	 */
 	Afn = HTEscape(filename, URL_PATH);
 	LYLocalFileToURL(&Aname, Afn);
-	file_anchor = HTAnchor_parent(HTAnchor_findSimpleAddress(Aname));
+	file_anchor = HTAnchor_findSimpleAddress(Aname);
 
 	file_csname = file_anchor->charset;
 	format = HTFileFormat(filename, &myEnc, pdesc);
@@ -1279,11 +1279,10 @@ PUBLIC BOOL HTEditable ARGS1(
 PUBLIC HTStream * HTFileSaveStream ARGS1(
 	HTParentAnchor *,	anchor)
 {
-    char * addr = HTAnchor_address((HTAnchor*)anchor);
+    CONST char * addr = anchor->address;
     char * localname = HTLocalName(addr);
     FILE * fp = fopen(localname, BIN_W);
 
-    FREE(addr);
     FREE(localname);
     if (!fp)
 	return NULL;
@@ -1353,10 +1352,10 @@ PUBLIC void HTDirEntry ARGS3(
 */
 PUBLIC BOOL HTDirTitles ARGS3(
 	HTStructured *, target,
-	HTAnchor *,	anchor,
+	HTParentAnchor *, anchor,
 	BOOL,		tildeIsTop)
 {
-    char * logical = HTAnchor_address(anchor);
+    CONST char * logical = anchor->address;
     char * path = HTParse(logical, "", PARSE_PATH + PARSE_PUNCTUATION);
     char * current;
     char * cp = NULL;
@@ -1449,7 +1448,6 @@ PUBLIC BOOL HTDirTitles ARGS3(
 	  (0 == strncasecomp(printable, "anonymou.", 9) &&
 	   strchr(printable, '/') == NULL)) {
 	  FREE(printable);
-	  FREE(logical);
 	  FREE(path);
 	  return(need_parent_link);
       }
@@ -1473,7 +1471,6 @@ PUBLIC BOOL HTDirTitles ARGS3(
 	     (!strcmp(parent, "/..") ||
 	      !strncasecomp(parent, "/%2F", 4))) ||
 	    !strncasecomp(current, "%2F", 3)) {
-	    FREE(logical);
 	    FREE(path);
 	    return(need_parent_link);
 	}
@@ -1529,7 +1526,6 @@ PUBLIC BOOL HTDirTitles ARGS3(
 		HTUnEscape(fullparentpath);
 		if ((dp = opendir(fullparentpath)) == NULL) {
 		    FREE(fullparentpath);
-		    FREE(logical);
 		    FREE(relative);
 		    FREE(path);
 		    return(need_parent_link);
@@ -1538,7 +1534,6 @@ PUBLIC BOOL HTDirTitles ARGS3(
 		FREE(fullparentpath);
 #ifdef LONG_LIST
 		need_parent_link = TRUE;
-		FREE(logical);
 		FREE(path);
 		FREE(relative);
 		return(need_parent_link);
@@ -1573,7 +1568,6 @@ PUBLIC BOOL HTDirTitles ARGS3(
     }
 #endif /* !NO_PARENT_DIR_REFERENCE */
 
-    FREE(logical);
     FREE(path);
     return(need_parent_link);
 }
@@ -1681,7 +1675,6 @@ PRIVATE int print_local_dir ARGS5(
     HTStructured *target;	/* HTML object */
     HTStructuredClass targetClass;
     STRUCT_DIRENT * dirbuf;
-    char *logical = NULL;
     char *pathname = NULL;
     char *tail = NULL;
     BOOL present[HTML_A_ATTRIBUTES];
@@ -1692,8 +1685,7 @@ PRIVATE int print_local_dir ARGS5(
 
     CTRACE((tfp, "print_local_dir() started\n"));
 
-    logical = HTAnchor_address((HTAnchor*)anchor);
-    pathname = HTParse(logical, "",
+    pathname = HTParse(anchor->address, "",
 		       PARSE_PATH + PARSE_PUNCTUATION);
 
     if (!strcmp(pathname,"/")) {
@@ -1740,12 +1732,11 @@ PRIVATE int print_local_dir ARGS5(
     **	is not defined so that need we to create the
     **	link via an LYListFmtParse() call. - FM
     */
-    need_parent_link = HTDirTitles(target,
-				   (HTAnchor *)anchor, FALSE);
+    need_parent_link = HTDirTitles(target, anchor, FALSE);
 
 #ifdef DIRED_SUPPORT
     if (!isLYNXCGI(anchor->address)) {
-	HTAnchor_setFormat((HTParentAnchor *) anchor, WWW_DIRED);
+	HTAnchor_setFormat(anchor, WWW_DIRED);
 	lynx_edit_mode = TRUE;
     }
 #endif /* DIRED_SUPPORT */
@@ -2010,7 +2001,6 @@ PRIVATE int print_local_dir ARGS5(
 	    }
 	} /* end printing out the tree in order */
 
-	FREE(logical);
 	FREE(tmpfilename);
 	FREE(tail);
 	HTBTreeAndObject_free(bt);
@@ -2765,7 +2755,8 @@ PUBLIC CONST char * HTGetProgramPath ARGS1(
 }
 
 /*
- * Store a program's path
+ * Store a program's path.  The caller must allocate the string used for 'path',
+ * since HTInitProgramPaths() may free it.
  */
 PUBLIC void HTSetProgramPath ARGS2(
 	ProgramPaths,	code,

@@ -315,8 +315,12 @@ extern WINDOW *LYstartPopup PARAMS((int top_y, int left_x, int height, int width
 
 #ifdef HAVE_NAPMS
 #define SECS2Secs(n) (1000 * (n))
+#define Secs2SECS(n) ((n) / 1000.0)
+#define SECS_FMT "%.3f"
 #else
 #define SECS2Secs(n) (n)
+#define Secs2SECS(n) (n)
+#define SECS_FMT "%.0f"
 #endif
 
 /* Both slang and curses: */

@@ -69,7 +69,7 @@ extern char * HTCacheFileName PARAMS((CONST char * name));
 */
 extern BOOL HTDirTitles PARAMS((
         HTStructured *  target,
-        HTAnchor *      anchor,
+        HTParentAnchor* anchor,
 	BOOL		tildeIsTop));
 
 /*

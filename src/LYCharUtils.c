@@ -2538,7 +2538,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	    /* id_string seems to be used wrong below if given.
 	       not that it matters much.  avoid setting it here. - kw */
 	    if ((strncmp(href, "http", 4) == 0) &&
-		(cp = strrchr(href, '#')) != NULL) {
+		(cp = strchr(href, '#')) != NULL) {
 		StrAllocCopy(id_string, cp);
 		*cp = '\0';
 	    }

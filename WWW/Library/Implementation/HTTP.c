@@ -70,11 +70,11 @@ PRIVATE int HTSSLCallback(int preverify_ok, X509_STORE_CTX *x509_ctx)
     char *msg = NULL;
     int result = 1;
 
-    if (!(preverify_ok || ssl_okay)) {
+    if (!(preverify_ok || ssl_okay || ssl_noprompt)) {
 
 	HTSprintf0(&msg, "SSL error:%s-Continue?",
 		   X509_verify_cert_error_string(X509_STORE_CTX_get_error(x509_ctx)));
-	if (HTConfirmDefault(msg, TRUE))
+	if (HTForcedPrompt(ssl_noprompt, msg, YES))
 	    ssl_okay = 1;
 	else
 	    result = 0;
@@ -595,7 +595,7 @@ use_tunnel:
       if ((cert_host = strstr(ssl_dn, "/CN=")) == NULL) {
 	  HTSprintf0(&msg,
 		     gettext("SSL error:Can't find common name in certificate-Continue?"));
-	  if (! HTConfirmDefault(msg, TRUE)) {
+	   if (! HTForcedPrompt(ssl_noprompt, msg, YES)) {
 	      status = HT_NOT_LOADED;
 	      FREE(msg);
 	      goto done;
@@ -610,7 +610,7 @@ use_tunnel:
 			 gettext("SSL error:host(%s)!=cert(%s)-Continue?"),
 			 ssl_host,
 			 cert_host);
-	      if (! HTConfirmDefault(msg, TRUE)) {
+	      if (! HTForcedPrompt(ssl_noprompt, msg, YES)) {
 		  status = HT_NOT_LOADED;
 		  FREE(msg);
 		  goto done;

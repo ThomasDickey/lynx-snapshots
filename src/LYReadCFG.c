@@ -1264,10 +1264,11 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_STR(RC_COOKIE_SAVE_FILE,     LYCookieSaveFile),
 #endif /* EXP_PERSISTENT_COOKIES */
      PARSE_STR(RC_COOKIE_STRICT_INVALID_DOMAIN, LYCookieSStrictCheckDomains),
-     PARSE_Env(RC_CSO_PROXY, 0 ),
+     PARSE_Env(RC_CSO_PROXY,		0),
 #ifdef VMS
      PARSE_PRG(RC_CSWING_PATH,          ppCSWING),
 #endif
+     PARSE_TIM(RC_DELAYSECS,            DebugSecs),
      PARSE_FUN(RC_DEFAULT_BOOKMARK_FILE, default_bookmark_file_fun),
      PARSE_FUN(RC_DEFAULT_CACHE_SIZE,   default_cache_size_fun),
      PARSE_FUN(RC_DEFAULT_EDITOR,       default_editor_fun),
@@ -1291,21 +1292,25 @@ PRIVATE Config_Type Config_Table [] =
 #ifdef USE_EXTERNALS
      PARSE_ADD(RC_EXTERNAL,             externals),
 #endif
-     PARSE_Env(RC_FINGER_PROXY,         0 ),
+     PARSE_Env(RC_FINGER_PROXY,         0),
 #if defined(_WINDOWS)	/* 1998/10/05 (Mon) 17:34:15 */
      PARSE_SET(RC_FOCUS_WINDOW,         focus_window),
 #endif
      PARSE_SET(RC_FORCE_8BIT_TOUPPER,   UCForce8bitTOUPPER),
+     PARSE_ENU(RC_FORCE_COOKIE_PROMPT,  cookie_noprompt, tbl_force_prompt),
      PARSE_SET(RC_FORCE_EMPTY_HREFLESS_A, force_empty_hrefless_a),
      PARSE_SET(RC_FORCE_SSL_COOKIES_SECURE, LYForceSSLCookiesSecure),
+#ifdef USE_SSL
+     PARSE_ENU(RC_FORCE_SSL_PROMPT,     ssl_noprompt, tbl_force_prompt),
+#endif
 #if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
      PARSE_SET(RC_FORMS_OPTIONS,        LYUseFormsOptions),
 #endif
      PARSE_SET(RC_FTP_PASSIVE,          ftp_passive),
-     PARSE_Env(RC_FTP_PROXY,            0 ),
+     PARSE_Env(RC_FTP_PROXY,            0),
      PARSE_STR(RC_GLOBAL_EXTENSION_MAP, global_extension_map),
      PARSE_STR(RC_GLOBAL_MAILCAP,       global_type_map),
-     PARSE_Env(RC_GOPHER_PROXY,         0 ),
+     PARSE_Env(RC_GOPHER_PROXY,         0),
      PARSE_SET(RC_GOTOBUFFER,           goto_buffer),
      PARSE_PRG(RC_GZIP_PATH,            ppGZIP),
      PARSE_STR(RC_HELPFILE,             helpfile),
@@ -1317,8 +1322,8 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_FUN(RC_HTMLSRC_ATTRNAME_XFORM, read_htmlsrc_attrname_xform),
      PARSE_FUN(RC_HTMLSRC_TAGNAME_XFORM, read_htmlsrc_tagname_xform),
 #endif
-     PARSE_Env(RC_HTTP_PROXY,           0 ),
-     PARSE_Env(RC_HTTPS_PROXY,          0 ),
+     PARSE_Env(RC_HTTP_PROXY,           0),
+     PARSE_Env(RC_HTTPS_PROXY,          0),
      PARSE_REQ(RC_INCLUDE,              0),
      PARSE_TIM(RC_INFOSECS,             InfoSecs),
      PARSE_PRG(RC_INSTALL_PATH,         ppINSTALL),
@@ -1386,11 +1391,9 @@ PRIVATE Config_Type Config_Table [] =
 #endif
      PARSE_SET(RC_NO_FROM_HEADER,       LYNoFromHeader),
      PARSE_SET(RC_NO_ISMAP_IF_USEMAP,   LYNoISMAPifUSEMAP),
-     PARSE_Env(RC_NO_PROXY,             0 ),
+     PARSE_Env(RC_NO_PROXY,             0),
      PARSE_SET(RC_NO_REFERER_HEADER,    LYNoRefererHeader),
-#ifdef SH_EX
      PARSE_SET(RC_NO_TABLE_CENTER,      no_table_center),
-#endif
      PARSE_FUN(RC_NONRESTARTING_SIGWINCH, nonrest_sigwinch_fun),
      PARSE_FUN(RC_OUTGOING_MAIL_CHARSET, outgoing_mail_charset_fun),
 #ifdef DISP_PARTIAL
@@ -1435,9 +1438,9 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_SET(RC_SET_COOKIES,          LYSetCookies),
      PARSE_SET(RC_SHOW_CURSOR,          LYShowCursor),
      PARSE_ENU(RC_SHOW_KB_RATE,         LYTransferRate, tbl_transfer_rate),
-     PARSE_Env(RC_SNEWS_PROXY,          0 ),
-     PARSE_Env(RC_SNEWSPOST_PROXY,      0 ),
-     PARSE_Env(RC_SNEWSREPLY_PROXY,     0 ),
+     PARSE_Env(RC_SNEWS_PROXY,          0),
+     PARSE_Env(RC_SNEWSPOST_PROXY,      0),
+     PARSE_Env(RC_SNEWSREPLY_PROXY,     0),
      PARSE_SET(RC_SOFT_DQUOTES,         soft_dquotes),
 #ifdef SOURCE_CACHE
      PARSE_ENU(RC_SOURCE_CACHE,         LYCacheSource, tbl_source_cache),
@@ -1487,7 +1490,7 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_SET(RC_VERBOSE_IMAGES,       verbose_img),
      PARSE_SET(RC_VI_KEYS_ALWAYS_ON,    vi_keys),
      PARSE_FUN(RC_VIEWER,               viewer_fun),
-     PARSE_Env(RC_WAIS_PROXY,           0 ),
+     PARSE_Env(RC_WAIS_PROXY,           0),
      PARSE_STR(RC_XLOADIMAGE_COMMAND,   XLoadImageCommand),
      PARSE_PRG(RC_ZCAT_PATH,            ppZCAT),
      PARSE_PRG(RC_ZIP_PATH,             ppZIP),

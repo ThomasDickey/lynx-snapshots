@@ -341,7 +341,7 @@ PRIVATE void fill_DocAddress ARGS4(
 	wwwdoc->bookmark = NULL;
 	wwwdoc->isHEAD = FALSE;
 	wwwdoc->safe = FALSE;
-	underlying = HTAnchor_parent(HTAnchor_findAddress(wwwdoc));
+	underlying = HTAnchor_findAddress(wwwdoc);
 	if (underlying->safe)
 	    wwwdoc->safe = TRUE;
 	if (punderlying)
@@ -547,7 +547,7 @@ PRIVATE int LYLoadIMGmap ARGS4 (
     } else if (LYRequestTitle && *LYRequestTitle &&
 	       strcasecomp(LYRequestTitle, "[USEMAP]")) {
 	StrAllocCopy(MapTitle, LYRequestTitle);
-    } else if ((cp = strrchr(address, '#')) != NULL) {
+    } else if ((cp = strchr(address, '#')) != NULL) {
 	StrAllocCopy(MapTitle, (cp+1));
     }
     if (!(MapTitle && *MapTitle)) {

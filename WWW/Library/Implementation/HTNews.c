@@ -2310,7 +2310,7 @@ PRIVATE int HTLoadNews ARGS4(
 		    NEWS_NETCLOSE(s);
 		    s = -1;
 		}
-	    StrAllocCopy(NewsHost, cp);
+		StrAllocCopy(NewsHost, cp);
 	    }
 	    FREE(cp);
 	    sprintf(command, "%s//%.250s/", STR_SNEWS_URL, NewsHost);

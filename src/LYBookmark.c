@@ -425,10 +425,8 @@ Note: if you edit this file manually\n\
 		WWWDoc.bookmark = HDOC(i).bookmark;
 		WWWDoc.isHEAD = FALSE;
 		WWWDoc.safe = FALSE;
-		if (((tmpanchor = HTAnchor_parent(
-					HTAnchor_findAddress(&WWWDoc)
-						 )) != NULL) &&
-		    (text = (HText *)HTAnchor_document(tmpanchor)) != NULL) {
+		tmpanchor = HTAnchor_findAddress(&WWWDoc);
+		if ((text = (HText *)HTAnchor_document(tmpanchor)) != NULL) {
 		    HText_setNoCache(text);
 		}
 		break;

@@ -79,10 +79,10 @@ typedef struct _STable_cellinfo {
 				   contentless cells (and cells we do
 				   not want to measure and count?),
 				   line-of-the-start otherwise.  */
-	int	pos;		/* column where cell starts */
-	int	len;		/* number of character positions */
-	int	colspan;	/* number of columns to span */
-	int	alignment;	/* one of HT_LEFT, HT_CENTER, HT_RIGHT,
+	short	pos;		/* column where cell starts */
+	short	len;		/* number of character positions */
+	short	colspan;	/* number of columns to span */
+	short	alignment;	/* one of HT_LEFT, HT_CENTER, HT_RIGHT,
 				   or RESERVEDCELL */
 } STable_cellinfo;
 
@@ -98,12 +98,13 @@ enum ended_state {
 #define OFFSET_IS_VALID			8
 #define OFFSET_IS_VALID_LAST_CELL	0x10
 #define BELIEVE_OFFSET			0x20
+#define IS_CONTINUATION_OF_MULTICELL	0x40
 
 typedef struct _STable_rowinfo {
     /* Each row may be displayed on many display lines, but we fix up
        positions of cells on this display line only: */
 	int	Line;		/* lineno in doc (zero-based) */
-	int	ncells;		/* number of table cells */
+	short	ncells;		/* number of table cells */
 
     /* What is the meaning of this?!  It is set if:
        [search for	def of fixed_line	below]
@@ -127,14 +128,14 @@ typedef struct _STable_rowinfo {
        REMARK: If this variable is not set, but icell_core is, Line is
        reset to the line of icell_core.
      */
-	BOOL	fixed_line;	/* if we have a 'core' line of cells */
+	short	fixed_line;	/* if we have a 'core' line of cells */
 	enum ended_state ended;	/* if we saw </tr> etc */
-	int	content;	/* Whether contains end-of-cell etc */
-	int	offset;		/* >=0 after line break in a multiline cell */
-	int	allocated;	/* number of table cells allocated or 0
+	short	content;	/* Whether contains end-of-cell etc */
+	short	offset;		/* >=0 after line break in a multiline cell */
+	short	allocated;	/* number of table cells allocated or 0
 				   if the .cells should not be free()ed */
+	short	alignment;	/* global align attribute for this row */
 	STable_cellinfo * cells;
-	int	alignment;	/* global align attribute for this row */
 } STable_rowinfo;
 
 struct _STable_chunk;
@@ -1365,10 +1366,16 @@ PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
 	int prev_reserved_last = -1;
 	STable_rowinfo *prev_row;
 	int prev_row_n2 = lastrow - me->rows;
+	int is_multicell = 0;
 
 	CTRACE2(TRACE_TRST,
 		(tfp, "TRST:Stbl_fakeFinishCellInTable(lineno=%d, finishing=%d) START FAKING\n",
 		      lineno, finishing));
+
+	if ( lastrow->ncells > 1
+	     && (lastrow->cells[lastrow->ncells - 2].pos
+		 != lastrow->cells[lastrow->ncells - 1].pos))
+	    is_multicell = 1;
 
 	/* Although here we use pos=0, this may commit the previous
 	   cell which had <BR> as a last element.  This may overflow
@@ -1391,6 +1398,10 @@ PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
 	}
 	lastrow = me->rows + (me->nrows - 1);
 	lastrow->content = IS_CONTINUATION_OF_CELL;
+	if (is_multicell)
+	    lastrow->content = IS_CONTINUATION_OF_MULTICELL;
+	else
+	    lastrow->content = IS_CONTINUATION_OF_CELL;
 	for (i = 0; i < lastrow->allocated; i++) {
 	    if (lastrow->cells[i].alignment == RESERVEDCELL) {
 		need_reserved = 1;
@@ -1679,10 +1690,23 @@ PUBLIC int Stbl_trimFakeRows ARGS3(
 	return 0;
     if ( prevrow->ended != ROW_ended_by_splitline) /* Lastrow non-fake */
 	return 0;
-    /* XXXX should remove duplicate RESERVED stuff too */
     me->nrows--;
-    if (lastrow->cells && lastrow->allocated == 0) /* Moved to pool */
-	lastrow->cells = NULL;
+    /* prevrow is now the last row, so its cells should be realloc()able */
+    if (prevrow->cells && prevrow->allocated == 0) { /* Moved to pool */
+	int c = prevrow->ncells;
+	STable_cellinfo *p;
+
+	if (lastrow->allocated > c)	/* May have RESERVED info */
+	    c = lastrow->allocated;
+	p = malloc(c * sizeof(STable_cellinfo));
+	memcpy(p, prevrow->cells, prevrow->ncells * sizeof(STable_cellinfo));
+	/* Copy back the possibly present RESERVED info.
+	   XXXX remove duplicated RESERVED stuff from the followup rows too! */
+	memcpy(p + prevrow->ncells, lastrow->cells + prevrow->ncells,
+	       (c - prevrow->ncells) * sizeof(STable_cellinfo));
+	prevrow->cells = p;	/* XXXX How would ride with RESERVED? */
+	prevrow->allocated = c;
+    }
     lastrow->ncells = 0;
     lastrow->content = 0;
     prevrow->ended = ROW_not_ended;	/* Give it new life */

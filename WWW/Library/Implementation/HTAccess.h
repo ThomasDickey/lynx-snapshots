@@ -105,15 +105,11 @@ extern BOOL override_proxy PARAMS((
 Load a document from relative name
 
   ON ENTRY,
-
   relative_name           The relative address of the file to be accessed.
-
   here                    The anchor of the object being searched
 
   ON EXIT,
-
   returns    YES          Success in opening file
-
   NO                      Failure
 
  */
@@ -127,23 +123,11 @@ extern  BOOL HTLoadRelative PARAMS((
 Load a document from absolute name
 
   ON ENTRY,
-
   addr                    The absolute address of the document to be accessed.
-
   filter_it               if YES, treat document as HTML
 
- */
-
-/*
-
   ON EXIT,
-
- */
-
-/*
-
   returns YES             Success in opening document
-
   NO                      Failure
 
  */
@@ -155,15 +139,11 @@ extern BOOL HTLoadAbsolute PARAMS((CONST DocAddress * addr));
 Load a document from absolute name to a stream
 
   ON ENTRY,
-
   addr                    The absolute address of the document to be accessed.
-
   filter_it               if YES, treat document as HTML
 
   ON EXIT,
-
   returns YES             Success in opening document
-
   NO                      Failure
 
    Note: This is equivalent to HTLoadDocument
@@ -178,27 +158,13 @@ extern BOOL HTLoadToStream PARAMS((CONST char * addr, BOOL filter_it,
 Load if necessary, and select an anchor
 
   ON ENTRY,
-
   destination                The child or parenet anchor to be loaded.
 
- */
-
-/*
-
   ON EXIT,
-
- */
-
-/*
-
   returns YES             Success
-
   returns NO              Failure
 
  */
-
-
-
 extern BOOL HTLoadAnchor PARAMS((HTAnchor * destination));
 
 
@@ -207,16 +173,12 @@ extern BOOL HTLoadAnchor PARAMS((HTAnchor * destination));
 Make a stream for Saving object back
 
   ON ENTRY,
-
   anchor                  is valid anchor which has previously beeing loaded
 
   ON EXIT,
-
   returns                 0 if error else a stream to save the object to.
 
  */
-
-
 extern HTStream * HTSaveStream PARAMS((HTParentAnchor * anchor));
 
 
@@ -228,9 +190,7 @@ Search
    current address and attempts to open the new address.
 
   ON ENTRY,
-
   *keywords               space-separated keyword list or similar search list
-
   here                    The anchor of the object being searched
 
  */
@@ -245,9 +205,7 @@ Search Given Indexname
    the current address and attempts to open the new address.
 
   ON ENTRY,
-
   *keywords               space-separated keyword list or similar search list
-
   *indexname              is name of object search is to be done on.
 
  */

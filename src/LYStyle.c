@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.51 Wed, 22 Jan 2003 01:43:13 -0800 dickey @
+ * @Id: LYStyle.c 1.52 Sun, 01 Jun 2003 18:16:28 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -59,6 +59,13 @@ PUBLIC int s_alert		= NOSTYLE;
 PUBLIC int s_alink		= NOSTYLE;
 PUBLIC int s_curedit		= NOSTYLE;
 PUBLIC int s_forw_backw		= NOSTYLE;
+PUBLIC int s_hot_paste		= NOSTYLE;
+PUBLIC int s_menu_active	= NOSTYLE;
+PUBLIC int s_menu_bg		= NOSTYLE;
+PUBLIC int s_menu_entry		= NOSTYLE;
+PUBLIC int s_menu_frame		= NOSTYLE;
+PUBLIC int s_menu_number	= NOSTYLE;
+PUBLIC int s_menu_sb		= NOSTYLE;
 PUBLIC int s_normal		= NOSTYLE;
 PUBLIC int s_prompt_edit	= NOSTYLE;
 PUBLIC int s_prompt_edit_arr	= NOSTYLE;
@@ -67,12 +74,6 @@ PUBLIC int s_prompt_sel		= NOSTYLE;
 PUBLIC int s_status		= NOSTYLE;
 PUBLIC int s_title		= NOSTYLE;
 PUBLIC int s_whereis		= NOSTYLE;
-PUBLIC int s_menu_frame		= NOSTYLE;
-PUBLIC int s_menu_bg		= NOSTYLE;
-PUBLIC int s_menu_number	= NOSTYLE;
-PUBLIC int s_menu_entry		= NOSTYLE;
-PUBLIC int s_menu_active	= NOSTYLE;
-PUBLIC int s_menu_sb		= NOSTYLE;
 
 #ifdef USE_SCROLLBAR
 PUBLIC int s_sb_aa		= NOSTYLE;
@@ -250,6 +251,7 @@ PRIVATE void parse_style ARGS1(char*, param)
 	{ "edit.prompt.marked",	DSTYLE_ELEMENTS,	&s_prompt_sel },
 	{ "edit.prompt",	DSTYLE_ELEMENTS,	&s_prompt_edit },
 	{ "forwbackw.arrow",	DSTYLE_ELEMENTS,	&s_forw_backw },
+	{ "hot.paste",		DSTYLE_ELEMENTS,	&s_hot_paste },
 	{ "menu.frame",		DSTYLE_ELEMENTS,	&s_menu_frame },
 	{ "menu.bg",		DSTYLE_ELEMENTS,	&s_menu_bg },
 	{ "menu.n",		DSTYLE_ELEMENTS,	&s_menu_number },

@@ -906,6 +906,9 @@
 #define MESSAGESECS 2
 #define ALERTSECS 3
 
+#define DEBUGSECS 0
+#define REPLAYSECS 0
+
 /******************************
  * SHOW_COLOR controls whether the program displays in color by default.
  */
@@ -1347,11 +1350,11 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.5dev.15"
+#define LYNX_VERSION "2.8.5dev.16"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Sun, 27 Apr 2003 17:38:00 -0700"
+#define LYNX_DATE "Sun, 01 Jun 2003 18:16:28 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 
@@ -1378,6 +1381,9 @@
 #else
 #define HTML_SUFFIX ".html"
 #endif
+
+#define BIN_SUFFIX  ".bin"
+#define TEXT_SUFFIX ".txt"
 
 #ifdef VMS
 /*

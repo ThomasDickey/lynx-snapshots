@@ -50,6 +50,11 @@ extern void HTReadProgress PARAMS((long bytes, long total));
  */
 extern BOOL HTLastConfirmCancelled NOPARAMS;
 
+/*
+**	Supports logic for forced yes/no prompt results.
+*/
+extern int HTForcedPrompt PARAMS((int Opt, CONST char * Msg, int Dft));
+
 /*      Display a message, then wait for 'yes' or 'no', allowing default
 **	response if a return or left-arrow is used.
 **
@@ -150,6 +155,7 @@ extern int HTConfirmPostRedirect PARAMS((
 
 
 extern void LYSleepAlert NOPARAMS;
+extern void LYSleepDebug NOPARAMS;
 extern void LYSleepInfo NOPARAMS;
 extern void LYSleepMsg NOPARAMS;
 extern void LYSleepReplay NOPARAMS;

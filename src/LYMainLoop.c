@@ -78,16 +78,12 @@ PUBLIC char *str_kcode(HTkcode code)
 	}
     }
 
-#ifdef SH_EX	/* 1999/05/25 (Tue) 11:12:05 */
     if (no_table_center) {
 	buff[0] = '!';
 	strcpy(buff + 1, p);
     } else {
 	strcpy(buff, p);
     }
-#else
-    strcpy(buff, p);
-#endif
 
     return buff;
 }
@@ -398,18 +394,11 @@ PUBLIC int LYGetNewline NOARGS
 }
 
 #ifdef SOURCE_CACHE
-/*
- * To reparse current html document under the different settings we call
- * reparse_document() within mainloop refresh cycle, it relies upon 'curdoc'.
- *
- * From the other hand, regular requests for new document go to getfile()
- * and rely upon 'newdoc'.
- *
- * To work around newdoc.line/curdoc.line/www_search_target/Newline message
- * the following flag is introduced:
- */
 PRIVATE BOOLEAN from_source_cache = FALSE;
 
+/*
+ * Like HTreparse_document(), but also set the flag.
+ */
 PRIVATE BOOLEAN reparse_document NOARGS
 {
     BOOLEAN ok;
@@ -431,8 +420,7 @@ PRIVATE BOOLEAN reparse_or_reload ARGS1(
     int *,	cmd)
 {
 #ifdef SOURCE_CACHE
-    if (HTcan_reparse_document()) {
-	reparse_document();
+    if (reparse_document()) {
 	return FALSE;
     }
 #endif
@@ -471,6 +459,7 @@ PRIVATE void move_address ARGS2(
     free_address(src);
 }
 
+#ifdef DISP_PARTIAL
 /*
  * This is for traversal call from within partial mode in LYUtils.c
  * and HTFormat.c  It simply calls HText_pageDisplay() but utilizes
@@ -480,7 +469,6 @@ PRIVATE void move_address ARGS2(
 PUBLIC BOOL LYMainLoop_pageDisplay ARGS1(
 	int,		line_num)
 {
-#ifdef DISP_PARTIAL
     CONST char * pound;
     int prev_newline = Newline;
 
@@ -503,19 +491,15 @@ PUBLIC BOOL LYMainLoop_pageDisplay ARGS1(
 	 * If the requested URL has the #fragment, and we are not popped
 	 * from the history stack, and have not scrolled the document yet -
 	 * we should calculate correct newline position for the fragment.
+	 * (This is a bit suboptimal since HTFindPoundSelector() traverse
+	 * anchors list each time, so we have a quadratic complexity
+	 * and may load CPU in a worst case).
 	 */
 	if (display_partial
 	    && newdoc.line == 1 && line_num == 1 && prev_newline == 1
 	    && (pound = findPoundSelector(newdoc.address))
 	    && *pound && *(pound+1)) {
-
-	    HTChildAnchor sample;           /** 5 lines from HTAnchor.c **/
-	    sample.tag = (char*)pound+1;    /* for compare_anchors() only */
-
-	    if (HTMainAnchor         /* document is coming */
-		&& HTMainAnchor->children
-		&& HTBTree_search(HTMainAnchor->children, &sample) != NULL
-		&& HTFindPoundSelector(pound+1)) {
+	    if (HTFindPoundSelector(pound+1)) {
 		/* HTFindPoundSelector will initialize www_search_result */
 		Newline = www_search_result;
 	    } else {
@@ -523,11 +507,11 @@ PUBLIC BOOL LYMainLoop_pageDisplay ARGS1(
 		return NO;	/* no repaint */
 	    }
 	}
-#endif /* DISP_PARTIAL */
 
     HText_pageDisplay(Newline, prev_target);
     return YES;
 }
+#endif /* DISP_PARTIAL */
 
 
 PRIVATE void set_curdoc_link ARGS1(
@@ -2492,10 +2476,7 @@ PRIVATE void handle_LYK_DWIMHELP ARGS1(
     if (curdoc.link >= 0 && curdoc.link < nlinks &&
 	links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
 	!links[curdoc.link].l_form->disabled &&
-	(links[curdoc.link].l_form->type == F_TEXT_TYPE ||
-	 links[curdoc.link].l_form->type == F_TEXT_SUBMIT_TYPE ||
-	 links[curdoc.link].l_form->type == F_PASSWORD_TYPE ||
-	 links[curdoc.link].l_form->type == F_TEXTAREA_TYPE)) {
+	F_TEXTLIKE(links[curdoc.link].l_form->type)) {
 	*cshelpfile = LYLineeditHelpURL();
     }
 }
@@ -3102,10 +3083,7 @@ PRIVATE void handle_LYK_HISTORICAL NOARGS
 #ifdef SOURCE_CACHE
     } /* end if no bypass */
 #endif
-    if (historical_comments)
-	historical_comments = FALSE;
-    else
-	historical_comments = TRUE;
+    historical_comments = !historical_comments;
     if (minimal_comments) {
 	HTAlert(historical_comments ?
 		HISTORICAL_ON_MINIMAL_OFF : HISTORICAL_OFF_MINIMAL_ON);
@@ -3167,10 +3145,7 @@ PRIVATE BOOLEAN handle_LYK_HISTORY ARGS1(
 PRIVATE BOOLEAN handle_LYK_IMAGE_TOGGLE ARGS1(
     int *,	cmd)
 {
-    if (clickable_images)
-	clickable_images = FALSE;
-    else
-	clickable_images = TRUE;
+    clickable_images = !clickable_images;
 
     HTUserMsg(clickable_images ?
 	     CLICKABLE_IMAGES_ON : CLICKABLE_IMAGES_OFF);
@@ -3323,10 +3298,7 @@ PRIVATE BOOLEAN handle_LYK_INFO ARGS1(
 PRIVATE BOOLEAN handle_LYK_INLINE_TOGGLE ARGS1(
     int *,	cmd)
 {
-    if (pseudo_inline_alts)
-	pseudo_inline_alts = FALSE;
-    else
-	pseudo_inline_alts = TRUE;
+    pseudo_inline_alts = !pseudo_inline_alts;
 
     HTUserMsg(pseudo_inline_alts ?
 	      PSEUDO_INLINE_ALTS_ON : PSEUDO_INLINE_ALTS_OFF);
@@ -3620,20 +3592,17 @@ PRIVATE void handle_LYK_MINIMAL NOARGS
     } /* end if no bypass */
 #endif
     }
-    if (minimal_comments)
-	minimal_comments = FALSE;
-    else
-	minimal_comments = TRUE;
+    minimal_comments = !minimal_comments;
     if (!historical_comments) {
 	HTAlert(minimal_comments ?
 		MINIMAL_ON_IN_EFFECT : MINIMAL_OFF_VALID_ON);
-#ifdef SOURCE_CACHE
-	(void)reparse_document();
-#endif
     } else {
 	HTAlert(minimal_comments ?
 		MINIMAL_ON_BUT_HISTORICAL : MINIMAL_OFF_HISTORICAL_ON);
     }
+#ifdef SOURCE_CACHE
+    (void)reparse_document();
+#endif
     return;
 }
 
@@ -4010,7 +3979,7 @@ PRIVATE int handle_PREV_DOC ARGS3(
 	    WWWDoc.bookmark = HDOC(nhist - 1).bookmark;
 	    WWWDoc.isHEAD = HDOC(nhist - 1).isHEAD;
 	    WWWDoc.safe = HDOC(nhist - 1).safe;
-	    tmpanchor = HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
+	    tmpanchor = HTAnchor_findAddress(&WWWDoc);
 	    if (HTAnchor_safe(tmpanchor)) {
 		break;
 	    }
@@ -4300,10 +4269,7 @@ PRIVATE void handle_LYK_SOFT_DQUOTES NOARGS
 #ifdef SOURCE_CACHE
     } /* end if no bypass */
 #endif
-    if (soft_dquotes)
-	soft_dquotes = FALSE;
-    else
-	soft_dquotes = TRUE;
+    soft_dquotes = !soft_dquotes;
     HTUserMsg(soft_dquotes ?
 	      SOFT_DOUBLE_QUOTE_ON : SOFT_DOUBLE_QUOTE_OFF);
 #ifdef SOURCE_CACHE
@@ -5490,7 +5456,7 @@ try_again:
 		    WWWDoc.bookmark = newdoc.bookmark;
 		    WWWDoc.isHEAD = newdoc.isHEAD;
 		    WWWDoc.safe = newdoc.safe;
-		    tmpanchor = HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
+		    tmpanchor = HTAnchor_findAddress(&WWWDoc);
 		    if ((HText *)HTAnchor_document(tmpanchor) == NULL) {
 			if (!LYReopenTracelog(&trace_mode_flag)) {
 			    old_c = 0;
@@ -6385,10 +6351,7 @@ try_again:
 	curlink_is_editable =
 	    (nlinks > 0 &&
 	     links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-	     (links[curdoc.link].l_form->type == F_TEXT_TYPE ||
-	      links[curdoc.link].l_form->type == F_TEXT_SUBMIT_TYPE ||
-	      links[curdoc.link].l_form->type == F_PASSWORD_TYPE ||
-	      links[curdoc.link].l_form->type == F_TEXTAREA_TYPE));
+	     F_TEXTLIKE(links[curdoc.link].l_form->type));
 
 	use_last_tfpos = (curlink_is_editable &&
 			  (real_cmd == LYK_LPOS_PREV_LINK ||
@@ -6864,7 +6827,6 @@ new_cmd:  /*
 	    handle_LYK_SOURCE(&ownerS_address);
 	    break;
 
-#ifdef SH_EX		/* 1999/01/01 (Fri) */
 	case LYK_CHG_CENTER:	/* ^Q */
 
 	    if (no_table_center) {
@@ -6874,8 +6836,8 @@ new_cmd:  /*
 		no_table_center = TRUE;
 		HTInfoMsg(gettext("TABLE center disable."));
 	    }
-#endif
 	    /* FALLTHRU */
+
 	case LYK_RELOAD:  /* control-R to reload and refresh */
 	    handle_LYK_RELOAD(real_cmd);
 	    break;
@@ -6975,6 +6937,11 @@ new_cmd:  /*
 		    s++;
 		while (s < e && strchr(" \t\n\r", e[-1]))
 		    e--;
+		if (s[0] == '<' && e > s && e[-1] == '>') {
+		    s++; e--;
+		    if (!strncasecomp(s,"URL:", 4))
+			s += 4;
+		}
 		if (s >= e) {
 		    HTInfoMsg(gettext("No URL in the clipboard."));
 		    break;

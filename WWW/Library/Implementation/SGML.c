@@ -197,6 +197,8 @@ struct _HTStream {
     BOOL			no_lynx_specialcodes;
     int				current_attribute_number;
     HTChunk			*string;
+    int				leading_spaces;
+    int				trailing_spaces;
     HTElement			*element_stack;
     sgml_state			state;
     unsigned char kanji_buf;
@@ -1552,6 +1554,7 @@ PRIVATE void SGML_character ARGS2(
     HTTag * testtag = NULL;
     BOOLEAN chk;	/* Helps (?) walk through all the else ifs... */
     UCode_t clong, uck = 0; /* Enough bits for UCS4 ... */
+    int testlast;
 #ifdef CJK_EX
     unsigned char c;
 #else
@@ -2207,16 +2210,30 @@ top1:
 	    testtag = context->element_stack ?
 		context->element_stack->tag : NULL;
 
-	if (TOUPPER(c) != ((string->size == 1) ?
-					   '/' :
-			   testtag->name[string->size-2])) {
+	if (testtag == NULL) {
+	    string->size--;
+	    context->state = S_text;
+	    goto top1;
+	}
+
+	/*
+	 * Normally when we get the closing ">",
+	 *	testtag contains something like "TITLE"
+	 *	string contains something like "/title>"
+	 * so we decrement by 2 to compare the final character of each.
+	 */
+	testlast = string->size - 2 - context->trailing_spaces - context->leading_spaces;
+
+	if (TOUPPER(c) != ((testlast < 0)
+			    ? '/'
+			    : testtag->name[testlast])) {
 	    int i;
 
 	    /*
 	    **	If complete match, end litteral.
 	    */
-	    if ((c == '>') && testtag &&
-		string->size > 1 && !testtag->name[string->size-2]) {
+	    if ((c == '>') &&
+		testlast >= 0 && !testtag->name[testlast]) {
 #ifdef USE_PRETTYSRC
 		if (psrc_view) {
 		    PSRCSTART(abracket);
@@ -2250,12 +2267,33 @@ top1:
 		break;
 	    }
 
+	    /*
+	     * Allow whitespace between the "<" or ">" and the keyword, for
+	     * error-recovery.
+	     */
+	    if (isspace(UCH(c))) {
+		if (testlast == -1) {
+		    context->leading_spaces += 1;
+		    CTRACE2(TRACE_SGML, (tfp, "leading spaces: %d\n", context->leading_spaces));
+		    break;
+		} else if (testlast > 0) {
+		    context->trailing_spaces += 1;
+		    CTRACE2(TRACE_SGML, (tfp, "trailing spaces: %d\n", context->trailing_spaces));
+		    break;
+		}
+	    }
+
+	    /*
+	     * Mismatch - recover.
+	     */
+	    context->leading_spaces = 0;
+	    context->trailing_spaces = 0;
 	    if (((testtag->contents != SGML_LITTERAL &&
 		  (testtag->flags & Tgf_strict)) ||
 		 (context->state == S_pcdata &&
 		  (testtag->flags & (Tgf_strict|Tgf_endO)))) &&
-		(string->size > 1 &&
-		 (c == '>' || string->size > 2 || IsNmStart(c)))) {
+		(testlast > -1 &&
+		 (c == '>' || testlast > 0 || IsNmStart(c)))) {
 		context->state = S_end;
 		string->size--;
 		for (i = 0; i < string->size; i++)  /* remove '/' */
@@ -2267,7 +2305,7 @@ top1:
 	    }
 	    if (context->state == S_pcdata &&
 		(testtag->flags & (Tgf_strict|Tgf_endO)) &&
-		(string->size == 1 && IsNmStart(c))) {
+		(testlast < 0 && IsNmStart(c))) {
 		context->state = S_tag;
 		break;
 	    }
@@ -4409,6 +4447,8 @@ PUBLIC HTStream* SGML_new  ARGS3(
 
     context->isa = &SGMLParser;
     context->string = HTChunkCreate(128);	/* Grow by this much */
+    context->leading_spaces = 0;
+    context->trailing_spaces = 0;
     context->dtd = dtd;
     context->target = target;
     context->actions = (CONST HTStructuredClass*)(((HTStream*)target)->isa);
