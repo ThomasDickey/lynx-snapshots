@@ -349,21 +349,21 @@ PUBLIC CONST char ** LYCharSets[MAXCHARSETS]={
  *  The order of LYCharSets and LYchar_set_names MUST be the same
  */
 PUBLIC CONST char * LYchar_set_names[MAXCHARSETSP]={
-	"Western (ISO-8859-1)  ",
-	"Western (cp850)       ",
+	"Western (ISO-8859-1)",
+	"Western (cp850)",
 	"Western (windows-1252)",
 	"IBM PC US codepage (cp437)",
-	"DEC Multinational   ",
-	"Macintosh (8 bit)   ",
-	"NeXT character set  ",
-	"Chinese             ",
-	"Japanese (EUC-JP)   ",
+	"DEC Multinational",
+	"Macintosh (8 bit)",
+	"NeXT character set",
+	"Chinese",
+	"Japanese (EUC-JP)",
 	"Japanese (Shift_JIS)",
-	"Korean              ",
-	"Taipei (Big5)       ",
-	"Vietnamese (VISCII) ",
+	"Korean",
+	"Taipei (Big5)",
+	"Vietnamese (VISCII)",
 	"7 bit approximations (US-ASCII)",
-	"Transparent         ",
+	"Transparent",
 	(char *) 0
 };
 
@@ -731,7 +731,7 @@ PRIVATE CONST names_pairs OLD_charset_names[] = {
     {"UNICODE UTF 8",       "utf-8"},
     {"RFC 1345 w/o Intro",  "mnemonic+ascii+0"},
     {"RFC 1345 Mnemonic",   "mnemonic"},
-    {NULL,   NULL},
+    {NULL,   NULL}, /* terminated with NULL */
 };
 
 /*
@@ -740,24 +740,23 @@ PRIVATE CONST names_pairs OLD_charset_names[] = {
  *  in both MIME name and "human-readable" name (old and new style).
  *  Returns -1 if not recognized.
  */
-PUBLIC int UCGetLYhndl_byAnyName ARGS1 (CONST char *, value)
+PUBLIC int UCGetLYhndl_byAnyName ARGS1 (char *, value)
 {
     int i;
 
+    LYTrimTrailing(value);
     if (value == NULL) return -1;
 
     /* search by name */
     for (i = 0; (i < MAXCHARSETS && LYchar_set_names[i]); i++) {
-	if (!strncmp(LYchar_set_names[i], value,
-		     strlen(LYchar_set_names[i]))) {
+	if (!strcmp(value, LYchar_set_names[i])) {
 	    return i;  /* OK */
 	}
     }
 
     /* search by old name from 2.8/2.7.2 version */
     for (i = 0; (OLD_charset_names[i].fullname); i++) {
-	if (!strncmp(OLD_charset_names[i].fullname, value,
-		     strlen(OLD_charset_names[i].fullname))) {
+	if (!strcmp(value, OLD_charset_names[i].fullname)) {
 	    return UCGetLYhndl_byMIME(OLD_charset_names[i].MIMEname); /* OK */
 	}
     }

@@ -1216,12 +1216,12 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.1pre.2"
+#define LYNX_VERSION "2.8.1pre.3"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Fri, 25 Sep 1998 04:41:38 -0600"
+#define LYNX_DATE "Sat, 26 Sep 1998 21:28:34 -0600"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1998"
@@ -1271,11 +1271,12 @@
 #define SYSTEM_MAIL_FLAGS "-t -oi"
 /*
 **  Following executables may be sought from your PATH at run-time.
-**  To get those programs look for GNU-port stuff elsewhere.
-**  Currently, if compiled with -DUSE_ZLIB (default), you need only "cp"
+**  To get those programs look for GNU-port stuff elsewhere. Currently,
+**  if compiled with -DUSE_ZLIB and without -DDIRED_SUPPORT (default),
+**  you need only "cp.exe" from the list below.
 **
-**    WINDOWS
-**  ===========
+**    WINDOWS/DOS
+**    ===========
 */
 #define COMPRESS_PATH   "compress"
 #define UNCOMPRESS_PATH "uncompress"
@@ -1288,7 +1289,7 @@
 
 /*
 **    WINDOWS/DOS
-**  ===========
+**    ===========
 */
 #define ZIP_PATH        "zip"
 #define UNZIP_PATH      "unzip"

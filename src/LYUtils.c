@@ -5547,22 +5547,43 @@ PUBLIC FILE *LYNewBinFile ARGS1(char *, name)
 
 PUBLIC FILE *LYNewTxtFile ARGS1(char *, name)
 {
+    FILE *fp;
+
 #ifdef VMS
-    FILE *fp = fopen (name, "w", "shr=get");
+    fp = fopen (name, "w", "shr=get");
     chmod(name, HIDE_CHMOD);
 #else
-    FILE *fp = OpenHiddenFile(name, "w");
+#if defined(__DJGPP__) || defined(_WINDOWS)
+    _fmode = O_TEXT;
+#endif /* __DJGPP__  or _WINDOWS */
+
+    fp = OpenHiddenFile(name, "w");
+
+#if defined(__DJGPP__) || defined(_WINDOWS)
+    _fmode = O_BINARY;
+#endif /* __DJGPP__ or _WINDOWS */  
 #endif
+
     return fp;
 }
 
 PUBLIC FILE *LYAppendToTxtFile ARGS1(char *, name)
 {
+    FILE *fp;
+
 #ifdef VMS
-    FILE *fp = fopen (name, "a+", "shr=get");
+    fp = fopen (name, "a+", "shr=get");
     chmod(name, HIDE_CHMOD);
 #else
-    FILE *fp = OpenHiddenFile(name, "a+");
+#if defined(__DJGPP__) || defined(_WINDOWS)
+    _fmode = O_TEXT;
+#endif /* __DJGPP__  or _WINDOWS */
+
+    fp = OpenHiddenFile(name, "a+");
+
+#if defined(__DJGPP__) || defined(_WINDOWS)
+    _fmode = O_BINARY;
+#endif /* __DJGPP__ or _WINDOWS */  
 #endif
     return fp;
 }

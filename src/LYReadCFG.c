@@ -1198,8 +1198,8 @@ PUBLIC void read_cfg ARGS4(
 
     /*
      * If any COOKIE_{ACCEPT,REJECT}_DOMAINS have been defined,
-     * process them. These are comma delimited lists of
-     * domains, with leading '.'. - BJP
+     * process them.  These are comma delimited lists of
+     * domains. - BJP
      */
 
     if (LYCookieAcceptDomains != NULL) {

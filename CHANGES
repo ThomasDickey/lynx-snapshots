@@ -1,6 +1,20 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-09-27 (2.8.1pre.3)
++ fix a place in cookie_add{accept,reject}list() where cookies would be deleted
+  from memory if a persistent cookie had the same domain as an entry in
+  COOKIE_{ACCEPT,REJECT}_DOMAINS - BJP
+* move Lynx's writing of persistent cookies to COOKIE_FILE from happening when
+  you enter the Cookie Jar page to quit time, before cleaning up temporary
+  files - BJP
+* Lynx_user_guide.html: add text about lynx.cfg - LP
+* forms-options: options names moved 2 columns to the right (is it good?) - LP
+* fix reading .lynxrc "character_set" (trim trailing spaces in fullname) - LP
+* fix ReadProgress message for LYshow_kb_rate (while <1024 bytes received
+  we showed byte-transfer rate even in KB mode), extra dot removed - LP
+* DOS text files: opening text mode switch now incorporated in LYNewTxtFile/
+  LYAppendToTxtFile and hope for the best - LP
 1998-09-25 (2.8.1pre.2)
 * fixed forms submission charset: was broken by me in dev26 (HText_SubmitForm()
   in GridText.c) - LP
