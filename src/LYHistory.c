@@ -121,8 +121,8 @@ PUBLIC BOOLEAN LYwouldPush ARGS1(
 	char *,	title)
 {
     return (!strcmp(title, HISTORY_PAGE_TITLE)
-         || !strcmp(title, PRINT_OPTIONS_TITLE)
-         || !strcmp(title, DOWNLOAD_OPTIONS_TITLE)
+	 || !strcmp(title, PRINT_OPTIONS_TITLE)
+	 || !strcmp(title, DOWNLOAD_OPTIONS_TITLE)
 #ifdef DIRED_SUPPORT
 	 || !strcmp(title, DIRED_MENU_TITLE)
 	 || !strcmp(title, UPLOAD_OPTIONS_TITLE)
@@ -322,6 +322,11 @@ PUBLIC void LYpop ARGS1(
 	doc->isHEAD = history[nhist].isHEAD;
 	doc->safe = history[nhist].safe;
 	doc->internal_link = history[nhist].internal_link;
+#ifdef DISP_PARTIAL
+	/* assume we pop the 'doc' to show it soon... */
+	Newline_partial = doc->line;	/* reinitialize */
+	NumOfLines_partial = -1;	/* initialize to -1 */
+#endif /* DISP_PARTIAL */
 	CTRACE(tfp, "LYpop[%d]: address:%s\n     title:%s\n",
 		    nhist, doc->address, doc->title);
     }
@@ -347,6 +352,11 @@ PUBLIC void LYpop_num ARGS2(
 	doc->isHEAD = history[number].isHEAD;
 	doc->safe = history[number].safe;
 	doc->internal_link = history[number].internal_link; /* ?? */
+#ifdef DISP_PARTIAL
+	/* assume we pop the 'doc' to show it soon... */
+	Newline_partial = doc->line;	/* reinitialize */
+	NumOfLines_partial = -1;	/* initialize to -1 */
+#endif /* DISP_PARTIAL */
     }
 }
 

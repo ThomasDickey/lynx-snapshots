@@ -392,9 +392,12 @@ extern void lynx_stop_radio_color NOPARAMS;
 extern void lynx_stop_all_colors NOPARAMS;
 
 /*
- * To prevent corrupting binary data with _WINDOWS and DJGPP we open files and
- * stdout in BINARY mode by default.  Where necessary we should open and
+ * To prevent corrupting binary data on DOS, MS-WINDOWS or OS/2 we open files
+ * and stdout in BINARY mode by default.  Where necessary we should open and
  * (close!) TEXT mode.
+ *
+ * Note:  EMX has no corresponding variable like _fmode on DOS, but it does
+ * have setmode.
  */
 #if defined(_WINDOWS) || defined(DJGPP) || defined(__EMX__)
 #define SetOutputMode(mode) setmode(fileno(stdout), mode)

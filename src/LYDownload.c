@@ -614,15 +614,20 @@ PUBLIC int LYdownload_options ARGS2(
     BeginInternalPage(fp0, DOWNLOAD_OPTIONS_TITLE, DOWNLOAD_OPTIONS_HELP);
 
     fprintf(fp0, "<pre>\n");
+
     fprintf(fp0, "\
-  <em>Downloaded link:</em> %s\n\
+  <em>Downloaded link:</em> %s\n",
+	downloaded_url);
+
+    if (!no_disk_save && !child_lynx)
+    fprintf(fp0, "\
   <em>Suggested file name:</em> %s%s\n",
-       downloaded_url, (lynx_save_space ? lynx_save_space : ""), sug_filename);
+	(lynx_save_space ? lynx_save_space : ""), sug_filename);
 
     fprintf(fp0, "\n%s options:\n",
 	(user_mode == NOVICE_MODE) ? "Standard download" : "Download");
 
-    if(!no_disk_save && !child_lynx) {
+    if (!no_disk_save && !child_lynx) {
 #ifdef DIRED_SUPPORT
 	/*
 	 *  Disable save to disk option for local files.

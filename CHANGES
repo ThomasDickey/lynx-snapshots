@@ -1,6 +1,25 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-10-04 (2.8.1pre.7)
+* add special-case CF_TERMIOS_AND_CURSES configure macro (fixes problem reported
+  by Philippe De Muyter) - TD
+* update/reorganize option_help.html (Philip Webb).
+* Restore newline position when return from the Print menu or follow a link
+  from History page (was broken for partial display mode only):  LYPop() and
+  LYPop_num now reinitialize Newline_partial if it happens on getfile stage. 
+  Also remove changes from 1998-06-11 (case LYK_DOWNLOAD) since this is now
+  protected by HText_new() which never starts.  - LP
+* tweak suggested filename for download menu: now it we have URL 
+  terminated with "/" (e.g. a directory or possibly root) do one more try - 
+  remove terminating "/" - LP
+* download menu: do not show "Suggested file name" when "save to disk disabled" 
+  (requested by HN) - LP 
+* more tweaks on LYshow_kb_rate - LP 
+* move fallback definitions for POSIX S_ISLNK, etc., to allow build with
+  VAX C (reported by Tony Bolton) - TD
+* add parentheses to eval-expression in CF_MAKE_INCLUDE configure test to
+  accommodate bash2 (Tadayoshi Okuma <tad@pht.co.jp>)
 1998-10-01 (2.8.1pre.6)
 * add EMX to special cases for SetOutputMode, to force stdout to O_BINARY mode
   so that downloading binary files will not corrupt them (reported by Ilya
@@ -45,8 +64,6 @@ Changes since Lynx 2.8 release
 1998-09-28 (2.8.1pre.4)
 * tentative fix for HPUX sed problems (reported by jones.peter@uqam.ca) - TD
 * update lynx.man and lynx.hlp to reflect new command-line options - TD
-* add PARTIAL_MIN_LINES switch in lynx.cfg to customize incremental rendering
-  with smaller chunks (requested by Eric <erbrun@bellatlantic.net>) - LP
 * minor documentation fix - LP
 * miscellaneous fixes for build on VMS (reported by Tony Bolton) - TD
 * tweak 'const' assignment for VMS (in LYReadCFG.c and LYPrint.c) - LP

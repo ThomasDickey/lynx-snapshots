@@ -791,7 +791,7 @@ all :
 	@echo 'cf_make_include=\$(RESULT)'
 CF_EOF
 	cf_make_include=""
-	eval `cd $cf_dir && ${MAKE-make} 2>&AC_FD_CC | grep cf_make_include=OK`
+	eval `(cd $cf_dir && ${MAKE-make}) 2>&AC_FD_CC | grep cf_make_include=OK`
 	if test -n "$cf_make_include"; then
 		make_include_left="$cf_include"
 		make_include_quote="$cf_quote"
@@ -1464,6 +1464,27 @@ fi
 if test "$cf_cv_lib_termcap" = none; then
 	AC_ERROR([Can't find -ltermlib, -lcurses, or -ltermcap])
 fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Check if including termio.h with <curses.h> dies like on sysv68
+dnl FIXME: this is too Lynx-specific
+AC_DEFUN([CF_TERMIO_AND_CURSES],
+[
+AC_CACHE_CHECK(if we can include termio.h with curses,cf_cv_termio_and_curses,[
+    cf_save_CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS -DHAVE_CONFIG_H -I. -I${srcdir-.} -I${srcdir-.}/src -I${srcdir-.}/WWW/Library/Implementation"
+    touch lynx_cfg.h
+    AC_TRY_COMPILE([
+#include <$1>
+#include <termio.h>],
+    [putchar(0x0a)],
+    [cf_cv_termio_and_curses=yes],
+    [cf_cv_termio_and_curses=no])
+    CFLAGS="$cf_save_CFLAGS"
+    rm -f lynx_cfg.h
+])
+
+test $cf_cv_termio_and_curses = no && AC_DEFINE(TERMIO_AND_CURSES)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check if including both termio.h and termios.h die like on DG.UX

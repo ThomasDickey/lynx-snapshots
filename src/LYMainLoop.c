@@ -505,14 +505,16 @@ try_again:
 				/* and set the flag to 0  */
 		if (display_partial) {
 		    /*
-		     * Disable display_partial if requested URL has #fragment.
+		     * Disable display_partial if requested URL has #fragment
+		     * and we are not popped from the history stack
+		     * so can't calculate correct newline position for fragment.
 		     * Otherwise user got the new document from the first page
 		     * and be moved to #fragment later after download
-		     * completed, but only if user did not mess screen up by
+		     * completed, but only if s/he did not mess screen up by
 		     * scrolling before...  So fall down to old behavior here.
 		     */
 		    if (!LYCursesON ||
-				(strchr(newdoc.address, '#')))
+			       (Newline_partial == 1 && strchr(newdoc.address, '#')))
 			display_partial = FALSE;
 		}
 #endif /* DISP_PARTIAL */
@@ -985,7 +987,8 @@ try_again:
 			 *  Override newdoc.line with a new value if user
 			 *  scrolled the document while downloading.
 			 */
-			if (Newline_partial != newdoc.line)
+			if (Newline_partial != newdoc.line
+			 && NumOfLines_partial > 0)
 			    Newline = Newline_partial;
 
 			/*
@@ -4928,7 +4931,6 @@ check_add_bookmark_to_self:
 		    newdoc.isHEAD = history[number].isHEAD;
 		    newdoc.safe = history[number].safe;
 		    newdoc.internal_link = FALSE;
-		    newdoc.line = curdoc.line;  /* need for display_partial ! */
 		    newdoc.link = 0;
 		    HTOutputFormat = HTAtom_for("www/download");
 		    LYUserSpecifiedURL = TRUE;
@@ -5007,7 +5009,6 @@ check_add_bookmark_to_self:
 			newdoc.safe = FALSE;
 		    }
 		    newdoc.internal_link = FALSE;
-		    newdoc.line = curdoc.line;  /* need for display_partial ! */
 		    newdoc.link = 0;
 		    HTOutputFormat = HTAtom_for("www/download");
 		    /*

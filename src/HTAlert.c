@@ -122,7 +122,7 @@ PUBLIC void HTReadProgress ARGS2(
 	    if (LYshow_kb_rate
 	     && (total >= kb_units || bytes >= kb_units)) {
 		units = "KB";
-		divisor = 1024;
+		divisor = kb_units;
 		bytes /= divisor;
 		if (total > 0) total /= divisor;
 	    }
@@ -132,7 +132,7 @@ PUBLIC void HTReadProgress ARGS2(
 	    else
 		sprintf (line, "Read %ld %s of data", bytes, units);
 	    if ((transfer_rate > 0)
-		     && (!LYshow_kb_rate || (bytes * divisor > kb_units)))
+		     && (!LYshow_kb_rate || (bytes * divisor >= kb_units)))
 		sprintf (line + strlen(line), ", %ld %s/sec.", transfer_rate / divisor, units);
 	    else
 		sprintf (line + strlen(line), ".");
