@@ -1809,7 +1809,9 @@ PUBLIC int main ARGS2(
 	if (persistent_cookies)
 	    LYStoreCookies(LYCookieFile);
 #endif /* EXP_PERSISTENT_COOKIES */
+	cleanup_files();
 	exit_immediately(status);
+	cleanup_files();
     } else {
 	/*
 	 *  Start an INTERACTIVE session. - FM

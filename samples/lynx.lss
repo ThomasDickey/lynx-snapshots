@@ -1,8 +1,10 @@
+# It's best to put these in a .lss file and use "lynx -lss=file.lss whatever"
+# for now.
 #
-#it's best to put these in a .lss file and use "lynx -lss=file.lss whatever" for now.
+# Normal type styles correspond to HTML tags.
 #
-# Normal type styles.
-# next line means: use bold if mono, otherwise brightblue on <defaultbackground>
+# The next line (beginning with "em") means:  use bold if mono, otherwise
+# brightblue on <defaultbackground>
 em:bold:brightblue
 strong:bold:brightred
 b:bold:red
@@ -35,6 +37,12 @@ td:normal:default
 br:normal:default
 
 # Special styles - not corresponding directly to HTML tags
+#	alert	- status bar, when message begins "Alert".
+#	alink	- active link
+#	normal	- default attributes
+#	status	- status bar
+#	whereis	- whereis search target
+#
 #normal:normal:default:blue
 alink:reverse:yellow:black
 status:reverse:yellow:blue
