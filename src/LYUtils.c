@@ -119,7 +119,7 @@ extern int BSDselect PARAMS((int nfds, fd_set * readfds, fd_set * writefds,
  * it no longer applies, since it will reuse that filename at a later time.
  */
 #ifdef EXP_RAND_TEMPNAME
-#if defined(HAVE_RAND) && defined(HAVE_SRAND) && defined(RAND_MAX)
+#if defined(RAND_MAX)
 #define USE_RAND_TEMPNAME 1
 #define MAX_TEMPNAME 10000
 #ifndef BITS_PER_CHAR
@@ -245,6 +245,14 @@ PUBLIC void highlight ARGS3(
 #else	/* here USE_COLOR_STYLE defined */
 	int s = s_alink;
 
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+	if ( textfields_need_activation &&
+	     links[cur].type == WWW_FORM_LINK_TYPE &&
+	     F_TEXTLIKE(links[cur].form->type) )
+	    s = s_curedit;
+#endif
+
+
 #  define LXP (links[cur].lx)
 #  define LYP (links[cur].ly)
 	if (flag != ON) {
@@ -287,7 +295,7 @@ PUBLIC void highlight ARGS3(
 	} else {
 	    CTRACE((tfp, "STYLE.highlight.on: @(%d,%d).\n", LYP, LXP));
 	}
-	move(LYP, LXP);
+	LYmove(LYP, LXP);
 	LynxChangeStyle(s, STACK_ON, 0);
 #endif
 	}
@@ -302,11 +310,11 @@ PUBLIC void highlight ARGS3(
 		       links[cur].hightext : ""),
 		      (avail_space > links[cur].form->size ?
 				      links[cur].form->size : avail_space));
-	    addstr(buffer);
+	    LYaddstr(buffer);
 
 	    len = strlen(buffer);
 	    for (; len < links[cur].form->size && len < avail_space; len++)
-		addch('_');
+		LYaddch('_');
 
 	} else {
 #if defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
@@ -327,7 +335,7 @@ PUBLIC void highlight ARGS3(
 			      (sizeof(buffer) - 1),
 			      ((LYcols - 1) - links[cur].lx),
 			      utf_flag);
-		addstr(buffer);
+		LYaddstr(buffer);
 	    }
 	}
 
@@ -340,7 +348,7 @@ PUBLIC void highlight ARGS3(
 #endif
 	) {
 	    lynx_stop_link_color (flag == ON, links[cur].inUnderline);
-	    move((links[cur].ly + 1), links[cur].hightext2_offset);
+	    LYmove((links[cur].ly + 1), links[cur].hightext2_offset);
 #ifndef USE_COLOR_STYLE
 	    lynx_start_link_color (flag == ON, links[cur].inUnderline);
 #else
@@ -358,10 +366,10 @@ PUBLIC void highlight ARGS3(
 		     */
 		    if (HTCJK != NOCJK && !isascii(tmp[0])) {
 			tmp[1] = links[cur].hightext2[++i];
-			addstr(tmp);
+			LYaddstr(tmp);
 			tmp[1] = '\0';
 		    } else {
-			addstr(tmp);
+			LYaddstr(tmp);
 		    }
 		 }
 	    }
@@ -471,7 +479,7 @@ PUBLIC void highlight ARGS3(
 		 *  Go to the start of the hightext and
 		 *  handle its first character. - FM
 		 */
-		move(hLine, offset);
+		LYmove(hLine, offset);
 		tmp[0] = data[itmp];
 		if (utf_flag && !isascii(tmp[0])) {
 		    if ((*tmp & 0xe0) == 0xc0) {
@@ -507,9 +515,9 @@ PUBLIC void highlight ARGS3(
 		    if (flag != ON) {
 			LYstartTargetEmphasis();
 			TargetEmphasisON = TRUE;
-			addstr(tmp);
+			LYaddstr(tmp);
 		    } else {
-			move(hLine, (offset + 1));
+			LYmove(hLine, (offset + 1));
 		    }
 		    tmp[1] = '\0';
 		    written += (utf_extra + 1);
@@ -526,9 +534,9 @@ PUBLIC void highlight ARGS3(
 		    if (flag != ON) {
 			LYstartTargetEmphasis();
 			TargetEmphasisON = TRUE;
-			addstr(tmp);
+			LYaddstr(tmp);
 		    } else {
-			move(hLine, (offset + 1));
+			LYmove(hLine, (offset + 1));
 		    }
 		    tmp[1] = '\0';
 		    written += 2;
@@ -540,9 +548,9 @@ PUBLIC void highlight ARGS3(
 		    if (flag != ON) {
 			LYstartTargetEmphasis();
 			TargetEmphasisON = TRUE;
-			addstr(tmp);
+			LYaddstr(tmp);
 		    } else {
-			move(hLine, (offset + 1));
+			LYmove(hLine, (offset + 1));
 		    }
 		    written++;
 		}
@@ -606,9 +614,9 @@ PUBLIC void highlight ARGS3(
 			    LYstopTargetEmphasis();
 			    TargetEmphasisON = FALSE;
 			    LYGetYX(y, offset);
-			    move(hLine, (offset + 1));
+			    LYmove(hLine, (offset + 1));
 			} else {
-			    addstr(tmp);
+			    LYaddstr(tmp);
 			}
 			tmp[1] = '\0';
 			written += (utf_extra + 1);
@@ -627,9 +635,9 @@ PUBLIC void highlight ARGS3(
 			    LYstopTargetEmphasis();
 			    TargetEmphasisON = FALSE;
 			    LYGetYX(y, offset);
-			    move(hLine, (offset + 1));
+			    LYmove(hLine, (offset + 1));
 			} else {
-			    addstr(tmp);
+			    LYaddstr(tmp);
 			}
 			tmp[1] = '\0';
 			written += 2;
@@ -643,9 +651,9 @@ PUBLIC void highlight ARGS3(
 			    LYstopTargetEmphasis();
 			    TargetEmphasisON = FALSE;
 			    LYGetYX(y, offset);
-			    move(hLine, (offset + 1));
+			    LYmove(hLine, (offset + 1));
 			} else {
-			    addstr(tmp);
+			    LYaddstr(tmp);
 			}
 			written++;
 		    }
@@ -733,7 +741,7 @@ highlight_hit_within_hightext:
 	    if (!utf_flag) {
 		data += (Offset - offset);
 	    } else {
-		refresh();
+		LYrefresh();
 		data = LYmbcs_skip_glyphs(data,
 					  (Offset - offset),
 					  utf_flag);
@@ -747,7 +755,7 @@ highlight_hit_within_hightext:
 	     *	Go to the start of the hit and
 	     *	handle its first character. - FM
 	     */
-	    move(hLine, offset);
+	    LYmove(hLine, offset);
 	    tmp[0] = data[itmp];
 	    if (utf_flag && !isascii(tmp[0])) {
 		if ((*tmp & 0xe0) == 0xc0) {
@@ -786,9 +794,9 @@ highlight_hit_within_hightext:
 		    (offset > hoffset && data[itmp+1] != '\0')) {
 		    LYstartTargetEmphasis();
 		    TargetEmphasisON = TRUE;
-		    addstr(tmp);
+		    LYaddstr(tmp);
 		} else {
-		    move(hLine, (offset + 1));
+		    LYmove(hLine, (offset + 1));
 		}
 		tmp[1] = '\0';
 		written += (utf_extra + 1);
@@ -808,9 +816,9 @@ highlight_hit_within_hightext:
 		    (offset > hoffset && data[itmp+1] != '\0')) {
 		    LYstartTargetEmphasis();
 		    TargetEmphasisON = TRUE;
-		    addstr(tmp);
+		    LYaddstr(tmp);
 		} else {
-		    move(hLine, (offset + 1));
+		    LYmove(hLine, (offset + 1));
 		}
 		tmp[1] = '\0';
 		written += 2;
@@ -825,9 +833,9 @@ highlight_hit_within_hightext:
 		    (offset > hoffset && data[itmp+1] != '\0')) {
 		    LYstartTargetEmphasis();
 		    TargetEmphasisON = TRUE;
-		    addstr(tmp);
+		    LYaddstr(tmp);
 		} else {
-		    move(hLine, (offset + 1));
+		    LYmove(hLine, (offset + 1));
 		}
 		written++;
 	    }
@@ -888,9 +896,9 @@ highlight_hit_within_hightext:
 			LYstopTargetEmphasis();
 			TargetEmphasisON = FALSE;
 			LYGetYX(y, offset);
-			move(hLine, (offset + 1));
+			LYmove(hLine, (offset + 1));
 		    } else {
-			addstr(tmp);
+			LYaddstr(tmp);
 		    }
 		    tmp[1] = '\0';
 		    written += (utf_extra + 1);
@@ -909,9 +917,9 @@ highlight_hit_within_hightext:
 			LYstopTargetEmphasis();
 			TargetEmphasisON = FALSE;
 			LYGetYX(y, offset);
-			move(hLine, (offset + 1));
+			LYmove(hLine, (offset + 1));
 		    } else {
-			addstr(tmp);
+			LYaddstr(tmp);
 		    }
 		    tmp[1] = '\0';
 		    written += 2;
@@ -925,9 +933,9 @@ highlight_hit_within_hightext:
 			LYstopTargetEmphasis();
 			TargetEmphasisON = FALSE;
 			LYGetYX(y, offset);
-			move(hLine, (offset + 1));
+			LYmove(hLine, (offset + 1));
 		    } else {
-			addstr(tmp);
+			LYaddstr(tmp);
 		    }
 		    written++;
 		}
@@ -996,12 +1004,12 @@ highlight_hit_within_hightext:
 		    if (!utf_flag) {
 			data = buffer + (offset - hoffset);
 		    } else {
-			refresh();
+			LYrefresh();
 			data = LYmbcs_skip_glyphs(buffer,
 						  (offset - hoffset),
 						  utf_flag);
 		    }
-		    move(hLine, offset);
+		    LYmove(hLine, offset);
 		    itmp = 0;
 		    written = 0;
 		    len = strlen(data);
@@ -1056,9 +1064,9 @@ highlight_hit_within_hightext:
 				LYstopTargetEmphasis();
 				TargetEmphasisON = FALSE;
 				LYGetYX(y, offset);
-				move(hLine, (offset + 1));
+				LYmove(hLine, (offset + 1));
 			    } else {
-				addstr(tmp);
+				LYaddstr(tmp);
 			    }
 			    tmp[1] = '\0';
 			    written += (utf_extra + 1);
@@ -1077,7 +1085,7 @@ highlight_hit_within_hightext:
 				LYstopTargetEmphasis();
 				TargetEmphasisON = FALSE;
 			    } else {
-				addstr(tmp);
+				LYaddstr(tmp);
 			    }
 			    tmp[1] = '\0';
 			    written += 2;
@@ -1091,7 +1099,7 @@ highlight_hit_within_hightext:
 				LYstopTargetEmphasis();
 				TargetEmphasisON = FALSE;
 			    } else {
-				addstr(tmp);
+				LYaddstr(tmp);
 			    }
 			    written++;
 			}
@@ -1201,7 +1209,7 @@ highlight_search_hightext2:
 		 *  Go to the start of the hightext2 and
 		 *  handle its first character. - FM
 		 */
-		move(hLine, offset);
+		LYmove(hLine, offset);
 		tmp[0] = data[itmp];
 		if (utf_flag && !isascii(tmp[0])) {
 		    if ((*tmp & 0xe0) == 0xc0) {
@@ -1237,9 +1245,9 @@ highlight_search_hightext2:
 		    if (flag != ON) {
 			LYstartTargetEmphasis();
 			TargetEmphasisON = TRUE;
-			addstr(tmp);
+			LYaddstr(tmp);
 		    } else {
-			move(hLine, (offset + 1));
+			LYmove(hLine, (offset + 1));
 		    }
 		    tmp[1] = '\0';
 		    written += (utf_extra + 1);
@@ -1256,9 +1264,9 @@ highlight_search_hightext2:
 		    if (flag != ON) {
 			LYstartTargetEmphasis();
 			TargetEmphasisON = TRUE;
-			addstr(tmp);
+			LYaddstr(tmp);
 		    } else {
-			move(hLine, (offset + 1));
+			LYmove(hLine, (offset + 1));
 		    }
 		    tmp[1] = '\0';
 		    written += 2;
@@ -1270,9 +1278,9 @@ highlight_search_hightext2:
 		    if (flag != ON) {
 			LYstartTargetEmphasis();
 			TargetEmphasisON = TRUE;
-			addstr(tmp);
+			LYaddstr(tmp);
 		    } else {
-			move(hLine, (offset + 1));
+			LYmove(hLine, (offset + 1));
 		    }
 		    written++;
 		}
@@ -1336,9 +1344,9 @@ highlight_search_hightext2:
 			    LYstopTargetEmphasis();
 			    TargetEmphasisON = FALSE;
 			    LYGetYX(y, offset);
-			    move(hLine, (offset + 1));
+			    LYmove(hLine, (offset + 1));
 			} else {
-			    addstr(tmp);
+			    LYaddstr(tmp);
 			}
 			tmp[1] = '\0';
 			written += (utf_extra + 1);
@@ -1357,9 +1365,9 @@ highlight_search_hightext2:
 			    LYstopTargetEmphasis();
 			    TargetEmphasisON = FALSE;
 			    LYGetYX(y, offset);
-			    move(hLine, (offset + 1));
+			    LYmove(hLine, (offset + 1));
 			} else {
-			    addstr(tmp);
+			    LYaddstr(tmp);
 			}
 			tmp[1] = '\0';
 			written += 2;
@@ -1373,9 +1381,9 @@ highlight_search_hightext2:
 			    LYstopTargetEmphasis();
 			    TargetEmphasisON = FALSE;
 			    LYGetYX(y, offset);
-			    move(hLine, (offset + 1));
+			    LYmove(hLine, (offset + 1));
 			} else {
-			    addstr(tmp);
+			    LYaddstr(tmp);
 			}
 			written++;
 		    }
@@ -1462,7 +1470,7 @@ highlight_hit_within_hightext2:
 	    if (!utf_flag) {
 		data += (Offset - offset);
 	    } else {
-		refresh();
+		LYrefresh();
 		data = LYmbcs_skip_glyphs(data,
 					  (Offset - offset),
 					  utf_flag);
@@ -1476,7 +1484,7 @@ highlight_hit_within_hightext2:
 	     *	Go to the start of the hit and
 	     *	handle its first character. - FM
 	     */
-	    move(hLine, offset);
+	    LYmove(hLine, offset);
 	    tmp[0] = data[itmp];
 	    if (utf_flag && !isascii(tmp[0])) {
 		if ((*tmp & 0xe0) == 0xc0) {
@@ -1515,9 +1523,9 @@ highlight_hit_within_hightext2:
 		    (offset > hoffset && data[itmp+1] != '\0')) {
 		    LYstartTargetEmphasis();
 		    TargetEmphasisON = TRUE;
-		    addstr(tmp);
+		    LYaddstr(tmp);
 		} else {
-		    move(hLine, (offset + 1));
+		    LYmove(hLine, (offset + 1));
 		}
 		tmp[1] = '\0';
 		written += (utf_extra + 1);
@@ -1537,9 +1545,9 @@ highlight_hit_within_hightext2:
 		    (offset > hoffset && data[itmp+1] != '\0')) {
 		    LYstartTargetEmphasis();
 		    TargetEmphasisON = TRUE;
-		    addstr(tmp);
+		    LYaddstr(tmp);
 		} else {
-		    move(hLine, (offset + 1));
+		    LYmove(hLine, (offset + 1));
 		}
 		tmp[1] = '\0';
 		written += 2;
@@ -1554,9 +1562,9 @@ highlight_hit_within_hightext2:
 		    (offset > hoffset && data[itmp+1] != '\0')) {
 		    LYstartTargetEmphasis();
 		    TargetEmphasisON = TRUE;
-		    addstr(tmp);
+		    LYaddstr(tmp);
 		} else {
-		    move(hLine, (offset + 1));
+		    LYmove(hLine, (offset + 1));
 		}
 		written++;
 	    }
@@ -1617,9 +1625,9 @@ highlight_hit_within_hightext2:
 			LYstopTargetEmphasis();
 			TargetEmphasisON = FALSE;
 			LYGetYX(y, offset);
-			move(hLine, (offset + 1));
+			LYmove(hLine, (offset + 1));
 		    } else {
-			addstr(tmp);
+			LYaddstr(tmp);
 		    }
 		    tmp[1] = '\0';
 		    written += (utf_extra + 1);
@@ -1638,9 +1646,9 @@ highlight_hit_within_hightext2:
 			LYstopTargetEmphasis();
 			TargetEmphasisON = FALSE;
 			LYGetYX(y, offset);
-			move(hLine, (offset + 1));
+			LYmove(hLine, (offset + 1));
 		    } else {
-			addstr(tmp);
+			LYaddstr(tmp);
 		    }
 		    tmp[1] = '\0';
 		    written += 2;
@@ -1654,9 +1662,9 @@ highlight_hit_within_hightext2:
 			LYstopTargetEmphasis();
 			TargetEmphasisON = FALSE;
 			LYGetYX(y, offset);
-			move(hLine, (offset + 1));
+			LYmove(hLine, (offset + 1));
 		    } else {
-			addstr(tmp);
+			LYaddstr(tmp);
 		    }
 		    written++;
 		}
@@ -1725,12 +1733,12 @@ highlight_hit_within_hightext2:
 		    if (!utf_flag) {
 			data = buffer + (offset - hoffset);
 		    } else {
-			refresh();
+			LYrefresh();
 			data = LYmbcs_skip_glyphs(buffer,
 						  (offset - hoffset),
 						  utf_flag);
 		    }
-		    move(hLine, offset);
+		    LYmove(hLine, offset);
 		    itmp = 0;
 		    written = 0;
 		    len = strlen(data);
@@ -1785,9 +1793,9 @@ highlight_hit_within_hightext2:
 				LYstopTargetEmphasis();
 				TargetEmphasisON = FALSE;
 				LYGetYX(y, offset);
-				move(hLine, (offset + 1));
+				LYmove(hLine, (offset + 1));
 			    } else {
-				addstr(tmp);
+				LYaddstr(tmp);
 			    }
 			    tmp[1] = '\0';
 			    written += (utf_extra + 1);
@@ -1806,7 +1814,7 @@ highlight_hit_within_hightext2:
 				LYstopTargetEmphasis();
 				TargetEmphasisON = FALSE;
 			    } else {
-				addstr(tmp);
+				LYaddstr(tmp);
 			    }
 			    tmp[1] = '\0';
 			    written += 2;
@@ -1820,7 +1828,7 @@ highlight_hit_within_hightext2:
 				LYstopTargetEmphasis();
 				TargetEmphasisON = FALSE;
 			    } else {
-				addstr(tmp);
+				LYaddstr(tmp);
 			    }
 			    written++;
 			}
@@ -1856,11 +1864,11 @@ highlight_search_done:
 	    /*
 	     *	Never hide the cursor if there's no FANCY CURSES or SLANG.
 	     */
-	    move(links[cur].ly,
+	    LYmove(links[cur].ly,
 		 ((links[cur].lx > 0) ? (links[cur].lx - 1) : 0));
 
 	if (flag)
-	    refresh();
+	    LYrefresh();
     }
     return;
 }
@@ -2066,16 +2074,16 @@ PUBLIC void statusline ARGS1(
      */
     if (LYStatusLine >= 0) {
 	if (LYStatusLine < LYlines-1) {
-	    move(LYStatusLine, 0);
+	    LYmove(LYStatusLine, 0);
 	} else {
-	    move(LYlines-1, 0);
+	    LYmove(LYlines-1, 0);
 	}
     } else if (user_mode == NOVICE_MODE) {
-	move(LYlines-3, 0);
+	LYmove(LYlines-3, 0);
     } else {
-	move(LYlines-1, 0);
+	LYmove(LYlines-1, 0);
     }
-    clrtoeol();
+    LYclrtoeol();
 
     if (text != NULL && text[0] != '\0') {
 	BOOLEAN has_CJK = FALSE;
@@ -2094,12 +2102,12 @@ PUBLIC void statusline ARGS1(
 	    || (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8)
 #endif
 	    ) {
-	    refresh();
+	    LYrefresh();
 	}
 
 #ifndef USE_COLOR_STYLE
 	lynx_start_status_color ();
-	addstr (buffer);
+	LYaddstr (buffer);
 	lynx_stop_status_color ();
 #else
 	/* draw the status bar in the STATUS style */
@@ -2107,23 +2115,23 @@ PUBLIC void statusline ARGS1(
 		int a=(strncmp(buffer, ALERT_FORMAT, ALERT_PREFIX_LEN) ||
 		       !hashStyles[s_alert].name) ? s_status : s_alert;
 		LynxChangeStyle (a, STACK_ON, 1);
-		addstr(buffer);
-		wbkgdset(stdscr,
+		LYaddstr(buffer);
+		wbkgdset(LYwin,
 			 ((lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
 			  ? hashStyles[a].color
 			  :A_NORMAL) | ' ');
-		clrtoeol();
+		LYclrtoeol();
 		if (!(lynx_has_color && LYShowColor >= SHOW_COLOR_ON))
-		    wbkgdset(stdscr, A_NORMAL | ' ');
+		    wbkgdset(LYwin, A_NORMAL | ' ');
 		else if (s_normal != NOSTYLE)
-		    wbkgdset(stdscr, hashStyles[s_normal].color | ' ');
+		    wbkgdset(LYwin, hashStyles[s_normal].color | ' ');
 		else
-		    wbkgdset(stdscr, displayStyles[DSTYLE_NORMAL].color | ' ');
+		    wbkgdset(LYwin, displayStyles[DSTYLE_NORMAL].color | ' ');
 		LynxChangeStyle (a, STACK_OFF, 0);
 	}
 #endif
     }
-    refresh();
+    LYrefresh();
 
     return;
 }
@@ -2160,23 +2168,23 @@ PUBLIC void noviceline ARGS1(
     if (dump_output_immediately)
 	return;
 
-    move(LYlines-2,0);
+    LYmove(LYlines-2,0);
     /* stop_reverse(); */
-    clrtoeol();
-    addstr(NOVICE_LINE_ONE);
-    clrtoeol();
+    LYclrtoeol();
+    LYaddstr(NOVICE_LINE_ONE);
+    LYclrtoeol();
 #if defined(DIRED_SUPPORT ) && defined(OK_OVERRIDE)
     if (lynx_edit_mode && !no_dired_support)
-	addstr(DIRED_NOVICELINE);
+	LYaddstr(DIRED_NOVICELINE);
     else
 #endif /* DIRED_SUPPORT && OK_OVERRIDE */
 
     if (LYUseNoviceLineTwo)
-	addstr(NOVICE_LINE_TWO);
+	LYaddstr(NOVICE_LINE_TWO);
     else
-	addstr((char *)novice_lines(lineno));
+	LYaddstr((char *)novice_lines(lineno));
 
-    refresh();
+    LYrefresh();
     return;
 }
 
@@ -2335,14 +2343,14 @@ PUBLIC int HTCheckForInterrupt NOARGS
 #endif /* !_WINDOWS */
 
 #if defined(PDCURSES)
-    nodelay(stdscr,TRUE);
+    nodelay(LYwin,TRUE);
 #endif /* DOSPATH */
     /*
      * 'c' contains whatever character we're able to read from keyboard
      */
     c = LYgetch();
 #if defined(PDCURSES)
-    nodelay(stdscr,FALSE);
+    nodelay(LYwin,FALSE);
 #endif /* DOSPATH */
 
 #else /* VMS: */
@@ -2378,7 +2386,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
      */
 
 	/** Keyboard 'Z' or 'z', or Control-G or Control-C **/
-    if (TOUPPER(c) == 'Z' || LYCharIsINTERRUPT(c))
+    if (LYCharIsINTERRUPT(c))
 	return((int)TRUE);
 
 	/* There is a subset of mainloop() actions available at this stage:
@@ -2857,6 +2865,11 @@ PUBLIC int is_url ARGS1(
 
     } else if (compare_type(cp, "mailto:", 7)) {
 	return(MAILTO_URL_TYPE);
+
+#ifndef DISABLE_BIBP
+    } else if (compare_type(cp, "bibp:", 5)) {
+	return(BIBP_URL_TYPE);
+#endif
 
     } else if (compare_type(cp, "file:", 5)) {
 	if (LYisLocalFile(cp)) {
@@ -3460,9 +3473,9 @@ PUBLIC void size_change ARGS1(
 #endif /* HAVE_SIZECHANGE */
 
     if (LYlines <= 0)
-	LYlines = 24;
+	LYlines = DFT_ROWS;
     if (LYcols <= 0)
-	LYcols = 80;
+	LYcols = DFT_COLS;
 #endif /* USE_SLANG */
 
     /*
@@ -3880,7 +3893,7 @@ PRIVATE int fmt_tempname ARGS3(
      */
 #ifdef USE_RAND_TEMPNAME
     if (first) {
-	srand((unsigned)((long)time((time_t *)0) + (long)result));
+	my_srand((unsigned)((long)time((time_t *)0) + (long)result));
 	first = FALSE;
 	used_tempname = typecallocn(unsigned char,
 				(MAX_TEMPNAME / BITS_PER_CHAR) + 1);
@@ -3895,7 +3908,7 @@ PRIVATE int fmt_tempname ARGS3(
      */
     counter = MAX_TEMPNAME;
     while (names_used < MAX_TEMPNAME) {
-	counter = ( (float)MAX_TEMPNAME * rand() ) / RAND_MAX + 1;
+	counter = ( (float)MAX_TEMPNAME * my_rand() ) / RAND_MAX + 1;
 	/*
 	 * Avoid reusing a temporary name, since there are places in the code
 	 * which can refer to a temporary filename even after it has been
@@ -4005,114 +4018,66 @@ PUBLIC int number2arrows ARGS1(
 /* skip the special flags when processing "all" and "default": */
 #define N_SPECIAL_RESTRICT_OPTIONS 2
 
-PRIVATE CONST char *restrict_name[] = {
-       "default" ,
-       "all"     ,
-       "inside_telnet" ,
-       "outside_telnet",
-       "telnet_port"   ,
-       "inside_ftp"    ,
-       "outside_ftp"   ,
-       "inside_rlogin" ,
-       "outside_rlogin",
-       "suspend"       ,
-       "editor"        ,
-       "shell"	       ,
-       "bookmark"      ,
-       "multibook"     ,
-       "bookmark_exec" ,
-       "option_save"   ,
-       "print"	       ,
-       "download"      ,
-       "disk_save"     ,
-       "exec"	       ,
-       "lynxcgi"       ,
-       "exec_frozen"   ,
-       "goto"	       ,
-       "jump"	       ,
-       "file_url"      ,
-#ifndef DISABLE_NEWS
-       "news_post"     ,
-       "inside_news"   ,
-       "outside_news"  ,
+PRIVATE CONST struct {
+    CONST char *name;
+    BOOLEAN *flag;
+    BOOLEAN can;
+} restrictions[] = {
+    { "default",	&had_restrictions_default, TRUE },
+    { "all",		&had_restrictions_all,	TRUE },
+    { "inside_telnet",	&no_inside_telnet,	CAN_ANONYMOUS_INSIDE_DOMAIN_TELNET },
+    { "outside_telnet",	&no_outside_telnet,	CAN_ANONYMOUS_OUTSIDE_DOMAIN_TELNET },
+    { "telnet_port",	&no_telnet_port,	CAN_ANONYMOUS_GOTO_TELNET_PORT },
+    { "inside_ftp",	&no_inside_ftp,		CAN_ANONYMOUS_INSIDE_DOMAIN_FTP },
+    { "outside_ftp",	&no_outside_ftp,	CAN_ANONYMOUS_OUTSIDE_DOMAIN_FTP },
+    { "inside_rlogin",	&no_inside_rlogin,	CAN_ANONYMOUS_INSIDE_DOMAIN_RLOGIN },
+    { "outside_rlogin",	&no_outside_rlogin,	CAN_ANONYMOUS_OUTSIDE_DOMAIN_RLOGIN },
+    { "suspend",	&no_suspend,		TRUE },
+    { "editor",		&no_editor,		TRUE },
+    { "shell",		&no_shell,		TRUE },
+    { "bookmark",	&no_bookmark,		TRUE },
+    { "multibook",	&no_multibook,		TRUE },
+    { "bookmark_exec",	&no_bookmark_exec,	TRUE },
+    { "option_save",	&no_option_save,	TRUE },
+    { "print",		&no_print,		CAN_ANONYMOUS_PRINT },
+    { "download",	&no_download,		TRUE },
+    { "disk_save",	&no_disk_save,		TRUE },
+#if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
+    { "exec",		&no_exec,		LOCAL_EXECUTION_LINKS_ALWAYS_OFF_FOR_ANONYMOUS },
 #endif
-       "mail"	       ,
-       "dotfiles"      ,
-       "useragent"     ,
+    { "lynxcgi",	&no_lynxcgi,		TRUE },
+    { "exec_frozen",	&exec_frozen,		TRUE },
+    { "goto",		&no_goto,		CAN_ANONYMOUS_GOTO },
+    { "jump",		&no_jump,		CAN_ANONYMOUS_JUMP },
+    { "file_url",	&no_file_url,		TRUE },
+#ifndef DISABLE_NEWS
+    { "news_post",	&no_newspost,		TRUE },
+    { "inside_news",	&no_inside_news,	CAN_ANONYMOUS_INSIDE_DOMAIN_READ_NEWS },
+    { "outside_news",	&no_outside_news,	CAN_ANONYMOUS_OUTSIDE_DOMAIN_READ_NEWS },
+#endif
+    { "mail",		&no_mail,		CAN_ANONYMOUS_MAIL },
+    { "dotfiles",	&no_dotfiles,		TRUE },
+    { "useragent",	&no_useragent,		TRUE },
 #ifdef DIRED_SUPPORT
-       "dired_support" ,
+    { "dired_support",	&no_dired_support,	TRUE },
 #ifdef OK_PERMIT
-       "change_exec_perms",
+    { "change_exec_perms", &no_change_exec_perms, TRUE },
 #endif /* OK_PERMIT */
 #endif /* DIRED_SUPPORT */
 #ifdef USE_EXTERNALS
-       "externals" ,
+    { "externals",	&no_externals,		TRUE },
 #endif
-       "lynxcfg_info" ,
+    { "lynxcfg_info",	&no_lynxcfg_info,	CAN_ANONYMOUS_VIEW_LYNXCFG_INFO },
 #ifndef NO_CONFIG_INFO
-       "lynxcfg_xinfo" ,
+    { "lynxcfg_xinfo",	&no_lynxcfg_xinfo,	CAN_ANONYMOUS_VIEW_LYNXCFG_EXTENDED_INFO },
 #ifdef HAVE_CONFIG_H
-       "compileopts_info",
+    { "compileopts_info", &no_compileopts_info,	CAN_ANONYMOUS_VIEW_COMPILEOPTS_INFO },
 #endif
 #endif
-       (char *) 0     };
-
-	/* restrict_name and restrict_flag structure order
-	 * must be maintained exactly!
-	 */
-
-PRIVATE BOOLEAN *restrict_flag[] = {
-       &had_restrictions_default,
-       &had_restrictions_all,
-       &no_inside_telnet,
-       &no_outside_telnet,
-       &no_telnet_port,
-       &no_inside_ftp,
-       &no_outside_ftp,
-       &no_inside_rlogin,
-       &no_outside_rlogin,
-       &no_suspend  ,
-       &no_editor   ,
-       &no_shell    ,
-       &no_bookmark ,
-       &no_multibook ,
-       &no_bookmark_exec,
-       &no_option_save,
-       &no_print    ,
-       &no_download ,
-       &no_disk_save,
-       &no_exec     ,
-       &no_lynxcgi  ,
-       &exec_frozen ,
-       &no_goto     ,
-       &no_jump     ,
-       &no_file_url ,
-#ifndef DISABLE_NEWS
-       &no_newspost ,
-       &no_inside_news,
-       &no_outside_news,
+#ifndef DISABLE_BIBP
+    { "bibp:",		&no_goto_bibp,		TRUE },
 #endif
-       &no_mail     ,
-       &no_dotfiles ,
-       &no_useragent ,
-#ifdef DIRED_SUPPORT
-       &no_dired_support,
-#ifdef OK_PERMIT
-       &no_change_exec_perms,
-#endif /* OK_PERMIT */
-#endif /* DIRED_SUPPORT */
-#ifdef USE_EXTERNALS
-       &no_externals ,
-#endif
-       &no_lynxcfg_info ,
-#ifndef NO_CONFIG_INFO
-       &no_lynxcfg_xinfo ,
-#ifdef HAVE_CONFIG_H
-       &no_compileopts_info ,
-#endif
-#endif
-       (BOOLEAN *) 0  };
-
+};
 
 /*  This will make no difference between '-' and '_'. It does only in/equality
     compare. It assumes that p2 can't contain dashes, but p1 can.
@@ -4162,103 +4127,56 @@ PUBLIC BOOL strn_dash_equ ARGS3(
 PUBLIC void parse_restrictions ARGS1(
 	CONST char *,	s)
 {
-      CONST char *p;
-      CONST char *word;
-      int i;
+    CONST char *p;
+    CONST char *word;
+    unsigned i;
 
-      p = s;
-      while (*p) {
-	  p = LYSkipCBlanks(p);
-	  if (*p == '\0')
-	      break;
-	  word = p;
-	  while (*p != ',' && *p != '\0')
-	      p++;
+    p = s;
+    while (*p) {
+	p = LYSkipCBlanks(p);
+	if (*p == '\0')
+	    break;
+	word = p;
+	while (*p != ',' && *p != '\0')
+	    p++;
 
-	  if (RESTRICT_NM_EQU(word, "all", p-word)) {
-	      /* set all restrictions */
-	      for (i=N_SPECIAL_RESTRICT_OPTIONS; restrict_flag[i]; i++)
-		  *restrict_flag[i] = TRUE;
-	  }
+	if (RESTRICT_NM_EQU(word, "all", p-word)) {
+	    for (i = N_SPECIAL_RESTRICT_OPTIONS; i < TABLESIZE(restrictions); i++)
+		*(restrictions[i].flag) = TRUE;
+	} else if (RESTRICT_NM_EQU(word, "default", p-word)) {
+	    for (i = N_SPECIAL_RESTRICT_OPTIONS; i < TABLESIZE(restrictions); i++)
+		*(restrictions[i].flag) = !restrictions[i].can;
+	} else {
+	    for (i=0; i < TABLESIZE(restrictions); i++) {
+		if (RESTRICT_NM_EQU(word, restrictions[i].name, p-word)) {
+		    *(restrictions[i].flag) = TRUE;
+		    break;
+		}
+	    }
+	}
+	if (*p)
+	    p++;
+    }
 
-	  if (RESTRICT_NM_EQU(word, "default", p-word)) {
-	      /* set all restrictions */
-	      for (i=N_SPECIAL_RESTRICT_OPTIONS; restrict_flag[i]; i++)
-		  *restrict_flag[i] = TRUE;
-
-	     /* reset these to defaults */
-	     no_inside_telnet = !(CAN_ANONYMOUS_INSIDE_DOMAIN_TELNET);
-	    no_outside_telnet = !(CAN_ANONYMOUS_OUTSIDE_DOMAIN_TELNET);
-#ifndef DISABLE_NEWS
-	       no_inside_news = !(CAN_ANONYMOUS_INSIDE_DOMAIN_READ_NEWS);
-	      no_outside_news = !(CAN_ANONYMOUS_OUTSIDE_DOMAIN_READ_NEWS);
+    /*
+     * If shell is restricted, set restrictions on related topics.
+     */
+    if (no_shell) {
+	no_goto_lynxexec = TRUE;
+	no_goto_lynxprog = TRUE;
+	no_goto_lynxcgi = TRUE;
+#ifdef EXEC_LINKS
+	local_exec_on_local_files = TRUE;
 #endif
-		no_inside_ftp = !(CAN_ANONYMOUS_INSIDE_DOMAIN_FTP);
-	       no_outside_ftp = !(CAN_ANONYMOUS_OUTSIDE_DOMAIN_FTP);
-	     no_inside_rlogin = !(CAN_ANONYMOUS_INSIDE_DOMAIN_RLOGIN);
-	    no_outside_rlogin = !(CAN_ANONYMOUS_OUTSIDE_DOMAIN_RLOGIN);
-		      no_goto = !(CAN_ANONYMOUS_GOTO);
-		  no_goto_cso = !(CAN_ANONYMOUS_GOTO_CSO);
-		 no_goto_file = !(CAN_ANONYMOUS_GOTO_FILE);
-#ifndef DISABLE_FINGER
-	       no_goto_finger = !(CAN_ANONYMOUS_GOTO_FINGER);
-#endif
-		  no_goto_ftp = !(CAN_ANONYMOUS_GOTO_FTP);
-#ifndef DISABLE_GOPHER
-	       no_goto_gopher = !(CAN_ANONYMOUS_GOTO_GOPHER);
-#endif
-		 no_goto_http = !(CAN_ANONYMOUS_GOTO_HTTP);
-		no_goto_https = !(CAN_ANONYMOUS_GOTO_HTTPS);
-	      no_goto_lynxcgi = !(CAN_ANONYMOUS_GOTO_LYNXCGI);
-	     no_goto_lynxexec = !(CAN_ANONYMOUS_GOTO_LYNXEXEC);
-	     no_goto_lynxprog = !(CAN_ANONYMOUS_GOTO_LYNXPROG);
-	       no_goto_mailto = !(CAN_ANONYMOUS_GOTO_MAILTO);
-#ifndef DISABLE_NEWS
-		 no_goto_news = !(CAN_ANONYMOUS_GOTO_NEWS);
-		 no_goto_nntp = !(CAN_ANONYMOUS_GOTO_NNTP);
-#endif
-	       no_goto_rlogin = !(CAN_ANONYMOUS_GOTO_RLOGIN);
-#ifndef DISABLE_NEWS
-		no_goto_snews = !(CAN_ANONYMOUS_GOTO_SNEWS);
-#endif
-	       no_goto_telnet = !(CAN_ANONYMOUS_GOTO_TELNET);
-	       no_goto_tn3270 = !(CAN_ANONYMOUS_GOTO_TN3270);
-		 no_goto_wais = !(CAN_ANONYMOUS_GOTO_WAIS);
-	       no_telnet_port = !(CAN_ANONYMOUS_GOTO_TELNET_PORT);
-		      no_jump = !(CAN_ANONYMOUS_JUMP);
-		      no_mail = !(CAN_ANONYMOUS_MAIL);
-		     no_print = !(CAN_ANONYMOUS_PRINT);
-	      no_lynxcfg_info = !(CAN_ANONYMOUS_VIEW_LYNXCFG_INFO);
-#ifndef NO_CONFIG_INFO
-	     no_lynxcfg_xinfo = !(CAN_ANONYMOUS_VIEW_LYNXCFG_EXTENDED_INFO);
-#ifdef HAVE_CONFIG_H
-	  no_compileopts_info = !(CAN_ANONYMOUS_VIEW_COMPILEOPTS_INFO);
-#endif
-#endif
-	   no_goto_configinfo = !(CAN_ANONYMOUS_GOTO_CONFIGINFO);
-#if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
-		      no_exec = LOCAL_EXECUTION_LINKS_ALWAYS_OFF_FOR_ANONYMOUS;
-#endif /* EXEC_LINKS || EXEC_SCRIPTS */
-	  }
-
-	  for (i=0; restrict_name[i]; i++) {
-	     if (RESTRICT_NM_EQU(word, restrict_name[i], p-word)) {
-		 *restrict_flag[i] = TRUE;
-		 break;
-	     }
-	  }
-	  if (*p)
-	      p++;
-      }
-      return;
+    }
 }
 
 PUBLIC void print_restrictions_to_fd ARGS1(
     FILE *,	fp)
 {
-    int i, count = 0;
-    for (i=0; restrict_name[i]; i++) {
-	if (*restrict_flag[i] == TRUE)
+    unsigned i, count = 0;
+    for (i=0; i < TABLESIZE(restrictions); i++) {
+	if (*(restrictions[i].flag) == TRUE)
 	    count++;
     }
     if (!count) {
@@ -4266,9 +4184,9 @@ PUBLIC void print_restrictions_to_fd ARGS1(
 	return;
     }
     fprintf(fp, gettext("Restrictions set:\n"));
-    for (i=0; restrict_name[i]; i++) {
-	if (*restrict_flag[i] == TRUE) {
-	    fprintf(fp, "   %s\n", restrict_name[i]);
+    for (i=0; i < TABLESIZE(restrictions); i++) {
+	if (*(restrictions[i].flag) == TRUE) {
+	    fprintf(fp, "   %s\n", restrictions[i].name);
 	}
     }
 }
@@ -4939,9 +4857,9 @@ PUBLIC int win32_check_interrupt()
     int c;
 
     if (kbhit()) {
-	c = getch();
+	c = wgetch(LYwin);
 	/** Keyboard 'Z' or 'z', or Control-G or Control-C **/
-	if (TOUPPER(c) == 'Z' || LYCharIsINTERRUPT(c) || c == 0x1b) {
+	if (LYCharIsINTERRUPT(c) || c == 0x1b) {
 	    return TRUE;
 	}
     }
@@ -4957,7 +4875,7 @@ void sleep(unsigned sec)
 	for (i = 0; i < 10; i++) {
 	    Sleep(100);
 	    if (kbhit()) {
-		c = getch();
+		c = wgetch(LYwin);
 		return;
 	    }
 	}
@@ -6946,6 +6864,31 @@ PUBLIC void LYRenamedTemp ARGS2(
 	StrAllocCopy((p->name), newname);
     }
 }
+
+#ifndef DISABLE_BIBP
+/*
+ *  Check that bibhost defines the BibP icon.
+ */
+PUBLIC void LYCheckBibHost NOARGS
+{
+    DocAddress bibhostIcon;
+    BOOLEAN saveFlag;
+
+    bibhostIcon.address = NULL;
+    StrAllocCopy(bibhostIcon.address, BibP_bibhost);
+    StrAllocCat(bibhostIcon.address, "bibp1.0/bibpicon.jpg");
+    bibhostIcon.post_data = NULL;
+    bibhostIcon.post_content_type = NULL;
+    bibhostIcon.bookmark = FALSE;
+    bibhostIcon.isHEAD = FALSE;
+    bibhostIcon.safe = FALSE;
+    saveFlag = traversal;
+    traversal = TRUE;  /* Hack to force error response. */
+    BibP_bibhost_available = HTLoadAbsolute(&bibhostIcon) == YES;
+    traversal = saveFlag;
+    BibP_bibhost_checked = TRUE;
+}
+#endif /* !DISABLE_BIBP */
 
 /*
  *  Management of User Interface Pages. - kw

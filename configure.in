@@ -349,10 +349,6 @@ AC_ARG_WITH(ssl,
 	[cf_cv_use_libssl=no])
 ])
 
-if test "x$cf_cv_use_libssl"  != xno ; then
-	CF_SSL($cf_cv_use_libssl)
-fi
-
 AC_CACHE_CHECK(if you want socks library,cf_cv_use_libsocks,[
 AC_ARG_WITH(socks,
 	[  --with-socks[=path]     link with socks library if available],
@@ -375,6 +371,9 @@ else
 	CF_NETLIBS
 fi
 CF_INET_ADDR
+if test "x$cf_cv_use_libssl"  != xno ; then
+	CF_SSL($cf_cv_use_libssl)
+fi
 
 dnl This has to be cached, since there's a lot of interdependent tests.
 AC_CACHE_CHECK(for screen type, cf_cv_screen,[
@@ -539,10 +538,8 @@ AC_CHECK_FUNCS( \
 	mktemp \
 	popen \
 	putenv \
-	rand \
 	readdir \
 	setuid \
-	srand \
 	strerror \
 	truncate \
 	ttyname \
@@ -555,6 +552,7 @@ AC_REPLACE_FUNCS( \
 	strstr \
 )
 
+CF_SRAND
 CF_CHECK_FUNCDECLS([#include <string.h>], strstr)
 CF_CHECK_FUNCDECLS([
 #include <stdio.h>
@@ -590,7 +588,9 @@ if test $cf_cv_screen != slang ; then
 		getbegx \
 		getbegy \
 		keypad \
+		newpad \
 		newterm \
+		pnoutrefresh \
 		resizeterm \
 		touchline \
 		touchwin \
@@ -605,6 +605,14 @@ dnl --------------------------------------------------------------------------
 
 CF_HELP_MESSAGE(
 Experimental Options:)
+
+AC_MSG_CHECKING(if bibp: URLs should be supported)
+CF_ARG_DISABLE(bibp-urls,
+[  --disable-bibp-urls     disable support for bibp: URLs],
+	[use_bibp_urls=$enableval],
+	[use_bibp_urls=yes])
+AC_MSG_RESULT($use_bibp_urls)
+test $use_bibp_urls = no && AC_DEFINE(DISABLE_BIBP)
 
 AC_MSG_CHECKING(if configuration info should be browsable)
 CF_ARG_DISABLE(config-info,
@@ -667,8 +675,6 @@ if test $use_color_style != no ; then
 	if test $cf_cv_screen = slang ; then
 		AC_ERROR(Configuration does not support color-styles)
 	fi
-	AC_DEFINE(USE_HASH)
-	AC_DEFINE(LINKEDSTYLES)
 fi
 
 case $use_color_style in

@@ -107,6 +107,10 @@ extern char *LYCgiDocumentRoot;  /* DOCUMENT_ROOT in the lynxcgi env */
 extern BOOLEAN LYUseNoviceLineTwo;  /* True if TOGGLE_HELP is not mapped */
 
 #define MAX_LINE 1024	/* Hope that no window is larger than this */
+#define MAX_COLS 999	/* we don't expect wider than this */
+#define DFT_COLS 80	/* ...and normally only this */
+#define DFT_ROWS 24	/* ...corresponding nominal height */
+
 extern char star_string[MAX_LINE + 1]; /* from GridText.c */
 #define STARS(n) \
  ((n) >= MAX_LINE ? star_string : &star_string[(MAX_LINE-1)] - (n))
@@ -376,6 +380,14 @@ extern char *LYCookieSRejectDomains;    /* domains to reject all cookies */
 extern char *LYCookieSStrictCheckDomains;/* domains to check strictly    */
 extern char *LYCookieSLooseCheckDomains;/* domains to check loosely      */
 extern char *LYCookieSQueryCheckDomains;/* domains to check w/a query    */
+
+#ifndef DISABLE_BIBP
+extern BOOLEAN no_goto_bibp;
+extern char *BibP_globalserver;         /* global server for bibp: links */
+extern char *BibP_bibhost;              /* local server for bibp: links  */
+extern BOOLEAN BibP_bibhost_checked;    /* bibhost has been checked      */
+extern BOOLEAN BibP_bibhost_available;  /* bibhost is responding         */
+#endif
 
 #ifdef EXP_PERSISTENT_COOKIES
 extern BOOLEAN persistent_cookies;

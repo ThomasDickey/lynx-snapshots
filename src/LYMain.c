@@ -379,8 +379,8 @@ PUBLIC BOOLEAN LYUseDefaultRawMode = TRUE;
 PUBLIC char *UCAssume_MIMEcharset = NULL;
 PUBLIC BOOLEAN UCSaveBookmarksInUnicode = FALSE;
 PUBLIC BOOLEAN UCForce8bitTOUPPER = FALSE; /* override locale for case-conversion? */
-PUBLIC int LYlines = 24;
-PUBLIC int LYcols = 80;
+PUBLIC int LYlines = DFT_ROWS;
+PUBLIC int LYcols = DFT_COLS;
 PUBLIC int dump_output_width = 0;
 PUBLIC linkstruct links[MAXLINKS];
 PUBLIC histstruct history[MAXHIST];
@@ -423,6 +423,15 @@ PUBLIC char *LYCookieSRejectDomains = NULL; /* domains to reject all cookies */
 PUBLIC char *LYCookieSStrictCheckDomains = NULL; /* check strictly  */
 PUBLIC char *LYCookieSLooseCheckDomains = NULL;  /* check loosely   */
 PUBLIC char *LYCookieSQueryCheckDomains = NULL;  /* check w/a query */
+
+#ifndef DISABLE_BIBP
+PUBLIC BOOLEAN no_goto_bibp = FALSE;
+PUBLIC char *BibP_globalserver = NULL;   /* global server for bibp: links */
+PUBLIC char *BibP_bibhost = NULL;        /* local server for bibp: links  */
+PUBLIC BOOLEAN BibP_bibhost_checked = FALSE;  /*  until LYCheckBibHost   */
+PUBLIC BOOLEAN BibP_bibhost_available = FALSE;  /* until check succeeds  */
+#endif
+
 #ifdef EXP_PERSISTENT_COOKIES
 BOOLEAN persistent_cookies = FALSE;	/* disabled by default! */
 PUBLIC char *LYCookieFile = NULL;	/* cookie read file */
@@ -538,7 +547,7 @@ PUBLIC BOOLEAN restore_sigpipe_for_children = FALSE;
 PRIVATE void FatalProblem PARAMS((int sig));
 #endif /* !VMS */
 
-#if defined(USE_HASH)
+#if defined(USE_COLOR_STYLE)
 PUBLIC char *lynx_lss_file = NULL;
 #endif
 
@@ -624,6 +633,10 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(LynxSigFile);
     FREE(system_mail);
     FREE(system_mail_flags);
+#ifndef DISABLE_BIBP
+    FREE(BibP_bibhost);
+    FREE(BibP_globalserver);
+#endif
 #ifdef EXP_PERSISTENT_COOKIES
     FREE(LYCookieFile);
     FREE(LYCookieSaveFile);
@@ -661,7 +674,7 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(lynx_temp_space);
     FREE(LYTraceLogPath);
     FREE(lynx_cfg_file);
-#if defined(USE_HASH)
+#if defined(USE_COLOR_STYLE)
     FREE(lynx_lss_file);
 #endif
     FREE(UCAssume_MIMEcharset);
@@ -797,11 +810,12 @@ PRIVATE void tildeExpand ARGS2(
     }
 }
 
-PRIVATE BOOL GetStdin ARGS1(
-	char **,	buf)
+PRIVATE BOOL GetStdin ARGS2(
+	char **,	buf,
+	BOOL,		marker)
 {
     if (LYSafeGets(buf, stdin) != 0
-     && strncmp(*buf, "---", 3) != 0) {
+     && (!marker || strncmp(*buf, "---", 3) != 0)) {
 	LYTrimTrailing(*buf);
 	CTRACE((tfp, "...data: %s\n", *buf));
 	return TRUE;
@@ -1141,10 +1155,16 @@ PUBLIC int main ARGS2(
 #else
     StrAllocCopy(LYHostName, HTHostName());
 #endif /* LYNX_HOST_NAME */
+
     StrAllocCopy(LYLocalDomain, LOCAL_DOMAIN);
     StrAllocCopy(URLDomainPrefixes, URL_DOMAIN_PREFIXES);
     StrAllocCopy(URLDomainSuffixes, URL_DOMAIN_SUFFIXES);
     StrAllocCopy(XLoadImageCommand, XLOADIMAGE_COMMAND);
+
+#ifndef DISABLE_BIBP
+    StrAllocCopy(BibP_globalserver, BIBP_GLOBAL_SERVER);
+    StrAllocCopy(BibP_bibhost, "http://bibhost/");  /* protocol specified. */
+#endif
 
     /*
      *	Disable news posting if the compilation-based
@@ -1195,7 +1215,7 @@ PUBLIC int main ARGS2(
 	char *buf = NULL;
 
 	CTRACE((tfp, "processing stdin arguments\n"));
-	while (GetStdin(&buf) != 0) {
+	while (GetStdin(&buf, TRUE)) {
 	    char *noargv[2];
 
 	    noargv[0] = buf;
@@ -1355,6 +1375,11 @@ PUBLIC int main ARGS2(
     /*
      *	Set up the compilation default character set. - FM
      */
+#ifdef CAN_AUTODETECT_DISPLAY_CHARSET
+    if (auto_display_charset >= 0)
+	current_char_set = auto_display_charset;
+    else
+#endif
     current_char_set = safeUCGetLYhndl_byMIME(CHARACTER_SET);
     /*
      *	Set up HTTP default for unlabeled charset (iso-8859-1).
@@ -1371,7 +1396,7 @@ PUBLIC int main ARGS2(
 	exit(EXIT_FAILURE);
     }
 
-#if defined(USE_HASH)
+#if defined(USE_COLOR_STYLE)
     /*
      *	If no alternate lynx-style file was specified on
      *	the command line, see if it's in the environment.
@@ -1403,7 +1428,7 @@ PUBLIC int main ARGS2(
     {
 	style_readFromFile(lynx_lss_file);
     }
-#endif /* USE_HASH */
+#endif /* USE_COLOR_STYLE */
 
 #ifdef USE_COLOR_TABLE
     /*
@@ -1525,7 +1550,7 @@ PUBLIC int main ARGS2(
 	CTRACE((tfp, "processing stdin startfile, tty=%s\n", tty));
 	if ((fp = LYOpenTemp (result, HTML_SUFFIX, "w")) != 0) {
 	    StrAllocCopy(startfile, result);
-	    while (GetStdin(&buf)) {
+	    while (GetStdin(&buf, FALSE)) {
 		fputs(buf, fp);
 		fputc('\n', fp);
 	    }
@@ -2098,9 +2123,6 @@ PUBLIC void reload_read_cfg NOARGS
 	   checked by caller. - kw */
 	return;
     }
-#if 0				/* therefore this isn't needed: */
-    if (LYRestricted) return;  /* for sure */
-#endif
 
     /*
      *  Current user preferences are saved in a temporary file, to be
@@ -2492,7 +2514,7 @@ PRIVATE int crawl_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     crawl = TRUE;
-    LYcols = 80;
+    LYcols = DFT_COLS;
     return 0;
 }
 
@@ -2502,12 +2524,27 @@ PRIVATE int display_fun ARGS1(
 {
     if (next_arg != 0) {
 	LYsetXDisplay(next_arg);
-#if 0		/* LYsetXDisplay already does this as a side effect  - kw */
-	if ((next_arg = LYgetXDisplay()) != 0)
-	    StrAllocCopy(x_display, next_arg);
-#endif
     }
 
+    return 0;
+}
+
+/* -display_charset */
+PRIVATE int display_charset_fun ARGS1(
+	char *,			next_arg)
+{
+    int i = UCGetLYhndl_byMIME(next_arg);
+
+#ifdef CAN_AUTODETECT_DISPLAY_CHARSET
+    if (i < 0 && !stricmp(next_arg,"auto"))
+	i = auto_display_charset;
+#endif
+    if (i < 0) {	/* do nothing here: so fallback to lynx.cfg */
+	fprintf(stderr,
+		gettext("Lynx: ignoring unrecognized charset=%s\n"), next_arg);
+    }
+    else
+	current_char_set = i;
     return 0;
 }
 
@@ -2516,7 +2553,7 @@ PRIVATE int dump_output_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     dump_output_immediately = TRUE;
-    LYcols = 80;
+    LYcols = DFT_COLS;
     return 0;
 }
 
@@ -2576,7 +2613,7 @@ PRIVATE int get_data_fun ARGS1(
      */
 #ifndef VMS
     dump_output_immediately = TRUE;
-    LYcols = 80;
+    LYcols = DFT_COLS;
 #endif /* VMS */
 
     StrAllocCopy(form_get_data, "?");   /* Prime the pump */
@@ -2586,7 +2623,7 @@ PRIVATE int get_data_fun ARGS1(
      *  Build GET data for later.  Stop reading when we see a line
      *  with "---" as its first three characters.
      */
-    while (GetStdin(&buf)) {
+    while (GetStdin(&buf, TRUE)) {
 	StrAllocCat(*get_data, buf);
     }
 
@@ -2643,7 +2680,7 @@ PRIVATE int mime_header_fun ARGS1(
     dump_output_immediately = TRUE;
     HTOutputFormat = (LYPrependBase ?
 		      HTAtom_for("www/download") : HTAtom_for("www/dump"));
-    LYcols = 999;
+    LYcols = MAX_COLS;
     return 0;
 }
 
@@ -2777,7 +2814,7 @@ PRIVATE int post_data_fun ARGS1(
      */
 #ifndef VMS
     dump_output_immediately = TRUE;
-    LYcols = 80;
+    LYcols = DFT_COLS;
 #endif /* VMS */
 
     post_data = &form_post_data;
@@ -2786,7 +2823,7 @@ PRIVATE int post_data_fun ARGS1(
      * Build post data for later.  Stop reading when we see a line with "---"
      * as its first three characters.
      */
-    while (GetStdin(&buf)) {
+    while (GetStdin(&buf, TRUE)) {
 	StrAllocCat(*post_data, buf);
     }
     return 0;
@@ -2918,7 +2955,7 @@ PRIVATE int source_fun ARGS1(
     dump_output_immediately = TRUE;
     HTOutputFormat = (LYPrependBase ?
 		      HTAtom_for("www/download") : HTAtom_for("www/dump"));
-    LYcols = 999;
+    LYcols = MAX_COLS;
     return 0;
 }
 
@@ -2928,9 +2965,9 @@ PRIVATE int traversal_fun ARGS1(
 {
     traversal = TRUE;
 #ifdef USE_SLANG
-    LYcols = 80;
+    LYcols = DFT_COLS;
 #else
-    LYcols = 999;
+    LYcols = MAX_COLS;
 #endif /* USE_SLANG */
 
     return 0;
@@ -3025,7 +3062,7 @@ PRIVATE int width_fun ARGS1(
     if (next_arg != 0) {
 	int w = atoi(next_arg);
 	if (w > 0)
-	    dump_output_width = ((w < 999) ? w : 999);
+	    dump_output_width = ((w < MAX_COLS) ? w : MAX_COLS);
     }
 
     return 0;
@@ -3036,7 +3073,7 @@ PRIVATE Parse_Args_Type Arg_Table [] =
 {
    PARSE_SET(
       "accept_all_cookies", 4|SET_ARG,		&LYAcceptAllCookies,
-      "\naccept cookies without prompting if Set-Cookie handling is on"
+      "\naccept cookies without prompting if Set-Cookie handling\nis on"
    ),
    PARSE_FUN(
       "anonymous",	2|FUNCTION_ARG,		anonymous_fun,
@@ -3062,6 +3099,12 @@ PRIVATE Parse_Args_Type Arg_Table [] =
       "base",		4|FUNCTION_ARG,		base_fun,
       "prepend a request URL comment and BASE tag to text/html\noutputs for -source dumps"
    ),
+#ifndef DISABLE_BIBP
+   PARSE_STR(
+      "bibhost",	4|NEED_LYSTRING_ARG,	&BibP_bibhost,
+      "=URL\nlocal bibp server (default http://bibhost/)"
+   ),
+#endif
 #ifdef USE_SLANG
    PARSE_FUN(
       "blink",		4|FUNCTION_ARG,		blink_fun,
@@ -3101,7 +3144,7 @@ PRIVATE Parse_Args_Type Arg_Table [] =
    ),
    PARSE_STR(
        "cmd_script",	2|NEED_LYSTRING_ARG,	&lynx_cmd_script,
-       "=FILENAME\nread keystroke commands from the given file (see -cmd_log)"
+       "=FILENAME\nread keystroke commands from the given file\n(see -cmd_log)"
    ),
 #endif
    PARSE_FUN(
@@ -3123,7 +3166,7 @@ PRIVATE Parse_Args_Type Arg_Table [] =
 #ifdef MISC_EXP
    PARSE_SET(
       "convert_to",	4|FUNCTION_ARG,		convert_to_fun,
-      "=FORMAT\nconvert input, FORMAT is in MIME type notation (experimental)"
+      "=FORMAT\nconvert input, FORMAT is in MIME type notation\n(experimental)"
    ),
 #endif
 #ifdef EXP_PERSISTENT_COOKIES
@@ -3167,9 +3210,13 @@ with -dump, format output as with -traversal, but to stdout"
       "display",	4|NEED_FUNCTION_ARG,	display_fun,
       "=DISPLAY\nset the display variable for X exec'ed programs"
    ),
+   PARSE_FUN(
+      "display_charset", 4|NEED_FUNCTION_ARG,	display_charset_fun,
+      "=MIMEname\ncharset for the terminal output"
+   ),
    PARSE_SET(
       "dont_wrap_pre",	4|SET_ARG,		&dont_wrap_pre,
-      "inhibit wrapping of text in <pre> when -dump'ing and \n\
+      "inhibit wrapping of text in <pre> when -dump'ing and\n\
 -crawl'ing, mark wrapped lines in interactive session"
    ),
    PARSE_FUN(
@@ -3209,7 +3256,7 @@ keys (may be incompatible with some curses packages)"
 #endif
    PARSE_SET(
       "force_empty_hrefless_a",	4|SET_ARG,	&force_empty_hrefless_a,
-      "force HREF-less 'A' elements to be empty (close them as soon as they are seen)"
+      "\nforce HREF-less 'A' elements to be empty (close them as\nsoon as they are seen)"
    ),
    PARSE_SET(
       "force_html",	4|SET_ARG,		&LYforce_HTML_mode,
@@ -3251,7 +3298,7 @@ keys (may be incompatible with some curses packages)"
    ),
    PARSE_SET(
       "historical",	4|TOGGLE_ARG,		&historical_comments,
-      "toggles use of '>' or '-->' as a terminator for comments"
+      "toggles use of '>' or '-->' as terminator for comments"
    ),
    PARSE_FUN(
       "homepage",	4|NEED_FUNCTION_ARG,	homepage_fun,
@@ -3289,7 +3336,7 @@ keys (may be incompatible with some curses packages)"
       "enable local program execution from local files only"
    ),
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
-#if defined(USE_HASH)
+#if defined(USE_COLOR_STYLE)
    PARSE_STR(
       "lss",		2|NEED_LYSTRING_ARG,	&lynx_lss_file,
       "=FILENAME\nspecifies a lynx.lss file other than the default"
@@ -3358,7 +3405,7 @@ keys (may be incompatible with some curses packages)"
 #if HAVE_SIGACTION && defined(SIGWINCH)
    PARSE_SET(
       "nonrestarting_sigwinch", 4|SET_ARG,	&LYNonRestartingSIGWINCH,
-      "make window size change handler non-restarting"
+      "\nmake window size change handler non-restarting"
    ),
 #endif /* HAVE_SIGACTION */
    PARSE_FUN(
@@ -3440,7 +3487,7 @@ to visualize how lynx behaves with invalid HTML"
 #ifdef USE_PRETTYSRC
    PARSE_SET(
       "prettysrc",	4|SET_ARG,		&LYpsrc,
-      "do syntax highlighting and hyperlink handling in source view"
+      "do syntax highlighting and hyperlink handling in source\nview"
    ),
 #endif
    PARSE_SET(
@@ -3481,7 +3528,7 @@ with the PREV_DOC command or from the History List"
 #ifdef USE_SCROLLBAR
    PARSE_SET(
       "scrollbar",	4|TOGGLE_ARG,		&LYsb,
-      "toggles showing scrollbar (requires color styles)"
+      "toggles showing scrollbar"
    ),
    PARSE_SET(
       "scrollbar_arrow", 4|TOGGLE_ARG,		&LYsb_arrow,
@@ -3494,7 +3541,7 @@ with the PREV_DOC command or from the History List"
    ),
    PARSE_SET(
       "short_url",	4|SET_ARG,		&long_url_ok,
-      "enables examination of beginning and end of long URL in status line"
+      "enables examination of beginning and end of long URL in\nstatus line"
    ),
 #ifdef SH_EX
    PARSE_SET(
@@ -3610,7 +3657,7 @@ treated '>' as a co-terminator for double-quotes and tags"
 #ifdef __DJGPP__
    PARSE_SET(
       "wdebug",		4|TOGGLE_ARG,		&watt_debug,
-      "enables Waterloo tcp/ip packet debug. Prints to watt debugfile"
+      "enables Waterloo tcp/ip packet debug. Prints to watt\ndebugfile"
   ),
 #endif /* __DJGPP__ */
    PARSE_FUN(
@@ -3620,7 +3667,7 @@ treated '>' as a co-terminator for double-quotes and tags"
 #ifndef NO_DUMP_WITH_BACKSPACES
    PARSE_SET(
       "with_backspaces", 4|SET_ARG,		&with_backspaces,
-      "emit backspaces in output if -dumping or -crawling (like 'man' does)"
+      "emit backspaces in output if -dumping or -crawling\n(like 'man' does)"
    ),
 #endif
    {NULL, 0, 0, NULL}
@@ -3743,8 +3790,10 @@ PRIVATE int arg_eqs_parse ARGS3(
 	char *,		b,
 	char **,	c)
 {
+    int result = -1;
+
     *c = NULL;
-    while (1) {
+    while (result < 0) {
 	if ((*a != *b)
 	 || (*a == 0)
 	 || (*b == 0)) {
@@ -3753,30 +3802,43 @@ PRIVATE int arg_eqs_parse ARGS3(
 		case '\t':	/* embedded blank when reading stdin */
 		case ' ':
 		    *c = LYSkipBlanks(b);
-		    return 1;
+		    result = 1;
+		    break;
 		case '=':
 		case ':':
 		    *c = b + 1;
-		    return 1;
-		case '-':	/* FALLTHRU */
+		    result = 1;
+		    break;
+		case '-':
+#if OPTNAME_ALLOW_DASHES
+		    if (isalpha(b[1])) {
+			result = 0;
+			break;
+		    }
+#endif
+		    /* FALLTHRU */
 		case '+':
 		    *c = b;
-		    return 1;
+		    result = 1;
+		    break;
 		case 0:
-		    return 1;
+		    result = 1;
+		    break;
 		default:
-		    return 0;
+		    result = 0;
+		    break;
 		}
 	    } else {
 #if OPTNAME_ALLOW_DASHES
 		if (!(*a == '_' && *b == '-'))
 #endif
-		return 0;
+		result = 0;
 	    }
 	}
 	a++;
 	b++;
-     }
+    }
+    return result;
 }
 
 #define is_true(s)  (*s == '1' || *s == '+' || !strcmp(s, "on"))

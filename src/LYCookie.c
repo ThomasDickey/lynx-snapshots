@@ -2436,11 +2436,10 @@ PRIVATE int LYHandleCookies ARGS4 (
 				return(HT_NO_DATA);
 
 			    case 'C':
-			    case LYCharINTERRUPT2:	/* Ctrl-G */
-			    case LYCharINTERRUPT1:	/* Ctrl-C */
 				/*
 				 *  Cancelled. - FM
 				 */
+			      reject:
 				HTUserMsg(CANCELLED);
 				return(HT_NO_DATA);
 
@@ -2524,6 +2523,8 @@ Delete_all_cookies_in_domain:
 				return(HT_NO_DATA);
 
 			    default:
+				if (LYCharIsINTERRUPT(ch))
+				    goto reject;
 				continue;
 			}
 			break;

@@ -197,7 +197,8 @@ typedef struct _EditFieldData {
         int  margin;    /* Number of columns look-ahead/look-back    */
         int  current_modifiers; /* Modifiers for next input lynxkeycode */
 #ifdef ENHANCED_LINEEDIT
-	int  mark;	/* position of emacs-like mark */
+	int  mark;	/* position of emacs-like mark, or -1-pos to denote
+				unactive mark.  */
 #endif
 
         char buffer[1024]; /* String buffer                          */
@@ -227,8 +228,10 @@ typedef struct _EditFieldData {
 #define LYE_BOL   (LYE_ERASE +1)  /* Go to begin of line   */
 #define LYE_EOL   (LYE_BOL   +1)  /* Go to end   of line   */
 #define LYE_FORW  (LYE_EOL   +1)  /* Cursor forwards       */
-#define LYE_BACK  (LYE_FORW  +1)  /* Cursor backwards      */
-#define LYE_FORWW (LYE_BACK  +1)  /* Word forward          */
+#define LYE_FORW_RL (LYE_FORW +1) /* Cursor forwards or right link */
+#define LYE_BACK  (LYE_FORW_RL+1) /* Cursor backwards      */
+#define LYE_BACK_LL (LYE_BACK+1)  /* Cursor backwards or left link */
+#define LYE_FORWW (LYE_BACK_LL+1) /* Word forward          */
 #define LYE_BACKW (LYE_FORWW +1)  /* Word back             */
 
 #define LYE_LOWER (LYE_BACKW +1)  /* Lower case the line   */
@@ -330,6 +333,8 @@ extern char * LYLineEditors[];
 extern CONST char * LYLineeditHelpURLs[];
 
 extern CONST char * LYLineeditHelpURL NOPARAMS;
+
+extern int escape_bound;
 
 #define LYLineEdit(e,c,m) LYEdit1(e,c,EditBinding(c)&~LYE_DF,m)
 

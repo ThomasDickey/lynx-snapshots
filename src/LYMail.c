@@ -30,7 +30,7 @@ PRIVATE void terminate_letter ARGS1(int,sig GCC_UNUSED)
      */
     if (!dump_output_immediately) {
 	lynx_force_repaint();
-	refresh();
+	LYrefresh();
     }
 #endif /* VMS */
 }
@@ -266,7 +266,7 @@ PRIVATE int header_prompt ARGS3(
     int ok;
 
     if (*result != 0) {
-	addstr(CTRL_U_TO_ERASE);
+	LYaddstr(CTRL_U_TO_ERASE);
 	LYstrncpy(buffer, *result, sizeof(buffer)-1);
     } else
 	*buffer = 0;
@@ -274,10 +274,11 @@ PRIVATE int header_prompt ARGS3(
     if (limit > sizeof(buffer))
 	limit = sizeof(buffer);
 
-    printw("%s: ", gettext(label));
+    LYaddstr(gettext(label));
+    LYaddstr(": ");
     ok = (LYgetstr(buffer, VISIBLE, limit, NORECALL) >= 0
 	&& !term_letter);
-    addstr("\n");
+    LYaddstr("\n");
 
     if (ok) {
 	remove_tildes(buffer);
@@ -298,14 +299,14 @@ PRIVATE void show_addresses ARGS1(
 	while (*cp == ' ')
 	    cp++;
 	if (*cp) {
-	    addstr(cp);
-	    addstr(",\n  ");
+	    LYaddstr(cp);
+	    LYaddstr(",\n  ");
 	}
 	*cp1 = ',';
 	cp = (cp1 + 1);
     }
     if (*cp) {
-	addstr(cp);
+	LYaddstr(cp);
     }
 }
 
@@ -1284,13 +1285,13 @@ PUBLIC void reply_by_mail ARGS4(
     /*
      *	Clear the screen and inform the user.
      */
-    clear();
-    move(2,0);
-    scrollok(stdscr, TRUE);	/* Enable scrolling. */
+    LYclear();
+    LYmove(2,0);
+    scrollok(LYwin, TRUE);	/* Enable scrolling. */
     if (body)
-	addstr(SENDING_MESSAGE_WITH_BODY_TO);
+	LYaddstr(SENDING_MESSAGE_WITH_BODY_TO);
     else
-	addstr(SENDING_COMMENT_TO);
+	LYaddstr(SENDING_COMMENT_TO);
     show_addresses(to_address);
     if (
 #if USE_VMS_MAILER
@@ -1299,13 +1300,13 @@ PUBLIC void reply_by_mail ARGS4(
 	(cp = ccaddr) != NULL)
     {
 	if (strchr(cp, ',') != NULL) {
-	    addstr(WITH_COPIES_TO);
+	    LYaddstr(WITH_COPIES_TO);
 	} else {
-	    addstr(WITH_COPY_TO);
+	    LYaddstr(WITH_COPY_TO);
 	}
 	show_addresses(ccaddr);
     }
-    addstr(CTRL_G_TO_CANCEL_SEND);
+    LYaddstr(CTRL_G_TO_CANCEL_SEND);
 
 #if USE_VMS_MAILER
     if (isPMDF || !body) {
@@ -1314,7 +1315,7 @@ PUBLIC void reply_by_mail ARGS4(
     /*
      *	Get the user's personal name.
      */
-    addstr(ENTER_NAME_OR_BLANK);
+    LYaddstr(ENTER_NAME_OR_BLANK);
 #if USE_VMS_MAILER
     if (isPMDF) {
 	label = "Personal_name: ";
@@ -1338,8 +1339,8 @@ PUBLIC void reply_by_mail ARGS4(
     /*
      *	Get the user's return address.
      */
-    addstr(ENTER_MAIL_ADDRESS_OR_OTHER);
-    addstr(MEANS_TO_CONTACT_FOR_RESPONSE);
+    LYaddstr(ENTER_MAIL_ADDRESS_OR_OTHER);
+    LYaddstr(MEANS_TO_CONTACT_FOR_RESPONSE);
 #if USE_VMS_MAILER
     if (isPMDF) {
 	label = "From";
@@ -1373,7 +1374,7 @@ PUBLIC void reply_by_mail ARGS4(
     /*
      *	Get the subject line.
      */
-    addstr(ENTER_SUBJECT_LINE);
+    LYaddstr(ENTER_SUBJECT_LINE);
     label = "Subject";
     if (*default_subject) {
 	StrAllocCopy(the_subject, default_subject);
@@ -1390,8 +1391,8 @@ PUBLIC void reply_by_mail ARGS4(
      *	Offer a CC line, if permitted. - FM
      */
     if (!LYNoCc) {
-	addstr(ENTER_ADDRESS_FOR_CC);
-	addstr(BLANK_FOR_NO_COPY);
+	LYaddstr(ENTER_ADDRESS_FOR_CC);
+	LYaddstr(BLANK_FOR_NO_COPY);
 	if (personal_mail_address)
 	    StrAllocCopy(cc_address, personal_mail_address);
 	if (!header_prompt("Cc", &cc_address, LINESIZE)) {
@@ -1455,7 +1456,7 @@ PUBLIC void reply_by_mail ARGS4(
 	    }
 	}
 	LYCloseTempFP(fd);	/* Close the tmpfile. */
-	scrollok(stdscr,FALSE); /* Stop scrolling.    */
+	scrollok(LYwin,FALSE);	/* Stop scrolling.    */
 
 	if (term_letter || LYCharIsINTERRUPT(c))
 	    goto cleanup;
@@ -1482,18 +1483,18 @@ PUBLIC void reply_by_mail ARGS4(
 	/*
 	 *  Let user review the body. - FM
 	 */
-	clear();
-	move(0,0);
-	addstr(REVIEW_MESSAGE_BODY);
-	refresh();
+	LYclear();
+	LYmove(0,0);
+	LYaddstr(REVIEW_MESSAGE_BODY);
+	LYrefresh();
 	cp1 = body;
 	i = (LYlines - 5);
 	while((cp = strchr(cp1, '\n')) != NULL) {
 	    if (i <= 0) {
-		addstr(RETURN_TO_CONTINUE);
-		refresh();
+		LYaddstr(RETURN_TO_CONTINUE);
+		LYrefresh();
 		c = LYgetch();
-		addstr("\n");
+		LYaddstr("\n");
 		if (term_letter || LYCharIsINTERRUPT(c)) {
 		    goto cancelled;
 		}
@@ -1501,28 +1502,28 @@ PUBLIC void reply_by_mail ARGS4(
 	    }
 	    *cp++ = '\0';
 	    fprintf(fd, "%s\n", cp1);
-	    addstr(cp1);
-	    addstr("\n");
+	    LYaddstr(cp1);
+	    LYaddstr("\n");
 	    cp1 = cp;
 	    i--;
 	}
 	while (i >= 0) {
-	    addstr("\n");
+	    LYaddstr("\n");
 	    i--;
 	}
-	refresh();
+	LYrefresh();
 	LYCloseTempFP(fd);	/* Close the tmpfile.	  */
-	scrollok(stdscr,FALSE); /* Stop scrolling.	  */
+	scrollok(LYwin,FALSE);	/* Stop scrolling.	  */
 
     } else {
 	/*
 	 *  Use the internal line editor for the message.
 	 */
-	addstr(ENTER_MESSAGE_BELOW);
-	addstr(ENTER_PERIOD_WHEN_DONE_A);
-	addstr(ENTER_PERIOD_WHEN_DONE_B);
-	addstr("\n\n");
-	refresh();
+	LYaddstr(ENTER_MESSAGE_BELOW);
+	LYaddstr(ENTER_PERIOD_WHEN_DONE_A);
+	LYaddstr(ENTER_PERIOD_WHEN_DONE_B);
+	LYaddstr("\n\n");
+	LYrefresh();
 	*user_input = '\0';
 	if (LYgetstr(user_input, VISIBLE, sizeof(user_input), NORECALL) < 0 ||
 	    term_letter || STREQ(user_input, ".")) {
@@ -1530,7 +1531,7 @@ PUBLIC void reply_by_mail ARGS4(
 	}
 
 	while (!STREQ(user_input, ".") && !term_letter) {
-	    addstr("\n");
+	    LYaddstr("\n");
 	    remove_tildes(user_input);
 	    fprintf(fd, "%s\n", user_input);
 	    *user_input = '\0';
@@ -1542,7 +1543,7 @@ PUBLIC void reply_by_mail ARGS4(
 
 	fprintf(fd, "\n");	/* Terminate the message. */
 	LYCloseTempFP(fd);	/* Close the tmpfile.	  */
-	scrollok(stdscr,FALSE); /* Stop scrolling.	  */
+	scrollok(LYwin,FALSE);	/* Stop scrolling.	  */
     }
 
 #if !USE_VMS_MAILER
@@ -1555,7 +1556,7 @@ PUBLIC void reply_by_mail ARGS4(
     c = HTConfirm (body ? SEND_MESSAGE_PROMPT : SEND_COMMENT_PROMPT);
     LYStatusLine = -1;
     if (c != YES) {
-	clear();  /* clear the screen */
+	LYclear();  /* clear the screen */
 	goto cleanup;
     }
     if ((body == NULL && LynxSigFile != NULL) &&
@@ -1584,7 +1585,7 @@ PUBLIC void reply_by_mail ARGS4(
 	}
 	LYCloseInput(fp);
     }
-    clear();  /* Clear the screen. */
+    LYclear();  /* Clear the screen. */
 
     /*
      *	Send the message.
@@ -1696,7 +1697,7 @@ PUBLIC void reply_by_mail ARGS4(
 cancelled:
     HTInfoMsg(CANCELLED);
     LYCloseTempFP(fd);		/* Close the tmpfile.	*/
-    scrollok(stdscr,FALSE); 	/* Stop scrolling.	*/
+    scrollok(LYwin,FALSE); 	/* Stop scrolling.	*/
 cleanup:
     signal(SIGINT, cleanup_sig);
     term_letter = FALSE;

@@ -93,4 +93,14 @@ extern int displayed_display_charset_idx;
 extern void init_charset_subsets NOPARAMS;
 #endif /* EXP_CHARSET_CHOICE */
 
+#if !defined(NO_AUTODETECT_DISPLAY_CHARSET)
+#  ifdef __EMX__
+#    define CAN_AUTODETECT_DISPLAY_CHARSET
+#  endif
+#endif
+
+#ifdef CAN_AUTODETECT_DISPLAY_CHARSET
+extern int auto_display_charset;
+#endif
+
 #endif /* LYCHARSETS_H */

@@ -24,4 +24,15 @@ extern int Stbl_getFixupPositions PARAMS((
     int *		newpos));
 extern short Stbl_getAlignment PARAMS((STable_info *));
 
+extern void Stbl_update_enclosing PARAMS((
+    STable_info *	me,
+    int			max_width,
+    int			last_lineno));
+struct _TextAnchor;
+extern void Stbl_set_enclosing PARAMS(( STable_info *me,
+					STable_info *encl,
+					struct _TextAnchor *last_anchor));
+extern STable_info * Stbl_get_enclosing PARAMS((STable_info *	me));
+extern struct _TextAnchor * Stbl_get_last_anchor_before PARAMS((STable_info *	me));
+
 #endif /* TRSTABLE_H */

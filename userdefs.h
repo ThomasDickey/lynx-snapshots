@@ -838,6 +838,12 @@
 #define LYNX_SIG_FILE ".lynxsig"
 
 /********************************
+ * BIBP_GLOBAL_SERVER is the default global server for bibp: links, used
+ * when a local bibhost or document-specified citehost is unavailable.
+ */
+#define BIBP_GLOBAL_SERVER "http://usin.org/"
+
+/********************************
  * If USE_SELECT_POPUPS is set FALSE, Lynx will present a vertical list
  * of radio buttons for the OPTIONs in SELECT blocks which lack the
  * MULTIPLE attribute, instead of using a popup menu.  Note that if
@@ -1345,11 +1351,11 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.4dev.16"
+#define LYNX_VERSION "2.8.4dev.17"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Mon, 01 Jan 2001 17:39:50 -0800"
+#define LYNX_DATE "Thu, 08 Feb 2001 18:50:00 -0800"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 
@@ -1581,6 +1587,7 @@
  * set to FALSE if you don't want users of your anonymous
  * account to be able to goto particular URLs.
  */
+#define CAN_ANONYMOUS_GOTO_BIBP		TRUE    /* BIBP maps to HTTP */
 #define CAN_ANONYMOUS_GOTO_CSO		FALSE
 #define CAN_ANONYMOUS_GOTO_FILE		FALSE
 #define CAN_ANONYMOUS_GOTO_FINGER	TRUE

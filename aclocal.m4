@@ -4,7 +4,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2000/12/31
+dnl Updated: 2001/2/4
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf, patched
 dnl by Tom Dickey.  See your local GNU archives, and this URL:
@@ -886,6 +886,7 @@ char * XCursesProgramName = "test";
 			[
 #ifndef ${cf_func}
 long foo = (long)(&${cf_func});
+exit(foo == 0);
 #endif
 			],
 			[cf_result=yes],
@@ -949,7 +950,7 @@ if test ".$ac_cv_func_initscr" != .yes ; then
 	cf_term_lib=""
 	cf_curs_lib=""
 
-	if test ".$cf_cv_ncurses_version" != .no
+	if test ".${cf_cv_ncurses_version-no}" != .no
 	then
 		cf_check_list="ncurses curses cursesX"
 	else
@@ -1532,7 +1533,6 @@ EOF
 if test "$GCC" = yes
 then
 	AC_CHECKING([for $CC __attribute__ directives])
-	changequote(,)dnl
 cat > conftest.$ac_ext <<EOF
 #line __oline__ "configure"
 #include "confdefs.h"
@@ -1551,9 +1551,8 @@ cat > conftest.$ac_ext <<EOF
 extern void wow(char *,...) GCC_SCANFLIKE(1,2);
 extern void oops(char *,...) GCC_PRINTFLIKE(1,2) GCC_NORETURN;
 extern void foo(void) GCC_NORETURN;
-int main(int argc GCC_UNUSED, char *argv[] GCC_UNUSED) { return 0; }
+int main(int argc GCC_UNUSED, char *argv[[]] GCC_UNUSED) { return 0; }
 EOF
-	changequote([,])dnl
 	for cf_attribute in scanf printf unused noreturn
 	do
 		CF_UPPER(CF_ATTRIBUTE,$cf_attribute)
@@ -1598,12 +1597,10 @@ AC_DEFUN([CF_GCC_WARNINGS],
 [
 if test "$GCC" = yes
 then
-	changequote(,)dnl
 	cat > conftest.$ac_ext <<EOF
 #line __oline__ "configure"
-int main(int argc, char *argv[]) { return (argv[argc-1] == 0) ; }
+int main(int argc, char *argv[[]]) { return (argv[[argc-1]] == 0) ; }
 EOF
-	changequote([,])dnl
 	AC_CHECKING([for $CC warning options])
 	cf_save_CFLAGS="$CFLAGS"
 	EXTRA_CFLAGS="-W -Wall"
@@ -1894,9 +1891,7 @@ make an error
 			curses.h \
 			ncurses.h
 		do
-changequote(,)dnl
-			if egrep "NCURSES_[VH]" $cf_incdir/$cf_header 1>&AC_FD_CC 2>&1; then
-changequote([,])dnl
+			if egrep "NCURSES_[[VH]]" $cf_incdir/$cf_header 1>&AC_FD_CC 2>&1; then
 				cf_cv_ncurses_header=$cf_incdir/$cf_header
 				test -n "$verbose" && echo $ac_n "	... found $ac_c" 1>&AC_FD_MSG
 				break
@@ -1910,9 +1905,7 @@ changequote([,])dnl
 AC_MSG_RESULT($cf_cv_ncurses_header)
 AC_DEFINE(NCURSES)
 
-changequote(,)dnl
-cf_incdir=`echo $cf_cv_ncurses_header | sed -e 's:/[^/]*$::'`
-changequote([,])dnl
+cf_incdir=`echo $cf_cv_ncurses_header | sed -e 's:/[[^/]]*$::'`
 
 case $cf_cv_ncurses_header in # (vi
 */ncurses.h)
@@ -2027,9 +2020,7 @@ EOF
 	cf_try="$ac_cpp conftest.$ac_ext 2>&AC_FD_CC | grep '^Autoconf ' >conftest.out"
 	AC_TRY_EVAL(cf_try)
 	if test -f conftest.out ; then
-changequote(,)dnl
-		cf_out=`cat conftest.out | sed -e 's@^Autoconf @@' -e 's@^[^"]*"@@' -e 's@".*@@'`
-changequote([,])dnl
+		cf_out=`cat conftest.out | sed -e 's@^Autoconf @@' -e 's@^[[^"]]*"@@' -e 's@".*@@'`
 		test -n "$cf_out" && cf_cv_ncurses_version="$cf_out"
 		rm -f conftest.out
 	fi
@@ -2134,7 +2125,7 @@ dnl Provide a value for the $PATH and similar separator
 AC_DEFUN([CF_PATHSEP],
 [
 	case $cf_cv_system_name in
-	os2)	PATHSEP=';'  ;;
+	os2*)	PATHSEP=';'  ;;
 	*)	PATHSEP=':'  ;;
 	esac
 ifelse($1,,,[$1=$PATHSEP])
@@ -2194,9 +2185,7 @@ AC_DEFUN([CF_PATH_SYNTAX],[
 case ".[$]$1" in #(vi
 ./*) #(vi
   ;;
-changequote(,)dnl
-.[a-zA-Z]:[\\/]*) #(vi OS/2 EMX
-changequote([,])dnl
+.[[a-zA-Z]]:[[\\/]]*) #(vi OS/2 EMX
   ;;
 .\[$]{*prefix}*) #(vi
   eval $1="[$]$1"
@@ -2412,9 +2401,7 @@ AC_CACHE_VAL(cf_cv_slang_header,[
 AC_MSG_RESULT($cf_cv_slang_header)
 AC_DEFINE(USE_SLANG)
 
-changequote(,)dnl
-cf_incdir=`echo $cf_cv_slang_header | sed -e 's:/[^/]*$::'`
-changequote([,])dnl
+cf_incdir=`echo $cf_cv_slang_header | sed -e 's:/[[^/]]*$::'`
 
 case $cf_cv_slang_header in # (vi
 predefined) # (vi
@@ -2580,6 +2567,33 @@ AC_MSG_RESULT($cf_use_socks5p_h)
 test "$cf_use_socks5p_h" = yes && AC_DEFINE(INCLUDE_PROTOTYPES)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl srand() and rand() are more standard, but we'll accept other variations
+dnl if they are available.  All return an integer between 0 and RAND_MAX,
+dnl which must be defined for use in scaling.
+AC_DEFUN([CF_SRAND],[
+AC_CACHE_CHECK(for random-integer functions, cf_cv_srand_func,[
+cf_cv_srand_func=unknown
+for cf_func in srand48/lrand48 srandom/random srand/rand
+do
+	cf_srand_func=`echo $cf_func | sed -e 's@/.*@@'`
+	cf_rand_func=`echo  $cf_func | sed -e 's@.*/@@'`
+AC_TRY_LINK([
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+],[long seed = 1; $cf_srand_func(seed); seed = $cf_rand_func()],
+[cf_cv_srand_func=$cf_func
+ break])
+done
+])
+if test "$cf_cv_srand_func" != unknown ; then
+	cf_srand_func=`echo $cf_func | sed -e 's@/.*@@'`
+	cf_rand_func=`echo $cf_func | sed -e 's@.*/@@'`
+	AC_DEFINE_UNQUOTED(my_srand,$cf_srand_func)
+	AC_DEFINE_UNQUOTED(my_rand, $cf_rand_func)
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Check for ssl library
 dnl $1 = the [optional] directory in which the library may be found
 AC_DEFUN([CF_SSL],[
@@ -2651,9 +2665,7 @@ AC_DEFUN([CF_STRIP_G_OPT],
 dnl ---------------------------------------------------------------------------
 dnl	Remove "-O" option from the compiler options
 AC_DEFUN([CF_STRIP_O_OPT],[
-changequote(,)dnl
-$1=`echo ${$1} | sed -e 's/-O[1-9]\? //' -e 's/-O[1-9]\?$//'`
-changequote([,])dnl
+$1=`echo ${$1} | sed -e 's/-O[[1-9]]\? //' -e 's/-O[[1-9]]\?$//'`
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Some machines require _POSIX_SOURCE to completely define struct termios.
@@ -2892,9 +2904,7 @@ dnl Make an uppercase version of a variable
 dnl $1=uppercase($2)
 AC_DEFUN([CF_UPPER],
 [
-changequote(,)dnl
 $1=`echo "$2" | sed y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%`
-changequote([,])dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check for UTMP/UTMPX headers
@@ -3247,9 +3257,7 @@ AC_REQUIRE([CF_CHECK_CACHE])
 SYSTEM_NAME=`echo "$cf_cv_system_name"|tr ' ' -`
 cf_have_X_LIBS=no
 case $SYSTEM_NAME in
-changequote(,)dnl
-irix[56]*) ;;
-changequote([,])dnl
+irix[[56]]*) ;;
 clix*)
 	# FIXME: modify the library lookup in autoconf to
 	# allow _s.a suffix ahead of .a

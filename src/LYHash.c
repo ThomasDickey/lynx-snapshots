@@ -10,12 +10,7 @@
  *  but with a different value for HASH_SIZE.
  */
 
-#ifdef NOT_USED
-#define HASH_SIZE 8193		/* Arbitrary prime.  Memory/speed tradeoff */
-#else
 #define HASH_SIZE CSHASHSIZE
-#endif
-
 #define HASH_OF(h, v) ((int)((h) * 3 + UCH(v)) % HASH_SIZE)
 
 PUBLIC int hash_code ARGS1 (char*, string)

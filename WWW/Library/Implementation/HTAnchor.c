@@ -83,6 +83,7 @@ PRIVATE HTParentAnchor * HTParentAnchor_new NOARGS
     newAnchor->FileCache = NULL;	/* Path to a disk-cached copy. - FM */
     newAnchor->SugFname = NULL; 	/* Suggested filename. - FM */
     newAnchor->RevTitle = NULL; 	/* TITLE for a LINK with REV. - FM */
+    newAnchor->citehost = NULL; 	/* LINK REL=citehost - RDC */
     newAnchor->cache_control = NULL;	/* Cache-Control. - FM */
     newAnchor->no_cache = FALSE;	/* no-cache? - FM */
     newAnchor->content_type = NULL;	/* Content-Type. - FM */
@@ -743,6 +744,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
     FREE(me->bookmark);
     FREE(me->owner);
     FREE(me->RevTitle);
+    FREE(me->citehost);
 #ifdef SOURCE_CACHE
     HTAnchor_clearSourceCache(me);
 #endif
@@ -770,7 +772,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
     FREE(me->last_modified);
     FREE(me->ETag);
     FREE(me->server);
-#ifdef USE_HASH
+#ifdef USE_COLOR_STYLE
     FREE(me->style);
 #endif
 
@@ -921,7 +923,7 @@ PUBLIC BOOL HTAnchor_hasChildren ARGS1(
     return (BOOL) ( me ? ! HTList_isEmpty(me->children) : NO);
 }
 
-#if defined(USE_HASH)
+#if defined(USE_COLOR_STYLE)
 /*	Style handling.
 */
 PUBLIC CONST char * HTAnchor_style ARGS1(
@@ -1050,6 +1052,25 @@ PUBLIC void HTAnchor_setRevTitle ARGS2(
 	}
     }
 }
+
+#ifndef DISABLE_BIBP
+/*	Citehost for bibp links from LINKs with REL="citehost". - RDC
+*/
+PUBLIC CONST char * HTAnchor_citehost ARGS1(
+	HTParentAnchor *,	me)
+{
+    return( me ? me->citehost : NULL);
+}
+
+PUBLIC void HTAnchor_setCitehost ARGS2(
+	HTParentAnchor *,	me,
+	CONST char *,		citehost)
+{
+    if (me) {
+	StrAllocCopy(me->citehost, citehost);
+    }
+}
+#endif /* !DISABLE_BIBP */
 
 /*	Suggested filename handling. - FM
 **	(will be loaded if we had a Content-Disposition

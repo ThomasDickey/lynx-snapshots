@@ -67,7 +67,8 @@ struct _HTParentAnchor {
   char *	title;		/* Title of document */
   char *	owner;		/* Owner of document */
   char *	RevTitle;	/* TITLE in REV="made" or REV="owner" LINK */
-#ifdef USE_HASH
+  char *	citehost;	/* Citehost from REL="citehost" LINK */
+#ifdef USE_COLOR_STYLE
   char *	style;
 #endif
 
@@ -246,7 +247,7 @@ extern BOOL HTAnchor_isISMAPScript PARAMS((
 extern BOOL HTAnchor_hasChildren PARAMS((
 	HTParentAnchor *	me));
 
-#if defined(USE_HASH)
+#if defined(USE_COLOR_STYLE)
 extern CONST char * HTAnchor_style PARAMS((
 	HTParentAnchor *	me));
 
@@ -294,6 +295,15 @@ extern CONST char * HTAnchor_RevTitle PARAMS((
 extern void HTAnchor_setRevTitle PARAMS((
 	HTParentAnchor *	me,
 	CONST char *		title));
+
+/*	Citehost for bibp links from LINKs with REL="citehost". - RDC
+*/
+extern CONST char * HTAnchor_citehost PARAMS((
+	HTParentAnchor *	me));
+
+extern void HTAnchor_setCitehost PARAMS((
+	HTParentAnchor *	me,
+	CONST char *		citehost));
 
 /*	Suggested filename handling. - FM
 **	(will be loaded if we had a Content-Disposition

@@ -30,13 +30,13 @@
 /*
  *  Include chartrans tables:
  */
-#include <cp1250_uni.h> 	/* WinLatin2 (cp1250)	*/
-#include <cp1251_uni.h> 	/* WinCyrillic (cp1251) */
-#include <cp1252_uni.h> 	/* WinLatin1 (cp1252)	*/
-#include <cp1253_uni.h> 	/* WinGreek (cp1253)	*/
-#include <cp1255_uni.h> 	/* WinHebrew (cp1255)	*/
-#include <cp1256_uni.h> 	/* WinArabic (cp1256)	*/
-#include <cp1257_uni.h> 	/* WinBaltRim (cp1257)	*/
+#include <cp1250_uni.h>		/* WinLatin2 (cp1250)	*/
+#include <cp1251_uni.h>		/* WinCyrillic (cp1251) */
+#include <cp1252_uni.h>		/* WinLatin1 (cp1252)	*/
+#include <cp1253_uni.h>		/* WinGreek (cp1253)	*/
+#include <cp1255_uni.h>		/* WinHebrew (cp1255)	*/
+#include <cp1256_uni.h>		/* WinArabic (cp1256)	*/
+#include <cp1257_uni.h>		/* WinBaltRim (cp1257)	*/
 #include <cp437_uni.h>		/* DosLatinUS (cp437)	*/
 #include <cp737_uni.h>		/* DosGreek (cp737)	*/
 #include <cp775_uni.h>		/* DosBaltRim (cp775)	*/
@@ -62,16 +62,26 @@
 #include <iso15_uni.h>		/* ISO 8859-15 (Latin 9)*/
 #include <koi8r_uni.h>		/* KOI8-R Cyrillic	*/
 #include <mac_uni.h>		/* Macintosh (8 bit)	*/
-#include <mnem2_suni.h> 	/* RFC 1345 Mnemonic	*/
+#include <mnem2_suni.h>		/* RFC 1345 Mnemonic	*/
 #include <next_uni.h>		/* NeXT character set	*/
 #include <rfc_suni.h>		/* RFC 1345 w/o Intro	*/
 /* #include <utf8_uni.h> */     /* UNICODE UTF 8        */
-#include <viscii_uni.h> 	/* Vietnamese (VISCII)	*/
+#include <viscii_uni.h>		/* Vietnamese (VISCII)	*/
 #include <cp866u_uni.h>		/* Ukrainian Cyrillic (866) */
 #include <koi8u_uni.h>		/* Ukrainian Cyrillic (koi8-u */
 #ifdef NOTDEFINED
 #include <mnem_suni.h>
 #endif /* NOTDEFINED */
+
+#ifdef CAN_AUTODETECT_DISPLAY_CHARSET
+int auto_display_charset = -1;
+#  ifdef __EMX__
+/* If we include <os2.h>, BOOLEAN conflicts.  Just copy the proto: */
+unsigned long DosQueryCp (unsigned long ulLength,
+			  unsigned long* pCodePageList,
+			  unsigned long* pDataLength);
+#  endif
+#endif
 
 /*
  *  Some of the code below, and some of the comments, are left in for
@@ -608,7 +618,7 @@ PRIVATE int con_insert_unipair ARGS3(
 
 PRIVATE int con_insert_unipair_str ARGS3(
 	u16,		unicode,
-	CONST char *, 	replace_str,
+	CONST char *,	replace_str,
 	int,		fordefault)
 {
     int i, n;
@@ -1082,7 +1092,7 @@ PUBLIC int UCTransUniChar ARGS2(
  *  Returns string length, or negative value for error.
  */
 PUBLIC int UCTransUniCharStr ARGS5(
-	char *, 	outbuf,
+	char *,		outbuf,
 	int,		buflen,
 	long,		unicode,
 	int,		charset_out,
@@ -1379,7 +1389,7 @@ PUBLIC int UCReverseTransChar ARGS3(
  *  Returns string length, or negative value for error.
  */
 PUBLIC int UCTransCharStr ARGS6(
-	char *, 	outbuf,
+	char *,		outbuf,
 	int,		buflen,
 	char,		ch_in,
 	int,		charset_in,
@@ -2179,13 +2189,13 @@ PUBLIC void UCInit NOARGS
     UC_CHARSET_SETUP_cp437;		  /* DosLatinUS (cp437)   */
 
     UC_CHARSET_SETUP_dec_mcs;		  /* DEC Multinational	  */
-    UC_CHARSET_SETUP_macintosh; 	  /* Macintosh (8 bit)	  */
+    UC_CHARSET_SETUP_macintosh;		  /* Macintosh (8 bit)	  */
     UC_CHARSET_SETUP_next;		  /* NeXT character set   */
     UC_CHARSET_SETUP_hp_roman8;		  /* HP Roman8		  */
 
     UC_CHARSET_SETUP_euc_cn;		  /*** Chinese		    */
     UC_CHARSET_SETUP_euc_jp;		  /*** Japanese (EUC_JP)    */
-    UC_CHARSET_SETUP_shift_jis; 	  /*** Japanese (Shift_JIS) */
+    UC_CHARSET_SETUP_shift_jis;		  /*** Japanese (Shift_JIS) */
     UC_CHARSET_SETUP_euc_kr;		  /*** Korean		    */
     UC_CHARSET_SETUP_big5;		  /*** Taipei (Big5)	    */
 
@@ -2226,6 +2236,43 @@ PUBLIC void UCInit NOARGS
 #ifdef NOTDEFINED
     UC_CHARSET_SETUP_mnem;
 #endif /* NOTDEFINED */
+
+#ifdef CAN_AUTODETECT_DISPLAY_CHARSET
+#  ifdef __EMX__
+    {
+	unsigned long lst[3];
+	unsigned long len;
+
+	if (DosQueryCp(sizeof(lst), lst, &len) == 0 && len >= 1) {
+	    static char lyName[80];
+	    static char myMimeName[80];
+	    char *mimeName;
+	    int s, i, exists = 0;
+
+	    sprintf(myMimeName, "auto-cp%lu", lst[0]);
+	    mimeName = myMimeName + 5;
+	    sprintf(lyName, "AutoDetect (cp%lu)", lst[0]);
+	    /* Find slot. */
+	    s = -1;
+	    for (i = 0; i < UCNumCharsets; i++) {
+		    if (!strcmp(UCInfo[i].LYNXname, lyName))
+			exists = 1;
+		    else if (!stricmp(UCInfo[i].MIMEname, mimeName))
+			s = i;
+	    }
+	    if (s >= 0 && !exists) {
+		/* Duplicate the record. */
+		UC_Charset_Setup(myMimeName, lyName,
+				 UCInfo[s].unicount, UCInfo[s].unitable,
+				 UCInfo[s].num_uni, UCInfo[s].replacedesc,
+				 UCInfo[s].lowest_eight, UCInfo[s].enc,
+				 UCInfo[s].codepage);
+		auto_display_charset = UCGetLYhndl_byMIME(myMimeName);
+	    }
+	}
+    }
+#  endif
+#endif
 
 /*
  *  To add synonyms for any charset name

@@ -334,6 +334,8 @@ install-doc : $(DOCDIR) $(HELPDIR)
 
 # HPUX 'sed' does not seem to like '=' as pattern delimiter.
 # We cannot use '%' because it may appear in a URL.
+# Andrew filesystem uses '@'.
+# So we limit sed delimiters to '!' and '%', depending on the expected text.
 FIX_SED = tr '=' '"'
 
 help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
@@ -360,7 +362,7 @@ help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
 	@-rm -f help_files.tmp
 
 install-help : help_files.sed $(HELPDIR)
-	(cd $(HELPDIR) && WD=`pwd` && HEAD=`echo $$WD|sed -e 's@/lynx_help$$@@'` && test $$WD != $$HEAD && rm -rf *)
+	(cd $(HELPDIR) && WD=`pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_help$$!!'` && test $$WD != $$HEAD && rm -rf *)
 @LYNXCFG_MAKE@	@echo 'Making htmlized lynx.cfg'
 @LYNXCFG_MAKE@	cd src && make LYReadCFG.i
 @LYNXCFG_MAKE@	@-rm -f alphatoc.html body.html cattoc.html
@@ -392,12 +394,12 @@ install-help : help_files.sed $(HELPDIR)
 		cp $(srcdir)/lynx.cfg $(LIBDIR)/lynx.tmp ; \
 	fi'
 	@echo Updating $(libdir)/lynx.cfg to point to installed help-files
-	@ECHO_CC@sed	-e '/^HELPFILE:http/s@^@#@' \
-		-e '/^#HELPFILE:file/s@#@@' \
-		-e '/^HELPFILE:file/s@/PATH_TO/lynx_help@$(helpdir)@' \
-		-e '/^[A-Z_]*:/s@/PATH_TO/lynx_doc@$(docdir)@' \
-		-e '/^HELPFILE:file/s@$$@$(COMPRESS_EXT)@' \
-		-e '/^HELPFILE:file/s@$(COMPRESS_EXT)$(COMPRESS_EXT)$$@$(COMPRESS_EXT)@' \
+	@ECHO_CC@sed	-e '/^HELPFILE:http/s!^!#!' \
+		-e '/^#HELPFILE:file/s!#!!' \
+		-e '/^HELPFILE:file/s!/PATH_TO/lynx_help!$(helpdir)!' \
+		-e '/^[A-Z_]*:/s!/PATH_TO/lynx_doc!$(docdir)!' \
+		-e '/^HELPFILE:file/s!$$!$(COMPRESS_EXT)!' \
+		-e '/^HELPFILE:file/s!$(COMPRESS_EXT)$(COMPRESS_EXT)$$!$(COMPRESS_EXT)!' \
 		$(LIBDIR)/lynx.tmp >$(LIBDIR)/lynx.cfg
 	chmod 644 $(LIBDIR)/lynx.cfg
 	-rm -f $(LIBDIR)/lynx.tmp
@@ -438,12 +440,12 @@ uninstall ::
 
 uninstall \
 uninstall-help ::
-	-test -d $(HELPDIR) && WD=`cd $(HELPDIR) && pwd` && HEAD=`echo $$WD|sed -e 's@/lynx_help$$@@'` && test $$WD != $$HEAD && rm -rf $(HELPDIR)
+	-test -d $(HELPDIR) && WD=`cd $(HELPDIR) && pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_help$$!!'` && test $$WD != $$HEAD && rm -rf $(HELPDIR)
 
 uninstall \
 uninstall-doc ::
-	-test -d $(DOCDIR) && WD=`cd $(DOCDIR) && pwd` && HEAD=`echo $$WD|sed -e 's@/lynx_doc$$@@'` && test $$WD != $$HEAD && rm -rf $(DOCDIR)
-	-test -d $(HELPDIR) && WD=`cd $(HELPDIR) && pwd` && HEAD=`echo $$WD|sed -e 's@/lynx_help$$@@'` && test $$WD != $$HEAD && cd $(HELPDIR) && rm -f COPYING COPYHEADER
+	-test -d $(DOCDIR) && WD=`cd $(DOCDIR) && pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_doc$$!!'` && test $$WD != $$HEAD && rm -rf $(DOCDIR)
+	-test -d $(HELPDIR) && WD=`cd $(HELPDIR) && pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_help$$!!'` && test $$WD != $$HEAD && cd $(HELPDIR) && rm -f COPYING COPYHEADER
 
 $(BINDIR) $(MANDIR) $(LIBDIR) $(HELPDIR) $(DOCDIR) :
 	$(srcdir)/mkdirs.sh $@

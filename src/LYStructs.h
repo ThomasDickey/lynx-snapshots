@@ -34,7 +34,7 @@ typedef struct _document {
    int    line;
    BOOL   internal_link;	/* whether doc was reached via an internal
 				 (fragment) link. - kw */
-#ifdef USE_HASH
+#ifdef USE_COLOR_STYLE
    char * style;
 #endif
 } document;

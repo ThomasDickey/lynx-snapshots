@@ -420,7 +420,7 @@ PUBLIC int showinfo ARGS4(
 #endif /* DIRED_SUPPORT */
     EndInternalPage(fp0);
 
-    refresh();
+    LYrefresh();
 
     LYCloseTemp(tempfile);
     FREE(Address);

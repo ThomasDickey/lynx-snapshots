@@ -1,15 +1,15 @@
 1 LYNX
-2 NAME
+2 Name
        lynx  -  a general purpose distributed information browser
        for the World Wide Web
 
-2 SYNOPSIS
+2 Synopsis
        lynx [options] [path or URL]
 
        use "lynx -help" to display a  complete  list  of  current
        options.
 
-2 DESCRIPTION
+2 Description
        Lynx  is  a fully-featured World Wide Web (WWW) client for
        users running cursor-addressable,  character-cell  display
        devices (e.g., vt100 terminals, vt100 emulators running on
@@ -28,7 +28,7 @@
        addition, Lynx can  be  used  to  build  systems  isolated
        within a single LAN.
 
-2 OPTIONS
+2 Options
        At  start  up, Lynx will load any local file or remote URL
        specified at the command line.  For help with URLs,  press
        "?"   or  "H"  while  running  Lynx.  Then follow the link
@@ -153,6 +153,9 @@
        -display=DISPLAY
               set the display variable for X rexec-ed programs.
 
+       -display_charset=MIMEname
+              set the charset for the terminal output.
+
        -dont_wrap_pre
               inhibit  wrapping  of  text in <pre> when -dump'ing
               and -crawl'ing, mark wrapped lines  in  interactive
@@ -161,6 +164,7 @@
        -dump  dumps  the formatted output of the default document
               or one specified on the command  line  to  standard
               output.  This can be used in the following way:
+
               lynx -dump http://www.trill-home.com/lynx.html
 
        -editor=EDITOR
@@ -377,6 +381,7 @@
               set.
 
        -realm restricts access to URLs in the starting realm.
+
        -reload
               flushes the cache on a proxy server (only the first
               document affected).
@@ -427,11 +432,11 @@
               exec - disable execution scripts.
 
               exec_frozen  -  disallow the user from changing the
+
               local execution option.
 
               externals - disallow some "EXTERNAL"  configuration
               lines  if  support  for  passing  URLs  to external
-
               applications (with the EXTERN command) is  compiled
               in.
 
@@ -485,6 +490,7 @@
               selectivity).
 
               print - disallow most print options.
+
               shell - disallow  shell  escapes  and  lynxexec  or
               lynxprog G)oto's.
 
@@ -534,11 +540,11 @@
        -soft_dquotes
               toggles  emulation  of  the old Netscape and Mosaic
               bug  which  treated  '>'  as  a  co-terminator  for
+
               double-quotes and tags.
 
        -source
               works  the  same  as  dump  but outputs HTML source
-
               instead of formatted text.
 
        -stack_dump
@@ -593,7 +599,6 @@
               line  to  scroll  up.   Click on the bottom line to
               scroll down.  The first few positions  in  the  top
               and  bottom  line  may invoke additional functions.
-
               Lynx must be compiled  with  ncurses  or  slang  to
               support this feature.  If ncurses is used, clicking
               the middle mouse button  pops  up  a  simple  menu.
@@ -630,7 +635,7 @@
               emit  backspaces in output if -dumping or -crawling
               (like 'man' does)
 
-2 COMMANDS
+2 Commands
        o Use Up arrow and Down arrow to scroll through  hypertext
        links.
        o   Right  arrow  or  Return  will  follow  a  highlighted
@@ -641,14 +646,14 @@
        o  Type  "K" for a complete list of the current key-stroke
        command mappings.
 
-2 ENVIRONMENT
+2 Environment
        In addition to various  "standard"  environment  variables
        such  as  HOME,  PATH,  USER,  DISPLAY,  TMPDIR, etc, Lynx
+
        utilizes several Lynx-specific environment  variables,  if
        they exist.
 
        Others  may be created or modified by Lynx to pass data to
-
        an external program, or  for  other  reasons.   These  are
        listed separately below.
 
@@ -688,7 +693,7 @@
                            the  default  path  prefix  for  files
                            saved  to  disk that is defined in the
                            lynx.cfg SAVE_SPACE:  statement.   See
-                           the    lynx.cfg    file    for    more
+                           the    lynx.cfg    file    for   more
                            information.
 
        LYNX_TEMP_SPACE     This variable, if set,  will  override
@@ -699,6 +704,7 @@
                            variable.
 
        MAIL                This  variable  specifies  the default
+
                            inbox Lynx will check for new mail, if
                            such   checking   is  enabled  in  the
                            lynx.cfg file.
@@ -733,7 +739,7 @@
                            by setting  environment  variables  of
                            the  form  PROTOCOL_proxy  (literally:
                            http_proxy,  ftp_proxy,  gopher_proxy,
-                           etc),                               to
+                           etc),               to
                            "http://some.server.dom:port/".    See
                            Lynx   Users   Guide   for  additional
                            details and examples.
@@ -757,7 +763,6 @@
        Environment Variables Set or Modified By Lynx:
 
        LYNX_PRINT_DATE     This  variable  is  set  by  the  Lynx
-
                            p(rint)  function, to the Date: string
                            seen in  the  document's  "Information
                            about"  page  (=  cmd), if any.  It is
@@ -828,7 +833,7 @@
                            the LINES and/or  COLUMNS  environment
                            variables may also be changed.
 
-2 SIMULATED CGI SUPPORT
+2 Simulated Cgi Support
        If  built  with  the cgi-links option enabled, Lynx allows
        access to a cgi script directly without the  need  for  an
        http daemon.
@@ -866,7 +871,6 @@
        Other  environment  variables  are  not  inherited  by the
        script, unless they are provided via a LYNXCGI_ENVIRONMENT
        statement  in  the  configuration  file.  See the lynx.cfg
-
        file,   and   the   (draft)    CGI    1.1    Specification
        <http://Web.Golux.Com/coar/cgi/draft-coar-cgi-v11-00.txt>
        for the definition and usage of these variables.
@@ -875,7 +879,7 @@
        should  be consulted for general information on CGI script
        programming.
 
-2 NATIVE LANGUAGE SUPPORT
+2 Native Language Support
        If configured and installed with Native Language  Support,
        Lynx  will display status and other messages in your local
        language.   See  the  file   ABOUT_NLS   in   the   source
@@ -914,10 +918,11 @@
        NLSPATH             This  variable, if set, is used as the
                            path prefix for message catalogs.
 
-2 NOTES
+2 Notes
        This is the Lynx v2.8.3 Release
 
        If you wish to contribute to the  further  development  of
+
        Lynx,  subscribe  to  our  mailing  list.   Send  email to
        <majordomo@sig.net> with "subscribe lynx-dev" as the  only
        line in the body of your message.
@@ -930,7 +935,7 @@
        your message.  Do not send the unsubscribe message to  the
        lynx-dev list, itself.
 
-2 SEE ALSO
+2 See Also
        catgets(3),   curses(3),  environ(7),  execve(2),  ftp(1),
        gettext(GNU),  localeconv(3),  ncurses(3),   setlocale(3),
        slang(?), termcap(5), terminfo(5), wget(GNU)
@@ -949,7 +954,7 @@
        with the topic, or contact your System Administrator
        for further information).
 
-2 ACKNOWLEDGMENTS
+2 Acknowledgments
        Lynx has incorporated code from a variety of sources along
        the way.  The earliest versions of Lynx included code from
        Earl Fogel of Computing  Services  at  the  University  of
@@ -970,12 +975,11 @@
        ports)  or indirectly (through inspiration and development
        of other systems).
 
-2 AUTHORS
+2 Authors
        Lou Montulli,  Garrett  Blythe,  Craig  Lavender,  Michael
        Grobe, Charles Rezac
        Academic Computing Services
        University of Kansas
-
        Lawrence, Kansas 66047
 
        Foteos Macrides

@@ -86,7 +86,7 @@ PUBLIC int change_form_link_ex ARGS8(
     /*
      *  Move to the link position.
      */
-    move(form_link->ly, form_link->lx);
+    LYmove(form_link->ly, form_link->lx);
 
     switch(form->type) {
 	case F_CHECKBOX_TYPE:
@@ -188,8 +188,8 @@ PUBLIC int change_form_link_ex ARGS8(
 			 */
 			!strcmp(links[i].form->name, form->name) &&
 			links[i].form->num_value) {
-			move(links[i].ly, links[i].lx);
-			addstr(unchecked_radio);
+			LYmove(links[i].ly, links[i].lx);
+			LYaddstr(unchecked_radio);
 			links[i].hightext = unchecked_radio;
 		    }
 		}
@@ -421,7 +421,7 @@ PRIVATE int form_getstr ARGS3(
 	     */
 	    HTUserMsg(FORM_VALUE_TOO_LONG);
 	    show_formlink_statusline(form, redraw_only? FOR_PANEL : FOR_INPUT);
-	    move(startline, startcol);
+	    LYmove(startline, startcol);
 	}
     }
 
@@ -445,7 +445,7 @@ PRIVATE int form_getstr ARGS3(
 	    MyEdit.pos = LastTFPos;
 #ifdef ENHANCED_LINEEDIT
 	if (MyEdit.pos == 0)
-	    MyEdit.mark = MyEdit.strlen;
+	    MyEdit.mark = -1 - MyEdit.strlen;	/* Do not show the region. */
 #endif
     }
     /* Try to prepare for setting position based on the last mouse event */
@@ -683,12 +683,12 @@ again:
 		goto breakfor;
 #endif /* NOTDEFINED */
 
-	    /*
+	    default:
+	    /*	[ 1999/04/14 (Wed) 15:01:33 ]
 	     *  Left arrrow in column 0 deserves special treatment here,
 	     *  else you can get trapped in a form without submit button!
 	     */
-	    case LTARROW:	/* 1999/04/14 (Wed) 15:01:33 */
-		if (MyEdit.pos == 0 && repeat == -1) {
+		if (action == LYE_BACK && MyEdit.pos == 0 && repeat == -1) {
 		    int c = YES;    /* Go back immediately if no changes */
 		    if (textfield_prompt_at_left_edge) {
 			c = HTConfirmDefault(PREV_DOC_QUERY, NO);
@@ -704,9 +704,6 @@ again:
 			    _statusline(ENTER_TEXT_ARROWS_OR_TAB);
 		    }
 		}
-		/* fall through */
-
-	    default:
 		if (form->disabled == YES) {
 		    /*
 		     *  Allow actions that don't modify the contents even
@@ -717,7 +714,9 @@ again:
 		    case LYE_BOL:
 		    case LYE_EOL:
 		    case LYE_FORW:
+		    case LYE_FORW_RL:
 		    case LYE_BACK:
+		    case LYE_BACK_LL:
 		    case LYE_FORWW:
 		    case LYE_BACKW:
 #ifdef EXP_KEYBOARD_LAYOUT
@@ -738,10 +737,32 @@ again:
 		if (repeat < 0)
 		    repeat = 1;
 		while (repeat--) {
-#ifndef SUPPORT_MULTIBYTE_EDIT
-		    LYLineEdit(&MyEdit, ch, TRUE);
-#else /* SUPPORT_MULTIBYTE_EDIT */
-		    if (LYLineEdit(&MyEdit, ch, TRUE) == 0) {
+		    int rc = LYLineEdit(&MyEdit, ch, TRUE);
+
+		    if (rc < 0) {
+			ch = -rc;
+			/* FORW_RL and BACK_LL may require special attention.
+			   BACK_LL wanted to switch to the previous link on
+			   the same line.  However, if there is no such link,
+			   then we would either disactivate the form
+			   (with -tna), or will reenter the form, thus we jump
+			   to the end of the line; both are counterintuitive.
+			   Unfortunately, we do not have access to curdoc.link,
+			   so we deduce it ourselves.  We don't have the info
+			   to do it inside LYLineEdit().
+			   This should work for prompts too.  */
+			if ( (action != LYE_BACK_LL && action != LYE_FORW_RL)
+			     || ((form_link - links) >= 0
+				&& (form_link - links) < nlinks
+				&& (action==LYE_FORW_RL
+				    ? (form_link - links) < nlinks - 1
+				    : (form_link - links) > 0)
+				&& form_link[action==LYE_FORW_RL ? 1 : -1].ly
+				   == form_link->ly))
+			    goto breakfor;
+		    }
+#ifdef SUPPORT_MULTIBYTE_EDIT
+		    if (rc == 0) {
 			if (HTCJK != NOCJK && (0x80 <= ch)
 			&& (ch <= 0xfe) && refresh_mb)
 			    refresh_mb = FALSE;
@@ -771,9 +792,7 @@ again:
 		LYSetLastTFPos(MyEdit.pos);
 	}
     }
-#if defined(NOTDEFINED) || defined(SH_EX)
-breakfor:
-#endif /* NOTDEFINED */
+  breakfor:
     if (Edited) {
 	char  *p;
 

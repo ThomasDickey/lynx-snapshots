@@ -1,4 +1,3 @@
-
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYKeymap.h>
@@ -167,10 +166,10 @@ LYK_PRINT,           LYK_QUIT,    LYK_DEL_BOOKMARK, LYK_INDEX_SEARCH,
 LYK_TAG_LINK,     LYK_PREV_DOC,   LYK_VIEW_BOOKMARK,   0,
 /* t */              /* u */         /* v */        /* w */
 
-LYK_NOCACHE,            0,          LYK_INTERRUPT,     0,
+LYK_NOCACHE,            0,          LYK_INTERRUPT, LYK_SHIFT_LEFT,
 /* x */              /* y */          /* z */       /* { */
 
-LYK_PIPE,               0,              0,          LYK_HISTORY,
+LYK_LINEWRAP_TOGGLE, LYK_SHIFT_RIGHT,  0,          LYK_HISTORY,
 /* | */               /* } */         /* ~ */       /* del */
 
 
@@ -668,9 +667,6 @@ PRIVATE Kcmd revmap[] = {
 	LYK_RELOAD, "RELOAD",
 	"reload the current document" ),
     DATA(
-	LYK_PIPE, "PIPE",
-	"pipe the current document to an external command" ),
-    DATA(
 	LYK_QUIT, "QUIT",
 	"quit the browser" ),
     DATA(
@@ -949,6 +945,17 @@ PRIVATE Kcmd revmap[] = {
 	LYK_CHDIR, "CHDIR",
 	"change current directory" ),
 #endif
+#ifdef USE_CURSES_PADS
+    DATA(
+	LYK_SHIFT_LEFT, "SHIFT_LEFT",
+	"shift the screen left" ),
+    DATA(
+	LYK_SHIFT_RIGHT, "SHIFT_RIGHT",
+	"shift the screen right" ),
+    DATA(
+	LYK_LINEWRAP_TOGGLE, "LINEWRAP_TOGGLE",
+	"toggle linewrap on/off" ),
+#endif
     DATA(
 	LYK_UNKNOWN, NULL,
 	"" )
@@ -1010,7 +1017,9 @@ PRIVATE struct emap ekmap[] = {
   {"BOL",	LYE_BOL,	"Go to begin of line"},
   {"EOL",	LYE_EOL,	"Go to end   of line"},
   {"FORW",	LYE_FORW,	"Cursor forwards"},
+  {"FORW_RL",	LYE_FORW_RL,	"Cursor forwards or right link"},
   {"BACK",	LYE_BACK,	"Cursor backwards"},
+  {"BACK_LL",	LYE_BACK_LL,	"Cursor backwards or left link"},
   {"FORWW",	LYE_FORWW,	"Word forward"},
   {"BACKW",	LYE_BACKW,	"Word back"},
 
@@ -1357,6 +1366,8 @@ PUBLIC int lkcstring_to_lkc ARGS1(
 #endif
 #endif
     }
+    if (c == CH_ESC)
+	escape_bound = 1;
     if (c < -1)
 	return (-1);
     else
@@ -1400,12 +1411,9 @@ PRIVATE int LYLoadKeymap ARGS4 (
     }
     for (i = 1; i < KEYMAP_SIZE; i++) {
 	/*
-	 *  LYK_PIPE not implemented yet.
-	 *
 	 *  Don't show CHANGE_LINK if mouse not enabled.
 	 */
 	if ((i >= 0200 || i <= ' ' || !isalpha(i-1)) &&
-	    (keymap[i] != LYK_PIPE) &&
 	    (LYUseMouse || (keymap[i] != LYK_CHANGE_LINK))) {
 	    print_binding(target, i, FALSE);
 	}

@@ -176,6 +176,9 @@ II. Compile instructions -- UNIX
 	Compiles-in an alternative set of line-edit bindings, in addition
 	to the default bindings.
 
+  --disable-bibp-urls			(define DISABLE_BIBP)
+	Disable (do not compile code) support for bibp: URLs.
+
   --disable-config-info			(define NO_CONFIG_INFO)
   	Use this option to disable extended browsable configuration information
 	(a screen that shows the result of the configuration script, as well

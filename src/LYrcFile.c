@@ -163,7 +163,7 @@ PUBLIC void read_rc ARGS1(FILE *, fp)
 	 *  Find the line position of the number sign if there is one.
 	 */
 	if ((cp = (char *)strchr(line_buffer, '#')) == NULL)
-	    number_sign = 999;
+	    number_sign = strlen(line_buffer) + 100;
 	else
 	    number_sign = cp - line_buffer;
 

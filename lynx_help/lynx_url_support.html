@@ -18,6 +18,7 @@
 <a href="#mailto">mailto</a> <em>|</em>
 <a href="#finger">finger</a> <em>|</em>
 <a href="#cso">cso</a> <em>|</em>
+<a href="#bibp">bibp</a> <em>|</em>
 <a href="#exec">lynxexec, lynxprog</a> <em>|</em>
 <a href="#cgi">lynxcgi</a><em>|</em>
 <a href="#internal">internal</a><em>]</em>
@@ -30,8 +31,8 @@ more details about URLs (Uniform Resource Locators) see <em>RFC1738</em>:
 <ul>
 <li><a href="http://www.w3.org/Addressing/rfc1738.txt"
 >http://www.w3.org/Addressing/rfc1738.txt</a>
-<li><a href="ftp://ds.internic.net/rfc/rfc1738.txt"
->ftp://ds.internic.net/rfc/rfc1738.txt</a>
+<li><a href="ftp://ftp.rfc-editor.org/in-notes/rfc1738.txt"
+>ftp://ftp.rfc-editor.org/in-notes/rfc1738.txt</a>
 </ul>
 
 <p>Lynx resolves partial or relative URLs in documents with respect to
@@ -40,8 +41,8 @@ absolute URL, using the rules described in <em>RFC1808</em>:
 <ul>
 <li><a href="http://www.w3.org/Addressing/rfc1808.txt"
 >http://www.w3.org/Addressing/rfc1808.txt</a>
-<li><a href="ftp://ds.internic.net/rfc/rfc1808.txt"
->ftp://ds.internic.net/rfc/rfc1808.txt</a>
+<li><a href="ftp://ftp.rfc-editor.org/in-notes/rfc1808.txt"
+>ftp://ftp.rfc-editor.org/in-notes/rfc1808.txt</a>
 </ul>
 
 and in subsequent drafts of the <em>IETF</em>:
@@ -537,6 +538,15 @@ to the server.   Any strings in the reports returned for these requests
 (searches) which appear to be a URL with a supported scheme will be
 converted into a link for accessing that URL.
 <HR>
+
+<H2><a name="bibp">The <em>bibp</em> URL:</a></H2>
+
+<p>Lynx provides built-in support for bibliographic protocol (BibP).
+BibP links are links to published works such as books or journal articles,
+without a predefined server.  BibP links are intended for resolution
+by a local bibhost server (http://bibhost/) if it exists.   Otherwise,
+resolution is performed by a document-specified server or a known global
+server.
 
 <H2><a name="exec">The <em>lynxexec</em> and <em>lynxprog</em> URLs:</a></H2>
 
