@@ -289,7 +289,7 @@ PRIVATE int LYLoadCGI ARGS4(
 	int fd1[2], fd2[2];
 	char buf[1024];
 	pid_t pid;
-#if HAVE_TYPE_UNION_WAIT && !HAVE_WAITPID
+#if HAVE_TYPE_UNIONWAIT && !HAVE_WAITPID
 	union wait wstatus;
 #else
 	int wstatus;
@@ -376,7 +376,7 @@ PRIVATE int LYLoadCGI ARGS4(
 		    
 		    (*target->isa->put_block)(target, buf, chars);
 		}
-#if HAVE_TYPE_UNION_WAIT && !HAVE_WAITPID
+#if HAVE_TYPE_UNIONWAIT && !HAVE_WAITPID
 		while (wait(&wstatus) != pid)
 		    ; /* do nothing */
 #else

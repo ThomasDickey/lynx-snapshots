@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * $Id: LYStyle.c,v 1.1 1997/05/25 00:14:19 tom Exp $
+ * $Id: LYStyle.c,v 1.2 1997/09/17 23:34:13 tom Exp $
  */
 #include "HTUtils.h"
 #include "HTML.h"
@@ -123,7 +123,7 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
   * If we have colour, and space to create a new colour attribute,
   * and we have a valid colour description, then add this style
   */
- if (has_color && colorPairs < COLOR_PAIRS-1 && fA!=-1)
+ if (lynx_uses_color && colorPairs < COLOR_PAIRS-1 && fA!=-1)
  {
 	colorPairs++;
 	init_pair(colorPairs, fA, bA);

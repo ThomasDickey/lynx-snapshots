@@ -258,7 +258,7 @@ PRIVATE void HTMLGen_start_element ARGS5(
 	HTStructured *, 	me,
 	int,			element_number,
 	CONST BOOL*,	 	present,
-	CONST char **,		value,
+	char **,		value,
 	char **,		insert)
 {
     int i;

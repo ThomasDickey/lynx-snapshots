@@ -8,7 +8,17 @@ exec_prefix	= @exec_prefix@
 srcdir		= @srcdir@
 VPATH		= $(srcdir)
 
-MCFLAGS		= # FIXME: set in parent makefile
+# Symbols which the configure script can set in each makefile:
+CC		= @CC@
+CPP		= @CPP@
+CFLAGS		= @CFLAGS@
+DEFS		= @DEFS@
+CPPFLAGS	= @CPPFLAGS@
+
+LIBS		= @LIBS@ $(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)
+LDFLAGS		= @LDFLAGS@
+
+# Symbols inherited from the top-level makefile
 RESOLVLIB	= # FIXME: set in parent makefile
 SITE_DEFS	= # FIXME: set in parent makefile
 SITE_LIBS	= # FIXME: set in parent makefile
@@ -18,16 +28,11 @@ WAISLIB		= # FIXME: set in parent makefile
 WWWINC		= WWW/Library/Implementation
 WWWLIB		= ../WWW/Library/unix/libwww.a
 
-CC		= @CC@
-CPP		= @CPP@
-CPPOPTS		= @DEFS@ @CPPFLAGS@ -I.. -I../$(WWWINC) $(MCFLAGS) $(SITE_DEFS)
-CFLAGS		= $(CPPOPTS) @CFLAGS@
+CPP_OPTS	= $(DEFS) $(CPPFLAGS) -I.. -I../$(WWWINC) $(SITE_DEFS)
+CC_OPTS		= $(CPP_OPTS) $(CFLAGS)
 
 LINT		= @LINT@
 LINTOPTS	=
-
-LIBS		= @LIBS@ $(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)
-LDFLAGS		= @LDFLAGS@
 
 CHARTRANS_OBJS=UCdomap.o UCAux.o UCAuto.o
 OBJS=  LYClean.o LYShowInfo.o LYEdit.o LYStrings.o \
@@ -47,16 +52,16 @@ all: lynx
 .SUFFIXES : .i
 
 .c.o:
-@SHOW_CC@
-	@ECHO_CC@$(CC) $(CFLAGS) -c $(srcdir)/$*.c
+@RULE_CC@
+	@ECHO_CC@$(CC) $(CC_OPTS) -c $(srcdir)/$*.c
 
 .c.i:
-@SHOW_CC@
-	@ECHO_CC@$(CPP) -C $(CPPOPTS) $*.c >$@
+@RULE_CC@
+	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $*.c >$@
 
 lynx:   message @EXTRA_DEPS@ $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
-	$(CC) $(CFLAGS) $(LDFLAGS) -o lynx  $(OBJS) $(WWWLIB) $(LIBS)
+	$(CC) $(CC_OPTS) $(LDFLAGS) -o lynx  $(OBJS) $(WWWLIB) $(LIBS)
 	@echo "Copying Lynx executable into top-level directory"
 	cp lynx ..
 	@echo "Welcome to Lynx!"
@@ -66,12 +71,11 @@ message:
 
 do_chartrans_stuff:
 	-cd chrtrans && $(MAKE) \
-		MCFLAGS="$(MCFLAGS)" \
 		SITE_DEFS="$(SITE_DEFS)" \
 		CC="$(CC)" tables
 
 lint:
-	$(LINT) $(LINTOPTS) $(CPPOPTS) *.c  > ../lint.out
+	$(LINT) $(LINTOPTS) $(CPP_OPTS) *.c  > ../lint.out
 
 clean:
 	rm -f lynx core *.[ob] *.bak
@@ -133,6 +137,6 @@ UCAux.o : UCAux.c $(CMN)UCAux.h $(CMN)UCDefs.h
 LYCookie.o: ../userdefs.h
 
 depend :
-	makedepend -fmakefile -- $(CFLAGS) -- $(C_SRC)
+	makedepend -fmakefile -- $(CC_OPTS) -- $(C_SRC)
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

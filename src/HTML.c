@@ -519,6 +519,9 @@ char prevailing_class[TEMPSTRINGSIZE];
     char myHash[128];
     int hcode;
 #endif
+
+#define CHECK_ID(code) LYCheckForID(me, present, (CONST char **)value, (int)code)
+
 /*	Start Element
 **	-------------
 */
@@ -526,7 +529,7 @@ PRIVATE void HTML_start_element ARGS5(
 	HTStructured *, 	me,
 	int,			element_number,
 	CONST BOOL*,	 	present,
-	CONST char **,		value,
+	char **,		value,
 	char **,		include)
 {
     char *alt_string = NULL;
@@ -636,7 +639,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    char *base = NULL;
 	    char *related = NULL;
 
-	    StrAllocCopy(base, (char *)value[HTML_BASE_HREF]);
+	    StrAllocCopy(base, value[HTML_BASE_HREF]);
 	    if (!(url_type = LYLegitimizeHREF(me, (char**)&base,
 	    				      TRUE, TRUE))) {
 	        if (TRACE)
@@ -1155,7 +1158,7 @@ PRIVATE void HTML_start_element ARGS5(
     case HTML_BODY:
 	if (!me->text)
 	    UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_BODY_ID);
+	CHECK_ID(HTML_BODY_ID);
 	if (HText_hasToolbar(me->text))
 	    HText_appendParagraph(me->text);
 	break;
@@ -1223,7 +1226,7 @@ PRIVATE void HTML_start_element ARGS5(
 	        HText_appendCharacter(me->text, LY_UNDERLINE_END_CHAR);
 	    HTML_put_character(me, ' ');
 	    me->in_word = NO;
-	    LYCheckForID(me, present, value, (int)HTML_FRAME_ID);
+	    CHECK_ID(HTML_FRAME_ID);
 	    HText_beginAnchor(me->text, me->inUnderline, me->CurrentA);
 	    if (me->inBoldH == FALSE)
 		HText_appendCharacter(me->text, LY_BOLD_START_CHAR);
@@ -1234,7 +1237,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    HText_endAnchor(me->text, 0);
 	    LYEnsureSingleSpace(me);
 	} else {
-	    LYCheckForID(me, present, value, (int)HTML_FRAME_ID);
+	    CHECK_ID(HTML_FRAME_ID);
 	}
 	FREE(id_string);
 	break;
@@ -1303,7 +1306,7 @@ PRIVATE void HTML_start_element ARGS5(
 	        HText_appendCharacter(me->text, LY_UNDERLINE_END_CHAR);
 	    HTML_put_character(me, ' ');
 	    me->in_word = NO;
-	    LYCheckForID(me, present, value, (int)HTML_IFRAME_ID);
+	    CHECK_ID(HTML_IFRAME_ID);
 	    HText_beginAnchor(me->text, me->inUnderline, me->CurrentA);
 	    if (me->inBoldH == FALSE)
 		HText_appendCharacter(me->text, LY_BOLD_START_CHAR);
@@ -1314,7 +1317,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    HText_endAnchor(me->text, 0);
 	    LYEnsureSingleSpace(me);
 	} else {
-	    LYCheckForID(me, present, value, (int)HTML_IFRAME_ID);
+	    CHECK_ID(HTML_IFRAME_ID);
 	}
 	FREE(id_string);
 	break;
@@ -1335,7 +1338,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    HText_endAnchor(me->text, 0);
 	    HText_setToolbar(me->text);
 	}
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
 	break;
 
     case HTML_CENTER:
@@ -1376,7 +1379,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    UPDATE_STYLE;
 	    me->current_default_alignment = styles[HTML_DLEFT]->alignment;
 	}
-	LYCheckForID(me, present, value, (int)HTML_DIV_ID);
+	CHECK_ID(HTML_DIV_ID);
 	break;
 
     case HTML_H1:
@@ -1433,7 +1436,7 @@ PRIVATE void HTML_start_element ARGS5(
 		me->in_word = NO;
 		me->inP = FALSE;
 	    }
-	    LYCheckForID(me, present, value, (int)HTML_H_ID);
+	    CHECK_ID(HTML_H_ID);
 	    break;
 	}
 
@@ -1460,7 +1463,7 @@ PRIVATE void HTML_start_element ARGS5(
     	    change_paragraph_style(me, styles[ElementNumber]);
 	}
 	UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_H_ID);
+	CHECK_ID(HTML_H_ID);
 	    
 	if ((bold_headers == TRUE ||
 	     (ElementNumber == HTML_H1 && bold_H1 == TRUE)) &&
@@ -1542,7 +1545,7 @@ PRIVATE void HTML_start_element ARGS5(
 	        me->sp->style->alignment = HT_LEFT;
 	}
 
-	LYCheckForID(me, present, value, (int)HTML_P_ID);
+	CHECK_ID(HTML_P_ID);
 
 	/*
 	 *  Mark that we are starting a new paragraph
@@ -1555,7 +1558,7 @@ PRIVATE void HTML_start_element ARGS5(
 
     case HTML_BR:
         UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
 	if ((LYCollapseBRs == FALSE) ||
 	    HText_LastLineSize(me->text, FALSE)) {
 	    HText_setLastChar(me->text, ' ');  /* absorb white space */
@@ -1567,14 +1570,14 @@ PRIVATE void HTML_start_element ARGS5(
 
     case HTML_WBR:
         UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
 	HText_setBreakPoint(me->text);
 	break;
 
     case HTML_HY:
     case HTML_SHY:
         UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
 	HText_appendCharacter(me->text, LY_SOFT_HYPHEN);
 	break;
 
@@ -1601,7 +1604,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    /*
 	     *  Add an ID link if needed. - FM
 	     */
-	    LYCheckForID(me, present, value, (int)HTML_HR_ID);
+	    CHECK_ID(HTML_HR_ID);
 
            /*
 	    *  Center lines within the current margins, if
@@ -1820,7 +1823,7 @@ PRIVATE void HTML_start_element ARGS5(
     case HTML_STRONG:
 	UPDATE_STYLE;
 	me->Underline_Level++;
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
 	/*
 	 *  Ignore this if inside of a bold anchor or header.
 	 *  Can't display both underline and bold at same time.
@@ -1857,7 +1860,7 @@ PRIVATE void HTML_start_element ARGS5(
     case HTML_VAR:
         if (!me->text)
 	    UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
 	break; /* ignore */
 
     case HTML_DEL:
@@ -1865,7 +1868,7 @@ PRIVATE void HTML_start_element ARGS5(
     case HTML_STRIKE:
         if (!me->text)
 	    UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
 	if (me->inUnderline == FALSE)
 	    HText_appendCharacter(me->text, LY_UNDERLINE_START_CHAR);
 	HTML_put_string(me, "[DEL:");
@@ -1878,7 +1881,7 @@ PRIVATE void HTML_start_element ARGS5(
     case HTML_INS:
         if (!me->text)
 	    UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
 	if (me->inUnderline == FALSE)
 	    HText_appendCharacter(me->text, LY_UNDERLINE_START_CHAR);
 	HTML_put_string(me, "[INS:");
@@ -1891,7 +1894,7 @@ PRIVATE void HTML_start_element ARGS5(
     case HTML_Q:
 	if (!me->text)
 	    UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
         /*
 	 *  Should check LANG and/or DIR attributes, and the
 	 *  me->node_anchor->charset and/or yet to be added
@@ -1916,7 +1919,7 @@ PRIVATE void HTML_start_element ARGS5(
     case HTML_PLAINTEXT:
 	change_paragraph_style(me, styles[ElementNumber]);
 	UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
     	if (me->comment_end)
     	    HText_appendText(me->text, me->comment_end);
 	break;
@@ -1927,7 +1930,7 @@ PRIVATE void HTML_start_element ARGS5(
 	UPDATE_STYLE;
 	if (me->sp->tag_number == ElementNumber)
 	    LYEnsureDoubleSpace(me);
-	LYCheckForID(me, present, value, (int)HTML_BQ_ID);
+	CHECK_ID(HTML_BQ_ID);
 	break;
 
     case HTML_NOTE:
@@ -1935,7 +1938,7 @@ PRIVATE void HTML_start_element ARGS5(
 	UPDATE_STYLE;
 	if (me->sp->tag_number == ElementNumber)
 	    LYEnsureDoubleSpace(me);
-	LYCheckForID(me, present, value, (int)HTML_NOTE_ID);
+	CHECK_ID(HTML_NOTE_ID);
 	{
 	    char *note = NULL;
 
@@ -1979,7 +1982,7 @@ PRIVATE void HTML_start_element ARGS5(
 	UPDATE_STYLE;
 	if (me->sp->tag_number == ElementNumber)
 	    LYEnsureDoubleSpace(me);
-	LYCheckForID(me, present, value, (int)HTML_ADDRESS_ID);
+	CHECK_ID(HTML_ADDRESS_ID);
 	break;
 
     case HTML_DL:
@@ -1998,7 +2001,7 @@ PRIVATE void HTML_start_element ARGS5(
 		 : styles[(HTML_DL1 - 1) + me->List_Nesting_Level]);
 	}
 	UPDATE_STYLE;	  /* update to the new style */
-	LYCheckForID(me, present, value, (int)HTML_DL_ID);
+	CHECK_ID(HTML_DL_ID);
 	break;
 	
     case HTML_DLC:
@@ -2014,13 +2017,13 @@ PRIVATE void HTML_start_element ARGS5(
                             styles[(HTML_DLC1 - 1) + me->List_Nesting_Level]);
         }
 	UPDATE_STYLE;	  /* update to the new style */
-	LYCheckForID(me, present, value, (int)HTML_DL_ID);
+	CHECK_ID(HTML_DL_ID);
         break;
 
     case HTML_DT:
 	if (!me->text)
 	    UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
         if (!me->style_change) {
 	    HText_appendParagraph(me->text);
 	    me->in_word = NO;
@@ -2032,7 +2035,7 @@ PRIVATE void HTML_start_element ARGS5(
     case HTML_DD:
 	if (!me->text)
 	    UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
 	HText_setLastChar(me->text, ' ');  /* absorb white space */
         if (!me->style_change)  {
 	    if (HText_LastLineSize(me->text, FALSE))
@@ -2150,7 +2153,7 @@ PRIVATE void HTML_start_element ARGS5(
 		          styles[HTML_OL1 + me->List_Nesting_Level - 1]);
 	}
 	UPDATE_STYLE;  /* update to the new style */
-	LYCheckForID(me, present, value, (int)HTML_OL_ID);
+	CHECK_ID(HTML_OL_ID);
 	break;
 
     case HTML_UL:
@@ -2192,7 +2195,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    }
 	}
 	UPDATE_STYLE;  /* update to the new style */
-	LYCheckForID(me, present, value, (int)HTML_UL_ID);
+	CHECK_ID(HTML_UL_ID);
 	break;
 
     case HTML_MENU:
@@ -2210,13 +2213,13 @@ PRIVATE void HTML_start_element ARGS5(
 		          styles[HTML_MENU1 + me->List_Nesting_Level - 1]);
 	}
 	UPDATE_STYLE;  /* update to the new style */
-	LYCheckForID(me, present, value, (int)HTML_UL_ID);
+	CHECK_ID(HTML_UL_ID);
 	break;
 	
     case HTML_LH:
         UPDATE_STYLE;  /* update to the new style */
 	HText_appendParagraph(me->text);
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
 	HTML_put_character(me, HT_NON_BREAK_SPACE);
 	HText_setLastChar(me->text, ' ');
 	me->in_word = NO;
@@ -2227,7 +2230,7 @@ PRIVATE void HTML_start_element ARGS5(
         UPDATE_STYLE;  /* update to the new style */
 	HText_appendParagraph(me->text);
 	me->sp->style->alignment = HT_LEFT;
-	LYCheckForID(me, present, value, (int)HTML_LI_ID);
+	CHECK_ID(HTML_LI_ID);
 	if (me->sp[0].tag_number == HTML_OL) {
 	    char number_string[20];
 	    int counter, seqnum;
@@ -2369,7 +2372,7 @@ PRIVATE void HTML_start_element ARGS5(
     case HTML_SPAN:
 	if (!me->text)
 	    UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
         /*
 	 *  Should check LANG and/or DIR attributes, and the
 	 *  me->node_anchor->charset and/or yet to be added
@@ -2380,7 +2383,7 @@ PRIVATE void HTML_start_element ARGS5(
     case HTML_BDO:
 	if (!me->text)
 	    UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
         /*
 	 *  Should check DIR (and LANG) attributes, and the
 	 *  me->node_anchor->charset and/or yet to be added
@@ -2391,7 +2394,7 @@ PRIVATE void HTML_start_element ARGS5(
     case HTML_SPOT:
 	if (!me->text)
 	    UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
 	break;
 
     case HTML_FN:
@@ -2399,7 +2402,7 @@ PRIVATE void HTML_start_element ARGS5(
 	UPDATE_STYLE;
 	if (me->sp->tag_number == ElementNumber)
 	    LYEnsureDoubleSpace(me);
-	LYCheckForID(me, present, value, (int)HTML_FN_ID);
+	CHECK_ID(HTML_FN_ID);
 	if (me->inUnderline == FALSE)
 	    HText_appendCharacter(me->text, LY_UNDERLINE_START_CHAR);
 	HTML_put_string(me, "FOOTNOTE:");
@@ -3259,7 +3262,7 @@ PRIVATE void HTML_start_element ARGS5(
 	break;
 
     case HTML_BODYTEXT:
-        LYCheckForID(me, present, value, (int)HTML_BODYTEXT_ID);
+        CHECK_ID(HTML_BODYTEXT_ID);
         /*
 	 *  We may need to look at this someday to deal with
 	 *  OBJECTs optimally, but just ignore it for now. - FM
@@ -3267,7 +3270,7 @@ PRIVATE void HTML_start_element ARGS5(
 	break;
 
     case HTML_TEXTFLOW:
-        LYCheckForID(me, present, value, (int)HTML_BODYTEXT_ID);
+        CHECK_ID(HTML_BODYTEXT_ID);
         /*
 	 *  We may need to look at this someday to deal with
 	 *  APPLETs optimally, but just ignore it for now. - FM
@@ -3291,7 +3294,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    me->inFIGwithP = FALSE;
 	    HTML_put_character(me, ' ');  /* space char may be ignored */
 	}
-	LYCheckForID(me, present, value, (int)HTML_FIG_ID);
+	CHECK_ID(HTML_FIG_ID);
 	me->in_word = NO;
 	me->inP = FALSE;
 
@@ -3880,7 +3883,7 @@ PRIVATE void HTML_start_element ARGS5(
 	LYEnsureDoubleSpace(me);
 	LYResetParagraphAlignment(me);
 	me->inCREDIT = TRUE;
-	LYCheckForID(me, present, value, (int)HTML_CREDIT_ID);
+	CHECK_ID(HTML_CREDIT_ID);
 	if (me->inUnderline == FALSE)
 	    HText_appendCharacter(me->text, LY_UNDERLINE_START_CHAR);
 	HTML_put_string(me, "CREDIT:");
@@ -3913,7 +3916,7 @@ PRIVATE void HTML_start_element ARGS5(
 	LYEnsureDoubleSpace(me);
 	LYResetParagraphAlignment(me);
 	me->inCAPTION = TRUE;
-	LYCheckForID(me, present, value, (int)HTML_CAPTION_ID);
+	CHECK_ID(HTML_CAPTION_ID);
 	if (me->inUnderline == FALSE)
 	    HText_appendCharacter(me->text, LY_UNDERLINE_START_CHAR);
 	HTML_put_string(me, "CAPTION:");
@@ -4080,7 +4083,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    FREE(enctype);
 	    FREE(title);
 	}
-	LYCheckForID(me, present, value, (int)HTML_FORM_ID);
+	CHECK_ID(HTML_FORM_ID);
 	break;
 
     case HTML_FIELDSET:
@@ -4088,7 +4091,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    UPDATE_STYLE;
 	LYEnsureDoubleSpace(me);
 	LYResetParagraphAlignment(me);
-        LYCheckForID(me, present, value, (int)HTML_FIELDSET_ID);
+        CHECK_ID(HTML_FIELDSET_ID);
         break;
 
     case HTML_LEGEND:
@@ -4096,15 +4099,15 @@ PRIVATE void HTML_start_element ARGS5(
 	    UPDATE_STYLE;
 	LYEnsureDoubleSpace(me);
 	LYResetParagraphAlignment(me);
-        LYCheckForID(me, present, value, (int)HTML_LEGEND_ID);
+        CHECK_ID(HTML_LEGEND_ID);
         break;
 
     case HTML_LABEL:
-        LYCheckForID(me, present, value, (int)HTML_LABEL_ID);
+        CHECK_ID(HTML_LABEL_ID);
         break;
 
     case HTML_KEYGEN:
-        LYCheckForID(me, present, value, (int)HTML_KEYGEN_ID);
+        CHECK_ID(HTML_KEYGEN_ID);
         break;
 
     case HTML_BUTTON:
@@ -4122,12 +4125,12 @@ PRIVATE void HTML_start_element ARGS5(
 	    UPDATE_STYLE;
 	    if ((present && present[HTML_BUTTON_TYPE] &&
 	         value[HTML_BUTTON_TYPE]) &&
-		(!strcasecomp((char *)value[HTML_BUTTON_TYPE], "submit") ||
-		 !strcasecomp((char *)value[HTML_BUTTON_TYPE], "reset"))) {
+		(!strcasecomp(value[HTML_BUTTON_TYPE], "submit") ||
+		 !strcasecomp(value[HTML_BUTTON_TYPE], "reset"))) {
 	        /*
 		 *  It's a button for submitting or resetting a form. - FM
 		 */
-		I.type = (char *)value[HTML_BUTTON_TYPE];
+		I.type = value[HTML_BUTTON_TYPE];
 	    } else {
 	        /*
 		 *  Ugh, it's a button for a script. - FM
@@ -4175,7 +4178,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    HTML_put_character(me, '(');
 
 	    if (present && present[HTML_BUTTON_NAME] && value[HTML_BUTTON_NAME])
-		I.name = (char *)value[HTML_BUTTON_NAME];
+		I.name = value[HTML_BUTTON_NAME];
 	    else
 	        I.name = "";
 
@@ -4184,16 +4187,15 @@ PRIVATE void HTML_start_element ARGS5(
 	        /*
 		 *  Convert any HTML entities or decimal escaping. - FM
 		 */
-		int CurrentCharSet = current_char_set;
 		int len;
 
 		me->UsePlainSpace = TRUE;
 		if (current_char_set) {
 		    LYExpandString((char **)&value[HTML_BUTTON_VALUE]);
 		}
-	        LYUnEscapeEntities((char *)value[HTML_BUTTON_VALUE],
+	        LYUnEscapeEntities(value[HTML_BUTTON_VALUE],
 				   me->UsePlainSpace, me->HiddenValue);
-		I.value = (char *)value[HTML_BUTTON_VALUE];
+		I.value = value[HTML_BUTTON_VALUE];
 		/*
 		 *  Convert any newlines or tabs to spaces,
 		 *  and trim any lead or trailing spaces. - FM
@@ -4212,17 +4214,17 @@ PRIVATE void HTML_start_element ARGS5(
 
 	    if (present && present[HTML_BUTTON_CLASS] && /* Not yet used. */
 	        value[HTML_BUTTON_CLASS] && *value[HTML_BUTTON_CLASS])
-		I.class = (char *)value[HTML_BUTTON_CLASS];
+		I.class = value[HTML_BUTTON_CLASS];
 
 	    if (present && present[HTML_BUTTON_ID] &&
 	        value[HTML_BUTTON_ID] && *value[HTML_BUTTON_ID]) {
-		I.id = (char *)value[HTML_BUTTON_ID];
-		LYCheckForID(me, present, value, (int)HTML_BUTTON_ID);
+		I.id = value[HTML_BUTTON_ID];
+		CHECK_ID(HTML_BUTTON_ID);
 	    }
 
 	    if (present && present[HTML_BUTTON_LANG] && /* Not yet used. */
 	        value[HTML_BUTTON_LANG] && *value[HTML_BUTTON_LANG])
-		I.lang = (char *)value[HTML_BUTTON_LANG];
+		I.lang = value[HTML_BUTTON_LANG];
 
 	    chars = HText_beginInput(me->text, me->inUnderline, &I);
 	    /*
@@ -4325,13 +4327,13 @@ PRIVATE void HTML_start_element ARGS5(
 	     */
 	    if (present && present[HTML_INPUT_TYPE] &&
 	        value[HTML_INPUT_TYPE] && *value[HTML_INPUT_TYPE]) {
-		I.type = (char *)value[HTML_INPUT_TYPE];
+		I.type = value[HTML_INPUT_TYPE];
 
 		if (!strcasecomp(I.type, "range")) {
 		    if (present[HTML_INPUT_MIN])
-		        I.min = (char *)value[HTML_INPUT_MIN];
+		        I.min = value[HTML_INPUT_MIN];
 		    if (present[HTML_INPUT_MAX])
-		        I.max = (char *)value[HTML_INPUT_MAX];
+		        I.max = value[HTML_INPUT_MAX];
 		    /*
 		     *  Not yet implemented.
 		     */
@@ -4344,7 +4346,7 @@ PRIVATE void HTML_start_element ARGS5(
 
 		} else if (!strcasecomp(I.type, "file")) {
 		    if (present[HTML_INPUT_ACCEPT])
-		        I.accept = (char *)value[HTML_INPUT_ACCEPT];
+		        I.accept = value[HTML_INPUT_ACCEPT];
 		    /*
 		     *  Not yet implemented.
 		     */
@@ -4408,7 +4410,7 @@ PRIVATE void HTML_start_element ARGS5(
 	     *  Handle the INPUT as for a FORM. - FM
 	     */
 	    if (present && present[HTML_INPUT_NAME] && value[HTML_INPUT_NAME])
-		I.name = (char *)value[HTML_INPUT_NAME];
+		I.name = value[HTML_INPUT_NAME];
 	    else
 	        I.name = "";
 	    if ((present && present[HTML_INPUT_ALT] &&
@@ -4429,7 +4431,7 @@ PRIVATE void HTML_start_element ARGS5(
 	        present && present[HTML_INPUT_SRC] &&
 	        value[HTML_INPUT_SRC] && *value[HTML_INPUT_SRC] &&
 		I.type && !strcasecomp(I.type, "image")) {
-		StrAllocCopy(href, (char *)value[HTML_INPUT_SRC]);
+		StrAllocCopy(href, value[HTML_INPUT_SRC]);
 		/*
 		 *  We have a TYPE="image" with a non-zero-length SRC
 		 *  attribute and want clickable images.  Make the
@@ -4511,12 +4513,12 @@ PRIVATE void HTML_start_element ARGS5(
 			    (char **)&value[HTML_INPUT_ALT] :
 			    (char **)&value[HTML_INPUT_VALUE]));
 	        LYUnEscapeEntities(((UseALTasVALUE == TRUE) ?
-			      (char *)value[HTML_INPUT_ALT] :
-			      (char *)value[HTML_INPUT_VALUE]),
+			      value[HTML_INPUT_ALT] :
+			      value[HTML_INPUT_VALUE]),
 				   me->UsePlainSpace, me->HiddenValue);
 		I.value = ((UseALTasVALUE == TRUE) ?
-		     (char *)value[HTML_INPUT_ALT] :
-		     (char *)value[HTML_INPUT_VALUE]);
+		     value[HTML_INPUT_ALT] :
+		     value[HTML_INPUT_VALUE]);
 		if (me->UsePlainSpace == TRUE) {
 		    /*
 		     *  Convert any newlines or tabs to spaces,
@@ -4553,39 +4555,39 @@ PRIVATE void HTML_start_element ARGS5(
 		I.checked = YES;
 	    if (present && present[HTML_INPUT_SIZE] &&
 	        value[HTML_INPUT_SIZE] && *value[HTML_INPUT_SIZE])
-		I.size = (char *)value[HTML_INPUT_SIZE];
+		I.size = value[HTML_INPUT_SIZE];
 	    if (present && present[HTML_INPUT_MAXLENGTH] &&
 	        value[HTML_INPUT_MAXLENGTH] && *value[HTML_INPUT_MAXLENGTH])
-		I.maxlength = (char *)value[HTML_INPUT_MAXLENGTH];
+		I.maxlength = value[HTML_INPUT_MAXLENGTH];
 	    if (present && present[HTML_INPUT_DISABLED])
 		I.disabled = YES;
 
 	    if (present && present[HTML_INPUT_ALIGN] && /* Not yet used. */
 	        value[HTML_INPUT_ALIGN] && *value[HTML_INPUT_ALIGN])
-		I.align = (char *)value[HTML_INPUT_ALIGN];
+		I.align = value[HTML_INPUT_ALIGN];
 	    if (present && present[HTML_INPUT_CLASS] && /* Not yet used. */
 	        value[HTML_INPUT_CLASS] && *value[HTML_INPUT_CLASS])
-		I.class = (char *)value[HTML_INPUT_CLASS];
+		I.class = value[HTML_INPUT_CLASS];
 	    if (present && present[HTML_INPUT_ERROR] && /* Not yet used. */
 	        value[HTML_INPUT_ERROR] && *value[HTML_INPUT_ERROR])
-		I.error = (char *)value[HTML_INPUT_ERROR];
+		I.error = value[HTML_INPUT_ERROR];
 	    if (present && present[HTML_INPUT_HEIGHT] && /* Not yet used. */
 	        value[HTML_INPUT_HEIGHT] && *value[HTML_INPUT_HEIGHT])
-		I.height = (char *)value[HTML_INPUT_HEIGHT];
+		I.height = value[HTML_INPUT_HEIGHT];
 	    if (present && present[HTML_INPUT_WIDTH] && /* Not yet used. */
 	        value[HTML_INPUT_WIDTH] && *value[HTML_INPUT_WIDTH])
-		I.width = (char *)value[HTML_INPUT_WIDTH];
+		I.width = value[HTML_INPUT_WIDTH];
 	    if (present && present[HTML_INPUT_ID] &&
 	        value[HTML_INPUT_ID] && *value[HTML_INPUT_ID]) {
-		I.id = (char *)value[HTML_INPUT_ID];
-		LYCheckForID(me, present, value, (int)HTML_INPUT_ID);
+		I.id = value[HTML_INPUT_ID];
+		CHECK_ID(HTML_INPUT_ID);
 	    }
 	    if (present && present[HTML_INPUT_LANG] && /* Not yet used. */
 	        value[HTML_INPUT_LANG] && *value[HTML_INPUT_LANG])
-		I.lang = (char *)value[HTML_INPUT_LANG];
+		I.lang = value[HTML_INPUT_LANG];
 	    if (present && present[HTML_INPUT_MD] && /* Not yet used. */
 	        value[HTML_INPUT_MD] && *value[HTML_INPUT_MD])
-		I.md = (char *)value[HTML_INPUT_MD];
+		I.md = value[HTML_INPUT_MD];
 
 	    chars = HText_beginInput(me->text, me->inUnderline, &I);
 	    /*
@@ -4875,7 +4877,7 @@ PRIVATE void HTML_start_element ARGS5(
 		if (TRACE)
 		    fprintf(stderr,
 		    	    "HTML: Ignoring SIZE=\"%s\" for SELECT.\n",
-		    	    (char *)value[HTML_SELECT_SIZE]);
+		    	    value[HTML_SELECT_SIZE]);
 #endif /* NOTDEFINED */
 	    }
 
@@ -4907,7 +4909,7 @@ PRIVATE void HTML_start_element ARGS5(
 		me->in_word = NO;
 	    }
 
-	    LYCheckForID(me, present, value, (int)HTML_SELECT_ID);
+	    CHECK_ID(HTML_SELECT_ID);
 
 	    HText_beginSelect(name, multiple, size);
 	    FREE(name);
@@ -5014,7 +5016,7 @@ PRIVATE void HTML_start_element ARGS5(
 			LYUseDefaultRawMode = TRUE;
 			HTMLSetCharacterHandling(current_char_set);
 		    }
-	            LYUnEscapeEntities((char *)value[HTML_OPTION_VALUE],
+	            LYUnEscapeEntities(value[HTML_OPTION_VALUE],
 		    		       me->UsePlainSpace, me->HiddenValue);
 		    if (CurrentCharSet) {
 		        current_char_set = CurrentCharSet;
@@ -5024,7 +5026,7 @@ PRIVATE void HTML_start_element ARGS5(
 			HTCJK = CurrentHTCJK;
 		    }
 
-		    I.value = (char *)value[HTML_OPTION_VALUE];
+		    I.value = value[HTML_OPTION_VALUE];
 		}
 
 	        if (me->select_disabled ||
@@ -5040,7 +5042,7 @@ PRIVATE void HTML_start_element ARGS5(
 				    (HTLinkType*)0)) != NULL) {	   /* Type */
 			HText_beginAnchor(me->text, me->inUnderline, ID_A);
 			HText_endAnchor(me->text, 0);
-		        I.id = (char *)value[HTML_OPTION_ID];
+		        I.id = value[HTML_OPTION_ID];
 		    }
 		}
 
@@ -5151,7 +5153,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    UPDATE_STYLE;
 	    me->current_default_alignment = styles[HTML_DLEFT]->alignment;
 	}
-	LYCheckForID(me, present, value, (int)HTML_TABLE_ID);
+	CHECK_ID(HTML_TABLE_ID);
 	break;
 
     case HTML_TR:
@@ -5189,7 +5191,7 @@ PRIVATE void HTML_start_element ARGS5(
 	        me->sp->style->alignment = HT_LEFT;
 	}
 
-	LYCheckForID(me, present, value, (int)HTML_TR_ID);
+	CHECK_ID(HTML_TR_ID);
 	me->inP = FALSE;
         break;
 
@@ -5200,7 +5202,7 @@ PRIVATE void HTML_start_element ARGS5(
 	 *  Not yet implemented.  Just check for an ID link. - FM
 	 */
         UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_TR_ID);
+	CHECK_ID(HTML_TR_ID);
         break;
     
     case HTML_COL:
@@ -5209,12 +5211,12 @@ PRIVATE void HTML_start_element ARGS5(
 	 *  Not yet implemented.  Just check for an ID link. - FM
 	 */
         UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_COL_ID);
+	CHECK_ID(HTML_COL_ID);
         break;
     
     case HTML_TH:
         UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_TD_ID);
+	CHECK_ID(HTML_TD_ID);
         /*
 	 *  Not yet implemented.  Just add a collapsible space and break. - FM
 	 */
@@ -5224,7 +5226,7 @@ PRIVATE void HTML_start_element ARGS5(
 
     case HTML_TD:
         UPDATE_STYLE;
-	LYCheckForID(me, present, value, (int)HTML_TD_ID);
+	CHECK_ID(HTML_TD_ID);
         /*
 	 *  Not yet implemented.  Just add a collapsible space and break. - FM
 	 */
@@ -5240,7 +5242,7 @@ PRIVATE void HTML_start_element ARGS5(
 	if (!me->text)
 	    UPDATE_STYLE;
 	HTChunkClear(&me->math);
-	LYCheckForID(me, present, value, (int)HTML_GEN_ID);
+	CHECK_ID(HTML_GEN_ID);
 	break;
 
     default:
@@ -5325,6 +5327,8 @@ PRIVATE void HTML_start_element ARGS5(
 	}
 #endif /* USE_COLOR_STYLE */
 }
+
+#undef CHECK_ID  /* LYCheckForID() */
 
 /*		End Element
 **		-----------

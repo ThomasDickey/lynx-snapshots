@@ -2205,7 +2205,7 @@ PUBLIC int LYExecv ARGS3(
     int rc;
     char tmpbuf[512];
     pid_t pid;
-#if HAVE_TYPE_UNION_WAIT && !HAVE_WAITPID
+#if HAVE_TYPE_UNIONWAIT && !HAVE_WAITPID
     union wait wstatus;
 #else
     int wstatus;
@@ -2224,7 +2224,7 @@ PUBLIC int LYExecv ARGS3(
 	    execv(path, argv);
 	    exit(-1);	/* execv failed, give wait() something to look at */
 	default:  /* parent */
-#if HAVE_TYPE_UNION_WAIT && !HAVE_WAITPID
+#if HAVE_TYPE_UNIONWAIT && !HAVE_WAITPID
 	    while (wait(&wstatus) != pid)
 		; /* do nothing */
 #else

@@ -12,7 +12,7 @@ extern CONST SGML_dtd HTML_dtd;
 extern HTCharStyle displayStyles[DSTYLE_ELEMENTS];
 
 /* Can we do colour? - RP */
-extern int has_color;
+extern int lynx_uses_color;
 
 /* Set all the buckets in the hash table to be empty */
 extern void style_initialiseHashTable NOPARAMS;

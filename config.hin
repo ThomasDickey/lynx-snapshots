@@ -36,20 +36,22 @@
 #undef HAVE_SYS_DIR_H		/* defined by AC_HEADER_DIRENT */
 #undef HAVE_SYS_FCNTL_H		/* have <sys/fcntl.h> */
 #undef HAVE_SYS_FILIO_H		/* have <sys/filio.h> */
+#undef HAVE_SYS_IOCTL_H		/* have <sys/ioctl.h> */
 #undef HAVE_SYS_NDIR_H		/* defined by AC_HEADER_DIRENT */
 #undef HAVE_TERMIOS_H		/* have <termios.h> */
 #undef HAVE_TTYTYPE
-#undef HAVE_TYPE_UNION_WAIT	/* CF_UNION_WAIT */
+#undef HAVE_TYPE_UNIONWAIT	/* CF_UNION_WAIT */
 #undef HAVE_UNISTD_H		/* have <unistd.h> */
 #undef HAVE_UTMP
+#undef HAVE_WAITPID
 #undef IGNORE_CTRL_C		/* FIXME: make tests? */
 #undef INSTALL_ARGS		/* CF_PATH_PROG(install) */
 #undef INSTALL_PATH		/* CF_PATH_PROG(install) */
 #undef LINUX			/* FIXME: make tests? */
 #undef LOCALE			/* for locale support */
 #undef LONG_LIST		/* CF_ARG_DISABLE(long-list) */
-#undef LY_FIND_LEAKS		/* configure --disable-leaks */
 #undef LYNX_CFG_FILE		/* CF_WITH_PATH(cfg-file) */
+#undef LY_FIND_LEAKS		/* configure --disable-leaks */
 #undef MKDIR_PATH		/* CF_PATH_PROG(mkdir) */
 #undef MV_PATH			/* CF_PATH_PROG(mv) */
 #undef NCURSES			/* defined for ncurses support */
@@ -69,7 +71,6 @@
 #undef STDC_HEADERS
 #undef SYSTEM_MAIL		/* CF_DEFINE_PROG */
 #undef SYSTEM_MAIL_FLAGS	/* defined by CF_SYSTEM_MAIL_FLAGS */
-#undef SYS_IOCTL_H		/* have <sys/ioctl.h> */
 #undef TAR_PATH			/* CF_PATH_PROG(tar) */
 #undef TERMIO_AND_TERMIOS	/* termio.h and termios.h combo bug */
 #undef TOUCH_PATH		/* CF_PATH_PROG(touch) */
@@ -91,14 +92,12 @@
 /* FIXME:DGUX */
 /* FIXME:DGUX_OLD */
 /* FIXME:EXEC_LINKS */
+/* FIXME:EXEC_SCRIPTS */
 /* FIXME:HP_TERMINAL */
-/* FIXME:ISC */
 /* FIXME:NOPORT */
-/* FIXME:NO_CPU_LIMIT */
 /* FIXME:NSL_FORK */
 /* FIXME:POSIX_JC */
 /* FIXME:REVERSE_CLEAR_SCREEN_PROBLEM */
-/* FIXME:SGI */
 /* FIXME:SHORTENED_RBIND */
 /* FIXME:SNAKE */
 /* FIXME:SOCKS */

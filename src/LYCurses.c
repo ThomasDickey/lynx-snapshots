@@ -35,7 +35,10 @@ extern int _NOSHARE(COLS);
 #ifdef USE_COLOR_STYLE
 #include "AttrList.h"
 #include "LYHash.h"
-int has_color = 0;
+#endif
+
+#if defined(COLOR_CURSES)
+int lynx_uses_color = 0;
 #endif
 
 /*
@@ -208,7 +211,7 @@ PRIVATE int LYAttrset ARGS3(WINDOW*,win,int,color,int,mono)
 {
 	if (TRACE)
 		fprintf(stderr, "CSS:LYAttrset (%d, %d)\n", color, mono);
-	if (has_color && LYShowColor >= SHOW_COLOR_ON && color > -1)
+	if (lynx_uses_color && LYShowColor >= SHOW_COLOR_ON && color > -1)
 	{
 		wattrset(win,color);
 #if 0
@@ -360,7 +363,6 @@ void attribute ARGS2(int,style,int,dir)
  * special case of initialization before 'initscr()' is called.
  * 1997/1/19 - T.E.Dickey <dickey@clark.net>
  */
-PRIVATE int lynx_uses_color;
 PRIVATE int lynx_called_initscr;
 
 PRIVATE struct {
@@ -702,8 +704,8 @@ PUBLIC void start_curses NOARGS
 #endif
 
 #ifdef USE_COLOR_STYLE
-	has_color = has_colors();
-	if (has_color)
+	lynx_uses_color = has_colors();
+	if (lynx_uses_color)
 		start_color();
 	parse_userstyles();
 #endif
