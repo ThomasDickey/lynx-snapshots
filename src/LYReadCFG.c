@@ -343,13 +343,13 @@ PUBLIC int check_color ARGS2(
 {
     int i;
 
-    if (!strcasecmp(color, "default"))
+    if (!strcasecomp(color, "default"))
 	return the_default;
-    if (!strcasecmp(color, "nocolor"))
+    if (!strcasecomp(color, "nocolor"))
 	return NO_COLOR;
 
     for (i = 0; i < 16; i++) {
-	if (!strcasecmp(color, Color_Strings[i]))
+	if (!strcasecomp(color, Color_Strings[i]))
 	    return ColorCode(i);
     }
     return ERR_COLOR;

@@ -19,6 +19,8 @@
 #include <sys/types.h>
 #else
 
+#define DONT_TRACK_INTERNAL_LINKS 1
+
 /* Explicit system-configure */
 #ifdef VMS
 #define NO_SIZECHANGE
@@ -144,6 +146,10 @@ SOLARIS 2
 #define HAVE_UTMP 1
 #endif
 
+#endif
+
+#ifndef	GCC_UNUSED
+#define	GCC_UNUSED /* nothing */
 #endif
 
 #ifdef _WINDOWS                         /* SCW */
@@ -420,7 +426,7 @@ Upper- and Lowercase macros
   /* Pyramid and Mips can't uppercase non-alpha */
 #define TOLOWER(c) (isupper((unsigned char)c) ? tolower((unsigned char)c) : (c))
 #define TOUPPER(c) (islower((unsigned char)c) ? toupper((unsigned char)c) : (c))
-#endif /* ndef TOLOWER */
+#endif /* TOLOWER */
 
 /*
 

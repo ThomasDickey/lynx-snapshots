@@ -308,7 +308,7 @@ PRIVATE void UCreset_allocated_LYCharSets NOPARAMS;
 PRIVATE void UCfree_allocated_LYCharSets NOPARAMS;
 PRIVATE char ** UC_setup_LYCharSets_repl PARAMS((
 	int		UC_charset_in_hndl,
-	int		lowest8));
+	unsigned	lowest8));
 PRIVATE int UC_Register_with_LYCharSets PARAMS((
 	int		s,
 	CONST char *	UC_MIMEcharset,
@@ -1678,7 +1678,7 @@ PRIVATE void UCfree_allocated_LYCharSets NOARGS
 
 PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
 	int,		UC_charset_in_hndl,
-	int,		lowest8)
+	unsigned,	lowest8)
 {
     char **ISO_Latin1 = LYCharSets[0];
     char **p;
@@ -1687,7 +1687,8 @@ PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
     char **tp;
     char *s7;
     char *s8;
-    int i, j, changed;
+    size_t i;
+    int j, changed;
     u16 k;
     u8 *ti;
 

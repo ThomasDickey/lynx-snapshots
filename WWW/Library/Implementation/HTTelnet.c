@@ -544,8 +544,8 @@ PRIVATE int HTLoadTelnet
 ARGS4
 (
  CONST char *,		addr,
- HTParentAnchor *,	anchor,
- HTFormat,		format_out,
+ HTParentAnchor *,	anchor GCC_UNUSED,
+ HTFormat,		format_out GCC_UNUSED,
  HTStream *,		sink			/* Ignored */
 )
 {

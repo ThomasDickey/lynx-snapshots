@@ -144,6 +144,9 @@ AC_DEFUN([CF_CHECK_ERRNO],
 AC_MSG_CHECKING([declaration of $1])
 AC_CACHE_VAL(cf_cv_dcl_$1,[
     AC_TRY_COMPILE([
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #include <stdio.h>
 #include <sys/types.h>
 #include <errno.h> ],
@@ -394,7 +397,7 @@ dnl
 AC_DEFUN([CF_DISABLE_ECHO],[
 AC_MSG_CHECKING(if you want to see long compiling messages)
 CF_ARG_DISABLE(echo,
-	[  --disable-echo          test: display \"compiling\" commands],
+	[  --disable-echo          test: display "compiling" commands],
 	[
     ECHO_LD='@echo linking [$]@;'
     RULE_CC='	@echo compiling [$]<'
@@ -508,6 +511,28 @@ AC_TRY_LINK([
 test "$cf_cv_fionbio" = "fcntl" && AC_DEFINE(USE_FCNTL)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl A conventional existence-check for 'lstat' won't work with the Linux
+dnl version of gcc 2.7.0, since the symbol is defined only within <sys/stat.h>
+dnl as an inline function.
+dnl
+dnl So much for portability.
+AC_DEFUN([CF_FUNC_LSTAT],
+[
+AC_MSG_CHECKING(for lstat)
+AC_CACHE_VAL(ac_cv_func_lstat,[
+AC_TRY_LINK([
+#include <sys/types.h>
+#include <sys/stat.h>],
+	[lstat(".", (struct stat *)0)],
+	[ac_cv_func_lstat=yes],
+	[ac_cv_func_lstat=no])
+	])
+AC_MSG_RESULT($ac_cv_func_lstat )
+if test $ac_cv_func_lstat = yes; then
+	AC_DEFINE(HAVE_LSTAT)
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Test for the presence of <sys/wait.h>, 'union wait', arg-type of 'wait()'
 dnl and/or 'waitpid()'.
 dnl
@@ -543,6 +568,83 @@ if test $cf_cv_type_unionwait = yes; then
 	AC_MSG_RESULT($cf_cv_arg_union_waitpid)
 	test $cf_cv_arg_union_waitpid = yes && AC_DEFINE(WAITPID_USES_UNION)
 
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Test for availability of useful gcc __attribute__ directives to quiet
+dnl compiler warnings.  Though useful, not all are supported -- and contrary
+dnl to documentation, unrecognized directives cause older compilers to barf.
+AC_DEFUN([CF_GCC_ATTRIBUTES],
+[
+if test -n "$GCC"
+then
+cat > conftest.i <<EOF
+#ifndef GCC_PRINTF
+#define GCC_PRINTF 0
+#endif
+#ifndef GCC_SCANF
+#define GCC_SCANF 0
+#endif
+#ifndef GCC_NORETURN
+#define GCC_NORETURN /* nothing */
+#endif
+#ifndef GCC_UNUSED
+#define GCC_UNUSED /* nothing */
+#endif
+EOF
+if test -n "$GCC"
+then
+	AC_CHECKING([for gcc __attribute__ directives])
+	changequote(,)dnl
+cat > conftest.$ac_ext <<EOF
+#line __oline__ "configure"
+#include "confdefs.h"
+#include "conftest.h"
+#include "conftest.i"
+#if	GCC_PRINTF
+#define GCC_PRINTFLIKE(fmt,var) __attribute__((format(printf,fmt,var)))
+#else
+#define GCC_PRINTFLIKE(fmt,var) /*nothing*/
+#endif
+#if	GCC_SCANF
+#define GCC_SCANFLIKE(fmt,var)  __attribute__((format(scanf,fmt,var)))
+#else
+#define GCC_SCANFLIKE(fmt,var)  /*nothing*/
+#endif
+extern void wow(char *,...) GCC_SCANFLIKE(1,2);
+extern void oops(char *,...) GCC_PRINTFLIKE(1,2) GCC_NORETURN;
+extern void foo(void) GCC_NORETURN;
+int main(int argc GCC_UNUSED, char *argv[] GCC_UNUSED) { return 0; }
+EOF
+	changequote([,])dnl
+	for cf_attribute in scanf printf unused noreturn
+	do
+		CF_UPPER(CF_ATTRIBUTE,$cf_attribute)
+		cf_directive="__attribute__(($cf_attribute))"
+		echo "checking for gcc $cf_directive" 1>&AC_FD_CC
+		case $cf_attribute in
+		scanf|printf)
+		cat >conftest.h <<EOF
+#define GCC_$CF_ATTRIBUTE 1
+EOF
+			;;
+		*)
+		cat >conftest.h <<EOF
+#define GCC_$CF_ATTRIBUTE $cf_directive
+EOF
+			;;
+		esac
+		if AC_TRY_EVAL(ac_compile); then
+			test -n "$verbose" && AC_MSG_RESULT(... $cf_attribute)
+			cat conftest.h >>confdefs.h
+#		else
+#			sed -e 's/__attr.*/\/*nothing*\//' conftest.h >>confdefs.h
+		fi
+	done
+else
+	fgrep define conftest.i >>confdefs.h
+fi
+rm -rf conftest*
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------

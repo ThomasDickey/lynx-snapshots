@@ -30,7 +30,7 @@
 #include <dirent.h>
 #define USE_DIRENT
 #include "HTDOS.h"
-#endif
+#endif /* DOSPATH */
 
 #include "HTUtils.h"
 #include "tcp.h"
@@ -996,7 +996,7 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
     FREE(cp);
 
     /*
-    **  Set up defaults, if needed. - FM
+    **	Set up defaults, if needed. - FM
     */
     if (!chartrans_ok && !anchor->charset && default_LYhndl >= 0) {
 	HTAnchor_setUCInfoStage(anchor, default_LYhndl,
@@ -1206,7 +1206,7 @@ PUBLIC void HTDirEntry ARGS3(
 **
 **  On exit:
 **	Returns TRUE if an "Up to <parent>" link was not created
-**	for a readable local directiory because LONG_LIST is defined
+**	for a readable local directory because LONG_LIST is defined
 **	and NO_PARENT_DIR_REFERENCE is not defined, such that the
 **	calling function use LYListFmtParse() to create a link to
 **	the parent directory.  Otherwise, it returns FALSE. - FM
@@ -1439,7 +1439,7 @@ PUBLIC BOOL HTDirTitles ARGS3(
 **			This is the physical address of the file
 **
 **  On exit:
-**	returns 	<0		Error has occured.
+**	returns 	<0		Error has occurred.
 **			HTLOADED	OK
 **
 */
@@ -1504,7 +1504,7 @@ PUBLIC int HTLoadFile ARGS4(
 	/*
 	 *  If content_type and content_encoding are BOTH already set
 	 *  in the anchor object, we believe it and don't try to
-	 *  derive format and ancoding from the filename. - kw
+	 *  derive format and encoding from the filename. - kw
 	 */
 	format = HTAtom_for(anchor->content_type);
 	myEncoding = HTAtom_for(anchor->content_encoding);
@@ -1573,7 +1573,7 @@ PUBLIC int HTLoadFile ARGS4(
 	fp = fopen(vmsname, "r", "shr=put", "shr=upd");
 
 	/*
-	**  If the file wasn't VMS syntax, then perhaps it is ultrix.
+	**  If the file wasn't VMS syntax, then perhaps it is Ultrix.
 	*/
 	if (!fp) {
 	    char ultrixname[INFINITY];
@@ -1726,7 +1726,7 @@ PUBLIC int HTLoadFile ARGS4(
 		fclose(fp);
 	    }
 	    return status;
-	}  /* If successfull open */
+	}  /* If successful open */
 	FREE(filename);
     }
 
@@ -1884,7 +1884,7 @@ PUBLIC int HTLoadFile ARGS4(
 	**  is create a new hypertext object containing a list of files and
 	**  subdirectories contained in the directory.	All of these are
 	**  links to the directories or files listed.
-	**  NB This assumes the existance of a type 'STRUCT_DIRENT', which
+	**  NB This assumes the existence of a type 'STRUCT_DIRENT', which
 	**  will hold the directory entry, and a type 'DIR' which is used
 	**  to point to the current directory being read.
 	*/
@@ -1974,7 +1974,7 @@ PUBLIC int HTLoadFile ARGS4(
 		    */
 		    StrAllocCopy (tail, "/foo/..");
 		} else {
-		    char *p = strrchr(pathname, '/');  /* find lastslash */
+		    char *p = strrchr(pathname, '/');  /* find last slash */
 
 		    if (!p) {
 			/*
@@ -2367,7 +2367,7 @@ PUBLIC int HTLoadFile ARGS4(
 		    fclose(fp);
 		}
 		return status;
-	    }  /* If succesfull open */
+	    }  /* If successful open */
 	    FREE(localname);
 	}  /* scope of fp */
     }  /* local unix file system */
@@ -2380,7 +2380,7 @@ PUBLIC int HTLoadFile ARGS4(
     */
     {
 	/*
-	**  Deal with case-sensitivity differences on VMS verus Unix.
+	**  Deal with case-sensitivity differences on VMS versus Unix.
 	*/
 #ifdef VMS
 	if (strcasecomp(nodename, HTHostName()) != 0)

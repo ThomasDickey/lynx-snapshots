@@ -1746,7 +1746,7 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
     }
     if (strlen(cp) == 8 &&
 	isdigit(*cp) && isdigit(*(cp+1)) && *(cp+2) == '-' &&
-	isdigit(*(cp+3)) && isdigit(*(cp+1)) && *(cp+5) == '-') {
+	isdigit(*(cp+3)) && isdigit(*(cp+4)) && *(cp+5) == '-') {
 	*(cp+2)  = '\0';	/* Month */
 	i = atoi(cp) - 1;
 	*(cp+5) = '\0';		/* Day */
@@ -1756,12 +1756,10 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
 	cp += 6;			/* Year */
 	if (strcmp((ThisYear+2), cp)) {
 	    /* Not this year, so show the year */
-	    if (atoi(cp) < atoi((char *)&ThisYear[2])) {
-		sprintf((char *)&date[6], "  %c%c%s",
-				          ThisYear[0], ThisYear[1], cp);
+	    if (atoi(cp) < 70) {
+		sprintf((char *)&date[6], "  20%s", cp);
 	    } else {
-		sprintf((char *)&date[6], "  %c%c%s",
-					  LastYear[0], LastYear[1], cp);
+		sprintf((char *)&date[6], "  19%s", cp);
 	    }
 	} else {
 	    /* Is this year, so show the time */
@@ -1936,12 +1934,10 @@ PRIVATE void parse_cms_dir_entry ARGS2(
 	    cpd += 6;		/* Year */
 	    if (strcmp((ThisYear+2), cpd)) {
 	        /* Not this year, so show the year. */
-		if (atoi(cpd) < atoi((char *)&ThisYear[2])) {
-		    sprintf((char *)&date[6], "  %c%c%s",
-					      ThisYear[0], ThisYear[1], cpd);
+		if (atoi(cpd) < 70) {
+		    sprintf((char *)&date[6], "  20%s", cpd);
 		} else {
-		    sprintf((char *)&date[6], "  %c%c%s",
-					      LastYear[0], LastYear[1], cpd);
+		    sprintf((char *)&date[6], "  19%s", cpd);
 		}
 	    } else {
 	        /* Is this year, so show the time. */

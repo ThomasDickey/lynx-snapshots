@@ -33,7 +33,7 @@
 **
 ** AUTHORS:
 **	AL	Ari Luotonen	luotonen@dxcern.cern.ch
-**	MD 	Mark Donszelmann    duns@vxdeop.cern.ch
+**	MD	Mark Donszelmann    duns@vxdeop.cern.ch
 **
 ** HISTORY:
 **	 8 Nov 93  MD	(VMS only) Added case insensitive comparison in HTAA_templateCaseMatch
@@ -62,7 +62,7 @@
 **	name		is a string representing the scheme name.
 **
 ** ON EXIT:
-**	returns		the enumerated constant for that scheme.
+**	returns 	the enumerated constant for that scheme.
 */
 PUBLIC HTAAScheme HTAAScheme_enum ARGS1(CONST char*, name)
 {
@@ -70,7 +70,7 @@ PUBLIC HTAAScheme HTAAScheme_enum ARGS1(CONST char*, name)
     char *cur;
 
     if (!name)
-        return HTAA_UNKNOWN;
+	return HTAA_UNKNOWN;
 
     StrAllocCopy(upcased, name);
     cur = upcased;
@@ -78,24 +78,24 @@ PUBLIC HTAAScheme HTAAScheme_enum ARGS1(CONST char*, name)
 	*cur = TOUPPER(*cur);
 	cur++;
     }
-    
+
     if (!strncmp(upcased, "NONE", 4)) {
-        FREE(upcased);
+	FREE(upcased);
 	return HTAA_NONE;
     } else if (!strncmp(upcased, "BASIC", 5)) {
-        FREE(upcased);
+	FREE(upcased);
 	return HTAA_BASIC;
     } else if (!strncmp(upcased, "PUBKEY", 6)) {
-        FREE(upcased);
+	FREE(upcased);
 	return HTAA_PUBKEY;
     } else if (!strncmp(upcased, "KERBEROSV4", 10)) {
-        FREE(upcased);
+	FREE(upcased);
 	return HTAA_KERBEROS_V4;
     } else if (!strncmp(upcased, "KERBEROSV5", 10)) {
-        FREE(upcased);
+	FREE(upcased);
 	return HTAA_KERBEROS_V5;
     } else {
-        FREE(upcased);
+	FREE(upcased);
 	return HTAA_UNKNOWN;
     }
 }
@@ -108,13 +108,13 @@ PUBLIC HTAAScheme HTAAScheme_enum ARGS1(CONST char*, name)
 **			HTAA_NONE, HTAA_BASIC, HTAA_PUBKEY, ...
 **
 ** ON EXIT:
-**	returns		the name of the scheme, i.e.
+**	returns 	the name of the scheme, i.e.
 **			"None", "Basic", "Pubkey", ...
 */
 PUBLIC char *HTAAScheme_name ARGS1(HTAAScheme, scheme)
 {
     switch (scheme) {
-        case HTAA_NONE:
+	case HTAA_NONE:
 	    return "None";
 	    break;
 	case HTAA_BASIC:
@@ -144,7 +144,7 @@ PUBLIC char *HTAAScheme_name ARGS1(HTAAScheme, scheme)
 **	name		is the method name to translate.
 **
 ** ON EXIT:
-**	returns		HTAAMethod enumerated value corresponding
+**	returns 	HTAAMethod enumerated value corresponding
 **			to the given name.
 */
 PUBLIC HTAAMethod HTAAMethod_enum ARGS1(CONST char *, name)
@@ -154,7 +154,7 @@ PUBLIC HTAAMethod HTAAMethod_enum ARGS1(CONST char *, name)
     char *dest = tmp;
 
     if (!name)
-        return METHOD_UNKNOWN;
+	return METHOD_UNKNOWN;
 
     while (*src) {
 	*dest = TOUPPER(*src);
@@ -179,23 +179,23 @@ PUBLIC HTAAMethod HTAAMethod_enum ARGS1(CONST char *, name)
 **			METHOD_GET, METHOD_PUT, ...
 **
 ** ON EXIT:
-**	returns		the name of the scheme, i.e.
+**	returns 	the name of the scheme, i.e.
 **			"GET", "PUT", ...
 */
 PUBLIC char *HTAAMethod_name ARGS1(HTAAMethod, method)
 {
     switch (method) {
       case METHOD_GET:
-          return "GET";
+	  return "GET";
 	  break;
       case METHOD_PUT:
-          return "PUT";
+	  return "PUT";
 	  break;
       case METHOD_UNKNOWN:
-          return "UNKNOWN";
+	  return "UNKNOWN";
 	  break;
       default:
-          return "THIS-IS-A-BUG";
+	  return "THIS-IS-A-BUG";
     }
 }
 
@@ -207,10 +207,10 @@ PUBLIC char *HTAAMethod_name ARGS1(HTAAMethod, method)
 **	list		is a list of method names.
 **
 ** ON EXIT:
-**	returns		YES, if method was found.
+**	returns 	YES, if method was found.
 **			NO, if not found.
 */
-PUBLIC BOOL HTAAMethod_inList ARGS2(HTAAMethod,	method,
+PUBLIC BOOL HTAAMethod_inList ARGS2(HTAAMethod, method,
 				    HTList *,	list)
 {
     HTList *cur = list;
@@ -246,10 +246,10 @@ PUBLIC BOOL HTAAMethod_inList ARGS2(HTAAMethod,	method,
 **			agaist the template.
 **
 ** ON EXIT:
-**	returns		YES, if filename matches the template.
+**	returns 	YES, if filename matches the template.
 **			NO, otherwise.
 */
-PUBLIC BOOL HTAA_templateMatch ARGS2(CONST char *, template, 
+PUBLIC BOOL HTAA_templateMatch ARGS2(CONST char *, template,
 				     CONST char *, filename)
 {
     CONST char *p = template;
@@ -260,7 +260,7 @@ PUBLIC BOOL HTAA_templateMatch ARGS2(CONST char *, template,
 	; /* do nothing else */
 
     if (!*p && !*q)
-        return YES;			/* Equally long equal strings */
+	return YES;			/* Equally long equal strings */
     else if ('*' == *p) {		/* Wildcard */
 	p++;				/* Skip wildcard character */
 	m = strlen(q) - strlen(p);	/* Amount to match to wildcard */
@@ -268,14 +268,14 @@ PUBLIC BOOL HTAA_templateMatch ARGS2(CONST char *, template,
 	    return NO;			/* No match, filename too short */
 	else {			/* Skip the matched characters and compare */
 	    if (strcmp(p, q+m))
-	        return NO;	/* Tail mismatch */
+		return NO;	/* Tail mismatch */
 	    else
-	        return YES;	/* Tail match */
+		return YES;	/* Tail match */
 	}
     }	/* if wildcard */
     else
-        return NO;		/* Length or character mismatch */
-}    
+	return NO;		/* Length or character mismatch */
+}
 
 
 /* PUBLIC						HTAA_templateCaseMatch()
@@ -284,7 +284,7 @@ PUBLIC BOOL HTAA_templateMatch ARGS2(CONST char *, template,
 ** NOTE:
 **	This is essentially the same code as in HTAA_templateMatch, but
 **	it compares case insensitive (for VMS). Reason for this routine
-**	is that HTAA_templateMatch gets called from several places, also 
+**	is that HTAA_templateMatch gets called from several places, also
 **	there where a case sensitive match is needed, so one cannot just
 **	change the HTAA_templateMatch routine for VMS.
 **
@@ -297,11 +297,11 @@ PUBLIC BOOL HTAA_templateMatch ARGS2(CONST char *, template,
 **			agaist the template.
 **
 ** ON EXIT:
-**	returns		YES, if filename matches the template.
+**	returns 	YES, if filename matches the template.
 **			NO, otherwise.
 */
-PUBLIC BOOL HTAA_templateCaseMatch ARGS2(CONST char *, template, 
-			        	 CONST char *, filename)
+PUBLIC BOOL HTAA_templateCaseMatch ARGS2(CONST char *, template,
+					 CONST char *, filename)
 {
     CONST char *p = template;
     CONST char *q = filename;
@@ -312,7 +312,7 @@ PUBLIC BOOL HTAA_templateCaseMatch ARGS2(CONST char *, template,
 	; /* do nothing else */
 
     if (!*p && !*q)
-        return YES;			/* Equally long equal strings */
+	return YES;			/* Equally long equal strings */
     else if ('*' == *p) {		/* Wildcard */
 	p++;				/* Skip wildcard character */
 	m = strlen(q) - strlen(p);	/* Amount to match to wildcard */
@@ -320,14 +320,14 @@ PUBLIC BOOL HTAA_templateCaseMatch ARGS2(CONST char *, template,
 	    return NO;			/* No match, filename too short */
 	else {			/* Skip the matched characters and compare */
 	    if (strcasecomp(p, q+m))
-	        return NO;	/* Tail mismatch */
+		return NO;	/* Tail mismatch */
 	    else
-	        return YES;	/* Tail match */
+		return YES;	/* Tail match */
 	}
     }	/* if wildcard */
     else
-        return NO;		/* Length or character mismatch */
-}    
+	return NO;		/* Length or character mismatch */
+}
 
 
 /* PUBLIC					HTAA_makeProtectionTemplate()
@@ -337,10 +337,10 @@ PUBLIC BOOL HTAA_templateCaseMatch ARGS2(CONST char *, template,
 **		it to tell the client, and by browser if server
 **		didn't send WWW-ProtectionTemplate: field)
 ** ON ENTRY:
-**	docname	is the document pathname (from URL).
+**	docname is the document pathname (from URL).
 **
 ** ON EXIT:
-**	returns	a template matching docname, and other files
+**	returns a template matching docname, and other files
 **		files in that directory.
 **
 **		E.g.  /foo/bar/x.html  =>  /foo/bar/ *
@@ -365,11 +365,11 @@ PUBLIC char *HTAA_makeProtectionTemplate ARGS1(CONST char *, docname)
 	StrAllocCat(template, "*");
     }
     else
-        StrAllocCopy(template, "*");
+	StrAllocCopy(template, "*");
 
     if (TRACE)
-        fprintf(stderr, "make_template: made template `%s' for file `%s'\n",
-		        template, docname);
+	fprintf(stderr, "make_template: made template `%s' for file `%s'\n",
+			template, docname);
 
     return template;
 }
@@ -407,7 +407,7 @@ PUBLIC char *HTAA_makeProtectionTemplate ARGS1(CONST char *, docname)
 **			   name = "value" ,  foo = "bar"
 **
 ** ON EXIT:
-**	returns	a list of name-value pairs (actually HTAssocList*).
+**	returns a list of name-value pairs (actually HTAssocList*).
 **		For items with no name, just value, the name is
 **		the number of order number of that item. E.g.
 **		"1" for the first, etc.
@@ -420,7 +420,7 @@ PUBLIC HTAssocList *HTAA_parseArgList ARGS1(char *, str)
     int n = 0;
 
     if (!str)
-        return assoc_list;
+	return assoc_list;
 
     while (*str) {
 	SKIPWS(str);				/* Skip leading whitespace */
@@ -458,7 +458,7 @@ PUBLIC HTAssocList *HTAA_parseArgList ARGS1(char *, str)
 	    }
 	}
 	else {	/* No name, just a value */
-	    if (*cur == ',') 
+	    if (*cur == ',')
 		*(cur++) = '\0';		/* Terminate value */
 	    /* else last value on line (already terminated by NULL) */
 	    StrAllocCopy(name, "nnn");	/* Room for item order number */
@@ -496,15 +496,15 @@ PRIVATE int in_soc = -1;
 **	soc		is the socket to use when start_of_headers
 **			buffer is used up.
 ** ON EXIT:
-**	returns		nothing.
+**	returns 	nothing.
 **			Subsequent calls to HTAA_getUnfoldedLine()
 **			will use this buffer first and then
 **			proceed to read from socket.
 */
 PUBLIC void HTAA_setupReader ARGS4(char *,	start_of_headers,
-				   int,		length,
+				   int, 	length,
 				   void *,	handle,
-				   int,		soc)
+				   int, 	soc)
 {
     start_pointer = buffer;
     if (start_of_headers) {
@@ -527,8 +527,8 @@ PUBLIC void HTAA_setupReader ARGS4(char *,	start_of_headers,
 **	this function to set up internal buffer.
 **
 ** ON EXIT:
-**	returns	a newly-allocated character string representing
-**		the read line.  The line is unfolded, i.e.
+**	returns a newly-allocated character string representing
+**		the read line.	The line is unfolded, i.e.
 **		lines that begin with whitespace are appended
 **		to current line.  E.g.
 **
@@ -549,7 +549,7 @@ PUBLIC char *HTAA_getUnfoldedLine NOARGS
     BOOL peek_for_folding = NO;
 
     if (in_soc < 0) {
-        if (TRACE)
+	if (TRACE)
 	    fprintf(stderr, "%s %s\n",
 			    "HTAA_getUnfoldedLine: buffer not initialized",
 			    "with function HTAA_setupReader()");
@@ -581,7 +581,7 @@ PUBLIC char *HTAA_getUnfoldedLine NOARGS
 
 
 	/* Unfolding */
-	
+
 	if (peek_for_folding) {
 	    if (*cur != ' '  &&  *cur != '\t')
 		return line;	/* Ok, no continuation line */
@@ -595,7 +595,7 @@ PUBLIC char *HTAA_getUnfoldedLine NOARGS
 	while (cur < end_pointer && *cur != '\n') /* Find the end-of-line */
 	    cur++;				  /* (or end-of-buffer).  */
 
-	
+
 	/* Terminating line */
 
 	if (cur < end_pointer) {	/* So *cur==LF, terminate line */

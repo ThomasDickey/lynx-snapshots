@@ -31,16 +31,25 @@ PUBLIC int LYNumCharsets = 0; /* Will be initialized later by UC_Register. */
  *  INSTRUCTIONS for adding new character sets which do not have
  *		 Unicode tables.
  *
+ *  Currently we only declare some charset's properties here
+ *  (such as MIME names, etc.), it does not include real mapping.
+ *
+ *  [We hope you need not correct/add old-style mapping
+ *  as in ISO_LATIN1[] or SevenBitApproximations[] any more -
+ *  it works now via new chartrans mechanism, but kept for compatibility only:
+ *  we should cleanup the stuff, but this is not so easy...]
+ *
+ *  There is a place marked "Add your new character sets HERE" in this file.
  *  Make up a character set and add it in the same
  *  style as the ISO_LATIN1 set below, giving it a unique name.
  *
- *  Near the end of this file is a place marked "Add your character sets HERE".
+ *  Add the name of the set to LYCharSets.
+ *  Similarly add the appropriate information to the tables below:
+ *  LYchar_set_names, LYCharSet_UC, LYlowest_eightbit.
+ *  These 4 tables all MUST have the same order.
+ *  (And this is the order you will see in Lynx Options Menu,
+ *  which is why few unicode-based charsets are listed here).
  *
- *  Add the name of the set to LYCharSets at the bottom of this file, and
- *  also add it to the LYchar_set_names table below LYCharSets.
- *  Similarly add the appropriate information to LYCharSet_UC and to
- *  LYlowest_eightbit below that.
- *  These tables all MUST have the same order.
  */
 
 /*	Entity values -- for ISO Latin 1 local representation
@@ -96,7 +105,7 @@ PRIVATE char * ISO_Latin1[] = {
 	"\251", /* copyright sign (&#169;) - copy */
 	"\244", /* currency sign (&#164;) - curren */
 	"\260", /* degree sign (&#176;) - deg */
-	"\250", /* spacing diaresis (&#168;) - die */
+	"\250", /* spacing dieresis (&#168;) - die */
 	"\367", /* division sign (&#247;) - divide */
 	"\351", /* small e, acute accent (&#233;) - eacute */
 	"\352", /* small e, circumflex accent (&#234;) - ecirc */
@@ -155,7 +164,7 @@ PRIVATE char * ISO_Latin1[] = {
 	"\372", /* small u, acute accent (&#250;) - uacute */
 	"\373", /* small u, circumflex accent (&#251;) - ucirc */
 	"\371", /* small u, grave accent (&#249;) - ugrave */
-	"\250", /* spacing diaresis (&#168;) - uml */
+	"\250", /* spacing dieresis (&#168;) - uml */
 	"\374", /* small u, dieresis or umlaut mark (&#252;) - uuml */
 	"\375", /* small y, acute accent (&#253;) - yacute */
 	"\245", /* yen sign (&#165;) - yen */
@@ -231,7 +240,7 @@ PUBLIC char * SevenBitApproximations[] = {
 	"(c)",	/* copyright sign (&#169;) - copy */
 	"CUR",	/* currency sign (&#164;) - curren */
 	"DEG",	/* degree sign (&#176;) - deg */
-	"\042", /* spacing diaresis (&#168;) - die */
+	"\042", /* spacing dieresis (&#168;) - die */
 	"/",	/* division sign (&#247;) - divide */
 	"e",	/* small e, acute accent (&#233;) - eacute */
 	"e",	/* small e, circumflex accent (&#234;) - ecirc */
@@ -294,7 +303,7 @@ PUBLIC char * SevenBitApproximations[] = {
 	"u",	/* small u, acute accent (&#250;) - uacute */
 	"u",	/* small u, circumflex accent (&#251;) - ucirc */
 	"u",	/* small u, grave accent (&#249;) - ugrave */
-	"\042", /* spacing diaresis (&#168;) - uml */
+	"\042", /* spacing dieresis (&#168;) - uml */
 #ifdef LY_UMLAUT
 	"ue",	/* small u, dieresis or umlaut mark (&#252;) - uuml */
 #else
@@ -670,7 +679,7 @@ PUBLIC CONST char * LYEntityNames[] = {
 	"yen",		/* 165, yen sign */
 	"brvbar",	/* 166, broken vertical bar, (brkbar) */
 	"sect", 	/* 167, section sign */
-	"uml",		/* 168, spacing diaresis */
+	"uml",		/* 168, spacing dieresis */
 	"copy", 	/* 169, copyright sign */
 	"ordf", 	/* 170, feminine ordinal indicator */
 	"laquo",	/* 171, angle quotation mark, left */
@@ -779,15 +788,17 @@ PUBLIC CONST char * HTMLGetEntityName ARGS1(
 
 /*
  *  Function to return the UCode_t (long int) value for entity names
- *  in the ISO_Latin1 and UC_entity_info extra_entities arrays.  It
- *  returns 0 if not found. - FM
+ *  in the ISO_Latin1 and UC_entity_info unicode_entities arrays.
+ *  It returns 0 if not found. - FM
  *
- *  Unicode-based extra_entities[] table now handles all the names from old
- *  style entities[] too.  In the future we will try to redirect all calls to
- *  both entities[] and extra_entities[] through HTMLGetEntityUCValue() only.
- *  Also, we should not worry about control characters, they will pass through
- *  Unicode anyway and should be processed *after* calling this function.
- *  (see put_special_unicodes() in SGML.c).  - LP
+ *  unicode_entities[] now handles all the names from old style entities[] too.
+ *  Lynx now calls unicode_entities[] only through this function:
+ *  HTMLGetEntityUCValue().  Note, we need not check for special characters
+ *  here in function or even before it, we should check them *after*
+ *  invoking this function, see put_special_unicodes() in SGML.c.
+ *
+ *  In the future we will try to isolate all calls to entities[]
+ *  in favor of new unicode-based chartrans scheme. - LP
  */
 PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
 	CONST char *,	name)
@@ -796,7 +807,7 @@ PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
     size_t i, high, low;
     int diff = 0;
 /*  CONST char ** entities = HTML_dtd.entity_names;  */
-    CONST UC_entity_info * extra_entities = HTML_dtd.extra_entity_info;
+    CONST UC_entity_info * unicode_entities = HTML_dtd.unicode_entity_info;
 
     /*
      *	Make sure we have a non-zero length name. - FM
@@ -807,7 +818,9 @@ PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
 
 #ifdef NOTDEFINED
 /*
-**  extra_entities[] now handle all names from entities[], so disable latter.
+**  unicode_entities[] now handles all names from entities[], so disable latter.
+**  Let us keep this some sort of comment until we remove
+**  all calls to old-style entities[] from the code. - LP
 */
 
     /*
@@ -864,23 +877,23 @@ PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
     }
 
     /*
-     *	Not yet found, so try UC_entity_info extra_entities[]. - FM
+     *	Not yet found...    - FM
      */
 #endif /* NOTDEFINED */
 
     /*
-     *	Try UC_entity_info extra_entities[].
+     *	Try UC_entity_info unicode_entities[].
      */
-    for (low = 0, high = HTML_dtd.number_of_extra_entities;
+    for (low = 0, high = HTML_dtd.number_of_unicode_entities;
 	 high > low;
 	 diff < 0 ? (low = i+1) : (high = i)) {
 	/*
 	**  Binary search.
 	*/
 	i = (low + (high-low)/2);
-	diff = strcmp(extra_entities[i].name, name);
+	diff = strcmp(unicode_entities[i].name, name);	/* Case sensitive! */
 	if (diff == 0) {
-	    value = extra_entities[i].code;
+	    value = unicode_entities[i].code;
 	    break;
 	}
     }

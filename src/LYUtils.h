@@ -51,9 +51,9 @@ extern void Define_VMSLogical PARAMS((
 	char *LogicalName, char *LogicalValue));
 #endif /* VMS */
 extern CONST char *Home_Dir NOPARAMS;
-extern BOOLEAN LYPathOffHomeOK PARAMS((char *fbuffer, int fbuffer_size));
+extern BOOLEAN LYPathOffHomeOK PARAMS((char *fbuffer, size_t fbuffer_size));
 extern void LYAddPathToHome PARAMS((
-	char *fbuffer, int fbuffer_size, char *fname));
+	char *fbuffer, size_t fbuffer_size, char *fname));
 extern time_t LYmktime PARAMS((char *string, BOOL absolute));
 #if ! HAVE_PUTENV
 extern int putenv PARAMS((CONST char *string));

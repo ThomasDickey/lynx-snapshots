@@ -14,9 +14,6 @@
 #include "HTWSRC.h"
 
 
-/* #include <sys/types.h>	already in tcp.h */
-/* #include <sys/stat.h>	this too	 */
-/* #include <stdio.h> included in HTUtils.h -- FM */
 #include "HTML.h"
 #include "HTParse.h"
 
@@ -428,7 +425,7 @@ PRIVATE void WSRCParser_free ARGS1(HTStream *, me)
     FREE(me);
 }
 
-PRIVATE void WSRCParser_abort ARGS2(HTStream *, me, HTError, e)
+PRIVATE void WSRCParser_abort ARGS2(HTStream *, me, HTError, e GCC_UNUSED)
 {
     WSRCParser_free(me);
 }

@@ -52,6 +52,29 @@
 #undef HZ  /* to prevent parse error :( */
 #endif /* HZ */
 
+/* SunOS 4.x has a redefinition between ioctl.h and termios.h */
+#if defined(sun) && !defined(__SVR4)
+#undef NL0
+#undef NL1
+#undef CR0
+#undef CR1
+#undef CR2
+#undef CR3
+#undef TAB0
+#undef TAB1
+#undef TAB2
+#undef XTABS
+#undef BS0
+#undef BS1
+#undef FF0
+#undef FF1
+#undef ECHO
+#undef NOFLSH
+#undef TOSTOP
+#undef FLUSHO
+#undef PENDIN
+#endif
+
 #ifdef HAVE_CONFIG_H
 # ifdef HAVE_NCURSES_H
 #  include <ncurses.h>
@@ -163,7 +186,7 @@ extern unsigned int Lynx_Color_Flags;
 #ifdef USE_SLANG
 #if !defined(VMS) && !defined(DJGPP)
 #define USE_SLANG_MOUSE		1
-#endif
+#endif /* USE_SLANG */
 
 #define SL_LYNX_USE_COLOR	1
 #define SL_LYNX_USE_BLINK	2
@@ -198,11 +221,18 @@ extern void LY_SLerase NOPARAMS;
 #define standout SLsmg_reverse_video
 #define standend  SLsmg_normal_video
 #define clrtoeol SLsmg_erase_eol
+
+#ifdef SLSMG_NEWLINE_SCROLLS
+#define scrollok(a,b) SLsmg_Newline_Behavior \
+   = ((b) ? SLSMG_NEWLINE_SCROLLS : SLSMG_NEWLINE_MOVES)
+#else
 #define scrollok(a,b) SLsmg_Newline_Moves = ((b) ? 1 : -1)
+#endif
+
 #define addch SLsmg_write_char
 #define echo()
 #define printw SLsmg_printf
- 
+
 extern int curscr;
 extern BOOLEAN FullRefresh;
 #ifdef clearok
@@ -308,11 +338,11 @@ extern int  lynx_chg_color PARAMS((int, int, int));
  *  so we'll use them synonymously for bold and
  *  reverse, and ignore underline. - FM
  */
-#define start_bold()		standout()  
+#define start_bold()		standout()
 #define start_underline()	/* nothing */
 #define start_reverse()		standout()
 #define wstart_reverse(a)	wstandout(a)
-#define stop_bold()		standend()  
+#define stop_bold()		standend()
 #define stop_underline()	/* nothing */
 #define stop_reverse()		standend()
 #define wstop_reverse(a)	wstandend(a)

@@ -4,16 +4,16 @@
 **	This code is in common between client and server sides.
 **
 **	16 Jan 92  TBL	Fix strtol() undefined on CMU Mach.
-**	25 Jun 92  JFG  Added DECNET option through TCP socket emulation.
-**	13 Sep 93  MD   Added correct return of vmserrorno for HTInetStatus.
+**	25 Jun 92  JFG	Added DECNET option through TCP socket emulation.
+**	13 Sep 93  MD	Added correct return of vmserrorno for HTInetStatus.
 **			Added decoding of vms error message for MULTINET.
-**      7-DEC-1993 Bjorn S. Nilsson, ALEPH, CERN, VMS UCX ioctl() changes
+**	7-DEC-1993 Bjorn S. Nilsson, ALEPH, CERN, VMS UCX ioctl() changes
 **			(done of Mosaic)
-**      19 Feb 94  Danny Mayer	Added Bjorn Fixes to Lynx version
-**	 7 Mar 94  Danny Mayer  Added Fix UCX version for full domain name
-**	20 May 94  Andy Harper  Added support for CMU TCP/IP transport
-**	17 Nov 94  Andy Harper  Added support for SOCKETSHR transport
-**      16 Jul 95  S. Bjorndahl added kluge to deal with LIBCMU bug
+**	19 Feb 94  Danny Mayer	Added Bjorn Fixes to Lynx version
+**	 7 Mar 94  Danny Mayer	Added Fix UCX version for full domain name
+**	20 May 94  Andy Harper	Added support for CMU TCP/IP transport
+**	17 Nov 94  Andy Harper	Added support for SOCKETSHR transport
+**	16 Jul 95  S. Bjorndahl added kluge to deal with LIBCMU bug
 */
 
 #include "HTUtils.h"
@@ -27,17 +27,17 @@
 #include <signal.h>
 #include <sys/wait.h>
 #endif /* NSL_FORK */
- 
+
 #define FREE(x) if (x) {free(x); x = NULL;}
 
 extern int HTCheckForInterrupt NOPARAMS;
 
 #ifdef SVR4_BSDSELECT
 PUBLIC int BSDselect PARAMS((
-	int 		 nfds,
-	fd_set * 	 readfds,
+	int		 nfds,
+	fd_set *	 readfds,
 	fd_set *	 writefds,
-	fd_set * 	 exceptfds,
+	fd_set *	 exceptfds,
 	struct timeval * timeout));
 #ifdef select
 #undef select
@@ -55,7 +55,7 @@ PUBLIC int BSDselect PARAMS((
 
 #ifdef SHORT_NAMES
 #define HTInetStatus		HTInStat
-#define HTInetString 		HTInStri
+#define HTInetString		HTInStri
 #define HTParseInet		HTPaInet
 #endif /* SHORT_NAMES */
 
@@ -88,10 +88,10 @@ PUBLIC unsigned long socks_bind_remoteAddr; /* for long Rbind */
 **
 **  On entry,
 **	where		gives a description of what caused the error
-**	global errno	gives the error number in the unix way.
+**	global errno	gives the error number in the Unix way.
 **
 **  On return,
-**	returns		a negative status in the unix way.
+**	returns 	a negative status in the Unix way.
 */
 #ifndef PCNFS
 
@@ -119,7 +119,7 @@ extern int sys_nerr;
 
 #if defined(VMS) && defined(UCX)
 /*
-**  A routine to mimick the ioctl function for UCX.
+**  A routine to mimic the ioctl function for UCX.
 **  Bjorn S. Nilsson, 25-Nov-1993. Based on an example in the UCX manual.
 */
 #include <iodef.h>
@@ -127,7 +127,7 @@ extern int sys_nerr;
 extern int vaxc$get_sdc(), sys$qiow();
 
 PUBLIC int HTioctl ARGS3(
-	int,		d, 
+	int,		d,
 	int,		request,
 	int *,		argp)
 {
@@ -135,41 +135,41 @@ PUBLIC int HTioctl ARGS3(
     unsigned short fun, iosb[4];
     char *p5, *p6;
     struct comm {
-        int command;
-        char *addr;
+	int command;
+	char *addr;
     } ioctl_comm;
     struct it2 {
-        unsigned short len;
-        unsigned short opt;
-        struct comm *addr;
+	unsigned short len;
+	unsigned short opt;
+	struct comm *addr;
     } ioctl_desc;
 
     if ((sdc = vaxc$get_sdc (d)) == 0) {
-        errno = EBADF;
-        return -1;
+	errno = EBADF;
+	return -1;
     }
     ioctl_desc.opt  = UCX$C_IOCTL;
     ioctl_desc.len  = sizeof(struct comm);
     ioctl_desc.addr = &ioctl_comm;
     if (request & IOC_OUT) {
-        fun = IO$_SENSEMODE;
-        p5 = 0;
-        p6 = (char *)&ioctl_desc;
+	fun = IO$_SENSEMODE;
+	p5 = 0;
+	p6 = (char *)&ioctl_desc;
     } else {
-        fun = IO$_SETMODE;
-        p5 = (char *)&ioctl_desc;
-        p6 = 0;
+	fun = IO$_SETMODE;
+	p5 = (char *)&ioctl_desc;
+	p6 = 0;
     }
     ioctl_comm.command = request;
     ioctl_comm.addr = (char *)argp;
     status = sys$qiow (0, sdc, fun, iosb, 0, 0, 0, 0, 0, 0, p5, p6);
     if (!(status & 01)) {
-        errno = status;
-        return -1;
+	errno = status;
+	return -1;
     }
     if (!(iosb[0] & 01)) {
-        errno = iosb[0];
-        return -1;
+	errno = iosb[0];
+	return -1;
     }
     return 0;
 }
@@ -179,7 +179,7 @@ PUBLIC int HTioctl ARGS3(
 **	---------------------
 */
 PUBLIC int HTInetStatus ARGS1(
-	char *,		where)
+	char *, 	where)
 {
 #ifdef VMS
 #ifdef MULTINET
@@ -188,7 +188,7 @@ PUBLIC int HTInetStatus ARGS1(
 #endif /* VMS */
 
     CTRACE(tfp,
-    	"TCP: Error %d in `SOCKET_ERRNO' after call to %s() failed.\n\t%s\n",
+	"TCP: Error %d in `SOCKET_ERRNO' after call to %s() failed.\n\t%s\n",
 	   SOCKET_ERRNO,  where,
 	   /* third arg is transport/platform specific */
 #ifdef VM
@@ -198,7 +198,7 @@ PUBLIC int HTInetStatus ARGS1(
 
 #ifdef VMS
 #ifdef MULTINET
-           vms_errno_string());
+	   vms_errno_string());
 #else
 	   ((SOCKET_ERRNO > 0 && SOCKET_ERRNO <= 65) ?
 	    strerror(SOCKET_ERRNO) : "(Error number not translated)"));
@@ -219,17 +219,17 @@ PUBLIC int HTInetStatus ARGS1(
 #ifdef VMS
 #ifndef MULTINET
     CTRACE(tfp,
-    	   "         Unix error number (SOCKET_ERRNO) = %ld dec\n",
+	   "         Unix error number (SOCKET_ERRNO) = %ld dec\n",
 	   SOCKET_ERRNO);
     CTRACE(tfp,
-    	   "         VMS error (vaxc$errno)    = %lx hex\n",
+	   "         VMS error (vaxc$errno)    = %lx hex\n",
 	   vaxc$errno);
 #endif /* MULTINET */
 #endif /* VMS */
 
 #ifdef VMS
     /*
-    **  uerrno and errno happen to be zero if vmserrno <> 0
+    **	uerrno and errno happen to be zero if vmserrno <> 0
     */
 #ifdef MULTINET
     return -vmserrno;
@@ -261,32 +261,32 @@ PUBLIC unsigned int HTCardinal ARGS3(
 {
     unsigned int n;
     if ((**pp<'0') || (**pp>'9')) {	    /* Null string is error */
-	*pstatus = -3;  /* No number where one expeceted */
+	*pstatus = -3;	/* No number where one expected */
 	return 0;
     }
 
     n = 0;
     while ((**pp >= '0') && (**pp <= '9'))
-        n = n*10 + *((*pp)++) - '0';
+	n = n*10 + *((*pp)++) - '0';
 
     if (n > max_value) {
-	*pstatus = -4;  /* Cardinal outside range */
+	*pstatus = -4;	/* Cardinal outside range */
 	return 0;
     }
 
     return n;
 }
 
-#ifndef DECNET  /* Function only used below for a trace message */
+#ifndef DECNET	/* Function only used below for a trace message */
 /*	Produce a string for an Internet address
 **	----------------------------------------
 **
 **  On exit,
-**	returns	a pointer to a static string which must be copied if
+**	returns a pointer to a static string which must be copied if
 **		it is to be kept.
 */
 PUBLIC CONST char * HTInetString ARGS1(
-	SockA*,		soc_in)
+	SockA*, 	soc_in)
 {
     static char string[16];
     sprintf(string, "%d.%d.%d.%d",
@@ -307,7 +307,7 @@ PUBLIC CONST char * HTInetString ARGS1(
 **	soc_in	points to the binary internet or decnet address field.
 **
 **  On exit,
-**	*soc_in	is filled in. If no port is specified in str, that
+**	*soc_in is filled in. If no port is specified in str, that
 **		field is left unchanged in *soc_in.
 */
 PUBLIC int HTParseInet ARGS2(
@@ -320,7 +320,7 @@ PUBLIC int HTParseInet ARGS2(
     struct hostent  *phost;	/* Pointer to host - See netdb.h */
 
     if (!str) {
-    	if (TRACE) {
+	if (TRACE) {
 	    fprintf(stderr, "HTParseInet: Can't parse `NULL'.\n");
 	}
 	return -1;
@@ -334,11 +334,11 @@ PUBLIC int HTParseInet ARGS2(
     StrAllocCopy(host, str);	/* Make a copy we can mutilate */
 
     /*
-    **  Parse port number if present.
-    */    
+    **	Parse port number if present.
+    */
     if ((port = strchr(host, ':')) != NULL) {
-    	*port++ = 0;		/* Chop off port */
-        if (port[0] >= '0' && port[0] <= '9') {
+	*port++ = 0;		/* Chop off port */
+	if (port[0] >= '0' && port[0] <= '9') {
 #ifdef unix
 	    soc_in->sin_port = htons(atol(port));
 #else /* VMS: */
@@ -348,7 +348,7 @@ PUBLIC int HTParseInet ARGS2(
 	    soc_in->sin_port = htons((unsigned short)strtol(port,(char**)0,10));
 #endif /* Decnet */
 #endif /* Unix vs. VMS */
-#ifdef SUPPRESS		/* 1. crashes!?!.  2. Not recommended */
+#ifdef SUPPRESS 	/* 1. crashes!?!.  2. Not recommended */
 	} else {
 	    struct servent * serv = getservbyname(port, (char*)0);
 	    if (serv) {
@@ -362,13 +362,13 @@ PUBLIC int HTParseInet ARGS2(
 
 #ifdef DECNET
     /*
-    **  Read Decnet node name. @@ Should know about DECnet addresses, but
-    **  it's probably worth waiting until the Phase transition from IV to V.
+    **	Read Decnet node name. @@ Should know about DECnet addresses, but
+    **	it's probably worth waiting until the Phase transition from IV to V.
     */
     soc_in->sdn_nam.n_len = min(DN_MAXNAML, strlen(host));  /* <=6 in phase 4 */
     strncpy(soc_in->sdn_nam.n_name, host, soc_in->sdn_nam.n_len + 1);
     if (TRACE) {
-        fprintf(stderr,  
+	fprintf(stderr,
 		"DECnet: Parsed address as object number %d on host %.6s...\n",
 		soc_in->sdn_objnum, host);
     }
@@ -390,8 +390,8 @@ PUBLIC int HTParseInet ARGS2(
     }
 
     /*
-    **  Parse host number if present.
-    */  
+    **	Parse host number if present.
+    */
     if (dotcount_ip == 3) {   /* Numeric node address: */
 
 #ifdef DJGPP
@@ -409,7 +409,7 @@ PUBLIC int HTParseInet ARGS2(
 #endif /* DJGPP */
 	FREE(host);
     } else {		    /* Alphanumeric node name: */
-#ifdef MVS	/* Oustanding problem with crash in MVS gethostbyname */
+#ifdef MVS	/* Outstanding problem with crash in MVS gethostbyname */
 	if (TRACE) {
 	    fprintf(stderr,
 		    "HTParseInet: Calling gethostbyname(%s)\n", host);
@@ -421,9 +421,9 @@ PUBLIC int HTParseInet ARGS2(
 	**  Start block for fork-based gethostbyname() with
 	**  checks for interrupts. - Tom Zerucha (tz@execpc.com) & FM
 	*/
-	{ 
+	{
 	    /*
-	    **  Pipe, child pid, and status buffers.
+	    **	Pipe, child pid, and status buffers.
 	    */
 	    pid_t fpid, waitret = (pid_t)0;
 	    int pfd[2], cstat, cst1 = 0;
@@ -431,7 +431,7 @@ PUBLIC int HTParseInet ARGS2(
 	    pipe(pfd);
 
 	    if ((fpid = fork()) == 0 ) {
-		/* 
+		/*
 		**  Child - for the long call.
 		*/
 		phost = gethostbyname(host);
@@ -450,11 +450,11 @@ PUBLIC int HTParseInet ARGS2(
 	    }
 
 	    /*
-	    **  (parent) Wait until lookup finishes, or interrupt.
+	    **	(parent) Wait until lookup finishes, or interrupt.
 	    */
 	    cstat = 0;
 	    while (cstat <= 0) {
-	        /*
+		/*
 		**  Exit when data sent.
 		*/
 		IOCTL(pfd[0], FIONREAD, &cstat);
@@ -512,41 +512,41 @@ PUBLIC int HTParseInet ARGS2(
 		}
 	    }
 	    /*
-	    **  Read as much as we can - should be the address.
+	    **	Read as much as we can - should be the address.
 	    */
 	    IOCTL(pfd[0], FIONREAD, &cstat);
 	    if (cstat < 4) {
 		if (TRACE) {
-		    fprintf(stderr, 
+		    fprintf(stderr,
 		       "HTParseInet: NSL_FORK child returns only %d bytes.\n",
 			    cstat);
 		    fprintf(stderr,
-		       "             Trying again without forking.\n");
+			"             Trying again without forking.\n");
 		}
 		phost = gethostbyname(host);	/* See netdb.h */
 		if (!phost) {
 		    if (TRACE) {
-			fprintf(stderr, 
+			fprintf(stderr,
 			 "HTParseInet: Can't find internet node name `%s'.\n",
 				host);
 		    }
 		    memset((void *)&soc_in->sin_addr, 0, sizeof(soc_in->sin_addr));
 		} else {
 		    memcpy((void *)&soc_in->sin_addr,
-		    	   phost->h_addr, phost->h_length);
+			   phost->h_addr, phost->h_length);
 		}
 #ifdef NOTDEFINED
-	        cstat = read(pfd[0], (void *)&soc_in->sin_addr , 4);
+		cstat = read(pfd[0], (void *)&soc_in->sin_addr , 4);
 #endif /* NOTDEFINED */
 	    } else {
-	        cstat = read(pfd[0], (void *)&soc_in->sin_addr , cstat);
+		cstat = read(pfd[0], (void *)&soc_in->sin_addr , cstat);
 	    }
 	    close(pfd[0]);
 	    close(pfd[1]);
 	}
 	if (soc_in->sin_addr.s_addr == 0) {
 	    if (TRACE) {
-	        fprintf(stderr, 
+		fprintf(stderr,
 			"HTParseInet: Can't find internet node name `%s'.\n",
 			host);
 	    }
@@ -563,7 +563,7 @@ PUBLIC int HTParseInet ARGS2(
 
 #else /* Not NSL_FORK: */
 #ifdef DJGPP
-        soc_in->sin_addr.s_addr = htonl(resolve(host));  
+	soc_in->sin_addr.s_addr = htonl(resolve(host));
 	FREE(host);
 	if (soc_in->sin_addr.s_addr == 0) {
 		 if (TRACE)
@@ -581,12 +581,12 @@ PUBLIC int HTParseInet ARGS2(
 #endif /* MVS */
 	if (!phost) {
 	    if (TRACE) {
-	        fprintf(stderr, 
+		fprintf(stderr,
 			"HTParseInet: Can't find internet node name `%s'.\n",
 			host);
 	    }
 	    FREE(host);
-	    return -1;  /* Fail? */
+	    return -1;	/* Fail? */
 	}
 	FREE(host);
 #if defined(VMS) && defined(CMU_TCP)
@@ -594,9 +594,9 @@ PUBLIC int HTParseInet ARGS2(
 	**  In LIBCMU, phost->h_length contains not the length of one address
 	**  (four bytes) but the number of bytes in *h_addr, i.e. some multiple
 	**  of four. Thus we need to hard code the value here, and remember to
-	**  change it if/when IP addresses change in size. :-(  LIBCMU is no
+	**  change it if/when IP addresses change in size. :-(	LIBCMU is no
 	**  longer supported, and CMU users are encouraged to obtain and use
-	**  SOCKETSHR/NETLIB instead. - S. Bjorndahl 
+	**  SOCKETSHR/NETLIB instead. - S. Bjorndahl
 	*/
 	memcpy((void *)&soc_in->sin_addr, phost->h_addr, 4);
 #else
@@ -607,7 +607,7 @@ PUBLIC int HTParseInet ARGS2(
     }
 
     if (TRACE) {
-        fprintf(stderr,  
+	fprintf(stderr,
 	   "HTParseInet: Parsed address as port %d, IP address %d.%d.%d.%d\n",
 		(int)ntohs(soc_in->sin_port),
 		(int)*((unsigned char *)(&soc_in->sin_addr)+0),
@@ -615,7 +615,7 @@ PUBLIC int HTParseInet ARGS2(
 		(int)*((unsigned char *)(&soc_in->sin_addr)+2),
 		(int)*((unsigned char *)(&soc_in->sin_addr)+3));
     }
-#endif  /* Internet vs. Decnet */
+#endif	/* Internet vs. Decnet */
 
     return 0;	/* OK */
 }
@@ -647,32 +647,32 @@ PRIVATE void get_host_details NOARGS
     struct hostent * phost;		/* Pointer to host -- See netdb.h */
 #endif /* NEED_HOST_ADDRESS */
     int namelength = sizeof(name);
-    
+
     if (hostname)
-    	return;				/* Already done */
+	return; 			/* Already done */
     gethostname(name, namelength);	/* Without domain */
     StrAllocCopy(hostname, name);
     atexit(free_HTTCP_hostname);
 #ifdef UCX
     /*
-    **  UCX doesn't give the complete domain name.
-    **  Get rest from UCX$BIND_DOM logical.
+    **	UCX doesn't give the complete domain name.
+    **	Get rest from UCX$BIND_DOM logical.
     */
-    if (strchr(hostname,'.') == NULL) {           /* Not full address */
-        domain_name = getenv("UCX$BIND_DOMAIN");
-        if (domain_name != NULL) {
-            StrAllocCat(hostname, ".");
-            StrAllocCat(hostname, domain_name);
-        }
+    if (strchr(hostname,'.') == NULL) { 	  /* Not full address */
+	domain_name = getenv("UCX$BIND_DOMAIN");
+	if (domain_name != NULL) {
+	    StrAllocCat(hostname, ".");
+	    StrAllocCat(hostname, domain_name);
+	}
      }
 #endif /* UCX */
     CTRACE(tfp, "TCP: Local host name is %s\n", hostname);
 
-#ifndef DECNET  /* Decnet ain't got no damn name server 8#OO */
+#ifndef DECNET	/* Decnet ain't got no damn name server 8#OO */
 #ifdef NEED_HOST_ADDRESS		/* no -- needs name server! */
     phost = gethostbyname(name);	/* See netdb.h */
     if (!phost) {
-	if (TRACE) fprintf(stderr, 
+	if (TRACE) fprintf(stderr,
 		"TCP: Can't find my own internet node address for `%s'!!\n",
 		name);
 	return;  /* Fail! */
@@ -696,11 +696,11 @@ PUBLIC CONST char * HTHostName NOARGS
 **  Interruptable connect as implemented for Mosaic by Marc Andreesen
 **  and hacked in for Lynx years ago by Lou Montulli, and further
 **  modified over the years by numerous Lynx lovers. - FM
-*/ 
+*/
 PUBLIC int HTDoConnect ARGS4(
 	CONST char *,	url,
-	char *,		protocol,
-	int,		default_port, 
+	char *, 	protocol,
+	int,		default_port,
 	int *,		s)
 {
     struct sockaddr_in soc_address;
@@ -712,13 +712,13 @@ PUBLIC int HTDoConnect ARGS4(
     char *host = NULL;
 
     /*
-    **  Set up defaults.
+    **	Set up defaults.
     */
     soc_in->sin_family = AF_INET;
     soc_in->sin_port = htons(default_port);
 
     /*
-    **  Get node name and optional port number.
+    **	Get node name and optional port number.
     */
     p1 = HTParse(url, "", PARSE_HOST);
     if ((at_sign = strchr(p1, '@')) != NULL) {
@@ -745,7 +745,7 @@ PUBLIC int HTDoConnect ARGS4(
 	}
 	FREE(host);
 	FREE(line);
-        return status;
+	return status;
     }
 
     sprintf (line, "Making %s connection to %s.", protocol, host);
@@ -753,7 +753,7 @@ PUBLIC int HTDoConnect ARGS4(
     FREE(host);
 
     /*
-    **  Now, let's get a socket set up from the server for the data.
+    **	Now, let's get a socket set up from the server for the data.
     */
     *s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (*s == -1) {
@@ -761,155 +761,155 @@ PUBLIC int HTDoConnect ARGS4(
 	FREE(line);
 	return HT_NO_DATA;
     }
-   
+
 #ifndef DOSPATH
 #if !defined(NO_IOCTL) || defined(USE_FCNTL)
     /*
-    **  Make the socket non-blocking, so the connect can be canceled.
-    **  This means that when we issue the connect we should NOT
-    **  have to wait for the accept on the other end.
+    **	Make the socket non-blocking, so the connect can be canceled.
+    **	This means that when we issue the connect we should NOT
+    **	have to wait for the accept on the other end.
     */
     {
 #ifdef USE_FCNTL
-        int ret = fcntl(*s, F_SETFL, O_NONBLOCK);
+	int ret = fcntl(*s, F_SETFL, O_NONBLOCK);
 #else
-        int val = 1;
-        int ret = IOCTL(*s, FIONBIO, &val);
+	int val = 1;
+	int ret = IOCTL(*s, FIONBIO, &val);
 #endif /* USE_FCNTL */
-        if (ret == -1)
-            _HTProgress("Could not make connection non-blocking.");
+	if (ret == -1)
+	    _HTProgress("Could not make connection non-blocking.");
     }
 #endif /* !NO_IOCTL || USE_FCNTL */
-#endif /* DOSPATH */
+#endif /* !DOSPATH */
 
     /*
-    **  Issue the connect.  Since the server can't do an instantaneous
-    **  accept and we are non-blocking, this will almost certainly return
-    **  a negative status.
+    **	Issue the connect.  Since the server can't do an instantaneous
+    **	accept and we are non-blocking, this will almost certainly return
+    **	a negative status.
     */
 #ifdef SOCKS
     if (socks_flag) {
-        status = Rconnect(*s, (struct sockaddr*)&soc_address,
-      			  sizeof(soc_address));
+	status = Rconnect(*s, (struct sockaddr*)&soc_address,
+			  sizeof(soc_address));
 	/*
 	**  For long Rbind.
 	*/
-        socks_bind_remoteAddr = soc_address.sin_addr.s_addr;
+	socks_bind_remoteAddr = soc_address.sin_addr.s_addr;
     } else
 #endif /* SOCKS */
     status = connect(*s, (struct sockaddr*)&soc_address, sizeof(soc_address));
 #ifndef DJGPP
     /*
-    **  According to the Sun man page for connect:
-    **     EINPROGRESS         The socket is non-blocking and the  con-
-    **                         nection cannot be completed immediately.
-    **                         It is possible to select(2) for  comple-
-    **                         tion  by  selecting the socket for writ-
-    **                         ing.
-    **  According to the Motorola SVR4 man page for connect:
-    **     EAGAIN              The socket is non-blocking and the  con-
-    **                         nection cannot be completed immediately.
-    **                         It is possible to select for  completion
-    **                         by  selecting  the  socket  for writing.
-    **                         However, this is only  possible  if  the
-    **                         socket  STREAMS  module  is  the topmost
-    **                         module on  the  protocol  stack  with  a
-    **                         write  service  procedure.  This will be
-    **                         the normal case.
+    **	According to the Sun man page for connect:
+    **	   EINPROGRESS	       The socket is non-blocking and the  con-
+    **			       nection cannot be completed immediately.
+    **			       It is possible to select(2) for	comple-
+    **			       tion  by  selecting the socket for writ-
+    **			       ing.
+    **	According to the Motorola SVR4 man page for connect:
+    **	   EAGAIN	       The socket is non-blocking and the  con-
+    **			       nection cannot be completed immediately.
+    **			       It is possible to select for  completion
+    **			       by  selecting  the  socket  for writing.
+    **			       However, this is only  possible	if  the
+    **			       socket  STREAMS	module	is  the topmost
+    **			       module on  the  protocol  stack	with  a
+    **			       write  service  procedure.  This will be
+    **			       the normal case.
     */
     if ((status < 0) &&
-        (SOCKET_ERRNO == EINPROGRESS || SOCKET_ERRNO == EAGAIN)) {
-        struct timeval timeout;
-        int ret;
-        int tries=0;
+	(SOCKET_ERRNO == EINPROGRESS || SOCKET_ERRNO == EAGAIN)) {
+	struct timeval timeout;
+	int ret;
+	int tries=0;
 
-        ret = 0;
-        while (ret <= 0) {
-            fd_set writefds;
+	ret = 0;
+	while (ret <= 0) {
+	    fd_set writefds;
 
 	    /*
-	    **  Protect against an infinite loop.
+	    **	Protect against an infinite loop.
 	    */
 	    if (tries++ >= 180000) {
-	        HTAlert("Connection failed for 180,000 tries.");
-	        FREE(line);
- 	        return HT_NO_DATA;
+		HTAlert("Connection failed for 180,000 tries.");
+		FREE(line);
+		return HT_NO_DATA;
 	    }
 
 	    timeout.tv_sec = 0;
 	    timeout.tv_usec = 100000;
-            FD_ZERO(&writefds);
-            FD_SET(*s, &writefds);
+	    FD_ZERO(&writefds);
+	    FD_SET(*s, &writefds);
 #ifdef SOCKS
 	    if (socks_flag)
-                ret = Rselect(FD_SETSIZE, NULL,
-	      		      (void *)&writefds, NULL, &timeout);
+		ret = Rselect(FD_SETSIZE, NULL,
+			      (void *)&writefds, NULL, &timeout);
 	    else
 #endif /* SOCKS */
-            ret = select(FD_SETSIZE, NULL, (void *)&writefds, NULL, &timeout);
+	    ret = select(FD_SETSIZE, NULL, (void *)&writefds, NULL, &timeout);
 
 	   /*
-	   **  If we suspend, then it is possible that select will be 
+	   **  If we suspend, then it is possible that select will be
 	   **  interrupted.  Allow for this possibility. - JED
 	   */
 	   if ((ret == -1) && (errno == EINTR))
 	     continue;
 
-            /*
-            **  Again according to the Sun and Motorola man pagse for connect:
-            **     EALREADY            The socket is non-blocking and a  previ-
-            **                         ous  connection attempt has not yet been
-            **                         completed.
-            **  Thus if the SOCKET_ERRNO is NOT EALREADY we have a real error,
-            **  and should break out here and return that error.
-            **  Otherwise if it is EALREADY keep on trying to complete the
-            **  connection.
-            */
-            if ((ret < 0) && (SOCKET_ERRNO != EALREADY)) {
-                status = ret;
-                break;
-            } else if (ret > 0) {
-                /*
-                **  Extra check here for connection success, if we try to
-                **  connect again, and get EISCONN, it means we have a
-                **  successful connection.  But don't check with SOCKS.
-                */
+	    /*
+	    **	Again according to the Sun and Motorola man pages for connect:
+	    **	   EALREADY	       The socket is non-blocking and a  previ-
+	    **			       ous  connection attempt has not yet been
+	    **			       completed.
+	    **	Thus if the SOCKET_ERRNO is NOT EALREADY we have a real error,
+	    **	and should break out here and return that error.
+	    **	Otherwise if it is EALREADY keep on trying to complete the
+	    **	connection.
+	    */
+	    if ((ret < 0) && (SOCKET_ERRNO != EALREADY)) {
+		status = ret;
+		break;
+	    } else if (ret > 0) {
+		/*
+		**  Extra check here for connection success, if we try to
+		**  connect again, and get EISCONN, it means we have a
+		**  successful connection.  But don't check with SOCKS.
+		*/
 #ifdef SOCKS
-	        if (socks_flag) {
-	            status = 0;
-	        } else {
+		if (socks_flag) {
+		    status = 0;
+		} else {
 #endif /* SOCKS */
-                status = connect(*s, (struct sockaddr*)&soc_address,
-                                 sizeof(soc_address));
+		status = connect(*s, (struct sockaddr*)&soc_address,
+				 sizeof(soc_address));
 #ifdef UCX
-	        /*
-	        **  A UCX feature: Instead of returning EISCONN
-	        **		 UCX returns EADDRINUSE.
-	        **  Test for this status also.
-	        */
-                if ((status < 0) && ((SOCKET_ERRNO == EISCONN) ||
+		/*
+		**  A UCX feature: Instead of returning EISCONN
+		**		 UCX returns EADDRINUSE.
+		**  Test for this status also.
+		*/
+		if ((status < 0) && ((SOCKET_ERRNO == EISCONN) ||
 				     (SOCKET_ERRNO == EADDRINUSE)))
 #else
-                if ((status < 0) && (SOCKET_ERRNO == EISCONN))
+		if ((status < 0) && (SOCKET_ERRNO == EISCONN))
 #endif /* UCX */
-                {
-                    status = 0;
-                }
+		{
+		    status = 0;
+		}
 
-	        if (status && (SOCKET_ERRNO == EALREADY)) /* new stuff LJM */
+		if (status && (SOCKET_ERRNO == EALREADY)) /* new stuff LJM */
 		    ret = 0; /* keep going */
-	        else
-                    break;
+		else
+		    break;
 #ifdef SOCKS
-	        }
+		}
 #endif /* SOCKS */
-            } 
+	    }
 #ifdef SOCKS
 	    else if (!socks_flag)
 #else
-            else
+	    else
 #endif /* SOCKS */
-            {
+	    {
 		/*
 		**  The select says we aren't ready yet.  Try to connect
 		**  again to make sure.  If we don't get EALREADY or EISCONN,
@@ -922,51 +922,51 @@ PUBLIC int HTDoConnect ARGS4(
 		**  For some reason, UCX pre 3 apparently returns
 		**  errno = 18242 instead the EALREADY or EISCONN.
 		*/
-                status = connect(*s, (struct sockaddr*)&soc_address,
-                                 sizeof(soc_address));
-                if ((status < 0) &&
-	            (SOCKET_ERRNO != EALREADY && SOCKET_ERRNO != EAGAIN) &&
+		status = connect(*s, (struct sockaddr*)&soc_address,
+				 sizeof(soc_address));
+		if ((status < 0) &&
+		    (SOCKET_ERRNO != EALREADY && SOCKET_ERRNO != EAGAIN) &&
 #ifdef UCX
 		    (SOCKET_ERRNO != 18242) &&
 #endif /* UCX */
 		    (SOCKET_ERRNO != EISCONN)) {
-                    break;
-                }
-            }
-            if (HTCheckForInterrupt()) {
-                if (TRACE)
-                    fprintf(stderr, "*** INTERRUPTED in middle of connect.\n");
-                status = HT_INTERRUPTED;
-                SOCKET_ERRNO = EINTR;
-                break;
-            }
-        }
+		    break;
+		}
+	    }
+	    if (HTCheckForInterrupt()) {
+		if (TRACE)
+		    fprintf(stderr, "*** INTERRUPTED in middle of connect.\n");
+		status = HT_INTERRUPTED;
+		SOCKET_ERRNO = EINTR;
+		break;
+	    }
+	}
     }
-#endif /* DJGPP */
+#endif /* !DJGPP */
     if (status < 0) {
-        /*
-        **  The connect attempt failed or was interrupted,
-        **  so close up the socket.
-        */
-        NETCLOSE(*s);
+	/*
+	**  The connect attempt failed or was interrupted,
+	**  so close up the socket.
+	*/
+	NETCLOSE(*s);
     }
 #ifndef DOSPATH
 #if !defined(NO_IOCTL) || defined(USE_FCNTL)
     else {
-        /*
+	/*
 	**  Make the socket blocking again on good connect.
 	*/
 #ifdef USE_FCNTL
-        int ret = fcntl(*s, F_SETFL, 0);
-#else 
-        int val = 0;
-        int ret = IOCTL(*s, FIONBIO, &val);
+	int ret = fcntl(*s, F_SETFL, 0);
+#else
+	int val = 0;
+	int ret = IOCTL(*s, FIONBIO, &val);
 #endif /* USE_FCNTL */
-        if (ret == -1)
-            _HTProgress("Could not restore socket to blocking.");
+	if (ret == -1)
+	    _HTProgress("Could not restore socket to blocking.");
     }
 #endif /* !NO_IOCTL || USE_FCNTL */
-#endif /* DOSPATH */
+#endif /* !DOSPATH */
 
     FREE(line);
     return status;
@@ -977,7 +977,7 @@ PUBLIC int HTDoConnect ARGS4(
 */
 PUBLIC int HTDoRead ARGS3(
 	int,		fildes,
-	void *,		buf,
+	void *, 	buf,
 	unsigned,	nbyte)
 {
     int ready, ret;
@@ -989,11 +989,11 @@ PUBLIC int HTDoRead ARGS3(
 #endif /* UCX, BSN */
 
     if (fildes <= 0)
-        return -1;
+	return -1;
 
     if (HTCheckForInterrupt()) {
-        SOCKET_ERRNO = EINTR;
-        return (HT_INTERRUPTED);
+	SOCKET_ERRNO = EINTR;
+	return (HT_INTERRUPTED);
     }
 
 #if !defined(NO_IOCTL)
@@ -1012,17 +1012,17 @@ PUBLIC int HTDoRead ARGS3(
 	}
 
 	/*
-	**  If we suspend, then it is possible that select will be 
+	**  If we suspend, then it is possible that select will be
 	**  interrupted.  Allow for this possibility. - JED
 	*/
-        do {
+	do {
 	    timeout.tv_sec = 0;
 	    timeout.tv_usec = 100000;
 	    FD_ZERO(&readfds);
 	    FD_SET(fildes, &readfds);
 #ifdef SOCKS
 	    if (socks_flag)
-	        ret = Rselect(FD_SETSIZE,
+		ret = Rselect(FD_SETSIZE,
 			      (void *)&readfds, NULL, NULL, &timeout);
 	    else
 #endif /* SOCKS */
@@ -1030,34 +1030,34 @@ PUBLIC int HTDoRead ARGS3(
 			     (void *)&readfds, NULL, NULL, &timeout);
 	} while ((ret == -1) && (errno == EINTR));
 
-        if (ret < 0) {
-            return -1;
-        } else if (ret > 0) {
-            ready = 1;
-        } else if (HTCheckForInterrupt()) {
-       	    SOCKET_ERRNO = EINTR;
-            return HT_INTERRUPTED;
-        }
+	if (ret < 0) {
+	    return -1;
+	} else if (ret > 0) {
+	    ready = 1;
+	} else if (HTCheckForInterrupt()) {
+	    SOCKET_ERRNO = EINTR;
+	    return HT_INTERRUPTED;
+	}
     }
 
 #if !defined(UCX) || !defined(VAXC)
     return SOCKET_READ (fildes, buf, nbyte);
 #else
     /*
-    **  VAXC and UCX problem only.
+    **	VAXC and UCX problem only.
     */
     errno = vaxc$errno = 0;
     nb = SOCKET_READ (fildes, buf, nbyte);
     CTRACE(tfp,
-    	   "Read - nb,errno,vaxc$errno: %d %d %d\n", nb,errno,vaxc$errno);
+	   "Read - nb,errno,vaxc$errno: %d %d %d\n", nb,errno,vaxc$errno);
     if ((nb <= 0) && TRACE)
-        perror ("HTTCP.C:HTDoRead:read");          /* RJF */
+	perror ("HTTCP.C:HTDoRead:read");	   /* RJF */
     /*
-    **  An errno value of EPIPE and nb < 0 indicates end-of-file on VAXC.
+    **	An errno value of EPIPE and nb < 0 indicates end-of-file on VAXC.
     */
     if ((nb <= 0) && (errno == EPIPE)) {
-        nb = 0;
-        errno = 0;
+	nb = 0;
+	errno = 0;
     }
     return nb;
 #endif /* UCX, BSN */

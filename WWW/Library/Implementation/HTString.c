@@ -11,6 +11,7 @@
 #include "tcp.h"
 
 #include "LYLeaks.h"
+#include "LYStrings.h"
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
@@ -22,6 +23,58 @@ PUBLIC int WWW_TraceFlag = 0;	/* Global trace flag for ALL W3 code */
 
 PUBLIC CONST char * HTLibraryVersion = VC; /* String for help screen etc */
 
+/*
+**     strcasecomp8 is a variant of strcasecomp (below)
+**     ------------		    -----------
+**     but uses 8bit upper/lower case information
+**     from the current display charset.
+**     It returns 0 if exact match.
+*/
+PUBLIC int strcasecomp8 ARGS2(
+       CONST char*,    a,
+       CONST char *,   b)
+{
+    CONST char *p = a;
+    CONST char *q = b;
+
+    for ( ; *p && *q; p++, q++) {
+	int diff = UPPER8(*p, *q);
+	if (diff) return diff;
+    }
+    if (*p)
+	return 1;	/* p was longer than q */
+    if (*q)
+	return -1;	/* p was shorter than q */
+    return 0;		/* Exact match */
+}
+
+/*
+**     strncasecomp8 is a variant of strncasecomp (below)
+**     -------------		     ------------
+**     but uses 8bit upper/lower case information
+**     from the current display charset.
+**     It returns 0 if exact match.
+*/
+PUBLIC int strncasecomp8 ARGS3(
+	CONST char*,	a,
+	CONST char *,	b,
+	int,		n)
+{
+    CONST char *p = a;
+    CONST char *q = b;
+
+    for ( ; ; p++, q++) {
+	int diff;
+	if (p == (a+n))
+	    return 0;	/*   Match up to n characters */
+	if (!(*p && *q))
+	    return (*p - *q);
+	diff = UPPER8(*p, *q);
+	if (diff)
+	    return diff;
+    }
+    /*NOTREACHED*/
+}
 #ifndef VM		/* VM has these already it seems */
 
 /*	Strings of any length
@@ -34,7 +87,7 @@ PUBLIC int strcasecomp ARGS2(
     CONST char *p = a;
     CONST char *q = b;
 
-    for (p = a, q = b; *p && *q; p++, q++) {
+    for ( ; *p && *q; p++, q++) {
 	int diff = TOLOWER(*p) - TOLOWER(*q);
 	if (diff) return diff;
     }
@@ -57,7 +110,7 @@ PUBLIC int strncasecomp ARGS3(
     CONST char *p = a;
     CONST char *q = b;
 
-    for (p = a, q = b; ; p++, q++) {
+    for ( ; ; p++, q++) {
 	int diff;
 	if (p == (a+n))
 	    return 0;	/*   Match up to n characters */

@@ -24,7 +24,7 @@ struct _HTStream {
 
 	int	soc;
 	char	*write_pointer;
-	char 	buffer[BUFFER_SIZE];
+	char	buffer[BUFFER_SIZE];
 #ifdef NOT_ASCII
 	BOOL	make_ascii;	/* Are we writing to the net? */
 #endif
@@ -37,19 +37,19 @@ struct _HTStream {
 
 PRIVATE void flush ARGS1(HTStream *, me)
 {
-    char *read_pointer 	= me->buffer;
+    char *read_pointer	= me->buffer;
     char *write_pointer = me->write_pointer;
 
 #ifdef NOT_ASCII
     if (me->make_ascii) {
-    	char * p;
+	char * p;
 	for(p = me->buffer; p < me->write_pointer; p++)
 	    *p = TOASCII(*p);
     }
 #endif
     while (read_pointer < write_pointer) {
-        int status;
-	status = NETWRITE(me->soc, me->buffer,  /* Put timeout? @@@ */
+	int status;
+	status = NETWRITE(me->soc, me->buffer,	/* Put timeout? @@@ */
 			write_pointer - read_pointer);
 	if (status<0) {
 	    if(TRACE) fprintf(stderr,
@@ -64,7 +64,7 @@ PRIVATE void flush ARGS1(HTStream *, me)
 
 /*_________________________________________________________________________
 **
-**			A C T I O N 	R O U T I N E S
+**			A C T I O N	R O U T I N E S
 */
 
 /*	Character handling
@@ -98,14 +98,14 @@ PRIVATE void HTWriter_put_string ARGS2(HTStream *, me, CONST char*, s)
 */
 PRIVATE void HTWriter_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 {
- 
-    CONST char *read_pointer 	= s;
+
+    CONST char *read_pointer	= s;
     CONST char *write_pointer = s+l;
 
     flush(me);		/* First get rid of our buffer */
 
     while (read_pointer < write_pointer) {
-        int status = NETWRITE(me->soc, (char *)read_pointer,
+	int status = NETWRITE(me->soc, (char *)read_pointer,
 			write_pointer - read_pointer);
 	if (status<0) {
 	    if(TRACE) fprintf(stderr,
@@ -132,7 +132,7 @@ PRIVATE void HTWriter_free ARGS1(HTStream *, me)
     FREE(me);
 }
 
-PRIVATE void HTWriter_abort ARGS2(HTStream *, me, HTError, e)
+PRIVATE void HTWriter_abort ARGS2(HTStream *, me, HTError, e GCC_UNUSED)
 {
     HTWriter_free(me);
 }
@@ -142,13 +142,13 @@ PRIVATE void HTWriter_abort ARGS2(HTStream *, me, HTError, e)
 **	-----------------------
 */
 PRIVATE CONST HTStreamClass HTWriter = /* As opposed to print etc */
-{		
+{
 	"SocketWriter",
 	HTWriter_free,
 	HTWriter_abort,
 	HTWriter_put_character, HTWriter_put_string,
 	HTWriter_write
-}; 
+};
 
 
 /*	Subclass-specific Methods
@@ -159,11 +159,11 @@ PUBLIC HTStream* HTWriter_new ARGS1(int, soc)
 {
     HTStream* me = (HTStream*)malloc(sizeof(*me));
     if (me == NULL) outofmem(__FILE__, "HTML_new");
-    me->isa = &HTWriter;       
-    
+    me->isa = &HTWriter;
+
 #ifdef NOT_ASCII
     me->make_ascii = NO;
-#endif    
+#endif
     me->soc = soc;
     me->write_pointer = me->buffer;
     return me;
@@ -177,11 +177,11 @@ PUBLIC HTStream* HTASCIIWriter ARGS1(int, soc)
 {
     HTStream* me = (HTStream*)malloc(sizeof(*me));
     if (me == NULL) outofmem(__FILE__, "HTML_new");
-    me->isa = &HTWriter;       
+    me->isa = &HTWriter;
 
 #ifdef NOT_ASCII
     me->make_ascii = YES;
-#endif    
+#endif
     me->soc = soc;
     me->write_pointer = me->buffer;
     return me;

@@ -9,7 +9,7 @@ LYLeaks.o LYexit.o LYJump.o LYList.o LYCgi.o LYTraversal.o \
 LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o LYExtern.o \
 LYStyle.o LYHash.o
 
-CFLAGS= $(MCFLAGS) -I.. $(SLANGINC)
+CFLAGS= $(MCFLAGS) -I. -I.. $(SLANGINC)
 
 CC = gcc
 MCFLAGS = -O3 -DRAWDOSKEYHACK -DUSE_ZLIB -DUSE_EXTERNALS -DCOLOR_CURSES -DNCURSES -DFANCY_CURSES -DACCESS_AUTH -DNO_CUSERID -DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP -Ichrtrans -I../WWW/library/implementation -I../curses  -I../djgpp/tcplib/include -I../djgpp/tcplib/include/tcp

@@ -30,7 +30,7 @@
 **			from browser.
 **
 ** ON EXIT:
-**	returns		a node representing the user information
+**	returns 	a node representing the user information
 **			(as always, this is automatically freed
 **			by AA package).
 */
@@ -45,23 +45,23 @@ PRIVATE HTAAUser *decompose_auth_string ARGS2(char *,		authstring,
     char *timestamp = NULL;
     char *browsers_key = NULL;
 
-    if (!user && !(user = (HTAAUser*)malloc(sizeof(HTAAUser))))	/* Allocated */
+    if (!user && !(user = (HTAAUser*)malloc(sizeof(HTAAUser)))) /* Allocated */
 	outofmem(__FILE__, "decompose_auth_string");		/* only once */
 
     user->scheme = scheme;
     user->username = NULL;	/* Not freed, because freeing */
     user->password = NULL;	/* cleartext also frees these */
-    user->inet_addr = NULL;	/* See below: ||              */
-    user->timestamp = NULL;	/*            ||              */
-    user->secret_key = NULL;	/*            ||              */
-                                /*            \/              */
+    user->inet_addr = NULL;	/* See below: ||	      */
+    user->timestamp = NULL;	/*	      ||	      */
+    user->secret_key = NULL;	/*	      ||	      */
+				/*	      \/	      */
     FREE(cleartext);	/* From previous call.				*/
-                        /* NOTE: parts of this memory are pointed to by	*/
-                        /* pointers in HTAAUser structure. Therefore,	*/
-                        /* this also frees all the strings pointed to	*/
+			/* NOTE: parts of this memory are pointed to by */
+			/* pointers in HTAAUser structure. Therefore,	*/
+			/* this also frees all the strings pointed to	*/
 			/* by the static 'user'.			*/
 
-    if (!authstring || !*authstring || 
+    if (!authstring || !*authstring ||
 	scheme != HTAA_BASIC || scheme == HTAA_PUBKEY)
 	return NULL;
 
@@ -85,7 +85,7 @@ PRIVATE HTAAUser *decompose_auth_string ARGS2(char *,		authstring,
     else {   /* Just uudecode */
 	int bytes_decoded;
 	int len = strlen(authstring) + 1;
-	
+
 	if (!(cleartext = (char*)malloc(len)))
 	    outofmem(__FILE__, "decompose_auth_string");
 	bytes_decoded = HTUU_decode(authstring,
@@ -111,7 +111,7 @@ PRIVATE HTAAUser *decompose_auth_string ARGS2(char *,		authstring,
 ** Extract rest of the fields
 */
     if (scheme == HTAA_PUBKEY) {
-	if (                          !(i_net_adr   =strchr(password, ':')) || 
+	if (			      !(i_net_adr   =strchr(password, ':')) ||
 	    (*(i_net_adr++)   ='\0'), !(timestamp   =strchr(i_net_adr,':')) ||
 	    (*(timestamp++)   ='\0'), !(browsers_key=strchr(timestamp,':')) ||
 	    (*(browsers_key++)='\0')) {
@@ -142,7 +142,7 @@ PRIVATE HTAAUser *decompose_auth_string ARGS2(char *,		authstring,
 		    "Pubkey scheme authentication string:",
 		    username, password, i_net_adr, timestamp, browsers_key);
     }
-    
+
     return user;
 }
 
@@ -171,7 +171,7 @@ PRIVATE BOOL HTAA_checkInetAddress ARGS1(CONST char *, i_net_adr)
 **			for the file.
 **
 ** ON EXIT:
-**	returns		NULL, if authentication failed.
+**	returns 	NULL, if authentication failed.
 **			Otherwise a pointer to a structure
 **			representing authenticated user,
 **			which should not be freed.
@@ -189,7 +189,7 @@ PUBLIC HTAAUser *HTAA_authenticate ARGS3(HTAAScheme,	scheme,
       case HTAA_PUBKEY:
 	{
 	    HTAAUser *user = decompose_auth_string(scheme_specifics, scheme);
-	                                   /* Remember, user is auto-freed */
+					   /* Remember, user is auto-freed */
 	    if (user &&
 		HTAA_checkPassword(user->username,
 				   user->password,

@@ -44,10 +44,8 @@ Step 3. (You may skip this step if you only use English and are not
     character set) and ASSUME_LOCAL_CHARSET to work correctly for them before
     creating bookmark files et cetera.  Please read "lynx.cfg" for detailed
     instructions.  Additional character sets and their properties may be
-    defined with tables in the src/chrtrans directory.  It is not necessary to
-    change src/LYCharSets.c to make new character sets known to Lynx, but new
-    ones have to be listed in src/UCdomap.c and, currently, the makefiles in
-    src/ and src/chrtrans to be used.  See the README.* files in src/chrtrans/.
+    defined with tables in the src/chrtrans directory, see the README.* files
+    therein.
 
 Step 4. (optional -- news for UNIX and VMS)
     Set NNTPSERVER in "lynx.cfg" to your site's NNTP server, or set the
@@ -110,12 +108,14 @@ II. Compile instructions -- UNIX
     It has been tested on the following platforms.
 
 	AIX 3.2.5 (cc w/ curses)	CLIX (cc w/ curses & ncurses)
-	DGUX				Digital Unix 3.2C (gcc & cc w/ slang)
+	DGUX
+	Digital Unix 3.2C and 4.0 (gcc & cc w/ curses, ncurses & slang)
 	FreeBSD 2.1.5 (gcc 2.6.3 w/ curses & ncurses)
 	HP-UX (K&R and ANSI cc, gcc w/ curses, ncurses & slang)
 	IRIX 5.2 and 6.2 (cc & gcc w/ curses, ncurses & slang)
 	Linux 2.0.0 (gcc 2.7.2 w/ curses, ncurses & slang)
-	MkLinux 2.1.5 (gcc 2.7.2.1)	NetBSD		SCO (cc w/ curses)
+	MkLinux 2.1.5 (gcc 2.7.2.1)	NetBSD
+	OS/2 EMX 0.9b			SCO (cc w/ curses)
 	Solaris 2.5 & 2.6 (cc & gcc w/ curses, ncurses & slang)
 	SunOS 4.1 (cc w/ curses, gcc w/ ncurses & slang)
 
@@ -185,14 +185,13 @@ II. Compile instructions -- UNIX
   	Use this option to suppress the "compiling" commands during a build.
 	Doing this makes it easier to find and read warning messages.
 
+  --disable-extended-dtd		(define NO_EXTENDED_HTMLDTD)
+	disable extended HTML DTD logic.  This should revert to old-style
+	(2.7.1/2.7.2) behavior, but is not well-tested.
+
   --disable-full-paths
   	Use this option to control whether full utility pathnames are used.
 	By default, configure substitutes full pathnames.
-
-  --disable-internal-links		(define DONT_TRACK_INTERNAL_LINKS)
-	Defined by default, this option prevents tracking of internal links,
-	a useful feature which could, however, compromise a secure transaction
-	by forcing inappropriate resubmission of form content.
 
   --disable-long-list			(prevent defining LONG_LIST)
   	Use this option to disable long "ls -l" directory listings.
@@ -200,12 +199,21 @@ II. Compile instructions -- UNIX
   --disable-parent-dir-refs		(define NO_PARENT_DIR_REFERENCE)
   	Use this option to disable "Up-to" parent-links in directory listings.
 
+  --enable-8bit-toupper			(define EXP_8BIT_TOUPPER)
+	use experimental 8-bit case-conversion, e.g., for case-insensitive
+	searches in non-ASCII character set.
+
   --enable-color-style			(define USE_COLOR_STYLE)
   	Use this option to enable optional and *experimental* color style.
 	(Also defines USE_HASH, LINKEDSTYLES)
 
   --enable-debug			(The symbol DEBUG is always defined.)
   	Use this option to compile-in support for debugging.
+
+  --enable-default-colors		(define USE_DEFAULT_COLORS)
+  	enable use of default-color background (ncurses/slang).  Either
+	configuration supports the use of 'default' for colors even without
+	this option.
 
   --enable-externs			(define USE_EXTERNALS)
 	Use this option to enable external application support. (See lynx.cfg.)
@@ -217,6 +225,11 @@ II. Compile instructions -- UNIX
 	Allow Lynx to automatically change the Linux console state (switch
 	fonts) according to the current Display Character Set.  (Linux console
         only.  *Use with discretion.*  See docs/README.chartrans.)
+
+  --enable-internal-links		(define DONT_TRACK_INTERNAL_LINKS)
+	Disabled by default, this option allows tracking of internal links,
+	a useful feature which could, however, compromise a secure transaction
+	by forcing inappropriate resubmission of form content.
 
   --enable-nsl-fork			(define NSL_FORK)
 	Use this option to allow NSL requests to be aborted at will.

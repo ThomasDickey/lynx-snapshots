@@ -210,11 +210,6 @@ struct _HTStructured {
     int 		tag_charset; /* charset for attribute values etc. */
 };
 
-struct _HTStream {
-    CONST HTStreamClass *	isa;
-    /* .... */
-};
-
 extern  HTStyle *styles[HTML_ELEMENTS+31]; /* adding 24 nested list styles  */
 					   /* and 3 header alignment styles */
 					   /* and 3 div alignment styles    */

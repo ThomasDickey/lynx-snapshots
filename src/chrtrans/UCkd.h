@@ -56,6 +56,7 @@ struct unimapdesc_str {
 #define UC_MAXLEN_LYNXCSNAME 40
 #define UC_LEN_LYNXCSNAME 20
 
+#undef  EX_OK			/* may be defined in system headers */
 #define EX_OK		0	/* successful termination */
 #define EX_USAGE	64	/* command line usage error */
 #define EX_DATAERR	65	/* data format error */

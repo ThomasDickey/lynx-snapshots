@@ -77,6 +77,7 @@ CF_ARG_ENABLE(warnings,
 AC_MSG_RESULT($with_warnings)
 if test "$with_warnings" = "yes"
 then
+	CF_GCC_ATTRIBUTES
 	CF_GCC_WARNINGS
 fi
 fi
@@ -140,6 +141,7 @@ fi
 AC_C_CONST
 
 dnl Only add to this case statement things that we cannot design tests for.
+PROG_EXT=
 case $host_os in
 aix4*)
 	CFLAGS="$CFLAGS -DAIX4 -D_BSD=44" 
@@ -189,6 +191,12 @@ next*)
 openbsd*)
 	LIBS="$LIBS -lcompat"
 	;;
+os2*)
+	# We make sure -Zexe is not used -- it would interfere with @PROG_EXT@
+	CFLAGS="$CFLAGS -Zmt -D__ST_MT_ERRNO__"
+	LDFLAGS=`echo "$LDFLAGS -Zmt -Zcrtdll" | sed "s/-Zexe//g"`
+	PROG_EXT=".exe"
+	;;
 osf*)
 	# Increase the maximum size of functions that will be optimized.
 	test -z "$GCC" && CFLAGS="$CFLAGS -O -Olimit 4000"
@@ -235,6 +243,7 @@ ultrix*)
 	AC_CHECK_HEADERS(cursesX.h, cf_cv_ncurses_header=cursesX.h)
 	;;
 esac
+AC_SUBST(PROG_EXT)
 
 dnl --------------------------------------------------------------------------
 dnl Checks for library configuration (added right-to-left)
@@ -301,6 +310,7 @@ dnl Don't check for sys/wait.h here since it is covered by another test.
 AC_CHECK_HEADERS( \
 	fcntl.h \
 	limits.h \
+	stdlib.h \
 	string.h \
 	sys/fcntl.h \
 	sys/filio.h \
@@ -322,6 +332,7 @@ dnl --------------------------------------------------------------------------
 AC_FUNC_VFORK
 CF_FIONBIO
 CF_REMOVE_BROKEN
+CF_FUNC_LSTAT
 AC_CHECK_FUNCS( \
 	cuserid \
 	getcwd \
@@ -376,6 +387,13 @@ dnl --------------------------------------------------------------------------
 CF_HELP_MESSAGE(
 Miscellaneous Options:)
 
+AC_MSG_CHECKING(if experimental 8-bit case-conversion should be used)
+CF_ARG_ENABLE(8bit-toupper,
+[  --enable-8bit-toupper   use experimental 8-bit case-conversion],
+	[use_8bit_toupper=$enableval],
+	[use_8bit_toupper=no])
+test $use_8bit_toupper != no && AC_DEFINE(EXP_8BIT_TOUPPER)
+
 AC_MSG_CHECKING(if color-style code should be used)
 CF_ARG_ENABLE(color-style,
 [  --enable-color-style    use optional/experimental color style],
@@ -411,6 +429,20 @@ no)
 esac
 AC_SUBST(INSTALL_LSS)
 
+use_dft_colors=no
+test ".$cf_cv_screen" = ".slang"                && use_dft_colors=maybe
+test ".$ac_cv_func_use_default_colors" = ".yes" && use_dft_colors=maybe
+
+if test "$use_dft_colors" != no ; then
+AC_MSG_CHECKING(if you want to use default-colors)
+CF_ARG_ENABLE(default-colors,
+[  --enable-default-colors enable use of default-colors (ncurses/slang)],
+	[use_dft_colors=yes],
+	[use_dft_colors=no])
+AC_MSG_RESULT($use_dft_colors)
+test $use_dft_colors = "yes" && AC_DEFINE(USE_DEFAULT_COLORS)
+fi
+
 AC_MSG_CHECKING(if you want to use extended HTML DTD logic)
 CF_ARG_DISABLE(extended-dtd,
 [  --disable-extended-dtd  disable extended HTML DTD logic],
@@ -436,10 +468,10 @@ AC_MSG_RESULT($use_setfont)
 test $use_setfont = yes && AC_DEFINE(EXP_CHARTRANS_AUTOSWITCH)
 
 AC_MSG_CHECKING(if you want internal-links feature)
-CF_ARG_DISABLE(internal-links,
-[  --disable-internal-links handle following links to same doc differently],
-	[use_internal_links=no],
-	[use_internal_links=yes])
+CF_ARG_ENABLE(internal-links,
+[  --enable-internal-links  handle following links to same doc differently],
+	[use_internal_links=yes],
+	[use_internal_links=no])
 AC_MSG_RESULT($use_internal_links)
 test $use_internal_links = no && AC_DEFINE(DONT_TRACK_INTERNAL_LINKS)
 

@@ -78,10 +78,6 @@ extern BOOL HTPassHighCtrlRaw;
 extern HTkcode kanji_code;
 extern HTCJKlang HTCJK;
 
-/*	From default style sheet:
-*/
-extern HTStyleSheet * styleSheet;	/* Default or overridden */
-
 /*	Exports
 */
 PUBLIC HText * HTMainText = NULL;		/* Equivalent of main window */
@@ -2338,7 +2334,7 @@ PUBLIC void HText_appendCharacter ARGS2(
      *  Tabs.
      */
     if (ch == '\t') {
-	HTTabStop * Tab;
+	CONST HTTabStop * Tab;
 	int target;	/* Where to tab to */
 	int here;
 
@@ -3355,7 +3351,7 @@ re_parse:
 /*	Dump diagnostics to stderr
 */
 PUBLIC void HText_dump ARGS1(
-	HText *,	text)
+	HText *,	text GCC_UNUSED)
 {
     fprintf(stderr, "HText: Dump called\n");
 }
@@ -3491,7 +3487,9 @@ PUBLIC int HTGetLinkInfo ARGS6(
 {
     TextAnchor *a;
     HTAnchor *link_dest;
+#ifndef DONT_TRACK_INTERNAL_LINKS
     HTAnchor *link_dest_intl = NULL;
+#endif
     int anchors_this_line = 0, anchors_this_screen = 0;
     int prev_anchor_line = -1, prev_prev_anchor_line = -1;
 
@@ -4271,8 +4269,8 @@ PUBLIC BOOL HText_selectAnchor ARGS2(
 /*	Apply this style to the selection
 */
 PUBLIC void HText_applyStyle ARGS2(
-	HText *,	me,
-	HTStyle *,	style)
+	HText *,	me GCC_UNUSED,
+	HTStyle *,	style GCC_UNUSED)
 {
 
 }
@@ -4281,8 +4279,8 @@ PUBLIC void HText_applyStyle ARGS2(
 /*	Update all text with changed style.
 */
 PUBLIC void HText_updateStyle ARGS2(
-	HText *,	me,
-	HTStyle *,	style)
+	HText *,	me GCC_UNUSED,
+	HTStyle *,	style GCC_UNUSED)
 {
 
 }
@@ -4291,8 +4289,8 @@ PUBLIC void HText_updateStyle ARGS2(
 /*	Return style of  selection
 */
 PUBLIC HTStyle * HText_selectionStyle ARGS2(
-	HText *,		me,
-	HTStyleSheet *,		sheet)
+	HText *,		me GCC_UNUSED,
+	HTStyleSheet *,		sheet GCC_UNUSED)
 {
     return 0;
 }
@@ -4301,9 +4299,9 @@ PUBLIC HTStyle * HText_selectionStyle ARGS2(
 /*	Paste in styled text
 */
 PUBLIC void HText_replaceSel ARGS3(
-	HText *,	me,
-	CONST char *,	aString,
-	HTStyle *,	aStyle)
+	HText *,	me GCC_UNUSED,
+	CONST char *,	aString GCC_UNUSED,
+	HTStyle *,	aStyle GCC_UNUSED)
 {
 }
 
@@ -4312,8 +4310,8 @@ PUBLIC void HText_replaceSel ARGS3(
 **	(style recovery only)
 */
 PUBLIC void HTextApplyToSimilar ARGS2(
-	HText *,	me,
-	HTStyle *,	style)
+	HText *,	me GCC_UNUSED,
+	HTStyle *,	style GCC_UNUSED)
 {
 
 }
@@ -4323,8 +4321,8 @@ PUBLIC void HTextApplyToSimilar ARGS2(
 **	(style recovery only)
 */
 PUBLIC void HTextSelectUnstyled ARGS2(
-	HText *,		me,
-	HTStyleSheet *,		sheet)
+	HText *,		me GCC_UNUSED,
+	HTStyleSheet *,		sheet GCC_UNUSED)
 {
 
 }
@@ -4333,13 +4331,13 @@ PUBLIC void HTextSelectUnstyled ARGS2(
 /*	Anchor handling:
 */
 PUBLIC void HText_unlinkSelection ARGS1(
-	HText *,	me)
+	HText *,	me GCC_UNUSED)
 {
 
 }
 
 PUBLIC HTAnchor * HText_referenceSelected ARGS1(
-	HText *,	me)
+	HText *,	me GCC_UNUSED)
 {
      return 0;
 }
@@ -4358,8 +4356,8 @@ PUBLIC int HText_getLines ARGS1(
 }
 
 PUBLIC HTAnchor * HText_linkSelTo ARGS2(
-	HText *,	me,
-	HTAnchor *,	anchor)
+	HText *,	me GCC_UNUSED,
+	HTAnchor *,	anchor GCC_UNUSED)
 {
     return 0;
 }

@@ -15,7 +15,8 @@ extern int current_char_set;
 extern CONST char * LYchar_set_names[];
 
 /*
- *  Initializer for LYCharSets.c.
+ *  Initializer, calls initialization function for the
+ *  CHARTRANS handling. - KW
  */
 extern int LYCharSetsDeclared NOPARAMS;
 
@@ -30,9 +31,17 @@ extern void HTMLSetCharacterHandling PARAMS((int i));
 extern void HTMLSetRawModeDefault PARAMS((int i));
 extern void HTMLSetUseDefaultRawMode PARAMS((int i, BOOLEAN modeflag));
 extern void HTMLSetHaveCJKCharacterSet PARAMS((int i));
+extern void HTMLUseCharacterSet PARAMS((int i));
+extern UCode_t HTMLGetEntityUCValue PARAMS((CONST char *name));
+
 extern CONST char * LYEntityNames[];
 extern CONST char * HTMLGetEntityName PARAMS((UCode_t code));
-extern UCode_t HTMLGetEntityUCValue PARAMS((CONST char *name));
-extern void HTMLUseCharacterSet PARAMS((int i));
+		/*
+		** HTMLGetEntityName calls LYEntityNames for iso-8859-1 entity
+		** names only.	This is an obsolete technique but widely used in
+		** the code.  Note that unicode number in general may have
+		** several equivalent entity names because of synonyms.
+		*/
+
 
 #endif /* LYCHARSETS_H */

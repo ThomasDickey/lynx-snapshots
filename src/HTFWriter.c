@@ -414,7 +414,9 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 /*	Abort writing
 **	-------------
 */
-PRIVATE void HTFWriter_abort ARGS2(HTStream *, me, HTError, e)
+PRIVATE void HTFWriter_abort ARGS2(
+	HTStream *,	me,
+	HTError,	e GCC_UNUSED)
 {
     if (TRACE)
 	fprintf(stderr,"HTFWriter_abort called\n");
@@ -908,8 +910,7 @@ Prepend_BASE:
 	    StrAllocCopy(temp, anchor->charset);
 	    collapse_spaces(temp);
 		fprintf(ret_obj->fp,
-		"<META HTTP-EQUIV=\"Content-Type\" "
-		"CONTENT=\"text/html; charset=%s\">\n\n",
+		"<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=%s\">\n\n",
 		temp);
 	}
 	FREE(temp);
@@ -1158,9 +1159,9 @@ Compressed_tempname:
 **
 */
 PUBLIC HTStream* HTDumpToStdout ARGS3(
-	HTPresentation *,	pres,
+	HTPresentation *,	pres GCC_UNUSED,
 	HTParentAnchor *,	anchor,
-	HTStream *,		sink)
+	HTStream *,		sink GCC_UNUSED)
 {
     HTStream * ret_obj;
     ret_obj = (HTStream*)calloc(sizeof(* ret_obj),1);

@@ -416,7 +416,7 @@ cleanup:
 }
 
 PRIVATE void terminate_message ARGS1(
-	int,	sig)
+	int,	sig GCC_UNUSED)
 {
     term_message = TRUE;
     /*

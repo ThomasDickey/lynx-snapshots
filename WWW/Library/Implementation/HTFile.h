@@ -12,7 +12,9 @@
 
 #include "HTFormat.h"
 #include "HTAccess.h"
+#ifndef HTML_H
 #include "HTML.h"               /* SCW */
+#endif /* HTML_H */
 
 /*
 **  Controlling globals

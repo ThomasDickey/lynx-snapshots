@@ -211,7 +211,7 @@ PRIVATE void write_anchor ARGS2(CONST char *,text, CONST char *,addr)
 **	============================
 */
 PRIVATE void parse_menu ARGS2(
-	CONST char *,		arg,
+	CONST char *,		arg GCC_UNUSED,
 	HTParentAnchor *,	anAnchor)
 {
     char gtype;
@@ -865,7 +865,7 @@ PRIVATE int interpret_cso_key ARGS5(
 	/*
 	**  No match, dump key to buffer so client sees it for debugging.
 	*/
-	int out = 0;
+	size_t out = 0;
 	while (*key && (*key != ')')) {
 	    buf[out++] = (*key++);
 	    if (out > sizeof(buf)-2) {
@@ -936,7 +936,8 @@ PRIVATE int parse_cso_fields ARGS2(
 {
     char ch;
     char *p = buf;
-    int i, code = 0, prev_code, alen;
+    int i, code = 0, prev_code;
+    size_t alen;
     char *indx, *name;
     CSOfield_info *last, *new;
 
@@ -1103,7 +1104,8 @@ PRIVATE int generate_cso_form ARGS4(
 	char *, 	buf,
 	HTStream *,	Target)
 {
-    int i, j, length, out;
+    int i, j, length;
+    size_t out;
     int full_flag = 1;
     char *key, *line;
     CSOformgen_context ctx;

@@ -512,7 +512,7 @@ PUBLIC float HTStackValue ARGS4(
 PUBLIC int HTCopy ARGS4(
 	HTParentAnchor *,	anchor,
 	int,			file_number,
-	void*,			handle,
+	void*,			handle GCC_UNUSED,
 	HTStream*,		sink)
 {
     HTStreamClass targetClass;
@@ -806,7 +806,7 @@ PRIVATE int HTGzFileCopy ARGS2(
 **
 */
 PUBLIC void HTCopyNoCR ARGS3(
-	HTParentAnchor *,	anchor,
+	HTParentAnchor *,	anchor GCC_UNUSED,
 	int,			file_number,
 	HTStream*,		sink)
 {

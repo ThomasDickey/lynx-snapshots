@@ -552,7 +552,7 @@ PRIVATE void print_binding ARGS3(HTStream *, target, char *, buf, int, i)
 }
 
 PRIVATE int LYLoadKeymap ARGS4 (
-	CONST char *, 		arg,
+	CONST char *, 		arg GCC_UNUSED,
 	HTParentAnchor *,	anAnchor,
 	HTFormat,		format_out,
 	HTStream*,		sink)
@@ -589,7 +589,7 @@ PRIVATE int LYLoadKeymap ARGS4 (
 			  i-' ');  /* uppercase mapping is different */
 	}
     }
-    for (i = 1; i < sizeof(keymap); i++) {
+    for (i = 1; i < (int) sizeof(keymap); i++) {
 	/*
 	 *  LYK_PIPE not implemented yet.
 	 */
@@ -796,6 +796,7 @@ PUBLIC BOOL LYisNonAlnumKeyname ARGS2(
     return(keymap[ch+1] == key_name);
 }
 
+#ifdef NOTUSED_FOTEMODS
 /*
  *  This function returns the (int)ch mapped to the
  *  LYK_foo value passed to it as an argument. - FM
@@ -813,3 +814,4 @@ PUBLIC int LYReverseKeymap ARGS1(
 
     return(0);
 }
+#endif

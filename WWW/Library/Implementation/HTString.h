@@ -25,6 +25,15 @@ Case-insensitive string comparison
 extern int strcasecomp  PARAMS((CONST char *a, CONST char *b));
 extern int strncasecomp PARAMS((CONST char *a, CONST char *b, int n));
 
+extern int strcasecomp8  PARAMS((CONST char *a, CONST char *b));
+extern int strncasecomp8 PARAMS((CONST char *a, CONST char *b, int n));
+       /*
+       **  strcasecomp8 and strncasecomp8 are variants of strcasecomp
+       **  and strncasecomp, but use 8bit upper/lower case information
+       **  from the current display charset
+       */
+
+
 /*
 
 Malloced string manipulation

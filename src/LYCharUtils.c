@@ -833,7 +833,7 @@ PUBLIC void LYGetChartransInfo ARGS1(
 				      UCT_STAGE_STRUCTURED);
 }
 
-#if 0
+#if NOTUSED_FOTEMODS
 /*
 **  This function reallocates an allocated string and converts
 **  characters for the current display character set.  It assumes
@@ -1026,7 +1026,7 @@ PUBLIC void LYExpandString ARGS2(
 		/*
 		**  Got an ASCII character when expecting
 		**  UTF-8 multibytes, so ignore the buffered
-		**  multibye characters and fall through with
+		**  multibyte characters and fall through with
 		**  the current ASCII character. - FM
 		*/
 		utf_count = 0;
@@ -1115,7 +1115,7 @@ PUBLIC void LYExpandString ARGS2(
 	}
 	/*
 	**  Ignore low ISO 646 7-bit control characters
-	**  if they sneeked through (should have been
+	**  if they sneaked through (should have been
 	**  filtered by the parser). - FM
 	*/
 	if (code < 32 &&
@@ -1124,7 +1124,7 @@ PUBLIC void LYExpandString ARGS2(
 	}
 	/*
 	**  Ignore 127 if we don't have HTPassHighCtrlRaw
-	**  and it sneeked through (should have been
+	**  and it sneaked through (should have been
 	**  filtered by the parser). - FM
 	*/
 	if (c == 127 &&
@@ -1134,7 +1134,7 @@ PUBLIC void LYExpandString ARGS2(
 	}
 	/*
 	**  Ignore 8-bit control characters 128 - 159 if we don't
-	**  have HTPassHighCtrlRaw set and they sneeked through
+	**  have HTPassHighCtrlRaw set and they sneaked through
 	**  (should have been filtered by the parser). - FM
 	*/
 	if (code > 127 && code < 160 &&
@@ -1362,7 +1362,7 @@ PUBLIC void LYExpandString ARGS2(
 						UCGetLYhndl_byMIME("us-ascii"),
 						0) >= 0)) {
 		/*
-		**  Got a repacement string (yippey). - FM
+		**  Got a replacement string (yippey). - FM
 		*/
 		HTChunkPuts(s, replace_buf);
 		continue;
@@ -1393,7 +1393,7 @@ PUBLIC void LYExpandString ARGS2(
     StrAllocCopy(*str, s->data);
     HTChunkFree(s);
 }
-#endif
+#endif /* NOTUSED_FOTEMODS */
 
 /*
 ** Get UCS character code for one character from UTF-8 encoded string.
@@ -1547,7 +1547,7 @@ PRIVATE char *hex = "0123456789ABCDEF";
 **
 **  If `stype' is st_URL, non-ASCII characters are URL-encoded instead.
 **  The sequence of bytes being URL-encoded is the raw input character if
-**  we couldn't transtate it from `cs_in' (CJK etc.); otherwise it is the
+**  we couldn't translate it from `cs_in' (CJK etc.); otherwise it is the
 **  UTF-8 representation if either `cs_to' requires this or if the
 **  character's Unicode value is > 255, otherwise it should be the iso-8859-1
 **  representation.
@@ -1592,8 +1592,6 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
     long int lcode;
     BOOL output_utf8 = 0, repl_translated_C0 = 0;
     size_t len;
-    int high, low, diff = 0, i;
-    CONST char ** entities = HTML_dtd.entity_names;
     CONST char * name = NULL;
     BOOLEAN no_bytetrans;
     UCTransParams T;
@@ -2509,7 +2507,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	 *  header via META tags, because it's likely
 	 *  to be untrustworthy, but do check for a
 	 *  Date header from a server when making the
-	 *  comparsion. - FM
+	 *  comparison. - FM
 	 */
 	LYUCFullyTranslateString(&content, me->tag_charset, me->tag_charset,
 				 NO, NO, YES, st_other);
@@ -3168,7 +3166,7 @@ PUBLIC void LYHandleSELECT ARGS5(
 	     *	Force a newline when we're using a popup in
 	     *	a PRE block and are within 7 columns from the
 	     *	right margin.  This will allow for the '['
-	     *	popup designater and help avoid a wrap in the
+	     *	popup designator and help avoid a wrap in the
 	     *	underscore placeholder for the retracted popup
 	     *	entry in the HText structure. - FM
 	     */
@@ -3312,7 +3310,7 @@ PUBLIC int LYLegitimizeHREF ARGS4(
     if (!strncasecomp(*href, "lynxexec:", 9) ||
 	!strncasecomp(*href, "lynxprog:", 9)) {
 	/*
-	 *  The original implementions of these schemes expected
+	 *  The original implementations of these schemes expected
 	 *  white space without hex escaping, and did not check
 	 *  for hex escaping, so we'll continue to support that,
 	 *  until that code is redone in conformance with SGML
@@ -3567,8 +3565,8 @@ PUBLIC void LYHandleID ARGS2(
 }
 
 /*
-**  This function checks whether we want to overrride
-**  the current default alignment for parargraphs and
+**  This function checks whether we want to override
+**  the current default alignment for paragraphs and
 **  instead use that specified in the element's style
 **  sheet. - FM
 */
