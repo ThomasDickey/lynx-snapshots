@@ -17,7 +17,7 @@
 #define HTRULE_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
 
 typedef enum _HTRuleOp {

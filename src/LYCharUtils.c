@@ -2,50 +2,50 @@
 **  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
 **  ==========================================================================
 */
-#include "HTUtils.h"
-#include "tcp.h"
-#include "SGML.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <SGML.h>
 
 #define Lynx_HTML_Handler
-#include "HTChunk.h"
-#include "HText.h"
-#include "HTStyle.h"
-#include "HTMIME.h"
-#include "HTML.h"
+#include <HTChunk.h>
+#include <HText.h>
+#include <HTStyle.h>
+#include <HTMIME.h>
+#include <HTML.h>
 
-#include "HTCJK.h"
-#include "HTAtom.h"
-#include "HTMLGen.h"
-#include "HTParse.h"
-#include "UCMap.h"
-#include "UCDefs.h"
-#include "UCAux.h"
+#include <HTCJK.h>
+#include <HTAtom.h>
+#include <HTMLGen.h>
+#include <HTParse.h>
+#include <UCMap.h>
+#include <UCDefs.h>
+#include <UCAux.h>
 
-#include "LYGlobalDefs.h"
-#include "LYCharUtils.h"
-#include "LYCharSets.h"
+#include <LYGlobalDefs.h>
+#include <LYCharUtils.h>
+#include <LYCharSets.h>
 
-#include "HTAlert.h"
-#include "HTFont.h"
-#include "HTForms.h"
-#include "HTNestedList.h"
-#include "GridText.h"
-#include "LYSignal.h"
-#include "LYUtils.h"
-#include "LYMap.h"
-#include "LYBookmark.h"
-#include "LYCurses.h"
-#include "LYCookie.h"
+#include <HTAlert.h>
+#include <HTFont.h>
+#include <HTForms.h>
+#include <HTNestedList.h>
+#include <GridText.h>
+#include <LYSignal.h>
+#include <LYUtils.h>
+#include <LYMap.h>
+#include <LYBookmark.h>
+#include <LYCurses.h>
+#include <LYCookie.h>
 
 #ifdef VMS
-#include "HTVMSUtils.h"
+#include <HTVMSUtils.h>
 #endif /* VMS */
 #ifdef DOSPATH
-#include "HTDOS.h"
+#include <HTDOS.h>
 #endif
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

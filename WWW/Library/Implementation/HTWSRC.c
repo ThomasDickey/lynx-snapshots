@@ -8,16 +8,16 @@
 **	3 June 93	Bug fix: Won't crash if no description
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
+#include <HTUtils.h>
+#include <tcp.h>
 
-#include "HTWSRC.h"
+#include <HTWSRC.h>
 
 
-#include "HTML.h"
-#include "HTParse.h"
+#include <HTML.h>
+#include <HTParse.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

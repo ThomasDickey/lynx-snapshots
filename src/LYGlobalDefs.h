@@ -4,15 +4,15 @@
 #define LYGLOBALDEFS_H
 
 #ifndef USERDEFS_H
-#include "userdefs.h"
+#include <userdefs.h>
 #endif /* USERDEFS_H */
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
 
 #ifndef LYSTRUCTS_H
-#include "LYStructs.h"
+#include <LYStructs.h>
 #endif /* LYSTRUCTS_H */
 
 #ifdef SOCKS
@@ -112,6 +112,7 @@ extern int LYChosenShowColor;	/* extended color/monochrome choice */
 extern int LYrcShowColor;	/* ... as read or last written	    */
 
 extern BOOLEAN LYShowCursor;	/* Show the cursor or hide it?	    */
+extern BOOLEAN verbose_img;	/* display filenames of images?     */	 
 extern BOOLEAN LYUseDefShoCur;	/* Command line -show_cursor toggle */
 extern BOOLEAN LYCursesON;  /* start_curses()->TRUE, stop_curses()->FALSE */
 extern BOOLEAN LYUserSpecifiedURL;  /* URL from a goto or document? */

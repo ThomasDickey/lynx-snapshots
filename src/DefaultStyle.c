@@ -3,12 +3,12 @@
 **	The dimensions are all in characters!
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTStyle.h"
-#include "HTFont.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTStyle.h>
+#include <HTFont.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 /*	Tab arrays:
 */

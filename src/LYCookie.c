@@ -44,26 +44,26 @@
       * Cookies could be optionally stored in a file from session to session.
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTAccess.h"
-#include "HTParse.h"
-#include "HTAlert.h"
-#include "LYCurses.h"
-#include "LYSignal.h"
-#include "LYUtils.h"
-#include "LYCharUtils.h"
-#include "LYClean.h"
-#include "LYGlobalDefs.h"
-#include "LYEdit.h"
-#include "LYStrings.h"
-#include "LYSystem.h"
-#include "GridText.h"
-#include "LYUtils.h"
-#include "LYCharUtils.h"
-#include "LYCookie.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTAccess.h>
+#include <HTParse.h>
+#include <HTAlert.h>
+#include <LYCurses.h>
+#include <LYSignal.h>
+#include <LYUtils.h>
+#include <LYCharUtils.h>
+#include <LYClean.h>
+#include <LYGlobalDefs.h>
+#include <LYEdit.h>
+#include <LYStrings.h>
+#include <LYSystem.h>
+#include <GridText.h>
+#include <LYUtils.h>
+#include <LYCharUtils.h>
+#include <LYCookie.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

@@ -23,30 +23,30 @@
 **      nph- script.
 */ 
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTTP.h"
-#include "HTParse.h"
-#include "HTTCP.h"
-#include "HTFormat.h"
-#include "HTFile.h"
-#include "HTAlert.h"
-#include "HTMIME.h"
-#include "HTAABrow.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTTP.h>
+#include <HTParse.h>
+#include <HTTCP.h>
+#include <HTFormat.h>
+#include <HTFile.h>
+#include <HTAlert.h>
+#include <HTMIME.h>
+#include <HTAABrow.h>
 
-#include "LYGlobalDefs.h"
-#include "LYUtils.h"
-#include "HTML.h"
-#include "HTInit.h"
-#include "LYGetFile.h"
-#include "LYBookmark.h"
-#include "GridText.h"
+#include <LYGlobalDefs.h>
+#include <LYUtils.h>
+#include <HTML.h>
+#include <HTInit.h>
+#include <LYGetFile.h>
+#include <LYBookmark.h>
+#include <GridText.h>
 #include <ctype.h>
-#include "LYCgi.h"
-#include "LYSignal.h"
-#include "LYLocal.h"
+#include <LYCgi.h>
+#include <LYSignal.h>
+#include <LYLocal.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

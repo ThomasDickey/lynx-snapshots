@@ -16,16 +16,16 @@
 
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
 
-#include "tcp.h"		/* Macro FROMASCII() */
+#include <tcp.h>		/* Macro FROMASCII() */
 /*#include <stdio.h> included by HTUtils.h -- FM *//* FILE */
 #include <string.h>
-#include "HTAAUtil.h"		/* Common utilities used in AA */
-#include "HTAAFile.h"		/* Implemented here */
+#include <HTAAUtil.h>		/* Common utilities used in AA */
+#include <HTAAFile.h>		/* Implemented here */
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define SPACE			' '
 #define TAB			'\t'

@@ -2,18 +2,18 @@
 **		===============================
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTString.h"
-#include "HTFont.h"
-#include "HTAccess.h"
-#include "HTAnchor.h"
-#include "HTParse.h"
-#include "HTTP.h"
-#include "HTAlert.h"
-#include "HTCJK.h"
-#include "UCDefs.h"
-#include "UCAux.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTString.h>
+#include <HTFont.h>
+#include <HTAccess.h>
+#include <HTAnchor.h>
+#include <HTParse.h>
+#include <HTTP.h>
+#include <HTAlert.h>
+#include <HTCJK.h>
+#include <UCDefs.h>
+#include <UCAux.h>
 
 #include <assert.h>
 #include <ctype.h>
@@ -23,29 +23,29 @@
 #endif /* SYSLOG_REQUESTED_URLS */
 #endif /* !VMS */
 
-#include "GridText.h"
-#include "LYCurses.h"
-#include "LYUtils.h"
-#include "LYStrings.h"
-#include "LYStructs.h"
-#include "LYGlobalDefs.h"
-#include "LYGetFile.h"
-#include "LYSignal.h"
-#include "LYMail.h"
-#include "LYList.h"
-#include "LYCharSets.h"
-#include "LYCharUtils.h"	/* LYUCTranslateBack... */
-#include "UCMap.h"
+#include <GridText.h>
+#include <LYCurses.h>
+#include <LYUtils.h>
+#include <LYStrings.h>
+#include <LYStructs.h>
+#include <LYGlobalDefs.h>
+#include <LYGetFile.h>
+#include <LYSignal.h>
+#include <LYMail.h>
+#include <LYList.h>
+#include <LYCharSets.h>
+#include <LYCharUtils.h>	/* LYUCTranslateBack... */
+#include <UCMap.h>
 #ifdef EXP_CHARTRANS_AUTOSWITCH
-#include "UCAuto.h"
+#include <UCAuto.h>
 #endif /* EXP_CHARTRANS_AUTOSWITCH */
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 #ifdef USE_COLOR_STYLE
-#include "AttrList.h"
-#include "LYHash.h"
+#include <AttrList.h>
+#include <LYHash.h>
 
 unsigned int cached_styles[CACHEH][CACHEW];
 

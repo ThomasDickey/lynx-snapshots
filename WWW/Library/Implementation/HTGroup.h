@@ -6,9 +6,9 @@
 #define HTGROUP_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
-#include "HTList.h"
+#include <HTList.h>
 
 #ifdef SHORT_NAMES
 #define HTAApGrD        HTAA_parseGroupDef

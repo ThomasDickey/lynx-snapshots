@@ -13,9 +13,9 @@
 #define HTMLDTD_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
-#include "SGML.h"
+#include <SGML.h>
 
 /*
 **  Lynx internal character representations.

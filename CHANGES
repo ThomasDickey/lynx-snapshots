@@ -1,7 +1,35 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
-1998-03-20
+1998-03-29 (2.8.1dev.5)
+* Fixed my typo for FNAMES_8_3 define. WB
+* Added SYSTEM_MAIL and SYSTEM_MAIL_FLAGS defines for DOSPATH target. WB
+* Better kluge to set terminal type for DOSPATH. WB
+* Restored DOSPATH kludge to get to root of directory. WB
+* Added a bit of missing _WINDOWS_NSL ifdef'ing. WB
+* Minor DOS dirent mod to work with Tom's rearrangements. WB
+* Changed #if XYZ to #ifdef XYZ in tcp.h for dumb (?) compilers. WB
+1998-03-25 (2.8.1dev.4)
+* restore original string in LYUtils.c when user enters a badly formed or
+  nonexistent URL when prompted for Goto/history list (patch by Randall
+  <hezekiah@may98.rahul.net>).  Otherwise Lynx would always attempt to load
+  a local file.
+* tweak formatting of .message in HTFTP.c so it has leading/trailing blank
+  lines (patch by Ismael Cordeiro <ismael@CAM.ORG>)
+* retested 'make depend' rule (for Larry Virden) - TD
+* eliminate (except for absolute pathnames, as in VMS) quoted includes - TD
+* remove WWW/Library/Implementation/HTAlert.[ch], since they conflict with
+  src/HTAlert.[ch], and are not used - TD
+* replace the [LINK], [INLINE] and [IMAGE] comments (for images without ALT)
+  with filenames of these images.  This feature can be enabled or disabled by
+  setting VERBOSE_IMAGES in lynx.cfg and/or userdefs.h (patches by
+  helen@voland.cc.huji.ac.il and wschiavo@concentric.net>)
+* consistently use ${cf_cv_ncurses_header-curses.h} rather than
+  $cf_cv_ncurses_header in configure script, as noted by JS - TD
+* tweak include of HTML.h in HTFile.h to fix compile problem on VMS (we really
+  should not use quote-style includes) - TD
+* fixes to LYStyle.c to make color-style code work on Digital Unix 4.0 - TD
+1998-03-20 (2.8.1dev.3)
 * Added death for Win/DOS clients that don't have a TMP space defined. - WB
 * Added _WINDOWS_NSL to provide interruptable lookups in Win32 per a
   patch from afn06760@afn.org. (modified hopefully for borland AND cygwin and

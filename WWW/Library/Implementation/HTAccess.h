@@ -16,11 +16,11 @@ extern char * use_this_url_instead;
 /*      Definition uses:
 */
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
-#include "tcp.h"
-#include "HTAnchor.h"
-#include "HTFormat.h"
+#include <tcp.h>
+#include <HTAnchor.h>
+#include <HTFormat.h>
 
 #ifdef SHORT_NAMES
 #define HTClientHost            HTClHost

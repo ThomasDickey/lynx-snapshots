@@ -13,14 +13,14 @@
 **
 */
 
-#include "HTUtils.h"
+#include <HTUtils.h>
 #include <string.h>
-#include "HTPasswd.h"	/* Password file routines	*/
-#include "HTAssoc.h"
-#include "HTAuth.h"	/* Implemented here		*/
-#include "HTUU.h"	/* Uuencoding and uudecoding	*/
+#include <HTPasswd.h>	/* Password file routines	*/
+#include <HTAssoc.h>
+#include <HTAuth.h>	/* Implemented here		*/
+#include <HTUU.h>	/* Uuencoding and uudecoding	*/
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 /* PRIVATE					    decompose_auth_string()
 **		DECOMPOSE AUTHENTICATION STRING

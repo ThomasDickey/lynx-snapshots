@@ -43,13 +43,13 @@
 
 
 
-#include "HTUtils.h"
+#include <HTUtils.h>
 #include <string.h>
-#include "HTAAUtil.h"
-#include "HTLex.h"	/* Lexical analysor	*/
-#include "HTGroup.h"	/* Implemented here	*/
+#include <HTAAUtil.h>
+#include <HTLex.h>	/* Lexical analysor	*/
+#include <HTGroup.h>	/* Implemented here	*/
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 /*
 ** Group file parser

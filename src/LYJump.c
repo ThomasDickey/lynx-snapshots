@@ -1,15 +1,15 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTAlert.h"
-#include "LYUtils.h"
-#include "LYStrings.h"
-#include "LYGlobalDefs.h"
-#include "LYJump.h"
-#include "LYKeymap.h"
-#include "LYSignal.h"
-#include "GridText.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTAlert.h>
+#include <LYUtils.h>
+#include <LYStrings.h>
+#include <LYGlobalDefs.h>
+#include <LYJump.h>
+#include <LYKeymap.h>
+#include <LYSignal.h>
+#include <GridText.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #ifdef VMS
 #include <fab.h>

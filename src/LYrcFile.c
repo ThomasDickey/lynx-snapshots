@@ -1,14 +1,14 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTFTP.h"
-#include "LYUtils.h"
-#include "LYrcFile.h"
-#include "LYStrings.h"
-#include "LYGlobalDefs.h"
-#include "LYCharSets.h"
-#include "LYBookmark.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTFTP.h>
+#include <LYUtils.h>
+#include <LYrcFile.h>
+#include <LYStrings.h>
+#include <LYGlobalDefs.h>
+#include <LYCharSets.h>
+#include <LYBookmark.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 PUBLIC void read_rc NOPARAMS
 {

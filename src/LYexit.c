@@ -1,14 +1,14 @@
 /*
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
  */
-#include "HTUtils.h"
-#include "tcp.h"
-#include "LYexit.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <LYexit.h>
 #ifndef VMS
-#include "LYGlobalDefs.h"
-#include "LYUtils.h"
-#include "LYSignal.h"
-#include "LYClean.h"
+#include <LYGlobalDefs.h>
+#include <LYUtils.h>
+#include <LYSignal.h>
+#include <LYClean.h>
 #ifdef SYSLOG_REQUESTED_URLS
 #include <syslog.h>
 #endif /* SYSLOG_REQUESTED_URLS */

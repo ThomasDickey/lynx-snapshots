@@ -6,16 +6,16 @@
 **	29 Nov 91	Downgraded to C, for portable implementation.
 */
 
-#include "HTUtils.h"		/* Coding convention macros */
-#include "tcp.h"
+#include <HTUtils.h>		/* Coding convention macros */
+#include <tcp.h>
 
 /* Implements:
 */
-#include "HTNews.h"
+#include <HTNews.h>
 
-#include "HTCJK.h"
-#include "HTMIME.h"
-#include "HTTCP.h"
+#include <HTCJK.h>
+#include <HTMIME.h>
+#include <HTTCP.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
@@ -41,14 +41,14 @@ PUBLIC int HTNewsMaxChunk = 40; /* Largest number of articles in one window */
 
 #include <ctype.h>
 
-#include "HTML.h"
-#include "HTParse.h"
-#include "HTFormat.h"
-#include "HTAlert.h"
+#include <HTML.h>
+#include <HTParse.h>
+#include <HTFormat.h>
+#include <HTAlert.h>
 
-#include "LYNews.h"
-#include "LYGlobalDefs.h"
-#include "LYLeaks.h"
+#include <LYNews.h>
+#include <LYGlobalDefs.h>
+#include <LYLeaks.h>
 
 #define BIG 1024 /* @@@ */
 

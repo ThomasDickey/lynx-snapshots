@@ -26,9 +26,9 @@
 #define HTWAIS_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
-#include "HTAccess.h"
+#include <HTAccess.h>
 
 #ifdef GLOBALREF_IS_MACRO
 extern GLOBALREF(HTProtocol, HTWAIS);

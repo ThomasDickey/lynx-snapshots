@@ -24,12 +24,12 @@
  */
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif
 
-#include "ufc-crypt.h"
+#include <ufc-crypt.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #ifdef _UFC_32_
 

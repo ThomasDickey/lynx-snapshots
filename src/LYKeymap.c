@@ -1,13 +1,13 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "LYUtils.h"
-#include "LYKeymap.h"
-#include "LYGlobalDefs.h"
-#include "HTAccess.h"
-#include "HTFormat.h"
-#include "HTAlert.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <LYUtils.h>
+#include <LYKeymap.h>
+#include <LYGlobalDefs.h>
+#include <HTAccess.h>
+#include <HTFormat.h>
+#include <HTAlert.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 PRIVATE CONST DocAddress keymap_anchor = {"LYNXKEYMAP", NULL, NULL};
 

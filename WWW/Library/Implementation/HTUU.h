@@ -12,7 +12,7 @@
 #define HTUU_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
 
 PUBLIC int HTUU_encode PARAMS((unsigned char *bufin,

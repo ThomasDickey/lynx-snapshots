@@ -1,25 +1,25 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTParse.h"
-#include "HTAlert.h"
-#include "HTTP.h"
-#include "LYCurses.h"
-#include "LYStrings.h"
-#include "LYUtils.h"
-#include "LYStructs.h"
-#include "LYGlobalDefs.h"
-#include "LYShowInfo.h"
-#include "LYSignal.h"
-#include "LYCharUtils.h"
-#include "GridText.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTParse.h>
+#include <HTAlert.h>
+#include <HTTP.h>
+#include <LYCurses.h>
+#include <LYStrings.h>
+#include <LYUtils.h>
+#include <LYStructs.h>
+#include <LYGlobalDefs.h>
+#include <LYShowInfo.h>
+#include <LYSignal.h>
+#include <LYCharUtils.h>
+#include <GridText.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #ifdef DIRED_SUPPORT
 #include <pwd.h>
 #include <grp.h>
 #include <time.h>
-#include "LYLocal.h"
+#include <LYLocal.h>
 #endif /* DIRED_SUPPORT */
 
 #define FREE(x) if (x) {free(x); x = NULL;}

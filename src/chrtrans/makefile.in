@@ -23,6 +23,7 @@ CFLAGS		= @CFLAGS@
 CPP_OPTS	= @DEFS@ @CPPFLAGS@ \
 		-I../.. \
 		-I$(top_srcdir)/src \
+		-I$(top_srcdir)/src/chrtrans \
 		-I$(top_srcdir)/$(WWWINC) \
 		$(SITE_DEFS)
 CC_OPTS		= $(CPP_OPTS) $(CFLAGS)

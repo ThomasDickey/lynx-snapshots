@@ -11,7 +11,7 @@
    
  */
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
 
 extern void HTFormatInit NOPARAMS;

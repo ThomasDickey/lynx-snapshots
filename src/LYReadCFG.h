@@ -2,7 +2,7 @@
 #define LYREADCFG_H
 
 #ifndef LYSTRUCTS_H
-#include "LYStructs.h"
+#include <LYStructs.h>
 #endif /* LYSTRUCTS_H */
 
 #if defined(USE_COLOR_STYLE) || defined(USE_COLOR_TABLE)

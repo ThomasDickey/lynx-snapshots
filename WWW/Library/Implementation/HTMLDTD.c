@@ -5,9 +5,9 @@
 /* Implements:
 */
 
-#include "HTUtils.h"
-#include "HTMLDTD.h"
-#include "LYLeaks.h"
+#include <HTUtils.h>
+#include <HTMLDTD.h>
+#include <LYLeaks.h>
 
 /*	Entity Names
 **	------------
@@ -1330,7 +1330,7 @@ static attr ulist_attr[] = {			/* UL attributes */
 **
 **    Name,	Attributes,	No. of attributes,     content,   extra info...
 */
-static HTTag tags_old[HTML_ELEMENTS] = {
+static CONST HTTag tags_old[HTML_ELEMENTS] = {
     { "A"	, a_attr,	HTML_A_ATTRIBUTES,	SGML_EMPTY,T_A},
     { "ABBREV"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ABBREV},
     { "ACRONYM" , gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ACRONYM},
@@ -1451,7 +1451,7 @@ static HTTag tags_old[HTML_ELEMENTS] = {
     { "XMP"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL,T_XMP},
 };
 
-static HTTag tags_new[HTML_ELEMENTS] = {
+static CONST HTTag tags_new[HTML_ELEMENTS] = {
     { "A"	, a_attr,	HTML_A_ATTRIBUTES,	SGML_MIXED,T_A},
     { "ABBREV"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ABBREV},
     { "ACRONYM" , gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ACRONYM},

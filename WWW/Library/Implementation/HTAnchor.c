@@ -15,16 +15,16 @@
 
 #define HASH_SIZE 101		/* Arbitrary prime. Memory/speed tradeoff */
 
-#include "HTUtils.h"
-#include "tcp.h"
+#include <HTUtils.h>
+#include <tcp.h>
 #include <ctype.h>
-#include "HTAnchor.h"
-#include "HTParse.h"
-#include "UCAux.h"
-#include "UCMap.h"
+#include <HTAnchor.h>
+#include <HTParse.h>
+#include <UCAux.h>
+#include <UCMap.h>
 
-#include "LYCharSets.h"
-#include "LYLeaks.h"
+#include <LYCharSets.h>
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

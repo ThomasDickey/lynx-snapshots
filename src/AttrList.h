@@ -1,8 +1,8 @@
 #if !defined(__ATTRLIST_H)
 #define __ATTRLIST_H
 
-#include "HText.h"
-#include "HTMLDTD.h"
+#include <HText.h>
+#include <HTMLDTD.h>
 
 #define TEMPSTRINGSIZE 256
 

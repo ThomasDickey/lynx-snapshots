@@ -8,34 +8,34 @@
 **		strings written must be less than buffer size.
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "LYCurses.h"
-#include "HTFWriter.h"
-#include "HTSaveToFile.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <LYCurses.h>
+#include <HTFWriter.h>
+#include <HTSaveToFile.h>
 
-#include "HTFormat.h"
-#include "UCDefs.h"
-#include "HTAlert.h"
-#include "HTFile.h"
-#include "HTPlain.h"
-#include "HTFile.h"
+#include <HTFormat.h>
+#include <UCDefs.h>
+#include <HTAlert.h>
+#include <HTFile.h>
+#include <HTPlain.h>
+#include <HTFile.h>
 #ifdef VMS
-#include "HTVMSUtils.h"
+#include <HTVMSUtils.h>
 #endif /* VMS */
 #ifdef DOSPATH
-#include "HTDOS.h"
+#include <HTDOS.h>
 #endif
 
-#include "LYStrings.h"
-#include "LYUtils.h"
-#include "LYGlobalDefs.h"
-#include "LYSignal.h"
-#include "LYSystem.h"
-#include "GridText.h"
-#include "LYexit.h"
-#include "LYLeaks.h"
-#include "LYKeymap.h"
+#include <LYStrings.h>
+#include <LYUtils.h>
+#include <LYGlobalDefs.h>
+#include <LYSignal.h>
+#include <LYSystem.h>
+#include <GridText.h>
+#include <LYexit.h>
+#include <LYLeaks.h>
+#include <LYKeymap.h>
 
 PUBLIC char * WWW_Download_File=NULL; /* contains the name of the temp file
 				      ** which is being downloaded into

@@ -11,11 +11,11 @@
 #define HTFTP_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
-#include "HTAnchor.h"
-#include "HTStream.h"
-#include "HTParse.h"
+#include <HTAnchor.h>
+#include <HTStream.h>
+#include <HTParse.h>
 
 #define FILE_BY_NAME 0 
 #define FILE_BY_TYPE 1

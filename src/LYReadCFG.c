@@ -1,28 +1,28 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTFile.h"
-#include "UCMap.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTFile.h>
+#include <UCMap.h>
 
-#include "LYUtils.h"
-#include "LYStrings.h"
-#include "LYStructs.h"
-#include "LYGlobalDefs.h"
-#include "LYCharSets.h"
-#include "LYKeymap.h"
-#include "LYJump.h"
-#include "LYGetFile.h"
-#include "LYCgi.h"
-#include "LYCurses.h"
-#include "LYSignal.h"
-#include "LYBookmark.h"
-#include "LYReadCFG.h"
+#include <LYUtils.h>
+#include <LYStrings.h>
+#include <LYStructs.h>
+#include <LYGlobalDefs.h>
+#include <LYCharSets.h>
+#include <LYKeymap.h>
+#include <LYJump.h>
+#include <LYGetFile.h>
+#include <LYCgi.h>
+#include <LYCurses.h>
+#include <LYSignal.h>
+#include <LYBookmark.h>
+#include <LYReadCFG.h>
 
 #ifdef DIRED_SUPPORT
-#include "LYLocal.h"
+#include <LYLocal.h>
 #endif /* DIRED_SUPPORT */
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
@@ -1240,7 +1240,10 @@ PUBLIC void read_cfg ARGS3(
 	break;
 
 	case 'V':
-	if (!strncasecomp(buffer, "VI_KEYS_ALWAYS_ON:", 18)) {
+	if (!strncasecomp(buffer, "VERBOSE_IMAGES:", 15)) { 
+	    verbose_img = is_true(buffer+15); 
+ 
+	} else if (!strncasecomp(buffer, "VI_KEYS_ALWAYS_ON:", 18)) { 
 	    vi_keys = is_true(buffer+18);
 
 	} else if (!strncasecomp(buffer, "VIEWER:", 7)) {

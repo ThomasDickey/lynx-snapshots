@@ -23,8 +23,8 @@
 #include <string.h>
 #include <ctype.h>
 #else
-#include "HTUtils.h"
-#include "tcp.h"
+#include <HTUtils.h>
+#include <tcp.h>
 /*
  *  Don't try to use LYexit().
  */
@@ -37,8 +37,8 @@
 #define TOLOWER(c) (isupper((unsigned char)c) ? tolower((unsigned char)c) : (c))
 #endif /* !TOLOWER */
 
-#include "UCkd.h"
-#include "UCDefs.h"
+#include <UCkd.h>
+#include <UCDefs.h>
 
 #define MAX_FONTLEN 256
 

@@ -36,7 +36,7 @@ $  CHRcompiler := "DECC"
 $  v1 = f$verify(1)
 $! DECC:
 $  cc := cc/decc/prefix=all /nomember 'CHRcc_opts'-
-	   /INCLUDE=([-],[--],[--.WWW.Library.Implementation]) 
+	   /INCLUDE=([],[-],[--],[--.WWW.Library.Implementation]) 
 $  v1 = 'f$verify(0)'
 $ ELSE
 $  IF f$search("gnu_cc:[000000]gcclib.olb") .nes. ""
@@ -44,13 +44,13 @@ $  THEN
 $   CHRcompiler := "GNUC"
 $   v1 = f$verify(1)
 $! GNUC:
-$   cc := gcc 'CHRcc_opts'/INCLUDE=([-],[--],[--.WWW.Library.Implementation]) 
+$   cc := gcc 'CHRcc_opts'/INCLUDE=([],[-],[--],[--.WWW.Library.Implementation]) 
 $   v1 = 'f$verify(0)'
 $  ELSE
 $   CHRcompiler := "VAXC"
 $   v1 = f$verify(1)
 $! VAXC:
-$   cc := cc 'CHRcc_opts'/INCLUDE=([-],[--],[--.WWW.Library.Implementation]) 
+$   cc := cc 'CHRcc_opts'/INCLUDE=([],[-],[--],[--.WWW.Library.Implementation]) 
 $   v1 = 'f$verify(0)'
 $  ENDIF
 $ ENDIF

@@ -2,16 +2,16 @@
 **		===========
 **
 */
-#include "HTUtils.h"
-#include "tcp.h"
+#include <HTUtils.h>
+#include <tcp.h>
 
-#include "HTWriter.h"
+#include <HTWriter.h>
 
 #define BUFFER_SIZE 4096	/* Tradeoff */
 
 /*#include <stdio.h> included by HTUtils.h -- FM */
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

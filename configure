@@ -1140,15 +1140,15 @@ CFLAGS=`echo ${CFLAGS} | sed -e 's/-O[1-9]\? //' -e 's/-O[1-9]\?$//'`
 	esac
 else
 	case $host_os in
-	ultrix*|osf*) #(vi
+	osf*) #(vi
+		CFLAGS="$CFLAGS -std1"
 		CFLAGS=`echo ${CFLAGS} | sed -e 's/-g //' -e 's/-g$//'`
 		;;
 	*)
-			CFLAGS=`echo ${CFLAGS} | sed -e 's/-g //' -e 's/-g$//'`
+		CFLAGS=`echo ${CFLAGS} | sed -e 's/-g //' -e 's/-g$//'`
 		;;
 	esac
 fi
-
 
 
 if test -n "$GCC"
@@ -3763,7 +3763,7 @@ else
 #line 3764 "configure"
 #include "confdefs.h"
 
-#include <$cf_cv_ncurses_header>
+#include <${cf_cv_ncurses_header-curses.h}>
 int main() {
 
 #if defined(wbkgdset) && defined(clearok) && defined(getbkgd)
@@ -3782,7 +3782,7 @@ if { (eval echo configure:3778: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; 
 #include "confdefs.h"
 
 #define CURS_PERFORMANCE
-#include <$cf_cv_ncurses_header>
+#include <${cf_cv_ncurses_header-curses.h}>
 int main() {
 
 #if defined(wbkgdset) && defined(clearok) && defined(getbkgd)
@@ -6282,7 +6282,7 @@ cat > conftest.$ac_ext <<EOF
 #line 6283 "configure"
 #include "confdefs.h"
 
-#include <$cf_cv_ncurses_header>
+#include <${cf_cv_ncurses_header-curses.h}>
 #include <stdio.h>
 int main() {
 int x = TRUE, y = FALSE
@@ -6678,7 +6678,7 @@ else
 #line 6679 "configure"
 #include "confdefs.h"
 
-#include <$cf_cv_ncurses_header>
+#include <${cf_cv_ncurses_header-curses.h}>
 	
 int main() {
 chtype x = acs_map['l']; acs_map['m'] = 0
@@ -6713,7 +6713,7 @@ else
 #line 6714 "configure"
 #include "confdefs.h"
 
-#include <$cf_cv_ncurses_header>
+#include <${cf_cv_ncurses_header-curses.h}>
 
 int main() {
 attrset(A_UNDERLINE|A_BOLD|A_REVERSE);
@@ -6829,7 +6829,7 @@ cat > conftest.$ac_ext <<EOF
 #line 6830 "configure"
 #include "confdefs.h"
 
-#include <$cf_cv_ncurses_header>
+#include <${cf_cv_ncurses_header-curses.h}>
 int main() {
 
 #if defined(NCURSES_VERSION) && defined(wgetbkgd)
@@ -7006,7 +7006,7 @@ else
 	cat > conftest.$ac_ext <<EOF
 #line 7008 "configure"
 #include "confdefs.h"
-#include <$cf_cv_ncurses_header>
+#include <${cf_cv_ncurses_header-curses.h}>
 int main() {
 char *x = &ttytype[1]; *x = 1
 ; return 0; }

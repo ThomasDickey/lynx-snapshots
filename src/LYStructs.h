@@ -3,11 +3,11 @@
 #define LYSTRUCTS_H
 
 #ifndef USERDEFS_H
-#include "userdefs.h"
+#include <userdefs.h>
 #endif /* USERDEFS_H */
 
 #ifndef HTANCHOR_H
-#include "HTAnchor.h"
+#include <HTAnchor.h>
 #endif /* HTANCHOR_H */
 
 typedef struct link {
@@ -45,7 +45,7 @@ typedef struct _document {
 } document;
 
 #ifndef HTFORMS_H
-#include "HTForms.h"
+#include <HTForms.h>
 #endif /* HTFORMS_H */
 
 typedef struct _histstruct {

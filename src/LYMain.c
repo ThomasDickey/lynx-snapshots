@@ -1,37 +1,37 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTTP.h"
-#include "HTParse.h"
-#include "HTAccess.h"
-#include "HTList.h"
-#include "HTFile.h"
-#include "UCMap.h"
-#include "UCDefs.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTTP.h>
+#include <HTParse.h>
+#include <HTAccess.h>
+#include <HTList.h>
+#include <HTFile.h>
+#include <UCMap.h>
+#include <UCDefs.h>
 #ifdef VMS
-#include "HTVMSUtils.h"
+#include <HTVMSUtils.h>
 #endif /* VMS */
-#include "HTInit.h"
-#include "LYCurses.h"
-#include "LYStyle.h"
-#include "HTML.h"
-#include "LYUtils.h"
-#include "LYGlobalDefs.h"
-#include "LYSignal.h"
-#include "LYGetFile.h"
-#include "LYStrings.h"
-#include "LYClean.h"
-#include "LYCharSets.h"
-#include "LYCharUtils.h"
-#include "UCMap.h"
-#include "LYReadCFG.h"
-#include "LYrcFile.h"
-#include "LYKeymap.h"
-#include "LYList.h"
-#include "LYJump.h"
-#include "LYMainLoop.h"
-#include "LYBookmark.h"
+#include <HTInit.h>
+#include <LYCurses.h>
+#include <LYStyle.h>
+#include <HTML.h>
+#include <LYUtils.h>
+#include <LYGlobalDefs.h>
+#include <LYSignal.h>
+#include <LYGetFile.h>
+#include <LYStrings.h>
+#include <LYClean.h>
+#include <LYCharSets.h>
+#include <LYCharUtils.h>
+#include <UCMap.h>
+#include <LYReadCFG.h>
+#include <LYrcFile.h>
+#include <LYKeymap.h>
+#include <LYList.h>
+#include <LYJump.h>
+#include <LYMainLoop.h>
+#include <LYBookmark.h>
 #ifdef DOSPATH
-#include "HTDOS.h"
+#include <HTDOS.h>
 #endif
 
 #ifndef VMS
@@ -41,11 +41,11 @@
 #endif /* !VMS */
 
 #ifdef LOCALE
-#include<locale.h>
+#include <locale.h>
 #endif /* LOCALE */
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
@@ -164,6 +164,7 @@ PUBLIC int LYShowColor = SHOW_COLOR_UNKNOWN; /* to show or not to show */
 PUBLIC int LYChosenShowColor = SHOW_COLOR_UNKNOWN; /* whether to show and save */
 PUBLIC int LYrcShowColor = SHOW_COLOR_UNKNOWN;	/* ... as last read or written */
 PUBLIC BOOLEAN LYShowCursor = SHOW_CURSOR; /* to show or not to show */
+PUBLIC BOOLEAN verbose_img = VERBOSE_IMAGES;  /* show filenames or not */ 
 PUBLIC BOOLEAN LYUseDefShoCur = TRUE;	/* Command line -show_cursor toggle */
 PUBLIC BOOLEAN LYforce_no_cache = FALSE;
 PUBLIC BOOLEAN LYoverride_no_cache = FALSE;/*override no-cache b/c history etc*/
@@ -571,7 +572,7 @@ else {init_ctrl_break[0] = 1;}
 #endif
 
 #ifdef DOSPATH
-    terminal = "vt100";
+	if (getenv("TERM")==NULL) putenv("TERM=vt100");
 #endif
 
     LYShowColor = (SHOW_COLOR ? SHOW_COLOR_ON : SHOW_COLOR_OFF);

@@ -1,27 +1,27 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTAlert.h"
-#include "LYUtils.h"
-#include "LYStrings.h"
-#include "LYBookmark.h"
-#include "LYGlobalDefs.h"
-#include "LYSignal.h"
-#include "LYSystem.h"
-#include "LYKeymap.h"
-#include "LYCharUtils.h"
-#include "LYCurses.h"
-#include "GridText.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTAlert.h>
+#include <LYUtils.h>
+#include <LYStrings.h>
+#include <LYBookmark.h>
+#include <LYGlobalDefs.h>
+#include <LYSignal.h>
+#include <LYSystem.h>
+#include <LYKeymap.h>
+#include <LYCharUtils.h>
+#include <LYCurses.h>
+#include <GridText.h>
 
 #ifdef DOSPATH
-#include "HTDOS.h"
+#include <HTDOS.h>
 #endif
 #ifdef VMS
-#include "HTVMSUtils.h"
+#include <HTVMSUtils.h>
 #include <nam.h>
 extern BOOLEAN HadVMSInterrupt;	/* Flag from cleanup_sig() AST */
 #endif /* VMS */
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

@@ -112,7 +112,7 @@ HFILES = $(CMN)HTParse.h $(CMN)HTAccess.h $(CMN)HTTP.h $(CMN)HTFile.h \
 	$(CMN)HTStream.h \
 	$(CMN)HTAtom.h $(CMN)HTAnchor.h $(CMN)HTStyle.h \
 	$(CMN)HTList.h \
-	$(CMN)HTString.h $(CMN)HTAlert.h $(CMN)HTRules.h \
+	$(CMN)HTString.h $(CMN)HTRules.h \
 	$(CMN)HTFormat.h $(CMN)HTInit.h \
 	$(CMN)HTMIME.h $(CMN)HTHistory.h $(CMN)HTNews.h \
 	$(CMN)HTGopher.h \
@@ -325,7 +325,7 @@ $(LOB)/HTAAServ.o : $(OE) $(CMN)HTAAServ.c $(CMN)HTAAServ.h \
 $(LOB)/HTAABrow.o : $(OE) $(CMN)HTAABrow.c $(CMN)HTAABrow.h \
 	 $(CMN)HTAAUtil.h $(CMN)HTUU.h \
 	 $(CMN)HTUtils.h $(CMN)HTString.h \
-	 $(CMN)HTParse.h $(CMN)HTList.h $(CMN)HTAlert.h \
+	 $(CMN)HTParse.h $(CMN)HTList.h \
 	 $(CMN)HTAssoc.h
 	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTAABrow.c
 

@@ -39,7 +39,7 @@ AC_DEFUN([CF_ALT_CHAR_SET],
 AC_MSG_CHECKING([if curses supports alternate-character set])
 AC_CACHE_VAL(cf_cv_alt_char_set,[
 	AC_TRY_LINK([
-#include <$cf_cv_ncurses_header>
+#include <${cf_cv_ncurses_header-curses.h}>
 	],[chtype x = acs_map['l']; acs_map['m'] = 0],
 	[cf_cv_alt_char_set=yes],  
 	[cf_cv_alt_char_set=no])])
@@ -126,7 +126,7 @@ AC_DEFUN([CF_BOOL_DEFS],
 AC_MSG_CHECKING(if TRUE/FALSE are defined)
 AC_CACHE_VAL(cf_cv_bool_defs,[
 AC_TRY_COMPILE([
-#include <$cf_cv_ncurses_header>
+#include <${cf_cv_ncurses_header-curses.h}>
 #include <stdio.h>],[int x = TRUE, y = FALSE],
 	[cf_cv_bool_defs=yes],
 	[cf_cv_bool_defs=no])])
@@ -346,7 +346,7 @@ AC_MSG_CHECKING([for curses performance tradeoff])
 AC_CACHE_VAL(cf_cv_curs_performance,[
     cf_cv_curs_performance=no
     AC_TRY_COMPILE([
-#include <$cf_cv_ncurses_header>],[
+#include <${cf_cv_ncurses_header-curses.h}>],[
 #if defined(wbkgdset) && defined(clearok) && defined(getbkgd)
 	int x = ERR;
 #else
@@ -355,7 +355,7 @@ AC_CACHE_VAL(cf_cv_curs_performance,[
 	],[
 	AC_TRY_COMPILE([
 #define CURS_PERFORMANCE
-#include <$cf_cv_ncurses_header>],[
+#include <${cf_cv_ncurses_header-curses.h}>],[
 #if defined(wbkgdset) && defined(clearok) && defined(getbkgd)
 	int x = ;	/* force an error */
 #else
@@ -427,7 +427,7 @@ AC_DEFUN([CF_FANCY_CURSES],
 AC_MSG_CHECKING(if curses supports fancy attributes)
 AC_CACHE_VAL(cf_cv_fancy_curses,[
 	AC_TRY_LINK([
-#include <$cf_cv_ncurses_header>
+#include <${cf_cv_ncurses_header-curses.h}>
 ],
 	[attrset(A_UNDERLINE|A_BOLD|A_REVERSE);
 	 wattrset(stdscr, A_BLINK|A_DIM);
@@ -818,7 +818,7 @@ if test "$cf_cv_ncurses_version" != no ; then
 AC_MSG_CHECKING(for obsolete/broken version of ncurses)
 AC_CACHE_VAL(cf_cv_ncurses_broken,[
 AC_TRY_COMPILE([
-#include <$cf_cv_ncurses_header>],[
+#include <${cf_cv_ncurses_header-curses.h}>],[
 #if defined(NCURSES_VERSION) && defined(wgetbkgd)
 	make an error
 #else
@@ -1401,7 +1401,7 @@ AC_DEFUN([CF_TTYTYPE],
 [
 AC_MSG_CHECKING(if ttytype is declared in curses library)
 AC_CACHE_VAL(cf_cv_have_ttytype,[
-	AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
+	AC_TRY_LINK([#include <${cf_cv_ncurses_header-curses.h}>],
 	[char *x = &ttytype[1]; *x = 1],
 	[cf_cv_have_ttytype=yes],
 	[cf_cv_have_ttytype=no])

@@ -23,8 +23,8 @@
 #ifndef HTMIME_H
 #define HTMIME_H
 
-#include "HTStream.h"
-#include "HTAnchor.h"
+#include <HTStream.h>
+#include <HTAnchor.h>
 
 /*
 **  This function is for trimming off any paired

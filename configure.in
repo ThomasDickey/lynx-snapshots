@@ -56,15 +56,15 @@ if test "$with_debug" = "yes" ; then
 	esac
 else
 	case $host_os in
-	ultrix*|osf*) #(vi
+	osf*) #(vi
+		CFLAGS="$CFLAGS -std1"
 		CF_STRIP_G_OPT(CFLAGS)
 		;;
 	*)
-			CF_STRIP_G_OPT(CFLAGS)
+		CF_STRIP_G_OPT(CFLAGS)
 		;;
 	esac
 fi
-
 
 
 if test -n "$GCC"

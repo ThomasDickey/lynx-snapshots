@@ -12,23 +12,23 @@
 **	which is cleanest.
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
+#include <HTUtils.h>
+#include <tcp.h>
 
 #define BUFFER_SIZE    200	/* Line buffer attempts to make neat breaks */
 #define MAX_CLEANNESS	20
 
 /* Implements:
 */
-#include "HTMLGen.h"
+#include <HTMLGen.h>
 
 #include <stdio.h>
-#include "HTMLDTD.h"
-#include "HTStream.h"
-#include "SGML.h"
-#include "HTFormat.h"
+#include <HTMLDTD.h>
+#include <HTStream.h>
+#include <SGML.h>
+#include <HTFormat.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

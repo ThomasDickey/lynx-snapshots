@@ -9,10 +9,10 @@
 #define HTAUTH_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
-#include "HTAAUtil.h"
-#include "HTAAProt.h"
+#include <HTAAUtil.h>
+#include <HTAAProt.h>
 
 
 #ifdef SHORT_NAMES

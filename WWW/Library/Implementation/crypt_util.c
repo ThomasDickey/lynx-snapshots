@@ -24,7 +24,7 @@
  */
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif
 
 #ifdef DEBUG
@@ -36,18 +36,18 @@
 #endif
 
 #ifndef DOS
-#include "patchlevel.h"
-#include "ufc-crypt.h"
+#include <patchlevel.h>
+#include <ufc-crypt.h>
 #else
 /*
  * Thanks to greg%wind@plains.NoDak.edu (Greg W. Wettstein)
  * for DOS patches
  */
-#include "pl.h"
-#include "ufc.h"
+#include <pl.h>
+#include <ufc.h>
 #endif
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 static char patchlevel_str[] = PATCHLEVEL;
 

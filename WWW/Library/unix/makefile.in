@@ -20,7 +20,12 @@ LYFLAGS		= # FIXME: set in parent makefile
 CC		= @CC@
 DEFS		= @DEFS@
 CPPFLAGS	= @CPPFLAGS@
-CPPOPTS		= $(DEFS) $(CPPFLAGS) $(LYFLAGS) -I../../.. -I../../../src -I$(top_srcdir) -I$(top_srcdir)/src
+CPPOPTS		= $(DEFS) $(CPPFLAGS) $(LYFLAGS) \
+		-I../../.. \
+		-I../../../src \
+		-I$(top_srcdir) \
+		-I$(top_srcdir)/src \
+		-I$(top_srcdir)/WWW/Library/Implementation
 LY_CFLAGS	= @CFLAGS@
 CFLAGS		= $(CPPOPTS) $(LY_CFLAGS)
 

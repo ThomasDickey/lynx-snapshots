@@ -3,7 +3,7 @@
 #define LYPRINT_H
 
 #ifndef LYSTRUCTS_H
-#include "LYStructs.h"
+#include <LYStructs.h>
 #endif /* LYSTRUCTS_H */
 
 extern int printfile PARAMS((document *newdoc));

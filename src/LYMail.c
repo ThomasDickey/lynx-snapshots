@@ -1,19 +1,19 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTParse.h"
-#include "LYGlobalDefs.h"
-#include "HTAlert.h"
-#include "LYCurses.h"
-#include "LYSignal.h"
-#include "LYUtils.h"
-#include "LYClean.h"
-#include "LYStrings.h"
-#include "GridText.h"
-#include "LYSystem.h"
-#include "LYMail.h"
-#include "LYCharSets.h"  /* to get current charset for mail header */
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTParse.h>
+#include <LYGlobalDefs.h>
+#include <HTAlert.h>
+#include <LYCurses.h>
+#include <LYSignal.h>
+#include <LYUtils.h>
+#include <LYClean.h>
+#include <LYStrings.h>
+#include <GridText.h>
+#include <LYSystem.h>
+#include <LYMail.h>
+#include <LYCharSets.h>  /* to get current charset for mail header */
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

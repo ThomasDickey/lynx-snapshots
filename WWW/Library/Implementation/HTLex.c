@@ -13,11 +13,11 @@
 **
 */
 
-#include "HTUtils.h"
-#include "HTAAUtil.h"
-#include "HTLex.h"	/* Implemented here */
+#include <HTUtils.h>
+#include <HTAAUtil.h>
+#include <HTLex.h>	/* Implemented here */
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 /*
 ** Global variables

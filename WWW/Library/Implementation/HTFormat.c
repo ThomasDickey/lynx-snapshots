@@ -10,13 +10,13 @@
 **
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTAccess.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTAccess.h>
 
 /* Implements:
 */
-#include "HTFormat.h"
+#include <HTFormat.h>
 
 PUBLIC float HTMaxSecs = 1e10;		/* No effective limit */
 PUBLIC float HTMaxLength = 1e10;	/* No effective limit */
@@ -31,25 +31,25 @@ PUBLIC long int HTMaxBytes  = 0;	/* No effective limit */
 #endif /* NeXT */
 #endif /* unix */
 
-#include "HTML.h"
-#include "HTMLDTD.h"
-#include "HText.h"
-#include "HTAlert.h"
-#include "HTList.h"
-#include "HTInit.h"
-#include "HTTCP.h"
+#include <HTML.h>
+#include <HTMLDTD.h>
+#include <HText.h>
+#include <HTAlert.h>
+#include <HTList.h>
+#include <HTInit.h>
+#include <HTTCP.h>
 /*	Streams and structured streams which we use:
 */
-#include "HTFWriter.h"
-#include "HTPlain.h"
-#include "SGML.h"
-#include "HTML.h"
-#include "HTMLGen.h"
+#include <HTFWriter.h>
+#include <HTPlain.h>
+#include <SGML.h>
+#include <HTML.h>
+#include <HTMLGen.h>
 
-#include "LYexit.h"
-#include "LYUtils.h"
-#include "LYGlobalDefs.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYUtils.h>
+#include <LYGlobalDefs.h>
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

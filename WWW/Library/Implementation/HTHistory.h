@@ -3,7 +3,7 @@
 #ifndef HTHISTORY_H
 #define HTHISTORY_H
 
-#include "HTAnchor.h"
+#include <HTAnchor.h>
 
 #ifdef SHORT_NAMES
 #define HTHistory_record                HTHiReco

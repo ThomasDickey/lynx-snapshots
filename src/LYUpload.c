@@ -14,23 +14,23 @@
 **	  the command line (great way of bypassing the nodotfile code :=( ).
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTParse.h"
-#include "HTAlert.h"
-#include "LYCurses.h"
-#include "LYUtils.h"
-#include "LYGlobalDefs.h"
-#include "LYSignal.h"
-#include "LYStrings.h"
-#include "LYClean.h"
-#include "LYGetFile.h"
-#include "LYUpload.h"
-#include "LYSystem.h"
-#include "LYLocal.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTParse.h>
+#include <HTAlert.h>
+#include <LYCurses.h>
+#include <LYUtils.h>
+#include <LYGlobalDefs.h>
+#include <LYSignal.h>
+#include <LYStrings.h>
+#include <LYClean.h>
+#include <LYGetFile.h>
+#include <LYUpload.h>
+#include <LYSystem.h>
+#include <LYLocal.h>
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

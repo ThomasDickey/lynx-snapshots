@@ -6,12 +6,12 @@
 **	New nodes are inserted between the header and the rest of the list.
 */
 
-#include "HTUtils.h"
-#include "HTList.h"
+#include <HTUtils.h>
+#include <HTList.h>
 
 /*#include <stdio.h> included by HTUtils.h -- FM *//* joe@athena, TBL 921019 */
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

@@ -16,15 +16,15 @@
 */
 
 
-#include "HTUtils.h"
-#include "tcp.h"	/* FROMASCII()		*/
+#include <HTUtils.h>
+#include <tcp.h>	/* FROMASCII()		*/
 #include <string.h>
-#include "HTAAUtil.h"	/* Common parts of AA	*/
-#include "HTAAFile.h"	/* File routines	*/
-#include "HTAAServ.h"	/* Server routines	*/
-#include "HTPasswd.h"	/* Implemented here	*/
+#include <HTAAUtil.h>	/* Common parts of AA	*/
+#include <HTAAFile.h>	/* File routines	*/
+#include <HTAAServ.h>	/* Server routines	*/
+#include <HTPasswd.h>	/* Implemented here	*/
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 extern char *crypt();
 

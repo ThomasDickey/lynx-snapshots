@@ -32,9 +32,9 @@
 #define HTAABROW_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"            /* BOOL, PARAMS, ARGS */
+#include <HTUtils.h>            /* BOOL, PARAMS, ARGS */
 #endif /* HTUTILS_H */
-#include "HTAAUtil.h"           /* Common parts of AA */
+#include <HTAAUtil.h>           /* Common parts of AA */
 
 
 #ifdef SHORT_NAMES

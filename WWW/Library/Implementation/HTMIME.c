@@ -11,16 +11,16 @@
 **	   Feb 92	Written Tim Berners-Lee, CERN
 **
 */
-#include "HTUtils.h"
-#include "HTMIME.h"		/* Implemented here */
-#include "HTAlert.h"
-#include "HTCJK.h"
-#include "UCMap.h"
-#include "UCDefs.h"
-#include "UCAux.h"
+#include <HTUtils.h>
+#include <HTMIME.h>		/* Implemented here */
+#include <HTAlert.h>
+#include <HTCJK.h>
+#include <UCMap.h>
+#include <UCDefs.h>
+#include <UCAux.h>
 
-#include "LYCharSets.h"
-#include "LYLeaks.h"
+#include <LYCharSets.h>
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

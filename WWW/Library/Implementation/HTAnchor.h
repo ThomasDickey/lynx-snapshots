@@ -14,9 +14,9 @@
 /* Version 0 (TBL) written in Objective-C for the NeXT browser */
 /* Version 1 of 24-Oct-1991 (JFG), written in C, browser-independant */
 
-#include "HTList.h"
-#include "HTAtom.h"
-#include "UCDefs.h"
+#include <HTList.h>
+#include <HTAtom.h>
+#include <UCDefs.h>
 
 #ifdef SHORT_NAMES
 #define HTAnchor_findChild			HTAnFiCh
@@ -57,7 +57,7 @@ typedef struct _HTAnchor HTAnchor;
 typedef struct _HTParentAnchor HTParentAnchor;
 
 /*	After definition of HTFormat: */
-#include "HTFormat.h"
+#include <HTFormat.h>
 
 typedef HTAtom HTLinkType;
 

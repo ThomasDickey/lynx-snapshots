@@ -1,24 +1,24 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTCJK.h"
-#include "HTTP.h"
-#include "HTAlert.h"
-#include "LYCurses.h"
-#include "GridText.h"
-#include "LYCharSets.h"
-#include "UCAux.h"
-#include "LYUtils.h"
-#include "LYStructs.h"  /* includes HTForms.h */
-#include "LYStrings.h"
-#include "LYGlobalDefs.h"
-#include "LYKeymap.h"
-#include "LYSignal.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTCJK.h>
+#include <HTTP.h>
+#include <HTAlert.h>
+#include <LYCurses.h>
+#include <GridText.h>
+#include <LYCharSets.h>
+#include <UCAux.h>
+#include <LYUtils.h>
+#include <LYStructs.h>  /* includes HTForms.h */
+#include <LYStrings.h>
+#include <LYGlobalDefs.h>
+#include <LYKeymap.h>
+#include <LYSignal.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #ifdef USE_COLOR_STYLE
-#include "AttrList.h"
-#include "LYHash.h"
+#include <AttrList.h>
+#include <LYHash.h>
 #endif
 
 extern HTCJKlang HTCJK;
