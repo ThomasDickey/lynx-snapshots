@@ -2781,11 +2781,11 @@ PUBLIC void HTSetProgramPath ARGS2(
  */
 PUBLIC void HTInitProgramPaths NOARGS
 {
-    ProgramPaths code;
+    int code;
     CONST char *path;
     CONST char *test;
 
-    for (code = ppUnknown + 1; code < pp_Last; ++code) {
+    for (code = (int) ppUnknown + 1; code < (int) pp_Last; ++code) {
 	switch (code) {
 #ifdef BZIP2_PATH
 	case ppBZIP2:

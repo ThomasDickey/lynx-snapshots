@@ -2350,19 +2350,20 @@ PRIVATE BOOLEAN GetOptValues ARGS3(
  */
 
 PRIVATE PostPair * break_data ARGS1(
-    char *,	data)
+    bstring *,	data)
 {
-    char * p = data;
+    char * p;
     PostPair * q = NULL;
     int count = 0;
 
-    if (p==NULL || p[0]=='\0')
+    if (isBEmpty(data))
 	return NULL;
 
-    CTRACE((tfp, "break_data %s\n", data));
+    p = BStrData(data);
+    CTRACE((tfp, "break_data %s\n", p));
 
     q = typecalloc(PostPair);
-    if (q==NULL)
+    if (q == NULL)
 	outofmem(__FILE__, "break_data(calloc)");
 
     do {
@@ -2414,10 +2415,10 @@ PRIVATE PostPair * break_data ARGS1(
 	 * Linux ;->
 	 */
 	q = realloc(q, sizeof(PostPair)*(count+1));
-	if (q==NULL)
+	if (q == NULL)
 	    outofmem(__FILE__, "break_data(realloc)");
-	q[count].tag=NULL;
-    } while (p!=NULL && p[0]!='\0');
+	q[count].tag = NULL;
+    } while (p != NULL && p[0] != '\0');
     return q;
 }
 
@@ -2915,7 +2916,7 @@ PUBLIC int postoptions ARGS1(
     /*
      * FIXME: Golly gee, we need to write all of this out now, don't we?
      */
-    FREE(newdoc->post_data);
+    BStrFree(newdoc->post_data);
     FREE(data);
     if (save_all) {
 	HTInfoMsg(SAVING_OPTIONS);

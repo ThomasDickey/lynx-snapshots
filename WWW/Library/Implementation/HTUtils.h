@@ -168,7 +168,7 @@ typedef unsigned short mode_t;
 #  define NO_EMPTY_HREFLESS_A
 #endif
 
-#if  defined(__EMX__) || defined(WIN_EX)
+#if  defined(__EMX__) || defined(WIN_EX) || defined(HAVE_POPEN)
 #  define CAN_CUT_AND_PASTE
 #endif
 
@@ -360,7 +360,7 @@ Booleans
 
 #ifndef _WINDOWS
 #ifndef BOOLEAN_DEFINED
-        typedef char    BOOLEAN;                /* Logical value */
+    typedef char    BOOLEAN;	/* Logical value */
 #ifndef CURSES
 #ifndef TRUE
 #define TRUE    (BOOLEAN)1
@@ -374,6 +374,7 @@ Booleans
 #ifndef BOOL
 #define BOOL BOOLEAN
 #endif
+
 #ifndef YES
 #define YES (BOOLEAN)1
 #define NO (BOOLEAN)0
@@ -523,6 +524,7 @@ extern int WWW_TraceMask;
 #define TRACE_STYLE     (TRACE_bit(1))
 #define TRACE_TRST      (TRACE_bit(2))
 #define TRACE_CFG       (TRACE_bit(3))
+#define TRACE_BSTRING   (TRACE_bit(4))
 
 #if defined(LY_TRACELINE)
 #define LY_SHOWWHERE fprintf( tfp, "%s: %d: ", __FILE__, LY_TRACELINE ),
@@ -590,17 +592,33 @@ extern FILE *TraceFP NOPARAMS;
 
 #ifdef USE_SSL
 #define free_func free__func
+
 #ifdef USE_OPENSSL_INCL
 #include <openssl/ssl.h>
 #include <openssl/crypto.h>
 #include <openssl/rand.h>
 #include <openssl/err.h>
+
 #else
+
+#ifdef USE_GNUTLS_INCL
+#include <gnutls/openssl.h>
+/*
+ * GNUTLS's implementation of OpenSSL is very incomplete and rudimentary.
+ * For a start, let's make it compile (TD - 2003/4/13).
+ */
+#ifndef SSL_VERIFY_PEER
+#define SSL_VERIFY_PEER			0x01
+#endif
+
+#else	/* assume SSLeay */
 #include <ssl.h>
 #include <crypto.h>
 #include <rand.h>
 #include <err.h>
 #endif
+#endif /* USE_OPENSSL_INCL */
+
 #undef free_func
 
 extern SSL * HTGetSSLHandle NOPARAMS;
@@ -612,17 +630,11 @@ extern char HTGetSSLCharacter PARAMS((void * handle));
 #ifdef HAVE_LIBDMALLOC
 #include <dmalloc.h>    /* Gray Watson's library */
 #define show_alloc() dmalloc_log_unfreed()
-#else
-#undef  HAVE_LIBDMALLOC
-#define HAVE_LIBDMALLOC 0
 #endif
 
 #ifdef HAVE_LIBDBMALLOC
 #include <dbmalloc.h>   /* Conor Cahill's library */
 #define show_alloc() malloc_dump(fileno(stderr))
-#else
-#undef  HAVE_LIBDBMALLOC
-#define HAVE_LIBDBMALLOC 0
 #endif
 
 #ifndef show_alloc

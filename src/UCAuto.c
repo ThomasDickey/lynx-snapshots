@@ -507,7 +507,7 @@ PUBLIC int Find_Best_Display_Charset ARGS1 (int, ord)
     }
     /* Here r point to the replacement, s to the end of the replacement. */
     if (s >= r + sizeof(buf)) {
-	HTInfoMsg("Charset name in CHARSET_SWITCH_RULES too long");
+	HTInfoMsg(gettext("Charset name in CHARSET_SWITCH_RULES too long"));
 	return ord;
     }
     strncpy(buf, r, s-r);

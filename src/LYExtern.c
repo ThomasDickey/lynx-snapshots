@@ -269,7 +269,7 @@ BOOL run_external ARGS2(
 
 #ifdef WIN_EX			/* 1998/01/26 (Mon) 09:16:13 */
     if (param == NULL) {
-	HTInfoMsg("External command is null");
+	HTInfoMsg(gettext("External command is null"));
 	return 0;
     }
 #endif

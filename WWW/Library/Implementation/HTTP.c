@@ -54,14 +54,6 @@ PUBLIC char * redirecting_url = NULL;	    /* Location: value. */
 PUBLIC BOOL permanent_redirection = FALSE;  /* Got 301 status? */
 PUBLIC BOOL redirect_post_content = FALSE;  /* Don't convert to GET? */
 
-extern BOOLEAN LYUserSpecifiedURL; /* Is the URL a goto? */
-
-extern BOOL keep_mime_headers;	 /* Include mime headers and force source dump */
-extern BOOL no_url_redirection;  /* Don't follow Location: URL for */
-extern char *http_error_file;	 /* Store HTTP status code in this file */
-extern BOOL traversal;		 /* TRUE if we are doing a traversal */
-extern BOOL dump_output_immediately;  /* TRUE if no interactive user */
-
 #ifdef USE_SSL
 PUBLIC SSL_CTX * ssl_ctx = NULL;	/* SSL ctx */
 PUBLIC SSL * SSL_handle = NULL;
@@ -259,7 +251,6 @@ PUBLIC int ws_netread(int fd, char *buf, int len)
 
     extern int win32_check_interrupt(void);	/* LYUtil.c */
     extern int lynx_timeout;			/* LYMain.c */
-    extern int AlertSecs;			/* LYMain.c */
     extern CRITICAL_SECTION critSec_READ;	/* LYMain.c */
 
 #define TICK	5
@@ -390,7 +381,7 @@ PRIVATE int HTLoadHTTP ARGS4 (
 {
   int s;			/* Socket number for returned data */
   CONST char *url = arg;	/* The URL which get_physical() returned */
-  char *command = NULL;		/* The whole command */
+  bstring *command = NULL;	/* The whole command */
   char *eol;			/* End of line if found */
   char *start_of_data;		/* Start of body of reply */
   int status;			/* tcp return */
@@ -646,18 +637,18 @@ use_tunnel:
 #ifdef USE_SSL
     if (do_connect) {
 	METHOD = "CONNECT";
-	StrAllocCopy(command, "CONNECT ");
+	BStrCopy0(command, "CONNECT ");
     } else
 #endif /* USE_SSL */
     if (do_post) {
 	METHOD = "POST";
-	StrAllocCopy(command, "POST ");
+	BStrCopy0(command, "POST ");
     } else if (do_head) {
 	METHOD = "HEAD";
-	StrAllocCopy(command, "HEAD ");
+	BStrCopy0(command, "HEAD ");
     } else {
 	METHOD = "GET";
-	StrAllocCopy(command, "GET ");
+	BStrCopy0(command, "GET ");
     }
 
     /*
@@ -668,24 +659,24 @@ use_tunnel:
 #ifdef USE_SSL
     if (using_proxy && !did_connect) {
 	if (do_connect)
-	    StrAllocCat(command, connect_host);
+	    BStrCat0(command, connect_host);
 	else
-	    StrAllocCat(command, p1+1);
+	    BStrCat0(command, p1+1);
     }
 #else
     if (using_proxy)
-	StrAllocCat(command, p1+1);
+	BStrCat0(command, p1+1);
 #endif /* USE_SSL */
     else
-	StrAllocCat(command, p1);
+	BStrCat0(command, p1);
     FREE(p1);
   }
   if (extensions) {
-      StrAllocCat(command, " ");
-      StrAllocCat(command, HTTP_VERSION);
+      BStrCat0(command, " ");
+      BStrCat0(command, HTTP_VERSION);
   }
 
-  StrAllocCat(command, crlf);	/* CR LF, as in rfc 977 */
+  BStrCat0(command, crlf);	/* CR LF, as in rfc 977 */
 
   if (extensions) {
       int n, i;
@@ -693,7 +684,7 @@ use_tunnel:
 
       if ((host = HTParse(anAnchor->address, "", PARSE_HOST)) != NULL) {
 	  strip_userid(host);
-	  HTSprintf(&command, "Host: %s%c%c", host, CR,LF);
+	  HTBprintf(&command, "Host: %s%c%c", host, CR,LF);
 	  FREE(host);
       }
 
@@ -726,17 +717,17 @@ use_tunnel:
 			    temp);
 	      len += strlen(linebuf);
 	      if (len > 252 && !first_Accept) {
-		  StrAllocCat(command, crlf);
+		  BStrCat0(command, crlf);
 		  HTSprintf0(&linebuf, "Accept: %s%s",
 				HTAtom_name(pres->rep),
 				temp);
 		  len = strlen(linebuf);
 	      }
-	      StrAllocCat(command, linebuf);
+	      BStrCat0(command, linebuf);
 	      first_Accept = FALSE;
 	  }
       }
-      HTSprintf(&command, "%s*/*;q=0.01%c%c",
+      HTBprintf(&command, "%s*/*;q=0.01%c%c",
 		    (first_Accept ?
 		       "Accept: " : ", "), CR, LF);
       first_Accept = FALSE;
@@ -765,17 +756,17 @@ use_tunnel:
 	  StrAllocCat(list, "compress");
 #endif
 	  if (list != 0) {
-	      HTSprintf(&command, "Accept-Encoding: %s%c%c", list, CR, LF);
+	      HTBprintf(&command, "Accept-Encoding: %s%c%c", list, CR, LF);
 	      free(list);
 	  }
       }
 
       if (language && *language) {
-	  HTSprintf(&command, "Accept-Language: %s%c%c", language, CR, LF);
+	  HTBprintf(&command, "Accept-Language: %s%c%c", language, CR, LF);
       }
 
       if (pref_charset && *pref_charset) {
-	  StrAllocCat(command, "Accept-Charset: ");
+	  BStrCat0(command, "Accept-Charset: ");
 	  StrAllocCopy(linebuf, pref_charset);
 	  if (linebuf[strlen(linebuf)-1] == ',')
 	      linebuf[strlen(linebuf)-1] = '\0';
@@ -784,8 +775,8 @@ use_tunnel:
 	      StrAllocCat(linebuf, ", iso-8859-1;q=0.01");
 	  if (strstr(linebuf, "us-ascii") == NULL)
 	      StrAllocCat(linebuf, ", us-ascii;q=0.01");
-	  StrAllocCat(command, linebuf);
-	  HTSprintf(&command, "%c%c", CR, LF);
+	  BStrCat0(command, linebuf);
+	  HTBprintf(&command, "%c%c", CR, LF);
       }
 
 #if 0
@@ -812,7 +803,7 @@ use_tunnel:
       **  new-httpd@apache.org from Koen Holtman, Jan 1999.
       */
       if (!do_post) {
-	  HTSprintf(&command, "Negotiate: trans%c%c", CR, LF);
+	  HTBprintf(&command, "Negotiate: trans%c%c", CR, LF);
       }
 #endif /* 0 */
 
@@ -823,25 +814,25 @@ use_tunnel:
       **  Also send it as a Cache-Control header for HTTP/1.1. - FM
       */
       if (reloading) {
-	  HTSprintf(&command, "Pragma: no-cache%c%c", CR, LF);
-	  HTSprintf(&command, "Cache-Control: no-cache%c%c", CR, LF);
+	  HTBprintf(&command, "Pragma: no-cache%c%c", CR, LF);
+	  HTBprintf(&command, "Cache-Control: no-cache%c%c", CR, LF);
       }
 
       if (LYUserAgent && *LYUserAgent) {
 	  char *cp = LYSkipBlanks(LYUserAgent);
 	  /* Won't send it at all if all blank - kw */
 	  if (*cp != '\0')
-	      HTSprintf(&command, "User-Agent: %.*s%c%c",
+	      HTBprintf(&command, "User-Agent: %.*s%c%c",
 		      INIT_LINE_SIZE-15, LYUserAgent, CR, LF);
       } else {
-	  HTSprintf(&command, "User-Agent: %s/%s  libwww-FM/%s%c%c",
+	  HTBprintf(&command, "User-Agent: %s/%s  libwww-FM/%s%c%c",
 		  HTAppName ? HTAppName : "unknown",
 		  HTAppVersion ? HTAppVersion : "0.0",
 		  HTLibraryVersion, CR, LF);
       }
 
       if (personal_mail_address && !LYNoFromHeader) {
-	  HTSprintf(&command, "From: %s%c%c", personal_mail_address, CR,LF);
+	  HTBprintf(&command, "From: %s%c%c", personal_mail_address, CR,LF);
       }
 
       if (!(LYUserSpecifiedURL ||
@@ -849,15 +840,15 @@ use_tunnel:
 	  strcmp(HTLoadedDocumentURL(), "")) {
 	  char *cp = LYRequestReferer;
 	  if (!cp) cp = HTLoadedDocumentURL(); /* @@@ Try both? - kw */
-	  StrAllocCat(command, "Referer: ");
+	  BStrCat0(command, "Referer: ");
 	  if (isLYNXIMGMAP(cp)) {
 	      char *cp1 = trimPoundSelector(cp);
-	      StrAllocCat(command, cp + LEN_LYNXIMGMAP);
+	      BStrCat0(command, cp + LEN_LYNXIMGMAP);
 	      restorePoundSelector(cp1);
 	  } else {
-	      StrAllocCat(command, cp);
+	      BStrCat0(command, cp);
 	  }
-	  HTSprintf(&command, "%c%c", CR, LF);
+	  HTBprintf(&command, "%c%c", CR, LF);
       }
 
       {
@@ -919,7 +910,7 @@ use_tunnel:
 		**  If auth is not NULL nor zero-length, it's
 		**  an Authorization header to be included. - FM
 		*/
-		HTSprintf(&command, "%s%c%c", auth, CR, LF);
+		HTBprintf(&command, "%s%c%c", auth, CR, LF);
 		CTRACE((tfp, "HTTP: Sending authorization: %s\n", auth));
 	    } else if (auth && *auth == '\0') {
 		/*
@@ -937,7 +928,7 @@ use_tunnel:
 		    if (did_connect)
 			HTTP_NETCLOSE(s, handle);
 #endif /* USE_SSL */
-		    FREE(command);
+		    BStrFree(command);
 		    FREE(hostname);
 		    FREE(docname);
 		    FREE(abspath);
@@ -978,8 +969,8 @@ use_tunnel:
 		**  It's a historical cookie, so signal to the
 		**  server that we support modern cookies. - FM
 		*/
-		StrAllocCat(command, "Cookie2: $Version=\"1\"");
-		StrAllocCat(command, crlf);
+		BStrCat0(command, "Cookie2: $Version=\"1\"");
+		BStrCat0(command, crlf);
 		CTRACE((tfp, "HTTP: Sending Cookie2: $Version =\"1\"\n"));
 	    }
 	    if (*cookie != '\0') {
@@ -988,9 +979,9 @@ use_tunnel:
 		**  Note that any folding of long strings has been
 		**  done already in LYCookie.c. - FM
 		*/
-		StrAllocCat(command, "Cookie: ");
-		StrAllocCat(command, cookie);
-		StrAllocCat(command, crlf);
+		BStrCat0(command, "Cookie: ");
+		BStrCat0(command, cookie);
+		BStrCat0(command, crlf);
 		CTRACE((tfp, "HTTP: Sending Cookie: %s\n", cookie));
 	    }
 	    FREE(cookie);
@@ -1014,7 +1005,7 @@ use_tunnel:
 	    **	an Authorization or Proxy-Authorization
 	    **	header to be included. - FM
 	    */
-	    HTSprintf(&command, "%s%c%c", auth, CR, LF);
+	    HTBprintf(&command, "%s%c%c", auth, CR, LF);
 	    CTRACE((tfp, (auth_proxy ?
 			 "HTTP: Sending proxy authorization: %s\n" :
 			 "HTTP: Sending authorization: %s\n"),
@@ -1034,7 +1025,7 @@ use_tunnel:
 	    } else {
 		if (traversal || dump_output_immediately)
 		    HTAlert(FAILED_NEED_PASSWD);
-		FREE(command);
+		BStrFree(command);
 		FREE(hostname);
 		FREE(docname);
 		status = HT_NOT_LOADED;
@@ -1057,50 +1048,52 @@ use_tunnel:
 #endif /* USE_SSL */
 	do_post) {
 	CTRACE((tfp, "HTTP: Doing post, content-type '%s'\n",
-		     anAnchor->post_content_type ? anAnchor->post_content_type
-						 : "lose"));
-	HTSprintf(&command, "Content-type: %s%c%c",
+		     anAnchor->post_content_type
+		     ? anAnchor->post_content_type
+		     : "lose"));
+	HTBprintf(&command, "Content-type: %s%c%c",
 		   anAnchor->post_content_type
 		   ? anAnchor->post_content_type
 		   : "lose",
 		  CR, LF);
-	/*
-	 * FIXME: Ack!  This assumes non-binary data!  Icky!
-	 */
-	HTSprintf(&command, "Content-length: %d%c%c",
-		  (anAnchor->post_data)
-		   ? strlen (anAnchor->post_data)
+
+	HTBprintf(&command, "Content-length: %d%c%c",
+		  !isBEmpty(anAnchor->post_data)
+		   ? BStrLen(anAnchor->post_data)
 		   : 0,
 		  CR, LF);
 
-	StrAllocCat(command, crlf);	/* Blank line means "end" of headers */
+	BStrCat0(command, crlf);	/* Blank line means "end" of headers */
 
-	StrAllocCat(command, anAnchor->post_data);
+	BStrCat(command, anAnchor->post_data);
     }
     else
-	StrAllocCat(command, crlf);	/* Blank line means "end" of headers */
+	BStrCat0(command, crlf);	/* Blank line means "end" of headers */
 
+    if (TRACE) {
+	CTRACE((tfp, "Writing:\n"));
+	trace_bstring(command);
 #ifdef USE_SSL
-  CTRACE((tfp, "Writing:\n%s%s----------------------------------\n",
-	       command,
+	CTRACE((tfp, "%s",
 	       (anAnchor->post_data && !do_connect ? crlf : "")));
 #else
-  CTRACE((tfp, "Writing:\n%s%s----------------------------------\n",
-	       command,
+	CTRACE((tfp, "%s",
 	       (anAnchor->post_data ? crlf : "")));
 #endif /* USE_SSL */
+	CTRACE((tfp, "----------------------------------\n"));
+    }
 
   _HTProgress (gettext("Sending HTTP request."));
 
 #ifdef    NOT_ASCII  /* S/390 -- gil -- 0548 */
   {   char *p;
 
-      for ( p = command; p < command + strlen(command); p++ )
+      for ( p = BStrData(command); p < BStrData(command) + BStrLen(command); p++ )
 	  *p = TOASCII(*p);
   }
 #endif /* NOT_ASCII */
-  status = HTTP_NETWRITE(s, command, (int)strlen(command), handle);
-  FREE(command);
+  status = HTTP_NETWRITE(s, BStrData(command), BStrLen(command), handle);
+  BStrFree(command);
   FREE(linebuf);
   if (status <= 0) {
       if (status == 0) {

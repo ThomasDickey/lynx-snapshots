@@ -543,9 +543,9 @@ PRIVATE char *HTAlloc ARGS2(char *, ptr, size_t, length)
 #endif
 
 /*
- * Replacement for sprintf, allocates buffer on the fly according to what's needed
- * for its arguments.  Unlike sprintf, this always concatenates to the destination
- * buffer, so we do not have to provide both flavors.
+ * Replacement for sprintf, allocates buffer on the fly according to what's
+ * needed for its arguments.  Unlike sprintf, this always concatenates to the
+ * destination buffer, so we do not have to provide both flavors.
  */
 typedef enum { Flags, Width, Prec, Type, Format } PRINTF;
 
@@ -789,9 +789,9 @@ PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf ARGS4(
 #undef SAVE_TIME_NOT_SPACE
 
 /*
- * Replacement for sprintf, allocates buffer on the fly according to what's needed
- * for its arguments.  Unlike sprintf, this always concatenates to the destination
- * buffer.
+ * Replacement for sprintf, allocates buffer on the fly according to what's
+ * needed for its arguments.  Unlike sprintf, this always concatenates to the
+ * destination buffer.
  */
 /* Note: if making changes, also check the memory tracking version
  * LYLeakHTSprintf in LYLeaks.c. - kw */
@@ -1063,6 +1063,7 @@ PUBLIC void HTEndParam ARGS3(
 {
     CONST char *last;
     int count;
+
     count = HTCountCommandArgs (command);
     if (count < number)
 	number = count;
@@ -1074,11 +1075,11 @@ PUBLIC void HTEndParam ARGS3(
 }
 
 
-#ifdef EXP_FILE_UPLOAD
-/*	bstring Allocate and Concatenate
-*/
+/*	Binary-strings (may have embedded nulls).
+ *	Some modules (HTGopher) assume there is a null on the end, anyway.
+ */
 
-/*	Allocate a new copy of a bstring, and returns it
+/*	Allocate a new bstring, and return it.
 */
 PUBLIC void HTSABCopy ARGS3(
 	bstring**,	dest,
@@ -1086,51 +1087,198 @@ PUBLIC void HTSABCopy ARGS3(
 	int,		len)
 {
     bstring *t;
-    CTRACE((tfp, "HTSABCopy(%p, %p, %d)\n", dest, src, len));
-    /* if we already have a bstring ** ... */
-    if (dest) {
-	/* ... with a valid bstring *, free it ... */
-	if (*dest) {
-	    FREE((*dest)->str);
-	    FREE(*dest);
+    unsigned need = len + 1;
+
+    CTRACE2(TRACE_BSTRING, (tfp, "HTSABCopy(%p, %p, %d)\n", dest, src, len));
+    HTSABFree(dest);
+    if (src) {
+	if (TRACE_BSTRING) {
+	    CTRACE((tfp, "===    %4d:", len));
+	    trace_bstring2(src, len);
+	    CTRACE((tfp, "\n"));
 	}
-	*dest = malloc(sizeof(bstring));
-	if (src) {
-	    CTRACE((tfp, "%% [%s]\n", src));
-	    t = (bstring*) malloc(sizeof(bstring));
-	    if (t == NULL)
-		outofmem(__FILE__, "HTSABCopy");
-	    t->str = (char *) malloc (len);
-	    if (t->str == NULL)
-		outofmem(__FILE__, "HTSABCopy");
-	    memcpy (t->str, src, len);
-	    t->len = len;
-	    *dest = t;
-	}
+	if ((t = (bstring*) malloc(sizeof(bstring))) == NULL)
+	    outofmem(__FILE__, "HTSABCopy");
+	if ((t->str = (char *) malloc (need)) == NULL)
+	    outofmem(__FILE__, "HTSABCopy");
+	memcpy (t->str, src, len);
+	t->len = len;
+	t->str[t->len] = '\0';
+	*dest = t;
+    }
+    if (TRACE_BSTRING) {
+	CTRACE((tfp, "=>     %4d:", BStrLen(*dest)));
+	trace_bstring(*dest);
+	CTRACE((tfp, "\n"));
     }
 }
 
+/*
+ * Initialize with a null-terminated string (discards the null).
+ */
+PUBLIC void HTSABCopy0 ARGS2(
+	bstring**,	dest,
+	CONST char *,	src)
+{
+    HTSABCopy(dest, src, strlen(src));
+}
+
+/*
+ * Append a block of memory to a bstring.
+ */
 PUBLIC void HTSABCat ARGS3(
 	bstring **,	dest,
 	CONST char *,	src,
 	int,		len)
 {
     bstring *t = *dest;
+
+    CTRACE2(TRACE_BSTRING, (tfp, "HTSABCat(%p, %p, %d)\n", dest, src, len));
     if (src) {
+	unsigned need = len + 1;
+
+	if (TRACE_BSTRING) {
+	    CTRACE((tfp, "===    %4d:", len));
+	    trace_bstring2(src, len);
+	    CTRACE((tfp, "\n"));
+	}
 	if (t) {
-	    int length = t->len;
-	    t->str = (char *)realloc(t->str, length + len);
-	} else {
-	    t = typecalloc(bstring);
-	    if (t == NULL)
+	    unsigned length = t->len + need;
+	    if ((t->str = (char *)realloc(t->str, length)) == NULL)
 		outofmem(__FILE__, "HTSACat");
-	    t->str = (char *)malloc(len);
+	} else {
+	    if ((t = typecalloc(bstring)) == NULL)
+		outofmem(__FILE__, "HTSACat");
+	    t->str = (char *)malloc(need);
 	}
 	if (t->str == NULL)
 	    outofmem(__FILE__, "HTSACat");
 	memcpy (t->str + t->len, src, len);
 	t->len += len;
+	t->str[t->len] = '\0';
 	*dest = t;
     }
+    if (TRACE_BSTRING) {
+	CTRACE((tfp, "=>     %4d:", BStrLen(*dest)));
+	trace_bstring(*dest);
+	CTRACE((tfp, "\n"));
+    }
 }
-#endif /* EXP_FILE_UPLOAD */
+
+/*
+ * Append a null-terminated string (discards the null).
+ */
+PUBLIC void HTSABCat0 ARGS2(
+	bstring**,	dest,
+	CONST char *,	src)
+{
+    HTSABCat(dest, src, strlen(src));
+}
+
+/*
+ * Compare two bstring's for equality
+ */
+PUBLIC BOOL HTSABEql   ARGS2(
+	bstring *,	a,
+	bstring *,	b)
+{
+    unsigned len_a = (a != 0) ? a->len : 0;
+    unsigned len_b = (b != 0) ? b->len : 0;
+
+    if (len_a == len_b) {
+	if (len_a == 0
+	 || memcmp(a->str, b->str, a->len) == 0)
+	    return TRUE;
+    }
+    return FALSE;
+}
+
+/*
+ * Deallocate a bstring.
+ */
+PUBLIC void HTSABFree ARGS1(
+	bstring **,	ptr)
+{
+    if (*ptr != NULL) {
+	FREE((*ptr)->str);
+	FREE(*ptr);
+	*ptr = NULL;
+    }
+}
+
+/*
+ * Use this function to perform formatted sprintf's onto the end of a bstring.
+ * The bstring may contain embedded nulls; the formatted portions must not.
+ */
+#ifdef ANSI_VARARGS
+PUBLIC bstring * HTBprintf (bstring ** pstr, CONST char * fmt, ...)
+#else
+PUBLIC bstring * HTBprintf ()
+#endif
+{
+    bstring *result = 0;
+    char *temp = 0;
+    va_list ap;
+
+    LYva_start(ap,fmt);
+    {
+#if !ANSI_VARARGS
+	char **		pstr = va_arg(ap, char **);
+	CONST char *	fmt  = va_arg(ap, CONST char *);
+#endif
+	temp = StrAllocVsprintf(&temp, 0, fmt, &ap);
+	if (!isEmpty(temp)) {
+	    HTSABCat (pstr, temp, strlen(temp));
+	}
+	FREE(temp);
+	result = *pstr;
+    }
+    va_end(ap);
+
+    return (result);
+}
+
+/*
+ * Write binary-data to the logfile, making it safe for most editors to view.
+ * That is most, since we do not restrict line-length.  Nulls and other
+ * non-printing characters are addressed.
+ */
+PUBLIC void trace_bstring2 ARGS2(
+	CONST char *,	text,
+	int,		size)
+{
+    int n;
+
+    if (text != 0) {
+	for (n = 0; n < size; ++n) {
+	    int ch = UCH(text[n]);
+	    switch (ch) {
+	    case '\\':
+		fputs("\\\\", tfp);
+		break;
+	    case '\r':
+		fputs("\\r", tfp);
+		break;
+	    case '\t':
+		fputs("\\t", tfp);
+		break;
+	    case '\f':
+		fputs("\\f", tfp);
+		break;
+	    default:
+		if (isprint(ch) || isspace(ch)) {
+		    fputc(ch, tfp);
+		} else {
+		    fprintf(tfp, "\\%03o", ch);
+		}
+		break;
+	    }
+	}
+    }
+}
+
+PUBLIC void trace_bstring ARGS1(
+	bstring *,	data)
+{
+    trace_bstring2(BStrData(data), BStrLen(data));
+}

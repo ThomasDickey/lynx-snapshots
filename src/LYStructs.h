@@ -38,7 +38,7 @@ typedef struct {
     /* FIXME: see DocAddress */
     char * title;
     char * address;
-    char * post_data;
+    bstring * post_data;
     char * post_content_type;
     char * bookmark;
     BOOL   isHEAD;

@@ -17,10 +17,18 @@
 #ifdef SAVE_TIME_NOT_SPACE
 #define CELLS_GROWBY 16
 #define ROWS_GROWBY 16
-#else
+#define ROWS_GROWBY_DIVISOR 2
+#else  /* This is very silly, and leads to *larger* memory consumption... */
 #define CELLS_GROWBY 2
 #define ROWS_GROWBY 2
+#define ROWS_GROWBY_DIVISOR 10
 #endif
+
+#define  REUSE_ROWS_AS_CELLS_POOLS 0	/* Turns out to be not beneficial */
+
+/* Experiments show that 2 is better than 1.5 is better than 1.25 (all by
+   a small margin only)??? */
+#define CELLS_GROWBY_FACTOR 2
 
 #ifdef USE_CURSES_PADS
 #  define MAX_STBL_POS (LYwideLines ? MAX_COLS - 1 : LYcols-1)
@@ -123,10 +131,20 @@ typedef struct _STable_rowinfo {
 	enum ended_state ended;	/* if we saw </tr> etc */
 	int	content;	/* Whether contains end-of-cell etc */
 	int	offset;		/* >=0 after line break in a multiline cell */
-	int	allocated;	/* number of table cells allocated */
+	int	allocated;	/* number of table cells allocated or 0
+				   if the .cells should not be free()ed */
 	STable_cellinfo * cells;
 	int	alignment;	/* global align attribute for this row */
 } STable_rowinfo;
+
+struct _STable_chunk;
+typedef struct _STable_chunk {
+    struct _STable_chunk *next;
+    int alloc_cells;
+    int used_cells;
+    STable_cellinfo cells[1];
+} STable_chunk;
+
 
 struct _STable_info {
 #ifdef EXP_NESTED_TABLES
@@ -140,7 +158,8 @@ struct _STable_info {
 	int	maxpos;		/* max. of max. cell pos's of any row */
 	int	allocated_rows; /* number of rows allocated */
 	int	allocated_sumcols;	/* number of sumcols allocated */
-	int	ncolinfo;		/* number of COL info collected */
+	int	ncolinfo;	/* number of COL info collected */
+	int	last_reserved;	/* -1 or last line with reserved cells */
 	STable_cellinfo * sumcols; /* for summary (max len/pos) col info */
 	STable_rowinfo * rows;
 	STable_rowinfo	rowspans2eog;
@@ -149,6 +168,8 @@ struct _STable_info {
 	short	pending_colgroup_align;
 	int	pending_colgroup_next;
 	STable_states s;
+	STable_chunk *free_chunks;
+	STable_chunk *used_chunks;
 };
 
 /*
@@ -205,7 +226,7 @@ PRIVATE int Stbl_finishCellInRow PARAMS((
     int			end_td,
     int			lineno,
     int			pos));
-PRIVATE int Stbl_finishRowInTable PARAMS((
+PRIVATE int Stbl_DOfinishRowInTable PARAMS((
     STable_info *	me));
 
 PRIVATE CONST char * cellstate_s ARGS1(
@@ -244,10 +265,12 @@ PUBLIC struct _STable_info * Stbl_startTABLE ARGS1(
 	me->pending_colgroup_align = HT_ALIGN_NONE;
 	me->s.x_td = -1;
 	me->s.icell_core = -1;
+	me->last_reserved = -1;
 #ifdef EXP_NESTED_TABLES
 	if (nested_tables)
 	    me->enclosing = 0;
 #endif
+	me->used_chunks = me->free_chunks = NULL;
     }
     return me;
 }
@@ -259,6 +282,95 @@ PRIVATE void free_rowinfo ARGS1(
 	FREE(me->cells);
     }
 }
+
+PRIVATE int addmem_rowinfo ARGS2(
+    STable_info *,	me,
+    int,		incr)
+{
+    int i;
+    int growby = 0;
+    STable_rowinfo *rows, *row;
+
+    while (me->nrows + incr + 1 > me->allocated_rows + growby)
+	growby += ROWS_GROWBY + me->allocated_rows/ROWS_GROWBY_DIVISOR;
+    if (growby) {
+	if (me->allocated_rows == 0 && !me->rows) {
+	    rows = typecallocn(STable_rowinfo, growby);
+	} else {
+#if REUSE_ROWS_AS_CELLS_POOLS		/* Turns out to be not beneficial */
+	    /* Work in a regime which has a chance to work efficiently
+	       even with lousy malloc()s: do not realloc() until we
+	       have many (2) free chunks available (possible with very
+	       simple structure of each row).  Simultaneously,
+	       make it possible to use an effecient realloc() which
+	       would grow the region in place - so DO use realloc() if
+	       we already have many free chunks to put the cellinfo into.
+	     */
+	    if ( me->free_chunks && me->free_chunks->next
+		 || (me->allocated_rows*sizeof(STable_rowinfo) <
+		    (sizeof(STable_chunk)
+		     + (CELLS_GROWBY-1)*sizeof(STable_cellinfo)))
+		 || 1)
+#endif
+	    {
+		rows = realloc(me->rows,
+			       (me->allocated_rows + growby)
+			       * sizeof(STable_rowinfo));
+	    }
+#if REUSE_ROWS_AS_CELLS_POOLS
+	    else {
+		rows = malloc((me->allocated_rows + growby)
+			      * sizeof(STable_rowinfo));
+		if (rows) {
+		    STable_chunk *p;
+
+		    memcpy(rows, me->rows,
+			   (me->allocated_rows + growby)
+			   * sizeof(STable_rowinfo));
+		    p = (STable_chunk*)me->rows;
+		    p->alloc_cells =
+			1 + (me->allocated_rows*sizeof(STable_rowinfo)
+			     - sizeof(STable_chunk))/sizeof(STable_cellinfo);
+		    p->used_cells = 0;
+		    p->next = me->free_chunks;
+		    me->free_chunks = p;
+		}
+	    }
+#endif
+	    for (i = 0; rows && i < growby; i++) {
+		row = rows + me->allocated_rows + i;
+		if (!me->rowspans2eog.allocated) {
+		    row->allocated = 0;
+		    row->cells = NULL;
+		} else {
+		    row->cells = typecallocn(STable_cellinfo,
+					     me->rowspans2eog.allocated);
+		    if (row->cells) {
+			row->allocated = me->rowspans2eog.allocated;
+			memcpy(row->cells, me->rowspans2eog.cells,
+			       row->allocated * sizeof(STable_cellinfo));
+		    } else {
+			FREE(rows);
+			break;
+		    }
+		}
+		row->ncells = 0;
+		row->fixed_line = NO;
+		row->alignment = HT_ALIGN_NONE;
+		row->offset = 0;
+		row->content = 0;
+	    }
+	}
+	if (rows) {
+	    me->allocated_rows += growby;
+	    me->rows = rows;
+	} else {
+	    return 0;
+	}
+    }
+    return 1;
+}
+
 
 PUBLIC void Stbl_free ARGS1(
     STable_info *,	me)
@@ -274,6 +386,17 @@ PUBLIC void Stbl_free ARGS1(
     free_rowinfo(&me->rowspans2eog);
     if (me)
 	FREE(me->sumcols);
+    if (me) {
+	STable_chunk *this;
+	while ((this = me->free_chunks)) {
+	    me->free_chunks = this->next;
+	    FREE(this);
+	}
+	while ((this = me->used_chunks)) {
+	    me->used_chunks = this->next;
+	    FREE(this);
+	}
+    }
     FREE(me);
 }
 
@@ -948,9 +1071,7 @@ PRIVATE int Stbl_reserveCellsInTable ARGS4(
     int,		colspan,
     int,		rowspan)
 {
-    STable_rowinfo *rows, *row;
-    int growby;
-    int i;
+    int i, last;
 
     if (me->nrows <= 0)
 	return -1;		/* must already have at least one row */
@@ -969,39 +1090,13 @@ PRIVATE int Stbl_reserveCellsInTable ARGS4(
 	Stbl_reserveCellsInRow(&me->rowspans2eog, icell, colspan);
     }
 
-    growby = me->nrows + rowspan - 1 - me->allocated_rows;
-    if (growby > 0) {
-	rows = realloc(me->rows,
-		       (me->allocated_rows + growby)
-		       * sizeof(STable_rowinfo));
-	if (!rows)
-	    return 0; /* ignore silently, no free memory, may be recoverable */
-	for (i = 0; i < growby; i++) {
-	    row = rows + me->allocated_rows + i;
-	    row->allocated = 0;
-	    row->offset = 0;
-	    row->content = 0;
-	    if (!me->rowspans2eog.allocated) {
-		row->cells = NULL;
-	    } else {
-		row->cells = typecallocn(STable_cellinfo,
-					 me->rowspans2eog.allocated);
-		if (row->cells) {
-		    row->allocated = me->rowspans2eog.allocated;
-		    memcpy(row->cells, me->rowspans2eog.cells,
-			   row->allocated * sizeof(STable_cellinfo));
-		}
-	    }
-	    row->ncells = 0;
-	    row->fixed_line = NO;
-	    row->alignment = HT_ALIGN_NONE;
-	}
-	me->allocated_rows += growby;
-	me->rows = rows;
-    }
-    for (i = me->nrows;
-	 i < (rowspan == 0 ? me->allocated_rows : me->nrows + rowspan - 1);
-	 i++) {
+    if (!addmem_rowinfo(me, rowspan - 1))
+	return 0; /* ignore silently, no free memory, may be recoverable */
+
+    last = (rowspan == 0 ? me->allocated_rows : me->nrows + rowspan - 1);
+    if (me->last_reserved < last)
+	me->last_reserved = last;
+    for (i = me->nrows; i < last; i++) {
 	if (!me->rows[i].allocated) {
 	    me->rows[i].cells = typecallocn(STable_cellinfo, icell + colspan);
 	    if (!me->rows[i].cells)
@@ -1040,7 +1135,6 @@ PUBLIC int Stbl_addRowToTable ARGS3(
     int,		alignment,
     int,		lineno)
 {
-    STable_rowinfo *rows, *row;
     STable_states * s = &me->s;
 
     CTRACE2(TRACE_TRST,
@@ -1051,56 +1145,14 @@ PUBLIC int Stbl_addRowToTable ARGS3(
 	    me->rows[me->nrows-1].cells[me->rows[me->nrows-1].ncells - 1].len = s->pending_len;
 	s->pending_len = 0;
     }
-    Stbl_finishRowInTable(me);
+    Stbl_DOfinishRowInTable(me);
     if (me->nrows > 0 && me->rows[me->nrows-1].Line == lineno)
 	me->rows[me->nrows-1].Line = -1;
     s->pending_len = 0;
     s->x_td = -1;
 
-    {
-	int i;
-	int growby = 0;
-	while (me->nrows + 2 > me->allocated_rows + growby)
-	    growby += ROWS_GROWBY;
-	if (growby) {
-	    if (me->allocated_rows == 0 && !me->rows) {
-		rows = typecallocn(STable_rowinfo, growby);
-	    } else {
-		rows = realloc(me->rows,
-				  (me->allocated_rows + growby)
-				  * sizeof(STable_rowinfo));
-		for (i = 0; rows && i < growby; i++) {
-		    row = rows + me->allocated_rows + i;
-		    if (!me->rowspans2eog.allocated) {
-			row->allocated = 0;
-			row->cells = NULL;
-		    } else {
-			row->cells = typecallocn(STable_cellinfo,
-						 me->rowspans2eog.allocated);
-			if (row->cells) {
-			    row->allocated = me->rowspans2eog.allocated;
-			    memcpy(row->cells, me->rowspans2eog.cells,
-				   row->allocated * sizeof(STable_cellinfo));
-			} else {
-			    FREE(rows);
-			    break;
-			}
-		    }
-		    row->ncells = 0;
-		    row->fixed_line = NO;
-		    row->alignment = HT_ALIGN_NONE;
-		    row->offset = 0;
-		    row->content = 0;
-		}
-	    }
-	    if (rows) {
-		me->allocated_rows += growby;
-		me->rows = rows;
-	    } else {
-		return -1;
-	    }
-	}
-    }
+    if (!addmem_rowinfo(me, 1))
+	return -1;
 
     me->rows[me->nrows].Line = lineno;
     if (me->nrows == 0)
@@ -1111,6 +1163,49 @@ PUBLIC int Stbl_addRowToTable ARGS3(
 	me->rows[me->nrows].alignment =
 	    (me->rowgroup_align==HT_ALIGN_NONE) ?
 				  me->alignment : me->rowgroup_align;
+    if (me->nrows >= 2	/* We may use RESERVEDCELL flag of cells in nrows-1 */
+	&& me->rows[me->nrows - 2].allocated > me->rows[me->nrows - 2].ncells) {
+	int c = me->rows[me->nrows - 2].ncells;
+	STable_cellinfo *p  = me->rows[me->nrows - 2].cells;
+
+#if 0	/* Leads to no memory savings and quadratic time with EMX malloc */
+	/* Do not need extra cells any more */
+	me->rows[me->nrows - 2].cells = realloc(p,c * sizeof(STable_cellinfo));
+	me->rows[me->nrows - 2].allocated = me->rows[me->nrows - 2].ncells;
+#else
+	if (!me->used_chunks
+	    || ((me->used_chunks->alloc_cells - me->used_chunks->used_cells)
+		< c)) {
+	    if (me->free_chunks && (me->free_chunks->alloc_cells >= c)) {
+	        STable_chunk *p2 = me->free_chunks;
+
+		me->free_chunks = p2->next;
+		p2->next = me->used_chunks;
+		me->used_chunks = p2;
+	    } else {			/* Need to get a new guy */
+	        STable_chunk *p2;
+
+		if (c < CELLS_GROWBY)
+		    c = CELLS_GROWBY;
+		if ( me->used_chunks
+		     && c < me->used_chunks->alloc_cells*CELLS_GROWBY_FACTOR )
+		    c = 2*me->used_chunks->alloc_cells * CELLS_GROWBY_FACTOR;
+		p2 = malloc(sizeof(STable_chunk) + (c-1)*sizeof(STable_cellinfo));
+		p2->alloc_cells = c;
+		p2->used_cells = 0;
+		p2->next = me->used_chunks;
+		me->used_chunks = p2;
+	    }
+	}
+	memcpy(me->used_chunks->cells + me->used_chunks->used_cells,
+	       p, me->rows[me->nrows - 2].ncells * sizeof(STable_cellinfo));
+	me->rows[me->nrows - 2].cells =
+	    me->used_chunks->cells + me->used_chunks->used_cells;
+	me->used_chunks->used_cells += me->rows[me->nrows - 2].ncells;
+	me->rows[me->nrows - 2].allocated = 0; /* Do not FREE() */
+	FREE(p);
+#endif
+    }
     me->nrows++;
     if (me->pending_colgroup_next > me->ncolinfo) {
 	me->ncolinfo = me->pending_colgroup_next;
@@ -1124,19 +1219,20 @@ PUBLIC int Stbl_addRowToTable ARGS3(
 /*
  * Returns -1 on error, otherwise current number of rows.
  */
-PRIVATE int Stbl_finishRowInTable ARGS1(
+PRIVATE int Stbl_DOfinishRowInTable ARGS1(
     STable_info *,	me)
 {
     STable_rowinfo *lastrow;
     STable_states * s = &me->s;
     int ncells;
 
-    CTRACE2(TRACE_TRST, (tfp, "TRST:Stbl_finishRowInTable()\n"));
+    CTRACE2(TRACE_TRST, (tfp, "TRST:Stbl_DOfinishRowInTable()\n"));
     if (!me->rows || !me->nrows)
 	return -1;		/* no row started! */
     lastrow = me->rows + (me->nrows - 1);
     ncells = lastrow->ncells;
-    lastrow->ended = ROW_ended_by_endtr;
+    if (lastrow->ended != ROW_ended_by_splitline)
+	lastrow->ended = ROW_ended_by_endtr;
     if (lastrow->ncells > 0) {
 	if (s->pending_len > 0)
 	    lastrow->cells[lastrow->ncells - 1].len = s->pending_len;
@@ -1331,11 +1427,13 @@ PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
 	    lastrow = me->rows + (me->nrows - 1);
 	    prev_row = me->rows + prev_row_n;
 	    me->allocated_rows++;
+	    me->last_reserved++;
 
 	    /* Insert a duplicate row after lastrow */
 	    for (n = me->allocated_rows - me->nrows - 1; n >= 0; --n)
 		lastrow[n + 1] = lastrow[n];
 
+	    lastrow[1].content = 0;
 	    /* Ignore cells, they belong to the next row now */
 	    lastrow->allocated = 0;
 	    lastrow->cells = 0;
@@ -1498,6 +1596,103 @@ PUBLIC int Stbl_addCellToTable ARGS8(
     if (me->maxpos > /* @@@ max. line length we can accept */ MAX_STBL_POS)
 	return -1;
     return 0;
+}
+
+PUBLIC BOOL Stbl_at_start_of_cell ARGS3(
+    STable_info *,	me,
+    int,		lineno,
+    int,		pos)
+{
+    STable_rowinfo *lastrow;
+    int icell;
+
+    CTRACE2(TRACE_TRST,
+	    (tfp, "TRST:Stbl_at_start_of_cell(lineno=%d, pos=%d): ",
+		  lineno, pos));
+    if (me->nrows == 0)
+	goto yes;
+    lastrow = me->rows + (me->nrows - 1);
+    if (lastrow->ended != ROW_not_ended)
+	goto no;			/* E.g., may be processing </tr> */
+    icell = lastrow->ncells - 1;
+    if (icell < 0)
+	goto yes;
+    if (lastrow->cells[icell].cLine != lineno
+	|| lastrow->cells[icell].pos != pos) {
+      no:
+	CTRACE2(TRACE_TRST, (tfp, "no\n"));
+	return FALSE;			/* XXXX  What to do if cLine is -1? */
+    }
+  yes:
+    CTRACE2(TRACE_TRST, (tfp, "yes\n"));
+    return TRUE;
+}
+
+PUBLIC void Stbl_finishRowInTable ARGS1(
+    STable_info *,	me)
+{
+    STable_rowinfo *lastrow;
+
+    CTRACE2(TRACE_TRST,
+	    (tfp, "TRST:Stbl_finishRowInTable()\n"));
+    if (me->nrows <= 0)
+	return;
+    lastrow = me->rows + (me->nrows - 1);
+    if (lastrow->ended == ROW_not_ended)
+	lastrow->ended = ROW_ended_by_endtr;
+}
+
+/* Assumes that the current pos is at beginning of line.
+   Checks whether the last row was a fake row, and undo it if possible.
+   Returns TRUE if the last line (empty!) can be safely trimmed. */
+PUBLIC int Stbl_trimFakeRows ARGS3(
+    STable_info *,	me,
+    int,		lineno,
+    int,		pos GCC_UNUSED)
+{
+    STable_rowinfo *prevrow, *lastrow;
+    int icell;
+
+    CTRACE2(TRACE_TRST, (tfp, "TRST:Stbl_trimFakeRows()\n"));
+
+    /* XXXX The logic may be much better if we support removal of
+       RESERVED cells.  Until this is done, bail out early: */
+    if (me->nrows <= 0 || me->nrows <= me->last_reserved)
+	return 0;
+    lastrow = me->rows + (me->nrows - 1);
+    icell = lastrow->ncells - 1;
+    if (icell >= 0 && lastrow->cells[icell].cLine < lineno) {
+	/* The last cell start on a preceeding line; keep lastrow */
+	lastrow->ended = ROW_not_ended; /* Give it new life */
+	/* We do not use state info for a lot of things any more, so do
+	   not try to do anything special here */
+	me->s.state = CS__0new;		/* This is enough to revive things. */
+	me->s.x_td = lastrow->cells[lastrow->ncells - 1].pos;
+	me->s.lineno = lastrow->cells[lastrow->ncells - 1].cLine;
+	CTRACE2(TRACE_TRST, (tfp, "  un-ended the last row.\n"));
+	return 1;
+    }
+    if (me->nrows <= 1 || !(lastrow->content & IS_CONTINUATION_OF_CELL))
+	return 0;
+    prevrow = me->rows + (me->nrows - 2);
+    if (prevrow->ncells != icell + 1)	/* Empty cells were added after the break */
+	return 0;
+    if ( prevrow->ended != ROW_ended_by_splitline) /* Lastrow non-fake */
+	return 0;
+    /* XXXX should remove duplicate RESERVED stuff too */
+    me->nrows--;
+    if (lastrow->cells && lastrow->allocated == 0) /* Moved to pool */
+	lastrow->cells = NULL;
+    lastrow->ncells = 0;
+    lastrow->content = 0;
+    prevrow->ended = ROW_not_ended;	/* Give it new life */
+    /* We do not use state info for a lot of things any more, so do
+       not try to do anything special here */
+    me->s.state = CS__0new;
+    me->s.x_td = prevrow->cells[prevrow->ncells - 1].pos;
+    me->s.lineno = prevrow->cells[prevrow->ncells - 1].cLine;
+    CTRACE2(TRACE_TRST, (tfp, "  Removed the last row.\n"));
+    return 1;
 }
 
 /*
@@ -1726,7 +1921,7 @@ PUBLIC int Stbl_finishTABLE ARGS1(
 	    me->rows[me->nrows-1].cells[me->rows[me->nrows-1].ncells - 1].len = s->pending_len;
 	s->pending_len = 0;
     }
-    Stbl_finishRowInTable(me);
+    Stbl_DOfinishRowInTable(me);
     /* take into account offsets on multi-line cells.
        XXX We cannot do it honestly, since two cells on the same row may
        participate in multi-line table entries, and we preserve only
@@ -1905,11 +2100,18 @@ PUBLIC int Stbl_getFixupPositions ARGS4(
     STable_rowinfo * row;
     int j;
     int ninserts = -1;
+    static int prev_row = 0;
+
     if (!me || !me->nrows)
 	return -1;
-    for (j = 0; j < me->nrows; j++) {
+    if (prev_row < me->nrows && me->rows[prev_row].Line <= lineno)
+	j = prev_row;
+    else
+	j = 0;
+    for ( ; j < me->nrows; j++) {
 	row = me->rows + j;
 	if (row->Line == lineno) {
+	    prev_row = j;
 	    ninserts = get_fixup_positions(row, oldpos, newpos,
 					   me->sumcols);
 	    break;

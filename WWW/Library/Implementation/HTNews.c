@@ -52,6 +52,7 @@ PRIVATE char HTNewsGetCharacter NOPARAMS;
 #endif /* USE_SSL */
 
 #include <HTML.h>
+#include <HTAccess.h>
 #include <HTParse.h>
 #include <HTFormat.h>
 #include <HTAlert.h>
@@ -74,7 +75,6 @@ struct _HTStream
 
 #define LINE_LENGTH 512			/* Maximum length of line of ARTICLE etc */
 #define GROUP_NAME_LENGTH	256	/* Maximum length of group name */
-extern BOOL using_proxy;	/* Are we using an NNTP proxy? */
 
 /*
 **  Module-wide variables.

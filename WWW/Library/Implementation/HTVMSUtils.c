@@ -20,6 +20,7 @@
 #include <UCMap.h>
 #include <UCAux.h>
 #include <HTFTP.h>
+#include <HTTCP.h>
 #include <HTVMSUtils.h>
 #include <ssdef.h>
 #include <jpidef.h>
@@ -31,11 +32,12 @@
 #include <starlet.h>
 #include <rmsdef.h>
 
+#include <LYGlobalDefs.h>
 #include <LYUtils.h>
 #include <LYLeaks.h>
 #include <LYStrings.h>
 
-PUBLIC BOOL HTVMSFileVersions=FALSE; /* Include version numbers in listing? */
+PUBLIC BOOL HTVMSFileVersions = FALSE; /* Include version numbers in listing? */
 
 typedef struct {
    unsigned long BufferLength : 16;
@@ -43,8 +45,6 @@ typedef struct {
    unsigned long BufferAddress : 32;
    unsigned long ReturnLengthAddress : 32;
 } ItemStruct;
-
-extern CONST char * HTHostName NOPARAMS;
 
 /* PUBLIC							HTVMS_authSysPrv()
 **		CHECKS IF THIS PROCESS IS AUTHORIZED TO ENABLE SYSPRV
@@ -754,7 +754,6 @@ PUBLIC int HTVMSBrowseDir ARGS4(
     static char ThisYear[8];
     VMSEntryInfo *entry_info = 0;
     char string_buffer[64];
-    extern BOOLEAN no_dotfiles, show_dotfiles;
 
     HTUnEscape(pathname);
     CTRACE((tfp,"HTVMSBrowseDir: Browsing `%s\'\n", pathname));

@@ -20,7 +20,7 @@
  * Links to collections of alternate definitions, developed by the Lynx
  * User Community, are maintained in Lynx links:
  *
- *    http://www.trill-home.com/lynx.html
+ *    http://www.subir.com/lynx.html
  *
  * See ABOUT-NLS and po/readme for details and location of contributed
  * translations.  When no translation is available, the English default is

@@ -32,6 +32,7 @@
 #include <HTAlert.h>
 
 #include <LYStrings.h>
+#include <LYClean.h>
 #include <LYLeaks.h>
 
 PRIVATE void do_system ARGS1(char *, command)
@@ -320,8 +321,6 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	    do_system(command);
 	}
 	else {
-	    extern BOOLEAN HadVMSInterrupt;
-
 	    printf(
 	"\nSorry, this browser was compiled without the %s access option.\n",
 		acc_method);
@@ -430,8 +429,6 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	    do_system(command);
 	}
 	else {
-	    extern BOOLEAN HadVMSInterrupt;
-
 	    printf(
 	  "\nSorry, this browser was compiled without the %s access option.\n",
 		acc_method);
@@ -449,8 +446,6 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	    do_system(command);
 	}
 	else {
-	    extern BOOLEAN HadVMSInterrupt;
-
 	    printf(
 	  "\nSorry, this browser was compiled without the %s access option.\n",
 		acc_method);
@@ -488,10 +483,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	    fflush(stdout);
 	    LYgetch();
 #ifdef VMS
-	    {
-		extern BOOLEAN HadVMSInterrupt;
-		HadVMSInterrupt = FALSE;
-	    }
+	    HadVMSInterrupt = FALSE;
 #endif /* VMS */
 	}
 #endif /* !TELNET_DONE */

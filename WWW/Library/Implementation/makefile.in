@@ -173,7 +173,7 @@ $(LOB)/libwww.a : $(COMMON)
 #	Clean up everything generatable except final products
 clean :
 	rm -f core *.core *.leaks *.[oi] *.bak tags TAGS
-	rm $(LOB)/*$(_O)
+	rm -f $(LOB)/*$(_O)
 
 #			Common code
 #			-----------

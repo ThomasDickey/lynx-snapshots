@@ -8,6 +8,7 @@
 #include <LYUtils.h>
 #include <LYLeaks.h>
 #include <LYStrings.h>
+#include <LYCharUtils.h>
 
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
@@ -153,7 +154,6 @@ PRIVATE void scan ARGS2(
     }
 } /*scan */
 
-
 #if defined(HAVE_ALLOCA) && !defined(LY_FIND_LEAKS)
 #define LYalloca(x)        alloca(x)
 #define LYalloca_free(x)   {}
@@ -226,16 +226,33 @@ PUBLIC char * HTParse ARGS3(
     rel = name + len1;
 
     /*
-    **	Make working copies of the input strings to cut up.
+    **	Make working copy of the input string to cut up.
     */
     memcpy(name, aName, len1);
-    memcpy(rel, relatedName, len2);
 
     /*
-    **	Cut up the strings into URL fields.
+    **	Cut up the string into URL fields.
     */
     scan(name, &given);
-    scan(rel,  &related);
+
+    /*
+    **	Now related string.
+    */
+    if ((given.access && given.host && given.absolute) || !*relatedName) {
+	/*
+	**  Inherit nothing!
+	*/
+	related.access = NULL;
+	related.host = NULL;
+	related.absolute = NULL;
+	related.relative = NULL;
+	related.search = NULL;
+	related.anchor = NULL;
+    } else {
+	memcpy(rel, relatedName, len2);
+	scan(rel,  &related);
+    }
+
 
     /*
     **	Handle the scheme (access) field.
@@ -302,11 +319,12 @@ PUBLIC char * HTParse ARGS3(
 	    /*
 	    **	Ignore default port numbers, and trailing dots on FQDNs,
 	    **	which will only cause identical addresses to look different.
+	    **  (related is already a clean url).
 	    */
 	    {
 		char *p2, *h;
 		if ((p2 = strchr(result, '@')) != NULL)
-		   tail = (p2 + 1);
+ 		   tail = (p2 + 1);
 		p2 = strchr(tail, ':');
 		if (p2 != NULL && !isdigit(UCH(p2[1])))
 		    /*
@@ -496,21 +514,56 @@ PUBLIC char * HTParse ARGS3(
      * See the discussion in LYLegitimizeHREF() for example.
      */
     if ((p = strchr(result, ' ')) != 0) {
-	do {
-	    char *q = p + strlen(p) + 2;
-	    while (q != p + 1) {
-		q[0] = q[-2];
-		--q;
-	    }
-	    p[0] = '%';
-	    p[1] = '2';
-	    p[2] = '0';
-	} while ((p = strchr(result, ' ')) != 0);
+	switch (is_url(result)) {
+	case NOT_A_URL_TYPE:
+	case UNKNOWN_URL_TYPE:
+	    CTRACE((tfp, "HTParse:      ignore:`%s'\n", result));
+	    break;
+	case LYNXEXEC_URL_TYPE:
+	case LYNXPROG_URL_TYPE:
+	case LYNXCGI_URL_TYPE:
+	case LYNXPRINT_URL_TYPE:
+	case LYNXHIST_URL_TYPE:
+	case LYNXDOWNLOAD_URL_TYPE:
+	case LYNXKEYMAP_URL_TYPE:
+	case LYNXIMGMAP_URL_TYPE:
+	case LYNXCOOKIE_URL_TYPE:
+	case LYNXDIRED_URL_TYPE:
+	case LYNXOPTIONS_URL_TYPE:
+	case LYNXCFG_URL_TYPE:
+	case LYNXCOMPILE_OPTS_URL_TYPE:
+	case LYNXMESSAGES_URL_TYPE:
+	    CTRACE((tfp, "HTParse:      spaces:`%s'\n", result));
+	    break;
+	default:
+	    CTRACE((tfp, "HTParse:      encode:`%s'\n", result));
+	    do {
+		char *q = p + strlen(p) + 2;
+		while (q != p + 1) {
+		    q[0] = q[-2];
+		    --q;
+		}
+		p[0] = '%';
+		p[1] = '2';
+		p[2] = '0';
+	    } while ((p = strchr(result, ' ')) != 0);
+	    break;
+	}
     }
-    CTRACE((tfp, "HTParse:      result:%s\n", result));
+    CTRACE((tfp, "HTParse:      result:`%s'\n", result));
 
     StrAllocCopy(return_value, result);
     LYalloca_free(result);
+
+    /* FIXME: could be optimized using HTParse() internals */
+    if (*relatedName &&
+	((wanted & PARSE_ALL_WITHOUT_ANCHOR) == PARSE_ALL_WITHOUT_ANCHOR)) {
+	/*
+	 *  Check whether to fill in localhost. - FM
+	 */
+	LYFillLocalFileURL(&return_value, relatedName);
+	CTRACE((tfp, "pass LYFillLocalFile:`%s'\n", return_value));
+    }
 
     return return_value;		/* exactly the right length */
 }
@@ -1012,17 +1065,21 @@ PRIVATE CONST unsigned char crfc[96] =
 
 /*
 **  Turn a string which is not a RFC 822 token into a quoted-string. - KW
+**  The "quoted" parameter tells whether we need the beginning/ending quote
+**  marks.  If not, the caller will provide them -TD
 */
-PUBLIC void HTMake822Word ARGS1(
-	char **,	str)
+PUBLIC void HTMake822Word ARGS2(
+	char **,	str,
+	int,		quoted)
 {
     CONST char * p;
     char * q;
     char * result;
     unsigned char a;
     int added = 0;
-    if (!(*str) || !(**str)) {
-	StrAllocCopy(*str, "\"\"");
+
+    if (isEmpty(*str)) {
+	StrAllocCopy(*str, quoted ? "\"\"" : "");
 	return;
     }
     for (p = *str; *p; p++) {
@@ -1044,14 +1101,17 @@ PUBLIC void HTMake822Word ARGS1(
     result = typecallocn(char, p-(*str) + added + 1);
     if (result == NULL)
 	outofmem(__FILE__, "HTMake822Word");
-    result[0] = '"';
+
+    q = result;
+    if (quoted)
+	*q++ = '"';
     /*
     ** Having converted the character to ASCII, we can't use symbolic
     ** escape codes, since they're in the host character set, which
     ** is not necessarily ASCII.  Thus we use octal escape codes instead.
     ** -- gil (Paul Gilmartin) <pg@sweng.stortek.com>
     */  /* S/390 -- gil -- 0268 */
-    for (q = result + 1, p = *str; *p; p++) {
+    for (p = *str; *p; p++) {
 	a = TOASCII(*p);
 	if ((a != '\011') && ((a & 127) < 32 ||
 			    ( a < 128 && ((crfc[a-32]) & 2))))
@@ -1060,7 +1120,8 @@ PUBLIC void HTMake822Word ARGS1(
 	if (a == '\012' || (a == '\015' && (TOASCII(*(p+1)) != '\012')))
 	    *q++ = ' ';
     }
-    *q++ = '"';
+    if (quoted)
+	*q++ = '"';
     *q++ = '\0';			/* Terminate */
     FREE(*str);
     *str = result;

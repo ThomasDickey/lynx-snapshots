@@ -574,11 +574,10 @@ PUBLIC void mailform ARGS4(
     char my_tmpfile[LY_MAXPATH];
 #endif
 
-    CTRACE((tfp, "mailform(\"%s\", \"%s\", \"%s\", \"%s\")\n",
-	NONNULL(mailto_address),
-	NONNULL(mailto_subject),
-	NONNULL(mailto_content),
-	NONNULL(mailto_type)));
+    CTRACE((tfp, "mailto_address: \"%s\"\n", NONNULL(mailto_address)));
+    CTRACE((tfp, "mailto_subject: \"%s\"\n", NONNULL(mailto_subject)));
+    CTRACE((tfp, "mailto_content: \"%s\"\n", NONNULL(mailto_content)));
+    CTRACE((tfp, "mailto_type:    \"%s\"\n", NONNULL(mailto_type)));
 
     if (!LYSystemMail())
 	return;

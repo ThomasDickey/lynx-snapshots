@@ -479,6 +479,16 @@ II. Compile instructions -- UNIX
   --with-dmalloc
 	use Gray Watson's dmalloc library
 
+  --with-gnutls[=XXX]			(define USE_SSL)
+	Use this option to configure with the GNU TLS library.
+	See docs/README.ssl for additional information.
+
+	The optional value XXX specifies the directory in which the library
+	can be found, and may be either the path of the "lib" directory,
+	or one level above.  In either case, the corresponding header files
+	are assumed to be in the parallel "include" directory.  The default
+	is /usr/local/gnutls.
+
   --with-included-gettext
 	use the GNU gettext library included here (default).  See
 	"--enable-nls".

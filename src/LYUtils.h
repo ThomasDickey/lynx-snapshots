@@ -238,7 +238,7 @@ extern void  get_clip_release(void);
 #  ifdef WIN_EX
 #    define size_clip()	8192
 #  else
-extern int size_clip();
+extern int size_clip NOPARAMS;
 #  endif
 #endif
 

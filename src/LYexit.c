@@ -140,13 +140,17 @@ PUBLIC void LYexit ARGS1(
 #endif /* !VMS */
 
     /*
-     *	Do functions registered with LYatexit. - GAB
+     * Close syslog before doing atexit-cleanup, since it may use a string
+     * that would be freed there.
      */
-    LYCompleteExit();
-
 #if !defined(VMS) && defined(SYSLOG_REQUESTED_URLS)
     LYCloselog();
 #endif /* !VMS && SYSLOG_REQUESTED_URLS */
+
+    /*
+     *	Do functions registered with LYatexit. - GAB
+     */
+    LYCompleteExit();
 
     LYCloseCmdLogfile();
 

@@ -208,14 +208,18 @@ typedef struct {
 # endif
 
 # ifdef FANCY_CURSES
-#  if defined(NCURSES) && defined(HAVE_NCURSES_TERM_H)
-#    include <ncurses/term.h>
+#  if defined(NCURSES) && defined(HAVE_NCURSESW_TERM_H)
+#    include <ncursesw/term.h>
 #  else
-#   if defined(HAVE_NCURSESW_NCURSES_H) || defined(HAVE_NCURSES_NCURSES_H) || defined(HAVE_XCURSES)
-#     undef HAVE_TERM_H			/* only use one in comparable path! */
-#   endif
-#   if defined(HAVE_TERM_H)
-#    include <term.h>
+#    if defined(NCURSES) && defined(HAVE_NCURSES_TERM_H)
+#      include <ncurses/term.h>
+#    else
+#     if defined(HAVE_NCURSESW_NCURSES_H) || defined(HAVE_NCURSES_NCURSES_H) || defined(HAVE_XCURSES)
+#       undef HAVE_TERM_H			/* only use one in comparable path! */
+#     endif
+#     if defined(HAVE_TERM_H)
+#      include <term.h>
+#     endif
 #   endif
 #  endif
 # endif

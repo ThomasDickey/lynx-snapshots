@@ -123,10 +123,6 @@ extern void LYWriteCmdKey PARAMS((int ch));
 #define LYCloseCmdLogfile() /* nothing */
 #endif
 
-#ifdef EXP_FILE_UPLOAD
-extern void base64_encode PARAMS((char * dest, char * src, int len));
-#endif
-
 /* values for LYgetch */
 /* The following are lynxkeycodes, not to be confused with
    lynxactioncodes (LYK_*) to which they are often mapped.

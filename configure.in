@@ -4,7 +4,7 @@ dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ask PRCS to plug-in the project-version for the configure-script.
-dnl $Format: AC_REVISION($ProjectVersion: 2.8.5dev.14 $\""$)
+dnl $Format: AC_REVISION($ProjectVersion: 2.8.5dev.15 $\""$)
 AC_REVISION(none)
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
@@ -370,6 +370,15 @@ AC_ARG_WITH(ssl,
 	[cf_cv_use_libssl=no])
 ])
 
+if test "x$cf_cv_use_libssl" = "xno" ; then
+AC_CACHE_CHECK(if you want experimental gnutls support,cf_cv_use_libgnutls,[
+AC_ARG_WITH(gnutls,
+	[  --with-gnutls[=path]    link with experimental gnutls support],
+	[cf_cv_use_libgnutls=$withval],
+	[cf_cv_use_libgnutls=no])
+])
+fi
+
 AC_CACHE_CHECK(if you want socks library,cf_cv_use_libsocks,[
 AC_ARG_WITH(socks,
 	[  --with-socks[=path]     link with socks library if available],
@@ -394,6 +403,8 @@ fi
 CF_INET_ADDR
 if test "x$cf_cv_use_libssl"  != xno ; then
 	CF_SSL($cf_cv_use_libssl)
+elif test "x$cf_cv_use_libgnutls" != xno ; then
+	CF_GNUTLS($cf_cv_use_libgnutls)
 fi
 
 dnl This has to be cached, since there's a lot of interdependent tests.

@@ -310,6 +310,6 @@ extern void LYUCPushAssumed PARAMS((
     HTParentAnchor *	anchor));
 extern int LYUCPopAssumed NOPARAMS;
 
-extern BOOL using_proxy;
+extern BOOL using_proxy;	/* Are we using an NNTP proxy? */
 
 #endif /* HTACCESS_H */

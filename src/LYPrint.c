@@ -1204,8 +1204,8 @@ PRIVATE int remove_quotes ARGS1(
 /*
  *  Mail subject may have 8-bit characters and they are in display charset.
  *  There is no stable practice for 8-bit subject encodings:
- *  MIME define "quoted-printable" which holds charset info
- *  but most mailers still don't support it, on the other hand
+ *  MIME defines "quoted-printable" which holds charset info
+ *  but most mailers still don't support it.  On the other hand
  *  many mailers send open 8-bit subjects without charset info
  *  and use local assumption for certain countries.  Besides that,
  *  obsolete SMTP software is not 8bit clean but still in use,

@@ -101,6 +101,7 @@
 #undef HAVE_NCURSES_H		/* defined if we include <ncurses.h> */
 #undef HAVE_NCURSES_NCURSES_H	/* defined if we include <ncurses/ncurses.h> */
 #undef HAVE_NCURSES_TERM_H	/* have <ncurses/term.h> */
+#undef HAVE_NCURSESW_TERM_H	/* have <ncursesw/term.h> */
 #undef HAVE_NEWPAD
 #undef HAVE_NEWTERM
 #undef HAVE_NL_TYPES_H		/* AM_GNU_GETTEXT */
@@ -218,6 +219,7 @@
 #undef USE_EXECVP		/* CF_ARG_DISABLE(full-paths) */
 #undef USE_EXTERNALS		/* CF_ARG_ENABLE(externs) */
 #undef USE_FCNTL		/* CF_FIONBIO */
+#undef USE_GNUTLS_INCL		/* CF_GNUTLS */
 #undef USE_OPENSSL_INCL		/* CF_SSL */
 #undef USE_PRETTYSRC		/* CF_ARG_ENABLE(prettysrc) */
 #undef USE_SCROLLBAR		/* CF_ARG_ENABLE(scrollbar) */

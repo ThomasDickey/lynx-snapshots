@@ -1,6 +1,103 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2003-04-27 (2.8.5dev.15)
+* change definition of docdir1, helpdir1 to avoid using ksh-semantics (see
+  2.8.5dev.2) -TD
+* update ja.po, uk.po, zh_TW.po from
+  http://www.iro.umontreal.ca/contrib/po/maint/lynx/
+* improve layout of TRSTable.c, reducing "laddering" effect, where cells in
+  different columns do not overlap by lines -IZ
+* modify SGML_new() to allow display charset-switching when reloading a
+  document -IZ
+* fix a buffer-size in LYK_PASTE_URL case in LYMainLoop.c -IZ
+* various improvements to load-time for TRSTable.c -IZ
+  As a test:
+   <URL:ilyaz.org/software/tmp/table_2col_bold_it_500000.html.gz>.
+  This is a simple table with 2 columns, one with bold contents, another with
+  italic one.  The total number of rows is 500K.  With the patch and an
+  acceptable malloc(), lynx should use the working set of about 110M to show
+  the table.  On my system with 128M memory, this leads to only 4M of the
+  process space swapped.
+* add case LYK_TO_CLIPBOARD to HTCheckForInterrupt (not a good place), to allow
+  COPY command to work during download (copying the location to clipboard). 
+  The best thing would be to get the location *after* redirects, but this will
+  require some additional work -IZ
+* add popen-based support for cut/paste.  This is a slightly reworked patch to
+  GNU readline.  If RL_PASTE_CMD and RL_CLCOPY_CMD are defined in the
+  environment, lynx will use them as commands to do cut&paste.  The simplest
+  such commands could just store/retrieve things from
+  /tmp/.clipboard_user-name; more advanced ones could use X clipboard -IZ
+* modify yawerty_kb.h to map U+0411 and U+0431 to 'B' and 'W' positions
+  respectively.  The map contained U+0412 and U+0432 at those positions,
+  which are duplicated at other positons -IZ
+* fix HTLoadFinger() which was miscasting const data -TD
+* update Subir Grewal's Lynx links URL to the newest location
+  http://www.subir.com/lynx.html -TD
+* add configure option --with-gnutls, to allow lynx to be built with gnutls. 
+  Used gnutls 0.8.6 on Redhat 8.0 to login at yahoo (gnutls is not very
+  portable, so this is an experimental option) -TD
+* modify loop in HTInitProgramPaths() to convert enum ProgramPaths to an
+  integer, to accommodate HPUX 11.22 compiler (report by JS) -TD
+* amend change in dev.13 to HTParse() to escape spaces, to exclude lynx's
+  internal URL types such as lynxprog (report by P.J.Walsh) -TD
+* modified ifdef's to enable -connect_timeout option for DJGPP -GV
+  In particular, in LYUtils.c, undef "select" in case Lynx is compiled with
+  curses (and not S-Lang).  Watt-32's select_s cannot be used on a 
+  stdin handle, so one must undef it and use DJGPP's select().
+* modify ifdef in HTCheckForInterrupt() to work with MingW and PDcurses -GV
+* add version information for the macros in aclocal.m4 (request by Lars
+  Hecking) -TD
+* modify file-upload to use actual binary-data rather than base64-format -TD
+* generate unique boundary for multipart data in HText_SubmitForm() -TD 
+* reorganize HText_SubmitForm(), maintaining post data using bstring's -TD
+* modify HText_SubmitForm() to add field name for the fake coordinate pair
+  when formatting a multipart submit (report by Peter Pilsl
+  <pilsl_@goldfisch.at>) -TD
+* change post_data to a bstring; implement functions and macros for
+  manipulating bstring data.  This allows post_data to maintain embedded nulls,
+  e.g., for file-upload -TD
+* fix ifdef's for <ncursesw/term.h> -TD
+* fixes for file upload -IZ
+  + modify logic for headers use write them even if MultipartContentType was
+    not set.
+  + change logic for base64 to be used ONLY if \0 was found.
+    If a "strange" char is found, only change "text/plain" to
+    "application/octet-stream".
+* change a couple of _user_message() calls to HTUserMsg2() calls so their
+  content is saved in the "Messages" buffer -IZ, TD
+* undo 2002-11-11 SGMLFindTag optimization (problem with color styles,
+  reported by IZ). Optimize the function by storing the previously found tags.
+  Also use my_casecomp() to decrease AS_casecomp() calls by testing the
+  first character manually -LP
+* optimize HTStyle comparison:  just compare numbers from enum.
+  It was previously implemented as a strcmp comparison with a fixed string.
+  Used in a very inner loop, in HTML_put_character() -LP
+* LYEnsureAbsoluteURL() now absorbs LYFillLocalFileURL() call -LP
+* optimize LYLegitimizeHREF() -LP
+* in HTML.c, revise href resolving logic.  HTAnchor_findChildAndLink now
+  resolves href with respect to BASE internally; HTParse incorporates
+  LYFillLocalFileURL call (after the parsing, and only when the related string
+  is not empty and parse includes access, host, path and punctuation).  This
+  removes all LYFillLocalFileURL and most HTParse calls from HTML.c and makes
+  code more consistent. (Previously, functions were called in a different order
+  for document with/without BASE, which had the side effect in some cases,
+  e.g., href="c:" on a DOS machine was resolved properly with _any_ base, and
+  badly broken without:) -LP
+* add/use HTParseALL macro to simplify coding -LP
+* revise "internal links" logic (read KW 1997-11-03 notes, before v2.8).
+  In HTML.c and HTAnchor.c, internal links code affects only parent lookup
+  in the adults table (more correct in case of post data), now a mainline:
+  we omit "#ifndef DONT_TRACK_INTERNAL_LINKS" condition in the two files.
+  In HTML.c, avoid using internal links for unrelated `src=' attributes
+  (BGSOUND_SRC, FRAME_SRC, IFRAME_SRC, OVERLAY_SRC, EMBED_ERC links:) -LP
+* refine HTAnchor_delete() vs deleteLinks() mutual recursion logic - LP
+* change ALIGN_SIZE in GridText.c to sizeof(double), which is probably more
+  portable than "8" -LP
+* modify a syslog() call to guard against possible '%' in its parameter -TD
+* remove extra quotes from calling HTMake822Word() for form boundary names
+  (addresses bug report for fastmail.fm by P.J.Walsh) -TD
+
 2003-02-04 (2.8.5dev.14)
 * correct a missing ">" at the beginning of page sent as response to mailto -TD
 * simplify (clarify) anchor structure:  links now moved from HTAnchor to
@@ -150,7 +247,7 @@ Changes since Lynx 2.8 release
   a blank precedes the '='.  The misplaced markers made lynx omit newlines from
   the pretty-source view (report by LP) -TD
 * rewrote HTStat() to ensure that it does stat() for files on Windows -TD
-* HTTCP.c patch to make djgpp/Watt-32 non-blocking connect in HTDoConnect().
+* HTTCP.c patch to make DJGPP/Watt-32 non-blocking connect in HTDoConnect().
   This allows pressing 'z' to abort connections.  Removed extra _HTProgress()
   for INET6; it overwrote previous progress message -GV, DK
 * in SGML.c, element stack now use a pool of 10 elements to avoid most of
@@ -183,16 +280,16 @@ Changes since Lynx 2.8 release
     Because of some work with anchors on the last(=split) line,
     the anchors list was traversed from the beginning for each output line.
     Now we store last_anchor_before_split  explicitly.
-    With my 800Kb test file (13000 output lines, 3100 anchors) this shows
-    25% speedup: split_line() weight decreased from 26% down to 1%
+    [According to gprof, split_line() weight decreased from 33% down to 4%,
+    with the following test file: 13,000 output lines, 3,100 anchors, ~800Kb]
   + remove quadratic complexity from HTAnchor_findChild() usage [HTAnchor.c].
     HTParentAnchor::children list was traversed zillion times, now we
     split it into a tree (named anchors <a name=...>, fast search required)
     and a list (just a storage for the rest anchors, no search required).
-    This one gives 11% speedup for 3100 anchors html on my system.
+    [The same file, gprof shows HTAnchor_findChild() weight decreased
+    from 11% down to 0.1%]
   + remove quadratic complexity when generating a 'l'ist page,
     now traverse anchors list only once [LYList.c, GridText.c].
-    Not too much savings but trivial.
 * add a search method to HTBTree implementation. - LP
 * amend check for refresh-URL to avoid adding a link if the retrieved page is
   compressed, since the link would be added to the compressed file, corrupting
@@ -217,7 +314,7 @@ Changes since Lynx 2.8 release
 * make permanent an ifdef from HS which provides for truncating a too-long
   title with an ellipsis -HN
 * gettext'ify a few overlooked strings in LYOptions.c -HN
-* modify LYGetHostByName() for MSDOS/djgpp/Watt-32 to enable terminating it by
+* modify LYGetHostByName() for MSDOS/DJGPP/Watt-32 to enable terminating it by
   pressing 'z' (patch by Gisle Vanem)
 * update configure script macros for NLS to gettext 0.10.40 -TD
 * add PRCS version/date to lynx.cfg -TD
@@ -906,7 +1003,7 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
   has to be set appropriately.  Made EXP_NESTED_TABLES the default and changed
   the default locations for WATT-32 and PDCURSES to top-level directories.  The
   DOS port of gettext is now dependent on libiconv.a to convert character sets
-  as the .mo file is read.  The format for the makefile in WWW/Library/djgpp
+  as the .mo file is read.  The format for the makefile in WWW/Library/DJGPP
   now reflects the changes previously made in the src makefile.
 * improve definition of CTRACE, making it an expression again as it was before
   dev.20 -PG
@@ -2660,7 +2757,7 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
   visited links page -IZ
 * reformatted src/makefile.dos and src/makefile.dsl to make them simpler to
   modify -TD
-* add -DOK_OVERRIDE to DIRED_DEFS for djgpp -LP
+* add -DOK_OVERRIDE to DIRED_DEFS for DJGPP -LP
 * change the samples in "URL Schemes Supported in Lynx" so they would appear
   without //user:passw@ but //user@ with the explanation of yet another
   possibility added in words...  So user will not get a wrong impression if
@@ -2718,7 +2815,7 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
 * correct ifdef's in LYPrint.c so that send_file_to_mail() works with DJGPP -DK
 * modify DOS makefiles for PDCURSES for watt-32 and some of the other recent
   changes to lynx.  Included some of the EXP_ defines that DOS users may want.
-  Changed the -O3 back to -O2, since -O3 has no advantage under djgpp -DK
+  Changed the -O3 back to -O2, since -O3 has no advantage under DJGPP -DK
 * remove a useless ';', use FREE() instead of free() - JB
 * correct spelling lexem/lexeme (reported by KW) -TD
 * split-out function check_history() in LYMainLoop.c -TD

@@ -99,7 +99,7 @@ PUBLIC void HTList_linkObject ARGS3(
 	HTList *,	newNode)
 {
     if (me) {
-	if (newNode->object == 0 && newNode->next == 0) {
+	if (newNode->object == NULL && newNode->next == NULL) {
 	    /*  It is safe: */
 	    newNode->object = newObject;
 	    newNode->next = me->next;
@@ -107,7 +107,7 @@ PUBLIC void HTList_linkObject ARGS3(
 
 	} else {
 	    /*
-	     *  This node was already linked to some list (probably this one),
+	     *  This node is already linked to some list (probably this one),
 	     *  so refuse changing node pointers to keep the list valid!!!
 	     */
 	    CTRACE((tfp, "*** HTList: Refuse linking already linked obj "));
@@ -228,6 +228,8 @@ PUBLIC BOOL HTList_unlinkObject ARGS2(
 	    temp = temp->next;
 	    if (temp->object == oldObject) {
 		prevNode->next = temp->next;
+		temp->next = NULL;
+		temp->object = NULL;
 		return YES;  /* Success */
 	    }
 	}
@@ -305,6 +307,8 @@ PUBLIC void * HTList_unlinkLastObject ARGS1(
 	lastNode = me->next;
 	lastObject = lastNode->object;
 	me->next = lastNode->next;
+	lastNode->next = NULL;
+	lastNode->object = NULL;
 	return lastObject;
 
     } else {  /* Empty list */

@@ -1299,7 +1299,7 @@ PUBLIC int main ARGS2(
 	!strcasecomp((LYGetEnv("USER")==NULL ? " " : LYGetEnv("USER")),
 		     ANONYMOUS_USER)
 #else
-#if HAVE_CUSERID
+#ifdef HAVE_CUSERID
 	STREQ((char *)cuserid((char *) NULL), ANONYMOUS_USER)
 #else
 	STREQ(((char *)getlogin()==NULL ? " " : getlogin()), ANONYMOUS_USER)
@@ -1515,7 +1515,6 @@ PUBLIC int main ARGS2(
      * it's not an absolute URL, make it one. - FM
      */
     StrAllocCopy(LynxHome, startfile);
-    LYFillLocalFileURL((char **)&LynxHome, "file://localhost");
     LYEnsureAbsoluteURL((char **)&LynxHome, "LynxHome", FALSE);
 
     /*
@@ -1915,7 +1914,6 @@ PUBLIC int main ARGS2(
      *	force in "//localhost", and if it's not an absolute URL,
      *	make it one. - FM
      */
-    LYFillLocalFileURL((char **)&startfile, "file://localhost");
     LYEnsureAbsoluteURL((char **)&startfile, "STARTFILE", FALSE);
 
     /*
@@ -1924,7 +1922,6 @@ PUBLIC int main ARGS2(
      *	not an absolute URL, make it one. - FM
      */
     if (homepage) {
-	LYFillLocalFileURL((char **)&homepage, "file://localhost");
 	LYEnsureAbsoluteURL((char **)&homepage, "HOMEPAGE", FALSE);
     }
 
@@ -3230,12 +3227,10 @@ PRIVATE Config_Type Arg_Table [] =
       "force color mode on with standard bg colors"
    ),
 #endif
-#ifndef __DJGPP__
    PARSE_INT(
       "connect_timeout", 4|NEED_INT_ARG,	connect_timeout,
       "=N\nset the N-second connection timeout"
    ),
-#endif
 #ifdef MISC_EXP
    PARSE_FUN(
       "convert_to",	4|FUNCTION_ARG,		convert_to_fun,

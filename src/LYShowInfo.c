@@ -325,8 +325,10 @@ PUBLIC int LYShowInfo ARGS4(
 #endif /* ADVANCED_INFO */
 
     if (doc->post_data) {
-	fprintf(fp0, "<dt><em>%s</em> <xmp>%s</xmp>\n",
-		gettext("Post Data:"), doc->post_data);
+	fprintf(fp0, "<dt><em>%s</em> <xmp>%.*s</xmp>\n",
+		gettext("Post Data:"),
+		BStrLen(doc->post_data),
+		BStrData(doc->post_data));
 	fprintf(fp0, "<dt><em>%s</em> %s\n",
 		gettext("Post Content Type:"), doc->post_content_type);
     }

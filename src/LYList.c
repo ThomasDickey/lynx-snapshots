@@ -133,9 +133,10 @@ PUBLIC int showlist ARGS2(
 	    dest_intl : HTAnchor_followLink(child);
 	parent = HTAnchor_parent(dest);
 	if (!intern_w_post && dest_intl &&
-	    HTMainAnchor && HTMainAnchor->post_data &&
+	    HTMainAnchor &&
+	    HTMainAnchor->post_data &&
 	    parent->post_data &&
-	    !strcmp(HTMainAnchor->post_data, parent->post_data)) {
+	    BINEQ(HTMainAnchor->post_data, parent->post_data)) {
 	    /*
 	     *	Set flag to note that we had at least one internal link,
 	     *	if the document from which we are generating the list
