@@ -39,15 +39,17 @@
 PUBLIC BOOLEAN LYDidRename = FALSE;
 #endif /* VMS */
 
+PRIVATE char LYValidDownloadFile[256] = "\0";
+
 PUBLIC void LYDownload ARGS1(char *,line) 
 {
-    char *Line=NULL, *method, *file, *sug_file=NULL;
+    char *Line = NULL, *method, *file, *sug_file = NULL;
     int method_number;
     int count;
     char buffer[256];
     char command[256];
     char *cp;
-    lynx_html_item_type *download_command=0;
+    lynx_html_item_type *download_command = 0;
     int c, len;
     FILE *fp;
     int ch, recall;
@@ -60,6 +62,19 @@ PUBLIC void LYDownload ARGS1(char *,line)
     LYDidRename = FALSE;
 #endif /* VMS */
 
+    /*
+     *  Make sure we have a valid download
+     *  file comparison string loaded via
+     *  the download options menu. - FM
+     */
+    if (LYValidDownloadFile[0] == '\0') {
+    goto failed;
+    }
+
+    /*
+     *  Make a copy of the LYNXDOWNLOAD
+     *  internal URL for parsing. - FM
+     */
     StrAllocCopy(Line, line);
 
     /* parse out the sug_file, Method and the File */
@@ -73,12 +88,20 @@ PUBLIC void LYDownload ARGS1(char *,line)
 	goto failed;
     *(file-1) = '\0';
     /* go past "File=" */
-    file+=5;
+    file += 5;
+    /*
+     *  Make sure that the file string is the one from
+     *  the last displayed download options menu. - FM
+     */
+    if (strcmp(file, LYValidDownloadFile)) {
+        goto failed;
+    }
+
 
 #ifdef DIRED_SUPPORT
-    if (!strncmp(file,"file://localhost",16))
+    if (!strncmp(file, "file://localhost", 16))
         file += 16;
-    else if (!strncmp(file,"file:",5))
+    else if (!strncmp(file, "file:", 5))
         file += 5;
     HTUnEscape(file);
 #endif /* DIRED_SUPPORT */
@@ -86,7 +109,7 @@ PUBLIC void LYDownload ARGS1(char *,line)
     if ((method = (char *)strstr(Line, "Method=")) == NULL)
 	goto failed;
     /* go past "Method=" */
-    method+=7;
+    method += 7;
     method_number = atoi(method);
  
 
@@ -198,7 +221,7 @@ check_recall:
 	if ((cp = strchr(buffer, '~'))) {
 	    *(cp++) = '\0';
 	    strcpy(command, buffer);
-	    if ((len=strlen(command)) > 0 && command[len-1] == '/')
+	    if ((len = strlen(command)) > 0 && command[len-1] == '/')
 	        command[len-1] = '\0';
 #ifdef DOSPATH
 		 strcat(command, HTDOS_wwwName((char *)Home_Dir()));
@@ -240,7 +263,7 @@ check_recall:
 #endif /* VMS */
 
 	/* see if it already exists */
-	if ((fp = fopen(buffer,"r")) != NULL) {
+	if ((fp = fopen(buffer, "r")) != NULL) {
 	    fclose(fp);
 
 #ifdef VMS
@@ -252,18 +275,18 @@ check_recall:
 	    while(TOUPPER(c)!='Y' && TOUPPER(c)!='N' && c != 7 && c != 3)
  	        c = LYgetch();
 #ifdef VMS
-	    if(HadVMSInterrupt) {
+	    if (HadVMSInterrupt) {
 	        HadVMSInterrupt = FALSE;
 		FREE(Line);
 		return;
 	    }
 #endif /* VMS */
 
-	    if(c == 7 || c == 3) { /* Control-G or Control-C */
+	    if (c == 7 || c == 3) { /* Control-G or Control-C */
 		goto cancelled;
 	    }
 
-	    if(TOUPPER(c) == 'N') {
+	    if (TOUPPER(c) == 'N') {
 		_statusline(NEW_FILENAME_PROMPT);
 		FirstRecall = TRUE;
 		FnameNum = FnameTotal;
@@ -272,7 +295,7 @@ check_recall:
 	}
 
 	/* see if we can write to it */
-	if ((fp = fopen(buffer,"w")) != NULL) {
+	if ((fp = fopen(buffer, "w")) != NULL) {
 	    fclose(fp);
 	    remove(buffer);
 	} else {
@@ -325,7 +348,7 @@ check_recall:
 	 *  Use configured download commands.
 	 */
 	buffer[0] = '\0';
-        for (count=0, download_command=downloaders;
+        for (count = 0, download_command = downloaders;
 	     count < method_number;
        	     count++, download_command = download_command->next)
 	    ; /* null body */
@@ -465,8 +488,8 @@ check_recall:
         }
 
         stop_curses();
-        if(TRACE)
-            fprintf(stderr,"command: %s\n",command);
+        if (TRACE)
+            fprintf(stderr, "command: %s\n", command);
         system(command);
         fflush(stdout);
         start_curses();
@@ -517,8 +540,8 @@ PUBLIC int LYdownload_options ARGS2(char **,newfile, char *,data_file)
 {
     static char tempfile[256];
     static BOOLEAN first = TRUE;
-    char download_filename[256];
-    char *sug_filename=NULL;
+    static char download_filename[256];
+    char *sug_filename = NULL;
     FILE *fp0;
     lynx_html_item_type *cur_download;
     int count;
@@ -526,6 +549,11 @@ PUBLIC int LYdownload_options ARGS2(char **,newfile, char *,data_file)
     if (first) {
         tempname(tempfile, NEW_FILE);
 	first = FALSE;
+#if defined (VMS) || defined (DOSPATH)
+    sprintf(download_filename, "file://localhost/%s", tempfile);
+#else
+    sprintf(download_filename, "file://localhost%s", tempfile);
+#endif /* VMS */
 #ifdef VMS
     } else {
         remove(tempfile);   /* Remove duplicates on VMS. */
@@ -541,13 +569,11 @@ PUBLIC int LYdownload_options ARGS2(char **,newfile, char *,data_file)
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
+    chmod(tempfile, 0600);
 
-    /* make the file a URL now */
-#if defined (VMS) || defined (DOSPATH)
-    sprintf(download_filename,"file://localhost/%s",tempfile);
-#else
-    sprintf(download_filename,"file://localhost%s",tempfile);
-#endif /* VMS */
+    LYstrncpy(LYValidDownloadFile,
+          data_file,
+          (sizeof(LYValidDownloadFile) - 1));
     StrAllocCopy(*newfile, download_filename);
     LYforce_no_cache = TRUE;  /* don't cache this doc */
 
@@ -577,7 +603,7 @@ PUBLIC int LYdownload_options ARGS2(char **,newfile, char *,data_file)
 
     if(downloaders != NULL) {
 
-        for(count=0, cur_download=downloaders; cur_download != NULL; 
+        for(count = 0, cur_download = downloaders; cur_download !=  NULL; 
 			    cur_download = cur_download->next, count++) {
 
 	    if(!no_download || cur_download->always_enabled) {
