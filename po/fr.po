@@ -29,10 +29,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-05-05 20:33-0400\n"
+"POT-Creation-Date: 2004-05-23 15:43-0400\n"
 "PO-Revision-Date: 1999-06-05 15:18-0400\n"
 "Last-Translator: Jim Spath <jspath@bcpl.net>\n"
-"Language-Team: (none yet, address for now:) French <lynx-dev@sig.net>\n"
+"Language-Team: (none yet, address for now:) French <lynx-dev@nongnu.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=iso-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -56,517 +56,517 @@ msgstr ""
 #. * translations.  When no translation is available, the English default is
 #. * used.
 #.
-#: LYMessages.c:29
+#: LYMessages.c:30
 #, c-format
 msgid "Alert!: %s"
 msgstr "Alerte! : %s"
 
 # END of the file browser/F)ull menu
 # Following are from the File browser
-#: LYMessages.c:30
+#: LYMessages.c:31
 msgid "Welcome"
 msgstr "Bienvenue"
 
-#: LYMessages.c:31
+#: LYMessages.c:32
 msgid "Are you sure you want to quit?"
 msgstr "Désirez-vous vraiment quitter?"
 
-#: LYMessages.c:33
+#: LYMessages.c:34
 msgid "Really exit from Lynx?"
 msgstr "Vous voulez vraiment quitter Lynx?"
 
-#: LYMessages.c:35
+#: LYMessages.c:36
 msgid "Connection interrupted."
 msgstr "Connexion interrompue."
 
-#: LYMessages.c:36
+#: LYMessages.c:37
 msgid "Data transfer interrupted."
 msgstr "Transfert de données interrompu"
 
-#: LYMessages.c:37
+#: LYMessages.c:38
 msgid "Cancelled!!!"
 msgstr "Annulé!"
 
-#: LYMessages.c:38
+#: LYMessages.c:39
 msgid "Cancelling!"
 msgstr "Annulation!"
 
-#: LYMessages.c:39
+#: LYMessages.c:40
 msgid "Excellent!!!"
 msgstr "Excellent!"
 
-#: LYMessages.c:40
+#: LYMessages.c:41
 msgid "OK"
 msgstr ""
 
-#: LYMessages.c:41
+#: LYMessages.c:42
 msgid "Done!"
 msgstr "Terminé!"
 
-#: LYMessages.c:42
+#: LYMessages.c:43
 msgid "Bad request!"
 msgstr "Demande erronée!"
 
-#: LYMessages.c:43
+#: LYMessages.c:44
 msgid "previous"
 msgstr "écran précédent"
 
-#: LYMessages.c:44
+#: LYMessages.c:45
 msgid "next screen"
 msgstr "écran suivant"
 
-#: LYMessages.c:45
+#: LYMessages.c:46
 msgid "HELP!"
 msgstr "Aide!"
 
-#: LYMessages.c:46
+#: LYMessages.c:47
 msgid ", help on "
 msgstr ", aide activée "
 
 #. #define HELP
-#: LYMessages.c:48
+#: LYMessages.c:49
 msgid "Commands: Use arrow keys to move, '?' for help, 'q' to quit, '<-' to go back."
 msgstr "Touches fléchées: se déplacer, '?': aide, 'q': quitter, '<-': retour"
 
 #. #define MOREHELP
-#: LYMessages.c:50
+#: LYMessages.c:51
 msgid "-- press space for more, use arrow keys to move, '?' for help, 'q' to quit."
 msgstr "touche d'espac.: page suiv., flèches: se déplacer, '?': aide, 'q': quitter"
 
-#: LYMessages.c:51
+#: LYMessages.c:52
 msgid "-- press space for next page --"
 msgstr "- appuyez sur la touche d'espacement pour aller à la page suivante -"
 
-#: LYMessages.c:52
+#: LYMessages.c:53
 msgid "URL too long"
 msgstr "URL à ouvrir"
 
 #. Inactive input fields, messages used with -tna option - kw
 #. #define FORM_LINK_TEXT_MESSAGE_INA
-#: LYMessages.c:58
+#: LYMessages.c:59
 msgid "(Text entry field) Inactive.  Press <return> to activate."
 msgstr "(Champ texte) inactif. Appuyez sur <entrée> pour l'activer."
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE_INA
-#: LYMessages.c:60
+#: LYMessages.c:61
 msgid "(Textarea) Inactive.  Press <return> to activate."
 msgstr "(Aire de texte) inactive. Appuyez sur <entrée> pour l'activer."
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE_INA_E
-#: LYMessages.c:62
+#: LYMessages.c:63
 #, c-format
 msgid "(Textarea) Inactive.  Press <return> to activate (%s for editor)."
 msgstr "(Aire de texte) Inactive. Appuyez sur <entrée> pour l'activer (%s pour éditer)."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MESSAGE_INA
-#: LYMessages.c:64
+#: LYMessages.c:65
 msgid "(Form field) Inactive.  Use <return> to edit."
 msgstr "Entrez le texte. <Entr> pour confirmer («x» : nouvelle instance)."
 
 #. #define FORM_TEXT_SUBMIT_MESSAGE_INA_X
-#: LYMessages.c:66
+#: LYMessages.c:67
 #, c-format
 msgid "(Form field) Inactive.  Use <return> to edit (%s to submit with no cache)."
 msgstr "Entrez le texte. <Entr> pour confirmer (%s : nouvelle instance)."
 
 #. #define FORM_TEXT_RESUBMIT_MESSAGE_INA
-#: LYMessages.c:68
+#: LYMessages.c:69
 msgid "(Form field) Inactive. Press <return> to edit, press <return> twice to submit."
 msgstr "Entrez le texte. <Entr> pour confirmer; flèches ou tabulateur pour se déplacer."
 
 #. #define FORM_TEXT_SUBMIT_MAILTO_MSG_INA
-#: LYMessages.c:70
+#: LYMessages.c:71
 msgid "(mailto form field) Inactive.  Press <return> to change."
 msgstr "Entrez le texte. <Entr> pour confirmer; touches fléchées pour vous déplacer."
 
 #. #define FORM_LINK_PASSWORD_MESSAGE_INA
-#: LYMessages.c:72
+#: LYMessages.c:73
 msgid "(Password entry field) Inactive.  Press <return> to activate."
 msgstr "Entrez le texte. Touches HAUT/BAS ou tabulateur pour vous déplacer."
 
 #. #define FORM_LINK_FILE_UNM_MSG
-#: LYMessages.c:75
+#: LYMessages.c:76
 msgid "UNMODIFIABLE file entry field.  Use UP or DOWN arrows or tab to move off."
 msgstr "Utilisez les touches HAUT/BAS ou le tabulateur pour vous déplacer."
 
 #. #define FORM_LINK_FILE_MESSAGE
-#: LYMessages.c:77
+#: LYMessages.c:78
 msgid "(File entry field) Enter filename.  Use UP or DOWN arrows or tab to move off."
 msgstr "Entrez le texte. Touches HAUT/BAS ou tabulateur pour se déplacer."
 
 #. #define FORM_LINK_TEXT_MESSAGE
-#: LYMessages.c:79
+#: LYMessages.c:80
 msgid "(Text entry field) Enter text.  Use UP or DOWN arrows or tab to move off."
 msgstr "Entrez le texte. Touches HAUT/BAS ou tabulateur pour se déplacer"
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE
-#: LYMessages.c:81
+#: LYMessages.c:82
 msgid "(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off."
 msgstr "Entrez le texte. Touches HAUT/BAS ou tabulateur pour se déplacer."
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE_E
-#: LYMessages.c:83
+#: LYMessages.c:84
 #, c-format
 msgid "(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor)."
 msgstr "Entrez le texte. Touches HAUT/BAS ou tabulateur pour se déplacer (%s pour éditeur)"
 
 #. #define FORM_LINK_TEXT_UNM_MSG
-#: LYMessages.c:85
+#: LYMessages.c:86
 msgid "UNMODIFIABLE form text field.  Use UP or DOWN arrows or tab to move off."
 msgstr "Utilisez les touches HAUT/BAS ou le tabulateur pour vous déplacer."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MESSAGE
-#: LYMessages.c:87
+#: LYMessages.c:88
 msgid "(Form field) Enter text.  Use <return> to submit."
 msgstr "Entrez le texte. <Entr> pour confirmer."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MESSAGE_X
-#: LYMessages.c:89
+#: LYMessages.c:90
 #, c-format
 msgid "(Form field) Enter text.  Use <return> to submit (%s for no cache)."
 msgstr "Entrez le texte. <Entr> pour confirmer (%s : nouvelle instance)."
 
 #. #define FORM_LINK_TEXT_RESUBMIT_MESSAGE
-#: LYMessages.c:91
+#: LYMessages.c:92
 msgid "(Form field) Enter text.  Use <return> to submit, arrows or tab to move off."
 msgstr "Entrez le texte. <Entr> pour confirmer; flèches ou tabulateur pour se déplacer"
 
 #. #define FORM_LINK_TEXT_SUBMIT_UNM_MSG
-#: LYMessages.c:93
+#: LYMessages.c:94
 msgid "UNMODIFIABLE form field.  Use UP or DOWN arrows or tab to move off."
 msgstr "Utilisez les touches HAUT/BAS ou le tabulateur pour vous déplacer"
 
 #. #define FORM_LINK_TEXT_SUBMIT_MAILTO_MSG
-#: LYMessages.c:95
+#: LYMessages.c:96
 msgid "(mailto form field) Enter text.  Use <return> to submit, arrows to move off."
 msgstr "Entrez le texte. <Entr> pour confirmer; touches fléchées pour vous déplacer"
 
 #. #define FORM_LINK_TEXT_SUBMIT_MAILTO_DIS_MSG
-#: LYMessages.c:97
+#: LYMessages.c:98
 msgid "(mailto form field) Mail is disallowed so you cannot submit."
 msgstr "Fonction de courrier invalidée; impossible de soumettre l'envoi"
 
 #. #define FORM_LINK_PASSWORD_MESSAGE
-#: LYMessages.c:99
+#: LYMessages.c:100
 msgid "(Password entry field) Enter text.  Use UP or DOWN arrows or tab to move off."
 msgstr "Entrez le texte. Touches HAUT/BAS ou tabulateur pour vous déplacer"
 
 #. #define FORM_LINK_PASSWORD_UNM_MSG
-#: LYMessages.c:101
+#: LYMessages.c:102
 msgid "UNMODIFIABLE form password.  Use UP or DOWN arrows or tab to move off."
 msgstr "Utilisez les touches HAUT/BAS ou le tabulateur pour vous déplacer"
 
 #. #define FORM_LINK_CHECKBOX_MESSAGE
-#: LYMessages.c:103
+#: LYMessages.c:104
 msgid "(Checkbox Field)   Use right-arrow or <return> to toggle."
 msgstr "Touche DROITE ou <Entr> pour changer d'option"
 
 #. #define FORM_LINK_CHECKBOX_UNM_MSG
-#: LYMessages.c:105
+#: LYMessages.c:106
 msgid "UNMODIFIABLE form checkbox.  Use UP or DOWN arrows or tab to move off."
 msgstr "Utilisez les touches HAUT/BAS ou le tabulateur pour vous déplacer"
 
 #. #define FORM_LINK_RADIO_MESSAGE
-#: LYMessages.c:107
+#: LYMessages.c:108
 msgid "(Radio Button)   Use right-arrow or <return> to toggle."
 msgstr "Touche DROITE ou <Entr> pour changer d'option"
 
 #. #define FORM_LINK_RADIO_UNM_MSG
-#: LYMessages.c:109
+#: LYMessages.c:110
 msgid "UNMODIFIABLE form radio button.  Use UP or DOWN arrows or tab to move off."
 msgstr "Utilisez les touches HAUT/BAS ou le tabulateur pour vous déplacer"
 
 #. #define FORM_LINK_SUBMIT_PREFIX
-#: LYMessages.c:111
+#: LYMessages.c:112
 msgid "Submit ('x' for no cache) to "
 msgstr "Soumettre ('x' pour annuler le cache) à"
 
 #. #define FORM_LINK_RESUBMIT_PREFIX
-#: LYMessages.c:113
+#: LYMessages.c:114
 msgid "Submit to "
 msgstr "Soumettre à"
 
 #. #define FORM_LINK_SUBMIT_MESSAGE
-#: LYMessages.c:115
+#: LYMessages.c:116
 msgid "(Form submit button) Use right-arrow or <return> to submit ('x' for no cache)."
 msgstr "Touche DROITE ou <Entr> pour confirmer («x» : nouvelle instance)"
 
 #. #define FORM_LINK_RESUBMIT_MESSAGE
-#: LYMessages.c:117
+#: LYMessages.c:118
 msgid "(Form submit button) Use right-arrow or <return> to submit."
 msgstr "Utilisez la touche DROITE ou <Entr> pour confirmer"
 
 #. #define FORM_LINK_SUBMIT_DIS_MSG
-#: LYMessages.c:119
+#: LYMessages.c:120
 msgid "DISABLED form submit button.  Use UP or DOWN arrows or tab to move off."
 msgstr "Utilisez les touches HAUT/BAS ou le tabulateur pour vous déplacer"
 
 #. #define FORM_LINK_SUBMIT_MAILTO_PREFIX
-#: LYMessages.c:121
+#: LYMessages.c:122
 msgid "Submit mailto form to "
 msgstr "Soumettre le formulaire via mail à"
 
 #. #define FORM_LINK_SUBMIT_MAILTO_MSG
-#: LYMessages.c:123
+#: LYMessages.c:124
 msgid "(mailto form submit button) Use right-arrow or <return> to submit."
 msgstr "Utilisez la touche DROITE ou <Entr> pour confirmer"
 
 #. #define FORM_LINK_SUBMIT_MAILTO_DIS_MSG
-#: LYMessages.c:125
+#: LYMessages.c:126
 msgid "(mailto form submit button) Mail is disallowed so you cannot submit."
 msgstr "Fonction de courrier invalidée; envoi impossible"
 
 #. #define FORM_LINK_RESET_MESSAGE
-#: LYMessages.c:127
+#: LYMessages.c:128
 msgid "(Form reset button)   Use right-arrow or <return> to reset form to defaults."
 msgstr "Utilisez la touche DROITE ou <Entr> pour réinitialiser le formulaire"
 
 #. #define FORM_LINK_RESET_DIS_MSG
-#: LYMessages.c:129
+#: LYMessages.c:130
 msgid "DISABLED form reset button.  Use UP or DOWN arrows or tab to move off."
 msgstr "Utilisez les touches HAUT/BAS ou le tabulateur pour vous déplacer"
 
 #. #define FORM_LINK_OPTION_LIST_MESSAGE
-#: LYMessages.c:131
+#: LYMessages.c:132
 msgid "(Option list) Hit return and use arrow keys and return to select option."
 msgstr "Faites <Entr> et touches fléchées, puis <Entr> pour choisir une option"
 
 # /maxwell/lynx2.7.1/LYMessages_en.h
 #. #define CHOICE_LIST_MESSAGE
-#: LYMessages.c:133
+#: LYMessages.c:134
 msgid "(Choice list) Hit return and use arrow keys and return to select option."
 msgstr "(Liste de choix) Entr, puis touches fléchées et Entr pour faire votre choix"
 
 #. #define FORM_LINK_OPTION_LIST_UNM_MSG
-#: LYMessages.c:135
+#: LYMessages.c:136
 msgid "UNMODIFIABLE option list.  Use return or arrow keys to review or leave."
 msgstr "Faites <Entr> ou touches fléchées pour revoir les options et quitter"
 
 #. #define CHOICE_LIST_UNM_MSG
-#: LYMessages.c:137
+#: LYMessages.c:138
 msgid "UNMODIFIABLE choice list.  Use return or arrow keys to review or leave."
 msgstr "Liste de choix NON MODIFIABLE. Entr ou touches fléchées pour revoir ou quitter"
 
-#: LYMessages.c:138
+#: LYMessages.c:139
 msgid "Submitting form..."
 msgstr "Envoi du formulaire... "
 
-#: LYMessages.c:139
+#: LYMessages.c:140
 msgid "Resetting form..."
 msgstr "Réinitialisation du formulaire..."
 
 #. #define RELOADING_FORM
-#: LYMessages.c:141
+#: LYMessages.c:142
 msgid "Reloading document.  Any form entries will be lost!"
 msgstr "Rechargement du document.  Toutes les entrées seront effacées!"
 
-#: LYMessages.c:142
+#: LYMessages.c:143
 #, c-format
 msgid "Warning: Cannot transcode form data to charset %s!"
 msgstr "Transcodage impossible des données au jeu de caractères %s!"
 
 #. #define NORMAL_LINK_MESSAGE
-#: LYMessages.c:145
+#: LYMessages.c:146
 msgid "(NORMAL LINK)   Use right-arrow or <return> to activate."
 msgstr "Utilisez la touche DROITE ou <Entr> pour activer le lien"
 
-#: LYMessages.c:146
+#: LYMessages.c:147
 msgid "The resource requested is not available at this time."
 msgstr "La ressource demandée n'est pas disponible en ce moment."
 
-#: LYMessages.c:147
+#: LYMessages.c:148
 msgid "Enter Lynx keystroke command: "
 msgstr "Entrer la commande Lynx au clavier : "
 
-#: LYMessages.c:148
+#: LYMessages.c:149
 msgid "Looking up "
 msgstr "Recherche "
 
-#: LYMessages.c:149
+#: LYMessages.c:150
 #, c-format
 msgid "Getting %s"
 msgstr "Accès à %s"
 
-#: LYMessages.c:150
+#: LYMessages.c:151
 #, c-format
 msgid "Skipping %s"
 msgstr "Ignoré : %s"
 
-#: LYMessages.c:151
+#: LYMessages.c:152
 #, c-format
 msgid "Using %s"
 msgstr "Utilisation de %s"
 
-#: LYMessages.c:152
+#: LYMessages.c:153
 #, c-format
 msgid "Illegal URL: %s"
 msgstr "URL illégal : %s"
 
-#: LYMessages.c:153
+#: LYMessages.c:154
 #, c-format
 msgid "Badly formed address %s"
 msgstr "Adresse mal formée %s"
 
-#: LYMessages.c:154
+#: LYMessages.c:155
 #, c-format
 msgid "URL: %s"
 msgstr "l'URL : %s"
 
-#: LYMessages.c:155
+#: LYMessages.c:156
 msgid "Unable to access WWW file!!!"
 msgstr "Impossible d'accéder au fichier W3!"
 
-#: LYMessages.c:156
+#: LYMessages.c:157
 #, c-format
 msgid "This is a searchable index.  Use %s to search."
 msgstr "Ceci est un index consultable.  Utilisez %s pour la recherche."
 
 #. #define WWW_INDEX_MORE_MESSAGE
-#: LYMessages.c:158
+#: LYMessages.c:159
 #, c-format
 msgid "--More--  This is a searchable index.  Use %s to search."
 msgstr "-Suite- Ceci est un index consultable. Utilisez %s pour la recherche."
 
-#: LYMessages.c:159
+#: LYMessages.c:160
 msgid "You have entered an invalid link number."
 msgstr "Vous avez entré un numéro de lien invalide."
 
 #. #define SOURCE_HELP
-#: LYMessages.c:161
+#: LYMessages.c:162
 msgid "Currently viewing document source.  Press '\\' to return to rendered version."
 msgstr "Vous visualisez le code source. Faites '\\' pour la version hypertexte"
 
 #. #define NOVICE_LINE_ONE
-#: LYMessages.c:163
+#: LYMessages.c:164
 msgid "  Arrow keys: Up and Down to move.  Right to follow a link; Left to go back.  \n"
 msgstr "HAUT/BAS: se déplacer; DROITE: activer le lien; GAUCHE: document précédent\n"
 
 # Is the AIDE command correct? There is no online Help in Lynx. 
 #. #define NOVICE_LINE_TWO
-#: LYMessages.c:165
+#: LYMessages.c:166
 msgid " H)elp O)ptions P)rint G)o M)ain screen Q)uit /=search [delete]=history list \n"
 msgstr "H) Accueil S) Paramètres P) Imprimer G) Aller M) Départ Q)uitter /=chercher [Y]=Historique\n"
 
 #. #define NOVICE_LINE_TWO_A
-#: LYMessages.c:167
+#: LYMessages.c:168
 msgid "  O)ther cmds  H)elp  K)eymap  G)oto  P)rint  M)ain screen  o)ptions  Q)uit  \n"
 msgstr " O) Commandes G) Aller B) PagePréc H) Accueil C)ommenter ^L) Rafraîchir Q)uitter\n"
 
 #. #define NOVICE_LINE_TWO_B
-#: LYMessages.c:169
+#: LYMessages.c:170
 msgid "  O)ther cmds  B)ack  E)dit  D)ownload ^R)eload ^W)ipe screen  search doc: / \n"
 msgstr "  O) Commandes S) Paramètres W) Recherche N) Suivant D) Décharger U) Charger\n"
 
 # NOVICE_LINE_TWO_C
 #. #define NOVICE_LINE_TWO_C
-#: LYMessages.c:171
+#: LYMessages.c:172
 msgid "O)ther cmds  C)omment  History: <backspace>  Bookmarks: V)iew, A)dd, R)emove \n"
 msgstr "  O) Commandes  K) Clavier  ^R) Recharger  Signets: v)oir A)jouter R) Suppr\n"
 
 #  Z)ap Transfer missing from line, since it does nothing
 #. #define FORM_NOVICELINE_ONE
-#: LYMessages.c:173
+#: LYMessages.c:174
 msgid "            Enter text into the field by typing on the keyboard              "
 msgstr "Entrez le texte dans la zone à partir du clavier                 "
 
 #. #define FORM_NOVICELINE_TWO
-#: LYMessages.c:175
+#: LYMessages.c:176
 msgid "    Ctrl-U to delete all text in field, [Backspace] to delete a character    "
 msgstr "Ctrl-U pour supprimer tout le texte, [rapp. arrière] pour effacer caractère"
 
 #. #define FORM_NOVICELINE_TWO_DELBL
-#: LYMessages.c:177
+#: LYMessages.c:178
 msgid "      Ctrl-U to delete text in field, [Backspace] to delete a character    "
 msgstr "Ctrl-U pour supprimer tout le texte, [rapp. arrière] pour effacer caractère"
 
 #. #define FORM_NOVICELINE_TWO_VAR
-#: LYMessages.c:179
+#: LYMessages.c:180
 #, c-format
 msgid "    %s to delete all text in field, [Backspace] to delete a character    "
 msgstr "%s pour supprimer tout le texte, [rapp. arrière] pour effacer caractère"
 
 #. #define FORM_NOVICELINE_TWO_DELBL_VAR
-#: LYMessages.c:181
+#: LYMessages.c:182
 #, c-format
 msgid "      %s to delete text in field, [Backspace] to delete a character    "
 msgstr "%s pour supprimer tout le texte, [rapp. arrière] pour effacer caractère"
 
 #. mailto
-#: LYMessages.c:184
+#: LYMessages.c:185
 msgid "Malformed mailto form submission!  Cancelled!"
 msgstr "Envoi de formulaire mailto incorrect. Demande annulée!"
 
-#: LYMessages.c:185
+#: LYMessages.c:186
 msgid "Warning!  Control codes in mail address replaced by ?"
 msgstr "Attention! Les codes de controles de l'adresse ont étés remplacés par ?"
 
-#: LYMessages.c:186
+#: LYMessages.c:187
 msgid "Mail disallowed!  Cannot submit."
 msgstr "La fonction de courrier est invalidée. Impossible de soumettre l'envoi!"
 
-#: LYMessages.c:187
+#: LYMessages.c:188
 msgid "Mailto form submission failed!"
 msgstr "Impossible d'envoyer le formulaire mailto!"
 
-#: LYMessages.c:188
+#: LYMessages.c:189
 msgid "Mailto form submission Cancelled!!!"
 msgstr "Envoi du formulaire mailto annulé!"
 
-#: LYMessages.c:189
+#: LYMessages.c:190
 msgid "Sending form content..."
 msgstr "Envoi du contenu du formulaire..."
 
-#: LYMessages.c:190
+#: LYMessages.c:191
 msgid "No email address is present in mailto URL!"
 msgstr "Aucune adresse de courrier ne figure dans l'URL mailto!"
 
 #. #define MAILTO_URL_TEMPOPEN_FAILED
-#: LYMessages.c:192
+#: LYMessages.c:193
 msgid "Unable to open temporary file for mailto URL!"
 msgstr "Impossible d'ouvrir de fichier temporaire pour l'URL mailto!"
 
 #. #define INC_ORIG_MSG_PROMPT
-#: LYMessages.c:194
+#: LYMessages.c:195
 msgid "Do you wish to include the original message?"
 msgstr "Voulez-vous inclure le message d'origine?"
 
 #. #define INC_PREPARSED_MSG_PROMPT
-#: LYMessages.c:196
+#: LYMessages.c:197
 msgid "Do you wish to include the preparsed source?"
 msgstr "Voulez-vous inclure la source pré-analysée?"
 
 #. #define SPAWNING_EDITOR_FOR_MAIL
-#: LYMessages.c:198
+#: LYMessages.c:199
 msgid "Spawning your selected editor to edit mail message"
 msgstr "Lancement de votre éditeur de choix pour l'édition du message"
 
 #. #define ERROR_SPAWNING_EDITOR
-#: LYMessages.c:200
+#: LYMessages.c:201
 msgid "Error spawning editor, check your editor definition in the options menu"
 msgstr "Erreur de lancement; vérifier les données sur l'éditeur dans les paramètres"
 
-#: LYMessages.c:201
+#: LYMessages.c:202
 msgid "Send this comment?"
 msgstr "Envoyer ce commentaire? "
 
-#: LYMessages.c:202
+#: LYMessages.c:203
 msgid "Send this message?"
 msgstr "Envoyer ce message? "
 
-#: LYMessages.c:203
+#: LYMessages.c:204
 msgid "Sending your message..."
 msgstr "Envoi de votre message..."
 
-#: LYMessages.c:204
+#: LYMessages.c:205
 msgid "Sending your comment:"
 msgstr "Envoi de votre commentaire:"
 
 #. textarea
-#: LYMessages.c:207
+#: LYMessages.c:208
 msgid "Not in a TEXTAREA; cannot use external editor."
 msgstr "Vous n'êtes pas dans une zone de texte, impossible d'utiliser l'éditeur éxterne."
 
-#: LYMessages.c:208
+#: LYMessages.c:209
 msgid "Not in a TEXTAREA; cannot use command."
 msgstr "Vous n'êtes pas dans une zone de texte, impossible d'utiliser cette commande."
 
@@ -2293,7 +2293,7 @@ msgstr "(Aucun nom)"
 msgid "(No value.)"
 msgstr "(Aucune valeur)"
 
-#: LYMessages.c:713
+#: LYMessages.c:713 src/LYOptions.c:2383
 msgid "None"
 msgstr "Aucun(e)"
 
@@ -2863,8 +2863,8 @@ msgstr "**** HTAccess: socket ou numéro de fichier renvoyé par une routine de ch
 
 #: WWW/Library/Implementation/HTAccess.c:1078
 #, c-format
-msgid "**** HTAccess: Internal software error.  Please mail lynx-dev@sig.net!\n"
-msgstr "**** HTAccess: Erreur interne. Merci de contacter lynx-dev@sig.net !\n"
+msgid "**** HTAccess: Internal software error.  Please mail lynx-dev@nongnu.org!\n"
+msgstr "**** HTAccess: Erreur interne. Merci de contacter lynx-dev@nongnu.org !\n"
 
 #: WWW/Library/Implementation/HTAccess.c:1079
 #, c-format
@@ -2875,7 +2875,7 @@ msgstr "**** HTAccess: L'état retourné était: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1085 src/LYMainLoop.c:7615
+#: WWW/Library/Implementation/HTAccess.c:1085 src/LYMainLoop.c:7617
 msgid "Can't Access"
 msgstr "Acces impossible"
 
@@ -2945,40 +2945,40 @@ msgstr "Impossible d'atteindre l'hote"
 msgid "No response from finger server."
 msgstr "Pas de réponses du serveur finger"
 
-#: WWW/Library/Implementation/HTNews.c:380
+#: WWW/Library/Implementation/HTNews.c:424
 #, c-format
 msgid "Username for news host '%s':"
 msgstr "Nom d'utilisateur pour l'hôte de forums '%s' :"
 
-#: WWW/Library/Implementation/HTNews.c:433
+#: WWW/Library/Implementation/HTNews.c:477
 msgid "Change username?"
 msgstr "Modifier le nom d'utilisateur?"
 
-#: WWW/Library/Implementation/HTNews.c:437
+#: WWW/Library/Implementation/HTNews.c:481
 msgid "Username:"
 msgstr "Nom d'utilisateur:"
 
-#: WWW/Library/Implementation/HTNews.c:462
+#: WWW/Library/Implementation/HTNews.c:506
 #, c-format
 msgid "Password for news host '%s':"
 msgstr "Mot de passe pour l'hôte de forums '%s' :"
 
-#: WWW/Library/Implementation/HTNews.c:545
+#: WWW/Library/Implementation/HTNews.c:589
 msgid "Change password?"
 msgstr "Changer le mot de passe?"
 
-#: WWW/Library/Implementation/HTNews.c:1693
+#: WWW/Library/Implementation/HTNews.c:1737
 #, c-format
 msgid "No matches for: %s"
 msgstr "Pas de correspondances pour: %s"
 
-#: WWW/Library/Implementation/HTNews.c:1746
+#: WWW/Library/Implementation/HTNews.c:1790
 msgid ""
 "\n"
 "No articles in this group.\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTNews.c:1758
+#: WWW/Library/Implementation/HTNews.c:1802
 msgid ""
 "\n"
 "No articles in this range.\n"
@@ -2989,16 +2989,16 @@ msgstr ""
 #.
 #. * Set window title.
 #.
-#: WWW/Library/Implementation/HTNews.c:1771
+#: WWW/Library/Implementation/HTNews.c:1815
 #, c-format
 msgid "%s,  Articles %d-%d"
 msgstr ""
 
-#: WWW/Library/Implementation/HTNews.c:1794
+#: WWW/Library/Implementation/HTNews.c:1838
 msgid "Earlier articles"
 msgstr "Articles plus récents"
 
-#: WWW/Library/Implementation/HTNews.c:1807
+#: WWW/Library/Implementation/HTNews.c:1851
 #, c-format
 msgid ""
 "\n"
@@ -3009,41 +3009,41 @@ msgstr ""
 "Il y a à jusqu'à %d articles accessibles dans %s, les ID suivent:\n"
 "\n"
 
-#: WWW/Library/Implementation/HTNews.c:1869
+#: WWW/Library/Implementation/HTNews.c:1913
 msgid "All available articles in "
 msgstr "Tout les articles accessibles dans "
 
-#: WWW/Library/Implementation/HTNews.c:2090
+#: WWW/Library/Implementation/HTNews.c:2134
 msgid "Later articles"
 msgstr "Articles anciens"
 
-#: WWW/Library/Implementation/HTNews.c:2113
+#: WWW/Library/Implementation/HTNews.c:2157
 msgid "Post to "
 msgstr "Postez vers"
 
-#: WWW/Library/Implementation/HTNews.c:2334
+#: WWW/Library/Implementation/HTNews.c:2378
 msgid "This client does not contain support for SNEWS URLs."
 msgstr "Ce client ne supporte pas les Urls SNEWS"
 
-#: WWW/Library/Implementation/HTNews.c:2542
+#: WWW/Library/Implementation/HTNews.c:2586
 msgid "No target for raw text!"
 msgstr "Aucune cible pour le texte brut!"
 
-#: WWW/Library/Implementation/HTNews.c:2573
+#: WWW/Library/Implementation/HTNews.c:2617
 msgid "Connecting to NewsHost ..."
 msgstr "Connection à l'hote de news ...."
 
-#: WWW/Library/Implementation/HTNews.c:2625
+#: WWW/Library/Implementation/HTNews.c:2669
 #, c-format
 msgid "Could not access %s."
 msgstr "Impossible d'accéder à %s."
 
-#: WWW/Library/Implementation/HTNews.c:2731
+#: WWW/Library/Implementation/HTNews.c:2775
 #, c-format
 msgid "Can't read news info.  News host %.20s responded: %.200s"
 msgstr "Impossible de lire les informations. Le serveur de news %.20s à répondut: %.200s"
 
-#: WWW/Library/Implementation/HTNews.c:2735
+#: WWW/Library/Implementation/HTNews.c:2779
 #, c-format
 msgid "Can't read news info, empty response from host %s"
 msgstr "Impossible de lire les informations, réponse vide de l'hote %s"
@@ -3051,22 +3051,22 @@ msgstr "Impossible de lire les informations, réponse vide de l'hote %s"
 #.
 #. * List available newsgroups.  - FM
 #.
-#: WWW/Library/Implementation/HTNews.c:2939
+#: WWW/Library/Implementation/HTNews.c:2983
 msgid "Reading list of available newsgroups."
 msgstr "Lecture de la liste des forums disponibles."
 
-#: WWW/Library/Implementation/HTNews.c:2960
+#: WWW/Library/Implementation/HTNews.c:3004
 msgid "Reading list of articles in newsgroup."
 msgstr "Lecture de la liste des articles du forum."
 
 #.
 #. * Get an article from a news group.  - FM
 #.
-#: WWW/Library/Implementation/HTNews.c:2966
+#: WWW/Library/Implementation/HTNews.c:3010
 msgid "Reading news article."
 msgstr "Lecture d'articles de forums."
 
-#: WWW/Library/Implementation/HTNews.c:2996
+#: WWW/Library/Implementation/HTNews.c:3040
 msgid "Sorry, could not load requested news."
 msgstr "Désolé, impossible de charger la news demandée."
 
@@ -3137,40 +3137,40 @@ msgid "Unable to connect to remote host."
 msgstr "Impossible d'établir une connexion à l'hôte distant"
 
 # First %s will be FTP, HTTP or other protocol and second %s will be hostname
-#: WWW/Library/Implementation/HTTP.c:554
+#: WWW/Library/Implementation/HTTP.c:547
 #, fuzzy
 msgid "Retrying connection without TLS."
 msgstr "Connexion %s à %s "
 
-#: WWW/Library/Implementation/HTTP.c:597
+#: WWW/Library/Implementation/HTTP.c:590
 msgid "SSL error:Can't find common name in certificate-Continue?"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:614
+#: WWW/Library/Implementation/HTTP.c:607
 #, c-format
 msgid "SSL error:host(%s)!=cert(%s)-Continue?"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:626
+#: WWW/Library/Implementation/HTTP.c:619
 #, c-format
 msgid "Secure %d-bit %s (%s) HTTP connection"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1091
+#: WWW/Library/Implementation/HTTP.c:1089
 msgid "Sending HTTP request."
 msgstr "Envoi de la requête HTTP"
 
-#: WWW/Library/Implementation/HTTP.c:1130
+#: WWW/Library/Implementation/HTTP.c:1128
 msgid "Unexpected network write error; connection aborted."
 msgstr "Erreur d'écriture réseau inattendue: connection annulée."
 
-#: WWW/Library/Implementation/HTTP.c:1136
+#: WWW/Library/Implementation/HTTP.c:1134
 msgid "HTTP request sent; waiting for response."
 msgstr "Demande acheminée au serveur. Veuillez attendre"
 
 # END of Permit FORM
 # More progress strings follow
-#: WWW/Library/Implementation/HTTP.c:1204
+#: WWW/Library/Implementation/HTTP.c:1202
 msgid "Unexpected network read error; connection aborted."
 msgstr "Erreur de lecture inattendue; connexion interrompue"
 
@@ -3183,7 +3183,7 @@ msgstr "Erreur de lecture inattendue; connexion interrompue"
 #. * line and possibly other headers, so we'll deal with them by
 #. * showing the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1398
+#: WWW/Library/Implementation/HTTP.c:1396
 msgid "Got unexpected Informational Status."
 msgstr "Réception d'information de statut inattendue"
 
@@ -3193,7 +3193,7 @@ msgstr "Réception d'information de statut inattendue"
 #. * content.  We'll instruct the user to do that, and
 #. * restore the current document.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1432
+#: WWW/Library/Implementation/HTTP.c:1430
 msgid "Request fulfilled.  Reset Content."
 msgstr "Requête fructueuse. Restauration du contenu."
 
@@ -3203,27 +3203,27 @@ msgstr "Requête fructueuse. Restauration du contenu."
 #. * status is inappropriate.  We'll deal with it by showing
 #. * the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1549
+#: WWW/Library/Implementation/HTTP.c:1547
 msgid "Got unexpected 304 Not Modified status."
 msgstr "Réception inattendue d'un état non modifié 304"
 
-#: WWW/Library/Implementation/HTTP.c:1612
+#: WWW/Library/Implementation/HTTP.c:1610
 msgid "Redirection of POST content requires user approval."
 msgstr "La redirection d'un contenu post nécessite l'accord de l'utilisateur"
 
-#: WWW/Library/Implementation/HTTP.c:1627
+#: WWW/Library/Implementation/HTTP.c:1625
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr "Contnu POST. La redirection permanente est traitée comme temporaire.\n"
 
-#: WWW/Library/Implementation/HTTP.c:1669
+#: WWW/Library/Implementation/HTTP.c:1667
 msgid "Retrying with access authorization information."
 msgstr "Nouvel essai avec information d'autorisation d'accès"
 
-#: WWW/Library/Implementation/HTTP.c:1681
+#: WWW/Library/Implementation/HTTP.c:1679
 msgid "Show the 401 message body?"
 msgstr "Visualiser le corps du message 401 ?"
 
-#: WWW/Library/Implementation/HTTP.c:1724
+#: WWW/Library/Implementation/HTTP.c:1722
 msgid "Show the 407 message body?"
 msgstr "Afficher le corps du message 407?"
 
@@ -3231,7 +3231,7 @@ msgstr "Afficher le corps du message 407?"
 #. * Bad or unknown server_status number.  Take a chance and hope
 #. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1824
+#: WWW/Library/Implementation/HTTP.c:1822
 msgid "Unknown status reply from server!"
 msgstr "Réponse d'état inconnue recue du serveur"
 
@@ -3504,20 +3504,20 @@ msgid "Submitting %s"
 msgstr "Envoi de %s"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12240
+#: src/GridText.c:12254
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr ""
 
 #. don't show previous state
-#: src/GridText.c:12445
+#: src/GridText.c:12459
 msgid "Wrap lines to fit displayed area?"
 msgstr "Raccourcir les lignes pour correspondre à l'aire d'affichage ?"
 
-#: src/GridText.c:12497
+#: src/GridText.c:12511
 msgid "Very long lines have been wrapped!"
 msgstr "Les tres longues lignes ont étées tassées"
 
-#: src/GridText.c:12938
+#: src/GridText.c:12952
 msgid "Very long lines have been truncated!"
 msgstr "Les tres longues lignes ont étées tronquées"
 
@@ -4246,21 +4246,19 @@ msgstr "Ce message est généré automatiquement par"
 msgid "No system mailer configured"
 msgstr ""
 
-#: src/LYMain.c:991
-#, c-format
+#: src/LYMain.c:993
 msgid "No Winsock found, sorry."
 msgstr "Pas de Winsock trouvée, désolé."
 
-#: src/LYMain.c:1193
-#, c-format
-msgid "You MUST define a valid TMP or TEMP area!\n"
-msgstr "vous DEVEZ définire une aire TMP ou TEMP valide ! \n"
+#: src/LYMain.c:1195
+msgid "You MUST define a valid TMP or TEMP area!"
+msgstr "vous DEVEZ définire une aire TMP ou TEMP valide ! "
 
-#: src/LYMain.c:1246 src/LYMainLoop.c:4927
+#: src/LYMain.c:1248 src/LYMainLoop.c:4927
 msgid "No such directory"
 msgstr "Pas de tel répertoire"
 
-#: src/LYMain.c:1451
+#: src/LYMain.c:1453
 #, c-format
 msgid ""
 "\n"
@@ -4272,7 +4270,7 @@ msgstr ""
 "\n"
 
 # src/LYMain.c
-#: src/LYMain.c:1461
+#: src/LYMain.c:1463
 #, c-format
 msgid ""
 "\n"
@@ -4283,7 +4281,7 @@ msgstr ""
 "Jeux de caractères Lynx non précisés.\n"
 "\n"
 
-#: src/LYMain.c:1490
+#: src/LYMain.c:1492
 #, c-format
 msgid ""
 "\n"
@@ -4294,7 +4292,7 @@ msgstr ""
 "Relevé de liens Lynx non déclaré.\n"
 "\n"
 
-#: src/LYMain.c:1516
+#: src/LYMain.c:1518
 #, c-format
 msgid ""
 "\n"
@@ -4305,59 +4303,52 @@ msgstr ""
 "Le fichier Lynx %s n'est pas disponible.\n"
 "\n"
 
-#: src/LYMain.c:1756
+#: src/LYMain.c:1758
 msgid "Warning:"
 msgstr "Attention:"
 
-#: src/LYMain.c:2296
+#: src/LYMain.c:2298
 msgid "persistent cookies state will be changed in next session only."
 msgstr "L'état des cookies persistant ne seront changés qu'au cours de la prochaine session."
 
-#: src/LYMain.c:2533 src/LYMain.c:2578
+#: src/LYMain.c:2535 src/LYMain.c:2580
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: ignorer le charset=%s inconnu\n"
 
-#: src/LYMain.c:3087
+#: src/LYMain.c:3089
 #, fuzzy, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Version %s (%s)\n"
 
-#: src/LYMain.c:3110
+#: src/LYMain.c:3112
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Compilé le %s %s %s\n"
 
-#: src/LYMain.c:3132
-#, c-format
-msgid "Copyrights held by the University of Kansas, CERN, and other contributors.\n"
-msgstr "Copyright tenu par l'université du Kansas, du CERN, et d'autres contribuants\n"
-
 #: src/LYMain.c:3134
-#, c-format
-msgid "Distributed under the GNU General Public License.\n"
-msgstr "Distribué sous le permis de grand public de GNU\n"
+msgid "Copyrights held by the University of Kansas, CERN, and other contributors."
+msgstr "Copyright tenu par l'université du Kansas, du CERN, et d'autres contribuants"
 
 #: src/LYMain.c:3135
-#, c-format
-msgid ""
-"See http://lynx.isc.org/ and the online help for more information.\n"
-"\n"
-msgstr ""
-"Voyez http://lynx.isc.org/ et d'aide en ligne pour plus d'information.\n"
-"\n"
+msgid "Distributed under the GNU General Public License."
+msgstr "Distribué sous le permis de grand public de GNU"
 
-#: src/LYMain.c:3889
+#: src/LYMain.c:3136
+msgid "See http://lynx.isc.org/ and the online help for more information."
+msgstr "Voyez http://lynx.isc.org/ et d'aide en ligne pour plus d'information."
+
+#: src/LYMain.c:3890
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "USAGE : %s [options] [fichier]\n"
 
-#: src/LYMain.c:3890
+#: src/LYMain.c:3891
 #, c-format
 msgid "Options are:\n"
 msgstr "Les options sont :\n"
 
-#: src/LYMain.c:4162
+#: src/LYMain.c:4163
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s : Option non valide : %s\n"
@@ -4414,57 +4405,57 @@ msgstr "Changement de répertoire impossible"
 msgid "Reparsing document under current settings..."
 msgstr "Relecture du document avec les parametres actuels."
 
-#: src/LYMainLoop.c:6369 src/LYMainLoop.c:6372
+#: src/LYMainLoop.c:6374
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Erreur fatale - impossible d'ouvrir le fichier de sortie %s\n"
 
-#: src/LYMainLoop.c:6716
+#: src/LYMainLoop.c:6718
 msgid "TABLE center enable."
 msgstr ""
 
-#: src/LYMainLoop.c:6719
+#: src/LYMainLoop.c:6721
 msgid "TABLE center disable."
 msgstr ""
 
-#: src/LYMainLoop.c:6796
+#: src/LYMainLoop.c:6798
 #, fuzzy
 msgid "Current URL is empty."
 msgstr "Le répertoire courant:"
 
-#: src/LYMainLoop.c:6798 src/LYUtils.c:1697
+#: src/LYMainLoop.c:6800 src/LYUtils.c:1693
 msgid "Copy to clipboard failed."
 msgstr ""
 
-#: src/LYMainLoop.c:6800
+#: src/LYMainLoop.c:6802
 msgid "Document URL put to clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:6802
+#: src/LYMainLoop.c:6804
 msgid "Link URL put to clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:6829
+#: src/LYMainLoop.c:6831
 msgid "No URL in the clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:7500 src/LYMainLoop.c:7670
+#: src/LYMainLoop.c:7502 src/LYMainLoop.c:7672
 msgid "-index-"
 msgstr "-index-"
 
-#: src/LYMainLoop.c:7610
+#: src/LYMainLoop.c:7612
 msgid "lynx: Can't access startfile"
 msgstr "lynx : accès impossible au fichier de départ"
 
-#: src/LYMainLoop.c:7622
+#: src/LYMainLoop.c:7624
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx : fichier de départ introuvable ou son mode n'est pas reconnu"
 
-#: src/LYMainLoop.c:7623
+#: src/LYMainLoop.c:7625
 msgid "      Exiting..."
 msgstr "Sortie"
 
-#: src/LYMainLoop.c:7664
+#: src/LYMainLoop.c:7666
 msgid "-more-"
 msgstr "-suite-"
 
@@ -4528,293 +4519,330 @@ msgstr ""
 msgid "Message has no original text!"
 msgstr "Le message n'a pas de texte original !"
 
-#: src/LYOptions.c:755
+#: src/LYOptions.c:760
 msgid "review/edit B)ookmarks files"
 msgstr "B) Éditer fichiers signets "
 
-#: src/LYOptions.c:757
+#: src/LYOptions.c:762
 msgid "B)ookmark file: "
 msgstr "B) Fichier de signets : "
 
-#: src/LYOptions.c:2120 src/LYOptions.c:2127
+#: src/LYOptions.c:2125 src/LYOptions.c:2132
 msgid "ON"
 msgstr ""
 
 #. verbose_img variable
-#: src/LYOptions.c:2121 src/LYOptions.c:2126 src/LYOptions.c:2264 src/LYOptions.c:2274
+#: src/LYOptions.c:2126 src/LYOptions.c:2131 src/LYOptions.c:2278 src/LYOptions.c:2289
 msgid "OFF"
 msgstr ""
 
-#: src/LYOptions.c:2122
+#: src/LYOptions.c:2127
 msgid "NEVER"
 msgstr ""
 
-#: src/LYOptions.c:2123
+#: src/LYOptions.c:2128
 msgid "ALWAYS"
 msgstr ""
 
-#: src/LYOptions.c:2138 src/LYOptions.c:2256
+#: src/LYOptions.c:2144 src/LYOptions.c:2270
 msgid "ignore"
 msgstr ""
 
-#: src/LYOptions.c:2139
+#: src/LYOptions.c:2145
 msgid "ask user"
 msgstr ""
 
-#: src/LYOptions.c:2140
+#: src/LYOptions.c:2146
 msgid "accept all"
 msgstr ""
 
-#: src/LYOptions.c:2152
+#: src/LYOptions.c:2158
 msgid "ALWAYS OFF"
 msgstr ""
 
-#: src/LYOptions.c:2153
+#: src/LYOptions.c:2159
 msgid "FOR LOCAL FILES ONLY"
 msgstr ""
 
-#: src/LYOptions.c:2155
+#: src/LYOptions.c:2161
 msgid "ALWAYS ON"
 msgstr ""
 
-#: src/LYOptions.c:2166
+#: src/LYOptions.c:2173
 msgid "Numbers act as arrows"
 msgstr ""
 
-#: src/LYOptions.c:2168
+#: src/LYOptions.c:2175
 msgid "Links are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2171
+#: src/LYOptions.c:2178
 msgid "Links and form fields are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2174
+#: src/LYOptions.c:2181
 msgid "Form fields are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2182
+#: src/LYOptions.c:2190
 msgid "Case insensitive"
 msgstr ""
 
-#: src/LYOptions.c:2183
+#: src/LYOptions.c:2191
 msgid "Case sensitive"
 msgstr ""
 
-#: src/LYOptions.c:2205
+#: src/LYOptions.c:2215
 msgid "prompt normally"
 msgstr ""
 
-#: src/LYOptions.c:2206
+#: src/LYOptions.c:2216
 msgid "force yes-response"
 msgstr ""
 
-#: src/LYOptions.c:2207
+#: src/LYOptions.c:2217
 msgid "force no-response"
 msgstr ""
 
-#: src/LYOptions.c:2224
+#: src/LYOptions.c:2235
 #, fuzzy
 msgid "Novice"
 msgstr "Aucun(e)"
 
-#: src/LYOptions.c:2225
+#: src/LYOptions.c:2236
 #, fuzzy
 msgid "Intermediate"
 msgstr "Interne"
 
-#: src/LYOptions.c:2226
+#: src/LYOptions.c:2237
 msgid "Advanced"
 msgstr ""
 
-#: src/LYOptions.c:2234
+#: src/LYOptions.c:2246
 msgid "By First Visit"
 msgstr ""
 
-#: src/LYOptions.c:2236
+#: src/LYOptions.c:2248
 msgid "By First Visit Reversed"
 msgstr ""
 
-#: src/LYOptions.c:2237
+#: src/LYOptions.c:2249
 msgid "As Visit Tree"
 msgstr ""
 
-#: src/LYOptions.c:2238
+#: src/LYOptions.c:2250
 msgid "By Last Visit"
 msgstr ""
 
-#: src/LYOptions.c:2240
+#: src/LYOptions.c:2252
 msgid "By Last Visit Reversed"
 msgstr ""
 
 #. Old_DTD variable
-#: src/LYOptions.c:2250
+#: src/LYOptions.c:2263
 msgid "relaxed (TagSoup mode)"
 msgstr ""
 
-#: src/LYOptions.c:2251
+#: src/LYOptions.c:2264
 msgid "strict (SortaSGML mode)"
 msgstr ""
 
-#: src/LYOptions.c:2257
+#: src/LYOptions.c:2271
 msgid "as labels"
 msgstr ""
 
-#: src/LYOptions.c:2258
+#: src/LYOptions.c:2272
 #, fuzzy
 msgid "as links"
 msgstr "ce lien"
 
-#: src/LYOptions.c:2265
+#: src/LYOptions.c:2279
 #, fuzzy
 msgid "show filename"
 msgstr "(mauvais nom de fichier)"
 
-#: src/LYOptions.c:2275
+#: src/LYOptions.c:2290
 msgid "STANDARD"
 msgstr ""
 
-#: src/LYOptions.c:2276
+#: src/LYOptions.c:2291
 msgid "ADVANCED"
-msgstr ""
-
-#: src/LYOptions.c:2301
-#, fuzzy
-msgid "Directories first"
-msgstr "Sous-répertoires :"
-
-#: src/LYOptions.c:2302
-#, fuzzy
-msgid "Files first"
-msgstr " premier"
-
-#: src/LYOptions.c:2303
-msgid "Mixed style"
-msgstr ""
-
-#: src/LYOptions.c:2310 src/LYOptions.c:2326
-#, fuzzy
-msgid "By Name"
-msgstr "Nom :"
-
-#: src/LYOptions.c:2311 src/LYOptions.c:2327
-msgid "By Type"
-msgstr ""
-
-#: src/LYOptions.c:2312 src/LYOptions.c:2328
-#, fuzzy
-msgid "By Size"
-msgstr "Taille de byte"
-
-#: src/LYOptions.c:2313 src/LYOptions.c:2329
-#, fuzzy
-msgid "By Date"
-msgstr "Date :"
-
-#: src/LYOptions.c:2314
-msgid "By Mode"
-msgstr ""
-
-#: src/LYOptions.c:2316
-msgid "By User"
 msgstr ""
 
 #: src/LYOptions.c:2317
 #, fuzzy
+msgid "Directories first"
+msgstr "Sous-répertoires :"
+
+#: src/LYOptions.c:2318
+#, fuzzy
+msgid "Files first"
+msgstr " premier"
+
+#: src/LYOptions.c:2319
+msgid "Mixed style"
+msgstr ""
+
+#: src/LYOptions.c:2327 src/LYOptions.c:2344
+#, fuzzy
+msgid "By Name"
+msgstr "Nom :"
+
+#: src/LYOptions.c:2328 src/LYOptions.c:2345
+msgid "By Type"
+msgstr ""
+
+#: src/LYOptions.c:2329 src/LYOptions.c:2346
+#, fuzzy
+msgid "By Size"
+msgstr "Taille de byte"
+
+#: src/LYOptions.c:2330 src/LYOptions.c:2347
+#, fuzzy
+msgid "By Date"
+msgstr "Date :"
+
+#: src/LYOptions.c:2331
+msgid "By Mode"
+msgstr ""
+
+#: src/LYOptions.c:2333
+msgid "By User"
+msgstr ""
+
+#: src/LYOptions.c:2334
+#, fuzzy
 msgid "By Group"
 msgstr "Groupe"
 
-#: src/LYOptions.c:2336
+#: src/LYOptions.c:2355
 msgid "Do not show rate"
 msgstr ""
 
-#: src/LYOptions.c:2337 src/LYOptions.c:2338
+#: src/LYOptions.c:2356 src/LYOptions.c:2357
 #, fuzzy, c-format
 msgid "Show %s/sec rate"
 msgstr "Transfert de données terminé"
 
-#: src/LYOptions.c:2340 src/LYOptions.c:2341
+#: src/LYOptions.c:2359 src/LYOptions.c:2360
 #, c-format
 msgid "Show %s/sec, ETA"
 msgstr ""
 
-#: src/LYOptions.c:2588 src/LYOptions.c:2612
+#: src/LYOptions.c:2372
+msgid "Accept lynx's internal types"
+msgstr ""
+
+#: src/LYOptions.c:2373
+msgid "Also accept lynx.cfg's types"
+msgstr ""
+
+#: src/LYOptions.c:2374
+msgid "Also accept user's types"
+msgstr ""
+
+#: src/LYOptions.c:2375
+msgid "Also accept system's types"
+msgstr ""
+
+#: src/LYOptions.c:2376
+#, fuzzy
+msgid "Accept all types"
+msgstr "Accepter les changements"
+
+#: src/LYOptions.c:2385
+msgid "gzip"
+msgstr ""
+
+#: src/LYOptions.c:2388
+msgid "compress"
+msgstr ""
+
+#: src/LYOptions.c:2391
+msgid "bzip2"
+msgstr ""
+
+#: src/LYOptions.c:2393
+msgid "All"
+msgstr ""
+
+#: src/LYOptions.c:2658 src/LYOptions.c:2682
 #, c-format
 msgid "Use %s to invoke the Options menu!"
 msgstr "Utilisez %s pour invoquer le menu des Options."
 
-#: src/LYOptions.c:3326
+#: src/LYOptions.c:3410
 msgid "(options marked with (!) will not be saved)"
 msgstr ""
 
-#: src/LYOptions.c:3334
+#: src/LYOptions.c:3418
 msgid "General Preferences"
 msgstr "Références"
 
 #. ***************************************************************
 #. User Mode: SELECT
-#: src/LYOptions.c:3338
+#: src/LYOptions.c:3422
 msgid "User mode"
 msgstr "Mode utilisateur"
 
 #. Editor: INPUT
-#: src/LYOptions.c:3344
+#: src/LYOptions.c:3428
 msgid "Editor"
 msgstr "Éditeur"
 
 #. Search Type: SELECT
-#: src/LYOptions.c:3349
+#: src/LYOptions.c:3433
 msgid "Type of Search"
 msgstr " pour la recherche"
 
-#: src/LYOptions.c:3354
+#: src/LYOptions.c:3438
 msgid "Security and Privacy"
 msgstr ""
 
 #. ***************************************************************
 #. Cookies: SELECT
-#: src/LYOptions.c:3358
+#: src/LYOptions.c:3442
 msgid "Cookies"
 msgstr "Cookies"
 
 #. Cookie Prompting: SELECT
-#: src/LYOptions.c:3372
+#: src/LYOptions.c:3456
 msgid "Invalid-Cookie Prompting"
 msgstr ""
 
 #. SSL Prompting: SELECT
-#: src/LYOptions.c:3379
+#: src/LYOptions.c:3463
 msgid "SSL Prompting"
 msgstr ""
 
-#: src/LYOptions.c:3385
+#: src/LYOptions.c:3469
 msgid "Keyboard Input"
 msgstr "Entrée du clavier"
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
-#: src/LYOptions.c:3389
+#: src/LYOptions.c:3473
 msgid "Keypad mode"
 msgstr "Pavé numérique"
 
 #. Emacs keys: ON/OFF
-#: src/LYOptions.c:3395
+#: src/LYOptions.c:3479
 msgid "Emacs keys"
 msgstr "Touches emacs"
 
 #. VI Keys: ON/OFF
-#: src/LYOptions.c:3401
+#: src/LYOptions.c:3485
 msgid "VI keys"
 msgstr "Touches vi"
 
 #. Line edit style: SELECT
 #. well, at least 2 line edit styles available
-#: src/LYOptions.c:3408
+#: src/LYOptions.c:3492
 msgid "Line edit style"
 msgstr ""
 
 #. Keyboard layout: SELECT
-#: src/LYOptions.c:3420
+#: src/LYOptions.c:3504
 #, fuzzy
 msgid "Keyboard layout"
 msgstr "Entrée du clavier"
@@ -4822,22 +4850,22 @@ msgstr "Entrée du clavier"
 #.
 #. * Display and Character Set
 #.
-#: src/LYOptions.c:3434
+#: src/LYOptions.c:3518
 msgid "Display and Character Set"
 msgstr "Variable d'affichage"
 
 #. Use locale-based character set: ON/OFF
-#: src/LYOptions.c:3439
+#: src/LYOptions.c:3523
 #, fuzzy
 msgid "Use locale-based character set"
 msgstr "charset présumé du document:"
 
 #. Display Character Set: SELECT
-#: src/LYOptions.c:3448
+#: src/LYOptions.c:3532
 msgid "Display character set"
 msgstr "Afficher le charset"
 
-#: src/LYOptions.c:3479
+#: src/LYOptions.c:3563
 msgid "Assumed document character set"
 msgstr "charset présumé du document:"
 
@@ -4846,157 +4874,169 @@ msgstr "charset présumé du document:"
 #. * we split the header to make it more readable:
 #. * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 #.
-#: src/LYOptions.c:3499
+#: src/LYOptions.c:3583
 msgid "CJK mode"
 msgstr ""
 
-#: src/LYOptions.c:3501
+#: src/LYOptions.c:3585
 msgid "Raw 8-bit"
 msgstr "Mode 8-bit"
 
 #. X Display: INPUT
-#: src/LYOptions.c:3509
+#: src/LYOptions.c:3593
 msgid "X Display"
 msgstr "X Display"
 
 #.
 #. * Document Appearance
 #.
-#: src/LYOptions.c:3515
+#: src/LYOptions.c:3599
 msgid "Document Appearance"
 msgstr "Apparence du document"
 
-#: src/LYOptions.c:3521
+#: src/LYOptions.c:3605
 msgid "Show color"
 msgstr "Afficher les couleurs"
 
 #. Show cursor: ON/OFF
-#: src/LYOptions.c:3545
+#: src/LYOptions.c:3629
 msgid "Show cursor"
 msgstr "Afficher le curseur"
 
 #. Underline links: ON/OFF
-#: src/LYOptions.c:3551
+#: src/LYOptions.c:3635
 #, fuzzy
 msgid "Underline links"
 msgstr "Liens cachés :"
 
 #. Show scrollbar: ON/OFF
-#: src/LYOptions.c:3558
+#: src/LYOptions.c:3642
 #, fuzzy
 msgid "Show scrollbar"
 msgstr "Afficher les couleurs"
 
 #. Select Popups: ON/OFF
-#: src/LYOptions.c:3565
+#: src/LYOptions.c:3649
 msgid "Popups for select fields"
 msgstr "Fenêtre popup pour les champs sélectionnés."
 
 #. HTML error recovery: SELECT
-#: src/LYOptions.c:3571
+#: src/LYOptions.c:3655
 msgid "HTML error recovery"
 msgstr "Reprise d'une erreur HTML"
 
 #. Show Images: SELECT
-#: src/LYOptions.c:3577
+#: src/LYOptions.c:3661
 msgid "Show images"
 msgstr "Montrer les images"
 
 #. Verbose Images: ON/OFF
-#: src/LYOptions.c:3591
+#: src/LYOptions.c:3675
 msgid "Verbose images"
 msgstr "Images verbeuses"
 
-#: src/LYOptions.c:3600
+#: src/LYOptions.c:3684
 msgid "Headers Transferred to Remote Servers"
 msgstr "Les headers sont transférés aux serveurs distants"
 
 #. ***************************************************************
 #. Mail Address: INPUT
-#: src/LYOptions.c:3604
+#: src/LYOptions.c:3688
 msgid "Personal mail address"
 msgstr "Adresse email personnelle"
 
+#. Preferred media type: SELECT
+#: src/LYOptions.c:3693
+#, fuzzy
+msgid "Preferred media type"
+msgstr "%d bytes transférés"
+
+#. Preferred encoding: SELECT
+#: src/LYOptions.c:3699
+#, fuzzy
+msgid "Preferred encoding"
+msgstr "Langue préférée"
+
 #. Preferred Document Character Set: INPUT
-#: src/LYOptions.c:3609
+#: src/LYOptions.c:3705
 msgid "Preferred document character set"
 msgstr "Jeu de caractères préféré"
 
 #. Preferred Document Language: INPUT
-#: src/LYOptions.c:3614
+#: src/LYOptions.c:3710
 msgid "Preferred document language"
 msgstr "Langue préférée"
 
-#: src/LYOptions.c:3620
+#: src/LYOptions.c:3716
 msgid "User-Agent header"
 msgstr "Header 'User-Agent'"
 
 #.
 #. * Listing and Accessing Files
 #.
-#: src/LYOptions.c:3628
+#: src/LYOptions.c:3724
 msgid "Listing and Accessing Files"
 msgstr "Listes et acces aux fichiers"
 
 #. ***************************************************************
 #. FTP sort: SELECT
-#: src/LYOptions.c:3632
+#: src/LYOptions.c:3728
 msgid "FTP sort criteria"
 msgstr "Critères de tri FTP"
 
 #. Local Directory Sort: SELECT
-#: src/LYOptions.c:3639
+#: src/LYOptions.c:3735
 msgid "Local directory sort criteria"
 msgstr "Critère de tri des répertoires locaux."
 
 #. Local Directory Order: SELECT
-#: src/LYOptions.c:3645
+#: src/LYOptions.c:3741
 #, fuzzy
 msgid "Local directory sort order"
 msgstr "Critère de tri des répertoires locaux."
 
-#: src/LYOptions.c:3654
+#: src/LYOptions.c:3750
 msgid "Show dot files"
 msgstr "Montrer les fichiers cachés"
 
-#: src/LYOptions.c:3662
+#: src/LYOptions.c:3758
 msgid "Execution links"
 msgstr "Liens à éxécuter"
 
 #. Show transfer rate: SELECT
-#: src/LYOptions.c:3682
+#: src/LYOptions.c:3778
 msgid "Show transfer rate"
 msgstr "Transfert de données terminé"
 
 #.
 #. * Special Files and Screens
 #.
-#: src/LYOptions.c:3702
+#: src/LYOptions.c:3798
 msgid "Special Files and Screens"
 msgstr "Fichiers et écrans spéciaux."
 
-#: src/LYOptions.c:3707
+#: src/LYOptions.c:3803
 msgid "Multi-bookmarks"
 msgstr "Bookmarks multiples"
 
-#: src/LYOptions.c:3715
+#: src/LYOptions.c:3811
 msgid "Review/edit Bookmarks files"
 msgstr "Revoir/Editer les fichiers Bookmarks"
 
-#: src/LYOptions.c:3717
+#: src/LYOptions.c:3813
 msgid "Goto multi-bookmark menu"
 msgstr "Aller au menu multi-bookmarks"
 
-#: src/LYOptions.c:3719
+#: src/LYOptions.c:3815
 msgid "Bookmarks file"
 msgstr "Fichier de Bookmarks"
 
 #. Visited Pages: SELECT
-#: src/LYOptions.c:3725
+#: src/LYOptions.c:3821
 msgid "Visited Pages"
 msgstr "la Page des liens activés"
 
-#: src/LYOptions.c:3730
+#: src/LYOptions.c:3826
 #, fuzzy
 msgid "View the file "
 msgstr "Envoyer le fichier par courriel"
@@ -5117,38 +5157,38 @@ msgstr "Lynx: impossible de démarrer. Le fichier de règles CERN %s n'est pas acc
 msgid "(no name)"
 msgstr "(pas de nom)"
 
-#: src/LYReadCFG.c:1767
+#: src/LYReadCFG.c:1772
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "Plus de %d inclusions de lynx.cfg imbriquées. Peut être y a t'il une boucle ?\n"
 
-#: src/LYReadCFG.c:1769
+#: src/LYReadCFG.c:1774
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "Le dernier include tenté était: '%s',\n"
 
-#: src/LYReadCFG.c:1770
+#: src/LYReadCFG.c:1775
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "included de '%s'.\n"
 
-#: src/LYReadCFG.c:2176 src/LYReadCFG.c:2189 src/LYReadCFG.c:2247
+#: src/LYReadCFG.c:2181 src/LYReadCFG.c:2194 src/LYReadCFG.c:2252
 msgid "The following is read from your lynx.cfg file."
 msgstr "Les données suivantes sont lues à partie de votre fichier lynx.cfg."
 
-#: src/LYReadCFG.c:2177 src/LYReadCFG.c:2190
+#: src/LYReadCFG.c:2182 src/LYReadCFG.c:2195
 msgid "Please read the distribution"
 msgstr "Merci de lire la distribution"
 
-#: src/LYReadCFG.c:2183 src/LYReadCFG.c:2193
+#: src/LYReadCFG.c:2188 src/LYReadCFG.c:2198
 msgid "for more comments."
 msgstr "pour plus de commentaires."
 
-#: src/LYReadCFG.c:2229
+#: src/LYReadCFG.c:2234
 msgid "RELOAD THE CHANGES"
 msgstr "RECHARGER LES MODIFICATIONS"
 
-#: src/LYReadCFG.c:2237
+#: src/LYReadCFG.c:2242
 msgid "Your primary configuration"
 msgstr "Votre configuration principale"
 
@@ -5385,34 +5425,34 @@ msgstr "Téléchargement vers:"
 msgid "Upload options:"
 msgstr "Options de chargement de fichier :"
 
-#: src/LYUtils.c:1699
+#: src/LYUtils.c:1695
 msgid "Download document URL put to clipboard."
 msgstr ""
 
-#: src/LYUtils.c:2467
+#: src/LYUtils.c:2463
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "Protocole d'acces inattendu pour ce scheme d'url"
 
-#: src/LYUtils.c:3285
+#: src/LYUtils.c:3281
 msgid "Too many tempfiles"
 msgstr ""
 
-#: src/LYUtils.c:3589
+#: src/LYUtils.c:3585
 #, fuzzy
 msgid "unknown restriction"
 msgstr "Pas de réstriction définies."
 
-#: src/LYUtils.c:3619
+#: src/LYUtils.c:3615
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "Pas de réstriction définies.\n"
 
-#: src/LYUtils.c:3622
+#: src/LYUtils.c:3618
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "Définition de réstriction:\n"
 
-#: src/LYUtils.c:5002
+#: src/LYUtils.c:4998
 msgid "Cannot find HOME directory"
 msgstr ""
 
@@ -5420,7 +5460,7 @@ msgstr ""
 msgid "Normally disabled.  See ENABLE_LYNXRC in lynx.cfg\n"
 msgstr ""
 
-#: src/LYrcFile.c:292
+#: src/LYrcFile.c:317
 msgid ""
 "accept_all_cookies allows the user to tell Lynx to automatically\n"
 "accept all cookies if desired.  The default is \"FALSE\" which will\n"
@@ -5428,7 +5468,7 @@ msgid ""
 "all cookies.\n"
 msgstr ""
 
-#: src/LYrcFile.c:299
+#: src/LYrcFile.c:324
 msgid ""
 "bookmark_file specifies the name and location of the default bookmark\n"
 "file into which the user can paste links for easy access at a later\n"
@@ -5438,7 +5478,7 @@ msgstr ""
 "dans lequel l'utilisateur peut copier des liens pour un accès rapide\n"
 "ultérieurement.\n"
 
-#: src/LYrcFile.c:304
+#: src/LYrcFile.c:329
 msgid ""
 "If case_sensitive_searching is \"on\" then when the user invokes a search\n"
 "using the 's' or '/' keys, the search performed will be case sensitive\n"
@@ -5448,7 +5488,7 @@ msgstr ""
 "moyen des touches 's' ou '/', la recherche tient compte des maj./min. au lieu\n"
 "de reconnaître tous les caractères. La valeur par défaut est «DÉSACTIVÉ».\n"
 
-#: src/LYrcFile.c:309
+#: src/LYrcFile.c:334
 msgid ""
 "The character_set definition controls the representation of 8 bit\n"
 "characters for your terminal.  If 8 bit characters do not show up\n"
@@ -5462,7 +5502,7 @@ msgstr ""
 "bits différent ou utiliser les caractères approximatifs 7 bits.  Les jeux\n"
 "de caractères valides courants sont :\n"
 
-#: src/LYrcFile.c:316
+#: src/LYrcFile.c:341
 msgid ""
 "cookie_accept_domains and cookie_reject_domains are comma-delimited\n"
 "lists of domains from which Lynx should automatically accept or reject\n"
@@ -5471,7 +5511,7 @@ msgid ""
 "settings made here.\n"
 msgstr ""
 
-#: src/LYrcFile.c:324
+#: src/LYrcFile.c:349
 msgid ""
 "cookie_file specifies the file from which to read persistent cookies.\n"
 "The default is ~/.lynx_cookies.\n"
@@ -5479,7 +5519,7 @@ msgstr ""
 "cookie_file spécifie le fichier à partir duquel lire les cookies\n"
 "persistants. Le défaut est ~/.lynx_cookies.\n"
 
-#: src/LYrcFile.c:329
+#: src/LYrcFile.c:354
 msgid ""
 "cookie_loose_invalid_domains, cookie_strict_invalid_domains, and\n"
 "cookie_query_invalid_domains are comma-delimited lists of which domains\n"
@@ -5490,13 +5530,13 @@ msgid ""
 "querying the user for an invalid path or domain.\n"
 msgstr ""
 
-#: src/LYrcFile.c:343
+#: src/LYrcFile.c:368
 msgid ""
 "dir_list_order specifies the directory list order under DIRED_SUPPORT\n"
 "(if implemented).  The default is \"ORDER_BY_NAME\"\n"
 msgstr ""
 
-#: src/LYrcFile.c:348
+#: src/LYrcFile.c:373
 msgid ""
 "dir_list_styles specifies the directory list style under DIRED_SUPPORT\n"
 "(if implemented).  The default is \"MIXED_STYLE\", which sorts both\n"
@@ -5509,7 +5549,7 @@ msgstr ""
 "permet de lister les fichiers d'abord tandis que «DIRECTORIES_FIRST» permet\n"
 "de lister les répertoires d'abord.\n"
 
-#: src/LYrcFile.c:356
+#: src/LYrcFile.c:381
 msgid ""
 "If emacs_keys is to \"on\" then the normal EMACS movement keys:\n"
 "  ^N = down    ^P = up\n"
@@ -5521,7 +5561,7 @@ msgstr ""
 "  ^B = gauche    ^F = droite\n"
 "est activé.\n"
 
-#: src/LYrcFile.c:362
+#: src/LYrcFile.c:387
 msgid ""
 "file_editor specifies the editor to be invoked when editing local files\n"
 "or sending mail.  If no editor is specified, then file editing is disabled\n"
@@ -5533,7 +5573,7 @@ msgstr ""
 "à moins qu'elle soit activée de la ligne de commande, auquel cas l'éditeur\n"
 "de lignes sera utilisé pour l'envoi de courrier.\n"
 
-#: src/LYrcFile.c:368
+#: src/LYrcFile.c:393
 msgid ""
 "The file_sorting_method specifies which value to sort on when viewing\n"
 "file lists such as FTP directories.  The options are:\n"
@@ -5549,7 +5589,7 @@ msgstr ""
 "   VOLUME    -- tri selon le volume du fichier\n"
 "   DATE      -- tri selon la date du fichier\n"
 
-#: src/LYrcFile.c:386
+#: src/LYrcFile.c:411
 msgid ""
 "lineedit_mode specifies the key binding used for inputting strings in\n"
 "prompts and forms.  If lineedit_mode is set to \"Default Binding\" then\n"
@@ -5577,7 +5617,7 @@ msgstr ""
 "\n"
 "Les modes d'édition de ligne courants sont:\n"
 
-#: src/LYrcFile.c:404
+#: src/LYrcFile.c:429
 msgid ""
 "The following allow you to define sub-bookmark files and descriptions.\n"
 "The format is multi_bookmark<capital_letter>=<filename>,<description>\n"
@@ -5589,7 +5629,7 @@ msgstr ""
 "vous pouvez définir jusque 26 fichiers de signets (l'alphabet anglais).\n"
 "commencez avec «multi_bookmarkB» puisque 'A' est le fichier implicite (voir ci-après.\n"
 
-#: src/LYrcFile.c:410
+#: src/LYrcFile.c:435
 msgid ""
 "personal_mail_address specifies your personal mail address.  The\n"
 "address will be sent during HTTP file transfers for authorization and\n"
@@ -5607,7 +5647,7 @@ msgstr ""
 "utilisez l'option -nofrom en ligne de commande. Vous pouvez aussi laisser\n"
 "ce champ vide, mais alors il n'apparaitra pas dans vos commentaires postés.\n"
 
-#: src/LYrcFile.c:419
+#: src/LYrcFile.c:444
 msgid ""
 "preferred_charset specifies the character set in MIME notation (e.g.,\n"
 "ISO-8859-2, ISO-8859-5) which Lynx will indicate you prefer in requests\n"
@@ -5634,7 +5674,7 @@ msgstr ""
 "réponse acceptable relativement à votre choix, le serveur DEVRAIT renvoyer un \n"
 "message d'erreur bien que le renvoi d'une réponse inacceptable soit permi.\n"
 
-#: src/LYrcFile.c:433
+#: src/LYrcFile.c:460
 msgid ""
 "preferred_language specifies the language in MIME notation (e.g., en,\n"
 "fr, may be a comma-separated list in decreasing preference)\n"
@@ -5647,7 +5687,7 @@ msgstr ""
 "Si un fichier est disponible dans la langue précisée, le serveur l'envoie.\n"
 "Sinon, le serveur envoie le fichier dans la langue par défaut.\n"
 
-#: src/LYrcFile.c:442
+#: src/LYrcFile.c:471
 msgid ""
 "If run_all_execution_links is set \"on\" then all local execution links\n"
 "will be executed when they are selected.\n"
@@ -5669,7 +5709,7 @@ msgstr ""
 "          fonction devrait être réglée à «activé» uniquement si vous\n"
 "          consultez de l'information fiable.\n"
 
-#: src/LYrcFile.c:453
+#: src/LYrcFile.c:482
 msgid ""
 "If run_execution_links_on_local_files is set \"on\" then all local\n"
 "execution links that are found in LOCAL files will be executed when they\n"
@@ -5697,7 +5737,7 @@ msgstr ""
 "          compromettre la sécurité. Cette fonction devrait être réglée à\n"
 "          «activé» uniquement si vous consultez de l'information fiable.\n"
 
-#: src/LYrcFile.c:471
+#: src/LYrcFile.c:500
 msgid ""
 "select_popups specifies whether the OPTIONs in a SELECT block which\n"
 "lacks a MULTIPLE attribute are presented as a vertical list of radio\n"
@@ -5716,7 +5756,7 @@ msgstr ""
 "sélectionnera les boutons radio par défaut. Cette option peut être surchargée\n"
 "par l'option -popup en ligne de commande.\n"
 
-#: src/LYrcFile.c:481
+#: src/LYrcFile.c:510
 msgid ""
 "show_color specifies how to set the color mode at startup.  A value of\n"
 "\"never\" will force color mode off (treat the terminal as monochrome)\n"
@@ -5752,7 +5792,7 @@ msgstr ""
 "paramètres sont enregistrés, les attributs «oui» et «non» de l'option\n"
 "«afficher les couleurs» sont interprétés comme étant la valeur «implicite».\n"
 
-#: src/LYrcFile.c:498
+#: src/LYrcFile.c:527
 msgid ""
 "show_cursor specifies whether to 'hide' the cursor to the right (and\n"
 "bottom, if possible) of the screen, or to place it to the left of the\n"
@@ -5775,7 +5815,7 @@ msgstr ""
 "équivaut à 'cacher' le curseur de l'écran.  La valeur implicite peut être\n"
 "annulée à la ligne de commande au moyen de l'option -show_cursor.\n"
 
-#: src/LYrcFile.c:509
+#: src/LYrcFile.c:538
 msgid ""
 "show_dotfiles specifies that the directory listing should include\n"
 "\"hidden\" (dot) files/directories.  If set \"on\", this will be\n"
@@ -5790,7 +5830,7 @@ msgstr ""
 "l'affichage des fichiers cachés est désactivé, la création de tels fichiers\n"
 "dans Lynx est aussi désactivée.\n"
 
-#: src/LYrcFile.c:520
+#: src/LYrcFile.c:549
 msgid ""
 "If sub_bookmarks is not turned \"off\", and multiple bookmarks have\n"
 "been defined (see below), then all bookmark operations will first\n"
@@ -5813,7 +5853,7 @@ msgstr ""
 "modes novices et intérmédiaires. Lorsque cette option est définie comme \n"
 "\"standard\", le menu apparaitra quelquesoit le mode d'utilisation.\n"
 
-#: src/LYrcFile.c:534
+#: src/LYrcFile.c:563
 msgid ""
 "user_mode specifies the users level of knowledge with Lynx.  The\n"
 "default is \"NOVICE\" which displays two extra lines of help at the\n"
@@ -5829,7 +5869,7 @@ msgstr ""
 "«INTERMEDIATE» pour éliminer ces lignes.  Utilisez l'option «ADVANCED» pour\n"
 "afficher l'URL du lien sélectionné au bas de l'écran.\n"
 
-#: src/LYrcFile.c:543
+#: src/LYrcFile.c:572
 msgid ""
 "If verbose_images is \"on\", lynx will print the name of the image\n"
 "source file in place of [INLINE], [LINK] or [IMAGE]\n"
@@ -5838,7 +5878,7 @@ msgstr ""
 "Si verbose_images est à \"on\", lynx affichera les noms des fichier d'images\n"
 "sources au lieu de [INLINE],[LINK] ou [IMAGE]\n"
 
-#: src/LYrcFile.c:548
+#: src/LYrcFile.c:577
 msgid ""
 "If vi_keys is set to \"on\", then the normal VI movement keys:\n"
 "  j = down    k = up\n"
@@ -5854,7 +5894,7 @@ msgstr ""
 "Les majuscules 'H', 'J' et 'K' activent l'aide, les touches de raccourci\n"
 "et la configuration des touches respectivement.\n"
 
-#: src/LYrcFile.c:556
+#: src/LYrcFile.c:585
 msgid ""
 "The visited_links setting controls how Lynx organizes the information\n"
 "in the Visited Links Page.\n"
@@ -5862,7 +5902,7 @@ msgstr ""
 "L'option visited_links controle la façon dont Lynx organise les informations\n"
 "sur la page Liens visités.\n"
 
-#: src/LYrcFile.c:774
+#: src/LYrcFile.c:803
 msgid ""
 "If keypad_mode is set to \"NUMBERS_AS_ARROWS\", then the numbers on\n"
 "your keypad when the numlock is on will act as arrow keys:\n"
@@ -5881,7 +5921,7 @@ msgstr ""
 "et les chiffres correspondants de votre clavier se comporterons\n"
 "comme des flèches, quelquesoit l'état du numlock.\n"
 
-#: src/LYrcFile.c:783
+#: src/LYrcFile.c:812
 msgid ""
 "If keypad_mode is set to \"LINKS_ARE_NUMBERED\", then numbers will\n"
 "appear next to each link and numbers are used to select links.\n"
@@ -5890,7 +5930,7 @@ msgstr ""
 "chifres apparaitrons à cotés des liens afin de pouvoir sélectionner\n"
 "ces liens\n"
 
-#: src/LYrcFile.c:787
+#: src/LYrcFile.c:816
 msgid ""
 "If keypad_mode is set to \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\", then\n"
 "numbers will appear next to each link and visible form input field.\n"
@@ -5910,7 +5950,7 @@ msgstr ""
 "de référence et les sorties de ces listes de commandes enumèrent aussi les\n"
 "champs de formulaires.\n"
 
-#: src/LYrcFile.c:796
+#: src/LYrcFile.c:825
 msgid ""
 "NOTE: Some fixed format documents may look disfigured when\n"
 "\"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n"
@@ -5920,7 +5960,7 @@ msgstr ""
 "lorsque \"LINKS_ARE_NUMBERED\" ou \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" \n"
 "sont sélectionnés.\n"
 
-#: src/LYrcFile.c:828
+#: src/LYrcFile.c:857
 msgid ""
 "Lynx User Defaults File\n"
 "\n"

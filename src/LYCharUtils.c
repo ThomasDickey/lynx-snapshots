@@ -1142,7 +1142,11 @@ char **LYUCFullyTranslateString(char **str,
      * iso-8859-1 (and we are not called to back-translate), or if we are in
      * CJK mode.
      */
-    if (HTCJK != NOCJK) {
+    if ((HTCJK != NOCJK)
+#ifdef EXP_JAPANESEUTF8_SUPPORT
+	&& (strcmp(LYCharSet_UC[cs_from].MIMEname, "utf-8") != 0)
+#endif
+	) {
 	no_bytetrans = TRUE;
     } else if (cs_to <= 0 && cs_from == cs_to && (!Back || cs_to < 0)) {
 	no_bytetrans = TRUE;
@@ -2383,7 +2387,11 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 					    UCT_STAGE_HTEXT,
 					    UCT_SETBY_DEFAULT);
 		}
-		if (p_in->enc != UCT_ENC_CJK) {
+		if ((p_in->enc != UCT_ENC_CJK)
+#ifdef EXP_JAPANESEUTF8_SUPPORT
+		    && (p_in->enc != UCT_ENC_UTF8)
+#endif
+		    ) {
 		    HTCJK = NOCJK;
 		    if (!(p_in->codepoints &
 			  UCT_CP_SUBSETOF_LAT1) &&

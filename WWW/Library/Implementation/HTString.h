@@ -21,7 +21,6 @@ extern int AS_casecomp(const char *a, const char *b);
 extern int AS_ncmp(const char *a, const char *b, unsigned int n);
 
 #define    AS_cmp( a, b )  ( AS_ncmp( ( a ), ( b ), -1 ) )
-extern int AS_cmp(const char *a, const char *b);
 
 #else
 #define AS_casecomp( a, b ) ( strcasecomp( ( a ), ( b ) ) )

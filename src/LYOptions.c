@@ -27,6 +27,9 @@
 
 BOOLEAN term_options;
 
+#define TOP_LINK  "/"
+#define MBM_LINK  "//MBM_MENU"
+
 static int LYChosenShowColor = SHOW_COLOR_UNKNOWN;	/* whether to show and save */
 
 static void terminate_options(int sig);
@@ -58,7 +61,9 @@ static void SetupChosenShowColor(void)
     can_do_colors = TRUE;
 #if defined(COLOR_CURSES)
     if (LYCursesON)		/* could crash if called before initialization */
-	can_do_colors = (BOOL) has_colors();
+	can_do_colors = (has_colors()
+			 ? TRUE
+			 : FALSE);
 #endif
     if (!no_option_save) {
 	if (LYChosenShowColor == SHOW_COLOR_UNKNOWN) {
@@ -2125,7 +2130,8 @@ static OptValues bool_values[] =
 {
     {FALSE, N_("OFF"), "OFF"},
     {TRUE, N_("ON"), "ON"},
-    {0, 0, 0}};
+    {0, 0, 0}
+};
 
 static char *secure_string = "secure";
 static char *secure_value = NULL;
@@ -2154,7 +2160,8 @@ static OptValues exec_links_values[] =
 #ifndef NEVER_ALLOW_REMOTE_EXEC
     {EXEC_ALWAYS, N_("ALWAYS ON"), "ALWAYS ON"},
 #endif
-    {0, 0, 0}};
+    {0, 0, 0}
+};
 #endif /* ENABLE_OPTS_CHANGE_EXEC */
 
 #ifdef EXP_KEYBOARD_LAYOUT
@@ -2173,7 +2180,8 @@ static OptValues keypad_mode_values[] =
     {FIELDS_ARE_NUMBERED,
      N_("Form fields are numbered"),
      "forms_numbered"},
-    {0, 0, 0}};
+    {0, 0, 0}
+};
 static char *lineedit_mode_string = RC_LINEEDIT_MODE;
 static char *mail_address_string = RC_PERSONAL_MAIL_ADDRESS;
 static char *search_type_string = RC_CASE_SENSITIVE_SEARCHING;
@@ -2181,7 +2189,8 @@ static OptValues search_type_values[] =
 {
     {FALSE, N_("Case insensitive"), "case_insensitive"},
     {TRUE, N_("Case sensitive"), "case_sensitive"},
-    {0, 0, 0}};
+    {0, 0, 0}
+};
 
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
 static char *show_color_string = RC_SHOW_COLOR;
@@ -2191,7 +2200,8 @@ static OptValues show_color_values[] =
     {SHOW_COLOR_OFF, off_string, off_string},
     {SHOW_COLOR_ON, on_string, on_string},
     {SHOW_COLOR_ALWAYS, always_string, always_string},
-    {0, 0, 0}};
+    {0, 0, 0}
+};
 #endif
 
 static char *show_cursor_string = RC_SHOW_CURSOR;
@@ -2210,7 +2220,8 @@ static OptValues prompt_values[] =
     {FORCE_PROMPT_DFT, prompt_dft_string, prompt_dft_string},
     {FORCE_PROMPT_YES, prompt_yes_string, prompt_yes_string},
     {FORCE_PROMPT_NO, prompt_no_string, prompt_no_string},
-    {0, 0, 0}};
+    {0, 0, 0}
+};
 
 static char *cookie_prompt_string = RC_FORCE_COOKIE_PROMPT;
 
@@ -2224,7 +2235,8 @@ static OptValues user_mode_values[] =
     {NOVICE_MODE, N_("Novice"), "Novice"},
     {INTERMEDIATE_MODE, N_("Intermediate"), "Intermediate"},
     {ADVANCED_MODE, N_("Advanced"), "Advanced"},
-    {0, 0, 0}};
+    {0, 0, 0}
+};
 
 static char *vi_keys_string = RC_VI_KEYS;
 
@@ -2238,7 +2250,8 @@ static OptValues visited_links_values[] =
     {VISITED_LINKS_AS_LATEST, N_("By Last Visit"), "last_visited"},
     {VISITED_LINKS_AS_LATEST | VISITED_LINKS_REVERSE,
      N_("By Last Visit Reversed"), "last_visited_reversed"},
-    {0, 0, 0}};
+    {0, 0, 0}
+};
 
 /*
  * Document Layout
@@ -2249,7 +2262,8 @@ static OptValues DTD_type_values[] =
 	/* Old_DTD variable */
     {TRUE, N_("relaxed (TagSoup mode)"), "tagsoup"},
     {FALSE, N_("strict (SortaSGML mode)"), "sortasgml"},
-    {0, 0, 0}};
+    {0, 0, 0}
+};
 
 static char *select_popups_string = RC_SELECT_POPUPS;
 static char *images_string = "images";
@@ -2263,7 +2277,8 @@ static OptValues verbose_images_type_values[] =
 	/* verbose_img variable */
     {FALSE, N_("OFF"), "OFF"},
     {TRUE, N_("show filename"), "ON"},
-    {0, 0, 0}};
+    {0, 0, 0}
+};
 
 /*
  * Bookmark Options
@@ -2274,7 +2289,8 @@ static OptValues mbm_values[] =
     {MBM_OFF, N_("OFF"), "OFF"},
     {MBM_STANDARD, N_("STANDARD"), "STANDARD"},
     {MBM_ADVANCED, N_("ADVANCED"), "ADVANCED"},
-    {0, 0, 0}};
+    {0, 0, 0}
+};
 
 static char *single_bookmark_string = RC_BOOKMARK_FILE;
 
@@ -2301,7 +2317,8 @@ static OptValues dired_list_values[] =
     {DIRS_FIRST, N_("Directories first"), "dired_dir"},
     {FILES_FIRST, N_("Files first"), "dired_files"},
     {MIXED_STYLE, N_("Mixed style"), "dired_mixed"},
-    {0, 0, 0}};
+    {0, 0, 0}
+};
 
 #ifdef LONG_LIST
 static char *dired_sort_string = RC_DIR_LIST_ORDER;
@@ -2316,7 +2333,8 @@ static OptValues dired_sort_values[] =
     {ORDER_BY_USER, N_("By User"), "dired_by_user"},
     {ORDER_BY_GROUP, N_("By Group"), "dired_by_group"},
 #endif
-    {0, 0, 0}};
+    {0, 0, 0}
+};
 #endif /* LONG_LIST */
 #endif /* DIRED_SUPPORT */
 
@@ -2327,7 +2345,8 @@ static OptValues ftp_sort_values[] =
     {FILE_BY_TYPE, N_("By Type"), "ftp_by_type"},
     {FILE_BY_SIZE, N_("By Size"), "ftp_by_size"},
     {FILE_BY_DATE, N_("By Date"), "ftp_by_date"},
-    {0, 0, 0}};
+    {0, 0, 0}
+};
 
 #ifdef USE_READPROGRESS
 static char *show_rate_string = RC_SHOW_KB_RATE;
@@ -2340,8 +2359,40 @@ static OptValues rate_values[] =
     {rateEtaBYTES, N_("Show %s/sec, ETA"), "rate_eta_bytes"},
     {rateEtaKB, N_("Show %s/sec, ETA"), "rate_eta_kb"},
 #endif
-    {0, 0, 0}};
+    {0, 0, 0}
+};
 #endif /* USE_READPROGRESS */
+
+/*
+ * Presentation (MIME) types used in "Accept".
+ */
+static char *preferred_media_string = RC_PREFERRED_MEDIA_TYPES;
+static OptValues media_values[] =
+{
+    {mediaOpt1, N_("Accept lynx's internal types"), "media_opt1"},
+    {mediaOpt2, N_("Also accept lynx.cfg's types"), "media_opt2"},
+    {mediaOpt3, N_("Also accept user's types"), "media_opt3"},
+    {mediaOpt4, N_("Also accept system's types"), "media_opt4"},
+    {mediaALL, N_("Accept all types"), "media_all"},
+    {0, 0, 0}
+};
+
+static char *preferred_encoding_string = RC_PREFERRED_ENCODING;
+static OptValues encoding_values[] =
+{
+    {encodingNONE, N_("None"), "encoding_none"},
+#if defined(USE_ZLIB) || defined(GZIP_PATH)
+    {encodingGZIP, N_("gzip"), "encoding_gzip"},
+#endif
+#if defined(USE_ZLIB) || defined(COMPRESS_PATH)
+    {encodingCOMPRESS, N_("compress"), "encoding_compress"},
+#endif
+#if defined(USE_BZLIB) || defined(BZIP2_PATH)
+    {encodingBZIP2, N_("bzip2"), "encoding_bzip2"},
+#endif
+    {encodingALL, N_("All"), "encoding_all"},
+    {0, 0, 0}
+};
 
 /*
  * Headers transferred to remote server
@@ -2403,7 +2454,6 @@ static BOOLEAN GetOptValues(OptValues * table, char *value,
  * will have a tag pointing to NULL.
  * Not pretty, but works.  Hey, if strings can be null terminate arrays...
  */
-
 static PostPair *break_data(bstring *data)
 {
     char *p;
@@ -2478,6 +2528,22 @@ static PostPair *break_data(bstring *data)
     return q;
 }
 
+static BOOL isLynxOptionsPage(const char *address, const char *portion)
+{
+    BOOL result = FALSE;
+
+    if (!strncasecomp(address, STR_LYNXOPTIONS, LEN_LYNXOPTIONS)) {
+	unsigned len = strlen(portion);
+
+	address += LEN_LYNXOPTIONS;
+	if (!strncasecomp(address, portion, len)
+	    && (address[len] == '\0' || LYIsHtmlSep(address[len]))) {
+	    result = TRUE;
+	}
+    }
+    return result;
+}
+
 static int gen_options(char **newfile);
 
 /*
@@ -2520,6 +2586,7 @@ int postoptions(DocInfo *newdoc)
     int code;
     BOOLEAN save_all = FALSE;
     int display_char_set_old = current_char_set;
+    int old_media_value = LYAcceptMedia;
     BOOLEAN raw_mode_old = LYRawMode;
     BOOLEAN assume_char_set_changed = FALSE;
     BOOLEAN need_reload = FALSE;
@@ -2531,10 +2598,10 @@ int postoptions(DocInfo *newdoc)
 
     /*-------------------------------------------------
      * kludge a link from mbm_menu, the URL was:
-     * "<a href=\"LYNXOPTIONS://MBM_MENU\">Goto multi-bookmark menu</a>\n"
+     * "<a href=\"" LYNXOPTIONS_PAGE(MBM_MENU) "\">Goto multi-bookmark menu</a>\n"
      *--------------------------------------------------*/
 
-    if (strstr(newdoc->address, "LYNXOPTIONS://MBM_MENU")) {
+    if (isLynxOptionsPage(newdoc->address, MBM_LINK)) {
 	FREE(newdoc->post_data);
 	if (no_bookmark) {
 	    HTAlert(BOOKMARK_CHANGE_DISALLOWED);	/* anonymous */
@@ -2545,6 +2612,9 @@ int postoptions(DocInfo *newdoc)
 	    edit_bookmarks();
 	    return (NULLFILE);
 	}
+    } else if (!isLynxOptionsPage(newdoc->address, "/")) {
+	HTAlert(RANDOM_URL_DISALLOWED);
+	return NULLFILE;
     }
 
     data = break_data(newdoc->post_data);
@@ -2923,6 +2993,16 @@ int postoptions(DocInfo *newdoc)
 	}
 #endif /* USE_READPROGRESS */
 
+	/* Preferred Media Type: SELECT */
+	if (!strcmp(data[i].tag, preferred_media_string)) {
+	    GetOptValues(media_values, data[i].value, &LYAcceptMedia);
+	}
+
+	/* Preferred Encoding: SELECT */
+	if (!strcmp(data[i].tag, preferred_encoding_string)) {
+	    GetOptValues(encoding_values, data[i].value, &LYAcceptEncoding);
+	}
+
 	/* Preferred Document Character Set: INPUT */
 	if (!strcmp(data[i].tag, preferred_doc_char_string)) {
 	    if (strcmp(pref_charset, data[i].value)) {
@@ -2964,6 +3044,10 @@ int postoptions(DocInfo *newdoc)
 #ifdef EXP_LOCALE_CHARSET
     LYFindLocaleCharset();
 #endif
+
+    if (old_media_value != LYAcceptMedia)
+	HTFilterPresentations();
+
     if (display_char_set_old != current_char_set ||
 	raw_mode_old != LYRawMode ||
 	assume_char_set_changed) {
@@ -2999,7 +3083,7 @@ int postoptions(DocInfo *newdoc)
     }
     /* end of charset settings */
     /*
-       * FIXME: Golly gee, we need to write all of this out now, don't we?
+     * FIXME: Golly gee, we need to write all of this out now, don't we?
      */
     BStrFree(newdoc->post_data);
     FREE(data);
@@ -3265,17 +3349,17 @@ static int gen_options(char **newfile)
 
     LYLocalFileToURL(newfile, tempfile);
 
-    /* This should not be needed if we regenerate the temp file every
-       time with a new name, which just happened above in the case
-       LYReuseTempfiles==FALSE.  Even for LYReuseTempfiles=TRUE, code
-       at the end of postoptions() may remove an older cached version
-       from memory if that version of the page was left by submitting
-       changes. - kw 1999-11-27
-       If access to the actual file via getfile() later fails
-       (maybe because of some restrictions), mainloop may leave
-       this flag on after popping the previous doc which is then
-       unnecessarily reloaded.  But I changed mainloop to reset
-       the flag. - kw 1999-05-24 */
+    /* This should not be needed if we regenerate the temp file every time with
+     * a new name, which just happened above in the case
+     * LYReuseTempfiles==FALSE.  Even for LYReuseTempfiles=TRUE, code at the
+     * end of postoptions() may remove an older cached version from memory if
+     * that version of the page was left by submitting changes.  - kw
+     * 1999-11-27
+     * If access to the actual file via getfile() later fails (maybe because of
+     * some restrictions), mainloop may leave this flag on after popping the
+     * previous doc which is then unnecessarily reloaded.  But I changed
+     * mainloop to reset the flag.  - kw 1999-05-24
+     */
     LYforce_no_cache = TRUE;
 
     /*
@@ -3605,6 +3689,18 @@ static int gen_options(char **newfile)
     PutTextInput(fp0, mail_address_string,
 		 NonNull(personal_mail_address), text_len, "");
 
+    /* Preferred media type: SELECT */
+    PutLabel(fp0, gettext("Preferred media type"), preferred_media_string);
+    BeginSelect(fp0, preferred_media_string);
+    PutOptValues(fp0, LYAcceptMedia, media_values);
+    EndSelect(fp0);
+
+    /* Preferred encoding: SELECT */
+    PutLabel(fp0, gettext("Preferred encoding"), preferred_encoding_string);
+    BeginSelect(fp0, preferred_encoding_string);
+    PutOptValues(fp0, LYAcceptEncoding, encoding_values);
+    EndSelect(fp0);
+
     /* Preferred Document Character Set: INPUT */
     PutLabel(fp0, gettext("Preferred document character set"), preferred_doc_char_string);
     PutTextInput(fp0, preferred_doc_char_string,
@@ -3713,8 +3809,8 @@ static int gen_options(char **newfile)
     /* Bookmarks File Menu: LINK/INPUT */
     if (LYMultiBookmarks) {
 	PutLabel(fp0, gettext("Review/edit Bookmarks files"), mbm_string);
-	fprintf(fp0, "<a href=\"%s//MBM_MENU\">%s</a>\n",
-		STR_LYNXOPTIONS, gettext("Goto multi-bookmark menu"));
+	fprintf(fp0, "<a href=\"%s\">%s</a>\n",
+		LYNXOPTIONS_PAGE(MBM_LINK), gettext("Goto multi-bookmark menu"));
     } else {
 	PutLabel(fp0, gettext("Bookmarks file"), single_bookmark_string);
 	PutTextInput(fp0, single_bookmark_string,

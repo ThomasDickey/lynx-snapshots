@@ -21,7 +21,7 @@
 #define MSG_ENABLE_LYNXRC N_("Normally disabled.  See ENABLE_LYNXRC in lynx.cfg\n")
 #define putBool(value) ((value) ? "on" : "off")
 /* *INDENT-OFF* */
-Config_Enum tbl_DTD_recovery[] = {
+static Config_Enum tbl_DTD_recovery[] = {
     { "true",		TRUE },
     { "false",		FALSE },
     { "on",		TRUE },
@@ -78,6 +78,31 @@ Config_Enum tbl_multi_bookmarks[] = {
     { "STANDARD",	MBM_STANDARD },
     { "ON",		MBM_STANDARD },
     { "ADVANCED",	MBM_ADVANCED },
+    { NULL,		-1 }
+};
+
+/* the names in this table are used as lowercase in HTTP.c */
+Config_Enum tbl_preferred_encoding[] = {
+    { "none",		encodingNONE },
+#if defined(USE_ZLIB) || defined(GZIP_PATH)
+    { "gzip",		encodingGZIP },
+#endif
+#if defined(USE_ZLIB) || defined(COMPRESS_PATH)
+    { "compress",	encodingCOMPRESS },
+#endif
+#if defined(USE_BZLIB) || defined(BZIP2_PATH)
+    { "bzip2",		encodingBZIP2 },
+#endif
+    { "all",		encodingALL },
+    { NULL,		-1 }
+};
+
+Config_Enum tbl_preferred_media[] = {
+    { "INTERNAL",	mediaOpt1 },
+    { "CONFIGFILE",	mediaOpt2 },
+    { "USER",		mediaOpt3 },
+    { "SYSTEM",		mediaOpt4 },
+    { "ALL",		mediaALL },
     { NULL,		-1 }
 };
 
@@ -430,6 +455,8 @@ according to the Accept-Charset header, then the server SHOULD send\n\
 an error response, though the sending of an unacceptable response\n\
 is also allowed.\n\
 ")),
+    MAYBE_ENU(RC_PREFERRED_ENCODING,    LYAcceptEncoding,   tbl_preferred_encoding,
+	      MSG_ENABLE_LYNXRC),
     PARSE_STR(RC_PREFERRED_LANGUAGE,    language, N_("\
 preferred_language specifies the language in MIME notation (e.g., en,\n\
 fr, may be a comma-separated list in decreasing preference)\n\
@@ -437,6 +464,8 @@ which Lynx will indicate you prefer in requests to http servers.\n\
 If a file in that language is available, the server will send it.\n\
 Otherwise, the server will send the file in its default language.\n\
 ")),
+    MAYBE_ENU(RC_PREFERRED_MEDIA_TYPES, LYAcceptMedia,      tbl_preferred_media,
+	      MSG_ENABLE_LYNXRC),
     MAYBE_SET(RC_RAW_MODE,              LYRawMode,          MSG_ENABLE_LYNXRC),
 #if defined(ENABLE_OPTS_CHANGE_EXEC) && (defined(EXEC_LINKS) || defined(EXEC_SCRIPTS))
     PARSE_SET(RC_RUN_ALL_EXECUTION_LINKS, local_exec, N_("\

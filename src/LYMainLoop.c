@@ -3714,7 +3714,7 @@ static BOOLEAN handle_LYK_OPTIONS(int *cmd,
      */
     if (!LYIsUIPage(curdoc.address, UIP_OPTIONS_MENU)) {
 
-	set_address(&newdoc, "LYNXOPTIONS:/");
+	set_address(&newdoc, LYNXOPTIONS_PAGE("/"));
 	LYFreePostData(&newdoc);
 	FREE(newdoc.bookmark);
 	newdoc.isHEAD = FALSE;
@@ -6363,13 +6363,15 @@ int mainloop(void)
 		} else {
 		    if (!dump_output_immediately)
 			cleanup();
+		    fprintf(
 #ifdef UNIX
-		    if (dump_output_immediately)
-			fprintf(stderr,
-				gettext("Fatal error - could not open output file %s\n"), cfile);
-		    else
+			       (dump_output_immediately
+				? stderr
+				: stdout),
+#else
+			       stdout,
 #endif
-			printf(gettext("Fatal error - could not open output file %s\n"), cfile);
+			       gettext("Fatal error - could not open output file %s\n"), cfile);
 		    if (!dump_output_immediately) {
 			exit_immediately(EXIT_FAILURE);
 		    }

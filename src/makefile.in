@@ -21,6 +21,7 @@ CPP		= @CPP@
 CFLAGS		= @CFLAGS@
 DEFS		= @DEFS@
 CHARSET_DEFS	= @CHARSET_DEFS@
+EXTRA_CPPFLAGS	= @EXTRA_CPPFLAGS@
 CPPFLAGS	= @CPPFLAGS@
 
 x		= @EXEEXT@
@@ -47,7 +48,7 @@ WWWLIB		= $(top_builddir)/WWW/Library/Implementation/libwww.a
 INTLLIB		= @INTLLIBS@
 INTLDIR_CPPFLAGS= @INTLDIR_CPPFLAGS@-I$(top_srcdir)/intl
 
-CPP_OPTS	= $(CPPFLAGS) $(DEFS) $(CHARSET_DEFS) \
+CPP_OPTS	= $(EXTRA_CPPFLAGS) $(CPPFLAGS) $(DEFS) $(CHARSET_DEFS) \
 		-DLOCALEDIR=\"$(localedir)\" \
 		-I. \
 		-I$(top_builddir) \
@@ -94,7 +95,7 @@ all: lynx$x
 
 lynx$x:   message do_chartrans_stuff $(top_builddir)/LYHelp.h $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
-	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(WWWLIB) $(INTLLIB) $(LIBS)
+	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(WWWLIB) $(INTLLIB) $(LDFLAGS) $(LIBS)
 	@echo "Copying Lynx executable into top-level directory"
 	rm -f $(top_builddir)/$@
 	cp $@ $(top_builddir)/

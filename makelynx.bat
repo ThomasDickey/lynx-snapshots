@@ -1,7 +1,8 @@
 @echo off
 @echo Windows/Dos batch makefile for MingW32 and lynx.exe
-@echo Remember to precede this by "command /E:8192" and to set the
-@echo MingW32 C_INCLUDE_PATH and %C_INCLUDE_PATH%..\..\bin paths
+@echo Remember to precede this by "command /E:8192" for Windows prior to
+@echo W2000 and "cmd.exe /E:8192" for subsequent Window versions and to
+@echo set the MingW32 C_INCLUDE_PATH and %C_INCLUDE_PATH%..\..\bin paths
 @echo.
 @echo Usage: makelynx [option]
 @echo Default option: all
@@ -9,48 +10,80 @@
 @echo Specifying "link" causes the batch file to skip to the final
 @echo linking phase.
 @echo.
-@echo Note that you have to edit i386-mingw32\include\stdlib.h to put
-@echo an "#ifndef WIN_EX" around the declaration for `sleep', or the
+@echo Note that you have to edit early versions of i386-mingw32\include\stdlib.h
+@echo to put an "#ifndef WIN_EX" around the declaration for `sleep', or the
 @echo compile won't work.  There is also an "#ifndef PDCURSES" around
 @echo the declaration for `beep' for the same reason.
 @echo.
-@echo To change the console library from libslang to libpdcurses,
-@echo uncomment the `SET LIBRARY' line below.
+@echo To change the console library from libpdcurses to libslang,
+@echo put a "rem" before the `SET LIBRARY' line below.
+@echo.
+@echo If you don't have libz.a, either compile it
+@echo or put a "rem" in front of the following USE_ZLIB line.
+@echo This will cause the gzip.exe version of lynx
+@echo to be compiled.  It doesn't work well at present:
 
-rem SET LIBRARY=PDCURSES
+SET LIBRARY=PDCURSES
+SET USE_ZLIB=YES
 
 rem Uncomment these lines if the slang/curses headers and libraries
 rem are in the top-level lib directory:
 rem set C_INCLUDE_PATH=..\lib;..\..\..\lib;%C_INCLUDE_PATH%
 rem set LIBRARY_PATH=..\lib;..\..\..\lib;%LIBRARY_PATH%
 
-set CC=gcc
+echo Your compiler may not support -march=pentiumpro.
+echo In that case, replace -march=pentiumpro with -mpentium or -m486 or nothing:
 
+if "%OS%" == "Windows_NT" goto then0
+rem command.com doesn't handle the 'a=b' option
+set CC=gcc -mpentium
+goto else0
+:then0
+rem assumes a cmd.exe, rather than command.com, environment
+set CC=gcc -march=pentiumpro -mthreads
+:else0
+
+
+rem These definitions come from the Microsoft.msc makefile, with some
+rem modification.  Note that -Dx=y didn't work in older versions
+rem of Windows batch files, only -Dx, so a lynx_cfg.h was needed as
+rem a workaround.
 echo /* Generated lynx_cfg.h file in the lynx directory: */ > lynx_cfg.h
+echo. >> lynx_cfg.h
 echo. >> lynx_cfg.h
 echo #define ANSI_VARARGS	 1 >> lynx_cfg.h
 echo #define BOXHORI             0 >> lynx_cfg.h
 echo #define BOXVERT             0 >> lynx_cfg.h
+echo #define CAN_PIPE_TO_MAILER  0 >> lynx_cfg.h
 echo #define HAVE_GETCWD	 1 >> lynx_cfg.h
 echo #define HAVE_STRERROR	 1 >> lynx_cfg.h
 echo #define LYNX_CFG_FILE "./lynx.cfg" >> lynx_cfg.h
 echo #define LY_MAXPATH       1024 >> lynx_cfg.h
-echo #define USE_ALT_BLAT_MAILER 1 >> lynx_cfg.h
 echo #define USE_BLAT_MAILER	 1 >> lynx_cfg.h
+echo #define USE_ALT_BLAT_MAILER 1 >> lynx_cfg.h
+echo #define VC			2.14FM  >> lynx_cfg.h
 echo #define _WIN_CC		 1 >> lynx_cfg.h
 rem echo #define USE_SCROLLBAR	 1 >> lynx_cfg.h
 
 SET DEFINES=-DCJK_EX
+SET DEFINES=%DEFINES% -DEXP_READPROGRESS
+SET DEFINES=%DEFINES% -DEXP_NESTED_TABLES
+SET DEFINES=%DEFINES% -DEXP_JUSTIFY_ELTS
+SET DEFINES=%DEFINES% -DEXP_ALT_BINDINGS
+SET DEFINES=%DEFINES% -DUSE_PERSISTENT_COOKIES
+if not "%OS%" == "Windows_NT" goto next11
+SET DEFINES=%DEFINES% -DLY_MAXPATH=1024
+rem The following is unnecessary and causes the
+rem compile to fail:
+rem SET DEFINES=%DEFINES% -DUSE_WINSOCK2_H
+:next11
 SET DEFINES=%DEFINES% -DNO_CONFIG_INFO
 SET DEFINES=%DEFINES% -DSH_EX
 SET DEFINES=%DEFINES% -DWIN_EX
 SET DEFINES=%DEFINES% -D_WINDOWS
 SET DEFINES=%DEFINES% -DUSE_EXTERNALS
-SET DEFINES=%DEFINES% -DEXP_JUSTIFY_ELTS
 SET DEFINES=%DEFINES% -DDIRED_SUPPORT
 SET DEFINES=%DEFINES% -DDOSPATH
-SET DEFINES=%DEFINES% -DEXP_ALT_BINDINGS
-SET DEFINES=%DEFINES% -DUSE_PERSISTENT_COOKIES
 SET DEFINES=%DEFINES% -DHAVE_DIRENT_H
 SET DEFINES=%DEFINES% -DHAVE_KEYPAD
 SET DEFINES=%DEFINES% -DACCESS_AUTH
@@ -63,9 +96,12 @@ SET DEFINES=%DEFINES% -DNOSIGHUP
 SET DEFINES=%DEFINES% -DNOUSERS
 SET DEFINES=%DEFINES% -DLONG_LIST
 SET DEFINES=%DEFINES% -DDISP_PARTIAL
-SET DEFINES=%DEFINES% -DUSE_SOURCE_CACHE
+SET DEFINES=%DEFINES% -DSOURCE_CACHE
 SET DEFINES=%DEFINES% -DUSE_PRETTYSRC
-SET DEFINES=%DEFINES% -DVC="2.14FM"
+SET DEFINES=%DEFINES% -DWIN32
+if not "%USE_ZLIB%" == "YES" goto next1
+SET DEFINES=%DEFINES% -DUSE_ZLIB
+:next1
 if "%LIBRARY%" == "PDCURSES" goto else1
 SET DEFINES=%DEFINES% -DUSE_SLANG
 goto endif1
@@ -87,10 +123,7 @@ if not "%1" == "link" goto endif
 
 SET INCLUDES=-I. -I..\..\.. -I..\..\..\src
 
-REM Your compiler may not support -mpentium.
-REM In that case, replace -mpentium with -m486 or nothing.
-
-set CFLAGS=-O3 -mpentium %INCLUDES% %DEFINES%
+set CFLAGS=-O3 %INCLUDES% %DEFINES%
 set COMPILE_CMD=%CC% -c %CFLAGS%
 
 cd WWW\Library\Implementation
@@ -175,7 +208,7 @@ cd ..\..\..\src\chrtrans
 erase *.o
 
 SET INCLUDES=-I. -I.. -I..\.. -I..\..\WWW\Library\Implementation
-SET CFLAGS=-O3 -mpentium %INCLUDES% %DEFINES%
+SET CFLAGS=-O3 %INCLUDES% %DEFINES%
 SET COMPILE_CMD=%CC% -c %CFLAGS%
 
 %COMPILE_CMD% makeuctb.c
@@ -189,7 +222,7 @@ cd ..\
 
 :src
 SET INCLUDES=-I. -I.. -I.\chrtrans -I..\WWW\Library\Implementation
-SET CFLAGS=-O3 -mpentium %INCLUDES% %DEFINES%
+SET CFLAGS=-O3 %INCLUDES% %DEFINES%
 SET COMPILE_CMD=%CC% -c %CFLAGS%
 SET PATH=..\WWW\Library\Implementation;%PATH%
 erase *.o
@@ -301,11 +334,17 @@ if errorlevel 1 PAUSE
 
 :link
 if not "%LIBRARY%" == "PDCURSES" goto else2
-SET LIBS=-L..\WWW\Library\Implementation -lwww -lpdcurses -lwsock32 -luser32
+SET LIBS=-L..\WWW\Library\Implementation -lwww -lpdcurses
 goto endif2
 :else2
-SET LIBS=-L..\WWW\Library\Implementation -lwww -lslang -lwsock32 -luser32
+SET LIBS=-L..\WWW\Library\Implementation -lwww -lslang
 :endif2
+
+SET LIBS=%LIBS% -lwsock32 -luser32
+
+if not "%USE_ZLIB%" == "YES" goto else4
+SET LIBS=%LIBS% -lz
+:else4
 
 %CC% -s -o lynx *.o %LIBS%
 if exist lynx.exe ECHO "Welcome to lynx!"

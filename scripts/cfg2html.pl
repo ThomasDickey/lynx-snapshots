@@ -102,7 +102,7 @@ sub gen_alphatoc {
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
 <html>
 <head>
-<link rev="made" href="mailto:lynx-dev@sig.net">
+<link rev="made" href="mailto:lynx-dev@nongnu.org">
 <title>Settings by name</title>
 </head>
 <body>
@@ -171,7 +171,7 @@ sub gen_body {
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
 <html>
 <head>
-<link rev="made" href="mailto:lynx-dev@sig.net">
+<link rev="made" href="mailto:lynx-dev@nongnu.org">
 <title>Description of settings in lynx configuration file</title>
 </head>
 <body>
@@ -418,7 +418,7 @@ sub gen_cattoc {
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
 <html>
 <head>
-<link rev="made" href="mailto:lynx-dev@sig.net">
+<link rev="made" href="mailto:lynx-dev@nongnu.org">
 <title>Settings by category</title>
 </head>
 <body>

@@ -28,7 +28,7 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
-static int HTLoadTypesConfigFile(char *fn);
+static int HTLoadTypesConfigFile(char *fn, AcceptMedia media);
 static int HTLoadExtensionsConfigFile(char *fn);
 
 #define SET_SUFFIX1(suffix, description, type) \
@@ -38,13 +38,18 @@ static int HTLoadExtensionsConfigFile(char *fn);
        HTSetSuffix5(suffix, mimetype, type, description, 1.0)
 
 #define SET_PRESENT(mimetype, command, quality, delay) \
-  HTSetPresentation(mimetype, command, quality, delay, 0.0, 0)
+  HTSetPresentation(mimetype, command, quality, delay, 0.0, 0, media)
 
-#define SET_CONVERT(rep_in, rep_out, command, quality) \
-    HTSetConversion(rep_in, rep_out, command, quality, 0.0, 0.0, 0)
+#define SET_EXTERNL(rep_in, rep_out, command, quality) \
+    HTSetConversion(rep_in, rep_out, command, quality, 3.0, 0.0, 0, mediaEXT)
+
+#define SET_INTERNL(rep_in, rep_out, command, quality) \
+    HTSetConversion(rep_in, rep_out, command, quality, 0.0, 0.0, 0, mediaINT)
 
 void HTFormatInit(void)
 {
+    AcceptMedia media = mediaEXT;
+
 #ifdef NeXT
     SET_PRESENT("application/postscript", "open %s", 1.0, 2.0);
     SET_PRESENT("image/x-tiff", "open %s", 2.0, 2.0);
@@ -87,77 +92,78 @@ void HTFormatInit(void)
     /*
      * Add our header handlers.
      */
-    SET_CONVERT("message/x-http-redirection", "*", HTMIMERedirect, 2.0);
-    SET_CONVERT("message/x-http-redirection", "www/present", HTMIMERedirect, 2.0);
-    SET_CONVERT("message/x-http-redirection", "www/debug", HTMIMERedirect, 1.0);
-    SET_CONVERT("www/mime", "www/present", HTMIMEConvert, 1.0);
-    SET_CONVERT("www/mime", "www/download", HTMIMEConvert, 1.0);
-    SET_CONVERT("www/mime", "www/source", HTMIMEConvert, 1.0);
-    SET_CONVERT("www/mime", "www/dump", HTMIMEConvert, 1.0);
+    media = mediaINT;
+    SET_INTERNL("message/x-http-redirection", "*", HTMIMERedirect, 2.0);
+    SET_INTERNL("message/x-http-redirection", "www/present", HTMIMERedirect, 2.0);
+    SET_INTERNL("message/x-http-redirection", "www/debug", HTMIMERedirect, 1.0);
+    SET_INTERNL("www/mime", "www/present", HTMIMEConvert, 1.0);
+    SET_INTERNL("www/mime", "www/download", HTMIMEConvert, 1.0);
+    SET_INTERNL("www/mime", "www/source", HTMIMEConvert, 1.0);
+    SET_INTERNL("www/mime", "www/dump", HTMIMEConvert, 1.0);
 
     /*
      * Add our compressed file handlers.
      */
-    SET_CONVERT("www/compressed", "www/download", HTCompressed, 1.0);
-    SET_CONVERT("www/compressed", "www/present", HTCompressed, 1.0);
-    SET_CONVERT("www/compressed", "www/source", HTCompressed, 1.0);
-    SET_CONVERT("www/compressed", "www/dump", HTCompressed, 1.0);
+    SET_INTERNL("www/compressed", "www/download", HTCompressed, 1.0);
+    SET_INTERNL("www/compressed", "www/present", HTCompressed, 1.0);
+    SET_INTERNL("www/compressed", "www/source", HTCompressed, 1.0);
+    SET_INTERNL("www/compressed", "www/dump", HTCompressed, 1.0);
 
     /*
      * Added the following to support some content types beginning to surface.
      */
-    SET_CONVERT("application/html", "text/x-c", HTMLToC, 0.5);
-    SET_CONVERT("application/html", "text/plain", HTMLToPlain, 0.5);
-    SET_CONVERT("application/html", "www/present", HTMLPresent, 2.0);
-    SET_CONVERT("application/html", "www/source", HTPlainPresent, 1.0);
-    SET_CONVERT("application/x-wais-source", "www/source", HTPlainPresent, 1.0);
-    SET_CONVERT("application/x-wais-source", "www/present", HTWSRCConvert, 2.0);
-    SET_CONVERT("application/x-wais-source", "www/download", HTWSRCConvert, 1.0);
-    SET_CONVERT("application/x-wais-source", "www/dump", HTWSRCConvert, 1.0);
+    SET_INTERNL("application/html", "text/x-c", HTMLToC, 0.5);
+    SET_INTERNL("application/html", "text/plain", HTMLToPlain, 0.5);
+    SET_INTERNL("application/html", "www/present", HTMLPresent, 2.0);
+    SET_INTERNL("application/html", "www/source", HTPlainPresent, 1.0);
+    SET_INTERNL("application/x-wais-source", "www/source", HTPlainPresent, 1.0);
+    SET_INTERNL("application/x-wais-source", "www/present", HTWSRCConvert, 2.0);
+    SET_INTERNL("application/x-wais-source", "www/download", HTWSRCConvert, 1.0);
+    SET_INTERNL("application/x-wais-source", "www/dump", HTWSRCConvert, 1.0);
 
     /*
      * Save all unknown mime types to disk.
      */
-    HTSetConversion("www/source", "www/present", HTSaveToFile, 1.0, 3.0, 0.0, 0);
-    HTSetConversion("www/source", "www/source", HTSaveToFile, 1.0, 3.0, 0.0, 0);
-    HTSetConversion("www/source", "www/download", HTSaveToFile, 1.0, 3.0, 0.0, 0);
-    HTSetConversion("www/source", "*", HTSaveToFile, 1.0, 3.0, 0.0, 0);
+    SET_EXTERNL("www/source", "www/present", HTSaveToFile, 1.0);
+    SET_EXTERNL("www/source", "www/source", HTSaveToFile, 1.0);
+    SET_EXTERNL("www/source", "www/download", HTSaveToFile, 1.0);
+    SET_EXTERNL("www/source", "*", HTSaveToFile, 1.0);
 
     /*
      * Output all www/dump presentations to stdout.
      */
-    HTSetConversion("www/source", "www/dump", HTDumpToStdout, 1.0, 3.0, 0.0, 0);
+    SET_EXTERNL("www/source", "www/dump", HTDumpToStdout, 1.0);
 
     /*
      * Now add our basic conversions.
      */
-    SET_CONVERT("text/x-sgml", "www/source", HTPlainPresent, 1.0);
-    SET_CONVERT("text/x-sgml", "www/present", HTMLPresent, 2.0);
-    SET_CONVERT("text/sgml", "www/source", HTPlainPresent, 1.0);
-    SET_CONVERT("text/sgml", "www/present", HTMLPresent, 1.0);
-    SET_CONVERT("text/plain", "www/present", HTPlainPresent, 1.0);
-    SET_CONVERT("text/plain", "www/source", HTPlainPresent, 1.0);
-    SET_CONVERT("text/html", "www/source", HTPlainPresent, 1.0);
-    SET_CONVERT("text/html", "text/x-c", HTMLToC, 0.5);
-    SET_CONVERT("text/html", "text/plain", HTMLToPlain, 0.5);
-    SET_CONVERT("text/html", "www/present", HTMLPresent, 1.0);
+    SET_INTERNL("text/x-sgml", "www/source", HTPlainPresent, 1.0);
+    SET_INTERNL("text/x-sgml", "www/present", HTMLPresent, 2.0);
+    SET_INTERNL("text/sgml", "www/source", HTPlainPresent, 1.0);
+    SET_INTERNL("text/sgml", "www/present", HTMLPresent, 1.0);
+    SET_INTERNL("text/plain", "www/present", HTPlainPresent, 1.0);
+    SET_INTERNL("text/plain", "www/source", HTPlainPresent, 1.0);
+    SET_INTERNL("text/html", "www/source", HTPlainPresent, 1.0);
+    SET_INTERNL("text/html", "text/x-c", HTMLToC, 0.5);
+    SET_INTERNL("text/html", "text/plain", HTMLToPlain, 0.5);
+    SET_INTERNL("text/html", "www/present", HTMLPresent, 1.0);
 
     /*
      * These should override the default types as necessary.
      */
-    HTLoadTypesConfigFile(global_type_map);
+    HTLoadTypesConfigFile(global_type_map, mediaSYS);
 
     /*
      * Load the local maps.
      */
     if (LYCanReadFile(personal_type_map)) {
 	/* These should override everything else. */
-	HTLoadTypesConfigFile(personal_type_map);
+	HTLoadTypesConfigFile(personal_type_map, mediaUSR);
     } else {
 	char buffer[LY_MAXPATH];
 
 	LYAddPathToHome(buffer, sizeof(buffer), personal_type_map);
-	HTLoadTypesConfigFile(buffer);
+	HTLoadTypesConfigFile(buffer, mediaUSR);
     }
 
     /*
@@ -176,8 +182,8 @@ void HTFormatInit(void)
 void HTPreparsedFormatInit(void)
 {
     if (LYPreparsedSource) {
-	SET_CONVERT("text/html", "www/source", HTMLParsedPresent, 1.0);
-	SET_CONVERT("text/html", "www/dump", HTMLParsedPresent, 1.0);
+	SET_INTERNL("text/html", "www/source", HTMLParsedPresent, 1.0);
+	SET_INTERNL("text/html", "www/dump", HTMLParsedPresent, 1.0);
     }
 }
 
@@ -214,14 +220,13 @@ struct MailcapEntry {
     int needtofree;
     char *label;
     char *printcommand;
+    char *nametemplate;
     float quality;
     long int maxbytes;
 };
 
 static int ExitWithError(char *txt);
 static int PassesTest(struct MailcapEntry *mc);
-
-#define LINE_BUF_SIZE		2048
 
 static char *GetCommand(char *s, char **t)
 {
@@ -268,7 +273,60 @@ static char *Cleanse(char *s)
     return (s);
 }
 
-static int ProcessMailcapEntry(FILE *fp, struct MailcapEntry *mc)
+/* remove unnecessary (unquoted) blanks in a shell command */
+static void TrimCommand(char *command)
+{
+    LYTrimTrailing(command);
+#ifdef UNIX
+    {
+	char *s = command;
+	char *d = command;
+	int ch;
+	int c0 = ' ';
+	BOOL escape = FALSE;
+	BOOL dquote = FALSE;
+	BOOL squote = FALSE;
+
+	while ((ch = *s++) != '\0') {
+	    if (escape) {
+		escape = FALSE;
+	    } else if (squote) {
+		if (ch == '\'')
+		    squote = FALSE;
+	    } else if (dquote) {
+		if (ch == '"')
+		    dquote = FALSE;
+	    } else {
+		switch (ch) {
+		case '"':
+		    dquote = TRUE;
+		    break;
+		case '\'':
+		    squote = TRUE;
+		    break;
+		case '\\':
+		    if (dquote)
+			escape = TRUE;
+		    break;
+		}
+	    }
+	    if (!escape && !dquote && !squote) {
+		if (ch == '\t')
+		    ch = ' ';
+		if (ch == ' ') {
+		    if (c0 == ' ')
+			continue;
+		}
+	    }
+	    *d++ = ch;
+	    c0 = ch;
+	}
+	*d = '\0';
+    }
+#endif
+}
+
+static int ProcessMailcapEntry(FILE *fp, struct MailcapEntry *mc, AcceptMedia media)
 {
     size_t rawentryalloc = 2000, len, need;
     char *rawentry, *s, *t;
@@ -361,14 +419,15 @@ static int ProcessMailcapEntry(FILE *fp, struct MailcapEntry *mc)
 	    } else if (eq && !strcmp(arg, "test")) {
 		mc->testcommand = NULL;
 		StrAllocCopy(mc->testcommand, eq);
+		TrimCommand(mc->testcommand);
 		CTRACE((tfp, "ProcessMailcapEntry: Found testcommand:%s\n",
 			mc->testcommand));
 	    } else if (eq && !strcmp(arg, "description")) {
-		mc->label = eq;
+		mc->label = eq;	/* ignored */
 	    } else if (eq && !strcmp(arg, "label")) {
-		mc->label = eq;	/* bogus old name for description */
+		mc->label = eq;	/* ignored: bogus old name for description */
 	    } else if (eq && !strcmp(arg, "print")) {
-		mc->printcommand = eq;
+		mc->printcommand = eq;	/* ignored */
 	    } else if (eq && !strcmp(arg, "textualnewlines")) {
 		/* no support for now.  What does this do anyways? */
 		/* ExceptionalNewline(mc->contenttype, atoi(eq)); */
@@ -398,7 +457,8 @@ static int ProcessMailcapEntry(FILE *fp, struct MailcapEntry *mc)
     if (PassesTest(mc)) {
 	CTRACE((tfp, "ProcessMailcapEntry Setting up conversion %s : %s\n",
 		mc->contenttype, mc->command));
-	HTSetPresentation(mc->contenttype, mc->command, mc->quality, 3.0, 0.0, mc->maxbytes);
+	HTSetPresentation(mc->contenttype, mc->command, mc->quality,
+			  3.0, 0.0, mc->maxbytes, media);
     }
     FREE(mc->command);
     FREE(mc->contenttype);
@@ -508,6 +568,9 @@ static int RememberTestResult(int mode, char *cmd, int result)
     return 0;
 }
 
+/* FIXME: this sometimes used caseless comparison, e.g., strcasecomp */
+#define SameCommand(tst,ref) !strcmp(tst,ref)
+
 static int PassesTest(struct MailcapEntry *mc)
 {
     int result;
@@ -522,9 +585,9 @@ static int PassesTest(struct MailcapEntry *mc)
     /*
      *  Save overhead of system() calls by faking these. - FM
      */
-    if (0 == strcmp(mc->testcommand, "test \"$DISPLAY\"") ||
-	0 == strcmp(mc->testcommand, "test \"$DISPLAY\" != \"\"") ||
-	0 == strcasecomp(mc->testcommand, "test -n \"$DISPLAY\"")) {
+    if (SameCommand(mc->testcommand, "test \"$DISPLAY\"") ||
+	SameCommand(mc->testcommand, "test \"$DISPLAY\" != \"\"") ||
+	SameCommand(mc->testcommand, "test -n \"$DISPLAY\"")) {
 	FREE(mc->testcommand);
 	CTRACE((tfp, "PassesTest: Testing for XWINDOWS environment.\n"));
 	if (LYgetXDisplay() != NULL) {
@@ -535,7 +598,7 @@ static int PassesTest(struct MailcapEntry *mc)
 	    return (-1 == 0);
 	}
     }
-    if (0 == strcasecomp(mc->testcommand, "test -z \"$DISPLAY\"")) {
+    if (SameCommand(mc->testcommand, "test -z \"$DISPLAY\"")) {
 	FREE(mc->testcommand);
 	CTRACE((tfp, "PassesTest: Testing for NON_XWINDOWS environment.\n"));
 	if (LYgetXDisplay() == NULL) {
@@ -550,7 +613,7 @@ static int PassesTest(struct MailcapEntry *mc)
     /*
      *  Why do anything but return success for this one! - FM
      */
-    if (0 == strcasecomp(mc->testcommand, "test -n \"$LYNX_VERSION\"")) {
+    if (SameCommand(mc->testcommand, "test -n \"$LYNX_VERSION\"")) {
 	FREE(mc->testcommand);
 	CTRACE((tfp, "PassesTest: Testing for LYNX environment.\n"));
 	CTRACE((tfp, "PassesTest: Test passed!\n"));
@@ -559,7 +622,7 @@ static int PassesTest(struct MailcapEntry *mc)
 	/*
 	 *  ... or failure for this one! - FM
 	 */
-    if (0 == strcasecomp(mc->testcommand, "test -z \"$LYNX_VERSION\"")) {
+    if (SameCommand(mc->testcommand, "test -z \"$LYNX_VERSION\"")) {
 	FREE(mc->testcommand);
 	CTRACE((tfp, "PassesTest: Testing for non-LYNX environment.\n"));
 	CTRACE((tfp, "PassesTest: Test failed!\n"));
@@ -608,7 +671,7 @@ static int PassesTest(struct MailcapEntry *mc)
     return (result == 0);
 }
 
-static int ProcessMailcapFile(char *file)
+static int ProcessMailcapFile(char *file, AcceptMedia media)
 {
     struct MailcapEntry mc;
     FILE *fp;
@@ -622,7 +685,7 @@ static int ProcessMailcapFile(char *file)
     }
 
     while (fp && !feof(fp)) {
-	ProcessMailcapEntry(fp, &mc);
+	ProcessMailcapEntry(fp, &mc, media);
     }
     LYCloseInput(fp);
     RememberTestResult(RTR_forget, NULL, 0);
@@ -642,7 +705,7 @@ static int ExitWithError(char *txt)
  * behavior, which means that the last match wins. - kw */
 static int reverse_mailcap = 1;
 
-static int HTLoadTypesConfigFile(char *fn)
+static int HTLoadTypesConfigFile(char *fn, AcceptMedia media)
 {
     int result = 0;
     HTList *saved = HTPresentations;
@@ -651,7 +714,7 @@ static int HTLoadTypesConfigFile(char *fn)
 	HTPresentations = NULL;
     }
 
-    result = ProcessMailcapFile(fn);
+    result = ProcessMailcapFile(fn, media);
 
     if (reverse_mailcap) {
 	if (result && HTPresentations) {

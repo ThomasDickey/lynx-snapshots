@@ -668,9 +668,12 @@ int Switch_Display_Charset(const int ord, const enum switch_display_charset_t re
 
     if (!switch_display_charsets
 	&& (really == SWITCH_DISPLAY_CHARSET_MAYBE
+#ifdef SWITCH_DISPLAY_CHARSET_NOT_NEEDED_ANY_MORE
     /* The first switch is not due to an interactive action */
 	    || (really == SWITCH_DISPLAY_CHARSET_REALLY
-		&& !(repeated++))))
+		&& !(repeated++))
+#endif
+	))
 	return 0;
     res = _Switch_Display_Charset(ord, really);
     if (res < 0 || prev == res)	/* No change */

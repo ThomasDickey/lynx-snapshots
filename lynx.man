@@ -987,17 +987,17 @@ codes.  Currently, it is hard-coded to a wish list.
 .B NLSPATH
 This variable, if set, is used as the path prefix for message catalogs.
 .SH NOTES
-This is the Lynx v2.8.4 Release
+This is the Lynx v2.8.5 Release; development is in progress for 2.8.6.
 .PP
 If you wish to contribute to the further development
 of \fILynx\fR, subscribe to our mailing list.  Send email to
-<majordomo@sig.net> with "subscribe lynx-dev" as the only line
+<lynx-dev-request@nongnu.org> with "subscribe lynx-dev" as the only line
 in the body of your message.
 .PP
-Send bug reports, comments, suggestions to <lynx-dev@sig.net>
+Send bug reports, comments, suggestions to <lynx-dev@nongnu.org>
 after subscribing.
 .PP
-Unsubscribe by sending email to <majordomo@sig.net> with
+Unsubscribe by sending email to <lynx-dev-request@nongnu.org> with
 "unsubscribe lynx-dev" as the only line in the body of your message.
 Do not send the unsubscribe message to the lynx-dev list, itself.
 .SH SEE ALSO

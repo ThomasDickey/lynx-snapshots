@@ -174,6 +174,7 @@ struct _HTPresentation {
     float secs_per_byte;
     long int maxbytes;
     BOOL get_accept;		/* list in "Accept:" for GET */
+    int accept_opt;		/* matches against LYAcceptMedia */
 };
 
 /*
@@ -192,6 +193,36 @@ extern HTList *HTPresentations;
 extern HTPresentation *default_presentation;
 
 /*
+ * Options used for "Accept:" string
+ */
+typedef enum {
+    /* make the components powers of two so we can add them */
+    mediaINT = 1		/* internal types predefined in HTInit.c */
+    ,mediaEXT = 2		/* external types predefined in HTInit.c */
+    ,mediaCFG = 4		/* types, e.g., viewers, from lynx.cfg */
+    ,mediaUSR = 8		/* user's mime-types, etc. */
+    ,mediaSYS = 16		/* system's mime-types, etc. */
+    /* these are useful flavors for the options menu */
+    ,mediaOpt1 = mediaINT
+    ,mediaOpt2 = mediaINT + mediaCFG
+    ,mediaOpt3 = mediaINT + mediaCFG + mediaUSR
+    ,mediaOpt4 = mediaINT + mediaCFG + mediaUSR + mediaSYS
+    /* this is the flavor from pre-2.8.6 */
+    ,mediaALL = mediaINT + mediaEXT + mediaCFG + mediaUSR + mediaSYS
+} AcceptMedia;
+
+/*
+ * Options used for "Accept-Encoding:" string
+ */
+typedef enum {
+    encodingNONE = 0
+    ,encodingGZIP = 1
+    ,encodingCOMPRESS = 2
+    ,encodingBZIP2 = 4
+    ,encodingALL = encodingGZIP + encodingCOMPRESS + encodingBZIP2
+} AcceptEncoding;
+
+/*
 
 HTSetPresentation: Register a system command to present a format
 
@@ -208,13 +239,16 @@ HTSetPresentation: Register a system command to present a format
 
   maxbytes                A limit on the length acceptable as input (0 infinite)
 
+  media                   Used in filtering presentation types for "Accept:"
+
  */
 extern void HTSetPresentation(const char *representation,
 			      const char *command,
 			      double quality,
 			      double secs,
 			      double secs_per_byte,
-			      long int maxbytes
+			      long int maxbytes,
+			      AcceptMedia media
 );
 
 /*
@@ -237,7 +271,8 @@ extern void HTSetConversion(const char *rep_in,
 			    float quality,
 			    float secs,
 			    float secs_per_byte,
-			    long int maxbytes
+			    long int maxbytes,
+			    AcceptMedia media
 );
 
 /*

@@ -37,6 +37,7 @@
 #undef EXP_ALT_BINDINGS		/* CF_ARG_ENABLE(alt-bindings) */
 #undef EXP_CHARSET_CHOICE	/* CF_ARG_ENABLE(charset-choice) */
 #undef EXP_CHARTRANS_AUTOSWITCH	/* CF_ARG_ENABLE(font-switch) */
+#undef EXP_JAPANESEUTF8_SUPPORT	/* CF_ARG_ENABLE(japanese-utf8) */
 #undef EXP_JUSTIFY_ELTS		/* CF_ARG_ENABLE(justify-elts) */
 #undef EXP_KEYBOARD_LAYOUT	/* CF_ARG_ENABLE(kbd-layout) */
 #undef EXP_LOCALE_CHARSET	/* CF_ARG_ENABLE(locale-charset) */

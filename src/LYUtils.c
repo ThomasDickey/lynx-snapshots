@@ -36,10 +36,6 @@ int kbhit(void);
 #include <HTFile.h>
 #endif
 
-#ifdef _WIN_CC
-extern int exec_command(char *cmd, int wait_flag);	/* xsystem.c */
-#endif
-
 #ifdef _WINDOWS			/* 1998/04/30 (Thu) 19:04:25 */
 #define GETPID()	(getpid() & 0xffff)
 #else
@@ -6383,7 +6379,7 @@ typedef struct uipage_entry {
 } uip_entry;
 
 #define UIP_F_MULTI	0x0001	/* flag: track multiple instances */
-#define UIP_F_LIMIT	0x0002	/* flag: limit size of alturl list */
+#define UIP_F_LIMIT	0x0002	/* flag: limit size of alturls list */
 #define UIP_F_LMULTI   (UIP_F_MULTI | UIP_F_LIMIT)
 /* *INDENT-OFF* */
 static uip_entry ly_uip[] =

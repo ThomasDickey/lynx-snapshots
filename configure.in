@@ -5,7 +5,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ask PRCS to plug-in the project-version for the configure-script.
 dnl $Format: "AC_REVISION($ProjectVersion$)"$
-AC_REVISION(2.8.6dev.3)
+AC_REVISION(2.8.6dev.4)
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
 # in the environment, or whether autoconf added -O and -g options:
@@ -33,7 +33,7 @@ CF_CHECK_CACHE
 PACKAGE=lynx
 dnl ask PRCS to plug-in the project-version for the packages.
 # $Format: "VERSION=$ProjectVersion$"$
-VERSION=2.8.6dev.3
+VERSION=2.8.6dev.4
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_SUBST(DESTDIR)
@@ -667,6 +667,17 @@ CF_ARG_ENABLE(cjk,
 	[use_cjk=no])
 AC_MSG_RESULT($use_cjk)
 test $use_cjk != no && AC_DEFINE(CJK_EX)
+
+AC_MSG_CHECKING(if experimental Japanese UTF-8 logic should be used)
+CF_ARG_ENABLE(japanese-utf8,
+[  --enable-japanese-utf8  use experimental Japanese UTF-8 logic],
+	[use_ja_utf8=$enableval],
+	[use_ja_utf8=no])
+AC_MSG_RESULT($use_ja_utf8)
+if test $use_ja_utf8 != no ; then
+	AC_DEFINE(EXP_JAPANESEUTF8_SUPPORT)
+	AC_CHECK_LIB(iconv,libiconv_open)
+fi
 
 AC_MSG_CHECKING(if color-style code should be used)
 CF_ARG_ENABLE(color-style,

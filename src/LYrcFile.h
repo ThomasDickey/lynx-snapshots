@@ -154,6 +154,8 @@
 #define RC_PERSONAL_MAILCAP             "personal_mailcap"
 #define RC_PERSONAL_MAIL_ADDRESS        "personal_mail_address"
 #define RC_PREFERRED_CHARSET            "preferred_charset"
+#define RC_PREFERRED_MEDIA_TYPES        "preferred_media_types"
+#define RC_PREFERRED_ENCODING           "preferred_encoding"
 #define RC_PREFERRED_LANGUAGE           "preferred_language"
 #define RC_PREPEND_BASE_TO_SOURCE       "prepend_base_to_source"
 #define RC_PREPEND_CHARSET_TO_SOURCE    "prepend_charset_to_source"
@@ -233,10 +235,11 @@
 #define RC_ZCAT_PATH                    "zcat_path"
 #define RC_ZIP_PATH                     "zip_path"
 
-extern Config_Enum tbl_DTD_recovery[];
 extern Config_Enum tbl_force_prompt[];
 extern Config_Enum tbl_keypad_mode[];
 extern Config_Enum tbl_multi_bookmarks[];
+extern Config_Enum tbl_preferred_encoding[];
+extern Config_Enum tbl_preferred_media[];
 extern Config_Enum tbl_transfer_rate[];
 extern Config_Enum tbl_user_mode[];
 

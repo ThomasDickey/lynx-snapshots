@@ -466,6 +466,7 @@ typedef enum {
 #define isLYNXPROG(addr)     ((*addr == 'l' || *addr == 'L') &&\
                              !strncasecomp(addr, STR_LYNXPROG, LEN_LYNXPROG))
 
+#define LYNXOPTIONS_PAGE(s)  STR_LYNXOPTIONS s
 /*
  *  For change_sug_filename().
  */

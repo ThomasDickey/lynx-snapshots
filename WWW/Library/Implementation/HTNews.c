@@ -31,9 +31,14 @@ int HTNewsMaxChunk = 40;	/* Largest number of articles in one window */
 #ifndef DEFAULT_NEWS_HOST
 #define DEFAULT_NEWS_HOST "news"
 #endif /* DEFAULT_NEWS_HOST */
-#ifndef SERVER_FILE
-#define SERVER_FILE "/usr/local/lib/rn/server"
-#endif /* SERVER_FILE */
+
+#ifndef NEWS_SERVER_FILE
+#define NEWS_SERVER_FILE "/usr/local/lib/rn/server"
+#endif /* NEWS_SERVER_FILE */
+
+#ifndef NEWS_AUTH_FILE
+#define NEWS_AUTH_FILE ".newsauth"
+#endif /* NEWS_AUTH_FILE */
 
 #ifdef USE_SSL
 extern SSL_CTX *ssl_ctx;
@@ -43,7 +48,7 @@ static int channel_s = 1;
 #define NEWS_NETWRITE(sock, buff, size) \
 	(Handle ? SSL_write(Handle, buff, size) : NETWRITE(sock, buff, size))
 #define NEWS_NETCLOSE(sock) \
-	{ (void)NETCLOSE(sock); if (Handle) SSL_free(Handle); Handle = NULL; }
+	{ (void)NETCLOSE(sock); if (Handle) { SSL_free(Handle); Handle = NULL; } }
 static char HTNewsGetCharacter(void);
 
 #define NEXT_CHAR HTNewsGetCharacter()
@@ -153,6 +158,44 @@ static void free_NNTP_AuthInfo(void)
     return;
 }
 
+/*
+ * Initialize the authentication list by loading the user's $HOME/.newsauth
+ * file.  That file is part of tin's configuration and is used by a few other
+ * programs.
+ */
+static void load_NNTP_AuthInfo(void)
+{
+    FILE *fp;
+    char fname[LY_MAXPATH];
+    char buffer[LINE_LENGTH + 1];
+
+    LYAddPathToHome(fname, sizeof(fname), NEWS_AUTH_FILE);
+
+    if ((fp = fopen(fname, "r")) != 0) {
+	while (fgets(buffer, sizeof(buffer), fp) != 0) {
+	    char the_host[LINE_LENGTH + 1];
+	    char the_pass[LINE_LENGTH + 1];
+	    char the_user[LINE_LENGTH + 1];
+
+	    if (sscanf(buffer, "%s%s%s", the_host, the_pass, the_user) == 3
+		&& strlen(the_host) != 0
+		&& strlen(the_pass) != 0
+		&& strlen(the_user) != 0) {
+		NNTPAuth *auth = typecalloc(NNTPAuth);
+
+		if (auth == NULL)
+		    break;
+		StrAllocCopy(auth->host, the_host);
+		StrAllocCopy(auth->pass, the_pass);
+		StrAllocCopy(auth->user, the_user);
+
+		HTList_appendObject(NNTP_AuthInfo, auth);
+	    }
+	}
+	fclose(fp);
+    }
+}
+
 const char *HTGetNewsHost(void)
 {
     return HTNewsHost;
@@ -169,7 +212,7 @@ void HTSetNewsHost(const char *value)
  *	Except on the NeXT, we pick up the NewsHost name from
  *
  *	1.	Environment variable NNTPSERVER
- *	2.	File SERVER_FILE
+ *	2.	File NEWS_SERVER_FILE
  *	3.	Compilation time macro DEFAULT_NEWS_HOST
  *	4.	Default to "news"
  *
@@ -207,7 +250,7 @@ static BOOL initialize(void)
 	CTRACE((tfp, "HTNews: NNTPSERVER defined as `%s'\n",
 		HTNewsHost));
     } else {
-	FILE *fp = fopen(SERVER_FILE, TXT_R);
+	FILE *fp = fopen(NEWS_SERVER_FILE, TXT_R);
 
 	if (fp) {
 	    char server_name[MAXHOSTNAMELEN + 1];
@@ -219,7 +262,7 @@ static BOOL initialize(void)
 		    *p = '\0';
 		StrAllocCopy(HTNewsHost, server_name);
 		CTRACE((tfp, "HTNews: File %s defines news host as `%s'\n",
-			SERVER_FILE, HTNewsHost));
+			NEWS_SERVER_FILE, HTNewsHost));
 	    }
 	    fclose(fp);
 	}
@@ -258,12 +301,12 @@ static int response(char *command)
 	CTRACE((tfp, "NNTP command to be sent: %s", command));
 #ifdef NOT_ASCII
 	{
-	    const char *p;
+	    const char *p2;
 	    char *q;
 	    char ascii[LINE_LENGTH + 1];
 
-	    for (p = command, q = ascii; *p; p++, q++) {
-		*q = TOASCII(*p);
+	    for (p2 = command, q = ascii; *p2; p2++, q++) {
+		*q = TOASCII(*p2);
 	    }
 	    status = NEWS_NETWRITE(s, ascii, length);
 	}
@@ -313,7 +356,7 @@ static int response(char *command)
  *	-----------------------------------
  *
  * On entry,
- *	template must be already un upper case.
+ *	template must be already in upper case.
  *	unknown may be in upper or lower or mixed case to match.
  */
 static BOOL match(const char *unknown, const char *template)
@@ -353,20 +396,21 @@ static NNTPAuthResult HTHandleAuthInfo(char *host)
     /*
      * Check for an existing authorization entry.  - FM
      */
-    if (NNTP_AuthInfo != NULL) {
-	cur = NNTP_AuthInfo;
-	while (NULL != (auth = (NNTPAuth *) HTList_nextObject(cur))) {
-	    if (!strcmp(auth->host, host)) {
-		UserName = auth->user;
-		PassWord = auth->pass;
-		break;
-	    }
-	}
-    } else {
+    if (NNTP_AuthInfo == NULL) {
 	NNTP_AuthInfo = HTList_new();
+	load_NNTP_AuthInfo();
 #ifdef LY_FIND_LEAKS
 	atexit(free_NNTP_AuthInfo);
 #endif
+    }
+
+    cur = NNTP_AuthInfo;
+    while (NULL != (auth = (NNTPAuth *) HTList_nextObject(cur))) {
+	if (!strcmp(auth->host, host)) {
+	    UserName = auth->user;
+	    PassWord = auth->pass;
+	    break;
+	}
     }
 
     /*
