@@ -511,7 +511,6 @@ PRIVATE char * scan_cookie_sublist ARGS6(
     HTList *hl = sublist, *next = NULL;
     cookie *co;
     time_t now = time(NULL);
-    BOOL Quoted = FALSE;
     int len = 0;
     char crlftab[8];
 
@@ -669,7 +668,6 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	char *,		path,
 	int,		port)
 {
-    char *header = NULL;
     CONST char *p, *attr_start, *attr_end, *value_start, *value_end;
     HTList *CombinedCookies = NULL, *cl = NULL;
     cookie *cur_cookie = NULL, *co = NULL;
@@ -1695,8 +1693,8 @@ PRIVATE void LYProcessSetCookies ARGS6(
 			    (co->name ? co->name : "[no name]"),
 			    (co->value ? co->value : "[no value]"));
 	    if (co->expires > 0) {
-		fprintf(stderr, "                    expires: %i, %s\n",
-				 co->expires,
+		fprintf(stderr, "                    expires: %ld, %s\n",
+				 (long) co->expires,
 				 ctime(&co->expires));
 	    }
 	}

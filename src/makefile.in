@@ -19,8 +19,12 @@ WWWINC		= WWW/Library/Implementation
 WWWLIB		= ../WWW/Library/unix/libwww.a
 
 CC		= @CC@
+CPP		= @CPP@
 CPPOPTS		= @DEFS@ @CPPFLAGS@ -I.. -I../$(WWWINC) $(MCFLAGS) $(SITE_DEFS)
 CFLAGS		= $(CPPOPTS) @CFLAGS@
+
+LINT		= @LINT@
+LINTOPTS	=
 
 LIBS		= @LIBS@ $(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)
 LDFLAGS		= @LDFLAGS@
@@ -35,6 +39,8 @@ HTML.o HTFWriter.o HTInit.o DefaultStyle.o LYLocal.o LYUpload.o \
 LYLeaks.o LYexit.o LYJump.o LYList.o LYCgi.o LYTraversal.o \
 LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o LYExtern.o \
 LYStyle.o LYHash.o @EXTRA_OBJS@
+
+C_SRC	= $(OBJS:.o=.c)
 
 all: lynx
 
@@ -65,11 +71,13 @@ do_chartrans_stuff:
 		CC="$(CC)" tables
 
 lint:
-	lint $(CPPOPTS) *.c  > ../lint.out
+	$(LINT) $(LINTOPTS) $(CPPOPTS) *.c  > ../lint.out
 
 clean:
-	rm -f lynx core *.[ob]
+	rm -f lynx core *.[ob] *.bak
 	cd chrtrans && $(MAKE) clean
+
+distclean: clean
 
 LYMain.o: ../userdefs.h
 LYMainLoop.o: ../userdefs.h
@@ -120,3 +128,8 @@ UCdomap.o: UCdomap.c chrtrans/UCkd.h chrtrans/makeuctb chrtrans/makeuctb.c \
 
 UCAux.o : UCAux.c $(CMN)UCAux.h $(CMN)UCDefs.h
 LYCookie.o: ../userdefs.h
+
+depend :
+	makedepend -fmakefile -- $(CFLAGS) -- $(C_SRC)
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.

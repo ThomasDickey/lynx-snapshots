@@ -174,8 +174,8 @@ PUBLIC void LYpush ARGS2(
 	if (history[nhist-1].internal_link == doc->internal_link) {
 	    /* But it is nice to have the last position remembered!
 	       - kw */
-	    history[nhist].link = doc->link;
-	    history[nhist].page = doc->line;
+	    history[nhist-1].link = doc->link;
+	    history[nhist-1].page = doc->line;
  	    return;
 	}
     }

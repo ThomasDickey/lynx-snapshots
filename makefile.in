@@ -169,6 +169,7 @@ help:
 	@echo "Please run make with one of the following arguments"
 	@echo "all        -- to make the executable, put it in this directory"
 	@echo "clean      -- removes all '.o' and 'core' files"
+	@echo "depend     -- use makedepend to generate header-dependencies"
 	@echo "tar        -- runs clean, removes executable, and tars the whole directory"
 	@echo "compress   -- runs tar, then compresses the result"
 	@echo "zip        -- runs clean, removes executable, and zips the whole directory"
@@ -178,16 +179,20 @@ help:
 clean:
 	rm -f WWW/Library/*/*.[aob]
 	rm -f WWW/Library/*/.created
-	cd src; $(MAKE) clean
+	cd src && $(MAKE) clean
 	rm -f *.b src/lynx core Lynx.leaks
+
+depend:
+	cd WWW/Library/unix && $(MAKE) $@
+	cd src && $(MAKE) $@
 
 distclean: clean
 	-rm -f WWW/Library/unix/makefile src/makefile src/chrtrans/makefile
 	-rm -f WWW/Library/*/*~
 	-rm -f WWW/Library/*/*.bak
 	-rm -rf src/obsolete
-	-cd src; $(MAKE) clean
-	-cd src/chrtrans; $(MAKE) distclean
+	-cd src && $(MAKE) clean
+	-cd src/chrtrans && $(MAKE) distclean
 	-rm -f *~ *.bak *.sav
 	-rm -f makefile lynx_cfg.h config.status config.log config.cache
 	-rm -f lynx
@@ -219,7 +224,7 @@ save:
 compress: tar
 	cd ..; rm -f $(lynxname).tar.Z; compress -f -v $(lynxname).tar
 
-install:
+install: all
 	-mv -f $(bindir)/lynx $(bindir)/lynx.old
 	-mv -f $(libdir)/lynx.cfg $(libdir)/lynx.oldcfg
 	$(installbin) lynx $(bindir)/lynx

@@ -159,10 +159,6 @@ PUBLIC char *LYNewsPost ARGS2(
 	}
 	if (strncasecomp(cp, "Re:", 3)) {
             strcat(user_input, "Re: ");
-	    cp += 3;
-	    while (isspace(*cp)) {
-		cp++;
-	    }
 	}
         strcat(user_input, cp);
     }
