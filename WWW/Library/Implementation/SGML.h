@@ -2,17 +2,14 @@
                                SGML AND STRUCTURED STREAMS
 
    The SGML parser is a state machine.  It is called for every character
-
    of the input stream.  The DTD data structure contains pointers
-
    to functions which are called to implement the actual effect of the
-
    text read. When these functions are called, the attribute structures pointed to by the
    DTD are valid, and the function is passed a pointer to the current tag structure, and an
    "element stack" which represents the state of nesting within SGML elements.
 
-   The following aspects are from Dan Connolly's suggestions:  Binary search, Structured
-   object scheme basically, SGML content enum type.
+   The following aspects are from Dan Connolly's suggestions:  Binary search,
+   Structured object scheme basically, SGML content enum type.
 
    (c) Copyright CERN 1991 - See Copyright.html
 
@@ -130,23 +127,13 @@ struct _tag{
 **  Not the whole DTD, but all this parser uses of it.
 */
 typedef struct {
-    char* name;
-    long code;
-} UC_entity_info;
-
-typedef struct {
     HTTag *             tags;           /* Must be in strcmp order by name */
     int                 number_of_tags;
     CONST char **       entity_names;   /* Must be in strcmp order by name */
     size_t              number_of_entities;
-    CONST UC_entity_info * unicode_entity_info; /* strcmp order by name */
-    size_t              number_of_unicode_entities;
-			/*
-			**  All calls to unicode_entities table should be done
-			**  through HTMLGetEntityUCValue (LYCharSets.c) only.
-			**  unicode_entities table now holds *all*
-			**  old-style entities too.
-			*/
+				/*  "entity_names" table probably unused,
+				**  see comments in HTMLDTD.c near the top
+				*/
 } SGML_dtd;
 
 

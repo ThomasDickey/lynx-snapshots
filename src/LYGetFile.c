@@ -246,6 +246,7 @@ Try_Redirected_URL:
 		    return(postoptions(doc));
 #endif
 
+#ifndef DISABLE_NEWS
 		} else if (url_type == NEWSPOST_URL_TYPE ||
 			   url_type == NEWSREPLY_URL_TYPE ||
 			   url_type == SNEWSPOST_URL_TYPE ||
@@ -258,6 +259,7 @@ Try_Redirected_URL:
 			HTLoadAbsolute(&WWWDoc);
 			return(NULLFILE);
 		    }
+#endif
 
 		} else if (url_type == LYNXDOWNLOAD_URL_TYPE) {
 		    LYDownload(doc->address);
@@ -489,9 +491,11 @@ Try_Redirected_URL:
 		/*
 		 *  Disable www news access if not news_ok.
 		 */
+#ifndef DISABLE_NEWS
 		} else if (url_type == NEWS_URL_TYPE && !news_ok) {
 		    HTUserMsg(NEWS_DISABLED);
 		    return(NULLFILE);
+#endif
 
 		} else if (url_type == RLOGIN_URL_TYPE) {
 		    if (!rlogin_ok) {
@@ -730,14 +734,18 @@ Try_Redirected_URL:
 				 url_type == HTTPS_URL_TYPE) ||
 				(no_goto_mailto &&
 				 url_type == MAILTO_URL_TYPE) ||
+#ifndef DISABLE_NEWS
 				(no_goto_news &&
 				 url_type == NEWS_URL_TYPE) ||
 				(no_goto_nntp &&
 				 url_type == NNTP_URL_TYPE) ||
+#endif
 				(no_goto_rlogin &&
 				 url_type == RLOGIN_URL_TYPE) ||
+#ifndef DISABLE_NEWS
 				(no_goto_snews &&
 				 url_type == SNEWS_URL_TYPE) ||
+#endif
 				(no_goto_telnet &&
 				 url_type == TELNET_URL_TYPE) ||
 				(no_goto_tn3270 &&
@@ -948,6 +956,7 @@ PUBLIC int follow_link_number ARGS4(
     int rel = 0;
     int new_top, new_link;
     BOOL want_go;
+    int curline = *num; /* passed in from mainloop() */
 
     CTRACE(tfp,"follow_link_number(%d,%d,...)\n",c,cur);
     temp[0] = c;
@@ -972,6 +981,8 @@ PUBLIC int follow_link_number ARGS4(
 	break;
     default:
 	rel = *++p;
+    case 0:
+	break;
     }
     /* don't currently check for errors typing suffix */
 
@@ -985,7 +996,6 @@ PUBLIC int follow_link_number ARGS4(
 	int npages = ((nlines + 1) > display_lines) ?
 		(((nlines + 1) + (display_lines - 1))/(display_lines))
 						    : 1;
-	int curline = doc->line; /* passed from mainloop() */
 	int curpage = ((curline + 1) > display_lines) ?
 		     (((curline + 1) + (display_lines - 1))/(display_lines))
 						      : 1;

@@ -329,7 +329,7 @@ PRIVATE BOOLEAN not_already_exists ARGS1(char *, name)
     return FALSE;
 }
 
-PRIVATE BOOLEAN dir_has_same_owner ARGS2(struct stat, *info, int, owner)
+PRIVATE BOOLEAN dir_has_same_owner ARGS2(struct stat *, info, int, owner)
 {
     if (S_ISDIR(info->st_mode)) {
 	if (info->st_uid == owner) {
@@ -1780,8 +1780,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 	char **,	newpath)
 {
     char *tmpbuf = NULL;
-    static char savepath[512]; /* This will be the link that
-				  is to be installed. */
+    char savepath[512]; /* This will be the link that is to be installed. */
     struct stat dir_info;
     char *args[6];
     HTList *tag;
@@ -1878,6 +1877,8 @@ PUBLIC void add_menu_item ARGS1(
 	menu_head = NULL;
 
     new = (struct dired_menu *)calloc(1, sizeof(*new));
+    if (new == NULL)
+	outofmem(__FILE__, "add_menu_item");
 
     /*
      *	Conditional on tagged != NULL ?

@@ -18,13 +18,6 @@ extern char * use_this_url_instead;
 #include <HTAnchor.h>
 #include <HTFormat.h>
 
-#ifdef SHORT_NAMES
-#define HTClientHost            HTClHost
-#define HTSearchAbsolute        HTSeAbso
-#define HTOutputStream          HTOuStre
-#define HTOutputFormat          HTOuForm
-#endif
-
 /*      Return codes from load routines:
 **
 **      These codes may be returned by the protocol modules,

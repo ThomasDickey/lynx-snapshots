@@ -7,13 +7,6 @@
 
 #include <HTList.h>
 
-#ifdef SHORT_NAMES
-#define HTAA_encryptPasswd	HTAAenPw
-#define HTAA_passwdMatch	HTAApwMa
-#define HTAAFile_readPasswdRec	HTAAFrPR
-#define HTAA_checkPasswd	HTAAchPw
-#endif /* SHORT_NAMES */
-
 /*
 
 User Authentication

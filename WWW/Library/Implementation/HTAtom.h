@@ -23,11 +23,6 @@
 
 #include <HTList.h>
 
-#ifdef SHORT_NAMES
-#define HTAt_for        HTAtom_for
-#define HTAt_tMa        HTAtom_templateMatches
-#endif /*SHORT_NAMES*/
-
 typedef struct _HTAtom HTAtom;
 struct _HTAtom {
         HTAtom *        next;

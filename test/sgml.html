@@ -38,7 +38,15 @@ original comment:
 # The contents of this table are drawn from various sources, and
 # are in the public domain.
 #
+<!-- Changes:
++   {"euro",    0x20AC},  /* EURO SIGN                                     */
+    {"loz",     0x25CA},  /* LOZENGE                                       */
+! /*  {"loz",   0x2727},  WHITE FOUR POINTED STAR                          */
+!  /* Warning: Duplicated &loz; entry.  HTML 4,0 defines it as U+25CA. */
+-   {"b.delta", 0x03B3},  /* GREEK SMALL LETTER GAMMA                      */
++   {"b.delta", 0x03B4},  /* GREEK SMALL LETTER DELTA                      */
 
+-->
 
 This test illuminating SGML character entities implementation in your browser.
 We sort the entities according to unicode numbers.
@@ -394,12 +402,12 @@ this table is much wider than in HTML 4.0 draft).
 0x03B2    &b.beta;	      ISOgrk4	# GREEK SMALL LETTER BETA
 0x03B2    &beta;	      ISOgrk3	# GREEK SMALL LETTER BETA
 0x03B2    &bgr;	      ISOgrk1	# GREEK SMALL LETTER BETA
-0x03B3    &b.delta;	      ISOgrk4	# GREEK SMALL LETTER GAMMA
 0x03B3    &b.gamma;	      ISOgrk4	# GREEK SMALL LETTER GAMMA
 0x03B3    &gamma;	      ISOgrk3	# GREEK SMALL LETTER GAMMA
 0x03B3    &ggr;	      ISOgrk1	# GREEK SMALL LETTER GAMMA
 0x03B4    &delta;	      ISOgrk3	# GREEK SMALL LETTER DELTA
 0x03B4    &dgr;	      ISOgrk1	# GREEK SMALL LETTER DELTA
+0x03B4    &b.delta;          ISOgrk4   # GREEK SMALL LETTER DELTA
 0x03B5    &b.epsi;	      ISOgrk4	# GREEK SMALL LETTER EPSILON
 0x03B5    &b.epsis;	      ISOgrk4	# GREEK SMALL LETTER EPSILON
 0x03B5    &b.epsiv;	      ISOgrk4	# GREEK SMALL LETTER EPSILON
@@ -625,6 +633,7 @@ this table is much wider than in HTML 4.0 draft).
 0x2041    &caret;	      ISOpub	# CARET INSERTION POINT
 0x2043    &hybull;	      ISOpub	# HYPHEN BULLET
 0x2044    &frasl;	      HTMLsymbol	# FRACTION SLASH
+0x20AC    &euro;             new       # EURO SIGN
 0x20DB    &tdot;	      ISOtech	# COMBINING THREE DOTS ABOVE
 0x20DC    &DotDot;	      ISOtech	# COMBINING FOUR DOTS ABOVE
 0x2105    &incare;	      ISOpub	# CARE OF
@@ -1037,7 +1046,7 @@ this table is much wider than in HTML 4.0 draft).
 0x2717    &cross;	      ISOpub	# BALLOT X
 0x2720    &malt;	      ISOpub	# MALTESE CROSS
 0x2726    &lozf;	      ISOpub	# BLACK FOUR POINTED STAR
-0x2727    &loz;	      ISOpub	# WHITE FOUR POINTED STAR
+<!-- 0x2727    &loz;         ISOpub    # WHITE FOUR POINTED STAR -->
 0x2736    &sext;	      ISOpub	# SIX POINTED BLACK STAR
 0x????    &epsiv;	      ISOgrk3	# variant epsilon
 0x????    &fjlig;	      ISOpub	# fj ligature

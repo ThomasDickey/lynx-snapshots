@@ -2,6 +2,8 @@
  *  UCdomap.c
  *  =========
  *
+ * This is a Lynx chartrans engine, its external calls are in UCMap.h
+ *
  * Derived from code in the Linux kernel console driver.
  * The GNU Public Licence therefore applies, see
  * the file COPYING in the top-level directory
@@ -67,7 +69,6 @@
 #include <rfc_suni.h>		/* RFC 1345 w/o Intro	*/
 /* #include <utf8_uni.h> */     /* UNICODE UTF 8        */
 #include <viscii_uni.h> 	/* Vietnamese (VISCII)	*/
-#include <iso9945uni.h>		/* Ukrainian Cyrillic (ISO 9945-2) */
 #include <cp866u_uni.h>		/* Ukrainian Cyrillic (866) */
 #include <koi8u_uni.h>		/* Ukrainian Cyrillic (koi8-u */
 #ifdef NOTDEFINED
@@ -490,11 +491,12 @@ PRIVATE void UC_con_set_trans ARGS3(
   }
     /*
      *	The font is always 256 characters - so far.
-     *  (fake 0 for built-in charsets like CJK or x-transparent, use .num_n256)
+     *  (this function preserved by num_uni==0 so unicount=NULL for built-in
+     *  charsets like CJK or x-transparent should not be a problem?)
      */
   con_clear_unimap();
 #endif
-    for (i = 0; i < UCInfo[UC_charset_in_hndl].num_n256; i++) {
+    for (i = 0; i < 256; i++) {
 	if ((j = UCInfo[UC_charset_in_hndl].unicount[i])) {
 	    ptrans[i] = *p;
 	    for (; j; j--) {
@@ -753,6 +755,7 @@ PRIVATE void con_set_default_unimap NOARGS
 
     /*
      *	The default font is always 256 characters.
+     *  (default font can not be a fake one, so unicout!=NULL for sure.)
      */
     con_clear_unimap(1);
 
@@ -810,11 +813,11 @@ PRIVATE int UC_con_set_unimap ARGS2(
 
     /*
      *	The font is always 256 characters - so far.
-     *  (fake 0 for built-in charsets like CJK or x-transparent, use .num_n256)
+     *  (fake 0 for built-in charsets like CJK or x-transparent, add a check)
      */
     con_clear_unimap(0);
 
-    for (i = 0; i < UCInfo[UC_charset_out_hndl].num_n256; i++) {
+    for (i = 0; i < 256 && UCInfo[UC_charset_out_hndl].unicount != NULL; i++) {
 	for (j = UCInfo[UC_charset_out_hndl].unicount[i]; j; j--) {
 	    con_insert_unipair(*(p++), i, 0);
 	}
@@ -1972,7 +1975,6 @@ PUBLIC void UC_Charset_Setup ARGS9(
     }
     UCInfo[s].LYNXname = UC_LYNXcharset;
     UCInfo[s].unicount = unicount;
-    UCInfo[s].num_n256 = (unicount == NULL) ? 0 : 256 ; /* hack */
     UCInfo[s].unitable = unitable;
     UCInfo[s].num_uni = nnuni;
     UCInfo[s].replacedesc = replacedesc;
@@ -2077,7 +2079,6 @@ PUBLIC void UCInit NOARGS
     UC_CHARSET_SETUP_utf_8;		  /*** UNICODE UTF-8	  */
     UC_CHARSET_SETUP_mnemonic_ascii_0;	  /* RFC 1345 w/o Intro   */
     UC_CHARSET_SETUP_mnemonic;		  /* RFC 1345 Mnemonic	  */
-    UC_CHARSET_SETUP_iso_9945_2;	  /* Ukrainian Cyrillic (ISO 9945-2) */
     UC_CHARSET_SETUP_cp866u;		  /* Ukrainian Cyrillic (866) */
     UC_CHARSET_SETUP_koi8_u;		  /* Ukrainian Cyrillic (koi8-u) */
 #ifdef NOTDEFINED

@@ -22,6 +22,8 @@
 #include <LYLocal.h>
 #endif /* DIRED_SUPPORT */
 
+#define ADVANCED_INFO 1		/* to get more info in advanced mode */
+
 #if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
 #define HAVE_CFG_DEFS_H
 
@@ -89,6 +91,9 @@ PUBLIC int showinfo ARGS4(
     char *Address = NULL, *Title = NULL;
     char *name;
     CONST char *cp;
+#ifdef ADVANCED_INFO
+    BOOLEAN LYInfoAdvanced = (user_mode == ADVANCED_MODE);
+#endif
 
 #ifdef DIRED_SUPPORT
     char temp[LY_MAXPATH];
@@ -324,6 +329,28 @@ PUBLIC int showinfo ARGS4(
     if ((cp = HText_getLastModified()) != NULL && *cp != '\0')
 	fprintf(fp0, "<dt><em>%s</em> %s\n", gettext("Last Mod:"), cp);
 
+#ifdef ADVANCED_INFO
+    if (LYInfoAdvanced) {
+	if (HTMainAnchor && HTMainAnchor->expires) {
+	    fprintf(fp0, "<dt><em>%s</em> %s\n",
+		    gettext("&nbsp;Expires:"), HTMainAnchor->expires);
+	}
+	if (HTMainAnchor && HTMainAnchor->cache_control) {
+	    fprintf(fp0, "<dt><em>%s</em> %s\n",
+		    gettext("Cache-Control:"), HTMainAnchor->cache_control);
+	}
+	if (HTMainAnchor && HTMainAnchor->content_length > 0) {
+	    fprintf(fp0, "<dt><em>%s</em> %d %s\n",
+		    gettext("Content-Length:"),
+		    HTMainAnchor->content_length, gettext("bytes"));
+	}
+	if (HTMainAnchor && HTMainAnchor->content_language) {
+	    fprintf(fp0, "<dt><em>%s</em> %s\n",
+		    gettext("Language:"), HTMainAnchor->content_language);
+	}
+    }
+#endif /* ADVANCED_INFO */
+
     if (doc->post_data) {
 	fprintf(fp0, "<dt><em>%s</em> <xmp>%s</xmp>\n",
 		gettext("Post Data:"), doc->post_data);
@@ -342,15 +369,29 @@ PUBLIC int showinfo ARGS4(
     fprintf(fp0, "<dt>&nbsp;&nbsp;&nbsp;&nbsp;<em>%s</em> %d %s\n",
 	    gettext("size:"), size_of_file, gettext("lines"));
 
-    fprintf(fp0, "<dt>&nbsp;&nbsp;&nbsp;&nbsp;<em>%s</em> %s%s%s\n",
+    fprintf(fp0, "<dt>&nbsp;&nbsp;&nbsp;&nbsp;<em>%s</em> %s%s%s",
 		 gettext("mode:"),
 		 (lynx_mode == FORMS_LYNX_MODE ?
-				  gettext("forms mode") : gettext("normal")),
+				  gettext("forms mode") :
+		  HTisDocumentSource() ?
+				  gettext("source") : gettext("normal")),
 		 (doc->safe ? gettext(", safe") : ""),
 		 (doc->internal_link ? gettext(", internal link") : "")
 	    );
+#ifdef ADVANCED_INFO
+    if (LYInfoAdvanced) {
+	fprintf(fp0, "%s%s%s\n",
+		(HText_hasNoCacheSet(HTMainText) ?
+				  gettext(", no-cache") : ""),
+		(HTAnchor_isISMAPScript((HTAnchor *)HTMainAnchor) ?
+				  gettext(", ISMAP script") : ""),
+		(doc->bookmark ?
+				  gettext(", bookmark file") : "")
+	    );
+    }
+#endif /* ADVANCED_INFO */
 
-    fprintf(fp0, "</dl>\n");  /* end of list */
+    fprintf(fp0, "\n</dl>\n");  /* end of list */
 
     if (nlinks > 0) {
 	fprintf(fp0, "<h2>%s</h2>\n<dl compact>",

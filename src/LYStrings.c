@@ -13,11 +13,18 @@
 #include <LYCharSets.h>
 #include <HTAlert.h>
 #include <HTString.h>
+#include <LYCharUtils.h>
+#include <HTParse.h>
 
 #ifdef DJGPP_KEYHANDLER
 #include <pc.h>
 #include <keys.h>
 #endif /* DJGPP_KEYHANDLER */
+
+#ifdef USE_COLOR_STYLE
+#include <LYHash.h>
+#include <AttrList.h>
+#endif
 
 #include <LYLeaks.h>
 
@@ -1721,6 +1728,29 @@ PUBLIC void LYTrimTrailing ARGS1(
 }
 
 /*
+ * Trim a startfile, returning true if it looks like one of the Lynx tags.
+ */
+PUBLIC BOOLEAN LYTrimStartfile ARGS1(
+	char *,		buffer)
+{
+    LYTrimHead(buffer);
+    if (!strncasecomp(buffer, "lynxexec:", 9) ||
+	!strncasecomp(buffer, "lynxprog:", 9)) {
+	/*
+	 *  The original implementations of these schemes expected
+	 *  white space without hex escaping, and did not check
+	 *  for hex escaping, so we'll continue to support that,
+	 *  until that code is redone in conformance with SGML
+	 *  principles.  - FM
+	 */
+	HTUnEscapeSome(buffer, " \r\n\t");
+	convert_to_spaces(buffer, TRUE);
+	return TRUE;
+    }
+    return FALSE;
+}
+
+/*
 **  Display the current value of the string and allow the user
 **  to edit it.
 */
@@ -2046,6 +2076,20 @@ PUBLIC void LYRefreshEdit ARGS1(
 	nrdisplayed = DspWdth;
 
     move(edit->sy, edit->sx);
+#ifdef USE_COLOR_STYLE
+    /*
+     *  If this is the last screen line, set attributes to normal,
+     *  should only be needed for color styles.  The curses function
+     *  may be used directly to avoid complications. - kw
+     */
+    if (edit->sy == (LYlines - 1)) {
+	if (s_normal != NOSTYLE) {
+	    curses_style(s_normal, ABS_ON);
+	} else {
+	    attrset(A_NORMAL);	/* need to do something about colors? */
+	}
+    }
+#endif
     if (edit->hidden) {
 	for (i = 0; i < nrdisplayed; i++)
 	    addch('*');
@@ -2119,12 +2163,20 @@ again:
 	LYRefreshEdit(&MyEdit);
 	ch = LYgetch();
 #ifdef VMS
-	if (term_letter || term_options || term_message || HadVMSInterrupt) {
+	if (term_letter || term_options ||
+#ifndef DISABLE_NEWS
+	      term_message
+#endif
+	      || HadVMSInterrupt) {
 	    HadVMSInterrupt = FALSE;
 	    ch = 7;
 	}
 #else
-	if (term_letter || term_options || term_message)
+      if (term_letter || term_options
+#ifndef DISABLE_NEWS
+	      || term_message
+#endif
+	      )
 	    ch = 7;
 #endif /* VMS */
 	if (recall && (ch == UPARROW || ch == DNARROW)) {

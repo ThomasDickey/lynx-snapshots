@@ -41,7 +41,6 @@ PUBLIC long int HTMaxBytes  = 0;	/* No effective limit */
 #include <HTFWriter.h>
 #include <HTPlain.h>
 #include <SGML.h>
-#include <HTML.h>
 #include <HTMLGen.h>
 
 #include <LYexit.h>

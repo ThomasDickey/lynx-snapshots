@@ -149,7 +149,7 @@
 # but for a quick fix:
 #   Map   http://www.siteA.com/~jdoe/*      http://siteB.org/john/*
 #   Map   http://www.provider.com/company/* http://www.company.com/*
-# But note that you are likely to create invalid links if no all documents
+# But note that you are likely to create invalid links if not all documents
 # from a site are mapped (Limitation 3).
 #
 # 6. DNS troubles
@@ -178,7 +178,7 @@
 # -------------------------
 # Rules processing does not apply to all URL schemes.  Some are
 # handled differently from the generic access code, therefore rules
-# for such URLs will never bee "seen".  This limitation applies at
+# for such URLs will never be "seen".  This limitation applies at
 # least to lynxexec:, lynxprog:, mailto:, and LYNXHIST: URLs.
 #
 # Also, a scheme has to be known to Lynx in order to get as far as

@@ -9,12 +9,19 @@
 #include <HTMLDTD.h>
 #include <LYLeaks.h>
 
+/*
+ *     Character entities like &nbsp now excluded from our DTD tables,
+ *     they are mapped to Unicode and handled by chartrans code directly
+ *     the similar way the numeric entities like &#123 does.
+ *     See  src/chrtrans/entities.h  for real mapping.
+ */
+
 /*	Entity Names
 **	------------
 **
 **	This table must be matched exactly with ALL the translation tables
-**		(this is an obsolete translation mechanism,
-**		currently replaced with unicode chartrans in most cases...)
+**		(this is an obsolete translation mechanism, probably unused,
+**		currently replaced with Unicode chartrans in most cases...)
 */
 static CONST char* entities[] = {
   "AElig",	/* capital AE diphthong (ligature) */
@@ -131,9 +138,6 @@ static CONST char* entities[] = {
   "yuml",	/* small y, dieresis or umlaut mark */
 };
 
-#define HTML_ENTITIES 112
-
-#include <entities.h>
 
 /*		Attribute Lists
 **		---------------
@@ -1591,10 +1595,8 @@ static HTTag tags[HTML_ELEMENTS];
 PUBLIC CONST SGML_dtd HTML_dtd = {
 	tags,
 	HTML_ELEMENTS,
-	entities,
+	entities, /* probably unused */
 	sizeof(entities)/sizeof(entities[0]),
-	unicode_entities,
-	sizeof(unicode_entities)/sizeof(unicode_entities[0])
 };
 
 /* This function fills the "tags" part of the HTML_dtd structure with

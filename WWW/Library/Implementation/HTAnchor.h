@@ -18,36 +18,6 @@
 #include <HTAtom.h>
 #include <UCDefs.h>
 
-#ifdef SHORT_NAMES
-#define HTAnchor_findChild			HTAnFiCh
-#define HTAnchor_findChildAndLink		HTAnFiLi
-#define HTAnchor_findAddress			HTAnFiAd
-#define HTAnchor_delete 			HTAnDele
-#define HTAnchor_makeLastChild			HTAnMaLa
-#define HTAnchor_parent 			HTAnPare
-#define HTAnchor_setDocument			HTAnSeDo
-#define HTAnchor_document			HTAnDocu
-#define HTAnchor_setFormat			HTAnSeFo
-#define HTAnchor_format 			HTAnForm
-#define HTAnchor_setIndex			HTAnSeIn
-#define HTAnchor_setPrompt			HTAnSePr
-#define HTAnchor_isIndex			HTAnIsIn
-#define HTAnchor_address			HTAnAddr
-#define HTAnchor_hasChildren			HTAnHaCh
-#define HTAnchor_title				HTAnTitl
-#define HTAnchor_setTitle			HTAnSeTi
-#define HTAnchor_appendTitle			HTAnApTi
-#define HTAnchor_link				HTAnLink
-#define HTAnchor_followMainLink 		HTAnFoMa
-#define HTAnchor_followTypedLink		HTAnFoTy
-#define HTAnchor_makeMainLink			HTAnMaMa
-#define HTAnchor_setProtocol			HTAnSePr
-#define HTAnchor_protocol			HTAnProt
-#define HTAnchor_physical			HTAnPhys
-#define HTAnchor_setPhysical			HTAnSePh
-#define HTAnchor_methods			HtAnMeth
-#endif /* SHORT_NAMES */
-
 /*			Main definition of anchor
 **			=========================
 */
@@ -225,12 +195,6 @@ extern void HTAnchor_setDocument PARAMS((
 
 extern HyperDoc * HTAnchor_document PARAMS((
 	HTParentAnchor *	me));
-
-/* We don't want code to change an address after anchor creation... yet ?
-extern void HTAnchor_setAddress PARAMS((
-	HTAnchor *		me,
-	char *			addr));
-*/
 
 /*	Returns the full URI of the anchor, child or parent
 **	as a malloc'd string to be freed by the caller.

@@ -140,8 +140,6 @@ $ define/user sys$output 'CHRwhere'iso08_uni.h	!ISO 8859-8 Hebrew
 $ makeuctb iso08_uni.tbl
 $ define/user sys$output 'CHRwhere'cp862_uni.h	!DosHebrew (cp862)
 $ makeuctb cp862_uni.tbl
-$ define/user sys$output 'CHRwhere'iso9945uni.h !Ukranian
-$ makeuctb iso9945uni.tbl
 $ define/user sys$output 'CHRwhere'cp1255_uni.h	!WinHebrew (cp1255)
 $ makeuctb cp1255_uni.tbl
 $ define/user sys$output 'CHRwhere'iso09_uni.h	!ISO 8859-9 (Latin 5)

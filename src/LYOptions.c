@@ -1,5 +1,6 @@
 #include <HTUtils.h>
 #include <HTFTP.h>
+#include <HTTP.h>  /* 'reloading' flag */
 #include <HTML.h>
 #include <LYCurses.h>
 #include <LYUtils.h>
@@ -1805,6 +1806,7 @@ PRIVATE int boolean_choice ARGS4(
 		case LYK_UP_HALF:
 		case LYK_UP_TWO:
 		case LYK_PREV_LINK:
+		case LYK_FASTBACKW_LINK:
 		case LYK_UP_LINK:
 		case LYK_LEFT_LINK:
 		    if (cur_choice == 0)
@@ -3495,14 +3497,6 @@ PRIVATE PostPair * break_data ARGS1(
  * post_data here, but bring along everything just in case.  It's only a
  * pointer.  MRC
  *
- * By changing the certain options value (like preferred language or
- * fake browser name) we need to inform the remote server and reload
- * (uncache on a proxy) the document which was active just before
- * the Options menu was invoked.  Another values (like display_char_set
- * or assume_char_set) used by lynx initial rendering stages
- * and can only be changed after reloading :-(
- * So we introduce boolean flag 'need_reload' (currently dummy).
- *
  * Options are processed in order according to gen_options(), we should not
  * depend on it and add boolean flags where the order is essential (save,
  * character sets...)
@@ -3511,13 +3505,30 @@ PRIVATE PostPair * break_data ARGS1(
  * conditions.  We *should* duplicate the same conditions here in postoptions()
  * to prevent user with a limited access from editing HTML options code
  * manually (e.g., doing 'e'dit in 'o'ptions) and submit it to access the
- * restricted items. Prevent spoofing attempts from index overrun. - LP
+ * restricted items.  Prevent spoofing attempts from index overrun. - LP
+ *
+ * Exit status: NULLFILE (reloading) or NORMAL (from HText cache).
+ *
+ * On exit, got the document which was current before the Options menu:
+ *
+ *   (from cache) nothing changed or no visual effect supposed:
+ *             editor name, e-mail, etc.
+ *
+ *   (reload locally) to see the effect of certain changes:
+ *             display_char_set, assume_charset, etc.
+ *             (use 'need_reload' flag where necessary).
+ *
+ *   (reload from remote server and uncache on a proxy)
+ *             few options changes should be transferred to remote server:
+ *             preferred language, fake browser name, etc.
+ *             (use 'need_end_reload' flag).
  */
 
 PUBLIC int postoptions ARGS1(
     document *, 	newdoc)
 {
     PostPair *data = 0;
+    DocAddress WWWDoc;  /* need on exit */
     int i;
     int code;
     BOOLEAN save_all = FALSE;
@@ -3525,6 +3536,7 @@ PUBLIC int postoptions ARGS1(
     BOOLEAN raw_mode_old = LYRawMode;
     BOOLEAN assume_char_set_changed = FALSE;
     BOOLEAN need_reload = FALSE;
+    BOOLEAN need_end_reload = FALSE;
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
     int CurrentShowColor = LYShowColor;
 #endif
@@ -3613,7 +3625,12 @@ PUBLIC int postoptions ARGS1(
 
 	/* Keypad Mode: SELECT */
 	if (!strcmp(data[i].tag, keypad_mode_string)) {
-	    GetOptValues(keypad_mode_values, data[i].value, &keypad_mode);
+	    int newval;
+	    if (GetOptValues(keypad_mode_values, data[i].value, &newval)
+		 && keypad_mode != newval) {
+		keypad_mode = newval;
+		need_reload = TRUE;
+	    }
 	}
 
 	/* Line edit style: SELECT */
@@ -3653,8 +3670,11 @@ PUBLIC int postoptions ARGS1(
 	/* HTML error tolerance: SELECT */
 	if (!strcmp(data[i].tag, DTD_recovery_string)
 	 && GetOptValues(DTD_type_values, data[i].value, &code)) {
-	    Old_DTD = code;
-	    HTSwitchDTD(!Old_DTD);
+	    if (Old_DTD != code) {
+		Old_DTD = code;
+		HTSwitchDTD(!Old_DTD);
+		need_reload = TRUE;
+	    }
 	}
 
 	/* Select Popups: ON/OFF */
@@ -3696,21 +3716,30 @@ PUBLIC int postoptions ARGS1(
 
 	/* Show Images: SELECT */
 	if (!strcmp(data[i].tag, images_string)) {
-	    if (!strcmp(data[i].value, images_ignore_all_string)) {
-		pseudo_inline_alts = FALSE;
-		clickable_images = FALSE;
-	    } else if (!strcmp(data[i].value, images_use_label_string)) {
-		pseudo_inline_alts = TRUE;
-		clickable_images = FALSE;
-	    } else if (!strcmp(data[i].value, images_use_links_string)) {
+	    if (!strcmp(data[i].value, images_ignore_all_string)
+			&& !(pseudo_inline_alts == FALSE && clickable_images == FALSE)) {
+		 pseudo_inline_alts = FALSE;
+		 clickable_images = FALSE;
+		need_reload = TRUE;
+	    } else if (!strcmp(data[i].value, images_use_label_string)
+			&& !(pseudo_inline_alts == TRUE && clickable_images == FALSE)) {
+		 pseudo_inline_alts = TRUE;
+		 clickable_images = FALSE;
+		need_reload = TRUE;
+	    } else if (!strcmp(data[i].value, images_use_links_string)
+			&& !(clickable_images == TRUE)) {
 		clickable_images = TRUE;
+		need_reload = TRUE;
 	    }
 	}
 
 	/* Verbose Images: ON/OFF */
 	if (!strcmp(data[i].tag, verbose_images_string)
-        && GetOptValues(verbose_images_type_values, data[i].value, &code)) {
-	   verbose_img = code;
+	 && GetOptValues(verbose_images_type_values, data[i].value, &code)) {
+	    if (verbose_img != code) {
+		verbose_img = code;
+		need_reload = TRUE;
+	    }
 	}
 
 	/* VI Keys: ON/OFF */
@@ -3773,8 +3802,8 @@ PUBLIC int postoptions ARGS1(
 
 	/* Raw Mode: ON/OFF */
 	if (!strcmp(data[i].tag, raw_mode_string)
-        && GetOptValues(bool_values, data[i].value, &code)) {
-	   LYRawMode = code;
+	 && GetOptValues(bool_values, data[i].value, &code)) {
+	    LYRawMode = code;
 	}
 
 	/*
@@ -3799,28 +3828,37 @@ PUBLIC int postoptions ARGS1(
 
 	/* Preferred Document Character Set: INPUT */
 	if (!strcmp(data[i].tag, preferred_doc_char_string)) {
-	    FREE(pref_charset);
-	    StrAllocCopy(pref_charset, data[i].value);
+	    if (strcmp(pref_charset, data[i].value)) {
+		FREE(pref_charset);
+		StrAllocCopy(pref_charset, data[i].value);
+		need_end_reload = TRUE;
+	   }
 	}
 
 	/* Preferred Document Language: INPUT */
 	if (!strcmp(data[i].tag, preferred_doc_lang_string)) {
-	    FREE(language);
-	    StrAllocCopy(language, data[i].value);
+	    if (strcmp(language, data[i].value)) {
+		FREE(language);
+		StrAllocCopy(language, data[i].value);
+		need_end_reload = TRUE;
+	    }
 	}
 
 	/* User Agent: INPUT */
 	if (!strcmp(data[i].tag, user_agent_string) && (!no_useragent)) {
-	    FREE(LYUserAgent);
-	    /* ignore Copyright warning ? */
-	    StrAllocCopy(LYUserAgent,
-	    	*(data[i].value)
-	    	? data[i].value
-		: LYUserAgentDefault);
-	    if (LYUserAgent && *LYUserAgent &&
-		!strstr(LYUserAgent, "Lynx") &&
-		!strstr(LYUserAgent, "lynx")) {
-		HTAlert(UA_COPYRIGHT_WARNING);
+	    if (strcmp(LYUserAgent, data[i].value)) {
+		need_end_reload = TRUE;
+		FREE(LYUserAgent);
+		/* ignore Copyright warning ? */
+		StrAllocCopy(LYUserAgent,
+		   *(data[i].value)
+		   ? data[i].value
+		   : LYUserAgentDefault);
+		if (LYUserAgent && *LYUserAgent &&
+		   !strstr(LYUserAgent, "Lynx") &&
+		   !strstr(LYUserAgent, "lynx")) {
+		    HTAlert(UA_COPYRIGHT_WARNING);
+		}
 	    }
 	}
     } /* end of loop */
@@ -3870,12 +3908,75 @@ PUBLIC int postoptions ARGS1(
 	    HTAlert(OPTIONS_NOT_SAVED);
 	}
     }
-    LYpop(newdoc);  /* return to previous doc, not to options menu! */
 
-    if (need_reload == TRUE)  {
-	/* FIXME: currently dummy */
+    /*
+     *  Exit: working around the previous document.
+     */
+    CTRACE(tfp, "\nLYOptions.c/postoptions(): exiting...\n");
+
+    /*  Options menu was pushed before postoptions(), so pop-up. */
+    LYpop(newdoc);
+    WWWDoc.address = newdoc->address;
+    WWWDoc.post_data = newdoc->post_data;
+    WWWDoc.post_content_type = newdoc->post_content_type;
+    WWWDoc.bookmark = newdoc->bookmark;
+    WWWDoc.isHEAD = newdoc->isHEAD;
+    WWWDoc.safe = newdoc->safe;
+    if (!HTLoadAbsolute(&WWWDoc))
+	return(NOT_FOUND);
+
+    /*** two HTLoadAbsolute() here allow things work correctly,
+     *** sorry for overhead (probably only seen in trace log).
+     ***/
+
+    /*
+     *  Return to previous doc, not to options menu!
+     *  Reload the document we had before the options menu
+     *  but uncache only when necessary (Hurrah, user!):
+     */
+    LYpop(newdoc);
+    WWWDoc.address = newdoc->address;
+    WWWDoc.post_data = newdoc->post_data;
+    WWWDoc.post_content_type = newdoc->post_content_type;
+    WWWDoc.bookmark = newdoc->bookmark;
+    WWWDoc.isHEAD = newdoc->isHEAD;
+    WWWDoc.safe = newdoc->safe;
+    if (!HTLoadAbsolute(&WWWDoc))
+       return(NOT_FOUND);
+
+    /*  force end-to-end reload from remote server if change LYUserAgent
+     *  or language or pref_charset (marked by need_end_reload flag above),
+     *  from old-style LYK_OPTIONS (mainloop):
+     */
+    if ((need_end_reload == TRUE &&
+	 (strncmp(newdoc->address, "http", 4) == 0 ||
+	  strncmp(newdoc->address, "lynxcgi:", 8) == 0))) {
+	/*
+	 *  An option has changed which may influence
+	 *  content negotiation, and the resource is from
+	 *  a http or https or lynxcgi URL (the only protocols
+	 *  which currently do anything with this information).
+	 *  Set reloading = TRUE so that proxy caches will be
+	 *  flushed, which is necessary until the time when
+	 *  all proxies understand HTTP 1.1 Vary: and all
+	 *  Servers properly use it...  Treat like
+	 *  case LYK_RELOAD (see comments there). - KW
+	 */
+	reloading = TRUE;  /* global flag */
+	need_reload = TRUE;
     }
-    return(NULLFILE);
+
+    if (need_reload == TRUE) {
+	/*  update HText cache */
+	HTuncache_current_document();
+	LYpush(newdoc, FALSE);
+	CTRACE(tfp, "LYOptions.c/postoptions(): now really exit.\n\n");
+	return(NULLFILE);
+    } else {
+	/*  no uncache, already loaded */
+	CTRACE(tfp, "LYOptions.c/postoptions(): now really exit.\n\n");
+	return(NORMAL);
+    }
 }
 
 PRIVATE char *NewSecureValue NOARGS

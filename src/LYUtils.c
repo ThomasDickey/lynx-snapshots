@@ -147,18 +147,36 @@ PUBLIC void highlight ARGS3(
 	lynx_start_link_color (flag == ON, links[cur].inUnderline);
 #else
 	if (flag == ON) {
-	    LynxChangeStyle(s_alink, ABS_ON, 0);
+	    LynxChangeStyle(s_alink, STACK_ON, 0);
 	} else {
-		/* the logic is flawed here - no provision is made for links that
-		** aren't coloured as [s_a] by default - rjp
-		*/
-	    if (LYP >= 0 && LYP < CACHEH && LXP >= 0 && LXP < CACHEW &&
-		cached_styles[LYP][LXP]) {
-		LynxChangeStyle(cached_styles[LYP][LXP], ABS_ON, 0);
+	    int s, x;
+		/*
+		 *  This is where we try to restore the original style when
+		 *  a link is unhighlighted.  The purpose of cached_styles[][]
+		 *  is to save the original style just for this case.
+		 *  If it doesn't have a color change saved at just the right
+		 *  position, we look at preceding positions in the same line
+		 *  until we find one.
+		 */
+	    if (LYP >= 0 && LYP < CACHEH && LXP >= 0 && LXP < CACHEW) {
+		s = cached_styles[LYP][LXP];
+		if (s == 0) {
+		    for (x = LXP-1; x >= 0; x--) {
+			if (cached_styles[LYP][x]) {
+			    if (cached_styles[LYP][x] > 0) {
+				s = cached_styles[LYP][x];
+				cached_styles[LYP][LXP] = s;
+			    }
+			    break;
+			}
+		    }
+		    if (s == 0)
+			s = s_a;
+		}
+	    } else {
+		s = s_a;
 	    }
-	    else {
-		LynxChangeStyle(s_a, ABS_ON, 0);
-	    }
+	    LynxChangeStyle(s, STACK_ON, 0);
 	}
 #endif
 
@@ -1924,22 +1942,21 @@ PUBLIC void statusline ARGS1(
 	/* draw the status bar in the STATUS style */
 	{
 		int a=(strncmp(buffer, ALERT_FORMAT, ALERT_PREFIX_LEN) ||
-		       !hashStyles[s_alert].name ? s_status : s_alert);
-		LynxChangeStyle (a, ABS_ON, 1);
+		       !hashStyles[s_alert].name) ? s_status : s_alert;
+		LynxChangeStyle (a, STACK_ON, 1);
 		addstr(buffer);
 		wbkgdset(stdscr,
 			 ((lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
 			  ? hashStyles[a].color
 			  :A_NORMAL) | ' ');
 		clrtoeol();
-		if (s_normal != NOSTYLE)
+		if (!(lynx_has_color && LYShowColor >= SHOW_COLOR_ON))
+		    wbkgdset(stdscr, A_NORMAL | ' ');
+		else if (s_normal != NOSTYLE)
 		    wbkgdset(stdscr, hashStyles[s_normal].color | ' ');
 		else
-		    wbkgdset(stdscr,
-			     ((lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
-			      ? displayStyles[DSTYLE_NORMAL].color
-			      : A_NORMAL) | ' ');
-		LynxChangeStyle (a, ABS_OFF, 0);
+		    wbkgdset(stdscr, displayStyles[DSTYLE_NORMAL].color | ' ');
+		LynxChangeStyle (a, STACK_OFF, 0);
 	}
 #endif
     }
@@ -2145,10 +2162,12 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	 return((int)FALSE);
 #endif /* USE_SLANG */
 
-    /** Keyboard 'Z' or 'z', or Control-G or Control-C **/
 #if defined (DOSPATH) && defined (NCURSES)
     nodelay(stdscr,TRUE);
 #endif /* DOSPATH */
+    /*
+     * 'c' contains whatever character we're able to read from keyboard
+     */
     c = LYgetch();
 #if defined (DOSPATH) && defined (NCURSES)
     nodelay(stdscr,FALSE);
@@ -2175,103 +2194,113 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	return((int)TRUE);
     }
 
-    /** Keyboard 'Z' or 'z', or Control-G or Control-C **/
+    /*
+     * 'c' contains whatever character we're able to read from keyboard
+     */
     c = typeahead();
 
 #endif /* !VMS */
 
     /*
-     * 'c' contains whatever character we're able to read from type-ahead
+     * 'c' contains whatever character we're able to read from keyboard
      */
+
+	/** Keyboard 'Z' or 'z', or Control-G or Control-C **/
     if (TOUPPER(c) == 'Z' || c == 7 || c == 3)
 	return((int)TRUE);
-#ifdef DISP_PARTIAL
-    else if (display_partial && (NumOfLines_partial > 2))
-    /* OK, we got several lines from new document and want to scroll... */
-    {
+
 	/* There is a subset of mainloop() actions available at this stage:
 	** no new getfile() cyrcle possible until the previous finished.
-	** Currently we have scrolling and toggling of trace log here.
+	** Currently we have scrolling in partial mode and toggling of trace log.
 	*/
+    switch (keymap[c+1])
+    {
+    case LYK_TRACE_TOGGLE :	       /*  Toggle TRACE mode. */
+	WWW_TraceFlag = ! WWW_TraceFlag;
+	if (LYOpenTraceLog())
+	    HTUserMsg(WWW_TraceFlag ? TRACE_ON : TRACE_OFF);
+	break ;
+    default :
 
-	int res;
-	switch (keymap[c+1])
-	{
-	case LYK_FASTBACKW_LINK :
-	    if (Newline_partial <= (display_lines)+1) {
-		Newline_partial -= display_lines ;
-	    } else if ((res =
-			HTGetLinkOrFieldStart(-1,
-					      &Newline_partial, NULL,
-					      -1, TRUE)) == LINK_LINE_FOUND) {
-		Newline_partial++;
-	    } else if (res == LINK_DO_ARROWUP) {
-		Newline_partial -= display_lines ;
-	    }
-	    break;
-	case LYK_FASTFORW_LINK :
-	    if (HText_canScrollDown()) {
-		/* This is not an exact science... - kw */
-		if ((res =
-		     HTGetLinkOrFieldStart(HText_LinksInLines(HTMainText,
-							      Newline_partial,
-							      display_lines)
-					   - 1,
-					   &Newline_partial, NULL,
-					   +1, TRUE)) == LINK_LINE_FOUND) {
+#ifdef DISP_PARTIAL
+        if (display_partial && (NumOfLines_partial > 2))
+        /* OK, we got several lines from new document and want to scroll... */
+        {
+	    int res;
+	    switch (keymap[c+1])
+	    {
+	    case LYK_FASTBACKW_LINK :
+	        if (Newline_partial <= (display_lines)+1) {
+		    Newline_partial -= display_lines ;
+	        } else if ((res =
+			    HTGetLinkOrFieldStart(-1,
+					          &Newline_partial, NULL,
+					          -1, TRUE)) == LINK_LINE_FOUND) {
 		    Newline_partial++;
-		}
-	    }
-	    break;
-	case LYK_PREV_PAGE :
-	    if (Newline_partial > 1)
-		Newline_partial -= display_lines ;
-	    break ;
-	case LYK_NEXT_PAGE :
-	    if (HText_canScrollDown())
-		Newline_partial += display_lines ;
-	    break ;
-	case LYK_UP_HALF :
-	    if (Newline_partial > 1)
-		Newline_partial -= (display_lines/2) ;
-	    break ;
-	case LYK_DOWN_HALF :
-	    if (HText_canScrollDown())
-		Newline_partial += (display_lines/2) ;
-	    break ;
-	case LYK_UP_TWO :
-	    if (Newline_partial > 1)
-		Newline_partial -= 2 ;
-	    break ;
-	case LYK_DOWN_TWO :
-	    if (HText_canScrollDown())
-		Newline_partial += 2 ;
-	    break ;
-	case LYK_HOME:
-	    if (Newline_partial > 1)
+	        } else if (res == LINK_DO_ARROWUP) {
+		    Newline_partial -= display_lines ;
+	        }
+	        break;
+	    case LYK_FASTFORW_LINK :
+	        if (HText_canScrollDown()) {
+		    /* This is not an exact science... - kw */
+		    if ((res =
+		        HTGetLinkOrFieldStart(HText_LinksInLines(HTMainText,
+							         Newline_partial,
+							         display_lines)
+					      - 1,
+					      &Newline_partial, NULL,
+					      1, TRUE)) == LINK_LINE_FOUND) {
+		        Newline_partial++;
+		    }
+	        }
+	        break;
+	    case LYK_PREV_PAGE :
+		if (Newline_partial > 1)
+		    Newline_partial -= display_lines ;
+		break ;
+	    case LYK_NEXT_PAGE :
+		if (HText_canScrollDown())
+		    Newline_partial += display_lines ;
+		break ;
+	    case LYK_UP_HALF :
+		if (Newline_partial > 1)
+		    Newline_partial -= (display_lines/2) ;
+		break ;
+	    case LYK_DOWN_HALF :
+		if (HText_canScrollDown())
+		    Newline_partial += (display_lines/2) ;
+		break ;
+	    case LYK_UP_TWO :
+		if (Newline_partial > 1)
+		    Newline_partial -= 2 ;
+		break ;
+	    case LYK_DOWN_TWO :
+		if (HText_canScrollDown())
+		    Newline_partial += 2 ;
+		break ;
+	    case LYK_HOME:
+		if (Newline_partial > 1)
+		    Newline_partial = 1;
+		break;
+	    case LYK_END:
+		if (HText_canScrollDown())
+		    Newline_partial = HText_getNumOfLines() - display_lines + 1;
+		    /* calculate for "current" bottom value */
+		break;
+	    case LYK_REFRESH :
+		break ;
+	    default :
+	        /** Other or no keystrokes **/
+		return ((int)FALSE) ;
+	    } /* end switch */
+	    if (Newline_partial < 1)
 		Newline_partial = 1;
-	    break;
-	case LYK_END:
-	    if (HText_canScrollDown())
-		Newline_partial = HText_getNumOfLines() - display_lines + 1;
-		/* calculate for "current" bottom value */
-	    break;
-	case LYK_REFRESH :
-	    break ;
-	case LYK_TRACE_TOGGLE:	/*  Toggle TRACE mode. */
-	    WWW_TraceFlag = ! WWW_TraceFlag;
-	    if (LYOpenTraceLog())
-		HTUserMsg(WWW_TraceFlag ? TRACE_ON : TRACE_OFF);
-	    break;
-	default :
-	    return ((int)FALSE) ;
+	    NumOfLines_partial = HText_getNumOfLines();
+	    HText_pageDisplay(Newline_partial, "");
 	}
-	if (Newline_partial < 1)
-	    Newline_partial = 1;
-	NumOfLines_partial = HText_getNumOfLines();
-	HText_pageDisplay(Newline_partial, "");
-    }
 #endif /* DISP_PARTIAL */
+    } /* end switch */
     /** Other or no keystrokes **/
     return((int)FALSE);
 }
@@ -3425,9 +3454,11 @@ PRIVATE CONST char *restrict_name[] = {
        "goto"	       ,
        "jump"	       ,
        "file_url"      ,
+#ifndef DISABLE_NEWS
        "news_post"     ,
        "inside_news"   ,
        "outside_news"  ,
+#endif
        "mail"	       ,
        "dotfiles"      ,
        "useragent"     ,
@@ -3470,9 +3501,11 @@ PRIVATE BOOLEAN *restrict_flag[] = {
        &no_goto     ,
        &no_jump     ,
        &no_file_url ,
+#ifndef DISABLE_NEWS
        &no_newspost ,
        &no_inside_news,
        &no_outside_news,
+#endif
        &no_mail     ,
        &no_dotfiles ,
        &no_useragent ,
@@ -3509,8 +3542,10 @@ PUBLIC void parse_restrictions ARGS1(
 	     /* reset these to defaults */
 	     no_inside_telnet = !(CAN_ANONYMOUS_INSIDE_DOMAIN_TELNET);
 	    no_outside_telnet = !(CAN_ANONYMOUS_OUTSIDE_DOMAIN_TELNET);
+#ifndef DISABLE_NEWS
 	       no_inside_news = !(CAN_ANONYMOUS_INSIDE_DOMAIN_READ_NEWS);
 	      no_outside_news = !(CAN_ANONYMOUS_OUTSIDE_DOMAIN_READ_NEWS);
+#endif
 		no_inside_ftp = !(CAN_ANONYMOUS_INSIDE_DOMAIN_FTP);
 	       no_outside_ftp = !(CAN_ANONYMOUS_OUTSIDE_DOMAIN_FTP);
 	     no_inside_rlogin = !(CAN_ANONYMOUS_INSIDE_DOMAIN_RLOGIN);
@@ -3518,19 +3553,27 @@ PUBLIC void parse_restrictions ARGS1(
 		      no_goto = !(CAN_ANONYMOUS_GOTO);
 		  no_goto_cso = !(CAN_ANONYMOUS_GOTO_CSO);
 		 no_goto_file = !(CAN_ANONYMOUS_GOTO_FILE);
+#ifndef DISABLE_FINGER
 	       no_goto_finger = !(CAN_ANONYMOUS_GOTO_FINGER);
+#endif
 		  no_goto_ftp = !(CAN_ANONYMOUS_GOTO_FTP);
+#ifndef DISABLE_GOPHER
 	       no_goto_gopher = !(CAN_ANONYMOUS_GOTO_GOPHER);
+#endif
 		 no_goto_http = !(CAN_ANONYMOUS_GOTO_HTTP);
 		no_goto_https = !(CAN_ANONYMOUS_GOTO_HTTPS);
 	      no_goto_lynxcgi = !(CAN_ANONYMOUS_GOTO_LYNXCGI);
 	     no_goto_lynxexec = !(CAN_ANONYMOUS_GOTO_LYNXEXEC);
 	     no_goto_lynxprog = !(CAN_ANONYMOUS_GOTO_LYNXPROG);
 	       no_goto_mailto = !(CAN_ANONYMOUS_GOTO_MAILTO);
+#ifndef DISABLE_NEWS
 		 no_goto_news = !(CAN_ANONYMOUS_GOTO_NEWS);
 		 no_goto_nntp = !(CAN_ANONYMOUS_GOTO_NNTP);
+#endif
 	       no_goto_rlogin = !(CAN_ANONYMOUS_GOTO_RLOGIN);
+#ifndef DISABLE_NEWS
 		no_goto_snews = !(CAN_ANONYMOUS_GOTO_SNEWS);
+#endif
 	       no_goto_telnet = !(CAN_ANONYMOUS_GOTO_TELNET);
 	       no_goto_tn3270 = !(CAN_ANONYMOUS_GOTO_TN3270);
 		 no_goto_wais = !(CAN_ANONYMOUS_GOTO_WAIS);

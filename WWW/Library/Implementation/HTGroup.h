@@ -7,13 +7,6 @@
 
 #include <HTList.h>
 
-#ifdef SHORT_NAMES
-#define HTAA_parseGroupDef		HTAApGrD
-#define HTAA_resolveGroupReferences	HTAArGrR
-#define HTAA_printGroupDef		HTAApGrD
-#define GroupDef_delete			HTAAGD_d
-#define HTAA_userAndInetInGroup		HTAAuIIG
-#endif /* SHORT_NAMES */
 
 typedef HTList GroupDefList;
 typedef HTList ItemList;

@@ -1917,7 +1917,7 @@ PUBLIC char * LYCookie ARGS4(
 		 */
 		header = scan_cookie_sublist(hostname, path, port,
 					     de->cookie_list, header, secure);
-	    } else if (de->bv == QUERY_USER) {
+	    } else if (de->bv == QUERY_USER && de->invcheck_bv == INVCHECK_QUERY) {
 		/*
 		 *  No cookies in this domain, and no default
 		 *  accept/reject choice was set by the user,

@@ -17,36 +17,6 @@
 #include <HTStream.h>
 #include <SGML.h>
 
-#ifdef SHORT_NAMES
-#define HTMainText                      HTMaText
-#define HTMainAnchor                    HtMaAnch
-#define HText_new                       HTHTNew
-#define HText_new2                      HTHTNew2
-#define HText_free                      HTHTFree
-#define HText_beginAppend               HTHTBeAp
-#define HText_endAppend                 HTHTEnAp
-#define HText_setStyle                  HTHTSeSt
-#define HText_appendCharacter           HTHTApCh
-#define HText_appendImage               HTHTApIm
-#define HText_appendText                HTHTApTe
-#define HText_appendParagraph           HTHTApPa
-#define HText_beginAnchor               HTHTBeAn
-#define HText_endAnchor                 HTHTEnAn
-#define HText_dump                      HTHTDump
-#define HText_nodeAnchor                HTHTNoAn
-#define HText_select                    HTHTSele
-#define HText_selectAnchor              HTHTSeAn
-#define HText_applyStyle                HTHTApSt
-#define HText_updateStyle               HTHTUpSt
-#define HText_selectionStyle            HTHTStyl
-#define HText_replaceSel                HTHTRepl
-#define HText_applyToSimilar            HTHTApTo
-#define HText_selectUnstyled            HTHTSeUn
-#define HText_unlinkSelection           HTHTUnSe
-#define HText_linkSelTo                 HTHTLiSe
-#define HText_referenceSelected         HTHTRefS
-#endif
-
 #ifndef THINK_C
 #ifndef HyperText               /* Objective C version defined HyperText */
 typedef struct _HText HText;    /* Normal Library */

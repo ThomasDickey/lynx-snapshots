@@ -21,10 +21,11 @@ default mappings listed in the Unicode Character Database.
 
  */
 
+#include <UCkd.h> /* typedef u16 */
 
 typedef struct {
-	long upper;
-	long lower;
+	u16 upper;
+	u16 lower;
 } unipair;
 
 static CONST unipair unicode_to_lower_case[] =

@@ -17,12 +17,6 @@
 
 #include <HTList.h>             /* HTList */
 
-#ifdef SHORT_NAMES
-#define HTAAFnRe        HTAAFile_nextRec
-#define HTAAFrFi        HTAAFile_readField
-#define HTAAFrLi        HTAAFile_readList
-#endif /*SHORT_NAMES*/
-
 
 /* Used field separators */
 

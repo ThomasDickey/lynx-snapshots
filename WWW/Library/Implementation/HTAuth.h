@@ -12,11 +12,6 @@
 #include <HTAAProt.h>
 
 
-#ifdef SHORT_NAMES
-#define HTAA_authenticate	HTAAauth
-#endif /* SHORT_NAMES */
-
-
 /*
 ** Server's representation of a user (fields in authentication string)
 */

@@ -1,4 +1,5 @@
 #include <HTUtils.h>
+#ifndef DISABLE_NEWS
 #include <HTParse.h>
 #include <HTAccess.h>
 #include <HTCJK.h>
@@ -468,3 +469,5 @@ PRIVATE void terminate_message ARGS1(
     refresh();
 #endif /* VMS */
 }
+
+#endif /* not DISABLE_NEWS */

@@ -30,8 +30,10 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
+#ifndef DISABLE_NEWS
 extern int HTNewsMaxChunk;  /* Max news articles before chunking (HTNews.c) */
 extern int HTNewsChunkSize; /* Number of news articles per chunk (HTNews.c) */
+#endif
 
 PUBLIC BOOLEAN have_read_cfg=FALSE;
 PUBLIC BOOLEAN LYUseNoviceLineTwo=TRUE;
@@ -283,7 +285,8 @@ PRIVATE void add_printer_to_list ARGS2(
 	/*
 	 *  Process pagelen field.
 	 */
-	if ((next_colon = find_colon(next_colon+1)) != NULL) {
+	if (next_colon != NULL
+	 && (next_colon = find_colon(next_colon+1)) != NULL) {
 	    cur_item->pagelen = atoi(next_colon+1);
 	} else {
 	    /* default to 66 lines */
@@ -678,6 +681,7 @@ static int lynx_sig_file_fun ARGS1(
     return 0;
 }
 
+#ifndef DISABLE_NEWS
 static int news_chunk_size_fun ARGS1(
 	char *, 	value)
 {
@@ -711,6 +715,7 @@ static int news_posting_fun ARGS1(
     no_newspost = (LYNewsPosting == FALSE);
     return 0;
 }
+#endif /* DISABLE_NEWS */
 
 #ifndef NO_RULES
 static int cern_rulesfile_fun ARGS1(
@@ -909,8 +914,10 @@ static Config_Type Config_Table [] =
      PARSE_FUN("keyboard_layout", CONF_FUN, keyboard_layout_fun),
 #endif
      PARSE_FUN("keymap", CONF_FUN, keymap_fun),
+#ifndef DISABLE_NEWS
      PARSE_SET("list_news_numbers", CONF_BOOL, LYListNewsNumbers),
      PARSE_SET("list_news_dates", CONF_BOOL, LYListNewsDates),
+#endif
 #ifndef VMS
      PARSE_STR("list_format", CONF_STR, list_format),
 #endif
@@ -938,6 +945,7 @@ static Config_Type Config_Table [] =
      PARSE_SET("minimal_comments", CONF_BOOL, minimal_comments),
      PARSE_INT("multi_bookmark_support", CONF_BOOL, LYMultiBookmarks),
      PARSE_SET("ncr_in_bookmarks", CONF_BOOL, UCSaveBookmarksInUnicode),
+#ifndef DISABLE_NEWS
      PARSE_FUN("news_chunk_size", CONF_FUN, news_chunk_size_fun),
      PARSE_FUN("news_max_chunk", CONF_FUN, news_max_chunk_fun),
      PARSE_FUN("news_posting", CONF_FUN, news_posting_fun),
@@ -946,6 +954,7 @@ static Config_Type Config_Table [] =
      PARSE_ENV("newsreply_proxy", CONF_ENV, 0),
      PARSE_ENV("nntp_proxy", CONF_ENV, 0),
      PARSE_ENV("nntpserver", CONF_ENV2, 0), /* actually NNTPSERVER */
+#endif
      PARSE_SET("no_dot_files", CONF_BOOL, no_dotfiles),
      PARSE_SET("no_file_referer", CONF_BOOL, no_filereferer),
 #ifndef VMS
@@ -972,8 +981,8 @@ static Config_Type Config_Table [] =
      PARSE_FUN("printer", CONF_FUN, printer_fun),
      PARSE_SET("quit_default_yes", CONF_BOOL, LYQuitDefaultYes),
 #ifndef NO_RULES
-     PARSE_STR("rule", CONF_FUN, HTSetConfiguration),
-     PARSE_STR("rulesfile", CONF_FUN, cern_rulesfile_fun),
+     PARSE_FUN("rule", CONF_FUN, HTSetConfiguration),
+     PARSE_FUN("rulesfile", CONF_FUN, cern_rulesfile_fun),
 #endif /* NO_RULES */
      PARSE_STR("save_space", CONF_STR, lynx_save_space),
      PARSE_SET("scan_for_buried_news_refs", CONF_BOOL, scan_for_buried_news_references),

@@ -77,7 +77,6 @@ TABLES= \
  iso09_uni.h \
  iso10_uni.h \
  iso15_uni.h \
- iso9945uni.h \
  koi8r_uni.h \
  koi8u_uni.h \
  mac_uni.h \
@@ -105,7 +104,7 @@ makeuctb.o: $(srcdir)/UCkd.h $(srcdir)/makeuctb.c
 
 .c.i:
 @RULE_CC@
-	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $*.c >$@
+	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $(srcdir)/$*.c >$@
 
 .tbl.h:
 	./makeuctb$x $(srcdir)/$*.tbl > $@
@@ -143,7 +142,6 @@ iso08_uni.h:		$(srcdir)/iso08_uni.tbl		makeuctb$x
 iso09_uni.h:		$(srcdir)/iso09_uni.tbl		makeuctb$x
 iso10_uni.h:		$(srcdir)/iso10_uni.tbl		makeuctb$x
 iso15_uni.h:		$(srcdir)/iso15_uni.tbl		makeuctb$x
-iso9945uni.h:		$(srcdir)/iso9945uni.tbl	makeuctb$x
 koi8r_uni.h:		$(srcdir)/koi8r_uni.tbl		makeuctb$x
 koi8u_uni.h:		$(srcdir)/koi8u_uni.tbl		makeuctb$x
 mac_uni.h:		$(srcdir)/mac_uni.tbl		makeuctb$x

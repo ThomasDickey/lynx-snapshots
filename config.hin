@@ -17,7 +17,9 @@
 #undef DECL_STRSTR
 #undef DECL_SYS_ERRLIST
 #undef DIRED_SUPPORT		/* AC_ARG_WITH(dired) */
+#undef DISABLE_FINGER		/* CF_ARG_DISABLE(finger) */
 #undef DISABLE_GOPHER		/* CF_ARG_DISABLE(gopher) */
+#undef DISABLE_NEWS		/* CF_ARG_DISABLE(news) */
 #undef DISP_PARTIAL		/* CF_ARG_ENABLE(partial) */
 #undef DONT_TRACK_INTERNAL_LINKS /* CF_ARG_DISABLE(internal-links) */
 #undef EBCDIC			/* CF_EBCDIC */

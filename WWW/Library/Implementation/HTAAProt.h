@@ -1,5 +1,5 @@
 /*                                   PROTECTION SETUP FILE
-                                             
+
  */
 
 #ifndef HTAAPROT_H
@@ -8,15 +8,6 @@
 #include <HTGroup.h>
 #include <HTAssoc.h>
 
-#ifdef SHORT_NAMES
-#define HTAA_getUid			HTAAgUid        
-#define HTAA_getGid			HTAAgGid        
-#define HTAA_setDefaultProtection	HTAAgDPr        
-#define HTAA_setCurrentProtection	HTAAsCPr        
-#define HTAA_getCurrentProtection	HTAAgCPr        
-#define HTAA_getDefaultProtection	HTAAgDPr        
-#define HTAA_clearProtections		HTAAclPr        
-#endif /*SHORT_NAMES*/
 /*
 
 Server's Representation of Document (Tree) Protections
@@ -38,15 +29,15 @@ typedef struct {
 Callbacks for rule system
 
    The following three functioncs are called by the rule system:
-   
+
       HTAA_clearProtections() when starting to translate a filename
-      
+
       HTAA_setDefaultProtection() when "defprot" rule is matched
-      
+
       HTAA_setCurrentProtection() when "protect" rule is matched
-      
+
    Protection setup files are cached by these functions.
-   
+
  */
 
 /* PUBLIC                                       HTAA_setDefaultProtection()
@@ -116,11 +107,11 @@ Getting Protection Settings
 
       HTAA_getCurrentProtection() returns the current protection mode (if there was a
       "protect" rule). NULL, if no "protect" rule has been matched.
-      
+
       HTAA_getDefaultProtection() sets the current protection mode to what it was set to
       by "defprot" rule and also returns it (therefore after this call also
       HTAA_getCurrentProtection() returns the same structure.
-      
+
  */
 
 /* PUBLIC                                       HTAA_getCurrentProtection()
@@ -193,7 +184,7 @@ extern int HTAA_getGid NOPARAMS;
 /*
 
    For VMS:
-   
+
  */
 
 #ifdef VMS

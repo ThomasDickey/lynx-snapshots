@@ -829,8 +829,10 @@ PRIVATE int display_line ARGS2(
 
 #endif
 	    case LY_SOFT_NEWLINE:
-		if (!dump_output_immediately)
+		if (!dump_output_immediately) {
 		    addch('+');
+		    i++;
+		}
 		break;
 
 	    case LY_SOFT_HYPHEN:
@@ -957,7 +959,11 @@ PRIVATE void display_title ARGS1(
     lynx_start_title_color ();
 #ifdef USE_COLOR_STYLE
 /* turn the TITLE style on */
-    LynxChangeStyle(s_title, ABS_ON, 0);
+    if (last_colorattr_ptr > 0) {
+	LynxChangeStyle(s_title, STACK_ON, 0);
+    } else {
+	LynxChangeStyle(s_title, ABS_ON, 0);
+    }
 #endif /* USE_COLOR_STYLE */
 
     /*
@@ -1053,7 +1059,7 @@ PRIVATE void display_title ARGS1(
 
 #ifdef USE_COLOR_STYLE
 /* turn the TITLE style off */
-    LynxChangeStyle(s_title, ABS_OFF, 0);
+    LynxChangeStyle(s_title, STACK_OFF, 0);
 #endif /* USE_COLOR_STYLE */
     lynx_stop_title_color ();
 
@@ -1182,6 +1188,23 @@ PRIVATE void display_page ARGS3(
     }
 
 #ifdef USE_COLOR_STYLE
+    /*
+     *  Reset stack of color attribute changes to avoid color leaking,
+     *  except if what we last displayed from this text was the previous
+     *  screenful, in which case carrying over the state might be beneficial
+     *  (although it shouldn't generally be needed any more). - kw
+     */
+    if (text->stale ||
+	line_number != text->top_of_screen + (display_lines)) {
+	last_colorattr_ptr = 0;
+    }
+#endif
+
+    text->top_of_screen = line_number;
+    display_title(text);  /* will move cursor to top of screen */
+    display_flag=TRUE;
+
+#ifdef USE_COLOR_STYLE
 #ifdef DISP_PARTIAL
     if (display_partial ||
 	line_number != text->first_lineno_last_disp_partial ||
@@ -1189,10 +1212,6 @@ PRIVATE void display_page ARGS3(
 #endif /* DISP_PARTIAL */
     LynxResetScreenCache();
 #endif /* USE_COLOR_STYLE */
-
-    text->top_of_screen = line_number;
-    display_title(text);  /* will move cursor to top of screen */
-    display_flag=TRUE;
 
     /*
      *  Output the page.
@@ -2013,13 +2032,33 @@ PRIVATE void split_line ARGS2(
 	    spare -= 2;
 	} else if (spare && !previous->styles[spare - 1].direction) {
 	    /*
-	     *  Found an OFF change not part of a matched pair.
-	     *  Assume it is safer to leave whatever comes before
-	     *  it on the previous line alone.  Setting spare to 0
-	     *  ensures that it won't be used in a following
+	     *  Found an OFF change not part of an adjacent matched pair.
+	     *  Walk backward looking for the corresponding ON change.
+	     *  If we find it, skip the ON/OFF and everything in between.
+	     *  This can only work correctly if all changes are correctly
+	     *  nested!  If this fails, assume it is safer to leave whatever
+	     *  comes before the OFF on the previous line alone.  Setting
+	     *  spare to 0 ensures that it won't be used in a following
 	     *  iteration. - kw
 	     */
-	    spare = 0;
+	    int level=-1;
+	    int itmp;
+	    for (itmp = spare-1; itmp > 0; itmp--) {
+		if (previous->styles[itmp - 1].style
+		    == previous->styles[spare - 1].style) {
+		    if (previous->styles[itmp - 1].direction == STACK_OFF) {
+			level--;
+		    } else if (previous->styles[itmp - 1].direction == STACK_ON) {
+			if (++level == 0)
+			    break;
+		    } else
+			break;
+		}
+	    }
+	    if (level == 0)
+		spare = itmp - 1;
+	    else
+		spare = 0;
 	} else {
 	    /*
 	     *  Nothing applied, so we are done with the loop. - kw
@@ -2343,8 +2382,8 @@ PUBLIC void HText_appendCharacter ARGS2(
 	case HT_NON_BREAK_SPACE:
 		special = "HT_NON_BREAK_SPACE";
 		break;
-	case HT_EM_SPACE:
-		special = "HT_EM_SPACE";
+	case HT_EN_SPACE:
+		special = "HT_EN_SPACE";
 		break;
 	case LY_UNDERLINE_START_CHAR:
 		special = "LY_UNDERLINE_START_CHAR";
@@ -2620,7 +2659,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		    !isspace((unsigned char)line->data[i]) &&
 		    (unsigned char)line->data[i] != '-' &&
 		    (unsigned char)line->data[i] != HT_NON_BREAK_SPACE &&
-		    (unsigned char)line->data[i] != HT_EM_SPACE) {
+		    (unsigned char)line->data[i] != HT_EN_SPACE) {
 		    break;
 		}
 	    }
@@ -2660,9 +2699,9 @@ PUBLIC void HText_appendCharacter ARGS2(
     }
 
     /*
-     *  Convert EM_SPACE to a space here so that it doesn't get collapsed.
+     *  Convert EN_SPACE to a space here so that it doesn't get collapsed.
      */
-    if (ch == HT_EM_SPACE)
+    if (ch == HT_EN_SPACE)
 	ch = ' ';
 
     /*
@@ -3102,7 +3141,7 @@ PUBLIC void HText_endAnchor ARGS2(
 	 */
 	a->extent += (text->chars + last->size) - a->start -
 		     (text->Lines - a->line_num);
-	if ((unsigned) a->extent > last->size) {
+	if (a->extent > (int)last->size) {
 	    /*
 	     *  The anchor extends over more than one line,
 	     *  so set up to check the entire last line. - FM
@@ -3116,17 +3155,17 @@ PUBLIC void HText_endAnchor ARGS2(
 	    i = a->extent;
 	}
 	k = j = (last->size - i);
-	while ((unsigned) j < last->size) {
+	while (j < (int)last->size) {
 	    if (!IsSpecialAttrChar(last->data[j]) &&
 		!isspace((unsigned char)last->data[j]) &&
 		last->data[j] != HT_NON_BREAK_SPACE &&
-		last->data[j] != HT_EM_SPACE)
+		last->data[j] != HT_EN_SPACE)
 		break;
 	    i--;
 	    j++;
 	}
 	if (i == 0) {
-	    if ((unsigned) a->extent > last->size) {
+	    if (a->extent > (int)last->size) {
 		/*
 		 *  The anchor starts on a preceding line, and
 		 *  the last line has only white and special
@@ -3173,17 +3212,17 @@ PUBLIC void HText_endAnchor ARGS2(
 		 */
 		i = a->extent - CurBlankExtent;
 	    }
-	    while ((unsigned) j < prev->size) {
+	    while (j < (int)prev->size) {
 		if (!IsSpecialAttrChar(prev->data[j]) &&
 		    !isspace((unsigned char)prev->data[j]) &&
 		    prev->data[j] != HT_NON_BREAK_SPACE &&
-		    prev->data[j] != HT_EM_SPACE)
+		    prev->data[j] != HT_EN_SPACE)
 		    break;
 		i--;
 		j++;
 	    }
 	    if (i == 0) {
-		if ((unsigned) a->extent > (CurBlankExtent + prev->size) ||
+		if (a->extent > (CurBlankExtent + (int)prev->size) ||
 		    (a->extent == CurBlankExtent + (int)prev->size &&
 		     k == 0 &&
 		     prev->prev != text->last_line &&
@@ -3292,7 +3331,7 @@ PUBLIC void HText_endAnchor ARGS2(
 				text->permissible_split -= NumSize;
 			}
 			k = j + NumSize;
-			while ((unsigned) k < start->size)
+			while (k < (int)start->size)
 			    start->data[j++] = start->data[k++];
 			if (start != last)
 			    text->chars -= NumSize;
@@ -3330,7 +3369,7 @@ PUBLIC void HText_endAnchor ARGS2(
 			     */
 			    NumSize++;
 			    l = (i - j);
-			    while ((unsigned) i < prev->size)
+			    while (i < (int)prev->size)
 				prev->data[j++] = prev->data[i++];
 			    text->chars -= l;
 			    for (anc = a; anc; anc = anc->next) {
@@ -3348,7 +3387,7 @@ PUBLIC void HText_endAnchor ARGS2(
 			    }
 			    j = 0;
 			    i = k;
-			    while ((unsigned) k < start->size)
+			    while (k < (int)start->size)
 				start->data[j++] = start->data[k++];
 			    if (start != last)
 				text->chars -= i;
@@ -3407,7 +3446,7 @@ PUBLIC void HText_endAnchor ARGS2(
 			     */
 			    NumSize++;
 			    k = j + NumSize;
-			    while ((unsigned) k < prev->size)
+			    while (k < (int)prev->size)
 				prev->data[j++] = prev->data[k++];
 			    text->chars -= NumSize;
 			    for (anc = a; anc; anc = anc->next) {
@@ -4402,7 +4441,8 @@ PUBLIC int HTGetLinkOrFieldStart ARGS5(
 		max_offset = a->line_num - (HTMainText->top_of_screen -
 					    screensback * (display_lines));
 	    } else if (HTMainText->Lines - a->line_num <= (display_lines)) {
-		max_offset = a->line_num - (HTMainText->Lines - (display_lines));
+		max_offset = a->line_num - (HTMainText->Lines + 1
+					    - (display_lines));
 	    } else if (a->line_num >=
 		       HTMainText->top_of_screen+(display_lines)) {
 		int screensahead =
@@ -6289,7 +6329,7 @@ PRIVATE int HText_TrueLineSize ARGS3(
 		 ((unsigned char)(line->data[i] & 0xc0) == 0xc0)) &&
 		!isspace((unsigned char)line->data[i]) &&
 		(unsigned char)line->data[i] != HT_NON_BREAK_SPACE &&
-		(unsigned char)line->data[i] != HT_EM_SPACE) {
+		(unsigned char)line->data[i] != HT_EN_SPACE) {
 		true_size++;
 	    }
 	}
@@ -6943,7 +6983,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	    cp++;
 	for (i = 0, j = 0; cp[i]; i++) {
 	    if (cp[i] == HT_NON_BREAK_SPACE ||
-		cp[i] == HT_EM_SPACE) {
+		cp[i] == HT_EN_SPACE) {
 		cp[j++] = ' ';
 	    } else if (cp[i] != LY_SOFT_HYPHEN &&
 		       !IsSpecialAttrChar((unsigned char)cp[i])) {
@@ -7821,7 +7861,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 		     p && *p && !(field_has_8bit && field_has_special);
 		     p++)
 		    if ((*p == HT_NON_BREAK_SPACE) ||
-			(*p == HT_EM_SPACE) ||
+		       (*p == HT_EN_SPACE) ||
 			(*p == LY_SOFT_HYPHEN)) {
 			field_has_special = YES;
 		    } else if ((*p & 0x80) != 0) {
@@ -7831,7 +7871,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 		     p && *p && !(name_has_8bit && name_has_special);
 		     p++)
 		    if ((*p == HT_NON_BREAK_SPACE) ||
-			(*p == HT_EM_SPACE) ||
+			(*p == HT_EN_SPACE) ||
 			(*p == LY_SOFT_HYPHEN)) {
 			name_has_special = YES;
 		    } else if ((*p & 0x80) != 0) {
@@ -8057,7 +8097,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 			 p && *p && !(field_has_8bit && field_has_special);
 			 p++) {
 			if ((*p == HT_NON_BREAK_SPACE) ||
-			    (*p == HT_EM_SPACE) ||
+			    (*p == HT_EN_SPACE) ||
 			    (*p == LY_SOFT_HYPHEN)) {
 			    field_has_special = YES;
 			} else if ((*p & 0x80) != 0) {
@@ -8147,7 +8187,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 			 p && *p && !(name_has_8bit && name_has_special);
 			 p++) {
 			if ((*p == HT_NON_BREAK_SPACE) ||
-			    (*p == HT_EM_SPACE) ||
+			    (*p == HT_EN_SPACE) ||
 			    (*p == LY_SOFT_HYPHEN)) {
 			    name_has_special = YES;
 			} else if ((*p & 0x80) != 0) {
@@ -8558,6 +8598,7 @@ PUBLIC void HText_SubmitForm ARGS4(
     }
     FREE(copied_name_used);
     if (Boundary) {
+	FREE(MultipartContentType);
 	HTSprintf(&query, "\r\n--%s--\r\n", Boundary);
     } else if (!query) {
 	StrAllocCopy(query, "");
@@ -9677,7 +9718,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
     TextAnchor *end_anchor    = NULL;
     BOOLEAN	firstanchor   = TRUE;
 
-    char	ed_offset[10] = "\0";
+    char	ed_offset[10];
     int 	start_line    = 0;
     int 	entry_line    = form_link->anchor_line_num;
     int 	exit_line     = 0;

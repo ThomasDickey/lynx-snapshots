@@ -36,13 +36,6 @@
 #include <HTAuth.h>             /* Authentication       */
 
 
-#ifdef SHORT_NAMES
-#define HTAA_statusMessage	HTAAstMs
-#define HTAA_checkAuthorization	HTAAchAu
-#define HTAA_composeAuthHeaders	HTAAcoAH
-#define HTAA_startLogging	HTAAsLog
-#endif /*SHORT_NAMES*/
-
 extern time_t theTime;
 
 /*

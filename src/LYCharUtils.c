@@ -140,7 +140,7 @@ PUBLIC void LYEntify ARGS2(
 
 /*
 **  This function trims characters <= that of a space (32),
-**  including HT_NON_BREAK_SPACE (1) and HT_EM_SPACE (2),
+**  including HT_NON_BREAK_SPACE (1) and HT_EN_SPACE (2),
 **  but not ESC, from the heads of strings. - FM
 */
 PUBLIC void LYTrimHead ARGS1(
@@ -163,7 +163,7 @@ PUBLIC void LYTrimHead ARGS1(
 
 /*
 **  This function trims characters <= that of a space (32),
-**  including HT_NON_BREAK_SPACE (1), HT_EM_SPACE (2), and
+**  including HT_NON_BREAK_SPACE (1), HT_EN_SPACE (2), and
 **  ESC from the tails of strings. - FM
 */
 PUBLIC void LYTrimTail ARGS1(
@@ -1204,7 +1204,7 @@ PUBLIC void LYExpandString ARGS2(
 	    if (plain_space || hidden) {
 		HTChunkPutc(s, ' ');
 	    } else {
-		HTChunkPutc(s, HT_EM_SPACE);
+		HTChunkPutc(s, HT_EN_SPACE);
 	    }
 	    if (me->T.decode_utf8 && *utf_buf) {
 		utf_buf[0] == '\0';
@@ -1849,7 +1849,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	    if (Back) {
 		int rev_c;
 		if ((*p) == HT_NON_BREAK_SPACE ||
-		    (*p) == HT_EM_SPACE) {
+		    (*p) == HT_EN_SPACE) {
 		    if (plain_space) {
 			code = *p = ' ';
 			state = S_got_outchar;
@@ -2254,7 +2254,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 			code = ' ';
 			state = S_got_outchar;
 		    } else {
-			code = HT_EM_SPACE;
+			code = HT_EN_SPACE;
 			state = S_got_outchar;
 		    }
 		    break;
@@ -3442,19 +3442,7 @@ PUBLIC int LYLegitimizeHREF ARGS4(
     if (!me || !href || *href == NULL || *(*href) == '\0')
 	return(url_type);
 
-    LYTrimHead(*href);
-    if (!strncasecomp(*href, "lynxexec:", 9) ||
-	!strncasecomp(*href, "lynxprog:", 9)) {
-	/*
-	 *  The original implementations of these schemes expected
-	 *  white space without hex escaping, and did not check
-	 *  for hex escaping, so we'll continue to support that,
-	 *  until that code is redone in conformance with SGML
-	 *  principles.  - FM
-	 */
-	HTUnEscapeSome(*href, " \r\n\t");
-	convert_to_spaces(*href, TRUE);
-    } else {
+    if (!LYTrimStartfile(*href)) {
 	/*
 	 *  Collapse spaces in the actual URL, but just
 	 *  protect against tabs or newlines in the

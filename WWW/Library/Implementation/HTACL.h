@@ -8,12 +8,6 @@
 #include <HTAAUtil.h>
 #include <HTGroup.h>
 
-#ifdef SHORT_NAMES
-#define HTAA_openAcl		HTAAoACL
-#define HTAA_closeAcl		HTAAcACL
-#define HTAA_getAclEntry	HTAAgAEn
-#endif /* SHORT_NAMES */
-
 /*
 
 Opening Access Control List File
