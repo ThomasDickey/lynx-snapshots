@@ -2458,18 +2458,14 @@ PUBLIC void HText_appendCharacter ARGS2(
     else {
 	/*
 	 * If we're displaying document source, wrap long lines to keep all of
-	 * the source visible.  Note that we splice the pieces together with
-	 * a recursion on this function to supply the character that is removed
-	 * by 'split_line'.
+	 * the source visible.
 	 */
 	int target = (int)(line->offset + line->size);
-	if ((target > (LYcols-1) - style->rightIndent) &&
+	if ((target >= (LYcols-1) - style->rightIndent) &&
 		HTisDocumentSource()) {
-	    int gap = line->data[line->size - 1];
 	    new_line(text);
 	    line = text->last_line;
 	    HText_appendCharacter (text, LY_SOFT_NEWLINE);
-	    HText_appendCharacter (text, gap);
 	}
     }
 
@@ -4746,8 +4742,7 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
     line = HTMainText->last_line->next;
     for (;; line = line->next) {
 	if (!first
-	 && line->data[0] != LY_SOFT_NEWLINE
-	 && line->data[0] != '\0')
+	 && line->data[0] != LY_SOFT_NEWLINE)
 	    fputc('\n',fp);
 	first = FALSE;
 
@@ -4836,8 +4831,7 @@ PUBLIC void print_crawl_to_fd ARGS3(
 
     for (;; line = line->next) {
 	if (!first
-	 && line->data[0] != LY_SOFT_NEWLINE
-	 && line->data[0] != '\0')
+	 && line->data[0] != LY_SOFT_NEWLINE)
 	    fputc('\n',fp);
 	first = FALSE;
 	/*

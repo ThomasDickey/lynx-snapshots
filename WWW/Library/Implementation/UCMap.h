@@ -37,7 +37,7 @@ extern int UCGetRawUniMode_byLYhndl PARAMS((
 extern int UCGetLYhndl_byMIME PARAMS((
 	CONST char *	p)); /* returns -1 if name not recognized */
 extern int safeUCGetLYhndl_byMIME PARAMS((
-	CONST char *	p)); /* returns LATIN1 if MIME name not recognized */
+	CONST char *	p)); /* returns LATIN1 if name not recognized */
 
 extern int UCLYhndl_for_unspec;
 extern int UCLYhndl_for_unrec;
@@ -46,6 +46,7 @@ extern int UCLYhndl_HTFile_for_unrec;
 
 /* easy to type: */
 #define LATIN1   UCGetLYhndl_byMIME("iso-8859-1")
+#define US_ASCII UCGetLYhndl_byMIME("us-ascii")
 
 /*
 In general, Lynx translates letters from document charset to display charset.

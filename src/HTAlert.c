@@ -41,8 +41,10 @@ PUBLIC void HTInfoMsg ARGS1(
 	CONST char *,	Msg)
 {
     _statusline(Msg);
-    if (Msg && *Msg)
+    if (Msg && *Msg) {
+	CTRACE(tfp, "Info: %s\n", Msg);
 	sleep(InfoSecs);
+    }
 }
 
 /*	Issue an important message.			HTUserMsg()
@@ -52,8 +54,10 @@ PUBLIC void HTUserMsg ARGS1(
 	CONST char *,	Msg)
 {
     _statusline(Msg);
-    if (Msg && *Msg)
+    if (Msg && *Msg) {
+	CTRACE(tfp, "User: %s\n", Msg);
 	sleep(MessageSecs);
+    }
 }
 
 PUBLIC void HTUserMsg2 ARGS2(
@@ -61,8 +65,10 @@ PUBLIC void HTUserMsg2 ARGS2(
 	CONST char *,	Arg)
 {
     _user_message(Msg, Arg);
-    if (Msg && *Msg)
+    if (Msg && *Msg) {
+	CTRACE(tfp, "User: %s (%s)\n", Msg, Arg);
 	sleep(MessageSecs);
+    }
 }
 
 /*	Issue a progress message.			HTProgress()
@@ -120,7 +126,7 @@ PUBLIC void HTReadProgress ARGS2(
 	    if (total <= 0)
 		sprintf (line, "Read %ld %s of data.", bytes, units);
 	     if (transfer_rate > 0)
-		sprintf (line + strlen(line), " %ld kb/sec.", transfer_rate / 1024);
+		sprintf (line + strlen(line), " %ld KB/sec.", transfer_rate / 1024);
 	    if (total <  0) {
 		if (total < -1)
 		    strcat(line, " (Press 'z' to abort)");

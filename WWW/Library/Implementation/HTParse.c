@@ -245,7 +245,7 @@ PUBLIC char * HTParse ARGS3(
     **	this is back to inheriting for identical
     **	schemes whether or not they are "file".
     **	If you want to try it again yourself,
-    **	uncomment the strncasecomp() below. - FM
+    **	uncomment the strcasecomp() below. - FM
     */
     if ((given.access && related.access) &&
 	(/* strcasecomp(given.access, "file") || */

@@ -33,7 +33,7 @@
 PUBLIC BOOLEAN LYDidRename = FALSE;
 #endif /* VMS */
 
-PRIVATE char LYValidDownloadFile[256] = "\0";
+PRIVATE char LYValidDownloadFile[LY_MAXPATH] = "\0";
 
 PUBLIC void LYDownload ARGS1(
 	char *, 	line)
@@ -100,6 +100,7 @@ PUBLIC void LYDownload ARGS1(
     }
 
 #ifdef DIRED_SUPPORT
+    /* FIXME: use HTLocalName */
     if (!strncmp(file, "file://localhost", 16))
 	file += 16;
     else if (!strncmp(file, "file:", 5))
@@ -586,8 +587,7 @@ PUBLIC int LYdownload_options ARGS2(
 	char **,	newfile,
 	char *, 	data_file)
 {
-    static char tempfile[256];
-    static char download_filename[256];
+    static char tempfile[LY_MAXPATH];
     char *sug_filename = NULL;
     FILE *fp0;
     lynx_html_item_type *cur_download;
@@ -604,12 +604,11 @@ PUBLIC int LYdownload_options ARGS2(
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
-    LYLocalFileToURL(download_filename, tempfile);
+    LYLocalFileToURL(newfile, tempfile);
 
     LYstrncpy(LYValidDownloadFile,
 	      data_file,
 	      (sizeof(LYValidDownloadFile) - 1));
-    StrAllocCopy(*newfile, download_filename);
     LYforce_no_cache = TRUE;  /* don't cache this doc */
 
 
@@ -622,7 +621,7 @@ PUBLIC int LYdownload_options ARGS2(
 	data_file, (lynx_save_space ? lynx_save_space : ""), sug_filename);
     fprintf(fp0, "\nStandard download options:\n");
 
-    if(!no_disk_save && !child_lynx)
+    if(!no_disk_save && !child_lynx) {
 #ifdef DIRED_SUPPORT
 	/*
 	 *  Disable save to disk option for local files.
@@ -632,11 +631,9 @@ PUBLIC int LYdownload_options ARGS2(
 	    fprintf(fp0,"   \
 <a href=\"LYNXDOWNLOAD://Method=-1/File=%s/SugFile=%s%s\">Save to disk</a>\n",
 	   data_file, (lynx_save_space ? lynx_save_space : ""), sug_filename);
-#ifdef DIRED_SUPPORT
-	else {}
-#endif /* DIRED_SUPPORT */
-    else
+    } else {
 	fprintf(fp0,"   <em>Save to disk disabled.</em>\n");
+    }
 
     fprintf(fp0, "\nLocal additions:\n");
 

@@ -32,7 +32,7 @@
 **			Clear:	we only get addresses.
 */
 
-static char list_filename[256] = "\0";
+static char *list_filename = 0;
 
 /*
  *  Returns the name of the file used for the List Page, if one has
@@ -41,7 +41,7 @@ static char list_filename[256] = "\0";
  */
 PUBLIC char * LYlist_temp_url NOARGS
 {
-    return list_filename;
+    return list_filename ? list_filename : "";
 }
 
 PUBLIC int showlist ARGS2(
@@ -74,7 +74,7 @@ PUBLIC int showlist ARGS2(
 	return(-1);
     }
 
-    LYLocalFileToURL(list_filename, tempfile);
+    LYLocalFileToURL(&list_filename, tempfile);
 
     StrAllocCopy(newdoc->address, list_filename);
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */

@@ -4214,22 +4214,15 @@ check_goto_URL:
 		if (nlinks > 0) {
 		    cp = links[curdoc.link].lname;
 		    if (is_url(cp) == FILE_URL_TYPE) {
-			if (!strncmp(cp, "file://localhost", 16)) {
-			    /*
-			     *	This is the only case that should occur. - kw
-			     */
-			    StrAllocCopy(tp, cp + 16);
-			} else if (!strncmp(cp, "file:", 5)) {
-			    StrAllocCopy(tp, cp + 5);
-			} else {
-			    StrAllocCopy(tp, cp);
-			}
-			HTUnEscape(tp);
+			cp = HTfullURL_toFile(cp);
+			StrAllocCopy(tp, cp);
+			free(cp);
+
 			if (stat(tp, &dir_info) == -1) {
 			    HTAlert(NO_STATUS);
 			} else {
 			    if (S_ISREG(dir_info.st_mode)) {
-				StrAllocCopy(tp, cp);
+				StrAllocCopy(tp, links[curdoc.link].lname);
 				HTUnEscapeSome(tp, "/");
 				if (edit_current_file(tp,
 						      curdoc.link, Newline)) {
@@ -5134,12 +5127,7 @@ check_add_bookmark_to_self:
 	    if (!LYReopenTracelog(&trace_mode_flag))
 		break;
 
-	    StrAllocCopy(newdoc.address, "file://localhost");
-#ifdef VMS
-	    StrAllocCat(newdoc.address, HTVMS_wwwName(LYTraceLogPath));
-#else
-	    StrAllocCat(newdoc.address, LYTraceLogPath);
-#endif /* VMS */
+	    LYLocalFileToURL (&(newdoc.address), LYTraceLogPath);
 	    StrAllocCopy(newdoc.title, LYNX_TRACELOG_TITLE);
 	    FREE(newdoc.post_data);
 	    FREE(newdoc.post_content_type);

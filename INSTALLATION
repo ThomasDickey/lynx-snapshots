@@ -276,7 +276,7 @@ II. Compile instructions -- UNIX
 	Use this option to log NSL requests via syslog().
 
   --enable-underlines			(define UNDERLINE_LINKS)
-	Use this option underline links rather than using boldface.
+	Use this option to underline links rather than using boldface.
 
   --enable-warnings
 	Use this option to turn on GCC compiler warnings.

@@ -66,7 +66,7 @@ PRIVATE int remove_quotes PARAMS((char *string));
 PUBLIC int printfile ARGS1(
 	document *,	newdoc)
 {
-    static char tempfile[256];
+    static char tempfile[LY_MAXPATH];
     char buffer[LINESIZE];
     char filename[LINESIZE];
     char user_response[256];
@@ -95,7 +95,7 @@ PUBLIC int printfile ARGS1(
     char *envbuffer = NULL;
 #ifdef VMS
     BOOLEAN isPMDF = FALSE;
-    char hdrfile[256];
+    char hdrfile[LY_MAXPATH];
     FILE *hfd;
 
     if (!strncasecomp(system_mail, "PMDF SEND", 9)) {
@@ -1249,8 +1249,7 @@ PUBLIC int print_options ARGS3(
 	char **,	printed_url,
 	int,		lines_in_file)
 {
-    static char tempfile[256];
-    static char print_filename[256];
+    static char tempfile[LY_MAXPATH];
     char buffer[LINESIZE];
     int count;
     int pages;
@@ -1264,9 +1263,7 @@ PUBLIC int print_options ARGS3(
 	return(-1);
     }
 
-    LYLocalFileToURL(print_filename, tempfile);
-
-    StrAllocCopy(*newfile, print_filename);
+    LYLocalFileToURL(newfile, tempfile);
 
     BeginInternalPage(fp0, PRINT_OPTIONS_TITLE, PRINT_OPTIONS_HELP);
 

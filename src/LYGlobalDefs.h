@@ -142,6 +142,7 @@ extern BOOLEAN LYNewsPosting;	/* News posting supported if TRUE */
 extern char *LynxSigFile;	/* Signature file, in or off home */
 extern char *system_mail;
 extern char *system_mail_flags;
+extern char *lynx_cfg_file;	/* location of active lynx.cfg file */
 extern char *lynx_temp_space;
 extern char *lynx_save_space;
 extern BOOLEAN LYforce_HTML_mode;

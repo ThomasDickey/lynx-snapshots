@@ -14,7 +14,7 @@
 #include <LYCharSets.h>
 #include <LYCharUtils.h>
 
-#ifdef DOSPATH
+#if defined(DOSPATH) || defined(__EMX__)
 #include <HTDOS.h>
 #endif
 #ifdef DJGPP_KEYHANDLER
@@ -1933,7 +1933,7 @@ PUBLIC void statusline ARGS1(
     return;
 }
 
-static CONST char *novice_lines[] = {
+static char *novice_lines[] = {
 #ifndef NOVICE_LINE_TWO_A
 #define NOVICE_LINE_TWO_A	NOVICE_LINE_TWO
 #define NOVICE_LINE_TWO_B	""
@@ -2469,9 +2469,9 @@ PUBLIC int is_url ARGS1(
 	return(0);
 
 #if defined (DOSPATH) || defined (__EMX__) /* sorry! */
-	if (strncmp(cp, "file:///", 8) && strlen(cp) == 19 &&
-	    cp[strlen(cp)-1] == ':')
-	    StrAllocCat(cp,"/");
+    if (strncmp(cp, "file:///", 8) && strlen(cp) == 19 &&
+	cp[strlen(cp)-1] == ':')
+	StrAllocCat(cp,"/");
 #endif
 
     if (compare_type(cp, "news:", 5)) {
@@ -2734,6 +2734,7 @@ PUBLIC void remove_backslashes ARGS1(
  */
 PUBLIC char * quote_pathname ARGS1(
 	char *, 	pathname)
+#ifndef __DJGPP__
 {
     size_t i, n = 0;
     char * result;
@@ -2746,9 +2747,7 @@ PUBLIC char * quote_pathname ARGS1(
 	outofmem(__FILE__, "quote_pathname");
 
     n = 0;
-#ifndef __DJGPP__
     result[n++] = '\'';
-#endif /* __DJGPP__ */
     for (i = 0; i < strlen(pathname); i++) {
 	if (pathname[i] == '\'') {
 	    result[n++] = '\'';
@@ -2760,12 +2759,15 @@ PUBLIC char * quote_pathname ARGS1(
 	    result[n++] = pathname[i];
 	}
     }
-#ifndef __DJGPP__
     result[n++] = '\'';
-#endif /* !__DJGPP__ */
     result[n] = '\0';
     return result;
 }
+#else
+{
+	return pathname;
+}
+#endif /* !__DJGPP__ */
 
 #if HAVE_UTMP
 extern char *ttyname PARAMS((int fd));
@@ -3258,9 +3260,9 @@ PRIVATE char *fmt_tempname ARGS3(
     char *leaf;
 
     if (prefix == 0)
-    	prefix = "";
+	prefix = "";
     if (suffix == 0)
-    	suffix = "";
+	suffix = "";
     strcpy(result, prefix);
     leaf = result + strlen(result);
     counter++;
@@ -3688,10 +3690,6 @@ PUBLIC void LYConvertToURL ARGS1(
 	 cp_url--;
 	 if(*cp_url == ':')
 		 StrAllocCat(*AllocatedString,"/");
-#ifdef NOTDEFINED
-	 if(strlen(old_string) > 3 && *cp_url == '/')
-		*cp_url = '\0';
-#endif
     }
 #endif /* DOSPATH */
 
@@ -4765,7 +4763,7 @@ PUBLIC char *LYPathLeaf ARGS1(char *, pathname)
 #else
 #ifdef VMS
     if ((leaf = strrchr(pathname, ']')) == 0)
-    	leaf = strrchr(pathname, ':');
+	leaf = strrchr(pathname, ':');
     if (leaf != 0)
 	leaf++;
 #else
@@ -5339,9 +5337,6 @@ License along with the GNU C Library; see the file  COPYING.LIB.  If
 not, write to the Free Software Foundation, Inc., 675  Mass Ave,
 Cambridge, MA 02139, USA.  */
 
-#include <sys/types.h>
-#include <errno.h>
-
 #if defined(STDC_HEADERS) || defined(USG)
 #include <string.h>
 #else /* Not (STDC_HEADERS or USG): */
@@ -5444,7 +5439,7 @@ PRIVATE BOOL IsOurFile ARGS1(char *, name)
 	    if ((leaf = LYPathLeaf(path)) != path)
 		*--leaf = '\0';	/* write a null on the '/' */
 	    if (lstat(*path ? path : "/", &data) != 0) {
-	    	break;
+		break;
 	    }
 	    /*
 	     * If we find a symbolic link, it has to be in a directory that's
@@ -5822,43 +5817,48 @@ PUBLIC void LYCleanupTemp NOARGS
  * Convert a local filename to a URL
  */
 PUBLIC void LYLocalFileToURL ARGS2(
-	char *, 	target,
-	char *, 	source)
+	char **, 	target,
+	CONST char *, 	source)
 {
-#ifdef DOSPATH
-    sprintf(target, "file://localhost/%s", HTDOS_wwwName(source));
+    char *leaf;
+
+    StrAllocCopy(*target, "file://localhost");
+
+#if defined(DOSPATH) || defined(__EMX__)
+    leaf = HTDOS_wwwName(source);
 #else
 #ifdef VMS
-    sprintf(target, "file://localhost%s", HTVMS_wwwName(source));
+    leaf = HTVMS_wwwName(source);
 #else
-#ifdef __EMX__
-    sprintf(target, "file://localhost/%s", source);
-#else
-    sprintf(target, "file://localhost%s", source);
-#endif /* __EMX__ */
+    leaf = (char *)source;
 #endif /* VMS */
 #endif /* DOSPATH */
+
+    if (!LYIsHtmlSep(*leaf))
+	LYAddHtmlSep(target);
+    StrAllocCat(*target, leaf);
 }
 
+#ifdef NOTDEFINED
+/* FIXME: this may be useful for pages that do not allow nested pages */
 PUBLIC int LYOpenInternalPage ARGS2(
-	FILE *,  fp0,
+	FILE **,  fp0,
 	char **, newfile)
 {
     static char tempfile[256];
-    static char local_address[256];
 
     LYRemoveTemp(tempfile);
-    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
+    if ((*fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
 
-    LYLocalFileToURL(local_address, tempfile);
-    StrAllocCopy(*newfile, local_address);
+    LYLocalFileToURL(newfile, tempfile);
     LYforce_no_cache = TRUE;  /* don't cache this doc */
 
     return(0);  /* OK */
 }
+#endif
 
 PUBLIC void BeginInternalPage ARGS3(
 	FILE *, fp0,
@@ -5914,7 +5914,7 @@ PUBLIC void LYTrimPathSep ARGS1(
     if (path != 0
      && (len = strlen(path)) != 0
      && LYIsPathSep(path[len-1]))
-    	path[len-1] = 0;
+	path[len-1] = 0;
 }
 
 #ifdef DOSPATH
@@ -5969,7 +5969,7 @@ PUBLIC void LYTrimHtmlSep ARGS1(
     if (path != 0
      && (len = strlen(path)) != 0
      && LYIsHtmlSep(path[len-1]))
-    	path[len-1] = 0;
+	path[len-1] = 0;
 }
 
 /*

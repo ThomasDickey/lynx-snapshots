@@ -19,21 +19,14 @@
 #include <UCDefs.h>
 #include <UCAux.h>
 
+#include <LYCookie.h>
 #include <LYCharSets.h>
 #include <LYStrings.h>
+#include <LYUtils.h>
 #include <LYLeaks.h>
 
-extern CONST char *LYchar_set_names[];
-extern BOOLEAN LYRawMode;
 extern BOOL HTPassEightBitRaw;
 extern HTCJKlang HTCJK;
-
-extern void LYSetCookie PARAMS((
-	CONST char *	SetCookie,
-	CONST char *	SetCookie2,
-	CONST char *	address));
-extern time_t LYmktime PARAMS((char *string, BOOL absolute));
-
 
 /*		MIME Object
 **		-----------

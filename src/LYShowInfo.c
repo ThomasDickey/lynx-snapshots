@@ -1,4 +1,5 @@
 #include <HTUtils.h>
+#include <HTFile.h>
 #include <HTParse.h>
 #include <HTAlert.h>
 #include <HTTP.h>
@@ -11,6 +12,7 @@
 #include <LYSignal.h>
 #include <LYCharUtils.h>
 #include <GridText.h>
+#include <LYReadCFG.h>
 
 #include <LYLeaks.h>
 
@@ -39,7 +41,7 @@ PRIVATE char *lynx_compile_opts NOARGS
 	    tempfile[0] = '\0';
 	    return(0);
 	}
-	BeginInternalPage (fp0, CONFIG_DEF_TITLE, (char *)0);
+	BeginInternalPage (fp0, CONFIG_DEF_TITLE, NULL);
 	fprintf(fp0, "<pre>\n");
 	fprintf(fp0, "\n<em>config.cache</em>\n");
 	for (n = 0; n < TABLESIZE(config_cache); n++) {
@@ -57,7 +59,7 @@ PRIVATE char *lynx_compile_opts NOARGS
 }
 #else
 #undef HAVE_CFG_DEFS_H
-#endif
+#endif /* HAVE_CONFIG_H */
 
 /*
  *  Showinfo prints a page of info about the current file and the link
@@ -71,7 +73,7 @@ PUBLIC int showinfo ARGS4(
 	char *, 	owner_address)
 {
     static char tempfile[256];
-    static char info_url[256];
+    static char *info_url;
     int url_type;
     FILE *fp0;
     char *Address = NULL, *Title = NULL;
@@ -90,7 +92,7 @@ PUBLIC int showinfo ARGS4(
 	return(-1);
     }
 
-    LYLocalFileToURL(info_url, tempfile);
+    LYLocalFileToURL(&info_url, tempfile);
 
     /*
      *	Point the address pointer at this Url
@@ -114,43 +116,41 @@ PUBLIC int showinfo ARGS4(
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 SHOWINFO_TITLE);
 
+    LYLocalFileToURL(&info_url, lynx_compile_opts());
+    fprintf(fp0, "<h1>%s %s (%.*s) (<a href=\"%s\">%s</a>)",
+		 LYNX_NAME, LYNX_VERSION,
+		 LYNX_DATE_LEN,
+		 (LYNX_RELEASE ? LYNX_RELEASE_DATE : &LYNX_DATE[LYNX_DATE_OFF]),
+		 (LYNX_RELEASE ? LYNX_WWW_HOME   : LYNX_WWW_DIST),
+		 (LYNX_RELEASE ? "latest release" : "development version") );
 #ifdef HAVE_CFG_DEFS_H
-    fprintf(fp0, "<h1>%s %s (<a href=\"%s\">%s</a>) - <a href=\"%s\">compile time settings</a></h1>\n",
-		 LYNX_NAME, LYNX_VERSION,
-		 (LYNX_RELEASE ? LYNX_WWW_HOME   : LYNX_WWW_DIST),
-		 (LYNX_RELEASE ? "major release" : "development version"),
-		 lynx_compile_opts());
+    fprintf(fp0, " - <a href=\"%s\">compile time settings</a></h1>\n",
+		 info_url);
 #else
-    fprintf(fp0, "<h1>%s %s (<a href=\"%s\">%s</a>)</h1>\n",
-		 LYNX_NAME, LYNX_VERSION,
-		 (LYNX_RELEASE ? LYNX_WWW_HOME   : LYNX_WWW_DIST),
-		 (LYNX_RELEASE ? "major release" : "development version") );
+    fprintf(fp0, "</h1>\n"
+		 ); /* do not forget to close </h1> */
 #endif
 
 #ifdef DIRED_SUPPORT
     if (lynx_edit_mode && nlinks > 0) {
+	char *s;
+
 	fprintf(fp0, "<pre>\n");
 	fprintf(fp0, "\nDirectory that you are currently viewing\n\n");
 
-	cp = doc->address;
-	if (!strncmp(cp, "file://localhost", 16))
-	    cp += 16;
-	else if (!strncmp(cp, "file:", 5))
-	    cp += 5;
-	strcpy(temp, cp);
-	HTUnEscape(temp);
+	s = HTfullURL_toFile(doc->address);
+	strcpy(temp, s);
+	free(s);
 
 	fprintf(fp0,"   <em>Name:</em>  %s\n", temp);
 	fprintf(fp0,"   <em> URL:</em>  %s\n", doc->address);
 
-	cp = links[doc->link].lname;
-	if (!strncmp(cp, "file://localhost", 16))
-	    cp += 16;
-	else if (!strncmp(cp, "file:", 5))
-	    cp += 5;
-	strcpy(temp, cp);
-	HTUnEscape(temp);
+	s = HTfullURL_toFile(links[doc->link].lname);
+	strcpy(temp, s);
+	free(s);
+
 	if (lstat(temp, &dir_info) == -1) {
+	    CTRACE(tfp, "lstat(%s) failed, errno=%d\n", temp, errno);
 	    HTAlert(CURRENT_LINK_STATUS_FAILED);
 	} else {
 	    char modes[80];

@@ -187,35 +187,6 @@ PUBLIC void LYpush ARGS2(
 	    return;
 	}
     }
-
-#ifdef NOTDEFINED
-/*
-**  The following segment not used any more - What's it good for,
-**  anyway??  Doing a pop when a push is requested is confusing,
-**  also to the user.  Moreover, the way it was done seems to cause
-**  a memory leak. - KW
-*/  /*
-     *	If file is identical to one two before it, don't push it.
-     */
-    if (nhist > 2 &&
-	STREQ(history[nhist-2].address, doc->address) &&
-	!strcmp(history[nhist-2].post_data ?
-		history[nhist-2].post_data : "",
-		doc->post_data ?
-		doc->post_data : "") &&
-	!strcmp(history[nhist-2].bookmark ?
-		history[nhist-2].bookmark : "",
-		doc->bookmark ?
-		doc->bookmark : "") &&
-	history[nhist-2].isHEAD == doc->isHEAD) {
-	/*
-	 *  Pop one off the stack.
-	 */
-	nhist--;
-	return;
-    }
-#endif /* NOTDEFINED */
-
     /*
      *	OK, push it if we have stack space.
      */
@@ -320,9 +291,9 @@ PUBLIC void LYpush ARGS2(
 			    "but didn't check out!");
 	    }
 	}
+	CTRACE(tfp, "\nLYpush[%d]: address:%s\n        title:%s\n",
+		    nhist, doc->address, doc->title);
 	nhist++;
-	CTRACE(tfp, "\nLYpush: address:%s\n        title:%s\n",
-		    doc->address, doc->title);
     } else {
 	if (LYCursesON) {
 	    HTAlert(MAXHIST_REACHED);
@@ -355,8 +326,8 @@ PUBLIC void LYpop ARGS1(
 	doc->isHEAD = history[nhist].isHEAD;
 	doc->safe = history[nhist].safe;
 	doc->internal_link = history[nhist].internal_link;
-	CTRACE(tfp, "LYpop: address:%s\n     title:%s\n",
-		    doc->address, doc->title);
+	CTRACE(tfp, "LYpop[%d]: address:%s\n     title:%s\n",
+		    nhist, doc->address, doc->title);
     }
 }
 
@@ -389,8 +360,7 @@ PUBLIC void LYpop_num ARGS2(
 PUBLIC int showhistory ARGS1(
 	char **,	newfile)
 {
-    static char tempfile[256];
-    static char hist_filename[256];
+    static char tempfile[LY_MAXPATH];
     char *Title = NULL;
     int x = 0;
     FILE *fp0;
@@ -401,9 +371,8 @@ PUBLIC int showhistory ARGS1(
 	return(-1);
     }
 
-    LYLocalFileToURL(hist_filename, tempfile);
+    LYLocalFileToURL(newfile, tempfile);
 
-    StrAllocCopy(*newfile, hist_filename);
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
     LYforce_no_cache = TRUE;	/* force this file to be new */
 
@@ -530,8 +499,7 @@ PUBLIC BOOLEAN historytarget ARGS1(
 PUBLIC int LYShowVisitedLinks ARGS1(
 	char **,	newfile)
 {
-    static char tempfile[256];
-    static char vl_filename[256];
+    static char tempfile[LY_MAXPATH];
     char *Title = NULL;
     char *Address = NULL;
     int x;
@@ -548,9 +516,8 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 	return(-1);
     }
 
-    LYLocalFileToURL(vl_filename, tempfile);
+    LYLocalFileToURL(newfile, tempfile);
 
-    StrAllocCopy(*newfile, vl_filename);
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
     LYforce_no_cache = TRUE;	/* force this file to be new */
 

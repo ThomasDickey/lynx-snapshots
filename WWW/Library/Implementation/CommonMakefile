@@ -85,7 +85,8 @@ COMMON = $(LOB)/HTParse.o $(LOB)/HTAccess.o $(LOB)/HTTP.o \
 	$(LOB)/HTAAUtil.o $(LOB)/HTAAServ.o $(LOB)/HTAABrow.o \
 	$(LOB)/HTAAFile.o $(LOB)/HTPasswd.o $(LOB)/HTGroup.o  \
 	$(LOB)/HTACL.o    $(LOB)/HTAuth.o   $(LOB)/HTAAProt.o \
-	$(LOB)/HTAssoc.o  $(LOB)/HTLex.o    $(LOB)/HTUU.o
+	$(LOB)/HTAssoc.o  $(LOB)/HTLex.o    $(LOB)/HTUU.o \
+	$(LOB)/HTDOS.o
 
 CFILES = $(CMN)HTParse.c $(CMN)HTAccess.c $(CMN)HTTP.c $(CMN)HTFile.c \
         $(CMN)HTBTree.c \
@@ -373,4 +374,7 @@ $(LOB)/HTAccess.o : $(OE)  $(CMN)HTAccess.c $(CMN)HTUtils.h
 
 $(LOB)/HTParse.o : $(OE) $(CMN)HTParse.c $(CMN)HTUtils.h
 	$(COMPILE) $(CMN)HTParse.c
+
+$(LOB)/HTDOS.o : $(OE) $(CMN)HTDOS.c $(CMN)HTUtils.h
+	$(COMPILE) $(CMN)HTDOS.c
 

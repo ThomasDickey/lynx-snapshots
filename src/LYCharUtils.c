@@ -333,12 +333,10 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 	    StrAllocCat(*href, "localhost");
 	} else if (!strncmp(*href, "file:///", 8)) {
 	    StrAllocCopy(temp, (*href+7));
-	    StrAllocCopy(*href, "file://localhost");
-	    StrAllocCat(*href, temp);
+	    LYLocalFileToURL (href, temp);
 	} else if (!strncmp(*href, "file:/", 6) && !LYIsHtmlSep(*(*href+6))) {
 	    StrAllocCopy(temp, (*href+5));
-	    StrAllocCopy(*href, "file://localhost");
-	    StrAllocCat(*href, temp);
+	    LYLocalFileToURL (href, temp);
 	}
     }
 
@@ -1257,7 +1255,7 @@ PUBLIC void LYExpandString ARGS2(
 	**  back translate for our character set. - FM
 	*/
 	if (code > 160 && code < 256 &&
-	     me->outUCLYhndl != 0 &&
+	     me->outUCLYhndl != LATIN1 &&
 	     (!(HTPassEightBitRaw ||
 		(me->T.do_8bitraw && !me->T.trans_from_uni)))) {
 	    value = (code - 160);
@@ -2279,9 +2277,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		*/
 		} else if (code < 161 ||
 			   (code < 256 &&
-			    (HTPassEightBitNum ||
-			     !strncmp(LYchar_set_names[cs_to],
-				      "ISO Latin 1", 11)))) {
+			    (HTPassEightBitNum || cs_to == LATIN1))) {
 		    /*
 		    **	No conversion needed.
 		    */
