@@ -1448,7 +1448,11 @@ try_again:
 	     */
             if (crawl && crawl_ok) {
 	        crawl_ok = FALSE;
+#ifdef FNAMES_8_3
+	        sprintf(cfile,"lnk%05d.dat",ccount);
+#else
 	        sprintf(cfile,"lnk%08d.dat",ccount);
+#endif /* FNAMES_8_3 */
 	        ccount = ccount + 1;
 	        if ((cfp = LYNewTxtFile(cfile))  != NULL) {
 	            print_crawl_to_fd(cfp,curdoc.address,curdoc.title);
@@ -1954,11 +1958,7 @@ new_cmd:  /*
 		HTOutputFormat = WWW_SOURCE;
 	    }
 	    HEAD_request = HTLoadedDocumentIsHEAD();
-	    if (real_cmd == LYK_RELOAD) {
-		HTuncache_current_document();
-	    } else {
-		LYforce_no_cache = TRUE;
-	    }
+	    HTuncache_current_document();
 #ifdef NO_ASSUME_SAME_DOC
 	    /*
 	     *  Don't assume the reloaded document will be the same. - FM
@@ -3805,6 +3805,7 @@ check_goto_URL:
 			HTOutputFormat = WWW_SOURCE;
 		    }
 		    HEAD_request = HTLoadedDocumentIsHEAD();
+		    HTuncache_current_document();
 #ifdef NO_ASSUME_SAME_DOC
 		    newdoc.line = 1;
 		    newdoc.link = 0;

@@ -168,6 +168,16 @@ PUBLIC void cleanup NOARGS
 
         stop_curses();
     }
+
+#ifdef EXP_CHARTRANS_AUTOSWITCH
+#ifdef LINUX
+    /*
+     *  Currently implemented only for LINUX: Restore original font.
+     */
+    UCChangeTerminalCodepage(-1, (LYUCcharset*)0);
+#endif /* LINUX */
+#endif /* EXP_CHARTRANS_AUTOSWITCH */
+
     cleanup_files();
     for (i = 0; i < nhist; i++) {
         FREE(history[i].title);

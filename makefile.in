@@ -164,7 +164,7 @@ SITE_DEFS = # Your defines here
 # TESTED: Linux FreeBSD SunOS Solaris IRIX CLIX HP-UX AIX SCO
 all lynx:
 	cd WWW/Library/unix && $(MAKE) CC="$(CC)" \
-		LY_CFLAGS="$(CFLAGS)"
+		LY_CFLAGS="$(CFLAGS)" \
 		CPPFLAGS="$(CPPFLAGS)" \
 		LYFLAGS="$(SITE_LYDEFS)"
 	cd src && $(MAKE) all CC="$(CC)" \
