@@ -689,8 +689,13 @@ else {init_ctrl_break[0] = 1;}
     else if ((cp = getenv("TMP")) != NULL)
 	StrAllocCopy(lynx_temp_space, cp);
     else
-#endif
+	{
+		printf("You MUST define a valid TMP or TEMP area!\n");
+		exit(-1);
+	}
+#else
 	StrAllocCopy(lynx_temp_space, TEMP_SPACE);
+#endif
     if ((cp = strchr(lynx_temp_space, '~'))) {
 	*(cp++) = '\0';
 	StrAllocCopy(temp, lynx_temp_space);

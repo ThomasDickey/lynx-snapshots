@@ -1,6 +1,14 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-03-20
+* Added death for Win/DOS clients that don't have a TMP space defined. - WB
+* Added _WINDOWS_NSL to provide interruptable lookups in Win32 per a
+  patch from afn06760@afn.org. (modified hopefully for borland AND cygwin and
+  hard defined in tcp.h).  I had to recompile everything in multithread
+  mode for borland, including my zlib library. - WB
+* Added _WINDOWS as a target for FNAMES_8_3 in userdefs.h to allow for 16
+  bit helper apps that can't handle LFN's. (report by afn06760@afn.org) - WB
 1998-03-18 (2.8.1dev.1)
 * correct an ifdef that caused inconsistent pathname separators on Windows
   (reported by afn, patch by DK).

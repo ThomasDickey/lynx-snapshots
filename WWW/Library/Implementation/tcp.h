@@ -135,6 +135,7 @@ IBM-PC running Windows NT
 */
 
 #ifdef _WINDOWS
+#define _WINDOWS_NSL
 #include "fcntl.h"                      /* For HTFile.c */
 #include "sys\types.h"                  /* For HTFile.c */
 #include "sys\stat.h"                   /* For HTFile.c */
