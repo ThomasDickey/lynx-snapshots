@@ -48,7 +48,7 @@
 #else
 #ifdef NCURSES
 # ifdef HAVE_CONFIG_H
-# ifdef NCURSESHEADER
+# ifdef HAVE_NCURSES_H
 #  include <ncurses.h>
 # else
 #  include <curses.h>
@@ -56,7 +56,7 @@
 extern void LYsubwindow PARAMS((WINDOW * param));
 
 # else /* FIXME: remove this after configure script is complete */
-# ifndef NCURSESHEADER
+# ifndef HAVE_NCURSES_H
 #  include <ncurses/curses.h>
 # else
 #  ifdef __NetBSD__
@@ -65,7 +65,7 @@ extern void LYsubwindow PARAMS((WINDOW * param));
 #    include <ncurses.h>
 #  endif /* __NetBSD__ */
 # endif /* HAVE_CONFIG_H */
-# endif /* NCURSESHEADER */
+# endif /* HAVE_NCURSES_H */
 
 #else
 # ifdef ULTRIX

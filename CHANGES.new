@@ -10,6 +10,13 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+1997-08-27
+* Further refine/correct configure macros for finding network and curses
+  libraries, adding CF_RECHECK_FUNC to simplify CF_NETLIBS. - TD
+* Rename #define for NCURSESHEADER to HAVE_NCURSES_H, for consistency. - TD
+* Add-back test for -lm to support slang shared libraries. - TD
+* Modify test for disentangling ncurses library from mytinfo on FreeBSD
+  to workaround linker limitation. - AC
 1997-08-21
 * Tweak to LYHistory.c to better remember last position on page. - KW
 * Eliminated two more MIME types (application/html and text/x-sgml) from

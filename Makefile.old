@@ -183,7 +183,7 @@ DIRED_PERMIT   =   -DOK_PERMIT
 # If you need ncurses, the latest version can always be found in
 #	ftp://ftp.clark.net/pub/dickey/ncurses/
 # or	ftp://ftp.netcom.com/pub/zm/zmbenhal/ncurses/
-# (you may need -DNCURSESHEADER in addition to -DNCURSES for old
+# (you may need -DHAVE_NCURSES_H in addition to -DNCURSES for old
 # versions of ncurses; see below).
 #
 # Also be sure to check out the compilation symbols in userdefs.h
@@ -293,7 +293,7 @@ SITE_DEFS = $(DIR_DEFS) $(RP_DEFS) -DEXP_CHARTRANS -DNSL_FORK -DLYNXCGI_LINKS -D
 # -DFANCY_CURSES   enables fancy curses (bold, underline, reverse)
 # -DCOLOR_CURSES   enables color in SVr4 curses & clones such as ncurses
 # -DNCURSES        for ncurses support (also indicate the LIBS path)
-# -DNCURSESHEADER  seek ncurses.h instead of ncurses/curses.h in LYCurses.h
+# -DHAVE_NCURSES_H  seek ncurses.h instead of ncurses/curses.h in LYCurses.h
 # -DNO_KEYPAD      if you don't have keypad() and related defines
 # -DNO_SIZECHANGE  Disables window sizechange code
 # -DNO_CPU_LIMIT   Disables Max CPU timeout (includes CLOCKS_PER_SECOND)
@@ -425,7 +425,7 @@ freebsd:
 freebsd-ncurses:
 	cd WWW/Library/freebsd; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
 	cd src; $(MAKE) all MCFLAGS="$(CFLAGS) -DFANCY_CURSES -DCOLOR_CURSES -DNCURSES \
-		-DNCURSESHEADER -DUNIX -DNO_TTYTYPE -DNO_CUSERID -DLOCALE \
+		-DHAVE_NCURSES_H -DUNIX -DNO_TTYTYPE -DNO_CUSERID -DLOCALE \
 		-I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lncurses -lmytinfo \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
