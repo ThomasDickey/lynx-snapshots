@@ -1197,16 +1197,11 @@
  */
 
 #define LYNX_NAME "Lynx"
-#ifdef USE_COLOR_STYLE
 /* The strange-looking comments on the next line tell PRCS to replace
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
-/* $Format: "#define LYNX_VERSION \"$ProjectVersion$-Styles\""$ */
-#define LYNX_VERSION "2.7.1ac-0.28-Styles"
-#else
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.28"
-#endif
+#define LYNX_VERSION "2.7.1ac-0.30"
 
 /****************************************************************
  * The LYMessages_en.h header defines default, English strings

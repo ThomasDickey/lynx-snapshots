@@ -10,6 +10,13 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+1997-06-26
+* change download function to check filename -- FM 
+1997-06-23
+* patch pop-up function in LYForms.c - FM
+* remove "Styles" identifier from Lynx version string in userdefs.h
+  since it causes "patch-o-matic" to choke. -- JES
+
 1997-05-24
 * integrate patch JED's mods which support mouse for slang as well as add
   new functions to encapsulate differences between slang/curses. - TD

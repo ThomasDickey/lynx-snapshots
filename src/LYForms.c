@@ -96,12 +96,7 @@ PUBLIC int change_form_link ARGS6(struct link *, form_link, int, mode,
 		form->value = opt_ptr->name;   /* set the name */
 		form->cp_submit_value = opt_ptr->cp_submit_value; /* set the value */
 	    }
-#if defined(FANCY_CURSES) || defined(USE_SLANG)
-	    if (!enable_scrollback)
-		c = DO_NOTHING;
-	    else
-#endif
-		c = 12;  /* CTRL-L for repaint */
+	    c = 12;  /* CTRL-L for repaint */
 	    break;
 
 	case F_RADIO_TYPE:
