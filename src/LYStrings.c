@@ -1316,6 +1316,18 @@ PRIVATE void setup_vtXXX_keymap NOARGS
 	INTERN_KEY( "\033OP",	F1,		KEY_F(1) ),
 	INTERN_KEY( "\033[OP",	F1,		KEY_F(1) ),
 	INTERN_KEY( "\033[29~",	DO_KEY,		KEY_F(16) ),
+#if defined(USE_SLANG) && defined(__MINGW32__)
+	INTERN_KEY( "\xE0H",	UPARROW,	KEY_UP ),
+	INTERN_KEY( "\xE0P",	DNARROW,	KEY_DOWN ),
+	INTERN_KEY( "\xE0M",	RTARROW,	KEY_RIGHT ),
+	INTERN_KEY( "\xE0K",	LTARROW,	KEY_LEFT ),
+	INTERN_KEY( "\xE0R",	INSERT_KEY,	KEY_IC ),
+	INTERN_KEY( "\xE0S",	REMOVE_KEY,	KEY_DC ),
+	INTERN_KEY( "\xE0I",	PGUP,		KEY_PPAGE ),
+	INTERN_KEY( "\xE0Q",	PGDOWN,		KEY_NPAGE ),
+	INTERN_KEY( "\xE0G",	HOME,		KEY_HOME),
+	INTERN_KEY( "\xE0O",	END_KEY,	KEY_END ),
+#endif
 #if defined(USE_SLANG) && !defined(VMS)
 	INTERN_KEY(	"^(ku)", UPARROW,	KEY_UP ),
 	INTERN_KEY(	"^(kd)", DNARROW,	KEY_DOWN ),
@@ -1509,8 +1521,30 @@ PRIVATE int LYgetch_for ARGS1(
    current_sl_modifier = 0;
 
    key = SLang_do_key (Keymap_List, myGetChar);
-   if ((key == NULL) || (key->type != SLKEY_F_KEYSYM))
+   if ((key == NULL) || (key->type != SLKEY_F_KEYSYM)) {
+#ifdef __MINGW32__
+	   if ((key == NULL) && (current_sl_modifier == LKC_ISLKC)) {
+		   key = SLang_do_key (Keymap_List, myGetChar);
+		   keysym = key->f.keysym;
+		   switch (keysym) {
+			   case 'H': keysym = UPARROW; break;
+			   case 'P': keysym = DNARROW; break;
+			   case 'M': keysym = RTARROW; break;
+			   case 'K': keysym = LTARROW; break;
+			   case 'R': keysym = INSERT_KEY; break;
+			   case 'S': keysym = REMOVE_KEY; break;
+			   case 'I': keysym = PGUP; break;
+			   case 'Q': keysym = PGDOWN; break;
+			   case 'G': keysym = HOME; break;
+			   case 'O': keysym = END_KEY; break;
+			   case ';': keysym = F1; break;
+		   }
+		   return(keysym);
+	   }
+#endif
+
      return (current_sl_modifier ? 0 : DO_NOTHING);
+   }
 
    keysym = key->f.keysym;
 

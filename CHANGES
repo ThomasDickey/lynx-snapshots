@@ -1,6 +1,15 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2004-02-01 (2.8.5pre.5)
+* MINGW32-specific changes to build with that configuration using the configure
+  script in Cygwin and "-mno-cygwin" option -DK
+* move Cygwin defines for WIN_EX, _WINDOWS_NSL out of www_tcp.h, to the
+  configure script to fix a definition-order problem with CAN_CUT_AND_PASTE
+  (report by DK) -TD
+* improve workaround for ncurses to build with pre-4.0 versions that do not
+  declare attr_t -TD
+
 2004-01-28 (2.8.5pre.4)
 * workaround to build with ncurses 4.2 -TD
 * fixes from Thorsten Glaser:
@@ -97,7 +106,7 @@ This version has been test-built on
 * Tru64 4.0d, 5.1 (cc, curses),
 * OpenVMS,
 * OS/2 EMX,
-* win32 (Visual C++ 6.0 and Borland C++, cygwin),
+* win32 (Visual C++ 6.0 and Borland C++, Cygwin),
 * AIX 4.3, 5.1,
 * HPUX 11,
 * Solaris 8, 9.
@@ -117,7 +126,7 @@ FreeBSD 4.1, 4.8, NetBSD 1.5, 1.6 and OpenBSD 2.8 (curses/ncurses).
 * correct some mismatches between INSTALLATION and "configure --help" (prompted
   by discussion with Stef Caunter) -TD
 * undef conflicting symbols "small" and FILE_DOES_NOT_EXIST which are
-  misdefined in cygwin's w32api headers (report by Frederic L W Meunier) -TD
+  misdefined in Cygwin's w32api headers (report by Frederic L W Meunier) -TD
 * amend check for refresh-URL to ensure it only prepends a link for text/html
   content type (report by Carlton Anderson).
 * do not strip parameters from refresh-URL (report by Carlton Anderson gave an
@@ -514,7 +523,7 @@ FreeBSD 4.1, 4.8, NetBSD 1.5, 1.6 and OpenBSD 2.8 (curses/ncurses).
 * modify parsing of refresh-URL to strip single quotes, to handle
     http://tovar.yandex.ru/
   (reported by LP) -TD
-* investigated conflict between NSL_FORK and _WINDOWS_NSL ifdef's for cygwin
+* investigated conflict between NSL_FORK and _WINDOWS_NSL ifdef's for Cygwin
   configuration in HTTCP.c; left them as-is since #undef'ing _WINDOWS_NSL in
   that case causes problems connecting (feedback by Frederic L W Meunier) -TD
 * corrected an off-by-one error in computing the location of the bottom line
@@ -554,7 +563,7 @@ FreeBSD 4.1, 4.8, NetBSD 1.5, 1.6 and OpenBSD 2.8 (curses/ncurses).
   other sources (report by Peter Rasmussen <plr@udgaard.com>) -TD
 
 2002-12-18 (2.8.5dev.12)
-* remove a check in LYMain.c for cygwin's console, which does not work with
+* remove a check in LYMain.c for Cygwin's console, which does not work with
   screen (report by Frederic L W Meunier) -TD
 * undo line/pool logic, fixing a memory leak -LP
 * changes proposed by Bela Lubkin, to optimize ALLOC_IN_POOL macro
@@ -1313,7 +1322,7 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
   coding for the alphabet -TD
 * workaround in lynx_nl2crlf() for ncurses, which did not refrain from using
   cursor-down if it was set to a newline when nonl() was specified -TD
-* replace permissions[] array in LYLocal.c because cygwin (mis)implements the
+* replace permissions[] array in LYLocal.c because Cygwin (mis)implements the
   S_xxx values as a function -TD
 * add ENABLE_LYNXRC setting to lynx.cfg, which allows one to modify the list
   of values which are visible on the O'ptions form which can be saved to the
@@ -1343,7 +1352,7 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
   case where items in very wide popup menus would wrap, e.g., the EXTERN_LINK
   menu -TD
 * add a configure checks for term.h, to work around broken package for ncurses
-  on cygwin -TD
+  on Cygwin -TD
 * combine checks for useragent into one function LYCheckUserAgent() -TD
 * add runtime toggle for EXP_NESTED_TABLES, bind this to "~" (see www.tin.org
   for comparison) -TD
@@ -1809,7 +1818,7 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
   exists; attempt to create the directory if it does not, e.g., ~/tmp/, to
   resolve problem introduced by Mandrake's patch -TD
 * modify SetOutputMode() to flush stdout to work around buffering problem with
-  cygwin on error exit from Lynx (reported by Brad Town <btown@ceddec.com>) -TD
+  Cygwin on error exit from Lynx (reported by Brad Town <btown@ceddec.com>) -TD
 * change definitions for LYCharINTERRUPT1 and LYCharINTERRUPT2 to not use
   FROMASCII() in the EBCDIC configuration, since those symbols are used in case
   statements which otherwise would not compile -PG
@@ -2423,10 +2432,10 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
   ShowInfo Page -TH
 * remove spurious backslashes in sed script for adjusting link to htmlized
   lynx.cfg -Michael Warner
-* add -luser32 library for cygwin configuration, needed for WIN_EX ifdefs -DK
+* add -luser32 library for Cygwin configuration, needed for WIN_EX ifdefs -DK
 * correct some screen handling problems when built with SLang -DK
-* updated the INSTALLATION file to reflect building under cygwin -DK
-* define WIN_EX and _WINDOWS_NSL for cygwin configuration -DK
+* updated the INSTALLATION file to reflect building under Cygwin -DK
+* define WIN_EX and _WINDOWS_NSL for Cygwin configuration -DK
 * use select_s() from WATT-32 for the DJGPP port, rather than select() from
   DJGPP (suggested by Gisle Vanem, to make it faster) -DK
 * add a configure check CF_SET_ERRNO to check if we really can set errno,
@@ -2820,7 +2829,7 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
   with ncurses and possibly other curses implementations, but not with slang,
   on Unix-like platforms, and cannot work on platforms where lynx gets keyboard
   input in the form of platform- or implementation-specific keycodes (DOS,
-  Windows - except with cygwin?) instead of as an octet stream.
+  Windows - except with Cygwin?) instead of as an octet stream.
   - The -nozap option takes an argument.  The basic functionality as already
   described gets invoked if the argument is not a specially recognized keyword
   (it is suggested that -nozap=full or -nozap=all be used).  The only
@@ -3152,9 +3161,9 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
   and TEXTAREA_AUTOEXTEDIT, added description -KW
 * minor tweaks: -accept_all_cookies help string, some formatting changes,
   minor text additions and corrections -KW
-* set $(PROG_EXT) variable in makefiles for cygwin -TD
+* set $(PROG_EXT) variable in makefiles for Cygwin -TD
 * define __CYGWIN__ if needed, e.g., for betas that define __CYGWIN32__ -TD
-* workaround cygwin b19.1 problem generating cfg_defs.h because it did not
+* workaround Cygwin b19.1 problem generating cfg_defs.h because it did not
   properly export $PATH -TD
 1999-11-03 (2.8.3dev.14)
 * modify no_color_video check for A_UNDERLINE so it is active for any
@@ -7270,7 +7279,7 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
 1998-03-20 (2.8.1dev.3)
 * Added death for Win/DOS clients that don't have a TMP space defined. - WB
 * Added _WINDOWS_NSL to provide interruptable lookups in Win32 per a
-  patch from afn06760@afn.org. (modified hopefully for borland AND cygwin and
+  patch from afn06760@afn.org. (modified hopefully for borland AND Cygwin and
   hard defined in tcp.h).  I had to recompile everything in multithread
   mode for borland, including my zlib library. - WB
 * Added _WINDOWS as a target for FNAMES_8_3 in userdefs.h to allow for 16
