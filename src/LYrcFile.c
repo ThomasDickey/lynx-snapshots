@@ -29,11 +29,15 @@ PRIVATE char *SkipEquals ARGS1(char *, src)
     return LYSkipBlanks(src);
 }
 
-PUBLIC void read_rc NOPARAMS
+/*  Read and process user options.
+ *  If the passed-in fp is NULL, open the regular user defaults file
+ *  for reading, otherwise use fp which has to be a file open for
+ *  reading. - kw
+ */
+PUBLIC void read_rc ARGS1(FILE *, fp)
 {
     char *line_buffer = NULL;
     char rcfile[LY_MAXPATH];
-    FILE *fp;
     char *cp;
     int number_sign;
     char MBM_line[256];
@@ -41,16 +45,18 @@ PUBLIC void read_rc NOPARAMS
     char *MBM_cp2, *MBM_cp1;
     int  MBM_i2;
 
-    /*
-     *  Make an RC file name.
-     */
-    LYAddPathToHome(rcfile, sizeof(rcfile), FNAME_LYNXRC);
+    if (!fp) {
+	/*
+	 *  Make an RC file name.
+	 */
+	LYAddPathToHome(rcfile, sizeof(rcfile), FNAME_LYNXRC);
 
-    /*
-     *  Open the RC file for reading.
-     */
-    if ((fp = fopen(rcfile, TXT_R)) == NULL) {
-	return;
+	/*
+	 *  Open the RC file for reading.
+	 */
+	if ((fp = fopen(rcfile, TXT_R)) == NULL) {
+	    return;
+	}
     }
 
     /*
@@ -540,23 +546,30 @@ PRIVATE void write_list ARGS2(
     }
 }
 
-PUBLIC int save_rc NOPARAMS
+/*  Save user options.
+ *  If the passed-in fp is NULL, open the regular user defaults file
+ *  for writing, otherwise use fp which has to be a temp file open for
+ *  writing. - kw
+ */
+PUBLIC int save_rc ARGS1(FILE *, fp)
 {
     char rcfile[LY_MAXPATH];
-    FILE *fp;
+    BOOLEAN is_tempfile = (fp != NULL);
     int i;
     int MBM_c;
 
-    /*
-     *  Make a name.
-     */
-    LYAddPathToHome(rcfile, sizeof(rcfile), FNAME_LYNXRC);
+    if (!fp) {
+	/*
+	 *  Make a name.
+	 */
+	LYAddPathToHome(rcfile, sizeof(rcfile), FNAME_LYNXRC);
 
-    /*
-     *  Open the file for write.
-     */
-    if ((fp = LYNewTxtFile(rcfile)) == NULL) {
-	return FALSE;
+	/*
+	 *  Open the file for write.
+	 */
+	if ((fp = LYNewTxtFile(rcfile)) == NULL) {
+	    return FALSE;
+	}
     }
 
     /*
@@ -1044,9 +1057,12 @@ See also VERBOSE_IMAGES in lynx.cfg\n\
     /*
      *  Close the RC file.
      */
-    fclose(fp);
-
-    HTSYS_purge(rcfile);
+    if (is_tempfile) {
+	LYCloseTempFP(fp);
+    } else {
+	fclose(fp);
+	HTSYS_purge(rcfile);
+    }
 
     return TRUE;
 }

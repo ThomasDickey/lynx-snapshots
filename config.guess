@@ -563,7 +563,7 @@ EOF
 	  sparclinux) echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
 	  armlinux)   echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
 	  m68klinux)  echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
-	  elf32ppc)   echo "powerpc-unknown-linux-gnu"              ; exit 0 ;;
+	  elf32ppc*)  echo "powerpc-unknown-linux-gnu"              ; exit 0 ;;
 	esac
 
 	if test "${UNAME_MACHINE}" = "alpha" ; then

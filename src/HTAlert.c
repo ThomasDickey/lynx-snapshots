@@ -238,7 +238,7 @@ PUBLIC void HTReadProgress ARGS2(
 	    last = now;
 	    bytes_last = bytes;
 	}
-	if (total >= kb_units || bytes >= kb_units) {
+	if (LYshow_kb_rate && (total >= kb_units || bytes >= kb_units)) {
 	    if (total > 0)
 		total /= 1024;
 	    bytes /= 1024;
@@ -469,6 +469,12 @@ PUBLIC int HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
     char *msg_yes = gettext("yes");
     char *msg_no  = gettext("no");
     int result = -1;
+
+    /* If they're not really distinct in the first letter, revert to English */
+    if (TOUPPER(*msg_yes) == TOUPPER(*msg_no)) {
+	msg_yes = "yes";
+	msg_no = "no";
+    }
 
     conf_cancelled = NO;
     if (dump_output_immediately) { /* Non-interactive, can't respond */

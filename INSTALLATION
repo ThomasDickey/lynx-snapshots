@@ -25,62 +25,76 @@ First, you must configure Lynx for your system regardless of the port you use.
 Follow the instructions given immediately below to configure for your system,
 and then go to the respective section concerning the port you wish to compile.
 
-
 I. General configuration instructions (all ports).
 
-Step 1. (define compile-time variables  -- See the userdefs.h file.)
-    There are a few variables that MUST be defined, or Lynx will not build.
-    There are a few more that you will probably want to change.  The variables
-    that must be changed are marked as such in the userdefs.h file.  Just edit
-    this file, and the changes should be straight forward.  If you compile
-    using autoconfigure, you can set most defines with option switches and do
-    not absolutely have to edit userdefs.h.  Many of the variables are now
-    configurable in the lynx.cfg file, so you may set them at run-time if you
-    wish.  Lynx implements Native Language Support.  Read "ABOUT-NLS" if you
-    want to build an international version of Lynx or tailor the statusline
-    prompts, messages and warnings to the requirements of your site.
+Step 1.  Compile-time Variables.
 
-Step 2. (define run-time variables -- See the lynx.cfg file for details.)
-    Set up local printers, downloaders, assumed character set, key mapping,
-    and colors in the lynx.cfg file.  Please read "lynx.cfg" thoroughly as
-    many of the features of Lynx, and how to use them, are explained.  Also
-    see the example mime.types, mailcap and jumps files in the samples
-    subdirectory.  Lynx MUST be able to find the lynx.cfg file at start-up.
-    The location of the lynx.cfg file may be compiled in with the LYNX_CFG_FILE
-    defined in userdefs.h (or with the configure option explained in the Unix
-    section below), specified with an environment variable, LYNX_CFG, or
-    specified with the "-cfg" command line option.
+  There are a few variables that MUST be defined in order for Lynx to build
+  and there are others you may want to change.
 
-Step 3. (You may skip this step if you are not interested in any special
-    characters and any local files or WWW pages you will view all use the
-    ISO-8859-1 "ISO Latin 1" Western European character set.) People who
-    will be running Lynx in an environment with different and incompatible
-    character sets should configure CHARACTER_SET (the Display character set)
-    and ASSUME_LOCAL_CHARSET to work correctly for them before creating
-    bookmark files et cetera.  Read "lynx.cfg" for detailed instructions.
-    Additional character sets and their properties may be defined with tables
-    in the src/chrtrans directory, see the README.* files therein.
+  If you are using configure (e.g., with UNIX or Cygwin), you don't strictly
+  need to make any changes in  userdefs.h , but it is wise to check there
+  to make sure e.g., that the location of  lynx.cfg  is correctly defined.
+  There are a few variables you can't define with configure --switches
+  but can define in  userdefs.h , e.g., numbering fields as well as links.
+  Many variables which can be defined with configure or  userdefs.h
+  can also be defined in  lynx.cfg  or via the Options Page (key `o').
 
-Step 4. (optional -- news for UNIX and VMS)
-    Set NNTPSERVER in "lynx.cfg" to your site's NNTP server, or set the
-    environment variable externally.  For news posting ability to be enabled
-    in Lynx, the NEWS_POSTING symbol must be defined to TRUE in userdefs.h or
-    lynx.cfg.  Also define LYNX_SIG_FILE in userdefs.h or lynx.cfg so that it
-    points to users' signature files for appending to posted messages.
+  Lynx implements Native Language Support.  Read "ABOUT-NLS", if you want
+  to build an international version of Lynx or tailor status-line prompts,
+  messages and warnings to the requirements of your site.
 
-Step 5. (Anonymous account -- VERY IMPORTANT!!!!! -- )
-    If you are building Lynx for your personal use only you may skip this
-    step.  If you are setting up an anonymous account with Lynx, you are
-    STRONGLY advised to use the -anonymous command line option.  If you do
-    not use this option, users may be able to gain access to all readable
-    files on your machine!  ALSO NOTE that many implementations of telnetd
-    allow passing of environment variables, which might be used by
-    unscrupulous people to modify the environment in anonymous accounts.
-    When making Web access publicly available via anonymous accounts intended
-    to run Lynx captively, be sure the wrapper uses the -cfg and -homepage
-    switches to specify the configuration and start files, rather than relying
-    on the LYNX_CFG, LYNX_CFG_FILE, or WWW_HOME variables.
+Step 2.  Run-time Variables.
 
+  Lynx MUST be able to find  lynx.cfg  at start-up: its location
+  can be compiled in with LYNX_CFG_FILE defined in userdefs.h
+  or with the configure option explained in the Unix section below,
+  or may be specified with environment variable LYNX_CFG
+  or with the "-cfg" command-line option.
+
+  Read  lynx.cfg  thoroughly, as many Lynx features and how to use them
+  are explained there, in some cases ONLY there.  Set up local printers,
+  downloaders, assumed character set, key mapping and colors in  lynx.cfg .
+  Also see the sample mime.types, mailcap and jumps files
+  in the samples subdirectory.
+
+Step 3.  Alternative Character Sets.
+
+  You may skip this, if you are not interested in special characters
+  and all local files or WWW pages you will view will use the ISO-8859-1
+  "ISO Latin 1" Western European character set.
+
+  If you will be running Lynx in an environment with different incompatible
+  character sets, configure CHARACTER_SET (the Display character set)
+  and ASSUME_LOCAL_CHARSET to work correctly before creating bookmark files
+  and other such items: read "lynx.cfg" for detailed instructions.
+  Additional character sets and their properties may be defined with tables
+  in the src/chrtrans directory: see the README.* files therein.
+
+Step 4.  News for UNIX and VMS.
+
+  Set NNTPSERVER in "lynx.cfg" to your site's NNTP server, or set the
+  environment variable externally.  For news posting ability to be enabled
+  in Lynx, the NEWS_POSTING symbol must be defined to TRUE in userdefs.h or
+  lynx.cfg.  Also define LYNX_SIG_FILE in userdefs.h or lynx.cfg so that it
+  points to users' signature files for appending to posted messages.
+
+Step 5.  Anonymous accounts *** VERY IMPORTANT!!!!! ***
+
+  If you are building Lynx for personal use only, you should skip this.
+
+  If you are setting up anonymous accounts to use Lynx captively,
+  i.e., making Web access publicly available to unknown users
+  who should not be allowed any other type of access to your system,
+  you are STRONGLY advised to use the -anonymous command-line option:
+  if you do not use this option, users may be able to gain access
+  to all readable files on your machine!
+
+  Many implementations of telnetd allow passing of environment variables,
+  which might be used to modify the environment in anonymous accounts,
+  allowing mischief or damage by malicious users, so make sure the wrapper
+  uses the -cfg and -homepage switches to specify  lynx.cfg  and start-file,
+  rather than relying on variables LYNX_CFG, LYNX_CFG_FILE and WWW_HOME.
 
 II. Compile instructions -- UNIX
 
@@ -133,17 +147,17 @@ II. Compile instructions -- UNIX
 1b. Platforms.  Configure should work properly on any Unix-style system.
     It has been tested on the following platforms.
 
-	AIX 3.2.5 (cc w/ curses)	CLIX (cc w/ curses & ncurses)
-	DGUX
+	AIX 3.2.5 (cc w/ curses)	BeOS 4.5 (gcc w/ ncurses)
+	CLIX (cc w/ curses & ncurses)	DGUX
 	Digital Unix 3.2C and 4.0 (gcc & cc w/ curses, ncurses & slang)
-	FreeBSD 2.1.5 (gcc 2.6.3 w/ curses & ncurses)
+	FreeBSD 2.1.5, 3.1 (gcc 2.6.3 w/ curses & ncurses)
 	HP-UX (K&R and ANSI cc, gcc w/ curses, ncurses & slang)
 	IRIX 5.2 and 6.2 (cc & gcc w/ curses, ncurses & slang)
 	Linux 2.0.0 (gcc 2.7.2 w/ curses, ncurses & slang)
 	MkLinux 2.1.5 (gcc 2.7.2.1)	NetBSD
 	NEXTSTEP 3.3 (gcc 2.7.2.3 w/ curses)
-	OS/2 EMX 0.9b (ncurses) 	SCO (cc w/ curses)
-	Solaris 2.5 & 2.6 (cc & gcc w/ curses, ncurses & slang)
+	OS/2 EMX 0.9c (ncurses) 	SCO OpenServer (cc w/ curses)
+	Solaris 2.5, 2.6 & 2.7 (cc & gcc w/ curses, ncurses & slang)
 	SunOS 4.1 (cc w/ curses, gcc w/ ncurses & slang)
 	OS390 and BS2000.
 
@@ -161,7 +175,7 @@ II. Compile instructions -- UNIX
     order shown by the -help option is different.  See "docs/README.defines"
     for information on defines for which there are no option switches.
 
-  --disable-alt-bindings 		(define EXP_ALT_BINDINGS)
+  --disable-alt-bindings 		(prevent defining EXP_ALT_BINDINGS)
 	Compiles-in an alternative set of line-edit bindings, in addition
 	to the default bindings.
 
@@ -171,7 +185,7 @@ II. Compile instructions -- UNIX
 	as extended lynx.cfg viewing with a pointer to the lynx.cfg file and
 	additional functionality).
 
-  --disable-dired			(define DIRED_SUPPORT)
+  --disable-dired			(prevent defining DIRED_SUPPORT)
 	Use this option to disable the optional directory-editor.
 
 	Lynx supports directory editing (DirEd) for local directories.
@@ -182,14 +196,15 @@ II. Compile instructions -- UNIX
 	current directory.  If you're building a Lynx that is to be used as
 	a kind of restricted shell for users who do not have access to the
 	command line and should not have access to equivalent capabilities,
-	you must disable DirEd with this option.  You can also disable some
-	DirEd functions while allowing others.  If you have disabled DirEd
-	completely, you can ignore all the other DirEd options.
+	you probably want to disable DirEd with this option.  You can also
+	disable some DirEd functions while allowing others.  If you have
+	disabled DirEd completely, you can ignore all the more specific
+	DirEd options.
 
-	All DirEd functions that were enabled on compilation can be disabled
-	or modified at run time via DIRED_MENU symbols in lynx.cfg.
+	All DirEd key functions that were enabled on compilation can be
+	disabled or modified at run time via DIRED_MENU symbols in lynx.cfg.
 
-  --disable-dired-archive		(define ARCHIVE_ONLY)
+  --disable-dired-dearchive		(define ARCHIVE_ONLY)
 	Use this option to prevent DirEd from extracting files from an
 	archive file.
 
@@ -197,9 +212,8 @@ II. Compile instructions -- UNIX
 	Use this option to prevent DirEd from using gzip and gunzip.
 
   --disable-dired-override		(prevent defining OK_OVERRIDE)
-	Lynx users can customize their keymaps by creating private
-	versions of lynx.cfg and modifying them to override the default
-	keymap.  Use this option to prevent DirEd keymap overriding.
+	Normally, in DirEd directory viewing mode some key mappings are
+	overridden.  Use this option to disable DirEd keymap overriding.
 
   --disable-dired-permit		(prevent defining OK_PERMIT)
 	Use this option to prevent DirEd from changing the permissions
@@ -239,17 +253,21 @@ II. Compile instructions -- UNIX
 
   --disable-forms-options		(define NO_OPTION_FORMS)
 	Disable the forms-based options screen.  (See --disable-menu-options).
-	Please note that a few users with broken curses may have problems with
-	popup forms fields.  The default behaviour is to compile both forms and
-	menu options code with FORMS_OPTIONS switch in lynx.cfg, or
-	-forms_options command-line switch.
+	The default behavior is to compile both forms and menu options code
+	with FORMS_OPTIONS switch in lynx.cfg, or -forms_options command-line
+	switch.
 
   --disable-gopher			(define DISABLE_GOPHER)
 	Do not compile-in code used to connect to GOPHER servers.
 
   --disable-full-paths
-  	Use this option to control whether full utility pathnames are used.
-	By default, configure substitutes full pathnames.
+  	Use this option to control whether full pathnames are compiled in for
+	various utilities invoked by lynx as external commands.  By default,
+	full pathnames are compiled in for the the locations where configure
+	finds these commands at configure time.  Affected commands are chmod,
+	compress, cp, gzip, install, mkdir, mv, rm, tar, touch, gunzip, unzip,
+	bzip2, uudecode, zcat, zip, telnet, tn3270, rlogin.  (Not all of them
+	are used on all systems or in all configurations.)
 
   --disable-included-msgs
 	Do not use included messages, for i18n support.  If NLS support is
@@ -262,22 +280,21 @@ II. Compile instructions -- UNIX
 
   --disable-menu-options		(define NO_OPTION_MENU)
 	Disable the menu-style options screen.  (See --disable-forms-options).
-	Please note that a few users with broken curses may have problems with
-	popup forms fields.  The default behaviour is to compile both styles
-	options menu code with FORMS_OPTIONS switch in lynx.cfg, or
-	-forms_options command-line switch.
+	The default behavior is to compile both styles options menu code with
+	FORMS_OPTIONS switch in lynx.cfg, or -forms_options command-line
+	switch.
 
   --disable-news			(define DISABLE_NEWS)
-	Do not compile-in code used to connect to NEWS servers.
+	Do not compile-in code used to connect to NNTP (netnews) servers.
 
   --disable-parent-dir-refs		(define NO_PARENT_DIR_REFERENCE)
   	Use this option to disable "Up-to" parent-links in directory listings.
 
-  --disable-partial			(define DISP_PARTIAL)
+  --disable-partial			(prevent defining DISP_PARTIAL)
 	Turn off code that lets Lynx display parts of a long page while loading
 	it.
 
-  --disable-persistent-cookies		(define EXP_PERSISTENT_COOKIES)
+  --disable-persistent-cookies		(prevent defining EXP_PERSISTENT_COOKIES)
 	Use this option to tell configure whether to compile-in support for
 	saving cookies to a file, for subsequent reuse.  Persistent cookie
 	support will use (or create) the file specified by the 'COOKIE_FILE'
@@ -355,7 +372,7 @@ II. Compile instructions -- UNIX
   --enable-justify-elts			(define EXP_JUSTIFY_ELTS)
 	use experimental element-justification logic.
 
-  --enable-internal-links		(define DONT_TRACK_INTERNAL_LINKS)
+  --enable-internal-links		(prevent defining DONT_TRACK_INTERNAL_LINKS)
 	Disabled by default, this option allows tracking of internal links,
 	a feature which could, however, compromise a secure transaction by
 	forcing inappropriate resubmission of form content.

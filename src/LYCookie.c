@@ -1962,9 +1962,9 @@ PUBLIC char * LYCookie ARGS4(
     domain_entry *de;
 
     CTRACE((tfp, "LYCookie: Searching for '%s:%d', '%s'.\n",
-		(hostname ? hostname : "(null)"),
+		NONNULL(hostname),
 		port,
-		(path ? path : "(null)")));
+		NONNULL(path)));
 
     /*
      *	Search the cookie_list elements in the domain_list

@@ -1,4 +1,4 @@
-/* @Id: Xsystem.c 1.4 Sat, 28 Aug 1999 15:04:13 -0600 dickey @
+/* @Id: Xsystem.c 1.5 Tue, 30 Nov 1999 20:33:02 -0700 dickey @
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -549,6 +549,9 @@ xsystem(char *cmd)
 
 int exec_command(char * cmd, int wait_flag)
 {
+#if defined(__MINGW32__)
+    return system(cmd);
+#else
     PRO *p;
     char *pif;
     int rc = 0;
@@ -584,6 +587,7 @@ int exec_command(char * cmd, int wait_flag)
 	rc = prog_go(p, P_NOWAIT);
 
     return rc;
+#endif
 }
 
 

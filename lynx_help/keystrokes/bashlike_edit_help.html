@@ -11,8 +11,8 @@
 
 Lynx invokes a built-in <em>Line Editor</em> for entering strings in
 response to prompts, in forms, and for email messages if an external editor
-has not been defined.  Administrators can offer several sets of key
-bindings by configuring with --enable-alt-bindings or by adding them in
+has not been defined.  Several sets of key-bindings can be offered
+by configuring with --enable-alt-bindings or by adding them in
 LYEditmap.c before compiling Lynx.  If available,
 they may be selected via the 'o'ptions menu, or by editing lineedit_mode in
 the '.lynxrc' file.
@@ -161,7 +161,9 @@ Passed as specific command:
             M-e      EDITTEXTAREA   C-e C-e
             M-g      GROWTEXTAREA   (none, C-v $ suggested?)
             M-i      INSERTFILE     (none, C-v # suggested?)
-            M-F1     DWIMHELP       (none, F1 suggested)
+            M-&lt;      HOME           M-Home
+            M-&gt;      END            M-End
+            M-F1     DWIMHELP       F1
             M-Find   WHEREIS        C-v /
             M-Select NEXT           C-v n
 

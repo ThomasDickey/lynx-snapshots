@@ -531,11 +531,13 @@ AC_CHECK_FUNCS( \
 	gettimeofday \
 	popen \
 	putenv \
+	rand \
 	readdir \
+	srand \
 	strerror \
 	truncate \
-	vasprintf \
 	unsetenv \
+	vasprintf \
 	waitpid \
 )
 AC_REPLACE_FUNCS( \
@@ -571,13 +573,15 @@ if test $cf_cv_screen != slang ; then
 	CF_COLOR_CURSES
 	CF_SIZECHANGE
 	CF_TTYTYPE
-	AC_CHECK_FUNCS( \
+	CF_CURSES_FUNCS( \
+		assume_default_colors \
 		cbreak \
 		define_key \
 		keypad \
 		resizeterm \
 		use_default_colors \
-		wborder )
+		wborder \
+		wredrawln )
 fi
 
 dnl --------------------------------------------------------------------------
@@ -672,7 +676,7 @@ AC_SUBST(INSTALL_LSS)
 
 use_dft_colors=no
 test ".$cf_cv_screen" = ".slang"                && use_dft_colors=maybe
-test ".$ac_cv_func_use_default_colors" = ".yes" && use_dft_colors=maybe
+test ".$cf_cv_func_use_default_colors" = ".yes" && use_dft_colors=maybe
 
 if test "$use_dft_colors" != no ; then
 AC_MSG_CHECKING(if you want to use default-colors)
@@ -957,13 +961,13 @@ if test ".$use_dired" != ".no" ; then
 	AC_DEFINE(DIRED_SUPPORT)
 
 	AC_MSG_CHECKING(if you wish to allow extracting from archives via DirEd)
-	CF_ARG_DISABLE(dired-archive,
+	CF_ARG_DISABLE(dired-dearchive,
 	[  --disable-dired-archive  disable dearchiving commands],[AC_DEFINE(ARCHIVE_ONLY)])
 	AC_MSG_RESULT($enableval)
 
-	AC_MSG_CHECKING(if you wish to allow users to redefine DirEd keys)
+	AC_MSG_CHECKING(if DirEd mode should override keys)
 	CF_ARG_DISABLE(dired-override,
-	[  --disable-dired-override disable private keymaps],,[AC_DEFINE(OK_OVERRIDE)])
+	[  --disable-dired-override disable DirEd override keymap],,[AC_DEFINE(OK_OVERRIDE)])
 	AC_MSG_RESULT($enableval)
 
 	AC_MSG_CHECKING(if you wish to allow permissions commands via DirEd)

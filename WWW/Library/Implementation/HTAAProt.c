@@ -408,7 +408,7 @@ PRIVATE HTAAProt *HTAAProt_new ARGS3(CONST char *,	cur_docname,
 	} else {
 	    CTRACE((tfp, "HTAAProt_new: %s `%s'\n",
 			"Unable to open protection setup file",
-			(prot_filename ? prot_filename : "(null)")));
+			NONNULL(prot_filename)));
 	}
     }
 

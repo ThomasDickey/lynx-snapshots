@@ -232,6 +232,9 @@ typedef struct _EditFieldData {
 #define LYE_XPMARK  (LYE_SETMARK +1)  /* emacs-like exchange-point-and-mark */
 #define LYE_KILLREG (LYE_XPMARK  +1)  /* emacs-like kill-region */
 #define LYE_YANK    (LYE_KILLREG +1)  /* emacs-like yank */
+#if defined(WIN_EX)
+#define LYE_PASTE (LYE_YANK +1)	  /* ClipBoard to Lynx	   */
+#endif
 /* All preceding values must be within 0x00..0x7f - kw */
 
 /*  The following are meant to be bitwise or-ed:  */
@@ -240,9 +243,6 @@ typedef struct _EditFieldData {
 #define LYE_FORM_LAC 0x1000       /* Flag to pass lynxactioncode given by
 				     lower bits.  Doesn't fit in a char! */
 
-#if defined(WIN_EX)
-#define LYE_PASTE (LYE_AIX +1)	  /* ClipBoard to Lynx	   */
-#endif
 
 #if defined(USE_KEYMAPS)
 extern int lynx_initialize_keymaps NOPARAMS;
@@ -277,7 +277,10 @@ extern void LYSetupEdit PARAMS((
 extern void LYRefreshEdit PARAMS((
 	EditFieldData *	edit));
 extern int EditBinding PARAMS((int ch));		   /* in LYEditmap.c */
-extern int LYRemapEditBinding PARAMS((int xlkc, int lec)); /* in LYEditmap.c */
+extern BOOL LYRemapEditBinding PARAMS((
+	int		xlkc,
+	int		lec,
+	int 		select_edi));			   /* in LYEditmap.c */
 extern int LYKeyForEditAction PARAMS((int lec));	   /* in LYEditmap.c */
 extern int LYEditKeyForAction PARAMS((int lac, int *pmodkey));/* LYEditmap.c */
 extern int LYEdit1 PARAMS((

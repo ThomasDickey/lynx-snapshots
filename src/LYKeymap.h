@@ -8,11 +8,13 @@
 extern BOOLEAN LYisNonAlnumKeyname PARAMS((int ch, int KeyName));
 extern char *key_for_func PARAMS((int func));
 extern char *key_for_func_ext PARAMS((int lac, int context_code));
+extern char *fmt_keys PARAMS((int lkc_first, int lkc_second));
 extern int LYReverseKeymap PARAMS((int KeyName));
-extern int lacname_to_lac PARAMS((CONST char *func));
-extern int lkcstring_to_lkc PARAMS((CONST char *src));
 extern int lookup_keymap PARAMS((int code));
-extern int remap PARAMS((char *key, char *func));
+extern int lacname_to_lac PARAMS((CONST char *func));
+extern int lecname_to_lec PARAMS((CONST char *func));
+extern int lkcstring_to_lkc PARAMS((CONST char *src));
+extern int remap PARAMS((char *key, char *func, BOOLEAN for_dired));
 extern void print_keymap PARAMS((char **newfile));
 extern void reset_emacs_keys NOPARAMS;
 extern void reset_numbers_as_arrows NOPARAMS;
@@ -32,8 +34,9 @@ typedef unsigned short LYKeymap_t;
 extern LYKeymap_t keymap[KEYMAP_SIZE]; /* main keymap matrix */
 
 #ifdef EXP_KEYBOARD_LAYOUT
+typedef unsigned short LYKbLayout_t;
 extern int current_layout;
-extern LYKeymap_t * LYKbLayouts[];
+extern LYKbLayout_t * LYKbLayouts[];
 extern char * LYKbLayoutNames[];
 extern int LYSetKbLayout PARAMS((char *layout_id));
 #endif
@@ -43,10 +46,13 @@ extern LYKeymap_t key_override[];
 #endif
 
 /* * *  LynxKeyCodes  * * */
+#define LKC_ISLECLAC	0x8000	/* flag: contains lynxaction + editaction */
 #define LKC_MOD1	0x4000	/* a modifier bit - currently for ^x-map */
 #define LKC_MOD2	0x2000	/* another one - currently for esc-map */
 #define LKC_MOD3	0x1000	/* another one - currently for double-map */
 #define LKC_ISLAC	0x0800	/* flag: lynxkeycode already lynxactioncode */
+
+/* Used to distinguish internal Lynx keycodes of (say) extended ncurses once. */
 #define LKC_ISLKC	0x0400	/* flag: already lynxkeycode (not native) */
 		     /* 0x0400  is MOUSE_KEYSYM for slang in LYStrings.c */
 #define LKC_MASK	0x07FF	/* mask for lynxkeycode proper */
@@ -54,27 +60,48 @@ extern LYKeymap_t key_override[];
 #define LKC_DONE	0x07FE	/* special value - operation done, not-a-key */
 
 /* * *  LynxActionCodes  * * */
-#define LAC_MASK	0x00FF	/* mask for lynxactioncode - must cover all
+#define LAC_SHIFT	8	/* shift for lynxactioncode - must not
+				   overwrite any assigned LYK_* values */
+#define LAC_MASK	((1<<LAC_SHIFT)-1)
+				/* mask for lynxactioncode - must cover all
 				   assigned LYK_* values */
 
 
+#if 0
+/*  Substitute a single actioncode given a double one - NOT USED */
+#define LKC2_TO_LKC(c,n)   (((c) == -1 || !((c) & LKC_ISLECLAC)) ? (c) : \
+			    ((n) == 1) ? (((c) & LAC_MASK) | LKC_ISLAC) : \
+			    (((((c)&~LKC_ISLECLAC)>>LAC_SHIFT) & LAC_MASK) | LKC_ISLECLAC))
+#endif /* 0 */
+
+/*  Return lkc masking single actioncode, given an lkc masking a lac + lec */
+#define LKC2_TO_LKC(c)   (((c) == -1 || !((c) & LKC_ISLECLAC)) ? (c) : \
+			    (((c) & LAC_MASK) | LKC_ISLAC))
+
+/*  Return lynxeditactioncode, given an lkc masking a lac + lec */
+#define LKC2_TO_LEC(c)   (((c) == -1 || !((c) & LKC_ISLECLAC)) ? (c) : \
+			    ((((c)&~LKC_ISLECLAC)>>LAC_SHIFT) & LAC_MASK))
+
 /*  Convert lynxkeycode to lynxactioncode.  Modifiers are dropped.  */
 #define LKC_TO_LAC(ktab,c) (((c) == -1) ? ktab[0] : \
-			    ((c) & LKC_ISLAC) ? ((c) & LAC_MASK) : \
+			    ((c) & (LKC_ISLECLAC|LKC_ISLAC)) ? ((c) & LAC_MASK) : \
 			    ktab[((c) & LKC_MASK) + 1])
 
 
 /*  Mask lynxactioncode as a lynxkeycode.  */
 #define LAC_TO_LKC0(a) ((a)|LKC_ISLAC)
 
+/*  Mask a lynxactioncode and an editactioncode as a lynxkeycode.  */
+#define LACLEC_TO_LKC0(a,b) ((a)|((b)<<LAC_SHIFT)|LKC_ISLECLAC)
+
 /*  Convert lynxactioncode to a lynxkeycode, attempting reverse mapping.  */
 #define LAC_TO_LKC(a) ((LYReverseKeymap(a)>=0)?LYReverseKeymap(a):LAC_TO_LKC0(a))
 
 /*  Simplify a lynxkeycode:
-    attempt reverse mapping if a masked lynxactioncode, drop modifiers.  */
-#define LKC_TO_C(c) ((c&LKC_ISLAC)? LAC_TO_LKC(c&LAC_MASK) : (c&LKC_MASK))
+    attempt reverse mapping if a single masked lynxactioncode, drop modifiers.  */
+#define LKC_TO_C(c) ((c&LKC_ISLECLAC)? c : (c&LKC_ISLAC)? LAC_TO_LKC(c&LAC_MASK) : (c&LKC_MASK))
 
-#define LKC_HAS_ESC_MOD(c) (c >= 0 && (c&LKC_MOD2))
+#define LKC_HAS_ESC_MOD(c) (c >= 0 && !(c&LKC_ISLECLAC) && (c&LKC_MOD2))
 
 
 /* *  The defined LynxActionCodes  * */
@@ -204,7 +231,7 @@ typedef enum {
   , LYK_CHG_KCODE
 #endif /* SH_EX */
 
-} LYKeymapCodes;
+} LYKeymapCode;
 
 
 #endif /* LYKEYMAP_H */

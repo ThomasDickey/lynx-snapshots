@@ -13,13 +13,21 @@
 
 #include <LYLeaks.h>
 
+#ifdef SAVE_TIME_NOT_SPACE
+#define CELLS_GROWBY 16
+#define ROWS_GROWBY 16
+#else
 #define CELLS_GROWBY 2
 #define ROWS_GROWBY 2
+#endif
+
 #define MAX_STBL_POS (LYcols-1)
 
 /* must be different from HT_ALIGN_NONE and HT_LEFT, HT_CENTER etc.: */
 #define RESERVEDCELL (-2)  /* cell's alignment field is overloaded, this
 			      value means cell was reserved by ROWSPAN */
+#define EOCOLG (-2)  	/* sumcols' Line field isn't used for line info, this
+			      special value means end of COLGROUP */
 typedef enum {
     CS_invalid = -1,
     CS_new     =  0,
@@ -76,6 +84,7 @@ struct _STable_info {
 	int	ncolinfo;		/* number of COL info collected */
 	STable_cellinfo * sumcols; /* for summary (max len/pos) col info */
 	STable_rowinfo * rows;
+	STable_rowinfo	rowspans2eog;
 	short	alignment;	/* global align attribute for this table */
 	short	rowgroup_align;	/* align default for current group of rows */
 	short	pending_colgroup_align;
@@ -144,7 +153,7 @@ PRIVATE int Stbl_finishRowInTable PARAMS((
 PUBLIC struct _STable_info * Stbl_startTABLE ARGS1(
     short,		alignment)
 {
-    STable_info *me = (STable_info *) calloc(1, sizeof(STable_info));
+    STable_info *me = typecalloc(STable_info);
     if (me) {
 	me->alignment = alignment;
 	me->rowgroup_align = HT_ALIGN_NONE;
@@ -172,6 +181,7 @@ PUBLIC void Stbl_free ARGS1(
 	    free_rowinfo(me->rows + i);
 	FREE(me->rows);
     }
+    free_rowinfo(&me->rowspans2eog);
     if (me)
 	FREE(me->sumcols);
     FREE(me);
@@ -407,11 +417,14 @@ PRIVATE int Stbl_addCellToRow ARGS9(
 	    growby += CELLS_GROWBY;
 	if (growby) {
 	    if (me->allocated == 0 && !me->cells) {
-		cells = calloc(growby, sizeof(STable_cellinfo));
+		cells = typecallocn(STable_cellinfo, growby);
 	    } else {
 		cells = realloc(me->cells,
 				  (me->allocated + growby)
 				  * sizeof(STable_cellinfo));
+                for (i = 0; cells && i < growby; i++) {
+		    cells[me->allocated + i].alignment = HT_ALIGN_NONE;
+                }
 	    }
 	    if (cells) {
 		me->allocated += growby;
@@ -426,8 +439,6 @@ PRIVATE int Stbl_addCellToRow ARGS9(
     me->cells[me->ncells].pos = *ppos;
     me->cells[me->ncells].len = -1;
     me->cells[me->ncells].colspan = colspan;
-    me->cells[me->ncells].alignment =
-	(alignment==HT_ALIGN_NONE) ? me->alignment : alignment;
 
     if (alignment != HT_ALIGN_NONE)
 	    me->cells[me->ncells].alignment = alignment;
@@ -466,6 +477,9 @@ PRIVATE int Stbl_reserveCellsInRow ARGS3(
 			(me->allocated + growby)
 			* sizeof(STable_cellinfo));
 	if (cells) {
+	    for (i = 0; i < growby; i++) {
+		cells[me->allocated + i].alignment = HT_ALIGN_NONE;
+	    }
 	    me->allocated += growby;
 	    me->cells = cells;
 	} else {
@@ -883,8 +897,10 @@ PRIVATE int Stbl_finishCellInRow ARGS5(
 }
 
 /*
- *  Reserve cells, of colspan=spolspan each, in (rowspan-1) rows after
- *  the current row.
+ *  Reserve cells, each of given colspan, in (rowspan-1) rows after
+ *  the current row of rowspan>1.  If rowspan==0, use special 'row'
+ *  rowspans2eog to keep track of rowspans that are to remain in effect
+ *  until the end of the row group (until next THEAD/TFOOT/TBODY) or table.
  */
 PRIVATE int Stbl_reserveCellsInTable ARGS4(
     STable_info *,	me,
@@ -897,27 +913,51 @@ PRIVATE int Stbl_reserveCellsInTable ARGS4(
     int i;
     if (me->nrows <= 0)
 	return -1;		/* must already have at least one row */
+
+    if (rowspan == 0) {
+	if (!me->rowspans2eog.cells) {
+	    me->rowspans2eog.cells = typecallocn(STable_cellinfo, icell + colspan);
+	    if (!me->rowspans2eog.cells)
+		return 0;	/* fail silently */
+	    else
+		me->rowspans2eog.allocated = icell + colspan;
+	}
+	Stbl_reserveCellsInRow(&me->rowspans2eog, icell, colspan);
+    }
+
     growby = me->nrows + rowspan - 1 - me->allocated_rows;
     if (growby > 0) {
 	rows = realloc(me->rows,
 		       (me->allocated_rows + growby)
 		       * sizeof(STable_rowinfo));
 	if (!rows)
-	    return 0; /* ignore silently, maybe someone said ROWSPAN=9999999 */
+	    return 0; /* ignore silently, no free memory, may be recoverable */
 	for (i = 0; i < growby; i++) {
 	    row = rows + me->allocated_rows + i;
 	    row->allocated = 0;
+	    if (!me->rowspans2eog.allocated) {
+		row->cells = NULL;
+	    } else {
+		row->cells = typecallocn(STable_cellinfo,
+					 me->rowspans2eog.allocated);
+		if (row->cells) {
+		    row->allocated = me->rowspans2eog.allocated;
+		    memcpy(row->cells, me->rowspans2eog.cells,
+			   row->allocated * sizeof(STable_cellinfo));
+		}
+	    }
 	    row->ncells = 0;
 	    row->fixed_line = NO;
-	    row->cells = NULL;
 	    row->alignment = HT_ALIGN_NONE;
 	}
 	me->allocated_rows += growby;
 	me->rows = rows;
     }
-    for (i = me->nrows; i < me->nrows + rowspan - 1; i++) {
+    for (i = me->nrows;
+	 i < (rowspan == 0 ? me->allocated_rows : me->nrows + rowspan - 1);
+	 i++) {
 	if (!me->rows[i].allocated) {
-	    me->rows[i].cells = calloc(icell + colspan, sizeof(STable_cellinfo));
+	    me->rows[i].cells = typecallocn(STable_cellinfo, icell + colspan);
 	    if (!me->rows[i].cells)
 		return 0;	/* fail silently */
 	    else
@@ -926,6 +966,22 @@ PRIVATE int Stbl_reserveCellsInTable ARGS4(
 	Stbl_reserveCellsInRow(me->rows + i, icell, colspan);
     }
     return 0;
+}
+
+/* Remove reserved cells in trailing rows that were added for rowspan,
+ * to be used when a THEAD/TFOOT/TBODY ends. */
+PRIVATE void Stbl_cancelRowSpans ARGS1(
+    STable_info *,	me)
+{
+    int i;
+    for (i = me->nrows; i < me->allocated_rows; i++) {
+	if (!me->rows[i].ncells) { /* should always be the case */
+	    FREE(me->rows[i].cells);
+	    me->rows[i].allocated = 0;
+	}
+    }
+    free_rowinfo(&me->rowspans2eog);
+    me->rowspans2eog.allocated = 0;
 }
 
 /*
@@ -967,17 +1023,30 @@ PUBLIC int Stbl_addRowToTable ARGS3(
 	    growby += ROWS_GROWBY;
 	if (growby) {
 	    if (me->allocated_rows == 0 && !me->rows) {
-		rows = calloc(growby, sizeof(STable_rowinfo));
+		rows = typecallocn(STable_rowinfo, growby);
 	    } else {
 		rows = realloc(me->rows,
 				  (me->allocated_rows + growby)
 				  * sizeof(STable_rowinfo));
 		for (i = 0; rows && i < growby; i++) {
 		    row = rows + me->allocated_rows + i;
-		    row->allocated = 0;
+		    if (!me->rowspans2eog.allocated) {
+			row->allocated = 0;
+			row->cells = NULL;
+		    } else {
+			row->cells = typecallocn(STable_cellinfo,
+						 me->rowspans2eog.allocated);
+			if (row->cells) {
+			    row->allocated = me->rowspans2eog.allocated;
+			    memcpy(row->cells, me->rowspans2eog.cells,
+				   row->allocated * sizeof(STable_cellinfo));
+			} else {
+			    FREE(rows);
+			    break;
+			}
+		    }
 		    row->ncells = 0;
 		    row->fixed_line = NO;
-		    row->cells = NULL;
 		    row->alignment = HT_ALIGN_NONE;
 		}
 	    }
@@ -1084,6 +1153,29 @@ PRIVATE void update_sumcols0 ARGS7(
     }
 }
 
+PRIVATE int get_remaining_colspan ARGS5(
+    STable_rowinfo *,	me,
+    STable_cellinfo *,	colinfo,
+    int,		ncolinfo,
+    int,		colspan,
+    int,		ncols_sofar)
+{
+    int i;
+    int last_colspan = me->ncells ?
+	me->cells[me->ncells - 1].colspan : 1;
+
+    if (ncolinfo == 0 || me->ncells + last_colspan > ncolinfo) {
+	colspan = HTMAX(TRST_MAXCOLSPAN,
+			ncols_sofar - (me->ncells + last_colspan - 1));
+    } else {
+	for (i = me->ncells + last_colspan - 1; i < ncolinfo - 1; i++)
+	    if (colinfo[i].Line == EOCOLG)
+		break;
+	colspan = i - (me->ncells + last_colspan - 2);
+    }
+    return colspan;
+}
+
 /*
  * Returns -1 on error, otherwise 0.
  */
@@ -1110,6 +1202,10 @@ PUBLIC int Stbl_addCellToTable ARGS7(
     Stbl_finishCellInTable(me, YES,
 			   lineno, pos);
     lastrow = me->rows + (me->nrows - 1);
+    if (colspan == 0) {
+	colspan = get_remaining_colspan(lastrow, me->sumcols, me->ncolinfo,
+					colspan, me->ncols);
+    }
     ncells = lastrow->ncells;	/* remember what it was before adding cell. */
     icell = Stbl_addCellToRow(lastrow, me->sumcols, me->ncolinfo, s,
 			      colspan, alignment, isheader,
@@ -1119,7 +1215,7 @@ PUBLIC int Stbl_addCellToTable ARGS7(
     if (me->nrows == 1 && me->startline < lastrow->Line)
 	me->startline = lastrow->Line;
 
-    if (rowspan > 1) {
+    if (rowspan != 1) {
 	Stbl_reserveCellsInTable(me, icell, colspan, rowspan);
 	/* me->rows may now have been realloc'd, make lastrow valid pointer */
 	lastrow = me->rows + (me->nrows - 1);
@@ -1131,7 +1227,7 @@ PUBLIC int Stbl_addCellToTable ARGS7(
 	    growby += CELLS_GROWBY;
 	if (growby) {
 	    if (me->allocated_sumcols == 0 && !me->sumcols) {
-		sumcols = calloc(growby, sizeof(STable_cellinfo));
+		sumcols = typecallocn(STable_cellinfo, growby);
 	    } else {
 		sumcols = realloc(me->sumcols,
 				  (me->allocated_sumcols + growby)
@@ -1141,6 +1237,8 @@ PUBLIC int Stbl_addCellToTable ARGS7(
 		    sumcol->pos = sumcols[me->allocated_sumcols-1].pos;
 		    sumcol->len = 0;
 		    sumcol->colspan = 0;
+		    sumcol->Line = 0;
+		    sumcol->alignment = HT_ALIGN_NONE;
 		}
 	    }
 	    if (sumcols) {
@@ -1342,6 +1440,8 @@ PUBLIC int Stbl_addColInfo ARGS4(
 	if (me->pending_colgroup_next > me->ncolinfo)
 	    me->ncolinfo = me->pending_colgroup_next;
 	me->pending_colgroup_next = me->ncolinfo + colspan;
+	if (me->ncolinfo > 0)
+	    me->sumcols[me->ncolinfo -  1].Line = EOCOLG;
 	me->pending_colgroup_align = alignment;
     } else {
 	for (i = me->pending_colgroup_next - 1;
@@ -1359,7 +1459,7 @@ PUBLIC int Stbl_addColInfo ARGS4(
 	    growby += CELLS_GROWBY;
 	if (growby) {
 	    if (me->allocated_sumcols == 0) {
-		sumcols = calloc(growby, sizeof(STable_cellinfo));
+		sumcols = typecallocn(STable_cellinfo, growby);
 	    } else {
 		sumcols = realloc(me->sumcols,
 				  (me->allocated_sumcols + growby)
@@ -1369,6 +1469,7 @@ PUBLIC int Stbl_addColInfo ARGS4(
 		    sumcol->pos = sumcols[me->allocated_sumcols-1].pos;
 		    sumcol->len = 0;
 		    sumcol->colspan = 0;
+		    sumcol->Line = 0;
 		}
 	    }
 	    if (sumcols) {
@@ -1394,8 +1495,11 @@ PUBLIC int Stbl_addColInfo ARGS4(
 PUBLIC int Stbl_finishColGroup ARGS1(
     STable_info *,	me)
 {
-    if (me->pending_colgroup_next > me->ncolinfo)
+    if (me->pending_colgroup_next >= me->ncolinfo) {
 	me->ncolinfo = me->pending_colgroup_next;
+	if (me->ncolinfo > 0)
+	    me->sumcols[me->ncolinfo -  1].Line = EOCOLG;
+    }
     me->pending_colgroup_next = 0;
     me->pending_colgroup_align = HT_ALIGN_NONE;
     return 0;
@@ -1405,6 +1509,7 @@ PUBLIC int Stbl_addRowGroup ARGS2(
     STable_info *,	me,
     short,		alignment)
 {
+    Stbl_cancelRowSpans(me);
     me->rowgroup_align = alignment;
     return 0;			/* that's all! */
 }
@@ -1469,7 +1574,7 @@ PRIVATE int get_fixup_positions ARGS4(
     if (!me)
 	return -1;
     while (i < me->ncells) {
-	next_i = i + me->cells[i].colspan;
+	next_i = i + HTMAX(1, me->cells[i].colspan);
 	if (me->cells[i].Line != me->Line) {
 	    if (me->cells[i].Line > me->Line)
 		break;

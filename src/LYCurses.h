@@ -166,6 +166,7 @@ extern BOOLEAN setup PARAMS((char *terminal));
 extern void LYnoVideo PARAMS((int mask));
 extern void LYstartTargetEmphasis NOPARAMS;
 extern void LYstopTargetEmphasis NOPARAMS;
+extern void LYtouchline PARAMS((int row));
 extern void LYwaddnstr PARAMS((WINDOW *w, CONST char *s, size_t len));
 
 #define LYaddstr(s)      LYwaddnstr(stdscr, s, strlen(s))

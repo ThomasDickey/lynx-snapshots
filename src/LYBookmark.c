@@ -472,12 +472,15 @@ PUBLIC void remove_bookmark_link ARGS2(
 #ifdef VMS
     char filename_buffer[NAM$C_MAXRSS+12];
     char newfile[NAM$C_MAXRSS+12];
+#define keep_tempfile FALSE
 #else
     char filename_buffer[LY_MAXPATH];
     char newfile[LY_MAXPATH];
+    BOOLEAN keep_tempfile = FALSE;
 #ifdef UNIX
     struct stat stat_buf;
     mode_t mode;
+    BOOLEAN regular = FALSE;
 #endif /* UNIX */
 #endif /* VMS */
     char homepath[LY_MAXPATH];
@@ -508,6 +511,7 @@ PUBLIC void remove_bookmark_link ARGS2(
      *	Explicitly preserve bookmark file mode on Unix. - DSL
      */
     if (stat(filename_buffer, &stat_buf) == 0) {
+	regular = (S_ISREG(stat_buf.st_mode) && stat_buf.st_nlink == 1);
 	mode = ((stat_buf.st_mode & 0777) | 0600); /* make it writable */
 	(void) chmod(newfile, mode);
 	if ((nfp = LYReopenTemp(newfile)) == NULL) {
@@ -563,11 +567,16 @@ PUBLIC void remove_bookmark_link ARGS2(
 	}
     }
 
+    FREE(buf);
     CTRACE((tfp, "remove_bookmark_link: files: %s %s\n",
 			newfile, filename_buffer));
 
     fclose(fp);
     fp = NULL;
+    if (fflush(nfp) == EOF) {
+	CTRACE((tfp, "fflush(nfp): %s", LYStrerror(errno)));
+	goto failure;
+    }
     LYCloseTempFP(nfp);
     nfp = NULL;
 #ifdef DOSPATH
@@ -580,12 +589,39 @@ PUBLIC void remove_bookmark_link ARGS2(
      *	can preserve the original ownership of the file, provided that
      *	it is writable by the current process.
      *	Changed to copy  1998-04-26 -- gil
+     *  But if the copy fails, for example because the filesystem is full,
+     *  we are left with a corrupt bookmark file.  Changed back to use
+     *  the previous mechanism [try rename(), then mv for EXDEV], except
+     *  in usual cases (not a regular file e.g., symbolic link, or has hard
+     *  links).  This will let bookmarks survive a filesystem full condition
+     *  in the "normal" case (bookmark is on same filesystem as home directory,
+     *  is a regular file, has no additional hard links).
+     *  If we first tried LYCopyFile, and that fails, also fall back to trying
+     *  the other stuff.  That gives a chance to recover in case the LYCopyFile
+     *  left a corrupt target file.
+     *  If there is an error, and that error may mean that the bookmark file
+     *  has been corrupted, don't remove the temporary newfile (which should
+     *  always be uncorrupted) in place, it may still be used to recover
+     *  manually.  If this applies, produce an additional message to that
+     *  effect.  The temp file will still be removed by normal program exit
+     *  cleanup. - kw 1999-11-12
      */
-    if (LYCopyFile(newfile, filename_buffer) == 0)
-	return;
-    HTAlert(BOOKTEMP_COPY_FAIL);
-#else  /* !UNIX */
+    if (!regular) {
+	if (LYCopyFile(newfile, filename_buffer) == 0) {
+	    LYRemoveTemp(newfile);
+	    return;
+	}
+	sleep(AlertSecs);	/* give a chance to see error from cp - kw */
+	HTUserMsg(BOOKTEMP_COPY_FAIL);
+	keep_tempfile = TRUE;
+    }
+#endif  /* UNIX */
+
     if (rename(newfile, filename_buffer) != -1) {
+#ifdef UNIX
+	if (regular)
+	    chmod(filename_buffer, stat_buf.st_mode & 07777);
+#endif /* UNIX */
 	HTSYS_purge(filename_buffer);
 	return;
     } else {
@@ -615,10 +651,20 @@ PUBLIC void remove_bookmark_link ARGS2(
 	    HTAddParam(&buffer, MV_FMT, 2, newfile);
 	    HTAddParam(&buffer, MV_FMT, 3, filename_buffer);
 	    HTEndParam(&buffer, MV_FMT, 3);
-	    LYSystem(buffer);
-	    FREE(buffer);
-	    return;
+	    if (LYSystem(buffer) == 0) {
+#ifdef UNIX
+		if (regular)
+		    chmod(filename_buffer, stat_buf.st_mode & 07777);
+#endif /* UNIX */
+		FREE(buffer);
+		return;
+	    } else {
+		FREE(buffer);
+		keep_tempfile = TRUE;
+		goto failure;
+	    }
 	}
+	CTRACE((tfp, "rename(): %s", LYStrerror(errno)));
 #endif /* _WINDOWS */
 #endif /* !VMS */
 
@@ -630,15 +676,21 @@ PUBLIC void remove_bookmark_link ARGS2(
 	if (TRACE)
 	    perror("renaming the file");
     }
-#endif /* UNIX */
+
 
 failure:
     FREE(buf);
     HTAlert(BOOKMARK_DEL_FAILED);
-    LYCloseTempFP(nfp);
+    if (nfp)
+	LYCloseTempFP(nfp);
     if (fp != NULL)
 	fclose(fp);
-    LYRemoveTemp(newfile);
+    if (keep_tempfile) {
+	HTUserMsg2(gettext("File may be recoverable from %s during this session"),
+		   newfile);
+    } else {
+	LYRemoveTemp(newfile);
+    }
 }
 
 /*

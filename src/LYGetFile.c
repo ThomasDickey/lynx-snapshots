@@ -317,11 +317,6 @@ Try_Redirected_URL:
 		    /* show compile-time settings */
 		    return(lynx_compile_opts(doc));
 #endif
-		} else if (url_type == LYNXMESSAGES_URL_TYPE) {
-			/* Uh! */
-			LYforce_no_cache = TRUE;
-			LYoverride_no_cache = FALSE;
-			/* continue */
 
 #ifndef DISABLE_NEWS
 		} else if (url_type == NEWSPOST_URL_TYPE ||
@@ -451,6 +446,9 @@ Try_Redirected_URL:
 		    }
 #endif
 
+#ifdef DIRED_SUPPORT
+		    lynx_edit_mode = FALSE;
+#endif /* DIRED_SUPPORT */
 		    if (!HTLoadAbsolute(&WWWDoc)) {
 			return(NOT_FOUND);
 		    }
@@ -714,6 +712,10 @@ Try_Redirected_URL:
 			WWWDoc.isHEAD = doc->isHEAD;
 			WWWDoc.safe = doc->safe;
 			status = HTLoadAbsolute(&WWWDoc);
+#ifdef DIRED_SUPPORT
+		    } else {
+			lynx_edit_mode = FALSE;
+#endif /* DIRED_SUPPORT */
 		    }
 		    return(status);
 
@@ -1497,16 +1499,26 @@ PRIVATE int fix_httplike_urls ARGS2(
 	if (!LYIsHtmlSep(*(slash-1)) || *(slash-2) != ':') {
 	    return(0);
 	}
-	if ((type == HTTP_URL_TYPE ||
-	     type == HTTPS_URL_TYPE) &&
-	    ((slash-2) - strchr(doc->address, ':'))) {
+	if (type == HTTP_URL_TYPE ||
+	    type == HTTPS_URL_TYPE) {
+	    if ((slash-2) - strchr(doc->address, ':')) {
 	    /*
 	     *  Turns out we were not looking at the right slash after all,
 	     *  there must have been more than one "://" which is valid
 	     *  at least for http URLs (later occurrences can be part of
 	     *  a query string, for example), so leave this alone, too. - kw
 	     */
-	    return(0);
+		return(0);
+	    }
+	    if (strchr(doc->address, '?')) {
+		/*
+		 *  If there is a question mark that appears to be part
+		 *  of the hostname, don't append anything either. Leave
+		 *  it to HTParse to interpret the question mark as ending
+		 *  the hostname. - kw
+		 */
+		return(0);
+	    }
 	}
     }
     CTRACE((tfp, "fix_httplike_urls: URL '%s'\n", doc->address));

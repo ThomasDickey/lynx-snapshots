@@ -1,9 +1,275 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-11-30 (2.8.3dev.16)
+* ifdef'd some places for MINGW32 (diffs from Victor Schneider)
+* remove 'host' variable in LYGetHostByName() that obscured module-level
+  'host[]' array in HTTCP.c for _WINDOWS_NSL configuration (patch by HS,
+  discussion by KW) -TD
+* the Newline variable is now PRIVATE except the mouse code in LYStrings.c -LP
+* modify HTDOS.c for Wattcp targets (Watt-32 and original wattcp).  When Lynx
+  is sitting idle in getxkey() waiting for a keypress, no network functions are
+  called.  Hence no sockets are procesessed, "ICMP Echo replies" is sent etc.
+  This patch has been tested with SLang and '-DDJGPP_KEYHANDLER' I'm not sure
+  how to hook into 'SLkp_getkey()' or keyboard polling in performed under raw
+  PCcurses (Gisle Vanem <gvanem@eunet.no>)
+* update docs for -tna instead of --sticky_inputs -KW
+* document extended KEYMAP syntax in lynx.cfg -KW
+* update Users Guide for KEYMAP changes, especially the TEXTAREA-related
+  sections -KW
+* move text on ^V a bit to better place, provide a couple links to it -KW
+* add blurb about TRST to Users Guide.  Also mention external scripts for table
+  handling -KW
+* revise section in Supported URLs on internal schemes.  Toned down, provide
+  rationale, give examples -KW
+* fix a few typos in README.TRST -LP
+* use 'rand()' in NewSecureValue() -TD
+* use a random number rather than a counter to name temporary files -TD
+* change LYReadCFG.c to accept any leading punctuation in lynx.cfg as a comment
+  delimiter -TD
+* eliminate some clutter with typecalloc/typecallocn macros -TD
+* eliminate some clutter with new function LYBadHTML() -TD
+* add checks for null pointers in CTRACE statements in HTML.c (based on report
+  by LV) -TD
+* change realloc calls in SAVE_TIME_NOT_SPACE ifdef in StrAllocVsprintf() to
+  HTalloc, since older machines (e.g., SunOS 4.x) do not necessarily handle a
+  null pointer parameter to realloc -TD
+* correct ordering of command-line options in LYMain.c -TD
+* updates for files in lynx_help & keystrokes -PW
+* clarify `General Configuration Instructions (all ports)' in INSTALLATION -PW
+* remove "your lynx.cfg"/"compiletime settings" from '='Info Page -LP
+* add a note to Lynx_Users_Guide.html#lynx.cfg on "g lynxcfg:" -LP,HN
+* change LYNXCOMPILEOPTS: to a link from LYNXCFG:  -LP
+* slightly reorganize partial mode logic:  'display_partial' variable is now
+  initialized directly in HText_new(), no need for specialized semaphore any
+  more -LP
+* Allow KEYMAP directives in lynx.cfg of extended form
+  KEYMAP:lynxkey:lynxaction:editaction[:sel], where lynxkey and lynxaction are
+  as before, editaction is a line-editor action like FORW, BACK, ERASE etc.
+  and sel selects the line-editor style to be affected (as a number, starting
+  with 1 for the Default Binding; or 0 for all styles (the default); or a
+  negative number -n meaning "all line-editor styles except n").  See Line
+  Editor Help pages for keywords to use as editaction.  This includes PASS
+  (which was already implemented), for "passing" on the key when line-editing
+  form fields so that the normal lynxaction will be invoked.
+  (KEYMAP:lynxkey:lynxaction:DIRED is also still possible for defining a Dired
+  mode binding).
+  This is based on a patch from IZ which introduced combined definitions
+  in a .lynx-keymaps file in the form:
+     setkey "\200s" LAC:LEFT_LINK/BACKW     # C-left
+     setkey "\200t" LAC:RIGHT_LINK/FORWW    # C-right
+  Combined definitions in .lynx-keymaps are also supported in this patch, but
+  the syntax was changed to use another ':' instead of '/' as separator.  Note
+  that there is no need to support .lynx-keymaps (i.e., compile with
+  USE_KEYMAPS defined) for using the extended KEYMAP lynx.cfg directive with
+  this patch -KW
+* avoid access to uninitialized members in TRSTable.c -KW
+* limit span values accepted for TRST with TRST_MAXCOLSPAN and TRST_MAXROWSPAN,
+  which can be changed in userdefs.h.  Without imposing a limit, attempts to
+  trick lynx into allocating huge blocks of memory (which might cause thrashing
+  without apparent reason) with something like ROWSPAN=10000000 are just too
+  easy -KW
+* moved definition of SAVE_TIME_NOT_SPACE to userdefs.h.  You may want to
+  undefine it for a platform where running out of memory is a frequent problem
+  (DOS?), although the effect won't be very pronounced.  Used in TRST code to
+  affect size of some allocations (also used as before for HTSprintf0/HTSprinf)
+  -KW
+* implement COLSPAN=0 and ROWSPAN=0 according to HTML 4.01 (not HTML 4.0).  The
+  span extends until the end of the current column group and row group (i.e.
+  next THEAD/TFOOT/TBODY), respectively; or until the end of the row or table,
+  respecitively, if there is no containing group (thus acting as per HTML 4.0).
+  Also cancel effect of all ROWSPANs at a THEAD/TFOOT/TBODY boundary (problem
+  with other browser described and behavior proposed by G.  James Berigan in
+  <http://www.war-of-the-worlds.org/html/span-vs-group.html>) -KW
+* 'prev_target' is now PRIVATE to LYMainLoop.c [defined outside of mainloop()];
+  this undoes some dev.15 changes.  -LP, KW
+* replace HText_pageDisplay() calls from partial mode (LYUtils.c and
+  HTFormat.c) with LYMainLoop_pageDisplay() function implemented in
+  LYMainLoop.c, it simply calls HText_pageDisplay() but has access to
+  LYMainLoop.c PRIVATE variables.  -LP, KW
+* make ^X a prefix key in all Line Edit styles.  That means ^V should never be
+  needed any more to invoke the special textarea commands (but it's still
+  supported).  Updates to help files to reflect this change -KW
+* don't produce a link from the KEYMAP page to a help file.  The one we used to
+  use doesn't really help -KW
+* correction in code executed after textarea external editing (that determines
+  when to prompt for re-wrapping):  use start_anchor not anchor_ptr.  Without
+  this correction, invalid memory access could occur.  (This was probably also
+  responsible for producing the prompt when it shouldn't be produced in some
+  cases, as has been reported.) -KW
+* some tweaks of Novice mode help lines:  don't show wrong key "to delete all
+  text in field" (FORM_NOVICELINE_TWO); replaced an occurrence of <delete> with
+  <backspace>.  In some cases (e.g., disabled fields), prefer no info to wrong
+  info -KW
+* extended KEYMAP option:  additional field can specify DIRED to request
+  mapping in the Dired mode key_override table rather than the normal keymap
+  table.  Documented the DIRED field and default override mapping in lynx.cfg
+  -KW
+* corrected KEYMAP display for dired mode.  It could display the normal binding
+  when that wouldn't actually be used, for example if a key is bound to
+  DO_NOTHING for DIRED.  The logic deciding whether to show a separate line for
+  uppercase letters was only looking at the normal keymap -KW
+* reset the edit_mode flag (indication of Dired mode) in various places, so the
+  flag doesn't stat TRUE after a new page has been loaded.  For example,
+  invoking the forms based 'O'ptions page from a Dired directory view would
+  leave the Dired key bindings enabled within the Options page -KW
+* for LYNXMESSAGES:  page of recent statusline messages, removed setting of the
+  LYforce_no_cache flag in getfile().  Set the flag in LYMainLoop.c instead,
+  but only for following a link.  This makes the page act more like a normal
+  no-cache document, for example returning to it via PREV_DOC does not cause an
+  automatic update.  The special handling in LYMainLoop.c is necessary because
+  the link to LYNXMESSAGES:  appears on the History Page, and following a link
+  from the History Page (as well as some other generated user interface pages)
+  normally implies overriding of no-cache behavior which we don't want in this
+  case -KW
+* in LYNXMESSAGES:  page, number recent statusline messages in historic order,
+  starting with 1 for the oldest.  This should make it more obvious that they
+  are listed latest-first.  Add "(No messages yet)" text if there are no
+  messages.  Removed generation of invalid <pre> -KW
+* use a temporary file instead of the normal .lynxrc file for saving and
+  restoring current settings in reload_read_cfg().  This avoids unexpected side
+  effects of lynx.cfg reloading (LYNXCFG://reload action), i.e.  silent
+  modification or first-time generation of .lynxrc contents.  In principle this
+  should make reloading of lynx.cfg usable for accounts that don't allow saving
+  of personal settings (i.e.  option_save restriction, implied by -anonymous)
+  if other restrictions don't forbid it; but currently the option_save
+  restriction is still obeyed for saving to the temporary file (so that
+  reloading of lynx.cfg is prevented) -KW
+* tweaks for LYNXCFG:  and LYNXCOMPILEOPTS:  pages:  honor REUSE_TEMPFILES
+  setting if pages need to be regenerated, and clean up the memory for holding
+  the file URLs in free_lynx_cfg().  Recover if the tempfile has unexpectedly
+  disappeared, by regenerating it.  Also regenerate tempfile if NOCACHE key
+  ('x') is used.  Added extra checks before doing automatic uncaching of
+  previous page in LYNXCFG://reload code, to test whether the previous page is
+  really a LYNXCFG:  view -KW
+* corrected problems with "show color" in forms Options page.  Omit "ON" choice
+  if color is not possible (but saving allowed).  When option_save restriction
+  was in effect, the ON/OFF initialisation was wrong (resulting in unwanted
+  toggling of color each time options were changed in an anonymous account) -KW
+* tweaks of reload_read_cfg() for retaining "show color" setting and for
+  updating display_lines (user_mode may have changed) -KW
+* change for HTParse: if there is a hostname part, recognize a '?' as ending
+  it if there are no further slash characters -KW
+* tweaks in configure.in and INSTALLATION: describe correctly what
+  --disable-dired-override does.  Rename --disable-dired-archive to
+  --disable-dired-dearchive.  Clarified INSTALLATION text for
+  --disable-full-paths.  Changed some "define" to "prevent defining" -KW
+* don't try to put cursor in last screen position for hiding in
+  show_main_statusline if -show_cursor/SHOW_CURSOR is on.  The show_cursor
+  behavior may have been turned on to avoid problems with curses libs or
+  terminal types that cannot deal with it correctly.  On pages with no links,
+  for example SOURCE display, this may leave the cursor at the end of the
+  statusline message if show_cursor is on.  This just restores previous
+  versions' behavior in that case.  On pages with links, the movement is
+  unnecessary anyway since the cursor will move again to the current link -KW
+* removed a bug in automatic textarea growing.  Textarea would grow by
+  one line unnecessarily if enter was used on the last input line on a
+  screen (if that was not actually the last line in the textarea).  New
+  function HText_TAHasMoreLines() to help with this -KW
+* revision of "nonsticky" behavior / options.  Got rid of "sticky" terminology.
+  Renamed the controlling option to TEXTFIELDS_NEED_ACTIVATION and command line
+  flag -tna.
+  Compiling in of this mode can be disabled, see in userdefs.h under
+  TEXTFIELDS_MAY_NEED_ACTIVATION.  Two versions of "Textfields Need
+  Activation" mode are provided.  The default mode (simpler yet better IMO)
+  highlights an inactive selected text input fields like a current normal
+  anchor.  The alternative variant (may go away later?) behaves like VH's
+  previous implementation and gets used when compiling with
+  -DINACTIVE_INPUT_STYLE_VH.
+  Many bugs that would occur in somewhat unusual circumstances are fixed, for
+  both variants.  (Action of various commands on TEXT_SUBMIT_TYPE fields,
+  interaction with mouse selection, ...) Selecting an inactive input field with
+  the mouse will activate it.  Various tweaks to make sure selecting a field in
+  this way will put the editing cursor at the right position (even if the line
+  had been scrolled / might be scrolled on entering the line editor), at least
+  with NCURSES mouse support.  Also, -show_cursor now in general works as
+  expected.  (In the INACTIVE_INPUT_STYLE_VH variant, cursor may sometimes end
+  up on the statusline after error messages.) -KW
+* treat input lines of the same textarea more like one entity, as far as
+  "Textfields Need Activation" is concerned, as long as movement among those
+  lines is with PREV_LINK/UP_LINK/LPOS_PREV_LINK/NEXT_LINK/DOWN_LINK/
+  LPOS_NEXT_LINK or ACTIVATE keys (the last one only if TEXTAREA_AUTOGROW is
+  defined, for consistency with line-appending behavior).  I.e.  moving among
+  textarea lines with those keys automatically activates ('enters') the new
+  field for line editing if the previous one was activated -KW
+* modified statusline messages to be more appropriate and specific on non-
+  activated form fields.  (The additional messages are not used or compiled
+  in if TEXTFIELDS_MAY_NEED_ACTIVATION isn't defined.)  Avoid unnecessary
+  repainting/refreshing of the physical statusline in many cases of moving
+  among fields and links.  Make sure the additional lines shown in Novice
+  mode are also appropriate -KW
+* modified line editor behavior on "disabled" form text fields:  instead of
+  disabling all non-terminating edit keys, allow those that never modify the
+  field contents.  The user can now scroll through a long value in a disabled
+  field with the arrow keys, rather than being stuck at the end -KW
+* the ncurses mouse popup window would overlap the statusline in Novice mode.
+  Limit the overlap to border area (so at least no significant text gets
+  corrupted) -KW
+* modified code for stickiness of the second kind (ex-STICKY_FIELDS) according
+  to preliminary proposal from Vlad.  Named LEFTARROW_IN_TEXTFIELD_PROMPT.
+  Does not depend on any conditional compilation symbols, and is now unrelated
+  to the other kind of "stickiness" discussed above.  See lynx.cfg.  This isn't
+  optimal yet (LAKABOFTIF discussion etc..), but better than leaving it as it
+  was -KW
+* made default width of textarea fields (if no COLS attribute given) depend on
+  window or screen width, instead of using a fixed default of "60".  I.e.  for
+  wider windows make better use of available space, and for narrows windows
+  avoid wrapped textarea lines.  Take the usual left/right margins (depending
+  on current block style) into account.  But for -dump don't make fields longer
+  than 60 anyway (they will just show up as blocks of underscores anyway, not
+  showing text content) -KW
+* changes in code used to create new bookmark file after a bookmark has been
+  'R'emoved.  Change should only affect Unix.  Basically, revert back to
+  behavior used before 2.8.1dev.8 for "normal" files (no symlinks or extra
+  hard links).  I.e. use rename / maybe try "mv" instead of "cp", then change
+  permission bits explicitly.  Using "cp" means running the risk of losing or
+  truncating the user's bookmark file if for example the disk became full
+  (although these occasions should be rare - the scratch file we are trying
+  to copy or rename was written just before without error, usually on the
+  same filesystem).  Some more comments in LYBookmark.c.  Note: if you like
+  your bookmark files, make backup copies of them anyway... -KW
+* changed F1 key bindings so it always invokes DWIMHELP, also in the Line
+  Editor (for all three Binding tables).  This means that pressing F1 (if you
+  have it, and it is correctly mapped and recognized) while in a text form
+  field will now bring up the Line Editor Help Page for the currently selected
+  line edit style.  Other keys bound to HELP by default ('?', 'h') remain
+  unchanged, they still always go to the main Help Page -KW
+* don't let DWIMHELP show Line Editor help for a text input field that is
+  disabled -KW
+* don't mangle a -cookie_file like /home/user/.lynx_cookies.~1~, only interpret
+  the '~' as reference to HOME if it's right at the beginning and followed by
+  '/' and then some more.  There are probably other instances where '~' gets
+  mistreated (in addition to the intentional dropping of "user" from something
+  like "~user/" in file URLs etc.) -KW
+* changed type of EXP_KEYBOARD_LAYOUT tables to LYKbLayout_t.  They hold
+  Unicode values, any similarity to LYKeymap_t is just accidental -KW
+* changed EXP_KEYBOARD_LAYOUT logic so that input characters that are
+  unrepresentable in the current display character set (unless it is UTF-8) get
+  transformed into '?' instead of some accidentally chosen 8-bit character.
+  For UTF-8, convert to UTF-8 encoding instead.  Note the Line Editor isn't yet
+  UTF-8 aware; with some care it is possible to enter UTF-8 text, but the
+  display will be messed up, esp.  the cursor position will be shown wrong -KW
+* some corrections for TPOS, YANK enhanced lineedit functions -KW
+* added back in a block in LYmbcsstrlen that got lost somehow -KW
+* fix an array boundary accident in GridText.c -JB
+* reiterate that LYNXCGI_LINKS is set by the configure script -PW
+* note that patches should be generated by "diff -u" -PG
+* modify HTReadProgress so that setting SHOW_KB_RATE false will let the
+  amount read be shown in bytes/sec -DK
+* modify mkdirs.sh to ignore DOS-style device -IZ
+* modify CF_PATH_SYNTAX configure macro to accept DOS-style path syntax, for
+  use in OS/2 EMX port -IZ
+* fix some memory leaks in visited-pages tree -IZ
+* correct recent change to LYEditmap.c for EBCDIC -PG
+* change 'elf32ppc' to 'elf32ppc*' in config.guess to work on MkLinux DR3
+  (reported by Christopher Conrade Zseleghovski (kkz@MIMUW.EDU.PL>)
+* add check to HTConfirmDefault() to ensure that NLS form of "yes" and "no"
+  are distinct in the first character, revert to English if not -TD
+* add configure test for wredrawln, and use CF_CURSES_FUNCS -TD
+* improve CF_TERMCAP_LIBS configure test -TD
 1999-11-17 (2.8.3dev.15)
 * add popup in options menu to control alternate organizations of the
-  visited links page (Ilya Zakharevich)
+  visited links page -IZ
 * reformatted src/makefile.dos and src/makefile.dsl to make them simpler to
   modify -TD
 * add -DOK_OVERRIDE to DIRED_DEFS for djgpp -LP
@@ -18,11 +284,6 @@ Changes since Lynx 2.8 release
 * undo recent no_color_video check for A_BOLD, A_UNDERLINE since this did not
   have the intended effect (reported by KW) -TD
 * add note to lynx_url_support.html about lynxcgi -PW
-* reorganize the code:  'search_target' now became global, so display_page()
-  and highlight() could be called from any place easily.  This was a mainloop
-  local variable (name changed from 'prev_target' to avoid conflict elsewhere),
-  the value currently changed in mainloop(), handle_LYK_WHEREIS() and
-  textsearch() -LP
 * add user search in partial mode (while loading of the document is in
   progress).  Scrolling to the string in question is not working properly yet
   if you repeat 'n' next time.  More work required -LP
@@ -32,8 +293,8 @@ Changes since Lynx 2.8 release
 * correct comment in userdefs.h regarding renaming of
   LINKS_AND_FORM_FIELDS_ARE_NUMBERED to LINKS_AND_FIELDS_ARE_NUMBERED and
   change DEFAULT_KEYPAD_MODE to LINKS_AND_FIELDS_ARE_NUMBERED -PW
-* fix bug that caused lss-enabled lynx to crash on growing textarea or inserting
-  file into it -VH
+* fix bug that caused lss-enabled lynx to crash on growing textarea or
+  inserting file into it -VH
 * new lynx.cfg option REFERER_WITH_QUERY:[SEND|PARTIAL|DROP] -KW
 * don't send Referer if we have to load a document again that we got
   from the history stack.  Lynx would send the URL of the current
@@ -319,7 +580,7 @@ Changes since Lynx 2.8 release
 * revert a change from dev.4 which disabled getbkgd support in PDCurses -DK
 * modify ifdef for USE_QUOTED_PARAMETER to include __CYGWIN__, else names such
   as "telnet.sh" are translated to "telnet" -DK
-* improve/simplify scrollbar support (Ilya Zakharevich)
+* improve/simplify scrollbar support -IZ
 * implement LYNXMESSAGES:/ page using non-tempfile approach -LP
 * correct an assignment to last_kcode, broken by restructuring of LYMainLoop.c
   in dev.11 -HS
@@ -734,12 +995,12 @@ Changes since Lynx 2.8 release
 * allow ':' as a separator between the option and its value -DK
 * corrected install rule using symbolic link for copyright files (reported by
   HN, KED) -TD
-* reset "stalled for xxx" counter from Ilya's ETA change in dev.5 between ftp
+* reset "stalled for xxx" counter from IZ's ETA change in dev.5 between ftp
   requests -VH
 * add support for scrollbars, ifdef'd with USE_SCROLLBAR.  Use command-line
   options -scrollbar and -scrollbar_arrow or corresponding lynx.cfg to enable
   it.  Requires ncurses; may be further tuned if color-style configuration
-  is used (Ilya Zakharevich)
+  is used -IZ
 * LYCopyFile():  Thanks to Hiroyuki Senshu, DOS-based systems need no cp.exe
   binary any more.  The code was originally ifdef'ed with SH_EX; now defined
   with DOSPATH so is used automatically by any dos/windows port, not used for
@@ -2834,7 +3095,7 @@ Changes since Lynx 2.8 release
   before triggering the action, so if the action chosen from the menu would
   not redraw the screen, the menu outline is left on the screen - IZ
 * modify LYKeymap.c so that it can show internal keymaps above 0400 as
-  hexadecimal codes even if they do not appear in the function-key table - IZ
+  hexadecimal codes even if they do not appear in the function-key table -IZ
 * add HTOptParam to avoid spurious quoting of blanks in rlogin URLs by
   HTAddParam - TD
 * correct missing assignment in remote_session(), from dev.9 changes for

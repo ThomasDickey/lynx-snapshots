@@ -501,8 +501,8 @@ PRIVATE char *HTAlloc ARGS2(char *, ptr, size_t, length)
  * in each invocation.  They only grow and never shrink, and won't be
  * cleaned up on exit. - kw
  */
-#if !(defined(_REENTRANT) || defined(_THREAD_SAFE))
-#define SAVE_TIME_NOT_SPACE
+#if defined(_REENTRANT) || defined(_THREAD_SAFE)
+#undef SAVE_TIME_NOT_SPACE
 #endif
 
 /*
@@ -559,22 +559,11 @@ PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf ARGS4(
 
     need = strlen(fmt) + 1;
 #ifdef SAVE_TIME_NOT_SPACE
-    /* the following assumes that 0 as first arg to realloc works
-       portably like malloc; if that isn't the case, change to use
-       HTAlloc. - kw */
     if (!fmt_ptr || fmt_len < need*NUM_WIDTH) {
-	if ((fmt_ptr = realloc(fmt_ptr, need*NUM_WIDTH)) == 0) {
-	    outofmem(__FILE__, "StrAllocVsprintf (fmt_ptr)");
-	} else {
-	    fmt_len = need*NUM_WIDTH;
-	}
+	fmt_ptr = HTAlloc(fmt_ptr, fmt_len = need*NUM_WIDTH);
     }
     if (!tmp_ptr || tmp_len < GROW_SIZE) {
-	if ((tmp_ptr = realloc(tmp_ptr, GROW_SIZE)) == 0) {
-	    outofmem(__FILE__, "StrAllocVsprintf (tmp_ptr)");
-	} else {
-	    tmp_len = GROW_SIZE;
-	}
+	tmp_ptr = HTAlloc(tmp_ptr, tmp_len = GROW_SIZE);
     }
 #else
     if ((fmt_ptr = malloc(need*NUM_WIDTH)) == 0

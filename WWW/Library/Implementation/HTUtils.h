@@ -298,11 +298,13 @@ Macros for declarations
 #define NULL ((void *)0)
 #endif
 
+#define NONNULL(s) (((s) != 0) ? s : "(null)")
+
 /* array/table size */
 #define	TABLESIZE(v)	(sizeof(v)/sizeof(v[0]))
 
-#define	typecalloc(cast)		(cast *)calloc(sizeof(cast),1)
-#define	typecallocn(cast,ntypes)	(cast *)calloc(sizeof(cast),ntypes)
+#define	typecalloc(cast)		(cast *)calloc(1,sizeof(cast))
+#define	typecallocn(cast,ntypes)	(cast *)calloc(ntypes,sizeof(cast))
 
 /*
 

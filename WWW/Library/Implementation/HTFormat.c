@@ -49,6 +49,10 @@ PUBLIC long int HTMaxBytes  = 0;	/* No effective limit */
 #include <LYGlobalDefs.h>
 #include <LYLeaks.h>
 
+#ifdef DISP_PARTIAL
+#include <LYMainLoop.h>
+#endif
+
 PUBLIC	BOOL HTOutputSource = NO;	/* Flag: shortcut parser to stdout */
 /* extern  BOOL interactive; LJM */
 
@@ -513,11 +517,9 @@ PUBLIC void HTDisplayPartial NOARGS
 	**  HText_getNumOfLines() = "current" number of complete lines received
 	**  NumOfLines_partial = number of lines at the moment of last repaint.
 	**
-	**  We update NumOfLines_partial only when we repaint the display.
-	**  -1 is the special value:
-	**  This is a synchronization flag switched to 0 when HText_new()
-	**  starts a new HTMainText object - all HText_ functions use it,
-	**  lines counter in particular [we call it from HText_getNumOfLines()].
+	**  display_partial could only be enabled in HText_new()
+	**  so a new HTMainText object available - all HText_ functions use it,
+	**  lines counter HText_getNumOfLines() in particular.
 	**
 	**  Otherwise HTMainText holds info from the previous document
 	**  and we may repaint it instead of the new one:
@@ -526,9 +528,7 @@ PUBLIC void HTDisplayPartial NOARGS
 	**
 	**  So repaint the page only when necessary:
 	*/
-	if ((NumOfLines_partial != -1)
-		/* new HText object available  */
-	&& ((Newline_partial + display_lines) > NumOfLines_partial)
+	if (((Newline_partial + display_lines) > NumOfLines_partial)
 		/* current page not complete... */
 	&& (partial_threshold > 0 ?
 		((Newline_partial + partial_threshold) < HText_getNumOfLines()) :
@@ -541,7 +541,7 @@ PUBLIC void HTDisplayPartial NOARGS
 		 */
 	) {
 	    NumOfLines_partial = HText_getNumOfLines();
-	    HText_pageDisplay(Newline_partial);
+	    LYMainLoop_pageDisplay(Newline_partial);
 	}
     }
 #else /* nothing */
@@ -552,24 +552,10 @@ PUBLIC void HTDisplayPartial NOARGS
 PUBLIC void HTFinishDisplayPartial NOARGS
 {
 #ifdef DISP_PARTIAL
-		    if (display_partial) {
-			/*
-			 *  Override Newline with a new value if user
-			 *  scrolled the document while downloading.
-			 */
-			if (Newline_partial != Newline
-			 && NumOfLines_partial > 0)
-			    Newline = Newline_partial;
-		    }
-
 		    /*
 		     *  End of incremental rendering stage here.
 		     */
 		    display_partial = FALSE;
-		    NumOfLines_partial = -1;       /* initialize to -1 */
-				/* -1 restrict HTDisplayPartial()   */
-				/* until HText_new() start next HTMainText */
-				/* and set the flag to 0  */
 #endif /* DISP_PARTIAL */
 }
 

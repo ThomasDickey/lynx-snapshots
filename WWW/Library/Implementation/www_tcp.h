@@ -56,7 +56,9 @@ Default values
 #define INVSOC (-1)             /* Unix invalid socket */
 		/* NB: newer libwww has something different for Windows */
 
+#if !defined(__MINGW32__)
 typedef struct sockaddr_in SockA;  /* See netinet/in.h */
+#endif
 
 #ifndef VMS
 #include <sys/types.h>
@@ -181,7 +183,7 @@ IBM-PC running Windows NT
 #include <winsock.h>
 typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #undef EINTR
 #undef EAGAIN
 #endif /* _MSC_VER */
@@ -639,13 +641,9 @@ typedef int pid_t;
 
 #else
 
-#ifndef VM
-#ifndef VMS
-#ifndef THINK_C
+#if !(defined(VM) || defined(VMS) || defined(THINK_C) || defined(__MINGW32__))
 #define DECL_SYS_ERRLIST 1
-#endif /* !THINK_C */
-#endif /* !VMS */
-#endif /* !VM */
+#endif
 
 #endif /* !HAVE_CONFIG_H */
 

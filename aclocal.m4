@@ -716,6 +716,42 @@ if test $cf_cv_color_curses = yes ; then
 fi
 ])
 dnl ---------------------------------------------------------------------------
+dnl Curses-functions are a little complicated, since a lot of them are macros.
+AC_DEFUN([CF_CURSES_FUNCS],
+[
+AC_REQUIRE([CF_XOPEN_CURSES])
+for cf_func in $1
+do
+	CF_UPPER(cf_tr_func,$cf_func)
+	AC_MSG_CHECKING(for ${cf_func})
+	CF_MSG_LOG(${cf_func})
+	AC_CACHE_VAL(cf_cv_func_$cf_func,[
+		eval cf_result='$ac_cv_func_'$cf_func
+		if test ".$cf_result" != ".no"; then
+			AC_TRY_LINK([
+#include <curses.h>
+#ifdef HAVE_TERM_H
+#include <term.h>
+#endif],
+			[
+#ifndef ${cf_func}
+long foo = (long)(&${cf_func});
+#endif
+			],
+			[cf_result=yes],
+			[cf_result=no])
+		fi
+		eval 'cf_cv_func_'$cf_func'=$cf_result'
+	])
+	# use the computed/retrieved cache-value:
+	eval 'cf_result=$cf_cv_func_'$cf_func
+	AC_MSG_RESULT($cf_result)
+	if test $cf_result != no; then
+		AC_DEFINE_UNQUOTED(HAVE_${cf_tr_func})
+	fi
+done
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Look for the curses libraries.  Older curses implementations may require
 dnl termcap/termlib to be linked as well.
 AC_DEFUN([CF_CURSES_LIBS],[
@@ -1343,6 +1379,12 @@ AC_MSG_RESULT($cf_cv_locale)
 test $cf_cv_locale = yes && AC_DEFINE(LOCALE)
 ])
 dnl ---------------------------------------------------------------------------
+dnl Write a debug message to config.log, along with the line number in the
+dnl configure script.
+AC_DEFUN([CF_MSG_LOG],[
+echo "(line __oline__) testing $* ..." 1>&AC_FD_CC
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Check for pre-1.9.9g ncurses (among other problems, the most obvious is
 dnl that color combinations don't work).
 AC_DEFUN([CF_NCURSES_BROKEN],
@@ -1694,6 +1736,8 @@ AC_DEFUN([CF_PATH_SYNTAX],[
 case ".[$]$1" in #(vi
 ./*) #(vi
   ;;
+.[a-zA-Z]:[\\/]*) #(vi OS/2 EMX
+  ;;
 .\[$]{*prefix}*) #(vi
   eval $1="[$]$1"
   case ".[$]$1" in #(vi
@@ -2020,25 +2064,34 @@ if test "$1" = ncurses; then
 fi
 ])
 if test "$cf_cv_termlib" = none; then
-	AC_CHECK_LIB(curses, tgetstr, [LIBS="$LIBS -lcurses" cf_cv_termlib=terminfo])
-fi
-# HP-UX 9.x terminfo has setupterm, but no tigetstr.
-if test "$cf_cv_termlib" = none; then
-	AC_CHECK_LIB(termlib, tigetstr, [LIBS="$LIBS -ltermlib" cf_cv_termlib=terminfo])
-fi
-if test "$cf_cv_termlib" = none; then
-	AC_CHECK_LIB(termlib, tgoto, [LIBS="$LIBS -ltermlib" cf_cv_termlib=termcap])
+	# FreeBSD's linker gives bogus results for AC_CHECK_LIB, saying that
+	# tgetstr lives in -lcurses when it is only an unsatisfied extern.
+	cf_save_LIBS="$LIBS"
+	for cf_lib in curses ncurses termlib termcap
+	do
+	LIBS="-l$cf_lib $cf_save_LIBS"
+	for cf_func in tigetstr tgetstr
+	do
+		AC_MSG_CHECKING(for $cf_func in -l$cf_lib)
+		AC_TRY_LINK([],[int x=$cf_func("")],[cf_result=yes],[cf_result=no])
+		AC_MSG_RESULT($cf_result)
+		if test "$cf_result" = yes ; then
+			if test "$cf_func" = tigetstr ; then
+				cf_cv_termlib=terminfo
+			else
+				cf_cv_termlib=termcap
+			fi
+			break
+		fi
+	done
+		test "$cf_result" = yes && break
+	done
+	test "$cf_result" = no && LIBS="$cf_save_LIBS"
 fi
 if test "$cf_cv_termlib" = none; then
 	# allow curses library for broken AIX system.
 	AC_CHECK_LIB(curses, initscr, [LIBS="$LIBS -lcurses" cf_cv_termlib=termcap])
 	AC_CHECK_LIB(termcap, tgoto, [LIBS="$LIBS -ltermcap" cf_cv_termlib=termcap])
-fi
-if test "$cf_cv_termlib" = none; then
-	AC_CHECK_LIB(termcap, tgoto, [LIBS="$LIBS -ltermcap" cf_cv_termlib=termcap])
-fi
-if test "$cf_cv_termlib" = none; then
-	AC_CHECK_LIB(ncurses, tgoto, [LIBS="$LIBS -lncurses" cf_cv_termlib=ncurses])
 fi
 ])
 if test "$cf_cv_termlib" = none; then
@@ -2245,4 +2298,24 @@ ifelse($4,,[withval="${$3}"],[withval="${$3-ifelse($5,,$4,$5)}"]))dnl
 CF_PATH_SYNTAX(withval)
 eval $3="$withval"
 AC_SUBST($3)dnl
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Test if we should define X/Open source for curses, needed on Digital Unix
+dnl 4.x, to see the extended functions, but breaks on IRIX 6.x.
+AC_DEFUN([CF_XOPEN_CURSES],
+[
+AC_CACHE_CHECK(if we must define _XOPEN_SOURCE_EXTENDED,cf_cv_need_xopen_extension,[
+AC_TRY_LINK([
+#include <stdlib.h>
+#include <curses.h>],[
+	long x = winnstr(stdscr, "", 0)],
+	[cf_cv_need_xopen_extension=no],
+	[AC_TRY_LINK([
+#define _XOPEN_SOURCE_EXTENDED
+#include <stdlib.h>
+#include <curses.h>],[
+	long x = winnstr(stdscr, "", 0)],
+	[cf_cv_need_xopen_extension=yes],
+	[cf_cv_need_xopen_extension=no])])])
+test $cf_cv_need_xopen_extension = yes && CFLAGS="$CFLAGS -D_XOPEN_SOURCE_EXTENDED"
 ])dnl

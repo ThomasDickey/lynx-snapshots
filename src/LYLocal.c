@@ -1951,7 +1951,7 @@ PRIVATE int fill_argv_for_execv ARGS5(
 	    }
 	    if (cp && (n >= LYEXECV_MAX_ARGC - reserve)) {
 		CTRACE((tfp, "Too many args for '%s' in '%s'!\n",
-		       cmd_path ? cmd_path : "<null>" , cmd_args));
+		       NONNULL(cmd_path), cmd_args));
 		return(-1);
 	    }
 	} else {

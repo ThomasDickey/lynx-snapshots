@@ -216,6 +216,7 @@ struct _HTStructured {
 };
 
 extern  HTStyle *LYstyles PARAMS((int style_number));
+extern	BOOL LYBadHTML PARAMS((HTStructured *me)); 
 
 /*
  *	Semi-Private functions. - FM

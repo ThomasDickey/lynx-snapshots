@@ -132,6 +132,9 @@ typedef struct _PerFormInfo
 #define F_IMAGE_SUBMIT_TYPE 13
 #define F_KEYGEN_TYPE     14
 
+#define F_TEXTLIKE(type) ((type)==F_TEXT_TYPE || (type)==F_TEXT_SUBMIT_TYPE ||\
+			  (type)==F_PASSWORD_TYPE || (type)==F_TEXTAREA_TYPE)
+
 #define WWW_FORM_LINK_TYPE  1
 #define WWW_LINK_TYPE   2
 #define WWW_INTERN_LINK_TYPE   6 /* can be used as a bitflag... - kw */

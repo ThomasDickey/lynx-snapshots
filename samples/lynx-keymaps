@@ -131,15 +131,18 @@ setkey "^(up)"		UPARROW
 #setkey "\033e"          Meta-'e'
 #setkey "\033\033[28~"   Meta-F1
 #
-# The following extension, introduced after lynx2.8.2, allows to map
+# The following extensions, introduced after lynx2.8.2, allow you to map
 # escape sequences directly to key commands (lynxactioncodes).
 #
 #       setkey ESC-SEQUENCE  LAC:LYNX_ACTION
+#       setkey ESC-SEQUENCE  LAC:LYNX_ACTION:LYNX_EDITACTION
 #
-# where LYNX_ACTION is a key command specified as in lynx.cfg KEYMAP
-# options and on the KEYMAP ('K') screen.  Using this form makes remapping
-# according to user preference with KEYMAP impossible and should thus be
-# used sparingly (in general, use KEYMAP with PASS instead, if the goal is
-# to force recognition of a key in form text fields).  For example:
+# where LYNX_ACTION is a key command specified as for lynx.cfg KEYMAP
+# options and as listed on the KEYMAP ('K') screen, and LYNX_EDITACTION
+# is a line-editor action specified as for KEYMAP and as listed in Line
+# Editor help pages.  Using this form makes remapping according to user
+# preference with KEYMAP impossible, and should thus be used sparingly
+# (in general, use KEYMAP with PASS instead, if the goal is to force
+# recognition of a key in form text fields).  For example:
 #
-#setkey "\033e"          LAC:EDITTEXTAREA
+#setkey "\033e"          LAC:EDITTEXTAREA:PASS

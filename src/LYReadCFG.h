@@ -49,6 +49,6 @@ extern BOOLEAN have_read_cfg;
 
 extern int lynx_cfg_infopage PARAMS((document *newdoc));
 extern int lynx_compile_opts PARAMS((document *newdoc));
-extern void reload_read_cfg NOPARAMS; /* not implemented yet, in LYMain.c */
+extern void reload_read_cfg NOPARAMS; /* implemented in LYMain.c */
 
 #endif /* LYREADCFG_H */

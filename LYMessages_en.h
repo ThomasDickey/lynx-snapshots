@@ -53,6 +53,25 @@
 #define URL_TOO_LONG gettext("URL too long")
 
 /* Forms messages */
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+/* Inactive input fields, messages used with -tna option - kw */
+#define FORM_LINK_TEXT_MESSAGE_INA \
+ gettext("(Text entry field) Inactive.  Press <return> to activate.")
+#define FORM_LINK_TEXTAREA_MESSAGE_INA \
+ gettext("(Textarea) Inactive.  Press <return> to activate.")
+#define FORM_LINK_TEXTAREA_MESSAGE_INA_E \
+ gettext("(Textarea) Inactive.  Press <return> to activate (%s for editor).")
+#define FORM_LINK_TEXT_SUBMIT_MESSAGE_INA \
+ gettext("(Form field) Inactive.  Use <return> to edit.")
+#define FORM_TEXT_SUBMIT_MESSAGE_INA_X \
+ gettext("(Form field) Inactive.  Use <return> to edit (%s to submit with no cache).")
+#define FORM_TEXT_RESUBMIT_MESSAGE_INA \
+ gettext("(Form field) Inactive. Press <return> to edit, press <return> twice to submit.")
+#define FORM_TEXT_SUBMIT_MAILTO_MSG_INA \
+ gettext("(mailto form field) Inactive.  Press <return> to change.")
+#define FORM_LINK_PASSWORD_MESSAGE_INA \
+ gettext("(Password entry field) Inactive.  Press <return> to activate.")
+#endif
 #define FORM_LINK_FILE_UNM_MSG \
  gettext("UNMODIFIABLE file entry field.  Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_FILE_MESSAGE \
@@ -150,11 +169,17 @@
 #define NOVICE_LINE_TWO_B \
  gettext("  O)ther cmds  B)ack  E)dit  D)ownload ^R)eload ^W)ipe screen  search doc: / \n")
 #define NOVICE_LINE_TWO_C \
- gettext("  O)ther cmds  C)omment  History: <delete>  Bookmarks: V)iew, A)dd, R)emove  \n")
+ gettext("O)ther cmds  C)omment  History: <backspace>  Bookmarks: V)iew, A)dd, R)emove \n")
 #define FORM_NOVICELINE_ONE \
  gettext("            Enter text into the field by typing on the keyboard              ")
 #define FORM_NOVICELINE_TWO \
  gettext("    Ctrl-U to delete all text in field, [Backspace] to delete a character    ")
+#define FORM_NOVICELINE_TWO_DELBL \
+ gettext("      Ctrl-U to delete text in field, [Backspace] to delete a character    ")
+#define FORM_NOVICELINE_TWO_VAR \
+ gettext("    %s to delete all text in field, [Backspace] to delete a character    ")
+#define FORM_NOVICELINE_TWO_DELBL_VAR \
+ gettext("      %s to delete text in field, [Backspace] to delete a character    ")
 
 /* mailto */
 #define BAD_FORM_MAILTO gettext("Malformed mailto form submission!  Cancelled!")
@@ -464,7 +489,7 @@
 #define CLEAR_ALL_AUTH_INFO gettext("Clear all authorization info for this session?")
 #define AUTH_INFO_CLEARED gettext("Authorization info cleared.")
 #define AUTH_FAILED_PROMPT gettext("Authorization failed.  Retry?")
-#define CGI_DISABLED gettext("cgi support has been disabled by system administrator.")
+#define CGI_DISABLED gettext("cgi support has been disabled.")
 #define CGI_NOT_COMPILED \
  gettext("Lynxcgi capabilities are not compiled into this version.")
 #define CANNOT_CONVERT_I_TO_O gettext("Sorry, no known way of converting %s to %s.")
@@ -656,6 +681,7 @@
 #define VISITED_LINKS_EMPTY gettext("No previously visited links available!")
 #define MEMORY_EXHAUSTED_ABORT gettext("Memory exhausted!  Program aborted!")
 #define MEMORY_EXHAUSTED_ABORTING gettext("Memory exhausted!  Aborting...")
+#define NOT_ENOUGH_MEMORY gettext("Not enough memory!")
 #define DFM_NOT_AVAILABLE gettext("Directory/File Manager not available")
 #define BASE_NOT_ABSOLUTE gettext("HREF in BASE tag is not an absolute URL.")
 #define LOCATION_NOT_ABSOLUTE gettext("Location URL is not absolute.")

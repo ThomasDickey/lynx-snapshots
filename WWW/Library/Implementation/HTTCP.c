@@ -642,7 +642,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 {
 #ifndef _WINDOWS_NSL
     CONST char *host = str;
-#endif /* _WINDOWS_NSL */
+#endif
 #ifdef NSL_FORK
     /* for transfer of result between from child to parent: */
     static struct {
@@ -693,6 +693,10 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 	return NULL;
     }
 
+#ifdef _WINDOWS_NSL
+    strncpy(host, str, (size_t)512);
+#endif /*  _WINDOWS_NSL */
+
     if (!valid_hostname(host)) {
 	lynx_nsl_status = HT_NOT_ACCEPTABLE;
 #ifdef NO_RECOVERY
@@ -704,12 +708,6 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 #endif
 	return NULL;
     }
-
-#ifdef _WINDOWS_NSL
-    strncpy(host, str, (size_t)512);
-#else
-    host = str;
-#endif /*  _WINDOWS_NSL */
 
 #ifdef MVS	/* Outstanding problem with crash in MVS gethostbyname */
     CTRACE((tfp, "LYGetHostByName: Calling gethostbyname(%s)\n", host));

@@ -1912,6 +1912,8 @@ U+3014:('
 U+3015:)'
 U+3016:(I
 U+3017:)I
+U+301a:[[
+U+301b:]]
 U+301c:-?
 U+3020:=T:)
 0x20	U+303f
@@ -2285,6 +2287,9 @@ U+fef9:lh-
 U+fefa:lh.
 U+fefb:la-
 U+fefc:la.
+
+# the reverse byte-order-mark: zero-width non-break space
+U+feff ""
 
 0x21-0x7e	U+ff01-U+ff5e
 0x2e	U+ff61

@@ -115,7 +115,7 @@ PUBLIC int HTAddRule ARGS5(
 	CTRACE((tfp, "Rule: For `%s' op %d", pattern, op));
     }
     if (cond_op) {
-	CTRACE((tfp, "\t%s %s\n", cond_op, cond ? cond : "<null>"));
+	CTRACE((tfp, "\t%s %s\n", cond_op, NONNULL(cond)));
     } else {
 	CTRACE((tfp, "\n"));
     }
@@ -182,7 +182,7 @@ PRIVATE BOOL rule_cond_ok ARGS1(
 	result = LYUserSpecifiedURL;
     else {
 	CTRACE((tfp, "....... rule ignored, unrecognized `%s %s'!\n",
-	       r->condition_op, r->condition ? r->condition : "<null>"));
+	       r->condition_op, NONNULL(r->condition)));
 	return NO;
     }
     if (!strcmp(r->condition_op, "if"))
@@ -388,14 +388,14 @@ char * HTTranslate ARGS1(
 		} else if (proxy_none_flag) {
 		    CTRACE((tfp, "For `%s' proxy server ignored: %s\n",
 			   current,
-			   r->equiv ? r->equiv : "<null>"));
+			   NONNULL(r->equiv)));
 		} else {
 		    char * temp = NULL;
 		    StrAllocCopy(temp, "Proxied=");
 		    StrAllocCat(temp, r->equiv);
 		    StrAllocCat(temp, current);
 		    CTRACE((tfp, "HTRule: proxy server found: %s\n",
-			   r->equiv ? r->equiv : "<null>"));
+			   NONNULL(r->equiv)));
 		    FREE(current);
 		    return temp;
 		}

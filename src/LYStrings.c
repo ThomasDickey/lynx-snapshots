@@ -1,5 +1,6 @@
 #include <HTUtils.h>
 #include <HTCJK.h>
+#include <UCAux.h>
 #include <LYUtils.h>
 #include <LYStrings.h>
 #include <LYGlobalDefs.h>
@@ -14,9 +15,9 @@
 #include <HTString.h>
 #include <LYCharUtils.h>
 #include <HTParse.h>
-#ifdef NCURSES_MOUSE_VERSION
+#if defined(NCURSES_MOUSE_VERSION) || defined(USE_SLANG_MOUSE)
 #include <LYMainLoop.h>
-#endif /* NCURSES_MOUSE_VERSION */
+#endif /* NCURSES_MOUSE_VERSION || USE_SLANG_MOUSE */
 
 #ifdef DJGPP_KEYHANDLER
 #include <pc.h>
@@ -26,6 +27,10 @@
 #ifdef USE_COLOR_STYLE
 #include <LYHash.h>
 #include <AttrList.h>
+#endif
+
+#ifdef USE_SCROLLBAR
+#include <LYMainLoop.h>
 #endif
 
 #include <LYLeaks.h>
@@ -332,17 +337,17 @@ PRIVATE int set_clicked_link ARGS4(
 	    return LAC_TO_LKC0(LYK_UP_TWO);
 	if (y >= h)
 	    return LAC_TO_LKC0(LYK_DOWN_TWO);
-#ifdef DISP_PARTIAL			/* Newline is not defined otherwise */
+
 	if (clicks >= 2) {
 	    double frac = (1. * y)/(h - 1);
 	    int l = HText_getNumOfLines() + 1;	/* NOL() off by one? */
 
 	    l -= display_lines;
 	    if (l > 0)
-		Newline = frac * l + 1 + 0.5;
+		LYSetNewline(frac * l + 1 + 0.5);
 	    return LYReverseKeymap(LYK_DO_NOTHING);
 	}
-#endif
+
 	if (y < LYsb_begin)
 	    return LAC_TO_LKC0(LYK_PREV_PAGE);
 	if (y >= LYsb_end)
@@ -358,10 +363,7 @@ PRIVATE int set_clicked_link ARGS4(
 	    int len, lx = links[i].lx, is_text = 0;
 
 	    if (links[i].type == WWW_FORM_LINK_TYPE
-		&& (links[i].form->type == F_TEXT_TYPE
-		 || links[i].form->type == F_TEXT_SUBMIT_TYPE
-		 || links[i].form->type == F_PASSWORD_TYPE
-		 || links[i].form->type == F_TEXTAREA_TYPE))
+		&& F_TEXTLIKE(links[i].form->type))
 		is_text = 1;
 
 	    if (is_text)
@@ -407,8 +409,13 @@ PRIVATE int set_clicked_link ARGS4(
 		    if (code != FOR_INPUT
 			/* Do not pick up the current input field */
 			|| !((cury == y && (curx >= lx) && ((curx - lx) <= len)))) {
-			if (is_text)
+			if (is_text) {
 			    have_levent = 1;
+#if defined(TEXTFIELDS_MAY_NEED_ACTIVATION) && defined(INACTIVE_INPUT_STYLE_VH)
+			    if (x == links[i].lx && y == links[i].ly)
+				textinput_redrawn = FALSE;
+#endif /* TEXTFIELDS_MAY_NEED_ACTIVATION && INACTIVE_INPUT_STYLE_VH */
+			}
 			mouse_link = i;
 		    } else
 			mouse_link = -1;
@@ -558,6 +565,8 @@ PUBLIC char * LYmbcs_skip_glyphs ARGS3(
  *  characters. - FM
  *  Counts glyph cells if count_gcells is set. (Full-width
  *  characters in CJK mode count as two.)
+ *  Counts character glyphs if count_gcells is unset. (Full-
+ *  width characters in CJK mode count as one.) - kw
  */
 PUBLIC int LYmbcsstrlen ARGS3(
 	char *, 	str,
@@ -584,6 +593,10 @@ PUBLIC int LYmbcsstrlen ARGS3(
 		i++;
 		j++;
 	    }
+	} else if (!utf_flag && HTCJK != NOCJK && !count_gcells &&
+		   !isascii(str[i]) && str[(i + 1)] != '\0' &&
+		    !IsSpecialAttrChar(str[(i + 1)])) {
+	    i++;
 	}
     }
 
@@ -940,6 +953,22 @@ PUBLIC int map_string_to_keysym ARGS2(CONST char*, str, int*,keysym)
     *keysym = -1;
 
     if (strncasecomp(str, "LAC:", 4) == 0) {
+	char *other = strchr(str+4, ':');
+
+	if (other) {
+	   int othersym = lecname_to_lec(other + 1);
+	   char buf[BUFSIZ];
+
+	   if (othersym >= 0 && other - str - 4 < BUFSIZ ) {
+		strncpy(buf, str + 4, other - str - 4);
+		buf[other - str - 4] = '\0';
+		*keysym = lacname_to_lac(buf);
+		if (*keysym >= 0) {
+		    *keysym = LACLEC_TO_LKC0(*keysym, othersym);
+		    return (*keysym);
+		}
+	   }
+	}
 	*keysym = lacname_to_lac(str + 4);
 	if (*keysym >= 0) {
 	    *keysym = LAC_TO_LKC0(*keysym);
@@ -1406,7 +1435,7 @@ PUBLIC int LYgetch_for ARGS1(
    if (keysym < 0)
        return 0;
 
-   if (keysym&LKC_ISLAC)
+   if (keysym & (LKC_ISLECLAC|LKC_ISLAC))
        return (keysym);
 
    current_sl_modifier = 0;
@@ -1467,6 +1496,50 @@ re_read:
 	}
     }
 #endif /* !USE_SLANG || VMS */
+
+#ifdef MISC_EXP
+    if (LYNoZapKey > 1 && errno != EINTR &&
+	(c == EOF
+#ifdef USE_SLANG
+	 || c = 0xFFFF
+#endif
+	    )) {
+	int fd, kbd_fd;
+	CTRACE((tfp,
+		"nozap: Got EOF, curses %s, stdin is %p, LYNoZapKey reduced from %d to 0.\n",
+		LYCursesON ? "on" : "off", stdin, LYNoZapKey));
+	LYNoZapKey = 0;		/* 2 -> 0 */
+	if ((fd = fileno(stdin)) == 0 && !isatty(fd) &&
+	    (kbd_fd = LYConsoleInputFD(FALSE)) == fd) {
+	    char *term_name;
+	    int new_fd = INVSOC;
+	    if ((term_name = ttyname(fileno(stdout))) != NULL)
+		new_fd = open(term_name, O_RDONLY);
+	    if (new_fd == INVSOC &&
+		(term_name = ttyname(fileno(stderr))) != NULL)
+		new_fd = open(term_name, O_RDONLY);
+	    if (new_fd == INVSOC) {
+		term_name = ctermid(NULL);
+		new_fd = open(term_name, O_RDONLY);
+	    }
+	    CTRACE((tfp, "nozap: open(%s) returned %d.\n", term_name, new_fd));
+	    if (new_fd >= 0) {
+		FILE *frp;
+		close(new_fd);
+		freopen(term_name, "r", stdin);
+		CTRACE((tfp,
+		"nozap: freopen(%s,\"r\",stdin) returned %p, stdin is now %p with fd %d.\n",
+			term_name, frp, stdin, fileno(stdin)));
+		if (LYCursesON) {
+		    stop_curses();
+		    start_curses();
+		    refresh();
+		}
+		goto re_read;
+	    }
+	}
+    }
+#endif /* MISC_EXP */
 
 #ifdef USE_GETCHAR
     if (c == EOF && errno == EINTR)	/* Ctrl-Z causes EINTR in getchar() */
@@ -1672,7 +1745,11 @@ re_read:
 	}
     }
 #ifdef USE_KEYMAPS
-    if (c >= 0 && (c&LKC_ISLKC)) {
+    /* Extract a single code if two are merged: */
+    if (c >= 0 && (c&LKC_ISLECLAC)) {
+	if (!(code == FOR_INPUT || code == FOR_PROMPT))
+	    c = LKC2_TO_LKC(c);
+    } else if (c >= 0 && (c&LKC_ISLKC)) {
 	c &= ~LKC_ISLKC;
 	done_esc = TRUE; /* already a lynxkeycode, skip keypad switches - kw */
     }
@@ -1680,7 +1757,7 @@ re_read:
 	current_modifier = LKC_MOD2;
 	c &= LKC_MASK;
     }
-    if (c >= 0 && (c&LKC_ISLAC)) {
+    if (c >= 0 && (c&(LKC_ISLECLAC|LKC_ISLAC))) {
 	done_esc = TRUE; /* already a lynxactioncode, skip keypad switches - iz */
     }
 #endif
@@ -1949,8 +2026,17 @@ re_read:
 			mouse_link = -1; /* Forget about approx stuff. */
 
 		    lac = LYmouse_menu(event.x, event.y, atlink, code);
-		    if (lac == LYK_SUBMIT && mouse_link == -1)
-			lac = LYK_ACTIVATE;
+		    if (lac == LYK_SUBMIT) {
+			if (mouse_link == -1)
+			    lac = LYK_ACTIVATE;
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+			else if (mouse_link >= 0 &&
+				 textfields_need_activation &&
+				 links[mouse_link].type == WWW_FORM_LINK_TYPE &&
+				 F_TEXTLIKE(links[mouse_link].form->type))
+			    lac = LYK_ACTIVATE;
+#endif
+		    }
 		    if (lac == LYK_ACTIVATE && mouse_link == -1) {
 			HTAlert("No link chosen");
 			lac = LYK_REFRESH;
@@ -2176,7 +2262,7 @@ re_read:
     }
 #endif /* USE_SLANG && __DJGPP__ && !DJGPP_KEYHANDLER && !USE_KEYMAPS */
 
-    if (c&LKC_ISLAC)
+    if (c&(LKC_ISLAC|LKC_ISLECLAC))
 	return(c);
     if ((c+1) >= KEYMAP_SIZE) {
 	/*
@@ -2506,9 +2592,39 @@ PUBLIC int LYEdit1 ARGS4(
     case LYE_CHAR:
 #ifdef EXP_KEYBOARD_LAYOUT
 	if (map_active && ch < 128 && ch >= 0 &&
-	    LYKbLayouts[current_layout][ch])
-	    ch = UCTransUniChar((long) LYKbLayouts[current_layout][ch],
-		current_char_set);
+	    LYKbLayouts[current_layout][ch]) {
+	    UCode_t ucode = LYKbLayouts[current_layout][ch];
+	    if (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
+		if (ucode > 127) {
+		    char utfbuf[8];
+		    utfbuf[0] = 0;
+		    if (UCConvertUniToUtf8(ucode, utfbuf)) {
+			int ulen = strlen(utfbuf);
+			i = 0;
+			if (ulen > 1) {
+			    if (Pos + ulen - 1 <= (MaxLen) &&
+				StrLen + ulen - 1 < (MaxLen)) {
+				for (i = 0; i < ulen-1; i++)
+				    LYEdit1(edit, utfbuf[i], LYE_CHAR, FALSE);
+				length = strlen(&Buf[0]);
+				StrLen = length;
+			    } else {
+				if (maxMessage)
+				    _statusline(MAXLEN_REACHED_DEL_OR_MOV);
+				return 0;
+			    }
+			}
+			ch = (unsigned char)utfbuf[i];
+		    }
+		} else {
+		    ch = (unsigned char)ucode;
+		}
+	    } else {
+		ch = UCTransUniChar(ucode, current_char_set);
+		if (ch < 0)
+		    ch = '?';
+	    }
+	}
 #endif
 	/*
 	 *  ch is (presumably) printable character.
@@ -2792,7 +2908,7 @@ PUBLIC int LYEdit1 ARGS4(
 	    Mark = Pos-1;
 	if (Buf[Pos-1] == Buf[Pos]) {
 	    Pos++;
-	    return(0);
+	    break;
 	}
 	i = Buf[Pos-1]; Buf[Pos-1] = Buf[Pos]; Buf[Pos++] = (char) i;
 	break;
@@ -2851,7 +2967,6 @@ PUBLIC int LYEdit1 ARGS4(
 
 		for(i = length; i >= Pos; i--)    /* Make room */
 		    Buf[i+yanklen] = Buf[i];
-		Buf[length+1]='\0';
 		for (i = 0; i < yanklen; i++)
 		    Buf[Pos++] = (unsigned char) killbuffer[i];
 
@@ -3532,8 +3647,8 @@ PUBLIC char * LYno_attr_char_strstr ARGS2(
  * It ignores the characters: LY_UNDERLINE_START_CHAR and
  *			      LY_UNDERLINE_END_CHAR
  *			      LY_BOLD_START_CHAR
- *				LY_BOLD_END_CHAR
- *				LY_SOFT_HYPHEN
+ *			      LY_BOLD_END_CHAR
+ *			      LY_SOFT_HYPHEN
  *			      if present in chptr.
  * It assumes UTF8 if utf_flag is set.
  *  It is a case insensitive search. - KW & FM

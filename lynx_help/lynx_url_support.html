@@ -594,22 +594,42 @@ within Lynx.
 
 <H2><a name="internal">The <em>LYNXfoo</em> internal URLs:</a></H2>
 
-Lynx uses a variety of internal URL schemes as structured stream
-objects for communication among its display modules.  If you discover
-what they are, and are tempted to use them externally in documents,
-find the self-restraint to <em>resist</em> that temptation!!!
+Lynx uses a variety of private URL schemes form communication among its
+internal modules.  They start with uppercase letters <code>LYNX</code>
+by convention, although, as input, URL schemes are recognized in a
+case-insensitive manner.
+<p>
+As you discover what they are, and are tempted to use them externally in
+documents, you should <em>resist</em> that temptation:
+<UL><LI>There already is too much browser-specific markup around...
+<LI>The schemes, or their meanings, may change between Lynx versions.
+<LI>Even if a scheme stays the same, some aspect of its behavior may
+    be modified without notice, or the context in which it is allows
+    may change.
+<LI>If it doesn't work as expected when used outside of the intended
+    purpose, don't expect anyone to "fix" it.
+</UL>
 
-<p>For example, tempting though it might be, do <em>not</em> use these:
+<p>For example, tempting though it might be, do not use these:
 <pre>
       <em>Return to your &lt;A HREF="LYNXHIST:0"&gt;Startfile&lt;/A&gt;</em>
       <em>Review your &lt;A HREF="LYNXKEYMAP:"&gt;Keymap&lt;/A&gt;</em>
 </pre>
-(Yes, they'll work.  No, they won't do any harm.  But...)
+(No, they won't do any harm.  Yes, they work.  But don't rely on it.)
 
-<p>If you <em>must</em> try one, the second is OK from the command line:<BR>
+<p>If you must try one, the second is OK from the command line:<BR>
 <pre>
       <em>lynx LYNXKEYMAP:</em>
 </pre>
 But within Lynx, use the '<em>K</em>' keystroke command.
+Sometimes it may be convenient to use an internal scheme with
+'<em>g</em>'oto, as in:
+<pre>
+      <em>g LYNXMESSAGES:</em>
+      <em>g LYNXCOMPILEOPTS:</em>
+      <em>g LYNXCFG:</em>
+</pre>
+But again, there usually is a way in which those special pages are
+meant to be reached that is more convenient.
 </BODY>
 </HTML>
