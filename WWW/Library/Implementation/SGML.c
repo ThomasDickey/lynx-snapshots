@@ -240,8 +240,7 @@ extern BOOL soft_dquotes;
 
 #ifdef USE_COLOR_STYLE
 #include <AttrList.h>
-extern char class_string[TEMPSTRINGSIZE];
-int current_is_class=0;
+static int current_is_class=0;
 #endif
 
 /*	Handle Attribute
@@ -614,7 +613,7 @@ PRIVATE BOOL element_valid_within ARGS3(
 		(stacked_tag->tagclass & usecontained));
 }
 
-extern BOOL New_DTD;
+extern BOOL Old_DTD;
 
 typedef enum {
     close_NO	= 0,
@@ -681,7 +680,7 @@ PRIVATE void end_element ARGS2(
     canclose_t canclose_check = close_valid;
     int stackpos = is_on_stack(context, old_tag);
 
-    if (New_DTD) {
+    if (!Old_DTD) {
 	while (canclose_check != close_NO &&
 	       context->element_stack &&
 	       (stackpos > 1 || (!extra_action_taken && stackpos == 0))) {
@@ -803,7 +802,7 @@ PRIVATE void start_element ARGS1(
     BOOL extra_action_taken = NO;
     canclose_t canclose_check = close_valid;
 
-    if (New_DTD) {
+    if (!Old_DTD) {
 	while (context->element_stack &&
 	       (canclose_check == close_valid ||
 		(canclose_check == close_error &&
@@ -2724,7 +2723,7 @@ top1:
 		/*
 		**  Just handle ALL end tags normally :-) - kw
 		*/
-		if (New_DTD) {
+		if (!Old_DTD) {
 		    end_element( context, context->current_tag);
 		} else
 #endif /* EXTENDED_HTMLDTD */

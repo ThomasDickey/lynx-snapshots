@@ -3279,7 +3279,6 @@ static OptValues search_type_values[] = {
 	{ FALSE,	    "Case insensitive",  "case_insensitive" },
 	{ TRUE, 	    "Case sensitive",	 "case_sensitive" },
 	{ 0, 0, 0 }};
-static char * select_popups_string	= "select_popups";
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
 static char * show_color_string		= "show_color";
 static OptValues show_color_values[] = {
@@ -3296,8 +3295,28 @@ static OptValues user_mode_values[] = {
 	{ INTERMEDIATE_MODE,	"Intermediate", "Intermediate" },
 	{ ADVANCED_MODE,	"Advanced",	"Advanced" },
 	{ 0, 0, 0 }};
-static char * verbose_images_string	= "verbose_images";
 static char * vi_keys_string		= "vi_keys";
+
+/*
+ * Document Layout
+ */
+static char * DTD_recovery_string      = "DTD";
+static OptValues DTD_type_values[] = {
+	/* Old_DTD variable */
+	{ TRUE, 	    "relaxed (TagSoup mode)",	 "tagsoup" },
+	{ FALSE, 	    "strict (SortaSGML mode)",	 "sortasgml" },
+	{ 0, 0, 0 }};
+static char * select_popups_string     = "select_popups";
+static char * images_string            = "images";
+static char * images_ignore_all_string  = "ignore";
+static char * images_use_label_string   = "as labels";
+static char * images_use_links_string   = "as links";
+static char * verbose_images_string    = "verbose_images";
+static OptValues verbose_images_type_values[] = {
+	/* verbose_img variable */
+	{ FALSE,	    "OFF",		 "OFF" },
+	{ TRUE, 	    "show filename",	 "ON" },
+	{ 0, 0, 0 }};
 
 /*
  * Bookmark Options
@@ -3376,16 +3395,19 @@ PRIVATE void PutOptValues ARGS3(
     }
 }
 
-PRIVATE int GetOptValues ARGS2(
+PRIVATE BOOLEAN GetOptValues ARGS3(
 	OptValues *,	table,
-	char *, 	value)
+	char *, 	value,
+	int *,		result)
 {
     while (table->LongName != 0) {
-	if (!strcmp(value, table->HtmlName))
-	    return table->value;
+	if (!strcmp(value, table->HtmlName)) {
+	    *result = table->value;
+	    return TRUE;
+	}
 	table++;
     }
-    return -1;
+    return FALSE;
 }
 
 /*
@@ -3488,7 +3510,8 @@ PRIVATE PostPair * break_data ARGS1(
  * Security:  some options are disabled in gen_options() under certain
  * conditions.  We *should* duplicate the same conditions here in postoptions()
  * to prevent user with a limited access from editing HTML options code
- * manually and submit it to access the restricted items.  - LP
+ * manually (e.g., doing 'e'dit in 'o'ptions) and submit it to access the
+ * restricted items. Prevent spoofing attempts from index overrun. - LP
  */
 
 PUBLIC int postoptions ARGS1(
@@ -3496,6 +3519,7 @@ PUBLIC int postoptions ARGS1(
 {
     PostPair *data = 0;
     int i;
+    int code;
     BOOLEAN save_all = FALSE;
     int display_char_set_old = current_char_set;
     BOOLEAN raw_mode_old = LYRawMode;
@@ -3567,8 +3591,9 @@ PUBLIC int postoptions ARGS1(
 	}
 
 	/* Emacs keys: ON/OFF */
-	if (!strcmp(data[i].tag, emacs_keys_string)) {
-	    if ((emacs_keys = GetOptValues(bool_values, data[i].value))) {
+	if (!strcmp(data[i].tag, emacs_keys_string)
+	 && GetOptValues(bool_values, data[i].value, &code)) {
+	    if ((emacs_keys = code) != FALSE) {
 		set_emacs_keys();
 	    } else {
 		reset_emacs_keys();
@@ -3577,8 +3602,8 @@ PUBLIC int postoptions ARGS1(
 
 	/* Execution links: SELECT */
 #ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
-	if (!strcmp(data[i].tag, exec_links_string)) {
-	    int code = GetOptValues(exec_links_values, data[i].value);
+	if (!strcmp(data[i].tag, exec_links_string)
+	 && GetOptValues(exec_links_values, data[i].value, &code)) {
 #ifndef NEVER_ALLOW_REMOTE_EXEC
 	    local_exec = (code == EXEC_ALWAYS);
 #endif /* !NEVER_ALLOW_REMOTE_EXEC */
@@ -3588,18 +3613,28 @@ PUBLIC int postoptions ARGS1(
 
 	/* Keypad Mode: SELECT */
 	if (!strcmp(data[i].tag, keypad_mode_string)) {
-	    keypad_mode = GetOptValues(keypad_mode_values, data[i].value);
+	    GetOptValues(keypad_mode_values, data[i].value, &keypad_mode);
 	}
 
 	/* Line edit style: SELECT */
 	if (!strcmp(data[i].tag, lineedit_style_string)) {
-	    current_lineedit = atoi(data[i].value);
+	    int newval = atoi(data[i].value);
+	    int j;
+	    /* prevent spoofing attempt */
+	    for (j = 0; LYLineeditNames[j]; j++) {
+	       if (j==newval)  current_lineedit = newval;
+	    }
 	}
 
 #ifdef EXP_KEYBOARD_LAYOUT
 	/* Keyboard layout: SELECT */
 	if (!strcmp(data[i].tag, kblayout_string)) {
-	    current_layout = atoi(data[i].value);
+	    int newval = atoi(data[i].value);
+	    int j;
+	    /* prevent spoofing attempt */
+	    for (j = 0; LYKbLayoutNames[j]; j++) {
+	       if (j==newval)  current_layout = newval;
+	    }
 	}
 #endif /* EXP_KEYBOARD_LAYOUT */
 
@@ -3610,19 +3645,28 @@ PUBLIC int postoptions ARGS1(
 	}
 
 	/* Search Type: SELECT */
-	if (!strcmp(data[i].tag, search_type_string)) {
-	    case_sensitive = GetOptValues(search_type_values, data[i].value);
+	if (!strcmp(data[i].tag, search_type_string)
+	 && GetOptValues(search_type_values, data[i].value, &code)) {
+	    case_sensitive = code;
+	}
+
+	/* HTML error tolerance: SELECT */
+	if (!strcmp(data[i].tag, DTD_recovery_string)
+	 && GetOptValues(DTD_type_values, data[i].value, &code)) {
+	    Old_DTD = code;
+	    HTSwitchDTD(!Old_DTD);
 	}
 
 	/* Select Popups: ON/OFF */
-	if (!strcmp(data[i].tag, select_popups_string)) {
-	    LYSelectPopups = GetOptValues(bool_values, data[i].value);
+	if (!strcmp(data[i].tag, select_popups_string)
+	 && GetOptValues(bool_values, data[i].value, &code)) {
+	    LYSelectPopups = code;
 	}
 
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
 	/* Show Color: SELECT */
-	if (!strcmp(data[i].tag, show_color_string)) {
-	    LYShowColor = GetOptValues(show_color_values, data[i].value);
+	if (!strcmp(data[i].tag, show_color_string)
+	 && GetOptValues(show_color_values, data[i].value, &LYShowColor)) {
 	    LYChosenShowColor = LYShowColor;
 	    if (CurrentShowColor != LYShowColor) {
 		lynx_force_repaint();
@@ -3635,13 +3679,14 @@ PUBLIC int postoptions ARGS1(
 #endif /* USE_SLANG || COLOR_CURSES */
 
 	/* Show Cursor: ON/OFF */
-	if (!strcmp(data[i].tag, show_cursor_string)) {
-	    LYShowCursor = GetOptValues(bool_values, data[i].value);
+	if (!strcmp(data[i].tag, show_cursor_string)
+	 && GetOptValues(bool_values, data[i].value, &code)) {
+	    LYShowCursor = code;
 	}
 
 	/* User Mode: SELECT */
-	if (!strcmp(data[i].tag, user_mode_string)) {
-	    user_mode = GetOptValues(user_mode_values, data[i].value);
+	if (!strcmp(data[i].tag, user_mode_string)
+	 && GetOptValues(user_mode_values, data[i].value, &user_mode)) {
 	    if (user_mode == NOVICE_MODE) {
 		display_lines = (LYlines - 4);
 	    } else {
@@ -3649,16 +3694,31 @@ PUBLIC int postoptions ARGS1(
 	    }
 	}
 
+	/* Show Images: SELECT */
+	if (!strcmp(data[i].tag, images_string)) {
+	    if (!strcmp(data[i].value, images_ignore_all_string)) {
+		pseudo_inline_alts = FALSE;
+		clickable_images = FALSE;
+	    } else if (!strcmp(data[i].value, images_use_label_string)) {
+		pseudo_inline_alts = TRUE;
+		clickable_images = FALSE;
+	    } else if (!strcmp(data[i].value, images_use_links_string)) {
+		clickable_images = TRUE;
+	    }
+	}
+
 	/* Verbose Images: ON/OFF */
-	if (!strcmp(data[i].tag, verbose_images_string)) {
-	    verbose_img = GetOptValues(bool_values, data[i].value);
+	if (!strcmp(data[i].tag, verbose_images_string)
+        && GetOptValues(verbose_images_type_values, data[i].value, &code)) {
+	   verbose_img = code;
 	}
 
 	/* VI Keys: ON/OFF */
-	if (!strcmp(data[i].tag, vi_keys_string)) {
-	    if ((vi_keys = GetOptValues(bool_values, data[i].value))) {
+	if (!strcmp(data[i].tag, vi_keys_string)
+	 && GetOptValues(bool_values, data[i].value, &code)) {
+	    if ((vi_keys = code) != FALSE) {
 		set_vi_keys();
-	    } else if (!strcmp(data[i].value, off_string)) {
+	    } else {
 		reset_vi_keys();
 	    }
 	}
@@ -3686,13 +3746,14 @@ PUBLIC int postoptions ARGS1(
 
 	/* Assume Character Set: SELECT */
 	if (!strcmp(data[i].tag, assume_char_set_string)) {
-	    int newval;
+	    int newval = UCGetLYhndl_byMIME(data[i].value);
 
-	    newval = UCGetLYhndl_byMIME(data[i].value);
-	    if ((raw_mode_old &&
-		 newval != safeUCGetLYhndl_byMIME(UCAssume_MIMEcharset))
-	       || (!raw_mode_old &&
-		   newval != UCLYhndl_for_unspec)) {
+	    if (newval >= 0
+	     && ((raw_mode_old &&
+		     newval != safeUCGetLYhndl_byMIME(UCAssume_MIMEcharset))
+	      || (!raw_mode_old &&
+		     newval != UCLYhndl_for_unspec)
+		)) {
 
 		UCLYhndl_for_unspec = newval;
 		StrAllocCopy(UCAssume_MIMEcharset, data[i].value);
@@ -3702,31 +3763,38 @@ PUBLIC int postoptions ARGS1(
 
 	/* Display Character Set: SELECT */
 	if (!strcmp(data[i].tag, display_char_set_string)) {
-           current_char_set = atoi(data[i].value);
+	    int newval = atoi(data[i].value);
+	    int j;
+	    /* prevent spoofing attempt */
+	    for (j = 0; LYchar_set_names[j]; j++) {
+		if (j==newval)	current_char_set = newval;
+	    }
 	}
 
 	/* Raw Mode: ON/OFF */
-	if (!strcmp(data[i].tag, raw_mode_string)) {
-           LYRawMode = GetOptValues(bool_values, data[i].value);
+	if (!strcmp(data[i].tag, raw_mode_string)
+        && GetOptValues(bool_values, data[i].value, &code)) {
+	   LYRawMode = code;
 	}
 
 	/*
 	 * ftp sort: SELECT
 	 */
 	if (!strcmp(data[i].tag, ftp_sort_string)) {
-	    HTfileSortMethod = GetOptValues(ftp_sort_values, data[i].value);
+	    GetOptValues(ftp_sort_values, data[i].value, &HTfileSortMethod);
 	}
 
 #ifdef DIRED_SUPPORT
 	/* Local Directory Sort: SELECT */
 	if (!strcmp(data[i].tag, dired_sort_string)) {
-	    dir_list_style = GetOptValues(dired_values, data[i].value);
+	    GetOptValues(dired_values, data[i].value, &dir_list_style);
 	}
 #endif /* DIRED_SUPPORT */
 
 	/* Show dot files: ON/OFF */
-	if (!strcmp(data[i].tag, show_dotfiles_string) && (!no_dotfiles)) {
-	    show_dotfiles = GetOptValues(bool_values, data[i].value);
+	if (!strcmp(data[i].tag, show_dotfiles_string) && (!no_dotfiles)
+	 && GetOptValues(bool_values, data[i].value, &code)) {
+	    show_dotfiles = code;
 	}
 
 	/* Preferred Document Character Set: INPUT */
@@ -3945,14 +4013,16 @@ PUBLIC int gen_options ARGS1(
     EndSelect(fp0);
 
     /* Line edit style: SELECT */
-    PutLabel(fp0, "Line edit style");
-    BeginSelect(fp0, lineedit_style_string);
-    for (i = 0; LYLineeditNames[i]; i++) {
-	char temp[16];
-	sprintf(temp, "%d", i);
-	PutOption(fp0, i==current_lineedit, temp, LYLineeditNames[i]);
+    if (LYLineeditNames[1]) { /* well, at least 2 line edit styles available */
+	PutLabel(fp0, "Line edit style");
+	BeginSelect(fp0, lineedit_style_string);
+	for (i = 0; LYLineeditNames[i]; i++) {
+	    char temp[16];
+	    sprintf(temp, "%d", i);
+	    PutOption(fp0, i==current_lineedit, temp, LYLineeditNames[i]);
+	}
+	EndSelect(fp0);
     }
-    EndSelect(fp0);
 
 #ifdef EXP_KEYBOARD_LAYOUT
     /* Keyboard layout: SELECT */
@@ -3970,12 +4040,6 @@ PUBLIC int gen_options ARGS1(
     PutLabel(fp0, gettext("Personal mail address"));
     PutTextInput(fp0, mail_address_string,
 		NOTEMPTY(personal_mail_address), text_len, "");
-
-    /* Select Popups: ON/OFF */
-    PutLabel(fp0, gettext("Popups for select fields"));
-    BeginSelect(fp0, select_popups_string);
-    PutOptValues(fp0, LYSelectPopups, bool_values);
-    EndSelect(fp0);
 
     /* Search Type: SELECT */
     PutLabel(fp0, gettext("Searching type"));
@@ -4039,22 +4103,52 @@ PUBLIC int gen_options ARGS1(
     PutOptValues(fp0, user_mode, user_mode_values);
     EndSelect(fp0);
 
-    /* Verbose Images: ON/OFF */
-    PutLabel(fp0, gettext("Verbose images"));
-    BeginSelect(fp0, verbose_images_string);
-    PutOptValues(fp0, verbose_img, bool_values);
-    EndSelect(fp0);
-
     /* VI Keys: ON/OFF */
     PutLabel(fp0, gettext("VI keys"));
     BeginSelect(fp0, vi_keys_string);
     PutOptValues(fp0, vi_keys, bool_values);
     EndSelect(fp0);
 
-
     /* X Display: INPUT */
     PutLabel(fp0, gettext("X Display"));
     PutTextInput(fp0, x_display_string, NOTEMPTY(x_display), text_len, "");
+
+    /*
+     * Document Layout
+     */
+    fprintf(fp0,"\n  <em>%s</em>\n", gettext("Document Layout"));
+
+    /* HTML error tolerance: SELECT */
+    PutLabel(fp0, gettext("HTML error tolerance"));
+    BeginSelect(fp0, DTD_recovery_string);
+    PutOptValues(fp0, Old_DTD, DTD_type_values);
+    EndSelect(fp0);
+
+    /* Select Popups: ON/OFF */
+    PutLabel(fp0, gettext("Popups for select fields"));
+    BeginSelect(fp0, select_popups_string);
+    PutOptValues(fp0, LYSelectPopups, bool_values);
+    EndSelect(fp0);
+
+    /* Show Images: SELECT */
+    PutLabel(fp0, gettext("Show images"));
+    BeginSelect(fp0, images_string);
+    PutOption(fp0, !pseudo_inline_alts && !clickable_images,
+       images_ignore_all_string,
+       images_ignore_all_string);
+    PutOption(fp0, pseudo_inline_alts && !clickable_images,
+       images_use_label_string,
+       images_use_label_string);
+    PutOption(fp0, clickable_images,
+       images_use_links_string,
+       images_use_links_string);
+    EndSelect(fp0);
+
+    /* Verbose Images: ON/OFF */
+    PutLabel(fp0, gettext("Verbose images"));
+    BeginSelect(fp0, verbose_images_string);
+    PutOptValues(fp0, verbose_img, verbose_images_type_values);
+    EndSelect(fp0);
 
     /*
      * Bookmark Options

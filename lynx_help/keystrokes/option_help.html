@@ -19,15 +19,20 @@ compiled in or chosen in `lynx.cfg':<P>
 <LI><A HREF="#EM">Emacs keys</A>
 <LI><A HREF="#LL">Execution links</A>
 <LI><A HREF="#KM">Keypad mode</A>
+<LI><A HREF="#LE">Line edit style</A>
 <LI><A HREF="#PM">Personal Mail Address</A>
-<LI><A HREF="#PU">Pop-ups for select fields</A>
 <LI><A HREF="#ST">Searching type</A>
 <LI><A HREF="#SC">Show color</A>
 <LI><A HREF="#CL">Show cursor for current link or option</A>
 <LI><A HREF="#UM">User Mode</A>
-<LI><A HREF="#VB">Verbose Images</A>
 <LI><A HREF="#VI">VI keys</A>
 <LI><A HREF="#DV">X DISPLAY variable</A></UL>
+<LI>Document Layout
+<UL>
+<LI><A HREF="#tagsoup">HTML error tolerance</A>
+<LI><A HREF="#PU">Pop-ups for select fields</A>
+<LI><A HREF="#SI">Show Images</A>
+<LI><A HREF="#VB">Verbose Images</A></UL>
 <LI>Bookmark Options
 <UL>
 <LI><A HREF="#MB">Multi-bookmarks</A>
@@ -47,9 +52,6 @@ compiled in or chosen in `lynx.cfg':<P>
 <LI><A HREF="#PC">Preferred Document Charset</A>
 <LI><A HREF="#PL">Preferred Document Language</A>
 <LI><A HREF="#UA">User Agent</A></UL>
-<LI> -- not in Options Form --
-<UL>
-<LI><A HREF="#LE">Line edit style</A></UL>
 </UL>
 
 <H1><A NAME="CK">Cookies</A></H1>
@@ -68,6 +70,7 @@ If set to 'ON' then the CTRL-P, CTRL-N, CTRL-F and CTRL-B keys will be mapped
 to up-arrow, down-arrow, right-arrow and left-arrow respectively.  Otherwise,
 they remain mapped to their configured bindings (normally UP_TWO lines,
 DOWN_TWO lines, NEXT_PAGE and PREV_PAGE respectively).
+<p>Note: setting emacs keys does not affect the line-editor bindings. 
 
 <H1><A NAME="LL">Execution links</A></H1>
 
@@ -82,6 +85,13 @@ see Lynx Navigation) and having every link numbered (numbered links)
 so that the links may be selected by numbers instead of moving to them
 with the arrow keys.  You can also number form fields.
 
+<H1><A NAME="LE">Line edit style</A></H1> 
+ 
+This allows you to set alternate key bindings for the built-in line editor, 
+if your system administrator has installed  
+<A HREF="alt_edit_help.html">Alternate Bindings</A>. 
+Otherwise, Lynx uses the <A HREF="edit_help.html">Default Binding</A>. 
+ 
 <H1><A NAME="PM">Personal Mail Address</A></H1>
 
 You may set your mail address here so that when mailing messages
@@ -157,6 +167,68 @@ for beginners.
 <dt><EM>Advanced</EM>: The URL is shown on the status line.
 </dl>
 
+<H1><A NAME="tagsoup">HTML error tolerance</A></H1>
+
+Lynx often has to deal with invalid HTML markup.  It always tries to 
+recover from errors, but there is no universally correct way for doing 
+this.  As a result, there are two parsing modes: 
+"<DFN>SortaSGML</DFN>" attempts to enforce valid nesting of most tags 
+at an earlier stage of processing, while "<DFN>TagSoup</DFN>" relies 
+more on the HTML rendering stage to mimic the behavior of some other 
+browsers. 
+You can also switch between these modes with the CTRL-V key, and the 
+default can be changed in lynx.cfg or with the -tagsoup command line 
+switch. 
+ 
+<P> 
+The "SortaSGML" mode will often appear to be more strict, and makes 
+some errors apparent that are otherwise unnoticeable.  One particular 
+difference is the handling of block elements or 
+&lt;li&gt;..&lt;/li&gt; inside &lt;a HREF="some.url"&gt;..&lt;/a&gt;. 
+Invalid nesting like this may turn anchors into hidden links which 
+cannot be easily followed, this is avoided in "TagSoup" mode.  See the 
+<a href="follow_help.html">help on following links by 
+number</a> for more information on hidden links.  Often pages may be 
+more readable in "TagSoup" mode, but sometimes the opposite is true. 
+Most documents with valid HTML, and documents with only minor errors, 
+should be rendered the same way in both modes. 
+ 
+<P> 
+If you are curious about what goes on behind the scenes, but find that 
+the information from the -trace switch is just too much, Lynx can be 
+started with the -preparsed switch; going into SOURCE mode ('\' key) 
+and toggling the parsing mode (with CTRL-V) should then show some of 
+the differences. 
+
+<!--
+LP's version - for reference - TD
+
+While the proper HTML markup should be canonical, badly nested HTML pages
+may be recovered in different ways.  There are two error recovery modes
+in Lynx: SortaSGML with the recovery at SGML stage and TagSoup mode
+with the recovery at HTML parsing stage, the latter gives more
+recovery and was the default in Lynx 2.7.2 and before,
+and the first may be useful for page validation purposes.
+One particular difference is known for &lt;li&gt;..&lt;/li&gt;
+or similar strong markup inside &lt;a HREF="some.url"&gt;..&lt;/a&gt;
+anchor text - those links are not reachable in SortaSGML
+(such markup should be placed outside &lt;a&gt;..&lt;/a&gt; indeed).
+Default recovery mode can also be switched with CTRL-V key,
+from lynx.cfg or command line switch.
+-->
+
+
+<H1><A NAME="SI">Show Images</A></H1>
+
+Text-based browser cannot show images directly, so we have a choice:
+ignore all images without ALT= text string (this is also switched by
+<A HREF="../Lynx_users_guide.html#[-key">'[' key</A>),
+show labels (see also "verbose images" for choice between [IMAGE] and filename),
+use links for every image to make it possible to download them
+(also switched by <A HREF="../Lynx_users_guide.html#*-key">'*' key</A>).
+Changing these settings will not be saved but could be made permanent
+by changing the respective settings in lynx.cfg.
+
 <H1><A NAME="VB">Verbose Images</A></H1>
 
 Controls whether or not Lynx replaces the [LINK], [INLINE] and [IMAGE] comments
@@ -170,6 +242,7 @@ If set to 'ON' then the lowercase h, j, k and l keys will be mapped
 to left-arrow, down-arrow, up-arrow and right-arrow respectively.
 <p>The uppercase H, J, K, and L keys remain mapped to their configured bindings
 (normally HELP, JUMP, KEYMAP and LIST, respectively).
+<p>Note: setting vi keys does not affect the line-editor bindings. 
 
 <H1><A NAME="DV">X DISPLAY variable</A></H1>
 
@@ -307,12 +380,6 @@ of `Mozilla' as the User-Agent are a copyright infringement, which will
 be prosecuted.  DO NOT misrepresent Lynx as Mozilla.  The Options Menu issues
 a warning about possible copyright infringement whenever the header is changed
 to one which does not include `Lynx' or `lynx'.
-
-<H1><A NAME="LE">Line edit style</A></H1>
-
-This allows you to set alternate key bindings for the built-in line editor,
-if your system administrator has installed alternates.
-Otherwise, Lynx uses the <A HREF="edit_help.html">Default Binding</A>.
 
 </BODY>
 </HTML>

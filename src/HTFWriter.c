@@ -459,7 +459,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 	HTParentAnchor *,	anchor,
 	HTStream *,		sink)
 {
-    char fnam[256];
+    char fnam[LY_MAXPATH];
     CONST char *suffix;
     HTStream* me;
 
@@ -513,7 +513,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     } else {
 	/*
 	 *  Check for a suffix.
-	 *	Save the file under a suitably suffixed name.
+	 *  Save the file under a suitably suffixed name.
 	 */
 	if (!strcasecomp(pres->rep->name, "text/html")) {
 	    suffix = HTML_SUFFIX;
@@ -577,7 +577,7 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 	HTStream *,		sink)
 {
     HTStream * ret_obj;
-    char fnam[256];
+    char fnam[LY_MAXPATH];
     CONST char * suffix;
     char *cp;
     int c = 0;
@@ -802,8 +802,8 @@ PUBLIC HTStream* HTCompressed ARGS3(
     HTPresentation *Pres = NULL;
     int n, i;
     BOOL can_present = FALSE;
-    char fnam[256];
-    char temp[256];
+    char fnam[LY_MAXPATH];
+    char temp[LY_MAXPATH];	/* actually stores just a suffix */
     CONST char *suffix;
     char *uncompress_mask = NULL;
     char *compress_suffix = "";

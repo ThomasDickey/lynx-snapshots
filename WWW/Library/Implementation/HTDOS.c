@@ -38,10 +38,12 @@ char * HTDOS_wwwName ARGS1(char *, dosname)
     if(strlen(wwwname) > 3 && *cp_url == '/')
 	*cp_url = '\0';
 
+#ifdef NOTUSED
     if(*cp_url == ':') {
 	cp_url++;
-	*cp_url = '/';
+	*cp_url = '/';	/* terminate drive letter to survive */
     }
+#endif
 
     return(wwwname);
 }
@@ -65,19 +67,12 @@ char * HTDOS_name ARGS1(char *, wwwname)
 
     for (joe = 0; cp_url[joe] != '\0'; joe++)	{
 	if (cp_url[joe] == '/')	{
-	    cp_url[joe] = '\\';
+	    cp_url[joe] = '\\';	/* convert slashes to dos-style */
 	}
     }
 
-    /* Needed to surf the root of a local drive. */
-
-    if(strlen(cp_url) < 4) cp_url[2] = ':';
-    if(strlen(cp_url) == 3) strcpy(cp_url+3, "\\");
-    if(strlen(cp_url) == 4) strcpy(cp_url+4, ".");
-
-    if((strlen(cp_url) > 2) && (cp_url[1] == '|'))
-	cp_url[1] = ':';
-
+    /* pesky leading slash, rudiment from file://localhost/  */
+    /* the rest of path may be with or without drive letter  */
     if((cp_url[1] == '\\') || (cp_url[0]  != '\\')) {
 	result = cp_url;
     } else {

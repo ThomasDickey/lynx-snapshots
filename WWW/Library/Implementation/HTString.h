@@ -71,8 +71,10 @@ extern char * HTSprintf0 () GCC_PRINTFLIKE(2,3);
 
 #if USE_QUOTED_PARAMETER
 extern char *HTQuoteParameter PARAMS((CONST char *parameter));
+extern void HTAddXpand PARAMS((char ** result, CONST char * command, int number, CONST char * parameter));
 #else
 #define HTQuoteParameter(parameter) parameter	/* simplify ifdef'ing */
+#define HTAddXpand(result,command,number,parameter)  HTAddParam(result,command,number,parameter)
 #endif
 
 extern int HTCountCommandArgs PARAMS((CONST char * command));

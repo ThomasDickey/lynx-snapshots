@@ -28,7 +28,7 @@ subdir = po
 
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
-MKINSTALLDIRS = $(top_srcdir)/@MKINSTALLDIRS@
+MKINSTALLDIRS = @MKINSTALLDIRS@
 
 CC = @CC@
 GENCAT = @GENCAT@
@@ -113,7 +113,7 @@ install-data-yes: all
 	if test -r $(MKINSTALLDIRS); then \
 	  $(MKINSTALLDIRS) $(datadir); \
 	else \
-	  $(top_srcdir)/mkinstalldirs $(datadir); \
+	  $(top_srcdir)/mkdirs.sh $(datadir); \
 	fi
 	@catalogs='$(CATALOGS)'; \
 	for cat in $$catalogs; do \
@@ -127,7 +127,7 @@ install-data-yes: all
 	  if test -r $(MKINSTALLDIRS); then \
 	    $(MKINSTALLDIRS) $$dir; \
 	  else \
-	    $(top_srcdir)/mkinstalldirs $$dir; \
+	    $(top_srcdir)/mkdirs.sh $$dir; \
 	  fi; \
 	  if test -r $$cat; then \
 	    $(INSTALL_DATA) $$cat $$dir/$(PACKAGE)$(INSTOBJEXT); \
@@ -155,7 +155,7 @@ install-data-yes: all
 	  if test -r $(MKINSTALLDIRS); then \
 	    $(MKINSTALLDIRS) $(gettextsrcdir); \
 	  else \
-	    $(top_srcdir)/mkinstalldirs $(gettextsrcdir); \
+	    $(top_srcdir)/mkdirs.sh $(gettextsrcdir); \
 	  fi; \
 	  $(INSTALL_DATA) $(srcdir)/makefile.inn \
 			  $(gettextsrcdir)/makefile.inn; \

@@ -661,10 +661,12 @@ static int lynxcgi_environment_fun ARGS1(
 static int lynx_sig_file_fun ARGS1(
 	char *, 	value)
 {
-    if (LYPathOffHomeOK(value, 256)) {
-	StrAllocCopy(LynxSigFile, value);
-	LYAddPathToHome(value, 256, LynxSigFile);
-	StrAllocCopy(LynxSigFile, value);
+    char temp[LY_MAXPATH];
+    LYstrncpy(temp, value, sizeof(temp)-1);
+    if (LYPathOffHomeOK(temp, sizeof(temp))) {
+	StrAllocCopy(LynxSigFile, temp);
+	LYAddPathToHome(temp, sizeof(temp), LynxSigFile);
+	StrAllocCopy(LynxSigFile, temp);
 	CTRACE(tfp, "LYNX_SIG_FILE set to '%s'\n", LynxSigFile);
     } else {
 	CTRACE(tfp, "LYNX_SIG_FILE '%s' is bad. Ignoring.\n", LYNX_SIG_FILE);
@@ -945,7 +947,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN("system_editor", CONF_FUN, system_editor_fun),
      PARSE_STR("system_mail", CONF_STR, system_mail),
      PARSE_STR("system_mail_flags", CONF_STR, system_mail_flags),
-     PARSE_SET("tagsoup", CONF_BOOL, New_DTD),
+     PARSE_SET("tagsoup", CONF_BOOL, Old_DTD),
 #ifdef EXEC_LINKS
      PARSE_DEF("trusted_exec", CONF_ADD_TRUSTED, EXEC_PATH),
 #endif

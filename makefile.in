@@ -295,7 +295,6 @@ install-doc : $(docdir)
 	@echo Copying sample files
 	(cd $(srcdir) && tar cf - C[HO]* PROBLEMS README samples test ) | \
 			       ( cd $(docdir) && tar xf - )
-	-rm -f $(libdir)/lynx.tmp
 
 # HPUX 'sed' does not seem to like '=' as pattern delimiter.
 FIX_SED = tr '=' '%'
@@ -370,9 +369,9 @@ LYHelp.h : LYHelp.hin
 	@echo
 	@echo '**********************************************'
 
-cfg_defs.h : $(srcdir)/cfg_defs.sh
+cfg_defs.h : $(srcdir)/cfg_defs.sh config.cache lynx_cfg.h
 	@rm -f $@
-	$(SHELL) $(srcdir)/cfg_defs.sh >$@
+	PATH=$(srcdir):$$PATH $(SHELL) -c '$(srcdir)/cfg_defs.sh'
 
 install-cfg : $(libdir)
 	-mv -f $(libdir)/lynx.cfg $(libdir)/lynx.oldcfg

@@ -4,8 +4,6 @@
 #include <HText.h>
 #include <HTMLDTD.h>
 
-#define TEMPSTRINGSIZE 256
-
 enum {
  ABS_OFF = 0,
  STACK_OFF = 0,
@@ -18,12 +16,12 @@ enum {
 enum {
  DSTYLE_LINK = HTML_A+STARTAT,
  DSTYLE_STATUS = HTML_ELEMENTS+STARTAT,
- DSTYLE_ALINK, /* active link */
- DSTYLE_NORMAL, /* default attributes */
-	DSTYLE_OPTION, 		/* option on the option screen */
-	DSTYLE_VALUE, 		/* value on the option screen */
-	DSTYLE_HIGH,
- DSTYLE_CANDY, /* possibly going to vanish */
+ DSTYLE_ALINK,		/* active link */
+ DSTYLE_NORMAL,		/* default attributes */
+ DSTYLE_OPTION, 	/* option on the option screen */
+ DSTYLE_VALUE, 		/* value on the option screen */
+ DSTYLE_HIGH,
+ DSTYLE_CANDY,		/* possibly going to vanish */
  DSTYLE_ELEMENTS
 };
 
@@ -48,14 +46,6 @@ typedef struct {
  int cattr; /* attributes to go with the color */
 } HTCharStyle;
 
-#ifdef NOT_USED
-
-typedef struct _linkedlist {
- char name[64];
- struct _linkedlist *next;
-} linked_list;
-#endif
-
 #define HText_characterStyle CTRACE(tfp,"HTC called from %s/%d\n",__FILE__,__LINE__);_internal_HTC
 
 #undef HText_characterStyle
@@ -63,6 +53,8 @@ typedef struct _linkedlist {
 
 #if defined(USE_COLOR_STYLE)
 extern void _internal_HTC PARAMS((HText * text, int style, int dir));
+#define TEMPSTRINGSIZE 256
+extern char class_string[TEMPSTRINGSIZE];
 #endif
 
 #endif

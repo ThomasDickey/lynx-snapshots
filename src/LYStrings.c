@@ -297,7 +297,11 @@ PUBLIC char *LYstrncpy ARGS3(
 	int,		n)
 {
     char *val;
-    int len = strlen(src);
+    int len;
+
+    if (src == 0)
+	src = "";
+    len = strlen(src);
 
     if (n < 0)
 	n = 0;
@@ -1833,6 +1837,17 @@ PUBLIC int LYEdit1 ARGS4(
 	    pos0 -= Pos;
 	    while (pos0--)
 		LYEdit1(edit, 0, LYE_DELN, FALSE);
+	}
+	break;
+
+    case LYE_DELBL:
+	/*
+	 *  Delete from current cursor position back to BOL.
+	 */
+	{
+	    int pos0 = Pos;
+	    while (pos0--)
+		LYEdit1(edit, 0, LYE_DELP, FALSE);
 	}
 	break;
 

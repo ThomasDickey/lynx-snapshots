@@ -67,6 +67,18 @@ PRIVATE char *post_len;
 
 PRIVATE void add_environment_value PARAMS((char *env_value));
 
+#define PERROR(msg) CTRACE(tfp, "LYNXCGI: %s: %s\n", msg, LYStrerror(errno))
+
+#ifdef HAVE_STRERROR
+#define LYStrerror(n) strerror(n)
+#else
+PRIVATE char *LYStrerror ARGS1(int, code)
+{
+    static char temp[80];
+    sprintf(temp, "System errno is %d.\r\n", code);
+    return temp;
+}
+#endif /* HAVE_STRERROR */
 
 /*
  * Simple routine for expanding the environment array and adding a value to
@@ -178,16 +190,14 @@ PRIVATE int LYLoadCGI ARGS4(
 		*cp = '\0';
 		statrv = 999;	/* force new stat()  - kw */
 	    } else {
-		if (TRACE)
-		    perror("LYNXCGI: strrchr(pgm_buff, '/') returned NULL");
+		PERROR("strrchr(pgm_buff, '/') returned NULL");
 	    	break;
 	    }
         }
 
 	if (statrv < 0) {
 	    /* Did not find PATH_INFO data */
-	    if (TRACE)
-		perror("LYNXCGI: stat() of pgm_buff failed");
+	    PERROR("stat() of pgm_buff failed");
 	} else {
 	    /* Found PATH_INFO data.  Strip it off of pgm and into path_info. */
 	    StrAllocCopy(path_info, pgm+strlen(pgm_buff));
@@ -205,9 +215,7 @@ PRIVATE int LYLoadCGI ARGS4(
 	 *  backing up were stat()able. - kw
 	 */
 	HTAlert(gettext("Unable to access cgi script"));
-	if (TRACE) {
-	    perror("LYNXCGI: stat() failed");
-	}
+	PERROR("stat() failed");
 	status = -4;
 
     } else if (!(S_ISREG(stat_buf.st_mode) &&
@@ -323,16 +331,12 @@ PRIVATE int LYLoadCGI ARGS4(
 
 	} else if (anAnchor->post_data && pipe(fd1) < 0) {
 	    HTAlert(CONNECT_SET_FAILED);
-	    if (TRACE) {
-		perror("LYNXCGI: pipe() failed");
-	    }
+	    PERROR("pipe() failed");
 	    status = -3;
 
 	} else if (pipe(fd2) < 0) {
 	    HTAlert(CONNECT_SET_FAILED);
-	    if (TRACE) {
-		perror("LYNXCGI: pipe() failed");
-	    }
+	    PERROR("pipe() failed");
 	    close(fd1[0]);
 	    close(fd1[1]);
 	    status = -3;
@@ -354,6 +358,8 @@ PRIVATE int LYLoadCGI ARGS4(
 			LYNX_NAME, LYNX_VERSION);
 		add_environment_value(server_software);
 	    }
+	    fflush(stdout);
+	    fflush(stderr);
 
 	    if ((pid = fork()) > 0) { /* The good, */
 		int chars, total_chars;
@@ -382,9 +388,7 @@ PRIVATE int LYLoadCGI ARGS4(
 			    if (errno == ERESTARTSYS)
 				continue;
 #endif /* ERESTARTSYS */
-			    if (TRACE) {
-				perror("LYNXCGI: write() of POST data failed");
-			    }
+			    PERROR("write() of POST data failed");
 			    break;
 			}
 			CTRACE(tfp, "LYNXCGI: Wrote %d bytes of POST data.\n",
@@ -402,11 +406,34 @@ PRIVATE int LYLoadCGI ARGS4(
 		}
 
 		HTReadProgress(total_chars = 0, 0);
-		while((chars = read(fd2[0], buf, sizeof(buf))) > 0) {
+		while((chars = read(fd2[0], buf, sizeof(buf))) != 0) {
+		    if (chars < 0) {
+#ifdef EINTR
+			if (errno == EINTR)
+			    continue;
+#endif /* EINTR */
+#ifdef ERESTARTSYS
+			if (errno == ERESTARTSYS)
+			    continue;
+#endif /* ERESTARTSYS */
+			PERROR("read() of CGI output failed");
+			break;
+		    }
 		    HTReadProgress(total_chars += chars, 0);
 		    CTRACE(tfp, "LYNXCGI: Rx: %.*s\n", chars, buf);
 		    (*target->isa->put_block)(target, buf, chars);
 		}
+
+		if (chars < 0 && total_chars == 0) {
+		    status = HT_NOT_LOADED;
+		    (*target->isa->_abort)(target, NULL);
+		    target = NULL;
+		} else if (chars != 0) {
+		    status = HT_PARTIAL_CONTENT;
+		} else {
+		    status = HT_LOADED;
+		}
+
 #if !HAVE_WAITPID
 		while (wait(&wstatus) != pid)
 		    ; /* do nothing */
@@ -424,12 +451,12 @@ PRIVATE int LYLoadCGI ARGS4(
 		}
 #endif /* !HAVE_WAITPID */
 		close(fd2[0]);
-		status = HT_LOADED;
 
 	    } else if (pid == 0) { /* The Bad, */
 		char **argv = NULL;
 		int argv_cnt = 3; /* name, one arg and terminator */
 		char **cur_argv = NULL;
+		int exec_errno;
 
 		/* Set up output pipe */
 		close(fd2[0]);
@@ -497,7 +524,7 @@ PRIVATE int LYLoadCGI ARGS4(
 		    /* Data for a get/search form */
 		    if (is_www_index) {
 			add_environment_value("REQUEST_METHOD=SEARCH");
-		    } else if (!anAnchor->isHEAD) {
+		    } else if (!anAnchor->isHEAD && !anAnchor->post_data) {
 			add_environment_value("REQUEST_METHOD=GET");
 		    }
 
@@ -523,6 +550,8 @@ PRIVATE int LYLoadCGI ARGS4(
 			}
 			cp++;
 		    }
+		} else if (!anAnchor->isHEAD && !anAnchor->post_data) {
+		    add_environment_value("REQUEST_METHOD=GET");
 		}
 		*cur_argv = NULL;	/* Terminate argv */
 		argv[0] = pgm;
@@ -557,15 +586,20 @@ PRIVATE int LYLoadCGI ARGS4(
 		/* End WebSter Mods  -jkt */
 
 		execve(argv[0], argv, env);
-		if (TRACE) {
-		    perror("LYNXCGI: execve failed");
+		exec_errno = errno;
+		PERROR("execve failed");
+		printf("Content-Type: text/plain\r\n\r\n");
+		if (!anAnchor->isHEAD) {
+		    printf("exec of %s failed", pgm);
+		    printf(": %s.\r\n", LYStrerror(exec_errno));
 		}
+		fflush(stdout);
+		fflush(stderr);
+		_exit(1);
 
 	    } else {	/* and the Ugly */
 		HTAlert(CONNECT_FAILED);
-		if (TRACE) {
-		    perror("LYNXCGI: fork() failed");
-		}
+		PERROR("fork() failed");
 		status = HT_NO_DATA;
 		close(fd1[0]);
 		close(fd1[1]);

@@ -7,20 +7,19 @@
 
 <em>ENVIRONMENT</em>
        In addition to various  "standard"  environment  variables
-       such  as HOME, PATH, USER, DISPLAY, TMPDIR, etc, Lynx utilizes
-       several Lynx-specific environment variables, <a href="#env">if they
-       exist</a>.
+       such as HOME, PATH, USER, DISPLAY, TMPDIR, etc, Lynx utilizes
+       several Lynx-specific environment variables, <a href="#env">if they exist</a>.
 
-       Others  may be created or modified by Lynx to pass data to
-       an external program, or  for  other  reasons.   These  are
+       Others may be created or modified by Lynx to pass data to
+       an external program, or for other reasons.  These are
        listed separately <a href="#setenv">below</a>.
 
-       See  also the sections on <a href="#cgi">SIMULATED CGI SUPPORT</a> and
+       See also the sections on <a href="#cgi">SIMULATED CGI SUPPORT</a> and
        <a href="#language">NATIVE LANGUAGE SUPPORT</a>, below.
 
        Note:  Not all environment variables apply to all types of
-       platforms  supported by Lynx, though most do.  Feedback on
-       platform dependencies is solicited. See also <a href="#dos">win32/dos</a> specific
+       platforms supported by Lynx, though most do.  Feedback on
+       platform dependencies is solicited.  See also <a href="#dos">win32/dos</a> specific
        variables.
 
 <a name="env"><em>
@@ -105,7 +104,7 @@ Environment Variables Used By Lynx:
                            the  form  PROTOCOL_proxy  (literally:
                            http_proxy,  ftp_proxy,  gopher_proxy,
                            etc), to "http://some.server.dom:port/".
-                           See <a href="#proxy">below</a> for details, and  examples.
+                           See <a href="#proxy">details and examples</a>.
 
        WWW_access_GATEWAY
                            Lynx still  supports  use  of  gateway
@@ -117,8 +116,7 @@ Environment Variables Used By Lynx:
                            discontinued.  Note that  you  do  not
                            include  a  terminal '/' for gateways,
                            but do for proxies specified by PROTOCOL_proxy
-                           environment variables.  See
-                           <a href="#proxy">below</a> for details.
+                           environment variables.  See <a href="#proxy">details</a>.
 
        WWW_HOME
                            This  variable,  if set, will override

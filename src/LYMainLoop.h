@@ -3,6 +3,7 @@
 
 #include <HTUtils.h>
 
+extern BOOLEAN LYOpenTraceLog NOPARAMS;
 extern void LYCloseTracelog NOPARAMS;
 extern int mainloop NOPARAMS;
 

@@ -74,6 +74,7 @@ TABLES= \
  iso08_uni.h \
  iso09_uni.h \
  iso10_uni.h \
+ iso15_uni.h \
  koi8r_uni.h \
  mac_uni.h \
  mnem_suni.h \
@@ -135,6 +136,7 @@ iso07_uni.h:		$(srcdir)/iso07_uni.tbl		makeuctb$x
 iso08_uni.h:		$(srcdir)/iso08_uni.tbl		makeuctb$x
 iso09_uni.h:		$(srcdir)/iso09_uni.tbl		makeuctb$x
 iso10_uni.h:		$(srcdir)/iso10_uni.tbl		makeuctb$x
+iso15_uni.h:		$(srcdir)/iso15_uni.tbl		makeuctb$x
 koi8r_uni.h:		$(srcdir)/koi8r_uni.tbl		makeuctb$x
 mac_uni.h:		$(srcdir)/mac_uni.tbl		makeuctb$x
 mnem_suni.h:		$(srcdir)/mnem_suni.tbl		makeuctb$x

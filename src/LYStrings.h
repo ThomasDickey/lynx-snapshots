@@ -155,7 +155,8 @@ typedef struct _EditFieldData {
 
 #define LYE_AIX   (LYE_LKCMD +1)  /* Hex 97                */
 
-#define LYE_DELEL (LYE_AIX   +1)  /* Delete thru EOL       */
+#define LYE_DELBL (LYE_AIX   +1)  /* Delete back to BOL    */
+#define LYE_DELEL (LYE_DELBL +1)  /* Delete thru EOL       */
 
 #define LYE_SWMAP (LYE_DELEL +1)  /* Switch input keymap   */
 

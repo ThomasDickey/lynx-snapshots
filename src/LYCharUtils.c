@@ -334,13 +334,25 @@ PUBLIC void LYFillLocalFileURL ARGS2(
     }
 
 #if defined(DOSPATH) || defined(__EMX__)
-    if (*(*href+1) == ':') {
+    if (isalpha(*(*href)) && (*(*href+1) == ':'))  {
 	/*
 	 * If it's a local DOS path beginning with drive letter,
 	 * add file://localhost/ prefix and go ahead.
 	 */
 	StrAllocCopy(temp, *href);
 	LYLocalFileToURL (href, temp);
+    }
+
+    /* use below: strlen("file://localhost/") = 17 */
+    if (!strncmp(*href, "file://localhost/", 17)
+	  && (strlen(*href) == 19)
+	  && isalpha(*(*href+17))
+	  && (*(*href+18) == ':')) {
+	/*
+	 * Terminate DOS drive letter with a slash to surf root successfully.
+	 * Here seems a proper place to do so.
+	 */
+	StrAllocCat(*href, "/");
     }
 #endif /* DOSPATH */
 
@@ -353,9 +365,9 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 #ifdef VMS
 	temp2 = HTVMS_wwwName(getenv("PATH"));
 #else
-	char curdir[DIRNAMESIZE];
+	char curdir[LY_MAXPATH];
 #if HAVE_GETCWD
-	getcwd (curdir, DIRNAMESIZE);
+	getcwd (curdir, sizeof(curdir));
 #else
 	getwd (curdir);
 #endif /* NO_GETCWD */
@@ -2888,7 +2900,7 @@ PUBLIC void LYHandleMETA ARGS4(
 		     *	but this is a Netscapism, so don't
 		     *	expect the author to know that. - FM
 		     */
-		    HTAlert(REFRESH_URL_NOT_ABSOLUTE);
+		    HTUserMsg(REFRESH_URL_NOT_ABSOLUTE);
 		    /*
 		     *	Use the document's address
 		     *	as the base. - FM

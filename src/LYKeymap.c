@@ -673,12 +673,12 @@ PRIVATE char *pretty ARGS1 (int, c)
 	return buf;
 }
 
-PRIVATE BOOL format_binding ARGS3(
-	char *,			buf,
+PRIVATE char * format_binding ARGS2(
 	unsigned short *,	table,
 	int,			i)
 {
     unsigned the_key = table[i];
+    char *buf = 0;
     char *formatted;
 
     if (the_key != 0
@@ -686,23 +686,24 @@ PRIVATE BOOL format_binding ARGS3(
      && revmap[the_key].name != 0
      && revmap[the_key].doc != 0
      && (formatted = pretty(i-1)) != 0) {
-	sprintf(buf, "%-12s%-14s%s\n", formatted,
+	HTSprintf0(&buf, "%-12s%-14s%s\n", formatted,
 		revmap[the_key].name,
 		revmap[the_key].doc);
-	return TRUE;
+	return buf;
     }
-    return FALSE;
+    return 0;
 }
 
-PRIVATE void print_binding ARGS3(HTStream *, target, char *, buf, int, i)
+PRIVATE void print_binding ARGS2(HTStream *, target, int, i)
 {
+    char *buf;
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
     if (prev_lynx_edit_mode && !no_dired_support &&
-        format_binding(buf, key_override, i)) {
+        (buf = format_binding(key_override, i)) != 0) {
 	(*target->isa->put_block)(target, buf, strlen(buf));
     } else
 #endif /* DIRED_SUPPORT && OK_OVERRIDE */
-    if (format_binding(buf, keymap, i)) {
+    if ((buf = format_binding(keymap, i)) != 0) {
 	(*target->isa->put_block)(target, buf, strlen(buf));
     }
 }
@@ -715,7 +716,7 @@ PRIVATE int LYLoadKeymap ARGS4 (
 {
     HTFormat format_in = WWW_HTML;
     HTStream *target;
-    char buf[256];
+    char *buf = 0;
     int i;
 
     /*
@@ -723,29 +724,29 @@ PRIVATE int LYLoadKeymap ARGS4 (
      */
     target = HTStreamStack(format_in, format_out, sink, anAnchor);
     if (!target || target == NULL) {
-	sprintf(buf, CANNOT_CONVERT_I_TO_O,
-		     HTAtom_name(format_in), HTAtom_name(format_out));
+	HTSprintf0(&buf, CANNOT_CONVERT_I_TO_O,
+			 HTAtom_name(format_in), HTAtom_name(format_out));
 	HTAlert(buf);
+	FREE(buf);
 	return(HT_NOT_LOADED);
     }
     anAnchor->no_cache = TRUE;
 
-    sprintf(buf, "<head>\n<title>%s</title>\n</head>\n<body>\n",
-    		  CURRENT_KEYMAP_TITLE);
+    HTSprintf0(&buf, "<head>\n<title>%s</title>\n</head>\n<body>\n",
+		     CURRENT_KEYMAP_TITLE);
     (*target->isa->put_block)(target, buf, strlen(buf));
-    sprintf(buf, "<h1>%s (%s)%s<a href=\"%s%s\">%s</a></h1>\n",
+    HTSprintf0(&buf, "<h1>%s (%s)%s<a href=\"%s%s\">%s</a></h1>\n",
 	LYNX_NAME, LYNX_VERSION,
 	HELP_ON_SEGMENT,
 	helpfilepath, CURRENT_KEYMAP_HELP, CURRENT_KEYMAP_TITLE);
     (*target->isa->put_block)(target, buf, strlen(buf));
-    sprintf(buf, "<pre>\n");
+    HTSprintf0(&buf, "<pre>\n");
     (*target->isa->put_block)(target, buf, strlen(buf));
 
     for (i = 'a'+1; i <= 'z'+1; i++) {
-	print_binding(target, buf, i);
+	print_binding(target, i);
 	if (keymap[i - ' '] != keymap[i]) {
-	    print_binding(target, buf,
-			  i-' ');  /* uppercase mapping is different */
+	    print_binding(target, i-' ');  /* uppercase mapping is different */
 	}
     }
     for (i = 1; i < KEYMAP_SIZE; i++) {
@@ -754,14 +755,15 @@ PRIVATE int LYLoadKeymap ARGS4 (
 	 */
 	if ((i >= 0400 || i <= ' ' || !isalpha(i-1)) &&
 	    strcmp(revmap[keymap[i]].name, "PIPE")) {
-	    print_binding(target, buf, i);
+	    print_binding(target, i);
 	}
     }
 
-    sprintf(buf,"</pre>\n</body>\n");
+    HTSprintf0(&buf,"</pre>\n</body>\n");
     (*target->isa->put_block)(target, buf, strlen(buf));
 
     (*target->isa->_free)(target);
+    FREE(buf);
     return(HT_LOADED);
 }
 
@@ -940,16 +942,15 @@ PUBLIC int lookup_keymap ARGS1(
 PUBLIC char *key_for_func ARGS1 (
 	int,	func)
 {
-    static char buf[512];
+    static char *buf;
     int i;
     char *formatted;
 
-    buf[0] = '\0';
     if ((i = LYReverseKeymap(func)) >= 0) {
-	if (*buf)
-	    strcat(buf, " or ");
 	formatted = pretty(i);
-	strcat(buf, formatted != 0 ? formatted : "?");
+	StrAllocCopy(buf, formatted != 0 ? formatted : "?");
+    } else if (buf == 0) {
+	StrAllocCopy(buf, "");
     }
     return buf;
 }

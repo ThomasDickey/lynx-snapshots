@@ -113,7 +113,7 @@ LYCharSets.o:	$(top_srcdir)/userdefs.h
 LYGetFile.o:	$(top_srcdir)/userdefs.h
 LYKeymap.o:	$(top_srcdir)/userdefs.h
 LYMail.o:	$(top_srcdir)/userdefs.h
-LYMain.o:	$(top_srcdir)/userdefs.h
+LYMain.o:	$(top_srcdir)/userdefs.h $(top_builddir)/lynx_cfg.h
 LYMainLoop.o:	$(top_srcdir)/userdefs.h
 LYOptions.o:	$(top_srcdir)/userdefs.h
 LYReadCFG.o:	$(top_srcdir)/userdefs.h
@@ -153,6 +153,7 @@ TABLES= \
  $(CHRTR)iso08_uni.h \
  $(CHRTR)iso09_uni.h \
  $(CHRTR)iso10_uni.h \
+ $(CHRTR)iso15_uni.h \
  $(CHRTR)koi8r_uni.h \
  $(CHRTR)mac_uni.h \
  $(CHRTR)mnem_suni.h \

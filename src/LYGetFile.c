@@ -603,8 +603,10 @@ Try_Redirected_URL:
 			    *cp1 = '\0';
 			    cp1 += 2;
 			    StrAllocCopy(temp, doc->address);
-			    LYAddHtmlSep(&temp);
-			    StrAllocCat(temp, wwwName(Home_Dir()));
+			    StrAllocCopy(cp, wwwName(Home_Dir()));
+			    if (!LYIsHtmlSep(*cp))
+				LYAddHtmlSep(&temp);
+			    StrAllocCat(temp, cp);
 			    if ((cp2 = strchr(cp1, '/')) != NULL) {
 				LYTrimRelFromAbsPath(cp2);
 				StrAllocCat(temp, cp2);

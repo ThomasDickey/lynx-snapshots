@@ -67,6 +67,7 @@ extern char *strip_trailing_slash PARAMS((char * my_dirname));
 extern char *wwwName PARAMS((CONST char *pathname));
 extern int HTCheckForInterrupt NOPARAMS;
 extern int LYCheckForProxyURL PARAMS((char *filename));
+extern int LYCopyFile PARAMS((char *src, char *dst));
 extern int LYOpenInternalPage PARAMS((FILE **fp0, char **newfile));
 extern int LYSystem PARAMS((char *command));
 extern int LYValidateOutput PARAMS((char * filename));
