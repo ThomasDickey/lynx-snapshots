@@ -16,8 +16,10 @@
 #undef DECL_SYS_ERRLIST
 #undef DIRED_SUPPORT		/* AC_ARG_WITH(dired) */
 #undef DONT_TRACK_INTERNAL_LINKS /* CF_ARG_DISABLE(internal-links) */
+#undef EXP_8BIT_TOUPPER		/* AC_ARG_WITH(8bit-toupper) */
 #undef EXP_CHARTRANS_AUTOSWITCH	/* AC_ARG_WITH(font-switch) */
 #undef FANCY_CURSES		/* defined by CF_FANCY_CURSES */
+#undef GCC_UNUSED		/* CF_GCC_ATTRIBUTES */
 #undef GZIP_PATH		/* CF_PATH_PROG(gzip) */
 #undef HAVE_CBREAK
 #undef HAVE_CUSERID
@@ -28,10 +30,12 @@
 #undef HAVE_GETGROUPS
 #undef HAVE_KEYPAD
 #undef HAVE_LIMITS_H
+#undef HAVE_LSTAT		/* defined by CF_FUNC_LSTAT */
 #undef HAVE_NCURSES_H		/* defined if we include <ncurses.h> */
 #undef HAVE_PUTENV
 #undef HAVE_READDIR
 #undef HAVE_SIZECHANGE		/* defined by CF_SIZECHANGE */
+#undef HAVE_STDLIB_H
 #undef HAVE_STRERROR
 #undef HAVE_STRING_H
 #undef HAVE_SYS_DIR_H		/* defined by AC_HEADER_DIRENT */
@@ -88,6 +92,7 @@
 #undef UNIX
 #undef UNZIP_PATH		/* CF_PATH_PROG(unzip) */
 #undef USE_COLOR_STYLE		/* CF_ARG_ENABLE(color-style) */
+#undef USE_DEFAULT_COLORS	/* CF_ARG_ENABLE(default-colors) */
 #undef USE_EXTERNALS		/* CF_ARG_ENABLE(externs) */
 #undef USE_FCNTL		/* CF_FIONBIO */
 #undef USE_HASH			/* see USE_COLOR_STYLE */
@@ -119,6 +124,10 @@
 /* FIXME:SOCKS */
 /* FIXME:SVR4_BSDSELECT */
 /* FIXME:SYSLOG_REQUESTED_URLS */
+
+#ifndef HAVE_LSTAT
+#define lstat stat
+#endif
 
 #ifdef DECL_GETGRGID
 extern struct group * getgrgid ();

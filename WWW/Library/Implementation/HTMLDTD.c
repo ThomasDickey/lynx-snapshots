@@ -13,6 +13,8 @@
 **	------------
 **
 **	This table must be matched exactly with ALL the translation tables
+**		(this is an obsolete translation mechanism,
+**		currently replaced with unicode chartrans in most cases...)
 */
 static CONST char* entities[] = {
   "AElig",	/* capital AE diphthong (ligature) */
@@ -63,7 +65,7 @@ static CONST char* entities[] = {
   "copy",	/* copyright sign */
   "curren",	/* currency sign */
   "deg",	/* degree sign */
-  "die",	/* spacing diaresis */
+  "die",	/* spacing dieresis */
   "divide",	/* division sign */
   "eacute",	/* small e, acute accent */
   "ecirc",	/* small e, circumflex accent */
@@ -106,7 +108,7 @@ static CONST char* entities[] = {
   "para",	/* paragraph sign */
   "plusmn",	/* plus-or-minus sign */
   "pound",	/* pound sign */
-  "quot",	/* quot '"' */
+  "quot",	/* quote '"' */
   "raquo",	/* angle quotation mark, right */
   "reg",	/* circled R registered sign */
   "sect",	/* section sign */
@@ -122,7 +124,7 @@ static CONST char* entities[] = {
   "uacute",	/* small u, acute accent */
   "ucirc",	/* small u, circumflex accent */
   "ugrave",	/* small u, grave accent */
-  "uml",	/* spacing diaresis */
+  "uml",	/* spacing dieresis */
   "uuml",	/* small u, dieresis or umlaut mark */
   "yacute",	/* small y, acute accent */
   "yen",	/* yen sign */
@@ -136,7 +138,7 @@ static CONST char* entities[] = {
 /*		Attribute Lists
 **		---------------
 **
-**	Lists must be in alphatbetical order by attribute name
+**	Lists must be in alphabetical order by attribute name
 **	The tag elements contain the number of attributes
 */
 static attr a_attr[] = {			/* Anchor attributes */
@@ -351,7 +353,7 @@ static attr credit_attr[] = {			/* CREDIT attributes */
 	{ 0 }	/* Terminate list */
 };
 
-static attr div_attr[] = {			/* DIV attribures */
+static attr div_attr[] = {			/* DIV attributes */
 	{ "ALIGN" },
 	{ "CLASS" },
 	{ "CLEAR" },
@@ -614,7 +616,7 @@ static attr input_attr[] = {			/* INPUT attributes */
 static attr isindex_attr[] = {			/* ISINDEX attributes */
 	{ "ACTION" },	/* Not in spec.  Lynx treats it as HREF. - FM */
 	{ "DIR" },
-	{ "HREF" },	/* HTML 3.0 attritute for search action. - FM */
+	{ "HREF" },	/* HTML 3.0 attribute for search action. - FM */
 	{ "ID" },
 	{ "LANG" },
 	{ "PROMPT" },	/* HTML 3.0 attribute for prompt string. - FM */
@@ -724,7 +726,7 @@ static attr meta_attr[] = {			/* META attributes */
 	{ 0 }	/* Terminate list */
 };
 
-static attr nextid_attr[] = {			/* NEXTID attribures */
+static attr nextid_attr[] = {			/* NEXTID attributes */
 	{ "N" }
 };
 
@@ -832,7 +834,7 @@ static attr p_attr[] = {			/* P attributes */
 	{ 0 }	/* Terminate list */
 };
 
-static attr param_attr[] = {			/* PARAM attribures */
+static attr param_attr[] = {			/* PARAM attributes */
 	{ "ACCEPT" },
 	{ "ACCEPT-CHARSET" },
 	{ "ACCEPT-ENCODING" },
@@ -854,7 +856,7 @@ static attr param_attr[] = {			/* PARAM attribures */
 	{ 0 }	/* Terminate list */
 };
 
-static attr script_attr[] = {			/* SCRIPT attribures */
+static attr script_attr[] = {			/* SCRIPT attributes */
 	{ "CLASS" },
 	{ "CLEAR" },
 	{ "DIR" },
@@ -1580,8 +1582,8 @@ PUBLIC CONST SGML_dtd HTML_dtd = {
 	HTML_ELEMENTS,
 	entities,
 	sizeof(entities)/sizeof(entities[0]),
-	extra_entities,
-	sizeof(extra_entities)/sizeof(extra_entities[0])
+	unicode_entities,
+	sizeof(unicode_entities)/sizeof(unicode_entities[0])
 };
 
 /* This function fills the "tags" part of the HTML_dtd structure with

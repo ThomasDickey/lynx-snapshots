@@ -113,20 +113,20 @@ PUBLIC void LYsubAttr ARGS1(
 
 PUBLIC void lynx_setup_colors NOARGS
 {
-    SLtt_set_color(0, NULL, "black", "white");
-    SLtt_set_color(1, NULL, "blue", "white");	 /* bold */
-    SLtt_set_color(2, NULL, "yellow", "blue");	 /* reverse */
-    SLtt_set_color(4, NULL, "magenta", "white"); /* underline */
+    SLtt_set_color(0, NULL, DEFAULT_FG, DEFAULT_BG);
+    SLtt_set_color(1, NULL, "blue",	DEFAULT_BG); /* bold */
+    SLtt_set_color(2, NULL, "yellow",	"blue");     /* reverse */
+    SLtt_set_color(4, NULL, "magenta",	DEFAULT_BG); /* underline */
     /*
      *	The other objects are '|'ed together to get rest.
      */
-    SLtt_set_color(3, NULL, "green", "white");	 /* bold-reverse */
-    SLtt_set_color(5, NULL, "blue", "white");	 /* bold-underline */
-    SLtt_set_color(6, NULL, "red", "white");	 /* reverse-underline */
-    SLtt_set_color(7, NULL, "magenta", "cyan");  /* reverse-underline-bold */
+    SLtt_set_color(3, NULL, "green",	DEFAULT_BG); /* bold-reverse */
+    SLtt_set_color(5, NULL, "blue",	DEFAULT_BG); /* bold-underline */
+    SLtt_set_color(6, NULL, "red",	DEFAULT_BG); /* reverse-underline */
+    SLtt_set_color(7, NULL, "magenta",	"cyan");     /* reverse-underline-bold */
 
     /*
-     *	Now set monchrome attributes.
+     *	Now set monochrome attributes.
      */
     SLtt_set_mono(1, NULL, SLTT_BOLD_MASK);
     SLtt_set_mono(2, NULL, SLTT_REV_MASK);
@@ -235,7 +235,7 @@ PUBLIC void LYbox ARGS2(
      *	If we don't have explicitly specified characters for either
      *	vertical or horizontal lines, the characters that box() would
      *	use for the corners probably also won't work well.  So we
-     *	specifiy our own ASCII characters for the corners and call
+     *	specify our own ASCII characters for the corners and call
      *	wborder() instead of box(). - kw
      */
 #ifdef HAVE_WBORDER
@@ -444,13 +444,13 @@ PRIVATE struct {
     int fg, bg;
     chtype attr;
 } lynx_color_cfg[] = {
-    /*0*/ { COLOR_BLACK,   COLOR_WHITE, A_NORMAL}, /* A_NORMAL */
-    /*1*/ { COLOR_BLUE,    COLOR_WHITE, A_NORMAL}, /* A_BOLD */
+    /*0*/ { DEFAULT_FG,    DEFAULT_BG,	A_NORMAL}, /* A_NORMAL */
+    /*1*/ { COLOR_BLUE,    DEFAULT_BG,	A_NORMAL}, /* A_BOLD */
     /*2*/ { COLOR_YELLOW,  COLOR_BLUE,	A_BOLD},   /* A_REVERSE */
-    /*3*/ { COLOR_GREEN,   COLOR_WHITE, A_NORMAL}, /* A_REVERSE | A_BOLD */
-    /*4*/ { COLOR_MAGENTA, COLOR_WHITE, A_NORMAL}, /* A_UNDERLINE */
-    /*5*/ { COLOR_BLUE,    COLOR_WHITE, A_NORMAL}, /* A_UNDERLINE | A_BOLD */
-    /*6*/ { COLOR_RED,	   COLOR_WHITE, A_NORMAL}, /* A_UNDERLINE | A_REVERSE */
+    /*3*/ { COLOR_GREEN,   DEFAULT_BG,	A_NORMAL}, /* A_REVERSE | A_BOLD */
+    /*4*/ { COLOR_MAGENTA, DEFAULT_BG,	A_NORMAL}, /* A_UNDERLINE */
+    /*5*/ { COLOR_BLUE,    DEFAULT_BG,	A_NORMAL}, /* A_UNDERLINE | A_BOLD */
+    /*6*/ { COLOR_RED,	   DEFAULT_BG,	A_NORMAL}, /* A_UNDERLINE | A_REVERSE */
     /*7*/ { COLOR_MAGENTA, COLOR_CYAN,	A_NORMAL}  /* A_UNDERLINE | A_BOLD | A_REVERSE */
 };
 
@@ -489,7 +489,7 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 	}
 	if (no_color_video < 0)
 		no_color_video = 0;
-#endif /* __DJGPP__ */
+#endif /* !__DJGPP__ and !_WINDOWS */
 
 	if (Current_Attr & A_BOLD)
 		code |= 1;
@@ -714,12 +714,12 @@ PUBLIC void start_curses NOARGS
     SLsmg_Display_Eight_Bit = LYlowest_eightbit[current_char_set];
     if (SLsmg_Display_Eight_Bit > 191)
        SLsmg_Display_Eight_Bit = 191; /* may print ctrl chars otherwise - kw */
-    SLsmg_Newline_Moves = -1;
+    scrollok(0,0);
     SLsmg_Backspace_Moves = 1;
 #ifndef VMS
 #ifndef _WINDOWS
    SLtty_set_suspend_state(1);
-#endif /* _WINDOWS */
+#endif /* !_WINDOWS */
 #ifdef SIGTSTP
     if (!no_suspend)
 	signal(SIGTSTP, sl_suspend);
@@ -750,7 +750,7 @@ PUBLIC void start_curses NOARGS
 		"Terminal initialisation failed - unknown terminal type?\n");
 #ifndef NOSIGHUP
 	    (void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
+#endif /* !NOSIGHUP */
 	    (void) signal(SIGTERM, SIG_DFL);
 	    (void) signal(SIGINT, SIG_DFL);
 #ifdef SIGTSTP
@@ -791,7 +791,7 @@ PUBLIC void start_curses NOARGS
 		default_fg = DEFAULT_COLOR;
 		default_bg = DEFAULT_COLOR;
 	    }
-#endif
+#endif /* HAVE_USE_DEFAULT_COLORS */
 	}
 #endif /* USE_COLOR_STYLE || USE_COLOR_TABLE */
 
@@ -860,7 +860,7 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
      mousemask(0, NULL);
 #else
    if (state) mouse_set(BUTTON1_CLICKED && BUTTON2_CLICKED && BUTTON3_CLICKED);
-#endif /* _WINDOWS */
+#endif /* !_WINDOWS */
 #endif /* NCURSES_MOUSE_VERSION */
 
 #if defined(DJGPP) && !defined(USE_SLANG)
@@ -1105,7 +1105,7 @@ PRIVATE int dumbterm ARGS1(
     int dumb = FALSE;
 
     /*
-     *	Began checking for terminal == NULL in case that TERM environemnt
+     *	Began checking for terminal == NULL in case that TERM environment
      *	variable is not set.  Thanks to Dick Wesseling (ftu@fi.ruu.nl).
      */
     if (terminal == NULL ||
@@ -1149,8 +1149,8 @@ PUBLIC void LYsubAttr ARGS1(
 {
     LYsubWAttr(stdscr, a);
 }
-#endif
-#endif /* USE_COLOR_STYLE */
+#endif /* USE_COLOR_TABLE */
+#endif /* !USE_COLOR_STYLE */
 #endif /* FANCY_CURSES */
 #endif /* VMS */
 
@@ -1285,7 +1285,7 @@ PUBLIC void VMSexit NOARGS
     if (!DidCleanup) {
 	if (LYOutOfMemory == FALSE) {
 	    fprintf(stderr,
-"\nA Fatal error has occured in %s Ver. %s\n", LYNX_NAME, LYNX_VERSION);
+"\nA Fatal error has occurred in %s Ver. %s\n", LYNX_NAME, LYNX_VERSION);
 	    fprintf(stderr,
 "\nPlease notify your system administrator to confirm a bug, and if\n");
 	    fprintf(stderr,
@@ -1669,7 +1669,7 @@ PUBLIC void lynx_force_repaint NOARGS
     bkgd(a | ' ');
 #endif
     attrset(a);
-#endif
+#endif /* COLOR_CURSES */
     clearok(curscr, TRUE);
 }
 
@@ -1727,7 +1727,7 @@ PUBLIC void lynx_stop_link_color ARGS2(
 #if defined(FANCY_CURSES) && defined(COLOR_CURSES)
 	if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
 	    stop_underline ();
-#endif /* USE_SLANG */
+#endif /* FANCY_CURSES && COLOR_CURSES */
     } else {
 	stop_bold();
 	/*

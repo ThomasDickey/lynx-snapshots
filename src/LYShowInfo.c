@@ -81,9 +81,10 @@ PUBLIC int showinfo ARGS4(
 	(url_type == LYNXEXEC_URL_TYPE ||
 	 url_type == LYNXPROG_URL_TYPE)) {
 	char *last_slash = strrchr(links[doc->link].lname,'/');
-	if (last_slash-links[doc->link].lname ==
-	    	strlen(links[doc->link].lname)-1) {
-	    links[doc->link].lname[strlen(links[doc->link].lname)-1] = '\0';
+	int next_to_last = strlen(links[doc->link].lname) - 1;
+
+	if ((last_slash - links[doc->link].lname) == next_to_last) {
+	    links[doc->link].lname[next_to_last] = '\0';
 	}
     }
 

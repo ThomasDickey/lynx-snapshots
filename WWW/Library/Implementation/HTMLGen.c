@@ -263,8 +263,8 @@ PRIVATE void HTMLGen_start_element ARGS6(
 	int,			element_number,
 	CONST BOOL*,		present,
 	CONST char **,		value,
-	int,			charset,
-	char **,		insert)
+	int,			charset GCC_UNUSED,
+	char **,		insert GCC_UNUSED)
 {
     int i;
     BOOL was_preformatted = me->preformatted;
@@ -344,7 +344,7 @@ PRIVATE void HTMLGen_start_element ARGS6(
 PRIVATE void HTMLGen_end_element ARGS3(
 	HTStructured *, 	me,
 	int,			element_number,
-	char **,		insert)
+	char **,		insert GCC_UNUSED)
 {
     if (!me->preformatted &&
 	HTML_dtd.tags[element_number].contents != SGML_EMPTY) {
@@ -404,14 +404,14 @@ PRIVATE void PlainToHTML_free ARGS1(
 
 PRIVATE void HTMLGen_abort ARGS2(
 	HTStructured *, 	me,
-	HTError,		e)
+	HTError,		e GCC_UNUSED)
 {
     HTMLGen_free(me);
 }
 
 PRIVATE void PlainToHTML_abort ARGS2(
 	HTStructured *, 	me,
-	HTError,		e)
+	HTError,		e GCC_UNUSED)
 {
     PlainToHTML_free(me);
 }
@@ -513,8 +513,8 @@ PRIVATE CONST HTStructuredClass PlainToHTMLConversion =
 **	------------------------------------------
 */
 PUBLIC HTStream* HTPlainToHTML ARGS3(
-	HTPresentation *,	pres,
-	HTParentAnchor *,	anchor,
+	HTPresentation *,	pres GCC_UNUSED,
+	HTParentAnchor *,	anchor GCC_UNUSED,
 	HTStream *,		sink)
 {
     HTStructured *me = (HTStructured *)malloc(sizeof(*me));

@@ -1887,7 +1887,7 @@ cleandown:
     return;
 }
 
-PRIVATE void terminate_letter ARGS1(int,sig)
+PRIVATE void terminate_letter ARGS1(int,sig GCC_UNUSED)
 {
     term_letter = TRUE;
     /* Reassert the AST */

@@ -1972,7 +1972,7 @@ PUBLIC void toggle_novice_line NOARGS
 }
 
 PUBLIC void noviceline ARGS1(
-	int,		more_flag)
+	int,		more_flag GCC_UNUSED)
 {
 
     if (dump_output_immediately)
@@ -2908,7 +2908,7 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
 #endif	/* TERMIO_AND_TERMIOS */
 
 PUBLIC void size_change ARGS1(
-	int,		sig)
+	int,		sig GCC_UNUSED)
 {
     int old_lines = LYlines;
     int old_cols = LYcols;
@@ -4937,6 +4937,7 @@ PUBLIC CONST char * Home_Dir NOARGS
 		StrAllocCopy(HomeDir, cp);
 	    }
 #else
+#if HAVE_UTMP
 	    /*
 	     *	One could use getlogin() and getpwnam() here instead.
 	     */
@@ -4944,7 +4945,9 @@ PUBLIC CONST char * Home_Dir NOARGS
 
 	    if (pw && pw->pw_dir) {
 		StrAllocCopy(HomeDir, pw->pw_dir);
-	    } else {
+	    } else
+#endif
+	    {
 		/*
 		 *  Use /tmp; it should be writable.
 		 */
@@ -4973,7 +4976,7 @@ PUBLIC CONST char * Home_Dir NOARGS
  */
 PUBLIC BOOLEAN LYPathOffHomeOK ARGS2(
 	char *, 	fbuffer,
-	int,		fbuffer_size)
+	size_t, 	fbuffer_size)
 {
     char *file = NULL;
     char *cp, *cp1;
@@ -5146,7 +5149,7 @@ PUBLIC BOOLEAN LYPathOffHomeOK ARGS2(
  */
 PUBLIC void LYAddPathToHome ARGS3(
 	char *, 	fbuffer,
-	int,		fbuffer_size,
+	size_t, 	fbuffer_size,
 	char *, 	fname)
 {
     char *home = NULL;
@@ -5399,7 +5402,19 @@ PUBLIC time_t LYmktime ARGS2(
 	LYstrncpy(temp, start, 4);
     } else if ((s - start) == 2) {
 	now = time(NULL);
-	LYstrncpy(temp, ((char *)ctime(&now) + 20), 2);
+	/*
+	 * Assume that received 2-digit dates >= 70 are 19xx; others
+	 * are 20xx.  Only matters when dealing with broken software
+	 * (HTTP server or web page) which is not Y2K compliant.  The
+	 * line is drawn on a best-guess basis; it is impossible for
+	 * this to be completely accurate because it depends on what
+	 * the broken sender software intends.	(This totally breaks
+	 * in 2100 -- setting up the next crisis...) - BL
+	 */
+	if (atoi(start) >= 70)
+	    LYstrncpy(temp, "19", 2);
+	else
+	    LYstrncpy(temp, "20", 2);
 	strncat(temp, start, 2);
 	temp[4] = '\0';
     } else {

@@ -351,8 +351,8 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
  *  This is the thing that actually gets called from display_page().
  */
 PUBLIC void UCChangeTerminalCodepage ARGS2(
-	int,		newcs,
-	LYUCcharset *,	p)
+	int,		newcs GCC_UNUSED,
+	LYUCcharset *,	p GCC_UNUSED)
 {
     if (TRACE) {
 	fprintf(stderr,

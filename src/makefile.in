@@ -2,6 +2,8 @@
 
 SHELL = /bin/sh
 
+x		= @PROG_EXT@
+
 @SET_MAKE@
 prefix		= @prefix@
 exec_prefix	= @exec_prefix@
@@ -32,8 +34,10 @@ WWWLIB		= ../WWW/Library/unix/libwww.a
 CPP_OPTS	= $(DEFS) $(CPPFLAGS) \
 		-I. \
 		-I.. \
+		-Ichrtrans \
 		-I$(srcdir)/chrtrans \
 		-I$(top_srcdir) \
+		-I$(top_srcdir)/src \
 		-I$(top_srcdir)/$(WWWINC) \
 		$(SITE_DEFS)
 CC_OPTS		= $(CPP_OPTS) $(CFLAGS)
@@ -54,7 +58,7 @@ LYStyle.o LYHash.o $(CHARTRANS_OBJS) @LIBOBJS@
 
 C_SRC	= $(OBJS:.o=.c)
 
-all: lynx
+all: lynx$x
 
 .SUFFIXES : .i
 
@@ -66,11 +70,11 @@ all: lynx
 @RULE_CC@
 	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $*.c >$@
 
-lynx:   message do_chartrans_stuff $(OBJS) $(WWWLIB)
+lynx$x:   message do_chartrans_stuff $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
-	$(CC) $(CC_OPTS) $(LDFLAGS) -o lynx  $(OBJS) $(WWWLIB) $(LIBS)
+	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(OBJS) $(WWWLIB) $(LIBS)
 	@echo "Copying Lynx executable into top-level directory"
-	cp lynx ..
+	cp $@ ..
 	@echo "Welcome to Lynx!"
 
 message:
@@ -87,7 +91,7 @@ lint:
 	$(LINT) $(LINTOPTS) $(CPP_OPTS) *.c  > ../lint.out
 
 clean:
-	rm -f lynx core *.[ob] *.bak
+	rm -f lynx$x core *.[ob] *.bak
 	cd chrtrans && $(MAKE) clean
 
 distclean: clean

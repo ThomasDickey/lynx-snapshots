@@ -12,6 +12,12 @@
 
 #include "HTPlain.h"
 
+#include "HTChunk.h"
+#include "HText.h"
+#include "HTStyle.h"
+#define Lynx_HTML_Handler
+#include "HTML.h"		/* styles[] */
+
 #define BUFFER_SIZE 4096;	/* Tradeoff */
 
 #include "HText.h"
@@ -27,8 +33,6 @@
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
-extern HTStyleSheet * styleSheet;
-
 extern BOOLEAN LYRawMode;
 extern BOOL HTPassEightBitRaw;
 extern BOOL HTPassHighCtrlRaw;
@@ -43,23 +47,23 @@ struct _HTStream {
     CONST HTStreamClass *	isa;
     HText *			text;
     /*
-    **  The node_anchor UCInfo and handle for the input (PARSER) stage. - FM
+    **	The node_anchor UCInfo and handle for the input (PARSER) stage. - FM
     */
-    LYUCcharset		*	inUCI;
-    int				inUCLYhndl;
+    LYUCcharset 	*	inUCI;
+    int 			inUCLYhndl;
     /*
-    **  The node_anchor UCInfo and handle for the output (HTEXT) stage. - FM
+    **	The node_anchor UCInfo and handle for the output (HTEXT) stage. - FM
     */
     int outUCLYhndl;
     /*
-    **  Counter, value, buffer and pointer for UTF-8 handling. - FM
+    **	Counter, value, buffer and pointer for UTF-8 handling. - FM
     */
     char			utf_count;
     UCode_t			utf_char;
     char			utf_buf[8];
     char *			utf_buf_p;
     /*
-    **  The charset transformation structure. - FM
+    **	The charset transformation structure. - FM
     */
     UCTransParams		T;
 };
@@ -256,7 +260,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    /*
 	    **	Combine UTF-8 into Unicode.
 	    **	Incomplete characters silently ignored.
-	    **  from Linux kernel's console.c - KW
+	    **	from Linux kernel's console.c - KW
 	    */
 	    if (c_unsign > 127) {
 		/*
@@ -264,9 +268,9 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		*/
 		if (me->utf_count > 0 && (c & 0xc0) == 0x80) {
 		    /*
-		    **  Adjust the UCode_t value, add the octet
-		    **  to the buffer, and decrement the byte
-		    **  count. - FM
+		    **	Adjust the UCode_t value, add the octet
+		    **	to the buffer, and decrement the byte
+		    **	count. - FM
 		    */
 		    me->utf_char = (me->utf_char << 6) | (c & 0x3f);
 		    me->utf_count--;
@@ -289,7 +293,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		    }
 		} else {
 		    /*
-		    **  Start handling a new multibyte character. - FM
+		    **	Start handling a new multibyte character. - FM
 		    */
 		    me->utf_buf_p = me->utf_buf;
 		    me->utf_buf_p[0] = c;
@@ -318,7 +322,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 			me->utf_buf_p[0] = '\0';
 		    }
 		    /*
-		    **  Get the next byte. - FM
+		    **	Get the next byte. - FM
 		    */
 		    continue;
 		}
@@ -609,7 +613,7 @@ PRIVATE void HTPlain_free ARGS1(
 */
 PRIVATE void HTPlain_abort ARGS2(
 	HTStream *,	me,
-	HTError,	e)
+	HTError,	e GCC_UNUSED)
 {
     HTPlain_free(me);
 }
@@ -629,9 +633,9 @@ PUBLIC CONST HTStreamClass HTPlain =
 **		----------
 */
 PUBLIC HTStream* HTPlainPresent ARGS3(
-	HTPresentation *,	pres,
+	HTPresentation *,	pres GCC_UNUSED,
 	HTParentAnchor *,	anchor,
-	HTStream *,		sink)
+	HTStream *,		sink GCC_UNUSED)
 {
 
     HTStream* me = (HTStream*)malloc(sizeof(*me));
@@ -654,7 +658,7 @@ PUBLIC HTStream* HTPlainPresent ARGS3(
 		     HTAnchor_getUCInfoStage(anchor,UCT_STAGE_HTEXT));
 
     me->text = HText_new(anchor);
-    HText_setStyle(me->text, HTStyleNamed(styleSheet, "Example"));
+    HText_setStyle(me->text, styles[HTML_XMP] );
     HText_beginAppend(me->text);
 
     return (HTStream*) me;

@@ -6,7 +6,7 @@ for some of the RFC 1345 Mnemonic codes are out of date, a cleanup and
 update would be needed for serious use.
 
 More translation files can be easily provided (and new character entities
-added to HTMLDTD.c), this set is just to test whether the system works 
+added to entities.h), this set is just to test whether the system works 
 in principle (and also how it behaves with incomplete data...)
 
 See the file README.format for a brief explanation of what's in the

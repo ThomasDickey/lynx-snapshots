@@ -72,11 +72,15 @@ extern BOOLEAN HT_Is_Gopher_URL;
 /* from Curses.h */
 extern int LYcols;
 
-extern HTStyleSheet * styleSheet;	/* Application-wide */
+struct _HTStream {
+    CONST HTStreamClass *	isa;
+    /* .... */
+};
+
+PRIVATE HTStyleSheet * styleSheet;	/* Application-wide */
 
 /*	Module-wide style cache
 */
-PRIVATE int		got_styles = 0;
 PUBLIC  HTStyle *styles[HTML_ELEMENTS+31]; /* adding 24 nested list styles  */
 					   /* and 3 header alignment styles */
 					   /* and 3 div alignment styles    */
@@ -265,7 +269,7 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 
     case HTML_PRE:				/* Formatted text */
 	/*
-	 *  We guarrantee that the style is up-to-date in begin_litteral
+	 *  We guarantee that the style is up-to-date in begin_litteral
 	 *  But we still want to strip \r's
 	 */
 	if (c != '\r' &&
@@ -282,7 +286,7 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
     case HTML_XMP:
     case HTML_PLAINTEXT:
 	/*
-	 *  We guarrantee that the style is up-to-date in begin_litteral
+	 *  We guarantee that the style is up-to-date in begin_litteral
 	 *  But we still want to strip \r's
 	 */
 	if (c != '\r')	{
@@ -397,7 +401,7 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
     case HTML_XMP:
     case HTML_PLAINTEXT:
 	/*
-	 *  We guarrantee that the style is up-to-date in begin_litteral
+	 *  We guarantee that the style is up-to-date in begin_litteral
 	 */
 	HText_appendText(me->text, s);
 	break;
@@ -6695,8 +6699,7 @@ End_Object:
 */
 PUBLIC int HTML_put_entity ARGS2(HTStructured *, me, int, entity_number)
 {
-    int nent = HTML_dtd.number_of_entities, c_out;
-    UCode_t uni;
+    int nent = HTML_dtd.number_of_entities;
 
     if (entity_number < nent) {
 	HTML_put_string(me, p_entity_values[entity_number]);
@@ -7005,8 +7008,6 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
 */
 PRIVATE void get_styles NOARGS
 {
-    got_styles = YES;
-
     default_style =		HTStyleNamed(styleSheet, "Normal");
 
     styles[HTML_H1] =		HTStyleNamed(styleSheet, "Heading1");
@@ -7128,10 +7129,14 @@ PUBLIC HTStructured* HTML_new ARGS3(
     if (me == NULL)
 	outofmem(__FILE__, "HTML_new");
 
-    if (!got_styles)
-	get_styles();
-    else
-	default_style = HTStyleNamed(styleSheet, "Normal");
+    /*
+     * This used to call 'get_styles()' only on the first time through this
+     * function.  However, if the user reloads a page with ^R, the styles[]
+     * array is not necessarily the same as it was from 'get_styles()'.  So
+     * we reinitialize the whole thing.
+     */
+    styleSheet = DefaultStyle();
+    get_styles();
 
     me->isa = &HTMLPresentation;
     me->node_anchor = anchor;
@@ -7427,7 +7432,7 @@ PUBLIC HTStream* HTMLParsedPresent ARGS3(
 **	This will convert from HTML to presentation or plain text.
 */
 PUBLIC HTStream* HTMLToC ARGS3(
-	HTPresentation *,	pres,
+	HTPresentation *,	pres GCC_UNUSED,
 	HTParentAnchor *,	anchor,
 	HTStream *,		sink)
 {
@@ -7450,9 +7455,9 @@ PUBLIC HTStream* HTMLToC ARGS3(
 */
 #ifndef GUI
 PUBLIC HTStream* HTMLPresent ARGS3(
-	HTPresentation *,	pres,
+	HTPresentation *,	pres GCC_UNUSED,
 	HTParentAnchor *,	anchor,
-	HTStream *,		sink)
+	HTStream *,		sink GCC_UNUSED)
 {
     return SGML_new(&HTML_dtd, anchor, HTML_new(anchor, WWW_PRESENT, NULL));
 }
@@ -7477,7 +7482,7 @@ PUBLIC HTStream* HTMLPresent ARGS3(
 **	returns a negative number to indicate lack of success in the load.
 */
 PUBLIC int HTLoadError ARGS3(
-	HTStream *,	sink,
+	HTStream *,	sink GCC_UNUSED,
 	int,		number,
 	CONST char *,	message)
 {

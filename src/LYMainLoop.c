@@ -3,6 +3,7 @@
 #include "HTAccess.h"
 #include "HTParse.h"
 #include "HTList.h"
+#include "HTML.h"
 #include "HTFTP.h"
 #include "HTFile.h"
 #include "HTTP.h"
@@ -64,9 +65,12 @@ PRIVATE BOOL confirm_post_resub PARAMS((
     int 		if_imgmap,
     int 		if_file));
 PRIVATE int are_different PARAMS((document *doc1, document *doc2));
-PRIVATE int are_phys_different PARAMS((document *doc1, document *doc2));
 PUBLIC void HTGotoURLs_free NOPARAMS;
 PUBLIC void HTAddGotoURL PARAMS((char *url));
+
+#ifndef DONT_TRACK_INTERNAL_LINKS
+PRIVATE int are_phys_different PARAMS((document *doc1, document *doc2));
+#endif
 
 #define FASTTAB
 #ifdef FASTTAB
@@ -194,7 +198,7 @@ int mainloop NOARGS
  *  newdoc.title   contains the link name that the user last chose to get
  *		     into the current link (file).
  */
-    /* initalize some variables*/
+    /* initialize some variables*/
     newdoc.address = NULL;
     newdoc.title = NULL;
     newdoc.post_data = NULL;
@@ -1234,7 +1238,7 @@ try_again:
 	}
 
 	/*
-	 *  Refresh the screen if neccessary.
+	 *  Refresh the screen if necessary.
 	 */
 	if (refresh_screen) {
 #if defined(FANCY_CURSES) || defined (USE_SLANG)
@@ -1565,7 +1569,7 @@ new_keyboard_input:
 	    /*
 	     *	This is a special feature to traverse every http link
 	     *	derived from startfile and check for errors or create
-	     *	crawl ouput files.  Only URL's that begin with
+	     *	crawl output files.  Only URL's that begin with
 	     *	"traversal_host" are searched - this keeps the search
 	     *	from crossing to other servers (a feature, not a bug!).
 	     */
@@ -1843,7 +1847,7 @@ new_cmd:  /*
 		    if (nlinks > 0 && curdoc.link > -1) {
 			if (curdoc.link == newdoc.link) {
 			    /*
-			     *	It's the current link, and presumeably
+			     *	It's the current link, and presumably
 			     *	reflects a typo in the statusline entry,
 			     *	so issue a statusline message for the
 			     *	typo-prone users (like me 8-). - FM
@@ -3479,7 +3483,7 @@ check_goto_URL:
 
 	    } else if ((no_shell || no_goto_lynxexec
 #ifdef EXEC_LINKS
-	    		|| local_exec_on_local_files
+			|| local_exec_on_local_files
 #endif /* EXEC_LINKS */
 			) &&
 		       !strncmp(user_input_buffer, "lynxexec:",9)) {
@@ -3488,7 +3492,7 @@ check_goto_URL:
 
 	    } else if ((no_shell || no_goto_lynxprog
 #ifdef EXEC_LINKS
-	    		|| local_exec_on_local_files
+			|| local_exec_on_local_files
 #endif /* EXEC_LINKS */
 			) &&
 		       !strncmp(user_input_buffer, "lynxprog:",9)) {
@@ -3866,7 +3870,7 @@ check_goto_URL:
 		    /*
 		     *	Make the curdoc.address the newdoc.address so that
 		     *	getfile doesn't try to get the newdoc.address.
-		     *	Since we have already gotton it.
+		     *	Since we have already gotten it.
 		     */
 		    StrAllocCopy(curdoc.address, newdoc.address);
 		    StrAllocCopy(newdoc.post_data, curdoc.post_data);
@@ -3974,8 +3978,8 @@ check_goto_URL:
 		refresh_screen = TRUE;
 	    } else if ((case_sensitive && 0!=strcmp(prev_target,
 						    remember_old_target)) ||
-		       (!case_sensitive && 0!=strcasecomp(prev_target,
-							  remember_old_target))) {
+		      (!case_sensitive && 0!=strcasecomp8(prev_target,
+						    remember_old_target))) {
 		refresh_screen = TRUE;
 	    }
 	    FREE(remember_old_target);
@@ -4274,7 +4278,7 @@ check_goto_URL:
 		    break;
 		remove_bookmark_link(links[curdoc.link].anchor_number-1,
 				     curdoc.bookmark);
-	    } else {	/* behave like REFRESH for backward compatability */
+	    } else {	/* behave like REFRESH for backward compatibility */
 		refresh_screen = TRUE;
 		if (old_c != real_c) {
 		    old_c = real_c;
@@ -4813,7 +4817,7 @@ check_add_bookmark_to_self:
 		fflush(stderr);
 		if (LYTraceLogFP)
 		    /*
-		     *	Set stderr back to its orginal value
+		     *	Set stderr back to its original value
 		     *	during the shell escape. - FM
 		     */
 		    *stderr = LYOrigStderr;
@@ -5443,7 +5447,7 @@ check_add_bookmark_to_self:
 			if (!strncasecomp(ret, "lynxexec:", 9) ||
 			    !strncasecomp(ret, "lynxprog:", 9)) {
 			    /*
-			     *	The original implementions of these schemes
+			     *	The original implementations of these schemes
 			     *	expected white space without hex escaping,
 			     *	and did not check for hex escaping, so we'll
 			     *	continue to support that, until that code is
@@ -5662,6 +5666,7 @@ PRIVATE int are_different ARGS2(
 /* This determines whether two docs are _physically_ different,
  * meaning they are "from different files". - kw
  */
+#ifndef DONT_TRACK_INTERNAL_LINKS
 PRIVATE int are_phys_different ARGS2(
 	document *,	doc1,
 	document *,	doc2)
@@ -5742,6 +5747,7 @@ PRIVATE int are_phys_different ARGS2(
      */
     return(FALSE);
 }
+#endif
 
 /*
  *  Utility for freeing the list of goto URLs. - FM

@@ -2168,9 +2168,10 @@ U+001f:US
 U+007f:DT
 U+0080:PA
 U+0081:HO
-# most of this characters (82-9F) may be switched ON in the code
-# as windows-1252 if come silently (HTTP default is iso-latin-1,
-# but windows-1252 is superset of iso-latin-1)
+# Most of these characters (82-9F) may be inflicted on us
+# by MS FrontPages which uses Unicode notation such as &#153;
+# but there are no assigned letters in Unicode 128-159 range.
+# It is assumed in the code that those codepoints are from windows-1252.
 #U+0082:BH
 #U+0083:NH
 #U+0084:IN

@@ -65,7 +65,7 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
 
     for (i = 0; i <7; i++)
     {
-	if (!strcasecmp(Mono_Strings[i], mono))
+	if (!strcasecomp(Mono_Strings[i], mono))
 	{
 	    mA = ncursesMono[i];
 	}
@@ -186,37 +186,37 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n", buffer);
     /*
     * We use some pseudo-elements, so catch these first
     */
-    if (!strncasecmp(element, "alink", 5)) /* active link */
+    if (!strncasecomp(element, "alink", 5)) /* active link */
     {
 	parse_attributes(mono,fg,bg,DSTYLE_ALINK,"alink");
     }
-    else if (!strcasecmp(element, "a")) /* normal link */
+    else if (!strcasecomp(element, "a")) /* normal link */
     {
 	parse_attributes(mono,fg,bg, DSTYLE_LINK,"a");
 	parse_attributes(mono,fg,bg, HTML_A,"a");
     }
-    else if (!strncasecmp(element, "status", 4)) /* status bar */
+    else if (!strncasecomp(element, "status", 4)) /* status bar */
     {
 	parse_attributes(mono,fg,bg, DSTYLE_STATUS,"status");
     }
-    else if (!strncasecmp(element, "label", 6)) /* [INLINE]'s */
+    else if (!strncasecomp(element, "label", 6)) /* [INLINE]'s */
     {
 	parse_attributes(mono,fg,bg,DSTYLE_OPTION,"label");
     }
-    else if (!strncasecmp(element, "value", 5)) /* [INLINE]'s */
+    else if (!strncasecomp(element, "value", 5)) /* [INLINE]'s */
     {
 	parse_attributes(mono,fg,bg,DSTYLE_VALUE,"value");
     }
-    else if (!strncasecmp(element, "high", 4)) /* [INLINE]'s */
+    else if (!strncasecomp(element, "high", 4)) /* [INLINE]'s */
     {
 	parse_attributes(mono,fg,bg,DSTYLE_HIGH,"high");
     }
-    else if (!strcmp(element, "normal")) /* added - kw */
+    else if (!strcasecomp(element, "normal")) /* added - kw */
     {
 	parse_attributes(mono,fg,bg,DSTYLE_NORMAL,"html");
     }
     /* this may vanish */
-    else if (!strncasecmp(element, "candy", 5)) /* [INLINE]'s */
+    else if (!strncasecomp(element, "candy", 5)) /* [INLINE]'s */
     {
 	parse_attributes(mono,fg,bg,DSTYLE_CANDY,"candy");
     }
@@ -229,7 +229,7 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n", buffer);
 	int i;
 	for (i = 0; i <HTML_ELEMENTS; i++)
 	{
-	    if (!strcasecmp (HTML_dtd.tags[i].name, element))
+	    if (!strcasecomp (HTML_dtd.tags[i].name, element))
 	    {
 		if (TRACE)
 		    fprintf(stderr, "PARSECSS:applying style <%s,%s,%s> for HTML_%s\n",mono,fg,bg,HTML_dtd.tags[i].name);

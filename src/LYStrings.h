@@ -3,6 +3,17 @@
 
 #include <string.h>
 
+#if !defined(EXP_8BIT_TOUPPER) && !defined(LOCALE) && !defined(__DJGPP__)
+#define EXP_8BIT_TOUPPER 1
+#endif
+
+#ifdef EXP_8BIT_TOUPPER
+extern int UPPER8  PARAMS((
+	int		ch1,
+	int		ch2));
+#else
+#define UPPER8(a,b) (TOUPPER(a) - TOUPPER(b))
+#endif
 extern int get_mouse_link NOPARAMS;
 extern char * LYstrncpy PARAMS((
 	char *		dst,
@@ -13,7 +24,7 @@ extern int LYgetch NOPARAMS;
 extern int LYgetstr PARAMS((
 	char *		inputline,
 	int		hidden,
-	int		bufsize,
+	size_t		bufsize,
 	int		recall));
 extern char * LYstrstr PARAMS((
 	char *		chptr,

@@ -1757,7 +1757,7 @@ PRIVATE int boolean_choice ARGS4(
 }
 
 PRIVATE void terminate_options ARGS1(
-	int,		sig)
+	int,		sig GCC_UNUSED)
 {
     term_options = TRUE;
     /*

@@ -12,7 +12,7 @@
 
 /*	Tab arrays:
 */
-PRIVATE HTTabStop tabs_8[] = {
+PRIVATE CONST HTTabStop tabs_8[] = {
 	{ 0, 8 }, {0, 16}, {0, 24}, {0, 32}, {0, 40},
 	{ 0, 48 }, {0, 56}, {0, 64}, {0, 72}, {0, 80},
 	{ 0, 88 }, {0, 96}, {0, 104}, {0, 112}, {0, 120},
@@ -364,5 +364,38 @@ PRIVATE HTStyle HTStyleHeadingRight = {
 PRIVATE HTStyleSheet sheet = { "default.style",
 				&HTStyleHeadingRight }; /* sheet */
 
-PUBLIC HTStyleSheet * styleSheet = &sheet;
- 
+PUBLIC HTStyleSheet * DefaultStyle NOARGS
+{
+    static HTStyleSheet *result;
+    HTStyle *p, *q;
+
+    /*
+     * The first time we're called, allocate a copy of the 'sheet' linked
+     * list.  Thereafter, simply copy the data from 'sheet' into our copy
+     * (preserving the copy's linked-list pointers).  We do this to reset the
+     * parameters of a style that might be altered while processing a page.
+     */
+    if (result == 0) {	/* allocate & copy */
+    	result = HTStyleSheetNew ();
+	*result = sheet;
+	result->styles = 0;
+	for (p = sheet.styles; p != 0; p = p->next) {
+	    q = HTStyleNew ();
+	    *q = *p;
+	    q->next = result->styles;
+	    result->styles = q;
+	}
+    } else {		/* recopy the data */
+    	for (p = result->styles, q = sheet.styles;
+		p != 0 && q != 0;
+		p = p->next, q = q->next) {
+    	    HTStyle *r = p->next;
+	    HTStyle temp;
+	    temp = *p;
+	    temp.next = q->next;
+	    *p = *q;
+	    p->next = r;
+	}
+    }
+    return result;
+}

@@ -13,6 +13,7 @@
 #include "LYNews.h"
 #include "LYOptions.h"
 #include "LYCharSets.h"
+#include "HTString.h"
 
 #include <ctype.h>
 
@@ -463,7 +464,7 @@ re_read:
 	     }
 	   else
 #endif
-	     c = '\n'; /* kepad enter on pc ncsa telnet */
+	     c = '\n'; /* keypad enter on pc ncsa telnet */
 	   break;
 
 	case 'm':
@@ -982,7 +983,7 @@ PUBLIC void LYRefreshEdit ARGS1(
  *	+---------+=============+-----------+
  *	0	  DspStart		     length
  *
- *  Insertion point can be anywhere beween 0 and stringlength.
+ *  Insertion point can be anywhere between 0 and stringlength.
  *  Figure out new display starting point.
  *
  *   The first "if" below makes Lynx scroll several columns at a time when
@@ -1060,7 +1061,7 @@ PUBLIC void LYRefreshEdit ARGS1(
 PUBLIC int LYgetstr ARGS4(
 	char *, 	inputline,
 	int,		hidden,
-	int,		bufsize,
+	size_t, 	bufsize,
 	int,		recall)
 {
     int x, y, MaxStringSize;
@@ -1140,40 +1141,35 @@ again:
 }
 
 /*
- *  LYstrstr will find the first occurence of the string
+ *  LYstrstr will find the first occurrence of the string
  *  pointed to by tarptr in the string pointed to by chptr.
+ *  It returns NULL if string not found.
  *  It is a case insensitive search.
  */
 PUBLIC char * LYstrstr ARGS2(
 	char *, 	chptr,
 	char *, 	tarptr)
 {
-    register char *tmpchptr, *tmptarptr;
+    int len = strlen(tarptr);
 
     for(; *chptr != '\0'; chptr++) {
-	if(TOUPPER(*chptr) == TOUPPER(*tarptr)) {
-	    /* see if they line up */
-	    for(tmpchptr = chptr+1, tmptarptr = tarptr+1;
-		(TOUPPER(*tmpchptr) == TOUPPER(*tmptarptr) &&
-		 *tmptarptr != '\0' && *tmpchptr != '\0');
-		tmpchptr++, tmptarptr++)
-		   ; /* null body */
-	    if(*tmptarptr == '\0')
+	if (0 == UPPER8(*chptr, *tarptr)) {
+	    if (0 == strncasecomp8(chptr+1, tarptr+1, len-1))
 		return(chptr);
 	}
     } /* end for */
 
-    return(NULL);
+    return(NULL); /* string not found or initial chptr was empty */
 }
 
 /*
- *  LYno_attr_char_case_strstr will find the first occurence of the
+ *  LYno_attr_char_case_strstr will find the first occurrence of the
  *  string pointed to by tarptr in the string pointed to by chptr.
  *  It ignores the characters: LY_UNDERLINE_START_CHAR and
  *			       LY_UNDERLINE_END_CHAR
  *			       LY_BOLD_START_CHAR
  *			       LY_BOLD_END_CHAR
- *				LY_SOFT_HYPHEN
+ *			       LY_SOFT_HYPHEN
  *			       if present in chptr.
  *  It is a case insensitive search.
  */
@@ -1190,7 +1186,7 @@ PUBLIC char * LYno_attr_char_case_strstr ARGS2(
 	chptr++;
 
     for (; *chptr != '\0'; chptr++) {
-	if (TOUPPER(*chptr) == TOUPPER(*tarptr)) {
+	 if (0 == UPPER8(*chptr, *tarptr)) {
 	    /*
 	     *	See if they line up.
 	     */
@@ -1201,18 +1197,18 @@ PUBLIC char * LYno_attr_char_case_strstr ARGS2(
 		 return(chptr);
 
 	    while (1) {
-		 if (!IsSpecialAttrChar(*tmpchptr)) {
-		    if (TOUPPER(*tmpchptr) != TOUPPER(*tmptarptr))
+		if (!IsSpecialAttrChar(*tmpchptr)) {
+		    if (0 != UPPER8(*tmpchptr, *tmptarptr))
 			break;
 		    tmpchptr++;
 		    tmptarptr++;
-		 } else {
+		} else {
 		    tmpchptr++;
-		 }
-		 if (*tmptarptr == '\0')
-		     return(chptr);
-		 if (*tmpchptr == '\0')
-		     break;
+		}
+		if (*tmptarptr == '\0')
+		    return(chptr);
+		if (*tmpchptr == '\0')
+		    break;
 	    }
 	}
     } /* end for */
@@ -1221,7 +1217,7 @@ PUBLIC char * LYno_attr_char_case_strstr ARGS2(
 }
 
 /*
- *  LYno_attr_char_strstr will find the first occurence of the
+ *  LYno_attr_char_strstr will find the first occurrence of the
  *  string pointed to by tarptr in the string pointed to by chptr.
  *  It ignores the characters: LY_UNDERLINE_START_CHAR and
  *			       LY_UNDERLINE_END_CHAR
@@ -1275,10 +1271,10 @@ PUBLIC char * LYno_attr_char_strstr ARGS2(
 }
 
 /*
- * LYno_attr_mbcs_case_strstr will find the first occurence of the string
+ * LYno_attr_mbcs_case_strstr will find the first occurrence of the string
  * pointed to by tarptr in the string pointed to by chptr.
  * It takes account of MultiByte Character Sequences (UTF8).
- * The physical lenght of the displayed string up to the end of the target
+ * The physical length of the displayed string up to the end of the target
  * string is returned in *nendp if the search is successful.
  * It ignores the characters: LY_UNDERLINE_START_CHAR and
  *			      LY_UNDERLINE_END_CHAR
@@ -1317,7 +1313,7 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
 	     *chptr == *tarptr &&
 	     *(chptr + 1) != '\0' &&
 	     !IsSpecialAttrChar(*(chptr + 1))) ||
-	    TOUPPER(*chptr) == TOUPPER(*tarptr)) {
+	    (0 == UPPER8(*chptr, *tarptr))) {
 	    int tarlen = 0;
 	    offset = len;
 	    len++;
@@ -1341,7 +1337,7 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
 		 *tmpchptr != '\0' &&
 		 !IsSpecialAttrChar(*tmpchptr)) {
 		/*
-		 *  Check the CJK mutibyte. - FM
+		 *  Check the CJK multibyte. - FM
 		 */
 		if (*tmpchptr == *tmptarptr) {
 		    /*
@@ -1381,7 +1377,7 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
 			} else {
 			break;
 			}
-		    } else if (TOUPPER(*tmpchptr) != TOUPPER(*tmptarptr)) {
+		    } else if (0 != UPPER8(*tmpchptr, *tmptarptr)) {
 			break;
 		    }
 
@@ -1419,7 +1415,7 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
 }
 
 /*
- * LYno_attr_mbcs_strstr will find the first occurence of the string
+ * LYno_attr_mbcs_strstr will find the first occurrence of the string
  * pointed to by tarptr in the string pointed to by chptr.
  *  It takes account of CJK and MultiByte Character Sequences (UTF8).
  *  The physical lengths of the displayed string up to the start and
@@ -1481,7 +1477,7 @@ PUBLIC char * LYno_attr_mbcs_strstr ARGS5(
 		 *tmpchptr != '\0' &&
 		 !IsSpecialAttrChar(*tmpchptr)) {
 		/*
-		 *  Check the CJK mutibyte. - FM
+		 *  Check the CJK multibyte. - FM
 		 */
 		if (*tmpchptr == *tmptarptr) {
 		    /*
@@ -1605,3 +1601,76 @@ PUBLIC char * SNACat ARGS3(
     }
     return *dest;
 }
+
+
+#ifdef EXP_8BIT_TOUPPER
+
+/*
+**   UPPER8 ?
+**   it was "TOUPPER(a) - TOUPPER(b)" in its previous life...
+**
+**   It was realized that case-insensitive user search
+**   got information about upper/lower mapping from TOUPPER
+**   (precisely from "(TOUPPER(a) - TOUPPER(b))==0").
+**   This function depends on locale in its 8bit mapping
+**   and usually fails with DOS/WINDOWS display charsets
+**   as well as on non-UNIX systems.
+**
+**   We extend this function for 8bit letters
+**   using Lynx internal chartrans feature:
+**   we assume that upper/lower case letters
+**   have their "7bit approximation" images (in def7_uni.tbl)
+**   matched case-insensitive (7bit).
+**
+**   By this technique we cover *any* charset known for Lynx chartrans
+**   and need no extra information for it.  - LP
+**
+*/
+PUBLIC int UPPER8(int ch1, int ch2)
+{
+    /* Use exact match for speed, but mostly for stability	    */
+    /* while doing experiments with the remainder of this function. */
+    if (ch1==ch2)
+	return(0);  /* Exact match */
+
+    /* case-insensitive match for us-ascii */
+    if ((unsigned char)ch1 < 128 && (unsigned char)ch2 < 128)
+	return(TOUPPER(ch1) - TOUPPER(ch2));
+
+    /* compare "7bit approximation" for letters >127   */
+    if ((unsigned char)ch1 > 127 && (unsigned char)ch2 >127)
+    {
+	/* BTW, if we remove the check for >127 above	   */
+	/* we get even more "relaxed" insensitive match... */
+
+	CONST char *disp_charset;
+	int charset_in, charset_out, uck1, uck2;
+	char replace_buf1 [10], replace_buf2 [10];
+
+	disp_charset = LYCharSet_UC[current_char_set].MIMEname;
+	charset_in  = UCGetLYhndl_byMIME(disp_charset);
+	charset_out = UCGetLYhndl_byMIME("us-ascii");
+
+	uck1 = UCTransCharStr(replace_buf1, sizeof(replace_buf1), ch1,
+			      charset_in, charset_out, YES);
+	uck2 = UCTransCharStr(replace_buf2, sizeof(replace_buf2), ch2,
+			      charset_in, charset_out, YES);
+	/*
+	** Got both replacement strings (yippey).  - FM
+	*/
+	if (strcmp(replace_buf1, replace_buf2)!=0)  /* case-sensitive ! */
+	/*
+	** Two strings different.  We assume the different letters
+	** should not have the equal strings for "7bit approx",
+	** overwise differently accented letters may be vanished.
+	** Now we return case-INsensitive comparision of strings:
+	*/
+
+	if ((uck1 > 0) && (uck2 > 0))
+	    return (strcasecomp(replace_buf1, replace_buf2));
+    }
+
+    return(-10);  /* mismatch */
+}
+
+#endif /* EXP_8BIT_TOUPPER */

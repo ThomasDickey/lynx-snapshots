@@ -1,10 +1,8 @@
-/*	Extra Entity Names
-**	------------------
-**
-**	This table contains Unicodes in addition to the Names.
+/*	Entity Names to Unicode table
+**	-----------------------------
 **
 *
-*	Whole entities[] thing above (and much more) now present
+*	Whole entities[] thing (and much more) now present
 *	in this kind of structure. The structured streams to which
 *	the SGML modules sends its output could then easily have access
 *	to both entity names and unicode values for each (special)
@@ -17,11 +15,13 @@
 *	Why keep two structures for entities?  Backward compatibility..
 */
 
-/* UC_entity_info structure is defined in SGML.h. */
-/* This has to be sorted alphabetically (case-sensitive),
-   bear this in mind when you add some more entities..
+/* UC_entity_info structure is defined in SGML.h.
+   This has to be sorted alphabetically (case-sensitive),
+   bear this in mind when you add some more entities..  */
 
-This table available from ftp://ftp.unicode.org/MAPPINGS/
+/*
+
+This table available from ftp://ftp.unicode.org/
 original comment follows:
 
 
@@ -50,10 +50,11 @@ original comment follows:
 # The contents of this table are drawn from various sources, and
 # are in the public domain.
 #
-*/
+########################
 
-/* We just sort it and move column 2 away (line too long, sorry).
-   Also we add a few synonyms (obsolete):
+   We just sort it and move column 2 away (line too long, sorry;
+   look at sgml.html in test/ directory for details).
+   Also we add a few (obsolete) synonyms:
    "brkbar"  for "brvbar" 0x00A6
    "emdash"  for "mdash" 0x2014
    "endash"  for "ndash" 0x2013
@@ -62,7 +63,7 @@ original comment follows:
    BTW, lots of synonyms found in this table, we shouldn't worry about...
 */
 
-static CONST UC_entity_info extra_entities[] = {
+static CONST UC_entity_info unicode_entities[] = {
   {"AElig",	0x00C6},  /* LATIN CAPITAL LETTER AE			   */
   {"Aacgr",	0x0386},  /* GREEK CAPITAL LETTER ALPHA WITH TONOS	   */
   {"Aacute",	0x00C1},  /* LATIN CAPITAL LETTER A WITH ACUTE		   */

@@ -87,7 +87,7 @@ PUBLIC char LYDiredFileURL[256] = "\0";
 PRIVATE char *filename PARAMS((
 	char *		prompt,
 	char *		buf,
-	int		bufsize));
+	size_t		bufsize));
 
 #ifdef OK_PERMIT
 PRIVATE BOOLEAN permit_location PARAMS((
@@ -1896,7 +1896,7 @@ PUBLIC int dired_options ARGS2(
 PRIVATE char *filename ARGS3(
 	char *, 	prompt,
 	char *, 	buf,
-	int,		bufsize)
+	size_t,		bufsize)
 {
     char *cp;
 

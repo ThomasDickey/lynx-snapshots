@@ -1,33 +1,33 @@
 /*                                                       HTStyle: Style management for libwww
                               STYLE DEFINITION FOR HYPERTEXT
-                                             
+
    Styles allow the translation between a logical property of a piece of text and its
    physical representation.
-   
+
    A StyleSheet is a collection of styles, defining the translation necessary to represent
    a document. It is a linked list of styles.
-   
+
 Overriding this module
 
    Why is the style structure declared in the HTStyle.h module, instead of having the user
    browser define the structure, and the HTStyle routines just use sizeof() for copying?
-   
+
    It's not obvious whether HTStyle.c should be common code.  It's useful to have common
    code for loading style sheets, especially if the movement toward standard style sheets
    gets going.
-   
+
    If it IS common code, then both the hypertext object and HTStyle.c must know the
    structure of a style, so HTStyle.h is a suitable place to put that.  HTStyle.c has to
    be compiled with a knowledge of the
-   
+
    It we take it out of the library, then of course HTStyle could be declared as an
    undefined structure. The only references to it are in the structure-flattening code
    HTML.c and HTPlain.c, which only use HTStypeNamed().
-   
+
    You can in any case override this function in your own code, which will prevent the
    HTStyle from being loaded.  You will be able to redefine your style structure in this
    case without problems, as no other moule needs to know it.
-   
+
  */
 #ifndef HTStyle_H
 #define HTStyle_H
@@ -80,7 +80,7 @@ typedef int HTColor;            /* Sorry about the US spelling! */
 
 
 #define STYLE_NAME_LENGTH       80      /* @@@@@@@@@@@ */
-        
+
 typedef struct {
     short               kind;           /* only NX_LEFTTAB implemented*/
     HTCoord             position;       /* x coordinate for stop */
@@ -118,7 +118,7 @@ typedef struct _HTStyle {
     short               alignment;      /* quad justification */
     HTCoord             lineHt;         /* line height */
     HTCoord             descentLine;    /* descender bottom from baseline */
-    HTTabStop           *tabs;          /* array of tab stops, 0 terminated */
+    CONST HTTabStop     *tabs;          /* array of tab stops, 0 terminated */
 
     BOOL                wordWrap;       /* Yes means wrap at space not char */
     BOOL                freeFormat;     /* Yes means \n is just white space */
@@ -140,7 +140,7 @@ typedef struct _HTStyle {
 /*      Style functions:
 */
 extern HTStyle * HTStyleNew NOPARAMS;
-extern HTStyle* HTStyleNewNamed PARAMS ((CONST char * name));
+extern HTStyle * HTStyleNewNamed PARAMS ((CONST char * name));
 extern HTStyle * HTStyleFree PARAMS((HTStyle * self));
 #ifdef SUPRESS
 extern HTStyle * HTStyleRead PARAMS((HTStyle * self, HTStream * stream));
@@ -175,9 +175,8 @@ extern HTStyleSheet * HTStyleSheetWrite PARAMS((HTStyleSheet * self,
                                                 HTStream * stream));
 #endif
 #define CLEAR_POINTER ((void *)-1)      /* Pointer value means "clear me" */
+
+/* DefaultStyle.c */
+extern HTStyleSheet * DefaultStyle NOPARAMS;
+
 #endif /* HTStyle_H */
-
-
-/*
-
-    */

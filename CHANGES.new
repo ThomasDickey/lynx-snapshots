@@ -7,20 +7,71 @@ platforms see also INSTALLATION, for some changes for auto-configure and
 simple curses color see also README.configure).  Note that the 2.7 -> 2.7.1
 changes are included here. - KW]
 
+1998-02-27
+* add RELEASE_STATEMENT file. - TD
+* modify slang configuration to add fake 'scrollok()' - JED
+* modify LYmktime() so that 2-digit years must be greater/equal to 70 to be in
+  1900's (patch by Bela Lubkin).  Also adjust parse_windows_nt_dir_entry() and
+  parse_cms_dir_entry() as noted by Bela - TD
+* comment-out entries in cp1252_uni.tbl which correspond to nonprinting
+  control-characters - LP
+* add logic in SGML.c to correspond with 2.7.2 logic for codes used by
+  MicroSoft FrontPage. - LP
+* remove unneeded code for nbsp, ensp, emsp, thinsp and shy from handle_entity()
+  in SGML.c - LP
+* ifdef UPPER8 function with EXP_8BIT_TOUPPER, make this the default for DJGPP,
+  add configure option --enable-8bit-toupper to allow testing.  - TD
+* case-insensitive search and 8bit letters: 
+  It was realized that information about upper/lower mapping got from TOUPPER
+  which depends on locale in its 8bit and usually fails on non-UNIX systems. 
+  We introduce UPPER8 and strcasecomp8 to implement 8-bit aware
+  case-independent search using one simple assumption:  8bit upper/lower case
+  letters have their "7bit approximation" images (in def7_uni.tbl) matched
+  matched case-insensitively (7bit).  The cost of this assumption is that
+  several differently accented letters may be interpreted as equal but this is
+  negligible if the search string is more than one character long. 
+  (LYStrings.c, also HTString.c and LYMainLoop.c).  - LP & TD
+* add SunOS 4.x-specific ifdef to quiet redefinition warnings for sys/ioctl.h
+  vs sys/termios.h - TD
+* convert usage/options messages into arrays to simplify maintenance. - TD
+* add "-useragent" command-line option to set "User-Agent" (request by Merlin
+  Mathesius <merlin_mathesius@swissbank.com>).  - LP
+* tweak HTML in LYDownload.c, LYPrint.c to restore some double-spacing effects
+  altered in 'collapsible spaces' change 1998-01-25 (reported by James Elkinton
+  <zio@blueneptune.com>).  - LP
+* use strncasecomp/strcasecomp consistently throughout to avoid library
+  dependency on strncasecmp/strcasecmp. - TD
+* correct lengths in several strncasecmp calls for command-line options
+  (though -w is still an abbreviation for -width). - TD
+* test-build with BSD curses on OS/2 EMX (does not display properly), and
+  with ncurses.
+* add configure check CF_FUNC_LSTAT.
+* modify CF_CHECK_ERRNO so that configure script on OS/2 EMX finds sys_errlist.
+* reset styles[] and styleSheet list in DefaultStyle.c, HTML.c so that when
+  a user reloads a page with ^R, we undo changes to those data structures
+  (reported by Larry Virden). - TD
+* remove extra copy of HTML.h from Implementation directory. - TD
+* add CF_GCC_ATTRIBUTES to configure script, to use in flushing out unused
+  parameter warnings (and later, to support prototypes for logging). - TD
+* rename 'extra_entities' to 'unicode_entities' (recommended by LP) - TD
+* add configure option --use-default-colors, to allow background color to use
+  default value (request by SUNAGAWA Keiki <Keiki_Sunagawa@yokogawa.co.jp>) -
+  TD
+* change default for --disable-internal-links so it is normally-off - TD
 1998-02-19
-+ add configure test CF_FIONBIO, some ifdef's (e.g., S_IFLNK) to support
+* add configure test CF_FIONBIO, some ifdef's (e.g., S_IFLNK) to support
   build on OS/2 EMX. - TD
-+ add configure option --disable-extended-dtd, for testing - TD
+* add configure option --disable-extended-dtd, for testing - TD
 * split-out entities.h from HTMLDTD.c - TD
 * remove obsolete mapping in "private" e000 area of mnem_suni.tbl,
   mnem2_suni.tbl, rfc_suni.tbl - LP
 * remove unused function HTMLGetLatinOneValue() - LP
 * remove logic that would attempt lookup of Unicode entities by index into the
-  extra_entities.put_entity method (e.g., of HTML_dtd), in HTML.c
+  unicode_entities.put_entity method (e.g., of HTML_dtd), in HTML.c
   (HTML_put_entity) and HTMLGen.c (HTMLGen_put_entity) - LP
-* tweaks to HTPlain.c, LYCharUtils.c and SGML.c, remove some special-case logic
-  for Unicodes 173, 8211, 8212, 8482, as well as "iso-8859-2", "koi8-r", since
-  they are done in the chartrans tables - LP
+* tweaks to HTPlain.c, LYCharUtils.c and SGML.c, remove extra checks for
+  Unicode mdash, ndash, trade, as well as "iso-8859-2", "koi8-r", since they
+  are done in the chartrans tables - LP
 * add an alias 'H' for F1 when using RAWDOSKEYHACK - DK
 * restore -DRAWDOSKEYHACK to src/makefile.dos, reported by DK - TD
 * correct a typo in CF_CURSES_LIBS configure macro, which caused the configure
@@ -73,7 +124,9 @@ changes are included here. - KW]
   cannot be overridden at run time. - FM
 1998-02-05
 * adjust formatting, comments & some messages in WWW files to simplify
-  comparison with 2.7.2 version.  - TD
+  comparison with 2.7.2 version.  (I have preserved some chunks of difference,
+  ifdef'd NOTUSED_FOTEMODS or NOTDEFINED for ease of comparison -- these may be
+  removed at a later time, when we are done absorbing changes from 2.7.2) - TD
 * Update SGML entity to Unicode table in HTMLDTD.c from ftp.unicode.org -
   lots of new entities, iso-latin-1 now included there.
   See also new files in test/ directory:  sgml.html and unicode.html.

@@ -60,7 +60,7 @@ PRIVATE void usage ARGS1(
 }
 
 /* copied from HTString.c, not everybody has strncasecmp */
-PUBLIC int strncasecomp ARGS3(
+PRIVATE int strncasecomp ARGS3(
 	CONST char*,	a,
 	CONST char *,	b,
 	int,		n)

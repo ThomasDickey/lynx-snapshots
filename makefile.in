@@ -1,6 +1,9 @@
 ##makefile for lynx
 
-SHELL = /bin/sh
+SHELL		= /bin/sh
+
+x		= @PROG_EXT@
+
 .SUFFIXES:
 @SET_MAKE@
 prefix		= @prefix@
@@ -160,7 +163,7 @@ SITE_DEFS = # Your defines here
 # for installation of local execution links, please see the file userdefs.h
 
 # TESTED: Linux FreeBSD SunOS Solaris IRIX CLIX HP-UX AIX SCO
-all lynx:
+all lynx$x:
 	cd WWW/Library/unix && $(MAKE) CC="$(CC)" \
 		LY_CFLAGS="$(CFLAGS)" \
 		CPPFLAGS="$(CPPFLAGS)" \
@@ -189,7 +192,7 @@ clean:
 	rm -f WWW/Library/*/*.[aob]
 	rm -f WWW/Library/*/.created
 	cd src && $(MAKE) clean
-	rm -f *.b src/lynx core Lynx.leaks
+	rm -f *.b src/lynx$x core Lynx.leaks
 
 depend:
 	cd WWW/Library/unix && $(MAKE) $@
@@ -208,14 +211,14 @@ distclean: clean
 	@SRCDIR_CLEAN@-rmdir WWW/Library/unix && rmdir WWW/Library && rmdir WWW
 	@SRCDIR_CLEAN@-rmdir src/chrtrans && rmdir src
 	-rm -f makefile lynx_cfg.h config.status config.log config.cache
-	-rm -f lynx install-*
+	-rm -f lynx$x install-*
 
 maintainer-clean: distclean
 	-rm -rf WWW/Library/*/obsolete
 	-rm -f Lynx.prj .*_aux
 
 tar:  clean
-	rm -f lynx
+	rm -f lynx$x
 	$(MAKE) save
 
 turnover:	clean
@@ -225,8 +228,8 @@ zipcompress: compress zip
 	echo "done!"
 
 zip:  clean
-	rm -f src/lynx
-	rm -f lynx
+	rm -f src/lynx$x
+	rm -f lynx$x
 	rm -f src/a.out
 	rm -f ../$(lynxname).zip
 	cd ..; rm -f $(lynxname).zip; zip -r $(lynxname).zip $(lynxdir)
@@ -237,14 +240,14 @@ save:
 compress: tar
 	cd ..; rm -f $(lynxname).tar.Z; compress -f -v $(lynxname).tar
 
-install: lynx install-bin install-man install-cfg @INSTALL_LSS@
+install: lynx$x install-bin install-man install-cfg @INSTALL_LSS@
 	@echo
 	@echo "Use $(MAKE) install-help to install the help-files"
 	@echo
 
 install-bin: $(bindir)
-	-mv -f $(bindir)/lynx $(bindir)/lynx.old
-	$(installbin) lynx $(bindir)/
+	-mv -f $(bindir)/lynx$x $(bindir)/lynx.old
+	$(installbin) lynx$x $(bindir)/
 
 install-man : $(mandir) 
 	$(installdoc) $(srcdir)/lynx.man $(mandir)/lynx.1
@@ -268,7 +271,7 @@ install-lss : $(libdir)
 	$(INSTALL_DATA) $(srcdir)/samples/lynx.lss $(libdir)/lynx.lss
 
 uninstall:
-	-rm -f $(bindir)/lynx
+	-rm -f $(bindir)/lynx$x
 	-rm -f $(mandir)/lynx.1
 	-rm -f $(libdir)/lynx.cfg
 	-rm -f $(libdir)/lynx.lss

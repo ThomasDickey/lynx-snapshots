@@ -58,6 +58,7 @@
 #include "HTAlert.h"
 #include "HTCJK.h"
 #include "UCMap.h"
+#include "GridText.h"
 
 #include "LYexit.h"
 #include "LYLeaks.h"

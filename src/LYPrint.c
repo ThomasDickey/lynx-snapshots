@@ -471,9 +471,9 @@ PUBLIC int printfile ARGS1(
 		     *	to the top of the file.  May create
 		     *	technically invalid HTML, but will help to resolve
 		     *	properly the document converted via chartrans:
-		     *  printed document correspond to a display charset
-		     *  and we *should* override both assume_local_charset
-		     *  and original document's META CHARSET (if any).
+		     *	printed document correspond to a display charset
+		     *	and we *should* override both assume_local_charset
+		     *	and original document's META CHARSET (if any).
 		     *
 		     *	Currently, if several META CHARSETs are found Lynx uses
 		     *	the first only, and it is opposite to BASE where the
@@ -490,8 +490,7 @@ PUBLIC int printfile ARGS1(
 			  strncasecomp(disp_charset, "x-", 2) == 0) {
 		     } else {
 			fprintf(outfile_fp,
-				"<META HTTP-EQUIV=\"Content-Type\" "
-				"CONTENT=\"text/html; charset=%s\">\n\n",
+				"<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=%s\">\n\n",
 				disp_charset);
 			}
 		}
@@ -1319,20 +1318,20 @@ PUBLIC int print_options ARGS2(
     fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
 		 PRINT_OPTIONS_TITLE);
 
-    fprintf(fp0,"<h1>Printing Options (%s Version %s)</h1>\n",
+    fprintf(fp0,"<h1>Printing Options (%s Version %s)</h1><pre>\n",
 				       LYNX_NAME, LYNX_VERSION);
 
     pages = (lines_in_file+65)/66;
     sprintf(buffer,
-	    "There are %d lines, or approximately %d page%s, to print.<br>\n",
+	   "   There are %d lines, or approximately %d page%s, to print.\n",
 	    lines_in_file, pages, (pages > 1 ? "s" : ""));
     fputs(buffer,fp0);
 
     if (no_print || no_disk_save || child_lynx || no_mail)
-	fputs("Some print functions have been disabled!!!<br>\n", fp0);
+	fprintf(fp0, "   Some print functions have been disabled!!!\n");
 
-    fputs("You have the following print choices.<br>\n", fp0);
-    fputs("Please select one:<br>\n<pre>\n", fp0);
+    fprintf(fp0, "   You have the following print choices.\n");
+    fprintf(fp0, "   Please select one:\n\n");
 
     if (child_lynx == FALSE && no_disk_save == FALSE && no_print == FALSE)
 	fprintf(fp0,

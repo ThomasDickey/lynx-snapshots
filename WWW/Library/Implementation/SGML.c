@@ -418,44 +418,11 @@ PRIVATE void handle_entity ARGS2(
     CONST char *s = context->string->data;
 #ifdef NOTUSED_FOTEMODS
     int high, low, i, diff;
-
-
-    /*
-    **	Use Lynx special characters for nbsp (160), ensp (8194),
-    **	emsp (8195), thinsp (8201), and shy (173). - FM
-    */
-    if (!strcmp(s, "nbsp")) {
-	PUTC(HT_NON_BREAK_SPACE);
-	FoundEntity = TRUE;
-	return;
-    }
-    if (!strcmp(s, "ensp") || !strcmp(s, "emsp") || !strcmp(s, "thinsp")) {
-	PUTC(HT_EM_SPACE);
-	FoundEntity = TRUE;
-	return;
-    }
-    if (!strcmp(s, "shy")) {
-	PUTC(LY_SOFT_HYPHEN);
-	FoundEntity = TRUE;
-	return;
-    }
-
-    /*
-    **	For ndash or endash (8211), and mdash or emdash (8212),
-    **	use an ASCII hyphen (32). - FM
-    */
-    if (!strcmp(s, "ndash") ||
-	!strcmp(s, "endash") ||
-	!strcmp(s, "mdash") ||
-	!strcmp(s, "endash")) {
-	PUTC('-');
-	FoundEntity = TRUE;
-	return;
-    }
 #endif
 
+
     /*
-    **	Handle all other entities normally. - FM
+    **	Handle all entities normally. - FM
     */
     FoundEntity = FALSE;
     if ((code = HTMLGetEntityUCValue(s)) != 0) {
@@ -1873,12 +1840,15 @@ top1:
 	    HTChunkTerminate(string);
 	    if ((context->isHex ? sscanf(string->data, "%lx", &code) :
 				  sscanf(string->data, "%ld", &code)) == 1) {
-#ifdef NOTUSED_FOTEMODS
 		if ((code == 1) ||
 		    (code > 129 && code < 156)) {
 		    /*
 		    **	Assume these are MicroSoft code points,
 		    **	inflicted on us by FrontPage. - FM
+		    **
+		    **	MS FrontPage uses syntax like &#153; in 128-159 range
+		    **	and doesn't follow Unicode standards for this area.
+		    **	Windows-1252 codepoints are assumed here.
 		    */
 		    switch (code) {
 			case 1:
@@ -1999,7 +1969,6 @@ top1:
 			    break;
 		    }
 		}
-#endif /* NOTUSED_FOTEMODS */
 		/*
 		**  Check for special values. - FM
 		*/
