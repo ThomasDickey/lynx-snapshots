@@ -197,9 +197,9 @@ PUBLIC int html_src_parse_tagspec ARGS4(
 			after_excl = TRUE;
 			break;
 		    default:
-			if (isalpha(*p) || *p == '_') {
+			if (isalpha(UCH(*p)) || *p == '_') {
 			    tagstart = p;
-			    while (*p && ( isalnum(*p) || *p == '_') )
+			    while (*p && ( isalnum(UCH(*p)) || *p == '_') )
 				 ++p;
 			    tagend = p;
 			    state = HTSRC_CK_after_tagname;
@@ -252,9 +252,9 @@ PUBLIC int html_src_parse_tagspec ARGS4(
 			return 1;
 		    default: {
 			char save, save1;
-			if ( isalpha(*p) || *p == '_' ) {
+			if ( isalpha(UCH(*p)) || *p == '_' ) {
 			    classstart = p;
-			    while (*p && ( isalnum(*p) || *p == '_') ) ++p;
+			    while (*p && ( isalnum(UCH(*p)) || *p == '_') ) ++p;
 			    classend = p;
 			    save = *classend;
 			    *classend = '\0';

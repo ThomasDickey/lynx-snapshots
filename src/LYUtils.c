@@ -228,11 +228,6 @@ PUBLIC void highlight ARGS3(
 	if (flag == ON || links[cur].type == WWW_FORM_LINK_TYPE)
 #endif
 	{
-
-#ifdef USE_COLOR_STYLE
-#define LXP (links[cur].lx)
-#define LYP (links[cur].ly)
-#endif
 #ifndef USE_COLOR_STYLE
 	if (links[cur].type == WWW_FORM_LINK_TYPE ||
 	    !links[cur].hightext) {
@@ -247,12 +242,13 @@ PUBLIC void highlight ARGS3(
 	    target1_drawn = YES;
 #endif
 	}
-#else
-	move(links[cur].ly, links[cur].lx);
-	if (flag == ON) {
-	    LynxChangeStyle(s_alink, STACK_ON, 0);
-	} else {
-	    int s, x;
+#else	/* here USE_COLOR_STYLE defined */
+	int s = s_alink;
+
+#  define LXP (links[cur].lx)
+#  define LYP (links[cur].ly)
+	if (flag != ON) {
+	    int x;
 		/*
 		 *  This is where we try to restore the original style when
 		 *  a link is unhighlighted.  The purpose of cached_styles[][]
@@ -262,6 +258,8 @@ PUBLIC void highlight ARGS3(
 		 *  until we find one.
 		 */
 	    if (LYP >= 0 && LYP < CACHEH && LXP >= 0 && LXP < CACHEW) {
+		CTRACE((tfp, "STYLE.highlight.off: cached style @(%d,%d): ",
+			LYP, LXP));
 		s = cached_styles[LYP][LXP];
 		if (s == 0) {
 		    for (x = LXP-1; x >= 0; x--) {
@@ -270,17 +268,27 @@ PUBLIC void highlight ARGS3(
 				s = cached_styles[LYP][x];
 				cached_styles[LYP][LXP] = s;
 			    }
+			    CTRACE((tfp, "found %d, x_offset=%d.\n",
+				    cached_styles[LYP][x], (int)x-LXP));
 			    break;
 			}
 		    }
-		    if (s == 0)
+		    if (s == 0) {
+			CTRACE((tfp, "not found, assume <a>.\n"));
 			s = s_a;
+		    }
+		} else {
+		    CTRACE((tfp, "found %d.\n", s));
 		}
 	    } else {
+		CTRACE((tfp, "STYLE.highlight.off: can't use cache.\n"));
 		s = s_a;
 	    }
-	    LynxChangeStyle(s, STACK_ON, 0);
+	} else {
+	    CTRACE((tfp, "STYLE.highlight.on: @(%d,%d).\n", LYP, LXP));
 	}
+	move(LYP, LXP);
+	LynxChangeStyle(s, STACK_ON, 0);
 #endif
 	}
 
@@ -305,6 +313,7 @@ PUBLIC void highlight ARGS3(
 	    if (flag == OFF) {
 		hl2_drawn = TRUE;
 		redraw_lines_of_link(cur);
+		CTRACE((tfp, "STYLE.highlight.off: NOFIX branch @(%d,%d).\n", LYP, LXP));
 	    } else
 #endif
 	    if (!hl1_drawn) {
@@ -335,6 +344,9 @@ PUBLIC void highlight ARGS3(
 #ifndef USE_COLOR_STYLE
 	    lynx_start_link_color (flag == ON, links[cur].inUnderline);
 #else
+	    CTRACE((tfp, "STYLE.highlight.line2: @(%d,%d), style=%d.\n",
+		    links[cur].ly + 1, links[cur].hightext2_offset,
+		    flag == ON ? s_alink : s_a));
 	    LynxChangeStyle(flag == ON ? s_alink : s_a, ABS_ON, 0);
 #endif
 
@@ -2363,7 +2375,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
      */
 
 	/** Keyboard 'Z' or 'z', or Control-G or Control-C **/
-    if (TOUPPER(c) == 'Z' || c == 7 || c == 3)
+    if (TOUPPER(c) == 'Z' || LYCharIsINTERRUPT(c))
 	return((int)TRUE);
 
 	/* There is a subset of mainloop() actions available at this stage:
@@ -2729,8 +2741,8 @@ PUBLIC int LYCheckForProxyURL ARGS1(
 	cp1++;
 	if (!*cp) {
 	    return(NOT_A_URL_TYPE);
-	} else if (isdigit((unsigned char)*cp1)) {
-	    while (*cp1 && isdigit((unsigned char)*cp1))
+	} else if (isdigit(UCH(*cp1))) {
+	    while (*cp1 && isdigit(UCH(*cp1)))
 		cp1++;
 	    if (*cp1 && !LYIsHtmlSep(*cp1))
 		return(UNKNOWN_URL_TYPE);
@@ -3117,7 +3129,7 @@ PUBLIC BOOLEAN LYCanDoHEAD ARGS1(
 	    FREE(temp);
 	    return TRUE;
 	}
-	if (cp && isdigit(cp[1]) && strchr(cp, '-') == NULL) {
+	if (cp && isdigit(UCH(cp[1])) && strchr(cp, '-') == NULL) {
 	    FREE(temp0);
 	    FREE(temp);
 	    return TRUE;
@@ -3651,7 +3663,7 @@ PUBLIC void change_sug_filename ARGS1(
 		   *cp == '<' || *cp == '>' || *cp == '#' ||
 		   *cp == '%' || *cp == '*' || *cp == '`' ||
 		   *cp == '~' || *cp == '^' || *cp == '|' ||
-		   *cp <  ' ' || ((unsigned char)*cp) > 126) {
+		   *cp <  ' ' || (UCH(*cp)) > 126) {
 	    *cp = '-';
 	}
     }
@@ -4548,7 +4560,7 @@ PUBLIC void LYConvertToURL ARGS2(
 		fragment = NULL;
 		if (strchr(old_string, '[') ||
 		    ((cp = strchr(old_string, ':')) != NULL &&
-		     !isdigit((unsigned char)cp[1])) ||
+		     !isdigit(UCH(cp[1]))) ||
 		    !LYExpandHostForURL((char **)&old_string,
 					URLDomainPrefixes,
 					URLDomainSuffixes)) {
@@ -4586,7 +4598,7 @@ PUBLIC void LYConvertToURL ARGS2(
 	    }
 	    if (strchr(old_string, '[') ||
 		((cp = strchr(old_string, ':')) != NULL &&
-		 !isdigit((unsigned char)cp[1])) ||
+		 !isdigit(UCH(cp[1]))) ||
 		!LYExpandHostForURL((char **)&old_string,
 				    URLDomainPrefixes,
 				    URLDomainSuffixes)) {
@@ -4926,7 +4938,7 @@ PUBLIC int win32_check_interrupt()
     if (kbhit()) {
 	c = getch();
 	/** Keyboard 'Z' or 'z', or Control-G or Control-C **/
-	if (TOUPPER(c) == 'Z' || c == 7 || c == 3 || c == 0x1b) {
+	if (TOUPPER(c) == 'Z' || LYCharIsINTERRUPT(c) || c == 0x1b) {
 	    return TRUE;
 	}
     }
@@ -5039,7 +5051,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
      *	filling in the host field. - FM
      */
     if ((StrColon = strrchr(Str, ':')) != NULL &&
-	isdigit((unsigned char)StrColon[1])) {
+	isdigit(UCH(StrColon[1]))) {
 	if (StrColon == Str) {
 	    FREE(Str);
 	    return GotHost;
@@ -5066,8 +5078,8 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = PF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    error = getaddrinfo(host, "80", &hints, &res); 
- 
+    error = getaddrinfo(host, "80", &hints, &res);
+
     if (!error && res)
 #else
     if (LYGetHostByName(host) != NULL)
@@ -5091,7 +5103,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	FREE(MsgStr);
 	return GotHost;
     }
-    else if (LYCursesON && 
+    else if (LYCursesON &&
 #if defined(__DJGPP__) && !defined(WATT32)
 	HTCheckForInterrupt()
 #else /* normal systems */
@@ -5181,7 +5193,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	    }
 	    StrAllocCat(Host, DomainSuffix);
 	    if ((HostColon = strrchr(Host, ':')) != NULL &&
-		isdigit((unsigned char)HostColon[1])) {
+		isdigit(UCH(HostColon[1]))) {
 		*HostColon = '\0';
 	    }
 	    StrAllocCopy(host, Host);
@@ -5968,7 +5980,7 @@ PUBLIC time_t LYmktime ARGS2(
      *	Skip any lead alphabetic "Day, " field and
      *	seek a numeric day field. - FM
      */
-    while (*s != '\0' && !isdigit((unsigned char)*s))
+    while (*s != '\0' && !isdigit(UCH(*s)))
 	s++;
     if (*s == '\0')
 	return(0);
@@ -5977,7 +5989,7 @@ PUBLIC time_t LYmktime ARGS2(
      *	Get the numeric day and convert to an integer. - FM
      */
     start = s;
-    while (*s != '\0' && isdigit((unsigned char)*s))
+    while (*s != '\0' && isdigit(UCH(*s)))
 	s++;
     if (*s == '\0' || (s - start) > 2)
 	return(0);
@@ -5989,18 +6001,18 @@ PUBLIC time_t LYmktime ARGS2(
     /*
      *	Get the month string and convert to an integer. - FM
      */
-    while (*s != '\0' && !isalnum((unsigned char)*s))
+    while (*s != '\0' && !isalnum(UCH(*s)))
 	s++;
     if (*s == '\0')
 	return(0);
     start = s;
-    while (*s != '\0' && isalnum((unsigned char)*s))
+    while (*s != '\0' && isalnum(UCH(*s)))
 	s++;
     if ((*s == '\0') ||
-	(s - start) < (isdigit((unsigned char)*(s - 1)) ? 2 : 3) ||
-	(s - start) > (isdigit((unsigned char)*(s - 1)) ? 2 : 9))
+	(s - start) < (isdigit(UCH(*(s - 1))) ? 2 : 3) ||
+	(s - start) > (isdigit(UCH(*(s - 1))) ? 2 : 9))
 	return(0);
-    LYstrncpy(temp, start, (isdigit((unsigned char)*(s - 1)) ? 2 : 3));
+    LYstrncpy(temp, start, (isdigit(UCH(*(s - 1))) ? 2 : 3));
     switch (TOUPPER(temp[0])) {
 	case '0':
 	case '1':
@@ -6080,12 +6092,12 @@ PUBLIC time_t LYmktime ARGS2(
     /*
      *	Get the numeric year string and convert to an integer. - FM
      */
-    while (*s != '\0' && !isdigit((unsigned char)*s))
+    while (*s != '\0' && !isdigit(UCH(*s)))
 	s++;
     if (*s == '\0')
 	return(0);
     start = s;
-    while (*s != '\0' && isdigit((unsigned char)*s))
+    while (*s != '\0' && isdigit(UCH(*s)))
 	s++;
     if ((s - start) == 4) {
 	LYstrncpy(temp, start, 4);
@@ -6114,7 +6126,7 @@ PUBLIC time_t LYmktime ARGS2(
     /*
      *	Get the numeric hour string and convert to an integer. - FM
      */
-    while (*s != '\0' && !isdigit((unsigned char)*s))
+    while (*s != '\0' && !isdigit(UCH(*s)))
 	s++;
     if (*s == '\0') {
 	hour = 0;
@@ -6122,7 +6134,7 @@ PUBLIC time_t LYmktime ARGS2(
 	seconds = 0;
     } else {
 	start = s;
-	while (*s != '\0' && isdigit((unsigned char)*s))
+	while (*s != '\0' && isdigit(UCH(*s)))
 	    s++;
 	if (*s != ':' || (s - start) > 2)
 	    return(0);
@@ -6132,12 +6144,12 @@ PUBLIC time_t LYmktime ARGS2(
 	/*
 	 *  Get the numeric minutes string and convert to an integer. - FM
 	 */
-	while (*s != '\0' && !isdigit((unsigned char)*s))
+	while (*s != '\0' && !isdigit(UCH(*s)))
 	    s++;
 	if (*s == '\0')
 	    return(0);
 	start = s;
-	while (*s != '\0' && isdigit((unsigned char)*s))
+	while (*s != '\0' && isdigit(UCH(*s)))
 	    s++;
 	if (*s != ':' || (s - start) > 2)
 	    return(0);
@@ -6147,12 +6159,12 @@ PUBLIC time_t LYmktime ARGS2(
 	/*
 	 *  Get the numeric seconds string and convert to an integer. - FM
 	 */
-	while (*s != '\0' && !isdigit((unsigned char)*s))
+	while (*s != '\0' && !isdigit(UCH(*s)))
 	    s++;
 	if (*s == '\0')
 	    return(0);
 	start = s;
-	while (*s != '\0' && isdigit((unsigned char)*s))
+	while (*s != '\0' && isdigit(UCH(*s)))
 	    s++;
 	if (*s == '\0' || (s - start) > 2)
 	    return(0);
@@ -6546,7 +6558,7 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 	     || (sb.st_mode & (S_IWOTH | S_IWGRP)) != 0) {
 		make_it = TRUE;
 		CTRACE((tfp, "lynx_temp_space is not our directory %s owner %d mode %03o\n",
-			     lynx_temp_space, sb.st_uid, sb.st_mode & 0777));
+			     lynx_temp_space, (int) sb.st_uid, (int) sb.st_mode & 0777));
 	    }
 	} else {
 	    make_it = TRUE;
@@ -7172,12 +7184,12 @@ PUBLIC BOOLEAN LYValidateFilename ARGS2(
 #if defined(__DJGPP__) || defined(_WINDOWS)
     if (strchr(result, ':') != NULL)
 	cp = NULL;
-    else 
+    else
 #endif /*  __DJGPP__ || _WINDOWS */
 	{
 #ifdef SUPPORT_CHDIR
 	    static char buf[LY_MAXPATH];
-	    cp = Current_Dir(buf);	    
+	    cp = Current_Dir(buf);
 #else
 	    cp = original_dir;
 #endif
@@ -7520,6 +7532,9 @@ PUBLIC int LYSystem ARGS1(
     BOOLEAN sigtstp_saved = FALSE;
 #endif
     int saved_errno = 0;
+#ifdef __EMX__
+    int scrsize[4];
+#endif
 
     fflush(stdout);
     fflush(stderr);
@@ -7539,6 +7554,8 @@ PUBLIC int LYSystem ARGS1(
        Native command-(non)-shell will not tolerate this. */
     {
 	char *space = command, *slash = command;
+
+	_scrsize(scrsize);
 	while (*space && *space != ' ' && *space != '\t')
 	    space++;
 	while (slash < space && *slash != '/')
@@ -7640,6 +7657,15 @@ PUBLIC int LYSystem ARGS1(
 	FREE(command);
 #if !defined(UCX) || !defined(VAXC) /* errno not modifiable ?? */
     set_errno(saved_errno);	/* may have been clobbered */
+#endif
+#ifdef __EMX__			/* Check whether the screen size changed */
+    _scrsize(scrsize+2);
+    if ((scrsize[0] != scrsize[2]) || (scrsize[1] != scrsize[3])) {
+	CTRACE((tfp, "EMX update size...\n"));
+	LYcols = scrsize[2];
+	LYlines = scrsize[3];
+	recent_sizechange = TRUE;
+    }
 #endif
     return code;
 }

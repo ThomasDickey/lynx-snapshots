@@ -1268,12 +1268,12 @@ PUBLIC BOOL HTSearch ARGS2(
     for (e = s + strlen(s); e > s && WHITE(*(e-1)); e--) /* Scan */
 	;	/* Skip trailers */
     for (q = escaped, p = s; p < e; p++) {	/* Scan stripped field */
-	unsigned char c = (unsigned char)TOASCII(*p);
+	unsigned char c = UCH(TOASCII(*p));
 	if (WHITE(*p)) {
 	    *q++ = '+';
 	} else if (HTCJK != NOCJK) {
 	    *q++ = *p;
-	} else if (c>=32 && c<=(unsigned char)127 && isAcceptable[c-32]) {
+	} else if (c>=32 && c<=UCH(127) && isAcceptable[c-32]) {
 	    *q++ = *p;				/* 930706 TBL for MVS bug */
 	} else {
 	    *q++ = '%';

@@ -428,13 +428,13 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 #if 0 /* Should this check be done in HText_appendCharacter? */
 		if (last_kcode == EUC) {
 		    if (save_ch1 && !save_ch2) {
-			if ((unsigned char)c & 0x80) {
+			if (UCH(c) & 0x80) {
 			    save_ch2 = c;
 			}
 			HText_appendCharacter(me->text, save_ch1);
 			HText_appendCharacter(me->text, save_ch2);
 			save_ch1 = save_ch2 = '\0';
-		    } else if ((unsigned char)c & 0x80) {
+		    } else if (UCH(c) & 0x80) {
 			save_ch1 = c;
 			save_ch2 = '\0';
 		    } else {
@@ -955,6 +955,7 @@ PRIVATE int HTML_start_element ARGS6(
     int status = HT_OK;
 #ifdef USE_COLOR_STYLE
     char* class_name;
+    int class_used = 0;
 #  if OPT_SCN
 #    if !OMIT_SCN_KEEPING
     char* Style_className_end_was = Style_className_end+1;
@@ -1100,8 +1101,9 @@ PRIVATE int HTML_start_element ARGS6(
 	force_current_tag_style = FALSE;
     }
 
+    CTRACE((tfp, "CSS.elt:<%s>\n", HTML_dtd.tags[element_number].name));
 
-    if (current_tag_style == -1) {
+    if (current_tag_style == -1) {	/* Append class_name */
 #if !OPT_SCN
 	strcpy (myHash, HTML_dtd.tags[element_number].name);
 #else
@@ -1109,6 +1111,8 @@ PRIVATE int HTML_start_element ARGS6(
 #endif
 	if (class_name[0])
 	{
+	    int ohcode = hcode;
+	    char *oend = Style_className_end;
 #if !OPT_SCN
 	    int len = strlen(myHash);
 	    sprintf(myHash, ".%.*s", (int)sizeof(myHash) - len - 2, class_name);
@@ -1124,7 +1128,18 @@ PRIVATE int HTML_start_element ARGS6(
 	    hcode = hash_code_aggregate_char('.', hcode);
 	    hcode = hash_code_aggregate_lower_str(class_name, hcode);
 #endif
+	    if (!hashStyles[hcode].name) { /* None such -> classless version */
+		hcode = ohcode;
+		*oend = '\0';
+		CTRACE((tfp, "STYLE.start_element: <%s> (class <%s> not configured), hcode=%d.\n",
+			HTML_dtd.tags[element_number].name, class_name, hcode));
+	    } else {
+		CTRACE((tfp, "STYLE.start_element: <%s>.<%s>, hcode=%d.\n",
+			HTML_dtd.tags[element_number].name, class_name, hcode));
+		class_used = 1;
+	    }
 	}
+
 #if !OPT_SCN
 	strtolower(myHash);
 	hcode = hash_code(myHash);
@@ -1155,13 +1170,6 @@ PRIVATE int HTML_start_element ARGS6(
 	    fprintf(tfp, " ca=%d\n", hashStyles[hcode].color);
     }
 #endif
-
-	/* seems that this condition is always true - HV */
-	if (displayStyles[element_number + STARTAT].color > -2) /* actually set */
-	{
-	    CTRACE((tfp, "CSSTRIM: start_element: top <%s>\n", HTML_dtd.tags[element_number].name));
-	    HText_characterStyle(me->text, hcode, 1);
-	}
     } else { /* (current_tag_style!=-1)	 */
 	if (class_name[0]) {
 #if !OPT_SCN
@@ -1179,7 +1187,8 @@ PRIVATE int HTML_start_element ARGS6(
 	    class_string[0] = '\0';
 	}
 	hcode = current_tag_style;
-	HText_characterStyle(me->text, hcode , 1);
+	CTRACE((tfp, "STYLE.start_element: <%s>, hcode=%d.\n",
+		HTML_dtd.tags[element_number].name, hcode));
 	current_tag_style = -1;
     }
 
@@ -1192,8 +1201,33 @@ PRIVATE int HTML_start_element ARGS6(
 #   endif
 #endif
 
+#if OPT_SCN && !OMIT_SCN_KEEPING	/* Can be done in other cases too... */
+    if (!class_used && ElementNumber == HTML_INPUT) { /* For some other too? */
+	char *type = "", *oend = Style_className_end;
+	int l, ohcode = hcode;
 
+	if (present && present[HTML_INPUT_TYPE] && value[HTML_INPUT_TYPE])
+	    type = (char *)value[HTML_INPUT_TYPE];
+	l = strlen(type);
 
+	*Style_className_end = '.';
+	memcpy(Style_className_end+1, "type.", 5 );
+	memcpy(Style_className_end+6, type, l+1 );
+	Style_className_end += l+6;
+	hcode = hash_code_aggregate_lower_str(".type.", hcode);
+	hcode = hash_code_aggregate_lower_str(type, hcode);
+	if (!hashStyles[hcode].name) { /* None such -> classless version */
+	    hcode = ohcode;
+	    *oend = '\0';
+	    CTRACE((tfp, "STYLE.start_element: type <%s> not configured.\n", type));
+	} else {
+	    CTRACE((tfp, "STYLE.start_element: <%s>.type.<%s>, hcode=%d.\n",
+		    HTML_dtd.tags[element_number].name, type, hcode));
+	}
+    }
+#endif	/* OPT_SCN && !OMIT_SCN_KEEPING */
+
+    HText_characterStyle(me->text, hcode, 1);
 #endif /* USE_COLOR_STYLE */
 
     /*
@@ -1642,7 +1676,7 @@ PRIVATE int HTML_start_element ARGS6(
 	    {
 		char *tmp = 0;
 		HTSprintf0(&tmp, "link.%s.%s", value[HTML_LINK_CLASS], title);
-		CTRACE((tfp, "CSSTRIM:link=%s\n", tmp));
+		CTRACE((tfp, "STYLE.link: using style <%s>\n", tmp));
 
 		HText_characterStyle(me->text, hash_code(tmp), 1);
 		HTML_put_string(me, title);
@@ -2170,7 +2204,7 @@ PRIVATE int HTML_start_element ARGS6(
 	    width = LYcols - 1 -
 		    me->new_style->leftIndent - me->new_style->rightIndent;
 	    if (present && present[HTML_HR_WIDTH] && value[HTML_HR_WIDTH] &&
-		isdigit(*value[HTML_HR_WIDTH]) &&
+		isdigit(UCH(*value[HTML_HR_WIDTH])) &&
 		value[HTML_HR_WIDTH][strlen(value[HTML_HR_WIDTH])-1] == '%') {
 		char *percent = NULL;
 		int Percent, Width;
@@ -2268,7 +2302,7 @@ PRIVATE int HTML_start_element ARGS6(
 		    value[HTML_TAB_TO] && *value[HTML_TAB_TO]) ||
 		   (present[HTML_TAB_INDENT] &&
 		    value[HTML_TAB_INDENT] &&
-		    isdigit(*value[HTML_TAB_INDENT]))) {
+		    isdigit(UCH(*value[HTML_TAB_INDENT])))) {
 	    int column, target = -1;
 	    int enval = 2;
 
@@ -2284,7 +2318,7 @@ PRIVATE int HTML_start_element ARGS6(
 		}
 	    } else if (!(temp && *temp) && present[HTML_TAB_INDENT] &&
 		       value[HTML_TAB_INDENT] &&
-		       isdigit(*value[HTML_TAB_INDENT])) {
+		       isdigit(UCH(*value[HTML_TAB_INDENT]))) {
 		/*
 		 *  The INDENT value is in "en" (enval per column) units.
 		 *  Divide it by enval, rounding odd values up. - FM
@@ -2399,7 +2433,7 @@ PRIVATE int HTML_start_element ARGS6(
 	break; /* ignore */
 
     case HTML_SUP:
-	if (isxdigit((unsigned char)HText_getLastChar(me->text))) {
+	if (isxdigit(UCH(HText_getLastChar(me->text)))) {
 	    HText_appendCharacter(me->text, '^');
 	}
 	CHECK_ID(HTML_GEN_ID);
@@ -2828,9 +2862,9 @@ PRIVATE int HTML_start_element ARGS6(
 		if (present && present[HTML_LI_VALUE] &&
 		    ((value[HTML_LI_VALUE] != NULL) &&
 		     (*value[HTML_LI_VALUE] != '\0')) &&
-		    ((isdigit(*value[HTML_LI_VALUE])) ||
+		    ((isdigit(UCH(*value[HTML_LI_VALUE]))) ||
 		     (*value[HTML_LI_VALUE] == '-' &&
-		      isdigit(*(value[HTML_LI_VALUE] + 1))))) {
+		      isdigit(UCH(*(value[HTML_LI_VALUE] + 1)))))) {
 		    seqnum = atoi(value[HTML_LI_VALUE]);
 		    if (seqnum <= OL_VOID)
 			seqnum = OL_VOID + 1;
@@ -5068,7 +5102,7 @@ PRIVATE int HTML_start_element ARGS6(
 		 */
 	    }
 
-	    CTRACE((tfp, "Ok, we're trying [%s]\n", NONNULL(I.type)));
+	    CTRACE((tfp, "Ok, we're trying type=[%s]\n", NONNULL(I.type)));
 
 	    /*
 	     *	Check for an unclosed TEXTAREA.
@@ -5177,7 +5211,7 @@ PRIVATE int HTML_start_element ARGS6(
 		}
 		FREE(href);
 	    }
-	    CTRACE((tfp, "2.Ok, we're trying [%s] (present=%p)\n", NONNULL(I.type), present));
+	    CTRACE((tfp, "2.Ok, we're trying type=[%s] (present=%p)\n", NONNULL(I.type), present));
 	    /* text+file don't go in here */
 	    if ((UseALTasVALUE == TRUE) ||
 		(present && present[HTML_INPUT_VALUE] &&
@@ -5202,7 +5236,7 @@ PRIVATE int HTML_start_element ARGS6(
 		    HTMLSetCharacterHandling(current_char_set);
 		}
 
-		CTRACE((tfp, "3.Ok, we're trying [%s]\n", NONNULL(I.type)));
+		CTRACE((tfp, "3.Ok, we're trying type=[%s]\n", NONNULL(I.type)));
 		if (!I.type)
 		    me->UsePlainSpace = TRUE;
 		else if (!strcasecomp(I.type, "text") ||
@@ -5223,7 +5257,7 @@ PRIVATE int HTML_start_element ARGS6(
 		if (me->UsePlainSpace && !me->HiddenValue) {
 		    I.value_cs = current_char_set;
 		}
-		CTRACE((tfp, "4.Ok, we're trying [%s]\n", NONNULL(I.type)));
+		CTRACE((tfp, "4.Ok, we're trying type=[%s]\n", NONNULL(I.type)));
 		TRANSLATE_AND_UNESCAPE_ENTITIES6(
 		    &I_value,
 		    ATTR_CS_IN,
@@ -5503,7 +5537,7 @@ PRIVATE int HTML_start_element ARGS6(
 
 	if (present && present[HTML_TEXTAREA_COLS] &&
 	    value[HTML_TEXTAREA_COLS] &&
-	    isdigit((unsigned char)*value[HTML_TEXTAREA_COLS]))
+	    isdigit(UCH(*value[HTML_TEXTAREA_COLS])))
 	    StrAllocCopy(me->textarea_cols, value[HTML_TEXTAREA_COLS]);
 	else {
 	    int width;
@@ -5520,7 +5554,7 @@ PRIVATE int HTML_start_element ARGS6(
 
 	if (present && present[HTML_TEXTAREA_ROWS] &&
 	    value[HTML_TEXTAREA_ROWS] &&
-	    isdigit((unsigned char)*value[HTML_TEXTAREA_ROWS]))
+	    isdigit(UCH(*value[HTML_TEXTAREA_ROWS])))
 	    me->textarea_rows = atoi(value[HTML_TEXTAREA_ROWS]);
 	else
 	    me->textarea_rows = 4;
@@ -5978,7 +6012,7 @@ PRIVATE int HTML_start_element ARGS6(
 	    int span = 1;
 	    if (present && present[HTML_COL_SPAN] &&
 		value[HTML_COL_SPAN] &&
-		isdigit((unsigned char)*value[HTML_COL_SPAN]))
+		isdigit(UCH(*value[HTML_COL_SPAN])))
 		span = atoi(value[HTML_COL_SPAN]);
 	    if (present && present[HTML_COL_ALIGN] && value[HTML_COL_ALIGN]) {
 		if (!strcasecomp(value[HTML_COL_ALIGN], "center")) {
@@ -6017,11 +6051,11 @@ PRIVATE int HTML_start_element ARGS6(
 	    int colspan = 1, rowspan = 1;
 	    if (present && present[HTML_TD_COLSPAN] &&
 		value[HTML_TD_COLSPAN] &&
-		isdigit((unsigned char)*value[HTML_TD_COLSPAN]))
+		isdigit(UCH(*value[HTML_TD_COLSPAN])))
 		colspan = atoi(value[HTML_TD_COLSPAN]);
 	    if (present && present[HTML_TD_ROWSPAN] &&
 		value[HTML_TD_ROWSPAN] &&
-		isdigit((unsigned char)*value[HTML_TD_ROWSPAN]))
+		isdigit(UCH(*value[HTML_TD_ROWSPAN])))
 		rowspan = atoi(value[HTML_TD_ROWSPAN]);
 	    if (present && present[HTML_TD_ALIGN] && value[HTML_TD_ALIGN]) {
 		if (!strcasecomp(value[HTML_TD_ALIGN], "center")) {
@@ -6098,7 +6132,7 @@ PRIVATE int HTML_start_element ARGS6(
 
     if (ReallyEmptyTagNum(element_number))
     {
-	CTRACE((tfp, "STYLE:begin_element:ending EMPTY element style\n"));
+	CTRACE((tfp, "STYLE.begin_element:ending \"EMPTY\" element style\n"));
 #if !defined(USE_HASH)
 	HText_characterStyle(me->text, element_number+STARTAT, STACK_OFF);
 #else
@@ -6309,11 +6343,11 @@ PRIVATE int HTML_end_element ARGS3(
 		     *  being called for. - kw
 		     */
 		    CTRACE((tfp,
-		        "HTML:end_element[%d]: %s (level %d), %s - %s\n",
+			"HTML:end_element[%d]: %s (level %d), %s - %s\n",
 			(int) STACKLEVEL(me),
-		        "Special OBJECT->FIG handling", me->objects_figged_open,
-		        "treating as end FIG",
-		        NONNULL(me->sp->style->name)));
+			"Special OBJECT->FIG handling", me->objects_figged_open,
+			"treating as end FIG",
+			NONNULL(me->sp->style->name)));
 		    me->objects_figged_open--;
 		    element_number = HTML_FIG;
 		}
@@ -7714,7 +7748,8 @@ End_Object:
 
 	if (!ReallyEmptyTagNum(element_number))
 	{
-	    CTRACE((tfp, "STYLE:end_element: ending non-EMPTY style\n"));
+	    CTRACE((tfp, "STYLE.end_element: ending non-\"EMPTY\" style <%s...>\n",
+		    HTML_dtd.tags[element_number].name));
 #if !defined(USE_HASH)
 	    HText_characterStyle(me->text, element_number+STARTAT, STACK_OFF);
 #else

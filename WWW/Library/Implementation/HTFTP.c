@@ -306,7 +306,7 @@ PRIVATE int next_data_char NOARGS
 	return FROMASCII(c);
     }
 #else
-    return (unsigned char)(*data_read_pointer++);
+    return UCH(*data_read_pointer++);
 #endif /* NOT_ASCII */
 }
 
@@ -1408,7 +1408,7 @@ PRIVATE BOOLEAN is_ls_date ARGS1(
 	char *,		s)
 {
     /* must start with three alpha characters */
-    if (!isalpha(*s++) || !isalpha(*s++) || !isalpha(*s++))
+    if (!isalpha(UCH(*s++)) || !isalpha(UCH(*s++)) || !isalpha(UCH(*s++)))
 	return FALSE;
 
     /* space or HT_NON_BREAK_SPACE */
@@ -1419,14 +1419,14 @@ PRIVATE BOOLEAN is_ls_date ARGS1(
     s++;
 
     /* space or digit */
-    if (!(*s == ' ' || isdigit(*s))) {
+    if (!(*s == ' ' || isdigit(UCH(*s)))) {
 	s++;
 	return FALSE;
     }
     s++;
 
     /* digit */
-    if (!isdigit(*s++))
+    if (!isdigit(UCH(*s++)))
 	return FALSE;
 
     /* space */
@@ -1434,29 +1434,29 @@ PRIVATE BOOLEAN is_ls_date ARGS1(
 	return FALSE;
 
     /* space or digit */
-    if (!(*s == ' ' || isdigit(*s))) {
+    if (!(*s == ' ' || isdigit(UCH(*s)))) {
 	s++;
 	return FALSE;
     }
     s++;
 
     /* digit */
-    if (!isdigit(*s++))
+    if (!isdigit(UCH(*s++)))
 	return FALSE;
 
     /* colon or digit */
-    if (!(*s == ':' || isdigit(*s))) {
+    if (!(*s == ':' || isdigit(UCH(*s)))) {
 	s++;
 	return FALSE;
     }
     s++;
 
     /* digit */
-    if (!isdigit(*s++))
+    if (!isdigit(UCH(*s++)))
 	return FALSE;
 
     /* space or digit */
-    if (!(*s == ' ' || isdigit(*s))) {
+    if (!(*s == ' ' || isdigit(UCH(*s)))) {
 	s++;
 	return FALSE;
     }
@@ -1539,7 +1539,7 @@ PRIVATE void parse_ls_line ARGS2(
     int    size_num=0;
 
     for (i = strlen(line) - 1;
-	 (i > 13) && (!isspace(line[i]) || !is_ls_date(&line[i-12])); i--)
+	 (i > 13) && (!isspace(UCH(line[i])) || !is_ls_date(&line[i-12])); i--)
 	; /* null body */
     line[i] = '\0';
     if (i > 13) {
@@ -1555,7 +1555,7 @@ PRIVATE void parse_ls_line ARGS2(
 	}
     }
     j = i - 14;
-    while (isdigit(line[j])) {
+    while (isdigit(UCH(line[j]))) {
 	size_num += (line[j] - '0') * base;
 	base *= 10;
 	j--;
@@ -1605,9 +1605,9 @@ PRIVATE void parse_dls_line ARGS3(
 	return;
     }
     if (len < 24 || line[23] != ' ' ||
-	(isspace(line[0]) && !*pspilledname)) {
+	(isspace(UCH(line[0])) && !*pspilledname)) {
 	/* this isn't the expected "dls" format! */
-	if (!isspace(line[0]))
+	if (!isspace(UCH(line[0])))
 	    *cps = '\0';
 	if (*pspilledname && !*line) {
 	    entry_info->filename = *pspilledname;
@@ -1631,7 +1631,7 @@ PRIVATE void parse_dls_line ARGS3(
     if (line[j] == '=' || line[j] == '-') {
 	StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
     } else {
-	while (isdigit(line[j])) {
+	while (isdigit(UCH(line[j]))) {
 	    size_num += (line[j] - '0') * base;
 	    base *= 10;
 	    j--;
@@ -1742,8 +1742,8 @@ PRIVATE void parse_vms_dir_entry ARGS2(
 
     /** Track down the date. **/
     if ((cpd=strchr(cp, '-')) != NULL &&
-	strlen(cpd) > 9 && isdigit(*(cpd-1)) &&
-	isalpha(*(cpd+1)) && *(cpd+4) == '-') {
+	strlen(cpd) > 9 && isdigit(UCH(*(cpd-1))) &&
+	isalpha(UCH(*(cpd+1))) && *(cpd+4) == '-') {
 
 	/** Month **/
 	*(cpd+2) = (char) TOLOWER(*(cpd+2));
@@ -1751,7 +1751,7 @@ PRIVATE void parse_vms_dir_entry ARGS2(
 	sprintf(date, "%.3s ", cpd+1);
 
 	/** Day **/
-	if (isdigit(*(cpd-2)))
+	if (isdigit(UCH(*(cpd-2))))
 	    sprintf(date+4, "%.2s ", cpd-2);
 	else
 	    sprintf(date+4, "%c%.1s ", HT_NON_BREAK_SPACE, cpd-1);
@@ -1771,13 +1771,13 @@ PRIVATE void parse_vms_dir_entry ARGS2(
     if ((cpd=strchr(cp, '/')) != NULL) {
 	/* Appears be in used/allocated format */
 	cps = cpd;
-	while (isdigit(*(cps-1)))
+	while (isdigit(UCH(*(cps-1))))
 	    cps--;
 	if (cps < cpd)
 	    *cpd = '\0';
 	entry_info->size = atoi(cps);
 	cps = cpd+1;
-	while (isdigit(*cps))
+	while (isdigit(UCH(*cps)))
 	    cps++;
 	*cps = '\0';
 	ialloc = atoi(cpd+1);
@@ -1790,7 +1790,7 @@ PRIVATE void parse_vms_dir_entry ARGS2(
 	/* Now let's hunt for a lone, size number    */
 	while ((cps=strtok(NULL, sp)) != NULL) {
 	    cpd = cps;
-	    while (isdigit(*cpd))
+	    while (isdigit(UCH(*cpd)))
 		cpd++;
 	    if (*cpd == '\0') {
 		/* Assume it's blocks */
@@ -1839,7 +1839,7 @@ PRIVATE void parse_ms_windows_dir_entry ARGS2(
 	cps = LYSkipBlanks(cps);
 	cpd = LYSkipNonBlanks(cps);
 	*cpd++ = '\0';
-	if (isdigit(*cps)) {
+	if (isdigit(UCH(*cps))) {
 	    entry_info->size = atoi(cps);
 	} else {
 	    StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
@@ -2057,7 +2057,7 @@ PRIVATE void parse_cms_dir_entry ARGS2(
 	cp = LYSkipBlanks(cp);
 	cps = LYSkipNonBlanks(cp);
 	*cps++ = '\0';
-	if (isdigit(*cp)) {
+	if (isdigit(UCH(*cp))) {
 	    RecordLength = atoi(cp);
 	}
     }
@@ -2068,7 +2068,7 @@ PRIVATE void parse_cms_dir_entry ARGS2(
 	cp = LYSkipBlanks(cp);
 	cps = LYSkipNonBlanks(cp);
 	*cps++ = '\0';
-	if (isdigit(*cp)) {
+	if (isdigit(UCH(*cp))) {
 	    Records = atoi(cp);
 	}
 	if (Records > 0 && RecordLength > 0) {
@@ -2087,7 +2087,7 @@ PRIVATE void parse_cms_dir_entry ARGS2(
     if (((cps < end) &&
 	 (cps = strchr(cpd, ':')) != NULL) &&
 	(cps < (end - 3) &&
-	 isdigit(*(cps+1)) && isdigit(*(cps+2)) && *(cps+3) == ':')) {
+	 isdigit(UCH(*(cps+1))) && isdigit(UCH(*(cps+2))) && *(cps+3) == ':')) {
 	cps += 3;
 	*cps = '\0';
 	if ((cps - cpd) >= 14) {
@@ -2269,7 +2269,7 @@ PRIVATE EntryInfo * parse_dir_entry ARGS3(
 		**  Strip off " -> pathname".
 		*/
 		for (i = len - 1; (i > 3) &&
-				  (!isspace(entry[i]) ||
+				  (!isspace(UCH(entry[i])) ||
 				   (entry[i-1] != '>')	||
 				   (entry[i-2] != '-') ||
 				   (entry[i-3] != ' ')); i--)

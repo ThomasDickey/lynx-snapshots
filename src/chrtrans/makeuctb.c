@@ -26,11 +26,11 @@
 #endif /* exit */
 
 #ifndef TOUPPER
-#define TOUPPER(c) (islower((unsigned char)c) ? toupper((unsigned char)c) : (c))
+#define TOUPPER(c) (islower(UCH(c)) ? toupper(UCH(c)) : (c))
 #endif /* !TOLOWER */
 
 #ifndef TOLOWER
-#define TOLOWER(c) (isupper((unsigned char)c) ? tolower((unsigned char)c) : (c))
+#define TOLOWER(c) (isupper(UCH(c)) ? tolower(UCH(c)) : (c))
 #endif /* !TOLOWER */
 
 #include <UCkd.h>
@@ -112,8 +112,11 @@ PRIVATE int getunicode ARGS1(
     if (*p == '-') {
 	return -2;
     } else if (*p != 'U' || p[1] != '+' ||
-	       !isxdigit(p[2]) || !isxdigit(p[3]) || !isxdigit(p[4]) ||
-	       !isxdigit(p[5]) || isxdigit(p[6])) {
+	       !isxdigit(UCH(p[2])) ||
+	       !isxdigit(UCH(p[3])) ||
+	       !isxdigit(UCH(p[4])) ||
+	       !isxdigit(UCH(p[5])) ||
+	        isxdigit(UCH(p[6]))) {
 	return -1;
     }
     *p0 = p+6;
@@ -559,9 +562,9 @@ PUBLIC int main ARGS2(
 		 *  We had ':'.
 		 */
 		for (ch = *(++p); (ch = *p) != '\0'; p++, p1++) {
-		    if ((unsigned char)ch < 32 || ch == '\\' || ch == '\"' ||
-			(unsigned char)ch >= 127) {
-			sprintf(p1, "\\%.3o", (unsigned char)ch);
+		    if (UCH(ch) < 32 || ch == '\\' || ch == '\"' ||
+			UCH(ch) >= 127) {
+			sprintf(p1, "\\%.3o", UCH(ch));
 #ifdef NOTDEFINED
 			fprintf(stderr, "%s\n", tbuf);
 #endif /* NOTDEFINED */
@@ -763,7 +766,7 @@ PUBLIC int main ARGS2(
 	for (i = 0, p = this_MIMEcharset;
 	     *p && (i < UC_MAXLEN_ID_APPEND-1);
 	     p++, i++) {
-	    id_append[i+1] = isalnum(*p) ? *p : '_';
+	    id_append[i+1] = isalnum(UCH(*p)) ? *p : '_';
 	}
 	id_append[i+1] = '\0';
     }

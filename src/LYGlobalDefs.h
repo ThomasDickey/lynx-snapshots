@@ -126,6 +126,16 @@ extern BOOLEAN LYUseFormsOptions; /* use Forms-based options menu */
 #define LYUseFormsOptions FALSE	/* simplify ifdef'ing in LYMainLoop.c */
 #endif
 
+typedef enum {
+    rateOFF = 0
+    , rateBYTES = 1
+    , rateKB
+#ifdef EXP_READPROGRESS
+    , rateEtaBYTES
+    , rateEtaKB
+#endif
+} TransferRate;
+
 extern BOOLEAN LYCursesON;  	/* start_curses()->TRUE, stop_curses()->FALSE */
 extern BOOLEAN LYJumpFileURL;   /* URL from the jump file shortcuts? */
 extern BOOLEAN LYNewsPosting;	/* News posting supported if TRUE */
@@ -137,7 +147,6 @@ extern BOOLEAN LYforce_no_cache;
 extern BOOLEAN LYinternal_flag; /* don't need fresh copy, was internal link */
 extern BOOLEAN LYoverride_no_cache;  /* don't need fresh copy, from history */
 extern BOOLEAN LYresubmit_posts;
-extern BOOLEAN LYshow_kb_rate;	/* show KB/sec in HTReadProgress */
 extern BOOLEAN bold_H1;
 extern BOOLEAN bold_headers;
 extern BOOLEAN bold_name_anchors;
@@ -188,6 +197,7 @@ extern char *system_mail_flags;
 extern char *unchecked_box;	/* form boxes */
 extern char *unchecked_radio;	/* form radio buttons */
 extern char *x_display;
+extern int LYTransferRate;	/* see enum TransferRate */
 extern int display_lines;	/* number of lines in the display */
 extern int dump_output_width;
 extern int keypad_mode;		/* NUMBERS_AS_ARROWS or LINKS_ARE_NUMBERED */

@@ -366,6 +366,8 @@ PRIVATE int ColorCode ARGS1(
 #define ColorCode(color) (color)
 #endif
 
+BOOL default_color_reset = FALSE;
+
 /*
  *  Validator for COLOR fields.
  */
@@ -378,18 +380,24 @@ PUBLIC int check_color ARGS2(
     CTRACE((tfp, "check_color(%s,%d)\n", color, the_default));
     if (!strcasecomp(color, "default")) {
 #if USE_DEFAULT_COLORS
-	the_default = DEFAULT_COLOR;
+	if (!default_color_reset)
+	    the_default = DEFAULT_COLOR;
 #endif	/* USE_DEFAULT_COLORS */
-	CTRACE((tfp, "=> %d\n", the_default));
+	CTRACE((tfp, "=> default %d\n", the_default));
 	return the_default;
     }
     if (!strcasecomp(color, "nocolor"))
 	return NO_COLOR;
 
     for (i = 0; i < 16; i++) {
-	if (!strcasecomp(color, Color_Strings[i]))
-	    return ColorCode(i);
+	if (!strcasecomp(color, Color_Strings[i])) {
+	    int c = ColorCode(i);
+
+	    CTRACE((tfp, "=> %d\n", c));
+	    return c;
+	}
     }
+    CTRACE((tfp, "=> ERR_COLOR\n"));
     return ERR_COLOR;
 }
 #endif /* USE_COLOR_STYLE || USE_COLOR_TABLE */
@@ -1101,6 +1109,24 @@ static int system_editor_fun ARGS1(
     return 0;
 }
 
+#ifdef EXP_READPROGRESS
+static int transfer_rate_fun ARGS1(
+	char *,		value)
+{
+    static Config_Enum table[] = {
+	{ "NONE",	rateOFF },
+	{ "KB",		rateKB },
+	{ "TRUE",	rateKB },
+	{ "BYTES",	rateBYTES },
+	{ "FALSE",	rateBYTES },
+	{ "KB,ETA",	rateEtaKB },
+	{ "BYTES,ETA",	rateEtaBYTES },
+	{ NULL,		-1 },
+    };
+    config_enum(table, value, &LYTransferRate);
+    return 0;
+}
+#endif
 static int viewer_fun ARGS1(
 	char *,		value)
 {
@@ -1558,7 +1584,9 @@ static Config_Type Config_Table [] =
      PARSE_SET("seek_frag_map_in_cur", CONF_BOOL, &LYSeekFragMAPinCur),
      PARSE_SET("set_cookies", CONF_BOOL, &LYSetCookies),
      PARSE_SET("show_cursor", CONF_BOOL, &LYShowCursor),
-     PARSE_SET("show_kb_rate", CONF_BOOL, &LYshow_kb_rate),
+#ifdef EXP_READPROGRESS
+     PARSE_SET("show_kb_rate", CONF_FUN, transfer_rate_fun),
+#endif
      PARSE_ENV("snews_proxy", CONF_ENV, 0 ),
      PARSE_ENV("snewspost_proxy", CONF_ENV, 0 ),
      PARSE_ENV("snewsreply_proxy", CONF_ENV, 0 ),
@@ -1771,7 +1799,7 @@ PRIVATE void do_read_cfg ARGS5(
 	 */
 	name = LYSkipBlanks(buffer);
 
-	if (ispunct(*name))
+	if (ispunct(UCH(*name)))
 	    continue;
 
 	LYTrimTrailing(name);
@@ -1798,7 +1826,7 @@ PRIVATE void do_read_cfg ARGS5(
 	    cp = value;
 	if ((cp = strchr (cp, '#')) != 0) {
 	    cp--;
-	    if (isspace ((unsigned char) *cp))
+	    if (isspace(UCH(*cp)))
 		*cp = 0;
 	}
 

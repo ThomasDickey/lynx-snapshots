@@ -358,12 +358,12 @@ extern BOOL LYOutOfMemory;	/* Declared in LYexit.c - FM */
 /*      Inline Function WHITE: Is character c white space? */
 /*      For speed, include all control characters */
 
-#define WHITE(c) (((unsigned char)(TOASCII(c))) <= 32)
+#define WHITE(c) ((UCH(TOASCII(c))) <= 32)
 
 /*     Inline Function LYIsASCII: Is character c a traditional ASCII
 **     character (i.e. <128) after converting from host character set.  */
 
-#define LYIsASCII(c) (TOASCII((unsigned char)(c)) < 128)
+#define LYIsASCII(c) (TOASCII(UCH(c)) < 128)
 
 /*
 
@@ -454,8 +454,8 @@ Upper- and Lowercase macros
 
 #ifndef TOLOWER
   /* Pyramid and Mips can't uppercase non-alpha */
-#define TOLOWER(c) (isupper((unsigned char)c) ? tolower((unsigned char)c) : ((unsigned char)c))
-#define TOUPPER(c) (islower((unsigned char)c) ? toupper((unsigned char)c) : ((unsigned char)c))
+#define TOLOWER(c) (isupper(UCH(c)) ? tolower(UCH(c)) : UCH(c))
+#define TOUPPER(c) (islower(UCH(c)) ? toupper(UCH(c)) : UCH(c))
 #endif /* TOLOWER */
 
 #define FREE(x) if (x != 0) {free((char *)x); x = NULL;}

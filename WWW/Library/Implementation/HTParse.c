@@ -292,7 +292,7 @@ PUBLIC char * HTParse ARGS3(
 		if ((p2 = strchr(result, '@')) != NULL)
 		   tail = (p2 + 1);
 		p2 = strchr(tail, ':');
-		if (p2 != NULL && !isdigit((unsigned char)p2[1]))
+		if (p2 != NULL && !isdigit(UCH(p2[1])))
 		    /*
 		    **	Colon not followed by a port number.
 		    */
@@ -732,7 +732,7 @@ PUBLIC char * HTEscape ARGS2(
     char * result;
     int unacceptable = 0;
     for (p = str; *p; p++)
-	if (!ACCEPTABLE((unsigned char)TOASCII(*p)))
+	if (!ACCEPTABLE(UCH(TOASCII(*p))))
 	    unacceptable++;
     result = (char *)calloc(1, (p-str + unacceptable + unacceptable + 1));
     if (result == NULL)
@@ -770,7 +770,7 @@ PUBLIC char * HTEscapeSP ARGS2(
     char * result;
     int unacceptable = 0;
     for (p = str; *p; p++)
-	if (!(*p == ' ' || ACCEPTABLE((unsigned char)TOASCII(*p))))
+	if (!(*p == ' ' || ACCEPTABLE(UCH(TOASCII(*p)))))
 	    unacceptable++;
     result = (char *)calloc(1, (p-str + unacceptable + unacceptable + 1));
     if (result == NULL)
@@ -822,8 +822,8 @@ PUBLIC char * HTUnEscape ARGS1(
 	     *	Tests shouldn't be needed, but better safe than sorry.
 	     */
 	    p[1] && p[2] &&
-	    isxdigit((unsigned char)p[1]) &&
-	    isxdigit((unsigned char)p[2])) {
+	    isxdigit(UCH(p[1])) &&
+	    isxdigit(UCH(p[2]))) {
 	    p++;
 	    if (*p)
 		*q = (char) (from_hex(*p++) * 16);
@@ -869,8 +869,8 @@ PUBLIC char * HTUnEscapeSome ARGS2(
     while (*p != '\0') {
 	if (*p == HEX_ESCAPE &&
 	    p[1] && p[2] &&	/* tests shouldn't be needed, but.. */
-	    isxdigit((unsigned char)p[1]) &&
-	    isxdigit((unsigned char)p[2]) &&
+	    isxdigit(UCH(p[1])) &&
+	    isxdigit(UCH(p[2])) &&
 	    (testcode = (char) FROMASCII(from_hex(p[1])*16 +
 		from_hex(p[2]))) && /* %00 no good*/
 	    strchr(do_trans, testcode)) { /* it's one of the ones we want */

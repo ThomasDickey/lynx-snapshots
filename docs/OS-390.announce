@@ -18,9 +18,9 @@ o Alternatively, download the PKZIPped archive lynx2-8-3.zip in BINARY.
 
 o Unpack with:
 
-	unzip -a lynx2-8-3.zip
+	unzip -aa lynx2-8-3.zip
 
-  The "-a" is needed to convert the ASCII archive
+  The "-aa" is needed to convert the ASCII archive
   to EBCDIC.  (unzip is not shipped with OS/390.  You can
   obtain it from:
 

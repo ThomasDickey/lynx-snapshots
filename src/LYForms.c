@@ -489,7 +489,7 @@ again:
 #ifdef VMS
 	if (HadVMSInterrupt) {
 	    HadVMSInterrupt = FALSE;
-	    ch = 7;
+	    ch = LYCharINTERRUPT2;
 	}
 #endif /* VMS */
 
@@ -594,7 +594,7 @@ again:
 #ifdef VMS
 	    if (HadVMSInterrupt) {
 		HadVMSInterrupt = FALSE;
-		ch = 7;
+		ch = LYCharINTERRUPT2;
 	    }
 #endif /* VMS */
 	    break;

@@ -562,6 +562,11 @@ systems without FANCY_CURSES capabilities.  The default
 configuration can be changed in userdefs.h or lynx.cfg.
 The command line switch toggles the default.
 .TP
+.B -show_rate
+If enabled the transfer rate is shown in bytes/second.
+If disabled, no transfer rate is shown.
+Use lynx.cfg or the options menu to select KB/second and/or ETA.
+.TP
 .B -soft_dquotes
 toggles emulation of the old Netscape and Mosaic bug which
 treated '>' as a co-terminator for double-quotes and tags.

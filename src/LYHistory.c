@@ -570,7 +570,7 @@ PUBLIC BOOLEAN historytarget ARGS1(
     BOOLEAN treat_as_intern = FALSE;
 
     if ((!newdoc || !newdoc->address) ||
-	strlen(newdoc->address) < 10 || !isdigit(*(newdoc->address+9)))
+	strlen(newdoc->address) < 10 || !isdigit(UCH(*(newdoc->address+9))))
 	return(FALSE);
 
     if ((number = atoi(newdoc->address+9)) > nhist || number < 0)

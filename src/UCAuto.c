@@ -249,7 +249,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
        */
 
     if (!strncmp(name, "iso-8859-1", 10) &&
-	       (!name[10] || !isdigit((unsigned char)name[10]))
+	       (!name[10] || !isdigit(UCH(name[10])))
 	) {
 	if ((lastHasUmap == Is_Set) && !strcmp(lastname, "cp850")) {
 	    /*
@@ -292,7 +292,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	HasUmap = Dunno; /* distributed lat0 files have bogus map data! */
 	Utf = Is_Unset;
     } else if (!strncmp(name, "iso-8859-", 9)) {
-	if (strlen(name) <= 10 || !isdigit((unsigned char)name[10]))
+	if (strlen(name) <= 10 || !isdigit(UCH(name[10])))
 	    HTSprintf0(&tmpbuf1, "iso0%s", &name[9]);
 	else
 	    HTSprintf0(&tmpbuf1, "iso%s", &name[9]);

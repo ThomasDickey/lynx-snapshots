@@ -36,7 +36,7 @@ PRIVATE void free_atoms NOPARAMS;
 /*
  *	Alternate hashing function.
  */
-#define HASH_FUNCTION(cp_hash) ((strlen(cp_hash) * (unsigned char)*cp_hash) % HASH_SIZE)
+#define HASH_FUNCTION(cp_hash) ((strlen(cp_hash) * UCH(*cp_hash)) % HASH_SIZE)
 
 PUBLIC HTAtom * HTAtom_for ARGS1(CONST char *, string)
 {

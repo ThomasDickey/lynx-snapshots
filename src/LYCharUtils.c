@@ -190,9 +190,9 @@ PUBLIC void LYEntify ARGS2(
 		    break;
 	    }
 	    if (*(p+1) != '\0' &&
-		(IS_EUC((unsigned char)*p, (unsigned char)*(p+1)) ||
-		 IS_SJIS((unsigned char)*p, (unsigned char)*(p+1), in_sjis) ||
-		 IS_BIG5((unsigned char)*p, (unsigned char)*(p+1)))) {
+		(IS_EUC(UCH(*p), UCH(*(p+1))) ||
+		 IS_SJIS(UCH(*p), UCH(*(p+1)), in_sjis) ||
+		 IS_BIG5(UCH(*p), UCH(*(p+1))))) {
 		*q++ = *p++;
 		*q++ = *p;
 		continue;
@@ -237,7 +237,7 @@ PUBLIC void LYTrimHead ARGS1(
     if (!str || *str == '\0')
 	return;
 
-    while (str[i] != '\0' && WHITE(str[i]) && (unsigned char)str[i] != (unsigned char)CH_ESC)   /* S/390 -- gil -- 1669 */
+    while (str[i] != '\0' && WHITE(str[i]) && UCH(str[i]) != UCH(CH_ESC))   /* S/390 -- gil -- 1669 */
 	i++;
     if (i > 0) {
 	for (j = 0; str[i] != '\0'; i++) {
@@ -358,7 +358,7 @@ PUBLIC char *LYFindEndOfComment ARGS1(
 		    return cp;
 		if (*cp == '-') {
 		    state = start1;
-		} else if (!(WHITE(*cp) && (unsigned char)*cp != (unsigned char)CH_ESC)) {  /* S/390 -- gil -- 1686 */
+		} else if (!(WHITE(*cp) && UCH(*cp) != UCH(CH_ESC))) {  /* S/390 -- gil -- 1686 */
 		    /*
 		     *	Invalid comment, so return the first
 		     *	'>' from the start of the string. - FM
@@ -1029,7 +1029,7 @@ PUBLIC void LYExpandString ARGS2(
 	**  whenever that's appropriate.  - FM
 	*/
 	c = p[i];
-	c_unsign = (unsigned char)c;
+	c_unsign = UCH(c);
 	code = (UCode_t)c_unsign;
 	saved_char_in = '\0';
 	/*
@@ -1070,7 +1070,7 @@ PUBLIC void LYExpandString ARGS2(
 			*/
 			if (code > 0 && code < 256) {
 			    c = ((char)(code & 0xff));
-			    c_unsign = (unsigned char)c;
+			    c_unsign = UCH(c);
 			}
 		    } else {
 			/*
@@ -1139,7 +1139,7 @@ PUBLIC void LYExpandString ARGS2(
 	**  to Unicode (if appropriate). - FM
 	*/
 	if (!(me->T.decode_utf8 &&
-	      (unsigned char)p[i] > 127)) {
+	      UCH(p[i]) > 127)) {
 #ifdef NOTDEFINED
 	    if (me->T.strip_raw_char_in)
 		saved_char_in = c;
@@ -1156,7 +1156,7 @@ PUBLIC void LYExpandString ARGS2(
 		    saved_char_in = c;
 		    if (code < 256) {
 			c = ((char)(code & 0xff));
-			c_unsign = (unsigned char)c;
+			c_unsign = UCH(c);
 		    }
 		}
 	    } else if (code < ' ' && code != 0 &&  /* S/390 -- gil -- 1720 */
@@ -1172,7 +1172,7 @@ PUBLIC void LYExpandString ARGS2(
 		    saved_char_in = c;
 		    if (code < 256) {
 			c = ((char)(code & 0xff));
-			c_unsign = (unsigned char)c;
+			c_unsign = UCH(c);
 		    }
 		} else {
 		    uck = -1;
@@ -1190,7 +1190,7 @@ PUBLIC void LYExpandString ARGS2(
 			continue;
 		    } else if (uck < 0) {
 			utf_buf[0] = '\0';
-			code = (unsigned char)c;
+			code = UCH(c);
 		    } else {
 			c = replace_buf[0];
 			if (c && replace_buf[1]) {
@@ -1199,11 +1199,11 @@ PUBLIC void LYExpandString ARGS2(
 			}
 		    }
 		    utf_buf[0] = '\0';
-		    code = (unsigned char)c;
+		    code = UCH(c);
 		} /*  Next line end of ugly stuff for C0. - KW */
 	    } else {
 		utf_buf[0] = '\0';
-		code = (unsigned char)c;
+		code = UCH(c);
 	    }
 	}
 	/*
@@ -1397,8 +1397,8 @@ PUBLIC void LYExpandString ARGS2(
 	**  Check for a strippable koi8-r 8-bit character. - FM
 	*/
 	if (me->T.strip_raw_char_in &&
-	    (unsigned char)saved_char_in >= 192 &&
-	    (unsigned char)saved_char_in < 255 &&
+	    UCH(saved_char_in) >= 192 &&
+	    UCH(saved_char_in) < 255 &&
 	    saved_char_in) {
 	    /*
 	    **	KOI8 special: strip high bit, gives (somewhat) readable
@@ -1765,18 +1765,18 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
     while (*p || (state != S_text && state != S_nonascii_text)) {
 	switch(state) {
 	case S_text:
-	    code = (unsigned char)(*p);
+	    code = UCH(*p);
 #ifdef KANJI_CODE_OVERRIDE
 	    if (HTCJK == JAPANESE && last_kcode == SJIS) {
 		if (sjis_1st == '\0' && (IS_SJIS_HI1(code)||IS_SJIS_HI2(code))){
-		    sjis_1st = (unsigned char)code;
+		    sjis_1st = UCH(code);
 		} else if (sjis_1st && IS_SJIS_LO(code)) {
 		    sjis_1st = '\0';
 		} else {
 #ifdef CONV_JISX0201KANA_JISX0208KANA
 		    if (0xA1 <= code && code <= 0xDF) {
 			sjis_str[2] = '\0';
-			JISx0201TO0208_SJIS((unsigned char)code,
+			JISx0201TO0208_SJIS(UCH(code),
 						sjis_str, sjis_str + 1);
 			REPLACE_STRING(sjis_str);
 			p++;
@@ -1915,7 +1915,7 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
 			    state = S_check_uni;
 			    break;
 			} else {
-			    *(unsigned char *)p = (unsigned char)160;
+			    *(unsigned char *)p = UCH(160);
 			}
 		    }
 		} else if ((*p) == LY_SOFT_HYPHEN) {
@@ -1929,7 +1929,7 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
 			state = S_check_uni;
 			break;
 		    } else {
-			*(unsigned char *)p = (unsigned char)173;
+			*(unsigned char *)p = UCH(173);
 		    }
 		} else if (code < 127 || T.transp) {
 		    state = S_got_outchar;
@@ -1952,7 +1952,7 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
 		    puni = p;
 		    code = UCGetUniFromUtf8String(&puni);
 		    if (code <= 0) {
-			code = (unsigned char)(*p);
+			code = UCH(*p);
 		    } else {
 			what = P_utf8;
 		    }
@@ -1971,12 +1971,12 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
 		code = UCTransToUni(*p, cs_from);
 		if (code <= 0) {
 		    /* What else can we do? */
-		    code = (unsigned char)(*p);
+		    code = UCH(*p);
 		}
 #ifdef NOTUSED_FOTEMODS
 	    } else if (T.strip_raw_char_in &&
-		       (unsigned char)(*p) >= 0xc0 &&
-		       (unsigned char)(*p) < 255) {
+		       UCH(*p) >= 0xc0 &&
+		       UCH(*p) < 255) {
 		code = ((*p & 0x7f));
 		state = S_got_outchar;
 		break;
@@ -2008,17 +2008,17 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
 		*/
 		if (*pp == '#' && len > 2 &&
 		    (*(pp+1) == 'x' || *(pp+1) == 'X') &&
-		    (unsigned char)*(pp+2) < 127 &&
-		    isxdigit((unsigned char)*(pp+2))) {
+		    UCH(*(pp+2)) < 127 &&
+		    isxdigit(UCH(*(pp+2)))) {
 		    what = P_hex;
 		    state = S_ncr;
 		} else if (*pp == '#' && len > 2 &&
-			   (unsigned char)*(pp+1) < 127 &&
-			   isdigit((unsigned char)*(pp+1))) {
+			   UCH(*(pp+1)) < 127 &&
+			   isdigit(UCH(*(pp+1)))) {
 		    what = P_decimal;
 		    state = S_ncr;
-		} else if ((unsigned char)*pp < 127 &&
-			   isalpha((unsigned char)*pp)) {
+		} else if (UCH(*pp) < 127 &&
+			   isalpha(UCH(*pp))) {
 		    what = P_named;
 		    state = S_named;
 		} else {
@@ -2036,9 +2036,9 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
 		    p += 2;
 		}
 		cp = p;
-		while (*p && (unsigned char)*p < 127 &&
-		       (what == P_hex ? isxdigit((unsigned char)*p) :
-					isdigit((unsigned char)*p))) {
+		while (*p && UCH(*p) < 127 &&
+		       (what == P_hex ? isxdigit(UCH(*p)) :
+					isdigit(UCH(*p)))) {
 		    p++;
 		}
 		/*
@@ -2417,27 +2417,27 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
 		state = S_done;
 #ifdef NOTUSED_FOTEMODS
 	    } else if (T.strip_raw_char_in &&
-		(unsigned char)(*p) >= 0xc0 &&
-		(unsigned char)(*p) < 255) {
+		UCH(*p) >= 0xc0 &&
+		UCH(*p) < 255) {
 		code = (((*p) & 0x7f));
 		state = S_got_outchar;
 #endif /* NOTUSED_FOTEMODS */
 	    } else if (!T.output_utf8 && stype == st_HTML && !hidden &&
 		!(HTPassEightBitRaw &&
-		 (unsigned char)(*p) >= lowest_8)) {
+		 UCH(*p) >= lowest_8)) {
 		sprintf(replace_buf, "U%.2lX", code);
 		state = S_got_outstring;
 	    } else {
 		puni = p;
-		code = (unsigned char)(*p);
+		code = UCH(*p);
 		state = S_got_outchar;
 	    }
 	    break;
 
 	case S_named:
 	    cp = ++p;
-	    while (*cp && (unsigned char)*cp < 127 &&
-		   isalnum((unsigned char)*cp))
+	    while (*cp && UCH(*cp) < 127 &&
+		   isalnum(UCH(*cp)))
 		cp++;
 	    cpe = *cp;
 	    *cp = '\0';
@@ -2735,9 +2735,9 @@ PUBLIC void LYHandleMETA ARGS4(
 			cp++;
 			while (*cp != '\0' && WHITE(*cp))
 			    cp++;
-			if (isdigit((unsigned char)*cp)) {
+			if (isdigit(UCH(*cp))) {
 			    cp0 = cp;
-			    while (isdigit((unsigned char)*cp))
+			    while (isdigit(UCH(*cp)))
 				cp++;
 			    if (*cp0 == '0' && cp == (cp0 + 1)) {
 				me->node_anchor->no_cache = TRUE;
@@ -2926,7 +2926,7 @@ PUBLIC void LYHandleMETA ARGS4(
 		 */
 		BOOL given_is_8859
 		    = (BOOL) (!strncmp(cp4, "iso-8859-", 9) &&
-		       isdigit((unsigned char)cp4[9]));
+		       isdigit(UCH(cp4[9])));
 		BOOL given_is_8859like
 		    = (BOOL) (given_is_8859 || !strncmp(cp4, "windows-", 8) ||
 			!strncmp(cp4, "cp12", 4) ||
@@ -2941,7 +2941,7 @@ PUBLIC void LYHandleMETA ARGS4(
 		if (given_is_8859) {
 		    cp1 = &cp4[10];
 		    while (*cp1 &&
-			   isdigit((unsigned char)(*cp1)))
+			   isdigit(UCH((*cp1))))
 			cp1++;
 		    *cp1 = '\0';
 		}
@@ -2975,9 +2975,9 @@ PUBLIC void LYHandleMETA ARGS4(
 	 *  Look for the Seconds field. - FM
 	 */
 	cp = LYSkipBlanks(content);
-	if (*cp && isdigit(*cp)) {
+	if (*cp && isdigit(UCH(*cp))) {
 	    cp1 = cp;
-	    while (*cp1 && isdigit(*cp1))
+	    while (*cp1 && isdigit(UCH(*cp1)))
 		cp1++;
 	    if (*cp1)
 		*cp1++ = '\0';
@@ -2991,10 +2991,10 @@ PUBLIC void LYHandleMETA ARGS4(
 	    while (*cp1) {
 		if (!strncasecomp(cp1, "URL", 3)) {
 		    cp = (cp1 + 3);
-		    while (*cp && (*cp == '=' || isspace((unsigned char)*cp)))
+		    while (*cp && (*cp == '=' || isspace(UCH(*cp))))
 			cp++;
 		    cp1 = cp;
-		    while (*cp1 && !isspace((unsigned char)*cp1))
+		    while (*cp1 && !isspace(UCH(*cp1)))
 			cp1++;
 		    *cp1 = '\0';
 		    if (*cp)
@@ -3938,7 +3938,7 @@ PUBLIC BOOLEAN LYCommentHacks ARGS2(
 	char *messageid = NULL;
 	char *p;
 	for (cp = comment+17; *cp; cp++) {
-	    if ((unsigned char)*cp >= 127 || !isgraph((unsigned char)*cp)) {
+	    if (UCH(*cp) >= 127 || !isgraph(UCH(*cp))) {
 		break;
 	    }
 	}
@@ -3951,7 +3951,7 @@ PUBLIC BOOLEAN LYCommentHacks ARGS2(
 	if (!LYUCTranslateHTMLString(&messageid, 0, 0, NO, NO, YES, st_URL))
 	    return FALSE;
 	for (p = messageid; *p; p++) {
-	    if ((unsigned char)*p >= 127 || !isgraph((unsigned char)*p)) {
+	    if (UCH(*p) >= 127 || !isgraph(UCH(*p))) {
 		break;
 	    }
 	}
@@ -3982,7 +3982,7 @@ PUBLIC BOOLEAN LYCommentHacks ARGS2(
 	char *subject = NULL;
 	char *p;
 	for (cp = comment+14; *cp; cp++) {
-	    if ((unsigned char)*cp >= 127 || !isprint((unsigned char)*cp)) {
+	    if (UCH(*cp) >= 127 || !isprint(UCH(*cp))) {
 		return FALSE;
 	    }
 	}
@@ -4003,7 +4003,7 @@ PUBLIC BOOLEAN LYCommentHacks ARGS2(
 	if (!LYUCTranslateHTMLString(&subject, 0, 0, NO, YES, NO, st_HTML))
 	    return FALSE;
 	for (p = subject; *p; p++) {
-	    if ((unsigned char)*p >= 127 || !isprint((unsigned char)*p)) {
+	    if (UCH(*p) >= 127 || !isprint(UCH(*p))) {
 		FREE(subject);
 		return FALSE;
 	    }

@@ -360,7 +360,7 @@ PUBLIC BOOL valid_hostname ARGS1(
 	} else if (++iseg > 63) {
 	    return NO;
 	}
-	if (!isalnum((unsigned char)*cp) &&
+	if (!isalnum(UCH(*cp)) &&
 	    *cp != '-' && *cp != '_' &&
 	    *cp != '$' && *cp != '+') {
 	    return NO;
@@ -1282,7 +1282,7 @@ PRIVATE int HTParseInet ARGS2(
 	while (*strptr) {
 	    if (*strptr == '.') {
 		dotcount_ip++;
-	    } else if (!isdigit(*strptr)) {
+	    } else if (!isdigit(UCH(*strptr))) {
 		break;
 	    }
 	    strptr++;

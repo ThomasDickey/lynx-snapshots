@@ -34,6 +34,10 @@
 
 #define LYIsPipeCommand(s) ((s)[0] == '|')
 
+#define LYCharINTERRUPT1 (FROMASCII(3)) /* Control-C */
+#define LYCharINTERRUPT2 (FROMASCII(7)) /* Control-G */
+#define LYCharIsINTERRUPT(ch)	((ch) == LYCharINTERRUPT1 || ch == LYCharINTERRUPT2)
+
 #if defined(DOSPATH) || defined(__EMX__)
 #define LYIsPathSep(ch) ((ch) == '/' || (ch) == '\\')
 #else

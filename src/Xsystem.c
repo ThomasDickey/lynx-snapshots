@@ -1,4 +1,4 @@
-/* @Id: Xsystem.c 1.7 Fri, 31 Mar 2000 16:33:40 -0800 dickey @
+/* @Id: Xsystem.c 1.8 Wed, 25 Oct 2000 09:35:28 -0700 dickey @
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -51,8 +51,7 @@
 
 extern char *mktemp(char *);
 
-#define UCH(c)   ((unsigned char)(c))
-#define isk1(c)  ((0x81<=UCH(c)&&UCH(c)<=0x9F)||(0xE0<=UCH(c)&&UCH(c)<=0xFC))
+#define isk1(c)  ((0x81 <= UCH(c) && UCH(c) <= 0x9F) || (0xE0 <= UCH(c) && UCH(c) <= 0xFC))
 #define isq(c)   ((c) == '"')
 #define isspc(c) ((c) == ' ' || (c) == '\t')
 #define issep(c) (isspc(c) || (c) == '"' || (c) == '\'' || (c) == '<' || (c) == '>' || (c) == 0)

@@ -992,7 +992,7 @@ PUBLIC int EditBinding ARGS1(
     } else if (xlkc & LKC_MOD3) {
 	xleac = LKC_TO_LEC_M3(c);
     } else {
-	xleac = (unsigned char)LYLineEditors[current_lineedit][c];
+	xleac = UCH(LYLineEditors[current_lineedit][c]);
     }
 #endif
     /*

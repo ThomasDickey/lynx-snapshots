@@ -91,7 +91,7 @@ struct _HTStream {			/* only know it as object */
 
 #define TITLE_LINES  1
 #define IS_UTF_EXTRA(ch) (text->T.output_utf8 && \
-			  ((unsigned char)(ch)&0xc0) == 0x80)
+			  (UCH((ch))&0xc0) == 0x80)
 /* a test in compact form: how many extra UTF-8 chars after initial? - kw */
 #define UTF8_XNEGLEN(c) (c&0xC0? 0 :c&32? 1 :c&16? 2 :c&8? 3 :c&4? 4 :c&2? 5:0)
 #define UTF_XLEN(c) UTF8_XNEGLEN(((char)~(c)))
@@ -1290,7 +1290,7 @@ PRIVATE int display_line ARGS4(
 
 	    case LY_SOFT_HYPHEN:
 		if (*data != '\0' ||
-		    isspace((unsigned char)LastDisplayChar) ||
+		    isspace(UCH(LastDisplayChar)) ||
 		    LastDisplayChar == '-') {
 		    /*
 		     *  Ignore the soft hyphen if it is not the last
@@ -1326,7 +1326,7 @@ PRIVATE int display_line ARGS4(
 #endif /* SHOW_WHEREIS_TARGETS */
 #endif /* USE_COLOR_STYLE */
 		i++;
-		if (text->T.output_utf8 && !isascii((unsigned char)buffer[0])) {
+		if (text->T.output_utf8 && !isascii(UCH(buffer[0]))) {
 		    text->has_utf8 = YES;
 		    if ((*buffer & 0xe0) == 0xc0) {
 			utf_extra = 1;
@@ -1359,7 +1359,7 @@ PRIVATE int display_line ARGS4(
 		    buffer[1] = '\0';
 		    data += utf_extra;
 		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && !isascii((unsigned char)buffer[0])
+		} else if (HTCJK != NOCJK && !isascii(UCH(buffer[0]))
 #ifndef CONV_JISX0201KANA_JISX0208KANA
 		    && kanji_code != SJIS
 #endif
@@ -1391,7 +1391,7 @@ PRIVATE int display_line ARGS4(
 #if 0	/* last-ditch attempt to prevent 0x9B to screen - disabled  */
 #if defined(UNIX) || defined(VMS)
 		    if (!dump_output_immediately &&
-			(unsigned char)buffer[0] == 128+27) {
+			UCH(buffer[0]) == 128+27) {
 			addstr("~^");
 			buffer[0] ^= 0xc0;
 		    }
@@ -1969,7 +1969,7 @@ PRIVATE void display_page ARGS3(
 			/*
 			 *  Output all the printable target chars.
 			 */
-			if (text->T.output_utf8 && !isascii((unsigned char)tmp[0])) {
+			if (text->T.output_utf8 && !isascii(UCH(tmp[0]))) {
 			    if ((*tmp & 0xe0) == 0xc0) {
 				utf_extra = 1;
 			    } else if ((*tmp & 0xf0) == 0xe0) {
@@ -2001,7 +2001,7 @@ PRIVATE void display_page ARGS3(
 			    tmp[1] = '\0';
 			    written += (utf_extra + 1);
 			    utf_extra = 0;
-			} else if (HTCJK != NOCJK && !isascii((unsigned char)tmp[0])) {
+			} else if (HTCJK != NOCJK && !isascii(UCH(tmp[0]))) {
 			    /*
 			     *  For CJK strings, by Masanobu Kimura.
 			     */
@@ -2013,7 +2013,7 @@ PRIVATE void display_page ARGS3(
 #if 0	/* last-ditch attempt to prevent 0x9B to screen - disabled  */
 #if defined(UNIX) || defined(VMS)
 			    if (!dump_output_immediately &&
-				(unsigned char)tmp[0] == 128+27) {
+				UCH(tmp[0]) == 128+27) {
 				addstr("~^");
 				tmp[0] ^= 0xc0;
 			    }
@@ -3096,7 +3096,7 @@ PRIVATE void split_line ARGS2(
 		*jp = ' ';	/* substitute it */
 		continue;
 	    }
-	    if (text->T.output_utf8 && !isascii((unsigned char)c)) {
+	    if (text->T.output_utf8 && !isascii(UCH(c))) {
 		int utf_extra = 0;
 		if ((c & 0xe0) == 0xc0) {
 		    utf_extra = 1;
@@ -3636,13 +3636,13 @@ PUBLIC void HText_appendCharacter ARGS2(
      *  processing stage anyway. - kw
      */
 #ifndef   EBCDIC  /* S/390 -- gil -- 1514 */
-    if ((unsigned char)ch >= 128 && HTCJK == NOCJK &&
+    if (UCH(ch) >= 128 && HTCJK == NOCJK &&
 	!text->T.transp && !text->T.output_utf8 &&
-	(unsigned char)ch < LYlowest_eightbit[current_char_set])
+	UCH(ch) < LYlowest_eightbit[current_char_set])
 	return;
 #endif /* EBCDIC */
 #endif /* !USE_SLANG */
-    if ((unsigned char)ch == 155 && HTCJK == NOCJK) {	/* octal 233 */
+    if (UCH(ch) == 155 && HTCJK == NOCJK) {	/* octal 233 */
 	if (!HTPassHighCtrlRaw &&
 	    !text->T.transp && !text->T.output_utf8 &&
 	    (155 < LYlowest_eightbit[current_char_set])) {
@@ -3810,11 +3810,11 @@ PUBLIC void HText_appendCharacter ARGS2(
 		     )
 #endif
 		    ) &&
-		    ((unsigned char)ch >= 0xA1) &&
-		    ((unsigned char)ch <= 0xDF)) {
+		    (UCH(ch) >= 0xA1) &&
+		    (UCH(ch) <= 0xDF)) {
 #ifdef CONV_JISX0201KANA_JISX0208KANA
-		    unsigned char c = (unsigned char)ch;
-		    unsigned char kb = (unsigned char)text->kanji_buf;
+		    unsigned char c = UCH(ch);
+		    unsigned char kb = UCH(text->kanji_buf);
 		    JISx0201TO0208_SJIS(c,
 					(unsigned char *)&kb,
 					(unsigned char *)&c);
@@ -3892,11 +3892,11 @@ PUBLIC void HText_appendCharacter ARGS2(
 		return;
 
 	    for (i = (text->permissible_split + 1); line->data[i]; i++) {
-		if (!IsSpecialAttrChar((unsigned char)line->data[i]) &&
-		    !isspace((unsigned char)line->data[i]) &&
-		    (unsigned char)line->data[i] != '-' &&
-		    (unsigned char)line->data[i] != HT_NON_BREAK_SPACE &&
-		    (unsigned char)line->data[i] != HT_EN_SPACE) {
+		if (!IsSpecialAttrChar(UCH(line->data[i])) &&
+		    !isspace(UCH(line->data[i])) &&
+		    UCH(line->data[i]) != '-' &&
+		    UCH(line->data[i]) != HT_NON_BREAK_SPACE &&
+		    UCH(line->data[i]) != HT_EN_SPACE) {
 		    break;
 		}
 	    }
@@ -4248,8 +4248,8 @@ check_WrapSource:
 	line = text->last_line; /* May have changed */
 
 	if (HTCJK != NOCJK && text->kanji_buf) {
-	    hi = (unsigned char)text->kanji_buf;
-	    lo = (unsigned char)ch;
+	    hi = UCH(text->kanji_buf);
+	    lo = UCH(ch);
 
 	    if (HTCJK == JAPANESE) {
 		if (text->kcode != JIS) {
@@ -4346,7 +4346,7 @@ check_WrapSource:
 	}
 #if 0
 	if (HTCJK != NOCJK && text->kanji_buf) {
-	    hi = (unsigned char)text->kanji_buf, lo = (unsigned char)ch;
+	    hi = UCH(text->kanji_buf), lo = UCH(ch);
 	    if (HTCJK == JAPANESE && text->kcode == NOKANJI) {
 		if (IS_SJIS(hi, lo, text->in_sjis) && IS_EUC(hi, lo)) {
 		    text->kcode = NOKANJI;
@@ -4381,9 +4381,9 @@ check_WrapSource:
 	}
 #endif
 #ifndef CONV_JISX0201KANA_JISX0208KANA
-	else if ((HTCJK == JAPANESE) && IS_SJIS_X0201KANA((unsigned char)(ch)) &&
+	else if ((HTCJK == JAPANESE) && IS_SJIS_X0201KANA(UCH((ch))) &&
 		 (kanji_code == EUC)) {
-	    line->data[line->size++] = (unsigned char) 0x8e;
+	    line->data[line->size++] = UCH(0x8e);
 	    line->data[line->size++] = ch;
 	}
 #endif
@@ -4554,8 +4554,8 @@ PRIVATE HTLine * insert_blanks_in_line ARGS6(
 	     line->data[ioldb] == LY_UNDERLINE_START_CHAR ||
 	     !IsSpecialAttrChar(line->data[ioldb])) &&
 	    (!(text && text->T.output_utf8) ||
-	     (unsigned char)line->data[ioldb] < 128 ||
-	     ((unsigned char)(line->data[ioldb] & 0xc0) == 0xc0))) {
+	     UCH(line->data[ioldb]) < 128 ||
+	     (UCH((line->data[ioldb] & 0xc0)) == 0xc0))) {
 	    /*
 	     *  A new displayable character starts here.  Time to check
 	     *  whether this is a position to insert spaces.
@@ -5186,7 +5186,7 @@ PUBLIC BOOL HText_isAnchorBlank ARGS2(
 	k = j = (last->size - i);
 	while (j < (int)last->size) {
 	    if (!IsSpecialAttrChar(last->data[j]) &&
-		!isspace((unsigned char)last->data[j]) &&
+		!isspace(UCH(last->data[j])) &&
 		last->data[j] != HT_NON_BREAK_SPACE &&
 		last->data[j] != HT_EN_SPACE)
 		break;
@@ -5243,7 +5243,7 @@ PUBLIC BOOL HText_isAnchorBlank ARGS2(
 	    }
 	    while (j < (int)prev->size) {
 		if (!IsSpecialAttrChar(prev->data[j]) &&
-		    !isspace((unsigned char)prev->data[j]) &&
+		    !isspace(UCH(prev->data[j])) &&
 		    prev->data[j] != HT_NON_BREAK_SPACE &&
 		    prev->data[j] != HT_EN_SPACE)
 		    break;
@@ -5372,7 +5372,7 @@ PUBLIC void HText_endAnchor ARGS2(
 	k = j = (last->size - i);
 	while (j < (int)last->size) {
 	    if (!IsSpecialAttrChar(last->data[j]) &&
-		!isspace((unsigned char)last->data[j]) &&
+		!isspace(UCH(last->data[j])) &&
 		last->data[j] != HT_NON_BREAK_SPACE &&
 		last->data[j] != HT_EN_SPACE)
 		break;
@@ -5429,7 +5429,7 @@ PUBLIC void HText_endAnchor ARGS2(
 	    }
 	    while (j < (int)prev->size) {
 		if (!IsSpecialAttrChar(prev->data[j]) &&
-		    !isspace((unsigned char)prev->data[j]) &&
+		    !isspace(UCH(prev->data[j])) &&
 		    prev->data[j] != HT_NON_BREAK_SPACE &&
 		    prev->data[j] != HT_EN_SPACE)
 		    break;
@@ -5525,7 +5525,7 @@ PUBLIC void HText_endAnchor ARGS2(
 		if (start->data[j] == ']') {
 		    j--;
 		    NumSize++;
-		    while (j >= 0 && isdigit((unsigned char)start->data[j])) {
+		    while (j >= 0 && isdigit(UCH(start->data[j]))) {
 			j--;
 			NumSize++;
 		    }
@@ -5568,7 +5568,7 @@ PUBLIC void HText_endAnchor ARGS2(
 			    j--;
 			i = (j + 1);
 			while (j >= 0 &&
-			       isdigit((unsigned char)prev->data[j])) {
+			       isdigit(UCH(prev->data[j]))) {
 			    j--;
 			    NumSize++;
 			}
@@ -5640,12 +5640,12 @@ PUBLIC void HText_endAnchor ARGS2(
 		    i = (j + 1);
 		    if ((j >= 2) &&
 			(prev->data[j] == ']' &&
-			 isdigit((unsigned char)prev->data[j - 1]))) {
+			 isdigit(UCH(prev->data[j - 1])))) {
 			j--;
 			NumSize++;
 			k = (j + 1);
 			while (j >= 0 &&
-			       isdigit((unsigned char)prev->data[j])) {
+			       isdigit(UCH(prev->data[j]))) {
 			    j--;
 			    NumSize++;
 			}
@@ -5986,13 +5986,13 @@ re_parse:
 	 *  if they exist, but only on HYPERTEXT_ANCHORS.
 	 */
 	if (anchor_ptr->link_type & HYPERTEXT_ANCHOR) {
-	    ch = (unsigned char)line_ptr->data[anchor_ptr->line_pos];
+	    ch = UCH(line_ptr->data[anchor_ptr->line_pos]);
 	    while (isspace(ch) ||
 		   IsSpecialAttrChar(ch)) {
 		anchor_ptr->line_pos++;
 		anchor_ptr->extent--;
 		cur_shift++;
-		ch = (unsigned char)line_ptr->data[anchor_ptr->line_pos];
+		ch = UCH(line_ptr->data[anchor_ptr->line_pos]);
 	    }
 	}
 	if (anchor_ptr->extent < 0) {
@@ -8771,13 +8771,13 @@ PRIVATE int HText_TrueLineSize ARGS3(
 
     if (IgnoreSpaces) {
 	for (i = 0; i < line->size; i++) {
-	    if (!IsSpecialAttrChar((unsigned char)line->data[i]) &&
+	    if (!IsSpecialAttrChar(UCH(line->data[i])) &&
 		(!(text && text->T.output_utf8) ||
-		 (unsigned char)line->data[i] < 128 ||
-		 ((unsigned char)(line->data[i] & 0xc0) == 0xc0)) &&
-		!isspace((unsigned char)line->data[i]) &&
-		(unsigned char)line->data[i] != HT_NON_BREAK_SPACE &&
-		(unsigned char)line->data[i] != HT_EN_SPACE) {
+		 UCH(line->data[i]) < 128 ||
+		 (UCH((line->data[i] & 0xc0)) == 0xc0)) &&
+		!isspace(UCH(line->data[i])) &&
+		UCH(line->data[i]) != HT_NON_BREAK_SPACE &&
+		UCH(line->data[i]) != HT_EN_SPACE) {
 		true_size++;
 	    }
 	}
@@ -8785,8 +8785,8 @@ PRIVATE int HText_TrueLineSize ARGS3(
 	for (i = 0; i < line->size; i++) {
 	    if (!IsSpecialAttrChar(line->data[i]) &&
 		(!(text && text->T.output_utf8) ||
-		 (unsigned char)line->data[i] < 128 ||
-		 ((unsigned char)(line->data[i] & 0xc0) == 0xc0))) {
+		 UCH(line->data[i]) < 128 ||
+		 (UCH(line->data[i] & 0xc0) == 0xc0))) {
 		true_size++;
 	    }
 	}
@@ -9270,8 +9270,8 @@ PRIVATE char * HText_skipOptionNumPrefix ARGS1(
 	char *cp = opname;
 
 	if ((cp && *cp && *cp++ == '(') &&
-	    *cp && isdigit(*cp++)) {
-	    while (*cp && isdigit(*cp))
+	    *cp && isdigit(UCH(*cp++))) {
+	    while (*cp && isdigit(UCH(*cp)))
 		++cp;
 	    if (*cp && *cp++ == ')') {
 		int i = (cp - opname);
@@ -9331,8 +9331,8 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
      */
     if (*value) {
 	cp = &value[strlen(value)-1];
-	while ((cp >= value) && (isspace((unsigned char)*cp) ||
-				 IsSpecialAttrChar((unsigned char)*cp)))
+	while ((cp >= value) && (isspace(UCH(*cp)) ||
+				 IsSpecialAttrChar(UCH(*cp))))
 	    cp--;
 	*(cp+1) = '\0';
     }
@@ -9341,8 +9341,8 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
      *  Find first non space
      */
     cp = value;
-    while (isspace((unsigned char)*cp) ||
-	   IsSpecialAttrChar((unsigned char)*cp))
+    while (isspace(UCH(*cp)) ||
+	   IsSpecialAttrChar(UCH(*cp)))
 	cp++;
     if (HTCurSelectGroupType == F_RADIO_TYPE &&
 	LYSelectPopups &&
@@ -9353,8 +9353,8 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	 */
 	if ((cp1 = HText_skipOptionNumPrefix(cp)) > cp) {
 	    i = 0, j = (cp1 - cp);
-	    while (isspace((unsigned char)cp1[i]) ||
-		   IsSpecialAttrChar((unsigned char)cp1[i])) {
+	    while (isspace(UCH(cp1[i])) ||
+		   IsSpecialAttrChar(UCH(cp1[i]))) {
 		i++;
 	    }
 	    if (i > 0) {
@@ -9434,15 +9434,15 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	 *  changed the string. - kw
 	 */
 	cp = value;
-	while (isspace((unsigned char)*cp) ||
-	       IsSpecialAttrChar((unsigned char)*cp))
+	while (isspace(UCH(*cp)) ||
+	       IsSpecialAttrChar(UCH(*cp)))
 	    cp++;
 	for (i = 0, j = 0; cp[i]; i++) {
 	    if (cp[i] == HT_NON_BREAK_SPACE ||
 		cp[i] == HT_EN_SPACE) {
 		cp[j++] = ' ';
 	    } else if (cp[i] != LY_SOFT_HYPHEN &&
-		       !IsSpecialAttrChar((unsigned char)cp[i])) {
+		       !IsSpecialAttrChar(UCH(cp[i]))) {
 		cp[j++] = cp[i];
 	    }
 	}
@@ -11774,7 +11774,7 @@ PRIVATE void cleanup_line_for_textarea ARGS2(
      *  Whack off trailing whitespace from the line.
      */
     for (i = len, p = line + (len - 1); i != 0; p--, i--) {
-	if (isspace (*p))
+	if (isspace(UCH(*p)))
 	    *p = '\0';
 	else
 	    break;
@@ -11830,14 +11830,14 @@ PRIVATE void cleanup_line_for_textarea ARGS2(
 	 */
 	for (p = line, s = tbuf; *s != '\0'; p++, s++) {
 #ifndef EBCDIC
-	    *p = (((unsigned char)*s  < (unsigned char)' ')       ||
-		  ((unsigned char)*s == (unsigned char)'\177')    ||
-		  (((unsigned char)*s > (unsigned char)'\177') &&
-		   ((unsigned char)*s <
-		    (unsigned char)LYlowest_eightbit[current_char_set])))
+	    *p = ((UCH(*s)  < UCH(' '))       ||
+		  (UCH(*s) == UCH('\177'))    ||
+		  ((UCH(*s) > UCH('\177')) &&
+		   (UCH(*s) <
+		    UCH(LYlowest_eightbit[current_char_set]))))
 		 ? (char) SPLAT : *s;
 #else
-	    *p = ((unsigned char)*s < (unsigned char)' ') ? SPLAT : *s;
+	    *p = (UCH(*s) < UCH(' ')) ? SPLAT : *s;
 #endif
 	}
 	*p = '\0';
@@ -11944,7 +11944,7 @@ PRIVATE int increment_tagged_htline ARGS6(
 		    plx   = TRUE;
 		    break;
 		}
-		if (isdigit (*t++) != 0) {
+		if (isdigit(UCH(*t++)) != 0) {
 		    n++;
 		    continue;
 		} else {
@@ -12039,7 +12039,7 @@ PRIVATE int increment_tagged_htline ARGS6(
 		 *  Go hunting again for just digits, followed by tag end ']'.
 		 */
 		while (*t != ']') {
-		    if (isdigit (*t++) != 0) {
+		    if (isdigit(UCH(*t++)) != 0) {
 			n++;
 			continue;
 		    } else {
@@ -12573,7 +12573,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
     /*
      *	Nuke any blank lines from the end of the edited data.
      */
-    while ((size != 0) && (isspace (ebuf[size-1]) || (ebuf[size-1] == '\0')))
+    while ((size != 0) && (isspace(UCH(ebuf[size-1])) || (ebuf[size-1] == '\0')))
 	ebuf[--size] = '\0';
 
     /*
@@ -12628,16 +12628,16 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	if (wanted_fieldlen_wrap > 0 && len0+len > wanted_fieldlen_wrap) {
 	    for (i = wanted_fieldlen_wrap-len0;
 		 i+len0 >= wanted_fieldlen_wrap/4; i--) {
-		if (isspace((unsigned char)lp[i])) {
+		if (isspace(UCH(lp[i]))) {
 		    len = i + 1;
 		    cp = lp + i;
 		    if (cp[1] != '\n' &&
-			isspace((unsigned char)cp[1]) &&
-			!isspace((unsigned char)cp[2])) {
+			isspace(UCH(cp[1])) &&
+			!isspace(UCH(cp[2]))) {
 			len++;
 			cp++;
 		    }
-		    if (!isspace((unsigned char)cp[1])) {
+		    if (!isspace(UCH(cp[1]))) {
 			while (*cp && *cp != '\r' && *cp != '\n' &&
 			       (cp - lp) <= len + (3 * wanted_fieldlen_wrap/4))
 			    cp++;	/* search for next line break */
@@ -12645,9 +12645,9 @@ PUBLIC int HText_ExtEditForm ARGS1(
 			    cp++;
 			if (*cp == '\n' &&
 			    (cp[1] == '\r' || cp[1] == '\n' ||
-			     !isspace((unsigned char)cp[1]))) {
+			     !isspace(UCH(cp[1])))) {
 			    *cp = ' ';
-			    while (isspace((unsigned char)*(cp-1))) {
+			    while (isspace(UCH(*(cp-1)))) {
 				skip_num++;
 				cp--;
 			    }
@@ -12661,7 +12661,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	if (wanted_fieldlen_wrap > 0 && len0+len > wanted_fieldlen_wrap) {
 	    i = len-1;
 	    while (len0+i+1 > wanted_fieldlen_wrap &&
-		   isspace((unsigned char)lp[i]))
+		   isspace(UCH(lp[i])))
 		i--;
 	    if (len0+i+1 > wanted_fieldlen_wrap)
 		len = wanted_fieldlen_wrap - len0;
@@ -12677,7 +12677,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	     *  First try to find a space character for wrapping - kw
 	     */
 	    for (i = MAX_LINE - len0 - 1; i > 0; i--) {
-		if (isspace((unsigned char)lp[i])) {
+		if (isspace(UCH(lp[i]))) {
 		    len = i;
 		    break;
 		}
@@ -12720,7 +12720,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	 *  And do the next line of edited text, for the next anchor ...
 	 */
 	lp += len;
-	if (*lp && isspace((unsigned char)*lp)) lp++;
+	if (*lp && isspace(UCH(*lp))) lp++;
 
 	end_anchor = anchor_ptr;
 	anchor_ptr = anchor_ptr->next;
@@ -13281,7 +13281,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 
 	    case LY_SOFT_HYPHEN:
 		if (*data != '\0' ||
-		    isspace((unsigned char)LastDisplayChar) ||
+		    isspace(UCH(LastDisplayChar)) ||
 		    LastDisplayChar == '-') {
 		    /*
 		     *  Ignore the soft hyphen if it is not the last
@@ -13305,7 +13305,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 
 	    default:
 		i++;
-		if (text->T.output_utf8 && !isascii((unsigned char)buffer[0])) {
+		if (text->T.output_utf8 && !isascii(UCH(buffer[0]))) {
 		    if ((*buffer & 0xe0) == 0xc0) {
 			utf_extra = 1;
 		    } else if ((*buffer & 0xf0) == 0xe0) {
@@ -13337,7 +13337,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 		    buffer[1] = '\0';
 		    data += utf_extra;
 		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && !isascii((unsigned char)buffer[0])) {
+		} else if (HTCJK != NOCJK && !isascii(UCH(buffer[0]))) {
 		    /*
 		     *  For CJK strings, by Masanobu Kimura.
 		     */
@@ -13361,7 +13361,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 #if 0	/* last-ditch attempt to prevent 0x9B to screen - disabled  */
 #if defined(UNIX) || defined(VMS)
 		    if (!dump_output_immediately &&
-			(unsigned char)buffer[0] == 128+27) {
+			UCH(buffer[0]) == 128+27) {
 			addstr("~^");
 			buffer[0] ^= 0xc0;
 		    }
@@ -13710,7 +13710,7 @@ PRIVATE void move_to_glyph ARGS10(
 
 	    case LY_SOFT_HYPHEN:
 		if (*data != '\0' ||
-		    isspace((unsigned char)LastDisplayChar) ||
+		    isspace(UCH(LastDisplayChar)) ||
 		    LastDisplayChar == '-') {
 		    /*
 		     *  Ignore the soft hyphen if it is not the last
@@ -13742,7 +13742,7 @@ PRIVATE void move_to_glyph ARGS10(
 		    if (i == XP - 1) {
 			i_after_tgt = i;
 		    } else if (i == XP - 2 && HTCJK != NOCJK &&
-			       !isascii((unsigned char)buffer[0])) {
+			       !isascii(UCH(buffer[0]))) {
 			i_after_tgt = i;
 			cp_tgt = NULL;
 			if (drawing) {
@@ -13800,7 +13800,7 @@ PRIVATE void move_to_glyph ARGS10(
 		    }
 
 		i++;
-		if (utf_flag && !isascii((unsigned char)buffer[0])) {
+		if (utf_flag && !isascii(UCH(buffer[0]))) {
 		    hadutf8 = YES;
 		    if ((*buffer & 0xe0) == 0xc0) {
 			utf_extra = 1;
@@ -13849,7 +13849,7 @@ PRIVATE void move_to_glyph ARGS10(
 		    buffer[1] = '\0';
 		    sdata += utf_extra; data += utf_extra;
 		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && !isascii((unsigned char)buffer[0])) {
+		} else if (HTCJK != NOCJK && !isascii(UCH(buffer[0]))) {
 		    /*
 		     *  For CJK strings, by Masanobu Kimura.
 		     */
@@ -13877,7 +13877,7 @@ PRIVATE void move_to_glyph ARGS10(
 #if 0	/* last-ditch attempt to prevent 0x9B to screen - disabled  */
 #if defined(UNIX) || defined(VMS)
 			if (!dump_output_immediately &&
-			    (unsigned char)buffer[0] == 128+27) {
+			    UCH(buffer[0]) == 128+27) {
 			    addstr("~^");
 			    buffer[0] ^= 0xc0;
 			}

@@ -959,8 +959,8 @@ PUBLIC void HTAnchor_setTitle ARGS2(
 	if (title) {
 	    StrAllocCopy(me->title, title);
 	    for (i = 0; me->title[i]; i++) {
-		if ((unsigned char)me->title[i] == 1 ||
-		    (unsigned char)me->title[i] == 2) {
+		if (UCH(me->title[i]) == 1 ||
+		    UCH(me->title[i]) == 2) {
 		    me->title[i] = ' ';
 		}
 	    }
@@ -985,8 +985,8 @@ PUBLIC void HTAnchor_appendTitle ARGS2(
     if (me) {
 	StrAllocCat(me->title, title);
 	for (i = 0; me->title[i]; i++) {
-	    if ((unsigned char)me->title[i] == 1 ||
-		(unsigned char)me->title[i] == 2) {
+	    if (UCH(me->title[i]) == 1 ||
+		UCH(me->title[i]) == 2) {
 		me->title[i] = ' ';
 	    }
 	}
@@ -1043,8 +1043,8 @@ PUBLIC void HTAnchor_setRevTitle ARGS2(
     if (me) {
 	StrAllocCopy(me->RevTitle, title);
 	for (i = 0; me->RevTitle[i]; i++) {
-	    if ((unsigned char)me->RevTitle[i] == 1 ||
-		(unsigned char)me->RevTitle[i] == 2) {
+	    if (UCH(me->RevTitle[i]) == 1 ||
+		UCH(me->RevTitle[i]) == 2) {
 		me->RevTitle[i] = ' ';
 	    }
 	}

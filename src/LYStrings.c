@@ -535,8 +535,8 @@ PUBLIC char *LYstrncpy ARGS3(
     return val;
 }
 
-#define IS_NEW_GLYPH(ch) (utf_flag && ((unsigned char)(ch)&0xc0) != 0x80)
-#define IS_UTF_EXTRA(ch) (utf_flag && ((unsigned char)(ch)&0xc0) == 0x80)
+#define IS_NEW_GLYPH(ch) (utf_flag && (UCH(ch)&0xc0) != 0x80)
+#define IS_UTF_EXTRA(ch) (utf_flag && (UCH(ch)&0xc0) == 0x80)
 
 /*
  *  LYmbcsstrncpy() terminates strings with a null byte.
@@ -615,7 +615,7 @@ PUBLIC char * LYmbcs_skip_glyphs ARGS3(
  *  width characters in CJK mode count as one.) - kw
  */
 PUBLIC int LYmbcsstrlen ARGS3(
-	char *, 	str,
+	char *,		str,
 	BOOL,		utf_flag,
 	BOOL,		count_gcells)
 {
@@ -707,7 +707,7 @@ PRIVATE WINDOW *my_subwindow;
 PUBLIC void LYsubwindow ARGS1(WINDOW *, param)
 {
     if (param != 0) {
-        my_subwindow = param;
+	my_subwindow = param;
 #if defined(NCURSES) || defined(PDCURSES)
 	keypad(my_subwindow, TRUE);
 #if defined(HAVE_GETBKGD) /* not defined in ncurses 1.8.7 */
@@ -799,7 +799,7 @@ PUBLIC void ena_csi ARGS1(
 #define define_key(string, code) \
 	SLkm_define_keysym (string, code, Keymap_List)
 #define expand_substring(dst, first, last, final) \
-	SLexpand_escaped_string(dst, (char *)first, (char *)last)
+	(SLexpand_escaped_string(dst, (char *)first, (char *)last), 1)
 static SLKeyMap_List_Type *Keymap_List;
 /* This value should be larger than anything in LYStrings.h */
 #define MOUSE_KEYSYM 0x0400
@@ -937,9 +937,10 @@ PRIVATE CONST char *expand_tichar (CONST char *first, char **result, char *final
     return first;
 }
 
-PRIVATE void expand_substring (char* dst, CONST char* first, CONST char* last, char *final)
+PRIVATE int expand_substring (char* dst, CONST char* first, CONST char* last, char *final)
 {
     int ch;
+
     while (first < last) {
 	switch (ch = *first++) {
 	case ESCAPE:
@@ -949,9 +950,12 @@ PRIVATE void expand_substring (char* dst, CONST char* first, CONST char* last, c
 	    ch = *first++;
 	    if (ch == LPAREN) {
 		CONST char *s = strchr(first, RPAREN);
+		char *was = dst;
 		if (s == 0)
 		    s = first + strlen(first);
 		first = expand_tiname(first, s-first, &dst, final);
+		if (dst == was)
+		    return 0;
 		if (*first)
 		    first++;
 	    } else if (ch == '?') {		/* ASCII delete? */
@@ -972,6 +976,7 @@ PRIVATE void expand_substring (char* dst, CONST char* first, CONST char* last, c
 	}
     }
     *dst = '\0';
+    return 1;
 }
 #endif
 
@@ -999,10 +1004,8 @@ PRIVATE BOOLEAN unescape_string ARGS3(char*, src, char *, dst, char *, final)
 	    dst[1] = '\0';
 	    ok = TRUE;
 	}
-    } else if (*src == DQUOTE) {
-	expand_substring(dst, src + 1, src + strlen(src) - 1, final);
-	ok = TRUE;
-    }
+    } else if (*src == DQUOTE)
+	ok = expand_substring(dst, src + 1, src + strlen(src) - 1, final);
     return ok;
 }
 
@@ -1040,11 +1043,11 @@ PUBLIC int map_string_to_keysym ARGS2(CONST char*, str, int*,keysym)
 	if (*str) {
 	    size_t len = strlen(str);
 	    if (len == 1)
-		return (*keysym = ((unsigned char)str[0])|modifier);
+		return (*keysym = (UCH(str[0]))|modifier);
 	    else if (len == 2 && str[0] == '^' &&
-		     (isalpha(str[1]) ||
+		     (isalpha(UCH(str[1])) ||
 		      (TOASCII(str[1]) >= '@' && TOASCII(str[1]) <= '_')))
-		return (*keysym = FROMASCII((unsigned char)str[1]&0x1f)|modifier);
+		return (*keysym = FROMASCII(UCH(str[1]&0x1f))|modifier);
 	    else if (len == 2 && str[0] == '^' &&
 		     str[1] == '?')
 		return (*keysym = CH_DEL|modifier);
@@ -1052,16 +1055,16 @@ PUBLIC int map_string_to_keysym ARGS2(CONST char*, str, int*,keysym)
 		char buf[BUFSIZ];
 		expand_substring(buf, str, str + HTMIN(len, 28), buf + sizeof(buf) - 1);
 		if (strlen(buf) <= 1)
-		    return (*keysym = ((unsigned char)buf[0])|modifier);
+		    return (*keysym = (UCH(buf[0]))|modifier);
 	    }
 	}
     }
     if (*str == SQUOTE) {
 	unescaped_char(str, keysym);
-    } else if (isdigit(*str)) {
+    } else if (isdigit(UCH(*str))) {
 	char *tmp;
 	long value = strtol(str, &tmp, 0);
-	if (!isalnum(*tmp)) {
+	if (!isalnum(UCH(*tmp))) {
 	    *keysym = value;
 #ifndef USE_SLANG
 	    if (*keysym > 255)
@@ -1108,7 +1111,7 @@ PRIVATE char *skip_keysym ARGS1(char *, parse)
 	    escaped = 1;
 	} else if (*parse == DQUOTE || *parse == SQUOTE) {
 	    quoted = *parse;
-	} else if (isspace(*parse)) {
+	} else if (isspace(UCH(*parse))) {
 	    break;
 	}
 	parse++;
@@ -1128,7 +1131,7 @@ PRIVATE int setkey_cmd (char *parse)
 
     CTRACE((tfp, "KEYMAP(PA): in=%s", parse));	/* \n-terminated */
     if ((s = skip_keysym(parse)) != 0) {
-	if (isspace(*s)) {
+	if (isspace(UCH(*s))) {
 	    *s++ = '\0';
 	    s = LYSkipBlanks(s);
 	    if ((t = skip_keysym(s)) == 0) {
@@ -1137,8 +1140,11 @@ PRIVATE int setkey_cmd (char *parse)
 	    }
 	    if (t != s)
 		*t = '\0';
-	    if (map_string_to_keysym (s, &keysym) >= 0
-	     && unescape_string(parse, buf, buf + sizeof(buf) - 1)) {
+	    if (map_string_to_keysym (s, &keysym) >= 0) {
+		if (!unescape_string(parse, buf, buf + sizeof(buf) - 1)) {
+		    CTRACE((tfp, "KEYMAP(SKIP) could unescape key\n"));
+		    return 0;		/* Trace the failure and continue. */
+		}
 		if (LYTraceLogFP == 0) {
 		    CTRACE((tfp, "KEYMAP(DEF) keysym=%#x\n", keysym));
 		} else {
@@ -1553,11 +1559,13 @@ re_read:
 	    if (sigint)
 		sigint = FALSE;
 #endif /* IGNORE_CTRL_C */
-	    return(7); /* use ^G to cancel whatever called us. */
+	    CTRACE((tfp, "GETCH: Translate ^C to ^G.\n"));
+	    return(LYCharINTERRUPT2); /* use ^G to cancel whatever called us. */
 	}
     }
 #endif /* !USE_SLANG || VMS */
 
+    CTRACE((tfp, "GETCH: Got %#x.\n", c));
 #ifdef MISC_EXP
     if (LYNoZapKey > 1 && errno != EINTR &&
 	(c == EOF
@@ -1634,12 +1642,12 @@ re_read:
 	    goto re_read;
 	}
 #endif /* IGNORE_CTRL_C */
-	return(7); /* use ^G to cancel whatever called us. */
+	return(LYCharINTERRUPT2); /* use ^G to cancel whatever called us. */
     }
 #else  /* not USE_SLANG: */
     if (feof(stdin) || ferror(stdin) || c == EOF) {
 	if (recent_sizechange)
-	    return(7); /* use ^G to cancel whatever called us. */
+	    return(LYCharINTERRUPT2); /* use ^G to cancel whatever called us. */
 #ifdef IGNORE_CTRL_C
 	if (sigint) {
 	    sigint = FALSE;
@@ -1657,7 +1665,7 @@ re_read:
     }
 #endif /* USE_SLANG */
 
-    if (c == CH_ESC || (csi_is_csi && c == (unsigned char)CH_ESC_PAR)) { /* handle escape sequence  S/390 -- gil -- 2024 */
+    if (c == CH_ESC || (csi_is_csi && c == UCH(CH_ESC_PAR))) { /* handle escape sequence  S/390 -- gil -- 2024 */
 	done_esc = TRUE;		/* Flag: we did it, not keypad() */
 	b = GetChar();
 
@@ -1979,13 +1987,13 @@ re_read:
 #endif /* HAVE_SIZECHANGE || USE_SLANG */
 	    if (!recent_sizechange) {
 #if 0			/* assumption seems flawed? */
-	        /*  Not detected by us or already processed by us.  It can
+		/*  Not detected by us or already processed by us.  It can
 		 *  happens that ncurses lags behind us in detecting the
 		 *  change, since its own SIGTSTP handler is not installed
 		 *  so detecting happened *at the end* of the last refresh.
 		 *  Tell it to refresh again... - kw
 		 */
-	        refresh();
+		refresh();
 #endif
 #if defined(NCURSES)
 		/*
@@ -1996,12 +2004,12 @@ re_read:
 		 */
 		recent_sizechange = TRUE;
 #endif
-	        /*
+		/*
 		 *  May be just the delayed effect of mainloop()'s call
 		 *  to resizeterm().  Pretend we haven't read anything
 		 *  yet, don't return. - kw
 		 */
-	        goto re_read;
+		goto re_read;
 	    }
 	   /*
 	    *  Yep, we agree there was a change.  Return now so that
@@ -2368,8 +2376,8 @@ PUBLIC int LYgetch NOARGS
 PUBLIC int LYgetch_choice NOARGS
 {
     int ch = LYReadCmdKey(FOR_CHOICE);
-    if (ch == 3)
-	ch = 7;			/* treat ^C the same as ^G */
+    if (ch == LYCharINTERRUPT1)
+	ch = LYCharINTERRUPT2;			/* treat ^C the same as ^G */
     return ch;
 }
 
@@ -2379,8 +2387,8 @@ PUBLIC int LYgetch_choice NOARGS
 PUBLIC int LYgetch_input NOARGS
 {
     int ch = LYReadCmdKey(FOR_INPUT);
-    if (ch == 3)
-	ch = 7;			/* treat ^C the same as ^G */
+    if (ch == LYCharINTERRUPT1)
+	ch = LYCharINTERRUPT2;			/* treat ^C the same as ^G */
     return ch;
 }
 
@@ -2391,8 +2399,8 @@ PUBLIC int LYgetch_input NOARGS
 PUBLIC int LYgetch_single NOARGS
 {
     int ch = LYReadCmdKey(FOR_SINGLEKEY);
-    if (ch == 3)
-	ch = 7;			/* treat ^C the same as ^G */
+    if (ch == LYCharINTERRUPT1)
+	ch = LYCharINTERRUPT2;			/* treat ^C the same as ^G */
     else if (ch > 0 && ch < 256)
 	ch = TOUPPER(ch);	/* will ignore case of result */
     return ch;
@@ -2410,12 +2418,12 @@ PUBLIC void LYLowerCase ARGS1(
 #ifdef SUPPORT_MULTIBYTE_EDIT	/* 1998/11/23 (Mon) 17:04:55 */
     {
 	if (buffer[i] & 0x80) {
-	    if ((kanji_code == SJIS) && IS_SJIS_X0201KANA((unsigned char)(buffer[i]))) {
+	    if ((kanji_code == SJIS) && IS_SJIS_X0201KANA(UCH((buffer[i])))) {
 		continue;
 	    }
 	    i++;
 	} else {
-	    buffer[i] = (unsigned char) TOLOWER(buffer[i]);
+	    buffer[i] = UCH(TOLOWER(buffer[i]));
 	}
     }
 #else
@@ -2435,7 +2443,7 @@ PUBLIC void LYUpperCase ARGS1(
 #ifdef SUPPORT_MULTIBYTE_EDIT	/* 1998/11/23 (Mon) 17:05:10 */
     {
 	if (buffer[i] & 0x80) {
-	    if ((kanji_code == SJIS) && IS_SJIS_X0201KANA((unsigned char)(buffer[i]))) {
+	    if ((kanji_code == SJIS) && IS_SJIS_X0201KANA(UCH((buffer[i])))) {
 		continue;
 	    }
 	    i++;
@@ -2457,7 +2465,7 @@ PUBLIC void LYRemoveBlanks ARGS1(
     if (buffer != 0) {
 	size_t i, j;
 	for (i = j = 0; buffer[i]; i++)
-	    if (!isspace((unsigned char)(buffer[i])))
+	    if (!isspace(UCH((buffer[i]))))
 		buffer[j++] = buffer[i];
 	buffer[j] = 0;
     }
@@ -2469,7 +2477,7 @@ PUBLIC void LYRemoveBlanks ARGS1(
 PUBLIC char * LYSkipBlanks ARGS1(
 	char *,		buffer)
 {
-    while (isspace((unsigned char)(*buffer)))
+    while (isspace(UCH((*buffer))))
 	buffer++;
     return buffer;
 }
@@ -2480,7 +2488,7 @@ PUBLIC char * LYSkipBlanks ARGS1(
 PUBLIC char * LYSkipNonBlanks ARGS1(
 	char *,		buffer)
 {
-    while (*buffer != 0 && !isspace((unsigned char)(*buffer)))
+    while (*buffer != 0 && !isspace(UCH((*buffer))))
 	buffer++;
     return buffer;
 }
@@ -2491,7 +2499,7 @@ PUBLIC char * LYSkipNonBlanks ARGS1(
 PUBLIC CONST char * LYSkipCBlanks ARGS1(
 	CONST char *,	buffer)
 {
-    while (isspace((unsigned char)(*buffer)))
+    while (isspace(UCH((*buffer))))
 	buffer++;
     return buffer;
 }
@@ -2502,7 +2510,7 @@ PUBLIC CONST char * LYSkipCBlanks ARGS1(
 PUBLIC CONST char * LYSkipCNonBlanks ARGS1(
 	CONST char *,	buffer)
 {
-    while (*buffer != 0 && !isspace((unsigned char)(*buffer)))
+    while (*buffer != 0 && !isspace(UCH((*buffer))))
 	buffer++;
     return buffer;
 }
@@ -2525,7 +2533,7 @@ PUBLIC void LYTrimTrailing ARGS1(
 	char *,		buffer)
 {
     size_t i = strlen(buffer);
-    while (i != 0 && isspace((unsigned char)buffer[i-1]))
+    while (i != 0 && isspace(UCH(buffer[i-1])))
 	buffer[--i] = 0;
 }
 
@@ -2637,7 +2645,7 @@ PRIVATE int prev_pos ARGS2(
 	    int c;
 	    c = Buf[i];
 	    if (!(isascii(c) ||
-		  ((kanji_code == SJIS) && IS_SJIS_X0201KANA((unsigned char)c)))) {
+		  ((kanji_code == SJIS) && IS_SJIS_X0201KANA(UCH(c))))) {
 		i++;
 	    }
 	    i++;
@@ -2656,7 +2664,7 @@ PUBLIC int LYEdit1 ARGS4(
 	int,		action,
 	BOOL,		maxMessage)
 {   /* returns 0    character processed
-     *         ch   otherwise
+     *	       ch   otherwise
      */
     int i;
     int length;
@@ -2716,10 +2724,10 @@ PUBLIC int LYEdit1 ARGS4(
 				return 0;
 			    }
 			}
-			ch = (unsigned char)utfbuf[i];
+			ch = UCH(utfbuf[i]);
 		    }
 		} else {
-		    ch = (unsigned char)ucode;
+		    ch = UCH(ucode);
 		}
 	    } else {
 		ch = UCTransUniChar(ucode, current_char_set);
@@ -2739,7 +2747,7 @@ PUBLIC int LYEdit1 ARGS4(
 	    for(i = length; i >= Pos; i--)    /* Make room */
 		Buf[i+1] = Buf[i];
 	    Buf[length+1]='\0';
-	    Buf[Pos] = (unsigned char) ch;
+	    Buf[Pos] = UCH(ch);
 	    Pos++;
 	} else if (maxMessage) {
 	    _statusline(MAXLEN_REACHED_DEL_OR_MOV);
@@ -2768,7 +2776,7 @@ PUBLIC int LYEdit1 ARGS4(
 	    for(i = length; i >= Pos; i--)    /* Make room */
 		Buf[i+1] = Buf[i];
 	    Buf[length+1]='\0';
-	    Buf[Pos] = (unsigned char) ch;
+	    Buf[Pos] = UCH(ch);
 	    Pos++;
 	} else {
 	    if (maxMessage) {
@@ -2800,7 +2808,7 @@ PUBLIC int LYEdit1 ARGS4(
 	    pos0 = prev_pos(edit, Pos);
 	    while (Pos &&
 		   (HTCJK == NOCJK || isascii(Buf[pos0])) &&
-		   !isalnum(Buf[pos0])) {
+		   !isalnum(UCH(Buf[pos0]))) {
 		Pos = pos0;
 		pos0 = prev_pos(edit, Pos);
 	    }
@@ -2810,7 +2818,9 @@ PUBLIC int LYEdit1 ARGS4(
 		    pos0 = prev_pos(edit, Pos);
 		}
 	    } else {
-		while (Pos && isascii(Buf[pos0]) && isalnum(Buf[pos0])) {
+		while (Pos
+		 && isascii(UCH(Buf[pos0]))
+		 && isalnum(UCH(Buf[pos0]))) {
 		    Pos = pos0;
 		    pos0 = prev_pos(edit, Pos);
 		}
@@ -2833,11 +2843,11 @@ PUBLIC int LYEdit1 ARGS4(
 	    while (!isascii(Buf[Pos]))
 		Pos += 2;
 	} else {
-	    while (isascii(Buf[Pos]) && isalnum(Buf[Pos]))
+	    while (isascii(UCH(Buf[Pos])) && isalnum(UCH(Buf[Pos])))
 		Pos++;	/* '\0' is not a/n */
 	}
-	while ((HTCJK == NOCJK || isascii(Buf[Pos])) &&
-	       !isalnum(Buf[Pos]) && Buf[Pos])
+	while ((HTCJK == NOCJK || isascii(UCH(Buf[Pos]))) &&
+	       !isalnum(UCH(Buf[Pos])) && Buf[Pos])
 	    Pos++;
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 	break;
@@ -3070,7 +3080,7 @@ PUBLIC int LYEdit1 ARGS4(
 		for(i = length; i >= Pos; i--)    /* Make room */
 		    Buf[i+yanklen] = Buf[i];
 		for (i = 0; i < yanklen; i++)
-		    Buf[Pos++] = (unsigned char) killbuffer[i];
+		    Buf[Pos++] = UCH(killbuffer[i]);
 
 	    } else if (maxMessage) {
 		_statusline(MAXLEN_REACHED_DEL_OR_MOV);
@@ -3129,7 +3139,7 @@ PUBLIC int get_popup_number ARGS3(
 
     *rel = '\0';
     num = atoi(p);
-    while ( isdigit(*p) )
+    while ( isdigit(UCH(*p)) )
 	++p;
     switch ( *p ) {
     case '+': case '-':
@@ -3160,6 +3170,20 @@ PUBLIC int get_popup_number ARGS3(
     return num;
 }
 
+#ifdef USE_COLOR_STYLE
+#  define TmpStyleOn(s)		curses_style((s), STACK_ON)
+#  define TmpStyleOff(s)	curses_style((s), STACK_OFF)
+#else
+#  define TmpStyleOn(s)
+#  define TmpStyleOff(s)
+#endif	/* defined USE_COLOR_STYLE */
+
+#ifndef ACS_LARROW
+#  define ACS_LARROW '{'
+#endif
+#ifndef ACS_RARROW
+#  define ACS_RARROW '}'
+#endif
 
 PUBLIC void LYRefreshEdit ARGS1(
 	EDREC *,	edit)
@@ -3174,6 +3198,9 @@ PUBLIC void LYRefreshEdit ARGS1(
     int begin_multi = 0;
     int end_multi = 0;
 #endif /* SUPPORT_MULTIBYTE_EDIT */
+#ifdef USE_COLOR_STYLE
+    int estyle, prompting = 0;
+#endif
 
     buffer[0] = buffer[1] = buffer[2] = '\0';
     if (!edit->dirty || (DspWdth == 0))
@@ -3257,13 +3284,18 @@ PUBLIC void LYRefreshEdit ARGS1(
      *  should only be needed for color styles.  The curses function
      *  may be used directly to avoid complications. - kw
      */
-    if (edit->sy == (LYlines - 1)) {
-	if (s_normal != NOSTYLE) {
-	    curses_style(s_normal, ABS_ON);
-	} else {
-	    attrset(A_NORMAL);	/* need to do something about colors? */
-	}
-    }
+    if (edit->sy == (LYlines - 1))
+	prompting = 1;
+    if (prompting)
+	estyle = s_prompt_edit;
+    else
+	estyle = s_aedit;
+    CTRACE((tfp, "STYLE.getstr: switching to <edit.%s>.\n",
+	    prompting ? "prompt" : "active"));
+    if (estyle != NOSTYLE)
+	curses_style(estyle, STACK_ON);
+    else
+	attrset(A_NORMAL);	/* need to do something about colors? */
 #endif
     if (edit->hidden) {
 	for (i = 0; i < nrdisplayed; i++)
@@ -3271,7 +3303,7 @@ PUBLIC void LYRefreshEdit ARGS1(
     } else {
 	for (i = 0; i < nrdisplayed; i++)
 	    if ((buffer[0] = str[i]) == 1 || buffer[0] == 2 ||
-		((unsigned char)buffer[0] == 160 &&
+		(UCH(buffer[0]) == 160 &&
 		 !(HTPassHighCtrlRaw || HTCJK != NOCJK ||
 		   (LYCharSet_UC[current_char_set].enc != UCT_ENC_8859 &&
 		    !(LYCharSet_UC[current_char_set].like8859
@@ -3308,37 +3340,40 @@ PUBLIC void LYRefreshEdit ARGS1(
      *	Erase rest of input area.
      */
     padsize = DspWdth-nrdisplayed;
-    while (padsize--)
-	addch((unsigned char)edit->pad);
+    if (padsize) {
+	TmpStyleOn(prompting ? s_prompt_edit_pad : s_aedit_pad);
+	while (padsize--)
+	    addch(UCH(edit->pad));
+	TmpStyleOff(prompting ? s_prompt_edit_pad : s_aedit_pad);
+    }
 
     /*
      *	Scrolling indicators.
      */
     if (edit->panon) {
 	if ((DspStart + nrdisplayed) < length) {
-#ifndef SUPPORT_MULTIBYTE_EDIT
-	    move(edit->sy, edit->sx+nrdisplayed-1);
-	    addch('}');
-#else /* SUPPORT_MULTIBYTE_EDIT */
-	    if (end_multi) {
-		move(edit->sy, edit->sx+nrdisplayed-2);
-		addstr(" }");
-	    } else {
-		move(edit->sy, edit->sx+nrdisplayed-1);
-		addch('}');
-	}
-#endif /* SUPPORT_MULTIBYTE_EDIT */
+	    int add_space = 0;
+
+	    TmpStyleOn(prompting ? s_prompt_edit_arr : s_aedit_arr);
+#ifdef SUPPORT_MULTIBYTE_EDIT
+	    if (end_multi)
+		add_space = 1;
+#endif
+	    move(edit->sy, edit->sx + nrdisplayed - 1 - add_space);
+	    if (add_space)
+		addch(' ');		/* Needed with styles? */
+	    addch(ACS_RARROW);
+	    TmpStyleOff(prompting ? s_prompt_edit_arr : s_aedit_arr);
 	}
 	if (DspStart) {
+	    TmpStyleOn(prompting ? s_prompt_edit_arr : s_aedit_arr);
 	    move(edit->sy, edit->sx);
-#ifndef SUPPORT_MULTIBYTE_EDIT
-	    addch('{');
-#else /* SUPPORT_MULTIBYTE_EDIT */
+	    addch(ACS_LARROW);
+#ifdef SUPPORT_MULTIBYTE_EDIT
 	    if (begin_multi)
-		addstr("{ ");
-	    else
-	    addch('{');
+		addch(' ');		/* Needed with styles? */
 #endif /* SUPPORT_MULTIBYTE_EDIT */
+	    TmpStyleOff(prompting ? s_prompt_edit_arr : s_aedit_arr);
 	}
     }
 
@@ -3349,6 +3384,11 @@ PUBLIC void LYRefreshEdit ARGS1(
 	lynx_force_repaint();
 #endif /* !USE_SLANG && !defined(USE_MULTIBYTE_CURSES) */
 #endif /* SUPPORT_MULTIBYTE_EDIT */
+
+#ifdef USE_COLOR_STYLE
+    if (estyle != NOSTYLE)
+	curses_style(estyle, STACK_OFF);
+#endif
     refresh();
 }
 
@@ -3399,7 +3439,7 @@ PRIVATE char **sortedList ARGS2(
     unsigned k, jk;
     char **result = calloc(count + 1, sizeof(char *));
 
-    if (result == 0) 
+    if (result == 0)
 	outofmem(__FILE__, "sortedList");
 
     while (!HTList_isEmpty(list))
@@ -3768,7 +3808,7 @@ redraw:
 	LYstowCursor(form_window, row, 1);
 
 	c = LYgetch_choice();
-	if (term_options || c == 7) {	/* Control-C or Control-G */
+	if (term_options || LYCharIsINTERRUPT(c)) { /* Control-C or Control-G */
 	    cmd = LYK_QUIT;
 #ifndef USE_SLANG
 	} else if (c == MOUSE_KEY) {
@@ -4476,7 +4516,7 @@ again:
 #ifdef VMS
 	    HadVMSInterrupt = FALSE;
 #endif /* VMS */
-	    ch = 7;
+	    ch = LYCharINTERRUPT2;
 	}
 
 	if (recall != NORECALL && (ch == UPARROW || ch == DNARROW)) {
@@ -5246,17 +5286,17 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
     if (ch1 == ch2)
 	return 0;
     if (!ch2)
-	return (unsigned char)ch1;
+	return UCH(ch1);
     else if (!ch1)
-	return -(unsigned char)ch2;
+	return -UCH(ch2);
 
     /* case-insensitive match for us-ascii */
-    if ((unsigned char)TOASCII(ch1) < 128 && (unsigned char)TOASCII(ch2) < 128)
+    if (UCH(TOASCII(ch1)) < 128 && UCH(TOASCII(ch2)) < 128)
 	return(TOUPPER(ch1) - TOUPPER(ch2));
 
     /* case-insensitive match for upper half */
-    if ((unsigned char)TOASCII(ch1) > 127 &&  /* S/390 -- gil -- 2066 */
-	(unsigned char)TOASCII(ch2) > 127)
+    if (UCH(TOASCII(ch1)) > 127 &&  /* S/390 -- gil -- 2066 */
+	UCH(TOASCII(ch2)) > 127)
     {
 	if (DisplayCharsetMatchLocale)
 	   return(TOUPPER(ch1) - TOUPPER(ch2)); /* old-style */
@@ -5265,7 +5305,7 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
 	    long uni_ch2 = UCTransToUni((char)ch2, current_char_set);
 	    long uni_ch1;
 	    if (uni_ch2 < 0)
-		return (unsigned char)ch1;
+		return UCH(ch1);
 	    uni_ch1 = UCTransToUni((char)ch1, current_char_set);
 	    return(UniToLowerCase(uni_ch1) - UniToLowerCase(uni_ch2));
 	}
@@ -5297,12 +5337,12 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
 {
 
     /* case-insensitive match for us-ascii */
-    if ((unsigned char)TOASCII(ch1) < 128 && (unsigned char)TOASCII(ch2) < 128)
+    if (UCH(TOASCII(ch1)) < 128 && UCH(TOASCII(ch2)) < 128)
 	return(TOUPPER(ch1) - TOUPPER(ch2));
 
     /* case-insensitive match for upper half */
-    if ((unsigned char)TOASCII(ch1) > 127 &&  /* S/390 -- gil -- 2066 */
-	(unsigned char)TOASCII(ch2) > 127)
+    if (UCH(TOASCII(ch1)) > 127 &&  /* S/390 -- gil -- 2066 */
+	UCH(TOASCII(ch2)) > 127)
     {
 	if (DisplayCharsetMatchLocale)
 	   return(TOUPPER(ch1) - TOUPPER(ch2)); /* old-style */
@@ -5329,7 +5369,7 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
 	/* check to be sure we have not lost any strange characters */
 	/* which are not found in def7_uni.tbl but _equal_ in fact. */
 	/* this also applied for "x-transparent" display mode.	    */
-	if ((unsigned char)ch1==(unsigned char)ch2)
+	if (UCH(ch1) == UCH(ch2))
 	    return(0);	 /* match */
 	}
     }
@@ -5406,7 +5446,7 @@ static unsigned char index_64[256] = {
 };
 
 #define GETC(str,len)  (len > 0 ? len--,*str++ : EOF)
-#define INVALID_B64(c) (index_64[(unsigned char)c] == XX)
+#define INVALID_B64(c) (index_64[UCH(c)] == XX)
 #endif
 
 PUBLIC void base64_encode ARGS3(

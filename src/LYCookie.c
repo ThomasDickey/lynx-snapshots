@@ -241,17 +241,17 @@ PRIVATE BOOLEAN port_matches ARGS2(
 {
     CONST char *number = list;
 
-    if (!(number && isdigit(*number)))
+    if (!(number && isdigit(UCH(*number))))
 	return(FALSE);
 
     while (*number != '\0') {
 	if (atoi(number) == port) {
 	    return(TRUE);
 	}
-	while (isdigit(*number)) {
+	while (isdigit(UCH(*number))) {
 	    number++;
 	}
-	while (*number != '\0' && !isdigit(*number)) {
+	while (*number != '\0' && !isdigit(UCH(*number))) {
 	    number++;
 	}
     }
@@ -760,7 +760,7 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 		    StrAllocCat(header, "\"");
 		    len += (strlen(co->path) + 10);
 		}
-		if (co->PortList && isdigit((unsigned char)*co->PortList)) {
+		if (co->PortList && isdigit(UCH(*co->PortList))) {
 		    /*
 		     *	Append the port attribute. - FM
 		     */
@@ -842,7 +842,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	 *  Get the attribute name.
 	 */
 	attr_start = p;
-	while (*p != '\0' && !isspace((unsigned char)*p) &&
+	while (*p != '\0' && !isspace(UCH(*p)) &&
 	       *p != '=' && *p != ';' && *p != ',')
 	    p++;
 	attr_end = p;
@@ -881,7 +881,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		!strncasecomp(attr_start, "Expires", 7)) {
 		int spaces = 6;
 		value_start = p;
-		if (isdigit((unsigned char)*p)) {
+		if (isdigit(UCH(*p))) {
 		    /*
 		     *	No alphabetic day field. - FM
 		     */
@@ -890,18 +890,18 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		    /*
 		     *	Skip the alphabetic day field. - FM
 		     */
-		    while (*p != '\0' && isalpha((unsigned char)*p)) {
+		    while (*p != '\0' && isalpha(UCH(*p))) {
 			p++;
 		    }
-		    while (*p == ',' || isspace((unsigned char)*p)) {
+		    while (*p == ',' || isspace(UCH(*p))) {
 			p++;
 		    }
 		    spaces--;
 		}
 		while (*p != '\0' && *p != ';' && *p != ',' && spaces) {
 		    p++;
-		    if (isspace((unsigned char)*p)) {
-			while (isspace((unsigned char)*(p + 1)))
+		    if (isspace(UCH(*p))) {
+			while (isspace(UCH(*(p + 1))))
 			    p++;
 			spaces--;
 		    } else if (*p == '-') {
@@ -918,14 +918,14 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	     */
 	    } else if ((attr_end - attr_start) == 4 &&
 		       !strncasecomp(attr_start, "port", 4) &&
-		       isdigit((unsigned char)*p)) {
+		       isdigit(UCH(*p))) {
 		/*
 		 *  The value starts as an unquoted number.
 		 */
 		CONST char *cp, *cp1;
 		value_start = p;
 		while (1) {
-		    while (isdigit((unsigned char)*p))
+		    while (isdigit(UCH(*p)))
 			p++;
 		    value_end = p;
 		    p = LYSkipCBlanks(p);
@@ -933,9 +933,9 @@ PRIVATE void LYProcessSetCookies ARGS6(
 			break;
 		    if (*p == ',') {
 			cp = LYSkipCBlanks(p + 1);
-			if (*cp != '\0' && isdigit((unsigned char)*cp)) {
+			if (*cp != '\0' && isdigit(UCH(*cp))) {
 			    cp1 = cp;
-			    while (isdigit((unsigned char)*cp1))
+			    while (isdigit(UCH(*cp1)))
 				cp1++;
 			    cp1 = LYSkipCBlanks(cp1);
 			    if (*cp1 == '\0' || *cp1 == ',' || *cp1 == ';') {
@@ -951,11 +951,11 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		     *	Trim trailing spaces.
 		     */
 		    if ((value_end > value_start) &&
-			isspace((unsigned char)*(value_end - 1))) {
+			isspace(UCH(*(value_end - 1)))) {
 			value_end--;
 			while ((value_end > (value_start + 1)) &&
-			       isspace((unsigned char)*value_end) &&
-			       isspace((unsigned char)*(value_end - 1))) {
+			       isspace(UCH(*value_end)) &&
+			       isspace(UCH(*(value_end - 1)))) {
 			    value_end--;
 			}
 		    }
@@ -995,11 +995,11 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		 *  Trim trailing spaces.
 		 */
 		if ((value_end > value_start) &&
-		    isspace((unsigned char)*(value_end - 1))) {
+		    isspace(UCH(*(value_end - 1)))) {
 		    value_end--;
 		    while ((value_end > (value_start + 1)) &&
-			   isspace((unsigned char)*value_end) &&
-			   isspace((unsigned char)*(value_end - 1))) {
+			   isspace(UCH(*value_end)) &&
+			   isspace(UCH(*(value_end - 1)))) {
 			value_end--;
 		    }
 		}
@@ -1123,7 +1123,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 			if (ptr != NULL && ptr[1] != '\0') {
 			    ptr = value;
 			    while (*ptr == '.' ||
-				   isdigit((unsigned char)*ptr))
+				   isdigit(UCH(*ptr)))
 				ptr++;
 			    if (*ptr != '\0') {
 				CTRACE((tfp,
@@ -1163,7 +1163,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		    cur_cookie->PortList == NULL) {
 		    char *cp = value;
 		    while ((*cp != '\0') &&
-			   (isdigit((unsigned char)*cp) ||
+			   (isdigit(UCH(*cp)) ||
 			    *cp == ',' || *cp == ' ')) {
 			cp++;
 		    }
@@ -1366,7 +1366,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	 *  Get the attribute name.
 	 */
 	attr_start = p;
-	while (*p != '\0' && !isspace((unsigned char)*p) &&
+	while (*p != '\0' && !isspace(UCH(*p)) &&
 	       *p != '=' && *p != ';' && *p != ',')
 	    p++;
 	attr_end = p;
@@ -1401,7 +1401,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		!strncasecomp(attr_start, "Expires", 7)) {
 		int spaces = 6;
 		value_start = p;
-		if (isdigit((unsigned char)*p)) {
+		if (isdigit(UCH(*p))) {
 		    /*
 		     *	No alphabetic day field. - FM
 		     */
@@ -1410,18 +1410,18 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		    /*
 		     *	Skip the alphabetic day field. - FM
 		     */
-		    while (*p != '\0' && isalpha((unsigned char)*p)) {
+		    while (*p != '\0' && isalpha(UCH(*p))) {
 			p++;
 		    }
-		    while (*p == ',' || isspace((unsigned char)*p)) {
+		    while (*p == ',' || isspace(UCH(*p))) {
 			p++;
 		    }
 		    spaces--;
 		}
 		while (*p != '\0' && *p != ';' && *p != ',' && spaces) {
 		    p++;
-		    if (isspace((unsigned char)*p)) {
-			while (isspace((unsigned char)*(p + 1)))
+		    if (isspace(UCH(*p))) {
+			while (isspace(UCH(*(p + 1))))
 			    p++;
 			spaces--;
 		    } else if (*p == '-') {
@@ -1438,14 +1438,14 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	     */
 	    } else if ((attr_end - attr_start) == 4 &&
 		       !strncasecomp(attr_start, "port", 4) &&
-		       isdigit((unsigned char)*p)) {
+		       isdigit(UCH(*p))) {
 		/*
 		 *  The value starts as an unquoted number.
 		 */
 		CONST char *cp, *cp1;
 		value_start = p;
 		while (1) {
-		    while (isdigit((unsigned char)*p))
+		    while (isdigit(UCH(*p)))
 			p++;
 		    value_end = p;
 		    p = LYSkipCBlanks(p);
@@ -1453,9 +1453,9 @@ PRIVATE void LYProcessSetCookies ARGS6(
 			break;
 		    if (*p == ',') {
 			cp = LYSkipCBlanks(p + 1);
-			if (*cp != '\0' && isdigit((unsigned char)*cp)) {
+			if (*cp != '\0' && isdigit(UCH(*cp))) {
 			    cp1 = cp;
-			    while (isdigit((unsigned char)*cp1))
+			    while (isdigit(UCH(*cp1)))
 				cp1++;
 			    cp1 = LYSkipCBlanks(cp1);
 			    if (*cp1 == '\0' || *cp1 == ',' || *cp1 == ';') {
@@ -1471,11 +1471,11 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		     *	Trim trailing spaces.
 		     */
 		    if ((value_end > value_start) &&
-			isspace((unsigned char)*(value_end - 1))) {
+			isspace(UCH(*(value_end - 1)))) {
 			value_end--;
 			while ((value_end > (value_start + 1)) &&
-			       isspace((unsigned char)*value_end) &&
-			       isspace((unsigned char)*(value_end - 1))) {
+			       isspace(UCH(*value_end)) &&
+			       isspace(UCH(*(value_end - 1)))) {
 			    value_end--;
 			}
 		    }
@@ -1515,11 +1515,11 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		 *  Trim trailing spaces.
 		 */
 		if ((value_end > value_start) &&
-		    isspace((unsigned char)*(value_end - 1))) {
+		    isspace(UCH(*(value_end - 1)))) {
 		    value_end--;
 		    while ((value_end > (value_start + 1)) &&
-			   isspace((unsigned char)*value_end) &&
-			   isspace((unsigned char)*(value_end - 1))) {
+			   isspace(UCH(*value_end)) &&
+			   isspace(UCH(*(value_end - 1)))) {
 			value_end--;
 		    }
 		}
@@ -1643,7 +1643,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 			if (ptr != NULL && ptr[1] != '\0') {
 			    ptr = value;
 			    while (*ptr == '.' ||
-				   isdigit((unsigned char)*ptr))
+				   isdigit(UCH(*ptr)))
 				ptr++;
 			    if (*ptr != '\0') {
 				CTRACE((tfp,
@@ -1683,7 +1683,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		    cur_cookie->PortList == NULL) {
 		    char *cp = value;
 		    while ((*cp != '\0') &&
-			   (isdigit((unsigned char)*cp) ||
+			   (isdigit(UCH(*cp)) ||
 			    *cp == ',' || *cp == ' ')) {
 			cp++;
 		    }
@@ -2436,8 +2436,8 @@ PRIVATE int LYHandleCookies ARGS4 (
 				return(HT_NO_DATA);
 
 			    case 'C':
-			    case 7:	/* Ctrl-G */
-			    case 3:	/* Ctrl-C */
+			    case LYCharINTERRUPT2:	/* Ctrl-G */
+			    case LYCharINTERRUPT1:	/* Ctrl-C */
 				/*
 				 *  Cancelled. - FM
 				 */

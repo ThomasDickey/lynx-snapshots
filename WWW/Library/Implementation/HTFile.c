@@ -264,7 +264,7 @@ PRIVATE void LYListFmtParse ARGS5(
 		if (s == end)
 			break;
 		start = ++s;
-		while (isdigit(*s) || *s == '.' || *s == '-' || *s == ' ' ||
+		while (isdigit(UCH(*s)) || *s == '.' || *s == '-' || *s == ' ' ||
 		    *s == '#' || *s == '+' || *s == '\'')
 			s++;
 		c = *s;		/* the format char. or \0 */
@@ -1037,7 +1037,7 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	    */
 	    BOOL given_is_8859
 		= (BOOL) (!strncmp(cp4, "iso-8859-", 9) &&
-		   isdigit((unsigned char)cp4[9]));
+		   isdigit(UCH(cp4[9])));
 	    BOOL given_is_8859like
 		= (BOOL) (given_is_8859 ||
 		   !strncmp(cp4, "windows-", 8) ||
@@ -1057,7 +1057,7 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	    if (given_is_8859) {
 		cp1 = &cp4[10];
 		while (*cp1 &&
-		       isdigit((unsigned char)(*cp1)))
+		       isdigit(UCH(*cp1)))
 		    cp1++;
 		*cp1 = '\0';
 	    }

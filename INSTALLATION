@@ -873,7 +873,7 @@ V. Compile instructions -- 386 DOS
     userdefs.h and lynx.cfg, which have unix-style end of lines. You would
     be well advised to use an editor that can handle end of lines terminated
     with a single LF character. You can also unpack the source code using
-    unzip386 or unzip with the -a switch to convert unix LF to dos CRLF.
+    unzip386 or unzip with the -a or -aa switch to convert unix LF to dos CRLF.
     That will make texts more readable under DOS. If you compile lynx
     regularly, you may automate the procedure by creating a batch file such
     as the following.

@@ -16,10 +16,10 @@
 #include <HTFont.h>
 
 /*
-**  Valid mane chars for tag parsing.
+**  Valid name chars for tag parsing.
 */
-#define IsNmStart(c) (isalpha((unsigned char)c))
-#define IsNmChar(c) (isalnum((unsigned char)c) || \
+#define IsNmStart(c) (isalpha(UCH(c)))
+#define IsNmChar(c) (isalnum(UCH(c)) || \
 		      c == '_' || c=='-' || c == '.' || c==':')
 
 

@@ -380,7 +380,7 @@ PRIVATE unsigned char inverse_translate ARGS1(
     } else {
 	return ((inv_translate && inv_translate[glyph]) ?
 				   inv_translate[glyph] :
-				   (unsigned char)(glyph & 0xff));
+				   UCH(glyph & 0xff));
     }
 }
 
@@ -424,7 +424,7 @@ PRIVATE int con_get_trans_old ARGS1(
 #ifdef NOTDEFINED
 	put_user((ch & ~0xff) ? 0 : ch, arg+i);
 #endif /* NOTDEFINED */
-	arg[i] = (unsigned char)((ch & ~0xff) ? 0 : ch);
+	arg[i] = UCH((ch & ~0xff) ? 0 : ch);
     }
     return 0;
 }
@@ -1224,7 +1224,7 @@ PUBLIC int UCTransChar ARGS3(
 
 #ifndef UC_NO_SHORTCUTS
     if (charset_in == charset_out)
-	return (unsigned char)ch_in;
+	return UCH(ch_in);
 #endif /* UC_NO_SHORTCUTS */
     if (charset_in < 0)
 	return -11;
@@ -1263,7 +1263,7 @@ PUBLIC int UCTransChar ARGS3(
 	}
     }
     UC_translate = set_translate(Gn);
-    unicode = UC_translate[(unsigned char)ch_in];
+    unicode = UC_translate[UCH(ch_in)];
     if (!isdefault) {
 	rc = conv_uni_to_pc(unicode, 0);
 	if (rc >= 0)
@@ -1289,16 +1289,16 @@ PUBLIC long int UCTransToUni ARGS2(
   unsigned char ch_iu;
   int UChndl_in;
 
-  ch_iu = (unsigned char)ch_in;
+  ch_iu = UCH(ch_in);
 #ifndef UC_NO_SHORTCUTS
     if (charset_in == LATIN1)
 	return ch_iu;
-    if ((unsigned char)ch_in < 128 && (unsigned char)ch_in >= 32)
+    if (UCH(ch_in) < 128 && UCH(ch_in) >= 32)
 	return ch_iu;
 #endif /* UC_NO_SHORTCUTS */
     if (charset_in < 0)
 	return -11;
-    if ((unsigned char)ch_in < 32 &&
+    if (UCH(ch_in) < 32 &&
 	LYCharSet_UC[charset_in].enc != UCT_ENC_8BIT_C0)
 	/*
 	 *  Don't translate C0 chars except for specific charsets.
@@ -1313,7 +1313,7 @@ PUBLIC long int UCTransToUni ARGS2(
     }
 
   UC_translate = set_translate(Gn);
-  unicode = UC_translate[(unsigned char)ch_in];
+  unicode = UC_translate[UCH(ch_in)];
 
   return unicode;
 }
@@ -1327,12 +1327,12 @@ PUBLIC int UCReverseTransChar ARGS3(
     int rc = -1;
     int UChndl_in, UChndl_out;
     int isdefault;
-    int i_ch = (unsigned char)ch_out;
+    int i_ch = UCH(ch_out);
     CONST u16 * ut;
 
 #ifndef UC_NO_SHORTCUTS
     if (charset_in == charset_out)
-	return (unsigned char)ch_out;
+	return UCH(ch_out);
 #endif /* UC_NO_SHORTCUTS */
     if (charset_in < 0)
 	return -11;
@@ -1425,7 +1425,7 @@ PUBLIC int UCTransCharStr ARGS6(
     }
 
     UC_translate = set_translate(Gn);
-    unicode = UC_translate[(unsigned char)ch_in];
+    unicode = UC_translate[UCH(ch_in)];
 
     if (chk_single_flag) {
 	if (!isdefault) {
@@ -1644,9 +1644,9 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 #endif
     if ((!strncasecomp(value, "ibm", 3) ||
 	 !strncasecomp(value, "cp-", 3)) &&
-	isdigit((unsigned char)value[3]) &&
-	isdigit((unsigned char)value[4]) &&
-	isdigit((unsigned char)value[5])) {
+	isdigit(UCH(value[3])) &&
+	isdigit(UCH(value[4])) &&
+	isdigit(UCH(value[5]))) {
 	/*
 	 * For "ibmNNN<...>" or "cp-NNN", try "cpNNN<...>"
 	 * if not yet found.  - KW & FM
@@ -1659,9 +1659,9 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	return getLYhndl_byCP("windows-", value + 3);
     }
     if (!strncasecomp(value, "windows-", 8) &&
-	isdigit((unsigned char)value[8]) &&
-	isdigit((unsigned char)value[9]) &&
-	isdigit((unsigned char)value[10])) {
+	isdigit(UCH(value[8])) &&
+	isdigit(UCH(value[9])) &&
+	isdigit(UCH(value[10]))) {
 	/*
 	 * For "windows-NNN<...>", try "cpNNN<...>" - FM
 	 */
@@ -1813,20 +1813,20 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
 	s7 = SevenBitApproximations[i];
 	s8 = ISO_Latin1[i];
 	*p = s7;
-	if (s8 && (unsigned char)(*s8) >= 160 && strlen(s8) == 1) {
+	if (s8 && UCH(*s8) >= 160 && strlen(s8) == 1) {
 	    /*
 	     *	We have an entity that is mapped to
 	     *	one valid eightbit latin1 char.
 	     */
-	    if (ti[(unsigned char)(*s8) - 160] >= lowest8 &&
-		!(s7[0] == ti[(unsigned char)(*s8) - 160] &&
+	    if (ti[UCH(*s8) - 160] >= lowest8 &&
+		!(s7[0] == ti[UCH(*s8) - 160] &&
 		s7[1] == '\0')) {
 		/*
 		 *  ...which in turn is mapped, by our "new method",
 		 *   to another valid eightbit char for this new
 		 *   charset: either to itself...
 		 */
-		if (ti[(unsigned char)(*s8) - 160] == (unsigned char)(*s8)) {
+		if (ti[UCH(*s8) - 160] == UCH(*s8)) {
 		    *p = s8;
 		} else {
 		    /*
@@ -1840,7 +1840,7 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
 			FREE(prepl);
 			return NULL;
 		    }
-		    (*p)[0] = ti[(unsigned char)(*s8) - 160];
+		    (*p)[0] = ti[UCH(*s8) - 160];
 		    (*p)[1] = '\0';
 #else
 		    /*
@@ -1851,18 +1851,18 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
 		     */
 		    static char dummy[2];	/* one char dummy string */
 
-		    dummy[0] = ti[(unsigned char)(*s8) - 160];
+		    dummy[0] = ti[UCH(*s8) - 160];
 		    *p = HTAtom_name(HTAtom_for(dummy));
 #endif /* NOTDEFINED */
 		}
 		changed = 1;
-	    } else if (tp[(unsigned char)(*s8) - 160] &&
-		       strcmp(s7, tp[(unsigned char)(*s8) - 160])) {
+	    } else if (tp[UCH(*s8) - 160] &&
+		       strcmp(s7, tp[UCH(*s8) - 160])) {
 		/*
 		 *  ...or which is mapped, by our "new method",
 		 *  to a replacement string for this new charset.
 		 */
-		*p = tp[(unsigned char)(*s8) - 160];
+		*p = tp[UCH(*s8) - 160];
 		changed = 1;
 	    }
 	}

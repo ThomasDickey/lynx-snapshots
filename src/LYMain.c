@@ -169,7 +169,6 @@ PUBLIC BOOLEAN LYforce_no_cache = FALSE;
 PUBLIC BOOLEAN LYoverride_no_cache = FALSE;/*override no-cache b/c history etc*/
 PUBLIC BOOLEAN LYinternal_flag = FALSE; /* override no-cache b/c internal link*/
 PUBLIC BOOLEAN LYresubmit_posts = ALWAYS_RESUBMIT_POSTS;
-PUBLIC BOOLEAN LYshow_kb_rate = TRUE;
 PUBLIC BOOLEAN LYUserSpecifiedURL = TRUE;/* always TRUE  the first time */
 PUBLIC BOOLEAN LYJumpFileURL = FALSE;	 /* always FALSE the first time */
 PUBLIC BOOLEAN jump_buffer = JUMPBUFFER; /* TRUE if offering default shortcut */
@@ -429,6 +428,7 @@ BOOLEAN persistent_cookies = FALSE;	/* disabled by default! */
 PUBLIC char *LYCookieFile = NULL;	/* cookie read file */
 PUBLIC char *LYCookieSaveFile = NULL;	/* cookie save file */
 #endif /* EXP_PERSISTENT_COOKIES */
+PUBLIC int LYTransferRate = rateBYTES;
 PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 PUBLIC BOOLEAN LYNoISMAPifUSEMAP = FALSE; /* Omit ISMAP link if MAP present? */
 PUBLIC int LYHiddenLinks = HIDDENLINKS_SEPARATE; /* Show hidden links? */
@@ -2895,8 +2895,7 @@ PRIVATE int version_fun ARGS1(
 {
     SetOutputMode( O_TEXT );
 
-    printf("\n");
-    printf(gettext("\n%s Version %s (%s)\n"),
+    printf(gettext("%s Version %s (%s)\n"),
 	  LYNX_NAME, LYNX_VERSION,
 	  LYVersionDate());
 #ifdef SYSTEM_NAME
@@ -3432,6 +3431,12 @@ with the PREV_DOC command or from the History List"
       "show_cursor",	4|TOGGLE_ARG,		&LYUseDefShoCur,
       "toggles hiding of the cursor in the lower right corner"
    ),
+#ifdef EXP_READPROGRESS
+   PARSE_SET(
+      "show_rate",	4|TOGGLE_ARG,		&LYTransferRate,
+      "toggles display of transfer rate"
+   ),
+#endif
    PARSE_SET(
       "soft_dquotes",	4|TOGGLE_ARG,		&soft_dquotes,
       "toggles emulation of the old Netscape and Mosaic bug which\n\

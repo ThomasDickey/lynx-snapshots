@@ -493,6 +493,7 @@ AC_CHECK_HEADERS( \
 	sys/filio.h \
 	sys/ioctl.h \
 	sys/param.h \
+	sys/timeb.h \
 	sys/time.h \
 	syslog.h \
 	termio.h \
@@ -518,6 +519,7 @@ CF_REMOVE_BROKEN
 CF_FUNC_LSTAT
 AC_CHECK_FUNCS( \
 	cuserid \
+	ftime \
 	getcwd \
 	getgroups \
 	gettimeofday \

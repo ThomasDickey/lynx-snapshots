@@ -616,9 +616,9 @@ PRIVATE char * author_address ARGS1(char *,email)
     if ((at = strrchr(address, '@')) && at > address) {
 	p = (at - 1);
 	e = (at + 1);
-	while (p > address && !isspace((unsigned char)*p))
+	while (p > address && !isspace(UCH(*p)))
 	    p--;
-	while (*e && !isspace((unsigned char)*e))
+	while (*e && !isspace(UCH(*e)))
 	    e++;
 	*e = 0;
 	return HTStrip(p);
@@ -628,10 +628,10 @@ PRIVATE char * author_address ARGS1(char *,email)
     **	Default to the first word.
     */
     p = address;
-    while (isspace((unsigned char)*p))
+    while (isspace(UCH(*p)))
 	p++; /* find first non-space */
     e = p;
-    while (!isspace((unsigned char)*e) && *e != '\0')
+    while (!isspace(UCH(*e)) && *e != '\0')
 	e++; /* find next space or end */
     *e = '\0'; /* terminate space */
 
@@ -799,7 +799,7 @@ PRIVATE BOOLEAN valid_header ARGS1(
     */
     colon = strchr(line, ':');
     space = strchr(line, ' ');
-    if (isalpha(line[0]) && colon && space == colon + 1)
+    if (isalpha(UCH(line[0])) && colon && space == colon + 1)
 	return(TRUE);
 
     /*
@@ -1085,11 +1085,11 @@ PRIVATE int read_article ARGS1(
 		    /*
 		    **	End of article?
 		    */
-		    if ((unsigned char)full_line[1] < ' ') {
+		    if (UCH(full_line[1]) < ' ') {
 			done = YES;
 			break;
 		    }
-		} else if ((unsigned char)full_line[0] < ' ') {
+		} else if (UCH(full_line[0]) < ' ') {
 		    break;		/* End of Header? */
 
 		} else if (match(full_line, "SUBJECT:")) {
@@ -1401,7 +1401,7 @@ PRIVATE int read_article ARGS1(
 		/*
 		**  End of article?
 		*/
-		if ((unsigned char)line[1] < ' ') {
+		if (UCH(line[1]) < ' ') {
 		    done = YES;
 		    break;
 		} else {			/* Line starts with dot */
@@ -1638,7 +1638,7 @@ PRIVATE int read_list ARGS1(char *, arg)
 		/*
 		**  End of article?
 		*/
-		if ((unsigned char)line[1] < ' ') {
+		if (UCH(line[1]) < ' ') {
 		    done = YES;
 		    break;
 		} else {			/* Line starts with dot */
@@ -1838,7 +1838,7 @@ PRIVATE int read_group ARGS3(
 			/*
 			**  End of article?
 			*/
-			if ((unsigned char)line[1] < ' ') {
+			if (UCH(line[1]) < ' ') {
 			    done = YES;
 			    break;
 			} else {		/* Line starts with dot */
@@ -1947,7 +1947,7 @@ PRIVATE int read_group ARGS3(
 			    /*
 			    **	End of article?
 			    */
-			    done = (BOOL) ((unsigned char)line[1] < ' ');
+			    done = (BOOL) (UCH(line[1]) < ' ');
 			    break;
 
 			case 'S':
@@ -2413,7 +2413,7 @@ PRIVATE int HTLoadNews ARGS4(
 		LYstrncpy(groupName, p1, sizeof(groupName) - 1);
 		*slash = '/';
 		(void)sscanf(slash+1, "%d-%d", &first, &last);
-		if ((first > 0) && (isdigit(*(slash+1))) &&
+		if ((first > 0) && (isdigit(UCH(*(slash+1)))) &&
 		    (strchr(slash+1, '-') == NULL || first == last)) {
 		    /*
 		    **	We got a number greater than 0, which will be

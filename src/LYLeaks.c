@@ -122,7 +122,7 @@ PUBLIC void LYLeaks NOARGS
 		 i_counter < ALp_head->st_Bytes &&
 		 i_counter < MAX_CONTENT_LENGTH;
 		 i_counter++) {
-		if (isprint(value[i_counter])) {
+		if (isprint(UCH(value[i_counter]))) {
 		    fprintf(Fp_leakagesink, "%c", value[i_counter]);
 		} else {
 		    fprintf(Fp_leakagesink, "|");
