@@ -41,7 +41,7 @@ PRIVATE HTAAUser *decompose_auth_string ARGS2(char *,		authstring,
     static char *cleartext = NULL;
     char *username = NULL;
     char *password = NULL;
-    char *inet_addr = NULL;
+    char *i_net_adr = NULL;
     char *timestamp = NULL;
     char *browsers_key = NULL;
 
@@ -111,8 +111,8 @@ PRIVATE HTAAUser *decompose_auth_string ARGS2(char *,		authstring,
 ** Extract rest of the fields
 */
     if (scheme == HTAA_PUBKEY) {
-	if (                          !(inet_addr   =strchr(password, ':')) || 
-	    (*(inet_addr++)   ='\0'), !(timestamp   =strchr(inet_addr,':')) ||
+	if (                          !(i_net_adr   =strchr(password, ':')) || 
+	    (*(i_net_adr++)   ='\0'), !(timestamp   =strchr(i_net_adr,':')) ||
 	    (*(timestamp++)   ='\0'), !(browsers_key=strchr(timestamp,':')) ||
 	    (*(browsers_key++)='\0')) {
 
@@ -128,7 +128,7 @@ PRIVATE HTAAUser *decompose_auth_string ARGS2(char *,		authstring,
 */
     user->username   = username;
     user->password   = password;
-    user->inet_addr  = inet_addr;
+    user->inet_addr  = i_net_adr;
     user->timestamp  = timestamp;
     user->secret_key = browsers_key;
 
@@ -140,7 +140,7 @@ PRIVATE HTAAUser *decompose_auth_string ARGS2(char *,		authstring,
 	else
 	    fprintf(stderr, "decompose_auth_string: %s (%s,%s,%s,%s,%s)\n",
 		    "Pubkey scheme authentication string:",
-		    username, password, inet_addr, timestamp, browsers_key);
+		    username, password, i_net_adr, timestamp, browsers_key);
     }
     
     return user;
@@ -154,7 +154,7 @@ PRIVATE BOOL HTAA_checkTimeStamp ARGS1(CONST char *, timestamp)
 }
 
 
-PRIVATE BOOL HTAA_checkInetAddress ARGS1(CONST char *, inet_addr)
+PRIVATE BOOL HTAA_checkInetAddress ARGS1(CONST char *, i_net_adr)
 {
     return NO;		/* This is just a stub */
 }

@@ -701,6 +701,8 @@ PRIVATE void HTML_start_element ARGS6(
 	      ElementNumber == HTML_BASE)) {
 	    return;
 	}
+    } else if (!me->text) {
+	UPDATE_STYLE;
     }
 
 #ifdef EXP_CHARTRANS
@@ -774,16 +776,15 @@ PRIVATE void HTML_start_element ARGS6(
 	me->inStyle[element_number]=1; /* this is a goodthing(tm) */
 #endif
 
+    /*
+     *  Handle the start tag. - FM
+     */
     switch (ElementNumber) {
 
     case HTML_HTML:
-	if (!me->text)
-	    UPDATE_STYLE;
 	break;
 
     case HTML_HEAD:
-	if (!me->text)
-	    UPDATE_STYLE;
 	break;
 
     case HTML_BASE:
@@ -889,22 +890,16 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_META:
-        if (!me->text)
-	    UPDATE_STYLE;
 	if (present)
 	    LYHandleMETA(me, present, value, (char **)&include);
 	break;
 
     case HTML_TITLE:
-	if (!me->text)
-	    UPDATE_STYLE;
         HTChunkClear(&me->title);
 	break;
 
     case HTML_LINK:
 	intern_flag = FALSE;
-	if (!me->text)
-	    UPDATE_STYLE;
 	if (present && present[HTML_LINK_HREF]) {
 	    CHECK_FOR_INTERN(value[HTML_LINK_HREF]);
 	    /*
@@ -1246,8 +1241,6 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_ISINDEX:
-	if (!me->text)
-	    UPDATE_STYLE;
 	if (((present)) &&
 	    ((present[HTML_ISINDEX_HREF] && value[HTML_ISINDEX_HREF]) ||
 	     (present[HTML_ISINDEX_ACTION] && value[HTML_ISINDEX_ACTION]))) {
@@ -1329,8 +1322,6 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_NEXTID:
-	if (!me->text)
-	    UPDATE_STYLE;
     	/* if (present && present[NEXTID_N] && value[NEXTID_N])
 		HText_setNextId(me->text, atoi(value[NEXTID_N])); */
     	break;
@@ -1340,8 +1331,6 @@ PRIVATE void HTML_start_element ARGS6(
 	 *  We're getting it as Litteral text, which, for now,
 	 *  we'll just ignore. - FM
 	 */
-	if (!me->text)
-	    UPDATE_STYLE;
 	HTChunkClear(&me->style_block);
 	break;
 
@@ -1350,27 +1339,19 @@ PRIVATE void HTML_start_element ARGS6(
 	 *  We're getting it as Litteral text, which, for now,
 	 *  we'll just ignore. - FM
 	 */
-	if (!me->text)
-	    UPDATE_STYLE;
 	HTChunkClear(&me->script);
 	break;
 
     case HTML_BODY:
-	if (!me->text)
-	    UPDATE_STYLE;
 	CHECK_ID(HTML_BODY_ID);
 	if (HText_hasToolbar(me->text))
 	    HText_appendParagraph(me->text);
 	break;
 
     case HTML_FRAMESET:
-	if (!me->text)
-	    UPDATE_STYLE;
 	break;
 
     case HTML_FRAME:
-	if (!me->text)
-	    UPDATE_STYLE;
 	if (present && present[HTML_FRAME_NAME] &&
 	    value[HTML_FRAME_NAME] && *value[HTML_FRAME_NAME]) {
 	    StrAllocCopy(id_string, value[HTML_FRAME_NAME]);
@@ -1447,15 +1428,11 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_NOFRAMES:
-	if (!me->text)
-	    UPDATE_STYLE;
 	LYEnsureDoubleSpace(me);
 	LYResetParagraphAlignment(me);
 	break;
 
     case HTML_IFRAME:
-	if (!me->text)
-	    UPDATE_STYLE;
 	if (present && present[HTML_IFRAME_NAME] &&
 	    value[HTML_IFRAME_NAME] && *value[HTML_IFRAME_NAME]) {
 	    StrAllocCopy(id_string, value[HTML_IFRAME_NAME]);
@@ -1620,8 +1597,6 @@ PRIVATE void HTML_start_element ARGS6(
 	     me->sp[0].tag_number == HTML_DIR)) {
 	    if (HTML_dtd.tags[HTML_LH].contents == SGML_EMPTY) {
 		ElementNumber = HTML_LH;
-		if (!me->text)
-		    UPDATE_STYLE;
 	    } else {
 		me->new_style = me->sp[0].style;
 		ElementNumber = me->sp[0].tag_number;
@@ -1990,13 +1965,9 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_BASEFONT:
-	if (!me->text)
-	    UPDATE_STYLE;
 	break;
 
     case HTML_FONT:
-	if (!me->text)
-	    UPDATE_STYLE;
 
         /*
 	 *  FONT *may* have been declared SGML_EMPTY in HTMLDTD.c, and
@@ -2068,16 +2039,12 @@ PRIVATE void HTML_start_element ARGS6(
     case HTML_SUP:
     case HTML_TT:
     case HTML_VAR:
-        if (!me->text)
-	    UPDATE_STYLE;
 	CHECK_ID(HTML_GEN_ID);
 	break; /* ignore */
 
     case HTML_DEL:
     case HTML_S:
     case HTML_STRIKE:
-        if (!me->text)
-	    UPDATE_STYLE;
 	CHECK_ID(HTML_GEN_ID);
 	if (me->inUnderline == FALSE)
 	    HText_appendCharacter(me->text, LY_UNDERLINE_START_CHAR);
@@ -2089,8 +2056,6 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_INS:
-        if (!me->text)
-	    UPDATE_STYLE;
 	CHECK_ID(HTML_GEN_ID);
 	if (me->inUnderline == FALSE)
 	    HText_appendCharacter(me->text, LY_UNDERLINE_START_CHAR);
@@ -2102,8 +2067,6 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_Q:
-	if (!me->text)
-	    UPDATE_STYLE;
 	CHECK_ID(HTML_GEN_ID);
         /*
 	 *  Should check LANG and/or DIR attributes, and the
@@ -2120,11 +2083,15 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_PRE:				/* Formatted text */
-        if (!HText_PreviousLineSize(me->text, FALSE))
-	    me->inPRE = FALSE;
-	else
-            me->inPRE = TRUE;
-    case HTML_LISTING:				/* Litteral text */
+        /*
+	**  Set our inPRE flag to FALSE so that a newline
+	**  immediately following the PRE start tag will
+	**  be ignored.  HTML_put_character() will set it
+	**  to TRUE when the first character within the
+	**  PRE block is received. - FM
+	*/
+	me->inPRE = FALSE;
+    case HTML_LISTING:				/* Literal text */
     case HTML_XMP:
     case HTML_PLAINTEXT:
 	change_paragraph_style(me, styles[ElementNumber]);
@@ -2231,8 +2198,6 @@ PRIVATE void HTML_start_element ARGS6(
         break;
 
     case HTML_DT:
-	if (!me->text)
-	    UPDATE_STYLE;
 	CHECK_ID(HTML_GEN_ID);
         if (!me->style_change) {
 	    HText_appendParagraph(me->text);
@@ -2243,8 +2208,6 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_DD:
-	if (!me->text)
-	    UPDATE_STYLE;
 	CHECK_ID(HTML_GEN_ID);
 	HText_setLastChar(me->text, ' ');  /* absorb white space */
         if (!me->style_change)  {
@@ -2581,8 +2544,6 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_SPAN:
-	if (!me->text)
-	    UPDATE_STYLE;
 	CHECK_ID(HTML_GEN_ID);
         /*
 	 *  Should check LANG and/or DIR attributes, and the
@@ -2592,8 +2553,6 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_BDO:
-	if (!me->text)
-	    UPDATE_STYLE;
 	CHECK_ID(HTML_GEN_ID);
         /*
 	 *  Should check DIR (and LANG) attributes, and the
@@ -2603,8 +2562,6 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_SPOT:
-	if (!me->text)
-	    UPDATE_STYLE;
 	CHECK_ID(HTML_GEN_ID);
 	break;
 
@@ -2642,8 +2599,6 @@ PRIVATE void HTML_start_element ARGS6(
 	 *  Set to know we are in an anchor.
 	 */
 	me->inA = TRUE;
-	if (!me->text)
-	    UPDATE_STYLE;
 
 	/*
 	 *  Load id_string if we have an ID or NAME. - FM
@@ -2834,8 +2789,6 @@ PRIVATE void HTML_start_element ARGS6(
     	break;
 
     case HTML_IMG:			/* Images */
-	if (!me->text)
-	    UPDATE_STYLE;
 	/*
 	 *  If we're in an anchor, get the destination, and if it's a
 	 *  clickable image for the current anchor, set our flags for
@@ -3527,8 +3480,6 @@ PRIVATE void HTML_start_element ARGS6(
 
     case HTML_FIG:
         me->inFIG = TRUE;
-	if (!me->text)
-	    UPDATE_STYLE;
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
 	    HTML_end_element(me, HTML_A, (char **)&include);
@@ -3595,8 +3546,6 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_OBJECT:
-	if (!me->text)
-	    UPDATE_STYLE;
 	if (!me->object_started) {
 	    /*
 	     *  This is an outer OBJECT start tag,
@@ -3773,12 +3722,8 @@ PRIVATE void HTML_start_element ARGS6(
 					NULL,			/* Tag */
 					href,			/* Addresss */
 					INTERN_LT);		/* Type */
-		if (!me->text) {
-		    UPDATE_STYLE;
-		} else {
-		    HTML_put_character(me, ' ');
-		    HText_appendCharacter(me->text, '+');
-		}
+		HTML_put_character(me, ' ');
+		HText_appendCharacter(me->text, '+');
 		me->CurrentANum = HText_beginAnchor(me->text,
 						    me->inUnderline,
 						    me->CurrentA);
@@ -3798,8 +3743,6 @@ PRIVATE void HTML_start_element ARGS6(
     case HTML_APPLET:
         me->inAPPLET = TRUE;
 	me->inAPPLETwithP = FALSE;
-	if (!me->text)
-	    UPDATE_STYLE;
 	HTML_put_character(me, ' ');  /* space char may be ignored */
 	/*
 	 *  Load id_string if we have an ID or NAME. - FM
@@ -3990,8 +3933,6 @@ PRIVATE void HTML_start_element ARGS6(
 			         me->inBASE) ?
 			       me->base_href : me->node_anchor->address));
 
-	    if (!me->text)
-	        UPDATE_STYLE;
 	    if (me->inA) {
 		if (me->inBoldA == TRUE && me->inBoldH == FALSE)
 		    HText_appendCharacter(me->text, LY_BOLD_END_CHAR);
@@ -4025,8 +3966,6 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_EMBED:
-	if (!me->text)
-	    UPDATE_STYLE;
 	if (pseudo_inline_alts || clickable_images)
 	    HTML_put_character(me, ' ');  /* space char may be ignored */
 	/*
@@ -4156,8 +4095,6 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_CREDIT:
-	if (!me->text)
-	    UPDATE_STYLE;
 	LYEnsureDoubleSpace(me);
 	LYResetParagraphAlignment(me);
 	me->inCREDIT = TRUE;
@@ -4189,8 +4126,6 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_CAPTION:
-	if (!me->text)
-	    UPDATE_STYLE;
 	LYEnsureDoubleSpace(me);
 	LYResetParagraphAlignment(me);
 	me->inCAPTION = TRUE;
@@ -4231,8 +4166,6 @@ PRIVATE void HTML_start_element ARGS6(
 	    HTChildAnchor * source;
 	    HTAnchor *link_dest;
 
-	    if (!me->text)
-	        UPDATE_STYLE;
 	    /*
 	     *  FORM may have been declared SGML_EMPTY in HTMLDTD.c, and
 	     *  SGML_character() in SGML.c may check for a FORM end
@@ -4377,16 +4310,12 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_FIELDSET:
-	if (!me->text)
-	    UPDATE_STYLE;
 	LYEnsureDoubleSpace(me);
 	LYResetParagraphAlignment(me);
         CHECK_ID(HTML_FIELDSET_ID);
         break;
 
     case HTML_LEGEND:
-	if (!me->text)
-	    UPDATE_STYLE;
 	LYEnsureDoubleSpace(me);
 	LYResetParagraphAlignment(me);
         CHECK_ID(HTML_LEGEND_ID);
@@ -5144,8 +5073,6 @@ PRIVATE void HTML_start_element ARGS6(
 				id_string,		/* Tag */
 				NULL,			/* Addresss */
 				(HTLinkType*)0))) {	/* Type */
-		if (!me->text)
-		    UPDATE_STYLE;
 		HText_beginAnchor(me->text, me->inUnderline, ID_A);
 		HText_endAnchor(me->text, 0);
 		StrAllocCopy(me->textarea_id, id_string);
@@ -5228,8 +5155,6 @@ PRIVATE void HTML_start_element ARGS6(
 	     */
 	    me->inSELECT = TRUE;
 
-	    if (!me->text)
-	        UPDATE_STYLE;
 	    if (!(present && present[HTML_SELECT_NAME] &&
 		  value[HTML_SELECT_NAME]  && *value[HTML_SELECT_NAME])) {
 	        StrAllocCopy(name, "");
@@ -5322,8 +5247,6 @@ PRIVATE void HTML_start_element ARGS6(
 		break;
 	    }
 
-	    if (!me->text)
-	        UPDATE_STYLE;
 	    if (!me->first_option) {
 	        /*
 		 *  Finish the data off.
@@ -5729,11 +5652,9 @@ PRIVATE void HTML_start_element ARGS6(
 
     case HTML_MATH:
         /*
-	 *  We're getting it as Litteral text, which, until we can process
+	 *  We're getting it as Literal text, which, until we can process
 	 *  it, we'll display as is, within brackets to alert the user. - FM
 	 */
-	if (!me->text)
-	    UPDATE_STYLE;
 	HTChunkClear(&me->math);
 	CHECK_ID(HTML_GEN_ID);
 	break;
@@ -5957,7 +5878,7 @@ PRIVATE void HTML_end_element ARGS3(
     /*
      *  Check for unclosed TEXTAREA. - FM
      */
-    if (me->inTEXTAREA && element_number != HTML_TEXTAREA)
+    if (me->inTEXTAREA && element_number != HTML_TEXTAREA) {
         if (TRACE) {
 	    fprintf(stderr, "Bad HTML: Missing TEXTAREA end tag *****\n");
 	} else if (!me->inBadHTML) {
@@ -5965,6 +5886,11 @@ PRIVATE void HTML_end_element ARGS3(
 	    me->inBadHTML = TRUE;
 	    sleep(MessageSecs);
 	}
+    }
+
+    if (!me->text && !LYMapsOnly) {
+	UPDATE_STYLE;
+    }
 
     /*
      *  Handle the end tag. - FM
@@ -5972,8 +5898,6 @@ PRIVATE void HTML_end_element ARGS3(
     switch(element_number) {
 
     case HTML_HTML:
-        if (!me->text)
-	    UPDATE_STYLE;
 	if (me->inA || me->inSELECT || me->inTEXTAREA)
 	    if (TRACE) {
 	        fprintf(stderr,
@@ -5991,8 +5915,6 @@ PRIVATE void HTML_end_element ARGS3(
 	break;
 
     case HTML_HEAD:
-        if (!me->text)
-	    UPDATE_STYLE;
 	if (me->inBASE &&
 	    !strcmp(me->node_anchor->address, LYlist_temp_url())) {
 	    /*  If we are parsing the List Page, and have a BASE after
@@ -6012,8 +5934,6 @@ PRIVATE void HTML_end_element ARGS3(
         HTChunkTerminate(&me->title);
     	HTAnchor_setTitle(me->node_anchor, me->title.data);
         HTChunkClear(&me->title);
-        if (!me->text)
-	    UPDATE_STYLE;
 	/*
 	 *  Check if it's a bookmark file, and if so, and multiple
 	 *  bookmark support is on, or it's off but this isn't the
@@ -6058,8 +5978,6 @@ PRIVATE void HTML_end_element ARGS3(
 	break;
 
     case HTML_STYLE:
-	if (!me->text)
-	    UPDATE_STYLE;
     	/*
 	 *  We're getting it as Litteral text, which, for now,
 	 *  we'll just ignore. - FM
@@ -6073,8 +5991,6 @@ PRIVATE void HTML_end_element ARGS3(
 	break;
 
     case HTML_SCRIPT:
-	if (!me->text)
-	    UPDATE_STYLE;
     	/*
 	 *  We're getting it as Litteral text, which, for now,
 	 *  we'll just ignore. - FM
@@ -6088,8 +6004,6 @@ PRIVATE void HTML_end_element ARGS3(
 	break;
 
     case HTML_BODY:
-	if (!me->text)
-	    UPDATE_STYLE;
 	if (me->inA || me->inSELECT || me->inTEXTAREA)
 	    if (TRACE) {
 	        fprintf(stderr,
@@ -6107,15 +6021,11 @@ PRIVATE void HTML_end_element ARGS3(
 	break;
 
     case HTML_FRAMESET:
-	if (!me->text)
-	    UPDATE_STYLE;
 	change_paragraph_style(me, me->sp->style);  /* Often won't really change */
 	break;
 
     case HTML_NOFRAMES:
     case HTML_IFRAME:
-	if (!me->text)
-	    UPDATE_STYLE;
 	LYEnsureDoubleSpace(me);
 	LYResetParagraphAlignment(me);
 	change_paragraph_style(me, me->sp->style);  /* Often won't really change */
@@ -6259,8 +6169,6 @@ PRIVATE void HTML_end_element ARGS3(
         break;
 
     case HTML_FONT:
-	if (!me->text)
-	    UPDATE_STYLE;
 	me->inFONT = FALSE;
 	break;
 
@@ -6272,8 +6180,6 @@ PRIVATE void HTML_end_element ARGS3(
     case HTML_CITE:			/* Logical character highlighting */
     case HTML_EM:
     case HTML_STRONG:
-	if (!me->text)
-	    UPDATE_STYLE;
         /*
 	 *  Ignore any emphasis end tags if the
 	 *  Underline_Level is not set. - FM
@@ -6311,15 +6217,11 @@ PRIVATE void HTML_end_element ARGS3(
     case HTML_SUP:
     case HTML_TT:
     case HTML_VAR:
-	if (!me->text)
-	    UPDATE_STYLE;
 	break;
 
     case HTML_DEL:
     case HTML_S:
     case HTML_STRIKE:
-        if (!me->text)
-	    UPDATE_STYLE;
 	HTML_put_character(me, ' ');
 	if (me->inUnderline == FALSE)
 	    HText_appendCharacter(me->text, LY_UNDERLINE_START_CHAR);
@@ -6331,8 +6233,6 @@ PRIVATE void HTML_end_element ARGS3(
 	break;
 
     case HTML_INS:
-        if (!me->text)
-	    UPDATE_STYLE;
 	HTML_put_character(me, ' ');
 	if (me->inUnderline == FALSE)
 	    HText_appendCharacter(me->text, LY_UNDERLINE_START_CHAR);
@@ -6344,8 +6244,6 @@ PRIVATE void HTML_end_element ARGS3(
 	break;
 
     case HTML_Q:
-	if (!me->text)
-	    UPDATE_STYLE;
         if (me->Quote_Level > 0)
 	    me->Quote_Level--;
         /*
@@ -6362,12 +6260,13 @@ PRIVATE void HTML_end_element ARGS3(
         break;
 
     case HTML_PRE:				/* Formatted text */
+	/*
+	 *  Set to know that we are no longer in a PRE block.
+	 */
 	me->inPRE = FALSE;
     case HTML_LISTING:				/* Litteral text */
     case HTML_XMP:
     case HTML_PLAINTEXT:
-	if (!me->text)
-	    UPDATE_STYLE;
     	if (me->comment_start)
     	    HText_appendText(me->text, me->comment_start);
 	change_paragraph_style(me, me->sp->style);  /* Often won't really change */
@@ -6421,8 +6320,6 @@ PRIVATE void HTML_end_element ARGS3(
 	 *  attributes, and the me->node_anchor->charset and/or
 	 *  yet to be added structure elements. - FM
 	 */
-	if (!me->text)
-	    UPDATE_STYLE;
         break;
 
     case HTML_A:
@@ -6485,8 +6382,6 @@ PRIVATE void HTML_end_element ARGS3(
 	break;
 
     case HTML_OBJECT:
-	if (!me->text)
-	    UPDATE_STYLE;
 	/*
 	 *  Finish the data off.
 	 */
@@ -6870,8 +6765,6 @@ End_Object:
 	 */
 	me->inFORM = FALSE;
 
-	if (!me->text)
-	    UPDATE_STYLE;
 	HText_endForm(me->text);
 	/*
 	 *  If we are in a list and are on the first line
@@ -6885,16 +6778,12 @@ End_Object:
 	break;
 
     case HTML_FIELDSET:
-	if (!me->text)
-	    UPDATE_STYLE;
 	LYEnsureDoubleSpace(me);
 	LYResetParagraphAlignment(me);
 	change_paragraph_style(me, me->sp->style);  /* Often won't really change */
         break;
 
     case HTML_LEGEND:
-	if (!me->text)
-	    UPDATE_STYLE;
 	LYEnsureDoubleSpace(me);
 	LYResetParagraphAlignment(me);
 	change_paragraph_style(me, me->sp->style);  /* Often won't really change */
@@ -7059,8 +6948,6 @@ End_Object:
     case HTML_SELECT:
 	{
 	    char *ptr;
-	    if (!me->text)
-	        UPDATE_STYLE;
 
 	    /*
 	     *  Make sure we had a select start tag.
@@ -7224,8 +7111,6 @@ End_Object:
 	break;
 
     case HTML_MATH:
-	if (!me->text)
-	    UPDATE_STYLE;
         /*
 	 *  We're getting it as Litteral text, which, until we can process
 	 *  it, we'll display as is, within brackets to alert the user. - FM

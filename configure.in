@@ -283,7 +283,7 @@ esac
 dnl Get the actual value for $libdir, which we will compile into Lynx as part of
 dnl the config pathnames.
 eval cf_libdir=$libdir
-cf_libdir=`echo $cf_libdir | sed -e s@'^NONE/'@$ac_default_prefix/@`
+cf_libdir=`echo $cf_libdir | sed -e s@'^NONE/'@$prefix/@ -e s@'^NONE/'@$ac_default_prefix/@`
 
 AC_MSG_CHECKING(for location of config-file)
 LYNX_CFG_FILE=$cf_libdir/lynx.cfg
@@ -443,6 +443,14 @@ CF_ARG_ENABLE(font-switch,
 AC_MSG_RESULT($use_setfont)
 test $use_setfont = yes && AC_DEFINE(EXP_CHARTRANS_AUTOSWITCH)
 
+AC_MSG_CHECKING(if you want internal-links feature)
+CF_ARG_DISABLE(internal-links,
+[  --disable-internal-links handle following links to same doc differently],
+	[use_internal_links=no],
+	[use_internal_links=yes])
+AC_MSG_RESULT($use_internal_links)
+test $use_internal_links = no && AC_DEFINE(DONT_TRACK_INTERNAL_LINKS)
+
 AC_MSG_CHECKING(if you want to fork NSL requests)
 CF_ARG_ENABLE(nsl-fork,
 [  --enable-nsl-fork       fork NSL requests, allowing them to be aborted],
@@ -513,37 +521,37 @@ if test ".$use_dired" != ".no" ; then
 	[  --disable-dired-xpermit disable chmod/attrib commands],[AC_DEFINE(NO_CHANGE_EXECUTE_PERMS)])
 	AC_MSG_RESULT($enableval)
 
-	AC_MSG_CHECKING(if you wish to allow \"tar\" commands from DirEd)
+	AC_MSG_CHECKING(if you wish to allow "tar" commands from DirEd)
 	CF_ARG_DISABLE(dired-tar,
-	[  --disable-dired-tar     disable \"tar\" command],,[AC_DEFINE(OK_TAR)])
+	[  --disable-dired-tar     disable "tar" command],,[AC_DEFINE(OK_TAR)])
 	AC_MSG_RESULT($enableval)
 
-	AC_MSG_CHECKING(if you wish to allow \"uudecode\" commands from DirEd)
+	AC_MSG_CHECKING(if you wish to allow "uudecode" commands from DirEd)
 	CF_ARG_DISABLE(dired-uudecode,
-	[  --disable-dired-uudecode disable \"uudecode\" command],,[AC_DEFINE(OK_UUDECODE)])
+	[  --disable-dired-uudecode disable "uudecode" command],,[AC_DEFINE(OK_UUDECODE)])
 	AC_MSG_RESULT($enableval)
 
-	AC_MSG_CHECKING(if you wish to allow \"zip\" and \"unzip\" commands from DirEd)
+	AC_MSG_CHECKING(if you wish to allow "zip" and "unzip" commands from DirEd)
 	CF_ARG_DISABLE(dired-zip,
-	[  --disable-dired-zip     disable \"zip\", \"unzip\"  commands],,[AC_DEFINE(OK_ZIP)])
+	[  --disable-dired-zip     disable "zip", "unzip"  commands],,[AC_DEFINE(OK_ZIP)])
 	AC_MSG_RESULT($enableval)
 
-	AC_MSG_CHECKING(if you wish to allow \"gzip\" and \"gunzip\" commands from DirEd)
+	AC_MSG_CHECKING(if you wish to allow "gzip" and "gunzip" commands from DirEd)
 	CF_ARG_DISABLE(dired-gzip,
-	[  --disable-dired-gzip    disable \"gzip\", \"gunzip\" commands],,[AC_DEFINE(OK_GZIP)])
+	[  --disable-dired-gzip    disable "gzip", "gunzip" commands],,[AC_DEFINE(OK_GZIP)])
 	AC_MSG_RESULT($enableval)
 fi
 
 AC_MSG_CHECKING(if you want long-directory listings)
 CF_ARG_DISABLE(long-list,
-[  --disable-long-list     disable long \"ls -l\" directory listings],,
+[  --disable-long-list     disable long "ls -l" directory listings],,
 	[AC_DEFINE(LONG_LIST)])
 AC_MSG_RESULT($enableval)
 
 AC_MSG_CHECKING(if parent-directory references are permitted)
 CF_ARG_DISABLE(parent-dir-refs,
 [  --disable-parent-dir-refs
-                          disable \"Up-to\" links in directory listings],
+                          disable "Up-to" links in directory listings],
 	[AC_DEFINE(NO_PARENT_DIR_REFERENCE)])
 AC_MSG_RESULT($enableval)
 

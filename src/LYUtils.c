@@ -1818,7 +1818,6 @@ PUBLIC void statusline ARGS1(
 {
     char buffer[256];
     unsigned char *temp = NULL;
-    extern BOOLEAN no_statusline;
     int max_length, len, i, j;
     unsigned char k;
 
@@ -2183,7 +2182,7 @@ PUBLIC BOOLEAN LYisLocalFile ARGS1(
 	char *,		filename)
 {
     char *host = NULL;
-    char *access = NULL;
+    char *acc_method = NULL;
     char *cp;
 
     if (!filename)
@@ -2198,8 +2197,8 @@ PUBLIC BOOLEAN LYisLocalFile ARGS1(
     if ((cp=strchr(host, ':')) != NULL)
         *cp = '\0';
 
-    if ((access = HTParse(filename, "", PARSE_ACCESS))) {
-        if (0==strcmp("file", access) &&
+    if ((acc_method = HTParse(filename, "", PARSE_ACCESS))) {
+        if (0==strcmp("file", acc_method) &&
 	    (0==strcmp(host, "localhost") ||
 #ifdef VMS
              0==strcasecomp(host, HTHostName())))
@@ -2208,13 +2207,13 @@ PUBLIC BOOLEAN LYisLocalFile ARGS1(
 #endif /* VMS */
         {
 	    FREE(host);
-	    FREE(access);
+	    FREE(acc_method);
 	    return YES;
 	}
     }
 
     FREE(host);
-    FREE(access);
+    FREE(acc_method);
     return NO;
 }
 
@@ -2853,6 +2852,10 @@ PUBLIC char * quote_pathname ARGS1(
     return result;
 }
 
+#if HAVE_UTMP
+extern char *ttyname PARAMS((int fd));
+#endif
+
 /*
  *  Checks to see if the current process is attached
  *  via a terminal in the local domain.
@@ -2867,7 +2870,6 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
     FILE *fp;
     struct utmp me;
     char *cp, *mytty = NULL;
-    extern char *ttyname PARAMS((int fd));
 
     if ((cp=ttyname(0)))
 	mytty = strrchr(cp, '/');
@@ -5131,7 +5133,7 @@ PUBLIC BOOLEAN LYPathOffHomeOK ARGS2(
  *  This function appends fname to the home path and returns
  *  the full path and filename.  The fname string can be just
  *  a filename (e.g., "lynx_bookmarks.html"), or include a
- *  subirectory off the home directory, in which case fname
+ *  subdirectory off the home directory, in which case fname
  *  should begin with "./" (e.g., ./BM/lynx_bookmarks.html)
  *  Use LYPathOffHomeOK() to check and/or fix up fname before
  *  calling this function.  On VMS, the resultant full path

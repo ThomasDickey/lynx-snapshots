@@ -350,6 +350,7 @@ extern void HTInitInput PARAMS((int file_number));
 Get next character from buffer
 
  */
+extern int interrupted_in_htgetcharacter;
 extern char HTGetCharacter NOPARAMS;
 
 

@@ -21,6 +21,7 @@
 #include <string.h>
 #include "HTAAUtil.h"	/* Common parts of AA	*/
 #include "HTAAFile.h"	/* File routines	*/
+#include "HTAAServ.h"	/* Server routines	*/
 #include "HTPasswd.h"	/* Implemented here	*/
 
 #include "LYLeaks.h"
@@ -87,16 +88,15 @@ PUBLIC char *HTAA_encryptPasswd ARGS1(CONST char *, password)
     char *tmp;
     CONST char *cur = password;
     int len = strlen(password);
-    extern time_t theTime;
-    int random = (int)theTime;	/* This is random enough */
+    int randum = (int)theTime;	/* This is random enough */
 
     if (!(result = (char*)malloc(13*((strlen(password)+7)/8) + 1)))
 	outofmem(__FILE__, "HTAA_encryptPasswd");
 
     *result = (char)0;
     while (len > 0) {
-	salt[0] = salt_chars[random%64];
-	salt[1] = salt_chars[(random/64)%64];
+	salt[0] = salt_chars[randum%64];
+	salt[1] = salt_chars[(randum/64)%64];
 	salt[2] = (char)0;
 
 	strncpy(chunk, cur, 8);

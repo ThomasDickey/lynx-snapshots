@@ -35,10 +35,6 @@
 #define DIRECT_WAIS
 #endif /* VMS */
 
-#ifndef DEFAULT_WAIS_GATEWAY
-#define DEFAULT_WAIS_GATEWAY "http://www.w3.org:8001"
-#endif
-
 #include "HTUtils.h"
 #include "HTTP.h"
 #include "HTAlert.h"
@@ -127,8 +123,6 @@ PUBLIC BOOL HTRegisterProtocol ARGS1(
 **	forced in at link time.
 */
 #ifndef NO_INIT
-PRIVATE void HTAccessInit NOARGS			/* Call me once */
-{
 #ifdef GLOBALREF_IS_MACRO
 extern GLOBALREF (HTProtocol, HTTP);
 extern GLOBALREF (HTProtocol, HTTPS);
@@ -163,6 +157,9 @@ GLOBALREF  HTProtocol HTWAIS;
 #endif /* DIRECT_WAIS */
 #endif /* !DECNET */
 #endif /* GLOBALREF_IS_MACRO */
+
+PRIVATE void HTAccessInit NOARGS			/* Call me once */
+{
     HTRegisterProtocol(&HTTP);
     HTRegisterProtocol(&HTTPS);
     HTRegisterProtocol(&HTFile);
@@ -213,7 +210,7 @@ PUBLIC BOOL override_proxy ARGS1(
     char * at = NULL;
     char * host = NULL;
     char * Host = NULL;
-    char * access = NULL;
+    char * acc_method = NULL;
     int port = 0;
     int h_len = 0;
 
@@ -241,8 +238,8 @@ PUBLIC BOOL override_proxy ARGS1(
     }
     Host = (((at = strchr(host, '@')) != NULL) ? (at+1) : host);
 
-    if ((access = HTParse(addr, "", PARSE_ACCESS))) {
-        if (!strcmp("file", access) &&
+    if ((acc_method = HTParse(addr, "", PARSE_ACCESS))) {
+        if (!strcmp("file", acc_method) &&
 	    (!strcmp(Host, "localhost") ||
 #ifdef VMS
              !strcasecomp(Host, HTHostName())
@@ -251,10 +248,10 @@ PUBLIC BOOL override_proxy ARGS1(
 #endif /* VMS */
         )) {
 	    FREE(host);
-	    FREE(access);
+	    FREE(acc_method);
 	    return YES;
 	}
-	FREE(access);
+	FREE(acc_method);
     }
 
     if (!no_proxy) {
@@ -266,23 +263,23 @@ PUBLIC BOOL override_proxy ARGS1(
         *p++ = 0;                   		/* Chop off port */
         port = atoi(p);
     } else {					/* Use default port */
-        access = HTParse(addr, "", PARSE_ACCESS);
-        if (access != NULL) {
-            if      (!strcmp(access, "http"))		port = 80;
-            else if (!strcmp(access, "https"))		port = 443;
-            else if (!strcmp(access, "ftp"))		port = 21;
-            else if (!strcmp(access, "gopher"))		port = 70;
-            else if (!strcmp(access, "cso"))		port = 105;
-	    else if (!strcmp(access, "news"))		port = 119;
-	    else if (!strcmp(access, "nntp"))		port = 119;
-	    else if (!strcmp(access, "newspost"))	port = 119;
-	    else if (!strcmp(access, "newsreply"))	port = 119;
-	    else if (!strcmp(access, "snews"))		port = 563;
-	    else if (!strcmp(access, "snewspost"))	port = 563;
-	    else if (!strcmp(access, "snewsreply"))	port = 563;
-	    else if (!strcmp(access, "wais"))		port = 210;
-	    else if (!strcmp(access, "finger"))		port = 79;
-            FREE(access);
+        acc_method = HTParse(addr, "", PARSE_ACCESS);
+        if (acc_method != NULL) {
+            if      (!strcmp(acc_method, "http"))	port = 80;
+            else if (!strcmp(acc_method, "https"))	port = 443;
+            else if (!strcmp(acc_method, "ftp"))	port = 21;
+            else if (!strcmp(acc_method, "gopher"))	port = 70;
+            else if (!strcmp(acc_method, "cso"))	port = 105;
+	    else if (!strcmp(acc_method, "news"))	port = 119;
+	    else if (!strcmp(acc_method, "nntp"))	port = 119;
+	    else if (!strcmp(acc_method, "newspost"))	port = 119;
+	    else if (!strcmp(acc_method, "newsreply"))	port = 119;
+	    else if (!strcmp(acc_method, "snews"))	port = 563;
+	    else if (!strcmp(acc_method, "snewspost"))	port = 563;
+	    else if (!strcmp(acc_method, "snewsreply"))	port = 563;
+	    else if (!strcmp(acc_method, "wais"))	port = 210;
+	    else if (!strcmp(acc_method, "finger"))	port = 79;
+            FREE(acc_method);
         }
     }
     if (!port)
@@ -343,7 +340,7 @@ PRIVATE int get_physical ARGS2(
 	CONST char *,		addr,
 	HTParentAnchor *,	anchor)
 {
-    char * access = NULL;	/* Name of access method */
+    char * acc_method = NULL;	/* Name of access method */
     char * physical = NULL;
     char * Server_addr = NULL;
 
@@ -372,7 +369,7 @@ PRIVATE int get_physical ARGS2(
     }
 #endif /* NO_RULES */
 
-    access =  HTParse(HTAnchor_physical(anchor),
+    acc_method =  HTParse(HTAnchor_physical(anchor),
     		"file:", PARSE_ACCESS);
 
     /*
@@ -387,7 +384,7 @@ PRIVATE int get_physical ARGS2(
     */
     using_proxy = NO;
 
-    if (!strcasecomp(access, "news")) {
+    if (!strcasecomp(acc_method, "news")) {
 	/*
 	**  News is different, so we need to check the name of the server,
 	**  as well as the default port for selective exclusions.
@@ -405,7 +402,7 @@ PRIVATE int get_physical ARGS2(
             StrAllocCat(Server_addr, (char *)getenv("NNTPSERVER"));
             StrAllocCat(Server_addr, ":119/");
          }
-    } else if (!strcasecomp(access, "wais")) {
+    } else if (!strcasecomp(acc_method, "wais")) {
     	/*
 	**  Wais also needs checking of the default port
 	**  for selective exclusions.
@@ -431,24 +428,24 @@ PRIVATE int get_physical ARGS2(
 	/*
 	**  Search for gateways.
 	*/
-	gateway_parameter = (char *)calloc(1, (strlen(access) + 20));
+	gateway_parameter = (char *)calloc(1, (strlen(acc_method) + 20));
 	if (gateway_parameter == NULL)
 	    outofmem(__FILE__, "HTLoad");
 	strcpy(gateway_parameter, "WWW_");
-	strcat(gateway_parameter, access);
+	strcat(gateway_parameter, acc_method);
 	strcat(gateway_parameter, "_GATEWAY");
 	gateway = (char *)getenv(gateway_parameter); /* coerce for decstation */
 
 	/*
 	**  Search for proxy servers.
 	*/
-	if (!strcmp(access, "file"))
+	if (!strcmp(acc_method, "file"))
 	    /*
 	    ** If we got to here, a file URL is for ftp on a remote host. - FM
 	    */
 	    strcpy(gateway_parameter, "ftp");
 	else
-	    strcpy(gateway_parameter, access);
+	    strcpy(gateway_parameter, acc_method);
         strcat(gateway_parameter, "_proxy");
 	proxy = (char *)getenv(gateway_parameter);
 	FREE(gateway_parameter);
@@ -458,12 +455,6 @@ PRIVATE int get_physical ARGS2(
 	if (TRACE && proxy)
 	    fprintf(stderr, "proxy server found: %s\n", proxy);
 	
-#ifndef DIRECT_WAIS
-	if (gateway == NULL && !strcmp(access, "wais")) {
-	    gateway = DEFAULT_WAIS_GATEWAY;
-	}
-#endif /* direct wais */
-
 	/*
 	**  Proxy servers have precedence over gateway servers.
 	*/
@@ -483,9 +474,9 @@ PRIVATE int get_physical ARGS2(
 	        StrAllocCat(gatewayed, "?0,0");
             HTAnchor_setPhysical(anchor, gatewayed);
 	    FREE(gatewayed);
-	    FREE(access);
+	    FREE(acc_method);
 
-    	    access =  HTParse(HTAnchor_physical(anchor),
+    	    acc_method =  HTParse(HTAnchor_physical(anchor),
     		"http:", PARSE_ACCESS);
 
 	} else if (gateway) {
@@ -496,9 +487,9 @@ PRIVATE int get_physical ARGS2(
 	    FREE(path);
             HTAnchor_setPhysical(anchor, gatewayed);
 	    FREE(gatewayed);
-	    FREE(access);
+	    FREE(acc_method);
 	    
-    	    access =  HTParse(HTAnchor_physical(anchor),
+    	    acc_method =  HTParse(HTAnchor_physical(anchor),
     		"http:", PARSE_ACCESS);
 	} 
     }
@@ -516,15 +507,15 @@ PRIVATE int get_physical ARGS2(
 	n = HTList_count(protocols);
 	for (i = 0; i < n; i++) {
 	    HTProtocol *p = (HTProtocol *)HTList_objectAt(protocols, i);
-	    if (!strcmp(p->name, access)) {
+	    if (!strcmp(p->name, acc_method)) {
 		HTAnchor_setProtocol(anchor, p);
-		FREE(access);
+		FREE(acc_method);
 		return (HT_OK);
 	    }
 	}
     }
 
-    FREE(access);
+    FREE(acc_method);
     return HT_NO_ACCESS;
 }
 
@@ -651,6 +642,17 @@ extern char LYinternal_flag;		       /* from LYMainLoop.c */
 **        returns    YES     Success in opening document
 **                   NO      Failure 
 */
+
+extern char LYforce_no_cache;			         /* from GridText.c */
+extern char LYoverride_no_cache;		       /* from LYMainLoop.c */
+extern char * HTLoadedDocumentURL NOPARAMS;		   /* in GridText.c */
+extern BOOL HText_hasNoCacheSet PARAMS((HText *text));     /* in GridText.c */
+extern BOOL reloading;
+extern BOOL permanent_redirection;
+#ifdef DIRED_SUPPORT
+extern BOOLEAN lynx_edit_mode;
+#endif
+
 PRIVATE BOOL HTLoadDocument ARGS4(
 	CONST char *,		full_address,
 	HTParentAnchor *,	anchor,
@@ -660,19 +662,9 @@ PRIVATE BOOL HTLoadDocument ARGS4(
     int	        status;
     HText *	text;
     CONST char * address_to_load = full_address;
-    extern char LYforce_no_cache;		       /* from   GridText.c */
-    extern char LYoverride_no_cache;		       /* from LYMainLoop.c */
-    extern char * HTLoadedDocumentURL NOPARAMS;		   /* in GridText.c */
-    extern BOOL HText_hasNoCacheSet PARAMS((HText *text)); /* in GridText.c */
-    extern BOOL reloading;
-    extern BOOL permanent_redirection;
     char *cp;
     BOOL ForcingNoCache = LYforce_no_cache;
     static int redirection_attempts = 0;
-
-#ifdef DIRED_SUPPORT
-    extern BOOLEAN lynx_edit_mode;
-#endif
 
     if (TRACE)
         fprintf (stderr, "HTAccess: loading document %s\n", address_to_load);

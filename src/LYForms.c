@@ -571,7 +571,7 @@ PRIVATE int popup_options ARGS7(
     int num_options = 0, top, bottom, length = -1;
     OptionType * opt_ptr = list;
     int window_offset = 0;
-    int display_lines;
+    int lines_to_show;
     int npages;
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt; /* Flag from cleanup_sig() AST */
@@ -602,12 +602,12 @@ PRIVATE int popup_options ARGS7(
     QueryNum = QueryTotal;
 
     /*
-     *  Set display_lines based on the user_mode global.
+     *  Set lines_to_show based on the user_mode global.
      */
     if (user_mode == NOVICE_MODE)
-	display_lines = LYlines-4;
+	lines_to_show = LYlines-4;
     else
-	display_lines = LYlines-2;
+	lines_to_show = LYlines-2;
 
     /*
      *  Counting the number of options to be displayed.
@@ -654,16 +654,16 @@ PRIVATE int popup_options ARGS7(
     /*
      *  Hmm...  If the bottom goes beyond the number of lines available,
      */
-    if (bottom > display_lines) {
+    if (bottom > lines_to_show) {
 	/*
 	 *  Position the window at the top if we have more
 	 *  options than will fit in the window.
 	 */
-	if (i_length+3 > display_lines) {
+	if (i_length+3 > lines_to_show) {
 	    top = 0;
 	    bottom = top + i_length+3;
-	    if (bottom > display_lines)
-		bottom = display_lines + 1;
+	    if (bottom > lines_to_show)
+		bottom = lines_to_show + 1;
 	} else {
 	    /*
 	     *  Try to position the window so that the selected option will
@@ -671,8 +671,8 @@ PRIVATE int popup_options ARGS7(
 	     *  It could end up too high, at this point, but we'll move it
 	     *    down latter, if that has happened.
 	     */
-	    top = (display_lines + 1) - (i_length + 3);
-	    bottom = (display_lines + 1);
+	    top = (lines_to_show + 1) - (i_length + 3);
+	    bottom = (lines_to_show + 1);
 	}
     }
 
@@ -686,8 +686,8 @@ PRIVATE int popup_options ARGS7(
      */
     if (bottom < ly + 2) {
 	bottom = ly + 2;
-	if (bottom > display_lines + 1)
-	    bottom = display_lines + 1;
+	if (bottom > lines_to_show + 1)
+	    bottom = lines_to_show + 1;
 	top = bottom - length - 2;
     }
 

@@ -119,7 +119,6 @@ PRIVATE int response ARGS5(
     int ch, i;
     char line[BIG], *l, *cmd=NULL;
     char *p = line, *href=NULL;
-    extern int interrupted_in_htgetcharacter;
 
     if (length == 0)
         return(-1);

@@ -66,6 +66,15 @@ extern BOOL HTDirTitles PARAMS((
         HTAnchor *      anchor,
 	BOOL		tildeIsTop));
 
+/*	Load a document.
+**	----------------
+*/
+extern int HTLoadFile PARAMS((
+	CONST char *		addr,
+	HTParentAnchor *	anchor,
+	HTFormat		format_out,
+	HTStream *		sink));
+
 /*
 **  Output a directory entry
 **
@@ -161,6 +170,12 @@ extern float HTFileValue PARAMS((
 **   Isn't there a quicker way?
 */
 extern BOOL HTEditable PARAMS((CONST char * filename));
+
+/*	Make a save stream.
+**	-------------------
+*/
+extern HTStream * HTFileSaveStream PARAMS((
+	HTParentAnchor *	anchor));
 
 /*
 ** Determine a suitable suffix, given the representation.

@@ -7,6 +7,7 @@
 #include "LYGlobalDefs.h"
 #include "LYStrings.h"
 #include "LYTraversal.h"
+#include "UCAuto.h"
 
 #include "LYexit.h"
 #include "LYLeaks.h"

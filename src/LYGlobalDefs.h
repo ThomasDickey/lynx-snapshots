@@ -219,6 +219,7 @@ extern BOOLEAN no_newspost;
 extern BOOLEAN no_mail;
 extern BOOLEAN no_dotfiles;
 extern BOOLEAN no_useragent;
+extern BOOLEAN no_statusline;
 extern BOOLEAN no_filereferer;
 extern BOOLEAN local_host_only;
 extern BOOLEAN override_no_download;
@@ -242,6 +243,7 @@ extern BOOLEAN nolist;
 extern BOOLEAN historical_comments;
 extern BOOLEAN minimal_comments;
 extern BOOLEAN soft_dquotes;
+extern BOOLEAN LYCancelDownload;
 extern BOOLEAN LYValidate;
 extern BOOLEAN LYPermitURL;
 extern BOOLEAN enable_scrollback; /* Clear screen before displaying new page */

@@ -46,6 +46,8 @@ PUBLIC int HTNewsMaxChunk = 40;	/* Largest number of articles in one window */
 #include "HTFormat.h"
 #include "HTAlert.h"
 
+#include "LYNews.h"
+#include "LYGlobalDefs.h"
 #include "LYLeaks.h"
 
 #define BIG 1024 /* @@@ */
@@ -321,7 +323,6 @@ PRIVATE NNTPAuthResult HTHandleAuthInfo ARGS1(
     char *msg = NULL;
     char buffer[512];
     int status, tries;
-    extern BOOL dump_output_immediately;
 
     /*
     **  Make sure we have an interactive user and a host. - FM
@@ -551,22 +552,22 @@ PRIVATE NNTPAuthResult HTHandleAuthInfo ARGS1(
 PRIVATE char * author_name ARGS1 (char *,email)
 {
     static char *name = NULL;
-    char *s, *e;
+    char *p, *e;
     
     StrAllocCopy(name, email);
     if (TRACE)
         fprintf(stderr,"Trying to find name in: %s\n",name);
 
-    if ((s = strchr(name, '(')) && (e = strchr(name, ')'))) {
-        if (e > s) {
+    if ((p = strchr(name, '(')) && (e = strchr(name, ')'))) {
+        if (e > p) {
 	    *e = '\0';			/* Chop off everything after the ')'  */
-	    return HTStrip(s+1);	/* Remove leading and trailing spaces */
+	    return HTStrip(p+1);	/* Remove leading and trailing spaces */
 	}
     }
 	
-    if ((s = strchr(name, '<')) && (e = strchr(name, '>'))) {
-        if (e > s) {
-	    strcpy(s, e+1);		/* Remove <...> */
+    if ((p = strchr(name, '<')) && (e = strchr(name, '>'))) {
+        if (e > p) {
+	    strcpy(p, e+1);		/* Remove <...> */
 	    return HTStrip(name);	/* Remove leading and trailing spaces */
 	}
     }
@@ -589,52 +590,52 @@ PRIVATE char * author_name ARGS1 (char *,email)
 PRIVATE char * author_address ARGS1(char *,email)
 {
     static char *address = NULL;
-    char *s, *at, *e;
+    char *p, *at, *e;
 
     StrAllocCopy(address, email);
     if (TRACE)
         fprintf(stderr,"Trying to find address in: %s\n",address);
 
-    if ((s = strchr(address, '<'))) {
-        if ((e = strchr(s, '>')) && (at = strchr(s, '@'))) {
+    if ((p = strchr(address, '<'))) {
+        if ((e = strchr(p, '>')) && (at = strchr(p, '@'))) {
 	    if (at < e) {
                 *e = '\0';               /* Remove > */
-                return HTStrip(s+1);  /* Remove leading and trailing spaces */
+                return HTStrip(p+1);  /* Remove leading and trailing spaces */
 	    }
 	}
     }
 
-    if ((s = strchr(address, '(')) &&
+    if ((p = strchr(address, '(')) &&
         (e = strchr(address, ')')) && (at = strchr(address, '@'))) {
-        if (e > s && at < e) {
-            *s = '\0';                  /* Chop off everything after the ')'  */
+        if (e > p && at < e) {
+            *p = '\0';                  /* Chop off everything after the ')'  */
             return HTStrip(address);    /* Remove leading and trailing spaces */
         }
     }
 
     if ((at = strchr(address, '@')) && at > address) {
-        s = (at - 1);
+        p = (at - 1);
 	e = (at + 1);
-        while (s > address && !isspace((unsigned char)*s))
-	    s--;
+        while (p > address && !isspace((unsigned char)*p))
+	    p--;
 	while (*e && !isspace((unsigned char)*e))
 	    e++;
 	*e = 0;
-	return HTStrip(s);
+	return HTStrip(p);
     }
 
     /*
     **  Default to the first word.
     */
-    s = address;
-    while (isspace((unsigned char)*s))
-        s++; /* find first non-space */
-    e = s;
+    p = address;
+    while (isspace((unsigned char)*p))
+        p++; /* find first non-space */
+    e = p;
     while (!isspace((unsigned char)*e) && *e != '\0')
         e++; /* find next space or end */
     *e = '\0'; /* terminate space */
 
-    return(s);
+    return(p);
 }
 
 /*	Start anchor element
@@ -1310,16 +1311,16 @@ PRIVATE int read_article NOARGS
 		    **  and any strings that look like URLs to links. - FM
 		    */
 		    char *l = line;
-		    char *p;
+		    char *p2;
 
-		    while ((p = strstr(l, "rticle <")) != NULL) {
-		        char *q  = strchr(p,'>');
-		        char *at = strchr(p, '@');
+		    while ((p2 = strstr(l, "rticle <")) != NULL) {
+		        char *q  = strchr(p2,'>');
+		        char *at = strchr(p2, '@');
 		        if (q && at && at<q) {
 		            char c = q[1];
 			    q[1] = 0;		/* chop up */
-			    p += 7;
-			    *p = 0;
+			    p2 += 7;
+			    *p2 = 0;
 			    while (*l) {
 			        if (strncmp(l, "news:", 5) &&
 				    strncmp(l, "snews://", 8) &&
@@ -1347,11 +1348,11 @@ PRIVATE int read_article NOARGS
 				    FREE(href);
 				}
 			    }
-			    *p = '<'; 		/* again */
+			    *p2 = '<'; 		/* again */
 			    *q = 0;
-			    start_anchor(p+1);
+			    start_anchor(p2+1);
 			    *q = '>'; 		/* again */
-			    PUTS(p);
+			    PUTS(p2);
 			    END(HTML_A);
 			    q[1] = c;		/* again */
 			    l=q+1;
@@ -1860,7 +1861,7 @@ PRIVATE int read_group ARGS3(
 			case 'f':
 			case 'F':
 			    if (match(line, "FROM:")) {
-				char * p;
+				char * p2;
 				strcpy(author,
 					author_name(strchr(line,':')+1));
 #ifdef NOTUSED_CHARTRANS
@@ -1872,9 +1873,9 @@ PRIVATE int read_group ARGS3(
 				    HTmmdecode(author, author);
 				    HTrjis(author, author);
 				}
-				p = author + strlen(author) - 1;
-				if (*p==LF)
-				    *p = '\0';	/* Chop off newline */
+				p2 = author + strlen(author) - 1;
+				if (*p2==LF)
+				    *p2 = '\0';	/* Chop off newline */
 			    }
 			    break;
 
@@ -2012,7 +2013,7 @@ add_post:
 /*	Load by name.						HTLoadNews
 **	=============
 */
-PUBLIC int HTLoadNews ARGS4(
+PRIVATE int HTLoadNews ARGS4(
 	CONST char *,		arg,
 	HTParentAnchor *,	anAnchor,
 	HTFormat,		format_out,
@@ -2543,8 +2544,6 @@ PUBLIC int HTLoadNews ARGS4(
 		return(HT_NOT_LOADED);
 	    }
 	    if (postfile == NULL) {
-	        extern char *LYNewsPost PARAMS((char *newsgroups,
-						BOOLEAN followup));
 		postfile = LYNewsPost(ListArg, (reply_wanted || sreply_wanted));
 	    }
 	    if (postfile == NULL) {

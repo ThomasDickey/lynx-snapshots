@@ -24,18 +24,14 @@
 #include "UCAux.h"
 #endif /* EXP_CHARTRANS */
 
+#include "LYCharSets.h"
 #include "LYLeaks.h"
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
 extern HTStyleSheet * styleSheet;
 
-extern int current_char_set;
-extern CONST char * LYchar_set_names[];
-extern CONST char **LYCharSets[];
-extern int LYlowest_eightbit[];
 extern BOOLEAN LYRawMode;
-extern CONST char * HTMLGetEntityName PARAMS((int i));
 extern BOOL HTPassEightBitRaw;
 extern BOOL HTPassHighCtrlRaw;
 extern HTCJKlang HTCJK;
@@ -436,6 +432,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		sprintf(replace_buf, "U%.2lX", code);
 		HText_appendText(me->text, replace_buf);
 	    }
+#ifdef NOTUSED_FOTEMODS
 	} else if (me->T.strip_raw_char_in &&
 		   (unsigned char)*p >= 0xc0 &&
 		   (unsigned char)*p < 255) {
@@ -444,7 +441,6 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    **  (somewhat) readable ASCII.
 	    */
 	    HText_appendCharacter(me->text, (char)(*p & 0x7f));
-#ifdef NOTUSED_FOTEMODS
 	    /*
 	    **  If we do not have the "7-bit approximations" as our
 	    **  output character set (in which case we did it already)

@@ -1,12 +1,13 @@
 #
 # This one is not really much of a "translation table", it mostly just
-# tells Lynx that "unicode-1-1-utf-8" is Unicode/UCS2 encoded in UTF8...
+# tells Lynx that "utf-8" is Unicode/UCS2 encoded in UTF8.  Note that
+# "unicode-1-1-utf-8" and "utf8" are treated as synonyms.
 #
 #The MIME name of this charset. 
 Mutf-8
 
 #Name as a Display Charset (used on Options screen)
-OptionName UNICODE UTF 8
+OUNICODE UTF 8
 
 # Some kind of raw Unicode?
 # Use 6 for for really "raw" 16bit UCS-2, 7 for UTF-8, ...

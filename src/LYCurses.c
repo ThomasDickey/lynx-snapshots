@@ -499,6 +499,8 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 	if (no_color_video < 0) {
 		no_color_video = tigetnum("ncv");
 	}
+	if (no_color_video < 0)
+		no_color_video = 0;
 #endif /* __DJGPP__ */
 
 	if (Current_Attr & A_BOLD)
@@ -515,12 +517,10 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 	 */
 	if ((Current_Attr & A_BOLD) && !(no_color_video & 33)) {
 		attr |= A_BOLD;
-		offs = 17;
 	}
 
-	if ((Current_Attr & A_UNDERLINE) && !(no_color_video & 2)) {
+	if ((Current_Attr == A_UNDERLINE) && !(no_color_video & 2)) {
 		attr |= A_UNDERLINE;
-		offs = 17;
 	}
 
 	attr |= COLOR_PAIR(code+offs);
@@ -590,16 +590,17 @@ PUBLIC void lynx_standout ARGS1(int, flag)
 PRIVATE void lynx_init_colors NOARGS
 {
     if (lynx_has_color) {
-	int n, m;
+	size_t n, m;
 
 	lynx_color_cfg[0].fg = default_fg;
 	lynx_color_cfg[0].bg = default_bg;
 
 	for (n = 0; n < sizeof(lynx_color_cfg)/sizeof(lynx_color_cfg[0]); n++) {
 	    for (m = 0; m <= 16; m += 8) {
-		init_pair(n+m+1,
-			lynx_color_pairs[n+m+1].fg,
-			lynx_color_pairs[n+m+1].bg);
+		int pair = n + m + 1;
+		init_pair(pair,
+			lynx_color_pairs[pair].fg,
+			lynx_color_pairs[pair].bg);
 	    }
 	    if (n == 0 && LYShowColor >= SHOW_COLOR_ON)
 		bkgd(COLOR_PAIR(9) | ' ');
@@ -833,7 +834,7 @@ PUBLIC void start_curses NOARGS
 
     noecho();
 
-#if defined(HAVE_KEYPAD)
+#if HAVE_KEYPAD
     keypad(stdscr,TRUE);
 #endif /* HAVE_KEYPAD */
 

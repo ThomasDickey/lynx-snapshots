@@ -47,6 +47,8 @@
 #define HTAAsLog        HTAA_startLogging
 #endif /*SHORT_NAMES*/
 
+extern time_t theTime;
+
 /*
 
 Check Access Authorization

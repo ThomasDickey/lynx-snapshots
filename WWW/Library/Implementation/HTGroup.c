@@ -514,16 +514,16 @@ PRIVATE BOOL part_match ARGS2(CONST char *, tcur,
 **		MATCH INET NUMBER AGAINST AN INET NUMBER MASK
 ** ON ENTRY:
 **	template	mask to match agaist, e.g. 128.141.*.*
-**	inet_addr	actual inet address, e.g. 128.141.201.74
+**	the_inet_addr	actual inet address, e.g. 128.141.201.74
 **
 ** ON EXIT:
 **	returns		YES, if match;  NO, if not.
 */
 PRIVATE BOOL ip_number_match ARGS2(CONST char *,	template,
-				   CONST char *,	inet_addr)
+				   CONST char *,	the_inet_addr)
 {
     CONST char *tcur = template;
-    CONST char *icur = inet_addr;
+    CONST char *icur = the_inet_addr;
     int cnt;
     
     for (cnt=0; cnt<4; cnt++) {

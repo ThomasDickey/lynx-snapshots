@@ -94,6 +94,7 @@ PRIVATE void write_esc ARGS1(
 	CONST char *,	p)
 {
     int fd = open("/dev/tty", O_WRONLY);
+
     if (fd >= 0) {
 	write(fd, p, strlen(p));
 	close(fd);
@@ -104,9 +105,10 @@ PRIVATE int nonempty_file ARGS1(
 	CONST char *,	p)
 {
     struct stat sb;
-    return (stat(p, &sb) == 0
-       &&   (sb.st_mode & S_IFMT) == S_IFREG
-       &&   (sb.st_size != 0));
+
+    return (stat(p, &sb) == 0 &&
+	    (sb.st_mode & S_IFMT) == S_IFREG && 
+	    (sb.st_size != 0));
 }
 
 /*
@@ -133,20 +135,23 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
     char tmpbuf1[100], tmpbuf2[20];
     char *cp;
 
-    /* Restore the original character set */
+    /*
+     *  Restore the original character set.
+     */
     if (newcs < 0 || p == 0) {
-	if (old_font && *old_font
-	 && old_umap && *old_umap) {
+	if (old_font && *old_font &&
+	    old_umap && *old_umap) {
 	    int have_font = nonempty_file(old_font);
 	    int have_umap = nonempty_file(old_umap);
 
 	    if (have_font) {
-		if (have_umap)
+		if (have_umap) {
 		    sprintf(tmpbuf1, "%s %s -u %s %s",
 			    SETFONT, old_font, old_umap, NOOUTPUT);
-		else
+		} else {
 		    sprintf(tmpbuf1, "%s %s %s",
 			    SETFONT, old_font, NOOUTPUT);
+		}
 		system(tmpbuf1);
 	    }
 
@@ -179,8 +184,6 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 
     /*
      *  Use this for output of escape sequences.
-     *
-     *  For some reason stdout won't do; maybe needs flush() somewhere.
      */
     if (display || (cp = getenv(DISPLAY)) != NULL) {
 	/*

@@ -6,7 +6,7 @@ D0
 Mcp850
 
 #Name as a Display Charset (used on Options screen)
-OIBM PC codepage 850 
+ODosLatin1 (cp850)
 #
 #    Name:     cp850_DOSLatin1 to Unicode table
 #    Unicode version: 1.1

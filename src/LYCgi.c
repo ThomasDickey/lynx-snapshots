@@ -473,6 +473,14 @@ PRIVATE int LYLoadCGI ARGS4(
 		    add_environment_value(cp);
 		}
 
+		if (anAnchor->post_data &&
+		    anAnchor->post_content_type) {
+		    cp = NULL;
+		    StrAllocCopy(cp, "CONTENT_TYPE=");
+		    StrAllocCat(cp, anAnchor->post_content_type);
+		    add_environment_value(cp);
+		}
+
 		if (anAnchor->post_data) { /* post script, read stdin */
 		    close(fd1[1]);
 		    dup2(fd1[0], fileno(stdin));

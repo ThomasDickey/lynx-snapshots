@@ -10,5 +10,6 @@ extern BOOL LYAddImageMap PARAMS((char *address, char *title,
 extern BOOL LYAddMapElement PARAMS((char *map, char *address, char *title,
 				    HTParentAnchor *node_anchor,
 				    BOOL intern_flag));
+extern BOOL LYHaveImageMap PARAMS((char *address));
 
 #endif /* LYMAP_H */

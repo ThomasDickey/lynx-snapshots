@@ -281,7 +281,7 @@ PRIVATE BOOL write_cache ARGS1(HTStream *, me)
 **
 */
 
-void give_parameter ARGS2(HTStream *, me, int, p)
+PRIVATE void give_parameter ARGS2(HTStream *, me, int, p)
 {
     PUTS(par_name[p]);
     if (me->par_value[p]) {
@@ -350,17 +350,7 @@ PRIVATE void WSRC_gen_html ARGS2(HTStream *, me, BOOL, source_file)
 	    PUTS("Direct access");
 	    END(HTML_A);
 	    /** Proxy will be used if defined, so let user know that - FM **/
-	    PUTS(" (or via proxy server, if defined), or");
-	    START(HTML_BR);
-	    /** Offer W3 Consortium gateway - FM **/
-	    sprintf(WSRC_address, "http://www.w3.org:8001/%s%s%s/%s",
-		me->par_value[PAR_IP_NAME],
-		me->par_value[PAR_TCP_PORT] ? ":" : "",
-		me->par_value[PAR_TCP_PORT] ? me->par_value[PAR_TCP_PORT] :"",
-		www_database);
-	    HTStartAnchor(me->target, NULL, WSRC_address);
-	    PUTS("through W3 Consortium gateway");
-	    END(HTML_A);
+	    PUTS(" (or via proxy server, if defined)");
 
 	    FREE(www_database);
 	    

@@ -32,6 +32,7 @@
 /*#include <stdio.h> included in HTUtils.h -- FM */
 #include "HTChunk.h"
 
+#include "LYCharSets.h"
 #include "LYLeaks.h"
 
 #define INVALID (-1)
@@ -44,8 +45,6 @@ PUBLIC BOOL HTPassEightBitNum = FALSE;	/* Pass ^ numeric entities raw.	*/
 PUBLIC BOOL HTPassHighCtrlRaw = FALSE;	/* Pass 127-160,173,&#127; raw.	*/
 PUBLIC BOOL HTPassHighCtrlNum = FALSE;	/* Pass &#128;-&#159; raw.	*/
 
-extern UCode_t HTMLGetEntityUCValue PARAMS((
-	CONST char *	name));
 extern int LYlowest_eightbit[];
 
 /*	The State (context) of the parser
@@ -141,8 +140,6 @@ PRIVATE void set_chartrans_handling ARGS3(
 	HTParentAnchor *,	anchor,
 	int,			chndl)
 {
-    extern int current_char_set;
-
     if (chndl < 0) {
 	chndl = HTAnchor_getUCLYhndl(anchor, UCT_STAGE_STRUCTURED);
 	if (chndl < 0)
@@ -1113,7 +1110,7 @@ PUBLIC HTTag * SGMLFindTag ARGS2(
 /*	Could check that we are back to bottom of stack! @@  */
 /* 	Do check! - FM					     */
 /*							     */
-PUBLIC void SGML_free  ARGS1(
+PRIVATE void SGML_free  ARGS1(
 	HTStream *,	context)
 {
     int i;
@@ -1155,7 +1152,7 @@ PUBLIC void SGML_free  ARGS1(
     FREE(context);
 }
 
-PUBLIC void SGML_abort ARGS2(
+PRIVATE void SGML_abort ARGS2(
 	HTStream *,	context,
 	HTError, 	e)
 {
@@ -1217,14 +1214,13 @@ PUBLIC void SGML_setCallerData ARGS2(
 }
 #endif /* CALLERDATA */
 
-PUBLIC void SGML_character ARGS2(
+PRIVATE void SGML_character ARGS2(
 	HTStream *,	context,
 	char,		c_in)
 {
     CONST SGML_dtd *dtd	=	context->dtd;
     HTChunk	*string = 	context->string;
     CONST char * EntityName;
-    extern CONST char * HTMLGetEntityName PARAMS((int i));
     char * p;
     BOOLEAN chk;	/* Helps (?) walk through all the else ifs... */
     UCode_t clong, uck;	/* Enough bits for UCS4 ... */
@@ -1306,8 +1302,10 @@ PUBLIC void SGML_character ARGS2(
 	}
     }
 
+#ifdef NOTUSED_FOTEMODS
     if (context->T.strip_raw_char_in)
 	saved_char_in = c;
+#endif
 
     if (context->T.trans_to_uni &&
 	((unsign_c >= 127) ||
@@ -1563,6 +1561,7 @@ top1:
 	    context->utf_buf_p = context->utf_buf;
 	    *(context->utf_buf_p) = '\0';
 
+#ifdef NOTUSED_FOTEMODS
 	} else if (context->T.strip_raw_char_in && saved_char_in &&
 		   ((unsigned char)saved_char_in >= 0xc0) &&
 		   ((unsigned char)saved_char_in < 255)) {
@@ -1572,6 +1571,7 @@ top1:
 	    */
 	    PUTC((char)(saved_char_in & 0x7f));
 	    saved_char_in = '\0';
+#endif /* NOTUSED_FOTEMODS */
 	} else if ((unsigned char)c <
 			LYlowest_eightbit[context->html_char_set] ||
 		   (context->T.trans_from_uni && !HTPassEightBitRaw)) {
@@ -3102,7 +3102,7 @@ top1:
 }  /* SGML_character */
 
 
-PUBLIC void SGML_string ARGS2(
+PRIVATE void SGML_string ARGS2(
 	HTStream *,	context,
 	CONST char*,	str)
 {
@@ -3112,7 +3112,7 @@ PUBLIC void SGML_string ARGS2(
 }
 
 
-PUBLIC void SGML_write ARGS3(
+PRIVATE void SGML_write ARGS3(
 	HTStream *,	context,
 	CONST char*,	str,
 	int,		l)
@@ -3339,12 +3339,12 @@ PUBLIC void JISx0201TO0208_SJIS ARGS3(
 PUBLIC unsigned char * SJIS_TO_EUC1 ARGS3(
 	unsigned char,		HI,
 	unsigned char,		LO,
-	unsigned char *,	EUC)
+	unsigned char *,	data)
 {
-    SJIS_TO_JIS1(HI, LO, EUC);
-    EUC[0] |= 0x80;
-    EUC[1] |= 0x80;
-    return EUC;
+    SJIS_TO_JIS1(HI, LO, data);
+    data[0] |= 0x80;
+    data[1] |= 0x80;
+    return data;
 }
 
 PUBLIC unsigned char * SJIS_TO_EUC ARGS2(

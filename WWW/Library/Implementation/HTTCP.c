@@ -286,14 +286,14 @@ PUBLIC unsigned int HTCardinal ARGS3(
 **		it is to be kept.
 */
 PUBLIC CONST char * HTInetString ARGS1(
-	SockA*,		sin)
+	SockA*,		soc_in)
 {
     static char string[16];
     sprintf(string, "%d.%d.%d.%d",
-	    (int)*((unsigned char *)(&sin->sin_addr)+0),
-	    (int)*((unsigned char *)(&sin->sin_addr)+1),
-	    (int)*((unsigned char *)(&sin->sin_addr)+2),
-	    (int)*((unsigned char *)(&sin->sin_addr)+3));
+	    (int)*((unsigned char *)(&soc_in->sin_addr)+0),
+	    (int)*((unsigned char *)(&soc_in->sin_addr)+1),
+	    (int)*((unsigned char *)(&soc_in->sin_addr)+2),
+	    (int)*((unsigned char *)(&soc_in->sin_addr)+3));
     return string;
 }
 #endif /* !DECNET */
@@ -304,14 +304,14 @@ PUBLIC CONST char * HTInetString ARGS1(
 **  On entry,
 **	str	points to a string with a node name or number,
 **		with optional trailing colon and port number.
-**	sin	points to the binary internet or decnet address field.
+**	soc_in	points to the binary internet or decnet address field.
 **
 **  On exit,
-**	*sin	is filled in. If no port is specified in str, that
-**		field is left unchanged in *sin.
+**	*soc_in	is filled in. If no port is specified in str, that
+**		field is left unchanged in *soc_in.
 */
 PUBLIC int HTParseInet ARGS2(
-	SockA *,	sin,
+	SockA *,	soc_in,
 	CONST char *,	str)
 {
     char *port;
@@ -340,19 +340,19 @@ PUBLIC int HTParseInet ARGS2(
     	*port++ = 0;		/* Chop off port */
         if (port[0] >= '0' && port[0] <= '9') {
 #ifdef unix
-	    sin->sin_port = htons(atol(port));
+	    soc_in->sin_port = htons(atol(port));
 #else /* VMS: */
 #ifdef DECNET
-	    sin->sdn_objnum = (unsigned char)(strtol(port, (char**)0, 10));
+	    soc_in->sdn_objnum = (unsigned char)(strtol(port, (char**)0, 10));
 #else
-	    sin->sin_port = htons((unsigned short)strtol(port,(char**)0,10));
+	    soc_in->sin_port = htons((unsigned short)strtol(port,(char**)0,10));
 #endif /* Decnet */
 #endif /* Unix vs. VMS */
 #ifdef SUPPRESS		/* 1. crashes!?!.  2. Not recommended */
 	} else {
 	    struct servent * serv = getservbyname(port, (char*)0);
 	    if (serv) {
-		sin->sin_port = serv->s_port;
+		soc_in->sin_port = serv->s_port;
 	    } else if (TRACE) {
 		fprintf(stderr, "TCP: Unknown service %s\n", port);
 	    }
@@ -365,12 +365,12 @@ PUBLIC int HTParseInet ARGS2(
     **  Read Decnet node name. @@ Should know about DECnet addresses, but
     **  it's probably worth waiting until the Phase transition from IV to V.
     */
-    sin->sdn_nam.n_len = min(DN_MAXNAML, strlen(host));  /* <=6 in phase 4 */
-    strncpy(sin->sdn_nam.n_name, host, sin->sdn_nam.n_len + 1);
+    soc_in->sdn_nam.n_len = min(DN_MAXNAML, strlen(host));  /* <=6 in phase 4 */
+    strncpy(soc_in->sdn_nam.n_name, host, soc_in->sdn_nam.n_len + 1);
     if (TRACE) {
         fprintf(stderr,  
 		"DECnet: Parsed address as object number %d on host %.6s...\n",
-		sin->sdn_objnum, host);
+		soc_in->sdn_objnum, host);
     }
 #else  /* parse Internet host: */
 
@@ -395,15 +395,15 @@ PUBLIC int HTParseInet ARGS2(
     if (dotcount_ip == 3) {   /* Numeric node address: */
 
 #ifdef DJGPP
-	sin->sin_addr.s_addr = htonl(aton(host));
+	soc_in->sin_addr.s_addr = htonl(aton(host));
 #else
 #ifdef DGUX_OLD
-	sin->sin_addr.s_addr = inet_addr(host).s_addr;	/* See arpa/inet.h */
+	soc_in->sin_addr.s_addr = inet_addr(host).s_addr; /* See arpa/inet.h */
 #else
 #ifdef GUSI
-	sin->sin_addr = inet_addr(host);		/* See netinet/in.h */
+	soc_in->sin_addr = inet_addr(host);		/* See netinet/in.h */
 #else
-	sin->sin_addr.s_addr = inet_addr(host);		/* See arpa/inet.h */
+	soc_in->sin_addr.s_addr = inet_addr(host);	/* See arpa/inet.h */
 #endif /* GUSI */
 #endif /* DGUX_OLD */
 #endif /* DJGPP */
@@ -475,6 +475,7 @@ PUBLIC int HTParseInet ARGS2(
 				"HTParseInet: INTERRUPTED gethostbyname.\n");
 		    }
 		    kill(fpid , SIGKILL);
+		    waitpid(fpid, NULL, 0);
 		    FREE(host);
 		    close(pfd[0]);
 		    close(pfd[1]);
@@ -529,21 +530,21 @@ PUBLIC int HTParseInet ARGS2(
 			 "HTParseInet: Can't find internet node name `%s'.\n",
 				host);
 		    }
-		    memset((void *)&sin->sin_addr, 0, sizeof(sin->sin_addr));
+		    memset((void *)&soc_in->sin_addr, 0, sizeof(soc_in->sin_addr));
 		} else {
-		    memcpy((void *)&sin->sin_addr,
+		    memcpy((void *)&soc_in->sin_addr,
 		    	   phost->h_addr, phost->h_length);
 		}
 #ifdef NOTDEFINED
-	        cstat = read(pfd[0], (void *)&sin->sin_addr , 4);
+	        cstat = read(pfd[0], (void *)&soc_in->sin_addr , 4);
 #endif /* NOTDEFINED */
 	    } else {
-	        cstat = read(pfd[0], (void *)&sin->sin_addr , cstat);
+	        cstat = read(pfd[0], (void *)&soc_in->sin_addr , cstat);
 	    }
 	    close(pfd[0]);
 	    close(pfd[1]);
 	}
-	if (sin->sin_addr.s_addr == 0) {
+	if (soc_in->sin_addr.s_addr == 0) {
 	    if (TRACE) {
 	        fprintf(stderr, 
 			"HTParseInet: Can't find internet node name `%s'.\n",
@@ -562,9 +563,9 @@ PUBLIC int HTParseInet ARGS2(
 
 #else /* Not NSL_FORK: */
 #ifdef DJGPP
-        sin->sin_addr.s_addr = htonl(resolve(host));  
+        soc_in->sin_addr.s_addr = htonl(resolve(host));  
 	FREE(host);
-	if (sin->sin_addr.s_addr == 0) {
+	if (soc_in->sin_addr.s_addr == 0) {
 		 if (TRACE)
 			  fprintf(stderr,
 			 "HTTPAccess: Can't find internet node name `%s'.\n",host);
@@ -597,9 +598,9 @@ PUBLIC int HTParseInet ARGS2(
 	**  longer supported, and CMU users are encouraged to obtain and use
 	**  SOCKETSHR/NETLIB instead. - S. Bjorndahl 
 	*/
-	memcpy((void *)&sin->sin_addr, phost->h_addr, 4);
+	memcpy((void *)&soc_in->sin_addr, phost->h_addr, 4);
 #else
-	memcpy((void *)&sin->sin_addr, phost->h_addr, phost->h_length);
+	memcpy((void *)&soc_in->sin_addr, phost->h_addr, phost->h_length);
 #endif /* VMS && CMU_TCP */
 #endif /* DJGPP */
 #endif /* NSL_FORK */
@@ -608,11 +609,11 @@ PUBLIC int HTParseInet ARGS2(
     if (TRACE) {
         fprintf(stderr,  
 	   "HTParseInet: Parsed address as port %d, IP address %d.%d.%d.%d\n",
-		(int)ntohs(sin->sin_port),
-		(int)*((unsigned char *)(&sin->sin_addr)+0),
-		(int)*((unsigned char *)(&sin->sin_addr)+1),
-		(int)*((unsigned char *)(&sin->sin_addr)+2),
-		(int)*((unsigned char *)(&sin->sin_addr)+3));
+		(int)ntohs(soc_in->sin_port),
+		(int)*((unsigned char *)(&soc_in->sin_addr)+0),
+		(int)*((unsigned char *)(&soc_in->sin_addr)+1),
+		(int)*((unsigned char *)(&soc_in->sin_addr)+2),
+		(int)*((unsigned char *)(&soc_in->sin_addr)+3));
     }
 #endif  /* Internet vs. Decnet */
 
@@ -703,7 +704,7 @@ PUBLIC int HTDoConnect ARGS4(
 	int *,		s)
 {
     struct sockaddr_in soc_address;
-    struct sockaddr_in *sin = &soc_address;
+    struct sockaddr_in *soc_in = &soc_address;
     int status;
     char *line = NULL;
     char *p1 = NULL;
@@ -713,8 +714,8 @@ PUBLIC int HTDoConnect ARGS4(
     /*
     **  Set up defaults.
     */
-    sin->sin_family = AF_INET;
-    sin->sin_port = htons(default_port);
+    soc_in->sin_family = AF_INET;
+    soc_in->sin_port = htons(default_port);
 
     /*
     **  Get node name and optional port number.
@@ -735,7 +736,7 @@ PUBLIC int HTDoConnect ARGS4(
 	outofmem(__FILE__, "HTDoConnect");
     sprintf (line, "Looking up %s.", host);
     _HTProgress (line);
-    status = HTParseInet(sin, host);
+    status = HTParseInet(soc_in, host);
     if (status) {
 	if (status != HT_INTERRUPTED) {
 	    sprintf (line, "Unable to locate remote host %s.", host);

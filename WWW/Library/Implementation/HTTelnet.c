@@ -49,7 +49,7 @@
 /*	Telnet or "rlogin" access
 **	-------------------------
 */
-PRIVATE int remote_session ARGS2(char *, access, char *, host)
+PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 {
 	char * user = host;
 	char * password = NULL;
@@ -58,8 +58,8 @@ PRIVATE int remote_session ARGS2(char *, access, char *, host)
 	char * port;
 	char   command[256];
 	enum _login_protocol { telnet, rlogin, tn3270 } login_protocol =
-		strcmp(access, "rlogin") == 0 ? rlogin :
-		strcmp(access, "tn3270") == 0 ? tn3270 : telnet;
+		strcmp(acc_method, "rlogin") == 0 ? rlogin :
+		strcmp(acc_method, "tn3270") == 0 ? tn3270 : telnet;
 #ifdef VMS
 	extern int DCLsystem PARAMS((char *command));
 #define system(a) DCLsystem(a) /* use LYCurses.c routines for spawns */
@@ -126,7 +126,7 @@ PRIVATE int remote_session ARGS2(char *, access, char *, host)
 	    printf("you log in to this information service remotely.\n\n");
 
 	    printf("You can manually connect to this service using %s\n",
-		   access);
+		   acc_method);
 	    printf("to host %s", hostname);
 	    if (user) printf(", user name %s", user);
 	    if (password) printf(", password %s", password);
@@ -328,7 +328,7 @@ PRIVATE int remote_session ARGS2(char *, access, char *, host)
 
 	    printf(
 	"\nSorry, this browser was compiled without the %s access option.\n",
-		access);
+		acc_method);
 	    printf("\nPress <return> to return to Lynx.");
 	    LYgetch();
 	    HadVMSInterrupt = FALSE;
@@ -450,7 +450,7 @@ PRIVATE int remote_session ARGS2(char *, access, char *, host)
 
 	    printf(
 	  "\nSorry, this browser was compiled without the %s access option.\n",
-    		access);
+    		acc_method);
     	    printf("\nPress <return> to return to Lynx.");
     	    LYgetch();
 	    HadVMSInterrupt = FALSE;
@@ -473,7 +473,7 @@ PRIVATE int remote_session ARGS2(char *, access, char *, host)
 
 	    printf(
 	  "\nSorry, this browser was compiled without the %s access option.\n",
-		access);
+		acc_method);
 	    printf("\nPress <return> to return to Lynx.");
 	    LYgetch();
 	    HadVMSInterrupt = FALSE;
@@ -501,9 +501,9 @@ PRIVATE int remote_session ARGS2(char *, access, char *, host)
 #ifndef TELNET_DONE
 	printf(
 	"\nSorry, this browser was compiled without the %s access option.\n",
-		access);
+		acc_method);
 	printf(
-	"\nTo access the information you must %s to %s", access, hostname);
+	"\nTo access the information you must %s to %s", acc_method, hostname);
 	if (port)
 	    printf(" (port %s)", port);
 	if (user)
@@ -549,8 +549,7 @@ ARGS4
  HTStream *,		sink			/* Ignored */
 )
 {
-    char * access;
-    
+    char * acc_method;  
     char * host;
     int status;
     
@@ -560,7 +559,7 @@ ARGS4
 	   "HTTelnet: Can't output a live session -- must be interactive!\n");
 	return HT_NO_DATA;
     }
-    access =  HTParse(addr, "file:", PARSE_ACCESS);
+    acc_method =  HTParse(addr, "file:", PARSE_ACCESS);
     
     host = HTParse(addr, "", PARSE_HOST);
     if (!host || *host == '\0') {
@@ -568,11 +567,11 @@ ARGS4
         if (TRACE)
 	    fprintf(stderr, "HTTelnet: No host specified!\n");
     } else {
-        status = remote_session(access, host);
+        status = remote_session(acc_method, host);
     }
 
     FREE(host);	
-    FREE(access);
+    FREE(acc_method);
     return status;
 }
 

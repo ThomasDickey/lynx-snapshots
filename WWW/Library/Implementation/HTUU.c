@@ -195,7 +195,7 @@ PUBLIC int HTUU_decode ARGS3(char *,		bufcoded,
    }
    
    if(nprbytes & 03) {
-      if(pr2six[bufin[-2]] > MAXVAL) {
+      if(pr2six[(int)bufin[-2]] > MAXVAL) {
          nbytesdecoded -= 2;
       } else {
          nbytesdecoded -= 1;
