@@ -455,7 +455,7 @@ static int set_clicked_link(int x,
 	for (i = 0; i < nlinks; i++) {
 	    int len, lx = links[i].lx, is_text = 0;
 	    int count = 0;
-	    char *text = LYGetHiliteStr(i, count);
+	    const char *text = LYGetHiliteStr(i, count);
 
 	    if (links[i].type == WWW_FORM_LINK_TYPE
 		&& F_TEXTLIKE(links[i].l_form->type))
@@ -620,9 +620,9 @@ char *LYmbcsstrncpy(char *dst,
  * and returns the resulting pointer.  It takes account of UTF-8 encoded
  * characters.  - KW
  */
-char *LYmbcs_skip_glyphs(char *data,
-			 int n_glyphs,
-			 BOOL utf_flag)
+const char *LYmbcs_skip_glyphs(const char *data,
+			       int n_glyphs,
+			       BOOL utf_flag)
 {
     int i_glyphs = 0;
 
@@ -653,7 +653,7 @@ char *LYmbcs_skip_glyphs(char *data,
  * mode count as two.) Counts character glyphs if count_gcells is unset. 
  * (Full- width characters in CJK mode count as one.) - kw
  */
-int LYmbcsstrlen(char *str,
+int LYmbcsstrlen(const char *str,
 		 BOOL utf_flag,
 		 BOOL count_gcells)
 {
@@ -865,7 +865,7 @@ static SLKeyMap_List_Type *Keymap_List;
 #endif
 
 typedef struct {
-    char *string;
+    const char *string;
     int value;
 } Keysym_String_List;
 /* *INDENT-OFF* */
@@ -928,7 +928,7 @@ static const char *expand_tichar(const char *first, char **result, char *final)
     int limit = 0;
     int radix = 0;
     int value = 0;
-    char *name = 0;
+    const char *name = 0;
 
     switch (ch = *first++) {
     case 'E':
@@ -1414,7 +1414,7 @@ static int LYmouse_menu(int x, int y, int atlink, int code)
 #define ENT_ONLY_LINK	2
     /* *INDENT-OFF* */
     static const struct {
-	char *txt;
+	const char *txt;
 	int  action;
 	unsigned int  flag;
     } possible_entries[] = {
@@ -1448,7 +1448,7 @@ static int LYmouse_menu(int x, int y, int atlink, int code)
     /* *INDENT-ON* */
 
 #define TOTAL_MENUENTRIES	TABLESIZE(possible_entries)
-    char *choices[TOTAL_MENUENTRIES + 1];
+    const char *choices[TOTAL_MENUENTRIES + 1];
     int actions[TOTAL_MENUENTRIES];
 
     int c, c1, retlac, filter_out = (atlink ? ENT_ONLY_DOC : ENT_ONLY_LINK);
@@ -2842,7 +2842,7 @@ static int map_active = 0;
 #define map_active 0
 #endif
 
-int LYEditInsert(EDREC * edit, unsigned char *s,
+int LYEditInsert(EDREC * edit, unsigned const char *s,
 		 int len,
 		 int map,
 		 BOOL maxMessage)
@@ -2870,7 +2870,7 @@ int LYEditInsert(EDREC * edit, unsigned char *s,
 	map = map_active;
     if (map && LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
 	int off = Pos;
-	unsigned char *e = s + len;
+	unsigned const char *e = s + len;
 	char *tail = 0;
 
 	while (s < e) {
@@ -2910,7 +2910,8 @@ int LYEditInsert(EDREC * edit, unsigned char *s,
 	len = off - Pos;
 	FREE(tail);
     } else if (map) {
-	unsigned char *e = s + len, *t = (unsigned char *) Buf + Pos;
+	unsigned const char *e = s + len;
+	unsigned char *t = (unsigned char *) Buf + Pos;
 
 	while (s < e) {
 	    int ch;
@@ -2929,7 +2930,7 @@ int LYEditInsert(EDREC * edit, unsigned char *s,
     } else
 #endif /* defined EXP_KEYBOARD_LAYOUT */
     {
-	strncpy(Buf + Pos, (char *) s, len);
+	strncpy(Buf + Pos, (const char *) s, len);
 	edited = 1;
     }
 
@@ -3385,7 +3386,7 @@ int LYEdit1(EDREC * edit, int ch,
  *  If a 'g' or 'p' suffix is included, that will be
  *  loaded into c.  Otherwise, c is zeroed. - FM & LE
  */
-int get_popup_number(char *msg,
+int get_popup_number(const char *msg,
 		     int *c,
 		     int *rel)
 {
@@ -3877,7 +3878,7 @@ int LYhandlePopupList(int cur_choice,
     BOOLEAN ReDraw = FALSE;
     int number;
     char buffer[MAX_LINE];
-    char *popup_status_msg = NULL;
+    const char *popup_status_msg = NULL;
     const char **Cptr = NULL;
 
 #define CAN_SCROLL_DOWN	1
@@ -4961,7 +4962,7 @@ int LYgetstr(char *inputline,
 			    s = e1;
 			    if (*e1 == '\t') {	/* Replace by space */
 				LYEditInsert(&MyEdit,
-					     (unsigned char *) " ",
+					     (unsigned const char *) " ",
 					     1,
 					     map_active,
 					     TRUE);
@@ -5121,10 +5122,10 @@ char *LYstrstr(char *chptr,
  *			       if present in chptr.
  * It is a case insensitive search.
  */
-char *LYno_attr_char_case_strstr(char *chptr,
-				 char *tarptr)
+const char *LYno_attr_char_case_strstr(const char *chptr,
+				       const char *tarptr)
 {
-    register char *tmpchptr, *tmptarptr;
+    register const char *tmpchptr, *tmptarptr;
 
     if (!chptr)
 	return (NULL);
@@ -5174,10 +5175,10 @@ char *LYno_attr_char_case_strstr(char *chptr,
  *			       if present in chptr.
  * It is a case sensitive search.
  */
-char *LYno_attr_char_strstr(char *chptr,
-			    char *tarptr)
+const char *LYno_attr_char_strstr(const char *chptr,
+				  const char *tarptr)
 {
-    register char *tmpchptr, *tmptarptr;
+    register const char *tmpchptr, *tmptarptr;
 
     if (!chptr)
 	return (NULL);
@@ -5237,14 +5238,14 @@ char *LYno_attr_char_strstr(char *chptr,
  * It assumes UTF8 if utf_flag is set.
  * It is a case insensitive search.  - KW & FM
  */
-char *LYno_attr_mbcs_case_strstr(char *chptr,
-				 const char *tarptr,
-				 BOOL utf_flag,
-				 BOOL count_gcells,
-				 int *nstartp,
-				 int *nendp)
+const char *LYno_attr_mbcs_case_strstr(const char *chptr,
+				       const char *tarptr,
+				       BOOL utf_flag,
+				       BOOL count_gcells,
+				       int *nstartp,
+				       int *nendp)
 {
-    char *tmpchptr;
+    const char *tmpchptr;
     const char *tmptarptr;
     int len = 0;
     int offset;
@@ -5400,14 +5401,14 @@ char *LYno_attr_mbcs_case_strstr(char *chptr,
  * It assumes UTF8 if utf_flag is set.
  * It is a case sensitive search.  - KW & FM
  */
-char *LYno_attr_mbcs_strstr(char *chptr,
-			    const char *tarptr,
-			    BOOL utf_flag,
-			    BOOL count_gcells,
-			    int *nstartp,
-			    int *nendp)
+const char *LYno_attr_mbcs_strstr(const char *chptr,
+				  const char *tarptr,
+				  BOOL utf_flag,
+				  BOOL count_gcells,
+				  int *nstartp,
+				  int *nendp)
 {
-    char *tmpchptr;
+    const char *tmpchptr;
     const char *tmptarptr;
     int len = 0;
     int offset;

@@ -389,7 +389,7 @@ static char *help_message_cache_contents(void)
  *		  or negative for communication failure (in which case
  *		  the control connection will be closed).
  */
-static int write_cmd(char *cmd)
+static int write_cmd(const char *cmd)
 {
     int status;
 
@@ -442,7 +442,7 @@ static int write_cmd(char *cmd)
  *	returns:  The first digit of the reply type,
  *		  or negative for communication failure.
  */
-static int response(char *cmd)
+static int response(const char *cmd)
 {
     int result;			/* Three-digit decimal code */
     int continuation_response = -1;
@@ -533,7 +533,7 @@ static int response(char *cmd)
     return result / 100;
 }
 
-static int send_cmd_1(char *verb)
+static int send_cmd_1(const char *verb)
 {
     char command[80];
 
@@ -541,7 +541,7 @@ static int send_cmd_1(char *verb)
     return response(command);
 }
 
-static int send_cmd_2(char *verb, char *param)
+static int send_cmd_2(const char *verb, const char *param)
 {
     char *command = 0;
     int status;
@@ -1340,7 +1340,7 @@ static int get_listen_socket(void)
 
 }				/* get_listen_socket */
 
-static char *months[12] =
+static const char *months[12] =
 {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -1686,7 +1686,8 @@ static void parse_vms_dir_entry(char *line,
 {
     int i, j;
     unsigned int ialloc;
-    char *cp, *cpd, *cps, date[16], *sp = " ";
+    char *cp, *cpd, *cps, date[16];
+    const char *sp = " ";
 
     /* Get rid of blank lines, and information lines.  Valid lines have the ';'
      * version number token.
@@ -2976,7 +2977,7 @@ static int setup_connection(const char *name,
 #endif /* REPEAT_PORT */
 	} else {		/* Tell the server to be passive */
 	    char *command = NULL;
-	    char *p;
+	    const char *p;
 	    int h0, h1, h2, h3, p0, p1;		/* Parts of reply */
 
 #ifdef INET6
@@ -3132,7 +3133,8 @@ int HTFTPLoad(const char *name,
 	char *fname = filename;	/* Save for subsequent free() */
 	char *vmsname = NULL;
 	BOOL binary;
-	char *type = NULL;
+	const char *type = NULL;
+	char *types = NULL;
 	char *cp;
 
 	if (server_type == CMS_SERVER) {
@@ -3152,22 +3154,22 @@ int HTFTPLoad(const char *name,
 	if (!*filename) {
 	    StrAllocCopy(filename, "/");
 	    type = "D";
-	} else if ((type = strrchr(filename, ';')) != NULL) {
+	} else if ((type = types = strrchr(filename, ';')) != NULL) {
 	    /*
 	     * Check and trim the type= parameter.  - FM
 	     */
 	    if (!strncasecomp((type + 1), "type=", 5)) {
 		switch (TOUPPER(*(type + 6))) {
 		case 'D':
-		    *type = '\0';
+		    *types = '\0';
 		    type = "D";
 		    break;
 		case 'A':
-		    *type = '\0';
+		    *types = '\0';
 		    type = "A";
 		    break;
 		case 'I':
-		    *type = '\0';
+		    *types = '\0';
 		    type = "I";
 		    break;
 		default:
@@ -3274,7 +3276,7 @@ int HTFTPLoad(const char *name,
 	    /*
 	     * Act on our setting if not already set.  - FM
 	     */
-	    char *mode = binary ? "I" : "A";
+	    const char *mode = binary ? "I" : "A";
 
 	    status = send_cmd_2("TYPE", mode);
 	    if (status != 2) {
@@ -3708,11 +3710,11 @@ int HTFTPLoad(const char *name,
 	    format = HTAtom_for("www/compressed");
 
 	} else {
-	    char *dot;
-	    CompressFileType cft = HTCompressFileType(FileName, "._-", &dot);
+	    int rootlen;
+	    CompressFileType cft = HTCompressFileType(FileName, "._-", &rootlen);
 
 	    if (cft != cftNone) {
-		*dot = '\0';
+		FileName[rootlen] = '\0';
 		format = HTFileFormat(FileName, &encoding, NULL);
 		format = HTCharsetFormat(format, anchor, -1);
 		StrAllocCopy(anchor->content_type, format->name);

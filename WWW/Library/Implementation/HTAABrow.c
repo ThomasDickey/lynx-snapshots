@@ -565,8 +565,8 @@ static char *compose_auth_string(HTAAScheme scheme, HTAASetup * setup, BOOL IsPr
     char *proxiedHost = NULL;
     char *thePort = NULL;
     HTAARealm *realm;
-    char *i_net_addr = "0.0.0.0";	/* Change... @@@@ */
-    char *timestamp = "42";	/* ... these @@@@ */
+    const char *i_net_addr = "0.0.0.0";		/* Change... @@@@ */
+    const char *timestamp = "42";	/* ... these @@@@ */
 
     FREE(compose_auth_stringResult);	/* From previous call */
 
@@ -910,7 +910,7 @@ char *HTAA_composeAuth(const char *hostname,
 	    StrAllocCopy(HTAA_composeAuthResult, "");
 	    return (HTAA_composeAuthResult);
 	}
-	len = strlen(auth_string) + strlen((char *) HTAAScheme_name(scheme)) + 26;
+	len = strlen(auth_string) + strlen(HTAAScheme_name(scheme)) + 26;
 	if ((HTAA_composeAuthResult = typecallocn(char, len)) == 0)
 	      outofmem(__FILE__, "HTAA_composeAuth");
 
@@ -988,7 +988,7 @@ char *HTAA_composeAuth(const char *hostname,
 	    return (HTAA_composeAuthResult);
 	}
 
-	len = strlen(auth_string) + strlen((char *) HTAAScheme_name(scheme)) + 20;
+	len = strlen(auth_string) + strlen(HTAAScheme_name(scheme)) + 20;
 	if ((HTAA_composeAuthResult = typecallocn(char, len)) == 0)
 	      outofmem(__FILE__, "HTAA_composeAuth");
 

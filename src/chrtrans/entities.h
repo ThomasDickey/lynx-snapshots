@@ -23,7 +23,7 @@ otherwise relaxed.
 
 #include <UCkd.h>		/* typedef u16 */
 typedef struct {
-    char *name;			/* sorted alphabetically (case-sensitive) */
+    const char *name;		/* sorted alphabetically (case-sensitive) */
     u16 code;
 } UC_entity_info;
 

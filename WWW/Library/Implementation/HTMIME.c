@@ -479,7 +479,7 @@ static int pumpData(HTStream *me)
 	char *url = NULL;
 	char *num = NULL;
 	char *txt = NULL;
-	char *base = "";	/* FIXME: refresh_url may be relative to doc */
+	const char *base = "";	/* FIXME: refresh_url may be relative to doc */
 
 	LYParseRefreshURL(me->refresh_url, &num, &url);
 	if (url != NULL && me->format == WWW_HTML) {

@@ -267,7 +267,7 @@ BOOL run_external(char *param,
 #endif
 
     cmdbuf = lookup_external(param, only_overriders);
-    if (cmdbuf != 0 && *cmdbuf != '\0') {
+    if (non_empty(cmdbuf)) {
 #ifdef WIN_EX			/* 1997/10/17 (Fri) 14:07:50 */
 	int len;
 	char buff[LY_MAXPATH];

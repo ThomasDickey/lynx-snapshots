@@ -105,7 +105,7 @@ LexItem lex(FILE *fp)
     }				/* forever */
 }
 
-char *lex_verbose(LexItem lex_item)
+const char *lex_verbose(LexItem lex_item)
 {
     static char msg[100];	/* @@@@@@@@ */
 

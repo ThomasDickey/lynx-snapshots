@@ -222,7 +222,7 @@ static void sl_suspend(int sig)
 /* *INDENT-OFF* */
 /* definitions for the mono attributes we can use */
 static struct {
-    char *name;
+    const char *name;
     int code;
 } Mono_Attrs[7] =
 {

@@ -49,7 +49,7 @@ Get the Name for Lexical Item
 
  */
 
-extern char *lex_verbose(LexItem lex_item);
+extern const char *lex_verbose(LexItem lex_item);
 
 /*
 

@@ -28,7 +28,7 @@ LYKbLayout_t *LYKbLayouts[] =
     kb_layout_yawerty
 };
 
-char *LYKbLayoutNames[] =
+const char *LYKbLayoutNames[] =
 {
     "ROT13'd keyboard layout",
     "JCUKEN Cyrillic, for AT 101-key kbd",
@@ -1122,7 +1122,7 @@ Kcmd *LYStringToKcmd(const char *name)
     Kcmd *result = 0;
     Kcmd *maybe = 0;
 
-    if (name != 0 && *name != 0) {
+    if (non_empty(name)) {
 	for (j = 0; revmap[j].name != 0; j++) {
 	    if (!strcasecomp(revmap[j].name, name)) {
 		result = revmap + j;
@@ -1344,7 +1344,7 @@ int lecname_to_lec(const char *func)
     int i;
     struct emap *mp;
 
-    if (func != NULL && *func != '\0') {
+    if (non_empty(func)) {
 	for (i = 0, mp = ekmap; (*mp).name != NULL; mp++, i++) {
 	    if (strcmp((*mp).name, func) == 0) {
 		return (*mp).code;
@@ -1460,7 +1460,7 @@ GLOBALDEF HTProtocol LYLynxKeymap =
  * returns lynxkeycode value != 0 if the mapping was made, 0 if not.
  */
 int remap(char *key,
-	  char *func,
+	  const char *func,
 	  BOOLEAN for_dired)
 {
     Kcmd *mp;

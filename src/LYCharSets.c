@@ -879,7 +879,7 @@ UCode_t HTMLGetEntityUCValue(const char *name)
     /*
      * Make sure we have a non-zero length name.  - FM
      */
-    if (!(name && *name))
+    if (isEmpty(name))
 	return (value);
 
     /*

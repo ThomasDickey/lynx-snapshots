@@ -46,7 +46,7 @@ typedef enum {
 } SGMLContent;
 
 typedef struct {
-    char *name;			/* The (constant) name of the attribute */
+    const char *name;		/* The name of the attribute */
 #ifdef USE_PRETTYSRC
     char type;			/* code of the type of the attribute. Code
 				   values are in HTMLDTD.h */
@@ -126,7 +126,7 @@ typedef int TagFlags;
  */
 typedef struct _tag HTTag;
 struct _tag {
-    char *name;			/* The name of the tag */
+    const char *name;		/* The name of the tag */
 #ifdef USE_COLOR_STYLE
     int name_len;		/* The length of the name */
 #endif
@@ -191,7 +191,7 @@ typedef struct _HTStructured HTStructured;
 
 typedef struct _HTStructuredClass {
 
-    char *name;			/* Just for diagnostics */
+    const char *name;		/* Just for diagnostics */
 
     void (*_free) (HTStructured * me);
 

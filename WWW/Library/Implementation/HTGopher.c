@@ -139,7 +139,7 @@ static BOOL acceptable_inited = NO;
 static void init_acceptable(void)
 {
     unsigned int i;
-    char *good =
+    const char *good =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./-_$";
 
     for (i = 0; i < 256; i++)
@@ -328,7 +328,7 @@ static void parse_menu(const char *arg GCC_UNUSED,
 
 	    } else if (port) {	/* Other types need port */
 		char *address = 0;
-		char *format = *selector ? "%s//%s@%s/" : "%s//%s/";
+		const char *format = *selector ? "%s//%s@%s/" : "%s//%s/";
 
 		if (gtype == GOPHER_TELNET) {
 		    PUTS(" (TEL) ");
@@ -725,7 +725,7 @@ static void free_CSOfields(void)
 /*	Interpret CSO/PH form template keys. - FM
  *	=========================================
  */
-static void interpret_cso_key(char *key,
+static void interpret_cso_key(const char *key,
 			      char *buf,
 			      int *length,
 			      CSOformgen_context * ctx,
@@ -1074,9 +1074,10 @@ static int generate_cso_form(char *host,
     int i, j, length;
     size_t out;
     int full_flag = 1;
-    char *key, *line;
+    const char *key;
+    const char *line;
     CSOformgen_context ctx;
-    static char *template[] =
+    static const char *template[] =
     {
 	"<HTML>\n<HEAD>\n<TITLE>CSO/PH Query Form for $(HOST)</TITLE>\n</HEAD>\n<BODY>",
 	"<H2><I>CSO/PH Query Form</I> for <EM>$(HOST)</EM></H2>",

@@ -77,7 +77,7 @@
 #endif /* FNAMES_8_3 */
 #endif /* OK_INSTALL */
 
-static char *get_filename(char *prompt,
+static char *get_filename(const char *prompt,
 			  char *buf,
 			  size_t bufsize);
 
@@ -680,7 +680,7 @@ static int modify_tagged(char *testpath)
 	 * This test used to always fail from the dired menu...  changed to
 	 * something that hopefully makes more sense - KW
 	 */
-	if (testpath && *testpath && 0 != strcmp(testpath, "/")) {
+	if (non_empty(testpath) && 0 != strcmp(testpath, "/")) {
 	    /*
 	     * testpath passed in and is not empty and not a single "/" (which
 	     * would probably be bogus) - use it.
@@ -810,7 +810,7 @@ static int modify_tagged(char *testpath)
  */
 static int modify_name(char *testpath)
 {
-    char *cp;
+    const char *cp;
     char tmpbuf[DIRED_MAXBUF];
     char *newpath = NULL;
     struct stat dir_info;
@@ -866,7 +866,8 @@ static int modify_name(char *testpath)
  */
 static int modify_location(char *testpath)
 {
-    char *cp;
+    const char *cp;
+    char *sp;
     dev_t dev;
     ino_t inode;
     int owner;
@@ -918,8 +919,8 @@ static int modify_location(char *testpath)
 	}
 	if (LYisAbsPath(tmpbuf)) {
 	    StrAllocCopy(newpath, tmpbuf);
-	} else if ((cp = LYLastPathSep(newpath)) != NULL) {
-	    *++cp = '\0';
+	} else if ((sp = LYLastPathSep(newpath)) != NULL) {
+	    *++sp = '\0';
 	    StrAllocCat(newpath, tmpbuf);
 	} else {
 	    HTAlert(gettext("Unexpected failure - unable to find trailing path separator"));
@@ -1034,7 +1035,7 @@ static int create_file(char *current_location)
     int code = FALSE;
     char tmpbuf[DIRED_MAXBUF];
     char *testpath = NULL;
-    char *bad_chars = ".~/";
+    const char *bad_chars = ".~/";
 
     tmpbuf[0] = '\0';
     if (get_filename(gettext("Enter name of file to create: "),
@@ -1075,7 +1076,7 @@ static int create_directory(char *current_location)
     int code = FALSE;
     char tmpbuf[DIRED_MAXBUF];
     char *testpath = NULL;
-    char *bad_chars = ".~/";
+    const char *bad_chars = ".~/";
 
     tmpbuf[0] = '\0';
     if (get_filename(gettext("Enter name for new directory: "),
@@ -1291,7 +1292,7 @@ static int permit_location(char *destpath,
 	 */
 	FILE *fp0;
 	char *user_filename;
-	char *group_name;
+	const char *group_name;
 
 	srcpath = strip_trailing_slash(srcpath);
 
@@ -2126,7 +2127,7 @@ int dired_options(DocInfo *doc, char **newfile)
 /*
  * Check DIRED filename.
  */
-static char *get_filename(char *prompt,
+static char *get_filename(const char *prompt,
 			  char *buf,
 			  size_t bufsize)
 {

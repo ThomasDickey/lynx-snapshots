@@ -63,7 +63,7 @@ static char *accept_language = NULL;
 static char *post_len = NULL;
 #endif /* LYNXCGI_LINKS */
 
-static void add_environment_value(char *env_value);
+static void add_environment_value(const char *env_value);
 
 #define PERROR(msg) CTRACE((tfp, "LYNXCGI: %s: %s\n", msg, LYStrerror(errno)))
 
@@ -100,7 +100,7 @@ static void remember_alloced(void *ptr)
  * Simple routine for expanding the environment array and adding a value to
  * it
  */
-static void add_environment_value(char *env_value)
+static void add_environment_value(const char *env_value)
 {
     if (envc == envc_size) {	/* Need some more slots */
 	envc_size += 10;
@@ -118,7 +118,7 @@ static void add_environment_value(char *env_value)
 	}
     }
 
-    env[envc++] = env_value;
+    env[envc++] = (char *) env_value;
     env[envc] = NULL;		/* Make sure it is always properly terminated */
 }
 
@@ -500,12 +500,12 @@ static int LYLoadCGI(const char *arg,
 		dup2(fd2[1], fileno(stderr));
 		close(fd2[1]);
 
-		if (language && *language) {
+		if (non_empty(language)) {
 		    HTSprintf0(&accept_language, "HTTP_ACCEPT_LANGUAGE=%s", language);
 		    add_environment_value(accept_language);
 		}
 
-		if (pref_charset && *pref_charset) {
+		if (non_empty(pref_charset)) {
 		    cp = NULL;
 		    StrAllocCopy(cp, "HTTP_ACCEPT_CHARSET=");
 		    StrAllocCat(cp, pref_charset);

@@ -365,7 +365,7 @@ int getfile(DocInfo *doc)
 
 	if (LYNoRefererHeader == FALSE &&
 	    LYNoRefererForThis == FALSE) {
-	    char *ref_url = HTLoadedDocumentURL();
+	    const char *ref_url = HTLoadedDocumentURL();
 
 	    if (isLYNXIMGMAP(ref_url))
 		ref_url += LEN_LYNXIMGMAP;
@@ -534,7 +534,7 @@ int getfile(DocInfo *doc)
 		    title = HTAnchor_title(tmpanchor);
 		} else if (HTMainAnchor && !LYUserSpecifiedURL) {
 		    title = HTAnchor_subject(HTMainAnchor);
-		    if (title && *title) {
+		    if (non_empty(title)) {
 			if (strncasecomp(title, "Re:", 3)) {
 			    StrAllocCopy(tmptitle, "Re: ");
 			    StrAllocCat(tmptitle, title);
@@ -851,7 +851,7 @@ int getfile(DocInfo *doc)
 		    temp = HTParse(use_this_url_instead,
 				   WWWDoc.address,
 				   PARSE_ALL);
-		    if (temp && *temp) {
+		    if (non_empty(temp)) {
 			StrAllocCopy(use_this_url_instead, temp);
 		    }
 		    FREE(temp);

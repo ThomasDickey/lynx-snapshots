@@ -530,7 +530,7 @@ static char *mailcap_substitute(HTParentAnchor *anchor,
     /* if we don't have a "%s" token, expect to provide the file via stdin */
     if (!LYMailcapUsesPctS(pres->command)) {
 	char *prepend = 0;
-	char *format = "( %s ) < %s";
+	const char *format = "( %s ) < %s";
 
 	HTSprintf(&prepend, "( %s", result);	/* ...avoid quoting */
 	HTAddParam(&prepend, format, 2, fnam);	/* ...to quote if needed */
@@ -891,9 +891,9 @@ HTStream *HTSaveToFile(HTPresentation *pres,
 	 */
 	char *temp = NULL;
 
-	if (anchor->content_base && *anchor->content_base) {
+	if (non_empty(anchor->content_base)) {
 	    StrAllocCopy(temp, anchor->content_base);
-	} else if (anchor->content_location && *anchor->content_location) {
+	} else if (non_empty(anchor->content_location)) {
 	    StrAllocCopy(temp, anchor->content_location);
 	}
 	if (temp) {
@@ -905,10 +905,10 @@ HTStream *HTSaveToFile(HTPresentation *pres,
 
 	fprintf(ret_obj->fp,
 		"<!-- X-URL: %s -->\n", anchor->address);
-	if (anchor->date && *anchor->date) {
+	if (non_empty(anchor->date)) {
 	    fprintf(ret_obj->fp,
 		    "<!-- Date: %s -->\n", anchor->date);
-	    if (anchor->last_modified && *anchor->last_modified
+	    if (non_empty(anchor->last_modified)
 		&& strcmp(anchor->last_modified, anchor->date)
 		&& strcmp(anchor->last_modified,
 			  "Thu, 01 Jan 1970 00:00:01 GMT")) {
@@ -933,7 +933,7 @@ HTStream *HTSaveToFile(HTPresentation *pres,
 	 */
 	char *temp = NULL;
 
-	if (anchor->charset && *anchor->charset) {
+	if (non_empty(anchor->charset)) {
 	    StrAllocCopy(temp, anchor->charset);
 	    LYRemoveBlanks(temp);
 	    fprintf(ret_obj->fp,
@@ -963,7 +963,7 @@ HTStream *HTCompressed(HTPresentation *pres,
     char temp[LY_MAXPATH];	/* actually stores just a suffix */
     const char *suffix;
     char *uncompress_mask = NULL;
-    char *compress_suffix = "";
+    const char *compress_suffix = "";
     const char *middle;
 
     /*

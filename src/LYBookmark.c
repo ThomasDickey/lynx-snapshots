@@ -24,7 +24,7 @@ char *MBM_A_subbookmark[MBM_V_MAXFILES + 1];
 char *MBM_A_subdescript[MBM_V_MAXFILES + 1];
 
 static BOOLEAN is_mosaic_hotlist = FALSE;
-static char *convert_mosaic_bookmark_file(char *filename_buffer);
+static const char *convert_mosaic_bookmark_file(const char *filename_buffer);
 
 int LYindex2MBM(int n)
 {
@@ -36,8 +36,8 @@ int LYindex2MBM(int n)
 int LYMBM2index(int ch)
 {
     if ((ch = TOUPPER(ch)) > 0) {
-	char *letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	char *result = strchr(letters, ch);
+	const char *letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	const char *result = strchr(letters, ch);
 
 	if (result != 0
 	    && (result - letters) <= MBM_V_MAXFILES)
@@ -68,7 +68,7 @@ static void show_bookmark_not_defined(void)
  * BookmarkPage but not *URL is the selection is valid but the file doesn't yet
  * exist.  - FM
  */
-char *get_bookmark_filename(char **URL)
+const char *get_bookmark_filename(char **URL)
 {
     static char filename_buffer[LY_MAXPATH];
     char *string_buffer = 0;
@@ -118,7 +118,7 @@ char *get_bookmark_filename(char **URL)
 	if (LYSafeGets(&string_buffer, fp) != 0
 	    && *LYTrimNewline(string_buffer) != '\0'
 	    && !strncmp(string_buffer, "ncsa-xmosaic-hotlist-format-1", 29)) {
-	    char *newname;
+	    const char *newname;
 
 	    /*
 	     * It is a mosaic hotlist file.
@@ -143,7 +143,7 @@ char *get_bookmark_filename(char **URL)
  * Converts a Mosaic hotlist file into an HTML file for handling as a Lynx
  * bookmark file.  - FM
  */
-static char *convert_mosaic_bookmark_file(char *filename_buffer)
+static const char *convert_mosaic_bookmark_file(const char *filename_buffer)
 {
     static char newfile[LY_MAXPATH];
     FILE *fp, *nfp;
@@ -196,12 +196,12 @@ static char *title_convert8bit(const char *Title);
  * exist, and making sure that no_cache is set for a pre-existing, cached file,
  * so that the change will be evident on return to to that file.  - FM
  */
-void save_bookmark_link(char *address,
-			char *title)
+void save_bookmark_link(const char *address,
+			const char *title)
 {
     FILE *fp;
     BOOLEAN first_time = FALSE;
-    char *filename;
+    const char *filename;
     char *bookmark_URL = NULL;
     char filename_buffer[LY_MAXPATH];
     char string_buffer[BUFSIZ];
@@ -216,7 +216,7 @@ void save_bookmark_link(char *address,
     /*
      * Make sure we were passed something to save.  - FM
      */
-    if (!(address && *address)) {
+    if (isEmpty(address)) {
 	HTAlert(MALFORMED_ADDRESS);
 	return;
     }
@@ -945,7 +945,7 @@ BOOLEAN LYHaveSubBookmarks(void)
     int i;
 
     for (i = 1; i < MBM_V_MAXFILES; i++) {
-	if (MBM_A_subbookmark[i] != NULL && *MBM_A_subbookmark[i] != '\0')
+	if (non_empty(MBM_A_subbookmark[i]))
 	    return (TRUE);
     }
 
@@ -959,7 +959,7 @@ BOOLEAN LYHaveSubBookmarks(void)
  * want to use _statusline() so that any multibyte/CJK characters in the string
  * will be handled properly.  - FM
  */
-void LYMBM_statusline(char *text)
+void LYMBM_statusline(const char *text)
 {
     if (LYMultiBookmarks != MBM_OFF && user_mode == NOVICE_MODE) {
 	LYStatusLine = (LYlines - 1);

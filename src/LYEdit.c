@@ -163,15 +163,15 @@ int edit_current_file(char *newfile,
 }
 
 void edit_temporary_file(char *filename,
-			 char *position,
-			 char *message)
+			 const char *position,
+			 const char *message)
 {
 #ifdef UNIX
     struct stat stat_info;
 #endif
-    char *format = "%s %s";
+    const char *format = "%s %s";
     char *command = NULL;
-    char *editor_arg = "";
+    const char *editor_arg = "";
     int params = 1;
     int rv;
 

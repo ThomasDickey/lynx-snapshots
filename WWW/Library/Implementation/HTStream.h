@@ -31,7 +31,7 @@ typedef struct _HTStream HTStream;
  */
 typedef struct _HTStreamClass {
 
-    char *name;			/* Just for diagnostics */
+    const char *name;		/* Just for diagnostics */
 
     void (*_free) (HTStream *me);
 

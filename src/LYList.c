@@ -14,6 +14,7 @@
 #include <LYGlobalDefs.h>
 #include <LYCharUtils.h>
 #include <LYCharSets.h>
+#include <LYStrings.h>
 #include <LYHistory.h>
 
 #ifdef DIRED_SUPPORT
@@ -44,7 +45,7 @@ int showlist(DocInfo *newdoc, BOOLEAN titles)
     char *Address = NULL, *Title = NULL, *cp = NULL;
     char *LinkTitle = NULL;	/* Rel stored as property of link, not of dest */
     BOOLEAN intern_w_post = FALSE;
-    char *desc = "unknown field or link";
+    const char *desc = "unknown field or link";
     void *helper;
 
     refs = HText_sourceAnchors(HTMainText);
@@ -80,8 +81,9 @@ int showlist(DocInfo *newdoc, BOOLEAN titles)
     StrAllocCopy(Address, HTLoadedDocumentURL());
     LYEntify(&Address, FALSE);
     fprintf(fp0, "%s%s<p>\n", gettext("References in "),
-	    ((Address != NULL && *Address != '\0') ? Address :
-	     gettext("this document:")));
+	    (non_empty(Address)
+	     ? Address
+	     : gettext("this document:")));
     FREE(Address);
     if (refs > 0) {
 	fprintf(fp0, "<%s compact>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
@@ -158,7 +160,7 @@ int showlist(DocInfo *newdoc, BOOLEAN titles)
 	StrAllocCopy(Address, address);
 	FREE(address);
 	LYEntify(&Address, TRUE);
-	if (title && *title) {
+	if (non_empty(title)) {
 	    LYformTitle(&Title, title);
 	    LYEntify(&Title, TRUE);
 	    if (*Title) {
@@ -194,7 +196,7 @@ int showlist(DocInfo *newdoc, BOOLEAN titles)
     for (cnt = 0; cnt < hidden_links; cnt++) {
 	StrAllocCopy(Address, HText_HiddenLinkAt(HTMainText, cnt));
 	LYEntify(&Address, FALSE);
-	if (!(Address && *Address)) {
+	if (isEmpty(Address)) {
 	    FREE(Address);
 	    continue;
 	}
@@ -243,7 +245,7 @@ void printlist(FILE *fp, BOOLEAN titles)
     int cnt;
     int refs, hidden_links;
     char *address = NULL;
-    char *desc = gettext("unknown field or link");
+    const char *desc = gettext("unknown field or link");
     void *helper;
 
     refs = HText_sourceAnchors(HTMainText);
@@ -309,7 +311,7 @@ void printlist(FILE *fp, BOOLEAN titles)
 		    gettext("Hidden links:"));
 	    for (cnt = 0; cnt < hidden_links; cnt++) {
 		StrAllocCopy(address, HText_HiddenLinkAt(HTMainText, cnt));
-		if (!(address && *address)) {
+		if (isEmpty(address)) {
 		    FREE(address);
 		    continue;
 		}

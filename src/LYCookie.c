@@ -1103,8 +1103,8 @@ static void LYProcessSetCookies(const char *SetCookie,
     BOOL Quoted = FALSE;
     unsigned parse_flags = 0;
 
-    if (!(SetCookie && *SetCookie) &&
-	!(SetCookie2 && *SetCookie2)) {
+    if (isEmpty(SetCookie) &&
+	isEmpty(SetCookie2)) {
 	/*
 	 * Yuk!  Garbage in, so nothing out.  - FM
 	 */
@@ -1424,7 +1424,7 @@ static void LYProcessSetCookies(const char *SetCookie,
     cookie_len = 0;
     NumCookies = 0;
     cur_cookie = NULL;
-    p = ((SetCookie && !(SetCookie2 && *SetCookie2)) ? SetCookie : "");
+    p = ((SetCookie && isEmpty(SetCookie2)) ? SetCookie : "");
     if (SetCookie2 && *p) {
 	CTRACE((tfp, "LYProcessSetCookies: Using Set-Cookie header.\n"));
     }
@@ -1769,8 +1769,8 @@ void LYSetCookie(const char *SetCookie,
 	    *ptr = '\0';
 	}
     }
-    if (!(SetCookie && *SetCookie) &&
-	!(SetCookie2 && *SetCookie2)) {
+    if (isEmpty(SetCookie) &&
+	isEmpty(SetCookie2)) {
 	/*
 	 * Yuk, something must have gone wrong in HTMIME.c or HTTP.c because
 	 * both SetCookie and SetCookie2 are NULL or zero-length.  - FM

@@ -95,9 +95,9 @@ void LYAddVisitedLink(DocInfo *doc)
 {
     VisitedLink *new;
     HTList *cur;
-    char *title = (doc->title ? doc->title : NO_TITLE);
+    const char *title = (doc->title ? doc->title : NO_TITLE);
 
-    if (!(doc->address && *doc->address)) {
+    if (isEmpty(doc->address)) {
 	PrevVisitedLink = NULL;
 	return;
     }
@@ -788,7 +788,7 @@ int LYShowVisitedLinks(char **newfile)
     HTList *cur = Visited_Links;
     int offset;
     int ret = 0;
-    char *arrow, *post_arrow;
+    const char *arrow, *post_arrow;
 
     if (!cur)
 	return (-1);
@@ -866,7 +866,7 @@ int LYShowVisitedLinks(char **newfile)
 		offset = LYcols * 3 / 4;
 	} else
 	    offset = (x > 99 ? 0 : x < 10 ? 2 : 1);
-	if (vl->title != NULL && *vl->title != '\0') {
+	if (non_empty(vl->title)) {
 	    StrAllocCopy(Title, vl->title);
 	    LYEntify(&Title, TRUE);
 	    LYTrimLeading(Title);
@@ -876,7 +876,7 @@ int LYShowVisitedLinks(char **newfile)
 	} else {
 	    StrAllocCopy(Title, NO_TITLE);
 	}
-	if (vl->address != NULL && *vl->address != '\0') {
+	if (non_empty(vl->address)) {
 	    StrAllocCopy(Address, vl->address);
 	    LYEntify(&Address, FALSE);
 	    fprintf(fp0,

@@ -357,11 +357,13 @@ static void strip_userid(char *host)
  * Check if the user's options specified to use the given encoding.  Normally
  * all encodings with compiled-in support are specified (encodingALL).
  */
-static BOOL acceptEncoding (int code)
+static BOOL acceptEncoding(int code)
 {
     BOOL result = FALSE;
+
     if ((code & LYAcceptEncoding) != 0) {
 	const char *program = 0;
+
 	switch (code) {
 	case encodingGZIP:
 	    program = HTGetProgramPath(ppGZIP);
@@ -421,7 +423,7 @@ static int HTLoadHTTP(const char *arg,
     HTFormat format_in;		/* Format arriving in the message */
     BOOL do_head = FALSE;	/* Whether or not we should do a head */
     BOOL do_post = FALSE;	/* ARE WE posting ? */
-    char *METHOD;
+    const char *METHOD;
 
     BOOL had_header;		/* Have we had at least one header? */
     char *line_buffer;
@@ -874,16 +876,16 @@ static int HTLoadHTTP(const char *arg,
 	if (!(LYUserSpecifiedURL ||
 	      LYNoRefererHeader || LYNoRefererForThis) &&
 	    strcmp(HTLoadedDocumentURL(), "")) {
-	    char *cp = LYRequestReferer;
+	    const char *cp = LYRequestReferer;
 
 	    if (!cp)
 		cp = HTLoadedDocumentURL();	/* @@@ Try both? - kw */
 	    BStrCat0(command, "Referer: ");
 	    if (isLYNXIMGMAP(cp)) {
-		char *cp1 = trimPoundSelector(cp);
+		char *pound = findPoundSelector(cp);
+		int nn = (pound ? (int) (pound - cp) : (int) strlen(cp));
 
-		BStrCat0(command, cp + LEN_LYNXIMGMAP);
-		restorePoundSelector(cp1);
+		HTSABCat(&command, cp + LEN_LYNXIMGMAP, nn);
 	    } else {
 		BStrCat0(command, cp);
 	    }

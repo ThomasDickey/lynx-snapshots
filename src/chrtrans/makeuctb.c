@@ -141,8 +141,8 @@ int unicount[MAX_FONTLEN];
 struct unimapdesc_str themap_str =
 {0, NULL, 0, 0};
 
-static char *tblname;
-static char *hdrname;
+static const char *tblname;
+static const char *hdrname;
 
 static int RawOrEnc = 0;
 static int Raw_found = 0;	/* whether explicit R directive found */
@@ -248,7 +248,7 @@ int lowest_eight = 999;
 
 int main(int argc, char **argv)
 {
-    static char *first_ifdefs[] =
+    static const char *first_ifdefs[] =
     {
 	"/*",
 	" * Compile-in this chunk of code unless we've turned it off specifically",
@@ -279,7 +279,7 @@ int main(int argc, char **argv)
 	"#define UC_CHARSET_SETUP%s /*nothing*/",
 	"#else"
     };
-    static char *last_ifdefs[] =
+    static const char *last_ifdefs[] =
     {
 	"",
 	"#endif /* NO_CHARSET%s */",
@@ -323,7 +323,8 @@ int main(int argc, char **argv)
 	chdr = stdout;
 	hdrname = "stdout";
     } else {
-	strcpy(hdrname = outname, tblname);
+	strcpy(outname, tblname);
+	hdrname = outname;
 	if ((p = strrchr(outname, '.')) == 0)
 	    p = outname + strlen(outname);
 	strcpy(p, ".h");

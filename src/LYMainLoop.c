@@ -854,7 +854,7 @@ static int find_link_near_col(int col,
 
 	    while ((delta > 0 ? (i < nlinks) : (i >= 0)) && cy == links[i].ly) {
 		int cx = links[i].lx;
-		char *text = LYGetHiliteStr(i, 0);
+		const char *text = LYGetHiliteStr(i, 0);
 
 		if (text != NULL)
 		    cx += strlen(text) / 2;
@@ -1748,7 +1748,7 @@ static void handle_LYK_COMMENT(BOOLEAN *refresh_screen,
 
 		if (!kp && HTMainAnchor) {
 		    kp = HTAnchor_subject(HTMainAnchor);
-		    if (kp && *kp) {
+		    if (non_empty(kp)) {
 			if (strncasecomp(kp, "Re: ", 4)) {
 			    StrAllocCopy(tmptitle, "Re: ");
 			    StrAllocCat(tmptitle, kp);
@@ -2198,7 +2198,7 @@ static void handle_LYK_DOWN_LINK(int *follow_col,
 	int newlink;
 
 	if (*follow_col == -1) {
-	    char *text = LYGetHiliteStr(curdoc.link, 0);
+	    const char *text = LYGetHiliteStr(curdoc.link, 0);
 
 	    *follow_col = links[curdoc.link].lx;
 
@@ -2376,7 +2376,7 @@ static void handle_LYK_EDIT(int *old_c,
 	 * Allow the user to edit the link rather than curdoc in edit mode.
 	 */
 	if (lynx_edit_mode &&
-	    editor && *editor != '\0' && !no_dired_support) {
+	    non_empty(editor) && !no_dired_support) {
 	if (nlinks > 0) {
 	    cp = links[curdoc.link].lname;
 	    if (is_url(cp) == FILE_URL_TYPE) {
@@ -2415,7 +2415,7 @@ static void handle_LYK_EDIT(int *old_c,
 	}
     } else
 #endif /* DIRED_SUPPORT */
-    if (editor && *editor != '\0') {
+    if (non_empty(editor)) {
 	if (edit_current_file(newdoc.address, curdoc.link, Newline)) {
 	    HTuncache_current_document();
 	    LYforce_no_cache = TRUE;	/*force reload of document */
@@ -4176,7 +4176,13 @@ static void handle_LYK_SHELL(BOOLEAN *refresh_screen,
 	    Cygwin_Shell();
 	} else
 #endif
-	    LYSystem(LYSysShell());
+	{
+	    static char *shell = NULL;
+
+	    if (shell == 0)
+		StrAllocCopy(shell, LYSysShell());
+	    LYSystem(shell);
+	}
 	start_curses();
 	*refresh_screen = TRUE;	/* for an HText_pageDisplay() */
     } else {
@@ -4530,7 +4536,7 @@ static void handle_LYK_UP_LINK(int *follow_col,
 	int newlink;
 
 	if (*follow_col == -1) {
-	    char *text = LYGetHiliteStr(curdoc.link, 0);
+	    const char *text = LYGetHiliteStr(curdoc.link, 0);
 
 	    *follow_col = links[curdoc.link].lx;
 
@@ -4594,7 +4600,7 @@ static void handle_LYK_VIEW_BOOKMARK(BOOLEAN *refresh_screen,
 				     int *old_c,
 				     int real_c)
 {
-    char *cp;
+    const char *cp;
 
     if (LYValidate) {
 	if (*old_c != real_c) {
@@ -5047,7 +5053,7 @@ static void handle_LYK_SHIFT_RIGHT(BOOLEAN *flag, int count)
 static BOOLEAN handle_LYK_LINEWRAP_TOGGLE(int *cmd,
 					  BOOLEAN *flag)
 {
-    static char *choices[] =
+    static const char *choices[] =
     {
 	"Try to fit screen width",
 	"No line wrap in columns",
@@ -5229,12 +5235,14 @@ int mainloop(void)
 	    bookmark_start = FALSE;
 	    goto initialize;
 	} else {
+	    const char *cp1;
+
 	    /*
 	     * See if a bookmark page exists.  If it does, replace
 	     * newdoc.address with its name
 	     */
-	    if ((cp = get_bookmark_filename(&newdoc.address)) != NULL &&
-		*cp != '\0' && strcmp(cp, " ")) {
+	    if ((cp1 = get_bookmark_filename(&newdoc.address)) != NULL &&
+		*cp1 != '\0' && strcmp(cp1, " ")) {
 		StrAllocCopy(newdoc.title, BOOKMARK_TITLE);
 		StrAllocCopy(newdoc.bookmark, BookmarkPage);
 		StrAllocCopy(startrealm, newdoc.address);
@@ -5700,7 +5708,7 @@ int mainloop(void)
 		 */
 		if (((first_file == TRUE) &&
 		     (dump_output_immediately == FALSE) &&
-		     !(newdoc.bookmark && *newdoc.bookmark)) &&
+		     isEmpty(newdoc.bookmark)) &&
 		    ((LYisLocalFile(newdoc.address) == TRUE) &&
 		     !(strcmp(NonNull(HText_getTitle()),
 			      BOOKMARK_TITLE))) &&
@@ -7455,7 +7463,7 @@ void HTAddGotoURL(char *url)
     char *old;
     HTList *cur;
 
-    if (!(url && *url))
+    if (isEmpty(url))
 	return;
 
     CTRACE((tfp, "HTAddGotoURL %s\n", url));
@@ -7529,7 +7537,7 @@ static void show_main_statusline(const LinkInfo curlink,
 	 * Let them know if it's an index -- very rare.
 	 */
 	if (is_www_index) {
-	    char *indx = gettext("-index-");
+	    const char *indx = gettext("-index-");
 
 	    LYmove(LYlines - 1, LYcolLimit - strlen(indx));
 	    lynx_start_reverse();
@@ -7751,9 +7759,9 @@ static void status_link(char *curlink_name,
     }
 }
 
-char *LYDownLoadAddress(void)
+const char *LYDownLoadAddress(void)
 {
-    char *s = newdoc.address ? newdoc.address : "";
+    const char *s = newdoc.address ? newdoc.address : "";
 
     return s;
 }

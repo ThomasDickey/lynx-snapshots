@@ -103,7 +103,7 @@ extern HTAAScheme HTAAScheme_enum(const char *name);
  *      returns         the name of the scheme, i.e.
  *                      "none", "basic", "pubkey", ...
  */
-extern char *HTAAScheme_name(HTAAScheme scheme);
+extern const char *HTAAScheme_name(HTAAScheme scheme);
 
 /*
 
@@ -132,7 +132,7 @@ extern HTAAMethod HTAAMethod_enum(const char *name);
  *      returns         the name of the scheme, i.e.
  *                      "GET", "PUT", ...
  */
-extern char *HTAAMethod_name(HTAAMethod method);
+extern const char *HTAAMethod_name(HTAAMethod method);
 
 /* PUBLIC                                               HTAAMethod_inList()
  *              IS A METHOD IN A LIST OF METHOD NAMES

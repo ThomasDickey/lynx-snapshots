@@ -19,7 +19,7 @@ int WWW_TraceMask = 0;		/* Global trace flag for ALL W3 code */
 #endif
 
 #ifndef VC
-#define VC "unknown"
+#define VC "2.14"
 #endif /* !VC */
 
 #ifdef _WINDOWS

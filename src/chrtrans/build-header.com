@@ -1,4 +1,5 @@
-$ v = 'f$verify(0)'
+$ v0 = 0
+$ v = f$verify(v0)
 $!			BUILD-HEADER.COM
 $!
 $!   Command file to use MAKEUCTB.EXE on VMS systems for creating
@@ -25,11 +26,11 @@ $!	Create a Lynx [.SRC.CHRTRANS] header file.
 $!
 $ makeuctb := $'CHRwhere'makeuctb
 $ makeuctb 'P1'.tbl
-$ v1 = 'f$verify(0)'
+$ v1 = f$verify(v0)
 $ exit
 $!
 $ CLEANUP:
-$    v1 = 'f$verify(0)'
+$    v1 = f$verify(v0)
 $    write sys$output "Default directory:"
 $    show default
 $    v1 = f$verify(v)

@@ -16,7 +16,7 @@ extern int LYStringToKeycode(char *src);
 extern int lacname_to_lac(const char *func);
 extern int lecname_to_lec(const char *func);
 extern int lkcstring_to_lkc(const char *src);
-extern int remap(char *key, char *func, BOOLEAN for_dired);
+extern int remap(char *key, const char *func, BOOLEAN for_dired);
 extern void print_keymap(char **newfile);
 extern void reset_emacs_keys(void);
 extern void reset_numbers_as_arrows(void);
@@ -39,7 +39,7 @@ extern LYKeymap_t keymap[KEYMAP_SIZE];	/* main keymap matrix */
 typedef unsigned short LYKbLayout_t;
 extern int current_layout;
 extern LYKbLayout_t *LYKbLayouts[];
-extern char *LYKbLayoutNames[];
+extern const char *LYKbLayoutNames[];
 extern int LYSetKbLayout(char *layout_id);
 #endif
 

@@ -6,8 +6,8 @@
 #endif /* LYSTRUCTS_H */
 
 extern BOOL LYVersionIsRelease(void);
-extern char *LYVersionStatus(void);
-extern char *LYVersionDate(void);
+extern const char *LYVersionStatus(void);
+extern const char *LYVersionDate(void);
 extern int LYShowInfo(DocInfo *doc,
 		      int size_of_file,
 		      DocInfo *newdoc,

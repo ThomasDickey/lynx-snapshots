@@ -84,7 +84,7 @@ void HTAlwaysAlert(const char *extra_prefix,
 void HTInfoMsg(const char *Msg)
 {
     _statusline(Msg);
-    if (Msg && *Msg) {
+    if (non_empty(Msg)) {
 	CTRACE((tfp, "Info message: %s\n", Msg));
 	LYstore_message(Msg);
 	LYSleepInfo();
@@ -97,7 +97,7 @@ void HTInfoMsg(const char *Msg)
 void HTUserMsg(const char *Msg)
 {
     _statusline(Msg);
-    if (Msg && *Msg) {
+    if (non_empty(Msg)) {
 	CTRACE((tfp, "User message: %s\n", Msg));
 	LYstore_message(Msg);
 #if !(defined(USE_SLANG) || defined(WIDEC_CURSES))
@@ -113,7 +113,7 @@ void HTUserMsg(const char *Msg)
 void HTUserMsg2(const char *Msg2, const char *Arg)
 {
     _user_message(Msg2, Arg);
-    if (Msg2 && *Msg2) {
+    if (non_empty(Msg2)) {
 	CTRACE((tfp, "User message: "));
 	CTRACE((tfp, Msg2, Arg));
 	CTRACE((tfp, "\n"));
@@ -326,7 +326,7 @@ BOOL HTLastConfirmCancelled(void)
 int HTForcedPrompt(int option, const char *msg, int dft)
 {
     int result = FALSE;
-    char *show = NULL;
+    const char *show = NULL;
     char *msg2 = NULL;
 
     if (option == FORCE_PROMPT_DFT) {
@@ -381,8 +381,8 @@ int HTConfirmDefault(const char *Msg, int Dft)
  * Lynx will also accept y Y n N as responses unless there is a conflict
  * with the first letter of the "yes" or "no" translation.
  */
-    char *msg_yes = gettext("yes");
-    char *msg_no = gettext("no");
+    const char *msg_yes = gettext("yes");
+    const char *msg_no = gettext("no");
     int result = -1;
 
     /* If they're not really distinct in the first letter, revert to English */
@@ -722,7 +722,7 @@ void HTPromptUsernameAndPassword(const char *Msg,
 	    } else {
 		FREE(authentication_info[1]);
 	    }
-	} else if (*username != NULL && *username[0] != '\0') {
+	} else if (non_empty(*username)) {
 	    /*
 	     * We have a non-zero length username,
 	     * so prompt for the password.  - FM
@@ -756,7 +756,7 @@ BOOL HTConfirmCookie(domain_entry * de, const char *server,
 		     const char *value)
 {
     int ch;
-    char *prompt = ADVANCED_COOKIE_CONFIRMATION;
+    const char *prompt = ADVANCED_COOKIE_CONFIRMATION;
 
     if (de == NULL)
 	return FALSE;

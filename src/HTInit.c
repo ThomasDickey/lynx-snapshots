@@ -59,7 +59,7 @@ void HTFormatInit(void)
 #else
     if (LYgetXDisplay() != 0) {	/* Must have X11 */
 	SET_PRESENT("application/postscript", "ghostview %s&", 1.0, 3.0);
-	if (XLoadImageCommand && *XLoadImageCommand) {
+	if (non_empty(XLoadImageCommand)) {
 	    /* *INDENT-OFF* */
 	    SET_PRESENT("image/gif",	   XLoadImageCommand, 1.0, 3.0);
 	    SET_PRESENT("image/x-xbm",	   XLoadImageCommand, 1.0, 3.0);
@@ -226,7 +226,7 @@ struct MailcapEntry {
     long int maxbytes;
 };
 
-static int ExitWithError(char *txt);
+static int ExitWithError(const char *txt);
 static int PassesTest(struct MailcapEntry *mc);
 
 static char *GetCommand(char *s, char **t)
@@ -241,7 +241,7 @@ static char *GetCommand(char *s, char **t)
 	ExitWithError(MEMORY_EXHAUSTED_ABORT);
 
     *t = s2;
-    while (s && *s) {
+    while (non_empty(s)) {
 	if (quoted) {
 	    if (*s == '%')
 		*s2++ = '%';	/* Quote through next level, ugh! */
@@ -411,7 +411,7 @@ static int ProcessMailcapEntry(FILE *fp, struct MailcapEntry *mc, AcceptMedia me
 	    *eq++ = '\0';
 	    eq = LYSkipBlanks(eq);
 	}
-	if (arg && *arg) {
+	if (non_empty(arg)) {
 	    arg = Cleanse(arg);
 	    if (!strcmp(arg, "needsterminal")) {
 		mc->needsterminal = 1;
@@ -928,7 +928,7 @@ static int ProcessMailcapFile(char *file, AcceptMedia media)
     return (0 == 0);
 }
 
-static int ExitWithError(char *txt)
+static int ExitWithError(const char *txt)
 {
     if (txt)
 	fprintf(tfp, "Lynx: %s\n", txt);

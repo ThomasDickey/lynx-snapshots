@@ -841,7 +841,7 @@ static int form_getstr(int cur,
 	 * character set has been set truthfully) the user confirms by changing
 	 * the field that the character encoding is right.  - kw
 	 */
-	if (form->value && *form->value)
+	if (non_empty(form->value))
 	    form->value_cs = current_char_set;
     }
     return (ch);
@@ -908,7 +908,7 @@ void show_formlink_statusline(const FormInfo * form,
 	    char *submit_str = NULL;
 	    char *xkey_info = key_for_func_ext(LYK_NOCACHE, for_what);
 
-	    if (xkey_info && *xkey_info) {
+	    if (non_empty(xkey_info)) {
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 		if (for_what == FOR_PANEL)
 		    HTSprintf0(&submit_str, FORM_TEXT_SUBMIT_MESSAGE_INA_X,
@@ -1011,7 +1011,7 @@ void show_formlink_statusline(const FormInfo * form,
 		    xkey_info = key_for_func_ext(LYK_DWIMEDIT, for_what);
 #endif
 	    }
-	    if (xkey_info && *xkey_info) {
+	    if (non_empty(xkey_info)) {
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 		if (for_what == FOR_PANEL)
 		    HTSprintf0(&submit_str, FORM_LINK_TEXTAREA_MESSAGE_INA_E,

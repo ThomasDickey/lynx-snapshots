@@ -8,8 +8,9 @@
 #ifdef DISP_PARTIAL
 extern BOOL LYMainLoop_pageDisplay(int line_num);
 #endif
+
 extern BOOLEAN LYOpenTraceLog(void);
-extern char *LYDownLoadAddress(void);
+extern const char *LYDownLoadAddress(void);
 extern int LYGetNewline(void);
 extern int mainloop(void);
 extern void HTAddGotoURL(char *url);

@@ -886,7 +886,7 @@ static const unsigned char isAcceptable[96] =
 	 7,7,7,7,7,7,7,7,7,7,7,0,0,0,0,0 };	/* 7X  pqrstuvwxyz{|}~	DEL */
 /* *INDENT-ON* */
 
-static char *hex = "0123456789ABCDEF";
+static const char *hex = "0123456789ABCDEF";
 
 #define ACCEPTABLE(a)	( a>=32 && a<128 && ((isAcceptable[a-32]) & mask))
 

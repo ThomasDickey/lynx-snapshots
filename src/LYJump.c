@@ -62,7 +62,7 @@ void LYAddJumpShortcut(HTList *historyp, char *shortcut)
     char *old;
     HTList *cur = historyp;
 
-    if (!historyp || !(shortcut && *shortcut))
+    if (!historyp || isEmpty(shortcut))
 	return;
 
     StrAllocCopy(new, shortcut);
@@ -163,7 +163,7 @@ BOOL LYJumpInit(char *config)
     if (cp) {
 	jtp->key = remap(cp, "JUMP", FALSE);	/* key is present, (re)map it */
 	cp = strtok(NULL, "\n");	/* get prompt, if present */
-	if (cp && *cp)
+	if (non_empty(cp))
 	    StrAllocCopy(jtp->msg, cp);		/* prompt is present, load it */
 	else
 	    cp = NULL;
@@ -208,9 +208,9 @@ char *LYJump(int key)
     if (jtp->nel == 0)
 	return NULL;
 
-    if (!jump_buffer || !(jtp->shortcut && *jtp->shortcut))
+    if (!jump_buffer || isEmpty(jtp->shortcut))
 	*buf = '\0';
-    else if (jtp->shortcut && *jtp->shortcut) {
+    else if (non_empty(jtp->shortcut)) {
 	if (strlen(jtp->shortcut) > 119)
 	    jtp->shortcut[119] = '\0';
 	strcpy(buf, jtp->shortcut);

@@ -47,7 +47,7 @@ BOOL LYVersionIsRelease(void)
     return (BOOL) (strstr(LYNX_VERSION, "rel") != 0);
 }
 
-char *LYVersionStatus(void)
+const char *LYVersionStatus(void)
 {
     if (LYVersionIsRelease())
 	return REL_VERSION;
@@ -56,7 +56,7 @@ char *LYVersionStatus(void)
     return DEV_VERSION;
 }
 
-char *LYVersionDate(void)
+const char *LYVersionDate(void)
 {
     static char temp[LYNX_DATE_LEN + 1];
 
@@ -116,7 +116,7 @@ int LYShowInfo(DocInfo *doc,
     int url_type;
     FILE *fp0;
     char *Title = NULL;
-    char *name;
+    const char *name;
     const char *cp;
     char *temp = 0;
 
@@ -326,7 +326,7 @@ int LYShowInfo(DocInfo *doc,
 		HTAnchor_getUCLYhndl(HTMainAnchor, UCT_STAGE_PARSER) < 0) {
 		p_in = HTAnchor_getUCInfoStage(HTMainAnchor, UCT_STAGE_MIME);
 	    }
-	    if (p_in && p_in->MIMEname && *(p_in->MIMEname) &&
+	    if (p_in && non_empty(p_in->MIMEname) &&
 		HTAnchor_getUCLYhndl(HTMainAnchor, UCT_STAGE_MIME) >= 0) {
 		HTSprintf(&temp, "%s %s",
 			  p_in->MIMEname,

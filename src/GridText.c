@@ -117,8 +117,8 @@ HTkcode last_kcode = NOKANJI;	/* 1997/11/14 (Fri) 09:09:26 */
 HText *HTMainText = NULL;	/* Equivalent of main window */
 HTParentAnchor *HTMainAnchor = NULL;	/* Anchor for HTMainText */
 
-char *HTAppName = LYNX_NAME;	/* Application name */
-char *HTAppVersion = LYNX_VERSION;	/* Application version */
+const char *HTAppName = LYNX_NAME;	/* Application name */
+const char *HTAppVersion = LYNX_VERSION;	/* Application version */
 
 static int HTFormNumber = 0;
 static int HTFormFields = 0;
@@ -128,10 +128,10 @@ int HTCurSelectGroupType = F_RADIO_TYPE;	/* Group type */
 char *HTCurSelectGroupSize = NULL;	/* Length of select */
 static char *HTCurSelectedOptionValue = NULL;	/* Select choice */
 
-char *checked_box = "[X]";
-char *unchecked_box = "[ ]";
-char *checked_radio = "(*)";
-char *unchecked_radio = "( )";
+const char *checked_box = "[X]";
+const char *unchecked_box = "[ ]";
+const char *checked_radio = "(*)";
+const char *unchecked_radio = "( )";
 
 static BOOLEAN underline_on = OFF;
 static BOOLEAN bold_on = OFF;
@@ -728,7 +728,7 @@ static void LYClearHiText(TextAnchor *a)
 /*
  * Set the initial highlight information for a given anchor.
  */
-static void LYSetHiText(TextAnchor *a, char *text,
+static void LYSetHiText(TextAnchor *a, const char *text,
 			int len)
 {
     if (text != NULL) {
@@ -743,7 +743,7 @@ static void LYSetHiText(TextAnchor *a, char *text,
 /*
  * Add highlight information for the next line of a anchor.
  */
-static void LYAddHiText(TextAnchor *a, char *text,
+static void LYAddHiText(TextAnchor *a, const char *text,
 			int x)
 {
     HiliteInfo *have = a->lites.hl_info;
@@ -1887,13 +1887,13 @@ static void display_scrollbar(HText *text)
  *	-------------
  */
 static void display_page(HText *text, int line_number,
-			 char *target)
+			 const char *target)
 {
     HTLine *line = NULL;
     int i;
 
 #if defined(USE_COLOR_STYLE) && defined(SHOW_WHEREIS_TARGETS)
-    char *cp;
+    const char *cp;
 #endif
     char tmp[7];
     int last_screen;
@@ -5989,7 +5989,7 @@ HTChildAnchor *HText_childNextNumber(int number, void **prev)
  * for the field.  -FM & LE
  */
 void HText_FormDescNumber(int number,
-			  char **desc)
+			  const char **desc)
 {
     TextAnchor *a;
 
@@ -6623,7 +6623,7 @@ BOOL HText_getFirstTargetInLine(HText *text, int line_num,
     HTLine *line;
     char *LineData;
     int LineOffset, HitOffset, LenNeeded, i;
-    char *cp;
+    const char *cp;
 
     /*
      * Make sure we have an HText structure, that line_num is
@@ -6739,7 +6739,7 @@ void HTCheckFnameForCompression(char **fname,
     char *fn = *fname;
     char *dot = NULL;
     char *cp = NULL;
-    char *suffix = "";
+    const char *suffix = "";
     const char *ct = NULL;
     const char *ce = NULL;
     CompressFileType method = cftNone;
@@ -6806,7 +6806,9 @@ void HTCheckFnameForCompression(char **fname,
      * we have a gzip or compress suffix.  -FM
      */
     if ((dot = strrchr(fn, '.')) != NULL) {
-	if (HTCompressFileType(fn, ".", &cp) != cftNone) {
+	int rootlen = 0;
+
+	if (HTCompressFileType(fn, ".", &rootlen) != cftNone) {
 	    if (method == cftNone) {
 		/*
 		 * It has a suffix which signifies a gzipped
@@ -6817,7 +6819,8 @@ void HTCheckFnameForCompression(char **fname,
 	    }
 	    return;
 	}
-	if ((second = HTCompressFileType(fn, "-_", &cp)) != cftNone) {
+	if ((second = HTCompressFileType(fn, "-_", &rootlen)) != cftNone) {
+	    cp = fn + rootlen;
 	    if (method == cftNone) {
 		/*
 		 * It has a tail which signifies a gzipped
@@ -7839,7 +7842,8 @@ static void adjust_search_result(DocInfo *doc, int tentative_result,
 static BOOL anchor_has_target(TextAnchor *a, char *target)
 {
     OptionType *option;
-    char *stars = NULL, *cp;
+    char *stars = NULL, *sp;
+    const char *cp;
     int count;
 
     /*
@@ -7868,8 +7872,8 @@ static BOOL anchor_has_target(TextAnchor *a, char *target)
 		return TRUE;
 	    }
 	    StrAllocCopy(stars, a->input_field->value);
-	    for (cp = stars; *cp != '\0'; cp++)
-		*cp = '*';
+	    for (sp = stars; *sp != '\0'; sp++)
+		*sp = '*';
 	    if (LYno_attr_strstr(stars, target)) {
 		FREE(stars);
 		return TRUE;
@@ -8443,7 +8447,7 @@ int HTisDocumentSource(void)
     return (HTMainText != 0) ? HTMainText->source : FALSE;
 }
 
-char *HTLoadedDocumentURL(void)
+const char *HTLoadedDocumentURL(void)
 {
     if (!HTMainText)
 	return ("");
@@ -8464,7 +8468,7 @@ bstring *HTLoadedDocumentPost_data(void)
 	return (0);
 }
 
-char *HTLoadedDocumentTitle(void)
+const char *HTLoadedDocumentTitle(void)
 {
     if (!HTMainText)
 	return ("");
@@ -8497,7 +8501,7 @@ BOOLEAN HTLoadedDocumentIsSafe(void)
 	return (FALSE);
 }
 
-char *HTLoadedDocumentCharset(void)
+const char *HTLoadedDocumentCharset(void)
 {
     if (!HTMainText)
 	return (NULL);
@@ -8525,7 +8529,7 @@ void HText_setNodeAnchorBookmark(const char *bookmark)
 	HTAnchor_setBookmark(HTMainText->node_anchor, bookmark);
 }
 
-char *HTLoadedDocumentBookmark(void)
+const char *HTLoadedDocumentBookmark(void)
 {
     if (!HTMainText)
 	return (NULL);
@@ -8829,7 +8833,7 @@ int HText_HiddenLinkCount(HText *text)
  * a hidden link, at the position (zero-based) in the
  * text->hidden_links list of the number argument.  -FM
  */
-char *HText_HiddenLinkAt(HText *text, int number)
+const char *HText_HiddenLinkAt(HText *text, int number)
 {
     char *href = NULL;
 
@@ -9538,8 +9542,8 @@ int HText_beginInput(HText *text, BOOL underline,
     /*
      * Set SIZE.
      */
-    if (I->size != NULL) {
-	f->size = atoi(I->size);
+    if (I->size != 0) {
+	f->size = I->size;
 	/*
 	 * Leave at zero for option lists.
 	 */
@@ -10001,7 +10005,7 @@ static int find_best_target_cs(char **best_csname,
 }
 
 #ifdef USE_FILE_UPLOAD
-static void load_a_file(char *val_used,
+static void load_a_file(const char *val_used,
 			bstring **result)
 {
     FILE *fd;
@@ -10048,10 +10052,10 @@ static void cannot_transcode(BOOL *had_warning,
 #define SPECIAL_8BIT 1
 #define SPECIAL_FORM 2
 
-static unsigned check_form_specialchars(char *value)
+static unsigned check_form_specialchars(const char *value)
 {
     unsigned result = 0;
-    char *p;
+    const char *p;
 
     for (p = value;
 	 non_empty(p) && (result != (SPECIAL_8BIT | SPECIAL_FORM));
@@ -10097,7 +10101,7 @@ static void UpdateBoundary(char **Boundary,
 /*
  * Convert a string to base64
  */
-static char *convert_to_base64(char *src,
+static char *convert_to_base64(const char *src,
 			       int len)
 {
 #define B64_LINE       76
@@ -10108,7 +10112,9 @@ static char *convert_to_base64(char *src,
     char *dest;
     int rlen;			/* length of result string */
     unsigned char c1, c2, c3;
-    char *eol, *r, *str;
+    const char *eol;
+    char *r;
+    const char *str;
     int eollen;
     int chunk;
 
@@ -10132,8 +10138,8 @@ static char *convert_to_base64(char *src,
     /* encode */
     for (chunk = 0; len > 0; len -= 3, chunk++) {
 	if (chunk == (B64_LINE / 4)) {
-	    char *c = eol;
-	    char *e = eol + eollen;
+	    const char *c = eol;
+	    const char *e = eol + eollen;
 
 	    while (c < e)
 		*r++ = *c++;
@@ -10157,8 +10163,8 @@ static char *convert_to_base64(char *src,
     }
     if (rlen) {
 	/* append eol to the result string */
-	char *c = eol;
-	char *e = eol + eollen;
+	const char *c = eol;
+	const char *e = eol + eollen;
 
 	while (c < e)
 	    *r++ = *c++;
@@ -10184,9 +10190,9 @@ typedef struct {
     QuoteData quote;		/* how to quote/translate the data */
 } PostData;
 
-static char *escape_or_quote_name(char *name,
+static char *escape_or_quote_name(const char *name,
 				  QuoteData quoting,
-				  char *MultipartContentType)
+				  const char *MultipartContentType)
 {
     char *escaped1 = NULL;
 
@@ -10211,7 +10217,7 @@ static char *escape_or_quote_name(char *name,
     return escaped1;
 }
 
-static char *escape_or_quote_value(char *value,
+static char *escape_or_quote_value(const char *value,
 				   QuoteData quoting)
 {
     char *escaped2 = NULL;
@@ -10301,9 +10307,9 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc, char *link_name,
     char *escaped1 = NULL;
     char *escaped2 = NULL;
     char *last_textarea_name = NULL;
-    char *name_used = "";
+    const char *name_used = "";
     char *previous_blanks = NULL;
-    char *val_used = "";
+    const char *val_used = "";
     int anchor_count = 0;
     int anchor_limit = 0;
     int form_number = submit_item->number;
@@ -11074,11 +11080,11 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc, char *link_name,
 			      escaped2,
 			      ((PlainText && *escaped2) ? "\n" : ""));
 		} else {
-		    char *marker = (PlainText
-				    ? "\n"
-				    : (Boundary
-				       ? "\r\n"
-				       : "%0d%0a"));
+		    const char *marker = (PlainText
+					  ? "\n"
+					  : (Boundary
+					     ? "\r\n"
+					     : "%0d%0a"));
 
 		    /*
 		     * This is a continuation of a previous textarea.
@@ -13085,13 +13091,13 @@ int HText_InsertFile(LinkInfo * form_link)
  * (since no support for lss is availble for Slang) -HV.
  */
 #ifdef USE_COLOR_STYLE
-static void redraw_part_of_line(HTLine *line, char *str,
+static void redraw_part_of_line(HTLine *line, const char *str,
 				int len,
 				HText *text)
 {
     register int i;
     char buffer[7];
-    char *data, *end_of_data;
+    const char *data, *end_of_data;
     size_t utf_extra = 0;
 
 #ifdef USE_COLOR_STYLE
@@ -13265,11 +13271,11 @@ static void redraw_part_of_line(HTLine *line, char *str,
 static void move_to_glyph(int YP,
 			  int XP,
 			  int XP_draw_min,
-			  char *data,
+			  const char *data,
 			  int datasize,
 			  unsigned offset,
 			  const char *target,
-			  char *hightext,
+			  const char *hightext,
 			  int flags,
 			  BOOL utf_flag)
 {
@@ -13291,7 +13297,7 @@ static void move_to_glyph(int YP,
     BOOL incurlink = NO;
     BOOL drawingtarget = NO;
     BOOL flag = NO;
-    char *sdata = data;
+    const char *sdata = data;
     char LastDisplayChar = ' ';
 
     int i = (int) offset;	/* FIXME: should be columns, not offset? */
@@ -13755,7 +13761,7 @@ static void move_to_glyph(int YP,
  */
 void LYMoveToLink(int cur,
 		  const char *target,
-		  char *hightext,
+		  const char *hightext,
 		  int flag,
 		  BOOL inU,
 		  BOOL utf_flag)
@@ -13819,7 +13825,7 @@ void redraw_lines_of_link(int cur GCC_UNUSED)
     HTLine *todr1;
     int lines_back;
     int row, col, count;
-    char *text;
+    const char *text;
 
     if (HTMainText->next_line == HTMainText->last_line) {
 	/* we are at the last page - that is partially filled */

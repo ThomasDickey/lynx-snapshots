@@ -209,7 +209,7 @@ Register an access method
  */
 
 typedef struct _HTProtocol {
-    char *name;
+    const char *name;
 
     int (*load) (const char *full_address,
 		 HTParentAnchor *anchor,
