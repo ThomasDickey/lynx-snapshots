@@ -146,7 +146,7 @@ static CONST char* entities[] = {
 **	Lists must be in alphabetical order by attribute name
 **	The tag elements contain the number of attributes
 */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 # define N HTMLA_NORMAL
 # define i HTMLA_ANAME
 # define h HTMLA_HREF

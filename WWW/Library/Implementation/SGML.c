@@ -35,7 +35,7 @@
 #ifdef USE_COLOR_STYLE
 # include <LYStyle.h>
 #endif
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 # include <LYPrettySrc.h>
 #endif
 
@@ -45,7 +45,7 @@ extern HTkcode last_kcode;
 
 #define INVALID (-1)
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 
 #  define PSRC(x) if (psrc_view) { x };
 #  define NPSRC(x) if (!psrc_view) { x };
@@ -191,14 +191,14 @@ struct _HTStream {
     char *			url;
     char *			csi;
     int				csi_index;
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     BOOL			cur_attr_is_href;
     BOOL			cur_attr_is_name;
     BOOL			seen_nonwhite_in_junk_tag;
 #endif
 };
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 
 PRIVATE void HTMLSRC_apply_markup ARGS3(
 	    HTStream *,	      context,
@@ -375,7 +375,7 @@ PRIVATE void handle_attribute_name ARGS2(
     attr * attributes = tag->attributes;
     int high, low, i, diff;
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     if (psrc_view) {
 	attr_is_href = FALSE;
 	attr_is_name = FALSE;
@@ -385,7 +385,7 @@ PRIVATE void handle_attribute_name ARGS2(
     **	Ignore unknown tag. - KW
     */
     if (tag == context->unknown_tag) {
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	if (psrc_view)
 	    context->current_attribute_number = 1; /* anything !=INVALID */
 #endif
@@ -402,13 +402,13 @@ PRIVATE void handle_attribute_name ARGS2(
 	diff = strcasecomp(attributes[i].name, s);
 	if (diff == 0) {		/* success: found it */
 	    context->current_attribute_number = i;
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (!psrc_view) {
 #endif
 	    context->present[i] = YES;
 	    FREE(context->value[i]);
 #ifdef USE_COLOR_STYLE
-#  ifdef USE_PSRC
+#  ifdef USE_PRETTYSRC
 	    current_is_class = IS_C(attributes[i]);
 #   else
 	    current_is_class = (!strcasecomp("class", s));
@@ -416,7 +416,7 @@ PRIVATE void handle_attribute_name ARGS2(
 	    CTRACE((tfp, "SGML: found attribute %s, %d\n", s, current_is_class));
 #endif
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    } else {
 		 attr_is_name = (BOOL) (attributes[i].type == HTMLA_ANAME);
 		 attr_is_href = (BOOL) (attributes[i].type == HTMLA_HREF);
@@ -486,7 +486,7 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 	/*
 	**  Use Lynx special character for nbsp.
 	*/
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	if (!psrc_view)
 #endif
 	PUTC(HT_NON_BREAK_SPACE);
@@ -494,7 +494,7 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 	/*
 	**  Use Lynx special character for shy.
 	*/
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	if (!psrc_view)
 #endif
 	PUTC(LY_SOFT_HYPHEN);
@@ -512,7 +512,7 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 	**
 	**  We may treat emsp as one or two ensp (below).
 	*/
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	if (!psrc_view)
 #endif
 	PUTC(HT_EN_SPACE);
@@ -520,12 +520,12 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 	/*
 	**  Use Lynx special character for emsp.
 	*/
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	if (!psrc_view) {
 #endif
 	/* PUTC(HT_EN_SPACE);  let's stay with a single space :) */
 	PUTC(HT_EN_SPACE);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	}
 #endif
     } else {
@@ -577,7 +577,7 @@ PRIVATE void handle_entity ARGS2(
 	**  Check for special Unicodes. - FM
 	*/
 	if (put_special_unicodes(context, code)) {
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		HTMLSRC_apply_markup(context,HTL_entity,START);
 		PUTC('&');
@@ -598,7 +598,7 @@ PRIVATE void handle_entity ARGS2(
 	    uck < 256 &&
 	    (uck < 127 ||
 	     uck >= LYlowest_eightbit[context->outUCLYhndl])) {
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		HTMLSRC_apply_markup(context,HTL_entity,START);
 		PUTC('&'); PUTS(entity_string); if (term) PUTC(term);
@@ -616,7 +616,7 @@ PRIVATE void handle_entity ARGS2(
 		   */
 		   (uck = UCTransUniCharStr(replace_buf, 60, code,
 					    context->outUCLYhndl, 0) >= 0)) {
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		HTMLSRC_apply_markup(context,HTL_entity,START);
 		PUTC('&');
@@ -634,7 +634,7 @@ PRIVATE void handle_entity ARGS2(
 	/*
 	**  If we're displaying UTF-8, try that now. - FM
 	*/
-#ifndef USE_PSRC
+#ifndef USE_PRETTYSRC
 	if (context->T.output_utf8 && PUTUTF8(code)) {
 	    FoundEntity = TRUE;
 	    return;
@@ -658,7 +658,7 @@ PRIVATE void handle_entity ARGS2(
 	**  If it's safe ASCII, use it. - FM
 	*/
 	if (code >= 32 && code < 127) {
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		HTMLSRC_apply_markup(context,HTL_entity,START);
 		PUTC('&');
@@ -682,7 +682,7 @@ PRIVATE void handle_entity ARGS2(
 	if (!strcmp(s, "zwnj") ||
 	    !strcmp(s, "zwj")) {
 	    CTRACE((tfp, "handle_entity: Ignoring '%s'.\n", s));
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		HTMLSRC_apply_markup(context,HTL_entity,START);
 		PUTC('&');
@@ -701,7 +701,7 @@ PRIVATE void handle_entity ARGS2(
 	if (!strcmp(s, "lrm") ||
 	    !strcmp(s, "rlm")) {
 	    CTRACE((tfp, "handle_entity: Ignoring '%s'.\n", s));
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		HTMLSRC_apply_markup(context,HTL_entity,START);
 		PUTC('&');
@@ -719,7 +719,7 @@ PRIVATE void handle_entity ARGS2(
     /*
     **	If entity string not found, display as text.
     */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     if (psrc_view)
 	PSRCSTART(badseq);
 #endif
@@ -730,7 +730,7 @@ PRIVATE void handle_entity ARGS2(
     }
     if (term != '\0')
 	PUTC(term);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     if (psrc_view)
 	PSRCSTOP(badseq);
 #endif
@@ -943,7 +943,7 @@ PRIVATE void do_close_stacked ARGS1(
 	context->inSELECT = FALSE;
     }
     e = NORMAL_TAGNUM(TAGNUM_OF_TAGP(stacked->tag));
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     if (!psrc_view) /* Don't actually pass call on if viewing psrc - kw */
 #endif
     (*context->actions->end_element)(
@@ -1083,7 +1083,7 @@ PRIVATE void end_element ARGS2(
 	}
 
 	e = NORMAL_TAGNUM(TAGNUM_OF_TAGP(t));
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	if (!psrc_view) /* Don't actually pass call on if viewing psrc - kw */
 #endif
 	    status = (*context->actions->end_element)(context->target,
@@ -1354,7 +1354,7 @@ PRIVATE void SGML_free ARGS1(
 	t = cur->tag;
 	context->element_stack = cur->next;	/* Remove from stack */
 	FREE(cur);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	if (!psrc_view) /* Don't actually call on target if viewing psrc - kw */
 #endif
 	    (*context->actions->end_element)(context->target,
@@ -1376,7 +1376,7 @@ PRIVATE void SGML_free ARGS1(
 	FREE(context->value[i]);
     FREE(context);
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     sgml_in_psrc_was_initialized =FALSE;
 #endif
 }
@@ -1419,7 +1419,7 @@ PRIVATE void SGML_abort ARGS2(
 	FREE(context->value[i]);
     FREE(context);
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     sgml_in_psrc_was_initialized =FALSE;
 #endif
 
@@ -1785,7 +1785,7 @@ top1:
 	}
 
 	if (c == '&' || c == '<') {
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) { /*there is nothing useful in the element_stack*/
 		testtag = context->current_tag;
 	    } else
@@ -1799,7 +1799,7 @@ top1:
 	     (testtag->contents == SGML_MIXED ||
 	      testtag->contents == SGML_ELEMENT ||
 	      testtag->contents == SGML_PCDATA ||
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	      testtag->contents == SGML_EMPTY ||
 #endif
 	      testtag->contents == SGML_RCDATA))) {
@@ -1831,7 +1831,7 @@ top1:
 	    **  cases generate a "</NAME>" end tag in the recover buffer for
 	    **  reparsing unless NAME is really an empty element. - kw
 	    */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		PSRCSTART(abracket);
 		PUTC(c);
@@ -1967,7 +1967,7 @@ top1:
 		   !(PASSHI8BIT || HTCJK != NOCJK) &&
 		   !IncludesLatin1Enc) {
 	    int i;
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    int psrc_view_backup = 0;
 #endif
 
@@ -1976,14 +1976,14 @@ top1:
 	    for (i = 0; EntityName[i]; i++)
 		HTChunkPutc(string, EntityName[i]);
 	    HTChunkTerminate(string);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    /* we need to disable it temporary*/
 	    if (psrc_view) {
 		psrc_view_backup =1; psrc_view =0;
 	    }
 #endif
 	    handle_entity(context, '\0');
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    /* we need to disable it temporary*/
 	    if (psrc_view_backup)
 		psrc_view = TRUE;
@@ -2102,7 +2102,7 @@ top1:
 	    } else if (c == '?') { /* <? - ignore as a PI until '>' - kw */
 		CTRACE((tfp,
 			"SGML: Found PI in PCDATA, junking it until '>'\n"));
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		if (psrc_view) {
 		    PSRCSTART(abracket);PUTS("<?");PSRCSTOP(abracket);
 		    context->seen_nonwhite_in_junk_tag = TRUE; /* show all */
@@ -2120,7 +2120,7 @@ top1:
     */
     case S_litteral: /*PSRC:this case not understood completely by HV, not done*/
 	HTChunkPutc(string, c);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	if (psrc_view) { /*there is nothing useful in the element_stack*/
 	    testtag = context->current_tag;
 	} else
@@ -2137,7 +2137,7 @@ top1:
 	    **	If complete match, end litteral.
 	    */
 	    if ((c == '>') && testtag && !testtag->name[string->size-2]) {
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		if (psrc_view) {
 		    PSRCSTART(abracket);PUTC('<');PUTC('/');PSRCSTOP(abracket);
 		    PSRCSTART(tag);
@@ -2230,12 +2230,12 @@ top1:
 	    **	It was an ampersand that's just text, so output
 	    **	the ampersand and recycle this character. - FM
 	    */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view)
 		PSRCSTART(badseq);
 #endif
 	    PUTC('&');
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view)
 		PSRCSTOP(badseq);
 #endif
@@ -2246,7 +2246,7 @@ top1:
 	    **	Terminate entity name and try to handle it. - FM
 	    */
 	    HTChunkTerminate(string);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    entity_string = string->data;
 #endif
 	    /* S/390 -- gil -- 1039 */
@@ -2287,7 +2287,7 @@ top1:
 	    **	via handle_entity(), or if the terminator is
 	    **	not the "standard" semi-colon for HTML. - FM
 	    */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view && FoundEntity && c == ';') {
 		HTMLSRC_apply_markup(context,HTL_entity, START);
 		PUTC(c);
@@ -2318,13 +2318,13 @@ top1:
 	    **	No 'x' or digit following the "&#" so recover
 	    **	them and recycle the character. - FM
 	    */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view)
 		PSRCSTART(badseq);
 #endif
 	    PUTC('&');
 	    PUTC('#');
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view)
 		PSRCSTOP(badseq);
 #endif
@@ -2351,14 +2351,14 @@ top1:
 	    **	No hex digit following the "&#x" so recover
 	    **	them and recycle the character. - FM
 	    */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view)
 		PSRCSTART(badseq);
 #endif
 	    PUTC('&');
 	    PUTC('#');
 	    PUTC('x');
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view)
 		PSRCSTOP(badseq);
 #endif
@@ -2372,7 +2372,7 @@ top1:
 	    UCode_t code;
 	    int i;
 	    HTChunkTerminate(string);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    entity_string = string->data;
 #endif
 	    if ((context->isHex ? sscanf(string->data, "%lx", &code) :
@@ -2555,7 +2555,7 @@ top1:
 		    **	We handled the value as a special character,
 		    **	so recycle the terminator or break. - FM
 		    */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		    if (psrc_view) {
 			PSRCSTART(entity);
 			PUTS( (context->isHex ? "&#x" : "&#") );
@@ -2580,11 +2580,11 @@ top1:
 		    uck < 256 &&
 		    (uck < 127 ||
 		     uck >= LYlowest_eightbit[context->outUCLYhndl])) {
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		    if (!psrc_view) {
 #endif
 		    PUTC(FROMASCII((char)uck));
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		    } else {
 			PSRCSTART(entity);
 			PUTS( (context->isHex ? "&#x" : "&#") );
@@ -2602,7 +2602,7 @@ top1:
 			   (uck = UCTransUniCharStr(replace_buf, 60, code,
 						    context->outUCLYhndl,
 						    0) >= 0)) {
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		    if (psrc_view) {
 			PSRCSTART(entity);
 			PUTS( (context->isHex ? "&#x" : "&#") );
@@ -2635,7 +2635,7 @@ top1:
 		    /*
 		    **	Got an ASCII character (yippey). - FM
 		    */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		    if (psrc_view) {
 			PSRCSTART(entity);
 			PUTS( (context->isHex ? "&#x" : "&#") );
@@ -2654,7 +2654,7 @@ top1:
 		    /*
 		    **	Got a replacement string (yippey). - FM
 		    */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		    if (psrc_view) {
 			PSRCSTART(entity);
 			PUTS( (context->isHex ? "&#x" : "&#") );
@@ -2683,7 +2683,7 @@ top1:
 				(context->isHex ? "&#x" : "&#"),
 				replace_buf);
 		    }
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		    if (psrc_view) {
 			PSRCSTART(badseq);
 			PUTS( (context->isHex ? "&#x" : "&#") );
@@ -2725,7 +2725,7 @@ top1:
 			**  "&#" or "&#x" and digit(s), and recycle
 			**  the terminator. - FM
 			*/
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 			if (psrc_view) {
 			    PSRCSTART(badseq);
 			}
@@ -2739,7 +2739,7 @@ top1:
 			string->size--;
 			for (i = 0; i < string->size; i++)	/* recover */
 			    PUTC(string->data[i]);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 			if (psrc_view) {
 			    PSRCSTOP(badseq);
 			}
@@ -2754,7 +2754,7 @@ top1:
 		    /*
 		    **	No conversion needed. - FM
 		    */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		    if (psrc_view) {
 			PSRCSTART(entity);
 			PUTS( (context->isHex ? "&#x" : "&#") );
@@ -2788,7 +2788,7 @@ top1:
 			**  Our conversion failed, so recover the "&#"
 			**  and digit(s), and recycle the terminator. - FM
 			*/
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 			if (psrc_view)
 			    PSRCSTART(badseq);
 #endif
@@ -2801,7 +2801,7 @@ top1:
 			string->size--;
 			for (i = 0; i < string->size; i++)	/* recover */
 			    PUTC(string->data[i]);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 			if (psrc_view)
 			    PSRCSTOP(badseq);
 #endif
@@ -2834,13 +2834,13 @@ top1:
 		string->size--;
 		HTChunkPutc(string, c);
 		HTChunkTerminate(string);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		if (psrc_view)
 		    PSRCSTART(badseq);
 #endif
 		PUTC('&');
 		PUTC('#');
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		if (psrc_view)
 		    PSRCSTOP(badseq);
 #endif
@@ -2895,12 +2895,12 @@ top1:
 	    **	So recover the '<' and following character as data. - FM & KW
 	    */
 	    context->state = S_text;
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view)
 		PSRCSTART(badseq);
 #endif
 	    PUTC('<');
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view)
 		PSRCSTOP(badseq);
 #endif
@@ -2928,14 +2928,14 @@ top1:
 		**  Treat <URL: as text rather than a junk tag,
 		**  so we display it and the URL (Lynxism 8-). - FM
 		*/
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		if (psrc_view)
 		    PSRCSTART(badseq);
 #endif
 		PUTC('<');
 		PUTS(string->data); /* recover */
 		PUTC(c);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		if (psrc_view)
 		    PSRCSTOP(badseq);
 #endif
@@ -2957,7 +2957,7 @@ top1:
 	    if (!t) {
 		if (c == '?' && string->size <= 1) {
 		    CTRACE((tfp, "SGML: Found PI, junking it until '>'\n"));
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		    if (psrc_view) {
 			PSRCSTART(abracket);PUTS("<?");PSRCSTOP(abracket);
 			context->seen_nonwhite_in_junk_tag = TRUE; /*show all*/
@@ -2969,7 +2969,7 @@ top1:
 		CTRACE((tfp, "SGML: *** Invalid element %s\n",
 			    string->data));
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		if (psrc_view) {
 		    PSRCSTART(abracket);PUTC('<');PSRCSTOP(abracket);
 		    PSRCSTART(badtag);
@@ -3001,7 +3001,7 @@ top1:
 	    }
 	    context->current_tag = t;
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		PSRCSTART(abracket);PUTC('<');PSRCSTOP(abracket);
 		if (t != context->unknown_tag)
@@ -3032,7 +3032,7 @@ top1:
 
 	    string->size = 0;
 	    context->current_attribute_number = INVALID;
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		if (c == '>' || c == '<' || (c == '/' && context->slashedtag)) {
 		    if (c != '<') {
@@ -3099,7 +3099,7 @@ top1:
 	    **	Try to handle identifier. - FM
 	    */
 	    HTChunkTerminate(string);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		PSRCSTART(sgmlspecial);
 		PUTC('<');
@@ -3168,11 +3168,11 @@ top1:
 	    */
 	    if (c == '>') {
 		HTChunkTerminate(string);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		if (psrc_view) {
 		    PSRCSTART(comm);
 		    PUTC('<');
-		    PUTS(string->data);
+		    PUTS_TR(string->data);
 		    PUTC('>');
 		    PSRCSTOP(comm);
 		} else
@@ -3184,8 +3184,7 @@ top1:
 		context->state = S_text;
 		break;
 	    }
-	    HTChunkPutc(string, c);
-	    break;
+	    goto S_comment_put_c;
 	}
 	if (!context->first_dash && c == '-') {
 	    HTChunkPutc(string, c);
@@ -3210,16 +3209,16 @@ top1:
 	    **	Terminate and handle the comment. - FM
 	    */
 	    HTChunkTerminate(string);
-#ifdef USE_PSRC
-		if (psrc_view) {
-		    PSRCSTART(comm);
-		    PUTC('<');
-		    PUTS(string->data);
-		    PUTC('>');
-		    PSRCSTOP(comm);
-		} else
+#ifdef USE_PRETTYSRC
+	    if (psrc_view) {
+		PSRCSTART(comm);
+		PUTC('<');
+		PUTS_TR(string->data);
+		PUTC('>');
+		PSRCSTOP(comm);
+	    } else
 #endif
-	    handle_comment(context);
+		handle_comment(context);
 	    string->size = 0;
 	    context->end_comment = FALSE;
 	    context->first_dash = FALSE;
@@ -3229,7 +3228,30 @@ top1:
 	context->first_dash = FALSE;
 	if (context->end_comment && !isspace(c))
 	    context->end_comment = FALSE;
-	HTChunkPutc(string, c);
+
+    S_comment_put_c:
+	if (context->T.decode_utf8 &&
+		   *context->utf_buf) {
+	    HTChunkPuts(string, context->utf_buf);
+	    context->utf_buf_p = context->utf_buf;
+	    *(context->utf_buf_p) = '\0';
+	} else if (HTCJK == NOCJK &&
+		   (context->T.output_utf8 ||
+		    context->T.trans_from_uni)) {
+	    if (clong == 0xfffd && saved_char_in &&
+		HTPassEightBitRaw &&
+		(unsigned char)saved_char_in >=
+		LYlowest_eightbit[context->outUCLYhndl]) {
+		HTChunkPutUtf8Char(string,
+				   (0xf000 | (unsigned char)saved_char_in));
+	    } else {
+		HTChunkPutUtf8Char(string, clong);
+	    }
+	} else if (saved_char_in && context->T.use_raw_char_in) {
+	    HTChunkPutc(string, saved_char_in);
+	} else {
+	    HTChunkPutc(string, c);
+	}
 	break;
 
     case S_doctype:		/* Expecting DOCTYPE. - FM */
@@ -3246,7 +3268,7 @@ top1:
 	}
 	if (c == '>') {
 	    HTChunkTerminate(string);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		PSRCSTART(sgmlspecial);
 		PUTC('<');
@@ -3278,7 +3300,7 @@ top1:
 	}
 	if (!context->second_bracket && c == '>') {
 	    HTChunkTerminate(string);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		PSRCSTART(sgmlspecial);
 		PUTC('<');
@@ -3312,7 +3334,7 @@ top1:
 	}
 	if (context->end_comment && c == '>') {
 	    HTChunkTerminate(string);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		PSRCSTART(sgmlspecial);
 		PUTC('<');
@@ -3349,7 +3371,7 @@ top1:
 	}
 	if (context->end_comment && c == '>') {
 	    HTChunkTerminate(string);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		PSRCSTART(sgmlspecial);
 		PUTC('<');
@@ -3386,7 +3408,7 @@ top1:
 	}
 	if (context->end_comment && c == '>') {
 	    HTChunkTerminate(string);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		PSRCSTART(sgmlspecial);
 		PUTC('<');
@@ -3410,12 +3432,12 @@ top1:
 	if (WHITE(c))
 	    break;		/* Gap between attributes */
 	if (c == '>') {		/* End of tag */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (!psrc_view)
 #endif
 	    if (context->current_tag->name)
 		start_element(context);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		PSRCSTART(abracket);
 		PUTC('>');
@@ -3434,7 +3456,7 @@ top1:
 	if (WHITE(c) || (c == '>') || (c == '=')) {	/* End of word */
 	    HTChunkTerminate(string);
 	    handle_attribute_name(context, string->data);
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (!psrc_view) {
 #endif
 	    string->size = 0;
@@ -3444,7 +3466,7 @@ top1:
 		context->state = S_text;
 		break;
 	    }
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    }  else {
 		PUTC(' ');
 		if (context->current_attribute_number == INVALID)
@@ -3483,7 +3505,7 @@ top1:
 	if (WHITE(c))
 	    break;		/* Gap after attribute */
 	if (c == '>') {		/* End of tag */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		if (context->current_attribute_number == INVALID)
 		    PSRCSTOP(badattr);
@@ -3499,7 +3521,7 @@ top1:
 	    context->state = S_text;
 	    break;
 	} else if (c == '=') {
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		PUTC('=');
 		if (context->current_attribute_number == INVALID)
@@ -3511,7 +3533,7 @@ top1:
 	    context->state = S_equals;
 	    break;
 	}
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	/* we are here because this char seemed the beginning of attrname */
 	if (psrc_view && context->current_attribute_number == INVALID) {
 	    PSRCSTOP(badattr);
@@ -3527,7 +3549,7 @@ top1:
 	    break;		/* Before attribute value */
 	if (c == '>') {		/* End of tag */
 	    CTRACE((tfp, "SGML: found = but no value\n"));
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		PSRCSTART(abracket);
 		PUTC('>');
@@ -3540,7 +3562,7 @@ top1:
 	    break;
 
 	} else if (c == '\'') {
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		PSRCSTART(attrval);
 		PUTC(c);
@@ -3550,7 +3572,7 @@ top1:
 	    break;
 
 	} else if (c == '"') {
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		PSRCSTART(attrval);
 		PUTC(c);
@@ -3559,7 +3581,7 @@ top1:
 	    context->state = S_dquoted;
 	    break;
 	}
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	if (psrc_view)
 	    PSRCSTART(attrval);
 #endif
@@ -3569,7 +3591,7 @@ top1:
     case S_value:
 	if (WHITE(c) || (c == '>')) {		/* End of word */
 	    HTChunkTerminate(string) ;
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		/*PSRCSTART(attrval);*/
 		if (attr_is_name) {
@@ -3607,7 +3629,7 @@ top1:
 	    handle_attribute_value(context, string->data);
 	    string->size = 0;
 	    if (c == '>') {		/* End of tag */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		if (psrc_view) {
 		    PSRCSTART(abracket);
 		    PUTC('>');
@@ -3647,7 +3669,7 @@ top1:
     case S_squoted:		/* Quoted attribute value */
 	if (c == '\'') {	/* End of attribute value */
 	    HTChunkTerminate(string) ;
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		/*PSRCSTART(attrval);*/
 		if (attr_is_name) {
@@ -3711,7 +3733,7 @@ top1:
 	    (soft_dquotes &&	/*  If emulating old Netscape bug, treat '>' */
 	     c == '>')) {	/*  as a co-terminator of dquoted and tag    */
 	    HTChunkTerminate(string) ;
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		/*PSRCSTART(attrval);*/
 		if (attr_is_name) {
@@ -3779,7 +3801,7 @@ top1:
 	    HTChunkPutc(string, c);
 	} else {				/* End of end tag name */
 	    HTTag * t = 0;
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    BOOL psrc_tagname_processed = FALSE;
 #endif
 
@@ -3792,7 +3814,7 @@ top1:
 	    }
 	    if (!t || t == context->unknown_tag) {
 		CTRACE((tfp, "Unknown end tag </%s>\n", string->data));
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		if (psrc_view) {
 		    PSRCSTART(abracket);
 		    PUTC('<');
@@ -3938,7 +3960,7 @@ top1:
 					SGMLFindTag(context->dtd, "SELECT"));
 			    CTRACE((tfp, "SGML: End </%s>\n", string->data));
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 			    if (!psrc_view) /* Don't actually call if viewing psrc - kw */
 #endif
 			    (*context->actions->end_element)
@@ -3966,7 +3988,7 @@ top1:
 		    } else {
 			CTRACE((tfp, "SGML: End </%s>\n", string->data));
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 			if (!psrc_view) /* Don't actually call if viewing psrc - kw */
 #endif
 			(*context->actions->end_element)
@@ -3991,7 +4013,7 @@ top1:
 		}
 	    }
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view && !psrc_tagname_processed) {
 		PSRCSTART(abracket);
 		PUTC('<');
@@ -4174,7 +4196,7 @@ top1:
     case S_junk_tag:
     case S_junk_pi:
 	if (c == '>') {
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		if (context->state == S_junk_tag) {
 		    PSRCSTOP(badtag);
@@ -4188,7 +4210,7 @@ top1:
 	    context->current_tag = NULL;
 	    context->state = S_text;
 	}
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	else if (psrc_view) {
 	    /*pack spaces until first non-space is seen*/
 	    if (!context->seen_nonwhite_in_junk_tag) {
@@ -4407,7 +4429,7 @@ PUBLIC HTStream* SGML_new  ARGS3(
     context->csi = NULL;
     context->csi_index = 0;
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     if (psrc_view) {
 	psrc_view = FALSE;
 	mark_htext_as_source = TRUE;

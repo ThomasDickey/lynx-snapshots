@@ -360,8 +360,32 @@ PUBLIC int check_color ARGS2(
 {
     int i;
 
-    if (!strcasecomp(color, "default"))
+    CTRACE((tfp, "check_color(%s,%d)\n", color, the_default));
+    if (!strcasecomp(color, "default")) {
+#if HAVE_USE_DEFAULT_COLORS && USE_DEFAULT_COLORS
+#if HAVE_ASSUME_DEFAULT_COLORS	/* ncurses 5.1 */
+	/*
+	 * This may be invoked before ncurses is initialized, depending on
+	 * whether color-style is used or not.
+	 *
+	 * If we have assume_default_colors(), we can leave the global fg/bg
+	 * colors with the standard white/black until we find a color specified
+	 * as "default".
+	 */
+	static int found = 0;
+	if (!found)
+	    found = lynx_default_colors();
+	if (found >= 0)
+	    the_default = DEFAULT_COLOR;
+#else
+	the_default = DEFAULT_COLOR;
+#endif	/* HAVE_ASSUME_DEFAULT_COLORS */
+	default_fg = DEFAULT_COLOR;
+	default_bg = DEFAULT_COLOR;
+#endif	/* USE_DEFAULT_COLORS */
+	CTRACE((tfp, "=> %d\n", the_default));
 	return the_default;
+    }
     if (!strcasecomp(color, "nocolor"))
 	return NO_COLOR;
 
@@ -1138,8 +1162,7 @@ PRIVATE int parse_assumed_doc_charset_choice ARGS1(char*,p)
 
 #endif /* EXP_CHARSET_CHOICE */
 
-#ifdef USE_PSRC
-
+#ifdef USE_PRETTYSRC
 static void html_src_bad_syntax ARGS2(
 	    char*, value,
 	    char*, option_name)
@@ -1175,8 +1198,8 @@ static int parse_html_src_spec ARGS3(
 
     CTRACE((tfp,"ReadCFG - parsing tagspec '%s:%s' for option '%s'\n",value,ts2,option_name));
     html_src_clean_item(lexeme_code);
-    if ( html_src_parse_tagspec(value, lexeme_code, FALSE, TRUE)
-	|| html_src_parse_tagspec(ts2, lexeme_code, FALSE, FALSE) )
+    if ( html_src_parse_tagspec(value, lexeme_code, TRUE, TRUE)
+	|| html_src_parse_tagspec(ts2, lexeme_code, TRUE, TRUE) )
     {
 	*ts2 = ':';
 	BS();
@@ -1188,28 +1211,52 @@ static int parse_html_src_spec ARGS3(
     return 0;
 }
 
-#if defined(__STDC__) || defined(_WIN_CC)
-#define defHTSRC_parse_fun(x) static int html_src_set_##x ARGS1( char*,str) \
- { parse_html_src_spec(HTL_##x,str,#x); return 0; }
-#else
-#define defHTSRC_parse_fun(x) static int html_src_set_/**/x ARGS1( char*,str) \
- { parse_html_src_spec(HTL_/**/x,str,"x"); return 0; }
-#endif
+typedef struct string_int_pair_
+{
+    char* str;
+    int val;
+} string_int_pair;
 
-defHTSRC_parse_fun(comm)
-defHTSRC_parse_fun(tag)
-defHTSRC_parse_fun(attrib)
-defHTSRC_parse_fun(attrval)
-defHTSRC_parse_fun(abracket)
-defHTSRC_parse_fun(entity)
-defHTSRC_parse_fun(href)
-defHTSRC_parse_fun(entire)
-defHTSRC_parse_fun(badseq)
-defHTSRC_parse_fun(badtag)
-defHTSRC_parse_fun(badattr)
-defHTSRC_parse_fun(sgmlspecial)
+PRIVATE int psrcspec_fun ARGS1(char*,s)
+{
+    char* e;
+    static string_int_pair lexemnames[] =
+    {
+	{ "comm",	HTL_comm	},
+	{ "tag",	HTL_tag		},
+	{ "attrib",	HTL_attrib	},
+	{ "attrval",	HTL_attrval	},
+	{ "abracket",	HTL_abracket	},
+	{ "entity",	HTL_entity	},
+	{ "href",	HTL_href	},
+	{ "entire",	HTL_entire	},
+	{ "badseq",	HTL_badseq	},
+	{ "badtag",	HTL_badtag	},
+	{ "badattr",	HTL_badattr	},
+	{ "sgmlspecial", HTL_sgmlspecial },
+	{ NULL,		-1		}
+    };
+    string_int_pair* cur = lexemnames;
+    BOOL found = FALSE;
 
-#undef defHTSRC_parse_fun
+    e = strchr(s,':');
+    if (!e) {
+	CTRACE((tfp,"bad format of PRETTYSRC_SPEC setting value, ignored %s\n",s));
+	return 0;
+    }
+    *e = '\0';
+    while (cur->str) {
+	if ((found = !strcasecomp(s, cur->str)) != 0)
+	    break;
+	++cur;
+    }
+    if (!found) {
+	CTRACE((tfp,"bad format of PRETTYSRC_SPEC setting value, ignored %s:%s\n",s,e+1));
+	return 0;
+    }
+    parse_html_src_spec(cur->val, e+1, s);
+    return 0;
+}
 
 static int read_htmlsrc_attrname_xform ARGS1( char*,str)
 {
@@ -1240,19 +1287,7 @@ static int read_htmlsrc_tagname_xform ARGS1( char*,str)
     }
     return 0;
 }
-
-
-#ifdef __STDC__
-#define defHTSRC_option(x) \
-    PARSE_FUN( "htmlsrc_" #x ,CONF_FUN, html_src_set_##x),
-#else
-#define defHTSRC_option(x) \
-    PARSE_FUN( "htmlsrc_" #x ,CONF_FUN, html_src_set_/**/x),
-    /*                    ^^ (cannot adapt to K&R) */
 #endif
-
-#endif
-
 
 /* This table should be sorted alphabetically */
 static Config_Type Config_Table [] =
@@ -1335,31 +1370,10 @@ static Config_Type Config_Table [] =
      PARSE_SET("gotobuffer", CONF_BOOL, &goto_buffer),
      PARSE_STR("helpfile", CONF_STR, &helpfile),
      PARSE_SET("historical_comments", CONF_BOOL, &historical_comments),
-
-#if defined(USE_PSRC) && defined(__STDC__)
-
-     defHTSRC_option(abracket)
-     defHTSRC_option(attrib)
-
+#ifdef USE_PRETTYSRC
      PARSE_FUN("htmlsrc_attrname_xform", CONF_FUN, read_htmlsrc_attrname_xform),
-
-     defHTSRC_option(attrval)
-     defHTSRC_option(badattr)
-     defHTSRC_option(badseq)
-     defHTSRC_option(badtag)
-     defHTSRC_option(comm)
-     defHTSRC_option(entire)
-     defHTSRC_option(entity)
-     defHTSRC_option(href)
-     defHTSRC_option(sgmlspecial)
-     defHTSRC_option(tag)
-
      PARSE_FUN("htmlsrc_tagname_xform", CONF_FUN, read_htmlsrc_tagname_xform),
-
-
-# undef defHTSRC_option
 #endif
-
      PARSE_ENV("http_proxy", CONF_ENV, 0 ),
      PARSE_ENV("https_proxy", CONF_ENV, 0 ),
      PARSE_FUN("include", CONF_INCLUDE, 0),
@@ -1369,6 +1383,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN("jumpfile", CONF_FUN, jumpfile_fun),
 #ifdef EXP_JUSTIFY_ELTS
      PARSE_SET("justify", CONF_BOOL, &ok_justify),
+     PARSE_SET("justify_max_void_percent", CONF_INT, &justify_max_void_percent),
 #endif
 #ifdef EXP_KEYBOARD_LAYOUT
      PARSE_FUN("keyboard_layout", CONF_FUN, keyboard_layout_fun),
@@ -1443,10 +1458,11 @@ static Config_Type Config_Table [] =
      PARSE_STR("preferred_language", CONF_STR, &language),
      PARSE_SET("prepend_base_to_source", CONF_BOOL, &LYPrependBaseToSource),
      PARSE_SET("prepend_charset_to_source", CONF_BOOL, &LYPrependCharsetToSource),
-     PARSE_FUN("printer", CONF_FUN, printer_fun),
-#ifdef USE_PSRC
-     PARSE_SET("psrcview_no_anchor_numbering", CONF_BOOL, &psrcview_no_anchor_numbering),
+#ifdef USE_PRETTYSRC
+     PARSE_FUN("prettysrc_spec" ,CONF_FUN, psrcspec_fun),
+     PARSE_SET("prettysrc_view_no_anchor_numbering", CONF_BOOL, &psrcview_no_anchor_numbering),
 #endif
+     PARSE_FUN("printer", CONF_FUN, printer_fun),
      PARSE_SET("quit_default_yes", CONF_BOOL, &LYQuitDefaultYes),
      PARSE_SET("referer_with_query", CONF_FUN, referer_with_query_fun),
      PARSE_SET("reuse_tempfiles", CONF_BOOL, &LYReuseTempfiles),

@@ -1,0 +1,19 @@
+#  This file is a placeholder;
+#  see http://www.iro.umontreal.ca/contrib/po/HTML/domain-lynx.html
+
+# Czech translation of the Lynx.
+# Copyright (C) 1998 Free Software Foundation, Inc.
+# Ji<F8><ED> Pavlovsk<FD> <pavlovsk@ff.cuni.cz>, 1999
+#
+
+msgid ""
+msgstr ""
+"Date: 1999-12-12 02:44:02-0500\n"
+"From: Webmaster Jim <jspath@bcpl.net>\n"
+"Content-Type: text/plain; charset=\n"
+"Xgettext-Options: --default-domain=po/cs\n"
+"Files: src/LYMain.c\n"
+
+#: src/LYMain.c:2554
+msgid "\n%s Version %s (%.*s)\n"
+msgstr "\n%s verze %s (%.*s)\n"

@@ -49,7 +49,7 @@
 #include <LYCurses.h>
 #endif /* VMS */
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 #include <LYPrettySrc.h>
 #endif
 
@@ -476,13 +476,13 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 */
 PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 {
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     char* translated_string = NULL;
 #endif
 
     if (s == NULL || (LYMapsOnly && me->sp[0].tag_number != HTML_OBJECT))
 	return;
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     if (psrc_convert_string) {
 	StrAllocCopy(translated_string,s);
 	TRANSLATE_AND_UNESCAPE_ENTITIES(&translated_string, TRUE, FALSE);
@@ -541,7 +541,7 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 	     *	by the cases above (HTML_PRE or similar may not be the
 	     *	last element pushed on the style stack). - kw
 	     */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		/*
 		 * We do this so that a raw '\r' in the string will not be
@@ -622,7 +622,7 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 	    } /* for */
 	}
     } /* end switch */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     if (psrc_convert_string) {
 	psrc_convert_string = FALSE;
 	FREE(translated_string);
@@ -722,7 +722,7 @@ static int hcode;
 #endif
 
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 
 PRIVATE void HTMLSRC_apply_markup ARGS4(
 	    HTStructured *,   context,
@@ -772,7 +772,7 @@ PRIVATE void HTMLSRC_apply_markup ARGS4(
 #  define PUTC(x) HTML_put_character(me,x)
 #  define PUTS(x) HTML_put_string(me,x)
 
-#endif /* USE_PSRC*/
+#endif /* USE_PRETTYSRC*/
 
 PRIVATE void LYStartArea ARGS5(
 	HTStructured *,		obj,
@@ -966,7 +966,7 @@ PRIVATE int HTML_start_element ARGS6(
 #  endif
 #endif
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     if (psrc_view && !sgml_in_psrc_was_initialized) {
 	if (!psrc_nested_call) {
 	    HTTag * tag = &HTML_dtd.tags[element_number];
@@ -1054,7 +1054,7 @@ PRIVATE int HTML_start_element ARGS6(
 	} /*if (!psrc_nested_call) */
 	/*fall through*/
     }
-#endif /* USE_PSRC */
+#endif /* USE_PRETTYSRC */
 
     if (LYMapsOnly) {
 	if (!(ElementNumber == HTML_MAP || ElementNumber == HTML_AREA ||
@@ -6145,7 +6145,7 @@ PRIVATE int HTML_end_element ARGS3(
     BOOL skip_stack_requested = FALSE;
     EMIT_IFDEF_EXP_JUSTIFY_ELTS(BOOL reached_awaited_stacked_elt=FALSE;)
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     if (psrc_view && !sgml_in_psrc_was_initialized) {
 	if (!psrc_nested_call) {
 	    HTTag * tag = &HTML_dtd.tags[element_number];

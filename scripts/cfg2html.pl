@@ -199,6 +199,7 @@ EOF
 					printf FP "<h3><em>Description</em></h3>\n";
 					printf FP "Please see the description of <a href=\"#%s\">%s</a>\n", $h2[0], $h2[0];
 				}
+				@h2 = "";
 			}
 			$m = 0;
 			$first = 1;

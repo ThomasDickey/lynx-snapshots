@@ -47,7 +47,7 @@ typedef enum _SGMLContent {
 
 typedef struct {
     char *	name;		/* The (constant) name of the attribute */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     char	type;		/* code of the type of the attribute. Code
 				   values are in HTMLDTD.h */
 #endif

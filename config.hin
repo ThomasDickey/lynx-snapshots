@@ -182,7 +182,7 @@
 #undef USE_EXTERNALS		/* CF_ARG_ENABLE(externs) */
 #undef USE_FCNTL		/* CF_FIONBIO */
 #undef USE_HASH			/* see USE_COLOR_STYLE */
-#undef USE_PSRC			/* CF_ARG_ENABLE(prettysrc) */
+#undef USE_PRETTYSRC		/* CF_ARG_ENABLE(prettysrc) */
 #undef USE_SCROLLBAR		/* CF_ARG_ENABLE(scrollbar) */
 #undef USE_SIZECHANGEHACK	/* FIXME: find a case where this works! */
 #undef USE_SLANG		/* AC_ARG_WITH(screen=slang) */

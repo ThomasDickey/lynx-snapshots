@@ -11109,7 +11109,7 @@ fi
 
 echo "$ac_t""$use_prettysrc" 1>&6
 test $use_prettysrc != no && cat >> confdefs.h <<\EOF
-#define USE_PSRC 1
+#define USE_PRETTYSRC 1
 EOF
 
 

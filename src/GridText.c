@@ -11,6 +11,7 @@
 #include <HTTP.h>
 #include <HTAlert.h>
 #include <HTCJK.h>
+#include <HTFile.h>
 #include <UCDefs.h>
 #include <UCAux.h>
 
@@ -435,7 +436,7 @@ static int justify_start_position;/* this is an index of char from which
 
 static int ht_num_runs;/*the number of runs filled*/
 static ht_run_info ht_runs[MAX_LINE];
-static BOOL this_line_was_splitted;
+static BOOL this_line_was_split;
 static TextAnchor* last_anchor_of_previous_line;
 static int justified_text_map[MAX_LINE]; /* this is a map - for each index i
     it tells to which position j=justified_text_map[i] in justified text
@@ -446,7 +447,7 @@ static BOOL have_raw_nbsps = FALSE;
 PUBLIC void ht_justify_cleanup NOARGS
 {
     wait_for_this_stacked_elt = !ok_justify
-#  ifdef USE_PSRC
+#  ifdef USE_PRETTYSRC
 	|| psrc_view
 #  endif
 	? 30000/*MAX_NESTING*/+2 /*some unreachable value*/ : -1;
@@ -455,7 +456,7 @@ PUBLIC void ht_justify_cleanup NOARGS
     form_in_htext = FALSE;
 
     last_anchor_of_previous_line = NULL;
-    this_line_was_splitted = FALSE;
+    this_line_was_split = FALSE;
     in_DT = FALSE;
     have_raw_nbsps = FALSE;
 }
@@ -803,7 +804,7 @@ PUBLIC HText *	HText_new ARGS1(
     self->LastChar = '\0';
     self->IgnoreExcess = FALSE;
 
-#ifndef USE_PSRC
+#ifndef USE_PRETTYSRC
     if (HTOutputFormat == WWW_SOURCE)
 	self->source = YES;
     else
@@ -2367,6 +2368,24 @@ PRIVATE void split_line ARGS2(
     CTRACE((tfp,"   bold_on=%d, underline_on=%d\n", bold_on, underline_on));
 #endif
 
+    cp = previous->data;
+    if (cp[0] == LY_BOLD_START_CHAR
+     || cp[0] == LY_UNDERLINE_START_CHAR) {
+	switch (cp[1]) {
+	    case LY_SOFT_NEWLINE:
+		cp[1] = cp[0];
+		cp[0] = LY_SOFT_NEWLINE;
+		break;
+	    case LY_BOLD_START_CHAR:
+	    case LY_UNDERLINE_START_CHAR:
+		if (cp[2] == LY_SOFT_NEWLINE) {
+		    cp[2] = cp[1];
+		    cp[1] = cp[0];
+		    cp[0] = LY_SOFT_NEWLINE;
+		}
+		break;
+	}
+    }
     if (split > previous->size) {
 	CTRACE((tfp,
 	       "*** split_line: split==%d greater than last_line->size==%d !\n",
@@ -2568,7 +2587,7 @@ PRIVATE void split_line ARGS2(
 #else
 	   (previous->data[previous->size-1] == ' ') &&
 #endif
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    !psrc_view && /*don't strip trailing whites - since next line can
 		start with LY_SOFT_NEWLINE - so we don't lose spaces when
 		'p'rinting this text to file -VH */
@@ -2777,7 +2796,7 @@ PRIVATE void split_line ARGS2(
     spare = 0;
     if (
 #ifdef EXP_JUSTIFY_ELTS
-	this_line_was_splitted ||
+	this_line_was_split ||
 #endif
 	(alignment == HT_CENTER ||
 	 alignment == HT_RIGHT) || text->stbl) {
@@ -3011,7 +3030,15 @@ PRIVATE void split_line ARGS2(
 #ifdef EXP_JUSTIFY_ELTS
     /* now perform justification - by VH */
 
-    if (this_line_was_splitted && spare ) {
+    if (this_line_was_split
+     && spare
+     && justify_max_void_percent > 0
+     && justify_max_void_percent <= 100
+     && justify_max_void_percent >= ((100*spare)
+				  / ((LYcols - 1)
+				   - (int)style->rightIndent
+				   - indent
+				   + ctrl_chars_on_previous_line))) {
 	/* this is the only case when we need justification*/
 	char* jp = previous->data + justify_start_position;
 	ht_run_info* r = ht_runs;
@@ -3297,7 +3324,7 @@ PRIVATE void split_line ARGS2(
 	/* cleanup */
     can_justify_this_line = TRUE;
     justify_start_position = 0;
-    this_line_was_splitted = FALSE;
+    this_line_was_split = FALSE;
     have_raw_nbsps = FALSE;
 #endif /* EXP_JUSTIFY_ELTS */
 } /* split_line */
@@ -3987,7 +4014,7 @@ check_IgnoreExcess:
 	if (style->wordWrap && HTOutputFormat != WWW_SOURCE) {
 #ifdef EXP_JUSTIFY_ELTS
 	    if (REALLY_CAN_JUSTIFY(text))
-		this_line_was_splitted=TRUE;
+		this_line_was_split = TRUE;
 #endif
 	    split_line(text, text->permissible_split);
 	    if (ch == ' ') return;	/* Ignore space causing split */
@@ -4680,10 +4707,10 @@ PUBLIC void HText_endStblTABLE ARGS1(
 	lines_changed = HText_insertBlanksInStblLines(me, ncols);
 	CTRACE((tfp, "endStblTABLE: changed %d lines, done.\n", lines_changed));
 #ifdef DISP_PARTIAL
-       /* allow HTDisplayPartial() to redisplay the changed lines.
-        * There is no harm if we got several stbl in the document, hope so.
-        */
-       NumOfLines_partial -= lines_changed;  /* fake */
+	/* allow HTDisplayPartial() to redisplay the changed lines.
+	 * There is no harm if we got several stbl in the document, hope so.
+	 */
+	NumOfLines_partial -= lines_changed;  /* fake */
 #endif  /* DISP_PARTIAL */
     }
     Stbl_free(me->stbl);
@@ -4844,7 +4871,7 @@ PUBLIC int HText_beginAnchor ARGS3(
      *  If we are doing link_numbering add the link number.
      */
     if ((a->number > 0) &&
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	(text->source ? !psrcview_no_anchor_numbering : 1 ) &&
 #endif
 	(keypad_mode == LINKS_ARE_NUMBERED ||
@@ -7413,11 +7440,7 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 
     line = HTMainText->last_line->next;
     for (;; line = line->next) {
-	if (!first &&
-	 line->data[0] != LY_SOFT_NEWLINE &&
-	 line->data[0] != '\0' &&
-	 line->data[1] != LY_SOFT_NEWLINE) {
-	    /* data[0] can be LY_*START_CHAR, so LY_SOFT_NEWLINE can be in [1] - VH */
+	if (!first && line->data[0] != LY_SOFT_NEWLINE) {
 	    fputc('\n',fp);
 	    /*
 	     *  Add news-style quotation if requested. - FM
@@ -7540,9 +7563,7 @@ PUBLIC void print_crawl_to_fd ARGS3(
     }
 
     for (;; line = line->next) {
-	if (!first
-	 && line->data[0] != LY_SOFT_NEWLINE && line->data[1] != LY_SOFT_NEWLINE)
-	    /* data[0] can be LY_*START_CHAR, so LY_SOFT_NEWLINE can be in [1] - VH */
+	if (!first && line->data[0] != LY_SOFT_NEWLINE)
 	    fputc('\n',fp);
 	first = FALSE;
 	/*
@@ -13621,7 +13642,7 @@ PUBLIC void redraw_lines_of_link ARGS1(
     return;
 }
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 PUBLIC void HTMark_asSource NOARGS
 {
     if (HTMainText)

@@ -982,7 +982,7 @@ Attribute numbers
 #define HTML_UL_WRAP           13
 #define HTML_UL_ATTRIBUTES     14
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 /* values of HTML attributes' types */
 #define HTMLA_NORMAL 0 /* nothing specific */
 #define HTMLA_ANAME  1 /* anchor name - 'id' or a's 'name' */

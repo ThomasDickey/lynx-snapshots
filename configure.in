@@ -726,7 +726,7 @@ CF_ARG_ENABLE(prettysrc,
 	[use_prettysrc=$enableval],
 	[use_prettysrc=no])
 AC_MSG_RESULT($use_prettysrc)
-test $use_prettysrc != no && AC_DEFINE(USE_PSRC)
+test $use_prettysrc != no && AC_DEFINE(USE_PRETTYSRC)
 
 AC_MSG_CHECKING(if read-progress message should show ETA)
 CF_ARG_ENABLE(read-eta,

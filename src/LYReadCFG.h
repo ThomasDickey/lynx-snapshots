@@ -40,6 +40,10 @@
 extern int default_fg;
 extern int default_bg;
 
+#if HAVE_USE_DEFAULT_COLORS && USE_DEFAULT_COLORS
+extern int lynx_default_colors NOPARAMS;
+#endif
+
 extern int check_color PARAMS((char * color, int the_default));
 #endif
 

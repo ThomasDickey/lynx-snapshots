@@ -437,6 +437,7 @@ PUBLIC BOOLEAN dont_wrap_pre = FALSE;
 
 #ifdef EXP_JUSTIFY_ELTS
 PUBLIC BOOL ok_justify = TRUE;
+PUBLIC int justify_max_void_percent = 35;
 #endif
 
 #ifndef NO_DUMP_WITH_BACKSPACES
@@ -1512,7 +1513,7 @@ PUBLIC int main ARGS2(
 	CTRACE((tfp, "LYNX_SIG_FILE '%s' is bad. Ignoring.\n", LYNX_SIG_FILE));
     }
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     /*this is required for checking the tagspecs when parsing cfg file by
        LYReadCFG.c:parse_html_src_spec -HV */
     HTSwitchDTD(TRUE);
@@ -1570,7 +1571,7 @@ PUBLIC int main ARGS2(
      *  Initialize other things based on the configuration read.
      */
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     if ( (!Old_DTD) != TRUE ) /* skip if they are already initialized -HV */
 #endif
     HTSwitchDTD(!Old_DTD);
@@ -1605,28 +1606,29 @@ PUBLIC int main ARGS2(
 	LYLoadCookies(LYCookieFile);
     }
 
+    /* tilde-expand LYCookieSaveFile */
+    if (LYCookieSaveFile != NULL) {
+	if (LYCookieSaveFile[0] == '~' && LYCookieSaveFile[1] == '/' &&
+	  LYCookieSaveFile[2] != '\0') {
+	    temp = NULL;
+	    StrAllocCopy(temp, LYCookieSaveFile + 2);
+	    StrAllocCopy(LYCookieSaveFile, wwwName(Home_Dir()));
+	    LYAddPathSep(&LYCookieSaveFile);
+	    StrAllocCat(LYCookieSaveFile, temp);
+	    FREE(temp);
+	}
+    }
+
     /*
      * In dump_output_immediately mode, LYCookieSaveFile defaults to
      * /dev/null, otherwise it defaults to LYCookieFile.
      */
 
-    if (dump_output_immediately) {
-	if (LYCookieSaveFile != NULL) {
-	    if (LYCookieSaveFile[0] == '~' && LYCookieSaveFile[1] == '/' &&
-		LYCookieSaveFile[2] != '\0') {
-		temp = NULL;
-		StrAllocCopy(temp, LYCookieSaveFile + 2);
-		StrAllocCopy(LYCookieSaveFile, wwwName(Home_Dir()));
-		LYAddPathSep(&LYCookieSaveFile);
-		StrAllocCat(LYCookieSaveFile, temp);
-		FREE(temp);
-	    }
+    if (LYCookieSaveFile == NULL) {
+	if (dump_output_immediately) {
+		StrAllocCopy(LYCookieSaveFile, "/dev/null");
 	} else {
-	    StrAllocCopy(LYCookieSaveFile, "/dev/null");
-	}
-    } else {
-	if (LYCookieSaveFile == NULL) {
-	    StrAllocCopy(LYCookieSaveFile, LYCookieFile);
+		StrAllocCopy(LYCookieSaveFile, LYCookieFile);
 	}
     }
 #endif
@@ -1895,7 +1897,7 @@ PUBLIC int main ARGS2(
      *  Done here so that URL guessing in LYEnsureAbsoluteURL() can be
      *  interruptible (terminal is in raw mode, select() works).  -BL
      */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
     if (!dump_output_immediately) {
 	HTMLSRC_init_caches(FALSE); /* do it before terminal is initialized*/
 #ifdef LY_FIND_LEAKS
@@ -2109,9 +2111,18 @@ PUBLIC void LYRegisterLynxProtocols NOARGS
  *  Some stuff to reload lynx.cfg without restarting new lynx session,
  *  also load options menu items and command-line options
  *  to make things consistent.
- *  Warning: experimental, more main() reorganization required.
  *
  *  Called by user of interactive session by LYNXCFG://reload/ link.
+ *
+ *  Warning: experimental, more main() reorganization required.
+ *	*Known* exceptions: persistent cookies, cookie files.
+ *
+ *	Some aspects of COLOR (with slang?).
+ *	Viewer stuff, mailcap files
+ *	SUFFIX, mime.types files
+ *	RULESFILE/RULE
+ *
+ *	All work "somewhat", but not exactly as the first time.
  */
 PUBLIC void reload_read_cfg NOARGS
 {
@@ -2188,7 +2199,7 @@ PUBLIC void reload_read_cfg NOARGS
 	memset((char*)charset_subsets, 0, sizeof(charset_subset_t)*MAXCHARSETS);
 #endif
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	html_src_on_lynxcfg_reload();
 #endif
 	/* free downloaders, printers, environments, dired menu */
@@ -3462,7 +3473,7 @@ with partial-display logic"
       "show parsed text/html with -source and in source view\n\
 to visualize how lynx behaves with invalid HTML"
    ),
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
    PARSE_SET(
       "prettysrc",	SET_ARG,		&LYpsrc,
       "do syntax highlighting and hyperlink handling in source view"

@@ -10,7 +10,7 @@
 #define NO_MEMORY_TRACKING
 #include <LYLeaks.h>
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 BOOL psrc_convert_string = FALSE;
 PUBLIC BOOL psrc_view = FALSE;/* this is read by SGML_put_character - TRUE
 	when viewing pretty source */
@@ -328,11 +328,9 @@ PUBLIC void HTMLSRC_init_caches ARGS1(
     char buf[1000];
 
     for (i = 0; i < HTL_num_lexemes; ++i) {
-
-	strcpy(buf, HTL_tagspecs_defaults[i]);
-	p = HTL_tagspecs_defaults[i];
-	HTL_tagspecs[i] = NULL;
-	StrAllocCopy(HTL_tagspecs[i],p);
+	/*we assume that HT_tagspecs was NULLs at when program started*/
+	strcpy(buf, HTL_tagspecs[i] ? HTL_tagspecs[i] : HTL_tagspecs_defaults[i]);
+	StrAllocCopy(HTL_tagspecs[i],buf);
 
 	if ((p = strchr(buf, ':')) != 0)
 	    *p = '\0';
@@ -347,4 +345,4 @@ PUBLIC void HTMLSRC_init_caches ARGS1(
     }
 }
 
-#endif /* ifdef USE_PSRC */
+#endif /* ifdef USE_PRETTYSRC */

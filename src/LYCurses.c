@@ -457,6 +457,28 @@ void attribute ARGS2(int,style,int,dir)
 #endif
 #endif /* USE_COLOR_STYLE */
 
+PRIVATE int lynx_called_initscr;
+
+#if HAVE_USE_DEFAULT_COLORS && USE_DEFAULT_COLORS
+/*
+ * If we find a "default" color while reading the config-file, set default
+ * colors on the screen.
+ */
+PUBLIC int lynx_default_colors NOARGS
+{
+    int code = 0;
+    if (lynx_called_initscr) {
+	code = -1;
+	if (use_default_colors() == OK) {
+	    default_fg = DEFAULT_COLOR;
+	    default_bg = DEFAULT_COLOR;
+	    code = 1;
+	}
+    }
+    return code;
+}
+#endif /* HAVE_USE_DEFAULT_COLORS && USE_DEFAULT_COLORS */
+
 #if USE_COLOR_TABLE && defined(COLOR_CURSES)
 /*
  * This block of code is designed to produce the same color effects using SVr4
@@ -466,7 +488,6 @@ void attribute ARGS2(int,style,int,dir)
  * special case of initialization before 'initscr()' is called.
  * 1997/1/19 - T.E.Dickey <dickey@clark.net>
  */
-PRIVATE int lynx_called_initscr;
 
 PRIVATE struct {
     int fg, bg;
@@ -532,6 +553,8 @@ PRIVATE void lynx_map_color ARGS1(int, n)
 {
     int m;
 
+    CTRACE((tfp, "lynx_map_color(%d)\n", n));
+
     lynx_color_pairs[n+1].fg = lynx_color_cfg[n].fg;
     lynx_color_pairs[n+1].bg = lynx_color_cfg[n].bg;
 
@@ -595,6 +618,8 @@ PRIVATE void lynx_init_colors NOARGS
     if (lynx_has_color) {
 	size_t n, m;
 
+	CTRACE((tfp, "lynx_init_colors\n"));
+
 	lynx_color_cfg[0].fg = default_fg;
 	lynx_color_cfg[0].bg = default_bg;
 
@@ -617,6 +642,7 @@ PRIVATE void lynx_init_colors NOARGS
 PUBLIC void lynx_setup_colors NOARGS
 {
     int n;
+    CTRACE((tfp, "lynx_setup_colors\n"));
     for (n = 0; n < 8; n++)
 	lynx_map_color(n);
 }
@@ -771,6 +797,7 @@ PUBLIC void start_curses NOARGS
 		gettext("Terminal initialisation failed - unknown terminal type?"));
 	    exit_immediately (-1);
 	}
+	lynx_called_initscr = TRUE;
 #if defined(SIGWINCH) && defined(NCURSES_VERSION)
 	size_change(0);
 	recent_sizechange = FALSE; /* prevent mainloop drawing 1st doc twice */
@@ -805,12 +832,40 @@ PUBLIC void start_curses NOARGS
 	if (has_colors()) {
 	    lynx_has_color = TRUE;
 	    start_color();
-#if HAVE_USE_DEFAULT_COLORS && !defined(PDCURSES)
-	    if (use_default_colors() == OK) {
-		default_fg = DEFAULT_COLOR;
-		default_bg = DEFAULT_COLOR;
+#if USE_DEFAULT_COLORS
+#if HAVE_USE_DEFAULT_COLORS	/* ncurses 4.1 */
+#if HAVE_ASSUME_DEFAULT_COLORS	/* ncurses 5.1 */
+#if !defined(USE_COLOR_STYLE)
+	    /*
+	     * If no "default" color was specified in the cfg file, adjust the
+	     * color mapping table so we'll not use the codes that would work
+	     * if we had called use_default_colors().
+	     */
+	    if (default_fg < 0 || default_bg < 0) {
+		if (assume_default_colors(default_fg, default_bg) != OK) {
+		    default_fg = COLOR_WHITE;
+		    default_bg = COLOR_BLACK;
+		}
 	    }
+	    if (default_fg >= 0 || default_bg >= 0) {
+		unsigned n;
+		for (n = 0; n < TABLESIZE(lynx_color_cfg); n++) {
+		    if (default_fg >= 0 && lynx_color_cfg[n].fg < 0)
+			lynx_color_cfg[n].fg = default_fg;
+		    if (default_bg >= 0 && lynx_color_cfg[n].bg < 0)
+			lynx_color_cfg[n].bg = default_bg;
+		    CTRACE((tfp, "color_cfg[%d] = %d/%d\n", n,
+			    lynx_color_cfg[n].fg,
+			    lynx_color_cfg[n].bg));
+		}
+		lynx_setup_colors();
+	    }
+#endif
+#else
+	    lynx_default_colors();
+#endif /* HAVE_ASSUME_DEFAULT_COLORS */
 #endif /* HAVE_USE_DEFAULT_COLORS */
+#endif /* USE_DEFAULT_COLORS */
 	}
 #endif /* USE_COLOR_STYLE || USE_COLOR_TABLE */
 
@@ -820,7 +875,6 @@ PUBLIC void start_curses NOARGS
 	first_time = FALSE;
 #if USE_COLOR_TABLE
 	lynx_init_colors();
-	lynx_called_initscr = TRUE;
 #endif /* USE_COLOR_TABLE */
     }
 #ifdef __DJGPP__
