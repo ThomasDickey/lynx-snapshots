@@ -16,11 +16,7 @@ extern HTCharStyle displayStyles[DSTYLE_ELEMENTS];
 extern int lynx_has_color;
 
 /* Set all the buckets in the hash table to be empty */
-extern void style_initialiseHashTable NOPARAMS;
-
 extern void parse_userstyles NOPARAMS;
-
-extern void HStyle_addStyle PARAMS((char* buffer));
 
 extern void style_deleteStyleList NOPARAMS;
 

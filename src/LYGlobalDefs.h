@@ -215,7 +215,7 @@ extern int display_lines;	/* number of lines in the display */
 extern int dump_output_width;
 extern int keypad_mode;		/* NUMBERS_AS_ARROWS or LINKS_ARE_NUMBERED */
 extern int lynx_temp_subspace;
-extern int more;		/* is there more document to display? */
+extern BOOLEAN more;		/* is there more document to display? */
 extern int user_mode;		/* novice or advanced */
 extern int www_search_result;
 
@@ -405,7 +405,7 @@ extern BOOLEAN no_externals; 		/* don't allow the use of externals */
 extern BOOLEAN LYNoISMAPifUSEMAP;	/* Omit ISMAP link if MAP present? */
 extern int LYHiddenLinks;
 
-extern BOOL Old_DTD;
+extern BOOLEAN Old_DTD;
 
 #define MBM_V_MAXFILES  25		/* Max number of sub-bookmark files */
 /*

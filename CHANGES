@@ -1,6 +1,55 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-07-16 (2.8.4dev.5)
+* remove "*:OS/390:*:*" item from config.guess -PG
+* add os390 item to $host_os case-statement in configure.in -PG
+* move $host_os case-statement in configure.in before some configuration tests
+  such as CF_BUNDLED_INTL which might perform compile-time tests -TD
+* use LYLocalFileToURL() in handle_LYK_CHDIR() to ensure that DOSPATH is
+  handled properly, inserting a '/' (reported by DK) -TD
+* correct loop condition in HTSaveToFile(), from dev.4 changes for -cmd_script
+  option which left it ignoring 'c' for cancel -TD
+* speed up local directory access for DJGPP by setting _djstat_flags (Gisle
+  Vanem)
+* updates for makelynx.bat, and improved call on the blat mailer (note -f field
+  not needed or wanted):  -Victor Schneider
+* fix Debian bug #65151:  "<> in javascript causes premature </script>"
+  (reported by H Nanosecond <aldomel@ix.netcom.com>) -KW
+* replaced all occurences of 'black' with 'default' in /samples/mild-colors.lss
+  to make it more reasonable on terminals with non-black background -VH
+* modify color-style initialization to avoid passing -1's as attribute codes
+  which would happen if the lynx.lss file was not found, or if not all styles
+  were set in that file.  Also if lynx.lss is not found, initialize the
+  predefined styles to match those in samples/lynx.lss -TD
+* modify handling of empty values for radio and checkbox fields to avoid
+  sending "on" as the value (reported by Janne Peltonen <jkhp@cc.hut.fi>) -KW
+* don't double backslash characters in HTQuoteParameter(), since that changes
+  the string a program invoked through system will see.  Note this assumes UNIX
+  or POSIX interpretation of single-quoted strings by the shell -KW
+* implement first draft of command-completion using popup menu for selection.
+  Pressing tab twice in the prompt for command or URLs will display a sorted
+  list of the choices -TD
+* implement a simple parser for Lynx commands which are normally bound to keys
+  using KEYMAP.  This is bound to ':', so you can for instance type ":quit" to
+  exit.  The parser allows unique abbreviations, so ":q" is equivalent to
+  ":quit" -TD
+* consolidate/simplify logic for displaying popup menus -TD
+* rewrote tab-completion to use an HTList -TD
+* move related logic into LYSubwindow() to reduce clutter - TD
+* make $(DESTDIR) variable work for po directory -TD
+* update bundled intl directory to match gettext-0.10.35 (except for fixes to
+  build scripts) -TD
+* modify configure macro CF_CURSES_LIBS to use a different order for library
+  checks if it has found ncurses header files (i.e., they are installed as
+  /usr/include/curses.h).  This is done to fix an problem where there are two
+  versions of the curses/ncurses libraries installed, and the "curses" library
+  is not ncurses (from a report by Sergei Pokrovsky <pok@nbsp.nsk.su>) -TD
+* fix for configure script from dialog:  If we really do not use included intl,
+  suppress the command that would attempt to symlink the two copies of its
+  header -TD
+* updates for config.guess, config.sub from tin -TD
+
 2000-06-23 (2.8.4dev.4)
 * modify handling to EXTERNAL settings by adding a new field in lynx.cfg.  When
   TRUE, then activating (using arrow-right for example) the link with URL
@@ -25,7 +74,7 @@ Changes since Lynx 2.8 release
       #define SUPPORT_CHDIR 
   in userdefs.h -VH
 * add definitions to allow slang configuration to implement scrollbars.  This
-  will no work for any termcap/terminfo-based systems, appears specific to
+  will not work for any termcap/terminfo-based systems, appears specific to
   MS-DOS (patch by Gisle Vanem)
 * updates for config.guess, config.sub from tin -TD
 * fix typo in CF_CHECK_ERRNO configure macro (reported by John Coyne
@@ -3421,7 +3470,7 @@ Changes since Lynx 2.8 release
      default), will now bring up the editor within a TEXTAREA, so there's no
      need to "waste" a separate keybinding (though you can still additionally
      bind the function separately, if desired).
-  2.  Converts any tab chars in the edited file, to spaces in the TEXTAREA
+  2. Converts any tab chars in the edited file, to spaces in the TEXTAREA
      anchor line.  The tabstop is currently #define'd to the quasi-standard
      value of 8.  (If anyone thinks that needs to be user configurable, feel
      free to add that to the o(ptions) form/menu,

@@ -4432,7 +4432,7 @@ PUBLIC void _internal_HTC ARGS3(HText *,text, int,style, int,dir)
 	if (line->numstyles > 0 && dir == 0 &&
 	    line->styles[line->numstyles].direction &&
 	    line->styles[line->numstyles].style == style &&
-	    line->styles[line->numstyles].horizpos
+	    (int) line->styles[line->numstyles].horizpos
 	    == (int)line->size - ctrl_chars_on_this_line) {
 	    /*
 	     *  If this is an OFF change directly preceded by an

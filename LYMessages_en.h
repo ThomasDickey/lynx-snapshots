@@ -579,6 +579,7 @@
 #define NEED_ADVANCED_USER_MODE gettext("That key requires Advanced User mode.")
 #define CONTENT_TYPE_MSG gettext("Content-type: %s")
 #define COMMAND_PROMPT gettext("Command: ")
+#define COMMAND_UNKNOWN gettext("Unknown or ambiguous command")
 #define VERSION_SEGMENT gettext(" Version ")
 #define FIRST_SEGMENT gettext(" first")
 #define GUESSING_SEGMENT gettext(", guessing...")

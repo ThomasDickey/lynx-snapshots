@@ -4385,7 +4385,7 @@ PUBLIC void LYConvertToURL ARGS2(
 #endif /* DOSPATH */
 
     *AllocatedString = NULL;  /* so StrAllocCopy doesn't free it */
-    StrAllocCopy(*AllocatedString,"file://localhost");
+    StrAllocCopy(*AllocatedString, "file://localhost");
 
     if (*old_string != '/') {
 	char *fragment = NULL;
@@ -4551,7 +4551,7 @@ have_VMS_URL:
 	    chk = GetFullPathNameA(old_string, MAX_PATH + 1,
 			fullpath, &filepart);
 	    if (chk != 0) {
-		StrAllocCopy(temp, HTDOS_wwwName(fullpath));
+		StrAllocCopy(temp, wwwName(fullpath));
 		StrAllocCat(*AllocatedString, temp);
 		FREE(temp);
 		CTRACE((tfp, "Converted '%s' to '%s'\n",
@@ -4607,11 +4607,7 @@ have_VMS_URL:
 	     */
 #if defined (DOSPATH) || defined (__EMX__) || defined (WIN_EX)
 	    if (old_string[1] != ':' && old_string[1] != '|') {
-#ifdef DOSPATH
-		StrAllocCopy(temp, HTDOS_wwwName(curdir));
-#else
 		StrAllocCopy(temp, wwwName(curdir));
-#endif
 		LYAddHtmlSep(&temp);
 		LYstrncpy(curdir, temp, (sizeof(curdir) - 1));
 		StrAllocCat(temp, old_string);
@@ -7184,6 +7180,8 @@ PUBLIC void LYLocalFileToURL ARGS2(
     if (!LYIsHtmlSep(*leaf))
 	LYAddHtmlSep(target);
     StrAllocCat(*target, leaf);
+    if (leaf != source)
+    	FREE(leaf);
 }
 
 #ifdef NOTDEFINED

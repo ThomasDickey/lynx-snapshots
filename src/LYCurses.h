@@ -47,7 +47,15 @@
 
 #ifdef USE_SLANG
 #include <slang.h>
-#define WINDOW void
+
+#undef WINDOW
+typedef struct {
+    int	top_y;
+    int left_x;
+    int height;
+    int width;
+} WINDOW;
+
 #define waddstr(w,s) addstr(s)
 
 #ifndef ACS_UARROW  
@@ -158,10 +166,6 @@
 # endif /* VMS && __GNUC__ */
 #endif /* HAVE_CONFIG_H */
 
-#if defined(NCURSES) || defined(PDCURSES)
-extern void LYsubwindow PARAMS((WINDOW * param));
-#endif /* NCURSES */
-
 /*
  * PDCurses' mouse code does nothing in the DJGPP configuration.
  */
@@ -176,12 +180,17 @@ extern void LYsubwindow PARAMS((WINDOW * param));
 #define USE_MOUSE 1
 #endif
 
-#ifdef VMS
-extern void VMSbox PARAMS((WINDOW *win, int height, int width));
-#else
-extern void LYbox PARAMS((WINDOW *win, BOOLEAN formfield));
-#endif /* VMS */
 #endif /* USE_SLANG */
+
+#ifdef USE_SLANG
+#define LYstopPopup() /* nothing */
+#else
+extern void LYsubwindow PARAMS((WINDOW * param));
+#define LYstopPopup() LYsubwindow(0)
+#endif /* NCURSES */
+
+extern void LYbox PARAMS((WINDOW *win, BOOLEAN formfield));
+extern WINDOW *LYstartPopup PARAMS((int top_y, int left_x, int height, int width));
 
 /*
  * Useful macros not in PDCurses or very old ncurses headers.
@@ -247,6 +256,7 @@ extern void LYstartTargetEmphasis NOPARAMS;
 extern void LYstopTargetEmphasis NOPARAMS;
 extern void LYtouchline PARAMS((int row));
 extern void LYwaddnstr PARAMS((WINDOW *w, CONST char *s, size_t len));
+extern void LYpaddstr PARAMS((WINDOW *w, int width, CONST char *s));
 
 #define LYaddstr(s)      LYwaddnstr(stdscr, s, strlen(s))
 #define LYaddnstr(s,len) LYwaddnstr(stdscr, s, len)
@@ -310,9 +320,6 @@ extern unsigned int Lynx_Color_Flags;
 /*
  *  Map some curses functions to slang functions.
  */
-#ifndef WINDOW
-#define WINDOW void
-#endif
 #define stdscr NULL
 #ifdef SLANG_MBCS_HACK
 extern int PHYSICAL_SLtt_Screen_Cols;
@@ -551,5 +558,7 @@ extern void lynx_stop_all_colors NOPARAMS;
 #else
 #define LYHideCursor() move((LYlines - 1), (LYcols - 2))
 #endif
+
+extern void LYstowCursor PARAMS((WINDOW * win, int row, int col));
 
 #endif /* LYCURSES_H */

@@ -1,11 +1,11 @@
 #ifndef LYKEYMAP_H
 #define LYKEYMAP_H
 
-#ifndef HTUTILS_H
 #include <HTUtils.h>
-#endif
+#include <HTList.h>
 
 extern BOOLEAN LYisNonAlnumKeyname PARAMS((int ch, int KeyName));
+extern HTList *LYcommandList NOPARAMS;
 extern char *LYKeycodeToString PARAMS((int c, BOOLEAN upper8));
 extern char *fmt_keys PARAMS((int lkc_first, int lkc_second));
 extern char *key_for_func PARAMS((int func));
@@ -111,10 +111,13 @@ extern LYKeymap_t key_override[];
 /*  Variables for holding and passing around lynxactioncodes are
  *  generally of type int, the types LYKeymap_t and LYKeymapCodes
  *  are currently only used for the definitions.  That could change. - kw
+ *
+ *  The values in this enum are indexed against the command names in the
+ *  'revmap[]' array in LYKeymap.c
  */
-/* The order of this enum must match the 'revmap[]' array in LYKeymap.c */
 typedef enum {
     LYK_UNKNOWN=0
+  , LYK_COMMAND
   , LYK_1
   , LYK_2
   , LYK_3
@@ -243,5 +246,16 @@ typedef enum {
 #endif
 } LYKeymapCode;
 
+/*
+ * Symbol table for internal commands.
+ */
+typedef struct {
+	LYKeymapCode code;
+	CONST char *name;
+	CONST char *doc;
+} Kcmd;
+
+extern Kcmd * LYKeycodeToKcmd PARAMS((LYKeymapCode code));
+extern Kcmd * LYStringToKcmd PARAMS((CONST char * name));
 
 #endif /* LYKEYMAP_H */

@@ -1,28 +1,46 @@
-REM Windows/Dos batch makefile for MingW32 and lynx.exe
-REM Remember to precede this by "command /E:32000" and to set the
-REM MingW32 paths
-REM Usage: makelynx [all|src|link]
-REM Default option: all
-REM Specifying "src" causes the libwww code to be skipped.
-REM Specifying "link" causes the batch file to skip to the final
-REM linking phase.
-REM Note that you have to edit i386-mingw32\include\stdlib.h to put
-REM an "#ifndef WIN_EX" around the declaration for `sleep', or the
-REM compile won't work.  There is also an "#ifndef PDCURSES" around
-REM the declaration for `beep' for the same reason.  To change the
-REM console library from libslang to libpdcurses, uncomment the
-REM `SET LIBRARY' line below.
+@echo Windows/Dos batch makefile for MingW32 and lynx.exe
+@echo Remember to precede this by "command /E:8192" and to set the
+@echo MingW32 C_INCLUDE_PATH and %C_INCLUDE_PATH%..\..\bin paths
+@echo
+@echo Usage: makelynx [all|src|link]
+@echo Default option: all
+@echo Specifying "src" causes the libwww code to be skipped.
+@echo Specifying "link" causes the batch file to skip to the final
+@echo linking phase.
+@echo
+PAUSE
+@echo Note that you have to edit i386-mingw32\include\stdlib.h to put
+@echo an "#ifndef WIN_EX" around the declaration for `sleep', or the
+@echo compile won't work.  There is also an "#ifndef PDCURSES" around
+@echo the declaration for `beep' for the same reason.  To change the
+@echo console library from libslang to libpdcurses, uncomment the
+@echo `SET LIBRARY' line below.
 
-REM Taken from the MSC makefile:
+PAUSE
 
-REM PUT THIS IN htutils.h:  LY_MAXPATH=1024
 REM SET LIBRARY=PDCURSES
 
+set CC=gcc
+
+echo /* Generated lynx_cfg.h file in the lynx directory: */ > lynx_cfg.h
+echo. >> lynx_cfg.h
+echo #define _WIN_CC		 1 >> lynx_cfg.h
+echo #define USE_ALT_BLAT_MAILER 1 >> lynx_cfg.h
+echo #define USE_BLAT_MAILER	 1 >> lynx_cfg.h
+echo #define ANSI_VARARGS	 1 >> lynx_cfg.h
+echo #define HAVE_GETCWD	 1 >> lynx_cfg.h
+echo #define LY_MAXPATH       1024 >> lynx_cfg.h
+rem echo #define USE_SCROLLBAR	 1 >> lynx_cfg.h
+
 SET DEFINES=-DCJK_EX
+SET DEFINES=%DEFINES% -DHAVE_CONFIG_H
+SET DEFINES=%DEFINES% -DNO_CONFIG_INFO
 SET DEFINES=%DEFINES% -DSH_EX
 SET DEFINES=%DEFINES% -DWIN_EX
-SET DEFINES=%DEFINES% -D_WIN_CC
 SET DEFINES=%DEFINES% -D_WINDOWS
+SET DEFINES=%DEFINES% -DUSE_EXTERNALS
+SET DEFINES=%DEFINES% -DEXP_JUSTIFY_ELTS
+SET DEFINES=%DEFINES% -DDIRED_SUPPORT
 SET DEFINES=%DEFINES% -DDOSPATH
 SET DEFINES=%DEFINES% -DEXP_ALT_BINDINGS
 SET DEFINES=%DEFINES% -DEXP_PERSISTENT_COOKIES
@@ -51,8 +69,6 @@ SET DEFINES=%DEFINES% -DCOLOR_CURSES
 SET DEFINES=%DEFINES% -DPDCURSES
 SET DEFINES=%DEFINES% -DUSE_MULTIBYTE_CURSES
 :endif1
-SET DEFINES=%DEFINES% -DUSE_EXTERNALS
-SET DEFINES=%DEFINES% -DUSE_ALT_BLAT_MAILER
 
 if not "%1" == "src" goto else
 	cd src
@@ -65,9 +81,11 @@ if not "%1" == "link" goto endif
 
 SET INCLUDES=-I. -I..\..\.. -I..\..\..\src
 
-SET CFLAGS=-O %INCLUDES% %DEFINES%
-SET COMPILE_CMD=gcc -c %CFLAGS%
+REM Your compiler may not support -mpentium.
+REM In that case, replace -mpentium with -m486 or nothing.
 
+set CFLAGS=-O3 -mpentium %INCLUDES% %DEFINES%
+set COMPILE_CMD=%CC% -c %CFLAGS%
 
 cd WWW\Library\Implementation
 erase *.o
@@ -151,12 +169,12 @@ cd ..\..\..\src\chrtrans
 erase *.o
 
 SET INCLUDES=-I. -I.. -I..\.. -I..\..\WWW\Library\Implementation
-SET CFLAGS=-O %INCLUDES% %DEFINES%
-SET COMPILE_CMD=gcc -c %CFLAGS%
+SET CFLAGS=-O3 -mpentium %INCLUDES% %DEFINES%
+SET COMPILE_CMD=%CC% -c %CFLAGS%
 
 %COMPILE_CMD% makeuctb.c
 if errorlevel 1 PAUSE
-gcc -o makeuctb.exe makeuctb.o
+%CC% -o makeuctb.exe makeuctb.o
 if errorlevel 1 PAUSE
 
 call makew32.bat
@@ -165,8 +183,8 @@ cd ..\
 
 :src
 SET INCLUDES=-I. -I.. -I.\chrtrans -I..\WWW\Library\Implementation
-SET CFLAGS=-O %INCLUDES% %DEFINES%
-SET COMPILE_CMD=gcc -c %CFLAGS%
+SET CFLAGS=-O3 -mpentium %INCLUDES% %DEFINES%
+SET COMPILE_CMD=%CC% -c %CFLAGS%
 SET PATH=..\WWW\Library\Implementation;%PATH%
 erase *.o
 
@@ -283,6 +301,5 @@ goto endif2
 SET LIBS=-L..\WWW\Library\Implementation -lwww -lslang -lwsock32 -luser32
 :endif2
 
-gcc -o lynx *.o %LIBS%
-strip lynx.exe
+%CC% -s -o lynx *.o %LIBS%
 if exist lynx.exe ECHO "Welcome to lynx!"

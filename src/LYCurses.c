@@ -198,48 +198,44 @@ PRIVATE void sl_suspend ARGS1(
 #endif /* SIGSTOP */
     return;
 }
+#endif /* USE_SLANG */
 
-#else  /* Not slang: */
-
-#ifdef VMS
 /*
-**  This function boxes windows with graphic characters for
-**  VMS curses.  Pass it the window, it's height, and it's
-**  width. - FM
-*/
-PUBLIC void VMSbox ARGS3(
-	WINDOW *,	win,
-	int,		height,
-	int,		width)
-{
-    int i;
-
-    wmove(win, 0, 0);
-    waddstr(win, "\033)0\016l");
-    for (i = 1; i < width; i++)
-	waddch(win, 'q');
-    waddch(win, 'k');
-    for (i = 1; i < height-1; i++) {
-	wmove(win, i, 0);
-	waddch(win, 'x');
-	wmove(win, i, width-1);
-	waddch(win, 'x');
-    }
-    wmove(win, i, 0);
-    waddch(win, 'm');
-    for (i = 1; i < width; i++)
-	waddch(win, 'q');
-    waddstr(win, "j\017");
-}
-#else
-/*
-**  This function boxes windows for non-VMS (n)curses.
-**  Pass it the window. - FM
+**  This function boxes windows for (n)curses.
 */
 PUBLIC void LYbox ARGS2(
 	WINDOW *,	win,
 	BOOLEAN,	formfield GCC_UNUSED)
 {
+#ifdef USE_SLANG
+    SLsmg_draw_box(win->top_y, win->left_x, win->height, win->width + 4);
+#else
+#ifdef VMS
+    /*
+     * This should work for VAX-C and DEC-C, since they both have the same
+     * win._max_y and win._max_x members -TD
+     *
+     * (originally VMSbox by FM)
+     */
+    int i;
+
+    wmove(win, 0, 0);
+    waddstr(win, "\033)0\016l");
+    for (i = 1; i < win->_max_x; i++)
+	waddch(win, 'q');
+    waddch(win, 'k');
+    for (i = 1; i < win->_max_y-1; i++) {
+	wmove(win, i, 0);
+	waddch(win, 'x');
+	wmove(win, i, win->_max_x-1);
+	waddch(win, 'x');
+    }
+    wmove(win, i, 0);
+    waddch(win, 'm');
+    for (i = 1; i < win->_max_x; i++)
+	waddch(win, 'q');
+    waddstr(win, "j\017");
+#else /* !VMS */
     /*
      *	If the terminal is in UTF-8 mode, it probably cannot understand
      *	box drawing characters as (n)curses handles them.  (This may also
@@ -276,9 +272,10 @@ PUBLIC void LYbox ARGS2(
     if (formfield)
 	wcurses_css(win, "frame", ABS_OFF);
 #endif
-}
 #endif /* VMS */
+    wrefresh(win);
 #endif /* USE_SLANG */
+}
 
 #if defined(USE_COLOR_STYLE)
 /* Ok, explanation of the USE_COLOR_STYLE styles.  The basic styles (ie non
@@ -336,109 +333,108 @@ PUBLIC void curses_w_style ARGS3(
 {
 #if OMIT_SCN_KEEPING
 # define SPECIAL_STYLE /*(CSHASHSIZE+1) */ 88888
-  /* if TRACEs are not compiled in, this macro is redundant - we neend't valid
-    'ds' to stack off. */
+/* if TRACEs are not compiled in, this macro is redundant - we needn't valid
+'ds' to stack off. */
 #endif
 
-	int YP,XP;
+    int YP,XP;
 #if !OMIT_SCN_KEEPING
-	bucket* ds= (style == NOSTYLE ? &nostyle_bucket : &hashStyles[style]);
+    bucket* ds= (style == NOSTYLE ? &nostyle_bucket : &hashStyles[style]);
 #else
-	bucket* ds= (style == NOSTYLE ?	     &nostyle_bucket :
-		(style== SPECIAL_STYLE ? &special_bucket :&hashStyles[style]) );
+    bucket* ds= (style == NOSTYLE ?	     &nostyle_bucket :
+	    (style== SPECIAL_STYLE ? &special_bucket :&hashStyles[style]) );
 #endif
 
 
-	if (!ds->name)
-	{
-		CTRACE((tfp, "CSS.CS:Style %d not configured\n",style));
+    if (!ds->name) {
+	CTRACE((tfp, "CSS.CS:Style %d not configured\n",style));
 #if !OMIT_SCN_KEEPING
-		return;
+	return;
 #endif
+    }
+
+    CTRACE((tfp, "CSS.CS:<%s%s> (%d)\n",(dir?"":"/"),ds->name,ds->code));
+
+    getyx (win, YP, XP);
+
+    if (style == s_normal && dir) {
+	wattrset(win,A_NORMAL);
+	if (win==stdscr) cached_styles[YP][XP]=s_normal;
+	return;
+    }
+
+    switch (dir)
+    {
+	/* ABS_OFF is the same as STACK_OFF for the moment */
+    case STACK_OFF:
+	if (last_colorattr_ptr) {
+	    int last_attr = last_styles[--last_colorattr_ptr];
+	    LYAttrset(win,last_attr,last_attr);
 	}
+	else
+	    LYAttrset(win,A_NORMAL,-1);
+	break;
 
-	CTRACE((tfp, "CSS.CS:<%s%s> (%d)\n",(dir?"":"/"),ds->name,ds->code));
-
-	getyx (win, YP, XP);
-
-	if (style == s_normal && dir)
-	{
-		wattrset(win,A_NORMAL);
-		if (win==stdscr) cached_styles[YP][XP]=s_normal;
-		return;
+    case STACK_ON: /* remember the current attributes */
+	if (last_colorattr_ptr > 127) {
+	    CTRACE((tfp,"........... %s (0x%x) %s\r\n",
+			"attribute cache FULL, dropping last",
+			last_styles[last_colorattr_ptr],
+			"in LynxChangeStyle(curses_w_style)"));
+	    last_colorattr_ptr--;
 	}
-
-	switch (dir)
-	{
-		/* ABS_OFF is the same as STACK_OFF for the moment */
-	case STACK_OFF:
-		if (last_colorattr_ptr) {
-		    int last_attr = last_styles[--last_colorattr_ptr];
-		    LYAttrset(win,last_attr,last_attr);
-		}
-		else
-			LYAttrset(win,A_NORMAL,-1);
-		return;
-
-	case STACK_ON: /* remember the current attributes */
-		if (last_colorattr_ptr > 127) {
-		    CTRACE((tfp,"........... %s (0x%x) %s\r\n",
-				"attribute cache FULL, dropping last",
-				last_styles[last_colorattr_ptr],
-				"in LynxChangeStyle(curses_w_style)"));
-		    last_colorattr_ptr--;
-		}
-		last_styles[last_colorattr_ptr++] = getattrs(stdscr);
-		/* don't cache style changes for active links */
+	last_styles[last_colorattr_ptr++] = getattrs(stdscr);
+	/* don't cache style changes for active links */
 #if OMIT_SCN_KEEPING
-		/* since we don't compute the hcode to stack off in HTML.c, we
-		 * don't know whether this style is configured.  So, we
-		 * shouldn't simply return on stacking on on unconfigured
-		 * styles, we should push curr attrs on stack.  -HV
-		 */
-		if (!ds->name) return;
+	/* since we don't compute the hcode to stack off in HTML.c, we
+	 * don't know whether this style is configured.  So, we
+	 * shouldn't simply return on stacking on unconfigured
+	 * styles, we should push curr attrs on stack.  -HV
+	 */
+	if (!ds->name) break;
 #endif
-		if (style != s_alink)
-		{
-			CTRACE((tfp, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP));
-			if (win==stdscr) cached_styles[YP][XP]=style;
-		}
-		LYAttrset(win, ds->color, ds->mono);
-		return;
-
-	case ABS_ON: /* change without remembering the previous style */
-		/* don't cache style changes for active links */
-		if (style != s_alink)
-		{
-			CTRACE((tfp, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP));
-			if (win==stdscr) cached_styles[YP][XP]=style;
-		}
-		LYAttrset(win, ds->color, ds->mono);
-		return;
+	if (style != s_alink) {
+	    CTRACE((tfp, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP));
+	    if (win == stdscr) cached_styles[YP][XP] = style;
 	}
+	LYAttrset(win, ds->color, ds->mono);
+	break;
+
+    case ABS_ON: /* change without remembering the previous style */
+	    /* don't cache style changes for active links */
+	if (style != s_alink) {
+	    CTRACE((tfp, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP));
+	    if (win == stdscr) cached_styles[YP][XP] = style;
+	}
+	LYAttrset(win, ds->color, ds->mono);
+	break;
+    }
 }
 
 /*
  * wrapper function to set on-screen styles - RP
  */
-PUBLIC void wcurses_css ARGS3(WINDOW *,win,char*,name,int,dir)
+PUBLIC void wcurses_css ARGS3(
+    WINDOW *,	win,
+    char*,	name,
+    int,	dir)
 {
-	int try_again=1;
-	while (try_again)
-	{
-		int tmpHash=hash_code(name);
-		CTRACE((tfp, "CSSTRIM:trying to set [%s] style - ", name));
-		if (tmpHash==NOSTYLE) {
-			char *class=strrchr(name, '.');
-			CTRACE((tfp, "undefined, trimming at %p\n", class));
-			if (class)	*class='\0';
-			else		try_again=0;
-		} else {
-			CTRACE((tfp, "ok (%d)\n", hash_code(name)));
-			curses_w_style(win, hash_code(name), dir);
-			try_again=0;
-		}
+    int try_again = 1;
+
+    while (try_again) {
+	int tmpHash = hash_code(name);
+	CTRACE((tfp, "CSSTRIM:trying to set [%s] style - ", name));
+	if (tmpHash == NOSTYLE) {
+	    char *class = strrchr(name, '.');
+	    CTRACE((tfp, "undefined, trimming at %p\n", class));
+	    if (class)	*class = '\0';
+	    else	try_again = 0;
+	} else {
+	    CTRACE((tfp, "ok (%d)\n", hash_code(name)));
+	    curses_w_style(win, hash_code(name), dir);
+	    try_again = 0;
 	}
+    }
 }
 
 PUBLIC void curses_css ARGS2(char *,name,int,dir)
@@ -1322,6 +1318,52 @@ PUBLIC void LYsubAttr ARGS1(
 #endif /* FANCY_CURSES */
 #endif /* VMS */
 
+/* Use this rather than the 'wprintw()' function to write a blank-padded
+ * string to the given window, since someone's asserted that printw doesn't
+ * handle 8-bit characters unlike addstr (though more info would be useful).
+ *
+ * We're blank-filling so that with SVr4 curses, it'll show the background
+ * color to a uniform width in the popup-menu.
+ */
+#ifndef USE_SLANG
+PUBLIC void LYpaddstr ARGS3(
+	WINDOW *,	the_window,
+	int,		width,
+	CONST char *,	the_string)
+{
+    width -= strlen(the_string);
+    waddstr(the_window, the_string);
+    while (width-- > 0)
+	waddstr(the_window, " ");
+}
+#endif
+
+PUBLIC WINDOW *LYstartPopup ARGS4(
+    int,	top_y,
+    int,	left_x,
+    int,	height,
+    int,	width)
+{
+    WINDOW *form_window = 0;
+#ifdef USE_SLANG
+    static WINDOW fake_window;
+    SLsmg_fill_region(top_y, left_x - 1, height, width + 4, ' ');
+    form_window = &fake_window;
+    form_window->top_y  = top_y;
+    form_window->left_x = left_x;
+    form_window->height = height;
+    form_window->width  = width;
+#else
+    if (!(form_window = newwin(height, width + 4, top_y, left_x - 1)) &&
+	!(form_window = newwin(height, 0, top_y, 0))) {
+	HTAlert(POPUP_FAILED);
+    } else {
+	LYsubwindow(form_window);
+    }
+#endif /* USE_SLANG */
+    return form_window;
+}
+
 PUBLIC void LYstartTargetEmphasis NOARGS
 {
 #ifdef USE_COLOR_STYLE
@@ -2039,4 +2081,33 @@ PUBLIC void lynx_stop_all_colors NOARGS
    stop_underline ();
    stop_reverse ();
    stop_bold ();
+}
+
+/*
+ * If LYShowCursor is ON, move the cursor to the left of the current option, so
+ * that blind users, who are most likely to have LYShowCursor ON, will have
+ * it's string spoken or passed to the braille interface as each option is made
+ * current.  Otherwise, move it to the bottom, right column of the screen, to
+ * "hide" the cursor as for the main document, and let sighted users rely on
+ * the current option's highlighting or color without the distraction of a
+ * blinking cursor in the window.  - FM
+ */
+PUBLIC void LYstowCursor ARGS3(
+    WINDOW *,	win,
+    int,	row,
+    int,	col)
+{
+#ifdef USE_SLANG
+    if (LYShowCursor)
+	SLsmg_gotorc(win->top_y + row, win->left_x + col);
+    else
+	LYHideCursor();
+    SLsmg_refresh();
+#else
+    if (LYShowCursor)
+	wmove(win, row, col);
+    else
+	LYHideCursor();
+    wrefresh(win);
+#endif /* USE_SLANG  */
 }

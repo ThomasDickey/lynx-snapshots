@@ -9,7 +9,7 @@ $!    object library does not already exist.
 $!=========================================================================
 $!   NOTE:  Set SLANGINC to the location of your slang.h and slcurses.h,
 $!   ====   and SLANGLIB to the location of your slang.olb (can be relative
-$!          to the lynx2-8.src subdirectory of this distribution):
+$!          to the [.src] subdirectory of this distribution):
 $!
 $! SLANGINC = "[-.slang.src]"
 $! SLANGLIB = "[-.slang.src]"

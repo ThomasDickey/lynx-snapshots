@@ -31,14 +31,13 @@ extern int hash_code PARAMS((char* string));
 extern bucket special_bucket;/*it's used when OMIT_SCN_KEEPING is 1 in HTML.c
     and LYCurses.c. */
 extern bucket nostyle_bucket;/*initialized properly - to be used in CTRACE when
-            NOSTYLE is passed as 'style' to curses_w_style */    
+            NOSTYLE is passed as 'style' to curses_w_style */
 
 extern int hash_code_lowercase_on_fly PARAMS((char* string));
 extern int hash_code_aggregate_char PARAMS((char c,int hash));
 extern int hash_code_aggregate_lower_str  PARAMS((char* c,int hash_was));
 
 extern int	s_alink, s_a, s_status,
-		s_label, s_value, s_high,
 		s_normal, s_alert, s_title,
 #ifdef USE_SCROLLBAR
 		s_sb_bar, s_sb_bg, s_sb_aa, s_sb_naa,

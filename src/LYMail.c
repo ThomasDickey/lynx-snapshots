@@ -54,16 +54,15 @@ PRIVATE char *blat_cmd(
 
 #ifdef USE_ALT_BLAT_MAILER
 
-    HTSprintf0(&b_cmd, "%s %s -t %s -s \"%s\" %s %s %s %s %s",
+    HTSprintf0(&b_cmd, "%s %s -t \"%s\" -s \"%s\" %s%s%s%s",
 		mail_cmd,
 		filename,
 		address,
 		subject,
 		system_mail_flags,
-		ccaddr? "-c" : "",
+		ccaddr? " -c \"" : "",
 		ccaddr? ccaddr : "",
-		mail_addr? (mail_addr[0]? "-f" : "") : "",
-		mail_addr? (mail_addr[0]? mail_addr : "") : "");
+		ccaddr? "\"" : "");
 
 #else /* !USE_ALT_BLAT_MAILER */
 
@@ -1682,7 +1681,7 @@ PUBLIC void reply_by_mail ARGS4(
 	    if (HTConfirm(is_preparsed
 	    	? INC_PREPARSED_MSG_PROMPT
 		: INC_ORIG_MSG_PROMPT) == YES) {
-		print_wwwfile_to_fd(fd, !is_preparsed);
+		print_wwwfile_to_fd(fd, (BOOLEAN)!is_preparsed);
 	    }
 	}
 	LYCloseTempFP(fd);	/* Close the tmpfile. */

@@ -14,6 +14,7 @@
 #include <HTAlert.h>
 #include <HTString.h>
 #include <LYCharUtils.h>
+#include <HTList.h>
 #include <HTParse.h>
 #ifdef USE_MOUSE
 #include <LYMainLoop.h>
@@ -46,13 +47,7 @@ extern BOOL HTPassHighCtrlRaw;
 /*Allowing the user to press tab when entering URL to get the closest
   match in the closet*/
 #define LYClosetSize 100
-static char* LYCloset[LYClosetSize]; /* Closet with LYClosetSize shelves */
-static int LYClosetTop = 0;		/*Points to the next empty shelf */
-
-PRIVATE char *LYFindInCloset PARAMS((
-	char*		base));
-PRIVATE void LYAddToCloset PARAMS((
-	char*		str));
+static HTList *URL_edit_history;
 
 /* If you want to add mouse support for some new platform, it's fairly
 ** simple to do.  Once you've determined the X and Y coordinates of
@@ -257,6 +252,60 @@ PUBLIC int fancy_mouse ARGS3(
 /************************************************************************/
 #endif  /* USE_MOUSE */
     return cmd;
+}
+
+/*
+ * Remove the oldest item in the closet
+ */
+PRIVATE void LYRemoveFromCloset NOARGS
+{
+    char *data = HTList_removeFirstObject(URL_edit_history);
+
+    if (data != 0)
+	FREE(data);
+}
+
+PUBLIC void LYOpenCloset NOARGS
+{
+    URL_edit_history = HTList_new();
+}
+
+PUBLIC void LYCloseCloset NOARGS
+{
+    while (!HTList_isEmpty(URL_edit_history) ) {
+	LYRemoveFromCloset();
+    }
+    HTList_delete(URL_edit_history);	/* should already be empty */
+}
+
+/*
+ * Strategy:  We begin at the top and search downwards.  We return the first
+ * match, i.e., the newest since we search from the top.  This should be made
+ * more intelligent, but works for now.
+ */
+PRIVATE char * LYFindInCloset ARGS1(char*, base)
+{
+    HTList *list = URL_edit_history;
+    char *data;
+    unsigned len = strlen(base);
+
+    while (!HTList_isEmpty(list)) {
+	data = HTList_nextObject(list);
+	if (!strncmp(base, data, len))
+	    return(data);
+    }
+
+    return(0);
+}
+
+PRIVATE void LYAddToCloset ARGS1(char*, str)
+{
+    char *data = NULL;
+
+    StrAllocCopy(data, str);
+    HTList_addObject(URL_edit_history, data);
+    while (HTList_count(URL_edit_history) > LYClosetSize)
+	LYRemoveFromCloset();
 }
 
 
@@ -645,7 +694,6 @@ PUBLIC int LYmbcsstrlen ARGS3(
 #endif /* HAVE_KEYPAD */
 #endif /* !defined(GetChar) */
 
-#if defined(NCURSES) || defined(PDCURSES)
 /*
  * Workaround a bug in ncurses order-of-refresh by setting a pointer to
  * the topmost window that should be displayed.
@@ -653,14 +701,24 @@ PUBLIC int LYmbcsstrlen ARGS3(
  * FIXME: the associated call on 'keypad()' is not needed for Unix, but
  * something in the OS/2 EMX port requires it.
  */
+#ifndef USE_SLANG
 PRIVATE WINDOW *my_subwindow;
 
 PUBLIC void LYsubwindow ARGS1(WINDOW *, param)
 {
-#if !defined(WIN_EX)
-    if ((my_subwindow = param) != 0)
+    if ((my_subwindow = param) != 0) {
+#if defined(NCURSES) || defined(PDCURSES)
 	keypad(param, TRUE);
+#if defined(HAVE_GETBKGD) /* not defined in ncurses 1.8.7 */
+	wbkgd(my_subwindow, getbkgd(stdscr));
+	wbkgdset(my_subwindow, getbkgd(stdscr));
 #endif
+#endif
+	scrollok(my_subwindow, TRUE);
+    } else {
+	touchwin(stdscr);
+	delwin(my_subwindow);
+    }
 }
 #endif
 
@@ -3218,20 +3276,291 @@ PUBLIC void LYRefreshEdit ARGS1(
     refresh();
 }
 
+PRIVATE void reinsertEdit ARGS2(
+    EditFieldData *,	edit,
+    char *,		result)
+{
+    if (result != 0) {
+	LYEdit1(edit, '\0', LYE_ERASE, FALSE);
+	while (*result != '\0') {
+	    LYLineEdit(edit, (int)(*result), FALSE);
+	    result++;
+	}
+    }
+}
+
+PRIVATE HTList *whichRecall ARGS1(
+    RecallType,		recall)
+{
+    switch (recall) {
+    case RECALL_CMD:
+	return LYcommandList();
+    default:
+	return URL_edit_history;
+    }
+}
+
+PRIVATE int caselessCmpList ARGS2(
+    CONST void *,	a,
+    CONST void *,	b)
+{
+    return strcasecomp(*(CONST char *CONST *)a, *(CONST char *CONST *)b);
+}
+
+PRIVATE int normalCmpList ARGS2(
+    CONST void *,	a,
+    CONST void *,	b)
+{
+    return strcmp(*(CONST char *CONST *)a, *(CONST char *CONST *)b);
+}
+
+PRIVATE char **sortedList ARGS2(
+    HTList *,	list,
+    BOOL,	ignorecase)
+{
+    unsigned count = HTList_count(list);
+    unsigned n = 0;
+    char **result = calloc(count + 1, sizeof(char *));
+
+    if (result == 0) 
+	outofmem(__FILE__, "sortedList");
+
+    while (!HTList_isEmpty(list))
+	result[n++] = HTList_nextObject(list);
+    if (count > 1) {
+	qsort((char *)result, count, sizeof(*result),
+	      ignorecase ? caselessCmpList : normalCmpList);
+    }
+
+    return result;
+}
+
+PRIVATE int lengthOfList ARGS1(
+    char **,	list)
+{
+    int result = 0;
+
+    while (*list++ != 0)
+	result++;
+    return result;
+}
+
+PRIVATE int widestInList ARGS1(
+    char **,	list)
+{
+    int result = 0;
+    int check;
+
+    while (*list != 0) {
+	check = strlen(*list++);
+	if (check > result)
+	    result = check;
+    }
+    return result;
+}
+
+PRIVATE void draw_option ARGS5(
+	WINDOW *,	win,
+	int,		entry,
+	int,		width,
+	BOOL,		reversed,
+	char *,		value)
+{
+#ifdef USE_SLANG
+    if (reversed)
+	SLsmg_gotorc((win->top_y + entry), win->left_x + 2);
+    SLsmg_gotorc(win->top_y + entry, win->left_x + 2);
+    SLsmg_write_nstring(value, win->width);
+    if (reversed)
+	SLsmg_set_color(0);
+#else
+    wmove(win, entry, 2);
+    if (reversed)
+	wstart_reverse(win);
+    LYpaddstr(win, width, value);
+    if (reversed)
+	wstop_reverse(win);
+#endif /* USE_SLANG */
+}
+
+PRIVATE int LYgetMenuKeycode ARGS3(
+    WINDOW *,	win,
+    int,	row,
+    int *,	cur_selectionp)
+{
+    int cmd;
+    int c = LYgetch_choice();
+
+    if (c == 7) {		/* Control-C or Control-G */
+	cmd = LYK_QUIT;
+#ifndef USE_SLANG
+    } else if (c == MOUSE_KEY) {
+	cmd = fancy_mouse(win, row, cur_selectionp);
+#endif
+    } else {
+	cmd = LKC_TO_LAC(keymap,c);
+    }
+#ifdef VMS
+    if (HadVMSInterrupt) {
+	HadVMSInterrupt = FALSE;
+	cmd = LYK_QUIT;
+    }
+#endif /* VMS */
+    return cmd;
+}
+
+PRIVATE void completeFromPopup ARGS2(
+    EditFieldData *,	edit,
+    char **,		data)
+{
+    WINDOW *win;
+    int top;
+    int lx = 2;
+    int width = widestInList(data);
+    int num_options = lengthOfList(data);
+    int height = num_options + 2;
+    int i, row, length;
+    int cmd = LYK_UNKNOWN;
+    int window_offset = 0;
+    int cur_selection = 0;
+    int old_selection = -1;
+    int old_y, old_x;
+
+#ifdef USE_SLANG
+    old_y = SLsmg_get_row();
+    old_x = SLsmg_get_column();
+#else
+    getyx(stdscr, old_y, old_x);
+#endif
+
+    if (height > LYlines - 2)
+    	height = LYlines - 2;
+    length = height - 2;
+    top = LYlines - height - 1;
+
+    while (cur_selection < num_options
+     && strcasecomp(data[cur_selection], edit->buffer) < 0)
+	cur_selection++;
+    if (cur_selection + 1 - window_offset >= length) {
+	window_offset = cur_selection + 1 - length;
+    }
+
+    /* construct a popup window */
+    if ((win = LYstartPopup(top, lx, height, width)) != 0) {
+	/* handle events in the popup window */
+redraw:
+	LYbox(win, FALSE);
+	for (i = 0; i < num_options; i++) {
+	    row = ((i + 1) - window_offset);
+	    if (row >= 1 && row <= length)
+		draw_option(win, row, width, FALSE, data[i]);
+	}
+	old_selection = -1;
+
+	while (cmd != LYK_ACTIVATE) {
+
+	    if (old_selection >= 0
+	     && old_selection != cur_selection) {
+		row = ((old_selection + 1) - window_offset);
+		draw_option(win, row, width, FALSE, data[old_selection]);
+	    }
+	    old_selection = cur_selection;
+
+	    row = ((cur_selection + 1) - window_offset);
+	    draw_option(win, row, width, TRUE, data[cur_selection]);
+	    LYstowCursor(win, row, 1);
+	    cmd = LYgetMenuKeycode(win, row, &cur_selection);
+
+	    /* FIXME: this whole switch statement should be integrated with
+	     * the redundant logic in LYForms.c and LYOptions.c (there's no
+	     * point in having multiple copies of code that scroll through
+	     * a popup menu).
+	     */
+	    switch (cmd) {
+	    case -1:
+		goto redraw;
+
+	    case LYK_HOME:
+		cur_selection = 0;
+		if (window_offset > 0) {
+		    window_offset = 0;
+		    goto redraw;
+		}
+		break;
+
+	    case LYK_END:
+		cur_selection = num_options - 1;
+		if (window_offset != (num_options - length)) {
+		    window_offset = (num_options - length);
+		    goto redraw;
+		}
+		break;
+
+	    case LYK_PREV_LINK:
+	    case LYK_LPOS_PREV_LINK:
+	    case LYK_FASTBACKW_LINK:
+	    case LYK_UP_LINK:
+		if (cur_selection > 0)
+		    cur_selection--;
+
+		/*
+		 *  Scroll the window up if necessary.
+		 */
+		if ((cur_selection - window_offset) < 0) {
+		    window_offset--;
+		    goto redraw;
+		}
+		break;
+
+	    case LYK_NEXT_LINK:
+	    case LYK_LPOS_NEXT_LINK:
+	    case LYK_FASTFORW_LINK:
+	    case LYK_DOWN_LINK:
+		if (cur_selection < num_options - 1)
+		    cur_selection++;
+		/*
+		 *  Scroll the window down if necessary
+		 */
+		if ((cur_selection - window_offset) >= length) {
+		    window_offset++;
+		    goto redraw;
+		}
+		break;
+
+	    case LYK_QUIT:
+	    case LYK_ABORT:
+	    case LYK_PREV_DOC:
+		cur_selection = -1;
+		cmd = LYK_ACTIVATE; /* to exit */
+		break;
+	    }
+	}
+	LYstopPopup();
+    }
+    if (cur_selection >= 0)
+	reinsertEdit(edit, data[cur_selection]);
+
+#ifdef USE_SLANG
+    SLsmg_gotorc(old_y, old_x);
+#else
+    wmove(stdscr, old_y, old_x);
+#endif
+}
+
 #define CurModif MyEdit.current_modifiers
 
 PUBLIC int LYgetstr ARGS4(
 	char *,		inputline,
 	int,		hidden,
 	size_t,		bufsize,
-	int,		recall)
+	RecallType,	recall)
 {
     int x, y, MaxStringSize;
     int ch;
-    int xlec;
+    int xlec = -2;
+    int last_xlec = -1;
     int last_xlkc = -1;
     EditFieldData MyEdit;
-    char *res;
 #ifdef SUPPORT_MULTIBYTE_EDIT
     BOOL refresh_mb = TRUE;
 #endif /* SUPPORT_MULTIBYTE_EDIT */
@@ -3278,7 +3607,7 @@ again:
 	    ch = 7;
 	}
 
-	if (recall && (ch == UPARROW || ch == DNARROW)) {
+	if (recall != NORECALL && (ch == UPARROW || ch == DNARROW)) {
 	    LYstrncpy(inputline, MyEdit.buffer, (int)bufsize);
 	    LYAddToCloset(MyEdit.buffer);
 	    return(ch);
@@ -3294,6 +3623,7 @@ again:
 	if (LKC_TO_LAC(keymap,ch) == LYK_REFRESH)
 	    goto again;
 #endif
+	last_xlec = xlec;
 	xlec = EditBinding(ch);
 	if ((xlec & LYE_DF) && !(xlec & LYE_FORM_LAC)) {
 	    last_xlkc = ch;
@@ -3315,18 +3645,15 @@ again:
 	    CurModif |= LKC_MOD2;
 	    break;
 	case LYE_TAB:
-	    ch = '\t';
-	    /* This used to fall through to the next case before
-	     tab completion was introduced */
-	    res = LYFindInCloset(MyEdit.buffer);
-	    if (res != 0) {
-		LYEdit1(&MyEdit, '\0', LYE_ERASE, FALSE);
-		while (*res != '\0') {
-		    LYLineEdit(&MyEdit, (int)(*res), FALSE);
-		    res++;
+	    if (xlec == last_xlec) {
+		HTList *list = whichRecall(recall);
+		if (!HTList_isEmpty(list)) {
+		    char **data = sortedList(list, recall == RECALL_CMD);
+		    completeFromPopup(&MyEdit, data);
+		    FREE(data);
 		}
 	    } else {
-		ch = '\0';
+		reinsertEdit(&MyEdit, LYFindInCloset(MyEdit.buffer));
 	    }
 	    break;
 
@@ -3552,58 +3879,6 @@ PUBLIC char * LYno_attr_char_case_strstr ARGS2(
     } /* end for */
 
     return(NULL);
-}
-
-PUBLIC void LYOpenCloset NOARGS
-{
-    /* We initialize the list-looka-like, i.e., the Closet */
-    int i = 0;
-    while(i < LYClosetSize){
-	LYCloset[i] = NULL;
-	i = i + 1;
-    }
-    LYClosetTop = 0;
-}
-
-PUBLIC void LYCloseCloset NOARGS
-{
-    int i = 0;
-
-    /* Clean up the list-looka-like, i.e., the Closet */
-    while (i < LYClosetSize){
-	FREE(LYCloset[i]);
-	i = i + 1;
-    }
-}
-
-/*
- * Strategy:  We begin at the top and search downwards.  We return the first
- * match, i.e., the newest since we search from the top.  This should be made
- * more intelligent, but works for now.
- */
-PRIVATE char * LYFindInCloset ARGS1(char*, base)
-{
-    int shelf;
-    unsigned len = strlen(base);
-
-    shelf = (LYClosetTop - 1 + LYClosetSize) % LYClosetSize;
-
-    while (LYCloset[shelf] != NULL){
-	if (!strncmp(base, LYCloset[shelf], len)) {
-	    return(LYCloset[shelf]);
-	}
-	shelf = (shelf - 1 + LYClosetSize) % LYClosetSize;
-    }
-    return(0);
-}
-
-PRIVATE void LYAddToCloset ARGS1(char*, str)
-{
-    LYCloset[LYClosetTop] = NULL;
-    StrAllocCopy(LYCloset[LYClosetTop], str);
-
-    LYClosetTop = (LYClosetTop + 1) % LYClosetSize;
-    FREE(LYCloset[LYClosetTop]);
 }
 
 /*
