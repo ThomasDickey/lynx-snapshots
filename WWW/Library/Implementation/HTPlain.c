@@ -424,7 +424,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 
 	/*
 	**  If CJK mode is on, we'll assume the document matches
-	**  the user's selected character set, and if not, the
+	**  the user's display character set, and if not, the
 	**  user should toggle off raw/CJK mode to reload. - FM
 	*/
 	if (HTCJK != NOCJK) {

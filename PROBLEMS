@@ -15,6 +15,14 @@ they will be outlined in this file.
     documents will look fine.  You can reload documents to the current
     window size with CTRL-R
 
+    If the configure script dies when it discovers that gcc is broken,
+    despite the fact there is a perfectly good ANSI cc in the PATH,
+    try setting the CC environment variable to your working cc compiler
+    before running configure: e.g.
+
+      setenv CC cc   (or   set CC=cc; export CC  , depending on the shell)
+      ./configure
+
     On a Sun system, the message:
         "Alert!:  Unable to connect to remote host"
     will be displayed every time an attempt is made to access a host

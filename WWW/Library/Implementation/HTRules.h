@@ -31,10 +31,6 @@ typedef enum _HTRuleOp {
 
 #ifndef NO_RULES
 
-#ifdef SHORT_NAMES
-#define HTSearchScript	HTSearSc
-#endif /*SHORT_NAMES*/
-
 /*
 
 Server Side Script Execution

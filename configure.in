@@ -123,6 +123,7 @@ NLS_DATADIR,
 INTLDIR_MAKE=
 MSG_DIR_MAKE=
 SUB_MAKEFILE=
+CF_OUR_MESSAGES
 if test "$USE_INCLUDED_LIBINTL" = yes ; then
         if test "$nls_cv_force_use_gnu_gettext" = yes ; then
 		AC_MSG_WARN(Using included gettext anyway, since none was found)
@@ -130,7 +131,6 @@ if test "$USE_INCLUDED_LIBINTL" = yes ; then
 	else
 		INTLDIR_MAKE="#"
 	fi
-	CF_OUR_MESSAGES
 	if test $use_our_messages = no ; then
 		MSG_DIR_MAKE="#"
 		SUB_MAKEFILE=
@@ -152,7 +152,6 @@ fi
 dnl We might want to use a preinstalled message library rather than the one
 dnl which is bundled with this program.
 if test -z "$MSG_DIR_MAKE" ; then
-	CF_OUR_MESSAGES
 	if test $use_our_messages = no ; then
 		MSG_DIR_MAKE="#"
 		SUB_MAKEFILE=
@@ -760,6 +759,14 @@ if test ".$use_zlib" != ".no" ; then
 	AC_DEFINE(USE_ZLIB)
 fi
 
+AC_MSG_CHECKING(if you want to exclude FINGER code)
+CF_ARG_DISABLE(finger,
+[  --disable-finger  disable FINGER logic],
+	[use_finger=yes],
+	[use_finger=no])
+AC_MSG_RESULT($use_finger)
+test $use_finger != "no" && AC_DEFINE(DISABLE_FINGER)
+
 AC_MSG_CHECKING(if you want to exclude GOPHER code)
 CF_ARG_DISABLE(gopher,
 [  --disable-gopher  disable GOPHER logic],
@@ -768,6 +775,13 @@ CF_ARG_DISABLE(gopher,
 AC_MSG_RESULT($use_gopher)
 test $use_gopher != "no" && AC_DEFINE(DISABLE_GOPHER)
 
+AC_MSG_CHECKING(if you want to exclude NEWS code)
+CF_ARG_DISABLE(news,
+[  --disable-news  disable NEWS logic],
+      [use_news=yes],
+      [use_news=no])
+AC_MSG_RESULT($use_news)
+test $use_news != "no" && AC_DEFINE(DISABLE_NEWS)
 
 dnl --------------------------------------------------------------------------
 dnl DirEd (directory-editor) options

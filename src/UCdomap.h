@@ -41,7 +41,6 @@ struct UC_charset {
 	CONST char *MIMEname;
 	CONST char *LYNXname;
 	CONST u8* unicount;
-	int num_n256;	/* 256 for *.tbl, 0 for CJK and x-transparent (hack) */
 	CONST u16* unitable;
 	int num_uni;
 	struct unimapdesc_str replacedesc;
@@ -77,30 +76,34 @@ extern void UCInit NOARGS;
    *  from Unicode mechanism).  For now we use the MIME name that describes
    *  what is output to the terminal. - KW
    */
+static CONST struct unimapdesc_str dfont_replacedesc_Asian = {0,NULL,0,1};
+
 #define UC_CHARSET_SETUP_euc_cn UC_Charset_Setup("euc-cn","Chinese",\
-       NULL,NULL,0,(struct unimapdesc_str){0,NULL,0,1},\
+       NULL,NULL,0,dfont_replacedesc_Asian,\
        128,UCT_ENC_CJK,0)
 #define UC_CHARSET_SETUP_euc_jp UC_Charset_Setup("euc-jp","Japanese (EUC-JP)",\
-       NULL,NULL,0,(struct unimapdesc_str){0,NULL,0,1},\
+       NULL,NULL,0,dfont_replacedesc_Asian,\
        128,UCT_ENC_CJK,0)
 #define UC_CHARSET_SETUP_shift_jis UC_Charset_Setup("shift_jis","Japanese (Shift_JIS)",\
-       NULL,NULL,0,(struct unimapdesc_str){0,NULL,0,1},\
+       NULL,NULL,0,dfont_replacedesc_Asian,\
        128,UCT_ENC_CJK,0)
 #define UC_CHARSET_SETUP_euc_kr UC_Charset_Setup("euc-kr","Korean",\
-       NULL,NULL,0,(struct unimapdesc_str){0,NULL,0,1},\
+       NULL,NULL,0,dfont_replacedesc_Asian,\
        128,UCT_ENC_CJK,0)
 #define UC_CHARSET_SETUP_big5 UC_Charset_Setup("big5","Taipei (Big5)",\
-       NULL,NULL,0,(struct unimapdesc_str){0,NULL,0,1},\
+       NULL,NULL,0,dfont_replacedesc_Asian,\
        128,UCT_ENC_CJK,0)
   /*
    *  Placeholder for non-translation mode. - FM
    */
+static CONST struct unimapdesc_str dfont_replacedesc_trans = {0,NULL,0,0};
+
 #define UC_CHARSET_SETUP_x_transparent UC_Charset_Setup("x-transparent","Transparent",\
-       NULL,NULL,0,(struct unimapdesc_str){0,NULL,0,0},\
+       NULL,NULL,0,dfont_replacedesc_trans,\
        128,1,0)
 
 #define UC_CHARSET_SETUP_utf_8 UC_Charset_Setup("utf-8","UNICODE (UTF-8)",\
-       NULL,NULL,0,(struct unimapdesc_str){0,NULL,0,0},\
+       NULL,NULL,0,dfont_replacedesc_trans,\
        128,UCT_ENC_UTF8,0)
 
 

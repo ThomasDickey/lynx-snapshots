@@ -33,7 +33,6 @@ makeuctb iso08_uni.tbl > iso08_uni.h
 makeuctb iso09_uni.tbl > iso09_uni.h
 makeuctb iso10_uni.tbl > iso10_uni.h
 makeuctb iso15_uni.tbl > iso15_uni.h 
-makeuctb iso9945uni.tbl > iso9945_uni.h
 makeuctb koi8r_uni.tbl > koi8r_uni.h
 makeuctb koi8u_uni.tbl > koi8u_uni.h
 makeuctb mac_uni.tbl > mac_uni.h

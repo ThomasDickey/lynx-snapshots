@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.21 Wed, 18 Nov 1998 12:23:55 -0700 dickey @
+ * @Id: LYStyle.c 1.22 Wed, 17 Mar 1999 20:17:11 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -11,6 +11,7 @@
 #include <LYReadCFG.h>
 #include <LYCurses.h>
 #include <LYCharUtils.h>
+#include <LYUtils.h>		/* defines TABLESIZE */
 #include <AttrList.h>
 #include <SGML.h>
 #include <HTMLDTD.h>
@@ -23,6 +24,10 @@
 #include <LYLeaks.h>
 
 #ifdef USE_COLOR_STYLE
+
+/* stack of attributes during page rendering */
+PUBLIC int last_styles[128];
+PUBLIC int last_colorattr_ptr=0;
 
 PUBLIC bucket hashStyles[CSHASHSIZE];
 
@@ -43,7 +48,8 @@ static char *Mono_Strings[7] =
 /* Remember the hash codes for common elements */
 PUBLIC int	s_alink  = NOSTYLE, s_a     = NOSTYLE, s_status = NOSTYLE,
 		s_label  = NOSTYLE, s_value = NOSTYLE, s_high   = NOSTYLE,
-		s_normal = NOSTYLE, s_alert = NOSTYLE, s_title  = NOSTYLE;
+		s_normal = NOSTYLE, s_alert = NOSTYLE, s_title  = NOSTYLE,
+		s_whereis= NOSTYLE;
 
 /* start somewhere safe */
 PRIVATE int colorPairs = 0;
@@ -58,11 +64,39 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
 
     CTRACE(tfp, "CSS(PA):style d=%d / h=%d, e=%s\n", style, newstyle,element);
 
-    for (i = 0; i <7; i++)
+    for (i = 0; i < (int)TABLESIZE(Mono_Strings); i++)
     {
 	if (!strcasecomp(Mono_Strings[i], mono))
 	{
 	    mA = ncursesMono[i];
+	}
+    }
+    if (!mA) {
+	/*
+	 *  Not found directly yet, see whether we have a combination
+	 *  of several mono attributes separated by '+' - kw
+	 */
+	char *cp0 = mono;
+	char csep = '+';
+	char *cp = strchr(mono, csep);
+	while (cp) {
+	    *cp = '\0';
+	    for (i = 0; i < (int)TABLESIZE(Mono_Strings); i++)
+	    {
+		if (!strcasecomp(Mono_Strings[i], cp0))
+		{
+		    mA |= ncursesMono[i];
+		}
+	    }
+	    if (!csep)
+		break;
+	    *cp = csep;
+	    cp0 = cp + 1;
+	    cp = strchr(cp0, csep);
+	    if (!cp) {
+		cp = cp0 + strlen(cp0);
+		csep = '\0';
+	    }
 	}
     }
     CTRACE(tfp, "CSS(CP):%d\n", colorPairs);
@@ -197,11 +231,18 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
     else if (!strcasecomp(element, "normal")) /* added - kw */
     {
 	parse_attributes(mono,fg,bg,DSTYLE_NORMAL,"html");
+	s_normal  = hash_code("html"); /* rather bizarre... - kw */
     }
     /* this may vanish */
     else if (!strncasecomp(element, "candy", 5)) /* [INLINE]'s */
     {
 	parse_attributes(mono,fg,bg,DSTYLE_CANDY,"candy");
+    }
+    /* added for whereis search target - kw */
+    else if (!strncasecomp(element, "whereis", 7))
+    {
+	parse_attributes(mono,fg,bg,DSTYLE_WHEREIS,"whereis");
+	s_whereis  = hash_code("whereis");
     }
     /* Ok, it must be a HTML element, so look through the list until we
     * find it
@@ -381,4 +422,37 @@ PUBLIC int style_readFromFile ARGS1(char*, file)
 	parse_userstyles();
     return 0;
 }
+
+/* Used in HTStructured methods: - kw */
+
+PUBLIC void TrimColorClass ARGS3(
+    CONST char *,	tagname,
+    char *,		styleclassname,
+    int *,		phcode)
+{
+    char *end, *start=NULL, *lookfrom;
+    char tmp[64];
+
+    sprintf(tmp, ";%.*s", (int) sizeof(tmp) - 3, tagname);
+    strtolower(tmp);
+
+    if ((lookfrom = styleclassname) != 0) {
+	do {
+	    end = start;
+	    start = strstr(lookfrom, tmp);
+	    if (start)
+		lookfrom = start + 1;
+	}
+	while (start);
+	/* trim the last matching element off the end
+	** - should match classes here as well (rp)
+	*/
+	if (end)
+	    *end='\0';
+    }
+    *phcode = hash_code(lookfrom && *lookfrom ? lookfrom : &tmp[1]);
+    CTRACE(tfp, "CSS:%s (trimmed %s)\n",
+	   (styleclassname ? styleclassname : "<null>"), tmp);
+}
+
 #endif /* USE_COLOR_STYLE */

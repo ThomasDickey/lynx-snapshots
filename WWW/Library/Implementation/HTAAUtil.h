@@ -32,20 +32,6 @@
 
 #include <HTList.h>
 
-#ifdef SHORT_NAMES
-#define HTAAScheme_enum			HTAASenu
-#define HTAAScheme_name			HTAASnam
-#define HTAAMethod_enum			HTAAMenu
-#define HTAAMethod_name			HTAAMnam
-#define HTAAMethod_inList		HTAAMinL
-#define HTAA_templateMatch		HTAAteMa
-#define HTAA_makeProtectionTemplate	HTAAmaPT
-#define HTAA_parseArgList		HTAApALi
-#define HTAA_setupReader		HTAAsuRe
-#define HTAA_getUnfoldedLine		HTAAgUfL
-#endif /*SHORT_NAMES*/
-
-
 /*
 
 Default filenames

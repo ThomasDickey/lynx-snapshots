@@ -21,16 +21,6 @@ typedef struct {
 } HTChunk;
 
 
-#ifdef SHORT_NAMES
-#define HTChunkClear		HTChClea
-#define HTChunkPutc		HTChPutc
-#define HTChunkPuts		HTChPuts
-#define HTChunkCreate		HTChCrea
-#define HTChunkTerminate	HTChTerm
-#define HTChunkEnsure		HtChEnsu
-#endif
-
-
 /*
  *
  * Create new chunk

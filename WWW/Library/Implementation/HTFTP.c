@@ -1891,6 +1891,8 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
     char *cp;
 
     entry_info = (EntryInfo *)malloc(sizeof(EntryInfo));
+    if (entry_info == NULL)
+	outofmem(__FILE__, "parse_dir_entry");
     entry_info->filename = NULL;
     entry_info->type = NULL;
     entry_info->date = NULL;

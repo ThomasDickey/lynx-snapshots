@@ -639,7 +639,6 @@
  *     Hebrew (windows-1255)              windows-1255
  *     Turkish (ISO-8859-9)               iso-8859-9
  *     ISO-8859-10                        iso-8859-10
- *     Ukrainian Cyrillic (ISO-9945-2)    iso-9945-2
  *     Ukrainian Cyrillic (cp866u)        cp866u
  *     Ukrainian Cyrillic (KOI8-U)        koi8-u
  *     UNICODE (UTF-8)                    utf-8
@@ -1206,12 +1205,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.2dev.19"
+#define LYNX_VERSION "2.8.2dev.20"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Thu, 04 Mar 1999 08:31:38 -0700"
+#define LYNX_DATE "Wed, 17 Mar 1999 20:17:11 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1998"

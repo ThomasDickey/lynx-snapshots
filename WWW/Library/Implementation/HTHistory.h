@@ -5,18 +5,6 @@
 
 #include <HTAnchor.h>
 
-#ifdef SHORT_NAMES
-#define HTHistory_record                HTHiReco
-#define HTHistory_backtrack             HTHiBack
-#define HTHistory_canBacktrack          HTHiCaBa
-#define HTHistory_moveBy                HTHiMoBy
-#define HTHistory_canMoveBy             HTHiCaMo
-#define HTHistory_read                  HTHiRead
-#define HTHistory_recall                HTHiReca
-#define HTHistory_count                 HTHiCoun
-#define HTHistory_leavingFrom           HTHiLeFr
-#endif
-
 /*                              Navigation
 **                              ==========
 */

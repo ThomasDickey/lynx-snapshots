@@ -203,6 +203,8 @@ extern void LYTrimLeading PARAMS((
 	char *		buffer));
 extern void LYTrimTrailing PARAMS((
 	char *		buffer));
+extern BOOLEAN LYTrimStartfile PARAMS((
+	char *		buffer));
 extern void LYSetupEdit PARAMS((
 	EditFieldData *	edit,
 	char *		old,

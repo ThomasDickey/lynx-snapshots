@@ -276,6 +276,25 @@ save:
 compress: tar
 	cd ..; rm -f $(lynxname).tar.Z; compress -f -v $(lynxname).tar
 
+# Directory containing reference source for patch generation,
+#     either absolute or relative to $(top_srcdir)/..
+REFDIR=orig/$(lynxdir)
+
+lynx.patch: $(top_srcdir) $(top_srcdir)/CHANGES
+	cd  $(top_srcdir)/.. && cd $(REFDIR) && { rm -f \
+		config.log \
+		config.status \
+		lynx_cfg.h \
+			; \
+		for I in . src WWW/Library/Implementation; do ( set +e; \
+			( set -x; cd $$I && rm -f *.orig *.rej makefile ); : ); \
+		done; }
+	( cd $(top_srcdir)/..; echo "%%% Created `date` by target $@. %%%"; \
+			diff -brc $(REFDIR) $(lynxdir) ) \
+		| grep -v '^Common' \
+		| grep -v '^Binary files ' \
+		| grep -v '^Only ' | tee $@ | grep '^--- $(lynxdir)'
+
 install: lynx$x install-bin install-man install-cfg @INSTALL_LSS@
 	@echo
 	@echo "Use $(MAKE) install-help to install the help-files"
@@ -317,6 +336,8 @@ install-help : $(helpdir)
 		-e 's%\(.*\)=\(.*\.html\)$$%s=\2=\2$(COMPRESS_EXT)=g%' \
 		-e 's%\.html=%\\.html=%' \
 		$(srcdir)/lynx_help/help_files.txt | $(FIX_SED) >> \
+		$(helpdir)/help_files.sed
+	echo 's%\$(COMPRESS_EXT)\$(COMPRESS_EXT)%$(COMPRESS_EXT)%g' >> \
 		$(helpdir)/help_files.sed
 	@echo Translating/copying html files
 	@ECHO_CC@$(SHELL) -c 'cd $(srcdir)/lynx_help && ( \

@@ -55,12 +55,10 @@
 
 #include <HTList.h>
 #include <HText.h>	/* See bugs above */
-#include <HTAlert.h>
 #include <HTCJK.h>
 #include <UCMap.h>
 #include <GridText.h>
 
-#include <GridText.h>
 #include <LYGlobalDefs.h>
 #include <LYexit.h>
 #include <LYUtils.h>
@@ -134,6 +132,7 @@ extern GLOBALREF (HTProtocol, HTTn3270);
 extern GLOBALREF (HTProtocol, HTRlogin);
 #ifndef DECNET
 extern GLOBALREF (HTProtocol, HTFTP);
+#ifndef DISABLE_NEWS
 extern GLOBALREF (HTProtocol, HTNews);
 extern GLOBALREF (HTProtocol, HTNNTP);
 extern GLOBALREF (HTProtocol, HTNewsPost);
@@ -141,11 +140,14 @@ extern GLOBALREF (HTProtocol, HTNewsReply);
 extern GLOBALREF (HTProtocol, HTSNews);
 extern GLOBALREF (HTProtocol, HTSNewsPost);
 extern GLOBALREF (HTProtocol, HTSNewsReply);
+#endif /* not DISABLE_NEWS */
 #ifndef DISABLE_GOPHER
 extern GLOBALREF (HTProtocol, HTGopher);
 extern GLOBALREF (HTProtocol, HTCSO);
 #endif /* not DISABLE_GOPHER */
+#ifndef DISABLE_FINGER
 extern GLOBALREF (HTProtocol, HTFinger);
+#endif /* not DISABLE_FINGER */
 #ifdef DIRECT_WAIS
 extern GLOBALREF (HTProtocol, HTWAIS);
 #endif /* DIRECT_WAIS */
@@ -153,12 +155,17 @@ extern GLOBALREF (HTProtocol, HTWAIS);
 #else
 GLOBALREF HTProtocol HTTP, HTTPS, HTFile, HTTelnet, HTTn3270, HTRlogin;
 #ifndef DECNET
-GLOBALREF HTProtocol HTFTP, HTNews, HTNNTP, HTNewsPost, HTNewsReply;
+GLOBALREF HTProtocol HTFTP;
+#ifndef DISABLE_NEWS
+GLOBALREF HTProtocol HTNews, HTNNTP, HTNewsPost, HTNewsReply;
 GLOBALREF HTProtocol HTSNews, HTSNewsPost, HTSNewsReply;
+#endif /* not DISABLE_NEWS */
 #ifndef DISABLE_GOPHER
 GLOBALREF HTProtocol HTGopher, HTCSO;
 #endif /* not DISABLE_GOPHER */
+#ifndef DISABLE_FINGER
 GLOBALREF HTProtocol HTFinger;
+#endif /* not DISABLE_FINGER */
 #ifdef DIRECT_WAIS
 GLOBALREF  HTProtocol HTWAIS;
 #endif /* DIRECT_WAIS */
@@ -174,6 +181,7 @@ PRIVATE void HTAccessInit NOARGS			/* Call me once */
     HTRegisterProtocol(&HTTn3270);
     HTRegisterProtocol(&HTRlogin);
 #ifndef DECNET
+#ifndef DISABLE_NEWS
     HTRegisterProtocol(&HTFTP);
     HTRegisterProtocol(&HTNews);
     HTRegisterProtocol(&HTNNTP);
@@ -182,11 +190,14 @@ PRIVATE void HTAccessInit NOARGS			/* Call me once */
     HTRegisterProtocol(&HTSNews);
     HTRegisterProtocol(&HTSNewsPost);
     HTRegisterProtocol(&HTSNewsReply);
+#endif /* not DISABLE_NEWS */
 #ifndef DISABLE_GOPHER
     HTRegisterProtocol(&HTGopher);
     HTRegisterProtocol(&HTCSO);
 #endif /* not DISABLE_GOPHER */
+#ifndef DISABLE_FINGER
     HTRegisterProtocol(&HTFinger);
+#endif /* not DISABLE_FINGER */
 #ifdef DIRECT_WAIS
     HTRegisterProtocol(&HTWAIS);
 #endif /* DIRECT_WAIS */
@@ -277,8 +288,11 @@ PUBLIC BOOL override_proxy ARGS1(
 	    if	    (!strcmp(acc_method, "http"))	port = 80;
 	    else if (!strcmp(acc_method, "https"))	port = 443;
 	    else if (!strcmp(acc_method, "ftp"))	port = 21;
+#ifndef DISABLE_GOPHER
 	    else if (!strcmp(acc_method, "gopher"))	port = 70;
+#endif
 	    else if (!strcmp(acc_method, "cso"))	port = 105;
+#ifndef DISABLE_NEWS
 	    else if (!strcmp(acc_method, "news"))	port = 119;
 	    else if (!strcmp(acc_method, "nntp"))	port = 119;
 	    else if (!strcmp(acc_method, "newspost"))	port = 119;
@@ -286,8 +300,11 @@ PUBLIC BOOL override_proxy ARGS1(
 	    else if (!strcmp(acc_method, "snews"))	port = 563;
 	    else if (!strcmp(acc_method, "snewspost"))	port = 563;
 	    else if (!strcmp(acc_method, "snewsreply")) port = 563;
+#endif
 	    else if (!strcmp(acc_method, "wais"))	port = 210;
+#ifndef DISABLE_FINGER
 	    else if (!strcmp(acc_method, "finger"))	port = 79;
+#endif
 	    FREE(acc_method);
 	}
     }

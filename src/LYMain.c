@@ -185,7 +185,9 @@ PUBLIC BOOLEAN emacs_keys = EMACS_KEYS_ALWAYS_ON;
 PUBLIC int keypad_mode = DEFAULT_KEYPAD_MODE;
 PUBLIC BOOLEAN case_sensitive = CASE_SENSITIVE_ALWAYS_ON;
 PUBLIC BOOLEAN telnet_ok = TRUE;
+#ifndef DISABLE_NEWS
 PUBLIC BOOLEAN news_ok = TRUE;
+#endif
 PUBLIC BOOLEAN rlogin_ok = TRUE;
 PUBLIC BOOLEAN ftp_ok = TRUE;
 PUBLIC BOOLEAN system_editor = FALSE;
@@ -195,8 +197,10 @@ PUBLIC BOOLEAN no_externals = FALSE;
 PUBLIC BOOLEAN no_inside_telnet = FALSE;
 PUBLIC BOOLEAN no_outside_telnet = FALSE;
 PUBLIC BOOLEAN no_telnet_port = FALSE;
+#ifndef DISABLE_NEWS
 PUBLIC BOOLEAN no_inside_news = FALSE;
 PUBLIC BOOLEAN no_outside_news = FALSE;
+#endif
 PUBLIC BOOLEAN no_inside_ftp = FALSE;
 PUBLIC BOOLEAN no_outside_ftp = FALSE;
 PUBLIC BOOLEAN no_inside_rlogin = FALSE;
@@ -226,16 +230,22 @@ PUBLIC BOOLEAN no_goto_lynxcgi = FALSE;
 PUBLIC BOOLEAN no_goto_lynxexec = FALSE;
 PUBLIC BOOLEAN no_goto_lynxprog = FALSE;
 PUBLIC BOOLEAN no_goto_mailto = FALSE;
+#ifndef DISABLE_NEWS
 PUBLIC BOOLEAN no_goto_news = FALSE;
 PUBLIC BOOLEAN no_goto_nntp = FALSE;
+#endif
 PUBLIC BOOLEAN no_goto_rlogin = FALSE;
+#ifndef DISABLE_NEWS
 PUBLIC BOOLEAN no_goto_snews = FALSE;
+#endif
 PUBLIC BOOLEAN no_goto_telnet = FALSE;
 PUBLIC BOOLEAN no_goto_tn3270 = FALSE;
 PUBLIC BOOLEAN no_goto_wais = FALSE;
 PUBLIC BOOLEAN no_jump = FALSE;
 PUBLIC BOOLEAN no_file_url = FALSE;
+#ifndef DISABLE_NEWS
 PUBLIC BOOLEAN no_newspost = FALSE;
+#endif
 PUBLIC BOOLEAN no_mail = FALSE;
 PUBLIC BOOLEAN no_dotfiles = NO_DOT_FILES;
 PUBLIC BOOLEAN no_useragent = FALSE;
@@ -383,8 +393,10 @@ PUBLIC char *log_file_name = NULL; /* for WAIS log file name	in libWWW */
 PUBLIC FILE *logfile = NULL;	   /* for WAIS log file output	in libWWW */
 #endif /* DECLARE_WAIS_LOGFILES */
 
+#ifndef DISABLE_NEWS
 extern int HTNewsChunkSize; /* Number of news articles per chunk (HTNews.c) */
 extern int HTNewsMaxChunk;  /* Max news articles before chunking (HTNews.c) */
+#endif
 
 PRIVATE BOOLEAN stack_dump = FALSE;
 PRIVATE char *terminal = NULL;
@@ -392,6 +404,15 @@ PRIVATE char *pgm;
 PRIVATE BOOLEAN number_links = FALSE;
 PRIVATE BOOLEAN LYPrependBase = FALSE;
 PRIVATE HTList *LYStdinArgs = NULL;
+
+#ifndef EXTENDED_OPTION_LOGIC
+/* if set then '--' will be recognized as the end of options */
+#define EXTENDED_OPTION_LOGIC 1
+#endif
+
+#if EXTENDED_OPTION_LOGIC
+PRIVATE BOOLEAN no_options_further=FALSE; /* set to TRUE after '--' argument */
+#endif
 
 PRIVATE void parse_arg PARAMS((char **arg, int *i));
 PRIVATE void print_help_and_exit PARAMS((int exit_status));
@@ -598,6 +619,23 @@ static void FixCharacters(void)
 }
 #endif /* EBCDIC */
 
+/* these are used for matching commandline options. */
+PRIVATE int argcmp ARGS2(
+	char*,		str,
+	char*,	        what)
+{
+    if (str[0] == '-' && str[1] == '-' ) ++str;
+    return strcmp(str,what);
+}
+
+PRIVATE int argncmp ARGS2(
+	char*,		str,
+	char*,	        what)
+{
+    if (str[0] == '-' && str[1] == '-' ) ++str;
+    return strncmp(str, what, strlen(what));
+}
+
 /*
  * Wow!  Someone wants to start up Lynx.
  */
@@ -673,7 +711,7 @@ PUBLIC int main ARGS2(
      *	Act on -help NOW, so we only output the help and exit. - FM
      */
     for (i = 1; i < argc; i++) {
-	if (strncmp(argv[i], "-help", 5) == 0) {
+	if (argncmp(argv[i], "-help") == 0) {
 	    parse_arg(&argv[i], &i);
 	}
     }
@@ -736,19 +774,7 @@ PUBLIC int main ARGS2(
     AlertSecs	= (int)ALERTSECS;
     StrAllocCopy(helpfile, HELPFILE);
     StrAllocCopy(startfile, STARTFILE);
-    LYTrimHead(startfile);
-    if (!strncasecomp(startfile, "lynxexec:", 9) ||
-	!strncasecomp(startfile, "lynxprog:", 9)) {
-	/*
-	 *  The original implementations of these schemes expected
-	 *  white space without hex escaping, and did not check
-	 *  for hex escaping, so we'll continue to support that,
-	 *  until that code is redone in conformance with SGML
-	 *  principles.  - FM
-	 */
-	HTUnEscapeSome(startfile, " \r\n\t");
-	convert_to_spaces(startfile, TRUE);
-    }
+    LYTrimStartfile(startfile);
     StrAllocCopy(indexfile, DEFAULT_INDEX_FILE);
     StrAllocCopy(global_type_map, GLOBAL_MAILCAP);
     StrAllocCopy(personal_type_map, PERSONAL_MAILCAP);
@@ -863,7 +889,9 @@ PUBLIC int main ARGS2(
      *	further down via lynx.cfg or the -restriction
      *	command line switch. - FM
      */
+#ifndef DISABLE_NEWS
     no_newspost = (LYNewsPosting == FALSE);
+#endif
 
     /*
      *	Set up trace, the anonymous account defaults,
@@ -873,28 +901,28 @@ PUBLIC int main ARGS2(
      *	the help menu, output that and exit. - FM
      */
     for (i = 1; i < argc; i++) {
-	if (strncmp(argv[i], "-trace", 6) == 0) {
+	if (argncmp(argv[i], "-trace") == 0) {
 	    WWW_TraceFlag = TRUE;
-	} else if (strncmp(argv[i], "-tlog", 5) == 0) {
+	} else if (argncmp(argv[i], "-tlog") == 0) {
 	    if (LYUseTraceLog) {
 		LYUseTraceLog = FALSE;
 	    } else {
 		LYUseTraceLog = TRUE;
 	    }
-	} else if (strncmp(argv[i], "-anonymous", 10) == 0) {
+	} else if (argncmp(argv[i], "-anonymous") == 0) {
 	    if (!LYValidate)
 		parse_restrictions("default");
 	    LYRestricted = TRUE;
-	} else if (strcmp(argv[i], "-validate") == 0) {
+	} else if (argcmp(argv[i], "-validate") == 0) {
 	    /*
 	     *	Follow only http URLs.
 	     */
 	    LYValidate = TRUE;
 #ifdef SOCKS
-	} else if (strncmp(argv[i], "-nosocks", 8) == 0) {
+	} else if (argncmp(argv[i], "-nosocks") == 0) {
 	    socks_flag = FALSE;
 #endif /* SOCKS */
-	} else if (strncmp(argv[i], "-cfg", 4) == 0) {
+	} else if (argncmp(argv[i], "-cfg") == 0) {
 	    if ((cp=strchr(argv[i],'=')) != NULL)
 		StrAllocCopy(lynx_cfg_file, cp+1);
 	    else {
@@ -903,7 +931,7 @@ PUBLIC int main ARGS2(
 	    }
 
 #if defined(USE_HASH)
-	} else if (strncmp(argv[i], "-lss", 4) == 0) {
+	} else if (argncmp(argv[i], "-lss") == 0) {
 	    if ((cp=strchr(argv[i],'=')) != NULL)
 		StrAllocCopy(lynx_lss_file, cp+1);
 	    else {
@@ -947,28 +975,28 @@ PUBLIC int main ARGS2(
 		buf[j] = '\0';
 	    }
 
-	    if (strncmp(buf, "-trace", 6) == 0) {
+	    if (argncmp(buf, "-trace") == 0) {
 		WWW_TraceFlag = TRUE;
-	    } else if (strncmp(buf, "-tlog", 5) == 0) {
+	    } else if (argncmp(buf, "-tlog") == 0) {
 		if (LYUseTraceLog) {
 		    LYUseTraceLog = FALSE;
 		} else {
 		    LYUseTraceLog = TRUE;
 		}
-	    } else if (strncmp(buf, "-anonymous", 10) == 0) {
+	    } else if (argncmp(buf, "-anonymous") == 0) {
 		if (!LYValidate && !LYRestricted)
 		    parse_restrictions("default");
 		LYRestricted = TRUE;
-	    } else if (strcmp(buf, "-validate") == 0) {
+	    } else if (argcmp(buf, "-validate") == 0) {
 		/*
 		 *  Follow only http URLs.
 		 */
 		LYValidate = TRUE;
 #ifdef SOCKS
-	    } else if (strncmp(buf, "-nosocks", 8) == 0) {
+	    } else if (argncmp(buf, "-nosocks") == 0) {
 		socks_flag = FALSE;
 #endif /* SOCKS */
-	    } else if (strncmp(buf, "-cfg", 4) == 0) {
+	    } else if (argncmp(buf, "-cfg") == 0) {
 		if ((cp = strchr(buf,'=')) != NULL) {
 		    StrAllocCopy(lynx_cfg_file, cp+1);
 		} else {
@@ -978,7 +1006,7 @@ PUBLIC int main ARGS2(
 			StrAllocCopy(lynx_cfg_file, cp);
 		}
 #if defined(USE_HASH)
-	    } else if (strncmp(buf, "-lss", 4) == 0) {
+	    } else if (argncmp(buf, "-lss") == 0) {
 		if ((cp = strchr(buf,'=')) != NULL) {
 		    StrAllocCopy(lynx_lss_file, cp+1);
 		} else {
@@ -990,7 +1018,7 @@ PUBLIC int main ARGS2(
 		CTRACE(tfp, "LYMain found -lss flag, lss file is %s\n",
 			lynx_lss_file ? lynx_lss_file : "<NONE>");
 #endif
-	    } else if (strcmp(buf, "-get_data") == 0) {
+	    } else if (argcmp(buf, "-get_data") == 0) {
 		/*
 		 *  User data for GET form.
 		 */
@@ -1029,7 +1057,7 @@ PUBLIC int main ARGS2(
 		    }
 		    StrAllocCat(*get_data, buf);
 		}
-	    } else if (strcmp(buf, "-post_data") == 0) {
+	    } else if (argcmp(buf, "-post_data") == 0) {
 		/*
 		 *  User data for POST form.
 		 */
@@ -1369,19 +1397,7 @@ PUBLIC int main ARGS2(
      */
     if ((cp = getenv("WWW_HOME")) != NULL) {
 	StrAllocCopy(startfile, cp);
-	LYTrimHead(startfile);
-	if (!strncasecomp(startfile, "lynxexec:", 9) ||
-	    !strncasecomp(startfile, "lynxprog:", 9)) {
-	    /*
-	     *	The original implementations of these schemes expected
-	     *	white space without hex escaping, and did not check
-	     *	for hex escaping, so we'll continue to support that,
-	     *	until that code is redone in conformance with SGML
-	     *	principles.  - FM
-	     */
-	    HTUnEscapeSome(startfile, " \r\n\t");
-	    convert_to_spaces(startfile, TRUE);
-	}
+	LYTrimStartfile(startfile);
     }
 
     /*
@@ -1651,20 +1667,26 @@ PUBLIC int main ARGS2(
     if (inlocaldomain()) {
 #if !defined(HAVE_UTMP) || defined(VMS) /* not selective */
 	telnet_ok = !no_inside_telnet && !no_outside_telnet && telnet_ok;
+#ifndef DISABLE_NEWS
 	news_ok = !no_inside_news && !no_outside_news && news_ok;
+#endif
 	ftp_ok = !no_inside_ftp && !no_outside_ftp && ftp_ok;
 	rlogin_ok = !no_inside_rlogin && !no_outside_rlogin && rlogin_ok;
 #else
 	CTRACE(tfp,"LYMain.c: User in Local domain\n");
 	telnet_ok = !no_inside_telnet && telnet_ok;
+#ifndef DISABLE_NEWS
 	news_ok = !no_inside_news && news_ok;
+#endif
 	ftp_ok = !no_inside_ftp && ftp_ok;
 	rlogin_ok = !no_inside_rlogin && rlogin_ok;
 #endif /* !HAVE_UTMP || VMS */
     } else {
 	CTRACE(tfp,"LYMain.c: User in REMOTE domain\n");
 	telnet_ok = !no_outside_telnet && telnet_ok;
+#ifndef DISABLE_NEWS
 	news_ok = !no_outside_news && news_ok;
+#endif
 	ftp_ok = !no_outside_ftp && ftp_ok;
 	rlogin_ok = !no_outside_rlogin && rlogin_ok;
     }
@@ -2179,19 +2201,7 @@ static int homepage_fun ARGS3(
 {
     if (next_arg != 0) {
 	StrAllocCopy(homepage, next_arg);
-	LYTrimHead(homepage);
-	if (!strncasecomp(homepage, "lynxexec:", 9) ||
-	    !strncasecomp(homepage, "lynxprog:", 9)) {
-	    /*
-	     *  The original implementations of these schemes expected
-	     *  white space without hex escaping, and did not check
-	     *  for hex escaping, so we'll continue to support that,
-	     *  until that code is redone in conformance with SGML
-	     *  principles.  - FM
-	     */
-	    HTUnEscapeSome(homepage, " \r\n\t");
-	    convert_to_spaces(homepage, TRUE);
-	}
+	LYTrimStartfile(homepage);
     }
     return 0;
 }
@@ -2213,6 +2223,7 @@ static int mime_header_fun ARGS3(
     return 0;
 }
 
+#ifndef DISABLE_NEWS
 /* -newschunksize */
 static int newschunksize_fun ARGS3(
 	Parse_Args_Type *,	p GCC_UNUSED,
@@ -2248,6 +2259,7 @@ static int newsmaxchunk_fun ARGS3(
     }
     return 0;
 }
+#endif /* not DISABLE_NEWS */
 
 /* -nobrowse */
 static int nobrowse_fun ARGS3(
@@ -2750,6 +2762,7 @@ keys (may be incompatible with some curses packages)"
       "minimal",	TOGGLE_ARG,		&minimal_comments,
       "toggles minimal versus valid comment parsing"
    ),
+#ifndef DISABLE_NEWS
    PARSE_FUN(
       "newschunksize",	NEED_FUNCTION_ARG,	newschunksize_fun,
       "=NUMBER\nnumber of articles in chunked news listings"
@@ -2758,6 +2771,7 @@ keys (may be incompatible with some curses packages)"
       "newsmaxchunk",	NEED_FUNCTION_ARG,	newsmaxchunk_fun,
       "=NUMBER\nmaximum news articles in listings before chunking"
    ),
+#endif
    PARSE_FUN(
       "nobrowse",	FUNCTION_ARG,		nobrowse_fun,
       "disable directory browsing"
@@ -3039,8 +3053,10 @@ in double-quotes (\"-\") on VMS)", NULL);
 	switch (p->type & ARG_TYPE_MASK) {
 	    case TOGGLE_ARG:
 	    case SET_ARG:
-	    case UNSET_ARG:
 		sprintf(temp, "%s", *(q->set_value) ? "on" : "off");
+		break;
+	    case UNSET_ARG:
+		sprintf(temp, "%s", *(q->set_value) ? "off" : "on");
 		break;
 	    case INT_ARG:
 		sprintf(temp, "%d", *(q->int_value));
@@ -3118,23 +3134,22 @@ PRIVATE void parse_arg ARGS2(
     /*
      *	Check for a command line startfile. - FM
      */
-    if (*arg_name != '-') {
+#if !EXTENDED_OPTION_LOGIC
+    if (*arg_name != '-')
+#else
+    if (*arg_name != '-' || no_options_further == TRUE )
+#endif
+    {
 	StrAllocCopy(startfile, arg_name);
-	LYTrimHead(startfile);
-	if (!strncasecomp(startfile, "lynxexec:", 9) ||
-	    !strncasecomp(startfile, "lynxprog:", 9)) {
-	    /*
-	     *	The original implementations of these schemes expected
-	     *	white space without hex escaping, and did not check
-	     *	for hex escaping, so we'll continue to support that,
-	     *	until that code is redone in conformance with SGML
-	     *	principles.  - FM
-	     */
-	    HTUnEscapeSome(startfile, " \r\n\t");
-	    convert_to_spaces(startfile, TRUE);
-	}
+	LYTrimStartfile(startfile);
 	return;
     }
+#if EXTENDED_OPTION_LOGIC
+    if (strcmp(arg_name,"--") == 0) {
+	no_options_further = TRUE;
+	return;
+    }
+#endif
 
     /* lose the first '-' character */
     arg_name++;
@@ -3146,6 +3161,10 @@ PRIVATE void parse_arg ARGS2(
      */
     if (*arg_name == 0)
 	return;
+
+    /* allow GNU-style options with -- prefix*/
+    if (*arg_name == '-') ++arg_name;
+
 
     p = Arg_Table;
     while (p->name != 0) {

@@ -13,19 +13,32 @@
 #ifndef HT_NON_BREAK_SPACE
 #define HT_NON_BREAK_SPACE	((char)1)	/* remember it */
 #endif /* !HT_NON_BREAK_SPACE */
-#ifndef HT_EM_SPACE
-#define HT_EM_SPACE		((char)2)	/* remember it */
-#endif /* !HT_EM_SPACE */
+#ifndef HT_EN_SPACE
+#define HT_EN_SPACE		((char)2)	/* remember it */
+#endif /* !HT_EN_SPACE */
 #define LY_UNDERLINE_START_CHAR	'\003'
 #define LY_UNDERLINE_END_CHAR	'\004'
+
+/* Turn about is fair play ASCII platforms use EBCDIC tab;
+   EBCDIC platforms use ASCII tab for LY_BOLD_START_CHAR.
+*/
+#ifdef EBCDIC
+#define LY_BOLD_START_CHAR	'\011'
+#else
 #define LY_BOLD_START_CHAR	'\005'
+#endif
+
 #define LY_BOLD_END_CHAR	'\006'
 #ifndef LY_SOFT_HYPHEN
 #define LY_SOFT_HYPHEN		((char)7)
 #endif /* !LY_SOFT_HYPHEN */
 #define LY_SOFT_NEWLINE 	((char)8)
 
-#define IsSpecialAttrChar(a)  ((a > '\002') && (a <= '\010'))
+#ifdef EBCDIC
+#define IsSpecialAttrChar(a)  (((a) > '\002') && ((a) <= '\011') && ((a)!='\t'))
+#else
+#define IsSpecialAttrChar(a)  (((a) > '\002') && ((a) <= '\010'))
+#endif
 
 #define TABSTOP 8
 #define SPACES  "        "  /* must be at least TABSTOP spaces long */
@@ -75,19 +88,6 @@ extern int HTCurSelectGroupType;
 extern char * HTCurSelectGroupSize;
 extern HText * HTMainText;		/* Equivalent of main window */
 extern HTParentAnchor * HTMainAnchor;	/* Anchor for HTMainText */
-
-#ifdef SHORT_NAMES
-#define HText_childNumber		HTGTChNu
-#define HText_canScrollUp		HTGTCaUp
-#define HText_canScrollDown		HTGTCaDo
-#define HText_scrollUp			HTGTScUp
-#define HText_scrollDown		HTGTScDo
-#define HText_scrollTop			HTGTScTo
-#define HText_scrollBottom		HTGTScBo
-#define HText_sourceAnchors		HTGTSoAn
-#define HText_setStale			HTGTStal
-#define HText_refresh			HTGTRefr
-#endif /* SHORT_NAMES */
 
 extern int WWW_TraceFlag;
 

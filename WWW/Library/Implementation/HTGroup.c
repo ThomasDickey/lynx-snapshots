@@ -108,6 +108,8 @@ PRIVATE AddressDefList *parse_address_part ARGS1(FILE *, fp)
 
     for(;;) {
 	Ref *ref = (Ref*)calloc(1, sizeof(Ref));
+	if (ref == NULL)
+	    outofmem(__FILE__, "parse_address_part");
 	ref->name = NULL;
 	ref->translation = NULL;
 	StrAllocCopy(ref->name, HTlex_buffer);
@@ -162,6 +164,8 @@ PRIVATE UserDefList *parse_user_part ARGS1(FILE *, fp)
 
     for (;;) {
 	Ref *ref = (Ref*)calloc(1, sizeof(Ref));
+	if (ref == NULL)
+	    outofmem(__FILE__, "parse_user_part");
 	ref->name = NULL;
 	ref->translation = NULL;
 	StrAllocCopy(ref->name, HTlex_buffer);
@@ -220,7 +224,7 @@ PRIVATE Item *parse_item ARGS1(FILE *, fp)
 	}
 	else {
 	    if (user_def_list) {
-	        HTList_delete(user_def_list);	/* @@@@ */
+		HTList_delete(user_def_list);	/* @@@@ */
 		user_def_list = NULL;
 	    }
 	    syntax_error(fp, "Expected address part (single address or list)",
@@ -235,6 +239,8 @@ PRIVATE Item *parse_item ARGS1(FILE *, fp)
 	return NULL;
     }
     item = (Item*)calloc(1, sizeof(Item));
+    if (item == NULL)
+	outofmem(__FILE__, "parse_item");
     item->user_def_list = user_def_list;
     item->address_def_list = address_def_list;
     return item;
@@ -282,6 +288,8 @@ PUBLIC GroupDef *HTAA_parseGroupDef ARGS1(FILE *, fp)
 	return NULL;
     }
     group_def = (GroupDef*)calloc(1, sizeof(GroupDef));
+    if (group_def == NULL)
+	outofmem(__FILE__, "HTAA_parseGroupDef");
     group_def->group_name = NULL;
     group_def->item_list = item_list;
 
@@ -341,8 +349,8 @@ PRIVATE GroupDef *find_group_def ARGS2(GroupDefList *,	group_list,
 	while (NULL != (group_def = (GroupDef*)HTList_nextObject(cur))) {
 	    if (!strcmp(group_name, group_def->group_name)) {
 		return group_def;
-            }
-        }
+	    }
+	}
     }
     return NULL;
 }
@@ -661,7 +669,7 @@ PUBLIC GroupDefList *HTAA_readGroupFile ARGS1(CONST char *, filename)
     } /* cache exists */
 
     CTRACE(tfp, "HTAA_readGroupFile: reading group file `%s'\n",
-	        filename);
+		filename);
 
     if (!(fp = fopen(filename, "r"))) {
 	CTRACE(tfp, "%s '%s'\n",

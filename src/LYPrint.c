@@ -174,7 +174,7 @@ PRIVATE int RecallFilename ARGS5(
 	BOOLEAN *,	first,
 	int *,		now,
 	int *,		total,
-	int,            flag)
+	int,		flag)
 {
     int ch;
     char *cp;
@@ -1393,13 +1393,13 @@ check_recall:
      */
 #ifdef VMS
     if (0 == strncasecomp (fbuf, "sys$disk:", 9)) {
-        if (0 == strncmp ((fbuf+9), "[]", 2)) {
+	if (0 == strncmp ((fbuf+9), "[]", 2)) {
 	    HTAddSugFilename (fbuf+11);
-        } else {
+	} else {
 	    HTAddSugFilename (fbuf+9);
-        }
+	}
     } else {
-        HTAddSugFilename (fbuf);
+	HTAddSugFilename (fbuf);
     }
 #else
     HTAddSugFilename (fbuf);
@@ -1409,28 +1409,32 @@ check_recall:
      *  Expand tilde's, make filename absolute, etc.
      */
     if (!LYValidateFilename (tbuf, fbuf))
-        goto quit;
+	goto quit;
 
     /*
      *  Check for file existence; readability.
      */
     if ((stat (tbuf, &stat_info) < 0) ||
-	(!(S_ISREG(stat_info.st_mode) || S_ISLNK(stat_info.st_mode)))) {
-        HTInfoMsg (FILE_DOES_NOT_EXIST);
-        _statusline(FILE_DOES_NOT_EXIST_RE);
-        FirstRecall = TRUE;
-        FnameNum    = FnameTotal;
-        goto retry;
+       (!(S_ISREG(stat_info.st_mode)
+#ifdef S_IFLNK
+	 || S_ISLNK(stat_info.st_mode)
+#endif /* S_IFLNK */
+	))) {
+	HTInfoMsg (FILE_DOES_NOT_EXIST);
+	_statusline(FILE_DOES_NOT_EXIST_RE);
+	FirstRecall = TRUE;
+	FnameNum    = FnameTotal;
+	goto retry;
     }
 
     if ((fp = fopen (tbuf, "r")) == NULL) {
-        HTInfoMsg (FILE_NOT_READABLE);
-        _statusline(FILE_NOT_READABLE_RE);
-        FirstRecall = TRUE;
-        FnameNum    = FnameTotal;
-        goto retry;
+	HTInfoMsg (FILE_NOT_READABLE);
+	_statusline(FILE_NOT_READABLE_RE);
+	FirstRecall = TRUE;
+	FnameNum    = FnameTotal;
+	goto retry;
     } else {
-        fclose (fp);
+	fclose (fp);
     }
 
     /*
@@ -1444,7 +1448,7 @@ check_recall:
      *   with  --enable-find-leaks  turned on.  Dumb.]
      */
     if ((fn = (char *) calloc (1, (strlen (tbuf) + 1))) == NULL)
-        outofmem(__FILE__, "GetFileName");
+	outofmem(__FILE__, "GetFileName");
     return (strcpy (fn, tbuf));
 
 

@@ -25,7 +25,7 @@
 
 struct _HTStream {
 	CONST HTStreamClass *	isa;
-	
+
 	FILE *			fp;
 	char * 			end_command;
 	char * 			remove_command;
@@ -57,13 +57,13 @@ PRIVATE void HTBlackHole_abort ARGS2(HTStream *, me, HTError, e)
 **	-----------------
 */
 PRIVATE CONST HTStreamClass HTBlackHoleClass =
-{		
+{
 	"BlackHole",
 	HTBlackHole_free,
 	HTBlackHole_abort,
 	HTBlackHole_put_character, 	HTBlackHole_put_string,
 	HTBlackHole_write
-}; 
+};
 
 PRIVATE HTStream HTBlackHoleInstance =
 {
@@ -116,7 +116,7 @@ PRIVATE void HTFWriter_put_string ARGS2(HTStream *, me, CONST char*, s)
 */
 PRIVATE void HTFWriter_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 {
-    fwrite(s, 1, l, me->fp); 
+    fwrite(s, 1, l, me->fp);
 }
 
 
@@ -169,13 +169,13 @@ PRIVATE void HTFWriter_abort ARGS2(HTStream *, me, HTError, e)
 **	-----------------------
 */
 PRIVATE CONST HTStreamClass HTFWriter = /* As opposed to print etc */
-{		
+{
 	"FileWriter",
 	HTFWriter_free,
 	HTFWriter_abort,
 	HTFWriter_put_character, 	HTFWriter_put_string,
 	HTFWriter_write
-}; 
+};
 
 
 /*	Subclass-specific Methods
@@ -185,12 +185,12 @@ PRIVATE CONST HTStreamClass HTFWriter = /* As opposed to print etc */
 PUBLIC HTStream* HTFWriter_new ARGS1(FILE *, fp)
 {
     HTStream* me;
-    
+
     if (!fp) return NULL;
 
     me = (HTStream*)malloc(sizeof(*me));
     if (me == NULL) outofmem(__FILE__, "HTML_new");
-    me->isa = &HTFWriter;       
+    me->isa = &HTFWriter;
 
     me->fp = fp;
     me->end_command = NULL;
@@ -234,26 +234,28 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 {
     char *fnam;
     CONST char * suffix;
-    
+
     HTStream* me;
-    
+
     if (HTClientHost) {
         HTAlert(CANNOT_SAVE_REMOTE);
 	return HTBlackHole();
     }
-    
+
     me = (HTStream*)malloc(sizeof(*me));
     if (me == NULL) outofmem(__FILE__, "Save and execute");
-    me->isa = &HTFWriter;  
-    
+    me->isa = &HTFWriter;
+
     /* Save the file under a suitably suffixed name */
-    
+
     suffix = HTFileSuffix(pres->rep, anchor->content_encoding);
 
     fnam = (char *)malloc (L_tmpnam + 16 + strlen(suffix));
+    if (fnam == NULL)
+	outofmem(__FILE__, "HTSaveAndExecute");
     tmpnam (fnam);
     if (suffix) strcat(fnam, suffix);
-    
+
     me->fp = fopen (fnam, "w");
     if (!me->fp) {
 	HTAlert(CANNOT_OPEN_TEMP);
@@ -270,7 +272,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     me->remove_command = NULL;	/* If needed, put into end_command */
 #ifdef NOPE
 /*	Make command to delete file
-*/ 
+*/
     me->remove_command = 0;
     HTSprintf0(&(me->remove_command), REMOVE_COMMAND, fnam);
 #endif
@@ -301,34 +303,36 @@ PUBLIC HTStream* HTSaveLocally ARGS3(
     char *fnam;
     char *answer;
     CONST char * suffix;
-    
+
     HTStream* me;
-    
+
     if (HTClientHost) {
         HTAlert(CANNOT_SAVE_REMOTE);
 	return HTBlackHole();
     }
-    
+
     me = (HTStream*)malloc(sizeof(*me));
     if (me == NULL) outofmem(__FILE__, "SaveLocally");
-    me->isa = &HTFWriter;  
+    me->isa = &HTFWriter;
     me->end_command = NULL;
     me->remove_command = NULL;	/* If needed, put into end_command */
     me->announce = YES;
-    
+
     /* Save the file under a suitably suffixed name */
-    
+
     suffix = HTFileSuffix(pres->rep, anchor->content_encoding);
 
     fnam = (char *)malloc (L_tmpnam + 16 + strlen(suffix));
+    if (fnam == NULL)
+	outofmem(__FILE__, "HTSaveLocally");
     tmpnam (fnam);
     if (suffix) strcat(fnam, suffix);
-    
+
     /*	Save Panel */
     answer = HTPrompt(GIVE_FILENAME, fnam);
-    
+
     FREE(fnam);
-    
+
     me->fp = fopen (answer, "w");
     if (!me->fp) {
 	HTAlert(CANNOT_OPEN_OUTPUT);

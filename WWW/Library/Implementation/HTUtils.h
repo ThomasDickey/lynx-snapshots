@@ -115,11 +115,6 @@
 
 #endif
 
-
-#ifdef SHORT_NAMES
-#define WWW_TraceFlag HTTrFlag
-#endif
-
 /*
 
 Debug message control.

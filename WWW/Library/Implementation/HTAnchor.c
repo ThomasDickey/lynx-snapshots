@@ -372,6 +372,8 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 	hash = HASH_FUNCTION(newdoc->address);
 	if (!adult_table) {
 	    adult_table = (HTList **)calloc(HASH_SIZE, sizeof(HTList *));
+	    if (!adult_table)
+		outofmem(__FILE__, "HTAnchor_findAddress");
 	    atexit(free_adult_table);
 	}
 	if (!adult_table[hash])
@@ -785,16 +787,6 @@ PUBLIC HyperDoc * HTAnchor_document ARGS1(
 }
 
 
-/*  We don't want code to change an address after anchor creation... yet ?
-PUBLIC void HTAnchor_setAddress ARGS2(
-	HTAnchor *,	me,
-	char *, 	addr)
-{
-    if (me)
-	StrAllocCopy (me->parent->address, addr);
-}
-*/
-
 PUBLIC char * HTAnchor_address ARGS1(
 	HTAnchor *,	me)
 {
@@ -805,8 +797,13 @@ PUBLIC char * HTAnchor_address ARGS1(
 	    !((HTChildAnchor *)me)->tag) {  /* it's an adult or no tag */
 	    StrAllocCopy(addr, me->parent->address);
 	} else {  /* it's a named child */
-	    HTSprintf0(&addr, "%s#%s",
-			      me->parent->address, ((HTChildAnchor *)me)->tag);
+	    addr = malloc(2 +
+			  strlen(me->parent->address) +
+			  strlen(((HTChildAnchor *)me)->tag));
+	    if (addr == NULL)
+		outofmem(__FILE__, "HTAnchor_address");
+	    sprintf(addr, "%s#%s",
+			   me->parent->address, ((HTChildAnchor *)me)->tag);
 	}
     }
     return(addr);

@@ -15,11 +15,6 @@
 #include <HTAnchor.h>
 #include <HTMLDTD.h>
 
-#ifdef SHORT_NAMES
-#define HTMLPresentation        HTMLPren
-#define HTMLPresent             HTMLPres
-#endif /* SHORT_NAMES */
-
 /* #define ATTR_CS_IN (me->T.output_utf8 ? me->UCLYhndl : 0) */
 #define ATTR_CS_IN me->tag_charset
 

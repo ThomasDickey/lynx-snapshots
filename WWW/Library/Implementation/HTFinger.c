@@ -26,6 +26,9 @@
 */
 
 #include <HTUtils.h>
+
+#ifndef DISABLE_FINGER
+
 #include <HTAlert.h>
 #include <HTML.h>
 #include <HTParse.h>
@@ -416,3 +419,5 @@ GLOBALDEF (HTProtocol, HTFinger, _HTFINGER_C_1_INIT);
 #else
 GLOBALDEF PUBLIC HTProtocol HTFinger = { "finger", HTLoadFinger, NULL };
 #endif /* GLOBALDEF_IS_MACRO */
+
+#endif /* not DISABLE_FINGER */

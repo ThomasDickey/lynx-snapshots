@@ -55,12 +55,6 @@ PUBLIC int BSDselect PARAMS((
 
 #include <LYLeaks.h>
 
-#ifdef SHORT_NAMES
-#define HTInetStatus		HTInStat
-#define HTInetString		HTInStri
-#define HTParseInet		HTPaInet
-#endif /* SHORT_NAMES */
-
 #ifndef FD_SETSIZE
 #if defined(UCX) || defined(SOCKETSHR_TCP) || defined(CMU_TCP)
 #define FD_SETSIZE 32

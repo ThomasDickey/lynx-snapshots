@@ -19,9 +19,9 @@
 PUBLIC HTStyle* HTStyleNew NOARGS
 {
     HTStyle * self = (HTStyle *)malloc(sizeof(*self));
+    if (self == NULL)
+	outofmem(__FILE__, "HTStyleNew");
     memset((void *)self, 0, sizeof(*self));
-    self->font = (HTFont) 0;
-    self->color = 0;
     return self;
 }
 
@@ -72,6 +72,8 @@ HTStyle * HTStyleRead (HTStyle * style, HTStream * stream)
     if (gotpara) {
 	if (!style->paragraph) {
 	    style->paragraph = malloc(sizeof(*(style->paragraph)));
+	    if (!style->paragraph)
+		outofmem(__FILE__, "HTStyleRead");
 	    style->paragraph->tabs = 0;
 	}
 	p = style->paragraph;
@@ -86,6 +88,8 @@ HTStyle * HTStyleRead (HTStyle * style, HTStream * stream)
 	    &p->numTabs);
 	FREE(p->tabs);
 	p->tabs = malloc(p->numTabs * sizeof(p->tabs[0]));
+	if (!p->tabs)
+	    outofmem(__FILE__, "HTStyleRead");
 	for (tab=0; tab < p->numTabs; tab++) {
 	    NXScanf(stream, "%hd%f",
 		    &p->tabs[tab].kind,
@@ -284,6 +288,8 @@ HTStyleSheet * HTStyleSheetRemoveStyle ARGS2
 HTStyleSheet * HTStyleSheetNew NOARGS
 {
     HTStyleSheet * self = (HTStyleSheet *)malloc(sizeof(*self));
+    if (self == NULL)
+	outofmem(__FILE__, "HTStyleSheetNew");
 
     memset((void*)self, 0, sizeof(*self));	/* ANSI */
 /* Harbison c ref man says (char*)self

@@ -22,6 +22,7 @@ enum {
  DSTYLE_VALUE, 		/* value on the option screen */
  DSTYLE_HIGH,
  DSTYLE_CANDY,		/* possibly going to vanish */
+ DSTYLE_WHEREIS,	/* whereis search target */
  DSTYLE_ELEMENTS
 };
 
@@ -31,7 +32,7 @@ enum {
  MSTYLE_STRONG = 2,
  MSTYLE_PHYSICAL = 3,
  MSTYLE_A = 4,
- MSTYLE_A_OFF = 4, 
+ MSTYLE_A_OFF = 4,
  MSTYLE_A_ON,
  MSTYLE_BOLD,
  MSTYLE_UL,
@@ -55,6 +56,11 @@ typedef struct {
 extern void _internal_HTC PARAMS((HText * text, int style, int dir));
 #define TEMPSTRINGSIZE 256
 extern char class_string[TEMPSTRINGSIZE];
+
+/* stack of attributes during page rendering */
+extern int last_styles[128];
+extern int last_colorattr_ptr;
+
 #endif
 
 #endif

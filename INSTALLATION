@@ -113,6 +113,16 @@ II. Compile instructions -- UNIX
     environment variables BEFORE running configure.  See "1d. Environment".
     Use the "--with-screen=ncurses" or "--with-screen=slang" option.
 
+    Note that while lynx will build with a variety of versions of curses and
+    ncurses, some will be less satisfactory.  Versions of ncurses before 1.9.9g
+    will not render color properly (some of the interfaces did not match the
+    standard).  Some other versions of curses do not display color at all.
+    Likewise, lynx may not build with very old versions of slang, e.g., before
+    0.99-38 because slang's interfaces change periodically.
+
+    See also
+	http://www.clark.net/pub/dickey/ncurses/ncurses.faq.html
+
 1b. Platforms.  Configure should work properly on any Unix-style system.
     It has been tested on the following platforms.
 
@@ -214,7 +224,10 @@ II. Compile instructions -- UNIX
 	disable extended HTML DTD logic.  This should revert to old-style
 	(2.7.1/2.7.2) behavior, but is not well-tested.
 
-  --disable-forms-options               (define NO_OPTION_FORMS)
+  --disable-finger			(define DISABLE_FINGER)
+	Do not compile-in code used to connect to "finger" URLs.
+
+  --disable-forms-options		(define NO_OPTION_FORMS)
 	Disable the forms-based options screen.  (See --disable-menu-options).
 	Please note that a few users with broken curses may have problems with
 	popup forms fields.  The default behaviour is to compile both forms and
@@ -236,12 +249,15 @@ II. Compile instructions -- UNIX
   --disable-long-list			(prevent defining LONG_LIST)
   	Use this option to disable long "ls -l" directory listings.
 
-  --disable-menu-options                (define NO_OPTION_MENU)
+  --disable-menu-options		(define NO_OPTION_MENU)
 	Disable the menu-style options screen.  (See --disable-forms-options).
 	Please note that a few users with broken curses may have problems with
 	popup forms fields.  The default behaviour is to compile both styles
 	options menu code with FORMS_OPTIONS switch in lynx.cfg, or
 	-forms_options command-line switch.
+
+  --disable-news			(define DISABLE_NEWS)
+	Do not compile-in code used to connect to NEWS servers.
 
   --disable-parent-dir-refs		(define NO_PARENT_DIR_REFERENCE)
   	Use this option to disable "Up-to" parent-links in directory listings.
@@ -251,20 +267,20 @@ II. Compile instructions -- UNIX
 	it.
 
   --disable-trace			(define NO_LYNX_TRACE)
-	Turn off code that lets you trace internal details of Lynx's operation. 
+	Turn off code that lets you trace internal details of Lynx's operation.
 	We recommend that you leave this enabled, since we need this
 	information to diagnose problems with either Lynx or the sites to which
 	you connect.
 
-  --enable-addrlist-page                (define EXP_ADDRLIST_PAGE)
+  --enable-addrlist-page		(define EXP_ADDRLIST_PAGE)
 	Compiles-in an alternative list-page, bound to 'A' rather than 'l',
 	which always lists URLs rather than titles.
 
-  --enable-alt-bindings                 (define EXP_ALT_BINDINGS)
+  --enable-alt-bindings 		(define EXP_ALT_BINDINGS)
 	Compiles-in an alternative set of line-edit bindings, in addition
 	to the default bindings.
 
-  --enable-cgi-links                    (define LYNXCGI_LINKS)
+  --enable-cgi-links			(define LYNXCGI_LINKS)
 	Allows lynx to access a cgi script directly without the need for
 	a http daemon.
 
@@ -280,10 +296,10 @@ II. Compile instructions -- UNIX
 	configuration supports the use of 'default' for colors even without
 	this option.
 
-  --enable-exec-links                   (define EXEC_LINKS)
+  --enable-exec-links			(define EXEC_LINKS)
 	Allows lynx to execute programs by accessing a link.
 
-  --enable-exec-scripts                 (define EXEC_SCRIPTS)
+  --enable-exec-scripts 		(define EXEC_SCRIPTS)
 	Allows lynx to execute programs inferred from a link.
 
   --enable-externs			(define USE_EXTERNALS)
@@ -394,7 +410,8 @@ II. Compile instructions -- UNIX
     values rather than computing new ones.  Useful variables include:
 
 	CC - the C compiler.  If you do not override this, configure
-		will try to use gcc.
+		will try to use gcc. For instance, setting CC=cc and
+		exporting this value will cause configure to use cc instead.
 
 	CFLAGS - the C compiler options.  These also include C
 		preprocessor options (such as -I), since the $CFLAGS and

@@ -425,6 +425,8 @@ PUBLIC int HTAA_checkAuthorization ARGS4(CONST char *,	url,
 	HTAAFailReason = HTAA_DOTDOT;
     }
     else {
+
+#ifndef NO_RULES
 	pathname = HTTranslate(local_copy); /* Translate rules even if */
 					    /* a /htbin call to set up */
 					    /* protections.	       */
@@ -437,6 +439,8 @@ PUBLIC int HTAA_checkAuthorization ARGS4(CONST char *,	url,
 		    *end = '\0';
 		FREE(pathname);
 		pathname=(char*)malloc(strlen(HTBinDir)+strlen(local_copy)+1);
+		if (pathname == NULL)
+		    outofmem(__FILE__, "HTAA_checkAuthorization");
 		strcpy(pathname, HTBinDir);
 		strcat(pathname, local_copy+6);
 	    }
@@ -447,6 +451,8 @@ PUBLIC int HTAA_checkAuthorization ARGS4(CONST char *,	url,
 	    HTAAFailReason = HTAA_BY_RULE;
 	}
 	else if (HTAAFailReason != HTAA_HTBIN) {
+#endif /* NO_RULES */
+
 	    /* pathname != NULL */
 	    char *acc_method = HTParse(pathname, "", PARSE_ACCESS);
 	    if (!*acc_method || 0 == strcmp(acc_method,"file")) { /*Local file, do AA*/
@@ -464,7 +470,11 @@ PUBLIC int HTAA_checkAuthorization ARGS4(CONST char *,	url,
 			    "Gatewaying -- skipping authorization check",
 			    acc_method);
 	    }
+
+#ifndef NO_RULES
 	} /* pathname */
+#endif /* NO_RULES */
+
     }
     FREE(local_copy);
 

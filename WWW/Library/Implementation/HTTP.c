@@ -650,6 +650,8 @@ try_again:
     int buffer_length = INIT_LINE_SIZE;
 
     line_buffer = (char *)calloc(1, (buffer_length * sizeof(char)));
+    if (line_buffer == NULL)
+	outofmem(__FILE__, "HTLoadHTTP");
 
     HTReadProgress (bytes_already_read = 0, 0);
     do {/* Loop to read in the first line */
@@ -660,6 +662,8 @@ try_again:
 	    buffer_length = buffer_length + buffer_length;
 	    line_buffer =
 	      (char *)realloc(line_buffer, (buffer_length * sizeof(char)));
+	    if (line_buffer == NULL)
+		outofmem(__FILE__, "HTLoadHTTP");
 	}
 	CTRACE (tfp, "HTTP: Trying to read %d\n",
 		     buffer_length - length - 1);
@@ -729,6 +733,8 @@ try_again:
 	if (line_buffer) {
 	    FREE(line_kept_clean);
 	    line_kept_clean = (char *)malloc(buffer_length * sizeof(char));
+	    if (line_kept_clean == NULL)
+		outofmem(__FILE__, "HTLoadHTTP");
 	    memcpy(line_kept_clean, line_buffer, buffer_length);
 	}
 

@@ -36,23 +36,6 @@ Overriding this module
 
 typedef long int HTFont;        /* Dummy definition instead */
 
-#ifdef SHORT_NAMES
-#define HTStyleNew                      HTStNew
-#define HTStyleFree                     HTStFree
-#define HTStyleRead                     HTStRead
-#define HTStyleWrite                    HTStWrite
-#define HTStyleSheetNew                 HTStShNe
-#define HTStyleSheetFree                HTStShFr
-#define HTStyleNamed                    HTStName
-#define HTStyleForParagraph             HTStFoPa
-#define HTStyleMatching                 HTStMatc
-#define HTStyleForRun                   HTStFoRu
-#define HTStyleSheetAddStyle            HTStShAd
-#define HTStyleSheetRemoveStyle         HTStShRm
-#define HTStyleSheetRead                HTStShRe
-#define HTStyleSheetWrite               HTStShWr
-#endif
-
 #ifdef NeXT_suppressed
 #include <appkit/appkit.h>
 typedef NXCoord HTCoord;

@@ -1,15 +1,11 @@
 /*                         LEXICAL ANALYSOR (MAINLY FOR CONFIG FILES)
-                                             
+
  */
 
 #ifndef HTLEX_H
 #define HTLEX_H
 
 #include <HTUtils.h>
-
-#ifdef SHORT_NAMES
-#define lex_verb        lex_verbose
-#endif /*SHORT_NAMES*/
 
 typedef enum {
     LEX_NONE,		/* Internally used      */
@@ -32,7 +28,7 @@ extern int HTlex_line;		/* Line number in source file   */
 Get Next Lexical Item
 
    If returns LEX_ALPH_STR or LEX_TMPL_STR the string is in global buffer lex_buffer.
-   
+
  */
 
 PUBLIC LexItem lex PARAMS((FILE * fp));

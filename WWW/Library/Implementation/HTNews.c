@@ -8,6 +8,8 @@
 
 #include <HTUtils.h>		/* Coding convention macros */
 
+#ifndef DISABLE_NEWS
+
 /* Implements:
 */
 #include <HTNews.h>
@@ -2820,3 +2822,5 @@ GLOBALDEF PUBLIC HTProtocol HTSNews = { "snews", HTLoadNews, NULL };
 GLOBALDEF PUBLIC HTProtocol HTSNewsPost = { "snewspost", HTLoadNews, NULL };
 GLOBALDEF PUBLIC HTProtocol HTSNewsReply = { "snewsreply", HTLoadNews, NULL };
 #endif /* GLOBALDEF_IS_MACRO */
+
+#endif /* not DISABLE_NEWS */

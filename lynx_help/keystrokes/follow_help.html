@@ -46,19 +46,25 @@ navigation aid.
 <p>Finally, a user may add a <em>+</em> or <em>-</em> suffix to a number
 command to indicate jumping forward or back relative to the current link or
 page.
-For example,
-typing
-<em>1g+</em> followed by RETURN will move the current
-link to the next numbered link, skipping any intervening
-pages or unnumbered links.  <em>1g-</em> goes to the preceeding
-numbered link.  <em>5p+</em> skips ahead 5 pages, and so on.
+For example, typing <em>1g+</em> followed by RETURN will move the current
+link to the next numbered link, skipping any intervening pages
+or unnumbered links; <em>1g-</em> goes to the preceding numbered link.
+On a page without links, <em>3g+</em> goes to the 3rd link <em>following</em>
+the page.  <em>5p+</em> skips ahead 5 pages, and so on.
+You can also enter <em>5+</em> or <em>5-</em>, which will activate
+the 5th link ahead/behind where you are currently positioned.
 Note that typing <em>1g+</em> is different from typing a down arrow
 in that <em>1g+</em> may skip pages containing no links, or
 intervening non-numbered links, such as form fields when
 form fields are not numbered.  It also differs from
 the <em>&lt;tab&gt;</em> command in that <em>1g+</em>
 does not skip over whole textareas, unless form fields
-are not numbered..
+are not numbered.
+
+<p>
+<em>NOTE:</em> <em>1+g 1-g 1+p 1-p</em> are all recognized as equivalent<br>
+to <em>1g+ 1g- 1p+ 1p-</em> .  Any other (mistyped) characters terminate<br>
+the formula: e.g. <em>1gh+</em> is treated as <em>1g</em>.
 
 <p>If the user has set <em>Keypad mode</em> to <em>Numbers act as arrows</em>,
 then only '<em>0</em>', rather than every number, will be treated as an

@@ -825,9 +825,8 @@ PUBLIC CONST char * HTMLGetEntityName ARGS1(
 }
 
 /*
- *  Function to return the UCode_t (long int) value for entity names
- *  in the ISO_Latin1 and UC_entity_info unicode_entities arrays.
- *  It returns 0 if not found. - FM
+ *  Function to return the UCode_t (long int) value for entity names.
+ *  It returns 0 if not found.
  *
  *  unicode_entities[] handles all the names from old style entities[] too.
  *  Lynx now calls unicode_entities[] only through this function:
@@ -841,10 +840,12 @@ PUBLIC CONST char * HTMLGetEntityName ARGS1(
 PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
 	CONST char *,	name)
 {
+#include <entities.h>
+
     UCode_t value = 0;
     size_t i, high, low;
     int diff = 0;
-    CONST UC_entity_info * unicode_entities = HTML_dtd.unicode_entity_info;
+    size_t number_of_unicode_entities = sizeof(unicode_entities)/sizeof(unicode_entities[0]);
 
     /*
      *	Make sure we have a non-zero length name. - FM
@@ -856,12 +857,12 @@ PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
      *	Try UC_entity_info unicode_entities[].
      */
 #ifdef    NOT_ASCII  /* S/390 -- gil -- 1656 */
-    for (i = 0; i < HTML_dtd.number_of_unicode_entities; i++ ) {
+    for (i = 0; i < number_of_unicode_entities; i++ ) {
 	/*
 	**  Linear search for NOT_ASCII.
 	*/
 #else  /* NOT_ASCII */
-    for (low = 0, high = HTML_dtd.number_of_unicode_entities;
+    for (low = 0, high = number_of_unicode_entities;
 	 high > low;
 	 diff < 0 ? (low = i+1) : (high = i)) {
 	/*

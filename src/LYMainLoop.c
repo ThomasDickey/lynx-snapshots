@@ -1,6 +1,5 @@
 #include <HTUtils.h>
 #include <HTAccess.h>
-#include <HTParse.h>
 #include <HTList.h>
 #include <HTML.h>
 #include <HTFTP.h>
@@ -1830,7 +1829,7 @@ new_cmd:  /*
 	    /* pass cur line num for use in follow_link_number()
 	     * Note: Current line may not equal links[cur].line
 	     */
-	    newdoc.line = curdoc.line;
+	    number = curdoc.line;
 	    switch (follow_link_number(c, lindx, &newdoc, &number)) {
 	    case DO_LINK_STUFF:
 		/*
@@ -2525,7 +2524,7 @@ new_cmd:  /*
 	    } else if (more &&	/* need a later page */
 		       HTGetLinkOrFieldStart(curdoc.link,
 					     &Newline, &newdoc.link,
-					     +1, TRUE) != NO) {
+					     1, TRUE) != NO) {
 		Newline++;	/* our line counting starts with 1 not 0 */
 		/* nothing more to do here */
 
@@ -3422,7 +3421,7 @@ new_cmd:  /*
 	    LYstrncpy(user_input_buffer,
 		      ((links[curdoc.link].type == WWW_FORM_LINK_TYPE)
 						?
-	 links[curdoc.link].form->submit_action : links[curdoc.link].lname),
+	    links[curdoc.link].form->submit_action : links[curdoc.link].lname),
 		      (sizeof(user_input_buffer) - 1));
 
 	    /*
@@ -3436,19 +3435,7 @@ new_cmd:  /*
 		       ((links[curdoc.link].type == WWW_FORM_LINK_TYPE)
 				? links[curdoc.link].form->submit_action
 				: links[curdoc.link].lname))) {
-		LYTrimHead(user_input_buffer);
-		if (!strncasecomp(user_input_buffer, "lynxexec:", 9) ||
-		    !strncasecomp(user_input_buffer, "lynxprog:", 9)) {
-		    /*
-		     *	The original implementations of these schemes expected
-		     *	white space without hex escaping, and did not check
-		     *	for hex escaping, so we'll continue to support that,
-		     *	until that code is redone in conformance with SGML
-		     *	principles.  - FM
-		     */
-		    HTUnEscapeSome(user_input_buffer, " \r\n\t");
-		    convert_to_spaces(user_input_buffer, TRUE);
-		} else {
+		if (!LYTrimStartfile(user_input_buffer)) {
 		    LYRemoveBlanks(user_input_buffer);
 		}
 		if (user_input_buffer[0] != '\0') {
@@ -3520,19 +3507,7 @@ new_cmd:  /*
 				sizeof(user_input_buffer), RECALL)) >= 0) &&
 		user_input_buffer[0] != '\0' &&
 		strcmp(user_input_buffer, curdoc.address)) {
-		LYTrimHead(user_input_buffer);
-		if (!strncasecomp(user_input_buffer, "lynxexec:", 9) ||
-		    !strncasecomp(user_input_buffer, "lynxprog:", 9)) {
-		    /*
-		     *	The original implementations of these schemes expected
-		     *	white space without hex escaping, and did not check
-		     *	for hex escaping, so we'll continue to support that,
-		     *	until that code is redone in conformance with SGML
-		     *	principles.  - FM
-		     */
-		    HTUnEscapeSome(user_input_buffer, " \r\n\t");
-		    convert_to_spaces(user_input_buffer, TRUE);
-		} else {
+		if (!LYTrimStartfile(user_input_buffer)) {
 		    LYRemoveBlanks(user_input_buffer);
 		}
 		if (user_input_buffer[0] != '\0') {
@@ -3592,19 +3567,7 @@ check_recall:
 	    /*
 	     *	Get rid of leading spaces (and any other spaces).
 	     */
-	    LYTrimHead(user_input_buffer);
-	    if (!strncasecomp(user_input_buffer, "lynxexec:", 9) ||
-		!strncasecomp(user_input_buffer, "lynxprog:", 9)) {
-		/*
-		 *  The original implementations of these schemes expected
-		 *  white space without hex escaping, and did not check
-		 *  for hex escaping, so we'll continue to support that,
-		 *  until that code is redone in conformance with SGML
-		 *  principles.  - FM
-		 */
-		HTUnEscapeSome(user_input_buffer, " \r\n\t");
-		convert_to_spaces(user_input_buffer, TRUE);
-	    } else {
+	    if (!LYTrimStartfile(user_input_buffer)) {
 		LYRemoveBlanks(user_input_buffer);
 	    }
 	    if (*user_input_buffer == '\0' &&
@@ -3771,6 +3734,7 @@ check_goto_URL:
 		       !strncmp(user_input_buffer, "mailto:", 7)) {
 		HTUserMsg(GOTO_MAILTO_DISALLOWED);
 
+#ifndef DISABLE_NEWS
 	    } else if (no_goto_news &&
 		       !strncmp(user_input_buffer, "news:", 5)) {
 		HTUserMsg(GOTO_NEWS_DISALLOWED);
@@ -3778,14 +3742,17 @@ check_goto_URL:
 	    } else if (no_goto_nntp &&
 		       !strncmp(user_input_buffer, "nntp:", 5)) {
 		HTUserMsg(GOTO_NNTP_DISALLOWED);
+#endif
 
 	    } else if (no_goto_rlogin &&
 		       !strncmp(user_input_buffer, "rlogin:", 7)) {
 		HTUserMsg(GOTO_RLOGIN_DISALLOWED);
 
+#ifndef DISABLE_NEWS
 	    } else if (no_goto_snews &&
 		       !strncmp(user_input_buffer, "snews:", 6)) {
 		HTUserMsg(GOTO_SNEWS_DISALLOWED);
+#endif
 
 	    } else if (no_goto_telnet &&
 		       !strncmp(user_input_buffer, "telnet:", 7)) {
@@ -4019,15 +3986,13 @@ if (!LYUseFormsOptions) {
 #endif /* !NO_OPTION_MENU */
 #ifndef NO_OPTION_FORMS
 	    /*
-	     * FIXME: Blatantly stolen from LYK_PRINT below.
-	     * how much is really valid here?  I don't know the
-	     * innards well enough. MRC
+	     * FIXME: Blatantly stolen from LYK_PRINT below,
+	     * except ForcePush special.
 	     */
 	    /*
 	     *	Don't do if already viewing options page.
 	     */
-	    if (strcmp((curdoc.title ? curdoc.title : ""),
-		       OPTIONS_TITLE)) {
+	    if (strcmp((curdoc.title ? curdoc.title : ""), OPTIONS_TITLE)) {
 
 		if (gen_options(&newdoc.address) < 0)
 		    break;
@@ -4042,12 +4007,12 @@ if (!LYUseFormsOptions) {
 		refresh_screen = TRUE;	/* redisplay */
 
 		/*
-		 * FIXME:  this is a temporary solution until we find the
-		 * correct place for this command to reload the document
+		 * FIXME:  this was a temporary solution until we find the
+		 * correct place in postoptions() to reload the document
 		 * before the 'options menu' only when (few) important options
 		 * were changed.
 		 */
-		HTuncache_current_document();
+/*             HTuncache_current_document(); */
 	    }
 #endif /* !NO_OPTION_FORMS */
 	    break;
@@ -5218,6 +5183,14 @@ check_add_bookmark_to_self:
 			    }
 			    break;
 			}
+			if (!strncmp(links[curdoc.link].form->submit_action,
+				"LYNXOPTIONS:", 12)) {
+			    if (old_c != real_c) {
+				old_c = real_c;
+				HTUserMsg(NO_DOWNLOAD_SPECIAL);
+			    }
+			    break;
+			}
 			HTOutputFormat = HTAtom_for("www/download");
 			LYforce_no_cache = TRUE;
 			cmd = LYK_ACTIVATE;
@@ -5711,20 +5684,7 @@ check_add_bookmark_to_self:
 			}
 #endif /* PERMIT_GOTO_FROM_JUMP */
 			ret = HTParse(ret, startfile, PARSE_ALL);
-			LYTrimHead(ret);
-			if (!strncasecomp(ret, "lynxexec:", 9) ||
-			    !strncasecomp(ret, "lynxprog:", 9)) {
-			    /*
-			     *	The original implementations of these schemes
-			     *	expected white space without hex escaping,
-			     *	and did not check for hex escaping, so we'll
-			     *	continue to support that, until that code is
-			     *	redone in conformance with SGML principles.
-			     *	- FM
-			     */
-			    HTUnEscapeSome(ret, " \r\n\t");
-			    convert_to_spaces(ret, TRUE);
-			} else {
+			if (!LYTrimStartfile(ret)) {
 			    LYRemoveBlanks(user_input_buffer);
 			}
 			StrAllocCopy(newdoc.address, ret);
@@ -5753,7 +5713,9 @@ check_add_bookmark_to_self:
 		    FREE(proxyauth_info[0]);
 		    FREE(proxyauth_info[1]);
 		    HTClearHTTPAuthInfo();
+#ifndef DISABLE_NEWS
 		    HTClearNNTPAuthInfo();
+#endif
 		    HTClearFTPPassword();
 		    HTUserMsg(AUTH_INFO_CLEARED);
 		} else {

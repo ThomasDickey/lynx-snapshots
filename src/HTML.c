@@ -605,42 +605,10 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
 #endif /* DONT_TRACK_INTERNAL_LINKS */
 
 #ifdef USE_COLOR_STYLE
-char class_string[TEMPSTRINGSIZE];
-#endif
-
-#ifdef USE_COLOR_STYLE
 static char *Style_className = NULL;
 static char myHash[128];
 static int hcode;
 #endif
-
-#ifdef USE_COLOR_STYLE
-PRIVATE void TrimColorClass ARGS1(char *, tagname)
-{
-    char *end, *start=NULL, *lookfrom;
-    char tmp[64];
-
-    sprintf(tmp, ";%.*s", (int) sizeof(tmp) - 3, tagname);
-    strtolower(tmp);
-
-    if ((lookfrom = Style_className) != 0) {
-	do {
-	    end = start;
-	    start = strstr(lookfrom, tmp);
-	    if (start)
-		lookfrom = start + 1;
-	}
-	while (start);
-	/* trim the last matching element off the end
-	** - should match classes here as well (rp)
-	*/
-	if (end)
-	    *end='\0';
-    }
-    hcode = hash_code(lookfrom && *lookfrom ? lookfrom : &tmp[1]);
-    CTRACE(tfp, "CSS:%s (trimmed %s)\n", Style_className, tmp);
-}
-#endif /* USE_COLOR_STYLE */
 
 /*	Start Element
 **	-------------
@@ -1026,10 +994,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    !strcasecomp(value[HTML_LINK_REL], "Documentation") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Biblioentry") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Bibliography") ||
-		    !strcasecomp(value[HTML_LINK_REL], "Alternate") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Start") ||
-		    !strcasecomp(value[HTML_LINK_REL], "Section") ||
-		    !strcasecomp(value[HTML_LINK_REL], "Subsection") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Appendix")) {
 		    StrAllocCopy(title, value[HTML_LINK_REL]);
 		    pdoctitle = &title;	/* for setting HTAnchor's title */
@@ -1046,10 +1011,13 @@ PRIVATE void HTML_start_element ARGS6(
 		    !strcasecomp(value[HTML_LINK_REL], "Pointer") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Translation") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Definition") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Alternate") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Section") ||
+		    !strcasecomp(value[HTML_LINK_REL], "Subsection") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Chapter")) {
 		    StrAllocCopy(title, value[HTML_LINK_REL]);
 		    /* not setting target HTAnchor's title, for these
-		       link of highly relative character.  Instead,
+		       links of highly relative character.  Instead,
 		       try to remember the REL attribute as a property
 		       of the link (but not the destination), in the
 		       (otherwise underused) link type in a special format;
@@ -1168,7 +1136,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    value && *value[HTML_LINK_CLASS]!='\0')
 	    {
 		char *tmp = 0;
-		HTSprintf0(&tmp, "link.%s.%s.%s", value[HTML_LINK_CLASS], title, value[HTML_LINK_CLASS]);
+		HTSprintf0(&tmp, "link.%s.%s", value[HTML_LINK_CLASS], title);
 		CTRACE(tfp, "CSSTRIM:link=%s\n", tmp);
 
 		HText_characterStyle(me->text, hash_code(tmp), 1);
@@ -5303,7 +5271,8 @@ PRIVATE void HTML_start_element ARGS6(
 #else
 	HText_characterStyle(me->text, hcode, STACK_OFF);
 #endif /* USE_HASH */
-	TrimColorClass(HTML_dtd.tags[element_number].name);
+	TrimColorClass(HTML_dtd.tags[element_number].name,
+		       Style_className, &hcode);
     }
 #endif /* USE_COLOR_STYLE */
 }
@@ -6589,6 +6558,11 @@ End_Object:
 
 /* These TABLE related elements may now not be SGML_EMPTY. - kw */
     case HTML_TR:
+	if (HText_LastLineSize(me->text, FALSE)) {
+	    HText_setLastChar(me->text, ' ');  /* absorb next white space */
+	    HText_appendCharacter(me->text, '\r');
+	}
+	me->in_word = NO;
 	break;
 
     case HTML_THEAD:
@@ -6643,7 +6617,8 @@ End_Object:
 
     } /* switch */
 #ifdef USE_COLOR_STYLE
-    TrimColorClass(HTML_dtd.tags[element_number].name);
+    TrimColorClass(HTML_dtd.tags[element_number].name,
+		   Style_className, &hcode);
 
     if (!REALLY_EMPTY(element_number))
     {
@@ -7329,6 +7304,9 @@ PUBLIC HTStructured* HTML_new ARGS3(
 **	----------------------------------
 **
 **	This will convert from HTML to presentation or plain text.
+**
+**	It is registered in HTInit.c, but never actually used by lynx.
+**	- kw 1999-03-15
 */
 PUBLIC HTStream* HTMLToPlain ARGS3(
 	HTPresentation *,	pres,
@@ -7342,6 +7320,12 @@ PUBLIC HTStream* HTMLToPlain ARGS3(
 **	-----------------------------------------
 **
 **	This will preparse HTML and convert back to presentation or plain text.
+**
+**	It is registered in HTInit.c and used by lynx if invoked with
+**	-preparsed.  The stream generated here will be fed with HTML text,
+**	It feeds that to the SGML.c parser, which in turn feeds an HTMLGen.c
+**	structured stream for regenerating flat text; the latter should
+**	end up being handled as text/plain. - kw
 */
 PUBLIC HTStream* HTMLParsedPresent ARGS3(
 	HTPresentation *,	pres,
@@ -7365,10 +7349,14 @@ PUBLIC HTStream* HTMLParsedPresent ARGS3(
 	HTAnchor_setUCInfoStage(anchor, structured_cset,
 				UCT_STAGE_PARSER, UCT_SETBY_MIME);
 	if (pres->rep_out == WWW_SOURCE) {
-/*	    intermediate = HTPlainPresent(pres, anchor, NULL); */
+		/*  same effect as
+	    intermediate = HTPlainPresent(pres, anchor, NULL);
+		    just written in a more general way:
+		 */
 	    intermediate = HTStreamStack(WWW_PLAINTEXT, WWW_PRESENT,
 					 NULL, anchor);
 	} else {
+	    	/*  this too should amount to calling HTPlainPresent: */
 	    intermediate = HTStreamStack(WWW_PLAINTEXT, pres->rep_out,
 					 NULL, anchor);
 	}
@@ -7393,6 +7381,9 @@ PUBLIC HTStream* HTMLParsedPresent ARGS3(
 **	C code is like plain text but all non-preformatted code
 **	is commented out.
 **	This will convert from HTML to presentation or plain text.
+**
+**	It is registered in HTInit.c, but never actually used by lynx.
+**	- kw 1999-03-15
 */
 PUBLIC HTStream* HTMLToC ARGS3(
 	HTPresentation *,	pres GCC_UNUSED,
@@ -7414,6 +7405,7 @@ PUBLIC HTStream* HTMLToC ARGS3(
 **
 **	This will convert from HTML to presentation or plain text.
 **
+** (Comment from original libwww:)
 **	Override this if you have a windows version
 */
 #ifndef GUI
@@ -7426,6 +7418,7 @@ PUBLIC HTStream* HTMLPresent ARGS3(
 }
 #endif /* !GUI */
 
+/* (Comments from original libwww:) */
 /*	Record error message as a hypertext object
 **	------------------------------------------
 **
@@ -7443,6 +7436,10 @@ PUBLIC HTStream* HTMLPresent ARGS3(
 **
 ** On exit,
 **	returns a negative number to indicate lack of success in the load.
+*/
+/* (We don't actually do any of that hypertext stuff for errors,
+   the trivial implementation for lynx just generates a message
+   and returns. - kw 1999-03-15)
 */
 PUBLIC int HTLoadError ARGS3(
 	HTStream *,	sink GCC_UNUSED,

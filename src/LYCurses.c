@@ -34,7 +34,11 @@ extern int _NOSHARE(COLS);
 int lynx_has_color = FALSE;
 #endif
 
+#if defined(USE_COLOR_STYLE) && !USE_COLOR_TABLE
+#define COLOR_BKGD ((s_normal != NOSTYLE) ? hashStyles[s_normal].color : A_NORMAL)
+#else
 #define COLOR_BKGD ((COLOR_PAIRS >= 9) ? COLOR_PAIR(9) : A_NORMAL)
+#endif
 
 /*
  *  These are routines to start and stop curses and to cleanup
@@ -251,11 +255,6 @@ PUBLIC void LYbox ARGS2(
 #endif /* USE_SLANG */
 
 #if defined(USE_COLOR_STYLE)
-PRIVATE int last_styles[128];
-PRIVATE int last_ptr=0;
-#endif
-
-#if defined(USE_COLOR_STYLE)
 /* Ok, explanation of the USE_COLOR_STYLE styles.  The basic styles (ie non
  * HTML) are set the same as the SLANG version for ease of programming.  The
  * other styles are simply the HTML enum from HTMLDTD.h + 16.
@@ -335,8 +334,8 @@ PUBLIC void curses_w_style ARGS3(
 	{
 		/* ABS_OFF is the same as STACK_OFF for the moment */
 	case STACK_OFF:
-		if (last_ptr) {
-		    int last_attr = last_styles[--last_ptr];
+		if (last_colorattr_ptr) {
+		    int last_attr = last_styles[--last_colorattr_ptr];
 		    LYAttrset(win,last_attr,last_attr);
 		}
 		else
@@ -344,14 +343,14 @@ PUBLIC void curses_w_style ARGS3(
 		return;
 
 	case STACK_ON: /* remember the current attributes */
-		if (last_ptr > 127) {
+		if (last_colorattr_ptr > 127) {
 		    CTRACE(tfp,"........... %s (0x%x) %s\r\n",
 				"attribute cache FULL, dropping last",
-				last_styles[last_ptr],
+				last_styles[last_colorattr_ptr],
 				"in LynxChangeStyle(curses_w_style)");
-		    last_ptr--;
+		    last_colorattr_ptr--;
 		}
-		last_styles[last_ptr++] = getattrs(stdscr);
+		last_styles[last_colorattr_ptr++] = getattrs(stdscr);
 		/* don't cache style changes for active links */
 		if (style != s_alink)
 		{
@@ -1027,8 +1026,8 @@ PUBLIC BOOLEAN setup ARGS1(
 PUBLIC BOOLEAN setup ARGS1(
 	char *, 	terminal)
 {
-    static char *term_putenv;
-    char buffer[120];
+    static char term_putenv[112];
+    char buffer[108];
     char *cp;
 #if defined(HAVE_SIZECHANGE) && !defined(USE_SLANG) && defined(NOTDEFINED)
 /*
@@ -1064,7 +1063,7 @@ PUBLIC BOOLEAN setup ARGS1(
     }
 
     if (terminal != NULL) {
-	HTSprintf0(&term_putenv, "TERM=%s", terminal);
+	sprintf(term_putenv, "TERM=%.106s", terminal);
 	(void) putenv(term_putenv);
     }
 
@@ -1084,9 +1083,9 @@ PUBLIC BOOLEAN setup ARGS1(
 	if (strlen(buffer) == 0)
 	    strcpy(buffer,"vt100");
 
-	HTSprintf0(&term_putenv,"TERM=%s", buffer);
+	sprintf(term_putenv,"TERM=%.106s", buffer);
 	(void) putenv(term_putenv);
-	printf("\n%s%s\n", gettext("TERMINAL TYPE IS SET TO"), getenv("TERM"));
+	printf("\n%s %s\n", gettext("TERMINAL TYPE IS SET TO"), getenv("TERM"));
 	sleep(MESSAGESECS);
     }
 
@@ -1189,6 +1188,12 @@ PUBLIC void LYsubAttr ARGS1(
 
 PUBLIC void LYstartTargetEmphasis NOARGS
 {
+#ifdef USE_COLOR_STYLE
+    if (s_whereis != NOSTYLE) {
+	curses_style(s_whereis, STACK_ON);
+	return;
+    }
+#endif
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
     start_bold();
     start_reverse();
@@ -1198,6 +1203,12 @@ PUBLIC void LYstartTargetEmphasis NOARGS
 
 PUBLIC void LYstopTargetEmphasis NOARGS
 {
+#ifdef USE_COLOR_STYLE
+    if (s_whereis != NOSTYLE) {
+	curses_style(s_whereis, STACK_OFF);
+	return;
+    }
+#endif
     stop_underline();
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
     stop_reverse();
@@ -1685,11 +1696,9 @@ PUBLIC void lynx_force_repaint NOARGS
 {
 #if defined(COLOR_CURSES)
     chtype a;
-#ifndef USE_COLOR_STYLE
     if (LYShowColor >= SHOW_COLOR_ON)
 	a = COLOR_BKGD;
     else
-#endif
 	a = A_NORMAL;
     bkgdset(a | ' ');
 #ifndef USE_COLOR_STYLE

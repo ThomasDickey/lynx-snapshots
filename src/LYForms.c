@@ -552,6 +552,8 @@ PRIVATE int get_popup_option_number ARGS2(
     default:
 	*c = *p++;
 	*rel = *p;
+    case 0:
+	break;
     }
 
     /*
@@ -1094,6 +1096,7 @@ redraw:
 		break;
 
 	    case LYK_PREV_LINK:
+	    case LYK_FASTBACKW_LINK:
 	    case LYK_UP_LINK:
 
 		if (cur_selection > 0)
@@ -1109,6 +1112,7 @@ redraw:
 		break;
 
 	    case LYK_NEXT_LINK:
+	    case LYK_FASTFORW_LINK:
 	    case LYK_DOWN_LINK:
 		if (cur_selection < num_options)
 		    cur_selection++;

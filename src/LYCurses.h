@@ -325,7 +325,11 @@ extern int  lynx_chg_color PARAMS((int, int, int));
 #else /* not UNDERLINE_LINKS: */
 #define start_bold()		LYaddAttr(A_BOLD)
 #define stop_bold()		LYsubAttr(A_BOLD)
+#ifdef USE_COLOR_STYLE
+#define start_underline()	attron(A_UNDERLINE) /* allow combining - kw */
+#else
 #define start_underline()	LYaddAttr(A_UNDERLINE)
+#endif /* USE_COLOR_STYLE */
 #define stop_underline()	LYsubAttr(A_UNDERLINE)
 #endif /* UNDERLINE_LINKS */
 #if defined(SNAKE) && defined(HP_TERMINAL)

@@ -342,27 +342,26 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 	**  Use Lynx special character for shy.
 	*/
 	PUTC(LY_SOFT_HYPHEN);
-    } else if (code == 8194 || code == 8195 || code == 8201) {
+    } else if (code == 8194 || code == 8201) {
 	/*
-	**  Use Lynx special character for ensp, emsp or thinsp.
+	**  Use Lynx special character for ensp or thinsp.
 	**
 	**  Originally, Lynx use space '32' as word delimiter and omits this
 	**  space at end of line if word is wrapped to the next line.  There
 	**  are several other spaces in the Unicode repertoire and we should
 	**  teach Lynx to understand them, not only as regular characters but
 	**  in the context of line wrapping.  Unfortunately, if we use
-	**  HT_EM_SPACE we override the chartrans tables for those spaces
-	**  (e.g., emsp= double space) with a single '32' for all (but do line
-	**  wrapping more fancy).  So we probably need HT_EN_SPACE etc...
+	**  HT_EN_SPACE we override the chartrans tables for those spaces
+	**  with a single '32' for all (but do line wrapping more fancy).
+	**  Assume emsp as two ensp (below).
 	*/
-	PUTC(HT_EM_SPACE);
-#ifdef NOTUSED_FOTEMODS
-    } else if (code == 8211 || code == 8212) {
+	PUTC(HT_EN_SPACE);
+    } else if (code == 8195) {
 	/*
-	**  Use ASCII hyphen for ndash/endash or mdash/emdash.
+	**  Use Lynx special character for emsp.
 	*/
-	PUTC('-');
-#endif
+	PUTC(HT_EN_SPACE);
+	PUTC(HT_EN_SPACE);
     } else {
 	/*
 	**  Return NO if nothing done.
@@ -704,7 +703,7 @@ PRIVATE void end_element ARGS2(
 	}
 
 	if (stackpos == 0 && old_tag->contents != SGML_EMPTY) {
-	    CTRACE(tfp, "SGML: Still open %s, no open %s for </%s>\n",
+	    CTRACE(tfp, "SGML: Still open %s, ***no open %s for </%s>\n",
 			context->element_stack ?
 			context->element_stack->tag->name : "none",
 			old_tag->name,
@@ -844,7 +843,7 @@ PRIVATE void start_element ARGS1(
 	    for (; i< new_tag->number_of_attributes && !has_attributes; i++)
 		has_attributes = context->present[i];
 	    if (!has_attributes) {
-		CTRACE(tfp, "SGML: Still open %s, converting invalid <%s> to </%s>\n",
+		CTRACE(tfp, "SGML: Still open %s, ***converting invalid <%s> to </%s>\n",
 			    context->element_stack->tag->name,
 			    new_tag->name,
 			    new_tag->name);
@@ -1609,10 +1608,11 @@ top1:
 	    **	If Mismatch: recover string.
 	    */
 	    PUTC('<');
-	    for (i = 0; i < string->size; i++)	/* recover */
+	    for (i = 0; i < string->size-1; i++)  /* recover, except last c */
 	       PUTC(string->data[i]);
 	    string->size = 0;
 	    context->state = S_text;
+	    goto top1;		/* to recover last c */
 	}
 	break;
 

@@ -27,6 +27,12 @@ extern void style_defaultStyleSheet NOPARAMS;
 
 extern int style_readFromFile PARAMS((char* file));
 
+
+extern void TrimColorClass PARAMS((
+    CONST char *	tagname,
+    char *		styleclassname,
+    int *		phcode));
+
 #endif /* USE_COLOR_STYLE */
 
 #endif /* LYSTYLE_H */
