@@ -729,6 +729,7 @@ PRIVATE int get_connection ARGS2(
 
 /* Get node name:
 */
+    CTRACE((tfp, "get_connection(%s)\n", arg));
     {
 	char *p1 = HTParse(arg, "", PARSE_HOST);
 	char *p2 = strrchr(p1, '@');	/* user? */
@@ -960,9 +961,17 @@ PRIVATE int get_connection ARGS2(
 	    CTRACE((tfp, "HTFTP: Treating as MSDOS (Unix emulation) server.\n"));
 
 	} else if (strncmp(response_text+4, "VMS", 3) == 0) {
-	    server_type = VMS_SERVER;
+	    char *tilde = strstr(arg, "/~");
 	    use_list = TRUE;
-	    CTRACE((tfp, "HTFTP: Treating as VMS server.\n"));
+	    if (tilde != 0
+	     && tilde[2] != 0
+	     && strstr(response_text+4, "MadGoat") != 0) {
+		server_type = UNIX_SERVER;
+		CTRACE((tfp, "HTFTP: Treating VMS as UNIX server.\n"));
+	    } else {
+		server_type = VMS_SERVER;
+		CTRACE((tfp, "HTFTP: Treating as VMS server.\n"));
+	    }
 
 	} else if ((strncmp(response_text+4, "VM/CMS", 6) == 0) ||
 		   (strncmp(response_text+4, "VM ", 3) == 0)) {
@@ -3253,6 +3262,7 @@ PUBLIC int HTFTPLoad ARGS4(
 	  {
 	    char *cp1, *cp2;
 	    BOOL included_device = FALSE;
+	    BOOL found_tilde = FALSE;
 	    /** Accept only Unix-style filename **/
 	    if (strchr(filename, ':') != NULL ||
 		strchr(filename, '[') != NULL) {
@@ -3415,8 +3425,10 @@ PUBLIC int HTFTPLoad ARGS4(
 		goto listen;
 	    }
 	    /** Otherwise, go to appropriate directory and doctor filename **/
-	    if (!strncmp(filename, "/~", 2))
+	    if (!strncmp(filename, "/~", 2)) {
 		filename += 2;
+		found_tilde = TRUE;
+	    }
 	    CTRACE((tfp, "check '%s' to translate x/y/ to [.x.y]\n", filename));
 	    if (!included_device &&
 		(cp = strchr(filename, '/')) != NULL &&
@@ -3443,7 +3455,7 @@ PUBLIC int HTFTPLoad ARGS4(
 		}
 		filename = cp1+1;
 	    } else {
-		if (!included_device) {
+		if (!included_device && !found_tilde) {
 		    filename += 1;
 		}
 	    }

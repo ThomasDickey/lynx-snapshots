@@ -328,6 +328,7 @@ install-doc : $(DOCDIR) $(HELPDIR)
 	(cd $(srcdir) && tar cf - C[HO]* PROBLEMS README samples test ) | \
 			       ( cd $(DOCDIR) && chmod -R u+w . && tar xf - )
 	$(SHELL) -c 'for name in COPYING COPYHEADER; do \
+		cd $(HELPDIR) && rm -f $$name ;\
 		cd $(HELPDIR) && ( $(LN_S) $(DOCDIR)/$$name . || cp $(DOCDIR)/$$name . );\
 		done'
 
@@ -442,6 +443,7 @@ uninstall-help ::
 uninstall \
 uninstall-doc ::
 	-test -d $(DOCDIR) && WD=`cd $(DOCDIR) && pwd` && HEAD=`echo $$WD|sed -e 's@/lynx_doc$$@@'` && test $$WD != $$HEAD && rm -rf $(DOCDIR)
+	-test -d $(HELPDIR) && WD=`cd $(HELPDIR) && pwd` && HEAD=`echo $$WD|sed -e 's@/lynx_help$$@@'` && test $$WD != $$HEAD && cd $(HELPDIR) && rm -f COPYING COPYHEADER
 
 $(BINDIR) $(MANDIR) $(LIBDIR) $(HELPDIR) $(DOCDIR) :
 	$(srcdir)/mkdirs.sh $@

@@ -1,6 +1,33 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-10-18 (2.8.4dev.11)
+* include LYLeaks.h in LYPrettySrc.c to allow leak-checking -TD
+* modify configure script macro CF_RECHECK_FUNC to ensure that we add a given
+  library only once to the resulting list.  This fixes a longstanding bug which
+  caused the nsl library to be repeated on some platforms (reported by BL for
+  one of the SCO configurations, and Urs JanBen <urs@tin.org> for SINIX-L 5.41
+  (i386-sni-sysv4)) -TD
+* modify "make install-doc" rule to first remove targets.  Otherwise "ln -s"
+  and "cp" fail to create the targets when installing with normal user
+  permissions (reported by LV) -TD
+* fix for handle_LYK_DWIMEDIT() to ensure it does not dereference a null
+  pointer, when trying to edit a text file with no links within it (report by
+  Harri Tuominen) -DK
+* add fallback definitions to accommodate renaming of UCX$xxx symbols to
+  TCPIP$xxx in recent versions of OpenVMS UCX (reported by Horst Drechsel
+  <ai05@sternwarte.uni-erlangen.de>) -TD
+* add TRSTable.obj to src/descrip.mms objects -TD 
+* modify configure script to omit LYExtern.o and LYLocal.o if the corresponding
+  options (externs and dired) are disabled -TD
+* correct a typo that made configure script always define USE_EXTERNALS -TD
+* interpret ftp server type for VMS if a URL is given with "/~name", as a
+  Unix-style server.  This works for the following, at least:
+    VMS V6.2 AlphaServer 2100 4/233 MadGoat System type.
+  (reported by Rick Dyson <dyson@iowasp.physics.uiowa.edu>) -TD
+* make configure check for getaddrinfo() less strict, needed with --enable-ipv6
+  on IPv4-only system (patch by Munechika SUMIKAWA)
+
 2000-09-21 (2.8.4dev.10)
 * modified www_tcp.h and makefile.msc to allow compile with winsock2 if
   USE_WINSOCK2_H is defined -TD
