@@ -48,7 +48,7 @@ PUBLIC int edit_current_file ARGS3(
     char *number_sign;
     char position[80];
     FILE *fp;
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__) && defined(DOSPATH)
     unsigned char temp_buff[LY_MAXPATH];
 #endif
 

@@ -476,7 +476,7 @@ PRIVATE void send_file_to_mail ARGS3(
     char hdrfile[LY_MAXPATH];
     char my_temp[LY_MAXPATH];
 #endif
-#if defined(DOSPATH)
+#if !CAN_PIPE_TO_MAILER 
     char my_temp[LY_MAXPATH];
 #endif
 

@@ -157,7 +157,7 @@ PUBLIC void mailform ARGS4(
     FILE *hfd;
     char hdrfile[LY_MAXPATH];
 #endif
-#if defined(VMS) || defined(DOSPATH) || defined(SH_EX)
+#if !CAN_PIPE_TO_MAILER
     char *command = NULL;
     char my_tmpfile[LY_MAXPATH];
 #endif
@@ -707,11 +707,9 @@ PUBLIC void mailmsg ARGS4(
 #ifdef ALERTMAIL
     BOOLEAN skip_parsing = FALSE;
 #endif
-#if defined(DOSPATH) || defined(WIN_EX)
+#if !CAN_PIPE_TO_MAILER
     char *ccaddr;
     char subject[128];
-#endif
-#if defined(VMS) || defined(DOSPATH) || defined(WIN_EX)
     char my_tmpfile[LY_MAXPATH];
 #endif
 #ifdef VMS
@@ -1031,10 +1029,8 @@ PUBLIC void reply_by_mail ARGS4(
     int i, len;
     int c = 0;	/* user input */
     char my_tmpfile[LY_MAXPATH], cmd[512];
-#if defined(DOSPATH) || defined(WIN_EX)
+#if !CAN_PIPE_TO_MAILER
     char tmpfile2[LY_MAXPATH];
-#endif
-#if defined(DOSPATH) || defined(WIN_EX) || defined(VMS)
     char *command = NULL;
 #endif
 #ifndef NO_ANONYMOUS_EMAIL
