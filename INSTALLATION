@@ -303,6 +303,11 @@ II. Compile instructions -- UNIX
 	Allows lynx to access a cgi script directly without the need for
 	a http daemon.
 
+  --enable-charset-choice		(define EXP_CHARSET_CHOICE)
+	Add logic for ASSUMED_DOC_CHARSET_CHOICE and DISPLAY_CHARSET_CHOICE in
+	lynx.cfg, allowing user to configure a subset of the compiled-in
+	charsets for normal use.
+
   --enable-cjk				(define CJK_EX)
 	Add special logic for supporting CJK documents.
 
@@ -379,6 +384,11 @@ II. Compile instructions -- UNIX
 	Enhance the read-progress message to show ETA (estimated time to
 	completion), as well as the amount of time stalled without any data
 	transferred.
+
+  --enable-scrollbar			(define USE_SCROLLBAR)
+	Compile-in experimental support for scrollbar on the right-margin of
+	the screen.  If you configure with ncurses, this works with the mouse
+	on xterm, etc.
 
   --enable-source-cache			(define SOURCE_CACHE)
 	Use this option to compile-in support for caching HTML pages locally,
@@ -506,7 +516,7 @@ II. Compile instructions -- UNIX
     process will create the libraries you will need, wais.a and client.a.  Edit
     the Makefile in the top level directory and add the library locations under
     the DIRECT WAIS ACCESS heading.  Edit the Makefile for the WWW Library in
-    "WWW/Library/Implementation/CommonMakefile" to point to the include
+    "WWW/Library/Implementation/makefile" to point to the include
     directory for the freewais distribution.  Precompiled libraries are
     available for many platforms if you don't wish to compile one yourself.
 

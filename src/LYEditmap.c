@@ -895,7 +895,7 @@ LYE_FORM_LAC|LYK_DWIMHELP,
 
 #endif /* _WINDOWS || __DJGPP__ */
 
-LYE_UNMOD,      LYE_NOP,        LYE_UNMOD,      LYE_UNMOD,    
+LYE_UNMOD,      LYE_NOP,        LYE_UNMOD,      LYE_UNMOD,
 /* Insert key   Remove key      DO_NOTHING      Back tab */
 
 /* 110..18F */
@@ -948,7 +948,7 @@ PUBLIC char * LYLineeditNames[]={
 /*
  * Add the URL (relative to helpfilepath) used for context-dependent
  * help on form field editing.
- * 
+ *
  * The order must correspond to that of LYLineditNames.
  */
 PUBLIC CONST char * LYLineeditHelpURLs[]={
@@ -1024,17 +1024,17 @@ PUBLIC int LYRemapEditBinding ARGS2(
 	if (c > LAST_MOD1_LKC)
 	    return FALSE;
 	else
-	    Mod1Binding[c] = lec;
+	    Mod1Binding[c] = (short) lec;
     } else if (xlkc & LKC_MOD2) {
 	if (c > LAST_MOD2_LKC)
 	    return FALSE;
 	else
-	    Mod2Binding[c] = lec;
+	    Mod2Binding[c] = (short) lec;
     } else if (xlkc & LKC_MOD3) {
 	if (c > LAST_MOD3_LKC)
 	    return FALSE;
 	else
-	    Mod3Binding[c] = lec;
+	    Mod3Binding[c] = (short) lec;
     } else
 #endif /* EXP_ALT_BINDINGS */
     {
@@ -1044,7 +1044,7 @@ PUBLIC int LYRemapEditBinding ARGS2(
 	if ((unsigned int)lec > UCHAR_MAX)
 	    return FALSE;	/* cannot do, doesn't fit in a char - kw */
 	for (j = 0; LYLineeditNames[j]; j++) {
-	    LYLineEditors[j][c] = lec;
+	    LYLineEditors[j][c] = (char) lec;
 	}
     }
     return TRUE;

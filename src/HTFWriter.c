@@ -13,7 +13,7 @@
 #include <HTFWriter.h>
 #include <HTSaveToFile.h>
 
-#if WIN_EX
+#ifdef WIN_EX
 #include <HTParse.h>
 #endif
 
@@ -165,7 +165,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	     *	a temporary file for uncompression. - FM
 	     */
 	    if (me->anchor->FileCache != NULL) {
-		BOOL skip_loadfile = (me->viewer_command != NULL);
+		BOOL skip_loadfile = (BOOL) (me->viewer_command != NULL);
 		/*
 		 *  Save the path with the "gz" or "Z" suffix trimmed,
 		 *  and remove any previous uncompressed copy. - FM
@@ -598,7 +598,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 		cp++;
 	    }
 	    if (strchr(view_fname, ' '))
-		view_fname = quote_pathname(view_fname);
+		view_fname = (unsigned char *) quote_pathname(view_fname);
 
 	    StrAllocCopy(me->viewer_command, pres->command);
 

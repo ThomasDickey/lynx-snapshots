@@ -108,7 +108,7 @@ PRIVATE int getunicode ARGS1(
 unicode unitable[MAX_FONTLEN][255];
 int unicount[MAX_FONTLEN];
 
-struct unimapdesc_str themap_str = {0, NULL};
+struct unimapdesc_str themap_str = {0, NULL, 0, 0};
 
 char *tblname;
 

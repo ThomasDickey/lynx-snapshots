@@ -17,6 +17,11 @@
 #include <LYMainLoop.h>
 #include <LYKeymap.h>
 
+#ifdef __DJGPP__
+#include <go32.h>
+#include <sys/exceptn.h>
+#endif /* __DJGPP__ */
+
 #ifndef NO_GROUPS
 #include <HTFile.h>
 #endif
@@ -130,7 +135,7 @@ PUBLIC void highlight ARGS3(
     int LenNeeded;
     BOOL TargetEmphasisON = FALSE;
 #endif
-    BOOL utf_flag = (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8);
+    BOOL utf_flag = (BOOL)(LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8);
 #if defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
     BOOL hl2_drawn=FALSE;	/* whether links[cur].hightext2 is already drawn
 				   properly */
@@ -2097,7 +2102,7 @@ PUBLIC int LYConsoleInputFD ARGS1(
 #ifdef USE_SLANG
     if (!LYCursesON)
 	fd = fileno(stdin);
-#if SLANG_VERSION >= 9919
+#if ((SLANG_VERSION >= 9919) && defined(UNIX))
     /* SLang_TT_Read_FD introduced in slang 0.99.19, from its changelog:
      *   SLang_TT_Read_FD variable is now available for unix.  This is the file
      *   descriptor used by SLang_getkey. */
@@ -2382,13 +2387,13 @@ PUBLIC BOOLEAN LYisAbsPath ARGS1(
 {
     BOOLEAN result;
 #ifdef DOSPATH
-    result = (LYIsPathSep(path[0])
+    result = (BOOL) (LYIsPathSep(path[0])
      || (isalpha(path[0])
       && (path[1] == ':')
        && LYIsPathSep(path[2])));
 #else
     result = (LYIsPathSep(path[0]));
-#endif /* __DJGPP__ */
+#endif /* DOSPATH */
     return result;
 }
 
@@ -2405,7 +2410,7 @@ PUBLIC BOOLEAN LYisRootPath ARGS1(
      && LYIsPathSep(path[2]))
 	return TRUE;
 #endif
-    return ((strlen(path) == 1) && LYIsPathSep(path[0]));
+    return (BOOL) ((strlen(path) == 1) && LYIsPathSep(path[0]));
 }
 
 /*
@@ -4731,7 +4736,8 @@ PUBLIC int win32_check_interrupt()
 
 void sleep(unsigned sec)
 {
-    int i, j, c;
+    unsigned int i, j;
+    int c;
 
     for (j = 0; j < sec; j++) {
 	for (i = 0; i < 10; i++) {
@@ -4775,7 +4781,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
     char *Path = NULL;
     char *Fragment = NULL;
     BOOLEAN GotHost = FALSE;
-    BOOLEAN Startup = (helpfilepath == NULL);
+    BOOLEAN Startup = (BOOL) (helpfilepath == NULL);
 #ifdef _WINDOWS
     int hoststat;
     struct hostent  *phost;	/* Pointer to host - See netdb.h */
@@ -4851,11 +4857,8 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
     } else if (Startup && !dump_output_immediately) {
 	fprintf(stdout, "%s '%s'%s\n", WWW_FIND_MESSAGE, host, FIRST_SEGMENT);
     }
-#ifndef DJGPP
+
     if (LYGetHostByName(host) != NULL)
-#else
-    if (resolve(host) != 0)
-#endif /* DJGPP */
     {
 	/*
 	 *  Clear any residual interrupt. - FM
@@ -4875,11 +4878,11 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	FREE(MsgStr);
 	return GotHost;
     }
-#ifndef DJGPP
-    else if (LYCursesON && (lynx_nsl_status == HT_INTERRUPTED))
-#else /* DJGPP */
+#if defined(__DJGPP__) && !defined(WATT32)
     else if (LYCursesON && HTCheckForInterrupt())
-#endif /* DJGPP */
+#else /* normal systems */
+    else if (LYCursesON && (lynx_nsl_status == HT_INTERRUPTED))
+#endif
     {
 	/*
 	 *  Give the user chance to interrupt lookup cycles. - KW & FM
@@ -4976,11 +4979,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	    } else if (Startup && !dump_output_immediately) {
 		fprintf(stdout, "%s '%s'%s\n", WWW_FIND_MESSAGE, host, GUESSING_SEGMENT);
 	    }
-#ifdef DJGPP
-	    GotHost = (resolve(host) != 0);
-#else
-	    GotHost = (LYGetHostByName(host) != NULL);
-#endif /* DJGPP */
+	    GotHost = (BOOL) (LYGetHostByName(host) != NULL);
 	    if (HostColon != NULL) {
 		*HostColon = ':';
 	    }
@@ -4988,11 +4987,11 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 		/*
 		 *  Give the user chance to interrupt lookup cycles. - KW
 		 */
-#ifdef DJGPP
+#if defined(__DJGPP__) && !defined(WATT32)
 		if (LYCursesON && HTCheckForInterrupt())
-#else /* !DJGPP */
+#else /* normal systems */
 		if (LYCursesON && (lynx_nsl_status == HT_INTERRUPTED))
-#endif /* DJGPP */
+#endif
 		{
 		    CTRACE(tfp,
 	"LYExpandHostForURL: Interrupted while '%s' failed to resolve.\n",
@@ -5206,7 +5205,7 @@ PUBLIC void LYTrimRelFromAbsPath ARGS1(
     /*
      *	Check whether the path has a terminal slash. - FM
      */
-    TerminalSlash = LYIsPathSep(path[(strlen(path) - 1)]);
+    TerminalSlash = (BOOL) (LYIsPathSep(path[(strlen(path) - 1)]));
 
     /*
      *	Simplify the path and then do any necessary trimming. - FM
@@ -6166,7 +6165,7 @@ PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
 	    fd = open(name, O_CREAT|O_EXCL|O_WRONLY, HIDE_CHMOD);
 	}
 	if (fd >= 0) {
-#ifdef O_BINARY	/* for __CYGWIN_ */
+#if defined(O_BINARY) && defined(__CYGWIN__)
 	    if (mode[1] == 'b')
 		setmode(fd, O_BINARY);
 #endif
@@ -6450,7 +6449,7 @@ PUBLIC FILE *LYOpenTempRewrite ARGS3(
 #ifndef NO_GROUPS
 	writable_exists = HTEditable(fname); /* existing, can write */
 #else
-	writable_exists = (stat(fname, &stat_buf) == 0); /* existing, assume can write */
+	writable_exists = (BOOL) (stat(fname, &stat_buf) == 0); /* existing, assume can write */
 #endif
 
 	if (writable_exists) {

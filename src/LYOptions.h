@@ -10,10 +10,12 @@ extern  int popup_choice PARAMS((
 	int		cur_choice,
 	int		line,
 	int		column,
-	char ** 	choices,
-	int		i_length,
+	CONST char ** 	choices,
+	int		length,
 	int		disabled,
-	BOOLEAN		for_mouse));
+	BOOLEAN		mouse));
+#define LYChoosePopup(cur, line, column, choices, length, disabled, mouse) \
+	popup_choice(cur, line, column, (CONST char **)choices, length, disabled, mouse)
 
 #ifndef NO_OPTION_FORMS
 extern int postoptions PARAMS((document *newdoc));

@@ -307,7 +307,9 @@ PUBLIC BOOLEAN system_is_NT = FALSE;
 #ifdef SH_EX
 PUBLIC BOOLEAN show_cfg = FALSE;
 PUBLIC BOOLEAN mail_is_blat = TRUE;
+#ifdef WIN_EX
 PUBLIC int     debug_delay = 0;		/* 1998/10/06 (Tue) 08:41:20 */
+#endif
 PUBLIC BOOLEAN no_table_center = FALSE;	/* 1998/10/09 (Fri) 15:12:49 */
 #endif /* SH_EX */
 
@@ -479,6 +481,7 @@ PRIVATE BOOLEAN stack_dump = FALSE;
 PRIVATE char *terminal = NULL;
 PRIVATE char *pgm;
 PRIVATE BOOLEAN number_links = FALSE;
+PRIVATE BOOLEAN number_fields = FALSE;
 PRIVATE BOOLEAN LYPrependBase = FALSE;
 PRIVATE HTList *LYStdinArgs = NULL;
 
@@ -518,7 +521,7 @@ PRIVATE void FatalProblem PARAMS((int sig));
 #endif
 
 #ifdef __DJGPP__
-PRIVATE int LY_set_ctrl_break(int setting)
+PRIVATE void LY_set_ctrl_break(int setting)
 {
     (void)signal(SIGINT, (setting ? SIG_DFL : SIG_IGN));
     setcbrk(setting);
@@ -780,6 +783,10 @@ PUBLIC int main ARGS2(
     FixCharacters();
 #endif /* NOT_ASCII */
 
+#ifdef EXP_CHARSET_CHOICE
+    memset((char*)charset_subsets, 0, sizeof(charset_subset_t)*MAXCHARSETS);
+#endif
+
 #ifdef _WINDOWS
     WSADATA WSAData;
     {
@@ -812,7 +819,7 @@ PUBLIC int main ARGS2(
 
 #if defined(WIN_EX)
     /* 1997/10/19 (Sun) 21:40:54 */
-    system_is_NT = is_windows_nt();
+    system_is_NT = (BOOL) is_windows_nt();
 
     /* 1998/01/13 (Tue) 21:13:47 */
     GetWindowsDirectory(filename, sizeof filename);
@@ -984,7 +991,11 @@ PUBLIC int main ARGS2(
     }
 #endif
 
-    if ((cp = strchr(lynx_temp_space, '~'))) {
+    if ((cp = strchr(lynx_temp_space, '~')) != 0
+#ifdef WIN_EX	/* for Windows 2000 ... 1999/08/23 (Mon) 08:24:35 */
+	 && (access(lynx_temp_space, 0) != 0)
+#endif
+      ) {
 	*(cp++) = '\0';
 	StrAllocCopy(temp, lynx_temp_space);
 	LYTrimPathSep(temp);
@@ -1049,7 +1060,7 @@ PUBLIC int main ARGS2(
      *	command line switch. - FM
      */
 #ifndef DISABLE_NEWS
-    no_newspost = (LYNewsPosting == FALSE);
+    no_newspost = (BOOL) (LYNewsPosting == FALSE);
 #endif
 
     /*
@@ -1717,10 +1728,13 @@ PUBLIC int main ARGS2(
 	}
     }
 
-    if (number_links && keypad_mode == NUMBERS_AS_ARROWS)
-	keypad_mode = LINKS_ARE_NUMBERED;
-    if (keypad_mode == NUMBERS_AS_ARROWS)
+    if (keypad_mode == NUMBERS_AS_ARROWS) {
+	if (number_fields)
+	    keypad_mode = LINKS_AND_FIELDS_ARE_NUMBERED;
+	if (number_links)
+	    keypad_mode = LINKS_ARE_NUMBERED;
 	set_numbers_as_arrows();
+    }
 
     /*
      *	Check the -popup command line toggle. - FM
@@ -1902,29 +1916,29 @@ PUBLIC int main ARGS2(
      */
     if (inlocaldomain()) {
 #if !defined(HAVE_UTMP) || defined(VMS) /* not selective */
-	telnet_ok = !no_inside_telnet && !no_outside_telnet && telnet_ok;
+	telnet_ok = (BOOL)(!no_inside_telnet && !no_outside_telnet && telnet_ok);
 #ifndef DISABLE_NEWS
-	news_ok = !no_inside_news && !no_outside_news && news_ok;
+	news_ok = (BOOL)(!no_inside_news && !no_outside_news && news_ok);
 #endif
-	ftp_ok = !no_inside_ftp && !no_outside_ftp && ftp_ok;
-	rlogin_ok = !no_inside_rlogin && !no_outside_rlogin && rlogin_ok;
+	ftp_ok = (BOOL)(!no_inside_ftp && !no_outside_ftp && ftp_ok);
+	rlogin_ok = (BOOL)(!no_inside_rlogin && !no_outside_rlogin && rlogin_ok);
 #else
 	CTRACE(tfp, "LYMain: User in Local domain\n");
-	telnet_ok = !no_inside_telnet && telnet_ok;
+	telnet_ok = (BOOL)(!no_inside_telnet && telnet_ok);
 #ifndef DISABLE_NEWS
-	news_ok = !no_inside_news && news_ok;
+	news_ok = (BOOL)(!no_inside_news && news_ok);
 #endif
-	ftp_ok = !no_inside_ftp && ftp_ok;
-	rlogin_ok = !no_inside_rlogin && rlogin_ok;
+	ftp_ok = (BOOL)(!no_inside_ftp && ftp_ok);
+	rlogin_ok = (BOOL)(!no_inside_rlogin && rlogin_ok);
 #endif /* !HAVE_UTMP || VMS */
     } else {
 	CTRACE(tfp, "LYMain: User in REMOTE domain\n");
-	telnet_ok = !no_outside_telnet && telnet_ok;
+	telnet_ok = (BOOL)(!no_outside_telnet && telnet_ok);
 #ifndef DISABLE_NEWS
-	news_ok = !no_outside_news && news_ok;
+	news_ok = (BOOL)(!no_outside_news && news_ok);
 #endif
-	ftp_ok = !no_outside_ftp && ftp_ok;
-	rlogin_ok = !no_outside_rlogin && rlogin_ok;
+	ftp_ok = (BOOL)(!no_outside_ftp && ftp_ok);
+	rlogin_ok = (BOOL)(!no_outside_rlogin && rlogin_ok);
     }
 
     /*
@@ -1944,19 +1958,19 @@ PUBLIC int main ARGS2(
 	StrAllocCopy(MBM_A_subdescript[0], MULTIBOOKMARKS_DEFAULT);
     }
 
-#if defined (__DJGPP__) 
-    if (watt_debug) 
-      dbug_init(); 
-    sock_init(); 
+#if defined (__DJGPP__)
+    if (watt_debug)
+      dbug_init();
+    sock_init();
 
-    __system_flags = 
-       __system_emulate_chdir        |  /* handle `cd' internally */ 
-       __system_handle_null_commands |  /* ignore cmds with no effect */ 
-       __system_allow_long_cmds      |  /* handle commands > 126 chars  */ 
-       __system_use_shell            |  /* use $SHELL if set */ 
-       __system_allow_multiple_cmds  |  /* allow `cmd1; cmd2; ...' */ 
-       __system_redirect;               /* redirect internally */ 
-#endif  /* __DJGPP__ */ 
+    __system_flags =
+       __system_emulate_chdir        |  /* handle `cd' internally */
+       __system_handle_null_commands |  /* ignore cmds with no effect */
+       __system_allow_long_cmds      |  /* handle commands > 126 chars  */
+       __system_use_shell            |  /* use $SHELL if set */
+       __system_allow_multiple_cmds  |  /* allow `cmd1; cmd2; ...' */
+       __system_redirect;               /* redirect internally */
+#endif  /* __DJGPP__ */
 
     /*
      *	Here's where we do all the work.
@@ -1966,9 +1980,14 @@ PUBLIC int main ARGS2(
 	 *  Finish setting up and start a
 	 *  NON-INTERACTIVE session. - FM
 	 */
-	if (!crawl && !nolist) {
+	if (crawl && !number_links && !number_fields) {
+	    keypad_mode = NUMBERS_AS_ARROWS;
+	} else if (!nolist) {
 	    if (keypad_mode == NUMBERS_AS_ARROWS) {
-		keypad_mode = LINKS_ARE_NUMBERED;
+		if (number_fields)
+		    keypad_mode = LINKS_AND_FIELDS_ARE_NUMBERED;
+		else
+		    keypad_mode = LINKS_ARE_NUMBERED;
 	    }
 	}
 
@@ -2012,6 +2031,11 @@ PUBLIC int main ARGS2(
 	    with_backspaces = FALSE;
 	}
 #endif
+
+#ifndef ALL_CHARSETS_IN_O_MENU_SCREEN
+	init_charset_subsets();
+#endif
+
 	ena_csi((BOOLEAN)(LYlowest_eightbit[current_char_set] > 155));
 	LYOpenCloset();
 	status = mainloop();
@@ -2094,6 +2118,11 @@ PUBLIC void reload_read_cfg NOARGS
 	StrAllocCopy(LYCookieFile_flag, LYCookieFile);
 #endif
 
+#ifdef EXP_CHARSET_CHOICE
+	custom_assumed_doc_charset = FALSE;
+	custom_display_charset = FALSE;
+	memset((char*)charset_subsets, 0, sizeof(charset_subset_t)*MAXCHARSETS);
+#endif
 	free_lynx_cfg(); /* free downloaders, printers, not always environments */
 	/*
 	 *  Process the configuration file.
@@ -2105,6 +2134,9 @@ PUBLIC void reload_read_cfg NOARGS
 	 */
 	read_rc();
 
+#ifdef EXP_CHARSET_CHOICE
+	init_charset_subsets();
+#endif
 
 	/* We are not interested in startfile here */
 	/* but other things may be lost: */
@@ -2839,7 +2871,11 @@ static int version_fun ARGS1(
 #ifdef _MSC_VER
     printf("Compiled by Microsoft Visual C++ (%s %s).\n", __DATE__, __TIME__);
 #else
+#ifdef __DJGPP__
+    printf("Compiled by DJGPP (%s %s).\n", __DATE__, __TIME__);
+#else
     printf("Compiled at (%s %s).\n", __DATE__, __TIME__);
+#endif /* __DJGPP__ */
 #endif /* _MSC_VER */
 #endif /* __BORLANDC__ */
 #endif /* __CYGWIN__ */
@@ -2965,7 +3001,7 @@ with -dump, format output as with -traversal, but to stdout"
       "incremental display stages with MessageSecs delay"
    ),
 #endif
-#ifdef SH_EX
+#if defined(SH_EX) && defined(WIN_EX)
    PARSE_SET(
       "delay",		NEED_INT_ARG,		&debug_delay,
       "=NNN\nset the NNN msec delay at statusline message"
@@ -3189,6 +3225,10 @@ keys (may be incompatible with some curses packages)"
       "disable the miscellaneous information messages"
    ),
    PARSE_SET(
+      "number_fields",	SET_ARG,		&number_fields,
+      "force numbering of links as well as form input fields"
+   ),
+   PARSE_SET(
       "number_links",	SET_ARG,		&number_links,
       "force numbering of links"
    ),
@@ -3198,7 +3238,7 @@ keys (may be incompatible with some curses packages)"
       "toggles display partial pages while downloading"
    ),
    PARSE_INT(
-      "partial_thres",  NEED_INT_ARG,          &partial_threshold,
+      "partial_thres",	NEED_INT_ARG,		&partial_threshold,
       "[=NUMBER]\nnumber of lines to render before repainting display\n\
 with partial-display logic"
    ),
@@ -3642,7 +3682,7 @@ PRIVATE void parse_arg ARGS2(
 		 if (next_arg == 0) {
 		    switch (p->type & ARG_TYPE_MASK) {
 		    case TOGGLE_ARG:
-			 *(q->set_value) = !(*(q->set_value));
+			 *(q->set_value) = (BOOL) !(*(q->set_value));
 			 break;
 		    case SET_ARG:
 			 *(q->set_value) = TRUE;

@@ -86,7 +86,7 @@ PRIVATE void start_anchor ARGS1(CONST char *,  href)
     {
 	int i;
 	for(i=0; i<HTML_A_ATTRIBUTES; i++)
-	    present[i] = (i==HTML_A_HREF);
+	    present[i] = (BOOL) (i==HTML_A_HREF);
     }
     ((CONST char **)value)[HTML_A_HREF] = href;
     (*targetClass.start_element)(target, HTML_A, present,
@@ -191,7 +191,7 @@ PRIVATE int response ARGS5(
 	}
 
 	if (ch != LF) {
-	    *p = ch;		/* Put character in line */
+	    *p = (char) ch;      /* Put character in line */
 	    if (p < &line[BIG-1]) {
 		p++;
 	    }

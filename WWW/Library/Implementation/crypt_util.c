@@ -278,12 +278,13 @@ static ufc_long longmask[32] = {
 
 #ifdef DEBUG
 
-pr_bits(a, n)
-  ufc_long *a;
-  int n;
-  { ufc_long i, j, t, tmp;
+pr_bits ARGS2(
+	ufc_long *,	a,
+	int,		n)
+{
+    ufc_long i, j, t, tmp;
     n /= 8;
-    for(i = 0; i < n; i++) {
+    for(i = 0; i < (ufc_long) n; i++) {
       tmp=0;
       for(j = 0; j < 8; j++) {
 	t=8*i+j;
@@ -292,18 +293,19 @@ pr_bits(a, n)
       (void)printf("%02x ",tmp);
     }
     printf(" ");
-  }
+}
 
-static set_bits(v, b)
-  ufc_long v;
-  ufc_long *b;
-  { ufc_long i;
+static set_bits ARGS(
+	ufc_long,	v,
+	ufc_long *,	b)
+{
+    ufc_long i;
     *b = 0;
     for(i = 0; i < 24; i++) {
       if(v & longmask[8 + i])
 	*b |= BITMASK(i);
     }
-  }
+}
 
 #endif
 
@@ -702,7 +704,7 @@ STATIC char *output_conversion(v1, v2, salt)
 
     for(i = 0; i < 5; i++) {
       shf = (26 - 6 * i); /* to cope with MSC compiler bug */
-      outbuf[i + 2] = bin_to_ascii((v1 >> shf) & 0x3f);
+      outbuf[i + 2] = (char) bin_to_ascii((v1 >> shf) & 0x3f);
     }
 
     s  = (v2 & 0xf) << 2;
@@ -710,10 +712,10 @@ STATIC char *output_conversion(v1, v2, salt)
 
     for(i = 5; i < 10; i++) {
       shf = (56 - 6 * i);
-      outbuf[i + 2] = bin_to_ascii((v2 >> shf) & 0x3f);
+      outbuf[i + 2] = (char) bin_to_ascii((v2 >> shf) & 0x3f);
     }
 
-    outbuf[12] = bin_to_ascii(s);
+    outbuf[12] = (char) bin_to_ascii(s);
     outbuf[13] = 0;
 
     return outbuf;
@@ -872,7 +874,7 @@ void setkey(key)
 
     for(i = 0; i < 8; i++) {
       for(j = 0, c = 0; j < 8; j++)
-	c = c << 1 | *key++;
+	c = (c << 1) | *key++;
       ktab[i] = c >> 1;
     }
 

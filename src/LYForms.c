@@ -388,7 +388,7 @@ PRIVATE int form_getstr ARGS3(
      */
     LYSetupEdit(&MyEdit, value, max_length, (far_col - startcol));
     MyEdit.pad = '_';
-    MyEdit.hidden = (form->type == F_PASSWORD_TYPE);
+    MyEdit.hidden = (BOOL) (form->type == F_PASSWORD_TYPE);
     if (use_last_tfpos && LastTFPos >= 0 && LastTFPos < MyEdit.strlen) {
 	MyEdit.pos = LastTFPos;
 #ifdef ENHANCED_LINEEDIT
@@ -747,7 +747,7 @@ PRIVATE int get_popup_option_number ARGS2(
     /*
      *  Load the c argument into the prompt buffer.
      */
-    temp[0] = *c;
+    temp[0] = (char) *c;
     temp[1] = '\0';
     _statusline(SELECT_OPTION_NUMBER);
 

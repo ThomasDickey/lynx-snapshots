@@ -16,10 +16,11 @@ PUBLIC BOOL LYpsrc = FALSE; /* this tells what will be shown on '\':
 PUBLIC BOOL sgml_in_psrc_was_initialized;
 PUBLIC BOOL psrc_nested_call;
 PUBLIC BOOL psrc_first_tag;
-
+PUBLIC BOOL mark_htext_as_source=FALSE;
   /* tagspecs from lynx.cfg are read here. After .lss file is read (is with lss
      support), the style cache and markup are created before entering the
      mainloop. */
+PUBLIC BOOL psrcview_no_anchor_numbering = FALSE;
 PUBLIC char* HTL_tagspecs[HTL_num_lexems] = {
  /* these values are defaults. They are also listed in comments of distibution's
      lynx.cfg.*/

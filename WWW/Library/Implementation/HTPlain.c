@@ -478,7 +478,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 /******************************************************************
  *   I. LATIN-1 OR UCS2  TO  DISPLAY CHARSET
  ******************************************************************/
-	} else if ((chk = (me->T.trans_from_uni && code >= 160)) &&
+	} else if ((chk = (BOOL) (me->T.trans_from_uni && code >= 160)) &&
 		   (uck = UCTransUniChar(code,
 					 me->outUCLYhndl)) >= ' ' &&  /* S/390 -- gil -- 0464 */
 		   uck < 256) {
@@ -542,7 +542,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    **	seek a translation for that.  Otherwise, or if the
 	    **	translation fails, use UHHH notation. - FM
 	    */
-	    if ((chk = (me->outUCLYhndl !=
+	    if ((chk = (BOOL) (me->outUCLYhndl !=
 			UCGetLYhndl_byMIME("us-ascii"))) &&
 		   (uck = UCTransUniChar(code,
 					 UCGetLYhndl_byMIME("us-ascii")))

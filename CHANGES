@@ -1,6 +1,72 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-08-26 (2.8.3dev.7)
+* tweak ifdef'ing of `debug_delay' (only available with SH_EX _and_ WIN_EX) -LP
+* tweak src/Xsystem.c (extern system_is_NT is now ifdef'ed with WIN_EX) so
+  exec_command() can also be used with DJGPP when compiled with _WIN_CC symbol
+  (though choice of _WIN_CC is questionable) -LP
+* simplified ifdef'ing for resolv() vs LYGetHostByName() for DJGPP -TD
+* DJGPP with WATT32 now does DNS lookup via LYGetHostByName()/gethostbyname()
+  like other lynx ports so we get reasonable error recovery when DNS lookup
+  fails.  (For example, we now avoid a hang when wattcp.cfg is not configured
+  properly - a typical situation when playing with nullpkt.com).  Build with
+  -DNSL_FORK (in both src and WWW makefiles) is recommended:  this will prevent
+  unexpected 1 second curses delay when alerting a wrongly configured tcp.  (No
+  real fork() in DJGPP, unfortunately:  this function always returns -1 and set
+  'errno' to ENOMEM, as MS-DOS does not support multiple processes.  It exists
+  only to assist in porting Unix programs) -LP
+* alternative patch (replaces HN's) for UCdomap.c -KW
+* modify initialization of lynx_temp_space in case the given name has
+  embedded "~", ifdef'd for WIN_EX -SH
+* fix a problem hanging caused by allowing some unknown entities in an ALT
+  string.  The "hang" problem was caused by a combination of removing too much
+  under 'case S_check_name' in 'LYUCFullyTranslateString_1', _and_ having
+  having some Latin 1 character codes that are untranslatable to the display
+  character set -KW
+* added lynx.cfg setting PSRCVIEW_NO_ANCHOR_NUMBERING that inhibits link
+  numbering when in psrc mode if set to TRUE (default is FALSE) -VH
+* fixes for justification code (anchor position recalculation) and the
+  GridText.c:*TrimHightext (it was not designed to support LY_SOFT_NEWLINES),
+  correcting rendering of links on wrapped lines in psrc mode -VH
+* fixes to www_tcp.h, LYUtils.c and UCdomap.c to build on BeOS 4.5 -TD
+* fixes for CYGWIN with Slang, mainly due to platform differences in Slang -DK
+* fixes for DJGPP, missing headers and declarations -DK
+* let CJK charsets default to 7 Bit Approximations.  Needed to display entities
+  in the decimal 160-255 range.  (Restore behavior before the changes made to
+  declarations of charsets on 1999-03-04) -HN
+* rename -number_links_forms to -number_fields -TD
+* add the -number_links_forms command line option (John Hawkinson
+  <jhawk@MIT.EDU>).
+* modify configure script so --enable-change-exec sets default for
+  the --enable-exec-links and --enable-exec-scripts options -TD
+* modify ifdef's for ENABLE_OPTS_CHANGE_EXEC since one or both of EXEC_LINKS
+  and EXEC_SCRIPTS must also be defined to make this effective (reported by
+  KED).
+* add explanations of the various choices for revealing/not images, to Users
+  Guide, Options Help & lynx.cfg -PW
+* fix LYgetstr() to disable saving of input text on LYE_ENTER state when the
+  input is supposed to be hidden -KW
+* add/use LYaddstr() to fix some const-casts -TD
+* move dependency of "lynx$x" from "install" to
+  "install-bin:" in top-level makefile.in -PG
+* corrected display of SGML_LITTERAL content -VH
+* now LY_SOFT_NEWLINE is used in psrc mode to denote wrapped lines (as in plain
+  source mode) -VH
+* add configure option --enable-scrollbar -TD
+* make the charset-choice code lynx.cfg-reloading-safe -VH
+* add experimental code to allow users to specify that a subset of the compiled-in
+  charset definitions are available for selection for display (ifdef'd with
+  EXP_CHARSET_CHOICE, added configure option --enable-charset-choice -TD) -VH
+* add/use ANSI_PREPRO symbol to simplify ifdef's concerning preprocessor token
+  substitution/concatenation -TD
+* modify ifdef of code that shows current CJK code in the title area under
+  SH_EX as well as CJK_EX -TD
+* modify HTMLDTD.c to set canclose for <Hn> inside <PRE></PRE> -VH
+* correct ifdef'ing of set_ws_title(), which should be applied only on win32
+  (reported by Frederic L W Meunier) -LP, TD
+* reduce compiler warnings from Borland C++Builder.  Most of these are casts,
+  with boolean constructs dominating -JS
 1999-08-13 (2.8.3dev.6)
 * workarounds in LYMain.c and LYMainLoop.c for excessive compiler warnings due
   to defective design of glibc2 -TD
@@ -21,11 +87,11 @@ Changes since Lynx 2.8 release
   options -scrollbar and -scrollbar_arrow or corresponding lynx.cfg to enable
   it.  Requires ncurses; may be further tuned if color-style configuration
   is used (Ilya Zakharevich)
-* LYCopyFile():  Thanks to Hiroyuki Senshu, DOS-based systems needs no cp.exe
-  binary when compiled with SH_EX.  This code is now defined with DOSPATH so
-  used automatically by any dos/windows port, but unused for UNIXes
-  (permissions?) if occasionally built with SH_EX symbol -LP
-* few includes labelled with _WIN_CC now tweaked with WIN_EX as should be -LP
+* LYCopyFile():  Thanks to Hiroyuki Senshu, DOS-based systems need no cp.exe
+  binary any more.  The code was originally ifdef'ed with SH_EX; now defined
+  with DOSPATH so is used automatically by any dos/windows port, not used for
+  UNIXes (permissions?) -LP
+* a few includes labeled with _WIN_CC now tweaked with WIN_EX as should be -LP
 * adjustments to SH_EX, CJK_EX ifdef's in LYMainLoop.c and LYUtils.c to aid in
   porting -LP
 * improved logic in status_link() for -short_url option (patches from

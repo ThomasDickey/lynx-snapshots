@@ -50,7 +50,7 @@ PRIVATE HTAAProt *current_prot	= NULL;	/* Current protection mode	*/
                                         /* from the rule system when	*/
                                         /* a "protect" rule is matched.	*/
 
-
+#ifndef NOUSERS
 /* PRIVATE							isNumber()
 **		DOES A CHARACTER STRING REPRESENT A NUMBER
 */
@@ -70,6 +70,7 @@ PRIVATE BOOL isNumber ARGS1(CONST char *, s)
     }
     return YES;
 }
+#endif /* !NOUSERS */
 
 
 #if defined (NOUSERS)
@@ -599,6 +600,7 @@ PRIVATE void clear_uidgid_cache NOARGS
 }
 #endif /* LY_FIND_LEAKS */
 
+#ifndef NOUSERS
 PRIVATE void save_gid_info ARGS2(char *, name, int, user)
 {
     USER_DATA *data = (USER_DATA *)calloc(1, sizeof(USER_DATA));
@@ -617,7 +619,9 @@ PRIVATE void save_gid_info ARGS2(char *, name, int, user)
     data->user = user;
     HTList_addObject (known_grp, data);
 }
+#endif /* NOUSERS */
 
+#ifndef NOUSERS
 PRIVATE void save_uid_info ARGS2(char *, name, int, user)
 {
     USER_DATA *data = (USER_DATA *)calloc(1, sizeof(USER_DATA));
@@ -636,6 +640,7 @@ PRIVATE void save_uid_info ARGS2(char *, name, int, user)
     data->user = user;
     HTList_addObject (known_pwd, data);
 }
+#endif /* !NOUSERS */
 
 /* PUBLIC                                                       HTAA_UidToName
 **              GET THE USER NAME

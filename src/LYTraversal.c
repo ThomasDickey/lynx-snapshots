@@ -58,7 +58,7 @@ PUBLIC BOOLEAN lookup ARGS1(char *,target)
     FREE(buffer);
 
     fclose(ifp);
-    return(result);
+    return (BOOL) (result);
 }
 
 PUBLIC void add_to_table ARGS1(char *,target)
@@ -169,5 +169,5 @@ PUBLIC BOOLEAN lookup_reject ARGS1(char *,target)
     FREE(line);
 
     fclose(ifp);
-    return(result);
+    return (BOOL) (result);
 }

@@ -969,7 +969,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		p++;
 		value_start = p;
 		while (*p != '\0' && (*p != '"' || escaped)) {
-		    escaped = (!escaped && *p == '\\');
+		    escaped = (BOOL) (!escaped && *p == '\\');
 		    p++;
 		}
 		if (p != value_start && *p == '"' && !escaped) {
@@ -1489,7 +1489,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		p++;
 		value_start = p;
 		while (*p != '\0' && (*p != '"' || escaped)) {
-		    escaped = (!escaped && *p == '\\');
+		    escaped = (BOOL) (!escaped && *p == '\\');
 		    p++;
 		}
 		if (p != value_start && *p == '"' && !escaped) {

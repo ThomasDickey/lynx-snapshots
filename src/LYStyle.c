@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.31 Fri, 13 Aug 1999 07:27:27 -0600 dickey @
+ * @Id: LYStyle.c 1.32 Thu, 26 Aug 1999 05:31:19 -0600 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -33,22 +33,24 @@ PUBLIC int last_colorattr_ptr=0;
 PUBLIC bucket hashStyles[CSHASHSIZE];
 PUBLIC bucket special_bucket =
 {
- "<special>" /* in order something to be in trace. */
+    "<special>", /* in order something to be in trace. */
+    0, 0, 0, 0, NULL
 };
 PUBLIC bucket nostyle_bucket =
 {
- "<NOSTYLE>" /* in order something to be in trace. */
+    "<NOSTYLE>", /* in order something to be in trace. */
+    0, 0, 0, 0, NULL
 };
 
 PUBLIC int cached_tag_styles[HTML_ELEMENTS];
 PUBLIC int current_tag_style;
-PUBLIC BOOL force_current_tag_style=FALSE;
+PUBLIC BOOL force_current_tag_style = FALSE;
 PUBLIC char* forced_classname;
 PUBLIC BOOL force_classname;
 
 /* definitions for the mono attributes we can use */
 static int ncursesMono[7] = {
- A_NORMAL, A_BOLD, A_REVERSE, A_UNDERLINE, A_STANDOUT, A_BLINK, A_DIM
+    A_NORMAL, A_BOLD, A_REVERSE, A_UNDERLINE, A_STANDOUT, A_BLINK, A_DIM
 };
 
 /*
@@ -57,7 +59,7 @@ static int ncursesMono[7] = {
  */
 static char *Mono_Strings[7] =
 {
- "normal", "bold", "reverse", "underline", "standout", "blink", "dim"
+    "normal", "bold", "reverse", "underline", "standout", "blink", "dim"
 };
 
 /* Remember the hash codes for common elements */

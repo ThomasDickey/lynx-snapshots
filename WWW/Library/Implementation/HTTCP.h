@@ -10,7 +10,7 @@
 #ifndef HTUTILS_H
 #include <HTUtils.h>
 #endif
- 
+
 /*      Produce a string for an internet address
 **      ---------------------------------------
 **
@@ -86,10 +86,12 @@ extern BOOL valid_hostname PARAMS((CONST char * name));
 */
 extern int lynx_nsl_status;
 
-#ifndef DJGPP
+#if defined(__DJGPP__) && !defined(WATT32)
+#define LYGetHostByName(host) resolv(host) /* we'll use it the same way */
+#else
 extern struct hostent * LYGetHostByName PARAMS((
 	CONST char *	str));
-#endif /* DJGPP */
+#endif
 
 
 /*      Parse an internet node address and port

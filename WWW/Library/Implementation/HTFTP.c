@@ -445,7 +445,7 @@ PRIVATE int response ARGS1(
 	char *p = response_text;
 	for (;;) {
 	    int ich = NEXT_CHAR;
-	    if (((*p++ = ich) == LF)
+	    if (((*p++ = (char) ich) == LF)
 			|| (p == &response_text[LINE_LENGTH])) {
 
 		char continuation;
@@ -1029,7 +1029,7 @@ PRIVATE int close_master_socket NOARGS
     int status;
 
     if (master_socket != -1)
-	FD_CLR(master_socket, &open_sockets);
+	FD_CLR( (unsigned) master_socket, &open_sockets);
     status = NETCLOSE(master_socket);
     CTRACE(tfp, "HTFTP: Closed master socket %d\n", master_socket);
     master_socket = -1;
@@ -1207,7 +1207,7 @@ PRIVATE int get_listen_socket NOARGS
     }
   }
     CTRACE(tfp, "TCP: Master socket(), bind() and listen() all OK\n");
-    FD_SET(master_socket, &open_sockets);
+    FD_SET( (unsigned) master_socket, &open_sockets);
     if ((master_socket+1) > num_sockets)
 	num_sockets = master_socket+1;
 
@@ -1416,7 +1416,7 @@ PRIVATE void parse_ls_line ARGS2(
 	char *,		line,
 	EntryInfo *,	entry_info)
 {
-    short  i, j;
+    int    i, j;
     int    base=1;
     int    size_num=0;
 
@@ -1629,8 +1629,8 @@ PRIVATE void parse_vms_dir_entry ARGS2(
 
 	/** Month **/
 	*(cpd+4) = '\0';
-	*(cpd+2) = TOLOWER(*(cpd+2));
-	*(cpd+3) = TOLOWER(*(cpd+3));
+	*(cpd+2) = (char) TOLOWER(*(cpd+2));
+	*(cpd+3) = (char) TOLOWER(*(cpd+3));
 	sprintf(date, "%s ", cpd+1);
 	*(cpd+4) = '-';
 
@@ -3038,7 +3038,7 @@ PUBLIC int HTFTPLoad ARGS4(
 	    format = HTFileFormat(filename, &encoding, NULL);
 	}
 	format = HTCharsetFormat(format, anchor, -1);
-	binary = (encoding != HTAtom_for("8bit") &&
+	binary = (BOOL) (encoding != HTAtom_for("8bit") &&
 		  encoding != HTAtom_for("7bit"));
 	if (!binary &&
 	    /*

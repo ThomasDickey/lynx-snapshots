@@ -158,10 +158,10 @@ PRIVATE CONST char hex[17] = "0123456789abcdef";
 
 PRIVATE char from_hex ARGS1(char, c)
 {
-    return		  (c>='0')&&(c<='9') ? c-'0'
+    return (char) (       (c>='0')&&(c<='9') ? c-'0'
 			: (c>='A')&&(c<='F') ? c-'A'+10
 			: (c>='a')&&(c<='f') ? c-'a'+10
-			:		       0;
+			:		       0);
 }
 
 /*	Paste in an Anchor
@@ -256,7 +256,7 @@ PRIVATE void parse_menu ARGS2(
 	}
 
 	if ((char)ich != LF) {
-	    *p = ich;		/* Put character in line */
+	    *p = (char) ich;    /* Put character in line */
 	    if (p< &line[BIG-1]) p++;
 
 	} else {
@@ -497,7 +497,7 @@ PRIVATE void parse_cso ARGS2(
 	{
 	    if ((char)ich != LF)
 		{
-		    *p = ich;		/* Put character in line */
+		    *p = (char) ich;    /* Put character in line */
 		    if (p< &line[BIG-1]) p++;
 		}
 	    else
@@ -708,7 +708,7 @@ PRIVATE void de_escape ARGS2(char *, command, CONST char *, selector)
 	    b =   from_hex(c);
 	    c = *p++;
 	    if (!c) break;	/* Odd number of chars! */
-	    *q++ = FROMASCII((b<<4) + from_hex(c));
+	    *q++ = (char) FROMASCII((b<<4) + from_hex(c));
 	} else {
 	    *q++ = *p++;	/* Record */
 	}
@@ -947,7 +947,7 @@ PRIVATE int parse_cso_fields ARGS2(
 	}
 
 	if ((char)ich != LF) {
-	    *p = ich;		/* Put character in buffer */
+	    *p = (char) ich;    /* Put character in buffer */
 	    if (p < &buf[size-1]) {
 		p++;
 	    }
@@ -1243,7 +1243,7 @@ PRIVATE int generate_cso_report ARGS1(
 	}
 
 	if ((char)ich != LF) {
-	    *p = ich;		/* Put character in line */
+	    *p = (char) ich;    /* Put character in line */
 	    if (p < &line[BIG-1]) {
 		p++;
 	    }

@@ -156,7 +156,7 @@ extern int hash_code PARAMS((char* i));
 PUBLIC void strtolower ARGS1(char*, i)
 {
 	if (!i) return;
-	while (*i) { *i=tolower(*i); i++; }
+	while (*i) { *i=(char)tolower(*i); i++; }
 }
 
 /*		Flattening the style structure
@@ -845,7 +845,7 @@ PRIVATE void HTML_start_element ARGS6(
 			if (value[i]) {
 			    char q='"';
 				/*0 in dquotes, 1 - in quotes, 2 mixed*/
-			    char kind= ( !strchr(value[i], '"') ?
+			    char kind= (char) ( !strchr(value[i], '"') ?
 					 0 :
 					 !strchr(value[i], '\'') ?
 					 q='\'',1 :
@@ -1795,7 +1795,7 @@ PRIVATE void HTML_start_element ARGS6(
 		     me->sp[0].tag_number == HTML_DD)
 		me->current_default_alignment = HT_LEFT;
 	    LYHandlePlike(me, present, value, include, HTML_DIV_ALIGN, TRUE);
-	    me->DivisionAlignments[me->Division_Level] =
+	    me->DivisionAlignments[me->Division_Level] = (short)
 		me->current_default_alignment;
 	} else if (present && present[HTML_DIV_ALIGN] &&
 		   value[HTML_DIV_ALIGN] && *value[HTML_DIV_ALIGN]) {
@@ -4927,7 +4927,8 @@ PRIVATE void HTML_start_element ARGS6(
 		    ATTR_CS_IN,
 		    I.value_cs,
 		    (me->UsePlainSpace && !me->HiddenValue),
-		    me->UsePlainSpace, me->HiddenValue);
+		    me->UsePlainSpace,
+		    me->HiddenValue);
 		I.value = I_value;
 		if (me->UsePlainSpace == TRUE) {
 		    /*
@@ -5580,7 +5581,7 @@ PRIVATE void HTML_start_element ARGS6(
 		     !strcmp(me->sp->style->name, "Preformatted")))) {
 		me->sp->style->alignment = HT_LEFT;
 	} else {
-	    me->sp->style->alignment = me->current_default_alignment;
+	    me->sp->style->alignment = (short) me->current_default_alignment;
 	}
 	if (present && present[HTML_TR_ALIGN] && value[HTML_TR_ALIGN]) {
 #ifdef SH_EX
@@ -6891,7 +6892,7 @@ End_Object:
 		int j;
 		for (j = 0; temp && temp[j]; j++) {
 		    if (temp[j] == '\r')
-			temp[j] = (temp[j+1] ? ' ' : '\0');
+			temp[j] = (char) (temp[j+1] ? ' ' : '\0');
 		}
 		I.value = temp;
 		chars = HText_beginInput(me->text, me->inUnderline, &I);
@@ -6924,7 +6925,7 @@ End_Object:
 		int j;
 		for (j = 0; temp && temp[j]; j++) {
 		    if (temp[j] == '\r')
-			temp[j] = (temp[j+1] ? ' ' : '\0');
+			temp[j] = (char) (temp[j+1] ? ' ' : '\0');
 		}
 		I.value = temp;
 		chars = HText_beginInput(me->text, me->inUnderline, &I);

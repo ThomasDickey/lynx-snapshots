@@ -599,7 +599,7 @@ PUBLIC int HTCopy ARGS4(
 #ifdef _WINDOWS	/* 1997/11/11 (Tue) 15:18:16 */
     long file_length;
     extern int bytes_already_read;
-    
+
     file_length = anchor->content_length;
 #endif
 
@@ -647,7 +647,7 @@ PUBLIC int HTCopy ARGS4(
 		goto finished;
 	    } else if (SOCKET_ERRNO == ENOTCONN ||
 #ifdef _WINDOWS	/* 1997/11/10 (Mon) 16:57:18 */
-		       SOCKET_ERRNO == ETIMEDOUT || 
+		       SOCKET_ERRNO == ETIMEDOUT ||
 #endif
 		       SOCKET_ERRNO == ECONNRESET ||
 		       SOCKET_ERRNO == EPIPE) {
@@ -965,7 +965,7 @@ PUBLIC void HTCopyNoCR ARGS3(
 	HTStream*,		sink)
 {
     HTStreamClass targetClass;
-    char character;
+    int character;
 
     /*	Push the data, ignoring CRLF, down the stream
     */
@@ -979,7 +979,7 @@ PUBLIC void HTCopyNoCR ARGS3(
     HTInitInput(file_number);
     for (;;) {
 	character = HTGetCharacter();
-	if (character == (char)EOF)
+	if (character == EOF)
 	    break;
 	(*targetClass.put_character)(sink, character);
     }
@@ -1289,7 +1289,7 @@ PRIVATE void NetToText_put_character ARGS2(HTStream *, me, char, net_char)
 	    me->sink->isa->put_character(me->sink, CR); /* leftover */
 	}
     }
-    me->had_cr = (c == CR);
+    me->had_cr = (BOOL) (c == CR);
     if (!me->had_cr)
 	me->sink->isa->put_character(me->sink, c);		/* normal */
 }

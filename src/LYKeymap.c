@@ -1,3 +1,4 @@
+
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYKeymap.h>
@@ -31,9 +32,6 @@ PUBLIC char * LYKbLayoutNames[]={
         (char *) 0
 };
 #endif /* EXP_KEYBOARD_LAYOUT */
-
-PRIVATE CONST DocAddress keymap_anchor = {"LYNXKEYMAP", NULL, NULL,
-	NULL, FALSE, FALSE};
 
 struct _HTStream
 {
@@ -187,7 +185,7 @@ LYK_TAG_LINK,     LYK_PREV_DOC,   LYK_VIEW_BOOKMARK,   0,
 LYK_NOCACHE,            0,          LYK_INTERRUPT,     0,
 /* x */              /* y */          /* z */       /* { */
 
-#if (defined(_WINDOWS) || defined(__DJGPP__))
+#if (defined(_WINDOWS) || defined(__DJGPP__) || defined(__CYGWIN__))
 
 LYK_PIPE,               0,              0,             0,
 /* | */               /* } */         /* ~ */
@@ -197,7 +195,7 @@ LYK_PIPE,               0,              0,             0,
 LYK_PIPE,               0,              0,          LYK_HISTORY,
 /* | */               /* } */         /* ~ */       /* del */
 
-#endif /* _WINDOWS || __DJGPP__ */
+#endif /* _WINDOWS || __DJGPP__ || __CYGWIN__ */
 
 /* 80..9F (illegal ISO-8859-1) 8-bit characters. */
    0,                  0,              0,             0,
@@ -242,7 +240,7 @@ LYK_PREV_LINK,    LYK_NEXT_LINK,    LYK_ACTIVATE,   LYK_PREV_DOC,
 LYK_NEXT_PAGE,    LYK_PREV_PAGE,    LYK_HOME,       LYK_END,
 /* PGDOWN */      /* PGUP */        /* HOME */      /* END */
 
-#if (defined(_WINDOWS) || defined(__DJGPP__))
+#if (defined(_WINDOWS) || defined(__DJGPP__) || defined(__CYGWIN__))
 
 LYK_HELP,              0,              0,             0,
 /* F1*/
@@ -251,19 +249,19 @@ LYK_HELP,              0,              0,             0,
 LYK_HELP,         LYK_ACTIVATE,     LYK_HOME,       LYK_END,
 /* F1*/ 	  /* Do key */      /* Find key */  /* Select key */
 
-#endif /* _WINDOWS || __DJGPP__ */
+#endif /* _WINDOWS || __DJGPP__ || __CYGWIN__ */
 
 LYK_UP_TWO,       LYK_DOWN_TWO,     LYK_DO_NOTHING, LYK_FASTBACKW_LINK,
 /* Insert key */  /* Remove key */  /* DO_NOTHING*/ /* Back tab */
 
 /* 110..18F */
 
-#if (defined(_WINDOWS) || defined(__DJGPP__)) && defined(USE_SLANG) && !defined(DJGPP_KEYHANDLER)
+#if (defined(_WINDOWS) || defined(__DJGPP__) || defined(__CYGWIN__)) && defined(USE_SLANG) && !defined(DJGPP_KEYHANDLER)
    LYK_HISTORY,        LYK_ACTIVATE,   0,             0,
    /* Backspace */     /* Enter */
 #else
    0,                  0,              0,             0,
-#endif /* USE_SLANG &&(_WINDOWS || __DJGPP) && !DJGPP_KEYHANDLER */
+#endif /* USE_SLANG &&(_WINDOWS || __DJGPP || __CYGWIN__) && !DJGPP_KEYHANDLER */
    0,                  0,              0,             0,
    0,             LYK_DO_NOTHING,      0,             0,
                /* 0x11d: MOUSE_KEY */
@@ -313,7 +311,7 @@ LYK_UP_TWO,       LYK_DOWN_TWO,     LYK_DO_NOTHING, LYK_FASTBACKW_LINK,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
-#if (defined(_WINDOWS) || defined(__DJGPP__)) && !defined(USE_SLANG) /* PDCurses */
+#if (defined(_WINDOWS) || defined(__DJGPP__) || defined(__CYGWIN__)) && !defined(USE_SLANG) /* PDCurses */
    LYK_ABORT,          0,              0,             0,
    /* ALT_X */
    0,                  0,              0,             0,
@@ -333,7 +331,7 @@ LYK_UP_TWO,       LYK_DOWN_TWO,     LYK_DO_NOTHING, LYK_FASTBACKW_LINK,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
-#endif /* (_WINDOWS || __DJGPP__) && !USE_SLANG */
+#endif /* (_WINDOWS || __DJGPP__ || __CYGWIN__) && !USE_SLANG */
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
@@ -997,35 +995,35 @@ PUBLIC int remap ARGS2(
 	char *,	key,
 	char *,	func)
 {
-       int i;
-       struct rmap *mp;
-       int c;
+    int i;
+    struct rmap *mp;
+    int c;
 
-       if (func == NULL)
-	       return 0;
-       c = lkcstring_to_lkc(key);
-       if (c <= -1)
+    if (func == NULL)
+	return 0;
+    c = lkcstring_to_lkc(key);
+    if (c <= -1)
+	return 0;
+    else if (c >= 0) {
+	/* Remapping of key actions is supported only for basic
+	 * lynxkeycodes, without modifiers etc.!  If we get somehow
+	 * called for an invalid lynxkeycode, fail or silently
+	 * modifiers. - kw
+	 */
+	if (c & LKC_ISLAC)
 	   return 0;
-       else if (c >= 0) {
-	   /* Remapping of key actions is supported only for basic
-	    * lynxkeycodes, without modifiers etc.!  If we get somehow
-	    * called for an invalid lynxkeycode, fail or silently
-	    * modifiers. - kw
-	    */
-	   if (c & LKC_ISLAC)
-	       return 0;
-	   if ((c & LKC_MASK) != c)
-	       c &= LKC_MASK;
-       }
-       if (c + 1 >= KEYMAP_SIZE)
-	   return 0;
-       for (i = 0, mp = revmap; (*mp).name != NULL; mp++, i++) {
-               if (strcmp((*mp).name, func) == 0) {
-                       keymap[c+1] = i;
-                       return (c ? c : LAC_TO_LKC0(i));
-               }
-       }
-       return 0;
+	if ((c & LKC_MASK) != c)
+	   c &= LKC_MASK;
+    }
+    if (c + 1 >= KEYMAP_SIZE)
+	return 0;
+    for (i = 0, mp = revmap; (*mp).name != NULL; mp++, i++) {
+	if (strcmp((*mp).name, func) == 0) {
+	    keymap[c+1] = (char) i;
+	    return (c ? c : LAC_TO_LKC0(i));
+	}
+    }
+    return 0;
 }
 
 
@@ -1191,7 +1189,7 @@ PUBLIC BOOL LYisNonAlnumKeyname ARGS2(
 	ch < 0 || ch >= KEYMAP_SIZE)
 	return (FALSE);
 
-    return(keymap[ch+1] == key_name);
+    return (BOOL) (keymap[ch+1] == key_name);
 }
 
 /*

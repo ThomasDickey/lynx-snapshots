@@ -163,6 +163,8 @@ extern void stop_curses NOPARAMS;
 extern BOOLEAN setup PARAMS((char *terminal));
 extern void LYstartTargetEmphasis NOPARAMS;
 extern void LYstopTargetEmphasis NOPARAMS;
+extern void LYaddnstr PARAMS((CONST char *s, size_t len));
+extern void LYaddstr PARAMS((CONST char *s));
 
 #ifdef VMS
 extern int DCLsystem (char *command);
@@ -199,7 +201,7 @@ extern unsigned int Lynx_Color_Flags;
 #define USE_SLANG_MOUSE		1
 #endif
 
-#if !defined(__DJGPP__)
+#if !defined(__DJGPP__) && !defined(__CYGWIN__)
 #define USE_KEYMAPS		1
 #endif
 

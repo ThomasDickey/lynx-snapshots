@@ -177,7 +177,7 @@ PRIVATE BOOL rule_cond_ok ARGS1(
 	return NO;
     }
     if (!strcmp(r->condition, "redirected"))
-	result = (redirection_attempts > 0);
+	result = (BOOL) (redirection_attempts > 0);
     else if (!strcmp(r->condition, "userspec"))
 	result = LYUserSpecifiedURL;
     else {
@@ -188,7 +188,7 @@ PRIVATE BOOL rule_cond_ok ARGS1(
     if (!strcmp(r->condition_op, "if"))
 	return result;
     else
-	return (!result);
+	return (BOOL) (!result);
 
 }
 /*	Translate by rules					HTTranslate()
@@ -369,14 +369,14 @@ char * HTTranslate ARGS1(
 		    CTRACE(tfp, "HTRule: ...and redirect to `%s'\n",
 				current);
 		    redirecting_url = current;
-		    HTPermitRedir = (permitredir_flag == 1);
+		    HTPermitRedir = (BOOL) (permitredir_flag == 1);
 		    return (char *)0;
 		} else if (r->op == HT_RedirectPerm) {
 		    CTRACE(tfp, "HTRule: ...and redirect like 301 to `%s'\n",
 				current);
 		    redirecting_url = current;
 		    permanent_redirection = TRUE;
-		    HTPermitRedir = (permitredir_flag == 1);
+		    HTPermitRedir = (BOOL) (permitredir_flag == 1);
 		    return (char *)0;
 		}
 		break;

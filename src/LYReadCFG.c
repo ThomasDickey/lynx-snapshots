@@ -661,7 +661,7 @@ static int keymap_fun ARGS1(
 		if (strcasecomp(efunc, "PASS!") == 0) {
 		    if (func) {
 			lec = LYE_FORM_LAC|lacname_to_lac(func);
-			success = LYRemapEditBinding(lkc, lec);
+			success = (BOOL) LYRemapEditBinding(lkc, lec);
 		    }
 		    if (!success)
 			fprintf(stderr,
@@ -673,7 +673,7 @@ static int keymap_fun ARGS1(
 		}
 		if (!success && strncasecomp(efunc, "PASS", 4) == 0) {
 		    lec = LYE_FORM_PASS;
-		    success = LYRemapEditBinding(lkc, lec);
+		    success = (BOOL) LYRemapEditBinding(lkc, lec);
 		}
 		if (!success) {
 		    if (lec != -1) {
@@ -756,8 +756,8 @@ static int news_max_chunk_fun ARGS1(
 static int news_posting_fun ARGS1(
 	char *,		value)
 {
-    LYNewsPosting = is_true(value);
-    no_newspost = (LYNewsPosting == FALSE);
+    LYNewsPosting = (BOOL) is_true(value);
+    no_newspost = (BOOL) (LYNewsPosting == FALSE);
     return 0;
 }
 #endif /* DISABLE_NEWS */
@@ -901,9 +901,9 @@ static int nonrest_sigwinch_fun ARGS1(
 	char *,		value)
 {
     if (!strncasecomp(value, "XWINDOWS", 8)) {
-	LYNonRestartingSIGWINCH = (LYgetXDisplay() != NULL);
+	LYNonRestartingSIGWINCH = (BOOL) (LYgetXDisplay() != NULL);
     } else {
-	LYNonRestartingSIGWINCH = is_true(value);
+	LYNonRestartingSIGWINCH = (BOOL) is_true(value);
     }
     return 0;
 }
@@ -956,6 +956,91 @@ static int parse_html_src_spec ARGS3(
 #undef BS
     return 0;
 }
+
+#ifdef EXP_CHARSET_CHOICE
+PRIVATE void matched_charset_choice ARGS2(
+	BOOL,	display_charset,
+	int,	i)
+{
+    int j;
+
+    if (display_charset && !custom_display_charset) {
+	for (custom_display_charset = TRUE, j = 0; j < LYNumCharsets; ++j)
+	    charset_subsets[j].hide_display = TRUE;
+    } else if (!display_charset && !custom_assumed_doc_charset) {
+	for (custom_assumed_doc_charset = TRUE, j = 0; j < LYNumCharsets; ++j)
+	    charset_subsets[j].hide_assumed = TRUE;
+    }
+    if (display_charset)
+	charset_subsets[i].hide_display = FALSE;
+    else
+	charset_subsets[i].hide_assumed = FALSE;
+}
+
+PRIVATE int parse_charset_choice ARGS2(
+	char *,	p,
+	BOOL,	display_charset) /*if FALSE, then assumed doc charset*/
+{
+    int len, i;
+    int matches = 0;
+
+    /*only one charset choice is allowed per line!*/
+    LYTrimHead(p);
+    LYTrimTail(p);
+    CTRACE(tfp, "parsing charset choice for %s:\"%s\"",
+	(display_charset ? "display charset" : "assumed doc charset"), p);
+    len = strlen(p);
+    if (!len) {
+	CTRACE(tfp," - EMPTY STRING\n");
+	return 1;
+    }
+    if (*p == '*' && len == 1) {
+	if (display_charset)
+	    for (custom_display_charset = TRUE, i = 0 ;i < LYNumCharsets; ++i)
+		charset_subsets[i].hide_display = FALSE;
+	else
+	    for (custom_assumed_doc_charset = TRUE, i = 0; i < LYNumCharsets; ++i)
+		charset_subsets[i].hide_assumed = FALSE;
+	CTRACE(tfp," - all unhidden\n");
+	return 0;
+    }
+    if (p[len-1] == '*') {
+	--len;
+	for (i = 0 ;i < LYNumCharsets; ++i) {
+	    if ((!strncasecmp(p, LYchar_set_names[i], len)) ||
+		(!strncasecmp(p, LYCharSet_UC[i].MIMEname, len)) ) {
+		++matches;
+		matched_charset_choice(display_charset, i);
+	    }
+	}
+	CTRACE(tfp," - %d matches\n", matches);
+	return 0;
+    } else {
+	for (i = 0; i < LYNumCharsets; ++i) {
+	    if ((!strcasecmp(p,LYchar_set_names[i])) ||
+		(!strcasecmp(p,LYCharSet_UC[i].MIMEname)) ) {
+		matched_charset_choice(display_charset, i);
+		CTRACE(tfp," - OK\n");
+		++matches;
+		return 0;
+	    }
+	}
+	CTRACE(tfp," - NOT recognised\n");
+	return 1;
+    }
+}
+
+PRIVATE int parse_display_charset_choice ARGS1(char*,p)
+{
+    return parse_charset_choice(p,1);
+}
+
+PRIVATE int parse_assumed_doc_charset_choice ARGS1(char*,p)
+{
+    return parse_charset_choice(p,0);
+}
+
+#endif /* EXP_CHARSET_CHOICE */
 
 #if defined(__STDC__) || defined(_WIN_CC)
 #define defHTSRC_parse_fun(x) static int html_src_set_##x ARGS1( char*,str) \
@@ -1035,6 +1120,9 @@ static Config_Type Config_Table [] =
      PARSE_FUN("assume_charset", CONF_FUN, assume_charset_fun),
      PARSE_FUN("assume_local_charset", CONF_FUN, assume_local_charset_fun),
      PARSE_FUN("assume_unrec_charset", CONF_FUN, assume_unrec_charset_fun),
+#ifdef EXP_CHARSET_CHOICE
+     PARSE_FUN("assumed_doc_charset_choice",CONF_FUN,parse_assumed_doc_charset_choice),
+#endif
      PARSE_SET("block_multi_bookmarks", CONF_BOOL, &LYMBMBlocked),
      PARSE_SET("bold_h1", CONF_BOOL, &bold_H1),
      PARSE_SET("bold_headers", CONF_BOOL, &bold_headers),
@@ -1069,6 +1157,9 @@ static Config_Type Config_Table [] =
 #endif
 #ifdef DIRED_SUPPORT
      PARSE_FUN("dired_menu", CONF_FUN, dired_menu_fun),
+#endif
+#ifdef EXP_CHARSET_CHOICE
+     PARSE_FUN("display_charset_choice",CONF_FUN,parse_display_charset_choice),
 #endif
      PARSE_ADD("downloader", CONF_ADD_ITEM, downloaders),
      PARSE_SET("emacs_keys_always_on", CONF_BOOL, &emacs_keys),
@@ -1203,6 +1294,9 @@ static Config_Type Config_Table [] =
      PARSE_SET("prepend_base_to_source", CONF_BOOL, &LYPrependBaseToSource),
      PARSE_SET("prepend_charset_to_source", CONF_BOOL, &LYPrependCharsetToSource),
      PARSE_FUN("printer", CONF_FUN, printer_fun),
+#ifdef USE_PSRC
+     PARSE_SET("psrcview_no_anchor_numbering", CONF_BOOL, &psrcview_no_anchor_numbering),
+#endif
      PARSE_SET("quit_default_yes", CONF_BOOL, &LYQuitDefaultYes),
      PARSE_SET("reuse_tempfiles", CONF_BOOL, &LYReuseTempfiles),
 #ifndef NO_RULES
@@ -1318,7 +1412,7 @@ PRIVATE Config_Type *lookup_config ARGS1(
 	char *,		name)
 {
     Config_Type *tbl = Config_Table;
-    char ch = TOUPPER(*name);
+    char ch = (char) TOUPPER(*name);
 
     while (tbl->name != 0) {
 	char ch1 = tbl->name[0];
@@ -1481,7 +1575,7 @@ PRIVATE void do_read_cfg ARGS5(
 		: tbl->type) {
 	case CONF_BOOL:
 	    if (q->set_value != 0)
-		*(q->set_value) = is_true (value);
+		*(q->set_value) = (BOOL) is_true (value);
 	    break;
 
 	case CONF_FUN:

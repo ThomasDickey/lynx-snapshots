@@ -40,7 +40,7 @@ PUBLIC int showinfo ARGS4(
     char *name;
     CONST char *cp;
 #ifdef ADVANCED_INFO
-    BOOLEAN LYInfoAdvanced = (user_mode == ADVANCED_MODE);
+    BOOLEAN LYInfoAdvanced = (BOOL) (user_mode == ADVANCED_MODE);
 #endif
 
 #ifdef DIRED_SUPPORT

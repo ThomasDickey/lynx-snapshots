@@ -189,7 +189,7 @@ struct _HTStream {
     char *			url;
     char *			csi;
     int				csi_index;
-} ;
+};
 
 #ifdef USE_PSRC
 static BOOL seen_letter_in_junk_tag;
@@ -228,7 +228,7 @@ PRIVATE void HTMLSRC_apply_markup ARGS3(
     }
 }
 
-#if defined(__STDC__) || _WIN_CC
+#if ANSI_PREPRO
 #  define PSRCSTART(x)	HTMLSRC_apply_markup(context,HTL_##x,START)
 #  define PSRCSTOP(x)  HTMLSRC_apply_markup(context,HTL_##x,STOP)
 #else
@@ -416,8 +416,8 @@ PRIVATE void handle_attribute_name ARGS2(
 
 #ifdef USE_PSRC
 	    } else {
-		 cur_attr_is_name = (attributes[i].type == HTMLA_ANAME);
-		 cur_attr_is_href = (attributes[i].type == HTMLA_HREF);
+		 cur_attr_is_name = (BOOL) (attributes[i].type == HTMLA_ANAME);
+		 cur_attr_is_href = (BOOL) (attributes[i].type == HTMLA_HREF);
 	    }
 #endif
 	    return;
@@ -631,7 +631,7 @@ PRIVATE void handle_entity ARGS2(
 #else
 	if (context->T.output_utf8 && (psrc_view ?
 	      (UCPutUtf8_charstring((HTStream *)context->target,
-	      (putc_func_t*)(&fake_put_character), code)): PUTUTF8(code) ) ) {
+	      (putc_func_t*)(fake_put_character), code)): PUTUTF8(code) ) ) {
 
 	    if (psrc_view) {
 		HTMLSRC_apply_markup(context,HTL_entity,START);
@@ -844,10 +844,10 @@ PRIVATE BOOL element_valid_within ARGS3(
     usecontains = (direct ? stacked_tag->contains : stacked_tag->icontains);
     usecontained = (direct ? new_tag->contained : new_tag->icontained);
     if (new_tag == stacked_tag)
-	return ((Tgc_same & usecontains) &&
+	return (BOOL) ((Tgc_same & usecontains) &&
 		(Tgc_same & usecontained));
     else
-	return ((new_tag->tagclass & usecontains) &&
+	return (BOOL) ((new_tag->tagclass & usecontains) &&
 		(stacked_tag->tagclass & usecontained));
 }
 
@@ -1700,6 +1700,12 @@ top1:
 			context->element_stack->tag->contents == SGML_LITTERAL)
 					 ?
 			      S_litteral : S_tag;
+#ifdef USE_PSRC
+	    if (psrc_view) /*there is nothing useful in the element_stack*/
+		if (context->current_tag &&
+			context->current_tag->contents == SGML_LITTERAL)
+		    context->state = S_litteral;
+#endif
 #define PASS8859SPECL context->T.pass_160_173_raw
 	/*
 	**  Convert 160 (nbsp) to Lynx special character if
@@ -1730,7 +1736,7 @@ top1:
 /******************************************************************
  *   I. LATIN-1 OR UCS2	 TO  DISPLAY CHARSET
  ******************************************************************/
-	} else if ((chk = (context->T.trans_from_uni && TOASCII(unsign_c) >= 160)) &&  /* S/390 -- gil -- 0968 */
+	} else if ((chk = (BOOL) (context->T.trans_from_uni && TOASCII(unsign_c) >= 160)) &&  /* S/390 -- gil -- 0968 */
 		   (uck = UCTransUniChar(unsign_c,
 					 context->outUCLYhndl)) >= ' ' &&
 		   uck < 256) {
@@ -1901,12 +1907,45 @@ top1:
 	HTChunkPutc(string, c);
 	if (TOUPPER(c) != ((string->size == 1) ?
 					   '/' :
+#ifdef USE_PSRC
+			psrc_view ? context->current_tag->name[string->size-2]:
+#endif
 			context->element_stack->tag->name[string->size-2])) {
 	    int i;
 
 	    /*
 	    **	If complete match, end litteral.
 	    */
+#ifdef USE_PSRC
+	    if (psrc_view) {
+		if ((c == '>') && context->current_tag && !context->current_tag->name[string->size-2]) {
+		    PSRCSTART(abracket);PUTC('<');PUTC('/');PSRCSTOP(abracket);
+		    PSRCSTART(tag);
+		    strcpy(string->data,context->current_tag->name);
+		    if (tagname_transform != 1) {
+			if (tagname_transform == 0)
+			    LYLowerCase(string->data);
+			else
+			    LYUpperCase(string->data);
+		    }
+		    PUTS(string->data);
+		    PSRCSTOP(tag);
+		    PSRCSTART(abracket);PUTC('>');PSRCSTOP(abracket);
+
+		    context->current_tag = NULL;
+		    string->size = 0;
+		    context->current_attribute_number = INVALID;
+		    context->state = S_text;
+		    break;
+		}
+		PUTC('<');
+		for (i = 0; i < string->size-1; i++)  /* recover, except last c */
+	    	    PUTC(string->data[i]);
+		string->size = 0;
+		context->state = S_text;
+		goto top1;		/* to recover last c */
+	    } else
+#endif
 	    if ((c == '>') &&
 		(!context->element_stack->tag->name[string->size-2])) {
 		end_element(context, context->element_stack->tag);
@@ -3535,7 +3574,7 @@ top1:
 	    } else if (psrc_view) {
 #endif
 	    } else {
-		BOOL tag_OK = (c == '>' || WHITE(c));
+		BOOL tag_OK = (BOOL) (c == '>' || WHITE(c));
 #if OPT
 		HTMLElement e = context->current_tag - context->dtd->tags;
 		int branch = 2; /* it can be 0,1,2*/
@@ -4058,6 +4097,7 @@ PUBLIC HTStream* SGML_new  ARGS3(
 #ifdef USE_PSRC
     if (psrc_view) {
 	psrc_view = FALSE;
+	mark_htext_as_source = TRUE;
 	SGML_string(context,
 		    "<HTML><HEAD><TITLE>source</TITLE></HEAD><BODY><PRE>");
 	psrc_view = TRUE;
@@ -4201,15 +4241,15 @@ PUBLIC unsigned char * SJIS_TO_JIS1 ARGS3(
 	register unsigned char,		LO,
 	register unsigned char *,	JCODE)
 {
-    HI -= (HI <= 0x9F) ? 0x71 : 0xB1;
-    HI = (HI << 1) + 1;
+    HI -= (unsigned char) ((HI <= 0x9F) ? 0x71 : 0xB1);
+    HI = (unsigned char) ((HI << 1) + 1);
     if (0x7F < LO)
 	LO--;
     if (0x9E <= LO) {
-	LO -= 0x7D;
+	LO -= (unsigned char) 0x7D;
 	HI++;
     } else {
-	LO -= 0x1F;
+	LO -= (unsigned char) 0x1F;
     }
     JCODE[0] = HI;
     JCODE[1] = LO;
@@ -4222,15 +4262,15 @@ PUBLIC unsigned char * JIS_TO_SJIS1 ARGS3(
 	register unsigned char *,	SJCODE)
 {
     if (HI & 1)
-	LO += 0x1F;
+	LO += (unsigned char) 0x1F;
     else
-	LO += 0x7D;
+	LO += (unsigned char) 0x7D;
     if (0x7F <= LO)
 	LO++;
 
-    HI = ((HI - 0x21) >> 1) + 0x81;
+    HI = (unsigned char) (((HI - 0x21) >> 1) + 0x81);
     if (0x9F < HI)
-	HI += 0x40;
+	HI += (unsigned char) 0x40;
     SJCODE[0] = HI;
     SJCODE[1] = LO;
     return SJCODE;
@@ -4243,7 +4283,7 @@ PUBLIC unsigned char * EUC_TO_SJIS1 ARGS3(
 {
     if (HI == 0x8E)
 	JISx0201TO0208_EUC(HI, LO, &HI, &LO);
-    JIS_TO_SJIS1(HI & 0x7F, LO & 0x7F, SJCODE);
+    JIS_TO_SJIS1((unsigned char) (HI & 0x7F), (unsigned char) (LO & 0x7F), SJCODE);
     return SJCODE;
 }
 
@@ -4255,7 +4295,7 @@ PUBLIC void JISx0201TO0208_SJIS ARGS3(
     unsigned char SJCODE[2];
 
     JISx0201TO0208_EUC(0x8E, I, OHI, OLO);
-    JIS_TO_SJIS1(*OHI & 0x7F, *OLO & 0x7F, SJCODE);
+    JIS_TO_SJIS1((unsigned char)(*OHI & 0x7F), (unsigned char)(*OLO & 0x7F), SJCODE);
     *OHI = SJCODE[0];
     *OLO = SJCODE[1];
 }
@@ -4303,7 +4343,7 @@ PUBLIC unsigned char * EUC_TO_SJIS ARGS2(
     for (sp = src, dp = dst; *sp;) {
 	if (*sp & 0x80) {
 	    if (sp[1] && (sp[1] & 0x80)) {
-		JIS_TO_SJIS1(sp[0] & 0x7F, sp[1] & 0x7F, dp);
+		JIS_TO_SJIS1((unsigned char)(sp[0] & 0x7F), (unsigned char)(sp[1] & 0x7F), dp);
 		dp += 2;
 		sp += 2;
 	    } else {
@@ -4341,16 +4381,16 @@ PUBLIC unsigned char *EUC_TO_JIS ARGS4(
 		continue;
 	    }
 	    if (!kana_mode) {
-		kana_mode = ~kana_mode;
+		kana_mode = (unsigned char) ~kana_mode;
 		dp = Strcpy(dp, toK);
 	    }
 	    if (*sp & 0x80) {
-		*dp++ = cch & ~0x80;
-		*dp++ = *sp++ & ~0x80;
+		*dp++ = (unsigned char) (cch & ~0x80);
+		*dp++ = (unsigned char) (*sp++ & ~0x80);
 	    }
 	} else {
 	    if (kana_mode) {
-		kana_mode = ~kana_mode;
+		kana_mode = (unsigned char) ~kana_mode;
 		dp = Strcpy(dp, toA);
 	    }
 	    *dp++ = cch;
@@ -4389,8 +4429,8 @@ PRIVATE CONST unsigned char *repairJIStoEUC ARGS2(
 	if (!IS_JIS7(ch1, ch2))
 	    return 0;
 
-	*d++ = 0x80 | ch1;
-	*d++ = 0x80 | ch2;
+	*d++ = (unsigned char) (0x80 | ch1);
+	*d++ = (unsigned char) (0x80 | ch2);
     }
     return 0;
 }

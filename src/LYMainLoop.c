@@ -46,22 +46,6 @@ extern char *string_short(char *str, int cut_pos);	/* LYExtern.c */
 
 #define CHARSET_TRANS 14	/* "Transparent" in LYCharSets.c */
 
-#ifdef SH_EX
-PRIVATE char *str_sjis(char *to, char *from)
-{
-    if (!LYRawMode) {
-	strcpy(to, from);
-    } else if (last_kcode == EUC) {
-	EUC_TO_SJIS(from, to);
-    } else if (last_kcode == SJIS) {
-	strcpy(to, from);
-    } else {
-	TO_SJIS(from, to);
-    }
-    return to;
-}
-#endif
-
 PUBLIC char *str_kcode(HTkcode code)
 {
     char *p;
@@ -109,15 +93,28 @@ PUBLIC char *str_kcode(HTkcode code)
     return buff;
 }
 
+#ifdef WIN_EX
 
-#ifdef SH_EX
+PRIVATE char *str_sjis(char *to, char *from)
+{
+    if (!LYRawMode) {
+	strcpy(to, from);
+    } else if (last_kcode == EUC) {
+	EUC_TO_SJIS(from, to);
+    } else if (last_kcode == SJIS) {
+	strcpy(to, from);
+    } else {
+	TO_SJIS(from, to);
+    }
+    return to;
+}
+
 PRIVATE void set_ws_title(char * str)
 {
-#ifdef WIN_EX
     SetConsoleTitle(str);
-#endif
 }
-#endif
+
+#endif /* WIN_EX */
 
 #endif /* CJK_EX */
 
@@ -414,7 +411,7 @@ PRIVATE int DoTraversal ARGS2(
     BOOLEAN rlink_exists;
     BOOLEAN rlink_allowed;
 
-    rlink_exists = (nlinks > 0 &&
+    rlink_exists = (BOOL) (nlinks > 0 &&
 		    links[curdoc.link].type != WWW_FORM_LINK_TYPE &&
 		    links[curdoc.link].lname != NULL);
 
@@ -424,11 +421,11 @@ PRIVATE int DoTraversal ARGS2(
 	     traversal_host &&
 	     links[curdoc.link].lname) {
 	    if (strncmp(links[curdoc.link].lname, "LYNXIMGMAP:", 11)) {
-		rlink_allowed = !strncmp(traversal_host,
+		rlink_allowed = (BOOL) !strncmp(traversal_host,
 					 links[curdoc.link].lname,
 					 strlen(traversal_host));
 	    } else {
-		rlink_allowed = !strncmp(traversal_host,
+		rlink_allowed = (BOOL) !strncmp(traversal_host,
 					 links[curdoc.link].lname + 11,
 					 strlen(traversal_host));
 	    }
@@ -498,10 +495,9 @@ PRIVATE int DoTraversal ARGS2(
 
 int mainloop NOARGS
 {
-#if defined(SH_EX)	/* 1997/10/08 (Wed) 14:52:06 */
+#if defined(WIN_EX)	/* 1997/10/08 (Wed) 14:52:06 */
 #undef	STRING_MAX
 #define	STRING_MAX	4096
-    char title_buff[STRING_MAX];
     char temp_buff[STRING_MAX];
 
 #define	BUFF_MAX	1024
@@ -1285,13 +1281,6 @@ try_again:
 		     *	to Newline, so we get a redraw.
 		     */
 		    curdoc.line = -1;
-#ifdef USE_PSRC
-		    if (psrc_view)
-			HTMark_asSource(); /* this flag is not set, since when
-			displaying source, psrc_view is temporary unset when
-			writing the HTML header - and HTMainText is created
-			at that time.*/
-#endif
 		    break;
 		}  /* end switch */
 
@@ -1690,7 +1679,7 @@ try_again:
 
 	}
 
-#if defined(CJK_EX)			/* 1997/10/08 (Wed) 14:52:06 */
+#if defined(WIN_EX)			/* 1997/10/08 (Wed) 14:52:06 */
 	if (nlinks > 0) {
 	    char *p = "LYNX (unknown link type)";
 
@@ -1743,7 +1732,7 @@ try_again:
 			HTUnEscape(temp_buff);
 		    }
 		    str_sjis(sjis_buff, temp_buff);
-		    SetConsoleTitle(string_short(sjis_buff, 10));
+		    set_ws_title(string_short(sjis_buff, 10));
 		}
 	    }
 	} else {
@@ -1756,7 +1745,7 @@ try_again:
 		set_ws_title(HTUnEscape(temp_buff));
 	    }
 	}
-#endif /* CJK_EX */
+#endif /* WIN_EX */
 
 	/*
 	 *  Report unread or new mail, if appropriate.
@@ -1833,7 +1822,7 @@ try_again:
 		 links[curdoc.link].form->type == F_TEXTAREA_TYPE)) {
 
 		BOOLEAN use_last_tfpos;
-		use_last_tfpos = (real_cmd == LYK_LPOS_PREV_LINK ||
+		use_last_tfpos = (BOOL) (real_cmd == LYK_LPOS_PREV_LINK ||
 				  real_cmd == LYK_LPOS_NEXT_LINK);
 
 #ifndef NO_NONSTICKY_INPUTS
@@ -4481,9 +4470,9 @@ if (!LYUseFormsOptions) {
 	    BOOLEAN LYUseDefaultRawMode_flag = LYUseDefaultRawMode;
 	    BOOLEAN LYSelectPopups_flag = LYSelectPopups;
 	    BOOLEAN verbose_img_flag = verbose_img;
-	    BOOLEAN keypad_mode_flag = keypad_mode;
+	    BOOLEAN keypad_mode_flag = (BOOL) keypad_mode;
 	    BOOLEAN show_dotfiles_flag = show_dotfiles;
-	    BOOLEAN user_mode_flag = user_mode;
+	    BOOLEAN user_mode_flag = (BOOL) user_mode;
 	    int CurrentAssumeCharSet_flag = UCLYhndl_for_unspec;
 	    int CurrentCharSet_flag = current_char_set;
 	    int HTfileSortMethod_flag = HTfileSortMethod;
@@ -6168,7 +6157,7 @@ check_add_bookmark_to_self:
 		HTUserMsg(gettext("charset for this document specified explicitely, sorry..."));
 		break;
 	    } else {
-		LYUseDefaultRawMode = !LYUseDefaultRawMode;
+		LYUseDefaultRawMode = (BOOL) !LYUseDefaultRawMode;
 		HTUserMsg(LYRawMode ? RAWMODE_OFF : RAWMODE_ON);
 		HTMLSetCharacterHandling(current_char_set);
 #ifdef SOURCE_CACHE

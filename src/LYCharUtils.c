@@ -182,7 +182,7 @@ PUBLIC void LYEntify ARGS2(
 		    }
 
 		case S_nonascii_text:
-		    if (*p == '\033') 
+		    if (*p == '\033')
 			state = S_esc;
 		    *q++ = *p;
 		    continue;
@@ -1743,12 +1743,12 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
     **	are both iso-8859-1,
     **	or if we are in CJK mode.
     */
-    no_bytetrans = ((cs_to <= 0 && cs_from == cs_to) ||
+    no_bytetrans = (BOOL) ((cs_to <= 0 && cs_from == cs_to) ||
 		    HTCJK != NOCJK);
 
     /* No need to translate or examine the string any further */
     if (!no_bytetrans)
-	no_bytetrans = (!use_lynx_specials && !Back &&
+	no_bytetrans = (BOOL) (!use_lynx_specials && !Back &&
 			UCNeedNotTranslate(cs_from, cs_to));
 
     /*
@@ -1776,14 +1776,14 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	UCTransParams_clear(&T);
 	UCSetTransParams(&T, cs_from, &LYCharSet_UC[cs_from],
 			 cs_to, &LYCharSet_UC[cs_to]);
-	from_is_utf8 = (LYCharSet_UC[cs_from].enc == UCT_ENC_UTF8);
+	from_is_utf8 = (BOOL) (LYCharSet_UC[cs_from].enc == UCT_ENC_UTF8);
 	output_utf8 = T.output_utf8;
 	repl_translated_C0 = T.repl_translated_C0;
 	puni = p;
     } else if (do_ent) {
-	output_utf8 = (LYCharSet_UC[cs_to].enc == UCT_ENC_UTF8 ||
+	output_utf8 = (BOOL) (LYCharSet_UC[cs_to].enc == UCT_ENC_UTF8 ||
 		       HText_hasUTF8OutputSet(HTMainText));
-	repl_translated_C0 = (LYCharSet_UC[cs_to].enc == UCT_ENC_8BIT_C0);
+	repl_translated_C0 = (BOOL) (LYCharSet_UC[cs_to].enc == UCT_ENC_8BIT_C0);
     }
 
     lowest_8 = LYlowest_eightbit[cs_to];
@@ -1833,7 +1833,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		} else {
 		    if (0xA1 <= code && code <= 0xDF) {
 		        sjis_str[2] = '\0';
-			JISx0201TO0208_SJIS((unsigned char)code, 
+			JISx0201TO0208_SJIS((unsigned char)code,
 						sjis_str, sjis_str + 1);
 			REPLACE_STRING(sjis_str);
 			p++;
@@ -1982,7 +1982,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		}
 		rev_c = UCReverseTransChar(*p, cs_to, cs_from);
 		if (rev_c > 127) {
-		    *p = rev_c;
+		    *p = (char) rev_c;
 		    code = rev_c;
 		    state = S_got_outchar;
 		    break;
@@ -2400,6 +2400,22 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    */
 		    state = S_got_outchar;
 		    break;
+
+		    /* The following disabled section doesn't make sense
+		    ** any more.  It used to make sense in the past, when
+		    ** S_check_named would look in "old style" tables
+		    ** in addition to what it does now.
+		    ** Disabling of going to S_check_name here prevents
+		    ** endless looping between S_check_uni and S_check_names
+		    ** states, which could occur here for Latin 1 codes
+		    ** for some cs_to if they had no translation in that
+		    ** cs_to.  Normally all cs_to *should* now have valid
+		    ** translations via UCTransUniChar or UCTransUniCharStr
+		    ** for all Latin 1 codes, so that we would not get here
+		    ** anyway, and no loop could occur.  Still, if we *do*
+		    ** get here, FALL THROUGH to case S_recover now.  - kw
+		    */
+#if 0
 		    /*
 		    **	If we get to here, convert and handle
 		    **	the character as a named entity. - FM
@@ -2408,6 +2424,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    name = HTMLGetEntityName(code - 160);
 		    state = S_check_name;
 		    break;
+#endif
 		}
 
 	case S_recover:
@@ -2620,7 +2637,7 @@ PUBLIC BOOL LYUCTranslateBackFormData ARGS4(
     ret = (LYUCFullyTranslateString_1(str, cs_from, cs_to, FALSE,
 				       NO, plain_space, YES,
 				       YES, st_HTML));
-    return (ret != NULL);
+    return (BOOL) (ret != NULL);
 }
 
 /*
@@ -2939,14 +2956,14 @@ PUBLIC void LYHandleMETA ARGS4(
 		 *  of match.
 		 */
 		BOOL given_is_8859
-		    = (!strncmp(cp4, "iso-8859-", 9) &&
+		    = (BOOL) (!strncmp(cp4, "iso-8859-", 9) &&
 		       isdigit((unsigned char)cp4[9]));
 		BOOL given_is_8859like
-		    = (given_is_8859 || !strncmp(cp4, "windows-", 8) ||
+		    = (BOOL) (given_is_8859 || !strncmp(cp4, "windows-", 8) ||
 			!strncmp(cp4, "cp12", 4) ||
 			!strncmp(cp4, "cp-12", 5));
 		BOOL given_and_display_8859like
-		    = (given_is_8859like &&
+		    = (BOOL) (given_is_8859like &&
 		       (strstr(LYchar_set_names[current_char_set],
 			       "ISO-8859") ||
 			strstr(LYchar_set_names[current_char_set],
@@ -3270,7 +3287,7 @@ PUBLIC void LYHandlePlike ARGS6(
 		     !strcmp(me->sp->style->name, "Preformatted")))) {
 		me->sp->style->alignment = HT_LEFT;
 	} else {
-	    me->sp->style->alignment = me->current_default_alignment;
+	    me->sp->style->alignment = (short) me->current_default_alignment;
 	}
 
 	if (start) {
@@ -3883,7 +3900,7 @@ PUBLIC void LYResetParagraphAlignment ARGS1(
 	  !strcmp(me->sp->style->name, "Preformatted")))) {
 	me->sp->style->alignment = HT_LEFT;
     } else {
-	me->sp->style->alignment = me->current_default_alignment;
+	me->sp->style->alignment = (short) me->current_default_alignment;
     }
     return;
 }

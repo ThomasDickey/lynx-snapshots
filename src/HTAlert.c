@@ -263,7 +263,7 @@ PUBLIC void HTReadProgress ARGS2(
 		if (t_rate < 1000)
 		    sprintf (line + n, " %6d bytes/sec.", t_rate);
 		else
-		    sprintf (line + n, " %6d,%03d bytes/sec.", 
+		    sprintf (line + n, " %6d,%03d bytes/sec.",
 					t_rate / 1000, t_rate % 1000);
 	    }
 	}
@@ -438,7 +438,7 @@ PUBLIC BOOL HTLastConfirmCancelled NOARGS
 /*	Seek confirmation with default answer.		HTConfirmDefault()
 **	--------------------------------------
 */
-PUBLIC BOOL HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
+PUBLIC int HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 {
     char *msg_yes = gettext("yes");
     char *msg_no  = gettext("no");
@@ -498,7 +498,7 @@ PUBLIC BOOL HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 */
 PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
 {
-    return HTConfirmDefault(Msg, DFT_CONFIRM);
+    return (BOOL) HTConfirmDefault(Msg, DFT_CONFIRM);
 }
 
 /*	Prompt for answer and get text back.		HTPrompt()

@@ -165,9 +165,9 @@ PRIVATE BOOL HTIdentical ARGS2(
 		return(NO);
 	    }
 	}
-	return(*s == *t);
+	return (BOOL) (*s == *t);
     } else {
-	return(s == t); 	/* Two NULLs are identical, aren't they ? */
+	return (BOOL) (s == t);  /* Two NULLs are identical, aren't they ? */
     }
 }
 #endif /* CASE_INSENSITIVE_ANCHORS */
@@ -896,7 +896,7 @@ PUBLIC BOOL HTAnchor_isISMAPScript ARGS1(
 PUBLIC BOOL HTAnchor_hasChildren ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? ! HTList_isEmpty(me->children) : NO);
+    return (BOOL) ( me ? ! HTList_isEmpty(me->children) : NO);
 }
 
 #if defined(USE_HASH)
@@ -1086,7 +1086,7 @@ PUBLIC CONST char * HTAnchor_server ARGS1(
 PUBLIC BOOL HTAnchor_safe ARGS1(
 	HTParentAnchor *,	me)
 {
-    return( me ? me->safe : FALSE);
+    return (BOOL) ( me ? me->safe : FALSE);
 }
 
 /*	Content-Base header handling. - FM

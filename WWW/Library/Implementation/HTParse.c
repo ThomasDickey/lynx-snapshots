@@ -777,9 +777,9 @@ PUBLIC char * HTEscapeSP ARGS2(
 PRIVATE char from_hex ARGS1(
 	char,		c)
 {
-    return  c >= '0' && c <= '9' ?  c - '0'
+    return (char) ( c >= '0' && c <= '9' ?  c - '0'
 	    : c >= 'A' && c <= 'F'? c - 'A' + 10
-	    : c - 'a' + 10;	/* accept small letters just in case */
+	    : c - 'a' + 10);     /* accept small letters just in case */
 }
 
 PUBLIC char * HTUnEscape ARGS1(
@@ -804,12 +804,12 @@ PUBLIC char * HTUnEscape ARGS1(
 	      } else {
 		p++;
 		if (*p)
-		    *q = from_hex(*p++) * 16;
+		    *q = (char) (from_hex(*p++) * 16);
 		if (*p) {
 		    /*
 		    ** Careful! FROMASCII() may evaluate its arg more than once!
 		    */  /* S/390 -- gil -- 0221 */
-		    *q = *q + from_hex(*p++) ;
+		    *q = (char) (*q + from_hex(*p++));
 		}
 		*q = FROMASCII(*q);
 		q++;
@@ -850,7 +850,8 @@ PUBLIC char * HTUnEscapeSome ARGS2(
 	    p[1] && p[2] &&	/* tests shouldn't be needed, but.. */
 	    isxdigit((unsigned char)p[1]) &&
 	    isxdigit((unsigned char)p[2]) &&
-	    (testcode = FROMASCII(from_hex(p[1])*16 + from_hex(p[2]))) && /* %00 no good*/
+	    (testcode = (char) FROMASCII(from_hex(p[1])*16 +
+		from_hex(p[2]))) && /* %00 no good*/
 	    strchr(do_trans, testcode)) { /* it's one of the ones we want */
 	    *q++ = testcode;
 	    p += 3;

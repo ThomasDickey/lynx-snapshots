@@ -7,7 +7,7 @@
 #define NORMAL 1
 #define NULLFILE 3
 
-extern BOOLEAN getfile PARAMS((document *doc));
+extern int getfile PARAMS((document *doc));
 extern int follow_link_number PARAMS((
 	int		c,
 	int		cur,

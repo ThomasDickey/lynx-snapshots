@@ -526,7 +526,7 @@ PRIVATE void send_file_to_mail ARGS3(
 	disp_charset = NULL;
 	use_cte = FALSE;
     }
-    use_type =  (disp_charset || HTisDocumentSource());
+    use_type = (BOOL) (disp_charset || HTisDocumentSource());
 
     /*
      * Use newdoc->title as a subject instead of sug_filename:  MORE readable
@@ -705,8 +705,8 @@ PRIVATE void send_file_to_mail ARGS3(
     if (use_cte && !disp_charset)
 	use_cte = FALSE;
 #endif /* NOTDEFINED */
-    use_type = (disp_charset || HTisDocumentSource());
-    use_mime = (use_cte || use_type);
+    use_type = (BOOL) (disp_charset || HTisDocumentSource());
+    use_mime = (BOOL) (use_cte || use_type);
 
     if (use_mime) {
 	fprintf(outfile_fp, "Mime-Version: 1.0\n");

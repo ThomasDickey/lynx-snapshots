@@ -32,6 +32,10 @@
 #include <resolv.h>
 #endif
 
+#if defined(__DJGPP__) && defined (WATT32)
+#include <netdb.h>
+#endif /* __DJGPP__ */
+
 #define OK_HOST(p) ((p) != 0 && ((p)->h_length) != 0)
 
 #ifdef SVR4_BSDSELECT
@@ -359,7 +363,7 @@ PUBLIC BOOL valid_hostname ARGS1(
 	    return NO;
 	}
     }
-    return (*cp == '\0' || (*cp == '.' && iseg != 0 && cp[1] == '\0'));
+    return (BOOL) (*cp == '\0' || (*cp == '.' && iseg != 0 && cp[1] == '\0'));
 }
 
 #ifdef NSL_FORK
@@ -377,7 +381,7 @@ PRIVATE void quench ARGS1(
 
 PUBLIC int lynx_nsl_status = HT_OK;
 
-#ifndef DJGPP			/* much excluded! */
+#if !( defined(__DJGPP__) && !defined(WATT32) )    /* much excluded! */
 
 #define DEBUG_HOSTENT		/* disable in case of problems */
 #define DEBUG_HOSTENT_CHILD  /* for NSL_FORK, may screw up trace file */
@@ -1074,11 +1078,6 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 
 #ifdef _WINDOWS_NSL
     {
-	char buff[256];
-	LPSTR szIPAddr;	/* IP address as a dotted decimal string */
-	IN_ADDR addr;
-	IN_ADDR *p;
-
 	HANDLE hThread, dwThreadID;
 
 	if (!system_is_NT) {	/* for Windows9x */
@@ -1151,7 +1150,7 @@ failed:
     return NULL;
 }
 
-#endif /* from here on DJGPP joins us again. */
+#endif /* from here on DJGPP without WATT32 joins us again. */
 
 
 /*	Parse a network node address and port
@@ -1248,7 +1247,7 @@ PUBLIC int HTParseInet ARGS2(
     */
     if (dotcount_ip == 3) {   /* Numeric node address: */
 
-#ifdef DJGPP
+#if defined(__DJGPP__) && !defined(WATT32)
 	soc_in->sin_addr.s_addr = htonl(aton(host));
 #else
 #ifdef DGUX_OLD
@@ -1270,7 +1269,7 @@ PUBLIC int HTParseInet ARGS2(
 #endif /* HAVE_INET_ATON */
 #endif /* GUSI */
 #endif /* DGUX_OLD */
-#endif /* DJGPP */
+#endif /* __DJGPP__ && !WATT32 */
 #ifndef _WINDOWS_NSL
 	FREE(host);
 #endif /* _WINDOWS_NSL */
@@ -1280,7 +1279,7 @@ PUBLIC int HTParseInet ARGS2(
 	CTRACE(tfp, "HTParseInet: Calling LYGetHostByName(%s)\n", host);
 #endif /* MVS */
 
-#ifdef DJGPP
+#if defined(__DJGPP__) && !defined(WATT32)
 	if (!valid_hostname(host)) {
 	    FREE(host);
 	    return HT_NOT_ACCEPTABLE; /* only HTDoConnect checks this. */
@@ -1289,12 +1288,12 @@ PUBLIC int HTParseInet ARGS2(
 	if (soc_in->sin_addr.s_addr == 0) {
 	    goto failed;
 	}
-#else /* !DJGPP: */
+#else /* !(__DJGPP__ && !WATT32) */
 #ifdef _WINDOWS_NSL
 	phost = LYGetHostByName(host);	/* See above */
 	if (!phost) goto failed;
 	memcpy((void *)&soc_in->sin_addr, phost->h_addr, phost->h_length);
-#else /* !DJGPP, !_WINDOWS_NSL: */
+#else /* !(__DJGPP__ && !WATT32) && !_WINDOWS_NSL */
 	{
 	    struct hostent  *phost;
 	    phost = LYGetHostByName(host);	/* See above */
@@ -1318,8 +1317,8 @@ PUBLIC int HTParseInet ARGS2(
 	    memcpy((void *)&soc_in->sin_addr, phost->h_addr, phost->h_length);
 #endif /* VMS && CMU_TCP */
 	}
-#endif /* !DJGPP, !_WINDOWS_NSL */
-#endif /* !DJGPP */
+#endif /* _WINDOWS_NSL */
+#endif /* __DJGPP__ && !WATT32 */
 #ifndef _WINDOWS_NSL
 	FREE(host);
 #endif /* _WINDOWS_NSL */
@@ -1432,7 +1431,7 @@ PUBLIC CONST char * HTHostName NOARGS
 #endif  /* UCX && VAXC */
 #endif /* MULTINET */
 /*
-**  Interruptable connect as implemented for Mosaic by Marc Andreesen
+**  Interruptible connect as implemented for Mosaic by Marc Andreesen
 **  and hacked in for Lynx years ago by Lou Montulli, and further
 **  modified over the years by numerous Lynx lovers. - FM
 */
@@ -1544,7 +1543,7 @@ PUBLIC int HTDoConnect ARGS4(
     } else
 #endif /* SOCKS */
     status = connect(*s, (struct sockaddr*)&soc_address, sizeof(soc_address));
-#ifndef DJGPP
+#ifndef __DJGPP__
     /*
     **	According to the Sun man page for connect:
     **	   EINPROGRESS	       The socket is non-blocking and the  con-
@@ -1595,7 +1594,7 @@ PUBLIC int HTDoConnect ARGS4(
 #endif /* _WINDOWS_NSL */
 	    timeout.tv_usec = 100000;
 	    FD_ZERO(&writefds);
-	    FD_SET(*s, &writefds);
+	    FD_SET((unsigned) *s, &writefds);
 #ifdef SOCKS
 	    if (socks_flag)
 		ret = Rselect(FD_SETSIZE, NULL,
@@ -1735,7 +1734,7 @@ PUBLIC int HTDoConnect ARGS4(
 	    errno = saved_errno;	/* I don't trust HTInetStatus */
     }
 #endif /* SOCKET_DEBUG_TRACE */
-#endif /* !DJGPP */
+#endif /* !__DJGPP__ */
     if (status < 0) {
 	/*
 	**  The connect attempt failed or was interrupted,
@@ -1847,7 +1846,7 @@ PUBLIC int HTDoRead ARGS3(
 	    timeout.tv_sec = 0;
 	    timeout.tv_usec = 100000;
 	    FD_ZERO(&readfds);
-	    FD_SET(fildes, &readfds);
+	    FD_SET((unsigned)fildes, &readfds);
 #ifdef SOCKS
 	    if (socks_flag)
 		ret = Rselect(FD_SETSIZE,

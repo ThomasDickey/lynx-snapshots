@@ -62,7 +62,7 @@ extern BOOL HTLastConfirmCancelled NOPARAMS;
 **              If the user enters 'YES', returns TRUE, returns FALSE
 **              otherwise.
 */
-extern BOOL HTConfirmDefault PARAMS ((CONST char * Msg, int Dft));
+extern int HTConfirmDefault PARAMS ((CONST char * Msg, int Dft));
 
 
 /*      Display a message, then wait for 'yes' or 'no'.
