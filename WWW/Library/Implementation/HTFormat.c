@@ -585,11 +585,14 @@ finished:
 **
 **
 */
-PUBLIC void HTFileCopy ARGS2(
+PUBLIC int HTFileCopy ARGS2(
 	FILE *,			fp,
 	HTStream*,		sink)
 {
-    HTStreamClass targetClass;    
+    HTStreamClass targetClass;
+    char line[256];
+    int bytes = 0, nreads = 0, nprogr = 0;
+    int rv = HT_OK;
     
     /*  Push the data down the stream
     */
@@ -599,19 +602,58 @@ PUBLIC void HTFileCopy ARGS2(
     */
     for (;;) {
 	int status = fread(input_buffer, 1, INPUT_BUFFER_SIZE, fp);
+	nreads ++;
 
 	if (status == 0) { /* EOF or error */
-	    if (ferror(fp) == 0)
+	    if (ferror(fp) == 0) {
+		rv = HT_LOADED;
 	        break;
+	    }
 	    if (TRACE)
 	        fprintf(stderr,
 			"HTFormat: Read error, read returns %d\n",
 			ferror(fp));
+	    rv = HT_PARTIAL_CONTENT;
 	    break;
 	}
 	(*targetClass.put_block)(sink, input_buffer, status);
+
+	bytes += status;
+	if (nreads >= 100) {
+	    /*
+	     *  Show progres messages for local files, and check for
+	     *  user interruption.
+	     *  Start doing so only after a certain number of reads
+	     *  have been done, and don't update it on every read -
+	     *  normally reading in a local file should be speedy.
+	     */
+	    if (nprogr == 0) {
+	        if (bytes < 1024000) {
+		    sprintf(line, "Read %d bytes of data.", bytes);
+		} else {
+		    sprintf(line, "Read %d KB of data. %s",
+			    bytes/1024,
+		    "(Press 'z' if you want to abort loading.)");
+		}
+		HTProgress(line);
+		if (HTCheckForInterrupt()) {
+		    _HTProgress ("Data transfer interrupted.");
+		    if (bytes)
+			rv = HT_INTERRUPTED;
+		    else
+			rv = HT_PARTIAL_CONTENT;
+		    break;
+		}
+		nprogr++;
+	    } else if (nprogr == 25) {
+		nprogr = 0;
+	    } else {
+		nprogr++;
+	    }
+	}
     } /* next bufferload */
-	
+
+    return rv;
 }
 
 /*	Push data from a socket down a stream STRIPPING CR
@@ -718,6 +760,7 @@ PUBLIC int HTParseFile ARGS5(
 {
     HTStream * stream;
     HTStreamClass targetClass;    
+    int rv;
 
     stream = HTStreamStack(rep_in,
 			format_out,
@@ -744,9 +787,14 @@ PUBLIC int HTParseFile ARGS5(
     **  The current method smells anyway.
     */
     targetClass = *(stream->isa);	/* Copy pointers to procedures */
-    HTFileCopy(fp, stream);
-    (*targetClass._free)(stream);
-    
+    rv = HTFileCopy(fp, stream);
+    if (rv == -1 || rv == HT_INTERRUPTED)
+        (*targetClass._abort)(stream, NULL);
+    else
+	(*targetClass._free)(stream);
+
+    if (rv == HT_INTERRUPTED || (rv > 0 && rv != HT_LOADED))
+	return HT_PARTIAL_CONTENT;
     return HT_LOADED;
 }
 

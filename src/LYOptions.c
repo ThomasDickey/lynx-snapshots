@@ -336,7 +336,7 @@ draw_options:
 #else
     addstr(local_exec_on_local_files ? "FOR LOCAL FILES ONLY" :
 				       "ALWAYS OFF          ");
-#endif /* NEVER_ALLOW_REMOTE_EXEC */
+#endif /* !NEVER_ALLOW_REMOTE_EXEC */
 #endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
 
     move(LYlines-3, 2);
@@ -1369,9 +1369,8 @@ draw_options:
 		if (local_exec) {
 		    itmp = 2;
 		} else
-#else
+#endif /* !NEVER_ALLOW_REMOTE_EXEC */
 		{
-#endif /* NEVER_ALLOW_REMOTE_EXEC */
 		    if (local_exec_on_local_files) {
 			itmp= 1;
 		    } else {
@@ -1389,7 +1388,7 @@ draw_options:
 #ifndef NEVER_ALLOW_REMOTE_EXEC
 		StrAllocCopy(choices[2], "ALWAYS ON           ");
 		choices[3] = NULL;
-#endif /* NEVER_ALLOW_REMOTE_EXEC */
+#endif /* !NEVER_ALLOW_REMOTE_EXEC */
 		if (!LYSelectPopups) {
 		    itmp = boolean_choice(itmp,
 					  L_EXEC, -1,
@@ -1409,7 +1408,7 @@ draw_options:
 		FREE(choices[1]);
 #ifndef NEVER_ALLOW_REMOTE_EXEC
 		FREE(choices[2]);
-#endif /* NEVER_ALLOW_REMOTE_EXEC */
+#endif /* !NEVER_ALLOW_REMOTE_EXEC */
 		if (!exec_frozen) {
 		    switch (itmp) {
 			case 0:
@@ -1425,7 +1424,7 @@ draw_options:
 			    local_exec = TRUE;
 			    local_exec_on_local_files = FALSE;
 			    break;
-#endif /* NEVER_ALLOW_REMOTE_EXEC */
+#endif /* !NEVER_ALLOW_REMOTE_EXEC */
 		    } /* end switch */
 		}
 		response = ' ';

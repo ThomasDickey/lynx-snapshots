@@ -93,10 +93,8 @@ PUBLIC BOOLEAN getfile ARGS1(
 	char *cp = NULL;
 	char *temp = NULL;
 	DocAddress WWWDoc;  /* a WWW absolute doc address struct */
-	int redirection_counter = 0;
 
 Try_Redirected_URL:
-	redirection_counter++;
 	/*
 	 *  Load the WWWDoc struct in case we need to use it.
 	 */
@@ -240,25 +238,6 @@ Try_Redirected_URL:
 
 		} else if (url_type == DATA_URL_TYPE) {
 		    HTAlert(UNSUPPORTED_DATA_URL);
-		    return(NULLFILE);
-
-		} else if (redirection_counter != 1 &&
-			   (url_type == LYNXDOWNLOAD_URL_TYPE ||
-			    url_type == LYNXEXEC_URL_TYPE ||
-			    url_type == LYNXPROG_URL_TYPE ||
-			    url_type == LYNXDIRED_URL_TYPE)) {
-		    /*
-		     *  Some schemes are definitely not acceptable
-		     *  from server redirections. - kw
-		     */
-		    HTAlert(INVALID_URL_SCHEME_IN_REDIRECTION);
-		    if (LYCursesON) {
-			_user_message("Bad URL: %s", doc->address);
-			sleep(AlertSecs);
-		    } else {
-			fprintf(stderr,
-				"Bad Redirection URL: %s", doc->address);
-		    }
 		    return(NULLFILE);
 
 		} else if (url_type == LYNXPRINT_URL_TYPE) {
@@ -737,6 +716,68 @@ Try_Redirected_URL:
 				FREE(temp);
 			    }
 			    HTMLSetCharacterHandling(current_char_set);
+			    url_type = is_url(use_this_url_instead);
+			    if (url_type == LYNXDOWNLOAD_URL_TYPE ||
+				url_type == LYNXEXEC_URL_TYPE ||
+				url_type == LYNXPROG_URL_TYPE ||
+#ifdef DIRED_SUPPORT
+				url_type == LYNXDIRED_URL_TYPE ||
+#endif /* DIRED_SUPPORT */
+				url_type == LYNXPRINT_URL_TYPE ||
+				url_type == LYNXHIST_URL_TYPE ||
+				url_type == LYNXCOOKIE_URL_TYPE ||
+				(LYValidate &&
+				 url_type != HTTP_URL_TYPE &&
+				 url_type != HTTPS_URL_TYPE) ||
+				((no_file_url || no_goto_file) &&
+				 url_type == FILE_URL_TYPE) ||
+				(no_goto_lynxcgi &&
+				 url_type == LYNXCGI_URL_TYPE) ||
+				(no_goto_cso &&
+				 url_type == CSO_URL_TYPE) ||
+				(no_goto_finger &&
+				 url_type == FINGER_URL_TYPE) ||
+				(no_goto_ftp &&
+				 url_type == FTP_URL_TYPE) ||
+				(no_goto_gopher &&
+				 url_type == GOPHER_URL_TYPE) ||
+				(no_goto_http &&
+				 url_type == HTTP_URL_TYPE) ||
+				(no_goto_https &&
+				 url_type == HTTPS_URL_TYPE) ||
+				(no_goto_mailto &&
+				 url_type == MAILTO_URL_TYPE) ||
+				(no_goto_news &&
+				 url_type == NEWS_URL_TYPE) ||
+				(no_goto_nntp &&
+				 url_type == NNTP_URL_TYPE) ||
+				(no_goto_rlogin &&
+				 url_type == RLOGIN_URL_TYPE) ||
+				(no_goto_snews &&
+				 url_type == SNEWS_URL_TYPE) ||
+				(no_goto_telnet &&
+				 url_type == TELNET_URL_TYPE) ||
+				(no_goto_tn3270 &&
+				 url_type == TN3270_URL_TYPE) ||
+				(no_goto_wais &&
+				 url_type == WAIS_URL_TYPE)) {
+				/*
+				 *  Some schemes are not acceptable from
+				 *  server redirections. - KW & FM
+				 */
+				HTAlert(ILLEGAL_REDIRECTION_URL);
+				if (LYCursesON) {
+				    _user_message("Illegal URL: %s",
+				    		  use_this_url_instead);
+				    sleep(AlertSecs);
+				} else {
+				    fprintf(stderr,
+					    "Illegal Redirection URL: %s",
+					    use_this_url_instead);
+				}
+				FREE(use_this_url_instead);
+				return(NULLFILE);
+			    }
 			    if (TRACE)
 			        sleep(MessageSecs);
 			    _user_message("Using %s", use_this_url_instead);
