@@ -26,15 +26,13 @@
 #include "HTMLGen.h"
 #include "HTParse.h"
 #include "HTList.h"
+#include "UCMap.h"
+#include "UCDefs.h"
+#include "UCAux.h"
 
 #include "LYGlobalDefs.h"
 #include "LYCharUtils.h"
 #include "LYCharSets.h"
-#ifdef EXP_CHARTRANS
-#include "UCMap.h"
-#include "UCDefs.h"
-#include "UCAux.h"
-#endif
 
 #include "HTAlert.h"
 #include "HTFont.h"
@@ -500,15 +498,25 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
         HTML_put_character(me, *p);
 }
 
+#ifndef DONT_TRACK_INTERNAL_LINKS
+
 /* A flag is used to keep track of whether an "URL reference" encountered
    had a real "URL" or not.  (This is the terminology of the Fielding
    Internet Draft.)  In the latter case, it will be marked as an "internal"
-   link.  The flag is set before we stard messing around with the string
+   link.  The flag is set before we start messing around with the string
    (resolution of relative URLs etc.). - kw */
 #define CHECK_FOR_INTERN(s) intern_flag = (s && (*s=='#' || *s=='\0')) ? TRUE : FALSE; 
+
 /* Last argument to pass to HTAnchor_findChildAndLink() calls,
    just an abbreviation. - kw */
 #define INTERN_LT (HTLinkType *)(intern_flag ? LINK_INTERNAL : NULL)
+
+#else  /* TRACK_INTERNAL_LINKS */
+
+#define CHECK_FOR_INTERN(s)  /* do nothing */ ;
+#define INTERN_LT (HTLinkType *)NULL
+
+#endif /* TRACK_INTERNAL_LINKS */
 
 #ifdef USE_COLOR_STYLE
 char class_string[TEMPSTRINGSIZE];
@@ -615,9 +623,7 @@ PRIVATE void HTML_start_element ARGS6(
     char *title = NULL;
     char *I_value = NULL, *I_name = NULL;
     char *temp = NULL;
-#ifdef EXP_CHARTRANS
     int dest_char_set  = -1;
-#endif
     HTParentAnchor *dest = NULL;	     /* An anchor's destination */
     BOOL dest_ismap = FALSE;	     	     /* Is dest an image map script? */
     BOOL UseBASE = TRUE;		     /* Resoved vs. BASE if present? */
@@ -801,7 +807,7 @@ PRIVATE void HTML_start_element ARGS6(
         if (!me->text)
 	    UPDATE_STYLE;
 	if (present)
-	    LYHandleMETA(me, present, (CONST char **)value, (char **)&include);
+	    LYHandleMETA(me, present, value, (char **)&include);
 	break;
 
     case HTML_TITLE:
@@ -1091,14 +1097,14 @@ PRIVATE void HTML_start_element ARGS6(
 		    		INTERN_LT);		/* Type */
 	    if ((dest = HTAnchor_parent(
 			    HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
-			    	      )) != 0) {
+			    	      )) != NULL) {
 		if (!HTAnchor_title(dest))
 		    HTAnchor_setTitle(dest, title);
 		dest = NULL;
 #ifdef EXP_CHARTRANS
-	        if (present[HTML_A_CHARSET] &&
-		    value[HTML_A_CHARSET] && *value[HTML_A_CHARSET] != '\0') {
-		    dest_char_set = UCGetLYhndl_byMIME(value[HTML_A_CHARSET]);
+	        if (present[HTML_LINK_CHARSET] &&
+		    value[HTML_LINK_CHARSET] && *value[HTML_LINK_CHARSET] != '\0') {
+		    dest_char_set = UCGetLYhndl_byMIME(value[HTML_LINK_CHARSET]);
 		    if (dest_char_set < 0)
 		        dest_char_set = UCLYhndl_for_unrec;
 		}
@@ -1861,7 +1867,8 @@ PRIVATE void HTML_start_element ARGS6(
 		 *  The INDENT value is in "en" (enval per column) units.
 		 *  Divide it by enval, rounding odd values up. - FM
 		 */
-	        target = ((1.0 * atoi(value[HTML_TAB_INDENT])) / enval) + 0.5;
+	        target =
+		   (int)(((1.0 * atoi(value[HTML_TAB_INDENT])) / enval)+(0.5));
 	    }
 	    FREE(temp);
 	    /*
@@ -2156,8 +2163,9 @@ PRIVATE void HTML_start_element ARGS6(
 	CHECK_ID(HTML_GEN_ID);
 	HText_setLastChar(me->text, ' ');  /* absorb white space */
         if (!me->style_change)  {
-	    if (HText_LastLineSize(me->text, FALSE))
+	    if (HText_LastLineSize(me->text, FALSE)) {
 		HText_appendCharacter(me->text, '\r');
+	    }
 	} else {
             UPDATE_STYLE;
 	    HText_appendCharacter(me->text, '\t');
@@ -2549,6 +2557,8 @@ PRIVATE void HTML_start_element ARGS6(
 	 *  Set to know we are in an anchor.
 	 */
 	me->inA = TRUE;
+	if (!me->text)
+	    UPDATE_STYLE;
 
 	/*
 	 *  Load id_string if we have an ID or NAME. - FM
@@ -2571,11 +2581,12 @@ PRIVATE void HTML_start_element ARGS6(
 	 *  Handle the reference. - FM
 	 */
 	if (present && present[HTML_A_HREF]) {
-
+#ifndef DONT_TRACK_INTERNAL_LINKS
 	    if (present[HTML_A_ISMAP])
 		intern_flag = FALSE;
 	    else
 		CHECK_FOR_INTERN(value[HTML_A_HREF]);
+#endif
 	    /*
 	     *  Prepare to do housekeeping on the reference. - FM
 	     */
@@ -2679,37 +2690,38 @@ PRIVATE void HTML_start_element ARGS6(
 	    }
 	    if (present[HTML_A_ISMAP])
 		dest_ismap = TRUE;
-#ifdef EXP_CHARTRANS
-	        if (present[HTML_A_CHARSET] &&
-		    value[HTML_A_CHARSET] && *value[HTML_A_CHARSET] != '\0') {
-		    dest_char_set = UCGetLYhndl_byMIME(value[HTML_A_CHARSET]);
+	    if (present[HTML_A_CHARSET] &&
+		value[HTML_A_CHARSET] && *value[HTML_A_CHARSET] != '\0') {
+		/*
+		**  Set up to load the anchor's chartrans structures.
+		*/
+		StrAllocCopy(temp, value[HTML_A_CHARSET]);
+		TRANSLATE_AND_UNESCAPE_TO_STD(&temp);
+		dest_char_set = UCGetLYhndl_byMIME(temp);
 		if (dest_char_set < 0) {
 		        dest_char_set = UCLYhndl_for_unrec;
 		}
-		}
-		if (title != NULL || dest_ismap == TRUE || dest_char_set >= 0)
-#else
-	    if (title != NULL || dest_ismap == TRUE)
-#endif /* EXP_CHARTRANS */
+	    }
+	    if (title != NULL || dest_ismap == TRUE || dest_char_set >= 0) {
 	        dest = HTAnchor_parent(
 			HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
 		    		      );
+	    }
 	    if (dest && title != NULL && HTAnchor_title(dest) == NULL)
 		HTAnchor_setTitle(dest, title);
 	    if (dest && dest_ismap)
 		dest->isISMAPScript = TRUE;
-#ifdef EXP_CHARTRANS
-		if (dest && dest_char_set >= 0)
-		    HTAnchor_setUCInfoStage(dest, dest_char_set,
-					    UCT_STAGE_PARSER,
-					    UCT_SETBY_LINK);
-		dest_char_set = -1;
-#endif /* EXP_CHARTRANS */
+    	    if (dest && dest_char_set >= 0) {
+		HTAnchor_setUCInfoStage(dest, dest_char_set,
+					UCT_STAGE_PARSER,
+					UCT_SETBY_LINK);
+	    }
+	    FREE(temp);
 	    dest = NULL;
 	    dest_ismap = FALSE;
+	    dest_char_set = -1;
 	    FREE(title);
 	}
-	UPDATE_STYLE;
 	me->CurrentANum = HText_beginAnchor(me->text,
 					    me->inUnderline, me->CurrentA);
 	if (me->inBoldA == TRUE && me->inBoldH == FALSE)
@@ -2740,7 +2752,7 @@ PRIVATE void HTML_start_element ARGS6(
 	if (me->inA && me->CurrentA) {
 	    if ((dest = HTAnchor_parent(
 			HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
-				      )) != 0) {
+				      )) != NULL) {
 		if (dest->isISMAPScript == TRUE) {
 		    dest_ismap = TRUE;
 		    if (TRACE)
@@ -2768,17 +2780,19 @@ PRIVATE void HTML_start_element ARGS6(
 	    CHECK_FOR_INTERN(map_href);
 	    url_type = LYLegitimizeHREF(me, (char**)&map_href, TRUE, TRUE);
 	    /*
-	     *	If map_href ended up zero-length or otherwise doesn't
-	     *	have a hash, it can't be valid, so ignore it. - FM
+	     *  If map_href ended up zero-length or otherwise doesn't
+	     *  have a hash, it can't be valid, so ignore it. - FM
 	     */
 	    if (strchr(map_href, '#') == NULL) {
 	        FREE(map_href);
 	    }
 	}
-	if (map_href) {
 
+
+	if (map_href) {
 	    /*
-	     *  Check whether a base tag is in effect. - FM
+	     *  If the MAP reference doesn't yet begin with a scheme,
+	     *  check whether a base tag is in effect. - FM
 	     */
 	    if (!url_type && me->inBASE) {
 		/*
@@ -3032,7 +3046,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    if (me->CurrentA && title) {
 			if ((dest = HTAnchor_parent(
 				HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
-					          )) != 0) {
+					          )) != NULL) {
 			    if (!HTAnchor_title(dest))
 			        HTAnchor_setTitle(dest, title);
 			}
@@ -3089,7 +3103,7 @@ PRIVATE void HTML_start_element ARGS6(
 		if (me->CurrentA && title) {
 		    if ((dest = HTAnchor_parent(
 				HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
-					      )) != 0) {
+					      )) != NULL) {
 		        if (!HTAnchor_title(dest))
 			    HTAnchor_setTitle(dest, title);
 		    }
@@ -3183,7 +3197,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (me->CurrentA && title) {
 		if ((dest = HTAnchor_parent(
 				HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
-				          )) != 0) {
+				          )) != NULL) {
 		    if (!HTAnchor_title(dest))
 		        HTAnchor_setTitle(dest, title);
 		}
@@ -4160,9 +4174,11 @@ PRIVATE void HTML_start_element ARGS6(
 		url_type = LYLegitimizeHREF(me, (char**)&action, TRUE, TRUE);
 
 		/*
-		 *  Check whether a base tag is in effect.
+		 *  Check whether a base tag is in effect.  Note that
+		 *  actions always are resolved w.r.t. to the base,
+		 *  even if the action is empty. - FM
 		 */
-		if ((me->inBASE && *action != '\0' && *action != '#') &&
+		if ((me->inBASE && me->base_href && *me->base_href) &&
 		    (temp = HTParse(action, me->base_href, PARSE_ALL)) &&
 		    *temp != '\0') {
 	            /*
@@ -4261,7 +4277,6 @@ PRIVATE void HTML_start_element ARGS6(
 	    FREE(action);
 	    FREE(method);
 	    FREE(enctype);
-	    FREE(title);
 	    FREE(title);
 	}
 	CHECK_ID(HTML_FORM_ID);
@@ -5254,10 +5269,12 @@ PRIVATE void HTML_start_element ARGS6(
 	            /*
 		     *  Convert any HTML entities or decimal escaping. - FM
 		     */
+#ifndef EXP_CHARTRANS
 		    int CurrentCharSet = current_char_set;
 		    BOOL CurrentEightBitRaw = HTPassEightBitRaw;
 		    BOOLEAN CurrentUseDefaultRawMode = LYUseDefaultRawMode;
 		    HTCJKlang CurrentHTCJK = HTCJK;
+#endif
 
 		    StrAllocCopy(I_value, value[HTML_OPTION_VALUE]);
 		    me->HiddenValue = TRUE;
@@ -5354,10 +5371,12 @@ PRIVATE void HTML_start_element ARGS6(
 	            /*
 		     *  Convert any HTML entities or decimal escaping. - FM
 		     */
+#ifndef EXP_CHARTRANS
 		    int CurrentCharSet = current_char_set;
 		    BOOL CurrentEightBitRaw = HTPassEightBitRaw;
 		    BOOLEAN CurrentUseDefaultRawMode = LYUseDefaultRawMode;
 		    HTCJKlang CurrentHTCJK = HTCJK;
+#endif
 
 		    StrAllocCopy(I_value, value[HTML_OPTION_VALUE]);
 		    me->HiddenValue = TRUE;
@@ -5585,11 +5604,11 @@ PRIVATE void HTML_start_element ARGS6(
         {
                 if (TRACE)
                         fprintf(stderr, "STYLE:begin_element:ending EMPTY element style\n");
-#if !defined(USEHASH)
+#if !defined(USE_HASH)
         HText_characterStyle(me->text, element_number+STARTAT, STACK_OFF);
 #else
         HText_characterStyle(me->text, hcode, STACK_OFF);
-#endif /* USEHASH */
+#endif /* USE_HASH */
                 {
                         char *end, *start=NULL, *lookfrom;
                         char tmp[64];
@@ -6755,6 +6774,14 @@ End_Object:
 	    I.disabled = me->textarea_disabled;
 	    I.id = me->textarea_id;
 
+	    /*
+	     *  SGML unescape any character references in TEXTAREA
+	     *  content, then parse it into individual lines
+	     *  to be handled as a series of INPUT fields (ugh!).
+	     *  Any raw 8-bit or multibye characters already have been
+	     *  handled in relation to the display character set
+	     *  in SGML_character().
+	     */
 	    me->UsePlainSpace = TRUE;
 
 #ifndef EXP_CHARTRANS
@@ -6828,7 +6855,6 @@ End_Object:
 		}
             }
 	    FREE(temp);
-
 	    me->UsePlainSpace = FALSE;
 
 	    HTChunkClear(&me->textarea);
@@ -7065,11 +7091,11 @@ End_Object:
     {
         if (TRACE)
             fprintf(stderr, "STYLE:end_element: ending non-EMPTY style\n");
-#if !defined(USEHASH)
+#if !defined(USE_HASH)
         HText_characterStyle(me->text, element_number+STARTAT, STACK_OFF);
 #else
         HText_characterStyle(me->text, hcode, STACK_OFF);
-#endif /* USEHASH */
+#endif /* USE_HASH */
 #if defined(PREVAIL)
         /* reset the prevailing class to the previous one */
         {

@@ -197,8 +197,6 @@ Try_Redirected_URL:
 			  url_type == LYNXCOOKIE_URL_TYPE ||
 			  0==strncasecomp(WWWDoc.address, helpfilepath,
 					  strlen(helpfilepath)) ||
-			  0==strncasecomp(WWWDoc.address, aboutfilepath,
-			  		  strlen(aboutfilepath)) ||
 			  (lynxlistfile != NULL &&
 			   0==strncasecomp(WWWDoc.address, lynxlistfile,
 			  		  strlen(lynxlistfile))) ||
@@ -242,8 +240,6 @@ Try_Redirected_URL:
 			   *WWWDoc.bookmark != '\0') ||
 			  0==strncasecomp(WWWDoc.address, helpfilepath,
 					  strlen(helpfilepath)) ||
-			  0==strncasecomp(WWWDoc.address, aboutfilepath,
-			  		  strlen(aboutfilepath)) ||
 			  (lynxlistfile != NULL &&
 			   0==strncasecomp(WWWDoc.address, lynxlistfile,
 			  		  strlen(lynxlistfile))) ||
@@ -352,9 +348,11 @@ Try_Redirected_URL:
 		    WWWDoc.bookmark = doc->bookmark;
 		    WWWDoc.isHEAD = doc->isHEAD;
 		    WWWDoc.safe = doc->safe;
+#ifndef DONT_TRACK_INTERNAL_LINKS
 		    if (doc->internal_link && !reloading) {
 			LYoverride_no_cache = TRUE;
 		    }
+#endif
 
 		    if (!HTLoadAbsolute(&WWWDoc)) {
 		        HTMLSetCharacterHandling(current_char_set);

@@ -4,7 +4,7 @@
  *
  * Derived from code in the Linux kernel console driver.
  * The GNU Public Licence therefore applies, see 
- * the file COPYING in the about_lynx directory 
+ * the file COPYING in the top-level directory 
  * which should come with every Lynx distribution.
  *
  *  [ original comment: - KW ]
@@ -282,12 +282,16 @@ PRIVATE void UC_con_set_trans PARAMS((
 	int		update_flag));
 PRIVATE int con_insert_unipair PARAMS((
 	u16 		unicode,
-	u16		fontpos));
+	u16		fontpos,
+	int		fordefault));
 PRIVATE int con_insert_unipair_str PARAMS((
 	u16		unicode,
-	char *		replace_str));
-PRIVATE void con_clear_unimap NOPARAMS;
-PRIVATE void con_clear_unimap_str NOPARAMS;
+	char *		replace_str,
+	int		fordefault));
+PRIVATE void con_clear_unimap PARAMS((
+        int		fordefault));
+PRIVATE void con_clear_unimap_str PARAMS((
+        int		fordefault));
 #ifdef NOTDEFINED
 PRIVATE int con_set_unimap PARAMS((
 	u16			ct,
@@ -299,7 +303,8 @@ PRIVATE int UC_con_set_unimap PARAMS((
 	int		update_flag));
 PRIVATE int UC_con_set_unimap_str PARAMS((
 	u16			ct,
-	struct unipair_str *	list));
+	struct unipair_str *	list,
+	int			fordefault));
 #ifdef NOTDEFINED
 PRIVATE int con_get_unimap PARAMS((
 	u16			ct,
@@ -307,11 +312,13 @@ PRIVATE int con_get_unimap PARAMS((
 	struct unipair *	list));
 #endif /* NOTDEFINED */
 PRIVATE int conv_uni_to_pc PARAMS((
-	long			ucs));
+	long			ucs,
+	int			usedefault));
 PRIVATE int conv_uni_to_str PARAMS((
 	char*		outbuf,
 	int		buflen,
-	long		ucs));
+	long		ucs,
+	int		usedefault));
 PRIVATE void UCconsole_map_init NOPARAMS;
 PRIVATE int UC_MapGN PARAMS((
 	int		UChndl,
@@ -330,6 +337,7 @@ PRIVATE int UC_Register_with_LYCharSets PARAMS((
 	int		lowest_eightbit));
 PRIVATE void UCcleanup_mem NOPARAMS;
 
+PRIVATE int default_UChndl = -1;
 
 PRIVATE void set_inverse_transl ARGS1(
 	int,		i)
@@ -350,7 +358,7 @@ PRIVATE void set_inverse_transl ARGS1(
 		q[j] = 0;
 
 	for (j=0; j<E_TABSZ; j++) {
-		glyph = conv_uni_to_pc(p[j]);
+		glyph = conv_uni_to_pc(p[j], 0);
 		if (glyph >= 0 && glyph < MAX_GLYPH && q[glyph] < 32) {
 			/* prefer '-' above SHY etc. */
 		  	q[glyph] = j;
@@ -480,13 +488,13 @@ PRIVATE void UC_con_set_trans ARGS3(
   u16 *ptrans;
 
     if (!UC_valid_UC_charset(UC_charset_in_hndl)) {
-      if (TRACE)
-	fprintf(stderr,"UC_con_set_trans: Invalid charset handle %i.\n",
-		UC_charset_in_hndl);
-      return;
+	if (TRACE)
+	    fprintf(stderr,"UC_con_set_trans: Invalid charset handle %i.\n",
+		    UC_charset_in_hndl);
+	return;
     }
-  ptrans = translations[Gn];
-  p = UCInfo[UC_charset_in_hndl].unitable;
+    ptrans = translations[Gn];
+    p = UCInfo[UC_charset_in_hndl].unitable;
 #if(0)
   if (p == UC_current_unitable) {    /* test whether pointers are equal */
     return;			/* nothing to be done */
@@ -497,18 +505,18 @@ PRIVATE void UC_con_set_trans ARGS3(
   con_clear_unimap();
 #endif
     for (i = 0; i < 256; i++) {
-      if ((j = UCInfo[UC_charset_in_hndl].unicount[i])) {
-	ptrans[i] = *p;
+	if ((j = UCInfo[UC_charset_in_hndl].unicount[i])) {
+	    ptrans[i] = *p;
 	    for (; j; j--) {
-	  p++;
-      }
+		p++;
+	    }
 	} else {
-	ptrans[i] = 0xfffd;
-    }
+	    ptrans[i] = 0xfffd;
+	}
     }
     if (update_flag) {
-    set_inverse_transl(Gn);    /* Update inverse translation for this one */
-}
+	set_inverse_transl(Gn);	/* Update inverse translation for this one */
+    }
 }
 
 /*
@@ -521,8 +529,8 @@ PRIVATE void UC_con_set_trans ARGS3(
  * this 3-level paged table scheme to be comparable to a hash table.
  */
 
-int hashtable_contents_valid = 0; /* Use ASCII-only mode for bootup*/
-int hashtable_str_contents_valid = 0; 
+PRIVATE int unitable_contents_valid = 0; /* Use ASCII-only mode for bootup*/
+PRIVATE int unitable_str_contents_valid = 0; 
 
 static u16 **uni_pagedir[32] =
 {
@@ -542,16 +550,50 @@ static char* **uni_pagedir_str[32] =
 PRIVATE u16 * UC_current_unitable = NULL;
 PRIVATE struct unimapdesc_str *UC_current_unitable_str = NULL;
 
-PRIVATE int con_insert_unipair ARGS2(
+/*
+ *  Keep a second set of structures for the translation designated
+ *  as "default" - kw
+ */
+PRIVATE int unidefault_contents_valid = 0; /* Use ASCII-only mode for bootup*/
+PRIVATE int unidefault_str_contents_valid = 0; 
+
+static u16 **unidefault_pagedir[32] =
+{
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+};
+static char* **unidefault_pagedir_str[32] =
+{
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+};
+
+PRIVATE u16 * UC_default_unitable = NULL;
+PRIVATE struct unimapdesc_str *UC_default_unitable_str = NULL;
+
+PRIVATE int con_insert_unipair ARGS3(
 	u16, 		unicode,
-	u16,		fontpos)
+	u16,		fontpos,
+	int,		fordefault)
 {
   int i, n;
   u16 **p1, *p2;
 
-  if ( !(p1 = uni_pagedir[n = unicode >> 11]) )
+  if(fordefault)
+      p1 = unidefault_pagedir[n = unicode >> 11];
+  else
+      p1 = uni_pagedir[n = unicode >> 11];
+  if (!p1)
     {
-      p1 = uni_pagedir[n] = (u16* *) malloc(32*sizeof(u16 *));
+      p1 = (u16* *) malloc(32*sizeof(u16 *));
+      if (fordefault)
+	  unidefault_pagedir[n] = p1;
+      else
+	  uni_pagedir[n] = p1;
       if ( !p1 )
 	return -ENOMEM;
 
@@ -574,16 +616,25 @@ PRIVATE int con_insert_unipair ARGS2(
   return 0;
 }
  
-PRIVATE int con_insert_unipair_str ARGS2(
+PRIVATE int con_insert_unipair_str ARGS3(
 	u16,		unicode,
-	char *,		replace_str)
+	char *,		replace_str,
+	int,		fordefault)
 {
   int i, n;
   char ***p1, **p2;
 
-  if ( !(p1 = uni_pagedir_str[n = unicode >> 11]) )
+  if(fordefault)
+      p1 = unidefault_pagedir_str[n = unicode >> 11];
+  else
+      p1 = uni_pagedir_str[n = unicode >> 11];
+  if (!p1)
     {
-      p1 = uni_pagedir_str[n] = (char** *) malloc(32*sizeof(char **));
+      p1 = (char** *) malloc(32*sizeof(char **));
+      if (fordefault)
+	  unidefault_pagedir_str[n] = p1;
+      else
+	  uni_pagedir_str[n] = p1;
       if ( !p1 )
 	return -ENOMEM;
 
@@ -608,11 +659,24 @@ PRIVATE int con_insert_unipair_str ARGS2(
  
 /* ui arg was a leftover, deleted -kw */
 PRIVATE void
-con_clear_unimap NOARGS
+con_clear_unimap ARGS1(int, fordefault)
 {
   int i, j;
   u16 **p1;
-  
+
+  if (fordefault) {
+    for (i = 0; i < 32; i++) {
+	if ((p1 = unidefault_pagedir[i]) != NULL) {
+	    for (j = 0; j < 32; j++) {
+		FREE(p1[j]);
+	    }
+	    FREE(p1);
+	}
+      unidefault_pagedir[i] = NULL;
+    }
+
+    unidefault_contents_valid = 1;
+  } else {
     for (i = 0; i < 32; i++) {
 	if ((p1 = uni_pagedir[i]) != NULL) {
 	    for (j = 0; j < 32; j++) {
@@ -623,15 +687,29 @@ con_clear_unimap NOARGS
       uni_pagedir[i] = NULL;
     }
 
-  hashtable_contents_valid = 1;
+    unitable_contents_valid = 1;
+  }
 }
 
 PRIVATE void
-con_clear_unimap_str NOARGS
+con_clear_unimap_str ARGS1(int, fordefault)
 {
   int i, j;
   char ***p1;
-  
+
+  if (fordefault) {
+    for (i = 0; i < 32; i++) {
+	if ((p1 = unidefault_pagedir_str[i]) != NULL) {
+	    for (j = 0; j < 32; j++) {
+		FREE(p1[j]);
+	    }
+	    FREE(p1);
+	}
+      unidefault_pagedir_str[i] = NULL;
+    }
+
+    unidefault_str_contents_valid = 1;  /* ??? probably no use... */
+  } else {
     for (i = 0; i < 32; i++) {
 	if ((p1 = uni_pagedir_str[i]) != NULL) {
 	    for (j = 0; j < 32; j++) {
@@ -642,7 +720,8 @@ con_clear_unimap_str NOARGS
       uni_pagedir_str[i] = NULL;
     }
 
-  hashtable_str_contents_valid = 1;  /* ??? probably no use... */
+    unitable_str_contents_valid = 1;  /* ??? probably no use... */
+  }
 }
 
 #ifdef NOTDEFINED
@@ -679,17 +758,23 @@ con_set_default_unimap NOARGS
 
   /* The default font is always 256 characters */
 
-  con_clear_unimap();
+  con_clear_unimap(1);
 
   p = dfont_unitable;
   for ( i = 0 ; i < 256 ; i++ )
     for ( j = dfont_unicount[i] ; j ; j-- )
-      con_insert_unipair(*(p++), i);
+      con_insert_unipair(*(p++), i, 1);
 
+#if 0
   for ( i = 0 ; i <= 3 ; i++ )
     set_inverse_transl(i);	/* Update all inverse translations */
+#endif
 
-  UC_current_unitable = dfont_unitable;
+  UC_default_unitable = dfont_unitable;
+
+  con_clear_unimap_str(1);
+  UC_con_set_unimap_str(dfont_replacedesc.entry_ct, repl_map, 1);
+  UC_default_unitable_str = &dfont_replacedesc;
 }
 
 PUBLIC int UCNumCharsets = 0;
@@ -721,11 +806,11 @@ PRIVATE int UC_con_set_unimap ARGS2(
 
   /* The font is always 256 characters - so far. */
 
-  con_clear_unimap();
+  con_clear_unimap(0);
 
     for (i = 0; i < 256; i++) {
  	for (j = UCInfo[UC_charset_out_hndl].unicount[i]; j; j--) {
-      con_insert_unipair(*(p++), i);
+	    con_insert_unipair(*(p++), i, 0);
 	}
     }
 
@@ -735,15 +820,18 @@ PRIVATE int UC_con_set_unimap ARGS2(
   return 0;
 }
 
-PRIVATE int
-UC_con_set_unimap_str ARGS2(u16, ct, struct unipair_str *, list)
+PRIVATE int UC_con_set_unimap_str ARGS3(
+    u16,		ct,
+    struct unipair_str *, list,
+    int,		fordefault)
 {
   int err = 0, err1;
 
   while( ct-- )
     {
       if ( (err1 = con_insert_unipair_str(list->unicode,
-				      list->replace_str)) != 0 )
+					  list->replace_str,
+					  fordefault)) != 0 )
 	err = err1;
       list++;
     }
@@ -752,7 +840,10 @@ UC_con_set_unimap_str ARGS2(u16, ct, struct unipair_str *, list)
      *  No inverse translations for replacement strings!
      */
     if (!err) {
-	hashtable_str_contents_valid = 1;  
+	if (fordefault)
+	    unidefault_str_contents_valid = 1;
+	else
+	    unitable_str_contents_valid = 1;  
     }
 
   return err;
@@ -788,8 +879,9 @@ con_get_unimap ARGS3(u16, ct, u16 *, uct, struct unipair *, list)
 }
 #endif
 
-PRIVATE int conv_uni_to_pc ARGS1(
-	long,		ucs) 
+PRIVATE int conv_uni_to_pc ARGS2(
+	long,		ucs,
+	int,		usedefault)
 {
   int h;
   u16 **p1, *p2;
@@ -809,10 +901,17 @@ PRIVATE int conv_uni_to_pc ARGS1(
   else if ( (ucs & ~UNI_DIRECT_MASK) == UNI_DIRECT_BASE )
     return ucs & UNI_DIRECT_MASK;
   
-  if (!hashtable_contents_valid)
-    return -3;
-  
-  if ( (p1 = uni_pagedir[ucs >> 11]) &&
+  if (usedefault) {
+      if (!unidefault_contents_valid)
+	  return -3;
+      p1 = unidefault_pagedir[ucs >> 11];
+  } else {
+      if (!unitable_contents_valid)
+	  return -3;
+      p1 = uni_pagedir[ucs >> 11];
+  }
+
+  if (p1 &&
       (p2 = p1[(ucs >> 6) & 0x1f]) &&
       (h = p2[ucs & 0x3f]) < MAX_GLYPH )
     return h;
@@ -823,10 +922,11 @@ PRIVATE int conv_uni_to_pc ARGS1(
 /*
  *  Note: contents of outbuf is not changes for negative return value!
  */
-PRIVATE int conv_uni_to_str ARGS3(
+PRIVATE int conv_uni_to_str ARGS4(
 	char*,		outbuf,
 	int,		buflen,
-	long,		ucs) 
+	long,		ucs,
+	int,		usedefault)
 {
   char *h;
   char ***p1, **p2;
@@ -849,10 +949,18 @@ PRIVATE int conv_uni_to_str ARGS3(
   else if ( (ucs & ~UNI_DIRECT_MASK) == UNI_DIRECT_BASE )
     return ucs & UNI_DIRECT_MASK;
 #endif
-  if (!hashtable_str_contents_valid)
-    return -3;
-  
-  if ( (p1 = uni_pagedir_str[ucs >> 11]) &&
+
+  if (usedefault) {
+      if (!unidefault_str_contents_valid)
+	  return -3;
+      p1 = unidefault_pagedir_str[ucs >> 11];
+  } else {
+      if (!unitable_str_contents_valid)
+	  return -3;
+      p1 = uni_pagedir_str[ucs >> 11];
+  }
+
+  if (p1 &&
       (p2 = p1[(ucs >> 6) & 0x1f]) &&
       (h = p2[ucs & 0x3f]) ) {
     strncpy (outbuf,h,(size_t) (buflen-1));
@@ -875,8 +983,8 @@ PUBLIC int UCInitialized = 0;
 PRIVATE void
 UCconsole_map_init NOARGS
 {
-  con_set_default_unimap();
-  UCInitialized = 1;
+    con_set_default_unimap();
+    UCInitialized = 1;
 }
 
 /*
@@ -891,24 +999,44 @@ PUBLIC int UCTransUniChar ARGS2(
 	long,		unicode,
 	int,		charset_out)
 {
-  int rc;
-  int UChndl_out;
-  u16 * ut;
+    int rc;
+    int UChndl_out;
+    int isdefault, trydefault;
+    u16 * ut;
 
-  if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0)
-    return -12;
-
-  ut = UCInfo[UChndl_out].unitable;
-  if (ut != UC_current_unitable) {
-    rc = UC_con_set_unimap(UChndl_out, 1);
-	if (rc < 0) {
-      return rc;
-  }
+    if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
+	if ((UChndl_out = default_UChndl) < 0)
+	    return -12;
+	isdefault = 1;
+    } else {
+	isdefault = UCInfo[UChndl_out].replacedesc.isdefault;
+	trydefault = UCInfo[UChndl_out].replacedesc.trydefault;
     }
-  rc = conv_uni_to_pc(unicode);
-  if (rc == -4)
-    rc = conv_uni_to_pc(0xfffd);
-  return rc;
+
+    if (!isdefault) {
+	ut = UCInfo[UChndl_out].unitable;
+	if (ut != UC_current_unitable) {
+	    rc = UC_con_set_unimap(UChndl_out, 1);
+	    if (rc < 0) {
+		return rc;
+	    }
+	}
+	rc = conv_uni_to_pc(unicode, 0);
+	if (rc >= 0)
+	    return rc;
+    }
+    if (isdefault || trydefault) {
+	rc = conv_uni_to_pc(unicode, 1);
+	if (rc >= 0)
+	    return rc;
+    }
+    if (!isdefault && (rc == -4)) {
+	rc = conv_uni_to_pc(0xfffd, 0);
+    }
+    if ((isdefault || trydefault) && (rc == -4)) {
+	rc = conv_uni_to_pc(0xfffd, 1);
+    }
+    return rc;
 }
   
 /*
@@ -923,49 +1051,79 @@ PUBLIC int UCTransUniCharStr ARGS5(
 {
   int rc, src = 0, ignore_err;
   int UChndl_out;
+  int isdefault, trydefault;
   struct unimapdesc_str * repl;
   u16 * ut;
 
-if (buflen<2)
-  return -13;
+  if (buflen<2)
+      return -13;
 
-  if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0)
-    return -12;
+  if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
+      if ((UChndl_out = default_UChndl) < 0)
+	  return -12;
+      isdefault = 1;
+  } else {
+      isdefault = UCInfo[UChndl_out].replacedesc.isdefault;
+      trydefault = UCInfo[UChndl_out].replacedesc.trydefault;
+  }
 
   if (chk_single_flag) {
-    ut = UCInfo[UChndl_out].unitable;
-    if (ut != UC_current_unitable) {
-      src = UC_con_set_unimap(UChndl_out, 1);
-	    if (src < 0) {
-	return src;
-    }
-	}
-    src = conv_uni_to_pc(unicode);
-    if (src >= 32) {
-      outbuf[0] = src; outbuf[1] = '\0';
-	    return 1;
-	}
+      if (!isdefault) {
+	  ut = UCInfo[UChndl_out].unitable;
+	  if (ut != UC_current_unitable) {
+	      src = UC_con_set_unimap(UChndl_out, 1);
+	      if (src < 0) {
+		  return src;
+	      }
+	  }
+      }
+      src = conv_uni_to_pc(unicode, isdefault);
+      if (src >= 32) {
+	  outbuf[0] = src; outbuf[1] = '\0';
+	  return 1;
+      }
   }
-
   repl = &(UCInfo[UChndl_out].replacedesc);
-  if (repl != UC_current_unitable_str)  {
-    con_clear_unimap_str();
-    ignore_err = UC_con_set_unimap_str(repl->entry_ct, repl->entries);
-    UC_current_unitable_str = repl;
+  if (!isdefault) {
+      if (repl != UC_current_unitable_str)  {
+	  con_clear_unimap_str(0);
+	  ignore_err = UC_con_set_unimap_str(repl->entry_ct, repl->entries, 0);
+	  UC_current_unitable_str = repl;
+      }
+      rc = conv_uni_to_str(outbuf, buflen, unicode, 0);
+      if (rc >= 0)
+	  return (strlen(outbuf));
   }
-  rc = conv_uni_to_str(outbuf, buflen, unicode);
-  if (rc == -4)
-    rc = conv_uni_to_str(outbuf, buflen, 0xfffd);
-  if (rc >= 0)
-    return (strlen(outbuf));
-
+  if (trydefault && chk_single_flag) {
+      src = conv_uni_to_pc(unicode, 1);
+      if (src >= 32) {
+	  outbuf[0] = src; outbuf[1] = '\0';
+	  return 1;
+      }
+  }
+  if (isdefault || trydefault) {
+      rc = conv_uni_to_str(outbuf, buflen, unicode, 1);
+      if (rc >= 0)
+	  return (strlen(outbuf));
+  }
+  if (rc == -4) {
+    if (!isdefault)
+	rc = conv_uni_to_str(outbuf, buflen, 0xfffd, 0);
+    if ((rc == -4) && (isdefault || trydefault))
+	rc = conv_uni_to_str(outbuf, buflen, 0xfffd, 1);
+    if (rc >= 0)
+	return (strlen(outbuf));
+  }
   if (chk_single_flag && src == -4) {
-    rc = conv_uni_to_pc(0xfffd);
-    if (rc >= 32) {
-      outbuf[0] = rc; outbuf[1] = '\0';
-	    return 1; 
-	}
-	return rc;
+      if (!isdefault)
+	  rc = conv_uni_to_pc(0xfffd, 0);
+      if ((rc == -4) && (isdefault || trydefault))
+	  rc = conv_uni_to_pc(0xfffd, 1);
+      if (rc >= 32) {
+	  outbuf[0] = rc; outbuf[1] = '\0';
+	  return 1; 
+      }
+      return rc;
   }
   return -4;
 }
@@ -976,39 +1134,39 @@ PRIVATE int UC_MapGN ARGS2(
 	int,		UChndl,
 	int,		update_flag)
 {
-  int i,Gn,found,lasthndl;
-  found = 0;
-  Gn = -1;
-  for (i=0; i<4 && Gn<0; i++) { 
+    int i,Gn,found,lasthndl;
+    found = 0;
+    Gn = -1;
+    for (i=0; i<4 && Gn<0; i++) { 
 	if (UC_GNhandles[i] < 0) {
 	    Gn = i;
 	} else if (UC_GNhandles[i] == UChndl) {
-      Gn = i;
+	    Gn = i;
 	    found = 1;
-  }
+	}
     }
     if (found) 
 	return Gn;
-  if (Gn >= 0) {
-    UCInfo[UChndl].GN = Gn;
-    UC_GNhandles[Gn] = UChndl;
+    if (Gn >= 0) {
+	UCInfo[UChndl].GN = Gn;
+	UC_GNhandles[Gn] = UChndl;
     } else {
 	if (UC_lastautoGN == GRAF_MAP) {
-      Gn = IBMPC_MAP;
+	    Gn = IBMPC_MAP;
 	} else {
 	    Gn = GRAF_MAP;
 	}
-    UC_lastautoGN = Gn;
-    lasthndl = UC_GNhandles[Gn];
-    UCInfo[lasthndl].GN = -1;
-    UCInfo[UChndl].GN = Gn;
-    UC_GNhandles[Gn] = UChndl;
-  }
-  if (TRACE)
-      fprintf(stderr,"UC_Map...... Using %i <- %i (%s)\n",
+	UC_lastautoGN = Gn;
+	lasthndl = UC_GNhandles[Gn];
+	UCInfo[lasthndl].GN = -1;
+	UCInfo[UChndl].GN = Gn;
+	UC_GNhandles[Gn] = UChndl;
+    }
+    if (TRACE)
+	fprintf(stderr,"UC_Map...... Using %i <- %i (%s)\n",
 		Gn, UChndl, UCInfo[UChndl].MIMEname);
-  UC_con_set_trans(UChndl,Gn,update_flag);
-  return Gn;
+    UC_con_set_trans(UChndl,Gn,update_flag);
+    return Gn;
 }
   
 PUBLIC int UCTransChar ARGS3(
@@ -1016,48 +1174,69 @@ PUBLIC int UCTransChar ARGS3(
 	int,		charset_in,
 	int,		charset_out)
 {
-  int unicode, Gn;
-  int rc;
-  int UChndl_in, UChndl_out;
-  u16 * ut;
-  int upd = 0;
+    int unicode, Gn;
+    int rc = -4;
+    int UChndl_in, UChndl_out;
+    int isdefault, trydefault;
+    u16 * ut;
+    int upd = 0;
 
 #ifndef UC_NO_SHORTCUTS
-  if (charset_in == charset_out)
-    return (unsigned char)ch_in;
+    if (charset_in == charset_out)
+	return (unsigned char)ch_in;
 #endif /* UC_NO_SHORTCUTS */
     if (charset_in < 0)
 	return -11;
-  if ((UChndl_in = LYCharSet_UC[charset_in].UChndl) < 0)
-    return -11;
-  if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0)
-    return -12;
-  if (!UCInfo[UChndl_in].num_uni)
-    return -11;
+    if ((UChndl_in = LYCharSet_UC[charset_in].UChndl) < 0)
+	return -11;
+    if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
+	if ((UChndl_out = default_UChndl) < 0)
+	    return -12;
+	isdefault = 1;
+    } else {
+	isdefault = UCInfo[UChndl_out].replacedesc.isdefault;
+	trydefault = UCInfo[UChndl_out].replacedesc.trydefault;
+    }
+    if (!UCInfo[UChndl_in].num_uni)
+	return -11;
     if ((Gn = UCInfo[UChndl_in].GN) < 0) {
 	Gn = UC_MapGN(UChndl_in,0);
 	upd = 1;
+
     }
 
-  ut = UCInfo[UChndl_out].unitable;
-    if (ut == UC_current_unitable) {
-	if (upd) {
-	    set_inverse_transl(Gn);
+    ut = UCInfo[UChndl_out].unitable;
+    if (!isdefault) {
+	if (ut == UC_current_unitable) {
+	    if (upd) {
+		set_inverse_transl(Gn);
+	    }
+	} else {
+	    rc = UC_con_set_unimap(UChndl_out, 1);
+	    if (rc > 0) {
+		set_inverse_transl(Gn);
+	    } else if (rc < 0) {
+		return rc;
+	    }
 	}
-    } else {
-    rc = UC_con_set_unimap(UChndl_out, 1);
-	if (rc > 0) {
-      set_inverse_transl(Gn);
-	} else if (rc < 0) {
-      return rc;
-  }
     }
-  UC_translate = set_translate(Gn);
-  unicode = UC_translate[(unsigned char)ch_in];
-  rc = conv_uni_to_pc(unicode);
-  if (rc == -4)
-    rc = conv_uni_to_pc(0xfffd);
-  return rc;
+    UC_translate = set_translate(Gn);
+    unicode = UC_translate[(unsigned char)ch_in];
+    if (!isdefault) {
+	rc = conv_uni_to_pc(unicode, 0);
+	if (rc >= 0)
+	    return rc;
+    }
+    if ((rc == -4) && (isdefault || trydefault)) {
+	rc = conv_uni_to_pc(unicode, 1);
+    }
+    if ((rc == -4) && !isdefault) {
+	rc = conv_uni_to_pc(0xfffd, 0);
+    }
+    if ((rc == -4) && (isdefault || trydefault)) {
+	rc = conv_uni_to_pc(0xfffd, 1);
+    }
+    return rc;
 }
 
 PUBLIC long int UCTransToUni ARGS2(
@@ -1102,6 +1281,7 @@ PUBLIC int UCReverseTransChar ARGS3(char, ch_out, int, charset_in, int, charset_
     int Gn;
     int rc;
     int UChndl_in, UChndl_out;
+    int isdefault;
     int i_ch = (unsigned char)ch_out;
     u16 * ut;
 
@@ -1113,27 +1293,40 @@ PUBLIC int UCReverseTransChar ARGS3(char, ch_out, int, charset_in, int, charset_
 	return -11;
     if ((UChndl_in = LYCharSet_UC[charset_in].UChndl) < 0)
 	return -11;
-    if (charset_out < 0)
-	return -12;
-    if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0)
-	return -12;
     if (!UCInfo[UChndl_in].num_uni)
 	return -11;
+    if (charset_out < 0)
+	return -12;
+    if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
+	if ((UChndl_out = default_UChndl) < 0)
+	    return -12;
+	isdefault = 1;
+    } else {
+	isdefault = UCInfo[UChndl_out].replacedesc.isdefault;
+    }
 
-    ut = UCInfo[UChndl_out].unitable;
-    if (ut == UC_current_unitable) {
-	if ((Gn = UCInfo[UChndl_in].GN) >= 0) {
-	    UC_translate = set_translate(Gn);
-	    rc = inv_translate[i_ch];
-	    if (rc >= 32) {
-		return rc;
-	    }
-	} else {
-	    Gn = UC_MapGN(UChndl_in,1);
-	    UC_translate = set_translate(Gn);
-	    rc = inv_translate[i_ch];
-	    if (rc >= 32) {
-		return rc;
+    if (!isdefault) {
+	/*
+	 *  Try to use the inverse table if charset_out is not equivalent
+	 *  to using just the default table.  If it is, it should have
+	 *  just ASCII chars and trying to back-translate those should
+	 *  not give anything but themselves. - kw
+	 */
+	ut = UCInfo[UChndl_out].unitable;
+	if (ut == UC_current_unitable) {
+	    if ((Gn = UCInfo[UChndl_in].GN) >= 0) {
+		UC_translate = set_translate(Gn);
+		rc = inv_translate[i_ch];
+		if (rc >= 32) {
+		    return rc;
+		}
+	    } else {
+		Gn = UC_MapGN(UChndl_in,1);
+		UC_translate = set_translate(Gn);
+		rc = inv_translate[i_ch];
+		if (rc >= 32) {
+		    return rc;
+		}
 	    }
 	}
     }
@@ -1151,17 +1344,18 @@ PUBLIC int UCTransCharStr ARGS6(
 	int,		charset_out,
 	int,		chk_single_flag)
 {
-  int unicode, Gn;
-  int rc, src = 0, ignore_err;
-  int UChndl_in, UChndl_out;
-  struct unimapdesc_str * repl;
-  u16 * ut;
-  int upd = 0;
+    int unicode, Gn;
+    int rc, src = 0, ignore_err;
+    int UChndl_in, UChndl_out;
+    int isdefault, trydefault;
+    struct unimapdesc_str * repl;
+    u16 * ut;
+    int upd = 0;
 
-if (buflen<2)
-  return -13;
+    if (buflen<2)
+	return -13;
 #ifndef UC_NO_SHORTCUTS
-  if (chk_single_flag && charset_in == charset_out) {
+    if (chk_single_flag && charset_in == charset_out) {
 	outbuf[0] = ch_in;
 	outbuf[1] = '\0';
 	return 1;
@@ -1169,60 +1363,91 @@ if (buflen<2)
 #endif /* UC_NO_SHORTCUTS */
     if (charset_in < 0)
 	return -11;
-  if ((UChndl_in = LYCharSet_UC[charset_in].UChndl) < 0)
-    return -11;
-  if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0)
-    return -12;
-  if (!UCInfo[UChndl_in].num_uni)
-    return -11;
-  if ((Gn = UCInfo[UChndl_in].GN) < 0)
+    if ((UChndl_in = LYCharSet_UC[charset_in].UChndl) < 0)
+	return -11;
+    if (!UCInfo[UChndl_in].num_uni)
+	return -11;
+    if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
+	if ((UChndl_out = default_UChndl) < 0)
+	    return -12;
+	isdefault = 1;
+    } else {
+	isdefault = UCInfo[UChndl_out].replacedesc.isdefault;
+	trydefault = UCInfo[UChndl_out].replacedesc.trydefault;
+    }
+    if ((Gn = UCInfo[UChndl_in].GN) < 0)
     {Gn = UC_MapGN(UChndl_in,!chk_single_flag); upd=chk_single_flag;}
 
-  UC_translate = set_translate(Gn);
-  unicode = UC_translate[(unsigned char)ch_in];
+    UC_translate = set_translate(Gn);
+    unicode = UC_translate[(unsigned char)ch_in];
 
-  if (chk_single_flag) {
-    ut = UCInfo[UChndl_out].unitable;
-	if (ut == UC_current_unitable) {
-	    if (upd) set_inverse_transl(Gn);
-	} else {
-      src = UC_con_set_unimap(UChndl_out, 1);
-	    if (src > 0) {
-	set_inverse_transl(Gn);
-	    } else if (src < 0) {
-	return src;
+    if (chk_single_flag) {
+	if (!isdefault) {
+	    ut = UCInfo[UChndl_out].unitable;
+	    if (ut == UC_current_unitable) {
+		if (upd) set_inverse_transl(Gn);
+	    } else {
+		src = UC_con_set_unimap(UChndl_out, 1);
+		if (src > 0) {
+		    set_inverse_transl(Gn);
+		} else if (src < 0) {
+		    return src;
+		}
+	    }
+	}
+	src = conv_uni_to_pc(unicode, isdefault);
+	if (src >= 32) {
+	    outbuf[0] = src; outbuf[1] = '\0';
+	    return 1;
+	}
     }
+
+    repl = &(UCInfo[UChndl_out].replacedesc);
+    if (!isdefault) {
+	if (repl != UC_current_unitable_str) {
+	    con_clear_unimap_str(0);
+	    ignore_err = UC_con_set_unimap_str(repl->entry_ct, repl->entries, 0);
+	    UC_current_unitable_str = repl;
 	}
-    src = conv_uni_to_pc(unicode);
-    if (src >= 32) {
-      outbuf[0] = src; outbuf[1] = '\0';
+	rc = conv_uni_to_str(outbuf, buflen, unicode, 0);
+	if (rc >= 0)
+	    return (strlen(outbuf));
+    }
+    if (trydefault && chk_single_flag) {
+	src = conv_uni_to_pc(unicode, 1);
+	if (src >= 32) {
+	    outbuf[0] = src; outbuf[1] = '\0';
 	    return 1;
 	}
-  }
-
-  repl = &(UCInfo[UChndl_out].replacedesc);
-  if (repl != UC_current_unitable_str)  {
-    con_clear_unimap_str();
-    ignore_err = UC_con_set_unimap_str(repl->entry_ct, repl->entries);
-    UC_current_unitable_str = repl;
-  }
-  rc = conv_uni_to_str(outbuf, buflen, unicode);
-  if (rc == -4)
-    rc = conv_uni_to_str(outbuf, buflen, 0xfffd);
-  if (rc >= 0)
-    return (strlen(outbuf));
-
-  if (chk_single_flag && src == -4) {
-    rc = conv_uni_to_pc(0xfffd);
-    if (rc >= 32) {
-      outbuf[0] = rc; outbuf[1] = '\0';
-	    return 1;
+    }
+    if (isdefault || trydefault) {
+	rc = conv_uni_to_str(outbuf, buflen, unicode, 1);
+	if (rc >= 0)
+	    return (strlen(outbuf));
+    }
+    if (rc == -4) {
+	if (!isdefault)
+	    rc = conv_uni_to_str(outbuf, buflen, 0xfffd, 0);
+	if ((rc == -4) && (isdefault || trydefault))
+	    rc = conv_uni_to_str(outbuf, buflen, 0xfffd, 1);
+	if (rc >= 0)
+	    return (strlen(outbuf));
+    }
+    if (chk_single_flag && src == -4) {
+	if (!isdefault)
+	    rc = conv_uni_to_pc(0xfffd, 0);
+	if ((rc == -4) && (isdefault || trydefault))
+	    rc = conv_uni_to_pc(0xfffd, 1);
+	if (rc >= 32) {
+	    outbuf[0] = rc; outbuf[1] = '\0';
+	    return 1; 
 	} else if (rc <= 0) {
 	    outbuf[0] = '\0';
 	    return rc;
 	}
-  }
-  return -4;
+	return rc;
+    }
+    return -4;
 }
 
 PRIVATE int UC_FindGN_byMIME ARGS1(
@@ -1262,10 +1487,10 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
     for (i = 0;
 	 (i < MAXCHARSETS && i < LYNumCharsets &&
           LYchar_set_names[i] && LYhndl < 0); i++) {
-    if (LYCharSet_UC[i].MIMEname &&
-	!strcmp(UC_MIMEcharset,LYCharSet_UC[i].MIMEname)) {
-      LYhndl = i;
-    }
+	if (LYCharSet_UC[i].MIMEname &&
+	    !strcmp(UC_MIMEcharset,LYCharSet_UC[i].MIMEname)) {
+	    LYhndl = i;
+	}
     }
     if (LYhndl < 0) {
 	/*
@@ -1282,10 +1507,13 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	  return UCGetLYhndl_byMIME("euc-jp");
 	} else if (!strcmp(UC_MIMEcharset, "iso-2022-kr")) {
 	  return UCGetLYhndl_byMIME("euc-kr");
-	} else if (!strcmp(UC_MIMEcharset, "gb2312")) {
+	} else if (!strcmp(UC_MIMEcharset, "gb2312") ||
+		   !strncmp(UC_MIMEcharset, "cn-gb", 5)) {
 	  return UCGetLYhndl_byMIME("euc-cn");
 	} else if (!strcmp(UC_MIMEcharset, "iso-2022-cn")) {
 	    return UCGetLYhndl_byMIME("euc-cn");
+	} else if (!strcmp(UC_MIMEcharset, "cn-big5")) {
+	    return UCGetLYhndl_byMIME("big5");
 	} else if (!strcmp(UC_MIMEcharset, "windows-1252")) {
 	    /*
 	     *  It's not my fault that Microsoft hasn't registered
@@ -1423,7 +1651,7 @@ PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
   }
     /*
      *  Now allocate a new table compatible with LYCharSets[] 
-     *  and with the HTMLDTD for entitied.
+     *  and with the HTMLDTD for entities.
      *  We don't know yet whether we'll keep it around. */
   p = prepl = (char **) malloc(HTML_dtd.number_of_entities * sizeof(char *));
   if (!p) {
@@ -1528,7 +1756,7 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
 
     /*
      *  Do different kinds of searches...
-     *  after all, this is experimental...
+     *  Normally the first should find the match if there is one!
      */
     for (i = 0; i < MAXCHARSETS && LYchar_set_names[i] && LYhndl < 0; i++) {
 	if (!strcmp(UC_LYNXcharset, LYchar_set_names[i])) {
@@ -1643,6 +1871,9 @@ PUBLIC void UC_Charset_Setup ARGS8(
   UCInfo[s].unitable = unitable;
   UCInfo[s].num_uni = nnuni;
   UCInfo[s].replacedesc = replacedesc;
+  if (replacedesc.isdefault) {
+      default_UChndl = s;
+  }
   Gn = UC_FindGN_byMIME(UC_MIMEcharset);
   if (Gn >= 0)
     UC_GNhandles[Gn] = s;
@@ -1664,8 +1895,10 @@ PRIVATE void UCcleanup_mem NOARGS
 {
     int i;
     UCfree_allocated_LYCharSets();
-    con_clear_unimap_str();
-    con_clear_unimap();
+    con_clear_unimap_str(0);
+    con_clear_unimap_str(1);
+    con_clear_unimap(0);
+    con_clear_unimap(1);
     for (i = 1; i < 4; i++) {	/* first one is static! */
 	FREE(inverse_translations[i]);
 }

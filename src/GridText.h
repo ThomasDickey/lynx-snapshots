@@ -83,7 +83,7 @@ extern char * HText_getServer NOPARAMS;
 extern char * HText_getOwner NOPARAMS;
 extern char * HText_getContentBase NOPARAMS;
 extern char * HText_getContentLocation NOPARAMS;
-#ifdef USEHASH
+#ifdef USE_HASH
 extern char * HText_getStyle NOPARAMS;
 #endif
 extern void HText_setMainTextOwner PARAMS((CONST char * owner));

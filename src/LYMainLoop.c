@@ -102,7 +102,7 @@ PRIVATE void free_mainloop_variables NOARGS
     FREE(curdoc.post_data);
     FREE(curdoc.post_content_type);
     FREE(curdoc.bookmark);
-#ifdef USEHASH
+#ifdef USE_HASH
     FREE(curdoc.style);
     FREE(newdoc.style);
 #endif
@@ -199,7 +199,7 @@ int mainloop NOARGS
     curdoc.post_data = NULL;
     curdoc.post_content_type = NULL;
     curdoc.bookmark = NULL;
-#ifdef USEHASH
+#ifdef USE_HASH
     curdoc.style = NULL;
     newdoc.style = NULL;
 #endif
@@ -288,7 +288,7 @@ initialize:
         display_lines = LYlines-2;
 
     while (TRUE) {
-#ifdef USEHASH
+#ifdef USE_HASH
 	if (curdoc.style != NULL) force_load = TRUE;
 #endif
 	/*
@@ -333,6 +333,19 @@ try_again:
 		     */
                     LYpop(&newdoc);
 		    popped_doc = TRUE;
+
+
+#ifndef DONT_TRACK_INTERNAL_LINKS
+#define NONINTERNAL_OR_DIFFERENT(c,n) TRUE
+#define NONINTERNAL_OR_PHYS_DIFFERENT(p,n) (!curdoc.internal_link || \
+			   are_phys_different(p,n))
+#else /* TRACK_INTERNAL_LINKS */
+#define NONINTERNAL_OR_DIFFERENT(c,n) are_different(c,n)
+#define NONINTERNAL_OR_PHYS_DIFFERENT(p,n) are_different(p,n)
+#endif /* TRACK_INTERNAL_LINKS */
+
+
+#ifndef DONT_TRACK_INTERNAL_LINKS
 		    /*
 		    ** If curdoc had been reached via an internal
 		    ** (fragment) link from what we now have just
@@ -344,9 +357,12 @@ try_again:
 		        LYoverride_no_cache = TRUE;
 			LYforce_no_cache = FALSE;
 			try_internal = TRUE;
-		    } else if ((newdoc.bookmark != NULL) ||
+		    } else
+#endif /* TRACK_INTERNAL_LINKS */
+			if ((newdoc.bookmark != NULL) ||
 			(newdoc.post_data != NULL && !newdoc.safe &&
-			 LYresubmit_posts)) {
+			 LYresubmit_posts &&
+			    NONINTERNAL_OR_DIFFERENT(&curdoc, &newdoc))) {
 		        LYoverride_no_cache = FALSE;
 		    } else {
 		        LYoverride_no_cache = TRUE;
@@ -357,9 +373,19 @@ try_again:
 		    /*
 		     *  Make SURE this is an appropriate request. - FM
 		     */
-		    if (newdoc.address &&
-		        !strncmp(newdoc.address, "http", 4))
-		        newdoc.isHEAD = TRUE;
+		    if (newdoc.address) {
+			if (!strncmp(newdoc.address, "http", 4)) {
+			    newdoc.isHEAD = TRUE;
+			} else if (!strncmp(newdoc.address, "LYNXIMGMAP:", 11)) {
+			    if (!strncmp(newdoc.address + 11, "http", 4)) {
+				StrAllocCopy(temp, newdoc.address + 11);
+				FREE(newdoc.address);
+				newdoc.address = temp;
+				newdoc.isHEAD = TRUE;
+				temp = NULL;
+			    }
+			}
+		    }
 		    try_internal = FALSE;
 		    HEAD_request = FALSE;
 		}
@@ -419,6 +445,7 @@ try_again:
 		    LYPermitURL = TRUE;
 		}
 
+#ifndef DONT_TRACK_INTERNAL_LINKS
 		if (try_internal) {
 		    if (newdoc.address &&
 			0==strncmp(newdoc.address, "LYNXIMGMAP:", 11)) {
@@ -465,6 +492,9 @@ try_again:
 		    }
 		    getresult = getfile(&newdoc);
 		}
+#else  /* TRACK_INTERNAL_LINKS */
+		getresult = getfile(&newdoc);
+#endif /* TRACK_INTERNAL_LINKS */
 
 		switch(getresult) {
 
@@ -766,7 +796,7 @@ try_again:
 							(BookmarkPage + 2)));
 				    StrAllocCopy(newdoc.title, BOOKMARK_TITLE);
 				    StrAllocCopy(newdoc.bookmark, BookmarkPage);
-#ifdef USEHASH
+#ifdef USE_HASH
 				    if (curdoc.style)
 					StrAllocCopy(newdoc.style, curdoc.style);
 #endif
@@ -865,7 +895,7 @@ try_again:
 	    StrAllocCopy(curdoc.post_data, newdoc.post_data);
 	    StrAllocCopy(curdoc.post_content_type, newdoc.post_content_type);
 	    StrAllocCopy(curdoc.bookmark, newdoc.bookmark);
-#ifdef USEHASH
+#ifdef USE_HASH
 	    StrAllocCopy(curdoc.style, HText_getStyle());
 	    if (curdoc.style != NULL)
 		style_readFromFile (curdoc.style);
@@ -925,7 +955,7 @@ try_again:
 	}
 
 	/*
-	 *  If the resent_sizechange variable is set to TRUE
+	 *  If the recent_sizechange variable is set to TRUE
 	 *  then the window size changed recently. 
 	 */
 	if (recent_sizechange) {
@@ -983,7 +1013,7 @@ try_again:
 			/*
 			 *  We forced HTML for a local startfile which
 			 *  is not a bookmark file and has a path of at
-			 *  least two letters.  It it doesn't have a
+			 *  least two letters.  If it doesn't have a
 			 *  suffix mapped to text/html, we'll set the
 			 *  entire path (including the lead slash) as a
 			 *  "suffix" mapped to text/html to ensure it is
@@ -1277,19 +1307,26 @@ try_again:
 			
 	    } else if (user_mode == ADVANCED_MODE && nlinks > 0) {
 		/*
-		 *  Show the URL.
+		 *  Show the URL or, for some internal links, the fragment
 		 */
+		cp = NULL;
+		if (links[curdoc.link].type == WWW_INTERN_LINK_TYPE &&
+		    strncmp(links[curdoc.link].lname, "LYNXIMGMAP:", 11)) {
+		    cp = strchr(links[curdoc.link].lname, '#');
+		}
+		if (!cp)
+		    cp = links[curdoc.link].lname;
 		if (more)
 		    if (is_www_index)
 		        _user_message("-more- -index- %s",
-						 links[curdoc.link].lname);
+						 cp);
 		    else
-		        _user_message("-more- %s",links[curdoc.link].lname);
+		        _user_message("-more- %s",cp);
 		else
 		    if (is_www_index)
-		        _user_message("-index- %s",links[curdoc.link].lname);
+		        _user_message("-index- %s",cp);
 		    else
-		        statusline(links[curdoc.link].lname);
+		        statusline(cp);
 	    } else if (is_www_index && more) {
 		char buf[128];
 
@@ -1910,7 +1947,7 @@ new_cmd:  /*
 	    else
 	        New_DTD = YES;
 	    HTSwitchDTD(New_DTD);
-	    _statusline(New_DTD ? USING_DTD_0 : USING_DTD_1);
+	    _statusline(New_DTD ? USING_DTD_1 : USING_DTD_0);
 	    sleep(MessageSecs);
 	    break;
 
@@ -2379,11 +2416,9 @@ new_cmd:  /*
 		    }
 		    if (((HText *)HTAnchor_document(tmpanchor) == NULL ||
 			 (LYresubmit_posts &&
-			  !(curdoc.internal_link &&
-			    !are_phys_different((document *)&history[(nhist - 1)],
-						&curdoc))
-			     )
-			) &&
+			  NONINTERNAL_OR_PHYS_DIFFERENT(
+			      (document *)&history[(nhist - 1)],
+			      &curdoc))) &&
 			HTConfirm(CONFIRM_POST_RESUBMISSION) == FALSE) {
 			if (nhist == 1) {
 			    _statusline(CANCELLED);
@@ -2671,6 +2706,7 @@ new_cmd:  /*
 		     */
 		    StrAllocCopy(newdoc.address, links[curdoc.link].lname);
 		    StrAllocCopy(newdoc.title, links[curdoc.link].hightext);
+#ifndef DONT_TRACK_INTERNAL_LINKS
 		    /*
 		     *  Might be an internal link anchor in the same doc.
 		     *  If so, take the try_internal shortcut if we didn't
@@ -2678,19 +2714,22 @@ new_cmd:  /*
 		     */
 		    newdoc.internal_link =
 			(links[curdoc.link].type == WWW_INTERN_LINK_TYPE);
-		    if (newdoc.internal_link && cmd != LYK_NOCACHE) {
+		    if (newdoc.internal_link) {
 			if (0==strcmp(curdoc.address, LYlist_temp_url()) &&
 			    0==strcmp((curdoc.title ? curdoc.title : ""),
 				      LIST_PAGE_TITLE)) {
 			    FREE(curdoc.address);
-			} else 
+			} else if (cmd != LYK_NOCACHE) {
 			    try_internal = TRUE;
+			}
 			LYoverride_no_cache = TRUE;	/* ??? */
 			/* We still set force_load so that history pushing
 			** etc. will be done.  - kw */
 			force_load = TRUE;
 			break;
+		    } else {
 		    }
+#endif /* TRACK_INTERNAL_LINKS */
 		    /*
 		     *  Might be an anchor in the same doc from a POST
 		     *  form.  If so, dont't free the content. -- FM
@@ -3100,13 +3139,13 @@ check_goto_URL:
 		    newdoc.safe = FALSE;
 		    newdoc.internal_link = FALSE;
 		    force_load = TRUE;
-		    LYUserSpecifiedURL = TRUE;
 #ifdef DIRED_SUPPORT
 		    if (lynx_edit_mode) 
 		        HTuncache_current_document();
 #endif /* DIRED_SUPPORT */
-		    HTAddGotoURL(newdoc.address);
 		}
+		LYUserSpecifiedURL = TRUE;
+		HTAddGotoURL(newdoc.address);
 	    } 
 	    break;
 
@@ -4703,7 +4742,9 @@ check_add_bookmark_to_self:
 	        _statusline(HEAD_D_L_OR_CANCEL);
 		c = LYgetch();
 		if (TOUPPER(c) == 'D') {
-		    if (strncmp(curdoc.address, "http", 4)) {
+		    char *scheme = strncmp(curdoc.address, "LYNXIMGMAP:", 11) ?
+			curdoc.address : curdoc.address + 11;
+		    if (strncmp(scheme, "http", 4)) {
 		        _statusline(DOC_NOT_HTTP_URL);
 			sleep(MessageSecs);
 		    } else {
@@ -4733,6 +4774,8 @@ check_add_bookmark_to_self:
 		} else if (TOUPPER(c) == 'L') {
 		    if (links[curdoc.link].type != WWW_FORM_LINK_TYPE &&
 		    	strncmp(links[curdoc.link].lname, "http", 4) &&
+		    	strncmp(links[curdoc.link].lname,
+				"LYNXIMGMAP:http", 15) &&
 			(links[curdoc.link].type != WWW_INTERN_LINK_TYPE ||
 			 !curdoc.address ||
 			 strncmp(curdoc.address, "http", 4))) {
@@ -4794,12 +4837,14 @@ check_add_bookmark_to_self:
 		    c = 'D';
 		}
 		if (TOUPPER(c) == 'D') {
+		    char *scheme = strncmp(curdoc.address, "LYNXIMGMAP:", 11) ?
+			curdoc.address : curdoc.address + 11;
 		    /*
 		     *  The user didn't cancel, so check if
 		     *  a HEAD request is appropriate for the
 		     *  current document. - FM
 		     */ 
-		    if (strncmp(curdoc.address, "http", 4)) {
+		    if (strncmp(scheme, "http", 4)) {
 		        _statusline(DOC_NOT_HTTP_URL);
 			sleep(MessageSecs);
 		    } else {

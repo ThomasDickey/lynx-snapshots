@@ -154,3 +154,135 @@ PUBLIC char * HTNextField ARGS1(
     *pstr = p;
     return start;
 }
+
+/*	Find next Token
+**	---------------
+**	Finds the next token in a string
+**	On entry,
+**	*pstr	points to a string to be parsed.
+**      delims  lists characters to be recognized as delimiters.
+**              If NULL default is white white space "," ";" or "=".
+**              The word can optionally be quoted or enclosed with
+**		chars from bracks.
+**		Comments surrrounded by '(' ')' are filtered out
+**		unless they are specifically reqested by including
+**		' ' or '(' in delims or bracks.
+**      bracks  lists bracketing chars.  Some are recognized as
+**              special, for those give the opening char.
+**		If NULL defaults to <"> and "<" ">".
+**      found   points to location to fill with the ending delimiter
+**              found, or is NULL.
+**
+** 	On exit,
+**	*pstr	has been moved to the first delimiter past the
+**		field
+**		THE STRING HAS BEEN MUTILATED by a 0 terminator
+**      found   points to the delimiter found unless it was NULL.
+**	Returns	a pointer to the first word or NULL on error
+*/
+PUBLIC char * HTNextTok (char ** pstr,
+		      const char * delims, const char * bracks, char * found)
+{
+    char * p = *pstr;
+    char * start = NULL;
+    BOOL get_blanks, skip_comments;
+    BOOL get_comments;
+    BOOL get_closing_char_too = FALSE;
+    char closer;
+    if (!pstr || !*pstr) return NULL;
+    if (!delims) delims = " ;,=" ;
+    if (!bracks) bracks = "<\"" ;
+
+    get_blanks = (!strchr(delims,' ') && !strchr(bracks,' '));
+    get_comments = (strchr(bracks,'(') != NULL);
+    skip_comments = (!get_comments && !strchr(delims,'(') && !get_blanks); 
+#define skipWHITE(c) (!get_blanks && WHITE(c))
+
+    while (*p && skipWHITE(*p))
+        p++;				/* Strip white space */
+    if (!*p) {
+	*pstr = p;
+	if (found) *found = '\0';
+        return NULL;		/* No first field */
+    }
+    while (1) {
+	/* Strip white space and other delimiters */
+	while (*p && (skipWHITE(*p) || strchr(delims,*p))) p++;
+	if (!*p) {
+	    *pstr = p;
+	    if (found) *found = *(p-1);
+	    return NULL;				   	 /* No field */
+	}
+
+	if (*p == '(' && (skip_comments || get_comments)) {	  /* Comment */
+	    int comment_level = 0;
+	    if (get_comments && !start) start = p+1;
+	    for(;*p && (*p!=')' || --comment_level>0); p++) {
+		if (*p == '(') comment_level++;
+		else if (*p == '"') {	      /* quoted field within Comment */
+		    for(p++; *p && *p!='"'; p++)
+			if (*p == '\\' && *(p+1)) p++; /* Skip escaped chars */
+		    if (!*p) break; /* (invalid) end of string found, leave */
+		}
+		if (*p == '\\' && *(p+1)) p++;	       /* Skip escaped chars */
+	    }
+	    if (get_comments)
+		break;
+	    if (*p) p++;
+	    if (get_closing_char_too) {
+		if (!*p || (!strchr(bracks,*p) && strchr(delims,*p))) {
+		    break;
+		} else
+		    get_closing_char_too = (strchr(bracks,*p) != NULL);
+	    }
+	} else if (strchr(bracks,*p)) {	       /* quoted or bracketted field */
+	    switch (*p) {
+	       case '<': closer = '>'; break;
+	       case '[': closer = ']'; break;
+	       case '{': closer = '}'; break;
+	       case ':': closer = ';'; break;
+	    default:     closer = *p;
+	    }
+	    if (!start) start = ++p;
+	    for(;*p && *p!=closer; p++)
+		if (*p == '\\' && *(p+1)) p++;	       /* Skip escaped chars */
+	    if (get_closing_char_too) {
+		p++;
+		if (!*p || (!strchr(bracks,*p) && strchr(delims,*p))) {
+		    break;
+		} else
+		    get_closing_char_too = (strchr(bracks,*p) != NULL);
+	    } else
+	    break;			    /* kr95-10-9: needs to stop here */
+#if 0
+	} else if (*p == '<') {				     /* quoted field */
+	    if (!start) start = ++p;
+	    for(;*p && *p!='>'; p++)
+		if (*p == '\\' && *(p+1)) p++;	       /* Skip escaped chars */
+	    break;			    /* kr95-10-9: needs to stop here */
+#endif
+	} else {					      /* Spool field */
+	    if (!start) start = p;
+	    while(*p && !skipWHITE(*p) && !strchr(bracks,*p) &&
+		                          !strchr(delims,*p))
+		p++;
+	    if (*p && strchr(bracks,*p)) {
+		get_closing_char_too = TRUE;
+	    } else {
+		if (*p=='(' && skip_comments) {
+		    *pstr = p;
+		    HTNextTok(pstr, NULL, "(", found);  /*      Advance pstr */
+		    *p = '\0';
+		    if (*pstr && **pstr) (*pstr)++;
+		    return start;
+		}
+		    break;					   /* Got it */
+	    }
+	}
+    }
+    if (found) *found = *p;
+	
+    if (*p) *p++ = '\0';
+    *pstr = p;
+    return start;
+}

@@ -1,7 +1,8 @@
 /*
- *  makeuctb.c, derived from conmakehash.c
+ *  makeuctb.c, derived from conmakehash.c   - kw
  *
- *  [ original comments: - kw ]
+ *    Original comments from conmakehash.c:
+ *
  *  Create arrays for initializing the kernel folded tables (using a hash
  *  table turned out to be to limiting...)  Unfortunately we can't simply
  *  preinitialize the tables at compile time since kfree() cannot accept
@@ -56,6 +57,28 @@ PRIVATE void usage ARGS1(
     fprintf(stderr,
 	    "Utility to convert .tbl into .h files for Lynx compilation.\n");
     exit(EX_USAGE);
+}
+
+/* copied from HTString.c, not everybody has strncasecmp */
+PUBLIC int strncasecomp ARGS3(
+	CONST char*,	a,
+	CONST char *,	b,
+	int,		n)
+{
+    CONST char *p = a;
+    CONST char *q = b;
+
+    for (p = a, q = b; ; p++, q++) {
+        int diff;
+	if (p == (a+n))
+	    return 0;	/*   Match up to n characters */
+	if (!(*p && *q))
+	    return (*p - *q);
+	diff = TOLOWER(*p) - TOLOWER(*q);
+	if (diff)
+	    return diff;
+    }
+    /*NOTREACHED*/
 }
 
 PRIVATE int getunicode ARGS1(
@@ -184,6 +207,7 @@ char this_MIMEcharset[UC_MAXLEN_MIMECSNAME +1];
 char this_LYNXcharset[UC_MAXLEN_LYNXCSNAME +1];
 char id_append[UC_MAXLEN_ID_APPEND +1] = "_";
 int this_isDefaultMap = -1;
+int useDefaultMap = 1;
 int lowest_eight = 999;
 
 PUBLIC int main ARGS2(
@@ -267,6 +291,12 @@ PUBLIC int main ARGS2(
 	     *  processing.  One digit code.
 	     */
 	    case 'R':
+		if (p[1] == 'a' || p[1] == 'A') {
+		    buffer[sizeof(buffer) - 1] = '\0';
+		    if (!strncasecomp(p, "RawOrEnc", 8)) {
+			p += 8;
+		    }
+		}
 		p++;
 		while (*p == ' ' || *p == '\t') {
 	  	    p++;
@@ -276,17 +306,46 @@ PUBLIC int main ARGS2(
 		continue;
 
 	    /*
-	     *  Is this the default display font?
+	     *  Is this the default table?
 	     */
  	    case 'D':
+		if (p[1] == 'e' || p[1] == 'E') {
+		    buffer[sizeof(buffer) - 1] = '\0';
+		    if (!strncasecomp(p, "Default", 7)) {
+			p += 7;
+		    }
+		}
 		p++;
 		while (*p == ' ' || *p == '\t') {
 		    p++;
 		}
-		this_isDefaultMap = (*p == '1');
+		this_isDefaultMap = (*p == '1' || TOLOWER(*p) == 'y');
+		continue;
+
+	    /*
+	     *  Is this the default table?
+	     */
+ 	    case 'F':
+		if (p[1] == 'a' || p[1] == 'A') {
+		    buffer[sizeof(buffer) - 1] = '\0';
+		    if (!strncasecomp(p, "FallBack", 8)) {
+			p += 8;
+		    }
+		}
+		p++;
+		while (*p == ' ' || *p == '\t') {
+		    p++;
+		}
+		useDefaultMap = (*p == '1' || tolower(*p) == 'y');
 		continue;
 
 	    case 'M':
+		if (p[1] == 'i' || p[1] == 'I') {
+		    buffer[sizeof(buffer) - 1] = '\0';
+		    if (!strncasecomp(p, "MIMEName", 8)) {
+			p += 8;
+		    }
+		}
 		p++;
 		while (*p == ' ' || *p == '\t') {
 		    p++;
@@ -298,6 +357,12 @@ PUBLIC int main ARGS2(
 	     *  Display charset name for options screen.
 	     */
 	    case 'O':
+		if (p[1] == 'p' || p[1] == 'P') {
+		    buffer[sizeof(buffer) - 1] = '\0';
+		    if (!strncasecomp(p, "OptionName", 10)) {
+			p += 10;
+		    }
+		}
 		p++;
 		while (*p == ' ' || *p == '\t') {
 		    p++;
@@ -635,12 +700,17 @@ static struct unipair_str repl_map%s[%d] = \n\
     }
     if (themap_str.entry_ct) {
 	printf("\n\
-static struct unimapdesc_str dfont_replacedesc%s = {%d,repl_map%s};\n",
+static struct unimapdesc_str dfont_replacedesc%s = {%d,repl_map%s,",
 id_append, themap_str.entry_ct, id_append);
     } else {
 	printf("\n\
-static struct unimapdesc_str dfont_replacedesc%s = {0,NULL};\n",id_append);
+static struct unimapdesc_str dfont_replacedesc%s = {0,NULL,",id_append);
     }
+    printf("%d,%d};\n",
+    this_isDefaultMap ? 1 : 0,
+    (useDefaultMap && !this_isDefaultMap) ? 1 : 0
+    );
+
 
     printf("#define UC_CHARSET_SETUP%s UC_Charset_Setup(\
 \"%s\",\\\n\"%s\",\\\n\

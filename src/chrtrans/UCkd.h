@@ -43,6 +43,8 @@ struct unimapdesc {
 struct unimapdesc_str {
 	u16 entry_ct;
 	struct unipair_str *entries;
+        int isdefault;
+        int trydefault;
 };
 
 

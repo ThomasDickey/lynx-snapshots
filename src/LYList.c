@@ -96,9 +96,7 @@ PUBLIC int showlist ARGS2(
 
 
     fprintf(fp0, "<head>\n");
-#ifdef EXP_CHARTRANS
     LYAddMETAcharsetToFD(fp0, -1);
-#endif
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 LIST_PAGE_TITLE);
     fprintf(fp0, "<h1>You have reached the List Page</h1>\n");
@@ -117,7 +115,7 @@ PUBLIC int showlist ARGS2(
     }
     for (cnt = 1; cnt <= refs; cnt++) {
 	HTChildAnchor *child = HText_childNumber(cnt);
-	HTAnchor *dest_intl;
+	HTAnchor *dest_intl = NULL;
 	HTAnchor *dest;
 	HTParentAnchor *parent;
 	char *address;
@@ -139,8 +137,10 @@ PUBLIC int showlist ARGS2(
 	    }
 	    continue;
 	}
+#ifndef DONT_TRACK_INTERNAL_LINKS
 	dest_intl = HTAnchor_followTypedLink((HTAnchor *)child,
 						       LINK_INTERNAL);
+#endif
 	dest = dest_intl ?
 	    dest_intl : HTAnchor_followMainLink((HTAnchor *)child);
 	parent = HTAnchor_parent(dest);
@@ -151,11 +151,12 @@ PUBLIC int showlist ARGS2(
 	LYEntify(&Address, TRUE);
 	if (title && *title) {
 	    StrAllocCopy(Title, title);
-	    if (*Title)
-		LYEntify(&Title, TRUE);
-	    else
+	    LYEntify(&Title, TRUE);
+	    if (*Title) {
+		cp = strchr(Address, '#');
+	    } else {
 		FREE(Title);
-	    cp = strchr(Address, '#');
+	    }
 	}
 
         fprintf(fp0, "<li><a href=\"%s\"%s>%s%s%s%s%s</a>\n", Address,

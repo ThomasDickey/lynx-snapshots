@@ -377,7 +377,7 @@ PUBLIC void LYpop_num ARGS2(
 	int,		number,
 	document *,	doc)
 {
-    if (number >= 0 && nhist >= number) {
+    if (number >= 0 && nhist > number) {
 	doc->link = history[number].link;
 	doc->line = history[number].page;
 	StrAllocCopy(doc->title, history[number].title);
@@ -499,12 +499,18 @@ PUBLIC BOOLEAN historytarget ARGS1(
         return(FALSE);
 
     LYpop_num(number, newdoc);
-    if (newdoc->internal_link &&
-	history[number].intern_seq_start == history[nhist-1].intern_seq_start
+    if (((newdoc->internal_link &&
+	  history[number].intern_seq_start == history[nhist-1].intern_seq_start) ||
+	 (number < nhist-1 &&
+	  history[nhist-1].internal_link &&
+	  number == history[nhist-1].intern_seq_start))
 	&& !(LYforce_no_cache == TRUE && LYoverride_no_cache == FALSE)) {
+#ifndef DONT_TRACK_INTERNAL_LINKS
 	LYforce_no_cache = FALSE;
 	LYoverride_no_cache = TRUE;
+	newdoc->internal_link = TRUE;
 	treat_as_intern = TRUE;
+#endif
     } else {
 	newdoc->internal_link = FALSE;
     }
@@ -592,9 +598,7 @@ PUBLIC int LYShowVisitedLinks ARGS1(
     LYforce_no_cache = TRUE;	/* force this file to be new */
 
     fprintf(fp0, "<head>\n");
-#ifdef EXP_CHARTRANS
     LYAddMETAcharsetToFD(fp0, -1);
-#endif
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 VISITED_LINKS_TITLE);
     fprintf(fp0, "<h1>You have reached the Visited Links Page</h1>\n");

@@ -161,133 +161,285 @@ static CONST char* entities[] = {
 static CONST UC_entity_info extra_entities[] = {
   {"Aacute",	0x00c1},  /* A with acute */
   {"Abreve",	0x0102},  /* A with breve */
-  {"Acirc",	0x00c2},  /* A with circumflex */
+  {"Acirc",	0x00c2},  /* capital A, circumflex accent */
+  {"Alpha",	0x0391},  /* greek capital letter alpha,  u+0391 */
   {"Aogon",	0x0104},  /* A with ogonek */
-  {"Auml",	0x00c4},  /* A with diaeresis */
+  {"Auml",	0x00c4},  /* capital A, dieresis or umlaut mark */
+  {"Beta",	0x0392},  /* greek capital letter beta,  u+0392 */
   {"Cacute",	0x0106},  /* C with acute */
   {"Ccaron",	0x010c},  /* C with caron */
-  {"Ccedil",	0x00c7},  /* C with cedilla */
+  {"Ccedil",	0x00c7},  /* capital C, cedilla */
+  {"Chi",	0x03a7},  /* greek capital letter chi,  u+03A7 */
+  {"Dagger",	0x2021},  /* double dagger, u+2021 ISOpub */
   {"Dcaron",	0x010e},  /* D with caron */
+  {"Delta",	0x0394},  /* greek capital letter delta,  u+0394 ISOgrk3 */
   {"Dstrok",	0x0110},  /* D with stroke */
   {"Eacute",	0x00c9},  /* E with acute */
   {"Ecaron",	0x011a},  /* E with caron */
   {"Eogon",	0x0118},  /* E with ogonek */
-  {"Euml",	0x00cb},  /* E with diaeresis */
+  {"Epsilon",	0x0395},  /* greek capital letter epsilon,  u+0395 */
+  {"Eta",	0x0397},  /* greek capital letter eta,  u+0397 */
+  {"Euml",	0x00cb},  /* capital E, dieresis or umlaut mark */
+  {"Gamma",	0x0393},  /* greek capital letter gamma,  u+0393 ISOgrk3 */
   {"Iacute",	0x00cd},  /* I with acute */
-  {"Icirc",	0x00ce},  /* I with circumflex */
+  {"Icirc",	0x00ce},  /* capital I, circumflex accent */
+  {"Iota",	0x0399},  /* greek capital letter iota,  u+0399 */
+  {"Kappa",	0x039a},  /* greek capital letter kappa,  u+039A */
   {"Lacute",	0x0139},  /* L with acute */
+  {"Lambda",	0x039b},  /* greek capital letter lambda,  u+039B ISOgrk */
   {"Lcaron",	0x013d},  /* L with caron */
   {"Lstrok",	0x0141},  /* L with stroke */
+  {"Mu",	0x039c},  /* greek capital letter mu,  u+039C */
   {"Nacute",	0x0143},  /* N with acute */
   {"Ncaron",	0x0147},  /* N with caron */
+  {"Ntilde",	0x00d1},  /* capital N, tilde */
+  {"Nu",	0x039d},  /* greek capital letter nu,  u+039D */
+  {"OElig",	0x0152},  /* latin capital ligature oe, u+0152 ISOlat2 - */
   {"Oacute",	0x00d3},  /* O with acute */
   {"Ocirc",	0x00d4},  /* O with circumflex */
   {"Odblac",	0x0150},  /* O with double acute */
+  {"Ograve",	0x00d2},  /* capital O, grave accent */
+  {"Omega",	0x03a9},  /* greek capital letter omega,  u+03A9 ISOgrk3 */
+  {"Omicron",	0x039f},  /* greek capital letter omicron,  u+039F */
   {"Ouml",	0x00d6},  /* O with diaeresis */
+  {"Phi",	0x03a6},  /* greek capital letter phi,  u+03A6 ISOgrk3 - */
+  {"Pi",	0x03a0},  /* greek capital letter pi,  u+03A0 ISOgrk3 -- */
+  {"Prime",	0x2033},  /* double prime, =seconds, =inches, u+2033 IS */
+  {"Psi",	0x03a8},  /* greek capital letter psi,  u+03A8 ISOgrk3 - */
   {"Racute",	0x0154},  /* R with acute */
   {"Rcaron",	0x0158},  /* R with caron */
+  {"Rho",	0x03a1},  /* greek capital letter rho,  u+03A1 */
   {"Sacute",	0x015a},  /* S with acute */
   {"Scaron",	0x0160},  /* S with caron */
   {"Scedil",	0x015e},  /* S with cedilla */
+  {"Sigma",	0x03a3},  /* greek capital letter sigma,  u+03A3 ISOgrk3 */
+  {"Tau",	0x03a4},  /* greek capital letter tau,  u+03A4 */
   {"Tcaron",	0x0164},  /* T with caron */
   {"Tcedil",	0x0162},  /* T with cedilla */
+  {"Theta",	0x0398},  /* greek capital letter theta,  u+0398 ISOgrk3 */
   {"Uacute",	0x00da},  /* U with acute */
   {"Udblac",	0x0170},  /* U with double acute */
+  {"Ugrave",	0x00d9},  /* capital U, grave accent */
+  {"Upsilon",	0x03a5},  /* greek capital letter upsilon,  u+03A5 IS */
   {"Uring",	0x016e},  /* U with ring above */
-  {"Uuml",	0x00dc},  /* U with diaeresis */
-  {"Yacute",	0x00dd},  /* Y with acute */
+  {"Uuml",	0x00dc},  /* capital U, dieresis or umlaut mark */
+  {"Xi",	0x039e},  /* greek capital letter xi,  u+039E ISOgrk3 -- */
+  {"Yacute",	0x00dd},  /* capital Y, acute accent */
+  {"Yuml",	0x0178},  /* latin capital letter y with diaeresis, u+01 */
   {"Zacute",	0x0179},  /* Z with acute */
   {"Zcaron",	0x017d},  /* Z with caron */
   {"Zdot",	0x017b},  /* Z with dot above */
+  {"Zeta",	0x0396},  /* greek capital letter zeta,  u+0396 */
   {"aacute",	0x00e1},  /* a with acute */
   {"abreve",	0x0103},  /* a with breve */
   {"acirc",	0x00e2},  /* a with circumflex */
   {"acute",	0x00b4},  /* acuteaccent */
-  {"amp",	0x0026},  /* ampersand */
+  {"alefsym",	0x2135},  /* alef symbol, =first transfinite cardinal, */
+  {"alpha",	0x03b1},  /* greek small letter alpha, u+03B1 ISOgrk3 -- */
+  {"amp",	0x0026},  /* ampersand, u+0026 ISOnum */
+  {"and",	0x2227},  /* logical and, =wedge, u+2227 ISOtech */
+  {"ang",	0x2220},  /* angle, u+2220 ISOamso */
   {"aogon",	0x0105},  /* a with ogonek */
   {"apos",	0x0027},  /* apostrophe */
   {"ast",	0x002a},  /* asterisk */
-  {"auml",	0x00e4},  /* a with diaeresis */
+  {"asymp",	0x2248},  /* almost equal to, =asymptotic to, u+2248 IS */
+  {"auml",	0x00e4},  /* small a, dieresis or umlaut mark */
+  {"bdquo",	0x201e},  /* double low-9 quotation mark, u+201E NEW -- */
+  {"beta",	0x03b2},  /* greek small letter beta,  u+03B2 ISOgrk3 -- */
   {"breve",	0x02d8},  /* breve */
   {"bsol",	0x005c},  /* reversesolidus */
+  {"bull",	0x2022},  /* bullet, =black small circle, u+2022 ISOpub */
   {"cacute",	0x0107},  /* c with acute */
+  {"cap",	0x2229},  /* intersection, =cap, u+2229 ISOtech */
   {"caron",	0x02c7},  /* caron */
   {"ccaron",	0x010d},  /* c with caron */
   {"ccedil",	0x00e7},  /* c with cedilla */
   {"cedil",	0x00b8},  /* cedilla */
-  {"circ",	0x005e},  /* circumflexaccent */
+  {"cent",	0x00a2},  /* cent sign */
+  {"chi",	0x03c7},  /* greek small letter chi,  u+03C7 ISOgrk3 */
+  {"circ",	0x02c6},  /* modifier letter circumflex accent, u+02C6 */
+  {"clubs",	0x2663},  /* black club suit, =shamrock, u+2663 ISOpub */
   {"colon",	0x003a},  /* colon */
   {"comma",	0x002c},  /* comma */
   {"commat",	0x0040},  /* commercialat */
-  {"curren",	0x00a4},  /* currencysign */
+  {"cong",	0x2245},  /* approximately equal to, u+2245 ISOtech */
+  {"crarr",	0x21b5},  /* downwards arrow with corner leftwards, =ca */
+  {"cup",	0x222a},  /* union, =cup, u+222A ISOtech */
+  {"curren",	0x00a4},  /* general currency sign */
+  {"dArr",	0x21d3},  /* downwards double arrow, u+21D3 ISOamsa */
+  {"dagger",	0x2020},  /* dagger, u+2020 ISOpub */
+  {"darr",	0x2193},  /* downwards arrow, u+2193 ISOnum */
   {"dblac",	0x02dd},  /* doubleacuteaccent */
   {"dcaron",	0x010f},  /* d with caron */
   {"deg",	0x00b0},  /* degreesign */
+  {"delta",	0x03b4},  /* greek small letter delta,  u+03B4 ISOgrk3 - */
+  {"diams",	0x2666},  /* black diamond suit, u+2666 ISOpub */
   {"divide",	0x00f7},  /* divisionsign */
   {"dollar",	0x0024},  /* dollarsign */
   {"dot",	0x02d9},  /* dotabove */
   {"dstrok",	0x0111},  /* d with stroke */
   {"eacute",	0x00e9},  /* e with acute */
   {"ecaron",	0x011b},  /* e with caron */
+  {"ecirc",	0x00ea},  /* small e, circumflex accent */
+  {"empty",	0x2205},  /* empty set, =null set, =diameter, u+2205 IS */
+  {"emsp",	0x2003},  /* em space, u+2003 ISOpub */
+  {"ensp",	0x2002},  /* en space, u+2002 ISOpub */
   {"eogon",	0x0119},  /* e with ogonek */
+  {"epsilon",	0x03b5},  /* greek small letter epsilon,  u+03B5 ISOg */
   {"equals",	0x003d},  /* equalssign */
+  {"equiv",	0x2261},  /* identical to, u+2261 ISOtech */
+  {"eta",	0x03b7},  /* greek small letter eta,  u+03B7 ISOgrk3 */
   {"euml",	0x00eb},  /* e with diaeresis */
   {"excl",	0x0021},  /* exclamationmark */
+  {"exist",	0x2203},  /* there exists, u+2203 ISOtech */
+  {"fnof",	0x0192},  /* latin small f with hook, =function, =flori */
+  {"forall",	0x2200},  /* for all, u+2200 ISOtech */
+  {"frasl",	0x2044},  /* fraction slash, u+2044 NEW */
+  {"gamma",	0x03b3},  /* greek small letter gamma,  u+03B3 ISOgrk3 - */
+  {"ge",	0x2265},  /* greater-than or equal to, u+2265 ISOtech - */
   {"grave",	0x0060},  /* graveaccent */
   {"gt",	0x003e},  /* greater-thansign */
+  {"hArr",	0x21d4},  /* left right double arrow, u+21D4 ISOamsa -- */
+  {"harr",	0x2194},  /* left right arrow, u+2194 ISOamsa */
+  {"hearts",	0x2665},  /* black heart suit, =valentine, u+2665 ISOpu */
+  {"hellip",	0x2026},  /* horizontal ellipsis, =three dot leader, u+ */
   {"hyphen",	0x002d},  /* hyphen-minus */
   {"iacute",	0x00ed},  /* i with acute */
-  {"icirc",	0x00ee},  /* i with circumflex */
+  {"icirc",	0x00ee},  /* small i, circumflex accent */
+  {"image",	0x2111},  /* blackletter capital I, =imaginary part, u+ */
+  {"infin",	0x221e},  /* infinity, u+221E ISOtech */
+  {"int",	0x222b},  /* integral, u+222B ISOtech */
+  {"iota",	0x03b9},  /* greek small letter iota,  u+03B9 ISOgrk3 -- */
+  {"isin",	0x2208},  /* element of, u+2208 ISOtech */
+  {"kappa",	0x03ba},  /* greek small letter kappa,  u+03BA ISOgrk3 - */
+  {"lArr",	0x21d0},  /* leftwards double arrow, u+21D0 ISOtech */
   {"lacute",	0x013a},  /* l with acute */
+  {"lambda",	0x03bb},  /* greek small letter lambda,  u+03BB ISOgrk3 */
+  {"lang",	0x2329},  /* left-pointing angle bracket, =bra, u+2329 */
+  {"larr",	0x2190},  /* leftwards arrow, u+2190 ISOnum */
   {"lcaron",	0x013e},  /* l with caron */
+  {"lceil",	0x2308},  /* left ceiling, =apl upstile, u+2308, ISOams */
   {"lcub",	0x007b},  /* leftcurlybracket */
+  {"ldquo",	0x201c},  /* left double quotation mark, u+201C ISOnum */
+  {"le",	0x2264},  /* less-than or equal to, u+2264 ISOtech */
+  {"lfloor",	0x230a},  /* left floor, =apl downstile, u+230A, ISOams */
+  {"lowast",	0x2217},  /* asterisk operator, u+2217 ISOtech */
   {"lowbar",	0x005f},  /* lowline */
+  {"loz",	0x25ca},  /* lozenge, u+25CA ISOpub */
   {"lpar",	0x0028},  /* leftparenthesis */
-  {"lrm",	 8206},	/* left-to-right mark */ 
+  {"lrm",	0x200e},  /* left-to-right mark, u+200E NEW RFC 2070 -- */
+  {"lsaquo",	0x2039},  /* single left-pointing angle quotation mark, */
   {"lsqb",	0x005b},  /* leftsquarebracket */
+  {"lsquo",	0x2018},  /* left single quotation mark, u+2018 ISOnum */
   {"lstrok",	0x0142},  /* l with stroke */
   {"lt",	0x003c},  /* less-thansign */
+  {"macr",	0x00af},  /* macron */
+  {"mdash",	0x2014},  /* em dash, u+2014 ISOpub */
+  {"minus",	0x2212},  /* minus sign, u+2212 ISOtech */
+  {"mu",	0x03bc},  /* greek small letter mu,  u+03BC ISOgrk3 */
+  {"nabla",	0x2207},  /* nabla, =backward difference, u+2207 ISOtec */
   {"nacute",	0x0144},  /* n with acute */
-  {"nbsp",	0x00a0},  /* no-breakspace */
+  {"nbsp",	0x00a0},  /* no-break space */
   {"ncaron",	0x0148},  /* n with caron */
+  {"ndash",	0x2013},  /* en dash, u+2013 ISOpub */
+  {"ne",	0x2260},  /* not equal to, u+2260 ISOtech */
+  {"ni",	0x220b},  /* contains as member, u+220B ISOtech */
+  {"notin",	0x2209},  /* not an element of, u+2209 ISOtech */
+  {"nsub",	0x2284},  /* not a subset of, u+2284 ISOamsn */
+  {"nu",	0x03bd},  /* greek small letter nu,  u+03BD ISOgrk3 */
   {"num",	0x0023},  /* numbersign */
   {"oacute",	0x00f3},  /* o with acute */
   {"ocirc",	0x00f4},  /* o with circumflex */
   {"odblac",	0x0151},  /* o with double acute */
+  {"oelig",	0x0153},  /* latin small ligature oe, u+0153 ISOlat2 */
   {"ogon",	0x02db},  /* ogonek */
-  {"ouml",	0x00f6},  /* o with diaeresis */
+  {"ograve",	0x00f2},  /* small o, grave accent */
+  {"oline",	0x203e},  /* overline, =spacing overscore, u+203E NEW - */
+  {"omega",	0x03c9},  /* greek small letter omega,  u+03C9 ISOgrk3 - */
+  {"omicron",	0x03bf},  /* greek small letter omicron,  u+03BF NEW */
+  {"oplus",	0x2295},  /* circled plus, =direct sum, u+2295 ISOamsb */
+  {"or",	0x2228},  /* logical or, =vee, u+2228 ISOtech */
+  {"oslash",	0x00f8},  /* small o, slash */
+  {"otimes",	0x2297},  /* circled times, =vector product, u+2297 ISO */
+  {"ouml",	0x00f6},  /* small o, dieresis or umlaut mark */
+  {"part",	0x2202},  /* partial differential, u+2202 ISOtech  */
   {"percnt",	0x0025},  /* percentsign */
   {"period",	0x002e},  /* fullstop */
+  {"permil",	0x2030},  /* per mille sign, u+2030 ISOtech */
+  {"perp",	0x22a5},  /* up tack, =orthogonal to, =perpendicular, u */
+  {"phi",	0x03c6},  /* greek small letter phi,  u+03C6 ISOgrk3 */
+  {"pi",	0x03c0},  /* greek small letter pi,  u+03C0 ISOgrk3 */
+  {"piv",	0x03d6},  /* greek pi symbol,  u+03D6 ISOgrk3 */
   {"plus",	0x002b},  /* plussign */
+  {"plusmn",	0x00b1},  /* plus-or-minus sign */
+  {"prime",	0x2032},  /* prime, =minutes, =feet, u+2032 ISOtech */
+  {"prod",	0x220f},  /* n-ary product, =product sign, u+220F ISOam */
+  {"prop",	0x221d},  /* proportional to, u+221D ISOtech */
+  {"psi",	0x03c8},  /* greek small letter psi,  u+03C8 ISOgrk3 */
   {"quest",	0x003f},  /* questionmark */
   {"quot",	0x0022},  /* quotationmark */
+  {"rArr",	0x21d2},  /* rightwards double arrow, u+21D2 ISOtech -- */
   {"racute",	0x0155},  /* r with acute */
+  {"radic",	0x221a},  /* square root, =radical sign, u+221A ISOtech */
+  {"rang",	0x232a},  /* right-pointing angle bracket, =ket, u+232A */
+  {"rarr",	0x2192},  /* rightwards arrow, u+2192 ISOnum */
   {"rcaron",	0x0159},  /* r with caron */
+  {"rceil",	0x2309},  /* right ceiling, u+2309, ISOamsc  */
   {"rcub",	0x007d},  /* rightcurlybracket */
+  {"rdquo",	0x201d},  /* right double quotation mark, u+201D ISOnum */
+  {"real",	0x211c},  /* blackletter capital R, =real part symbol, */
+  {"rfloor",	0x230b},  /* right floor, u+230B, ISOamsc  */
+  {"rho",	0x03c1},  /* greek small letter rho,  u+03C1 ISOgrk3 */
   {"rlm",	 8207},	/* right-to-left mark */ 
   {"rpar",	0x0029},  /* rightparenthesis */
+  {"rsaquo",	0x203a},  /* single right-pointing angle quotation mark */
   {"rsqb",	0x005d},  /* rightsquarebracket */
+  {"rsquo",	0x2019},  /* right single quotation mark, u+2019 ISOnum */
   {"sacute",	0x015b},  /* s with acute */
-  {"scaron",	0x0161},  /* s with caron */
+  {"sbquo",	0x201a},  /* single low-9 quotation mark, u+201A NEW -- */
+  {"scaron",	0x0161},  /* latin small letter s with caron, u+0161 ISO */
   {"scedil",	0x015f},  /* s with cedilla */
-  {"sect",	0x00a7},  /* sectionsign */
+  {"sdot",	0x22c5},  /* dot operator, u+22C5 ISOamsb */
+  {"sect",	0x00a7},  /* section sign */
   {"semi",	0x003b},  /* semicolon */
-  {"shy",	0x00ad},  /* softhyphen */
+  {"shy",	0x00ad},  /* soft hyphen */
+  {"sigma",	0x03c3},  /* greek small letter sigma,  u+03C3 ISOgrk3 - */
+  {"sigmaf",	0x03c2},  /* greek small letter final sigma,  u+03C2 ISO */
+  {"sim",	0x223c},  /* tilde operator, =varies with, =similar to, */
   {"sol",	0x002f},  /* solidus */
+  {"spades",	0x2660},  /* black spade suit, u+2660 ISOpub */
+  {"sub",	0x2282},  /* subset of, u+2282 ISOtech */
+  {"sube",	0x2286},  /* subset of or equal to, u+2286 ISOtech */
+  {"sum",	0x2211},  /* n-ary sumation, u+2211 ISOamsb */
+  {"sup",	0x2283},  /* superset of, u+2283 ISOtech */
+  {"supe",	0x2287},  /* superset of or equal to, u+2287 ISOtech -- */
+  {"tau",	0x03c4},  /* greek small letter tau,  u+03C4 ISOgrk3 */
   {"tcaron",	0x0165},  /* t with caron */
   {"tcedil",	0x0163},  /* t with cedilla */
-  {"tilde",	0x007e},  /* tilde */
-  {"times",	0x00d7},  /* multiplicationsign */
+  {"there4",	0x2234},  /* therefore, u+2234 ISOtech */
+  {"theta",	0x03b8},  /* greek small letter theta,  u+03B8 ISOgrk3 - */
+  {"thetasym",	0x03d1},  /* greek small letter theta symbol,  u+03D1 */
+  {"thinsp",	0x2009},  /* thin space, u+2009 ISOpub */
+  {"tilde",	0x02dc},  /* small tilde, u+02DC ISOdia */
+  {"times",	0x00d7},  /* multiply sign */
+  {"trade",	0x2122},  /* trade mark sign, u+2122 ISOnum */
+  {"uArr",	0x21d1},  /* upwards double arrow, u+21D1 ISOamsa */
   {"uacute",	0x00fa},  /* u with acute */
+  {"uarr",	0x2191},  /* upwards arrow, u+2191 ISOnum--> */
   {"udblac",	0x0171},  /* u with double acute */
-  {"uml",	0x00a8},  /* diaeresis */
+  {"uml",	0x00a8},  /* umlaut (dieresis) */
+  {"upsih",	0x03d2},  /* greek upsilon with hook symbol,  u+03D2 NEW */
+  {"upsilon",	0x03c5},  /* greek small letter upsilon,  u+03C5 ISOg */
   {"uring",	0x016f},  /* u with ring above */
   {"uuml",	0x00fc},  /* u with diaeresis */
   {"verbar",	0x007c},  /* verticalline */
+  {"weierp",	0x2118},  /* script capital P, =power set, =Weierstrass */
+  {"xi",	0x03be},  /* greek small letter xi,  u+03BE ISOgrk3 */
   {"yacute",	0x00fd},  /* y with acute */
   {"zacute",	0x017a},  /* z with acute */
   {"zcaron",	0x017e},  /* z with caron */
   {"zdot",	0x017c},  /* z with dot above */
+  {"zeta",	0x03b6},  /* greek small letter zeta,  u+03B6 ISOgrk3 -- */
   {"zwj",	 8205},	/* zero width joiner */ 
   {"zwnj",	 8204},	/* zero width non-joiner */ 
 

@@ -2966,13 +2966,27 @@ PUBLIC void change_sug_filename ARGS1(
      */
     HTUnEscape(fname);
 
-     /*** rename any temporary files ***/
-     temp = (char *)calloc(1, (strlen(lynx_temp_space) + 60));
-     if (*lynx_temp_space == '/')
-         sprintf(temp, "file://localhost%sL%d", lynx_temp_space, (int)getpid());
-     else
-         sprintf(temp, "file://localhost/%sL%d", lynx_temp_space, (int)getpid());
-     len = strlen(temp);
+    /*** rename any temporary files ***/
+    temp = (char *)calloc(1, (strlen(lynx_temp_space) + 60));
+#ifdef FNAMES_8_3
+#ifdef DOSPATH
+    cp = HTDOS_wwwName(lynx_temp_space);
+#else
+    cp = lynx_temp_space;
+#endif
+    if (*cp == '/') {
+	sprintf(temp, "file://localhost%s%d", cp, (int)getpid());
+    } else {
+	sprintf(temp, "file://localhost/%s%d", cp, (int)getpid());
+    }
+#else  /* FNAMES_8_3 */
+    if (*lynx_temp_space == '/') {
+	sprintf(temp, "file://localhost%sL%d", lynx_temp_space, (int)getpid());
+    } else {
+	sprintf(temp, "file://localhost/%sL%d", lynx_temp_space, (int)getpid());
+    }
+#endif  /* FNAMES_8_3 */
+    len = strlen(temp);
     if (!strncmp(fname, temp, len)) {
 	cp = strrchr(fname, '.');
 	if (strlen(cp) > (len - 4))
@@ -3223,21 +3237,36 @@ PUBLIC void tempname ARGS2(
 {
     static int counter = 0;
     FILE *fp = NULL;
+#ifdef FNAMES_8_3
+    int LYMaxTempCount = 1000; /* Arbitrary limit.  Make it configurable? */
+#else
     int LYMaxTempCount = 10000; /* Arbitrary limit.  Make it configurable? */
+#endif /* FNAMES_8_3 */
 
     if (action == REMOVE_FILES) {
         /*
 	 *  Remove all temporary files with .txt or .html suffixes. - FM
 	 */ 
 	for (; counter > 0; counter--) {
+#ifdef FNAMES_8_3
 	    sprintf(namebuffer,
-	    	    "%sL%d%uTMP.txt",
+	    	    "%s%d%u.txt",
 		    lynx_temp_space, (int)getpid(), counter-1);
 	    remove(namebuffer);
 	    sprintf(namebuffer,
-	    	    "%sL%d%uTMP%s",
+	    	    "%s%d%u%s",
 		    lynx_temp_space, (int)getpid(), counter-1, HTML_SUFFIX);
 	    remove(namebuffer);
+#else
+	    sprintf(namebuffer,
+	    	    "%sL%d-%uTMP.txt",
+		    lynx_temp_space, (int)getpid(), counter-1);
+	    remove(namebuffer);
+	    sprintf(namebuffer,
+	    	    "%sL%d-%uTMP%s",
+		    lynx_temp_space, (int)getpid(), counter-1, HTML_SUFFIX);
+	    remove(namebuffer);
+#endif /* FNAMES_8_3 */
 	}
     } else {
         /*
@@ -3257,9 +3286,15 @@ PUBLIC void tempname ARGS2(
 	     *  should be done consistently by always using HTML_SUFFIX
 	     *  where filenames are generated for new local files. - kw
 	     */
+#ifdef FNAMES_8_3
 	    sprintf(namebuffer,
-		    "%sL%d%uTMP.txt",
+		    "%s%d%u.txt",
 		    lynx_temp_space, (int)getpid(), counter);
+#else
+	    sprintf(namebuffer,
+		    "%sL%d-%uTMP.txt",
+		    lynx_temp_space, (int)getpid(), counter);
+#endif /* FNAMES_8_3 */
 	    if ((fp = fopen(namebuffer, "r")) != NULL) {
 		fclose(fp);
 		if (TRACE)
@@ -3269,9 +3304,15 @@ PUBLIC void tempname ARGS2(
 		counter++;
 		continue;
 	    }
+#ifdef FNAMES_8_3
 	    sprintf(namebuffer,
-		    "%sL%d%uTMP.bin",
+		    "%s%d%u.bin",
 		    lynx_temp_space, (int)getpid(), counter);
+#else
+	    sprintf(namebuffer,
+		    "%sL%d-%uTMP.bin",
+		    lynx_temp_space, (int)getpid(), counter);
+#endif /* FNAMES_8_3 */
 	    if ((fp = fopen(namebuffer, "r")) != NULL) {
 		fclose(fp);
 		if (TRACE)
@@ -3281,9 +3322,15 @@ PUBLIC void tempname ARGS2(
 		counter++;
 		continue;
 	    }
+#ifdef FNAMES_8_3
 	    sprintf(namebuffer,
-		    "%sL%d%uTMP%s",
+		    "%s%d%u%s",
 		    lynx_temp_space, (int)getpid(), counter++, HTML_SUFFIX);
+#else
+	    sprintf(namebuffer,
+		    "%sL%d-%uTMP%s",
+		    lynx_temp_space, (int)getpid(), counter++, HTML_SUFFIX);
+#endif /* FNAMES_8_3 */
 	    if ((fp = fopen(namebuffer, "r")) != NULL) {
 		fclose(fp);
 		if (TRACE)

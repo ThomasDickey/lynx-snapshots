@@ -1583,6 +1583,7 @@ PUBLIC int HTLoadCSO ARGS4(
 	    }
 	}
     }
+    anAnchor->safe = TRUE;
     if (!(anAnchor->post_data && *anAnchor->post_data)) {
         generate_cso_form(host, port, buf, Target);
 	(*Target->isa->_free)(Target);

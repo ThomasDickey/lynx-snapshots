@@ -20,18 +20,14 @@
 #include <ctype.h>
 #include "HTAnchor.h"
 #include "HTParse.h"
-#ifdef EXP_CHARTRANS
 #include "UCAux.h"
 #include "UCMap.h"
-#endif /* EXP_CHARTRANS */
 
 #include "LYLeaks.h"
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
-#ifdef EXP_CHARTRANS
 extern LYUCcharset LYCharSet_UC[];
-#endif
 
 #ifdef NOT_DEFINED
 /*
@@ -501,10 +497,11 @@ PRIVATE void deleteLinks ARGS1(
 	        me->parent != parent) {
 	        HTAnchor_delete(parent);
 	    }
-	    /* The link structure has to be deleted, too!
-	    ** That was missing, but this code probably never
-	    ** got exercised by Lynx.  - kw
-	    */
+	    /*
+	     *  The link structure has to be deleted, too!
+	     *  That was missing, but this code probably never
+	     *  got exercised by Lynx.  - KW
+	     */
 	    FREE(target);
         }
 
@@ -663,7 +660,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
     FREE(me->expires);
     FREE(me->last_modified);
     FREE(me->server);
-#ifdef USEHASH
+#ifdef USE_HASH
     FREE(me->style);
 #endif
  
@@ -829,7 +826,7 @@ PUBLIC BOOL HTAnchor_hasChildren ARGS1(
     return me ? ! HTList_isEmpty(me->children) : NO;
 }
 
-#if defined(USEHASH)
+#if defined(USE_HASH)
 /*      Style handling.
 */
 PUBLIC CONST char * HTAnchor_style ARGS1(
@@ -1159,8 +1156,6 @@ PUBLIC void HTAnchor_setPhysical ARGS2(
     }
 }
 
-#ifdef EXP_CHARTRANS
-
 /*
 **  We store charset info in the HTParentAnchor object, for several
 **  "stages".  (See UCDefs.h)
@@ -1312,13 +1307,10 @@ PUBLIC LYUCcharset * HTAnchor_copyUCInfoStage ARGS4(
 	    me->UCStages->s[to_stage].lock = set_by;
 	    me->UCStages->s[to_stage].LYhndl =
 		me->UCStages->s[from_stage].LYhndl;
-
 	    if (p_to != p_from)
 		memcpy(p_to, p_from, sizeof(LYUCcharset));
-
 	    return p_to;
 	}
     }
     return NULL;
 }
-#endif /* EXP_CHARTRANS */

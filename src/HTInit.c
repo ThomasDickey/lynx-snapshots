@@ -46,7 +46,6 @@ PUBLIC void HTFormatInit NOARGS
 {
  FILE *fp = NULL;
  char *cp = NULL;
- extern char * personal_type_map, * global_type_map;
 
 #ifdef NeXT
   HTSetPresentation("application/postscript",   "open %s", 1.0, 2.0, 0.0, 0);
@@ -679,8 +678,6 @@ PRIVATE int HTLoadTypesConfigFile ARGS1(char *,fn)
 PUBLIC void HTFileInit NOARGS
 {
     FILE *fp;
-    extern char *global_extension_map;
-    extern char *personal_extension_map;
 
     if (TRACE)
         fprintf (stderr, "@@@ Using default extension map\n");

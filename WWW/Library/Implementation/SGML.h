@@ -222,10 +222,11 @@ typedef struct _HTStructuredClass{
 }HTStructuredClass;
 
 /*
-  The following functions possibly should be generalised into
-  additional HTStructuredClass memebers. - kw
+  Equivalents to the following functions possibly could be generalised
+  into additional HTStructuredClass members.  FOr now they don't do
+  anything target-specific. - kw
   */
-extern BOOLEAN LYCheckForCSI PARAMS((HTStructured *target, char **url));
+extern BOOLEAN LYCheckForCSI PARAMS((HTParentAnchor *anchor, char **url));
 extern void LYDoCSI PARAMS((char *url, CONST char *comment, char **csi));
 
 /*

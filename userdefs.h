@@ -6,7 +6,7 @@
  */
 
 /*******************************************************************
- * There are three sections to this document
+ * There are four sections to this document:
  *  Section 1.  Things you MUST change or verify
  *	Section 1a)  VMS specific things
  *	Section 1b)  UNIX specific things
@@ -16,6 +16,9 @@
  *
  *  Section 3.  Things you should only change after you have a good
  *              understanding of the program!
+ *
+ *  Section 4.  Things you MUST check only if you plan to use Lynx in
+ *              an anonymous account (allow public access to Lynx)!
  *
  */
 
@@ -138,7 +141,7 @@
 #define SYSTEM_MAIL_FLAGS ""
 
 /*************************
- * below is the argument for an sprintf command that will add
+ * Below is the argument for an sprintf command that will add
  * "IN%""ADDRESS""" to the Internet mail address given by the user.
  * It is structured for PMDF's IN%"INTERNET_ADDRESS" scheme.  The %s
  * is replaced with the address given by the user.  If you are using
@@ -199,17 +202,15 @@
 /**************************
  * LYNX_LSS_FILE is the location and name of the default lynx
  * character style sheet file.  It is sought and processed at
- * startup of Lynx only if experimental character style code
- * has been compiled in, otherwise it will be ignored.  Note
- * that use of the character style option is, to say it again,
- * experimental and unsupported, and without other documentation
- * than a sample lynx.lss file, and likely won't work at all on VMS.
- * You also can define the location and name of this file
- * via environment variables "LYNX_CFG" or "lynx_lss"
- * which will override the "LYNX_CFG_FILE" definition here.
- * You can use '~' in either or both definitions to refer to
- * the user's home directorty.  The -lss command line switch
- * will override these definitions.
+ * startup of Lynx only if experimental character style code has
+ * been compiled in, otherwise it will be ignored.  Note that use
+ * of the character style option is _experimental_ AND _unsupported_.
+ * There is no documentation other than a sample lynx.lss file in
+ * the samples subdirectory.  This code probably won't even work on
+ * VMS.  You can define the location and name of this file via an
+ * environment variable, "lynx_lss", which will override the definition
+ * here.  You can use '~' to refer to the user's home directory.  The
+ * -lss command line switch will override these definitions.
  */
 #ifndef LYNX_LSS_FILE
 #define LYNX_LSS_FILE "Lynx_Dir:lynx.lss"
@@ -405,15 +406,14 @@
  * character style sheet file.  It is sought and processed at
  * startup of Lynx only if experimental character style code
  * has been compiled in, otherwise it will be ignored.  Note
- * that use of the character style option is, to say it again,
- * experimental and unsupported, and without other documentation
- * than a sample lynx.lss file.
- * You also can define the location and name of this file
- * via environment variables "LYNX_LSS" or "lynx_lss"
- * which will override the "LYNX_LSS_FILE" definition here.
- * You can use '~' in either or both definitions to refer to
- * the user's home directorty.  The -lss command line switch
- * will override these definitions.
+ * that use of the character style option is _experimental_ AND
+ * _unsupported_.  There is no documentation other than a sample
+ * lynx.lss file in the samples subdirectory.  You also can
+ * define the location and name of this file via environment
+ * variables "LYNX_LSS" or "lynx_lss" which will override the
+ * "LYNX_LSS_FILE" definition here.  You can use '~' in either or
+ * both definitions to refer to the user's home directory.  The
+ * -lss command line switch will override these definitions.
  */
 #ifndef LYNX_LSS_FILE
 #define LYNX_LSS_FILE "/usr/local/lib/lynx.lss"
@@ -832,26 +832,6 @@
 #define MESSAGESECS 2
 #define ALERTSECS 3
 
-/*****************************
- * Enter the name of your anonymous account if you have one
- * as ANONYMOUS_USER.  UNIX systems will use a cuserid
- * or get_login call to determine if the current user is
- * the ANONYMOUS_USER.  VMS systems will use getenv("USER").
- *
- * You may use the "-anonymous" option for multiple accounts,
- * or for precautionary reasons in the anonymous account,
- * as well.
- *
- * It is very important to have this correctly defined or include
- * the "-anonymous" command line option for invokations of Lynx
- * in an anonymous account!  If you do not you will be putting 
- * yourself at GREAT security risk!
- *
- * Later on in this file you can specify privileges for the
- * anonymous account.
- */
-#define ANONYMOUS_USER ""
-
 /******************************
  * SHOW_COLOR controls whether the program displays in color by default.
  */
@@ -904,117 +884,6 @@
  * One would have to modify the corresponding *.tbl file for this.
  */
 #define LY_UMLAUT
-
-/*******************************
- * set to FALSE if you don't want users of your anonymous account
- * who are calling from inside your local domain
- * to be able to telnet back out
- */
-#define CAN_ANONYMOUS_INSIDE_DOMAIN_TELNET	TRUE
-
-/*******************************
- * set to FALSE if you don't want users of your anonymous
- * account who are calling from outside your
- * local domain to be able to telnet back out
- */
-#define CAN_ANONYMOUS_OUTSIDE_DOMAIN_TELNET	TRUE
-
-/*******************************
- * set to FALSE if you don't want users of your anonymous account
- * who are calling from inside your local domain
- * to be able to read news
- */
-#define CAN_ANONYMOUS_INSIDE_DOMAIN_READ_NEWS	TRUE
-
-/*******************************
- * set to FALSE if you don't want users of your anonymous
- * account who are calling from outside your
- * local domain to be able to read news
- */
-#define CAN_ANONYMOUS_OUTSIDE_DOMAIN_READ_NEWS	FALSE
-
-/*******************************
- * set to FALSE if you don't want users of your anonymous
- * account who are calling from inside your local domain
- * to be able to use ftp
- */
-#define CAN_ANONYMOUS_INSIDE_DOMAIN_FTP		TRUE
-
-/*******************************
- * set to FALSE if you don't want users of your anonymous
- * account who are calling from outside your local domain
- * to be able to use ftp
- */
-#define CAN_ANONYMOUS_OUTSIDE_DOMAIN_FTP	TRUE
-
-/*******************************
- * set to FALSE if you don't want users of your anonymous
- * account who are calling from inside your local domain 
- * to be able to use rlogin
- */
-#define CAN_ANONYMOUS_INSIDE_DOMAIN_RLOGIN	TRUE
-
-/*******************************
- * set to FALSE if you don't want users of your anonymous
- * account who are calling from outside your local domain
- * to be able to use rlogin
- */
-#define CAN_ANONYMOUS_OUTSIDE_DOMAIN_RLOGIN	TRUE
-
-/*******************************
- * set to FALSE if you don't want users of your anonymous
- * account to be able to goto random URLs. (The 'g' command)
- */
-#define CAN_ANONYMOUS_GOTO		TRUE
-
-/*******************************
- * set to FALSE if you don't want users of your anonymous
- * account to be able to goto particular URLs.
- */
-#define CAN_ANONYMOUS_GOTO_CSO		TRUE
-#define CAN_ANONYMOUS_GOTO_FILE		TRUE
-#define CAN_ANONYMOUS_GOTO_FINGER	TRUE
-#define CAN_ANONYMOUS_GOTO_FTP		TRUE
-#define CAN_ANONYMOUS_GOTO_GOPHER	TRUE
-#define CAN_ANONYMOUS_GOTO_HTTP		TRUE
-#define CAN_ANONYMOUS_GOTO_HTTPS	TRUE
-#define CAN_ANONYMOUS_GOTO_LYNXCGI	TRUE
-#define CAN_ANONYMOUS_GOTO_LYNXEXEC	TRUE
-#define CAN_ANONYMOUS_GOTO_LYNXPROG	TRUE
-#define CAN_ANONYMOUS_GOTO_MAILTO	TRUE
-#define CAN_ANONYMOUS_GOTO_NEWS		TRUE
-#define CAN_ANONYMOUS_GOTO_NNTP		TRUE
-#define CAN_ANONYMOUS_GOTO_RLOGIN	TRUE
-#define CAN_ANONYMOUS_GOTO_SNEWS	TRUE
-#define CAN_ANONYMOUS_GOTO_TELNET	TRUE
-#define CAN_ANONYMOUS_GOTO_TN3270	TRUE
-#define CAN_ANONYMOUS_GOTO_WAIS		TRUE
-
-/*******************************
- * set to FALSE if you don't want users of your anonymous
- * account to be able to specify a port in 'g'oto commands
- * for telnet URLs.
- */
-#define CAN_ANONYMOUS_GOTO_TELNET_PORT	FALSE
-
-/*******************************
- * set to FALSE if you don't want users of your anonymous
- * account to be able to jump to URLs (The 'J' command)
- * via the shortcut entries in your JUMPFILE.
- */
-#define CAN_ANONYMOUS_JUMP	TRUE
-
-/*******************************
- * set to FALSE if you don't want users of your anonymous
- * account to be able to mail
- */
-#define CAN_ANONYMOUS_MAIL	TRUE
-
-/*******************************
- * set to FALSE if you don't want users of your anonymous
- * account to be able to print
- */
-#define CAN_ANONYMOUS_PRINT	FALSE
 
 /*******************************
  * Execution links/scripts configuration.
@@ -1291,6 +1160,16 @@
 #define TRAVERSE_REJECT_FILE "reject.dat"
 #define TRAVERSE_ERRORS "traverse.errors"
 
+/****************************************************************
+ * The LYMessages_en.h header defines default, English strings
+ * used in statusline prompts, messages, and warnings during
+ * program execution.  See the comments in LYMessages_en.h for
+ * information on translating or customizing them for your site.
+ */
+#ifndef HTTELNET_H
+#include "LYMessages_en.h"
+#endif /* !HTTELNET_H */
+
 
 /****************************************************************
  *   Section 3.   Things that you should not change until you
@@ -1302,17 +1181,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.64"
-
-/****************************************************************
- * The LYMessages_en.h header defines default, English strings
- * used in statusline prompts, messages, and warnings during
- * program execution.  See the comments in LYMessages_en.h for
- * information on customizing them for your site.
- */
-#ifndef HTTELNET_H
-#include "LYMessages_en.h"
-#endif /* !HTTELNET_H */
+#define LYNX_VERSION "2.7.1ac-0.89"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */
@@ -1431,5 +1300,127 @@
 #endif /* HAVE_CONFIG_H */
 #endif /* DOSPATH */
 #endif /* VMS */
+
+
+/****************************************************************
+ *  Section 4.  Things you MUST check only if you plan to use Lynx
+ *              in an anonymous account (allow public access to Lynx).
+ *              This section may be skipped by those people building
+ *              Lynx for private use only.
+ *
+ */
+
+/*****************************
+ * Enter the name of your anonymous account if you have one
+ * as ANONYMOUS_USER.  UNIX systems will use a cuserid
+ * or get_login call to determine if the current user is
+ * the ANONYMOUS_USER.  VMS systems will use getenv("USER").
+ *
+ * You may use the "-anonymous" option for multiple accounts,
+ * or for precautionary reasons in the anonymous account, as well.
+ *
+ * Specify privileges for the anonymous account below.
+ *
+ * It is very important to have this correctly defined or include
+ * the "-anonymous" command line option for invocation of Lynx
+ * in an anonymous account!  If you do not you will be putting 
+ * yourself at GREAT security risk!
+ */
+#define ANONYMOUS_USER ""
+
+/*******************************
+ * In the following four pairs of defines,
+ * INSIDE_DOMAIN means users connecting from inside your local domain,
+ * OUTSIDE_DOMAIN means users connecting from outside your local domain.
+ *
+ * set to FALSE if you don't want users of your anonymous
+ * account to be able to telnet back out
+ */
+#define CAN_ANONYMOUS_INSIDE_DOMAIN_TELNET	TRUE
+#define CAN_ANONYMOUS_OUTSIDE_DOMAIN_TELNET	FALSE
+
+/*******************************
+ * set to FALSE if you don't want users of your anonymous
+ * account to be able to use ftp
+ */
+#define CAN_ANONYMOUS_INSIDE_DOMAIN_FTP		TRUE
+#define CAN_ANONYMOUS_OUTSIDE_DOMAIN_FTP	FALSE
+
+/*******************************
+ * set to FALSE if you don't want users of your anonymous
+ * account to be able to use rlogin
+ */
+#define CAN_ANONYMOUS_INSIDE_DOMAIN_RLOGIN	TRUE
+#define CAN_ANONYMOUS_OUTSIDE_DOMAIN_RLOGIN	FALSE
+
+/*******************************
+ * set to FALSE if you don't want users of your anonymous
+ * account to be able to read news
+ */
+#define CAN_ANONYMOUS_INSIDE_DOMAIN_READ_NEWS	TRUE
+#define CAN_ANONYMOUS_OUTSIDE_DOMAIN_READ_NEWS	FALSE
+
+/*******************************
+ * set to FALSE if you don't want users of your anonymous
+ * account to be able to goto random URLs. (The 'g' command)
+ */
+#define CAN_ANONYMOUS_GOTO		TRUE
+
+/*******************************
+ * set to FALSE if you don't want users of your anonymous
+ * account to be able to goto particular URLs.
+ */
+#define CAN_ANONYMOUS_GOTO_CSO		FALSE
+#define CAN_ANONYMOUS_GOTO_FILE		FALSE
+#define CAN_ANONYMOUS_GOTO_FINGER	TRUE
+#define CAN_ANONYMOUS_GOTO_FTP		FALSE
+#define CAN_ANONYMOUS_GOTO_GOPHER	FALSE
+#define CAN_ANONYMOUS_GOTO_HTTP		TRUE
+#define CAN_ANONYMOUS_GOTO_HTTPS	FALSE
+#define CAN_ANONYMOUS_GOTO_LYNXCGI	FALSE
+#define CAN_ANONYMOUS_GOTO_LYNXEXEC	FALSE
+#define CAN_ANONYMOUS_GOTO_LYNXPROG	FALSE
+#define CAN_ANONYMOUS_GOTO_MAILTO	TRUE
+#define CAN_ANONYMOUS_GOTO_NEWS		FALSE
+#define CAN_ANONYMOUS_GOTO_NNTP		FALSE
+#define CAN_ANONYMOUS_GOTO_RLOGIN	FALSE
+#define CAN_ANONYMOUS_GOTO_SNEWS	FALSE
+#define CAN_ANONYMOUS_GOTO_TELNET	FALSE
+#define CAN_ANONYMOUS_GOTO_TN3270	FALSE
+#define CAN_ANONYMOUS_GOTO_WAIS		TRUE
+
+/*******************************
+ * set to FALSE if you don't want users of your anonymous
+ * account to be able to specify a port in 'g'oto commands
+ * for telnet URLs.
+ */
+#define CAN_ANONYMOUS_GOTO_TELNET_PORT	FALSE
+
+/*******************************
+ * set to FALSE if you don't want users of your anonymous
+ * account to be able to jump to URLs (The 'J' command)
+ * via the shortcut entries in your JUMPFILE.
+ */
+#define CAN_ANONYMOUS_JUMP	FALSE
+
+/*******************************
+ * set to FALSE if you don't want users of your anonymous
+ * account to be able to mail
+ */
+#define CAN_ANONYMOUS_MAIL	TRUE
+
+/*******************************
+ * set to FALSE if you don't want users of your anonymous
+ * account to be able to print
+ */
+#define CAN_ANONYMOUS_PRINT	FALSE
+
+/*****************************
+ * Be sure you have read about and set defines above in Sections
+ * 1, 2 and 3 that could  affect Lynx in an anonymous account,
+ * especially LOCAL_EXECUTION_LINKS_ALWAYS_OFF_FOR_ANONYMOUS.
+ *
+ * This ends the section specific to anonymous accounts.
+ */
 
 #endif /* USERDEFS_H */

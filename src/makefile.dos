@@ -1,18 +1,20 @@
-OBJS=  LYClean.o LYShowInfo.o LYEdit.o LYStrings.o \
+OBJS= UCdomap.o UCAux.o UCAuto.o \
+LYClean.o LYShowInfo.o LYEdit.o LYStrings.o \
 LYMail.o HTAlert.o GridText.o LYGetFile.o \
 LYMain.o LYMainLoop.o LYCurses.o LYBookmark.o LYUtils.o \
 LYOptions.o LYReadCFG.o LYSearch.o LYHistory.o \
 LYForms.o LYPrint.o LYrcFile.o LYDownload.o LYNews.o LYKeymap.o \
-HTFWriter.o HTInit.o DefaultStyle.o LYLocal.o LYUpload.o \
+HTML.o HTFWriter.o HTInit.o DefaultStyle.o LYLocal.o LYUpload.o \
 LYLeaks.o LYexit.o LYJump.o LYList.o LYCgi.o LYTraversal.o \
-LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o LYExtern.o HTML.o 
+LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o LYExtern.o \
+LYStyle.o LYHash.o
 
 CFLAGS= $(MCFLAGS) -I.. $(SLANGINC)
 
 CC = gcc
-#MCFLAGS = -O -DNCURSES -DFANCY_CURSES -DACCESS_AUTH -DNO_CUSERID -DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP -I../WWW/library/implementation -I../djgpp/tcplib/include -I../djgpp/tcplib/include/tcp -I../djgpp/pdcurses/include
-MCFLAGS = -DCOLOR_CURSES -DNCURSES -DFANCY_CURSES -DACCESS_AUTH -DNO_CUSERID -DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP -I../WWW/library/implementation -I../djgpp/tcplib/include -I../djgpp/tcplib/include/tcp -I../djgpp/pdcurses/include
-WWWLIB = ../WWW/library/djgpp/libwww.a ../djgpp/pdcurses/lib/libcurso.a ../djgpp/tcplib/obj/libtcp.a
+MCFLAGS = -O3 -DALT_CHAR_SET -DUSE_ZLIB -DUSE_EXTERNALS -DNCURSES_VERSION -DEXP_CHARTRANS -DCOLOR_CURSES -DNCURSES -DFANCY_CURSES -DACCESS_AUTH -DNO_CUSERID -DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP -I../WWW/library/implementation -I../curses  -I../djgpp/tcplib/include -I../djgpp/tcplib/include/tcp
+WWWLIB = ../WWW/library/djgpp/libwww.a ../curses/pdcurses.a ../djgpp/tcplib/obj/libtcp.a
+LIBS=-lz
 
 all: lynx
 
@@ -52,4 +54,10 @@ DefaultStyle.o: DefaultStyle.c ../userdefs.h
 LYEditmap.o: LYEditmap.c ../userdefs.h
 LYCharUtils.o: LYCharUtils.c ../userdefs.h
 LYExtern.o: LYExtern.c ../userdefs.h
+LYCookie.o: ../userdefs.h
+
+#UCdomap.o: UCdomap.c ../userdefs.h lycharsets.h
+#UCdomap.o: UCdomap.c chrtrans/UCkd.h chrtrans/makeuctb chrtrans/makeuctb.c \
+#                UCdomap.h UCMap.h ../userdefs.h
+#UCAux.o : UCAux.c $(CMN)UCAux.h $(CMN)UCDefs.h
 

@@ -479,7 +479,7 @@ PRIVATE void handle_comment ARGS1(
 
     if (context->csi == NULL &&
         strncmp(s, "!--#", 4) == 0 &&
-        LYCheckForCSI(context->target, (char **)&context->url) == TRUE) {
+        LYCheckForCSI(context->node_anchor, (char **)&context->url) == TRUE) {
 	LYDoCSI(context->url, s, (char **)&context->csi);
     }
 

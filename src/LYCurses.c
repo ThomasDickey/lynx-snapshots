@@ -667,7 +667,7 @@ PUBLIC void start_curses NOARGS
 
     if (first_time) {
 	/*
-	 *  If we're not VMS then only do initsrc() one time,
+	 *  If we're not VMS then only do initscr() one time,
 	 *  and one time only!
 	 */
 	if (initscr() == NULL) {  /* start curses */
@@ -684,6 +684,9 @@ PUBLIC void start_curses NOARGS
 #endif /* SIGTSTP */
 	    exit (-1);
 	}
+#if defined(SIGWINCH) && defined(NCURSES_VERSION)
+	size_change(0);
+#endif /* SIGWINCH */
 
 	/*
 	 * This is a workaround for a bug in SVr4 curses, observed on Solaris

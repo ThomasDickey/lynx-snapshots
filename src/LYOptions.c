@@ -12,6 +12,7 @@
 #include "LYCharSets.h"
 #include "LYCharUtils.h"
 #include "UCMap.h"
+#include "UCAux.h"
 #include "LYKeymap.h"
 #include "LYrcFile.h"
 #include "HTAlert.h"
@@ -2321,7 +2322,11 @@ redraw:
 #ifdef VMS
     VMSbox(form_window, (bottom - top), (Lnum + width + 4));
 #else
-    box(form_window, BOXVERT, BOXHORI);
+    {
+	int boxvert, boxhori;
+	UCSetBoxChars(current_char_set, &boxvert, &boxhori, BOXVERT, BOXHORI);
+	box(form_window, boxvert, boxhori);
+    }
 #endif /* VMS */
     wrefresh(form_window);
 #endif /* USE_SLANG */

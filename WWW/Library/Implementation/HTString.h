@@ -42,6 +42,9 @@ Next word or quoted string
  */
 extern char * HTNextField PARAMS ((char** pstr));
 
+/* A more general parser - kw */
+extern char * HTNextTok (char ** pstr,
+		      const char * delims, const char * bracks, char * found);
 
 #endif
 /*
