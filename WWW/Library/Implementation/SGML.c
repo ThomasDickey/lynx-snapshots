@@ -1720,9 +1720,9 @@ top1:
 	    context->first_bracket = FALSE;
 	    HTChunkPutc(string, c);
 	    break;
-        } else if (WHITE(c) && !string->size) {	/* <WHITE */
+        } else if (!string->size && (WHITE(c) || c == '=')) {/* <WHITE or <= */
 	    /*
-	    **  Recover the '<' and WHITE character. - FM
+	    **  Recover the '<' and WHITE or '=' character. - FM, kw
 	    */
 	    context->state = S_text;
 	    PUTC('<');

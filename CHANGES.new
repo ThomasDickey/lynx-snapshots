@@ -10,8 +10,24 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+97-09-15
+* Recover from bad sequence "<=" in SGML.c by outputting those characters
+  litterally. - KW
+* Try again after interrupted waitpid() in LYExecv(). - JED
+* Some tweaks in new DTD, some doc typo corrections. - KW
+97-09-13
+* Changes in LYConvertToURL() for better handling of the case when the
+  pathname of the current directory (when Lynx is invoked) contains
+  unusual, URL-reserved characters (especially '#') and we test for
+  a relative but URL-encoded path. (no change for VMS) - KW
+97-09-13
+* Changes in LYStrings.c to enable keypad() processing for non-NCURSES
+  if HAVE_KEYPAD is defined. - KW
+97-09-12
+* Correct mismatch/omission of HAVE_TYPE_UNION_WAIT symbol from
+  change for wait vs waitpid. - TD
 97-09-11
-* Tweaks in HTMLGen.c for display of spacial characters and line breaking
+* Tweaks in HTMLGen.c for display of special characters and line breaking
   with -preparsed. - KW
 * Got rid of use of underlining together with reverse for non-current 
   links for (n)curses if color is not used. - KW

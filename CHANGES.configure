@@ -1,3 +1,7 @@
+97-09-12
+--------
+* Correct mismatch/omission of HAVE_TYPE_UNION_WAIT symbol from
+  change for wait vs waitpid. - TD
 97-09-10
 --------
 * Modify CF_WITH_PATH to allow substitution of --libdir and other

@@ -39,6 +39,7 @@
 #undef HAVE_SYS_NDIR_H		/* defined by AC_HEADER_DIRENT */
 #undef HAVE_TERMIOS_H		/* have <termios.h> */
 #undef HAVE_TTYTYPE
+#undef HAVE_TYPE_UNION_WAIT	/* CF_UNION_WAIT */
 #undef HAVE_UNISTD_H		/* have <unistd.h> */
 #undef HAVE_UTMP
 #undef IGNORE_CTRL_C		/* FIXME: make tests? */

@@ -207,15 +207,19 @@ PUBLIC int LYmbcsstrlen ARGS2(
 #define GetChar() wgetch(stdscr)
 #endif
 
-#if !defined(GetChar)
-#ifdef VMS
+#if !defined(GetChar) && defined(VMS)
 #define GetChar() ttgetc()
+#endif
+
+#if !defined(GetChar)
+#ifdef HAVE_KEYPAD
+#define GetChar getch
 #else
 #ifndef USE_GETCHAR
 #define USE_GETCHAR
 #endif /* !USE_GETCHAR */
 #define GetChar() getchar()  /* used to be "getc(stdin)" and "getch()" */
-#endif /* VMS */
+#endif /* HAVE_KEYPAD */
 #endif /* !defined(GetChar) */
 
 #if defined(NCURSES)
@@ -281,7 +285,7 @@ PUBLIC int LYgetch NOARGS
 {
     int a, b, c, d = -1;
 
-#if defined(IGNORE_CTRL_C) || defined(USE_GETCHAR)
+#if defined(IGNORE_CTRL_C) || defined(USE_GETCHAR) || !defined(NCURSES)
 re_read:
 #endif /* IGNORE_CTRL_C || USE_GETCHAR */
 #ifndef USE_SLANG
@@ -346,6 +350,11 @@ re_read:
 	    goto re_read;
 	}
 #endif /* IGNORE_CTRL_C */
+#if !defined(USE_GETCHAR) && !defined(VMS) && !defined(NCURSES)
+	if (c == ERR && errno == EINTR) /* may have been handled signal - kw */
+	    goto re_read;
+#endif /* USE_GETCHAR */
+
 	cleanup();
 #ifndef NOSIGHUP
         (void) signal(SIGHUP, SIG_DFL);

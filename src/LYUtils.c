@@ -3895,6 +3895,7 @@ have_VMS_URL:
 	     *  Create a full path to the current default directory.
 	     */
 	    char curdir[DIRNAMESIZE];
+	    char *temp2 = NULL;
 	    BOOL is_local = FALSE;
 #if HAVE_GETCWD
 	    getcwd (curdir, DIRNAMESIZE);
@@ -3910,13 +3911,16 @@ have_VMS_URL:
 	    StrAllocCat(temp, "/");
 	    StrAllocCat(temp, old_string);
 #else
-	if (old_string[1] != ':' && old_string[1] != '|')
-	{
-		 StrAllocCopy(temp, HTDOS_wwwName(curdir));
-		 if(curdir[strlen(curdir)-1] != '/')
-					 StrAllocCat(temp, "/");
-		 StrAllocCat(temp, old_string);
-	} else StrAllocCopy(temp, old_string);
+	    if (old_string[1] != ':' && old_string[1] != '|') {
+		StrAllocCopy(temp, HTDOS_wwwName(curdir));
+		if(curdir[strlen(curdir)-1] != '/')
+		    StrAllocCat(temp, "/");
+		LYstrncpy(curdir, temp, (DIRNAMESIZE - 1));
+		StrAllocCat(temp, old_string);
+	    } else {
+		curdir[0] = '\0';
+		StrAllocCopy(temp, old_string);
+	    }
 #endif /* DOSPATH */
 	    LYTrimRelFromAbsPath(temp);
 	    if (TRACE) {
@@ -3936,33 +3940,82 @@ have_VMS_URL:
 		}
 		is_local = TRUE;
 	    } else {
-	        if ((fragment = strchr(temp, '#')) != NULL)
-	            *fragment = '\0';
-		StrAllocCopy(cp, temp);
-		HTUnEscape(cp);
-		if ((stat(cp, &st) > -1) ||
-		    (fptemp = fopen(cp, "r")) != NULL) {
+		char *cp2 = NULL;
+		StrAllocCopy(temp2, curdir);
+		if (curdir[0] != '\0' && curdir[strlen(curdir)-1] != '/')
+		    StrAllocCat(temp2, "/");
+		StrAllocCopy(cp, old_string);
+	        if ((fragment = strchr(cp, '#')) != NULL)
+	            *fragment = '\0';   /* keep as pointer into cp string */
+		HTUnEscape(cp);	  /* unescape given path without fragment */
+		StrAllocCat(temp2, cp);		/* append to current dir  */
+		StrAllocCopy(cp2, temp2); 	/* keep a copy in cp2     */
+		LYTrimRelFromAbsPath(temp2);
+		    
+		if (strcmp(temp2, temp) != 0 &&
+		    ((stat(temp2, &st) > -1) ||
+		     (fptemp = fopen(temp2, "r")) != NULL)) {
 		    /*
 		     *  It is a subdirectory or file on the local system
 		     *  with escaped characters and/or a fragment to be
 		     *  appended to the URL. - FM
 		     */
-		    if (fragment != NULL) {
-			*fragment = '#';
-			fragment = NULL;
+
+		    FREE(temp);
+		    if (strcmp(cp2, temp2) == 0) {
+			/*
+			 *  LYTrimRelFromAbsPath did nothing, use
+			 *  old_string as given. - kw
+			 */
+			temp = HTEscape(curdir, URL_PATH);
+			if (curdir[0] != '\0' && curdir[strlen(curdir)-1] != '/')
+			    StrAllocCat(temp, "/");
+			StrAllocCat(temp, old_string);
+		    } else {
+			temp = HTEscape(temp2, URL_PATH);
+			if (fragment != NULL) {
+			    *fragment = '#';
+			    StrAllocCat(temp, fragment);
+			}
 		    }
+
 		    StrAllocCat(*AllocatedString, temp);
 		    if (TRACE) {
 		        fprintf(stderr, "Converted '%s' to '%s'\n",
 					old_string, *AllocatedString);
 		    }
 		    is_local = TRUE;
+
+		} else if (strchr(curdir, '#') != NULL ||
+			   strchr(curdir, '%') != NULL) {
+		    /*
+		     *  If PWD has some unusual characters, construct a
+		     *  filename in temp where those are escaped.  This
+		     *  is mostly to prevent this function from returning
+		     *  with some weird URL if the LYExpandHostForURL tests
+		     *  further down fail. - kw
+		     */
+		    FREE(temp);
+		    if (strcmp(cp2, temp2) == 0) {
+			/*
+			 *  LYTrimRelFromAbsPath did nothing, use
+			 *  old_string as given. - kw
+			 */
+			temp = HTEscape(curdir, URL_PATH);
+			if (curdir[0] != '\0' && curdir[strlen(curdir)-1] != '/')
+			    StrAllocCat(temp, "/");
+			StrAllocCat(temp, old_string);
+		    } else {
+			temp = HTEscape(temp2, URL_PATH);
+			if (fragment != NULL) {
+			    *fragment = '#';
+			    StrAllocCat(temp, fragment);
+			}
+		    }
 		}
+
 		FREE(cp);
-		if (fragment != NULL) {
-		    *fragment = '#';
-		    fragment = NULL;
-		}
+		FREE(cp2);
 	    }
 	    if (is_local == FALSE) {
 		/*
@@ -3971,7 +4024,8 @@ have_VMS_URL:
 		 *  the scheme with "http://" as the default.
 		 */
 		if (TRACE) {
-		    fprintf(stderr, "Can't stat() or fopen() '%s'\n", temp);
+		    fprintf(stderr, "Can't stat() or fopen() '%s'\n",
+			    temp2 ? temp2 : temp);
 		}
 		if (LYExpandHostForURL((char **)&old_string,
 		    		       URLDomainPrefixes,
@@ -3990,6 +4044,7 @@ have_VMS_URL:
 		}
 	    }
 	    FREE(temp);
+	    FREE(temp2);
 	    if (fptemp) {
 		fclose(fptemp);
 		fptemp = NULL;
