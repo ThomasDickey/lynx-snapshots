@@ -3,7 +3,7 @@
 #   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
 #   Free Software Foundation, Inc.
 
-version='2000-06-13'
+version='2000-07-06'
 
 # This file is (in principle) common to ALL GNU software.
 # The presence of a machine in this file suggests that SOME GNU software
@@ -218,8 +218,13 @@ case $basic_machine in
 		| mips64vr4300 | mips64vr4300el | mips64vr4100 | mips64vr4100el \
 		| mips64vr5000 | miprs64vr5000el | mcore \
 		| sparc | sparclet | sparclite | sparc64 | sparcv9 | v850 | c4x \
-		| thumb | d10v | fr30 | avr)
+		| thumb | d10v | d30v | fr30 | avr)
 		basic_machine=$basic_machine-unknown
+		;;
+	m6811 | m68hc11 | m6812 | m68hc12)
+		# Motorola 68HC11/12.
+		basic_machine=$basic_machine-unknown
+		os=-none
 		;;
 	m88110 | m680[12346]0 | m683?2 | m68360 | m5200 | z8k | v70 | h8500 | w65 | pj | pjl)
 		;;
@@ -257,7 +262,7 @@ case $basic_machine in
 	      | f301-* | armv*-* | s390-* | sv1-* | t3e-* \
 	      | m88110-* | m680[01234]0-* | m683?2-* | m68360-* | z8k-* | d10v-* \
 	      | thumb-* | v850-* | d30v-* | tic30-* | c30-* | fr30-* \
-	      | bs2000-*)
+	      | bs2000-* | tic54x-* | c54x-*)
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
@@ -478,13 +483,6 @@ case $basic_machine in
 		;;
 	i370-ibm* | ibm*)
 		basic_machine=i370-ibm
-		;;
-	s390 | s390-ibm*)
-# OS/390 support after:
-#  Linkname: Mortice Kern Systems (MKS) Inc. - OS/390 OpenEdition -- GNU Utilities Downloads
-#       URL: http://www.mks.com/s390/gnu/download.htm#autoconf
-		basic_machine=s390-ibm  #  /* S/390 -- gil -- 1419 */
-		os=-os390
 		;;
 # I'm not sure what "Sysv32" means.  Should this be sysv3.2?
 	i[34567]86v32)
@@ -800,6 +798,10 @@ case $basic_machine in
 		basic_machine=t3e-cray
 		os=-unicos
 		;;
+	tic54x | c54x*)
+		basic_machine=tic54x-unknown
+		os=-coff
+		;;
 	tx39)
 		basic_machine=mipstx39-unknown
 		;;
@@ -976,7 +978,7 @@ case $os in
 	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -solaris* | -sym* \
 	      | -amigaos* | -amigados* | -msdos* | -newsos* | -unicos* | -aof* \
 	      | -aos* \
-	      | -nindy* | -vxsim* | -vxworks* | -ebmon* | -hms* | -mvs* | -os390* \
+	      | -nindy* | -vxsim* | -vxworks* | -ebmon* | -hms* | -mvs* \
 	      | -clix* | -riscos* | -uniplus* | -iris* | -rtu* | -xenix* \
 	      | -hiux* | -386bsd* | -netbsd* | -openbsd* | -freebsd* | -riscix* \
 	      | -lynxos* | -bosx* | -nextstep* | -cxux* | -aout* | -elf* | -oabi* \

@@ -299,6 +299,17 @@ PUBLIC unsigned int HTCardinal ARGS3(
 PUBLIC CONST char * HTInetString ARGS1(
 	SockA*,		soc_in)
 {
+#ifdef INET6
+    static char hostbuf[MAXHOSTNAMELEN];
+    getnameinfo((struct sockaddr *)soc_in,
+#ifdef SIN6_LEN
+	    ((struct sockaddr *)soc_in)->sa_len,
+#else
+	    SA_LEN((struct sockaddr *)soc_in),
+#endif /* SIN6_LEN */
+	    hostbuf, sizeof(hostbuf), NULL, 0, NI_NUMERICHOST);
+    return hostbuf;
+#else
     static char string[16];
     sprintf(string, "%d.%d.%d.%d",
 	    (int)*((unsigned char *)(&soc_in->sin_addr)+0),
@@ -306,6 +317,7 @@ PUBLIC CONST char * HTInetString ARGS1(
 	    (int)*((unsigned char *)(&soc_in->sin_addr)+2),
 	    (int)*((unsigned char *)(&soc_in->sin_addr)+3));
     return string;
+#endif /* INET6 */
 }
 #endif /* !DECNET */
 
@@ -719,7 +731,12 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 	**	control variables.
 	*/
 	pid_t fpid, waitret;
-	int pfd[2], selret, readret, waitstat = 0;
+	int pfd[2], selret, readret;
+#ifdef HAVE_TYPE_UNIONWAIT
+	union wait waitstat;
+#else
+	int waitstat = 0;
+#endif
 	time_t start_time = time((time_t *)0);
 	fd_set readfds;
 	struct timeval timeout;
@@ -999,10 +1016,18 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 		**  Make sure child is cleaned up.  -BL
 		*/
 		if (!child_exited)
+#ifdef HAVE_TYPE_UNIONWAIT
+		    waitret = waitpid(fpid, &waitstat.w_status, WNOHANG);
+#else
 		    waitret = waitpid(fpid, &waitstat, WNOHANG);
+#endif
 		if (!WIFEXITED(waitstat) && !WIFSIGNALED(waitstat)) {
 		    kill(fpid, SIGTERM);
+#ifdef HAVE_TYPE_UNIONWAIT
+		    waitret = waitpid(fpid, &waitstat.w_status, WNOHANG);
+#else
 		    waitret = waitpid(fpid, &waitstat, WNOHANG);
+#endif
 		}
 		break;
 	    }
@@ -1011,13 +1036,21 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 	    **  Clean up if child exited before & no data received.  -BL
 	    */
 	    if (child_exited) {
+#ifdef HAVE_TYPE_UNIONWAIT
+		waitret = waitpid(fpid, &waitstat.w_status, WNOHANG);
+#else
 		waitret = waitpid(fpid, &waitstat, WNOHANG);
+#endif
 		break;
 	    }
 	    /*
 	    **  If child exited, loop once more looking for data.  -BL
 	    */
+#ifdef HAVE_TYPE_UNIONWAIT
+	    if ((waitret = waitpid(fpid, &waitstat.w_status, WNOHANG)) > 0) {
+#else
 	    if ((waitret = waitpid(fpid, &waitstat, WNOHANG)) > 0) {
+#endif
 		/*
 		**	Data will be arriving right now, so make sure we
 		**	don't short-circuit out for too many loops, and
@@ -1046,8 +1079,13 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 	}
 	if (waitret > 0) {
 	    if (WIFEXITED(waitstat)) {
+#ifdef HAVE_TYPE_UNIONWAIT
 		CTRACE((tfp, "LYGetHostByName: NSL_FORK child %d exited, status 0x%x.\n",
-		       (int)waitret, waitstat));
+			(int)waitret, waitstat.w_status));
+#else
+		CTRACE((tfp, "LYGetHostByName: NSL_FORK child %d exited, status 0x%x.\n",
+			(int)waitret, waitstat));
+#endif
 	    } else if (WIFSIGNALED(waitstat)) {
 		CTRACE((tfp, "LYGetHostByName: NSL_FORK child %d got signal, status 0x%x!\n",
 		       (int)waitret, waitstat));
@@ -1058,8 +1096,13 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 		}
 #endif /* WCOREDUMP */
 	    } else if (WIFSTOPPED(waitstat)) {
-		CTRACE((tfp, "LYGetHostByName: NSL_FORK child %d is stopped, status 0x%x!\n",
-		       (int)waitret, waitstat));
+#ifdef HAVE_TYPE_UNIONWAIT
+	      CTRACE((tfp, "LYGetHostByName: NSL_FORK child %d is stopped, status 0x%x!\n",
+		      (int)waitret, waitstat.w_status));
+#else
+	      CTRACE((tfp, "LYGetHostByName: NSL_FORK child %d is stopped, status 0x%x!\n",
+		      (int)waitret, waitstat));
+#endif
 	    }
 	}
 	if (!got_rehostent) {
@@ -1157,10 +1200,19 @@ failed:
 **	*soc_in is filled in.  If no port is specified in str, that
 **		field is left unchanged in *soc_in.
 */
+#ifdef INET6
+PUBLIC int HTParseInet ARGS3(
+ 	SockA *,	soc_in,
+	CONST char *,	str,
+	int, default_port)
+{
+    char portstr[NI_MAXSERV];
+#else
 PUBLIC int HTParseInet ARGS2(
 	SockA *,	soc_in,
 	CONST char *,	str)
 {
+#endif /* INET6 */
     char *port;
     int dotcount_ip = 0;	/* for dotted decimal IP addr */
     char *strptr;
@@ -1185,6 +1237,19 @@ PUBLIC int HTParseInet ARGS2(
     /*
     **	Parse port number if present.
     */
+#ifdef INET6
+    if (!strrchr(host, ']'))
+	port = strrchr(host, ':');
+    else
+	port = strrchr(strrchr(host, ']'), ':');
+
+    if (port) {
+      *port++ = 0;            /* Chop off port */
+    }
+    else {
+      sprintf(portstr,"%d", default_port);
+      port = portstr;
+#else
     if ((port = strchr(host, ':')) != NULL) {
 	*port++ = 0;		/* Chop off port */
 	strptr = port;
@@ -1215,6 +1280,7 @@ PUBLIC int HTParseInet ARGS2(
 	    HTAlwaysAlert(NULL, gettext("Address has invalid port"));
 	    return -1;
 	}
+#endif /* INET6 */
     }
 
 #ifdef DECNET
@@ -1228,6 +1294,13 @@ PUBLIC int HTParseInet ARGS2(
 		soc_in->sdn_objnum, host));
 #else  /* parse Internet host: */
 
+#ifdef INET6
+    /* [host] case */
+    if (host[0] == '[' && host[strlen(host) - 1] == ']') {
+	host[strlen(host) - 1] = '\0';
+	host++;
+    }
+#else
     if (*host >= '0' && *host <= '9') {   /* Test for numeric node address: */
 	strptr = host;
 	while (*strptr) {
@@ -1246,7 +1319,8 @@ PUBLIC int HTParseInet ARGS2(
     /*
     **	Parse host number if present.
     */
-    if (dotcount_ip == 3) {   /* Numeric node address: */
+    if (dotcount_ip == 3)   /* Numeric node address: */
+    {
 
 #if defined(__DJGPP__) && !defined(WATT32)
 	soc_in->sin_addr.s_addr = htonl(aton(host));
@@ -1274,7 +1348,9 @@ PUBLIC int HTParseInet ARGS2(
 #ifndef _WINDOWS_NSL
 	FREE(host);
 #endif /* _WINDOWS_NSL */
-    } else {		    /* Alphanumeric node name: */
+    } else
+#endif /* INET6 */
+    {			    /* Alphanumeric node name: */
 
 #ifdef MVS	/* Outstanding problem with crash in MVS gethostbyname */
 	CTRACE((tfp, "HTParseInet: Calling LYGetHostByName(%s)\n", host));
@@ -1296,10 +1372,25 @@ PUBLIC int HTParseInet ARGS2(
 	memcpy((void *)&soc_in->sin_addr, phost->h_addr, phost->h_length);
 #else /* !(__DJGPP__ && !WATT32) && !_WINDOWS_NSL */
 	{
+#ifdef INET6
+	    struct addrinfo hints, *res;
+	    int error;
+
+	    memset(&hints, 0, sizeof(hints));
+	    hints.ai_family = PF_UNSPEC;
+	    error = getaddrinfo(host, port, &hints, &res);
+
+	    if (error || !res) {
+		CTRACE((tfp, "HTParseInet: getaddrinfo(%s): %s\n", host,
+			gai_strerror(error)));
+		goto failed;
+	    }
+#else
 	    struct hostent  *phost;
 	    phost = LYGetHostByName(host);	/* See above */
 
 	    if (!phost) goto failed;
+#endif /* INET6 */
 #if defined(VMS) && defined(CMU_TCP)
 	    /*
 	    **  In LIBCMU, phost->h_length contains not the length of one address
@@ -1309,14 +1400,32 @@ PUBLIC int HTParseInet ARGS2(
 	    **  longer supported, and CMU users are encouraged to obtain and use
 	    **  SOCKETSHR/NETLIB instead. - S. Bjorndahl
 	    */
+#ifdef INET6
+	    if (res->ai_family == AF_INET) {
+		memcpy((void *)&soc_in->sin_addr,
+		    &((struct sockaddr_in *)res->ai_addr)->sin_addr, 4);
+	    } else {
+		CTRACE(tfp, "HTParseInet: unsupported address family %d\n",
+			res->ai_family);
+		goto failed;
+	    }
+#else
 	    memcpy((void *)&soc_in->sin_addr, phost->h_addr, 4);
+#endif /* INET6 */
+#else
+#ifdef INET6
+	    memcpy((void *)soc_in, res->ai_addr, res->ai_addrlen);
 #else
 	    if (!phost) goto failed;
 	    if (phost->h_length != sizeof soc_in->sin_addr) {
 		HTAlwaysAlert(host, gettext("Address length looks invalid"));
 	    }
 	    memcpy((void *)&soc_in->sin_addr, phost->h_addr, phost->h_length);
+#endif /* INET6 */
 #endif /* VMS && CMU_TCP */
+#ifdef INET6
+	    freeaddrinfo(res);
+#endif /* INET6 */
 	}
 #endif /* _WINDOWS_NSL */
 #endif /* __DJGPP__ && !WATT32 */
@@ -1326,12 +1435,14 @@ PUBLIC int HTParseInet ARGS2(
 
     }	/* Alphanumeric node name */
 
+#ifndef INET6
     CTRACE((tfp, "HTParseInet: Parsed address as port %d, IP address %d.%d.%d.%d\n",
 		(int)ntohs(soc_in->sin_port),
 		(int)*((unsigned char *)(&soc_in->sin_addr)+0),
 		(int)*((unsigned char *)(&soc_in->sin_addr)+1),
 		(int)*((unsigned char *)(&soc_in->sin_addr)+2),
 		(int)*((unsigned char *)(&soc_in->sin_addr)+3)));
+#endif /* !INET6 */
 #endif	/* Internet vs. Decnet */
 
     return 0;	/* OK */
@@ -1343,13 +1454,57 @@ failed:
     FREE(host);
 #endif /* _WINDOWS_NSL */
     switch (lynx_nsl_status) {
-    case HT_NOT_ACCEPTABLE:
-    case HT_INTERRUPTED:
-	return lynx_nsl_status;
-    default:
-    return -1;
+        case HT_NOT_ACCEPTABLE:
+        case HT_INTERRUPTED:
+	    return lynx_nsl_status;
+        default:
+        return -1;
+    }
 }
+
+#ifdef INET6
+PRIVATE struct addrinfo *
+HTGetAddrInfo ARGS2(
+    CONST char *, str,
+    CONST int, defport)
+{
+    struct addrinfo hints, *res;
+    int error;
+    char *p;
+    char *s;
+    char *host, *port;
+    char pbuf[10];
+
+    s = strdup(str);
+
+    if (s[0] == '[' && (p = strchr(s, ']')) != NULL) {
+	*p++ = '\0';
+	host = s + 1;
+    } else {
+	p = s;
+	host = &s[0];
+    }
+    port = strrchr(p, ':');
+    if (port) {
+	*port++ = '\0';
+    } else {
+	snprintf(pbuf, sizeof(pbuf), "%d", defport);
+	port = pbuf;
+    }
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = PF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    error = getaddrinfo(host, port, &hints, &res);
+    if (error || !res) {
+	CTRACE((tfp, "HTGetAddrInfo: getaddrinfo(%s, %s): %s\n", host, port,
+		gai_strerror(error)));
+	return NULL;
+    }
+
+    return res;
 }
+#endif /* INET6 */
 
 #ifdef LY_FIND_LEAKS
 /*	Free our name for the host on which we are - FM
@@ -1377,7 +1532,12 @@ PRIVATE void get_host_details NOARGS
     char *domain_name;			/* The name of this host domain */
 #endif /* UCX */
 #ifdef NEED_HOST_ADDRESS		/* no -- needs name server! */
+#ifdef INET6
+    struct addrinfo hints, *res;
+    int error;
+#else
     struct hostent * phost;		/* Pointer to host -- See netdb.h */
+#endif /* INET6 */
 #endif /* NEED_HOST_ADDRESS */
     int namelength = sizeof(name);
 
@@ -1405,6 +1565,22 @@ PRIVATE void get_host_details NOARGS
 
 #ifndef DECNET	/* Decnet ain't got no damn name server 8#OO */
 #ifdef NEED_HOST_ADDRESS		/* no -- needs name server! */
+#ifdef INET6
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = PF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_CANONNAME;
+    error = getaddrinfo(name, NULL, &hints, &res);
+    if (error || !res || !res->ai_canonname) {
+	CTRACE((tfp, "TCP: %s: `%s'\n", gai_strerror(error), name));
+	if (res)
+	    freeaddrinfo(res);
+	return;  /* Fail! */
+    }
+    StrAllocCopy(hostname, res->ai_canonname);
+    memcpy(&HTHostAddress, res->ai_addr, res->ai_addrlen);
+    freeaddrinfo(res);
+#else
     phost = gethostbyname(name);	/* See netdb.h */
     if (!OK_HOST(phost)) {
 	CTRACE((tfp, "TCP: Can't find my own internet node address for `%s'!!\n",
@@ -1413,6 +1589,7 @@ PRIVATE void get_host_details NOARGS
     }
     StrAllocCopy(hostname, phost->h_name);
     memcpy(&HTHostAddress, &phost->h_addr, phost->h_length);
+#endif /* INET6 */
     CTRACE((tfp, "     Name server says that I am `%s' = %s\n",
 		hostname, HTInetString(&HTHostAddress)));
 #endif /* NEED_HOST_ADDRESS */
@@ -1442,13 +1619,18 @@ PUBLIC int HTDoConnect ARGS4(
 	int,		default_port,
 	int *,		s)
 {
-    struct sockaddr_in soc_address;
-    struct sockaddr_in *soc_in = &soc_address;
     int status;
     char *line = NULL;
     char *p1 = NULL;
     char *at_sign = NULL;
     char *host = NULL;
+#ifdef INET6
+    int error;
+    struct sockaddr *sa;
+    struct addrinfo *res, *res0;
+#else
+    struct sockaddr_in soc_address;
+    struct sockaddr_in *soc_in = &soc_address;
 
     /*
     **	Set up defaults.
@@ -1456,6 +1638,7 @@ PUBLIC int HTDoConnect ARGS4(
     memset(soc_in, 0, sizeof(*soc_in));
     soc_in->sin_family = AF_INET;
     soc_in->sin_port = htons((unsigned short) default_port);
+#endif /* INET6 */
 
     /*
     **	Get node name and optional port number.
@@ -1473,6 +1656,17 @@ PUBLIC int HTDoConnect ARGS4(
 
     HTSprintf0 (&line, "%s%s", WWW_FIND_MESSAGE, host);
     _HTProgress (line);
+#ifdef INET6
+    /* HTParseInet() is useless! */
+    _HTProgress(host);
+    res0 = HTGetAddrInfo(host, default_port);
+    if (res0 == NULL) {
+	sprintf (line, "Unable to locate remote host %s.", host);
+	_HTProgress(line);
+	FREE(host);
+	FREE(line);
+	return HT_NO_DATA;
+#else
     status = HTParseInet(soc_in, host);
     if (status) {
 	if (status != HT_INTERRUPTED) {
@@ -1492,6 +1686,7 @@ PUBLIC int HTDoConnect ARGS4(
 	FREE(host);
 	FREE(line);
 	return status;
+#endif /* INET6 */
     }
 
     HTSprintf0 (&line, gettext("Making %s connection to %s"), protocol, host);
@@ -1502,11 +1697,27 @@ PUBLIC int HTDoConnect ARGS4(
     /*
     **	Now, let's get a socket set up from the server for the data.
     */
+#ifdef INET6
+    for (res = res0; res; res = res->ai_next) {
+	*s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+	if (*s == -1) {
+	    char hostbuf[1024], portbuf[1024];
+	    getnameinfo(res->ai_addr, res->ai_addrlen,
+		    hostbuf, sizeof(hostbuf), portbuf, sizeof(portbuf),
+		    NI_NUMERICHOST|NI_NUMERICSERV);
+	    HTSprintf0 (&line, "socket failed: family %d addr %s port %s.",
+		    res->ai_family, hostbuf, portbuf);
+	    _HTProgress (line);
+	    FREE(line);
+	    continue;
+	}
+#else
     *s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (*s == -1) {
 	HTAlert(gettext("socket failed."));
 	return HT_NO_DATA;
     }
+#endif /* INET6 */
 
 #ifndef DOSPATH
 #if !defined(NO_IOCTL) || defined(USE_FCNTL)
@@ -1535,15 +1746,23 @@ PUBLIC int HTDoConnect ARGS4(
     */
 #ifdef SOCKS
     if (socks_flag) {
+#ifdef INET6
+	status = Rconnect(*s, res->ai_addr, res->ai_addrlen);
+#else
 	status = Rconnect(*s, (struct sockaddr*)&soc_address,
 			  sizeof(soc_address));
+#endif /* INET6 */
 	/*
 	**  For long Rbind.
 	*/
 	socks_bind_remoteAddr = soc_address.sin_addr.s_addr;
     } else
 #endif /* SOCKS */
+#ifdef INET6
+    status = connect(*s, res->ai_addr, res->ai_addrlen);
+#else
     status = connect(*s, (struct sockaddr*)&soc_address, sizeof(soc_address));
+#endif /* INET6 */
 #ifndef __DJGPP__
     /*
     **	According to the Sun man page for connect:
@@ -1581,6 +1800,10 @@ PUBLIC int HTDoConnect ARGS4(
 	    */
 	    if ((tries++/10) >= connect_timeout) {
 		HTAlert(gettext("Connection failed (too many retries)."));
+#ifdef INET6
+		FREE(line);
+		freeaddrinfo(res0);
+#endif /* INET6 */
 		return HT_NO_DATA;
 	    }
 
@@ -1642,8 +1865,12 @@ PUBLIC int HTDoConnect ARGS4(
 		    status = 0;
 		} else {
 #endif /* SOCKS */
+#ifdef INET6
+		status = connect(*s, res->ai_addr, res->ai_addrlen);
+#else
 		status = connect(*s, (struct sockaddr*)&soc_address,
 				 sizeof(soc_address));
+#endif /* INET6 */
 #ifdef UCX
 		/*
 		**  A UCX feature: Instead of returning EISCONN
@@ -1691,8 +1918,12 @@ PUBLIC int HTDoConnect ARGS4(
 		**  For some reason, UCX pre 3 apparently returns
 		**  errno = 18242 instead the EALREADY or EISCONN.
 		*/
+#ifdef INET6
+		status = connect(*s, res->ai_addr, res->ai_addrlen);
+#else
 		status = connect(*s, (struct sockaddr*)&soc_address,
 				 sizeof(soc_address));
+#endif /* INET6 */
 		if ((status < 0) &&
 		    (SOCKET_ERRNO != EALREADY && SOCKET_ERRNO != EAGAIN) &&
 #ifdef UCX
@@ -1722,8 +1953,21 @@ PUBLIC int HTDoConnect ARGS4(
 	HTInetStatus("this socket's first and only connect");
     }
 #endif /* SOCKET_DEBUG_TRACE */
+#ifdef INET6
+	if (status < 0) {
+		NETCLOSE(*s);
+		*s = -1;
+		continue;
+	}
+	break;
+    }
+#endif /* INET6 */
 #endif /* !__DJGPP__ */
+#ifdef INET6
+    if (*s < 0) {
+#else
     if (status < 0) {
+#endif /* INET6 */
 	/*
 	**  The connect attempt failed or was interrupted,
 	**  so close up the socket.
@@ -1748,6 +1992,10 @@ PUBLIC int HTDoConnect ARGS4(
 #endif /* !NO_IOCTL || USE_FCNTL */
 #endif /* !DOSPATH */
 
+#ifdef INET6
+    FREE(line);
+    freeaddrinfo(res0);
+#endif /* INET6 */
     return status;
 }
 

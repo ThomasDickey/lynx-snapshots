@@ -2066,7 +2066,12 @@ PUBLIC void statusline ARGS1(
 
     if (text != NULL && text[0] != '\0') {
 #ifdef HAVE_UTF8_STATUSLINES
-	if (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
+	if ((LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) || 
+	    (HTCJK != NOCJK)) {
+	    refresh();
+	}
+#else
+	if (HTCJK != NOCJK) {
 	    refresh();
 	}
 #endif /* HAVE_UTF8_STATUSLINES */
@@ -4913,6 +4918,11 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
     char *Fragment = NULL;
     BOOLEAN GotHost = FALSE;
     BOOLEAN Startup = (BOOL) (helpfilepath == NULL);
+#ifdef INET6
+    struct addrinfo hints, *res;
+    int error;
+#endif /* INET6 */
+
 #ifdef _WINDOWS
     int hoststat;
     struct hostent  *phost;	/* Pointer to host - See netdb.h */
@@ -4989,7 +4999,16 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	fprintf(stdout, "%s '%s'%s\n", WWW_FIND_MESSAGE, host, FIRST_SEGMENT);
     }
 
+#ifdef INET6
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = PF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    error = getaddrinfo(host, "80", &hints, &res); 
+ 
+    if (!error && res)
+#else
     if (LYGetHostByName(host) != NULL)
+#endif /* INET6 */
     {
 	/*
 	 *  Clear any residual interrupt. - FM

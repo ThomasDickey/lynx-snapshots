@@ -1332,7 +1332,7 @@ PUBLIC void LYpaddstr ARGS3(
 	CONST char *,	the_string)
 {
     width -= strlen(the_string);
-    waddstr(the_window, the_string);
+    LYwaddstr(the_window, the_string);
     while (width-- > 0)
 	waddstr(the_window, " ");
 }
@@ -1429,11 +1429,13 @@ PUBLIC void LYwaddnstr ARGS3(
 	CONST char *,	s,
 	size_t,		len)
 {
-    if (len != 0) {
+    while (len > 0) {
 	char temp[MAX_LINE];
-	memcpy(temp, s, len);
-	temp[len] = 0;
+	size_t use = (len >= MAX_LINE) ? MAX_LINE - 1 : len;
+	memcpy(temp, s, use);
+	temp[use] = 0;
 	waddstr(w, temp);
+	len -= use;
     }
 }
 

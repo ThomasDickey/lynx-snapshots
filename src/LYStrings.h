@@ -24,6 +24,12 @@ extern char * LYstrncpy PARAMS((
 	CONST char *	src,
 	int		n));
 extern void ena_csi PARAMS((BOOLEAN flag));
+extern int get_popup_number PARAMS((
+	char *		msg,
+	int *		c,
+	int *		rel));
+extern int LYarrayLength PARAMS((CONST char ** list));
+extern int LYarrayWidth PARAMS((CONST char ** list));
 extern int LYgetch NOPARAMS;
 extern int LYgetch_choice NOPARAMS;
 extern int LYgetch_input NOPARAMS;
@@ -305,6 +311,16 @@ extern int LYEdit1 PARAMS((
 	BOOL		maxMessage));
 extern void LYOpenCloset NOPARAMS;
 extern void LYCloseCloset NOPARAMS;
+extern int LYhandlePopupList PARAMS((
+	int		cur_choice,
+	int		ly,
+	int		lx,
+	CONST char **	choices,
+	int		width,
+	int		i_length,
+	int		disabled,
+	BOOLEAN		for_mouse,
+	BOOLEAN		numbered));
 
 extern int current_lineedit;
 extern char * LYLineeditNames[];
@@ -312,15 +328,6 @@ extern char * LYLineEditors[];
 extern CONST char * LYLineeditHelpURLs[];
 
 extern CONST char * LYLineeditHelpURL NOPARAMS;
-
-#if 0				/* NOT USED, use function instead - kw */
-/* Push a character through the lineedit machinery */
-#ifdef    NOT_ASCII  /* S/390 -- gil -- 2080 */
-#define EditBinding(c) (LYLineEditors[current_lineedit][(c)<256 ? TOASCII(c) : c])
-#else  /* NOT_ASCII */
-#define EditBinding(c) (LYLineEditors[current_lineedit][c])
-#endif /* NOT_ASCII */
-#endif /* 0 */
 
 #define LYLineEdit(e,c,m) LYEdit1(e,c,EditBinding(c)&~LYE_DF,m)
 

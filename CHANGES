@@ -1,6 +1,28 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-08-03 (2.8.4dev.7)
+* add sample mailto-form.pl script to illustrate handling mailto URLs -KW
+* modify HTTCP.c to build on AIX 4.3 using HAVE_TYPE_UNIONWAIT as in LYLocal.c
+  (Georg Drenkhahn <georg@MPA-Garching.MPG.DE>)
+* change $host_os special case for 'os390' to 'openedition' in configure.in,
+  make corresponding changes for config.guess and config.sub -PG
+* integrate KAME patch for IPV6 (Wesley Morgan <morganw@chemicals.tacorp.com>)
+* add configure script macros for checking IPV6 from tin -TD
+* small fixes for configure script macros CF_BUNDLED_INTL, CF_CURSES_LIBS,
+  CF_UPPER, CF_X_ATHENA -TD
+* fix for multibyte characters in status line (Hataguchi Takeshi
+  <patakuti@t3.rim.or.jp>)
+* align/merge logic in LYOptions.c and LYForms.c which handles navigation in a
+  popup list, for reuse in name-completion -TD
+* restore check for ^G to cancel in HTSaveToFile() lost in dev.4 changes -VH
+* remove duplicate entries in sortedList() which are used for name-completion
+  (Frederic L W Meunier) -TD
+* fix compiler warning about const in LYpaddstr() using LYwaddnstr(), and
+  fix a potential buffer overflow in the latter (report by PG) -TD
+* correct logic in LYsubwindow(), which called delwin() with a null WINDOW
+  pointer -PG, TD
+
 2000-07-17 (2.8.4dev.6)
 * move special case statement for os390 compiler before AC_PROG_CC macro in
   configure.in and regenerate configure script (reported by PG) -TD
