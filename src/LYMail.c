@@ -329,7 +329,6 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
     FILE *fd, *fp;
     char *address = NULL;
     char cmd[512], *cp, *cp0, *cp1;
-    int i;
 #if defined(VMS) || defined(DOSPATH)
     char my_tempfile[256];
     char *address_ptr1, *address_ptr2;
@@ -1251,7 +1250,7 @@ PRIVATE void terminate_letter ARGS1(int,sig)
 #if defined(VMS) || defined(DOSPATH)
     /* Refresh the screen to get rid of the "interrupt" message */
     if (!dump_output_immediately) {
-	clearok(curscr, TRUE);
+	lynx_force_repaint();
 	refresh();
     }
 #endif /* VMS */

@@ -194,7 +194,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		    fclose(fp);
 		    fp = NULL;
 		    if (!dump_output_immediately) {
-		        clearok(curscr, TRUE);
+		        lynx_force_repaint();
 			refresh();
 		    }
 		    HTAlert(ERROR_UNCOMPRESSING_TEMP);

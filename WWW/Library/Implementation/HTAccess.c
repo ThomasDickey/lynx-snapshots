@@ -40,6 +40,7 @@
 #endif
 
 #include "HTUtils.h"
+#include "HTTP.h"
 #include "HTAlert.h"
 /*
 **  Implements:
@@ -605,7 +606,6 @@ PRIVATE BOOL HTLoadDocument ARGS4(
     extern char * HTLoadedDocumentURL NOPARAMS;		   /* in GridText.c */
     extern BOOL HText_hasNoCacheSet PARAMS((HText *text)); /* in GridText.c */
     extern BOOL reloading;
-    extern char *redirecting_url;
     extern BOOL permanent_redirection;
     char *cp;
     BOOL ForcingNoCache = LYforce_no_cache;

@@ -1,4 +1,3 @@
-
 #ifndef LYOPTIONS_H
 #define LYOPTIONS_H
 
@@ -25,10 +24,14 @@ extern void edit_bookmarks NOPARAMS;
 #define L_FTPSTYPE	 5
 #define L_MAIL_ADDRESS	 6
 #define L_SSEARCH	 7
-#define L_CHARSET	 8
-#define L_RAWMODE	 9
-#define L_LANGUAGE	10
-#define L_PREF_CHARSET	11
+#define L_LANGUAGE	 8
+#define L_PREF_CHARSET	 9
+#define L_CHARSET	10
+#define L_RAWMODE	11
+
+#define L_COLOR         L_RAWMODE
+#define B_COLOR         44
+#define C_COLOR         62
 
 #define L_BOOL_A	12
 #define B_VIKEYS	5

@@ -6,7 +6,7 @@
 #include "LYCurses.h"
 #include "GridText.h"
 #include "LYUtils.h"
-#include "LYStructs.h"	/* includes HTForms.h */
+#include "LYStructs.h"  /* includes HTForms.h */
 #include "LYStrings.h"
 #include "LYGlobalDefs.h"
 #include "LYKeymap.h"
@@ -19,25 +19,13 @@
 #include "LYHash.h"
 #endif
 
-#ifdef ALT_CHAR_SET
-#define BOXVERT 0   /* use alt char set for popup window vertical borders */
-#define BOXHORI 0   /* use alt char set for popup window vertical borders */
-#endif
-
-#ifndef BOXVERT
-#define BOXVERT '*'	/* character for popup window vertical borders */
-#endif
-#ifndef BOXHORI
-#define BOXHORI '*'	/* character for popup window horizontal borders */
-#endif
-
 extern HTCJKlang HTCJK;
 
 PRIVATE int form_getstr PARAMS((
 	struct link *	form_link));
 PRIVATE int popup_options PARAMS((
 	int		cur_selection,
-	OptionType *	list, 
+	OptionType *	list,
 	int		ly,
 	int		lx,
 	int		width,
@@ -46,13 +34,12 @@ PRIVATE int popup_options PARAMS((
 
 PUBLIC int change_form_link ARGS6(
 	struct link *,	form_link,
-	int,		mode, 
+	int,		mode,
 	document *,	newdoc,
 	BOOLEAN *,	refresh_screen,
 	char *,		link_name,
 	char *,		link_value)
 {
-    extern BOOL reloading;
     FormInfo *form = form_link->form;
     int c = DO_NOTHING;
     int OrigNumValue;
@@ -112,7 +99,7 @@ PUBLIC int change_form_link ARGS6(
 				form->size_l, form->disabled);
 
 	    {
-    	        OptionType * opt_ptr = form->select_list;
+		OptionType * opt_ptr = form->select_list;
 		int i;
 		for (i = 0; i < form->num_value; i++, opt_ptr = opt_ptr->next)
 		    ; /* null body */
@@ -157,7 +144,7 @@ PUBLIC int change_form_link ARGS6(
 		lynx_start_radio_color ();
 		for (i = 0; i < nlinks; i++) {
 		    if (links[i].type == WWW_FORM_LINK_TYPE &&
-		        links[i].form->type == F_RADIO_TYPE &&
+			links[i].form->type == F_RADIO_TYPE &&
 			links[i].form->number == form->number &&
 			/*
 			 *  If it has the same name and its on...
@@ -167,7 +154,7 @@ PUBLIC int change_form_link ARGS6(
 			move(links[i].ly, links[i].lx);
 			addstr(unchecked_radio);
 			links[i].hightext = unchecked_radio;
-		     }
+		    }
 		}
 		lynx_stop_radio_color ();
 		/*
@@ -262,8 +249,8 @@ PUBLIC int change_form_link ARGS6(
     }
 
     return(c);
-
 }
+
 PRIVATE int form_getstr ARGS1(
 	struct link *,	form_link)
 {
@@ -523,10 +510,10 @@ PRIVATE void paddstr ARGS3(
 	int,		width,
 	char *, 	the_string)
 {
-	width -= strlen(the_string);
-	waddstr(the_window, the_string);
-	while (width-- > 0)
-		waddstr(the_window, " ");
+    width -= strlen(the_string);
+    waddstr(the_window, the_string);
+    while (width-- > 0)
+	waddstr(the_window, " ");
 }
 #endif
 
@@ -587,7 +574,7 @@ PRIVATE int popup_options ARGS7(
      *  Set display_lines based on the user_mode global.
      */
     if (user_mode == NOVICE_MODE)
-        display_lines = LYlines-4;
+	display_lines = LYlines-4;
     else
 	display_lines = LYlines-2;
 
@@ -618,9 +605,9 @@ PRIVATE int popup_options ARGS7(
      *  the number of real options.
      */
     if (!i_length) {
-        i_length = num_options;
+	i_length = num_options;
     } else {
-        /*
+	/*
 	 *  Otherwise, it is really one number too high.
 	 */
 	i_length--;
@@ -634,7 +621,7 @@ PRIVATE int popup_options ARGS7(
     bottom = top + i_length + 3;
 
     /*
-     *  Hmm...	If the bottom goes beyond the number of lines available,
+     *  Hmm...  If the bottom goes beyond the number of lines available,
      */
     if (bottom > display_lines) {
 	/*
@@ -681,7 +668,7 @@ PRIVATE int popup_options ARGS7(
     SLsmg_fill_region(top, lx - 1, bottom - top, width + 4, ' ');
 #else
     if (!(form_window = newwin(bottom - top, width + 4, top, lx - 1)) &&
-        !(form_window = newwin(bottom - top, 0, top, 0))) {
+	!(form_window = newwin(bottom - top, 0, top, 0))) {
 	HTAlert(POPUP_FAILED);
 	return(orig_selection);
     }
@@ -713,10 +700,10 @@ PRIVATE int popup_options ARGS7(
 		(((num_options + 1) + (length - 1))/(length))
 					  : 1;
 /*
- * OH!	I LOVE GOTOs! hack hack hack
- *    07-11-94 GAB
- *  MORE hack hack hack
- *    09-05-94 FM
+ * OH!  I LOVE GOTOs! hack hack hack
+ *        07-11-94 GAB
+ *      MORE hack hack hack
+ *        09-05-94 FM
  */
 redraw:
     opt_ptr = list;
@@ -1201,7 +1188,7 @@ redraw:
 		break;
 
 	    case LYK_REFRESH:
-		clearok(curscr, TRUE);
+		lynx_force_repaint();
 		refresh();
 		break;
 
@@ -1264,10 +1251,10 @@ check_recall:
 			FirstRecall = FALSE;
 			if (*prev_target_buffer) {
 			    for (QueryNum = (QueryTotal - 1);
-			         QueryNum > 0; QueryNum--) {
+				 QueryNum > 0; QueryNum--) {
 				if ((cp = (char *)HTList_objectAt(
 							search_queries,
-	    						QueryNum)) != NULL &&
+							QueryNum)) != NULL &&
 				    !strcmp(prev_target_buffer, cp)) {
 				    break;
 				}
@@ -1287,7 +1274,7 @@ check_recall:
 			 */
 			QueryNum = 0;
 		    if ((cp = (char *)HTList_objectAt(search_queries,
-	    					      QueryNum)) != NULL) {
+						      QueryNum)) != NULL) {
 			strcpy(prev_target, cp);
 			if (*prev_target_buffer &&
 			    !strcmp(prev_target_buffer, prev_target)) {
@@ -1322,7 +1309,7 @@ check_recall:
 			     QueryNum < (QueryTotal - 1); QueryNum++) {
 			    if ((cp = (char *)HTList_objectAt(
 							search_queries,
-	    						QueryNum)) != NULL &&
+							QueryNum)) != NULL &&
 				!strcmp(prev_target_buffer, cp)) {
 				    break;
 			    }
@@ -1342,7 +1329,7 @@ check_recall:
 		     */
 		    QueryNum = (QueryTotal - 1);
 		    if ((cp = (char *)HTList_objectAt(search_queries,
-	    					      QueryNum)) != NULL) {
+						      QueryNum)) != NULL) {
 			strcpy(prev_target, cp);
 			if (*prev_target_buffer &&
 			    !strcmp(prev_target_buffer, prev_target)) {

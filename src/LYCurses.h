@@ -98,6 +98,18 @@ extern void LYsubwindow PARAMS((WINDOW * param));
 #define CR FROMASCII('\015')
 #endif /* REDEFINE_CR */
 
+#ifdef ALT_CHAR_SET
+#define BOXVERT 0   /* use alt char set for popup window vertical borders */
+#define BOXHORI 0   /* use alt char set for popup window vertical borders */
+#endif
+
+#ifndef BOXVERT
+#define BOXVERT '*'	/* character for popup window vertical borders */
+#endif
+#ifndef BOXHORI
+#define BOXHORI '*'	/* character for popup window horizontal borders */
+#endif
+
 extern int LYlines;  /* replaces LINES */
 extern int LYcols;   /* replaces COLS */
 
@@ -311,6 +323,7 @@ extern int  lynx_chg_color PARAMS((int, int, int));
 #endif /* USE_SLANG */
 
 extern void lynx_enable_mouse PARAMS((int));
+extern void lynx_force_repaint NOPARAMS;
 extern void lynx_start_underline_color NOPARAMS;
 extern void lynx_stop_underline_color NOPARAMS;
 extern void lynx_start_bold_color NOPARAMS;

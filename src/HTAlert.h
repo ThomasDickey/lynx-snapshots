@@ -111,7 +111,7 @@ extern BOOL HTConfirmCookie PARAMS((
 /*      Confirm redirection of POST.		HTConfirmPostRedirect()
 **	----------------------------
 **  On entry,
-**      redirecting_url             is the Location.
+**      Redirecting_url             is the Location.
 **
 **  On exit,
 **      Returns 0 on cancel,
@@ -119,7 +119,7 @@ extern BOOL HTConfirmCookie PARAMS((
 **	303 for redirect as GET without content
 */
 extern int HTConfirmPostRedirect PARAMS((
-	CONST char *	redirecting_url));
+	CONST char *	Redirecting_url));
 
 /*
 

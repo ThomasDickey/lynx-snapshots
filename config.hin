@@ -1,6 +1,5 @@
 /* The configure script translates "config.hin" into "lynx_cfg.h" */
 #undef USE_COLOR_STYLE		/* FIXME: was 'CS' */
-#undef SLCS			/* FIXME: rename to USE_SLANG_STYLE */
 #undef USEHASH			/* FIXME: rename to USE_HASHING */
 #undef UNPAINT_CACHE		/* FIXME: for RP's code */
 /* #undef TEST			** FIXME: for RP's code */

@@ -62,8 +62,6 @@ PRIVATE char user_agent[64];
 PRIVATE char server_software[64];
 #endif /* LYNXCGI_LINKS */
 
-extern BOOLEAN reloading;
-
 PRIVATE void add_environment_value PARAMS((char *env_value));
 
 

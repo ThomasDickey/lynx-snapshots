@@ -638,7 +638,7 @@ get_advanced_choice:
 	    /*
 	     *  Refresh the screen.
 	     */
-	    clearok(curscr, TRUE);
+	    lynx_force_repaint();
 	    refresh();
 	    goto get_advanced_choice;
 	}
@@ -825,7 +825,7 @@ get_bookmark_choice:
 	/*
 	 *  Refresh the screen.
 	 */
-	clearok(curscr, TRUE);
+	lynx_force_repaint();
 	refresh();
 	goto get_bookmark_choice;
     }

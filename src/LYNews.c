@@ -433,7 +433,7 @@ PRIVATE void terminate_message ARGS1(
     /*
      *  Refresh the screen to get rid of the "interrupt" message.
      */
-    clearok(curscr, TRUE);
+    lynx_force_repaint();
     refresh();
 #endif /* VMS */
 }

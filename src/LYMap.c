@@ -7,6 +7,7 @@
 
 #include "HTUtils.h"
 #include "tcp.h"
+#include "HTTP.h"
 #include "HTAnchor.h"
 #include "HTAccess.h"
 #include "HTFormat.h"
@@ -29,8 +30,6 @@
 #include "LYLeaks.h"
  
 #define FREE(x) if (x) {free(x); x=NULL;}
-
-extern BOOL reloading;    /* For Flushing Cache on Proxy Server */
 
 typedef struct _LYMapElement {
    char * address;

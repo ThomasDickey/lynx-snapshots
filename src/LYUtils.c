@@ -181,8 +181,6 @@ PUBLIC void highlight ARGS3(
 	    	      (links[cur].hightext ?
 		       links[cur].hightext : ""),
 		      LYcols-links[cur].lx-1);
-#define LYmbcsstrncpy(dest,src,n,n_glyphs,enc) LYstrncpy(dest, src, n)
-#define LYmbcsstrlen(str,utf_flag) strlen(str)
 #endif /* EXP_CHARTRANS */
 	    addstr(buffer);  
 	}
@@ -2310,15 +2308,6 @@ PUBLIC int is_url ARGS1(
         return(0);
 
     /*
-     *  Can't be a URL if it starts with a slash.
-     *  So return immediately for this common case,
-     *  also to avoid false positives if there is a
-     *  colon later in the string. - kw
-     */
-    if (*cp == '/')
-        return(0);
-
-    /*
      *  Can't be a URL if it lacks a colon.
      */
     if (NULL == strchr(cp, ':'))
@@ -2329,6 +2318,15 @@ PUBLIC int is_url ARGS1(
      */
     while (isspace((unsigned char)*cp))
         cp++;
+
+    /*
+     *  Can't be a URL if it starts with a slash.
+     *  So return immediately for this common case,
+     *  also to avoid false positives if there was
+     *  a colon later in the string. - KW
+     */
+    if (*cp == '/')
+        return(0);
 
 #ifdef DOSPATH /* sorry! */
 	 if (strncmp(cp, "file:///", 8) && strlen(cp) == 19 &&

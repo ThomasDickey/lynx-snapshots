@@ -10,6 +10,28 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+1997-07-21
+* Check for lynx_uses_color and LYShowColor in lynx_start_status_color()
+  and lynx_stop_status_color() of LYCurses.c so that the statusline
+  will appear reverse (or otherwise hightlighted if the terminal doesn't
+  support reverse), if color support is compiled in but not currently
+  used. - KW
+* Added comments on color usage to lynx.cfg. - KW
+1997-07-20
+* Added command-line option "-nocolor" to disable color on terminals that
+  would otherwise support it.  Added options toggle for colors, tested
+  with ncurses. - TD
+* Remove option value from configure option "--with-color-styles". - TD
+* Correct background of popups in LYOptions.c - TD
+* Add configure check for compiler options to enable prototypes - TD
+* Remove IRIX "-cckr" compiler flags. - TD
+1997-07-18
+* Mods in LYexit.c and LYCurses.c to ensure restoration of stderr (if it
+  was changed for output to the trace log) on all exits. - BRL & FM
+* Include an unsigned char typecast in the HASH_FUNCTION definition for
+  HTAtom.c - CK
+* Modified change to is_url() of 1997-07-13 to check for the slash after
+  stripping any lead space characters. - FM
 1997-07-15
 * Added support for a commentURL attribute in cookies.  This attribute is
   under discussion in the HTTP-WG and not presently in the draft (see the
