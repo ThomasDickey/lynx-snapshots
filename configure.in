@@ -569,14 +569,6 @@ CF_ARG_ENABLE(addrlist-page,
 AC_MSG_RESULT($use_addrlist_page)
 test $use_addrlist_page != no && AC_DEFINE(EXP_ADDRLIST_PAGE)
 
-AC_MSG_CHECKING(if experimental alternative line-edit bindings should be used)
-CF_ARG_ENABLE(alt-bindings,
-[  --enable-alt-bindings   use experimental line-edit bindings],
-	[use_alt_bindings=$enableval],
-	[use_alt_bindings=no])
-AC_MSG_RESULT($use_alt_bindings)
-test $use_alt_bindings != no && AC_DEFINE(EXP_ALT_BINDINGS)
-
 AC_MSG_CHECKING(if color-style code should be used)
 CF_ARG_ENABLE(color-style,
 [  --enable-color-style    use optional/experimental color style],
@@ -634,21 +626,13 @@ CF_ARG_ENABLE(kbd-layout,
 AC_MSG_RESULT($use_kbd_layout)
 test $use_kbd_layout != no && AC_DEFINE(EXP_KEYBOARD_LAYOUT)
 
-AC_MSG_CHECKING(if experimental JavaScript support should be used)
-CF_ARG_ENABLE(libjs,
-[  --enable-libjs          use experimental JavaScript support (Mozilla libjs)],
-	[use_libjs=$enableval],
-	[use_libjs=no])
-AC_MSG_RESULT($use_libjs)
-test $use_libjs != no && AC_DEFINE(EXP_LIBJS)
-
-AC_MSG_CHECKING(if experimental persistent-cookie logic should be used)
-CF_ARG_ENABLE(persistent-cookies,
-[  --enable-persistent-cookies  use experimental persistent-cookie support],
-	[use_filed_cookies=$enableval],
-	[use_filed_cookies=no])
-AC_MSG_RESULT($use_filed_cookies)
-test $use_filed_cookies != no && AC_DEFINE(EXP_PERSISTENT_COOKIES)
+dnl AC_MSG_CHECKING(if experimental JavaScript support should be used)
+dnl CF_ARG_ENABLE(libjs,
+dnl [  --enable-libjs          use experimental JavaScript support (Mozilla libjs)],
+dnl 	[use_libjs=$enableval],
+dnl 	[use_libjs=no])
+dnl AC_MSG_RESULT($use_libjs)
+dnl test $use_libjs != no && AC_DEFINE(EXP_LIBJS)
 
 AC_MSG_CHECKING(if html source should be colorized)
 CF_ARG_ENABLE(prettysrc,
@@ -672,6 +656,14 @@ dnl --------------------------------------------------------------------------
 
 CF_HELP_MESSAGE(
 Miscellaneous Options:)
+
+AC_MSG_CHECKING(if alternative line-edit bindings should be used)
+CF_ARG_ENABLE(alt-bindings,
+[  --disable-alt-bindings  disable alternative line-edit bindings],
+	[use_alt_bindings=$enableval],
+	[use_alt_bindings=yes])
+AC_MSG_RESULT($use_alt_bindings)
+test $use_alt_bindings != no && AC_DEFINE(EXP_ALT_BINDINGS)
 
 AC_MSG_CHECKING(if you want to use extended HTML DTD logic)
 CF_ARG_DISABLE(extended-dtd,
@@ -746,6 +738,14 @@ CF_ARG_ENABLE(syslog,
 	[use_syslog=no])
 AC_MSG_RESULT($use_syslog)
 test $use_syslog = yes && AC_DEFINE(SYSLOG_REQUESTED_URLS)
+
+AC_MSG_CHECKING(if persistent-cookie logic should be used)
+CF_ARG_ENABLE(persistent-cookies,
+[  --disable-persistent-cookies  disable persistent-cookie support],
+	[use_filed_cookies=$enableval],
+	[use_filed_cookies=yes])
+AC_MSG_RESULT($use_filed_cookies)
+test $use_filed_cookies != no && AC_DEFINE(EXP_PERSISTENT_COOKIES)
 
 AC_MSG_CHECKING(if you want to underline links)
 CF_ARG_ENABLE(underlines,

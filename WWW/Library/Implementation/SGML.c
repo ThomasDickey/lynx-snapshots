@@ -3190,8 +3190,15 @@ top1:
 	    context->state = S_equals;
 	    break;
 	}
+#ifdef USE_PSRC
+	/* we are here because this char seemed the beginning of attrname */
+	if (psrc_view && context->current_attribute_number == INVALID) {
+	    PSRCSTOP(badattr);
+	    PUTC(' ');
+	}
+#endif
 	HTChunkPutc(string, c);
-	context->state = S_attr;		/* Get next attribute */
+	context->state = S_attr; /* Get next attribute */
 	break;
 
     case S_equals:		/* After attr = */
@@ -3202,7 +3209,7 @@ top1:
 #ifdef USE_PSRC
 	    if (psrc_view) {
 		if (context->current_tag != context->unknown_tag)
-    		    PSRCSTOP(tag);
+		    PSRCSTOP(tag);
 		else
 		    PSRCSTOP(badtag);
 		PSRCSTART(abracket);

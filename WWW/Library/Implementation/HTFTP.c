@@ -1418,7 +1418,7 @@ PRIVATE void parse_vms_dir_entry ARGS2(
 
     /**  Get rid of blank lines, and information lines.  **/
     /**  Valid lines have the ';' version number token.  **/
-    if (!strlen(line) || (cp=strchr(line, ';')) == NULL) {
+    if (!strlen(line) || (cp = strchr(line, ';')) == NULL) {
 	entry_info->display = FALSE;
 	return;
     }
@@ -1935,12 +1935,12 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
 		*first = FALSE;
 		if (!strncmp(entry, "total ", 6) ||
 		    strstr(entry, "not available") != NULL) {
-		    entry_info->display=FALSE;
+		    entry_info->display = FALSE;
 		    return(entry_info);
 		} else if (unsure_type) {
 		    /* this isn't really a unix server! */
 		    server_type = GENERIC_SERVER;
-		    entry_info->display=FALSE;
+		    entry_info->display = FALSE;
 		    return(entry_info);
 		}
 	    }
@@ -1982,7 +1982,7 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
 
 	    if (!strcmp(entry_info->filename,"..") ||
 		!strcmp(entry_info->filename,"."))
-		entry_info->display=FALSE;
+		entry_info->display = FALSE;
 	    /*
 	    **	Goto the bottom and get real type.
 	    */
@@ -2576,7 +2576,6 @@ PUBLIC int HTFTPLoad ARGS4(
     int status;
     int retry;			/* How many times tried? */
     HTFormat format;
-    char command[LINE_LENGTH+1];
 
 
     /* set use_list to NOT since we don't know what kind of server
@@ -2626,6 +2625,7 @@ PUBLIC int HTFTPLoad ARGS4(
 /*	Tell the server to be passive
 */
 	{
+	    char command[LINE_LENGTH+1];
 	    char *p;
 	    int reply, h0, h1, h2, h3, p0, p1;	/* Parts of reply */
 	    int status;
@@ -3014,19 +3014,19 @@ PUBLIC int HTFTPLoad ARGS4(
 	    /** Otherwise, go to appropriate directory and doctor filename **/
 	    if (!strncmp(filename, "/~", 2))
 		filename += 2;
-	    CTRACE(tfp, "check '%s' to translate x/y/ to x[y]\n", filename);
+	    CTRACE(tfp, "check '%s' to translate x/y/ to [.x.y]\n", filename);
 	    if (!included_device &&
 		(cp = strchr(filename, '/')) != NULL &&
-		(cp1 = strrchr(cp, '/')) != NULL && cp != cp1) {
+		(cp1 = strrchr(cp, '/')) != NULL &&
+		(cp1 - cp) > 1) {
 		char *tmp = 0;
 
-		StrAllocCopy(tmp, cp+1);
-		tmp[(cp1-cp)] = 0;
+		HTSprintf0(&tmp, "[.%.*s]", cp1-cp-1, cp+1);
 
-		CTRACE(tfp, "change command '%s'\n", command);
-		while ((cp2 = strrchr(command, '/')) != NULL)
+		CTRACE(tfp, "change path '%s'\n", tmp);
+		while ((cp2 = strrchr(tmp, '/')) != NULL)
 		    *cp2 = '.';
-		CTRACE(tfp, "...to  command '%s'\n", command);
+		CTRACE(tfp, "...to  path '%s'\n", tmp);
 
 		status = send_cwd(tmp);
 		FREE(tmp);

@@ -128,6 +128,10 @@ PRIVATE int add_it ARGS2(char *, text, int, len)
     return 0;
 }
 
+/*
+ * addlbl() is used instead of plain addstr() in old-style options menu
+ * to show hot keys in bold.
+ */
 PRIVATE void addlbl ARGS1(CONST char *, text)
 {
     char actual[80];
@@ -420,7 +424,7 @@ draw_options:
 
 #ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
     move(L_Exec, 5);
-    addstr("local e(X)ecution links      : ");
+    addlbl("local e(X)ecution links      : ");
 #ifndef NEVER_ALLOW_REMOTE_EXEC
     addstr(               local_exec ? "ALWAYS ON           " :
 	  (local_exec_on_local_files ? "FOR LOCAL FILES ONLY" :

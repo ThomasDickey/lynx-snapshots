@@ -161,6 +161,10 @@ II. Compile instructions -- UNIX
     order shown by the -help option is different.  See "docs/README.defines"
     for information on defines for which there are no option switches.
 
+  --disable-alt-bindings 		(define EXP_ALT_BINDINGS)
+	Compiles-in an alternative set of line-edit bindings, in addition
+	to the default bindings.
+
   --disable-config-info			(define NO_CONFIG_INFO)
   	Use this option to disable the browsable configuration information
 	(screens that show the result of the configuration script, as well
@@ -272,6 +276,13 @@ II. Compile instructions -- UNIX
 	Turn off code that lets Lynx display parts of a long page while loading
 	it.
 
+  --disable-persistent-cookies		(define EXP_PERSISTENT_COOKIES)
+	Use this option to tell configure whether to compile-in support for
+	saving cookies to a file, for subsequent reuse.  This creates the file
+	specified by the 'COOKIE_FILE' option, or defaults to ".lynx_cookies"
+	in the home directory.  (Currently there is no protection against
+	conflict if several lynx copies are active from the same account).
+
   --disable-trace			(define NO_LYNX_TRACE)
 	Turn off code that lets you trace internal details of Lynx's operation.
 	We recommend that you leave this enabled, since we need this
@@ -281,10 +292,6 @@ II. Compile instructions -- UNIX
   --enable-addrlist-page		(define EXP_ADDRLIST_PAGE)
 	Compiles-in an alternative list-page, bound to 'A' rather than 'l',
 	which always lists URLs rather than titles.
-
-  --enable-alt-bindings 		(define EXP_ALT_BINDINGS)
-	Compiles-in an alternative set of line-edit bindings, in addition
-	to the default bindings.
 
   --enable-cgi-links			(define LYNXCGI_LINKS)
 	Allows lynx to access a cgi script directly without the need for
@@ -346,13 +353,6 @@ II. Compile instructions -- UNIX
   --enable-nsl-fork			(define NSL_FORK)
 	Disabled by default, this allows interruption of NSL requests,
 	so that `z' will stop the `look-up' phase of a connection.
-
-  --enable-persistent-cookies		(define EXP_PERSISTENT_COOKIES)
-	Use this option to compile-in support for saving cookies to a file,
-	for subsequent reuse.  This creates the file specified by the
-	'COOKIE_FILE' option, or defaults to ".lynx_cookies" in the home
-	directory.  (Currently there is no protection against conflict
-	if several lynx copies active from the same account).
 
   --enable-prettysrc			(define USE_PSRC)
 	Use this option to compile-in support for colorizing the source
