@@ -73,7 +73,9 @@ PUBLIC char *LYNewsPost ARGS2(
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(postfile);
     }
+#ifndef __DJGPP__ 
     chmod(my_tempfile, 0600);
+#endif /* __DJGPP__ */   
 
     /*
      *  If we're using a Japanese display character set,
@@ -94,7 +96,9 @@ PUBLIC char *LYNewsPost ARGS2(
 #endif /* VMS */
 	    return(postfile);
 	}
+#ifndef __DJGPP__ 
 	chmod(CJKfile, 0600);
+#endif /* __DJGPP__ */
     }
 
     /*

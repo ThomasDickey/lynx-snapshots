@@ -523,7 +523,9 @@ try_again:
 #endif /* SIGTSTP */
 			        exit(-1);
 			    }
+#ifndef __DJGPP__  
 			    chmod(TRAVERSE_ERRORS, 0600);
+#endif /* __DJGPP__ */
 		        }
 		        fprintf(ofp, "%s %s\tin %s\n",
 		       		     links[curdoc.link].lname, 
@@ -1337,7 +1339,9 @@ try_again:
 	        sprintf(cfile,"lnk%08d.dat",ccount);
 	        ccount = ccount + 1;
 	        if ((cfp = fopen(cfile,"w"))  != NULL) {
+#ifndef __DJGPP__  
 		    chmod(cfile, 0600);
+#endif /* __DJGPP__ */
 	            print_crawl_to_fd(cfp,curdoc.address,curdoc.title);
 	            fclose(cfp);
 	        } else {
@@ -4552,7 +4556,9 @@ check_add_bookmark_to_self:
 		    break;
 		}
 #endif /* VMS */
+#ifndef __DJGPP__  
 		chmod(LYTraceLogPath, 0600);
+#endif /* __DJGPP__ */
 		*stderr = *LYTraceLogFP;
 		fprintf(stderr, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
 	    }

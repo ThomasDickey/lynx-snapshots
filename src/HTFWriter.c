@@ -585,7 +585,9 @@ SaveAndExecute_tempname:
 	FREE(me);
 	return NULL;
     }
+#ifndef __DJGPP__ 
     chmod(fnam, 0600);
+#endif /* __DJGPP__ */ 
 
     StrAllocCopy(me->viewer_command, pres->command);
     /*
@@ -785,7 +787,9 @@ SaveToFile_tempname:
         FREE(ret_obj);
         return NULL;
     }
+#ifndef __DJGPP__ 
     chmod(fnam, 0600);
+#endif /* __DJGPP__ */ 
 
     /*
      *  Any "application/foo" or other non-"text/foo" types that
@@ -1048,7 +1052,9 @@ Compressed_tempname:
 	FREE(me);
 	return NULL;
     }
+#ifndef __DJGPP__ 
     chmod(fnam, 0600);
+#endif /* __DJGPP__ */
 
     /*
      *  me->viewer_command will be NULL if the converter Pres found above

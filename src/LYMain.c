@@ -1014,7 +1014,9 @@ PUBLIC int main ARGS2(
 	    exit(-1);
 	}
 #endif /* VMS */
+#ifndef __DJGPP__ 
 	chmod(LYTraceLogPath, 0600);
+#endif /* __DJGPP__ */
 	*stderr = *LYTraceLogFP;
 	fprintf(stderr, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
     }

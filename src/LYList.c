@@ -89,7 +89,9 @@ PUBLIC int showlist ARGS2(
 	sleep(MessageSecs);
 	return(-1);
     }
+#ifndef __DJGPP__
     chmod(tempfile, 0600);
+#endif /* __DJGPP__ */
 
     StrAllocCopy(*newfile, list_filename);
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */

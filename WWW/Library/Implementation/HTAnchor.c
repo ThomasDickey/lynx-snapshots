@@ -21,6 +21,7 @@
 #include "HTAnchor.h"
 #include "HTParse.h"
 #ifdef EXP_CHARTRANS
+#include "UCAux.h"
 #include "UCMap.h"
 #endif /* EXP_CHARTRANS */
 

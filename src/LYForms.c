@@ -682,7 +682,7 @@ PRIVATE int popup_options ARGS7(
 #endif
     LYsubwindow(form_window);
 #endif
-#if defined(COLOR_CURSES)	/* not defined in ncurses 1.8.7 */
+#if defined(COLOR_CURSES) && defined(getbkgd) /* not defined in ncurses 1.8.7 */
     wbkgd(form_window, getbkgd(stdscr));
     wbkgdset(form_window, getbkgd(stdscr));
 #endif

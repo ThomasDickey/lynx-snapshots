@@ -198,7 +198,9 @@ retry:
     system(cmd);
     fflush(stdout);
     start_curses();
+#ifndef __DJGPP__ 
     chmod(buffer, 0600);
+#endif /* __DJGPP__ */ 
     /* don't remove(file); */
 
     return 1;
@@ -252,7 +254,9 @@ PUBLIC int LYUpload_options ARGS2(
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
+#ifndef __DJGPP__ 
     chmod(tempfile, 0600);
+#endif /* __DJGPP__ */ 
 
 #ifdef VMS
     strcpy(curloc, "/sys$login");
