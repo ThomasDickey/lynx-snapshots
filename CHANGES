@@ -1,6 +1,15 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2001-06-03 (2.8.4pre.1)
+This version has been test-built on Linux (BSD curses, ncurses,
+slang), Tru64 5.1 (cc, curses/ncurses/slang), OpenVMS, OS/2 EMX, win32
+(both Visual C++ 4.1 and 5.0 as well as Borland C++), AIX 4, HPUX 11,
+Solaris 8.  Recent builds include SunOS 4.1.4 (cc and gcc,
+curses/ncurses/slang), Solaris 2.5.1 (cc and gcc,
+curses/ncurses/slang) and IRIX 6.5 (cc and gcc, curses/ncurses).  Less
+recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
+
 2001-06-02 (2.8.4dev.21)
 * regenerated lynx.pot and resync'd the .po files against it with msgmerge,
   formatted to 132 columns to minimize line-breaks, for ease of comparison -TD
