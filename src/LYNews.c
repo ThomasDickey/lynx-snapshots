@@ -46,9 +46,9 @@ PUBLIC char *LYNewsPost ARGS2(
     CONST char *kp = NULL;
     int c = 0;  /* user input */
     FILE *fd = NULL;
-    char my_tempfile[256];
+    char my_tempfile[LY_MAXPATH];
     FILE *fc = NULL;
-    char CJKfile[256];
+    char CJKfile[LY_MAXPATH];
     char *postfile = NULL;
     char *NewsGroups = NULL;
     char *org = NULL;

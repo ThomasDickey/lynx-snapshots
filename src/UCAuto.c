@@ -37,9 +37,9 @@ typedef enum {
     GN_Blat1, GN_0decgraf, GN_Ucp437, GN_Kuser, GN_dunno, GN_dontCare
 } TTransT_t;
 
-static char T_font_fn[100] = "\0";
-static char T_umap_fn[100] = "\0";
-static char T_setfont_cmd[200] = "\0";
+static char *T_font_fn = NULL;
+static char *T_umap_fn = NULL;
+
 #define SETFONT "setfont"
 #define NOOUTPUT "2>/dev/null >/dev/null"
 
@@ -48,37 +48,38 @@ PRIVATE void call_setfont ARGS3(
 	char *, 	fnsuffix,
 	char *, 	umap)
 {
-    if (font && *font && umap && *umap &&
-	!strcmp(font, T_font_fn) && !strcmp(umap, T_umap_fn)) {
+    char *T_setfont_cmd = NULL;
+
+    if ((font && T_font_fn && !strcmp(font, T_font_fn))
+     && (umap && T_umap_fn && !strcmp(umap, T_umap_fn))) {
 	/*
 	 *  No need to repeat.
 	 */
 	return;
     }
     if (font)
-	strcpy(T_font_fn, font);
+	StrAllocCopy(T_font_fn, font);
     if (umap)
-	strcpy(T_umap_fn, umap);
+	StrAllocCopy(T_umap_fn, umap);
 
     if (!*fnsuffix)
 	fnsuffix = "";
 
     if (umap &&*umap && font && *font) {
-	sprintf(T_setfont_cmd, "%s %s%s -u %s %s",
+	HTSprintf0(&T_setfont_cmd, "%s %s%s -u %s %s",
 		SETFONT, font, fnsuffix,	umap,	NOOUTPUT);
     } else if (font && *font) {
-	sprintf(T_setfont_cmd, "%s %s%s %s",
+	HTSprintf0(&T_setfont_cmd, "%s %s%s %s",
 		SETFONT, font, fnsuffix,		NOOUTPUT);
     } else if (umap && *umap) {
-	sprintf(T_setfont_cmd, "%s -u %s %s",
+	HTSprintf0(&T_setfont_cmd, "%s -u %s %s",
 		SETFONT,			umap,	NOOUTPUT);
-    } else {
-	*T_setfont_cmd = '\0';
     }
 
-    if (*T_setfont_cmd) {
+    if (T_setfont_cmd) {
 	CTRACE(tfp, "Executing setfont: '%s'\n", T_setfont_cmd);
 	LYSystem(T_setfont_cmd);
+	FREE(T_setfont_cmd);
     }
 }
 
@@ -124,7 +125,8 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
     TGen_state_t Utf = Dunno;
     TGen_state_t HasUmap = Dunno;
 
-    char tmpbuf1[100], tmpbuf2[20];
+    char *tmpbuf1 = NULL;
+    char *tmpbuf2 = NULL;
 
     /*
      *	Restore the original character set.
@@ -137,13 +139,14 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 
 	    if (have_font) {
 		if (have_umap) {
-		    sprintf(tmpbuf1, "%s %s -u %s %s",
+		    HTSprintf0(&tmpbuf1, "%s %s -u %s %s",
 			    SETFONT, old_font, old_umap, NOOUTPUT);
 		} else {
-		    sprintf(tmpbuf1, "%s %s %s",
+		    HTSprintf0(&tmpbuf1, "%s %s %s",
 			    SETFONT, old_font, NOOUTPUT);
 		}
 		LYSystem(tmpbuf1);
+		FREE(tmpbuf1);
 	    }
 
 	    remove(old_font);
@@ -158,9 +161,10 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
     } else if (lastcs < 0 && old_umap == 0 && old_font == 0) {
 	old_umap = tempnam((char *)0, "umap");
 	old_font = tempnam((char *)0, "font");
-	sprintf(tmpbuf1, "%s -o %s -ou %s %s",
+	HTSprintf0(&tmpbuf1, "%s -o %s -ou %s %s",
 		SETFONT, old_font, old_umap, NOOUTPUT);
 	LYSystem(tmpbuf1);
+	FREE(tmpbuf1);
     }
 
     name = p->MIMEname;
@@ -223,12 +227,13 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	HasUmap = Is_Set;
 	Utf = Is_Unset;
     } else if (!strncmp(name, "iso-8859-", 9)) {
-	sprintf(tmpbuf1, "iso0%s", &name[9]);
-	sprintf(tmpbuf2, "iso0%s%s", &name[9],".uni");
+	HTSprintf0(&tmpbuf1, "iso0%s", &name[9]);
+	HTSprintf0(&tmpbuf2, "iso0%s%s", &name[9],".uni");
 	/*
 	 *  "setfont iso0N.f16 -u iso0N.uni"
 	 */
 	call_setfont(tmpbuf1, SUFF1, tmpbuf2);
+	FREE(tmpbuf2);
 	TransT = GN_Kuser;
 	HasUmap = Is_Set;
 	Utf = Is_Unset;

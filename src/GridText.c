@@ -1160,10 +1160,8 @@ PRIVATE void display_page ARGS3(
 	/*
 	 *  Currently implemented only for LINUX
 	 */
-	stop_curses();
 	UCChangeTerminalCodepage(current_char_set,
 				 &LYCharSet_UC[current_char_set]);
-	start_curses();
 #endif /* LINUX */
 #endif /* EXP_CHARTRANS_AUTOSWITCH */
     }
@@ -1180,8 +1178,13 @@ PRIVATE void display_page ARGS3(
     }
 
 #ifdef USE_COLOR_STYLE
+#ifdef DISP_PARTIAL
+    if (display_partial ||
+	line_number != text->first_lineno_last_disp_partial ||
+	line_number > text->last_lineno_last_disp_partial)
+#endif /* DISP_PARTIAL */
     LynxResetScreenCache();
-#endif
+#endif /* USE_COLOR_STYLE */
 
     text->top_of_screen = line_number;
     display_title(text);  /* will move cursor to top of screen */
@@ -1610,6 +1613,7 @@ PRIVATE void display_page ARGS3(
 #ifdef DISP_PARTIAL
     if (display_partial && display_flag &&
 	last_disp_partial >= text->top_of_screen &&
+	!enable_scrollback &&
 	!recent_sizechange) {	/*  really remember them if ok - kw  */
 	text->first_lineno_last_disp_partial = text->top_of_screen;
 	text->last_lineno_last_disp_partial = last_disp_partial;
@@ -2368,7 +2372,6 @@ PUBLIC void HText_appendCharacter ARGS2(
 	    CTRACE(tfp, "add(%c) %d/%d\n", ch,
 		   HTisDocumentSource(), HTOutputFormat != WWW_SOURCE);
 	}
-	FREE(special);
     } /* trace only */
 #endif /* DEBUG_APPCH */
 
@@ -3107,7 +3110,7 @@ PUBLIC void HText_endAnchor ARGS2(
 	     */
 	    i = a->extent;
 	}
-	j = (last->size - i);
+	k = j = (last->size - i);
 	while (j < last->size) {
 	    if (!IsSpecialAttrChar(last->data[j]) &&
 		!isspace((unsigned char)last->data[j]) &&
@@ -3146,11 +3149,12 @@ PUBLIC void HText_endAnchor ARGS2(
 	while (i == 0 &&
 	       (a->extent > CurBlankExtent ||
 		(a->extent == CurBlankExtent &&
+		 k == 0 &&
 		 prev != text->last_line &&
 		 (prev->size == 0 ||
 		  prev->data[prev->size - 1] == ']')))) {
 	    start = prev;
-	    j = prev->size - a->extent + CurBlankExtent;
+	    k = j = prev->size - a->extent + CurBlankExtent;
 	    if (j < 0) {
 		/*
 		 *  The anchor starts on a preceding line,
@@ -3175,7 +3179,8 @@ PUBLIC void HText_endAnchor ARGS2(
 	    }
 	    if (i == 0) {
 		if (a->extent > (CurBlankExtent + prev->size) ||
-		    (a->extent == CurBlankExtent + prev->size &&
+		    (a->extent == CurBlankExtent + (int)prev->size &&
+		     k == 0 &&
 		     prev->prev != text->last_line &&
 		     (prev->prev->size == 0 ||
 		      prev->prev->data[prev->prev->size - 1] == ']'))) {
@@ -4634,6 +4639,17 @@ PUBLIC BOOL HText_select ARGS1(
 	 */
 	if (text)
 	    text->page_has_target = NO;
+
+#ifdef DISP_PARTIAL
+	/* Reset these for the previous and current text. - kw */
+	text->first_lineno_last_disp_partial =
+	    text->last_lineno_last_disp_partial = -1;
+	if (HTMainText) {
+	    HTMainText->first_lineno_last_disp_partial =
+		HTMainText->last_lineno_last_disp_partial = -1;
+	}
+#endif /* DISP_PARTIAL */
+
 	/*
 	 *  Make this text the most current in the loaded texts list. - FM
 	 */

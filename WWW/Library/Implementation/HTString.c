@@ -128,12 +128,16 @@ PUBLIC char * HTSACopy ARGS2(
 	char **,	dest,
 	CONST char *,	src)
 {
-    FREE(*dest);
-    if (src) {
-	*dest = (char *) malloc (strlen(src) + 1);
-	if (*dest == NULL)
-	    outofmem(__FILE__, "HTSACopy");
-	strcpy (*dest, src);
+    if (src != 0) {
+	if (src != *dest) {
+	    FREE(*dest);
+	    *dest = (char *) malloc (strlen(src) + 1);
+	    if (*dest == NULL)
+		outofmem(__FILE__, "HTSACopy");
+	    strcpy (*dest, src);
+	}
+    } else {
+	FREE(*dest);
     }
     return *dest;
 }
@@ -144,7 +148,7 @@ PUBLIC char * HTSACat ARGS2(
 	char **,	dest,
 	CONST char *,	src)
 {
-    if (src && *src) {
+    if (src && *src && (src != *dest)) {
 	if (*dest) {
 	    int length = strlen(*dest);
 	    *dest = (char *)realloc(*dest, length + strlen(src) + 1);
@@ -690,6 +694,55 @@ PRIVATE CONST char *HTAfterCommandArg ARGS2(
 }
 
 /*
+ * Like HTAddParam, but the parameter may be an environment variable, which we
+ * will expand and append.  Do this only for things like the command-verb,
+ * where we obtain the parameter from the user's configuration.  Any quoting
+ * required for the environment variable has to be done within its value, e.g.,
+ *
+ *	setenv EDITOR 'xvile -name "No such class"'
+ *
+ * This is useful only when we quote parameters, of course.
+ */
+#if USE_QUOTED_PARAMETER
+PUBLIC void HTAddXpand ARGS4(
+    char **,		result,
+    CONST char *,	command,
+    int,		number,
+    CONST char *,	parameter)
+{
+    if (*parameter != '$') {
+	HTAddParam (result, command, number, parameter);
+    } else if (number > 0) {
+	CONST char *last = HTAfterCommandArg(command, number - 1);
+	CONST char *next = last;
+
+	parameter = getenv(parameter+1);
+	if (parameter == 0)
+	    parameter = "";
+
+	if (number <= 1) {
+	    FREE(*result);
+	}
+
+	while (next[0] != 0) {
+	    if (HTIsParam(next)) {
+		if (next != last) {
+		    size_t len = (next - last)
+		    		+ ((*result != 0) ? strlen(*result) : 0);
+		    HTSACat(result, last);
+		    (*result)[len] = 0;
+		}
+		HTSACat(result, parameter);
+		CTRACE(tfp, "PARAM-EXP:%s\n", *result);
+		return;
+	    }
+	    next++;
+	}
+    }
+}
+#endif /* USE_QUOTED_PARAMETER */
+
+/*
  * Append string-parameter to a system command that we are constructing.  The
  * string is a complete parameter (which is a necessary assumption so we can
  * quote it properly).  We're given the index of the newest parameter we're
@@ -706,11 +759,11 @@ PUBLIC void HTAddParam ARGS4(
     int,		number,
     CONST char *,	parameter)
 {
-    CONST char *last = HTAfterCommandArg(command, number - 1);
-    CONST char *next = last;
-    char *quoted;
-
     if (number > 0) {
+	CONST char *last = HTAfterCommandArg(command, number - 1);
+	CONST char *next = last;
+	char *quoted;
+
 	if (number <= 1) {
 	    FREE(*result);
 	}

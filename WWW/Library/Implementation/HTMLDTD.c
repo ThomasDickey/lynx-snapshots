@@ -1325,7 +1325,7 @@ static attr ulist_attr[] = {			/* UL attributes */
 **	Must be in alphabetical order.
 **
 **  The T_* extra info is listed here, but it won't matter (is not used
-**  in SGML.c if New_DTD is not set).  This mainly simplifies comparison
+**  in SGML.c if Old_DTD is not set).  This mainly simplifies comparison
 **  of the tags_old[] table (otherwise unchanged from original Lynx treatment)
 **  with the tags_new[] table below. - kw
 **

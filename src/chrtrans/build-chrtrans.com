@@ -140,6 +140,8 @@ $ define/user sys$output 'CHRwhere'iso09_uni.h	!ISO 8859-9 (Latin 5)
 $ makeuctb iso09_uni.tbl
 $ define/user sys$output 'CHRwhere'iso10_uni.h	!ISO 8859-10
 $ makeuctb iso10_uni.tbl
+$ define/user sys$output 'CHRwhere'iso15_uni.h	!ISO 8859-15
+$ makeuctb iso15_uni.tbl
 $ define/user sys$output 'CHRwhere'utf8_uni.h	!UNICODE UTF-8
 $ makeuctb utf8_uni.tbl
 $ define/user sys$output 'CHRwhere'rfc_suni.h	!RFC 1345 w/o Intro

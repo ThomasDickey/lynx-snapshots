@@ -33,7 +33,7 @@ LYE_UPPER,      LYE_ERASE,      LYE_LKCMD,      LYE_NOP,
 LYE_ERASE,      LYE_NOP,        LYE_NOP,        LYE_NOP,
 /* ^X           ^Y              ^Z              ESC     */
 
-LYE_NOP,        LYE_NOP,        LYE_SWMAP,      LYE_NOP,
+LYE_NOP,        LYE_NOP,        LYE_SWMAP,      LYE_DELEL,
 /* ^\           ^]              ^^              ^_      */
 
 /* sp .. RUBOUT                                         */
@@ -110,15 +110,17 @@ LYE_NOP,        LYE_TAB,        LYE_BOL,        LYE_EOL,
 /* F1           Do key          Find key        Select key  */
 
 LYE_NOP,        LYE_DELP,       LYE_NOP,        LYE_NOP,
-/* Insert key   Remove key      MOUSE_KEY       DO_NOTHING         */
+/* Insert key   Remove key      MOUSE_KEY       DO_NOTHING  */
 };
 
 /*
  * Add your favorite key bindings HERE
  */
 
-/* 01 */ /* Default except that  ^F=cursor-forward  and  ^B=cursor-backward */
-/*    */
+/* KED-01 */ /* Default except: ^B=cursor-backward,  ^F=cursor-forward,   */
+             /*                 ^K=delete-to-EOL,    ^X=delete-to-BOL,    */
+             /*                 ^R=delete-prev-word, ^T=delete-next-word, */
+             /*                 ^^=upper-case-line,  ^_=lower-case-line   */
 
 #ifdef EXP_ALT_BINDINGS
 PRIVATE char BetterEditBinding[]={
@@ -141,7 +143,7 @@ LYE_BACKW,      LYE_NOP,        LYE_DELPW,      LYE_NOP,
 LYE_DELNW,      LYE_ERASE,      LYE_LKCMD,      LYE_NOP,
 /* ^T           ^U              ^V              ^W      */
 
-LYE_ERASE,      LYE_NOP,        LYE_NOP,        LYE_NOP,
+LYE_DELBL,      LYE_NOP,        LYE_NOP,        LYE_NOP,
 /* ^X           ^Y              ^Z              ESC     */
 
 LYE_NOP,        LYE_NOP,        LYE_UPPER,      LYE_LOWER,
@@ -221,7 +223,7 @@ LYE_NOP,        LYE_TAB,        LYE_BOL,        LYE_EOL,
 /* F1           Do key          Find key        Select key  */
 
 LYE_NOP,        LYE_DELP,       LYE_NOP,        LYE_NOP,
-/* Insert key   Remove key      DO_NOTHING      ...         */
+/* Insert key   Remove key      MOUSE_KEY       DO_NOTHING  */
 };
 #endif
 

@@ -138,7 +138,39 @@ PUBLIC FILE *TraceFP NOARGS
 PRIVATE void TracelogOpenFailed NOARGS
 {
     WWW_TraceFlag = FALSE;
-    HTUserMsg(TRACELOG_OPEN_FAILED);
+    if (LYCursesON) {
+	HTUserMsg(TRACELOG_OPEN_FAILED);
+    } else {
+	fprintf(stderr, "%s\n", TRACELOG_OPEN_FAILED);
+	exit(-1);
+    }
+}
+
+PUBLIC BOOLEAN LYOpenTraceLog NOARGS
+{
+    if (TRACE && LYUseTraceLog && LYTraceLogFP == NULL) {
+	/*
+	 * If we can't open it for writing, give up.  Otherwise, on VMS close
+	 * it, delete it and any versions from previous sessions so they don't
+	 * accumulate, and open it again.  - FM
+	 */
+	if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
+	    TracelogOpenFailed();
+	    return FALSE;
+	}
+#ifdef VMS
+	LYCloseTracelog();
+	HTSYS_remove(LYTraceLogPath);
+	if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
+	    TracelogOpenFailed();
+	    return FALSE;
+	}
+#endif /* VMS */
+	fflush(stdout);
+	fflush(stderr);
+	fprintf(tfp, "\t\t%s (%s)\n\n", LYNX_TRACELOG_TITLE, LYNX_VERSION);
+    }
+    return TRUE;
 }
 
 PUBLIC void LYCloseTracelog NOARGS
@@ -2130,12 +2162,9 @@ new_cmd:  /*
 	    newdoc.line = curdoc.line;
 	    newdoc.link = curdoc.link;
 #endif /* NO_ASSUME_SAME_DOC */
-	    if (New_DTD)
-		New_DTD = NO;
-	    else
-		New_DTD = YES;
-	    HTSwitchDTD(New_DTD);
-	    HTUserMsg(New_DTD ? USING_DTD_1 : USING_DTD_0);
+	    Old_DTD = !Old_DTD;
+	    HTSwitchDTD(!Old_DTD);
+	    HTUserMsg(Old_DTD ? USING_DTD_0 : USING_DTD_1);
 	    break;
 
 #ifdef NOT_DONE_YET
@@ -4980,40 +5009,9 @@ check_add_bookmark_to_self:
 #endif /* DIRED_SUPPORT */
 
 	case LYK_TRACE_TOGGLE:	/*  Toggle TRACE mode. */
-	    if (WWW_TraceFlag)
-		WWW_TraceFlag = FALSE;
-	    else
-		WWW_TraceFlag = TRUE;
-
-	    if (TRACE && LYUseTraceLog && LYTraceLogFP == NULL) {
-		/*
-		 *  We haven't yet started a TRACE log for this
-		 *  session.  If we can't open the file with write
-		 *  access, turn off TRACE and give up.  Otherwise,
-		 *  on VMS we'll close it and delete it and any
-		 *  log file from a previous session, so they don't
-		 *  accumulate, and then open it again, including
-		 *  "shr=get" to overcome open file locking when
-		 *  attempting to read the log via the TRACE_LOG
-		 *  command. - FM
-		 */
-		if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
-		    TracelogOpenFailed();
-		    break;
-		}
-#ifdef VMS
-		LYCloseTracelog();
-		HTSYS_remove(LYTraceLogPath);
-		if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
-		    TracelogOpenFailed();
-		    break;
-		}
-#endif /* VMS */
-		fprintf(tfp, "\t\t%s (%s)\n\n",
-			     LYNX_TRACELOG_TITLE,
-			     LYNX_VERSION);
-	    }
-	    HTUserMsg(WWW_TraceFlag ? TRACE_ON : TRACE_OFF);
+	    WWW_TraceFlag = ! WWW_TraceFlag;
+	    if (LYOpenTraceLog())
+		HTUserMsg(WWW_TraceFlag ? TRACE_ON : TRACE_OFF);
 	    break;
 
 	case LYK_TRACE_LOG:	/*  View TRACE log. */

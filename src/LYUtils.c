@@ -90,6 +90,12 @@ extern int BSDselect PARAMS((int nfds, fd_set * readfds, fd_set * writefds,
 #endif /* __FreeBSD__ || __bsdi__ */
 #endif /* !UTMP_FILE */
 
+#ifdef VMS
+#define COPY_COMMAND "copy/nolog/noconf %s %s"
+#else
+#define COPY_COMMAND "%s %s %s"
+#endif /* VMS */
+
 extern HTkcode kanji_code;
 extern BOOLEAN LYHaveCJKCharacterSet;
 extern HTCJKlang HTCJK;
@@ -1818,7 +1824,8 @@ PUBLIC void statusline ARGS1(
      *	character set selected, otherwise, strip any escapes.  Also,
      *	make sure text is not longer than the statusline window. - FM
      */
-    max_length = ((LYcols - 2) < 256) ? (LYcols - 2) : 255;
+    max_length = ((LYcols - 2) < sizeof(buffer))
+		? (LYcols - 2) : sizeof(buffer)-1;
     if ((text[0] != '\0') &&
 	(LYHaveCJKCharacterSet)) {
 	/*
@@ -2476,12 +2483,6 @@ PUBLIC int is_url ARGS1(
     if (LYIsHtmlSep(*cp))
 	return(0);
 
-#if defined (DOSPATH) || defined (__EMX__) /* sorry! */
-    if (strncmp(cp, "file:///", 8) && strlen(cp) == 19 &&
-	cp[strlen(cp)-1] == ':')
-	StrAllocCat(cp,"/");
-#endif
-
     if (compare_type(cp, "news:", 5)) {
 	return(NEWS_URL_TYPE);
 
@@ -2769,8 +2770,8 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
 		return(TRUE);
 #ifdef LINUX
 /* Linux fix to check for local user. J.Cullen 11Jul94		*/
-		if ((n > 0) && (strlen(me.ut_host) == 0))
-			return(TRUE);
+	    if ((n > 0) && (strlen(me.ut_host) == 0))
+		return(TRUE);
 #endif /* LINUX */
 
     } else {
@@ -3220,22 +3221,21 @@ PUBLIC void change_sug_filename ARGS1(
 }
 
 /*
- * Construct a temporary-filename
+ * Construct a temporary-filename.  Assumes result is LY_MAXPATH chars long.
  */
-PRIVATE char *fmt_tempname ARGS3(
+PRIVATE int fmt_tempname ARGS3(
 	char *, 	result,
 	CONST char *, 	prefix,
 	CONST char *,	suffix)
 {
     static unsigned counter;
-    char *leaf;
+    char leaf[LY_MAXPATH];
+    int code;
 
     if (prefix == 0)
 	prefix = "";
     if (suffix == 0)
 	suffix = "";
-    strcpy(result, prefix);
-    leaf = result + strlen(result);
     counter++;
 #ifdef FNAMES_8_3
     /*
@@ -3257,8 +3257,18 @@ PRIVATE char *fmt_tempname ARGS3(
 #else
     sprintf(leaf, "L%u-%uTMP%s", (unsigned)getpid(), counter, suffix);
 #endif
+    /*
+     * Someone could have configured the temporary pathname to be too long.
+     */
+    if ((strlen(prefix) + strlen(leaf)) < LY_MAXPATH) {
+	sprintf(result, "%s%s", prefix, leaf);
+	code = TRUE;
+    } else {
+	sprintf(result, "%.*s", LY_MAXPATH-1, leaf);
+	code = FALSE;
+    }
     CTRACE(tfp, "-> '%s'\n", result);
-    return result;
+    return (code);
 }
 
 /*
@@ -3727,7 +3737,7 @@ PUBLIC void LYConvertToURL ARGS1(
 		StrAllocCat(*AllocatedString, fragment);
 		fragment = NULL;
 	    }
-	} else if ((NULL != getcwd(dir_name, 255, 0)) &&
+	} else if ((NULL != getcwd(dir_name, sizeof(dir_name)-1, 0)) &&
 		   0 == chdir(old_string)) {
 	    /*
 	     * Probably a directory.  Try converting that.
@@ -3736,7 +3746,7 @@ PUBLIC void LYConvertToURL ARGS1(
 	    if (fragment != NULL) {
 		*fragment = '#';
 	    }
-	    if (NULL != getcwd(dir_name, 255, 0)) {
+	    if (NULL != getcwd(dir_name, sizeof(dir_name)-1, 0)) {
 		/*
 		 * Yup, we got it!
 		 */
@@ -3831,8 +3841,8 @@ have_VMS_URL:
 	    /*
 	     *	They want .
 	     */
-	    char curdir[DIRNAMESIZE];
-	    getcwd (curdir, DIRNAMESIZE);
+	    char curdir[LY_MAXPATH];
+	    getcwd (curdir, sizeof(curdir));
 	    StrAllocCopy(temp, wwwName(curdir));
 	    StrAllocCat(*AllocatedString, temp);
 	    FREE(temp);
@@ -3862,11 +3872,11 @@ have_VMS_URL:
 	    /*
 	     *	Create a full path to the current default directory.
 	     */
-	    char curdir[DIRNAMESIZE];
+	    char curdir[LY_MAXPATH];
 	    char *temp2 = NULL;
 	    BOOL is_local = FALSE;
 #if HAVE_GETCWD
-	    getcwd (curdir, DIRNAMESIZE);
+	    getcwd (curdir, sizeof(curdir));
 #else
 	    getwd (curdir);
 #endif /* NO_GETCWD */
@@ -3878,7 +3888,7 @@ have_VMS_URL:
 	    if (old_string[1] != ':' && old_string[1] != '|') {
 		StrAllocCopy(temp, wwwName(curdir));
 		LYAddHtmlSep(&temp);
-		LYstrncpy(curdir, temp, (DIRNAMESIZE - 1));
+		LYstrncpy(curdir, temp, (sizeof(curdir) - 1));
 		StrAllocCat(temp, old_string);
 	    } else {
 		curdir[0] = '\0';
@@ -5633,7 +5643,8 @@ PUBLIC FILE *LYOpenTemp ARGS3(
     }
 
     do {
-	(void) fmt_tempname(result, lynx_temp_space, suffix);
+	if (!fmt_tempname(result, lynx_temp_space, suffix))
+	    return 0;
 	if (txt) {
 	    switch (wrt) {
 	    case 'w':
@@ -5689,7 +5700,9 @@ PUBLIC FILE *LYOpenScratch ARGS2(
     FILE *fp;
     LY_TEMP *p;
 
-    (void) fmt_tempname(result, prefix, HTML_SUFFIX);
+    if (!fmt_tempname(result, prefix, HTML_SUFFIX))
+	return 0;
+
     if ((fp = LYNewTxtFile (result)) != 0) {
 	if ((p = (LY_TEMP *)calloc(1, sizeof(LY_TEMP))) != 0) {
 	    p->next = ly_temp;
@@ -6123,7 +6136,7 @@ PUBLIC void LYAddHtmlSep ARGS1(
  * to it.  This only applies to HTML paths.
  */
 PUBLIC void LYAddHtmlSep0 ARGS1(
-	char *,	path)
+	char *,		path)
 {
     size_t len;
 
@@ -6132,6 +6145,31 @@ PUBLIC void LYAddHtmlSep0 ARGS1(
      && !LYIsHtmlSep(path[len-1])) {
 	strcat(path, "/");
     }
+}
+
+/*
+ * Copy a file
+ */
+PUBLIC int LYCopyFile ARGS2(
+	char *,		src,
+	char *,		dst)
+{
+    int code;
+    char *the_command = 0;
+
+    HTAddParam(&the_command, COPY_COMMAND, 1, COPY_PATH);
+    HTAddParam(&the_command, COPY_COMMAND, 2, src);
+    HTAddParam(&the_command, COPY_COMMAND, 3, dst);
+    HTEndParam(&the_command, COPY_COMMAND, 3);
+
+    CTRACE(tfp, "command: %s\n", the_command);
+    stop_curses();
+    code = LYSystem(the_command);
+    start_curses();
+
+    FREE(the_command);
+
+    return code;
 }
 
 /*

@@ -19,7 +19,7 @@
 
 PUBLIC void read_rc NOPARAMS
 {
-    char line_buffer[256];
+    char line_buffer[LINESIZE];
     char rcfile[LY_MAXPATH];
     FILE *fp;
     char *cp, *cp2;

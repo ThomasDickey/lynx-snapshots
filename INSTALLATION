@@ -583,18 +583,26 @@ IV. Compile instructions -- Win32 (Windows95/NT)
 
 V. Compile instructions -- 386 DOS
 
-    Compiling for DOS with DJGPP is a multistep procedure.  First install
-    the c compiler and its libraries.  Update the distribution with the
-    patched lib.c, to take care of bug fixes.  It is available at:
-    "http://www.cartsys.com/eldredge/djgpp-patches.html".
-    DJGPP, as distributed from the usual DJGPP archives, will
-    not successfully compile lynx.  You need to "stubedit" your
-    "cc1.exe" file.  The following parameters have worked successfully:
-    minstack=800k, bufsize=64k.  To accomplish this, move to the
-    djgpp\bin directory and type the command:
-	"stubedit cc1.exe bufsize=64k minstack=800k".
-    Or do it interactively with the command: "stubedit cc1.exe".
-    (see "http://www.flora.org/lynx-dev/html/month0897/msg00145.html").
+    Compiling for DOS with DJGPP is a multistep procedure. First install
+    the c compiler and its libraries. If using DJGPP 2.01, update the
+    distribution with the patched lib.c, to take care of bug fixes. It is
+    available at: "http://www.cartsys.com/eldredge/djgpp-patches.html".
+    GCC 2.7.2.1, as distributed from the usual DJGPP archives, will not
+    successfully compile lynx. You need to "stubedit" your "cc1.exe" file.
+    The following parameters have worked successfully: minstack=800k,
+    bufsize=64k. To accomplish this, move to the djgpp\bin directory
+    and type the command:
+    	"stubedit cc1.exe bufsize=64k minstack=800k".
+    Or do it interactively with the command: "stubedit cc1.exe". (see
+    "http://www.flora.org/lynx-dev/html/month0897/msg00145.html").
+
+    If using DJGPP 2.02 and GCC 2.8.1, you may not need to "stubedit"
+    cc1.exe if you use -O2 optimization, since cc1.exe comes with
+    a 1536K stack. To compile with -O3 optimization, the stub
+    needs to be edited to give a larger stack. To do this go into
+    djgpp\lib\gcc-lib\djgpp\2.81 and either type the command:
+   	 "stubedit cc1.exe bufsize=63k minstack=2M",
+    or edit interactively with: "stubedit cc1.exe".
 
     Unpack the source code using a DOS program like UNZIP386.  If you are
     using PKUNZIP to unpack the .zip archive, you must use the -d command

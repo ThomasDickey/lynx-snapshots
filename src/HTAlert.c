@@ -111,8 +111,12 @@ PUBLIC void HTReadProgress ARGS2(
 	if (transfer_rate <= 0)    /* the very first time */
 	    transfer_rate = (bytes) / (now - first);   /* bytes/sec */
 
-	/* optimal refresh time: every 0.2 sec */
-	if ((bytes - bytes_last) > (transfer_rate / 5)) {
+	/*
+	 * Optimal refresh time:  every 0.2 sec, use interpolation.  Transfer
+	 * rate is not constant when we have partial content in a proxy, so
+	 * interpolation lies - will check every second at least for sure.
+	 */
+	if (((bytes - bytes_last) > (transfer_rate / 5)) || (now != last)) {
 
 	    bytes_last += (transfer_rate / 5);	/* until we got next second */
 
@@ -412,7 +416,6 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 	CONST char *,	name,
 	CONST char *,	value)
 {
-    char message[256];
     domain_entry *de;
     int ch, namelen, valuelen, space_free;
 
@@ -471,9 +474,11 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 	valuelen = (int)(percentage*(float)valuelen);
     }
     if(!LYAcceptAllCookies) {
-	sprintf(message, ADVANCED_COOKIE_CONFIRMATION,
-		server, namelen, name, valuelen, value);
+	char *message = 0;
+	HTSprintf(&message, ADVANCED_COOKIE_CONFIRMATION,
+		 server, namelen, name, valuelen, value);
 	_statusline(message);
+	free(message);
     }
     while (1) {
 	if(!LYAcceptAllCookies) {
@@ -542,9 +547,10 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 	CONST char *,	Redirecting_url,
 	int,		server_status)
 {
+    int result = -1;
     char *show_POST_url = NULL;
-    char StatusInfo[256];
-    char url[256];
+    char *StatusInfo = 0;
+    char *url = 0;
     int on_screen = 0;	/* 0 - show menu
 			 * 1 - show url
 			 * 2 - menu is already on screen */
@@ -576,16 +582,14 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 	}
     }
 
-    StatusInfo[254] = StatusInfo[255] = '\0';
-    url[254] = url[(LYcols < 250 ? LYcols-1 : 255)] = '\0';
     if (user_mode == NOVICE_MODE) {
 	on_screen = 2;
 	move(LYlines-2, 0);
-	sprintf(StatusInfo, SERVER_ASKED_FOR_REDIRECTION, server_status);
+	HTSprintf0(&StatusInfo, SERVER_ASKED_FOR_REDIRECTION, server_status);
 	addstr(StatusInfo);
 	clrtoeol();
 	move(LYlines-1, 0);
-	sprintf(url, "URL: %.*s",
+	HTSprintf0(&url, "URL: %.*s",
 		    (LYcols < 250 ? LYcols-6 : 250), Redirecting_url);
 	addstr(url);
 	clrtoeol();
@@ -595,7 +599,7 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 	    _statusline(PROCEED_OR_CANCEL);
 	}
     } else {
-	sprintf(StatusInfo, "%d %.*s",
+	HTSprintf0(&StatusInfo, "%d %.*s",
 			    server_status,
 			    251,
 			    ((server_status == 301) ?
@@ -604,7 +608,7 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 	StrAllocCopy(show_POST_url, LOCATION_HEADER);
 	StrAllocCat(show_POST_url, Redirecting_url);
     }
-    while (1) {
+    while (result < 0) {
 	int c;
 
 	switch (on_screen) {
@@ -622,7 +626,8 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 		**  with same method and POST content. - FM
 		*/
 		FREE(show_POST_url);
-		return 1;
+		result = 1;
+		break;
 
 	    case 7:
 	    case 'C':
@@ -630,7 +635,8 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 		**  Cancel request.
 		*/
 		FREE(show_POST_url);
-		return 0;
+		result = 0;
+		break;
 
 	    case 'U':
 		/*
@@ -651,7 +657,8 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 		    **	Treat as 303 (GET without content).
 		    */
 		    FREE(show_POST_url);
-		    return 303;
+		    result = 303;
+		    break;
 		}
 		/* fall through to default */
 
@@ -666,4 +673,7 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 		}
 	}
     }
+    FREE(StatusInfo);
+    FREE(url);
+    return (result);
 }

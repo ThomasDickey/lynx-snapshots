@@ -58,6 +58,7 @@
 #include <iso08_uni.h>		/* ISO 8859-8 Hebrew	*/
 #include <iso09_uni.h>		/* ISO 8859-9 (Latin 5) */
 #include <iso10_uni.h>		/* ISO 8859-10		*/
+#include <iso15_uni.h>		/* ISO 8859-15 (Latin 9)*/
 #include <koi8r_uni.h>		/* KOI8-R Cyrillic	*/
 #include <mac_uni.h>		/* Macintosh (8 bit)	*/
 #include <mnem2_suni.h> 	/* RFC 1345 Mnemonic	*/
@@ -2013,6 +2014,7 @@ PUBLIC void UCInit NOARGS
  */
 
     UC_CHARSET_SETUP_iso_8859_1;	  /* ISO Latin 1	  */
+    UC_CHARSET_SETUP_iso_8859_15;	  /* ISO 8859-15 (Latin 9)*/
     UC_CHARSET_SETUP_cp850;		  /* DosLatin1 (cp850)	  */
     UC_CHARSET_SETUP_windows_1252;	  /* WinLatin1 (cp1252)   */
     UC_CHARSET_SETUP_cp437;		  /* DosLatinUS (cp437)   */

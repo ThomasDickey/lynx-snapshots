@@ -25,6 +25,18 @@ PUBLIC char *MBM_A_subdescript[MBM_V_MAXFILES+1];
 PRIVATE BOOLEAN is_mosaic_hotlist = FALSE;
 PRIVATE char * convert_mosaic_bookmark_file PARAMS((char *filename_buffer));
 
+PRIVATE void
+show_bookmark_not_defined NOARGS
+{
+    char *string_buffer = 0;
+
+    HTSprintf0(&string_buffer,
+	    BOOKMARK_FILE_NOT_DEFINED,
+	    key_for_func(LYK_OPTIONS));
+    LYMBM_statusline(string_buffer);
+    free(string_buffer);
+}
+
 /*
  *  Tries to open a bookmark file for reading, which may be
  *  the default, or based on offering the user a choice from
@@ -41,8 +53,8 @@ PRIVATE char * convert_mosaic_bookmark_file PARAMS((char *filename_buffer));
 PUBLIC char * get_bookmark_filename ARGS1(
 	char **,	URL)
 {
-    static char filename_buffer[256];
-    char string_buffer[256];
+    static char filename_buffer[LY_MAXPATH];
+    char string_buffer[BUFSIZ];
     FILE *fp;
     int MBM_tmp;
 
@@ -57,10 +69,7 @@ PUBLIC char * get_bookmark_filename ARGS1(
 	 */
 	return("");
     if (MBM_tmp == -1) {
-	sprintf(string_buffer,
-		BOOKMARK_FILE_NOT_DEFINED,
-		key_for_func(LYK_OPTIONS));
-	HTAlert(string_buffer);
+	show_bookmark_not_defined();
 	/*
 	 *  Space flags an undefined selection. - FMG
 	 */
@@ -80,7 +89,6 @@ PUBLIC char * get_bookmark_filename ARGS1(
     /*
      *	Seek it in the home path. - FM
      */
-    filename_buffer[255] = '\0';
     LYAddPathToHome(filename_buffer,
 		    sizeof(filename_buffer),
 		    BookmarkPage);
@@ -100,7 +108,7 @@ success:
      *	We now have the file open.
      *	Check if it is a mosaic hotlist.
      */
-    if (fgets(string_buffer, 255, fp) &&
+    if (fgets(string_buffer, sizeof(string_buffer)-1, fp) &&
 	!strncmp(string_buffer, "ncsa-xmosaic-hotlist-format-1", 29)) {
 	char *newname;
 	/*
@@ -127,7 +135,7 @@ success:
 PRIVATE char * convert_mosaic_bookmark_file ARGS1(
 	char *, 	filename_buffer)
 {
-    static char newfile[256];
+    static char newfile[LY_MAXPATH];
     FILE *fp, *nfp;
     char buf[BUFSIZ];
     int line = -2;
@@ -191,8 +199,8 @@ PUBLIC void save_bookmark_link ARGS2(
     BOOLEAN first_time = FALSE;
     char *filename;
     char *bookmark_URL = NULL;
-    char filename_buffer[256];
-    char string_buffer[256];
+    char filename_buffer[LY_MAXPATH];
+    char string_buffer[BUFSIZ];
     char *Address = NULL;
     char *Title = NULL;
     int i, c;
@@ -261,7 +269,6 @@ PUBLIC void save_bookmark_link ARGS2(
     /*
      *	Allow user to change the title. - FM
      */
-    string_buffer[sizeof(string_buffer)-1] = '\0';
     do {
 	LYstrncpy(string_buffer, title, sizeof(string_buffer)-1);
 	convert_to_spaces(string_buffer, FALSE);
@@ -414,12 +421,12 @@ PUBLIC void remove_bookmark_link ARGS2(
     char filename_buffer[NAM$C_MAXRSS+12];
     char newfile[NAM$C_MAXRSS+12];
 #else
-    char filename_buffer[256];
-    char newfile[256];
+    char filename_buffer[LY_MAXPATH];
+    char newfile[LY_MAXPATH];
     struct stat stat_buf;
     mode_t mode;
 #endif /* VMS */
-    char homepath[256];
+    char homepath[LY_MAXPATH];
 
     CTRACE(tfp, "remove_bookmark_link: deleting link number: %d\n", cur);
 
@@ -514,19 +521,9 @@ PUBLIC void remove_bookmark_link ARGS2(
      *	it is writable by the current process.
      *	Changed to copy  1998-04-26 -- gil
      */
-    {	char buffer[3072];
-
-	sprintf(buffer, "%s %s %s && %s %s",
-	    COPY_PATH, newfile, filename_buffer,
-	    RM_PATH, newfile);
-
-	CTRACE(tfp, "remove_bookmark_link: %s\n", buffer);
-	if( LYSystem( buffer ) ) {
-	    HTAlert(BOOKTEMP_COPY_FAIL);
-	} else {
-	    return;
-	}
-    }
+    if (LYCopyFile(newfile, filename_buffer) == 0) 
+	return;
+    HTAlert(BOOKTEMP_COPY_FAIL);
 #else  /* !UNIX */
     if (rename(newfile, filename_buffer) != -1) {
 	HTSYS_purge(filename_buffer);
@@ -544,9 +541,14 @@ PUBLIC void remove_bookmark_link ARGS2(
 	if (errno == EXDEV)
 #endif /* WINDOWS */
 	{
-	    char buffer[2048];
-	    sprintf(buffer, "%s %s %s", MV_PATH, newfile, filename_buffer);
+	    static CONST char MV_FMT[] = "%s %s %s";
+	    char *buffer = 0;
+	    HTAddParam(&buffer, MV_FMT, 1, MV_PATH);
+	    HTAddParam(&buffer, MV_FMT, 2, newfile);
+	    HTAddParam(&buffer, MV_FMT, 3, filename_buffer);
+	    HTEndParam(&buffer, MV_FMT, 3);
 	    LYSystem(buffer);
+	    FREE(buffer);
 	    return;
 	}
 #endif /* !VMS */
@@ -658,8 +660,6 @@ PUBLIC int select_menu_multi_bookmarks NOARGS
 {
     int c, MBM_tmp_count, MBM_allow;
     int MBM_screens, MBM_from, MBM_to, MBM_current;
-    char string_buffer[256];
-    char shead_buffer[256];
 
     /*
      *	If not enabled, pick the "default" (0).
@@ -702,12 +702,6 @@ PUBLIC int select_menu_multi_bookmarks NOARGS
 	HTAlert(MULTIBOOKMARKS_SMALL);
 	return (-2);
     }
-    /*
-     *	Load the bad choice message buffer.
-     */
-    sprintf(string_buffer,
-	    BOOKMARK_FILE_NOT_DEFINED,
-	    key_for_func(LYK_OPTIONS));
 
     MBM_screens = (MBM_V_MAXFILES/MBM_allow)+1; /* int rounds off low. */
 
@@ -733,9 +727,11 @@ draw_bookmark_choices:
     move(1, 5);
     lynx_start_h1_color ();
     if (MBM_screens > 1) {
-	sprintf(shead_buffer,
+	char *shead_buffer = 0;
+	HTSprintf0(&shead_buffer,
 		MULTIBOOKMARKS_SHEAD_MASK, MBM_current, MBM_screens);
 	addstr(shead_buffer);
+	free(shead_buffer);
     } else {
 	addstr(MULTIBOOKMARKS_SHEAD);
     }
@@ -837,8 +833,7 @@ get_bookmark_choice:
     if (c < 0 || c > MBM_V_MAXFILES) {
 	goto get_bookmark_choice;
     } else if (!MBM_A_subbookmark[c]) {
-	LYMBM_statusline(string_buffer);
-	sleep(AlertSecs);
+	show_bookmark_not_defined();
 	LYMBM_statusline(MULTIBOOKMARKS_SAVE);
 	goto get_bookmark_choice;
     } else {
@@ -948,9 +943,8 @@ PRIVATE  BOOLEAN have8bit ARGS1(CONST char *, Title)
 PRIVATE  char* title_convert8bit ARGS1(CONST char *, Title)
 {
     CONST char *p = Title;
-    char temp[256];
     char *p0;
-    char *q = temp;
+    char *q;
     char *comment = NULL;
     char *ncr     = NULL;
     char *buf = NULL;
@@ -958,25 +952,24 @@ PRIVATE  char* title_convert8bit ARGS1(CONST char *, Title)
     int charset_out = UCGetLYhndl_byMIME("us-ascii");
 
     for ( ; *p; p++) {
-	LYstrncpy(q, p, 1);
-	if ((unsigned char)*q <= 127) {
-	    StrAllocCat(comment, q);
-	    StrAllocCat(ncr, q);
+	char temp[2];
+	LYstrncpy(temp, p, sizeof(temp)-1);
+	if ((unsigned char)*temp <= 127) {
+	    StrAllocCat(comment, temp);
+	    StrAllocCat(ncr, temp);
 	} else {
-	    int uck;
 	    long unicode;
-	    char replace_buf [10], replace_buf2 [10];
+	    char replace_buf [32];
 
-	    uck = UCTransCharStr(replace_buf, sizeof(replace_buf), *q,
-				  charset_in, charset_out, YES);
-	    if (uck >0)
+	    if (UCTransCharStr(replace_buf, sizeof(replace_buf), *temp,
+				  charset_in, charset_out, YES) > 0)
 		StrAllocCat(comment, replace_buf);
 
-	    unicode = UCTransToUni( *q, charset_in);
+	    unicode = UCTransToUni( *temp, charset_in);
 
 	    StrAllocCat(ncr, "&#");
-	    sprintf(replace_buf2, "%ld", unicode);
-	    StrAllocCat(ncr, replace_buf2);
+	    sprintf(replace_buf, "%ld", unicode);
+	    StrAllocCat(ncr, replace_buf);
 	    StrAllocCat(ncr, ";");
 	}
     }

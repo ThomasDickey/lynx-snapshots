@@ -215,104 +215,104 @@ $(WWW)/Copyright.txt : $(WWW)/../Copyright.html
 #	Directory for object files
 
 $(LOB)/HTList.o : $(OE) $(CMN)HTList.c $(CMN)HTUtils.h $(CMN)HTList.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTList.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTList.c
 
 $(LOB)/HTAnchor.o : $(OE) $(CMN)HTAnchor.c $(CMN)HTUtils.h $(CMN)HTList.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTAnchor.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTAnchor.c
 
 $(LOB)/HTFormat.o : $(OE) $(CMN)HTFormat.c $(CMN)HTUtils.h $(CMN)HTList.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTFormat.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTFormat.c
 
 $(LOB)/HTMIME.o : $(OE) $(CMN)HTMIME.c $(CMN)HTUtils.h $(CMN)HTList.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTMIME.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTMIME.c
 
 $(LOB)/HTHistory.o : $(OE) $(CMN)HTHistory.c $(CMN)HTUtils.h $(CMN)HTList.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTHistory.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTHistory.c
 
 $(LOB)/HTDOS.o : $(OE) $(CMN)HTDOS.c $(CMN)HTUtils.h $(CMN)../../../userdefs.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTDOS.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTDOS.c
 
 $(LOB)/HTNews.o : $(OE) $(CMN)HTNews.c $(CMN)HTUtils.h $(CMN)HTList.h\
 	 $(CMN)HTMLDTD.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTNews.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTNews.c
 
 $(LOB)/HTGopher.o : $(OE) $(CMN)HTGopher.c $(CMN)HTUtils.h $(CMN)HTList.h \
 	 $(CMN)HTMLDTD.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTGopher.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTGopher.c
 
 $(LOB)/HTTelnet.o : $(OE) $(CMN)HTTelnet.c $(CMN)HTUtils.h $(CMN)HTTelnet.h $(CMN)../../../userdefs.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTTelnet.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTTelnet.c
 
 $(LOB)/HTFinger.o : $(OE) $(CMN)HTFinger.c $(CMN)HTUtils.h $(CMN)HTList.h \
 	$(CMN)HTMLDTD.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTFinger.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTFinger.c
 
 $(LOB)/HTStyle.o : $(OE) $(CMN)HTStyle.c $(CMN)HTUtils.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTStyle.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTStyle.c
 
 $(LOB)/HTAtom.o : $(OE) $(CMN)HTAtom.c $(CMN)HTUtils.h $(CMN)HTList.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTAtom.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTAtom.c
 
 $(LOB)/HTChunk.o : $(OE) $(CMN)HTChunk.c $(CMN)HTUtils.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTChunk.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTChunk.c
 
 $(LOB)/HTString.o : $(OE) $(CMN)HTString.c $(CMN)HTUtils.h $(CMN)Version.make
-	$(CC) -c -o $@ $(CFLAGS2) -DVC=\"$(VC)\" $(CMN)HTString.c
+	$(CC) -c  $(CFLAGS2) -DVC=\"$(VC)\" $(CMN)HTString.c
 
 $(LOB)/HTRules.o : $(OE) $(CMN)HTRules.c $(CMN)HTUtils.h $(CMN)Version.make \
 	 $(CMN)HTAAServ.h $(CMN)HTAAProt.h
-	$(CC) -c -o $@ $(CFLAGS2) -DVC=\"$(VC)\" $(CMN)HTRules.c
+	$(CC) -c  $(CFLAGS2) -DVC=\"$(VC)\" $(CMN)HTRules.c
 
 $(LOB)/SGML.o : $(OE) $(CMN)SGML.c $(CMN)HTUtils.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)SGML.c
+	$(CC) -c  $(CFLAGS2) $(CMN)SGML.c
 
 $(LOB)/HTMLGen.o : $(OE) $(CMN)HTMLGen.c $(CMN)HTUtils.h $(CMN)HTMLDTD.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTMLGen.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTMLGen.c
 
 $(LOB)/HTMLDTD.o : $(OE) $(CMN)HTMLDTD.c $(CMN)SGML.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTMLDTD.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTMLDTD.c
 
 $(LOB)/HTPlain.o : $(OE) $(CMN)HTPlain.c $(CMN)HTPlain.h $(CMN)HTStream.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTPlain.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTPlain.c
 
 $(LOB)/HTWAIS.o : $(OE) $(CMN)HTWAIS.c $(CMN)HTUtils.h $(CMN)HTList.h
-	$(CC) -c -o $@ $(CFLAGS2) $(WAISINC) $(CMN)HTWAIS.c
+	$(CC) -c  $(CFLAGS2) $(WAISINC) $(CMN)HTWAIS.c
 
 $(LOB)/HTWSRC.o : $(OE) $(CMN)HTWSRC.c $(CMN)HTUtils.h $(CMN)HTList.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTWSRC.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTWSRC.c
 
 $(LOB)/HTWriter.o : $(OE) $(CMN)HTWriter.c $(CMN)HTWriter.h $(CMN)HTStream.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTWriter.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTWriter.c
 
 
 #	Access Authorization
 
 $(LOB)/HTAAUtil.o : $(OE) $(CMN)HTAAUtil.c $(CMN)HTAAUtil.h \
 	 $(CMN)HTUtils.h $(CMN)HTString.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTAAUtil.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTAAUtil.c
 
 $(LOB)/HTAAFile.o : $(OE) $(CMN)HTAAFile.c $(CMN)HTAAFile.h \
 	 $(CMN)HTAAUtil.h $(CMN)HTUtils.h $(CMN)HTList.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTAAFile.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTAAFile.c
 
 $(LOB)/HTPasswd.o : $(OE) $(CMN)HTPasswd.c $(CMN)HTPasswd.h \
 	 $(CMN)HTAAUtil.h $(CMN)HTAAFile.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTPasswd.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTPasswd.c
 
 $(LOB)/HTGroup.o : $(OE) $(CMN)HTGroup.c $(CMN)HTGroup.h \
 	 $(CMN)HTAAUtil.h $(CMN)HTAAFile.h \
 	 $(CMN)HTAssoc.h $(CMN)HTLex.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTGroup.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTGroup.c
 
 $(LOB)/HTACL.o : $(OE) $(CMN)HTACL.c $(CMN)HTACL.h \
 	 $(CMN)HTAAUtil.h $(CMN)HTAAFile.h $(CMN)HTGroup.h \
 	 $(CMN)HTAssoc.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTACL.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTACL.c
 
 $(LOB)/HTAuth.o : $(OE) $(CMN)HTAuth.c $(CMN)HTAuth.h \
 	 $(CMN)HTAAUtil.h $(CMN)HTPasswd.h $(CMN)HTAAFile.h \
 	 $(CMN)HTAssoc.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTAuth.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTAuth.c
 
 $(LOB)/HTAAServ.o : $(OE) $(CMN)HTAAServ.c $(CMN)HTAAServ.h \
 	$(CMN)HTAAUtil.h $(CMN)HTAAFile.h $(CMN)HTPasswd.h \
@@ -320,52 +320,52 @@ $(LOB)/HTAAServ.o : $(OE) $(CMN)HTAAServ.c $(CMN)HTAAServ.h \
 	 $(CMN)HTUU.h $(CMN)HTParse.h $(CMN)HTList.h \
 	 $(CMN)HTUtils.h $(CMN)HTString.h $(CMN)HTRules.h \
 	 $(CMN)HTAAProt.h $(CMN)HTAssoc.h $(CMN)HTLex.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTAAServ.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTAAServ.c
 
 $(LOB)/HTAABrow.o : $(OE) $(CMN)HTAABrow.c $(CMN)HTAABrow.h \
 	 $(CMN)HTAAUtil.h $(CMN)HTUU.h \
 	 $(CMN)HTUtils.h $(CMN)HTString.h \
 	 $(CMN)HTParse.h $(CMN)HTList.h \
 	 $(CMN)HTAssoc.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTAABrow.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTAABrow.c
 
 $(LOB)/HTAAProt.o : $(OE) $(CMN)HTAAProt.c $(CMN)HTAAProt.h \
 	 $(CMN)HTUtils.h $(CMN)HTAAUtil.h $(CMN)HTAAFile.h \
 	 $(CMN)HTAssoc.h $(CMN)HTLex.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTAAProt.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTAAProt.c
 
 $(LOB)/HTAssoc.o : $(OE) $(CMN)HTAssoc.c $(CMN)HTAssoc.h \
 	$(CMN)HTUtils.h $(CMN)HTString.h $(CMN)HTList.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTAssoc.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTAssoc.c
 
 $(LOB)/HTLex.o : $(OE) $(CMN)HTLex.c $(CMN)HTLex.h $(CMN)HTUtils.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTLex.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTLex.c
 
 $(LOB)/HTUU.o : $(OE) $(CMN)HTUU.c $(CMN)HTUU.h $(CMN)HTUtils.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTUU.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTUU.c
 
 
 #	Communications & Files
 
 $(LOB)/HTTP.o : $(OE) $(CMN)HTTP.c $(CMN)HTUtils.h $(CMN)HTAABrow.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTTP.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTTP.c
 
 $(LOB)/HTTCP.o : $(OE) $(CMN)HTTCP.c $(CMN)HTUtils.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTTCP.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTTCP.c
 
 $(LOB)/HTFile.o : $(OE) $(CMN)HTFile.c $(CMN)HTUtils.h \
 	 $(CMN)HTMLDTD.h $(CMN)HTAAServ.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTFile.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTFile.c
 
 $(LOB)/HTBTree.o : $(OE) $(CMN)HTBTree.c $(CMN)HTUtils.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTBTree.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTBTree.c
 
 $(LOB)/HTFTP.o : $(OE) $(CMN)HTFTP.c $(CMN)HTUtils.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTFTP.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTFTP.c
 
 $(LOB)/HTAccess.o : $(OE)  $(CMN)HTAccess.c $(CMN)HTUtils.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTAccess.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTAccess.c
 
 $(LOB)/HTParse.o : $(OE) $(CMN)HTParse.c $(CMN)HTUtils.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTParse.c
+	$(CC) -c  $(CFLAGS2) $(CMN)HTParse.c
 

@@ -349,7 +349,7 @@ PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 PUBLIC BOOLEAN LYNoISMAPifUSEMAP = FALSE; /* Omit ISMAP link if MAP present? */
 PUBLIC int LYHiddenLinks = HIDDENLINKS_SEPARATE; /* Show hidden links? */
 
-PUBLIC BOOL New_DTD = YES;
+PUBLIC BOOL Old_DTD = NO;
 PUBLIC FILE *LYTraceLogFP = NULL;		/* Pointer for TRACE log  */
 PUBLIC char *LYTraceLogPath = NULL;		/* Path for TRACE log	   */
 PUBLIC BOOLEAN LYUseTraceLog = USE_TRACE_LOG;	/* Use a TRACE log?	   */
@@ -592,7 +592,7 @@ PUBLIC int main ARGS2(
     char *temp = NULL;
     char *cp;
     FILE *fp;
-    char filename[256];
+    char filename[LY_MAXPATH];
     BOOL LYGetStdinArgs = FALSE;
 
 #ifdef    NOT_ASCII  /* S/390 -- gil -- 2002 */
@@ -914,7 +914,7 @@ PUBLIC int main ARGS2(
 	}
     }
     if (LYGetStdinArgs == TRUE) {
-	char buf[1025];
+	char buf[LINESIZE];
 
 	while (fgets(buf, sizeof(buf) - 1, stdin)) {
 	    int j;
@@ -1099,32 +1099,7 @@ PUBLIC int main ARGS2(
      *	Set up the TRACE log path, and logging if appropriate. - FM
      */
     LYAddPathToHome(LYTraceLogPath = malloc(LY_MAXPATH), LY_MAXPATH, "Lynx.trace");
-
-    if (TRACE && LYUseTraceLog) {
-	/*
-	 *  If we can't open it for writing, give up.
-	 *  Otherwise, on VMS close it, delete it and any
-	 *  versions from previous sessions so they don't
-	 *  accumulate, and open it again. - FM
-	 */
-	if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
-	    WWW_TraceFlag = FALSE;
-	    fprintf(stderr, "%s\n", TRACELOG_OPEN_FAILED);
-	    exit(-1);
-	}
-#ifdef VMS
-	LYCloseTracelog();
-	HTSYS_remove(LYTraceLogPath);
-	if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
-	    WWW_TraceFlag = FALSE;
-	    printf("%s\n", TRACELOG_OPEN_FAILED);
-	    exit(-1);
-	}
-#endif /* VMS */
-	fflush(stdout);
-	fflush(stderr);
-	fprintf(tfp, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
-    }
+    LYOpenTraceLog();
 
     /*
      *	If TRACE is on, indicate whether the
@@ -1317,7 +1292,7 @@ PUBLIC int main ARGS2(
      */
     read_rc();
 
-    HTSwitchDTD(New_DTD);
+    HTSwitchDTD(!Old_DTD);
 
     /*
      *	Check for a save space path in the environment.
@@ -2474,7 +2449,7 @@ static int tagsoup_fun ARGS3(
 	char **,		argv GCC_UNUSED,
 	char *,			next_arg GCC_UNUSED)
 {
-    HTSwitchDTD(New_DTD = NO);
+    HTSwitchDTD(!(Old_DTD = YES));
     return 0;
 }
 
@@ -2977,9 +2952,10 @@ treated '>' as a co-terminator for double-quotes and tags"
    {NULL}
 };
 
-static void print_help_strings ARGS2(
+static void print_help_strings ARGS3(
 	CONST char *,	name,
-	CONST char *,	help)
+	CONST char *,	help,
+	CONST char *,	value)
 {
     int pad;
     int c;
@@ -3003,7 +2979,7 @@ static void print_help_strings ARGS2(
     }
 
     if (strchr (help, '\n') == 0) {
-	fprintf (stdout, "%s\n", help);
+	fprintf (stdout, "%s", help);
     } else {
 	while ((c = *help) != 0) {
 	    if (c == '\n') {
@@ -3021,8 +2997,10 @@ static void print_help_strings ARGS2(
 	    help++;
 	    first--;
 	}
-	fputc ('\n', stdout);
     }
+    if (value)
+	printf(" (%s)", value);
+    fputc ('\n', stdout);
 }
 
 static void print_help_and_exit ARGS1(int, exit_status)
@@ -3037,10 +3015,31 @@ static void print_help_and_exit ARGS1(int, exit_status)
     fprintf (stdout, gettext("Options are:\n"));
     print_help_strings("",
 "receive the arguments from stdin (enclose\n\
-in double-quotes (\"-\") on VMS)");
+in double-quotes (\"-\") on VMS)", NULL);
 
-    for (p = Arg_Table; p->name != 0; p++)
-	print_help_strings(p->name, p->help_string);
+    for (p = Arg_Table; p->name != 0; p++) {
+	char temp[LINESIZE], *value = temp;
+	ParseUnion *q = (ParseUnion *)(&(p->value));
+	switch (p->type & ARG_TYPE_MASK) {
+	    case TOGGLE_ARG:
+	    case SET_ARG:
+	    case UNSET_ARG:
+		sprintf(temp, "%s", *(q->set_value) ? "on" : "off");
+		break;
+	    case INT_ARG:
+		sprintf(temp, "%d", *(q->int_value));
+		break;
+	    case STRING_ARG:
+		if ((value = *(q->str_value)) != 0
+		 && !*value)
+		    value = 0;
+		break;
+	    default:
+		value = 0;
+		break;
+	}
+	print_help_strings(p->name, p->help_string, value);
+    }
 
     SetOutputMode( O_BINARY );
 

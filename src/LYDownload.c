@@ -22,10 +22,7 @@
  *  LYNXDOWNLOAD://Method=<#>/File=<STRING>/SugFile=<STRING>
  */
 #ifdef VMS
-#define COPY_COMMAND "copy/nolog/noconf %s %s"
 PUBLIC BOOLEAN LYDidRename = FALSE;
-#else
-#define COPY_COMMAND "%s %s %s"
 #endif /* VMS */
 
 PRIVATE char LYValidDownloadFile[LY_MAXPATH] = "\0";
@@ -264,14 +261,7 @@ check_recall:
 	     *	Failed.  Use spawned COPY_COMMAND. - FM
 	     */
 	    CTRACE(tfp, "         FAILED!\n");
-	    HTAddParam(&the_command, COPY_COMMAND, 1, file);
-	    HTAddParam(&the_command, COPY_COMMAND, 2, buffer);
-	    HTEndParam(&the_command, COPY_COMMAND, 2);
-	    CTRACE(tfp, "command: %s\n", the_command);
-	    stop_curses();
-	    LYSystem(the_command);
-	    FREE(the_command);
-	    start_curses();
+	    LYCopyFile(file, buffer);
 	} else {
 	    /*
 	     *	We don't have the temporary file (it was renamed to
@@ -283,16 +273,8 @@ check_recall:
 	chmod(buffer, HIDE_CHMOD);
 #else /* Unix: */
 
-	HTAddParam(&the_command, COPY_COMMAND, 1, COPY_PATH);
-	HTAddParam(&the_command, COPY_COMMAND, 2, file);
-	HTAddParam(&the_command, COPY_COMMAND, 3, buffer);
-	HTEndParam(&the_command, COPY_COMMAND, 3);
+	LYCopyFile(file, buffer);
 
-	CTRACE(tfp, "command: %s\n", the_command);
-	stop_curses();
-	LYSystem(the_command);
-	FREE(the_command);
-	start_curses();
 #if defined(UNIX)
 	LYRelaxFilePermissions(buffer);
 #endif /* defined(UNIX) */
@@ -539,7 +521,7 @@ PUBLIC int LYdownload_options ARGS2(
 	if (!lynx_edit_mode)
 #endif /* DIRED_SUPPORT */
 	fprintf(fp0,
-		"  <a href=\"LYNXDOWNLOAD://Method=-1/File=%s/SugFile=%s%s\">%s</a>\n",
+		"   <a href=\"LYNXDOWNLOAD://Method=-1/File=%s/SugFile=%s%s\">%s</a>\n",
 		data_file,
 		(lynx_save_space ? lynx_save_space : ""),
 		sug_filename,

@@ -68,14 +68,14 @@ PUBLIC void mailform ARGS4(
     char cmd[512];
     int len, i, ch;
 #if defined(VMS) || defined(DOSPATH)
-    char my_tmpfile[256];
+    char my_tmpfile[LY_MAXPATH];
     char *command = NULL;
 #ifdef VMS
     char *address_ptr1, *address_ptr2;
     BOOLEAN first = TRUE;
 #endif
     BOOLEAN isPMDF = FALSE;
-    char hdrfile[256];
+    char hdrfile[LY_MAXPATH];
     FILE *hfd;
 
     if (!strncasecomp(system_mail, "PMDF SEND", 9)) {
@@ -596,14 +596,14 @@ PUBLIC void mailmsg ARGS4(
     char *searchpart = NULL;
     char cmd[512], *cp, *cp0, *cp1;
 #if defined(VMS) || defined(DOSPATH)
-    char my_tmpfile[256];
+    char my_tmpfile[LY_MAXPATH];
     char *command = NULL;
 #ifdef VMS
     char *address_ptr1, *address_ptr2;
     BOOLEAN first = TRUE;
 #endif
     BOOLEAN isPMDF = FALSE;
-    char hdrfile[256];
+    char hdrfile[LY_MAXPATH];
     FILE *hfd;
 
     CTRACE(tfp, "mailmsg(%d, \"%s\", \"%s\", \"%s\")\n", cur,
@@ -868,9 +868,9 @@ PUBLIC void reply_by_mail ARGS3(
     char *temp = NULL;
     int i, len;
     int c = 0;	/* user input */
-    char my_tmpfile[256], cmd[512];
+    char my_tmpfile[LY_MAXPATH], cmd[512];
 #ifdef DOSPATH
-    char tmpfile2[256];
+    char tmpfile2[LY_MAXPATH];
 #endif
 #if defined(DOSPATH) || defined(VMS)
     char *command = NULL;
@@ -883,7 +883,7 @@ PUBLIC void reply_by_mail ARGS3(
     char *address_ptr1 = NULL, *address_ptr2 = NULL;
     BOOLEAN first = TRUE;
     BOOLEAN isPMDF = FALSE;
-    char hdrfile[256];
+    char hdrfile[LY_MAXPATH];
     FILE *hfd;
 
     CTRACE(tfp, "reply_by_mail(\"%s\", \"%s\", \"%s\")\n",

@@ -1,10 +1,92 @@
-Changes since Lynx 2.8.1 release
+Changes since Lynx 2.8 release
 ================================================================================
 
+1998-01-13 (2.8.2dev.13)
+* correct a missing trailing newline in caselower.h (this may be a problem
+  patching since 'diff' does not like that) - TD
+* fix off-by-one alignment download options (reported by LV) - IC
+* use HTSprintf/HTSprintf0 in UCAuto.c - TD
+* remove stop/start curses calls around UCChangeTerminalCodepage() in
+  GridText.c, since they are not necessary, and are a little distracting
+  when running Lynx in xterm - TD
+* correct handling in getfile() of ~/ expansion - KW
+* modify NSL_FORK logic to prevent child process from running any signal
+  handlers the parent may have installed - KW
+* The logic added to display_page for avoiding unnecessary screen redraw with
+  partial display (see 1998-12-03) is now disabled if enable_scrollback is set. 
+  Otherwise displayed pages could appear as empty (or with only the current
+  link drawn) - KW
+* Modify conditions under which screen style cache is reset (only relevant for
+  color style in combination with partial display) - KW
+* update the INSTALLATION file, reflecting the changes between the two DJGPP
+  versions of GCC in use.  Also, change optimization to -O2 in the other two
+  DOS makefiles - DK
+* add support for ISO 8859-15, i.e., "Latin 9", make corrections to DEC
+  Multinational character translations (patch by (Christian Weisgerber
+  <naddy@mips.rhein-neckar.de>)
+* modify po/makefile.inn to use mkdirs.sh rather than mkinstalldirs script
+  (reported by LV) - TD
+* modify print_help_and_exit() to print values for the simple options, i.e.,
+  toggle, integer and string, as part of "lynx -help" (request by
+  mattack@area.com) - TD
+* correct sense shown for Old_DTD variable in LYOptions.c (reported by DK).
+* correct order of params for non-Unix use of HTAddParam in LYBookmark.c
+  (reported by DK)
+1998-12-31
+* delete unused 'PREVAIL' color-style code from HTML.c, merge a couple of
+  sections of logic with TrimColorClass, and change Style_className to
+  a dynamically-allocated string - TD
+* modify fmt_tempname() to check for buffer overflow - TD
+* check/modify for potential buffer overflows:  HTAlert.c, LYBookMark.c,
+  LYKeymap.c, LYPrint.c (including splitting it up into functions) - TD
+* change GetOptValues to return status separately from the decoded value, in
+  case the options form is damaged (suggested by LP) - TD
+* add new function HTAddXpand to use in special case where Lynx is building
+  shell command using data from user's configuration, which should not be
+  quoted.  Use this in LYEdit.c to allow $EDITOR to be given as the editor
+  name (request by PG) - TD
+* add new function LYOpenTraceLog, to combine logic in LYMain.c and
+  LYMainLoop.c, including Lynx's version message - TD
+* fix some discrepancies between the code and the documentation (help files),
+  for the alternate line edit keybindings, that were first included in the
+  distribution somewhere around -dev.3, or so - KED
+* added a delete-to-beginning-of-line (for the alt bindings only), and a help
+  page that describes the alternate bindings - KED
+* improved description of "HTML error tolerance" - KW
+* Changes for handling lynxcgi:  handle failure of execve(), by showing the
+  system error and then _exit()ing the child process.  Make sure REQUEST_METHOD
+  is always set.  Added checks for EINTR and other errors from read() - KW
+* DOSPATH or EMX:  remove strange code dealing with root of local drive from
+  is_url() and HTDOS_name()/HTDOS_wwwname(), add right code at the earlier
+  stage in LYFillLocalFileURL() - LP (thanks KW)
+* Relax warning from HTAlert to HTUserMsg on REFRESH_URL_NOT_ABSOLUTE - LP
+* More tweaks on transfer rate calculation - LP
+* modify HTSACopy and HTSACat in case the source and destination are the same
+  pointer - TD
+* tested/removed redundant OS/2 EMX adjustement to filename from LYEdit.c - TD
+* optimized LYEdit.c by moving calls on HTSYS_name(filename) to a single place
+  near the top - LP
+* forms-based options menu:  prevent spoofing attempts from possible overruns
+  (e.g., user can doing 'e'dit in 'o'ptions and get coredump if
+  display_char_set gets an illegal number such as 50, or hang the keyboard with
+  illegal Line edit style) - LP
+* forms-based options menu:  add new logical section - Document Layout,
+  currently with "HTML error tolerance" (TagSoup/SortaSGML), "Pop-up for select
+  fields", "Show images" (no_alt/labels/links) and "Verbose images".  New
+  switches added for information purposes mostly, they duplicate hot keys but
+  not so hidden from user's view.  Documentation updated also.  (Oh yes, "Line
+  edit style" option is now available when we have a real choice >1) - LP
+* split cfg_defs.sh into two script based on revised script from PG - TD
+* minor fixes for toplevel makefile.in - PG
+* fixes for makefiles with gcc 2.8.1 using DJGPP 2.02 (do not use "-c -o"
+  combination, strip trailing blanks from makefile.sla, change optimization
+  level to -O2) - DK
+* rename New_DTD variable to Old_DTD, change logic for -tagsoup option to be
+  consistent with sense in lynx.cfg (reported by LP)
 1998-12-26 (2.8.2dev.12)
 * use HTSprintf0 in LYCgi.c - TD
 * add tab-completion on URL's, by using previously-entered strings for
-  matching (patch by Kari Davidsson <karid@loki.midheimar>) - TD
+  matching (patch by Kari Davidsson <karid@isholf.is>) - TD
 * add version number to trace log (patch by IC)
 * modify HTDOS_name to be consistent with HTVMS_name, which does not modify
   its parameter (reported by LP).  Also, modify HTDOS_name and HTDOS_wwwName
@@ -61,7 +143,7 @@ Changes since Lynx 2.8.1 release
   were received, although this is probably not necessary after all.  There is
   no difference any more w.r.t.  insertion into the list between cookies from
   the file and cookies from response headers - KW
-* use <= instead of < comparison when checking whether a cookie has expired - KW 
+* use <= instead of < comparison when checking whether a cookie has expired - KW
 * don't write expired cookies, cookies with discard attribute, or cookies
   without expiration date to persistent file - KW
 * don't call HTConfirmCookie for cookies read from file.  This doesn't change
@@ -71,9 +153,9 @@ Changes since Lynx 2.8.1 release
   unnecessary multiple atexit()'s - KW
 * write the cookie file even if we now have no cookies, if we have previously
   read cookies from the file.  The file should be updated if all cookies that
-  were in it are expired or superseded or deleted - KW 
+  were in it are expired or superseded or deleted - KW
 * when reading file cookies, set attributes in a way that (hopefully) makes
-  more sense than just ignoring them.  See comments in LYLoadCookies. 
+  more sense than just ignoring them.  See comments in LYLoadCookies.
   We are restricted a lot by the choice of a netscape-compatible cookie file
   format, some version 1 properties just cannot be stored in it AFAIK.  Some
   more tweaking in LYLoadCookies - KW
@@ -82,7 +164,7 @@ Changes since Lynx 2.8.1 release
   error - KW
 * some changes in what is displayed on Cookie Jar page:  FROM_FILE is a
   property of individual cookies, not of domains as previously.  Cookies from
-  file (which haven't been updated) are shown as "(from a previous session)". 
+  file (which haven't been updated) are shown as "(from a previous session)".
   Show expiration time ("Max.  Gobble Date") whenever we have one.  The state
   of the "discard" attribute is already displayed separately - KW
 * made color styles code work much better with TagSoup parsing mode.  A new
@@ -99,7 +181,7 @@ Changes since Lynx 2.8.1 release
 * split_line:  color style changes after the split position are moved to the
   correct position in the new line - KW
 * set TextAnchor's line_num in HText_beginInput, so that split_line can adjust
-  the input field's position properly if a split moves it to the next line. 
+  the input field's position properly if a split moves it to the next line.
   Should solve problem reported for www.lycos.com - KW
 * don't refuse to read from file-descriptor 0 in HTDoRead for Unix if it is not
   a tty.  The socket fd from HTDoConnect can be 0 if fd 0 was not open when
@@ -448,7 +530,7 @@ Changes since Lynx 2.8.1 release
 * misc documentation updates for the gettext/internationalization - LP
 * rename po/makefile.in.in to po/makefile.inn, and modify distclean rule to
   remove the remaining generated files - TD
-+ add preliminary changes from PG (pg@sweng.stortek.com) to support port to
+* add preliminary changes from PG (pg@sweng.stortek.com) to support port to
   OS/390, some ifdef'd with __MVS__, some with EBCDIC and NOT_ASCII.
 * modify LYCookie.c to accept cookies with no value, in case the site resets a
   cookie by nulling out the value (reported by Larry Virden) - BJP

@@ -51,7 +51,7 @@ PUBLIC int showlist ARGS2(
 {
     int cnt;
     int refs, hidden_links;
-    static char tempfile[256];
+    static char tempfile[LY_MAXPATH];
     FILE *fp0;
     char *Address = NULL, *Title = NULL, *cp = NULL;
     BOOLEAN intern_w_post = FALSE;

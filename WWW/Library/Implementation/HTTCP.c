@@ -20,6 +20,7 @@
 #include <HTParse.h>
 #include <HTAlert.h>
 #include <HTTCP.h>
+#include <LYGlobalDefs.h>	/* added for no_suspend */
 #include <LYUtils.h>
 
 #ifdef NSL_FORK
@@ -478,6 +479,34 @@ PUBLIC int HTParseInet ARGS2(
 		**  Make sure parent can kill us at will.  -BL
 		*/
 		(void) signal(SIGTERM, quench);
+
+		/*
+		**  Also make sure the child does not run one of the
+		**  signal handlers that may have been installed by
+		**  Lynx if one of those signals occurs.  For example
+		**  we don't want the child to remove temp files on
+		**  ^C, let the parent deal with that. - kw
+		*/
+		(void) signal(SIGINT, quench);
+#ifndef NOSIGHUP
+		(void) signal(SIGHUP, quench);
+#endif /* NOSIGHUP */
+#ifdef SIGTSTP
+		if (no_suspend)
+		    (void) signal(SIGTSTP, SIG_IGN);
+		else
+		    (void) signal(SIGTSTP, SIG_DFL);
+#endif /* SIGTSTP */
+#ifdef SIGWINCH
+		(void) signal(SIGWINCH, SIG_IGN);
+#endif /* SIGWINCH */
+#ifndef __linux__
+#ifndef DOSPATH
+		signal(SIGBUS, SIG_DFL);
+#endif /* DOSPATH */
+#endif /* !__linux__ */
+		signal(SIGSEGV, SIG_DFL);
+		signal(SIGILL, SIG_DFL);
 
 		/*
 		**  Child won't use read side.  -BL

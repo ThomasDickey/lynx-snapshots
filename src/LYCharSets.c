@@ -328,6 +328,7 @@ PUBLIC CONST char * SevenBitApproximations[] = {
  */
 PUBLIC CONST char ** LYCharSets[MAXCHARSETS]={
 	ISO_Latin1,		/* ISO Latin 1		*/
+	SevenBitApproximations, /* ISO 8859-15 (Latin 9)*/
 	SevenBitApproximations, /* DosLatin1 (cp850)	*/
 	SevenBitApproximations, /* WinLatin1 (cp1252)	*/
 	SevenBitApproximations, /* DosLatinUS (cp437)	*/
@@ -350,6 +351,7 @@ PUBLIC CONST char ** LYCharSets[MAXCHARSETS]={
  */
 PUBLIC CONST char * LYchar_set_names[MAXCHARSETS + 1]={
 	"Western (ISO-8859-1)",
+	"Western (ISO-8859-15)",
 	"Western (cp850)",
 	"Western (windows-1252)",
 	"IBM PC US codepage (cp437)",
@@ -391,6 +393,7 @@ PUBLIC LYUCcharset LYCharSet_UC[MAXCHARSETS]=
   /*
    *  Placeholders for Unicode tables. - FM
    */
+  {-1,"iso-8859-15",   UCT_ENC_8BIT,0,0,0,     UCT_R_8BIT,UCT_R_ASCII},
   {-1,"cp850",         UCT_ENC_8BIT,0,
                        UCT_REP_SUPERSETOF_LAT1,
                        0,                      UCT_R_8BIT,UCT_R_ASCII},
@@ -439,6 +442,7 @@ PUBLIC LYUCcharset LYCharSet_UC[MAXCHARSETS]=
  */
 PUBLIC int LYlowest_eightbit[MAXCHARSETS]={
 	160,	/* ISO Latin 1		*/
+	160,	/* ISO 8859-15 (Latin 9)*/
 	128,	/* DosLatin1 (cp850)	*/
 	130,	/* WinLatin1 (cp1252)	*/
 	128,	/* DosLatinUS (cp437)	*/

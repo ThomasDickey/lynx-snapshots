@@ -56,7 +56,6 @@
 #include <LYStyle.h>
 #undef SELECTED_STYLES
 #define pHText_changeStyle(X,Y,Z) {}
-char Style_className[16384];
 #endif
 
 #include <LYexit.h>
@@ -607,13 +606,41 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
 
 #ifdef USE_COLOR_STYLE
 char class_string[TEMPSTRINGSIZE];
-char prevailing_class[TEMPSTRINGSIZE];
 #endif
 
 #ifdef USE_COLOR_STYLE
-    char myHash[128];
-    int hcode;
+static char *Style_className;
+static char myHash[128];
+static int hcode;
 #endif
+
+#ifdef USE_COLOR_STYLE
+PRIVATE void TrimColorClass ARGS1(char *, tagname)
+{
+    char *end, *start=NULL, *lookfrom;
+    char tmp[64];
+
+    sprintf(tmp, ";%.*s", (int) sizeof(tmp) - 3, tagname);
+    strtolower(tmp);
+
+    if ((lookfrom = Style_className) != 0) {
+	do {
+	    end = start;
+	    start = strstr(lookfrom, tmp);
+	    if (start)
+		lookfrom = start + 1;
+	}
+	while (start);
+	/* trim the last matching element off the end
+	** - should match classes here as well (rp)
+	*/
+	if (end)
+	    *end='\0';
+    }
+    hcode = hash_code(lookfrom && *lookfrom ? lookfrom : &tmp[1]);
+    CTRACE(tfp, "CSS:%s (trimmed %s)\n", Style_className, tmp);
+}
+#endif /* USE_COLOR_STYLE */
 
 /*	Start Element
 **	-------------
@@ -664,55 +691,41 @@ PRIVATE void HTML_start_element ARGS6(
 
 /* this should be done differently */
 #if defined(USE_COLOR_STYLE)
-	strcat (Style_className, ";");
-	strcat (Style_className, HTML_dtd.tags[element_number].name);
-	strcpy (myHash, HTML_dtd.tags[element_number].name);
-	if (class_string[0])
-	{
-		strcat (Style_className, ".");
-		strcat (Style_className, class_string);
-		strcat (myHash, ".");
-		strcat (myHash, class_string);
-#ifdef PREVAIL
-		strcpy (prevailing_class, class_string);
-#endif
-	}
-#ifdef PREVAIL
-	else if (prevailing_class[0])
-	{
-		strcat (Style_className, ".");
-		strcat (Style_className, prevailing_class);
-		strcat (myHash, ".");
-		strcat (myHash, prevailing_class);
-	}
-#endif /* PREVAIL */
-	class_string[0]='\0';
-	strtolower(myHash);
-	hcode=hash_code(myHash);
-	strtolower(Style_className);
+    HTSprintf (&Style_className, ";%s", HTML_dtd.tags[element_number].name);
+    strcpy (myHash, HTML_dtd.tags[element_number].name);
+    if (class_string[0])
+    {
+	HTSprintf (&Style_className, ".%s", class_string);
+	strcat (myHash, ".");
+	strcat (myHash, class_string);
+    }
+    class_string[0] = '\0';
+    strtolower(myHash);
+    hcode = hash_code(myHash);
+    strtolower(Style_className);
 
-	if (TRACE)
+    if (TRACE)
+    {
+	fprintf(tfp, "CSSTRIM:%s -> %d", myHash, hcode);
+	if (hashStyles[hcode].code!=hcode)
 	{
-		fprintf(tfp, "CSSTRIM:%s -> %d", myHash, hcode);
-		if (hashStyles[hcode].code!=hcode)
-		{
-			char *rp=strrchr(myHash, '.');
-			fprintf(tfp, " (undefined) %s\n", myHash);
-			if (rp)
-			{
-				int hcd;
-				*rp='\0'; /* trim the class */
-				hcd = hash_code(myHash);
-				fprintf(tfp, "CSS:%s -> %d", myHash, hcd);
-				if (hashStyles[hcd].code!=hcd)
-					fprintf(tfp, " (undefined) %s\n", myHash);
-				else
-					fprintf(tfp, " ca=%d\n", hashStyles[hcd].color);
-			}
-		}
+	    char *rp=strrchr(myHash, '.');
+	    fprintf(tfp, " (undefined) %s\n", myHash);
+	    if (rp)
+	    {
+		int hcd;
+		*rp='\0'; /* trim the class */
+		hcd = hash_code(myHash);
+		fprintf(tfp, "CSS:%s -> %d", myHash, hcd);
+		if (hashStyles[hcd].code!=hcd)
+		    fprintf(tfp, " (undefined) %s\n", myHash);
 		else
-			fprintf(tfp, " ca=%d\n", hashStyles[hcode].color);
+		    fprintf(tfp, " ca=%d\n", hashStyles[hcd].color);
+	    }
 	}
+	else
+	    fprintf(tfp, " ca=%d\n", hashStyles[hcode].color);
+    }
 
     if (displayStyles[element_number + STARTAT].color > -2) /* actually set */
     {
@@ -5252,43 +5265,16 @@ PRIVATE void HTML_start_element ARGS6(
 #define REALLY_EMPTY(e) ((HTML_dtd.tags[e].contents == SGML_EMPTY) && \
 			 !(HTML_dtd.tags[e].flags & Tgf_nreie))
 
-	if (REALLY_EMPTY(element_number))
-	{
-		CTRACE(tfp, "STYLE:begin_element:ending EMPTY element style\n");
+    if (REALLY_EMPTY(element_number))
+    {
+	CTRACE(tfp, "STYLE:begin_element:ending EMPTY element style\n");
 #if !defined(USE_HASH)
 	HText_characterStyle(me->text, element_number+STARTAT, STACK_OFF);
 #else
 	HText_characterStyle(me->text, hcode, STACK_OFF);
 #endif /* USE_HASH */
-		{
-			char *end, *start=NULL, *lookfrom;
-			char tmp[64];
-			sprintf(tmp, ";%s", HTML_dtd.tags[element_number].name);
-			strtolower(tmp);
-
-			lookfrom = Style_className;
-			do
-			{
-				end = start;
-				start = strstr(lookfrom, tmp);
-				if (start)
-				    lookfrom = start + 1;
-			}
-			while (start);
-			if (end)
-				*end='\0';
-
-#if defined(PREVAIL)
-			start=strrchr(Style_className, '.');
-			if (start)
-				strcpy(prevailing_class, (start+1));
-			else
-				strcpy(prevailing_class, "");
-#endif
-
-			CTRACE(tfp, "CSS:%s (trimmed %s, SGML_EMPTY)\n", Style_className, tmp);
-		}
-	}
+	TrimColorClass(HTML_dtd.tags[element_number].name);
+    }
 #endif /* USE_COLOR_STYLE */
 }
 
@@ -6627,29 +6613,7 @@ End_Object:
 
     } /* switch */
 #ifdef USE_COLOR_STYLE
-    {
-	char *end, *start=NULL, *lookfrom;
-	char tmp[64];
-	sprintf(tmp, ";%s", HTML_dtd.tags[element_number].name);
-	strtolower(tmp);
-
-	lookfrom = Style_className;
-	do
-	{
-	    end = start;
-	    start = strstr(lookfrom, tmp);
-	    if (start)
-		lookfrom = start + 1;
-	}
-	while (start);
-/* trim the last matching element off the end
-** - should match classes here as well (rp)
-*/
-	if (end)
-	    *end='\0';
-	hcode = hash_code(lookfrom && *lookfrom ? lookfrom : &tmp[1]);
-	CTRACE(tfp, "CSS:%s (trimmed %s, END_ELEMENT)\n", Style_className, tmp);
-    }
+    TrimColorClass(HTML_dtd.tags[element_number].name);
 
     if (!REALLY_EMPTY(element_number))
     {
@@ -6659,15 +6623,6 @@ End_Object:
 #else
 	HText_characterStyle(me->text, hcode, STACK_OFF);
 #endif /* USE_HASH */
-#if defined(PREVAIL)
-	/* reset the prevailing class to the previous one */
-	{
-		char *dot=strrchr(Style_className,'.');
-		LYstrncpy(prevailing_class,
-			  dot ? (dot+1) : "",
-			  (TEMPSTRINGSIZE - 1));
-	}
-#endif
     }
 #endif /* USE_COLOR_STYLE */
 }
@@ -7234,9 +7189,8 @@ PUBLIC HTStructured* HTML_new ARGS3(
     me->comment_end = NULL;
 
 #ifdef USE_COLOR_STYLE
-    Style_className[0] = '\0';
+    FREE(Style_className);
     class_string[0] = '\0';
-    prevailing_class[0] = '\0';
 #endif
 
 #ifdef NOTUSED_FOTEMODS

@@ -96,7 +96,6 @@ extern BOOLEAN LYUseNoviceLineTwo;  /* True if TOGGLE_HELP is not mapped */
 extern char star_string[MAX_LINE + 1]; /* from GridText.c */
 #define STARS(n) \
  ((n) >= MAX_LINE ? star_string : &star_string[(MAX_LINE-1)] - (n))
-#define DIRNAMESIZE 256
 
 #define SHOW_COLOR_UNKNOWN	(-1)
 #define SHOW_COLOR_NEVER  0
@@ -326,7 +325,7 @@ extern BOOLEAN no_externals; 		/* don't allow the use of externals */
 extern BOOLEAN LYNoISMAPifUSEMAP;	/* Omit ISMAP link if MAP present? */
 extern int LYHiddenLinks;
 
-extern BOOL New_DTD;
+extern BOOL Old_DTD;
 
 #define MBM_V_MAXFILES  25		/* Max number of sub-bookmark files */
 /*

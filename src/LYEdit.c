@@ -77,16 +77,11 @@ PUBLIC int edit_current_file ARGS3(
 #endif /* !VMS */
 	filename = HTParse(newfile, "", PARSE_PATH+PARSE_PUNCTUATION);
 	HTUnEscape(filename);
-#if defined (DOSPATH) || defined (__EMX__)
-	if (strlen(filename) > 1) {	/* FIXME: why do we need to do this? */
-	    int n;
-	    for (n = 0; (filename[n] = filename[n+1]) != 0; n++)
-		;
-	}
-#endif
-	if ((fp = fopen(HTSYS_name(filename), "r")) == NULL)
+	StrAllocCopy(filename, HTSYS_name(filename));
+	if ((fp = fopen(filename, "r")) == NULL)
 	{
 	    HTAlert(COULD_NOT_ACCESS_FILE);
+	    CTRACE(tfp, "filename: '%s'\n", filename);
 	    goto done;
 	}
 #if !defined (VMS) && !defined (DOSPATH) && !defined (__EMX__)
@@ -98,7 +93,7 @@ PUBLIC int edit_current_file ARGS3(
     /*
      *  Don't allow editing if user lacks append access.
      */
-    if ((fp = fopen(HTSYS_name(filename), "a")) == NULL)
+    if ((fp = fopen(filename, "a")) == NULL)
     {
 	HTUserMsg(NOAUTH_TO_EDIT_FILE);
 	goto done;
@@ -127,20 +122,20 @@ PUBLIC int edit_current_file ARGS3(
     if (editor_can_position() && *position) {
 #ifdef VMS
 	format = "%s %s -%s";
-	HTAddParam(&command, format, params++, editor);
-	HTAddParam(&command, format, params++, HTVMS_name("", filename));
+	HTAddXpand(&command, format, params++, editor);
+	HTAddParam(&command, format, params++, filename);
 	HTAddParam(&command, format, params++, position);
 	HTEndParam(&command, format, params);
 #else
 	format = "%s +%s %s";
-	HTAddParam(&command, format, params++, editor);
+	HTAddXpand(&command, format, params++, editor);
 	HTAddParam(&command, format, params++, position);
-	HTAddParam(&command, format, params++, HTSYS_name(filename));
+	HTAddParam(&command, format, params++, filename);
 	HTEndParam(&command, format, params);
 #endif
     } else {
-	HTAddParam(&command, format, params++, editor);
-	HTAddParam(&command, format, params++, HTSYS_name(filename));
+	HTAddXpand(&command, format, params++, editor);
+	HTAddParam(&command, format, params++, filename);
 	HTEndParam(&command, format, params);
     }
 

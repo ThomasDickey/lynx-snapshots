@@ -967,7 +967,9 @@ PRIVATE void HTGetWord ARGS4(
 PRIVATE int HTLoadExtensionsConfigFile ARGS1(
 	char *,		fn)
 {
-    char l[MAX_STRING_LEN],w[MAX_STRING_LEN],*ct;
+    char line[MAX_STRING_LEN];
+    char word[MAX_STRING_LEN];
+    char *ct;
     FILE *f;
     int count = 0;
 
@@ -978,24 +980,24 @@ PRIVATE int HTLoadExtensionsConfigFile ARGS1(
 	return count;
     }
 
-    while (!(HTGetLine(l,MAX_STRING_LEN,f))) {
-	HTGetWord(w, l, ' ', '\t');
-	if (l[0] == '\0' || w[0] == '#')
+    while (!(HTGetLine(line,sizeof(line),f))) {
+	HTGetWord(word, line, ' ', '\t');
+	if (line[0] == '\0' || word[0] == '#')
 	    continue;
-	ct = (char *)malloc(sizeof(char) * (strlen(w) + 1));
+	ct = (char *)malloc(sizeof(char) * (strlen(word) + 1));
 	if (!ct)
 	    outofmem(__FILE__, "HTLoadExtensionsConfigFile");
-	strcpy(ct,w);
+	strcpy(ct,word);
 	LYLowerCase(ct);
 
-	while(l[0]) {
-	    HTGetWord(w, l, ' ', '\t');
-	    if (w[0] && (w[0] != ' ')) {
-		char *ext = (char *)malloc(sizeof(char) * (strlen(w)+1+1));
+	while(line[0]) {
+	    HTGetWord(word, line, ' ', '\t');
+	    if (word[0] && (word[0] != ' ')) {
+		char *ext = (char *)malloc(sizeof(char) * (strlen(word)+1+1));
 	        if (!ext)
 	            outofmem(__FILE__, "HTLoadExtensionsConfigFile");
 
-		sprintf(ext, ".%s", w);
+		sprintf(ext, ".%s", word);
 		LYLowerCase(ext);
 
 		CTRACE (tfp, "SETTING SUFFIX '%s' to '%s'.\n", ext, ct);
