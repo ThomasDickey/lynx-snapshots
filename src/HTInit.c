@@ -160,13 +160,8 @@ PUBLIC void HTFormatInit NOARGS
      /* These should override everything else. */
      HTLoadTypesConfigFile(personal_type_map);
  } else {
-     char buffer[256];
-#ifdef VMS
-     sprintf(buffer, "sys$login:%s", personal_type_map);
-#else
-     sprintf(buffer, "%s/%s", (Home_Dir() ? Home_Dir() : ""),
-			      personal_type_map);
-#endif
+     char buffer[LY_MAXPATH];
+     LYAddPathToHome(buffer, sizeof(buffer), personal_type_map);
      HTLoadTypesConfigFile(buffer);
  }
 
@@ -227,7 +222,6 @@ PRIVATE int ExitWithError PARAMS((char *txt));
 PRIVATE int PassesTest PARAMS((struct MailcapEntry *mc));
 
 #define LINE_BUF_SIZE		2048
-#define TMPFILE_NAME_SIZE	256
 
 PRIVATE char *GetCommand ARGS2(
 	char *,		s,
@@ -482,7 +476,7 @@ PRIVATE int PassesTest ARGS1(
 	struct MailcapEntry *,	mc)
 {
     int result;
-    char *cmd, TmpFileName[TMPFILE_NAME_SIZE];
+    char *cmd, TmpFileName[LY_MAXPATH];
 
     /*
      *  Make sure we have a command
@@ -852,13 +846,8 @@ PUBLIC void HTFileInit NOARGS
 	/* These should override everything else. */
 	HTLoadExtensionsConfigFile(personal_extension_map);
     } else {
-	char buffer[256];
-#ifdef VMS
-	sprintf(buffer, "sys$login:%s", personal_extension_map);
-#else
-	sprintf(buffer, "%s/%s", (Home_Dir() ? Home_Dir() : ""),
-				  personal_extension_map);
-#endif /* VMS */
+	char buffer[LY_MAXPATH];
+	LYAddPathToHome(buffer, sizeof(buffer), personal_extension_map);
 	/* These should override everything else. */
 	HTLoadExtensionsConfigFile(buffer);
     }

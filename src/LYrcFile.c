@@ -10,10 +10,16 @@
 
 #include <LYLeaks.h>
 
+#ifdef FNAMES_8_3
+#define FNAME_LYNXRC "lynx.rc"
+#else
+#define FNAME_LYNXRC ".lynxrc"
+#endif /* FNAMES_8_3 */
+
 PUBLIC void read_rc NOPARAMS
 {
     char line_buffer[256];
-    char rcfile[256];
+    char rcfile[LY_MAXPATH];
     FILE *fp;
     char *cp, *cp2;
     int number_sign;
@@ -25,15 +31,7 @@ PUBLIC void read_rc NOPARAMS
     /*
      *  Make an RC file name.
      */
-#ifdef DJGPP
-    sprintf(rcfile, "%s/lynx.rc", Home_Dir());
-#else
-#ifdef VMS
-    sprintf(rcfile, "sys$login:.lynxrc");
-#else
-    sprintf(rcfile, "%s/.lynxrc", Home_Dir());
-#endif /* VMS */
-#endif /* DJGPP */
+    LYAddPathToHome(rcfile, sizeof(rcfile), FNAME_LYNXRC);
 
     /*
      *  Open the RC file for reading.
@@ -251,7 +249,6 @@ PUBLIC void read_rc NOPARAMS
 	    for (; LYchar_set_names[i]; i++) {
 		if (!strncmp(cp, LYchar_set_names[i], strlen(cp))) {
 		    current_char_set=i;
-		    HTMLSetRawModeDefault(i);
 		    break;
 		}
 	    }
@@ -549,7 +546,7 @@ PUBLIC void read_rc NOPARAMS
 
 PUBLIC int save_rc NOPARAMS
 {
-    char rcfile[256];
+    char rcfile[LY_MAXPATH];
     FILE *fp;
     int i;
     int MBM_c;
@@ -557,15 +554,7 @@ PUBLIC int save_rc NOPARAMS
     /*
      *  Make a name.
      */
-#ifdef DJGPP
-    sprintf(rcfile, "%s/lynx.rc", Home_Dir());
-#else
-#ifdef VMS
-    sprintf(rcfile, "sys$login:.lynxrc");
-#else
-    sprintf(rcfile, "%s/.lynxrc", Home_Dir());
-#endif /* VMS */
-#endif /* DJGPP */
+    LYAddPathToHome(rcfile, sizeof(rcfile), FNAME_LYNXRC);
 
     /*
      *  Open the file for write.
@@ -854,7 +843,7 @@ PUBLIC int save_rc NOPARAMS
      *  Lineedit mode.
      */
     fprintf(fp, "\
-# linedit_mode specifies the key binding used for inputting strings in\n\
+# lineedit_mode specifies the key binding used for inputting strings in\n\
 # prompts and forms.  If lineedit_mode is set to \"Default Binding\" then\n\
 # the following control characters are used for moving and deleting:\n\
 #\n\

@@ -293,8 +293,6 @@ PUBLIC BOOLEAN LYRawMode;
 PUBLIC BOOLEAN LYDefaultRawMode;
 PUBLIC BOOLEAN LYUseDefaultRawMode = TRUE;
 PUBLIC char *UCAssume_MIMEcharset = NULL;
-PUBLIC char *UCAssume_localMIMEcharset = NULL;
-PUBLIC char *UCAssume_unrecMIMEcharset = NULL;
 PUBLIC BOOLEAN UCSaveBookmarksInUnicode = FALSE;
 PUBLIC BOOLEAN UCForce8bitTOUPPER = FALSE; /* override locale for case-conversion? */
 PUBLIC int LYlines = 24;
@@ -357,6 +355,7 @@ PUBLIC BOOLEAN LYQuitDefaultYes = QUIT_DEFAULT_YES;
 #ifdef DISP_PARTIAL
 PUBLIC BOOLEAN display_partial = TRUE; /* Display document during download */
 PUBLIC BOOLEAN debug_display_partial = FALSE; /* Show with MessageSecs delay */
+PUBLIC BOOLEAN detected_forms_input_partial = FALSE; /* trimHightext temp fix */
 #endif
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
@@ -479,8 +478,6 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(lynx_lss_file);
 #endif
     FREE(UCAssume_MIMEcharset);
-    FREE(UCAssume_unrecMIMEcharset);
-    FREE(UCAssume_localMIMEcharset);
     for (i = 0; i < nlinks; i++) {
 	FREE(links[i].lname);
     }
@@ -754,19 +751,6 @@ PUBLIC int main ARGS2(
     StrAllocCopy(URLDomainPrefixes, URL_DOMAIN_PREFIXES);
     StrAllocCopy(URLDomainSuffixes, URL_DOMAIN_SUFFIXES);
     StrAllocCopy(XLoadImageCommand, XLOADIMAGE_COMMAND);
-    /*
-     *	Set up the compilation default character set. - FM
-     */
-    for (i = 0; LYchar_set_names[i]; i++) {
-	if (!strncmp(CHARACTER_SET, LYchar_set_names[i],
-		     strlen(CHARACTER_SET))) {
-	    current_char_set=i;
-	    break;
-	}
-    }
-    if (!LYchar_set_names[i])
-	current_char_set = i = 0;
-    HTMLSetRawModeDefault(i);
 
     /*
      *	Disable news posting if the compilation-based
@@ -1032,12 +1016,8 @@ PUBLIC int main ARGS2(
     /*
      *	Set up the TRACE log path, and logging if appropriate. - FM
      */
-#ifdef VMS
-    StrAllocCopy(LYTraceLogPath, "sys$login:Lynx.trace");
-#else
-    StrAllocCopy(LYTraceLogPath, (Home_Dir() ? Home_Dir() : ""));
-    StrAllocCat(LYTraceLogPath, "/Lynx.trace");
-#endif /* VMS */
+    LYAddPathToHome(LYTraceLogPath = malloc(LY_MAXPATH), LY_MAXPATH, "Lynx.trace");
+
     if (TRACE && LYUseTraceLog) {
 #if defined(__DJGPP__) || defined(_WINDOWS)
 	_fmode = O_TEXT;
@@ -1147,10 +1127,11 @@ PUBLIC int main ARGS2(
     }
     fclose(fp);
 
-#if defined(USE_SLANG_KEYMAPS)
+#if defined(USE_KEYMAPS) && defined(USE_SLANG)
     if (-1 == lynx_initialize_keymaps ())
 	exit (-1);
 #endif
+
     /*
      * Make sure we have the character sets declared.
      *	This will initialize the CHARTRANS handling. - KW
@@ -1159,6 +1140,22 @@ PUBLIC int main ARGS2(
 	fprintf(stderr, "\nLynx character sets not declared.\n\n");
 	exit(-1);
     }
+    /*
+     *  (**) in Lynx, UCLYhndl_HTFile_for_unspec and UCLYhndl_for_unrec may be
+     *  valid or not, but current_char_set and UCLYhndl_for_unspec SHOULD
+     *  ALWAYS be a valid charset. Initialized here and may be changed later
+     *  from lynx.cfg/command_line/options_menu. - LP  (**)
+     */
+    /*
+     *	Set up the compilation default character set. - FM
+     */
+    current_char_set = safeUCGetLYhndl_byMIME(CHARACTER_SET);
+    /*
+     *	Set up HTTP default for unlabeled charset (iso-8859-1).
+     */
+    UCLYhndl_for_unspec = LATIN1;
+    StrAllocCopy(UCAssume_MIMEcharset,
+			LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
 
 #if defined(USE_HASH)
     /*
@@ -1199,7 +1196,7 @@ PUBLIC int main ARGS2(
      *	inform the user and exit.
      */
     if ((fp = fopen(lynx_lss_file, "r")) == NULL) {
-	fprintf(stderr, "\nLynxile file %s is not available.\n\n",
+	fprintf(stderr, "\nLynx file %s is not available.\n\n",
 			lynx_lss_file);
     }
     else
@@ -1502,15 +1499,7 @@ PUBLIC int main ARGS2(
      *	cookies file, probably.  - RP
      */
     if(LYCookieFile == NULL) {
-#ifdef VMS
-	/* I really don't know if this is going to work on VMS. Someone
-	 * who knows needs to take a look. - BJP
-	 */
-	StrAllocCopy(LYCookieFile, "sys$login:cookies");
-#else
-	StrAllocCopy(LYCookieFile, Home_Dir());
-	StrAllocCat(LYCookieFile, "/cookies");
-#endif /* VMS */
+	LYAddPathToHome(LYCookieFile = malloc(LY_MAXPATH), LY_MAXPATH, "cookies");
     } else {
 	if ((cp = strchr(LYCookieFile, '~'))) {
 	    temp = NULL;
@@ -1534,6 +1523,22 @@ PUBLIC int main ARGS2(
     LYLoadCookies(LYCookieFile);
 #endif
 
+#ifdef SIGTSTP
+    /*
+     *	Block Control-Z suspending if requested. - FM
+     */
+    if (no_suspend)
+	(void) signal(SIGTSTP,SIG_IGN);
+#endif /* SIGTSTP */
+
+    /*
+     *  Finish setting up for an INTERACTIVE session.
+     *  Done here so that URL guessing in LYEnsureAbsoluteURL() can be
+     *  interruptible (terminal is in raw mode, select() works).  -BL
+     */
+    if (!dump_output_immediately) {
+	setup(terminal);
+    }
     /*
      *	If startfile is a file URL and the host is defaulted,
      *	force in "//localhost", and if it's not an absolute URL,
@@ -1586,14 +1591,6 @@ PUBLIC int main ARGS2(
 	ftp_ok = !no_outside_ftp && ftp_ok;
 	rlogin_ok = !no_outside_rlogin && rlogin_ok;
     }
-
-#ifdef SIGTSTP
-    /*
-     *	Block Control-Z suspending if requested. - FM
-     */
-    if (no_suspend)
-	(void) signal(SIGTSTP,SIG_IGN);
-#endif /* SIGTSTP */
 
     /*
      *	Check for a valid HEAD request. - FM
@@ -1722,17 +1719,14 @@ PUBLIC int main ARGS2(
 #endif /* SIGTSTP */
     } else {
 	/*
-	 *  Finish setting up and start an
-	 *  INTERACTIVE session. - FM
+	 *  Start an INTERACTIVE session. - FM
 	 */
-	if (setup(terminal)) {
-	    if (x_display != NULL && *x_display != '\0') {
-		LYisConfiguredForX = TRUE;
-	    }
-	    ena_csi((LYlowest_eightbit[current_char_set] > 155));
-	    status = mainloop();
-	    cleanup();
+	if (x_display != NULL && *x_display != '\0') {
+	    LYisConfiguredForX = TRUE;
 	}
+	ena_csi((LYlowest_eightbit[current_char_set] > 155));
+	status = mainloop();
+	cleanup();
     }
 
     exit(status);
@@ -1890,14 +1884,13 @@ static int assume_charset_fun ARGS3(
 	char **,		argv GCC_UNUSED,
 	char *,			next_arg)
 {
-    if (next_arg == 0) {
-	UCLYhndl_for_unspec = UCGetLYhndl_byMIME("iso-8859-1");
-    } else {
-	LYLowerCase(next_arg);
-	StrAllocCopy(UCAssume_MIMEcharset, next_arg);
-	if (UCAssume_MIMEcharset && *UCAssume_MIMEcharset)
-	    UCLYhndl_for_unspec = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
-    }
+    UCLYhndl_for_unspec = safeUCGetLYhndl_byMIME(next_arg);
+    StrAllocCopy(UCAssume_MIMEcharset,
+		 LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
+/*	   this may be a memory for bogus typo -
+    StrAllocCopy(UCAssume_MIMEcharset, next_arg);
+    LYLowerCase(UCAssume_MIMEcharset);   */
+
     return 0;
 }
 
@@ -1907,15 +1900,7 @@ static int assume_local_charset_fun ARGS3(
 	char **,		argv GCC_UNUSED,
 	char *,			next_arg)
 {
-    if (next_arg == 0) {
-	UCLYhndl_HTFile_for_unspec = UCGetLYhndl_byMIME("iso-8859-1");
-    } else {
-	LYLowerCase(next_arg);
-	StrAllocCopy(UCAssume_localMIMEcharset, next_arg);
-	if (UCAssume_localMIMEcharset && *UCAssume_localMIMEcharset)
-	    UCLYhndl_HTFile_for_unspec =
-		UCGetLYhndl_byMIME(UCAssume_localMIMEcharset);
-    }
+    UCLYhndl_HTFile_for_unspec = safeUCGetLYhndl_byMIME(next_arg);
     return 0;
 }
 
@@ -1925,14 +1910,7 @@ static int assume_unrec_charset_fun ARGS3(
 	char **,		argv GCC_UNUSED,
 	char *,			next_arg)
 {
-    if (next_arg == 0) {
-	UCLYhndl_for_unrec = UCGetLYhndl_byMIME("iso-8859-1");
-    } else {
-	LYLowerCase(next_arg);
-	StrAllocCopy(UCAssume_unrecMIMEcharset, next_arg);
-	if (UCAssume_unrecMIMEcharset && *UCAssume_unrecMIMEcharset)
-	    UCLYhndl_for_unrec = UCGetLYhndl_byMIME(UCAssume_unrecMIMEcharset);
-    }
+    UCLYhndl_for_unrec = safeUCGetLYhndl_byMIME(next_arg);
     return 0;
 }
 

@@ -196,7 +196,7 @@ PRIVATE void set_chartrans_handling ARGS3(
 	       context->T.trans_from_uni) {
 	context->current_tag_charset = UCGetLYhndl_byMIME("utf-8");
     } else {
-	context->current_tag_charset = 0;
+	context->current_tag_charset = LATIN1;
     }
 }
 
@@ -396,7 +396,7 @@ PRIVATE char replace_buf [64];	      /* buffer for replacement strings */
 PRIVATE BOOL FoundEntity = FALSE;
 
 #define IncludesLatin1Enc \
-		(context->outUCLYhndl == 0 || \
+		(context->outUCLYhndl == LATIN1 || \
 		 (context->outUCI && \
 		  (context->outUCI->enc & (UCT_CP_SUPERSETOF_LAT1))))
 

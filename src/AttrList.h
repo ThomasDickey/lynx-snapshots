@@ -56,7 +56,7 @@ typedef struct _linkedlist {
 } linked_list;
 #endif
 
-#define HText_characterStyle if(TRACE)fprintf(stderr,"HTC called from %s/%d\n",__FILE__,__LINE__);_internal_HTC
+#define HText_characterStyle CTRACE(tfp,"HTC called from %s/%d\n",__FILE__,__LINE__);_internal_HTC
 
 #undef HText_characterStyle
 #define HText_characterStyle _internal_HTC

@@ -8,8 +8,6 @@
 
 #include <LYLeaks.h>
 
-#define TABLESIZE(v) (sizeof(v)/sizeof(v[0]))
-
 PRIVATE CONST DocAddress keymap_anchor = {"LYNXKEYMAP", NULL, NULL};
 
 struct _HTStream

@@ -113,8 +113,9 @@ PRIVATE void change_paragraph_style PARAMS((HTStructured * me,
 #define VERBOSE_IMG(value,src_type,string) \
       ((verbose_img) ? (newtitle = MakeNewTitle(value,src_type)): string)
 
-PRIVATE char * MakeNewTitle PARAMS((CONST char ** value, int src_type));
-PRIVATE char * MakeNewImageValue PARAMS((CONST char ** value));
+PRIVATE char* MakeNewTitle PARAMS((CONST char ** value, int src_type));
+PRIVATE char* MakeNewImageValue PARAMS((CONST char ** value));
+PRIVATE char* MakeNewMapValue PARAMS((const char ** value, const char* mapstr));
 
 /*	Set an internal flag that the next call to a stack-affecting method
 **	is only internal and the stack manipulation should be skipped. - kw
@@ -636,7 +637,7 @@ PRIVATE void HTML_start_element ARGS6(
     char *I_value = NULL;
     char *I_name = NULL;
     char *temp = NULL;
-    int dest_char_set  = -1;
+    int dest_char_set = UCLYhndl_for_unrec;
     HTParentAnchor *dest = NULL;	     /* An anchor's destination */
     BOOL dest_ismap = FALSE;		     /* Is dest an image map script? */
     BOOL UseBASE = TRUE;		     /* Resoved vs. BASE if present? */
@@ -1096,12 +1097,13 @@ PRIVATE void HTML_start_element ARGS6(
 		    dest_char_set = UCGetLYhndl_byMIME(value[HTML_LINK_CHARSET]);
 		    if (dest_char_set < 0)
 			dest_char_set = UCLYhndl_for_unrec;
+		    if (dest_char_set < 0)  /* recover if not defined :-( */
+			dest_char_set = UCLYhndl_for_unspec; /* always >= 0 */
 		}
-		if (dest && dest_char_set >= 0)
+		if (dest)
 		    HTAnchor_setUCInfoStage(dest, dest_char_set,
 					    UCT_STAGE_PARSER,
 					    UCT_SETBY_LINK);
-		dest_char_set = -1;
 	    }
 	    UPDATE_STYLE;
 	    if (!HText_hasToolbar(me->text) &&
@@ -2532,6 +2534,8 @@ PRIVATE void HTML_start_element ARGS6(
 		dest_char_set = UCGetLYhndl_byMIME(temp);
 		if (dest_char_set < 0) {
 			dest_char_set = UCLYhndl_for_unrec;
+		if (dest_char_set < 0) /* recover if not defined :-( */
+			dest_char_set = UCLYhndl_for_unspec; /* always >= 0 */
 		}
 	    }
 	    if (title != NULL || dest_ismap == TRUE || dest_char_set >= 0) {
@@ -2543,7 +2547,7 @@ PRIVATE void HTML_start_element ARGS6(
 		HTAnchor_setTitle(dest, title);
 	    if (dest && dest_ismap)
 		dest->isISMAPScript = TRUE;
-	    if (dest && dest_char_set >= 0) {
+	    if (dest) {
 		/*
 		**  Load the anchor's chartrans structures.
 		**  This should be done more intelligently
@@ -2560,7 +2564,6 @@ PRIVATE void HTML_start_element ARGS6(
 	    FREE(temp);
 	    dest = NULL;
 	    dest_ismap = FALSE;
-	    dest_char_set = -1;
 	    FREE(title);
 	}
 	me->CurrentANum = HText_beginAnchor(me->text,
@@ -2732,11 +2735,11 @@ PRIVATE void HTML_start_element ARGS6(
 		LYTrimTail(alt_string);
 		if (*alt_string == '\0') {
 		    if (map_href) {
-			StrAllocCopy(alt_string, (title ?
-						  title : "[USEMAP]"));
+			StrAllocCopy(alt_string, (title ? title :
+				     MakeNewMapValue(value,"USEMAP")));
 		    } else if (dest_ismap) {
-			StrAllocCopy(alt_string, (title ?
-						  title : "[ISMAP]"));
+			StrAllocCopy(alt_string, (title ? title :
+				     MakeNewMapValue(value,"ISMAP")));
 
 		    } else if (me->inA == TRUE && dest) {
 			StrAllocCopy(alt_string, (title ?
@@ -2755,13 +2758,13 @@ PRIVATE void HTML_start_element ARGS6(
 	    }
 
 	} else if (map_href) {
-	    StrAllocCopy(alt_string, (title ?
-				      title : "[USEMAP]"));
+	    StrAllocCopy(alt_string, (title ? title :
+				      MakeNewMapValue(value,"USEMAP")));
 
 	} else if ((dest_ismap == TRUE) ||
 		   (me->inA && present && present[HTML_IMG_ISMAP])) {
-	    StrAllocCopy(alt_string, (title ?
-				      title : "[ISMAP]"));
+	    StrAllocCopy(alt_string, (title ? title :
+				      MakeNewMapValue(value,"ISMAP")));
 
 	} else if (me->inA == TRUE && dest) {
 	    StrAllocCopy(alt_string, (title ?
@@ -2780,7 +2783,7 @@ PRIVATE void HTML_start_element ARGS6(
 					  title : ""));
 	}
 	if (*alt_string == '\0' && map_href) {
-	    StrAllocCopy(alt_string, "[USEMAP]");
+	    StrAllocCopy(alt_string, MakeNewMapValue(value,"USEMAP"));
 	}
 
 	CTRACE(tfp, "HTML IMG: USEMAP=%d ISMAP=%d ANCHOR=%d PARA=%d\n",
@@ -2842,7 +2845,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    if (dest_ismap) {
 			HTML_put_character(me, ' ');
 			me->in_word = NO;
-			HTML_put_string(me, "[ISMAP]");
+			HTML_put_string(me, MakeNewMapValue(value,"ISMAP"));
 		    } else if (dest) {
 			HTML_put_character(me, ' ');
 			me->in_word = NO;
@@ -3010,7 +3013,7 @@ PRIVATE void HTML_start_element ARGS6(
 		if (dest_ismap) {
 		    HTML_put_character(me, ' ');/* space char may be ignored */
 		    me->in_word = NO;
-		    HTML_put_string(me, "[ISMAP]");
+		    HTML_put_string(me, MakeNewMapValue(value,"ISMAP"));
 		} else if (dest) {
 		    HTML_put_character(me, ' ');/* space char may be ignored */
 		    me->in_word = NO;
@@ -7447,7 +7450,6 @@ PUBLIC int HTLoadError ARGS3(
     return -number;
 }
 
-
 PRIVATE char * MakeNewTitle ARGS2(CONST char **, value, int, src_type)
 {
     char *ptr;
@@ -7463,6 +7465,7 @@ PRIVATE char * MakeNewTitle ARGS2(CONST char **, value, int, src_type)
     StrAllocCat(newtitle, "]");
     return newtitle;
 }
+
 PRIVATE char * MakeNewImageValue ARGS1(CONST char **, value)
 {
     char *ptr;
@@ -7476,5 +7479,25 @@ PRIVATE char * MakeNewImageValue ARGS1(CONST char **, value)
 	StrAllocCat(newtitle, ptr + 1);
     }
     StrAllocCat(newtitle, "]-Submit");
+    return newtitle;
+}
+
+PRIVATE char * MakeNewMapValue ARGS2(const char **, value, const char*, mapstr)
+{
+    char *ptr;
+    char *newtitle = NULL;
+
+    StrAllocCopy(newtitle, "[");
+    StrAllocCat(newtitle,mapstr); /* ISMAP or USEMAP */
+    if ( verbose_img ) {
+	StrAllocCat(newtitle,":");
+	ptr = strrchr(value[HTML_IMG_SRC], '/');
+	if (!ptr) {
+	    StrAllocCat(newtitle, value[HTML_IMG_SRC]);
+	} else {
+	    StrAllocCat(newtitle, ptr + 1);
+	}
+    }
+    StrAllocCat(newtitle, "]");
     return newtitle;
 }

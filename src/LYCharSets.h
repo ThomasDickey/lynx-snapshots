@@ -9,7 +9,7 @@
 #endif /* !UCMAP_H */
 
 extern BOOLEAN LYHaveCJKCharacterSet;
-extern BOOLEAN DisplayCharsetMatchLocale; 
+extern BOOLEAN DisplayCharsetMatchLocale;
 
 /*
  *  LYchar_set_name[current_char_set] points to the currently active set.
@@ -31,11 +31,10 @@ extern int LYlowest_eightbit[];
 extern int LYNumCharsets;
 extern LYUCcharset LYCharSet_UC[];
 extern void HTMLSetCharacterHandling PARAMS((int i));
-extern void HTMLSetRawModeDefault PARAMS((int i));
 extern void HTMLSetUseDefaultRawMode PARAMS((int i, BOOLEAN modeflag));
-extern void HTMLSetHaveCJKCharacterSet PARAMS((int i));
 extern void HTMLUseCharacterSet PARAMS((int i));
 extern UCode_t HTMLGetEntityUCValue PARAMS((CONST char *name));
+extern void Set_HTCJK PARAMS((CONST char *inMIMEname, CONST char *outMIMEname));
 
 extern CONST char * LYEntityNames[];
 extern CONST char * HTMLGetEntityName PARAMS((UCode_t code));

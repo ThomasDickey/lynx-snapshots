@@ -144,7 +144,7 @@ typedef struct _EditFieldData {
 
 #define LYE_AIX   (LYE_LKCMD +1)  /* Hex 97		   */
 
-#if defined(USE_SLANG_KEYMAPS)
+#if defined(USE_KEYMAPS)
 extern int lynx_initialize_keymaps NOPARAMS;
 #endif
 
@@ -184,7 +184,7 @@ extern int current_lineedit;
 extern char * LYLineeditNames[];
 extern char * LYLineEditors[];
 
-/* Push a chacter through the linedit machinery */
+/* Push a character through the lineedit machinery */
 #define EditBinding(c) (LYLineEditors[current_lineedit][c])
 #define LYLineEdit(e,c,m) LYEdit1(e,c,EditBinding(c),m)
 

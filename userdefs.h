@@ -344,16 +344,14 @@
 #define TEMP_SPACE "/tmp/"
 
 /********************************
- * Don't let the user enter his/her email address when sending a message.
- * Anonymous mail makes it far too easy for a user to spoof someone else's
- * email address.
- * This requires that your mailer agent put in the From: field for you.
- *
- * The default should be to uncomment this line but there probably are too
- * many mail agents out there that won't do the right thing if there is no
- * From: line.
+ * Comment this line out to let the user enter his/her email address
+ * when sending a message.  There should be no need to do this unless
+ * your mailer agent does not put in the From: field for you.  (If your
+ * mailer agent does not automatically put in the From: field, you should
+ * upgrade, because anonymous mail makes it far too easy for a user to
+ * spoof someone else's email address.)
  */
-/* #define NO_ANONYMOUS_EMAIL TRUE */
+#define NO_ANONYMOUS_EMAIL TRUE
 
 /********************************
  * LIST_FORMAT defines the display for local files when LONG_LIST
@@ -1218,7 +1216,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.1dev.25"
+#define LYNX_VERSION "2.8.1dev.26"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE

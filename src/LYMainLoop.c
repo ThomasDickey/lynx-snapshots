@@ -4344,8 +4344,8 @@ check_goto_URL:
 	     */
 	    if (strcmp((curdoc.title ? curdoc.title : ""),
 		       SHOWINFO_TITLE)) {
-		if (!showinfo(&curdoc, lines_in_file,
-			      &newdoc, owner_address))
+		if (showinfo(&curdoc, lines_in_file,
+			      &newdoc, owner_address) < 0)
 		    break;
 		StrAllocCopy(newdoc.title, SHOWINFO_TITLE);
 		FREE(newdoc.post_data);
@@ -4381,7 +4381,8 @@ check_goto_URL:
 	    if (strcmp((curdoc.title ? curdoc.title : ""),
 		       PRINT_OPTIONS_TITLE)) {
 
-		if (print_options(&newdoc.address, lines_in_file) < 0)
+		if (print_options(&newdoc.address,
+				&curdoc.address, lines_in_file) < 0)
 		    break;
 		StrAllocCopy(newdoc.title, PRINT_OPTIONS_TITLE);
 		FREE(newdoc.post_data);

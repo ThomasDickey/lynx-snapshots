@@ -762,6 +762,10 @@ PUBLIC void start_curses NOARGS
 #if defined(SIGWINCH) && defined(NCURSES_VERSION)
 	size_change(0);
 #endif /* SIGWINCH */
+#if defined(USE_KEYMAPS) && defined(NCURSES_VERSION)
+	if (-1 == lynx_initialize_keymaps ())
+	    exit (-1);
+#endif
 
 	/*
 	 * This is a workaround for a bug in SVr4 curses, observed on Solaris

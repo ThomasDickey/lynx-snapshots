@@ -1244,8 +1244,9 @@ PRIVATE int remove_quotes ARGS1(
  *  LYNXPRINT://MAIL_FILE/lines=#	     mail the file
  *  LYNXPRINT://PRINTER/lines=#/number=#   print to printer number #
  */
-PUBLIC int print_options ARGS2(
+PUBLIC int print_options ARGS3(
 	char **,	newfile,
+	char **,	printed_url,
 	int,		lines_in_file)
 {
     static char tempfile[256];
@@ -1256,7 +1257,6 @@ PUBLIC int print_options ARGS2(
     FILE *fp0;
     lynx_printer_item_type *cur_printer;
 
-    pages = lines_in_file/66 + 1;
 
     LYRemoveTemp(tempfile);
     if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
@@ -1271,13 +1271,17 @@ PUBLIC int print_options ARGS2(
     BeginInternalPage(fp0, PRINT_OPTIONS_TITLE, PRINT_OPTIONS_HELP);
 
     fprintf(fp0, "<pre>\n");
+
+    /*  pages = lines_in_file/66 + 1; */
     pages = (lines_in_file+65)/66;
     sprintf(buffer, "   \
-<em>You print the document:</em> %s\n   \
-       <em>Number of lines:</em> %d\n   \
-       <em>Number of pages:</em> %d page%s (approximately)\n",
-	tempfile, lines_in_file, pages, (pages > 1 ? "s" : ""));
-    fputs(buffer,fp0);
+<em>Document:</em> %s\n   \
+<em>Number of lines:</em> %d\n   \
+<em>Number of pages:</em> %d page%s (approximately)\n",
+	*printed_url,
+	lines_in_file,
+	pages, (pages > 1 ? "s" : ""));
+    fputs(buffer, fp0);
 
     if (no_print || no_disk_save || child_lynx || no_mail)
 	fprintf(fp0, "   <em>Some print functions have been disabled!</em>\n");

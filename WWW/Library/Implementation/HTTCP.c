@@ -121,7 +121,7 @@ extern int sys_nerr;
 
 unsigned long _fork_func (void *arglist)
 {
-		  return (unsigned long)(phost = gethostbyname(host));
+    return (unsigned long)(phost = gethostbyname(host));
 }
 #endif /* _WINDOWS_NSL */
 
@@ -324,15 +324,16 @@ PUBLIC int HTParseInet ARGS2(
 {
     char *port;
     int dotcount_ip = 0;	/* for dotted decimal IP addr */
+    int success = 0;
 #ifndef _WINDOWS_NSL
     char *host = NULL;
-    struct hostent  *phost;	/* Pointer to host - See netdb.h */
 #endif /* _WINDOWS_NSL */
 
     if (!str) {
 	CTRACE(tfp, "HTParseInet: Can't parse `NULL'.\n");
 	return -1;
     }
+    CTRACE(tfp, "HTParseInet: parsing `%s'.\n", str);
     if (HTCheckForInterrupt()) {
 	CTRACE (tfp, "HTParseInet: INTERRUPTED for '%s'.\n", str);
 	return -1;
@@ -428,48 +429,120 @@ PUBLIC int HTParseInet ARGS2(
 	*/
 	{
 	    /*
-	    **	Pipe, child pid, and status buffers.
+	    **	Pipe, child pid, status buffers, cycle count, select()
+	    **	control variables.
 	    */
 	    pid_t fpid, waitret = (pid_t)0;
-	    int pfd[2], cstat, cst1 = 0;
+	    int pfd[2], cstat, cst1 = 0, cycle = 0;
+	    fd_set readfds;
+	    struct timeval timeout;
 
 	    pipe(pfd);
 
 	    if ((fpid = fork()) == 0 ) {
+		struct hostent  *phost;	/* Pointer to host - See netdb.h */
 		/*
 		**  Child - for the long call.
+		**  Child won't use read side.  -BL
 		*/
+		close(pfd[0]);
 		phost = gethostbyname(host);
-		cst1 = 0;
+#ifdef MVS
+		CTRACE(tfp, "HTParseInet: gethostbyname() returned %d\n", phost);
+#endif /* MVS */
+
 		/*
-		**  Return value (or nulls).
+		**  Send length of subsequent value to parent (as a
+		**  native int).
 		*/
-		if (OK_HOST(phost)) {
+		if (OK_HOST(phost))
+			cstat = phost->h_length;
+		else
+			cstat = 0;
+		write(pfd[1], &cstat, sizeof cstat);
+
+		if (cstat) {
+		    /*
+		    **  Return value through pipe...
+		    */
 		    write(pfd[1], phost->h_addr, phost->h_length);
 		    _exit(0);
 		} else {
-		    write(pfd[1], &cst1, 4);
-		    _exit(1);	/* return an error code */
+		    /*
+		    **  ... or return error as exit code.
+		    */
+		    _exit(1);
 		}
 	    }
 
 	    /*
-	    **	(parent) Wait until lookup finishes, or interrupt.
+	    **	(parent) Wait until lookup finishes, or interrupt,
+	    **	or cycled too many times (just in case) -BL
 	    */
-	    cstat = 0;
-	    while (cstat <= 0) {
+
+	    close(pfd[1]);      /* parent won't use write side -BL */
+
+	    while (cycle < 50) {
 		/*
-		**  Exit when data sent.
+		**  Avoid infinite loop in the face of the unexpected.  -BL
 		*/
-		IOCTL(pfd[0], FIONREAD, &cstat);
-		if (cstat > 0)
-		    break;
+		cycle++;
+
+		timeout.tv_sec = 1;
+		timeout.tv_usec = 0;
+		FD_ZERO(&readfds);
+		FD_SET(pfd[0], &readfds);
+#ifndef USE_SLANG
 		/*
-		**  Exit if child exited.
+		**  This allows us to abort immediately, not after 1-second
+		**  timeout, when user hits abort key.  Can't do this when
+		**  using SLANG (or at least I don't know how), so SLANG
+		**  users must live with up-to-1s timeout.  -BL
 		*/
-		if ((waitret = waitpid(fpid, &cst1, WNOHANG)) > 0) {
+		FD_SET(0, &readfds);    /* stdin -BL */
+#endif /* USE_SLANG */
+
+		/*
+		**  Return when data received, interrupted, or failed.
+		**  If nothing is waiting, we sleep for 1 second in
+		**  select(), to be nice to the system.  -BL
+		*/
+#ifdef SOCKS
+		if (socks_flag)
+		    cst1 = Rselect(pfd[0] + 1, (void *)&readfds, NULL, NULL, &timeout);
+		else
+#endif /* SOCKS */
+		    cst1 = select(pfd[0] + 1, (void *)&readfds, NULL, NULL, &timeout);
+
+		if ((cst1 > 0) && FD_ISSET(pfd[0], &readfds)) {
+		    /*
+		    **	First get length of address.  -BL
+		    */
+		    cst1 = read(pfd[0], (void *)&cstat, sizeof cstat);
+		    if (cstat == sizeof soc_in->sin_addr) {
+			/*
+			**  Then get address itself.  -BL
+			*/
+			cst1 = read(pfd[0], (void *)&soc_in->sin_addr, cstat);
+			if (cst1 == cstat) success = 1;
+	    	    }
+		    /*
+		    **  Make sure child is cleaned up.  -BL
+		    */
+		    waitret = waitpid(fpid, &cst1, WNOHANG);
+		    if (!WIFEXITED(cst1) && !WIFSIGNALED(cst1)) {
+			kill(fpid, SIGKILL);
+			waitret = waitpid(fpid, &cst1, WNOHANG);
+		    }
 		    break;
-		}
+	    	}
+
+		/*
+		**  End loop if child exited.
+		*/
+		if ((waitret = waitpid(fpid, &cst1, WNOHANG)) > 0)
+		    break;
+
 		/*
 		**  Abort if interrupt key pressed.
 		*/
@@ -479,83 +552,43 @@ PUBLIC int HTParseInet ARGS2(
 		    waitpid(fpid, NULL, 0);
 		    FREE(host);
 		    close(pfd[0]);
-		    close(pfd[1]);
 		    return HT_INTERRUPTED;
 		}
-		/*
-		**  Be nice to the system.
-		*/
-		sleep(1);
 	    }
+	    close(pfd[0]);
 	    if (waitret <= 0) {
 		waitret = waitpid(fpid, &cst1, WNOHANG);
 	    }
-	    if (WIFEXITED(cst1)) {
-		CTRACE(tfp, "HTParseInet: NSL_FORK child %d exited, status 0x%x.\n",
-			    (int)waitret, cst1);
-	    } else if (WIFSIGNALED(cst1)) {
-		CTRACE(tfp, "HTParseInet: NSL_FORK child %d got signal, status 0x%x!\n",
-			    (int)waitret, cst1);
+	    if (waitret > 0) {
+		if (WIFEXITED(cst1)) {
+		    CTRACE(tfp, "HTParseInet: NSL_FORK child %d exited, status 0x%x.\n",
+				(int)waitret, cst1);
+		} else if (WIFSIGNALED(cst1)) {
+		    CTRACE(tfp, "HTParseInet: NSL_FORK child %d got signal, status 0x%x!\n",
+				(int)waitret, cst1);
 #ifdef WCOREDUMP
-		if (WCOREDUMP(cst1)) {
-		    CTRACE(tfp, "HTParseInet: NSL_FORK child %d dumped core!\n",
-				(int)waitret);
+		    if (WCOREDUMP(cst1)) {
+			CTRACE(tfp, "HTParseInet: NSL_FORK child %d dumped core!\n",
+				    (int)waitret);
 		    }
 #endif /* WCOREDUMP */
-	    } else if (WIFSTOPPED(cst1)) {
-		CTRACE(tfp, "HTParseInet: NSL_FORK child %d is stopped, status 0x%x!\n",
-			    (int)waitret, cst1);
-	    }
-	    /*
-	    **	Read as much as we can - should be the address.
-	    */
-	    IOCTL(pfd[0], FIONREAD, &cstat);
-	    if (cstat < 4) {
-		CTRACE(tfp, "HTParseInet: NSL_FORK child returns only %d bytes.\n",
-			    cstat);
-		CTRACE(tfp, "             Trying again without forking.\n");
-		phost = gethostbyname(host);	/* See netdb.h */
-		if (!OK_HOST(phost)) {
-		    CTRACE(tfp, "HTParseInet: Can't find internet node name `%s'.\n",
-				host);
-		    memset((void *)&soc_in->sin_addr, 0, sizeof(soc_in->sin_addr));
-		} else {
-		    memcpy((void *)&soc_in->sin_addr,
-			   phost->h_addr, phost->h_length);
+		} else if (WIFSTOPPED(cst1)) {
+		    CTRACE(tfp, "HTParseInet: NSL_FORK child %d is stopped, status 0x%x!\n",
+				(int)waitret, cst1);
 		}
-#ifdef NOTDEFINED
-		cstat = read(pfd[0], (void *)&soc_in->sin_addr , 4);
-#endif /* NOTDEFINED */
-	    } else {
-		cstat = read(pfd[0], (void *)&soc_in->sin_addr , cstat);
 	    }
-	    close(pfd[0]);
-	    close(pfd[1]);
+	    if (!success) {
+		memset((void *)&soc_in->sin_addr, 0, sizeof(soc_in->sin_addr));
+		goto failed;
+	    }
 	}
-	if (soc_in->sin_addr.s_addr == 0) {
-	    CTRACE(tfp, "HTParseInet: Can't find internet node name `%s'.\n",
-			host);
-#ifndef _WINDOWS_NSL
-	    FREE(host);
-#endif /* _WINDOWS_NSL */
-	    return -1;
-	}
-#ifndef _WINDOWS_NSL
-	FREE(host);
-#endif /* _WINDOWS_NSL */
-#ifdef MVS
-	CTRACE(tfp, "HTParseInet: gethostbyname() returned %d\n", phost);
-#endif /* MVS */
-
 #else /* Not NSL_FORK: */
 #ifdef DJGPP
 	soc_in->sin_addr.s_addr = htonl(resolve(host));
-	FREE(host);
 	if (soc_in->sin_addr.s_addr == 0) {
-	    CTRACE(tfp, "HTTPAccess: Can't find internet node name `%s'.\n",host);
-	    return -1;  /* Fail? */
+	    goto failed;
 	}
-#else
+#else /* !NSL_FORK, !DJGPP: */
 #ifdef _WINDOWS_NSL
 	{
 #ifdef __BORLANDC__
@@ -585,38 +618,35 @@ PUBLIC int HTParseInet ARGS2(
 			  return HT_INTERRUPTED;
 			};
 	};
-#else /* !_WINDOWS_NSL */
-	phost = gethostbyname(host);	/* See netdb.h */
-#endif /* _WINDOWS_NSL */
+#else /* !NSL_FORK, !DJGPP, !_WINDOWS_NSL: */
+	{
+	    struct hostent  *phost;
+	    phost = gethostbyname(host);	/* See netdb.h */
 #ifdef MVS
-	CTRACE(tfp, "HTParseInet: gethostbyname() returned %d\n", phost);
+	    CTRACE(tfp, "HTParseInet: gethostbyname() returned %d\n", phost);
 #endif /* MVS */
-	if (!phost) {
-	    CTRACE(tfp, "HTParseInet: Can't find internet node name `%s'.\n",
-			host);
-#ifndef _WINDOWS_NSL
-	    FREE(host);
-#endif /* _WINDOWS_NSL */
-	    return -1;	/* Fail? */
+	    if (!phost) goto failed;
+#if defined(VMS) && defined(CMU_TCP)
+	    /*
+	    **  In LIBCMU, phost->h_length contains not the length of one address
+	    **  (four bytes) but the number of bytes in *h_addr, i.e. some multiple
+	    **  of four. Thus we need to hard code the value here, and remember to
+	    **  change it if/when IP addresses change in size. :-(	LIBCMU is no
+	    **  longer supported, and CMU users are encouraged to obtain and use
+	    **  SOCKETSHR/NETLIB instead. - S. Bjorndahl
+	    */
+	    memcpy((void *)&soc_in->sin_addr, phost->h_addr, 4);
+#else
+	    memcpy((void *)&soc_in->sin_addr, phost->h_addr, phost->h_length);
+#endif /* VMS && CMU_TCP */
 	}
+#endif /* !NSL_FORK, !DJGPP, !_WINDOWS_NSL */
+#endif /* !NSL_FORK, !DJGPP */
+#endif /* !NSL_FORK */
 #ifndef _WINDOWS_NSL
 	FREE(host);
 #endif /* _WINDOWS_NSL */
-#if defined(VMS) && defined(CMU_TCP)
-	/*
-	**  In LIBCMU, phost->h_length contains not the length of one address
-	**  (four bytes) but the number of bytes in *h_addr, i.e. some multiple
-	**  of four. Thus we need to hard code the value here, and remember to
-	**  change it if/when IP addresses change in size. :-(	LIBCMU is no
-	**  longer supported, and CMU users are encouraged to obtain and use
-	**  SOCKETSHR/NETLIB instead. - S. Bjorndahl
-	*/
-	memcpy((void *)&soc_in->sin_addr, phost->h_addr, 4);
-#else
-	memcpy((void *)&soc_in->sin_addr, phost->h_addr, phost->h_length);
-#endif /* VMS && CMU_TCP */
-#endif /* DJGPP */
-#endif /* NSL_FORK */
+
     }
 
     CTRACE(tfp, "HTParseInet: Parsed address as port %d, IP address %d.%d.%d.%d\n",
@@ -628,6 +658,14 @@ PUBLIC int HTParseInet ARGS2(
 #endif	/* Internet vs. Decnet */
 
     return 0;	/* OK */
+
+failed:
+    CTRACE(tfp, "HTParseInet: Can't find internet node name `%s'.\n",
+		host);
+#ifndef _WINDOWS_NSL
+    FREE(host);
+#endif /* _WINDOWS_NSL */
+    return -1;
 }
 
 /*	Free our name for the host on which we are - FM

@@ -2517,7 +2517,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	HTStructured *, 	me,
 	CONST BOOL*,		present,
 	CONST char **,		value,
-	char **,		include)
+	char **,		include GCC_UNUSED)
 {
     char *http_equiv = NULL, *name = NULL, *content = NULL;
     char *href = NULL, *id_string = NULL, *temp = NULL;
@@ -2708,6 +2708,7 @@ PUBLIC void LYHandleMETA ARGS4(
     } else if (!(me->node_anchor->charset && *me->node_anchor->charset) &&
 	       !strcasecomp((http_equiv ? http_equiv : ""), "Content-Type")) {
 	LYUCcharset * p_in = NULL;
+	LYUCcharset * p_out = NULL;
 	LYUCFullyTranslateString(&content, me->tag_charset, me->tag_charset,
 				 NO, NO, YES, st_other);
 	LYTrimHead(content);
@@ -2745,6 +2746,8 @@ PUBLIC void LYHandleMETA ARGS4(
 		 *  Got something but we don't recognize it.
 		 */
 		chndl = UCLYhndl_for_unrec;
+		if (chndl < 0) /* UCLYhndl_for_unrec not defined :-( */
+		     chndl = UCLYhndl_for_unspec; /* always >= 0 */
 		if (UCCanTranslateFromTo(chndl, current_char_set)) {
 		    chartrans_ok = YES;
 		    HTAnchor_setUCInfoStage(me->node_anchor, chndl,
@@ -2753,13 +2756,12 @@ PUBLIC void LYHandleMETA ARGS4(
 		}
 	    }
 	    if (chartrans_ok) {
-		LYUCcharset * p_out =
-				HTAnchor_setUCInfoStage(me->node_anchor,
-							current_char_set,
-							UCT_STAGE_HTEXT,
-							UCT_SETBY_DEFAULT);
 		p_in = HTAnchor_getUCInfoStage(me->node_anchor,
 					       UCT_STAGE_PARSER);
+		p_out = HTAnchor_setUCInfoStage(me->node_anchor,
+						current_char_set,
+						UCT_STAGE_HTEXT,
+						UCT_SETBY_DEFAULT);
 		if (!p_out) {
 		    /*
 		     *	Try again.
@@ -2791,37 +2793,30 @@ PUBLIC void LYHandleMETA ARGS4(
 			HTPassEightBitRaw = TRUE;
 		    }
 		} else if (p_out->enc == UCT_ENC_CJK) {
-		    if (LYRawMode) {
-			if ((!strcmp(p_in->MIMEname, "euc-jp") ||
-			     !strcmp(p_in->MIMEname, "shift_jis")) &&
-			    (!strcmp(p_out->MIMEname, "euc-jp") ||
-			     !strcmp(p_out->MIMEname, "shift_jis"))) {
-			    HTCJK = JAPANESE;
-			} else if (!strcmp(p_in->MIMEname, "euc-cn") &&
-				   !strcmp(p_out->MIMEname, "euc-cn")) {
-			    HTCJK = CHINESE;
-			} else if (!strcmp(p_in->MIMEname, "big5") &&
-				   !strcmp(p_out->MIMEname, "big5")) {
-			    HTCJK = TAIPEI;
-			} else if (!strcmp(p_in->MIMEname, "euc-kr") &&
-				   !strcmp(p_out->MIMEname, "euc-kr")) {
-			    HTCJK = KOREAN;
-			} else {
-			    HTCJK = NOCJK;
-			}
-		    } else {
-			HTCJK = NOCJK;
-		    }
+		    Set_HTCJK(p_in->MIMEname, p_out->MIMEname);
 		}
 		LYGetChartransInfo(me);
-	    /*
-	     *	Fall through to old behavior.
-	     */
-	    } else if (!strncmp(cp1, "us-ascii", 8) ||
-		       !strncmp(cp1, "iso-8859-1", 10)) {
-		StrAllocCopy(me->node_anchor->charset, "iso-8859-1");
-		HTCJK = NOCJK;
-
+		/*
+		**  Update the chartrans info homologously to
+		**  a Content-Type MIME header with a charset
+		**  parameter. - FM
+		*/
+		if (me->UCLYhndl != chndl) {
+		    HTAnchor_setUCInfoStage(me->node_anchor, chndl,
+					    UCT_STAGE_MIME,
+					    UCT_SETBY_STRUCTURED);
+		    HTAnchor_setUCInfoStage(me->node_anchor, chndl,
+					    UCT_STAGE_PARSER,
+					    UCT_SETBY_STRUCTURED);
+		    me->inUCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,
+							  UCT_STAGE_PARSER);
+		    me->inUCI = HTAnchor_getUCInfoStage(me->node_anchor,
+							UCT_STAGE_PARSER);
+		}
+		UCSetTransParams(&me->T,
+				 me->inUCLYhndl, me->inUCI,
+				 me->outUCLYhndl, me->outUCI);
+	    } else {
 		/*
 		 *  Hope it's a match, for now. - FM
 		 */
@@ -2834,41 +2829,6 @@ PUBLIC void LYHandleMETA ARGS4(
 		HTPassEightBitRaw = TRUE;
 		HTAlert(me->node_anchor->charset);
 
-	    } else if (!strncmp(cp1, "euc-jp", 6) && HTCJK == JAPANESE) {
-		StrAllocCopy(me->node_anchor->charset, "euc-jp");
-
-	    } else if (!strncmp(cp1, "shift_jis", 9) && HTCJK == JAPANESE) {
-		StrAllocCopy(me->node_anchor->charset, "shift_jis");
-
-	    } else if (!strncmp(cp1, "iso-2022-jp", 11) &&
-				HTCJK == JAPANESE) {
-		StrAllocCopy(me->node_anchor->charset, "iso-2022-jp");
-
-	    } else if (!strncmp(cp1, "iso-2022-jp-2", 13) &&
-				HTCJK == JAPANESE) {
-		StrAllocCopy(me->node_anchor->charset, "iso-2022-jp-2");
-
-	    } else if (!strncmp(cp1, "euc-kr", 6) && HTCJK == KOREAN) {
-		StrAllocCopy(me->node_anchor->charset, "euc-kr");
-
-	    } else if (!strncmp(cp1, "iso-2022-kr", 11) && HTCJK == KOREAN) {
-		StrAllocCopy(me->node_anchor->charset, "iso-2022-kr");
-
-	    } else if ((!strncmp(cp1, "big5", 4) ||
-			!strncmp(cp1, "cn-big5", 7)) &&
-		       HTCJK == TAIPEI) {
-		StrAllocCopy(me->node_anchor->charset, "big5");
-
-	    } else if (!strncmp(cp1, "euc-cn", 6) && HTCJK == CHINESE) {
-		StrAllocCopy(me->node_anchor->charset, "euc-cn");
-
-	    } else if ((!strncmp(cp1, "gb2312", 6) ||
-			!strncmp(cp1, "cn-gb", 5)) &&
-		       HTCJK == CHINESE) {
-		StrAllocCopy(me->node_anchor->charset, "gb2312");
-
-	    } else if (!strncmp(cp1, "iso-2022-cn", 11) && HTCJK == CHINESE) {
-		StrAllocCopy(me->node_anchor->charset, "iso-2022-cn");
 	    }
 	    FREE(cp3);
 
@@ -3103,7 +3063,7 @@ PUBLIC void LYHandleP ARGS5(
 	HTStructured *, 	me,
 	CONST BOOL*,		present,
 	CONST char **,		value,
-	char **,		include,
+	char **,		include GCC_UNUSED,
 	BOOL,			start)
 {
     if (TRUE) {
@@ -3211,7 +3171,7 @@ PUBLIC void LYHandleSELECT ARGS5(
 	HTStructured *, 	me,
 	CONST BOOL*,		present,
 	CONST char **,		value,
-	char **,		include,
+	char **,		include GCC_UNUSED,
 	BOOL,			start)
 {
     int i;
