@@ -78,6 +78,10 @@ extern BOOLEAN local_exec_on_local_files; /* TRUE to enable local program  *
 					   * execution in local files only */
 #endif /* defined(EXEC_LINKS) || defined(EXEC_SCRIPTS) */
 
+#if defined(LYNXCGI_LINKS) && !defined(VMS)  /* WebSter Mods -jkt */
+extern char *LYCgiDocumentRoot;  /* DOCUMENT_ROOT in the lynxcgi env */
+#endif /* LYNXCGI_LINKS */
+
 /* Values to which keypad_mode can be set */
 #define NUMBERS_AS_ARROWS 0
 #define LINKS_ARE_NUMBERED 1

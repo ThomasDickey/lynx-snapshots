@@ -834,6 +834,12 @@ PUBLIC void read_cfg ARGS1(
 #ifdef LYNXCGI_LINKS
 	} else if (!strncasecomp(buffer, "LYNXCGI_ENVIRONMENT:", 20)) {
 	    add_lynxcgi_environment(buffer+20);
+
+#ifndef VMS
+	/* WebSter Mods - Next 2 Lines -jkt */
+	} else if (!strncasecomp(buffer, "LYNXCGI_DOCUMENT_ROOT:", 22)) {
+	    StrAllocCopy(LYCgiDocumentRoot, buffer+22);
+#endif /* !VMS */
 #endif /* LYNXCGI_LINKS */
 
 	} else if (!strncasecomp(buffer, "LYNX_HOST_NAME:", 15)) {

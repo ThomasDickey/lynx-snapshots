@@ -2036,7 +2036,7 @@ PRIVATE void HTMIME_write ARGS3(
 
     } else {
         if (TRACE)
-	    fprintf(stderr, "HTMIME:  %s\n", s);
+	    fprintf(stderr, "HTMIME:  %.*s\n", l, s);
 
         for (p = s; p < s+l; p++)
 	    HTMIME_put_character(me, *p);

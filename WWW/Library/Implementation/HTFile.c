@@ -1687,6 +1687,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    (0 == strcmp(localname + strlen(localname) - strlen(MULTI_SUFFIX),
 	                 MULTI_SUFFIX))) {
 	    DIR *dp;
+	    BOOL forget_multi = NO;
 
 	    STRUCT_DIRENT * dirbuf;
 	    float best = NO_VALUE_FOUND;	/* So far best is bad */
@@ -1696,15 +1697,16 @@ PUBLIC int HTLoadFile ARGS4(
 	    char *base = strrchr(localname, '/');
 	    int baselen;
 
-	    if (!base || base == localname)
-	        goto forget_multi;
-	    *base++ = '\0';		/* Just got directory name */
-	    baselen = strlen(base)- strlen(MULTI_SUFFIX);
-	    base[baselen] = '\0';	/* Chop off suffix */
+	    if (!base || base == localname) {
+	        forget_multi = YES;
+	    } else {
+		*base++ = '\0';		/* Just got directory name */
+		baselen = strlen(base)- strlen(MULTI_SUFFIX);
+		base[baselen] = '\0';	/* Chop off suffix */
 
-	    dp = opendir(localname);
-	    if (!dp) {
-forget_multi:
+		dp = opendir(localname);
+	    }
+	    if (forget_multi || !dp) {
 		FREE(localname);
 		FREE(nodename);
 		return HTLoadError(sink, 500,
@@ -1894,7 +1896,16 @@ forget_multi:
         	    StrAllocCopy (tail, "/foo/..");
     	    	else {
         	    char *p = strrchr(pathname, '/');  /* find lastslash */
-        	    StrAllocCopy(tail, p+1); /* take slash off the beginning */
+		    if (!p) {
+			/*
+			 *  This probably should not happen, but be
+			 *  prepared if it does... - kw
+			 */
+			StrAllocCopy (tail, "/foo/..");
+		    } else {
+			/* take slash off the beginning */
+			StrAllocCopy(tail, p+1);
+		    }
     		}
     		FREE(pathname);
 
@@ -1926,8 +1937,10 @@ forget_multi:
 					       (HTAnchor *)anchor, FALSE);
 
 #ifdef DIRED_SUPPORT
-		HTAnchor_setFormat((HTParentAnchor *) anchor, WWW_DIRED);
-		lynx_edit_mode = TRUE;
+		if (strncmp(anchor->address, "lynxcgi:", 8)) {
+		    HTAnchor_setFormat((HTParentAnchor *) anchor, WWW_DIRED);
+		    lynx_edit_mode = TRUE;
+		}
 #endif /* DIRED_SUPPORT */
                 if (HTDirReadme == HT_DIR_README_TOP)
 		    do_readme(target, localname);

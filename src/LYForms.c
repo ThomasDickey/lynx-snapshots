@@ -674,15 +674,12 @@ PRIVATE int popup_options ARGS7(
     }
     scrollok(form_window, TRUE);
 #ifdef PDCURSES
-	keypad(form_window, TRUE);
+    keypad(form_window, TRUE);
 #endif /* PDCURSES */
 #ifdef NCURSES
-#ifdef wgetbkgd
-#define getbkgd(w) wgetbkgd(w)	/* workaround pre-1.9.9g bug */
-#endif
     LYsubwindow(form_window);
 #endif
-#if defined(COLOR_CURSES) && defined(getbkgd) /* not defined in ncurses 1.8.7 */
+#if defined(HAVE_GETBKGD) /* not defined in ncurses 1.8.7 */
     wbkgd(form_window, getbkgd(stdscr));
     wbkgdset(form_window, getbkgd(stdscr));
 #endif

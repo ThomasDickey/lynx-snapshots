@@ -57,6 +57,10 @@ extern time_t LYmktime PARAMS((char *string, BOOL absolute));
 extern int putenv PARAMS((CONST char *string));
 #endif /* HAVE_PUTENV */
 
+FILE *LYNewBinFile PARAMS((char * name));
+FILE *LYNewTxtFile PARAMS((char * name));
+FILE *LYAppendToTxtFile PARAMS((char * name));
+
 /*
  *  Whether or not the status line must be shown.
  */
@@ -130,5 +134,8 @@ extern HTList *sug_filenames;
 #define OFF     0
 #define STREQ(a,b) (strcmp(a,b) == 0)
 #define STRNEQ(a,b,c) (strncmp(a,b,c) == 0)
+
+#define HIDE_CHMOD 0600
+#define HIDE_UMASK 0077
 
 #endif /* LYUTILS_H */

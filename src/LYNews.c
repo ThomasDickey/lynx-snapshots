@@ -69,13 +69,10 @@ PUBLIC char *LYNewsPost ARGS2(
      *  and message body. - FM
      */
     tempname(my_tempfile, NEW_FILE);
-    if ((fd = fopen(my_tempfile, "w")) == NULL) {
+    if ((fd = LYNewTxtFile(my_tempfile)) == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(postfile);
     }
-#ifndef __DJGPP__ 
-    chmod(my_tempfile, 0600);
-#endif /* __DJGPP__ */   
 
     /*
      *  If we're using a Japanese display character set,
@@ -85,7 +82,7 @@ PUBLIC char *LYNewsPost ARGS2(
     if (!strncmp(LYchar_set_names[current_char_set], "Japanese (EUC)", 14) ||
 	!strncmp(LYchar_set_names[current_char_set], "Japanese (SJIS)", 15)) {
 	tempname(CJKfile, NEW_FILE);
-	if ((fc = fopen(CJKfile, "w")) == NULL) {
+	if ((fc = LYNewTxtFile(CJKfile)) == NULL) {
 	    HTAlert(CANNOT_OPEN_TEMP);
 	    fclose(fd);
 #ifdef VMS
@@ -96,9 +93,6 @@ PUBLIC char *LYNewsPost ARGS2(
 #endif /* VMS */
 	    return(postfile);
 	}
-#ifndef __DJGPP__ 
-	chmod(CJKfile, 0600);
-#endif /* __DJGPP__ */
     }
 
     /*

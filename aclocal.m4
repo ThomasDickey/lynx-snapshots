@@ -146,7 +146,8 @@ AC_CACHE_VAL(cf_cv_color_curses,[
 	AC_TRY_LINK([
 #include <$cf_cv_ncurses_header>
 ],
-	[has_colors();
+	[chtype x = COLOR_BLUE;
+	 has_colors();
 	 start_color();
 #ifndef NCURSES_BROKEN
 	 wbkgd(curscr, getbkgd(stdscr)); /* X/Open XPG4 aka SVr4 Curses */
@@ -156,7 +157,10 @@ AC_CACHE_VAL(cf_cv_color_curses,[
 	[cf_cv_color_curses=no])
 	])
 AC_MSG_RESULT($cf_cv_color_curses)
-test $cf_cv_color_curses = yes && AC_DEFINE(COLOR_CURSES)
+if test $cf_cv_color_curses = yes ; then
+	AC_DEFINE(COLOR_CURSES)
+	test ".$cf_cv_ncurses_broken" != .yes && AC_DEFINE(HAVE_GETBKGD)
+fi
 ])
 dnl ---------------------------------------------------------------------------
 dnl Look for the curses libraries.  Older curses implementations may require
@@ -164,14 +168,21 @@ dnl termcap/termlib to be linked as well.
 AC_DEFUN([CF_CURSES_LIBS],[
 AC_CHECK_FUNC(initscr,,[
 case $host_os in #(vi
-freebsd*)
+freebsd*) #(vi
 	AC_CHECK_LIB(mytinfo,tgoto,[LIBS="-lmytinfo $LIBS"])
+	;;
+*hp-hpux10.*)
+	AC_CHECK_LIB(cur_color,initscr,[
+		LIBS="-lcur_color $LIBS"
+		CFLAGS="-I/usr/include/curses_colr $CFLAGS"
+		])
 	;;
 esac
 if test -d /usr/5lib ; then
 	# SunOS 3.x or 4.x
 	CPPFLAGS="$CPPFLAGS -I/usr/5include"
 	LIBS="$LIBS -L/usr/5lib"
+# FIXME: check if we need/use -R option
 # elif test -d /usr/ccs/lib ; then
 # 	# Solaris 5.x
 # 	LIBS="$LIBS -L/usr/ccs/lib -R/usr/ccs/lib"
@@ -1007,3 +1018,20 @@ AC_MSG_RESULT($cf_cv_have_utmp)
 test $cf_cv_have_utmp != no && AC_DEFINE(HAVE_UTMP)
 test $cf_cv_have_utmp = utmpx && AC_DEFINE(UTMPX_FOR_UTMP)
 ])
+dnl ---------------------------------------------------------------------------
+dnl Wrapper for AC_ARG_WITH to ensure that user supplies a pathname, not just
+dnl defaulting to yes/no.
+AC_DEFUN([CF_WITH_PATH],
+[AC_ARG_WITH($1,[$2 ](default: ifelse($4,,empty,$4)),,
+ifelse($4,,[withval="${$3}"],[withval="${$3-$4}"]))dnl
+case ".$withval" in #(vi
+./*)
+  ;; #(vi
+*)
+  echo 'configure: error: expected a pathname for $3' 1>&2
+  exit 1
+  ;;
+esac
+$3="$withval"
+AC_SUBST($3)dnl
+])dnl

@@ -53,6 +53,11 @@
 # else
 #  include <curses.h>
 # endif
+
+# ifdef wgetbkgd
+#  define getbkgd(w) wgetbkgd(w)	/* workaround pre-1.9.9g bug */
+# endif
+
 extern void LYsubwindow PARAMS((WINDOW * param));
 
 # else /* FIXME: remove this after configure script is complete */
@@ -302,11 +307,11 @@ extern int  lynx_chg_color PARAMS((int, int, int));
  *  reverse, and ignore underline. - FM
  */
 #define start_bold()		standout()  
-#define start_underline()	1  /* nothing */
+#define start_underline()	/* nothing */
 #define start_reverse()		standout()
 #define wstart_reverse(a)	wstandout(a)
 #define stop_bold()		standend()  
-#define stop_underline()	1  /* nothing */
+#define stop_underline()	/* nothing */
 #define stop_reverse()		standend()
 #define wstop_reverse(a)	wstandend(a)
 

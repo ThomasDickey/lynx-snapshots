@@ -189,14 +189,11 @@ PUBLIC void mailform ARGS4(
 
 #if defined(VMS) || defined(DOSPATH)
     sprintf(my_tempfile, "%s%s", lynx_temp_space, "temp_mail.txt");
-    if ((fd = fopen(my_tempfile,"w")) == NULL) {
+    if ((fd = LYNewTxtFile(my_tempfile)) == NULL) {
 	HTAlert(FORM_MAILTO_FAILED);
 	FREE(address);
 	return;
     }
-#ifndef __DJGPP__    
-    chmod(tmpfile, 0600);
-#endif /* __DJGPP__ */
     if (*self) {
         cp = self;
 	while (*cp == ' ' || *cp == ',')
@@ -387,13 +384,10 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
 #endif /* UNIX */
 #if defined(VMS) || defined(DOSPATH)
     sprintf(my_tempfile, "%s%s", lynx_temp_space, "temp_mail.txt");
-    if ((fd = fopen(my_tempfile,"w")) == NULL) {
+    if ((fd = LYNewTxtFile(my_tempfile)) == NULL) {
 	FREE(address);
 	return;
     }
-#ifndef __DJGPP__    
-    chmod(tmpfile, 0600);
-#endif /* __DJGPP__ */
 #endif /* VMS */
 
     fprintf(fd, "The link   %s :?: %s \n",
@@ -450,8 +444,8 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
     if (traversal) {
 	FILE *ofp;
 
-	if ((ofp = fopen(TRAVERSE_ERRORS,"a+")) == NULL) {
-	    if ((ofp = fopen(TRAVERSE_ERRORS,"w")) == NULL) {
+	if ((ofp = LYAppendToTxtFile(TRAVERSE_ERRORS)) == NULL) {
+	    if ((ofp = LYNewTxtFile(TRAVERSE_ERRORS)) == NULL) {
 		perror(NOOPEN_TRAV_ERR_FILE);
 #ifndef NOSIGHUP
 		(void) signal(SIGHUP, SIG_DFL);
@@ -466,9 +460,6 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
 #endif /* SIGTSTP */
 		exit(-1);
             }
-#ifndef __DJGPP__    
-	    chmod(TRAVERSE_ERRORS, 0600);
-#endif /* __DJGPP__ */
 	}
 
 	fprintf(ofp, "%s\t%s \tin %s\n",
@@ -531,13 +522,10 @@ PUBLIC void reply_by_mail ARGS3(
 	*cp = '\0';
 	strcat(my_tempfile, ".txt");
     }
-    if ((fd = fopen(my_tempfile,"w")) == NULL) {
+    if ((fd = LYNewTxtFile(my_tempfile)) == NULL) {
 	HTAlert(MAILTO_URL_TEMPOPEN_FAILED);
 	return;
     }
-#ifndef __DJGPP__     
-    chmod(my_tempfile, 0600);
-#endif /* __DJGPP__ */
     subject[0] = '\0';
 
     /*

@@ -1609,7 +1609,7 @@ PUBLIC void lynx_start_link_color ARGS2(
 	 *  will be underlined if appropriate. - LE & FM
 	 */
 	if (pending)
-	    start_underline();
+	    lynx_start_underline_color();
      }
 }
 
@@ -1635,7 +1635,7 @@ PUBLIC void lynx_stop_link_color ARGS2(
 	 *  If underlining was turned on above, turn it off. - LE & FM
 	 */
 	if (pending)
-	    stop_underline();
+	    lynx_stop_underline_color();
     }
 #endif
 }

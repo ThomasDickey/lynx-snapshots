@@ -134,6 +134,10 @@ PUBLIC BOOLEAN local_exec_on_local_files =
 	       LOCAL_EXECUTION_LINKS_ON_BUT_NOT_REMOTE;
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
 
+#if defined(LYNXCGI_LINKS) && !defined(VMS)  /* WebSter Mods -jkt */
+PUBLIC char *LYCgiDocumentRoot = NULL; /* DOCUMENT_ROOT in the lynxcgi env */
+#endif /* LYNXCGI_LINKS */
+
 #ifdef REVERSE_CLEAR_SCREEN_PROBLEM
 PUBLIC BOOLEAN enable_scrollback=TRUE;
 #else
@@ -393,6 +397,9 @@ PRIVATE void free_lynx_globals NOARGS
 #ifdef SYSLOG_REQUESTED_URLS
     FREE(syslog_txt);
 #endif /* SYSLOG_REQUESTED_URLS */
+#ifdef LYNXCGI_LINKS  /* WebSter Mods -jkt */
+    FREE(LYCgiDocumentRoot);
+#endif /* LYNXCGI_LINKS */
     FREE(lynx_version_putenv_command);
     FREE(NNTPSERVER_putenv_cmd);
     FREE(http_proxy_putenv_cmd);
@@ -998,7 +1005,7 @@ PUBLIC int main ARGS2(
 	 *  versions from previous sessions so they don't
 	 *  accumulate, and open it again. - FM
 	 */
-	if ((LYTraceLogFP = fopen(LYTraceLogPath, "w")) == NULL) {
+	if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
 	    WWW_TraceFlag = FALSE;
 	    fprintf(stderr, "%s\n", TRACELOG_OPEN_FAILED);
 	    exit(-1);
@@ -1007,16 +1014,12 @@ PUBLIC int main ARGS2(
 	fclose(LYTraceLogFP);
 	while (remove(LYTraceLogPath) == 0)
 	    ;
-	if ((LYTraceLogFP = fopen(LYTraceLogPath, "w",
-				  "shr=get")) == NULL) {
+	if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
 	    WWW_TraceFlag = FALSE;
 	    printf("%s\n", TRACELOG_OPEN_FAILED);
 	    exit(-1);
 	}
 #endif /* VMS */
-#ifndef __DJGPP__ 
-	chmod(LYTraceLogPath, 0600);
-#endif /* __DJGPP__ */
 	*stderr = *LYTraceLogFP;
 	fprintf(stderr, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
     }

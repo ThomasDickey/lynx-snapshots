@@ -9,6 +9,7 @@
 **                  dynamic pages without the need for a http daemon. GL
 **      27 Jun 95   Added <index> (command line) support. Various cleanup
 **                  and bug fixes. GL
+**	04 Sep 97   Added support for PATH_INFO scripts.  JKT
 **
 ** Bugs
 **      If the called scripts aborts before sending the mime headers then
@@ -128,8 +129,19 @@ PRIVATE int LYLoadCGI ARGS4(
     struct stat stat_buf;
     char *pgm = NULL;		        /* executable */
     char *pgm_args = NULL;	        /* and its argument(s) */
+    int statrv;
+    char *orig_pgm = NULL;		/* Path up to ? as given, URL-escaped*/
+    char *document_root = NULL;		/* Corrected value of DOCUMENT_ROOT  */
+    char *path_info = NULL;             /* PATH_INFO extracted from pgm      */
+    char *pgm_buff = NULL;		/* PATH_INFO extraction buffer       */
+    char *path_translated;		/* From document_root/path_info      */
 
-    if (arg) {
+    if (!arg || !*arg || strlen(arg) <= 8) {
+	HTAlert(BAD_REQUEST);
+	status = -2;
+	return(status);
+
+    } else {
 	if (strncmp(arg, "lynxcgi://localhost", 19) == 0) {
 	    StrAllocCopy(pgm, arg+19);
 	} else {
@@ -141,11 +153,57 @@ PRIVATE int LYLoadCGI ARGS4(
 	}
     }
 
-    if (!arg || !*arg) {
-	HTAlert(BAD_REQUEST);
-	status = -2;
+    StrAllocCopy(orig_pgm, pgm);
+    if ((cp=strchr(pgm, '#')) != NULL) {
+	/*
+	 *  Strip a #fragment from path.  In this case any pgm_args
+	 *  found above will also be bogus, since the '?' came after
+	 *  the '#' and is part of the fragment.  Note that we don't
+	 *  handle the case where a '#' appears after a '?' properly
+	 *  according to URL rules. - kw
+	 */
+	*cp = '\0';
+	pgm_args = NULL;
+    }
+    HTUnEscape(pgm);
 
-    } else if (stat(pgm, &stat_buf) < 0) {
+    /* BEGIN WebSter Mods */
+    /* If pgm is not stat-able, see if PATH_INFO data is at the end of pgm */
+    if ((statrv = stat(pgm, &stat_buf)) < 0) {
+	StrAllocCopy(pgm_buff, pgm);
+	while (statrv < 0 || (statrv = stat(pgm_buff, &stat_buf)) < 0) {
+	    if ((cp=strrchr(pgm_buff, '/')) != NULL) {
+		*cp = '\0';
+		statrv = 999;	/* force new stat()  - kw */
+	    } else {
+		if (TRACE)
+		    perror("LYNXCGI: strrchr(pgm_buff, '/') returned NULL");
+	    	break;
+	    }
+        }
+
+	if (statrv < 0) {
+	    /* Did not find PATH_INFO data */
+	    if (TRACE) 
+		perror("LYNXCGI: stat() of pgm_buff failed");
+	} else {
+	    /* Found PATH_INFO data. Strip it off of pgm and into path_info. */
+	    StrAllocCopy(path_info, pgm+strlen(pgm_buff));
+	    strcpy(pgm, pgm_buff);
+	    if (TRACE)
+		fprintf(stderr,
+			"LYNXCGI: stat() of %s succeeded, path_info=\"%s\".\n",
+			pgm_buff, path_info);
+	}
+	FREE(pgm_buff);
+    }
+    /* END WebSter Mods */
+
+    if (statrv != 0) {
+	/*
+	 *  Neither the path as given nor any components examined by
+	 *  backing up were stat()able. - kw
+	 */
 	HTAlert("Unable to access cgi script");
 	if (TRACE) {
 	    perror("LYNXCGI: stat() failed");
@@ -154,13 +212,31 @@ PRIVATE int LYLoadCGI ARGS4(
 
     } else if (!(S_ISREG(stat_buf.st_mode) &&
 		 stat_buf.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH))) {
-	/* Not a runnable file, See if we can load it using file: code */
-	char *temp = NULL;
+	/*
+	 *  Not a runnable file, See if we can load it using "file:" code.
+	 */
 	char *new_arg = NULL;
 
-	StrAllocCopy(temp, pgm);
+	/*
+	 *  But try "file:" only if the file we are looking at is the path
+	 *  as given (no path_info was extracted), otherwise it will be
+	 *  to confusing to know just what file is loaded. - kw
+	 */
+	if (path_info) {
+	    if (TRACE) {
+		fprintf(stderr,
+			"%s is not a file and %s not an executable, giving up.\n",
+			orig_pgm, pgm);
+	    }
+	    FREE(path_info);
+	    FREE(pgm);
+	    FREE(orig_pgm);
+	    status = -4;
+	    return(status);
+	}
+	    
 	StrAllocCopy(new_arg, "file://localhost");
-	StrAllocCat(new_arg, temp);
+	StrAllocCat(new_arg, orig_pgm);
 
 	if (TRACE) {
 	    fprintf(stderr,
@@ -169,18 +245,41 @@ PRIVATE int LYLoadCGI ARGS4(
 	status = HTLoadFile(new_arg, anAnchor, format_out, sink);
 	FREE(new_arg);
 
+    } else if (path_info &&
+	       anAnchor != HTMainAnchor &&
+	       !(reloading && anAnchor->document) &&
+	       strcmp(arg, HTLoadedDocumentURL()) &&
+	       HText_AreDifferent(anAnchor, arg) &&
+	       HTUnEscape(orig_pgm) &&
+	       !exec_ok(HTLoadedDocumentURL(), orig_pgm,
+			CGI_PATH)) { /* exec_ok gives out msg. */
+	/*
+	 *  If we have extra path info and are not just reloading
+	 *  the current, check the full file path (after unescaping)
+	 *  now to catch forbidden segments. - kw
+	 */
+	status = HT_NOT_LOADED;
+
     } else if (no_lynxcgi) {
 	_statusline(CGI_DISABLED);
 	sleep(MessageSecs);
 	status = HT_NOT_LOADED;
 
-    } else if (!reloading && no_bookmark_exec &&
+    } else if (no_bookmark_exec &&
+	       anAnchor != HTMainAnchor &&
+	       !(reloading && anAnchor->document) &&
+	       strcmp(arg, HTLoadedDocumentURL()) &&
+	       HText_AreDifferent(anAnchor, arg) &&
  	       HTLoadedDocumentBookmark()) {
 	_statusline(BOOKMARK_EXEC_DISABLED);
 	sleep(MessageSecs);
 	status = HT_NOT_LOADED;
 
-    } else if (!reloading && !exec_ok(HTLoadedDocumentURL(), pgm,
+    } else if (anAnchor != HTMainAnchor &&
+	       !(reloading && anAnchor->document) &&
+	       strcmp(arg, HTLoadedDocumentURL()) &&
+	       HText_AreDifferent(anAnchor, arg) &&
+	       !exec_ok(HTLoadedDocumentURL(), pgm,
 			CGI_PATH)) { /* exec_ok gives out msg. */
 	status = HT_NOT_LOADED;
 
@@ -272,7 +371,7 @@ PRIVATE int LYLoadCGI ARGS4(
 		    sprintf (line, "Read %d bytes of data.", total_chars);
 		    HTProgress(line);
 		    if (TRACE) {
-			fprintf(stderr, "LYNXCGI: Rx: %s\n", buf);
+			fprintf(stderr, "LYNXCGI: Rx: %.*s\n", chars, buf);
 		    }
 		    
 		    (*target->isa->put_block)(target, buf, chars);
@@ -303,15 +402,15 @@ PRIVATE int LYLoadCGI ARGS4(
 		close(fd2[1]);
 
 		sprintf(buf, "HTTP_ACCEPT_LANGUAGE=%.*s",
-			     (sizeof(buf) - 22), language);
+			     (int)(sizeof(buf) - 22), language);
 		buf[(sizeof(buf) - 1)] = '\0';
 		add_environment_value(buf);
 
 		if (pref_charset) {
-		    sprintf(buf, "HTTP_ACCEPT_CHARSET=%.*s",
-			    (sizeof(buf) - 21), pref_charset);
-		    buf[(sizeof(buf) - 1)] = '\0';
-		    add_environment_value(buf);
+		    cp = NULL;
+		    StrAllocCopy(cp, "HTTP_ACCEPT_CHARSET=");
+		    StrAllocCat(cp, pref_charset);
+		    add_environment_value(cp);
 		}
 
 		if (anAnchor->post_data) { /* post script, read stdin */
@@ -382,6 +481,37 @@ PRIVATE int LYLoadCGI ARGS4(
 		*cur_argv = NULL;	/* Terminate argv */		
 		argv[0] = pgm;
 
+		/* Begin WebSter Mods  -jkt */                
+		if (LYCgiDocumentRoot != NULL) {
+		    /* Add DOCUMENT_ROOT to env */
+		    cp = NULL;
+		    StrAllocCopy(cp, "DOCUMENT_ROOT=");
+		    StrAllocCat(cp, LYCgiDocumentRoot);
+		    add_environment_value(cp);
+		}
+		if (path_info != NULL ) {
+		    /* Add PATH_INFO to env */
+		    cp = NULL;
+		    StrAllocCopy(cp, "PATH_INFO=");
+		    StrAllocCat(cp, path_info);
+		    add_environment_value(cp);
+		}
+		if (LYCgiDocumentRoot != NULL && path_info != NULL ) {
+		    /* Construct and add PATH_TRANSLATED to env */
+		    StrAllocCopy(document_root, LYCgiDocumentRoot);
+		    if (document_root[strlen(document_root) - 1] == '/') {
+			document_root[strlen(document_root) - 1] = '\0';
+		    }
+		    path_translated = document_root;
+		    StrAllocCat(path_translated, path_info);
+		    cp = NULL;
+		    StrAllocCopy(cp, "PATH_TRANSLATED=");
+		    StrAllocCat(cp, path_translated);
+		    add_environment_value(cp);
+		    FREE(path_translated);
+		}
+		/* End WebSter Mods  -jkt */
+
 		execve(argv[0], argv, env);
 		if (TRACE) {
 		    perror("LYNXCGI: execve failed");
@@ -405,7 +535,9 @@ PRIVATE int LYLoadCGI ARGS4(
 	    (*target->isa->_free)(target);
 	}
     }
+    FREE(path_info);
     FREE(pgm);
+    FREE(orig_pgm);
 #else  /* VMS */
 	HTStream *target;
 	char buf[256];

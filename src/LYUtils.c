@@ -5312,6 +5312,61 @@ PUBLIC int putenv ARGS1(
 #ifdef NEED_REMOVE
 int remove ARGS1(char *, name)
 {
-	return unlink(name);
+    return unlink(name);
 }
 #endif
+
+#ifdef UNIX
+/*
+ * Open a file that we don't want other users to see.  For new files, the umask
+ * will suffice; however if the file already exists we'll change permissions
+ * first, before opening it.  If the chmod fails because of some reason other
+ * than a non-existent file, there's no point in trying to open it.
+ */
+static FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
+{
+    int save = umask(HIDE_UMASK);
+    FILE *fp = 0;
+    if (chmod(name, HIDE_CHMOD) == 0 || errno == ENOENT)
+    	fp = fopen(name, mode);
+    umask(save);
+    return fp;
+}
+#else
+# ifndef VMS
+#  define OpenHiddenFile(name, mode) fopen(name, mode)
+# endif
+#endif
+
+FILE *LYNewBinFile ARGS1(char *, name)
+{
+#ifdef VMS
+    FILE *fp = fopen (name, "wb", "mbc=32");
+    chmod(name, HIDE_CHMOD);
+#else
+    FILE *fp = OpenHiddenFile(name, "wb");
+#endif
+    return fp;
+}
+
+FILE *LYNewTxtFile ARGS1(char *, name)
+{
+#ifdef VMS
+    FILE *fp = fopen (name, "w", "shr=get");
+    chmod(name, HIDE_CHMOD);
+#else
+    FILE *fp = OpenHiddenFile(name, "w");
+#endif
+    return fp;
+}
+
+FILE *LYAppendToTxtFile ARGS1(char *, name)
+{
+#ifdef VMS
+    FILE *fp = fopen (name, "a+", "shr=get");
+    chmod(name, HIDE_CHMOD);
+#else
+    FILE *fp = OpenHiddenFile(name, "a+");
+#endif
+    return fp;
+}

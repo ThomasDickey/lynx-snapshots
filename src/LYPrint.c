@@ -83,6 +83,8 @@ PUBLIC int printfile ARGS1(
     char *disp_charset;
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
+#else
+    char *envbuffer = NULL;       /* WebSter Print Mods -jkt */
 #endif /* VMS */
 
     /*
@@ -430,14 +432,13 @@ PUBLIC int printfile ARGS1(
 		    }
 		}
 
-                if ((outfile_fp = fopen(buffer,"w")) == NULL) {
+                if ((outfile_fp = LYNewTxtFile(buffer)) == NULL) {
 		    HTAlert(CANNOT_WRITE_TO_FILE);
 		    _statusline(NEW_FILENAME_PROMPT);
 		    FirstRecall = TRUE;
 		    FnameNum = FnameTotal;
 		    goto retry;
                 }
-		chmod(buffer, 0600);
 
 		if (HTisDocumentSource()) {
 		    /*
@@ -513,11 +514,10 @@ PUBLIC int printfile ARGS1(
 			strcat(tempfile, ".txt");
 		    }
 		}
-		if((outfile_fp = fopen(tempfile, "w")) == NULL) {
+		if((outfile_fp = LYNewTxtFile(tempfile)) == NULL) {
 		    HTAlert(UNABLE_TO_OPEN_TEMPFILE);
 		    break;
 		}
-		chmod(tempfile, 0600);
 
 		/*
 		 *  Write the contents to a temp file.
@@ -800,11 +800,10 @@ PUBLIC int printfile ARGS1(
 			strcat(tempfile, ".txt");
 		    }
 		}
-                if ((outfile_fp = fopen(tempfile, "w")) == NULL) {
+                if ((outfile_fp = LYNewTxtFile(tempfile)) == NULL) {
 	            HTAlert(FILE_ALLOC_FAILED);
 		    break;
                 }
-		chmod(tempfile, 0600);
 
 		if (HTisDocumentSource()) {
 		    /*
@@ -1004,11 +1003,26 @@ PUBLIC int printfile ARGS1(
 		if (TRACE)
 		    fprintf(stderr, "command: %s\n", buffer);
 		printf(PRINTING_FILE);
+
+#ifndef VMS
+		/* Begin WebSter Print Mods - jkt */                
+		StrAllocCopy(envbuffer, "LYNX_PRINT_TITLE=");
+		StrAllocCat(envbuffer, HText_getTitle());
+		putenv(envbuffer);
+		/* End   WebSter Print Mods - jkt */
+#endif /* !VMS */
+
 		fflush(stdout);
 		system(buffer);
 		fflush(stdout);
 #ifndef VMS
 		signal(SIGINT, cleanup_sig);
+		/*
+		 *  Remove LYNX_PRINT_TITLE value from environment - kw
+		 */
+		envbuffer[17] = '\0'; /* truncate after '=' */
+		putenv(envbuffer);
+		FREE(envbuffer);
 #endif /* !VMS */
 		sleep(MessageSecs);
 		start_curses();
@@ -1079,11 +1093,10 @@ PUBLIC int print_options ARGS2(
 #endif /* !VMS */
     }
 
-    if ((fp0 = fopen(tempfile, "w")) == NULL) {
+    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
         HTAlert(UNABLE_TO_OPEN_PRINTOP_FILE);
 	return(-1);
     }
-    chmod(tempfile, 0600);
 
     StrAllocCopy(*newfile, print_filename);
     LYforce_no_cache = TRUE;
