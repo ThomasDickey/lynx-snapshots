@@ -181,7 +181,7 @@ struct _HText {
 	int			top_of_screen;		/* Line number */
 	HTLine *		top_of_screen_line;	/* Top */
 	HTLine *		next_line;		/* Bottom + 1 */
-	int			permissible_split;	/* in last line */
+	unsigned		permissible_split;	/* in last line */
 	BOOL			in_line_1;		/* of paragraph */
 	BOOL			stale;			/* Must refresh */
 	BOOL			page_has_target; /* has target on screen */
@@ -1526,7 +1526,7 @@ PRIVATE void display_page ARGS3(
 	addstr("\n     Document is empty");
     }
 
-    if (HTCJK != NOCJK || text->T.output_utf8 || TRACE) {
+    if (HTCJK != NOCJK || text->T.output_utf8) {
 	/*
 	 *  For non-multibyte curses.
 	 */
@@ -1572,7 +1572,7 @@ PUBLIC void HText_beginAppend ARGS1(
 
 PRIVATE void split_line ARGS2(
 	HText *,	text,
-	int,		split)
+	unsigned,	split)
 {
     HTStyle * style = text->style;
     HTLine * temp;
@@ -1735,8 +1735,8 @@ PRIVATE void split_line ARGS2(
      */
     if (split > 0) {	/* Delete space at "split" splitting line */
 	char *p, *prevdata = previous->data, *linedata = line->data;
-	unsigned int plen;
-	int i;
+	unsigned plen;
+	unsigned i;
 
 	/*
 	 *  Split the line. - FM
@@ -1763,13 +1763,15 @@ PRIVATE void split_line ARGS2(
 	     * Make sure our global flag is correct. - FM
 	     */
 	    underline_on = NO;
-	    for (i = (split-1); i >= 0; i--) {
-	        if (prevdata[i] == LY_UNDERLINE_END_CHAR) {
-		    break;
-		}
-		if (prevdata[i] == LY_UNDERLINE_START_CHAR) {
-		    underline_on = YES;
-		    break;
+	    if (split) {
+		for (i = (split-1); i != 0; i--) {
+		    if (prevdata[i] == LY_UNDERLINE_END_CHAR) {
+			break;
+		    }
+		    if (prevdata[i] == LY_UNDERLINE_START_CHAR) {
+			underline_on = YES;
+			break;
+		    }
 		}
 	    }
 	    /*
@@ -1781,20 +1783,22 @@ PRIVATE void split_line ARGS2(
 		ctrl_chars_on_this_line++;
 		SpecialAttrChars++;
 	    }
-	    for (i = (plen - 1); i >= 0; i--) {
-		if (p[i] == LY_UNDERLINE_START_CHAR) {
-		    underline_on = YES;
-		    break;
+	    if (plen) {
+		for (i = (plen - 1); i != 0; i--) {
+		    if (p[i] == LY_UNDERLINE_START_CHAR) {
+			underline_on = YES;
+			break;
+		    }
+		    if (p[i] == LY_UNDERLINE_END_CHAR) {
+			underline_on = NO;
+			break;
+		    }
 		}
-		if (p[i] == LY_UNDERLINE_END_CHAR) {
-		    underline_on = NO;
-		    break;
-		}
-	    }
-	    for (i = (plen - 1); i >= 0; i--) {
-	        if (p[i] == LY_UNDERLINE_START_CHAR ||
-		    p[i] == LY_UNDERLINE_END_CHAR) {
-		    ctrl_chars_on_this_line++;
+		for (i = (plen - 1); i != 0; i--) {
+		    if (p[i] == LY_UNDERLINE_START_CHAR ||
+			p[i] == LY_UNDERLINE_END_CHAR) {
+			ctrl_chars_on_this_line++;
+		    }
 		}
 	    }
 	}
@@ -1804,13 +1808,15 @@ PRIVATE void split_line ARGS2(
 	 *  sure that our global flag is correct. - FM
 	 */
 	bold_on = NO;
-	for (i = (split - 1); i >= 0; i--) {
-	    if (prevdata[i] == LY_BOLD_END_CHAR) {
-		break;
-	    }
-	    if (prevdata[i] == LY_BOLD_START_CHAR) {
-	        bold_on = YES;
-		break;
+	if (split) {
+	    for (i = (split - 1); i != 0; i--) {
+		if (prevdata[i] == LY_BOLD_END_CHAR) {
+		    break;
+		}
+		if (prevdata[i] == LY_BOLD_START_CHAR) {
+		    bold_on = YES;
+		    break;
+		}
 	    }
 	}
 	/*
@@ -1822,25 +1828,27 @@ PRIVATE void split_line ARGS2(
 	    ctrl_chars_on_this_line++;
 	    SpecialAttrChars++;;
 	}
-	for (i = (plen - 1); i >= 0; i--) {
-	    if (p[i] == LY_BOLD_START_CHAR) {
-	        bold_on = YES;
-		break;
+	if (plen) {
+	    for (i = (plen - 1); i != 0; i--) {
+		if (p[i] == LY_BOLD_START_CHAR) {
+		    bold_on = YES;
+		    break;
+		}
+		if (p[i] == LY_BOLD_END_CHAR) {
+		    bold_on = NO;
+		    break;
+		}
 	    }
-	    if (p[i] == LY_BOLD_END_CHAR) {
-		bold_on = NO;
-		break;
-	    }
-	}
-	for (i = (plen - 1); i >= 0; i--) {
-	    if (p[i] == LY_BOLD_START_CHAR ||
-	        p[i] == LY_BOLD_END_CHAR ||
-		IS_UTF_EXTRA(p[i]) ||
-		p[i] == LY_SOFT_HYPHEN) {
-	        ctrl_chars_on_this_line++;
-	    }
-	    if (p[i] == LY_SOFT_HYPHEN && text->permissible_split < i) {
-	        text->permissible_split = i + 1;
+	    for (i = (plen - 1); i != 0; i--) {
+		if (p[i] == LY_BOLD_START_CHAR ||
+		    p[i] == LY_BOLD_END_CHAR ||
+		    IS_UTF_EXTRA(p[i]) ||
+		    p[i] == LY_SOFT_HYPHEN) {
+		    ctrl_chars_on_this_line++;
+		}
+		if (p[i] == LY_SOFT_HYPHEN && text->permissible_split < i) {
+		    text->permissible_split = i + 1;
+		}
 	    }
 	}
 
@@ -1923,12 +1931,12 @@ PRIVATE void split_line ARGS2(
     if (split > 0) {
 	for (a = text->first_anchor; a; a = a->next) {
 	    if (a->line_num == CurLine) {
-		if (a->line_pos >= split) {
+		if ((unsigned)a->line_pos >= split) {
 		    a->start += (1 + SpecialAttrChars - HeadTrim - TailTrim);
 		    a->line_pos -= (split - SpecialAttrChars + HeadTrim);
 		    a->line_num = text->Lines;
 		} else if ((a->link_type & HYPERTEXT_ANCHOR) &&
-			   (a->line_pos + a->extent) >= split) {
+			   (unsigned)(a->line_pos + a->extent) >= split) {
 		    a->extent -= (TailTrim + HeadTrim);
 		    if (a->extent < 0) {
 		        a->extent = 0;
@@ -2144,7 +2152,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		    /*
 		     *  Can split here. - FM
 		     */
-		    text->permissible_split = (int)text->last_line->size;
+		    text->permissible_split = text->last_line->size;
 		    text->state = S_text;
 		    return;
 		} else if (ch == 'I')  {
@@ -2152,7 +2160,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		    /*
 		     *  Can split here. - FM
 		     */
-		    text->permissible_split = (int)text->last_line->size;
+		    text->permissible_split = text->last_line->size;
 		    return;
 		} else {
 		    text->state = S_text;
@@ -2207,7 +2215,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		    /*
 		     *  Can split here. - FM
 		     */
-		    text->permissible_split = (int)text->last_line->size;
+		    text->permissible_split = text->last_line->size;
 		    return;
 	        }
 	    }
@@ -2254,7 +2262,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 	     *  on the line, or if it is preceded by a space or
 	     *  hyphen. - FM
 	     */
-	    if (line->size < 1 || text->permissible_split >= (int)line->size)
+	    if (line->size < 1 || text->permissible_split >= line->size)
 		return;
 
 	    for (i = (text->permissible_split + 1); line->data[i]; i++) {
@@ -2374,7 +2382,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 	    /*
 	     *  Can split here. - FM
 	     */
-	    text->permissible_split = (int)line->size;
+	    text->permissible_split = line->size;
 	    if (line->size == 0) {
 	        line->offset = line->offset + target - here;
 	    } else {
@@ -2394,7 +2402,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 	/*
 	 *  Can split here. - FM
 	 */
-	text->permissible_split = (int)text->last_line->size;
+	text->permissible_split = text->last_line->size;
 	/*
 	 *  There are some pages written in
 	 *  different kanji codes. - TA
@@ -2515,7 +2523,7 @@ check_IgnoreExcess:
 	    /*
 	     *  Can split here. - FM
 	     */
-	    text->permissible_split = (int)text->last_line->size;
+	    text->permissible_split = text->last_line->size;
 	}
     }
 }
@@ -3174,10 +3182,8 @@ PUBLIC void HText_endAppend ARGS1(
 	FREE(text->last_line);
 	text->last_line = next_to_the_last_line;
 	text->Lines--;
-#ifdef NOTUSED_BAD_FOR_SCREEN
 	CTRACE(tfp, "GridText: New bottom line: %s\n",
 			    text->last_line->data);
-#endif
     }
 
     /*
@@ -3225,15 +3231,13 @@ re_parse:
 	if (anchor_ptr->extent < 0) {
 	    anchor_ptr->extent = 0;
 	}
-#ifdef NOTUSED_BAD_FOR_SCREEN
 	CTRACE(tfp, "anchor text: '%s'   pos: %d\n",
 			    line_ptr->data, anchor_ptr->line_pos);
-#endif
 	/*
 	 *  If the link begins with an end of line and we have more
 	 *  lines, then start the highlighting on the next line. - FM
 	 */
-	if (anchor_ptr->line_pos >= strlen(line_ptr->data) &&
+	if ((unsigned)anchor_ptr->line_pos >= strlen(line_ptr->data) &&
 	    cur_line < text->Lines) {
 	    anchor_ptr->start += (cur_shift + 1);
 	    cur_shift = 0;
@@ -3241,10 +3245,8 @@ re_parse:
 	    goto re_parse;
 	}
 	cur_shift = 0;
-#ifdef NOTUSED_BAD_FOR_SCREEN
 	CTRACE(tfp, "anchor text: '%s'   pos: %d\n",
 			    line_ptr->data, anchor_ptr->line_pos);
-#endif
 	/*
 	 *  Copy the link name into the data structure.
 	 */
@@ -3261,7 +3263,7 @@ re_parse:
 	 *  If true the anchor extends over two lines,
 	 *  copy that into the data structure.
 	 */
-	if (anchor_ptr->extent > strlen(anchor_ptr->hightext)) {
+	if ((unsigned)anchor_ptr->extent > strlen(anchor_ptr->hightext)) {
 	    HTLine *line_ptr2 = line_ptr->next;
 	    /*
 	     *  Double check that we have a line pointer,
@@ -8059,7 +8061,7 @@ PUBLIC void HText_setBreakPoint ARGS1(
     /*
      *  Can split here. - FM
      */
-    text->permissible_split = (int)text->last_line->size;
+    text->permissible_split = text->last_line->size;
 
     return;
 }

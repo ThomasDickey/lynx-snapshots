@@ -255,8 +255,7 @@ II. Compile instructions -- UNIX
 	Use this option to allow NSL requests to be aborted at will.
 
   --enable-partial			(define DISP_PARTIAL)
-	Use experimental code that lets Lynx display parts of a long page
-	while loading it.
+	Use code that lets Lynx display parts of a long page while loading it.
 
   --enable-underlines			(define UNDERLINE_LINKS)
 	Use this option underline links rather than using boldface.

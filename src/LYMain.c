@@ -722,7 +722,7 @@ PUBLIC int main ARGS2(
 	exit(-1);
     }
 #else
-	StrAllocCopy(lynx_temp_space, TEMP_SPACE);
+    StrAllocCopy(lynx_temp_space, TEMP_SPACE);
 #endif
     if ((cp = strchr(lynx_temp_space, '~'))) {
 	*(cp++) = '\0';
@@ -1186,10 +1186,10 @@ PUBLIC int main ARGS2(
     }
     fclose(fp);
 
-#if defined(USE_SLANG_KEYMAPS) 
-    if (-1 == lynx_initialize_keymaps ()) 
-	exit (-1); 
-#endif 
+#if defined(USE_SLANG_KEYMAPS)
+    if (-1 == lynx_initialize_keymaps ())
+	exit (-1);
+#endif
     /*
      * Make sure we have the character sets declared.
      *	This will initialize the CHARTRANS handling. - KW
@@ -2808,10 +2808,12 @@ keys (may be incompatible with some curses packages)"
       "number_links",	SET_ARG,		&number_links,
       "force numbering of links"
    ),
+#ifdef DISP_PARTIAL
    PARSE_SET(
       "partial",	TOGGLE_ARG,		&display_partial,
       "display partial pages while downloading"
    ),
+#endif
    PARSE_FUN(
       "pauth",		NEED_FUNCTION_ARG,	pauth_fun,
       "=id:pw\nauthentication information for protected proxy server"
