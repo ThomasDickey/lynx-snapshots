@@ -47,9 +47,12 @@ PRIVATE Config_Enum tbl_file_sort[] = {
 };
 
 PUBLIC Config_Enum tbl_keypad_mode[] = {
+    { "FIELDS_ARE_NUMBERED", FIELDS_ARE_NUMBERED },
     { "LINKS_AND_FIELDS_ARE_NUMBERED", LINKS_AND_FIELDS_ARE_NUMBERED },
-    { "LINKS_AND_FORM_FIELDS_ARE_NUMBERED", LINKS_AND_FIELDS_ARE_NUMBERED },
     { "LINKS_ARE_NUMBERED", LINKS_ARE_NUMBERED },
+    { "LINKS_ARE_NOT_NUMBERED", NUMBERS_AS_ARROWS },
+    /* obsolete variations: */
+    { "LINKS_AND_FORM_FIELDS_ARE_NUMBERED", LINKS_AND_FIELDS_ARE_NUMBERED },
     { "NUMBERS_AS_ARROWS", NUMBERS_AS_ARROWS },
     { NULL,		DEFAULT_KEYPAD_MODE }
 };
@@ -400,6 +403,9 @@ WARNING - This is potentially dangerous.  Since you may view\n\
           you are viewing trusted source information.\n\
 ")),
 #endif
+#if USE_SCROLLBAR
+    MAYBE_SET("scrollbar",             LYShowScrollbar, MSG_ENABLE_LYNXRC),
+#endif
     PARSE_SET("select_popups",         LYSelectPopups, N_("\
 select_popups specifies whether the OPTIONs in a SELECT block which\n\
 lacks a MULTIPLE attribute are presented as a vertical list of radio\n\
@@ -530,6 +536,9 @@ PUBLIC void read_rc ARGS1(FILE *, fp)
 	if ((fp = fopen(rcfile, TXT_R)) == NULL) {
 	    return;
 	}
+	CTRACE((tfp, "read_rc opened %s\n", rcfile));
+    } else {
+	CTRACE((tfp, "read_rc used passed-in stream\n"));
     }
 
     /*
@@ -551,11 +560,15 @@ PUBLIC void read_rc ARGS1(FILE *, fp)
 	/*
 	 * Parse the "name=value" strings.
 	 */
-	if ((value = strchr(name, '=')) == 0)
+	if ((value = strchr(name, '=')) == 0) {
+	    CTRACE((tfp, "LYrcFile: missing '=' %s\n", name));
 	    continue;
+	}
 	*value++ = '\0';
 	LYTrimTrailing(name);
 	value = LYSkipBlanks(value);
+	CTRACE2(TRACE_CFG, (tfp, "LYrcFile %s:%s\n", name, value));
+
 	tbl = lookup_config(name);
 	if (tbl->name == 0) {
 	    char *special = "multi_bookmark";
@@ -563,8 +576,10 @@ PUBLIC void read_rc ARGS1(FILE *, fp)
 		tbl = lookup_config(special);
 	    }
 	    /* lynx ignores unknown keywords */
-	    if (tbl->name == 0)
+	    if (tbl->name == 0) {
+		CTRACE((tfp, "LYrcFile: ignored %s=%s\n", name, value));
 		continue;
+	    }
 	}
 
 	q = ParseUnionOf(tbl);

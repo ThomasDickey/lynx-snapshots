@@ -123,7 +123,7 @@ PUBLIC int showlist ARGS2(
 	     *	right in connection with always treating this file as
 	     *	HIDDENLINKS_MERGE in GridText.c - kw
 	     */
-	    if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) {
+	    if (fields_are_numbered()) {
 		HText_FormDescNumber(cnt, (char **)&desc);
 		fprintf(fp0,
 		"<li><a id=%d href=\"#%d\">form field</a> = <em>%s</em>\n",
@@ -286,7 +286,7 @@ PUBLIC void printlist ARGS2(
 		 *  the list page match the numbering in the original document,
 		 *  but won't create a forward link to the form. - FM && LE
 		 */
-		if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) {
+		if (fields_are_numbered()) {
 		    HText_FormDescNumber(cnt, (char **)&desc);
 		    fprintf(fp, "%4d. form field = %s\n", cnt, desc);
 		}

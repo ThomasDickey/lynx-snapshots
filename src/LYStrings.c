@@ -419,7 +419,7 @@ PRIVATE int set_clicked_link ARGS4(
 		c = LAC_TO_LKC0(LYK_PREV_PAGE);
 	}
 #ifdef USE_SCROLLBAR
-    } else if (x == LYcols - 1 && LYsb && LYsb_begin >= 0) {
+    } else if (x == LYcols - 1 && LYShowScrollbar && LYsb_begin >= 0) {
 	int h = display_lines - 2*(LYsb_arrow != 0);
 
 	mouse_link = -2;
@@ -700,7 +700,7 @@ PUBLIC int LYmbcsstrlen ARGS3(
 #endif /* USE_SLANG */
 
 #if !defined(GetChar) && defined(NCURSES)
-#define GetChar() wgetch(my_subwindow ? my_subwindow : LYwin)
+#define GetChar() wgetch(LYtopwindow())
 #endif
 
 #if !defined(GetChar) && defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
@@ -751,37 +751,6 @@ PRIVATE int myGetChar NOARGS
 #define GetChar() getchar()  /* used to be "getc(stdin)" and "getch()" */
 #endif /* HAVE_KEYPAD */
 #endif /* !defined(GetChar) */
-
-/*
- * Workaround a bug in ncurses order-of-refresh by setting a pointer to
- * the topmost window that should be displayed.
- *
- * FIXME: the associated call on 'keypad()' is not needed for Unix, but
- * something in the OS/2 EMX port requires it.
- */
-#ifndef USE_SLANG
-PRIVATE WINDOW *my_subwindow;
-
-PUBLIC void LYsubwindow ARGS1(WINDOW *, param)
-{
-    if (param != 0) {
-	my_subwindow = param;
-#if defined(NCURSES) || defined(PDCURSES)
-	keypad(my_subwindow, TRUE);
-#if defined(HAVE_GETBKGD) /* not defined in ncurses 1.8.7 */
-	wbkgd(my_subwindow, getbkgd(LYwin));
-	wbkgdset(my_subwindow, getbkgd(LYwin));
-#endif
-#endif
-	scrollok(my_subwindow, TRUE);
-    } else {
-	touchwin(LYwin);
-	delwin(my_subwindow);
-	my_subwindow = 0;
-    }
-}
-#endif
-
 
 #if defined(USE_SLANG) && defined(USE_MOUSE)
 PRIVATE int sl_parse_mouse_event ARGS3(int *, x, int *, y, int *, button)

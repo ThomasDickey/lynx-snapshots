@@ -145,7 +145,7 @@ PUBLIC int LYCacheSourceForAborted = SOURCE_CACHE_FOR_ABORTED_DROP;
 #endif
 
 #ifdef USE_SCROLLBAR
-PUBLIC BOOLEAN LYsb = FALSE;
+PUBLIC BOOLEAN LYShowScrollbar = FALSE;
 PUBLIC BOOLEAN LYsb_arrow = TRUE;
 PUBLIC int LYsb_begin = -1;
 PUBLIC int LYsb_end = -1;
@@ -1580,7 +1580,7 @@ PRIVATE void display_scrollbar ARGS1(
     int top_skip, bot_skip, sh, shown;
 
     LYsb_begin = LYsb_end = -1;
-    if (!LYsb || !text || h <= 2
+    if (!LYShowScrollbar || !text || h <= 2
 	|| (text->Lines + 1) <= display_lines)
 	return;
 
@@ -4014,12 +4014,32 @@ check_WrapSource:
     /*
      *  Check if we should ignore characters at the wrap point.
      */
-    if (text->IgnoreExcess &&
-	(((indent + (int)line->offset + (int)line->size) +
-	  (int)style->rightIndent - ctrl_chars_on_this_line) >= (WRAP_COLS(text)-1) ||
-	 ((indent + (int)line->offset + (int)line->size) +
-	  utfxtra_on_this_line - ctrl_chars_on_this_line) >= (LYcols_cu-1)))
-	return;
+    if (text->IgnoreExcess) {
+	int nominal = (indent + (int)(line->offset + line->size) - ctrl_chars_on_this_line);
+	int limit = (WRAP_COLS(text) - 1);
+	int number;
+
+	if (fields_are_numbered()
+	 && !number_fields_on_left
+	 && text->last_anchor != 0
+	 && (number = text->last_anchor->number) > 0) {
+	    limit -= (number > 99999
+	    		? 6
+			: (number > 9999
+			    ? 5
+			    : (number > 999
+				? 4
+				: (number > 99
+				    ? 3
+				    : (number > 9
+					? 2
+					: 1))))) + 2;
+	}
+	if ((nominal + (int)style->rightIndent) >= limit
+	 || (nominal + utfxtra_on_this_line) >= (LYcols_cu - 1)) {
+	    return;
+	}
+    }
 
     /*
      *  Check for end of line.
@@ -4769,6 +4789,33 @@ PUBLIC void HText_startStblRowGroup ARGS2(
 /*		Anchor handling
 **		---------------
 */
+PRIVATE void add_link_number ARGS3(
+    HText *,		text,
+    TextAnchor *,	a,
+    BOOL,		save_position)
+{
+    char marker[32];
+
+    /*
+     *  If we are doing link_numbering add the link number.
+     */
+    if ((a->number > 0)
+#ifdef USE_PRETTYSRC
+     && (text->source ? !psrcview_no_anchor_numbering : 1 )
+#endif
+     && links_are_numbered()) {
+	char saved_lastchar = text->LastChar;
+	int saved_linenum = text->Lines;
+	sprintf(marker,"[%d]", a->number);
+	HText_appendText(text, marker);
+	if (saved_linenum && text->Lines && saved_lastchar != ' ')
+	    text->LastChar = ']'; /* if marker not after space caused split */
+	if (save_position) {
+	    a->line_num = text->Lines;
+	    a->line_pos = text->last_line->size;
+	}
+    }
+}
 
 /*	Start an anchor field
 */
@@ -4777,8 +4824,6 @@ PUBLIC int HText_beginAnchor ARGS3(
 	BOOL,			underline,
 	HTChildAnchor *,	anc)
 {
-    char marker[32];
-
     TextAnchor * a = typecalloc(TextAnchor);
 
     if (a == NULL)
@@ -4812,25 +4857,8 @@ PUBLIC int HText_beginAnchor ARGS3(
 	a->number = 0;
     }
 
-    /*
-     *  If we are doing link_numbering add the link number.
-     */
-    if ((a->number > 0) &&
-#ifdef USE_PRETTYSRC
-	(text->source ? !psrcview_no_anchor_numbering : 1 ) &&
-#endif
-	(keypad_mode == LINKS_ARE_NUMBERED ||
-	 keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED)) {
-	char saved_lastchar = text->LastChar;
-	int saved_linenum = text->Lines;
-	sprintf(marker,"[%d]", a->number);
-	HText_appendText(text, marker);
-	if (saved_linenum && text->Lines && saved_lastchar != ' ')
-	    text->LastChar = ']'; /* if marker not after space caused split */
-	a->line_num = text->Lines;
-	a->line_pos = text->last_line->size;
-    }
-
+    if (number_links_on_left)
+	add_link_number(text, a, TRUE);
     return(a->number);
 }
 
@@ -4881,14 +4909,14 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 	   "BUG: HText_endAnchor0: internal error: last anchor was input field!\n"));
 	return FALSE;
     }
+
     if (a->number) {
 	/*
 	 *  If it goes somewhere...
 	 */
 	int i, j, k, l;
 	BOOL remove_numbers_on_empty = (BOOL) (
-	    ((keypad_mode == LINKS_ARE_NUMBERED ||
-	      keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) &&
+	    (links_are_numbered() &&
 	     (text->hiddenlinkflag != HIDDENLINKS_MERGE ||
 	      (LYNoISMAPifUSEMAP &&
 	       !(text->node_anchor && text->node_anchor->bookmark) &&
@@ -5117,7 +5145,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 			for (anc = a; anc; anc = anc->next) {
 			    if (anc->line_num == a->line_num &&
 				anc->line_pos >= NumSize) {
-			    anc->line_pos -= NumSize;
+				anc->line_pos -= NumSize;
 			    }
 			}
 			start->size = j;
@@ -5246,6 +5274,8 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 		}
 	    }
 	} else {
+    if (!number_links_on_left)
+	add_link_number(text, a, FALSE);
 	    /*
 	     *  The anchor's content is not restricted to only
 	     *  white and special characters, so we'll show it
@@ -7506,8 +7536,7 @@ PUBLIC void print_crawl_to_fd ARGS3(
      *  Add the References list if appropriate
      */
     if ((nolist == FALSE) &&
-	(keypad_mode == LINKS_ARE_NUMBERED ||
-	 keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED)) {
+	links_are_numbered()) {
 	printlist(fp,FALSE);
     }
 
@@ -8811,7 +8840,7 @@ PRIVATE char * HText_skipOptionNumPrefix ARGS1(
     /*
      *  Check if we are in the correct keypad mode.
      */
-    if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) {
+    if (fields_are_numbered()) {
 	/*
 	 *  Skip the option number embedded in the option name so the
 	 *  extra chars won't mess up cgi scripts processing the value.
@@ -8869,14 +8898,16 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
     unsigned char *tmp = NULL;
     int number = 0, i, j;
 
-    if (!(text && text->last_anchor &&
-	  text->last_anchor->link_type == INPUT_ANCHOR)) {
+    if (!(value
+      && text
+      && text->last_anchor
+      && text->last_anchor->link_type == INPUT_ANCHOR)) {
 	CTRACE((tfp, "HText_setLastOptionValue: invalid call!  value:%s!\n",
 		    (value ? value : "<NULL>")));
 	return NULL;
     }
 
-    CTRACE((tfp, "Entering HText_setLastOptionValue: value:%s, checked:%s\n",
+    CTRACE((tfp, "Entering HText_setLastOptionValue: value:\"%s\", checked:%s\n",
 		value, (checked ? "on" : "off")));
 
     /*
@@ -8899,7 +8930,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	cp++;
     if (HTCurSelectGroupType == F_RADIO_TYPE &&
 	LYSelectPopups &&
-	keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) {
+	fields_are_numbered()) {
 	/*
 	 *  Collapse any space between the popup option
 	 *  prefix and actual value. - FM
@@ -9100,7 +9131,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
     }
 
     if (TRACE) {
-	CTRACE((tfp, "HText_setLastOptionValue:%s value=%s",
+	CTRACE((tfp, "HText_setLastOptionValue:%s value=\"%s\"\n",
 		(order == LAST_ORDER) ? " LAST_ORDER" : "",
 		value));
 	CTRACE((tfp,"            val_cs=%d \"%s\"",
@@ -9108,7 +9139,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 			(val_cs >= 0 ?
 			 LYCharSet_UC[val_cs].MIMEname : "<UNKNOWN>")));
 	if (submit_value) {
-	    CTRACE((tfp, " (submit_val_cs %d \"%s\") submit_value%s=%s\n",
+	    CTRACE((tfp, " (submit_val_cs %d \"%s\") submit_value%s=\"%s\"\n",
 		    submit_val_cs,
 		    (submit_val_cs >= 0 ?
 		     LYCharSet_UC[submit_val_cs].MIMEname : "<UNKNOWN>"),
@@ -9139,6 +9170,9 @@ PUBLIC int HText_beginInput ARGS3(
     char *IValue = NULL;
     unsigned char *tmp = NULL;
     int i, j;
+    int adjust_marker = 0;
+    int MaximumSize;
+    char marker[16];
 
     CTRACE((tfp, "GridText: Entering HText_beginInput\n"));
 
@@ -9148,7 +9182,6 @@ PUBLIC int HText_beginInput ARGS3(
     a->inUnderline = underline;
     a->line_num = text->Lines;
     a->line_pos = text->last_line->size;
-
 
     /*
      *  If this is a radio button, or an OPTION we're converting
@@ -9208,7 +9241,6 @@ PUBLIC int HText_beginInput ARGS3(
     f->no_cache = NO;
 
     HTFormFields++;
-
 
     /*
      *  Set the no_cache flag if the METHOD is POST. - FM
@@ -9486,37 +9518,34 @@ PUBLIC int HText_beginInput ARGS3(
 	    break;
 
 	default:
-	    if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED)
+	    if (fields_are_numbered())
 		a->number = ++(text->last_anchor_number);
 	    else
 		a->number = 0;
 	    break;
     }
-    if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED && a->number > 0) {
-	char marker[16];
+    if (fields_are_numbered() && (a->number > 0)) {
+	sprintf(marker,"[%d]", a->number);
+	if (number_fields_on_left) {
+	    BOOL had_bracket = (f->type == F_OPTION_LIST_TYPE);
 
-	if (f->type != F_OPTION_LIST_TYPE)
-	    /*
-	     *  '[' was already put out for a popup menu
-	     *  designator.  See HTML.c.
-	     */
-	    HText_appendCharacter(text, '[');
-	sprintf(marker,"%d]", a->number);
-	HText_appendText(text, marker);
-	if (f->type == F_OPTION_LIST_TYPE)
-	    /*
-	     *  Add option list designation char.
-	     */
-	    HText_appendCharacter(text, '[');
+	    HText_appendText(text, had_bracket ? (marker + 1) : marker);
+	    if (had_bracket)
+		HText_appendCharacter(text, '[');
+	} else {
+	    adjust_marker = strlen(marker);
+	}
 	a->line_num = text->Lines;
 	a->line_pos = text->last_line->size;
+    } else {
+	*marker = '\0';
     }
 
     /*
      *  Restrict SIZE to maximum allowable size.
      */
+    MaximumSize = WRAP_COLS(text) - adjust_marker;
     switch (f->type) {
-	int MaximumSize;
 
 	case F_SUBMIT_TYPE:
 	case F_IMAGE_SUBMIT_TYPE:
@@ -9532,20 +9561,19 @@ PUBLIC int HText_beginInput ARGS3(
 	     *  text entry lines can be long, and will be scrolled
 	     *  horizontally within the editing window. - FM
 	     */
-	    MaximumSize = (WRAP_COLS(text) - 1) -
-			  (int)text->style->leftIndent -
-			  (int)text->style->rightIndent;
+	    MaximumSize -= (1 +
+			  (int)text->style->leftIndent +
+			  (int)text->style->rightIndent);
 
 	    /*  If we are numbering form links, place is taken by [nn]  */
-	    if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED)
-		MaximumSize -= (a->number >= 10	/*Buggy if 1e6 links, sowhat?*/
-				? (a->number >= 100
-				   ? (a->number >= 1000
-				      ? (a->number >= 10000
-					 ? (a->number >= 100000
-					    ? 6 : 5) : 4) : 3) : 2) : 1) + 2;
-	    if (f->size > MaximumSize)
-		f->size = MaximumSize;
+	    if (fields_are_numbered()) {
+		if (!number_fields_on_left
+		 && f->type == F_TEXT_TYPE
+		 && MaximumSize > a->line_pos + 10)
+		    MaximumSize -= a->line_pos;
+		else
+		    MaximumSize -= strlen(marker);
+	    }
 
 	    /*
 	     *  Save value for submit/reset buttons so they
@@ -9554,7 +9582,6 @@ PUBLIC int HText_beginInput ARGS3(
 	    I->value = f->value;
 	    break;
 
-
 	default:
 	    /*
 	     *  For all other fields we limit the size element to
@@ -9562,10 +9589,11 @@ PUBLIC int HText_beginInput ARGS3(
 	     *  are types with small placeholders, and/or are a
 	     *  type which is handled via a popup window. - FM
 	     */
-	    if (f->size > WRAP_COLS(text)-10)
-		f->size = WRAP_COLS(text)-10;  /* maximum */
+	    MaximumSize -= 10;
 	    break;
     }
+    if (f->size > MaximumSize)
+	f->size = MaximumSize;
 
     /*
      *  Add this anchor to the anchor list
@@ -9615,6 +9643,26 @@ PUBLIC int HText_beginInput ARGS3(
      *  Return the SIZE of the input field.
      */
     return(f->size);
+}
+
+/*
+ * If we're numbering fields on the right, do it.  Note that some fields may
+ * be too long for the line - we'll lose the marker in that case rather than
+ * truncate the field.
+ */
+PUBLIC void HText_endInput ARGS1(
+	HText *,		text)
+{
+    if (fields_are_numbered()
+     && !number_fields_on_left
+     && text != NULL
+     && text->last_anchor != NULL
+     && text->last_anchor->number > 0) {
+	char marker[20];
+	HText_setIgnoreExcess(text, FALSE);
+	sprintf(marker,"[%d]", text->last_anchor->number);
+	HText_appendText(text, marker);
+    }
 }
 
 /*
@@ -11720,7 +11768,7 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
     l->styles = htline->styles;
 #endif
     strcpy (l->data,     htline->data);
-    if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) {
+    if (fields_are_numbered()) {
 	a->number++;
 	increment_tagged_htline (l, a, &lx, &curr_tag, 1, CHOP);
     }
@@ -11791,7 +11839,7 @@ PRIVATE void update_subsequent_anchors ARGS4(
      */
     anchor = start_anchor->next;   /* begin updating with the NEXT anchor */
     while (anchor) {
-	if ((keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) &&
+	if (fields_are_numbered() &&
 	    (anchor->number != 0))
 	    anchor->number += newlines;
 	anchor->line_num  += newlines;
@@ -11828,7 +11876,7 @@ PRIVATE void update_subsequent_anchors ARGS4(
      *   relocating an anchor to the following line, when [tag] digits
      *   expansion pushes things too far in that direction.]
      */
-    if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) {
+    if (fields_are_numbered()) {
 	anchor = start_anchor->next;
 	while (htline != FirstHTLine(HTMainText)) {
 

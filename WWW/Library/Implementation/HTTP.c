@@ -675,6 +675,16 @@ use_tunnel:
       first_Accept = FALSE;
       len = 0;
 
+      /*
+       * FIXME:  suppressing the "Accept-Encoding" in this case is done to work
+       * around limitations of the presentation logic used for the command-line
+       * "-base" option.  The remote site may transmit the document gzip'd, but
+       * the ensuing logic in HTSaveToFile() would see the mime-type as gzip
+       * rather than text/html, and not prepend the base URL.  This is less
+       * efficient than accepting the compressed data and uncompressing it,
+       * adding the base URL but is simpler than augmenting the dump's
+       * presentation logic -TD
+       */
       if (!LYPrependBaseToSource)
 	  HTSprintf(&command, "Accept-Encoding: %s, %s%c%c",
 		    "gzip", "compress", CR, LF);

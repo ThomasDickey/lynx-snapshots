@@ -1089,6 +1089,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
     {
 	HANDLE hThread, dwThreadID;
 
+#ifndef __CYGWIN__
 	if (!system_is_NT) {	/* for Windows9x */
 	    unsigned long t;
 	    t = (unsigned long)inet_addr(host);
@@ -1097,6 +1098,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 	    else
 		phost = gethostbyname(host);
 	} else {		/* for Windows NT */
+#endif /* !__CYGWIN__ */
 	    phost = (struct hostent *) NULL;
 	    donelookup = FALSE;
 	    hThread = CreateThread((void *)NULL, 4096UL,
@@ -1118,7 +1120,9 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 		    return NULL;
 		}
 	    }
+#ifndef __CYGWIN__
 	}
+#endif /* !__CYGWIN__ */
 	if (phost) {
 	    lynx_nsl_status = HT_OK;
 	    result_phost = phost;

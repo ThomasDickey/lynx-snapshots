@@ -96,6 +96,15 @@ extern char *LYCgiDocumentRoot;  /* DOCUMENT_ROOT in the lynxcgi env */
 #define NUMBERS_AS_ARROWS 0
 #define LINKS_ARE_NUMBERED 1
 #define LINKS_AND_FIELDS_ARE_NUMBERED 2
+#define FIELDS_ARE_NUMBERED 3
+
+#define links_are_numbered() \
+	    (keypad_mode == LINKS_ARE_NUMBERED || \
+	     keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED)
+
+#define fields_are_numbered() \
+	    (keypad_mode == FIELDS_ARE_NUMBERED || \
+	     keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED)
 
 #define HIDDENLINKS_MERGE	0
 #define HIDDENLINKS_SEPARATE	1
@@ -185,6 +194,8 @@ extern BOOLEAN long_url_ok;
 extern BOOLEAN lynx_mode;
 extern BOOLEAN more;		/* is there more document to display? */
 extern BOOLEAN news_ok;
+extern BOOLEAN number_fields_on_left;
+extern BOOLEAN number_links_on_left;
 extern BOOLEAN recent_sizechange;
 extern BOOLEAN rlogin_ok;
 extern BOOLEAN system_editor;	  /* True if locked-down editor */
@@ -523,7 +534,7 @@ extern int setmode(int handle, int amode);
 
 #ifdef USE_SCROLLBAR
 /* GridText.c */
-extern BOOLEAN LYsb;
+extern BOOLEAN LYShowScrollbar;
 extern BOOLEAN LYsb_arrow;
 extern int LYsb_begin;
 extern int LYsb_end;

@@ -716,7 +716,9 @@ Try_Redirected_URL:
 		}
 		{
 
-		    if (url_type == FTP_URL_TYPE && !ftp_ok) {
+		    if (!ftp_ok
+		     && (url_type == FTP_URL_TYPE
+		      || url_type == NCFTP_URL_TYPE)) {
 			HTUserMsg(FTP_DISABLED);
 			return(NULLFILE);
 		    }
@@ -752,6 +754,7 @@ Try_Redirected_URL:
 		    if (url_type == HTTP_URL_TYPE ||
 			url_type == HTTPS_URL_TYPE ||
 			url_type == FTP_URL_TYPE ||
+			url_type == NCFTP_URL_TYPE ||
 			url_type == CSO_URL_TYPE)
 			fix_httplike_urls(doc, url_type);
 		    WWWDoc.address = doc->address;  /* possible reload */
@@ -899,7 +902,8 @@ Try_Redirected_URL:
 				(no_goto_finger &&
 				 url_type == FINGER_URL_TYPE) ||
 				(no_goto_ftp &&
-				 url_type == FTP_URL_TYPE) ||
+				 (url_type == FTP_URL_TYPE ||
+				  url_type == NCFTP_URL_TYPE)) ||
 				(no_goto_gopher &&
 				 url_type == GOPHER_URL_TYPE) ||
 				(no_goto_http &&
@@ -1552,6 +1556,20 @@ PRIVATE int fix_httplike_urls ARGS2(
 	LYTrimHtmlSep(doc->address);
 	CTRACE((tfp, "            changed to '%s'\n", doc->address));
 	CTRACE_SLEEP(MessageSecs);
+    } else if (type == NCFTP_URL_TYPE) {
+	char *path = NULL;
+	char *first = doc->address;
+	char *second = strchr(first, ':');
+
+	CTRACE((tfp, "fix_httplike_urls: URL '%s'\n", doc->address));
+
+	*second++ = '\0';
+	HTSprintf0(&path, "ftp://%s%s", first, second);
+	FREE(doc->address);
+	doc->address = path;
+
+	CTRACE((tfp, "            changed to '%s'\n", doc->address));
+	CTRACE_SLEEP(MessageSecs);
     }
 #endif /* DISABLE_FTP */
 
@@ -1565,12 +1583,12 @@ PRIVATE int fix_httplike_urls ARGS2(
 	if (type == HTTP_URL_TYPE ||
 	    type == HTTPS_URL_TYPE) {
 	    if ((slash-2) - strchr(doc->address, ':')) {
-	    /*
-	     *  Turns out we were not looking at the right slash after all,
-	     *  there must have been more than one "://" which is valid
-	     *  at least for http URLs (later occurrences can be part of
-	     *  a query string, for example), so leave this alone, too. - kw
-	     */
+		/*
+		 *  Turns out we were not looking at the right slash after all,
+		 *  there must have been more than one "://" which is valid
+		 *  at least for http URLs (later occurrences can be part of
+		 *  a query string, for example), so leave this alone, too. - kw
+		 */
 		return(0);
 	    }
 	    if (strchr(doc->address, '?')) {

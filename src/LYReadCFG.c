@@ -1393,6 +1393,8 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_Env("nntp_proxy",           0),
      PARSE_ENV("nntpserver",           0), /* actually NNTPSERVER */
 #endif
+     PARSE_SET("number_fields_on_left",number_fields_on_left),
+     PARSE_SET("number_links_on_left", number_links_on_left),
      PARSE_SET("no_dot_files",         no_dotfiles),
      PARSE_SET("no_file_referer",      no_filereferer),
 #ifndef VMS
@@ -1436,7 +1438,7 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_STR("save_space",           lynx_save_space),
      PARSE_SET("scan_for_buried_news_refs", scan_for_buried_news_references),
 #ifdef USE_SCROLLBAR
-     PARSE_SET("scrollbar",            LYsb),
+     PARSE_SET("scrollbar",            LYShowScrollbar),
      PARSE_SET("scrollbar_arrow",      LYsb_arrow),
 #endif
      PARSE_SET("seek_frag_area_in_cur", LYSeekFragAREAinCur),
@@ -1708,6 +1710,7 @@ PRIVATE void do_read_cfg ARGS5(
 	/* Significant lines are of the form KEYWORD:WHATEVER */
 	if ((value = strchr (name, ':')) == 0) {
 	    /* fprintf (stderr, "Bad line-- no :\n"); */
+	    CTRACE((tfp, "LYReadCFG: missing ':' %s\n", name));
 	    continue;
 	}
 
@@ -1729,9 +1732,11 @@ PRIVATE void do_read_cfg ARGS5(
 		*cp = 0;
 	}
 
+	CTRACE2(TRACE_CFG, (tfp, "LYReadCFG %s:%s\n", name, value));
 	tbl = lookup_config(name);
 	if (tbl->name == 0) {
 	    /* lynx ignores unknown keywords */
+	    CTRACE((tfp, "LYReadCFG: ignored %s:%s\n", name, value));
 	    continue;
 	}
 #ifdef SH_EX

@@ -501,6 +501,7 @@ extern int WWW_TraceMask;
 #define TRACE_SGML      (TRACE_bit(0))
 #define TRACE_STYLE     (TRACE_bit(1))
 #define TRACE_TRST      (TRACE_bit(2))
+#define TRACE_CFG       (TRACE_bit(3))
 
 #if defined(LY_TRACELINE)
 #define LY_SHOWWHERE fprintf( tfp, "%s: %d: ", __FILE__, LY_TRACELINE ),

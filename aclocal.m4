@@ -1885,6 +1885,46 @@ AC_MSG_RESULT($cf_cv_locale)
 test $cf_cv_locale = yes && AC_DEFINE(LOCALE)
 ])
 dnl ---------------------------------------------------------------------------
+dnl Check for a working mkstemp
+AC_DEFUN([CF_MKSTEMP],[
+AC_CACHE_CHECK(for working mkstemp, cf_cv_func_mkstemp,[
+rm -f conftest*
+AC_TRY_RUN([
+#include <sys/types.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/stat.h>
+int main()
+{
+	char *tmpl = "conftestXXXXXX";
+	char temp[80];
+	int result = 0;
+	int fd;
+	struct stat sb;
+
+	umask(077);
+	strcpy(temp, tmpl);
+	if ((fd = mkstemp(temp)) >= 0) {
+		if (!strcmp(temp, tmpl)
+		 || stat(temp, &sb) != 0
+		 || (sb.st_mode & S_IFMT) != S_IFREG
+		 || (sb.st_mode & 077) != 0) {
+			result = 1;
+		}
+		close(fd);
+	}
+	exit(result);
+}
+],[cf_cv_func_mkstemp=yes
+],[cf_cv_func_mkstemp=no
+],[AC_CHECK_FUNC(mkstemp)
+])
+])
+if test "$cf_cv_func_mkstemp" = yes ; then
+	AC_DEFINE(HAVE_MKSTEMP)
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Write a debug message to config.log, along with the line number in the
 dnl configure script.
 AC_DEFUN([CF_MSG_LOG],[
@@ -2274,11 +2314,13 @@ test -n "$cf_path_args" && AC_DEFINE_UNQUOTED($1_ARGS,"$cf_path_args")
 dnl ---------------------------------------------------------------------------
 dnl Check the argument to see that it looks like a pathname.  Rewrite it if it
 dnl begins with one of the prefix/exec_prefix variables, and then again if the
-dnl result begins with 'NONE'.  This is necessary to workaround autoconf's
+dnl result begins with 'NONE'.  This is necessary to work around autoconf's
 dnl delayed evaluation of those symbols.
 AC_DEFUN([CF_PATH_SYNTAX],[
 case ".[$]$1" in #(vi
-./*) #(vi
+.\[$]\(*\)*|.\'*\'*) #(vi
+  ;;
+..|./*|.\\*) #(vi
   ;;
 .[[a-zA-Z]]:[[\\/]]*) #(vi OS/2 EMX
   ;;
@@ -2294,7 +2336,7 @@ case ".[$]$1" in #(vi
   $1=`echo [$]$1 | sed -e s@NONE@$ac_default_prefix@`
   ;;
 *)
-  AC_ERROR(expected a pathname, not "[$]$1")
+  AC_ERROR([expected a pathname, not \"[$]$1\"])
   ;;
 esac
 ])dnl

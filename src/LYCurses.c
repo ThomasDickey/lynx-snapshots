@@ -1515,6 +1515,39 @@ PUBLIC void LYpaddstr ARGS3(
     while (width-- > 0)
 	waddstr(the_window, " ");
 }
+
+/*
+ * Workaround a bug in ncurses order-of-refresh by setting a pointer to
+ * the topmost window that should be displayed.
+ *
+ * FIXME: the associated call on 'keypad()' is not needed for Unix, but
+ * something in the OS/2 EMX port requires it.
+ */
+PRIVATE WINDOW *my_subwindow;
+
+PUBLIC void LYsubwindow ARGS1(WINDOW *, param)
+{
+    if (param != 0) {
+	my_subwindow = param;
+#if defined(NCURSES) || defined(PDCURSES)
+	keypad(my_subwindow, TRUE);
+#if defined(HAVE_GETBKGD) /* not defined in ncurses 1.8.7 */
+	wbkgd(my_subwindow, getbkgd(LYwin));
+	wbkgdset(my_subwindow, getbkgd(LYwin));
+#endif
+#endif
+	scrollok(my_subwindow, TRUE);
+    } else {
+	touchwin(LYwin);
+	delwin(my_subwindow);
+	my_subwindow = 0;
+    }
+}
+
+PUBLIC WINDOW *LYtopwindow NOARGS
+{
+    return (my_subwindow ? my_subwindow : LYwin);
+}
 #endif
 
 PUBLIC WINDOW *LYstartPopup ARGS4(
@@ -1595,7 +1628,7 @@ PUBLIC void LYstopTargetEmphasis NOARGS
 PUBLIC void LYtouchline ARGS1(
 	int,		row)
 {
-#if defined(HAVE_WREDRAWLN)
+#if defined(HAVE_WREDRAWLN) && !defined(NCURSES_VERSION)
     wredrawln(LYwin, row, 1);
 #else
 #if defined(HAVE_TOUCHLINE)
@@ -2206,6 +2239,15 @@ PUBLIC void LYrefresh NOARGS
 
 	wnoutrefresh(stdscr);
 	pnoutrefresh(LYwin, 0, LYshiftWin, 0, 0, LYlines, LYscreenWidth()-1);
+
+	/*
+	 * Keep a popup window visible.  This can happen if the user presses
+	 * '/' to do a search within a popup.
+	 */
+	if (my_subwindow != 0) {
+	    touchwin(my_subwindow);
+	    wnoutrefresh(my_subwindow);
+	}
 	doupdate();
     } else {
 	refresh();

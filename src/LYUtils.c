@@ -2779,18 +2779,19 @@ PUBLIC int is_url ARGS1(
 {
     char *cp = filename;
     char *cp1;
+    int result = NOT_A_URL_TYPE;
 
     /*
      *	Don't crash on an empty argument.
      */
     if (cp == NULL || *cp == '\0')
-	return(0);
+	return(result);
 
     /*
      *	Can't be a URL if it lacks a colon.
      */
     if (NULL == strchr(cp, ':'))
-	return(0);
+	return(result);
 
     /*
      *	Kill beginning spaces.
@@ -2804,61 +2805,63 @@ PUBLIC int is_url ARGS1(
      *	a colon later in the string.  Also can't be
      *  a URL if it starts with a colon. - KW
      */
-    if (*cp == ':' || LYIsHtmlSep(*cp))
-	return(0);
+    if (*cp == ':' || LYIsHtmlSep(*cp)) {
+	result = NOT_A_URL_TYPE;
 
-    if (compare_type(cp, "news:", 5)) {
-	return(NEWS_URL_TYPE);
+#ifndef DISABLE_NEWS
+    } else if (compare_type(cp, "news:", 5)) {
+	result = NEWS_URL_TYPE;
 
     } else if (compare_type(cp, "nntp:", 5)) {
-	return(NNTP_URL_TYPE);
+	result = NNTP_URL_TYPE;
 
     } else if (compare_type(cp, "snews:", 6)) {
-	return(SNEWS_URL_TYPE);
+	result = SNEWS_URL_TYPE;
 
     } else if (compare_type(cp, "newspost:", 9)) {
 	/*
 	 *  Special Lynx type to handle news posts.
 	 */
-	return(NEWSPOST_URL_TYPE);
+	result = NEWSPOST_URL_TYPE;
 
     } else if (compare_type(cp, "newsreply:", 10)) {
 	/*
 	 *  Special Lynx type to handle news replies (followups).
 	 */
-	return(NEWSREPLY_URL_TYPE);
+	result = NEWSREPLY_URL_TYPE;
 
     } else if (compare_type(cp, "snewspost:", 10)) {
 	/*
 	 *  Special Lynx type to handle snews posts.
 	 */
-	return(NEWSPOST_URL_TYPE);
+	result = NEWSPOST_URL_TYPE;
 
     } else if (compare_type(cp, "snewsreply:", 11)) {
 	/*
 	 *  Special Lynx type to handle snews replies (followups).
 	 */
-	return(NEWSREPLY_URL_TYPE);
+	result = NEWSREPLY_URL_TYPE;
+#endif
 
     } else if (compare_type(cp, "mailto:", 7)) {
-	return(MAILTO_URL_TYPE);
+	result = MAILTO_URL_TYPE;
 
 #ifndef DISABLE_BIBP
     } else if (compare_type(cp, "bibp:", 5)) {
-	return(BIBP_URL_TYPE);
+	result = BIBP_URL_TYPE;
 #endif
 
     } else if (compare_type(cp, "file:", 5)) {
 	if (LYisLocalFile(cp)) {
-	    return(FILE_URL_TYPE);
+	    result = FILE_URL_TYPE;
 	} else if (LYIsHtmlSep(cp[5]) && LYIsHtmlSep(cp[6])) {
-	    return(FTP_URL_TYPE);
+	    result = FTP_URL_TYPE;
 	} else {
-	    return(0);
+	    result = NOT_A_URL_TYPE;
 	}
 
     } else if (compare_type(cp, "data:", 5)) {
-	return(DATA_URL_TYPE);
+	result = DATA_URL_TYPE;
 
     } else if (compare_type(cp, "lynxexec:", 9)) {
 	/*
@@ -2866,7 +2869,7 @@ PUBLIC int is_url ARGS1(
 	 *  of commands or scripts which require a pause to
 	 *  read the screen upon completion.
 	 */
-	return(LYNXEXEC_URL_TYPE);
+	result = LYNXEXEC_URL_TYPE;
 
     } else if (compare_type(cp, "lynxprog:", 9)) {
 	/*
@@ -2874,146 +2877,161 @@ PUBLIC int is_url ARGS1(
 	 *  of commands, scripts or programs with do not
 	 *  require a pause to read screen upon completion.
 	 */
-	return(LYNXPROG_URL_TYPE);
+	result = LYNXPROG_URL_TYPE;
 
     } else if (compare_type(cp, "lynxcgi:", 8)) {
 	/*
 	 *  Special External Lynx type to handle cgi scripts.
 	 */
-	return(LYNXCGI_URL_TYPE);
+	result = LYNXCGI_URL_TYPE;
 
     } else if (compare_type(cp, "LYNXPRINT:", 10)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	return(LYNXPRINT_URL_TYPE);
+	result = LYNXPRINT_URL_TYPE;
 
     } else if (compare_type(cp, "LYNXOPTIONS:", 12)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	return(LYNXOPTIONS_URL_TYPE);
+	result = LYNXOPTIONS_URL_TYPE;
 
     } else if (compare_type(cp, "LYNXCFG:", 8)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	return(LYNXCFG_URL_TYPE);
+	result = LYNXCFG_URL_TYPE;
 
     } else if (compare_type(cp, "LYNXMESSAGES:", 13)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	return(LYNXMESSAGES_URL_TYPE);
+	result = LYNXMESSAGES_URL_TYPE;
 
     } else if (compare_type(cp, "LYNXCOMPILEOPTS:", 16)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	return(LYNXCOMPILE_OPTS_URL_TYPE);
+	result = LYNXCOMPILE_OPTS_URL_TYPE;
 
     } else if (compare_type(cp, "LYNXDOWNLOAD:", 13)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	return(LYNXDOWNLOAD_URL_TYPE);
+	result = LYNXDOWNLOAD_URL_TYPE;
 
     } else if (compare_type(cp, "LYNXDIRED:", 10)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	return(LYNXDIRED_URL_TYPE);
+	result = LYNXDIRED_URL_TYPE;
 
     } else if (compare_type(cp, "LYNXHIST:", 9)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	return(LYNXHIST_URL_TYPE);
+	result = LYNXHIST_URL_TYPE;
 
     } else if (compare_type(cp, "LYNXKEYMAP:", 11)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	return(LYNXKEYMAP_URL_TYPE);
+	result = LYNXKEYMAP_URL_TYPE;
 
     } else if (compare_type(cp, "LYNXIMGMAP:", 11)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
 	(void)is_url(&cp[11]);	/* forces lower/uppercase of next part */
-	return(LYNXIMGMAP_URL_TYPE);
+	result = LYNXIMGMAP_URL_TYPE;
 
     } else if (compare_type(cp, "LYNXCOOKIE:", 11)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	return(LYNXCOOKIE_URL_TYPE);
+	result = LYNXCOOKIE_URL_TYPE;
 
-    } else if (strstr((cp+3), "://") == NULL) {
+    } else if (strlen(cp) >= 3
+	    && strstr((cp+3), "://") == NULL) {
 	/*
 	 *  If it doesn't contain "://", and it's not one of the
 	 *  the above, it can't be a URL with a scheme we know,
 	 *  so check if it's an unknown scheme for which proxying
 	 *  has been set up. - FM
 	 */
-	return(LYCheckForProxyURL(filename));
+	if ((cp1 = strstr(cp, ":")) != NULL
+	 && (cp1 - cp) > 1		/* exclude DOS-style device:/path */
+	 && LYisAbsPath(cp1+1)) {
+	    result = NCFTP_URL_TYPE;
+	} else {
+	    result = LYCheckForProxyURL(filename);
+	}
 
     } else if (compare_type(cp, "http:", 5)) {
-	return(HTTP_URL_TYPE);
+	result = HTTP_URL_TYPE;
 
     } else if (compare_type(cp, "https:", 6)) {
-	return(HTTPS_URL_TYPE);
+	result = HTTPS_URL_TYPE;
 
+#ifndef DISABLE_GOPHER
     } else if (compare_type(cp, "gopher:", 7)) {
-	if ((cp1 = strchr(cp+11,'/')) != NULL) {
+	if (strlen(cp) >= 11
+	 && (cp1 = strchr(cp+11,'/')) != NULL) {
 
 	    if (TOUPPER(*(cp1+1)) == 'H' || *(cp1+1) == 'w')
 		/* if this is a gopher html type */
-		return(HTML_GOPHER_URL_TYPE);
+		result = HTML_GOPHER_URL_TYPE;
 	    else if (*(cp1+1) == 'T' || *(cp1+1) == '8')
-		return(TELNET_GOPHER_URL_TYPE);
+		result = TELNET_GOPHER_URL_TYPE;
 	    else if (*(cp1+1) == '7')
-		return(INDEX_GOPHER_URL_TYPE);
+		result = INDEX_GOPHER_URL_TYPE;
 	    else
-		return(GOPHER_URL_TYPE);
+		result = GOPHER_URL_TYPE;
 	} else {
-	    return(GOPHER_URL_TYPE);
+	    result = GOPHER_URL_TYPE;
 	}
+#endif
 
+#ifndef DISABLE_FTP
     } else if (compare_type(cp, "ftp:", 4)) {
-	return(FTP_URL_TYPE);
+	result = FTP_URL_TYPE;
+#endif
 
     } else if (compare_type(cp, "wais:", 5)) {
-	return(WAIS_URL_TYPE);
+	result = WAIS_URL_TYPE;
 
     } else if (compare_type(cp, "telnet:", 7)) {
-	return(TELNET_URL_TYPE);
+	result = TELNET_URL_TYPE;
 
     } else if (compare_type(cp, "tn3270:", 7)) {
-	return(TN3270_URL_TYPE);
+	result = TN3270_URL_TYPE;
 
     } else if (compare_type(cp, "rlogin:", 7)) {
-	return(RLOGIN_URL_TYPE);
+	result = RLOGIN_URL_TYPE;
 
     } else if (compare_type(cp, "cso:", 4)) {
-	return(CSO_URL_TYPE);
+	result = CSO_URL_TYPE;
 
+#ifndef DISABLE_FINGER
     } else if (compare_type(cp, "finger:", 7)) {
-	return(FINGER_URL_TYPE);
+	result = FINGER_URL_TYPE;
+#endif
 
     } else if (compare_type(cp, "afs:", 4)) {
-	return(AFS_URL_TYPE);
+	result = AFS_URL_TYPE;
 
     } else if (compare_type(cp, "prospero:", 9)) {
-	return(PROSPERO_URL_TYPE);
+	result = PROSPERO_URL_TYPE;
 
     } else {
 	/*
 	 *  Check if it's an unknown scheme for which
 	 *  proxying has been set up. - FM
 	 */
-	return(LYCheckForProxyURL(filename));
+	result = LYCheckForProxyURL(filename);
     }
+    return result;
 }
 
 /*
@@ -3278,7 +3296,8 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
 #endif /* LINUX */
 
     } else {
-	CTRACE((tfp, "Could not get ttyname or open UTMP file %s\n", UTMP_FILE));
+	CTRACE((tfp, "Could not get ttyname (returned %s) or open UTMP file %s\n",
+		      (cp != 0) ? cp : "<null>", UTMP_FILE));
     }
 
     return(FALSE);
@@ -3852,7 +3871,7 @@ PRIVATE int fmt_tempname ARGS3(
 	CONST char *,	suffix)
 {
     int code;
-#if defined(USE_MKSTEMP) && defined(HAVE_MKSTEMP)
+#if defined(HAVE_MKSTEMP)
     int fd;
     char interim[LY_MAXPATH];
     sprintf(interim, "%.*sXXXXXX", LY_MAXPATH - 8, prefix);
@@ -7360,7 +7379,7 @@ PUBLIC void LYTrimPathSep ARGS1(
 	path[len-1] = 0;
 }
 
-#ifdef DOSPATH
+#if defined(DOSPATH) && !defined(__DJGPP__)
 #define PATHSEP_STR "\\"
 #else
 #define PATHSEP_STR "/"

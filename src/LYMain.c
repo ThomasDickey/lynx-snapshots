@@ -154,49 +154,54 @@ PUBLIC lynx_list_item_type *downloaders = NULL;
 PUBLIC lynx_list_item_type *externals = NULL;
 			    /* linked list of external options */
 #endif
+
 PUBLIC lynx_list_item_type *uploaders = NULL;
 PUBLIC int port_syntax = 1;
 PUBLIC int LYShowColor = SHOW_COLOR_UNKNOWN; /* to show or not */
 PUBLIC int LYrcShowColor = SHOW_COLOR_UNKNOWN; /* ... last used */
+
 #if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
 PUBLIC BOOLEAN LYUseFormsOptions = TRUE; /* use forms-based options menu */
 #endif
+
+PUBLIC BOOLEAN LYJumpFileURL = FALSE;	 /* always FALSE the first time */
+PUBLIC BOOLEAN LYPermitURL = FALSE;
+PUBLIC BOOLEAN LYRestricted = FALSE; /* whether we have -anonymous option */
 PUBLIC BOOLEAN LYShowCursor = SHOW_CURSOR; /* to show or not to show */
-PUBLIC BOOLEAN verbose_img = VERBOSE_IMAGES;  /* show filenames or not */
 PUBLIC BOOLEAN LYUseDefShoCur = TRUE;	/* Command line -show_cursor toggle */
+PUBLIC BOOLEAN LYUserSpecifiedURL = TRUE;/* always TRUE  the first time */
+PUBLIC BOOLEAN LYValidate = FALSE;
 PUBLIC BOOLEAN LYforce_no_cache = FALSE;
-PUBLIC BOOLEAN LYoverride_no_cache = FALSE;/*override no-cache b/c history etc*/
 PUBLIC BOOLEAN LYinternal_flag = FALSE; /* override no-cache b/c internal link*/
+PUBLIC BOOLEAN LYoverride_no_cache = FALSE;/*override no-cache b/c history etc*/
 PUBLIC BOOLEAN LYresubmit_posts = ALWAYS_RESUBMIT_POSTS;
 PUBLIC BOOLEAN LYtrimInputFields = FALSE;
-PUBLIC BOOLEAN LYUserSpecifiedURL = TRUE;/* always TRUE  the first time */
-PUBLIC BOOLEAN LYJumpFileURL = FALSE;	 /* always FALSE the first time */
-PUBLIC BOOLEAN jump_buffer = JUMPBUFFER; /* TRUE if offering default shortcut */
-PUBLIC BOOLEAN goto_buffer = GOTOBUFFER; /* TRUE if offering default goto URL */
-PUBLIC BOOLEAN ftp_passive = FTP_PASSIVE; /* TRUE if doing ftp in passive mode */
-PUBLIC BOOLEAN recent_sizechange = FALSE;/* the window size changed recently? */
-PUBLIC int user_mode = NOVICE_MODE;
-PUBLIC BOOLEAN dump_output_immediately = FALSE;
-PUBLIC BOOLEAN is_www_index = FALSE;
-PUBLIC BOOLEAN lynx_mode = NORMAL_LYNX_MODE;
-PUBLIC BOOLEAN bold_headers = FALSE;
 PUBLIC BOOLEAN bold_H1 = FALSE;
+PUBLIC BOOLEAN bold_headers = FALSE;
 PUBLIC BOOLEAN bold_name_anchors = FALSE;
-PUBLIC BOOLEAN use_underscore = SUBSTITUTE_UNDERSCORES;
-PUBLIC BOOLEAN nolist = FALSE;
-PUBLIC BOOLEAN historical_comments = FALSE;
-PUBLIC BOOLEAN minimal_comments = FALSE;
-PUBLIC BOOLEAN soft_dquotes = FALSE;
-PUBLIC BOOLEAN LYRestricted = FALSE; /* whether we have -anonymous option */
-PUBLIC BOOLEAN LYValidate = FALSE;
-PUBLIC BOOLEAN LYPermitURL = FALSE;
-PUBLIC BOOLEAN child_lynx = FALSE;
-PUBLIC BOOLEAN error_logging = MAIL_SYSTEM_ERROR_LOGGING;
-PUBLIC BOOLEAN check_mail = CHECKMAIL;
-PUBLIC BOOLEAN vi_keys = VI_KEYS_ALWAYS_ON;
-PUBLIC BOOLEAN emacs_keys = EMACS_KEYS_ALWAYS_ON;
-PUBLIC int keypad_mode = DEFAULT_KEYPAD_MODE;
 PUBLIC BOOLEAN case_sensitive = CASE_SENSITIVE_ALWAYS_ON;
+PUBLIC BOOLEAN check_mail = CHECKMAIL;
+PUBLIC BOOLEAN child_lynx = FALSE;
+PUBLIC BOOLEAN dump_output_immediately = FALSE;
+PUBLIC BOOLEAN emacs_keys = EMACS_KEYS_ALWAYS_ON;
+PUBLIC BOOLEAN error_logging = MAIL_SYSTEM_ERROR_LOGGING;
+PUBLIC BOOLEAN ftp_passive = FTP_PASSIVE; /* TRUE if doing ftp in passive mode */
+PUBLIC BOOLEAN goto_buffer = GOTOBUFFER; /* TRUE if offering default goto URL */
+PUBLIC BOOLEAN historical_comments = FALSE;
+PUBLIC BOOLEAN is_www_index = FALSE;
+PUBLIC BOOLEAN jump_buffer = JUMPBUFFER; /* TRUE if offering default shortcut */
+PUBLIC BOOLEAN lynx_mode = NORMAL_LYNX_MODE;
+PUBLIC BOOLEAN minimal_comments = FALSE;
+PUBLIC BOOLEAN nolist = FALSE;
+PUBLIC BOOLEAN number_fields_on_left = TRUE;
+PUBLIC BOOLEAN number_links_on_left = TRUE;
+PUBLIC BOOLEAN recent_sizechange = FALSE;/* the window size changed recently? */
+PUBLIC BOOLEAN soft_dquotes = FALSE;
+PUBLIC BOOLEAN use_underscore = SUBSTITUTE_UNDERSCORES;
+PUBLIC BOOLEAN verbose_img = VERBOSE_IMAGES;  /* show filenames or not */
+PUBLIC BOOLEAN vi_keys = VI_KEYS_ALWAYS_ON;
+PUBLIC int keypad_mode = DEFAULT_KEYPAD_MODE;
+PUBLIC int user_mode = NOVICE_MODE;
 
 PUBLIC BOOLEAN telnet_ok = TRUE;
 #ifndef DISABLE_NEWS
@@ -1757,7 +1762,7 @@ PUBLIC int main ARGS2(
 	}
     }
 
-    if (keypad_mode == NUMBERS_AS_ARROWS) {
+    if (!links_are_numbered()) {
 	if (number_fields)
 	    keypad_mode = LINKS_AND_FIELDS_ARE_NUMBERED;
 	if (number_links)
@@ -2018,7 +2023,7 @@ PUBLIC int main ARGS2(
 	if (crawl && !number_links && !number_fields) {
 	    keypad_mode = NUMBERS_AS_ARROWS;
 	} else if (!nolist) {
-	    if (keypad_mode == NUMBERS_AS_ARROWS) {
+	    if (!links_are_numbered()) {
 		if (number_fields)
 		    keypad_mode = LINKS_AND_FIELDS_ARE_NUMBERED;
 		else
@@ -2035,8 +2040,7 @@ PUBLIC int main ARGS2(
 	status = mainloop();
 	if (!nolist &&
 	    !crawl &&		/* For -crawl it has already been done! */
-	    (keypad_mode == LINKS_ARE_NUMBERED ||
-	     keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED))
+	    links_are_numbered())
 	    printlist(stdout, FALSE);
 #ifdef EXP_PERSISTENT_COOKIES
 	/*
@@ -3598,7 +3602,7 @@ with the PREV_DOC command or from the History List"
    ),
 #ifdef USE_SCROLLBAR
    PARSE_SET(
-      "scrollbar",	4|TOGGLE_ARG,		LYsb,
+      "scrollbar",	4|TOGGLE_ARG,		LYShowScrollbar,
       "toggles showing scrollbar"
    ),
    PARSE_SET(
