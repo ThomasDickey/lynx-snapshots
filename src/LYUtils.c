@@ -3,6 +3,7 @@
 #include "HTParse.h"
 #include "HTAccess.h"
 #include "HTCJK.h"
+#include "HTAlert.h"
 #include "LYCurses.h"
 #include "LYUtils.h"
 #include "LYStrings.h"
@@ -1431,14 +1432,24 @@ PUBLIC void change_sug_filename ARGS1(char *,fname)
 
      /** Replace all but the last period with _'s, or second **/
      /** to last if last is followed by a terminal Z or z,   **/
+     /** or GZ or gz,					     **/
      /** e.g., convert foo.tar.Z to                          **/
      /**               foo.tar_Z                             **/
+     /**   or, convert foo.tar.gz to                         **/
+     /**               foo.tar-gz                            **/
      j = strlen(fname) - 1;
      if ((dot = strrchr(fname, '.')) != NULL) {
-	  if (((fname[j] == 'Z' || fname[j] == 'z') && fname[j-1] == '.') &&
-	      (((cp = strchr(fname, '.')) != NULL) && cp < dot)) {
-	       *dot = '_';
-	       dot = strrchr(fname, '.');
+	  if (TOUPPER(fname[j]) == 'Z') {
+	      if ((fname[j-1] == '.') &&
+	          (((cp = strchr(fname, '.')) != NULL) && cp < dot)) {
+		  *dot = '_';
+		  dot = strrchr(fname, '.');
+	      } else if (((TOUPPER(fname[j-1]) == 'G') &&
+	      		  fname[j-2] == '.') &&
+			 (((cp = strchr(fname, '.')) != NULL) && cp < dot)) {
+		  *dot = '-';
+		  dot = strrchr(fname, '.');
+	      }
 	  }
 	  cp = fname;
 	  while ((cp = strchr(cp, '.')) != NULL && cp < dot)
@@ -1592,6 +1603,8 @@ PRIVATE char *restrict_name[] = {
        "editor"        ,
        "shell"         ,
        "bookmark"      ,
+       "multibook"     ,
+       "bookmark_exec" ,
        "option_save"   ,
        "print"         ,
        "download"      ,
@@ -1599,7 +1612,6 @@ PRIVATE char *restrict_name[] = {
        "exec"          ,
        "lynxcgi"       ,
        "exec_frozen"   ,
-       "bookmark_exec" ,
        "goto"          ,
        "jump"          ,
        "file_url"      ,
@@ -1633,6 +1645,8 @@ PRIVATE BOOLEAN *restrict_flag[] = {
        &no_editor   ,
        &no_shell    ,
        &no_bookmark ,
+       &no_multibook ,
+       &no_bookmark_exec,
        &no_option_save,
        &no_print    ,
        &no_download ,
@@ -1640,7 +1654,6 @@ PRIVATE BOOLEAN *restrict_flag[] = {
        &no_exec     ,
        &no_lynxcgi  ,
        &exec_frozen ,
-       &no_bookmark_exec,
        &no_goto     ,
        &no_jump     ,
        &no_file_url ,
@@ -2132,7 +2145,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 {
     char DomainPrefix[80], *StartP, *EndP;
     char DomainSuffix[80], *StartS, *EndS;
-    char *Str = NULL, *StrColon = NULL;
+    char *Str = NULL, *StrColon = NULL, *MsgStr = NULL;
     char *Host = NULL, *HostColon = NULL;
     char *Path = NULL;
     struct hostent  *phost;
@@ -2176,9 +2189,16 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
      *  Do a DNS test on the potential host field
      *  as presently trimmed. - FM
      */
+    if (LYCursesON) {
+        StrAllocCopy(MsgStr, "Looking up ");
+	StrAllocCat(MsgStr, Str);
+	StrAllocCat(MsgStr, " first.");
+	HTProgress(MsgStr);
+    }
     if ((phost = gethostbyname(Str)) != NULL) {
         GotHost = TRUE;
         FREE(Str);
+        FREE(MsgStr);
 	return GotHost;
     }
 
@@ -2232,15 +2252,36 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	        isdigit(HostColon[1])) {
 		*HostColon = '\0';
 	    }
+	    if (LYCursesON) {
+ 	        StrAllocCopy(MsgStr, "Looking up ");
+ 		StrAllocCat(MsgStr, Host);
+ 		StrAllocCat(MsgStr, ", guessing...");
+ 		HTProgress(MsgStr);
+	    }
 	    GotHost = ((phost = gethostbyname(Host)) != NULL);
 	    if (HostColon != NULL) {
 	        *HostColon = ':';
 	    }
 	    if (GotHost == FALSE) {
+		/*
+		 *  Give the user chance to interrupt lookup cycles. - KW
+		 */
+		if (LYCursesON && HTCheckForInterrupt()) {
+		    if (TRACE) {
+			fprintf(stderr,
+	 "*** LYExpandHostForURL interrupted while %s failed to resolve\n",
+				Host);
+			    }
+		    FREE(Str);
+		    FREE(MsgStr);
+		    FREE(Host);
+		    return FALSE; /* We didn't find a valid name. */
+		}
+
 	        /*
 		**  Advance to the next suffix, or end of suffix list. - FM
 		*/
-		StartS = ((EndS == '\0') ? EndS : (EndS + 1));
+		StartS = ((*EndS == '\0') ? EndS : (EndS + 1));
 		while ((*StartS) && (WHITE(*StartS) || *StartS == ',')) {
 		    StartS++;	/* Skip whitespace and separators */
 		}
@@ -2256,7 +2297,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	   /*
 	   **  Advance to the next prefix, or end of prefix list. - FM
 	   */
-	   StartP = ((EndP == '\0') ? EndP : (EndP + 1));
+	   StartP = ((*EndP == '\0') ? EndP : (EndP + 1));
 	   while ((*StartP) && (WHITE(*StartP) || *StartP == ',')) {
 	       StartP++;	/* Skip whitespace and separators */
 	   }
@@ -2290,6 +2331,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
      *  Clean up and return the last test result. - FM
      */
     FREE(Str);
+    FREE(MsgStr);
     FREE(Host);
     return GotHost;
 }
@@ -2591,3 +2633,76 @@ putenv (string)
   return 0;
 }
 #endif /* NO_PUTENV */
+
+#ifdef VMS
+/*
+ *  This function appends fname to the home path and returns
+ *  the full path and filename in VMS syntax.  The fname
+ *  string can be just a filename, or include a subirectory
+ *  off the home directory, in which chase fname should
+ *  with "./" (e.g., ./BM/lynx_bookmarks.html). - FM
+ */
+PUBLIC void LYVMS_HomePathAndFilename ARGS3(
+	char *,		fbuffer,
+	int,		fbuffer_size,
+	char *,		fname)
+{
+    char *home = NULL;
+    char *temp = NULL;
+    int len;
+
+    /*
+     *  Make sure we have a buffer and string. - FM
+     */
+    if (!fbuffer)
+        return;
+    if (!(fname && *fname) || fbuffer_size < 1) {
+        fbuffer[0] = '\0';
+	return;
+    }
+
+    /*
+     *  Set up home string and length. - FM
+     */
+    StrAllocCopy(home, Home_Dir());
+    if (!(home && *home))
+        StrAllocCopy(home, "Error:");
+    len = fbuffer_size - strlen(home) - 1;
+    if (len < 0) {
+        len = 0;
+	home[fbuffer_size] = '\0';
+    }
+
+    /*
+     *  Check whether we have a subdirectory path or just a filename. - FM
+     */
+    if (!strncmp(fname, "./", 2)) {
+        /*
+	 *  We have a subdirectory path. - FM
+	 */
+	if (home[strlen(home)-1] == ']') {
+	    /*
+	     *  We got the home directory, so convert it to
+	     *  SHELL syntax and append subdirectory path,
+	     *  then convert that to VMS syntax. - FM
+	     */
+	    temp = (char *)calloc(1, (strlen(home) + strlen(fname) + 10));
+	    sprintf(temp, "%s%s", HTVMS_wwwName(home), (fname + 1));
+	    sprintf(fbuffer, "%.*s",
+	    	    (fbuffer_size - 1), HTVMS_name("", temp));
+	    FREE(temp);
+	} else {
+	    /*
+	     *  This will fail, but we need something in the buffer. - FM
+	     */
+	    sprintf(fbuffer,"%s%.*s", home, len, fname);
+	}
+    } else {
+        /*
+	 *  We have a file in the home directory. - FM
+	 */
+	sprintf(fbuffer,"%s%.*s", home, len, fname);
+    }
+    FREE(home);
+}
+#endif /* VMS */

@@ -12,6 +12,7 @@
 #include "LYCgi.h"
 #include "LYCurses.h"
 #include "LYSignal.h"
+#include "LYBookmark.h"
 
 #ifdef DIRED_SUPPORT
 #include "LYLocal.h"
@@ -590,7 +591,19 @@ PUBLIC void read_cfg ARGS1(
 		   user_mode = ADVANCED_MODE;
 
 	} else if(!strncasecomp(buffer,"DEFAULT_BOOKMARK_FILE:",22)) {
-		StrAllocCopy(bookmark_page,buffer+22);
+		StrAllocCopy(bookmark_page, buffer+22);
+		StrAllocCopy(BookmarkPage, bookmark_page);
+		StrAllocCopy(MBM_A_subbookmark[0], bookmark_page);
+		StrAllocCopy(MBM_A_subdescript[0], MULTIBOOKMARKS_DEFAULT);
+
+	} else if(!strncasecomp(buffer,"MULTI_BOOKMARK_SUPPORT:",23)) {
+		LYMultiBookmarks = is_true(buffer+23);
+
+	} else if(!strncasecomp(buffer,"BLOCK_MULTI_BOOKMARKS:",22)) {
+		LYMBMBlocked = is_true(buffer+22);
+
+	} else if(!strncasecomp(buffer,"ADVANCED_MULTI_BOOKMARKS:",25)) {
+		LYMBMAdvanced = is_true(buffer+25);
 
 	} else if(!system_editor && 
 		  !strncasecomp(buffer,"DEFAULT_EDITOR:",15)) {
@@ -956,6 +969,9 @@ PUBLIC void read_cfg ARGS1(
 		if (HTNewsChunkSize > HTNewsMaxChunk) {
 		    HTNewsChunkSize = HTNewsMaxChunk;
 		}
+
+	} else if(!strncasecomp(buffer,"USE_SELECT_POPUPS:",17)) {
+		LYSelectPopups = is_true(buffer+17);
 
 #if defined(VMS) && defined(VAXC) && !defined(__DECC)
 	} else if (!strncasecomp(buffer, "DEFAULT_VIRTUAL_MEMORY_SIZE:", 28)) {

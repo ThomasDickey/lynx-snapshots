@@ -52,15 +52,6 @@
 #include "HTTCP.h"
 #include "HTAlert.h"
 
-#ifdef USE_SSL
-#ifdef VMS
-#include "[-.-.-.refssl]ssl.h"
-#else
-#include "../../../refssl/ssl.h"
-#endif /* VMS */
-PRIVATE SSLHandle * ssl_handle=NULL;	/* The SSL handle */
-#endif /* USE_SSL */
-
 #include "LYLeaks.h"
 
 /* PUBLIC						HTAAScheme_enum()
@@ -526,9 +517,6 @@ PUBLIC void HTAA_setupReader ARGS4(char *,	start_of_headers,
 	end_pointer = start_pointer;
     }
     in_soc = soc;
-#ifdef USE_SSL
-    ssl_handle = (SSLHandle *)handle;
-#endif /* USE_SSL */
 }
 
 
@@ -573,14 +561,7 @@ PUBLIC char *HTAA_getUnfoldedLine NOARGS
 	/* Reading from socket */
 
 	if (start_pointer >= end_pointer) {/*Read the next block and continue*/
-#ifdef USE_SSL
-	    if (ssl_handle)
-	        count = SSL_Read(ssl_handle, buffer, BUFFER_SIZE);
-	    else
-	        count = NETREAD(in_soc, buffer, BUFFER_SIZE);
-#else
 	    count = NETREAD(in_soc, buffer, BUFFER_SIZE);
-#endif /* USE_SSL */
 	    if (count <= 0) {
 		in_soc = -1;
 		return line;

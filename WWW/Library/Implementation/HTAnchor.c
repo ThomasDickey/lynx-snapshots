@@ -65,21 +65,30 @@ PRIVATE HTList **adult_table = 0;  /* Point to table of lists of all parents */
 **	consistency, we insist that you furnish more information about the
 **	anchor you are creating : use newWithParent or newWithAddress.
 */
-
 PRIVATE HTParentAnchor * HTParentAnchor_new NOARGS
 {
     HTParentAnchor *newAnchor = 
        (HTParentAnchor *)calloc(1, sizeof(HTParentAnchor));  /* zero-filled */
     newAnchor->parent = newAnchor;
+    newAnchor->bookmark = NULL;		/* Bookmark filename. - FM */
     newAnchor->isISMAPScript = FALSE;	/* Lynx appends ?0,0 if TRUE. - FM */
     newAnchor->isHEAD = FALSE;		/* HEAD request if TRUE. - FM */
     newAnchor->FileCache = NULL;	/* Path to a disk-cached copy. - FM */
+    newAnchor->SugFname = NULL;		/* Suggested filename. - FM */
+    newAnchor->RevTitle = NULL;		/* TITLE for a LINK with REV. - FM */
     newAnchor->cache_control = NULL;	/* Cache-Control. - FM */
     newAnchor->no_cache = FALSE;	/* no-cache? - FM */
     newAnchor->content_type = NULL;	/* Content-Type. - FM */
     newAnchor->content_language = NULL;	/* Content-Language. - FM */
     newAnchor->content_encoding = NULL;	/* Compression algorith. - FM */
-    newAnchor->RevTitle = NULL;		/* TITLE for a LINK with REV. - FM */
+    newAnchor->content_base = NULL;	/* Content-Base. - FM */
+    newAnchor->content_disposition = NULL; /* Content-Disposition. - FM */
+    newAnchor->content_location = NULL;	/* Content-Location. - FM */
+    newAnchor->content_md5 = NULL;	/* Content-MD5. - FM */
+    newAnchor->date = NULL;		/* Date. - FM */
+    newAnchor->expires = NULL;		/* Expires. - FM */
+    newAnchor->last_modified = NULL;	/* Last-Modified. - FM */
+    newAnchor->server = NULL;		/* Server. - FM */
     return newAnchor;
 }
 
@@ -99,7 +108,6 @@ PRIVATE HTChildAnchor * HTChildAnchor_new NOARGS
 **	returns	YES if the strings are equivalent ignoring case
 **		NO if they differ in more than  their case.
 */
-
 PRIVATE BOOL HTEquivalent ARGS2(
 	CONST char *,	s,
 	CONST char *,	t)
@@ -127,7 +135,6 @@ PRIVATE BOOL HTEquivalent ARGS2(
 **	returns	YES if the strings are identical or both NULL
 **		NO if they differ.
 */
-
 PRIVATE BOOL HTIdentical ARGS2(
 	CONST char *,	s,
 	CONST char *,	t)
@@ -152,7 +159,6 @@ PRIVATE BOOL HTIdentical ARGS2(
 **	Me one is for a new anchor being edited into an existing
 **	document. The parent anchor must already exist.
 */
-
 PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
 	HTParentAnchor *,	parent,
 	CONST char *,		tag)
@@ -225,6 +231,7 @@ PUBLIC HTChildAnchor * HTAnchor_findChildAndLink ARGS4(
         parsed_doc.address = HTParse(href, relative_to, PARSE_ALL);
         parsed_doc.post_data = NULL;
         parsed_doc.post_content_type = NULL;
+        parsed_doc.bookmark = NULL;
         parsed_doc.isHEAD = FALSE;
         dest = HTAnchor_findAddress(&parsed_doc);
 
@@ -274,7 +281,6 @@ PRIVATE void free_adult_table NOARGS
 **	Note: You are not guaranteed a new anchor -- you might get an old one,
 **	like with fonts.
 */
-
 PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 	CONST DocAddress *,	newdoc)
 {
@@ -297,6 +303,7 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 		PARSE_ACCESS | PARSE_HOST | PARSE_PATH | PARSE_PUNCTUATION);
         parsed_doc.post_data = newdoc->post_data;
         parsed_doc.post_content_type = newdoc->post_content_type;
+        parsed_doc.bookmark = newdoc->bookmark;
         parsed_doc.isHEAD = newdoc->isHEAD;
 
         foundParent = (HTParentAnchor *) HTAnchor_findAddress (&parsed_doc);
@@ -337,12 +344,13 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 #ifdef CASE_INSENSITIVE_ANCHORS
             if (HTEquivalent(foundAnchor->address, newdoc->address) &&
 	        HTEquivalent(foundAnchor->post_data, newdoc->post_data) &&
-	        foundAnchor->isHEAD == newdoc->isHEAD) {
+	        foundAnchor->isHEAD == newdoc->isHEAD)
 #else
             if (HTIdentical(foundAnchor->address, newdoc->address) &&
 	        HTIdentical(foundAnchor->post_data, newdoc->post_data) &&
-	        foundAnchor->isHEAD == newdoc->isHEAD) {
+	        foundAnchor->isHEAD == newdoc->isHEAD)
 #endif /* CASE_INSENSITIVE_ANCHORS */
+	    {
 	        if (TRACE)
 		    fprintf(stderr,
 		    	    "Anchor %p with address `%s' already exists.\n",
@@ -365,6 +373,8 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
         if (newdoc->post_content_type)
 	    StrAllocCopy(foundAnchor->post_content_type,
 	    		 newdoc->post_content_type);
+        if (newdoc->bookmark)
+	    StrAllocCopy(foundAnchor->bookmark, newdoc->bookmark);
         foundAnchor->isHEAD = newdoc->isHEAD;
         HTList_addObject (adults, foundAnchor);
         return (HTAnchor *) foundAnchor;
@@ -381,7 +391,6 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 **	We also try to delete the targets whose documents are not loaded.
 **	If this anchor's source list is empty, we delete it and its children.
 */
-
 PRIVATE void deleteLinks ARGS1(
 	HTAnchor *,	me)
 {
@@ -609,6 +618,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
     FREE(me->physical);
     FREE(me->post_data);
     FREE(me->post_content_type);
+    FREE(me->bookmark);
     FREE(me->owner);
     FREE(me->RevTitle);
     if (me->FileCache) {
@@ -619,11 +629,20 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
 	}
 	FREE(me->FileCache);
     }
+    FREE(me->SugFname);
     FREE(me->cache_control);
     FREE(me->content_type);
     FREE(me->content_language);
     FREE(me->content_encoding);
-
+    FREE(me->content_base);
+    FREE(me->content_disposition);
+    FREE(me->content_location);
+    FREE(me->content_md5);
+    FREE(me->date);
+    FREE(me->expires);
+    FREE(me->last_modified);
+    FREE(me->server);
+ 
     /*
      *  Remove ourselves from the hash table's list.
      */
@@ -662,7 +681,6 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
 **	This is to ensure that an anchor which might have already existed
 **	is put in the correct order as we load the document.
 */
-
 PUBLIC void HTAnchor_makeLastChild ARGS1(
 	HTChildAnchor *,	me)
 {
@@ -676,7 +694,6 @@ PUBLIC void HTAnchor_makeLastChild ARGS1(
 /*	Data access functions
 **	---------------------
 */
-
 PUBLIC HTParentAnchor * HTAnchor_parent ARGS1(
 	HTAnchor *,	me)
 {
@@ -775,12 +792,12 @@ PUBLIC BOOL HTAnchor_hasChildren ARGS1(
     return me ? ! HTList_isEmpty(me->children) : NO;
 }
 
-/*	Title handling
+/*	Title handling.
 */
 PUBLIC CONST char * HTAnchor_title ARGS1(
 	HTParentAnchor *,	me)
 {
-    return me ? me->title : 0;
+    return me ? me->title : NULL;
 }
 
 PUBLIC void HTAnchor_setTitle ARGS2(
@@ -817,12 +834,28 @@ PUBLIC void HTAnchor_appendTitle ARGS2(
     }
 }
 
-/*	Owner handling
+/*	Bookmark handling.
+*/
+PUBLIC CONST char * HTAnchor_bookmark ARGS1(
+	HTParentAnchor *,	me)
+{
+    return me ? me->bookmark : NULL;
+}
+
+PUBLIC void HTAnchor_setBookmark ARGS2(
+	HTParentAnchor *,	me,
+	CONST char *,		bookmark)
+{
+    if (me)
+        StrAllocCopy(me->bookmark, bookmark);
+}
+
+/*	Owner handling.
 */
 PUBLIC CONST char * HTAnchor_owner ARGS1(
 	HTParentAnchor *,	me)
 {
-    return (me ? me->owner : 0);
+    return (me ? me->owner : NULL);
 }
 
 PUBLIC void HTAnchor_setOwner ARGS2(
@@ -834,12 +867,12 @@ PUBLIC void HTAnchor_setOwner ARGS2(
     }
 }
 
-/*      TITLE handling in LINKs with REV="made" or REV="owner"
+/*      TITLE handling in LINKs with REV="made" or REV="owner". - FM
 */
 PUBLIC CONST char * HTAnchor_RevTitle ARGS1(
 	HTParentAnchor *,	me)
 {
-    return (me ? me->RevTitle : 0);
+    return (me ? me->RevTitle : NULL);
 }
 
 PUBLIC void HTAnchor_setRevTitle ARGS2(
@@ -859,10 +892,43 @@ PUBLIC void HTAnchor_setRevTitle ARGS2(
     }
 }
 
+/*	Suggested filename handling. - FM
+**	(will be loaded if we had a Content-disposition
+**	 header with file; filename=name.suffix)
+*/
+PUBLIC CONST char * HTAnchor_SugFname ARGS1(
+	HTParentAnchor *,	me)
+{
+    return me ? me->SugFname : NULL;
+}
+
+/*	Last-Modified header handling. - FM
+*/
+PUBLIC CONST char * HTAnchor_last_modified ARGS1(
+	HTParentAnchor *,	me)
+{
+    return me ? me->last_modified : NULL;
+}
+
+/*	Date header handling. - FM
+*/
+PUBLIC CONST char * HTAnchor_date ARGS1(
+	HTParentAnchor *,	me)
+{
+    return me ? me->date : NULL;
+}
+
+/*	Server header handling. - FM
+*/
+PUBLIC CONST char * HTAnchor_server ARGS1(
+	HTParentAnchor *,	me)
+{
+    return me ? me->server : NULL;
+}
+
 /*	Link me Anchor to another given one
 **	-------------------------------------
 */
-
 PUBLIC BOOL HTAnchor_link ARGS3(
 	HTAnchor *,	source,
 	HTAnchor *,	destination,
@@ -896,7 +962,6 @@ PUBLIC BOOL HTAnchor_link ARGS3(
 /*	Manipulation of links
 **	---------------------
 */
-
 PUBLIC HTAnchor * HTAnchor_followMainLink ARGS1(
 	HTAnchor *,	me)
 {
@@ -952,7 +1017,6 @@ PUBLIC BOOL HTAnchor_makeMainLink ARGS2(
 /*	Methods List
 **	------------
 */
-
 PUBLIC HTList * HTAnchor_methods ARGS1(
 	HTParentAnchor *,	me)
 {
@@ -965,7 +1029,6 @@ PUBLIC HTList * HTAnchor_methods ARGS1(
 /*	Protocol
 **	--------
 */
-
 PUBLIC void * HTAnchor_protocol ARGS1(
 	HTParentAnchor *,	me)
 {
@@ -982,7 +1045,6 @@ PUBLIC void HTAnchor_setProtocol ARGS2(
 /*	Physical Address
 **	----------------
 */
-
 PUBLIC char * HTAnchor_physical ARGS1(
 	HTParentAnchor *,	me)
 {

@@ -193,7 +193,9 @@ PRIVATE BOOL override_proxy ARGS1(CONST char *, addr)
 {
     CONST char * no_proxy = getenv("no_proxy");
     char * p = NULL;
+    char * at = NULL;
     char * host = NULL;
+    char * Host = NULL;
     char * access = NULL;
     int port = 0;
     int h_len = 0;
@@ -220,14 +222,15 @@ PRIVATE BOOL override_proxy ARGS1(CONST char *, addr)
         FREE(host);
 	return NO;
     }
+    Host = (((at = strchr(host, '@')) != NULL) ? (at+1) : host);
 
     if((access = HTParse(addr, "", PARSE_ACCESS))) {
         if (0==strcmp("file", access) &&
-	    (0==strcmp(host, "localhost") ||
+	    (0==strcmp(Host, "localhost") ||
 #ifdef VMS
-             0==strcasecomp(host, HTHostName())))
+             0==strcasecomp(Host, HTHostName())))
 #else
-             0==strcmp(host, HTHostName())))
+             0==strcmp(Host, HTHostName())))
 #endif /* VMS */
         {
 	    FREE(host);
@@ -242,7 +245,7 @@ PRIVATE BOOL override_proxy ARGS1(CONST char *, addr)
         return NO;
     }
 
-    if (NULL != (p = strchr(host, ':'))) {	/* Port specified */
+    if (NULL != (p = strrchr(Host, ':'))) {	/* Port specified */
         *p++ = 0;                   		/* Chop off port */
         port = atoi(p);
     } else {					/* Use default port */
@@ -263,7 +266,7 @@ PRIVATE BOOL override_proxy ARGS1(CONST char *, addr)
     }
     if (!port)
         port = 80;                  /* Default */
-    h_len = strlen(host);
+    h_len = strlen(Host);
 
     while (*no_proxy) {
         CONST char * end;
@@ -290,7 +293,7 @@ PRIVATE BOOL override_proxy ARGS1(CONST char *, addr)
 
         if ((!templ_port || templ_port == port)  &&
             (t_len > 0  &&  t_len <= h_len  &&
-             !strncmp(host + h_len - t_len, no_proxy, t_len))) {
+             !strncmp(Host + h_len - t_len, no_proxy, t_len))) {
             FREE(host);
             return YES;
         }

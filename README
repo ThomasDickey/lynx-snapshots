@@ -20,8 +20,8 @@ WHAT IS LYNX?
    a single LAN.
    
    For information about Lynx, including new updates, go to the
-   			Lynx Enhanced Pages
-   	<URL:http://www.nyu.edu/pages/wsn/subir/lynx.html>.
+   			"Lynx links"
+   	<URL:http://www.crl.com/~subir/lynx.html>.
    
    Lynx is distributed under the GNU General Public License without
    restrictions on usage or redistribution, and is supported by the
@@ -67,10 +67,11 @@ INSTALLING LYNX
    
 PROBLEMS
 
-   If you experience problems installing or compiling Lynx, there is a
-   mailing list called lynx-dev which is frequented by Lynx experts. To
-   subscribe to lynx-dev, send email to majordomo@sig.net with only the
-   following message in the body:
+   If you experience problems installing or compiling Lynx, please read
+   the PROBLEMS file located in the source distribution. If your problem
+   is not addressed there, there is a mailing list called lynx-dev which
+   is frequented by Lynx experts. To subscribe to lynx-dev, send email to
+   majordomo@sig.net with only the following message in the body: 
    
       SUBSCRIBE LYNX-DEV address
 

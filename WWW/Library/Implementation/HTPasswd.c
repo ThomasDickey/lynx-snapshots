@@ -218,7 +218,7 @@ PUBLIC int HTAAFile_readPasswdRec ARGS3(FILE *, fp,
 					char *, out_username,
 					char *, out_password)
 {
-    char terminator;
+    int terminator;
     
     terminator = HTAAFile_readField(fp, out_username, MAX_USERNAME_LEN);
 

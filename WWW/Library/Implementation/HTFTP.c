@@ -1887,6 +1887,7 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
         case PETER_LEWIS_SERVER:
         case MACHTEN_SERVER:
 	case MSDOS_SERVER:
+        case WINDOWS_NT_SERVER:
 	    /*
 	    **  Check for EPLF output (local times).
 	    */
@@ -2004,6 +2005,7 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
 	    */
 	    break;
 
+#ifdef NOTDEFINED
         case WINDOWS_NT_SERVER:
             /*
 	    **  Interpret and edit LIST output from MS_WINDOWS server
@@ -2024,6 +2026,7 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
 	    **  Goto the bottom and get real type.
 	    */
 	    break;
+#endif /* NOTDEFINED */
 
         case CMS_SERVER:
 	  {

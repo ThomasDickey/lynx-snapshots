@@ -102,7 +102,7 @@ set the display variable for X rexec-ed programs.
 dumps the formatted output of the default document or one
 specified on the command line to standard out. 
 This can be used in the following way:
-lynx -dump http://www.nyu.edu/pages/wsn/subir/lynx.html.
+lynx -dump http://www.crl.com/~subir/lynx.html.
 .TP
 .B -editor\fR=\fIEDITOR
 enable edit mode using the specified
@@ -208,6 +208,10 @@ disable the retrieval status messages.
 .B -number_links
 force numbering of links.
 .TP
+.B -popup
+toggles handling of single-choice SELECT options via
+popup windows or as lists of radio buttons.
+.TP
 .B -post_data
 send form data from stdin using POST method and dump results.
 .TP
@@ -303,11 +307,14 @@ your domain (utmp required for selectivity).
 .I jump
 - disable the 'j' (jump) command.
 
+.I multibook
+- disallow multiple bookmarks.
+
 .I mail
-- disable mailing feature.
+- disallow mail.
 
 .I news_post
-- disable USENET News posting.
+- disallow USENET News posting.
 
 .I options_save 
 - disallow saving options in .lynxrc.

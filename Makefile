@@ -234,6 +234,8 @@ all:
 	@echo "decstation -- for DEC Ultrix (same as ultrix)"
 	@echo "ultrix-slang     -- for DEC Ultrix and color slang package"
 	@echo "decstation-slang -- for DEC Ultrix and color slang (same as ultrix-slang)"
+	@echo "umaxv   -- for Encore's UMAXV (SVR3.x) "
+	@echo "umaxv-slang   -- for Encore's UMAXV and color slang package"
 	@echo "unixware   -- for Novell's Unixware"
 	@echo "univell    -- for Novell's Unixware"
 	@echo "unixware-slang -- for Unixware and color slang package"
@@ -259,10 +261,10 @@ DIR_DEFS = $(DIRED_SUPPORT) $(DIRED_ARCHIVE) $(DIRED_TAR) $(DIRED_ZIP) $(DIRED_G
 #SITE_LIBS= # Your libraries here (remove the "#")
 
 # Set SITE_LYDEFS to one or more of the defines for the WWW Library:
-SITE_LYDEFS = $(DIR_LYDEFS) # Your defines here (remove the "#")
+SITE_LYDEFS = $(DIR_LYDEFS) # Your defines here
 
 # Set SITE_DEFS to one or more of the defines for lynx below:
-SITE_DEFS = $(DIR_DEFS) # Your defines here (remove the "#")
+SITE_DEFS = $(DIR_DEFS) # Your defines here
 
 # if you are compiling on a previously unsupported system, modify
 # this generic entry!!
@@ -288,6 +290,8 @@ SITE_DEFS = $(DIR_DEFS) # Your defines here (remove the "#")
 # -DSHORTENED_RBIND  For a SOCKSified lynx with the short version of Rbind.
 # -DNO_UNISTD_H    if you don't have <unistd.h>
 # -DNOPORT         if you must use PASV instead of PORT for FTP
+# -DNO_TTYTYPE	   if your system lacks a ttytype variable
+# -DNSL_FORK	   For fork-based name server lookups that can be 'z'apped.
 #
 # if you are linking to freeWAIS-0.202 or older, you should define this
 # in MCFLAGS (SITE_DEFS)
@@ -419,7 +423,7 @@ netbsd-ncurses:
 	cd WWW/Library/netbsd; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -DFANCY_CURSES -DNCURSES -DUNIX \
 		-DNO_KEYPAD -DNO_CUSERID -I../$(WWWINC) $(SITE_DEFS) \
-		-I/usr/include/ncurses"
+		-I/usr/include/ncurses" \
 		LIBS="-lncurses -lcompat -ltermcap \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		WWWLIB="../WWW/Library/netbsd/libwww.a"
@@ -541,6 +545,26 @@ ptx2:
 		LIBS="-lcurses -lsocket -linet -lnsl \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		WWWLIB="../WWW/Library/ptx/libwww.a"
+
+# Contributed by Thanh Ma (tma@encore.com).
+umaxv:
+	cd WWW/Library/umaxv-m88k; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
+	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -DFANCY_CURSES -DUNIX \
+		-D_SYSV3 -DHAVE_TERMIOS -DUSE_DIRENT -DNO_UTMP \
+		-I../$(WWWINC) $(SITE_DEFS)" \
+		LIBS="-lcurses \
+		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
+		WWWLIB="../WWW/Library/umaxv-m88k/libwww.a"
+
+# Contributed by Thanh Ma (tma@encore.com).
+umaxv-slang:
+	cd WWW/Library/umaxv-m88k; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
+	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -DUSE_SLANG -DUNIX \
+		-D_SYSV3 -DHAVE_TERMIOS -DUSE_DIRENT -DNO_UTMP \
+		-I../$(WWWINC) $(SITE_DEFS)" \
+		LIBS="$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
+		WWWLIB="../WWW/Library/umaxv-m88k/libwww.a" \
+		SLANGLIB="$(SLANGLIB) -lslang -lm" SLANGINC="$(SLANGINC)"
 
 unixware:
 	cd WWW/Library/svr4; $(MAKE) LYFLAGS="-DNO_BCOPY -DUNIXWARE \

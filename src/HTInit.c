@@ -141,6 +141,12 @@ PUBLIC void HTFormatInit NOARGS
 /*
  *  Now add our basic conversions.
  */
+ HTSetConversion("text/x-sgml",
+ 			      "www/source",  HTPlainPresent, 1.0, 0.0, 0.0, 0);
+ HTSetConversion("text/x-sgml",
+ 			      "www/present", HTMLPresent,    1.0, 0.0, 0.0, 0);
+ HTSetConversion("text/sgml", "www/source",  HTPlainPresent, 1.0, 0.0, 0.0, 0);
+ HTSetConversion("text/sgml", "www/present", HTMLPresent,    1.0, 0.0, 0.0, 0);
  HTSetConversion("text/plain","www/present", HTPlainPresent, 1.0, 0.0, 0.0, 0);
  HTSetConversion("text/html", "www/source",  HTPlainPresent, 1.0, 0.0, 0.0, 0);
  HTSetConversion("text/html", "text/x-c",    HTMLToC, 	     0.5, 0.0, 0.0, 0);

@@ -188,7 +188,7 @@ PUBLIC int HTAAFile_readList ARGS3(FILE *,	fp,
 				   int,		max_len)
 {
     char *item = NULL;
-    char terminator;
+    int terminator;
     int cnt = 0;
 
     do {

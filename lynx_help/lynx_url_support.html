@@ -81,13 +81,12 @@ technically an instruction rather than part of the URL.  Lynx will treat
 ID attributes as NAME-ed anchors for all tags in the BODY of a document
 which can correspond to positions in the rendering of the document.
 
-<p>The https URL has the same format, but the default port is
-<em>:443</em>.  Patches for support of https URLs and the CONNECT
-procedure are available for qualified recipients via links in the
-<a href="http://www.nyu.edu/pages/wsn/subir/lynx.html">Lynx Enhanced
-Pages</a>.  US Export laws and associated red tape pose severe
-impediments to inclusion of this support in the general distributions
-of freeware WWW clients such as Lynx.  Sorry.
+<p>The https URL has the same format, but the default port is <em>:443</em>.
+Patches for support of https URLs and the CONNECT procedure are available
+for qualified recipients via <a 
+href="http://www.crl.com/~subir/lynx.html">Lynx links</a>.  US Export laws
+and associated red tape pose severe impediments to inclusion of this support
+in the general distributions of freeware WWW clients such as Lynx.  Sorry.
 <HR WIDTH="100%">
 
 <H2><a name="telnet"
@@ -259,16 +258,16 @@ the hit list.
 The news and nntp URLs are handled by Lynx as specified in RFC1738, but
 for compatibility with other clients, Lynx allows inclusion of host and
 port fields in news URLs, which properly should be used <em>only</em> in
-nntp URLs.  If not included in news URLs, Lynx will use the nntp server
-pointed to by the NNTPSERVER environment variable or configuration symbol
-(see lynx.cfg), with default port <em>:119</em>.  A host field must be
-included in nntp URLs, and the port field is optional with the same default.
-Patches for support of snews URLs are available to qualified recipients via
-links in the <a
-href="http://www.nyu.edu/pages/wsn/subir/lynx.html"
->Lynx Enhanced Pages</a> but cannot be included in the general
-distribution (sorry, see <a href="#http">http and https</a>).
-The formats are:<BR>
+nntp and snews URLs.  If not included in news URLs, Lynx will use the nntp
+server pointed to by the NNTPSERVER environment variable or configuration
+symbol (see lynx.cfg), with default port <em>:119</em>.  A host field must
+be included in nntp URLs, and the port field is optional with the same
+default.  Patches for support of snews URLs are available to qualified
+recipients via <a href="http://www.crl.com/~subir/lynx.html">Lynx links</a>
+but cannot be included in the general distribution (sorry, see <a
+href="#http">http and https</a>).
+
+<p>The formats are:<BR>
 <tab indent="12"><em>news:newsgroup</em> <tab
 id="ng">(retrieves list of messages in newsgroup)<BR>
 <tab indent="12"><em>news:messageID</em> <tab

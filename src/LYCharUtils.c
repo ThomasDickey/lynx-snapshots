@@ -1024,7 +1024,7 @@ PUBLIC char *LYFindEndOfComment ARGS1(
 	 */
         return NULL;
 
-    if (strcmp(str, "<!--"))
+    if (strncmp(str, "<!--", 4))
         /*
 	 *  We don't have the start of a comment, so
 	 *  return the beginning of the string. - FM

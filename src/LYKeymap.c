@@ -750,3 +750,19 @@ PUBLIC char *key_for_func ARGS1 (int,func)
 	}
 	return buf;
 }
+
+/*
+ *  This function returns TRUE if the ch is non-alphanumeric
+ *  and maps to keyname (LYK_foo in the keymap[] array). - FM
+ */ 
+PUBLIC BOOL LYisNonAlnumKeyname ARGS2(
+	int,	ch,
+	int,	keyname)
+{
+    if ((ch >= '0' && ch <= '9') ||
+        (ch >= 'A' && ch <= 'z') ||
+	ch < 0 || ch > 269)
+	return (FALSE);
+
+    return(keymap[ch+1] == keyname);
+}

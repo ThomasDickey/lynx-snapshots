@@ -38,8 +38,9 @@ PUBLIC int HTNewsMaxChunk = 40;	/* Largest number of articles in one window */
 #define SERVER_FILE "/usr/local/lib/rn/server"
 #endif
 
-#define NEWS_NETREAD   NETREAD
 #define NEWS_NETWRITE  NETWRITE
+#define NEWS_NETCLOSE  NETCLOSE
+#define NEXT_CHAR HTGetCharacter()
 			
 #include <ctype.h>
 
@@ -57,7 +58,6 @@ struct _HTStructured {
 	/* ... */
 };
 
-#define NEXT_CHAR HTGetCharacter()
 #define LINE_LENGTH 512			/* Maximum length of line of ARTICLE etc */
 #define GROUP_NAME_LENGTH	256	/* Maximum length of group name */
 extern BOOLEAN scan_for_buried_news_references;
@@ -184,7 +184,7 @@ PRIVATE int response ARGS1(CONST char *,command)
 	if (status < 0){
 	    if (TRACE) fprintf(stderr,
 	        "HTNews: Unable to send command. Disconnecting.\n");
-	    NETCLOSE(s);
+	    NEWS_NETCLOSE(s);
 	    s = -1;
 	    return status;
 	} /* if bad status */
@@ -202,7 +202,7 @@ PRIVATE int response ARGS1(CONST char *,command)
 	if ((ch = *(p-1)) == (char)EOF) {
 	    if (TRACE) fprintf(stderr,
 	    	"HTNews: EOF on read, closing socket %d\n", s);
-	    NETCLOSE(s);	/* End of file, close socket */
+	    NEWS_NETCLOSE(s);	/* End of file, close socket */
 	    return s = -1;	/* End of file on response */
 	}
     } /* Loop over characters */
@@ -453,7 +453,7 @@ PRIVATE void abort_socket NOARGS
     if (TRACE)
         fprintf(stderr,
 	        "HTNews: EOF on read, closing socket %d\n", s);
-    NETCLOSE(s);	/* End of file, close socket */
+    NEWS_NETCLOSE(s);	/* End of file, close socket */
     PUTS("Network Error: connection lost");
     PUTC('\n');
     s = -1;		/* End of file on response */
@@ -1308,6 +1308,7 @@ PUBLIC int HTLoadNews ARGS4(
 	HTStream*,		stream)
 {
     char command[260];			/* The whole command */
+    char proxycmd[260];			/* The proxy command */
     char groupName[GROUP_NAME_LENGTH];	/* Just the group name */
     int status;				/* tcp return */
     int retries;			/* A count of how hard we have tried */ 
@@ -1342,8 +1343,8 @@ PUBLIC int HTLoadNews ARGS4(
     **  	xxxxx			News group (no "@")
     **  	group/n1-n2		Articles n1 to n2 in group
     */
-	group_wanted = (strchr(arg, '@')==0) && (strchr(arg, '*')==0);
-	list_wanted  = (strchr(arg, '@')==0) && (strchr(arg, '*')!=0);
+	group_wanted = (strchr(arg, '@') == NULL) && (strchr(arg, '*') == NULL);
+	list_wanted  = (strchr(arg, '@') == NULL) && (strchr(arg, '*') != NULL);
 
 	/* p1 = HTParse(arg, "", PARSE_PATH | PARSE_PUNCTUATION); */
 	/*
@@ -1361,19 +1362,19 @@ PUBLIC int HTLoadNews ARGS4(
 	  }
 	  if (!(cp = HTParse(arg, "", PARSE_HOST)) || *cp == '\0') {
 	      if (s >= 0 && NewsHost && strcasecomp(NewsHost, HTNewsHost)) {
-	          NETCLOSE(s);
+	          NEWS_NETCLOSE(s);
 		  s = -1;
 	      }
 	      StrAllocCopy(NewsHost, HTNewsHost);
 	  } else {
 	      if (s >= 0 && NewsHost && strcasecomp(NewsHost, cp)) {
-	          NETCLOSE(s);
+	          NEWS_NETCLOSE(s);
 		  s = -1;
 	      }
 	      StrAllocCopy(NewsHost, cp);
 	  }
 	  FREE(cp);
-	  sprintf(command, "nntp://%s/", NewsHost);
+	  sprintf(command, "nntp://%.250s/", NewsHost);
 	  StrAllocCopy(NewsHREF, command);
 	}
 	else if (!strncasecomp(arg, "snews:", 6)) {
@@ -1390,30 +1391,60 @@ PUBLIC int HTLoadNews ARGS4(
 	  }
 	  if (!(cp = HTParse(arg, "", PARSE_HOST)) || *cp == '\0') {
 	      if (s >= 0 && NewsHost && strcasecomp(NewsHost, HTNewsHost)) {
-	          NETCLOSE(s);
+	          NEWS_NETCLOSE(s);
 		  s = -1;
 	      }
 	      StrAllocCopy(NewsHost, HTNewsHost);
 	  } else {
 	      if (s >= 0 && NewsHost && strcasecomp(NewsHost, cp)) {
-	          NETCLOSE(s);
+	          NEWS_NETCLOSE(s);
 		  s = -1;
 	      }
 	      StrAllocCopy(NewsHost, cp);
 	  }
 	  FREE(cp);
-	  sprintf(command, "news://%s/", NewsHost);
+	  sprintf(command, "news://%.250s/", NewsHost);
 	  StrAllocCopy(NewsHREF, command);
-	}
-	else {
+	} else {
 	  p1 = arg + 5;  /* Skip "news:" prefix */
 	  if (s >= 0 && NewsHost && strcasecomp(NewsHost, HTNewsHost)) {
-	      NETCLOSE(s);
+	      NEWS_NETCLOSE(s);
 	      s = -1;
 	  }
 	  StrAllocCopy(NewsHost, HTNewsHost);
 	  StrAllocCopy(NewsHREF, "news:");
 	}
+
+	/*
+	 *  Set up any proxy for snews URLs that returns NNTP
+	 *  responses for Lynx to convert to HTML, instead of
+	 *  doing the conversion itself. - TZ & FM
+	 */
+	proxycmd[0] = '\0';
+ 	if (!strncasecomp (p1, "snews://", 8)) {
+	  if ((cp = strchr((p1+8), '/')) != NULL)
+	    *cp = '\0';
+	  sprintf(command, "%.258s/", p1);
+	  StrAllocCopy(NewsHREF, command);
+	  sprintf(proxycmd, "GET %.250s%c%c%c%c", p1, CR, LF, CR, LF);
+	  if ((cp == NULL) || *(cp+1) == '\0') {
+	      p1 = "*";
+	      group_wanted = FALSE;
+	      list_wanted = TRUE;
+	  } else {
+	      p1 = (cp+1);
+	  }
+	  if (cp != NULL)
+	      *cp = '/';
+	  if (TRACE)
+	      fprintf(stderr,
+	      	      "HTNews: Proxy command is '%.*s'\n",
+		      (strlen(proxycmd) - 4), proxycmd);
+	}
+
+	/*
+	 *  Set up command for a listing or article request. - FM
+	 */
 	if (list_wanted) {
 	    strcpy(command, "LIST NEWSGROUPS");
 	} else if (group_wanted) {
@@ -1453,10 +1484,12 @@ PUBLIC int HTLoadNews ARGS4(
 
         {
 	    char * p = command + strlen(command);
+	    /*
+	     *  Teminate command with CRLF, as in RFC 977.
+	     */
 	    *p++ = CR;		/* Macros to be correct on Mac */
 	    *p++ = LF;
 	    *p++ = 0;
-	    /* strcat(command, "\r\n");	*/	/* CR LF, as in rfc 977 */
 	}
 	StrAllocCopy(ListArg, p1);
     } /* scope of p1 */
@@ -1509,7 +1542,7 @@ PUBLIC int HTLoadNews ARGS4(
             }
 	    if (status < 0) {
 		char message[256];
-	        NETCLOSE(s);
+	        NEWS_NETCLOSE(s);
 		s = -1;
 		if (TRACE)
 		    fprintf(stderr,
@@ -1526,9 +1559,16 @@ PUBLIC int HTLoadNews ARGS4(
 		    fprintf(stderr, "HTNews: Connected to news host %s.\n",
 				    NewsHost);
 		HTInitInput(s);		/* set up buffering */
+		if (proxycmd[0]) {
+		    status = NEWS_NETWRITE(s, proxycmd, strlen(proxycmd));
+		    if (TRACE)
+		        fprintf(stderr,
+			     "HTNews: Proxy command returned status '%d'.\n",
+				status);
+		}
 		if ((response(NULL) / 100) != 2) {
 			char message[BIG];
-			NETCLOSE(s);
+			NEWS_NETCLOSE(s);
 			s = -1;
 			if (retries < 1)
 			    continue;
@@ -1576,7 +1616,7 @@ Send_NNTP_command:
 	        HTAlert(response_text);
 	    else
 	        _HTProgress(response_text);
-	    NETCLOSE(s);
+	    NEWS_NETCLOSE(s);
 	    s = -1;
 	    /*
 	     *  Message might be a leftover "Timeout-disconnected",

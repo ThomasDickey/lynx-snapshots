@@ -6,6 +6,7 @@
 #include "LYStrings.h"
 #include "LYGlobalDefs.h"
 #include "LYCharSets.h"
+#include "LYBookmark.h"
 
 #include "LYLeaks.h"
 
@@ -16,6 +17,10 @@ PUBLIC void read_rc()
     FILE *fp;
     char *cp, *cp2;
     int number_sign;
+    char MBM_line[256];
+    int  MBM_counter, MBM_counter2;
+    char *MBM_cp, *MBM_cp2, *MBM_cp1;
+    int  MBM_i1, MBM_i2;
 
     /* make a name */
 #ifdef UNIX
@@ -113,18 +118,92 @@ PUBLIC void read_rc()
  	       StrAllocCopy(editor, cp);
 
 	/* bookmark file */
-	} else if ((cp=LYstrstr(line_buffer,"bookmark_file"))!=NULL &&
-		cp-line_buffer < number_sign) {
+	} else if ((cp = LYstrstr(line_buffer, "bookmark_file")) != NULL &&
+		    cp-line_buffer < number_sign) {
 
-	   if ((cp2 = (char *)strchr(cp,'=')) != NULL)
+	    if ((cp2 = (char *)strchr(cp,'=')) != NULL)
 		cp = cp2+1;
 
-	   while (isspace(*cp)) cp++;  /* get rid of spaces */
+	    while (isspace(*cp))
+	        cp++;  /* get rid of spaces */
 
-	   StrAllocCopy(bookmark_page, cp);
+            /*
+	     *  Since this is the "default" saveto, we save it.
+	     */
+	    StrAllocCopy(bookmark_page, cp);
+	    StrAllocCopy(BookmarkPage, cp);
+            StrAllocCopy(MBM_A_subbookmark[0], cp);
+            StrAllocCopy(MBM_A_subdescript[0], MULTIBOOKMARKS_DEFAULT);
+
+	} else if ((cp = LYstrstr(line_buffer, "multi_bookmark")) != NULL &&
+                   cp-line_buffer < number_sign) {
+            /*
+	     *  Found the root, now cycle through all the
+             *  possible spaces and match specific ones.
+             */
+            for (MBM_counter = 1;
+	         MBM_counter <= MBM_V_MAXFILES; MBM_counter++) {
+                sprintf(MBM_line, "multi_bookmark%c", (MBM_counter + 'A'));
+
+                if ((cp = LYstrstr(line_buffer, MBM_line)) != NULL &&
+                    cp-line_buffer < number_sign) {
+                    if ((MBM_cp1 = (char *)strchr(cp, '=')) == NULL) {
+                        break;
+                    } else {
+                        if ((MBM_cp2 = (char *)strchr(cp, ',')) == NULL) {
+                            break;
+                        } else {
+                            MBM_i2 = 0;
+			    /*
+			     *  skip over the '='.
+			     */
+                            MBM_cp1++;
+                            while (MBM_cp1 && MBM_cp1 != MBM_cp2) {
+                                /*
+				 *  Skip spaces.
+				 */
+                                if (isspace(*MBM_cp1)) {
+                                    MBM_cp1++;
+                                    continue;
+                                } else {
+                                    MBM_line[MBM_i2++] = *MBM_cp1++;
+				}
+			    }
+                            MBM_line[MBM_i2++] = '\0';
+
+                            StrAllocCopy(MBM_A_subbookmark[MBM_counter],
+			    		 MBM_line);
+
+                            /*
+			     *  Now get the description ',' and ->.
+			     */
+                            MBM_cp1 = (char *)strchr(cp, ',');
+
+                            MBM_i2 = 0;
+			    /*
+			     *  Skip over the ','.
+			     */
+                            MBM_cp1++;
+                            /*
+			     *  Eat spaces in front of description.
+			     */
+                            while (isspace(*MBM_cp1))
+                                MBM_cp1++;
+                            while (*MBM_cp1)
+                                MBM_line[MBM_i2++] = *MBM_cp1++;
+                            MBM_line[MBM_i2++] = '\0';
+
+                            StrAllocCopy(MBM_A_subdescript[MBM_counter],
+			    		 MBM_line);
+
+                            break;
+			}
+                    }
+		}
+	    }
 
 	/* personal_mail_address */
-	} else if ((cp=LYstrstr(line_buffer,"personal_mail_address"))!=NULL &&
+        } else if((cp=LYstrstr(line_buffer,"personal_mail_address"))!=NULL &&
 		cp-line_buffer < number_sign) {
 
 	   if ((cp2 = (char *)strchr(cp,'=')) != NULL)
@@ -223,9 +302,31 @@ PUBLIC void read_rc()
            else
               emacs_keys=FALSE;
 
+	/* multi bookmarks */
+        } else if ((cp = LYstrstr(line_buffer, "sub_bookmarks")) != NULL &&
+                   cp-line_buffer < number_sign) {
+
+           if ((cp2 = (char *)strchr(cp, '=')) != NULL)
+                cp = (cp2 + 1);
+
+           while (isspace(*cp))
+	       cp++;  /* get rid of spaces */
+
+           if (!strncmp(cp, "on", 2) || !strncmp(cp, "ON", 2))
+              LYMultiBookmarks = TRUE;
+           else if (!strncmp(cp, "standard", 8) ||
+                        !strncmp(cp, "STANDARD", 8)) {
+              LYMultiBookmarks = TRUE;
+              LYMBMAdvanced = FALSE;
+           } else if (!strncmp(cp, "advanced", 8) ||
+                          !strncmp(cp, "ADVANCED", 8)) {
+              LYMultiBookmarks = TRUE;
+              LYMBMAdvanced = TRUE;
+           } else
+              LYMultiBookmarks = FALSE;
 
 	} else if ((cp=LYstrstr(line_buffer,"keypad_mode"))!=NULL &&
-		cp-line_buffer < number_sign) {
+		   cp-line_buffer < number_sign) {
 
 	   if ((cp2 = (char *)strchr(cp,'=')) != NULL)
 		cp = cp2+1;
@@ -292,6 +393,20 @@ PUBLIC void read_rc()
 
 #endif /* DIRED_SUPPORT */
 
+	/* select popups */
+	} else if ((cp=LYstrstr(line_buffer,"select_popups")) != NULL &&
+		cp-line_buffer < number_sign) {
+
+	   if ((cp2 = (char * )strchr(cp,'=')) != NULL)
+		cp = cp2+1;
+
+	   while (isspace(*cp)) cp++;  /* get rid of spaces */
+	
+	   if (!strncasecomp(cp, "off", 3))
+	       LYSelectPopups = FALSE;
+	   else
+	       LYSelectPopups = TRUE;
+
 	} /* end of if */
 
     } /* end of while */
@@ -304,6 +419,7 @@ PUBLIC int save_rc ()
     char rcfile[256];
     FILE *fp;
     int i;
+    int MBM_c;
 
     /* make a name */
 #ifdef UNIX
@@ -392,7 +508,8 @@ PUBLIC int save_rc ()
 
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS) 
     /* local_exec */
-    fprintf(fp,"# if run all execution links is on then all local exection links will\n\
+    fprintf(fp,"\
+# if run all execution links is on then all local exection links will\n\
 # be executed when they are selected.\n\
 #\n\
 # WARNING - this is potentially VERY dangerous.  Since you may view\n\
@@ -402,10 +519,11 @@ PUBLIC int save_rc ()
 #           or compromise security.  This should only be set to on if you\n\
 #           are viewing trusted source information\n");
 
-    fprintf(fp,"run_all_execution_links=%s\n\n",(local_exec ? "on" : "off"));
+    fprintf(fp, "run_all_execution_links=%s\n\n",(local_exec ? "on" : "off"));
 
     /* local_exec_on_local_files */
-    fprintf(fp,"# if run all execution links is on then all local exection links that\n\
+    fprintf(fp,"\
+# if run all execution links is on then all local exection links that\n\
 # are found in LOCAL files will be executed when they are selected.\n\
 # This is different from \"run all execution links\" in that only files\n\
 # that reside on the local system will have execution link permissions\n\
@@ -438,7 +556,34 @@ PUBLIC int save_rc ()
 # ^N - down    ^p - up\n\
 # ^B - left    ^F - right\n\
 # will be enabled.\n");
-    fprintf(fp,"emacs_keys=%s\n\n",(emacs_keys ? "on" : "off"));
+    fprintf(fp, "emacs_keys=%s\n\n", (emacs_keys ? "on" : "off"));
+
+    /* multiple bookmarks - on or off */
+    fprintf(fp,"\
+# If sub_bookmarks are turned on then all bookmark operations\n\
+# will first prompt the user to select an active sub-bookmark file.\n\
+# If the default lynx bookmarks file is defined, it will be used as\n\
+# the default selection. When this option is set to 'advanced', and\n\
+# the user mode is advanced, the 'v'iew bookmark command will invoke\n\
+# a statusline prompt instead of the menu seen in novice and intermediate\n\
+# user modes. When this option is set to 'standard', the menu will be\n\
+# presented regardless of user mode. If this option is set to 'off',\n\
+# sub-bookmark files are disabled.\n");
+    fprintf(fp,"sub_bookmarks=%s\n\n", (LYMultiBookmarks ?
+          (LYMBMAdvanced ? "advanced" : "standard") : "off"));
+
+    /* multiple bookmarks support - list out sub-bookmarks */
+    fprintf(fp,"\
+# The following allow you to define sub-bookmark files and definitions.\n\
+# Format is <keyword><letter>=<filename>,<description>\n\
+# Up to MBM_V_MAXFILES (26 MAX) are allowed.\n\
+# We start with 'multi_bookmarkB' since 'A' is reserved!\n");
+    for (MBM_c = 1; MBM_c <= MBM_V_MAXFILES; MBM_c++)
+       fprintf(fp,"multi_bookmark%c=%s%s%s\n", (MBM_c + 'A'),
+             (MBM_A_subbookmark[MBM_c] ? MBM_A_subbookmark[MBM_c] : ""),
+             (MBM_A_subbookmark[MBM_c] ? "," : ""),
+             (MBM_A_subdescript[MBM_c] ? MBM_A_subdescript[MBM_c] : ""));
+    fprintf(fp,"\n");
 
     /* keypad mode */
     fprintf(fp,"\
@@ -512,6 +657,17 @@ PUBLIC int save_rc ()
 			 (dir_list_style==MIXED_STYLE ? "MIXED_STYLE" :
 							"DIRECTORIES_FIRST")));
 #endif /* DIRED_SUPPORT */
+
+    /* select popups */
+    fprintf(fp, "\
+# select_popups specifies whether the OPTIONs in a SELECT block which\n\
+# lacks a MULTIPLE attribute are presented as a vertical list of radio\n\
+# buttons or via a popup menu.  Note that if the MULTIPLE attribute is\n\
+# present in the SELECT start tag, Lynx always will create a vertical list\n\
+# of checkboxes for the OPTIONs.  A value of \"on\" will set popup menus\n\
+# as the default while a value of \"off\" will set use of radio boxes.\n\
+# The default can be overridden via the -popup command line toggle.\n");
+    fprintf(fp, "select_popups=%s\n\n",(LYSelectPopups ? "on" : "off"));
 
     fclose(fp);
 

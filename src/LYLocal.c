@@ -5,8 +5,16 @@
 	Added OK_PERMIT compilation option.
 	Support replacement of compiled-in f)ull menu configuration via
 	  DIRED_MENU definitions in lynx.cfg, so that more than one menu
-	  can be driven by the same executable.
-*/
+	  can be driven by the same executable. */
+/* Modified Oct-96 Klaus Weide (kweide@tezcat.com):
+	Changed to use the library's HTList_* functions and macros for
+	  managing the list of tagged file URLs.
+	Keep track of proper level of URL escaping, so that unusual filenames
+	  which contain #% etc. are handled properly (some HTUnEscapeSome()'s
+	  left in to be conservative, and to document where superfluous
+	  unescaping took place before).
+	Dynamic memory instead of fixed length buffers in a few cases.
+	Other minor changes to make things work as intended. */
 
 #ifdef DIRED_SUPPORT
 
@@ -19,6 +27,8 @@
 #include "LYStrings.h"
 #include "LYStructs.h"
 #include "LYGetFile.h"
+#include "LYHistory.h"
+#include "LYUpload.h"
 #include "LYLocal.h"
 #include "LYSystem.h"
 
@@ -30,7 +40,6 @@
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
-PRIVATE void clear_tags NOPARAMS;
 PRIVATE int my_spawn PARAMS((char *path, char **argv, char *msg));
 PRIVATE char *filename PARAMS((char *prompt, char *buf, int bufsize));
 
@@ -39,7 +48,8 @@ PRIVATE BOOLEAN permit_location PARAMS((char * destpath, char * srcpath,
 					char ** newpath));
 #endif /* OK_PERMIT */
 
-PRIVATE char *render_item PARAMS((char *s, char *path, char *dir, char *buf));
+PRIVATE char *render_item PARAMS((char *s, char *path, char *dir, char *buf,
+				  int bufsize, BOOLEAN url_syntax));
 
 PRIVATE struct dired_menu *menu_head = NULL;
 struct dired_menu {
@@ -129,7 +139,7 @@ struct dired_menu {
 
 #ifdef OK_ZIP
 { DE_DIR,	      "", "Package and compress",
-           "(using zip)", "LYNXDIRED://ZIP%f",			NULL },
+           "(using zip)", "LYNXDIRED://ZIP%p",			NULL },
 #endif /* OK_ZIP */
 
 { DE_FILE,	      "", "Compress",
@@ -142,11 +152,11 @@ struct dired_menu {
 
 #ifdef OK_ZIP
 { DE_FILE,	      "", "Compress",
-           "(using zip)", "LYNXDIRED://ZIP%f",			NULL },
+           "(using zip)", "LYNXDIRED://ZIP%p",			NULL },
 #endif /* OK_ZIP */
 
 { DE_TAG,	      "", "Move all tagged items to another location.",
-		      "", "LYNXDIRED://MOVE_TAGGED",		NULL },
+		      "", "LYNXDIRED://MOVE_TAGGED%d",		NULL },
 
 { DE_TAG,	      "", "Remove all tagged files and directories.",
 		      "", "LYNXDIRED://REMOVE_TAGGED",		NULL },
@@ -162,13 +172,14 @@ PRIVATE BOOLEAN remove_tagged NOARGS
    int c, ans;
    char *cp,*tp;
    char tmpbuf[1024];
-   char testpath[512];
+   char *testpath = NULL;
    struct stat dir_info;
    int count,i;
-   taglink *tag;
+   HTList *tag;
    char *args[5];
 
-   if (tagged == NULL) return 0; /* should never happen */
+   if (HTList_isEmpty(tagged))  /* should never happen */
+       return 0;
 
    _statusline("Remove all tagged files and directories (y or n): ");
    c = LYgetch();
@@ -176,15 +187,14 @@ PRIVATE BOOLEAN remove_tagged NOARGS
 
    count = 0;
    tag = tagged;
-   while(ans == 'Y' && tag != NULL) {
-      cp = tag->name;
+   while(ans == 'Y' && (cp = (char *)HTList_nextObject(tag)) != NULL) {
       if(is_url(cp) == FILE_URL_TYPE) { /* unecessary check */
 	 tp = cp;
 	 if(!strncmp(tp,"file://localhost",16))
 	   tp += 16;
 	 else if(!strncmp(tp,"file:",5))
 	   tp += 5;
-	 strcpy(testpath,tp);
+	 StrAllocCopy(testpath,tp);
 	 HTUnEscape(testpath);
 	 if((i = strlen(testpath)) && testpath[i-1] == '/')
 	   testpath[i-1] = '\0';
@@ -202,19 +212,25 @@ PRIVATE BOOLEAN remove_tagged NOARGS
 	    args[2] = testpath;
 	    args[3] = (char *) 0;
 	    sprintf(tmpbuf, "remove %s", testpath);
-	    if (my_spawn(RM_PATH, args, tmpbuf) <= 0)
+	    if (my_spawn(RM_PATH, args, tmpbuf) <= 0) {
+		FREE(testpath);
 		return count;
+	    }
 	    ++count;
 	 }
       }
-      tag = tag->next;
    }
+   FREE(testpath);
    clear_tags();
    return count;
 }
 
 /* Move all tagged files and directories to a new location. */
 /* Input is current directory. */
+/* The tests in this function can, at best, prevent some user mistakes -
+   anybody who relies on them for security is seriously misguided.
+   If a user has enough permissions to move a file somewhere, the same 
+   uid with Lynx & dired can do the same thing. */
 
 PRIVATE BOOLEAN modify_tagged ARGS1(
 	char *,		testpath)
@@ -224,13 +240,15 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
    ino_t inode;
    uid_t owner;
    char tmpbuf[1024];
-   char savepath[512];
+   char *savepath = NULL;
+   char *srcpath = NULL;
    struct stat dir_info;
    char *args[5];
-   int count;
-   taglink *tag;
+   int count = 0;
+   HTList *tag;
 
-   if (tagged == NULL) return 0; /* should never happen */
+   if (HTList_isEmpty(tagged))  /* should never happen */
+       return 0;
 
    _statusline("Enter new location for tagged items: ");
 
@@ -240,17 +258,46 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 
 /* determine the ownership of the current location */
 
-      cp = testpath;
+   
+      /*
+       *  This test used to always fail from the dired menu...
+       *  changed to something that hopefully makes more sense - KW
+       */ 
+      if (testpath && *testpath && 0!=strcmp(testpath,"/")) {
+	  /*
+	   *  testpath passed in and is not empty and not
+	   *  a single "/" (which would probably be bogus) - use it
+	   */
+	  cp = testpath;
+      } else {
+	  /*
+	   *  Prepare to get directory path from one of the tagged files.
+	   */
+	  cp = HTList_lastObject(tagged);
+	  testpath = NULL;	/* won't be needed any more in this function,
+				 set to NULL as a flag */
+	  if (!cp)   /* last resort, should never happen */
+	      cp = "/";
+      }
       if (!strncmp(cp,"file://localhost",16))
 	cp += 16;
       else if (!strncmp(cp,"file:",5))
 	cp += 5;
-      strcpy(savepath,cp);
+      if (testpath==NULL) {
+          /*
+	   *  Get the directory containing the file or subdir.
+	   */
+	  cp = strip_trailing_slash(cp);
+	  savepath = HTParse(".", cp, PARSE_PATH+PARSE_PUNCTUATION);
+      } else {
+	  StrAllocCopy(savepath, cp);
+      }
       HTUnEscape(savepath);
       if (stat(savepath,&dir_info) == -1) {
 	 sprintf(tmpbuf,"Unable to get status of %s ",savepath);
 	 _statusline(tmpbuf);
 	 sleep(AlertSecs);
+	 FREE(savepath);
 	 return 0;
       } 
 
@@ -264,20 +311,29 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 /* replace ~/ references to the home directory */
 
       if (!strncmp(tmpbuf,"~/",2)) {
-	 cp = (char *)Home_Dir();
-	 strcpy(testpath,cp);
-	 strcat(testpath,tmpbuf+1);
-	 strcpy(tmpbuf,testpath);
+	  char *cp1 = NULL;
+	  StrAllocCopy(cp1, (char *)Home_Dir());
+	  StrAllocCat(cp1, (tmpbuf+1));
+	  if (strlen(cp1) > (sizeof(tmpbuf)-1)) {
+	      sprintf(tmpbuf, "%s ", "Path too long");
+	      _statusline(tmpbuf);
+	      sleep(AlertSecs);
+	      FREE(savepath);
+	      FREE(cp1);
+	      return 0;
+	  }
+	  strcpy(tmpbuf, cp1);
+	  FREE(cp1);
       }
 
 /* if path is relative prefix it with current location */
 
       if (tmpbuf[0] != '/') {
 	 if (savepath[strlen(savepath)-1] != '/')
-	   strcat(savepath,"/");
-	 strcat(savepath,tmpbuf);
+	     StrAllocCat(savepath,"/");
+	 StrAllocCat(savepath,tmpbuf);
       } else {
-	 strcpy(savepath,tmpbuf);
+	 StrAllocCopy(savepath,tmpbuf);
       }
 
 /* stat the target location to determine type and ownership */
@@ -286,6 +342,7 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 	 sprintf(tmpbuf,"Unable to get status of %s ",savepath);
 	 _statusline(tmpbuf);
 	 sleep(AlertSecs);
+	 FREE(savepath);
 	 return 0;
       }
 
@@ -295,6 +352,7 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 	 _statusline(
 	   "Source and destination are the same location - request ignored!");
 	 sleep(AlertSecs);
+	 FREE(savepath);
 	 return 0;
       }
 
@@ -308,35 +366,38 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 
 /* move all tagged items to the target location */
 
-	    while (tag != NULL) {
-	       cp = tag->name;
+	    while((cp = (char *)HTList_nextObject(tag)) != NULL) {
 	       if(!strncmp(cp,"file://localhost",16))
 		 cp += 16;
 	       else if(!strncmp(cp,"file:",5))
 		 cp += 5;
-	       strcpy(testpath,cp);
-	       HTUnEscape(testpath);
+	       StrAllocCopy(srcpath, cp);
+	       HTUnEscape(srcpath);
 
-	       sprintf(tmpbuf,"move %s to %s",testpath,savepath);
+	       sprintf(tmpbuf, "move %s to %s", srcpath, savepath);
 	       args[0] = "mv";
-	       args[1] = testpath;
+	       args[1] = srcpath;
 	       args[2] = savepath;
 	       args[3] = (char *) 0;
 	       if (my_spawn(MV_PATH, args, tmpbuf) <= 0)
 		  break;
-	       tag = tag->next;
 	       ++count;
 	    }
+	    FREE(srcpath);
+	    FREE(savepath);
 	    clear_tags();
 	    return count;
 	 } else {
 	    _statusline("Destination has different owner! Request denied. ");
 	    sleep(AlertSecs);
+	    FREE(srcpath);
+	    FREE(savepath);
 	    return 0;
 	 }
       } else {
 	 _statusline("Destination is not a valid directory! Request denied. ");
 	 sleep(AlertSecs);
+	 FREE(savepath);
 	 return 0;
       }
    }
@@ -548,14 +609,14 @@ PUBLIC BOOLEAN local_modify ARGS2(
    char testpath[512]; /* a bit ridiculous */
    int count;
 
-   if (tagged != NULL) {
+   if (!HTList_isEmpty(tagged)) {
       cp = doc->address;
       if (!strncmp(cp,"file://localhost",16))
 	cp += 16;
       else if (!strncmp(cp,"file:",5))
 	cp += 5;
       strcpy(testpath,cp);
-      HTUnEscape(testpath);
+      HTUnEscapeSome(testpath,"/");
       count = modify_tagged(testpath);
 
       if (doc->link > (nlinks-count-1)) doc->link = nlinks-count-1;
@@ -842,7 +903,7 @@ PUBLIC BOOLEAN local_remove ARGS1(
    char testpath[512];
    int count,i;
 
-   if (tagged != NULL) {
+   if (!HTList_isEmpty(tagged)) {
 
       count = remove_tagged();
 
@@ -972,8 +1033,12 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	fprintf(fp0, "<Html><Head>\n<Title>%s</Title>\n</Head>\n<Body>\n",
 		PERMIT_OPTIONS_TITLE);
 	fprintf(fp0,"<H1>Permissions for %s</H1>\n", user_filename);
-	fprintf(fp0, "<Form Action=\"LYNXDIRED://PERMIT_LOCATION%s\">\n",
-		srcpath);
+	{  /* prevent filenames which include '#' or '?' from messing it up */
+	    char * srcpath_url = HTEscape(srcpath, URL_PATH);
+	    fprintf(fp0, "<Form Action=\"LYNXDIRED://PERMIT_LOCATION%s\">\n",
+		    srcpath_url);
+	    FREE(srcpath_url);
+	}
 	
 	fprintf(fp0, "<Ol><Li>Specify permissions below:<Br><Br>\n");
 	fprintf(fp0, "Owner:<Br>\n");
@@ -1038,7 +1103,6 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	char *args[5];
 	char amode[10];
 	
-	HTUnEscape(destpath);
 	cp = destpath;
 	while (*cp != '\0' && *cp != '?') { /* Find filename */
 	    cp++;
@@ -1048,6 +1112,8 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	}
 	*cp++ = '\0';	/* Null terminate file name
 			   and start working on the masks */
+
+	HTUnEscape(destpath);	/* will now operate only on filename part */
 	
 	/* A couple of sanity tests */
 	destpath = strip_trailing_slash(destpath);
@@ -1121,6 +1187,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
 }
 #endif /* OK_PERMIT */
 
+#ifdef NOTDEFINED
 PUBLIC BOOLEAN is_a_file ARGS1(
 	char *,		testname)
 { 
@@ -1143,6 +1210,7 @@ PUBLIC BOOLEAN is_a_file ARGS1(
      else
        return 0;
 }
+#endif /* NOTDEFINED */
 
 /* display or remove a tag from a given link */
 
@@ -1174,19 +1242,19 @@ PUBLIC void tagflag ARGS2(
 }
 
 PUBLIC void showtags ARGS1(
-	taglink *,	t)
+	HTList *,	t)
 {
     int i;
-    taglink *s;
-    
+    HTList *s;
+    char * name;
+
     for(i=0;i<nlinks;i++) {
       s = t;
-      while(s != NULL) {
-	 if(!strcmp(links[i].lname,s->name)) {
+      while((name = HTList_nextObject(s)) != NULL) {
+	 if(!strcmp(links[i].lname,name)) {
 	    tagflag(ON,i);
 	    break;
-	 } else
-	    s = s->next;
+	 }
       }
    }
 }
@@ -1201,18 +1269,31 @@ PUBLIC char * strip_trailing_slash ARGS1(
    return dirname;
 }
 
-/* Perform file management operations for LYNXDIRED URL's */
-
+/*
+**  Perform file management operations for LYNXDIRED URL's.
+**  Attempt to be consistent.  These are (pseudo) URLs - i.e. they should
+**  be in URL syntax: some bytes will be URL-escaped with '%'.  This is 
+**  necessary because these (pseudo) URLs will go through some of the same 
+**  kinds of interpretations and mutilations as real ones: HTParse, stripping
+**  off #fragments etc.  (Some access schemes currently have special rules 
+**  about not escaping parsing '#' "the URL way" built into HTParse, but that
+**  doesn't look like a clean way.)  
+*/
 PUBLIC int local_dired ARGS1(
 	document *,	doc)
 {
-   char *line;
-   char *cp,*tp;
+   char *line_url;    /* will point to doc's address, which is a URL */
+   char *line = NULL; /* same as line_url, but HTUnEscaped, will be alloced */
+   char *cp, *tp, *bp;
    char tmpbuf[256];
    char buffer[512];
 
-   line = doc->address;
-   HTUnEscape(line);
+   line_url = doc->address;
+   HTUnEscapeSome(line_url,"/");	/* don't mess too much with *doc */
+
+   StrAllocCopy(line, line_url);
+   HTUnEscape(line);	/* _file_ (not URL) syntax, for those functions
+			   that need it.  DOn't forget to FREE it. */
 
    /* This causes a SIGSEGV later when StrAllocCopy tries to free tp
     * let's make it point to NULL
@@ -1226,6 +1307,7 @@ PUBLIC int local_dired ARGS1(
    } else if (!strncmp(line,"LYNXDIRED://INSTALL_SRC",23)) {
       local_install(NULL, &line[23], &tp);
       StrAllocCopy(doc->address, tp);
+      FREE(line);
       return 0;
    } else if (!strncmp(line,"LYNXDIRED://INSTALL_DEST",24)) {
       local_install(&line[24], NULL, &tp);
@@ -1235,26 +1317,36 @@ PUBLIC int local_dired ARGS1(
    } else if (!strncmp(line,"LYNXDIRED://MODIFY_LOCATION",27)) {
       if (modify_location(&line[27])) ++LYforce_no_cache;
    } else if (!strncmp(line,"LYNXDIRED://MOVE_TAGGED",23)) {
-      if (modify_tagged(&line[23])) ++LYforce_no_cache;
+      if (modify_tagged(&line_url[23])) ++LYforce_no_cache;
 #ifdef OK_PERMIT
    } else if (!strncmp(line,"LYNXDIRED://PERMIT_SRC",22)) {
       permit_location(NULL, &line[22], &tp);
-      StrAllocCopy(doc->address, tp);
+      if (tp)			/* one of the checks may have failed */
+	  StrAllocCopy(doc->address, tp);
+      FREE(line);
       return 0;
    } else if (!strncmp(line,"LYNXDIRED://PERMIT_LOCATION",27)) {
-       permit_location(&line[27], NULL, &tp);
+       permit_location(&line_url[27], NULL, &tp);
 #endif /* OK_PERMIT */
    } else if (!strncmp(line,"LYNXDIRED://REMOVE_SINGLE",25)) {
       if (remove_single(&line[25])) ++LYforce_no_cache;
    } else if (!strncmp(line,"LYNXDIRED://REMOVE_TAGGED",25)) {
       if (remove_tagged()) ++LYforce_no_cache;
    } else if (!strncmp(line,"LYNXDIRED://UPLOAD",18)) {
-     if (LYUpload(line)) ++LYforce_no_cache;
+      /*
+       *  They're written by LYUpload_options() HTUnEscaped,
+       *  don't want to change that for now... so pass through
+       *  without more unescaping.  Directory names containing
+       *  '#' will probably fail..
+       */
+      if (LYUpload(line_url)) ++LYforce_no_cache;
    } else {
       if (line[strlen(line)-1] == '/')
 	line[strlen(line)-1] = '\0';
-      if ((cp = strrchr(line,'/')) == NULL)
+      if ((cp = strrchr(line,'/')) == NULL) {
+	FREE(line);
 	return 0;
+      }
 
 /* Construct the appropriate system command taking care to escape all
    path references to avoid spoofing the shell. */
@@ -1347,12 +1439,20 @@ PUBLIC int local_dired ARGS1(
 #ifdef OK_ZIP
       } else if (!strncmp(line,"LYNXDIRED://ZIP",15)) {
 	tp = quote_pathname(line+15);
-	sprintf(buffer,"%s -rq %s.zip %s", ZIP_PATH, tp, tp);
+	*cp++ = '\0';
+	bp = quote_pathname(cp);
+	cp = quote_pathname(line+15);
+	sprintf(buffer,"cd %s; %s -rq %s.zip %s", cp, ZIP_PATH, tp, bp);
+	FREE(cp);
+	FREE(bp);
 	FREE(tp);
 # ifndef ARCHIVE_ONLY
       } else if (!strncmp(line,"LYNXDIRED://UNZIP",17)) {
 	tp = quote_pathname(line+17);
-	sprintf(buffer,"%s -q %s", UNZIP_PATH, tp);
+	*cp = '\0';
+	cp = quote_pathname(line+17);
+	sprintf(buffer,"cd %s; %s -q %s", cp, UNZIP_PATH, tp);
+	FREE(cp);
 	FREE(tp);
 # endif /* !ARCHIVE_ONLY */
 #endif /* OK_ZIP */
@@ -1383,6 +1483,7 @@ PUBLIC int local_dired ARGS1(
       }
    }
 
+   FREE(line);
    LYpop(doc);
    return 0;
 }
@@ -1402,7 +1503,10 @@ PUBLIC int dired_options ARGS2(
     struct stat dir_info;
     FILE *fp0;
     char *cp,*tp = NULL;
-    char *escaped;
+    /* char *escaped; */
+    char * dir_url = NULL;
+    char * path_url = NULL;
+    BOOLEAN nothing_tagged;
     int count;
     struct dired_menu *mp;
     char buf[2048];
@@ -1430,6 +1534,9 @@ PUBLIC int dired_options ARGS2(
     else if(!strncmp(cp,"file:",5))
       cp += 5;
     strcpy(dir,cp);
+    StrAllocCopy(dir_url, cp);
+    if (dir_url[strlen(dir_url)-1] == '/')
+      dir_url[strlen(dir_url)-1] = '\0';
     HTUnEscape(dir);
     if (dir[strlen(dir)-1] == '/')
       dir[strlen(dir)-1] = '\0';
@@ -1441,6 +1548,9 @@ PUBLIC int dired_options ARGS2(
        else if(!strncmp(cp,"file:",5))
 	 cp += 5;
        strcpy(path,cp);
+       StrAllocCopy(path_url,cp);
+       if (path_url[strlen(path_url)-1] == '/')
+	   path_url[strlen(path_url)-1] = '\0';
        HTUnEscape(path);
        if (path[strlen(path)-1] == '/')
 	  path[strlen(path)-1] = '\0';
@@ -1449,17 +1559,22 @@ PUBLIC int dired_options ARGS2(
 	  sprintf(tmpbuf,"Unable to get status of %s ",path);
 	  _statusline(tmpbuf);
 	  sleep(AlertSecs);
+	  FREE(dir_url);
+	  FREE(path_url);
 	  return 0;
        } 
 
+#ifdef NOTDEFINED
        if ((cp = strrchr(path,'.')) != NULL && strlen(path) > strlen(cp)) {
 	  *cp = '\0';
 	  tp = strrchr(path,'.');
 	  *cp = '.';
        }
+#endif /* NOTDEFINED */
     } else path[0] = '\0';
 
-    escaped = (char *) HTEscape(path,(unsigned char) 4);
+  /*escaped = (char *) HTEscape(path,(unsigned char) 4); path_url instead- kw*/
+    nothing_tagged = (HTList_isEmpty(tagged));
 
     fprintf(fp0,"<head>\n<title>%s</title></head>\n<body>\n",DIRED_MENU_TITLE);
 
@@ -1468,7 +1583,7 @@ PUBLIC int dired_options ARGS2(
 
     fprintf(fp0,"Current directory is %s <br>\n",dir);
 
-    if (tagged == NULL)
+    if (nothing_tagged)
        if (strlen(path))
           fprintf(fp0,"Current selection is %s <p>\n",path);
        else
@@ -1487,9 +1602,9 @@ PUBLIC int dired_options ARGS2(
     }
 
     for (mp = menu_head; mp != NULL; mp = mp->next) {
-	if (mp->cond != DE_TAG && tagged != NULL)
+	if (mp->cond != DE_TAG && !nothing_tagged)
 	    continue;
-	if (mp->cond == DE_TAG && tagged == NULL)
+	if (mp->cond == DE_TAG && nothing_tagged)
 	    continue;
 	if (mp->cond == DE_DIR && (dir_info.st_mode & S_IFMT) != S_IFDIR)
 	    continue;
@@ -1497,9 +1612,12 @@ PUBLIC int dired_options ARGS2(
 	    continue;
 	if (strcmp(mp->sfx, &path[strlen(path)-strlen(mp->sfx)]) != 0)
 	    continue;
-	fprintf(fp0, "<a href=\"%s", render_item(mp->href, path, dir, buf));
-	fprintf(fp0, "\">%s</a> ", render_item(mp->link, path, dir, buf));
-	fprintf(fp0, "%s<br>\n", render_item(mp->rest, path, dir, buf));
+	fprintf(fp0, "<a href=\"%s",
+		render_item(mp->href, path_url, dir_url, buf,2048, YES));
+	fprintf(fp0, "\">%s</a> ",
+		render_item(mp->link, path, dir, buf,2048, NO));
+	fprintf(fp0, "%s<br>\n",
+		render_item(mp->rest, path, dir, buf,2048, NO));
     }
 
     if (uploaders != NULL) {
@@ -1513,7 +1631,9 @@ PUBLIC int dired_options ARGS2(
     fprintf(fp0,"</body>\n");
     fclose(fp0);
 
-    FREE(escaped);
+    /* FREE(escaped);  not used any more - kw*/
+    FREE(dir_url);
+    FREE(path_url);
 
     LYforce_no_cache = 1;
 
@@ -1534,18 +1654,18 @@ PRIVATE int my_spawn ARGS3(
     int wstatus;
 #endif /* NeXT || AIX4 || sony_news */
 
-    rc = 1;                 /* It will work */
+    rc = 1;		/* It will work */
+    tmpbuf[0] = '\0';	/* empty buffer for alert messages */
     stop_curses();
-    pid = fork(); /* fork and execute rm */
+    pid = fork();	/* fork and execute rm */
     switch (pid) {
       case -1:
 	sprintf(tmpbuf, "Unable to %s due to system error!", msg);
-	_statusline(tmpbuf);
-	sleep(AlertSecs);
 	rc = 0;
+	break;		/* don't fall thru! - KW */
       case 0:  /* child */
 	execv(path, argv);
-	exit(-1);    /* execv failed, give wait() something to look at */
+	exit(-1);	/* execv failed, give wait() something to look at */
       default:  /* parent */
 #if defined(NeXT) || defined(AIX4) || defined(sony_news)
 	while (wait(&wstatus) != pid)
@@ -1557,8 +1677,6 @@ PRIVATE int my_spawn ARGS3(
 	    WTERMSIG(wstatus) != 0)  { /* error return */
 	    sprintf(tmpbuf, "Probable failure to %s due to system error!",
 		    msg);
-	    _statusline(tmpbuf);
-	    sleep(AlertSecs);
 	    rc = 0;
 	}
     }
@@ -1568,7 +1686,19 @@ PRIVATE int my_spawn ARGS3(
 	HadVMSInterrupt = FALSE;
     }
 #endif /* VMS */
+
+    if (rc == 0) {
+        /*
+	 *  Screen may have message from the failed execv'd command.
+	 *  Give user time to look at it before screen refresh.
+	 */
+	sleep(AlertSecs);
+    }
     start_curses();
+    if (tmpbuf[0]) {
+	_statusline(tmpbuf);
+	sleep(AlertSecs);
+    }
 
     return(rc);
 }
@@ -1616,7 +1746,7 @@ PUBLIC BOOLEAN local_install ARGS3(
    static char savepath[512]; /* this will be the link that is to be installed */
    struct stat dir_info;
    char *args[5];
-   taglink *tag;
+   HTList *tag;
    int count = 0;
 
 /* Determine the status of the selected item. */
@@ -1671,40 +1801,39 @@ PUBLIC BOOLEAN local_install ARGS3(
    args[3] = (char *) 0;
    sprintf(tmpbuf, "install %s", destpath);
    tag = tagged;
-   for (;;) {
-      if (tagged) {
-	 args[1] = tag->name;
-	 if (strncmp("file://localhost", args[1], 16) == 0)
-	    args[1] = tag->name + 16;
-      } else
-         args[1] = savepath;
 
-      if (my_spawn(INSTALL_PATH, args, tmpbuf) <= 0)
-         return count;
-      count++;
-      if (!tagged)
-	 break;
-      tag = tag->next;
-      if (!tag)
-	break;
+   if (HTList_isEmpty(tagged)) {
+         args[1] = savepath;
+	 if (my_spawn(INSTALL_PATH, args, tmpbuf) <= 0)
+	     return count;
+	 count++;
+   } else {
+       char * name;
+       while ((name = (char *)HTList_nextObject(tag))) {
+	   args[1] = name;
+	   if (strncmp("file://localhost", args[1], 16) == 0)
+	       args[1] = name + 16;
+
+	   if (my_spawn(INSTALL_PATH, args, tmpbuf) <= 0)
+	       return count;
+	   count++;
+       }	
+       clear_tags();
    }
-   if (tagged)
-      clear_tags();
    statusline("Installation complete");
    sleep(InfoSecs);
    return count;
 }
 
-PRIVATE void clear_tags NOARGS
+PUBLIC void clear_tags NOARGS
 {
-    taglink *t1;
+    char *cp = NULL;
 
-    while((t1=tagged) != NULL) { 
-	tagged = tagged->next;
-	FREE(t1->name);
-	FREE(t1);
+    while ((cp = HTList_removeLastObject(tagged)) != NULL) { 
+	FREE(cp);
     }
-    tagged = NULL;
+    if (HTList_isEmpty(tagged))
+	FREE(tagged);
 }
 
 PUBLIC void add_menu_item ARGS1(
@@ -1758,34 +1887,50 @@ PUBLIC void add_menu_item ARGS1(
 	menu_head = new;
 }
 
-PRIVATE char * render_item ARGS4(
+PRIVATE char * render_item ARGS6(
 	char *,		s,
 	char *,		path,
 	char *,		dir,
-	char *,		buf)
+	char *,		buf,
+	int,		bufsize,
+	BOOLEAN,	url_syntax)
 {
 	char *cp;
 	char *bp;
-	taglink *t1;
-	char *taglist;
+	char overrun = '\0';
+	char *taglist = NULL;
+#define BP_INC (bp>buf+bufsize-2 ?  &overrun : bp++)
+				/* Buffer overrun could happen for very long
+				 tag list, if %l or %t are used */
 
 	bp = buf;
-	while (*s) {
+	while (*s && !overrun) {
 	    if (*s == '%') {
 		s++;
 		switch (*s) {
 		case '%':
-		    *bp++ = '%';
+		    *BP_INC = '%';
+#ifdef NOTDEFINED
+		    /*
+		     *  These chars come from lynx.cfg or the default, let's
+		     *  just assume there won't be any improper %'s there that
+		     *  would need escaping.
+		     */
+		    if(url_syntax) {
+			*BP_INC = '2';
+			*BP_INC = '5';
+		    }
+#endif /* NOTDEFINED */
 		    break;
 		case 'p':
 		    cp = path;
 		    while (*cp)
-			*bp++ = *cp++;
+			*BP_INC = *cp++;
 		    break;
 		case 'd':
 		    cp = dir;
 		    while (*cp)
-			*bp++ = *cp++;
+			*BP_INC = *cp++;
 		    break;
 		case 'f':
 		    cp = strrchr(path, '/');
@@ -1794,31 +1939,58 @@ PRIVATE char * render_item ARGS4(
 		    else
 			cp = path;
 		    while (*cp)
-			*bp++ = *cp++;
+			*BP_INC = *cp++;
 		    break;
 		case 'l':
 		case 't':
-		    FREE(taglist);
-		    for (t1=tagged; t1 != NULL; t1 = t1->next) { 
-			if (*s == 'l' && (cp = strrchr(t1->name, '/')))
-			    cp++;
-			else
-			    cp = t1->name;
-			StrAllocCat(taglist, cp);
-			StrAllocCat(taglist, " ");
+		    if (!HTList_isEmpty(tagged)) {
+			HTList *cur = tagged; 
+			char *name;
+
+			while(!overrun &&
+			      (name = (char *)HTList_nextObject(cur))!=NULL) {
+			    if (*s == 'l' && (cp = strrchr(name, '/')))
+				cp++;
+			    else
+				cp = name;
+			    StrAllocCat(taglist, cp);
+			    StrAllocCat(taglist, " "); /* should this be %20?*/
+			}
 		    }
-		    cp = taglist;
-		    while (*cp)
-			*bp++ = *cp++;
+		    if (taglist) {
+			/* could HTUnescape here... */
+			cp = taglist;
+			while (*cp)
+			    *BP_INC = *cp++;
+			FREE(taglist);
+		    }
 		    break;
 		default:
-		    *bp++ = '%';
-		    *bp++ =*s;
+		    *BP_INC = '%';
+#ifdef NOTDEFINED
+		    if (url_syntax) {
+			*BP_INC = '2';
+			*BP_INC = '5';
+		    }
+#endif /* NOTDEFINED */
+		    *BP_INC =*s;
 		    break;
 		}
-	    } else
-		*bp++ =*s;
+	    } else {
+	        /*
+		 *  Other chars come from the lynx.cfg or
+		 *  the default. Let's assume there isn't
+		 *  anything weird there that needs escaping.
+		 */
+		*BP_INC =*s;
+	    }
 	    s++;
+	}
+	if (overrun & url_syntax) {
+	    sprintf(buf,"Temporary URL or list would be too long.");
+	    _statusline(buf);
+	    sleep(AlertSecs);
+	    bp = buf;	/* set to start, will return empty string as URL */
 	}
 	*bp = '\0';
 	return buf;

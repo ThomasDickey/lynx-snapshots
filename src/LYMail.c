@@ -22,8 +22,11 @@ PRIVATE void remove_tildes PARAMS((char *string));
 /*
 **  mailform() sends form content to the mailto address(es). - FM
 */
-PUBLIC void mailform ARGS3(char *,mailto_address, char *,mailto_subject,
-			   char *,mailto_content)
+PUBLIC void mailform ARGS4(
+	char *,		mailto_address,
+	char *,		mailto_subject,
+	char *,		mailto_content,
+	char *,		mailto_type)
 {
     FILE *fd;
     char *address = NULL;
@@ -46,42 +49,31 @@ PUBLIC void mailform ARGS3(char *,mailto_address, char *,mailto_subject,
     StrAllocCopy(address, mailto_address);
 
     /*
-     *  Check for a ?subject=foo. - FM
+     *  Check for a ?searchpart with subject=foo. - FM
      */
     subject[0] = '\0';
-    if ((cp = strchr(address, '?')) != NULL &&
-	strcasecomp(cp+1, "subject=")) {
-	*cp = '\0';
-	cp += 9;
-	strncpy(subject, cp, 70);
-	subject[70] = '\0';
-	HTUnEscape(subject);
+    if ((cp = strchr(address, '?')) != NULL) {
+	*cp++ = '\0';
+	while (*cp != '\0' && strncasecomp(cp, "subject=", 8))
+	    cp++;
+	cp0 = (cp - 1);
+	if ((*cp != '\0') &&
+	    (*cp0 == '\0' || *cp0 == '&' || *cp0 == ';')) {
+	    if ((cp1 = strchr(cp, '&')) != NULL) {
+	        *cp1 = '\0';
+	    } else if ((cp1 = strchr(cp, ';')) != NULL) {
+	        *cp1 = '\0';
+	    }
+	    strncpy(subject, cp, 70);
+	    subject[70] = '\0';
+	    HTUnEscape(subject);
+	}
     }
 
     /*
-     *  Unescape any hex escaped pounds. - FM
+     *  Unescape the address field. - FM
      */
-    while ((cp1 = strstr(address, "%23")) != NULL) {
-	*cp1 = '#';
-	cp0 = (cp1 + 1);
-	cp1 = (cp0 + 2);
-	for (i = 0; cp1[i]; i++) {
-	    cp0[i] = cp1[i];
-	}
-	cp0[i] = '\0';
-    }
-
-    /*
-     *  Unescape any hex escaped percents. - FM
-     */
-    while ((cp1 = strstr(address, "%25")) != NULL) {
-	cp0 = (cp1 + 1);
-	cp1 = (cp0 + 2);
-	for (i = 0; cp1[i]; i++) {
-	    cp0[i] = cp1[i];
-	}
-	cp0[i] = '\0';
-    }
+    HTUnEscape(address);
 
     /*
      * Convert any Explorer semi-colon Internet address
@@ -134,6 +126,10 @@ PUBLIC void mailform ARGS3(char *,mailto_address, char *,mailto_subject,
 	return;
     }
 
+    if (mailto_type && *mailto_type) {
+	fprintf(fd, "Mime-Version: 1.0\n");
+	fprintf(fd, "Content-Type: %s\n", mailto_type);
+    }
     fprintf(fd,"To: %s\n", address);
     if (personal_mail_address && *personal_mail_address)
 	fprintf(fd,"From: %s\n", personal_mail_address);
@@ -141,13 +137,21 @@ PUBLIC void mailform ARGS3(char *,mailto_address, char *,mailto_subject,
     _statusline(SENDING_FORM_CONTENT);
 #endif /* UNIX */
 #ifdef VMS
-    sprintf(tmpfile,"%s%s",lynx_temp_space, "temp_mail.");
+    sprintf(tmpfile,"%s%s",lynx_temp_space, "temp_mail.txt");
     if ((fd = fopen(tmpfile,"w")) == NULL) {
 	HTAlert(FORM_MAILTO_FAILED);
 	FREE(address);
 	return;
     }
-
+    if (mailto_type &&
+        !strncasecomp(mailto_type, "multipart/form-data", 19)) {
+	/*
+	 *  Ugh!  There's no good way to include headers while
+	 *  we're still using "generic" VMS MAIL, so we'll put
+	 *  this in the body of the message. - FM
+	 */
+	fprintf(fd, "X-Content-Type: %s\n\n", mailto_type);
+    }
 #endif /* VMS */
 
     /*
@@ -242,35 +246,15 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
     StrAllocCopy(address, owner_address);
 
     /*
-     *  Check for a ?subject=foo and trim it. - FM
+     *  Check for a ?searchpart and trim it. - FM
      */
-    if ((cp = strchr(address, '?')) != NULL && strcasecomp(cp+1, "subject="))
+    if ((cp = strchr(address, '?')) != NULL && strchr(cp+1, '=') != NULL)
 	*cp = '\0';
 
     /*
-     *  Unescape any hex escaped pounds. - FM
+     *  Unescape the address field. - FM
      */
-    while((cp1 = strstr(address, "%23")) != NULL) {
-	*cp1 = '#';
-	cp0 = (cp1 + 1);
-	cp1 = (cp0 + 2);
-	for (i = 0; cp1[i]; i++) {
-	    cp0[i] = cp1[i];
-	}
-	cp0[i] = '\0';
-    }
-
-    /*
-     *  Unescape any hex escaped percents. - FM
-     */
-    while ((cp1 = strstr(address, "%25")) != NULL) {
-	cp0 = (cp1 + 1);
-	cp1 = (cp0 + 2);
-	for (i = 0; cp1[i]; i++) {
-	    cp0[i] = cp1[i];
-	}
-	cp0[i] = '\0';
-    }
+    HTUnEscape(address);
 	
     /*
      *  Convert any Explorer semi-colon Internet address
@@ -304,7 +288,7 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
     fprintf(fd,"X-Mailer: Lynx, Version %s\n\n",LYNX_VERSION);
 #endif /* UNIX */
 #ifdef VMS
-    sprintf(tmpfile,"%s%s",lynx_temp_space, "temp_mail.");
+    sprintf(tmpfile,"%s%s",lynx_temp_space, "temp_mail.txt");
     if ((fd = fopen(tmpfile,"w")) == NULL) {
 	FREE(address);
 	return;
@@ -417,22 +401,39 @@ PUBLIC void reply_by_mail ARGS3(
     }
 
     tempname(tmpfile,NEW_FILE);
+    if (((cp = strrchr(tmpfile, '.')) != NULL) &&
+#ifdef VMS
+	NULL == strchr(cp, ']') &&
+#endif /* VMS */
+	NULL == strchr(cp, '/')) {
+	*cp = '\0';
+	strcat(tmpfile, ".txt");
+    }
     if ((fd = fopen(tmpfile,"w")) == NULL) {
 	HTAlert(MAILTO_URL_TEMPOPEN_FAILED);
 	return;
     }
 
     /*
-     *  Check for a ?subject=foo. - FM
+     *  Check for a ?searchpart with subject=foo. - FM
      */
     subject[0] = '\0';
-    if ((cp = strchr(address, '?')) != NULL &&
-	strcasecomp(cp+1, "subject=")) {
-	*cp = '\0';
-	cp += 9;
-	strncpy(subject, cp, 70);
-	subject[70] = '\0';
-	HTUnEscape(subject);
+    if ((cp = strchr(address, '?')) != NULL) {
+	*cp++ = '\0';
+	while (*cp != '\0' && strncasecomp(cp, "subject=", 8))
+	    cp++;
+	cp0 = (cp - 1);
+	if ((*cp != '\0') &&
+	    (*cp0 == '\0' || *cp0 == '&' || *cp0 == ';')) {
+	    if ((cp1 = strchr(cp, '&')) != NULL) {
+	        *cp1 = '\0';
+	    } else if ((cp1 = strchr(cp, ';')) != NULL) {
+	        *cp1 = '\0';
+	    }
+	    strncpy(subject, cp, 70);
+	    subject[70] = '\0';
+	    HTUnEscape(subject);
+	}
     }
     if (subject[0] == '\0' && title && *title) {
 	strncpy(subject, title, 70);
@@ -440,30 +441,10 @@ PUBLIC void reply_by_mail ARGS3(
     }
 
     /*
-     *  Unescape any hex escaped pounds. - FM
+     *  Unescape the address field. - FM
      */
-    while ((cp1 = strstr(address, "%23")) != NULL) {
-	*cp1 = '#';
-	cp0 = (cp1 + 1);
-	cp1 = (cp0 + 2);
-	for (i = 0; cp1[i]; i++) {
-	    cp0[i] = cp1[i];
-	}
-	cp0[i] = '\0';
-    }
+    HTUnEscape(address);
 
-    /*
-     *  Unescape any hex escaped percents. - FM
-     */
-    while ((cp1 = strstr(address, "%25")) != NULL) {
-	cp0 = (cp1 + 1);
-	cp1 = (cp0 + 2);
-	for (i = 0; cp1[i]; i++) {
-	    cp0[i] = cp1[i];
-	}
-	cp0[i] = '\0';
-    }
-	
     /*
      *  Convert any Explorer semi-colon Internet address
      *  separators to commas. - FM

@@ -84,8 +84,9 @@ struct _HTParentAnchor {
   HTList *      sources;        /* List of anchors pointing to this, if any */
   HyperDoc *    document;       /* The document within which this is an anchor */
   char *        address;        /* Absolute address of this node */
-  char *	post_data;      /* posting data */
-  char * 	post_content_type;  /* type of post data */
+  char *	post_data;      /* Posting data */
+  char * 	post_content_type;  /* Type of post data */
+  char *	bookmark;	/* Bookmark filname */
   HTFormat      format;         /* Pointer to node format descriptor */
   char *	charset;	/* Pointer to character set (kludge, for now */
   BOOL          isIndex;        /* Acceptance of a keyword search */
@@ -102,11 +103,20 @@ struct _HTParentAnchor {
   BOOL		isISMAPScript;	/* Script for clickable image map */
   BOOL		isHEAD;		/* Document is headers from a HEAD request */
   char *	FileCache;	/* Path to a disk-cached copy */
+  char *	SugFname;	/* Suggested filename */
   char *	cache_control;	/* Cache-Control */
   BOOL		no_cache;	/* Cache-Control, Pragma or META "no-cache"? */
-  char *	content_type;	/* Content-Type */
-  char *	content_language;   /* Content-Language */
-  char *	content_encoding;   /* Compression algorithm */
+  char *	content_type;		/* Content-Type */
+  char *	content_language;	/* Content-Language */
+  char *	content_encoding;	/* Compression algorithm */
+  char *	content_base;		/* Content-Base */
+  char *	content_disposition;	/* Content-Dispositon */
+  char *	content_location;	/* Content-Location */
+  char *	content_md5;		/* Content-MD5 */
+  char *	date;			/* Date */
+  char *	expires;		/* Expires */
+  char *	last_modified;		/* Last-Modified */
+  char *	server;			/* Server */
 };
 
 typedef struct {
@@ -128,6 +138,7 @@ typedef struct _DocAddress {
     char * address;
     char * post_data;
     char * post_content_type;
+    char * bookmark;
     BOOL   isHEAD;
 } DocAddress;
 
@@ -263,7 +274,7 @@ extern BOOL HTAnchor_hasChildren
      (HTParentAnchor *me)
      );
 
-/*      Title handling
+/*      Title handling.
 */
 extern CONST char * HTAnchor_title
   PARAMS(
@@ -280,7 +291,19 @@ extern void HTAnchor_appendTitle
      (HTParentAnchor *me, CONST char * title)
      );
 
-/*      Owner handling
+/*	Bookmark handling.
+*/
+extern CONST char * HTAnchor_bookmark
+  PARAMS(
+	(HTParentAnchor * me)
+	);
+
+extern void HTAnchor_setBookmark
+  PARAMS(
+	(HTParentAnchor *me, CONST char * bookmark)
+	);
+
+/*      Owner handling.
 */
 extern CONST char * HTAnchor_owner
   PARAMS(
@@ -292,7 +315,7 @@ extern void HTAnchor_setOwner
      (HTParentAnchor *me, CONST char * owner)
      );
 
-/*      TITLE handling in LINKs with REV="made" or REV="owner"
+/*      TITLE handling in LINKs with REV="made" or REV="owner". - FM
 */
 extern CONST char * HTAnchor_RevTitle
   PARAMS(
@@ -302,6 +325,36 @@ extern CONST char * HTAnchor_RevTitle
 extern void HTAnchor_setRevTitle
   PARAMS(
      (HTParentAnchor *me, CONST char * title)
+     );
+
+/*	Suggested filename handling. - FM
+**	(will be loaded if we had a Content-disposition
+**	 header with file; filename=name.suffix)
+*/
+extern CONST char * HTAnchor_SugFname
+  PARAMS(
+     (HTParentAnchor *me)
+     );
+
+/*	Last-Modified header handling. - FM
+*/
+extern CONST char * HTAnchor_last_modified
+  PARAMS(
+     (HTParentAnchor *me)
+     );
+
+/*	Date header handling. - FM
+*/
+extern CONST char * HTAnchor_date
+  PARAMS(
+     (HTParentAnchor *me)
+     );
+
+/*	Server header handling. - FM
+*/
+extern CONST char * HTAnchor_server
+  PARAMS(
+     (HTParentAnchor *me)
      );
 
 /*      Link this Anchor to another given one

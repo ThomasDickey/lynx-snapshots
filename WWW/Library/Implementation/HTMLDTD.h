@@ -1,11 +1,12 @@
-/*                                               The HTML DTD -- software interface in libwww
+/*                               The HTML DTD -- software interface in libwww
                               HTML DTD - SOFTWARE INTERFACE
                                              
-   SGML purists should excuse the use of the term "DTD" in this file to represent
-   DTD-related information which is not exactly a DTD itself.
+   SGML purists should excuse the use of the term "DTD" in this file to
+   represent DTD-related information which is not exactly a DTD itself.
    
-   The C modular structure doesn't work very well here, as the dtd is partly in the .h and
-   partly in the .c which are not very independent.  Tant pis.
+   The C modular structure doesn't work very well here, as the dtd is
+   partly in the .h and partly in the .c which are not very independent.
+   Tant pis.
    
  */
 #ifndef HTMLDTD_H
@@ -252,20 +253,20 @@ Attribute numbers
 #define HTML_BQ_STYLE           6
 #define HTML_BQ_ATTRIBUTES      7
 
-#define HTML_BODYTEXT_CLASS     1
-#define HTML_BODYTEXT_CLEAR     2
-#define HTML_BODYTEXT_DATA      3
-#define HTML_BODYTEXT_DIR       4
-#define HTML_BODYTEXT_ID        5
-#define HTML_BODYTEXT_LANG      6
-#define HTML_BODYTEXT_NAME      7
-#define HTML_BODYTEXT_OBJECT    8
-#define HTML_BODYTEXT_REF       9
-#define HTML_BODYTEXT_STYLE    10
-#define HTML_BODYTEXT_TYPE     11
-#define HTML_BODYTEXT_VALUE    12
-#define HTML_BODYTEXT_VALUETYPE  13
-#define HTML_BODYTEXT_ATTRIBUTES 14
+#define HTML_BODYTEXT_CLASS     0
+#define HTML_BODYTEXT_CLEAR     1
+#define HTML_BODYTEXT_DATA      2
+#define HTML_BODYTEXT_DIR       3
+#define HTML_BODYTEXT_ID        4
+#define HTML_BODYTEXT_LANG      5
+#define HTML_BODYTEXT_NAME      6
+#define HTML_BODYTEXT_OBJECT    7
+#define HTML_BODYTEXT_REF       8
+#define HTML_BODYTEXT_STYLE     9
+#define HTML_BODYTEXT_TYPE     10
+#define HTML_BODYTEXT_VALUE    11
+#define HTML_BODYTEXT_VALUETYPE  12
+#define HTML_BODYTEXT_ATTRIBUTES 13
 
 #define HTML_BODY_ALINK         0
 #define HTML_BODY_BACKGROUND    1
@@ -555,8 +556,8 @@ Attribute numbers
 #define HTML_LI_ID              4
 #define HTML_LI_LANG            5
 #define HTML_LI_MD              6
-#define HTML_LI_SRC             7
-#define HTML_LI_SKIP            8
+#define HTML_LI_SKIP            7
+#define HTML_LI_SRC             8
 #define HTML_LI_STYLE           9
 #define HTML_LI_TYPE           10
 #define HTML_LI_VALUE          11
@@ -671,8 +672,8 @@ Attribute numbers
 #define HTML_P_DIR              3
 #define HTML_P_ID               4
 #define HTML_P_LANG             5
-#define HTML_P_STYLE            6
-#define HTML_P_NOWRAP           7
+#define HTML_P_NOWRAP           6
+#define HTML_P_STYLE            7
 #define HTML_P_ATTRIBUTES       8
 
 #define HTML_PARAM_ACCEPT       0

@@ -1,10 +1,10 @@
 /*		Structured stream to Rich hypertext converter
 **		============================================
 **
-**	This generates of a hypertext object.  It converts from the
-**	structured stream interface fro HTMl events into the style-
-**	oriented iunterface of the HText.h interface.  This module is
-**	only used in clients and shouldnot be linked into servers.
+**	This generates a hypertext object.  It converts from the
+**	structured stream interface of HTML events into the style-
+**	oriented interface of the HText.h interface.  This module is
+**	only used in clients and should not be linked into servers.
 **
 **	Override this module if making a new GUI browser.
 **
@@ -13,43 +13,31 @@
 */
 #include "HTUtils.h"
 #include "tcp.h"
-
 #include "HTML.h"
-
-/* #define CAREFUL		 Check nesting here not really necessary */
-
-/*#include <ctype.h> included by HTUtils.h -- FM */
-/*#include <stdio.h> included by HTUtils.h -- FM */
-
 #include "HTCJK.h"
 #include "HTAtom.h"
 #include "HTChunk.h"
 #include "HText.h"
 #include "HTStyle.h"
-
 #include "HTAlert.h"
 #include "HTMLGen.h"
 #include "HTParse.h"
-
 #include "HTNestedList.h"
 #include "HTForms.h"
-
 #include "GridText.h"
-
 #include "HTFont.h"
-
-#ifdef VMS
-#include "LYCurses.h"
-#include "HTVMSUtils.h"
-#endif /* VMS */
-
-
 #include "LYGlobalDefs.h"
 #include "LYSignal.h"
 #include "LYUtils.h"
 #include "LYCharSets.h"
 #include "LYCharUtils.h"
 #include "LYMap.h"
+#include "LYBookmark.h"
+
+#ifdef VMS
+#include "LYCurses.h"
+#include "HTVMSUtils.h"
+#endif /* VMS */
 
 #include "LYexit.h"
 #include "LYLeaks.h"
@@ -305,7 +293,7 @@ PRIVATE void HTML_put_character ARGS2(HTStructured *, me, char, c)
     /*
      *  Ignore all non-MAP content when just
      *  scanning a document for MAPs. - FM
-     *  
+     */
     if (LYMapsOnly)
         return;
 
@@ -414,8 +402,7 @@ PRIVATE void HTML_put_character ARGS2(HTStructured *, me, char, c)
 	    B_inPRE = TRUE;
 
 	} else if (!strcmp(me->sp->style->name,"Listing") ||
-		   !strcmp(me->sp->style->name,"Example") ||
-		   !strcmp(me->sp->style->name,"Style")) {
+		   !strcmp(me->sp->style->name,"Example")) {
 	    if (c != '\r') {
 		B_inP = TRUE; 
 		B_inLABEL = FALSE; 
@@ -637,8 +624,6 @@ PRIVATE void HTML_start_element ARGS5(
 	    HText_appendCharacter(me->text,LY_UNDERLINE_END_CHAR);
 	    B_inUnderline = FALSE;
 	}
-	FREE(base_href);
-        B_inBASE = FALSE;
 	break;
 
     case HTML_HEAD:
@@ -652,8 +637,6 @@ PRIVATE void HTML_start_element ARGS5(
 	    HText_appendCharacter(me->text,LY_UNDERLINE_END_CHAR);
 	    B_inUnderline = FALSE;
 	}
-	FREE(base_href);
-        B_inBASE = FALSE;
 	break;
 
     case HTML_BASE:
@@ -1023,9 +1006,9 @@ PRIVATE void HTML_start_element ARGS5(
 			}
 			B_CurrentA = HTAnchor_findChildAndLink(
 				me->node_anchor,		/* Parent */
-				(id_string ? id_string : 0),	/* Tag */
+				id_string,			/* Tag */
 				href,				/* Addresss */
-				0);				/* Type */
+				(void *)0);			/* Type */
 			if (id_string)
 			    *cp = '#';
 			FREE(id_string);
@@ -1225,9 +1208,9 @@ PRIVATE void HTML_start_element ARGS5(
 		 */
 	        B_CurrentA = HTAnchor_findChildAndLink(
 				me->node_anchor,	/* Parent */
-		    		0,			/* Tag */
-		    		href ? href : 0,	/* Addresss */
-		    		0);			/* Type */
+		    		NULL,			/* Tag */
+		    		href,			/* Addresss */
+		    		(void *)0);		/* Type */
 		{
 		    if (dest = HTAnchor_parent(
 			    HTAnchor_followMainLink((HTAnchor*)B_CurrentA)
@@ -1240,8 +1223,8 @@ PRIVATE void HTML_start_element ARGS5(
 		        (B_ID_A = HTAnchor_findChildAndLink(
 					me->node_anchor,	/* Parent */
 					LYToolbarName,		/* Tag */
-					0,			/* Addresss */
-					0))) {			/* Type */
+					NULL,			/* Addresss */
+					(void *)0))) {		/* Type */
 			HText_beginAnchor(me->text, B_ID_A);
 			HText_endAnchor(me->text);
 			HText_setToolbar(me->text);
@@ -1439,9 +1422,9 @@ PRIVATE void HTML_start_element ARGS5(
 
 	    B_CurrentA = HTAnchor_findChildAndLink(
 				me->node_anchor,	/* Parent */
-				0,			/* Tag */
+				NULL,			/* Tag */
 				href,			/* Addresss */
-				0);			/* Type */
+				(void *)0);		/* Type */
 	    HTML_EnsureSingleSpace(me);
 	    if (B_inUnderline == FALSE)
 	        HText_appendCharacter(me->text,LY_UNDERLINE_START_CHAR);
@@ -1478,8 +1461,8 @@ PRIVATE void HTML_start_element ARGS5(
 	    (B_ID_A = HTAnchor_findChildAndLink(
 					me->node_anchor,	/* Parent */
 					LYToolbarName,		/* Tag */
-					0,			/* Addresss */
-					0))) {			/* Type */
+					NULL,			/* Addresss */
+					(void *)0))) {		/* Type */
 	    HText_beginAnchor(me->text, B_ID_A);
 	    HText_endAnchor(me->text);
 	    HText_setToolbar(me->text);
@@ -1938,7 +1921,7 @@ PRIVATE void HTML_start_element ARGS5(
 	 *  use chevrons, but for now we'll always use double-
 	 *  or single-quotes. - FM
 	 */
-	if (Quote_Level == ((Quote_Level/2)*2))
+	if (!(Quote_Level & 1))
 	    HText_appendCharacter(me->text, '"');
 	else
 	    HText_appendCharacter(me->text, '`');
@@ -2517,13 +2500,13 @@ PRIVATE void HTML_start_element ARGS5(
 	    }
 
 	    B_CurrentA = HTAnchor_findChildAndLink(
-			me->node_anchor,		/* Parent */
-			(id_string ? id_string : 0),	/* Tag */
-			(href ? href : 0),		/* Address */
+			me->node_anchor,			/* Parent */
+			id_string,				/* Tag */
+			href,					/* Address */
 			(present &&
 			 present[HTML_A_TYPE] &&
 			   value[HTML_A_TYPE]) ? 
-   (HTLinkType*)HTAtom_for(value[HTML_A_TYPE]) : 0);	/* Type */
+   (HTLinkType*)HTAtom_for(value[HTML_A_TYPE]) : (void *)0);	/* Type */
 
 	    /*
 	     *	Get rid of href since no longer needed.
@@ -2821,17 +2804,17 @@ PRIVATE void HTML_start_element ARGS5(
 		        if (B_ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
 				  id_string,		/* Tag */
-				  0,			/* Addresss */
-				  0)) {			/* Type */
+				  NULL,			/* Addresss */
+				  (void *)0)) {		/* Type */
 		            HText_beginAnchor(me->text, B_ID_A);
 		            HText_endAnchor(me->text);
 		        }
 		    }
 		    B_CurrentA = HTAnchor_findChildAndLink(
 		    		me->node_anchor,	/* Parent */
-				0,			/* Tag */
+				NULL,			/* Tag */
 				map_href,		/* Addresss */
-				0);			/* Type */
+				(void *)0);		/* Type */
 		    if (B_CurrentA && title) {
 			if (dest = HTAnchor_parent(
 				HTAnchor_followMainLink((HTAnchor*)B_CurrentA)
@@ -2862,8 +2845,8 @@ PRIVATE void HTML_start_element ARGS5(
 		    if (B_ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
 				  id_string,		/* Tag */
-				  0,			/* Addresss */
-				  0)) {			/* Type */
+				  NULL,			/* Addresss */
+				  (void *)0)) {		/* Type */
 		        HText_beginAnchor(me->text, B_ID_A);
 		        HText_endAnchor(me->text);
 		    }
@@ -2875,17 +2858,17 @@ PRIVATE void HTML_start_element ARGS5(
 		    if (B_ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
 				  id_string,		/* Tag */
-				  0,			/* Addresss */
-				  0)) {			/* Type */
+				  NULL,			/* Addresss */
+				  (void *)0)) {		/* Type */
 		        HText_beginAnchor(me->text, B_ID_A);
 		        HText_endAnchor(me->text);
 		    }
 		}
 		B_CurrentA = HTAnchor_findChildAndLink(
 		    		me->node_anchor,	/* Parent */
-				0,			/* Tag */
+				NULL,			/* Tag */
 				map_href,		/* Addresss */
-				0);			/* Type */
+				(void *)0);		/* Type */
 		if (B_CurrentA && title) {
 		    if (dest = HTAnchor_parent(
 				HTAnchor_followMainLink((HTAnchor*)B_CurrentA)
@@ -2916,8 +2899,8 @@ PRIVATE void HTML_start_element ARGS5(
 		    if (B_ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
 				  id_string,		/* Tag */
-				  0,			/* Addresss */
-				  0)) {			/* Type */
+				  NULL,			/* Addresss */
+				  (void *)0)) {		/* Type */
 		        HText_beginAnchor(me->text, B_ID_A);
 		        HText_endAnchor(me->text);
 		    }
@@ -2929,9 +2912,9 @@ PRIVATE void HTML_start_element ARGS5(
 	     */
 	    B_CurrentA = HTAnchor_findChildAndLink(
 			me->node_anchor,		/* Parent */
-			0,				/* Tag */
-			href ? href : 0,		/* Addresss */
-			0);				/* Type */
+			NULL,				/* Tag */
+			href,				/* Addresss */
+			(void *)0);			/* Type */
 	    FREE(href);
 	    HText_beginAnchor(me->text, B_CurrentA);
 	    if (B_inBoldH == FALSE)
@@ -2969,9 +2952,9 @@ PRIVATE void HTML_start_element ARGS5(
 	    }
 	    B_CurrentA = HTAnchor_findChildAndLink(
 		    		me->node_anchor,	/* Parent */
-				0,			/* Tag */
+				NULL,			/* Tag */
 				map_href,		/* Addresss */
-				0);			/* Type */
+				(void *)0);		/* Type */
 	    if (B_CurrentA && title) {
 		if (dest = HTAnchor_parent(
 				HTAnchor_followMainLink((HTAnchor*)B_CurrentA)
@@ -3007,8 +2990,8 @@ PRIVATE void HTML_start_element ARGS5(
 		if (B_ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
 				  id_string,		/* Tag */
-				  0,			/* Addresss */
-				  0)) {			/* Type */
+				  NULL,			/* Addresss */
+				  (void *)0)) {		/* Type */
 		    HText_beginAnchor(me->text, B_ID_A);
 		    HText_endAnchor(me->text);
 		}
@@ -3238,9 +3221,9 @@ PRIVATE void HTML_start_element ARGS5(
 
 		if ((B_CurrentA = HTAnchor_findChildAndLink(
 		       			me->node_anchor,	/* Parent */
-		       			0,			/* Tag */
+		       			NULL,			/* Tag */
 		       			href,			/* Addresss */
-		       			0))) {			/* Type */
+		       			(void *)0))) {		/* Type */
 		    HText_beginAnchor(me->text, B_CurrentA);
 		    if (B_inBoldH == FALSE)
 			HText_appendCharacter(me->text,LY_BOLD_START_CHAR);
@@ -3415,9 +3398,9 @@ PRIVATE void HTML_start_element ARGS5(
 
 		if ((B_CurrentA = HTAnchor_findChildAndLink(
 					me->node_anchor,	/* Parent */
-					0,			/* Tag */
+					NULL,			/* Tag */
 					href,			/* Addresss */
-					0))) {			/* Type */
+					(void *)0))) {		/* Type */
 		    if (!me->text) {
 		        UPDATE_STYLE;
 		    } else {
@@ -3566,9 +3549,9 @@ PRIVATE void HTML_start_element ARGS5(
 	    if ((href && *href) &&
 	        (B_CurrentA = HTAnchor_findChildAndLink(
 					me->node_anchor,	/* Parent */
-					0,			/* Tag */
+					NULL,			/* Tag */
 					href,			/* Addresss */
-					0))) {			/* Type */
+					(void *)0))) {		/* Type */
 		HText_beginAnchor(me->text, B_CurrentA);
 		if (B_inBoldH == FALSE)
 		    HText_appendCharacter(me->text,LY_BOLD_START_CHAR);
@@ -3632,9 +3615,9 @@ PRIVATE void HTML_start_element ARGS5(
 	        UPDATE_STYLE;
 	    if ((B_CurrentA = HTAnchor_findChildAndLink(
 					me->node_anchor,	/* Parent */
-					0,			/* Tag */
+					NULL,			/* Tag */
 					href,			/* Addresss */
-					0))) {			/* Type */
+					(void *)0))) {		/* Type */
 		HTML_put_character(me, ' ');  /* space char may be ignored */
 		me->in_word = NO;
 		HText_beginAnchor(me->text, B_CurrentA);
@@ -3741,9 +3724,9 @@ PRIVATE void HTML_start_element ARGS5(
 
 		if ((B_CurrentA = HTAnchor_findChildAndLink(
 					me->node_anchor,	/* Parent */
-					0,			/* Tag */
+					NULL,			/* Tag */
 					href,			/* Addresss */
-					0))) {			/* Type */
+					(void *)0))) {		/* Type */
 		    HText_beginAnchor(me->text, B_CurrentA);
 		    if (B_inBoldH == FALSE)
 			HText_appendCharacter(me->text,LY_BOLD_START_CHAR);
@@ -3885,9 +3868,9 @@ PRIVATE void HTML_start_element ARGS5(
 	    }
 	    if (action) {
 	        source = HTAnchor_findChildAndLink(me->node_anchor, 
-						   0,
+						   NULL,
 						   action,
-						   0);
+						   (void *)0);
 		if (link_dest = HTAnchor_followMainLink((HTAnchor *)source)) {
 		    /*
 		     *  Memory leak fixed.
@@ -4033,6 +4016,7 @@ PRIVATE void HTML_start_element ARGS5(
 		     *  Not yet implemented.
 		     */
 		    HTML_put_string(me,"[RANGE Input] (Not yet implemented.)");
+		    HText_DisableCurrentForm();
 		    if (TRACE)
 		        fprintf(stderr, "HTML: Ignoring TYPE=\"range\"\n");
 		    break;
@@ -4052,6 +4036,7 @@ PRIVATE void HTML_start_element ARGS5(
 		        HText_appendCharacter(me->text,
 					      LY_UNDERLINE_END_CHAR);
 		    }
+		    HText_DisableCurrentForm();
 		    if (TRACE)
 		        fprintf(stderr, "HTML: Ignoring TYPE=\"file\"\n");
 		    break;
@@ -4232,8 +4217,8 @@ PRIVATE void HTML_start_element ARGS5(
 	        (B_ID_A = HTAnchor_findChildAndLink(
 				me->node_anchor,	 /* Parent */
 				id_string,		 /* Tag */
-				0,			 /* Addresss */
-				0))) {			 /* Type */
+				NULL,			 /* Addresss */
+				(void *)0))) {		 /* Type */
 		if (!me->text)
 		    UPDATE_STYLE;
 		HText_beginAnchor(me->text, B_ID_A);
@@ -4309,15 +4294,27 @@ PRIVATE void HTML_start_element ARGS5(
 		select_disabled=YES;
 	    if (present && present[HTML_SELECT_SIZE] &&
 	        value[HTML_SELECT_SIZE] && *value[HTML_SELECT_SIZE]) {
+#ifdef NOTDEFINED
 		StrAllocCopy(size, value[HTML_SELECT_SIZE]);
+#else
+		/*
+		 *  Let the size be determined by the number of OPTIONs. - FM
+		 */
+		if (TRACE)
+		    fprintf(stderr,
+		    	    "HTML: Ignoring SIZE=\"%s\" for SELECT.\n",
+		    	    (char *)value[HTML_SELECT_SIZE]);
+#endif /* NOTDEFINED */
 	    }
 
-	    if (B_inBoldH == TRUE && multiple == NO) {
+	    if (B_inBoldH == TRUE &&
+	        (multiple == NO || LYSelectPopups == FALSE)) {
 	        HText_appendCharacter(me->text,LY_BOLD_END_CHAR);
 		B_inBoldH = FALSE;
 		B_needBoldH = TRUE;
 	    }
-	    if (B_inUnderline == TRUE && multiple == NO) {
+	    if (B_inUnderline == TRUE &&
+	        (multiple == NO || LYSelectPopups == FALSE)) {
 	        HText_appendCharacter(me->text,LY_UNDERLINE_END_CHAR);
 		B_inUnderline = FALSE;
 	    }
@@ -4376,12 +4373,15 @@ PRIVATE void HTML_start_element ARGS5(
 	    }
 
 	    /*
-	     *  If its not a multiple option list then don't
-	     *  use the checkbox method, and don't put
-	     *  anything on the screen yet.
+	     *  If its not a multiple option list and select popups
+	     *  are enabled, then don't use the checkbox/button method,
+	     *  and don't put anything on the screen yet.
 	     */
-	    if (first_option || HTCurSelectGroupType == F_CHECKBOX_TYPE) {
-		if (HTCurSelectGroupType == F_CHECKBOX_TYPE) {
+	    if (first_option ||
+	        HTCurSelectGroupType == F_CHECKBOX_TYPE ||
+		LYSelectPopups == FALSE) {
+		if (HTCurSelectGroupType == F_CHECKBOX_TYPE ||
+		    LYSelectPopups == FALSE) {
 	            /*
 		     *  Start a newline before each option.
 		     */
@@ -4405,7 +4405,9 @@ PRIVATE void HTML_start_element ARGS5(
 
 	        I.type = "OPTION";
     
-	        if (present && present[HTML_OPTION_SELECTED])
+	        if ((present && present[HTML_OPTION_SELECTED]) ||
+		    (first_option && LYSelectPopups == FALSE &&
+		     HTCurSelectGroupType == F_RADIO_TYPE))
 		    I.checked=YES;
 
 		if (present && present[HTML_OPTION_VALUE] &&
@@ -4445,8 +4447,8 @@ PRIVATE void HTML_start_element ARGS5(
 		    if (B_ID_A = HTAnchor_findChildAndLink(
 				    me->node_anchor,	   /* Parent */
 				    value[HTML_OPTION_ID], /* Tag */
-				    0,			   /* Addresss */
-				    0)) {		   /* Type */
+				    NULL,		   /* Addresss */
+				    (void *)0)) {	   /* Type */
 			HText_beginAnchor(me->text, B_ID_A);
 			HText_endAnchor(me->text);
 		        I.id = (char *)value[HTML_OPTION_ID];
@@ -4455,9 +4457,8 @@ PRIVATE void HTML_start_element ARGS5(
 
 	        HText_beginInput(me->text, &I);
     
-	        first_option = FALSE;
-
-		if (HTCurSelectGroupType == F_CHECKBOX_TYPE) {
+		if (HTCurSelectGroupType == F_CHECKBOX_TYPE ||
+		    LYSelectPopups == FALSE) {
 	            /*
 		     *  Put 3 underscores and one space before each option.
 		     */
@@ -4472,10 +4473,14 @@ PRIVATE void HTML_start_element ARGS5(
 	     *  Get ready for the next value.
 	     */
             HTChunkClear(&me->option);
-	    if (present && present[HTML_OPTION_SELECTED])
-		LastOptionChecked=YES;
+	    if ((present && present[HTML_OPTION_SELECTED]) ||
+	        (first_option && LYSelectPopups == FALSE &&
+		 HTCurSelectGroupType == F_RADIO_TYPE))
+		LastOptionChecked = TRUE;
 	    else
-		LastOptionChecked=NO;
+		LastOptionChecked = FALSE;
+	    first_option = FALSE;
+
 
 	    if (present && present[HTML_OPTION_VALUE] &&
 	        value[HTML_OPTION_VALUE])
@@ -4596,6 +4601,9 @@ PRIVATE void HTML_end_element ARGS3(
 	int,			element_number,
 	char **,		include)
 {
+    int i;
+    char *temp = NULL;
+
 #ifdef CAREFUL			/* parser assumed to produce good nesting */
     if (element_number != me->sp[0].tag_number) {
         fprintf(stderr, 
@@ -4604,15 +4612,23 @@ PRIVATE void HTML_end_element ARGS3(
 		HTML_dtd.tags[me->sp->tag_number].name);
 		/* panic */
     }
-#endif
+#endif /* CAREFUL */
+
+    /*
+     *  If we're seeking MAPs, skip everything that's
+     *  not a MAP or AREA tag. - FM
+     */
     if (LYMapsOnly) {
         if (!(element_number == HTML_MAP || element_number == HTML_AREA)) {
 	    return;
 	}
     }
-    
+
+    /*
+     *  Pop state off stack.
+     */
     if (me->sp < me->stack + MAX_NESTING+1) {
-        (me->sp)++;				/* Pop state off stack */
+        (me->sp)++;
         if (TRACE)
 	    fprintf(stderr,
 	    	    "HTML:end_element: Popped style off stack - %s\n",
@@ -4623,7 +4639,9 @@ PRIVATE void HTML_end_element ARGS3(
   "Stack underflow error!  Tried to pop off more styles than exist in stack\n");
     }
     
-    /* Check for unclosed TEXTAREA */
+    /*
+     *  Check for unclosed TEXTAREA. - FM
+     */
     if (B_inTEXTAREA && element_number != HTML_TEXTAREA)
         if (TRACE) {
 	    fprintf(stderr, "HTML: Missing TEXTAREA end tag\n");
@@ -4633,6 +4651,9 @@ PRIVATE void HTML_end_element ARGS3(
 	    sleep(MessageSecs);
 	}
 
+    /*
+     *  Handle the end tag. - FM
+     */
     switch(element_number) {
 
     case HTML_HTML:
@@ -4647,8 +4668,6 @@ PRIVATE void HTML_end_element ARGS3(
 	    HText_appendCharacter(me->text,LY_UNDERLINE_END_CHAR);
 	    B_inUnderline = FALSE;
 	}
-	FREE(base_href);
-        B_inBASE = FALSE;
 	if (B_inA || B_inFORM || B_inSELECT || B_inTEXTAREA)
 	    if (TRACE)
 	        fprintf(stderr,
@@ -4683,6 +4702,36 @@ PRIVATE void HTML_end_element ARGS3(
         HTChunkTerminate(&me->title);
     	HTAnchor_setTitle(me->node_anchor, me->title.data);
         HTChunkClear(&me->title);
+	/*
+	 *  Check if it's a bookmark file, and if so, insert the
+	 *  current description string and filepath for it. - FM
+	 */
+	if (me->node_anchor->bookmark && *me->node_anchor->bookmark) {
+	    for (i = 0; i <= MBM_V_MAXFILES; i++) {
+	        if (MBM_A_subbookmark[i] &&
+		    !strcmp(MBM_A_subbookmark[i],
+		    	    me->node_anchor->bookmark)) {
+		    StrAllocCat(*include, "<H2><EM>Description:</EM> ");
+		    StrAllocCopy(temp,
+		    		 ((MBM_A_subdescript[i] &&
+				   *MBM_A_subdescript[i]) ?
+				     MBM_A_subdescript[i] : "(none)"));
+		    LYEntify((char **)&temp, TRUE);
+		    StrAllocCat(*include, temp);
+		    StrAllocCat(*include,
+		    		"<BR><EM>&nbsp;&nbsp;&nbsp;Filepath:</EM> ");
+		    StrAllocCopy(temp,
+		    		 ((MBM_A_subbookmark[i] &&
+				   *MBM_A_subbookmark[i]) ?
+				     MBM_A_subbookmark[i] : "(unknown)"));
+		    LYEntify((char **)&temp, TRUE);
+		    StrAllocCat(*include, temp);
+		    FREE(temp);
+		    StrAllocCat(*include, "</H2>");
+		    break;
+		}
+	    }
+	}
 	break;
 	
     case HTML_STYLE:
@@ -4886,7 +4935,7 @@ PRIVATE void HTML_end_element ARGS3(
 	 *  use chevrons, but for now we'll always use double-
 	 *  or single-quotes. - FM
 	 */
-	if (Quote_Level == ((Quote_Level/2)*2))
+	if (!(Quote_Level & 1))
 	    HText_appendCharacter(me->text, '"');
 	else
 	    HText_appendCharacter(me->text, '\'');
@@ -5508,9 +5557,10 @@ End_Object:
 
 	    LastOptionChecked = FALSE;
 
-	    if (HTCurSelectGroupType == F_CHECKBOX_TYPE) {
+	    if (HTCurSelectGroupType == F_CHECKBOX_TYPE ||
+	        LYSelectPopups == FALSE) {
 	            /*
-		     *  Start a newline after the last checkbox option.
+		     *  Start a newline after the last checkbox/button option.
 		     */
 		    HTML_EnsureSingleSpace(me);
 	    } else {
@@ -5648,11 +5698,22 @@ PUBLIC void HTML_free ARGS1(HTStructured *, me)
     UPDATE_STYLE;		/* Creates empty document here! */
     if (me->comment_end)
 		HTML_put_string(me,me->comment_end);
-    HText_endAppend(me->text);
+    if (me->text) {
+	if (B_inUnderline) {
+	    HText_appendCharacter(me->text,LY_UNDERLINE_END_CHAR);
+	    B_inUnderline = FALSE;
+	}
+	HText_endAppend(me->text);
+    }
 
     if (me->target) {
         (*me->targetClass._free)(me->target);
     }
+    List_Nesting_Level = -1;
+    HTML_zero_OL_Counter();
+    Division_Level = -1;
+    Underline_Level = 0;
+    Quote_Level = 0;
     if (me->sp && me->sp->style && me->sp->style->name) {
         if (!strcmp(me->sp->style->name, "DivCenter") ||
 	    !strcmp(me->sp->style->name, "HeadingCenter")) {
@@ -5666,6 +5727,7 @@ PUBLIC void HTML_free ARGS1(HTStructured *, me)
 	styles[HTML_PRE]->alignment = HT_LEFT;
     }
     FREE(base_href);
+    B_inBASE = FALSE;
     FREE(LYMapName);
     FREE(me);
 }
@@ -5689,6 +5751,21 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
     if (me->target) {
         (*me->targetClass._abort)(me->target, e);
     }
+    if (me->sp && me->sp->style && me->sp->style->name) {
+        if (!strcmp(me->sp->style->name, "DivCenter") ||
+	    !strcmp(me->sp->style->name, "HeadingCenter")) {
+	    me->sp->style->alignment = HT_CENTER;
+	} else if (!strcmp(me->sp->style->name, "DivRight") ||
+		   !strcmp(me->sp->style->name, "HeadingRight")) {
+	    me->sp->style->alignment = HT_RIGHT;
+	} else  {
+	    me->sp->style->alignment = HT_LEFT;
+	}
+	styles[HTML_PRE]->alignment = HT_LEFT;
+    }
+    FREE(base_href);
+    B_inBASE = FALSE;
+    FREE(LYMapName);
     FREE(me);
 }
 
@@ -5762,7 +5839,6 @@ PRIVATE void get_styles NOARGS
     styles[HTML_PLAINTEXT] =
     styles[HTML_XMP] =		HTStyleNamed(styleSheet, "Example");
     styles[HTML_PRE] =		HTStyleNamed(styleSheet, "Preformatted");
-    styles[HTML_STYLE] =	HTStyleNamed(styleSheet, "Style");
     styles[HTML_LISTING] =	HTStyleNamed(styleSheet, "Listing");
 }
 /*				P U B L I C
@@ -6206,8 +6282,8 @@ PRIVATE void HTML_CheckForID ARGS4(
 	    (B_ID_A = HTAnchor_findChildAndLink(
 				me->node_anchor,	/* Parent */
 				temp,			/* Tag */
-				0,			/* Addresss */
-				0))) {			/* Type */
+				NULL,			/* Addresss */
+				(void *)0))) {		/* Type */
 	    HText_beginAnchor(me->text, B_ID_A);
 	    HText_endAnchor(me->text);
 	}
@@ -6238,8 +6314,8 @@ PRIVATE void HTML_HandleID ARGS2(
     if (B_ID_A = HTAnchor_findChildAndLink(
 				me->node_anchor,	/* Parent */
 				id,			/* Tag */
-				0,			/* Addresss */
-				0)) {			/* Type */
+				NULL,			/* Addresss */
+				(void *)0)) {		/* Type */
 	HText_beginAnchor(me->text, B_ID_A);
 	HText_endAnchor(me->text);
     }

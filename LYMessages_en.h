@@ -2,7 +2,7 @@
  * Lynx - Hypertext navigation system
  *
  *   (c) Copyright 1992, 1993, 1994 University of Kansas
- *	 1996: GNU General Public License
+ *	 1995, 1996: GNU General Public License
  */
 #ifndef LYMESSAGES_EN_H
 #define LYMESSAGES_EN_H
@@ -13,9 +13,9 @@
  * modify them to make them more appropriate for you site, and/or
  * to use other languages.  Links to collections of alternate
  * definitions, developed by the Lynx User Community, are maintained
- * in the Lynx Enhanced Pages:
+ * in Lynx links:
  *
- *    http://www.nyu.edu/pages/wsn/subir/lynx.html
+ *    http://www.crl.com/~subir/lynx.html
  *
  * You can substitute one of those as LYMessages_en.h, or modify
  * the header inclusion statement in your userdefs.h to include
@@ -148,6 +148,7 @@
 #define SPAWNING_DISABLED "Spawning is currently disabled."
 #define DOWNLOAD_DISABLED "The 'd'ownload command is currently disabled."
 #define NO_DOWNLOAD_INPUT "You cannot download a input field."
+#define NO_DOWNLOAD_MAILTO_ACTION "Form has a mailto action!  Cannot download."
 #define NO_DOWNLOAD_PRINT_OP "You cannot download a printing option."
 #define NO_DOWNLOAD_UPLOAD_OP "You cannot download an upload option."
 #define NO_DOWNLOAD_PERMIT_OP "You cannot download an permit option."
@@ -305,6 +306,7 @@
  "Not a searchable indexed document -- press '/' to search for a text string"
 #define NO_OWNER \
  "No owner is defined for this file so you cannot send a comment"
+#define NO_OWNER_USE "No owner is defined. Use %s? [N] "
 #define CONFIRM_COMMENT "Do you wish to send a comment? [N]"
 #define MAIL_DISALLOWED "Mail is disallowed so you cannot send a comment"
 #define EDIT_DISABLED "The 'e'dit command is currently disabled."
@@ -437,7 +439,7 @@
  "You are not allowed to change the bookmark file!"
 #define DOTFILE_ACCESS_DISABLED "Access to dot files is disabled!"
 #define UA_COPYRIGHT_WARNING \
- "WARNING: Misrepresentaton of the User-Agent may be a copyright violation!"
+ "WARNING: Misrepresentation of the User-Agent may be a copyright violation!"
 #define CHANGE_OF_SETTING_DISALLOWED \
  "You are not allowed to change this setting."
 #define SAVING_OPTIONS "Saving Options..."
@@ -450,6 +452,20 @@
 #define ERROR_UNCOMPRESSING_TEMP "Error uncompressing temporary file!"
 #define UNSUPPORTED_URL_SCHEME "Unsupported URL scheme!"
 #define UNSUPPORTED_DATA_URL "Unsupported data: URL!  Use SHOWINFO, for now."
+#define	SERVER_ASKED_FOR_REDIRECTION \
+ "Server asked for redirection of POST content to"
+#define	PROCEED_GET_CANCEL "P)roceed, use G)ET or C)ancel "
+#define	ADVANCED_POST_REDIRECT \
+ "Redirection of POST content. P)roceed, see U)RL, use G)ET or C)ancel"
+#define	LOCATION_HEADER "Location: "
+#define STRING_NOT_FOUND "'%s' not found!"
+#define MULTIBOOKMARKS_DEFAULT "Default Bookmark File"
+#define MULTIBOOKMARKS_SAVE "Select destination or ^G to Cancel: "
+#define MULTIBOOKMARKS_SMALL "Screen too small! (8x35 min)"
+#define MULTIBOOKMARKS_MOVE "'[' previous, ']' next screen"
+#define MULTIBOOKMARKS_SELF \
+ "Reproduce L)ink in this bookmark file or C)ancel? (l,c): "
+#define MULTIBOOKMARKS_DISALLOWED "Multiple bookmark support is not available."
 
 #ifdef DIRED_SUPPORT
 #define DIRED_NOVICELINE \

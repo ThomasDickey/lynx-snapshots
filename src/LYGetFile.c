@@ -53,28 +53,28 @@ extern BOOLEAN LYDidRename;
 PRIVATE char * LYSanctify ARGS1(char *, href) 
 {
     int i;
-    char *p,*cp,*tp;
+    char *p, *cp, *tp;
     char address_buffer[1024];
 
-    i = strlen(href) - 1;
+    i = (strlen(href) - 1);
     while (i && href[i] == '/') href[i--] = '\0';
 
-    if ((cp = (char *) strchr(href,'~')) != NULL) {
-       if (!strncmp(href,"file://localhost/",17))
-	 tp = href + 17;
+    if ((cp = (char *)strchr(href,'~')) != NULL) {
+       if (!strncmp(href, "file://localhost/", 17))
+	 tp = (href + 17);
        else 
-	 tp = href + 5;
-       if ((cp-tp) && *(cp-1) != '/')
+	 tp = (href + 5);
+       if ((cp - tp) && *(cp-1) != '/')
 	 return href;
-       LYstrncpy(address_buffer,href,cp-href);
-       if (address_buffer[strlen(address_buffer)-1] == '/')
-	 address_buffer[strlen(address_buffer)-1] = '\0';
+       LYstrncpy(address_buffer, href, (cp - href));
+       if (address_buffer[(strlen(address_buffer) - 1)] == '/')
+	 address_buffer[(strlen(address_buffer) - 1)] = '\0';
        p = (char *)Home_Dir();
-       strcat(address_buffer,p);
+       strcat(address_buffer, p);
        if (strlen(++cp))
-	 strcat(address_buffer,cp);
-       if (strcmp(href,address_buffer))
-	 StrAllocCopy(href,address_buffer);
+	 strcat(address_buffer, cp);
+       if (strcmp(href, address_buffer))
+	 StrAllocCopy(href, address_buffer);
     }
     return href;
 }
@@ -92,6 +92,7 @@ Try_Redirected_URL:
 	WWWDoc.address = doc->address;
         WWWDoc.post_data = doc->post_data;
         WWWDoc.post_content_type = doc->post_content_type;
+        WWWDoc.bookmark = doc->bookmark;
 	WWWDoc.isHEAD = doc->isHEAD;
 
 	/* reset WWW_Download_File just in case */
@@ -133,7 +134,8 @@ Try_Redirected_URL:
 		}
 		if (traversal) {
 		    /* only traverse http URLs */
-		    if (url_type != HTTP_URL_TYPE)
+		    if (url_type != HTTP_URL_TYPE &&
+		        url_type != LYNXIMGMAP_URL_TYPE)
 		        return(NULLFILE);
 		} else if (check_realm && !LYPermitURL && !LYJumpFileURL) {
 		    if (!(0==strncmp(startrealm, WWWDoc.address,
@@ -237,6 +239,7 @@ Try_Redirected_URL:
 		       WWWDoc.address = doc->address;
         	       WWWDoc.post_data = doc->post_data;
         	       WWWDoc.post_content_type = doc->post_content_type;
+		       WWWDoc.bookmark = doc->bookmark;
 		       WWWDoc.isHEAD = doc->isHEAD;
 
 		       if (!HTLoadAbsolute(&WWWDoc))
@@ -266,6 +269,7 @@ Try_Redirected_URL:
 		    WWWDoc.address = doc->address;
         	    WWWDoc.post_data = doc->post_data;
         	    WWWDoc.post_content_type = doc->post_content_type;
+		    WWWDoc.bookmark = doc->bookmark;
 		    WWWDoc.isHEAD = doc->isHEAD;
 
 		    if (!HTLoadAbsolute(&WWWDoc)) {
@@ -283,10 +287,8 @@ Try_Redirected_URL:
 				 doc->address+9, ALWAYS_EXEC_PATH)) {
             	        statusline(EXECUTION_DISABLED);
             		sleep(MessageSecs);
-		    } else if (no_bookmark_exec && bookmark_page &&
-		    	       (strstr(HTLoadedDocumentURL(), bookmark_page) ||
-			        !strcmp(HTLoadedDocumentTitle(),
-					MOSAIC_BOOKMARK_TITLE))) {
+		    } else if (no_bookmark_exec &&
+		    	       HTLoadedDocumentBookmark()) {
 			statusline(BOOKMARK_EXEC_DISABLED);
 			sleep(MessageSecs);
 		    } else if (local_exec || (local_exec_on_local_files &&
@@ -476,6 +478,7 @@ Try_Redirected_URL:
 			WWWDoc.address = doc->address;
 			WWWDoc.post_data = doc->post_data;
 			WWWDoc.post_content_type = doc->post_content_type;
+			WWWDoc.bookmark = doc->bookmark;
 			WWWDoc.isHEAD = doc->isHEAD;
 		        status = HTLoadAbsolute(&WWWDoc);
 		    }
@@ -639,51 +642,80 @@ Try_Redirected_URL:
 		     */
                     {
                         char *pound;
-                        /* check for #selector */
+                        /*
+			 *  Check for #selector.
+			 */
                         pound = (char *)strchr(doc->address, '#');
 
-			/* check to see if there is a temp
-			 * file waiting for us to download
+			/*
+			 *  Check to see if there is a temp
+			 *  file waiting for us to download.
 			 */
 			if (WWW_Download_File) {
-				HTMLSetCharacterHandling(current_char_set);
-				if (LYdownload_options(&doc->address,
-						       WWW_Download_File) < 0)
-				    return(NOT_FOUND);
-		    		WWWDoc.address = doc->address;
-		    		FREE(WWWDoc.post_data);
-		    		FREE(WWWDoc.post_content_type);
-				WWWDoc.isHEAD = FALSE;
-				HTOutputFormat = WWW_PRESENT;
-				if (!HTLoadAbsolute(&WWWDoc)) 
-                        	    return(NOT_FOUND);
-				else 
-				    return(NORMAL);
+			    HTParentAnchor *tmpanchor;
+			    char *fname = NULL;
+
+			    HTMLSetCharacterHandling(current_char_set);
+			    /*
+			     *  Check for a suggested filename from
+			     *  the Content-Dispostion header. - FM
+			     */
+			    if (((tmpanchor = HTAnchor_parent(
+						HTAnchor_findAddress(&WWWDoc)
+							     )) != NULL) &&
+				HTAnchor_SugFname(tmpanchor) != NULL) {
+				StrAllocCopy(fname,
+					     HTAnchor_SugFname(tmpanchor));
+			    } else {
+			        StrAllocCopy(fname, doc->address);
+			    }
+			    if (LYdownload_options(&fname,
+						   WWW_Download_File) < 0) {
+				FREE(fname);
+				return(NOT_FOUND);
+			    }
+			    StrAllocCopy(doc->address, fname);
+			    FREE(fname);
+		    	    WWWDoc.address = doc->address;
+		    	    FREE(WWWDoc.post_data);
+		    	    FREE(WWWDoc.post_content_type);
+			    WWWDoc.bookmark = doc->bookmark;
+			    WWWDoc.isHEAD = FALSE;
+			    HTOutputFormat = WWW_PRESENT;
+			    if (!HTLoadAbsolute(&WWWDoc)) 
+                        	return(NOT_FOUND);
+			    else 
+				return(NORMAL);
 
 			} else if (pound == NULL &&
-				  /*
-				   * HTAnchor hash-table searches are now
-				   * case-sensitive (hopefully, without
-				   * anchor deletion problems), so this
-				   * is too. - FM
-				   */
-                                  (strcmp(doc->address,
-						HTLoadedDocumentURL()) ||
-				  /*
-				   * Also check the post_data elements. - FM
-				   */
-				  strcmp(doc->post_data ? doc->post_data : "",
-				    	 HTLoadedDocumentPost_data()) ||
-				  /*
-				   * Also check the isHEAD element. - FM
-				   */
-				  doc->isHEAD != HTLoadedDocumentIsHEAD())) {
+				   /*
+				    * HTAnchor hash-table searches are now
+				    * case-sensitive (hopefully, without
+				    * anchor deletion problems), so this
+				    * is too. - FM
+				    */
+				   (strcmp(doc->address,
+				  	   HTLoadedDocumentURL()) ||
+				   /*
+				    * Also check the post_data elements. - FM
+				    */
+				   strcmp((doc->post_data ?
+				   	   doc->post_data : ""),
+				    	  HTLoadedDocumentPost_data()) ||
+				   /*
+				    * Also check the isHEAD element. - FM
+				    */
+				   doc->isHEAD != HTLoadedDocumentIsHEAD())) {
 			    HTMLSetCharacterHandling(current_char_set);
-			    /* nothing needed to be shown */
+			    /*
+			     *  Nothing needed to be shown.
+			     */
 			    return(NULLFILE);
 
                         } else {
-                        /* may set www_search_result */
+                        /*
+			 *  May set www_search_result.
+			 */
                             if (pound != NULL)
                                 HTFindPoundSelector(pound+1);
 			    HTMLSetCharacterHandling(current_char_set);

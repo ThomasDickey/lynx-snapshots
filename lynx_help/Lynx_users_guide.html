@@ -187,7 +187,7 @@ Here are some sample URLs.
 
 <dl>
    <dt>HTTP  (HyperText Transfer Protocol)
-     	<dd><code>http://www.nyu.edu/pages/wsn/subir/lynx.html</code>
+     	<dd><code>http://www.crl.com/~subir/lynx.html</code>
 
    <dt>Gopher
      	<dd><code>gopher://gopher.micro.umn.edu/11/</code>
@@ -310,7 +310,10 @@ available as configured by your system administrator.
 for an output filename.  All output filename entries are saved in a
 circular buffer, and any previous entries can be retrieved for re-use by
 pressing the <em>up-arrow</em> or <em>down-arrow</em> keys at the prompt.
-[<A HREF="#TOC">ToC</A>]
+
+<p>Note that if you want exact copies of text files without any expansions
+of TAB characters to spaces you should use the <a href="#9">Download</a>
+options. [<A HREF="#TOC">ToC</A>]
 
 <h2><A NAME="8"
 ><em>Viewing the HTML document source and editing documents</em></A></h2>
@@ -365,7 +368,7 @@ kermit and zmodem may be defined in the <em>lynx.cfg</em> file by the
 system administrator.  Downloading the sources of HTML and plain text
 files, instead of toggling to <a href="#8">display the source</a>
 ('<em>\</em>') and then using <a href="#7">Printing</a> options, ensures
-that no modifications of the source (e.g., expansions of tab characters
+that no modifications of the source (e.g., expansions of TAB characters
 to a series of spaces) will occur.
 
 <p>Some options, such as <em>Save to disk</em>, involve prompting for an
@@ -416,7 +419,7 @@ current document's URL and append your query string as a <em>?searchpart</em>
 <p>All search words or strings which you have entered during a Lynx session
 are saved in a circular buffer, and can be retrieved for re-use by pressing
 the <em>up-arrow</em> or <em>down-arrow</em> keys at the prompt for a search
-word or string.  Also, you can use the '<em>n</em>' command to repeated a
+word or string.  Also, you can use the '<em>n</em>'ext command to repeat a
 search with the last-entered search word or phrase, starting from the current
 position in the document.  The word or phrase matches will be highlighted
 throughout the document, but such highlighting will not persist for new
@@ -738,7 +741,7 @@ would any other link.  You can remove a link from the bookmark list by
 pressing the '<em>r</em>' key when positioned on that link.
 [<A HREF="#TOC">ToC</A>]
 
-<h2><a NAME="16"><em>Jump Command</em></a></h2>
+<h2><A NAME="16"><em>Jump Command</em></a></h2>
 
 A feature similar to the Lynx bookmarks is the jump command.  The jump
 command allows you to enter a shortcut name to access a URL.  If the jump
@@ -754,7 +757,7 @@ previous entries can be retrieved for re-use by pressing the
 to set up the jump command for your system and how to define shortcut names.
 [<A HREF="#TOC">ToC</A>]
 
-<h2><a NAME="17"><em>Directory Editing</em></a></h2>
+<h2><A NAME="17"><em>Directory Editing</em></a></h2>
 
 Lynx offers extended DIRED support on Unix (on VMS the more powerful
 CSwing program is recommended for character cell terminals, and can be
@@ -921,7 +924,7 @@ commands.
 	    [<A HREF="#TOC">ToC</A>]
 </dl>
 
-<h2><a name="19"><em>Lynx and HTML Forms</em></a></h2>
+<h2><A NAME="19"><em>Lynx and HTML Forms</em></a></h2>
 
 This section describes the Lynx Forms Interface.  HTML gives document
 providers the ability to create on-line forms which may be filled out
@@ -952,9 +955,16 @@ options from a list, and fields for entering text.
     press  the <em>right-arrow</em> or <em>Return</em> key.  A box with
     a border of asterisks (or line-drawing characters) will pop up with
     the list of possible options listed within the box.  Use the
-    <em>up-arrow</em> and <em>down-arrow</em> keys to move the cursor
-    between options and the <em>right-arrow</em> or <em>Return</em> 
-    key to select an option.
+    <em>up-arrow</em>, <em>down-arrow</em>, <em>page-up</em>,
+    <em>page-down</em>, and other navigation keys to move the cursor
+    among options, and the <em>right-arrow</em> or <em>Return</em> key to
+    select an option.  You also can use the '<em>/</em>' and '<em>n</em>'ext
+    <a href="#11">searching</a> commands for navigating to options which
+    contain particular strings.  <em>NOTE</em> that the popup menu
+    feature can be disabled via compilation and/or configuration options,
+    in which case the options will be converted to a list of radio buttons.
+    The default setting for use of popups or radio button lists can be
+    toggled via the <em>-popup</em> command line switch.
 
 <dt> Text Entry Fields
 <dd>Text entry (INPUT) fields are displayed as a row of underscores the
@@ -993,7 +1003,7 @@ interpreted by the <a href="keystroke_commands/edit_help.html"
 >Line Editor</a> as either text entries or editing commands.  Select a
 button or box when you want to use Lynx keystrokes.
 
-<p>To <a name="submit"><em>submit</em></a> the form press
+<p>To <A name="submit"><em>submit</em></a> the form press
 <em>right-arrow</em> or <em>Return</em> when positioned on the form's
 submit button.  If you've submitted the form previously during the Lynx
 session, have not changed any of the form content, and the METHOD was
@@ -1030,12 +1040,12 @@ submit the form (or to retrieve what was returned from an earlier submission
 if the content was not changed and the METHOD was <em>GET</em>).
 
 <p>Forms can have multiple <em>submit</em> buttons, if they have been
-assigned names in the markup.  In such cases, information about which
+assigned NAMEs in the markup.  In such cases, information about which
 one of the buttons was used to submit the form is included in the form
 content.
 
 <p>Inlined images can be used as submit buttons in forms.  If such
-buttons are assigned names in the markup, for graphic clients they can
+buttons are assigned NAMEs in the markup, for graphic clients they can
 also serve as <a href="#28">image maps</a>, and the x,y coordinates of
 the graphic client's cursor position in the image when it was
 <em>clicked</em> are included in the form content.  Since Lynx cannot
@@ -1043,17 +1053,17 @@ inline the image, and the user could not have moved a cursor from the
 origin for the image, if no alternatives are made available in the
 markup Lynx sends a 0,0 coordinate pair in the form content.  Document
 authors who use images as submit buttons, but have at least some concern
-for text clients and sight-challenged Webizens, should include values for
+for text clients and sight-challenged Webizens, should include VALUEs for
 the buttons in such markup.  Lynx will then display the string assigned
-to the value, as it would for a normal submit button, and will send that
-instead of an artificial 0,0 coordinate pair if that button is named and
+to the VALUE, as it would for a normal submit button, and will send that
+instead of an artificial 0,0 coordinate pair if that button is NAME-ed and
 is used to submit the form.  The script which analyzes the form content
 thus can be made aware whether the submission was by a user with a graphic
 client, or by a user who did not see the image nor make a conscious choice
 within it.
 
 <p>Forms can have <em>hidden</em> INPUT fields, which are not displayed,
-but have names and values included in the content.  These often are used
+but have NAMEs and VALUEs included in the content.  These often are used
 to keep track of information across a series of related form submissions,
 but have the potential for including information about the user that might
 be considered to represent an invasion of privacy.  NOTE, in this regard,
@@ -1083,7 +1093,7 @@ the <em>GET</em> METHOD causes the encoded form content to be appended
 as a <em>?searchpart</em> for the form's ACTION, and if such URLs are used
 in <em>text/html</em> documents or bookmark files without conversion
 of the ampersands to SGML character references (<em>&amp;amp;</em> or
-<em>&amp;#38;</em>), their being followed by form field names which might
+<em>&amp;#38;</em>), their being followed by form field NAMEs which might
 correspond to SGML entities could lead to corruption of the intended URL.
 
 <p>NOTE, in this regard, that Lynx converts ampersands to <em>&amp;amp;</em>
@@ -1094,14 +1104,24 @@ and which thus have the content appended as a <em>?searchpart</em>, but not
 if the METHOD was <em>POST</em>, because the content would be lost and the
 link thus would be invalid.
 
-<p>Lynx does not yet support <em>ENCTYPE="multipart/form-data"</em> for
-sending form content with name=value pairs encoded as multipart sections
-with individual MIME headers and terminators.  If the FORM tag indicates
-that ENCTYPE, Lynx will render and display the form fields, but will treat
-them as having the <em>DISABLED</em> attribute, so that they can't be
-submitted with an inappropriate encoding. [<A HREF="#TOC">ToC</A>]
+<p>Lynx supports <em>ENCTYPE="multipart/form-data"</em> for sending form
+content with name=value pairs encoded as multipart sections with individual
+MIME headers and boundaries.  However, Lynx does not yet support INPUTs
+with <em>TYPE=&quot;file&quot;</em> or <em>TYPE=&quot;range&quot;</em> and
+will set the <em>DISABLED</em> attribute for all of the form's fields if
+any INPUTs with either of those two TYPEs are present, so that the form
+can't be submitted.  Otherwise, Lynx will submit the form with the multipart
+ENCTYPE.
 
-<h2><a name="20"><em>Lynx and HTML Tables</em></a></h2>
+<p>A <em>Content-Disposition:&nbsp;file;&nbsp;filename=name.suffix</em>
+header can be used by CGI scripts to set the suggested filename offered
+by Lynx for '<em>d</em>'ownload and '<em>p</em>'rint menu options to save
+or mail the body returned by the script following submission of a FORM.
+Otherwise, Lynx uses the last symbolic element in the path for the FORM's
+ACTION, which is normally the script, itself, or a PATH_INFO field, and
+thus might be misleading. [<A HREF="#TOC">ToC</A>]
+
+<h2><A NAME="20"><em>Lynx and HTML Tables</em></a></h2>
 
 HTML includes markup for creating <em>tables</em> structured as arrays of
 cells aligned by columns and rows on the displayed page.
@@ -1125,7 +1145,7 @@ href="#21">HTML Tabs</a>.  An example <em>table</em> using <em>TAB</em>
 elements is included in the test subdirectory of the Lynx distribution.
 [<A HREF="#TOC">ToC</A>]
 
-<h2><a name="21"><em>Lynx and HTML Tabs</em></a></h2>
+<h2><A NAME="21"><em>Lynx and HTML Tabs</em></a></h2>
 
 Lynx implements the <a
 href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
@@ -1147,7 +1167,7 @@ support it.  Toggle to display of <a href="#8">source</a> and <a
 href="#11">search</a> for <em>&lt;tab</em> to examine the use of TAB markup
 in these documents. [<A HREF="#TOC">ToC</A>]
 
-<h2><a name="22"><em>Lynx and HTML Frames</em></a></h2>
+<h2><A NAME="22"><em>Lynx and HTML Frames</em></a></h2>
 
 Some implementations of HTML include markup, primarily designed for graphic
 clients, that is intended to create an array of simultaneously displayed,
@@ -1167,7 +1187,7 @@ one has the substantive material (if there is any), or you can try each
 of those links to see if anything worthwhile is returned.
 [<A HREF="#TOC">ToC</A>]
 
-<h2><a name="23"><em>Lynx and HTML Banners</em></a></h2>
+<h2><A NAME="23"><em>Lynx and HTML Banners</em></a></h2>
 
 Some implementations of HTML markup include provisions for creating a
 non-scrolling window to be positioned at the top of each page, containing
@@ -1199,7 +1219,7 @@ MicroSoft MARQUEE tag as a synonym for BANNER (i.e., presenting it's
 markup as a static <em>banner</em>, without any horizontal scrolling of
 its content). [<A HREF="#TOC">ToC</A>]
 
-<h2><a name="24"><em>Lynx and HTML Footnotes</em></a></h2>
+<h2><A NAME="24"><em>Lynx and HTML Footnotes</em></a></h2>
 
 Lynx implements the <a
 href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
@@ -1223,7 +1243,7 @@ you can return to your previous position in the document by pressing the
 markup that is valid in the BODY of the document.
 [<A HREF="#TOC">ToC</A>]
 
-<h2><a name="25"><em>Lynx and HTML Notes</em></a></h2>
+<h2><A NAME="25"><em>Lynx and HTML Notes</em></a></h2>
 
 Lynx implements the <a
 href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
@@ -1247,7 +1267,7 @@ It will <em>degrade gracefully</em> for WWW browsers which do not support
 NOTE, except for recognition of the ID attribute as a named <em>A</em>nchor.
 [<A HREF="#TOC">ToC</A>]
 
-<h2><a name="26"><em>Lynx and HTML Lists</em></a></h2>
+<h2><A NAME="26"><em>Lynx and HTML Lists</em></a></h2>
 
 Lynx implements the <a
 href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a>
@@ -1307,7 +1327,7 @@ blocks.  For DL blocks, double spacing will be used to separate the DT and
 DD elements unless the COMPACT attribute has been specified.
 [<A HREF="#TOC">ToC</A>]
 
-<h2><a name="27"><em>Lynx and HTML Quotes</em></a></h2>
+<h2><A NAME="27"><em>Lynx and HTML Quotes</em></a></h2>
 
 The <a
 href="http://www.w3.org/pub/WWW/MarkUp/html3/Contents.html">HTML 3.0</a> and
@@ -1333,7 +1353,7 @@ line.
 <p>Any ID attributes in BLOCKQUOTE, BQ or Q elements will be treated as
 named <em>A</em>nchors. [<A HREF="#TOC">ToC</A>]
 
-<h2><a name="28"><em>Lynx and Client-Side-Image-Maps</em></a></h2>
+<h2><A NAME="28"><em>Lynx and Client-Side-Image-Maps</em></a></h2>
 
 HTML includes markup, designed primarily for graphic clients, that treats
 inlined images as maps, such that areas of the image within which a mouse
@@ -1394,7 +1414,7 @@ OBJECT tags with the USEMAP and/or ISMAP attributes equivalently to
 its handling of IMG tags with <em>client-side-image-maps</em> and/or
 <em>server-side-image-maps</em>. [<A HREF="#TOC">ToC</A>]
 
-<h2><a name="29"><em>Lynx and Client-Side-Pull</em></a></h2>
+<h2><A NAME="29"><em>Lynx and Client-Side-Pull</em></a></h2>
 
 HTML includes provision for passing instructions to clients via directives
 in META tags, and one such instruction, via the token <em>Refresh</em>,
@@ -1587,6 +1607,9 @@ where
     		<dd>disable the retrieval status messages.
              <dt><code>-number_links</code>
     		<dd>force numbering of links.
+	     <dt><code>-popup</code>
+		<dd>toggles handling of single-choice SELECT options via
+		    popup windows or as lists of radio buttons.
 	     <dt><code>-post_data</code>
 		<dd>properly formatted data for a post form are read in from
 		    stdin and passed to the form. Input is terminated by a
@@ -1804,10 +1827,8 @@ the University of Minnesota, and the later versions of Lynx rely
 on the WWW client library code developed by Tim Berners-Lee (and
 others) and the WWW community.
 
-<p>Information on obtaining the most current version of Lynx is
-available via the
-<a href="http://www.nyu.edu/pages/wsn/subir/lynx.html"
->Lynx Enhanced Pages</a>.
+<p>Information on obtaining the most current version of Lynx is available
+via <a href="http://www.crl.com/~subir/lynx.html">Lynx links</a>.
 
 <p>[<A HREF="#TOC">ToC</A>]
 </body>

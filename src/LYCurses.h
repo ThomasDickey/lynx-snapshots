@@ -12,8 +12,7 @@
 #if defined(UNIX) && !defined(unix)
 #define unix
 #endif /* UNIX && !unix */
-#include "slang.h"
-#include "slcurses.h"
+#include <slang.h>
 
 #else /* Using curses: */
 
@@ -125,6 +124,21 @@ extern unsigned int Lynx_Color_Flags;
 #define NO_TTYTYPE
 #endif /* !NO_TTYTYPE */
 
+/* Map some curses functions to slang functions. */
+#define stdscr NULL
+#define COLS SLtt_Screen_Cols
+#define LINES SLtt_Screen_Rows
+#define move SLsmg_gotorc
+#define addstr SLsmg_write_string
+#define clear SLsmg_cls
+#define standout SLsmg_reverse_video
+#define standend  SLsmg_normal_video
+#define clrtoeol SLsmg_erase_eol
+#define scrollok(a,b) SLsmg_Newline_Moves = ((b) ? 1 : -1)
+#define addch SLsmg_write_char
+#define echo()
+#define printw SLsmg_printf
+ 
 extern int curscr;
 extern BOOLEAN FullRefresh;
 #ifdef clearok
@@ -139,10 +153,9 @@ extern void LY_SLrefresh NOPARAMS;
 
 #ifdef VMS
 extern void VTHome NOPARAMS;
-#ifdef endwin
-#undef endwin
-#endif /*endwin */
 #define endwin() clear(),refresh(),SLsmg_reset_smg(),VTHome()
+#else
+#define endwin SLsmg_reset_smg(),SLang_reset_tty
 #endif /* VMS */
 
 #else /* Define curses functions: */

@@ -48,7 +48,7 @@ extern char *list_format;
 extern BOOLEAN lynx_edit_mode;
 extern BOOLEAN no_dired_support;
 extern BOOLEAN dir_list_style;
-extern taglink *tagged;
+extern HTList *tagged;
 #define FILES_FIRST 1
 #define MIXED_STYLE 2
 #ifdef OK_OVERRIDE
@@ -81,7 +81,8 @@ extern BOOLEAN LYUseNoviceLineTwo;  /* True if TOGGLE_HELP is not mapped */
 
 #define MAX_LINE 1024	/* Hope that no window is larger than this */
 extern char star_string[MAX_LINE + 1]; /* from GridText.c */
-#define STARS(n) (&star_string[(MAX_LINE-1) - (n)])
+#define STARS(n) \
+ ((n) >= MAX_LINE ? star_string : &star_string[(MAX_LINE-1)] - (n))
 #define DIRNAMESIZE 256
 
 extern BOOLEAN LYShowCursor;   /* show the cursor or hide it */
@@ -153,6 +154,8 @@ extern BOOLEAN no_suspend;
 extern BOOLEAN no_editor;
 extern BOOLEAN no_shell;
 extern BOOLEAN no_bookmark;
+extern BOOLEAN no_multibook;
+extern BOOLEAN no_bookmark_exec;
 extern BOOLEAN no_option_save;
 extern BOOLEAN no_print;
 extern BOOLEAN no_download;
@@ -160,7 +163,6 @@ extern BOOLEAN no_disk_save;
 extern BOOLEAN no_exec;
 extern BOOLEAN no_lynxcgi;
 extern BOOLEAN exec_frozen;
-extern BOOLEAN no_bookmark_exec;
 extern BOOLEAN no_goto;
 extern BOOLEAN no_goto_cso;
 extern BOOLEAN no_goto_file;
@@ -197,6 +199,7 @@ extern char *editor;          /* if non empty it enables edit mode with
 			       * the editor that is named */
 extern char *jumpfile;
 extern char *bookmark_page;
+extern char *BookmarkPage;
 extern char *personal_type_map;
 extern char *global_type_map;
 extern char *global_extension_map;
@@ -248,5 +251,10 @@ extern BOOLEAN LYisConfiguredForX;
 extern char *URLDomainPrefixes;
 extern char *URLDomainSuffixes;
 extern BOOLEAN startfile_ok;
+extern BOOLEAN LYSelectPopups;		/* Cast popups to radio buttons? */
+extern BOOLEAN LYUseDefSelPop;		/* Command line -popup toggle    */
+extern int LYMultiBookmarks;    	/* Multi bookmark support on?	 */
+extern BOOLEAN LYMBMBlocked;		/* Force MBM support off?	 */
+extern BOOLEAN LYMBMAdvanced;		/* MBM statusline for ADVANCED?	 */
 
 #endif /* LYGLOBALDEFS_H */

@@ -50,6 +50,11 @@ PUBLIC unsigned long LYVMS_FixedLengthRecords PARAMS((char *filename));
 #endif /* USE_COMMAND_FILE */
 #endif /* VMS */
 
+PUBLIC HTStream* HTSaveToFile PARAMS((
+        HTPresentation *       pres,
+        HTParentAnchor *       anchor,
+        HTStream *             sink));
+
 #define FREE(x) if (x) {free(x); x = NULL;}
 
 
@@ -201,13 +206,23 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		    StrAllocCat(addr, path);
 #endif /* VMS */
 		    StrAllocCopy(me->anchor->FileCache, path);
+		    FREE(path);
 		    FREE(me->anchor->content_encoding);
 		    status = HTLoadFile(addr,
 			    		me->anchor,
 			    		me->pres->rep_out,
 					me->sink);
+		    if (dump_output_immediately &&
+		        me->pres->rep_out == HTAtom_for("www/present")) {
+			FREE(addr);
+			remove(me->anchor->FileCache);
+			FREE(me->anchor->FileCache);
+			FREE(me->remove_command);
+			FREE(me->end_command);
+			FREE(me);
+		        return;
+		    }
 		}
-		FREE(path);
 		FREE(addr);
 	    }
 
@@ -251,9 +266,10 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	FREE(me->end_command);
     }
 
-    FREE(me);
-
     if (dump_output_immediately) {
+        if (me->anchor->FileCache)
+            remove(me->anchor->FileCache);
+	FREE(me);
         (void) signal(SIGHUP, SIG_DFL);
         (void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
@@ -265,6 +281,9 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 #endif /* SIGTSTP */
         exit(0);
     }
+
+    FREE(me);
+    return;
 }
 
 /*	Abort writing
@@ -368,6 +387,10 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
     if (pres->quality == 999.0) { /* exec link */
+        if (dump_output_immediately) {
+	    LYCancelledFetch = TRUE;
+	    return(NULL);
+	}
         if (no_exec) {
             _statusline(EXECUTION_DISABLED);
             sleep(AlertSecs);
@@ -390,6 +413,10 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     }
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
     
+    if (dump_output_immediately) {
+        return(HTSaveToFile(pres, anchor, sink));
+    }
+
     me = (HTStream*)calloc(sizeof(*me),1);
     if (me == NULL)
         outofmem(__FILE__, "HTSaveAndExecute");
@@ -681,6 +708,17 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
     _statusline(RETRIEVING_FILE);
 
     StrAllocCopy(anchor->FileCache, fnam);
+    if (!strncasecomp(pres->rep->name, "text/html", 9)) {
+        /*
+	 *  Add the document's URL as a BASE tag at the top of the file,
+	 *  so that any partial or relative URLs within it will be resolved
+	 *  relative to that if no BASE tag is present and replaces it.
+	 *  Note that the markup will be technically invalid if a DOCTYPE
+	 *  declaration, or HTML or HEAD tags, are present, and thus the
+	 *  file may need editing for perfection. - FM
+	 */
+        fprintf(ret_obj->fp, "<BASE HREF=\"%s\">\n\n", anchor->address);
+    }
     return ret_obj;
 }
 

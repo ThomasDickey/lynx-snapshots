@@ -16,9 +16,6 @@
 #define HTTPS_PORT  443
 #define SNEWS_PORT  563
 
-#define HTTP_NETREAD   NETREAD
-#define HTTP_NETWRITE  NETWRITE
-
 #define INIT_LINE_SIZE		1024	/* Start with line buffer this big */
 #define LINE_EXTEND_THRESH	256	/* Minimum read size */
 #define VERSION_LENGTH 		20	/* for returned protocol version */
@@ -67,6 +64,10 @@ extern BOOL dump_output_immediately;  /* TRUE if no interactive user */
 
 extern char * HTLoadedDocumentURL NOPARAMS;
 extern int HTCheckForInterrupt NOPARAMS;
+
+#define HTTP_NETREAD(a, b, c, d)   NETREAD(a, b, c)
+#define HTTP_NETWRITE(a, b, c, d)  NETWRITE(a, b, c)
+#define HTTP_NETCLOSE(a, b)  (void)NETCLOSE(a)
 
 
 /*		Load Document from HTTP Server			HTLoadHTTP()
@@ -118,6 +119,8 @@ PUBLIC int HTLoadHTTP ARGS4 (
   int length, doing_redirect, rv;
   int already_retrying = 0;
   int len = 0;
+
+  void * handle = NULL;
 
   if (anAnchor->isHEAD)
       do_head = TRUE;
@@ -405,15 +408,16 @@ PUBLIC int HTLoadHTTP ARGS4 (
     {
       if (TRACE)
           fprintf (stderr, "HTTP: Doing post, content-type '%s'\n",
-                   anAnchor->post_content_type);
+                   anAnchor->post_content_type ? anAnchor->post_content_type
+		   			       : "lose");
       sprintf (line, "Content-type: %s%c%c",
                anAnchor->post_content_type ? anAnchor->post_content_type 
-							: "lose", CR, LF);
+					   : "lose", CR, LF);
       StrAllocCat(command, line);
       {
         int content_length;
         if (!anAnchor->post_data)
-          content_length = 4; /* 4 == "lose" :-) */
+          content_length = 0;
         else
           content_length = strlen (anAnchor->post_data);
         sprintf (line, "Content-length: %d%c%c",
@@ -421,12 +425,12 @@ PUBLIC int HTLoadHTTP ARGS4 (
         StrAllocCat(command, line);
       }
 
-      StrAllocCat(command, crlf);	/* Blank line means "end" */
+      StrAllocCat(command, crlf);	/* Blank line means "end" of headers */
 
       StrAllocCat(command, anAnchor->post_data);
     }
-
-  StrAllocCat(command, crlf);	/* Blank line means "end" */
+  else
+      StrAllocCat(command, crlf);	/* Blank line means "end" of headers */
 
   if (TRACE)
       fprintf (stderr, "Writing:\n%s----------------------------------\n",
@@ -434,7 +438,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
 
   _HTProgress ("Sending HTTP request.");
 
-  status = HTTP_NETWRITE(s, command, (int)strlen(command));
+  status = HTTP_NETWRITE(s, command, (int)strlen(command), handle);
   FREE(command);
   if (status <= 0) 
     {
@@ -455,7 +459,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
                 fprintf (stderr, 
                  "HTTP: BONZO ON WRITE Trying again with HTTP0 request.\n");
             _HTProgress ("Retrying as HTTP0 request.");
-            (void)NETCLOSE(s);
+            HTTP_NETCLOSE(s, handle);
             extensions = NO;
             already_retrying = 1;
             goto try_again;
@@ -465,7 +469,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
           if (TRACE)
               fprintf (stderr,
 	   "HTTP: Hit unexpected network WRITE error; aborting connection.\n");
-          (void)NETCLOSE(s);
+          HTTP_NETCLOSE(s, handle);
           status = -1;
           HTAlert("Unexpected network write error; connection aborted.");
           goto done;
@@ -500,7 +504,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
             fprintf (stderr, "HTTP: Trying to read %d\n",
                      buffer_length - length - 1);
         status = HTTP_NETREAD(s, line_buffer + length,
-                              buffer_length - length - 1);
+                              buffer_length - length - 1, handle);
         if (TRACE)
             fprintf (stderr, "HTTP: Read %d\n", status);
         if (status <= 0)
@@ -524,7 +528,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
                 if (TRACE)
                     fprintf (stderr,
 		    	"HTTP: BONZO Trying again with HTTP0 request.\n");
-                (void)NETCLOSE(s);
+                HTTP_NETCLOSE(s, handle);
                 FREE(line_buffer);
                 FREE(line_kept_clean);
 
@@ -540,7 +544,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
   "HTTP: Hit unexpected network read error; aborting connection; status %d.\n",
 			   status);
                 HTAlert("Unexpected network read error; connection aborted.");
-                (void)NETCLOSE(s);
+                HTTP_NETCLOSE(s, handle);
                 status = -1;
                 goto clean_up;
               }
@@ -609,7 +613,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
       already_retrying = 1;
       if (TRACE)
           fprintf(stderr, "HTTP: close socket %d to retry with HTTP0\n", s);
-      (void)NETCLOSE(s);
+      HTTP_NETCLOSE(s, handle);
       /* print a progress message */
       _HTProgress ("Retrying as HTTP0 request.");
       goto try_again;
@@ -755,7 +759,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
 		 *  document. - FM
 		 */
 	        HTAlert(line_buffer);
-                (void)NETCLOSE(s);
+                HTTP_NETCLOSE(s, handle);
 	        status = HT_NO_DATA;
 	        goto done;
 		break;
@@ -873,7 +877,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
 		   *  Don't redirect POST content without approval
 		   *  from an interactive user. - FM
 		   */
-		  (void)NETCLOSE(s);
+		  HTTP_NETCLOSE(s, handle);
 		  status = -1;
 		  HTAlert(
 		       "Redirection of POST content requires user approval.");
@@ -887,11 +891,12 @@ PUBLIC int HTLoadHTTP ARGS4 (
 	       *  any, and then close the connection. - FM
 	       */
 	      while ((status = HTTP_NETREAD(s, line_buffer,
-	      				    INIT_LINE_SIZE)) > 0) {
+	      				    INIT_LINE_SIZE,
+					    handle)) > 0) {
 	          line_buffer[status] = '\0';
 		  StrAllocCat(line_kept_clean, line_buffer);
 	      }
-	      (void)NETCLOSE(s);
+	      HTTP_NETCLOSE(s, handle);
               if (status == HT_INTERRUPTED) {
 		  /*
 		   *  Impatient user. - FM
@@ -1014,22 +1019,37 @@ PUBLIC int HTLoadHTTP ARGS4 (
 			}
 			/*
 			 *  Make sure the user wants to redirect
-			 *  the POST content. - FM
+			 *  the POST content, or treat as GET - FM & DK
 			 */
-			if (!HTConfirm(
-				"Redirection for POST content. Proceed?")) {
-			    doing_redirect = 0;
-			    FREE(redirecting_url);
-			    status = HT_NO_DATA;
-			    goto clean_up;
-			}
-			/*
-			 *  Set the flag to retain the POST content
-			 *  and go back to check out the URL. - FM
-			 */
-			redirect_post_content = TRUE;
-		        status = HT_REDIRECTING;
-		        goto clean_up;
+			switch (HTConfirmPostRedirect(redirecting_url)) {
+			    /*
+			     *  User failed to confirm.
+			     *  Abort the fetch.
+			     */
+			    case 0:
+			        doing_redirect = 0;
+				FREE(redirecting_url);
+				status = HT_NO_DATA;
+				goto clean_up;
+				      
+			    /*
+			     *  User wants to treat as GET with no content.
+			     *  Go back to check out the URL.
+			     */
+			    case 303:
+				status = HT_REDIRECTING;
+				goto clean_up;
+
+			    /*
+			     *  Set the flag to retain the POST
+			     *  content and go back to check out
+			     *  the URL. - FM
+			     */
+			    default:
+				status = HT_REDIRECTING;
+				redirect_post_content = TRUE;
+				goto clean_up;
+  			}
 		    }
 	            break;
 	        } else {
@@ -1070,11 +1090,12 @@ PUBLIC int HTLoadHTTP ARGS4 (
 		 *  Otherwise, issue a statusline message and
 		 *  restore the current document.  - FM
 		 */
-		if (HTAA_shouldRetryWithAuth(start_of_data, length, NULL, s)) 
+		if (HTAA_shouldRetryWithAuth(start_of_data, length,
+					     (void *)handle, s))
                   {
  		    extern char *authentication_info[2];
 
-                    (void)NETCLOSE(s);
+                    HTTP_NETCLOSE(s, handle);
                     if (dump_output_immediately && !authentication_info[0]) {
                         fprintf(stderr,
 		      		"HTTP: Access authorization required.\n");
@@ -1100,7 +1121,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
 		  {
 		    HTAlert(
 	"Can't retry with authorization!  Contact the server's WebMaster.");
-		    (void)NETCLOSE(s);
+		    HTTP_NETCLOSE(s, handle);
                     status = -1;
                     goto clean_up;
 		  }
@@ -1115,7 +1136,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
 		 */
 	        HTAlert(
 		 "Proxy Authentication Required.  Sorry, not yet supported.");
-                (void)NETCLOSE(s);
+                HTTP_NETCLOSE(s, handle);
 	        status = HT_NO_DATA;
 	        goto done;
 		break;
@@ -1126,7 +1147,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
 		 *  and restore the current document. - FM
 		 */
 	        HTAlert(line_buffer);
-                (void)NETCLOSE(s);
+                HTTP_NETCLOSE(s, handle);
 	        status = HT_NO_DATA;
 	        goto done;
 		break;
@@ -1154,7 +1175,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
 		 */
 		HTAlert(line_buffer);
 		if (traversal) {
-		    (void)NETCLOSE(s);
+		    HTTP_NETCLOSE(s, handle);
 		    status = -1;
 		    goto clean_up;
 		}
@@ -1187,7 +1208,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
             HTAlert("Unknown status reply from server!");
 	    HTAlert(line_buffer);
 	    if (traversal) {
-		(void)NETCLOSE(s);
+		HTTP_NETCLOSE(s, handle);
 		status = -1;
 		goto clean_up;
 	    }
@@ -1213,7 +1234,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
     {
       char buffer[1024];	/* @@@@@@@@ */
 
-      (void)NETCLOSE(s);
+      HTTP_NETCLOSE(s, handle);
       sprintf(buffer, "Sorry, no known way of converting %s to %s.",
               HTAtom_name(format_in), HTAtom_name(format_out));
       _HTProgress (buffer);
@@ -1225,61 +1246,69 @@ PUBLIC int HTLoadHTTP ARGS4 (
   (*target->isa->put_block)(target, start_of_data, length);
 
   /* Go pull the bulk of the data down. */
-  rv = HTCopy(s, NULL, target);
+  rv = HTCopy(s, (void *)handle, target);
 
-  if (rv == -1)
-    {
-      /* Intentional interrupt before data were received, not an error */
+  if (rv == -1) {
+      /*
+       *  Intentional interrupt before data were received, not an error
+       */
       /* (*target->isa->_abort)(target, NULL); */ /* already done in HTCopy */
       status = HT_INTERRUPTED;
-      (void)NETCLOSE(s);
+      HTTP_NETCLOSE(s, handle);
       goto clean_up;
-    }
-  if (rv == -2 && !already_retrying && !do_post)
-    { 
-      /* Aw hell, a REAL error, maybe cuz it's a dumb HTTP0 server */
-      if (TRACE)
-          fprintf (stderr, "HTTP: Trying again with HTTP0 request.\n");
-      /* May as well consider it an interrupt -- right? */
+  }
+
+  if (rv == -2) { 
+      /*
+       *  Aw hell, a REAL error, maybe cuz it's a dumb HTTP0 server
+       */
       (*target->isa->_abort)(target, NULL);
-      (void)NETCLOSE(s);
-      FREE(line_buffer);
-      FREE(line_kept_clean);
-      extensions = NO;
-      already_retrying = 1;
-      _HTProgress ("Retrying as HTTP0 request.");
-      goto try_again;
-    }
+      HTTP_NETCLOSE(s, handle);
+      if (!already_retrying && !do_post) {
+          if (TRACE)
+              fprintf (stderr, "HTTP: Trying again with HTTP0 request.\n");
+          /*
+           *  May as well consider it an interrupt -- right?
+           */
+          FREE(line_buffer);
+          FREE(line_kept_clean);
+          extensions = NO;
+          already_retrying = 1;
+          _HTProgress ("Retrying as HTTP0 request.");
+          goto try_again;
+      } else {
+          status = HT_NO_DATA;
+	  goto clean_up;
+      }
+  }
 
   /* 
-   * Close socket if partial transmission (was freed on abort)
-   * Free if complete transmission (socket was closed before return)
+   *  Free if complete transmission (socket was closed before return).
+   *  Close socket if partial transmission (was freed on abort).
    */
-  if (rv == HT_INTERRUPTED)
-    {
-      (void)NETCLOSE(s);
-    }
-  else
+  if (rv != HT_INTERRUPTED) {
       (*target->isa->_free)(target);
+  } else {
+      HTTP_NETCLOSE(s, handle);
+  }
 
-  if (doing_redirect)
-    /*
-     * We already jumped over all this if the "case 3:" code worked
-     * above, but we'll check here as a backup in case it fails. - FM
-     */
-    {
+  if (doing_redirect) {
+      /*
+       *  We already jumped over all this if the "case 3:" code worked
+       *  above, but we'll check here as a backup in case it fails. - FM
+       */
       /* Lou's old comment:  - FM */
       /* OK, now we've got the redirection URL temporarily stored
          in external variable redirecting_url, exported from HTMIME.c,
          since there's no straightforward way to do this in the library
          currently.  Do the right thing. */
       status = HT_REDIRECTING;
-    }
-  else
-    {
-      /* If any data were received, treat as a complete transmission */
+  } else {
+      /*
+       *  If any data were received, treat as a complete transmission
+       */
       status = HT_LOADED;
-    }
+  }
 
   /*	Clean up
    */

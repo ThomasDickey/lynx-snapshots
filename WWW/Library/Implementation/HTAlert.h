@@ -81,6 +81,20 @@ extern void HTPromptUsernameAndPassword PARAMS((
 	char **		username,
 	char **		password));
 
+
+/*      Confirm redirection of POST		HTConfirmPostRedirect()
+**
+** On entry,
+**      redirecting_url             is the Location.
+**
+** On exit,
+**      Returns 0 on cancel,
+**	  1 for redirect of POST with content,
+**	303 for redirect as GET without content
+*/
+extern int HTConfirmPostRedirect PARAMS((
+	CONST char *	redirecting_url));
+
 /*
 
     */

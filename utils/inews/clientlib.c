@@ -22,7 +22,6 @@ static char	*sccsid = "@(#)clientlib.c	1.11	(Berkeley) 10/27/89";
 #ifndef FOR_NN
 #include <sys/types.h>
 #endif
-#include <sys/socket.h>
 #ifdef FOR_NN
 #if !defined(NETWORK_DATABASE) || defined(NETWORK_BYTE_ORDER)
 #include <netinet/in.h>
@@ -30,6 +29,7 @@ static char	*sccsid = "@(#)clientlib.c	1.11	(Berkeley) 10/27/89";
 #else
 #include <netinet/in.h>
 #endif
+#include <sys/socket.h>
 #ifndef EXCELAN
 # include <netdb.h>
 #endif not EXCELAN

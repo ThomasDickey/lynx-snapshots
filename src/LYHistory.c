@@ -66,14 +66,16 @@ PUBLIC void LYpush ARGS1(document *,doc)
     if (nhist<MAXHIST)  {
 	history[nhist].link = doc->link;
 	history[nhist].page = doc->line;
-	history[nhist].title = 0;
+	history[nhist].title = NULL;
 	StrAllocCopy(history[nhist].title, doc->title);
-	history[nhist].address = 0;
+	history[nhist].address = NULL;
 	StrAllocCopy(history[nhist].address, doc->address);
-	history[nhist].post_data = 0;
+	history[nhist].post_data = NULL;
 	StrAllocCopy(history[nhist].post_data, doc->post_data);
-	history[nhist].post_content_type = 0;
+	history[nhist].post_content_type = NULL;
 	StrAllocCopy(history[nhist].post_content_type, doc->post_content_type);
+	history[nhist].bookmark = NULL;
+	StrAllocCopy(history[nhist].bookmark, doc->bookmark);
 	history[nhist].isHEAD = doc->isHEAD;
 	nhist++;
 
@@ -101,6 +103,8 @@ PUBLIC void LYpop ARGS1(document *,doc)
 	doc->post_data = history[nhist].post_data;
 	FREE(doc->post_content_type);
 	doc->post_content_type = history[nhist].post_content_type;
+	FREE(doc->bookmark);
+	doc->bookmark = history[nhist].bookmark;
 	doc->isHEAD = history[nhist].isHEAD;
 
         if(TRACE)
@@ -124,6 +128,7 @@ PUBLIC void LYpop_num ARGS2(int,number, document *,doc)
 	StrAllocCopy(doc->address, history[number].address);
 	StrAllocCopy(doc->post_data, history[number].post_data);
 	StrAllocCopy(doc->post_content_type, history[number].post_content_type);
+	StrAllocCopy(doc->bookmark, history[number].bookmark);
 	doc->isHEAD = history[number].isHEAD;
     }
 }
@@ -236,6 +241,7 @@ PUBLIC void historytarget ARGS1(document *,newdoc)
 	    WWWDoc.address = newdoc->address;
             WWWDoc.post_data = newdoc->post_data;
             WWWDoc.post_content_type = newdoc->post_content_type;
+            WWWDoc.bookmark = newdoc->bookmark;
 	    WWWDoc.isHEAD = newdoc->isHEAD;
 	    if ((HText *)HTAnchor_document(
 				HTAnchor_parent(HTAnchor_findAddress(&WWWDoc))

@@ -49,6 +49,7 @@ typedef enum _MIME_state {
 	miCONNECTION,
 	miCONTENT_,
 	miCONTENT_BASE,
+	miCONTENT_DISPOSITION,
 	miCONTENT_ENCODING,
 	miCONTENT_FEATURES,
 	miCONTENT_L,
@@ -75,7 +76,10 @@ typedef enum _MIME_state {
 	miPROXY_AUTHENTICATE,
 	miPUBLIC,
 	miRETRY_AFTER,
+	miS,
+	miSE,
 	miSERVER,
+	miSET_COOKIE,
 	miT,
 	miTITLE,
 	miTRANSFER_ENCODING,
@@ -227,7 +231,7 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 	    me->state = miCHECK;
 	    if (TRACE)
 	        fprintf(stderr,
-	 "HTMIME: Got 'S' at beginning of line, checking for 'eep-alive:'\n");
+	 "HTMIME: Got 'K' at beginning of line, checking for 'eep-alive:'\n");
 	    break;
 
 	case 'l':
@@ -258,12 +262,10 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 
 	case 's':
 	case 'S':
-	    me->check_pointer = "erver:";
-	    me->if_ok = miSERVER;
-	    me->state = miCHECK;
+	    me->state = miS;
 	    if (TRACE)
-	        fprintf(stderr,
-	      "HTMIME: Got 'S' at beginning of line, checking for 'erver'\n");
+	        fprintf (stderr,
+		       "HTMIME: Got 'S' at beginning of line, state now S\n");
 	    break;
 
 	case 't':
@@ -535,12 +537,12 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
         switch (c) {
         case 'l':
         case 'L':
-	    me->check_pointer = "low:";
+	    me->check_pointer = "ow:";
 	    me->if_ok = miALLOW;
 	    me->state = miCHECK;
 	    if (TRACE)
 	        fprintf(stderr,
-		      "HTMIME: Was AL, found L, checking for 'low:'\n");
+		      "HTMIME: Was AL, found L, checking for 'ow:'\n");
 	    break;
 
 	case 't':
@@ -629,12 +631,12 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
         switch (c) {
         case 'n':
         case 'N':
-	    me->check_pointer = "nection:";
+	    me->check_pointer = "ection:";
 	    me->if_ok = miCONNECTION;
 	    me->state = miCHECK;
 	    if (TRACE)
 	        fprintf(stderr,
-		      "HTMIME: Was CON, found N, checking for 'nection:'\n");
+		      "HTMIME: Was CON, found N, checking for 'ection:'\n");
 	    break;
 
 	case 't':
@@ -740,12 +742,12 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 	case 'R':
 	    me->state = miPR;
 	    if (TRACE)
-	        fprintf(stderr, "HTMIME: Was P, found O, state now PR'\n");
+	        fprintf(stderr, "HTMIME: Was P, found R, state now PR'\n");
 	    break;
 
  	case 'u':
 	case 'U':
-	    me->check_pointer = "lic:";
+	    me->check_pointer = "blic:";
 	    me->if_ok = miPUBLIC;
 	    me->state = miCHECK;
 	    if (TRACE)
@@ -768,12 +770,12 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
         switch (c) {
 	case 'a':
 	case 'A':
-	    me->check_pointer = "agma:";
+	    me->check_pointer = "gma:";
 	    me->if_ok = miPRAGMA;
 	    me->state = miCHECK;
 	    if (TRACE)
 	        fprintf(stderr,
-			"HTMIME: Was PR, found A, checking for 'agma'\n");
+			"HTMIME: Was PR, found A, checking for 'gma'\n");
 	    break;
 
 	case 'o':
@@ -791,6 +793,59 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 	        fprintf(stderr,
 		   "HTMIME: Bad character `%c' found where `%s' expected\n",
 		        c, "'a' or 'o'");
+	    goto bad_field_name;
+	    break;
+
+	} /* switch on character */
+	break;
+
+    case miS:				/* Check for 'e' */
+        switch (c) {
+	case 'e':
+	case 'E':
+	    me->state = miSE;
+	    if (TRACE)
+	        fprintf(stderr, "HTMIME: Was S, found E, state now SE'\n");
+	    break;
+
+	default:
+	    if (TRACE)
+	        fprintf(stderr,
+		   "HTMIME: Bad character `%c' found where `%s' expected\n",
+		        c, "'e'");
+	    goto bad_field_name;
+	    break;
+
+	} /* switch on character */
+	break;
+
+    case miSE:				/* Check for 'r' or 't' */
+        switch (c) {
+	case 'r':
+	case 'R':
+	    me->check_pointer = "ver:";
+	    me->if_ok = miSERVER;
+	    me->state = miCHECK;
+	    if (TRACE)
+	        fprintf(stderr,
+			"HTMIME: Was SE, found R, checking for 'ver'\n");
+	    break;
+
+	case 't':
+	case 'T':
+	    me->check_pointer = "-cookie:";
+	    me->if_ok = miSET_COOKIE;
+	    me->state = miCHECK;
+	    if (TRACE)
+	        fprintf(stderr,
+		 "HTMIME: Was SE, found T, checking for '-cookie'\n");
+	    break;
+
+	default:
+	    if (TRACE)
+	        fprintf(stderr,
+		   "HTMIME: Bad character `%c' found where `%s' expected\n",
+		        c, "'r' or 't'");
 	    goto bad_field_name;
 	    break;
 
@@ -957,6 +1012,16 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		      "HTMIME: Was CONTENT_, found B, checking for 'ase:'\n");
 	    break;
 
+        case 'd':
+        case 'D':
+	    me->check_pointer = "isposition:";
+	    me->if_ok = miCONTENT_DISPOSITION;
+	    me->state = miCHECK;
+	    if (TRACE)
+	        fprintf(stderr,
+		"HTMIME: Was CONTENT_, found D, checking for 'isposition:'\n");
+	    break;
+
         case 'e':
         case 'E':
 	    me->check_pointer = "ncoding:";
@@ -1101,6 +1166,7 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
     case miCOOKIE:
     case miCONNECTION:
     case miCONTENT_BASE:
+    case miCONTENT_DISPOSITION:
     case miCONTENT_ENCODING:
     case miCONTENT_FEATURES:
     case miCONTENT_LANGUAGE:
@@ -1122,6 +1188,7 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
     case miPUBLIC:
     case miRETRY_AFTER:
     case miSERVER:
+    case miSET_COOKIE:
     case miTITLE:
     case miTRANSFER_ENCODING:
     case miUPGRADE:
@@ -1183,6 +1250,8 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Cache-Control: '%s'\n",
 			    me->value);
+		if (!(me->value && *me->value))
+		    break;
 		/*
 		**  Convert to lowercase and indicate in anchor. - FM
 		*/
@@ -1212,6 +1281,49 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Content-Base: '%s'\n",
 			    me->value);
+		if (!(me->value && *me->value))
+		    break;
+		/*
+		**  Indicate in anchor. - FM
+		*/
+		StrAllocCopy(me->anchor->content_base, me->value);
+                break;
+	    case miCONTENT_DISPOSITION:
+                if (TRACE)
+                    fprintf(stderr,
+		    	    "HTMIME: PICKED UP Content-Disposition: '%s'\n",
+			    me->value);
+		if (!(me->value && *me->value))
+		    break;
+		/*
+		**  Indicate in anchor. - FM
+		*/
+		StrAllocCopy(me->anchor->content_disposition, me->value);
+		/*
+		**  If it includes file; filename=name.suffix
+		**  load the me->SugFname element. - FM
+		*/
+		cp = me->anchor->content_disposition;
+		while (*cp != '\0' && strncasecomp(cp, "file;", 5))
+		    cp++;
+		if (*cp != '\0') {
+		    cp += 5;
+		    while (*cp != '\0' && WHITE(*cp))
+		        cp++;
+		    if (*cp != '\0') {
+		        while (*cp != '\0' && strncasecomp(cp, "filename=", 9))
+			    cp++;
+			if (*cp != '\0') {
+			    StrAllocCopy(me->anchor->SugFname, (cp + 9));
+			    cp = me->anchor->SugFname;
+			    while (*cp != '\0' && !WHITE(*cp))
+				cp++;
+			    *cp = '\0';
+			    if (*me->anchor->SugFname == '\0')
+			        FREE(me->anchor->SugFname);
+			}
+		    }
+		}
                 break;
             case miCONTENT_ENCODING:
                 if (TRACE)
@@ -1256,6 +1368,8 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Content-Language: '%s'\n",
 			    me->value);
+		if (!(me->value && *me->value))
+		    break;
 		/*
 		**  Convert to lowercase and indicate in anchor. - FM
 		*/
@@ -1264,12 +1378,23 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
 		StrAllocCopy(me->anchor->content_language, me->value);
                 break;
 	    case miCONTENT_LENGTH:
+                if (TRACE)
+                    fprintf(stderr,
+                            "HTMIME: PICKED UP Content-Length: '%s'\n",
+                            me->value);
+		if (!(me->value && *me->value))
+		    break;
+		/*
+		**  Convert to integer and indicate in anchor. - FM
+		*/
                 me->content_length = atoi(me->value);
-                /* This is TEMPORARY. */
+                /*
+		**  This is TEMPORARY.
+		*/
                 loading_length = me->content_length;
                 if (TRACE)
                     fprintf(stderr,
-                            "HTMIME: PICKED UP Content-Length: '%d'\n",
+                            "        Converted to integer: '%d'\n",
                             me->content_length);
                 break;
 	    case miCONTENT_LOCATION:
@@ -1277,12 +1402,24 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Content-Location: '%s'\n",
 			    me->value);
+		if (!(me->value && *me->value))
+		    break;
+		/*
+		**  Indicate in anchor. - FM
+		*/
+		StrAllocCopy(me->anchor->content_location, me->value);
                 break;
 	    case miCONTENT_MD5:
                 if (TRACE)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Content-MD5: '%s'\n",
 			    me->value);
+		if (!(me->value && *me->value))
+		    break;
+		/*
+		**  Indicate in anchor. - FM
+		*/
+		StrAllocCopy(me->anchor->content_md5, me->value);
                 break;
 	    case miCONTENT_RANGE:
                 if (TRACE)
@@ -1295,6 +1432,8 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
                     fprintf(stderr,
 			"HTMIME: PICKED UP Content-Transfer-Encoding: '%s'\n",
                             me->value);
+		if (!(me->value && *me->value))
+		    break;
 		/*
 		**  Force the Content-Transfer-Encoding value
 		**  to all lower case. - FM
@@ -1308,6 +1447,8 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Content-Type: '%s'\n",
 			    me->value);
+		if (!(me->value && *me->value))
+		    break;
 		/*
 		**  Force the Content-Type value to all
 		**  lower case and strip spaces. - FM
@@ -1325,6 +1466,12 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Date: '%s'\n",
 			    me->value);
+		if (!(me->value && *me->value))
+		    break;
+		/*
+		**  Indicate in anchor. - FM
+		*/
+		StrAllocCopy(me->anchor->date, me->value);
                 break;
 	    case miETAG:
                 if (TRACE)
@@ -1337,6 +1484,12 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Expires: '%s'\n",
 			    me->value);
+		if (!(me->value && *me->value))
+		    break;
+		/*
+		**  Indicate in anchor. - FM
+		*/
+		StrAllocCopy(me->anchor->expires, me->value);
                 break;
 	    case miKEEP_ALIVE:
                 if (TRACE)
@@ -1349,6 +1502,12 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
                     fprintf(stderr,
 		    	    "HTMIME: PICKED UP Last-Modified: '%s'\n",
 			    me->value);
+		if (!(me->value && *me->value))
+		    break;
+		/*
+		**  Indicate in anchor. - FM
+		*/
+		StrAllocCopy(me->anchor->last_modified, me->value);
                 break;
 	    case miLINK:
                 if (TRACE)
@@ -1367,6 +1526,8 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
                     fprintf(stderr,
                             "HTMIME: PICKED UP Pragma: '%s'\n",
 			    me->value);
+		if (!(me->value && *me->value))
+		    break;
 		/*
 		 *  Check whether to set no_cache for the anchor. - FM
 		 */
@@ -1395,6 +1556,18 @@ PRIVATE void HTMIME_put_character ARGS2(HTStream *, me, char, c)
                 if (TRACE)
                     fprintf(stderr,
                             "HTMIME: PICKED UP Server: '%s'\n",
+			    me->value);
+		if (!(me->value && *me->value))
+		    break;
+		/*
+		**  Indicate in anchor. - FM
+		*/
+		StrAllocCopy(me->anchor->server, me->value);
+                break;
+	    case miSET_COOKIE:
+                if (TRACE)
+                    fprintf(stderr,
+                            "HTMIME: PICKED UP Set-Cookie: '%s'\n",
 			    me->value);
                 break;
 	    case miTITLE:
@@ -1579,9 +1752,18 @@ PUBLIC HTStream* HTMIMEConvert ARGS3(
     me->anchor	=	anchor;
     me->anchor->no_cache = FALSE;
     FREE(me->anchor->cache_control);
+    FREE(me->anchor->SugFname);
     FREE(me->anchor->charset);
     FREE(me->anchor->content_language);
     FREE(me->anchor->content_encoding);
+    FREE(me->anchor->content_base);
+    FREE(me->anchor->content_disposition);
+    FREE(me->anchor->content_location);
+    FREE(me->anchor->content_md5);
+    FREE(me->anchor->date);
+    FREE(me->anchor->expires);
+    FREE(me->anchor->last_modified);
+    FREE(me->anchor->server);
     me->target	= 	NULL;
     me->state	=	miBEGINNING_OF_LINE;
     /*
@@ -1919,7 +2101,7 @@ PUBLIC int HTrjis ARGS2(
 */
 /*
  * RJIS ( Recover JIS code from broken file )
- * $Header: /usr/build/VCS/lynx/WWW/Library/Implementation/RCS/HTMIME.c,v 1.1 1996/09/02 00:21:10 tom Exp $
+ * @Header: rjis.c,v 0.2 92/09/04 takahasi Exp @
  * Copyright (C) 1992 1994
  * Hironobu Takahashi (takahasi@tiny.or.jp)
  *
