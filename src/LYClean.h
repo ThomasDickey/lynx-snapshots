@@ -9,10 +9,10 @@
 extern BOOLEAN HadVMSInterrupt;
 #endif
 
-extern void cleanup_sig PARAMS((int sig));
-extern void cleanup NOPARAMS;
-extern void cleanup_files NOPARAMS;
-extern void set_alarm PARAMS((int sig));
-extern void reset_alarm NOPARAMS;
+extern void cleanup_sig (int sig);
+extern void cleanup (void);
+extern void cleanup_files (void);
+extern void set_alarm (int sig);
+extern void reset_alarm (void);
 
 #endif /* LYCLEAN_H */

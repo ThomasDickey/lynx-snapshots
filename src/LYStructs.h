@@ -127,12 +127,12 @@ extern lynx_list_item_type *externals;
 
 typedef struct
 {
-    CONST char *name;
+    const char *name;
     int value;
 }
 Config_Enum;
 
-typedef int (*ParseFunc) PARAMS((char *));
+typedef int (*ParseFunc) (char *);
 
 #define ParseUnionMembers \
 	lynx_list_item_type** add_value; \

@@ -39,14 +39,14 @@
 #include <HTNews.h>
 #endif
 
-PUBLIC BOOLEAN have_read_cfg = FALSE;
-PUBLIC BOOLEAN LYUseNoviceLineTwo = TRUE;
+BOOLEAN have_read_cfg = FALSE;
+BOOLEAN LYUseNoviceLineTwo = TRUE;
 
 /*
  *  Translate a TRUE/FALSE field in a string buffer.
  */
-PRIVATE BOOL is_true ARGS1(
-	char *, string)
+static BOOL is_true (
+	char * string)
 {
     if (!strncasecomp(string,"TRUE",4))
 	return(TRUE);
@@ -57,8 +57,8 @@ PRIVATE BOOL is_true ARGS1(
 /*
  *  Find an unescaped colon in a string buffer.
  */
-PRIVATE char *find_colon ARGS1(
-	char *, buffer)
+static char *find_colon (
+	char * buffer)
 {
     char ch, *buf = buffer;
 
@@ -78,8 +78,8 @@ PRIVATE char *find_colon ARGS1(
     return NULL;
 }
 
-PRIVATE void free_item_list ARGS1(
-    lynx_list_item_type **,	ptr)
+static void free_item_list (
+    lynx_list_item_type **	ptr)
 {
     lynx_list_item_type *cur = *ptr;
     lynx_list_item_type *next;
@@ -97,7 +97,7 @@ PRIVATE void free_item_list ARGS1(
 /*
  *  Function for freeing the DOWNLOADER and UPLOADER menus list. - FM
  */
-PRIVATE void free_all_item_lists NOARGS
+static void free_all_item_lists (void)
 {
     free_item_list(&printers);
     free_item_list(&downloaders);
@@ -115,10 +115,10 @@ PRIVATE void free_all_item_lists NOARGS
 /*
  *  Process string buffer fields for DOWNLOADER or UPLOADER menus.
  */
-PRIVATE void add_item_to_list ARGS3(
-	char *,			buffer,
-	lynx_list_item_type **, list_ptr,
-	int,			special)
+static void add_item_to_list (
+	char *			buffer,
+	lynx_list_item_type ** list_ptr,
+	int			special)
 {
     char *colon, *next_colon;
     lynx_list_item_type *cur_item, *prev_item;
@@ -203,9 +203,9 @@ PRIVATE void add_item_to_list ARGS3(
     }
 }
 
-PUBLIC lynx_list_item_type *find_item_by_number ARGS2(
-	lynx_list_item_type *,	list_ptr,
-	char *,			number)
+lynx_list_item_type *find_item_by_number (
+	lynx_list_item_type *	list_ptr,
+	char *			number)
 {
     int value = atoi(number);
     while (value-- >= 0 && list_ptr != 0) {
@@ -214,10 +214,10 @@ PUBLIC lynx_list_item_type *find_item_by_number ARGS2(
     return list_ptr;
 }
 
-PUBLIC int match_item_by_name ARGS3(
-    lynx_list_item_type *,	ptr,
-    char *,			name,
-    BOOLEAN,			only_overriders)
+int match_item_by_name (
+    lynx_list_item_type *	ptr,
+    char *			name,
+    BOOLEAN			only_overriders)
 {
     return
 	(ptr->command != 0
@@ -243,7 +243,7 @@ int default_fg = COLOR_WHITE;
 int default_bg = COLOR_BLACK;
 #endif
 
-PRIVATE CONST char *Color_Strings[16] =
+static const char *Color_Strings[16] =
 {
     "black",
     "red",
@@ -268,8 +268,8 @@ PRIVATE CONST char *Color_Strings[16] =
  * PDCurses (and possibly some other implementations) use a non-ANSI set of
  * codes for colors.
  */
-PRIVATE int ColorCode ARGS1(
-	int,	color)
+static int ColorCode (
+	int	color)
 {
 	static int map[] = {
 		0,  4,	2,  6, 1,  5,  3,  7,
@@ -285,9 +285,9 @@ BOOL default_color_reset = FALSE;
 /*
  *  Validator for COLOR fields.
  */
-PUBLIC int check_color ARGS2(
-	char *, color,
-	int,	the_default)
+int check_color (
+	char * color,
+	int	the_default)
 {
     int i;
 
@@ -315,8 +315,8 @@ PUBLIC int check_color ARGS2(
     return ERR_COLOR;
 }
 
-PUBLIC CONST char *lookup_color ARGS1(
-    int,	code)
+const char *lookup_color (
+    int	code)
 {
     unsigned n;
     for (n = 0; n < 16; n++) {
@@ -332,8 +332,8 @@ PUBLIC CONST char *lookup_color ARGS1(
 /*
  *  Exit routine for failed COLOR parsing.
  */
-PRIVATE void exit_with_color_syntax ARGS1(
-	char *,		error_line)
+static void exit_with_color_syntax (
+	char *		error_line)
 {
     unsigned int i;
     fprintf (stderr, gettext("\
@@ -358,8 +358,8 @@ The special strings 'nocolor' or 'default', or\n")
 /*
  *  Process string buffer fields for COLOR setting.
  */
-PRIVATE void parse_color ARGS1(
-	char *, buffer)
+static void parse_color (
+	char * buffer)
 {
     int color;
     char *fg, *bg;
@@ -443,15 +443,15 @@ typedef enum {
 
 typedef struct
 {
-   CONST char *name;
+   const char *name;
    Conf_Types type;
    ParseData;
    Config_Enum *table;
 }
 Config_Type;
 
-PRIVATE int assume_charset_fun ARGS1(
-	char *,		value)
+static int assume_charset_fun (
+	char *		value)
 {
     UCLYhndl_for_unspec = safeUCGetLYhndl_byMIME(value);
     StrAllocCopy(UCAssume_MIMEcharset,
@@ -463,22 +463,22 @@ PRIVATE int assume_charset_fun ARGS1(
     return 0;
 }
 
-PRIVATE int assume_local_charset_fun ARGS1(
-	char *,		value)
+static int assume_local_charset_fun (
+	char *		value)
 {
     UCLYhndl_HTFile_for_unspec = safeUCGetLYhndl_byMIME(value);
     return 0;
 }
 
-PRIVATE int assume_unrec_charset_fun ARGS1(
-	char *,		value)
+static int assume_unrec_charset_fun (
+	char *		value)
 {
     UCLYhndl_for_unrec = safeUCGetLYhndl_byMIME(value);
     return 0;
 }
 
-PRIVATE int character_set_fun ARGS1(
-	char *,		value)
+static int character_set_fun (
+	char *		value)
 {
     int i = UCGetLYhndl_byAnyName(value); /* by MIME or full name */
 
@@ -497,8 +497,8 @@ PRIVATE int character_set_fun ARGS1(
     return 0;
 }
 
-PRIVATE int outgoing_mail_charset_fun ARGS1(
-	char *,		value)
+static int outgoing_mail_charset_fun (
+	char *		value)
 {
     outgoing_mail_charset = UCGetLYhndl_byMIME(value);
     /* -1 if NULL or not recognized value: no translation (compatibility) */
@@ -510,8 +510,8 @@ PRIVATE int outgoing_mail_charset_fun ARGS1(
 /*
  *  Process string buffer fields for ASSUMED_COLOR setting.
  */
-PRIVATE int assumed_color_fun ARGS1(
-	char *, buffer)
+static int assumed_color_fun (
+	char * buffer)
 {
     char *fg = buffer, *bg;
     char *temp = 0;
@@ -547,38 +547,38 @@ PRIVATE int assumed_color_fun ARGS1(
 #endif /* EXP_ASSUMED_COLOR */
 
 #ifdef USE_COLOR_TABLE
-PRIVATE int color_fun ARGS1(
-	char *,		value)
+static int color_fun (
+	char *		value)
 {
     parse_color (value);
     return 0;
 }
 #endif
 
-PRIVATE int default_bookmark_file_fun ARGS1(
-	char *,		value)
+static int default_bookmark_file_fun (
+	char *		value)
 {
     set_default_bookmark_page(value);
     return 0;
 }
 
-PRIVATE int default_cache_size_fun ARGS1(
-	char *,		value)
+static int default_cache_size_fun (
+	char *		value)
 {
     HTCacheSize = atoi(value);
     if (HTCacheSize < 2) HTCacheSize = 2;
     return 0;
 }
 
-PRIVATE int default_editor_fun ARGS1(
-	char *,		value)
+static int default_editor_fun (
+	char *		value)
 {
     if (!system_editor) StrAllocCopy(editor, value);
     return 0;
 }
 
-PRIVATE int numbers_as_arrows_fun ARGS1(
-	char *,		value)
+static int numbers_as_arrows_fun (
+	char *		value)
 {
     if (is_true(value))
 	keypad_mode = NUMBERS_AS_ARROWS;
@@ -589,16 +589,16 @@ PRIVATE int numbers_as_arrows_fun ARGS1(
 }
 
 #ifdef DIRED_SUPPORT
-PRIVATE int dired_menu_fun ARGS1(
-	char *,		value)
+static int dired_menu_fun (
+	char *		value)
 {
     add_menu_item(value);
     return 0;
 }
 #endif
 
-PRIVATE int jumpfile_fun ARGS1(
-	char *,		value)
+static int jumpfile_fun (
+	char *		value)
 {
     char *buffer = NULL;
 
@@ -611,8 +611,8 @@ PRIVATE int jumpfile_fun ARGS1(
 }
 
 #ifdef EXP_KEYBOARD_LAYOUT
-PRIVATE int keyboard_layout_fun ARGS1(
-	char *,		key)
+static int keyboard_layout_fun (
+	char *		key)
 {
     if (!LYSetKbLayout(key))
 	CTRACE((tfp, "Failed to set keyboard layout %s\n", key));
@@ -620,8 +620,8 @@ PRIVATE int keyboard_layout_fun ARGS1(
 }
 #endif /* EXP_KEYBOARD_LAYOUT */
 
-PRIVATE int keymap_fun ARGS1(
-	char *,		key)
+static int keymap_fun (
+	char *		key)
 {
     char *func, *efunc;
 
@@ -718,24 +718,24 @@ PRIVATE int keymap_fun ARGS1(
     return 0;
 }
 
-PRIVATE int localhost_alias_fun ARGS1(
-	char *,		value)
+static int localhost_alias_fun (
+	char *		value)
 {
     LYAddLocalhostAlias(value);
     return 0;
 }
 
 #ifdef LYNXCGI_LINKS
-PRIVATE int lynxcgi_environment_fun ARGS1(
-	char *,		value)
+static int lynxcgi_environment_fun (
+	char *		value)
 {
     add_lynxcgi_environment(value);
     return 0;
 }
 #endif
 
-PRIVATE int lynx_sig_file_fun ARGS1(
-	char *,		value)
+static int lynx_sig_file_fun (
+	char *		value)
 {
     char temp[LY_MAXPATH];
     LYstrncpy(temp, value, sizeof(temp)-1);
@@ -751,8 +751,8 @@ PRIVATE int lynx_sig_file_fun ARGS1(
 }
 
 #ifndef DISABLE_NEWS
-PRIVATE int news_chunk_size_fun ARGS1(
-	char *,		value)
+static int news_chunk_size_fun (
+	char *		value)
 {
     HTNewsChunkSize = atoi(value);
     /*
@@ -764,8 +764,8 @@ PRIVATE int news_chunk_size_fun ARGS1(
     return 0;
 }
 
-PRIVATE int news_max_chunk_fun ARGS1(
-	char *,		value)
+static int news_max_chunk_fun (
+	char *		value)
 {
     HTNewsMaxChunk = atoi(value);
     /*
@@ -777,8 +777,8 @@ PRIVATE int news_max_chunk_fun ARGS1(
     return 0;
 }
 
-PRIVATE int news_posting_fun ARGS1(
-	char *,		value)
+static int news_posting_fun (
+	char *		value)
 {
     LYNewsPosting = is_true(value);
     no_newspost = (BOOL) (LYNewsPosting == FALSE);
@@ -787,8 +787,8 @@ PRIVATE int news_posting_fun ARGS1(
 #endif /* DISABLE_NEWS */
 
 #ifndef NO_RULES
-PRIVATE int cern_rulesfile_fun ARGS1(
-	char *,		value)
+static int cern_rulesfile_fun (
+	char *		value)
 {
     char *rulesfile1 = NULL;
     char *rulesfile2 = NULL;
@@ -821,15 +821,15 @@ PRIVATE int cern_rulesfile_fun ARGS1(
 }
 #endif /* NO_RULES */
 
-PRIVATE int printer_fun ARGS1(
-	char *,		value)
+static int printer_fun (
+	char *		value)
 {
     add_item_to_list(value, &printers, TRUE);
     return 0;
 }
 
-PRIVATE int referer_with_query_fun ARGS1(
-	char *,		value)
+static int referer_with_query_fun (
+	char *		value)
 {
     if (!strncasecomp(value, "SEND", 4))
 	LYRefererWithQuery = 'S';
@@ -840,8 +840,8 @@ PRIVATE int referer_with_query_fun ARGS1(
     return 0;
 }
 
-PRIVATE int suffix_fun ARGS1(
-	char *,		value)
+static int suffix_fun (
+	char *		value)
 {
     char *mime_type, *p;
     char *encoding = NULL, *sq = NULL, *description = NULL;
@@ -918,8 +918,8 @@ PRIVATE int suffix_fun ARGS1(
     return 0;
 }
 
-PRIVATE int suffix_order_fun ARGS1(
-	char *,		value)
+static int suffix_order_fun (
+	char *		value)
 {
     char *p = value;
     char *optn;
@@ -946,16 +946,16 @@ PRIVATE int suffix_order_fun ARGS1(
     return 0;
 }
 
-PRIVATE int system_editor_fun ARGS1(
-	char *,		value)
+static int system_editor_fun (
+	char *		value)
 {
     StrAllocCopy(editor, value);
     system_editor = TRUE;
     return 0;
 }
 
-PRIVATE int viewer_fun ARGS1(
-	char *,		value)
+static int viewer_fun (
+	char *		value)
 {
     char *mime_type;
     char *viewer;
@@ -998,8 +998,8 @@ PRIVATE int viewer_fun ARGS1(
     return 0;
 }
 
-PRIVATE int nonrest_sigwinch_fun ARGS1(
-	char *,		value)
+static int nonrest_sigwinch_fun (
+	char *		value)
 {
     if (!strncasecomp(value, "XWINDOWS", 8)) {
 	LYNonRestartingSIGWINCH = (BOOL) (LYgetXDisplay() != NULL);
@@ -1010,9 +1010,9 @@ PRIVATE int nonrest_sigwinch_fun ARGS1(
 }
 
 #ifdef EXP_CHARSET_CHOICE
-PRIVATE void matched_charset_choice ARGS2(
-	BOOL,	display_charset,
-	int,	i)
+static void matched_charset_choice (
+	BOOL	display_charset,
+	int	i)
 {
     int j;
 
@@ -1029,9 +1029,9 @@ PRIVATE void matched_charset_choice ARGS2(
 	charset_subsets[i].hide_assumed = FALSE;
 }
 
-PRIVATE int parse_charset_choice ARGS2(
-	char *,	p,
-	BOOL,	display_charset) /*if FALSE, then assumed doc charset*/
+static int parse_charset_choice (
+	char *	p,
+	BOOL	display_charset) /*if FALSE, then assumed doc charset*/
 {
     int len, i;
     int matches = 0;
@@ -1082,12 +1082,12 @@ PRIVATE int parse_charset_choice ARGS2(
     }
 }
 
-PRIVATE int parse_display_charset_choice ARGS1(char*,p)
+static int parse_display_charset_choice (char*p)
 {
     return parse_charset_choice(p,1);
 }
 
-PRIVATE int parse_assumed_doc_charset_choice ARGS1(char*,p)
+static int parse_assumed_doc_charset_choice (char*p)
 {
     return parse_charset_choice(p,0);
 }
@@ -1095,9 +1095,9 @@ PRIVATE int parse_assumed_doc_charset_choice ARGS1(char*,p)
 #endif /* EXP_CHARSET_CHOICE */
 
 #ifdef USE_PRETTYSRC
-PRIVATE void html_src_bad_syntax ARGS2(
-	    char*, value,
-	    char*, option_name)
+static void html_src_bad_syntax (
+	    char* value,
+	    char* option_name)
 {
     char *buf = 0;
 
@@ -1107,10 +1107,10 @@ PRIVATE void html_src_bad_syntax ARGS2(
     exit_immediately(EXIT_FAILURE);
 }
 
-PRIVATE int parse_html_src_spec ARGS3(
-	    HTlexeme, lexeme_code,
-	    char*, value,
-	    char*, option_name)
+static int parse_html_src_spec (
+	    HTlexeme lexeme_code,
+	    char* value,
+	    char* option_name)
 {
    /* Now checking the value for being correct.  Since HTML_dtd is not
     * initialized completely (member tags points to non-initiailized data), we
@@ -1142,7 +1142,7 @@ PRIVATE int parse_html_src_spec ARGS3(
     return 0;
 }
 
-PRIVATE int psrcspec_fun ARGS1(char*,s)
+static int psrcspec_fun (char*s)
 {
     char* e;
     static Config_Enum lexemnames[] =
@@ -1177,7 +1177,7 @@ PRIVATE int psrcspec_fun ARGS1(char*,s)
     return 0;
 }
 
-PRIVATE int read_htmlsrc_attrname_xform ARGS1( char*,str)
+static int read_htmlsrc_attrname_xform ( char*str)
 {
     int val;
     if ( 1 == sscanf(str, "%d", &val) ) {
@@ -1192,7 +1192,7 @@ PRIVATE int read_htmlsrc_attrname_xform ARGS1( char*,str)
     return 0;
 }
 
-PRIVATE int read_htmlsrc_tagname_xform ARGS1( char*,str)
+static int read_htmlsrc_tagname_xform ( char*str)
 {
     int val;
     if ( 1 == sscanf(str,"%d",&val) ) {
@@ -1209,8 +1209,8 @@ PRIVATE int read_htmlsrc_tagname_xform ARGS1( char*,str)
 #endif
 
 #if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
-PRIVATE int screen_size_fun ARGS1(
-	char *,		value)
+static int screen_size_fun (
+	char *		value)
 {
     char *cp;
 
@@ -1234,7 +1234,7 @@ PRIVATE int screen_size_fun ARGS1(
 #endif
 
 /* This table is searched ignoring case */
-PRIVATE Config_Type Config_Table [] =
+static Config_Type Config_Table [] =
 {
      PARSE_SET(RC_ACCEPT_ALL_COOKIES,   LYAcceptAllCookies),
      PARSE_TIM(RC_ALERTSECS,            AlertSecs),
@@ -1531,15 +1531,15 @@ PRIVATE Config_Type Config_Table [] =
      PARSE_NIL
 };
 
-PRIVATE char *lynxcfginfo_url = NULL;	/* static */
+static char *lynxcfginfo_url = NULL;	/* static */
 #if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
-PRIVATE char *configinfo_url = NULL;	/* static */
+static char *configinfo_url = NULL;	/* static */
 #endif
 
 /*
  * Free memory allocated in 'read_cfg()'
  */
-PUBLIC void free_lynx_cfg NOARGS
+void free_lynx_cfg (void)
 {
     Config_Type *tbl;
 
@@ -1585,8 +1585,8 @@ PUBLIC void free_lynx_cfg NOARGS
 #endif
 }
 
-PRIVATE Config_Type *lookup_config ARGS1(
-	char *,		name)
+static Config_Type *lookup_config (
+	char *		name)
 {
     Config_Type *tbl = Config_Table;
     char ch = (char) TOUPPER(*name);
@@ -1611,10 +1611,10 @@ PRIVATE Config_Type *lookup_config ARGS1(
  * Note:  only read files from the current directory if there's no parent
  * filename, otherwise it leads to user surprise.
  */
-PRIVATE char *actual_filename ARGS3(
-    char *,	cfg_filename,
-    char *,	parent_filename,
-    char *,	dft_filename)
+static char *actual_filename (
+    char *	cfg_filename,
+    char *	parent_filename,
+    char *	dft_filename)
 {
     char *my_filename = NULL;
 
@@ -1643,10 +1643,10 @@ PRIVATE char *actual_filename ARGS3(
     return my_filename;
 }
 
-PUBLIC FILE *LYOpenCFG ARGS3(
-    char *,	cfg_filename,
-    char *,	parent_filename,
-    char *,	dft_filename)
+FILE *LYOpenCFG (
+    char *	cfg_filename,
+    char *	parent_filename,
+    char *	dft_filename)
 {
     char *my_file = actual_filename(cfg_filename, parent_filename, dft_filename);
     FILE *result;
@@ -1673,9 +1673,9 @@ typedef BOOL (optidx_set_t) [ NOPTS_ ];
  * For simple (boolean, string, integer, time) values, set the corresponding
  * configuration variable.
  */
-PUBLIC void LYSetConfigValue ARGS2(
-    char *,	name,
-    char *,	value)
+void LYSetConfigValue (
+    char *	name,
+    char *	value)
 {
     Config_Type *tbl = lookup_config(name);
     ParseUnionPtr q = ParseUnionOf(tbl);
@@ -1766,12 +1766,12 @@ PUBLIC void LYSetConfigValue ARGS2(
  * file can also include other files with a list of acceptable options, these
  * lists are ANDed.
  */
-PRIVATE void do_read_cfg ARGS5(
-	char *, cfg_filename,
-	char *, parent_filename,
-	int,	nesting_level,
-	FILE *,	fp0,
-	optidx_set_t*, allowed)
+static void do_read_cfg (
+	char * cfg_filename,
+	char * parent_filename,
+	int	nesting_level,
+	FILE *	fp0,
+	optidx_set_t* allowed)
 {
     FILE *fp;
     char *buffer = 0;
@@ -2056,21 +2056,21 @@ PRIVATE void do_read_cfg ARGS5(
 }
 
 /* this is a public interface to do_read_cfg */
-PUBLIC void read_cfg ARGS4(
-	char *, cfg_filename,
-	char *, parent_filename,
-	int,	nesting_level,
-	FILE *,	fp0)
+void read_cfg (
+	char * cfg_filename,
+	char * parent_filename,
+	int	nesting_level,
+	FILE *	fp0)
 {
     HTInitProgramPaths();
     do_read_cfg(cfg_filename, parent_filename, nesting_level, fp0, NULL);
 }
 
 #ifndef NO_CONFIG_INFO
-PRIVATE void extra_cfg_link ARGS3(
-	FILE *,	fp,
-	char *,	href,
-	char *,	name)
+static void extra_cfg_link (
+	FILE *	fp,
+	char *	href,
+	char *	name)
 {
     fprintf(fp, "<a href=\"%s\">%s</a>",
 	    href, name);
@@ -2082,8 +2082,8 @@ PRIVATE void extra_cfg_link ARGS3(
  *  Called from getfile() cycle:
  *  we create and load the page just in place and return to mainloop().
  */
-PUBLIC int lynx_cfg_infopage ARGS1(
-    DocInfo *,		       newdoc)
+int lynx_cfg_infopage (
+    DocInfo *		       newdoc)
 {
     static char tempfile[LY_MAXPATH] = "\0";
     DocAddress WWWDoc;  /* need on exit */
@@ -2300,8 +2300,8 @@ PUBLIC int lynx_cfg_infopage ARGS1(
  *  Compile-time definitions info, LYNXCOMPILEOPTS:/ internal page,
  *  from getfile() cycle.
  */
-PUBLIC int lynx_compile_opts ARGS1(
-    DocInfo *,		       newdoc)
+int lynx_compile_opts (
+    DocInfo *		       newdoc)
 {
     static char tempfile[LY_MAXPATH] = "\0";
 #define PutDefs(table, N) fprintf(fp0, "%-35s %s\n", table[N].name, table[N].value)

@@ -3,6 +3,6 @@
 
 #include <UCDefs.h>
 
-extern void UCChangeTerminalCodepage PARAMS((int newcs, LYUCcharset *p));
+extern void UCChangeTerminalCodepage (int newcs, LYUCcharset *p);
 
 #endif /* UCAUTO_H */

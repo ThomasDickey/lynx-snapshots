@@ -114,48 +114,48 @@ typedef struct {
 #define ABORT_TARGET (*targetClass._abort)(target, NULL);
 
 struct _HTStructured {
-	CONST HTStructuredClass *	isa;
+	const HTStructuredClass *	isa;
 	/* ... */
 };
 
 /*
 **  Controlling globals.
 */
-PUBLIC int HTDirAccess = HT_DIR_OK;
+int HTDirAccess = HT_DIR_OK;
 
 #ifdef DIRED_SUPPORT
-PUBLIC int HTDirReadme = HT_DIR_README_NONE;
+int HTDirReadme = HT_DIR_README_NONE;
 #else
-PUBLIC int HTDirReadme = HT_DIR_README_TOP;
+int HTDirReadme = HT_DIR_README_TOP;
 #endif /* DIRED_SUPPORT */
 
-PRIVATE char *HTMountRoot = "/Net/";		/* Where to find mounts */
+static char *HTMountRoot = "/Net/";		/* Where to find mounts */
 #ifdef VMS
-PRIVATE char *HTCacheRoot = "/WWW$SCRATCH";	/* Where to cache things */
+static char *HTCacheRoot = "/WWW$SCRATCH";	/* Where to cache things */
 #else
-PRIVATE char *HTCacheRoot = "/tmp/W3_Cache_";	/* Where to cache things */
+static char *HTCacheRoot = "/tmp/W3_Cache_";	/* Where to cache things */
 #endif /* VMS */
 
 /*
 **  Suffix registration.
 */
-PRIVATE HTList * HTSuffixes = 0;
-PRIVATE HTSuffix no_suffix = { "*", NULL, NULL, NULL, 1.0 };
-PRIVATE HTSuffix unknown_suffix = { "*.*", NULL, NULL, NULL, 1.0};
+static HTList * HTSuffixes = 0;
+static HTSuffix no_suffix = { "*", NULL, NULL, NULL, 1.0 };
+static HTSuffix unknown_suffix = { "*.*", NULL, NULL, NULL, 1.0};
 
 
 /*	To free up the suffixes at program exit.
 **	----------------------------------------
 */
 #ifdef LY_FIND_LEAKS
-PRIVATE void free_suffixes NOPARAMS;
+static void free_suffixes (void);
 #endif
 
 #ifdef LONG_LIST
-PRIVATE char *FormatStr ARGS3(
-    char **,	bufp,
-    char *,	start,
-    CONST char *,	entry)
+static char *FormatStr (
+    char **	bufp,
+    char *	start,
+    const char *	entry)
 {
     char fmt[512];
     if (*start) {
@@ -169,10 +169,10 @@ PRIVATE char *FormatStr ARGS3(
     return *bufp;
 }
 
-PRIVATE char *FormatNum ARGS3(
-    char **,	bufp,
-    char *,	start,
-    int,	entry)
+static char *FormatNum (
+    char **	bufp,
+    char *	start,
+    int	entry)
 {
     char fmt[512];
     if (*start) {
@@ -185,12 +185,12 @@ PRIVATE char *FormatNum ARGS3(
     return *bufp;
 }
 
-PRIVATE void LYListFmtParse ARGS5(
-	char *,		fmtstr,
-	DIRED *,	data,
-	char *,		file,
-	HTStructured *, target,
-	char *,		tail)
+static void LYListFmtParse (
+	char *		fmtstr,
+	DIRED *	data,
+	char *		file,
+	HTStructured * target,
+	char *		tail)
 {
 	char c;
 	char *s;
@@ -296,7 +296,7 @@ PRIVATE void LYListFmtParse ARGS5(
 			    FormatStr(&buf, start, "");
 			}
 		    } else {
-			CONST char *cp2;
+			const char *cp2;
 			HTFormat format;
 			format = HTFileFormat(file, NULL, &cp2);
 
@@ -451,12 +451,12 @@ PRIVATE void LYListFmtParse ARGS5(
 **	If filename suffix is already defined with the same encoding
 **	its previous definition is overridden.
 */
-PUBLIC void HTSetSuffix5 ARGS5(
-	CONST char *,	suffix,
-	CONST char *,	representation,
-	CONST char *,	encoding,
-	CONST char *,	desc,
-	double,		value)
+void HTSetSuffix5 (
+	const char *	suffix,
+	const char *	representation,
+	const char *	encoding,
+	const char *	desc,
+	double		value)
 {
     HTSuffix * suff;
     BOOL trivial_enc = (BOOL) IsUnityEncStr(encoding);
@@ -522,7 +522,7 @@ PUBLIC void HTSetSuffix5 ARGS5(
 **	Revision History:
 **		05-28-94	created Lynx 2-3-1 Garrett Arch Blythe
 */
-PRIVATE void free_suffixes NOARGS
+static void free_suffixes (void)
 {
     HTSuffix * suff = NULL;
 
@@ -557,8 +557,8 @@ PRIVATE void free_suffixes NOARGS
 **  On exit:
 **	Returns a malloc'ed string which must be freed by the caller.
 */
-PUBLIC char * HTCacheFileName ARGS1(
-	CONST char *,	name)
+char * HTCacheFileName (
+	const char *	name)
 {
     char * acc_method = HTParse(name, "", PARSE_ACCESS);
     char * host = HTParse(name, "", PARSE_HOST);
@@ -577,7 +577,7 @@ PUBLIC char * HTCacheFileName ARGS1(
 **	-----------------------------------------
 */
 #ifdef NOT_IMPLEMENTED
-PRIVATE int HTCreatePath ARGS1(CONST char *,path)
+static int HTCreatePath (const char * path)
 {
     return -1;
 }
@@ -593,10 +593,10 @@ PRIVATE int HTCreatePath ARGS1(CONST char *,path)
 **  On exit:
 **	Returns a malloc'ed string which must be freed by the caller.
 */
-PUBLIC char * HTURLPath_toFile ARGS3(
-	CONST char *,	name,
-	BOOL,		expand_all,
-	BOOL,		is_remote GCC_UNUSED)
+char * HTURLPath_toFile (
+	const char *	name,
+	BOOL		expand_all,
+	BOOL		is_remote GCC_UNUSED)
 {
     char * path = NULL;
     char * result = NULL;
@@ -633,10 +633,10 @@ PUBLIC char * HTURLPath_toFile ARGS3(
 	 this function will return the wrong thing for some unusual
 	 paths (like ones containing "//", possibly escaped). - kw
 */
-PUBLIC char * HTnameOfFile_WWW ARGS3(
-	CONST char *,	name,
-	BOOL,		WWW_prefix,
-	BOOL,		expand_all)
+char * HTnameOfFile_WWW (
+	const char *	name,
+	BOOL		WWW_prefix,
+	BOOL		expand_all)
 {
     char * acc_method = HTParse(name, "", PARSE_ACCESS);
     char * host = HTParse(name, "", PARSE_HOST);
@@ -699,8 +699,8 @@ PUBLIC char * HTnameOfFile_WWW ARGS3(
 **	in and valid for the NeXT only.  This should be configurable in
 **	the general case.
 */
-PUBLIC char * WWW_nameOfFile ARGS1(
-	CONST char *,	name)
+char * WWW_nameOfFile (
+	const char *	name)
 {
     char * result = NULL;
 #ifdef NeXT
@@ -728,9 +728,9 @@ PUBLIC char * WWW_nameOfFile ARGS1(
 **	Returns a pointer to a suitable suffix string if one has been
 **	found, else "".
 */
-PUBLIC CONST char * HTFileSuffix ARGS2(
-	HTAtom*,	rep,
-	CONST char *,	enc)
+const char * HTFileSuffix (
+	HTAtom*	rep,
+	const char *	enc)
 {
     HTSuffix * suff;
 #ifdef FNAMES_8_3
@@ -796,10 +796,10 @@ PUBLIC CONST char * HTFileSuffix ARGS2(
 **
 **	It will handle for example  x.txt, x.txt,Z, x.Z
 */
-PUBLIC HTFormat HTFileFormat ARGS3(
-	CONST char *,	filename,
-	HTAtom **,	pencoding,
-	CONST char**,	pdesc)
+HTFormat HTFileFormat (
+	const char *	filename,
+	HTAtom **	pencoding,
+	const char**	pdesc)
 {
     HTSuffix * suff;
     int n;
@@ -904,10 +904,10 @@ PUBLIC HTFormat HTFileFormat ARGS3(
 **	indicated, sets Lynx up for proper handling in relation
 **	to the currently selected character set. - FM
 */
-PUBLIC HTFormat HTCharsetFormat ARGS3(
-	HTFormat,		format,
-	HTParentAnchor *,	anchor,
-	int,			default_LYhndl)
+HTFormat HTCharsetFormat (
+	HTFormat		format,
+	HTParentAnchor *	anchor,
+	int			default_LYhndl)
 {
     char *cp = NULL, *cp1, *cp2, *cp3 = NULL, *cp4;
     BOOL chartrans_ok = FALSE;
@@ -1088,21 +1088,21 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 **  through HTuncache_current_document or at the next document load.
 **  - kw
 */
-PUBLIC void LYGetFileInfo ARGS7(
-	CONST char *,		filename,
-	HTParentAnchor **,	pfile_anchor,
-	HTFormat *,		pformat,
-	HTAtom **,		pencoding,
-	CONST char**,		pdesc,
-	CONST char**,		pcharset,
-	int *,			pfile_cs)
+void LYGetFileInfo (
+	const char *		filename,
+	HTParentAnchor **	pfile_anchor,
+	HTFormat *		pformat,
+	HTAtom **		pencoding,
+	const char**		pdesc,
+	const char**		pcharset,
+	int *			pfile_cs)
 {
 	char *Afn;
 	char *Aname = NULL;
 	HTFormat format;
 	HTAtom * myEnc = NULL;
 	HTParentAnchor *file_anchor;
-	CONST char *file_csname;
+	const char *file_csname;
 	int file_cs;
 
 	/*
@@ -1149,8 +1149,8 @@ PUBLIC void LYGetFileInfo ARGS7(
 **	-------------------------------
 **
 */
-PUBLIC float HTFileValue ARGS1(
-	CONST char *,	filename)
+float HTFileValue (
+	const char *	filename)
 {
     HTSuffix * suff;
     int n;
@@ -1179,10 +1179,10 @@ PUBLIC float HTFileValue ARGS1(
 **  Determine compression type from file name, by looking at its suffix.
 **  Sets as side-effect a pointer to the "dot" that begins the suffix.
 */
-PUBLIC CompressFileType HTCompressFileType ARGS3(
-	char *,		filename,
-	char *,		dots,
-	char **,	suffix)
+CompressFileType HTCompressFileType (
+	char *		filename,
+	char *		dots,
+	char **	suffix)
 {
     CompressFileType result = cftNone;
     size_t len = strlen(filename);
@@ -1221,8 +1221,8 @@ PUBLIC CompressFileType HTCompressFileType ARGS3(
 **	1.	No code for non-unix systems.
 **	2.	Isn't there a quicker way?
 */
-PUBLIC BOOL HTEditable ARGS1(
-	CONST char *,	filename)
+BOOL HTEditable (
+	const char *	filename)
 {
 #ifndef NO_GROUPS
     GETGROUPS_T groups[NGROUPS];
@@ -1276,10 +1276,10 @@ PUBLIC BOOL HTEditable ARGS1(
 **	The stream must be used for writing back the file.
 **	@@@ no backup done
 */
-PUBLIC HTStream * HTFileSaveStream ARGS1(
-	HTParentAnchor *,	anchor)
+HTStream * HTFileSaveStream (
+	HTParentAnchor *	anchor)
 {
-    CONST char * addr = anchor->address;
+    const char * addr = anchor->address;
     char * localname = HTLocalName(addr);
     FILE * fp = fopen(localname, BIN_W);
 
@@ -1293,10 +1293,10 @@ PUBLIC HTStream * HTFileSaveStream ARGS1(
 /*	Output one directory entry.
 **	---------------------------
 */
-PUBLIC void HTDirEntry ARGS3(
-	HTStructured *, target,
-	CONST char *,	tail,
-	CONST char *,	entry)
+void HTDirEntry (
+	HTStructured * target,
+	const char *	tail,
+	const char *	entry)
 {
     char * relative = NULL;
     char * stripped = NULL;
@@ -1350,12 +1350,12 @@ PUBLIC void HTDirEntry ARGS3(
 **	calling function should use LYListFmtParse() to create a link
 **	to the parent directory.  Otherwise, it returns FALSE. - FM
 */
-PUBLIC BOOL HTDirTitles ARGS3(
-	HTStructured *, target,
-	HTParentAnchor *, anchor,
-	BOOL,		tildeIsTop)
+BOOL HTDirTitles (
+	HTStructured * target,
+	HTParentAnchor * anchor,
+	BOOL		tildeIsTop)
 {
-    CONST char * logical = anchor->address;
+    const char * logical = anchor->address;
     char * path = HTParse(logical, "", PARSE_PATH + PARSE_PUNCTUATION);
     char * current;
     char * cp = NULL;
@@ -1578,7 +1578,7 @@ PUBLIC BOOL HTDirTitles ARGS3(
 **
 **  If a README file exists, then it is inserted into the document here.
 */
-PRIVATE void do_readme ARGS2(HTStructured *, target, CONST char *, localname)
+static void do_readme (HTStructured *  target, const char *  localname)
 {
     FILE * fp;
     char * readme_file_name = NULL;
@@ -1609,7 +1609,7 @@ PRIVATE void do_readme ARGS2(HTStructured *, target, CONST char *, localname)
 #define NM_cmp(a,b) ((a) < (b) ? -1 : ((a) > (b) ? 1 : 0))
 
 #if defined(LONG_LIST) && defined(DIRED_SUPPORT)
-PRIVATE char *file_type ARGS1(char *, path)
+static char *file_type (char *  path)
 {
     char *type;
     while (*path == '.')
@@ -1621,7 +1621,7 @@ PRIVATE char *file_type ARGS1(char *, path)
 }
 #endif /* LONG_LIST && DIRED_SUPPORT */
 
-PRIVATE int dired_cmp ARGS2(void *, a, void *, b)
+static int dired_cmp (void *  a, void *  b)
 {
     DIRED *p = (DIRED *)a;
     DIRED *q = (DIRED *)b;
@@ -1665,12 +1665,12 @@ PRIVATE int dired_cmp ARGS2(void *, a, void *, b)
     return code;
 }
 
-PRIVATE int print_local_dir ARGS5(
-	DIR  *,			dp,
-	char *,			localname,
-	HTParentAnchor *,	anchor,
-	HTFormat,		format_out,
-	HTStream *,		sink)
+static int print_local_dir (
+	DIR  *			dp,
+	char *			localname,
+	HTParentAnchor *	anchor,
+	HTFormat		format_out,
+	HTStream *		sink)
 {
     HTStructured *target;	/* HTML object */
     HTStructuredClass targetClass;
@@ -2020,9 +2020,9 @@ PRIVATE int print_local_dir ARGS5(
 
 
 #ifndef VMS
-PUBLIC int HTStat ARGS2(
-	CONST char *,	filename,
-	struct stat *,	data)
+int HTStat (
+	const char *	filename,
+	struct stat *	data)
 {
     int result = -1;
     size_t len = strlen(filename);
@@ -2062,11 +2062,11 @@ PUBLIC int HTStat ARGS2(
 **			HTLOADED	OK
 **
 */
-PUBLIC int HTLoadFile ARGS4(
-	CONST char *,		addr,
-	HTParentAnchor *,	anchor,
-	HTFormat,		format_out,
-	HTStream *,		sink)
+int HTLoadFile (
+	const char *		addr,
+	HTParentAnchor *	anchor,
+	HTFormat		format_out,
+	HTStream *		sink)
 {
     char * filename = NULL;
     char * acc_method = NULL;
@@ -2860,15 +2860,15 @@ PUBLIC int HTLoadFile ARGS4(
     }
 }
 
-static CONST char *program_paths[pp_Last];
+static const char *program_paths[pp_Last];
 
 /*
  * Given a program number, return its path
  */
-PUBLIC CONST char * HTGetProgramPath ARGS1(
-	ProgramPaths,	code)
+const char * HTGetProgramPath (
+	ProgramPaths	code)
 {
-    CONST char *result = NULL;
+    const char *result = NULL;
     if (code > ppUnknown && code < pp_Last)
 	result = program_paths[code];
     return result;
@@ -2878,9 +2878,9 @@ PUBLIC CONST char * HTGetProgramPath ARGS1(
  * Store a program's path.  The caller must allocate the string used for 'path',
  * since HTInitProgramPaths() may free it.
  */
-PUBLIC void HTSetProgramPath ARGS2(
-	ProgramPaths,	code,
-	CONST char *,	path)
+void HTSetProgramPath (
+	ProgramPaths	code,
+	const char *	path)
 {
     if (code > ppUnknown && code < pp_Last) {
 	program_paths[code] = isEmpty(path) ? 0 : path;
@@ -2890,11 +2890,11 @@ PUBLIC void HTSetProgramPath ARGS2(
 /*
  * Reset the list of known program paths to the ones that are compiled-in
  */
-PUBLIC void HTInitProgramPaths NOARGS
+void HTInitProgramPaths (void)
 {
     int code;
-    CONST char *path;
-    CONST char *test;
+    const char *path;
+    const char *test;
 
     for (code = (int) ppUnknown + 1; code < (int) pp_Last; ++code) {
 	switch (code) {
@@ -3024,6 +3024,6 @@ GLOBALDEF (HTProtocol,HTFTP,_HTFILE_C_1_INIT);
 #define _HTFILE_C_2_INIT { "file", HTLoadFile, HTFileSaveStream }
 GLOBALDEF (HTProtocol,HTFile,_HTFILE_C_2_INIT);
 #else
-GLOBALDEF PUBLIC HTProtocol HTFTP  = { "ftp", HTLoadFile, 0 };
-GLOBALDEF PUBLIC HTProtocol HTFile = { "file", HTLoadFile, HTFileSaveStream };
+GLOBALDEF HTProtocol HTFTP  = { "ftp", HTLoadFile, 0 };
+GLOBALDEF HTProtocol HTFile = { "file", HTLoadFile, HTFileSaveStream };
 #endif /* GLOBALDEF_IS_MACRO */

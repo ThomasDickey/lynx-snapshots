@@ -5,26 +5,26 @@
 #include <HTList.h>
 #include <LYCurses.h>
 
-extern BOOLEAN LYisNonAlnumKeyname PARAMS((int ch, int KeyName));
-extern HTList *LYcommandList NOPARAMS;
-extern char *LYKeycodeToString PARAMS((int c, BOOLEAN upper8));
-extern char *fmt_keys PARAMS((int lkc_first, int lkc_second));
-extern char *key_for_func PARAMS((int func));
-extern char *key_for_func_ext PARAMS((int lac, int context_code));
-extern int LYReverseKeymap PARAMS((int KeyName));
-extern int LYStringToKeycode PARAMS((char *src));
-extern int lacname_to_lac PARAMS((CONST char *func));
-extern int lecname_to_lec PARAMS((CONST char *func));
-extern int lkcstring_to_lkc PARAMS((CONST char *src));
-extern int remap PARAMS((char *key, char *func, BOOLEAN for_dired));
-extern void print_keymap PARAMS((char **newfile));
-extern void reset_emacs_keys NOPARAMS;
-extern void reset_numbers_as_arrows NOPARAMS;
-extern void reset_vi_keys NOPARAMS;
-extern void set_emacs_keys NOPARAMS;
-extern void set_numbers_as_arrows NOPARAMS;
-extern void set_vi_keys NOPARAMS;
-extern void set_vms_keys NOPARAMS;
+extern BOOLEAN LYisNonAlnumKeyname (int ch, int KeyName);
+extern HTList *LYcommandList (void);
+extern char *LYKeycodeToString (int c, BOOLEAN upper8);
+extern char *fmt_keys (int lkc_first, int lkc_second);
+extern char *key_for_func (int func);
+extern char *key_for_func_ext (int lac, int context_code);
+extern int LYReverseKeymap (int KeyName);
+extern int LYStringToKeycode (char *src);
+extern int lacname_to_lac (const char *func);
+extern int lecname_to_lec (const char *func);
+extern int lkcstring_to_lkc (const char *src);
+extern int remap (char *key, char *func, BOOLEAN for_dired);
+extern void print_keymap (char **newfile);
+extern void reset_emacs_keys (void);
+extern void reset_numbers_as_arrows (void);
+extern void reset_vi_keys (void);
+extern void set_emacs_keys (void);
+extern void set_numbers_as_arrows (void);
+extern void set_vi_keys (void);
+extern void set_vms_keys (void);
 
 /* We only use unsigned keycodes; if there's a problem matching with enum
  * (which is supposed to be 'int'), that would be okay, but not as clean
@@ -40,7 +40,7 @@ typedef unsigned short LYKbLayout_t;
 extern int current_layout;
 extern LYKbLayout_t * LYKbLayouts[];
 extern char * LYKbLayoutNames[];
-extern int LYSetKbLayout PARAMS((char *layout_id));
+extern int LYSetKbLayout (char *layout_id);
 #endif
 
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
@@ -270,11 +270,11 @@ typedef enum {
  */
 typedef struct {
 	LYKeymapCode code;
-	CONST char *name;
-	CONST char *doc;
+	const char *name;
+	const char *doc;
 } Kcmd;
 
-extern Kcmd * LYKeycodeToKcmd PARAMS((LYKeymapCode code));
-extern Kcmd * LYStringToKcmd PARAMS((CONST char * name));
+extern Kcmd * LYKeycodeToKcmd (LYKeymapCode code);
+extern Kcmd * LYStringToKcmd (const char * name);
 
 #endif /* LYKEYMAP_H */

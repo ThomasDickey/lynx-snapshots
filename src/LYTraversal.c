@@ -11,7 +11,7 @@
 
 /* routines to handle special traversal feature */
 
-PRIVATE void final_perror ARGS2(CONST char *,msg, BOOLEAN, clean_flag)
+static void final_perror (const char *msg, BOOLEAN clean_flag)
 {
     int saved_errno = errno;
     if (LYCursesON) {
@@ -24,13 +24,13 @@ PRIVATE void final_perror ARGS2(CONST char *,msg, BOOLEAN, clean_flag)
     perror(msg);
 }
 
-PRIVATE void exit_with_perror ARGS1(CONST char *,msg)
+static void exit_with_perror (const char *msg)
 {
     final_perror(msg, TRUE);
     exit_immediately(EXIT_FAILURE);
 }
 
-PUBLIC BOOLEAN lookup ARGS1(char *,target)
+BOOLEAN lookup (char *target)
 {
     FILE *ifp;
     char *buffer = NULL;
@@ -61,7 +61,7 @@ PUBLIC BOOLEAN lookup ARGS1(char *,target)
     return (BOOL) (result);
 }
 
-PUBLIC void add_to_table ARGS1(char *,target)
+void add_to_table (char *target)
 {
 
     FILE *ifp;
@@ -75,7 +75,7 @@ PUBLIC void add_to_table ARGS1(char *,target)
     LYCloseOutput(ifp);
 }
 
-PUBLIC void add_to_traverse_list ARGS2(char *,fname, char *,prev_link_name)
+void add_to_traverse_list (char *fname, char *prev_link_name)
 {
 
     FILE *ifp;
@@ -89,7 +89,7 @@ PUBLIC void add_to_traverse_list ARGS2(char *,fname, char *,prev_link_name)
     LYCloseOutput(ifp);
 }
 
-PUBLIC void dump_traversal_history NOARGS
+void dump_traversal_history (void)
 {
     int x;
     FILE *ifp;
@@ -113,7 +113,7 @@ PUBLIC void dump_traversal_history NOARGS
     LYCloseOutput(ifp);
 }
 
-PUBLIC void add_to_reject_list ARGS1(char *,target)
+void add_to_reject_list (char *target)
 {
 
     FILE *ifp;
@@ -136,7 +136,7 @@ PUBLIC void add_to_reject_list ARGS1(char *,target)
    everything" it shouldn't come up much!
  */
 
-PUBLIC BOOLEAN lookup_reject ARGS1(char *,target)
+BOOLEAN lookup_reject (char *target)
 {
     FILE *ifp;
     char *buffer = NULL;

@@ -14,8 +14,8 @@
 #include <LYStrings.h>
 
 #ifndef NO_LYNX_TRACE
-PUBLIC BOOLEAN WWW_TraceFlag = 0;	/* Global trace flag for ALL W3 code */
-PUBLIC int WWW_TraceMask = 0;		/* Global trace flag for ALL W3 code */
+BOOLEAN WWW_TraceFlag = 0;	/* Global trace flag for ALL W3 code */
+int WWW_TraceMask = 0;		/* Global trace flag for ALL W3 code */
 #endif
 
 #ifndef VC
@@ -23,9 +23,9 @@ PUBLIC int WWW_TraceMask = 0;		/* Global trace flag for ALL W3 code */
 #endif /* !VC */
 
 #ifdef _WINDOWS
-CONST char * HTLibraryVersion = "2.14FM"; /* String for help screen etc */
+const char * HTLibraryVersion = "2.14FM"; /* String for help screen etc */
 #else
-PUBLIC CONST char * HTLibraryVersion = VC; /* String for help screen etc */
+const char * HTLibraryVersion = VC; /* String for help screen etc */
 #endif
 
 /*
@@ -35,12 +35,12 @@ PUBLIC CONST char * HTLibraryVersion = VC; /* String for help screen etc */
 **     from the current display charset.
 **     It returns 0 if exact match.
 */
-PUBLIC int strcasecomp8 ARGS2(
-       CONST char*,    a,
-       CONST char *,   b)
+int strcasecomp8 (
+       const char*    a,
+       const char *   b)
 {
-    CONST char *p = a;
-    CONST char *q = b;
+    const char *p = a;
+    const char *q = b;
 
     for ( ; *p && *q; p++, q++) {
 	int diff = UPPER8(*p, *q);
@@ -60,13 +60,13 @@ PUBLIC int strcasecomp8 ARGS2(
 **     from the current display charset.
 **     It returns 0 if exact match.
 */
-PUBLIC int strncasecomp8 ARGS3(
-	CONST char*,	a,
-	CONST char *,	b,
-	int,		n)
+int strncasecomp8 (
+	const char*	a,
+	const char *	b,
+	int		n)
 {
-    CONST char *p = a;
-    CONST char *q = b;
+    const char *p = a;
+    const char *q = b;
 
     for ( ; ; p++, q++) {
 	int diff;
@@ -125,9 +125,9 @@ static unsigned char charmap[] = {
 	'\370', '\371', '\372', '\373', '\374', '\375', '\376', '\377',
 };
 
-PUBLIC int strcasecomp ARGS2(
-	CONST char*,	s1,
-	CONST char*,	s2)
+int strcasecomp (
+	const char*	s1,
+	const char*	s2)
 {
     register unsigned char *cm = charmap;
     register unsigned char *us1 = (unsigned char *)s1;
@@ -139,10 +139,10 @@ PUBLIC int strcasecomp ARGS2(
     return (cm[*us1] - cm[*--us2]);
 }
 
-PUBLIC int strncasecomp ARGS3(
-	CONST char*,	a,
-	CONST char*,	b,
-	int,		n)
+int strncasecomp (
+	const char*	a,
+	const char*	b,
+	int		n)
 {
     register unsigned char *cm = charmap;
     register unsigned char *us1 = (unsigned char *)a;
@@ -159,12 +159,12 @@ PUBLIC int strncasecomp ARGS3(
 /*	Strings of any length
 **	---------------------
 */
-PUBLIC int strcasecomp ARGS2(
-	CONST char*,	a,
-	CONST char *,	b)
+int strcasecomp (
+	const char*	a,
+	const char *	b)
 {
-    CONST char *p = a;
-    CONST char *q = b;
+    const char *p = a;
+    const char *q = b;
 
     for ( ; *p && *q; p++, q++) {
 	int diff = TOLOWER(*p) - TOLOWER(*q);
@@ -181,13 +181,13 @@ PUBLIC int strcasecomp ARGS2(
 /*	With count limit
 **	----------------
 */
-PUBLIC int strncasecomp ARGS3(
-	CONST char*,	a,
-	CONST char *,	b,
-	int,		n)
+int strncasecomp (
+	const char*	a,
+	const char *	b,
+	int		n)
 {
-    CONST char *p = a;
-    CONST char *q = b;
+    const char *p = a;
+    const char *q = b;
 
     for ( ; ; p++, q++) {
 	int diff;
@@ -210,9 +210,9 @@ PUBLIC int strncasecomp ARGS3(
 /*	Case-insensitive with ASCII collating sequence
 **	----------------
 */
-PUBLIC int AS_casecomp ARGS2(
-	CONST char*,	p,
-	CONST char*,	q)
+int AS_casecomp (
+	const char*	p,
+	const char*	q)
 {
     int diff;
 
@@ -232,12 +232,12 @@ PUBLIC int AS_casecomp ARGS2(
 **	----------------
 **	AS_cmp uses n == -1 to compare indefinite length.
 */
-PUBLIC int AS_ncmp ARGS3(
-	CONST char *,	p,
-	CONST char *,	q,
-	unsigned int,	n)
+int AS_ncmp (
+	const char *	p,
+	const char *	q,
+	unsigned int	n)
 {
-    CONST char *a = p;
+    const char *a = p;
     int diff;
 
     for ( ; (p-a) < n; p++, q++) {
@@ -255,9 +255,9 @@ PUBLIC int AS_ncmp ARGS3(
 /*	With ASCII collating sequence
 **	----------------
 */
-PUBLIC int AS_cmp ARGS2(
-	CONST char *,	p,
-	CONST char *,	q)
+int AS_cmp (
+	const char *	p,
+	const char *	q)
 {
     return( AS_ncmp( p, q, -1 ) );
 }
@@ -266,9 +266,9 @@ PUBLIC int AS_cmp ARGS2(
 
 /*	Allocate a new copy of a string, and returns it
 */
-PUBLIC char * HTSACopy ARGS2(
-	char **,	dest,
-	CONST char *,	src)
+char * HTSACopy (
+	char **	dest,
+	const char *	src)
 {
     if (src != 0) {
 	if (src != *dest) {
@@ -287,9 +287,9 @@ PUBLIC char * HTSACopy ARGS2(
 
 /*	String Allocate and Concatenate
 */
-PUBLIC char * HTSACat ARGS2(
-	char **,	dest,
-	CONST char *,	src)
+char * HTSACat (
+	char **	dest,
+	const char *	src)
 {
     if (src && *src && (src != *dest)) {
 	if (*dest) {
@@ -314,16 +314,16 @@ PUBLIC char * HTSACat ARGS2(
 #define EXTRA_TYPE size_t		/* type we use for length */
 #define EXTRA_SIZE sizeof(void *)	/* alignment >= sizeof(EXTRA_TYPE) */
 
-PUBLIC void   HTSAFree_extra ARGS1(
-	char *,		s)
+void   HTSAFree_extra (
+	char *		s)
 {
     free(s - EXTRA_SIZE);
 }
 
 /* never shrink */
-PUBLIC char * HTSACopy_extra ARGS2(
-	char **,	dest,
-	CONST char *,	src)
+char * HTSACopy_extra (
+	char **	dest,
+	const char *	src)
 {
     if (src != 0) {
 	size_t srcsize = strlen(src) + 1;
@@ -362,8 +362,8 @@ PUBLIC char * HTSACopy_extra ARGS2(
 **
 **	returns a pointer to the first field
 */
-PUBLIC char * HTNextField ARGS1(
-	char **,	pstr)
+char * HTNextField (
+	char **	pstr)
 {
     char * p = *pstr;
     char * start;			/* start of field */
@@ -417,11 +417,11 @@ PUBLIC char * HTNextField ARGS1(
 **	found	points to the delimiter found unless it was NULL.
 **	Returns a pointer to the first word or NULL on error
 */
-PUBLIC char * HTNextTok ARGS4(
-	char **,	pstr,
-	CONST char *,	delims,
-	CONST char *,	bracks,
-	char *,		found)
+char * HTNextTok (
+	char **	pstr,
+	const char *	delims,
+	const char *	bracks,
+	char *		found)
 {
     char * p = *pstr;
     char * start = NULL;
@@ -521,7 +521,7 @@ PUBLIC char * HTNextTok ARGS4(
     return start;
 }
 
-PRIVATE char *HTAlloc ARGS2(char *, ptr, size_t, length)
+static char *HTAlloc (char *  ptr, size_t  length)
 {
     if (ptr != 0)
 	ptr = (char *)realloc(ptr, length);
@@ -560,11 +560,11 @@ typedef enum { Flags, Width, Prec, Type, Format } PRINTF;
 #define GROW_EXPR(n) (((n) * 3) / 2)
 #define GROW_SIZE 256
 
-PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf ARGS4(
-	char **,	pstr,
-	size_t,		dst_len,
-	CONST char *,	fmt,
-	va_list *,	ap)
+PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf (
+	char **	pstr,
+	size_t		dst_len,
+	const char *	fmt,
+	va_list *	ap)
 {
 #ifdef SAVE_TIME_NOT_SPACE
     static size_t tmp_len = 0;
@@ -578,7 +578,7 @@ PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf ARGS4(
 #endif /* SAVE_TIME_NOT_SPACE */
     size_t have, need;
     char *dst_ptr = *pstr;
-    CONST char *format = fmt;
+    const char *format = fmt;
 
     if (fmt == 0 || *fmt == '\0')
 	return 0;
@@ -799,9 +799,9 @@ PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf ARGS4(
 #undef HTSprintf
 #endif
 #if ANSI_VARARGS
-PUBLIC char * HTSprintf (char ** pstr, CONST char * fmt, ...)
+char * HTSprintf (char ** pstr, const char * fmt, ...)
 #else
-PUBLIC char * HTSprintf (va_alist)
+char * HTSprintf (va_alist)
     va_dcl
 #endif
 {
@@ -813,7 +813,7 @@ PUBLIC char * HTSprintf (va_alist)
     {
 #if !ANSI_VARARGS
 	char **		pstr = va_arg(ap, char **);
-	CONST char *	fmt  = va_arg(ap, CONST char *);
+	const char *	fmt  = va_arg(ap, const char *);
 #endif
 	if (pstr != 0 && *pstr != 0)
 	    inuse = strlen(*pstr);
@@ -835,9 +835,9 @@ PUBLIC char * HTSprintf (va_alist)
 #undef HTSprintf0
 #endif
 #if ANSI_VARARGS
-PUBLIC char * HTSprintf0 (char ** pstr, CONST char * fmt, ...)
+char * HTSprintf0 (char ** pstr, const char * fmt, ...)
 #else
-PUBLIC char * HTSprintf0 (va_alist)
+char * HTSprintf0 (va_alist)
     va_dcl
 #endif
 {
@@ -848,7 +848,7 @@ PUBLIC char * HTSprintf0 (va_alist)
     {
 #if !ANSI_VARARGS
 	char **		pstr = va_arg(ap, char **);
-	CONST char *	fmt  = va_arg(ap, CONST char *);
+	const char *	fmt  = va_arg(ap, const char *);
 #endif
 #ifdef USE_VASPRINTF
 	if (pstr) {
@@ -873,8 +873,8 @@ PUBLIC char * HTSprintf0 (va_alist)
 #if USE_QUOTED_PARAMETER
 #define S_QUOTE '\''
 #define D_QUOTE '"'
-PUBLIC char *HTQuoteParameter ARGS1(
-    CONST char *,	parameter)
+char *HTQuoteParameter (
+    const char *	parameter)
 {
     size_t i;
     size_t last;
@@ -928,8 +928,8 @@ PUBLIC char *HTQuoteParameter ARGS1(
 /*
  * Returns the number of "%s" tokens in a system command-template.
  */
-PUBLIC int HTCountCommandArgs ARGS1(
-    CONST char *,	command)
+int HTCountCommandArgs (
+    const char *	command)
 {
     int number = 0;
     while (command[0] != 0) {
@@ -943,9 +943,9 @@ PUBLIC int HTCountCommandArgs ARGS1(
 /*
  * Returns a pointer into the given string after the given parameter number
  */
-PRIVATE CONST char *HTAfterCommandArg ARGS2(
-    CONST char *,	command,
-    int,		number)
+static const char *HTAfterCommandArg (
+    const char *	command,
+    int		number)
 {
     while (number > 0) {
 	if (command[0] != 0) {
@@ -972,15 +972,15 @@ PRIVATE CONST char *HTAfterCommandArg ARGS2(
  * This is useful only when we quote parameters, of course.
  */
 #if USE_QUOTED_PARAMETER
-PUBLIC void HTAddXpand ARGS4(
-    char **,		result,
-    CONST char *,	command,
-    int,		number,
-    CONST char *,	parameter)
+void HTAddXpand (
+    char **		result,
+    const char *	command,
+    int		number,
+    const char *	parameter)
 {
     if (number > 0) {
-	CONST char *last = HTAfterCommandArg(command, number - 1);
-	CONST char *next = last;
+	const char *last = HTAfterCommandArg(command, number - 1);
+	const char *next = last;
 
 	if (number <= 1) {
 	    FREE(*result);
@@ -1014,15 +1014,15 @@ PUBLIC void HTAddXpand ARGS4(
  * Parameters are substituted at "%s" tokens, like printf.  Other printf-style
  * tokens are not substituted; they are passed through without change.
  */
-PUBLIC void HTAddToCmd ARGS4(
-    char **,		result,
-    CONST char *,	command,
-    int,		number,
-    CONST char *,	string)
+void HTAddToCmd (
+    char **		result,
+    const char *	command,
+    int		number,
+    const char *	string)
 {
     if (number > 0) {
-	CONST char *last = HTAfterCommandArg(command, number - 1);
-	CONST char *next = last;
+	const char *last = HTAfterCommandArg(command, number - 1);
+	const char *next = last;
 
 	if (number <= 1) {
 	    FREE(*result);
@@ -1051,11 +1051,11 @@ PUBLIC void HTAddToCmd ARGS4(
  * string is a complete parameter (which is a necessary assumption so we can
  * quote it properly).
  */
-PUBLIC void HTAddParam ARGS4(
-    char **,		result,
-    CONST char *,	command,
-    int,		number,
-    CONST char *,	parameter)
+void HTAddParam (
+    char **		result,
+    const char *	command,
+    int		number,
+    const char *	parameter)
 {
     if (number > 0) {
 #if USE_QUOTED_PARAMETER
@@ -1072,12 +1072,12 @@ PUBLIC void HTAddParam ARGS4(
  * Append the remaining command-string to a system command (compare with
  * HTAddParam).  Any remaining "%s" tokens are copied as empty strings.
  */
-PUBLIC void HTEndParam ARGS3(
-    char **,		result,
-    CONST char *,	command,
-    int,		number)
+void HTEndParam (
+    char **		result,
+    const char *	command,
+    int		number)
 {
-    CONST char *last;
+    const char *last;
     int count;
 
     count = HTCountCommandArgs (command);
@@ -1097,10 +1097,10 @@ PUBLIC void HTEndParam ARGS3(
 
 /*	Allocate a new bstring, and return it.
 */
-PUBLIC void HTSABCopy ARGS3(
-	bstring**,	dest,
-	CONST char *,	src,
-	int,		len)
+void HTSABCopy (
+	bstring**	dest,
+	const char *	src,
+	int		len)
 {
     bstring *t;
     unsigned need = len + 1;
@@ -1132,9 +1132,9 @@ PUBLIC void HTSABCopy ARGS3(
 /*
  * Initialize with a null-terminated string (discards the null).
  */
-PUBLIC void HTSABCopy0 ARGS2(
-	bstring**,	dest,
-	CONST char *,	src)
+void HTSABCopy0 (
+	bstring**	dest,
+	const char *	src)
 {
     HTSABCopy(dest, src, strlen(src));
 }
@@ -1142,10 +1142,10 @@ PUBLIC void HTSABCopy0 ARGS2(
 /*
  * Append a block of memory to a bstring.
  */
-PUBLIC void HTSABCat ARGS3(
-	bstring **,	dest,
-	CONST char *,	src,
-	int,		len)
+void HTSABCat (
+	bstring **	dest,
+	const char *	src,
+	int		len)
 {
     bstring *t = *dest;
 
@@ -1184,9 +1184,9 @@ PUBLIC void HTSABCat ARGS3(
 /*
  * Append a null-terminated string (discards the null).
  */
-PUBLIC void HTSABCat0 ARGS2(
-	bstring**,	dest,
-	CONST char *,	src)
+void HTSABCat0 (
+	bstring**	dest,
+	const char *	src)
 {
     HTSABCat(dest, src, strlen(src));
 }
@@ -1194,9 +1194,9 @@ PUBLIC void HTSABCat0 ARGS2(
 /*
  * Compare two bstring's for equality
  */
-PUBLIC BOOL HTSABEql   ARGS2(
-	bstring *,	a,
-	bstring *,	b)
+BOOL HTSABEql   (
+	bstring *	a,
+	bstring *	b)
 {
     unsigned len_a = (a != 0) ? a->len : 0;
     unsigned len_b = (b != 0) ? b->len : 0;
@@ -1212,8 +1212,8 @@ PUBLIC BOOL HTSABEql   ARGS2(
 /*
  * Deallocate a bstring.
  */
-PUBLIC void HTSABFree ARGS1(
-	bstring **,	ptr)
+void HTSABFree (
+	bstring **	ptr)
 {
     if (*ptr != NULL) {
 	FREE((*ptr)->str);
@@ -1227,9 +1227,9 @@ PUBLIC void HTSABFree ARGS1(
  * The bstring may contain embedded nulls; the formatted portions must not.
  */
 #ifdef ANSI_VARARGS
-PUBLIC bstring * HTBprintf (bstring ** pstr, CONST char * fmt, ...)
+bstring * HTBprintf (bstring ** pstr, const char * fmt, ...)
 #else
-PUBLIC bstring * HTBprintf (va_alist)
+bstring * HTBprintf (va_alist)
     va_dcl
 #endif
 {
@@ -1241,7 +1241,7 @@ PUBLIC bstring * HTBprintf (va_alist)
     {
 #if !ANSI_VARARGS
 	bstring **	pstr = va_arg(ap, char **);
-	CONST char *	fmt  = va_arg(ap, CONST char *);
+	const char *	fmt  = va_arg(ap, const char *);
 #endif
 	temp = StrAllocVsprintf(&temp, 0, fmt, &ap);
 	if (!isEmpty(temp)) {
@@ -1260,9 +1260,9 @@ PUBLIC bstring * HTBprintf (va_alist)
  * That is most, since we do not restrict line-length.  Nulls and other
  * non-printing characters are addressed.
  */
-PUBLIC void trace_bstring2 ARGS2(
-	CONST char *,	text,
-	int,		size)
+void trace_bstring2 (
+	const char *	text,
+	int		size)
 {
     int n;
 
@@ -1294,8 +1294,8 @@ PUBLIC void trace_bstring2 ARGS2(
     }
 }
 
-PUBLIC void trace_bstring ARGS1(
-	bstring *,	data)
+void trace_bstring (
+	bstring *	data)
 {
     trace_bstring2(BStrData(data), BStrLen(data));
 }

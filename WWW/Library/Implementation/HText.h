@@ -40,21 +40,21 @@ Creation and deletion
    for objects which need to refer to the structure which is kep by the creating stream.
 
  */
- extern HText * HText_new PARAMS((HTParentAnchor * anchor));
+ extern HText * HText_new (HTParentAnchor * anchor);
 
- extern HText * HText_new2 PARAMS((HTParentAnchor * anchor,
-                                HTStream * output_stream));
+ extern HText * HText_new2 (HTParentAnchor * anchor,
+                                HTStream * output_stream);
 
- extern HText * HText_new3 PARAMS((HTParentAnchor * anchor,
+ extern HText * HText_new3 (HTParentAnchor * anchor,
                                 HTStream * output_stream,
-                                HTStructured * structure));
+                                HTStructured * structure);
 
 /*
 
   FREE HYPERTEXT OBJECT
 
  */
-extern void     HText_free PARAMS((HText * me));
+extern void     HText_free (HText * me);
 
 
 /*
@@ -66,9 +66,9 @@ Object Building methods
    optimised handling using buffers and caches which are flushed at the end.
 
  */
-extern void HText_beginAppend PARAMS((HText * text));
+extern void HText_beginAppend (HText * text);
 
-extern void HText_endAppend PARAMS((HText * text));
+extern void HText_endAppend (HText * text);
 
 /*
 
@@ -76,14 +76,14 @@ extern void HText_endAppend PARAMS((HText * text));
 
  */
 
-extern void HText_setStyle PARAMS((HText * text, HTStyle * style));
+extern void HText_setStyle (HText * text, HTStyle * style);
 
 /*
 
   ADD ONE CHARACTER
 
  */
-extern void HText_appendCharacter PARAMS((HText * text, int ch));
+extern void HText_appendCharacter (HText * text, int ch);
 
 /*
 
@@ -91,7 +91,7 @@ extern void HText_appendCharacter PARAMS((HText * text, int ch));
 
  */
 
-extern void HText_appendText PARAMS((HText * text, CONST char * str));
+extern void HText_appendText (HText * text, const char * str);
 
 /*
 
@@ -100,11 +100,11 @@ extern void HText_appendText PARAMS((HText * text, CONST char * str));
    and similar things
 
  */
-extern void HText_appendParagraph PARAMS((HText * text));
+extern void HText_appendParagraph (HText * text);
 
-extern void HText_appendLineBreak PARAMS((HText * text));
+extern void HText_appendLineBreak (HText * text);
 
-extern void HText_appendHorizontalRule PARAMS((HText * text));
+extern void HText_appendHorizontalRule (HText * text);
 
 
 
@@ -121,12 +121,12 @@ extern void HText_appendHorizontalRule PARAMS((HText * text));
    nested.
 
  */
-extern int HText_beginAnchor PARAMS((
+extern int HText_beginAnchor (
 	HText *		text,
 	BOOL		underline,
-	HTChildAnchor *	anc));
-extern void HText_endAnchor PARAMS((HText * text, int number));
-extern BOOL HText_isAnchorBlank PARAMS((HText * text, int number));
+	HTChildAnchor *	anc);
+extern void HText_endAnchor (HText * text, int number);
+extern BOOL HText_isAnchorBlank (HText * text, int number);
 
 /*
 
@@ -140,19 +140,19 @@ extern BOOL HText_isAnchorBlank PARAMS((HText * text, int number));
    linked to the image itself as a separate document.
 
  */
-extern void HText_appendImage PARAMS((
+extern void HText_appendImage (
         HText *         text,
         HTChildAnchor * anc,
-        CONST char *    alternative_text,
+        const char *    alternative_text,
         int             alignment,
-        BOOL            isMap));
+        BOOL            isMap);
 
 /*
 
   RETURN THE ANCHOR ASSOCIATED WITH THIS NODE
 
  */
-extern HTParentAnchor * HText_nodeAnchor PARAMS((HText * me));
+extern HTParentAnchor * HText_nodeAnchor (HText * me);
 
 
 /*
@@ -169,8 +169,8 @@ Browsing functions
  */
 
 
-extern BOOL HText_select PARAMS((HText * text));
-extern BOOL HText_selectAnchor PARAMS((HText * text, HTChildAnchor* anchor));
+extern BOOL HText_select (HText * text);
+extern BOOL HText_selectAnchor (HText * text, HTChildAnchor* anchor);
 
 /*
 
@@ -185,39 +185,39 @@ Editing functions
 */
 /*      Apply this style to the selection
 */
-extern void HText_applyStyle PARAMS((HText * me, HTStyle *style));
+extern void HText_applyStyle (HText * me, HTStyle *style);
 
 /*      Update all text with changed style.
 */
-extern void HText_updateStyle PARAMS((HText * me, HTStyle *style));
+extern void HText_updateStyle (HText * me, HTStyle *style);
 
 /*      Return style of  selection
 */
-extern HTStyle * HText_selectionStyle PARAMS((
+extern HTStyle * HText_selectionStyle (
         HText * me,
-        HTStyleSheet* sheet));
+        HTStyleSheet* sheet);
 
 /*      Paste in styled text
 */
-extern void HText_replaceSel PARAMS((HText * me,
-        CONST char *aString,
-        HTStyle* aStyle));
+extern void HText_replaceSel (HText * me,
+        const char *aString,
+        HTStyle* aStyle);
 
 /*      Apply this style to the selection and all similarly formatted text
 **      (style recovery only)
 */
-extern void HTextApplyToSimilar PARAMS((HText * me, HTStyle *style));
+extern void HTextApplyToSimilar (HText * me, HTStyle *style);
 
 /*      Select the first unstyled run.
 **      (style recovery only)
 */
-extern void HTextSelectUnstyled PARAMS((HText * me, HTStyleSheet *sheet));
+extern void HTextSelectUnstyled (HText * me, HTStyleSheet *sheet);
 
 
 /*      Anchor handling:
 */
-extern void             HText_unlinkSelection PARAMS((HText * me));
-extern HTAnchor *       HText_referenceSelected PARAMS((HText * me));
-extern HTAnchor *       HText_linkSelTo PARAMS((HText * me, HTAnchor* anchor));
+extern void             HText_unlinkSelection (HText * me);
+extern HTAnchor *       HText_referenceSelected (HText * me);
+extern HTAnchor *       HText_linkSelTo (HText * me, HTAnchor* anchor);
 
 #endif /* HTEXT_H */

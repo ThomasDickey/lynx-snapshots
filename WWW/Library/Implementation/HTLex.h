@@ -33,21 +33,21 @@ Get Next Lexical Item
 
  */
 
-PUBLIC LexItem lex PARAMS((FILE * fp));
+extern LexItem lex (FILE * fp);
 /*
 
 Push Back Latest Item
 
  */
 
-PUBLIC void unlex PARAMS((LexItem lex_item));
+extern void unlex (LexItem lex_item);
 /*
 
 Get the Name for Lexical Item
 
  */
 
-PUBLIC char *lex_verbose PARAMS((LexItem lex_item));
+extern char *lex_verbose (LexItem lex_item);
 /*
 
  */

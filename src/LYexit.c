@@ -16,14 +16,14 @@
 /*
  *  Flag for outofmem macro. - FM
  */
-PUBLIC BOOL LYOutOfMemory = FALSE;
+BOOL LYOutOfMemory = FALSE;
 
 
 /*
  *  Stack of functions to call upon exit.
  */
-PRIVATE void (*callstack[ATEXITSIZE]) NOPARAMS;
-PRIVATE int topOfStack = 0;
+static void (*callstack[ATEXITSIZE]) (void);
+static int topOfStack = 0;
 
 /*
  *  Purpose:		Registers termination function.
@@ -35,12 +35,7 @@ PRIVATE int topOfStack = 0;
  *	06-15-94	created Lynx 2-3-1 Garrett Arch Blythe
  */
 
-#ifdef __STDC__
-PUBLIC int LYatexit(void (*function) NOPARAMS)
-#else /* Not ANSI, ugh! */
-PUBLIC int LYatexit(function)
-void (*function) NOPARAMS;
-#endif /* __STDC__ */
+int LYatexit(void (*function) (void))
 {
     /*
      *  Check for available space.
@@ -66,7 +61,7 @@ void (*function) NOPARAMS;
  *  Revision History:
  *	06-15-94	created Lynx 2-3-1 Garrett Arch Blythe
  */
-PRIVATE void LYCompleteExit NOPARAMS
+static void LYCompleteExit (void)
 {
     /*
      *  Just loop through registered functions.
@@ -86,8 +81,8 @@ PRIVATE void LYCompleteExit NOPARAMS
  *  Revision History:
  *	06-15-94	created Lynx 2-3-1 Garrett Arch Blythe
  */
-PUBLIC void LYexit ARGS1(
-	int,		status)
+void LYexit (
+	int		status)
 {
 #ifndef VMS	/*  On VMS, the VMSexit() handler does these. - FM */
 #ifdef _WINDOWS
@@ -174,9 +169,9 @@ PUBLIC void LYexit ARGS1(
     exit(status);
 }
 
-PUBLIC void outofmem ARGS2(
-	CONST char *,	fname,
-	CONST char *,	func)
+void outofmem (
+	const char *	fname,
+	const char *	func)
 {
     fprintf(stderr, "\n\n\n%s %s: %s\n", fname, func, MEMORY_EXHAUSTED_ABORTING);
     LYOutOfMemory = TRUE;

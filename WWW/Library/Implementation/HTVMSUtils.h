@@ -21,7 +21,7 @@ extern BOOL HTVMSFileVersions;	/* Include version numbers in listing? */
 ** ON EXIT:
 **	returns	YES if SYSPRV is authorized
 */
-PUBLIC BOOL HTVMS_authSysPrv NOPARAMS;
+extern BOOL HTVMS_authSysPrv (void);
 
 
 /* PUBLIC							HTVMS_enableSysPrv()
@@ -32,7 +32,7 @@ PUBLIC BOOL HTVMS_authSysPrv NOPARAMS;
 ** ON EXIT:
 **
 */
-PUBLIC void HTVMS_enableSysPrv NOPARAMS;
+extern void HTVMS_enableSysPrv (void);
 
 
 /* PUBLIC							HTVMS_disableSysPrv()
@@ -43,7 +43,7 @@ PUBLIC void HTVMS_enableSysPrv NOPARAMS;
 ** ON EXIT:
 **
 */
-PUBLIC void HTVMS_disableSysPrv NOPARAMS;
+extern void HTVMS_disableSysPrv (void);
 
 /* PUBLIC							HTVMS_checkAccess()
 **		CHECKS ACCESS TO FILE FOR CERTAIN USER
@@ -55,10 +55,10 @@ PUBLIC void HTVMS_disableSysPrv NOPARAMS;
 **	returns YES if access is allowed
 **
 */
-PUBLIC BOOL HTVMS_checkAccess PARAMS((
-	CONST char * FileName,
-	CONST char * UserName,
-	CONST char * Method));
+extern BOOL HTVMS_checkAccess (
+	const char * FileName,
+	const char * UserName,
+	const char * Method);
 
 
 /* PUBLIC							HTVMS_wwwName()
@@ -86,14 +86,14 @@ PUBLIC BOOL HTVMS_checkAccess PARAMS((
 **
 **
 */
-PUBLIC char * HTVMS_wwwName PARAMS((
-	CONST char *	vmsname));
+extern char * HTVMS_wwwName (
+	const char *	vmsname);
 
-PUBLIC int HTVMSBrowseDir PARAMS((
-	CONST char * address,
+extern int HTVMSBrowseDir (
+	const char * address,
 	HTParentAnchor * anchor,
 	HTFormat format_out,
-	HTStream * sink));
+	HTStream * sink);
 
 extern int HTVMS_remove(char *filename);
 extern void HTVMS_purge(char *filename);

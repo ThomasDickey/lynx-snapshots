@@ -33,33 +33,33 @@
 **  and will not modify the string unless both the
 **  first and last characters are double-quotes. - FM
 */
-extern void HTMIME_TrimDoubleQuotes PARAMS((
-	char *		value));
+extern void HTMIME_TrimDoubleQuotes (
+	char *		value);
 
 /*
 
   INPUT: LOCAL TEXT
 
  */
-extern HTStream * HTMIMEConvert PARAMS((HTPresentation * pres,
+extern HTStream * HTMIMEConvert (HTPresentation * pres,
                                         HTParentAnchor * anchor,
-                                        HTStream * sink));
+                                        HTStream * sink);
 /*
 
   INPUT: NET ASCII
 
  */
-extern HTStream * HTNetMIME PARAMS((HTPresentation * pres,
+extern HTStream * HTNetMIME (HTPresentation * pres,
                                         HTParentAnchor * anchor,
-                                        HTStream * sink));
+                                        HTStream * sink);
 /*
 
   INPUT: Redirection message, parse headers only for Location if present
 
  */
-extern HTStream * HTMIMERedirect PARAMS((HTPresentation * pres,
+extern HTStream * HTMIMERedirect (HTPresentation * pres,
                                         HTParentAnchor * anchor,
-                                        HTStream * sink));
+                                        HTStream * sink);
 
 
 /*
@@ -67,24 +67,24 @@ extern HTStream * HTMIMERedirect PARAMS((HTPresentation * pres,
   For handling Japanese headers.
 
 */
-extern void HTmmdec_base64 PARAMS((
+extern void HTmmdec_base64 (
 	char *	t,
-	char *	s));
+	char *	s);
 
-extern void HTmmdec_quote PARAMS((
+extern void HTmmdec_quote (
 	char *	t,
-	char *	s));
+	char *	s);
 
-extern void HTmmdecode PARAMS((
+extern void HTmmdecode (
 	char *	trg,
-	char *	str));
+	char *	str);
 
-extern int HTrjis PARAMS((
+extern int HTrjis (
 	char *	t,
-	char *	s));
+	char *	s);
 
-extern int HTmaybekanji PARAMS((
+extern int HTmaybekanji (
 	int	c1,
-	int	c2));
+	int	c2);
 
 #endif /* !HTMIME_H */

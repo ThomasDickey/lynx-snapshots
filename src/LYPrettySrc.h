@@ -59,12 +59,12 @@ extern char* HTL_tagspecs[HTL_num_lexemes];
 extern HT_tagspec* lexeme_start[HTL_num_lexemes];
 extern HT_tagspec* lexeme_end[HTL_num_lexemes];
 
-extern int html_src_parse_tagspec PARAMS((char* ts, HTlexeme lexeme,
-                     BOOL checkonly,BOOL isstart));
-extern void HTMLSRC_init_caches PARAMS((BOOL dont_exit));
-extern void html_src_clean_item PARAMS((HTlexeme l));
-extern void html_src_clean_data NOPARAMS;
-extern void html_src_on_lynxcfg_reload NOPARAMS;
+extern int html_src_parse_tagspec (char* ts, HTlexeme lexeme,
+                     BOOL checkonly,BOOL isstart);
+extern void HTMLSRC_init_caches (BOOL dont_exit);
+extern void html_src_clean_item (HTlexeme l);
+extern void html_src_clean_data (void);
+extern void html_src_on_lynxcfg_reload (void);
 
 /* these 2 vars tell what kind of transform should be appiled to tag names
   and attribute names. 0 - lowercase, 1 - as is, 2 uppercase. */

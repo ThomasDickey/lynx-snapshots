@@ -11,16 +11,16 @@
 #include <HTStream.h>
 #include <HTFormat.h>
 
-extern HTStream * HTFWriter_new PARAMS((FILE * fp));
+extern HTStream * HTFWriter_new (FILE * fp);
 
-extern HTStream * HTSaveAndExecute PARAMS((
+extern HTStream * HTSaveAndExecute (
         HTPresentation *        pres,
         HTParentAnchor *        anchor, /* Not used */
-        HTStream *              sink));
+        HTStream *              sink);
 
-extern HTStream * HTSaveLocally PARAMS((
+extern HTStream * HTSaveLocally (
         HTPresentation *        pres,
         HTParentAnchor *        anchor, /* Not used */
-        HTStream *              sink));
+        HTStream *              sink);
 
 #endif /* HTFWRITE_H */

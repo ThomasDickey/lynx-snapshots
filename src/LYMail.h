@@ -29,29 +29,29 @@
 
 extern BOOLEAN term_letter;
 
-extern BOOLEAN LYSystemMail NOPARAMS;
-extern BOOLEAN LYMailPMDF NOPARAMS;
-extern FILE *LYPipeToMailer NOPARAMS;
-extern int LYSendMailFile PARAMS((
+extern BOOLEAN LYSystemMail (void);
+extern BOOLEAN LYMailPMDF (void);
+extern FILE *LYPipeToMailer (void);
+extern int LYSendMailFile (
 	char *		the_address,
 	char *		the_filename,
 	char *		the_subject,
 	char *		the_ccaddr,
-	char *		message));
-extern void mailform PARAMS((
-	CONST char *	mailto_address,
-	CONST char *	mailto_subject,
-	CONST char *	mailto_content,
-	CONST char *	mailto_type));
-extern void mailmsg PARAMS((
+	char *		message);
+extern void mailform (
+	const char *	mailto_address,
+	const char *	mailto_subject,
+	const char *	mailto_content,
+	const char *	mailto_type);
+extern void mailmsg (
 	int		cur,
 	char *		owner_address,
 	char *		filename,
-	char *		linkname));
-extern void reply_by_mail PARAMS((
+	char *		linkname);
+extern void reply_by_mail (
 	char *		mail_address,
 	char *		filename,
-	CONST char *	title,
-	CONST char *	refid));
+	const char *	title,
+	const char *	refid);
 
 #endif /* LYMAIL_H */

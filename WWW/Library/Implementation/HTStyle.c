@@ -16,7 +16,7 @@
 
 /*	Create a new style
 */
-PUBLIC HTStyle* HTStyleNew NOARGS
+HTStyle* HTStyleNew (void)
 {
     HTStyle * self = typecalloc(HTStyle);
     if (self == NULL)
@@ -26,7 +26,7 @@ PUBLIC HTStyle* HTStyleNew NOARGS
 
 /*	Create a new style with a name
 */
-PUBLIC HTStyle* HTStyleNewNamed ARGS1 (CONST char *,name)
+HTStyle* HTStyleNewNamed (const char * name)
 {
     HTStyle * self = HTStyleNew();
     StrAllocCopy(self->name, name);
@@ -37,7 +37,7 @@ PUBLIC HTStyle* HTStyleNewNamed ARGS1 (CONST char *,name)
 
 /*	Free a style
 */
-PUBLIC HTStyle * HTStyleFree ARGS1 (HTStyle *,self)
+HTStyle * HTStyleFree (HTStyle * self)
 {
     FREE(self->name);
     FREE(self->SGMLTag);
@@ -181,7 +181,7 @@ HTStyle * HTStyleDump (HTStyle * style)
 
 /*	Searching for styles:
 */
-HTStyle * HTStyleNamed ARGS2 (HTStyleSheet *,self, CONST char *,name)
+HTStyle * HTStyleNamed (HTStyleSheet * self, const char * name)
 {
     HTStyle * scan;
     for (scan=self->styles; scan; scan=scan->next)
@@ -247,8 +247,7 @@ HTStyle * HTStyleForRun (HTStyleSheet *self, NXRun *run)
 /*	Add a style to a sheet
 **	----------------------
 */
-HTStyleSheet * HTStyleSheetAddStyle ARGS2
-  (HTStyleSheet *,self, HTStyle *,style)
+HTStyleSheet * HTStyleSheetAddStyle (HTStyleSheet * self, HTStyle * style)
 {
     style->next = 0;		/* The style will go on the end */
     if (!self->styles) {
@@ -264,8 +263,7 @@ HTStyleSheet * HTStyleSheetAddStyle ARGS2
 
 /*	Remove the given object from a style sheet if it exists
 */
-HTStyleSheet * HTStyleSheetRemoveStyle ARGS2
-  (HTStyleSheet *,self, HTStyle *,style)
+HTStyleSheet * HTStyleSheetRemoveStyle (HTStyleSheet * self, HTStyle * style)
 {
     if (self->styles == style) {
 	self->styles = style->next;
@@ -285,7 +283,7 @@ HTStyleSheet * HTStyleSheetRemoveStyle ARGS2
 /*	Create new style sheet
 */
 
-HTStyleSheet * HTStyleSheetNew NOARGS
+HTStyleSheet * HTStyleSheetNew (void)
 {
     HTStyleSheet * self = typecalloc(HTStyleSheet);
     if (self == NULL)
@@ -296,7 +294,7 @@ HTStyleSheet * HTStyleSheetNew NOARGS
 
 /*	Free off a style sheet pointer
 */
-HTStyleSheet * HTStyleSheetFree ARGS1 (HTStyleSheet *,self)
+HTStyleSheet * HTStyleSheetFree (HTStyleSheet * self)
 {
     HTStyle * style;
     while((style=self->styles)!=0) {

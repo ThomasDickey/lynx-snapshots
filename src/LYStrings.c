@@ -76,7 +76,7 @@ static MEVENT levent;
 #endif
 
 /* Return the value of mouse_link */
-PUBLIC int peek_mouse_levent NOARGS
+int peek_mouse_levent (void)
 {
 #if defined(USE_MOUSE) && defined(NCURSES)
     if (have_levent > 0) {
@@ -89,7 +89,7 @@ PUBLIC int peek_mouse_levent NOARGS
 }
 
 /* Return the value of mouse_link, erasing it */
-PUBLIC int get_mouse_link NOARGS
+int get_mouse_link (void)
 {
     int t;
     t = mouse_link;
@@ -100,16 +100,16 @@ PUBLIC int get_mouse_link NOARGS
 }
 
 /* Return the value of mouse_link */
-PUBLIC int peek_mouse_link NOARGS
+int peek_mouse_link (void)
 {
     return mouse_link;
 }
 
 
-PUBLIC int fancy_mouse ARGS3(
-    WINDOW *,	win,
-    int,	row,
-    int *,	position)
+int fancy_mouse (
+    WINDOW *	win,
+    int	row,
+    int *	position)
 {
     int cmd = LYK_DO_NOTHING;
 #ifdef USE_MOUSE
@@ -254,8 +254,8 @@ PUBLIC int fancy_mouse ARGS3(
 /*
  * Manage the collection of edit-histories
  */
-PRIVATE HTList *whichRecall ARGS1(
-    RecallType,		recall)
+static HTList *whichRecall (
+    RecallType		recall)
 {
     HTList **list;
 
@@ -277,7 +277,7 @@ PRIVATE HTList *whichRecall ARGS1(
 /*
  * Remove the oldest item in the closet
  */
-PRIVATE void LYRemoveFromCloset ARGS1(HTList *, list)
+static void LYRemoveFromCloset (HTList * list)
 {
     char *data = HTList_removeFirstObject(list);
 
@@ -285,7 +285,7 @@ PRIVATE void LYRemoveFromCloset ARGS1(HTList *, list)
 	FREE(data);
 }
 
-PUBLIC void LYCloseCloset ARGS1(RecallType, recall)
+void LYCloseCloset (RecallType recall)
 {
     HTList *list = whichRecall(recall);
 
@@ -300,7 +300,7 @@ PUBLIC void LYCloseCloset ARGS1(RecallType, recall)
  * match, i.e., the newest since we search from the top.  This should be made
  * more intelligent, but works for now.
  */
-PRIVATE char * LYFindInCloset ARGS2(RecallType, recall, char*, base)
+static char * LYFindInCloset (RecallType recall, char* base)
 {
     HTList *list = whichRecall(recall);
     char *data;
@@ -315,7 +315,7 @@ PRIVATE char * LYFindInCloset ARGS2(RecallType, recall, char*, base)
     return(0);
 }
 
-PRIVATE void LYAddToCloset ARGS2(RecallType, recall, char*, str)
+static void LYAddToCloset (RecallType recall, char* str)
 {
     HTList *list = whichRecall(recall);
     char *data = NULL;
@@ -327,12 +327,12 @@ PRIVATE void LYAddToCloset ARGS2(RecallType, recall, char*, str)
 }
 
 #ifdef USE_MOUSE
-PRIVATE int XYdist ARGS5(
-    int,	x1,
-    int,	y1,
-    int,	x2,
-    int,	y2,
-    int,	dx2)
+static int XYdist (
+    int	x1,
+    int	y1,
+    int	x2,
+    int	y2,
+    int	dx2)
 {
     int xerr = 3 * (x2 - x1), yerr = 9 * (y2 - y1);
 
@@ -369,11 +369,11 @@ now: (kw 1999-10-23)
 ** link.
 **/
 
-PRIVATE int set_clicked_link ARGS4(
-    int,	x,
-    int,	y,
-    int,	code,
-    int,	clicks)
+static int set_clicked_link (
+    int	x,
+    int	y,
+    int	code,
+    int	clicks)
 {
     int left = 6;
     int right = LYcols-6;
@@ -560,10 +560,10 @@ PRIVATE int set_clicked_link ARGS4(
  *  LYstrncpy() terminates strings with a null byte.
  *  Writes a null byte into the n+1 byte of dst.
  */
-PUBLIC char *LYstrncpy ARGS3(
-	char *,		dst,
-	CONST char *,	src,
-	int,		n)
+char *LYstrncpy (
+	char *		dst,
+	const char *	src,
+	int		n)
 {
     char *val;
     int len;
@@ -593,12 +593,12 @@ PUBLIC char *LYstrncpy ARGS3(
  *  either bytes or glyphs (mbcs sequences) (CJK or UTF8).  The utf_flag
  *  argument should be TRUE for UTF8. - KW & FM
  */
-PUBLIC char * LYmbcsstrncpy ARGS5(
-	char *,		dst,
-	CONST char *,	src,
-	int,		n_bytes,
-	int,		n_glyphs,
-	BOOL,		utf_flag)
+char * LYmbcsstrncpy (
+	char *		dst,
+	const char *	src,
+	int		n_bytes,
+	int		n_glyphs,
+	BOOL		utf_flag)
 {
     char *val = dst;
     int i_bytes = 0, i_glyphs = 0;
@@ -627,10 +627,10 @@ PUBLIC char * LYmbcsstrncpy ARGS5(
  *  in a string and returns the resulting pointer.  It takes account
  *  of UTF-8 encoded characters. - KW
  */
-PUBLIC char * LYmbcs_skip_glyphs ARGS3(
-	char *,		data,
-	int,		n_glyphs,
-	BOOL,		utf_flag)
+char * LYmbcs_skip_glyphs (
+	char *		data,
+	int		n_glyphs,
+	BOOL		utf_flag)
 {
     int i_glyphs = 0;
 
@@ -662,10 +662,10 @@ PUBLIC char * LYmbcs_skip_glyphs ARGS3(
  *  Counts character glyphs if count_gcells is unset. (Full-
  *  width characters in CJK mode count as one.) - kw
  */
-PUBLIC int LYmbcsstrlen ARGS3(
-	char *,		str,
-	BOOL,		utf_flag,
-	BOOL,		count_gcells)
+int LYmbcsstrlen (
+	char *		str,
+	BOOL		utf_flag,
+	BOOL		count_gcells)
 {
     int i, j, len = 0;
 
@@ -727,7 +727,7 @@ PUBLIC int LYmbcsstrlen ARGS3(
 /* PDCurses sends back key-modifiers that we don't use, but would waste time
  * upon, e.g., repainting the status line
  */
-PRIVATE int myGetChar NOARGS
+static int myGetChar (void)
 {
     int c;
     BOOL done = FALSE;
@@ -773,7 +773,7 @@ PRIVATE int myGetChar NOARGS
 #endif /* !defined(GetChar) */
 
 #if defined(USE_SLANG) && defined(USE_MOUSE)
-PRIVATE int sl_parse_mouse_event ARGS3(int *, x, int *, y, int *, button)
+static int sl_parse_mouse_event (int * x, int * y, int * button)
 {
     /* "ESC [ M" has already been processed.  There more characters are
      * expected:  BUTTON X Y
@@ -805,8 +805,8 @@ PRIVATE int sl_parse_mouse_event ARGS3(int *, x, int *, y, int *, button)
     return 0;
 }
 
-PRIVATE int sl_read_mouse_event ARGS1(
-    int,	code)
+static int sl_read_mouse_event (
+    int	code)
 {
    int mouse_x, mouse_y, button;
 
@@ -836,9 +836,9 @@ PRIVATE int sl_read_mouse_event ARGS1(
 #endif  /* USE_SLANG and USE_MOUSE */
 
 
-PRIVATE BOOLEAN csi_is_csi = TRUE;
-PUBLIC void ena_csi ARGS1(
-    BOOLEAN,	flag)
+static BOOLEAN csi_is_csi = TRUE;
+void ena_csi (
+    BOOLEAN	flag)
 {
     csi_is_csi = flag;
 }
@@ -910,7 +910,7 @@ static Keysym_String_List Keysym_Strings [] =
  * Ncurses stores the termcap/terminfo names in arrays sorted to match the
  * array of strings in the TERMTYPE struct.
  */
-PRIVATE int lookup_tiname (char *name, NCURSES_CONST char *CONST *names)
+static int lookup_tiname (char *name, NCURSES_CONST char *const *names)
 {
     int code;
 
@@ -920,7 +920,7 @@ PRIVATE int lookup_tiname (char *name, NCURSES_CONST char *CONST *names)
     return -1;
 }
 
-PRIVATE CONST char *expand_tiname (CONST char *first, size_t len, char **result, char *final)
+static const char *expand_tiname (const char *first, size_t len, char **result, char *final)
 {
     char name[BUFSIZ];
     int code;
@@ -937,7 +937,7 @@ PRIVATE CONST char *expand_tiname (CONST char *first, size_t len, char **result,
     return first + len;
 }
 
-PRIVATE CONST char *expand_tichar (CONST char *first, char **result, char *final)
+static const char *expand_tichar (const char *first, char **result, char *final)
 {
     int ch;
     int limit = 0;
@@ -986,7 +986,7 @@ PRIVATE CONST char *expand_tichar (CONST char *first, char **result, char *final
     return first;
 }
 
-PRIVATE int expand_substring (char* dst, CONST char* first, CONST char* last, char *final)
+static int expand_substring (char* dst, const char* first, const char* last, char *final)
 {
     int ch;
 
@@ -998,7 +998,7 @@ PRIVATE int expand_substring (char* dst, CONST char* first, CONST char* last, ch
 	case '^':
 	    ch = *first++;
 	    if (ch == LPAREN) {
-		CONST char *s = strchr(first, RPAREN);
+		const char *s = strchr(first, RPAREN);
 		char *was = dst;
 		if (s == 0)
 		    s = first + strlen(first);
@@ -1029,7 +1029,7 @@ PRIVATE int expand_substring (char* dst, CONST char* first, CONST char* last, ch
 }
 #endif
 
-PRIVATE void unescaped_char ARGS2(CONST char*, parse, int*,keysym)
+static void unescaped_char (const char* parse, int* keysym)
 {
     size_t len = strlen(parse);
     char buf[BUFSIZ];
@@ -1041,7 +1041,7 @@ PRIVATE void unescaped_char ARGS2(CONST char*, parse, int*,keysym)
     }
 }
 
-PRIVATE BOOLEAN unescape_string ARGS3(char*, src, char *, dst, char *, final)
+static BOOLEAN unescape_string (char* src, char * dst, char * final)
 {
     BOOLEAN ok = FALSE;
 
@@ -1058,7 +1058,7 @@ PRIVATE BOOLEAN unescape_string ARGS3(char*, src, char *, dst, char *, final)
     return ok;
 }
 
-PUBLIC int map_string_to_keysym ARGS2(CONST char*, str, int*,keysym)
+int map_string_to_keysym (const char* str, int* keysym)
 {
     int modifier = 0;
     *keysym = -1;
@@ -1142,7 +1142,7 @@ PUBLIC int map_string_to_keysym ARGS2(CONST char*, str, int*,keysym)
  * Starting at a nonblank character, skip over a token, counting quoted and
  * escaped characters.
  */
-PRIVATE char *skip_keysym ARGS1(char *, parse)
+static char *skip_keysym (char * parse)
 {
     int quoted = 0;
     int escaped = 0;
@@ -1172,7 +1172,7 @@ PRIVATE char *skip_keysym ARGS1(char *, parse)
  * The first token is the string to define, the second is the name (of the
  * keysym) to define it to.
  */
-PRIVATE int setkey_cmd (char *parse)
+static int setkey_cmd (char *parse)
 {
     char *s, *t;
     int keysym;
@@ -1215,7 +1215,7 @@ PRIVATE int setkey_cmd (char *parse)
     return -1;
 }
 
-PRIVATE int unsetkey_cmd (char *parse)
+static int unsetkey_cmd (char *parse)
 {
     char *s = skip_keysym(parse);
     if (s != parse) {
@@ -1249,11 +1249,11 @@ PRIVATE int unsetkey_cmd (char *parse)
 #define FNAME_LYNX_KEYMAPS ".lynx-keymaps"
 #endif /* FNAMES_8_3 */
 
-PRIVATE int read_keymap_file NOARGS
+static int read_keymap_file (void)
 {
     static struct {
-	CONST char *name;
-	int (*func) PARAMS((char *s));
+	const char *name;
+	int (*func) (char *s);
     } table[] = {
 	{"setkey",   setkey_cmd },
 	{"unsetkey", unsetkey_cmd },
@@ -1292,7 +1292,7 @@ PRIVATE int read_keymap_file NOARGS
     return 0;
 }
 
-PRIVATE void setup_vtXXX_keymap NOARGS
+static void setup_vtXXX_keymap (void)
 {
     static Keysym_String_List table[] = {
 	INTERN_KEY( "\033[A",	UPARROW,	KEY_UP ),
@@ -1350,7 +1350,7 @@ PRIVATE void setup_vtXXX_keymap NOARGS
 	define_key(table[n].string, table[n].value);
 }
 
-PUBLIC int lynx_initialize_keymaps NOARGS
+int lynx_initialize_keymaps (void)
 {
 #ifdef USE_SLANG
     int i;
@@ -1386,7 +1386,7 @@ PUBLIC int lynx_initialize_keymaps NOARGS
 
 
 #if defined(USE_MOUSE) && (defined(NCURSES))
-PRIVATE int LYmouse_menu ARGS4(int, x, int, y, int, atlink, int, code)
+static int LYmouse_menu (int x, int y, int atlink, int code)
 {
 #define ENT_ONLY_DOC	1
 #define ENT_ONLY_LINK	2
@@ -1502,10 +1502,10 @@ PRIVATE int LYmouse_menu ARGS4(int, x, int, y, int, atlink, int, code)
 #if defined(USE_KEYMAPS) && defined(USE_SLANG)
 /************************************************************************/
 
-PRIVATE int current_sl_modifier = 0;
+static int current_sl_modifier = 0;
 
 /* We cannot guarantee the type for 'GetChar', and should not use a cast. */
-PRIVATE int myGetChar NOARGS
+static int myGetChar (void)
 {
     int i = GetChar();
     if (i == 0)			/* trick to get NUL char through - kw */
@@ -1513,8 +1513,8 @@ PRIVATE int myGetChar NOARGS
     return i;
 }
 
-PRIVATE int LYgetch_for ARGS1(
-	int,	code)
+static int LYgetch_for (
+	int	code)
 {
    SLang_Key_Type *key;
    int keysym;
@@ -1580,8 +1580,8 @@ PRIVATE int LYgetch_for ARGS1(
  */
 #define found_CSI(first,second) ((second) == '[' || (first) == 155)
 
-PRIVATE int LYgetch_for ARGS1(
-	int,	code)
+static int LYgetch_for (
+	int	code)
 {
     int a, b, c, d = -1;
     int current_modifier = 0;
@@ -2374,7 +2374,7 @@ re_read:
 #endif	/* NOT  defined(USE_KEYMAPS) && defined(USE_SLANG) */
 
 
-PUBLIC int LYgetch NOARGS
+int LYgetch (void)
 {
     return LYReadCmdKey(FOR_PANEL);
 }
@@ -2382,7 +2382,7 @@ PUBLIC int LYgetch NOARGS
 /*
  * Read a single keystroke, allows mouse-selection.
  */
-PUBLIC int LYgetch_choice NOARGS
+int LYgetch_choice (void)
 {
     int ch = LYReadCmdKey(FOR_CHOICE);
     if (ch == LYCharINTERRUPT1)
@@ -2393,7 +2393,7 @@ PUBLIC int LYgetch_choice NOARGS
 /*
  * Read a single keystroke, allows mouse events.
  */
-PUBLIC int LYgetch_input NOARGS
+int LYgetch_input (void)
 {
     int ch = LYReadCmdKey(FOR_INPUT);
     if (ch == LYCharINTERRUPT1)
@@ -2405,7 +2405,7 @@ PUBLIC int LYgetch_input NOARGS
  * Read a single keystroke, ignoring case by translating it to uppercase.
  * Ignore mouse events, if any.
  */
-PUBLIC int LYgetch_single NOARGS
+int LYgetch_single (void)
 {
     int ch = LYReadCmdKey(FOR_SINGLEKEY);
     if (ch == LYCharINTERRUPT1)
@@ -2418,8 +2418,8 @@ PUBLIC int LYgetch_single NOARGS
 /*
  * Convert a null-terminated string to lowercase
  */
-PUBLIC void LYLowerCase ARGS1(
-	 char *,	arg_buffer)
+void LYLowerCase (
+	 char *	arg_buffer)
 {
     register unsigned char *buffer = (unsigned char *) arg_buffer;
     size_t i;
@@ -2444,8 +2444,8 @@ PUBLIC void LYLowerCase ARGS1(
 /*
  * Convert a null-terminated string to uppercase
  */
-PUBLIC void LYUpperCase ARGS1(
-	 char *,	arg_buffer)
+void LYUpperCase (
+	 char *	arg_buffer)
 {
     register unsigned char *buffer = (unsigned char *) arg_buffer;
     size_t i;
@@ -2470,8 +2470,8 @@ PUBLIC void LYUpperCase ARGS1(
 /*
  * Remove newlines from a string, returning true if we removed any.
  */
-PUBLIC BOOLEAN LYRemoveNewlines ARGS1(
-	char *,		buffer)
+BOOLEAN LYRemoveNewlines (
+	char *		buffer)
 {
     if (buffer != 0) {
 	register char* buf = buffer;
@@ -2495,8 +2495,8 @@ PUBLIC BOOLEAN LYRemoveNewlines ARGS1(
  * Remove ALL whitespace from a string (including embedded blanks), and returns
  * a pointer to the end of the trimmed string.
  */
-PUBLIC char * LYRemoveBlanks ARGS1(
-	char *,		buffer)
+char * LYRemoveBlanks (
+	char *		buffer)
 {
     if (buffer != 0) {
 	register char* buf = buffer;
@@ -2519,8 +2519,8 @@ PUBLIC char * LYRemoveBlanks ARGS1(
 /*
  * Skip whitespace
  */
-PUBLIC char * LYSkipBlanks ARGS1(
-	char *,		buffer)
+char * LYSkipBlanks (
+	char *		buffer)
 {
     while (isspace(UCH((*buffer))))
 	buffer++;
@@ -2530,8 +2530,8 @@ PUBLIC char * LYSkipBlanks ARGS1(
 /*
  * Skip non-whitespace
  */
-PUBLIC char * LYSkipNonBlanks ARGS1(
-	char *,		buffer)
+char * LYSkipNonBlanks (
+	char *		buffer)
 {
     while (*buffer != 0 && !isspace(UCH((*buffer))))
 	buffer++;
@@ -2539,10 +2539,10 @@ PUBLIC char * LYSkipNonBlanks ARGS1(
 }
 
 /*
- * Skip CONST whitespace
+ * Skip const whitespace
  */
-PUBLIC CONST char * LYSkipCBlanks ARGS1(
-	CONST char *,	buffer)
+const char * LYSkipCBlanks (
+	const char *	buffer)
 {
     while (isspace(UCH((*buffer))))
 	buffer++;
@@ -2550,10 +2550,10 @@ PUBLIC CONST char * LYSkipCBlanks ARGS1(
 }
 
 /*
- * Skip CONST non-whitespace
+ * Skip const non-whitespace
  */
-PUBLIC CONST char * LYSkipCNonBlanks ARGS1(
-	CONST char *,	buffer)
+const char * LYSkipCNonBlanks (
+	const char *	buffer)
 {
     while (*buffer != 0 && !isspace(UCH((*buffer))))
 	buffer++;
@@ -2563,8 +2563,8 @@ PUBLIC CONST char * LYSkipCNonBlanks ARGS1(
 /*
  * Trim leading blanks from a string
  */
-PUBLIC void LYTrimLeading ARGS1(
-	char *,		buffer)
+void LYTrimLeading (
+	char *		buffer)
 {
     char *skipped = LYSkipBlanks(buffer);
     while ((*buffer++ = *skipped++) != 0)
@@ -2574,8 +2574,8 @@ PUBLIC void LYTrimLeading ARGS1(
 /*
  * Trim trailing newline(s) from a string
  */
-PUBLIC char * LYTrimNewline ARGS1(
-	char *,		buffer)
+char * LYTrimNewline (
+	char *		buffer)
 {
     size_t i = strlen(buffer);
     while (i != 0 && (buffer[i-1] == '\n' || buffer[i-1] == '\r'))
@@ -2586,8 +2586,8 @@ PUBLIC char * LYTrimNewline ARGS1(
 /*
  * Trim trailing blanks from a string
  */
-PUBLIC void LYTrimTrailing ARGS1(
-	char *,		buffer)
+void LYTrimTrailing (
+	char *		buffer)
 {
     size_t i = strlen(buffer);
     while (i != 0 && isspace(UCH(buffer[i-1])))
@@ -2597,9 +2597,9 @@ PUBLIC void LYTrimTrailing ARGS1(
 /* 1997/11/10 (Mon) 14:26:10, originally string_short() in LYExterns.c, but
  * moved here because LYExterns is not always configured.
  */
-PUBLIC char *LYElideString ARGS2(
-	char *,		str,
-	int,		cut_pos)
+char *LYElideString (
+	char *		str,
+	int		cut_pos)
 {
     char buff[MAX_LINE], *s, *d;
     static char s_str[MAX_LINE];
@@ -2626,8 +2626,8 @@ PUBLIC char *LYElideString ARGS2(
 /*
  * Trim a startfile, returning true if it looks like one of the Lynx tags.
  */
-PUBLIC BOOLEAN LYTrimStartfile ARGS1(
-	char *,		buffer)
+BOOLEAN LYTrimStartfile (
+	char *		buffer)
 {
     LYTrimHead(buffer);
     if (isLYNXEXEC(buffer) ||
@@ -2649,8 +2649,8 @@ PUBLIC BOOLEAN LYTrimStartfile ARGS1(
 /*
  * Escape unsafe characters in startfile, except for lynx internal URLs.
  */
-PUBLIC void LYEscapeStartfile ARGS1(
-	char **,		buffer)
+void LYEscapeStartfile (
+	char **		buffer)
 {
     if (!LYTrimStartfile(*buffer)) {
 	char *escaped = HTEscapeUnsafe(*buffer);
@@ -2662,8 +2662,8 @@ PUBLIC void LYEscapeStartfile ARGS1(
 /*
  * Trim all blanks from startfile, except for lynx internal URLs.
  */
-PUBLIC void LYTrimAllStartfile ARGS1(
-	char *,		buffer)
+void LYTrimAllStartfile (
+	char *		buffer)
 {
     if (!LYTrimStartfile(buffer)) {
 	LYRemoveBlanks(buffer);
@@ -2692,14 +2692,14 @@ PUBLIC void LYTrimAllStartfile ARGS1(
 #endif
 
 #ifdef ENHANCED_LINEEDIT
-PRIVATE char killbuffer[1024] = "\0";
+static char killbuffer[1024] = "\0";
 #endif
 
-PUBLIC void LYSetupEdit ARGS4(
-	EDREC *,	edit,
-	char *,		old,
-	int,		maxstr,
-	int,		maxdsp)
+void LYSetupEdit (
+	EDREC *	edit,
+	char *		old,
+	int		maxstr,
+	int		maxdsp)
 {
     /*
      *	Initialize edit record
@@ -2740,9 +2740,9 @@ PUBLIC void LYSetupEdit ARGS4(
 
 #ifdef SUPPORT_MULTIBYTE_EDIT
 
-PRIVATE int prev_pos ARGS2(
-	EDREC *,	edit,
-	int,		pos)
+static int prev_pos (
+	EDREC *	edit,
+	int		pos)
 {
     int i = 0;
 
@@ -2774,12 +2774,12 @@ static int map_active = 0;
 #define map_active 0
 #endif
 
-PUBLIC int LYEditInsert ARGS5(
-	EDREC *,	edit,
-	unsigned char *,s,
-	int,		len,
-	int,		map,
-	BOOL,		maxMessage)
+int LYEditInsert (
+	EDREC *	edit,
+	unsigned char *s,
+	int		len,
+	int		map,
+	BOOL		maxMessage)
 {
     int length = strlen(Buf);
     int remains = MaxLen - (length + len);
@@ -2886,11 +2886,11 @@ PUBLIC int LYEditInsert ARGS5(
     return edited;
 }
 
-PUBLIC int LYEdit1 ARGS4(
-	EDREC *,	edit,
-	int,		ch,
-	int,		action,
-	BOOL,		maxMessage)
+int LYEdit1 (
+	EDREC *	edit,
+	int		ch,
+	int		action,
+	BOOL		maxMessage)
 {   /* returns 0    character processed
      *         -ch  if action should be performed outside of line-editing mode
      *	       ch   otherwise
@@ -3316,10 +3316,10 @@ PUBLIC int LYEdit1 ARGS4(
 **  If a 'g' or 'p' suffix is included, that will be
 **  loaded into c.  Otherwise, c is zeroed. - FM & LE
 */
-PUBLIC int get_popup_number ARGS3(
-	char *,		msg,
-	int *,		c,
-	int *,		rel)
+int get_popup_number (
+	char *		msg,
+	int *		c,
+	int *		rel)
 {
     char temp[120];
     char *p = temp;
@@ -3383,8 +3383,8 @@ PUBLIC int get_popup_number ARGS3(
 #  define TmpStyleOff(s)
 #endif	/* defined USE_COLOR_STYLE */
 
-PUBLIC void LYRefreshEdit ARGS1(
-	EDREC *,	edit)
+void LYRefreshEdit (
+	EDREC *	edit)
 {
     int i;
     int length;
@@ -3611,9 +3611,9 @@ PUBLIC void LYRefreshEdit ARGS1(
     LYrefresh();
 }
 
-PRIVATE void reinsertEdit ARGS2(
-    EditFieldData *,	edit,
-    char *,		result)
+static void reinsertEdit (
+    EditFieldData *	edit,
+    char *		result)
 {
     if (result != 0) {
 	LYEdit1(edit, '\0', LYE_ERASE, FALSE);
@@ -3624,23 +3624,23 @@ PRIVATE void reinsertEdit ARGS2(
     }
 }
 
-PRIVATE int caselessCmpList ARGS2(
-    CONST void *,	a,
-    CONST void *,	b)
+static int caselessCmpList (
+    const void *	a,
+    const void *	b)
 {
-    return strcasecomp(*(CONST char *CONST *)a, *(CONST char *CONST *)b);
+    return strcasecomp(*(const char *const *)a, *(const char *const *)b);
 }
 
-PRIVATE int normalCmpList ARGS2(
-    CONST void *,	a,
-    CONST void *,	b)
+static int normalCmpList (
+    const void *	a,
+    const void *	b)
 {
-    return strcmp(*(CONST char *CONST *)a, *(CONST char *CONST *)b);
+    return strcmp(*(const char *const *)a, *(const char *const *)b);
 }
 
-PRIVATE char **sortedList ARGS2(
-    HTList *,	list,
-    BOOL,	ignorecase)
+static char **sortedList (
+    HTList *	list,
+    BOOL	ignorecase)
 {
     unsigned count = HTList_count(list);
     unsigned j = 0;
@@ -3678,8 +3678,8 @@ PRIVATE char **sortedList ARGS2(
     return result;
 }
 
-PUBLIC int LYarrayLength ARGS1(
-    CONST char **,	list)
+int LYarrayLength (
+    const char **	list)
 {
     int result = 0;
 
@@ -3688,8 +3688,8 @@ PUBLIC int LYarrayLength ARGS1(
     return result;
 }
 
-PUBLIC int LYarrayWidth ARGS1(
-    CONST char **,	list)
+int LYarrayWidth (
+    const char **	list)
 {
     int result = 0;
     int check;
@@ -3702,11 +3702,11 @@ PUBLIC int LYarrayWidth ARGS1(
     return result;
 }
 
-PRIVATE void FormatChoiceNum ARGS4(
-	char *,		dst,
-	int,		num_choices,
-	int,		choice,
-	CONST char *,	value)
+static void FormatChoiceNum (
+	char *		dst,
+	int		num_choices,
+	int		choice,
+	const char *	value)
 {
     if (num_choices >= 0) {
 	int digits = (num_choices > 9) ? 2 : 1;
@@ -3718,8 +3718,8 @@ PRIVATE void FormatChoiceNum ARGS4(
     }
 }
 
-PRIVATE unsigned options_width ARGS1(
-	CONST char **,	list)
+static unsigned options_width (
+	const char **	list)
 {
     unsigned width = 0;
     int count = 0;
@@ -3733,14 +3733,14 @@ PRIVATE unsigned options_width ARGS1(
     return width;
 }
 
-PRIVATE void draw_option ARGS7(
-    WINDOW *,		win,
-    int,		entry,
-    int,		width,
-    BOOL,		reversed,
-    int,		num_choices,
-    int,		number,
-    CONST char *,	value)
+static void draw_option (
+    WINDOW *		win,
+    int		entry,
+    int		width,
+    BOOL		reversed,
+    int		num_choices,
+    int		number,
+    const char *	value)
 {
     char Cnum[MAX_LINE];
 
@@ -3788,16 +3788,16 @@ PRIVATE void draw_option ARGS7(
  *  Also used for mouse popups with ncurses; this is indicated
  *  by for_mouse.
  */
-PUBLIC int LYhandlePopupList ARGS9(
-	int,		cur_choice,
-	int,		ly,
-	int,		lx,
-	CONST char **,	choices,
-	int,		width,
-	int,		i_length,
-	int,		disabled,
-	BOOLEAN,	for_mouse,
-	BOOLEAN,	numbered)
+int LYhandlePopupList (
+	int		cur_choice,
+	int		ly,
+	int		lx,
+	const char **	choices,
+	int		width,
+	int		i_length,
+	int		disabled,
+	BOOLEAN	for_mouse,
+	BOOLEAN	numbered)
 {
     int c = 0, cmd = 0, i = 0, j = 0, rel = 0;
     int orig_choice;
@@ -3822,7 +3822,7 @@ PUBLIC int LYhandlePopupList ARGS9(
     int number;
     char buffer[MAX_LINE];
     char *popup_status_msg = NULL;
-    CONST char **Cptr = NULL;
+    const char **Cptr = NULL;
 #define CAN_SCROLL_DOWN	1
 #define CAN_SCROLL_UP	2
 #define CAN_SCROLL	4
@@ -4719,11 +4719,11 @@ restore_popup_statusline:
 
 #define CurModif MyEdit.current_modifiers
 
-PUBLIC int LYgetstr ARGS4(
-	char *,		inputline,
-	int,		hidden,
-	size_t,		bufsize,
-	RecallType,	recall)
+int LYgetstr (
+	char *		inputline,
+	int		hidden,
+	size_t		bufsize,
+	RecallType	recall)
 {
     int x, y, MaxStringSize;
     int ch;
@@ -4823,7 +4823,7 @@ again:
 		    char **data = sortedList(list, (BOOL)(recall == RECALL_CMD));
 		    int old_y, old_x;
 		    int cur_choice = 0;
-		    int num_options = LYarrayLength((CONST char **)data);
+		    int num_options = LYarrayLength((const char **)data);
 
 		    while (cur_choice < num_options
 		     && strcasecomp(data[cur_choice], MyEdit.buffer) < 0)
@@ -4834,7 +4834,7 @@ again:
 			cur_choice,
 			0,
 			old_x,
-			(CONST char **)data,
+			(const char **)data,
 			-1,
 			-1,
 			FALSE,
@@ -4985,7 +4985,7 @@ again:
     }
 }
 
-PUBLIC CONST char * LYLineeditHelpURL NOARGS
+const char * LYLineeditHelpURL (void)
 {
     static int lasthelp_lineedit = -1;
     static char helpbuf[LY_MAXPATH] = "\0";
@@ -5011,9 +5011,9 @@ PUBLIC CONST char * LYLineeditHelpURL NOARGS
 /*
  *  A replacement for 'strsep()'
  */
-PUBLIC char *LYstrsep ARGS2(
-	char **,	stringp,
-	CONST char *,	delim)
+char *LYstrsep (
+	char **	stringp,
+	const char *	delim)
 {
     char *tmp, *out;
 
@@ -5037,9 +5037,9 @@ PUBLIC char *LYstrsep ARGS2(
  *  It returns NULL if string not found.
  *  It is a case insensitive search.
  */
-PUBLIC char * LYstrstr ARGS2(
-	char *,		chptr,
-	CONST char *,	tarptr)
+char * LYstrstr (
+	char *		chptr,
+	const char *	tarptr)
 {
     int len = strlen(tarptr);
 
@@ -5064,9 +5064,9 @@ PUBLIC char * LYstrstr ARGS2(
  *			       if present in chptr.
  *  It is a case insensitive search.
  */
-PUBLIC char * LYno_attr_char_case_strstr ARGS2(
-	char *,		chptr,
-	char *,		tarptr)
+char * LYno_attr_char_case_strstr (
+	char *		chptr,
+	char *		tarptr)
 {
     register char *tmpchptr, *tmptarptr;
 
@@ -5118,9 +5118,9 @@ PUBLIC char * LYno_attr_char_case_strstr ARGS2(
  *			       if present in chptr.
  *  It is a case sensitive search.
  */
-PUBLIC char * LYno_attr_char_strstr ARGS2(
-	char *,		chptr,
-	char *,		tarptr)
+char * LYno_attr_char_strstr (
+	char *		chptr,
+	char *		tarptr)
 {
     register char *tmpchptr, *tmptarptr;
 
@@ -5181,16 +5181,16 @@ PUBLIC char * LYno_attr_char_strstr ARGS2(
  * It assumes UTF8 if utf_flag is set.
  *  It is a case insensitive search. - KW & FM
  */
-PUBLIC char * LYno_attr_mbcs_case_strstr ARGS6(
-	char *,		chptr,
-	CONST char *,	tarptr,
-	BOOL,		utf_flag,
-	BOOL,		count_gcells,
-	int *,		nstartp,
-	int *,		nendp)
+char * LYno_attr_mbcs_case_strstr (
+	char *		chptr,
+	const char *	tarptr,
+	BOOL		utf_flag,
+	BOOL		count_gcells,
+	int *		nstartp,
+	int *		nendp)
 {
     char *tmpchptr;
-    CONST char *tmptarptr;
+    const char *tmptarptr;
     int len = 0;
     int offset;
 
@@ -5334,16 +5334,16 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS6(
  * It assumes UTF8 if utf_flag is set.
  *  It is a case sensitive search. - KW & FM
  */
-PUBLIC char * LYno_attr_mbcs_strstr ARGS6(
-	char *,		chptr,
-	CONST char *,	tarptr,
-	BOOL,		utf_flag,
-	BOOL,		count_gcells,
-	int *,		nstartp,
-	int *,		nendp)
+char * LYno_attr_mbcs_strstr (
+	char *		chptr,
+	const char *	tarptr,
+	BOOL		utf_flag,
+	BOOL		count_gcells,
+	int *		nstartp,
+	int *		nendp)
 {
     char *tmpchptr;
-    CONST char *tmptarptr;
+    const char *tmptarptr;
     int len = 0;
     int offset;
 
@@ -5464,10 +5464,10 @@ PUBLIC char * LYno_attr_mbcs_strstr ARGS6(
 /*
  *  Allocate a new copy of a string, and returns it.
  */
-PUBLIC char * SNACopy ARGS3(
-	char **,	dest,
-	CONST char *,	src,
-	int,		n)
+char * SNACopy (
+	char **	dest,
+	const char *	src,
+	int		n)
 {
     FREE(*dest);
     if (src) {
@@ -5485,10 +5485,10 @@ PUBLIC char * SNACopy ARGS3(
 /*
  *  String Allocate and Concatenate.
  */
-PUBLIC char * SNACat ARGS3(
-	char **,	dest,
-	CONST char *,	src,
-	int,		n)
+char * SNACat (
+	char **	dest,
+	const char *	src,
+	int		n)
 {
     if (non_empty(src)) {
 	if (*dest) {
@@ -5515,7 +5515,7 @@ PUBLIC char * SNACat ARGS3(
  * Returns lowercase equivalent for unicode,
  * transparent output if no equivalent found.
  */
-PRIVATE long UniToLowerCase ARGS1(long, upper)
+static long UniToLowerCase (long upper)
 {
     size_t i, high, low;
     long diff = 0;
@@ -5561,7 +5561,7 @@ PRIVATE long UniToLowerCase ARGS1(long, upper)
 **
 **   So use unicode case mapping.
 */
-PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
+int UPPER8 (int ch1, int ch2)
 {
     /* if they are the same or one is a null characters return immediately. */
     if (ch1 == ch2)
@@ -5600,9 +5600,9 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
  * that is allocated.  When an EOF or error is found, the buffer is freed
  * automatically.
  */
-PUBLIC char *LYSafeGets ARGS2(
-	char **,	src,
-	FILE *,		fp)
+char *LYSafeGets (
+	char **	src,
+	FILE *		fp)
 {
     char buffer[BUFSIZ];
     char *result = 0;
@@ -5634,12 +5634,12 @@ PUBLIC char *LYSafeGets ARGS2(
 }
 
 #ifdef EXP_CMD_LOGGING
-PRIVATE FILE *cmd_logfile;
-PRIVATE FILE *cmd_script;
+static FILE *cmd_logfile;
+static FILE *cmd_script;
 
-PUBLIC void LYOpenCmdLogfile ARGS2(
-	int,		argc,
-	char **,	argv)
+void LYOpenCmdLogfile (
+	int		argc,
+	char **	argv)
 {
     int n;
 
@@ -5655,12 +5655,12 @@ PUBLIC void LYOpenCmdLogfile ARGS2(
     }
 }
 
-PUBLIC BOOL LYHaveCmdScript NOARGS
+BOOL LYHaveCmdScript (void)
 {
     return (BOOL)(cmd_script != 0);
 }
 
-PUBLIC void LYOpenCmdScript NOARGS
+void LYOpenCmdScript (void)
 {
     if (lynx_cmd_script != 0) {
 	cmd_script = fopen(lynx_cmd_script, TXT_R);
@@ -5670,8 +5670,8 @@ PUBLIC void LYOpenCmdScript NOARGS
     }
 }
 
-PUBLIC int LYReadCmdKey ARGS1(
-	int,	mode)
+int LYReadCmdKey (
+	int	mode)
 {
     int ch = -1;
 
@@ -5731,15 +5731,15 @@ PUBLIC int LYReadCmdKey ARGS1(
 /*
  * Write a LYKeymapCode 'ch' to the logfile.
  */
-PUBLIC void LYWriteCmdKey ARGS1(
-	int,	ch)
+void LYWriteCmdKey (
+	int	ch)
 {
     if (cmd_logfile != 0) {
 	fprintf(cmd_logfile, "key %s\n", LYKeycodeToString(ch, FALSE));
     }
 }
 
-PUBLIC void LYCloseCmdLogfile NOARGS
+void LYCloseCmdLogfile (void)
 {
     if (cmd_logfile != 0) {
 	LYCloseOutput(cmd_logfile);

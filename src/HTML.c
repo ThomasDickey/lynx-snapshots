@@ -81,13 +81,13 @@
 #define STACKLEVEL(me) ((me->stack + MAX_NESTING - 1) - me->sp)
 
 struct _HTStream {
-    CONST HTStreamClass *	isa;
+    const HTStreamClass *	isa;
 #ifdef USE_SOURCE_CACHE
     HTParentAnchor *		anchor;
     FILE *			fp;
     char *			filename;
     HTChunk *			chunk;
-    CONST HTStreamClass *	actions;
+    const HTStreamClass *	actions;
     HTStream *			target;
     int				status;
 #else
@@ -95,36 +95,36 @@ struct _HTStream {
 #endif
 };
 
-PRIVATE HTStyleSheet * styleSheet = NULL;	/* Application-wide */
+static HTStyleSheet * styleSheet = NULL;	/* Application-wide */
 
 /*	Module-wide style cache
 */
-PRIVATE HTStyle *styles[HTML_ELEMENTS+LYNX_HTML_EXTRA_ELEMENTS];
+static HTStyle *styles[HTML_ELEMENTS+LYNX_HTML_EXTRA_ELEMENTS];
 					   /* adding 24 nested list styles  */
 					   /* and 3 header alignment styles */
 					   /* and 3 div alignment styles    */
-PRIVATE HTStyle *default_style = NULL;
+static HTStyle *default_style = NULL;
 
-PUBLIC char *LYToolbarName = "LynxPseudoToolbar";
+char *LYToolbarName = "LynxPseudoToolbar";
 
 /* used to turn off a style if the HTML author forgot to
-PRIVATE int i_prior_style = -1;
+static int i_prior_style = -1;
  */
 
 /*
  *	Private function....
  */
-PRIVATE int HTML_end_element PARAMS((HTStructured *me,
+static int HTML_end_element (HTStructured *me,
 				      int element_number,
-				      char **include));
+				      char **include);
 
-PRIVATE int HTML_start_element PARAMS((
+static int HTML_start_element (
 	HTStructured *		me,
 	int			element_number,
-	CONST BOOL*		present,
-	CONST char **		value,
+	const BOOL*		present,
+	const char **		value,
 	int			tag_charset,
-	char **			include));
+	char **			include);
 
 /*
  * If we have verbose_img set, display labels for images.
@@ -132,9 +132,9 @@ PRIVATE int HTML_start_element PARAMS((
 #define VERBOSE_IMG(value,src_type,string) \
       ((verbose_img) ? (newtitle = MakeNewTitle(value,src_type)): string)
 
-PRIVATE char* MakeNewTitle PARAMS((CONST char ** value, int src_type));
-PRIVATE char* MakeNewImageValue PARAMS((CONST char ** value));
-PRIVATE char* MakeNewMapValue PARAMS((CONST char ** value, CONST char* mapstr));
+static char* MakeNewTitle (const char ** value, int src_type);
+static char* MakeNewImageValue (const char ** value);
+static char* MakeNewMapValue (const char ** value, const char* mapstr);
 
 /*	Set an internal flag that the next call to a stack-affecting method
 **	is only internal and the stack manipulation should be skipped. - kw
@@ -142,7 +142,7 @@ PRIVATE char* MakeNewMapValue PARAMS((CONST char ** value, CONST char* mapstr));
 #define SET_SKIP_STACK(el_num) if (HTML_dtd.tags[el_num].contents != SGML_EMPTY) \
 						{ me->skip_stack++; }
 
-PUBLIC void strtolower ARGS1(char*, i)
+void strtolower (char* i)
 {
     if (!i) return;
     while (*i) { *i = (char)TOLOWER(*i); i++; }
@@ -160,7 +160,7 @@ a sequence of styles.
 /*
 **  If style really needs to be set, call this.
 */
-PUBLIC void actually_set_style ARGS1(HTStructured *, me)
+void actually_set_style (HTStructured * me)
 {
     if (!me->text) {			/* First time through */
 	LYGetChartransInfo(me);
@@ -186,7 +186,7 @@ PUBLIC void actually_set_style ARGS1(HTStructured *, me)
 /*
 **  If you THINK you need to change style, call this.
 */
-PRIVATE void change_paragraph_style ARGS2(HTStructured *, me, HTStyle *,style)
+static void change_paragraph_style (HTStructured * me, HTStyle * style)
 {
     if (me->new_style != style) {
 	me->style_change = YES;
@@ -195,8 +195,8 @@ PRIVATE void change_paragraph_style ARGS2(HTStructured *, me, HTStyle *,style)
     me->in_word = NO;
 }
 
-PUBLIC BOOL LYBadHTML ARGS1(
-    HTStructured *,	me)
+BOOL LYBadHTML (
+    HTStructured *	me)
 {
     if (!TRACE && !me->inBadHTML) {
 	HTUserMsg(BAD_HTML_USE_TRACE);
@@ -226,7 +226,7 @@ PUBLIC BOOL LYBadHTML ARGS1(
 /*	Character handling
 **	------------------
 */
-PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
+void HTML_put_character (HTStructured * me, char c)
 {
     /*
      *	Ignore all non-MAP content when just
@@ -435,7 +435,7 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 **	This is written separately from put_character because the loop can
 **	in some cases be promoted to a higher function call level for speed.
 */
-PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
+void HTML_put_string (HTStructured * me, const char * s)
 {
 #ifdef USE_PRETTYSRC
     char* translated_string = NULL;
@@ -447,7 +447,7 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
     if (psrc_convert_string) {
 	StrAllocCopy(translated_string,s);
 	TRANSLATE_AND_UNESCAPE_ENTITIES(&translated_string, TRUE, FALSE);
-	s = (CONST char *) translated_string;
+	s = (const char *) translated_string;
     }
 #endif
 
@@ -517,7 +517,7 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 	    HText_appendText(me->text, s);
 	    break;
 	} else {
-	    CONST char *p = s;
+	    const char *p = s;
 	    char c;
 	    if (me->style_change) {
 		for (; *p && ((*p == '\n') || (*p == '\r') ||
@@ -594,10 +594,10 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 /*	Buffer write
 **	------------
 */
-PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
+void HTML_write (HTStructured * me, const char* s, int l)
 {
-    CONST char* p;
-    CONST char* e = s+l;
+    const char* p;
+    const char* e = s+l;
 
     if (LYMapsOnly && me->sp[0].tag_number != HTML_OBJECT)
 	return;
@@ -664,22 +664,22 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
 
 
 #ifdef USE_COLOR_STYLE
-PRIVATE char* Style_className = 0;
-PRIVATE char* Style_className_end = 0;
-PRIVATE unsigned Style_className_len = 0;
-PRIVATE int hcode;
+static char* Style_className = 0;
+static char* Style_className_end = 0;
+static unsigned Style_className_len = 0;
+static int hcode;
 
 #ifdef LY_FIND_LEAKS
-PRIVATE void free_Style_className NOARGS
+static void free_Style_className (void)
 {
     FREE(Style_className);
 }
 #endif
 
-PRIVATE void addClassName ARGS3(
-	CONST char *,	prefix,
-	CONST char *,	actual,
-	int,		length)
+static void addClassName (
+	const char *	prefix,
+	const char *	actual,
+	int		length)
 {
     int offset = strlen(prefix);
     unsigned have = (Style_className_end - Style_className);
@@ -712,11 +712,11 @@ PRIVATE void addClassName ARGS3(
 
 #ifdef USE_PRETTYSRC
 
-PRIVATE void HTMLSRC_apply_markup ARGS4(
-	    HTStructured *,   context,
-	    HTlexeme,	      lexeme,
-	    BOOL,	      start,
-	    int,	      tag_charset)
+static void HTMLSRC_apply_markup (
+	    HTStructured *   context,
+	    HTlexeme	      lexeme,
+	    BOOL	      start,
+	    int	      tag_charset)
 {
     HT_tagspec* ts = *( ( start ? lexeme_start : lexeme_end ) + lexeme);
 
@@ -735,7 +735,7 @@ PRIVATE void HTMLSRC_apply_markup ARGS4(
 		context,
 		ts->element,
 		ts->present,
-		(CONST char **)ts->value,
+		(const char **)ts->value,
 		tag_charset,
 		NULL);
 	else
@@ -749,28 +749,23 @@ PRIVATE void HTMLSRC_apply_markup ARGS4(
 #  define START TRUE
 #  define STOP FALSE
 
-#if defined(__STDC__) || defined(_WIN_CC)
 #  define PSRCSTART(x)	HTMLSRC_apply_markup(me,HTL_##x,START,tag_charset)
 #  define PSRCSTOP(x)  HTMLSRC_apply_markup(me,HTL_##x,STOP,tag_charset)
-#else
-#  define PSRCSTART(x)	HTMLSRC_apply_markup(me,HTL_/**/x,START,tag_charset)
-#  define PSRCSTOP(x)  HTMLSRC_apply_markup(me,HTL_/**/x,STOP,tag_charset)
-#endif
 
 #  define PUTC(x) HTML_put_character(me,x)
 #  define PUTS(x) HTML_put_string(me,x)
 
 #endif /* USE_PRETTYSRC*/
 
-PRIVATE void LYStartArea ARGS5(
-	HTStructured *,		obj,
-	CONST char *,		href,
-	CONST char *,		alt,
-	CONST char *,		title,
-	int,			tag_charset)
+static void LYStartArea (
+	HTStructured *		obj,
+	const char *		href,
+	const char *		alt,
+	const char *		title,
+	int			tag_charset)
 {
     BOOL		new_present[HTML_AREA_ATTRIBUTES];
-    CONST char *	new_value[HTML_AREA_ATTRIBUTES];
+    const char *	new_value[HTML_AREA_ATTRIBUTES];
     int i;
 
     for (i = 0; i < HTML_AREA_ATTRIBUTES; i++)
@@ -778,32 +773,32 @@ PRIVATE void LYStartArea ARGS5(
 
     if (alt) {
 	new_present[HTML_AREA_ALT] = YES;
-	new_value[HTML_AREA_ALT] = (CONST char *)alt;
+	new_value[HTML_AREA_ALT] = (const char *)alt;
     }
     if (title && *title) {
 	new_present[HTML_AREA_TITLE] = YES;
-	new_value[HTML_AREA_TITLE] = (CONST char *)title;
+	new_value[HTML_AREA_TITLE] = (const char *)title;
     }
     if (href) {
 	new_present[HTML_AREA_HREF] = YES;
-	new_value[HTML_AREA_HREF] = (CONST char *)href;
+	new_value[HTML_AREA_HREF] = (const char *)href;
     }
 
     (*obj->isa->start_element)(obj, HTML_AREA, new_present, new_value,
 			       tag_charset, 0);
 }
 
-PRIVATE void LYHandleFIG ARGS10(
-	HTStructured *,		me,
-	CONST BOOL*,		present,
-	CONST char **,		value,
-	BOOL,			isobject,
-	BOOL,			imagemap,
-	CONST char *,		id,
-	CONST char *,		src,
-	BOOL,			convert,
-	BOOL,			start,
-	BOOL *,			intern_flag GCC_UNUSED)
+static void LYHandleFIG (
+	HTStructured *		me,
+	const BOOL*		present,
+	const char **		value,
+	BOOL			isobject,
+	BOOL			imagemap,
+	const char *		id,
+	const char *		src,
+	BOOL			convert,
+	BOOL			start,
+	BOOL *			intern_flag GCC_UNUSED)
 {
     if (start == TRUE) {
 	me->inFIG = TRUE;
@@ -870,8 +865,8 @@ PRIVATE void LYHandleFIG ARGS10(
     }
 }
 
-PRIVATE void clear_objectdata ARGS1(
-	HTStructured *,		me)
+static void clear_objectdata (
+	HTStructured *		me)
 {
     if (me) {
 	HTChunkClear(&me->object);
@@ -900,13 +895,13 @@ PRIVATE void clear_objectdata ARGS1(
 /*	Start Element
 **	-------------
 */
-PRIVATE int HTML_start_element ARGS6(
-	HTStructured *,		me,
-	int,			element_number,
-	CONST BOOL*,		present,
-	CONST char **,		value,
-	int,			tag_charset,
-	char **,		include)
+static int HTML_start_element (
+	HTStructured *		me,
+	int			element_number,
+	const BOOL*		present,
+	const char **		value,
+	int			tag_charset,
+	char **		include)
 {
     char *alt_string = NULL;
     char *id_string = NULL;
@@ -918,7 +913,7 @@ PRIVATE int HTML_start_element ARGS6(
     char *I_value = NULL;
     char *I_name = NULL;
     char *temp = NULL;
-    CONST char *Base = NULL;
+    const char *Base = NULL;
     int dest_char_set = -1;
     HTParentAnchor *dest = NULL;	     /* An anchor's destination */
     BOOL dest_ismap = FALSE;		     /* Is dest an image map script? */
@@ -939,7 +934,7 @@ PRIVATE int HTML_start_element ARGS6(
 	if (!psrc_nested_call) {
 	    HTTag * tag = &HTML_dtd.tags[element_number];
 	    char buf[200];
-	    CONST char* p;
+	    const char* p;
 	    if (psrc_first_tag) {
 		psrc_first_tag = FALSE;
 		/* perform the special actions on the begining of the document.
@@ -1104,7 +1099,7 @@ PRIVATE int HTML_start_element ARGS6(
 
 #if !OMIT_SCN_KEEPING		/* Can be done in other cases too... */
     if (!class_used && ElementNumber == HTML_INPUT) { /* For some other too? */
-	CONST char *type = "";
+	const char *type = "";
 	int ohcode = hcode;
 
 	if (present && present[HTML_INPUT_TYPE] && value[HTML_INPUT_TYPE])
@@ -1145,7 +1140,7 @@ PRIVATE int HTML_start_element ARGS6(
 	if (present && present[HTML_BASE_HREF] && !local_host_only &&
 	    value[HTML_BASE_HREF] && *value[HTML_BASE_HREF]) {
 	    char *base = NULL;
-	    CONST char *related = NULL;
+	    const char *related = NULL;
 
 	    StrAllocCopy(base, value[HTML_BASE_HREF]);
 	    CTRACE((tfp, "*HTML_BASE: initial href=`%s'\n", NonNull(base)));
@@ -4174,7 +4169,7 @@ PRIVATE int HTML_start_element ARGS6(
 	    char * action = NULL;
 	    char * method = NULL;
 	    char * enctype = NULL;
-	    CONST char * accept_cs = NULL;
+	    const char * accept_cs = NULL;
 
 	    HTChildAnchor * source;
 	    HTAnchor *link_dest;
@@ -5098,7 +5093,7 @@ PRIVATE int HTML_start_element ARGS6(
 	 * Start a new SELECT block. - FM
 	 */
 	LYHandleSELECT(me,
-		       present, (CONST char **)value,
+		       present, (const char **)value,
 		       include,
 		       TRUE);
 	break;
@@ -5649,10 +5644,10 @@ PRIVATE int HTML_start_element ARGS6(
 **	(internal code errors apart) good nesting.  The parser checks
 **	incoming code errors, not this module.
 */
-PRIVATE int HTML_end_element ARGS3(
-	HTStructured *,		me,
-	int,			element_number,
-	char **,		include)
+static int HTML_end_element (
+	HTStructured *		me,
+	int			element_number,
+	char **		include)
 {
     int i = 0;
     int status = HT_OK;
@@ -6074,7 +6069,7 @@ PRIVATE int HTML_end_element ARGS3(
 
     case HTML_P:
 	LYHandlePlike(me,
-		 (CONST BOOL*)0, (CONST char **)0,
+		 (const BOOL*)0, (const char **)0,
 		 include, 0,
 		 FALSE);
 	break;
@@ -7257,7 +7252,7 @@ End_Object:
 */
 /*	(In fact, they all shrink!)
 */
-PUBLIC int HTML_put_entity ARGS2(HTStructured *, me, int, entity_number)
+int HTML_put_entity (HTStructured * me, int entity_number)
 {
     int nent = HTML_dtd.number_of_entities;
 
@@ -7279,7 +7274,7 @@ PUBLIC int HTML_put_entity ARGS2(HTStructured *, me, int, entity_number)
 **	If non-interactive, everything is freed off.   No: crashes -listrefs
 **	Otherwise, the interactive object is left.
 */
-PRIVATE void HTML_free ARGS1(HTStructured *, me)
+static void HTML_free (HTStructured * me)
 {
     char *include = NULL;
 
@@ -7459,7 +7454,7 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
     FREE(me);
 }
 
-PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
+static void HTML_abort (HTStructured * me, HTError e)
 {
     char *include = NULL;
 
@@ -7552,7 +7547,7 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
 /*	Get Styles from style sheet
 **	---------------------------
 */
-PRIVATE void get_styles NOARGS
+static void get_styles (void)
 {
     HTStyle** st = NULL;
     styleSheet = DefaultStyle(&st);  /* sets st[] array */
@@ -7627,7 +7622,7 @@ PRIVATE void get_styles NOARGS
  * If we're called from another module, make sure we've initialized styles
  * array first.
  */
-PUBLIC  HTStyle *LYstyles ARGS1(int, style_number)
+HTStyle *LYstyles (int style_number)
 {
     if (styles[style_number] == 0)
 	get_styles();
@@ -7640,7 +7635,7 @@ PUBLIC  HTStyle *LYstyles ARGS1(int, style_number)
 /*	Structured Object Class
 **	-----------------------
 */
-PUBLIC CONST HTStructuredClass HTMLPresentation = /* As opposed to print etc */
+const HTStructuredClass HTMLPresentation = /* As opposed to print etc */
 {
 	"Lynx_HTML_Handler",
 	HTML_free,
@@ -7656,10 +7651,10 @@ PUBLIC CONST HTStructuredClass HTMLPresentation = /* As opposed to print etc */
 **	The structured stream can generate either presentation,
 **	or plain text, or HTML.
 */
-PUBLIC HTStructured* HTML_new ARGS3(
-	HTParentAnchor *,	anchor,
-	HTFormat,		format_out,
-	HTStream*,		stream)
+HTStructured* HTML_new (
+	HTParentAnchor *	anchor,
+	HTFormat		format_out,
+	HTStream*		stream)
 {
 
     HTStructured * me;
@@ -7851,14 +7846,14 @@ PUBLIC HTStructured* HTML_new ARGS3(
  *  cannot be written would be annoying.  Reset when  lynx.cfg is being
  *  reloaded (user may change SOURCE_CACHE setting). - kw
  */
-PUBLIC BOOLEAN source_cache_file_error = FALSE;
+BOOLEAN source_cache_file_error = FALSE;
 
 /*
  * Pass-thru cache HTStream
  */
 
-PRIVATE void CacheThru_do_free ARGS1(
-	HTStream *,	me)
+static void CacheThru_do_free (
+	HTStream *me)
 {
     if (me->anchor->source_cache_file) {
 	CTRACE((tfp, "SourceCacheWriter: Removing previous file %s\n",
@@ -7907,17 +7902,17 @@ PRIVATE void CacheThru_do_free ARGS1(
     }
 }
 
-PRIVATE void CacheThru_free ARGS1(
-	HTStream *,	me)
+static void CacheThru_free (
+	HTStream *	me)
 {
     CacheThru_do_free(me);
     (*me->actions->_free)(me->target);
     FREE(me);
 }
 
-PRIVATE void CacheThru_abort ARGS2(
-	HTStream *,	me,
-	HTError,	e)
+static void CacheThru_abort (
+	HTStream *	me,
+	HTError	e)
 {
     if (me->fp)
 	LYCloseTempFP(me->fp);
@@ -7941,9 +7936,9 @@ PRIVATE void CacheThru_abort ARGS2(
     FREE(me);
 }
 
-PRIVATE void CacheThru_put_character ARGS2(
-	HTStream *,	me,
-	char,		c_in)
+static void CacheThru_put_character (
+	HTStream *	me,
+	char		c_in)
 {
     if (me->status == HT_OK) {
 	if (me->fp) {
@@ -7957,9 +7952,9 @@ PRIVATE void CacheThru_put_character ARGS2(
     (*me->actions->put_character)(me->target, c_in);
 }
 
-PRIVATE void CacheThru_put_string ARGS2(
-	HTStream *,	me,
-	CONST char *,	str)
+static void CacheThru_put_string (
+	HTStream *	me,
+	const char *	str)
 {
     if (me->status == HT_OK) {
 	if (me->fp) {
@@ -7973,10 +7968,10 @@ PRIVATE void CacheThru_put_string ARGS2(
     (*me->actions->put_string)(me->target, str);
 }
 
-PRIVATE void CacheThru_write ARGS3(
-	HTStream *,	me,
-	CONST char *,	str,
-	int,		l)
+static void CacheThru_write (
+	HTStream *	me,
+	const char *	str,
+	int		l)
 {
     if (me->status == HT_OK) {
 	if (me->fp) {
@@ -7992,7 +7987,7 @@ PRIVATE void CacheThru_write ARGS3(
     (*me->actions->put_block)(me->target, str, l);
 }
 
-PRIVATE CONST HTStreamClass PassThruCache =
+static const HTStreamClass PassThruCache =
 {
     "PassThruCache",
     CacheThru_free,
@@ -8002,9 +7997,9 @@ PRIVATE CONST HTStreamClass PassThruCache =
     CacheThru_write
 };
 
-PRIVATE HTStream* CacheThru_new ARGS2(
-	HTParentAnchor *,	anchor,
-	HTStream *,		target)
+static HTStream* CacheThru_new (
+	HTParentAnchor *	anchor,
+	HTStream *		target)
 {
     char filename[LY_MAXPATH];
     HTStream *stream = NULL;
@@ -8100,10 +8095,10 @@ PRIVATE HTStream* CacheThru_new ARGS2(
 **	It is registered in HTInit.c, but never actually used by lynx.
 **	- kw 1999-03-15
 */
-PUBLIC HTStream* HTMLToPlain ARGS3(
-	HTPresentation *,	pres,
-	HTParentAnchor *,	anchor,
-	HTStream *,		sink)
+HTStream* HTMLToPlain (
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,
+	HTStream *		sink)
 {
     return CacheThru_new(anchor,
 			 SGML_new(&HTML_dtd, anchor,
@@ -8121,10 +8116,10 @@ PUBLIC HTStream* HTMLToPlain ARGS3(
 **	structured stream for regenerating flat text; the latter should
 **	end up being handled as text/plain. - kw
 */
-PUBLIC HTStream* HTMLParsedPresent ARGS3(
-	HTPresentation *,	pres,
-	HTParentAnchor *,	anchor,
-	HTStream *,		sink)
+HTStream* HTMLParsedPresent (
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,
+	HTStream *		sink)
 {
     HTStream * intermediate = sink;
     if (!intermediate) {
@@ -8181,10 +8176,10 @@ PUBLIC HTStream* HTMLParsedPresent ARGS3(
 **	It is registered in HTInit.c, but normally not used by lynx.
 **	- kw 1999-03-15
 */
-PUBLIC HTStream* HTMLToC ARGS3(
-	HTPresentation *,	pres GCC_UNUSED,
-	HTParentAnchor *,	anchor,
-	HTStream *,		sink)
+HTStream* HTMLToC (
+	HTPresentation *	pres GCC_UNUSED,
+	HTParentAnchor *	anchor,
+	HTStream *		sink)
 {
     HTStructured * html;
     if (sink)
@@ -8207,10 +8202,10 @@ PUBLIC HTStream* HTMLToC ARGS3(
 **	Override this if you have a windows version
 */
 #ifndef GUI
-PUBLIC HTStream* HTMLPresent ARGS3(
-	HTPresentation *,	pres GCC_UNUSED,
-	HTParentAnchor *,	anchor,
-	HTStream *,		sink GCC_UNUSED)
+HTStream* HTMLPresent (
+	HTPresentation *	pres GCC_UNUSED,
+	HTParentAnchor *	anchor,
+	HTStream *		sink GCC_UNUSED)
 {
     return CacheThru_new(anchor,
 			 SGML_new(&HTML_dtd, anchor,
@@ -8241,16 +8236,16 @@ PUBLIC HTStream* HTMLPresent ARGS3(
    the trivial implementation for lynx just generates a message
    and returns. - kw 1999-03-15)
 */
-PUBLIC int HTLoadError ARGS3(
-	HTStream *,	sink GCC_UNUSED,
-	int,		number,
-	CONST char *,	message)
+int HTLoadError (
+	HTStream *	sink GCC_UNUSED,
+	int		number,
+	const char *	message)
 {
     HTAlert(message);		/* @@@@@@@@@@@@@@@@@@@ */
     return -number;
 }
 
-PRIVATE char * MakeNewTitle ARGS2(CONST char **, value, int, src_type)
+static char * MakeNewTitle (const char ** value, int src_type)
 {
     char *ptr;
     char *newtitle = NULL;
@@ -8291,7 +8286,7 @@ PRIVATE char * MakeNewTitle ARGS2(CONST char **, value, int, src_type)
     return newtitle;
 }
 
-PRIVATE char * MakeNewImageValue ARGS1(CONST char **, value)
+static char * MakeNewImageValue (const char ** value)
 {
     char *ptr;
     char *newtitle = NULL;
@@ -8307,7 +8302,7 @@ PRIVATE char * MakeNewImageValue ARGS1(CONST char **, value)
     return newtitle;
 }
 
-PRIVATE char * MakeNewMapValue ARGS2(CONST char **, value, CONST char*, mapstr)
+static char * MakeNewMapValue (const char ** value, const char* mapstr)
 {
     char *ptr;
     char *newtitle = NULL;

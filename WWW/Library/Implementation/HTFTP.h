@@ -32,9 +32,9 @@ extern int HTfileSortMethod;  /* specifies the method of sorting */
 **
 ** Bug:	Returns pointer to static -- non-reentrant
 */
-PUBLIC char * HTVMS_name PARAMS((
-	CONST char * nn,
-	CONST char * fn));
+extern char * HTVMS_name (
+	const char * nn,
+	const char * fn);
 
 
 /*
@@ -46,25 +46,25 @@ Retrieve File from Server
   returns                 Socket number for file if good.<0 if bad.
 
  */
-extern int HTFTPLoad PARAMS
-((
-  CONST char *          name,
+extern int HTFTPLoad 
+(
+  const char *          name,
   HTParentAnchor *      anchor,
   HTFormat              format_out,
   HTStream*             sink
-));
+);
 
 /*
 **  This function frees any user entered password, so that
 **  it must be entered again for a future request. - FM
 */
-extern void HTClearFTPPassword NOPARAMS;
+extern void HTClearFTPPassword (void);
 
 /*
 
 Return Host Name
 
  */
-extern CONST char * HTHostName NOPARAMS;
+extern const char * HTHostName (void);
 
 #endif

@@ -15,12 +15,12 @@
 #include <HTUtils.h>
 #endif
  
-PUBLIC int HTUU_encode PARAMS((unsigned char *bufin,
+extern int HTUU_encode (unsigned char *bufin,
                                unsigned int nbytes,
-                               char *bufcoded));
+                               char *bufcoded);
 
-PUBLIC int HTUU_decode PARAMS((char *bufcoded,
+extern int HTUU_decode (char *bufcoded,
                                unsigned char *bufplain,
-                               int outbufsize));
+                               int outbufsize);
 
 #endif /* HTUU_H */

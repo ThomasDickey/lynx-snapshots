@@ -29,28 +29,28 @@
 #include <LYLeaks.h>
 #include <HTCJK.h>
 
-PUBLIC HTList * Visited_Links = NULL;	/* List of safe popped docs. */
-PUBLIC int Visited_Links_As = VISITED_LINKS_AS_LATEST | VISITED_LINKS_REVERSE;
-PRIVATE VisitedLink *PrevVisitedLink = NULL;	    /* NULL on auxillary */
-PRIVATE VisitedLink *PrevActiveVisitedLink = NULL;  /* Last non-auxillary */
-PRIVATE VisitedLink Latest_first;
-PRIVATE VisitedLink Latest_last;
-PRIVATE VisitedLink *Latest_tree;
-PRIVATE VisitedLink *First_tree;
-PRIVATE VisitedLink *Last_by_first;
+HTList * Visited_Links = NULL;	/* List of safe popped docs. */
+int Visited_Links_As = VISITED_LINKS_AS_LATEST | VISITED_LINKS_REVERSE;
+static VisitedLink *PrevVisitedLink = NULL;	    /* NULL on auxillary */
+static VisitedLink *PrevActiveVisitedLink = NULL;  /* Last non-auxillary */
+static VisitedLink Latest_first;
+static VisitedLink Latest_last;
+static VisitedLink *Latest_tree;
+static VisitedLink *First_tree;
+static VisitedLink *Last_by_first;
 
 int nhist_extra;
 
 #ifdef LY_FIND_LEAKS
-PRIVATE int already_registered_free_messages_stack = 0;
-PRIVATE int already_registered_clean_all_history = 0;
+static int already_registered_free_messages_stack = 0;
+static int already_registered_clean_all_history = 0;
 #endif
 
 #ifdef LY_FIND_LEAKS
 /*
  *  Utility for freeing the list of visited links. - FM
  */
-PRIVATE void Visited_Links_free NOARGS
+static void Visited_Links_free (void)
 {
     VisitedLink *vl;
     HTList *cur = Visited_Links;
@@ -75,8 +75,8 @@ PRIVATE void Visited_Links_free NOARGS
 #endif /* LY_FIND_LEAKS */
 
 #ifdef DEBUG
-PRIVATE void trace_history ARGS1(
-	CONST char *,	tag)
+static void trace_history (
+	const char *	tag)
 {
     if (TRACE) {
 	CTRACE((tfp, "HISTORY %s %d/%d (%d extra)\n",
@@ -92,8 +92,8 @@ PRIVATE void trace_history ARGS1(
  *  Utility for listing visited links, making any repeated
  *  links the most current in the list. - FM
  */
-PUBLIC void LYAddVisitedLink ARGS1(
-	DocInfo *,	doc)
+void LYAddVisitedLink (
+	DocInfo *	doc)
 {
     VisitedLink *new;
     HTList *cur;
@@ -228,9 +228,9 @@ PUBLIC void LYAddVisitedLink ARGS1(
  *  also check the URL whether it is (likely to be) a generated special
  *  page.
  */
-PUBLIC BOOLEAN LYwouldPush ARGS2(
-	CONST char *,	title,
-	CONST char *,	docurl)
+BOOLEAN LYwouldPush (
+	const char *	title,
+	const char *	docurl)
 {
     BOOLEAN rc = FALSE;
 
@@ -278,8 +278,8 @@ PUBLIC BOOLEAN LYwouldPush ARGS2(
 /*
  * Free post-data for 'DocInfo'
  */
-PUBLIC void LYFreePostData ARGS1(
-    DocInfo *,		doc)
+void LYFreePostData (
+    DocInfo *		doc)
 {
     BStrFree(doc->post_data);
     FREE(doc->post_content_type);
@@ -288,8 +288,8 @@ PUBLIC void LYFreePostData ARGS1(
 /*
  * Free strings associated with a 'DocInfo' struct.
  */
-PUBLIC void LYFreeDocInfo ARGS1(
-    DocInfo *,		doc)
+void LYFreeDocInfo (
+    DocInfo *		doc)
 {
     FREE(doc->title);
     FREE(doc->address);
@@ -300,7 +300,7 @@ PUBLIC void LYFreeDocInfo ARGS1(
 /*
  *  Free the information in the last history entry.
  */
-PRIVATE void clean_extra_history NOARGS
+static void clean_extra_history (void)
 {
     trace_history("clean_extra_history");
     nhist += nhist_extra;
@@ -316,7 +316,7 @@ PRIVATE void clean_extra_history NOARGS
  * Free the entire history stack, for auditing memory leaks.
  */
 #ifdef LY_FIND_LEAKS
-PRIVATE void clean_all_history NOARGS
+static void clean_all_history (void)
 {
     trace_history("clean_all_history");
     clean_extra_history();
@@ -329,9 +329,9 @@ PRIVATE void clean_all_history NOARGS
 #endif
 
 /* FIXME What is the relationship to are_different() from the mainloop?! */
-PRIVATE int are_identical ARGS2(
-	HistInfo *,	doc,
-	DocInfo *,	doc1)
+static int are_identical (
+	HistInfo *	doc,
+	DocInfo *	doc1)
 {
      return (	STREQ(doc1->address, doc->hdoc.address)
 		&& BINEQ(doc1->post_data, doc->hdoc.post_data)
@@ -343,9 +343,9 @@ PRIVATE int are_identical ARGS2(
 /*
  *  Push the current filename, link and line number onto the history list.
  */
-PUBLIC int LYpush ARGS2(
-	DocInfo *,	doc,
-	BOOLEAN,	force_push)
+int LYpush (
+	DocInfo *	doc,
+	BOOLEAN	force_push)
 {
     /*
      *	Don't push NULL file names.
@@ -527,8 +527,8 @@ PUBLIC int LYpush ARGS2(
 /*
  *  Pop the previous filename, link and line number from the history list.
  */
-PUBLIC void LYpop ARGS1(
-	DocInfo *,	doc)
+void LYpop (
+	DocInfo *	doc)
 {
     if (nhist > 0) {
 	clean_extra_history();
@@ -550,8 +550,8 @@ PUBLIC void LYpop ARGS1(
 /*
  *  Move to the previous filename, link and line number from the history list.
  */
-PUBLIC void LYhist_prev ARGS1(
-	DocInfo *,	doc)
+void LYhist_prev (
+	DocInfo *	doc)
 {
     trace_history("LYhist_prev");
     if (nhist > 0 && (nhist_extra || nhist < MAXHIST)) {
@@ -565,8 +565,8 @@ PUBLIC void LYhist_prev ARGS1(
 /*
  *  Called before calling LYhist_prev().
  */
-PUBLIC void LYhist_prev_register ARGS1(
-	DocInfo *,	doc)
+void LYhist_prev_register (
+	DocInfo *	doc)
 {
     trace_history("LYhist_prev_register");
     if (nhist > 1) {
@@ -587,9 +587,9 @@ PUBLIC void LYhist_prev_register ARGS1(
 /*
  *  Move to the next filename, link and line number from the history.
  */
-PUBLIC int LYhist_next ARGS2(
-	DocInfo *,	doc,
-	DocInfo *,	newdoc)
+int LYhist_next (
+	DocInfo *	doc,
+	DocInfo *	newdoc)
 {
     if (nhist_extra <= 1)	/* == 1 when we are the last one */
 	return 0;
@@ -607,9 +607,9 @@ PUBLIC int LYhist_next ARGS2(
  *  list but don't actually remove the entry, just return it.
  *  (This procedure is badly named :)
  */
-PUBLIC void LYpop_num ARGS2(
-	int,		number,
-	DocInfo *,	doc)
+void LYpop_num (
+	int		number,
+	DocInfo *	doc)
 {
     if (number >= 0 && nhist + nhist_extra > number) {
 	doc->link = HDOC(number).link;
@@ -632,8 +632,8 @@ PUBLIC void LYpop_num ARGS2(
 /*
  *  This procedure outputs the history buffer into a temporary file.
  */
-PUBLIC int showhistory ARGS1(
-	char **,	newfile)
+int showhistory (
+	char **	newfile)
 {
     static char tempfile[LY_MAXPATH] = "\0";
     char *Title = NULL;
@@ -703,8 +703,8 @@ PUBLIC int showhistory ARGS1(
  *  link structure.  We saved out the history number to a special URL.
  *  The info looks like:  LYNXHIST:#
  */
-PUBLIC BOOLEAN historytarget ARGS1(
-	DocInfo *,	newdoc)
+BOOLEAN historytarget (
+	DocInfo *	newdoc)
 {
     int number;
     DocAddress WWWDoc;
@@ -791,8 +791,8 @@ PUBLIC BOOLEAN historytarget ARGS1(
  *  This procedure outputs the Visited Links list into a temporary file. - FM
  *  Returns links's number to make active (1-based), or 0 if not required.
  */
-PUBLIC int LYShowVisitedLinks ARGS1(
-	char **,	newfile)
+int LYShowVisitedLinks (
+	char **	newfile)
 {
     static char tempfile[LY_MAXPATH] = "\0";
     char *Title = NULL;
@@ -940,11 +940,11 @@ PUBLIC int LYShowVisitedLinks ARGS1(
  *  Keep cycled buffer for statusline messages.
  */
 #define STATUSBUFSIZE   40
-PRIVATE char * buffstack[STATUSBUFSIZE];
-PRIVATE int topOfStack = 0;
+static char * buffstack[STATUSBUFSIZE];
+static int topOfStack = 0;
 
 #ifdef LY_FIND_LEAKS
-PRIVATE void free_messages_stack NOARGS
+static void free_messages_stack (void)
 {
     topOfStack = STATUSBUFSIZE;
 
@@ -954,7 +954,7 @@ PRIVATE void free_messages_stack NOARGS
 }
 #endif
 
-PRIVATE void to_stack ARGS1(char *, str)
+static void to_stack (char * str)
 {
     /*
      *  Cycle buffer:
@@ -988,8 +988,8 @@ PRIVATE void to_stack ARGS1(char *, str)
  * will be very useful on exit.
  * (Don't expect everyone will look a trace log in case of difficulties:))
  */
-PUBLIC void LYstatusline_messages_on_exit ARGS1(
-	char **,	buf)
+void LYstatusline_messages_on_exit (
+	char **	buf)
 {
     int i;
 
@@ -1014,9 +1014,9 @@ PUBLIC void LYstatusline_messages_on_exit ARGS1(
 }
 
 
-PUBLIC void LYstore_message2 ARGS2(
-	CONST char *,	message,
-	CONST char *,	argument)
+void LYstore_message2 (
+	const char *	message,
+	const char *	argument)
 {
 
     if (message != NULL) {
@@ -1026,8 +1026,8 @@ PUBLIC void LYstore_message2 ARGS2(
     }
 }
 
-PUBLIC void LYstore_message ARGS1(
-	CONST char *,	message)
+void LYstore_message (
+	const char *	message)
 {
     if (message != NULL) {
 	char *temp = NULL;
@@ -1048,11 +1048,11 @@ struct _HTStream
     HTStreamClass * isa;
 };
 
-PRIVATE int LYLoadMESSAGES ARGS4 (
-	CONST char *,		arg GCC_UNUSED,
-	HTParentAnchor *,	anAnchor,
-	HTFormat,		format_out,
-	HTStream*,		sink)
+static int LYLoadMESSAGES (
+	const char *		arg GCC_UNUSED,
+	HTParentAnchor *	anAnchor,
+	HTFormat		format_out,
+	HTStream*		sink)
 {
     HTFormat format_in = WWW_HTML;
     HTStream *target = NULL;
@@ -1138,5 +1138,5 @@ PRIVATE int LYLoadMESSAGES ARGS4 (
 #define _LYMESSAGES_C_GLOBALDEF_1_INIT { "LYNXMESSAGES", LYLoadMESSAGES, 0}
 GLOBALDEF (HTProtocol,LYLynxStatusMessages,_LYMESSAGES_C_GLOBALDEF_1_INIT);
 #else
-GLOBALDEF PUBLIC HTProtocol LYLynxStatusMessages = {"LYNXMESSAGES", LYLoadMESSAGES, 0};
+GLOBALDEF HTProtocol LYLynxStatusMessages = {"LYNXMESSAGES", LYLoadMESSAGES, 0};
 #endif /* GLOBALDEF_IS_MACRO */

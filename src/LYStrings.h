@@ -13,70 +13,70 @@ typedef enum {
 #define is8bits(ch) (UCH(ch) >= 128)	/* isascii(ch) is not POSIX */
 
 /*  UPPER8(ch1,ch2) is an extension of (TOUPPER(ch1) - TOUPPER(ch2))  */
-extern int UPPER8  PARAMS((
+extern int UPPER8  (
 	int		ch1,
-	int		ch2));
+	int		ch2);
 
-extern int get_mouse_link NOPARAMS;
-extern int peek_mouse_link NOPARAMS;
-extern int peek_mouse_levent NOPARAMS;
-extern int fancy_mouse PARAMS((WINDOW *win, int row, int *position));
+extern int get_mouse_link (void);
+extern int peek_mouse_link (void);
+extern int peek_mouse_levent (void);
+extern int fancy_mouse (WINDOW *win, int row, int *position);
 
-extern char * LYstrncpy PARAMS((
+extern char * LYstrncpy (
 	char *		dst,
-	CONST char *	src,
-	int		n));
-extern void ena_csi PARAMS((BOOLEAN flag));
-extern int get_popup_number PARAMS((
+	const char *	src,
+	int		n);
+extern void ena_csi (BOOLEAN flag);
+extern int get_popup_number (
 	char *		msg,
 	int *		c,
-	int *		rel));
-extern int LYarrayLength PARAMS((CONST char ** list));
-extern int LYarrayWidth PARAMS((CONST char ** list));
-extern int LYgetch NOPARAMS;
-extern int LYgetch_choice NOPARAMS;
-extern int LYgetch_input NOPARAMS;
-extern int LYgetch_single NOPARAMS;
-extern int LYgetstr PARAMS((
+	int *		rel);
+extern int LYarrayLength (const char ** list);
+extern int LYarrayWidth (const char ** list);
+extern int LYgetch (void);
+extern int LYgetch_choice (void);
+extern int LYgetch_input (void);
+extern int LYgetch_single (void);
+extern int LYgetstr (
 	char *		inputline,
 	int		hidden,
 	size_t		bufsize,
-	RecallType	recall));
-extern char *LYstrsep PARAMS((
+	RecallType	recall);
+extern char *LYstrsep (
 	char **		stringp,
-	CONST char *	delim));
-extern char * LYstrstr PARAMS((
+	const char *	delim);
+extern char * LYstrstr (
 	char *		chptr,
-	CONST char *	tarptr));
-extern char * LYmbcsstrncpy PARAMS((
+	const char *	tarptr);
+extern char * LYmbcsstrncpy (
 	char *		dst,
-	CONST char *	src,
+	const char *	src,
 	int		n_bytes,
 	int		n_glyphs,
-	BOOL		utf_flag));
-extern char * LYmbcs_skip_glyphs PARAMS((
+	BOOL		utf_flag);
+extern char * LYmbcs_skip_glyphs (
 	char *		data,
 	int		n_glyphs,
-	BOOL		utf_flag));
-extern int LYmbcsstrlen PARAMS((
+	BOOL		utf_flag);
+extern int LYmbcsstrlen (
 	char *		str,
 	BOOL		utf_flag,
-	BOOL		count_gcells));
+	BOOL		count_gcells);
 
-extern char * LYno_attr_mbcs_strstr PARAMS((
+extern char * LYno_attr_mbcs_strstr (
 	char *		chptr,
-	CONST char *	tarptr,
+	const char *	tarptr,
 	BOOL		utf_flag,
 	BOOL		count_gcells,
 	int *		nstartp,
-	int *		nendp));
-extern char * LYno_attr_mbcs_case_strstr PARAMS((
+	int *		nendp);
+extern char * LYno_attr_mbcs_case_strstr (
 	char *		chptr,
-	CONST char *	tarptr,
+	const char *	tarptr,
 	BOOL		utf_flag,
 	BOOL		count_gcells,
 	int *		nstartp,
-	int *		nendp));
+	int *		nendp);
 
 #define non_empty(s) !isEmpty(s)
 
@@ -85,38 +85,38 @@ extern char * LYno_attr_mbcs_case_strstr PARAMS((
 	    ? LYno_attr_mbcs_strstr(chptr, tarptr, utf_flag, count_gcells, nstartp, nendp) \
 	    : LYno_attr_mbcs_case_strstr(chptr, tarptr, utf_flag, count_gcells, nstartp, nendp))
 
-extern char * LYno_attr_char_strstr PARAMS((
+extern char * LYno_attr_char_strstr (
 	char *		chptr,
-	char *		tarptr));
-extern char * LYno_attr_char_case_strstr PARAMS((
+	char *		tarptr);
+extern char * LYno_attr_char_case_strstr (
 	char *		chptr,
-	char *		tarptr));
+	char *		tarptr);
 
 #define LYno_attr_strstr(chptr, tarptr) \
 	(case_sensitive \
 	? LYno_attr_char_strstr(chptr, tarptr) \
 	: LYno_attr_char_case_strstr(chptr, tarptr))
 
-extern char * SNACopy PARAMS((
+extern char * SNACopy (
 	char **		dest,
-	CONST char *	src,
-	int		n));
-extern char * SNACat PARAMS((
+	const char *	src,
+	int		n);
+extern char * SNACat (
 	char **		dest,
-	CONST char *	src,
-	int		n));
+	const char *	src,
+	int		n);
 #define StrnAllocCopy(dest, src, n)  SNACopy (&(dest), src, n)
 #define StrnAllocCat(dest, src, n)   SNACat  (&(dest), src, n)
 
-extern char *LYSafeGets PARAMS((char ** src, FILE * fp));
+extern char *LYSafeGets (char ** src, FILE * fp);
 
 #ifdef EXP_CMD_LOGGING
-extern BOOL LYHaveCmdScript NOPARAMS;
-extern int LYReadCmdKey PARAMS((int mode));
-extern void LYCloseCmdLogfile NOPARAMS;
-extern void LYOpenCmdLogfile PARAMS((int argc, char **argv));
-extern void LYOpenCmdScript NOPARAMS;
-extern void LYWriteCmdKey PARAMS((int ch));
+extern BOOL LYHaveCmdScript (void);
+extern int LYReadCmdKey (int mode);
+extern void LYCloseCmdLogfile (void);
+extern void LYOpenCmdLogfile (int argc, char **argv);
+extern void LYOpenCmdScript (void);
+extern void LYWriteCmdKey (int ch);
 #else
 #define LYHaveCmdScript() FALSE
 #define LYReadCmdKey(mode) LYgetch_for(mode)
@@ -287,88 +287,88 @@ typedef enum {
 
 
 #if defined(USE_KEYMAPS)
-extern int lynx_initialize_keymaps NOPARAMS;
-extern int map_string_to_keysym PARAMS((CONST char * src, int *lec));
+extern int lynx_initialize_keymaps (void);
+extern int map_string_to_keysym (const char * src, int *lec);
 #endif
 
-extern char *LYElideString PARAMS((
+extern char *LYElideString (
 	char *		str,
-	int		cut_pos));
-extern void LYEscapeStartfile PARAMS((
-	char **		buffer));
-extern void LYLowerCase PARAMS((
-	char *		buffer));
-extern void LYUpperCase PARAMS((
-	char *		buffer));
-extern BOOLEAN LYRemoveNewlines PARAMS((
-	char *		buffer));
-extern char * LYRemoveBlanks PARAMS((
-	char *		buffer));
-extern char * LYSkipBlanks PARAMS((
-	char *		buffer));
-extern char * LYSkipNonBlanks PARAMS((
-	char *		buffer));
-extern CONST char * LYSkipCBlanks PARAMS((
-	CONST char *	buffer));
-extern CONST char * LYSkipCNonBlanks PARAMS((
-	CONST char *	buffer));
-extern void LYTrimLeading PARAMS((
-	char *		buffer));
-extern char * LYTrimNewline PARAMS((
-	char *		buffer));
-extern void LYTrimTrailing PARAMS((
-	char *		buffer));
-extern void LYTrimAllStartfile PARAMS((
-	char *		buffer));
-extern BOOLEAN LYTrimStartfile PARAMS((
-	char *		buffer));
-extern void LYSetupEdit PARAMS((
+	int		cut_pos);
+extern void LYEscapeStartfile (
+	char **		buffer);
+extern void LYLowerCase (
+	char *		buffer);
+extern void LYUpperCase (
+	char *		buffer);
+extern BOOLEAN LYRemoveNewlines (
+	char *		buffer);
+extern char * LYRemoveBlanks (
+	char *		buffer);
+extern char * LYSkipBlanks (
+	char *		buffer);
+extern char * LYSkipNonBlanks (
+	char *		buffer);
+extern const char * LYSkipCBlanks (
+	const char *	buffer);
+extern const char * LYSkipCNonBlanks (
+	const char *	buffer);
+extern void LYTrimLeading (
+	char *		buffer);
+extern char * LYTrimNewline (
+	char *		buffer);
+extern void LYTrimTrailing (
+	char *		buffer);
+extern void LYTrimAllStartfile (
+	char *		buffer);
+extern BOOLEAN LYTrimStartfile (
+	char *		buffer);
+extern void LYSetupEdit (
 	EditFieldData *	edit,
 	char *		old,
 	int		maxstr,
-	int		maxdsp));
-extern void LYRefreshEdit PARAMS((
-	EditFieldData *	edit));
-extern int EditBinding PARAMS((int ch));		   /* in LYEditmap.c */
-extern BOOL LYRemapEditBinding PARAMS((
+	int		maxdsp);
+extern void LYRefreshEdit (
+	EditFieldData *	edit);
+extern int EditBinding (int ch);		   /* in LYEditmap.c */
+extern BOOL LYRemapEditBinding (
 	int		xlkc,
 	int		lec,
-	int 		select_edi));			   /* in LYEditmap.c */
-extern int LYKeyForEditAction PARAMS((int lec));	   /* in LYEditmap.c */
-extern int LYEditKeyForAction PARAMS((int lac, int *pmodkey));/* LYEditmap.c */
-extern int LYEdit1 PARAMS((
+	int 		select_edi);			   /* in LYEditmap.c */
+extern int LYKeyForEditAction (int lec);	   /* in LYEditmap.c */
+extern int LYEditKeyForAction (int lac, int *pmodkey);/* LYEditmap.c */
+extern int LYEdit1 (
 	EditFieldData *	edit,
 	int		ch,
 	int		action,
-	BOOL		maxMessage));
-extern void LYCloseCloset PARAMS((RecallType recall));
-extern int LYhandlePopupList PARAMS((
+	BOOL		maxMessage);
+extern void LYCloseCloset (RecallType recall);
+extern int LYhandlePopupList (
 	int		cur_choice,
 	int		ly,
 	int		lx,
-	CONST char **	choices,
+	const char **	choices,
 	int		width,
 	int		i_length,
 	int		disabled,
 	BOOLEAN		for_mouse,
-	BOOLEAN		numbered));
+	BOOLEAN		numbered);
 
 typedef unsigned char LYEditCode;
 
 extern int current_lineedit;
 extern char * LYLineeditNames[];
 extern LYEditCode * LYLineEditors[];
-extern CONST char * LYLineeditHelpURLs[];
+extern const char * LYLineeditHelpURLs[];
 
-extern CONST char * LYLineeditHelpURL NOPARAMS;
+extern const char * LYLineeditHelpURL (void);
 
 extern int escape_bound;
 
 #define LYLineEdit(e,c,m) LYEdit1(e,c,EditBinding(c)&~LYE_DF,m)
 
 /* Dummy initializer for LYEditmap.c */
-extern int LYEditmapDeclared NOPARAMS;
+extern int LYEditmapDeclared (void);
 
-int LYEditInsert PARAMS((EditFieldData *edit, unsigned char *s,	int len, int map_active, BOOL maxMessage));
+int LYEditInsert (EditFieldData *edit, unsigned char *s,	int len, int map_active, BOOL maxMessage);
 
 #endif /* LYSTRINGS_H */

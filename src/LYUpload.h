@@ -6,8 +6,8 @@
 #include <LYStructs.h>
 #endif /* LYSTRUCTS_H */
 
-extern int LYUpload PARAMS((char *line));
-extern int LYUpload_options PARAMS((char **newfile, char *directory));
+extern int LYUpload (char *line);
+extern int LYUpload_options (char **newfile, char *directory);
 
 #endif /* LYUPLOAD_H */
 

@@ -84,12 +84,12 @@ HTAddRule:  Add rule to the list
    large.
 
  */
-extern int HTAddRule PARAMS((
+extern int HTAddRule (
     HTRuleOp op,
-    CONST char * pattern,
-    CONST char * equiv,
-    CONST char * cond_op,
-    CONST char * cond));
+    const char * pattern,
+    const char * equiv,
+    const char * cond_op,
+    const char * cond);
 
 
 /*
@@ -102,7 +102,7 @@ HTClearRules: Clear all rules
 
  */
 
-extern void HTClearRules PARAMS((void));
+extern void HTClearRules (void);
 
 /*
 
@@ -123,7 +123,7 @@ HTTranslate: Translate by rules
                          a copy of the original.
 
  */
-extern char * HTTranslate PARAMS((CONST char * required));
+extern char * HTTranslate (const char * required);
 
 /*
 
@@ -137,7 +137,7 @@ HTSetConfiguration:  Load one line of configuration information
    the  rule file, for example INI files for X resources.
 
  */
-extern int HTSetConfiguration PARAMS((char * config));
+extern int HTSetConfiguration (char * config);
 
 
 /*
@@ -157,7 +157,7 @@ HtLoadRules:  Load the rules from a file
 
  */
 
-extern int HTLoadRules PARAMS((CONST char * filename));
+extern int HTLoadRules (const char * filename);
 /*
 
  */

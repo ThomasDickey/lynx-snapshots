@@ -53,21 +53,21 @@
 
 /*	Module-wide variables
 */
-PRIVATE int finger_fd;				/* Socket for FingerHost */
+static int finger_fd;				/* Socket for FingerHost */
 
 struct _HTStructured {
-	CONST HTStructuredClass * isa;		/* For gopher streams */
+	const HTStructuredClass * isa;		/* For gopher streams */
 	/* ... */
 };
 
-PRIVATE HTStructured * target;			/* The output sink */
-PRIVATE HTStructuredClass targetClass;		/* Copy of fn addresses */
+static HTStructured * target;			/* The output sink */
+static HTStructuredClass targetClass;		/* Copy of fn addresses */
 
 /*	Initialisation for this module
 **	------------------------------
 */
-PRIVATE BOOL initialized = NO;
-PRIVATE BOOL initialize NOARGS
+static BOOL initialized = NO;
+static BOOL initialize (void)
 {
   finger_fd = -1;		/* Disconnected */
   return YES;
@@ -78,19 +78,19 @@ PRIVATE BOOL initialize NOARGS
 /*	Start anchor element
 **	--------------------
 */
-PRIVATE void start_anchor ARGS1(CONST char *,  href)
+static void start_anchor (const char *   href)
 {
     BOOL		present[HTML_A_ATTRIBUTES];
-    CONST char*		value[HTML_A_ATTRIBUTES];
+    const char*		value[HTML_A_ATTRIBUTES];
 
     {
 	int i;
 	for(i=0; i<HTML_A_ATTRIBUTES; i++)
 	    present[i] = (BOOL) (i==HTML_A_HREF);
     }
-    ((CONST char **)value)[HTML_A_HREF] = href;
+    ((const char **)value)[HTML_A_HREF] = href;
     (*targetClass.start_element)(target, HTML_A, present,
-				 (CONST char **)value, -1, 0);
+				 (const char **)value, -1, 0);
 
 }
 
@@ -106,12 +106,12 @@ PRIVATE void start_anchor ARGS1(CONST char *,  href)
 */
 
 
-PRIVATE int response ARGS5(
-	char *,			command,
-	char *,			sitename,
-	HTParentAnchor *,	anAnchor,
-	HTFormat,		format_out,
-	HTStream*,		sink)
+static int response (
+	char *			command,
+	char *			sitename,
+	HTParentAnchor *	anAnchor,
+	HTFormat		format_out,
+	HTStream*		sink)
 {
     int status;
     int length = strlen(command);
@@ -250,11 +250,11 @@ end_html:
 /*		Load by name					HTLoadFinger
 **		============
 */
-PUBLIC int HTLoadFinger ARGS4(
-	CONST char *,		arg,
-	HTParentAnchor *,	anAnchor,
-	HTFormat,		format_out,
-	HTStream*,		stream)
+int HTLoadFinger (
+	const char *		arg,
+	HTParentAnchor *	anAnchor,
+	HTFormat		format_out,
+	HTStream*		stream)
 {
     char *username, *sitename, *colon;	/* Fields extracted from URL */
     char *slash, *at_sign;		/* Fields extracted from URL */
@@ -263,7 +263,7 @@ PUBLIC int HTLoadFinger ARGS4(
     int status;				/* tcp return */
     int result = HT_LOADED;
     BOOL IsGopherURL = FALSE;
-    CONST char * p1 = arg;
+    const char * p1 = arg;
 
     CTRACE((tfp, "HTFinger: Looking for %s\n", (arg ? arg : "NULL")));
 
@@ -416,7 +416,7 @@ PUBLIC int HTLoadFinger ARGS4(
 #define _HTFINGER_C_1_INIT { "finger", HTLoadFinger, NULL }
 GLOBALDEF (HTProtocol, HTFinger, _HTFINGER_C_1_INIT);
 #else
-GLOBALDEF PUBLIC HTProtocol HTFinger = { "finger", HTLoadFinger, NULL };
+GLOBALDEF HTProtocol HTFinger = { "finger", HTLoadFinger, NULL };
 #endif /* GLOBALDEF_IS_MACRO */
 
 #endif /* not DISABLE_FINGER */

@@ -100,7 +100,7 @@ Group definition grammar
 
  */
 
-PUBLIC GroupDef *HTAA_parseGroupDef PARAMS((FILE * fp));
+extern GroupDef *HTAA_parseGroupDef (FILE * fp);
 /*
 
 Fill in Pointers to referenced Group Definitions in a Group Definition
@@ -110,8 +110,8 @@ Fill in Pointers to referenced Group Definitions in a Group Definition
 
  */
 
-PUBLIC void HTAA_resolveGroupReferences PARAMS((GroupDef *     group_def,
-                                                GroupDefList * group_def_list));
+extern void HTAA_resolveGroupReferences (GroupDef *     group_def,
+                                                GroupDefList * group_def_list);
 /*
 
 Read Group File (and do caching)
@@ -121,7 +121,7 @@ Read Group File (and do caching)
 
  */
 
-PUBLIC GroupDefList *HTAA_readGroupFile PARAMS((CONST char * filename));
+extern GroupDefList *HTAA_readGroupFile (const char * filename);
 /*
 
 Delete Group Definition
@@ -131,14 +131,14 @@ Delete Group Definition
 
  */
 
-PUBLIC void GroupDef_delete PARAMS((GroupDef * group_def));
+extern void GroupDef_delete (GroupDef * group_def);
 /*
 
 Print Out Group Definition (for trace purposes)
 
  */
 
-PUBLIC void HTAA_printGroupDef PARAMS((GroupDef * group_def));
+extern void HTAA_printGroupDef (GroupDef * group_def);
 /*
 
 Does a User Belong to a Given Set of Groups
@@ -165,9 +165,9 @@ Does a User Belong to a Given Set of Groups
 **                      to the group.
 **                      HTAA_OK if both IP address and user are ok.
 */
-PUBLIC HTAAFailReasonType HTAA_userAndInetInGroup PARAMS((GroupDef * group,
+extern HTAAFailReasonType HTAA_userAndInetInGroup (GroupDef * group,
                                                           char *     username,
                                                           char *     ip_number,
-                                                          char *     ip_name));
+                                                          char *     ip_name);
 
 #endif /* not HTGROUP_H */

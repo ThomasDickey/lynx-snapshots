@@ -14,20 +14,20 @@
 
 #ifdef USE_PRETTYSRC
 BOOL psrc_convert_string = FALSE;
-PUBLIC BOOL psrc_view = FALSE;/* this is read by SGML_put_character - TRUE
+BOOL psrc_view = FALSE;/* this is read by SGML_put_character - TRUE
 	when viewing pretty source */
-PUBLIC BOOL LYpsrc = FALSE; /* this tells what will be shown on '\':
+BOOL LYpsrc = FALSE; /* this tells what will be shown on '\':
   if TRUE, then pretty source, normal source view otherwise. Toggled by
   -prettysrc commandline option.  */
-PUBLIC BOOL sgml_in_psrc_was_initialized;
-PUBLIC BOOL psrc_nested_call;
-PUBLIC BOOL psrc_first_tag;
-PUBLIC BOOL mark_htext_as_source=FALSE;
+BOOL sgml_in_psrc_was_initialized;
+BOOL psrc_nested_call;
+BOOL psrc_first_tag;
+BOOL mark_htext_as_source=FALSE;
   /* tagspecs from lynx.cfg are read here. After .lss file is read (is with lss
      support), the style cache and markup are created before entering the
      mainloop. */
-PUBLIC BOOL psrcview_no_anchor_numbering = FALSE;
-PRIVATE char* HTL_tagspecs_defaults[HTL_num_lexemes] = {
+BOOL psrcview_no_anchor_numbering = FALSE;
+static char* HTL_tagspecs_defaults[HTL_num_lexemes] = {
  /* these values are defaults. They are also listed in comments of distibution's
      lynx.cfg.*/
 #ifdef USE_COLOR_STYLE
@@ -59,19 +59,19 @@ PRIVATE char* HTL_tagspecs_defaults[HTL_num_lexemes] = {
 #endif
 };
 
-PUBLIC char* HTL_tagspecs[HTL_num_lexemes];
+char* HTL_tagspecs[HTL_num_lexemes];
 
  /* these are pointers since tagspec can be empty (the pointer will be NULL
     in that case) */
-PUBLIC HT_tagspec* lexeme_start[HTL_num_lexemes];
-PUBLIC HT_tagspec* lexeme_end[HTL_num_lexemes];
+HT_tagspec* lexeme_start[HTL_num_lexemes];
+HT_tagspec* lexeme_end[HTL_num_lexemes];
 
-PUBLIC int tagname_transform = 2;
-PUBLIC int attrname_transform = 2;
+int tagname_transform = 2;
+int attrname_transform = 2;
 
 
-PRIVATE int html_src_tag_index ARGS1(
-	    char*, tagname)
+static int html_src_tag_index (
+	    char* tagname)
 {
     HTTag* tag = SGMLFindTag(&HTML_dtd, tagname);
     return (tag && tag != &HTTag_unrecognized ) ? tag - HTML_dtd.tags : -1;
@@ -84,10 +84,10 @@ typedef enum {
     HTSRC_CK_seen_dot
 } html_src_check_state;
 
-PRIVATE void append_close_tag ARGS3(
-	    char*,	  tagname,
-	    HT_tagspec**, head,
-	    HT_tagspec**, tail)
+static void append_close_tag (
+	    char*	  tagname,
+	    HT_tagspec** head,
+	    HT_tagspec** tail)
 {
     int idx, nattr;
     HTTag* tag;
@@ -121,11 +121,11 @@ PRIVATE void append_close_tag ARGS3(
 
 /* this will allocate node, initialize all members, and node
    append to the list, possibly modifying head and modifying tail */
-PRIVATE void append_open_tag ARGS4(
-	    char*,	  tagname,
-	    char*,	  classname GCC_UNUSED,
-	    HT_tagspec**, head,
-	    HT_tagspec**, tail)
+static void append_open_tag (
+	    char*	  tagname,
+	    char*	  classname GCC_UNUSED,
+	    HT_tagspec** head,
+	    HT_tagspec** tail)
 {
     HT_tagspec* subj;
     HTTag* tag;
@@ -166,11 +166,11 @@ PRIVATE void append_open_tag ARGS4(
 }
 
 /* returns 1 if incorrect */
-PUBLIC int html_src_parse_tagspec ARGS4(
-	char*,		ts,
-	HTlexeme,	lexeme,
-	BOOL,		checkonly,
-	BOOL,		isstart)
+int html_src_parse_tagspec (
+	char*		ts,
+	HTlexeme	lexeme,
+	BOOL		checkonly,
+	BOOL		isstart)
 {
     char *p = ts;
     char *tagstart = 0;
@@ -285,8 +285,8 @@ PUBLIC int html_src_parse_tagspec ARGS4(
 }
 
 /*this will clean the data associated with lexeme 'l' */
-PUBLIC void html_src_clean_item ARGS1(
-	HTlexeme, l)
+void html_src_clean_item (
+	HTlexeme l)
 {
     int i;
 
@@ -314,21 +314,21 @@ PUBLIC void html_src_clean_item ARGS1(
 }
 
 /*this will be registered with atexit*/
-PUBLIC void html_src_clean_data NOARGS
+void html_src_clean_data (void)
 {
     int i;
     for (i = 0; i < HTL_num_lexemes; ++i)
 	html_src_clean_item(i);
 }
 
-PUBLIC void html_src_on_lynxcfg_reload NOARGS
+void html_src_on_lynxcfg_reload (void)
 {
     html_src_clean_data();
     HTMLSRC_init_caches(TRUE);
 }
 
-PUBLIC void HTMLSRC_init_caches ARGS1(
-	BOOL,	dont_exit)
+void HTMLSRC_init_caches (
+	BOOL	dont_exit)
 {
     int i;
     char* p;

@@ -11,16 +11,16 @@
 #include <HTUtils.h>
 #endif /* HTUTILS_H */
 
-extern CONST char * HTLibraryVersion;   /* String for help screen etc */
+extern const char * HTLibraryVersion;   /* String for help screen etc */
 
 /*
     EBCDIC string comparison using ASCII collating sequence
 */
 #ifdef    NOT_ASCII
-extern int AS_casecomp  PARAMS((CONST char *a, CONST char *b));
-extern int AS_ncmp PARAMS((CONST char *a, CONST char *b, unsigned int n));
+extern int AS_casecomp  (const char *a, const char *b);
+extern int AS_ncmp (const char *a, const char *b, unsigned int n);
 #define    AS_cmp( a, b )  ( AS_ncmp( ( a ), ( b ), -1 ) )
-extern int AS_cmp PARAMS((CONST char *a, CONST char *b));
+extern int AS_cmp (const char *a, const char *b);
 
 #else
 #define AS_casecomp( a, b ) ( strcasecomp( ( a ), ( b ) ) )
@@ -36,11 +36,11 @@ Case-insensitive string comparison
    The usual routines (comp instead of cmp) had some problem.
    
  */
-extern int strcasecomp  PARAMS((CONST char *a, CONST char *b));
-extern int strncasecomp PARAMS((CONST char *a, CONST char *b, int n));
+extern int strcasecomp  (const char *a, const char *b);
+extern int strncasecomp (const char *a, const char *b, int n);
 
-extern int strcasecomp8  PARAMS((CONST char *a, CONST char *b));
-extern int strncasecomp8 PARAMS((CONST char *a, CONST char *b, int n));
+extern int strcasecomp8  (const char *a, const char *b);
+extern int strncasecomp8 (const char *a, const char *b, int n);
        /*
        **  strcasecomp8 and strncasecomp8 are variants of strcasecomp
        **  and strncasecomp, but use 8bit upper/lower case information
@@ -55,8 +55,8 @@ Malloced string manipulation
  */
 #define StrAllocCopy(dest, src) HTSACopy (&(dest), src)
 #define StrAllocCat(dest, src)  HTSACat  (&(dest), src)
-extern char * HTSACopy PARAMS ((char **dest, CONST char *src));
-extern char * HTSACat  PARAMS ((char **dest, CONST char *src));
+extern char * HTSACopy (char **dest, const char *src);
+extern char * HTSACat  (char **dest, const char *src);
 
 /*
 optimized for heavily realloc'd strings in temp objects
@@ -64,24 +64,24 @@ optimized for heavily realloc'd strings in temp objects
 #define StrAllocCopy_extra(dest, src) HTSACopy_extra (&(dest), src)
 #define FREE_extra(x)   {if (x != NULL) {HTSAFree_extra(x); x = NULL;}}
 #define Clear_extra(x)  {if (x != NULL) {*x = '\0';}}
-extern char * HTSACopy_extra PARAMS ((char **dest, CONST char *src));
-extern void   HTSAFree_extra PARAMS ((char *s));
+extern char * HTSACopy_extra (char **dest, const char *src);
+extern void   HTSAFree_extra (char *s);
 
 /*
 
 Next word or quoted string
 
  */
-extern char * HTNextField PARAMS ((char** pstr));
+extern char * HTNextField (char** pstr);
 
 /* A more general parser - kw */
-extern char * HTNextTok PARAMS((char ** pstr,
-		      CONST char * delims, CONST char * bracks, char * found));
+extern char * HTNextTok (char ** pstr,
+		      const char * delims, const char * bracks, char * found);
 
 #ifdef ANSI_VARARGS
-extern char * HTSprintf (char ** pstr, CONST char * fmt, ...)
+extern char * HTSprintf (char ** pstr, const char * fmt, ...)
 			GCC_PRINTFLIKE(2,3);
-extern char * HTSprintf0 (char ** pstr, CONST char * fmt, ...)
+extern char * HTSprintf0 (char ** pstr, const char * fmt, ...)
 			 GCC_PRINTFLIKE(2,3);
 #else
 extern char * HTSprintf () GCC_PRINTFLIKE(2,3);
@@ -89,11 +89,11 @@ extern char * HTSprintf0 () GCC_PRINTFLIKE(2,3);
 #endif
 
 #if defined(LY_FIND_LEAKS)	/* private otherwise */
-extern char * StrAllocVsprintf PARAMS((
+extern char * StrAllocVsprintf (
         char **		pstr,
         size_t		len,
-        CONST char *	fmt,
-        va_list *	ap));
+        const char *	fmt,
+        va_list *	ap);
 #endif
 
 #if (defined(VMS) || defined(DOSPATH) || defined(__EMX__)) && !defined(__CYGWIN__)
@@ -103,17 +103,17 @@ extern char * StrAllocVsprintf PARAMS((
 #endif
 
 #if USE_QUOTED_PARAMETER
-extern char *HTQuoteParameter PARAMS((CONST char *parameter));
-extern void HTAddXpand PARAMS((char ** result, CONST char * command, int number, CONST char * parameter));
+extern char *HTQuoteParameter (const char *parameter);
+extern void HTAddXpand (char ** result, const char * command, int number, const char * parameter);
 #else
 #define HTQuoteParameter(parameter) parameter	/* simplify ifdef'ing */
 #define HTAddXpand(result,command,number,parameter)  HTAddParam(result,command,number,parameter)
 #endif
 
-extern int HTCountCommandArgs PARAMS((CONST char * command));
-extern void HTAddToCmd PARAMS((char ** result, CONST char * command, int number, CONST char * string));
-extern void HTAddParam PARAMS((char ** result, CONST char * command, int number, CONST char * parameter));
-extern void HTEndParam PARAMS((char ** result, CONST char * command, int number));
+extern int HTCountCommandArgs (const char * command);
+extern void HTAddToCmd (char ** result, const char * command, int number, const char * string);
+extern void HTAddParam (char ** result, const char * command, int number, const char * parameter);
+extern void HTEndParam (char ** result, const char * command, int number);
 
 /* Force an option, with leading blanks, to be appended without quoting them */
 #define HTOptParam(result, command, number, parameter) HTSACat(result, parameter)
@@ -124,12 +124,12 @@ typedef struct {
 	int len;
 } bstring;
 
-extern void HTSABCopy  PARAMS((bstring ** dest, CONST char * src, int len));
-extern void HTSABCopy0 PARAMS((bstring ** dest, CONST char * src));
-extern void HTSABCat   PARAMS((bstring ** dest, CONST char * src, int len));
-extern void HTSABCat0  PARAMS((bstring ** dest, CONST char * src));
-extern BOOL HTSABEql   PARAMS((bstring * a, bstring * b));
-extern void HTSABFree  PARAMS((bstring ** ptr));
+extern void HTSABCopy  (bstring ** dest, const char * src, int len);
+extern void HTSABCopy0 (bstring ** dest, const char * src);
+extern void HTSABCat   (bstring ** dest, const char * src, int len);
+extern void HTSABCat0  (bstring ** dest, const char * src);
+extern BOOL HTSABEql   (bstring * a, bstring * b);
+extern void HTSABFree  (bstring ** ptr);
 
 #define BStrLen(s)    (((s) != 0) ? (s)->len : 0)
 #define BStrData(s)   (((s) != 0) ? (s)->str : 0)
@@ -145,13 +145,13 @@ extern void HTSABFree  PARAMS((bstring ** ptr));
 #define BStrFree(d)    HTSABFree(  &(d))
 
 #ifdef ANSI_VARARGS
-extern bstring * HTBprintf (bstring ** pstr, CONST char * fmt, ...)
+extern bstring * HTBprintf (bstring ** pstr, const char * fmt, ...)
 			    GCC_PRINTFLIKE(2,3);
 #else
 extern bstring * HTBprintf () GCC_PRINTFLIKE(2,3);
 #endif
 
-extern void trace_bstring PARAMS((bstring *data));
-extern void trace_bstring2 PARAMS((CONST char *text, int size));
+extern void trace_bstring (bstring *data);
+extern void trace_bstring2 (const char *text, int size);
 
 #endif /* HTSTRING_H */

@@ -23,14 +23,14 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
-PRIVATE HTAtom * hash_table[HASH_SIZE];
-PRIVATE BOOL initialised = NO;
+static HTAtom * hash_table[HASH_SIZE];
+static BOOL initialised = NO;
 
 /*
  *	To free off all atoms.
  */
 #ifdef LY_FIND_LEAKS
-PRIVATE void free_atoms NOPARAMS;
+static void free_atoms (void);
 #endif
 
 /*
@@ -38,7 +38,7 @@ PRIVATE void free_atoms NOPARAMS;
  */
 #define HASH_FUNCTION(cp_hash) ((strlen(cp_hash) * UCH(*cp_hash)) % HASH_SIZE)
 
-PUBLIC HTAtom * HTAtom_for ARGS1(CONST char *, string)
+HTAtom * HTAtom_for (const char * string)
 {
     int hash;
     HTAtom * a;
@@ -99,7 +99,7 @@ PUBLIC HTAtom * HTAtom_for ARGS1(CONST char *, string)
  *	Revision History:
  *		05-29-94	created Lynx 2-3-1 Garrett Arch Blythe
  */
-PRIVATE void free_atoms NOARGS
+static void free_atoms (void)
 {
 	auto int i_counter;
 	HTAtom *HTAp_freeme;
@@ -123,8 +123,8 @@ PRIVATE void free_atoms NOARGS
 }
 #endif /* LY_FIND_LEAKS */
 
-PRIVATE BOOL mime_match ARGS2(CONST char *, name,
-			      CONST char *, templ)
+static BOOL mime_match (const char * name,
+			      const char * templ)
 {
     if (name && templ) {
 	static char *n1 = NULL;
@@ -149,7 +149,7 @@ PRIVATE BOOL mime_match ARGS2(CONST char *, name,
 }
 
 
-PUBLIC HTList *HTAtom_templateMatches ARGS1(CONST char *, templ)
+HTList *HTAtom_templateMatches (const char * templ)
 {
     HTList *matches = HTList_new();
 

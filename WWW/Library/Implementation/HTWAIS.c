@@ -87,9 +87,9 @@
 
 #define HEX_ESCAPE '%'
 
-PRIVATE BOOL	as_gate;	/* Client is using us as gateway */
+static BOOL	as_gate;	/* Client is using us as gateway */
 
-PRIVATE char	line[2048];	/* For building strings to display */
+static char	line[2048];	/* For building strings to display */
 				/* Must be able to take id */
 
 #define PUTC(c) (*target->isa->put_character)(target, c)
@@ -101,12 +101,12 @@ PRIVATE char	line[2048];	/* For building strings to display */
 #define FREE_TARGET (*target->isa->_free)(target)
 
 struct _HTStructured {
-	CONST HTStructuredClass *	isa;
+	const HTStructuredClass *	isa;
 	/* ... */
 };
 
 struct _HTStream {
-	CONST HTStreamClass *	isa;
+	const HTStreamClass *	isa;
 	/* ... */
 };
 
@@ -114,10 +114,10 @@ struct _HTStream {
 /* ---------------- Local copy of connect_to_server calls ----------------- */
 /* ------------------------------------------------------------------------ */
 /* Returns 1 on success, 0 on fail, -1 on interrupt. */
-PRIVATE int fd_mosaic_connect_to_server ARGS3(
-	char *,		host_name,
-	long,		port,
-	long *,		fd)
+static int fd_mosaic_connect_to_server (
+	char *		host_name,
+	long		port,
+	long *		fd)
 {
     char *dummy = NULL;
     int status;
@@ -139,15 +139,15 @@ PRIVATE int fd_mosaic_connect_to_server ARGS3(
 
 /* Returns 1 on success, 0 on fail, -1 on interrupt. */
 #ifdef VMS
-PRIVATE int mosaic_connect_to_server ARGS3(
-	char *,		host_name,
-	long,		port,
-	long *,		fdp)
+static int mosaic_connect_to_server (
+	char *		host_name,
+	long		port,
+	long *		fdp)
 #else
-PRIVATE int mosaic_connect_to_server ARGS3(
-	char *,		host_name,
-	long,		port,
-	FILE **,	fp)
+static int mosaic_connect_to_server (
+	char *		host_name,
+	long		port,
+	FILE **	fp)
 #endif /* VMS */
 {
 #ifndef VMS
@@ -183,9 +183,9 @@ PRIVATE int mosaic_connect_to_server ARGS3(
 /*								showDiags
 */
 /* modified from Jonny G's version in ui/question.c */
-PRIVATE void showDiags ARGS2(
-	HTStream *,		target,
-	diagnosticRecord **,	d)
+static void showDiags (
+	HTStream *		target,
+	diagnosticRecord **	d)
 {
     long i;
 
@@ -204,10 +204,10 @@ PRIVATE void showDiags ARGS2(
 **	-----------------------------------------
 */
 
-PRIVATE BOOL acceptable[256];
-PRIVATE BOOL acceptable_inited = NO;
+static BOOL acceptable[256];
+static BOOL acceptable_inited = NO;
 
-PRIVATE void init_acceptable NOARGS
+static void init_acceptable (void)
 {
     unsigned int i;
     char * good =
@@ -225,8 +225,8 @@ PRIVATE void init_acceptable NOARGS
 **	returns		nil if error
 **			pointer to malloced string (must be freed) if ok
 */
-PRIVATE char * WWW_from_archie ARGS1(
-	char *,		file)
+static char * WWW_from_archie (
+	char *		file)
 {
     char * end;
     char * result;
@@ -253,10 +253,10 @@ PRIVATE char * WWW_from_archie ARGS1(
 **	returns		nil if error
 **			pointer to malloced string (must be freed) if ok
 */
-PRIVATE char hex [17] = "0123456789ABCDEF";
+static char hex [17] = "0123456789ABCDEF";
 
-PRIVATE char * WWW_from_WAIS ARGS1(
-	any *,		docid)
+static char * WWW_from_WAIS (
+	any *		docid)
 {
     static char buf[BIG];
     char * q = buf;
@@ -323,9 +323,9 @@ PRIVATE char * WWW_from_WAIS ARGS1(
 **	docid->size	is valid
 **	docid->bytes	is malloced and must later be freed.
 */
-PRIVATE any * WAIS_from_WWW ARGS2(
-	any *,		docid,
-	char *,		docname)
+static any * WAIS_from_WWW (
+	any *		docid,
+	char *		docname)
 {
     char *z;	/* Output pointer */
     char *sor;	/* Start of record - points to size field. */
@@ -406,11 +406,11 @@ PRIVATE any * WAIS_from_WWW ARGS2(
 /*	Send a plain text record to the client		output_text_record()
 **	--------------------------------------
 */
-PRIVATE void output_text_record ARGS4(
-    HTStream *,			target,
-    WAISDocumentText *,		record,
-    boolean,			quote_string_quotes,
-    boolean,			binary)
+static void output_text_record (
+    HTStream *			target,
+    WAISDocumentText *		record,
+    boolean			quote_string_quotes,
+    boolean			binary)
 {
   long count;
   /* printf(" Text\n");
@@ -448,11 +448,11 @@ PRIVATE void output_text_record ARGS4(
 /* modified from tracy shen's version in wutil.c
  * displays either a text record or a set of headlines.
  */
-PRIVATE void display_search_response ARGS4(
-    HTStructured *,		target,
-    SearchResponseAPDU *,	response,
-    char *,			database,
-    char *,			keywords)
+static void display_search_response (
+    HTStructured *		target,
+    SearchResponseAPDU *	response,
+    char *			database,
+    char *			keywords)
 {
     WAISSearchResponse	*info;
     long i, k;
@@ -600,11 +600,11 @@ PRIVATE void display_search_response ARGS4(
 **
 **  This renders any object or search as required.
 */
-PUBLIC int HTLoadWAIS ARGS4(
-	CONST char *,		arg,
-	HTParentAnchor *,	anAnchor,
-	HTFormat,		format_out,
-	HTStream*,		sink)
+int HTLoadWAIS (
+	const char *		arg,
+	HTParentAnchor *	anAnchor,
+	HTFormat		format_out,
+	HTStream*		sink)
 
 #define MAX_KEYWORDS_LENGTH 1000
 #define MAX_SERVER_LENGTH 1000
@@ -1065,5 +1065,5 @@ CleanUp:
 #define _HTWAIS_C_1_INIT { "wais", HTLoadWAIS, NULL }
 GLOBALDEF(HTProtocol, HTWAIS, _HTWAIS_C_1_INIT);
 #else
-GLOBALDEF PUBLIC HTProtocol HTWAIS = { "wais", HTLoadWAIS, NULL };
+GLOBALDEF HTProtocol HTWAIS = { "wais", HTLoadWAIS, NULL };
 #endif /* GLOBALDEF_IS_MACRO */

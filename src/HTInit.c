@@ -28,10 +28,10 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
-PRIVATE int HTLoadTypesConfigFile PARAMS((char *fn));
-PRIVATE int HTLoadExtensionsConfigFile PARAMS((char *fn));
+static int HTLoadTypesConfigFile (char *fn);
+static int HTLoadExtensionsConfigFile (char *fn);
 
-PUBLIC void HTFormatInit NOARGS
+void HTFormatInit (void)
 {
 #ifdef NeXT
   HTSetPresentation("application/postscript",   "open %s", 1.0, 2.0, 0.0, 0);
@@ -179,7 +179,7 @@ PUBLIC void HTFormatInit NOARGS
  HTFilterPresentations();
 }
 
-PUBLIC void HTPreparsedFormatInit NOARGS
+void HTPreparsedFormatInit (void)
 {
  if (LYPreparsedSource) {
      HTSetConversion("text/html", "www/source", HTMLParsedPresent, 1.0, 0.0, 0.0, 0);
@@ -225,14 +225,14 @@ struct MailcapEntry {
 };
 
 
-PRIVATE int ExitWithError PARAMS((char *txt));
-PRIVATE int PassesTest PARAMS((struct MailcapEntry *mc));
+static int ExitWithError (char *txt);
+static int PassesTest (struct MailcapEntry *mc);
 
 #define LINE_BUF_SIZE		2048
 
-PRIVATE char *GetCommand ARGS2(
-	char *,		s,
-	char **,	t)
+static char *GetCommand (
+	char *		s,
+	char **	t)
 {
     char *s2;
     int quoted = 0;
@@ -268,8 +268,8 @@ PRIVATE char *GetCommand ARGS2(
 }
 
 /* no leading or trailing space, all lower case */
-PRIVATE char *Cleanse ARGS1(
-	char *,		s)
+static char *Cleanse (
+	char *		s)
 {
     LYTrimLeading(s);
     LYTrimTrailing(s);
@@ -277,9 +277,9 @@ PRIVATE char *Cleanse ARGS1(
     return(s);
 }
 
-PRIVATE int ProcessMailcapEntry ARGS2(
-	FILE *,			fp,
-	struct MailcapEntry *,	mc)
+static int ProcessMailcapEntry (
+	FILE *			fp,
+	struct MailcapEntry *	mc)
 {
     size_t rawentryalloc = 2000, len, need;
     char *rawentry, *s, *t;
@@ -416,12 +416,12 @@ assign_presentation:
     return(1);
 }
 
-PRIVATE void BuildCommand ARGS5(
-	char **,	pBuf,
-	size_t,		Bufsize,
-	char *,		controlstring,
-	char *,		TmpFileName,
-	size_t,		TmpFileLen)
+static void BuildCommand (
+	char **	pBuf,
+	size_t		Bufsize,
+	char *		controlstring,
+	char *		TmpFileName,
+	size_t		TmpFileLen)
 {
     char *from, *to;
     int prefixed = 0;
@@ -480,10 +480,10 @@ PRIVATE void BuildCommand ARGS5(
 #define RTR_lookup      1
 #define RTR_add         2
 
-PRIVATE int RememberTestResult ARGS3(
-	int,		mode,
-	char *,		cmd,
-	int,		result)
+static int RememberTestResult (
+	int		mode,
+	char *		cmd,
+	int		result)
 {
     struct cmdlist_s {
 	char *cmd;
@@ -520,8 +520,8 @@ PRIVATE int RememberTestResult ARGS3(
     return 0;
 }
 
-PRIVATE int PassesTest ARGS1(
-	struct MailcapEntry *,	mc)
+static int PassesTest (
+	struct MailcapEntry *	mc)
 {
     int result;
     char *cmd, TmpFileName[LY_MAXPATH];
@@ -621,8 +621,8 @@ PRIVATE int PassesTest ARGS1(
     return(result == 0);
 }
 
-PRIVATE int ProcessMailcapFile ARGS1(
-	char *,		file)
+static int ProcessMailcapFile (
+	char *		file)
 {
     struct MailcapEntry mc;
     FILE *fp;
@@ -643,8 +643,8 @@ PRIVATE int ProcessMailcapFile ARGS1(
     return(0 == 0);
 }
 
-PRIVATE int ExitWithError ARGS1(
-	char *,		txt)
+static int ExitWithError (
+	char *		txt)
 {
     if (txt)
 	fprintf(tfp, "Lynx: %s\n", txt);
@@ -657,8 +657,8 @@ PRIVATE int ExitWithError ARGS1(
  * behavior, which means that the last match wins. - kw */
 static int reverse_mailcap = 1;
 
-PRIVATE int HTLoadTypesConfigFile ARGS1(
-	char *,		fn)
+static int HTLoadTypesConfigFile (
+	char *		fn)
 {
     int result = 0;
     HTList * saved = HTPresentations;
@@ -724,7 +724,7 @@ PRIVATE int HTLoadTypesConfigFile ARGS1(
  *  become consistently case-sensitive, as in newer W3C libwww).
  *  - kw 1999-10-12
  */
-PUBLIC void HTFileInit NOARGS
+void HTFileInit (void)
 {
 #ifdef BUILTIN_SUFFIX_MAPS
     if (LYUseBuiltinSuffixes)
@@ -1073,10 +1073,10 @@ PUBLIC void HTFileInit NOARGS
 
 #define MAX_STRING_LEN 256
 
-PRIVATE int HTGetLine ARGS3(
-	char *,		s,
-	int,		n,
-	FILE *,		f)
+static int HTGetLine (
+	char *		s,
+	int		n,
+	FILE *		f)
 {
     register int i = 0, r;
 
@@ -1103,11 +1103,11 @@ PRIVATE int HTGetLine ARGS3(
     }
 }
 
-PRIVATE void HTGetWord ARGS4(
-	char *,		word,
-	char *,		line,
-	char ,		stop,
-	char ,		stop2)
+static void HTGetWord (
+	char *		word,
+	char *		line,
+	char 		stop,
+	char 		stop2)
 {
     int x = 0, y;
 
@@ -1126,8 +1126,8 @@ PRIVATE void HTGetWord ARGS4(
     return;
 }
 
-PRIVATE int HTLoadExtensionsConfigFile ARGS1(
-	char *,		fn)
+static int HTLoadExtensionsConfigFile (
+	char *		fn)
 {
     char line[MAX_STRING_LEN];
     char word[MAX_STRING_LEN];

@@ -22,22 +22,22 @@
 
 #ifdef LY_FIND_LEAKS
 
-PRIVATE AllocationList *ALp_RunTimeAllocations = NULL;
+static AllocationList *ALp_RunTimeAllocations = NULL;
 
 #define LEAK_SUMMARY
 
 #ifdef LEAK_SUMMARY
 
-PRIVATE long now_allocated = 0;
-PRIVATE long peak_alloced = 0;
+static long now_allocated = 0;
+static long peak_alloced = 0;
 
-PRIVATE long total_alloced = 0;
-PRIVATE long total_freed = 0;
+static long total_alloced = 0;
+static long total_freed = 0;
 
-PRIVATE long count_mallocs = 0;
-PRIVATE long count_frees = 0;
+static long count_mallocs = 0;
+static long count_frees = 0;
 
-PRIVATE void CountMallocs ARGS1(long, size)
+static void CountMallocs (long size)
 {
     ++count_mallocs;
     total_alloced += size;
@@ -46,7 +46,7 @@ PRIVATE void CountMallocs ARGS1(long, size)
 	peak_alloced = now_allocated;
 }
 
-PRIVATE void CountFrees ARGS1(long, size)
+static void CountFrees (long size)
 {
     ++count_frees;
     total_freed += size;
@@ -67,8 +67,8 @@ PRIVATE void CountFrees ARGS1(long, size)
 **  Revision History:
 **	05-26-94	created Lynx 2-3-1 Garrett Arch Blythe
 */
-PRIVATE void AddToList ARGS1(
-	AllocationList *,	ALp_new)
+static void AddToList (
+	AllocationList *	ALp_new)
 {
     /*
      *	Just make this the first item in the list.
@@ -89,8 +89,8 @@ PRIVATE void AddToList ARGS1(
 **  Revision History:
 **	05-26-94	created Lynx 2-3-1 Garrett Arch Blythe
 */
-PRIVATE AllocationList *FindInList ARGS1(
-	void *,		vp_find)
+static AllocationList *FindInList (
+	void *		vp_find)
 {
     AllocationList *ALp_find = ALp_RunTimeAllocations;
 
@@ -118,8 +118,8 @@ PRIVATE AllocationList *FindInList ARGS1(
 **  Revision History:
 **	05-26-94	created Lynx 2-3-1 Garrett Arch Blythe
 */
-PRIVATE void RemoveFromList ARGS1(
-	AllocationList *,	ALp_del)
+static void RemoveFromList (
+	AllocationList *	ALp_del)
 {
     AllocationList *ALp_findbefore = ALp_RunTimeAllocations;
 
@@ -150,10 +150,12 @@ PRIVATE void RemoveFromList ARGS1(
 /*
  *  Make the malloc-sequence available for debugging/tracing.
  */
-PUBLIC long LYLeakSequence NOARGS
+#ifndef LYLeakSequence
+long LYLeakSequence (void)
 {
     return count_mallocs;
 }
+#endif
 
 /*
 **  Purpose:	Print a report of all memory left unallocated by
@@ -169,7 +171,7 @@ PUBLIC long LYLeakSequence NOARGS
 **		All output of this function is sent to the file defined in
 **		the header LYLeaks.h (LEAKAGE_SINK).
 */
-PUBLIC void LYLeaks NOARGS
+void LYLeaks (void)
 {
     AllocationList *ALp_head;
     size_t st_total = (size_t)0;
@@ -337,10 +339,10 @@ PUBLIC void LYLeaks NOARGS
 **  Revision History:
 **	05-26-94	created Lynx 2-3-1 Garrett Arch Blythe
 */
-PUBLIC void *LYLeakMalloc ARGS3(
-	size_t,		st_bytes,
-	CONST char *,	cp_File,
-	CONST short,	ssi_Line)
+void *LYLeakMalloc (
+	size_t		st_bytes,
+	const char *	cp_File,
+	const short	ssi_Line)
 {
     void *vp_malloc;
 
@@ -406,11 +408,11 @@ PUBLIC void *LYLeakMalloc ARGS3(
 **  Revision History:
 **	1999-02-08	created, modelled after LYLeakMalloc - kw
 */
-PUBLIC AllocationList *LYLeak_mark_malloced ARGS4(
-	void *,		vp_malloced,
-	size_t,		st_bytes,
-	CONST char *,	cp_File,
-	CONST short,	ssi_Line)
+AllocationList *LYLeak_mark_malloced (
+	void *		vp_malloced,
+	size_t		st_bytes,
+	const char *	cp_File,
+	const short	ssi_Line)
 {
     AllocationList *ALp_new = NULL;
 
@@ -475,11 +477,11 @@ PUBLIC AllocationList *LYLeak_mark_malloced ARGS4(
 **  Revision History:
 **		05-26-94	created Lynx 2-3-1 Garrett Arch Blythe
 */
-PUBLIC void *LYLeakCalloc ARGS4(
-	size_t,		st_number,
-	size_t,		st_bytes,
-	CONST char *,	cp_File,
-	CONST short,	ssi_Line)
+void *LYLeakCalloc (
+	size_t		st_number,
+	size_t		st_bytes,
+	const char *	cp_File,
+	const short	ssi_Line)
 {
     void *vp_calloc;
 
@@ -548,11 +550,11 @@ PUBLIC void *LYLeakCalloc ARGS4(
 **  Revision History:
 **	05-26-94	created Lynx 2-3-1 Garrett Arch Blythe
 */
-PUBLIC void *LYLeakRealloc ARGS4(
-	void *,		vp_Alloced,
-	size_t,		st_newBytes,
-	CONST char *,	cp_File,
-	CONST short,	ssi_Line)
+void *LYLeakRealloc (
+	void *		vp_Alloced,
+	size_t		st_newBytes,
+	const char *	cp_File,
+	const short	ssi_Line)
 {
     void *vp_realloc;
     AllocationList *ALp_renew;
@@ -645,12 +647,12 @@ PUBLIC void *LYLeakRealloc ARGS4(
 **	1999-02-11	created kw
 */
 #if defined(LY_FIND_LEAKS) && defined(LY_FIND_LEAKS_EXTENDED)
-PRIVATE AllocationList *mark_realloced ARGS5(
-	AllocationList *, ALp_old,
-	void *,		vp_realloced,
-	size_t,		st_newBytes,
-	CONST char *,	cp_File,
-	CONST short,	ssi_Line)
+static AllocationList *mark_realloced (
+	AllocationList * ALp_old,
+	void *		vp_realloced,
+	size_t		st_newBytes,
+	const char *	cp_File,
+	const short	ssi_Line)
 {
     /*
      *	If there is no list entry for the old allocation, treat this
@@ -695,10 +697,10 @@ PRIVATE AllocationList *mark_realloced ARGS5(
 **  Revision History:
 **	05-26-94	created Lynx 2-3-1 Garrett Arch Blythe
 */
-PUBLIC void LYLeakFree ARGS3(
-	void *,		vp_Alloced,
-	CONST char *,	cp_File,
-	CONST short,	ssi_Line)
+void LYLeakFree (
+	void *		vp_Alloced,
+	const char *	cp_File,
+	const short	ssi_Line)
 {
     AllocationList *ALp_free;
 
@@ -755,11 +757,11 @@ PUBLIC void LYLeakFree ARGS3(
 **  Tracks allocations by using other LYLeakFoo functions.
 **  Equivalent to HTSACopy in HTUtils.c - KW
 */
-PUBLIC char * LYLeakSACopy ARGS4(
-	char **,	dest,
-	CONST char *,	src,
-	CONST char *,	cp_File,
-	CONST short,	ssi_Line)
+char * LYLeakSACopy (
+	char **	dest,
+	const char *	src,
+	const char *	cp_File,
+	const short	ssi_Line)
 {
     if (src != NULL && src == *dest) {
 	CTRACE((tfp,
@@ -785,11 +787,11 @@ PUBLIC char * LYLeakSACopy ARGS4(
 **  Tracks allocations by using other LYLeakFoo functions.
 **  Equivalent to HTSACat in HTUtils.c - KW
 */
-PUBLIC char * LYLeakSACat ARGS4(
-	char **,	dest,
-	CONST char *,	src,
-	CONST char *,	cp_File,
-	CONST short,	ssi_Line)
+char * LYLeakSACat (
+	char **	dest,
+	const char *	src,
+	const char *	cp_File,
+	const short	ssi_Line)
 {
     if (src && *src) {
 	if (src == *dest) {
@@ -821,8 +823,8 @@ PUBLIC char * LYLeakSACat ARGS4(
 
 #if defined(LY_FIND_LEAKS) && defined(LY_FIND_LEAKS_EXTENDED)
 
-PUBLIC CONST char * leak_cp_File_hack = __FILE__;
-PUBLIC short leak_ssi_Line_hack = __LINE__;
+const char * leak_cp_File_hack = __FILE__;
+short leak_ssi_Line_hack = __LINE__;
 
 /*
 ** Purpose:	A wrapper around StrAllocVsprintf (the workhorse of
@@ -863,18 +865,18 @@ PUBLIC short leak_ssi_Line_hack = __LINE__;
 **	1999-02-11	created kw
 **	1999-10-15	added comments kw
 */
-PRIVATE char * LYLeakSAVsprintf ARGS6(
-	char **,	dest,
-	CONST char *,	cp_File,
-	CONST short,	ssi_Line,
-	size_t,		inuse,
-	CONST char *,	fmt,
-	va_list *,	ap)
+static char * LYLeakSAVsprintf (
+	char **	dest,
+	const char *	cp_File,
+	const short	ssi_Line,
+	size_t		inuse,
+	const char *	fmt,
+	va_list *	ap)
 {
     AllocationList *ALp_old;
     void *vp_oldAlloced;
 
-    CONST char * old_cp_File = __FILE__;
+    const char * old_cp_File = __FILE__;
     short old_ssi_Line = __LINE__;
 
     if (!dest)
@@ -969,9 +971,9 @@ PRIVATE char * LYLeakSAVsprintf ARGS6(
 /* Note: the following may need updating if HTSprintf in HTString.c
  * is changed. - kw */
 #ifdef ANSI_VARARGS
-PRIVATE char * LYLeakHTSprintf (char **pstr, CONST char *fmt, ...)
+static char * LYLeakHTSprintf (char **pstr, const char *fmt, ...)
 #else
-PRIVATE char * LYLeakHTSprintf (va_alist)
+static char * LYLeakHTSprintf (va_alist)
     va_dcl
 #endif
 {
@@ -982,7 +984,7 @@ PRIVATE char * LYLeakHTSprintf (va_alist)
     {
 #ifndef ANSI_VARARGS
 	char **		pstr = va_arg(ap, char **);
-	CONST char *	fmt  = va_arg(ap, CONST char *);
+	const char *	fmt  = va_arg(ap, const char *);
 #endif
 	if (pstr != 0 && *pstr != 0)
 	    inuse = strlen(*pstr);
@@ -996,9 +998,9 @@ PRIVATE char * LYLeakHTSprintf (va_alist)
 /* Note: the following may need updating if HTSprintf0 in HTString.c
  * is changed. - kw */
 #ifdef ANSI_VARARGS
-PRIVATE char * LYLeakHTSprintf0 (char **pstr, CONST char *fmt, ...)
+static char * LYLeakHTSprintf0 (char **pstr, const char *fmt, ...)
 #else
-PRIVATE char * LYLeakHTSprintf0 (va_alist)
+static char * LYLeakHTSprintf0 (va_alist)
     va_dcl
 #endif
 {
@@ -1008,7 +1010,7 @@ PRIVATE char * LYLeakHTSprintf0 (va_alist)
     {
 #ifndef ANSI_VARARGS
 	char **		pstr = va_arg(ap, char **);
-	CONST char *	fmt  = va_arg(ap, CONST char *);
+	const char *	fmt  = va_arg(ap, const char *);
 #endif
 	str = LYLeakSAVsprintf(pstr, leak_cp_File_hack, leak_ssi_Line_hack,
 			       0, fmt, &ap);
@@ -1027,18 +1029,18 @@ PRIVATE char * LYLeakHTSprintf0 (va_alist)
  *  compared to all the time that memory tracking takes up for list
  *  traversal. - kw
  */
-PUBLIC HTSprintflike *Get_htsprintf_fn ARGS2(
-	CONST char *,	cp_File,
-	CONST short,	ssi_Line)
+HTSprintflike *Get_htsprintf_fn (
+	const char *	cp_File,
+	const short	ssi_Line)
 {
     leak_cp_File_hack = cp_File;
     leak_ssi_Line_hack = ssi_Line;
     return &LYLeakHTSprintf;
 }
 
-PUBLIC HTSprintflike *Get_htsprintf0_fn ARGS2(
-	CONST char *,	cp_File,
-	CONST short,	ssi_Line)
+HTSprintflike *Get_htsprintf0_fn (
+	const char *	cp_File,
+	const short	ssi_Line)
 {
     leak_cp_File_hack = cp_File;
     leak_ssi_Line_hack = ssi_Line;
@@ -1048,6 +1050,6 @@ PUBLIC HTSprintflike *Get_htsprintf0_fn ARGS2(
 #endif /* LY_FIND_LEAKS and LY_FIND_LEAKS_EXTENDED */
 #else
 /* Standard C forbids an empty file */
-void no_leak_checking NOPARAMS;
-void no_leak_checking NOARGS { }
+void no_leak_checking (void);
+void no_leak_checking (void) { }
 #endif /* LY_FIND_LEAKS */

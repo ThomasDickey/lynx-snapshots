@@ -33,7 +33,7 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
-PRIVATE int fix_httplike_urls PARAMS((DocInfo *doc, UrlTypes type));
+static int fix_httplike_urls (DocInfo *doc, UrlTypes type);
 
 #ifdef VMS
 #define STRNADDRCOMP strncasecomp
@@ -41,7 +41,7 @@ PRIVATE int fix_httplike_urls PARAMS((DocInfo *doc, UrlTypes type));
 #define STRNADDRCOMP strncmp
 #endif /* !VMS */
 
-PUBLIC int HTNoDataOK = 0;
+int HTNoDataOK = 0;
 
 /*
  *  getfile is the main mechanism to load a new document (or a previously
@@ -66,8 +66,8 @@ PUBLIC int HTNoDataOK = 0;
  *  logging) errors inappropriately with -traversal, and from sending
  *  bogus error mail with MAIL_SYSTEM_ERROR_LOGGING:TRUE. - kw
  */
-PUBLIC int getfile ARGS1(
-	DocInfo *,	doc)
+int getfile (
+	DocInfo *	doc)
 {
     int url_type = 0;
     char *cp = NULL;
@@ -530,7 +530,7 @@ Try_Redirected_URL:
 		HTUserMsg(MAIL_DISABLED);
 	    } else {
 		HTParentAnchor *tmpanchor = HTAnchor_findAddress(&WWWDoc);
-		CONST char *title;
+		const char *title;
 		char *tmptitle = NULL;
 
 		title = "";
@@ -1097,8 +1097,8 @@ Try_Redirected_URL:
  *  mode ==  0: reset to normal if it was set to source
  *  - kw
  */
-PUBLIC void srcmode_for_next_retrieval ARGS1(
-    int,	mode)
+void srcmode_for_next_retrieval (
+    int	mode)
 {
     if (mode < 0) {
 	HTOutputFormat = WWW_PRESENT;
@@ -1142,11 +1142,11 @@ PUBLIC void srcmode_for_next_retrieval ARGS1(
  *  If follow_link_number returns DO_NOTHING nothing special
  *   will run after it.
  */
-PUBLIC int follow_link_number ARGS4(
-	int,		c,
-	int,		cur,
-	DocInfo *,	doc,
-	int *,		num)
+int follow_link_number (
+	int		c,
+	int		cur,
+	DocInfo *	doc,
+	int *		num)
 {
     char temp[120];
     char *p = temp;
@@ -1294,7 +1294,7 @@ static struct trust *always_trusted_exec = &always_trusted_exec_default;
 static struct trust *trusted_cgi = &trusted_cgi_default;
 
 #ifdef LY_FIND_LEAKS
-PRIVATE void LYTrusted_free NOARGS
+static void LYTrusted_free (void)
 {
     struct trust *cur;
     struct trust *next;
@@ -1336,9 +1336,9 @@ PRIVATE void LYTrusted_free NOARGS
 }
 #endif /* LY_FIND_LEAKS */
 
-PUBLIC void add_trusted ARGS2(
-	char *,		str,
-	int,		type)
+void add_trusted (
+	char *		str,
+	int		type)
 {
     struct trust *tp;
     char *path;
@@ -1393,14 +1393,14 @@ PUBLIC void add_trusted ARGS2(
 /*
  *  Check to see if the supplied paths is allowed to be executed.
  */
-PUBLIC BOOLEAN exec_ok ARGS3(
-	CONST char *,	source,
-	CONST char *,	linktext,
-	int,		type)
+BOOLEAN exec_ok (
+	const char *	source,
+	const char *	linktext,
+	int		type)
 {
     struct trust *tp;
-    CONST char *cp;
-    CONST char *allowed_extra_chars;
+    const char *cp;
+    const char *allowed_extra_chars;
     int Type = type;
 
     /*
@@ -1473,7 +1473,7 @@ PUBLIC BOOLEAN exec_ok ARGS3(
 check_tp_for_entry:
     while (tp) {
 	if (tp->type == Type) {
-	    char CONST *command = linktext;
+	    char const *command = linktext;
 
 	    if (strstr(command,"//") == linktext) {
 		command += 2;
@@ -1496,9 +1496,9 @@ check_tp_for_entry:
 }
 #endif /* EXEC_LINKS || LYNXCGI_LINKS */
 
-PRIVATE int fix_httplike_urls ARGS2(
-	DocInfo *,	doc,
-	UrlTypes,	type)
+static int fix_httplike_urls (
+	DocInfo *	doc,
+	UrlTypes	type)
 {
     char *slash;
 

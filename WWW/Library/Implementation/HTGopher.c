@@ -84,15 +84,15 @@
 /*
 **  Module-wide variables.
 */
-PRIVATE int s;				/* Socket for gopher or CSO host */
+static int s;				/* Socket for gopher or CSO host */
 
 struct _HTStructured {
-	CONST HTStructuredClass * isa;	/* For gopher streams */
+	const HTStructuredClass * isa;	/* For gopher streams */
 	/* ... */
 };
 
-PRIVATE HTStructured *target;		/* the new gopher hypertext */
-PRIVATE HTStructuredClass targetClass;	/* Its action routines */
+static HTStructured *target;		/* the new gopher hypertext */
+static HTStructuredClass targetClass;	/* Its action routines */
 
 struct _HTStream
 {
@@ -118,7 +118,7 @@ typedef struct _CSOfield_info {		/* For form-based CSO gateway - FM */
     char			attr_buf[80];	/* Avoid malloc if we can */
 } CSOfield_info;
 
-PRIVATE CSOfield_info *CSOfields = NULL; /* For form-based CSO gateway - FM */
+static CSOfield_info *CSOfields = NULL; /* For form-based CSO gateway - FM */
 
 typedef struct _CSOformgen_context {	 /* For form-based CSO gateway - FM */
     char *		host;
@@ -136,10 +136,10 @@ typedef struct _CSOformgen_context {	 /* For form-based CSO gateway - FM */
 /*	Matrix of allowed characters in filenames
 **	=========================================
 */
-PRIVATE BOOL acceptable[256];
-PRIVATE BOOL acceptable_inited = NO;
+static BOOL acceptable[256];
+static BOOL acceptable_inited = NO;
 
-PRIVATE void init_acceptable NOARGS
+static void init_acceptable (void)
 {
     unsigned int i;
     char * good =
@@ -154,9 +154,9 @@ PRIVATE void init_acceptable NOARGS
 /*	Decode one hex character
 **	========================
 */
-PRIVATE CONST char hex[17] = "0123456789abcdef";
+static const char hex[17] = "0123456789abcdef";
 
-PRIVATE char from_hex ARGS1(char, c)
+static char from_hex (char  c)
 {
     return (char) (       (c>='0')&&(c<='9') ? c-'0'
 			: (c>='A')&&(c<='F') ? c-'A'+10
@@ -175,27 +175,27 @@ PRIVATE char from_hex ARGS1(char, c)
 **	text	points to the text to be put into the file, 0 terminated.
 **	addr	points to the hypertext refernce address 0 terminated.
 */
-PUBLIC BOOLEAN HT_Is_Gopher_URL=FALSE;
+BOOLEAN HT_Is_Gopher_URL=FALSE;
 
-PRIVATE void write_anchor ARGS2(CONST char *,text, CONST char *,addr)
+static void write_anchor (const char * text, const char * addr)
 {
     BOOL present[HTML_A_ATTRIBUTES];
-    CONST char * value[HTML_A_ATTRIBUTES];
+    const char * value[HTML_A_ATTRIBUTES];
 
     int i;
 
     for (i = 0; i < HTML_A_ATTRIBUTES; i++)
 	present[i] = 0;
     present[HTML_A_HREF] = YES;
-    ((CONST char **)value)[HTML_A_HREF] = addr;
+    ((const char **)value)[HTML_A_HREF] = addr;
     present[HTML_A_TITLE] = YES;
-    ((CONST char **)value)[HTML_A_TITLE] = text;
+    ((const char **)value)[HTML_A_TITLE] = text;
 
     CTRACE((tfp,"HTGopher: adding URL: %s\n",addr));
 
     HT_Is_Gopher_URL = TRUE;  /* tell HTML.c that this is a Gopher URL */
     (*targetClass.start_element)(target, HTML_A, present,
-				 (CONST char **)value, -1, 0);
+				 (const char **)value, -1, 0);
 
     PUTS(text);
     END(HTML_A);
@@ -204,9 +204,9 @@ PRIVATE void write_anchor ARGS2(CONST char *,text, CONST char *,addr)
 /*	Parse a Gopher Menu document
 **	============================
 */
-PRIVATE void parse_menu ARGS2(
-	CONST char *,		arg GCC_UNUSED,
-	HTParentAnchor *,	anAnchor)
+static void parse_menu (
+	const char *		arg GCC_UNUSED,
+	HTParentAnchor *	anAnchor)
 {
     char gtype;
     int ich;
@@ -215,7 +215,7 @@ PRIVATE void parse_menu ARGS2(
     char *host = NULL;
     char *port;
     char *p = line;
-    CONST char *title;
+    const char *title;
     int bytes = 0;
     int BytesReported = 0;
     char buffer[128];
@@ -451,15 +451,15 @@ end_html:
 **  on XMosaic-1.1, and put on libwww 2.11 by Arthur Secret,
 **  secret@dxcern.cern.ch .
 */
-PRIVATE void parse_cso ARGS2(
-	CONST char *,		arg,
-	HTParentAnchor *,	anAnchor)
+static void parse_cso (
+	const char *		arg,
+	HTParentAnchor *	anAnchor)
 {
     int ich;
     char line[BIG];
     char *p = line;
     char *second_colon, last_char='\0';
-    CONST char *title;
+    const char *title;
 
     START(HTML_HEAD);
     PUTC('\n');
@@ -598,11 +598,11 @@ PRIVATE void parse_cso ARGS2(
 /*	Display a Gopher CSO ISINDEX cover page.
 **	========================================
 */
-PRIVATE void display_cso ARGS2(
-	CONST char *,		arg,
-	HTParentAnchor *,	anAnchor)
+static void display_cso (
+	const char *		arg,
+	HTParentAnchor *	anAnchor)
 {
-    CONST char * title;
+    const char * title;
 
     START(HTML_HEAD);
     PUTC('\n');
@@ -642,11 +642,11 @@ PRIVATE void display_cso ARGS2(
 /*	Display a Gopher Index document.
 **	================================
 */
-PRIVATE void display_index ARGS2(
-				  CONST char *, arg,
-				  HTParentAnchor *,anAnchor)
+static void display_index (
+				  const char * arg,
+				  HTParentAnchor *anAnchor)
 {
-    CONST char * title;
+    const char * title;
 
     START(HTML_HEAD);
     PUTC('\n');
@@ -686,9 +686,9 @@ PRIVATE void display_index ARGS2(
 **
 **	The % hex escapes are converted. Otheriwse, the string is copied.
 */
-PRIVATE void de_escape ARGS2(char *, command, CONST char *, selector)
+static void de_escape (char * command, const char * selector)
 {
-    CONST char * p = selector;
+    const char * p = selector;
     char * q = command;
 	if (command == NULL)
 	    outofmem(__FILE__, "HTLoadGopher");
@@ -713,7 +713,7 @@ PRIVATE void de_escape ARGS2(char *, command, CONST char *, selector)
 /*	Free the CSOfields structures. - FM
 **	===================================
 */
-PRIVATE void free_CSOfields NOPARAMS
+static void free_CSOfields (void)
 {
     CSOfield_info *cur = CSOfields;
     CSOfield_info *prev;
@@ -736,12 +736,12 @@ PRIVATE void free_CSOfields NOPARAMS
 /*	Interpret CSO/PH form template keys. - FM
 **	=========================================
 */
-PRIVATE void interpret_cso_key ARGS5(
-	char *,			key,
-	char *,			buf,
-	int *,			length,
-	CSOformgen_context *,	ctx,
-	HTStream *,		Target)
+static void interpret_cso_key (
+	char *			key,
+	char *			buf,
+	int *			length,
+	CSOformgen_context *	ctx,
+	HTStream *		Target)
 {
     CSOfield_info *fld;
 
@@ -869,8 +869,8 @@ PRIVATE void interpret_cso_key ARGS5(
 /*	Parse the elements in a CSO/PH fields structure. - FM
 **	=====================================================
 */
-PRIVATE int parse_cso_field_info ARGS1(
-	CSOfield_info *,	blk)
+static int parse_cso_field_info (
+	CSOfield_info *	blk)
 {
     char *info, *max_spec;
 
@@ -911,9 +911,9 @@ PRIVATE int parse_cso_field_info ARGS1(
 /*	Parse a reply from a CSO/PH fields request. - FM
 **	================================================
 */
-PRIVATE int parse_cso_fields ARGS2(
-	char *,		buf,
-	int,		size)
+static int parse_cso_fields (
+	char *		buf,
+	int		size)
 {
     int ich;
     char *p = buf;
@@ -1078,11 +1078,11 @@ PRIVATE int parse_cso_fields ARGS2(
 /*	Generate a form for submitting CSO/PH searches. - FM
 **	====================================================
 */
-PRIVATE int generate_cso_form ARGS4(
-	char *,		host,
-	int,		port,
-	char *,		buf,
-	HTStream *,	Target)
+static int generate_cso_form (
+	char *		host,
+	int		port,
+	char *		buf,
+	HTStream *	Target)
 {
     int i, j, length;
     size_t out;
@@ -1209,8 +1209,8 @@ PRIVATE int generate_cso_form ARGS4(
 /*	Generate a results report for CSO/PH form-based searches. - FM
 **	==============================================================
 */
-PRIVATE int generate_cso_report ARGS1(
-	HTStream *,	Target)
+static int generate_cso_report (
+	HTStream *	Target)
 {
     int ich;
     char line[BIG];
@@ -1426,13 +1426,13 @@ end_CSOreport:
 /*	CSO/PH form-based search gateway - FM			HTLoadCSO
 **	=====================================
 */
-PRIVATE int HTLoadCSO ARGS4(
-	CONST char *,		arg,
-	HTParentAnchor *,	anAnchor,
-	HTFormat,		format_out,
-	HTStream*,		sink)
+static int HTLoadCSO (
+	const char *		arg,
+	HTParentAnchor *	anAnchor,
+	HTFormat		format_out,
+	HTStream*		sink)
 {
-    static CONST char end_form[] = "</BODY>\n</HTML>\n";
+    static const char end_form[] = "</BODY>\n</HTML>\n";
     char *host, *cp, *data;
     int port = CSO_PORT;
     int status;				/* tcp return */
@@ -1684,11 +1684,11 @@ PRIVATE int HTLoadCSO ARGS4(
 **  Bug:  No decoding of strange data types as yet.
 **
 */
-PRIVATE int HTLoadGopher ARGS4(
-	CONST char *,		arg,
-	HTParentAnchor *,	anAnchor,
-	HTFormat,		format_out,
-	HTStream*,		sink)
+static int HTLoadGopher (
+	const char *		arg,
+	HTParentAnchor *	anAnchor,
+	HTFormat		format_out,
+	HTStream*		sink)
 {
     char *command;			/* The whole command */
     int status;				/* tcp return */
@@ -1713,7 +1713,7 @@ PRIVATE int HTLoadGopher ARGS4(
 	int len;
 
 	if ((len = strlen(arg)) > 5) {
-	    if (0 == strcmp((CONST char *)&arg[len-6], ":105/2")) {
+	    if (0 == strcmp((const char *)&arg[len-6], ":105/2")) {
 		/* Use CSO gateway. */
 		CTRACE((tfp, "HTGopher: Passing to CSO/PH gateway.\n"));
 		return HTLoadCSO(arg, anAnchor, format_out, sink);
@@ -1937,8 +1937,8 @@ GLOBALDEF (HTProtocol, HTGopher, _HTGOPHER_C_1_INIT);
 #define _HTCSO_C_1_INIT { "cso", HTLoadCSO, NULL }
 GLOBALDEF (HTProtocol, HTCSO, _HTCSO_C_1_INIT);
 #else
-GLOBALDEF PUBLIC HTProtocol HTGopher = { "gopher", HTLoadGopher, NULL };
-GLOBALDEF PUBLIC HTProtocol HTCSO = { "cso", HTLoadCSO, NULL };
+GLOBALDEF HTProtocol HTGopher = { "gopher", HTLoadGopher, NULL };
+GLOBALDEF HTProtocol HTCSO = { "cso", HTLoadCSO, NULL };
 #endif /* GLOBALDEF_IS_MACRO */
 
 #endif /* not DISABLE_GOPHER */

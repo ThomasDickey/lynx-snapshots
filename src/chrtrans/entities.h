@@ -27,7 +27,7 @@ typedef struct {
     u16 code;
 } UC_entity_info;
 
-static CONST UC_entity_info unicode_entities[] =
+static const UC_entity_info unicode_entities[] =
 
 
 #ifdef ENTITIES_HTML40_ONLY

@@ -18,8 +18,8 @@
 #include <HTUtils.h>
 #endif
  
-extern void HTFormatInit NOPARAMS;
-extern void HTPreparsedFormatInit NOPARAMS;
-extern void HTFileInit NOPARAMS;
+extern void HTFormatInit (void);
+extern void HTPreparsedFormatInit (void);
+extern void HTFileInit (void);
 
 #endif /* HTINIT_H */

@@ -6,8 +6,8 @@
 #include <LYStructs.h>
 #endif /* LYSTRUCT_H */
 
-extern BOOL textsearch PARAMS((DocInfo *cur_doc,
-			       char *prev_target, int target_size, int direction));
+extern BOOL textsearch (DocInfo *cur_doc,
+			       char *prev_target, int target_size, int direction);
 
 #define IN_FILE 1
 #define IN_LINKS 2

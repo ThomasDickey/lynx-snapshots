@@ -47,9 +47,9 @@
 char* entity_string; /* this is used for printing entity name.
     Unconditionally added since redundant assigments don't hurt much*/
 
-PRIVATE void fake_put_character ARGS2(
-		    void*, p GCC_UNUSED,
-		    char,  c GCC_UNUSED)
+static void fake_put_character (
+		    void* p GCC_UNUSED,
+		    char  c GCC_UNUSED)
 {
 }
 
@@ -109,11 +109,11 @@ PRIVATE void fake_put_character ARGS2(
 /*the following macros are used for pretty source view. */
 #define IS_C(attr) (attr.type == HTMLA_CLASS)
 
-PUBLIC HTCJKlang HTCJK = NOCJK;		/* CJK enum value.		*/
-PUBLIC BOOL HTPassEightBitRaw = FALSE;	/* Pass 161-172,174-255 raw.	*/
-PUBLIC BOOL HTPassEightBitNum = FALSE;	/* Pass ^ numeric entities raw. */
-PUBLIC BOOL HTPassHighCtrlRaw = FALSE;	/* Pass 127-160,173,&#127; raw. */
-PUBLIC BOOL HTPassHighCtrlNum = FALSE;	/* Pass &#128;-&#159; raw.	*/
+HTCJKlang HTCJK = NOCJK;		/* CJK enum value.		*/
+BOOL HTPassEightBitRaw = FALSE;	/* Pass 161-172,174-255 raw.	*/
+BOOL HTPassEightBitNum = FALSE;	/* Pass ^ numeric entities raw. */
+BOOL HTPassHighCtrlRaw = FALSE;	/* Pass 127-160,173,&#127; raw. */
+BOOL HTPassHighCtrlNum = FALSE;	/* Pass &#128;-&#159; raw.	*/
 
 /*	The State (context) of the parser
 **
@@ -186,15 +186,15 @@ typedef enum {
 */
 struct _HTStream {
 
-    CONST HTStreamClass *	isa;		/* inherited from HTStream */
+    const HTStreamClass *	isa;		/* inherited from HTStream */
 
-    CONST SGML_dtd		*dtd;
-    CONST HTStructuredClass	*actions;	/* target class	 */
+    const SGML_dtd		*dtd;
+    const HTStructuredClass	*actions;	/* target class	 */
     HTStructured		*target;	/* target object */
 
     HTTag			*current_tag;
     HTTag			*slashedtag;
-    CONST HTTag			*unknown_tag;
+    const HTTag			*unknown_tag;
     BOOL			inSELECT;
     BOOL			no_lynx_specialcodes;
     int				current_attribute_number;
@@ -246,7 +246,7 @@ struct _HTStream {
 };
 
 #ifndef NO_LYNX_TRACE
-PRIVATE char *state_name ARGS1(sgml_state, n)
+static char *state_name (sgml_state  n)
 {
     char *result = "?";
     switch (n) {
@@ -303,7 +303,7 @@ PRIVATE char *state_name ARGS1(sgml_state, n)
 static HTElement pool[DEPTH];
 static int depth = 0;
 
-PRIVATE HTElement* pool_alloc NOARGS
+static HTElement* pool_alloc (void)
 {
     depth++;
     if (depth > DEPTH)
@@ -311,7 +311,7 @@ PRIVATE HTElement* pool_alloc NOARGS
     return (pool + depth - 1);
 }
 
-PRIVATE void pool_free ARGS1(HTElement*, e)
+static void pool_free (HTElement*  e)
 {
     if (depth > DEPTH)
 	FREE(e);
@@ -321,10 +321,10 @@ PRIVATE void pool_free ARGS1(HTElement*, e)
 
 #ifdef USE_PRETTYSRC
 
-PRIVATE void HTMLSRC_apply_markup ARGS3(
-	    HTStream *,	      context,
-	    HTlexeme,	      lexeme,
-	    BOOL,	      start)
+static void HTMLSRC_apply_markup (
+	    HTStream *	      context,
+	    HTlexeme	      lexeme,
+	    BOOL	      start)
 {
     HT_tagspec* ts = *( ( start ? lexeme_start : lexeme_end ) + lexeme);
 
@@ -343,7 +343,7 @@ PRIVATE void HTMLSRC_apply_markup ARGS3(
 		context->target,
 		ts->element,
 		ts->present,
-		(CONST char **)ts->value,
+		(const char **)ts->value,
 		context->current_tag_charset,
 		(char **)&context->include);
 	else
@@ -367,10 +367,10 @@ PRIVATE void HTMLSRC_apply_markup ARGS3(
 #define attr_is_name context->cur_attr_is_name
 #endif
 
-PRIVATE void set_chartrans_handling ARGS3(
-	HTStream *,		context,
-	HTParentAnchor *,	anchor,
-	int,			chndl)
+static void set_chartrans_handling (
+	HTStream *		context,
+	HTParentAnchor *	anchor,
+	int			chndl)
 {
     if (chndl < 0) {
 	/*
@@ -440,8 +440,8 @@ PRIVATE void set_chartrans_handling ARGS3(
     }
 }
 
-PRIVATE void change_chartrans_handling ARGS1(
-	HTStream *,		context)
+static void change_chartrans_handling (
+	HTStream *		context)
 {
     int new_LYhndl = HTAnchor_getUCLYhndl(context->node_anchor,
 					  UCT_STAGE_PARSER);
@@ -477,11 +477,11 @@ static int current_is_class = 0;
 /*	Handle Attribute
 **	----------------
 */
-/* PUBLIC CONST char * SGML_default = "";   ?? */
+/* PUBLIC const char * SGML_default = "";   ?? */
 
-PRIVATE void handle_attribute_name ARGS2(
-	HTStream *,	context,
-	CONST char *,	s)
+static void handle_attribute_name (
+	HTStream *	context,
+	const char *	s)
 {
     HTTag * tag = context->current_tag;
     attr * attributes = tag->attributes;
@@ -546,9 +546,9 @@ PRIVATE void handle_attribute_name ARGS2(
 /*	Handle attribute value
 **	----------------------
 */
-PRIVATE void handle_attribute_value ARGS2(
-	HTStream *,	context,
-	CONST char *,	s)
+static void handle_attribute_value (
+	HTStream *	context,
+	const char *	s)
 {
     if (context->current_attribute_number != INVALID) {
 	StrAllocCopy_extra(context->value[context->current_attribute_number], s);
@@ -580,9 +580,9 @@ PRIVATE void handle_attribute_value ARGS2(
 **  but also in UCdomap.c because they are non printable...
 **
 */
-PRIVATE BOOL put_special_unicodes ARGS2(
-	HTStream *,	context,
-	UCode_t,	code)
+static BOOL put_special_unicodes (
+	HTStream *	context,
+	UCode_t	code)
 {
     /* (Tgf_nolyspcl) */
     if (context->no_lynx_specialcodes) {
@@ -651,7 +651,7 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 }
 
 #ifdef USE_PRETTYSRC
-PRIVATE void put_pretty_entity ARGS2(HTStream *, context, int, term)
+static void put_pretty_entity (HTStream *  context, int  term)
 {
     PSRCSTART(entity);
     PUTC('&');
@@ -661,7 +661,7 @@ PRIVATE void put_pretty_entity ARGS2(HTStream *, context, int, term)
     PSRCSTOP(entity);
 }
 
-PRIVATE void put_pretty_number ARGS1(HTStream *, context)
+static void put_pretty_number (HTStream *  context)
 {
     PSRCSTART(entity);
     PUTS( (context->isHex ? "&#x" : "&#") );
@@ -685,16 +685,16 @@ PRIVATE void put_pretty_number ARGS1(HTStream *, context)
 **
 ** Modified more (for use with Lynx character translation code):
 */
-PRIVATE char replace_buf [64];	      /* buffer for replacement strings */
-PRIVATE BOOL FoundEntity = FALSE;
+static char replace_buf [64];	      /* buffer for replacement strings */
+static BOOL FoundEntity = FALSE;
 
-PRIVATE void handle_entity ARGS2(
-	HTStream *,	context,
-	char,		term)
+static void handle_entity (
+	HTStream *	context,
+	char		term)
 {
     UCode_t code;
     long uck = -1;
-    CONST char *s = context->string->data;
+    const char *s = context->string->data;
 
     /*
     **	Handle all entities normally. - FM
@@ -837,10 +837,10 @@ PRIVATE void handle_entity ARGS2(
 /*	Handle comment
 **	--------------
 */
-PRIVATE void handle_comment ARGS1(
-	HTStream *,		context)
+static void handle_comment (
+	HTStream *		context)
 {
-    CONST char *s = context->string->data;
+    const char *s = context->string->data;
 
     CTRACE((tfp, "SGML Comment:\n<%s>\n", s));
 
@@ -859,10 +859,10 @@ PRIVATE void handle_comment ARGS1(
 /*	Handle identifier
 **	-----------------
 */
-PRIVATE void handle_identifier ARGS1(
-	HTStream *,		context)
+static void handle_identifier (
+	HTStream *		context)
 {
-    CONST char *s = context->string->data;
+    const char *s = context->string->data;
 
     CTRACE((tfp, "SGML Identifier:\n<%s>\n", s));
 
@@ -873,28 +873,28 @@ PRIVATE void handle_identifier ARGS1(
 /*	Handle doctype
 **	--------------
 */
-PRIVATE void handle_doctype ARGS1(
-	HTStream *,		context)
+static void handle_doctype (
+	HTStream *		context)
 {
-    CONST char *s = context->string->data;
+    const char *s = context->string->data;
 
     CTRACE((tfp, "SGML Doctype:\n<%s>\n", s));
 
     return;
 }
 
-PRIVATE void SGML_write PARAMS((
+static void SGML_write (
 	HTStream *		me,
-	CONST char *		s,
-	int			l));
+	const char *		s,
+	int			l);
 
 /*	Handle marked
 **	-------------
 */
-PRIVATE void handle_marked ARGS1(
-	HTStream *,		context)
+static void handle_marked (
+	HTStream *		context)
 {
-    CONST char *s = context->string->data;
+    const char *s = context->string->data;
 
     CTRACE((tfp, "SGML Marked Section:\n<%s>\n", s));
 
@@ -918,10 +918,10 @@ PRIVATE void handle_marked ARGS1(
 /*	Handle sgmlent
 **	--------------
 */
-PRIVATE void handle_sgmlent ARGS1(
-	HTStream *,		context)
+static void handle_sgmlent (
+	HTStream *		context)
 {
-    CONST char *s = context->string->data;
+    const char *s = context->string->data;
 
     CTRACE((tfp, "SGML Entity Declaration:\n<%s>\n", s));
 
@@ -932,10 +932,10 @@ PRIVATE void handle_sgmlent ARGS1(
 /*	Handle sgmlent
 **	--------------
 */
-PRIVATE void handle_sgmlele ARGS1(
-	HTStream *,		context)
+static void handle_sgmlele (
+	HTStream *		context)
 {
-    CONST char *s = context->string->data;
+    const char *s = context->string->data;
 
     CTRACE((tfp, "SGML Element Declaration:\n<%s>\n", s));
 
@@ -946,10 +946,10 @@ PRIVATE void handle_sgmlele ARGS1(
 /*	Handle sgmlatt
 **	--------------
 */
-PRIVATE void handle_sgmlatt ARGS1(
-	HTStream *,		context)
+static void handle_sgmlatt (
+	HTStream *		context)
 {
-    CONST char *s = context->string->data;
+    const char *s = context->string->data;
 
     CTRACE((tfp, "SGML Attribute Declaration:\n<%s>\n", s));
 
@@ -988,10 +988,10 @@ PRIVATE void handle_sgmlatt ARGS1(
 
 #ifdef EXTENDED_HTMLDTD
 
-PRIVATE BOOL element_valid_within ARGS3(
-    HTTag *,	new_tag,
-    HTTag *,	stacked_tag,
-    BOOL,	direct)
+static BOOL element_valid_within (
+    HTTag *	new_tag,
+    HTTag *	stacked_tag,
+    BOOL	direct)
 {
     TagClass usecontains, usecontained;
     if (!stacked_tag || !new_tag)
@@ -1012,9 +1012,9 @@ typedef enum {
     close_valid = 2
 } canclose_t;
 
-PRIVATE canclose_t can_close ARGS2(
-    HTTag *,	new_tag,
-    HTTag *,	stacked_tag)
+static canclose_t can_close (
+    HTTag *	new_tag,
+    HTTag *	stacked_tag)
 {
     if (!stacked_tag)
 	return close_NO;
@@ -1027,8 +1027,8 @@ PRIVATE canclose_t can_close ARGS2(
 		close_error : close_NO);
 }
 
-PRIVATE void do_close_stacked ARGS1(
-    HTStream *, context)
+static void do_close_stacked (
+    HTStream * context)
 {
     HTElement * stacked = context->element_stack;
     HTMLElement e;
@@ -1051,9 +1051,9 @@ PRIVATE void do_close_stacked ARGS1(
 	(context->element_stack->tag->flags & Tgf_nolyspcl) : NO;
 }
 
-PRIVATE int is_on_stack ARGS2(
-	HTStream *,	context,
-	HTTag *,	old_tag)
+static int is_on_stack (
+	HTStream *	context,
+	HTTag *	old_tag)
 {
    HTElement * stacked = context->element_stack;
     int i = 1;
@@ -1069,9 +1069,9 @@ PRIVATE int is_on_stack ARGS2(
 /*	End element
 **	-----------
 */
-PRIVATE void end_element ARGS2(
-	HTStream *,	context,
-	HTTag *,	old_tag)
+static void end_element (
+	HTStream *	context,
+	HTTag *	old_tag)
 {
 #ifdef EXTENDED_HTMLDTD
 
@@ -1212,8 +1212,8 @@ PRIVATE void end_element ARGS2(
 
 /*	Start a element
 */
-PRIVATE void start_element ARGS1(
-	HTStream *,	context)
+static void start_element (
+	HTStream *	context)
 {
     int status;
     HTTag * new_tag = context->current_tag;
@@ -1354,7 +1354,7 @@ PRIVATE void start_element ARGS1(
 	context->target,
 	TAGNUM_OF_TAGP(new_tag),
 	context->present,
-	(CONST char**) context->value,	/* coerce type for think c */
+	(const char**) context->value,	/* coerce type for think c */
 	context->current_tag_charset,
 	(char **)&context->include);
     if (status == HT_PARSER_OTHER_CONTENT)
@@ -1389,9 +1389,9 @@ PRIVATE void start_element ARGS1(
 **		NULL		tag not found
 **		else		address of tag structure in dtd
 */
-PUBLIC HTTag * SGMLFindTag ARGS2(
-	CONST SGML_dtd*,	dtd,
-	CONST char *,		s)
+HTTag * SGMLFindTag (
+	const SGML_dtd*	dtd,
+	const char *		s)
 {
     int high, low, i, diff;
     static HTTag* last[64] = {NULL};  /*optimize using the previous results*/
@@ -1428,8 +1428,8 @@ PUBLIC HTTag * SGMLFindTag ARGS2(
 /*	Could check that we are back to bottom of stack! @@  */
 /*	Do check! - FM					     */
 /*							     */
-PRIVATE void SGML_free ARGS1(
-	HTStream *,	context)
+static void SGML_free (
+	HTStream *	context)
 {
     int i;
     HTElement * cur;
@@ -1479,9 +1479,9 @@ PRIVATE void SGML_free ARGS1(
 #endif
 }
 
-PRIVATE void SGML_abort ARGS2(
-	HTStream *,	context,
-	HTError,	e)
+static void SGML_abort (
+	HTStream *	context,
+	HTError	e)
 {
     int i;
     HTElement * cur;
@@ -1532,27 +1532,27 @@ PRIVATE void SGML_abort ARGS2(
 */
 
 #ifdef CALLERDATA
-PUBLIC void* SGML_callerData ARGS1(
-	HTStream *,	context)
+void* SGML_callerData (
+	HTStream *	context)
 {
     return context->callerData;
 }
 
-PUBLIC void SGML_setCallerData ARGS2(
-	HTStream *,	context,
-	void*,		data)
+void SGML_setCallerData (
+	HTStream *	context,
+	void*		data)
 {
     context->callerData = data;
 }
 #endif /* CALLERDATA */
 
-PRIVATE void SGML_character ARGS2(
-	HTStream *,	context,
-	char,		c_in)
+static void SGML_character (
+	HTStream *	context,
+	char		c_in)
 {
-    CONST SGML_dtd *dtd =	context->dtd;
+    const SGML_dtd *dtd =	context->dtd;
     HTChunk	*string =	context->string;
-    CONST char * EntityName;
+    const char * EntityName;
     HTTag * testtag = NULL;
     BOOLEAN chk;	/* Helps (?) walk through all the else ifs... */
     UCode_t clong, uck = 0; /* Enough bits for UCS4 ... */
@@ -3686,7 +3686,7 @@ top1:
 		  if (string->data[1] == 'B' || string->data[1] == '@') {
 		    jis_buf[0] = '\033';
 		    strcpy(jis_buf + 1, string->data);
-		    TO_EUC((CONST unsigned char *)jis_buf, (unsigned char *)string->data);
+		    TO_EUC((const unsigned char *)jis_buf, (unsigned char *)string->data);
 		  }
 		}
 	    }
@@ -4390,23 +4390,23 @@ after_switch:
 }  /* SGML_character */
 
 
-PRIVATE void SGML_string ARGS2(
-	HTStream *,	context,
-	CONST char*,	str)
+static void SGML_string (
+	HTStream *	context,
+	const char*	str)
 {
-    CONST char *p;
+    const char *p;
     for (p = str; *p; p++)
 	SGML_character(context, *p);
 }
 
 
-PRIVATE void SGML_write ARGS3(
-	HTStream *,	context,
-	CONST char*,	str,
-	int,		l)
+static void SGML_write (
+	HTStream *	context,
+	const char*	str,
+	int		l)
 {
-    CONST char *p;
-    CONST char *e = str+l;
+    const char *p;
+    const char *e = str+l;
     for (p = str; p < e; p++)
 	SGML_character(context, *p);
 }
@@ -4417,7 +4417,7 @@ PRIVATE void SGML_write ARGS3(
 /*	Structured Object Class
 **	-----------------------
 */
-PUBLIC CONST HTStreamClass SGMLParser =
+const HTStreamClass SGMLParser =
 {
 	"SGMLParser",
 	SGML_free,
@@ -4436,10 +4436,10 @@ PUBLIC CONST HTStreamClass SGMLParser =
 **
 */
 
-PUBLIC HTStream* SGML_new  ARGS3(
-	CONST SGML_dtd *,	dtd,
-	HTParentAnchor *,	anchor,
-	HTStructured *,		target)
+HTStream* SGML_new  (
+	const SGML_dtd *	dtd,
+	HTParentAnchor *	anchor,
+	HTStructured *		target)
 {
     int i;
     HTStream* context = (HTStream *) malloc(sizeof(*context));
@@ -4452,7 +4452,7 @@ PUBLIC HTStream* SGML_new  ARGS3(
     context->trailing_spaces = 0;
     context->dtd = dtd;
     context->target = target;
-    context->actions = (CONST HTStructuredClass*)(((HTStream*)target)->isa);
+    context->actions = (const HTStructuredClass*)(((HTStream*)target)->isa);
 					/* Ugh: no OO */
     context->unknown_tag = &HTTag_unrecognized;
     context->current_tag = context->slashedtag = NULL;
@@ -4561,13 +4561,13 @@ History:
 ///////////////////////////////////////////////////////////////////////
 */
 
-PUBLIC int TREAT_SJIS = 1;
+int TREAT_SJIS = 1;
 
-PUBLIC void JISx0201TO0208_EUC ARGS4(
-	register unsigned char,		IHI,
-	register unsigned char,		ILO,
-	register unsigned char *,	OHI,
-	register unsigned char *,	OLO)
+void JISx0201TO0208_EUC (
+	register unsigned char		IHI,
+	register unsigned char		ILO,
+	register unsigned char *	OHI,
+	register unsigned char *	OLO)
 {
     static char *table[] = {
 	"\241\243",	/* A1,A3 */
@@ -4644,9 +4644,9 @@ PUBLIC void JISx0201TO0208_EUC ARGS4(
     }
 }
 
-PRIVATE int IS_SJIS_STR ARGS1(CONST unsigned char *, str)
+static int IS_SJIS_STR (const unsigned char *  str)
 {
-    CONST unsigned char *s;
+    const unsigned char *s;
     unsigned char ch;
     int is_sjis = 0;
 
@@ -4659,10 +4659,10 @@ PRIVATE int IS_SJIS_STR ARGS1(CONST unsigned char *, str)
     return 0;
 }
 
-PUBLIC unsigned char * SJIS_TO_JIS1 ARGS3(
-	register unsigned char,		HI,
-	register unsigned char,		LO,
-	register unsigned char *,	JCODE)
+unsigned char * SJIS_TO_JIS1 (
+	register unsigned char		HI,
+	register unsigned char		LO,
+	register unsigned char *	JCODE)
 {
     HI -= UCH((HI <= 0x9F) ? 0x71 : 0xB1);
     HI = UCH((HI << 1) + 1);
@@ -4679,10 +4679,10 @@ PUBLIC unsigned char * SJIS_TO_JIS1 ARGS3(
     return JCODE;
 }
 
-PUBLIC unsigned char * JIS_TO_SJIS1 ARGS3(
-	register unsigned char,		HI,
-	register unsigned char,		LO,
-	register unsigned char *,	SJCODE)
+unsigned char * JIS_TO_SJIS1 (
+	register unsigned char		HI,
+	register unsigned char		LO,
+	register unsigned char *	SJCODE)
 {
     if (HI & 1)
 	LO += UCH(0x1F);
@@ -4699,10 +4699,10 @@ PUBLIC unsigned char * JIS_TO_SJIS1 ARGS3(
     return SJCODE;
 }
 
-PUBLIC unsigned char * EUC_TO_SJIS1 ARGS3(
-	unsigned char,			HI,
-	unsigned char,			LO,
-	register unsigned char *,	SJCODE)
+unsigned char * EUC_TO_SJIS1 (
+	unsigned char			HI,
+	unsigned char			LO,
+	register unsigned char *	SJCODE)
 {
     if (HI == 0x8E)
 	JISx0201TO0208_EUC(HI, LO, &HI, &LO);
@@ -4710,10 +4710,10 @@ PUBLIC unsigned char * EUC_TO_SJIS1 ARGS3(
     return SJCODE;
 }
 
-PUBLIC void JISx0201TO0208_SJIS ARGS3(
-	register unsigned char,		I,
-	register unsigned char *,	OHI,
-	register unsigned char *,	OLO)
+void JISx0201TO0208_SJIS (
+	register unsigned char		I,
+	register unsigned char *	OHI,
+	register unsigned char *	OLO)
 {
     unsigned char SJCODE[2];
 
@@ -4723,10 +4723,10 @@ PUBLIC void JISx0201TO0208_SJIS ARGS3(
     *OLO = SJCODE[1];
 }
 
-PUBLIC unsigned char * SJIS_TO_EUC1 ARGS3(
-	unsigned char,		HI,
-	unsigned char,		LO,
-	unsigned char *,	data)
+unsigned char * SJIS_TO_EUC1 (
+	unsigned char		HI,
+	unsigned char		LO,
+	unsigned char *	data)
 {
     SJIS_TO_JIS1(HI, LO, data);
     data[0] |= 0x80;
@@ -4734,9 +4734,9 @@ PUBLIC unsigned char * SJIS_TO_EUC1 ARGS3(
     return data;
 }
 
-PUBLIC unsigned char * SJIS_TO_EUC ARGS2(
-	unsigned char *,	src,
-	unsigned char *,	dst)
+unsigned char * SJIS_TO_EUC (
+	unsigned char *	src,
+	unsigned char *	dst)
 {
     register unsigned char hi, lo, *sp, *dp;
     register int in_sjis = 0;
@@ -4757,9 +4757,9 @@ PUBLIC unsigned char * SJIS_TO_EUC ARGS2(
     return dst;
 }
 
-PUBLIC unsigned char * EUC_TO_SJIS ARGS2(
-	unsigned char *,	src,
-	unsigned char *,	dst)
+unsigned char * EUC_TO_SJIS (
+	unsigned char *	src,
+	unsigned char *	dst)
 {
     register unsigned char *sp, *dp;
 
@@ -4780,13 +4780,13 @@ PUBLIC unsigned char * EUC_TO_SJIS ARGS2(
     return dst;
 }
 
-#define Strcpy(a,b)	(strcpy((char*)a,(CONST char*)b),&a[strlen((CONST char*)a)])
+#define Strcpy(a,b)	(strcpy((char*)a,(const char*)b),&a[strlen((const char*)a)])
 
-PUBLIC unsigned char *EUC_TO_JIS ARGS4(
-	unsigned char *,	src,
-	unsigned char *,	dst,
-	CONST char *,		toK,
-	CONST char *,		toA)
+unsigned char *EUC_TO_JIS (
+	unsigned char *	src,
+	unsigned char *	dst,
+	const char *		toK,
+	const char *		toA)
 {
     register unsigned char kana_mode = 0;
     register unsigned char cch;
@@ -4831,13 +4831,13 @@ PUBLIC unsigned char *EUC_TO_JIS ARGS4(
 #define SO		('N'-0x40)
 #define SI		('O'-0x40)
 
-PUBLIC int repair_JIS = 0;
+int repair_JIS = 0;
 
-PRIVATE CONST unsigned char *repairJIStoEUC ARGS2(
-	CONST unsigned char *,	src,
-	unsigned char **,	dstp)
+static const unsigned char *repairJIStoEUC (
+	const unsigned char *	src,
+	unsigned char **	dstp)
 {
-    CONST unsigned char *s;
+    const unsigned char *s;
     unsigned char *d, ch1, ch2;
 
     d = *dstp;
@@ -4858,11 +4858,11 @@ PRIVATE CONST unsigned char *repairJIStoEUC ARGS2(
     return 0;
 }
 
-PUBLIC unsigned char *TO_EUC ARGS2(
-	CONST unsigned char *,	jis,
-	unsigned char *,	euc)
+unsigned char *TO_EUC (
+	const unsigned char *	jis,
+	unsigned char *	euc)
 {
-    register CONST unsigned char *s;
+    register const unsigned char *s;
     register unsigned char c, jis_stat;
     unsigned char *d;
     register int to1B, to2B;
@@ -4889,7 +4889,7 @@ PUBLIC unsigned char *TO_EUC ARGS2(
 
 	if (c == to2B && jis_stat == 0 && repair_JIS) {
 	    if (*s == 'B' || *s == '@') {
-		CONST unsigned char *ts;
+		const unsigned char *ts;
 		if ((ts = repairJIStoEUC(s + 1, &d)) != NULL) {
 		    s = ts;
 		    continue;
@@ -4948,7 +4948,7 @@ PUBLIC unsigned char *TO_EUC ARGS2(
 
 #define non94(ch) ((ch) <= 0x20 || (ch) == 0x7F)
 
-PRIVATE int is_EUC_JP ARGS1(unsigned char *, euc)
+static int is_EUC_JP (unsigned char *  euc)
 {
     unsigned char *cp;
     int ch1, ch2;
@@ -4970,13 +4970,13 @@ PRIVATE int is_EUC_JP ARGS1(unsigned char *, euc)
     return 1;
 }
 
-PUBLIC void TO_SJIS ARGS2(
-	CONST unsigned char *,	any,
-	unsigned char *,	sjis)
+void TO_SJIS (
+	const unsigned char *	any,
+	unsigned char *	sjis)
 {
     unsigned char *euc;
 
-    euc = malloc(strlen((CONST char *) any) + 1);
+    euc = malloc(strlen((const char *) any) + 1);
 #ifdef CJK_EX
     if (!euc)
 	outofmem(__FILE__, "TO_SJIS");
@@ -4985,13 +4985,13 @@ PUBLIC void TO_SJIS ARGS2(
     if (is_EUC_JP(euc))
 	EUC_TO_SJIS(euc, sjis);
     else
-	strcpy((char *) sjis, (CONST char *) any);
+	strcpy((char *) sjis, (const char *) any);
     free(euc);
 }
 
-PUBLIC void TO_JIS ARGS2(
-	CONST unsigned char *,	any,
-	unsigned char *,	jis)
+void TO_JIS (
+	const unsigned char *	any,
+	unsigned char *	jis)
 {
     unsigned char *euc;
 
@@ -4999,7 +4999,7 @@ PUBLIC void TO_JIS ARGS2(
 	jis[0] = 0;
 	return;
     }
-    euc = malloc(strlen((CONST char *) any) + 1);
+    euc = malloc(strlen((const char *) any) + 1);
 #ifdef CJK_EX
     if (!euc)
 	outofmem(__FILE__, "TO_JIS");

@@ -50,18 +50,18 @@ typedef struct _rule {
 /*	Global variables
 **	----------------
 */
-PUBLIC char *HTBinDir = NULL;	/* Physical /htbin directory path.	*/
+char *HTBinDir = NULL;	/* Physical /htbin directory path.	*/
 				/* In future this should not be global. */
-PUBLIC char *HTSearchScript = NULL;	/* Search script name.		*/
+char *HTSearchScript = NULL;	/* Search script name.		*/
 
 
 /*	Module-wide variables
 **	---------------------
 */
 
-PRIVATE rule * rules = 0;	/* Pointer to first on list */
+static rule * rules = 0;	/* Pointer to first on list */
 #ifndef PUT_ON_HEAD
-PRIVATE rule * rule_tail = 0;	/* Pointer to last on list */
+static rule * rule_tail = 0;	/* Pointer to last on list */
 #endif
 
 
@@ -76,12 +76,12 @@ PRIVATE rule * rule_tail = 0;	/* Pointer to last on list */
 **	returns		0 if success, -1 if error.
 */
 
-PUBLIC int HTAddRule ARGS5(
-    HTRuleOp,		op,
-    CONST char *,	pattern,
-    CONST char *,	equiv,
-    CONST char *,	cond_op,
-    CONST char *,	cond)
+int HTAddRule (
+    HTRuleOp		op,
+    const char *	pattern,
+    const char *	equiv,
+    const char *	cond_op,
+    const char *	cond)
 { /* BYTE_ADDRESSING removed and memory check - AS - 1 Sep 93 */
     rule *	temp;
     char *	pPattern = NULL;
@@ -144,7 +144,7 @@ PUBLIC int HTAddRule ARGS5(
 ** See also
 **	HTAddRule()
 */
-void HTClearRules NOARGS
+void HTClearRules (void)
 {
     while (rules) {
 	rule * temp = rules;
@@ -160,8 +160,8 @@ void HTClearRules NOARGS
 #endif
 }
 
-PRIVATE BOOL rule_cond_ok ARGS1(
-    rule *,	 r)
+static BOOL rule_cond_ok (
+    rule *	 r)
 {
     BOOL result;
     if (!r->condition_op)
@@ -205,8 +205,8 @@ PRIVATE BOOL rule_cond_ok ARGS1(
 **			protected, and so it knows how to handle it.
 **								-- AL
 */
-char * HTTranslate ARGS1(
-    CONST char *,	required)
+char * HTTranslate (
+    const char *	required)
 {
     rule * r;
     char *current = NULL;
@@ -221,7 +221,7 @@ char * HTTranslate ARGS1(
     for(r = rules; r; r = r->next) {
 	char * p = r->pattern;
 	int m=0;   /* Number of characters matched against wildcard */
-	CONST char * q = current;
+	const char * q = current;
 	for(;*p && *q; p++, q++) {   /* Find first mismatch */
 	    if (*p!=*q) break;
 	}
@@ -423,8 +423,8 @@ char * HTTranslate ARGS1(
 **
 ** returns	0 OK, < 0 syntax error.
 */
-PUBLIC int  HTSetConfiguration ARGS1(
-    char *,		config)
+int  HTSetConfiguration (
+    char *		config)
 {
     HTRuleOp op;
     char * line = NULL;
@@ -626,8 +626,8 @@ PUBLIC int  HTSetConfiguration ARGS1(
 **	The strings may not contain spaces.
 */
 
-int HTLoadRules ARGS1(
-    CONST char *,	filename)
+int HTLoadRules (
+    const char *	filename)
 {
     FILE * fp = fopen(filename, TXT_R);
     char line[LINE_LENGTH+1];

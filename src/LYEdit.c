@@ -11,9 +11,9 @@
 
 #include <LYLeaks.h>
 
-PUBLIC BOOLEAN editor_can_position NOARGS
+BOOLEAN editor_can_position (void)
 {
-    static CONST char *table[] = {
+    static const char *table[] = {
 #ifdef VMS
 	"sedt",
 	"SEDT"
@@ -47,10 +47,10 @@ PUBLIC BOOLEAN editor_can_position NOARGS
  *
  *  Returns FALSE if file is uneditable.
  */
-PUBLIC int edit_current_file ARGS3(
-	char *,		newfile,
-	int,		cur,
-	int,		lineno)
+int edit_current_file (
+	char *		newfile,
+	int		cur,
+	int		lineno)
 {
     int result = FALSE;
     char *filename = NULL;
@@ -160,10 +160,10 @@ done:
     return (result);
 }
 
-PUBLIC void edit_temporary_file ARGS3(
-	char *,		filename,
-	char *,		position,
-	char *,		message)
+void edit_temporary_file (
+	char *		filename,
+	char *		position,
+	char *		message)
 {
 #ifdef UNIX
     struct stat stat_info;

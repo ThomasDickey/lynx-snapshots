@@ -110,30 +110,30 @@ typedef struct _connection {
 #define ABORT_TARGET (*targetClass._free)         (target)
 
 struct _HTStructured {
-	CONST HTStructuredClass *	isa;
+	const HTStructuredClass *	isa;
 	/* ... */
 };
 
 /*	Global Variables
 **	---------------------
 */
-PUBLIC int HTfileSortMethod = FILE_BY_NAME;
+int HTfileSortMethod = FILE_BY_NAME;
 
 #ifndef DISABLE_FTP /*This disables everything to end-of-file */
-PRIVATE char ThisYear[8];
-PRIVATE char LastYear[8];
-PRIVATE int TheDate;
-PRIVATE BOOLEAN HaveYears = FALSE;
+static char ThisYear[8];
+static char LastYear[8];
+static int TheDate;
+static BOOLEAN HaveYears = FALSE;
 
 /*	Module-Wide Variables
 **	---------------------
 */
-PRIVATE connection * connections = NULL;/* Linked list of connections */
-PRIVATE char response_text[LINE_LENGTH+1];/* Last response from ftp host */
-PRIVATE connection * control = NULL;	/* Current connection */
-PRIVATE int data_soc = -1;		/* Socket for data transfer =invalid */
-PRIVATE char *user_entered_password = NULL;
-PRIVATE char *last_username_and_host = NULL;
+static connection * connections = NULL;/* Linked list of connections */
+static char response_text[LINE_LENGTH+1];/* Last response from ftp host */
+static connection * control = NULL;	/* Current connection */
+static int data_soc = -1;		/* Socket for data transfer =invalid */
+static char *user_entered_password = NULL;
+static char *last_username_and_host = NULL;
 
 /*
  * ProFTPD 1.2.5rc1 is known to have a broken implementation of RETR.  If asked
@@ -142,7 +142,7 @@ PRIVATE char *last_username_and_host = NULL;
  * at some point - TD 2004/1/1.
  */
 #define BROKEN_PROFTPD 1
-PRIVATE int ProFTPD_bugs = FALSE;
+static int ProFTPD_bugs = FALSE;
 
 typedef enum {
 	GENERIC_SERVER
@@ -163,39 +163,39 @@ typedef enum {
 	, DLS_SERVER
 } eServerType;
 
-PRIVATE eServerType server_type = GENERIC_SERVER; /* the type of ftp host */
-PRIVATE int	unsure_type = FALSE;		/* sure about the type? */
-PRIVATE BOOLEAN use_list = FALSE;		/* use the LIST command? */
+static eServerType server_type = GENERIC_SERVER; /* the type of ftp host */
+static int	unsure_type = FALSE;		/* sure about the type? */
+static BOOLEAN use_list = FALSE;		/* use the LIST command? */
 
-PRIVATE int	interrupted_in_next_data_char = FALSE;
+static int	interrupted_in_next_data_char = FALSE;
 
 #ifdef POLL_PORTS
-PRIVATE PortNumber	port_number = FIRST_TCP_PORT;
+static PortNumber	port_number = FIRST_TCP_PORT;
 #endif /* POLL_PORTS */
 
-PRIVATE int	master_socket = -1;	/* Listening socket = invalid	*/
-PRIVATE char	port_command[255];	/* Command for setting the port */
-PRIVATE fd_set	open_sockets;		/* Mask of active channels */
-PRIVATE int	num_sockets;		/* Number of sockets to scan */
-PRIVATE PortNumber	passive_port;	/* Port server specified for data */
+static int	master_socket = -1;	/* Listening socket = invalid	*/
+static char	port_command[255];	/* Command for setting the port */
+static fd_set	open_sockets;		/* Mask of active channels */
+static int	num_sockets;		/* Number of sockets to scan */
+static PortNumber	passive_port;	/* Port server specified for data */
 
 
 #define NEXT_CHAR HTGetCharacter()	/* Use function in HTFormat.c */
 
 #define DATA_BUFFER_SIZE 2048
-PRIVATE char data_buffer[DATA_BUFFER_SIZE];		/* Input data buffer */
-PRIVATE char * data_read_pointer;
-PRIVATE char * data_write_pointer;
+static char data_buffer[DATA_BUFFER_SIZE];		/* Input data buffer */
+static char * data_read_pointer;
+static char * data_write_pointer;
 #define NEXT_DATA_CHAR next_data_char()
-PRIVATE int close_connection PARAMS((
-	connection *	con));
+static int close_connection (
+	connection *	con);
 
 
 #ifdef LY_FIND_LEAKS
 /*
 **  This function frees module globals. - FM
 */
-PRIVATE void free_FTPGlobals NOARGS
+static void free_FTPGlobals (void)
 {
     FREE(user_entered_password);
     FREE(last_username_and_host);
@@ -218,9 +218,9 @@ PRIVATE void free_FTPGlobals NOARGS
 **
 ** Bug: Returns pointer to static -- non-reentrant
 */
-PUBLIC char * HTVMS_name ARGS2(
-	CONST char *,	nn,
-	CONST char *,	fn)
+char * HTVMS_name (
+	const char *	nn,
+	const char *	fn)
 {
 
 /*	We try converting the filename into Files-11 syntax.  That is, we assume
@@ -236,15 +236,15 @@ PUBLIC char * HTVMS_name ARGS2(
     char *second;		/* 2nd slash */
     char *last;			/* last slash */
 
-    CONST char * hostname = HTHostName();
+    const char * hostname = HTHostName();
 
     if (!filename || !nodename)
 	outofmem(__FILE__, "HTVMSname");
     strcpy(filename, fn);
     strcpy(nodename, "");	/* On same node?  Yes if node names match */
     if (strncmp(nn, "localhost", 9)) {
-	CONST char *p;
-	CONST char *q;
+	const char *p;
+	const char *q;
 	for (p = hostname, q = nn;
 	     *p && *p != '.' && *q && *q != '.'; p++, q++){
 	    if (TOUPPER(*p) != TOUPPER(*q)) {
@@ -287,7 +287,7 @@ PUBLIC char * HTVMS_name ARGS2(
 /*	Procedure: Read a character from the data connection
 **	----------------------------------------------------
 */
-PRIVATE int next_data_char NOARGS
+static int next_data_char (void)
 {
     int status;
     if (data_read_pointer >= data_write_pointer) {
@@ -313,8 +313,8 @@ PRIVATE int next_data_char NOARGS
 /*	Close an individual connection
 **
 */
-PRIVATE int close_connection ARGS1(
-	connection *,	con)
+static int close_connection (
+	connection *	con)
 {
     connection * scan;
     int status;
@@ -344,15 +344,15 @@ PRIVATE int close_connection ARGS1(
     return -1;		/* very strange -- was not on list. */
 }
 
-PRIVATE char *help_message_buffer = NULL;  /* global :( */
+static char *help_message_buffer = NULL;  /* global :( */
 
-PRIVATE void init_help_message_cache NOARGS
+static void init_help_message_cache (void)
 {
     FREE(help_message_buffer);
 }
 
-PRIVATE void help_message_cache_add ARGS1(
-	char *,		string)
+static void help_message_cache_add (
+	char *		string)
 {
     if (help_message_buffer)
 	StrAllocCat(help_message_buffer, string);
@@ -362,12 +362,12 @@ PRIVATE void help_message_cache_add ARGS1(
     CTRACE((tfp,"Adding message to help cache: %s\n",string));
 }
 
-PRIVATE char *help_message_cache_non_empty NOARGS
+static char *help_message_cache_non_empty (void)
 {
   return(help_message_buffer);
 }
 
-PRIVATE char *help_message_cache_contents NOARGS
+static char *help_message_cache_contents (void)
 {
    return(help_message_buffer);
 }
@@ -389,8 +389,8 @@ PRIVATE char *help_message_cache_contents NOARGS
 **		  or negative for communication failure (in which case
 **		  the control connection will be closed).
 */
-PRIVATE int write_cmd ARGS1(
-	char *,		cmd)
+static int write_cmd (
+	char *		cmd)
 {
     int status;
 
@@ -441,8 +441,8 @@ PRIVATE int write_cmd ARGS1(
 **	returns:  The first digit of the reply type,
 **		  or negative for communication failure.
 */
-PRIVATE int response ARGS1(
-	char *,		cmd)
+static int response (
+	char *		cmd)
 {
     int result;				/* Three-digit decimal code */
     int continuation_response = -1;
@@ -529,7 +529,7 @@ PRIVATE int response ARGS1(
     return result/100;
 }
 
-PRIVATE int send_cmd_1 ARGS1(char *, verb)
+static int send_cmd_1 (char *  verb)
 {
     char command[80];
 
@@ -537,7 +537,7 @@ PRIVATE int send_cmd_1 ARGS1(char *, verb)
     return response (command);
 }
 
-PRIVATE int send_cmd_2 ARGS2(char *, verb, char *, param)
+static int send_cmd_2 (char *  verb, char *  param)
 {
     char *command = 0;
     int status;
@@ -555,8 +555,8 @@ PRIVATE int send_cmd_2 ARGS2(char *, verb, char *, param)
  *  This function should try to set the macintosh server into binary mode.
  *  Some servers need an additional letter after the MACB command.
  */
-PRIVATE int set_mac_binary ARGS1(
-	eServerType,	ServerType)
+static int set_mac_binary (
+	eServerType	ServerType)
 {
     /* try to set mac binary mode */
     if (ServerType == APPLESHARE_SERVER ||
@@ -574,9 +574,9 @@ PRIVATE int set_mac_binary ARGS1(
  * determine what kind of host it is
  */
 
-PRIVATE void get_ftp_pwd ARGS2(
-	eServerType *,	ServerType,
-	BOOLEAN *,	UseList)
+static void get_ftp_pwd (
+	eServerType *	ServerType,
+	BOOLEAN *	UseList)
 {
 
     char *cp;
@@ -629,9 +629,9 @@ PRIVATE void get_ftp_pwd ARGS2(
  * Windows NT servers.
  */
 
-PRIVATE void set_unix_dirstyle ARGS2(
-	eServerType *,	ServerType,
-	BOOLEAN *,	UseList)
+static void set_unix_dirstyle (
+	eServerType *	ServerType,
+	BOOLEAN *	UseList)
 {
 
     char *cp;
@@ -679,9 +679,9 @@ PRIVATE void set_unix_dirstyle ARGS2(
 **	It ensures that all connections are logged in if they exist.
 **	It ensures they have the port number transferred.
 */
-PRIVATE int get_connection ARGS2(
-	CONST char *,		arg,
-	HTParentAnchor *,	anchor)
+static int get_connection (
+	const char *		arg,
+	HTParentAnchor *	anchor)
 {
     int status;
     char * command = 0;
@@ -866,7 +866,7 @@ PRIVATE int get_connection ARGS2(
 	     * Create and send a mail address as the password. - FM
 	     */
 	    char *user = NULL;
-	    CONST char *host = NULL;
+	    const char *host = NULL;
 	    char * cp;
 
 	    if (personal_mail_address && *personal_mail_address) {
@@ -1051,7 +1051,7 @@ PRIVATE int get_connection ARGS2(
 **
 **
 */
-PRIVATE int close_master_socket NOARGS
+static int close_master_socket (void)
 {
     int status;
 
@@ -1081,7 +1081,7 @@ PRIVATE int close_master_socket NOARGS
 **	master_socket	is socket number if good, else negative.
 **	port_number	is valid if good.
 */
-PRIVATE int get_listen_socket NOARGS
+static int get_listen_socket (void)
 {
 #ifdef INET6
     struct sockaddr_storage soc_address;	/* Binary network address */
@@ -1331,7 +1331,7 @@ PRIVATE int get_listen_socket NOARGS
 
 } /* get_listen_socket */
 
-PRIVATE char * months[12] = {
+static char * months[12] = {
     "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
 };
 
@@ -1345,7 +1345,7 @@ PRIVATE char * months[12] = {
 **		be perfect, but the actual date isn't changed in the display,
 **		i.e., the date is still correct. - FM
 */
-PRIVATE void set_years_and_date NOARGS
+static void set_years_and_date (void)
 {
     char day[8], month[8], date[12];
     time_t NowTime;
@@ -1381,8 +1381,8 @@ typedef struct _EntryInfo {
     BOOLEAN	 display;  /* show this entry? */
 } EntryInfo;
 
-PRIVATE void free_entryinfo_struct_contents ARGS1(
-	EntryInfo *,	entry_info)
+static void free_entryinfo_struct_contents (
+	EntryInfo *	entry_info)
 {
     if (entry_info) {
 	FREE(entry_info->filename);
@@ -1400,8 +1400,8 @@ PRIVATE void free_entryinfo_struct_contents ARGS1(
  *		"Dec 12 1989  " or
  *		"FCv 23 1990  " ...
  */
-PRIVATE BOOLEAN is_ls_date ARGS1(
-	char *,		s)
+static BOOLEAN is_ls_date (
+	char *		s)
 {
     /* must start with three alpha characters */
     if (!isalpha(UCH(*s++)) || !isalpha(UCH(*s++)) || !isalpha(UCH(*s++)))
@@ -1469,9 +1469,9 @@ PRIVATE BOOLEAN is_ls_date ARGS1(
  *  parse_eplf_line() --
  *	Extract the name, size, and date from an EPLF line. - 08-06-96 DJB
  */
-PRIVATE void parse_eplf_line ARGS2(
-	char *,		line,
-	EntryInfo *,	info)
+static void parse_eplf_line (
+	char *		line,
+	EntryInfo *	info)
 {
     char *cp = line;
     char ct[26];
@@ -1526,9 +1526,9 @@ PRIVATE void parse_eplf_line ARGS2(
  * parse_ls_line() --
  *	Extract the name, size, and date from an ls -l line.
  */
-PRIVATE void parse_ls_line ARGS2(
-	char *,		line,
-	EntryInfo *,	entry_info)
+static void parse_ls_line (
+	char *		line,
+	EntryInfo *	entry_info)
 {
     int    i, j;
     int    base=1;
@@ -1565,10 +1565,10 @@ PRIVATE void parse_ls_line ARGS2(
  *	Extract the name and size info and whether it refers to a
  *      directory from a LIST line in "dls" format.
  */
-PRIVATE void parse_dls_line ARGS3(
-	char *,		line,
-	EntryInfo *,	entry_info,
-	char **,	pspilledname)
+static void parse_dls_line (
+	char *		line,
+	EntryInfo *	entry_info,
+	char **	pspilledname)
 {
     short  j;
     int    base=1;
@@ -1670,9 +1670,9 @@ PRIVATE void parse_dls_line ARGS3(
  *	Format the name, date, and size from a VMS LIST line
  *	into the EntryInfo structure - FM
  */
-PRIVATE void parse_vms_dir_entry ARGS2(
-	char *,		line,
-	EntryInfo *,	entry_info)
+static void parse_vms_dir_entry (
+	char *		line,
+	EntryInfo *	entry_info)
 {
     int i, j;
     unsigned int ialloc;
@@ -1809,9 +1809,9 @@ PRIVATE void parse_vms_dir_entry ARGS2(
  *	Format the name, date, and size from an MS_WINDOWS LIST line into
  *	the EntryInfo structure (assumes Chameleon NEWT format). - FM
  */
-PRIVATE void parse_ms_windows_dir_entry ARGS2(
-	char *,		line,
-	EntryInfo *,	entry_info)
+static void parse_ms_windows_dir_entry (
+	char *		line,
+	EntryInfo *	entry_info)
 {
     char *cp = line;
     char *cps, *cpd, date[16];
@@ -1883,9 +1883,9 @@ PRIVATE void parse_ms_windows_dir_entry ARGS2(
  *	the EntryInfo structure (assumes Chameleon NEWT format). - FM
  */
 #ifdef NOTDEFINED
-PRIVATE void parse_windows_nt_dir_entry ARGS2(
-	char *,		line,
-	EntryInfo *,	entry_info)
+static void parse_windows_nt_dir_entry (
+	char *		line,
+	EntryInfo *	entry_info)
 {
     char *cp = line;
     char *cps, *cpd, date[16];
@@ -1992,9 +1992,9 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
  *	Format the name, date, and size from a VM/CMS line into
  *	the EntryInfo structure. - FM
  */
-PRIVATE void parse_cms_dir_entry ARGS2(
-	char *,		line,
-	EntryInfo *,	entry_info)
+static void parse_cms_dir_entry (
+	char *		line,
+	EntryInfo *	entry_info)
 {
     char *cp = line;
     char *cps, *cpd, date[16];
@@ -2135,10 +2135,10 @@ PRIVATE void parse_cms_dir_entry ARGS2(
  *	If first is true, this is the first name in a directory.
  */
 
-PRIVATE EntryInfo * parse_dir_entry ARGS3(
-	char *,		entry,
-	BOOLEAN *,	first,
-	char **,	pspilledname)
+static EntryInfo * parse_dir_entry (
+	char *		entry,
+	BOOLEAN *	first,
+	char **	pspilledname)
 {
     EntryInfo *entry_info;
     int  i;
@@ -2435,7 +2435,7 @@ PRIVATE EntryInfo * parse_dir_entry ARGS3(
     **	Get real types eventually.
     */
     if (!entry_info->type) {
-	CONST char *cp2;
+	const char *cp2;
 	HTFormat format;
 	HTAtom * encoding;  /* @@ not used at all */
 	format = HTFileFormat(entry_info->filename, &encoding, &cp2);
@@ -2456,9 +2456,9 @@ PRIVATE EntryInfo * parse_dir_entry ARGS3(
     return(entry_info);
 } /* parse_dir_entry */
 
-PRIVATE int compare_EntryInfo_structs ARGS2(
-	EntryInfo *,	entry1,
-	EntryInfo *,	entry2)
+static int compare_EntryInfo_structs (
+	EntryInfo *	entry1,
+	EntryInfo *	entry2)
 {
     int i, status;
     char date1[16], date2[16], time1[8], time2[8], month[4];
@@ -2599,11 +2599,11 @@ PRIVATE int compare_EntryInfo_structs ARGS2(
 **	returns		HT_LOADED if OK
 **			<0 if error.
 */
-PRIVATE int read_directory ARGS4(
-	HTParentAnchor *,	parent,
-	CONST char *,		address,
-	HTFormat,		format_out,
-	HTStream *,		sink)
+static int read_directory (
+	HTParentAnchor *	parent,
+	const char *		address,
+	HTFormat		format_out,
+	HTStream *		sink)
 {
     int status;
     BOOLEAN WasInterrupted = FALSE;
@@ -2922,9 +2922,9 @@ unload_btree:
 /*
  * Setup an FTP connection.
  */
-PRIVATE int setup_connection ARGS2(
-	CONST char *,		name,
-	HTParentAnchor *,	anchor)
+static int setup_connection (
+	const char *		name,
+	HTParentAnchor *	anchor)
 {
     int retry;			/* How many times tried? */
     int status;
@@ -3103,11 +3103,11 @@ PRIVATE int setup_connection ARGS2(
 **	returns		Socket number for file if good.
 **			<0 if bad.
 */
-PUBLIC int HTFTPLoad ARGS4(
-	CONST char *,		name,
-	HTParentAnchor *,	anchor,
-	HTFormat,		format_out,
-	HTStream *,		sink)
+int HTFTPLoad (
+	const char *		name,
+	HTParentAnchor *	anchor,
+	HTFormat		format_out,
+	HTStream *		sink)
 {
     BOOL isDirectory = NO;
     HTAtom * encoding = NULL;
@@ -3797,7 +3797,7 @@ listen:
 **  This function frees any user entered password, so that
 **  it must be entered again for a future request. - FM
 */
-PUBLIC void HTClearFTPPassword NOARGS
+void HTClearFTPPassword (void)
 {
     /*
     **	Need code to check cached documents from

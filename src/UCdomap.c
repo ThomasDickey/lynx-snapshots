@@ -79,7 +79,7 @@
 int auto_display_charset = -1;
 #endif
 
-CONST char *UC_GNsetMIMEnames[4] =
+const char *UC_GNsetMIMEnames[4] =
 	{"iso-8859-1", "x-dec-graphics", "cp437", "x-transparent"};
 
 int UC_GNhandles[4] = {-1, -1, -1, -1};
@@ -93,7 +93,7 @@ int UC_GNhandles[4] = {-1, -1, -1, -1};
  *  for chars < 127...).  - KW
  */
 
-PRIVATE u16 translations[][256] = {
+static u16 translations[][256] = {
   /*
    *  8-bit Latin-1 mapped to Unicode -- trivial mapping.
    */
@@ -243,9 +243,9 @@ PRIVATE u16 translations[][256] = {
     0xf0f8, 0xf0f9, 0xf0fa, 0xf0fb, 0xf0fc, 0xf0fd, 0xf0fe, 0xf0ff
   }
 };
-PRIVATE u16 *UC_translate = NULL;
+static u16 *UC_translate = NULL;
 
-PRIVATE struct UC_charset UCInfo[MAXCHARSETS];
+static struct UC_charset UCInfo[MAXCHARSETS];
 
 /*
  *  The standard kernel character-to-font mappings are not invertible
@@ -253,72 +253,72 @@ PRIVATE struct UC_charset UCInfo[MAXCHARSETS];
  */
 #define MAX_GLYPH 512		/* Max possible glyph value */
 
-PRIVATE unsigned char * inv_translate = NULL;
-PRIVATE unsigned char inv_norm_transl[MAX_GLYPH];
-PRIVATE unsigned char * inverse_translations[4] = { NULL, NULL, NULL, NULL };
+static unsigned char * inv_translate = NULL;
+static unsigned char inv_norm_transl[MAX_GLYPH];
+static unsigned char * inverse_translations[4] = { NULL, NULL, NULL, NULL };
 
-PRIVATE void set_inverse_transl PARAMS((
-	int		i));
-PRIVATE u16 *set_translate PARAMS((
-	int		m));
-PRIVATE int UC_valid_UC_charset PARAMS((
-	int		UC_charset_hndl));
-PRIVATE void UC_con_set_trans PARAMS((
+static void set_inverse_transl (
+	int		i);
+static u16 *set_translate (
+	int		m);
+static int UC_valid_UC_charset (
+	int		UC_charset_hndl);
+static void UC_con_set_trans (
 	int		UC_charset_in_hndl,
 	int		Gn,
-	int		update_flag));
-PRIVATE int con_insert_unipair PARAMS((
+	int		update_flag);
+static int con_insert_unipair (
 	u16		unicode,
 	u16		fontpos,
-	int		fordefault));
-PRIVATE int con_insert_unipair_str PARAMS((
+	int		fordefault);
+static int con_insert_unipair_str (
 	u16		unicode,
-	CONST char *	replace_str,
-	int		fordefault));
-PRIVATE void con_clear_unimap PARAMS((
-	int		fordefault));
-PRIVATE void con_clear_unimap_str PARAMS((
-	int		fordefault));
-PRIVATE void con_set_default_unimap NOPARAMS;
-PRIVATE int UC_con_set_unimap PARAMS((
+	const char *	replace_str,
+	int		fordefault);
+static void con_clear_unimap (
+	int		fordefault);
+static void con_clear_unimap_str (
+	int		fordefault);
+static void con_set_default_unimap (void);
+static int UC_con_set_unimap (
 	int		UC_charset_out_hndl,
-	int		update_flag));
-PRIVATE int UC_con_set_unimap_str PARAMS((
+	int		update_flag);
+static int UC_con_set_unimap_str (
 	u16			ct,
 	struct unipair_str *	list,
-	int			fordefault));
-PRIVATE int conv_uni_to_pc PARAMS((
+	int			fordefault);
+static int conv_uni_to_pc (
 	long			ucs,
-	int			usedefault));
-PRIVATE int conv_uni_to_str PARAMS((
+	int			usedefault);
+static int conv_uni_to_str (
 	char*		outbuf,
 	int		buflen,
 	long		ucs,
-	int		usedefault));
-PRIVATE void UCconsole_map_init NOPARAMS;
-PRIVATE int UC_MapGN PARAMS((
+	int		usedefault);
+static void UCconsole_map_init (void);
+static int UC_MapGN (
 	int		UChndl,
-	int		update_flag));
-PRIVATE int UC_FindGN_byMIME PARAMS((
-	CONST char *	UC_MIMEcharset));
-PRIVATE void UCreset_allocated_LYCharSets NOPARAMS;
-PRIVATE CONST char ** UC_setup_LYCharSets_repl PARAMS((
+	int		update_flag);
+static int UC_FindGN_byMIME (
+	const char *	UC_MIMEcharset);
+static void UCreset_allocated_LYCharSets (void);
+static const char ** UC_setup_LYCharSets_repl (
 	int		UC_charset_in_hndl,
-	unsigned	lowest8));
-PRIVATE int UC_Register_with_LYCharSets PARAMS((
+	unsigned	lowest8);
+static int UC_Register_with_LYCharSets (
 	int		s,
-	CONST char *	UC_MIMEcharset,
-	CONST char *	UC_LYNXcharset,
-	int		lowest_eightbit));
+	const char *	UC_MIMEcharset,
+	const char *	UC_LYNXcharset,
+	int		lowest_eightbit);
 #ifdef LY_FIND_LEAKS
-PRIVATE void UCfree_allocated_LYCharSets NOPARAMS;
-PRIVATE void UCcleanup_mem NOPARAMS;
+static void UCfree_allocated_LYCharSets (void);
+static void UCcleanup_mem (void);
 #endif
 
-PRIVATE int default_UChndl = -1;
+static int default_UChndl = -1;
 
-PRIVATE void set_inverse_transl ARGS1(
-	int,		i)
+static void set_inverse_transl (
+	int		i)
 {
     int j, glyph;
     u16 *p = translations[i];
@@ -348,8 +348,8 @@ PRIVATE void set_inverse_transl ARGS1(
     }
 }
 
-PRIVATE u16 *set_translate ARGS1(
-	int,		m)
+static u16 *set_translate (
+	int		m)
 {
 	if (!inverse_translations[m])
 		set_inverse_transl(m);
@@ -357,19 +357,19 @@ PRIVATE u16 *set_translate ARGS1(
 	return translations[m];
 }
 
-PRIVATE int UC_valid_UC_charset ARGS1(
-	int,		UC_charset_hndl)
+static int UC_valid_UC_charset (
+	int		UC_charset_hndl)
 {
   return (UC_charset_hndl >= 0 && UC_charset_hndl < UCNumCharsets);
 }
 
-PRIVATE void UC_con_set_trans ARGS3(
-	int,		UC_charset_in_hndl,
-	int,		Gn,
-	int,		update_flag)
+static void UC_con_set_trans (
+	int		UC_charset_in_hndl,
+	int		Gn,
+	int		update_flag)
 {
     int i, j;
-    CONST u16 *p;
+    const u16 *p;
     u16 *ptrans;
 
     if (!UC_valid_UC_charset(UC_charset_in_hndl)) {
@@ -412,10 +412,10 @@ PRIVATE void UC_con_set_trans ARGS3(
  * "paged table" instead.  Simulation has shown the memory cost of
  * this 3-level paged table scheme to be comparable to a hash table.
  */
-PRIVATE int hashtable_contents_valid = 0; /* Use ASCII-only mode for bootup*/
-PRIVATE int hashtable_str_contents_valid = 0;
+static int hashtable_contents_valid = 0; /* Use ASCII-only mode for bootup*/
+static int hashtable_str_contents_valid = 0;
 
-PRIVATE u16 **uni_pagedir[32] =
+static u16 **uni_pagedir[32] =
 {
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -423,7 +423,7 @@ PRIVATE u16 **uni_pagedir[32] =
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
-PRIVATE char* **uni_pagedir_str[32] =
+static char* **uni_pagedir_str[32] =
 {
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -431,15 +431,15 @@ PRIVATE char* **uni_pagedir_str[32] =
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
-PRIVATE CONST u16 * UC_current_unitable = NULL;
-PRIVATE struct unimapdesc_str *UC_current_unitable_str = NULL;
+static const u16 * UC_current_unitable = NULL;
+static struct unimapdesc_str *UC_current_unitable_str = NULL;
 
 /*
  *  Keep a second set of structures for the translation designated
  *  as "default" - kw
  */
-PRIVATE int unidefault_contents_valid = 0; /* Use ASCII-only mode for bootup*/
-PRIVATE int unidefault_str_contents_valid = 0;
+static int unidefault_contents_valid = 0; /* Use ASCII-only mode for bootup*/
+static int unidefault_str_contents_valid = 0;
 
 static u16 **unidefault_pagedir[32] =
 {
@@ -456,13 +456,13 @@ static char* **unidefault_pagedir_str[32] =
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
-PRIVATE CONST u16 * UC_default_unitable = 0;
-PRIVATE CONST struct unimapdesc_str *UC_default_unitable_str = 0;
+static const u16 * UC_default_unitable = 0;
+static const struct unimapdesc_str *UC_default_unitable_str = 0;
 
-PRIVATE int con_insert_unipair ARGS3(
-	u16,		unicode,
-	u16,		fontpos,
-	int,		fordefault)
+static int con_insert_unipair (
+	u16		unicode,
+	u16		fontpos,
+	int		fordefault)
 {
     int i, n;
     u16 **p1, *p2;
@@ -500,14 +500,14 @@ PRIVATE int con_insert_unipair ARGS3(
     return 0;
 }
 
-PRIVATE int con_insert_unipair_str ARGS3(
-	u16,		unicode,
-	CONST char *,	replace_str,
-	int,		fordefault)
+static int con_insert_unipair_str (
+	u16		unicode,
+	const char *	replace_str,
+	int		fordefault)
 {
     int i, n;
     char ***p1;
-    CONST char **p2;
+    const char **p2;
 
     if(fordefault)
 	p1 = unidefault_pagedir_str[n = unicode >> 11];
@@ -533,12 +533,12 @@ PRIVATE int con_insert_unipair_str ARGS3(
 	if (!p1[n])
 	    return -1;
 
-	p2 = (CONST char **)p1[n];
+	p2 = (const char **)p1[n];
 	for (i = 0; i < 64; i++) {
 	    p2[i] = NULL;	/* No replace string this character (yet) */
 	}
     }
-    p2 = (CONST char **)p1[n];
+    p2 = (const char **)p1[n];
 
     p2[unicode & 0x3f] = replace_str;
 
@@ -548,8 +548,8 @@ PRIVATE int con_insert_unipair_str ARGS3(
 /*
  *  ui arg was a leftover, deleted. - KW
  */
-PRIVATE void con_clear_unimap ARGS1(
-	int,		fordefault)
+static void con_clear_unimap (
+	int		fordefault)
 {
     int i, j;
     u16 **p1;
@@ -581,7 +581,7 @@ PRIVATE void con_clear_unimap ARGS1(
     }
 }
 
-PRIVATE void con_clear_unimap_str ARGS1(int, fordefault)
+static void con_clear_unimap_str (int fordefault)
 {
   int i, j;
   char ***p1;
@@ -619,10 +619,10 @@ PRIVATE void con_clear_unimap_str ARGS1(int, fordefault)
  *  with.  This routine is executed at sys_setup time, and when the
  *  PIO_FONTRESET ioctl is called.
  */
-PRIVATE void con_set_default_unimap NOARGS
+static void con_set_default_unimap (void)
 {
     int i, j;
-    CONST u16 *p;
+    const u16 *p;
 
     /*
      *	The default font is always 256 characters.
@@ -643,26 +643,26 @@ PRIVATE void con_set_default_unimap NOARGS
     UC_default_unitable_str = &dfont_replacedesc;
 }
 
-PUBLIC int UCNumCharsets = 0;
+int UCNumCharsets = 0;
 
-PUBLIC int UCLYhndl_HTFile_for_unspec = -1;
-PUBLIC int UCLYhndl_HTFile_for_unrec = -1;
-PUBLIC int UCLYhndl_for_unspec = -1;
-PUBLIC int UCLYhndl_for_unrec = -1;
+int UCLYhndl_HTFile_for_unspec = -1;
+int UCLYhndl_HTFile_for_unrec = -1;
+int UCLYhndl_for_unspec = -1;
+int UCLYhndl_for_unrec = -1;
 
  /* easy to type, will initialize later */
-PUBLIC int LATIN1 = -1;        /* UCGetLYhndl_byMIME("iso-8859-1") */
-PUBLIC int US_ASCII = -1;      /* UCGetLYhndl_byMIME("us-ascii")   */
-PUBLIC int UTF8_handle = -1;   /* UCGetLYhndl_byMIME("utf-8")      */
-PUBLIC int TRANSPARENT = -1;   /* UCGetLYhndl_byMIME("x-transparent")  */
+int LATIN1 = -1;        /* UCGetLYhndl_byMIME("iso-8859-1") */
+int US_ASCII = -1;      /* UCGetLYhndl_byMIME("us-ascii")   */
+int UTF8_handle = -1;   /* UCGetLYhndl_byMIME("utf-8")      */
+int TRANSPARENT = -1;   /* UCGetLYhndl_byMIME("x-transparent")  */
 
 
-PRIVATE int UC_con_set_unimap ARGS2(
-	int,		UC_charset_out_hndl,
-	int,		update_flag)
+static int UC_con_set_unimap (
+	int		UC_charset_out_hndl,
+	int		update_flag)
 {
     int i, j;
-    CONST u16 *p;
+    const u16 *p;
 
     if (!UC_valid_UC_charset(UC_charset_out_hndl)) {
 	CTRACE((tfp, "UC_con_set_unimap: Invalid charset handle %d.\n",
@@ -696,10 +696,10 @@ PRIVATE int UC_con_set_unimap ARGS2(
     return 0;
 }
 
-PRIVATE int UC_con_set_unimap_str ARGS3(
-	u16,		ct,
-	struct unipair_str *, list,
-	int,		fordefault)
+static int UC_con_set_unimap_str (
+	u16		ct,
+	struct unipair_str * list,
+	int		fordefault)
 {
     int err = 0, err1;
 
@@ -725,9 +725,9 @@ PRIVATE int UC_con_set_unimap_str ARGS3(
     return err;
 }
 
-PRIVATE int conv_uni_to_pc ARGS2(
-	long,		ucs,
-	int,		usedefault)
+static int conv_uni_to_pc (
+	long		ucs,
+	int		usedefault)
 {
     int h;
     u16 **p1, *p2;
@@ -785,11 +785,11 @@ PRIVATE int conv_uni_to_pc ARGS2(
 /*
  *  Note: contents of outbuf is not changes for negative return value!
  */
-PRIVATE int conv_uni_to_str ARGS4(
-	char*,		outbuf,
-	int,		buflen,
-	long,		ucs,
-	int,		usedefault)
+static int conv_uni_to_str (
+	char*		outbuf,
+	int		buflen,
+	long		ucs,
+	int		usedefault)
 {
     char *h;
     char ***p1, **p2;
@@ -840,7 +840,7 @@ PRIVATE int conv_uni_to_str ARGS4(
     return -4;
 }
 
-PUBLIC int UCInitialized = 0;
+int UCInitialized = 0;
 
 /*
  *  [ original comment: - KW ]
@@ -848,7 +848,7 @@ PUBLIC int UCInitialized = 0;
  * initialized.  It must be possible to call kmalloc(..., GFP_KERNEL)
  * from this function, hence the call from sys_setup.
  */
-PRIVATE void UCconsole_map_init NOARGS
+static void UCconsole_map_init (void)
 {
     con_set_default_unimap();
     UCInitialized = 1;
@@ -857,14 +857,14 @@ PRIVATE void UCconsole_map_init NOARGS
 /*
  *  OK now, finally, some stuff that is more specifically for Lynx: - KW
  */
-PUBLIC int UCTransUniChar ARGS2(
-	long,		unicode,
-	int,		charset_out)
+int UCTransUniChar (
+	long		unicode,
+	int		charset_out)
 {
     int rc = 0;
     int UChndl_out;
     int isdefault, trydefault = 0;
-    CONST u16 * ut;
+    const u16 * ut;
 
     if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
 	if (LYCharSet_UC[charset_out].codepage < 0)
@@ -906,18 +906,18 @@ PUBLIC int UCTransUniChar ARGS2(
 /*
  *  Returns string length, or negative value for error.
  */
-PUBLIC int UCTransUniCharStr ARGS5(
-	char *,		outbuf,
-	int,		buflen,
-	long,		unicode,
-	int,		charset_out,
-	int,		chk_single_flag)
+int UCTransUniCharStr (
+	char *		outbuf,
+	int		buflen,
+	long		unicode,
+	int		charset_out,
+	int		chk_single_flag)
 {
     int rc = -14, src = 0, ignore_err;
     int UChndl_out;
     int isdefault, trydefault = 0;
     struct unimapdesc_str * repl;
-    CONST u16 * ut;
+    const u16 * ut;
 
     if (buflen < 2)
 	return -13;
@@ -998,11 +998,11 @@ PUBLIC int UCTransUniCharStr ARGS5(
     return -4;
 }
 
-PRIVATE int UC_lastautoGN = 0;
+static int UC_lastautoGN = 0;
 
-PRIVATE int UC_MapGN ARGS2(
-	int,		UChndl,
-	int,		update_flag)
+static int UC_MapGN (
+	int		UChndl,
+	int		update_flag)
 {
     int i, Gn, found, lasthndl;
     found = 0;
@@ -1038,16 +1038,16 @@ PRIVATE int UC_MapGN ARGS2(
     return Gn;
 }
 
-PUBLIC int UCTransChar ARGS3(
-	char,		ch_in,
-	int,		charset_in,
-	int,		charset_out)
+int UCTransChar (
+	char		ch_in,
+	int		charset_in,
+	int		charset_out)
 {
     int unicode, Gn;
     int rc = -4;
     int UChndl_in, UChndl_out;
     int isdefault, trydefault = 0;
-    CONST u16 * ut;
+    const u16 * ut;
     int upd = 0;
 
 #ifndef UC_NO_SHORTCUTS
@@ -1109,9 +1109,9 @@ PUBLIC int UCTransChar ARGS3(
     return rc;
 }
 
-PUBLIC long int UCTransToUni ARGS2(
-	char,		ch_in,
-	int,		charset_in)
+long int UCTransToUni (
+	char		ch_in,
+	int		charset_in)
 {
   int unicode, Gn;
   unsigned char ch_iu;
@@ -1146,17 +1146,17 @@ PUBLIC long int UCTransToUni ARGS2(
   return unicode;
 }
 
-PUBLIC int UCReverseTransChar ARGS3(
-	char,		ch_out,
-	int,		charset_in,
-	int,		charset_out)
+int UCReverseTransChar (
+	char		ch_out,
+	int		charset_in,
+	int		charset_out)
 {
     int Gn;
     int rc = -1;
     int UChndl_in, UChndl_out;
     int isdefault;
     int i_ch = UCH(ch_out);
-    CONST u16 * ut;
+    const u16 * ut;
 
 #ifndef UC_NO_SHORTCUTS
     if (charset_in == charset_out)
@@ -1206,20 +1206,20 @@ PUBLIC int UCReverseTransChar ARGS3(
 /*
  *  Returns string length, or negative value for error.
  */
-PUBLIC int UCTransCharStr ARGS6(
-	char *,		outbuf,
-	int,		buflen,
-	char,		ch_in,
-	int,		charset_in,
-	int,		charset_out,
-	int,		chk_single_flag)
+int UCTransCharStr (
+	char *		outbuf,
+	int		buflen,
+	char		ch_in,
+	int		charset_in,
+	int		charset_out,
+	int		chk_single_flag)
 {
     int unicode, Gn;
     int rc = -14, src = 0, ignore_err;
     int UChndl_in, UChndl_out;
     int isdefault, trydefault = 0;
     struct unimapdesc_str * repl;
-    CONST u16 * ut;
+    const u16 * ut;
     int upd = 0;
 
     if (buflen < 2)
@@ -1327,8 +1327,8 @@ PUBLIC int UCTransCharStr ARGS6(
     return -4;
 }
 
-PRIVATE int UC_FindGN_byMIME ARGS1(
-	CONST char *,	UC_MIMEcharset)
+static int UC_FindGN_byMIME (
+	const char *	UC_MIMEcharset)
 {
   int i;
 
@@ -1340,8 +1340,8 @@ PRIVATE int UC_FindGN_byMIME ARGS1(
   return -1;
 }
 
-PUBLIC int UCGetRawUniMode_byLYhndl ARGS1(
-	int,		i)
+int UCGetRawUniMode_byLYhndl (
+	int		i)
 {
     if (i < 0)
 	return 0;
@@ -1353,9 +1353,9 @@ PUBLIC int UCGetRawUniMode_byLYhndl ARGS1(
  * potentially unchecked recursion into UCGetLYhntl_byMIME if neither the "cp"
  * nor "windows-" prefixes are configured, so we check it here.
  */
-PRIVATE int getLYhndl_byCP ARGS2(
-	CONST char *,	prefix,
-	CONST char *,	codepage)
+static int getLYhndl_byCP (
+	const char *	prefix,
+	const char *	codepage)
 {
     static int nested;
     int result = -1;
@@ -1376,8 +1376,8 @@ PRIVATE int getLYhndl_byCP ARGS2(
  *  return -1 if we got NULL or did not recognize value.
  *  According to RFC, MIME headers should match case-insensitively.
  */
-PUBLIC int UCGetLYhndl_byMIME ARGS1(
-	CONST char *,	value)
+int UCGetLYhndl_byMIME (
+	const char *	value)
 {
     int i;
     int LYhndl = -1;
@@ -1529,9 +1529,9 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 /*
  *  We need to remember which ones were allocated and which are static.
  */
-PRIVATE CONST char ** remember_allocated_LYCharSets[MAXCHARSETS];
+static const char ** remember_allocated_LYCharSets[MAXCHARSETS];
 
-PRIVATE void UCreset_allocated_LYCharSets NOARGS
+static void UCreset_allocated_LYCharSets (void)
 {
     int i = 0;
 
@@ -1541,7 +1541,7 @@ PRIVATE void UCreset_allocated_LYCharSets NOARGS
 }
 
 #ifdef LY_FIND_LEAKS
-PRIVATE void UCfree_allocated_LYCharSets NOARGS
+static void UCfree_allocated_LYCharSets (void)
 {
     int i = 0;
 
@@ -1553,17 +1553,17 @@ PRIVATE void UCfree_allocated_LYCharSets NOARGS
 }
 #endif
 
-PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
-	int,		UC_charset_in_hndl,
-	unsigned,	lowest8)
+static const char ** UC_setup_LYCharSets_repl (
+	int		UC_charset_in_hndl,
+	unsigned	lowest8)
 {
-    CONST char **ISO_Latin1 = LYCharSets[0];
-    CONST char **p;
+    const char **ISO_Latin1 = LYCharSets[0];
+    const char **p;
     char **prepl;
-    CONST u16 *pp;
+    const u16 *pp;
     char **tp;
-    CONST char *s7;
-    CONST char *s8;
+    const char *s7;
+    const char *s8;
     size_t i;
     int j, changed;
     u16 k;
@@ -1633,7 +1633,7 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
 	return 0;
     }
 
-    p = (CONST char **)prepl;
+    p = (const char **)prepl;
     changed = 0;
     for (i = 0; i < HTML_dtd.number_of_entities; i++, p++) {
 	/*
@@ -1689,20 +1689,20 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
 	FREE(prepl);
 	return NULL;
     }
-    return (CONST char **)prepl;
+    return (const char **)prepl;
 }
 
 /*
  *  "New method" meets "Old method" ...
  */
-PRIVATE int UC_Register_with_LYCharSets ARGS4(
-	int,		s,
-	CONST char *,	UC_MIMEcharset,
-	CONST char *,	UC_LYNXcharset,
-	int,		lowest_eightbit)
+static int UC_Register_with_LYCharSets (
+	int		s,
+	const char *	UC_MIMEcharset,
+	const char *	UC_LYNXcharset,
+	int		lowest_eightbit)
 {
     int i, LYhndl, found;
-    CONST char **repl;
+    const char **repl;
 
     LYhndl = -1;
     if (LYNumCharsets == 0) {
@@ -1786,16 +1786,16 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
  *  This only sets up the structure - no initialization of the tables
  * is done here yet.
  */
-PUBLIC void UC_Charset_Setup ARGS9(
-	CONST char *,		UC_MIMEcharset,
-	CONST char *,		UC_LYNXcharset,
-	CONST u8 *,		unicount,
-	CONST u16 *,		unitable,
-	int,			nnuni,
-	struct unimapdesc_str,	replacedesc,
-	int,			lowest_eight,
-	int,			UC_rawuni,
-	int,			codepage)
+void UC_Charset_Setup (
+	const char *		UC_MIMEcharset,
+	const char *		UC_LYNXcharset,
+	const u8 *		unicount,
+	const u16 *		unitable,
+	int			nnuni,
+	struct unimapdesc_str	replacedesc,
+	int			lowest_eight,
+	int			UC_rawuni,
+	int			codepage)
 {
     int s, Gn;
     int i, status = 0, found;
@@ -1854,12 +1854,12 @@ PUBLIC void UC_Charset_Setup ARGS9(
  *  These are for character sets without any real tables of their own.
  *  We don't keep an entry in UCinfo[] for them.
  */
-PRIVATE int UC_NoUctb_Register_with_LYCharSets ARGS5(
-	CONST char *,	UC_MIMEcharset,
-	CONST char *,	UC_LYNXcharset,
-	int,		lowest_eightbit,
-	int,			UC_rawuni,
-	int,			codepage)
+static int UC_NoUctb_Register_with_LYCharSets (
+	const char *	UC_MIMEcharset,
+	const char *	UC_LYNXcharset,
+	int		lowest_eightbit,
+	int			UC_rawuni,
+	int			codepage)
 {
     int i, LYhndl = -1;
 
@@ -1920,13 +1920,13 @@ PRIVATE int UC_NoUctb_Register_with_LYCharSets ARGS5(
 /*
  *  A wrapper for the previous function.
  */
-PRIVATE void UC_Charset_NoUctb_Setup ARGS6(
-	CONST char *,		UC_MIMEcharset,
-	CONST char *,		UC_LYNXcharset,
-	int,			trydefault,
-	int,			lowest_eight,
-	int,			UC_rawuni,
-	int,			codepage)
+static void UC_Charset_NoUctb_Setup (
+	const char *		UC_MIMEcharset,
+	const char *		UC_LYNXcharset,
+	int			trydefault,
+	int			lowest_eight,
+	int			UC_rawuni,
+	int			codepage)
 {
     int i;
 
@@ -1955,7 +1955,7 @@ PRIVATE void UC_Charset_NoUctb_Setup ARGS6(
 }
 
 #ifdef LY_FIND_LEAKS
-PRIVATE void UCcleanup_mem NOARGS
+static void UCcleanup_mem (void)
 {
     int i;
 
@@ -1972,7 +1972,7 @@ PRIVATE void UCcleanup_mem NOARGS
 
 #ifdef CAN_AUTODETECT_DISPLAY_CHARSET
 #  ifdef __EMX__
-PRIVATE int CpOrdinal ARGS2 (CONST unsigned long, cp, CONST int, other)
+static int CpOrdinal (const unsigned long cp, const int other)
 {
     char lyName[80];
     char myMimeName[80];
@@ -2011,7 +2011,7 @@ PRIVATE int CpOrdinal ARGS2 (CONST unsigned long, cp, CONST int, other)
 #  endif /* __EMX__ */
 #endif /* CAN_AUTODETECT_DISPLAY_CHARSET */
 
-PUBLIC void UCInit NOARGS
+void UCInit (void)
 {
 
     UCreset_allocated_LYCharSets();
@@ -2122,7 +2122,7 @@ PUBLIC void UCInit NOARGS
  *  Safe variant of UCGetLYhndl_byMIME, with blind recovery from typo
  *  in user input: lynx.cfg, userdefs.h, command line switches.
  */
-PUBLIC int safeUCGetLYhndl_byMIME ARGS1 (CONST char *, value)
+int safeUCGetLYhndl_byMIME (const char * value)
 {
     int i = UCGetLYhndl_byMIME(value);
 
@@ -2184,7 +2184,7 @@ typedef int nl_item;
 
 static char buf[16];
 
-PRIVATE char *nl_langinfo(nl_item item)
+static char *nl_langinfo(nl_item item)
 {
   char *l, *p;
 
@@ -2264,7 +2264,7 @@ PRIVATE char *nl_langinfo(nl_item item)
  * Another possible thing to investigate is the locale_charset() function
  * provided in libiconv 1.5.1.
  */
-PUBLIC void LYFindLocaleCharset NOARGS
+void LYFindLocaleCharset (void)
 {
     CTRACE((tfp, "LYFindLocaleCharset(%d)\n", LYLocaleCharset));
     if (LYLocaleCharset) {

@@ -30,14 +30,14 @@
 #include <LYCharSets.h>
 #include <LYLeaks.h>
 
-PUBLIC int HTPlain_lastraw = -1;
-PRIVATE int HTPlain_bs_pending = 0; /* 1:bs 2:underline 3:underline+bs - kw */
+int HTPlain_lastraw = -1;
+static int HTPlain_bs_pending = 0; /* 1:bs 2:underline 3:underline+bs - kw */
 
 /*		HTML Object
 **		-----------
 */
 struct _HTStream {
-    CONST HTStreamClass *	isa;
+    const HTStreamClass *	isa;
     HText *			text;
     /*
     **	The node_anchor UCInfo and handle for the input (PARSER) stage. - FM
@@ -62,11 +62,11 @@ struct _HTStream {
     UCTransParams		T;
 };
 
-PRIVATE char replace_buf [64];	      /* buffer for replacement strings */
+static char replace_buf [64];	      /* buffer for replacement strings */
 
-PRIVATE void HTPlain_getChartransInfo ARGS2(
-	HTStream *,		me,
-	HTParentAnchor *,	anchor)
+static void HTPlain_getChartransInfo (
+	HTStream *		me,
+	HTParentAnchor *	anchor)
 {
     if (me->inUCLYhndl < 0) {
 	HTAnchor_copyUCInfoStage(anchor, UCT_STAGE_PARSER, UCT_STAGE_MIME,
@@ -97,17 +97,17 @@ PRIVATE void HTPlain_getChartransInfo ARGS2(
 **			A C T I O N	R O U T I N E S
 */
 
-PRIVATE void HTPlain_write PARAMS((
+static void HTPlain_write (
 	HTStream *		me,
-	CONST char *		s,
-	int			l));
+	const char *		s,
+	int			l);
 
 /*	Character handling
 **	------------------
 */
-PRIVATE void HTPlain_put_character ARGS2(
-	HTStream *,		me,
-	char,			c)
+static void HTPlain_put_character (
+	HTStream *		me,
+	char			c)
 {
 #ifdef REMOVE_CR_ONLY
     /*
@@ -158,7 +158,7 @@ PRIVATE void HTPlain_put_character ARGS2(
 	    !((me->outUCLYhndl == LATIN1) ||
 	      (me->outUCI->enc & (UCT_CP_SUPERSETOF_LAT1)))) {
 	    int len, high, low, i, diff = 1;
-	    CONST char * name;
+	    const char * name;
 	    UCode_t value = (UCode_t)FROMASCII((TOASCII(UCH(c)) - 160));
 
 	    name = HTMLGetEntityName(value);
@@ -190,12 +190,12 @@ PRIVATE void HTPlain_put_character ARGS2(
 **	---------------
 **
 */
-PRIVATE void HTPlain_put_string ARGS2(HTStream *, me, CONST char*, s)
+static void HTPlain_put_string (HTStream *  me, const char*  s)
 {
 #ifdef REMOVE_CR_ONLY
     HText_appendText(me->text, s);
 #else
-    CONST char * p;
+    const char * p;
 
     if (s == NULL)
 	return;
@@ -210,10 +210,10 @@ PRIVATE void HTPlain_put_string ARGS2(HTStream *, me, CONST char*, s)
 **	Entry function for displayed text/plain and WWW_SOURCE strings. - FM
 **	---------------------------------------------------------------
 */
-PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
+static void HTPlain_write (HTStream * me, const char* s, int l)
 {
-    CONST char * p;
-    CONST char * e = s+l;
+    const char * p;
+    const char * e = s+l;
     char c;
     unsigned c_unsign;
     BOOL chk;
@@ -661,8 +661,8 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 **	Note that the SGML parsing context is freed, but the created object is
 **	not, as it takes on an existence of its own unless explicitly freed.
 */
-PRIVATE void HTPlain_free ARGS1(
-	HTStream *,	me)
+static void HTPlain_free (
+	HTStream *	me)
 {
     if (HTPlain_bs_pending >= 2)
 	HText_appendCharacter(me->text, '_');
@@ -671,9 +671,9 @@ PRIVATE void HTPlain_free ARGS1(
 
 /*	End writing
 */
-PRIVATE void HTPlain_abort ARGS2(
-	HTStream *,	me,
-	HTError,	e GCC_UNUSED)
+static void HTPlain_abort (
+	HTStream *	me,
+	HTError	e GCC_UNUSED)
 {
     HTPlain_free(me);
 }
@@ -681,7 +681,7 @@ PRIVATE void HTPlain_abort ARGS2(
 /*		Structured Object Class
 **		-----------------------
 */
-PUBLIC CONST HTStreamClass HTPlain =
+const HTStreamClass HTPlain =
 {
 	"PlainPresenter",
 	HTPlain_free,
@@ -692,10 +692,10 @@ PUBLIC CONST HTStreamClass HTPlain =
 /*		New object
 **		----------
 */
-PUBLIC HTStream* HTPlainPresent ARGS3(
-	HTPresentation *,	pres GCC_UNUSED,
-	HTParentAnchor *,	anchor,
-	HTStream *,		sink GCC_UNUSED)
+HTStream* HTPlainPresent (
+	HTPresentation *	pres GCC_UNUSED,
+	HTParentAnchor *	anchor,
+	HTStream *		sink GCC_UNUSED)
 {
 
     HTStream* me = (HTStream*)malloc(sizeof(*me));

@@ -44,20 +44,20 @@ typedef struct {
     HTAAProt *	prot;
 } HTAAProtCache;
 
-PRIVATE HTList *  prot_cache	= NULL;	/* Protection setup cache.	*/
-PRIVATE HTAAProt *default_prot	= NULL;	/* Default protection.		*/
-PRIVATE HTAAProt *current_prot	= NULL;	/* Current protection mode	*/
+static HTList *  prot_cache	= NULL;	/* Protection setup cache.	*/
+static HTAAProt *default_prot	= NULL;	/* Default protection.		*/
+static HTAAProt *current_prot	= NULL;	/* Current protection mode	*/
 					/* which is set up by callbacks */
 					/* from the rule system when	*/
 					/* a "protect" rule is matched. */
 
 #ifndef NOUSERS
-/* PRIVATE							isNumber()
+/* static							isNumber()
 **		DOES A CHARACTER STRING REPRESENT A NUMBER
 */
-PRIVATE BOOL isNumber ARGS1(CONST char *, s)
+static BOOL isNumber (const char * s)
 {
-    CONST char *cur = s;
+    const char *cur = s;
 
     if (isEmpty(s)) return NO;
 
@@ -84,7 +84,7 @@ PRIVATE BOOL isNumber ARGS1(CONST char *, s)
 **	returns	the user name
 **		Default is "" (nobody).
 */
-PUBLIC char * HTAA_getUidName NOARGS
+char * HTAA_getUidName (void)
 {
     if (current_prot && current_prot->uid_name
 		  && (0 != strcmp(current_prot->uid_name,"nobody")) )
@@ -101,7 +101,7 @@ PUBLIC char * HTAA_getUidName NOARGS
 ** ON EXIT:
 **	returns	the filename
 */
-PUBLIC char * HTAA_getFileName NOARGS
+char * HTAA_getFileName (void)
 {
     if (current_prot && current_prot->filename)
        return(current_prot->filename);
@@ -120,7 +120,7 @@ PUBLIC char * HTAA_getFileName NOARGS
 **	returns	the uid number to give to setuid() system call.
 **		Default is 65534 (nobody).
 */
-PUBLIC int HTAA_getUid NOARGS
+int HTAA_getUid (void)
 {
     int uid;
 
@@ -159,7 +159,7 @@ PUBLIC int HTAA_getUid NOARGS
 **	returns	the uid number to give to setgid() system call.
 **		Default is 65534 (nogroup).
 */
-PUBLIC int HTAA_getGid NOARGS
+int HTAA_getGid (void)
 {
     int gid;
 
@@ -190,7 +190,7 @@ PUBLIC int HTAA_getGid NOARGS
 #endif /* not VMS */
 
 
-/* PRIVATE							HTAA_setIds()
+/* static							HTAA_setIds()
 **		SET UID AND GID (AS NAMES OR NUMBERS)
 **		TO HTAAProt STRUCTURE
 ** ON ENTRY:
@@ -201,8 +201,8 @@ PUBLIC int HTAA_getGid NOARGS
 ** ON EXIT:
 **	returns		nothing.
 */
-PRIVATE void HTAA_setIds ARGS2(HTAAProt *,	prot,
-			       CONST char *,	ids)
+static void HTAA_setIds (HTAAProt *	prot,
+			       const char *	ids)
 {
     if (ids) {
 	char *local_copy = NULL;
@@ -227,7 +227,7 @@ PRIVATE void HTAA_setIds ARGS2(HTAAProt *,	prot,
 }
 
 
-/* PRIVATE						HTAA_parseProtFile()
+/* static						HTAA_parseProtFile()
 **		PARSE A PROTECTION SETUP FILE AND
 **		PUT THE RESULT IN A HTAAProt STRUCTURE
 ** ON ENTRY:
@@ -237,8 +237,8 @@ PRIVATE void HTAA_setIds ARGS2(HTAAProt *,	prot,
 ** ON EXIT:
 **	returns		nothing.
 */
-PRIVATE void HTAA_parseProtFile ARGS2(HTAAProt *, prot,
-				      FILE *,	  fp)
+static void HTAA_parseProtFile (HTAAProt * prot,
+				      FILE *	  fp)
 {
     if (prot && fp) {
 	LexItem lex_item;
@@ -335,7 +335,7 @@ PRIVATE void HTAA_parseProtFile ARGS2(HTAAProt *, prot,
 }
 
 
-/* PRIVATE						HTAAProt_new()
+/* static						HTAAProt_new()
 **		ALLOCATE A NEW HTAAProt STRUCTURE AND
 **		INITIALIZE IT FROM PROTECTION SETUP FILE
 ** ON ENTRY:
@@ -361,9 +361,9 @@ PRIVATE void HTAA_parseProtFile ARGS2(HTAAProt *, prot,
 **			in cache), only sets uid_name and gid
 **			fields, and returns that.
 */
-PRIVATE HTAAProt *HTAAProt_new ARGS3(CONST char *,	cur_docname,
-				     CONST char *,	prot_filename,
-				     CONST char *,	ids)
+static HTAAProt *HTAAProt_new (const char *	cur_docname,
+				     const char *	prot_filename,
+				     const char *	ids)
 {
     HTList *cur = prot_cache;
     HTAAProtCache *cache_item = NULL;
@@ -439,9 +439,9 @@ PRIVATE HTAAProt *HTAAProt_new ARGS3(CONST char *,	cur_docname,
 **	returns		nothing.
 **			Sets the module-wide variable default_prot.
 */
-PUBLIC void HTAA_setDefaultProtection ARGS3(CONST char *,	cur_docname,
-					    CONST char *,	prot_filename,
-					    CONST char *,	ids)
+void HTAA_setDefaultProtection (const char *	cur_docname,
+					    const char *	prot_filename,
+					    const char *	ids)
 {
     default_prot = NULL;	/* Not free()'d because this is in cache */
 
@@ -474,9 +474,9 @@ PUBLIC void HTAA_setDefaultProtection ARGS3(CONST char *,	cur_docname,
 **	returns		nothing.
 **			Sets the module-wide variable current_prot.
 */
-PUBLIC void HTAA_setCurrentProtection ARGS3(CONST char *,	cur_docname,
-					    CONST char *,	prot_filename,
-					    CONST char *,	ids)
+void HTAA_setCurrentProtection (const char *	cur_docname,
+					    const char *	prot_filename,
+					    const char *	ids)
 {
     current_prot = NULL;	/* Not free()'d because this is in cache */
 
@@ -514,7 +514,7 @@ PUBLIC void HTAA_setCurrentProtection ARGS3(CONST char *,	cur_docname,
 **		protection setup of the HTTranslate()'d file.
 **		This must not be free()'d.
 */
-PUBLIC HTAAProt *HTAA_getCurrentProtection NOARGS
+HTAAProt *HTAA_getCurrentProtection (void)
 {
     return current_prot;
 }
@@ -543,7 +543,7 @@ PUBLIC HTAAProt *HTAA_getCurrentProtection NOARGS
 **	the file is in fact protected and sets the current
 **	protection mode to default.
 */
-PUBLIC HTAAProt *HTAA_getDefaultProtection NOARGS
+HTAAProt *HTAA_getDefaultProtection (void)
 {
     if (!current_prot) {
 	current_prot = default_prot;
@@ -564,7 +564,7 @@ PUBLIC HTAAProt *HTAA_getDefaultProtection NOARGS
 **	returns	nothing.
 **		Frees the memory used by protection information.
 */
-PUBLIC void HTAA_clearProtections NOARGS
+void HTAA_clearProtections (void)
 {
     current_prot = NULL;	/* These are not freed because	*/
     default_prot = NULL;	/* they are actually in cache.	*/
@@ -576,13 +576,13 @@ typedef struct {
 	} USER_DATA;
 
 #ifndef NOUSERS
-PRIVATE HTList *known_grp = NULL;
-PRIVATE HTList *known_pwd = NULL;
-PRIVATE BOOL uidgid_cache_inited = NO;
+static HTList *known_grp = NULL;
+static HTList *known_pwd = NULL;
+static BOOL uidgid_cache_inited = NO;
 #endif
 
 #ifdef LY_FIND_LEAKS
-PRIVATE void clear_uidgid_cache NOARGS
+static void clear_uidgid_cache (void)
 {
 #ifndef NOUSERS
     USER_DATA *data;
@@ -605,7 +605,7 @@ PRIVATE void clear_uidgid_cache NOARGS
 #endif /* LY_FIND_LEAKS */
 
 #ifndef NOUSERS
-PRIVATE void save_gid_info ARGS2(char *, name, int, user)
+static void save_gid_info (char * name, int user)
 {
     USER_DATA *data = typecalloc(USER_DATA);
     if (!data)
@@ -626,7 +626,7 @@ PRIVATE void save_gid_info ARGS2(char *, name, int, user)
 #endif /* NOUSERS */
 
 #ifndef NOUSERS
-PRIVATE void save_uid_info ARGS2(char *, name, int, user)
+static void save_uid_info (char * name, int user)
 {
     USER_DATA *data = typecalloc(USER_DATA);
     if (!data)
@@ -654,7 +654,7 @@ PRIVATE void save_uid_info ARGS2(char *, name, int, user)
 ** ON EXIT:
 **      returns the user name, or an empty string if not found.
 */
-PUBLIC char * HTAA_UidToName ARGS1(int, uid)
+char * HTAA_UidToName (int uid)
 {
 #ifndef NOUSERS
     struct passwd *pw;
@@ -687,7 +687,7 @@ PUBLIC char * HTAA_UidToName ARGS1(int, uid)
 ** ON EXIT:
 **      returns the user id, or NONESUCH if not found.
 */
-PUBLIC int HTAA_NameToUid ARGS1(char *, name)
+int HTAA_NameToUid (char * name)
 {
 #ifndef NOUSERS
     struct passwd *pw;
@@ -719,7 +719,7 @@ PUBLIC int HTAA_NameToUid ARGS1(char *, name)
 ** ON EXIT:
 **      returns the group name, or an empty string if not found.
 */
-PUBLIC char * HTAA_GidToName ARGS1(int, gid)
+char * HTAA_GidToName (int gid)
 {
 #ifndef NOUSERS
     struct group *gr;
@@ -752,7 +752,7 @@ PUBLIC char * HTAA_GidToName ARGS1(int, gid)
 ** ON EXIT:
 **      returns the group id, or NONESUCH if not found.
 */
-PUBLIC int HTAA_NameToGid ARGS1(char *, name)
+int HTAA_NameToGid (char * name)
 {
 #ifndef NOUSERS
     struct group *gr;

@@ -108,6 +108,8 @@ do_chartrans_stuff:
 		SITE_DEFS="$(SITE_DEFS)" \
 		BUILD_CFLAGS="$(BUILD_CFLAGS)" \
 		BUILD_CPPFLAGS="$(BUILD_CPPFLAGS)" \
+		BUILD_LDFLAGS="$(BUILD_LDFLAGS)" \
+		BUILD_LIBS="$(BUILD_LIBS)" \
 		BUILD_CC="$(BUILD_CC)" tables
 
 lint:

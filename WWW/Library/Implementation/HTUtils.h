@@ -66,11 +66,10 @@ char *alloca ();
 #define DISP_PARTIAL	/* experimental */
 #endif
 
-#if defined(__STDC__) || defined(VMS) || defined(_WINDOWS)
+/* since 2.8.6dev.1, Lynx requires an ANSI C (c89) compiler */
 #define ANSI_VARARGS 1
 #undef HAVE_STDARG_H
 #define HAVE_STDARG_H 1
-#endif
 
 #if defined(VMS) || defined(_WINDOWS)
 #define HAVE_STDLIB_H 1
@@ -154,10 +153,8 @@ char *alloca ();
 #define	GCC_UNUSED /* nothing */
 #endif
 
-/* FIXME: need a configure-test */
-#if defined(__STDC__) || defined(__DECC) || defined(_WINDOWS) || _WIN_CC
+/* since 2.8.6dev.1, Lynx requires an ANSI C (c89) compiler */
 #define ANSI_PREPRO 1
-#endif
 
 #if defined(__CYGWIN32__) && ! defined(__CYGWIN__)
 #define __CYGWIN__ 1
@@ -282,72 +279,6 @@ Standard C library for malloc() etc
 #endif /* VAXC && !__DECC */
 
 #endif /* !VMS */
-
-/*
-
-Macros for declarations
-
- */
-#define PUBLIC                  /* Accessible outside this module     */
-#define PRIVATE static          /* Accessible only within this module */
-
-#if defined(__STDC__) || defined(__BORLANDC__) || defined(_MSC_VER)
-#define CONST const             /* "const" only exists in STDC */
-#define NOPARAMS (void)
-#define PARAMS(parameter_list) parameter_list
-#define NOARGS (void)
-#define ARGS1(t,a) \
-                (t a)
-#define ARGS2(t,a,u,b) \
-                (t a, u b)
-#define ARGS3(t,a,u,b,v,c) \
-                (t a, u b, v c)
-#define ARGS4(t,a,u,b,v,c,w,d) \
-                (t a, u b, v c, w d)
-#define ARGS5(t,a,u,b,v,c,w,d,x,e) \
-                (t a, u b, v c, w d, x e)
-#define ARGS6(t,a,u,b,v,c,w,d,x,e,y,f) \
-                (t a, u b, v c, w d, x e, y f)
-#define ARGS7(t,a,u,b,v,c,w,d,x,e,y,f,z,g) \
-                (t a, u b, v c, w d, x e, y f, z g)
-#define ARGS8(t,a,u,b,v,c,w,d,x,e,y,f,z,g,s,h) \
-                (t a, u b, v c, w d, x e, y f, z g, s h)
-#define ARGS9(t,a,u,b,v,c,w,d,x,e,y,f,z,g,s,h,r,i) \
-                (t a, u b, v c, w d, x e, y f, z g, s h, r i)
-#define ARGS10(t,a,u,b,v,c,w,d,x,e,y,f,z,g,s,h,r,i,q,j) \
-                (t a, u b, v c, w d, x e, y f, z g, s h, r i, q j)
-
-#else  /* not ANSI */
-
-#ifndef _WINDOWS
-#define CONST
-#endif
-#define NOPARAMS ()
-#define PARAMS(parameter_list) ()
-#define NOARGS ()
-#define ARGS1(t,a) (a) \
-                t a;
-#define ARGS2(t,a,u,b) (a,b) \
-                t a; u b;
-#define ARGS3(t,a,u,b,v,c) (a,b,c) \
-                t a; u b; v c;
-#define ARGS4(t,a,u,b,v,c,w,d) (a,b,c,d) \
-                t a; u b; v c; w d;
-#define ARGS5(t,a,u,b,v,c,w,d,x,e) (a,b,c,d,e) \
-                t a; u b; v c; w d; x e;
-#define ARGS6(t,a,u,b,v,c,w,d,x,e,y,f) (a,b,c,d,e,f) \
-                t a; u b; v c; w d; x e; y f;
-#define ARGS7(t,a,u,b,v,c,w,d,x,e,y,f,z,g) (a,b,c,d,e,f,g) \
-                t a; u b; v c; w d; x e; y f; z g;
-#define ARGS8(t,a,u,b,v,c,w,d,x,e,y,f,z,g,s,h) (a,b,c,d,e,f,g,h) \
-                t a; u b; v c; w d; x e; y f; z g; s h;
-#define ARGS9(t,a,u,b,v,c,w,d,x,e,y,f,z,g,s,h,r,i) (a,b,c,d,e,f,g,h,i) \
-                t a; u b; v c; w d; x e; y f; z g; s h; r i;
-#define ARGS10(t,a,u,b,v,c,w,d,x,e,y,f,z,g,s,h,r,i,q,j) (a,b,c,d,e,f,g,h,i,j) \
-                t a; u b; v c; w d; x e; y f; z g; s h; r i; q j;
-
-
-#endif /* __STDC__ (ANSI) */
 
 #ifndef NULL
 #define NULL ((void *)0)
@@ -501,7 +432,7 @@ Out Of Memory checking for malloc() return:
 
 #include <LYexit.h>
 
-extern void outofmem PARAMS((CONST char *fname, CONST char *func));
+extern void outofmem (const char *fname, const char *func);
 
 /*
  * Upper- and Lowercase macros
@@ -523,9 +454,9 @@ extern void outofmem PARAMS((CONST char *fname, CONST char *func));
 #define TOUPPER(c) ascii_toupper(UCH(c))
 #define ISUPPER(c) ascii_isupper(UCH(c))
 
-extern int ascii_toupper PARAMS((int));
-extern int ascii_tolower PARAMS((int));
-extern int ascii_isupper PARAMS((int));
+extern int ascii_toupper (int);
+extern int ascii_tolower (int);
+extern int ascii_isupper (int);
 
 #else
 
@@ -587,7 +518,7 @@ extern int WWW_TraceMask;
 #define CTRACE_SLEEP(secs) if (TRACE && LYTraceLogFP == 0) sleep(secs)
 #define CTRACE_FLUSH(fp)   if (TRACE) fflush(fp)
 
-extern FILE *TraceFP NOPARAMS;
+extern FILE *TraceFP (void);
 
 #include <www_tcp.h>
 
@@ -670,9 +601,9 @@ extern FILE *TraceFP NOPARAMS;
 
 #undef free_func
 
-extern SSL * HTGetSSLHandle NOPARAMS;
-extern void HTSSLInitPRNG NOPARAMS;
-extern char HTGetSSLCharacter PARAMS((void * handle));
+extern SSL * HTGetSSLHandle (void);
+extern void HTSSLInitPRNG (void);
+extern char HTGetSSLCharacter (void * handle);
 
 #endif /* USE_SSL */
 

@@ -17,14 +17,14 @@ typedef struct {
 } HTAssoc;
 
 
-PUBLIC HTAssocList *HTAssocList_new NOPARAMS;
-PUBLIC void HTAssocList_delete PARAMS((HTAssocList * alist));
+extern HTAssocList *HTAssocList_new (void);
+extern void HTAssocList_delete (HTAssocList * alist);
 
-PUBLIC void HTAssocList_add PARAMS((HTAssocList *       alist,
-                                    CONST char *        name,
-                                    CONST char *        value));
+extern void HTAssocList_add (HTAssocList *       alist,
+                                    const char *        name,
+                                    const char *        value);
 
-PUBLIC char *HTAssocList_lookup PARAMS((HTAssocList *   alist,
-                                        CONST char *    name));
+extern char *HTAssocList_lookup (HTAssocList *   alist,
+                                        const char *    name);
 
 #endif /* not HTASSOC_H */

@@ -97,8 +97,8 @@ extern HTFormat HTOutputFormat;         /* To convert on load, set this */
 **  Use "*" to override all proxy service:
 **	     no_proxy="*"
 */
-extern BOOL override_proxy PARAMS((
-	CONST char *	addr));
+extern BOOL override_proxy (
+	const char *	addr);
 
 /*
 
@@ -113,9 +113,9 @@ Load a document from relative name
   NO                      Failure
 
  */
-extern  BOOL HTLoadRelative PARAMS((
-		CONST char *		relative_name,
-		HTParentAnchor *	here));
+extern  BOOL HTLoadRelative (
+		const char *		relative_name,
+		HTParentAnchor *	here);
 
 
 /*
@@ -131,7 +131,7 @@ Load a document from absolute name
   NO                      Failure
 
  */
-extern BOOL HTLoadAbsolute PARAMS((CONST DocAddress * addr));
+extern BOOL HTLoadAbsolute (const DocAddress * addr);
 
 
 /*
@@ -149,8 +149,8 @@ Load a document from absolute name to a stream
    Note: This is equivalent to HTLoadDocument
 
  */
-extern BOOL HTLoadToStream PARAMS((CONST char * addr, BOOL filter_it,
-				HTStream * sink));
+extern BOOL HTLoadToStream (const char * addr, BOOL filter_it,
+				HTStream * sink);
 
 
 /*
@@ -165,7 +165,7 @@ Load if necessary, and select an anchor
   returns NO              Failure
 
  */
-extern BOOL HTLoadAnchor PARAMS((HTAnchor * destination));
+extern BOOL HTLoadAnchor (HTAnchor * destination);
 
 
 /*
@@ -179,7 +179,7 @@ Make a stream for Saving object back
   returns                 0 if error else a stream to save the object to.
 
  */
-extern HTStream * HTSaveStream PARAMS((HTParentAnchor * anchor));
+extern HTStream * HTSaveStream (HTParentAnchor * anchor);
 
 
 /*
@@ -194,7 +194,7 @@ Search
   here                    The anchor of the object being searched
 
  */
-extern BOOL HTSearch PARAMS((CONST char * keywords, HTParentAnchor* here));
+extern BOOL HTSearch (const char * keywords, HTParentAnchor* here);
 
 
 /*
@@ -209,9 +209,9 @@ Search Given Indexname
   *indexname              is name of object search is to be done on.
 
  */
-extern BOOL HTSearchAbsolute PARAMS((
-	CONST char *	keywords,
-	char *		indexname));
+extern BOOL HTSearchAbsolute (
+	const char *	keywords,
+	char *		indexname);
 
 
 /*
@@ -223,17 +223,17 @@ Register an access method
 typedef struct _HTProtocol {
 	char * name;
 
-	int (*load)PARAMS((
-		CONST char *	full_address,
+	int (*load)(
+		const char *	full_address,
 		HTParentAnchor * anchor,
 		HTFormat	format_out,
-		HTStream*	sink));
+		HTStream*	sink);
 
-	HTStream* (*saveStream)PARAMS((HTParentAnchor * anchor));
+	HTStream* (*saveStream)(HTParentAnchor * anchor);
 
 } HTProtocol;
 
-extern BOOL HTRegisterProtocol PARAMS((HTProtocol * protocol));
+extern BOOL HTRegisterProtocol (HTProtocol * protocol);
 
 
 /*
@@ -248,25 +248,25 @@ Generate the anchor for the home page
    This is a default algorithm -- browser don't HAVE to use this.
 
  */
-extern HTParentAnchor * HTHomeAnchor NOPARAMS;
+extern HTParentAnchor * HTHomeAnchor (void);
 
 /*
 
 Return Host Name
 
  */
-extern CONST char * HTHostName NOPARAMS;
+extern const char * HTHostName (void);
 
 /*
 
 For registering protocols supported by Lynx
 
 */
-extern void LYRegisterLynxProtocols NOARGS;
+extern void LYRegisterLynxProtocols (void);
 
-extern void LYUCPushAssumed PARAMS((
-    HTParentAnchor *	anchor));
-extern int LYUCPopAssumed NOPARAMS;
+extern void LYUCPushAssumed (
+    HTParentAnchor *	anchor);
+extern int LYUCPopAssumed (void);
 
 extern BOOL using_proxy;	/* Are we using an NNTP proxy? */
 

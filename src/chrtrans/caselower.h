@@ -28,7 +28,7 @@ typedef struct {
 	u16 lower;
 } unipair;
 
-static CONST unipair unicode_to_lower_case[] =
+static const unipair unicode_to_lower_case[] =
 {
   {0x0041, 0x0061},  /* LATIN CAPITAL LETTER A */
   {0x0042, 0x0062},  /* LATIN CAPITAL LETTER B */

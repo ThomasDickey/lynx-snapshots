@@ -25,16 +25,16 @@
 #define CTRL_W_HACK 23  /* CTRL-W refresh without clearok */
 #endif /* VMS && !USE_SLANG */
 
-PRIVATE int form_getstr PARAMS((
+static int form_getstr (
 	int		cur,
 	BOOLEAN		use_last_tfpos,
-	BOOLEAN		redraw_only));
+	BOOLEAN		redraw_only);
 
 /*
  * Returns an array of pointers to the given list
  */
-PRIVATE char ** options_list ARGS1(
-	OptionType *,	opt_ptr)
+static char ** options_list (
+	OptionType *	opt_ptr)
 {
     char **result = 0;
     size_t len;
@@ -58,13 +58,13 @@ PRIVATE char ** options_list ARGS1(
     return result;
 }
 
-PUBLIC int change_form_link_ex ARGS6(
-	int,		cur,
-	DocInfo *,	newdoc,
-	BOOLEAN *,	refresh_screen,
-	BOOLEAN,	use_last_tfpos,
-	BOOLEAN,	immediate_submit,
-	BOOLEAN,	redraw_only)
+int change_form_link_ex (
+	int		cur,
+	DocInfo *	newdoc,
+	BOOLEAN *	refresh_screen,
+	BOOLEAN	use_last_tfpos,
+	BOOLEAN	immediate_submit,
+	BOOLEAN	redraw_only)
 {
     FormInfo *form = links[cur].l_form;
     char *link_name = form->name;
@@ -107,7 +107,7 @@ PUBLIC int change_form_link_ex ARGS6(
 		dummy = LYhandlePopupList(form->num_value,
 					  links[cur].ly,
 					  links[cur].lx,
-					  (CONST char **)my_data,
+					  (const char **)my_data,
 					  form->size,
 					  form->size_l,
 					  form->disabled,
@@ -125,7 +125,7 @@ PUBLIC int change_form_link_ex ARGS6(
 	    form->num_value = LYhandlePopupList(form->num_value,
 						links[cur].ly,
 						links[cur].lx,
-						(CONST char **)my_data,
+						(const char **)my_data,
 						form->size,
 						form->size_l,
 						form->disabled,
@@ -342,12 +342,12 @@ PUBLIC int change_form_link_ex ARGS6(
     return(c);
 }
 
-PUBLIC int change_form_link ARGS5(
-	int,		cur,
-	DocInfo *,	newdoc,
-	BOOLEAN *,	refresh_screen,
-	BOOLEAN,	use_last_tfpos,
-	BOOLEAN,	immediate_submit)
+int change_form_link (
+	int		cur,
+	DocInfo *	newdoc,
+	BOOLEAN *	refresh_screen,
+	BOOLEAN	use_last_tfpos,
+	BOOLEAN	immediate_submit)
 {
     /*pass all our args and FALSE as last arg*/
     return change_form_link_ex(cur,
@@ -358,18 +358,18 @@ PUBLIC int change_form_link ARGS5(
 			       FALSE /*redraw_only*/ );
 }
 
-PRIVATE int LastTFPos = -1;	/* remember last text field position */
+static int LastTFPos = -1;	/* remember last text field position */
 
-PRIVATE void LYSetLastTFPos ARGS1(
-    int,	pos)
+static void LYSetLastTFPos (
+    int	pos)
 {
     LastTFPos = pos;
 }
 
-PRIVATE int form_getstr ARGS3(
-	int,		cur,
-	BOOLEAN,	use_last_tfpos,
-	BOOLEAN,	redraw_only)
+static int form_getstr (
+	int		cur,
+	BOOLEAN	use_last_tfpos,
+	BOOLEAN	redraw_only)
 {
     FormInfo *form = links[cur].l_form;
     char *value = form->value;
@@ -854,9 +854,9 @@ again:
 /*
  *  Display statusline info tailored for the current form field.
  */
-PUBLIC void show_formlink_statusline ARGS2(
-    CONST FormInfo *,	form,
-    int,		for_what)
+void show_formlink_statusline (
+    const FormInfo *	form,
+    int		for_what)
 {
     switch(form->type) {
     case F_PASSWORD_TYPE:

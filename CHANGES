@@ -1,6 +1,19 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2004-04-27 (2.8.6dev.2)
+* modify CF_NCURSES_LIBS to only look for -lmytinfo when building with ncurses.
+  This works around FreeBSD's broken linker semantics when configuring for
+  ncursesw -TD
+* update CF_GNUTLS macro to look for -lgnutls-openssl as well as the older
+  -lgnutls-extra library -TD
+* fix a spurious match of <openssl/ssl.h> when --with-ssl=path option provides
+  enough information to ensure that the test would be incorrect -TD
+* update config.guess (2004-02-16), config.sub (2004-02-23)
+* fixes to src/chrtrans/makefile.in, e.g., for building PDCurses version,
+  broken by dev.1 changes for cross-compiling -TD
+* remove macros such as ARGS1, NOPARM which supported K&R compilers -TD
+
 2004-04-19 (2.8.6dev.1)
 * correct ifdef in LYgetattrs() to ensure that getattrs() is used only if the
   configure script actually found it (report/patch by Paul Gilmartin).

@@ -7,42 +7,42 @@
 
 typedef long UCode_t;
 
-extern int UCTransUniChar PARAMS((
+extern int UCTransUniChar (
 	UCode_t		unicode,
-	int		charset_out));
-extern int UCTransUniCharStr PARAMS((
+	int		charset_out);
+extern int UCTransUniCharStr (
 	char *		outbuf,
 	int		buflen,
 	UCode_t		unicode,
 	int		charset_out,
-	int		chk_single_flag));
-extern int UCTransChar PARAMS((
+	int		chk_single_flag);
+extern int UCTransChar (
 	char		ch_in,
 	int		charset_in,
-	int		charset_out));
-extern int UCReverseTransChar PARAMS((
+	int		charset_out);
+extern int UCReverseTransChar (
 	char		ch_out,
 	int		charset_in,
-	int		charset_out));
-extern int UCTransCharStr PARAMS((
+	int		charset_out);
+extern int UCTransCharStr (
 	char *		outbuf,
 	int		buflen,
 	char		ch_in,
 	int		charset_in,
 	int		charset_out,
-	int		chk_single_flag));
-extern UCode_t UCTransToUni PARAMS((
+	int		chk_single_flag);
+extern UCode_t UCTransToUni (
 	char		ch_in,
-	int		charset_in));
-extern int UCGetRawUniMode_byLYhndl PARAMS((
-	int		i));
-extern int UCGetLYhndl_byMIME PARAMS((
-	CONST char *	p)); /* returns -1 if name not recognized */
-extern int safeUCGetLYhndl_byMIME PARAMS((
-	CONST char *	p)); /* returns LATIN1 if name not recognized */
+	int		charset_in);
+extern int UCGetRawUniMode_byLYhndl (
+	int		i);
+extern int UCGetLYhndl_byMIME (
+	const char *	p); /* returns -1 if name not recognized */
+extern int safeUCGetLYhndl_byMIME (
+	const char *	p); /* returns LATIN1 if name not recognized */
 
 #ifdef EXP_LOCALE_CHARSET
-extern void LYFindLocaleCharset NOPARAMS;
+extern void LYFindLocaleCharset (void);
 #endif
 
 extern int UCLYhndl_for_unspec;

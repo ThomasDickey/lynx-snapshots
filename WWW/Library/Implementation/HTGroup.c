@@ -70,9 +70,9 @@ typedef struct {
 
 
 
-PRIVATE void syntax_error ARGS3(FILE *,	 fp,
-				char *,	 msg,
-				LexItem, lex_item)
+static void syntax_error (FILE *	 fp,
+				char *	 msg,
+				LexItem lex_item)
 {
     char buffer[41];
     int cnt = 0;
@@ -89,7 +89,7 @@ PRIVATE void syntax_error ARGS3(FILE *,	 fp,
 }
 
 
-PRIVATE AddressDefList *parse_address_part ARGS1(FILE *, fp)
+static AddressDefList *parse_address_part (FILE *  fp)
 {
     AddressDefList *address_def_list = NULL;
     LexItem lex_item;
@@ -146,7 +146,7 @@ PRIVATE AddressDefList *parse_address_part ARGS1(FILE *, fp)
 }
 
 
-PRIVATE UserDefList *parse_user_part ARGS1(FILE *, fp)
+static UserDefList *parse_user_part (FILE *  fp)
 {
     UserDefList *user_def_list = NULL;
     LexItem lex_item;
@@ -202,7 +202,7 @@ PRIVATE UserDefList *parse_user_part ARGS1(FILE *, fp)
 }
 
 
-PRIVATE Item *parse_item ARGS1(FILE *, fp)
+static Item *parse_item (FILE *  fp)
 {
     Item *item = NULL;
     UserDefList *user_def_list = NULL;
@@ -248,7 +248,7 @@ PRIVATE Item *parse_item ARGS1(FILE *, fp)
 }
 
 
-PRIVATE ItemList *parse_item_list ARGS1(FILE *, fp)
+static ItemList *parse_item_list (FILE *  fp)
 {
     ItemList *item_list = HTList_new();
     Item *item;
@@ -279,7 +279,7 @@ PRIVATE ItemList *parse_item_list ARGS1(FILE *, fp)
 }
 
 
-PUBLIC GroupDef *HTAA_parseGroupDef ARGS1(FILE *, fp)
+GroupDef *HTAA_parseGroupDef (FILE *  fp)
 {
     ItemList *item_list = NULL;
     GroupDef *group_def = NULL;
@@ -302,7 +302,7 @@ PUBLIC GroupDef *HTAA_parseGroupDef ARGS1(FILE *, fp)
 }
 
 
-PRIVATE GroupDef *parse_group_decl ARGS1(FILE *, fp)
+static GroupDef *parse_group_decl (FILE *  fp)
 {
     char *group_name = NULL;
     GroupDef *group_def = NULL;
@@ -340,8 +340,8 @@ PRIVATE GroupDef *parse_group_decl ARGS1(FILE *, fp)
 ** Group manipulation routines
 */
 
-PRIVATE GroupDef *find_group_def ARGS2(GroupDefList *,	group_list,
-				       CONST char *,	group_name)
+static GroupDef *find_group_def (GroupDefList *	group_list,
+				       const char *	group_name)
 {
     if (group_list && group_name) {
 	GroupDefList *cur = group_list;
@@ -357,8 +357,8 @@ PRIVATE GroupDef *find_group_def ARGS2(GroupDefList *,	group_list,
 }
 
 
-PUBLIC void HTAA_resolveGroupReferences ARGS2(GroupDef *,	group_def,
-					      GroupDefList *,	group_def_list)
+void HTAA_resolveGroupReferences (GroupDef *	group_def,
+					      GroupDefList *	group_def_list)
 {
     if (group_def && group_def->item_list && group_def_list) {
 	ItemList *cur1 = group_def->item_list;
@@ -377,15 +377,15 @@ PUBLIC void HTAA_resolveGroupReferences ARGS2(GroupDef *,	group_def,
 }
 
 
-PRIVATE void add_group_def ARGS2(GroupDefList *, group_def_list,
-				 GroupDef *,	 group_def)
+static void add_group_def (GroupDefList * group_def_list,
+				 GroupDef *	 group_def)
 {
     HTAA_resolveGroupReferences(group_def, group_def_list);
     HTList_addObject(group_def_list, (void*)group_def);
 }
 
 
-PRIVATE GroupDefList *parse_group_file ARGS1(FILE *, fp)
+static GroupDefList *parse_group_file (FILE *  fp)
 {
     GroupDefList *group_def_list = HTList_new();
     GroupDef *group_def;
@@ -401,7 +401,7 @@ PRIVATE GroupDefList *parse_group_file ARGS1(FILE *, fp)
 ** Trace functions
 */
 
-PRIVATE void print_item ARGS1(Item *, item)
+static void print_item (Item *  item)
 {
     if (!item)
 	fprintf(tfp, "\tNULL-ITEM\n");
@@ -430,7 +430,7 @@ PRIVATE void print_item ARGS1(Item *, item)
 }
 
 
-PRIVATE void print_item_list ARGS1(ItemList *, item_list)
+static void print_item_list (ItemList *  item_list)
 {
     ItemList *cur = item_list;
     Item *item;
@@ -442,7 +442,7 @@ PRIVATE void print_item_list ARGS1(ItemList *, item_list)
 }
 
 
-PUBLIC void HTAA_printGroupDef ARGS1(GroupDef *, group_def)
+void HTAA_printGroupDef (GroupDef *  group_def)
 {
     if (!group_def) {
 	fprintf(tfp, "\nNULL RECORD\n");
@@ -457,7 +457,7 @@ PUBLIC void HTAA_printGroupDef ARGS1(GroupDef *, group_def)
 }
 
 
-PRIVATE void print_group_def_list ARGS1(GroupDefList *, group_list)
+static void print_group_def_list (GroupDefList *  group_list)
 {
     GroupDefList *cur = group_list;
     GroupDef *group_def;
@@ -472,7 +472,7 @@ PRIVATE void print_group_def_list ARGS1(GroupDefList *, group_list)
 ** IP address template matching
 */
 
-/* PRIVATE						part_match()
+/* static						part_match()
 **		MATCH ONE PART OF INET ADDRESS AGAIST
 **		A PART OF MASK (inet address has 4 parts)
 ** ON ENTRY:
@@ -483,12 +483,12 @@ PRIVATE void print_group_def_list ARGS1(GroupDefList *, group_list)
 ** ON EXIT:
 **	returns	YES, if match.
 */
-PRIVATE BOOL part_match ARGS2(CONST char *, tcur,
-			      CONST char *, icur)
+static BOOL part_match (const char * tcur,
+			      const char * icur)
 {
     char required[4];
     char actual[4];
-    CONST char *cur;
+    const char *cur;
     int cnt;
     BOOL status;
 
@@ -515,7 +515,7 @@ PRIVATE BOOL part_match ARGS2(CONST char *, tcur,
 
 
 
-/* PRIVATE						ip_number_match()
+/* static						ip_number_match()
 **		MATCH INET NUMBER AGAINST AN INET NUMBER MASK
 ** ON ENTRY:
 **	template	mask to match agaist, e.g., 128.141.*.*
@@ -524,11 +524,11 @@ PRIVATE BOOL part_match ARGS2(CONST char *, tcur,
 ** ON EXIT:
 **	returns		YES, if match;  NO, if not.
 */
-PRIVATE BOOL ip_number_match ARGS2(CONST char *,	template,
-				   CONST char *,	the_inet_addr)
+static BOOL ip_number_match (const char *	template,
+				   const char *	the_inet_addr)
 {
-    CONST char *tcur = template;
-    CONST char *icur = the_inet_addr;
+    const char *tcur = template;
+    const char *icur = the_inet_addr;
     int cnt;
 
     for (cnt=0; cnt<4; cnt++) {
@@ -542,7 +542,7 @@ PRIVATE BOOL ip_number_match ARGS2(CONST char *,	template,
 
 
 
-/* PRIVATE						is_domain_mask()
+/* static						is_domain_mask()
 **		DETERMINE IF A GIVEN MASK IS A
 **		DOMAIN NAME MASK OR AN INET NUMBER MASK
 ** ON ENTRY:
@@ -558,9 +558,9 @@ PRIVATE BOOL ip_number_match ARGS2(CONST char *,	template,
 **	returns	YES, if mask is a domain name mask.
 **		NO, if it is an inet number mask.
 */
-PRIVATE BOOL is_domain_mask ARGS1(CONST char *,	mask)
+static BOOL is_domain_mask (const char * 	mask)
 {
-    CONST char *cur = mask;
+    const char *cur = mask;
 
     if (!mask) return NO;
 
@@ -574,7 +574,7 @@ PRIVATE BOOL is_domain_mask ARGS1(CONST char *,	mask)
 
 
 
-/* PRIVATE							ip_mask_match()
+/* static							ip_mask_match()
 **		MATCH AN IP NUMBER MASK OR IP NAME MASK
 **		AGAINST ACTUAL IP NUMBER OR IP NAME
 **
@@ -594,9 +594,9 @@ PRIVATE BOOL is_domain_mask ARGS1(CONST char *,	mask)
 **			matches the mask.
 **			NO, if no match (no fire).
 */
-PRIVATE BOOL ip_mask_match ARGS3(CONST char *,	mask,
-				 CONST char *,	ip_number,
-				 CONST char *,	ip_name)
+static BOOL ip_mask_match (const char *	mask,
+				 const char *	ip_number,
+				 const char *	ip_name)
 {
     if (mask && (ip_number || ip_name)) {
 	if (is_domain_mask(mask)) {
@@ -614,9 +614,9 @@ PRIVATE BOOL ip_mask_match ARGS3(CONST char *,	mask,
 
 
 
-PRIVATE BOOL ip_in_def_list ARGS3(AddressDefList *,	address_def_list,
-				  char *,		ip_number,
-				  char *,		ip_name)
+static BOOL ip_in_def_list (AddressDefList *	address_def_list,
+				  char *		ip_number,
+				  char *		ip_name)
 {
     if (address_def_list && (ip_number || ip_name)) {
 	AddressDefList *cur = address_def_list;
@@ -644,10 +644,10 @@ typedef struct {
 
 typedef HTList GroupCacheList;
 
-PRIVATE GroupCacheList *group_cache_list = NULL;
+static GroupCacheList *group_cache_list = NULL;
 
 
-PUBLIC GroupDefList *HTAA_readGroupFile ARGS1(CONST char *, filename)
+GroupDefList *HTAA_readGroupFile (const char *  filename)
 {
     FILE *fp;
     GroupCache *group_cache;
@@ -714,10 +714,10 @@ PUBLIC GroupDefList *HTAA_readGroupFile ARGS1(CONST char *, filename)
 **			to the group.
 **			HTAA_OK if both IP address and user are ok.
 */
-PUBLIC HTAAFailReasonType HTAA_userAndInetInGroup ARGS4(GroupDef *, group,
-							char *,	    username,
-							char *,	    ip_number,
-							char *,	    ip_name)
+HTAAFailReasonType HTAA_userAndInetInGroup (GroupDef * group,
+							char *	    username,
+							char *	    ip_number,
+							char *	    ip_name)
 {
     HTAAFailReasonType reason = HTAA_NOT_MEMBER;
 
@@ -762,7 +762,7 @@ PUBLIC HTAAFailReasonType HTAA_userAndInetInGroup ARGS4(GroupDef *, group,
 }
 
 
-PUBLIC void GroupDef_delete ARGS1(GroupDef *, group_def)
+void GroupDef_delete (GroupDef *  group_def)
 {
     if (group_def) {
 	FREE(group_def->group_name);

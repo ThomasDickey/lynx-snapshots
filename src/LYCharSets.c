@@ -13,27 +13,27 @@
 
 #include <LYLeaks.h>
 
-PUBLIC HTkcode kanji_code = NOKANJI;
-PUBLIC BOOLEAN LYHaveCJKCharacterSet = FALSE;
-PUBLIC BOOLEAN DisplayCharsetMatchLocale = TRUE;
-PUBLIC BOOL force_old_UCLYhndl_on_reload = FALSE;
-PUBLIC int forced_UCLYhdnl;
-PUBLIC int LYNumCharsets = 0;  /* Will be initialized later by UC_Register. */
-PUBLIC int current_char_set = -1; /* will be intitialized later in LYMain.c */
-PUBLIC CONST char** p_entity_values = NULL; /* Pointer, for HTML_put_entity()*/
+HTkcode kanji_code = NOKANJI;
+BOOLEAN LYHaveCJKCharacterSet = FALSE;
+BOOLEAN DisplayCharsetMatchLocale = TRUE;
+BOOL force_old_UCLYhndl_on_reload = FALSE;
+int forced_UCLYhdnl;
+int LYNumCharsets = 0;  /* Will be initialized later by UC_Register. */
+int current_char_set = -1; /* will be intitialized later in LYMain.c */
+const char** p_entity_values = NULL; /* Pointer, for HTML_put_entity()*/
 			      /* obsolete and probably not used(???)        */
 			      /* will be initialized in HTMLUseCharacterSet */
 #ifdef EXP_CHARSET_CHOICE
-PUBLIC charset_subset_t charset_subsets[MAXCHARSETS];
-PUBLIC BOOL custom_display_charset = FALSE;
-PUBLIC BOOL custom_assumed_doc_charset = FALSE;
+charset_subset_t charset_subsets[MAXCHARSETS];
+BOOL custom_display_charset = FALSE;
+BOOL custom_assumed_doc_charset = FALSE;
 #ifndef ALL_CHARSETS_IN_O_MENU_SCREEN
-PUBLIC int display_charset_map[MAXCHARSETS];
-PUBLIC int assumed_doc_charset_map[MAXCHARSETS];
+int display_charset_map[MAXCHARSETS];
+int assumed_doc_charset_map[MAXCHARSETS];
 
-PUBLIC CONST char* display_charset_choices[MAXCHARSETS+1];
-PUBLIC CONST char* assumed_charset_choices[MAXCHARSETS+1];
-PUBLIC int displayed_display_charset_idx;
+const char* display_charset_choices[MAXCHARSETS+1];
+const char* assumed_charset_choices[MAXCHARSETS+1];
+int displayed_display_charset_idx;
 #endif
 #endif /* EXP_CHARSET_CHOICE */
 
@@ -69,7 +69,7 @@ PUBLIC int displayed_display_charset_idx;
 **
 **	This MUST match exactly the table referred to in the DTD!
 */
-PRIVATE CONST char * ISO_Latin1[] = {
+static const char * ISO_Latin1[] = {
 	"\306", /* capital AE diphthong (ligature) (&#198;) - AElig */
 	"\301", /* capital A, acute accent (&#193;) - Aacute */
 	"\302", /* capital A, circumflex accent (&#194;) - Acirc */
@@ -188,7 +188,7 @@ PRIVATE CONST char * ISO_Latin1[] = {
 **
 **	This MUST match exactly the table referred to in the DTD!
 */
-PUBLIC CONST char * SevenBitApproximations[] = {
+const char * SevenBitApproximations[] = {
 	"AE",	/* capital AE diphthong (ligature) (&#198;) - AElig */
 	"A",	/* capital A, acute accent (&#193;) - Aacute */
 	"A",	/* capital A, circumflex accent (&#194;) - Acirc */
@@ -335,7 +335,7 @@ PUBLIC CONST char * SevenBitApproximations[] = {
 /*
  *  Add the array name to LYCharSets
  */
-PUBLIC CONST char ** LYCharSets[MAXCHARSETS]={
+const char ** LYCharSets[MAXCHARSETS]={
 	ISO_Latin1,		/* ISO Latin 1		*/
 	SevenBitApproximations, /* 7 Bit Approximations */
 };
@@ -344,7 +344,7 @@ PUBLIC CONST char ** LYCharSets[MAXCHARSETS]={
  *  Add the name that the user will see below.
  *  The order of LYCharSets and LYchar_set_names MUST be the same
  */
-PUBLIC CONST char * LYchar_set_names[MAXCHARSETS + 1]={
+const char * LYchar_set_names[MAXCHARSETS + 1]={
 	"Western (ISO-8859-1)",
 	"7 bit approximations (US-ASCII)",
 	(char *) 0
@@ -362,7 +362,7 @@ PUBLIC CONST char * LYchar_set_names[MAXCHARSETS + 1]={
  *  Note that most of the charsets added by the new mechanism in src/chrtrans
  *  don't show up here at all.  They don't have to.
  */
-PUBLIC LYUCcharset LYCharSet_UC[MAXCHARSETS]=
+LYUCcharset LYCharSet_UC[MAXCHARSETS]=
 {
   /*
    *  Zero position placeholder and HTMLGetEntityUCValue() reference. - FM
@@ -388,7 +388,7 @@ PUBLIC LYUCcharset LYCharSet_UC[MAXCHARSETS]=
  *  (If charset have chartrans unicode table,
  *  LYlowest_eightbit will be verified/modified anyway.)
  */
-PUBLIC int LYlowest_eightbit[MAXCHARSETS]={
+int LYlowest_eightbit[MAXCHARSETS]={
 	160,	/* ISO Latin 1		*/
 	999,	/* 7 bit approximations */
 };
@@ -398,7 +398,7 @@ PUBLIC int LYlowest_eightbit[MAXCHARSETS]={
  *  Function to set the handling of selected character sets
  *  based on the current LYUseDefaultRawMode value. - FM
  */
-PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
+void HTMLSetCharacterHandling (int i)
 {
     int chndl = safeUCGetLYhndl_byMIME(UCAssume_MIMEcharset);
     BOOLEAN LYRawMode_flag = LYRawMode;
@@ -430,7 +430,7 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 	HTPassHighCtrlNum = FALSE;
 
     } else { /* CJK encoding: */
-	CONST char *mime = LYCharSet_UC[i].MIMEname;
+	const char *mime = LYCharSet_UC[i].MIMEname;
 
 	if (!strcmp(mime, "euc-cn")) {
 	    HTCJK = CHINESE;
@@ -508,9 +508,9 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 /*
  * Function to set HTCJK based on "in" and "out" charsets.
  */
-PUBLIC void Set_HTCJK ARGS2(
-	CONST char *,	inMIMEname,
-	CONST char *,	outMIMEname)
+void Set_HTCJK (
+	const char *	inMIMEname,
+	const char *	outMIMEname)
 {
     /* need not check for synonyms: MIMEname's got from LYCharSet_UC */
 
@@ -544,7 +544,7 @@ PUBLIC void Set_HTCJK ARGS2(
  *  Currently unused: the default value so obvious
  *  that LYUseDefaultRawMode utilized directly by someone's mistake. - LP
  */
-PRIVATE void HTMLSetRawModeDefault ARGS1(int,i)
+static void HTMLSetRawModeDefault (int i)
 {
     LYDefaultRawMode = (BOOL) (LYCharSet_UC[i].enc == UCT_ENC_CJK);
     return;
@@ -555,9 +555,9 @@ PRIVATE void HTMLSetRawModeDefault ARGS1(int,i)
  *  based on the selected character set and the
  *  current LYRawMode value. - FM
  */
-PUBLIC void HTMLSetUseDefaultRawMode ARGS2(
-	int,		i,
-	BOOLEAN,	modeflag)
+void HTMLSetUseDefaultRawMode (
+	int		i,
+	BOOLEAN		modeflag)
 {
     if (LYCharSet_UC[i].enc != UCT_ENC_CJK) {
 
@@ -576,7 +576,7 @@ PUBLIC void HTMLSetUseDefaultRawMode ARGS2(
  *  Function to set the LYHaveCJKCharacterSet value
  *  based on the selected character set. - FM
  */
-PRIVATE void HTMLSetHaveCJKCharacterSet ARGS1(int,i)
+static void HTMLSetHaveCJKCharacterSet (int i)
 {
     LYHaveCJKCharacterSet = (BOOL) (LYCharSet_UC[i].enc == UCT_ENC_CJK);
     return;
@@ -588,7 +588,7 @@ PRIVATE void HTMLSetHaveCJKCharacterSet ARGS1(int,i)
  *  It is used in UPPER8 for 8bit case-insensitive search
  *  by matching def7_uni.tbl images. - LP
  */
-PRIVATE void HTMLSetDisplayCharsetMatchLocale ARGS1(int,i)
+static void HTMLSetDisplayCharsetMatchLocale (int i)
 {
     BOOLEAN match;
 
@@ -641,11 +641,11 @@ PRIVATE void HTMLSetDisplayCharsetMatchLocale ARGS1(int,i)
  *  Please update this table when you change "fullname" of any present charset.
  */
 typedef struct _names_pairs {
-    CONST char * fullname;
-    CONST char * MIMEname;
+    const char * fullname;
+    const char * MIMEname;
 } names_pairs;
 
-PRIVATE CONST names_pairs OLD_charset_names[] = {
+static const names_pairs OLD_charset_names[] = {
     {"ISO Latin 1",         "iso-8859-1"},
     {"ISO Latin 2",         "iso-8859-2"},
     {"WinLatin1 (cp1252)",  "windows-1252"},
@@ -701,7 +701,7 @@ PRIVATE CONST names_pairs OLD_charset_names[] = {
  *  in both MIME name and "human-readable" name (old and new style).
  *  Returns -1 if not recognized.
  */
-PUBLIC int UCGetLYhndl_byAnyName ARGS1 (char *, value)
+int UCGetLYhndl_byAnyName (char * value)
 {
     int i;
 
@@ -734,7 +734,7 @@ PUBLIC int UCGetLYhndl_byAnyName ARGS1 (char *, value)
  *   For conversions of DECIMAL escaped entities.
  *   Must be in order of ascending value.
  */
-PRIVATE CONST char * LYEntityNames[] = {
+static const char * LYEntityNames[] = {
 /*	 NAME		   DECIMAL VALUE */
 	"nbsp",		/* 160, non breaking space */
 	"iexcl",	/* 161, inverted exclamation mark */
@@ -838,8 +838,8 @@ PRIVATE CONST char * LYEntityNames[] = {
  *  Function to return the entity names of
  *  ISO-8859-1 8-bit characters. - FM
  */
-PUBLIC CONST char * HTMLGetEntityName ARGS1(
-	UCode_t,	code)
+const char * HTMLGetEntityName (
+	UCode_t	code)
 {
 #define IntValue code
     int MaxValue = (TABLESIZE(LYEntityNames) - 1);
@@ -864,8 +864,8 @@ PUBLIC CONST char * HTMLGetEntityName ARGS1(
  *  In the future we will try to isolate all calls to entities[]
  *  in favor of new unicode-based chartrans scheme. - LP
  */
-PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
-	CONST char *,	name)
+UCode_t HTMLGetEntityUCValue (
+	const char *	name)
 {
 #include <entities.h>
 
@@ -903,7 +903,7 @@ PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
  *  Function to select a character set and then set the
  *  character handling and LYHaveCJKCharacterSet flag. - FM
  */
-PUBLIC void HTMLUseCharacterSet ARGS1(int, i)
+void HTMLUseCharacterSet (int i)
 {
     HTMLSetRawModeDefault(i);
     p_entity_values = LYCharSets[i];
@@ -917,7 +917,7 @@ PUBLIC void HTMLUseCharacterSet ARGS1(int, i)
  *  Initializer, calls initialization function for the
  *  CHARTRANS handling. - KW
  */
-PUBLIC int LYCharSetsDeclared NOARGS
+int LYCharSetsDeclared (void)
 {
     UCInit();
 
@@ -925,7 +925,7 @@ PUBLIC int LYCharSetsDeclared NOARGS
 }
 
 #ifdef EXP_CHARSET_CHOICE
-PUBLIC void init_charset_subsets NOARGS
+void init_charset_subsets (void)
 {
     int i,n;
     int cur_display = 0;

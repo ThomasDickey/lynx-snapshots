@@ -22,26 +22,26 @@
 /*
 ** Global variables
 */
-PUBLIC char HTlex_buffer[40];	/* Read lexical string		*/
-PUBLIC int HTlex_line = 1;	/* Line number in source file	*/
+char HTlex_buffer[40];	/* Read lexical string		*/
+int HTlex_line = 1;	/* Line number in source file	*/
 
 
 /*
 ** Module-wide variables
 */
-PRIVATE int lex_cnt;
-PRIVATE BOOL lex_template;
-PRIVATE LexItem lex_pushed_back = LEX_NONE;
-PRIVATE FILE *cache = NULL;
+static int lex_cnt;
+static BOOL lex_template;
+static LexItem lex_pushed_back = LEX_NONE;
+static FILE *cache = NULL;
 
 
-PUBLIC void unlex ARGS1(LexItem, lex_item)
+void unlex (LexItem  lex_item)
 {
     lex_pushed_back = lex_item;
 }
 
 
-PUBLIC LexItem lex ARGS1(FILE *, fp)
+LexItem lex (FILE *  fp)
 {
     int ch = 0;
 
@@ -97,7 +97,7 @@ PUBLIC LexItem lex ARGS1(FILE *, fp)
 }
 
 
-PUBLIC char *lex_verbose ARGS1(LexItem, lex_item)
+char *lex_verbose (LexItem  lex_item)
 {
     static char msg[100];	/* @@@@@@@@ */
 

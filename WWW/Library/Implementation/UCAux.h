@@ -5,12 +5,12 @@
 #include <HTUtils.h>
 #endif
 
-extern BOOL UCCanUniTranslateFrom PARAMS((int from));
-extern BOOL UCCanTranslateUniTo PARAMS((int to));
-extern BOOL UCCanTranslateFromTo PARAMS((int from, int to));
-extern BOOL UCNeedNotTranslate PARAMS((
+extern BOOL UCCanUniTranslateFrom (int from);
+extern BOOL UCCanTranslateUniTo (int to);
+extern BOOL UCCanTranslateFromTo (int from, int to);
+extern BOOL UCNeedNotTranslate (
 	int		from,
-	int		to));
+	int		to);
 
 struct _UCTransParams
 {
@@ -33,44 +33,44 @@ typedef struct _UCTransParams UCTransParams;
 #include <UCDefs.h>
 #endif /* UCDEFS_H */
 
-extern void UCSetTransParams PARAMS((
+extern void UCSetTransParams (
 	UCTransParams *		pT,
 	int			cs_in,
-	CONST LYUCcharset *	p_in,
+	const LYUCcharset *	p_in,
 	int			cs_out,
-	CONST LYUCcharset *	p_out));
+	const LYUCcharset *	p_out);
 
-extern void UCTransParams_clear PARAMS((
-	UCTransParams *		pT));
+extern void UCTransParams_clear (
+	UCTransParams *		pT);
 
-extern void UCSetBoxChars PARAMS((
+extern void UCSetBoxChars (
     int		cset,
     int *	pvert_out,
     int *	phori_out,
     int		vert_in,
-    int		hori_in));
+    int		hori_in);
 
 #ifndef HTSTREAM_H
 #include <HTStream.h>
 #endif /* HTSTREAM_H */
 
-typedef void putc_func_t PARAMS((
+typedef void putc_func_t (
 	HTStream *	me,
-	char		ch));
+	char		ch);
 
 #ifndef UCMAP_H
 #include <UCMap.h>
 #endif /* UCMAP_H */
 
-extern BOOL UCPutUtf8_charstring PARAMS((
+extern BOOL UCPutUtf8_charstring (
 	HTStream *	target,
 	putc_func_t *	actions,
-	UCode_t		code));
+	UCode_t		code);
 
-extern BOOL UCConvertUniToUtf8 PARAMS((
+extern BOOL UCConvertUniToUtf8 (
 	UCode_t		code,
-	char *		buffer));
+	char *		buffer);
 
-extern UCode_t UCGetUniFromUtf8String PARAMS((char ** ppuni));
+extern UCode_t UCGetUniFromUtf8String (char ** ppuni);
 
 #endif /* UCAUX_H */

@@ -57,10 +57,10 @@
 #define PRINTER   5
 
 #if USE_VMS_MAILER
-PRIVATE int remove_quotes PARAMS((char *string));
+static int remove_quotes (char *string);
 #endif /* USE_VMS_MAILER */
 
-PRIVATE  char* subject_translate8bit PARAMS((char *source));
+static  char* subject_translate8bit (char *source);
 
 #define LYNX_PRINT_TITLE   0
 #define LYNX_PRINT_URL     1
@@ -69,12 +69,12 @@ PRIVATE  char* subject_translate8bit PARAMS((char *source));
 
 #define MAX_PUTENV 4
 
-PRIVATE void set_environ ARGS3(
-	int,		name,
-	CONST char *,	value,
-	CONST char *,	no_value)
+static void set_environ (
+	int		name,
+	const char *	value,
+	const char *	no_value)
 {
-    static CONST char *names[MAX_PUTENV] = {
+    static const char *names[MAX_PUTENV] = {
 	"LYNX_PRINT_TITLE",
 	"LYNX_PRINT_URL",
 	"LYNX_PRINT_DATE",
@@ -105,8 +105,8 @@ PRIVATE void set_environ ARGS3(
 #endif
 }
 
-PRIVATE char *suggested_filename ARGS1(
-	DocInfo *,	newdoc)
+static char *suggested_filename (
+	DocInfo *	newdoc)
 {
     char *cp, *sug_filename = 0;
 
@@ -140,9 +140,9 @@ PRIVATE char *suggested_filename ARGS1(
     return sug_filename;
 }
 
-PRIVATE void SetupFilename ARGS2(
-	char *,		filename,
-	char *,		sug_filename)
+static void SetupFilename (
+	char *		filename,
+	char *		sug_filename)
 {
     HTFormat format;
     HTAtom *encoding;
@@ -170,12 +170,12 @@ PRIVATE void SetupFilename ARGS2(
 #define PRINT_FLAG   0
 #define GENERIC_FLAG 1
 
-PRIVATE int RecallFilename ARGS5(
-	char *,		filename,
-	BOOLEAN *,	first,
-	int *,		now,
-	int *,		total,
-	int,		flag)
+static int RecallFilename (
+	char *		filename,
+	BOOLEAN *	first,
+	int *		now,
+	int *		total,
+	int		flag)
 {
     int ch;
     char *cp;
@@ -272,10 +272,10 @@ PRIVATE int RecallFilename ARGS5(
     return FN_DONE;
 }
 
-PRIVATE BOOLEAN confirm_by_pages ARGS3(
-	char *,		prompt,
-	int,		lines_in_file,
-	int,		lines_per_page)
+static BOOLEAN confirm_by_pages (
+	char *		prompt,
+	int		lines_in_file,
+	int		lines_per_page)
 {
     int pages = lines_in_file/(lines_per_page+1);
     int c;
@@ -301,14 +301,14 @@ PRIVATE BOOLEAN confirm_by_pages ARGS3(
     return TRUE;
 }
 
-PRIVATE void send_file_to_file ARGS3(
-	DocInfo *,	newdoc,
-	char *,		content_base,
-	char *,		sug_filename)
+static void send_file_to_file (
+	DocInfo *	newdoc,
+	char *		content_base,
+	char *		sug_filename)
 {
     BOOLEAN FirstRecall = TRUE;
     BOOLEAN use_cte;
-    CONST char *disp_charset;
+    const char *disp_charset;
     FILE *outfile_fp;
     char buffer[LY_MAXPATH];
     char filename[LY_MAXPATH];
@@ -472,10 +472,10 @@ done:
     return;
 }
 
-PRIVATE void send_file_to_mail ARGS3(
-	DocInfo *,	newdoc,
-	char *,		content_base,
-	char *,		content_location)
+static void send_file_to_mail (
+	DocInfo *	newdoc,
+	char *		content_base,
+	char *		content_location)
 {
     static BOOLEAN first_mail_preparsed = TRUE;
 
@@ -491,7 +491,7 @@ PRIVATE void send_file_to_mail ARGS3(
 
     BOOL use_cte;
     BOOL use_type;
-    CONST char *disp_charset;
+    const char *disp_charset;
     FILE *outfile_fp;
     char *buffer = NULL;
     char *subject = NULL;
@@ -796,11 +796,11 @@ done:	/* send_file_to_mail() */
     return;
 }
 
-PRIVATE void send_file_to_printer ARGS4(
-	DocInfo *,	newdoc,
-	char *,		content_base,
-	char *,		sug_filename,
-	int,		printer_number)
+static void send_file_to_printer (
+	DocInfo *	newdoc,
+	char *		content_base,
+	char *		sug_filename,
+	int		printer_number)
 {
     BOOLEAN FirstRecall = TRUE;
     FILE *outfile_fp;
@@ -960,10 +960,10 @@ done:	/* send_file_to_printer() */
     return;
 }
 
-PRIVATE void send_file_to_screen ARGS3(
-	DocInfo *,	newdoc,
-	char *,		content_base,
-	BOOLEAN,	Lpansi)
+static void send_file_to_screen (
+	DocInfo *	newdoc,
+	char *		content_base,
+	BOOLEAN	Lpansi)
 {
     FILE *outfile_fp;
     char prompt[80];
@@ -1035,8 +1035,8 @@ done:	/* send_file_to_screen() */
     return;
 }
 
-PUBLIC int printfile ARGS1(
-	DocInfo *,	newdoc)
+int printfile (
+	DocInfo *	newdoc)
 {
     BOOLEAN Lpansi = FALSE;
     DocAddress WWWDoc;
@@ -1184,8 +1184,8 @@ PUBLIC int printfile ARGS1(
 }
 
 #if USE_VMS_MAILER
-PRIVATE int remove_quotes ARGS1(
-	char *,		string)
+static int remove_quotes (
+	char *		string)
 {
    int i;
 
@@ -1219,7 +1219,7 @@ PRIVATE int remove_quotes ARGS1(
  *  Always returns a new allocated string which has to be freed.
  */
 #include <LYCharUtils.h>
-PRIVATE char* subject_translate8bit ARGS1(char *, source)
+static char* subject_translate8bit (char * source)
 {
     char *target = NULL;
 
@@ -1254,10 +1254,10 @@ PRIVATE char* subject_translate8bit ARGS1(char *, source)
  *  LYNXPRINT://MAIL_FILE/lines=#	     mail the file
  *  LYNXPRINT://PRINTER/lines=#/number=#   print to printer number #
  */
-PUBLIC int print_options ARGS3(
-	char **,	newfile,
-	CONST char *,	printed_url,
-	int,		lines_in_file)
+int print_options (
+	char **	newfile,
+	const char *	printed_url,
+	int		lines_in_file)
 {
     static char my_temp[LY_MAXPATH] = "\0";
     char *buffer = 0;
@@ -1358,7 +1358,7 @@ PUBLIC int print_options ARGS3(
  *
  *  --KED  02/21/99
  */
-PUBLIC char * GetFileName NOARGS
+char * GetFileName (void)
 {
     struct stat stat_info;
 

@@ -19,13 +19,13 @@
  *  LYNXDOWNLOAD://Method=<#>/File=<STRING>/SugFile=<STRING>
  */
 #ifdef VMS
-PUBLIC BOOLEAN LYDidRename = FALSE;
+BOOLEAN LYDidRename = FALSE;
 #endif /* VMS */
 
-PRIVATE char LYValidDownloadFile[LY_MAXPATH] = "\0";
+static char LYValidDownloadFile[LY_MAXPATH] = "\0";
 
-PUBLIC void LYDownload ARGS1(
-	char *,		line)
+void LYDownload (
+	char *		line)
 {
     char *Line = NULL, *method, *file, *sug_file = NULL;
     int method_number;
@@ -466,9 +466,9 @@ cancelled:
  * Compare a filename with a given suffix, which we have set to give a rough
  * idea of its content.
  */
-PRIVATE int SuffixIs ARGS2(
-	char *,		filename,
-	char *,		suffix)
+static int SuffixIs (
+	char *		filename,
+	char *		suffix)
 {
     size_t have = strlen(filename);
     size_t need = strlen(suffix);
@@ -481,9 +481,9 @@ PRIVATE int SuffixIs ARGS2(
  *  they select all other links.  Download links look like:
  *  LYNXDOWNLOAD://Method=<#>/File=<STRING>/SugFile=<STRING>
  */
-PUBLIC int LYdownload_options ARGS2(
-	char **,	newfile,
-	char *,		data_file)
+int LYdownload_options (
+	char **	newfile,
+	char *		data_file)
 {
     static char tempfile[LY_MAXPATH] = "\0";
     char *downloaded_url = NULL;

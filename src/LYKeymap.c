@@ -17,15 +17,15 @@
 #endif
 
 #ifdef EXP_KEYBOARD_LAYOUT
-PUBLIC int current_layout = 0;  /* Index into LYKbLayouts[]   */
+int current_layout = 0;  /* Index into LYKbLayouts[]   */
 
-PUBLIC LYKbLayout_t * LYKbLayouts[]={
+LYKbLayout_t * LYKbLayouts[]={
 	kb_layout_rot13,
 	kb_layout_jcuken,
 	kb_layout_yawerty
 };
 
-PUBLIC char * LYKbLayoutNames[]={
+char * LYKbLayoutNames[]={
 	"ROT13'd keyboard layout",
 	"JCUKEN Cyrillic, for AT 101-key kbd",
 	"YAWERTY Cyrillic, for DEC LK201 kbd",
@@ -620,7 +620,7 @@ LYK_TAG_LINK,      LYK_UPLOAD,         0,             0,
 
 #define DATA(code, name, doc) { code, name, doc }
 /* The order of this array must match the LYKeymapCode enum in LYKeymap.h */
-PRIVATE Kcmd revmap[] = {
+static Kcmd revmap[] = {
     DATA(
 	LYK_UNKNOWN, "UNMAPPED",
 	NULL ),
@@ -973,9 +973,9 @@ PRIVATE Kcmd revmap[] = {
 };
 #undef DATA
 
-PRIVATE CONST struct {
+static const struct {
     int key;
-    CONST char *name;
+    const char *name;
 } named_keys[] = {
     { '\t',		"<tab>" },
     { '\r',		"<return>" },
@@ -1004,12 +1004,12 @@ PRIVATE CONST struct {
 };
 
 struct emap {
-	CONST char *name;
-	CONST int   code;
-	CONST char *descr;
+	const char *name;
+	const int   code;
+	const char *descr;
 };
 
-PRIVATE struct emap ekmap[] = {
+static struct emap ekmap[] = {
   {"NOP",	LYE_NOP,	"Do Nothing"},
   {"CHAR",	LYE_CHAR,	"Insert printable char"},
   {"ENTER",	LYE_ENTER,	"Input complete, return char/lynxkeycode"},
@@ -1067,7 +1067,7 @@ PRIVATE struct emap ekmap[] = {
 /*
  * Build a list of Lynx's commands, for use in the tab-completion in LYgetstr.
  */
-PUBLIC HTList *LYcommandList NOARGS
+HTList *LYcommandList (void)
 {
     static HTList *myList = NULL;
 
@@ -1088,8 +1088,8 @@ PUBLIC HTList *LYcommandList NOARGS
 /*
  * Find the given keycode.
  */
-PUBLIC Kcmd * LYKeycodeToKcmd ARGS1(
-	LYKeymapCode,	code)
+Kcmd * LYKeycodeToKcmd (
+	LYKeymapCode	code)
 {
     unsigned j;
     Kcmd *result = 0;
@@ -1108,8 +1108,8 @@ PUBLIC Kcmd * LYKeycodeToKcmd ARGS1(
 /*
  * Find the given command-name, accepting an abbreviation if it is unique.
  */
-PUBLIC Kcmd * LYStringToKcmd ARGS1(
-	CONST char *,	name)
+Kcmd * LYStringToKcmd (
+	const char *	name)
 {
     unsigned need = strlen(name);
     unsigned j;
@@ -1139,9 +1139,9 @@ PUBLIC Kcmd * LYStringToKcmd ARGS1(
     return (result != 0) ? result : maybe;
 }
 
-PUBLIC char *LYKeycodeToString ARGS2 (
-	int,		c,
-	BOOLEAN,	upper8)
+char *LYKeycodeToString (
+	int		c,
+	BOOLEAN	upper8)
 {
     static char buf[30];
     unsigned n;
@@ -1174,8 +1174,8 @@ PUBLIC char *LYKeycodeToString ARGS2 (
     return buf;
 }
 
-PUBLIC int LYStringToKeycode ARGS1 (
-	char *,		src)
+int LYStringToKeycode (
+	char *		src)
 {
     unsigned n;
     int key = -1;
@@ -1209,14 +1209,14 @@ PUBLIC int LYStringToKeycode ARGS1 (
 
 #define PRETTY_LEN 11
 
-PRIVATE char *pretty_html ARGS1 (int, c)
+static char *pretty_html (int c)
 {
     char *src = LYKeycodeToString(c, TRUE);
 
     if (src != 0) {
-	static CONST struct {
+	static const struct {
 	    int	code;
-	    CONST char *name;
+	    const char *name;
 	} table[] = {
 	    { '<',	"&lt;" },
 	    { '>',	"&gt;" },
@@ -1255,9 +1255,9 @@ PRIVATE char *pretty_html ARGS1 (int, c)
     return 0;
 }
 
-PRIVATE char * format_binding ARGS2(
-	LYKeymap_t *,	table,
-	int,		i)
+static char * format_binding (
+	LYKeymap_t *	table,
+	int		i)
 {
     LYKeymap_t the_key = table[i];
     char *buf = 0;
@@ -1279,10 +1279,10 @@ PRIVATE char * format_binding ARGS2(
 
 /* if both is true, produce an additional line for the corresponding
    uppercase key if its binding is different. - kw */
-PRIVATE void print_binding ARGS3(
-    HTStream *,	target,
-    int,	i,
-    BOOLEAN, 	both)
+static void print_binding (
+    HTStream *	target,
+    int	i,
+    BOOLEAN 	both)
 {
     char *buf;
     LYKeymapCode lac1 = LYK_UNKNOWN; /* 0 */
@@ -1325,8 +1325,8 @@ PRIVATE void print_binding ARGS3(
  *  Return lynxactioncode whose name is the string func.
  *  returns -1 if not found. - kw
  */
-PUBLIC int lacname_to_lac ARGS1(
-	CONST char *,	func)
+int lacname_to_lac (
+	const char *	func)
 {
     Kcmd *mp = LYStringToKcmd(func);
 
@@ -1338,8 +1338,8 @@ PUBLIC int lacname_to_lac ARGS1(
  *  func must be present in the ekmap table.
  *  returns -1 if not found. - kw
  */
-PUBLIC int lecname_to_lec ARGS1(
-	CONST char *,	func)
+int lecname_to_lec (
+	const char *	func)
 {
     int i;
     struct emap *mp;
@@ -1361,8 +1361,8 @@ PUBLIC int lecname_to_lec ARGS1(
  *  USE_KEYMAP, but compatible with revmap() used for processing
  *  KEYMAP options in the configuration file. - kw
  */
-PUBLIC int lkcstring_to_lkc ARGS1(
-	CONST char *,	src)
+int lkcstring_to_lkc (
+	const char *	src)
 {
     int c = -1;
 
@@ -1394,11 +1394,11 @@ PUBLIC int lkcstring_to_lkc ARGS1(
 	return c;
 }
 
-PRIVATE int LYLoadKeymap ARGS4 (
-	CONST char *, 		arg GCC_UNUSED,
-	HTParentAnchor *,	anAnchor,
-	HTFormat,		format_out,
-	HTStream*,		sink)
+static int LYLoadKeymap (
+	const char * 		arg GCC_UNUSED,
+	HTParentAnchor *	anAnchor,
+	HTFormat		format_out,
+	HTStream*		sink)
 {
     HTFormat format_in = WWW_HTML;
     HTStream *target;
@@ -1451,7 +1451,7 @@ PRIVATE int LYLoadKeymap ARGS4 (
 #define _LYKEYMAP_C_GLOBALDEF_1_INIT { "LYNXKEYMAP", LYLoadKeymap, 0}
 GLOBALDEF (HTProtocol,LYLynxKeymap,_LYKEYMAP_C_GLOBALDEF_1_INIT);
 #else
-GLOBALDEF PUBLIC HTProtocol LYLynxKeymap = {"LYNXKEYMAP", LYLoadKeymap, 0};
+GLOBALDEF HTProtocol LYLynxKeymap = {"LYNXKEYMAP", LYLoadKeymap, 0};
 #endif /* GLOBALDEF_IS_MACRO */
 
 /*
@@ -1462,10 +1462,10 @@ GLOBALDEF PUBLIC HTProtocol LYLynxKeymap = {"LYNXKEYMAP", LYLoadKeymap, 0};
  * when for_dired is requested.
  * returns lynxkeycode value != 0 if the mapping was made, 0 if not.
  */
-PUBLIC int remap ARGS3(
-	char *,		key,
-	char *,		func,
-	BOOLEAN,	for_dired)
+int remap (
+	char *		key,
+	char *		func,
+	BOOLEAN	for_dired)
 {
     Kcmd *mp;
     int c;
@@ -1513,9 +1513,9 @@ typedef struct {
 /*
  * Save the given keys in the table, setting them to the map'd value.
  */
-PRIVATE void set_any_keys ARGS2(
-	ANY_KEYS *,	table,
-	int,		size)
+static void set_any_keys (
+	ANY_KEYS *	table,
+	int		size)
 {
     int j, k;
 
@@ -1529,9 +1529,9 @@ PRIVATE void set_any_keys ARGS2(
 /*
  * Restore the given keys from the table.
  */
-PRIVATE void reset_any_keys ARGS2(
-	ANY_KEYS *,	table,
-	int,		size)
+static void reset_any_keys (
+	ANY_KEYS *	table,
+	int		size)
 {
     int j, k;
 
@@ -1546,7 +1546,7 @@ static ANY_KEYS vms_keys_table[] = {
     { '$',  LYK_SHELL,   0 },
 };
 
-PUBLIC void set_vms_keys NOARGS
+void set_vms_keys (void)
 {
     set_any_keys(vms_keys_table, TABLESIZE(vms_keys_table));
 }
@@ -1560,13 +1560,13 @@ static ANY_KEYS vi_keys_table[] = {
 
 static BOOLEAN did_vi_keys;
 
-PUBLIC void set_vi_keys NOARGS
+void set_vi_keys (void)
 {
     set_any_keys(vi_keys_table, TABLESIZE(vi_keys_table));
     did_vi_keys = TRUE;
 }
 
-PUBLIC void reset_vi_keys NOARGS
+void reset_vi_keys (void)
 {
     if (did_vi_keys) {
 	reset_any_keys(vi_keys_table, TABLESIZE(vi_keys_table));
@@ -1583,13 +1583,13 @@ static ANY_KEYS emacs_keys_table[] = {
 
 static BOOLEAN did_emacs_keys;
 
-PUBLIC void set_emacs_keys NOARGS
+void set_emacs_keys (void)
 {
     set_any_keys(emacs_keys_table, TABLESIZE(emacs_keys_table));
     did_emacs_keys = TRUE;
 }
 
-PUBLIC void reset_emacs_keys NOARGS
+void reset_emacs_keys (void)
 {
     if (did_emacs_keys) {
 	reset_any_keys(emacs_keys_table, TABLESIZE(emacs_keys_table));
@@ -1615,13 +1615,13 @@ static ANY_KEYS number_keys_table[] = {
 
 static BOOLEAN did_number_keys;
 
-PUBLIC void set_numbers_as_arrows NOARGS
+void set_numbers_as_arrows (void)
 {
     set_any_keys(number_keys_table, TABLESIZE(number_keys_table));
     did_number_keys = TRUE;
 }
 
-PUBLIC void reset_numbers_as_arrows NOARGS
+void reset_numbers_as_arrows (void)
 {
     if (did_number_keys) {
 	reset_any_keys(number_keys_table, TABLESIZE(number_keys_table));
@@ -1629,8 +1629,8 @@ PUBLIC void reset_numbers_as_arrows NOARGS
     }
 }
 
-PUBLIC char *key_for_func ARGS1 (
-	int,	func)
+char *key_for_func (
+	int	func)
 {
     static char *buf;
     int i;
@@ -1651,9 +1651,9 @@ PUBLIC char *key_for_func ARGS1 (
  *  if no valid lynxkeycode is passed in (i.e., lkc_first < 0 or some other
  *  failure).  The caller must free the string. - kw
  */
-PUBLIC char *fmt_keys ARGS2(
-    int,	lkc_first,
-    int,	lkc_second)
+char *fmt_keys (
+    int	lkc_first,
+    int	lkc_second)
 {
     char *buf = NULL;
     BOOLEAN quotes = FALSE;
@@ -1705,8 +1705,8 @@ PUBLIC char *fmt_keys ARGS2(
 #define NEXT_I(i,imax) ((i==122) ? 32 : (i==96) ? 123 : (i==126) ? 0 :\
 			(i==31) ? 256 : (i==imax) ? 127 :\
 			(i==255) ? (-1) :i+1)
-PRIVATE int best_reverse_keymap ARGS1(
-	int,	lac)
+static int best_reverse_keymap (
+	int	lac)
 {
     int i, c;
 
@@ -1737,9 +1737,9 @@ PRIVATE int best_reverse_keymap ARGS1(
  *  an appropriate binding for use while in the (forms) line editor
  *  is sought.  - kw
  */
-PUBLIC char* key_for_func_ext ARGS2(
-    int,	lac,
-    int,	context_code)
+char* key_for_func_ext (
+    int	lac,
+    int	context_code)
 {
     int lkc, modkey = -1;
 
@@ -1770,9 +1770,9 @@ PUBLIC char* key_for_func_ext ARGS2(
  *  This function returns TRUE if the ch is non-alphanumeric
  *  and maps to KeyName (LYK_foo in the keymap[] array). - FM
  */
-PUBLIC BOOL LYisNonAlnumKeyname ARGS2(
-	int,	ch,
-	int,	KeyName)
+BOOL LYisNonAlnumKeyname (
+	int	ch,
+	int	KeyName)
 {
     if (ch < 0 || ch >= KEYMAP_SIZE)
 	return (FALSE);
@@ -1789,8 +1789,8 @@ abcdefghijklmnopqrstuvwxyz", ch) != NULL)
  *  This function returns the (int)ch mapped to the
  *  LYK_foo value passed to it as an argument. - FM
  */
-PUBLIC int LYReverseKeymap ARGS1(
-	int,	KeyName)
+int LYReverseKeymap (
+	int	KeyName)
 {
     int i;
 
@@ -1804,8 +1804,8 @@ PUBLIC int LYReverseKeymap ARGS1(
 }
 
 #ifdef EXP_KEYBOARD_LAYOUT
-PUBLIC int LYSetKbLayout ARGS1(
-	char *,	layout_id)
+int LYSetKbLayout (
+	char *	layout_id)
 {
     int i;
 

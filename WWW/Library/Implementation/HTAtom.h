@@ -30,8 +30,8 @@ struct _HTAtom {
 }; /* struct _HTAtom */
 
 
-PUBLIC HTAtom * HTAtom_for PARAMS((CONST char * string));
-PUBLIC HTList * HTAtom_templateMatches PARAMS((CONST char * templ));
+extern HTAtom * HTAtom_for (const char * string);
+extern HTList * HTAtom_templateMatches (const char * templ);
 
 #define HTAtom_name(a) ((a)->name)
 

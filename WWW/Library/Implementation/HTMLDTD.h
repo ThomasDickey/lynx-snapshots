@@ -980,9 +980,9 @@ Attribute numbers
 #define HTMLA_AUXCLASS 8 /* attribute, the value of which also designates
 			    a class name */
 #endif
-extern CONST SGML_dtd HTML_dtd;
+extern const SGML_dtd HTML_dtd;
 
-extern void HTSwitchDTD PARAMS((int new_flag));
+extern void HTSwitchDTD (int new_flag);
 
 extern HTTag HTTag_unrecognized;
 extern HTTag HTTag_mixedObject;
@@ -1002,17 +1002,17 @@ Start anchor element
    to be omitted.
 
  */
-extern void HTStartAnchor PARAMS((
+extern void HTStartAnchor (
 		HTStructured * targetstream,
-		CONST char *	name,
-		CONST char *	href));
+		const char *	name,
+		const char *	href);
 
-extern void HTStartAnchor5 PARAMS((
+extern void HTStartAnchor5 (
 		HTStructured * targetstream,
-		CONST char *	name,
-		CONST char *	href,
-		CONST char *	linktype,
-		int		tag_charset));
+		const char *	name,
+		const char *	href,
+		const char *	linktype,
+		int		tag_charset);
 
 /*
 
@@ -1029,9 +1029,9 @@ Start IsIndex element - FM
    to be omitted.
 
  */
-extern void HTStartIsIndex PARAMS((
+extern void HTStartIsIndex (
 		HTStructured * targetstream,
-		CONST char *	prompt,
-		CONST char *	href));
+		const char *	prompt,
+		const char *	href);
 
 #endif /* HTMLDTD_H */

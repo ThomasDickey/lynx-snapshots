@@ -32,25 +32,25 @@ typedef struct _HTStreamClass {
 
         char*  name;                            /* Just for diagnostics */
                 
-        void (*_free) PARAMS((
-                HTStream*       me));
+        void (*_free) (
+                HTStream*       me);
 
-        void (*_abort) PARAMS((
+        void (*_abort) (
                 HTStream*       me,
-                HTError         e));
+                HTError         e);
                 
-        void (*put_character) PARAMS((
+        void (*put_character) (
                 HTStream*       me,
-                char            ch));
+                char            ch);
                                 
-        void (*put_string) PARAMS((
+        void (*put_string) (
                 HTStream*       me,
-                CONST char *    str));
+                const char *    str);
                 
-        void (*put_block) PARAMS((
+        void (*put_block) (
                 HTStream*       me,
-                CONST char *    str,
-                int             len));
+                const char *    str,
+                int             len);
 
 }HTStreamClass;
 
@@ -63,6 +63,6 @@ typedef struct _HTStreamClass {
    example from the network.
 
  */
-extern HTStream * HTErrorStream NOPARAMS;
+extern HTStream * HTErrorStream (void);
 
 #endif /* HTSTREAM_H */

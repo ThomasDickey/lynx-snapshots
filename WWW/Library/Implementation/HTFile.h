@@ -42,8 +42,8 @@ extern int HTDirReadme;         /* Include readme files in listing? */
 /*
 **  Convert filenames between local and WWW formats
 */
-extern char * HTURLPath_toFile PARAMS((CONST char * name, BOOL expand_all, BOOL is_remote));
-extern char * HTnameOfFile_WWW PARAMS((CONST char * name, BOOL WWW_prefix, BOOL expand_all));
+extern char * HTURLPath_toFile (const char * name, BOOL expand_all, BOOL is_remote);
+extern char * HTnameOfFile_WWW (const char * name, BOOL WWW_prefix, BOOL expand_all);
 #define HTLocalName(name)      HTnameOfFile_WWW(name,TRUE,TRUE)
 #define HTfullURL_toFile(name) HTnameOfFile_WWW(name,FALSE,TRUE)
 #define HTpartURL_toFile(name) HTnameOfFile_WWW(name,FALSE,FALSE)
@@ -51,12 +51,12 @@ extern char * HTnameOfFile_WWW PARAMS((CONST char * name, BOOL WWW_prefix, BOOL 
 /*
 **  Make a WWW name from a full local path name
 */
-extern char * WWW_nameOfFile PARAMS((CONST char * name));
+extern char * WWW_nameOfFile (const char * name);
 
 /*
 **  Generate the name of a cache file
 */
-extern char * HTCacheFileName PARAMS((CONST char * name));
+extern char * HTCacheFileName (const char * name);
 
 /*
 **  Output directory titles
@@ -67,26 +67,26 @@ extern char * HTCacheFileName PARAMS((CONST char * name));
 ** changed to return TRUE if parent directory link was generated,
 ** FALSE otherwise - KW
 */
-extern BOOL HTDirTitles PARAMS((
+extern BOOL HTDirTitles (
         HTStructured *  target,
         HTParentAnchor* anchor,
-	BOOL		tildeIsTop));
+	BOOL		tildeIsTop);
 
 /*
 **	Check existence.
 */
-extern int HTStat PARAMS((
-	CONST char *	filename,
-	struct stat *	data));
+extern int HTStat (
+	const char *	filename,
+	struct stat *	data);
 
 /*	Load a document.
 **	----------------
 */
-extern int HTLoadFile PARAMS((
-	CONST char *		addr,
+extern int HTLoadFile (
+	const char *		addr,
 	HTParentAnchor *	anchor,
 	HTFormat		format_out,
-	HTStream *		sink));
+	HTStream *		sink);
 
 /*
 **  Output a directory entry
@@ -94,10 +94,10 @@ extern int HTLoadFile PARAMS((
 ** This is used by HTFTP.c for example -- it is a common routine for
 **  generating a linked directory entry.
 */
-extern void HTDirEntry PARAMS((
+extern void HTDirEntry (
         HTStructured *  target,         /* in which to put the linked text */
-        CONST char *    tail,           /* last part of directory name */
-        CONST char *    entry));        /* name of this entry */
+        const char *    tail,           /* last part of directory name */
+        const char *    entry);        /* name of this entry */
 
 /*
 **  HTSetSuffix: Define the representation for a file suffix
@@ -129,12 +129,12 @@ extern void HTDirEntry PARAMS((
 **  ("application/x-compressed-tar"), but in that case don't use enconding
 **  to also indicate it but use "binary" etc.
 */
-extern void HTSetSuffix5 PARAMS((
-        CONST char *    suffix,
-        CONST char *    representation,
-        CONST char *    encoding,
-        CONST char *    desc,
-        double          quality));
+extern void HTSetSuffix5 (
+        const char *    suffix,
+        const char *    representation,
+        const char *    encoding,
+        const char *    desc,
+        double          quality);
 
 #define HTSetSuffix(suff,rep,enc,q) HTSetSuffix5(suff, rep, enc, NULL, q)
 
@@ -147,10 +147,10 @@ extern void HTSetSuffix5 PARAMS((
 **
 **  *pEncoding		The encoding (binary, 7bit, etc). See HTSetSuffix.
 */
-extern HTFormat HTFileFormat PARAMS((
-	CONST char *		filename,
+extern HTFormat HTFileFormat (
+	const char *		filename,
 	HTAtom **		pEncoding,
-	CONST char **		pDesc));
+	const char **		pDesc);
 
 /*
 **  HTCharsetFormat: Revise the file format in relation to the Lynx charset.
@@ -160,10 +160,10 @@ extern HTFormat HTFileFormat PARAMS((
 **  indicated, sets Lynx up for proper handling in relation
 **  to the currently selected character set. - FM
 */
-extern HTFormat HTCharsetFormat PARAMS((
+extern HTFormat HTCharsetFormat (
 	HTFormat		format,
 	HTParentAnchor *	anchor,
-	int			default_LYhndl));
+	int			default_LYhndl);
 
 /*	Get various pieces of meta info from file name.
 **	-----------------------------------------------
@@ -185,20 +185,20 @@ extern HTFormat HTCharsetFormat PARAMS((
 **  through HTuncache_current_document or at the next document load.
 **  - kw
 */
-extern void LYGetFileInfo PARAMS((
-	CONST char *		filename,
+extern void LYGetFileInfo (
+	const char *		filename,
 	HTParentAnchor **	pfile_anchor,
 	HTFormat *		pformat,
 	HTAtom **		pencoding,
-	CONST char**		pdesc,
-	CONST char**		pcharset,
-	int *			pfile_cs));
+	const char**		pdesc,
+	const char**		pcharset,
+	int *			pfile_cs);
 
 /*
 **  Determine file value from file name.
 */
-extern float HTFileValue PARAMS((
-	CONST char *	filename));
+extern float HTFileValue (
+	const char *	filename);
 
 /*
 **  Determine compression type from file name, by looking at its suffix.
@@ -210,10 +210,10 @@ typedef enum {
     , cftBzip2
 } CompressFileType;
 
-extern CompressFileType HTCompressFileType PARAMS((
+extern CompressFileType HTCompressFileType (
 	char *			filename,
 	char *			dots,
-	char **			suffix));
+	char **			suffix);
 
 /*
 **  Determine write access to a file.
@@ -250,13 +250,13 @@ extern CompressFileType HTCompressFileType PARAMS((
 
 #endif /* HAVE_CONFIG_H */
 
-extern BOOL HTEditable PARAMS((CONST char * filename));
+extern BOOL HTEditable (const char * filename);
 
 /*	Make a save stream.
 **	-------------------
 */
-extern HTStream * HTFileSaveStream PARAMS((
-	HTParentAnchor *	anchor));
+extern HTStream * HTFileSaveStream (
+	HTParentAnchor *	anchor);
 
 /*
 ** Determine a suitable suffix, given the representation.
@@ -271,9 +271,9 @@ extern HTStream * HTFileSaveStream PARAMS((
 **  returns		a pointer to a suitable suffix string if one has
 **			been found, else NULL.
 */
-extern CONST char * HTFileSuffix PARAMS((
+extern const char * HTFileSuffix (
                 HTAtom* rep,
-                CONST char* enc));
+                const char* enc);
 
 /*
  * Enumerate external programs that lynx may assume exists.  Unlike those
@@ -309,20 +309,20 @@ typedef enum {
 /*
  * Given a program number, return its path
  */
-extern CONST char * HTGetProgramPath PARAMS((
-		ProgramPaths code));
+extern const char * HTGetProgramPath (
+		ProgramPaths code);
 
 /*
  * Store a program's path 
  */
-extern void HTSetProgramPath PARAMS((
+extern void HTSetProgramPath (
 		ProgramPaths code,
-		CONST char *path));
+		const char *path);
 
 /*
  * Reset the list of known program paths to the ones that are compiled-in
  */
-extern void HTInitProgramPaths NOPARAMS;
+extern void HTInitProgramPaths (void);
 
 /*
 **  The Protocols

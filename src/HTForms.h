@@ -9,45 +9,45 @@
 
 /* change_form_link calls change_form_link_ex with all its args and FALSE as
   last arg */
-extern int change_form_link PARAMS((int cur,
+extern int change_form_link (int cur,
 				    DocInfo *newdoc,
 				    BOOLEAN *refresh_screen,
 				    BOOLEAN use_last_tfpos,
-				    BOOLEAN immediate_submit));
+				    BOOLEAN immediate_submit);
 
-extern int change_form_link_ex PARAMS((int cur,
+extern int change_form_link_ex (int cur,
 				    DocInfo *newdoc,
 				    BOOLEAN *refresh_screen,
 				    BOOLEAN use_last_tfpos,
 				    BOOLEAN immediate_submit,
-				    BOOLEAN draw_only));
+				    BOOLEAN draw_only);
 
 /* InputFieldData is used to pass the info between
  * HTML.c and Gridtext.c in HText_beginInput()
  */
 typedef struct _InputFieldData {
-	CONST char *accept;
-	CONST char *align;
+	const char *accept;
+	const char *align;
 	int   checked;
-	CONST char *class;
+	const char *class;
 	int   disabled;
-	CONST char *error;
-	CONST char *height;
-	CONST char *id;
-	CONST char *lang;
-	CONST char *max;
-	CONST char *maxlength;
-	CONST char *md;
-	CONST char *min;
-	CONST char *name;
-	CONST char *size;
-	CONST char *src;
-	CONST char *type;
+	const char *error;
+	const char *height;
+	const char *id;
+	const char *lang;
+	const char *max;
+	const char *maxlength;
+	const char *md;
+	const char *min;
+	const char *name;
+	const char *size;
+	const char *src;
+	const char *type;
 	char *value;
-	CONST char *width;
+	const char *width;
 	int name_cs;		/* charset handle for name */
 	int value_cs;		/* charset handle for value */
-	CONST char *accept_cs;
+	const char *accept_cs;
 } InputFieldData;
 
 /* The OptionType structure is for a linked list of option entries
@@ -153,7 +153,7 @@ typedef struct _PerFormInfo
 #define LAST_ORDER   3
 
 /* in LYForms.c */
-extern void show_formlink_statusline PARAMS((CONST FormInfo *	form,
-					     int		for_what));
+extern void show_formlink_statusline (const FormInfo *	form,
+					     int		for_what);
 
 #endif /* HTFORMS_H */

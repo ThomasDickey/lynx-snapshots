@@ -67,13 +67,13 @@ unsigned int cached_styles[CACHEH][CACHEW];
 #define FirstHTLine(text) ((text)->last_line->next)
 #define LastHTLine(text)  ((text)->last_line)
 
-PRIVATE void HText_trimHightext PARAMS((
+static void HText_trimHightext (
 	HText *		text,
 	BOOLEAN		final,
-	int		stop_before));
+	int		stop_before);
 
 #ifdef USE_COLOR_STYLE
-PRIVATE void LynxResetScreenCache NOARGS
+static void LynxResetScreenCache (void)
 {
     int i, j;
 
@@ -85,7 +85,7 @@ PRIVATE void LynxResetScreenCache NOARGS
 #endif /* USE_COLOR_STYLE */
 
 struct _HTStream {			/* only know it as object */
-    CONST HTStreamClass *       isa;
+    const HTStreamClass *       isa;
     /* ... */
 };
 
@@ -103,7 +103,7 @@ struct _HTStream {			/* only know it as object */
 #define UTF_XLEN(c) UTF8_XNEGLEN(((char)~(c)))
 
 #ifdef KANJI_CODE_OVERRIDE
-PUBLIC HTkcode last_kcode = NOKANJI;	/* 1997/11/14 (Fri) 09:09:26 */
+HTkcode last_kcode = NOKANJI;	/* 1997/11/14 (Fri) 09:09:26 */
 #endif
 #ifdef CJK_EX
 #define CHAR_WIDTH 6
@@ -113,38 +113,38 @@ PUBLIC HTkcode last_kcode = NOKANJI;	/* 1997/11/14 (Fri) 09:09:26 */
 
 /*	Exports
 */
-PUBLIC HText * HTMainText = NULL;		/* Equivalent of main window */
-PUBLIC HTParentAnchor * HTMainAnchor = NULL;	/* Anchor for HTMainText */
+HText * HTMainText = NULL;		/* Equivalent of main window */
+HTParentAnchor * HTMainAnchor = NULL;	/* Anchor for HTMainText */
 
-PUBLIC char * HTAppName = LYNX_NAME;		/* Application name */
-PUBLIC char * HTAppVersion = LYNX_VERSION;	/* Application version */
+char * HTAppName = LYNX_NAME;		/* Application name */
+char * HTAppVersion = LYNX_VERSION;	/* Application version */
 
-PUBLIC int HTFormNumber = 0;
-PUBLIC int HTFormFields = 0;
-PUBLIC char * HTCurSelectGroup = NULL;		/* Form select group name */
-PRIVATE int HTCurSelectGroupCharset = -1;	/* ... and name's charset */
-PUBLIC int HTCurSelectGroupType = F_RADIO_TYPE;	/* Group type */
-PUBLIC char * HTCurSelectGroupSize = NULL;	/* Length of select */
-PRIVATE char * HTCurSelectedOptionValue = NULL;	/* Select choice */
+int HTFormNumber = 0;
+int HTFormFields = 0;
+char * HTCurSelectGroup = NULL;		/* Form select group name */
+static int HTCurSelectGroupCharset = -1;	/* ... and name's charset */
+int HTCurSelectGroupType = F_RADIO_TYPE;	/* Group type */
+char * HTCurSelectGroupSize = NULL;	/* Length of select */
+static char * HTCurSelectedOptionValue = NULL;	/* Select choice */
 
-PUBLIC char * checked_box = "[X]";
-PUBLIC char * unchecked_box = "[ ]";
-PUBLIC char * checked_radio = "(*)";
-PUBLIC char * unchecked_radio = "( )";
+char * checked_box = "[X]";
+char * unchecked_box = "[ ]";
+char * checked_radio = "(*)";
+char * unchecked_radio = "( )";
 
-PRIVATE BOOLEAN underline_on = OFF;
-PRIVATE BOOLEAN bold_on      = OFF;
+static BOOLEAN underline_on = OFF;
+static BOOLEAN bold_on      = OFF;
 
 #ifdef USE_SOURCE_CACHE
-PUBLIC int LYCacheSource = SOURCE_CACHE_NONE;
-PUBLIC int LYCacheSourceForAborted = SOURCE_CACHE_FOR_ABORTED_DROP;
+int LYCacheSource = SOURCE_CACHE_NONE;
+int LYCacheSourceForAborted = SOURCE_CACHE_FOR_ABORTED_DROP;
 #endif
 
 #ifdef USE_SCROLLBAR
-PUBLIC BOOLEAN LYShowScrollbar = FALSE;
-PUBLIC BOOLEAN LYsb_arrow = TRUE;
-PUBLIC int LYsb_begin = -1;
-PUBLIC int LYsb_end = -1;
+BOOLEAN LYShowScrollbar = FALSE;
+BOOLEAN LYsb_arrow = TRUE;
+int LYsb_begin = -1;
+int LYsb_end = -1;
 #endif
 
 #ifndef VMS			/* VMS has a better way - right? - kw */
@@ -152,7 +152,7 @@ PUBLIC int LYsb_end = -1;
 #endif
 
 #ifdef CHECK_FREE_MEM
-PRIVATE void * LY_check_calloc PARAMS((size_t nmemb, size_t size));
+static void * LY_check_calloc (size_t nmemb, size_t size);
 #define LY_CALLOC LY_check_calloc
 #else
   /* using the regular calloc */
@@ -246,9 +246,9 @@ There are 3 functions - POOL_NEW, POOL_FREE, and ALLOC_IN_POOL.
  *   Returns a pointer to the "allocated" memory or NULL if fails.
  *   Updates 'poolptr' if necessary.
  */
-PRIVATE pool_data* ALLOC_IN_POOL ARGS2(
-	HTPool**,	ppoolptr,
-	unsigned,	request)
+static pool_data* ALLOC_IN_POOL (
+	HTPool**	ppoolptr,
+	unsigned	request)
 {
     HTPool* pool = *ppoolptr;
     pool_data* ptr;
@@ -287,7 +287,7 @@ PRIVATE pool_data* ALLOC_IN_POOL ARGS2(
 /*
  *   Returns a pointer to initialized pool of type 'HTPool', or NULL if fails.
  */
-PRIVATE HTPool* POOL_NEW NOARGS
+static HTPool* POOL_NEW (void)
 {
     HTPool* poolptr = (HTPool*)LY_CALLOC(1, sizeof(HTPool));
     if (poolptr) {
@@ -300,8 +300,8 @@ PRIVATE HTPool* POOL_NEW NOARGS
 /*
  *   Frees a pool of type 'HTPool' pointed by poolptr.
  */
-PRIVATE void POOL_FREE ARGS1(
-	HTPool*,	poolptr)
+static void POOL_FREE (
+	HTPool*	poolptr)
 {
     HTPool* cur = poolptr;
     HTPool* prev;
@@ -473,29 +473,29 @@ struct _HText {
 };
 
 /* exported */
-PUBLIC void* HText_pool_calloc ARGS2(
-	HText *,	text,
-	unsigned,	size)
+void* HText_pool_calloc (
+	HText *	text,
+	unsigned	size)
 {
     return (void*) ALLOC_IN_POOL(&text->pool, size);
 }
 
-PRIVATE void HText_AddHiddenLink PARAMS((HText *text, TextAnchor *textanchor));
+static void HText_AddHiddenLink (HText *text, TextAnchor *textanchor);
 
 #ifdef EXP_JUSTIFY_ELTS
-PUBLIC BOOL can_justify_here;
-PUBLIC BOOL can_justify_here_saved;
+BOOL can_justify_here;
+BOOL can_justify_here_saved;
 
-PUBLIC BOOL can_justify_this_line;/* =FALSE if line contains form objects */
-PUBLIC int wait_for_this_stacked_elt;/* -1 if can justify contents of the
+BOOL can_justify_this_line;/* =FALSE if line contains form objects */
+int wait_for_this_stacked_elt;/* -1 if can justify contents of the
     element on the op of stack. If positive - specifies minimal stack depth
     plus 1 at which we can justify element (can be MAX_LINE+2 if
     ok_justify ==FALSE or in psrcview. */
-PUBLIC BOOL form_in_htext;/*to indicate that we are in form (since HTML_FORM is
+BOOL form_in_htext;/*to indicate that we are in form (since HTML_FORM is
   not stacked in the HTML.c */
-PUBLIC BOOL in_DT = FALSE;
+BOOL in_DT = FALSE;
 #ifdef DEBUG_JUSTIFY
-PUBLIC BOOL can_justify_stack_depth;/* can be 0 or 1 if all code is correct*/
+BOOL can_justify_stack_depth;/* can be 0 or 1 if all code is correct*/
 #endif
 
 
@@ -513,7 +513,7 @@ static BOOL this_line_was_split;
 static TextAnchor* last_anchor_of_previous_line;
 static BOOL have_raw_nbsps = FALSE;
 
-PUBLIC void ht_justify_cleanup NOARGS
+void ht_justify_cleanup (void)
 {
     wait_for_this_stacked_elt = !ok_justify
 #  ifdef USE_PRETTYSRC
@@ -530,7 +530,7 @@ PUBLIC void ht_justify_cleanup NOARGS
     have_raw_nbsps = FALSE;
 }
 
-PUBLIC void mark_justify_start_position ARGS1(void*,text)
+void mark_justify_start_position (void* text)
 {
     if (text && ((HText*)text)->last_line)
 	justify_start_position = ((HText*)text )->last_line->size;
@@ -558,11 +558,11 @@ PUBLIC void mark_justify_start_position ARGS1(void*,text)
  *	05-29-94 Lynx 2-3-1 Garrett Arch Blythe
  *	Changed to arrays.
  */
-PRIVATE char underscore_string[MAX_LINE + 1];
-PUBLIC char star_string[MAX_LINE + 1];
+static char underscore_string[MAX_LINE + 1];
+char star_string[MAX_LINE + 1];
 
-PRIVATE int ctrl_chars_on_this_line = 0; /* num of ctrl chars in current line */
-PRIVATE int utfxtra_on_this_line = 0; /* num of UTF-8 extra bytes in line,
+static int ctrl_chars_on_this_line = 0; /* num of ctrl chars in current line */
+static int utfxtra_on_this_line = 0; /* num of UTF-8 extra bytes in line,
 				       they *also* count as ctrl chars. */
 #ifdef WIDEC_CURSES
 #define UTFXTRA_ON_THIS_LINE 0
@@ -570,7 +570,7 @@ PRIVATE int utfxtra_on_this_line = 0; /* num of UTF-8 extra bytes in line,
 #define UTFXTRA_ON_THIS_LINE utfxtra_on_this_line
 #endif
 
-PRIVATE HTStyle default_style =
+static HTStyle default_style =
 	{ 0,  "(Unstyled)", 0, "",
 	(HTFont)0, 1, HT_BLACK,		0, 0,
 	0, 0, 0, HT_LEFT,		1, 0,	0,
@@ -578,21 +578,21 @@ PRIVATE HTStyle default_style =
 
 
 
-PRIVATE HTList * loaded_texts = NULL;	 /* A list of all those in memory */
-PUBLIC  HTList * search_queries = NULL;  /* isindex and whereis queries   */
+static HTList * loaded_texts = NULL;	 /* A list of all those in memory */
+HTList * search_queries = NULL;  /* isindex and whereis queries   */
 #ifdef LY_FIND_LEAKS
-PRIVATE void free_all_texts NOARGS;
+static void free_all_texts (void);
 #endif
 
-PRIVATE BOOL HText_TrueEmptyLine PARAMS((
+static BOOL HText_TrueEmptyLine (
 	HTLine *	line,
 	HText *		text,
-	BOOL		IgnoreSpaces));
+	BOOL		IgnoreSpaces);
 
-PRIVATE int HText_TrueLineSize PARAMS((
+static int HText_TrueLineSize (
 	HTLine *	line,
 	HText *		text,
-	BOOL		IgnoreSpaces));
+	BOOL		IgnoreSpaces);
 
 #ifdef CHECK_FREE_MEM
 
@@ -604,7 +604,7 @@ PRIVATE int HText_TrueLineSize PARAMS((
  *		   3: normal text output will be suppressed (but not anchors,
  *		      form fields etc.)
  */
-PRIVATE void HText_halt NOARGS
+static void HText_halt (void)
 {
     if (HTFormNumber > 0)
 	HText_DisableCurrentForm();
@@ -628,9 +628,9 @@ PRIVATE void HText_halt NOARGS
  *  which might make the situation worse depending how allocation works.
  *  There should be a better way... - kw
  */
-PRIVATE BOOL mem_is_avail ARGS2(
-    size_t,	factor,
-    size_t,	bytes)
+static BOOL mem_is_avail (
+    size_t	factor,
+    size_t	bytes)
 {
     void *p;
     if (bytes < MIN_NEEDED_MEM && factor > 0)
@@ -651,9 +651,9 @@ PRIVATE BOOL mem_is_avail ARGS2(
  *  (with some security margins) and tries various recovery actions
  *  if deemed necessary. - kw
  */
-PRIVATE void * LY_check_calloc ARGS2(
-    size_t,	nmemb,
-    size_t,	size)
+static void * LY_check_calloc (
+    size_t	nmemb,
+    size_t	size)
 {
     int i, n;
     if (mem_is_avail(4, nmemb * size)) {
@@ -701,8 +701,8 @@ PRIVATE void * LY_check_calloc ARGS2(
  * Clear highlight information for a given anchor
  * (text was allocated in the pool).
  */
-PRIVATE void LYClearHiText ARGS1(
-	TextAnchor *,	a)
+static void LYClearHiText (
+	TextAnchor *	a)
 {
     FREE(a->lites.hl_info);
 
@@ -714,10 +714,10 @@ PRIVATE void LYClearHiText ARGS1(
 /*
  * Set the initial highlight information for a given anchor.
  */
-PRIVATE void LYSetHiText ARGS3(
-	TextAnchor *,	a,
-	char *,		text,
-	int,		len)
+static void LYSetHiText (
+	TextAnchor *	a,
+	char *		text,
+	int		len)
 {
     if (text != NULL) {
 	POOLallocstring(a->lites.hl_base.hl_text, len + 1);
@@ -731,10 +731,10 @@ PRIVATE void LYSetHiText ARGS3(
 /*
  * Add highlight information for the next line of a anchor.
  */
-PRIVATE void LYAddHiText ARGS3(
-	TextAnchor *,	a,
-	char *,		text,
-	int,		x)
+static void LYAddHiText (
+	TextAnchor *	a,
+	char *		text,
+	int		x)
 {
     HiliteInfo *have = a->lites.hl_info;
     unsigned need = (a->lites.hl_len - 1);
@@ -757,9 +757,9 @@ PRIVATE void LYAddHiText ARGS3(
  * needed to avoid having the color-style paint the leading blanks.
  */
 #ifdef USE_COLOR_STYLE
-PRIVATE int LYAdjHiTextPos ARGS2(
-	TextAnchor *,	a,
-	int,		count)
+static int LYAdjHiTextPos (
+	TextAnchor *	a,
+	int		count)
 {
     char *result;
 
@@ -779,9 +779,9 @@ PRIVATE int LYAdjHiTextPos ARGS2(
 /*
  * Get the highlight text, counting from zero.
  */
-PRIVATE char *LYGetHiTextStr ARGS2(
-	TextAnchor *,	a,
-	int,		count)
+static char *LYGetHiTextStr (
+	TextAnchor *	a,
+	int		count)
 {
     char *result;
 
@@ -798,9 +798,9 @@ PRIVATE char *LYGetHiTextStr ARGS2(
 /*
  * Get the X-ordinate at which to draw the corresponding highlight-text
  */
-PRIVATE int LYGetHiTextPos ARGS2(
-	TextAnchor *,	a,
-	int,		count)
+static int LYGetHiTextPos (
+	TextAnchor *	a,
+	int		count)
 {
     int result;
 
@@ -817,9 +817,9 @@ PRIVATE int LYGetHiTextPos ARGS2(
 /*
  * Copy highlighting information from anchor 'b' to 'a'.
  */
-PRIVATE void LYCopyHiText ARGS2(
-	TextAnchor *,	a,
-	TextAnchor *,	b)
+static void LYCopyHiText (
+	TextAnchor *	a,
+	TextAnchor *	b)
 {
     int count;
     char *s;
@@ -836,8 +836,8 @@ PRIVATE void LYCopyHiText ARGS2(
     }
 }
 
-PRIVATE void HText_getChartransInfo ARGS1(
-	HText *,	me)
+static void HText_getChartransInfo (
+	HText *	me)
 {
     me->UCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor, UCT_STAGE_HTEXT);
     if (me->UCLYhndl < 0) {
@@ -850,8 +850,8 @@ PRIVATE void HText_getChartransInfo ARGS1(
     me->UCI = HTAnchor_getUCInfoStage(me->node_anchor, UCT_STAGE_HTEXT);
 }
 
-PRIVATE void PerFormInfo_free ARGS1(
-    PerFormInfo *,	form)
+static void PerFormInfo_free (
+    PerFormInfo *	form)
 {
     if (form) {
 	FREE(form->accept_cs);
@@ -860,8 +860,8 @@ PRIVATE void PerFormInfo_free ARGS1(
     }
 }
 
-PRIVATE void free_form_fields ARGS1(
-	FormInfo *,	input_field)
+static void free_form_fields (
+	FormInfo *	input_field)
 {
     /*
      *  Free form fields.
@@ -908,8 +908,8 @@ PRIVATE void free_form_fields ARGS1(
     FREE(input_field->accept_cs);
 }
 
-PRIVATE void FormList_delete ARGS1(
-    HTList *,		forms)
+static void FormList_delete (
+    HTList *		forms)
 {
     HTList *cur = forms;
     PerFormInfo *form;
@@ -921,8 +921,8 @@ PRIVATE void FormList_delete ARGS1(
 /*			Creation Method
 **			---------------
 */
-PUBLIC HText *	HText_new ARGS1(
-	HTParentAnchor *,	anchor)
+HText *	HText_new (
+	HTParentAnchor *	anchor)
 {
 #if defined(VMS) && defined(VAXC) && !defined(__DECC)
 #include <lib$routines.h>
@@ -1153,9 +1153,9 @@ PUBLIC HText *	HText_new ARGS1(
 **
 **      Stream is assumed open and left open.
 */
-PUBLIC HText *  HText_new2 ARGS2(
-	HTParentAnchor *,	anchor,
-	HTStream *,		stream)
+HText *  HText_new2 (
+	HTParentAnchor *	anchor,
+	HTStream *		stream)
 
 {
     HText * this = HText_new(anchor);
@@ -1170,8 +1170,8 @@ PUBLIC HText *  HText_new2 ARGS2(
 /*	Free Entire Text
 **	----------------
 */
-PUBLIC void HText_free ARGS1(
-	HText *,	self)
+void HText_free (
+	HText *	self)
 {
     if (!self)
 	return;
@@ -1273,11 +1273,11 @@ PUBLIC void HText_free ARGS1(
 /*	Output a line
 **	-------------
 */
-PRIVATE int display_line ARGS4(
-	HTLine *,	line,
-	HText *,	text,
-	int,		scrline GCC_UNUSED,
-	CONST char*,	target GCC_UNUSED)
+static int display_line (
+	HTLine *	line,
+	HText *	text,
+	int		scrline GCC_UNUSED,
+	const char*	target GCC_UNUSED)
 {
     register int i, j;
     char buffer[7];
@@ -1292,7 +1292,7 @@ PRIVATE int display_line ARGS4(
     BOOL inbold=NO, inunderline=NO;
 #endif
 #if defined(SHOW_WHEREIS_TARGETS) && !defined(USE_COLOR_STYLE)
-    CONST char *cp_tgt;
+    const char *cp_tgt;
     int i_start_tgt=0, i_after_tgt;
     int HitOffset, LenNeeded;
     BOOL intarget=NO;
@@ -1588,8 +1588,8 @@ after_while:
 /*	Output the title line
 **	---------------------
 */
-PRIVATE void display_title ARGS1(
-	HText *,	text)
+static void display_title (
+	HText *	text)
 {
     char *title = NULL;
     char percent[20];
@@ -1686,7 +1686,7 @@ PRIVATE void display_title ARGS1(
 		}
 		tmp[j] = '\0';
 	    }
-	    StrAllocCopy(title, (CONST char *)tmp);
+	    StrAllocCopy(title, (const char *)tmp);
 	    FREE(tmp);
 	}
     }
@@ -1763,8 +1763,8 @@ PRIVATE void display_title ARGS1(
 **	---------------------
 */
 #ifdef USE_SCROLLBAR
-PRIVATE void display_scrollbar ARGS1(
-	HText *,	text)
+static void display_scrollbar (
+	HText *	text)
 {
     int i;
     int h = display_lines - 2 * (LYsb_arrow!=0); /* Height of the scrollbar */
@@ -1879,10 +1879,10 @@ PRIVATE void display_scrollbar ARGS1(
 /*	Output a page
 **	-------------
 */
-PRIVATE void display_page ARGS3(
-	HText *,	text,
-	int,		line_number,
-	char *,		target)
+static void display_page (
+	HText *	text,
+	int		line_number,
+	char *		target)
 {
     HTLine * line = NULL;
     int i;
@@ -2438,8 +2438,8 @@ PRIVATE void display_page ARGS3(
 **
 **	These are used by a parser to build the text in an object
 */
-PUBLIC void HText_beginAppend ARGS1(
-	HText *,	text)
+void HText_beginAppend (
+	HText *	text)
 {
     text->permissible_split = 0;
     text->in_line_1 = YES;
@@ -2494,11 +2494,11 @@ PUBLIC void HText_beginAppend ARGS1(
 #define CTRACE_SPLITLINE(p)	/*nothing*/
 #endif
 
-PRIVATE int set_style_by_embedded_chars ARGS4(
-	char *,		s,
-	char *,		e,
-	unsigned char,	start_c,
-	unsigned char,	end_c)
+static int set_style_by_embedded_chars (
+	char *		s,
+	char *		e,
+	unsigned char	start_c,
+	unsigned char	end_c)
 {
     int ret = NO;
 
@@ -2513,14 +2513,14 @@ PRIVATE int set_style_by_embedded_chars ARGS4(
     return ret;
 }
 
-PRIVATE void move_anchors_in_region ARGS7(
-    HTLine *,		line,
-    int,		line_number,
-    TextAnchor **,	prev_anchor,	/*updates++*/
-    int *,		prev_head_processed,
-    int,		sbyte,
-    int,		ebyte,
-    int,		shift)		/* Likewise */
+static void move_anchors_in_region (
+    HTLine *		line,
+    int		line_number,
+    TextAnchor **	prev_anchor,	/*updates++*/
+    int *		prev_head_processed,
+    int		sbyte,
+    int		ebyte,
+    int		shift)		/* Likewise */
 {
     /*
      * Update anchor positions for anchors that start on this line.  Note:  we
@@ -2588,14 +2588,14 @@ PRIVATE void move_anchors_in_region ARGS7(
  *  Returns NULL if no changes needed.  (Remove-spaces code may be buggy...)
  * - kw
  */
-PRIVATE HTLine * insert_blanks_in_line ARGS7(
-    HTLine *,		line,
-    int,		line_number,
-    HText *,		text,
-    TextAnchor **,	prev_anchor,	/*updates++*/
-    int,		ninserts,
-    int *,		oldpos,		/* Measured in cells */
-    int *,		newpos)		/* Likewise */
+static HTLine * insert_blanks_in_line (
+    HTLine *		line,
+    int		line_number,
+    HText *		text,
+    TextAnchor **	prev_anchor,	/*updates++*/
+    int		ninserts,
+    int *		oldpos,		/* Measured in cells */
+    int *		newpos)		/* Likewise */
 {
     int ioldc = 0;			/* count visible characters */
     int ip;				/* count insertion pairs */
@@ -2698,10 +2698,10 @@ PRIVATE HTLine * insert_blanks_in_line ARGS7(
 }
 
 #if defined(USE_COLOR_STYLE)
-PRIVATE HTStyleChange * skip_matched_and_correct_offsets ARGS3(
-	HTStyleChange *,	end,
-	HTStyleChange *,	start,
-	unsigned,		split_pos)
+static HTStyleChange * skip_matched_and_correct_offsets (
+	HTStyleChange *	end,
+	HTStyleChange *	start,
+	unsigned		split_pos)
 { /* Found an OFF change not part of an adjacent matched pair.
    * Walk backward looking for the corresponding ON change.
    * Move everything after split_pos to be at split_pos.
@@ -2728,9 +2728,9 @@ PRIVATE HTStyleChange * skip_matched_and_correct_offsets ARGS3(
 }
 #endif /* USE_COLOR_STYLE */
 
-PRIVATE void split_line ARGS2(
-	HText *,	text,
-	unsigned,	split)
+static void split_line (
+	HText *	text,
+	unsigned	split)
 {
     HTStyle * style = text->style;
     int spare;
@@ -3403,9 +3403,9 @@ PRIVATE void split_line ARGS2(
 /*	Allow vertical blank space
 **	--------------------------
 */
-PRIVATE void blank_lines ARGS2(
-	HText *,	text,
-	int,		newlines)
+static void blank_lines (
+	HText *	text,
+	int		newlines)
 {
     if (HText_LastLineEmpty(text, FALSE)) { /* No text on current line */
 	HTLine * line = text->last_line->prev;
@@ -3439,8 +3439,8 @@ PRIVATE void blank_lines ARGS2(
 **	------------------------------
 ** See also: setStyle.
 */
-PUBLIC void HText_appendParagraph ARGS1(
-	HText *,	text)
+void HText_appendParagraph (
+	HText *	text)
 {
     int after = text->style->spaceAfter;
     int before = text->style->spaceBefore;
@@ -3453,9 +3453,9 @@ PUBLIC void HText_appendParagraph ARGS1(
 **
 **	Does not filter unnecessary style changes.
 */
-PUBLIC void HText_setStyle ARGS2(
-	HText *,	text,
-	HTStyle *,	style)
+void HText_setStyle (
+	HText *	text,
+	HTStyle *	style)
 {
     int after, before;
 
@@ -3474,9 +3474,9 @@ PUBLIC void HText_setStyle ARGS2(
 /*	Append a character to the text object
 **	-------------------------------------
 */
-PUBLIC void HText_appendCharacter ARGS2(
-	HText *,	text,
-	int,		ch)
+void HText_appendCharacter (
+	HText *	text,
+	int		ch)
 {
     HTLine * line;
     HTStyle * style;
@@ -4075,7 +4075,7 @@ PUBLIC void HText_appendCharacter ARGS2(
      *  Tabs.
      */
     if (ch == '\t') {
-	CONST HTTabStop * Tab;
+	const HTTabStop * Tab;
 	int target, target_cu;	/* Where to tab to */
 	int here, here_cu;	/* in _cu we try to guess what curses thinks */
 
@@ -4429,7 +4429,7 @@ check_WrapSource:
 /*  Insert a style change into the current line
 **  -------------------------------------------
 */
-PUBLIC void _internal_HTC ARGS3(HText *,text, int,style, int,dir)
+void _internal_HTC (HText *text, int style, int dir)
 {
     HTLine* line;
 
@@ -4471,9 +4471,9 @@ PUBLIC void _internal_HTC ARGS3(HText *,text, int,style, int,dir)
 /*	Set LastChar element in the text object.
 **	----------------------------------------
 */
-PUBLIC void HText_setLastChar ARGS2(
-	HText *,	text,
-	char,		ch)
+void HText_setLastChar (
+	HText *	text,
+	char		ch)
 {
     if (!text)
 	return;
@@ -4484,8 +4484,8 @@ PUBLIC void HText_setLastChar ARGS2(
 /*	Get LastChar element in the text object.
 **	----------------------------------------
 */
-PUBLIC char HText_getLastChar ARGS1(
-	HText *,	text)
+char HText_getLastChar (
+	HText *	text)
 {
     if (!text)
 	return('\0');
@@ -4496,9 +4496,9 @@ PUBLIC char HText_getLastChar ARGS1(
 /*	Set IgnoreExcess element in the text object.
 **	--------------------------------------------
 */
-PUBLIC void HText_setIgnoreExcess ARGS2(
-	HText *,	text,
-	BOOL,		ignore)
+void HText_setIgnoreExcess (
+	HText *	text,
+	BOOL		ignore)
 {
     if (!text)
 	return;
@@ -4518,9 +4518,9 @@ PUBLIC void HText_setIgnoreExcess ARGS2(
  *  display of the lines on screen will be updated after partial display
  *  upon return to mainloop. - kw
  */
-PRIVATE int HText_insertBlanksInStblLines ARGS2(
-    HText *,		me,
-    int,		ncols)
+static int HText_insertBlanksInStblLines (
+    HText *		me,
+    int		ncols)
 {
     HTLine *line;
     HTLine *mod_line, *first_line = NULL;
@@ -4757,8 +4757,8 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 
 /*	Cancel simple table handling
 */
-PUBLIC void HText_cancelStbl ARGS1(
-	HText *,	me)
+void HText_cancelStbl (
+	HText *	me)
 {
     if (!me || !me->stbl) {
 	CTRACE((tfp, "cancelStbl: ignored.\n"));
@@ -4781,9 +4781,9 @@ PUBLIC void HText_cancelStbl ARGS1(
 
 /*	Start simple table handling
 */
-PUBLIC void HText_startStblTABLE ARGS2(
-	HText *,	me,
-	short,		alignment)
+void HText_startStblTABLE (
+	HText *	me,
+	short		alignment)
 {
 #ifdef EXP_NESTED_TABLES
     STable_info *current = me->stbl;
@@ -4818,8 +4818,8 @@ PUBLIC void HText_startStblTABLE ARGS2(
 }
 
 #ifdef EXP_NESTED_TABLES
-PRIVATE void free_enclosed_stbl ARGS1(
-	HText *,	me)
+static void free_enclosed_stbl (
+	HText *	me)
 {
     if (me->enclosed_stbl != NULL) {
 	HTList *list = me->enclosed_stbl;
@@ -4839,8 +4839,8 @@ PRIVATE void free_enclosed_stbl ARGS1(
 /*	Finish simple table handling
  *	Return TRUE if the table is nested inside another table.
  */
-PUBLIC int HText_endStblTABLE ARGS1(
-	HText *,	me)
+int HText_endStblTABLE (
+	HText *	me)
 {
     int ncols, lines_changed = 0;
     STable_info *enclosing = NULL;
@@ -4897,9 +4897,9 @@ PUBLIC int HText_endStblTABLE ARGS1(
 
 /*	Start simple table row
 */
-PUBLIC void HText_startStblTR ARGS2(
-	HText *,	me,
-	short,		alignment)
+void HText_startStblTR (
+	HText *	me,
+	short		alignment)
 {
     if (!me || !me->stbl)
 	return;
@@ -4909,8 +4909,8 @@ PUBLIC void HText_startStblTR ARGS2(
 
 /*	Finish simple table row
 */
-PUBLIC void HText_endStblTR ARGS1(
-	HText *,	me)
+void HText_endStblTR (
+	HText *	me)
 {
     if (!me || !me->stbl)
 	return;
@@ -4919,12 +4919,12 @@ PUBLIC void HText_endStblTR ARGS1(
 
 /*	Start simple table cell
 */
-PUBLIC void HText_startStblTD ARGS5(
-	HText *,	me,
-	int,		colspan,
-	int,		rowspan,
-	short,		alignment,
-	BOOL,		isheader)
+void HText_startStblTD (
+	HText *	me,
+	int		colspan,
+	int		rowspan,
+	short		alignment,
+	BOOL		isheader)
 {
     if (!me || !me->stbl)
 	return;
@@ -4945,8 +4945,8 @@ PUBLIC void HText_startStblTD ARGS5(
 
 /*	Finish simple table cell
 */
-PUBLIC void HText_endStblTD ARGS1(
-	HText *,	me)
+void HText_endStblTD (
+	HText *	me)
 {
     if (!me || !me->stbl)
 	return;
@@ -4957,11 +4957,11 @@ PUBLIC void HText_endStblTD ARGS1(
 
 /*	Remember COL info / Start a COLGROUP and remember info
 */
-PUBLIC void HText_startStblCOL ARGS4(
-	HText *,	me,
-	int,		span,
-	short,		alignment,
-	BOOL,		isgroup)
+void HText_startStblCOL (
+	HText *	me,
+	int		span,
+	short		alignment,
+	BOOL		isgroup)
 {
     if (!me || !me->stbl)
 	return;
@@ -4977,8 +4977,8 @@ PUBLIC void HText_startStblCOL ARGS4(
 
 /*	Finish a COLGROUP
 */
-PUBLIC void HText_endStblCOLGROUP ARGS1(
-	HText *,	me)
+void HText_endStblCOLGROUP (
+	HText *	me)
 {
     if (!me || !me->stbl)
 	return;
@@ -4988,9 +4988,9 @@ PUBLIC void HText_endStblCOLGROUP ARGS1(
 
 /*	Start a THEAD / TFOOT / TBODY - remember its alignment info
 */
-PUBLIC void HText_startStblRowGroup ARGS2(
-	HText *,	me,
-	short,		alignment)
+void HText_startStblRowGroup (
+	HText *	me,
+	short		alignment)
 {
     if (!me || !me->stbl)
 	return;
@@ -5001,10 +5001,10 @@ PUBLIC void HText_startStblRowGroup ARGS2(
 /*		Anchor handling
 **		---------------
 */
-PRIVATE void add_link_number ARGS3(
-    HText *,		text,
-    TextAnchor *,	a,
-    BOOL,		save_position)
+static void add_link_number (
+    HText *		text,
+    TextAnchor *	a,
+    BOOL		save_position)
 {
     char marker[32];
 
@@ -5031,10 +5031,10 @@ PRIVATE void add_link_number ARGS3(
 
 /*	Start an anchor field
 */
-PUBLIC int HText_beginAnchor ARGS3(
-	HText *,		text,
-	BOOL,			underline,
-	HTChildAnchor *,	anc)
+int HText_beginAnchor (
+	HText *		text,
+	BOOL			underline,
+	HTChildAnchor *	anc)
 {
     TextAnchor * a;
 
@@ -5074,10 +5074,10 @@ PUBLIC int HText_beginAnchor ARGS3(
 }
 
 /* If !really, report whether the anchor is empty. */
-PRIVATE BOOL HText_endAnchor0 ARGS3(
-	HText *,	text,
-	int,		number,
-	int,		really)
+static BOOL HText_endAnchor0 (
+	HText *	text,
+	int		number,
+	int		really)
 {
     TextAnchor *a;
 
@@ -5545,9 +5545,9 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
     return FALSE;
 }
 
-PUBLIC void HText_endAnchor ARGS2(
-	HText *,	text,
-	int,		number)
+void HText_endAnchor (
+	HText *	text,
+	int		number)
 {
     HText_endAnchor0(text, number, 1);
 }
@@ -5558,19 +5558,19 @@ PUBLIC void HText_endAnchor ARGS2(
     links - like ones produced by <a href=".">foo</a>, no inputs, etc. - VH
 */
 #ifdef MARK_HIDDEN_LINKS
-PUBLIC BOOL HText_isAnchorBlank ARGS2(
-	HText *,	text,
-	int,		number)
+BOOL HText_isAnchorBlank (
+	HText *	text,
+	int		number)
 {
     return HText_endAnchor0(text, number, 0);
 }
 #endif /* MARK_HIDDEN_LINKS */
 
-PUBLIC void HText_appendText ARGS2(
-	HText *,	text,
-	CONST char *,	str)
+void HText_appendText (
+	HText *	text,
+	const char *	str)
 {
-    CONST char *p;
+    const char *p;
 
     if (str == NULL)
 	return;
@@ -5584,8 +5584,8 @@ PUBLIC void HText_appendText ARGS2(
 }
 
 
-PRIVATE int remove_special_attr_chars ARGS1(
-	char *,		buf)
+static int remove_special_attr_chars (
+	char *		buf)
 {
     register char *cp;
     register int soft_newline_count = 0;
@@ -5610,8 +5610,8 @@ PRIVATE int remove_special_attr_chars ARGS1(
 **  and brings the anchors in line with the text by adding the text
 **  offset to each of the anchors.
 */
-PUBLIC void HText_endAppend ARGS1(
-	HText *,	text)
+void HText_endAppend (
+	HText *	text)
 {
     HTLine *line_ptr;
 
@@ -5701,10 +5701,10 @@ PUBLIC void HText_endAppend ARGS1(
 **  This needs to be done so that display_page finds the anchors in the
 **  form it expects when it sets the links[] elements.
 */
-PRIVATE void HText_trimHightext ARGS3(
-	HText *,	text,
-	BOOLEAN,	final,
-	int,		stop_before)
+static void HText_trimHightext (
+	HText *	text,
+	BOOLEAN	final,
+	int		stop_before)
 {
     int cur_line, cur_shift;
     TextAnchor *anchor_ptr;
@@ -5950,8 +5950,8 @@ re_parse:
 
 /*	Return the anchor associated with this node
 */
-PUBLIC HTParentAnchor * HText_nodeAnchor ARGS1(
-	HText *,	text)
+HTParentAnchor * HText_nodeAnchor (
+	HText *	text)
 {
     return text->node_anchor;
 }
@@ -5964,9 +5964,9 @@ PUBLIC HTParentAnchor * HText_nodeAnchor ARGS1(
  *  HText_childNextNumber() returns the anchor with index [number],
  *  using a pointer from the previous number (=optimization) or NULL.
  */
-PUBLIC HTChildAnchor * HText_childNextNumber ARGS2(
-	int,		number,
-	void**,		prev)
+HTChildAnchor * HText_childNextNumber (
+	int		number,
+	void**		prev)
 {
     /* Sorry, TextAnchor is not declared outside this file, use a cast. */
     TextAnchor * a = *prev;
@@ -5993,9 +5993,9 @@ PUBLIC HTChildAnchor * HText_childNextNumber ARGS2(
  *  with index N.  The index corresponds to the [number] we print
  *  for the field. -FM & LE
  */
-PUBLIC void HText_FormDescNumber ARGS2(
-	int,		number,
-	char **,	desc)
+void HText_FormDescNumber (
+	int		number,
+	char **	desc)
 {
     TextAnchor * a;
 
@@ -6072,10 +6072,10 @@ PUBLIC void HText_FormDescNumber ARGS2(
  * rel is 0 or '+' or '-'
  * cur is the current link
  */
-PUBLIC int HTGetRelLinkNum ARGS3(
-	int,	num,
-	int,	rel,
-	int,	cur)
+int HTGetRelLinkNum (
+	int	num,
+	int	rel,
+	int	cur)
 {
     TextAnchor *a, *l = 0;
     int scrtop = HText_getTopOfScreen(); /*XXX +1? */
@@ -6145,13 +6145,13 @@ PUBLIC int HTGetRelLinkNum ARGS3(
  *  If want_go is 0 and the number doesn't represent an input field, info
  *  on the link indicated by number is deposited in *hightext and *lname.
  */
-PUBLIC int HTGetLinkInfo ARGS6(
-	int,		number,
-	int,		want_go,
-	int *,		go_line,
-	int *,		linknum,
-	char **,	hightext,
-	char **,	lname)
+int HTGetLinkInfo (
+	int		number,
+	int		want_go,
+	int *		go_line,
+	int *		linknum,
+	char **	hightext,
+	char **	lname)
 {
     TextAnchor *a;
     HTAnchor *link_dest;
@@ -6301,12 +6301,12 @@ PUBLIC int HTGetLinkInfo ARGS6(
     return(NO);
 }
 
-PRIVATE BOOLEAN same_anchor_or_field ARGS5(
-    int,		numberA,
-    FormInfo *,		formA,
-    int,		numberB,
-    FormInfo *,		formB,
-    BOOLEAN,		ta_same)
+static BOOLEAN same_anchor_or_field (
+    int		numberA,
+    FormInfo *		formA,
+    int		numberB,
+    FormInfo *		formB,
+    BOOLEAN		ta_same)
 {
     if (numberA > 0 || numberB > 0) {
 	if (numberA == numberB)
@@ -6355,9 +6355,9 @@ PRIVATE BOOLEAN same_anchor_or_field ARGS5(
  *  (direction < 0) or after (direction > 0) the current one?
  *  On entry, curlink must be the index in links[] of a textarea field. - kw
  */
-PUBLIC BOOL HText_TAHasMoreLines ARGS2(
-	int,		curlink,
-	int,		direction)
+BOOL HText_TAHasMoreLines (
+	int		curlink,
+	int		direction)
 {
     TextAnchor *a;
     TextAnchor *prev_a = NULL;
@@ -6412,12 +6412,12 @@ PUBLIC BOOL HText_TAHasMoreLines ARGS2(
  *  to use after the line in *go_line has been made the new top screen
  *  line. - kw
  */
-PUBLIC int HTGetLinkOrFieldStart ARGS5(
-	int,		curlink,
-	int *,		go_line,
-	int *,		linknum,
-	int,		direction,
-	BOOLEAN,	ta_skip)
+int HTGetLinkOrFieldStart (
+	int		curlink,
+	int *		go_line,
+	int *		linknum,
+	int		direction,
+	BOOLEAN	ta_skip)
 {
     TextAnchor *a;
     int anchors_this_line = 0;
@@ -6603,14 +6603,14 @@ PUBLIC int HTGetLinkOrFieldStart ARGS5(
  *  or utf8 characters) are loaded into *offset and *tLen, and
  *  TRUE is returned. -FM
  */
-PUBLIC BOOL HText_getFirstTargetInLine ARGS7(
-	HText *,	text,
-	int,		line_num,
-	BOOL,		utf_flag,
-	int *,		offset,
-	int *,		tLen,
-	char **,	data,
-	CONST char *,	target)
+BOOL HText_getFirstTargetInLine (
+	HText *	text,
+	int		line_num,
+	BOOL		utf_flag,
+	int *		offset,
+	int *		tLen,
+	char **	data,
+	const char *	target)
 {
     HTLine *line;
     char *LineData;
@@ -6678,7 +6678,7 @@ PUBLIC BOOL HText_getFirstTargetInLine ARGS7(
  *  HText_getNumOfLines returns the number of lines in the
  *  current document.
  */
-PUBLIC int HText_getNumOfLines NOARGS
+int HText_getNumOfLines (void)
 {
     return(HTMainText ? HTMainText->Lines : 0);
 }
@@ -6687,14 +6687,14 @@ PUBLIC int HText_getNumOfLines NOARGS
  *  HText_getTitle returns the title of the
  *  current document.
  */
-PUBLIC CONST char * HText_getTitle NOARGS
+const char * HText_getTitle (void)
 {
     return(HTMainText ?
 	  HTAnchor_title(HTMainText->node_anchor) : 0);
 }
 
 #ifdef USE_COLOR_STYLE
-PUBLIC CONST char *HText_getStyle NOARGS
+const char *HText_getStyle (void)
 {
    return(HTMainText ?
 	  HTAnchor_style(HTMainText->node_anchor) : 0);
@@ -6706,7 +6706,7 @@ PUBLIC CONST char *HText_getStyle NOARGS
  *  document (normally derived from a Content-Disposition header with
  *  attachment; filename=name.suffix). -FM
  */
-PUBLIC CONST char * HText_getSugFname NOARGS
+const char * HText_getSugFname (void)
 {
     return(HTMainText ?
 	  HTAnchor_SugFname(HTMainText->node_anchor) : 0);
@@ -6724,16 +6724,16 @@ PUBLIC CONST char * HText_getSugFname NOARGS
  *  info enough to remove a compression suffix if the anchor object
  *  does not indicate compression. - kw
  */
-PUBLIC void HTCheckFnameForCompression ARGS3(
-	char **,		fname,
-	HTParentAnchor *,	anchor,
-	BOOL,			strip_ok)
+void HTCheckFnameForCompression (
+	char **		fname,
+	HTParentAnchor *	anchor,
+	BOOL			strip_ok)
 {
     char *fn = *fname;
     char *dot = NULL, *cp = NULL;
     char *suffix;
-    CONST char *ct = NULL;
-    CONST char *ce = NULL;
+    const char *ct = NULL;
+    const char *ce = NULL;
     CompressFileType method = cftNone;
     CompressFileType second;
 
@@ -6884,7 +6884,7 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
  *  HText_getLastModified returns the Last-Modified header
  *  if available, for the current document. -FM
  */
-PUBLIC CONST char * HText_getLastModified NOARGS
+const char * HText_getLastModified (void)
 {
     return(HTMainText ?
 	  HTAnchor_last_modified(HTMainText->node_anchor) : 0);
@@ -6894,7 +6894,7 @@ PUBLIC CONST char * HText_getLastModified NOARGS
  *  HText_getDate returns the Date header
  *  if available, for the current document. -FM
  */
-PUBLIC CONST char * HText_getDate NOARGS
+const char * HText_getDate (void)
 {
     return(HTMainText ?
 	  HTAnchor_date(HTMainText->node_anchor) : 0);
@@ -6904,7 +6904,7 @@ PUBLIC CONST char * HText_getDate NOARGS
  *  HText_getServer returns the Server header
  *  if available, for the current document. -FM
  */
-PUBLIC CONST char * HText_getServer NOARGS
+const char * HText_getServer (void)
 {
     return(HTMainText ?
 	  HTAnchor_server(HTMainText->node_anchor) : 0);
@@ -6915,9 +6915,9 @@ PUBLIC CONST char * HText_getServer NOARGS
  *  starting from the line 'line_num'-1.
  *  This is the primary call for lynx.
  */
-PUBLIC void HText_pageDisplay ARGS2(
-	int,		line_num,
-	char *,		target)
+void HText_pageDisplay (
+	int		line_num,
+	char *		target)
 {
 #ifdef DISP_PARTIAL
     if (debug_display_partial || (LYTraceLogFP != NULL)) {
@@ -6961,7 +6961,7 @@ PUBLIC void HText_pageDisplay ARGS2(
  *  Return YES if we have a whereis search target on the displayed
  *  page. - kw
  */
-PUBLIC BOOL HText_pageHasPrevTarget NOARGS
+BOOL HText_pageHasPrevTarget (void)
 {
     if (!HTMainText)
 	return NO;
@@ -6973,10 +6973,10 @@ PUBLIC BOOL HText_pageHasPrevTarget NOARGS
  *  HText_LinksInLines returns the number of links in the
  *  'Lines' number of lines beginning with 'line_num'-1. -FM
  */
-PUBLIC int HText_LinksInLines ARGS3(
-	HText *,	text,
-	int,		line_num,
-	int,		Lines)
+int HText_LinksInLines (
+	HText *	text,
+	int		line_num,
+	int		Lines)
 {
     int total = 0;
     int start = (line_num - 1);
@@ -7000,32 +7000,32 @@ PUBLIC int HText_LinksInLines ARGS3(
     return total;
 }
 
-PUBLIC void HText_setStale ARGS1(
-	HText *,	text)
+void HText_setStale (
+	HText *	text)
 {
     text->stale = YES;
 }
 
-PUBLIC void HText_refresh ARGS1(
-	HText *,	text)
+void HText_refresh (
+	HText *	text)
 {
     if (text->stale)
 	display_page(text, text->top_of_screen, "");
 }
 
-PUBLIC int HText_sourceAnchors ARGS1(
-	HText *,	text)
+int HText_sourceAnchors (
+	HText *	text)
 {
     return (text ? text->last_anchor_number : -1);
 }
 
-PUBLIC BOOL HText_canScrollUp ARGS1(
-	HText *,	text)
+BOOL HText_canScrollUp (
+	HText *	text)
 {
     return (BOOL) (text->top_of_screen != 0);
 }
 
-PUBLIC BOOL HText_canScrollDown NOARGS
+BOOL HText_canScrollDown (void)
 {
     HText * text = HTMainText;
 
@@ -7035,26 +7035,26 @@ PUBLIC BOOL HText_canScrollDown NOARGS
 
 /*		Scroll actions
 */
-PUBLIC void HText_scrollTop ARGS1(
-	HText *,	text)
+void HText_scrollTop (
+	HText *	text)
 {
     display_page(text, 0, "");
 }
 
-PUBLIC void HText_scrollDown ARGS1(
-	HText *,	text)
+void HText_scrollDown (
+	HText *	text)
 {
     display_page(text, text->top_of_screen + display_lines, "");
 }
 
-PUBLIC void HText_scrollUp ARGS1(
-	HText *,	text)
+void HText_scrollUp (
+	HText *	text)
 {
     display_page(text, text->top_of_screen - display_lines, "");
 }
 
-PUBLIC void HText_scrollBottom ARGS1(
-	HText *,	text)
+void HText_scrollBottom (
+	HText *	text)
 {
     display_page(text, text->Lines - display_lines, "");
 }
@@ -7066,8 +7066,8 @@ PUBLIC void HText_scrollBottom ARGS1(
 
 /* Bring to front and highlight it
 */
-PUBLIC BOOL HText_select ARGS1(
-	HText *,	text)
+BOOL HText_select (
+	HText *	text)
 {
     if (text != HTMainText) {
 	/*
@@ -7124,8 +7124,8 @@ PUBLIC BOOL HText_select ARGS1(
  *  and isHEAD elements are identical to those of a loaded
  *  (memory cached) text. -FM
  */
-PUBLIC BOOL HText_POSTReplyLoaded ARGS1(
-	DocInfo *,	doc)
+BOOL HText_POSTReplyLoaded (
+	DocInfo *	doc)
 {
     HText *text = NULL;
     HTList *cur = loaded_texts;
@@ -7165,8 +7165,8 @@ PUBLIC BOOL HText_POSTReplyLoaded ARGS1(
     return(FALSE);
 }
 
-PUBLIC BOOL HTFindPoundSelector ARGS1(
-	CONST char *,		selector)
+BOOL HTFindPoundSelector (
+	const char *		selector)
 {
     TextAnchor * a;
 
@@ -7191,9 +7191,9 @@ PUBLIC BOOL HTFindPoundSelector ARGS1(
 
 }
 
-PUBLIC BOOL HText_selectAnchor ARGS2(
-	HText *,		text,
-	HTChildAnchor *,	anchor)
+BOOL HText_selectAnchor (
+	HText *		text,
+	HTChildAnchor *	anchor)
 {
     TextAnchor * a;
 
@@ -7245,9 +7245,9 @@ PUBLIC BOOL HText_selectAnchor ARGS2(
 */
 /*	Apply this style to the selection
 */
-PUBLIC void HText_applyStyle ARGS2(
-	HText *,	me GCC_UNUSED,
-	HTStyle *,	style GCC_UNUSED)
+void HText_applyStyle (
+	HText *	me GCC_UNUSED,
+	HTStyle *	style GCC_UNUSED)
 {
 
 }
@@ -7255,9 +7255,9 @@ PUBLIC void HText_applyStyle ARGS2(
 
 /*	Update all text with changed style.
 */
-PUBLIC void HText_updateStyle ARGS2(
-	HText *,	me GCC_UNUSED,
-	HTStyle *,	style GCC_UNUSED)
+void HText_updateStyle (
+	HText *	me GCC_UNUSED,
+	HTStyle *	style GCC_UNUSED)
 {
 
 }
@@ -7265,9 +7265,9 @@ PUBLIC void HText_updateStyle ARGS2(
 
 /*	Return style of  selection
 */
-PUBLIC HTStyle * HText_selectionStyle ARGS2(
-	HText *,		me GCC_UNUSED,
-	HTStyleSheet *,		sheet GCC_UNUSED)
+HTStyle * HText_selectionStyle (
+	HText *		me GCC_UNUSED,
+	HTStyleSheet *		sheet GCC_UNUSED)
 {
     return 0;
 }
@@ -7275,10 +7275,10 @@ PUBLIC HTStyle * HText_selectionStyle ARGS2(
 
 /*	Paste in styled text
 */
-PUBLIC void HText_replaceSel ARGS3(
-	HText *,	me GCC_UNUSED,
-	CONST char *,	aString GCC_UNUSED,
-	HTStyle *,	aStyle GCC_UNUSED)
+void HText_replaceSel (
+	HText *	me GCC_UNUSED,
+	const char *	aString GCC_UNUSED,
+	HTStyle *	aStyle GCC_UNUSED)
 {
 }
 
@@ -7286,9 +7286,9 @@ PUBLIC void HText_replaceSel ARGS3(
 /*	Apply this style to the selection and all similarly formatted text
 **	(style recovery only)
 */
-PUBLIC void HTextApplyToSimilar ARGS2(
-	HText *,	me GCC_UNUSED,
-	HTStyle *,	style GCC_UNUSED)
+void HTextApplyToSimilar (
+	HText *	me GCC_UNUSED,
+	HTStyle *	style GCC_UNUSED)
 {
 
 }
@@ -7297,9 +7297,9 @@ PUBLIC void HTextApplyToSimilar ARGS2(
 /*	Select the first unstyled run.
 **	(style recovery only)
 */
-PUBLIC void HTextSelectUnstyled ARGS2(
-	HText *,		me GCC_UNUSED,
-	HTStyleSheet *,		sheet GCC_UNUSED)
+void HTextSelectUnstyled (
+	HText *		me GCC_UNUSED,
+	HTStyleSheet *		sheet GCC_UNUSED)
 {
 
 }
@@ -7307,34 +7307,34 @@ PUBLIC void HTextSelectUnstyled ARGS2(
 
 /*	Anchor handling:
 */
-PUBLIC void HText_unlinkSelection ARGS1(
-	HText *,	me GCC_UNUSED)
+void HText_unlinkSelection (
+	HText *	me GCC_UNUSED)
 {
 
 }
 
-PUBLIC HTAnchor * HText_referenceSelected ARGS1(
-	HText *,	me GCC_UNUSED)
+HTAnchor * HText_referenceSelected (
+	HText *	me GCC_UNUSED)
 {
      return 0;
 }
 
 
-PUBLIC int HText_getTopOfScreen NOARGS
+int HText_getTopOfScreen (void)
 {
     HText * text = HTMainText;
     return text != 0 ? text->top_of_screen : 0;
 }
 
-PUBLIC int HText_getLines ARGS1(
-	HText *,	text)
+int HText_getLines (
+	HText *	text)
 {
     return text->Lines;
 }
 
-PUBLIC HTAnchor * HText_linkSelTo ARGS2(
-	HText *,	me GCC_UNUSED,
-	HTAnchor *,	anchor GCC_UNUSED)
+HTAnchor * HText_linkSelTo (
+	HText *	me GCC_UNUSED,
+	HTAnchor *	anchor GCC_UNUSED)
 {
     return 0;
 }
@@ -7342,7 +7342,7 @@ PUBLIC HTAnchor * HText_linkSelTo ARGS2(
 /*
  *  Utility for freeing the list of previous isindex and whereis queries. -FM
  */
-PUBLIC void HTSearchQueries_free NOARGS
+void HTSearchQueries_free (void)
 {
     char *query;
     HTList *cur = search_queries;
@@ -7362,8 +7362,8 @@ PUBLIC void HTSearchQueries_free NOARGS
  *  Utility for listing isindex and whereis queries, making
  *  any repeated queries the most current in the list. -FM
  */
-PUBLIC void HTAddSearchQuery ARGS1(
-	char *,		query)
+void HTAddSearchQuery (
+	char *		query)
 {
     char *new_query = NULL;
     char *old;
@@ -7396,8 +7396,8 @@ PUBLIC void HTAddSearchQuery ARGS1(
     return;
 }
 
-PUBLIC int do_www_search ARGS1(
-	DocInfo *,	doc)
+int do_www_search (
+	DocInfo *	doc)
 {
     char searchstring[256], temp[256], *cp, *tmpaddress = NULL;
     int ch, recall;
@@ -7595,9 +7595,9 @@ get_query:
     return(NOT_FOUND);
 }
 
-PRIVATE void write_offset ARGS2(
-	FILE *,		fp,
-	HTLine *,	line)
+static void write_offset (
+	FILE *		fp,
+	HTLine *	line)
 {
     int i;
 
@@ -7608,8 +7608,8 @@ PRIVATE void write_offset ARGS2(
     }
 }
 
-PRIVATE void write_hyphen ARGS1(
-	FILE *,		fp)
+static void write_hyphen (
+	FILE *		fp)
 {
     if (dump_output_immediately &&
 	LYRawMode &&
@@ -7629,10 +7629,10 @@ PRIVATE void write_hyphen ARGS1(
  *  If is_reply is TRUE add ">" to the beginning of each
  *  line to specify the file is a reply to message.
  */
-PUBLIC void print_wwwfile_to_fd ARGS3(
-	FILE *,		fp,
-	BOOLEAN,	is_email,
-	BOOLEAN,	is_reply)
+void print_wwwfile_to_fd (
+	FILE *		fp,
+	BOOLEAN	is_email,
+	BOOLEAN	is_reply)
 {
     register int i;
     int first = TRUE;
@@ -7745,10 +7745,10 @@ PUBLIC void print_wwwfile_to_fd ARGS3(
  *  the file descriptor fp.
  *  First output line is "thelink", ie, the URL for this file.
  */
-PUBLIC void print_crawl_to_fd ARGS3(
-	FILE *,		fp,
-	char *,		thelink,
-	char *,		thetitle)
+void print_crawl_to_fd (
+	FILE *		fp,
+	char *		thelink,
+	char *		thetitle)
 {
     register int i;
     int first = TRUE;
@@ -7800,10 +7800,10 @@ PUBLIC void print_crawl_to_fd ARGS3(
 #endif /* VMS */
 }
 
-PRIVATE void adjust_search_result ARGS3(
-    DocInfo *,	doc,
-    int,	tentative_result,
-    int,	start_line)
+static void adjust_search_result (
+    DocInfo *	doc,
+    int	tentative_result,
+    int	start_line)
 {
     if (tentative_result > 0) {
 	int anch_line = -1;
@@ -7871,9 +7871,9 @@ PRIVATE void adjust_search_result ARGS3(
     }
 }
 
-PRIVATE BOOL anchor_has_target ARGS2(
-	TextAnchor *,	a,
-	char *,		target)
+static BOOL anchor_has_target (
+	TextAnchor *	a,
+	char *		target)
 {
     OptionType * option;
     char *stars = NULL, *cp;
@@ -7962,8 +7962,8 @@ PRIVATE BOOL anchor_has_target ARGS2(
     return FALSE;
 }
 
-PRIVATE TextAnchor *line_num_to_anchor ARGS1(
-    int,	line_num)
+static TextAnchor *line_num_to_anchor (
+    int	line_num)
 {
     TextAnchor *a;
 
@@ -7978,9 +7978,9 @@ PRIVATE TextAnchor *line_num_to_anchor ARGS1(
     return a;
 }
 
-PRIVATE int line_num_in_text ARGS2(
-    HText *,		text,
-    HTLine *,		line)
+static int line_num_in_text (
+    HText *		text,
+    HTLine *		line)
 {
     int result = 1;
     HTLine *temp = FirstHTLine(text);
@@ -7995,8 +7995,8 @@ PRIVATE int line_num_in_text ARGS2(
 /* Computes the 'prev' pointers on demand, and returns the one for the given
  * anchor.
  */
-PRIVATE TextAnchor *get_prev_anchor ARGS1(
-    TextAnchor *,	a)
+static TextAnchor *get_prev_anchor (
+    TextAnchor *	a)
 {
     TextAnchor *p, *q;
 
@@ -8011,12 +8011,12 @@ PRIVATE TextAnchor *get_prev_anchor ARGS1(
     return a->prev;
 }
 
-PRIVATE int www_search_forward ARGS5(
-	int,		start_line,
-	DocInfo *,	doc,
-	char *,		target,
-	HTLine *,	line,
-	int,		count)
+static int www_search_forward (
+	int		start_line,
+	DocInfo *	doc,
+	char *		target,
+	HTLine *	line,
+	int		count)
 {
     int wrapped = 0;
     TextAnchor *a = line_num_to_anchor(count - 1);
@@ -8054,12 +8054,12 @@ PRIVATE int www_search_forward ARGS5(
     return 0;
 }
 
-PRIVATE int www_search_backward ARGS5(
-	int,		start_line,
-	DocInfo *,	doc,
-	char *,		target,
-	HTLine *,	line,
-	int,		count)
+static int www_search_backward (
+	int		start_line,
+	DocInfo *	doc,
+	char *		target,
+	HTLine *	line,
+	int		count)
 {
     int wrapped = 0;
     TextAnchor *a = line_num_to_anchor(count - 1);
@@ -8097,11 +8097,11 @@ PRIVATE int www_search_backward ARGS5(
     return 0;
 }
 
-PUBLIC void www_user_search ARGS4(
-	int,		start_line,
-	DocInfo *,	doc,
-	char *,		target,
-	int,		direction)
+void www_user_search (
+	int		start_line,
+	DocInfo *	doc,
+	char *		target,
+	int		direction)
 {
     HTLine * line;
     int count;
@@ -8133,9 +8133,9 @@ PUBLIC void www_user_search ARGS4(
 	www_search_backward(start_line, doc, target, line, count);
 }
 
-PUBLIC void user_message ARGS2(
-	CONST char *,	message,
-	CONST char *,	argument)
+void user_message (
+	const char *	message,
+	const char *	argument)
 {
     char *temp = NULL;
 
@@ -8156,7 +8156,7 @@ PUBLIC void user_message ARGS2(
  *  HText_getOwner returns the owner of the
  *  current document.
  */
-PUBLIC CONST char * HText_getOwner NOARGS
+const char * HText_getOwner (void)
 {
     return(HTMainText ?
 	   HTAnchor_owner(HTMainText->node_anchor) : 0);
@@ -8166,8 +8166,8 @@ PUBLIC CONST char * HText_getOwner NOARGS
  *  HText_setMainTextOwner sets the owner for the
  *  current document.
  */
-PUBLIC void HText_setMainTextOwner ARGS1(
-	CONST char *,	owner)
+void HText_setMainTextOwner (
+	const char *	owner)
 {
     if (!HTMainText)
 	return;
@@ -8180,7 +8180,7 @@ PUBLIC void HText_setMainTextOwner ARGS1(
  *  current document, used as the subject for mailto comments
  *  to the owner.
  */
-PUBLIC CONST char * HText_getRevTitle NOARGS
+const char * HText_getRevTitle (void)
 {
     return(HTMainText ?
 	   HTAnchor_RevTitle(HTMainText->node_anchor) : 0);
@@ -8190,7 +8190,7 @@ PUBLIC CONST char * HText_getRevTitle NOARGS
  *  HText_getContentBase returns the Content-Base header
  *  of the current document.
  */
-PUBLIC CONST char * HText_getContentBase NOARGS
+const char * HText_getContentBase (void)
 {
     return(HTMainText ?
 	   HTAnchor_content_base(HTMainText->node_anchor) : 0);
@@ -8200,7 +8200,7 @@ PUBLIC CONST char * HText_getContentBase NOARGS
  *  HText_getContentLocation returns the Content-Location header
  *  of the current document.
  */
-PUBLIC CONST char * HText_getContentLocation NOARGS
+const char * HText_getContentLocation (void)
 {
     return(HTMainText ?
 	   HTAnchor_content_location(HTMainText->node_anchor) : 0);
@@ -8210,13 +8210,13 @@ PUBLIC CONST char * HText_getContentLocation NOARGS
  *  HText_getMessageID returns the Message-ID of the
  *  current document.
  */
-PUBLIC CONST char * HText_getMessageID NOARGS
+const char * HText_getMessageID (void)
 {
     return(HTMainText ?
 	   HTAnchor_messageID(HTMainText->node_anchor) : NULL);
 }
 
-PUBLIC void HTuncache_current_document NOARGS
+void HTuncache_current_document (void)
 {
     /*
      *  Should remove current document from memory.
@@ -8247,9 +8247,9 @@ PUBLIC void HTuncache_current_document NOARGS
 
 #ifdef USE_SOURCE_CACHE
 
-PRIVATE HTProtocol scm = { "source-cache-mem", 0, 0 }; /* dummy - kw */
+static HTProtocol scm = { "source-cache-mem", 0, 0 }; /* dummy - kw */
 
-PUBLIC BOOLEAN HTreparse_document NOARGS
+BOOLEAN HTreparse_document (void)
 {
     BOOLEAN ok = FALSE;
 
@@ -8375,7 +8375,7 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
     return ok;
 }
 
-PUBLIC BOOLEAN HTcan_reparse_document NOARGS
+BOOLEAN HTcan_reparse_document (void)
 {
     if (!HTMainAnchor || LYCacheSource == SOURCE_CACHE_NONE ||
 	(LYCacheSource == SOURCE_CACHE_FILE &&
@@ -8396,17 +8396,17 @@ PUBLIC BOOLEAN HTcan_reparse_document NOARGS
     return FALSE;  /* if came to here */
 }
 
-PRIVATE void trace_setting_change ARGS3(
-	CONST char *,	name,
-	int,		prev_setting,
-	int,		new_setting)
+static void trace_setting_change (
+	const char *	name,
+	int		prev_setting,
+	int		new_setting)
 {
     if (prev_setting != new_setting)
 	CTRACE((tfp, "HTdocument_settings_changed: %s setting has changed (was %d, now %d)\n",
 	       name, prev_setting, new_setting));
 }
 
-PUBLIC BOOLEAN HTdocument_settings_changed NOARGS
+BOOLEAN HTdocument_settings_changed (void)
 {
     /*
      * Annoying Hack(TM):  If we don't have a source cache, we can't
@@ -8463,12 +8463,12 @@ PUBLIC BOOLEAN HTdocument_settings_changed NOARGS
 }
 #endif
 
-PUBLIC int HTisDocumentSource NOARGS
+int HTisDocumentSource (void)
 {
     return (HTMainText != 0) ? HTMainText->source : FALSE;
 }
 
-PUBLIC char * HTLoadedDocumentURL NOARGS
+char * HTLoadedDocumentURL (void)
 {
     if (!HTMainText)
 	return ("");
@@ -8479,7 +8479,7 @@ PUBLIC char * HTLoadedDocumentURL NOARGS
 	return ("");
 }
 
-PUBLIC bstring * HTLoadedDocumentPost_data NOARGS
+bstring * HTLoadedDocumentPost_data (void)
 {
     if (HTMainText
      && HTMainText->node_anchor
@@ -8489,7 +8489,7 @@ PUBLIC bstring * HTLoadedDocumentPost_data NOARGS
 	return (0);
 }
 
-PUBLIC char * HTLoadedDocumentTitle NOARGS
+char * HTLoadedDocumentTitle (void)
 {
     if (!HTMainText)
 	return ("");
@@ -8500,7 +8500,7 @@ PUBLIC char * HTLoadedDocumentTitle NOARGS
 	return ("");
 }
 
-PUBLIC BOOLEAN HTLoadedDocumentIsHEAD NOARGS
+BOOLEAN HTLoadedDocumentIsHEAD (void)
 {
     if (!HTMainText)
 	return (FALSE);
@@ -8511,7 +8511,7 @@ PUBLIC BOOLEAN HTLoadedDocumentIsHEAD NOARGS
 	return (FALSE);
 }
 
-PUBLIC BOOLEAN HTLoadedDocumentIsSafe NOARGS
+BOOLEAN HTLoadedDocumentIsSafe (void)
 {
     if (!HTMainText)
 	return (FALSE);
@@ -8522,7 +8522,7 @@ PUBLIC BOOLEAN HTLoadedDocumentIsSafe NOARGS
 	return (FALSE);
 }
 
-PUBLIC char * HTLoadedDocumentCharset NOARGS
+char * HTLoadedDocumentCharset (void)
 {
     if (!HTMainText)
 	return (NULL);
@@ -8533,7 +8533,7 @@ PUBLIC char * HTLoadedDocumentCharset NOARGS
 	return (NULL);
 }
 
-PUBLIC BOOL HTLoadedDocumentEightbit NOARGS
+BOOL HTLoadedDocumentEightbit (void)
 {
     if (!HTMainText)
 	return (NO);
@@ -8541,8 +8541,8 @@ PUBLIC BOOL HTLoadedDocumentEightbit NOARGS
 	return (HTMainText->have_8bit_chars);
 }
 
-PUBLIC void HText_setNodeAnchorBookmark ARGS1(
-	CONST char *,	bookmark)
+void HText_setNodeAnchorBookmark (
+	const char *	bookmark)
 {
     if (!HTMainText)
 	return;
@@ -8551,7 +8551,7 @@ PUBLIC void HText_setNodeAnchorBookmark ARGS1(
 	HTAnchor_setBookmark(HTMainText->node_anchor, bookmark);
 }
 
-PUBLIC char * HTLoadedDocumentBookmark NOARGS
+char * HTLoadedDocumentBookmark (void)
 {
     if (!HTMainText)
 	return (NULL);
@@ -8562,35 +8562,35 @@ PUBLIC char * HTLoadedDocumentBookmark NOARGS
 	return (NULL);
 }
 
-PUBLIC int HText_LastLineSize ARGS2(
-	HText *,	text,
-	BOOL,		IgnoreSpaces)
+int HText_LastLineSize (
+	HText *	text,
+	BOOL		IgnoreSpaces)
 {
     if (!text || !text->last_line || !text->last_line->size)
 	return 0;
     return HText_TrueLineSize(text->last_line, text, IgnoreSpaces);
 }
 
-PUBLIC BOOL HText_LastLineEmpty ARGS2(
-	HText *,	text,
-	BOOL,		IgnoreSpaces)
+BOOL HText_LastLineEmpty (
+	HText *	text,
+	BOOL		IgnoreSpaces)
 {
     if (!text || !text->last_line || !text->last_line->size)
 	return TRUE;
     return HText_TrueEmptyLine(text->last_line, text, IgnoreSpaces);
 }
 
-PUBLIC int HText_LastLineOffset ARGS1(
-	HText *,	text)
+int HText_LastLineOffset (
+	HText *	text)
 {
     if (!text || !text->last_line)
 	return 0;
     return  text->last_line->offset;
 }
 
-PUBLIC int HText_PreviousLineSize ARGS2(
-	HText *,	text,
-	BOOL,		IgnoreSpaces)
+int HText_PreviousLineSize (
+	HText *	text,
+	BOOL		IgnoreSpaces)
 {
     HTLine * line;
 
@@ -8601,9 +8601,9 @@ PUBLIC int HText_PreviousLineSize ARGS2(
     return HText_TrueLineSize(line, text, IgnoreSpaces);
 }
 
-PUBLIC BOOL HText_PreviousLineEmpty ARGS2(
-	HText *,	text,
-	BOOL,		IgnoreSpaces)
+BOOL HText_PreviousLineEmpty (
+	HText *	text,
+	BOOL		IgnoreSpaces)
 {
     HTLine * line;
 
@@ -8617,10 +8617,10 @@ PUBLIC BOOL HText_PreviousLineEmpty ARGS2(
 /*
  * Compute the "true" line size.
  */
-PRIVATE int HText_TrueLineSize ARGS3(
-	HTLine *,	line,
-	HText *,	text,
-	BOOL,		IgnoreSpaces)
+static int HText_TrueLineSize (
+	HTLine *	line,
+	HText *	text,
+	BOOL		IgnoreSpaces)
 {
     size_t i;
     int true_size = 0;
@@ -8654,10 +8654,10 @@ PRIVATE int HText_TrueLineSize ARGS3(
  * HText_TrueLineSize(), and most lines are not empty.  So it is faster to
  * do this check than to check if the line size happens to be zero.
  */
-PRIVATE BOOL HText_TrueEmptyLine ARGS3(
-	HTLine *,	line,
-	HText *,	text,
-	BOOL,		IgnoreSpaces)
+static BOOL HText_TrueEmptyLine (
+	HTLine *	line,
+	HText *	text,
+	BOOL		IgnoreSpaces)
 {
     size_t i;
 
@@ -8685,8 +8685,8 @@ PRIVATE BOOL HText_TrueEmptyLine ARGS3(
     return TRUE;
 }
 
-PUBLIC void HText_NegateLineOne ARGS1(
-	HText *,	text)
+void HText_NegateLineOne (
+	HText *	text)
 {
     if (text) {
 	text->in_line_1 = NO;
@@ -8694,8 +8694,8 @@ PUBLIC void HText_NegateLineOne ARGS1(
     return;
 }
 
-PUBLIC BOOL HText_inLineOne ARGS1(
-	HText *,	text)
+BOOL HText_inLineOne (
+	HText *	text)
 {
     if (text) {
 	return text->in_line_1;
@@ -8713,8 +8713,8 @@ PUBLIC BOOL HText_inLineOne ARGS1(
  *  reiterated by split_line() in the retained blank
  *  line. -FM
  */
-PUBLIC void HText_RemovePreviousLine ARGS1(
-	HText *,	text)
+void HText_RemovePreviousLine (
+	HText *	text)
 {
     HTLine *line, *previous;
 
@@ -8736,8 +8736,8 @@ PUBLIC void HText_RemovePreviousLine ARGS1(
  *	  HT_RIGHT until subsequent characters are received
  *	  and split_line() is called. -FM
  */
-PUBLIC int HText_getCurrentColumn ARGS1(
-	HText *,	text)
+int HText_getCurrentColumn (
+	HText *	text)
 {
     int column = 0;
     BOOL IgnoreSpaces = FALSE;
@@ -8751,8 +8751,8 @@ PUBLIC int HText_getCurrentColumn ARGS1(
     return column;
 }
 
-PUBLIC int HText_getMaximumColumn ARGS1(
-	HText *,	text)
+int HText_getMaximumColumn (
+	HText *	text)
 {
     int column = (DISPLAY_COLS-2);
     if (text) {
@@ -8767,9 +8767,9 @@ PUBLIC int HText_getMaximumColumn ARGS1(
  *	  presently is correct only if the alignment is
  *	  HT_LEFT. -FM
  */
-PUBLIC void HText_setTabID ARGS2(
-	HText *,	text,
-	CONST char *,	name)
+void HText_setTabID (
+	HText *	text,
+	const char *	name)
 {
     HTTabID * Tab = NULL;
     HTList * cur = text->tabs;
@@ -8800,9 +8800,9 @@ PUBLIC void HText_setTabID ARGS2(
     return;
 }
 
-PUBLIC int HText_getTabIDColumn ARGS2(
-	HText *,	text,
-	CONST char *,	name)
+int HText_getTabIDColumn (
+	HText *	text,
+	const char *	name)
 {
     int column = 0;
     HTTabID * Tab;
@@ -8830,9 +8830,9 @@ PUBLIC int HText_getTabIDColumn ARGS2(
  *  retrieved via HText_HiddenLinkAt(), below, based on
  *  count. -FM
  */
-PRIVATE void HText_AddHiddenLink ARGS2(
-	HText *,	text,
-	TextAnchor *,	textanchor)
+static void HText_AddHiddenLink (
+	HText *	text,
+	TextAnchor *	textanchor)
 {
     HTAnchor *dest;
 
@@ -8866,8 +8866,8 @@ PRIVATE void HText_AddHiddenLink ARGS2(
  *  This function returns the number of addresses
  *  that are loaded in text->hidden_links. -FM
  */
-PUBLIC int HText_HiddenLinkCount ARGS1(
-	HText *,	text)
+int HText_HiddenLinkCount (
+	HText *	text)
 {
     int count = 0;
 
@@ -8882,9 +8882,9 @@ PUBLIC int HText_HiddenLinkCount ARGS1(
  *  a hidden link, at the position (zero-based) in the
  *  text->hidden_links list of the number argument. -FM
  */
-PUBLIC char * HText_HiddenLinkAt ARGS2(
-	HText *,	text,
-	int,		number)
+char * HText_HiddenLinkAt (
+	HText *	text,
+	int		number)
 {
     char *href = NULL;
 
@@ -8900,20 +8900,20 @@ PUBLIC char * HText_HiddenLinkAt ARGS2(
  *    These routines are used to build forms consisting
  *    of input fields
  */
-PRIVATE int HTFormMethod;
-PRIVATE char * HTFormAction = NULL;
-PRIVATE char * HTFormEnctype = NULL;
-PRIVATE char * HTFormTitle = NULL;
-PRIVATE char * HTFormAcceptCharset = NULL;
-PRIVATE BOOLEAN HTFormDisabled = FALSE;
-PRIVATE PerFormInfo * HTCurrentForm;
+static int HTFormMethod;
+static char * HTFormAction = NULL;
+static char * HTFormEnctype = NULL;
+static char * HTFormTitle = NULL;
+static char * HTFormAcceptCharset = NULL;
+static BOOLEAN HTFormDisabled = FALSE;
+static PerFormInfo * HTCurrentForm;
 
-PUBLIC void HText_beginForm ARGS5(
-	char *,		action,
-	char *,		method,
-	char *,		enctype,
-	char *,		title,
-	CONST char *,	accept_cs)
+void HText_beginForm (
+	char *		action,
+	char *		method,
+	char *		enctype,
+	char *		title,
+	const char *	accept_cs)
 {
     PerFormInfo * newform;
     HTFormMethod = URL_GET_METHOD;
@@ -8997,8 +8997,8 @@ PUBLIC void HText_beginForm ARGS5(
 		NonNull(HTFormAcceptCharset)));
 }
 
-PUBLIC void HText_endForm ARGS1(
-	HText *,	text)
+void HText_endForm (
+	HText *	text)
 {
     if (HTFormFields == 1 && text && text->first_anchor) {
 	/*
@@ -9063,11 +9063,11 @@ PUBLIC void HText_endForm ARGS1(
     HTFormDisabled = FALSE;
 }
 
-PUBLIC void HText_beginSelect ARGS4(
-	char *,		name,
-	int,		name_cs,
-	BOOLEAN,	multiple,
-	char *,		size)
+void HText_beginSelect (
+	char *		name,
+	int		name_cs,
+	BOOLEAN	multiple,
+	char *		size)
 {
     /*
      *  Save the group name.
@@ -9108,8 +9108,8 @@ PUBLIC void HText_beginSelect ARGS4(
 **  value currently is being accumulated for a select
 **  block. - LE && FM
 */
-PUBLIC int HText_getOptionNum ARGS1(
-	HText *,	text)
+int HText_getOptionNum (
+	HText *	text)
 {
     TextAnchor *a;
     OptionType *op;
@@ -9136,8 +9136,8 @@ PUBLIC int HText_getOptionNum ARGS1(
 **  pointer to the actual value, following that prefix.
 **  Otherwise, it returns the original pointer.
 */
-PRIVATE char * HText_skipOptionNumPrefix ARGS1(
-	char *,		opname)
+static char * HText_skipOptionNumPrefix (
+	char *		opname)
 {
     /*
      *  Check if we are in the correct keypad mode.
@@ -9186,14 +9186,14 @@ PRIVATE char * HText_skipOptionNumPrefix ARGS1(
 **  tag so we have to do it now.  Assume that the last anchor
 **  was the previous options tag.
 */
-PUBLIC char * HText_setLastOptionValue ARGS7(
-	HText *,	text,
-	char *,		value,
-	char*,		submit_value,
-	int,		order,
-	BOOLEAN,	checked,
-	int,		val_cs,
-	int,		submit_val_cs)
+char * HText_setLastOptionValue (
+	HText *	text,
+	char *		value,
+	char*		submit_value,
+	int		order,
+	BOOLEAN	checked,
+	int		val_cs,
+	int		submit_val_cs)
 {
     char *cp, *cp1;
     char *ret_Value = NULL;
@@ -9351,7 +9351,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 			}
 		    }
 		}
-		StrAllocCopy(new_ptr->name, (CONST char *)tmp);
+		StrAllocCopy(new_ptr->name, (const char *)tmp);
 		FREE(tmp);
 	    }
 	} else {
@@ -9454,14 +9454,14 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
  *  Returns the number of characters to leave
  *  blank so that the input field can fit.
  */
-PUBLIC int HText_beginInput ARGS3(
-	HText *,		text,
-	BOOL,			underline,
-	InputFieldData *,	I)
+int HText_beginInput (
+	HText *		text,
+	BOOL			underline,
+	InputFieldData *	I)
 {
     TextAnchor * a;
     FormInfo * f;
-    CONST char *cp_option = NULL;
+    const char *cp_option = NULL;
     char *IValue = NULL;
     unsigned char *tmp = NULL;
     int i, j;
@@ -9561,7 +9561,7 @@ PUBLIC int HText_beginInput ARGS3(
 		    }
 		}
 	    }
-	    StrAllocCopy(IValue, (CONST char *)tmp);
+	    StrAllocCopy(IValue, (const char *)tmp);
 	    FREE(tmp);
 	}
     }
@@ -9941,8 +9941,8 @@ PUBLIC int HText_beginInput ARGS3(
  * be too long for the line - we'll lose the marker in that case rather than
  * truncate the field.
  */
-PUBLIC void HText_endInput ARGS1(
-	HText *,		text)
+void HText_endInput (
+	HText *		text)
 {
     if (fields_are_numbered()
      && !number_fields_on_left
@@ -9967,9 +9967,9 @@ PUBLIC void HText_endInput ARGS1(
  *  Obsolete, it was planned to use here a quality parametr UCTQ_t,
  *  which is boolean now.
  */
-PRIVATE double get_trans_q ARGS2(
-    int,		cs_from,
-    char *,		givenmime)
+static double get_trans_q (
+    int		cs_from,
+    char *		givenmime)
 {
     double df = 1.0;
     BOOL tq;
@@ -10018,10 +10018,10 @@ PRIVATE double get_trans_q ARGS2(
  *  charset corresponding to the return value if return value >= 0.
  *  - kw
  */
-PRIVATE int find_best_target_cs ARGS3(
-    char **,		best_csname,
-    int,		cs_from,
-    CONST char *,	acceptstring)
+static int find_best_target_cs (
+    char **		best_csname,
+    int		cs_from,
+    const char *	acceptstring)
 {
     char *paccept = NULL;
     double bestq = -1.0;
@@ -10056,9 +10056,9 @@ PRIVATE int find_best_target_cs ARGS3(
 }
 
 #ifdef USE_FILE_UPLOAD
-PRIVATE void load_a_file ARGS2(
-    char *,	val_used,
-    bstring **,	result)
+static void load_a_file (
+    char *	val_used,
+    bstring **	result)
 {
     FILE *fd;
     size_t bytes;
@@ -10078,10 +10078,10 @@ PRIVATE void load_a_file ARGS2(
     }
 }
 
-PRIVATE CONST char *guess_content_type ARGS1(CONST char *, filename)
+static const char *guess_content_type (const char * filename)
 {
     HTAtom *encoding;
-    CONST char *desc;
+    const char *desc;
     HTFormat format = HTFileFormat (filename, &encoding, &desc);
     return (format != 0 && non_empty(format->name))
 	    ? format->name
@@ -10090,9 +10090,9 @@ PRIVATE CONST char *guess_content_type ARGS1(CONST char *, filename)
 #endif /* USE_FILE_UPLOAD */
 
 
-PRIVATE void cannot_transcode ARGS2(
-    BOOL *,		had_warning,
-    CONST char *,	target_csname)
+static void cannot_transcode (
+    BOOL *		had_warning,
+    const char *	target_csname)
 {
     if (*had_warning == NO) {
 	*had_warning = YES;
@@ -10105,8 +10105,8 @@ PRIVATE void cannot_transcode ARGS2(
 #define SPECIAL_8BIT 1
 #define SPECIAL_FORM 2
 
-PRIVATE unsigned check_form_specialchars ARGS1(
-    char *,	value)
+static unsigned check_form_specialchars (
+    char *	value)
 {
     unsigned result = 0;
     char *p;
@@ -10129,9 +10129,9 @@ PRIVATE unsigned check_form_specialchars ARGS1(
  * Scan the given data, adding characters to the MIME-boundary to keep it from
  * matching any part of the data.
  */
-PRIVATE void UpdateBoundary ARGS2(
-	char **,	Boundary,
-	bstring *,	data)
+static void UpdateBoundary (
+	char **	Boundary,
+	bstring *	data)
 {
     int j;
     int have = strlen(*Boundary);
@@ -10155,13 +10155,13 @@ PRIVATE void UpdateBoundary ARGS2(
 /*
  * Convert a string to base64
  */
-PRIVATE char * convert_to_base64 ARGS2(
-	char *,		src,
-	int,		len)
+static char * convert_to_base64 (
+	char *		src,
+	int		len)
 {
 #define B64_LINE       76
 
-    static CONST char basis_64[] =
+    static const char basis_64[] =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     char *dest;
@@ -10241,10 +10241,10 @@ typedef struct {
     QuoteData quote;	/* how to quote/translate the data */
 } PostData;
 
-PRIVATE char *escape_or_quote_name ARGS3(
-	char *,		name,
-	QuoteData,	quoting,
-	char *,		MultipartContentType)
+static char *escape_or_quote_name (
+	char *		name,
+	QuoteData	quoting,
+	char *		MultipartContentType)
 {
     char *escaped1 = NULL;
 
@@ -10269,9 +10269,9 @@ PRIVATE char *escape_or_quote_name ARGS3(
     return escaped1;
 }
 
-PRIVATE char *escape_or_quote_value ARGS2(
-	char *,		value,
-	QuoteData,	quoting)
+static char *escape_or_quote_value (
+	char *		value,
+	QuoteData	quoting)
 {
     char *escaped2 = NULL;
 
@@ -10296,9 +10296,9 @@ PRIVATE char *escape_or_quote_value ARGS2(
  * a multipart content type.  We should, if we're sending mail and the data
  * contains long lines or nonprinting characters.
  */
-PRIVATE int check_if_base64_needed ARGS2(
-	int,		submit_method,
-	bstring *,	data)
+static int check_if_base64_needed (
+	int		submit_method,
+	bstring *	data)
 {
     int width = 0;
     BOOL printable = TRUE;
@@ -10337,11 +10337,11 @@ PRIVATE int check_if_base64_needed ARGS2(
  *  Returns 1 if *doc set appropriately for next request,
  *	    0 otherwise. - kw
  */
-PUBLIC int HText_SubmitForm ARGS4(
-	FormInfo *,	submit_item,
-	DocInfo *,	doc,
-	char *,		link_name,
-	char *,		link_value)
+int HText_SubmitForm (
+	FormInfo *	submit_item,
+	DocInfo *	doc,
+	char *		link_name,
+	char *		link_value)
 {
     BOOL had_chartrans_warning = NO;
     BOOL have_accept_cs = NO;
@@ -10349,8 +10349,8 @@ PUBLIC int HText_SubmitForm ARGS4(
     BOOLEAN PlainText = FALSE;
     BOOLEAN SemiColon = FALSE;
     BOOL skip_field = FALSE;
-    CONST char *out_csname;
-    CONST char *target_csname = NULL;
+    const char *out_csname;
+    const char *target_csname = NULL;
     PerFormInfo *thisform;
     PostData *my_data = NULL;
     TextAnchor *anchor_ptr;
@@ -11166,7 +11166,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		if (PlainText) {
 		    StrAllocCopy(escaped1, my_data[anchor_count].name);
 		} else if (Boundary) {
-		    CONST char *t = guess_content_type(val_used);
+		    const char *t = guess_content_type(val_used);
 
 		    StrAllocCopy(escaped1, "Content-Disposition: form-data");
 		    HTSprintf(&escaped1, "; name=\"%s\"", my_data[anchor_count].name);
@@ -11264,7 +11264,7 @@ PUBLIC int HText_SubmitForm ARGS4(
     return (result);
 }
 
-PUBLIC void HText_DisableCurrentForm NOARGS
+void HText_DisableCurrentForm (void)
 {
     TextAnchor * anchor_ptr;
 
@@ -11288,8 +11288,8 @@ PUBLIC void HText_DisableCurrentForm NOARGS
     return;
 }
 
-PUBLIC void HText_ResetForm ARGS1(
-	FormInfo *,	form)
+void HText_ResetForm (
+	FormInfo *	form)
 {
     TextAnchor * anchor_ptr;
 
@@ -11338,8 +11338,8 @@ PUBLIC void HText_ResetForm ARGS1(
  * whether any forms content was changed by user so any information will be
  * lost.
  */
-PUBLIC BOOLEAN HText_HaveUserChangedForms ARGS1(
-	HText *,	text)
+BOOLEAN HText_HaveUserChangedForms (
+	HText *	text)
 {
     TextAnchor * anchor_ptr;
 
@@ -11383,8 +11383,8 @@ PUBLIC BOOLEAN HText_HaveUserChangedForms ARGS1(
     return FALSE;
 }
 
-PUBLIC void HText_activateRadioButton ARGS1(
-	FormInfo *,	form)
+void HText_activateRadioButton (
+	FormInfo *	form)
 {
     TextAnchor * anchor_ptr;
     int form_number = form->number;
@@ -11426,7 +11426,7 @@ PUBLIC void HText_activateRadioButton ARGS1(
  *	Revision History:
  *		05-27-94	created Lynx 2-3-1 Garrett Arch Blythe
  */
-PRIVATE void free_all_texts NOARGS
+static void free_all_texts (void)
 {
     HText *cur = NULL;
 
@@ -11472,8 +11472,8 @@ PRIVATE void free_all_texts NOARGS
 **  of N internal links.  Since the parent link has already been taken,
 **  it won't go again, hence the (incorrect) links won't cause problems.
 */
-PUBLIC char * stub_HTAnchor_address ARGS1(
-	HTAnchor *,	me)
+char * stub_HTAnchor_address (
+	HTAnchor *	me)
 {
     char *addr = NULL;
     if (me)
@@ -11481,36 +11481,36 @@ PUBLIC char * stub_HTAnchor_address ARGS1(
     return addr;
 }
 
-PUBLIC void HText_setToolbar ARGS1(
-	HText *,	text)
+void HText_setToolbar (
+	HText *	text)
 {
     if (text)
 	text->toolbar = TRUE;
     return;
 }
 
-PUBLIC BOOL HText_hasToolbar ARGS1(
-	HText *,	text)
+BOOL HText_hasToolbar (
+	HText *	text)
 {
     return (BOOL) ((text && text->toolbar) ? TRUE : FALSE);
 }
 
-PUBLIC void HText_setNoCache ARGS1(
-	HText *,	text)
+void HText_setNoCache (
+	HText *	text)
 {
     if (text)
 	text->no_cache = TRUE;
     return;
 }
 
-PUBLIC BOOL HText_hasNoCacheSet ARGS1(
-	HText *,	text)
+BOOL HText_hasNoCacheSet (
+	HText *	text)
 {
     return (BOOL) ((text && text->no_cache) ? TRUE : FALSE);
 }
 
-PUBLIC BOOL HText_hasUTF8OutputSet ARGS1(
-	HText *,	text)
+BOOL HText_hasUTF8OutputSet (
+	HText *	text)
 {
     return (BOOL) ((text && text->T.output_utf8) ? TRUE : FALSE);
 }
@@ -11525,10 +11525,10 @@ PUBLIC BOOL HText_hasUTF8OutputSet ARGS1(
 **  long.  It's potentially more important not to set HTCJK to
 **  NOCJK unless we are sure. - kw
 */
-PUBLIC void HText_setKcode ARGS3(
-	HText *,	text,
-	CONST char *,	charset,
-	LYUCcharset *,	p_in)
+void HText_setKcode (
+	HText *	text,
+	const char *	charset,
+	LYUCcharset *	p_in)
 {
     BOOL explicit;
 
@@ -11613,8 +11613,8 @@ PUBLIC void HText_setKcode ARGS3(
 /*
 **  Set a permissible split at the current end of the last line. -FM
 */
-PUBLIC void HText_setBreakPoint ARGS1(
-	HText *,	text)
+void HText_setBreakPoint (
+	HText *	text)
 {
     if (!text)
 	return;
@@ -11640,9 +11640,9 @@ PUBLIC void HText_setBreakPoint ARGS1(
 **  based on any caching directives or analyses which
 **  claimed or suggested this. -FM
 */
-PUBLIC BOOL HText_AreDifferent ARGS2(
-	HTParentAnchor *,	anchor,
-	CONST char *,		full_address)
+BOOL HText_AreDifferent (
+	HTParentAnchor *	anchor,
+	const char *		full_address)
 {
     HTParentAnchor *MTanc;
     char *MTaddress;
@@ -11746,9 +11746,9 @@ PUBLIC BOOL HText_AreDifferent ARGS2(
  *
  *  --KED  02/24/99
  */
-PRIVATE void cleanup_line_for_textarea ARGS2(
-	     char *,  line,
-	     int,     len)
+static void cleanup_line_for_textarea (
+	     char *  line,
+	     int     len)
 {
     char  tbuf[MAX_LINE];
 
@@ -11858,13 +11858,13 @@ PRIVATE void cleanup_line_for_textarea ARGS2(
  *
  *  --KED  02/03/99
  */
-PRIVATE int increment_tagged_htline ARGS6(
-	HTLine *,	ht,
-	TextAnchor *,   a,
-	int *,		lx_val,
-	int *,		old_val,
-	int,		incr,
-	int,		mode)
+static int increment_tagged_htline (
+	HTLine *	ht,
+	TextAnchor *   a,
+	int *		lx_val,
+	int *		old_val,
+	int		incr,
+	int		mode)
 {
     char    buf[MAX_LINE];
     char  lxbuf[MAX_LINE * 2];
@@ -12117,9 +12117,9 @@ PRIVATE int increment_tagged_htline ARGS6(
  *
  *  --KED  02/13/99
  */
-PRIVATE void insert_new_textarea_anchor ARGS2(
-	TextAnchor **,   curr_anchor,
-	HTLine **,       exit_htline)
+static void insert_new_textarea_anchor (
+	TextAnchor **   curr_anchor,
+	HTLine **       exit_htline)
 {
     TextAnchor *anchor = *curr_anchor;
     HTLine     *htline;
@@ -12247,11 +12247,11 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
  *
  *  --KED  02/13/99
  */
-PRIVATE void update_subsequent_anchors ARGS4(
-	int,		 newlines,
-	TextAnchor *,	 start_anchor,
-	HTLine *,	 start_htline,
-	int,		 start_tag)
+static void update_subsequent_anchors (
+	int		 newlines,
+	TextAnchor *	 start_anchor,
+	HTLine *	 start_htline,
+	int		 start_tag)
 {
     TextAnchor *anchor;
     HTLine     *htline = start_htline;
@@ -12394,8 +12394,8 @@ hang_detected:  /* ugliness has happened; inform user and do the best we can */
  *
  *  --KED  02/01/99
  */
-PUBLIC int HText_ExtEditForm ARGS1(
-	   LinkInfo *,	form_link)
+int HText_ExtEditForm (
+	   LinkInfo *	form_link)
 {
     struct stat stat_info;
     size_t	size;
@@ -12732,9 +12732,9 @@ PUBLIC int HText_ExtEditForm ARGS1(
  *
  *  --KED  02/14/99
  */
-PUBLIC void HText_ExpandTextarea ARGS2(
-	    LinkInfo *,	form_link,
-	    int,	newlines)
+void HText_ExpandTextarea (
+	    LinkInfo *	form_link,
+	    int	newlines)
 {
     TextAnchor *anchor_ptr;
     TextAnchor *end_anchor    = NULL;
@@ -12832,8 +12832,8 @@ PUBLIC void HText_ExpandTextarea ARGS2(
  *
  *  --KED  02/21/99
  */
-PUBLIC int HText_InsertFile ARGS1(
-	   LinkInfo *,	form_link)
+int HText_InsertFile (
+	   LinkInfo *	form_link)
 {
     struct stat stat_info;
     size_t	size;
@@ -13157,11 +13157,11 @@ PUBLIC int HText_InsertFile ARGS1(
  * (since no support for lss is availble for Slang) -HV.
  */
 #ifdef USE_COLOR_STYLE
-PRIVATE void redraw_part_of_line ARGS4(
-	HTLine *,	line,
-	char*,		str,
-	int,		len,
-	HText *,	text)
+static void redraw_part_of_line (
+	HTLine *	line,
+	char*		str,
+	int		len,
+	HText *	text)
 {
     register int i;
     char buffer[7];
@@ -13337,24 +13337,24 @@ PRIVATE void redraw_part_of_line ARGS4(
  *  cases.  If possible.  The complex WHEREIS target logic in highlight()
  *  could then be completely removed. - kw
  */
-PRIVATE void move_to_glyph ARGS10(
-	int,		YP,
-	int,		XP,
-	int,		XP_draw_min,
-	char *,		data,
-	int,		datasize,
-	unsigned,	offset,
-	CONST char *,	target,
-	char *,		hightext,
-	int,		flags,
-	BOOL,		utf_flag)
+static void move_to_glyph (
+	int		YP,
+	int		XP,
+	int		XP_draw_min,
+	char *		data,
+	int		datasize,
+	unsigned	offset,
+	const char *	target,
+	char *		hightext,
+	int		flags,
+	BOOL		utf_flag)
 {
     register int i;
     char buffer[7];
-    CONST char *end_of_data;
+    const char *end_of_data;
     size_t utf_extra = 0;
 #if defined(SHOW_WHEREIS_TARGETS)
-    CONST char *cp_tgt;
+    const char *cp_tgt;
     int i_start_tgt=0, i_after_tgt;
     int HitOffset, LenNeeded;
 #endif /* SHOW_WHEREIS_TARGETS */
@@ -13800,13 +13800,13 @@ PRIVATE void move_to_glyph ARGS10(
  *  link as stored in a links[] element, and the anchor text will be
  *  drawn too, with appropriate attributes. - kw
  */
-PUBLIC void LYMoveToLink ARGS6(
-	int,		cur,
-	CONST char *,	target,
-	char *,		hightext,
-	int,		flag,
-	BOOL,		inU,
-	BOOL,		utf_flag)
+void LYMoveToLink (
+	int		cur,
+	const char *	target,
+	char *		hightext,
+	int		flag,
+	BOOL		inU,
+	BOOL		utf_flag)
 {
 #define pvtTITLE_HEIGHT 1
     HTLine* todr;
@@ -13859,8 +13859,8 @@ PUBLIC void LYMoveToLink ARGS6(
  * This is used only if compiled with lss support.  It's called to draw regular
  * link (1st two lines of link) when it's being unhighlighted in LYhighlight().
  */
-PUBLIC void redraw_lines_of_link ARGS1(
-	int,		cur GCC_UNUSED)
+void redraw_lines_of_link (
+	int		cur GCC_UNUSED)
 {
 #ifdef USE_COLOR_STYLE
 #define pvtTITLE_HEIGHT 1
@@ -13895,40 +13895,40 @@ PUBLIC void redraw_lines_of_link ARGS1(
 }
 
 #ifdef USE_PRETTYSRC
-PUBLIC void HTMark_asSource NOARGS
+void HTMark_asSource (void)
 {
     if (HTMainText)
 	HTMainText->source = TRUE;
 }
 #endif
 
-PUBLIC HTkcode HText_getKcode ARGS1(
-	HText *,	text)
+HTkcode HText_getKcode (
+	HText *	text)
 {
     return text->kcode;
 }
 
-PUBLIC void HText_updateKcode ARGS2(
-	HText *,	text,
-	HTkcode,	kcode)
+void HText_updateKcode (
+	HText *	text,
+	HTkcode	kcode)
 {
     text->kcode = kcode;
 }
 
-PUBLIC HTkcode HText_getSpecifiedKcode ARGS1(
-	HText *,	text)
+HTkcode HText_getSpecifiedKcode (
+	HText *	text)
 {
     return text->specified_kcode;
 }
 
-PUBLIC void HText_updateSpecifiedKcode ARGS2(
-	HText *,	text,
-	HTkcode,	kcode)
+void HText_updateSpecifiedKcode (
+	HText *	text,
+	HTkcode	kcode)
 {
     text->specified_kcode = kcode;
 }
 
-PUBLIC int HTMainText_Get_UCLYhndl NOARGS
+int HTMainText_Get_UCLYhndl (void)
 {
     return (HTMainText ?
 	    HTAnchor_getUCLYhndl(HTMainText->node_anchor, UCT_STAGE_MIME)

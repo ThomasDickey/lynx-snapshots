@@ -69,10 +69,10 @@ static char *T_umap_fn = NULL;
  *	       -1  error (assume font and umap are not loaded)
  *		1  error with umap (assume font loaded but umap empty)
  */
-PRIVATE int call_setfont ARGS3(
-	CONST char *,	font,
-	CONST char *,	fnsuffix,
-	CONST char *,	umap)
+static int call_setfont (
+	const char *	font,
+	const char *	fnsuffix,
+	const char *	umap)
 {
     char *T_setfont_cmd = NULL;
     int rv;
@@ -124,8 +124,8 @@ PRIVATE int call_setfont ARGS3(
     return 0;
 }
 
-PRIVATE void write_esc ARGS1(
-	CONST char *,	p)
+static void write_esc (
+	const char *	p)
 {
     int fd = open("/dev/tty", O_WRONLY);
 
@@ -135,8 +135,8 @@ PRIVATE void write_esc ARGS1(
     }
 }
 
-PRIVATE int nonempty_file ARGS1(
-	CONST char *,	p)
+static int nonempty_file (
+	const char *	p)
 {
     struct stat sb;
 
@@ -148,12 +148,12 @@ PRIVATE int nonempty_file ARGS1(
 /*
  *  This is the thing that actually gets called from display_page().
  */
-PUBLIC void UCChangeTerminalCodepage ARGS2(
-	int,		newcs,
-	LYUCcharset *,	p)
+void UCChangeTerminalCodepage (
+	int		newcs,
+	LYUCcharset *	p)
 {
     static int lastcs = -1;
-    static CONST char * lastname = NULL;
+    static const char * lastname = NULL;
     static TTransT_t lastTransT = GN_dunno;
     static TGen_state_t lastUtf = Dunno;
     static TGen_state_t lastHasUmap = Dunno;
@@ -161,7 +161,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
     static char *old_font = NULL;
     static char *old_umap = NULL;
 
-    CONST char * name;
+    const char * name;
     TTransT_t TransT = GN_dunno;
     TGen_state_t Utf = Dunno;
     TGen_state_t HasUmap = Dunno;
@@ -442,9 +442,9 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 /*
  *  This is the thing that actually gets called from display_page().
  */
-PUBLIC void UCChangeTerminalCodepage ARGS2(
-	int,		newcs,
-	LYUCcharset *,	p)
+void UCChangeTerminalCodepage (
+	int		newcs,
+	LYUCcharset *	p)
 {
 #ifdef __EMX__
     int res = 0;
@@ -461,9 +461,9 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 
 #ifdef CAN_SWITCH_DISPLAY_CHARSET
 
-PUBLIC int Find_Best_Display_Charset ARGS1 (int, ord)
+int Find_Best_Display_Charset (int ord)
 {
-    CONST char *name = LYCharSet_UC[ord].MIMEname;
+    const char *name = LYCharSet_UC[ord].MIMEname;
     char *s = charset_switch_rules, *r;
     char buf[160];
     static int lowercase;
@@ -528,9 +528,9 @@ PUBLIC int Find_Best_Display_Charset ARGS1 (int, ord)
    before the actual display.
 
    Returns the charset we switched to.  */
-PRIVATE int _Switch_Display_Charset ARGS2 (int, ord, enum switch_display_charset_t, really)
+static int _Switch_Display_Charset (int ord, enum switch_display_charset_t really)
 {
-    CONST char *name;
+    const char *name;
     unsigned short cp;
     static int font_loaded_for = -1, old_h, old_w;
     int rc, ord1;
@@ -659,7 +659,7 @@ PRIVATE int _Switch_Display_Charset ARGS2 (int, ord, enum switch_display_charset
 }
 #  endif /* __EMX__ */
 
-PUBLIC int Switch_Display_Charset ARGS2 (CONST int, ord, CONST enum switch_display_charset_t, really)
+int Switch_Display_Charset (const int ord, const enum switch_display_charset_t really)
 {
     int prev = current_char_set;
     int res;
@@ -685,9 +685,9 @@ PUBLIC int Switch_Display_Charset ARGS2 (CONST int, ord, CONST enum switch_displ
 /*
  *  This is the thing that actually gets called from display_page().
  */
-PUBLIC void UCChangeTerminalCodepage ARGS2(
-	int,		newcs GCC_UNUSED,
-	LYUCcharset *,	p GCC_UNUSED)
+void UCChangeTerminalCodepage (
+	int		newcs GCC_UNUSED,
+	LYUCcharset *	p GCC_UNUSED)
 {
     CTRACE((tfp, "UCChangeTerminalCodepage: Called, but not implemented!"));
 }

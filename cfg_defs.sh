@@ -12,9 +12,9 @@ cat >$OUT <<EOF
 #ifndef CFG_DEFS_H
 #define CFG_DEFS_H 1
 
-static CONST struct {
-	CONST char *name;
-	CONST char *value;
+static const struct {
+	const char *name;
+	const char *value;
 } config_cache[] = {
 EOF
 
@@ -28,9 +28,9 @@ sed \
 cat >>$OUT <<EOF
 };
 
-static CONST struct {
-	CONST char *name;
-	CONST char *value;
+static const struct {
+	const char *name;
+	const char *value;
 } config_defines[] = {
 EOF
 fgrep	'#define' lynx_cfg.h |

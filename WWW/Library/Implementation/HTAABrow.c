@@ -107,36 +107,36 @@ typedef struct {
 /*
 **  To free off all globals. - FM
 */
-PRIVATE void free_HTAAGlobals NOPARAMS;
-PRIVATE BOOL free_HTAAGlobalsSet = FALSE;
-PRIVATE char *HTAA_composeAuthResult = NULL;
-PRIVATE char *compose_auth_stringResult = NULL;	/* Uuencoded presentation */
+static void free_HTAAGlobals (void);
+static BOOL free_HTAAGlobalsSet = FALSE;
+static char *HTAA_composeAuthResult = NULL;
+static char *compose_auth_stringResult = NULL;	/* Uuencoded presentation */
 
 /*
 **  Module-wide global variables
 */
-PRIVATE HTList *server_table	= NULL;	/* Browser's info about servers	     */
-PRIVATE char *secret_key	= NULL;	/* Browser's latest secret key       */
-PRIVATE HTAASetup *current_setup= NULL;	/* The server setup we are currently */
+static HTList *server_table	= NULL;	/* Browser's info about servers	     */
+static char *secret_key	= NULL;	/* Browser's latest secret key       */
+static HTAASetup *current_setup= NULL;	/* The server setup we are currently */
 					/* talking to			     */
-PRIVATE char *current_hostname	= NULL;	/* The server's name and portnumber  */
-PRIVATE int current_portnumber	= 80;	/* where we are currently trying to  */
+static char *current_hostname	= NULL;	/* The server's name and portnumber  */
+static int current_portnumber	= 80;	/* where we are currently trying to  */
 					/* connect.			     */
-PRIVATE char *current_docname	= NULL; /* The document's name we are	     */
+static char *current_docname	= NULL; /* The document's name we are	     */
 					/* trying to access.		     */
-PRIVATE char *HTAAForwardAuth	= NULL;	/* Authorization: line to forward    */
+static char *HTAAForwardAuth	= NULL;	/* Authorization: line to forward    */
 					/* (used by gateway httpds)	     */
-PRIVATE HTAASetup *proxy_setup	= NULL;	/* Same as above, but for Proxy -AJL */
-PRIVATE char *proxy_hostname	= NULL;
-PRIVATE char *proxy_docname	= NULL;
-PRIVATE int proxy_portnumber	= 80;
+static HTAASetup *proxy_setup	= NULL;	/* Same as above, but for Proxy -AJL */
+static char *proxy_hostname	= NULL;
+static char *proxy_docname	= NULL;
+static int proxy_portnumber	= 80;
 
 
 /*** HTAAForwardAuth for enabling gateway-httpds to forward Authorization ***/
 
-PUBLIC void HTAAForwardAuth_set ARGS2(
-	CONST char *,	scheme_name,
-	CONST char *,	scheme_specifics)
+void HTAAForwardAuth_set (
+	const char *	scheme_name,
+	const char *	scheme_specifics)
 {
     int len = 20 + (scheme_name      ? strlen(scheme_name)      : 0)
 		 + (scheme_specifics ? strlen(scheme_specifics) : 0);
@@ -155,7 +155,7 @@ PUBLIC void HTAAForwardAuth_set ARGS2(
     }
 }
 
-PUBLIC void HTAAForwardAuth_reset NOARGS
+void HTAAForwardAuth_reset (void)
 {
     FREE(HTAAForwardAuth);
 }
@@ -163,9 +163,9 @@ PUBLIC void HTAAForwardAuth_reset NOARGS
 
 /**************************** HTAAServer ***********************************/
 
-PRIVATE void HTAASetup_delete PARAMS((HTAASetup * killme));	/* Forward */
+static void HTAASetup_delete (HTAASetup * killme);	/* Forward */
 
-/* PRIVATE						HTAAServer_new()
+/* static						HTAAServer_new()
 **		ALLOCATE A NEW NODE TO HOLD SERVER INFO
 **		AND ADD IT TO THE LIST OF SERVERS
 ** ON ENTRY:
@@ -181,10 +181,10 @@ PRIVATE void HTAASetup_delete PARAMS((HTAASetup * killme));	/* Forward */
 **			the function HTAAServer_delete(), which also
 **			frees the node itself.
 */
-PRIVATE HTAAServer *HTAAServer_new ARGS3(
-	CONST char*,	hostname,
-	int,		portnumber,
-	BOOL,		IsProxy)
+static HTAAServer *HTAAServer_new (
+	const char*	hostname,
+	int		portnumber,
+	BOOL		IsProxy)
 {
     HTAAServer *server;
 
@@ -209,7 +209,7 @@ PRIVATE HTAAServer *HTAAServer_new ARGS3(
 }
 
 
-/* PRIVATE						HTAAServer_delete()
+/* static						HTAAServer_delete()
 **
 **	DELETE THE ENTRY FOR THE SERVER FROM THE HOST TABLE,
 **	AND FREE THE MEMORY USED BY IT.
@@ -220,8 +220,8 @@ PRIVATE HTAAServer *HTAAServer_new ARGS3(
 ** ON EXIT:
 **	returns		nothing.
 */
-PRIVATE void HTAAServer_delete ARGS1(
-	HTAAServer *,	killme)
+static void HTAAServer_delete (
+	HTAAServer *	killme)
 {
     int n, i;
     HTAASetup *setup;
@@ -259,7 +259,7 @@ PRIVATE void HTAAServer_delete ARGS1(
     }
 }
 
-/* PRIVATE						HTAAServer_lookup()
+/* static						HTAAServer_lookup()
 **		LOOK UP SERVER BY HOSTNAME AND PORTNUMBER
 ** ON ENTRY:
 **	hostname	obvious.
@@ -273,10 +273,10 @@ PRIVATE void HTAAServer_delete ARGS1(
 **			representing the looked-up server.
 **			NULL, if not found.
 */
-PRIVATE HTAAServer *HTAAServer_lookup ARGS3(
-	CONST char *,	hostname,
-	int,		portnumber,
-	BOOL,		IsProxy)
+static HTAAServer *HTAAServer_lookup (
+	const char *	hostname,
+	int		portnumber,
+	BOOL		IsProxy)
 {
     if (hostname) {
 	HTList *cur = server_table;
@@ -298,7 +298,7 @@ PRIVATE HTAAServer *HTAAServer_lookup ARGS3(
 
 /*************************** HTAASetup *******************************/
 
-/* PRIVATE						HTAASetup_lookup()
+/* static						HTAASetup_lookup()
 **	FIGURE OUT WHICH AUTHENTICATION SETUP THE SERVER
 **	IS USING FOR A GIVEN FILE ON A GIVEN HOST AND PORT
 **
@@ -320,11 +320,11 @@ PRIVATE HTAAServer *HTAAServer_lookup ARGS3(
 **			document tree.
 **
 */
-PRIVATE HTAASetup *HTAASetup_lookup ARGS4(
-	CONST char *,	hostname,
-	int,		portnumber,
-	CONST char *,	docname,
-	BOOL,		IsProxy)
+static HTAASetup *HTAASetup_lookup (
+	const char *	hostname,
+	int		portnumber,
+	const char *	docname,
+	BOOL		IsProxy)
 {
     HTAAServer *server;
     HTAASetup *setup;
@@ -366,7 +366,7 @@ PRIVATE HTAASetup *HTAASetup_lookup ARGS4(
     return NULL;	/* NULL in parameters, or not found */
 }
 
-/* PRIVATE						HTAASetup_new()
+/* static						HTAASetup_new()
 **			CREATE A NEW SETUP NODE
 ** ON ENTRY:
 **	server		is a pointer to a HTAAServer structure
@@ -385,11 +385,11 @@ PRIVATE HTAASetup *HTAASetup_lookup ARGS4(
 **	returns		a new HTAASetup node, and also adds it as
 **			part of the HTAAServer given as parameter.
 */
-PRIVATE HTAASetup *HTAASetup_new ARGS4(
-	HTAAServer *,	server,
-	char *,		template,
-	HTList *,	valid_schemes,
-	HTAssocList **,	scheme_specifics)
+static HTAASetup *HTAASetup_new (
+	HTAAServer *	server,
+	char *		template,
+	HTList *	valid_schemes,
+	HTAssocList **	scheme_specifics)
 {
     HTAASetup *setup;
 
@@ -412,7 +412,7 @@ PRIVATE HTAASetup *HTAASetup_new ARGS4(
     return setup;
 }
 
-/* PRIVATE						HTAASetup_delete()
+/* static						HTAASetup_delete()
 **			FREE A HTAASetup STRUCTURE
 ** ON ENTRY:
 **	killme		is a pointer to the structure to free().
@@ -420,8 +420,8 @@ PRIVATE HTAASetup *HTAASetup_new ARGS4(
 ** ON EXIT:
 **	returns		nothing.
 */
-PRIVATE void HTAASetup_delete ARGS1(
-	HTAASetup *,	killme)
+static void HTAASetup_delete (
+	HTAASetup *	killme)
 {
     int scheme;
 
@@ -439,7 +439,7 @@ PRIVATE void HTAASetup_delete ARGS1(
     }
 }
 
-/* PRIVATE					HTAASetup_updateSpecifics()
+/* static					HTAASetup_updateSpecifics()
 *		COPY SCHEME SPECIFIC PARAMETERS
 **		TO HTAASetup STRUCTURE
 ** ON ENTRY:
@@ -452,9 +452,9 @@ PRIVATE void HTAASetup_delete ARGS1(
 ** ON EXIT:
 **	returns		nothing.
 */
-PRIVATE void HTAASetup_updateSpecifics ARGS2(
-	HTAASetup *,	setup,
-	HTAssocList **,	specifics)
+static void HTAASetup_updateSpecifics (
+	HTAASetup *	setup,
+	HTAssocList **	specifics)
 {
     int scheme;
 
@@ -473,7 +473,7 @@ PRIVATE void HTAASetup_updateSpecifics ARGS2(
 
 /*************************** HTAARealm **********************************/
 
-/* PRIVATE						HTAARealm_lookup()
+/* static						HTAARealm_lookup()
 **		LOOKUP HTAARealm STRUCTURE BY REALM NAME
 ** ON ENTRY:
 **	realm_table	a list of realm objects.
@@ -482,9 +482,9 @@ PRIVATE void HTAASetup_updateSpecifics ARGS2(
 ** ON EXIT:
 **	returns		the realm.  NULL, if not found.
 */
-PRIVATE HTAARealm *HTAARealm_lookup ARGS2(
-	HTList *,	realm_table,
-	CONST char *,	realmname)
+static HTAARealm *HTAARealm_lookup (
+	HTList *	realm_table,
+	const char *	realmname)
 {
     if (realm_table && realmname) {
 	HTList *cur = realm_table;
@@ -498,7 +498,7 @@ PRIVATE HTAARealm *HTAARealm_lookup ARGS2(
     return NULL;	/* No table, NULL param, or not found */
 }
 
-/* PRIVATE						HTAARealm_new()
+/* static						HTAARealm_new()
 **		CREATE A NODE CONTAINING USERNAME AND
 **		PASSWORD USED FOR THE GIVEN REALM.
 **		IF REALM ALREADY EXISTS, CHANGE
@@ -513,11 +513,11 @@ PRIVATE HTAARealm *HTAARealm_lookup ARGS2(
 ** ON EXIT:
 **	returns		the created realm.
 */
-PRIVATE HTAARealm *HTAARealm_new ARGS4(
-	HTList *,	realm_table,
-	CONST char *,	realmname,
-	CONST char *,	username,
-	CONST char *,	password)
+static HTAARealm *HTAARealm_new (
+	HTList *	realm_table,
+	const char *	realmname,
+	const char *	username,
+	const char *	password)
 {
     HTAARealm *realm;
 
@@ -544,7 +544,7 @@ PRIVATE HTAARealm *HTAARealm_new ARGS4(
 
 /***************** Basic and Pubkey Authentication ************************/
 
-/* PRIVATE						compose_auth_string()
+/* static						compose_auth_string()
 **
 **		COMPOSE Basic OR Pubkey AUTHENTICATION STRING;
 **		PROMPTS FOR USERNAME AND PASSWORD IF NEEDED
@@ -565,10 +565,10 @@ PRIVATE HTAARealm *HTAARealm_new ARGS4(
 **	returned by AA package needs to (or should) be freed.
 **
 */
-PRIVATE char *compose_auth_string ARGS3(
-	HTAAScheme,	scheme,
-	HTAASetup *,	setup,
-	BOOL,		IsProxy)
+static char *compose_auth_string (
+	HTAAScheme	scheme,
+	HTAASetup *	setup,
+	BOOL		IsProxy)
 {
     char *cleartext = NULL;	/* Cleartext presentation */
     char *ciphertext = NULL;	/* Encrypted presentation */
@@ -733,7 +733,7 @@ PRIVATE char *compose_auth_string ARGS3(
     return compose_auth_stringResult;
 }
 
-/* BROWSER PRIVATE					HTAA_selectScheme()
+/* BROWSER static					HTAA_selectScheme()
 **		SELECT THE AUTHENTICATION SCHEME TO USE
 ** ON ENTRY:
 **	setup	is the server setup structure which can
@@ -751,8 +751,8 @@ PRIVATE char *compose_auth_string ARGS3(
 ** ON EXIT:
 **	returns	the authentication scheme to use.
 */
-PRIVATE HTAAScheme HTAA_selectScheme ARGS1(
-	HTAASetup *,	setup)
+static HTAAScheme HTAA_selectScheme (
+	HTAASetup *	setup)
 {
     HTAAScheme scheme;
 
@@ -773,7 +773,7 @@ PRIVATE HTAAScheme HTAA_selectScheme ARGS1(
 **  Revision History:
 **	06-19-96	created - FM
 */
-PRIVATE void free_HTAAGlobals NOARGS
+static void free_HTAAGlobals (void)
 {
     HTAAServer * server;
     int n, i;
@@ -821,11 +821,11 @@ PRIVATE void free_HTAAGlobals NOARGS
 **
 **		As usual, this string is automatically freed.
 */
-PUBLIC char *HTAA_composeAuth ARGS4(
-	CONST char *,	hostname,
-	CONST int,	portnumber,
-	CONST char *,	docname,
-	BOOL,		IsProxy)
+char *HTAA_composeAuth (
+	const char *	hostname,
+	const int	portnumber,
+	const char *	docname,
+	BOOL		IsProxy)
 {
     char *auth_string;
     BOOL retry;
@@ -1048,11 +1048,11 @@ PUBLIC char *HTAA_composeAuth ARGS4(
 **				  field (in function HTAA_composeAuth()).
 **			NO, otherwise.
 */
-PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(
-	char *,		start_of_headers,
-	int,		length,
-	int,		soc,
-	BOOL,		IsProxy)
+BOOL HTAA_shouldRetryWithAuth (
+	char *		start_of_headers,
+	int		length,
+	int		soc,
+	BOOL		IsProxy)
 {
     HTAAScheme scheme;
     char *line = NULL;
@@ -1270,7 +1270,7 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(
 **  the terminal for a period of time, but does not want
 **  to end the current session.  - FM
 */
-PUBLIC void HTClearHTTPAuthInfo NOARGS
+void HTClearHTTPAuthInfo (void)
 {
     /*
     **  Need code to check cached documents against the

@@ -7,15 +7,15 @@
 #define NORMAL 1
 #define NULLFILE 3
 
-extern int getfile PARAMS((DocInfo *doc));
-extern void srcmode_for_next_retrieval PARAMS((int));
-extern int follow_link_number PARAMS((
+extern int getfile (DocInfo *doc);
+extern void srcmode_for_next_retrieval (int);
+extern int follow_link_number (
 	int		c,
 	int		cur,
 	DocInfo *	doc,
-	int *		num));
-extern void add_trusted PARAMS((char *str, int type));
-extern BOOLEAN exec_ok PARAMS((CONST char *source, CONST char *linkpath, int type));
+	int *		num);
+extern void add_trusted (char *str, int type);
+extern BOOLEAN exec_ok (const char *source, const char *linkpath, int type);
 
 extern char * WWW_Download_File;
 

@@ -35,9 +35,9 @@
 */
 
 
-PUBLIC int showlist ARGS2(
-	DocInfo *,	newdoc,
-	BOOLEAN,	titles)
+int showlist (
+	DocInfo *	newdoc,
+	BOOLEAN	titles)
 {
     int cnt;
     int refs, hidden_links;
@@ -102,7 +102,7 @@ PUBLIC int showlist ARGS2(
 	HTAnchor *dest;
 	HTParentAnchor *parent;
 	char *address;
-	CONST char *title;
+	const char *title;
 
 	if (child == 0) {
 	    /*
@@ -242,9 +242,9 @@ PUBLIC int showlist ARGS2(
 **	titles		Set:	if we want titles where available
 **			Clear:	we only get addresses.
 */
-PUBLIC void printlist ARGS2(
-	FILE *, 	fp,
-	BOOLEAN,	titles)
+void printlist (
+	FILE * 	fp,
+	BOOLEAN	titles)
 {
     int cnt;
     int refs, hidden_links;
@@ -270,7 +270,7 @@ PUBLIC void printlist ARGS2(
 	    HTChildAnchor *child = HText_childNextNumber(cnt, &helper);
 	    HTAnchor *dest;
 	    HTParentAnchor *parent;
-	    CONST char *title;
+	    const char *title;
 
 	    if (child == 0) {
 		/*

@@ -26,13 +26,13 @@ typedef struct _hashbucket bucket;
 #define NOSTYLE -1
 
 extern bucket hashStyles[CSHASHSIZE];
-extern int hash_code PARAMS((CONST char* string));
+extern int hash_code (const char* string);
 extern bucket nostyle_bucket;/*initialized properly - to be used in CTRACE when
             NOSTYLE is passed as 'style' to curses_w_style */
 
-extern int hash_code_lowercase_on_fly PARAMS((CONST char* string));
-extern int hash_code_aggregate_char PARAMS((char c,int hash));
-extern int hash_code_aggregate_lower_str PARAMS((CONST char* c, int hash_was));
+extern int hash_code_lowercase_on_fly (const char* string);
+extern int hash_code_aggregate_char (char c,int hash);
+extern int hash_code_aggregate_lower_str (const char* c, int hash_was);
 
 extern int	s_a;
 extern int	s_aedit;

@@ -8,9 +8,9 @@
 
 #include <LYLeaks.h>
 
-PRIVATE BOOL link_has_target ARGS2(
-	int,		cur,
-	char *,		target)
+static BOOL link_has_target (
+	int		cur,
+	char *		target)
 {
     LinkInfo *a = &links[cur];
     OptionType *option;
@@ -110,9 +110,9 @@ PRIVATE BOOL link_has_target ARGS2(
  *  If not found do not reset cur and return FALSE.
  */
 
-PRIVATE int check_next_target_in_links ARGS2(
-	int *,		cur,
-	char *,		target)
+static int check_next_target_in_links (
+	int *		cur,
+	char *		target)
 {
     int i;
 
@@ -127,9 +127,9 @@ PRIVATE int check_next_target_in_links ARGS2(
     return FALSE;
 }
 
-PRIVATE int check_prev_target_in_links ARGS2(
-	int *,		cur,
-	char *,		target)
+static int check_prev_target_in_links (
+	int *		cur,
+	char *		target)
 {
     int i;
 
@@ -154,11 +154,11 @@ PRIVATE int check_prev_target_in_links ARGS2(
  *  or case insensitive depending on the 'case_sensitive' global
  *  variable
  */
-PUBLIC BOOL textsearch ARGS4(
-	DocInfo *,	cur_doc,
-	char *,		prev_target,
-	int,		target_size,
-	int,		direction)
+BOOL textsearch (
+	DocInfo *	cur_doc,
+	char *		prev_target,
+	int		target_size,
+	int		direction)
 {
     int offset;
     int oldcur = cur_doc->link;

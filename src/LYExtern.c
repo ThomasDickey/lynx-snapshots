@@ -69,8 +69,8 @@ static char *decode_string(char *s)
 /*
  *  Quote the path to make it safe for shell command processing.
  */
-PUBLIC char * quote_pathname ARGS1(
-	char *, 	pathname)
+char * quote_pathname (
+	char * 	pathname)
 {
     char * result = NULL;
 
@@ -84,10 +84,10 @@ PUBLIC char * quote_pathname ARGS1(
 #endif /* WIN_EX */
 
 
-PRIVATE void format ARGS3(
-    char **,	result,
-    char *,	fmt,
-    char *,	parm)
+static void format (
+    char **	result,
+    char *	fmt,
+    char *	parm)
 {
     *result = NULL;
     HTAddParam(result, fmt, 1, parm);
@@ -102,9 +102,9 @@ PRIVATE void format ARGS3(
  * Prevent spoofing of the shell.  Dunno how this needs to be modified for VMS
  * or DOS.  - kw
  */
-PRIVATE char *format_command ARGS2(
-    char *,	command,
-    char *,	param)
+static char *format_command (
+    char *	command,
+    char *	param)
 {
     char *cmdbuf = NULL;
 
@@ -175,9 +175,9 @@ PRIVATE char *format_command ARGS2(
  * more than one possibility, make a popup menu of the matching commands and
  * allow the user to select one.  Return the selected command.
  */
-PRIVATE char *lookup_external ARGS2(
-    char *, 	param,
-    BOOL,	only_overriders)
+static char *lookup_external (
+    char * 	param,
+    BOOL	only_overriders)
 {
     int pass, num_disabled, num_matched, num_choices, cur_choice;
     int length = 0;
@@ -228,7 +228,7 @@ PRIVATE char *lookup_external ARGS2(
 			-1,
 			0,
 			old_x,
-			(CONST char **)choices,
+			(const char **)choices,
 			-1,
 			-1,
 			FALSE,
@@ -252,9 +252,9 @@ PRIVATE char *lookup_external ARGS2(
     return cmdbuf;
 }
 
-BOOL run_external ARGS2(
-    char *, 	param,
-    BOOL,	only_overriders)
+BOOL run_external (
+    char * 	param,
+    BOOL	only_overriders)
 {
 #ifdef WIN_EX
     int status;

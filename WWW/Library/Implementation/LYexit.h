@@ -51,8 +51,8 @@
 /*
  *	Function declarations
  */
-extern void exit_immediately PARAMS((int status)) GCC_NORETURN;
-extern void LYexit PARAMS((int status)) GCC_NORETURN;
-extern int LYatexit PARAMS((void (*function)(void)));
+extern void exit_immediately (int status) GCC_NORETURN;
+extern void LYexit (int status) GCC_NORETURN;
+extern int LYatexit (void (*function)(void));
 
 #endif /* __LYEXIT_H */

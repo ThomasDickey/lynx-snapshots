@@ -67,28 +67,28 @@
 /*
 **  These flags may be set to modify the operation of this module
 */
-PUBLIC char * HTClientHost = NULL; /* Name of remote login host if any */
-PUBLIC FILE * HTlogfile = NULL;    /* File to which to output one-liners */
-PUBLIC BOOL HTSecure = NO;	   /* Disable access for telnet users? */
-PUBLIC BOOL HTPermitRedir = NO;	   /* Always allow redirection in getfile()? */
+char * HTClientHost = NULL; /* Name of remote login host if any */
+FILE * HTlogfile = NULL;    /* File to which to output one-liners */
+BOOL HTSecure = NO;	   /* Disable access for telnet users? */
+BOOL HTPermitRedir = NO;	   /* Always allow redirection in getfile()? */
 
-PUBLIC BOOL using_proxy = NO; /* are we using a proxy gateway? */
+BOOL using_proxy = NO; /* are we using a proxy gateway? */
 
 /*
 **  To generate other things, play with these:
 */
-PUBLIC HTFormat HTOutputFormat = NULL;
-PUBLIC HTStream* HTOutputStream = NULL; /* For non-interactive, set this */
+HTFormat HTOutputFormat = NULL;
+HTStream* HTOutputStream = NULL; /* For non-interactive, set this */
 
-PRIVATE HTList * protocols = NULL; /* List of registered protocol descriptors */
+static HTList * protocols = NULL; /* List of registered protocol descriptors */
 
-PUBLIC char *use_this_url_instead = NULL;
+char *use_this_url_instead = NULL;
 
-PRIVATE int pushed_assume_LYhndl = -1; /* see LYUC* functions below - kw */
-PRIVATE char * pushed_assume_MIMEname = NULL;
+static int pushed_assume_LYhndl = -1; /* see LYUC* functions below - kw */
+static char * pushed_assume_MIMEname = NULL;
 
 #ifdef LY_FIND_LEAKS
-PRIVATE void free_protocols NOARGS
+static void free_protocols (void)
 {
     HTList_delete(protocols);
     protocols = NULL;
@@ -99,8 +99,8 @@ PRIVATE void free_protocols NOARGS
 /*	Register a Protocol.				HTRegisterProtocol()
 **	--------------------
 */
-PUBLIC BOOL HTRegisterProtocol ARGS1(
-	HTProtocol *,	protocol)
+BOOL HTRegisterProtocol (
+	HTProtocol *	protocol)
 {
     if (!protocols) {
 	protocols = HTList_new();
@@ -179,7 +179,7 @@ GLOBALREF  HTProtocol HTWAIS;
 #endif /* !DECNET */
 #endif /* GLOBALREF_IS_MACRO */
 
-PRIVATE void HTAccessInit NOARGS			/* Call me once */
+static void HTAccessInit (void)			/* Call me once */
 {
     HTRegisterProtocol(&HTTP);
     HTRegisterProtocol(&HTTPS);
@@ -231,10 +231,10 @@ PRIVATE void HTAccessInit NOARGS			/* Call me once */
 **  Use "*" to override all proxy service:
 **	     no_proxy="*"
 */
-PUBLIC BOOL override_proxy ARGS1(
-	CONST char *,	addr)
+BOOL override_proxy (
+	const char *	addr)
 {
-    CONST char * no_proxy = getenv("no_proxy");
+    const char * no_proxy = getenv("no_proxy");
     char * p = NULL;
     char * at = NULL;
     char * host = NULL;
@@ -320,8 +320,8 @@ PUBLIC BOOL override_proxy ARGS1(
     h_len = strlen(Host);
 
     while (*no_proxy) {
-	CONST char * end;
-	CONST char * colon = NULL;
+	const char * end;
+	const char * colon = NULL;
 	int templ_port = 0;
 	int t_len;
 
@@ -378,9 +378,9 @@ PUBLIC BOOL override_proxy ARGS1(
 **	returns		HT_NO_ACCESS		Error has occurred.
 **			HT_OK			Success
 */
-PRIVATE int get_physical ARGS2(
-	CONST char *,		addr,
-	HTParentAnchor *,	anchor)
+static int get_physical (
+	const char *		addr,
+	HTParentAnchor *	anchor)
 {
     int result;
     char * acc_method = NULL;	/* Name of access method */
@@ -593,8 +593,8 @@ PRIVATE int get_physical ARGS2(
  *  I want the "pop" to occur as soon as possible after loading
  *  has finished. - kw @@@
  */
-PUBLIC void LYUCPushAssumed ARGS1(
-    HTParentAnchor *,	anchor)
+void LYUCPushAssumed (
+    HTParentAnchor *	anchor)
 {
     int anchor_LYhndl = -1;
     LYUCcharset * anchor_UCI = NULL;
@@ -628,7 +628,7 @@ PUBLIC void LYUCPushAssumed ARGS1(
  *  UCLYhndl_for_unspec used for charset "assuming" from the values
  *  saved by LYUCPushAssumed, if any. - kw
  */
-PUBLIC int LYUCPopAssumed NOARGS
+int LYUCPopAssumed (void)
 {
 
     if (pushed_assume_LYhndl >= 0) {
@@ -663,11 +663,11 @@ PUBLIC int LYUCPopAssumed NOARGS
 **			HT_NO_DATA	Success, but no document loaded.
 **					(telnet session started etc)
 */
-PRIVATE int HTLoad ARGS4(
-	CONST char *,		addr,
-	HTParentAnchor *,	anchor,
-	HTFormat,		format_out,
-	HTStream *,		sink)
+static int HTLoad (
+	const char *		addr,
+	HTParentAnchor *	anchor,
+	HTFormat		format_out,
+	HTStream *		sink)
 {
     HTProtocol *p;
     int status = get_physical(addr, anchor);
@@ -695,8 +695,8 @@ PRIVATE int HTLoad ARGS4(
 /*	Get a save stream for a document		HTSaveStream()
 **	--------------------------------
 */
-PUBLIC HTStream *HTSaveStream ARGS1(
-	HTParentAnchor *,	anchor)
+HTStream *HTSaveStream (
+	HTParentAnchor *	anchor)
 {
     HTProtocol *p = (HTProtocol *)HTAnchor_protocol(anchor);
     if (!p)
@@ -705,7 +705,7 @@ PUBLIC HTStream *HTSaveStream ARGS1(
     return p->saveStream(anchor);
 }
 
-PUBLIC int redirection_attempts = 0; /* counter in HTLoadDocument */
+int redirection_attempts = 0; /* counter in HTLoadDocument */
 
 /*	Load a document - with logging etc		HTLoadDocument()
 **	----------------------------------
@@ -725,15 +725,15 @@ PUBLIC int redirection_attempts = 0; /* counter in HTLoadDocument */
 **		     NO      Failure
 */
 
-PRIVATE BOOL HTLoadDocument ARGS4(
-	CONST char *,		full_address, /* may include #fragment */
-	HTParentAnchor *,	anchor,
-	HTFormat,		format_out,
-	HTStream*,		sink)
+static BOOL HTLoadDocument (
+	const char *		full_address, /* may include #fragment */
+	HTParentAnchor *	anchor,
+	HTFormat		format_out,
+	HTStream*		sink)
 {
     int     status;
     HText * text;
-    CONST char * address_to_load = full_address;
+    const char * address_to_load = full_address;
     char *cp;
     BOOL ForcingNoCache = LYforce_no_cache;
 
@@ -1106,8 +1106,8 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 **	  returns    YES     Success in opening document
 **		     NO      Failure
 */
-PUBLIC BOOL HTLoadAbsolute ARGS1(
-	CONST DocAddress *,	docaddr)
+BOOL HTLoadAbsolute (
+	const DocAddress *	docaddr)
 {
     return HTLoadDocument(docaddr->address,
 			  HTAnchor_findAddress(docaddr),
@@ -1127,10 +1127,10 @@ PUBLIC BOOL HTLoadAbsolute ARGS1(
 **	  returns    YES     Success in opening document
 **		     NO      Failure
 */
-PUBLIC BOOL HTLoadToStream ARGS3(
-	CONST char *,	addr,
-	BOOL,		filter,
-	HTStream *,	sink)
+BOOL HTLoadToStream (
+	const char *	addr,
+	BOOL		filter,
+	HTStream *	sink)
 {
     return HTLoadDocument(addr,
 			  HTAnchor_findSimpleAddress(addr),
@@ -1150,9 +1150,9 @@ PUBLIC BOOL HTLoadToStream ARGS3(
 **	  returns    YES     Success in opening document
 **		     NO      Failure
 */
-PUBLIC BOOL HTLoadRelative ARGS2(
-	CONST char *,		relative_name,
-	HTParentAnchor *,	here)
+BOOL HTLoadRelative (
+	const char *		relative_name,
+	HTParentAnchor *	here)
 {
     DocAddress full_address;
     BOOL result;
@@ -1194,8 +1194,8 @@ PUBLIC BOOL HTLoadRelative ARGS2(
 **	  returns    YES     Success
 **		     NO      Failure
 */
-PUBLIC BOOL HTLoadAnchor ARGS1(
-	HTAnchor *,	destination)
+BOOL HTLoadAnchor (
+	HTAnchor *	destination)
 {
     HTParentAnchor * parent;
     BOOL loaded = NO;
@@ -1245,26 +1245,26 @@ PUBLIC BOOL HTLoadAnchor ARGS1(
 **	 *keywords	space-separated keyword list or similar search list
 **	here		is anchor search is to be done on.
 */
-PRIVATE char hex ARGS1(
-    int,		i)
+static char hex (
+    int		i)
 {
     char * hexchars = "0123456789ABCDEF";
     return hexchars[i];
 }
 
-PUBLIC BOOL HTSearch ARGS2(
-	CONST char *,		keywords,
-	HTParentAnchor *,	here)
+BOOL HTSearch (
+	const char *		keywords,
+	HTParentAnchor *	here)
 {
 #define acceptable \
 "1234567890abcdefghijlkmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_"
 
     char *q, *u;
-    CONST char * p, *s, *e;		/* Pointers into keywords */
+    const char * p, *s, *e;		/* Pointers into keywords */
     char * address = NULL;
     BOOL result;
     char * escaped = typecallocn(char, (strlen(keywords)*3) + 1);
-    static CONST BOOL isAcceptable[96] =
+    static const BOOL isAcceptable[96] =
 
     /*	 0 1 2 3 4 5 6 7 8 9 A B C D E F */
     {	 0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,	/* 2x	!"#$%&'()*+,-./  */
@@ -1333,9 +1333,9 @@ PUBLIC BOOL HTSearch ARGS2(
 **	*keywords	space-separated keyword list or similar search list
 **	*indexname	is name of object search is to be done on.
 */
-PUBLIC BOOL HTSearchAbsolute ARGS2(
-	CONST char *,	keywords,
-	char *,		indexname)
+BOOL HTSearchAbsolute (
+	const char *	keywords,
+	char *		indexname)
 {
     DocAddress abs_doc;
     HTParentAnchor * anchor;
@@ -1365,7 +1365,7 @@ PUBLIC BOOL HTSearchAbsolute ARGS2(
 **		3	/usr/local/bin/default.html
 **		4	http://www.w3.org/default.html
 */
-PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
+HTParentAnchor * HTHomeAnchor (void)
 {
     char * my_home_document = NULL;
     char * home = LYGetEnv(LOGICAL_DEFAULT);

@@ -44,7 +44,7 @@
 #endif
 
 #ifdef KANJI_CODE_OVERRIDE
-PUBLIC char *str_kcode(HTkcode code)
+char *str_kcode(HTkcode code)
 {
     char *p;
     static char buff[8];
@@ -90,7 +90,7 @@ PUBLIC char *str_kcode(HTkcode code)
 
 #ifdef WIN_EX
 
-PRIVATE char *str_sjis(char *to, char *from)
+static char *str_sjis(char *to, char *from)
 {
     if (!LYRawMode) {
 	strcpy(to, from);
@@ -106,7 +106,7 @@ PRIVATE char *str_sjis(char *to, char *from)
     return to;
 }
 
-PRIVATE void set_ws_title(char * str)
+static void set_ws_title(char * str)
 {
     SetConsoleTitle(str);
 }
@@ -118,7 +118,7 @@ PRIVATE void set_ws_title(char * str)
 
 #define NOT_EQU	1
 
-PRIVATE int str_n_cmp(const char *p, const char *q, int n)
+static int str_n_cmp(const char *p, const char *q, int n)
 {
     if (n == 0)
 	return 0;
@@ -154,8 +154,8 @@ PRIVATE int str_n_cmp(const char *p, const char *q, int n)
 #include <LYLeaks.h>
 
 /* two constants: */
-PUBLIC HTLinkType * HTInternalLink = 0;
-PUBLIC HTAtom * WWW_SOURCE = 0;
+HTLinkType * HTInternalLink = 0;
+HTAtom * WWW_SOURCE = 0;
 
 #ifndef DONT_TRACK_INTERNAL_LINKS
 #define NO_INTERNAL_OR_DIFFERENT(c,n) TRUE
@@ -167,54 +167,54 @@ PUBLIC HTAtom * WWW_SOURCE = 0;
 #endif /* TRACK_INTERNAL_LINKS */
 
 
-PRIVATE void exit_immediately_with_error_message PARAMS((int state, BOOLEAN first_file));
-PRIVATE void status_link PARAMS((char *curlink_name, BOOLEAN show_more, BOOLEAN show_indx));
-PRIVATE void show_main_statusline PARAMS((CONST LinkInfo curlink, int for_what));
-PRIVATE void form_noviceline PARAMS((int));
-PRIVATE int are_different PARAMS((DocInfo *doc1, DocInfo *doc2));
+static void exit_immediately_with_error_message (int state, BOOLEAN first_file);
+static void status_link (char *curlink_name, BOOLEAN show_more, BOOLEAN show_indx);
+static void show_main_statusline (const LinkInfo curlink, int for_what);
+static void form_noviceline (int);
+static int are_different (DocInfo *doc1, DocInfo *doc2);
 
 #ifndef DONT_TRACK_INTERNAL_LINKS
-PRIVATE int are_phys_different PARAMS((DocInfo *doc1, DocInfo *doc2));
+static int are_phys_different (DocInfo *doc1, DocInfo *doc2);
 #endif
 
 #define FASTTAB
 
-PRIVATE int sametext ARGS2(
-	char *,		een,
-	char *,		twee)
+static int sametext (
+	char *		een,
+	char *		twee)
 {
     if (een && twee)
 	return (strcmp(een, twee) == 0);
     return TRUE;
 }
 
-PUBLIC	HTList * Goto_URLs = NULL;  /* List of Goto URLs */
+HTList * Goto_URLs = NULL;  /* List of Goto URLs */
 
-PUBLIC char * LYRequestTitle = NULL; /* newdoc.title in calls to getfile() */
-PUBLIC char * LYRequestReferer = NULL; /* Referer, may be set in getfile() */
+char * LYRequestTitle = NULL; /* newdoc.title in calls to getfile() */
+char * LYRequestReferer = NULL; /* Referer, may be set in getfile() */
 
-PRIVATE char prev_target[512];
+static char prev_target[512];
 
 #ifdef DISP_PARTIAL
-PUBLIC BOOLEAN display_partial = FALSE; /* could be enabled in HText_new() */
-PUBLIC int NumOfLines_partial = 0;  /* number of lines displayed in partial mode */
+BOOLEAN display_partial = FALSE; /* could be enabled in HText_new() */
+int NumOfLines_partial = 0;  /* number of lines displayed in partial mode */
 #endif
 
-PRIVATE int Newline = 0;
-PRIVATE DocInfo newdoc;
-PRIVATE DocInfo curdoc;
-PRIVATE char *traversal_host = NULL;
-PRIVATE char *traversal_link_to_add = NULL;
-PRIVATE char *owner_address = NULL;  /* Holds the responsible owner's address     */
-PRIVATE char *ownerS_address = NULL; /* Holds owner's address during source fetch */
+static int Newline = 0;
+static DocInfo newdoc;
+static DocInfo curdoc;
+static char *traversal_host = NULL;
+static char *traversal_link_to_add = NULL;
+static char *owner_address = NULL;  /* Holds the responsible owner's address     */
+static char *ownerS_address = NULL; /* Holds owner's address during source fetch */
 
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
-PRIVATE BOOL textinput_activated = FALSE;
+static BOOL textinput_activated = FALSE;
 #else
 #define textinput_activated TRUE /* a current text input is always active */
 #endif
 #ifdef INACTIVE_INPUT_STYLE_VH
-PUBLIC BOOL textinput_redrawn = FALSE;
+BOOL textinput_redrawn = FALSE;
     /*must be public since used in LYhighlight(..)*/
 #endif
 
@@ -222,7 +222,7 @@ PUBLIC BOOL textinput_redrawn = FALSE;
 /*
  *  Function for freeing allocated mainloop() variables. - FM
  */
-PRIVATE void free_mainloop_variables NOARGS
+static void free_mainloop_variables (void)
 {
     LYFreeDocInfo(&newdoc);
     LYFreeDocInfo(&curdoc);
@@ -247,7 +247,7 @@ PRIVATE void free_mainloop_variables NOARGS
 #endif /* LY_FIND_LEAKS */
 
 #ifndef NO_LYNX_TRACE
-PRIVATE void TracelogOpenFailed NOARGS
+static void TracelogOpenFailed (void)
 {
     WWW_TraceFlag = FALSE;
     if (LYCursesON) {
@@ -258,7 +258,7 @@ PRIVATE void TracelogOpenFailed NOARGS
     }
 }
 
-PRIVATE BOOLEAN LYReopenTracelog ARGS1(BOOLEAN *, trace_flag_ptr)
+static BOOLEAN LYReopenTracelog (BOOLEAN * trace_flag_ptr)
 {
     CTRACE((tfp, "\nTurning off TRACE for fetch of log.\n"));
     LYCloseTracelog();
@@ -273,7 +273,7 @@ PRIVATE BOOLEAN LYReopenTracelog ARGS1(BOOLEAN *, trace_flag_ptr)
     return TRUE;
 }
 
-PRIVATE void turn_trace_back_on ARGS1(BOOLEAN *, trace_flag_ptr)
+static void turn_trace_back_on (BOOLEAN * trace_flag_ptr)
 {
     if (*trace_flag_ptr == TRUE) {
 	WWW_TraceFlag = TRUE;
@@ -286,7 +286,7 @@ PRIVATE void turn_trace_back_on ARGS1(BOOLEAN *, trace_flag_ptr)
 #define turn_trace_back_on(flag) /*nothing*/
 #endif /* NO_LYNX_TRACE */
 
-PUBLIC FILE *TraceFP NOARGS
+FILE *TraceFP (void)
 {
 #ifndef NO_LYNX_TRACE
     if (LYTraceLogFP != 0) {
@@ -296,7 +296,7 @@ PUBLIC FILE *TraceFP NOARGS
     return stderr;
 }
 
-PUBLIC BOOLEAN LYOpenTraceLog NOARGS
+BOOLEAN LYOpenTraceLog (void)
 {
 #ifndef NO_LYNX_TRACE
     if (TRACE && LYUseTraceLog && LYTraceLogFP == NULL) {
@@ -358,7 +358,7 @@ PUBLIC BOOLEAN LYOpenTraceLog NOARGS
     return TRUE;
 }
 
-PUBLIC void LYCloseTracelog NOARGS
+void LYCloseTracelog (void)
 {
 #ifndef NO_LYNX_TRACE
     if (LYTraceLogFP != 0) {
@@ -370,7 +370,7 @@ PUBLIC void LYCloseTracelog NOARGS
 #endif /* NO_LYNX_TRACE */
 }
 
-PUBLIC void handle_LYK_TRACE_TOGGLE NOARGS
+void handle_LYK_TRACE_TOGGLE (void)
 {
 #ifndef NO_LYNX_TRACE
     WWW_TraceFlag = ! WWW_TraceFlag;
@@ -381,24 +381,24 @@ PUBLIC void handle_LYK_TRACE_TOGGLE NOARGS
 #endif /* NO_LYNX_TRACE */
 }
 
-PUBLIC void LYSetNewline ARGS1(
-	int,		value)
+void LYSetNewline (
+	int		value)
 {
     Newline = value;
 }
 
-PUBLIC int LYGetNewline NOARGS
+int LYGetNewline (void)
 {
     return Newline;
 }
 
 #ifdef USE_SOURCE_CACHE
-PRIVATE BOOLEAN from_source_cache = FALSE;
+static BOOLEAN from_source_cache = FALSE;
 
 /*
  * Like HTreparse_document(), but also set the flag.
  */
-PRIVATE BOOLEAN reparse_document NOARGS
+static BOOLEAN reparse_document (void)
 {
     BOOLEAN ok;
     from_source_cache = TRUE;	/* set for LYMainLoop_pageDisplay() */
@@ -415,8 +415,8 @@ PRIVATE BOOLEAN reparse_document NOARGS
  * Prefer reparsing if we can, but reload if we must - to force regeneration
  * of the display.
  */
-PRIVATE BOOLEAN reparse_or_reload ARGS1(
-    int *,	cmd)
+static BOOLEAN reparse_or_reload (
+    int *	cmd)
 {
 #ifdef USE_SOURCE_CACHE
     if (reparse_document()) {
@@ -430,29 +430,29 @@ PRIVATE BOOLEAN reparse_or_reload ARGS1(
 /*
  * Functions for setting the current address
  */
-PRIVATE void set_address ARGS2(
-	DocInfo *,	doc,
-	CONST char *,	address)
+static void set_address (
+	DocInfo *	doc,
+	const char *	address)
 {
     StrAllocCopy(doc->address, address);
 }
 
-PRIVATE void copy_address ARGS2(
-	DocInfo *,	dst,
-	DocInfo *,	src)
+static void copy_address (
+	DocInfo *	dst,
+	DocInfo *	src)
 {
     StrAllocCopy(dst->address, src->address);
 }
 
-PRIVATE void free_address ARGS1(
-	DocInfo *,	doc)
+static void free_address (
+	DocInfo *	doc)
 {
     FREE(doc->address);
 }
 
-PRIVATE void move_address ARGS2(
-	DocInfo *,	dst,
-	DocInfo *,	src)
+static void move_address (
+	DocInfo *	dst,
+	DocInfo *	src)
 {
     copy_address(dst, src);
     free_address(src);
@@ -462,13 +462,13 @@ PRIVATE void move_address ARGS2(
 /*
  * This is for traversal call from within partial mode in LYUtils.c
  * and HTFormat.c  It simply calls HText_pageDisplay() but utilizes
- * LYMainLoop.c PRIVATE variables to manage proper newline position
+ * LYMainLoop.c static variables to manage proper newline position
  * in case of #fragment
  */
-PUBLIC BOOL LYMainLoop_pageDisplay ARGS1(
-	int,		line_num)
+BOOL LYMainLoop_pageDisplay (
+	int		line_num)
 {
-    CONST char * pound;
+    const char * pound;
     int prev_newline = Newline;
 
     /*
@@ -513,8 +513,8 @@ PUBLIC BOOL LYMainLoop_pageDisplay ARGS1(
 #endif /* DISP_PARTIAL */
 
 
-PRIVATE void set_curdoc_link ARGS1(
-    int,	nextlink)
+static void set_curdoc_link (
+    int	nextlink)
 {
     if (curdoc.link != nextlink
      && nextlink >= 0
@@ -525,7 +525,7 @@ PRIVATE void set_curdoc_link ARGS1(
     }
 }
 
-PRIVATE int do_change_link NOARGS
+static int do_change_link (void)
 {
 #ifdef USE_MOUSE
     /* Is there a mouse-clicked link waiting? */
@@ -554,14 +554,14 @@ PRIVATE int do_change_link NOARGS
 			else HTuncache_current_document()
 #endif /* DIRED_SUPPORT */
 
-PRIVATE void do_check_goto_URL ARGS3(
-    char *,	user_input_buffer,
-    char **,	old_user_input,
-    BOOLEAN *,	force_load)
+static void do_check_goto_URL (
+    char *	user_input_buffer,
+    char **	old_user_input,
+    BOOLEAN *	force_load)
 {
     static BOOLEAN always = TRUE;
     static struct {
-	CONST char *name;
+	const char *name;
 	BOOLEAN *flag;
     } table[] = {
 	{ STR_FILE_URL,		&no_file_url },
@@ -668,14 +668,14 @@ PRIVATE void do_check_goto_URL ARGS3(
 }
 
 /* returns FALSE if user cancelled input or URL was invalid, TRUE otherwise */
-PRIVATE BOOL do_check_recall ARGS7(
-    int,	ch,
-    char *,	user_input_buffer,
-    char **,	old_user_input,
-    int,	URLTotal,
-    int *,	URLNum,
-    int,	recall,
-    BOOLEAN *,	FirstURLRecall)
+static BOOL do_check_recall (
+    int	ch,
+    char *	user_input_buffer,
+    char **	old_user_input,
+    int	URLTotal,
+    int *	URLNum,
+    int	recall,
+    BOOLEAN *	FirstURLRecall)
 {
     char *cp;
     BOOL ret = FALSE;
@@ -815,7 +815,7 @@ PRIVATE BOOL do_check_recall ARGS7(
     return ret;
 }
 
-PRIVATE void do_cleanup_after_delete NOARGS
+static void do_cleanup_after_delete (void)
 {
     HTuncache_current_document();
     move_address(&newdoc, &curdoc);
@@ -830,9 +830,9 @@ PRIVATE void do_cleanup_after_delete NOARGS
     }
 }
 
-PRIVATE int find_link_near_col ARGS2(
-	int,	col,
-	int,	delta)
+static int find_link_near_col (
+	int	col,
+	int	delta)
 {
     int i;
 
@@ -867,9 +867,9 @@ PRIVATE int find_link_near_col ARGS2(
  * with "traversal_host" are searched - this keeps the search from crossing to
  * other servers (a feature, not a bug!).
  */
-PRIVATE int DoTraversal ARGS2(
-    int,	c,
-    BOOLEAN *,	crawl_ok)
+static int DoTraversal (
+    int	c,
+    BOOLEAN *	crawl_ok)
 {
     BOOLEAN rlink_rejected = FALSE;
     BOOLEAN rlink_exists;
@@ -949,9 +949,9 @@ PRIVATE int DoTraversal ARGS2(
 }
 
 #ifndef DONT_TRACK_INTERNAL_LINKS
-PRIVATE BOOLEAN check_history NOARGS
+static BOOLEAN check_history (void)
 {
-    CONST char *base;
+    const char *base;
 
     if (!curdoc.post_data)
 	/*
@@ -985,13 +985,13 @@ PRIVATE BOOLEAN check_history NOARGS
 }
 #endif
 
-PRIVATE int handle_LYK_ACTIVATE ARGS6(
-    int *,	c,
-    int,	cmd GCC_UNUSED,
-    BOOLEAN *,	try_internal GCC_UNUSED,
-    BOOLEAN *,	refresh_screen,
-    BOOLEAN *,	force_load,
-    int,	real_cmd)
+static int handle_LYK_ACTIVATE (
+    int *	c,
+    int	cmd GCC_UNUSED,
+    BOOLEAN *	try_internal GCC_UNUSED,
+    BOOLEAN *	refresh_screen,
+    BOOLEAN *	force_load,
+    int	real_cmd)
 {
     if (do_change_link() == -1) {
 	LYforce_no_cache = FALSE;
@@ -1439,8 +1439,8 @@ gettext("Enctype multipart/form-data not yet supported!  Cannot submit."));
 }
 
 #ifdef EXP_ADDRLIST_PAGE
-PRIVATE BOOLEAN handle_LYK_ADDRLIST ARGS1(
-    int *,     cmd)
+static BOOLEAN handle_LYK_ADDRLIST (
+    int *     cmd)
 {
     /*
      *	Don't do if already viewing list addresses page.
@@ -1474,10 +1474,10 @@ PRIVATE BOOLEAN handle_LYK_ADDRLIST ARGS1(
 }
 #endif /* EXP_ADDRLIST_PAGE */
 
-PRIVATE void handle_LYK_ADD_BOOKMARK ARGS3(
-    BOOLEAN *,	refresh_screen,
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_ADD_BOOKMARK (
+    BOOLEAN *	refresh_screen,
+    int *	old_c,
+    int	real_c)
 {
     int c;
 
@@ -1621,9 +1621,9 @@ check_add_bookmark_to_self:
     }
 }
 
-PRIVATE void handle_LYK_CLEAR_AUTH ARGS2(
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_CLEAR_AUTH (
+    int *	old_c,
+    int	real_c)
 {
     if (*old_c != real_c) {
 	*old_c = real_c;
@@ -1646,8 +1646,8 @@ PRIVATE void handle_LYK_CLEAR_AUTH ARGS2(
     }
 }
 
-PRIVATE int handle_LYK_COMMAND ARGS1(
-    char *,	user_input_buffer)
+static int handle_LYK_COMMAND (
+    char *	user_input_buffer)
 {
     int ch;
     Kcmd *mp;
@@ -1670,11 +1670,11 @@ PRIVATE int handle_LYK_COMMAND ARGS1(
     return 0;
 }
 
-PRIVATE void handle_LYK_COMMENT ARGS4(
-    BOOLEAN *,	refresh_screen,
-    char **,	owner_address_p,
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_COMMENT (
+    BOOLEAN *	refresh_screen,
+    char **	owner_address_p,
+    int *	old_c,
+    int	real_c)
 {
     int	c;
 
@@ -1742,8 +1742,8 @@ PRIVATE void handle_LYK_COMMENT ARGS4(
 		/*
 		 *  The owner_address is a mailto: URL.
 		 */
-		CONST char *kp = HText_getRevTitle();
-		CONST char *id = HText_getMessageID();
+		const char *kp = HText_getRevTitle();
+		const char *id = HText_getMessageID();
 		char *tmptitle = NULL;
 		if (!kp && HTMainAnchor) {
 		    kp = HTAnchor_subject(HTMainAnchor);
@@ -1774,8 +1774,8 @@ PRIVATE void handle_LYK_COMMENT ARGS4(
     }
 }
 
-PRIVATE BOOLEAN handle_LYK_COOKIE_JAR ARGS1(
-    int *,	cmd)
+static BOOLEAN handle_LYK_COOKIE_JAR (
+    int *	cmd)
 {
     /*
      *	Don't do if already viewing the cookie jar.
@@ -1802,7 +1802,7 @@ PRIVATE BOOLEAN handle_LYK_COOKIE_JAR ARGS1(
 }
 
 #if defined(DIRED_SUPPORT)
-PRIVATE void handle_LYK_CREATE NOARGS
+static void handle_LYK_CREATE (void)
 {
     if (lynx_edit_mode && !no_dired_support) {
 	if (local_create(&curdoc) > 0) {
@@ -1820,10 +1820,10 @@ PRIVATE void handle_LYK_CREATE NOARGS
 }
 #endif /* DIRED_SUPPORT */
 
-PRIVATE void handle_LYK_DEL_BOOKMARK ARGS3(
-    BOOLEAN *,	refresh_screen,
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_DEL_BOOKMARK (
+    BOOLEAN *	refresh_screen,
+    int *	old_c,
+    int	real_c)
 {
     if (curdoc.bookmark != NULL) {
 	if (HTConfirmDefault(CONFIRM_BOOKMARK_DELETE,NO) != YES)
@@ -1842,10 +1842,10 @@ PRIVATE void handle_LYK_DEL_BOOKMARK ARGS3(
 }
 
 #if defined(DIRED_SUPPORT) || defined(VMS)
-PRIVATE void handle_LYK_DIRED_MENU ARGS3(
-    BOOLEAN *,	refresh_screen,
-    int *,	old_c GCC_UNUSED,
-    int,	real_c GCC_UNUSED)
+static void handle_LYK_DIRED_MENU (
+    BOOLEAN *	refresh_screen,
+    int *	old_c GCC_UNUSED,
+    int	real_c GCC_UNUSED)
 {
 #ifdef VMS
     char *cp, *temp = 0;
@@ -1967,10 +1967,10 @@ PRIVATE void handle_LYK_DIRED_MENU ARGS3(
 }
 #endif /* defined(DIRED_SUPPORT) || defined(VMS) */
 
-PRIVATE int handle_LYK_DOWNLOAD ARGS3(
-    int *,	cmd,
-    int *,	old_c,
-    int,	real_c)
+static int handle_LYK_DOWNLOAD (
+    int *	cmd,
+    int *	old_c,
+    int	real_c)
 {
 
     /*
@@ -2179,9 +2179,9 @@ PRIVATE int handle_LYK_DOWNLOAD ARGS3(
     return 0;
 }
 
-PRIVATE void handle_LYK_DOWN_HALF ARGS2(
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_DOWN_HALF (
+    int *	old_c,
+    int	real_c)
 {
     int i;
 
@@ -2199,10 +2199,10 @@ PRIVATE void handle_LYK_DOWN_HALF ARGS2(
     }
 }
 
-PRIVATE void handle_LYK_DOWN_LINK ARGS3(
-    int *,	follow_col,
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_DOWN_LINK (
+    int *	follow_col,
+    int *	old_c,
+    int	real_c)
 {
     if (curdoc.link < (nlinks-1)) {	/* more links? */
 	int newlink;
@@ -2234,9 +2234,9 @@ PRIVATE void handle_LYK_DOWN_LINK ARGS3(
     }
 }
 
-PRIVATE void handle_LYK_DOWN_TWO ARGS2(
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_DOWN_TWO (
+    int *	old_c,
+    int	real_c)
 {
     int i;
 
@@ -2254,10 +2254,10 @@ PRIVATE void handle_LYK_DOWN_TWO ARGS2(
     }
 }
 
-PRIVATE int handle_LYK_DWIMEDIT ARGS3(
-    int *,	cmd,
-    int *,	old_c,
-    int,	real_c)
+static int handle_LYK_DWIMEDIT (
+    int *	cmd,
+    int *	old_c,
+    int	real_c)
 {
 #ifdef TEXTAREA_AUTOEXTEDIT
     /*
@@ -2301,12 +2301,12 @@ PRIVATE int handle_LYK_DWIMEDIT ARGS3(
     return 0;
 }
 
-PRIVATE int handle_LYK_ECGOTO ARGS5(
-    int *,	ch,
-    char *,	user_input_buffer,
-    char **,	old_user_input,
-    int *,	old_c,
-    int,	real_c)
+static int handle_LYK_ECGOTO (
+    int *	ch,
+    char *	user_input_buffer,
+    char **	old_user_input,
+    int *	old_c,
+    int	real_c)
 {
     if (no_goto && !LYValidate) {
 	/*
@@ -2372,9 +2372,9 @@ PRIVATE int handle_LYK_ECGOTO ARGS5(
     return 0;
 }
 
-PRIVATE void handle_LYK_EDIT ARGS2(
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_EDIT (
+    int *	old_c,
+    int	real_c)
 {
 #ifdef DIRED_SUPPORT
     char *cp;
@@ -2464,8 +2464,8 @@ PRIVATE void handle_LYK_EDIT ARGS2(
     }
 }
 
-PRIVATE void handle_LYK_DWIMHELP ARGS1(
-    CONST char **,	cshelpfile)
+static void handle_LYK_DWIMHELP (
+    const char **	cshelpfile)
 {
     /*
      *  Currently a help file different from the main
@@ -2480,10 +2480,10 @@ PRIVATE void handle_LYK_DWIMHELP ARGS1(
     }
 }
 
-PRIVATE void handle_LYK_EDIT_TEXTAREA ARGS3(
-    BOOLEAN *,	refresh_screen,
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_EDIT_TEXTAREA (
+    BOOLEAN *	refresh_screen,
+    int *	old_c,
+    int	real_c)
 {
     int n;
 
@@ -2531,12 +2531,12 @@ PRIVATE void handle_LYK_EDIT_TEXTAREA ARGS3(
     }
 }
 
-PRIVATE int handle_LYK_ELGOTO ARGS5(
-    int *,	ch,
-    char *,	user_input_buffer,
-    char **,	old_user_input,
-    int *,	old_c,
-    int,	real_c)
+static int handle_LYK_ELGOTO (
+    int *	ch,
+    char *	user_input_buffer,
+    char **	old_user_input,
+    int *	old_c,
+    int	real_c)
 {
     if (no_goto && !LYValidate) {
 	/*
@@ -2629,8 +2629,8 @@ PRIVATE int handle_LYK_ELGOTO ARGS5(
 }
 
 #ifdef USE_EXTERNALS
-PRIVATE void handle_LYK_EXTERN_LINK ARGS1(
-    BOOLEAN *,	refresh_screen)
+static void handle_LYK_EXTERN_LINK (
+    BOOLEAN *	refresh_screen)
 {
     if ((nlinks > 0) && (links[curdoc.link].lname != NULL))
     {
@@ -2639,8 +2639,8 @@ PRIVATE void handle_LYK_EXTERN_LINK ARGS1(
     }
 }
 
-PRIVATE void handle_LYK_EXTERN_PAGE ARGS1(
-    BOOLEAN *,	refresh_screen)
+static void handle_LYK_EXTERN_PAGE (
+    BOOLEAN *	refresh_screen)
 {
     if (curdoc.address != NULL)
     {
@@ -2650,10 +2650,10 @@ PRIVATE void handle_LYK_EXTERN_PAGE ARGS1(
 }
 #endif
 
-PRIVATE BOOLEAN handle_LYK_FASTBACKW_LINK ARGS3(
-    int *,	cmd,
-    int *,	old_c,
-    int,	real_c)
+static BOOLEAN handle_LYK_FASTBACKW_LINK (
+    int *	cmd,
+    int *	old_c,
+    int	real_c)
 {
     int samepage = 0, nextlink = curdoc.link;
     int res;
@@ -2759,9 +2759,9 @@ PRIVATE BOOLEAN handle_LYK_FASTBACKW_LINK ARGS3(
     return FALSE;
 }
 
-PRIVATE void handle_LYK_FASTFORW_LINK ARGS2(
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_FASTFORW_LINK (
+    int *	old_c,
+    int	real_c)
 {
     int samepage = 0, nextlink = curdoc.link;
 
@@ -2825,7 +2825,7 @@ PRIVATE void handle_LYK_FASTFORW_LINK ARGS2(
     return;
 }
 
-PRIVATE void handle_LYK_FIRST_LINK NOARGS
+static void handle_LYK_FIRST_LINK (void)
 {
     int i = curdoc.link;
 
@@ -2838,16 +2838,16 @@ PRIVATE void handle_LYK_FIRST_LINK NOARGS
     }
 }
 
-PRIVATE BOOLEAN handle_LYK_GOTO ARGS9(
-    int *,	ch,
-    char *,	user_input_buffer,
-    char **,	old_user_input,
-    int *,	recall,
-    int *,	URLTotal,
-    int *,	URLNum,
-    BOOLEAN *,	FirstURLRecall,
-    int *,	old_c,
-    int,	real_c)
+static BOOLEAN handle_LYK_GOTO (
+    int *	ch,
+    char *	user_input_buffer,
+    char **	old_user_input,
+    int *	recall,
+    int *	URLTotal,
+    int *	URLNum,
+    BOOLEAN *	FirstURLRecall,
+    int *	old_c,
+    int	real_c)
 {
 
     if (no_goto && !LYValidate) {
@@ -2891,8 +2891,8 @@ PRIVATE BOOLEAN handle_LYK_GOTO ARGS9(
     return TRUE;
 }
 
-PRIVATE void handle_LYK_GROW_TEXTAREA ARGS1(
-    BOOLEAN *,	refresh_screen)
+static void handle_LYK_GROW_TEXTAREA (
+    BOOLEAN *	refresh_screen)
 {
     /*
      *  See if the current link is in a form TEXTAREA.
@@ -2910,8 +2910,8 @@ PRIVATE void handle_LYK_GROW_TEXTAREA ARGS1(
     }
 }
 
-PRIVATE BOOLEAN handle_LYK_HEAD ARGS1(
-    int *,	cmd)
+static BOOLEAN handle_LYK_HEAD (
+    int *	cmd)
 {
     int c;
 
@@ -3036,8 +3036,8 @@ PRIVATE BOOLEAN handle_LYK_HEAD ARGS1(
     return FALSE;
 }
 
-PRIVATE void handle_LYK_HELP ARGS1(
-    CONST char **,	cshelpfile)
+static void handle_LYK_HELP (
+    const char **	cshelpfile)
 {
     if (*cshelpfile == NULL)
 	*cshelpfile = helpfile;
@@ -3059,7 +3059,7 @@ PRIVATE void handle_LYK_HELP ARGS1(
     *cshelpfile = NULL;		/* reset pointer - kw */
 }
 
-PRIVATE void handle_LYK_HISTORICAL NOARGS
+static void handle_LYK_HISTORICAL (void)
 {
 #ifdef USE_SOURCE_CACHE
     if (!HTcan_reparse_document()) {
@@ -3096,8 +3096,8 @@ PRIVATE void handle_LYK_HISTORICAL NOARGS
     return;
 }
 
-PRIVATE BOOLEAN handle_LYK_HISTORY ARGS1(
-    BOOLEAN,	ForcePush)
+static BOOLEAN handle_LYK_HISTORY (
+    BOOLEAN	ForcePush)
 {
     if (curdoc.title && !LYIsUIPage(curdoc.address, UIP_HISTORY)) {
 	/*
@@ -3141,8 +3141,8 @@ PRIVATE BOOLEAN handle_LYK_HISTORY ARGS1(
     return FALSE;
 }
 
-PRIVATE BOOLEAN handle_LYK_IMAGE_TOGGLE ARGS1(
-    int *,	cmd)
+static BOOLEAN handle_LYK_IMAGE_TOGGLE (
+    int *	cmd)
 {
     clickable_images = !clickable_images;
 
@@ -3151,9 +3151,9 @@ PRIVATE BOOLEAN handle_LYK_IMAGE_TOGGLE ARGS1(
     return reparse_or_reload(cmd);
 }
 
-PRIVATE void handle_LYK_INDEX ARGS2(
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_INDEX (
+    int *	old_c,
+    int	real_c)
 {
     /*
      *	Make sure we are not in the index already.
@@ -3183,11 +3183,11 @@ PRIVATE void handle_LYK_INDEX ARGS2(
     }  /* end if */
 }
 
-PRIVATE void handle_LYK_INDEX_SEARCH ARGS4(
-    BOOLEAN *,	force_load,
-    BOOLEAN,	ForcePush,
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_INDEX_SEARCH (
+    BOOLEAN *	force_load,
+    BOOLEAN	ForcePush,
+    int *	old_c,
+    int	real_c)
 {
     if (is_www_index) {
 	/*
@@ -3263,8 +3263,8 @@ PRIVATE void handle_LYK_INDEX_SEARCH ARGS4(
     }
 }
 
-PRIVATE BOOLEAN handle_LYK_INFO ARGS1(
-    int *,	cmd)
+static BOOLEAN handle_LYK_INFO (
+    int *	cmd)
 {
     /*
      *	Don't do if already viewing info page.
@@ -3294,8 +3294,8 @@ PRIVATE BOOLEAN handle_LYK_INFO ARGS1(
     return FALSE;
 }
 
-PRIVATE BOOLEAN handle_LYK_INLINE_TOGGLE ARGS1(
-    int *,	cmd)
+static BOOLEAN handle_LYK_INLINE_TOGGLE (
+    int *	cmd)
 {
     pseudo_inline_alts = !pseudo_inline_alts;
 
@@ -3304,10 +3304,10 @@ PRIVATE BOOLEAN handle_LYK_INLINE_TOGGLE ARGS1(
     return reparse_or_reload(cmd);
 }
 
-PRIVATE void handle_LYK_INSERT_FILE ARGS3(
-    BOOLEAN *,	refresh_screen,
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_INSERT_FILE (
+    BOOLEAN *	refresh_screen,
+    int *	old_c,
+    int	real_c)
 {
     int n;
 
@@ -3365,24 +3365,24 @@ PRIVATE void handle_LYK_INSERT_FILE ARGS3(
 }
 
 #if defined(DIRED_SUPPORT) && defined(OK_INSTALL)
-PRIVATE void handle_LYK_INSTALL NOARGS
+static void handle_LYK_INSTALL (void)
 {
     if (lynx_edit_mode && nlinks > 0 && !no_dired_support)
 	local_install(NULL, links[curdoc.link].lname, &newdoc.address);
 }
 #endif
 
-PRIVATE BOOLEAN handle_LYK_JUMP ARGS10(
-    int,	c,
-    char *,	user_input_buffer,
-    char **,	old_user_input GCC_UNUSED,
-    int *,	recall GCC_UNUSED,
-    BOOLEAN *,	FirstURLRecall GCC_UNUSED,
-    int *,	URLNum GCC_UNUSED,
-    int *,	URLTotal GCC_UNUSED,
-    int *,	ch GCC_UNUSED,
-    int *,	old_c,
-    int,	real_c)
+static BOOLEAN handle_LYK_JUMP (
+    int	c,
+    char *	user_input_buffer,
+    char **	old_user_input GCC_UNUSED,
+    int *	recall GCC_UNUSED,
+    BOOLEAN *	FirstURLRecall GCC_UNUSED,
+    int *	URLNum GCC_UNUSED,
+    int *	URLTotal GCC_UNUSED,
+    int *	ch GCC_UNUSED,
+    int *	old_c,
+    int	real_c)
 {
     char *ret;
 
@@ -3440,11 +3440,11 @@ PRIVATE BOOLEAN handle_LYK_JUMP ARGS10(
     return FALSE;
 }
 
-PRIVATE void handle_LYK_KEYMAP ARGS4(
-    BOOLEAN *,	vi_keys_flag,
-    BOOLEAN *,	emacs_keys_flag,
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_KEYMAP (
+    BOOLEAN *	vi_keys_flag,
+    BOOLEAN *	emacs_keys_flag,
+    int *	old_c,
+    int	real_c)
 {
     if (*old_c != real_c) {
 	*old_c = real_c;
@@ -3478,7 +3478,7 @@ PRIVATE void handle_LYK_KEYMAP ARGS4(
     }
 }
 
-PRIVATE void handle_LYK_LAST_LINK NOARGS
+static void handle_LYK_LAST_LINK (void)
 {
     int i = curdoc.link;
 
@@ -3491,7 +3491,7 @@ PRIVATE void handle_LYK_LAST_LINK NOARGS
     }
 }
 
-PRIVATE void handle_LYK_LEFT_LINK NOARGS
+static void handle_LYK_LEFT_LINK (void)
 {
     if (curdoc.link>0 &&
 		links[curdoc.link].ly == links[curdoc.link-1].ly) {
@@ -3499,8 +3499,8 @@ PRIVATE void handle_LYK_LEFT_LINK NOARGS
     }
 }
 
-PRIVATE BOOLEAN handle_LYK_LIST ARGS1(
-    int *,     cmd)
+static BOOLEAN handle_LYK_LIST (
+    int *     cmd)
 {
     /*
      *	Don't do if already viewing list page.
@@ -3534,9 +3534,9 @@ PRIVATE BOOLEAN handle_LYK_LIST ARGS1(
     return FALSE;
 }
 
-PRIVATE void handle_LYK_MAIN_MENU ARGS2(
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_MAIN_MENU (
+    int *	old_c,
+    int	real_c)
 {
     /*
      *	If its already the homepage then don't reload it.
@@ -3566,7 +3566,7 @@ PRIVATE void handle_LYK_MAIN_MENU ARGS2(
     }
 }
 
-PRIVATE void handle_LYK_MINIMAL NOARGS
+static void handle_LYK_MINIMAL (void)
 {
     if (!historical_comments) {
 #ifdef USE_SOURCE_CACHE
@@ -3606,8 +3606,8 @@ PRIVATE void handle_LYK_MINIMAL NOARGS
 }
 
 #if defined(DIRED_SUPPORT)
-PRIVATE void handle_LYK_MODIFY ARGS1(
-    BOOLEAN *,	refresh_screen)
+static void handle_LYK_MODIFY (
+    BOOLEAN *	refresh_screen)
 {
     if (lynx_edit_mode && nlinks > 0 && !no_dired_support) {
 	int ret;
@@ -3632,8 +3632,8 @@ PRIVATE void handle_LYK_MODIFY ARGS1(
 #endif /* DIRED_SUPPORT */
 
 #ifdef EXP_NESTED_TABLES
-PRIVATE BOOLEAN handle_LYK_NESTED_TABLES ARGS1(
-    int *,	cmd)
+static BOOLEAN handle_LYK_NESTED_TABLES (
+    int *	cmd)
 {
     nested_tables = !nested_tables;
     HTUserMsg(nested_tables ? NESTED_TABLES_ON : NESTED_TABLES_OFF);
@@ -3641,9 +3641,9 @@ PRIVATE BOOLEAN handle_LYK_NESTED_TABLES ARGS1(
 }
 #endif
 
-PRIVATE BOOLEAN handle_LYK_OPTIONS ARGS2(
-    int *,	cmd,
-    BOOLEAN *,	refresh_screen)
+static BOOLEAN handle_LYK_OPTIONS (
+    int *	cmd,
+    BOOLEAN *	refresh_screen)
 {
 #ifndef NO_OPTION_MENU
     if (!LYUseFormsOptions) {
@@ -3814,7 +3814,7 @@ PRIVATE BOOLEAN handle_LYK_OPTIONS ARGS2(
     return FALSE;
 }
 
-PRIVATE void handle_NEXT_DOC NOARGS
+static void handle_NEXT_DOC (void)
 {
     if (LYhist_next(&curdoc, &newdoc)) {
 	free_address(&curdoc);	/* avoid push */
@@ -3823,10 +3823,10 @@ PRIVATE void handle_NEXT_DOC NOARGS
     HTUserMsg(gettext("No next document present"));
 }
 
-PRIVATE void handle_LYK_NEXT_LINK ARGS3(
-    int,	c,
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_NEXT_LINK (
+    int	c,
+    int *	old_c,
+    int	real_c)
 {
     if (curdoc.link < nlinks-1) {	/* next link */
 	LYhighlight(OFF, curdoc.link, prev_target);
@@ -3868,9 +3868,9 @@ PRIVATE void handle_LYK_NEXT_LINK ARGS3(
     }
 }
 
-PRIVATE void handle_LYK_NEXT_PAGE ARGS2(
-    int	*,	old_c,
-    int,	real_c)
+static void handle_LYK_NEXT_PAGE (
+    int	*	old_c,
+    int	real_c)
 {
     if (more) {
 	Newline += display_lines;
@@ -3882,9 +3882,9 @@ PRIVATE void handle_LYK_NEXT_PAGE ARGS2(
     }
 }
 
-PRIVATE BOOLEAN handle_LYK_NOCACHE ARGS2(
-    int *,	old_c,
-    int,	real_c)
+static BOOLEAN handle_LYK_NOCACHE (
+    int *	old_c,
+    int	real_c)
 {
     if (nlinks > 0) {
 	if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
@@ -3904,10 +3904,10 @@ PRIVATE BOOLEAN handle_LYK_NOCACHE ARGS2(
     return TRUE;
 }
 
-PRIVATE void handle_LYK_PREV_LINK ARGS3(
-    int *,	arrowup,
-    int	*,	old_c,
-    int,	real_c)
+static void handle_LYK_PREV_LINK (
+    int *	arrowup,
+    int	*	old_c,
+    int	real_c)
 {
     if (curdoc.link > 0) {	     /* previous link */
 	set_curdoc_link(curdoc.link - 1);
@@ -3944,10 +3944,10 @@ PRIVATE void handle_LYK_PREV_LINK ARGS3(
     }
 }
 
-PRIVATE int handle_PREV_DOC ARGS3(
-    int *,	cmd,
-    int *,	old_c,
-    int,	real_c)
+static int handle_PREV_DOC (
+    int *	cmd,
+    int *	old_c,
+    int	real_c)
 {
     if (nhist > 0) {  /* if there is anything to go back to */
 	/*
@@ -4055,9 +4055,9 @@ PRIVATE int handle_PREV_DOC ARGS3(
     return 0;
 }
 
-PRIVATE void handle_LYK_PREV_PAGE ARGS2(
-    int	*,	old_c,
-    int,	real_c)
+static void handle_LYK_PREV_PAGE (
+    int	*	old_c,
+    int	real_c)
 {
     if (Newline > 1) {
 	Newline -= display_lines;
@@ -4069,10 +4069,10 @@ PRIVATE void handle_LYK_PREV_PAGE ARGS2(
     }
 }
 
-PRIVATE void handle_LYK_PRINT ARGS3(
-    BOOLEAN *,	ForcePush,
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_PRINT (
+    BOOLEAN *	ForcePush,
+    int *	old_c,
+    int	real_c)
 {
     if (LYValidate) {
 	if (*old_c != real_c)	{
@@ -4100,7 +4100,7 @@ PRIVATE void handle_LYK_PRINT ARGS3(
     }
 }
 
-PRIVATE BOOLEAN handle_LYK_QUIT NOARGS
+static BOOLEAN handle_LYK_QUIT (void)
 {
     int c;
 
@@ -4123,8 +4123,8 @@ PRIVATE BOOLEAN handle_LYK_QUIT NOARGS
     return FALSE;
 }
 
-PRIVATE BOOLEAN handle_LYK_RAW_TOGGLE ARGS1(
-    int *,	cmd)
+static BOOLEAN handle_LYK_RAW_TOGGLE (
+    int *	cmd)
 {
     if (HTLoadedDocumentCharset()) {
 	HTUserMsg(gettext("charset for this document specified explicitly, sorry..."));
@@ -4137,8 +4137,8 @@ PRIVATE BOOLEAN handle_LYK_RAW_TOGGLE ARGS1(
     }
 }
 
-PRIVATE void handle_LYK_RELOAD ARGS1(
-    int,	real_cmd)
+static void handle_LYK_RELOAD (
+    int	real_cmd)
 {
     /*
      * Check if this is a reply from a POST, and if so,
@@ -4198,8 +4198,8 @@ PRIVATE void handle_LYK_RELOAD ARGS1(
 }
 
 #ifdef DIRED_SUPPORT
-PRIVATE void handle_LYK_REMOVE ARGS1(
-    BOOLEAN *,	refresh_screen)
+static void handle_LYK_REMOVE (
+    BOOLEAN *	refresh_screen)
 {
     if (lynx_edit_mode && nlinks > 0 && !no_dired_support) {
 	int linkno = curdoc.link; /* may be changed in local_remove - kw */
@@ -4212,7 +4212,7 @@ PRIVATE void handle_LYK_REMOVE ARGS1(
 }
 #endif /* DIRED_SUPPORT */
 
-PRIVATE void handle_LYK_RIGHT_LINK NOARGS
+static void handle_LYK_RIGHT_LINK (void)
 {
     if (curdoc.link<nlinks-1 &&
 		links[curdoc.link].ly == links[curdoc.link+1].ly) {
@@ -4220,10 +4220,10 @@ PRIVATE void handle_LYK_RIGHT_LINK NOARGS
     }
 }
 
-PRIVATE void handle_LYK_SHELL ARGS3(
-    BOOLEAN *,	refresh_screen,
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_SHELL (
+    BOOLEAN *	refresh_screen,
+    int *	old_c,
+    int	real_c)
 {
     if (!no_shell) {
 	stop_curses();
@@ -4245,7 +4245,7 @@ PRIVATE void handle_LYK_SHELL ARGS3(
     }
 }
 
-PRIVATE void handle_LYK_SOFT_DQUOTES NOARGS
+static void handle_LYK_SOFT_DQUOTES (void)
 {
 #ifdef USE_SOURCE_CACHE
     if (!HTcan_reparse_document()) {
@@ -4277,8 +4277,8 @@ PRIVATE void handle_LYK_SOFT_DQUOTES NOARGS
     return;
 }
 
-PRIVATE void handle_LYK_SOURCE ARGS1(
-    char **,	ownerS_address_p)
+static void handle_LYK_SOURCE (
+    char **	ownerS_address_p)
 {
     /*
      * Check if this is a reply from a POST, and if so,
@@ -4338,7 +4338,7 @@ PRIVATE void handle_LYK_SOURCE ARGS1(
     LYforce_no_cache = TRUE;
 }
 
-PRIVATE void handle_LYK_SWITCH_DTD NOARGS
+static void handle_LYK_SWITCH_DTD (void)
 {
 #ifdef USE_SOURCE_CACHE
     BOOLEAN canreparse = FALSE;
@@ -4398,7 +4398,7 @@ PRIVATE void handle_LYK_SWITCH_DTD NOARGS
 }
 
 #ifdef DIRED_SUPPORT
-PRIVATE void handle_LYK_TAG_LINK NOARGS
+static void handle_LYK_TAG_LINK (void)
 {
     if (lynx_edit_mode && nlinks > 0 && !no_dired_support) {
 	if (!strcmp(LYGetHiliteStr(curdoc.link, 0), ".."))
@@ -4445,7 +4445,7 @@ PRIVATE void handle_LYK_TAG_LINK NOARGS
 }
 #endif /* DIRED_SUPPORT */
 
-PRIVATE void handle_LYK_TOGGLE_HELP NOARGS
+static void handle_LYK_TOGGLE_HELP (void)
 {
     if (user_mode == NOVICE_MODE) {
 	toggle_novice_line();
@@ -4453,11 +4453,11 @@ PRIVATE void handle_LYK_TOGGLE_HELP NOARGS
     }
 }
 
-PRIVATE void handle_LYK_TOOLBAR ARGS4(
-    BOOLEAN *,	try_internal,
-    BOOLEAN *,	force_load,
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_TOOLBAR (
+    BOOLEAN *	try_internal,
+    BOOLEAN *	force_load,
+    int *	old_c,
+    int	real_c)
 {
     char *cp;
     char *toolbar = NULL;
@@ -4479,8 +4479,8 @@ PRIVATE void handle_LYK_TOOLBAR ARGS4(
     }
 }
 
-PRIVATE void handle_LYK_TRACE_LOG ARGS1(
-    BOOLEAN *,	trace_flag_ptr)
+static void handle_LYK_TRACE_LOG (
+    BOOLEAN *	trace_flag_ptr)
 {
 #ifndef NO_LYNX_TRACE
     /*
@@ -4530,7 +4530,7 @@ PRIVATE void handle_LYK_TRACE_LOG ARGS1(
 }
 
 #ifdef DIRED_SUPPORT
-PRIVATE void handle_LYK_UPLOAD NOARGS
+static void handle_LYK_UPLOAD (void)
 {
     /*
      *	Don't do if already viewing upload options page.
@@ -4556,10 +4556,10 @@ PRIVATE void handle_LYK_UPLOAD NOARGS
 }
 #endif /* DIRED_SUPPORT */
 
-PRIVATE void handle_LYK_UP_HALF ARGS3(
-    int *,	arrowup,
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_UP_HALF (
+    int *	arrowup,
+    int *	old_c,
+    int	real_c)
 {
     if (Newline > 1) {
 	int scrollamount = display_lines/2;
@@ -4582,11 +4582,11 @@ PRIVATE void handle_LYK_UP_HALF ARGS3(
     }
 }
 
-PRIVATE void handle_LYK_UP_LINK ARGS4(
-    int *,	follow_col,
-    int *,	arrowup,
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_UP_LINK (
+    int *	follow_col,
+    int *	arrowup,
+    int *	old_c,
+    int	real_c)
 {
     if (curdoc.link > 0 &&
 	(links[0].ly != links[curdoc.link].ly ||
@@ -4631,10 +4631,10 @@ PRIVATE void handle_LYK_UP_LINK ARGS4(
     }
 }
 
-PRIVATE void handle_LYK_UP_TWO ARGS3(
-    int *,	arrowup,
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_UP_TWO (
+    int *	arrowup,
+    int *	old_c,
+    int	real_c)
 {
     if (Newline > 1) {
 	int scrollamount = (Newline > 2 ? 2 : 1);
@@ -4654,10 +4654,10 @@ PRIVATE void handle_LYK_UP_TWO ARGS3(
     }
 }
 
-PRIVATE void handle_LYK_VIEW_BOOKMARK ARGS3(
-    BOOLEAN *,	refresh_screen,
-    int *,	old_c,
-    int,	real_c)
+static void handle_LYK_VIEW_BOOKMARK (
+    BOOLEAN *	refresh_screen,
+    int *	old_c,
+    int	real_c)
 {
     char *cp;
 
@@ -4704,9 +4704,9 @@ PRIVATE void handle_LYK_VIEW_BOOKMARK ARGS3(
     }
 }
 
-PRIVATE BOOLEAN handle_LYK_VLINKS ARGS2(
-    int *,	cmd,
-    BOOLEAN *,	newdoc_link_is_absolute)
+static BOOLEAN handle_LYK_VLINKS (
+    int *	cmd,
+    BOOLEAN *	newdoc_link_is_absolute)
 {
     int c;
 
@@ -4744,9 +4744,9 @@ PRIVATE BOOLEAN handle_LYK_VLINKS ARGS2(
     return FALSE;
 }
 
-PUBLIC void handle_LYK_WHEREIS ARGS2(
-    int,	cmd,
-    BOOLEAN *,	refresh_screen)
+void handle_LYK_WHEREIS (
+    int	cmd,
+    BOOLEAN *	refresh_screen)
 {
     BOOLEAN have_target_onscreen = (BOOLEAN) (*prev_target != '\0' &&
 				    HText_pageHasPrevTarget());
@@ -4807,13 +4807,13 @@ PUBLIC void handle_LYK_WHEREIS ARGS2(
 /*
  * Get a number from the user and follow that link number.
  */
-PRIVATE void handle_LYK_digit ARGS6(
-    int,	c,
-    BOOLEAN *,	force_load,
-    char *,	user_input_buffer,
-    int *,	old_c,
-    int,	real_c,
-    BOOLEAN *,	try_internal GCC_UNUSED)
+static void handle_LYK_digit (
+    int	c,
+    BOOLEAN *	force_load,
+    char *	user_input_buffer,
+    int *	old_c,
+    int	real_c,
+    BOOLEAN *	try_internal GCC_UNUSED)
 {
     int lindx = ((nlinks > 0) ? curdoc.link : 0);
     int number;
@@ -4990,7 +4990,7 @@ PRIVATE void handle_LYK_digit ARGS6(
 #ifdef SUPPORT_CHDIR
 
 /* original implementation by VH */
-PUBLIC void handle_LYK_CHDIR NOARGS
+void handle_LYK_CHDIR (void)
 {
     static char buf[LY_MAXPATH];
     char *p = NULL;
@@ -5077,7 +5077,7 @@ PUBLIC void handle_LYK_CHDIR NOARGS
  * repeat is not important, even if we overshoot again, it is going to be by 30
  * steps, which is easy to fix by reversing the direction again.
  */
-PRIVATE int repeat_to_delta ARGS1(int, n)
+static int repeat_to_delta (int n)
 {
     int threshold = LYcols / 3;
 
@@ -5091,7 +5091,7 @@ PRIVATE int repeat_to_delta ARGS1(int, n)
     return n;
 }
 
-PRIVATE void handle_LYK_SHIFT_LEFT ARGS2(BOOLEAN *, flag, int, count)
+static void handle_LYK_SHIFT_LEFT (BOOLEAN * flag, int count)
 {
     if (!LYwideLines) {
 	HTAlert(SHIFT_VS_LINEWRAP);
@@ -5105,7 +5105,7 @@ PRIVATE void handle_LYK_SHIFT_LEFT ARGS2(BOOLEAN *, flag, int, count)
 	LYshiftWin = 0;
 }
 
-PRIVATE void handle_LYK_SHIFT_RIGHT ARGS2(BOOLEAN *, flag, int, count)
+static void handle_LYK_SHIFT_RIGHT (BOOLEAN * flag, int count)
 {
     if (!LYwideLines) {
 	HTAlert(SHIFT_VS_LINEWRAP);
@@ -5115,9 +5115,9 @@ PRIVATE void handle_LYK_SHIFT_RIGHT ARGS2(BOOLEAN *, flag, int, count)
     *flag = TRUE;
 }
 
-PRIVATE BOOLEAN handle_LYK_LINEWRAP_TOGGLE ARGS2(
-    int *,	cmd,
-    BOOLEAN *,	flag)
+static BOOLEAN handle_LYK_LINEWRAP_TOGGLE (
+    int *	cmd,
+    BOOLEAN *	flag)
 {
     static char *choices[] = {
 	"Try to fit screen width",
@@ -5178,7 +5178,7 @@ PRIVATE BOOLEAN handle_LYK_LINEWRAP_TOGGLE ARGS2(
  *					(memoir from the original Lynx - FM)
  */
 
-int mainloop NOARGS
+int mainloop (void)
 {
 #if defined(WIN_EX)	/* 1997/10/08 (Wed) 14:52:06 */
 #undef	STRING_MAX
@@ -5193,7 +5193,7 @@ int mainloop NOARGS
     int getresult;
     int arrowup = FALSE, show_help = FALSE;
     char user_input_buffer[MAX_LINE];
-    CONST char *cshelpfile = NULL;
+    const char *cshelpfile = NULL;
     BOOLEAN first_file = TRUE;
     BOOLEAN popped_doc = FALSE;
     BOOLEAN refresh_screen = FALSE;
@@ -5784,7 +5784,7 @@ try_again:
 				  BOOKMARK_TITLE))) &&
 			(temp = HTParse(newdoc.address, "",
 				     PARSE_PATH+PARSE_PUNCTUATION)) != NULL) {
-			CONST char *name = wwwName(Home_Dir());
+			const char *name = wwwName(Home_Dir());
 			len = strlen(name);
 #ifdef VMS
 			if (!strncasecomp(temp, name, len) &&
@@ -7383,9 +7383,9 @@ new_cmd:  /*
     }
 }
 
-PRIVATE int are_different ARGS2(
-	DocInfo *,	doc1,
-	DocInfo *,	doc2)
+static int are_different (
+	DocInfo *	doc1,
+	DocInfo *	doc2)
 {
     char *cp1, *cp2;
 
@@ -7441,9 +7441,9 @@ PRIVATE int are_different ARGS2(
  * meaning they are "from different files". - kw
  */
 #ifndef DONT_TRACK_INTERNAL_LINKS
-PRIVATE int are_phys_different ARGS2(
-	DocInfo *,	doc1,
-	DocInfo *,	doc2)
+static int are_phys_different (
+	DocInfo *	doc1,
+	DocInfo *	doc2)
 {
     char *cp1, *cp2, *ap1 = doc1->address, *ap2 = doc2->address;
 
@@ -7515,7 +7515,7 @@ PRIVATE int are_phys_different ARGS2(
  *  Utility for freeing the list of goto URLs. - FM
  */
 #ifdef LY_FIND_LEAKS
-PRIVATE void HTGotoURLs_free NOARGS
+static void HTGotoURLs_free (void)
 {
     char *url;
     HTList *cur = Goto_URLs;
@@ -7534,8 +7534,8 @@ PRIVATE void HTGotoURLs_free NOARGS
  *  Utility for listing Goto URLs, making any
  *  repeated URLs the most current in the list. - FM
  */
-PUBLIC void HTAddGotoURL ARGS1(
-	char *,		url)
+void HTAddGotoURL (
+	char *		url)
 {
     char *new = NULL;
     char *old;
@@ -7574,9 +7574,9 @@ PUBLIC void HTAddGotoURL ARGS1(
  *  put a message on the screen
  *  to tell the user other misc info.
  */
-PRIVATE void show_main_statusline ARGS2(
-    CONST LinkInfo,	curlink,
-    int,		for_what)
+static void show_main_statusline (
+    const LinkInfo	curlink,
+    int		for_what)
 {
     /*
      *	Make sure form novice lines are replaced.
@@ -7671,15 +7671,15 @@ PRIVATE void show_main_statusline ARGS2(
  *  selected link.  It should only be called at times when curdoc.link,
  *  nlinks, and the links[] array are valid. - kw
  */
-PUBLIC void repaint_main_statusline ARGS1(
-    int,	for_what)
+void repaint_main_statusline (
+    int	for_what)
 {
     if (curdoc.link >= 0 && curdoc.link < nlinks)
 	show_main_statusline(links[curdoc.link], for_what);
 }
 
-PRIVATE void form_noviceline ARGS1(
-    int,	disabled)
+static void form_noviceline (
+    int	disabled)
 {
     LYmove(LYlines-2,0); LYclrtoeol();
     if (!disabled) {
@@ -7711,9 +7711,9 @@ PRIVATE void form_noviceline ARGS1(
     }
 }
 
-PRIVATE void exit_immediately_with_error_message ARGS2(
-	int,		state,
-	BOOLEAN,	first_file)
+static void exit_immediately_with_error_message (
+	int		state,
+	BOOLEAN	first_file)
 {
     char *buf = 0;
     char *buf2 = 0;
@@ -7769,10 +7769,10 @@ PRIVATE void exit_immediately_with_error_message ARGS2(
 }
 
 
-PRIVATE void status_link ARGS3(
-	char *,		curlink_name,
-	BOOLEAN,	show_more,
-	BOOLEAN,	show_indx)
+static void status_link (
+	char *		curlink_name,
+	BOOLEAN	show_more,
+	BOOLEAN	show_indx)
 {
 #define MAX_STATUS (LYcols - 2)
 #define MIN_STATUS 0
@@ -7843,8 +7843,8 @@ PRIVATE void status_link ARGS3(
     }
 }
 
-PUBLIC char*
-LYDownLoadAddress NOARGS
+char*
+LYDownLoadAddress (void)
 {
     char *s = newdoc.address ? newdoc.address : "";
     return s;
