@@ -1,19 +1,19 @@
 # Dutch messages for Lynx.
 # Copyright (C) 1999 Free Software Foundation, Inc.
 # Tijs van Bakel <smoke@casema.net>, 1999, 2000.
-# Aanpassingen: Pieter-Paul Spiertz <pspiertz@sci.kun.nl>, 2002.
+# Luk Claes <luk.claes@ugent.be>, 2004.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.4\n"
+"Project-Id-Version: lynx 2.8.6-dev6\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-10-17 16:29-0400\n"
-"PO-Revision-Date: 2000-04-08 21:13+02:00\n"
-"Last-Translator: Tijs van Bakel <smoke@casema.net>\n"
-"Language-Team: Dutch <vertaling@nl.linux.org>\n"
+"POT-Creation-Date: 2004-11-07 09:54-0500\n"
+"PO-Revision-Date: 2004-11-03 17:18+0100\n"
+"Last-Translator: Luk Claes <luk.claes@ugent.be>\n"
+"Language-Team: Dutch <vertaling@vrijschrift.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ISO-8859-1\n"
-"Content-Transfer-Encoding: 8-bit\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 
 #. ******************************************************************
 #. * The following definitions are for status line prompts, messages, or
@@ -37,7 +37,7 @@ msgstr ""
 #: LYMessages.c:30
 #, c-format
 msgid "Alert!: %s"
-msgstr "Let op: %s"
+msgstr "Let op!: %s"
 
 #: LYMessages.c:31
 msgid "Welcome"
@@ -49,7 +49,7 @@ msgstr "Weet u zeker dat u wilt stoppen?"
 
 #: LYMessages.c:34
 msgid "Really exit from Lynx?"
-msgstr "Wilt u Lynx echt beëindigen?"
+msgstr "Wilt u lynx echt beÃ«indigen?"
 
 #: LYMessages.c:36
 msgid "Connection interrupted."
@@ -77,7 +77,7 @@ msgstr "OK"
 
 #: LYMessages.c:42
 msgid "Done!"
-msgstr "Voltooid!"
+msgstr "Klaar!"
 
 #: LYMessages.c:43
 msgid "Bad request!"
@@ -163,33 +163,33 @@ msgstr "(Wachtwoord veld) Niet actief.  Gebruik <return> om te activeren."
 #. #define FORM_LINK_FILE_UNM_MSG
 #: LYMessages.c:76
 msgid "UNMODIFIABLE file entry field.  Use UP or DOWN arrows or tab to move off."
-msgstr "VASTSTAAND bestandsnaam invoerveld.  Verlaat met pijltjes of tab."
+msgstr "VASTSTAAND bestandsnaam invoerveld.  Ga weg met pijltjes of tab."
 
 #. #define FORM_LINK_FILE_MESSAGE
 #: LYMessages.c:78
 msgid "(File entry field) Enter filename.  Use UP or DOWN arrows or tab to move off."
-msgstr "(Bestandsnaam veld) Voer een bestandsnaam in.  Verlaat met pijltjes of tab."
+msgstr "(Bestandsnaam veld) Voer een bestandsnaam in.  Ga weg met pijltjes of tab."
 
 #. #define FORM_LINK_TEXT_MESSAGE
 #: LYMessages.c:80
 msgid "(Text entry field) Enter text.  Use UP or DOWN arrows or tab to move off."
-msgstr "(Tekst invoer) Voer tekst in.  Verlaat met pijltjes of tab."
+msgstr "(Tekst invoer) Voer tekst in.  Ga weg met pijltjes of tab."
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE
 #: LYMessages.c:82
 msgid "(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off."
-msgstr "(Tekstgebied) Voer tekst in.  Verlaat met pijltjes of tab."
+msgstr "(Tekstgebied) Voer tekst in.  Ga weg met pijltjes of tab."
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE_E
 #: LYMessages.c:84
 #, c-format
 msgid "(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor)."
-msgstr "(Tekstgebied) Voer tekst in.  Verlaat met pijltjes of tab (%s voor editor)."
+msgstr "(Tekstgebied) Voer tekst in.  Ga weg met pijltjes of tab (%s voor editor)."
 
 #. #define FORM_LINK_TEXT_UNM_MSG
 #: LYMessages.c:86
 msgid "UNMODIFIABLE form text field.  Use UP or DOWN arrows or tab to move off."
-msgstr "VASTSTAAND formulier tekst veld.  Verlaat met pijltjes of tab."
+msgstr "VASTSTAAND formulier tekst veld.  Ga weg met pijltjes of tab."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MESSAGE
 #: LYMessages.c:88
@@ -205,17 +205,17 @@ msgstr "(Formulierveld) Voer tekst in.  Verzend met <return> (%s - geen cache)."
 #. #define FORM_LINK_TEXT_RESUBMIT_MESSAGE
 #: LYMessages.c:92
 msgid "(Form field) Enter text.  Use <return> to submit, arrows or tab to move off."
-msgstr "(Form.veld) Voer tekst in.  <return>-verzenden, verlaat met pijltjes of tab."
+msgstr "(Form.veld) Voer tekst in.  <return>-verzenden, ga weg met pijltjes of tab."
 
 #. #define FORM_LINK_TEXT_SUBMIT_UNM_MSG
 #: LYMessages.c:94
 msgid "UNMODIFIABLE form field.  Use UP or DOWN arrows or tab to move off."
-msgstr "NIET WIJZIGBAAR formulierveld.  Verlaat met pijltjes of tab."
+msgstr "NIET WIJZIGBAAR formulierveld.  Ga weg met pijltjes of tab."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MAILTO_MSG
 #: LYMessages.c:96
 msgid "(mailto form field) Enter text.  Use <return> to submit, arrows to move off."
-msgstr "(email-formulierveld) Voer tekst in.  Verzend met <return>, verlaat met pijltjes"
+msgstr "(email-formulierveld) Voer tekst in.  Verzend met <return>, ga weg met pijltjes."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MAILTO_DIS_MSG
 #: LYMessages.c:98
@@ -225,12 +225,12 @@ msgstr "(email-formulierveld) Post verzenden is niet toegestaan, dus u kunt niet
 #. #define FORM_LINK_PASSWORD_MESSAGE
 #: LYMessages.c:100
 msgid "(Password entry field) Enter text.  Use UP or DOWN arrows or tab to move off."
-msgstr "(Wachtwoord veld) Voer tekst in.  Verlaat met pijltjes of tab."
+msgstr "(Wachtwoord veld) Voer tekst in.  Ga weg met pijltjes of tab."
 
 #. #define FORM_LINK_PASSWORD_UNM_MSG
 #: LYMessages.c:102
 msgid "UNMODIFIABLE form password.  Use UP or DOWN arrows or tab to move off."
-msgstr "NIET WIJZIGBAAR formulier wachtwoord.  Verlaat met pijltjes of tab."
+msgstr "NIET WIJZIGBAAR formulier wachtwoord.  Ga weg met pijltjes of tab."
 
 #. #define FORM_LINK_CHECKBOX_MESSAGE
 #: LYMessages.c:104
@@ -240,17 +240,17 @@ msgstr "(Aanvink Veld)  Gebruik pijltje-rechts of <return> om te veranderen."
 #. #define FORM_LINK_CHECKBOX_UNM_MSG
 #: LYMessages.c:106
 msgid "UNMODIFIABLE form checkbox.  Use UP or DOWN arrows or tab to move off."
-msgstr "NIET WIJZIGBAAR formulier aanvinkveld.  Verlaat met pijltjes of tab."
+msgstr "NIET WIJZIGBAAR formulier aanvinkveld.  Ga weg met pijltjes of tab."
 
 #. #define FORM_LINK_RADIO_MESSAGE
 #: LYMessages.c:108
 msgid "(Radio Button)   Use right-arrow or <return> to toggle."
-msgstr "(radio-knop)  Gebruik pijltje-rechts of <return> om te kiezen."
+msgstr "(druk-knop)  Gebruik pijltje-rechts of <return> om te veranderen."
 
 #. #define FORM_LINK_RADIO_UNM_MSG
 #: LYMessages.c:110
 msgid "UNMODIFIABLE form radio button.  Use UP or DOWN arrows or tab to move off."
-msgstr "NIET WIJZIGBARE formulier drukknop.  Verlaat met pijltjes of tab."
+msgstr "NIET WIJZIGBARE formulier drukknop.  Ga weg met pijltjes of tab."
 
 #. #define FORM_LINK_SUBMIT_PREFIX
 #: LYMessages.c:112
@@ -275,7 +275,7 @@ msgstr "(Formulier verzendknop) Verzend met pijltje rechts of <return>."
 #. #define FORM_LINK_SUBMIT_DIS_MSG
 #: LYMessages.c:120
 msgid "DISABLED form submit button.  Use UP or DOWN arrows or tab to move off."
-msgstr "NIET BESCHIKBAAR: formulier verzendknop.  Verlaat met pijltjes of tab."
+msgstr "NIET BESCHIKBAAR: formulier verzendknop.  Ga weg met pijltjes of tab."
 
 #. #define FORM_LINK_SUBMIT_MAILTO_PREFIX
 #: LYMessages.c:122
@@ -300,7 +300,7 @@ msgstr "(Formulier herstelknop)  Herstel met pijltje rechts of <return>."
 #. #define FORM_LINK_RESET_DIS_MSG
 #: LYMessages.c:130
 msgid "DISABLED form reset button.  Use UP or DOWN arrows or tab to move off."
-msgstr "NIET BESCHIKBAAR formulier herstelknop.  Verlaat met pijltjes of tab."
+msgstr "NIET BESCHIKBAAR formulier herstelknop.  Ga weg met pijltjes of tab."
 
 #. #define FORM_LINK_OPTION_LIST_MESSAGE
 #: LYMessages.c:132
@@ -310,7 +310,7 @@ msgstr "(Lijst van opties) Druk op enter, dan pijltjes en enter om een optie te 
 #. #define CHOICE_LIST_MESSAGE
 #: LYMessages.c:134
 msgid "(Choice list) Hit return and use arrow keys and return to select option."
-msgstr "(Keuzelijst) Gebruik de pijltjes en dan enter om een optie te kiezen."
+msgstr "(Keuzelijst) Druk op enter, dan pijltjes en enter om een optie te kiezen."
 
 #. #define FORM_LINK_OPTION_LIST_UNM_MSG
 #: LYMessages.c:136
@@ -419,7 +419,7 @@ msgstr "Pijltjes omhoog en omlaag-verplaatsen; Rechts-volg link; Links-ga terug.
 #. #define NOVICE_LINE_TWO
 #: LYMessages.c:166
 msgid " H)elp O)ptions P)rint G)o M)ain screen Q)uit /=search [delete]=history list \n"
-msgstr "H)elp O)pties P)rint G)a naar M)-beginscherm Q)-stop /=zoek [bksp]=historie\n"
+msgstr "H)elp O)pties P)rint G)a naar M)-beginscherm Q)-stop /=zoek [del]=historie\n"
 
 #. #define NOVICE_LINE_TWO_A
 #: LYMessages.c:168
@@ -439,34 +439,34 @@ msgstr "O)verige C)ommentaar <backspace>-Historie Boekenleggers: V)-inzien A)-to
 #. #define FORM_NOVICELINE_ONE
 #: LYMessages.c:174
 msgid "            Enter text into the field by typing on the keyboard              "
-msgstr "Typ tekst in de invoervelden"
+msgstr "Type tekst in de invoervelden"
 
 #. #define FORM_NOVICELINE_TWO
 #: LYMessages.c:176
 msgid "    Ctrl-U to delete all text in field, [Backspace] to delete a character    "
-msgstr "Ctrl-U wist alle tekst in het invoerveld, [Backspace] wist één teken"
+msgstr "Ctrl-U wist alle tekst in het invoerveld, [Backspace] wist Ã©Ã©n teken"
 
 #. #define FORM_NOVICELINE_TWO_DELBL
 #: LYMessages.c:178
 msgid "      Ctrl-U to delete text in field, [Backspace] to delete a character    "
-msgstr "Ctrl-U wist tekst in het invoerveld, [Backspace] wist één teken"
+msgstr "Ctrl-U wist tekst in het invoerveld, [Backspace] wist Ã©Ã©n teken"
 
 #. #define FORM_NOVICELINE_TWO_VAR
 #: LYMessages.c:180
 #, c-format
 msgid "    %s to delete all text in field, [Backspace] to delete a character    "
-msgstr "%s wist alle tekst in het invoerveld, [Backspace] wist één teken"
+msgstr "%s wist alle tekst in het invoerveld, [Backspace] wist Ã©Ã©n teken"
 
 #. #define FORM_NOVICELINE_TWO_DELBL_VAR
 #: LYMessages.c:182
 #, c-format
 msgid "      %s to delete text in field, [Backspace] to delete a character    "
-msgstr "%s wist tekst in het invoerveld, [Backspace] wist één teken"
+msgstr "%s wist tekst in het invoerveld, [Backspace] wist Ã©Ã©n teken"
 
 #. mailto
 #: LYMessages.c:185
 msgid "Malformed mailto form submission!  Cancelled!"
-msgstr "Verkeerd geformuleerde mailto-form verzending!  Geannuleerd!"
+msgstr "Verkeerd geformuleerde mailto-formulierverzending!  Geannuleerd!"
 
 #: LYMessages.c:186
 msgid "Warning!  Control codes in mail address replaced by ?"
@@ -478,11 +478,11 @@ msgstr "U mag niet e-mailen!  Gegevens kunnen niet worden verzonden."
 
 #: LYMessages.c:188
 msgid "Mailto form submission failed!"
-msgstr "Mailto-form verzending mislukt!"
+msgstr "Mailto-formulierverzending mislukt!"
 
 #: LYMessages.c:189
 msgid "Mailto form submission Cancelled!!!"
-msgstr "Mailto-form verzending geannuleerd!!!"
+msgstr "Mailto-formulierverzending geannuleerd!!!"
 
 #: LYMessages.c:190
 msgid "Sending form content..."
@@ -505,7 +505,7 @@ msgstr "Wilt u het originele bericht opnemen?"
 #. #define INC_PREPARSED_MSG_PROMPT
 #: LYMessages.c:197
 msgid "Do you wish to include the preparsed source?"
-msgstr "Wilt u de ontlede broncode opnemen?"
+msgstr "Wilt u de ontleedde broncode opnemen?"
 
 #. #define SPAWNING_EDITOR_FOR_MAIL
 #: LYMessages.c:199
@@ -576,16 +576,16 @@ msgstr "DCL subproces wordt aangeroepen.  Gebruik 'logout' om terug te keren naa
 #. #define SPAWNING_MSG
 #: LYMessages.c:225
 msgid "Type EXIT to return to Lynx.\n"
-msgstr "Typ EXIT om terug te keren naar Lynx.\n"
+msgstr "Type EXIT om terug te keren naar Lynx.\n"
 
 #. #define SPAWNING_MSG
 #: LYMessages.c:228
 msgid "Spawning your default shell.  Use 'exit' to return to Lynx.\n"
-msgstr "Uw standaard shell wordt aangeroepen.  Typ 'exit' om terug te keren naar Lynx.\n"
+msgstr "Uw standaard shell wordt aangeroepen.  Type 'exit' om terug te keren naar Lynx.\n"
 
 #: LYMessages.c:231
 msgid "Spawning is currently disabled."
-msgstr "Het starten van externe programma's is momenteel uitgeschakeld."
+msgstr "Het starten van externe programma's starten is uitgezet."
 
 #: LYMessages.c:232
 msgid "The 'd'ownload command is currently disabled."
@@ -597,7 +597,7 @@ msgstr "U kunt niet downloaden in een invoerveld."
 
 #: LYMessages.c:234
 msgid "Form has a mailto action!  Cannot download."
-msgstr "Form heeft een mailto-actie!  Kan niet downloaden."
+msgstr "Formulier heeft een mailto-actie!  Kan niet downloaden."
 
 #: LYMessages.c:235
 msgid "You cannot download a mailto: link."
@@ -605,7 +605,7 @@ msgstr "U kunt een 'mailto:' koppeling niet downloaden."
 
 #: LYMessages.c:236
 msgid "You cannot download cookies."
-msgstr "U kunt cookies niet downloaden."
+msgstr "U kunt koekjes niet downloaden."
 
 #: LYMessages.c:237
 msgid "You cannot download a printing option."
@@ -679,7 +679,7 @@ msgstr "Sorry, het document is niet een http URL."
 
 #: LYMessages.c:259
 msgid "Sorry, the link is not an http URL."
-msgstr "Sorry, deze link is geen http URL."
+msgstr "Sorry, de link is niet een http URL."
 
 #: LYMessages.c:260
 msgid "Sorry, the ACTION for this form is disabled."
@@ -688,15 +688,15 @@ msgstr "Sorry, de ACTIE voor dit formulier is uitgezet."
 #. #define FORM_ACTION_NOT_HTTP_URL
 #: LYMessages.c:262
 msgid "Sorry, the ACTION for this form is not an http URL."
-msgstr "Sorry, de ACTIE voor dit formulier is geen http URL."
+msgstr "Sorry, de ACTIE voor dit formulier is niet een http URL."
 
 #: LYMessages.c:263
 msgid "Not an http URL or form ACTION!"
-msgstr "Geen http URL of form ACTIE!"
+msgstr "Niet een http URL of formulier ACTIE!"
 
 #: LYMessages.c:264
 msgid "This special URL cannot be a form ACTION!"
-msgstr "Deze specifieke URL kan geen form ACTIE zijn!"
+msgstr "Dit specifieke URL kan niet een formulier ACTIE zijn!"
 
 #: LYMessages.c:265
 msgid "URL is not in starting realm!"
@@ -704,11 +704,11 @@ msgstr "URL is niet in begin-omgeving!"
 
 #: LYMessages.c:266
 msgid "News posting is disabled!"
-msgstr "Nieuwsberichten zenden is uitgeschakeld!"
+msgstr "Nieuwsberichten zenden is uitgezet!"
 
 #: LYMessages.c:267
 msgid "File management support is disabled!"
-msgstr "Bestandsbeheer is uitgeschakeld!"
+msgstr "Bestandsbeheer is uitgezet!"
 
 #: LYMessages.c:268
 msgid "No jump file is currently available."
@@ -774,7 +774,7 @@ msgstr "Fout bij het hernoemen van tijdelijk bestand."
 #. #define BOOKTEMP_COPY_FAIL
 #: LYMessages.c:289
 msgid "Unable to copy temporary file for deletion of link."
-msgstr "Kan tijdelijk bestand niet kopiëren om link te verwijderen."
+msgstr "Kan tijdelijk bestand niet kopiÃ«ren om link te verwijderen."
 
 #. #define BOOKTEMP_REOPEN_FAIL_FOR_DEL
 #: LYMessages.c:291
@@ -784,7 +784,7 @@ msgstr "Kan tijdelijk bestand niet heropenen om link te verwijderen."
 #. #define BOOKMARK_LINK_NOT_ONE_LINE
 #: LYMessages.c:294
 msgid "Link is not by itself all on one line in bookmark file."
-msgstr "De link vult meer dan één regel in het boekenleggerbestand."
+msgstr "De link vult meer dan Ã©Ã©n regel in het boekenleggerbestand."
 
 #: LYMessages.c:295
 msgid "Bookmark deletion failed."
@@ -793,7 +793,7 @@ msgstr "Boekenlegger kon niet gewist worden."
 #. #define BOOKMARKS_NOT_TRAVERSED
 #: LYMessages.c:297
 msgid "Bookmark files cannot be traversed (only http URLs)."
-msgstr "Boekenleggerbestanden kunnen niet doorkruist worden (enkel http URL's)."
+msgstr "boekenleggerbestanden kunnen niet doorkruist worden (enkel http URL's)."
 
 #. #define BOOKMARKS_NOT_OPEN
 #: LYMessages.c:299
@@ -939,11 +939,11 @@ msgstr "U staat niet op een form-verzendknop of op een normale link."
 #. #define NEED_CHECKED_RADIO_BUTTON
 #: LYMessages.c:345
 msgid "One radio button must be checked at all times!"
-msgstr "Er moet altijd één drukknop ingedrukt zijn!"
+msgstr "Er moet altijd Ã©Ã©n drukknop ingedrukt zijn!"
 
 #: LYMessages.c:346
 msgid "No submit button for this form, submit single text field?"
-msgstr "Geen invoerknop aanwezig, verzend dit tekstveld?"
+msgstr "Geen invoerknop aanwezig voor dit formulier, verzend het enige tekstveld?"
 
 #: LYMessages.c:347
 msgid "Do you want to go back to the previous document?"
@@ -951,16 +951,16 @@ msgstr "Wilt u terug gaan naar het vorige document?"
 
 #: LYMessages.c:348
 msgid "Use arrows or tab to move off of field."
-msgstr "Verlaat dit veld met pijltjes of tab."
+msgstr "Ga weg van dit veld met pijltjes of tab."
 
 #. #define ENTER_TEXT_ARROWS_OR_TAB
 #: LYMessages.c:350
 msgid "Enter text.  Use arrows or tab to move off of field."
-msgstr "Voer tekst in.  Verlaat dit veld met pijltjes of tab."
+msgstr "Voer tekst in.  Ga weg met pijltjes of tab."
 
 #: LYMessages.c:351
 msgid "** Bad HTML!!  No form action defined. **"
-msgstr "** Onjuiste HTML!!  Geen form-actie gedefiniëerd. **"
+msgstr "** Onjuiste HTML!!  Geen form-actie gedefiniÃ«erd. **"
 
 #: LYMessages.c:352
 msgid "Bad HTML!!  Unable to create popup window!"
@@ -1001,7 +1001,7 @@ msgstr "Wijzig een vorige Ga-naar URL: "
 
 #: LYMessages.c:361
 msgid "Current document has POST data."
-msgstr "Het huidige document bevat geen POST informatie."
+msgstr "Huidige document bevat geen POST informatie."
 
 #: LYMessages.c:362
 msgid "Edit this document's URL: "
@@ -1021,7 +1021,7 @@ msgstr "Voer een database-opdracht in: "
 
 #: LYMessages.c:366
 msgid "Enter a whereis query: "
-msgstr "Zoek op: "
+msgstr "Voer een zoekopdracht in: "
 
 #: LYMessages.c:367
 msgid "Edit the current query: "
@@ -1088,12 +1088,12 @@ msgstr "Wilt u echt naar het Beginscherm gaan?"
 
 #: LYMessages.c:384
 msgid "You are already at main screen!"
-msgstr "Dit is al het beginscherm!"
+msgstr "U bent al in het beginscherm!"
 
 #. #define NOT_ISINDEX
 #: LYMessages.c:386
 msgid "Not a searchable indexed document -- press '/' to search for a text string"
-msgstr "Dit is niet een geïndexeerd document -- gebruik '/' om een tekenreeks te zoeken"
+msgstr "Dit is niet een geÃ¯ndexeerd document -- gebruik '/' om een tekenreeks te zoeken"
 
 #. #define NO_OWNER
 #: LYMessages.c:388
@@ -1111,7 +1111,7 @@ msgstr "Wilt u commentaar versturen?"
 
 #: LYMessages.c:391
 msgid "Mail is disallowed so you cannot send a comment"
-msgstr "Email is niet toegestaan, dus u kunt geen commentaar zenden."
+msgstr "Email is niet toegestaan dus u kunt geen commentaar zenden"
 
 #: LYMessages.c:392
 msgid "The 'e'dit command is currently disabled."
@@ -1227,12 +1227,12 @@ msgstr "Uitvoermogelijkheden zijn niet ingebouwd in deze versie."
 
 #: LYMessages.c:423
 msgid "This file cannot be displayed on this terminal."
-msgstr "Dit bestand kan niet getoond worden op deze terminal."
+msgstr "Dit bestand kan niet op deze terminal getoond worden."
 
 #. #define CANNOT_DISPLAY_FILE_D_OR_C
 #: LYMessages.c:425
 msgid "This file cannot be displayed on this terminal:  D)ownload, or C)ancel"
-msgstr "Dit bestand kan niet getoond worden op deze terminal:  D)ownload, C)-annuleren"
+msgstr "Dit bestand kan niet op deze terminal getoond worden:  D)ownload, C)-annuleren"
 
 #: LYMessages.c:426
 #, c-format
@@ -1245,7 +1245,7 @@ msgstr "Bestand wordt geannuleerd."
 
 #: LYMessages.c:428
 msgid "Retrieving file.  - PLEASE WAIT -"
-msgstr "Bezig met ophalen van bestand.  - een ogenblik geduld a.u.b. -"
+msgstr "Bezig met ophalen van bestand.  - EEN OGENBLIK GEDULD A.U.B. -"
 
 #: LYMessages.c:429
 msgid "Enter a filename: "
@@ -1269,7 +1269,7 @@ msgstr "Bestandsnaam mag niet met een punt beginnen."
 
 #: LYMessages.c:435
 msgid "File exists.  Create higher version?"
-msgstr "Bestand bestaat.  Nieuwere versie aanmaken?"
+msgstr "Bestand bestaat.  Hogere versie aanmaken?"
 
 #: LYMessages.c:437
 msgid "File exists.  Overwrite?"
@@ -1340,7 +1340,7 @@ msgstr "Onvolledige operandi:"
 
 #: LYMessages.c:456
 msgid "You are not authorized to edit this file."
-msgstr "U bent niet geautoriseerd om dit bestand te wijzigen."
+msgstr "U bent niet geauthoriseerd om dit bestand te wijzigen."
 
 #: LYMessages.c:457
 msgid "Title: "
@@ -1360,7 +1360,7 @@ msgstr "Wachtwoord: "
 
 #: LYMessages.c:461
 msgid "lynx: Username and Password required!!!"
-msgstr "lynx: Gebruikersnaam en wachtwoord vereist!!!"
+msgstr "lynx: Gebruikersnaam en Wachtwoord vereist!!!"
 
 #: LYMessages.c:462
 msgid "lynx: Password required!!!"
@@ -1368,7 +1368,7 @@ msgstr "lynx: Wachtwoord vereist!!!"
 
 #: LYMessages.c:463
 msgid "Clear all authorization info for this session?"
-msgstr "Wis alle autorisatie informatie voor deze sessie?"
+msgstr "Wis alle authorisatie informatie voor deze sessie?"
 
 #: LYMessages.c:464
 msgid "Authorization info cleared."
@@ -1470,7 +1470,7 @@ msgstr "Nieuws Verzending Geannuleerd!!!"
 #. #define SPAWNING_EDITOR_FOR_NEWS
 #: LYMessages.c:496
 msgid "Spawning your selected editor to edit news message"
-msgstr "Uw editor wordt opgestart om een nieuwsbericht in te voeren"
+msgstr "Uw geselecteerde editor wordt opgestart om een nieuwsbericht in te voeren"
 
 #: LYMessages.c:497
 msgid "Post this message?"
@@ -1665,7 +1665,7 @@ msgstr "Versie "
 
 #: LYMessages.c:554
 msgid " first"
-msgstr ", als eerste poging."
+msgstr " eerst"
 
 #: LYMessages.c:555
 msgid ", guessing..."
@@ -2061,7 +2061,7 @@ msgid ""
 "  "
 msgstr ""
 "\n"
-" Met kopieën naar:\n"
+" Met kopieÃ«n naar:\n"
 "  "
 
 #. #define CTRL_G_TO_CANCEL_SEND
@@ -2173,34 +2173,34 @@ msgid ""
 " on a line and press enter again."
 msgstr ""
 "\n"
-" een punt (.) op één regel, en druk dan wederom op <return>."
+" een punt (.) op Ã©Ã©n regel, en druk dan wederom op <return>."
 
 #. Cookies messages
 #. #define ADVANCED_COOKIE_CONFIRMATION
 #: LYMessages.c:695
 #, c-format
 msgid "%s cookie: %.*s=%.*s  Allow? (Y/N/Always/neVer)"
-msgstr "%s cookie: %.*s=%.*s  Toestaan? J)a, N)ee, A)ltijd, V)-nooit"
+msgstr "%s koekje: %.*s=%.*s  Toestaan? J)a, N)ee, A)ltijd, V)-nooit"
 
 #. #define INVALID_COOKIE_DOMAIN_CONFIRMATION
 #: LYMessages.c:697
 #, c-format
 msgid "Accept invalid cookie domain=%s for '%s'?"
-msgstr "Accepteer ongeldig cookiesdomein=%s voor '%s'?"
+msgstr "Accepteer ongeldig koekjesdomein=%s voor '%s'?"
 
 #. #define INVALID_COOKIE_PATH_CONFIRMATION
 #: LYMessages.c:699
 #, c-format
 msgid "Accept invalid cookie path=%s as a prefix of '%s'?"
-msgstr "Accepteer ongeldig cookiespad=%s als een prefix voor '%s'?"
+msgstr "Accepteer ongeldig koekjespad=%s als een prefix voor '%s'?"
 
 #: LYMessages.c:700
 msgid "Allowing this cookie."
-msgstr "Dit cookie wordt toegelaten."
+msgstr "Dit koekje wordt toegelaten."
 
 #: LYMessages.c:701
 msgid "Rejecting this cookie."
-msgstr "Dit cookie wordt niet toegelaten."
+msgstr "Dit koekje wordt niet toegelaten."
 
 #: LYMessages.c:702
 msgid "The Cookie Jar is empty."
@@ -2209,7 +2209,7 @@ msgstr "De Koekjes Trommel is leeg."
 #. #define ACTIVATE_TO_GOBBLE
 #: LYMessages.c:704
 msgid "Activate links to gobble up cookies or entire domains,"
-msgstr "Activeer de links om cookies over hun houdbaarheidsdatum heen te helpen,"
+msgstr "Activeer de links om koekjes over hun houdbaarheidsdatum heen te helpen,"
 
 #: LYMessages.c:705
 msgid "or to change a domain's 'allow' setting."
@@ -2217,11 +2217,11 @@ msgstr "of om de 'toelaatbaarheids' instelling van een domein te wijzigen."
 
 #: LYMessages.c:706
 msgid "(Cookies never allowed.)"
-msgstr "(Cookies nooit toegestaan.)"
+msgstr "(Koekjes nooit toegestaan.)"
 
 #: LYMessages.c:707
 msgid "(Cookies always allowed.)"
-msgstr "(Cookies altijd toegestaan.)"
+msgstr "(Koekjes altijd toegestaan.)"
 
 #: LYMessages.c:708
 msgid "(Cookies allowed via prompt.)"
@@ -2229,7 +2229,7 @@ msgstr "(Koekjes toegestaan met prompt.)"
 
 #: LYMessages.c:709
 msgid "(Persistent Cookies.)"
-msgstr "(Persistente Cookies.)"
+msgstr "(Persistente Koekjes.)"
 
 #: LYMessages.c:710
 msgid "(No title.)"
@@ -2253,11 +2253,11 @@ msgstr "(Einde sessie.)"
 
 #: LYMessages.c:715
 msgid "Delete this cookie?"
-msgstr "Verwijder dit cookie?"
+msgstr "Verwijder dit koekje?"
 
 #: LYMessages.c:716
 msgid "The cookie has been eaten!"
-msgstr "Dit cookie is opgegeten!"
+msgstr "Dit koekje is opgegeten!"
 
 #: LYMessages.c:717
 msgid "Delete this empty domain?"
@@ -2279,7 +2279,7 @@ msgstr "D)omein wissen, zet toestaan A)ltijd/P)rompt/V)-nooit, of C)-annuleren? 
 
 #: LYMessages.c:723
 msgid "All cookies in the domain have been eaten!"
-msgstr "Alle cookies in het domein zijn opgegeten!"
+msgstr "Alle koekjes in het domein zijn opgegeten!"
 
 #: LYMessages.c:724
 #, c-format
@@ -2298,11 +2298,11 @@ msgstr "'P'rompt voor toestaan van domein '%s'."
 
 #: LYMessages.c:727
 msgid "Delete all cookies in this domain?"
-msgstr "Verwijder alle cookies in dit domein?"
+msgstr "Verwijder alle koekjes in dit domein?"
 
 #: LYMessages.c:728
 msgid "All of the cookies in the jar have been eaten!"
-msgstr "Alle cookies in de trommel zijn opgegeten!"
+msgstr "Alle koekjes in de trommel zijn opgegeten!"
 
 #: LYMessages.c:730
 msgid "Port 19 not permitted in URLs."
@@ -2349,12 +2349,12 @@ msgstr "Het maximale aantal tijdelijke bestanden is bereikt!"
 #. #define FORM_VALUE_TOO_LONG
 #: LYMessages.c:742
 msgid "Form field value exceeds buffer length!  Trim the tail."
-msgstr "Waarde in form veld overschrijdt lengte van de buffer!  Staart wordt afgeknipt."
+msgstr "Waarde in formulierveld overschrijdt lengte van de buffer!  Staart wordt afgeknipt."
 
 #. #define FORM_TAIL_COMBINED_WITH_HEAD
 #: LYMessages.c:744
 msgid "Modified tail combined with head of form field value."
-msgstr "Veranderde staart samengevoegd met kop van waarde uit form veld."
+msgstr "Veranderde staart samengevoegd met kop van waarde uit formulierveld."
 
 #. HTFile.c
 #: LYMessages.c:747
@@ -2540,15 +2540,15 @@ msgstr "Kan niet verder zonder gebruikersnaam en wachtwoord."
 
 #: LYMessages.c:793
 msgid "Can't retry with authorization!  Contact the server's WebMaster."
-msgstr "Herhalen gaat niet zonder autorisatie!  Vraag beheerder van de webserver."
+msgstr "Herhalen gaat niet zonder authorisatie!  Vraag beheerder van de webserver."
 
 #: LYMessages.c:794
 msgid "Can't retry with proxy authorization!  Contact the server's WebMaster."
-msgstr "Herhalen gaat niet met proxy autorisatie! Vraag beheerder van de webserver."
+msgstr "Herhalen gaat niet met proxy authorisatie! Vraag beheerder van de webserver."
 
 #: LYMessages.c:795
 msgid "Retrying with proxy authorization information."
-msgstr "Opnieuw proberen met proxy autorisatie informatie."
+msgstr "Bezig opnieuw te proberen met proxy authorisatie informatie."
 
 #. HTWAIS.c
 #: LYMessages.c:798
@@ -2649,7 +2649,7 @@ msgstr "Upload Opties"
 
 #: LYMessages.c:825
 msgid "Visited Links Page"
-msgstr "Overzicht van bezochte links"
+msgstr "Bezochte Links Pagina"
 
 #. CONFIG_DEF_TITLE subtitles
 #: LYMessages.c:828
@@ -2669,9 +2669,8 @@ msgid "compile time options"
 msgstr "compile opties"
 
 #: LYMessages.c:832
-#, fuzzy
 msgid "color-style configuration"
-msgstr "Uw primaire configuratie"
+msgstr "instelling kleurstijl"
 
 #: LYMessages.c:833
 msgid "latest release"
@@ -2709,7 +2708,7 @@ msgstr ""
 #. #define DIRED_NOVICELINE
 #: LYMessages.c:846
 msgid "  C)reate  D)ownload  E)dit  F)ull menu  M)odify  R)emove  T)ag  U)pload     \n"
-msgstr "C)reëer D)ownload E)dit F)-volledig menu M)-wijzig R)-wis T)-vink U)pload\n"
+msgstr "C)reÃ«er D)ownload E)dit F)-volledig menu M)-wijzig R)-wis T)-vink U)pload\n"
 
 #: LYMessages.c:847
 msgid "Failed to obtain status of current link!"
@@ -2726,37 +2725,32 @@ msgstr "Externe ondersteuning is momenteel uitgezet."
 
 #. new with 2.8.4dev.21
 #: LYMessages.c:858
-#, fuzzy
 msgid "Changing working-directory is currently disabled."
-msgstr "Het starten van externe programma's starten is uitgezet."
+msgstr "De werkmap wijzigen is momenteel uitgeschakeld."
 
 #: LYMessages.c:859
-#, fuzzy
 msgid "Linewrap OFF!"
-msgstr "Traceren UIT!"
+msgstr "Regelvouwen UIT!"
 
 #: LYMessages.c:860
 msgid "Linewrap ON!"
-msgstr ""
+msgstr "Regelvouwen AAN!"
 
 #: LYMessages.c:861
-#, fuzzy
 msgid "Parsing nested-tables toggled OFF!  Reloading..."
-msgstr "Ruwe 8-bit of CJK mode UIT gezet!  Bezig met herladen..."
+msgstr "Ontleden geneste tabellen UIT gezet!  Bezig met herladen..."
 
 #: LYMessages.c:862
-#, fuzzy
 msgid "Parsing nested-tables toggled ON!  Reloading..."
-msgstr "Ruwe 8-bit of CJK mode AAN gezet!  Bezig met herladen..."
+msgstr "Ontleden geneste tabellen AAN gezet!  Bezig met herladen..."
 
 #: LYMessages.c:863
 msgid "Shifting is disabled while line-wrap is in effect"
-msgstr ""
+msgstr "Gebruik van shift is uitgeschakeld als regelvouwen in gebruik is."
 
 #: LYMessages.c:864
-#, fuzzy
 msgid "Trace not supported"
-msgstr "Terminal ondersteunt geen kleur"
+msgstr "Traceren wordt niet ondersteund."
 
 #: WWW/Library/Implementation/HTAABrow.c:626
 #, c-format
@@ -2778,11 +2772,11 @@ msgstr "Foutieve kop '%s%s%s%s%s'"
 
 #: WWW/Library/Implementation/HTAABrow.c:1178
 msgid "Proxy authorization required -- retrying"
-msgstr "Proxy authorisatie vereist -- ik probeer opnieuw"
+msgstr "Proxy authorisatie vereisd -- ik probeer op nieuw"
 
 #: WWW/Library/Implementation/HTAABrow.c:1236
 msgid "Access without authorization denied -- retrying"
-msgstr "Toegang zonder authorisatie geweigerd -- ik probeer opnieuw"
+msgstr "Toegang zonder authorisatie geweigerd -- ik probeer op nieuw"
 
 #: WWW/Library/Implementation/HTAccess.c:685
 msgid "Access forbidden by rule"
@@ -2794,9 +2788,9 @@ msgstr "Document met POST inhoud niet gevonden in cache.  Nog eens verzenden?"
 
 #: WWW/Library/Implementation/HTAccess.c:936
 msgid "Loading failed, use a previous copy."
-msgstr ""
+msgstr "Het laden is mislukt, gebruik een vroegere kopie."
 
-#: WWW/Library/Implementation/HTAccess.c:1045 src/GridText.c:8296
+#: WWW/Library/Implementation/HTAccess.c:1045 src/GridText.c:8300
 msgid "Loading incomplete."
 msgstr "Laden niet voltooid."
 
@@ -2819,13 +2813,13 @@ msgstr "**** HTAccess: Geretourneerde status was: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1085 src/LYMainLoop.c:7647
+#: WWW/Library/Implementation/HTAccess.c:1085 src/LYMainLoop.c:7655
 msgid "Can't Access"
 msgstr "Kan geen toegang krijgen"
 
 #: WWW/Library/Implementation/HTAccess.c:1093
 msgid "Unable to access document."
-msgstr "Document is niet toegankelijk."
+msgstr "Kan geen toegang krijgen tot document."
 
 #: WWW/Library/Implementation/HTFTP.c:769
 #, c-format
@@ -2848,24 +2842,24 @@ msgstr "socket voor hoofdsocket"
 #. * It's a symbolic link, does the user care about knowing if it is
 #. * symbolic?  I think so since it might be a directory.
 #.
-#: WWW/Library/Implementation/HTFTP.c:1650 WWW/Library/Implementation/HTFTP.c:2266
+#: WWW/Library/Implementation/HTFTP.c:1650 WWW/Library/Implementation/HTFTP.c:2267
 msgid "Symbolic Link"
 msgstr "Symbolische Koppeling"
 
-#: WWW/Library/Implementation/HTFTP.c:2623
+#: WWW/Library/Implementation/HTFTP.c:2624
 msgid "Receiving FTP directory."
 msgstr "Bezig met ophalen van FTP bestandenoverzicht."
 
-#: WWW/Library/Implementation/HTFTP.c:2759
+#: WWW/Library/Implementation/HTFTP.c:2760
 #, c-format
 msgid "Transferred %d bytes (%5d)"
 msgstr "%d bytes overgezet (%5d)"
 
-#: WWW/Library/Implementation/HTFTP.c:3079
+#: WWW/Library/Implementation/HTFTP.c:3080
 msgid "connect for data"
 msgstr "verbinden voor datastroom"
 
-#: WWW/Library/Implementation/HTFTP.c:3741
+#: WWW/Library/Implementation/HTFTP.c:3743
 msgid "Receiving FTP file."
 msgstr "Bezig met ophalen van FTP bestand."
 
@@ -2953,7 +2947,6 @@ msgid ""
 msgstr ""
 "\n"
 "Er zijn momenteel ongeveer %d artikelen beschikbaar in %s, met volgende ID-nr's:\n"
-"\n"
 
 #: WWW/Library/Implementation/HTNews.c:1913
 msgid "All available articles in "
@@ -3050,7 +3043,7 @@ msgstr "socket mislukt."
 #: WWW/Library/Implementation/HTTCP.c:1605
 #, c-format
 msgid "socket failed: family %d addr %s port %s."
-msgstr ""
+msgstr "socket is mislukt: familie %d adres %s poort %s."
 
 #: WWW/Library/Implementation/HTTCP.c:1629
 msgid "Could not make connection non-blocking."
@@ -3071,48 +3064,47 @@ msgstr "Lezen uit socket mislukt na 180,000 (!) pogingen."
 #: WWW/Library/Implementation/HTTP.c:346
 #, c-format
 msgid "Address contains a username: %s"
-msgstr ""
+msgstr "Adres bevat een gebruikersnaam: %s"
 
-#: WWW/Library/Implementation/HTTP.c:531
+#: WWW/Library/Implementation/HTTP.c:533
 msgid "This client does not contain support for HTTPS URLs."
 msgstr "Dit programma ondersteunt geen HTTPS URL's."
 
-#: WWW/Library/Implementation/HTTP.c:556
+#: WWW/Library/Implementation/HTTP.c:558
 msgid "Unable to connect to remote host."
-msgstr "Verbinding met server mislukt."
+msgstr "Niet in staat om met de andere computer te verbinden."
 
-#: WWW/Library/Implementation/HTTP.c:578
-#, fuzzy
+#: WWW/Library/Implementation/HTTP.c:580
 msgid "Retrying connection without TLS."
-msgstr "%s verbinding met %s wordt gemaakt."
+msgstr "Verbinding wordt opnieuw geprobeerd zonder TLS."
 
-#: WWW/Library/Implementation/HTTP.c:621
+#: WWW/Library/Implementation/HTTP.c:623
 msgid "SSL error:Can't find common name in certificate-Continue?"
-msgstr ""
+msgstr "SSL-fout: kan gemeenschappelijke naam niet vinden in certificaat. Verdergaan?"
 
-#: WWW/Library/Implementation/HTTP.c:638
+#: WWW/Library/Implementation/HTTP.c:640
 #, c-format
 msgid "SSL error:host(%s)!=cert(%s)-Continue?"
-msgstr ""
+msgstr "SSL-fout: computer (%s) != certificaat (%s). Verdergaan?"
 
-#: WWW/Library/Implementation/HTTP.c:650
+#: WWW/Library/Implementation/HTTP.c:652
 #, c-format
 msgid "Secure %d-bit %s (%s) HTTP connection"
-msgstr ""
+msgstr "Veilige %d-bit %s (%s) HTTP-verbinding"
 
-#: WWW/Library/Implementation/HTTP.c:1120
+#: WWW/Library/Implementation/HTTP.c:1122
 msgid "Sending HTTP request."
 msgstr "Bezig met zenden van HTTP verzoek."
 
-#: WWW/Library/Implementation/HTTP.c:1159
+#: WWW/Library/Implementation/HTTP.c:1161
 msgid "Unexpected network write error; connection aborted."
 msgstr "Onverwachte fout bij schrijven naar netwerk: verbinding verbroken."
 
-#: WWW/Library/Implementation/HTTP.c:1165
+#: WWW/Library/Implementation/HTTP.c:1167
 msgid "HTTP request sent; waiting for response."
 msgstr "HTTP verzoek verzonden; wacht op antwoord."
 
-#: WWW/Library/Implementation/HTTP.c:1233
+#: WWW/Library/Implementation/HTTP.c:1235
 msgid "Unexpected network read error; connection aborted."
 msgstr "Onverwachte fout bij lezen uit netwerk; verbinding verbroken."
 
@@ -3125,7 +3117,7 @@ msgstr "Onverwachte fout bij lezen uit netwerk; verbinding verbroken."
 #. * line and possibly other headers, so we'll deal with them by
 #. * showing the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1427
+#: WWW/Library/Implementation/HTTP.c:1429
 msgid "Got unexpected Informational Status."
 msgstr "Onverwachte informatieve status ontvangen."
 
@@ -3135,7 +3127,7 @@ msgstr "Onverwachte informatieve status ontvangen."
 #. * content.  We'll instruct the user to do that, and
 #. * restore the current document.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1461
+#: WWW/Library/Implementation/HTTP.c:1463
 msgid "Request fulfilled.  Reset Content."
 msgstr "Verzoek volbracht.  Herstel inhoud."
 
@@ -3145,27 +3137,27 @@ msgstr "Verzoek volbracht.  Herstel inhoud."
 #. * status is inappropriate.  We'll deal with it by showing
 #. * the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1578
+#: WWW/Library/Implementation/HTTP.c:1580
 msgid "Got unexpected 304 Not Modified status."
 msgstr "Kreeg een onverwachte 304 Niet Gewijzigd statusmelding."
 
-#: WWW/Library/Implementation/HTTP.c:1641
+#: WWW/Library/Implementation/HTTP.c:1643
 msgid "Redirection of POST content requires user approval."
 msgstr "Doorverwijzing van POST inhoud vereist toestemming van de gebruiker."
 
-#: WWW/Library/Implementation/HTTP.c:1656
+#: WWW/Library/Implementation/HTTP.c:1658
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr "Heb POST inhoud.  Permanente doorverwijzing wordt behandeld als een tijdelijke.\n"
 
-#: WWW/Library/Implementation/HTTP.c:1698
+#: WWW/Library/Implementation/HTTP.c:1700
 msgid "Retrying with access authorization information."
 msgstr "Bezig opnieuw te proberen met informatie over toegangs-authorisatie."
 
-#: WWW/Library/Implementation/HTTP.c:1710
+#: WWW/Library/Implementation/HTTP.c:1712
 msgid "Show the 401 message body?"
 msgstr "Inhoud van het 401 bericht laten zien?"
 
-#: WWW/Library/Implementation/HTTP.c:1753
+#: WWW/Library/Implementation/HTTP.c:1755
 msgid "Show the 407 message body?"
 msgstr "Inhoud van het 407 bericht laten zien?"
 
@@ -3173,7 +3165,7 @@ msgstr "Inhoud van het 407 bericht laten zien?"
 #. * Bad or unknown server_status number.  Take a chance and hope
 #. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1853
+#: WWW/Library/Implementation/HTTP.c:1855
 msgid "Unknown status reply from server!"
 msgstr "Onbekend status-antwoord van server!"
 
@@ -3373,7 +3365,7 @@ msgstr "Geen geheugen meer beschikbaar, overdracht zal worden afgebroken!"
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr " *** GEHEUGEN VERMOEID ***"
 
-#: src/GridText.c:6000 src/GridText.c:6007 src/LYList.c:246
+#: src/GridText.c:6000 src/GridText.c:6007 src/LYList.c:248
 msgid "unknown field or link"
 msgstr "onbekend veld of link"
 
@@ -3407,7 +3399,7 @@ msgstr "popup menu"
 
 #: src/GridText.c:6037
 msgid "hidden form field"
-msgstr "verborgen form veld"
+msgstr "verborgen formulierveld"
 
 #: src/GridText.c:6040
 msgid "text entry area"
@@ -3437,31 +3429,30 @@ msgstr "sleutelaanmaak veld"
 msgid "unknown form field"
 msgstr "onbekend formulier veld"
 
-#: src/GridText.c:10015
-#, fuzzy
+#: src/GridText.c:10019
 msgid "Can't open file for uploading"
-msgstr "Kan bestand niet openen om te lezen."
+msgstr "Kan bestand niet openen voor upload"
 
-#: src/GridText.c:11165
+#: src/GridText.c:11171
 #, c-format
 msgid "Submitting %s"
 msgstr "Bezig met verzenden van %s"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12313
+#: src/GridText.c:12319
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
-msgstr ""
+msgstr "Ophanging Gedetecteerd: TextAnchor-struct is corrupt - stel voor te onderbreken!"
 
 #. don't show previous state
-#: src/GridText.c:12518
+#: src/GridText.c:12524
 msgid "Wrap lines to fit displayed area?"
 msgstr "Regels omvouwen zodat alles zichtbaar is?"
 
-#: src/GridText.c:12570
+#: src/GridText.c:12576
 msgid "Very long lines have been wrapped!"
 msgstr "Erg lange regels zijn omgevouwen!"
 
-#: src/GridText.c:13011
+#: src/GridText.c:13017
 msgid "Very long lines have been truncated!"
 msgstr "Erg lange regels zijn afgekapt!"
 
@@ -3485,14 +3476,14 @@ msgid ", %s/sec"
 msgstr ", %s/s"
 
 #: src/HTAlert.c:287
-#, fuzzy, c-format
+#, c-format
 msgid " (stalled for %s)"
-msgstr " (%ld sec. vastgelopen)"
+msgstr " (gestopt voor %s)"
 
 #: src/HTAlert.c:291
-#, fuzzy, c-format
+#, c-format
 msgid ", ETA %s"
-msgstr ", geschatte duur: %ld sec."
+msgstr ", ETA %s"
 
 #: src/HTAlert.c:298
 msgid " (Press 'z' to abort)"
@@ -3549,34 +3540,34 @@ msgstr "nee"
 #.
 #: src/HTAlert.c:841
 msgid "Y/N/A/V"
-msgstr ""
+msgstr "Y/N/A/V"
 
-#: src/HTML.c:5911
+#: src/HTML.c:5928
 msgid "Description:"
 msgstr "Omschrijving:"
 
-#: src/HTML.c:5916
+#: src/HTML.c:5933
 msgid "(none)"
 msgstr "(geen)"
 
-#: src/HTML.c:5920
+#: src/HTML.c:5937
 msgid "Filepath:"
 msgstr "Bestandspad:"
 
-#: src/HTML.c:5926
+#: src/HTML.c:5943
 msgid "(unknown)"
 msgstr "(onbekend)"
 
-#: src/HTML.c:7371
+#: src/HTML.c:7387
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr "Document heeft slechts verborgen links.  Gebruik het 'l'ijst commando."
 
 # Source?
-#: src/HTML.c:7865
+#: src/HTML.c:7880
 msgid "Source cache error - disk full?"
 msgstr "Cache fout - schijf vol?"
 
-#: src/HTML.c:7878
+#: src/HTML.c:7893
 msgid "Source cache error - not enough memory!"
 msgstr "Cache fout - niet genoeg geheugen!"
 
@@ -3629,7 +3620,7 @@ msgstr ""
 "N.B.: als u dit bestand handmatig hebt aangepast\n"
 "      moet u niet de formattering binnen de regels aanpassen\n"
 "      of andere HTML opmaak toevoegen.\n"
-"      Boekenlegger-links dienen als één regel te worden opgeslagen."
+"      Boekenlegger-links dienen als Ã©Ã©n regel te worden opgeslagen."
 
 #: src/LYBookmark.c:677
 #, c-format
@@ -3662,7 +3653,7 @@ msgstr "Het biedt voortreffelijke CGI script ondersteuning.\n"
 
 #: src/LYClean.c:121
 msgid "Exiting via interrupt:"
-msgstr "Beëindiging via interrupt:"
+msgstr "BeÃ«indiging via interrupt:"
 
 #: src/LYCookie.c:2462
 msgid "(from a previous session)"
@@ -3690,7 +3681,7 @@ msgstr "Terminal ="
 
 #: src/LYCurses.c:1452
 msgid "You must use a vt100, 200, etc. terminal with this program."
-msgstr "U moet een vt100 terminal of hoger gebruiken."
+msgstr "U mout een vt100, 200, enz. terminal gebruiken met dit programma."
 
 #: src/LYCurses.c:1501
 msgid "Your Terminal type is unknown!"
@@ -3766,9 +3757,8 @@ msgid "Save to disk"
 msgstr "Opslaan op schijf"
 
 #: src/LYDownload.c:543
-#, fuzzy
 msgid "View temporary file"
-msgstr "Post het bestand"
+msgstr "Bekijk tijdelijk bestand"
 
 #: src/LYDownload.c:550
 msgid "Save to disk disabled."
@@ -3817,7 +3807,7 @@ msgstr "Foutieve verwijzing gevonden."
 
 #: src/LYLeaks.c:208 src/LYLeaks.c:246
 msgid "Sequence:"
-msgstr ""
+msgstr "Sequentie:"
 
 #: src/LYLeaks.c:211 src/LYLeaks.c:249
 msgid "Pointer:"
@@ -3853,42 +3843,41 @@ msgstr "Totale geheugen lekkage tijdens deze uitvoering:"
 
 #: src/LYLeaks.c:303
 msgid "Peak allocation"
-msgstr ""
+msgstr "Piekallocatie"
 
 #: src/LYLeaks.c:304
-#, fuzzy
 msgid "Bytes allocated"
-msgstr "Opnieuw Gereserveerd:"
+msgstr "Aantal gealloceerde bytes"
 
 #: src/LYLeaks.c:305
 msgid "Total mallocs"
-msgstr ""
+msgstr "Totaal aantal mallocs"
 
 #: src/LYLeaks.c:306
 msgid "Total frees"
-msgstr ""
+msgstr "Totaal aantal free's"
 
-#: src/LYList.c:82
+#: src/LYList.c:83
 msgid "References in "
 msgstr "Referenties in "
 
-#: src/LYList.c:84
+#: src/LYList.c:86
 msgid "this document:"
 msgstr "dit document:"
 
-#: src/LYList.c:90
+#: src/LYList.c:92
 msgid "Visible links:"
 msgstr "Zichtbare links:"
 
-#: src/LYList.c:191 src/LYList.c:309
+#: src/LYList.c:193 src/LYList.c:311
 msgid "Hidden links:"
 msgstr "Verborgen links:"
 
-#: src/LYList.c:256
+#: src/LYList.c:258
 msgid "References"
 msgstr "Referenties"
 
-#: src/LYList.c:260
+#: src/LYList.c:262
 msgid "Visible links"
 msgstr "Zichtbare links"
 
@@ -3919,7 +3908,7 @@ msgstr "verwijder %s"
 #: src/LYLocal.c:504
 #, c-format
 msgid "touch %s"
-msgstr ""
+msgstr "%s aanraken"
 
 #: src/LYLocal.c:532
 #, c-format
@@ -3974,190 +3963,189 @@ msgstr "Voer een nieuwe naam in voor bestand: "
 msgid "Illegal character (path-separator) found! Request ignored."
 msgstr "Ongeldig teken (pad-separatie-teken) gevonden! Verzoek genegeerd."
 
-#: src/LYLocal.c:892
+#: src/LYLocal.c:893
 msgid "Enter new location for directory: "
 msgstr "Voer een nieuwe locatie in voor map: "
 
-#: src/LYLocal.c:898
+#: src/LYLocal.c:899
 msgid "Enter new location for file: "
 msgstr "Voer een nieuwe locatie voor bestand in: "
 
-#: src/LYLocal.c:925
+#: src/LYLocal.c:926
 msgid "Unexpected failure - unable to find trailing path separator"
 msgstr "Onverwachte mislukking - kan achterkomend pad-separatie-teken niet vinden"
 
-#: src/LYLocal.c:945
+#: src/LYLocal.c:946
 msgid "Source and destination are the same location!  Request ignored!"
 msgstr "Bron en bestemming zijn dezelfde locatie!  Verzoek genegeerd!"
 
-#: src/LYLocal.c:992
+#: src/LYLocal.c:993
 msgid "Modify name, location, or permission (n, l, or p): "
 msgstr "Wijzig N)aam, L)ocatie, of P)ermissies (n,l, of p): "
 
-#: src/LYLocal.c:994
+#: src/LYLocal.c:995
 msgid "Modify name or location (n or l): "
 msgstr "Wijzig N)aam of L)ocatie (n of l): "
 
 #.
 #. * Code for changing ownership needed here.
 #.
-#: src/LYLocal.c:1023
+#: src/LYLocal.c:1024
 msgid "This feature not yet implemented!"
-msgstr "Deze optie is nog niet geïmplementeerd!"
+msgstr "Deze optie is nog niet geÃ¯mplementeerd!"
 
-#: src/LYLocal.c:1040
+#: src/LYLocal.c:1041
 msgid "Enter name of file to create: "
 msgstr "Voer een bestandsnaam in om aan te maken: "
 
-#: src/LYLocal.c:1048 src/LYLocal.c:1089
+#: src/LYLocal.c:1049 src/LYLocal.c:1090
 msgid "Illegal redirection \"//\" found! Request ignored."
 msgstr "Foutieve verwijzing \"/\"gevonden! Verzoek genegeerd."
 
-#: src/LYLocal.c:1081
+#: src/LYLocal.c:1082
 msgid "Enter name for new directory: "
 msgstr "Voer een naam in voor een nieuwe map: "
 
-#: src/LYLocal.c:1125
+#: src/LYLocal.c:1126
 msgid "Create file or directory (f or d): "
 msgstr "Maak F)-bestand of D)-map (f of d): "
 
-#: src/LYLocal.c:1167
-#, fuzzy, c-format
+#: src/LYLocal.c:1168
+#, c-format
 msgid "Remove directory '%s'?"
-msgstr "Verwijder bestand '%s'?"
+msgstr "Map '%s' verwijderen?"
 
-#: src/LYLocal.c:1170
-#, fuzzy
+#: src/LYLocal.c:1171
 msgid "Remove directory?"
-msgstr " map"
+msgstr "Map verwijderen?"
 
-#: src/LYLocal.c:1175
+#: src/LYLocal.c:1176
 #, c-format
 msgid "Remove file '%s'?"
 msgstr "Verwijder bestand '%s'?"
 
-#: src/LYLocal.c:1177
+#: src/LYLocal.c:1178
 msgid "Remove file?"
 msgstr "Verwijder bestand?"
 
-#: src/LYLocal.c:1182
+#: src/LYLocal.c:1183
 #, c-format
 msgid "Remove symbolic link '%s'?"
 msgstr "Verwijder symbolische koppeling '%s'?"
 
-#: src/LYLocal.c:1184
+#: src/LYLocal.c:1185
 msgid "Remove symbolic link?"
 msgstr "Verwijder symbolische koppeling?"
 
-#: src/LYLocal.c:1279
+#: src/LYLocal.c:1280
 msgid "Sorry, don't know how to permit non-UNIX files yet."
 msgstr "Sorry, weet nog niet hoe met permissies van niet-UNIX bestanden om te gaan."
 
-#: src/LYLocal.c:1309
+#: src/LYLocal.c:1310
 msgid "Unable to open permit options file"
 msgstr "Kan bestand met permissie-opties niet openen"
 
-#: src/LYLocal.c:1339
+#: src/LYLocal.c:1340
 msgid "Specify permissions below:"
 msgstr "Specificeer permissies hieronder:"
 
-#: src/LYLocal.c:1340 src/LYShowInfo.c:260
+#: src/LYLocal.c:1341 src/LYShowInfo.c:260
 msgid "Owner:"
 msgstr "Eigenaar:"
 
-#: src/LYLocal.c:1356
+#: src/LYLocal.c:1357
 msgid "Group"
 msgstr "Groep"
 
-#: src/LYLocal.c:1372
+#: src/LYLocal.c:1373
 msgid "Others:"
 msgstr "Anderen:"
 
-#: src/LYLocal.c:1390
+#: src/LYLocal.c:1391
 msgid "form to permit"
 msgstr "formulier voor permissies"
 
-#: src/LYLocal.c:1485
+#: src/LYLocal.c:1486
 msgid "Invalid mode format."
 msgstr "Onjuist formaat voor modus."
 
-#: src/LYLocal.c:1489
+#: src/LYLocal.c:1490
 msgid "Invalid syntax format."
 msgstr "Onjuiste syntaxis."
 
-#: src/LYLocal.c:1671
+#: src/LYLocal.c:1672
 msgid "Warning!  UUDecoded file will exist in the directory you started Lynx."
 msgstr "Let op!  UUDecoded bestand blijft bestaan in de map waarin u Lynx startte."
 
-#: src/LYLocal.c:1861
+#: src/LYLocal.c:1862
 msgid "NULL URL pointer"
 msgstr "NULL URL verwijzing"
 
-#: src/LYLocal.c:1943
+#: src/LYLocal.c:1944
 #, c-format
 msgid "Executing %s "
 msgstr "Bezig met uitvoeren van %s "
 
-#: src/LYLocal.c:1946
+#: src/LYLocal.c:1947
 msgid "Executing system command. This might take a while."
 msgstr "Bezig met uitvoeren van systeemcommando. Dit kan even duren."
 
-#: src/LYLocal.c:2018
+#: src/LYLocal.c:2019
 msgid "Current directory:"
 msgstr "Huidige map:"
 
-#: src/LYLocal.c:2021 src/LYLocal.c:2039
+#: src/LYLocal.c:2022 src/LYLocal.c:2040
 msgid "Current selection:"
 msgstr "Huidige selectie:"
 
-#: src/LYLocal.c:2025
+#: src/LYLocal.c:2026
 msgid "Nothing currently selected."
 msgstr "Er is momenteel niets geselecteerd."
 
-#: src/LYLocal.c:2041
+#: src/LYLocal.c:2042
 msgid "tagged item:"
 msgstr "aangevinkt item:"
 
-#: src/LYLocal.c:2042
+#: src/LYLocal.c:2043
 msgid "tagged items:"
 msgstr "aangevinkte items:"
 
-#: src/LYLocal.c:2139 src/LYLocal.c:2150
+#: src/LYLocal.c:2140 src/LYLocal.c:2151
 msgid "Illegal filename; request ignored."
 msgstr "Onjuiste bestandsnaam; verzoek genegeerd."
 
 #. directory not writable
-#: src/LYLocal.c:2248 src/LYLocal.c:2307
+#: src/LYLocal.c:2249 src/LYLocal.c:2308
 msgid "Install in the selected directory not permitted."
 msgstr "Installatie in de geselecteerde map is niet toegestaan."
 
-#: src/LYLocal.c:2303
+#: src/LYLocal.c:2304
 msgid "The selected item is not a directory!  Request ignored."
 msgstr "Het geselecteerd item is geen map!  Verzoek genegeerd."
 
-#: src/LYLocal.c:2312
+#: src/LYLocal.c:2313
 msgid "Just a moment, ..."
 msgstr "Een ogenblik gedlud, ..."
 
-#: src/LYLocal.c:2329
+#: src/LYLocal.c:2330
 msgid "Error building install args"
 msgstr "Fout bij opbouwen van installatie-argumenten"
 
-#: src/LYLocal.c:2344 src/LYLocal.c:2375
+#: src/LYLocal.c:2345 src/LYLocal.c:2376
 #, c-format
 msgid "Source and target are the same: %s"
 msgstr "Bron en bestemming zijn gelijk: %s"
 
-#: src/LYLocal.c:2351 src/LYLocal.c:2382
+#: src/LYLocal.c:2352 src/LYLocal.c:2383
 #, c-format
 msgid "Already in target directory: %s"
 msgstr "Al in map van bestemmings: %s"
 
-#: src/LYLocal.c:2400
+#: src/LYLocal.c:2401
 msgid "Installation complete"
 msgstr "Installatie voltooid"
 
-#: src/LYLocal.c:2587
+#: src/LYLocal.c:2588
 msgid "Temporary URL or list would be too long."
 msgstr "Tijdelijke URL of lijst zou te lang zijn."
 
@@ -4194,21 +4182,21 @@ msgstr "Dit bericht is automatisch gegenereerd door"
 
 #: src/LYMail.c:1728
 msgid "No system mailer configured"
-msgstr ""
+msgstr "Geen systeemmailer geconfigureerd"
 
-#: src/LYMain.c:977
+#: src/LYMain.c:979
 msgid "No Winsock found, sorry."
 msgstr "Geen Winsock gevonden, sorry."
 
-#: src/LYMain.c:1172
+#: src/LYMain.c:1174
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "U MOET een geldig TMP of TEMP gebied opgeven!"
 
-#: src/LYMain.c:1225 src/LYMainLoop.c:4956
+#: src/LYMain.c:1227 src/LYMainLoop.c:4962
 msgid "No such directory"
-msgstr " map"
+msgstr "Geen dergelijke map"
 
-#: src/LYMain.c:1430
+#: src/LYMain.c:1432
 #, c-format
 msgid ""
 "\n"
@@ -4219,7 +4207,7 @@ msgstr ""
 "Configuratiebestand %s is niet beschikbaar.\n"
 "\n"
 
-#: src/LYMain.c:1440
+#: src/LYMain.c:1442
 #, c-format
 msgid ""
 "\n"
@@ -4230,7 +4218,7 @@ msgstr ""
 "Lynx karaktersets zijn niet opgegeven.\n"
 "\n"
 
-#: src/LYMain.c:1469
+#: src/LYMain.c:1471
 #, c-format
 msgid ""
 "\n"
@@ -4241,7 +4229,7 @@ msgstr ""
 "Lynx edit-kaart niet opgegeven.\n"
 "\n"
 
-#: src/LYMain.c:1495
+#: src/LYMain.c:1497
 #, c-format
 msgid ""
 "\n"
@@ -4252,52 +4240,52 @@ msgstr ""
 "Lynx bestand %s is niet beschikbaar.\n"
 "\n"
 
-#: src/LYMain.c:1736
+#: src/LYMain.c:1738
 msgid "Warning:"
 msgstr "Let op:"
 
-#: src/LYMain.c:2304
+#: src/LYMain.c:2306
 msgid "persistent cookies state will be changed in next session only."
-msgstr "Voortbestaande stand van cookies wordt pas in volgende sessie gewijzigd."
+msgstr "Voortbestaande stand van koekjes wordt pas in volgende sessie gewijzigd."
 
-#: src/LYMain.c:2541 src/LYMain.c:2586
+#: src/LYMain.c:2543 src/LYMain.c:2588
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: ik negeer onbekende karakterset=%s\n"
 
-#: src/LYMain.c:3097
-#, fuzzy, c-format
+#: src/LYMain.c:3099
+#, c-format
 msgid "%s Version %s (%s)"
-msgstr "%s Versie %s (%s)\n"
+msgstr "%s Versie %s (%s)"
 
-#: src/LYMain.c:3132
+#: src/LYMain.c:3134
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Gebouwd op %s %s %s\n"
 
-#: src/LYMain.c:3154
+#: src/LYMain.c:3156
 msgid "Copyrights held by the University of Kansas, CERN, and other contributors."
 msgstr "Copyrights in handen van `the University of Kansas', CERN, en andere medewerkers."
 
-#: src/LYMain.c:3155
+#: src/LYMain.c:3157
 msgid "Distributed under the GNU General Public License."
-msgstr "Gedistribueerd onder het GNU General Public License."
+msgstr "Gedistribueerd onder de GNU General Public License."
 
-#: src/LYMain.c:3156
+#: src/LYMain.c:3158
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr "Zie http://lynx.isc.org/ en de online help voor meer informatie."
 
-#: src/LYMain.c:3918
+#: src/LYMain.c:3920
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "GEBRUIK: %s [opties] [bestand]\n"
 
-#: src/LYMain.c:3919
+#: src/LYMain.c:3921
 #, c-format
 msgid "Options are:\n"
 msgstr "Opties zijn:\n"
 
-#: src/LYMain.c:4219
+#: src/LYMain.c:4221
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Ongeldige Optie: %s\n"
@@ -4307,7 +4295,7 @@ msgstr "%s: Ongeldige Optie: %s\n"
 msgid "Internal error: Invalid mouse link %d!"
 msgstr "Interne fout: Ongeldige muis link %d!"
 
-#: src/LYMainLoop.c:666 src/LYMainLoop.c:4978
+#: src/LYMainLoop.c:666 src/LYMainLoop.c:4984
 msgid "A URL specified by the user"
 msgstr "Een door de gebruiker opgegeven URL"
 
@@ -4326,85 +4314,84 @@ msgstr "Help Scherm"
 msgid "System Index"
 msgstr "Systeem Index"
 
-#: src/LYMainLoop.c:3506 src/LYMainLoop.c:5198
+#: src/LYMainLoop.c:3506 src/LYMainLoop.c:5204
 msgid "Entry into main screen"
 msgstr "Ingang naar begin scherm"
 
 #: src/LYMainLoop.c:3776
 msgid "No next document present"
-msgstr ""
+msgstr "Geen volgend document aanwezig"
 
 #: src/LYMainLoop.c:4074
 msgid "charset for this document specified explicitly, sorry..."
 msgstr "de tekenverzameling voor dit document is expliciet opgegeven, sorry..."
 
-#: src/LYMainLoop.c:4932
+#: src/LYMainLoop.c:4938
 msgid "cd to:"
-msgstr " aan "
+msgstr "cd naar:"
 
-#: src/LYMainLoop.c:4959
+#: src/LYMainLoop.c:4965
 msgid "A component of path is not a directory"
-msgstr ""
+msgstr "Een component van het pad is geen map"
 
-#: src/LYMainLoop.c:4962
+#: src/LYMainLoop.c:4968
 msgid "failed to change directory"
-msgstr "Geen toegang tot map."
+msgstr "Map wijzigen is mislukt"
 
-#: src/LYMainLoop.c:6118
+#: src/LYMainLoop.c:6126
 msgid "Reparsing document under current settings..."
 msgstr "Document wordt opnieuw ontleed met huidige instellingen..."
 
-#: src/LYMainLoop.c:6403
+#: src/LYMainLoop.c:6411
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Fatale fout - kan uitvoerbestand %s niet openen\n"
 
-#: src/LYMainLoop.c:6747
+#: src/LYMainLoop.c:6755
 msgid "TABLE center enable."
-msgstr ""
+msgstr "TABLE centreren ingeschakeld."
 
-#: src/LYMainLoop.c:6750
+#: src/LYMainLoop.c:6758
 msgid "TABLE center disable."
-msgstr ""
+msgstr "TABLE centreren uitgeschakeld."
 
-#: src/LYMainLoop.c:6827
-#, fuzzy
+#: src/LYMainLoop.c:6835
 msgid "Current URL is empty."
-msgstr "Huidige map:"
+msgstr "Huidige URL is leeg."
 
-#: src/LYMainLoop.c:6829 src/LYUtils.c:1694
+#: src/LYMainLoop.c:6837 src/LYUtils.c:1694
 msgid "Copy to clipboard failed."
-msgstr ""
+msgstr "KopiÃ«ren naar klembord is mislukt."
 
-#: src/LYMainLoop.c:6831
+#: src/LYMainLoop.c:6839
 msgid "Document URL put to clipboard."
-msgstr ""
+msgstr "Document URL op klembord geplaatst."
 
-#: src/LYMainLoop.c:6833
+#: src/LYMainLoop.c:6841
 msgid "Link URL put to clipboard."
-msgstr ""
+msgstr "Link URL op klembord geplaatst."
 
-#: src/LYMainLoop.c:6860
+#: src/LYMainLoop.c:6868
 msgid "No URL in the clipboard."
-msgstr ""
+msgstr "Geen URL op het klembord."
 
-#: src/LYMainLoop.c:7532 src/LYMainLoop.c:7702
+#: src/LYMainLoop.c:7540 src/LYMainLoop.c:7710
 msgid "-index-"
 msgstr "-index-"
 
-#: src/LYMainLoop.c:7642
+#: src/LYMainLoop.c:7650
 msgid "lynx: Can't access startfile"
 msgstr "lynx: Geen toegang tot startbestand"
 
-#: src/LYMainLoop.c:7654
+#: src/LYMainLoop.c:7662
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: Beginbestand kan niet gevonden worden of is geen tekst/html of tekst/plain"
 
-#: src/LYMainLoop.c:7655
+#: src/LYMainLoop.c:7663
 msgid "      Exiting..."
 msgstr "      Bezig met stoppen..."
 
-#: src/LYMainLoop.c:7696
+#: src/LYMainLoop.c:7704
 msgid "-more-"
 msgstr "-meer-"
 
@@ -4478,230 +4465,219 @@ msgstr "B)ladwijzer bestand: "
 
 #: src/LYOptions.c:2125 src/LYOptions.c:2132
 msgid "ON"
-msgstr ""
+msgstr "AAN"
 
 #. verbose_img variable
 #: src/LYOptions.c:2126 src/LYOptions.c:2131 src/LYOptions.c:2278 src/LYOptions.c:2289
 msgid "OFF"
-msgstr ""
+msgstr "UIT"
 
 #: src/LYOptions.c:2127
 msgid "NEVER"
-msgstr ""
+msgstr "NOOIT"
 
 #: src/LYOptions.c:2128
 msgid "ALWAYS"
-msgstr ""
+msgstr "ALTIJD"
 
 #: src/LYOptions.c:2144 src/LYOptions.c:2270
 msgid "ignore"
-msgstr ""
+msgstr "negeren"
 
 #: src/LYOptions.c:2145
 msgid "ask user"
-msgstr ""
+msgstr "vraag gebruiker"
 
 #: src/LYOptions.c:2146
 msgid "accept all"
-msgstr ""
+msgstr "alles aanvaarden"
 
 #: src/LYOptions.c:2158
 msgid "ALWAYS OFF"
-msgstr ""
+msgstr "ALTIJD UIT"
 
 #: src/LYOptions.c:2159
 msgid "FOR LOCAL FILES ONLY"
-msgstr ""
+msgstr "ALLEEN VOOR LOKALE BESTANDEN"
 
 #: src/LYOptions.c:2161
 msgid "ALWAYS ON"
-msgstr ""
+msgstr "ALTIJD AAN"
 
 #: src/LYOptions.c:2173
 msgid "Numbers act as arrows"
-msgstr ""
+msgstr "Nummers staan voor pijlen"
 
 #: src/LYOptions.c:2175
 msgid "Links are numbered"
-msgstr ""
+msgstr "Links zijn genummerd"
 
 #: src/LYOptions.c:2178
 msgid "Links and form fields are numbered"
-msgstr ""
+msgstr "Links en formuliervelden zijn genummerd"
 
 #: src/LYOptions.c:2181
 msgid "Form fields are numbered"
-msgstr ""
+msgstr "Velden in formulieren zijn genummerd"
 
 #: src/LYOptions.c:2190
 msgid "Case insensitive"
-msgstr ""
+msgstr "Hoofdletterongevoelig"
 
 #: src/LYOptions.c:2191
 msgid "Case sensitive"
-msgstr ""
+msgstr "Hoofdlettergevoelig"
 
 #: src/LYOptions.c:2215
 msgid "prompt normally"
-msgstr ""
+msgstr "prompt normaal"
 
 #: src/LYOptions.c:2216
 msgid "force yes-response"
-msgstr ""
+msgstr "ja-antwoord afdwingen"
 
 #: src/LYOptions.c:2217
 msgid "force no-response"
-msgstr ""
+msgstr "nee-antwoord afdwingen"
 
 #: src/LYOptions.c:2235
-#, fuzzy
 msgid "Novice"
-msgstr "Geen"
+msgstr "Beginner"
 
 #: src/LYOptions.c:2236
-#, fuzzy
 msgid "Intermediate"
-msgstr "Intern"
+msgstr "Gevorderde"
 
 #: src/LYOptions.c:2237
 msgid "Advanced"
-msgstr ""
+msgstr "Specialist"
 
 #: src/LYOptions.c:2246
 msgid "By First Visit"
-msgstr ""
+msgstr "Op het eerste bezoek"
 
 #: src/LYOptions.c:2248
 msgid "By First Visit Reversed"
-msgstr ""
+msgstr "Op Eerste Bezoek Omgekeerd"
 
 #: src/LYOptions.c:2249
 msgid "As Visit Tree"
-msgstr ""
+msgstr "Als bezoekboomstructuur"
 
 #: src/LYOptions.c:2250
 msgid "By Last Visit"
-msgstr ""
+msgstr "Op het laatste bezoek"
 
 #: src/LYOptions.c:2252
 msgid "By Last Visit Reversed"
-msgstr ""
+msgstr "Op Laatste Bezoek Omgekeerd"
 
 #. Old_DTD variable
 #: src/LYOptions.c:2263
 msgid "relaxed (TagSoup mode)"
-msgstr ""
+msgstr "versoepeld (TagSoup-modus)"
 
 #: src/LYOptions.c:2264
 msgid "strict (SortaSGML mode)"
-msgstr ""
+msgstr "strict (SortaSGML-modus)"
 
 #: src/LYOptions.c:2271
 msgid "as labels"
-msgstr ""
+msgstr "als labels"
 
 #: src/LYOptions.c:2272
-#, fuzzy
 msgid "as links"
-msgstr "deze link"
+msgstr "als links"
 
 #: src/LYOptions.c:2279
-#, fuzzy
 msgid "show filename"
-msgstr " (foutieve bestandsnaam)"
+msgstr "toon bestandsnaam"
 
 #: src/LYOptions.c:2290
 msgid "STANDARD"
-msgstr ""
+msgstr "STANDAARD"
 
 #: src/LYOptions.c:2291
 msgid "ADVANCED"
-msgstr ""
+msgstr "GEAVANCEERD"
 
 #: src/LYOptions.c:2317
-#, fuzzy
 msgid "Directories first"
-msgstr "Submappen:"
+msgstr "Mappen eerst"
 
 #: src/LYOptions.c:2318
-#, fuzzy
 msgid "Files first"
-msgstr ", als eerste poging."
+msgstr "Bestanden eerst"
 
 #: src/LYOptions.c:2319
 msgid "Mixed style"
-msgstr ""
+msgstr "Gemengde stijl"
 
 #: src/LYOptions.c:2327 src/LYOptions.c:2344
-#, fuzzy
 msgid "By Name"
-msgstr "Naam:"
+msgstr "Op Naam"
 
 #: src/LYOptions.c:2328 src/LYOptions.c:2345
 msgid "By Type"
-msgstr ""
+msgstr "Op Type"
 
 #: src/LYOptions.c:2329 src/LYOptions.c:2346
-#, fuzzy
 msgid "By Size"
-msgstr "ByteGrootte:"
+msgstr "Op Grootte"
 
 #: src/LYOptions.c:2330 src/LYOptions.c:2347
-#, fuzzy
 msgid "By Date"
-msgstr "Datum:"
+msgstr "Op Datum"
 
 #: src/LYOptions.c:2331
 msgid "By Mode"
-msgstr ""
+msgstr "Op Modus"
 
 #: src/LYOptions.c:2333
 msgid "By User"
-msgstr ""
+msgstr "Op Gebruiker"
 
 #: src/LYOptions.c:2334
-#, fuzzy
 msgid "By Group"
-msgstr "Groep"
+msgstr "Op Groep"
 
 #: src/LYOptions.c:2355
 msgid "Do not show rate"
-msgstr ""
+msgstr "Verhouding niet tonen"
 
 #: src/LYOptions.c:2356 src/LYOptions.c:2357
-#, fuzzy, c-format
+#, c-format
 msgid "Show %s/sec rate"
-msgstr "Gegevensoverdracht voltooid"
+msgstr "Toon verhouding %s/sec"
 
 #: src/LYOptions.c:2359 src/LYOptions.c:2360
 #, c-format
 msgid "Show %s/sec, ETA"
-msgstr ""
+msgstr "Toon verhouding %s/sec, ETA"
 
 #: src/LYOptions.c:2372
 msgid "Accept lynx's internal types"
-msgstr ""
+msgstr "Aanvaard interne types van lynx"
 
 #: src/LYOptions.c:2373
 msgid "Also accept lynx.cfg's types"
-msgstr ""
+msgstr "Aanvaard ook types van lynx.cfg"
 
 #: src/LYOptions.c:2374
 msgid "Also accept user's types"
-msgstr ""
+msgstr "Aanvaard ook types van gebruiker"
 
 #: src/LYOptions.c:2375
 msgid "Also accept system's types"
-msgstr ""
+msgstr "Aanvaard ook systeemtypes"
 
 #: src/LYOptions.c:2376
-#, fuzzy
 msgid "Accept all types"
-msgstr "Bevestigen"
+msgstr "Aanvaard alle types"
 
 #: src/LYOptions.c:2385
 msgid "gzip"
-msgstr ""
+msgstr "gzip"
 
 #: src/LYOptions.c:2386
 msgid "deflate"
@@ -4709,115 +4685,114 @@ msgstr ""
 
 #: src/LYOptions.c:2389
 msgid "compress"
-msgstr ""
+msgstr "compress"
 
 #: src/LYOptions.c:2392
 msgid "bzip2"
-msgstr ""
+msgstr "bzip2"
 
 #: src/LYOptions.c:2394
 msgid "All"
-msgstr ""
+msgstr "Allemaal"
 
 #: src/LYOptions.c:2659 src/LYOptions.c:2683
 #, c-format
 msgid "Use %s to invoke the Options menu!"
 msgstr "Gebruik %s om naar het Opties-menu te gaan!"
 
-#: src/LYOptions.c:3422
+#: src/LYOptions.c:3424
 msgid "(options marked with (!) will not be saved)"
-msgstr ""
+msgstr "(opties gemerkt met (!) zullen niet worden bewaard)"
 
-#: src/LYOptions.c:3430
+#: src/LYOptions.c:3432
 msgid "General Preferences"
-msgstr "Persoonlijke voorkeuren"
+msgstr "Algemene voorkeuren"
 
 #. ***************************************************************
 #. User Mode: SELECT
-#: src/LYOptions.c:3434
+#: src/LYOptions.c:3436
 msgid "User mode"
-msgstr "Type gebruiker"
+msgstr "Gebruiker-modus"
 
 #. Editor: INPUT
-#: src/LYOptions.c:3440
+#: src/LYOptions.c:3442
 msgid "Editor"
 msgstr "Editor"
 
 #. Search Type: SELECT
-#: src/LYOptions.c:3445
+#: src/LYOptions.c:3447
 msgid "Type of Search"
 msgstr "Zoekmethode"
 
-#: src/LYOptions.c:3450
+#: src/LYOptions.c:3452
 msgid "Security and Privacy"
-msgstr ""
+msgstr "Veiligheid en Privacy"
 
 #. ***************************************************************
 #. Cookies: SELECT
-#: src/LYOptions.c:3454
+#: src/LYOptions.c:3456
 msgid "Cookies"
-msgstr "Cookies"
+msgstr "Koekjes"
 
 #. Cookie Prompting: SELECT
-#: src/LYOptions.c:3468
+#: src/LYOptions.c:3470
 msgid "Invalid-Cookie Prompting"
-msgstr ""
+msgstr "Ongeldige Koekjesprompt"
 
 #. SSL Prompting: SELECT
-#: src/LYOptions.c:3475
+#: src/LYOptions.c:3477
 msgid "SSL Prompting"
-msgstr ""
+msgstr "SSL-prompt"
 
-#: src/LYOptions.c:3481
+#: src/LYOptions.c:3483
 msgid "Keyboard Input"
-msgstr ""
+msgstr "Toetsenbordinvoer"
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
-#: src/LYOptions.c:3485
+#: src/LYOptions.c:3487
 msgid "Keypad mode"
 msgstr "Gedrag van numeriek eiland"
 
 #. Emacs keys: ON/OFF
-#: src/LYOptions.c:3491
+#: src/LYOptions.c:3493
 msgid "Emacs keys"
 msgstr "Emacs toetsen"
 
 #. VI Keys: ON/OFF
-#: src/LYOptions.c:3497
+#: src/LYOptions.c:3499
 msgid "VI keys"
 msgstr "VI toetsen"
 
 #. Line edit style: SELECT
 #. well, at least 2 line edit styles available
-#: src/LYOptions.c:3504
+#: src/LYOptions.c:3506
 msgid "Line edit style"
-msgstr ""
+msgstr "Regelbewerkingsstijl"
 
 #. Keyboard layout: SELECT
-#: src/LYOptions.c:3516
+#: src/LYOptions.c:3518
 msgid "Keyboard layout"
-msgstr ""
+msgstr "Toetsenbordindeling"
 
 #.
 #. * Display and Character Set
 #.
-#: src/LYOptions.c:3530
+#: src/LYOptions.c:3532
 msgid "Display and Character Set"
-msgstr "Karakterset op beeldscherm"
+msgstr "Weergave en Karakterset"
 
 #. Use locale-based character set: ON/OFF
-#: src/LYOptions.c:3535
-#, fuzzy
+#: src/LYOptions.c:3537
 msgid "Use locale-based character set"
-msgstr "Veronderstelde karakterset"
+msgstr "Gebruik op locale-gebaseerde karakterset"
 
 #. Display Character Set: SELECT
-#: src/LYOptions.c:3544
+#: src/LYOptions.c:3546
 msgid "Display character set"
 msgstr "Karakterset op beeldscherm"
 
-#: src/LYOptions.c:3575
+#: src/LYOptions.c:3577
 msgid "Assumed document character set"
 msgstr "Veronderstelde karakterset"
 
@@ -4826,172 +4801,166 @@ msgstr "Veronderstelde karakterset"
 #. * we split the header to make it more readable:
 #. * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 #.
-#: src/LYOptions.c:3595
+#: src/LYOptions.c:3597
 msgid "CJK mode"
 msgstr "CJK modus"
 
-#: src/LYOptions.c:3597
+#: src/LYOptions.c:3599
 msgid "Raw 8-bit"
 msgstr "Kale 8-bit"
 
 #. X Display: INPUT
-#: src/LYOptions.c:3605
+#: src/LYOptions.c:3607
 msgid "X Display"
 msgstr "X Display"
 
 #.
 #. * Document Appearance
 #.
-#: src/LYOptions.c:3611
+#: src/LYOptions.c:3613
 msgid "Document Appearance"
-msgstr ""
+msgstr "Uitzicht Document"
 
-#: src/LYOptions.c:3617
+#: src/LYOptions.c:3619
 msgid "Show color"
 msgstr "Toon kleur"
 
 #. Show cursor: ON/OFF
-#: src/LYOptions.c:3641
+#: src/LYOptions.c:3643
 msgid "Show cursor"
 msgstr "Toon cursor"
 
 #. Underline links: ON/OFF
-#: src/LYOptions.c:3647
-#, fuzzy
+#: src/LYOptions.c:3649
 msgid "Underline links"
-msgstr "Verborgen links:"
+msgstr "Onderlijn links"
 
 #. Show scrollbar: ON/OFF
-#: src/LYOptions.c:3654
-#, fuzzy
+#: src/LYOptions.c:3656
 msgid "Show scrollbar"
-msgstr "Toon kleur"
+msgstr "Toon schuifbalk"
 
 #. Select Popups: ON/OFF
-#: src/LYOptions.c:3661
+#: src/LYOptions.c:3663
 msgid "Popups for select fields"
 msgstr "Menuutjes voor keuzevelden"
 
 #. HTML error recovery: SELECT
-#: src/LYOptions.c:3667
+#: src/LYOptions.c:3669
 msgid "HTML error recovery"
 msgstr "HTML foutcorrectie"
 
 #. Show Images: SELECT
-#: src/LYOptions.c:3673
+#: src/LYOptions.c:3675
 msgid "Show images"
 msgstr "Afbeeldingen laten zien als"
 
 #. Verbose Images: ON/OFF
-#: src/LYOptions.c:3687
+#: src/LYOptions.c:3689
 msgid "Verbose images"
 msgstr "Naam van afbeeldingen vermelden"
 
-#: src/LYOptions.c:3696
+#: src/LYOptions.c:3698
 msgid "Headers Transferred to Remote Servers"
-msgstr "Kopteksten die overgedragen worden naar andere computers"
+msgstr "Headers Overgedragen naar andere Servers"
 
 #. ***************************************************************
 #. Mail Address: INPUT
-#: src/LYOptions.c:3700
+#: src/LYOptions.c:3702
 msgid "Personal mail address"
 msgstr "Persoonlijk e-mail adres"
 
 #. Preferred media type: SELECT
-#: src/LYOptions.c:3705
-#, fuzzy
+#: src/LYOptions.c:3707
 msgid "Preferred media type"
-msgstr "%d bytes overgezet"
+msgstr "Geprefereerd mediatype"
 
 #. Preferred encoding: SELECT
-#: src/LYOptions.c:3711
-#, fuzzy
+#: src/LYOptions.c:3713
 msgid "Preferred encoding"
-msgstr "Voorkeur voor taal van document"
+msgstr "Geprefereerde codering"
 
 #. Preferred Document Character Set: INPUT
-#: src/LYOptions.c:3717
+#: src/LYOptions.c:3719
 msgid "Preferred document character set"
 msgstr "Voorkeur voor karakterset"
 
 #. Preferred Document Language: INPUT
-#: src/LYOptions.c:3722
+#: src/LYOptions.c:3724
 msgid "Preferred document language"
 msgstr "Voorkeur voor taal van document"
 
-#: src/LYOptions.c:3728
+#: src/LYOptions.c:3730
 msgid "User-Agent header"
-msgstr "User-Agent koptekst"
+msgstr "User-Agent header"
 
 #.
 #. * Listing and Accessing Files
 #.
-#: src/LYOptions.c:3736
+#: src/LYOptions.c:3738
 msgid "Listing and Accessing Files"
-msgstr ""
+msgstr "Lijsten van en Toegang tot Bestanden"
 
 #. ***************************************************************
 #. FTP sort: SELECT
-#: src/LYOptions.c:3740
+#: src/LYOptions.c:3742
 msgid "FTP sort criteria"
-msgstr "Sorteercriteria voor FTP"
+msgstr "sorteercriteria voor FTP"
 
 #. Local Directory Sort: SELECT
-#: src/LYOptions.c:3747
+#: src/LYOptions.c:3749
 msgid "Local directory sort criteria"
 msgstr "Sorteercriteria lokale mappen"
 
 #. Local Directory Order: SELECT
-#: src/LYOptions.c:3753
-#, fuzzy
+#: src/LYOptions.c:3755
 msgid "Local directory sort order"
-msgstr "Sorteercriteria lokale mappen"
+msgstr "Lokale mappensorteervolgorde"
 
-#: src/LYOptions.c:3762
+#: src/LYOptions.c:3764
 msgid "Show dot files"
 msgstr "Toon .-bestanden"
 
-#: src/LYOptions.c:3770
+#: src/LYOptions.c:3772
 msgid "Execution links"
 msgstr "verwijzingen die programma's starten"
 
 #. Show transfer rate: SELECT
-#: src/LYOptions.c:3790
+#: src/LYOptions.c:3792
 msgid "Show transfer rate"
-msgstr "Gegevensoverdracht voltooid"
+msgstr "Toon overdrachtverhouding"
 
 #.
 #. * Special Files and Screens
 #.
-#: src/LYOptions.c:3810
+#: src/LYOptions.c:3812
 msgid "Special Files and Screens"
-msgstr ""
+msgstr "Speciale Bestanden en Schermen"
 
-#: src/LYOptions.c:3815
+#: src/LYOptions.c:3817
 msgid "Multi-bookmarks"
 msgstr "Meervoudige boekenleggers"
 
-#: src/LYOptions.c:3823
+#: src/LYOptions.c:3825
 msgid "Review/edit Bookmarks files"
 msgstr "Bekijk/wijzig Boekenlegger bestanden"
 
-#: src/LYOptions.c:3825
+#: src/LYOptions.c:3827
 msgid "Goto multi-bookmark menu"
 msgstr "Ga naar multi-boekenlegger menu"
 
-#: src/LYOptions.c:3827
+#: src/LYOptions.c:3829
 msgid "Bookmarks file"
 msgstr "Boekenlegger bestand"
 
 #. Visited Pages: SELECT
-#: src/LYOptions.c:3833
+#: src/LYOptions.c:3835
 msgid "Visited Pages"
 msgstr "Bezochte Pagina's"
 
-#: src/LYOptions.c:3838
-#, fuzzy
+#: src/LYOptions.c:3840
 msgid "View the file "
-msgstr "Post het bestand"
+msgstr "Bestand bekijken"
 
 #: src/LYPrint.c:946
 #, c-format
@@ -5036,11 +5005,11 @@ msgstr "Afdrukinstellingen:"
 
 #: src/LYPrint.c:1294
 msgid "Save to a local file"
-msgstr "Opslaan in een lokaal bestand"
+msgstr "Opslaan naar een lokaal bestand"
 
 #: src/LYPrint.c:1296
 msgid "Save to disk disabled"
-msgstr "Opslaan op schijf niet beschikbaar"
+msgstr "Opslaan naar schijf niet beschikbaar"
 
 #: src/LYPrint.c:1303
 msgid "Mail the file"
@@ -5068,7 +5037,7 @@ msgstr ""
 "De regel moet in de volgende vorm staan:\n"
 "KLEUR:GEHEEL GETAL:VOORGROND:ACHTERGROND\n"
 "\n"
-"Hier kunnen VOORGROND en ACHTERGROND één van de volgende zijn:\n"
+"Hier kunnen VOORGROND en ACHTERGROND Ã©Ã©n van de volgende zijn:\n"
 "De uitzonderingen 'nocolor' of 'default', of\n"
 
 #: src/LYReadCFG.c:355
@@ -5083,7 +5052,7 @@ msgstr "toetsenbord afbeelding van %s naar %s voor %s mislukt\n"
 #: src/LYReadCFG.c:632
 #, c-format
 msgid "key remapping of %s to %s failed\n"
-msgstr "toetsenbord-mapping van %s naar %s mislukt\n"
+msgstr "toetsbord-mapping van %s naar %s mislukt\n"
 
 #: src/LYReadCFG.c:653
 #, c-format
@@ -5109,38 +5078,38 @@ msgstr "Lynx: kan niet starten, CERN reglement bestand %s is niet beschikbaar\n"
 msgid "(no name)"
 msgstr "(naamloos)"
 
-#: src/LYReadCFG.c:1773
+#: src/LYReadCFG.c:1775
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "Meer dan %d geneste lynx.cfg insluitingen -- misschien een lus?!?\n"
 
-#: src/LYReadCFG.c:1775
+#: src/LYReadCFG.c:1777
 #, c-format
 msgid "Last attempted include was '%s',\n"
-msgstr "De laatste include die geprobeerd is, was '%s',\n"
+msgstr "De laatste insluiting die geprobeerd is, was '%s',\n"
 
-#: src/LYReadCFG.c:1776
+#: src/LYReadCFG.c:1778
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "ingevoegd vanuit '%s'.\n"
 
-#: src/LYReadCFG.c:2183 src/LYReadCFG.c:2196 src/LYReadCFG.c:2254
+#: src/LYReadCFG.c:2185 src/LYReadCFG.c:2198 src/LYReadCFG.c:2256
 msgid "The following is read from your lynx.cfg file."
 msgstr "Het volgende wordt gelezen uit uw lynx.cfg bestand."
 
-#: src/LYReadCFG.c:2184 src/LYReadCFG.c:2197
+#: src/LYReadCFG.c:2186 src/LYReadCFG.c:2199
 msgid "Please read the distribution"
 msgstr "Lees a.u.b. de meegeleverde versie"
 
-#: src/LYReadCFG.c:2190 src/LYReadCFG.c:2200
+#: src/LYReadCFG.c:2192 src/LYReadCFG.c:2202
 msgid "for more comments."
 msgstr "voor meer opmerkingen."
 
-#: src/LYReadCFG.c:2236
+#: src/LYReadCFG.c:2238
 msgid "RELOAD THE CHANGES"
 msgstr "HERLAAD DE VERANDERINGEN"
 
-#: src/LYReadCFG.c:2244
+#: src/LYReadCFG.c:2246
 msgid "Your primary configuration"
 msgstr "Uw primaire configuratie"
 
@@ -5197,9 +5166,8 @@ msgid "File size:"
 msgstr "Bestandsgrootte:"
 
 #: src/LYShowInfo.c:226
-#, fuzzy
 msgid "(bytes)"
-msgstr "bytes"
+msgstr "(bytes)"
 
 #.
 #. * Include date and time information.
@@ -5221,13 +5189,12 @@ msgid "Access Permissions"
 msgstr "Toegangsrechten"
 
 #: src/LYShowInfo.c:278
-#, fuzzy
 msgid "Group:"
-msgstr "Groep"
+msgstr "Groep:"
 
 #: src/LYShowInfo.c:298
 msgid "World:"
-msgstr ""
+msgstr "Wereld:"
 
 #: src/LYShowInfo.c:305
 msgid "File that you are currently viewing"
@@ -5243,7 +5210,7 @@ msgstr "Karakterset:"
 
 #: src/LYShowInfo.c:333
 msgid "(assumed)"
-msgstr ""
+msgstr "(verondersteld)"
 
 #: src/LYShowInfo.c:340
 msgid "Server:"
@@ -5258,9 +5225,8 @@ msgid "Last Mod:"
 msgstr "Laatst veranderd:"
 
 #: src/LYShowInfo.c:351
-#, fuzzy
 msgid "Expires:"
-msgstr "&nbsp;Vervalt op:"
+msgstr "Vervalt:"
 
 #: src/LYShowInfo.c:354
 msgid "Cache-Control:"
@@ -5343,9 +5309,8 @@ msgid "Enctype:"
 msgstr "Beveiligingstype:"
 
 #: src/LYShowInfo.c:431
-#, fuzzy
 msgid "Action:"
-msgstr "Locatie: "
+msgstr "Actie:"
 
 #: src/LYShowInfo.c:436
 msgid "(Form field)"
@@ -5356,9 +5321,8 @@ msgid "No Links on the current page"
 msgstr "Er zijn geen verwijzingen op de huidige pagina"
 
 #: src/LYShowInfo.c:452
-#, fuzzy
 msgid "Server Headers:"
-msgstr "Server:"
+msgstr "Server Headers:"
 
 #: src/LYStyle.c:286
 #, c-format
@@ -5383,7 +5347,7 @@ msgstr "hier is een lijst van de logs, zodat u opnieuw kunt bouwen"
 
 #: src/LYUpload.c:75
 msgid "ERROR! - upload command is misconfigured"
-msgstr "FOUT! - upload-commando is niet goed ingesteld"
+msgstr "FOUT! - zend-commando is niet goed ingesteld"
 
 #: src/LYUpload.c:96
 msgid "Illegal redirection \"../\" found! Request ignored."
@@ -5403,15 +5367,15 @@ msgstr "Niet in staat bestand te zenden."
 
 #: src/LYUpload.c:201
 msgid "Upload To:"
-msgstr "Upload naar:"
+msgstr "Zenden naar:"
 
 #: src/LYUpload.c:202
 msgid "Upload options:"
-msgstr "Upload opties:"
+msgstr "Zend opties:"
 
 #: src/LYUtils.c:1696
 msgid "Download document URL put to clipboard."
-msgstr ""
+msgstr "Document afhalings-URL op klembord geplaatst."
 
 #: src/LYUtils.c:2464
 msgid "Unexpected access protocol for this URL scheme."
@@ -5422,9 +5386,8 @@ msgid "Too many tempfiles"
 msgstr "Teveel tijdelijke bestanden"
 
 #: src/LYUtils.c:3586
-#, fuzzy
 msgid "unknown restriction"
-msgstr "onbekende beperking"
+msgstr "Onbekende beperking"
 
 #: src/LYUtils.c:3616
 #, c-format
@@ -5436,9 +5399,9 @@ msgstr "Er zijn geen beperkingen gesteld.\n"
 msgid "Restrictions set:\n"
 msgstr "Gestelde beperkingen:\n"
 
-#: src/LYUtils.c:4999
+#: src/LYUtils.c:5001
 msgid "Cannot find HOME directory"
-msgstr ""
+msgstr "Kan HOME-map niet vinden"
 
 #: src/LYrcFile.c:21
 msgid "Normally disabled.  See ENABLE_LYNXRC in lynx.cfg\n"
@@ -5452,9 +5415,9 @@ msgid ""
 "all cookies.\n"
 msgstr ""
 "accept_all_cookies stelt de gebruiker in staat om, indien gewenst,\n"
-"Lynx automatisch alle cookies te laten accepteren.  De standaard is\n"
-"\"FALSE\", zodat voor elk cookie om bevestiging zal worden gevraagd.\n"
-"Zet accept_all_cookies op \"TRUE\" om alle cookies te accepteren.\n"
+"Lynx automatisch alle koekjes te laten accepteren.  De standaard is\n"
+"\"FALSE\", zodat voor elk koekje om bevestiging zal worden gevraagd.\n"
+"Zet accept_all_cookies op \"TRUE\" om alle koekjes te accepteren.\n"
 
 #: src/LYrcFile.c:325
 msgid ""
@@ -5499,7 +5462,7 @@ msgid ""
 "settings made here.\n"
 msgstr ""
 "cookie_accept_domains en cookie_reject_domains zijn door komma's gescheiden lijsten van domeinen voor welke Lynx automatisch alle "
-"cookies respectievelijk toelaat of weigert.  Als een domein opgegeven wordt voor beide opties zal verwerping het winnen van "
+"koekjes respectievelijk toelaat of weigert.  Als een domein opgegeven wordt voor beide opties zal verwerping het winnen van "
 "toelaten.  De accept_all_cookies parameter doet deze instellingen teniet.\n"
 
 #: src/LYrcFile.c:350
@@ -5507,7 +5470,7 @@ msgid ""
 "cookie_file specifies the file from which to read persistent cookies.\n"
 "The default is ~/.lynx_cookies.\n"
 msgstr ""
-"cookie_file specificeert het bestand waarin blijvende cookies worden\n"
+"cookie_file specificeert het bestand waarin blijvende koekjes worden\n"
 "opgeslagen. Standaard is dit ~/.lynx_cookies.\n"
 
 #: src/LYrcFile.c:355
@@ -5525,7 +5488,7 @@ msgstr ""
 "waarmee domeinen op verscheidene niveau's van geldigheid worden\n"
 "gecontroleerd.  Als een domein op `strict'e controle wordt gezet, moet\n"
 "strict voldaan worden aan RFC2109.  Een domein met 'loose' controle\n"
-"zal toegestaan worden om cookies met een ongeldige padnaam of\n"
+"zal toegestaan worden om koekjes met een ongeldige padnaam of\n"
 "domein-attribuut te plaatsen.  Alle domeinen zullen standaard de\n"
 "gebruiker vragen (query) in geval van ongeldig pad of domein.\n"
 
@@ -5534,6 +5497,8 @@ msgid ""
 "dir_list_order specifies the directory list order under DIRED_SUPPORT\n"
 "(if implemented).  The default is \"ORDER_BY_NAME\"\n"
 msgstr ""
+"dir_list_order bepaalt de volgorde van de mappenlijst onder DIRED_SUPPORT\n"
+"(als geÃ¯mplementeerd). De standaard is \"ORDER_BY_NAME\"\n"
 
 #: src/LYrcFile.c:374
 msgid ""
@@ -5543,7 +5508,7 @@ msgid ""
 "\"DIRECTORIES_FIRST\" lists directories first.\n"
 msgstr ""
 "dir_list_styles specificeert de stijl van een map in DIRED_SUPPORT\n"
-"(indien geïmplementeerd).  De standaard is \"MIXED_STYLE\", waarmee\n"
+"(indien geÃ¯mplementeerd).  De standaard is \"MIXED_STYLE\", waarmee\n"
 "bestanden en mappen samen worden gesorteerd.  \"FILES_FIRST\" plaatst\n"
 "bestanden eerst, \"DIRECTORIES_FIRST\" plaatst mappen eerst.\n"
 
@@ -5658,16 +5623,16 @@ msgid ""
 "an error response, though the sending of an unacceptable response\n"
 "is also allowed.\n"
 msgstr ""
-"preferred_charset specificeert de tekenverzameling in MIME notatie\n"
+"preferred_charset specificeert de karakterset in MIME notatie\n"
 "(dat is, ISO-8859-2, ISO-8859-5, .. een door komma's gescheiden lijst)\n"
 "waarmee Lynx uw voorkeuren doorgeeft aan http servers die een\n"
-"Accept-Charset kop gebruiken.  De waarde mag _niet_ ISO-8859-1 of\n"
+"Accept-Charset header gebruiken.  De waarde mag _niet_ ISO-8859-1 of\n"
 "US-ASCII bevatten, omdat deze waarden altijd standaard aangenomen\n"
 "worden.  Als een bestand in die tekenverzameling beschikbaar is, zal\n"
-"de server het verzenden.  Als geen Accept-Charset kop aanwezig is, is\n"
+"de server het verzenden.  Als geen Accept-Charset header aanwezig is, is\n"
 "elke willekeurige tekenverzameling acceptabel.  Als een Accept-Charset\n"
-"kop aanwezig is, en als de server geen antwoord kan zenden dat\n"
-"acceptabel is volgens deze koptekst, dan ZOU de server een foutmelding\n"
+"header aanwezig is, en als de server geen antwoord kan zenden dat\n"
+"acceptabel is volgens deze header, dan ZOU de server een foutmelding\n"
 "moeten sturen, maar het verzenden van een onacceptabel antwoord is ook\n"
 "toegestaan.\n"
 
@@ -5680,7 +5645,7 @@ msgid ""
 "Otherwise, the server will send the file in its default language.\n"
 msgstr ""
 "preferred_language specificeert de taal in MIME notatie (dat is, en,\n"
-"nl, fr, een door komma's gescheiden lijst in afnemende volgorde van\n"
+"fr, een door komma's gescheiden lijst in afnemende volgorde van\n"
 "voorkeur) waarmee Lynx uw voorkeuren doorgeeft in opdrachten aan http\n"
 "servers.  Als een bestand in een bepaalde taal aanwezig is, zal de\n"
 "server het verzenden.  Als dit niet het geval is, zal de server het\n"
@@ -5839,13 +5804,14 @@ msgstr ""
 "Als sub_bookmarks niet \"off\" is, en meervoudige boekenleggers zijn\n"
 "opgegeven (zie onder), dan zullen alle boekenlegger operaties eerst de\n"
 "gebruiker vragen om een actief sub-boekenlegger bestand te selecteren.\n"
-"Als de standaard Lynx bookmark_file gedefiniëerd is (zie boven), dan\n"
+"Als de standaard Lynx bookmark_file gedefiniÃ«erd is (zie boven), dan\n"
 "zal dit gebruikt worden als de standaard selectie.  Als deze optie op\n"
 "\"advanced\" gezet is en de gebruikersmodus ook \"advanced\" is, dan zal\n"
 "het 'v'-inzien boekenlegger commando een statusregel-menu tonen in\n"
 "plaats van het menu dat in \"novice\" en \"intermediate\" modus wordt\n"
 "gebruikt.  Als deze optie op \"standaard\" gezet wordt, zal ongeacht de\n"
 "gebruikersmodus het volledige menu getoond worden.\n"
+"\n"
 
 #: src/LYrcFile.c:564
 msgid ""
@@ -5940,7 +5906,7 @@ msgstr ""
 "formulier-invoervelden.  Nummers zullen gebruikt worden om links te\n"
 "selecteren, of om de \"huidige link\" te verplaatsen naar een\n"
 "formulier-invoerveld of -knop.  Daarbij komt dat opties in een popup\n"
-"menu geïndexeerd zijn, zodat de gebruiker een optienummer kan intypen\n"
+"menu geÃ¯ndexeerd zijn, zodat de gebruiker een optienummer kan intypen\n"
 "om een optie in een popup menu te selecteren, zelfs als de optie niet\n"
 "op het scherm zichtbaar is.  Referentielijsten en uitvoer van het\n"
 "lijst commando nummeren ook formulier-invoervelden.\n"
@@ -5979,21 +5945,3 @@ msgstr ""
 "Als u op zoek bent naar het algemene configuratiebestand - dat is\n"
 "meestal lynx.cfg, en het heeft andere inhoud en een andere opmaak.\n"
 "Het is niet dit bestand.\n"
-
-#~ msgid "KB"
-#~ msgstr "KB"
-
-#~ msgid "Remove '%s' and all of its contents?"
-#~ msgstr "Verwijder '%s' en haar volledige inhoud?"
-
-#~ msgid "Remove directory and all of its contents?"
-#~ msgstr "Verwijder map en haar volledige inhoud?"
-
-#~ msgid "create %s"
-#~ msgstr "maak %s aan"
-
-#~ msgid "Unable to open file management menu file."
-#~ msgstr "Kan bestand met bestandsbeheer-menu niet openen."
-
-#~ msgid "Ignoring invalid HOME"
-#~ msgstr "Negeer ongeldig HOME"

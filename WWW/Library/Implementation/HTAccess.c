@@ -1242,7 +1242,7 @@ BOOL HTLoadAnchor(HTAnchor * destination)
  */
 static char hex(int i)
 {
-    char *hexchars = "0123456789ABCDEF";
+    const char *hexchars = "0123456789ABCDEF";
 
     return hexchars[i];
 }

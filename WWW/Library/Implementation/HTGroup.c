@@ -66,7 +66,7 @@ typedef struct {
     GroupDef *translation;
 } Ref;
 
-static void syntax_error(FILE *fp, char *msg,
+static void syntax_error(FILE *fp, const char *msg,
 			 LexItem lex_item)
 {
     char buffer[41];

@@ -189,7 +189,7 @@ int HTioctl(int d,
 /*	Report Internet Error
  *	---------------------
  */
-int HTInetStatus(char *where)
+int HTInetStatus(const char *where)
 {
     int status;
     int saved_errno = errno;
@@ -1504,7 +1504,7 @@ const char *HTHostName(void)
  *  modified over the years by numerous Lynx lovers. - FM
  */
 int HTDoConnect(const char *url,
-		char *protocol,
+		const char *protocol,
 		int default_port,
 		int *s)
 {

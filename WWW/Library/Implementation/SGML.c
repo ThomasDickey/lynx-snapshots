@@ -224,9 +224,9 @@ struct _HTStream {
 };
 
 #ifndef NO_LYNX_TRACE
-static char *state_name(sgml_state n)
+static const char *state_name(sgml_state n)
 {
-    char *result = "?";
+    const char *result = "?";
     /* *INDENT-OFF* */
     switch (n) {
     case S_attr:                result = "S_attr";              break;
@@ -4506,12 +4506,12 @@ History:
 
 int TREAT_SJIS = 1;
 
-void JISx0201TO0208_EUC(register unsigned char IHI,
-			register unsigned char ILO,
-			register unsigned char *OHI,
-			register unsigned char *OLO)
+void JISx0201TO0208_EUC(unsigned char IHI,
+			unsigned char ILO,
+			unsigned char *OHI,
+			unsigned char *OLO)
 {
-    static char *table[] =
+    static const char *table[] =
     {
 	"\241\243",		/* A1,A3 */
 	"\241\326",		/* A1,D6 */

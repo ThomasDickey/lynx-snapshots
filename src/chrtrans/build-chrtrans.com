@@ -1,4 +1,5 @@
-$ v = 'f$verify(0)'
+$ v0 = 0
+$ v = f$verify(v0)
 $!			BUILD-CHRTRANS.COM
 $!
 $!   Command file to build MAKEUCTB.EXE on VMS systems
@@ -27,8 +28,10 @@ $ v1 = f$verify(1)
 $!
 $!	Compile the Lynx [.SRC.CHRTRANS]makeuctb module.
 $!
-$  v1 = 'f$verify(0)'
-$ IF f$trnlnm("VAXCMSG") .eqs. "DECC$MSG" .or. -
+$  v1 = f$verify(v0)
+$ IF f$getsyi("ARCH_NAME") .eqs. "Alpha" .or. -
+     f$getsyi("ARCH_NAME") .eqs. "IA64" .or. -
+     f$trnlnm("VAXCMSG") .eqs. "DECC$MSG" .or. -
      f$trnlnm("DECC$CC_DEFAULT") .eqs. "/DECC" .or. -
      f$trnlnm("DECC$CC_DEFAULT") .eqs. "/VAXC"
 $ THEN
@@ -37,7 +40,7 @@ $  v1 = f$verify(1)
 $! DECC:
 $  cc := cc/decc/prefix=all /nomember 'CHRcc_opts'-
 	   /INCLUDE=([],[-],[--],[--.WWW.Library.Implementation]) 
-$  v1 = 'f$verify(0)'
+$  v1 = f$verify(v0)
 $ ELSE
 $  IF f$search("gnu_cc:[000000]gcclib.olb") .nes. ""
 $  THEN
@@ -45,19 +48,19 @@ $   CHRcompiler := "GNUC"
 $   v1 = f$verify(1)
 $! GNUC:
 $   cc := gcc 'CHRcc_opts'/INCLUDE=([],[-],[--],[--.WWW.Library.Implementation]) 
-$   v1 = 'f$verify(0)'
+$   v1 = f$verify(v0)
 $  ELSE
 $   CHRcompiler := "VAXC"
 $   v1 = f$verify(1)
 $! VAXC:
 $   cc := cc 'CHRcc_opts'/INCLUDE=([],[-],[--],[--.WWW.Library.Implementation]) 
-$   v1 = 'f$verify(0)'
+$   v1 = f$verify(v0)
 $  ENDIF
 $ ENDIF
 $!
 $ v1 = f$verify(1)
 $ cc makeuctb
-$ v1 = 'f$verify(0)'
+$ v1 = f$verify(v0)
 $!
 $ Link_makeuctb:
 $!=============
@@ -65,9 +68,15 @@ $ v1 = f$verify(1)
 $!
 $!	Link the Lynx [.SRC.CHRTRANS]makeuctb module.
 $!
-$ link/exe=makeuctb.exe'CHRlink_opts' makeuctb, -
-sys$disk:[-]'CHRcompiler'.opt/opt
-$ v1 = 'f$verify(0)'
+$ IF f$getsyi("ARCH_NAME") .eqs. "IA64"
+$ THEN
+$    optslibs=""
+$ ELSE
+$    optslibs=", sys$disk:[-]''CHRcompiler'.opt/opt"
+$ ENDIF
+$
+$ link/exe=makeuctb.exe'CHRlink_opts' makeuctb 'optslibs
+$ v1 = f$verify(v0)
 $!
 $ Create_headers:
 $!==============
@@ -118,11 +127,11 @@ $ makeuctb pt154_uni.tbl
 $ makeuctb rfc_suni.tbl
 $ makeuctb utf8_uni.tbl
 $ makeuctb viscii_uni.tbl
-$ v1 = 'f$verify(0)'
+$ v1 = f$verify(v0)
 $ exit
 $!
 $ CLEANUP:
-$    v1 = 'f$verify(0)'
+$    v1 = f$verify(0)
 $    write sys$output "Default directory:"
 $    show default
 $    v1 = f$verify(v)

@@ -19,6 +19,7 @@
 #include <LYKeymap.h>
 #include <LYCharUtils.h>
 #include <LYCharSets.h>
+#include <LYStrings.h>
 
 #ifdef DIRED_SUPPORT
 #include <LYUpload.h>
@@ -131,7 +132,7 @@ BOOL LYAddImageMap(char *address,
     HTList *curele = NULL;
     LYMapElement *ele = NULL;
 
-    if (!(address && *address))
+    if (isEmpty(address))
 	return FALSE;
     if (!(node_anchor && node_anchor->address))
 	return FALSE;
@@ -195,7 +196,7 @@ BOOL LYAddImageMap(char *address,
 	return FALSE;
     }
     StrAllocCopy(new->address, address);
-    if (title && *title)
+    if (non_empty(title))
 	StrAllocCopy(new->title, title);
     if (new != old)
 	HTList_addObject(theList, new);
@@ -217,7 +218,7 @@ BOOL LYAddMapElement(char *map,
     HTList *theList = NULL;
     HTList *cur = NULL;
 
-    if (!(map && *map && address && *address))
+    if (isEmpty(map) || isEmpty(address))
 	return FALSE;
     if (!(node_anchor && node_anchor->address))
 	return FALSE;
@@ -274,7 +275,7 @@ BOOL LYAddMapElement(char *map,
 	return FALSE;
     }
     StrAllocCopy(new->address, address);
-    if (title && *title)
+    if (non_empty(title))
 	StrAllocCopy(new->title, title);
     else
 	StrAllocCopy(new->title, address);
@@ -294,7 +295,7 @@ BOOL LYHaveImageMap(char *address)
     LYImageMap *Map;
     HTList *cur = LynxMaps;
 
-    if (!(cur && address && *address != '\0'))
+    if (!(cur && non_empty(address)))
 	return FALSE;
 
     while (NULL != (Map = (LYImageMap *) HTList_nextObject(cur))) {
@@ -370,7 +371,7 @@ static HTList *get_the_list(DocAddress *wwwdoc, char *address,
 {
     if (anchor && anchor->post_data) {
 	fill_DocAddress(wwwdoc, address, anchor, punderlying);
-	if (punderlying && *punderlying)
+	if (non_empty(punderlying))
 	    return (*punderlying)->imaps;
 	return anchor->imaps;
     } else {
@@ -524,17 +525,17 @@ static int LYLoadIMGmap(const char *arg,
 	return (HT_NOT_LOADED);
     }
 
-    if (theMap->title && *theMap->title) {
+    if (non_empty(theMap->title)) {
 	StrAllocCopy(MapTitle, theMap->title);
-    } else if (anAnchor->title && *anAnchor->title) {
+    } else if (non_empty(anAnchor->title)) {
 	StrAllocCopy(MapTitle, anAnchor->title);
-    } else if (LYRequestTitle && *LYRequestTitle &&
+    } else if (non_empty(LYRequestTitle) &&
 	       strcasecomp(LYRequestTitle, "[USEMAP]")) {
 	StrAllocCopy(MapTitle, LYRequestTitle);
     } else if ((cp = strchr(address, '#')) != NULL) {
 	StrAllocCopy(MapTitle, (cp + 1));
     }
-    if (!(MapTitle && *MapTitle)) {
+    if (isEmpty(MapTitle)) {
 	StrAllocCopy(MapTitle, "[USEMAP]");
     } else {
 	LYEntify(&MapTitle, TRUE);

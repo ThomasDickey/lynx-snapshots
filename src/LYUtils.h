@@ -101,7 +101,7 @@
 #define restorePoundSelector(pound) if ((pound) != NULL) *(pound) = '#'
 
 extern BOOL strn_dash_equ(const char *p1, const char *p2, int len);
-extern BOOLEAN LYAddSchemeForURL(char **AllocatedString, char *default_scheme);
+extern BOOLEAN LYAddSchemeForURL(char **AllocatedString, const char *default_scheme);
 extern BOOLEAN LYCachedTemp(char *result, char **cached);
 extern BOOLEAN LYCanDoHEAD(const char *address);
 extern BOOLEAN LYCanReadFile(const char *name);
@@ -119,9 +119,9 @@ extern BOOLEAN LYisLocalHost(const char *filename);
 extern BOOLEAN LYisRootPath(const char *path);
 extern BOOLEAN inlocaldomain(void);
 extern FILE *InternalPageFP(char *filename, int reuse_flag);
-extern FILE *LYAppendToTxtFile(char *name);
-extern FILE *LYNewBinFile(char *name);
-extern FILE *LYNewTxtFile(char *name);
+extern FILE *LYAppendToTxtFile(const char *name);
+extern FILE *LYNewBinFile(const char *name);
+extern FILE *LYNewTxtFile(const char *name);
 extern FILE *LYOpenScratch(char *result, const char *prefix);
 extern FILE *LYOpenTemp(char *result, const char *suffix, const char *mode);
 extern FILE *LYOpenTempRewrite(char *result, const char *suffix, const char *mode);
@@ -129,14 +129,14 @@ extern FILE *LYReopenTemp(char *name);
 extern char *Current_Dir(char *pathname);
 extern char *LYAddPathToSave(char *fname);
 extern char *LYGetEnv(const char *name);
-extern char *LYGetHiliteStr(int cur, int count);
 extern char *LYLastPathSep(const char *path);
 extern char *LYPathLeaf(char *pathname);
-extern char *LYSysShell(void);
 extern char *LYgetXDisplay(void);
 extern char *strip_trailing_slash(char *my_dirname);
 extern char *trimPoundSelector(char *address);
 extern const char *Home_Dir(void);
+extern const char *LYGetHiliteStr(int cur, int count);
+extern const char *LYSysShell(void);
 extern const char *index_to_restriction(int inx);
 extern const char *wwwName(const char *pathname);
 extern int HTCheckForInterrupt(void);
@@ -152,7 +152,7 @@ extern int is_url(char *filename);
 extern int number2arrows(int number);
 extern size_t utf8_length(BOOL utf_flag, const char *data);
 extern time_t LYmktime(char *string, BOOL absolute);
-extern void BeginInternalPage(FILE *fp0, char *Title, char *HelpURL);
+extern void BeginInternalPage(FILE *fp0, const char *Title, const char *HelpURL);
 extern void EndInternalPage(FILE *fp0);
 extern void HTAddSugFilename(char *fname);
 extern void HTSugFilenames_free(void);
@@ -162,7 +162,7 @@ extern void LYAddHtmlSep0(char *path);
 extern void LYAddLocalhostAlias(char *alias);
 extern void LYAddPathSep(char **path);
 extern void LYAddPathSep0(char *path);
-extern void LYAddPathToHome(char *fbuffer, size_t fbuffer_size, char *fname);
+extern void LYAddPathToHome(char *fbuffer, size_t fbuffer_size, const char *fname);
 extern void LYCheckBibHost(void);
 extern void LYCheckMail(void);
 extern void LYCleanupTemp(void);
@@ -176,14 +176,14 @@ extern void LYFixCursesOn(const char *reason);
 extern void LYLocalFileToURL(char **target, const char *source);
 extern void LYLocalhostAliases_free(void);
 extern void LYRenamedTemp(char *oldname, char *newname);
-extern void LYSetHilite(int cur, char *text);
+extern void LYSetHilite(int cur, const char *text);
 extern void LYTrimHtmlSep(char *path);
 extern void LYTrimPathSep(char *path);
 extern void LYTrimRelFromAbsPath(char *path);
-extern void LYhighlight(int flag, int cur, char *target);
+extern void LYhighlight(int flag, int cur, const char *target);
 extern void LYmsec_delay(unsigned msec);
 extern void LYsetXDisplay(char *new_display);
-extern void WriteInternalTitle(FILE *fp0, char *Title);
+extern void WriteInternalTitle(FILE *fp0, const char *Title);
 extern void change_sug_filename(char *fname);
 extern void convert_to_spaces(char *string, BOOL condense);
 extern void free_and_clear(char **obj);
@@ -241,7 +241,7 @@ extern void LYRegisterUIPage(const char *url, UIP_t type);
 extern void LYUIPages_free(void);
 
 #ifdef CAN_CUT_AND_PASTE
-extern int put_clip(char *szBuffer);
+extern int put_clip(const char *szBuffer);
 
 /* get_clip_grab() returns a pointer to the string in the system area.
    get_clip_release() should be called ASAP after this. */

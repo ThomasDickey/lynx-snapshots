@@ -41,7 +41,7 @@ typedef struct _InputFieldData {
     const char *md;
     const char *min;
     const char *name;
-    const char *size;
+    int size;
     const char *src;
     const char *type;
     char *value;

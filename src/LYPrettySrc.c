@@ -30,7 +30,7 @@ BOOL mark_htext_as_source = FALSE;
      support), the style cache and markup are created before entering the
      mainloop. */
 BOOL psrcview_no_anchor_numbering = FALSE;
-static char *HTL_tagspecs_defaults[HTL_num_lexemes] =
+static const char *HTL_tagspecs_defaults[HTL_num_lexemes] =
 {
  /* these values are defaults. They are also listed in comments of distibution's
     lynx.cfg. */
@@ -146,7 +146,7 @@ static void append_open_tag(char *tagname,
 
 #ifdef USE_COLOR_STYLE
     hcode = hash_code_lowercase_on_fly(tagname);
-    if (classname && *classname) {
+    if (non_empty(classname)) {
 
 #  if 0
 	/*

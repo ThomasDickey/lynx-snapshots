@@ -940,7 +940,7 @@ LYEditCode *LYLineEditors[] =
  * Add the name that the user will see below.
  * The order of LYLineEditors and LYLineditNames MUST be the same.
  */
-char *LYLineeditNames[] =
+const char *LYLineeditNames[] =
 {
     "Default Binding",
 #ifdef EXP_ALT_BINDINGS

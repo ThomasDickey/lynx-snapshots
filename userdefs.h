@@ -1360,11 +1360,11 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.6dev.7"
+#define LYNX_VERSION "2.8.6dev.8"
 #define LYNX_WWW_HOME "http://lynx.isc.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Sun, 17 Oct 2004 14:54:30 -0700"
+#define LYNX_DATE "Sun, 07 Nov 2004 09:43:13 -0800"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 
@@ -1379,6 +1379,8 @@
 #define MAXCHARSETS 60		/* max character sets supported */
 #define TRST_MAXROWSPAN 200	/* max rowspan accepted by TRST code */
 #define TRST_MAXCOLSPAN 200	/* max colspan and COL/COLGROUP span accepted */
+#define MAX_TABLE_ROWS  200	/* max rows for tables */
+#define MAX_TABLE_COLS  200	/* max cols for tables */
 #define SAVE_TIME_NOT_SPACE	/* minimize number of some malloc calls */
 
 /* Win32 may support more, but old win16 helper apps may not. */

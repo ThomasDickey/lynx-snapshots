@@ -194,7 +194,7 @@ extern int HTAA_getGid(void);
  *      returns the user name
  *              Default is "" (nobody).
  */
-extern char *HTAA_getUidName(void);
+extern const char *HTAA_getUidName(void);
 
 /* PUBLIC                                                       HTAA_getFileName
  *              GET THE FILENAME (VMS ONLY)
@@ -204,7 +204,7 @@ extern char *HTAA_getUidName(void);
  * ON EXIT:
  *      returns the filename
  */
-extern char *HTAA_getFileName(void);
+extern const char *HTAA_getFileName(void);
 #endif /* VMS */
 
 /* PUBLIC                                                       HTAA_UidToName
@@ -215,7 +215,7 @@ extern char *HTAA_getFileName(void);
  * ON EXIT:
  *      returns the user name
  */
-extern char *HTAA_UidToName(int uid);
+extern const char *HTAA_UidToName(int uid);
 
 /* PUBLIC                                                       HTAA_NameToUid
  *              GET THE USER ID
@@ -225,7 +225,7 @@ extern char *HTAA_UidToName(int uid);
  * ON EXIT:
  *      returns the user id
  */
-extern int HTAA_NameToUid(char *name);
+extern int HTAA_NameToUid(const char *name);
 
 /* PUBLIC                                                       HTAA_GidToName
  *              GET THE GROUP NAME
@@ -235,7 +235,7 @@ extern int HTAA_NameToUid(char *name);
  * ON EXIT:
  *      returns the group name
  */
-extern char *HTAA_GidToName(int gid);
+extern const char *HTAA_GidToName(int gid);
 
 /* PUBLIC                                                       HTAA_NameToGid
  *              GET THE GROUP ID
@@ -245,6 +245,6 @@ extern char *HTAA_GidToName(int gid);
  * ON EXIT:
  *      returns the group id
  */
-extern int HTAA_NameToGid(char *name);
+extern int HTAA_NameToGid(const char *name);
 
 #endif /* not HTAAPROT_H */

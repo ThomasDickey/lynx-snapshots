@@ -13,7 +13,8 @@ static BOOL link_has_target(int cur,
 {
     LinkInfo *a = &links[cur];
     OptionType *option;
-    char *stars = NULL, *cp;
+    char *stars = NULL;
+    const char *cp;
     int count;
 
     /*
@@ -21,7 +22,7 @@ static BOOL link_has_target(int cur,
      * setting into account.
      */
     for (count = 0;; ++count) {
-	char *text = LYGetHiliteStr(cur, count);
+	const char *text = LYGetHiliteStr(cur, count);
 
 	if (text == NULL)
 	    break;
@@ -44,8 +45,7 @@ static BOOL link_has_target(int cur,
 		return TRUE;
 	    }
 	    StrAllocCopy(stars, a->l_form->value);
-	    for (cp = stars; *cp != '\0'; cp++)
-		*cp = '*';
+	    memset(stars, '*', strlen(stars));
 	    if (LYno_attr_strstr(stars, target)) {
 		FREE(stars);
 		return TRUE;

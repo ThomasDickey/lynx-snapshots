@@ -790,7 +790,7 @@ static int cern_rulesfile_fun(char *value)
     }
     fprintf(stderr,
 	    gettext("Lynx: cannot start, CERN rules file %s is not available\n"),
-	    (rulesfile2 && *rulesfile2) ? rulesfile2 : gettext("(no name)"));
+	    non_empty(rulesfile2) ? rulesfile2 : gettext("(no name)"));
     exit_immediately(EXIT_FAILURE);
     return 0;			/* though redundant, for compiler-warnings */
 }
@@ -816,7 +816,9 @@ static int referer_with_query_fun(char *value)
 static int suffix_fun(char *value)
 {
     char *mime_type, *p;
-    char *encoding = NULL, *sq = NULL, *description = NULL;
+    char *encoding = NULL;
+    char *sq = NULL;
+    char *description = NULL;
     double q = 1.0;
 
     if ((strlen(value) < 3)
@@ -1597,9 +1599,9 @@ static Config_Type *lookup_config(char *name)
  * Note:  only read files from the current directory if there's no parent
  * filename, otherwise it leads to user surprise.
  */
-static char *actual_filename(char *cfg_filename,
-			     char *parent_filename,
-			     char *dft_filename)
+static char *actual_filename(const char *cfg_filename,
+			     const char *parent_filename,
+			     const char *dft_filename)
 {
     char *my_filename = NULL;
 
@@ -1628,9 +1630,9 @@ static char *actual_filename(char *cfg_filename,
     return my_filename;
 }
 
-FILE *LYOpenCFG(char *cfg_filename,
-		char *parent_filename,
-		char *dft_filename)
+FILE *LYOpenCFG(const char *cfg_filename,
+		const char *parent_filename,
+		const char *dft_filename)
 {
     char *my_file = actual_filename(cfg_filename, parent_filename, dft_filename);
     FILE *result;
@@ -1753,8 +1755,8 @@ void LYSetConfigValue(char *name,
  * file can also include other files with a list of acceptable options, these
  * lists are ANDed.
  */
-static void do_read_cfg(char *cfg_filename,
-			char *parent_filename,
+static void do_read_cfg(const char *cfg_filename,
+			const char *parent_filename,
 			int nesting_level,
 			FILE *fp0,
 			optidx_set_t * allowed)
@@ -1894,7 +1896,7 @@ static void do_read_cfg(char *cfg_filename,
 
 		char *url = NULL;
 		char *cp1 = NULL;
-		char *sep = NULL;
+		const char *sep = NULL;
 
 		if ((p1 = strstr(value, sep = " for ")) != 0
 #if defined(UNIX) && !defined(USE_DOS_DRIVES)
@@ -2047,8 +2049,8 @@ static void do_read_cfg(char *cfg_filename,
 }
 
 /* this is a public interface to do_read_cfg */
-void read_cfg(char *cfg_filename,
-	      char *parent_filename,
+void read_cfg(const char *cfg_filename,
+	      const char *parent_filename,
 	      int nesting_level,
 	      FILE *fp0)
 {
@@ -2057,8 +2059,8 @@ void read_cfg(char *cfg_filename,
 }
 
 #ifndef NO_CONFIG_INFO
-static void extra_cfg_link(FILE *fp, char *href,
-			   char *name)
+static void extra_cfg_link(FILE *fp, const char *href,
+			   const char *name)
 {
     fprintf(fp, "<a href=\"%s\">%s</a>",
 	    href, name);

@@ -45,7 +45,7 @@ extern void LYAddMETAcharsetToFD(FILE *fd,
 extern void LYformTitle(char **dst,
 			const char *src);
 extern char *LYParseTagParam(char *from,
-			     char *name);
+			     const char *name);
 extern void LYParseRefreshURL(char *content,
 			      char **p_seconds,
 			      char **p_address);

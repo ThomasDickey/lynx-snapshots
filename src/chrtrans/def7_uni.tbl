@@ -6,7 +6,7 @@
 #
 # Note: there are a few rare replacement strings with trailing spaces
 # which should be enclosed as C strings like "... " to make things obvious
-# (and doing that we should escape \ as \134 and  escape " as \" or \042
+# (and doing that we should escape \ as \134 and escape " as \" or \042
 # but this is really rare).
 #
 
@@ -1858,20 +1858,49 @@ U+25d9:Ic
 U+25e2:Fd
 U+25e3:Bd
 U+25ef:Ci
+U+2600:SU	# cf. U+263c
 U+2605:*2
 U+2606:*1
 U+260e:TEL
 U+260f:tel
+U+261a:<==
+U+261b:==>
 U+261c:<--
 U+261e:-->
-U+2621 "CAUTION "
+U+2620:!X!	# or "POISON ", cf. U+2621
+U+2621:!C!	# previously "CAUTION " - or is it better to leave it spelled out in English?
+U+2622:!R!	# or "RADIOACTIVE ", cf. U+2621
+U+2623:!B!	# or "BIOHAZARD ", cf. U+2621
+U+2624:|S
 U+2627:XP
+U+262f:Pd
 U+2639::-(
 U+263a::-)
 U+263b:(-:
-U+263c:SU
-U+2640:f.
-U+2642:m.
+U+263c:su	# previously "SU" - cf. U+2600, typical to have "dark" character in uppercase, eg. U+260e, U+260f
+U+263d:Lun1	# Luna, 1st quarter
+U+263e:Lun3	# Luna, 3rd quarter
+U+263f:Mer
+U+2640:Ven	# previously "f." - this section labeled as astrological symbols
+U+2641:Ter	# Terra, to go with other Latin names
+U+2642:Mar	# previously "m." - this section labeled as astrological symbols
+U+2643:Jup
+U+2644:Sat
+U+2645:Ura
+U+2646:Nep
+U+2647:Plu
+U+2648:Ari	# Standard astronomical abbreviation
+U+2649:Tau	# Standard astronomical abbreviation
+U+264a:Gem	# Standard astronomical abbreviation
+U+264b:Cnc	# Standard astronomical abbreviation
+U+264c:Leo	# Standard astronomical abbreviation
+U+264d:Vir	# Standard astronomical abbreviation
+U+264e:Lib	# Standard astronomical abbreviation
+U+264f:Sco	# Standard astronomical abbreviation
+U+2650:Sgr	# Standard astronomical abbreviation
+U+2651:Cap	# Standard astronomical abbreviation
+U+2652:Aqr	# Standard astronomical abbreviation
+U+2653:Psc	# Standard astronomical abbreviation
 U+2660:cS
 U+2661:cH
 U+2662:cD
@@ -1887,6 +1916,26 @@ U+266c:M16
 U+266d:b
 U+266e:Mx
 U+266f:#
+U+2672:recyc
+U+2673:Recy1
+U+2674:Recy2
+U+2675:Recy3
+U+2676:Recy4
+U+2677:Recy5
+U+2678:Recy6
+U+2679:Recy7
+U+267a:Recy
+U+267b:Recyc
+U+267c:oRecy
+U+267d:orecy
+U+2680:d1
+U+2681:d2
+U+2682:d3
+U+2683:d4
+U+2684:d5
+U+2685:d6
+U+26a0:!W!	# or "WARNING ", cf. U+2621
+U+26a1:!V!	# or "VOLTAGE ", cf. U+2621
 0x58	U+2713	U+2717	# check marks -> x
 U+2720:-X
 #  CJK area:

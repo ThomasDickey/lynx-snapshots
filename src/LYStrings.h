@@ -25,7 +25,7 @@ extern char *LYstrncpy(char *dst,
 		       const char *src,
 		       int n);
 extern void ena_csi(BOOLEAN flag);
-extern int get_popup_number(char *msg,
+extern int get_popup_number(const char *msg,
 			    int *c,
 			    int *rel);
 extern int LYarrayLength(const char **list);
@@ -47,25 +47,25 @@ extern char *LYmbcsstrncpy(char *dst,
 			   int n_bytes,
 			   int n_glyphs,
 			   BOOL utf_flag);
-extern char *LYmbcs_skip_glyphs(char *data,
-				int n_glyphs,
-				BOOL utf_flag);
-extern int LYmbcsstrlen(char *str,
+extern const char *LYmbcs_skip_glyphs(const char *data,
+				      int n_glyphs,
+				      BOOL utf_flag);
+extern int LYmbcsstrlen(const char *str,
 			BOOL utf_flag,
 			BOOL count_gcells);
 
-extern char *LYno_attr_mbcs_strstr(char *chptr,
-				   const char *tarptr,
-				   BOOL utf_flag,
-				   BOOL count_gcells,
-				   int *nstartp,
-				   int *nendp);
-extern char *LYno_attr_mbcs_case_strstr(char *chptr,
-					const char *tarptr,
-					BOOL utf_flag,
-					BOOL count_gcells,
-					int *nstartp,
-					int *nendp);
+extern const char *LYno_attr_mbcs_strstr(const char *chptr,
+					 const char *tarptr,
+					 BOOL utf_flag,
+					 BOOL count_gcells,
+					 int *nstartp,
+					 int *nendp);
+extern const char *LYno_attr_mbcs_case_strstr(const char *chptr,
+					      const char *tarptr,
+					      BOOL utf_flag,
+					      BOOL count_gcells,
+					      int *nstartp,
+					      int *nendp);
 
 #define non_empty(s) !isEmpty(s)
 
@@ -74,10 +74,10 @@ extern char *LYno_attr_mbcs_case_strstr(char *chptr,
 	    ? LYno_attr_mbcs_strstr(chptr, tarptr, utf_flag, count_gcells, nstartp, nendp) \
 	    : LYno_attr_mbcs_case_strstr(chptr, tarptr, utf_flag, count_gcells, nstartp, nendp))
 
-extern char *LYno_attr_char_strstr(char *chptr,
-				   char *tarptr);
-extern char *LYno_attr_char_case_strstr(char *chptr,
-					char *tarptr);
+extern const char *LYno_attr_char_strstr(const char *chptr,
+					 const char *tarptr);
+extern const char *LYno_attr_char_case_strstr(const char *chptr,
+					      const char *tarptr);
 
 #define LYno_attr_strstr(chptr, tarptr) \
 	(case_sensitive \
@@ -324,7 +324,7 @@ extern int LYhandlePopupList(int cur_choice,
 typedef unsigned char LYEditCode;
 
 extern int current_lineedit;
-extern char *LYLineeditNames[];
+extern const char *LYLineeditNames[];
 extern LYEditCode *LYLineEditors[];
 extern const char *LYLineeditHelpURLs[];
 
@@ -338,7 +338,7 @@ extern int escape_bound;
 extern int LYEditmapDeclared(void);
 
 extern int LYEditInsert(EditFieldData *edit,
-			unsigned char *s,
+			unsigned const char *s,
 			int len, int map_active,
 			BOOL maxMessage);
 

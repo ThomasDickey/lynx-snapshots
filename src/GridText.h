@@ -64,7 +64,7 @@ extern int HTVirtualMemorySize;
 #endif /* VMS && VAXC && !__DECC */
 
 extern HTChildAnchor *HText_childNextNumber(int n, void **prev);
-extern void HText_FormDescNumber(int n, char **desc);
+extern void HText_FormDescNumber(int n, const char **desc);
 
 /*	Is there any file left?
 */
@@ -149,11 +149,11 @@ extern BOOL HText_inLineOne(HText *text);
 extern BOOLEAN HTLoadedDocumentIsHEAD(void);
 extern BOOLEAN HTLoadedDocumentIsSafe(void);
 extern bstring *HTLoadedDocumentPost_data(void);
-extern char *HTLoadedDocumentBookmark(void);
-extern char *HTLoadedDocumentCharset(void);
-extern char *HTLoadedDocumentTitle(void);
-extern char *HTLoadedDocumentURL(void);
-extern char *HText_HiddenLinkAt(HText *text, int number);
+extern const char *HTLoadedDocumentBookmark(void);
+extern const char *HTLoadedDocumentCharset(void);
+extern const char *HTLoadedDocumentTitle(void);
+extern const char *HTLoadedDocumentURL(void);
+extern const char *HText_HiddenLinkAt(HText *text, int number);
 extern int HText_HiddenLinkCount(HText *text);
 extern int HText_LastLineOffset(HText *me);
 extern int HText_LastLineSize(HText *me, BOOL IgnoreSpaces);
@@ -257,7 +257,7 @@ extern int HText_InsertFile(LinkInfo * form_link);
 extern void redraw_lines_of_link(int cur);
 extern void LYMoveToLink(int cur,
 			 const char *target,
-			 char *hightext,
+			 const char *hightext,
 			 int flag,
 			 BOOL inU,
 			 BOOL utf_flag);

@@ -268,9 +268,9 @@ size_t utf8_length(BOOL utf_flag,
  * Set the initial highlight information for a given link.
  */
 void LYSetHilite(int cur,
-		 char *text)
+		 const char *text)
 {
-    links[cur].list.hl_base.hl_text = text;
+    links[cur].list.hl_base.hl_text = (char *) text;
     links[cur].list.hl_len = (text != NULL) ? 1 : 0;
     FREE(links[cur].list.hl_info);
 }
@@ -300,10 +300,10 @@ void LYAddHilite(int cur,
 /*
  * Get the highlight text, counting from zero.
  */
-char *LYGetHiliteStr(int cur,
-		     int count)
+const char *LYGetHiliteStr(int cur,
+			   int count)
 {
-    char *result;
+    const char *result;
 
     if (count >= links[cur].list.hl_len)
 	result = NULL;
@@ -356,12 +356,12 @@ int LYGetHilitePos(int cur,
 static BOOL show_whereis_targets(int flag,
 				 int cur,
 				 int count,
-				 char *target,
+				 const char *target,
 				 BOOL TargetEmphasisON,
 				 BOOL utf_flag)
 {
-    char *Data = NULL;
-    char *cp;
+    const char *Data = NULL;
+    const char *cp;
     char *theData = NULL;
     char buffer[MAX_LINE];
     char tmp[7];
@@ -384,7 +384,7 @@ static BOOL show_whereis_targets(int flag,
 				      &theData,
 				      target)) {
 	int itmp, written, len, y, offset;
-	char *data;
+	const char *data;
 	int tlen = strlen(target);
 	int hlen, hLen;
 	int hLine = links[cur].ly + count;
@@ -987,14 +987,14 @@ static int find_cached_style(int cur,
  */
 void LYhighlight(int flag,
 		 int cur,
-		 char *target)
+		 const char *target)
 {
     char buffer[MAX_LINE];
     int i;
     int hi_count;
     int hi_offset;
     char tmp[7];
-    char *hi_string;
+    const char *hi_string;
 
 #ifdef SHOW_WHEREIS_TARGETS
     BOOL TargetEmphasisON = FALSE;
@@ -1048,7 +1048,7 @@ void LYhighlight(int flag,
 	if (links[cur].type == WWW_FORM_LINK_TYPE) {
 	    int len;
 	    int avail_space = (LYcolLimit - links[cur].lx);
-	    char *text = LYGetHiliteStr(cur, 0);
+	    const char *text = LYGetHiliteStr(cur, 0);
 
 	    if (avail_space > links[cur].l_form->size)
 		avail_space = links[cur].l_form->size;
@@ -1424,7 +1424,7 @@ void statusline(const char *text)
     return;
 }
 
-static char *novice_lines(int lineno)
+static const char *novice_lines(int lineno)
 {
     switch (lineno) {
     case 0:
@@ -1468,7 +1468,7 @@ void noviceline(int more_flag GCC_UNUSED)
     if (LYUseNoviceLineTwo)
 	LYaddstr(NOVICE_LINE_TWO);
     else
-	LYaddstr((char *) novice_lines(lineno));
+	LYaddstr(novice_lines(lineno));
 
     LYrefresh();
     return;
@@ -1688,7 +1688,7 @@ int HTCheckForInterrupt(void)
 	break;
 #ifdef CAN_CUT_AND_PASTE
     case LYK_TO_CLIPBOARD:{	/* ^S */
-	    char *s = LYDownLoadAddress();
+	    const char *s = LYDownLoadAddress();
 
 	    if (!s || !*s || put_clip(s))
 		HTInfoMsg(gettext("Copy to clipboard failed."));
@@ -4346,8 +4346,10 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
 			   char *prefix_list,
 			   char *suffix_list)
 {
-    char DomainPrefix[80], *StartP, *EndP;
-    char DomainSuffix[80], *StartS, *EndS;
+    char DomainPrefix[80];
+    const char *StartP, *EndP;
+    char DomainSuffix[80];
+    const char *StartS, *EndS;
     char *Str = NULL, *StrColon = NULL, *MsgStr = NULL;
     char *Host = NULL, *HostColon = NULL, *host = NULL;
     char *Path = NULL;
@@ -4645,7 +4647,7 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
  * was made.  - FM
  */
 BOOLEAN LYAddSchemeForURL(char **AllocatedString,
-			  char *default_scheme)
+			  const char *default_scheme)
 {
     char *Str = NULL;
     BOOLEAN GotScheme = FALSE;
@@ -5216,10 +5218,10 @@ BOOLEAN LYPathOffHomeOK(char *fbuffer,
  */
 void LYAddPathToHome(char *fbuffer,
 		     size_t fbuffer_size,
-		     char *fname)
+		     const char *fname)
 {
     char *home = NULL;
-    char *file = fname;
+    const char *file = fname;
     int len;
 
     /*
@@ -5694,7 +5696,7 @@ int remove(char *name)
  * special case of its directory being pointed to by a link from a directory
  * owned by root and not writable by other users.
  */
-static BOOL IsOurFile(char *name)
+static BOOL IsOurFile(const char *name)
 {
     struct stat data;
 
@@ -5757,7 +5759,7 @@ static BOOL IsOurFile(char *name)
 /*
  * Open a file that we don't want other users to see.
  */
-static FILE *OpenHiddenFile(char *name, char *mode)
+static FILE *OpenHiddenFile(const char *name, const char *mode)
 {
     FILE *fp = 0;
     struct stat data;
@@ -5813,7 +5815,7 @@ static FILE *OpenHiddenFile(char *name, char *mode)
 }
 #endif /* MULTI_USER_UNIX */
 
-FILE *LYNewBinFile(char *name)
+FILE *LYNewBinFile(const char *name)
 {
 #ifdef VMS
     FILE *fp = fopen(name, BIN_W, "mbc=32");
@@ -5825,7 +5827,7 @@ FILE *LYNewBinFile(char *name)
     return fp;
 }
 
-FILE *LYNewTxtFile(char *name)
+FILE *LYNewTxtFile(const char *name)
 {
     FILE *fp;
 
@@ -5843,7 +5845,7 @@ FILE *LYNewTxtFile(char *name)
     return fp;
 }
 
-FILE *LYAppendToTxtFile(char *name)
+FILE *LYAppendToTxtFile(const char *name)
 {
     FILE *fp;
 
@@ -6724,7 +6726,7 @@ FILE *InternalPageFP(char *filename,
 /*
  * This part is shared by all internal pages.
  */
-void WriteInternalTitle(FILE *fp0, char *Title)
+void WriteInternalTitle(FILE *fp0, const char *Title)
 {
     fprintf(fp0,
 	    "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n");
@@ -6753,8 +6755,8 @@ void WriteInternalTitle(FILE *fp0, char *Title)
  * This is used to start most internal pages, except for special cases where
  * the embedded HREF's in the title differ.
  */
-void BeginInternalPage(FILE *fp0, char *Title,
-		       char *HelpURL)
+void BeginInternalPage(FILE *fp0, const char *Title,
+		       const char *HelpURL)
 {
     WriteInternalTitle(fp0, Title);
 
@@ -7186,9 +7188,9 @@ int Cygwin_Shell(void)
 }
 #endif
 
-char *LYSysShell(void)
+const char *LYSysShell(void)
 {
-    char *shell = 0;
+    const char *shell = 0;
 
 #ifdef DOSPATH
 #ifdef WIN_EX
@@ -7306,7 +7308,7 @@ int size_clip(void)
 
 /* Code partially stolen from FED editor. */
 
-int put_clip(char *s)
+int put_clip(const char *s)
 {
     int sz = strlen(s) + 1;
     int ret = EOF, nl = 0;
@@ -7450,7 +7452,7 @@ char *get_clip_grab(void)
     return paste_buf;
 }
 
-int put_clip(char *s)
+int put_clip(const char *s)
 {
     char *cmd = LYGetEnv("RL_CLCOPY_CMD");
     FILE *fh;

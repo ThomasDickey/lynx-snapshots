@@ -455,7 +455,7 @@ void LYDownload(char *line)
  * Compare a filename with a given suffix, which we have set to give a rough
  * idea of its content.
  */
-static int SuffixIs(char *filename, char *suffix)
+static int SuffixIs(char *filename, const char *suffix)
 {
     size_t have = strlen(filename);
     size_t need = strlen(suffix);

@@ -85,7 +85,7 @@ static BOOL isNumber(const char *s)
  *	returns	the user name
  *		Default is "" (nobody).
  */
-char *HTAA_getUidName(void)
+const char *HTAA_getUidName(void)
 {
     if (current_prot && current_prot->uid_name
 	&& (0 != strcmp(current_prot->uid_name, "nobody")))
@@ -102,7 +102,7 @@ char *HTAA_getUidName(void)
  * ON EXIT:
  *	returns	the filename
  */
-char *HTAA_getFileName(void)
+const char *HTAA_getFileName(void)
 {
     if (current_prot && current_prot->filename)
 	return (current_prot->filename);
@@ -595,7 +595,7 @@ static void clear_uidgid_cache(void)
 #endif /* LY_FIND_LEAKS */
 
 #ifndef NOUSERS
-static void save_gid_info(char *name, int user)
+static void save_gid_info(const char *name, int user)
 {
     USER_DATA *data = typecalloc(USER_DATA);
 
@@ -617,7 +617,7 @@ static void save_gid_info(char *name, int user)
 #endif /* NOUSERS */
 
 #ifndef NOUSERS
-static void save_uid_info(char *name, int user)
+static void save_uid_info(const char *name, int user)
 {
     USER_DATA *data = typecalloc(USER_DATA);
 
@@ -646,7 +646,7 @@ static void save_uid_info(char *name, int user)
  * ON EXIT:
  *      returns the user name, or an empty string if not found.
  */
-char *HTAA_UidToName(int uid)
+const char *HTAA_UidToName(int uid)
 {
 #ifndef NOUSERS
     struct passwd *pw;
@@ -680,7 +680,7 @@ char *HTAA_UidToName(int uid)
  * ON EXIT:
  *      returns the user id, or NONESUCH if not found.
  */
-int HTAA_NameToUid(char *name)
+int HTAA_NameToUid(const char *name)
 {
 #ifndef NOUSERS
     struct passwd *pw;
@@ -713,7 +713,7 @@ int HTAA_NameToUid(char *name)
  * ON EXIT:
  *      returns the group name, or an empty string if not found.
  */
-char *HTAA_GidToName(int gid)
+const char *HTAA_GidToName(int gid)
 {
 #ifndef NOUSERS
     struct group *gr;
@@ -747,7 +747,7 @@ char *HTAA_GidToName(int gid)
  * ON EXIT:
  *      returns the group id, or NONESUCH if not found.
  */
-int HTAA_NameToGid(char *name)
+int HTAA_NameToGid(const char *name)
 {
 #ifndef NOUSERS
     struct group *gr;

@@ -104,7 +104,7 @@ HTAAScheme HTAAScheme_enum(const char *name)
  *	returns		the name of the scheme, i.e.
  *			"None", "Basic", "Pubkey", ...
  */
-char *HTAAScheme_name(HTAAScheme scheme)
+const char *HTAAScheme_name(HTAAScheme scheme)
 {
     switch (scheme) {
     case HTAA_NONE:
@@ -156,7 +156,7 @@ HTAAMethod HTAAMethod_enum(const char *name)
  *	returns		the name of the scheme, i.e.
  *			"GET", "PUT", ...
  */
-char *HTAAMethod_name(HTAAMethod method)
+const char *HTAAMethod_name(HTAAMethod method)
 {
     switch (method) {
     case METHOD_GET:

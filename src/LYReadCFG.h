@@ -49,14 +49,14 @@ extern int check_color(char *color, int the_default);
 extern const char *lookup_color(int code);
 #endif
 
-extern void read_cfg(char *cfg_filename,
-		     char *parent_filename,
+extern void read_cfg(const char *cfg_filename,
+		     const char *parent_filename,
 		     int nesting_level,
 		     FILE *fp0);
 extern void free_lynx_cfg(void);
 extern BOOLEAN have_read_cfg;
 
-extern FILE *LYOpenCFG(char *cfg_filename, char *parent_filename, char *dft_filename);
+extern FILE *LYOpenCFG(const char *cfg_filename, const char *parent_filename, const char *dft_filename);
 extern int lynx_cfg_infopage(DocInfo *newdoc);
 extern int lynx_compile_opts(DocInfo *newdoc);
 extern int match_item_by_name(lynx_list_item_type *ptr, char *name, BOOLEAN only_overriders);

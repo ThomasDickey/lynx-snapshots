@@ -235,10 +235,10 @@ typedef struct config_type {
     int enabled;		/* see lynx.cfg ENABLE_LYNXRC "off" lines */
     Conf_Types type;
       ParseData;
-    char **strings;
+    const char **strings;
     Config_Enum *table;
     void (*write_it) (FILE *fp, struct config_type *);
-    char *note;
+    const char *note;
 } Config_Type;
 
 static int get_assume_charset(char *value)
@@ -592,7 +592,7 @@ in the Visited Links Page.\n\
 };
 /* *INDENT-ON* */
 
-static Config_Type *lookup_config(char *name)
+static Config_Type *lookup_config(const char *name)
 {
     Config_Type *tbl = Config_Table;
     char ch = (char) TOUPPER(*name);
@@ -665,7 +665,7 @@ void read_rc(FILE *fp)
 
 	tbl = lookup_config(name);
 	if (tbl->name == 0) {
-	    char *special = RC_MULTI_BOOKMARK;
+	    const char *special = RC_MULTI_BOOKMARK;
 
 	    if (!strncasecomp(name, special, strlen(special))) {
 		tbl = lookup_config(special);
@@ -777,7 +777,7 @@ void read_rc(FILE *fp)
  * Write a set of comments.  Doing it this way avoids preprocessor problems
  * with the leading '#', makes it simpler to use gettext.
  */
-static void write_list(FILE *fp, char *list)
+static void write_list(FILE *fp, const char *list)
 {
     int first = TRUE;
 
@@ -952,7 +952,7 @@ It is not this file.\n\
 /*
  * Returns true if the given name would be saved in .lynxrc
  */
-BOOL will_save_rc(char *name)
+BOOL will_save_rc(const char *name)
 {
     Config_Type *tbl = lookup_config(name);
 

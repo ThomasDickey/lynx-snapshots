@@ -104,7 +104,7 @@ char *LYNewsPost(char *newsgroups,
      * Make sure a non-zero length newspost, newsreply, snewspost or snewsreply
      * path was sent to us.  - FM
      */
-    if (!(newsgroups && *newsgroups))
+    if (isEmpty(newsgroups))
 	return (postfile);
 
     /*
@@ -318,7 +318,7 @@ char *LYNewsPost(char *newsgroups,
     /*
      * Have the user create the message body.
      */
-    if (!no_editor && editor && *editor != '\0') {
+    if (!no_editor && non_empty(editor)) {
 
 	if (followup && nhist > 0) {
 	    /*

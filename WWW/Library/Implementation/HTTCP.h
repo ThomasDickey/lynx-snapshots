@@ -35,7 +35,7 @@ extern const char *HTInetString(struct sockaddr_in *mysin);
  * On return:
  *      returns a negative status in the unix way.
  */
-extern int HTInetStatus(char *where);
+extern int HTInetStatus(const char *where);
 
 /*      Publicly accessible variables
 */
@@ -93,7 +93,7 @@ extern struct hostent *LYGetHostByName(char *str);
 extern const char *HTHostName(void);
 
 extern int HTDoConnect(const char *url,
-		       char *protocol,
+		       const char *protocol,
 		       int default_port,
 		       int *s);
 

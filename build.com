@@ -1,10 +1,15 @@
-$ v = 'f$verify(0)'
+$ v0 = 0
+$ v = f$verify(v0)
 $!			BUILD.COM
 $!
 $!   Command file to build LYNX.EXE on VMS systems.
 $!   Also invokes build of the WWWLibrary if its
 $!    object library does not already exist.
 $!
+$!   04-Nov-2004	T.Dickey
+$!	workarounds to build with IA64 platform.
+$!   23-Oct-2004	T.Dickey
+$!	cleanup, remove duplication, etc.
 $!   08-Oct-1997	F.Macrides		macrides@sci.wfeb.edu
 $!	Added comments and minor tweaks for convenient addition of
 $!	compiler definitions and compiler and linker options.
@@ -59,7 +64,17 @@ $!	definitions will apply only to the LYfoo.c modules.  Ones
 $!	for the libwww-FM modules can be added equivalently in
 $!	[.WWW.Library.vms]libmake.com. - FM
 $!
-$ extra = ""
+$ extra_defs = ""
+$!
+$!	Include-paths can be added here as a comma separated
+$!	list with a lead comma, e.g., ",foo".
+$!
+$ extra_incs = ""
+$!
+$!	Library definitions can be added here as a comma separated
+$!	list with a lead comma, e.g., ",foo/LIB".
+$!
+$ extra_libs = ""
 $!
 $!	If no TCP/IP agent is specified (as the first argument),
 $!	prompt for a number from the list.   Note that the agent
@@ -86,7 +101,7 @@ $ 	read sys$command/prompt="Agent [1,2,3,4,5,6] (RETURN = [1]) " agent
 $   EndIf
 $ ENDIF
 $ option = ""
-$ if agent .eq. 1 .or. agent .eqs. "" .or. p1 .eqs. "" .or. p1 .eqs. "MULTINET" then - 
+$ if agent .eq. 1 .or. agent .eqs. "" .or. p1 .eqs. "" .or. p1 .eqs. "MULTINET" then -
     option = "MULTINET"
 $ if agent .eq. 2 .or. p1 .eqs. "UCX" then option = "UCX"
 $ if agent .eq. 3 .or. p1 .eqs. "WIN_TCP" then option = "WIN_TCP"
@@ -94,16 +109,16 @@ $ if agent .eq. 4 .or. p1 .eqs. "CMU_TCP" then option = "CMU_TCP"
 $ if agent .eq. 5 .or. p1 .eqs. "SOCKETSHR_TCP" then option = "SOCKETSHR_TCP"
 $ if agent .eq. 6 .or. p1 .eqs. "TCPWARE" then option = "TCPWARE"
 $!
-$ if option .eqs. "" 
-$ then 
-$    write sys$output "TCP/IP agent could not be determined" 
-$    exit 18 
-$ endif 
-$ 
+$ if option .eqs. ""
+$ then
+$    write sys$output "TCP/IP agent could not be determined"
+$    exit 18
+$ endif
+$
 $ if option .eqs. "TCPWARE"
 $ then
 $    write sys$output "Building Lynx for TCPWARE with UCX emulation..."
-$    extra = extra + ",UCX"
+$    extra_defs = extra_defs + ",UCX"
 $ endif
 $!
 $ optfile = "''option'"
@@ -118,17 +133,59 @@ $!
 $ cc_opts = ""
 $ link_opts = ""
 $!
-$ if p2 .nes. ""
+$!	The second parameter is a comma-separated list of the optional
+$!	libraries:
+$!		bzlib, slang, ssl, zlib
+$!	Because these are normally not installed in a standard place,
+$!	you must define their locations (see below for the symbols ending
+$!	with "_INC" or "_LIB").
+$!
+$ if P2 .nes. ""
 $ then
-$   ssl_arg = "openssl"
-$   extra = extra + ",USE_SSL,USE_OPENSSL_INCL"
-$   ssl_libs = ",ssllib:libssl/LIB,ssllib:libcrypto/LIB"
-$ else
-$   ssl_arg = ""
-$   ssl_libs = ""
+$   count_parm = 0
+$ parse_p2:
+$   value_parm = f$element('count_parm, ",", "''p2'")
+$   if value_parm .nes. ","
+$   then
+$      if value_parm .eqs. "BZLIB"
+$      then
+$         write sys$output "** adding BZlib to build."
+$         extra_defs = extra_defs + ",USE_BZLIB"
+$         extra_incs = extra_incs + "," + BZLIB_INC
+$         extra_libs = extra_libs + "," + BZLIB_LIB + "libbz2/LIB"
+$      endif
+$      if value_parm .eqs. "SLANG"
+$      then
+$         write sys$output "** adding SLang to build."
+$         extra_defs = extra_defs + ",USE_SLANG"
+$         extra_incs = extra_incs + "," + SLANG_INC
+$         extra_libs = extra_libs + "," + SLANG_LIB + "slang.olb/lib"
+$      endif
+$      if value_parm .eqs. "SSL"
+$      then
+$         write sys$output "** adding SSL to build."
+$         extra_defs = extra_defs + ",USE_SSL,USE_OPENSSL_INCL"
+$         extra_libs = extra_libs + "," + SSL_LIB + "libssl/LIB," + SSL_LIB + "libcrypto/LIB"
+$!
+$!	The "#include <openssl/ssl.h>" requires a logical variable "openssl".
+$!
+$         define/nolog openssl 'SSL_INC
+$      endif
+$      if value_parm .eqs. "ZLIB"
+$      then
+$         write sys$output "** adding Zlib to build."
+$         extra_defs = extra_defs + ",USE_ZLIB"
+$         extra_incs = extra_incs + "," + ZLIB_INC
+$         extra_libs = extra_libs + "," + ZLIB_LIB + "libz/LIB"
+$      endif
+$      count_parm = count_parm + 1
+$      goto parse_p2
+$   endif
 $ endif
 $!
-$ if p3 .nes. ""
+$!	The third parameter is nonempty to make a debug build
+$!
+$ if P3 .nes. ""
 $   then
 $      debug_arg = "DEBUG"
 $      cc_opts = cc_opts + "/DEBUG/NOOPT"
@@ -140,8 +197,8 @@ $!
 $ IF f$search("[.WWW.Library.Implementation]WWWLib_''option'.olb") .nes. ""
 $ THEN
 $   write sys$output "  WWWLib_''option'.olb already exists."
-$   If f$mode() .eqs. "BATCH" 
-$   Then 
+$   If f$mode() .eqs. "BATCH"
+$   Then
 $	write sys$output "  Updating WWWLib_''option'.olb"
 $   Else
 $	read sys$command/prompt="  Update it [default Y]? " reply
@@ -155,11 +212,11 @@ $!
 $!	Build the WWWLibrary
 $!
 $ set default [.WWW.Library.VMS]
-$ v1 = 'f$verify(0)'
-$ @libmake 'option' 'ssl_arg' 'debug_arg'
+$ v1 = f$verify(v0)
+$ @libmake "''option'" "''P2'" "''debug_arg'"
 $ v1 = f$verify(1)
 $ set default [-.-.-]
-$ v1 = 'f$verify(0)'
+$ v1 = f$verify(v0)
 $ ON CONTROL_Y THEN GOTO CLEANUP
 $ ON ERROR THEN GOTO CLEANUP
 $!
@@ -167,8 +224,8 @@ $Compile_CHRTRANS:
 $ IF f$search("[.src.chrtrans]makeuctb.exe") .nes. ""
 $ THEN
 $   write sys$output "  [.src.chrtrans]makeuctb.exe already exists."
-$   If f$mode() .eqs. "BATCH" 
-$   Then 
+$   If f$mode() .eqs. "BATCH"
+$   Then
 $	write sys$output "  Updating makeuctb.exe and chrtrans header files."
 $   Else
 $	read sys$command -
@@ -184,11 +241,11 @@ $!
 $!	Build the chrtrans modules.
 $!
 $ set default [.src.chrtrans]
-$ v1 = 'f$verify(0)'
+$ v1 = 'f$verify(v0)
 $ @build-chrtrans
 $ v1 = f$verify(1)
 $ set default [-.-]
-$ v1 = 'f$verify(0)'
+$ v1 = f$verify(v0)
 $ ON CONTROL_Y THEN GOTO CLEANUP
 $ ON ERROR THEN GOTO CLEANUP
 $!
@@ -198,23 +255,25 @@ $!
 $!	Compile the Lynx [.SRC] modules
 $!
 $ set default [.SRC]
-$ v1 = 'f$verify(0)'
-$ IF f$trnlnm("VAXCMSG") .eqs. "DECC$MSG" .or. -
+$ v1 = f$verify(v0)
+$ IF f$getsyi("ARCH_NAME") .eqs. "Alpha" .or. -
+     f$getsyi("ARCH_NAME") .eqs. "IA64" .or. -
+     f$trnlnm("VAXCMSG") .eqs. "DECC$MSG" .or. -
      f$trnlnm("DECC$CC_DEFAULT") .eqs. "/DECC" .or. -
      f$trnlnm("DECC$CC_DEFAULT") .eqs. "/VAXC"
 $ THEN
 $  compiler := "DECC"
 $  if option .eqs. "UCX" then optfile = "UCXSHR"
 $  if option .eqs. "TCPWARE" then optfile = "TCPWARESHR"
-$  if option .eqs. "SOCKETSHR_TCP" then extra = extra + ",_DECC_V4_SOURCE"
+$  if option .eqs. "SOCKETSHR_TCP" then extra_defs = extra_defs + ",_DECC_V4_SOURCE"
 $  if option .eqs. "MULTINET" then -
-	extra = extra + ",_DECC_V4_SOURCE,__SOCKET_TYPEDEFS"
+	extra_defs = extra_defs + ",_DECC_V4_SOURCE,__SOCKET_TYPEDEFS"
 $  v1 = f$verify(1)
 $! DECC:
 $  cc := cc/decc/prefix=all/nomember'cc_opts' -
-	   /DEFINE=(ACCESS_AUTH,'option''extra',__VMS_CURSES)-
-	   /INCLUDE=([],[-],[-.WWW.Library.Implementation],[.chrtrans]) 
-$  v1 = 'f$verify(0)'
+	   /DEFINE=(ACCESS_AUTH,'option''extra_defs',__VMS_CURSES)-
+	   /INCLUDE=([],[-],[-.WWW.Library.Implementation],[.chrtrans]'extra_incs')
+$  v1 = f$verify(v0)
 $ ELSE
 $  if option .eqs. "UCX" then optfile = "UCXOLB"
 $  if option .eqs. "TCPWARE" then optfile = "TCPWAREOLB"
@@ -224,17 +283,17 @@ $   compiler := "GNUC"
 $   v1 = f$verify(1)
 $! GNUC:
 $   cc := gcc'cc_opts' -
-	     /DEFINE=(ACCESS_AUTH,'option''extra')-
-	     /INCLUDE=([],[-],[-.WWW.Library.Implementation],[.chrtrans]) 
-$   v1 = 'f$verify(0)'
+	     /DEFINE=(ACCESS_AUTH,'option''extra_defs')-
+	     /INCLUDE=([],[-],[-.WWW.Library.Implementation],[.chrtrans]'extra_incs')
+$   v1 = f$verify(v0)
 $  ELSE
 $   compiler := "VAXC"
 $   v1 = f$verify(1)
 $! VAXC:
 $   cc := cc'cc_opts' -
-	    /DEFINE=(ACCESS_AUTH,'option''extra')-
-	    /INCLUDE=([],[-],[-.WWW.Library.Implementation],[.chrtrans]) 
-$   v1 = 'f$verify(0)'
+	    /DEFINE=(ACCESS_AUTH,'option''extra_defs')-
+	    /INCLUDE=([],[-],[-.WWW.Library.Implementation],[.chrtrans]'extra_incs')
+$   v1 = f$verify(v0)
 $  ENDIF
 $ ENDIF
 $ v1 = f$verify(1)
@@ -251,7 +310,7 @@ $ cc LYCharSets
 $ cc LYCharUtils
 $ cc LYClean
 $ cc LYCookie
-$ cc LYCurses
+$ cc/nooptimize LYCurses
 $ cc LYDownload
 $ cc LYEdit
 $ cc LYEditmap
@@ -284,6 +343,13 @@ $ cc UCAux
 $ cc UCdomap
 $!
 $!	Link the objects and libaries.
+$!
+$ IF f$getsyi("ARCH_NAME") .eqs. "IA64"
+$ THEN
+$    optslibs="''extra_libs'"
+$ ELSE
+$    optslibs=", sys$disk:[]''optfile'.opt/opt, sys$disk:[]''compiler'.opt/opt ''extra_libs'"
+$ ENDIF
 $!
 $ link/exe=lynx.exe/map=lynx 'link_opts' -
 DefaultStyle.obj, -
@@ -329,15 +395,14 @@ TRSTable.obj, -
 UCAuto.obj, -
 UCAux.obj, -
 UCdomap.obj, -
-[-.WWW.Library.Implementation]WWWLib_'option'.olb/library, -
-sys$disk:[]'optfile'.opt/opt, sys$disk:[]'compiler'.opt/opt 'ssl_libs'
+[-.WWW.Library.Implementation]WWWLib_'option'.olb/library 'optslibs
 $!
 $!	Copy the executable to the top directory and restore the default.
 $!
 $ copy lynx.exe [-]
 $ set def [-]
 $!
-$ v1 = 'f$verify(0)'
+$ v1 = f$verify(v0)
 $!
 $!  Issue message on how to include LYNX.HLP in the system HELP library
 $!
@@ -348,7 +413,7 @@ $ write sys$output "        library/replace sys$help:helplib.hlb lynx.hlp"
 $ write sys$output ""
 $!
 $ CLEANUP:
-$    v1 = 'f$verify(0)'
+$    v1 = f$verify(v0)
 $    set default 'where'
 $    write sys$output "Default directory:"
 $    show default

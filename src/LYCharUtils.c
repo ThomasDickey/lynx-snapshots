@@ -2042,7 +2042,7 @@ BOOL LYUCTranslateBackFormData(char **str,
  * Parse a parameter from an HTML META tag, i.e., the CONTENT.
  */
 char *LYParseTagParam(char *from,
-		      char *name)
+		      const char *name)
 {
     size_t len = strlen(name);
     char *result = NULL;
@@ -2128,7 +2128,7 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
      * Load the attributes for possible use by Lynx.  - FM
      */
     if (present[HTML_META_HTTP_EQUIV] &&
-	value[HTML_META_HTTP_EQUIV] && *value[HTML_META_HTTP_EQUIV]) {
+	non_empty(value[HTML_META_HTTP_EQUIV])) {
 	StrAllocCopy(http_equiv, value[HTML_META_HTTP_EQUIV]);
 	convert_to_spaces(http_equiv, TRUE);
 	LYUCTranslateHTMLString(&http_equiv, me->tag_charset, me->tag_charset,
@@ -2138,7 +2138,7 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 	}
     }
     if (present[HTML_META_NAME] &&
-	value[HTML_META_NAME] && *value[HTML_META_NAME]) {
+	non_empty(value[HTML_META_NAME])) {
 	StrAllocCopy(name, value[HTML_META_NAME]);
 	convert_to_spaces(name, TRUE);
 	LYUCTranslateHTMLString(&name, me->tag_charset, me->tag_charset,
@@ -2148,7 +2148,7 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 	}
     }
     if (present[HTML_META_CONTENT] &&
-	value[HTML_META_CONTENT] && *value[HTML_META_CONTENT]) {
+	non_empty(value[HTML_META_CONTENT])) {
 	/*
 	 * Technically, we should be creating a comma-separated list, but META
 	 * tags come one at a time, and we'll handle (or ignore) them as each
@@ -2286,7 +2286,7 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 	 * Check for a text/html Content-Type with a charset directive, if we
 	 * didn't already set the charset via a server's header.  - AAC & FM
 	 */
-    } else if (!(me->node_anchor->charset && *me->node_anchor->charset) &&
+    } else if (isEmpty(me->node_anchor->charset) &&
 	       !strcasecomp(NonNull(http_equiv), "Content-Type")) {
 	LYUCcharset *p_in = NULL;
 	LYUCcharset *p_out = NULL;
@@ -2585,7 +2585,7 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 	 * filename=name.suffix in it, if we don't already have it via a server
 	 * header.  - FM
 	 */
-    } else if (!(me->node_anchor->SugFname && *me->node_anchor->SugFname) &&
+    } else if (isEmpty(me->node_anchor->SugFname) &&
 	       !strcasecomp((http_equiv ?
 			     http_equiv : ""), "Content-Disposition")) {
 	cp = content;
@@ -2816,7 +2816,7 @@ void LYHandleSELECT(HTStructured * me, const BOOL *present,
 	me->inSELECT = TRUE;
 
 	if (!(present && present[HTML_SELECT_NAME] &&
-	      value[HTML_SELECT_NAME] && *value[HTML_SELECT_NAME])) {
+	      non_empty(value[HTML_SELECT_NAME]))) {
 	    StrAllocCopy(name, "");
 	} else if (strchr(value[HTML_SELECT_NAME], '&') == NULL) {
 	    StrAllocCopy(name, value[HTML_SELECT_NAME]);
@@ -2829,7 +2829,7 @@ void LYHandleSELECT(HTStructured * me, const BOOL *present,
 	if (present && present[HTML_SELECT_DISABLED])
 	    me->select_disabled = TRUE;
 	if (present && present[HTML_SELECT_SIZE] &&
-	    value[HTML_SELECT_SIZE] && *value[HTML_SELECT_SIZE]) {
+	    non_empty(value[HTML_SELECT_SIZE])) {
 	    /*
 	     * Let the size be determined by the number of OPTIONs.  - FM
 	     */
@@ -2941,7 +2941,7 @@ void LYHandleSELECT(HTStructured * me, const BOOL *present,
 		}
 		HText_setIgnoreExcess(me->text, TRUE);
 	    }
-	    for (; ptr && *ptr != '\0'; ptr++) {
+	    for (; non_empty(ptr); ptr++) {
 		if (*ptr == ' ')
 		    HText_appendCharacter(me->text, HT_NON_BREAK_SPACE);
 		else
@@ -3191,7 +3191,7 @@ void LYCheckForID(HTStructured * me, const BOOL *present,
 	return;
 
     if (present && present[attribute]
-	&& value[attribute] && *value[attribute]) {
+	&& non_empty(value[attribute])) {
 	/*
 	 * Translate any named or numeric character references.  - FM
 	 */
@@ -3225,7 +3225,7 @@ void LYHandleID(HTStructured * me, const char *id)
     HTChildAnchor *ID_A = NULL;
 
     if (!(me && me->text) ||
-	!(id && *id))
+	isEmpty(id))
 	return;
 
     /*

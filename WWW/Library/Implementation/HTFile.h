@@ -205,9 +205,9 @@ typedef enum {
 /*
  *  Determine compression type from file name, by looking at its suffix.
  */
-extern CompressFileType HTCompressFileType(char *filename,
-					   char *dots,
-					   char **suffix);
+extern CompressFileType HTCompressFileType(const char *filename,
+					   const char *dots,
+					   int *rootlen);
 
 /*
  *  Determine compression type from the content-type.

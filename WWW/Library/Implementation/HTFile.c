@@ -130,13 +130,13 @@ int HTDirReadme = HT_DIR_README_NONE;
 int HTDirReadme = HT_DIR_README_TOP;
 #endif /* DIRED_SUPPORT */
 
-static char *HTMountRoot = "/Net/";	/* Where to find mounts */
+static const char *HTMountRoot = "/Net/";	/* Where to find mounts */
 
 #ifdef VMS
-static char *HTCacheRoot = "/WWW$SCRATCH";	/* Where to cache things */
+static const char *HTCacheRoot = "/WWW$SCRATCH";	/* Where to cache things */
 
 #else
-static char *HTCacheRoot = "/tmp/W3_Cache_";	/* Where to cache things */
+static const char *HTCacheRoot = "/tmp/W3_Cache_";	/* Where to cache things */
 #endif /* VMS */
 
 /*
@@ -189,7 +189,7 @@ static char *FormatNum(char **bufp,
     return *bufp;
 }
 
-static void LYListFmtParse(char *fmtstr,
+static void LYListFmtParse(const char *fmtstr,
 			   DIRED * data,
 			   char *file,
 			   HTStructured * target,
@@ -205,7 +205,7 @@ static void LYListFmtParse(char *fmtstr,
     char type;
 
 #ifndef NOUSERS
-    char *name;
+    const char *name;
 #endif
     time_t now;
     char *datestr;
@@ -216,7 +216,7 @@ static void LYListFmtParse(char *fmtstr,
 #define SEC_PER_YEAR	(60 * 60 * 24 * 365)
 
 #ifdef _WINDOWS			/* 1998/01/06 (Tue) 21:20:53 */
-    static char *pbits[] =
+    static const char *pbits[] =
     {
 	"---", "--x", "-w-", "-wx",
 	"r--", "r-x", "rw-", "rwx",
@@ -225,10 +225,10 @@ static void LYListFmtParse(char *fmtstr,
 #define PBIT(a, n, s)  pbits[((a) >> (n)) & 0x7]
 
 #else
-    static char *pbits[] =
+    static const char *pbits[] =
     {"---", "--x", "-w-", "-wx",
      "r--", "r-x", "rw-", "rwx", 0};
-    static char *psbits[] =
+    static const char *psbits[] =
     {"--S", "--s", "-wS", "-ws",
      "r-S", "r-s", "rwS", "rws", 0};
 
@@ -236,7 +236,7 @@ static void LYListFmtParse(char *fmtstr,
 	pbits[((a) >> (n)) & 0x7]
 #endif
 #ifdef S_ISVTX
-    static char *ptbits[] =
+    static const char *ptbits[] =
     {"--T", "--t", "-wT", "-wt",
      "r-T", "r-t", "rwT", "rwt", 0};
 
@@ -819,13 +819,13 @@ const char *HTFileSuffix(HTAtom *rep,
 static const char *VMS_trim_version(const char *filename)
 {
     const char *result = filename;
-    char *version = strchr(filename, ';');
+    const char *version = strchr(filename, ';');
 
     if (version != 0) {
 	static char *stripped;
 
 	StrAllocCopy(stripped, filename);
-	stripped[(const char *) version - filename] = '\0';
+	stripped[version - filename] = '\0';
 	result = (const char *) stripped;
     }
     return result;
@@ -1201,13 +1201,13 @@ float HTFileValue(const char *filename)
  *  Determine compression type from file name, by looking at its suffix.
  *  Sets as side-effect a pointer to the "dot" that begins the suffix.
  */
-CompressFileType HTCompressFileType(char *filename,
-				    char *dots,
-				    char **suffix)
+CompressFileType HTCompressFileType(const char *filename,
+				    const char *dots,
+				    int *rootlen)
 {
     CompressFileType result = cftNone;
     size_t len = strlen(filename);
-    char *ftype = filename + len;
+    const char *ftype = filename + len;
 
     VMS_DEL_VERSION(filename);
 
@@ -1233,10 +1233,10 @@ CompressFileType HTCompressFileType(char *filename,
 	ftype -= 2;
     }
 
-    *suffix = ftype;
+    *rootlen = (ftype - filename);
 
     CTRACE((tfp, "HTCompressFileType(%s) returns %d:%s\n",
-	    filename, result, *suffix));
+	    filename, result, filename + *rootlen));
     return result;
 }
 
@@ -1663,9 +1663,9 @@ static void do_readme(HTStructured * target, const char *localname)
 #define NM_cmp(a,b) ((a) < (b) ? -1 : ((a) > (b) ? 1 : 0))
 
 #if defined(LONG_LIST) && defined(DIRED_SUPPORT)
-static char *file_type(char *path)
+static const char *file_type(const char *path)
 {
-    char *type;
+    const char *type;
 
     while (*path == '.')
 	++path;
@@ -2149,7 +2149,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
     CompressFileType internal_decompress = cftNone;
     BOOL failed_decompress = NO;
 #endif
-    char *dot = 0;
+    int rootlen = 0;
     char *localname = filename;
     int bin;
     FILE *fp;
@@ -2164,7 +2164,7 @@ static int decompressAndParse(HTParentAnchor *anchor,
 		 : localname + 1);
 #endif /* VMS */
 
-    bin = HTCompressFileType(filename, ".", &dot) != cftNone;
+    bin = HTCompressFileType(filename, ".", &rootlen) != cftNone;
     fp = fopen(localname, FOPEN_MODE(bin));
 
 #ifdef VMS
@@ -2238,13 +2238,13 @@ static int decompressAndParse(HTParentAnchor *anchor,
 		format = HTAtom_for("www/compressed");
 	    }
 	} else {
-	    CompressFileType cft = HTCompressFileType(localname, DOT_STRING, &dot);
+	    CompressFileType cft = HTCompressFileType(localname, DOT_STRING, &rootlen);
 
 	    if (cft != cftNone) {
 		char *cp = NULL;
 
 		StrAllocCopy(cp, localname);
-		cp[dot - localname] = '\0';
+		cp[rootlen] = '\0';
 		format = HTFileFormat(cp, &encoding, NULL);
 		FREE(cp);
 		format = HTCharsetFormat(format, anchor,
@@ -2407,7 +2407,6 @@ int HTLoadFile(const char *addr,
     char *newname = NULL;	/* Simplified name of file */
     HTAtom *myEncoding = NULL;	/* enc of this file, may be gzip etc. */
     int status = -1;
-    char *dot;
 
 #ifdef VMS
     struct stat stat_info;
@@ -2609,15 +2608,16 @@ int HTLoadFile(const char *addr,
 					       0L /* @@@@@@ */ );
 
 		    if (value <= 0.0) {
-			char *atomname = NULL;
+			int rootlen = 0;
+			const char *atomname = NULL;
 			CompressFileType cft =
-			HTCompressFileType(dirbuf->d_name, ".", &dot);
+			HTCompressFileType(dirbuf->d_name, ".", &rootlen);
 			char *cp = NULL;
 
 			enc = NULL;
 			if (cft != cftNone) {
 			    StrAllocCopy(cp, dirbuf->d_name);
-			    cp[dot - dirbuf->d_name] = '\0';
+			    cp[rootlen] = '\0';
 			    format = HTFileFormat(cp, NULL, NULL);
 			    FREE(cp);
 			    value = HTStackValue(format, format_out,

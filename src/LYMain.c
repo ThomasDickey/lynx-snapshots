@@ -150,7 +150,9 @@ BOOLEAN enable_scrollback = TRUE;
 BOOLEAN enable_scrollback = FALSE;
 #endif /* REVERSE_CLEAR_SCREEN_PROBLEM */
 
-char *empty_string = "\0";
+char empty_string[] =
+{'\0'};
+
 int display_lines;		/* number of lines in display */
 int www_search_result = -1;
 
@@ -571,7 +573,7 @@ BOOLEAN FileInitAlreadyDone = FALSE;
 
 static BOOLEAN stack_dump = FALSE;
 static char *terminal = NULL;
-static char *pgm;
+static const char *pgm;
 static BOOLEAN no_numbers = FALSE;
 static BOOLEAN number_links = FALSE;
 static BOOLEAN number_fields = FALSE;
@@ -888,7 +890,7 @@ static BOOL cleanup_win32(DWORD fdwCtrlType)
  */
 #ifdef USE_SSL
 static void append_ssl_version(char **target,
-			       char *separator)
+			       const char *separator)
 {
     char SSLLibraryVersion[256];
     char *SSLcp;
@@ -1599,7 +1601,7 @@ int main(int argc,
     if (startfile_stdin) {
 	char result[LY_MAXPATH];
 	char *buf = NULL;
-	char *tty = NULL;
+	const char *tty = NULL;
 
 # ifdef HAVE_TTYNAME
 	tty = ttyname(fileno(stderr));
@@ -1978,7 +1980,7 @@ int main(int argc,
      * If we don't have a homepage specified, set it to startfile.  Otherwise,
      * reset LynxHome.  - FM
      */
-    if (!(homepage && *homepage)) {
+    if (isEmpty(homepage)) {
 	StrAllocCopy(homepage, startfile);
     } else {
 	StrAllocCopy(LynxHome, homepage);
@@ -2031,7 +2033,7 @@ int main(int argc,
     LYOpenlog(syslog_txt);
 #endif
 
-    if (x_display != NULL && *x_display != '\0') {
+    if (non_empty(x_display)) {
 	LYisConfiguredForX = TRUE;
     }
 
@@ -2849,9 +2851,9 @@ static int post_data_fun(char *next_arg GCC_UNUSED)
     return 0;
 }
 
-static char *show_restriction(const char *name)
+static const char *show_restriction(const char *name)
 {
-    char *value = 0;
+    const char *value = 0;
 
     switch (find_restriction(name, -1)) {
     case TRUE:

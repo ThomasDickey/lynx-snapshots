@@ -81,7 +81,7 @@ static void comma_append(char **dst,
 
 static void extract_field(char **dst,
 			  char *src,
-			  char *keyword)
+			  const char *keyword)
 {
     int len = strlen(keyword);
     char *cp, *cp1;
@@ -246,7 +246,7 @@ static BOOLEAN convert_explorer(char *address)
  * reply_by_mail() prompts line-by-line for header information, allowing
  * scrolling of the screen.
  */
-static int header_prompt(char *label,
+static int header_prompt(const char *label,
 			 char **result,
 			 unsigned limit)
 {
@@ -1097,7 +1097,7 @@ void reply_by_mail(char *mail_address,
 #endif
     char user_input[LINESIZE];
     FILE *fd, *fp;
-    char *label = NULL;
+    const char *label = NULL;
     char *from_address = NULL;
     char *cc_address = NULL;
     char *to_address = NULL;

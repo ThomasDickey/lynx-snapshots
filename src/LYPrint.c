@@ -88,7 +88,7 @@ static void set_environ(int name,
     char temp[80];
 
     StrAllocCopy(envbuffer, value);
-    if (!(envbuffer && *envbuffer))
+    if (isEmpty(envbuffer))
 	StrAllocCopy(envbuffer, no_value);
     Define_VMSLogical(strcpy(temp, names[name]), envbuffer);
     FREE(envbuffer);
@@ -142,7 +142,7 @@ static char *suggested_filename(DocInfo *newdoc)
 }
 
 static void SetupFilename(char *filename,
-			  char *sug_filename)
+			  const char *sug_filename)
 {
     HTFormat format;
     HTAtom *encoding;
@@ -269,7 +269,7 @@ static int RecallFilename(char *filename,
     return FN_DONE;
 }
 
-static BOOLEAN confirm_by_pages(char *prompt,
+static BOOLEAN confirm_by_pages(const char *prompt,
 				int lines_in_file,
 				int lines_per_page)
 {
@@ -1066,7 +1066,7 @@ int printfile(DocInfo *newdoc)
     if (HText_getContentBase()) {
 	StrAllocCopy(content_base, HText_getContentBase());
 	LYRemoveBlanks(content_base);
-	if (!(content_base && *content_base)) {
+	if (isEmpty(content_base)) {
 	    FREE(content_base);
 	}
     }
@@ -1078,7 +1078,7 @@ int printfile(DocInfo *newdoc)
 	if (HText_getContentLocation()) {
 	    StrAllocCopy(content_location, HText_getContentLocation());
 	    LYRemoveBlanks(content_location);
-	    if (!(content_location && *content_location)) {
+	    if (isEmpty(content_location)) {
 		FREE(content_location);
 	    }
 	}

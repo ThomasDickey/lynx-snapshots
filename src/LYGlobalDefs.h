@@ -234,9 +234,6 @@ extern char *LYRequestTitle;	/* newdoc.title in calls to getfile() */
 extern char *LYTransferName;	/* abbreviation for Kilobytes */
 extern char *LynxHome;
 extern char *LynxSigFile;	/* Signature file, in or off home */
-extern char *checked_box;	/* form boxes */
-extern char *checked_radio;	/* form radio buttons */
-extern char *empty_string;
 extern char *ftp_lasthost;
 extern char *helpfile;
 extern char *helpfilepath;
@@ -255,9 +252,12 @@ extern char *pref_charset;	/* Lynx's preferred character set - MM */
 extern char *startfile;
 extern char *system_mail;
 extern char *system_mail_flags;
-extern char *unchecked_box;	/* form boxes */
-extern char *unchecked_radio;	/* form radio buttons */
 extern char *x_display;
+extern char empty_string[];
+extern const char *checked_box;	/* form boxes */
+extern const char *checked_radio;	/* form radio buttons */
+extern const char *unchecked_box;	/* form boxes */
+extern const char *unchecked_radio;	/* form radio buttons */
 
 extern int LYAcceptEncoding;
 extern int LYAcceptMedia;
@@ -400,7 +400,7 @@ extern char *startrealm;
 extern BOOLEAN more_links;
 extern int crawl_count;
 extern BOOLEAN LYCancelledFetch;
-extern char *LYToolbarName;
+extern const char *LYToolbarName;
 
 extern int AlertSecs;
 extern int InfoSecs;

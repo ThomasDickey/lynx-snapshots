@@ -209,7 +209,8 @@ char *HTTranslate(const char *required)
 {
     rule *r;
     char *current = NULL;
-    char *msgtmp = NULL, *pMsg;
+    char *msgtmp = NULL;
+    const char *pMsg;
     int proxy_none_flag = 0;
     int permitredir_flag = 0;
 
@@ -446,8 +447,11 @@ int HTSetConfiguration(char *config)
     HTRuleOp op;
     char *line = NULL;
     char *pointer = line;
-    char *word1, *word2, *word3;
-    char *cond_op = NULL, *cond = NULL;
+    char *word1;
+    const char *word2;
+    const char *word3;
+    const char *cond_op = NULL;
+    const char *cond = NULL;
     float quality, secs, secs_per_byte;
     int maxbytes;
     int status;
@@ -586,7 +590,8 @@ int HTSetConfiguration(char *config)
 		if (cond_op && *cond_op)
 		    cond = HTNextField(&pointer);
 		if (word3) {	/* Fix string with too may %s - kw */
-		    char *cp = word3, *cp1, *cp2;
+		    const char *cp = word3;
+		    char *cp1, *cp2;
 
 		    while ((cp1 = strchr(cp, '%'))) {
 			if (cp1[1] == '\0') {

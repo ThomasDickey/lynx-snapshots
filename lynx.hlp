@@ -1,4 +1,4 @@
-1 LYNX
+1
 2 Name
        lynx  - a general purpose distributed information browser for the World
        Wide Web
@@ -57,39 +57,40 @@
               charset for documents that don't specify it.
 
        -assume_local_charset=MIMEname
-              charset assumed for local files.
+              charset  assumed for local files, i.e., files which lynx creates
+              such as internal pages for the options menu.
 
        -assume_unrec_charset=MIMEname
               use this instead of unrecognized charsets.
 
        -auth=ID:PASSWD
-              set  authorization  ID  and  password for protected documents at
-              startup.  Be sure to protect any script  files  which  use  this
+              set authorization ID and password  for  protected  documents  at
+              startup.   Be  sure  to  protect any script files which use this
               switch.
 
-       -base  prepend  a request URL comment and BASE tag to text/html outputs
+       -base  prepend a request URL comment and BASE tag to text/html  outputs
               for -source dumps.
 
        -bibp=URL
               specify a local bibp server (default http://bibhost/).
 
-       -blink forces high intensity  background  colors  for  color  mode,  if
-              available  and  supported  by the terminal.  This applies to the
-              slang library (for a few terminal emulators),  or  to  OS/2  EMX
+       -blink forces  high  intensity  background  colors  for  color mode, if
+              available and supported by the terminal.  This  applies  to  the
+              slang  library  (for  a  few terminal emulators), or to OS/2 EMX
               with ncurses.
 
-       -book  use  the bookmark page as the startfile.  The default or command
-              line startfile is still set for the  Main  screen  command,  and
+       -book  use the bookmark page as the startfile.  The default or  command
+              line  startfile  is  still  set for the Main screen command, and
               will be used if the bookmark page is unavailable or blank.
 
        -buried_news
-              toggles  scanning  of  news  articles for buried references, and
-              converts them to news  links.   Not  recommended  because  email
-              addresses  enclosed in angle brackets will be converted to false
+              toggles scanning of news articles  for  buried  references,  and
+              converts  them  to  news  links.   Not recommended because email
+              addresses enclosed in angle brackets will be converted to  false
               news links, and uuencoded messages can be trashed.
 
        -cache=NUMBER
-              set the NUMBER of documents cached in memory.   The  default  is
+              set  the  NUMBER  of documents cached in memory.  The default is
               10.
 
        -case  enable case-sensitive string searching.
@@ -98,52 +99,52 @@
               Toggle center alignment in HTML TABLE.
 
        -cfg=FILENAME
-              specifies  a  Lynx  configuration  file  other  than the default
+              specifies a Lynx  configuration  file  other  than  the  default
               lynx.cfg.
 
        -child exit on left-arrow in startfile, and disable save to disk.
 
        -cmd_log=FILENAME
-              write  keystroke  commands  and  related  information   to   the
+              write   keystroke   commands  and  related  information  to  the
               specified file.
 
        -cmd_script=FILENAME
-              read  keystroke  commands  from the specified file.  You can use
-              the data written using the -cmd_log option.   Lynx  will  ignore
-              other  information which the command-logging may have written to
-              the logfile.  Each line of the command script contains either  a
+              read keystroke commands from the specified file.   You  can  use
+              the  data  written  using the -cmd_log option.  Lynx will ignore
+              other information which the command-logging may have written  to
+              the  logfile.  Each line of the command script contains either a
               comment beginning with "#", or a keyword:
 
-            exit causes   the   script  to  stop,  and  forces  Lynx  to  exit
+            exit causes  the  script  to  stop,  and  forces  Lynx   to   exit
                  immediately.
 
-            key  the character value, in printable  form.   Cursor  and  other
-                 special   keys  are  given  as  names,  e.g.,  "Down  Arrow".
-                 Printable 7-bit ASCII codes are given as-is, and  hexadecimal
+            key  the  character  value,  in  printable form.  Cursor and other
+                 special  keys  are  given  as  names,  e.g.,  "Down   Arrow".
+                 Printable  7-bit ASCII codes are given as-is, and hexadecimal
                  values represent other 8-bit codes.
 
-            set  followed  by a "name=value" allows one to override values set
+            set  followed by a "name=value" allows one to override values  set
                  in the lynx.cfg file.
 
-       -color forces color mode  on,  if  available.   Default  color  control
-              sequences  which work for many terminal types are assumed if the
-              terminal capability description does not specify how  to  handle
-              color.   Lynx  needs  to  be compiled with the slang library for
+       -color forces  color  mode  on,  if  available.   Default color control
+              sequences which work for many terminal types are assumed if  the
+              terminal  capability  description does not specify how to handle
+              color.  Lynx needs to be compiled with  the  slang  library  for
               this flag, it is equivalent to setting the COLORTERM environment
-              variable.   (If  color  support  is instead provided by a color-
-              capable curses library like ncurses, Lynx relies  completely  on
-              the  terminal  description  to  determine  whether color mode is
-              possible, and this flag is not needed and thus unavailable.)   A
-              saved  show_color=always  setting  found  in  a  .lynxrc file at
-              startup has the same effect.  A saved show_color=never found  in
+              variable.  (If color support is instead  provided  by  a  color-
+              capable  curses  library like ncurses, Lynx relies completely on
+              the terminal description to  determine  whether  color  mode  is
+              possible,  and this flag is not needed and thus unavailable.)  A
+              saved show_color=always setting  found  in  a  .lynxrc  file  at
+              startup  has the same effect.  A saved show_color=never found in
               .lynxrc on startup is overridden by this flag.
 
        -connect_timeout=N
               Sets the connection timeout, where N is given in seconds.
 
        -cookie_file=FILENAME
-              specifies  a file to use to read cookies.  If none is specified,
-              the default value  is  ~/.lynx_cookies  for  most  systems,  but
+              specifies a file to use to read cookies.  If none is  specified,
+              the  default  value  is  ~/.lynx_cookies  for  most systems, but
               ~/cookies for MS-DOS.
 
        -cookie_save_file=FILENAME
@@ -160,7 +161,7 @@
               output as with -traversal, but to stdout.
 
        -curses_pads
-              toggles  the  use  of  curses  "pad"  feature   which   supports
+              toggles   the   use  of  curses  "pad"  feature  which  supports
               left/right scrolling of the display.
 
        -debug_partial
@@ -178,22 +179,22 @@
               inhibit wrapping of text in <pre> when -dump'ing and -crawl'ing,
               mark wrapped lines in interactive session.
 
-       -dump  dumps the formatted output of  the  default  document  or  those
-              specified  on  the  command  line  to  standard  output.  Unlike
+       -dump  dumps  the  formatted  output  of  the default document or those
+              specified on  the  command  line  to  standard  output.   Unlike
               interactive mode, all documents are processed.  This can be used
               in the following way:
 
               lynx -dump http://www.subir.com/lynx.html
 
        -editor=EDITOR
-              enable  external  editing,  using the specified EDITOR. (vi, ed,
+              enable external editing, using the specified  EDITOR.  (vi,  ed,
               emacs, etc.)
 
        -emacskeys
               enable emacs-like key movement.
 
        -enable_scrollback
-              toggles compatibility with  communication  programs'  scrollback
+              toggles  compatibility  with  communication programs' scrollback
               keys (may be incompatible with some curses packages).
 
        -error_file=FILE
@@ -206,11 +207,11 @@
 
        -find_leaks
               toggle memory leak-checking.  Normally this is not compiled-into
-              your executable, but when it  is,  it  can  be  disabled  for  a
+              your  executable,  but  when  it  is,  it  can be disabled for a
               session.
 
        -force_empty_hrefless_a
-              force  HREF-less `A' elements to be empty (close them as soon as
+              force HREF-less `A' elements to be empty (close them as soon  as
               they are seen).
 
        -force_html
@@ -227,8 +228,8 @@
        -ftp   disable ftp access.
 
        -get_data
-              properly formatted data for a get form are read  in  from  stdin
-              and  passed  to  the  form.   Input is terminated by a line that
+              properly  formatted  data  for a get form are read in from stdin
+              and passed to the form.  Input is  terminated  by  a  line  that
               starts with `---'.
 
        -head  send a HEAD request for the mime headers.
@@ -242,9 +243,9 @@
               together with other links in the sequence of their occurrence in
               the document.
 
-              listonly hidden links  are  shown  only  on  L)ist  screens  and
-              listings  generated by -dump or from the P)rint menu, but appear
-              separately at the end of  those  lists.   This  is  the  default
+              listonly  hidden  links  are  shown  only  on  L)ist screens and
+              listings generated by -dump or from the P)rint menu, but  appear
+              separately  at  the  end  of  those  lists.  This is the default
               behavior.
 
               ignore hidden links do not appear even in listings.
@@ -261,7 +262,7 @@
        -index=URL
               set the default index file to the specified URL.
 
-       -ismap toggles  inclusion  of  ISMAP  links  when  client-side MAPs are
+       -ismap toggles inclusion of  ISMAP  links  when  client-side  MAPs  are
               present.
 
        -justify
@@ -270,19 +271,22 @@
        -link=NUMBER
               starting count for lnk#.dat files produced by -crawl.
 
+       -listonly
+              for -dump, show only the list of links.
+
        -localhost
               disable URLs that point to remote hosts.
 
        -locexec
-              enable local program execution from local files  only  (if  Lynx
+              enable  local  program  execution from local files only (if Lynx
               was compiled with local execution enabled).
 
        -lss=FILENAME
-              specify   filename   containing  color-style  information.   The
+              specify  filename  containing  color-style   information.    The
               default is lynx.lss.
 
        -mime_header
-              prints the MIME header of a  fetched  document  along  with  its
+              prints  the  MIME  header  of  a fetched document along with its
               source.
 
        -minimal
@@ -304,11 +308,11 @@
               disable directory browsing.
 
        -nocc  disable Cc: prompts for self copies of mailings.  Note that this
-              does not disable any CCs which are incorporated within a  mailto
+              does  not disable any CCs which are incorporated within a mailto
               URL or form ACTION.
 
        -nocolor
-              force  color  mode off, overriding terminal capabilities and any
+              force color mode off, overriding terminal capabilities  and  any
               -color flags, COLORTERM variable, and saved .lynxrc settings.
 
        -noexec
@@ -323,10 +327,14 @@
        -nolog disable mailing of error messages to document owners.
 
        -nonrestarting_sigwinch
-              This flag is not available on all  systems,  Lynx  needs  to  be
-              compiled  with  HAVE_SIGACTION defined.  If available, this flag
-              may cause Lynx to react more immediately to window changes  when
+              This  flag  is  not  available  on all systems, Lynx needs to be
+              compiled with HAVE_SIGACTION defined.  If available,  this  flag
+              may  cause Lynx to react more immediately to window changes when
               run within an xterm.
+
+       -nonumbers
+              disable   link-    and    field-numbering.     This    overrides
+              -number_fields and -number_links.
 
        -nopause
               disable forced pauses for statusline messages.
@@ -389,7 +397,7 @@
        -print enable print functions. (default)
 
        -pseudo_inlines
-              toggles pseudo-ALTs for inlines with no ALT string.
+              toggles pseudo-ALTs for inline images with no ALT string.
 
        -raw   toggles  default  setting of 8-bit character translations or CJK
               mode for the startup character set.

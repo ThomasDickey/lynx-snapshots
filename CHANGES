@@ -1,7 +1,23 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2004-10-?? (2.8.6dev.7)
+2004-11-07 (2.8.6dev.8)
+* improve def7_uni.tbl substitutions for the symbols beginning at U+2600
+  (patch by Tim Larson <Tim.Larson@conagrafoods.com>).
+* update nl.po, sv.po from
+    http://www.iro.umontreal.ca/translation/maint/lynx/
+* add clean.com -TD
+* scripting fixes to make OpenVMS/IA64 platform build/work -TD
+* several changes to use const, prompted by VMS compiler warnings -TD
+* remove build-slang.com -TD
+* simplify libmake.com -TD
+* modify build.com, making its second parameter a comma-separated list of the
+  special libraries which may be used, e.g., bzlib, slang, ssl and zlib -TD
+* some cleanup using non_empty() macro -TD
+* limit TEXTAREA columns to the screen width, and rows to 3 times the screen
+  height (report by FLWM) -TD
+
+2004-10-17 (2.8.6dev.7)
 * update de.po, et.po from
     http://www.iro.umontreal.ca/translation/maint/lynx
 * clarification in manpage description of "-pseudo_inlines" option (Dan

@@ -44,7 +44,7 @@ static BOOLEAN can_do_colors = FALSE;
 
 BOOLEAN LYCheckUserAgent(void)
 {
-    if (LYUserAgent && *LYUserAgent) {
+    if (non_empty(LYUserAgent)) {
 	if (strstr(LYUserAgent, "Lynx") == 0
 	    && strstr(LYUserAgent, "lynx") == 0
 	    && strstr(LYUserAgent, "L_y_n_x") == 0
@@ -266,19 +266,19 @@ static void addlbl(const char *text)
 void LYoptions(void)
 {
 #define ShowBool(value) LYaddstr((value) ? "ON " : "OFF")
-    static char *bool_choices[] =
+    static const char *bool_choices[] =
     {
 	"OFF",
 	"ON",
 	NULL
     };
-    static char *caseless_choices[] =
+    static const char *caseless_choices[] =
     {
 	"CASE INSENSITIVE",
 	"CASE SENSITIVE",
 	NULL
     };
-    static char *dirList_choices[] =
+    static const char *dirList_choices[] =
     {
 	"Directories first",
 	"Files first",
@@ -287,7 +287,7 @@ void LYoptions(void)
     };
 
 #if defined(ENABLE_OPTS_CHANGE_EXEC) && (defined(EXEC_LINKS) || defined(EXEC_SCRIPTS))
-    static char *exec_choices[] =
+    static const char *exec_choices[] =
     {
 	"ALWAYS OFF",
 	"FOR LOCAL FILES ONLY",
@@ -297,7 +297,7 @@ void LYoptions(void)
 	NULL
     };
 #endif
-    static char *fileSort_choices[] =
+    static const char *fileSort_choices[] =
     {
 	"By Filename",
 	"By Type",
@@ -305,21 +305,21 @@ void LYoptions(void)
 	"By Date",
 	NULL
     };
-    static char *keypad_choices[] =
+    static const char *keypad_choices[] =
     {
 	"Numbers act as arrows",
 	"Links are numbered",
 	"Links and form fields are numbered",
 	NULL
     };
-    static char *mbm_choices[] =
+    static const char *mbm_choices[] =
     {
 	"OFF     ",
 	"STANDARD",
 	"ADVANCED",
 	NULL
     };
-    static char *userMode_choices[] =
+    static const char *userMode_choices[] =
     {
 	"Novice",
 	"Intermediate",
@@ -416,11 +416,11 @@ void LYoptions(void)
     lynx_stop_h1_color();
     LYmove(L_EDITOR, 5);
     addlbl("(E)ditor                     : ");
-    LYaddstr((editor && *editor) ? editor : "NONE");
+    LYaddstr(non_empty(editor) ? editor : "NONE");
 
     LYmove(L_DISPLAY, 5);
     addlbl("(D)ISPLAY variable           : ");
-    LYaddstr((x_display && *x_display) ? x_display : "NONE");
+    LYaddstr(non_empty(x_display) ? x_display : "NONE");
 
     LYmove(L_HOME, 5);
     addlbl("mu(L)ti-bookmarks: ");
@@ -430,7 +430,7 @@ void LYoptions(void)
 	addlbl("review/edit (B)ookmarks files");
     } else {
 	addlbl("(B)ookmark file: ");
-	LYaddstr((bookmark_page && *bookmark_page) ? bookmark_page : "NONE");
+	LYaddstr(non_empty(bookmark_page) ? bookmark_page : "NONE");
     }
 
     LYmove(L_FTPSTYPE, 5);
@@ -442,7 +442,7 @@ void LYoptions(void)
 
     LYmove(L_MAIL_ADDRESS, 5);
     addlbl("(P)ersonal mail address      : ");
-    LYaddstr((personal_mail_address && *personal_mail_address) ?
+    LYaddstr(non_empty(personal_mail_address) ?
 	     personal_mail_address : "NONE");
 
     LYmove(L_SSEARCH, 5);
@@ -455,11 +455,11 @@ void LYoptions(void)
 
     LYmove(L_LANGUAGE, 5);
     addlbl("preferred document lan(G)uage: ");
-    LYaddstr((language && *language) ? language : "NONE");
+    LYaddstr(non_empty(language) ? language : "NONE");
 
     LYmove(L_PREF_CHARSET, 5);
     addlbl("preferred document c(H)arset : ");
-    LYaddstr((pref_charset && *pref_charset) ? pref_charset : "NONE");
+    LYaddstr(non_empty(pref_charset) ? pref_charset : "NONE");
 
     if (use_assume_charset) {
 	LYmove(L_ASSUME_CHARSET, 5);
@@ -562,7 +562,7 @@ void LYoptions(void)
 
     LYmove(L_User_Agent, 5);
     addlbl("user (A)gent                 : ");
-    LYaddstr((LYUserAgent && *LYUserAgent) ? LYUserAgent : "NONE");
+    LYaddstr(non_empty(LYUserAgent) ? LYUserAgent : "NONE");
 
 #if defined(ENABLE_OPTS_CHANGE_EXEC) && (defined(EXEC_LINKS) || defined(EXEC_SCRIPTS))
     LYmove(L_Exec, 5);
@@ -628,7 +628,7 @@ void LYoptions(void)
 	    } else if (system_editor) {
 		_statusline(EDITOR_LOCKED);
 	    } else {
-		if (editor && *editor)
+		if (non_empty(editor))
 		    LYstrncpy(display_option, editor, sizeof(display_option) - 1);
 		else {		/* clear the NONE */
 		    LYmove(L_EDITOR, COL_OPTION_VALUES);
@@ -643,7 +643,7 @@ void LYoptions(void)
 		lynx_stop_bold();
 		LYmove(L_EDITOR, COL_OPTION_VALUES);
 		if (term_options || ch == -1) {
-		    LYaddstr((editor && *editor) ?
+		    LYaddstr(non_empty(editor) ?
 			     editor : "NONE");
 		} else if (*display_option == '\0') {
 		    FREE(editor);
@@ -664,7 +664,7 @@ void LYoptions(void)
 	    break;
 
 	case 'D':		/* Change the display. */
-	    if (x_display && *x_display) {
+	    if (non_empty(x_display)) {
 		LYstrncpy(display_option, x_display, sizeof(display_option) - 1);
 	    } else {		/* clear the NONE */
 		LYmove(L_DISPLAY, COL_OPTION_VALUES);
@@ -692,7 +692,7 @@ void LYoptions(void)
 		 * Cancelled, or a non-NULL display string wasn't changed.  -
 		 * FM
 		 */
-		LYaddstr((x_display && *x_display) ? x_display : "NONE");
+		LYaddstr(non_empty(x_display) ? x_display : "NONE");
 		LYclrtoeol();
 		if (ch == -1) {
 		    HTInfoMsg(CANCELLED);
@@ -760,7 +760,7 @@ void LYoptions(void)
 		    LYaddstr(gettext("review/edit B)ookmarks files"));
 		} else {
 		    LYaddstr(gettext("B)ookmark file: "));
-		    LYaddstr((bookmark_page && *bookmark_page) ?
+		    LYaddstr(non_empty(bookmark_page) ?
 			     bookmark_page : "NONE");
 		}
 	    }
@@ -781,7 +781,7 @@ void LYoptions(void)
 		    signal(SIGINT, terminate_options);
 		    goto draw_options;
 		}
-		if (bookmark_page && *bookmark_page) {
+		if (non_empty(bookmark_page)) {
 		    LYstrncpy(display_option,
 			      bookmark_page,
 			      sizeof(display_option) - 1);
@@ -799,11 +799,11 @@ void LYoptions(void)
 		LYmove(L_HOME, C_DEFAULT);
 		if (term_options ||
 		    ch == -1 || *display_option == '\0') {
-		    LYaddstr((bookmark_page && *bookmark_page) ?
+		    LYaddstr(non_empty(bookmark_page) ?
 			     bookmark_page : "NONE");
 		} else if (!LYPathOffHomeOK(display_option,
 					    sizeof(display_option))) {
-		    LYaddstr((bookmark_page && *bookmark_page) ?
+		    LYaddstr(non_empty(bookmark_page) ?
 			     bookmark_page : "NONE");
 		    LYclrtoeol();
 		    _statusline(USE_PATH_OFF_HOME);
@@ -850,7 +850,7 @@ void LYoptions(void)
 	    break;
 
 	case 'P':		/* Change personal mail address for From headers. */
-	    if (personal_mail_address && *personal_mail_address) {
+	    if (non_empty(personal_mail_address)) {
 		LYstrncpy(display_option,
 			  personal_mail_address,
 			  sizeof(display_option) - 1);
@@ -1065,7 +1065,7 @@ void LYoptions(void)
 	    break;
 
 	case 'G':		/* Change language preference. */
-	    if (language && *language) {
+	    if (non_empty(language)) {
 		LYstrncpy(display_option, language, sizeof(display_option) - 1);
 	    } else {		/* clear the NONE */
 		LYmove(L_LANGUAGE, COL_OPTION_VALUES);
@@ -1080,7 +1080,7 @@ void LYoptions(void)
 	    lynx_stop_bold();
 	    LYmove(L_LANGUAGE, COL_OPTION_VALUES);
 	    if (term_options || ch == -1) {
-		LYaddstr((language && *language) ?
+		LYaddstr(non_empty(language) ?
 			 language : "NONE");
 	    } else if (*display_option == '\0') {
 		FREE(language);
@@ -1100,7 +1100,7 @@ void LYoptions(void)
 	    break;
 
 	case 'H':		/* Change charset preference. */
-	    if (pref_charset && *pref_charset) {
+	    if (non_empty(pref_charset)) {
 		LYstrncpy(display_option,
 			  pref_charset,
 			  sizeof(display_option) - 1);
@@ -1117,7 +1117,7 @@ void LYoptions(void)
 	    lynx_stop_bold();
 	    LYmove(L_PREF_CHARSET, COL_OPTION_VALUES);
 	    if (term_options || ch == -1) {
-		LYaddstr((pref_charset && *pref_charset) ?
+		LYaddstr(non_empty(pref_charset) ?
 			 pref_charset : "NONE");
 	    } else if (*display_option == '\0') {
 		FREE(pref_charset);
@@ -1438,7 +1438,7 @@ void LYoptions(void)
 
 	case 'A':		/* Change user agent string. */
 	    if (!no_useragent) {
-		if (LYUserAgent && *LYUserAgent) {
+		if (non_empty(LYUserAgent)) {
 		    LYstrncpy(display_option,
 			      LYUserAgent,
 			      sizeof(display_option) - 1);
@@ -2133,26 +2133,26 @@ static OptValues bool_values[] =
     {0, 0, 0}
 };
 
-static char *secure_string = "secure";
+static const char *secure_string = "secure";
 static char *secure_value = NULL;
-static char *save_options_string = "save_options";
+static const char *save_options_string = "save_options";
 
 /*
  * Personal Preferences
  */
-static char *cookies_string = RC_SET_COOKIES;
-static char *cookies_ignore_all_string = N_("ignore");
-static char *cookies_up_to_user_string = N_("ask user");
-static char *cookies_accept_all_string = N_("accept all");
-static char *x_display_string = RC_DISPLAY;
-static char *editor_string = RC_FILE_EDITOR;
-static char *emacs_keys_string = RC_EMACS_KEYS;
+static const char *cookies_string = RC_SET_COOKIES;
+static const char *cookies_ignore_all_string = N_("ignore");
+static const char *cookies_up_to_user_string = N_("ask user");
+static const char *cookies_accept_all_string = N_("accept all");
+static const char *x_display_string = RC_DISPLAY;
+static const char *editor_string = RC_FILE_EDITOR;
+static const char *emacs_keys_string = RC_EMACS_KEYS;
 
 #if defined(ENABLE_OPTS_CHANGE_EXEC) && (defined(EXEC_LINKS) || defined(EXEC_SCRIPTS))
 #define EXEC_ALWAYS 2
 #define EXEC_LOCAL  1
 #define EXEC_NEVER  0
-static char *exec_links_string = RC_RUN_ALL_EXECUTION_LINKS;
+static const char *exec_links_string = RC_RUN_ALL_EXECUTION_LINKS;
 static OptValues exec_links_values[] =
 {
     {EXEC_NEVER, N_("ALWAYS OFF"), "ALWAYS OFF"},
@@ -2165,9 +2165,9 @@ static OptValues exec_links_values[] =
 #endif /* ENABLE_OPTS_CHANGE_EXEC */
 
 #ifdef EXP_KEYBOARD_LAYOUT
-static char *kblayout_string = RC_KBLAYOUT;
+static const char *kblayout_string = RC_KBLAYOUT;
 #endif
-static char *keypad_mode_string = RC_KEYPAD_MODE;
+static const char *keypad_mode_string = RC_KEYPAD_MODE;
 static OptValues keypad_mode_values[] =
 {
     {NUMBERS_AS_ARROWS, N_("Numbers act as arrows"),
@@ -2182,9 +2182,9 @@ static OptValues keypad_mode_values[] =
      "forms_numbered"},
     {0, 0, 0}
 };
-static char *lineedit_mode_string = RC_LINEEDIT_MODE;
-static char *mail_address_string = RC_PERSONAL_MAIL_ADDRESS;
-static char *search_type_string = RC_CASE_SENSITIVE_SEARCHING;
+static const char *lineedit_mode_string = RC_LINEEDIT_MODE;
+static const char *mail_address_string = RC_PERSONAL_MAIL_ADDRESS;
+static const char *search_type_string = RC_CASE_SENSITIVE_SEARCHING;
 static OptValues search_type_values[] =
 {
     {FALSE, N_("Case insensitive"), "case_insensitive"},
@@ -2193,7 +2193,7 @@ static OptValues search_type_values[] =
 };
 
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
-static char *show_color_string = RC_SHOW_COLOR;
+static const char *show_color_string = RC_SHOW_COLOR;
 static OptValues show_color_values[] =
 {
     {SHOW_COLOR_NEVER, never_string, never_string},
@@ -2204,12 +2204,12 @@ static OptValues show_color_values[] =
 };
 #endif
 
-static char *show_cursor_string = RC_SHOW_CURSOR;
+static const char *show_cursor_string = RC_SHOW_CURSOR;
 
-static char *underline_links_string = RC_UNDERLINE_LINKS;
+static const char *underline_links_string = RC_UNDERLINE_LINKS;
 
 #ifdef USE_SCROLLBAR
-static char *show_scrollbar_string = RC_SCROLLBAR;
+static const char *show_scrollbar_string = RC_SCROLLBAR;
 #endif
 
 static const char prompt_dft_string[] = N_("prompt normally");
@@ -2223,13 +2223,13 @@ static OptValues prompt_values[] =
     {0, 0, 0}
 };
 
-static char *cookie_prompt_string = RC_FORCE_COOKIE_PROMPT;
+static const char *cookie_prompt_string = RC_FORCE_COOKIE_PROMPT;
 
 #ifdef USE_SSL
-static char *ssl_prompt_string = RC_FORCE_SSL_PROMPT;
+static const char *ssl_prompt_string = RC_FORCE_SSL_PROMPT;
 #endif
 
-static char *user_mode_string = RC_USER_MODE;
+static const char *user_mode_string = RC_USER_MODE;
 static OptValues user_mode_values[] =
 {
     {NOVICE_MODE, N_("Novice"), "Novice"},
@@ -2238,9 +2238,9 @@ static OptValues user_mode_values[] =
     {0, 0, 0}
 };
 
-static char *vi_keys_string = RC_VI_KEYS;
+static const char *vi_keys_string = RC_VI_KEYS;
 
-static char *visited_links_string = RC_VISITED_LINKS;
+static const char *visited_links_string = RC_VISITED_LINKS;
 static OptValues visited_links_values[] =
 {
     {VISITED_LINKS_AS_FIRST_V, N_("By First Visit"), "first_visited"},
@@ -2256,7 +2256,7 @@ static OptValues visited_links_values[] =
 /*
  * Document Layout
  */
-static char *DTD_recovery_string = RC_TAGSOUP;
+static const char *DTD_recovery_string = RC_TAGSOUP;
 static OptValues DTD_type_values[] =
 {
 	/* Old_DTD variable */
@@ -2265,13 +2265,13 @@ static OptValues DTD_type_values[] =
     {0, 0, 0}
 };
 
-static char *select_popups_string = RC_SELECT_POPUPS;
-static char *images_string = "images";
-static char *images_ignore_all_string = N_("ignore");
-static char *images_use_label_string = N_("as labels");
-static char *images_use_links_string = N_("as links");
+static const char *select_popups_string = RC_SELECT_POPUPS;
+static const char *images_string = "images";
+static const char *images_ignore_all_string = N_("ignore");
+static const char *images_use_label_string = N_("as labels");
+static const char *images_use_links_string = N_("as links");
 
-static char *verbose_images_string = RC_VERBOSE_IMAGES;
+static const char *verbose_images_string = RC_VERBOSE_IMAGES;
 static OptValues verbose_images_type_values[] =
 {
 	/* verbose_img variable */
@@ -2283,7 +2283,7 @@ static OptValues verbose_images_type_values[] =
 /*
  * Bookmark Options
  */
-static char *mbm_string = RC_MULTI_BOOKMARK;
+static const char *mbm_string = RC_MULTI_BOOKMARK;
 static OptValues mbm_values[] =
 {
     {MBM_OFF, N_("OFF"), "OFF"},
@@ -2292,26 +2292,26 @@ static OptValues mbm_values[] =
     {0, 0, 0}
 };
 
-static char *single_bookmark_string = RC_BOOKMARK_FILE;
+static const char *single_bookmark_string = RC_BOOKMARK_FILE;
 
 /*
  * Character Set Options
  */
-static char *assume_char_set_string = RC_ASSUME_CHARSET;
-static char *display_char_set_string = RC_CHARACTER_SET;
-static char *raw_mode_string = RC_RAW_MODE;
+static const char *assume_char_set_string = RC_ASSUME_CHARSET;
+static const char *display_char_set_string = RC_CHARACTER_SET;
+static const char *raw_mode_string = RC_RAW_MODE;
 
 #ifdef EXP_LOCALE_CHARSET
-static char *locale_charset_string = RC_LOCALE_CHARSET;
+static const char *locale_charset_string = RC_LOCALE_CHARSET;
 #endif
 
 /*
  * File Management Options
  */
-static char *show_dotfiles_string = RC_SHOW_DOTFILES;
+static const char *show_dotfiles_string = RC_SHOW_DOTFILES;
 
 #ifdef DIRED_SUPPORT
-static char *dired_list_string = RC_DIR_LIST_STYLE;
+static const char *dired_list_string = RC_DIR_LIST_STYLE;
 static OptValues dired_list_values[] =
 {
     {DIRS_FIRST, N_("Directories first"), "dired_dir"},
@@ -2321,7 +2321,7 @@ static OptValues dired_list_values[] =
 };
 
 #ifdef LONG_LIST
-static char *dired_sort_string = RC_DIR_LIST_ORDER;
+static const char *dired_sort_string = RC_DIR_LIST_ORDER;
 static OptValues dired_sort_values[] =
 {
     {ORDER_BY_NAME, N_("By Name"), "dired_by_name"},
@@ -2338,7 +2338,7 @@ static OptValues dired_sort_values[] =
 #endif /* LONG_LIST */
 #endif /* DIRED_SUPPORT */
 
-static char *ftp_sort_string = RC_FILE_SORTING_METHOD;
+static const char *ftp_sort_string = RC_FILE_SORTING_METHOD;
 static OptValues ftp_sort_values[] =
 {
     {FILE_BY_NAME, N_("By Name"), "ftp_by_name"},
@@ -2349,7 +2349,7 @@ static OptValues ftp_sort_values[] =
 };
 
 #ifdef USE_READPROGRESS
-static char *show_rate_string = RC_SHOW_KB_RATE;
+static const char *show_rate_string = RC_SHOW_KB_RATE;
 static OptValues rate_values[] =
 {
     {rateOFF, N_("Do not show rate"), "rate_off"},
@@ -2366,7 +2366,7 @@ static OptValues rate_values[] =
 /*
  * Presentation (MIME) types used in "Accept".
  */
-static char *preferred_media_string = RC_PREFERRED_MEDIA_TYPES;
+static const char *preferred_media_string = RC_PREFERRED_MEDIA_TYPES;
 static OptValues media_values[] =
 {
     {mediaOpt1, N_("Accept lynx's internal types"), "media_opt1"},
@@ -2377,7 +2377,7 @@ static OptValues media_values[] =
     {0, 0, 0}
 };
 
-static char *preferred_encoding_string = RC_PREFERRED_ENCODING;
+static const char *preferred_encoding_string = RC_PREFERRED_ENCODING;
 static OptValues encoding_values[] =
 {
     {encodingNONE, N_("None"), "encoding_none"},
@@ -2398,9 +2398,9 @@ static OptValues encoding_values[] =
 /*
  * Headers transferred to remote server
  */
-static char *preferred_doc_char_string = RC_PREFERRED_CHARSET;
-static char *preferred_doc_lang_string = RC_PREFERRED_LANGUAGE;
-static char *user_agent_string = RC_USERAGENT;
+static const char *preferred_doc_char_string = RC_PREFERRED_CHARSET;
+static const char *preferred_doc_lang_string = RC_PREFERRED_LANGUAGE;
+static const char *user_agent_string = RC_USERAGENT;
 
 #define PutTextInput(fp, Name, Value, Size, disable) \
 	fprintf(fp,\
@@ -3227,6 +3227,8 @@ int postoptions(DocInfo *newdoc)
 
 static char *NewSecureValue(void)
 {
+    static char oops[] = "?";
+
     FREE(secure_value);
     if ((secure_value = malloc(80)) != 0) {
 #if defined(RAND_MAX)
@@ -3238,7 +3240,7 @@ static char *NewSecureValue(void)
 	sprintf(secure_value, "%ld", key);
 	return secure_value;
     }
-    return "?";
+    return oops;
 }
 
 #define LABEL_LEN 33
@@ -3247,8 +3249,8 @@ static char *NewSecureValue(void)
  * Note: the 'value' we are passing here is a local copy of the "same" string
  * as is used in LYrcFile.c to index the savable options.
  */
-static void PutLabel(FILE *fp, char *name,
-		     char *value)
+static void PutLabel(FILE *fp, const char *name,
+		     const char *value)
 {
     int have = strlen(name);
     int want = LABEL_LEN;
@@ -3278,10 +3280,10 @@ static void PutLabel(FILE *fp, char *name,
  * so, return that name, so the subsequence will_save_rc() check in PutLabel()
  * will flag the composite as not-saved.
  */
-static char *check_if_write_lynxrc(char **table)
+static const char *check_if_write_lynxrc(const char **table)
 {
     int n;
-    char *result = NULL;
+    const char *result = NULL;
 
     for (n = 0; table[n] != 0; ++n) {
 	result = table[n];
@@ -3296,9 +3298,9 @@ static char *check_if_write_lynxrc(char **table)
  * from lynx.cfg (and perhaps .lynxrc) as a set of booleans.  Check if any are
  * not writable to .lynxrc, so we can show the user. 
  */
-static char *will_save_cookies(void)
+static const char *will_save_cookies(void)
 {
-    static char *table[] =
+    static const char *table[] =
     {
 	RC_SET_COOKIES,		/* LYSetCookies */
 	RC_ACCEPT_ALL_COOKIES,	/* LYAcceptAllCookies */
@@ -3313,9 +3315,9 @@ static char *will_save_cookies(void)
  * read from lynx.cfg (and perhaps .lynxrc) as a set of booleans.  Check if any
  * are not writable to .lynxrc, so we can show the user. 
  */
-static char *will_save_images(void)
+static const char *will_save_images(void)
 {
-    static char *table[] =
+    static const char *table[] =
     {
 	RC_MAKE_PSEUDO_ALTS_FOR_INLINES,	/* pseudo_inline_alts */
 	RC_MAKE_LINKS_FOR_ALL_IMAGES,	/* clickable_images */
