@@ -716,7 +716,7 @@ PUBLIC int LYshow_statusline_messages ARGS1(
  * will be very useful on exit.
  * (Don't expect everyone will look a trace log in case of difficulties:))
  */
-PUBLIC void LYprint_statusline_messages_on_exit ARGS1(
+PUBLIC void LYstatusline_messages_on_exit ARGS1(
 	char **,	buf)
 {
     int i;

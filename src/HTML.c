@@ -915,7 +915,7 @@ PRIVATE void HTML_start_element ARGS6(
 #   endif
 
 	    hcode = hash_code_aggregate_char('.', hcode);
-	    hcode = hash_code_aggregate_lower_on_fly(class_name, hcode);
+	    hcode = hash_code_aggregate_lower_str(class_name, hcode);
 #endif
 	}
 #if !OPT_SCN

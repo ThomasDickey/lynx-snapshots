@@ -34,13 +34,15 @@ PUBLIC int hash_code_rp ARGS1(char*,string)
 #define HASH_SIZE CSHASHSIZE
 #endif
 
+#define HASH_OF(h, v) ((int)((h) * 3 + (unsigned char)(v)) % HASH_SIZE)
+
 PUBLIC int hash_code ARGS1 (char*, string)
 {
     int hash;
     unsigned char *p;
 
     for (p = (unsigned char *)string, hash = 0; *p; p++)
-	hash = (int) (hash * 3 + (*(unsigned char *)p)) % HASH_SIZE;
+	hash = HASH_OF(hash,*p);
 
     return hash;
 }
@@ -51,23 +53,23 @@ PUBLIC int hash_code_lowercase_on_fly ARGS1 (char*, string)
     unsigned char *p;
 
     for (p = (unsigned char *)string, hash = 0; *p; p++)
-	hash = (int) (hash * 3 + (unsigned char)tolower(*(char*)p) ) % HASH_SIZE;
+	hash = HASH_OF(hash,tolower(*(char *)p));
 
     return hash;
 }
 
 PUBLIC int hash_code_aggregate_char ARGS2 (char, c,int,hash)
 {
-    return (int)(hash*3 + (unsigned char)c) % HASH_SIZE;
+    return HASH_OF(hash,c);
 }
 
-PUBLIC int hash_code_aggregate_lower_on_fly ARGS2 (char*, string,int,hash_was)
+PUBLIC int hash_code_aggregate_lower_str ARGS2 (char*, string,int,hash_was)
 {
     int hash;
     unsigned char *p;
 
     for (p = (unsigned char *)string, hash = hash_was ; *p; p++)
-	hash = (int) (hash * 3 + (unsigned char)tolower(*(char*)p) ) % HASH_SIZE;
+	hash = HASH_OF(hash,tolower(*(char *)p));
 
     return hash;
 }

@@ -1,6 +1,28 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-05-20 (2.8.2pre.5)
+* correct links to COPYHEADER and COPYING in about_lynx.html, by pointing to
+  author's URLs, rather than to files which are not installed anyway -PG
+* shorten a couple of identifiers to keep with 31-character limit:
+  hash_code_aggregate_lower_on_fly -> hash_code_aggregate_lower_str
+  LYprint_statusline_messages_on_exit -> LYstatusline_messages_on_exit
+  (reported by Andy Harper) -TD
+* correct VMS pathname in HTFTPLoad(), allowing connect to
+  ftp://ftp.wku.edu/vms/fileserv (reported by Andy Harper) -TD
+* chartrans:  cpXXXX Microsoft codepages verified against ftp.unicode.org -
+  apparently cp1256 (Arabic) was updated recently.  Although Arabic letters are
+  hardly useful for lynx (no right-to-left support) this codepage is supported
+  under chrtrans.  So update, just for fun -LP
+* fix core dump when starting "lynx LYNXOPTIONS:" command.  All phases of forms
+  options logic now handled by postoptions():  LYNXOPTIONS:/ without post_data
+  create a page (gen_options() now PRIVATE), LYNXOPTIONS:/ with post_data do
+  proccess changes as before.  Also LYK_ADD_BOOKMARK fixed:  forms options page
+  will not be added to bookmarks file -LP
+* modify HTGetRelLinkNum(), removing increment of HText_getTopOfScreen() value
+  so checks for line number begin at the very top of the screen, fixing a
+  problem reported when processing the 123[g][+-] command -LE
+* minor change to LYReadCFG.c to combine similar gettext'd strings -HN
 1999-05-16 (2.8.2pre.4)
 * add 'fixit' parameter to LYEnsureAbsoluteURL() to suppress logic in
   LYConvertToURL() that was changed in 2.8.1dev.4, to re-offer the original

@@ -16,7 +16,6 @@ extern  int popup_choice PARAMS((
 
 #ifndef NO_OPTION_FORMS
 extern int postoptions PARAMS((document *newdoc));
-extern int gen_options PARAMS((char **newfile));
 #endif /* !NO_OPTION_FORMS */
 
 #ifndef NO_OPTION_MENU

@@ -4077,7 +4077,7 @@ PUBLIC int HTGetRelLinkNum ARGS3(
 	int,	cur)
 {
     TextAnchor *a, *l = 0;
-    int scrtop = HText_getTopOfScreen()+1;
+    int scrtop = HText_getTopOfScreen(); /*XXX +1? */
     int curline = links[cur].anchor_line_num;
     int curpos = links[cur].lx;
     int on_screen = ( curline >= scrtop && curline < (scrtop + display_lines) );

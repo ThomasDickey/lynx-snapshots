@@ -1734,8 +1734,8 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 #if defined(HAVE_CONFIG_H) || defined(VMS)
 	    if (strcmp(lynx_cfg_file, LYNX_CFG_FILE)) {
 		fprintf(fp0, "<em>%s\n%s",
-			     gettext("This is read from your lynx.cfg file,"),
-			     gettext("please \"read\" distribution's"));
+			     gettext("The following is read from your lynx.cfg file."),
+			     gettext("Please read the distribution"));
 		LYLocalFileToURL(&temp, LYNX_CFG_FILE);
 		fprintf(fp0, " <a href=\"%s\">lynx.cfg</a> ",
 			     temp);
@@ -1747,8 +1747,8 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 	    {
 	    /* no absolute path... for lynx.cfg on DOS/Win32 */
 		fprintf(fp0, "<em>%s\n%s",
-			     gettext("This is read from your lynx.cfg file,"),
-			     gettext("please \"read\" distribution's"));
+			     gettext("The following is read from your lynx.cfg file."),
+			     gettext("Please read the distribution"));
 		fprintf(fp0, " </em>lynx.cfg<em> ");
 		fprintf(fp0, "%s</em>\n",
 			     gettext("for more comments."));
@@ -1775,7 +1775,7 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 	} else
 #endif /* !NO_CONFIG_INFO */
 
-	fprintf(fp0, "<em>%s</em>\n\n", gettext("This is read from your lynx.cfg file:"));
+	fprintf(fp0, "<em>%s</em>\n\n", gettext("The following is read from your lynx.cfg file."));
 
 	/*
 	 *  Process the configuration file.
