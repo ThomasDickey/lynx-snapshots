@@ -10,6 +10,8 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+1997-08-28
+* Correct a quoting error in CF_RECHECK_FUNC macro. - TD
 1997-08-27
 * Further refine/correct configure macros for finding network and curses
   libraries, adding CF_RECHECK_FUNC to simplify CF_NETLIBS. - TD
