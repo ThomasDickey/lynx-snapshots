@@ -566,7 +566,7 @@ PUBLIC void remove_bookmark_link ARGS2(
     }
     LYCloseTempFP(nfp);
     nfp = NULL;
-#ifdef DOSPATH
+#if defined(DOSPATH) || defined(__EMX__)
     remove(filename_buffer);
 #endif /* DOSPATH */
 

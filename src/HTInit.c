@@ -1011,6 +1011,8 @@ PUBLIC void HTFileInit NOARGS
     HTSetSuffix(".text",	"text/plain", "8bit", 1.0);
     HTSetSuffix(".txt",		"text/plain", "8bit", 1.0);
 
+    HTSetSuffix(".php",		"text/html", "8bit", 1.0);
+    HTSetSuffix(".php3",	"text/html", "8bit", 1.0);
     HTSetSuffix(".html3",	"text/html", "8bit", 1.0);
     HTSetSuffix(".ht3",		"text/html", "8bit", 1.0);
     HTSetSuffix(".phtml",	"text/html", "8bit", 1.0);

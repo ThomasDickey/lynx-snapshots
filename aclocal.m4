@@ -164,7 +164,6 @@ AC_DEFUN(AM_LC_MESSAGES,
       AC_DEFINE(HAVE_LC_MESSAGES)
     fi
   fi])
-
 dnl ---------------------------------------------------------------------------
 dnl Search path for a program which passes the given test.
 dnl Ulrich Drepper <drepper@cygnus.com>, 1996.
@@ -215,7 +214,6 @@ else
 fi
 AC_SUBST($1)dnl
 ])
-
 dnl ---------------------------------------------------------------------------
 dnl Macro to add for using GNU gettext.
 dnl Ulrich Drepper <drepper@cygnus.com>, 1995.
@@ -1775,7 +1773,7 @@ test "$prefix" != /opt && \
 test -d /opt && \
 $1="[$]$1 /opt/include /opt/include/$2 /opt/$2/include"
 
-$1="[$]$1 [$]HOME/lib [$]HOME/lib/$2 [$]HOME/$2/lib"
+$1="[$]$1 [$]HOME/include [$]HOME/include/$2 [$]HOME/$2/include"
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Insert text into the help-message, for readability, from AC_ARG_WITH.
@@ -1908,54 +1906,6 @@ AC_TRY_LINK([#include <locale.h>],
 AC_MSG_RESULT($cf_cv_locale)
 test $cf_cv_locale = yes && AC_DEFINE(LOCALE)
 ])
-dnl ---------------------------------------------------------------------------
-dnl Check for a working mkstemp.  This creates two files, checks that they are
-dnl successfully created and distinct (AmigaOS apparently fails on the last).
-AC_DEFUN([CF_MKSTEMP],[
-AC_CACHE_CHECK(for working mkstemp, cf_cv_func_mkstemp,[
-rm -f conftest*
-AC_TRY_RUN([
-#include <sys/types.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/stat.h>
-int main()
-{
-	char *tmpl = "conftestXXXXXX";
-	char name[2][80];
-	int n;
-	int result = 0;
-	int fd;
-	struct stat sb;
-
-	umask(077);
-	for (n = 0; n < 2; ++n) {
-		strcpy(name[n], tmpl);
-		if ((fd = mkstemp(name[n])) >= 0) {
-			if (!strcmp(name[n], tmpl)
-			 || stat(name[n], &sb) != 0
-			 || (sb.st_mode & S_IFMT) != S_IFREG
-			 || (sb.st_mode & 077) != 0) {
-				result = 1;
-			}
-			close(fd);
-		}
-	}
-	if (result == 0
-	 && !strcmp(name[0], name[1]))
-		result = 1;
-	exit(result);
-}
-],[cf_cv_func_mkstemp=yes
-],[cf_cv_func_mkstemp=no
-],[AC_CHECK_FUNC(mkstemp)
-])
-])
-if test "$cf_cv_func_mkstemp" = yes ; then
-	AC_DEFINE(HAVE_MKSTEMP)
-fi
-])dnl
 dnl ---------------------------------------------------------------------------
 dnl Write a debug message to config.log, along with the line number in the
 dnl configure script.
@@ -3192,7 +3142,6 @@ AC_MSG_RESULT($cf_cv_have_utmp_ut_host)
 test $cf_cv_have_utmp_ut_host != no && AC_DEFINE(HAVE_UTMP_UT_HOST)
 fi
 ])
-
 dnl ---------------------------------------------------------------------------
 dnl Check if UTMP/UTMPX struct defines ut_name member
 AC_DEFUN([CF_UTMP_UT_NAME],

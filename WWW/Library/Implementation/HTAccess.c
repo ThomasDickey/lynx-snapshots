@@ -468,9 +468,9 @@ PRIVATE int get_physical ARGS2(
 	    }
 	} else if (!strcasecomp(acc_method, "wais")) {
 	    /*
-	**  Wais also needs checking of the default port
-	**  for selective exclusions.
-	*/
+	    **  Wais also needs checking of the default port
+	    **  for selective exclusions.
+	    */
 	    char *host = NULL;
 	    if ((host = HTParse(addr, "", PARSE_HOST))) {
 		if (!(strchr(host, ':'))) {

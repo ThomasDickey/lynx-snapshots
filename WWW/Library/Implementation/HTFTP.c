@@ -57,10 +57,6 @@ BUGS:	@@@	Limit connection cache size!
 **		same time.
 */
 
-#if defined(DJGPP) && !defined(WATT32)
-#define u_long unsigned long
-#endif
-
 #include <HTUtils.h>
 
 #include <HTAlert.h>

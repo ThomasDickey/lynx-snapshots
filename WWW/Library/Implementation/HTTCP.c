@@ -32,7 +32,7 @@
 #include <resolv.h>
 #endif
 
-#if defined(__DJGPP__) && defined (WATT32)
+#ifdef __DJGPP__
 #include <netdb.h>
 #endif /* __DJGPP__ */
 
@@ -380,8 +380,6 @@ PRIVATE void quench ARGS1(
 #endif /* NSL_FORK */
 
 PUBLIC int lynx_nsl_status = HT_OK;
-
-#if !( defined(__DJGPP__) && !defined(WATT32) )    /* much excluded! */
 
 #define DEBUG_HOSTENT		/* disable in case of problems */
 #define DEBUG_HOSTENT_CHILD  /* for NSL_FORK, may screw up trace file */
@@ -1163,8 +1161,6 @@ failed:
     return NULL;
 }
 
-#endif /* from here on DJGPP without WATT32 joins us again. */
-
 
 /*	Parse a network node address and port
 **	-------------------------------------
@@ -1270,10 +1266,6 @@ PRIVATE int HTParseInet ARGS2(
     */
     if (dotcount_ip == 3)   /* Numeric node address: */
     {
-
-#if defined(__DJGPP__) && !defined(WATT32)
-	soc_in->sin_addr.s_addr = htonl(aton(host));
-#else
 #ifdef DGUX_OLD
 	soc_in->sin_addr.s_addr = inet_addr(host).s_addr; /* See arpa/inet.h */
 #else
@@ -1293,7 +1285,6 @@ PRIVATE int HTParseInet ARGS2(
 #endif /* HAVE_INET_ATON */
 #endif /* GUSI */
 #endif /* DGUX_OLD */
-#endif /* __DJGPP__ && !WATT32 */
 #ifndef _WINDOWS_NSL
 	FREE(host);
 #endif /* _WINDOWS_NSL */
@@ -1304,21 +1295,11 @@ PRIVATE int HTParseInet ARGS2(
 	CTRACE((tfp, "HTParseInet: Calling LYGetHostByName(%s)\n", host));
 #endif /* MVS */
 
-#if defined(__DJGPP__) && !defined(WATT32)
-	if (!valid_hostname(host)) {
-	    FREE(host);
-	    return HT_NOT_ACCEPTABLE; /* only HTDoConnect checks this. */
-	}
-	soc_in->sin_addr.s_addr = htonl(resolve(host));
-	if (soc_in->sin_addr.s_addr == 0) {
-	    goto failed;
-	}
-#else /* !(__DJGPP__ && !WATT32) */
 #ifdef _WINDOWS_NSL
 	phost = LYGetHostByName(host);	/* See above */
 	if (!phost) goto failed;
 	memcpy((void *)&soc_in->sin_addr, phost->h_addr, phost->h_length);
-#else /* !(__DJGPP__ && !WATT32) && !_WINDOWS_NSL */
+#else /* !_WINDOWS_NSL */
 	{
 	    struct hostent  *phost;
 	    phost = LYGetHostByName(host);	/* See above */
@@ -1343,7 +1324,7 @@ PRIVATE int HTParseInet ARGS2(
 #endif /* VMS && CMU_TCP */
 	}
 #endif /* _WINDOWS_NSL */
-#endif /* __DJGPP__ && !WATT32 */
+
 #ifndef _WINDOWS_NSL
 	FREE(host);
 #endif /* _WINDOWS_NSL */

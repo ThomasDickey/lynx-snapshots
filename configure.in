@@ -565,7 +565,6 @@ AC_REPLACE_FUNCS( \
 	strstr \
 )
 
-CF_MKSTEMP
 CF_SRAND(lynx_)
 CF_CHECK_FUNCDECLS([#include <string.h>], strstr)
 CF_CHECK_FUNCDECLS([

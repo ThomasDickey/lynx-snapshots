@@ -1772,6 +1772,20 @@ PRIVATE void display_scrollbar ARGS1(
 #define display_scrollbar(text) /*nothing*/
 #endif /* USE_SCROLLBAR */
 
+/*
+ * Utility to let us use for-loops on the anchor-pointers.
+ */
+PRIVATE TextAnchor * next_anchor ARGS2(
+	HText *,	text,
+	TextAnchor *,	anchor_ptr)
+{
+    if (anchor_ptr == text->last_anchor)
+	anchor_ptr = NULL;
+    else
+	anchor_ptr = anchor_ptr->next;
+    return anchor_ptr;
+}
+
 /*	Output a page
 **	-------------
 */
@@ -2110,9 +2124,9 @@ PRIVATE void display_page ARGS3(
      *  Add the anchors to Lynx structures.
      */
     nlinks = 0;
-    for (Anchor_ptr=text->first_anchor;  Anchor_ptr != NULL &&
-		Anchor_ptr->line_num <= stop_before_for_anchors;
-					    Anchor_ptr = Anchor_ptr->next) {
+    for (Anchor_ptr = text->first_anchor;
+	 Anchor_ptr != NULL && Anchor_ptr->line_num <= stop_before_for_anchors;
+	 Anchor_ptr = next_anchor(text, Anchor_ptr)) {
 
 	if (Anchor_ptr->line_num >= line_number
 	 && Anchor_ptr->line_num < stop_before_for_anchors) {
@@ -2249,12 +2263,6 @@ PRIVATE void display_page ARGS3(
 			    hi_string));
 	    }
 	}
-
-	if (Anchor_ptr == text->last_anchor)
-	    /*
-	     *  No more links in document. -FM
-	     */
-	    break;
 
 	if (nlinks == MAXLINKS) {
 	    /*
@@ -3246,10 +3254,8 @@ PRIVATE void split_line ARGS2(
 
 	    if (!a2)
 		a2 = text->first_anchor;
-	    else if (a2 == text->last_anchor)
-		a2 = NULL;
 	    else
-		a2 = a2->next; /* 1st anchor on line we justify */
+		a2 = next_anchor(text, a2); /* 1st anchor on line we justify */
 
 	    if (a2)
 		for (; a2 && a2->line_num <= text->Lines-1;
@@ -4098,7 +4104,7 @@ check_WrapSource:
 	 && text->last_anchor != 0
 	 && (number = text->last_anchor->number) > 0) {
 	    limit -= (number > 99999
-	    		? 6
+			? 6
 			: (number > 9999
 			    ? 5
 			    : (number > 999
@@ -5347,8 +5353,8 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 		}
 	    }
 	} else {
-    if (!number_links_on_left)
-	add_link_number(text, a, FALSE);
+	    if (!number_links_on_left)
+		add_link_number(text, a, FALSE);
 	    /*
 	     *  The anchor's content is not restricted to only
 	     *  white and special characters, so we'll show it
@@ -5603,8 +5609,8 @@ PRIVATE void HText_trimHightext ARGS3(
      *  create the hightext strings. -FM
      */
     for (anchor_ptr = text->first_anchor;
-	anchor_ptr;
-	prev_a = anchor_ptr, anchor_ptr=anchor_ptr->next) {
+	anchor_ptr != NULL;
+	prev_a = anchor_ptr, anchor_ptr = next_anchor(text, anchor_ptr)) {
 	int have_soft_newline_in_1st_line = 0;
 re_parse:
 	/*
@@ -5706,7 +5712,7 @@ re_parse:
 	if (line_ptr->data
 	 && anchor_ptr->extent > 0
 	 && anchor_ptr->line_pos >= 0) {
-	    LYSetHiText(anchor_ptr, 
+	    LYSetHiText(anchor_ptr,
 			&line_ptr->data[anchor_ptr->line_pos],
 			anchor_ptr->extent);
 	} else {
@@ -5731,13 +5737,16 @@ re_parse:
 	     && count_line >= stop_before) {
 		LYSetHiText(anchor_ptr, NULL, 0);
 		break;
+	    } else if (line_ptr2 == text->last_line) {
+		break;
 	    }
 
 	    /*
 	     * Double check that we have a line pointer, and if so, copy into
 	     * highlight text.
 	     */
-	    if (line_ptr2) {
+	    if (line_ptr2
+	     && line_ptr2->size) {
 		char *hi_string = NULL;
 		int hi_offset = line_ptr2->offset;
 
@@ -5796,12 +5805,6 @@ re_parse:
 	CTRACE((tfp, "GridText:     add link on line %d col %d [%d] %s\n",
 	       cur_line, anchor_ptr->line_pos,
 	       anchor_ptr->number, "in HText_trimHightext"));
-
-	/*
-	 *  If this is the last anchor, we're done!
-	 */
-	if (anchor_ptr == text->last_anchor)
-	    break;
     }
 }
 
@@ -6224,9 +6227,7 @@ PUBLIC BOOL HText_TAHasMoreLines ARGS2(
 	}
 	return NO;
     } else {
-	for (a = HTMainText->first_anchor; a; a = a->next) {
-	    if (a == HTMainText->last_anchor)
-		break;
+	for (a = HTMainText->first_anchor; a; a = next_anchor(HTMainText, a)) {
 	    if (a->link_type == INPUT_ANCHOR &&
 		links[curlink].l_form == a->input_field) {
 		return same_anchors(a, a->next, TRUE);
@@ -6837,15 +6838,13 @@ PUBLIC int HText_LinksInLines ARGS3(
 
     for (Anchor_ptr = text->first_anchor;
 		Anchor_ptr != NULL && Anchor_ptr->line_num <= end;
-			Anchor_ptr = Anchor_ptr->next) {
+			Anchor_ptr = next_anchor(text, Anchor_ptr)) {
 	if (Anchor_ptr->line_num >= start &&
 	    Anchor_ptr->line_num < end &&
 	    Anchor_ptr->show_anchor &&
 	    !(Anchor_ptr->link_type == INPUT_ANCHOR
 	      && Anchor_ptr->input_field->type == F_HIDDEN_TYPE))
 	    ++total;
-	if (Anchor_ptr == text->last_anchor)
-	    break;
     }
 
     return total;
@@ -8798,11 +8797,11 @@ PUBLIC void HText_endForm ARGS1(
 	 *  Support submission of a single text input field in
 	 *  the form via <return> instead of a submit button. -FM
 	 */
-	TextAnchor * a = text->first_anchor;
+	TextAnchor * a;
 	/*
 	 *  Go through list of anchors and get our input field. -FM
 	 */
-	while (a) {
+	for (a = text->first_anchor; a != NULL; a = next_anchor(text, a)) {
 	    if (a->link_type == INPUT_ANCHOR &&
 		a->input_field->number == HTFormNumber &&
 		a->input_field->type == F_TEXT_TYPE) {
@@ -8822,9 +8821,6 @@ PUBLIC void HText_endForm ARGS1(
 		    a->input_field->disabled = TRUE;
 		break;
 	    }
-	    if (a == text->last_anchor)
-		break;
-	    a = a->next;
 	}
     }
     /*
@@ -9161,27 +9157,24 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	new_ptr->value_cs = (submit_value ? submit_val_cs : val_cs);
 
 	if (first_option) {
+	    FormInfo *last_input = text->last_anchor->input_field;
+
 	    StrAllocCopy(HTCurSelectedOptionValue, new_ptr->name);
-	    text->last_anchor->input_field->num_value = 0;
+	    last_input->num_value = 0;
 	    /*
 	     *  If this is the first option in a popup select list,
 	     *  HText_beginInput may have allocated the value and
 	     *  cp_submit_value fields, so free them now to avoid
 	     *  a memory leak. - kw
 	     */
-	    FREE(text->last_anchor->input_field->value);
-	    FREE(text->last_anchor->input_field->cp_submit_value);
+	    FREE(last_input->value);
+	    FREE(last_input->cp_submit_value);
 
-	    text->last_anchor->input_field->value =
-		text->last_anchor->input_field->select_list->name;
-	    text->last_anchor->input_field->orig_value =
-		text->last_anchor->input_field->select_list->name;
-	    text->last_anchor->input_field->cp_submit_value =
-		text->last_anchor->input_field->select_list->cp_submit_value;
-	    text->last_anchor->input_field->orig_submit_value =
-		text->last_anchor->input_field->select_list->cp_submit_value;
-	    text->last_anchor->input_field->value_cs =
-		new_ptr->value_cs;
+	    last_input->value             = last_input->select_list->name;
+	    last_input->orig_value        = last_input->select_list->name;
+	    last_input->cp_submit_value   = last_input->select_list->cp_submit_value;
+	    last_input->orig_submit_value = last_input->select_list->cp_submit_value;
+	    last_input->value_cs          = new_ptr->value_cs;
 	} else {
 	    int newlen = strlen(new_ptr->name);
 	    int curlen = strlen(HTCurSelectedOptionValue);
@@ -9197,18 +9190,16 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	if (checked) {
 	    int curlen = strlen(new_ptr->name);
 	    int newlen = strlen(HTCurSelectedOptionValue);
+	    FormInfo *last_input = text->last_anchor->input_field;
 	    /*
 	     *  Set the default option as this one.
 	     */
-	    text->last_anchor->input_field->num_value = number;
-	    text->last_anchor->input_field->value = new_ptr->name;
-	    text->last_anchor->input_field->orig_value = new_ptr->name;
-	    text->last_anchor->input_field->cp_submit_value =
-				   new_ptr->cp_submit_value;
-	    text->last_anchor->input_field->orig_submit_value =
-				   new_ptr->cp_submit_value;
-	    text->last_anchor->input_field->value_cs =
-		new_ptr->value_cs;
+	    last_input->num_value	  = number;
+	    last_input->value		  = new_ptr->name;
+	    last_input->orig_value	  = new_ptr->name;
+	    last_input->cp_submit_value	  = new_ptr->cp_submit_value;
+	    last_input->orig_submit_value = new_ptr->cp_submit_value;
+	    last_input->value_cs	  = new_ptr->value_cs;
 	    StrAllocCopy(HTCurSelectedOptionValue, new_ptr->name);
 	    if (newlen > curlen)
 		StrAllocCat(HTCurSelectedOptionValue,
@@ -9298,9 +9289,9 @@ PUBLIC int HText_beginInput ARGS3(
 	if (!text->last_anchor) {
 	    I->checked = TRUE;
 	} else {
-	    TextAnchor * b = text->first_anchor;
+	    TextAnchor * b;
 	    int i2 = 0;
-	    while (b) {
+	    for (b = text->first_anchor; b != NULL; b = next_anchor(text, b)) {
 		if (b->link_type == INPUT_ANCHOR &&
 		    b->input_field->type == F_RADIO_TYPE &&
 		    b->input_field->number == HTFormNumber) {
@@ -9313,13 +9304,9 @@ PUBLIC int HText_beginInput ARGS3(
 			i2++;
 		    }
 		}
-		if (b == text->last_anchor) {
-		    if (i2 == 0)
-		       I->checked = TRUE;
-		    break;
-		}
-		b = b->next;
 	    }
+	    if (i2 == 0)
+	       I->checked = TRUE;
 	}
     }
 
@@ -9889,95 +9876,90 @@ PRIVATE BOOLEAN begin_submission_part ARGS5(
 }
 
 #ifdef EXP_FILE_UPLOAD
-PRIVATE BOOLEAN send_a_file ARGS6(
-    char **,	query,
-    BOOLEAN,	PlainText,
-    char *,	MultipartContentType,
-    char *,	Boundary,
-    char *,	name_used,
+PRIVATE char * load_a_file ARGS2(
+    BOOLEAN *,	use_mime,
     char *,	val_used)
 {
-    char *escaped1 = NULL;
     char *escaped2 = NULL;
     FILE *fd;
     size_t n, bytes;
-    BOOLEAN code = FALSE;
-    BOOLEAN use_mime = FALSE;
     char buffer[257];
     char base64buf[128];
 
     CTRACE((tfp, "Ok, about to convert %s to mime/thingy\n", val_used));
 
+    *use_mime = FALSE;
+
     if ((fd = fopen(val_used, BIN_R)) == 0) {
-	/* We can't open the file, what do we do? */
 	HTAlert(gettext("Can't open file for uploading"));
-	goto exit_disgracefully;
-    }
-    StrAllocCopy(escaped2, "");
-    while ((bytes = fread(buffer, sizeof(char), 256, fd)) != 0) {
-	buffer[bytes] = 0;
-	for (n = 0; n < bytes; ++n) {
-	    int ch = UCH(buffer[n]);
-	    if ((iscntrl(ch) && !isspace(ch))
-	     || (!iscntrl(ch) && !isprint(ch))) {
-		use_mime = TRUE;
+    } else {
+	StrAllocCopy(escaped2, "");
+	while ((bytes = fread(buffer, sizeof(char), 256, fd)) != 0) {
+	    buffer[bytes] = 0;
+	    for (n = 0; n < bytes; ++n) {
+		int ch = UCH(buffer[n]);
+		if ((iscntrl(ch) && !isspace(ch))
+		 || (!iscntrl(ch) && !isprint(ch))) {
+		    *use_mime = TRUE;
+		    break;
+		}
+	    }
+	    if (*use_mime)
 		break;
+	    StrAllocCat(escaped2, buffer);
+	}
+	if (*use_mime) {
+	    rewind(fd);
+	    StrAllocCopy(escaped2, "");
+	    while ((bytes = fread(buffer, sizeof(char), 45, fd)) != 0) {
+		base64_encode(base64buf, buffer, bytes);
+		StrAllocCat(escaped2, base64buf);
 	    }
 	}
-	if (use_mime)
-	    break;
-	StrAllocCat(escaped2, buffer);
-    }
-    if (use_mime) {
-	rewind(fd);
-	StrAllocCopy(escaped2, "");
-	while ((bytes = fread(buffer, sizeof(char), 45, fd)) != 0) {
-	    base64_encode(base64buf, buffer, bytes);
-	    StrAllocCat(escaped2, base64buf);
+	if (ferror(fd)) {
+	    HTAlert(gettext("Short read from file, problem?"));
+	    FREE(escaped2);
 	}
-    }
-    if (ferror(fd)) {
-	/* We got an error reading the file, what do we do? */
-	HTAlert(gettext("Short read from file, problem?"));
 	LYCloseInput(fd);
-	goto exit_disgracefully;
     }
-    LYCloseInput(fd);
-    /* we need to modify the mime-type here - rp */
-    /* Note: could use LYGetFileInfo for that and for
-       other headers that should be transmitted - kw */
-
-    if (PlainText) {
-	StrAllocCopy(escaped1, name_used);
-    } else if (Boundary) {
-	StrAllocCopy(escaped1, "Content-Disposition: form-data");
-	HTSprintf(&escaped1, "; name=%s", name_used);
-	HTSprintf(&escaped1, "; filename=\"%s\"", val_used);
-	if (MultipartContentType) {
-	    StrAllocCat(escaped1, MultipartContentType);
-	    if (use_mime)
-		StrAllocCat(escaped1, "\r\nContent-Transfer-Encoding: base64");
-	}
-	StrAllocCat(escaped1, "\r\n\r\n");
-    } else {
-	escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
-    }
-
-    HTSprintf(query,
-	      "%s%s%s%s%s",
-	      escaped1,
-	      (Boundary ? "" : "="),
-	      (PlainText ? "\n" : ""),
-	      escaped2,
-	      ((PlainText && *escaped2) ? "\n" : ""));
-    code = TRUE;
-
-exit_disgracefully:
-    FREE(escaped1);
-    FREE(escaped2);
-    return code;
+    return escaped2;
 }
 #endif /* EXP_FILE_UPLOAD */
+
+PRIVATE void cannot_transcode ARGS2(
+    BOOL *,		had_warning,
+    CONST char *,	target_csname)
+{
+    if (*had_warning == NO) {
+	*had_warning = YES;
+	_user_message(CANNOT_TRANSCODE_FORM,
+	    target_csname ? target_csname : "UNKNOWN");
+	LYSleepAlert();
+    }
+}
+
+#define SPECIAL_8BIT 1
+#define SPECIAL_FORM 2
+
+PRIVATE unsigned check_form_specialchars ARGS1(
+    char *,	value)
+{
+    unsigned result = 0;
+    char *p;
+
+    for (p = value;
+	 non_empty(p) && (result != (SPECIAL_8BIT|SPECIAL_FORM));
+	 p++) {
+	if ((*p == HT_NON_BREAK_SPACE) ||
+	    (*p == HT_EN_SPACE) ||
+	    (*p == LY_SOFT_HYPHEN)) {
+	    result |= SPECIAL_FORM;
+	} else if ((*p & 0x80) != 0) {
+	    result |= SPECIAL_8BIT;
+	}
+    }
+    return result;
+}
 
 /*
  *  HText_SubmitForm - generate submit data from form fields.
@@ -9993,34 +9975,35 @@ PUBLIC int HText_SubmitForm ARGS4(
 	char *,		link_name,
 	char *,		link_value)
 {
-    TextAnchor *anchor_ptr;
-    int form_number = submit_item->number;
-    FormInfo *form_ptr;
-    PerFormInfo *thisform;
-    char *query = NULL;
-    char *escaped1 = NULL, *escaped2 = NULL;
-    BOOLEAN first_one = TRUE;
-    char *last_textarea_name = NULL;
-    int textarea_lineno = 0;
-    char *previous_blanks = NULL;
+    BOOL had_chartrans_warning = NO;
+    BOOL have_accept_cs = NO;
+    BOOL success;
     BOOLEAN PlainText = FALSE;
     BOOLEAN SemiColon = FALSE;
+    BOOLEAN first_one = TRUE;
+    BOOLEAN use_mime;
+    CONST char *out_csname;
+    CONST char *target_csname = NULL;
+    PerFormInfo *thisform;
+    TextAnchor *anchor_ptr;
     char *Boundary = NULL;
     char *MultipartContentType = NULL;
     char *content_type_out = NULL;
-    int target_cs = -1;
-    CONST char *out_csname;
-    CONST char *target_csname = NULL;
-    char *name_used = "";
-    BOOL form_has_8bit = NO, form_has_special = NO;
-    BOOL field_has_8bit = NO, field_has_special = NO;
-    BOOL name_has_8bit = NO, name_has_special = NO;
-    BOOL have_accept_cs = NO;
-    BOOL success;
-    BOOL had_chartrans_warning = NO;
-    char *val_used = "";
-    char *copied_val_used = NULL;
     char *copied_name_used = NULL;
+    char *copied_val_used = NULL;
+    char *escaped1 = NULL;
+    char *escaped2 = NULL;
+    char *last_textarea_name = NULL;
+    char *name_used = "";
+    char *previous_blanks = NULL;
+    char *query = NULL;
+    char *val_used = "";
+    int anchor_count = 0;
+    int anchor_limit = 0;
+    int form_number = submit_item->number;
+    int target_cs = -1;
+    int textarea_lineno = 0;
+    unsigned form_is_special = 0;
 
     CTRACE((tfp, "SubmitForm\n  link_name=%s\n  link_value=%s\n", link_name, link_value));
     if (!HTMainText)
@@ -10126,105 +10109,77 @@ PUBLIC int HText_SubmitForm ARGS4(
     }
 
     /*
-     *  Go through list of anchors and get size first.
+     * Go through list of anchors and get a "max." charset parameter - kw
      */
-    /*
-     *  also get a "max." charset parameter - kw
-     */
-    anchor_ptr = HTMainText->first_anchor;
-    while (anchor_ptr) {
-	if (anchor_ptr->link_type == INPUT_ANCHOR) {
-	    if (anchor_ptr->input_field->number == form_number &&
-			!anchor_ptr->input_field->disabled) {
+    for (anchor_ptr = HTMainText->first_anchor;
+	 anchor_ptr != NULL;
+	 anchor_ptr = next_anchor(HTMainText, anchor_ptr)) {
 
-		char *p;
-		char * val;
-		form_ptr = anchor_ptr->input_field;
-		val = form_ptr->cp_submit_value != NULL ?
-				    form_ptr->cp_submit_value : form_ptr->value;
-		field_has_8bit = NO;
-		field_has_special = NO;
+	if (anchor_ptr->link_type != INPUT_ANCHOR)
+	    continue;
 
-		for (p = val;
-		     non_empty(p) && !(field_has_8bit && field_has_special);
-		     p++)
-		    if ((*p == HT_NON_BREAK_SPACE) ||
-			(*p == HT_EN_SPACE) ||
-			(*p == LY_SOFT_HYPHEN)) {
-			field_has_special = YES;
-		    } else if ((*p & 0x80) != 0) {
-			field_has_8bit = YES;
-		    }
-		for (p = form_ptr->name;
-		     non_empty(p) && !(name_has_8bit && name_has_special);
-		     p++)
-		    if ((*p == HT_NON_BREAK_SPACE) ||
-			(*p == HT_EN_SPACE) ||
-			(*p == LY_SOFT_HYPHEN)) {
-			name_has_special = YES;
-		    } else if ((*p & 0x80) != 0) {
-			name_has_8bit = YES;
-		    }
+	if (anchor_ptr->input_field->number == form_number &&
+		    !anchor_ptr->input_field->disabled) {
 
-		if (field_has_8bit || name_has_8bit)
-		    form_has_8bit = YES;
-		if (field_has_special || name_has_special)
-		    form_has_special = YES;
+	    FormInfo *form_ptr = anchor_ptr->input_field;
+	    char * val = form_ptr->cp_submit_value != NULL
+			    ? form_ptr->cp_submit_value
+			    : form_ptr->value;
 
-		if (!field_has_8bit && !field_has_special) {
-		    /* already ok */
-		} else if (target_cs < 0) {
-		    /* already confused */
-		} else if (!field_has_8bit &&
-		    (LYCharSet_UC[target_cs].enc == UCT_ENC_8859 ||
-		     (LYCharSet_UC[target_cs].like8859 & UCT_R_8859SPECL))) {
-		    /* those specials will be trivial */
-		} else if (UCNeedNotTranslate(form_ptr->value_cs, target_cs)) {
-		    /* already ok */
-		} else if (UCCanTranslateFromTo(form_ptr->value_cs, target_cs)) {
-		    /* also ok */
-		} else if (UCCanTranslateFromTo(target_cs, form_ptr->value_cs)) {
-		    target_cs = form_ptr->value_cs;	/* try this */
-		    target_csname = NULL; /* will be set after loop */
-		} else {
-		    target_cs = -1; /* don't know what to do */
-		}
+	    unsigned field_is_special = check_form_specialchars(val);
+	    unsigned name_is_special = check_form_specialchars(form_ptr->name);
 
-		/*  Same for name */
-		if (!name_has_8bit && !name_has_special) {
-		    /* already ok */
-		} else if (target_cs < 0) {
-		    /* already confused */
-		} else if (!name_has_8bit &&
-		    (LYCharSet_UC[target_cs].enc == UCT_ENC_8859 ||
-		     (LYCharSet_UC[target_cs].like8859 & UCT_R_8859SPECL))) {
-		    /* those specials will be trivial */
-		} else if (UCNeedNotTranslate(form_ptr->name_cs, target_cs)) {
-		    /* already ok */
-		} else if (UCCanTranslateFromTo(form_ptr->name_cs, target_cs)) {
-		    /* also ok */
-		} else if (UCCanTranslateFromTo(target_cs, form_ptr->name_cs)) {
-		    target_cs = form_ptr->value_cs;	/* try this */
-		    target_csname = NULL; /* will be set after loop */
-		} else {
-		    target_cs = -1; /* don't know what to do */
-		}
+	    form_is_special = (field_is_special | name_is_special);
 
-	    } else if (anchor_ptr->input_field->number > form_number) {
-		break;
+	    if (field_is_special == 0) {
+		/* already ok */
+	    } else if (target_cs < 0) {
+		/* already confused */
+	    } else if ((field_is_special & SPECIAL_8BIT) == 0
+	     && (LYCharSet_UC[target_cs].enc == UCT_ENC_8859
+	      || (LYCharSet_UC[target_cs].like8859 & UCT_R_8859SPECL))) {
+		/* those specials will be trivial */
+	    } else if (UCNeedNotTranslate(form_ptr->value_cs, target_cs)) {
+		/* already ok */
+	    } else if (UCCanTranslateFromTo(form_ptr->value_cs, target_cs)) {
+		/* also ok */
+	    } else if (UCCanTranslateFromTo(target_cs, form_ptr->value_cs)) {
+		target_cs = form_ptr->value_cs;	/* try this */
+		target_csname = NULL; /* will be set after loop */
+	    } else {
+		target_cs = -1; /* don't know what to do */
 	    }
-	}
 
-	if (anchor_ptr == HTMainText->last_anchor)
+	    /*  Same for name */
+	    if (name_is_special == 0) {
+		/* already ok */
+	    } else if (target_cs < 0) {
+		/* already confused */
+	    } else if ((name_is_special & SPECIAL_8BIT) == 0
+	     && (LYCharSet_UC[target_cs].enc == UCT_ENC_8859
+	      || (LYCharSet_UC[target_cs].like8859 & UCT_R_8859SPECL))) {
+		/* those specials will be trivial */
+	    } else if (UCNeedNotTranslate(form_ptr->name_cs, target_cs)) {
+		/* already ok */
+	    } else if (UCCanTranslateFromTo(form_ptr->name_cs, target_cs)) {
+		/* also ok */
+	    } else if (UCCanTranslateFromTo(target_cs, form_ptr->name_cs)) {
+		target_cs = form_ptr->value_cs;	/* try this */
+		target_csname = NULL; /* will be set after loop */
+	    } else {
+		target_cs = -1; /* don't know what to do */
+	    }
+
+	    ++anchor_limit;
+	} else if (anchor_ptr->input_field->number > form_number) {
 	    break;
-
-	anchor_ptr = anchor_ptr->next;
+	}
     }
 
     if (target_csname == NULL && target_cs >= 0) {
-	if (form_has_8bit) {
+	if ((form_is_special & SPECIAL_8BIT) != 0) {
 	    target_csname = LYCharSet_UC[target_cs].MIMEname;
-	} else if (form_has_special) {
+	} else if ((form_is_special & SPECIAL_FORM) != 0) {
 	    target_csname = LYCharSet_UC[target_cs].MIMEname;
 	} else {
 	    target_csname = "us-ascii";
@@ -10283,8 +10238,9 @@ PUBLIC int HText_SubmitForm ARGS4(
 	 *  For multipart/form-data the equivalent will be done later,
 	 *  separately for each form field. - kw
 	 */
-	if (have_accept_cs ||
-	    (form_has_8bit || form_has_special)) {
+	if (have_accept_cs
+	 || ((form_is_special & SPECIAL_8BIT) != 0
+	  || (form_is_special & SPECIAL_FORM) != 0)) {
 	    if (target_cs >= 0 && target_csname) {
 		if (Boundary == NULL) {
 		    if ((HTMainText->node_anchor->charset &&
@@ -10297,11 +10253,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		    }
 		}
 	    } else {
-		had_chartrans_warning = YES;
-		_user_message(
-		    CANNOT_TRANSCODE_FORM,
-		    target_csname ? target_csname : "UNKNOWN");
-		LYSleepAlert();
+		cannot_transcode(&had_chartrans_warning, target_csname);
 	    }
 	}
     }
@@ -10309,417 +10261,298 @@ PUBLIC int HText_SubmitForm ARGS4(
     out_csname = target_csname;
 
     /*
-     *  Reset anchor->ptr.
+     * Go through list of anchors and assemble URL query.
      */
-    anchor_ptr = HTMainText->first_anchor;
-    /*
-     *  Go through list of anchors and assemble URL query.
-     */
-    while (anchor_ptr) {
-	if (anchor_ptr->link_type == INPUT_ANCHOR) {
-	    if (anchor_ptr->input_field->number == form_number &&
-			!anchor_ptr->input_field->disabled) {
-		char *p;
-		int out_cs;
-		form_ptr = anchor_ptr->input_field;
+    for (anchor_ptr = HTMainText->first_anchor;
+	 anchor_ptr != NULL;
+	 anchor_ptr = next_anchor(HTMainText, anchor_ptr)) {
 
-		if (form_ptr->type != F_TEXTAREA_TYPE)
-		    textarea_lineno = 0;
+	if (anchor_ptr->link_type != INPUT_ANCHOR)
+	    continue;
 
-		switch(form_ptr->type) {
-		case F_RESET_TYPE:
-		    break;
+	if (anchor_ptr->input_field->number == form_number &&
+		    !anchor_ptr->input_field->disabled) {
+
+	    FormInfo *form_ptr = anchor_ptr->input_field;
+	    int out_cs;
+
+	    if (form_ptr->type != F_TEXTAREA_TYPE)
+		textarea_lineno = 0;
+
+	    ++anchor_count;
+	    switch(form_ptr->type) {
+	    case F_RESET_TYPE:
+		break;
 #ifdef EXP_FILE_UPLOAD
-		case F_FILE_TYPE:
-		    name_used = (form_ptr->name ? form_ptr->name : "");
-		    val_used = (form_ptr->value ? form_ptr->value : "");
-		    CTRACE((tfp,
-			    "I'd submit %s (from %s), but you've not finished it\n",
-			    val_used, name_used));
-		    break;
+	    case F_FILE_TYPE:
+		name_used = (form_ptr->name ? form_ptr->name : "");
+		val_used = (form_ptr->value ? form_ptr->value : "");
+		CTRACE((tfp, "SubmitForm[%d/%d]: I'd submit %s (from %s), but you've not finished it\n",
+			     anchor_count, anchor_limit,
+			     val_used, name_used));
+		break;
 #endif
-		case F_SUBMIT_TYPE:
-		case F_TEXT_SUBMIT_TYPE:
-		case F_IMAGE_SUBMIT_TYPE:
-		    if (!(non_empty(form_ptr->name) &&
-			  !strcmp(form_ptr->name, link_name))) {
-			CTRACE((tfp,
-				    "SubmitForm: skipping submit field with "));
-			CTRACE((tfp, "name \"%s\" for link_name \"%s\", %s.\n",
-				    form_ptr->name ? form_ptr->name : "???",
-				    link_name ? link_name : "???",
-				    non_empty(form_ptr->name) ?
-				    "not current link" : "no field name"));
-			break;
-		    }
-		    if (!(form_ptr->type == F_TEXT_SUBMIT_TYPE ||
-			(non_empty(form_ptr->value) &&
-			 !strcmp(form_ptr->value, link_value)))) {
-			CTRACE((tfp,
-				"SubmitForm: skipping submit field with "));
-			CTRACE((tfp,
-				"name \"%s\" for link_name \"%s\", %s!\n",
-				form_ptr->name ? form_ptr->name : "???",
-				link_name ? link_name : "???",
-				"values are different"));
-			break;
-		    }
-		    /* FALLTHRU */
-		case F_RADIO_TYPE:
-		case F_CHECKBOX_TYPE:
-		case F_TEXTAREA_TYPE:
-		case F_PASSWORD_TYPE:
-		case F_TEXT_TYPE:
-		case F_OPTION_LIST_TYPE:
-		case F_HIDDEN_TYPE:
-		    /*
-		     *	Be sure to actually look at the option submit value.
-		     */
-		    if (form_ptr->cp_submit_value != NULL) {
-			val_used = form_ptr->cp_submit_value;
-		    } else {
-			val_used = form_ptr->value;
-		    }
-
-		    /*
-		     *  Charset-translate value now, because we need
-		     *  to know the charset parameter for multipart
-		     *  bodyparts. - kw
-		     */
-		    field_has_8bit = NO;
-		    field_has_special = NO;
-		    for (p = val_used;
-			 non_empty(p) && !(field_has_8bit && field_has_special);
-			 p++) {
-			if ((*p == HT_NON_BREAK_SPACE) ||
-			    (*p == HT_EN_SPACE) ||
-			    (*p == LY_SOFT_HYPHEN)) {
-			    field_has_special = YES;
-			} else if ((*p & 0x80) != 0) {
-			    field_has_8bit = YES;
-			}
-		    }
-
-		    if (field_has_8bit || field_has_special) {
-			/*  We should translate back. */
-			StrAllocCopy(copied_val_used, val_used);
-			success = LYUCTranslateBackFormData(&copied_val_used,
-							form_ptr->value_cs,
-							target_cs, PlainText);
-			CTRACE((tfp, "SubmitForm: field \"%s\" %d %s -> %d %s %s\n",
-				    form_ptr->name ? form_ptr->name : "",
-				    form_ptr->value_cs,
-				    form_ptr->value_cs >= 0 ?
-				    LYCharSet_UC[form_ptr->value_cs].MIMEname :
-									  "???",
-				    target_cs,
-				    target_csname ? target_csname : "???",
-				    success ? "OK" : "FAILED"));
-			if (success) {
-			    val_used = copied_val_used;
-			}
-		    } else {  /* We can use the value directly. */
-			CTRACE((tfp, "SubmitForm: field \"%s\" %d %s OK\n",
-				    form_ptr->name ? form_ptr->name : "",
-				    target_cs,
-				    target_csname ? target_csname : "???"));
-			success = YES;
-		    }
-		    if (!success) {
-			if (!had_chartrans_warning) {
-			    had_chartrans_warning = YES;
-			    _user_message(
-				CANNOT_TRANSCODE_FORM,
-				target_csname ? target_csname : "UNKNOWN");
-			    LYSleepAlert();
-			}
-			out_cs = form_ptr->value_cs;
-		    } else {
-			out_cs = target_cs;
-		    }
-		    if (out_cs >= 0)
-			out_csname = LYCharSet_UC[out_cs].MIMEname;
-		    if (Boundary) {
-			StrAllocCopy(MultipartContentType,
-				     "\r\nContent-Type: text/plain");
-			if (!success && form_ptr->value_cs < 0) {
-			    /*  This is weird. */
-			    out_csname = "UNKNOWN-8BIT";
-			} else if (!success) {
-			    target_csname = NULL;
-			} else {
-			    if (!target_csname) {
-				target_csname = LYCharSet_UC[target_cs].MIMEname;
-			    }
-			}
-			if (strcmp(out_csname, "iso-8859-1"))
-			    HTSprintf(&MultipartContentType, "; charset=%s", out_csname);
-		    }
-
-		    /*
-		     *  Charset-translate name now, because we need
-		     *  to know the charset parameter for multipart
-		     *  bodyparts. - kw
-		     */
-		    if (form_ptr->type == F_TEXTAREA_TYPE) {
-			textarea_lineno++;
-			if (textarea_lineno > 1 &&
-			    last_textarea_name && form_ptr->name &&
-			    !strcmp(last_textarea_name, form_ptr->name)) {
-			    break;
-			}
-		    }
-		    name_used = (form_ptr->name ?
-				 form_ptr->name : "");
-
-		    name_has_8bit = NO;
-		    name_has_special = NO;
-		    for (p = name_used;
-			 non_empty(p) && !(name_has_8bit && name_has_special);
-			 p++) {
-			if ((*p == HT_NON_BREAK_SPACE) ||
-			    (*p == HT_EN_SPACE) ||
-			    (*p == LY_SOFT_HYPHEN)) {
-			    name_has_special = YES;
-			} else if ((*p & 0x80) != 0) {
-			    name_has_8bit = YES;
-			}
-		    }
-
-		    if (name_has_8bit || name_has_special) {
-			/*  We should translate back. */
-			StrAllocCopy(copied_name_used, name_used);
-			success = LYUCTranslateBackFormData(&copied_name_used,
-							form_ptr->name_cs,
-							target_cs, PlainText);
-			CTRACE((tfp, "SubmitForm: name \"%s\" %d %s -> %d %s %s\n",
-				    form_ptr->name ? form_ptr->name : "",
-				    form_ptr->name_cs,
-				    form_ptr->name_cs >= 0 ?
-				    LYCharSet_UC[form_ptr->name_cs].MIMEname :
-									  "???",
-				    target_cs,
-				    target_csname ? target_csname : "???",
-				    success ? "OK" : "FAILED"));
-			if (success) {
-			    name_used = copied_name_used;
-			}
-			if (Boundary) {
-			    if (!success) {
-				StrAllocCopy(MultipartContentType, "");
-				target_csname = NULL;
-			    } else {
-				if (!target_csname)
-				    target_csname = LYCharSet_UC[target_cs].MIMEname;
-			    }
-			}
-		    } else {  /* We can use the name directly. */
-			CTRACE((tfp, "SubmitForm: name \"%s\" %d %s OK\n",
-				    form_ptr->name ? form_ptr->name : "",
-				    target_cs,
-				    target_csname ? target_csname : "???"));
-			success = YES;
-			if (Boundary) {
-			    StrAllocCopy(copied_name_used, name_used);
-			}
-		    }
-		    if (!success) {
-			if (!had_chartrans_warning) {
-			    had_chartrans_warning = YES;
-			    _user_message(
-				CANNOT_TRANSCODE_FORM,
-				target_csname ? target_csname : "UNKNOWN");
-			    LYSleepAlert();
-			}
-		    }
-		    if (Boundary) {
-			/*
-			 *  According to RFC 1867, Non-ASCII field names
-			 *  "should be encoded according to the prescriptions
-			 *  of RFC 1522 [...].  I don't think RFC 1522 actually
-			 *  is meant to apply to parameters like this, and it
-			 *  is unknown whether any server would make sense of
-			 *  it, so for now just use some quoting/escaping and
-			 *  otherwise leave 8-bit values as they are.
-			 *  Non-ASCII characters in form field names submitted
-			 *  as multipart/form-data can only occur if the form
-			 *  provider specifically asked for it anyway. - kw
-			 */
-			HTMake822Word(&copied_name_used);
-			name_used = copied_name_used;
-		    }
-
-		    break;
-		default:
-		    CTRACE((tfp, "SubmitForm: What type is %d?\n",
-				form_ptr->type));
+	    case F_SUBMIT_TYPE:
+	    case F_TEXT_SUBMIT_TYPE:
+	    case F_IMAGE_SUBMIT_TYPE:
+		if (!(non_empty(form_ptr->name) &&
+		      !strcmp(form_ptr->name, link_name))) {
+		    CTRACE((tfp, "SubmitForm[%d/%d]: skipping submit field with ",
+				 anchor_count, anchor_limit));
+		    CTRACE((tfp, "name \"%s\" for link_name \"%s\", %s.\n",
+				 form_ptr->name ? form_ptr->name : "???",
+				 link_name ? link_name : "???",
+				 non_empty(form_ptr->name) ?
+				 "not current link" : "no field name"));
 		    break;
 		}
-
-		switch(form_ptr->type) {
-
-		case F_RESET_TYPE:
+		if (!(form_ptr->type == F_TEXT_SUBMIT_TYPE ||
+		    (non_empty(form_ptr->value) &&
+		     !strcmp(form_ptr->value, link_value)))) {
+		    CTRACE((tfp, "SubmitForm[%d/%d]: skipping submit field with ",
+				 anchor_count, anchor_limit));
+		    CTRACE((tfp, "name \"%s\" for link_name \"%s\", %s!\n",
+				 form_ptr->name ? form_ptr->name : "???",
+				 link_name ? link_name : "???",
+				 "values are different"));
 		    break;
+		}
+		/* FALLTHRU */
+	    case F_RADIO_TYPE:
+	    case F_CHECKBOX_TYPE:
+	    case F_TEXTAREA_TYPE:
+	    case F_PASSWORD_TYPE:
+	    case F_TEXT_TYPE:
+	    case F_OPTION_LIST_TYPE:
+	    case F_HIDDEN_TYPE:
+		/*
+		 * Be sure to actually look at the option submit value.
+		 */
+		if (form_ptr->cp_submit_value != NULL) {
+		    val_used = form_ptr->cp_submit_value;
+		} else {
+		    val_used = form_ptr->value;
+		}
+
+		/*
+		 * Charset-translate value now, because we need to know the
+		 * charset parameter for multipart bodyparts.  - kw
+		 */
+		if (check_form_specialchars(val_used) != 0) {
+		    /*  We should translate back. */
+		    StrAllocCopy(copied_val_used, val_used);
+		    success = LYUCTranslateBackFormData(&copied_val_used,
+							form_ptr->value_cs,
+							target_cs, PlainText);
+		    CTRACE((tfp, "SubmitForm[%d/%d]: field \"%s\" %d %s -> %d %s %s\n",
+				 anchor_count, anchor_limit,
+				 form_ptr->name ? form_ptr->name : "",
+				 form_ptr->value_cs,
+				 form_ptr->value_cs >= 0
+				     ? LYCharSet_UC[form_ptr->value_cs].MIMEname
+				     : "???",
+				 target_cs,
+				 target_csname ? target_csname : "???",
+				 success ? "OK" : "FAILED"));
+		    if (success) {
+			val_used = copied_val_used;
+		    }
+		} else {  /* We can use the value directly. */
+		    CTRACE((tfp, "SubmitForm[%d/%d]: field \"%s\" %d %s OK\n",
+				 anchor_count, anchor_limit,
+				 form_ptr->name ? form_ptr->name : "",
+				 target_cs,
+				 target_csname ? target_csname : "???"));
+		    success = YES;
+		}
+		if (!success) {
+		    cannot_transcode(&had_chartrans_warning, target_csname);
+		    out_cs = form_ptr->value_cs;
+		} else {
+		    out_cs = target_cs;
+		}
+		if (out_cs >= 0)
+		    out_csname = LYCharSet_UC[out_cs].MIMEname;
+		if (Boundary) {
+		    StrAllocCopy(MultipartContentType,
+				 "\r\nContent-Type: text/plain");
+		    if (!success && form_ptr->value_cs < 0) {
+			/*  This is weird. */
+			out_csname = "UNKNOWN-8BIT";
+		    } else if (!success) {
+			target_csname = NULL;
+		    } else {
+			if (!target_csname) {
+			    target_csname = LYCharSet_UC[target_cs].MIMEname;
+			}
+		    }
+		    if (strcmp(out_csname, "iso-8859-1"))
+			HTSprintf(&MultipartContentType, "; charset=%s", out_csname);
+		}
+
+		/*
+		 * Charset-translate name now, because we need to know the
+		 * charset parameter for multipart bodyparts.  - kw
+		 */
+		if (form_ptr->type == F_TEXTAREA_TYPE) {
+		    textarea_lineno++;
+		    if (textarea_lineno > 1 &&
+			last_textarea_name && form_ptr->name &&
+			!strcmp(last_textarea_name, form_ptr->name)) {
+			break;
+		    }
+		}
+		name_used = (form_ptr->name ?
+			     form_ptr->name : "");
+
+		if (check_form_specialchars(name_used) != 0) {
+		    /*  We should translate back. */
+		    StrAllocCopy(copied_name_used, name_used);
+		    success = LYUCTranslateBackFormData(&copied_name_used,
+							form_ptr->name_cs,
+							target_cs, PlainText);
+		    CTRACE((tfp, "SubmitForm[%d/%d]: name \"%s\" %d %s -> %d %s %s\n",
+				 anchor_count, anchor_limit,
+				 form_ptr->name ? form_ptr->name : "",
+				 form_ptr->name_cs,
+				 form_ptr->name_cs >= 0
+				     ? LYCharSet_UC[form_ptr->name_cs].MIMEname
+				     : "???",
+				 target_cs,
+				 target_csname ? target_csname : "???",
+				 success ? "OK" : "FAILED"));
+		    if (success) {
+			name_used = copied_name_used;
+		    }
+		    if (Boundary) {
+			if (!success) {
+			    StrAllocCopy(MultipartContentType, "");
+			    target_csname = NULL;
+			} else {
+			    if (!target_csname)
+				target_csname = LYCharSet_UC[target_cs].MIMEname;
+			}
+		    }
+		} else {  /* We can use the name directly. */
+		    CTRACE((tfp, "SubmitForm[%d/%d]: name \"%s\" %d %s OK\n",
+				anchor_count, anchor_limit,
+				form_ptr->name ? form_ptr->name : "",
+				target_cs,
+				target_csname ? target_csname : "???"));
+		    success = YES;
+		    if (Boundary) {
+			StrAllocCopy(copied_name_used, name_used);
+		    }
+		}
+		if (!success) {
+		    cannot_transcode(&had_chartrans_warning, target_csname);
+		}
+		if (Boundary) {
+		    /*
+		     *  According to RFC 1867, Non-ASCII field names
+		     *  "should be encoded according to the prescriptions
+		     *  of RFC 1522 [...].  I don't think RFC 1522 actually
+		     *  is meant to apply to parameters like this, and it
+		     *  is unknown whether any server would make sense of
+		     *  it, so for now just use some quoting/escaping and
+		     *  otherwise leave 8-bit values as they are.
+		     *  Non-ASCII characters in form field names submitted
+		     *  as multipart/form-data can only occur if the form
+		     *  provider specifically asked for it anyway. - kw
+		     */
+		    HTMake822Word(&copied_name_used);
+		    name_used = copied_name_used;
+		}
+
+		break;
+	    default:
+		CTRACE((tfp, "SubmitForm[%d/%d]: What type is %d?\n",
+			     anchor_count, anchor_limit,
+			     form_ptr->type));
+		break;
+	    }
+
+	    switch(form_ptr->type) {
+
+	    case F_RESET_TYPE:
+		break;
 
 #ifdef EXP_FILE_UPLOAD
-		case F_FILE_TYPE:
-		    first_one = begin_submission_part(&query,
-						    first_one,
-						    SemiColon,
-						    PlainText,
-						    Boundary);
-		    if (!send_a_file(&query,
-				     PlainText,
-				     MultipartContentType,
-				     Boundary,
-				     name_used,
-				     val_used))
-			goto exit_disgracefully;
+	    case F_FILE_TYPE:
+		first_one = begin_submission_part(&query,
+						  first_one,
+						  SemiColon,
+						  PlainText,
+						  Boundary);
+		if ((escaped2 = load_a_file(&use_mime, val_used)) == NULL)
+		    goto exit_disgracefully;
+
+		/* FIXME: we need to modify the mime-type here - rp */
+		/* Note: could use LYGetFileInfo for that and for
+		   other headers that should be transmitted - kw */
+
+		if (PlainText) {
+		    StrAllocCopy(escaped1, name_used);
+		} else if (Boundary) {
+		    StrAllocCopy(escaped1, "Content-Disposition: form-data");
+		    HTSprintf(&escaped1, "; name=\"%s\"", name_used);
+		    HTSprintf(&escaped1, "; filename=\"%s\"", val_used);
+		    if (MultipartContentType) {
+			StrAllocCat(escaped1, MultipartContentType);
+			if (use_mime)
+			    StrAllocCat(escaped1, "\r\nContent-Transfer-Encoding: base64");
+		    }
+		    StrAllocCat(escaped1, "\r\n\r\n");
+		} else {
+		    escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
+		}
+
+		HTSprintf(&query,
+			  "%s%s%s%s%s",
+			  escaped1,
+			  (Boundary ? "" : "="),
+			  (PlainText ? "\n" : ""),
+			  escaped2,
+			  ((PlainText && *escaped2) ? "\n" : ""));
 		break;
 #endif /* EXP_FILE_UPLOAD */
 
-		case F_SUBMIT_TYPE:
-		case F_TEXT_SUBMIT_TYPE:
-		case F_IMAGE_SUBMIT_TYPE:
-		    /*
-		     *  If it has a non-zero length name (e.g., because
-		     *  its IMAGE_SUBMIT_TYPE is to be handled homologously
-		     *  to an image map, or a SUBMIT_TYPE in a set of
-		     *  multiple submit buttons, or a single type="text"
-		     *  that's been converted to a TEXT_SUBMIT_TYPE),
-		     *  include the name=value pair, or fake name.x=0 and
-		     *  name.y=0 pairs for IMAGE_SUBMIT_TYPE. -FM
-		     */
-		    if ((non_empty(form_ptr->name) &&
-			!strcmp(form_ptr->name, link_name)) &&
-		       (form_ptr->type == F_TEXT_SUBMIT_TYPE ||
-			(non_empty(form_ptr->value) &&
-			 !strcmp(form_ptr->value, link_value)))) {
-			int cdisp_name_startpos = 0;
+	    case F_SUBMIT_TYPE:
+	    case F_TEXT_SUBMIT_TYPE:
+	    case F_IMAGE_SUBMIT_TYPE:
+		/*
+		 *  If it has a non-zero length name (e.g., because
+		 *  its IMAGE_SUBMIT_TYPE is to be handled homologously
+		 *  to an image map, or a SUBMIT_TYPE in a set of
+		 *  multiple submit buttons, or a single type="text"
+		 *  that's been converted to a TEXT_SUBMIT_TYPE),
+		 *  include the name=value pair, or fake name.x=0 and
+		 *  name.y=0 pairs for IMAGE_SUBMIT_TYPE. -FM
+		 */
+		if ((non_empty(form_ptr->name) &&
+		    !strcmp(form_ptr->name, link_name)) &&
+		   (form_ptr->type == F_TEXT_SUBMIT_TYPE ||
+		    (non_empty(form_ptr->value) &&
+		     !strcmp(form_ptr->value, link_value)))) {
 
-			first_one = begin_submission_part(&query,
-							  first_one,
-							  SemiColon,
-							  PlainText,
-							  Boundary);
+		    first_one = begin_submission_part(&query,
+						      first_one,
+						      SemiColon,
+						      PlainText,
+						      Boundary);
 
-			if (PlainText) {
-			    StrAllocCopy(escaped1, name_used);
-			} else if (Boundary) {
-			    StrAllocCopy(escaped1,
-				    "Content-Disposition: form-data; name=");
-			    cdisp_name_startpos = strlen(escaped1);
-			    StrAllocCat(escaped1, name_used);
-			    if (MultipartContentType)
-				StrAllocCat(escaped1, MultipartContentType);
-			    StrAllocCat(escaped1, "\r\n\r\n");
-			} else {
-			    escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
-			}
-
-			if (PlainText || Boundary) {
-			    StrAllocCopy(escaped2,
-					 (val_used ?
-					  val_used : ""));
-			} else {
-			    escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
-			}
-
-			if (form_ptr->type == F_IMAGE_SUBMIT_TYPE) {
-			    /*
-			     *  It's a clickable image submit button.
-			     *  Fake a 0,0 coordinate pair, which
-			     *  typically returns the image's default. -FM
-			     */
-			    if (Boundary) {
-				escaped1[cdisp_name_startpos] = '\0';
-				HTSprintf(&query,
-					"%s.x\r\n\r\n0\r\n--%s\r\n%s.y\r\n\r\n0",
-					escaped1,
-					Boundary,
-					escaped1);
-			    } else {
-				HTSprintf(&query,
-					"%s.x=0%s%s.y=0%s",
-					escaped1,
-					(PlainText ?
-					      "\n" : (SemiColon ?
-							    ";" : "&")),
-					escaped1,
-					((PlainText && *escaped1) ?
-							     "\n" : ""));
-			    }
-			} else {
-			    /*
-			     *  It's a standard submit button.
-			     *  Use the name=value pair. = FM
-			     */
-			    HTSprintf(&query,
-				    "%s%s%s%s%s",
-				    escaped1,
-				    (Boundary ? "" : "="),
-				    (PlainText ? "\n" : ""),
-				    escaped2,
-				    ((PlainText && *escaped2) ? "\n" : ""));
-			}
-			FREE(escaped1);
-			FREE(escaped2);
+		    if (PlainText) {
+			StrAllocCopy(escaped1, name_used);
+		    } else if (Boundary) {
+			StrAllocCopy(escaped1, "Content-Disposition: form-data");
+			HTSprintf(&escaped1, "; name=\"%s\"", name_used);
+			if (MultipartContentType)
+			    StrAllocCat(escaped1, MultipartContentType);
+			StrAllocCat(escaped1, "\r\n\r\n");
+		    } else {
+			escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
 		    }
-		    FREE(copied_name_used);
-		    FREE(copied_val_used);
-		    break;
 
-		case F_RADIO_TYPE:
-		case F_CHECKBOX_TYPE:
-		    /*
-		     *  Only add if selected.
-		     */
-		    if (form_ptr->num_value) {
-			first_one = begin_submission_part(&query,
-							  first_one,
-							  SemiColon,
-							  PlainText,
-							  Boundary);
-
-			if (PlainText) {
-			    StrAllocCopy(escaped1, name_used);
-			} else if (Boundary) {
-			    StrAllocCopy(escaped1,
-				     "Content-Disposition: form-data; name=");
-			    StrAllocCat(escaped1, name_used);
-			    if (MultipartContentType)
-				StrAllocCat(escaped1, MultipartContentType);
-			    StrAllocCat(escaped1, "\r\n\r\n");
-			} else {
-			    escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
-			}
-
-			if (PlainText || Boundary) {
-			    StrAllocCopy(escaped2,
-					 (val_used ?
-					  val_used : ""));
-			} else {
-			    escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
-			}
-
-			HTSprintf(&query,
-				"%s%s%s%s%s",
-				escaped1,
-				(Boundary ?
-				       "" : "="),
-				(PlainText ?
-				      "\n" : ""),
-				escaped2,
-				((PlainText && *escaped2) ?
-						     "\n" : ""));
-			FREE(escaped1);
-			FREE(escaped2);
-		    }
-		    FREE(copied_name_used);
-		    FREE(copied_val_used);
-		    break;
-
-		case F_TEXTAREA_TYPE:
 		    if (PlainText || Boundary) {
 			StrAllocCopy(escaped2,
 				     (val_used ?
@@ -10728,38 +10561,35 @@ PUBLIC int HText_SubmitForm ARGS4(
 			escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
 		    }
 
-		    if (!last_textarea_name ||
-			strcmp(last_textarea_name, form_ptr->name)) {
-			textarea_lineno = 1;
+		    if (form_ptr->type == F_IMAGE_SUBMIT_TYPE) {
 			/*
-			 *  Names are different so this is the first
-			 *  textarea or a different one from any before
-			 *  it.
+			 * It's a clickable image submit button.  Fake a 0,0
+			 * coordinate pair, which typically returns the image's
+			 * default.  -FM
 			 */
 			if (Boundary) {
-			    StrAllocCopy(previous_blanks, "\r\n");
+			    *(strchr(escaped1, '=') + 1) = '\0';
+			    HTSprintf(&query,
+				    "%s.x\r\n\r\n0\r\n--%s\r\n%s.y\r\n\r\n0",
+				    escaped1,
+				    Boundary,
+				    escaped1);
 			} else {
-			    FREE(previous_blanks);
+			    HTSprintf(&query,
+				    "%s.x=0%s%s.y=0%s",
+				    escaped1,
+				    (PlainText ?
+					  "\n" : (SemiColon ?
+							";" : "&")),
+				    escaped1,
+				    ((PlainText && *escaped1) ?
+							 "\n" : ""));
 			}
-			first_one = begin_submission_part(&query,
-							  first_one,
-							  SemiColon,
-							  PlainText,
-							  Boundary);
-
-			if (PlainText) {
-			    StrAllocCopy(escaped1, name_used);
-			} else if (Boundary) {
-			    StrAllocCopy(escaped1,
-				     "Content-Disposition: form-data; name=");
-			    StrAllocCat(escaped1, name_used);
-			    if (MultipartContentType)
-				StrAllocCat(escaped1, MultipartContentType);
-			    StrAllocCat(escaped1, "\r\n\r\n");
-			} else {
-			    escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
-			}
-
+		    } else {
+			/*
+			 * It's a standard submit button.  Use the name=value
+			 * pair.  = FM
+			 */
 			HTSprintf(&query,
 				"%s%s%s%s%s",
 				escaped1,
@@ -10767,54 +10597,27 @@ PUBLIC int HText_SubmitForm ARGS4(
 				(PlainText ? "\n" : ""),
 				escaped2,
 				((PlainText && *escaped2) ? "\n" : ""));
-			FREE(escaped1);
-			last_textarea_name = form_ptr->name;
-		    } else {
-			/*
-			 *  This is a continuation of a previous textarea
-			 *  add %0d%0a (\r\n) and the escaped string.
-			 */
-			if (escaped2[0] != '\0') {
-			    if (previous_blanks) {
-				StrAllocCat(query, previous_blanks);
-				FREE(previous_blanks);
-			    }
-			    if (PlainText) {
-				HTSprintf(&query, "%s\n", escaped2);
-			    } else if (Boundary) {
-				HTSprintf(&query, "%s\r\n", escaped2);
-			    } else {
-				HTSprintf(&query, "%%0d%%0a%s", escaped2);
-			    }
-			} else {
-			    if (PlainText) {
-				StrAllocCat(previous_blanks, "\n");
-			    } else if (Boundary) {
-				StrAllocCat(previous_blanks, "\r\n");
-			    } else {
-				StrAllocCat(previous_blanks, "%0d%0a");
-			    }
-			}
 		    }
-		    FREE(escaped2);
-		    FREE(copied_val_used);
-		    break;
+		}
+		break;
 
-		case F_PASSWORD_TYPE:
-		case F_TEXT_TYPE:
-		case F_OPTION_LIST_TYPE:
-		case F_HIDDEN_TYPE:
+	    case F_RADIO_TYPE:
+	    case F_CHECKBOX_TYPE:
+		/*
+		 *  Only add if selected.
+		 */
+		if (form_ptr->num_value) {
 		    first_one = begin_submission_part(&query,
 						      first_one,
 						      SemiColon,
 						      PlainText,
 						      Boundary);
+
 		    if (PlainText) {
-		       StrAllocCopy(escaped1, name_used);
+			StrAllocCopy(escaped1, name_used);
 		    } else if (Boundary) {
-			StrAllocCopy(escaped1,
-				    "Content-Disposition: form-data; name=");
-			StrAllocCat(escaped1, name_used);
+			StrAllocCopy(escaped1, "Content-Disposition: form-data");
+			HTSprintf(&escaped1, "; name=\"%s\"", name_used);
 			if (MultipartContentType)
 			    StrAllocCat(escaped1, MultipartContentType);
 			StrAllocCat(escaped1, "\r\n\r\n");
@@ -10837,22 +10640,132 @@ PUBLIC int HText_SubmitForm ARGS4(
 			    (PlainText ? "\n" : ""),
 			    escaped2,
 			    ((PlainText && *escaped2) ? "\n" : ""));
-		    FREE(escaped1);
-		    FREE(escaped2);
-		    FREE(copied_name_used);
-		    FREE(copied_val_used);
-		    break;
 		}
-	    } else if (anchor_ptr->input_field->number > form_number) {
+		break;
+
+	    case F_TEXTAREA_TYPE:
+		if (PlainText || Boundary) {
+		    StrAllocCopy(escaped2,
+				 (val_used ?
+				  val_used : ""));
+		} else {
+		    escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
+		}
+
+		if (!last_textarea_name ||
+		    strcmp(last_textarea_name, form_ptr->name)) {
+		    textarea_lineno = 1;
+		    /*
+		     * Names are different so this is the first textarea or a
+		     * different one from any before it.
+		     */
+		    if (Boundary) {
+			StrAllocCopy(previous_blanks, "\r\n");
+		    } else {
+			FREE(previous_blanks);
+		    }
+		    first_one = begin_submission_part(&query,
+						      first_one,
+						      SemiColon,
+						      PlainText,
+						      Boundary);
+
+		    if (PlainText) {
+			StrAllocCopy(escaped1, name_used);
+		    } else if (Boundary) {
+			StrAllocCopy(escaped1, "Content-Disposition: form-data");
+			HTSprintf(&escaped1, "; name=\"%s\"", name_used);
+			if (MultipartContentType)
+			    StrAllocCat(escaped1, MultipartContentType);
+			StrAllocCat(escaped1, "\r\n\r\n");
+		    } else {
+			escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
+		    }
+
+		    HTSprintf(&query,
+			    "%s%s%s%s%s",
+			    escaped1,
+			    (Boundary ? "" : "="),
+			    (PlainText ? "\n" : ""),
+			    escaped2,
+			    ((PlainText && *escaped2) ? "\n" : ""));
+		    last_textarea_name = form_ptr->name;
+		} else {
+		    /*
+		     * This is a continuation of a previous textarea.
+		     * Add %0d%0a (\r\n) and the escaped string.
+		     */
+		    if (escaped2[0] != '\0') {
+			if (previous_blanks) {
+			    StrAllocCat(query, previous_blanks);
+			    FREE(previous_blanks);
+			}
+			if (PlainText) {
+			    HTSprintf(&query, "%s\n", escaped2);
+			} else if (Boundary) {
+			    HTSprintf(&query, "%s\r\n", escaped2);
+			} else {
+			    HTSprintf(&query, "%%0d%%0a%s", escaped2);
+			}
+		    } else {
+			if (PlainText) {
+			    StrAllocCat(previous_blanks, "\n");
+			} else if (Boundary) {
+			    StrAllocCat(previous_blanks, "\r\n");
+			} else {
+			    StrAllocCat(previous_blanks, "%0d%0a");
+			}
+		    }
+		}
+		break;
+
+	    case F_PASSWORD_TYPE:
+	    case F_TEXT_TYPE:
+	    case F_OPTION_LIST_TYPE:
+	    case F_HIDDEN_TYPE:
+		first_one = begin_submission_part(&query,
+						  first_one,
+						  SemiColon,
+						  PlainText,
+						  Boundary);
+		if (PlainText) {
+		   StrAllocCopy(escaped1, name_used);
+		} else if (Boundary) {
+		    StrAllocCopy(escaped1, "Content-Disposition: form-data");
+		    HTSprintf(&escaped1, "; name=\"%s\"", name_used);
+		    if (MultipartContentType)
+			StrAllocCat(escaped1, MultipartContentType);
+		    StrAllocCat(escaped1, "\r\n\r\n");
+		} else {
+		    escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
+		}
+
+		if (PlainText || Boundary) {
+		    StrAllocCopy(escaped2,
+				 (val_used ?
+				  val_used : ""));
+		} else {
+		    escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
+		}
+
+		HTSprintf(&query,
+			"%s%s%s%s%s",
+			escaped1,
+			(Boundary ? "" : "="),
+			(PlainText ? "\n" : ""),
+			escaped2,
+			((PlainText && *escaped2) ? "\n" : ""));
 		break;
 	    }
-	}
-
-	if (anchor_ptr == HTMainText->last_anchor)
+	    FREE(escaped1);
+	    FREE(escaped2);
+	    FREE(copied_name_used);
+	    FREE(copied_val_used);
+	} else if (anchor_ptr->input_field->number > form_number) {
 	    break;
-
-	anchor_ptr = anchor_ptr->next;
+	}
     }
+
     FREE(copied_name_used);
     if (Boundary) {
 	FREE(MultipartContentType);
@@ -10931,18 +10844,14 @@ PUBLIC void HText_DisableCurrentForm NOARGS
     /*
      *  Go through list of anchors and set the disabled flag.
      */
-    anchor_ptr = HTMainText->first_anchor;
-    while (anchor_ptr) {
+    for (anchor_ptr = HTMainText->first_anchor;
+	 anchor_ptr != NULL;
+	 anchor_ptr = next_anchor(HTMainText, anchor_ptr)) {
 	if (anchor_ptr->link_type == INPUT_ANCHOR &&
 	    anchor_ptr->input_field->number == HTFormNumber) {
 
 	    anchor_ptr->input_field->disabled = TRUE;
 	}
-
-	if (anchor_ptr == HTMainText->last_anchor)
-	    break;
-
-	anchor_ptr = anchor_ptr->next;
     }
 
     return;
@@ -10960,8 +10869,9 @@ PUBLIC void HText_ResetForm ARGS1(
     /*
      *  Go through list of anchors and reset values.
      */
-    anchor_ptr = HTMainText->first_anchor;
-    while (anchor_ptr != 0) {
+    for (anchor_ptr = HTMainText->first_anchor;
+	 anchor_ptr != NULL;
+	 anchor_ptr = next_anchor(HTMainText, anchor_ptr)) {
 	if (anchor_ptr->link_type == INPUT_ANCHOR) {
 	    if (anchor_ptr->input_field->number == form->number) {
 
@@ -10989,11 +10899,6 @@ PUBLIC void HText_ResetForm ARGS1(
 		break;
 	    }
 	}
-
-	if (anchor_ptr == HTMainText->last_anchor)
-	    break;
-
-	anchor_ptr = anchor_ptr->next;
     }
 }
 
@@ -11013,8 +10918,9 @@ PUBLIC BOOLEAN HText_HaveUserChangedForms NOARGS
      *  Go through list of anchors to check if any value was changed.
      *  This code based on HText_ResetForm()
      */
-    anchor_ptr = HTMainText->first_anchor;
-    while (anchor_ptr != 0) {
+    for (anchor_ptr = HTMainText->first_anchor;
+	 anchor_ptr != NULL;
+	 anchor_ptr = next_anchor(HTMainText, anchor_ptr)) {
 	if (anchor_ptr->link_type == INPUT_ANCHOR) {
 
 	    if (anchor_ptr->input_field->type == F_RADIO_TYPE ||
@@ -11041,10 +10947,6 @@ PUBLIC BOOLEAN HText_HaveUserChangedForms NOARGS
 		    return TRUE;
 	    }
 	}
-	if (anchor_ptr == HTMainText->last_anchor)
-	   break;
-
-	anchor_ptr = anchor_ptr->next;
     }
     return FALSE;
 }
@@ -11057,8 +10959,9 @@ PUBLIC void HText_activateRadioButton ARGS1(
 
     if (!HTMainText)
 	return;
-    anchor_ptr = HTMainText->first_anchor;
-    while (anchor_ptr) {
+    for (anchor_ptr = HTMainText->first_anchor;
+	 anchor_ptr != NULL;
+	 anchor_ptr = next_anchor(HTMainText, anchor_ptr)) {
 	if (anchor_ptr->link_type == INPUT_ANCHOR &&
 		anchor_ptr->input_field->type == F_RADIO_TYPE) {
 
@@ -11075,11 +10978,6 @@ PUBLIC void HText_activateRadioButton ARGS1(
 	    }
 
 	}
-
-	if (anchor_ptr == HTMainText->last_anchor)
-	    break;
-
-	anchor_ptr = anchor_ptr->next;
    }
 
    form->num_value = 1;

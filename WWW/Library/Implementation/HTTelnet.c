@@ -33,10 +33,6 @@
 
 #include <LYStrings.h>
 #include <LYLeaks.h>
-#ifdef __DJGPP__
-#include <sys/exceptn.h>
-#include <go32.h>
-#endif /* __DJGPP__ */
 
 PRIVATE void do_system ARGS1(char *, command)
 {
@@ -208,22 +204,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	    break;
 	}
 
-#ifdef __DJGPP__
-#ifdef WATT32
-	_eth_release();
-#endif /* WATT32 */
-       __djgpp_set_ctrl_c(0);
-       _go32_want_ctrl_break(1);
-#endif /* __DJGPP__ */
-	do_system(command);
-#ifdef __DJGPP__
-       __djgpp_set_ctrl_c(1);
-       _go32_want_ctrl_break(0);
-#ifdef WATT32
-       _eth_init();
-#endif /* WATT32 */
-#endif /* __DJGPP__ */
-
+        LYSystem(command);
 #define TELNET_DONE
 #endif /* unix */
 

@@ -1,6 +1,68 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2002-05-28 (2.8.5dev.8)
+* updated makelynx.bat (vtailor@gte.net).
+* recognize charset value in meta description even if content-type is not
+  given, in  LYHandleMETA() -VH
+* remove ifdef that disabled home/end keys with Cygwin configuration -DK
+* fix a problem when whereis target string, which includes Japanese and is top
+  of the second line in the link string, is in the current link (patch by
+  Hataguchi Takeshi).
+* fix a problem with highlighting Japanese string (patch by Hataguchi Takeshi).
+* modify LYDownload() to ensure that local addresses under DJGPP using the
+  special form of path beginning "/dev/" are passed to external programs
+  without stripping the initial slash from the path.  This special form of path
+  will be understood only by other DJGPP programs.  Addresses of the form
+  "/dev/x/" are equivalent to the DOS path "x:\".  Addresses of the form
+  "/dev/env/VARI" are equivalent to the environment variable "VARI" -DK
+* modify remove_bookmark_link() to assume that OS/2 EMX does not allow rename
+  of a file overwriting an existing one -IZ
+* recognize local .php files as HTML files (patch by Karl Eichwalder
+  <ke@suse.de>).
+* change LYCurses.c to not redefine gettext(), and use ScreenClear() instead
+  of clrscr() for DJGPP -DK
+* the DJGPP port of Lynx once used to compile with DJ Delorie's tcp/ip library. 
+  It is no longer the case; Watt-32 is required.  Changed to assume WATT32 is
+  defined when DJGPP (or __DJGPP__) is defined (patch by Gisle Vanem).
+* change LYKeycodeToString() to provide a default translation for characters
+  which are not key-symbols, etc., so they may be used in command scripts
+  with the -cmd_file option (reported by Christoph Fabianek) -TD
+* new po files (ca.po, et.po, it.po, zh_TW.po) and updated de.po from
+  http://www.iro.umontreal.ca/contrib/po/maint/lynx/, used msgmerge to align
+  with 2.8.4's lynx.pot and corrected some minor issues highlighted by
+  check_po script by Stefan Hundhammer <sh@suse.de> -TD
+* some cleanup/restructuring of HText_SubmitForm(), incomplete - toward
+  implementing correct MIME boundary -TD
+* revalidate user's guide and related files using W3C validator via file-upload
+  facility -TD
+* simplify some loops in GridText.c using new function next_anchor() -TD
+* quote field-names used when submitting form-data as suggested in RFC 2068
+  (report by Lieven Tomme <lieven@itopia.com>) -TD
+* remove configure-check for mkstemp(), which is redundant given that lynx
+  writes temporary files in a directory which is not readable by other users. 
+  On more than one system (e.g., Solaris), mkstemp() is not usable in the
+  manner we attempted, since it does not necessarily choose a distinct name if
+  the previously-chosen filename no longer exists (report/analysis by PG) -TD
+* correct a typo in configure macro CF_HEADER_PATH which told the script to
+  look for header files in the user's $HOME/lib rather than $HOME/include
+  directory -TD
+* update config.guess, config.sub -TD
+* add check for HTTP headers using Netscape extension "Refresh", and if found,
+  add a corresponding refresh-url at the beginning of the document.  Fixes
+  Debian #126723.
+* strip username from URLs used in an HTTP GET, and warn about this condition.
+  The example given was
+    "http://www.microsoft.com&item%3dq209354@212.254.206.213/1338825GHU_98.asp"
+  the text of which could mislead a user into believe it was an official site
+  (reported by Frederic L W Meunier) -TD
+* add limit checks in HText_trimHightext() to fix an infinite loop visiting
+  this site (which contains a form with only hidden input fields):
+  1- http://www.ibazar.com.br/
+  2- Click "Cadastro" and accept all cookies
+  3- Click "[accepte.gif]"
+  (reported by Frederic L W Meunier) -TD
+
 2002-01-06 (2.8.5dev.7)
 * ifdef'd new directory-sorting code to compile when configure --disable-dired
   is specified -TD

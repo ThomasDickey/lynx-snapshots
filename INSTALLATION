@@ -866,7 +866,7 @@ V. Compile instructions -- 386 DOS
      
     +void sig_handler_watt (int sig)
     +{
-    +	sig_handler (int sig);
+    +   sig_handler (sig);
     +}
     +
      /*

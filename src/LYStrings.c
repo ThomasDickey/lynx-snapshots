@@ -2402,7 +2402,7 @@ PUBLIC void LYLowerCase ARGS1(
     for (i = 0; buffer[i]; i++)
 #ifdef SUPPORT_MULTIBYTE_EDIT	/* 1998/11/23 (Mon) 17:04:55 */
     {
-	if (buffer[i] & 0x80
+	if ((buffer[i] & 0x80) != 0
 	 && buffer[i+1] != 0) {
 	    if ((kanji_code == SJIS) && IS_SJIS_X0201KANA(UCH((buffer[i])))) {
 		continue;
@@ -2428,7 +2428,7 @@ PUBLIC void LYUpperCase ARGS1(
     for (i = 0; buffer[i]; i++)
 #ifdef SUPPORT_MULTIBYTE_EDIT	/* 1998/11/23 (Mon) 17:05:10 */
     {
-	if (buffer[i] & 0x80
+	if ((buffer[i] & 0x80) != 0
 	 && buffer[i+1] != 0) {
 	    if ((kanji_code == SJIS) && IS_SJIS_X0201KANA(UCH((buffer[i])))) {
 		continue;

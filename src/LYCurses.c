@@ -1,17 +1,6 @@
 #include <HTUtils.h>
 #include <HTAlert.h>
 
-#ifdef __DJGPP__
-#include <conio.h>
-/* The conio.h distributed with GNU gettext package may redefine gettext() to
- * _conio_gettext().  Restore our definition.
- */
-#ifndef HAVE_GETTEXT
-#undef gettext
-#define gettext(s) s
-#endif /* HAVE_GETTEXT */
-#endif /* __DJGPP__ */
-
 #include <LYCurses.h>
 #include <LYStyle.h>
 #include <LYUtils.h>
@@ -874,11 +863,7 @@ PUBLIC void start_curses NOARGS
 #endif /* (VMS || REAL_UNIX_SYSTEM) && !__CYGWIN__  */
     }
 #ifdef __DJGPP__
-#ifdef WATT32
     _eth_init();
-#else
-    else sock_init();
-#endif /* WATT32 */
 #endif /* __DJGPP__ */
 
     slinit = 1;
@@ -1059,11 +1044,7 @@ PUBLIC void start_curses NOARGS
 #endif /* USE_COLOR_TABLE */
     }
 #ifdef __DJGPP__
-#ifdef WATT32
     _eth_init();
-#else
-    else sock_init();
-#endif /* WATT32 */
 #endif /* __DJGPP__ */
 #endif /* not VMS */
 
@@ -1256,14 +1237,15 @@ PUBLIC void stop_curses NOARGS
     if (LYCursesON)
 	echo();
 #ifdef __DJGPP__
-#ifdef WATT32
     _eth_release();
-#else
-    sock_exit();
-#endif /* WATT32 */
 #endif /* __DJGPP__ */
+
 #if defined(DOSPATH) && !(defined(USE_SLANG) || _WIN_CC)
+#ifdef __DJGPP__
+    ScreenClear();
+#else
     clrscr();
+#endif
 #else
 
     /*

@@ -7,9 +7,6 @@
 */
 
 #include <HTUtils.h>
-#if defined(__DJGPP__) && defined (WATT32)
-#include <tcp.h>
-#endif /* __DJGPP__ */
 #include <HTTP.h>
 #include <LYUtils.h>
 
@@ -324,6 +321,32 @@ PUBLIC int ws_netread(int fd, char *buf, int len)
 }
 #endif
 
+/*
+ * Strip any username from the given string so we retain only the host.
+ * If the 
+ */
+PRIVATE void strip_userid ARGS1(
+	char *,		host)
+{
+    char *p1 = host;
+    char *p2 = strchr(host, '@');
+    char *fake;
+
+    if (p2 != 0) {
+	*p2++ = '\0';
+	if ((fake = HTParse(host, "", PARSE_HOST)) != NULL) {
+	    char *msg = NULL;
+
+	    CTRACE((tfp, "FIXME:%s\n", fake));
+	    HTSprintf0(&msg, gettext("Address contains a username: %s"), host);
+	    HTAlert(msg);
+	    FREE(msg);
+	}
+	while ((*p1++ = *p2++) != '\0') {
+	    ;
+	}
+    }
+}
 
 /*		Load Document from HTTP Server			HTLoadHTTP()
 **		==============================
@@ -626,6 +649,7 @@ use_tunnel:
       char * host = NULL;
 
       if ((host = HTParse(anAnchor->address, "", PARSE_HOST)) != NULL) {
+	  strip_userid(host);
 	  HTSprintf(&command, "Host: %s%c%c", host, CR,LF);
 	  FREE(host);
       }
@@ -989,10 +1013,9 @@ use_tunnel:
 		   ? anAnchor->post_content_type
 		   : "lose",
 		  CR, LF);
-/*
- * Ack!  This assumes non-binary data!  Icky!
- *
- */
+	/*
+	 * FIXME: Ack!  This assumes non-binary data!  Icky!
+	 */
 	HTSprintf(&command, "Content-length: %d%c%c",
 		  (anAnchor->post_data)
 		   ? strlen (anAnchor->post_data)
@@ -1038,7 +1061,7 @@ use_tunnel:
 		 !already_retrying &&
 		 /* Don't retry if we're posting. */ !do_post) {
 	    /*
-	    **	Arrrrgh, HTTP 0/1 compability problem, maybe.
+	    **	Arrrrgh, HTTP 0/1 compatibility problem, maybe.
 	    */
 	    CTRACE((tfp, "HTTP: BONZO ON WRITE Trying again with HTTP0 request.\n"));
 	    _HTProgress (RETRYING_AS_HTTP0);

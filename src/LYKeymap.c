@@ -216,7 +216,7 @@ LYK_PREV_LINK,    LYK_NEXT_LINK,    LYK_ACTIVATE,   LYK_PREV_DOC,
 LYK_NEXT_PAGE,    LYK_PREV_PAGE,    LYK_HOME,       LYK_END,
 /* PGDOWN */      /* PGUP */        /* HOME */      /* END */
 
-#if (defined(_WINDOWS) || defined(__DJGPP__) || defined(__CYGWIN__))
+#if (defined(_WINDOWS) || defined(__DJGPP__))
 
 LYK_DWIMHELP,          0,              0,             0,
 /* F1*/
@@ -225,7 +225,7 @@ LYK_DWIMHELP,          0,              0,             0,
 LYK_DWIMHELP,     LYK_ACTIVATE,     LYK_HOME,       LYK_END,
 /* F1*/ 	  /* Do key */      /* Find key */  /* Select key */
 
-#endif /* _WINDOWS || __DJGPP__ || __CYGWIN__ */
+#endif /* _WINDOWS || __DJGPP__ */
 
 LYK_UP_TWO,       LYK_DOWN_TWO,     LYK_DO_NOTHING, LYK_FASTBACKW_LINK,
 /* Insert key */  /* Remove key */  /* DO_NOTHING*/ /* Back tab */
@@ -1174,7 +1174,7 @@ PUBLIC char *LYKeycodeToString ARGS2 (
 	else if (c >= 0400)
 	    sprintf(buf, "key-%#x", c);
 	else
-	    return 0;
+	    sprintf(buf, "%#x", c);
     }
     return buf;
 }
