@@ -1,6 +1,52 @@
 Changes since Lynx 2.8.1 release
 ================================================================================
 
+1998-11-18 (2.8.2dev.4)
+* change default for configure option of NLS (gettext) to disabled until we
+  finish porting it to implementations other than GNU gettext.  Also,
+  change default for include-gettext configure option to "with" - TD
+* suppress cookie-storing if the value is null - BJP
+* ifdef'd alternative set of line-edit bindings with EXP_ALT_BINDINGS, add
+  configure option --enable-alt-bindings, rename DELEOL to DELEL, remove
+  binding of DELEL to '\'. - TD
+* add alternative set of line-edit bindings to change the behavior of the ^B
+  and ^F line editor bindings to provide emacs/tcsh like behavior (cursor
+  left/right), instead of "word" deletes.  Corrected a bug in the ^R (LYE_DELN)
+  function, which is described as "delete next character", but was in fact
+  performing identically to ^D (LYE_DELC) "delete current character".  Added a
+  function called LYE_DELEL, which does the expected thing, and deletes
+  from the current cursor position, to the EOL. 
+  New bindings:
+    ^B = LYE_BACK   cursor backwards 
+    ^F = LYE_FORW   cursor forwards 
+    ^K = LYE_DELEOL delete to end-of-line 
+    ^T = LYE_DELNW  delete next word 
+    ^X = LYE_DELPW  delete previous word 
+    ^^ = LYE_UPPER  upper case line (not active when kbd-layout binding is)
+    ^_ = LYE_LOWER  lower case line 
+  (Kim DeVaughn <kimdv@best.com>).
+* modify to show address to submit to on the statusline when in advanced user
+  mode.  Also fixes one small typo in LYMainLoop.c.  (suggested by
+  <erisson@sw-tech.com>) - BJP
+* modify HTParseInet() so that it works if stdin has been redirected to
+  /dev/null, e.g., when running a cron job (reported by John H.  DuBois III
+  <spcecdt@armory.com>) - BL
+* minor documentation updates to lynx.cfg (Larry Virden).
+* change some character constants from '\hex' and '\octal' form to decimal,
+  to pursuade compilers that upper-128 compares are legal - TD
+* ifdef'd KEYBOARD_LAYOUT with EXP_KEYBOARD_LAYOUT, add configure option
+  --enable-kbd-layout.  Note that control/Y is used as a process suspend
+  character on some platforms (VMS and Solaris) - TD
+* implement EXP_CHARTRANS_AUTOSWITCH for OS/2 EMX (Sergey Svishchev).
+* add 'a' response when printing a file to allow append rather than overwrite
+  (Sergey Svishchev).
+* add KEYBOARD_LAYOUT to lynx.cfg, to support character-translation on input,
+  add missing line editing style selection to Options form.  This is enabled
+  and disabled by the line edit control/Y (Sergey Svishchev <svs@ropnet.ru>).
+* use exit_immediately() to reduce some signal-function clutter - LP
+* correct dependency in src/makefile.in for cfg_defs.h (Masashi Fujita
+  <objectx@bandit.co.jp>)
+* change quoted includes in intl directory to bracketed includes - TD
 1998-11-16 (2.8.2dev.3)
 * misc documentation updates for the gettext/internationalization - LP
 * rename po/makefile.in.in to po/makefile.inn, and modify distclean rule to

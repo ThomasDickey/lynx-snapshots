@@ -4,6 +4,9 @@ Mcp862
 #Name as a Display Charset (used on Options screen).
 OHebrew (cp862)
 
+#Codepage number
+C862
+
 #    Name:     cp862_DOSHebrew to Unicode table
 #    Unicode version: 2.0
 #    Table version: 2.00

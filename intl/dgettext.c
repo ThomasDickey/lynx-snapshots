@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifdef _LIBC
 # include <libintl.h>
 #else
-# include "libgettext.h"
+# include <libgettext.h>
 #endif
 
 /* @@ end of prolog @@ */

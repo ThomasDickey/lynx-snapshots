@@ -19,7 +19,7 @@ top_builddir	= ../..
 LIBS		= @LIBS@ $(SITE_LIBS)
 LDFLAGS		= @LDFLAGS@
 
-INTLLIB		= @INTLDIR_MAKE@@INTLLIBS@ 
+INTLLIB		= @INTLDIR_MAKE@@INTLLIBS@
 
 WWWINC		= WWW/Library/Implementation
 SITE_DEFS	= # FIXME: set in parent makefile
@@ -102,7 +102,7 @@ makeuctb.o: $(srcdir)/UCkd.h $(srcdir)/makeuctb.c
 	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $*.c >$@
 
 .tbl.h:
-	./makeuctb $(srcdir)/$*.tbl > $@
+	./makeuctb$x $(srcdir)/$*.tbl > $@
 
 # table files listed here once again to get the make dependencies
 # right, in case makeuctb was recompiled.

@@ -3,21 +3,25 @@
 
 #include <HTUtils.h>
 
+/*
+ * Use integer values for character constants rather than '\octal' form, since
+ * not all compilers agree that those will fit in a character, even when cast.
+ */
 #ifndef   CH_ESC
 #ifdef    EBCDIC
-#define CH_DEL     '\x07'
-#define CH_ESC     '\x27'
-#define CH_ESC_PAR '\x27'
-#define CH_HICTL   '\x3f'
-#define CH_NBSP    '\x41'
-#define CH_SHY     '\xca'
+#define CH_DEL     	0x07
+#define CH_ESC     	0x27
+#define CH_ESC_PAR 	0x27
+#define CH_HICTL   	0x3f
+#define CH_NBSP    	0x41
+#define CH_SHY     	0xca
 #else  /* EBCDIC */
-#define CH_ESC     '\033'
-#define CH_DEL     '\177'
-#define CH_ESC_PAR '\233'
-#define CH_HICTL   '\237'
-#define CH_NBSP    '\240'
-#define CH_SHY     '\255'
+#define CH_ESC     	0033
+#define CH_DEL     	0177
+#define CH_ESC_PAR 	0233
+#define CH_HICTL   	0237
+#define CH_NBSP    	0240
+#define CH_SHY     	0255
 #endif /* EBCDIC */
 #endif /* CH_ESC */
 

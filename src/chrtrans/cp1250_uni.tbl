@@ -4,6 +4,9 @@ Mwindows-1250
 #Name as a Display Charset (used on Options screen)
 OEastern European (windows-1250)
 
+#Codepage number
+C1250
+
 #
 #    Name:     cp1250 to Unicode table
 #    Unicode version: 2.0

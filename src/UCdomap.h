@@ -29,7 +29,8 @@ extern void UC_Charset_Setup PARAMS((
 	int			nnuni,
 	struct unimapdesc_str	replacedesc,
 	int			lowest_eight,
-	int			UC_rawuni));
+	int			UC_rawuni,
+	int			codepage));
 
 CONST char *UC_GNsetMIMEnames[4] =
 	{"iso-8859-1", "x-dec-graphics", "cp437", "x-transparent"};
@@ -48,6 +49,7 @@ struct UC_charset {
 	int GN;
 	int lowest_eight;
 	int enc;
+	int codepage;	/* codepage number, used by OS/2 font-switching code */
 };
 
 extern int UCNumCharsets;

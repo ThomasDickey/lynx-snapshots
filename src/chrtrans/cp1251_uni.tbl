@@ -4,6 +4,9 @@ Mwindows-1251
 #Name as a Display Charset (used on Options screen)
 OCyrillic (windows-1251)
 
+#Codepage number
+C1251
+
 #
 #    Name:     cp1251 to Unicode table
 #    Unicode version: 2.0

@@ -250,6 +250,10 @@ II. Compile instructions -- UNIX
 	Turn off code that lets Lynx display parts of a long page while loading
 	it.
 
+  --enable-alt-bindings                 (define EXP_ALT_BINDINGS)
+	Compiles-in an alternative set of line-edit bindings, in addition
+	to the default bindings.
+
   --enable-cgi-links                    (define LYNXCGI_LINKS)
 	Allows lynx to access a cgi script directly without the need for
 	a http daemon.
@@ -288,6 +292,16 @@ II. Compile instructions -- UNIX
 	a feature which could, however, compromise a secure transaction by
 	forcing inappropriate resubmission of form content.
 
+  --enable-kbd-layout			(define EXP_KEYBOARD_LAYOUT)
+	Disabled by default, this option allows you to use translation
+	tables on the input keystrokes.  Current tables include
+		ROT13'd keyboard layout
+		JCUKEN Cyrillic, for AT 101-key kbd
+		YAWERTY Cyrillic, for DEC LK201 kbd
+
+  --enable-nls
+	use Native Language Support (i.e., gettext).
+
   --enable-nsl-fork			(define NSL_FORK)
 	Disabled by default, this allows interruption of NSL requests,
 	so that `z' will stop the `look-up' phase of a connection.
@@ -314,6 +328,13 @@ II. Compile instructions -- UNIX
 	with the $libdir environment variable.  (For platforms which do not
 	support a configure script, such as MS-DOS, Win32 and VMS, you must
 	edit userdefs.h if you wish to specify the location of lynx.cfg).
+
+  --with-catgets
+	use catgets functions if available.  See "--enable-nls".
+
+  --with-included-gettext
+	use the GNU gettext library included here (default).  See
+	"--enable-nls".
 
   --with-screen=XXX
 	Use this option to select the screen type.  The option value,

@@ -81,7 +81,7 @@ extern HTCJKlang HTCJK;
 PUBLIC HText * HTMainText = NULL;		/* Equivalent of main window */
 PUBLIC HTParentAnchor * HTMainAnchor = NULL;	/* Anchor for HTMainText */
 
-PUBLIC char * HTAppName = "Lynx";		/* Application name */
+PUBLIC char * HTAppName = LYNX_NAME;		/* Application name */
 PUBLIC char * HTAppVersion = LYNX_VERSION;	/* Application version */
 
 PUBLIC int HTFormNumber = 0;

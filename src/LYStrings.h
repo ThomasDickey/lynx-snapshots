@@ -122,9 +122,9 @@ typedef struct _EditFieldData {
 #define LYE_TAB   (LYE_ENTER +1)  /* Input complete, return TAB  */
 #define LYE_ABORT (LYE_TAB   +1)  /* Input cancelled       */
 
-#define LYE_DELN  (LYE_ABORT +1)  /* Delete next    char   */
-#define LYE_DELC  (LYE_DELN  +1)  /* Delete current char   */
-#define LYE_DELP  (LYE_DELC  +1)  /* Delete prev    char   */
+#define LYE_DELN  (LYE_ABORT +1)  /* Delete next/curr char */
+#define LYE_DELC  (LYE_DELN)      /* Obsolete (DELC case was equiv to DELN) */
+#define LYE_DELP  (LYE_DELN  +1)  /* Delete prev      char */
 #define LYE_DELNW (LYE_DELP  +1)  /* Delete next word      */
 #define LYE_DELPW (LYE_DELNW +1)  /* Delete prev word      */
 
@@ -142,7 +142,11 @@ typedef struct _EditFieldData {
 
 #define LYE_LKCMD (LYE_UPPER +1)  /* Invoke command prompt */
 
-#define LYE_AIX   (LYE_LKCMD +1)  /* Hex 97		   */
+#define LYE_AIX   (LYE_LKCMD +1)  /* Hex 97                */
+
+#define LYE_DELEL (LYE_AIX   +1)  /* Delete thru EOL       */
+
+#define LYE_SWMAP (LYE_DELEL +1)  /* Switch input keymap   */
 
 #if defined(USE_KEYMAPS)
 extern int lynx_initialize_keymaps NOPARAMS;

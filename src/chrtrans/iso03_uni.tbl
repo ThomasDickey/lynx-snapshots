@@ -4,6 +4,9 @@ Miso-8859-3
 #Name as a Display Charset (used on Options screen)
 OLatin 3 (ISO-8859-3)
  
+#Codepage number
+C913
+
 #
 #	Name:             ISO 8859-3 (1988) to Unicode
 #	Unicode version:  1.1

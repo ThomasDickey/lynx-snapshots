@@ -10,6 +10,9 @@ Miso-8859-1
 #Name as a Display Charset (used on Options screen)
 OWestern (ISO-8859-1)
 
+#Codepage number
+C819
+
 #
 #	Name:             ISO 8859-1 (1987) to Unicode
 #	Unicode version:  1.1

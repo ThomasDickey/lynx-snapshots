@@ -4,6 +4,9 @@ Miso-8859-5
 #Name as a Display Charset (used on Options screen)
 OCyrillic (ISO-8859-5)
 
+#Codepage number
+C915
+
 #
 #	Name:             ISO 8859-5 (1988) to Unicode
 #	Unicode version:  1.1

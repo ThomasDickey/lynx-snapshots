@@ -1901,6 +1901,7 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
      */
     LYCharSet_UC[LYhndl].MIMEname = UC_MIMEcharset;
     LYCharSet_UC[LYhndl].enc = UCInfo[s].enc;
+    LYCharSet_UC[LYhndl].codepage = UCInfo[s].codepage;
 
     /*
      *	@@@ We really SHOULD get more info from the table files,
@@ -1930,7 +1931,7 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
  *  This only sets up the structure - no initialization of the tables
  * is done here yet.
  */
-PUBLIC void UC_Charset_Setup ARGS8(
+PUBLIC void UC_Charset_Setup ARGS9(
 	CONST char *,		UC_MIMEcharset,
 	CONST char *,		UC_LYNXcharset,
 	u8 *,			unicount,
@@ -1938,7 +1939,8 @@ PUBLIC void UC_Charset_Setup ARGS8(
 	int,			nnuni,
 	struct unimapdesc_str,	replacedesc,
 	int,			lowest_eight,
-	int,			UC_rawuni)
+	int,			UC_rawuni,
+	int,			codepage)
 {
     int s, Gn;
     int i, status = 0, found;
@@ -1979,6 +1981,7 @@ PUBLIC void UC_Charset_Setup ARGS8(
 	lowest_eight = 128;  /* cheat here */
     UCInfo[s].lowest_eight = lowest_eight;
     UCInfo[s].enc = UC_rawuni;
+    UCInfo[s].codepage = codepage;
     UCInfo[s].LYhndl = UC_Register_with_LYCharSets(s,
 						   UC_MIMEcharset,
 						   UC_LYNXcharset,

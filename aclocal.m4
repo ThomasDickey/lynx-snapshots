@@ -223,8 +223,8 @@ AC_DEFUN(AM_WITH_NLS,
   [AC_MSG_CHECKING([whether NLS is requested])
     dnl Default is enabled NLS
     AC_ARG_ENABLE(nls,
-      [  --disable-nls           do not use Native Language Support],
-      USE_NLS=$enableval, USE_NLS=yes)
+      [  --enable-nls            use Native Language Support],
+      USE_NLS=$enableval, USE_NLS=no)
     AC_MSG_RESULT($USE_NLS)
     AC_SUBST(USE_NLS)
 
@@ -237,7 +237,7 @@ AC_DEFUN(AM_WITH_NLS,
       AC_ARG_WITH(included-gettext,
         [  --with-included-gettext use the GNU gettext library included here],
         nls_cv_force_use_gnu_gettext=$withval,
-        nls_cv_force_use_gnu_gettext=no)
+        nls_cv_force_use_gnu_gettext=yes)
       AC_MSG_RESULT($nls_cv_force_use_gnu_gettext)
 
       nls_cv_use_gnu_gettext="$nls_cv_force_use_gnu_gettext"

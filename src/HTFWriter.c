@@ -369,18 +369,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	if (me->anchor->FileCache)
 	    remove(me->anchor->FileCache);
 	FREE(me);
-#ifndef NOSIGHUP
-	(void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-	(void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-	(void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-	if (no_suspend)
-	  (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-	exit(0);
+	exit_immediately(0);
     }
 
     FREE(me);

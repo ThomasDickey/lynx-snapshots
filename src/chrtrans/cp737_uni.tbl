@@ -4,6 +4,9 @@ Mcp737
 #Name as a Display Charset (used on Options screen)
 OGreek (cp737)
 
+#Codepage number
+C737
+
 #
 #    Name:     cp737_DOSGreek to Unicode table
 #    Unicode version: 2.0

@@ -87,16 +87,17 @@ PRIVATE int popup_choice PARAMS((
 
 #define L_KEYPAD	14
 #define L_LINEED	15
+#define L_LAYOUT	16
 
 #ifdef DIRED_SUPPORT
-#define L_DIRED		16
+#define L_DIRED		17
+#define L_USER_MODE	18
+#define L_USER_AGENT	19
+#define L_EXEC		20
+#else
 #define L_USER_MODE	17
 #define L_USER_AGENT	18
 #define L_EXEC		19
-#else
-#define L_USER_MODE	16
-#define L_USER_AGENT	17
-#define L_EXEC		18
 #endif /* DIRED_SUPPORT */
 
 #define L_VERBOSE_IMAGES L_USER_MODE
@@ -115,6 +116,7 @@ PRIVATE int popup_choice PARAMS((
 #define L_Color (use_assume_charset ? L_COLOR + 1 : L_COLOR)
 #define L_Keypad (use_assume_charset ? L_KEYPAD + 1 : L_KEYPAD)
 #define L_Lineed (use_assume_charset ? L_LINEED + 1 : L_LINEED)
+#define L_Layout (use_assume_charset ? L_LAYOUT + 1 : L_LAYOUT)
 #define L_Dired (use_assume_charset ? L_DIRED + 1 : L_DIRED)
 #define L_User_Mode (use_assume_charset ? L_USER_MODE + 1 : L_USER_MODE)
 #define L_User_Agent (use_assume_charset ? L_USER_AGENT + 1 : L_USER_AGENT)
@@ -393,6 +395,12 @@ draw_options:
     move(L_Lineed, 5);
     addlbl("li(N)e edit style            : ");
     addstr(LYLineeditNames[current_lineedit]);
+
+#ifdef EXP_KEYBOARD_LAYOUT
+    move(L_Layout, 5);
+    addlbl("Ke(Y)board layout            : ");
+    addstr(LYKbLayoutNames[current_layout]);
+#endif
 
 #ifdef DIRED_SUPPORT
     move(L_Dired, 5);
@@ -1362,6 +1370,40 @@ draw_options:
 #endif /* !VMS || USE_SLANG */
 		}
 		break;
+
+#ifdef EXP_KEYBOARD_LAYOUT
+	    case 'y':	/* Change keyboard layout */
+	    case 'Y':
+		if (!LYSelectPopups) {
+		    current_layout = boolean_choice(current_layout,
+						      L_Layout, -1,
+						      LYKbLayoutNames);
+		} else {
+		    current_layout = popup_choice(current_layout,
+						    L_Layout, -1,
+						    LYKbLayoutNames,
+						    0, FALSE);
+#if defined(VMS) || defined(USE_SLANG)
+		    move(L_Layout, COL_OPTION_VALUES);
+		    clrtoeol();
+		    addstr(LYKbLayoutNames[current_layout]);
+#endif /* VMS || USE_SLANG */
+		}
+		response = ' ';
+		if (LYSelectPopups) {
+#if !defined(VMS) || defined(USE_SLANG)
+		    if (term_options) {
+			term_options = FALSE;
+		    } else {
+			AddValueAccepted = TRUE;
+		    }
+		    goto draw_options;
+#else
+		    term_options = FALSE;
+#endif /* !VMS || USE_SLANG */
+		}
+		break;
+#endif /* EXP_KEYBOARD_LAYOUT */
 
 #ifdef DIRED_SUPPORT
 	    case 'i':	/* Change local directory sorting. */
@@ -3225,6 +3267,9 @@ static OptValues exec_links_values[]	= {
 	{ 0, 0, 0 }};
 #endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
 
+#ifdef EXP_KEYBOARD_LAYOUT
+static char * kblayout_string		= "kblayout";
+#endif
 static char * keypad_mode_string	= "keypad_mode";
 static OptValues keypad_mode_values[]	= {
 	{ NUMBERS_AS_ARROWS,  "Numbers act as arrows", "number_arrows" },
@@ -3233,6 +3278,7 @@ static OptValues keypad_mode_values[]	= {
 			      "Links and form fields are numbered",
 			      "links_and_forms" },
 	{ 0, 0, 0 }};
+static char * lineedit_style_string	= "lineedit_style";
 static char * mail_address_string	= "mail_address";
 static char * search_type_string	= "search_type";
 static OptValues search_type_values[] = {
@@ -3547,6 +3593,18 @@ PUBLIC int postoptions ARGS1(
 	if (!strcmp(data[i].tag, keypad_mode_string)) {
 	    keypad_mode = GetOptValues(keypad_mode_values, data[i].value);
 	}
+
+	/* Line edit style: SELECT */
+	if (!strcmp(data[i].tag, lineedit_style_string)) {
+	    current_lineedit = atoi(data[i].value);
+	}
+
+#ifdef EXP_KEYBOARD_LAYOUT
+	/* Keyboard layout: SELECT */
+	if (!strcmp(data[i].tag, kblayout_string)) {
+	    current_layout = atoi(data[i].value);
+	}
+#endif /* EXP_KEYBOARD_LAYOUT */
 
 	/* Mail Address: INPUT */
 	if (!strcmp(data[i].tag, mail_address_string)) {
@@ -3888,6 +3946,28 @@ PUBLIC int gen_options ARGS1(
     BeginSelect(fp0, keypad_mode_string);
     PutOptValues(fp0, keypad_mode, keypad_mode_values);
     EndSelect(fp0);
+
+    /* Line edit style: SELECT */
+    PutLabel(fp0, "Line edit style");
+    BeginSelect(fp0, lineedit_style_string);
+    for (i = 0; LYLineeditNames[i]; i++) {
+	char temp[16];
+	sprintf(temp, "%d", i);
+	PutOption(fp0, i==current_lineedit, temp, LYLineeditNames[i]);
+    }
+    EndSelect(fp0);
+
+#ifdef EXP_KEYBOARD_LAYOUT
+    /* Keyboard layout: SELECT */
+    PutLabel(fp0, "Keyboard layout");
+    BeginSelect(fp0, kblayout_string);
+    for (i = 0; LYKbLayoutNames[i]; i++) {
+	char temp[16];
+	sprintf(temp, "%d", i);
+	PutOption(fp0, i==current_layout, temp, LYKbLayoutNames[i]);
+    }
+    EndSelect(fp0);
+#endif /* EXP_KEYBOARD_LAYOUT */
 
     /* Mail Address: INPUT */
     PutLabel(fp0, gettext("Personal mail address"));

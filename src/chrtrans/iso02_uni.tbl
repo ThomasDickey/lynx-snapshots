@@ -4,6 +4,9 @@ Miso-8859-2
 #Name as a Display Charset (used on Options screen)
 OEastern European (ISO-8859-2)
 
+#Codepage number
+C912
+
 #
 #	Name:             ISO 8859-2 (1987) to Unicode
 #	Unicode version:  1.1

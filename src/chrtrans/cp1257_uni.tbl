@@ -4,6 +4,9 @@ Mwindows-1257
 #Name as a Display Charset (used on Options screen)
 OBaltic Rim (windows-1257)
 
+#Codepage number
+C1257
+
 #
 #    Name:     cp1257 to Unicode table
 #    Unicode version: 2.0

@@ -4,6 +4,9 @@ Mcp775
 #Name as a Display Charset (used on Options screen)
 OBaltic Rim (cp775)
 
+#Codepage number
+C775
+
 #    Name:     cp775_DOSBaltRim to Unicode table
 #    Unicode version: 2.0
 #    Table version: 2.00

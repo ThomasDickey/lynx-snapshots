@@ -4,6 +4,9 @@ Mwindows-1253
 #Name as a Display Charset (used on Options screen)
 OGreek (windows-1253)
 
+#Codepage number
+C1253
+
 #
 #    Name:     cp1253 to Unicode table
 #    Unicode version: 2.0

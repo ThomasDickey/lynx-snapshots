@@ -35,7 +35,7 @@ WAISLIB		= # FIXME: set in parent makefile
 WWWINC		= WWW/Library/Implementation
 WWWLIB		= $(top_builddir)/WWW/Library/unix/libwww.a
 
-INTLLIB		= @INTLDIR_MAKE@@INTLLIBS@ 
+INTLLIB		= @INTLDIR_MAKE@@INTLLIBS@
 
 CPP_OPTS	= $(DEFS) $(CPPFLAGS) \
 		-DLOCALEDIR=\"$(localedir)\" \
@@ -111,12 +111,13 @@ HTFWriter.o:	$(top_srcdir)/userdefs.h
 HTInit.o:	$(top_srcdir)/userdefs.h
 LYCharSets.o:	$(top_srcdir)/userdefs.h
 LYGetFile.o:	$(top_srcdir)/userdefs.h
+LYKeymap.o:	$(top_srcdir)/userdefs.h
 LYMail.o:	$(top_srcdir)/userdefs.h
 LYMain.o:	$(top_srcdir)/userdefs.h
 LYMainLoop.o:	$(top_srcdir)/userdefs.h
 LYOptions.o:	$(top_srcdir)/userdefs.h
 LYReadCFG.o:	$(top_srcdir)/userdefs.h
-LYShowInfo.o:	$(top_srcdir)/cfg_defs.h
+LYShowInfo.o:	$(top_builddir)/cfg_defs.h
 LYTraversal.o:	$(top_srcdir)/userdefs.h
 LYUtils.o:	$(top_srcdir)/userdefs.h
 LYrcFile.o:	$(top_srcdir)/userdefs.h
@@ -166,7 +167,7 @@ CMN=$(top_srcdir)/WWW/Library/Implementation/
 $(TABLES):
 	-cd chrtrans && $(MAKE) tables
 
-UCdomap.o: UCdomap.c chrtrans/UCkd.h chrtrans/makeuctb chrtrans/makeuctb.c \
+UCdomap.o: UCdomap.c chrtrans/UCkd.h chrtrans/makeuctb$x chrtrans/makeuctb.c \
                  UCdomap.h $(CMN)UCMap.h $(TABLES) $(top_srcdir)/userdefs.h
 
 UCAux.o : UCAux.c $(CMN)UCAux.h $(CMN)UCDefs.h

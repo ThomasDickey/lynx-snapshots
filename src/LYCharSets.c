@@ -348,7 +348,7 @@ PUBLIC CONST char ** LYCharSets[MAXCHARSETS]={
  *  Add the name that the user will see below.
  *  The order of LYCharSets and LYchar_set_names MUST be the same
  */
-PUBLIC CONST char * LYchar_set_names[MAXCHARSETSP]={
+PUBLIC CONST char * LYchar_set_names[MAXCHARSETS + 1]={
 	"Western (ISO-8859-1)",
 	"Western (cp850)",
 	"Western (windows-1252)",
@@ -394,7 +394,7 @@ PUBLIC LYUCcharset LYCharSet_UC[MAXCHARSETS]=
   {-1,"cp850",		UCT_ENC_8BIT,
 			UCT_REP_SUPERSETOF_LAT1,
 			0,			UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"windows-1251", 	UCT_ENC_8BIT,
+  {-1,"windows-1252", 	UCT_ENC_8BIT,
 			UCT_REP_SUPERSETOF_LAT1,
 			0,			UCT_R_8BIT,UCT_R_ASCII},
   {-1,"cp437",		UCT_ENC_8BIT,0,0,	UCT_R_8BIT,UCT_R_ASCII},

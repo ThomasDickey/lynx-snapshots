@@ -4,6 +4,9 @@ OCyrillic (KOI8-R)
 # MIME name for this charset
 Mkoi8-r
 
+#Codepage number
+C878
+
 0x20-0x7f       idem
 # Based on a table received from "Glenn E. Thobe" <thobe@lafn.org>
 # (verified against RFC1489).

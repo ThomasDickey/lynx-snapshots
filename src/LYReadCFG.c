@@ -379,19 +379,7 @@ The special strings 'nocolor' or 'default', or\n")
 		Color_Strings[i + 2], Color_Strings[i + 3]);
     }
     fprintf (stderr, "%s\n%s\n", gettext("Offending line:"), error_line);
-
-#ifndef NOSIGHUP
-    (void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-    (void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-    (void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-    if (no_suspend)
-	(void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-    exit(-1);
+    exit_immediately(-1);
 }
 
 /*
@@ -623,6 +611,16 @@ static int jumpfile_fun ARGS1(
 
     return 0;
 }
+
+#ifdef EXP_KEYBOARD_LAYOUT
+static int keyboard_layout_fun ARGS1(
+	char *, 	key)
+{
+    if (!LYSetKbLayout(key))
+	CTRACE(tfp, "Failed to set keyboard layout %s\n", key);
+    return 0;
+}
+#endif /* EXP_KEYBOARD_LAYOUT */
 
 static int keymap_fun ARGS1(
 	char *, 	key)
@@ -862,6 +860,9 @@ static Config_Type Config_Table [] =
      PARSE_STR("jump_prompt", CONF_STR, jumpprompt),
      PARSE_SET("jumpbuffer", CONF_BOOL, jump_buffer),
      PARSE_FUN("jumpfile", CONF_FUN, jumpfile_fun),
+#ifdef EXP_KEYBOARD_LAYOUT
+     PARSE_FUN("keyboard_layout", CONF_FUN, keyboard_layout_fun),
+#endif
      PARSE_FUN("keymap", CONF_FUN, keymap_fun),
      PARSE_SET("list_news_numbers", CONF_BOOL, LYListNewsNumbers),
      PARSE_SET("list_news_dates", CONF_BOOL, LYListNewsDates),

@@ -7,6 +7,7 @@
 #include <LYCharSets.h>
 #include <LYBookmark.h>
 #include <LYCookie.h>
+#include <LYKeymap.h>
 
 #include <LYLeaks.h>
 
@@ -190,7 +191,7 @@ PUBLIC void read_rc NOPARAMS
 	    }
 
 	/*
-	 * FTP/file sorting method.
+	 *  FTP/file sorting method.
 	 */
 	} else if ((cp = LYstrstr(line_buffer,
 				  "file_sorting_method")) != NULL &&
@@ -278,7 +279,7 @@ PUBLIC void read_rc NOPARAMS
 	    StrAllocCopy(pref_charset, cp);
 
 	/*
-	 * VI keys.
+	 *  VI keys.
 	 */
 	} else if ((cp = LYstrstr(line_buffer, "vi_keys")) != NULL &&
 		   cp-line_buffer < number_sign) {
@@ -387,7 +388,27 @@ PUBLIC void read_rc NOPARAMS
 		keypad_mode = NUMBERS_AS_ARROWS;
 
 	/*
-	 *  Linedit mode.
+	 *  Keyboard layout.
+	 */
+#ifdef EXP_KEYBOARD_LAYOUT
+	} else if ((cp = LYstrstr(line_buffer, "kblayout")) != NULL &&
+		   cp-line_buffer < number_sign) {
+
+	    int i = 0;
+
+	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
+		cp = cp2 + 1;
+	    cp = LYSkipBlanks(cp);
+	    for (; LYKbLayoutNames[i]; i++) {
+		if (!strcmp(cp, LYKbLayoutNames[i])) {
+		    current_layout = i;
+		    break;
+		}
+	    }
+#endif /* EXP_KEYBOARD_LAYOUT */
+
+	/*
+	 *  Line edit mode.
 	 */
 	} else if ((cp = LYstrstr(line_buffer, "lineedit_mode")) != NULL &&
 		   cp-line_buffer < number_sign) {
@@ -406,7 +427,7 @@ PUBLIC void read_rc NOPARAMS
 
 #ifdef DIRED_SUPPORT
 	/*
-	 *  List directory style.
+	 *  Directory list style.
 	 */
 	} else if ((cp = LYstrstr(line_buffer, "dir_list_style")) != NULL &&
 		   cp-line_buffer < number_sign) {
@@ -440,7 +461,7 @@ PUBLIC void read_rc NOPARAMS
 
 
 	/*
-	 * Accept all cookies from certain domains?
+	 *  Accept all cookies from certain domains?
 	 */
 	} else if ((cp = LYstrstr(line_buffer, "cookie_accept_domains"))
 		!= NULL && cp-line_buffer < number_sign) {
@@ -452,7 +473,7 @@ PUBLIC void read_rc NOPARAMS
 
 
 	/*
-	 * Reject all cookies from certain domains?
+	 *  Reject all cookies from certain domains?
 	 */
 	} else if ((cp = LYstrstr(line_buffer, "cookie_reject_domains"))
 		!= NULL && cp-line_buffer < number_sign) {
@@ -464,7 +485,7 @@ PUBLIC void read_rc NOPARAMS
 
 #ifdef EXP_PERSISTENT_COOKIES
 	/*
-	 * File to store cookies in.
+	 *  File to store cookies in.
 	 */
 	} else if ((cp = LYstrstr(line_buffer, "cookie_file"))
 		!= NULL && cp-line_buffer < number_sign) {
@@ -511,8 +532,8 @@ PUBLIC void read_rc NOPARAMS
 
 #ifdef DISP_PARTIAL
 	/*
-	 * Partial display logic--set the threshold # of lines before
-	 * Lynx redraws the screen
+	 *  Partial display logic--set the threshold # of lines before
+	 *  Lynx redraws the screen
 	 */
 	} else if ((cp = LYstrstr(line_buffer, "partial_thres")) != NULL &&
 		   cp-line_buffer < number_sign) {
@@ -852,7 +873,7 @@ PUBLIC int save_rc NOPARAMS
 
 #ifdef DISP_PARTIAL
     /*
-     * Partial display threshold
+     *  Partial display threshold
      */
     fprintf(fp, gettext("\
 # partial_thres specifies the number of lines Lynx should download and render\n\
@@ -864,7 +885,7 @@ PUBLIC int save_rc NOPARAMS
 #endif /* DISP_PARTIAL */
 
     /*
-     *  Lineedit mode.
+     *  Line edit mode.
      */
     fprintf(fp, gettext("\
 # lineedit_mode specifies the key binding used for inputting strings in\n\
@@ -886,10 +907,13 @@ PUBLIC int save_rc NOPARAMS
 	}
     }
     fprintf(fp, "lineedit_mode=%s\n\n", LYLineeditNames[current_lineedit]);
+#ifdef EXP_KEYBOARD_LAYOUT
+    fprintf(fp, "kblayout=%s\n\n", LYKbLayoutNames[current_layout]);
+#endif
 
 #ifdef DIRED_SUPPORT
     /*
-     *  List directory style.
+     *  Directory list style.
      */
     fprintf(fp, gettext("\
 # dir_list_styles specifies the directory list style under DIRED_SUPPORT\n\
@@ -919,7 +943,7 @@ PUBLIC int save_rc NOPARAMS
 					  "ADVANCED" : "INTERMEDIATE")));
 
     /*
-     * Cookie options
+     *  Cookie options
      */
     fprintf(fp, gettext("\
 # accept_all_cookies allows the user to tell Lynx to automatically\n\
@@ -940,14 +964,14 @@ PUBLIC int save_rc NOPARAMS
     fprintf(fp, "# cookie_reject_domains=\n\n");
 
     /*
-     * cookie_accept_domains and cookie_reject_domains not set here because
-     * there's not currently a method on the options menu (maybe later?)
-     * to set them.
+     *  cookie_accept_domains and cookie_reject_domains not set here because
+     *  there's not currently a method on the options menu (maybe later?)
+     *  to set them.
      */
 
 #ifdef EXP_PERSISTENT_COOKIES
     /*
-     * Cookie file.
+     *  Cookie file.
      */
     fprintf(fp, gettext("\
 # cookie_file specifies the file in which to store persistent cookies.\n\

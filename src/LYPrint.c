@@ -69,7 +69,7 @@ PUBLIC int printfile ARGS1(
     int lines_in_file = 0;
     int printer_number = 0;
     int pages = 0;
-    int type = 0, c;
+    int type = 0, c = 0;
     BOOLEAN Lpansi = FALSE;
     FILE *outfile_fp;
     char *cp = NULL;
@@ -418,7 +418,7 @@ PUBLIC int printfile ARGS1(
 #endif /* VMS */
 		    c = 0;
 		    while (TOUPPER(c)!='Y' && TOUPPER(c)!='N' &&
-			   c != 7 && c != 3)
+			   TOUPPER(c)!='A' && c != 7 && c != 3)
 			c = LYgetch();
 #ifdef VMS
 		    if (HadVMSInterrupt) {
@@ -439,7 +439,15 @@ PUBLIC int printfile ARGS1(
 		    }
 		}
 
-		if ((outfile_fp = LYNewTxtFile(buffer)) == NULL) {
+		/*
+		 *  See if we can write to it.
+		 */
+		CTRACE(tfp, "LYPrint: filename is %s, action is `%c'\n", buffer, c);
+
+		if ((outfile_fp = (TOUPPER(c) == 'A'
+			? LYAppendToTxtFile(buffer)
+			: LYNewTxtFile(buffer))) == NULL) {
+		    CTRACE(tfp, "LYPrint: error is %s\n", strerror(errno));
 		    HTAlert(CANNOT_WRITE_TO_FILE);
 		    _statusline(NEW_FILENAME_PROMPT);
 		    FirstRecall = TRUE;

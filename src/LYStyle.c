@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.20 Tue, 10 Nov 1998 12:47:38 -0700 dickey @
+ * @Id: LYStyle.c 1.21 Wed, 18 Nov 1998 12:23:55 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -126,18 +126,7 @@ The line must be of the form:\n\
 OBJECT:MONO:COLOR (ie em:bold:brightblue:white)\n\
 where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
 	if (!dump_output_immediately) {
-#ifndef NOSIGHUP
-	    (void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-	    (void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-	    (void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-	    if (no_suspend)
-		(void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-	    exit(-1);
+	    exit_immediately(-1);
 	}
 	exit(1);
     }

@@ -655,10 +655,13 @@ PRIVATE void HTML_start_element ARGS6(
 	UPDATE_STYLE;
     }
 
+    CTRACE(tfp, "me->tag_charset: %d -> ", me->tag_charset); 
     if (tag_charset < 0)
 	me->tag_charset = me->UCLYhndl;
     else
 	me->tag_charset = tag_charset;
+    CTRACE(tfp, "%d (me->UCLYhndl: %d, tag_charset: %d)\n",  
+	me->tag_charset, me->UCLYhndl, tag_charset); 
 
 /* this should be done differently */
 #if defined(USE_COLOR_STYLE)
@@ -4089,7 +4092,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    /*
 	     *	Before any input field, add a collapsible space if
 	     *	we're not in a PRE block, to promote a wrap there
-	     *	for any long values that would extent past the right
+	     *	for any long values that would extend past the right
 	     *	margin from our current position in the line.  If
 	     *	we are in a PRE block, start a new line if the last
 	     *	line already is within 6 characters of the wrap point
@@ -4244,7 +4247,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    /*
 	     *	Before any input field, add a collapsible space if
 	     *	we're not in a PRE block, to promote a wrap there
-	     *	for any long values that would extent past the right
+	     *	for any long values that would extend past the right
 	     *	margin from our current position in the line.  If
 	     *	we are in a PRE block, start a new line if the last
 	     *	line already is within 6 characters of the wrap point
@@ -7084,18 +7087,7 @@ PUBLIC HTStructured* HTML_new ARGS3(
 	    return HTMLGenerator(intermediate);
 	fprintf(stderr, "\n** Internal error: can't parse HTML to %s\n",
 		HTAtom_name(format_out));
-#ifndef NOSIGHUP
-	(void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-	(void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-	(void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-	if (no_suspend)
-	  (void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-	exit (-1);
+	exit_immediately (-1);
     }
 
     me = (HTStructured*) calloc(sizeof(*me),1);

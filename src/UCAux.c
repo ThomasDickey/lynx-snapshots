@@ -150,6 +150,9 @@ PUBLIC void UCSetTransParams ARGS5(
     int,		cs_out,
     CONST LYUCcharset*,	p_out)
 {
+    CTRACE(tfp, "UCSetTransParams: from %s(%d) to %s(%d)\n",
+	   p_in->MIMEname, p_in->UChndl, p_out->MIMEname, p_out->UChndl);
+
     /*
     **  Initialize this element to FALSE, and set it TRUE
     **  below if we're dealing with VISCII. - FM

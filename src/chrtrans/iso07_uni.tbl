@@ -4,6 +4,9 @@ Miso-8859-7
 #Name as a Display Charset (used on Options screen)
 OGreek (ISO-8859-7)
  
+#Codepage number
+C813
+
 #
 #	Name:             ISO 8859-7 (1987) to Unicode
 #	Unicode version:  1.1

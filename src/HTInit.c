@@ -588,18 +588,7 @@ PRIVATE int ExitWithError ARGS1(
 {
     if (txt)
 	fprintf(tfp, "metamail: %s\n", txt);
-#ifndef NOSIGHUP
-    (void) signal(SIGHUP, SIG_DFL);
-#endif /* NOSIGHUP */
-    (void) signal(SIGTERM, SIG_DFL);
-#ifndef VMS
-    (void) signal(SIGINT, SIG_DFL);
-#endif /* !VMS */
-#ifdef SIGTSTP
-    if (no_suspend)
-	(void) signal(SIGTSTP,SIG_DFL);
-#endif /* SIGTSTP */
-    exit(-1);
+    exit_immediately(-1);
     return(-1);
 }
 
