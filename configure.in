@@ -584,6 +584,9 @@ if test $cf_cv_screen != slang ; then
 		assume_default_colors \
 		cbreak \
 		define_key \
+		getattrs \
+		getbegx \
+		getbegy \
 		keypad \
 		resizeterm \
 		use_default_colors \
@@ -1083,7 +1086,7 @@ AC_OUTPUT(
 	if test "$use_our_messages" = yes ; then
 		echo creating po/makefile
 		rm -f	po/temp$$
-		sed	-e 's@^.*LYMessages.c@../LYMessages.c@' \
+		sed	-e 's@^.*LYMessages.c@	../LYMessages.c@' \
 			-e '$s/\\//' po/POTFILES >po/temp$$
 		sed	-e "/POTFILES =/r po/temp$$" \
 			po/makefile.in > po/makefile

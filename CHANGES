@@ -1,6 +1,25 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-04-02 (2.8.3pre.2)
+* fixed problem with charset handling for SOURCE_CACHE:MEMORY - if the charset
+  was specified by Content-Type http header it won't be lost (as it was) when
+  reparsing from source cache (applies to toggling DTD, switching to srcview,
+  and other stuff like *,' etc) -VH
+* add ifdef'd call for creat() for Borland C configuration in LYExecv(), as per
+  JS report -TD
+* remove definition of NCURSES_MOUSE_VERSION from makefile.bcb and
+  makelynx.bat, which should fix compile problem reported by JS -TD
+* move a small number of gettext definitions into LYMessages_en.h to allow
+  removing the associated files from POTFILES.in, which must not be larger
+  than 1023 for Solaris (reported by JS) -TD
+* improve ifdef's for fallback definitions of getattrs(), getbegx(), getbegy()
+  and getbkgd() in LYCurses.h since they may be functions rather than macros
+  (reported by PG on os390) -TD
+* further restrict tildeExpand() so it allows embedded "~" only if it follows
+  a slash, or is the first character -TD
+* add check for "~" as the path to be expanded in tildeExpand() (fixes problem
+  reported by Frederic L W Meunier when TEMP_SPACE was defined to "~") -TD
 2000-03-31 (2.8.3pre.1)
 * remove annoying trailing period from two statusline messages ending with host
   name ("Looking up host.foo:81." and "Making HTTP connection to foo.bar.") -LP
@@ -11,7 +30,7 @@ Changes since Lynx 2.8 release
 * fix some compiler warnings for DECC dealing with time_t being unsigned in
   that environment (reported by Jerome Lauret) -TD
 * suppress Multinet prototypes in socket.h, to work around some places where
-  Multinet declares parameters a void* while DECC uses char * (patch by Jerome
+  Multinet declares parameters a void* while DECC uses char* (patch by Jerome
   Lauret <JLAURET@mail.chem.sunysb.edu>).
 * undo side-effect of config_enum() function in LYReadCFG.c from cleanup in
   dev.22 which made default_user_mode and source_cache values not set properly

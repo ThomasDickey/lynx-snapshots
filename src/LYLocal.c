@@ -2358,7 +2358,11 @@ PRIVATE int LYExecv ARGS3(
 #else
 #if defined(_WINDOWS)
     if (!strcmp(path, TOUCH_PATH)) {
+#if defined(__BORLANDC__)
+	int fd = creat(argv[1], 'rw');
+#else /* Visual C++ */
 	int fd = _creat(argv[1], _S_IREAD | _S_IWRITE);
+#endif
 	if (fd >= 0) {
 	    close(fd);
 	    return(1);

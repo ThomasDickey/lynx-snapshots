@@ -1724,7 +1724,7 @@ PRIVATE int HTLoadGopher ARGS4(
 	CTRACE((tfp, "HTGopher: Passing to finger gateway.\n"));
 	return HTLoadFinger(arg, anAnchor, format_out, sink);
 #else /* finger is disabled */
-	HTAlert(gettext("Unable to access document!"));
+	HTAlert(COULD_NOT_ACCESS_DOCUMENT);
 	return HT_NOT_LOADED;
 #endif /* DISABLE_FINGER */
     }

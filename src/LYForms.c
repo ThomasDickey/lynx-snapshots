@@ -229,9 +229,7 @@ PUBLIC int change_form_link_ex ARGS8(
 		form_link->hightext = form->value;
 #ifdef TEXT_SUBMIT_CONFIRM_WANTED
 		if (!immediate_submit && (c == '\r' || c == '\n') &&
-		    !HTConfirmDefault(
-	gettext("No submit button for this form, submit single text field?"),
-			YES)) {
+		    !HTConfirmDefault(NO_SUBMIT_BUTTON_QUERY), YES) {
 		    /* User was prompted and declined; if canceled with ^G
 		     * let mainloop stay on this field, otherwise move on to
 		     * the next field or link. - kw

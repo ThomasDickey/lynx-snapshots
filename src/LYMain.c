@@ -777,22 +777,31 @@ PRIVATE void tildeExpand ARGS2(
 	char **,	pathname,
 	BOOLEAN,	embedded)
 {
-    char *temp = embedded
-		? (*pathname != 0
-		    ? strchr(*pathname, '~')
-		    : 0)
-		: *pathname;
+    char *temp = *pathname;
+
+    if (embedded) {
+	if (temp != NULL) {
+	    temp = strstr(*pathname, "/~");
+	    if (temp != 0)
+		temp++;
+	    else
+		temp = *pathname;
+	}
+    }
 
     if (temp != NULL
-     && temp[0] == '~'
-     && temp[1] == '/'
-     && temp[2] != '\0') {
-	temp = NULL;
-	StrAllocCopy(temp, *pathname + 2);
-	StrAllocCopy(*pathname, wwwName(Home_Dir()));
-	LYAddPathSep(pathname);
-	StrAllocCat(*pathname, temp);
-	FREE(temp);
+     && temp[0] == '~') {
+	if (temp[1] == '/'
+	 && temp[2] != '\0') {
+	    temp = NULL;
+	    StrAllocCopy(temp, *pathname + 2);
+	    StrAllocCopy(*pathname, wwwName(Home_Dir()));
+	    LYAddPathSep(pathname);
+	    StrAllocCat(*pathname, temp);
+	    FREE(temp);
+	} else if (temp[1] == '\0') {
+	    StrAllocCopy(*pathname, wwwName(Home_Dir()));
+	}
     }
 }
 
@@ -1038,7 +1047,7 @@ PUBLIC int main ARGS2(
     if ((cp = strstr(lynx_temp_space, "$USER")) != NULL) {
 	char *cp1;
 
-	if ((cp1 = (char *)getenv("USER")) != NULL) {
+	if ((cp1 = getenv("USER")) != NULL) {
 	    *cp = '\0';
 	    StrAllocCopy(temp, lynx_temp_space);
 	    *cp = '$';
@@ -1362,7 +1371,7 @@ PUBLIC int main ARGS2(
     if (!LYValidate && !LYRestricted &&
 	strlen(ANONYMOUS_USER) > 0 &&
 #if defined (VMS) || defined (NOUSERS)
-	!strcasecomp(((char *)getenv("USER")==NULL ? " " : getenv("USER")),
+	!strcasecomp((getenv("USER")==NULL ? " " : getenv("USER")),
 		     ANONYMOUS_USER)
 #else
 #if HAVE_CUSERID
