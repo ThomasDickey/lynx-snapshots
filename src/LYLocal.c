@@ -1583,7 +1583,10 @@ PUBLIC int dired_options ARGS2(
 	  *cp = '.';
        }
 #endif /* NOTDEFINED */
-    } else path[0] = '\0';
+    } else {
+        path[0] = '\0';
+	StrAllocCopy(path_url, path);
+    }
 
   /*escaped = (char *) HTEscape(path,(unsigned char) 4); path_url instead- kw*/
     nothing_tagged = (HTList_isEmpty(tagged));

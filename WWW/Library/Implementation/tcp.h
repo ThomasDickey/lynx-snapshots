@@ -455,9 +455,9 @@ Regular BSD unix versions
 #include <sys/timeb.h>
 #include <time.h>
 #endif /* SCO */
-#ifdef AIX
+#if defined(AIX) || defined(SVR4)
 #include <time.h>
-#endif /* AIX */
+#endif /* AIX || SVR4 */
 #include <sys/time.h>       /* independent */
 #include <sys/stat.h>
 #include <sys/param.h>

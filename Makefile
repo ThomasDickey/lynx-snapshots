@@ -6,11 +6,11 @@ SHELL = /bin/sh
 #MAKE= make
 
 ##this is the name of the directory the lynx source code is in.
-##(e.g. lynx2-7, not the full path)
-lynxdir= lynx2-7
+##(e.g. lynx2-7-1, not the full path)
+lynxdir= lynx2-7-1
 
 ##this is the filename for .zip, .tar and .tar.Z archives.
-lynxname= lynx2-7
+lynxname= lynx2-7-1
 
 ##change the next line if you want lynx installed somewhere
 ##besides /usr/local/bin
@@ -24,7 +24,7 @@ doc= /usr/local/man/man1
 ##besides /usr/local/lib
 cfg= /usr/local/lib
 
-installbin= install -c -s -m 555
+installbin= install -c -s -m 755
 installdoc= install -c -m 444
 
 ##set the relative location of the WWW library Implementation directory,
@@ -189,6 +189,7 @@ all:
 	@echo "apollo     -- apollo systems (untested)"
 	@echo "bsdi       -- BSD Interactive"
 	@echo "bsdi-ncurses -- BSD/OS(v2.0 or later) using ncurses(v1.9.4 or later) package."
+	@echo "bsdi-slang -- BSD/OS(v2.0 or later) using the slang package."
 	@echo "clix       -- for Intergraph CLIX"
 	@echo "convex     -- for Convex C-series"
 	@echo "convex-ncurses -- for Convex C-series with ncurses package"
@@ -226,6 +227,7 @@ all:
 	@echo "sun4-slang -- for SUN 4 OS with color slang package"
 	@echo "svr4       -- for SVR4"
 	@echo "snake      -- for HP-UX lt 9.01 (gcc)"
+	@echo "snake-slang -- for HP-UX lt 9.01 (gcc) with color slang"
 	@echo "snake2     -- for HP-UX gte 9.01 (gcc)"
 	@echo "snake2-slang -- for HP-UX gte 9.01 (gcc) with color slang"
 	@echo "snake3     -- for HP-UX (purchased compiler)"
@@ -473,6 +475,15 @@ snake:
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		WWWLIB="../WWW/Library/snake/libwww.a"
 
+snake-slang:
+	cd WWW/Library/snake; $(MAKE) CC="gcc" LYFLAGS="$(SITE_LYDEFS)"
+	cd src; $(MAKE) all CC="gcc" MCFLAGS="-O -DUNIX \
+		-DUSE_SLANG -DSNAKE -I../$(WWWINC) $(SITE_DEFS)" \
+		LIBS="-lcurses -ltermcap \
+		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
+		WWWLIB="../WWW/Library/snake/libwww.a" \
+		SLANGLIB="$(SLANGLIB) -lslang" SLANGINC="$(SLANGINC)"
+
 snake2:
 	cd WWW/Library/snake; $(MAKE) CC="gcc" LYFLAGS="-D_INCLUDE_HPUX_SOURCE \
 		-D_INCLUDE_POSIX_SOURCE -D_INCLUDE_AES_SOURCE \
@@ -503,7 +514,8 @@ snake2-slang:
 # Note that initial releases of HP/UX 10.10 have a broken select() in
 # libcurses.a and will malfunction with Lynx.  See the PROBLEMS file.
 snake3:
-	cd WWW/Library/snake; $(MAKE) CC="cc" LYFLAGS="-Ae $(SITE_LYDEFS)"
+	cd WWW/Library/snake; $(MAKE) CC="cc" LYFLAGS="-Ae -DUNIX \
+		$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -Ae -DFANCY_CURSES -DUNIX \
 		-DSNAKE -I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lcurses -ltermcap \
@@ -511,7 +523,8 @@ snake3:
 		WWWLIB="../WWW/Library/snake/libwww.a"
 
 snake3-slang:
-	cd WWW/Library/snake; $(MAKE) CC="cc" LYFLAGS="-Ae $(SITE_LYDEFS)"
+	cd WWW/Library/snake; $(MAKE) CC="cc" LYFLAGS="-Ae -DUNIX \
+		$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -Ae -DUSE_SLANG -DUNIX \
 		-DSNAKE -I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lcurses -ltermcap \
@@ -650,6 +663,17 @@ bsdi-ncurses:
 		LIBS="-lncurses \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		WWWLIB="../WWW/Library/svr4/libwww.a"
+
+bsdi-slang:
+	cd WWW/Library/Implementation; $(MAKE) -f BSDI_Makefile \
+		LYFLAGS="-DBSDI $(SITE_LYDEFS)"
+	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -DNO_CUSERID -DUNIX \
+		-DNO_FILIO_H -DUSE_SLANG \
+		-I../$(WWWINC) -DNO_UTMP -DSVR4 -DNO_KEYPAD $(SITE_DEFS)" \
+		LIBS="-lcurses -ltermcap \
+		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
+		WWWLIB="../WWW/Library/svr4/libwww.a" \
+		SLANGLIB="$(SLANGLIB) -lslang -lm" SLANGINC="$(SLANGINC)"
 
 # define RESOLVLIB (above) for the "LIBS" entry if needed
 # Solaris2 doesn't have or need ranlib. (ignore the error message about that :)

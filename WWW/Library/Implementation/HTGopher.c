@@ -1550,7 +1550,7 @@ PUBLIC int HTLoadCSO ARGS4(
     status = parse_cso_fields(buf, sizeof(buf));
     if (status) {
         NETCLOSE(s);
-	if (status = HT_INTERRUPTED) {
+	if (status == HT_INTERRUPTED) {
 	    _HTProgress ("Connection interrupted.");
 	} else if (buf[0] != '\0') {
             HTAlert(buf);

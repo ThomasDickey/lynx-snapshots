@@ -251,7 +251,7 @@ check_recall:
      * link we are on, or the next page.
      */
     if (nlinks == 0)
-	offset = display_lines+1;
+	offset = (display_lines - 1);
     else
 	offset = links[cur_doc->link].ly;
 

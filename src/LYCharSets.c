@@ -142,7 +142,7 @@ PRIVATE char * ISO_Latin1[] = {
 	"\002",	/* thin space - not collapsed NEVER CHANGE THIS - thinsp */
   	"\376",	/* small thorn, Icelandic - thorn */ 
   	"\327",	/* multiplication sign (&#215;) - times */ 
-	"\256",	/* circled R registered sign (&#174:) - trade */
+	"(TM)",	/* circled TM trade mark sign (&#8482;) - trade */
   	"\372",	/* small u, acute accent - uacute */ 
   	"\373",	/* small u, circumflex accent - ucirc */ 
   	"\371",	/* small u, grave accent - ugrave */ 
@@ -261,7 +261,7 @@ PRIVATE char * ISO_Latin2[] = {
 	"\002",	/* thin space - not collapsed NEVER CHANGE THIS - thinsp */
   	"p",	/* small thorn, Icelandic - thorn */ 
   	"\327",	/* multiplication sign (&#215;) - times */ 
-	"(R)",	/* circled R registered sign (&#174;) - trade */
+	"(TM)",	/* circled TM trade mark sign (&#8482;) - trade */
   	"\372",	/* small u, acute accent - uacute */ 
   	"u",	/* small u, circumflex accent - ucirc */ 
   	"u",	/* small u, grave accent - ugrave */ 
@@ -400,7 +400,7 @@ PRIVATE char * ISO_LatinN[] = {
 	"\002",	/* thin space - not collapsed NEVER CHANGE THIS - thinsp */
         "p",	/* small thorn, Icelandic - thorn */
   	"*",	/* multiplication sign (&#215;) - times */ 
-	"(R)",	/* circled R registered sign (&#174;) - trade */
+	"(TM)",	/* circled TM trade mark sign (&#8482;) - trade */
         "u",	/* small u, acute accent - uacute */
         "u",	/* small u, circumflex accent - ucirc */
         "u",	/* small u, grave accent - ugrave */
@@ -523,7 +523,7 @@ PRIVATE char * DEC_Multinational[] = {
 	"\002",	/* thin space - not collapsed NEVER CHANGE THIS - thinsp */
   	"p",	/* small thorn, Icelandic - thorn */ 
   	"*",	/* multiplication sign (&#215;) - times */ 
-	"(R)",	/* circled R registered sign (&#174;) - trade */
+	"(TM)",	/* circled TM trade mark sign (&#8482;) - trade */
   	"\372",	/* small u, acute accent - uacute */ 
   	"\373",	/* small u, circumflex accent - ucirc */ 
   	"\371",	/* small u, grave accent - ugrave */ 
@@ -645,7 +645,7 @@ PRIVATE char * PC_charset[] = {
 	"\002",	/* thin space - not collapsed NEVER CHANGE THIS - thinsp */
         "\347",	/* small thorn, Icelandic - thorn */
   	"*",	/* multiplication sign (&#215;) - times */
-	"(R)",	/* circled R registered sign (&#174;) - trade */
+	"(TM)",	/* circled TM trade mark sign (&#8482;) - trade */
         "\243",	/* small u, acute accent - uacute */
         "\226",	/* small u, circumflex accent - ucirc */
         "\227",	/* small u, grave accent - ugrave */
@@ -767,7 +767,7 @@ PRIVATE char * PC_850_charset[] = {
 	"\002",	/* thin space - not collapsed NEVER CHANGE THIS - thinsp */
         "\347",	/* small thorn, Icelandic - thorn */
   	"\236",	/* multiplication sign (&#215;) - times */
-	"\251",	/* circled R registered sign (&#174;) - trade */
+	"(TM)",	/* circled TM trade mark sign (&#8482;) - trade */
 	"\243",	/* small u, acute accent - uacute */
         "\226",	/* small u, circumflex accent - ucirc */
 	"\227",	/* small u, grave accent - ugrave */
@@ -888,7 +888,7 @@ PRIVATE char * Macintosh[] = {
 	"\002",	/* thin space - not collapsed NEVER CHANGE THIS - thinsp */
         "p",	/* small thorn, Icelandic - thorn */
         "*",	/* multiplication sign (&#215;) - times */
-        "\250",	/* circled R registered sign (&#174;) - trade */
+        "\252",	/* circled TM trade mark sign (&#8482;) - trade */
         "\234",	/* small u, acute accent - uacute */
         "\236",	/* small u, circumflex accent - ucirc */
         "\235",	/* small u, grave accent - ugrave*/
@@ -1007,7 +1007,7 @@ PRIVATE char * NeXT_Step[] = {
 	"\002",	/* thin space - not collapsed NEVER CHANGE THIS - thinsp */
 	"\374",	/* small thorn, Icelandic - thorn */
   	"*",	/* multiplication sign (&#215;) - times */ 
-	"(R)",	/* circled R registered sign (&#174;) - trade */
+	"(TM)",	/* circled TM trade mark sign (&#8482;) - trade */
 	"\363",	/* small u, acute accent - uacute */
 	"\364",	/* small u, circumflex accent - ucirc */
 	"\362",	/* small u, grave accent - ugrave*/
@@ -1147,7 +1147,7 @@ PRIVATE char * KOI8_R[] = {
 	"\002",	/* thin space - not collapsed NEVER CHANGE THIS - thinsp */
         "p",	/* small thorn, Icelandic - thorn */
   	"*",	/* multiplication sign (&#215;) - times */ 
-	"(R)",	/* circled R registered sign (&#174;) - trade */
+	"(TM)",	/* circled TM trade mark sign (&#8482;) - trade */
         "u",	/* small u, acute accent - uacute */
         "u",	/* small u, circumflex accent - ucirc */
         "u",	/* small u, grave accent - ugrave */
@@ -1290,7 +1290,7 @@ PRIVATE char * Chinese[] = {
 	"\002",	/* thin space - not collapsed NEVER CHANGE THIS - thinsp */
         "p",	/* small thorn, Icelandic - thorn */
   	"*",	/* multiplication sign (&#215;) - times */ 
-	"(R)",	/* circled R registered sign (&#174;) - trade */
+	"(TM)",	/* circled TM trade mark sign (&#8482;) - trade */
         "u",	/* small u, acute accent - uacute */
         "u",	/* small u, circumflex accent - ucirc */
         "u",	/* small u, grave accent - ugrave */
@@ -1433,7 +1433,7 @@ PRIVATE char * EUC_JP[] = {
 	"\002",	/* thin space - not collapsed NEVER CHANGE THIS - thinsp */
         "p",	/* small thorn, Icelandic - thorn */
   	"*",	/* multiplication sign (&#215;) - times */ 
-	"(R)",	/* circled R registered sign (&#174;) - trade */
+	"(TM)",	/* circled TM trade mark sign (&#8482;) - trade */
         "u",	/* small u, acute accent - uacute */
         "u",	/* small u, circumflex accent - ucirc */
         "u",	/* small u, grave accent - ugrave */
@@ -1576,7 +1576,7 @@ PRIVATE char * Shift_JIS[] = {
 	"\002",	/* thin space - not collapsed NEVER CHANGE THIS - thinsp */
         "p",	/* small thorn, Icelandic - thorn */
   	"*",	/* multiplication sign (&#215;) - times */ 
-	"(R)",	/* circled R registered sign (&#174;) - trade */
+	"(TM)",	/* circled TM trade mark sign (&#8482;) - trade */
         "u",	/* small u, acute accent - uacute */
         "u",	/* small u, circumflex accent - ucirc */
         "u",	/* small u, grave accent - ugrave */
@@ -1719,7 +1719,7 @@ PRIVATE char * Korean[] = {
 	"\002",	/* thin space - not collapsed NEVER CHANGE THIS - thinsp */
         "p",	/* small thorn, Icelandic - thorn */
   	"*",	/* multiplication sign (&#215;) - times */ 
-	"(R)",	/* circled R registered sign (&#174;) - trade */
+	"(TM)",	/* circled TM trade mark sign (&#8482;) - trade */
         "u",	/* small u, acute accent - uacute */
         "u",	/* small u, circumflex accent - ucirc */
         "u",	/* small u, grave accent - ugrave */
@@ -1862,7 +1862,7 @@ PRIVATE char * Taipei[] = {
 	"\002",	/* thin space - not collapsed NEVER CHANGE THIS - thinsp */
         "p",	/* small thorn, Icelandic - thorn */
   	"*",	/* multiplication sign (&#215;) - times */ 
-	"(R)",	/* circled R registered sign (&#174;) - trade */
+	"(TM)",	/* circled TM trade mark sign (&#8482;) - trade */
         "u",	/* small u, acute accent - uacute */
         "u",	/* small u, circumflex accent - ucirc */
         "u",	/* small u, grave accent - ugrave */
@@ -2005,7 +2005,7 @@ PRIVATE char * SevenBitApproximations[] = {
 	"\002",	/* thin space - not collapsed NEVER CHANGE THIS - thinsp */
         "p",	/* small thorn, Icelandic - thorn */
   	"*",	/* multiplication sign (&#215;) - times */ 
-	"(R)",	/* circled R registered sign (&#174;) - trade */
+	"(TM)",	/* circled TM trade mark sign (&#8482;) - trade */
         "u",	/* small u, acute accent - uacute */
         "u",	/* small u, circumflex accent - ucirc */
         "u",	/* small u, grave accent - ugrave */

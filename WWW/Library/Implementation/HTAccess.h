@@ -92,7 +92,23 @@ extern BOOL HTSecure;                   /* Disable security holes? */
 extern HTStream* HTOutputStream;        /* For non-interactive, set this */
 extern HTFormat HTOutputFormat;         /* To convert on load, set this */
 
-
+/*	Check for proxy override.			override_proxy()
+**
+**	Check the no_proxy environment variable to get the list
+**	of hosts for which proxy server is not consulted.
+**
+**	no_proxy is a comma- or space-separated list of machine
+**	or domain names, with optional :port part.  If no :port
+**	part is present, it applies to all ports on that domain.
+**
+**  Example:
+**          no_proxy="cern.ch,some.domain:8001"
+**
+**  Use "*" to override all proxy service:
+**	     no_proxy="*"
+*/
+extern BOOL override_proxy PARAMS((
+	CONST char *	addr));
 
 /*
 

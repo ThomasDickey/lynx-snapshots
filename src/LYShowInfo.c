@@ -261,9 +261,8 @@ PUBLIC int showinfo ARGS4(
         fprintf(fp0, "<dt><em>Last Mod:</em> %s\n", cp);
 
     if (doc->post_data) {
-        StrAllocCopy(Address, doc->post_data);
-	LYEntify(&Address, FALSE);
-	fprintf(fp0, "<dt><em>Post Data:</em> <xmp>%s</xmp>\n", Address);
+	fprintf(fp0,
+		"<dt><em>Post Data:</em> <xmp>%s</xmp>\n", doc->post_data);
 	fprintf(fp0,
 	     "<dt><em>Post Content Type:</em> %s\n", doc->post_content_type);
     }

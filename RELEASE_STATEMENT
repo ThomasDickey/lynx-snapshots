@@ -1,5 +1,5 @@
 
-Lynx Ver. 2.7 is now available.
+Lynx Ver. 2.7.1 is now available.
 
 	Lynx is a hypertext browser with full World Wide Web capabilities.
 It is distributed under the GNU General Public License without restrictions
@@ -12,8 +12,8 @@ are maintained in the:
 			 "Lynx links"
 	<URL:http://www.crl.com/~subir/lynx.html>
 
-	Version 2.7 is an official release of the Lynx2-6FM code set
-through February 15, 1997.
+	Version 2.7.1 is an official release of the Lynx2-7 code set
+plus bug fixes through April 4, 1997.
 
 	See the CHANGES file in the Lynx distribution for a complete list of
 changes and bug fixes in this release.

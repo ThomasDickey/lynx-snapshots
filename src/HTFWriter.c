@@ -67,7 +67,8 @@ struct _HTStream {
 	FILE *			fp;		/* The file we've opened */
 	char * 			end_command;	/* What to do on _free.	 */
 	char * 			remove_command;	/* What to do on _abort. */
-	HTPresentation *	pres;	    /* Original stream's pres.   */
+	HTFormat		input_format;  /* Original pres->rep     */
+	HTFormat		output_format; /* Original pres->rep_out */
 	HTParentAnchor *	anchor;	    /* Original stream's anchor. */
 	HTStream *		sink;	    /* Original stream's sink.   */
 };
@@ -150,7 +151,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	    }
 	} else
 #endif /* VMS */
-	if (me->pres->rep == HTAtom_for("www/compressed")) {
+	if (me->input_format == HTAtom_for("www/compressed")) {
 	    /*
 	     *  It's a compressed file supposedly cached to
 	     *  a temporary file for uncompression. - FM
@@ -210,10 +211,10 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		    FREE(me->anchor->content_encoding);
 		    status = HTLoadFile(addr,
 			    		me->anchor,
-			    		me->pres->rep_out,
+			    		me->output_format,
 					me->sink);
 		    if (dump_output_immediately &&
-		        me->pres->rep_out == HTAtom_for("www/present")) {
+		        me->output_format == HTAtom_for("www/present")) {
 			FREE(addr);
 			remove(me->anchor->FileCache);
 			FREE(me->anchor->FileCache);
@@ -340,7 +341,6 @@ PUBLIC HTStream* HTFWriter_new ARGS1(FILE *, fp)
     me->fp = fp;
     me->end_command = NULL;
     me->remove_command = NULL;
-    me->pres = NULL;
     me->anchor = NULL;
     me->sink = NULL;
 
@@ -421,7 +421,8 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     if (me == NULL)
         outofmem(__FILE__, "HTSaveAndExecute");
     me->isa = &HTFWriter;
-    me->pres = pres;
+    me->input_format = pres->rep;
+    me->output_format = pres->rep_out;
     me->anchor = anchor;
     me->sink = sink;
     
@@ -538,7 +539,8 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
     ret_obj->isa = &HTFWriter;
     ret_obj->remove_command = NULL;
     ret_obj->end_command = NULL;
-    ret_obj->pres = pres;
+    ret_obj->input_format = pres->rep;
+    ret_obj->output_format = pres->rep_out;
     ret_obj->anchor = anchor;
     ret_obj->sink = sink;
 
@@ -773,9 +775,7 @@ PUBLIC HTStream* HTCompressed ARGS3(
 	 *  We have no idea what we're dealing with,
 	 *  so treat it as a binary stream. - FM
 	 */
-        StrAllocCopy(type, "application/octet-stream");
-	format = HTAtom_for(type);
-	FREE(type)
+	format = HTAtom_for("application/octet-stream");
 	me = HTStreamStack(format, pres->rep_out, sink, anchor);
 	return me;
     }
@@ -841,7 +841,8 @@ PUBLIC HTStream* HTCompressed ARGS3(
     if (me == NULL)
         outofmem(__FILE__, "HTCompressed");
     me->isa = &HTFWriter;
-    me->pres = pres;
+    me->input_format = pres->rep;
+    me->output_format = pres->rep_out;
     me->anchor = anchor;
     me->sink = sink;
 

@@ -1107,12 +1107,6 @@ PUBLIC void read_cfg ARGS1(
 	break;
 
 	case 'W':
-	if (!strncasecomp(buffer, "XLOADIMAGE_COMMAND:", 19)) {
-	    StrAllocCat(XLoadImageCommand, (char *)&buffer[19]);
-	}
-	break;
-
-	case 'X':
 	if (!strncasecomp(buffer, "wais_proxy:", 11)) {
 	    if (getenv("wais_proxy") == NULL) {
 #ifdef VMS
@@ -1125,6 +1119,12 @@ PUBLIC void read_cfg ARGS1(
 		putenv(wais_proxy_putenv_cmd);
 #endif /* VMS */
 	    }
+	}
+	break;
+
+	case 'X':
+	if (!strncasecomp(buffer, "XLOADIMAGE_COMMAND:", 19)) {
+	    StrAllocCat(XLoadImageCommand, (char *)&buffer[19]);
 	}
 	break;
 
