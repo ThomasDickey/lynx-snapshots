@@ -237,14 +237,15 @@ PUBLIC char * HTMake_VMS_name ARGS2(
     char *second;		/* 2nd slash */
     char *last;			/* last slash */
     
-    char * hostname = (char *)HTHostName();
+    CONST char * hostname = HTHostName();
 
     if (!filename || !nodename)
         outofmem(__FILE__, "HTVMSname");
     strcpy(filename, fn);
     strcpy(nodename, "");	/* On same node? Yes if node names match */
     if (strncmp(nn, "localhost", 9)) {
-        char *p, *q;
+        CONST char *p;
+	char *q;
         for (p = hostname, q = (char *)nn;
 	     *p && *p != '.' && *q && *q != '.'; p++, q++){
 	    if (TOUPPER(*p) != TOUPPER(*q)) {
@@ -757,7 +758,7 @@ PRIVATE int get_connection ARGS1(
 	     * Create and send a mail address as the password. - FM
 	     */
 	    char *user = NULL;
-	    char *host = NULL;
+	    CONST char *host = NULL;
 	    char * cp;
 
 	    if (personal_mail_address && *personal_mail_address) {
@@ -770,7 +771,7 @@ PRIVATE int get_connection ARGS1(
 		    *cp++ = '\0';
 		    host = cp;
 		} else {
-		    host = (char *)HTHostName();
+		    host = HTHostName();
 		}
 	    } else {
 	        /*
@@ -780,7 +781,7 @@ PRIVATE int get_connection ARGS1(
 		    StrAllocCopy(user, cp);
 		else
 		    StrAllocCopy(user, "WWWuser");
-		host = (char *)HTHostName();
+		host = HTHostName();
 	    }
 
 	    /*

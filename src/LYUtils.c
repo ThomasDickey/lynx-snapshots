@@ -1892,7 +1892,7 @@ PUBLIC void statusline ARGS1(
 		int a=(strncmp(buffer, "Alert", 5) || !hashStyles[s_alert].name ? s_status : s_alert);
 		LynxChangeStyle (a, ABS_ON, 1);
 		addstr(buffer);
-		wbkgdset(stdscr, (lynx_uses_color
+		wbkgdset(stdscr, (lynx_has_color
 			? hashStyles[a].color
 			: hashStyles[a].mono) | ' ');
 		clrtoeol();
@@ -4654,7 +4654,7 @@ PUBLIC void LYDoCSI ARGS3(
 	CONST char *,	comment,
 	char **,	csi)
 {
-    char *cp = (char *)comment;
+    CONST char *cp = comment;
 
     if (cp == NULL)
         return;

@@ -15,25 +15,25 @@ extern int change_form_link PARAMS((struct link *form_link, int mode,
  * HTML.c and Gridtext.c in HText_beginInput()
  */
 typedef struct _InputFieldData {
-	char *accept;
-	char *align;
+	CONST char *accept;
+	CONST char *align;
 	int   checked;
-	char *class;
+	CONST char *class;
 	int   disabled;
-	char *error;
-	char *height;
-	char *id;
-	char *lang;
-	char *max;
-	char *maxlength;
-	char *md;
-	char *min;
-    	char *name;
-	char *size;
-	char *src;
-	char *type;
+	CONST char *error;
+	CONST char *height;
+	CONST char *id;
+	CONST char *lang;
+	CONST char *max;
+	CONST char *maxlength;
+	CONST char *md;
+	CONST char *min;
+    	CONST char *name;
+	CONST char *size;
+	CONST char *src;
+	CONST char *type;
 	char *value;
-	char *width;
+	CONST char *width;
 } InputFieldData;
 
 /* The OptionType structure is for a linked list of option entries

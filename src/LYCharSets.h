@@ -4,7 +4,7 @@
 
 /* LYchar_set_name[current_char_set] points to the currently active set */
 extern int current_char_set;
-extern char *LYchar_set_names[];
+extern CONST char *LYchar_set_names[];
 
 
 extern char ** LYCharSets[];

@@ -478,7 +478,7 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
 PUBLIC void reply_by_mail ARGS3(
 	char *,		mail_address,
 	char *,		filename,
-	char *,		title)
+	CONST char *,	title)
 {
     char user_input[1000];
     FILE *fd, *fp;

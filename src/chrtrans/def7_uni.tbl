@@ -3,7 +3,7 @@
 # character set.
 
 #The MIME name of this charset.
-M us-ascii
+Mus-ascii
 
 # Shall this become the "default" translation table?  YES!
 # There has to be exactly one table marked as "default".
@@ -498,7 +498,7 @@ U+0481:c3
 U+0490:G3
 U+0491:g3
 
-# These may may Yiddish slightly more readable, until we have
+# These may make Yiddish slightly more readable, until we have
 # something better.
 
 0x69	U+05b4	# i
@@ -939,7 +939,7 @@ U+1358:mYa
 U+1359:rYa
 U+135A:fYa
 # ETHIOPIC SPACE U+1360 mapped to ASCII space
-0x20	U+1360 
+0x20	U+1360
 0x3a	U+1361	#::
 U+1362:::
 0x2c	U+1363	#:,

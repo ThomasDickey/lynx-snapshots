@@ -79,18 +79,19 @@ PRIVATE BOOL initialize NOARGS
 /*	Start anchor element
 **	--------------------
 */
-PRIVATE void start_anchor ARGS1(char *,  href)
+PRIVATE void start_anchor ARGS1(CONST char *,  href)
 {
     BOOL		present[HTML_A_ATTRIBUTES];
-    char*		value[HTML_A_ATTRIBUTES];
+    CONST char*		value[HTML_A_ATTRIBUTES];
     
     {
     	int i;
     	for(i=0; i<HTML_A_ATTRIBUTES; i++)
 	    present[i] = (i==HTML_A_HREF);
     }
-    value[HTML_A_HREF] = href;
-    (*targetClass.start_element)(target, HTML_A, present, value, 0);
+    ((CONST char **)value)[HTML_A_HREF] = href;
+    (*targetClass.start_element)(target, HTML_A, present,
+    				 (CONST char **)value, 0);
 
 }
 

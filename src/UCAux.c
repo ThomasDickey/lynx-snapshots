@@ -44,8 +44,8 @@ PUBLIC BOOL UCCanTranslateFromTo ARGS2(
 	return (LYCharSet_UC[from].UChndl >= 0);
     }
     {
-	char * fromname = LYCharSet_UC[from].MIMEname;
-	char * toname = LYCharSet_UC[to].MIMEname;
+	CONST char * fromname = LYCharSet_UC[from].MIMEname;
+	CONST char * toname = LYCharSet_UC[to].MIMEname;
 	if (!strcmp(fromname, "x-transparent") ||
 	    !strcmp(toname, "x-transparent")) {
 	    return YES;

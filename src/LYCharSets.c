@@ -2069,7 +2069,7 @@ PUBLIC char ** LYCharSets[MAXCHARSETS]={
  *  Add the name that the user will see below.
  *  The order of LYCharSets and char_set_names MUST be the same
  */
-PUBLIC char * LYchar_set_names[MAXCHARSETSP]={
+PUBLIC CONST char * LYchar_set_names[MAXCHARSETSP]={
 	"ISO Latin 1         ",
 	"ISO Latin 2         ",
 	"Other ISO Latin     ",

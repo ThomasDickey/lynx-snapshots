@@ -8,8 +8,12 @@
 
 typedef long int HTMLFont;	/* For now */
 
+#ifndef HT_NON_BREAK_SPACE
 #define HT_NON_BREAK_SPACE ((char)1)	/* For now */
+#endif /* !HT_NON_BREAK_SPACE */
+#ifndef HT_EM_SPACE
 #define HT_EM_SPACE ((char)2) 		/* For now */
+#endif /* !HT_EM_SPACE */
 
 
 #define HT_FONT		0

@@ -237,15 +237,17 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		    }
 		    FREE(path);
 #ifdef EXP_CHARTRANS
-		    /*
-		     *  Lock the chartrans info we may possibly have,
-		     *  so HTCharsetFormat() will not apply the default
-		     *  for local files. - KW
-		     */
 		    if (!skip_loadfile) {
+			/*
+			 *  Lock the chartrans info we may possibly have,
+			 *  so HTCharsetFormat() will not apply the default
+			 *  for local files. - KW
+			 */
 			if (HTAnchor_getUCLYhndl(me->anchor,
 						 UCT_STAGE_PARSER) < 0 ) {
-			    /* If not yet set - kw */
+			    /*
+			     *  If not yet set - KW
+			     */
 			    HTAnchor_copyUCInfoStage(me->anchor,
 						     UCT_STAGE_PARSER,
 						     UCT_STAGE_MIME,

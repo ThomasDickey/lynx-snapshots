@@ -104,12 +104,12 @@ CERNLIBBIN = $(WWW)/bin
 COMMON = $(LOB)/HTParse.o $(LOB)/HTAccess.o $(LOB)/HTTP.o \
 	$(LOB)/HTFile.o	$(LOB)/HTBTree.o $(LOB)/HTFTP.o $(LOB)/HTTCP.o \
 	$(LOB)/SGML.o $(LOB)/HTMLDTD.o $(LOB)/HTChunk.o \
-	$(LOB)/HTPlain.o $(LOB)/HTWriter.o $(LOB)/HTFWriter.o \
+	$(LOB)/HTPlain.o $(LOB)/HTWriter.o \
 	$(LOB)/HTMLGen.o \
 	$(LOB)/HTAtom.o $(LOB)/HTAnchor.o $(LOB)/HTStyle.o \
-	$(LOB)/HTList.o $(LOB)/HTString.o $(LOB)/HTAlert.o \
-	$(LOB)/HTRules.o $(LOB)/HTFormat.o $(LOB)/HTInit.o $(LOB)/HTMIME.o \
-	$(LOB)/HTHistory.o $(LOB)/HTNews.o $(LOB)/HTGopher.o \
+	$(LOB)/HTList.o $(LOB)/HTString.o \
+	$(LOB)/HTRules.o $(LOB)/HTFormat.o  $(LOB)/HTMIME.o \
+	$(LOB)/HTHistory.o $(LOB)/HTNews.o  $(LOB)/HTGopher.o \
 	$(LOB)/HTTelnet.o $(LOB)/HTFinger.o $(LOB)/HTWSRC.o $(HTWAIS) \
 	$(LOB)/HTAAUtil.o $(LOB)/HTAAServ.o $(LOB)/HTAABrow.o \
 	$(LOB)/HTAAFile.o $(LOB)/HTPasswd.o $(LOB)/HTGroup.o  \
@@ -120,11 +120,11 @@ CFILES = $(CMN)HTParse.c $(CMN)HTAccess.c $(CMN)HTTP.c $(CMN)HTFile.c \
         $(CMN)HTBTree.c \
 	$(CMN)HTFTP.c   $(CMN)HTTCP.c     $(CMN)SGML.c 	\
 	$(CMN)HTMLDTD.c \
-	$(CMN)HTPlain.c	$(CMN)HTWriter.c  $(CMN)HTFWriter.c \
+	$(CMN)HTPlain.c	$(CMN)HTWriter.c  \
         $(CMN)HTMLGen.c	\
 	$(CMN)HTChunk.c $(CMN)HTAtom.c   $(CMN)HTAnchor.c $(CMN)HTStyle.c \
-	$(CMN)HTList.c  $(CMN)HTString.c $(CMN)HTAlert.c $(CMN)HTRules.c \
-	$(CMN)HTFormat.c $(CMN)HTInit.c $(CMN)HTMIME.c $(CMN)HTHistory.c \
+	$(CMN)HTList.c  $(CMN)HTString.c $(CMN)HTRules.c \
+	$(CMN)HTFormat.c $(CMN)HTMIME.c $(CMN)HTHistory.c \
 	$(CMN)HTNews.c  $(CMN)HTGopher.c $(CMN)HTTelnet.c \
 	$(CMN)HTFinger.c $(CMN)HTWAIS.c  $(CMN)HTWSRC.c \
 	$(CMN)HTAAUtil.c $(CMN)HTAAServ.c $(CMN)HTAABrow.c \
@@ -259,9 +259,6 @@ $(LOB)/HTAnchor.o : $(OE) $(CMN)HTAnchor.c $(CMN)HTUtils.h $(CMN)HTList.h
 $(LOB)/HTFormat.o : $(OE) $(CMN)HTFormat.c $(CMN)HTUtils.h $(CMN)HTList.h
 	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTFormat.c
 
-$(LOB)/HTInit.o : $(OE) $(CMN)HTInit.c $(CMN)HTUtils.h $(CMN)HTList.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTInit.c
-
 $(LOB)/HTMIME.o : $(OE) $(CMN)HTMIME.c $(CMN)HTUtils.h $(CMN)HTList.h
 	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTMIME.c
 
@@ -295,14 +292,11 @@ $(LOB)/HTChunk.o : $(OE) $(CMN)HTChunk.c $(CMN)HTUtils.h
 $(LOB)/HTString.o : $(OE) $(CMN)HTString.c $(CMN)HTUtils.h $(CMN)Version.make
 	$(CC) -c -o $@ $(CFLAGS2) -DVC=\"$(VC)\" $(CMN)HTString.c
 
-$(LOB)/HTAlert.o : $(OE) $(CMN)HTAlert.c $(CMN)HTUtils.h $(CMN)Version.make
-	$(CC) -c -o $@ $(CFLAGS2) -DVC=\"$(VC)\" $(CMN)HTAlert.c
-
 $(LOB)/HTRules.o : $(OE) $(CMN)HTRules.c $(CMN)HTUtils.h $(CMN)Version.make \
 	 $(CMN)HTAAServ.h $(CMN)HTAAProt.h
 	$(CC) -c -o $@ $(CFLAGS2) -DVC=\"$(VC)\" $(CMN)HTRules.c
 
-$(LOB)/SGML.o : $(OE) $(CMN)SGML.c $(CMN)HTUtils.h
+$(LOB)/SGML.o : $(OE) $(CMN)SGML.c $(CMN)HTUtils.h $(CMN)UCAux.h
 	$(CC) -c -o $@ $(CFLAGS2) $(CMN)SGML.c
 
 $(LOB)/HTMLGen.o : $(OE) $(CMN)HTMLGen.c $(CMN)HTUtils.h $(CMN)HTMLDTD.h
@@ -311,7 +305,8 @@ $(LOB)/HTMLGen.o : $(OE) $(CMN)HTMLGen.c $(CMN)HTUtils.h $(CMN)HTMLDTD.h
 $(LOB)/HTMLDTD.o : $(OE) $(CMN)HTMLDTD.c $(CMN)SGML.h
 	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTMLDTD.c
 
-$(LOB)/HTPlain.o : $(OE) $(CMN)HTPlain.c $(CMN)HTPlain.h $(CMN)HTStream.h
+$(LOB)/HTPlain.o : $(OE) $(CMN)HTPlain.c $(CMN)HTPlain.h $(CMN)HTStream.h \
+	 $(CMN)UCAux.h
 	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTPlain.c
 
 $(LOB)/HTWAIS.o : $(OE) $(CMN)HTWAIS.c $(CMN)HTUtils.h $(CMN)HTList.h
@@ -322,9 +317,6 @@ $(LOB)/HTWSRC.o : $(OE) $(CMN)HTWSRC.c $(CMN)HTUtils.h $(CMN)HTList.h
 
 $(LOB)/HTWriter.o : $(OE) $(CMN)HTWriter.c $(CMN)HTWriter.h $(CMN)HTStream.h
 	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTWriter.c
-
-$(LOB)/HTFWriter.o : $(OE) $(CMN)HTFWriter.c $(CMN)HTFWriter.h $(CMN)HTStream.h
-	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTFWriter.c
 
 
 #	Access Authorization

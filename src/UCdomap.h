@@ -23,8 +23,8 @@
    UC[A-Z]* to be exported to other parts of Lynx. -kw
 */
 extern void UC_Charset_Setup PARAMS((
-	char *			UC_MIMEcharset,
-	char *			UC_LYNXcharset,
+	CONST char *		UC_MIMEcharset,
+	CONST char *		UC_LYNXcharset,
 	u8 *			unicount,
 	u16 *			unitable,
 	int			nnuni,
@@ -37,8 +37,8 @@ char *UC_GNsetMIMEnames[4] =
 int UC_GNhandles[4] = {-1, -1, -1, -1};
 
 struct UC_charset {
-  char *MIMEname;
-  char *LYNXname;
+  CONST char *MIMEname;
+  CONST char *LYNXname;
   u8* unicount;
   u16* unitable;
   int num_uni;

@@ -258,7 +258,7 @@ PRIVATE void HTMLGen_start_element ARGS5(
 	HTStructured *, 	me,
 	int,			element_number,
 	CONST BOOL*,	 	present,
-	char **,		value,
+	CONST char **,		value,
 	char **,		insert)
 {
     int i;
@@ -516,7 +516,7 @@ PUBLIC HTStream* HTPlainToHTML ARGS3(
     HTStructured* me = (HTStructured*)malloc(sizeof(*me));
     if (me == NULL)
         outofmem(__FILE__, "PlainToHTML");
-    me->isa = (HTStructuredClass*) &PlainToHTMLConversion;       
+    me->isa = (CONST HTStructuredClass*) &PlainToHTMLConversion;       
 
     /*
      *  Copy pointers to routines for speed.

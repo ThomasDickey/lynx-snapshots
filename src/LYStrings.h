@@ -7,7 +7,7 @@ extern char *strstr();
 #endif /* __STRICT_BSD__ */
 
 extern int get_mouse_link NOPARAMS;
-extern char * LYstrncpy PARAMS((char *dst, char *src, int n));
+extern char * LYstrncpy PARAMS((char *dst, CONST char *src, int n));
 extern int LYgetch NOPARAMS;
 extern int LYgetstr PARAMS((char *inputline, int hidden,
 			    int bufsize, int recall));
@@ -33,7 +33,7 @@ extern int LYmbcsstrlen PARAMS((
 	BOOL		utf_flag));
 extern char * LYmbcsstrncpy PARAMS((
 	char *		dst,
-	char *		src,
+	CONST char *	src,
 	int		n_bytes,
 	int		n_glyphs,
 	int		enc));
@@ -65,7 +65,7 @@ extern char * SNACat PARAMS((char **dest, CONST char *src, int n));
 #define SELECT_KEY	267	/* 0x10B */
 #define INSERT_KEY	268	/* 0x10C */
 #define REMOVE_KEY	269	/* 0x10D */
-#define DO_NOTHING	270	/* 0x00E */
+#define DO_NOTHING	270	/* 0x10E */
 
 #define VISIBLE  0
 #define HIDDEN   1

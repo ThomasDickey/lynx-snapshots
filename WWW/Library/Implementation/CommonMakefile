@@ -77,7 +77,7 @@ COMMON = $(LOB)/HTParse.o $(LOB)/HTAccess.o $(LOB)/HTTP.o \
 	$(LOB)/HTAtom.o $(LOB)/HTAnchor.o $(LOB)/HTStyle.o \
 	$(LOB)/HTList.o $(LOB)/HTString.o \
 	$(LOB)/HTRules.o $(LOB)/HTFormat.o  $(LOB)/HTMIME.o \
-	$(LOB)/HTHistory.o $(LOB)/HTNews.o $(LOB)/HTGopher.o \
+	$(LOB)/HTHistory.o $(LOB)/HTNews.o  $(LOB)/HTGopher.o \
 	$(LOB)/HTTelnet.o $(LOB)/HTFinger.o $(LOB)/HTWSRC.o $(HTWAIS) \
 	$(LOB)/HTAAUtil.o $(LOB)/HTAAServ.o $(LOB)/HTAABrow.o \
 	$(LOB)/HTAAFile.o $(LOB)/HTPasswd.o $(LOB)/HTGroup.o  \
@@ -273,7 +273,8 @@ $(LOB)/HTMLGen.o : $(OE) $(CMN)HTMLGen.c $(CMN)HTUtils.h $(CMN)HTMLDTD.h
 $(LOB)/HTMLDTD.o : $(OE) $(CMN)HTMLDTD.c $(CMN)SGML.h
 	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTMLDTD.c
 
-$(LOB)/HTPlain.o : $(OE) $(CMN)HTPlain.c $(CMN)HTPlain.h $(CMN)HTStream.h $(CMN)UCAux.h
+$(LOB)/HTPlain.o : $(OE) $(CMN)HTPlain.c $(CMN)HTPlain.h $(CMN)HTStream.h \
+	 $(CMN)UCAux.h
 	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTPlain.c
 
 $(LOB)/HTWAIS.o : $(OE) $(CMN)HTWAIS.c $(CMN)HTUtils.h $(CMN)HTList.h

@@ -10,10 +10,6 @@
    
  */
 
-#define HT_NON_BREAK_SPACE ((char)1)	/* For now */
-#define HT_EM_SPACE ((char)2)
-#define LY_SOFT_HYPHEN		'\007'
-
 #ifndef HTMLDTD_H
 #define HTMLDTD_H
 
@@ -21,6 +17,19 @@
 #include "HTUtils.h"
 #endif /* HTUTILS_H */
 #include "SGML.h"
+
+/*
+**  Lynx internal character representations.
+*/
+#ifndef HT_NON_BREAK_SPACE
+#define HT_NON_BREAK_SPACE	((char)1)	/* For now */
+#endif /* !HT_NON_BREAK_SPACE */
+#ifndef HT_EM_SPACE
+#define HT_EM_SPACE		((char)2)	/* For now */
+#endif /* !HT_EM_SPACE */
+#ifndef LY_SOFT_HYPHEN
+#define LY_SOFT_HYPHEN		((char)7)
+#endif /* !LY_SOFT_HYPHEN */
 
 /*
 
@@ -962,8 +971,8 @@ Start anchor element
  */
 extern void HTStartAnchor PARAMS((
                 HTStructured * targetstream,
-                char *    	name,
-                char *    	href));
+                CONST char *    name,
+                CONST char *    href));
 
 /*
 

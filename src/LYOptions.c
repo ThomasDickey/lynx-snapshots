@@ -89,7 +89,7 @@ PRIVATE void option_user_message ARGS2(
      *  Use _user_message() set to output on the bottom line.
      */
     LYStatusLine = (LYlines - 1);
-    _user_message((char *)message, argument);
+    _user_message(message, argument);
     LYStatusLine = -1;
 }
 
@@ -758,11 +758,11 @@ draw_options:
 		if (!LYSelectPopups) {
 		    current_char_set = boolean_choice(current_char_set,
 						      L_CHARSET, -1,
-						      LYchar_set_names);
+						      (char **)LYchar_set_names);
 		} else {
 		    current_char_set = popup_choice(current_char_set,
 						    L_CHARSET, -1,
-						    LYchar_set_names,
+						    (char **)LYchar_set_names,
 						    0, FALSE);
 #if defined(VMS) || defined(USE_SLANG)
 		    move(L_CHARSET, COL_OPTION_VALUES);

@@ -284,14 +284,14 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 	long, code)
 {
     if (code == 160) {
-	PUTC(1);
+	PUTC(HT_NON_BREAK_SPACE);
     } else  if (code==173) {
-	PUTC(7);
+	PUTC(LY_SOFT_HYPHEN);
     } else if (code == 8194 || code == 8195 || code == 8201) {
 		        /*
 			**  ensp, emsp or thinsp.
 			*/
-	PUTC(2);
+	PUTC(HT_EM_SPACE);
     } else if (code == 8211 || code == 8212) {
 		        /*
 			**  ndash or mdash.
@@ -350,17 +350,17 @@ PRIVATE void handle_entity ARGS2(
     **  filters instead of using HTML_put_string(). - FM
     */
     if (!strcmp(s, "nbsp")) {
-        PUTC(1);
+        PUTC(HT_NON_BREAK_SPACE);
 	FoundEntity = TRUE;
 	return;
     }
     if (!strcmp(s, "ensp") || !strcmp(s, "emsp") || !strcmp(s, "thinsp")) {
-        PUTC(2);
+        PUTC(HT_EM_SPACE);
 	FoundEntity = TRUE;
 	return;
     }
     if (!strcmp(s, "shy")) {
-        PUTC(7);
+        PUTC(LY_SOFT_HYPHEN);
 	FoundEntity = TRUE;
 	return;
     }
@@ -810,7 +810,7 @@ PRIVATE void start_element ARGS1(
     	context->target,
 	new_tag - context->dtd->tags,
 	context->present,
-	context->value,  /* coerce type for think c */
+	(CONST char**) context->value,  /* coerce type for think c */
 	(char **)&context->include);
     if (new_tag->contents != SGML_EMPTY) {		/* i.e. tag not empty */
 	HTElement * N = (HTElement *)malloc(sizeof(HTElement));
@@ -977,7 +977,7 @@ PUBLIC void SGML_character ARGS2(
     HTChunk	*string = 	context->string;
     CONST char * EntityName;
     extern int current_char_set;
-    extern char *LYchar_set_names[];
+    extern CONST char *LYchar_set_names[];
     extern CONST char * HTMLGetEntityName PARAMS((int i));
 
 #ifdef EXP_CHARTRANS
@@ -1086,7 +1086,9 @@ PUBLIC void SGML_character ARGS2(
 	goto top1;
     } else if (unsign_c < 32 && unsign_c != 0 &&
 	       context->T.trans_C0_to_uni) {
-	/* This else if may be too ugly to keep... - kw */
+	/*
+	**  This else if may be too ugly to keep. - KW
+	*/
 	if (context->T.trans_from_uni &&
 	    (((clong = UCTransToUni(c, context->in_char_set)) >= 32) ||
 	     (context->T.transp &&
@@ -1123,7 +1125,7 @@ PUBLIC void SGML_character ARGS2(
 		StrAllocCat(context->recover, replace_buf + 1);
 	    }
 	    goto top0a;
-	} /* next line end of ugly stuff for C0 - kw */
+	} /*  Next line end of ugly stuff for C0. - KW */
     } else {
 	goto top0a;
     }
@@ -1233,14 +1235,14 @@ top1:
 	*/
 	} else if (unsign_c == 160 &&
 		   !(PASS8859SPECL || HTCJK != NOCJK)) {
-            PUTC(1);
+            PUTC(HT_NON_BREAK_SPACE);
 	/*
 	**  Convert 173 (shy) to Lynx special character if
 	**  neither HTPassHighCtrlRaw nor HTCJK is set. - FM
 	*/
 	} else if (unsign_c == 173 &&
 		   !(PASS8859SPECL || HTCJK != NOCJK)) {
-            PUTC(7);
+            PUTC(LY_SOFT_HYPHEN);
 
 #ifdef EXP_CHARTRANS
 	} else if (context->T.use_raw_char_in && saved_char_in) {
@@ -1266,13 +1268,13 @@ top1:
 	    PUTC(c);
 	} else if (chk && ((uck == -4 ||
 			    (context->T.repl_translated_C0 &&
-			     uck > 0 && uck <32))) &&
-		/*
-		**  Not found; look for replacement string.
-		*/
-		(uck = UCTransUniCharStr(replace_buf,60, clong,
-					 context->html_char_set, 0) >= 0 ) ) { 
-	      CONST char *p;
+			     uck > 0 && uck < 32))) &&
+		   /*
+		   **  Not found; look for replacement string. - KW
+		   */
+		   (uck = UCTransUniCharStr(replace_buf,60, clong,
+					    context->html_char_set,
+					    0) >= 0)) { 
 	    /*
 	    **  No further tests for valididy - assume that whoever
 	    **  defined replacement strings knew what she was doing.
@@ -1490,14 +1492,15 @@ top1:
 #ifdef EXP_CHARTRANS
 		if (value == 160 || value == 173) {
 		    /*
-		    **  We *always* should interpret this as Latin1 here!
+		    **  We *always* should interpret these as Latin1 here!
 		    **  Output the Lynx special character for nbsp and
 		    **  then recycle the terminator or break. - FM
 		    */
-		    if (value == 160)
-			PUTC(1);
-		    else	/* 173 */
-			PUTC(7);
+		    if (value == 160) {
+			PUTC(HT_NON_BREAK_SPACE);
+		    } else {
+			PUTC(LY_SOFT_HYPHEN);
+		    }
 		    string->size = 0;
 		    context->isHex = FALSE;
 		    context->state = S_text;
@@ -1510,21 +1513,26 @@ top1:
 		 */
 	      if ((uck = UCTransUniChar(value,current_char_set)) >= 32 &&
 		    uck < 256 &&
-		      (uck < 127 ||
-		        uck >= LYlowest_eightbit[context->html_char_set])
-		       ) {
-		  if (uck==160 && current_char_set==0) 
-		      PUTC(1); /* would only happen if some other unicode
-				  is mapped to Latin-1 160 */
-		  else if (uck==173 && current_char_set==0) 
-		      PUTC(7); /* would only happen if some other unicode
-				  is mapped to Latin-1 173 */
-		  else {
-		      PUTC(FROMASCII((char)uck));
-		  }
-	      } else if ((uck == -4 ||
+		    (uck < 127 ||
+		     uck >= LYlowest_eightbit[context->html_char_set])) {
+		    if (uck == 160 && current_char_set == 0) {
+			/*
+			**  Would only happen if some other unicode
+			**  is mapped to Latin-1 160.
+			*/
+			PUTC(HT_NON_BREAK_SPACE);
+		    } else if (uck == 173 && current_char_set == 0) {
+			/*
+			**  Would only happen if some other unicode
+			**  is mapped to Latin-1 173.
+			*/
+			PUTC(LY_SOFT_HYPHEN);
+		    } else {
+			PUTC(FROMASCII((char)uck));
+		    }
+		} else if ((uck == -4 ||
 			    (context->T.repl_translated_C0 &&
-			     uck > 0 && uck <32)) &&
+			     uck > 0 && uck < 32)) &&
 			   /*
 			   **  Not found; look for replacement string.
 			   */
@@ -1576,7 +1584,7 @@ top1:
 		        /*
 			**  ensp, emsp or thinsp. - FM
 			*/
-			PUTC(2);
+			PUTC(HT_EM_SPACE);
 		    } else if (value == 8211 || value == 8212) {
 		        /*
 			**  ndash or mdash. - FM
@@ -1606,12 +1614,12 @@ top1:
 		    /*
 		    **  Use Lynx special character for 160 (nbsp). - FM
 		    */
-		    PUTC(1);
+		    PUTC(HT_NON_BREAK_SPACE);
 		} else if (value == 173) {
 		    /*
 		    **  Use Lynx special character for 173 (shy) - FM
 		    */
-		    PUTC(7);
+		    PUTC(LY_SOFT_HYPHEN);
 		} else if (value < 161 || HTPassEightBitNum ||
 			   !strncmp(LYchar_set_names[current_char_set],
 			   	    "ISO Latin 1", 11)) {
@@ -1722,7 +1730,7 @@ top1:
 	    break;
         } else if (!string->size && (WHITE(c) || c == '=')) {/* <WHITE or <= */
 	    /*
-	    **  Recover the '<' and WHITE or '=' character. - FM, kw
+	    **  Recover the '<' and WHITE or '=' character. - FM & KW
 	    */
 	    context->state = S_text;
 	    PUTC('<');

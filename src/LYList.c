@@ -260,7 +260,7 @@ PUBLIC void printlist ARGS2(
 	    address =  HTAnchor_address(dest);
 	    fprintf(fp, "%4d. %s%s\n", cnt,
 		    ((HTAnchor*)parent != dest) && title ? "in " : "",
-		    (char *)(title ? title : address));
+		    (title ? title : address));
 	    FREE(address);
 #ifdef VMS
 	    if (HadVMSInterrupt)

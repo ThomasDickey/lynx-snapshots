@@ -798,7 +798,7 @@ PUBLIC void LYZero_OL_Counter ARGS1(
 
 #ifdef EXP_CHARTRANS
 /*
-**  This function is used by the HTML Structured object. - kw
+**  This function is used by the HTML Structured object. - KW
 */
 PUBLIC void LYGetChartransInfo ARGS1(
 	HTStructured *,		me)
@@ -1379,9 +1379,9 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		p++;
 	    } else if (!hidden && *p == 10 && q != str && *(q-1) == 13) {
 		/*
-		 *  If this is not a hidden string, and the current char
-		 *  is the LF ('\n') of a CRLF pair, drop the CR ('\r'). - kw
-		 */
+		**  If this is not a hidden string, and the current char is
+		**  the LF ('\n') of a CRLF pair, drop the CR ('\r'). - KW
+		*/
 	        *(q-1) = *p++;
 	    } else {
 	        *q++ = *p++;
@@ -2005,7 +2005,7 @@ PUBLIC void LYHandleMETA ARGS4(
 						     UCT_STAGE_HTEXT,
 						     UCT_SETBY_DEFAULT);
 		}
-		if (p_in->enc != UCT_ENC_CJK &&
+		if ((p_in->enc != UCT_ENC_CJK) &&
 		    (p_in->codepoints & UCT_CP_SUBSETOF_LAT1)) {
 		    HTCJK = NOCJK;
 		} else if (chndl == current_char_set) {
@@ -2778,7 +2778,7 @@ PUBLIC void LYCheckForContentBase ARGS1(
 {
     char *cp = NULL;
     BOOL present[HTML_BASE_ATTRIBUTES];
-    char *value[HTML_BASE_ATTRIBUTES];
+    CONST char *value[HTML_BASE_ATTRIBUTES];
     int i;
 
     if (!(me && me->node_anchor))
@@ -2831,7 +2831,7 @@ PUBLIC void LYCheckForContentBase ARGS1(
     for (i = 0; i < HTML_BASE_ATTRIBUTES; i++)
 	 present[i] = NO;
     present[HTML_BASE_HREF] = YES;
-    value[HTML_BASE_HREF] = cp;
+    value[HTML_BASE_HREF] = (CONST char *)cp;
     (*me->isa->start_element)(me, HTML_BASE, present, value, 0);
     FREE(cp);
 }

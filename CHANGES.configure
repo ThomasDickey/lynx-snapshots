@@ -1,7 +1,5 @@
 97-09-17
 --------
-* Undo misleading/incorrect use of 'const' in HTML.c, and associated
-  modules. - TD
 * merge symbols 'has_color' and 'lynx_has_color' to simplify ifdef's,
   and correct a problem building color-style configuration. - TD
 * add configure symbol for ifdef'ing presence of waitpid, which

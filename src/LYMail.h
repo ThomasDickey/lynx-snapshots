@@ -19,8 +19,8 @@ extern void mailmsg PARAMS((
 	char *	filename,
 	char *	linkname));
 extern void reply_by_mail PARAMS((
-	char *	mail_address,
-	char *	filename,
-	char *	title));
+	char *		mail_address,
+	char *		filename,
+	CONST char *	title));
 
 #endif /* LYMAIL_H */
