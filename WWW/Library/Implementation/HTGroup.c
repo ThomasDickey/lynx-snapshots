@@ -78,7 +78,7 @@ PRIVATE void syntax_error ARGS3(FILE *,	 fp,
     int ch;
 
     while ((ch = getc(fp)) != EOF  &&  ch != '\n')
-	if (cnt < 40) buffer[cnt++] = ch;
+	if (cnt < 40) buffer[cnt++] = (char) ch;
     buffer[cnt] = (char)0;
 
     CTRACE(tfp, "%s %d before: '%s'\nHTGroup.c: %s (got %s)\n",

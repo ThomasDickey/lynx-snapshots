@@ -390,9 +390,9 @@ PUBLIC char * HTNextTok ARGS4(
     if (!delims) delims = " ;,=" ;
     if (!bracks) bracks = "<\"" ;
 
-    get_blanks = (!strchr(delims,' ') && !strchr(bracks,' '));
-    get_comments = (strchr(bracks,'(') != NULL);
-    skip_comments = (!get_comments && !strchr(delims,'(') && !get_blanks);
+    get_blanks = (BOOL) (!strchr(delims,' ') && !strchr(bracks,' '));
+    get_comments = (BOOL) (strchr(bracks,'(') != NULL);
+    skip_comments = (BOOL) (!get_comments && !strchr(delims,'(') && !get_blanks);
 #define skipWHITE(c) (!get_blanks && WHITE(c))
 
     while (*p && skipWHITE(*p))
@@ -430,7 +430,7 @@ PUBLIC char * HTNextTok ARGS4(
 		if (!*p || (!strchr(bracks,*p) && strchr(delims,*p))) {
 		    break;
 		} else
-		    get_closing_char_too = (strchr(bracks,*p) != NULL);
+		    get_closing_char_too = (BOOL) (strchr(bracks,*p) != NULL);
 	    }
 	} else if (strchr(bracks,*p)) {        /* quoted or bracketted field */
 	    switch (*p) {
@@ -448,7 +448,7 @@ PUBLIC char * HTNextTok ARGS4(
 		if (!*p || (!strchr(bracks,*p) && strchr(delims,*p))) {
 		    break;
 		} else
-		    get_closing_char_too = (strchr(bracks,*p) != NULL);
+		    get_closing_char_too = (BOOL) (strchr(bracks,*p) != NULL);
 	    } else
 	    break;			    /* kr95-10-9: needs to stop here */
 #if 0
@@ -922,7 +922,9 @@ PUBLIC void HTAddParam ARGS4(
     if (number > 0) {
 	CONST char *last = HTAfterCommandArg(command, number - 1);
 	CONST char *next = last;
+#if USE_QUOTED_PARAMETER
 	char *quoted;
+#endif
 
 	if (number <= 1) {
 	    FREE(*result);

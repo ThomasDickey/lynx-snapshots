@@ -68,14 +68,14 @@ PUBLIC int HTNoDataOK = 0;
  *                  to show for it either.
  *     NULLFILE   - requested document not loaded into HTMainText, either
  *                  some interactive protocol was requested (like telnet),
- *                  or lynx does not allow access, 
+ *                  or lynx does not allow access,
  *  The distinction between NOT_FOUND and NULLFILE is not very crucial,
  *  but getting it right prevents mainloop from exiting with the wrong
  *  message if it happens for the first file, and from logging (or not
  *  logging) errors inappropriately with -traversal, and from sending
  *  bogus error mail with MAIL_SYSTEM_ERROR_LOGGING:TRUE. - kw
  */
-PUBLIC BOOLEAN getfile ARGS1(
+PUBLIC int getfile ARGS1(
 	document *,	doc)
 {
 	int url_type = 0;
@@ -1103,7 +1103,7 @@ PUBLIC int follow_link_number ARGS4(
     int curline = *num; /* passed in from mainloop() */
 
     CTRACE(tfp,"follow_link_number(%d,%d,...)\n",c,cur);
-    temp[0] = c;
+    temp[0] = (char) c;
     temp[1] = '\0';
     *num = -1;
     _statusline(FOLLOW_LINK_NUMBER);
@@ -1166,7 +1166,7 @@ PUBLIC int follow_link_number ARGS4(
      *	Check if we want to make the link corresponding to the
      *	number the current link, rather than ACTIVATE-ing it.
      */
-    want_go = ( c == 'g' || c == 'G' );
+    want_go = (BOOL) ( c == 'g' || c == 'G' );
 
     /* If rel, add or subtract num from current link, or
      * nearest previous/subsequent link if current link is not on screen.

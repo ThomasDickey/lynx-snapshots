@@ -63,7 +63,7 @@ static char *decode_string(char *s)
 		*p = *s;
 		continue;
 	    }
-	    *p = (ASC2HEXD(*(s + 1)) << 4) + ASC2HEXD(*(s + 2));
+	    *p = (char)((ASC2HEXD(*(s + 1)) << 4) + ASC2HEXD(*(s + 2)));
 	    s += 2;
 	}
     }
@@ -204,8 +204,6 @@ void run_external ARGS1(char *, c)
 	if (externals2->command != 0
 	  && !strncasecomp(externals2->name, c, strlen(externals2->name)))
 	{
-	    char *cp;
-
 	    if (no_externals && !externals2->always_enabled) {
 		HTUserMsg(EXTERNALS_DISABLED);
 		return;
@@ -221,7 +219,7 @@ void run_external ARGS1(char *, c)
 #else	/* Unix or DOS/Win: */
 #if defined(WIN_EX)
 	    if (*c != '\"' && strchr(c, ' ') != NULL) {
-		cp = quote_pathname(c);
+		char *cp = quote_pathname(c);
 		sprintf(command, externals2->command, cp);
 		FREE(cp);
 	    } else {
@@ -283,9 +281,11 @@ void run_external ARGS1(char *, c)
 		}
 	    }
 #else	/* Unix */
-	    cp = HTQuoteParameter(c);
-	    sprintf(command, externals2->command, cp);
-	    FREE(cp);
+	    {
+		char *cp = HTQuoteParameter(c);
+		sprintf(command, externals2->command, cp);
+		FREE(cp);
+	    }
 #endif
 #endif	/* VMS */
 

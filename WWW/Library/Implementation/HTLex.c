@@ -89,7 +89,7 @@ PUBLIC LexItem lex ARGS1(FILE *, fp)
 	    }
 	    break;
 	  default:
-	    HTlex_buffer[lex_cnt++] = ch;
+	    HTlex_buffer[lex_cnt++] = (char) ch;
 	    HTlex_buffer[lex_cnt] = '\0';
 	    if ('*' == ch) lex_template = YES;
 	} /* switch ch */

@@ -1743,7 +1743,7 @@ PUBLIC void reply_by_mail ARGS4(
 	    /*
 	     *	Ask if the user wants to include the original message.
 	     */
-	    BOOLEAN is_preparsed = (LYPreparsedSource &&
+	    BOOLEAN is_preparsed = (BOOL) (LYPreparsedSource &&
 				    HTisDocumentSource());
 	    if (HTConfirm(is_preparsed
 	    	? INC_PREPARSED_MSG_PROMPT

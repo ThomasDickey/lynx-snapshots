@@ -49,6 +49,7 @@ within a single LAN.
 <li><A HREF="#DirEd" NAME="ToC-DirEd">Directory Editing</A>
 <li><A HREF="#MiscKeys" NAME="ToC-MiscKeys">Scrolling and Other useful commands</A>
 <li><a href="#Forms" NAME="ToC-Forms">Lynx and HTML Forms</a>
+| <a href="#Images" NAME="ToC-Images">Lynx and HTML Images</a>
 <li><a href="#Tables" NAME="ToC-Tables">Lynx and HTML Tables</a>
 | <a href="#Tabs" NAME="ToC-Tabs">Lynx and HTML Tabs</a>
 <li><a href="#Frames" NAME="ToC-Frames">Lynx and HTML Frames</a>
@@ -1567,6 +1568,38 @@ any document:
 ><em>&lt;META <tab id="cdis">HTTP-EQUIV="Content-Disposition"<BR>
 <tab to="cdis">CONTENT="file;&nbsp;filename=name.suffix"&gt;</em><BR>
 [<A HREF="#ToC-Forms">ToC</A>]
+
+<h2 ID="Images"><A NAME="Images"><em>Lynx and HTML Images</em></a></h2>
+
+As a text browser, Lynx does not display images as such
+-- you need to define a viewer in <em>lynx.cfg</em>: see there -- ,
+but users can choose a number of ways of showing their presence.
+<p>
+There are 3 choices in <em>lynx.cfg</em>, with 2 corresponding keys:
+<p><pre>
+     MAKE_LINKS_FOR_ALL_IMAGES        *  IMAGE_TOGGLE
+     MAKE_PSEUDO_ALTS_FOR_INLINES     [  INLINE_TOGGLE
+     VERBOSE_IMAGES                   no corresponding key
+</pre><p>
+You can also use the Options Menu, as outlined below:
+<p><pre>
+     key  lynx.cfg       FM LM .lynxrc    variable in source
+
+       *  MAKE_LINKS_     Y  N       N    clickable_images
+       [  MAKE_PSEUDO_    Y  N       N    pseudo_inline_alts
+          VERBOSE_        Y  Y       Y    verbose_img
+
+FM = new Form Menu ; LM = old List Menu ;
+in  .lynxrc ,  VERBOSE_IMAGES  is called `verbose_images':
+the other two cannot be saved between sessions.
+</pre><p>
+In the Forms Menu, the 3-way `Show images' selection
+combines the effects of the `*' &amp; `[' keys, as follows:
+<p><pre>
+     Ignore      clickable_images = FALSE, pseudo_inline_alts = FALSE
+     As labels   clickable_images = FALSE, pseudo_inline_alts = TRUE
+     As links    clickable_images = TRUE,  pseudo_inline_alts = unchanged
+</pre>
 
 <h2 ID="Tables"><A NAME="Tables"><em>Lynx and HTML Tables</em></a></h2>
 

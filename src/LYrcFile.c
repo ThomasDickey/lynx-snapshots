@@ -480,7 +480,7 @@ PUBLIC void read_rc NOPARAMS
 #endif /* DISP_PARTIAL */
 #endif /* NOTUSED */
 
-#ifdef ENABLE_OPTS_CHANGE_EXEC
+#if defined(ENABLE_OPTS_CHANGE_EXEC) && (defined(EXEC_LINKS) || defined(EXEC_SCRIPTS))
 	/*
 	 *  Local execution mode - all links.
 	 */

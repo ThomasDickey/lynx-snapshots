@@ -160,7 +160,7 @@ PRIVATE void sl_suspend ARGS1(
     SLang_init_tty(3, 0, 1);
 #endif /* SLANG_VERSION > 9929 */
     signal(SIGTSTP, sl_suspend);
-#if !defined(_WINDOWS) && !defined(__DJGPP__)
+#ifdef UNIX
     SLtty_set_suspend_state(1);
 #endif
     if (sig == SIGTSTP)
@@ -680,7 +680,7 @@ PUBLIC void start_curses NOARGS
 #if !defined(USE_KEYMAPS)
 	SLtt_get_terminfo();
 #endif
-#if defined(__DJGPP__) && !defined(DJGPP_KEYHANDLER)
+#if (defined(__DJGPP__) && !defined(DJGPP_KEYHANDLER)) || defined(__CYGWIN__)
 	SLkp_init ();
 #endif /* __DJGPP__ && !DJGPP_KEYHANDLER */
 
@@ -762,9 +762,9 @@ PUBLIC void start_curses NOARGS
     scrollok(0,0);
     SLsmg_Backspace_Moves = 1;
 #ifndef VMS
-#if !defined(_WINDOWS) && !defined(__DJGPP__)
+#ifdef UNIX
     SLtty_set_suspend_state(1);
-#endif /* !_WINDOWS */
+#endif /* UNIX */
 #ifdef SIGTSTP
     if (!no_suspend)
 	signal(SIGTSTP, sl_suspend);
@@ -1300,6 +1300,28 @@ PUBLIC void LYstopTargetEmphasis NOARGS
     stop_reverse();
     stop_bold();
 #endif /* FANCY_CURSES || USE_SLANG */
+}
+
+/*
+ * There's no guarantee that a library won't temporarily write on its input.
+ * Be safe and copy it when we have const-data.
+ */
+PUBLIC void LYaddnstr ARGS2(
+	CONST char *,	s,
+	size_t,		len)
+{
+    if (len != 0) {
+	char temp[MAX_LINE];
+	memcpy(temp, s, len);
+	temp[len] = 0;
+	addstr(temp);
+    }
+}
+
+PUBLIC void LYaddstr ARGS1(
+	CONST char *,	s)
+{
+    LYaddnstr(s, strlen(s));
 }
 
 #ifdef VMS

@@ -422,8 +422,10 @@ extern BOOLEAN focus_window;
 #ifdef SH_EX
 extern BOOLEAN show_cfg;
 extern BOOLEAN mail_is_blat;
-extern BOOLEAN no_table_center;
+#ifdef WIN_EX
 extern int     debug_delay;
+#endif
+extern BOOLEAN no_table_center;
 #endif
 
 #if !defined(__CYGWIN__) && defined(__CYGWIN32__)

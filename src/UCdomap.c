@@ -587,7 +587,7 @@ PRIVATE int con_insert_unipair ARGS3(
 	else
 	    uni_pagedir[n] = p1;
 	if ( !p1 )
-	    return -ENOMEM;
+	    return -1;
 
 	for (i = 0; i < 32; i++) {
 	    p1[i] = NULL;
@@ -597,7 +597,7 @@ PRIVATE int con_insert_unipair ARGS3(
     if (!(p2 = p1[n = (unicode >> 6) & 0x1f])) {
 	p2 = p1[n] = (u16 *)malloc(64*sizeof(u16));
 	if (!p2)
-	    return -ENOMEM;
+	    return -1;
 
 	for (i = 0; i < 64; i++) {
 	    p2[i] = 0xffff;		/* No glyph for this character (yet) */
@@ -629,7 +629,7 @@ PRIVATE int con_insert_unipair_str ARGS3(
 	else
 	    uni_pagedir_str[n] = p1;
 	if ( !p1 )
-	    return -ENOMEM;
+	    return -1;
 
 	for (i = 0; i < 32; i++) {
 	    p1[i] = NULL;
@@ -640,7 +640,7 @@ PRIVATE int con_insert_unipair_str ARGS3(
     if (!p1[n]) {
 	p1[n] = (char **)malloc(64*sizeof(char *));
 	if (!p1[n])
-	    return -ENOMEM;
+	    return -1;
 
 	p2 = (CONST char **)p1[n];
 	for (i = 0; i < 64; i++) {
@@ -891,7 +891,7 @@ PRIVATE int con_get_unimap ARGS3(
 	}
     }
     *uct = ect;
-    return ((ect <= ct) ? 0 : -ENOMEM);
+    return ((ect <= ct) ? 0 : -1);
 }
 #endif /* NOTDEFINED */
 
@@ -1046,6 +1046,8 @@ PUBLIC int UCTransUniChar ARGS2(
     CONST u16 * ut;
 
     if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
+	if (LYCharSet_UC[charset_out].codepage < 0)
+	    return (unicode < 128) ? (int)unicode : LYCharSet_UC[charset_out].codepage;
 	if ((UChndl_out = default_UChndl) < 0)
 	    return -12;
 	isdefault = 1;
@@ -1100,6 +1102,8 @@ PUBLIC int UCTransUniCharStr ARGS5(
 	return -13;
 
     if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
+	if (LYCharSet_UC[charset_out].codepage < 0)
+	    return LYCharSet_UC[charset_out].codepage;
 	if ((UChndl_out = default_UChndl) < 0)
 	    return -12;
 	isdefault = 1;
@@ -1231,6 +1235,8 @@ PUBLIC int UCTransChar ARGS3(
     if ((UChndl_in = LYCharSet_UC[charset_in].UChndl) < 0)
 	return -11;
     if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
+	if (LYCharSet_UC[charset_out].codepage < 0)
+	    return LYCharSet_UC[charset_out].codepage;
 	if ((UChndl_out = default_UChndl) < 0)
 	    return -12;
 	isdefault = 1;
@@ -1322,7 +1328,7 @@ PUBLIC int UCReverseTransChar ARGS3(
 	int,		charset_out)
 {
     int Gn;
-    int rc;
+    int rc = -1;
     int UChndl_in, UChndl_out;
     int isdefault;
     int i_ch = (unsigned char)ch_out;
@@ -1341,6 +1347,8 @@ PUBLIC int UCReverseTransChar ARGS3(
     if (charset_out < 0)
 	return -12;
     if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
+	if (LYCharSet_UC[charset_out].codepage < 0)
+	    return LYCharSet_UC[charset_out].codepage;
 	if ((UChndl_out = default_UChndl) < 0)
 	    return -12;
 	isdefault = 1;
@@ -1357,19 +1365,14 @@ PUBLIC int UCReverseTransChar ARGS3(
 	 */
 	ut = UCInfo[UChndl_out].unitable;
 	if (ut == UC_current_unitable) {
-	    if ((Gn = UCInfo[UChndl_in].GN) >= 0) {
-		UC_translate = set_translate(Gn);
-		rc = inv_translate[i_ch];
-		if (rc >= 32) {
-		    return rc;
-		}
-	    } else {
+	    if ((Gn = UCInfo[UChndl_in].GN) < 0) {
 		Gn = UC_MapGN(UChndl_in,1);
-		UC_translate = set_translate(Gn);
+	    }
+	    UC_translate = set_translate(Gn);
+	    if (inv_translate)
 		rc = inv_translate[i_ch];
-		if (rc >= 32) {
-		    return rc;
-		}
+	    if (rc >= 32) {
+		return rc;
 	    }
 	}
     }
@@ -1411,6 +1414,8 @@ PUBLIC int UCTransCharStr ARGS6(
     if (!UCInfo[UChndl_in].num_uni)
 	return -11;
     if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
+	if (LYCharSet_UC[charset_out].codepage < 0)
+	    return LYCharSet_UC[charset_out].codepage;
 	if ((UChndl_out = default_UChndl) < 0)
 	    return -12;
 	isdefault = 1;
@@ -1702,7 +1707,7 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
     CONST char **p;
     char **prepl;
     CONST u16 *pp;
-    CONST char **tp;
+    char **tp;
     CONST char *s7;
     CONST char *s8;
     size_t i;
@@ -1713,7 +1718,7 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
     /*
      *	Create a temporary table for reverse lookup of latin1 codes:
      */
-    tp = (CONST char **)malloc(96 * sizeof(CONST char *));
+    tp = (char **)malloc(96 * sizeof(CONST char *));
     if (!tp)
 	return NULL;
     for (i = 0; i < 96; i++)
@@ -1758,7 +1763,7 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
 	list = UCInfo[UC_charset_in_hndl].replacedesc.entries;
 	while (ct--) {
 	    if ((k = list->unicode) >= 160 && k < 256) {
-		tp[k-160] = list->replace_str;
+		tp[k-160] = (char *)(list->replace_str);
 	    }
 	    list++;
 	}
@@ -2000,6 +2005,113 @@ PUBLIC void UC_Charset_Setup ARGS9(
     UCInfo[s].uc_status = status;
     if (found < 0)
 	UCNumCharsets++;
+    return;
+}
+
+/*
+ *  UC_NoUctb_Register_with_LYCharSets, UC_Charset_NoUctb_Setup -
+ *  Alternative functions for adding character set info to the lists
+ *  kept in LYCharSets.c.
+ *  These are for character sets without any real tables of their own.
+ *  We don't keep an entry in UCinfo[] for them.
+ */
+PRIVATE int UC_NoUctb_Register_with_LYCharSets ARGS5(
+	CONST char *,	UC_MIMEcharset,
+	CONST char *,	UC_LYNXcharset,
+	int,		lowest_eightbit,
+	int,			UC_rawuni,
+	int,			codepage)
+{
+    int i, LYhndl = -1;
+
+    if (LYNumCharsets == 0) {
+	/*
+	 *  Initialize here; so whoever changes
+	 *  LYCharSets.c doesn't have to count...
+	 */
+	for (i = 0; (i < MAXCHARSETS) && LYchar_set_names[i]; i++) {
+	    LYNumCharsets = i+1;
+	}
+    }
+
+    /*
+     *	Search by MIME name, (LYchar_set_names may differ...)
+     *  ignore if already present!
+     */
+    for (i = 0; i < MAXCHARSETS && LYchar_set_names[i] && LYhndl < 0; i++) {
+	if (LYCharSet_UC[i].MIMEname &&
+	    !strcmp(UC_MIMEcharset, LYCharSet_UC[i].MIMEname)) {
+	    return -1;
+	}
+    }
+
+    /* not found */
+    if (LYNumCharsets >= MAXCHARSETS) {
+	CTRACE(tfp, "UC_NoUctb_Register_with_LYCharSets: Too many.  Ignoring %s/%s.",
+	       UC_MIMEcharset, UC_LYNXcharset);
+	return -1;
+    }
+    /*
+	 *  Add to LYCharSets.c lists.
+	 */
+    LYhndl = LYNumCharsets;
+    LYNumCharsets ++;
+    LYlowest_eightbit[LYhndl] = lowest_eightbit;
+    LYCharSets[LYhndl] = SevenBitApproximations;
+    LYchar_set_names[LYhndl] = UC_LYNXcharset;
+    LYchar_set_names[LYhndl+1] = NULL;
+    /*
+     *  Terminating NULL may be looked for by Lynx code.
+     */
+
+    LYCharSet_UC[LYhndl].UChndl = -1; /* no corresponding UChndl ! */
+    LYCharSet_UC[LYhndl].MIMEname = UC_MIMEcharset;
+    LYCharSet_UC[LYhndl].enc = UC_rawuni;
+    LYCharSet_UC[LYhndl].codepage = codepage;
+
+    /*
+     *	@@@ We really SHOULD get more info from the table files,
+     *	and set relevant flags in the LYCharSet_UC[] entry with
+     *	that info...  For now, let's try it without. - KW
+     */
+
+    return LYhndl;
+}
+
+/*
+ *  A wrapper for the previous function.
+ */
+PRIVATE void UC_Charset_NoUctb_Setup ARGS6(
+	CONST char *,		UC_MIMEcharset,
+	CONST char *,		UC_LYNXcharset,
+	int,			trydefault,
+	int,			lowest_eight,
+	int,			UC_rawuni,
+	int,			codepage)
+{
+    int i;
+
+    /*
+     *	Ignore completely if already in slot.
+     */
+    for (i = 0; i < UCNumCharsets; i++) {
+	if (!strcmp(UCInfo[i].MIMEname, UC_MIMEcharset)) {
+	    return;
+	}
+    }
+    if (UC_rawuni == UCT_ENC_UTF8)
+	lowest_eight = 128;  /* cheat here */
+    /* 'codepage' doubles as a flag for 'do not try any table
+    ** lookup, not even default' when negative.  The value will
+    ** be returned immediately by UCTrans* functions.
+    */
+    if (!trydefault && codepage == 0)
+	codepage = -12;	/* if not already set; any negative should do. */
+    UC_NoUctb_Register_with_LYCharSets(UC_MIMEcharset,
+				       UC_LYNXcharset,
+				       lowest_eight,
+				       UC_rawuni,
+				       codepage);
     return;
 }
 

@@ -496,7 +496,7 @@ struct timeval {
 #define GLOBALREF extern
 #endif /* !GLOBALREF */
 
-#ifdef DJGPP
+#ifdef __DJGPP__
 #undef SELECT
 #define TCP_INCLUDES_DONE
 #define NO_IOCTL
@@ -504,6 +504,14 @@ struct timeval {
 #include <errno.h>
 #include <sys/types.h>
 #include <socket.h>
+#include <io.h>
+#ifdef WATT32
+#include <arpa/inet.h>
+#include <tcp.h>
+#ifdef word
+#undef word
+#endif /* word */
+#endif /* WATT32 */
 
 #undef NETWRITE
 #define NETWRITE write_s
@@ -513,7 +521,7 @@ struct timeval {
 #define NETCLOSE close_s
 #ifndef WATT32
 #define getsockname getsockname_s
-#endif /* WATT32 */
+#endif /* !WATT32 */
 #ifdef HAVE_GETTEXT
 #define gettext gettext__
 #endif
@@ -656,7 +664,7 @@ Defaults
 #endif /* !NO_IOCTL */
 #include <sys/socket.h>
 #include <netinet/in.h>
-#ifndef __hpux /* this may or may not be good -marc */
+#if !defined( __hpux) && !defined(__BEOS__) /* this may or may not be good -marc */
 #include <arpa/inet.h>      /* Must be after netinet/in.h */
 #endif /* !__hpux */
 #include <netdb.h>

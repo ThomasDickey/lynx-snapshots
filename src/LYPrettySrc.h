@@ -21,6 +21,8 @@ extern BOOL psrc_nested_call;/* this is used when distinguishing whether
 extern BOOL psrc_first_tag; /* this is also used in HTML.c to trigger the 
  1st tag to preform special. */
 
+extern BOOL mark_htext_as_source;
+
 /* here is a list of lexem codes. */
 typedef enum _HTlexem {
   HTL_comm=0,
@@ -67,6 +69,7 @@ extern int tagname_transform;
 extern int attrname_transform;
 
 
+extern BOOL psrcview_no_anchor_numbering;
 #endif /* ifdef USE_PSRC */
 
 

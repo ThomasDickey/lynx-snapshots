@@ -1255,12 +1255,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.3dev.6"
+#define LYNX_VERSION "2.8.3dev.7"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Fri, 13 Aug 1999 07:27:27 -0600"
+#define LYNX_DATE "Thu, 26 Aug 1999 05:31:19 -0600"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1999"
@@ -1320,7 +1320,6 @@
 **  elsewhere.
 **  Currently, if compiled with -DUSE_ZLIB and without -DDIRED_SUPPORT
 **  (default), the following from the list below are required:
-**  COPY_PATH (cp.exe) - needed for file downloading
 **  MV_PATH   (mv.exe) - for bookmark handling (DEL_BOOKMARK command)
 **  UNCOMPRESS_PATH, BZIP2_PATH - for automatic decompression of files in
 **                                these formats

@@ -199,10 +199,14 @@ PRIVATE void LYListFmtParse ARGS5(
 	char *buf = NULL;
 	char tmp[LY_MAXPATH];
 	char type;
+#ifndef _WINDOWS
 	char *name;
+#endif
 	time_t now;
 	char *datestr;
+#ifdef S_IFLNK
 	int len;
+#endif
 #define SEC_PER_YEAR	(60 * 60 * 24 * 365)
 
 #ifdef _WINDOWS	/* 1998/01/06 (Tue) 21:20:53 */
@@ -460,7 +464,7 @@ PUBLIC void HTSetSuffix5 ARGS5(
 	float,		value)
 {
     HTSuffix * suff;
-    BOOL trivial_enc = IsUnityEncStr(encoding);
+    BOOL trivial_enc = (BOOL) IsUnityEncStr(encoding);
 
     if (strcmp(suffix, "*") == 0)
 	suff = &no_suffix;
@@ -767,7 +771,7 @@ PUBLIC CONST char * HTFileSuffix ARGS2(
 	HTFileInit();
 #endif /* !NO_INIT */
 
-    trivial_enc = IsUnityEncStr(enc);
+    trivial_enc = (BOOL) IsUnityEncStr(enc);
     n = HTList_count(HTSuffixes);
     for (i = 0; i < n; i++) {
 	suff = (HTSuffix *)HTList_objectAt(HTSuffixes, i);
@@ -1024,15 +1028,15 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	    **  of match.
 	    */
 	    BOOL given_is_8859
-		= (!strncmp(cp4, "iso-8859-", 9) &&
+		= (BOOL) (!strncmp(cp4, "iso-8859-", 9) &&
 		   isdigit((unsigned char)cp4[9]));
 	    BOOL given_is_8859like
-		= (given_is_8859 ||
+		= (BOOL) (given_is_8859 ||
 		   !strncmp(cp4, "windows-", 8) ||
 		   !strncmp(cp4, "cp12", 4) ||
 		   !strncmp(cp4, "cp-12", 5));
 	    BOOL given_and_display_8859like
-		= (given_is_8859like &&
+		= (BOOL) (given_is_8859like &&
 		   (strstr(LYchar_set_names[current_char_set],
 			   "ISO-8859") ||
 		    strstr(LYchar_set_names[current_char_set],
@@ -1589,7 +1593,7 @@ PRIVATE int print_local_dir ARGS5(
 
     { int i;
 	   for (i = 0; i < HTML_A_ATTRIBUTES; i++)
-		   present[i] = (i == HTML_A_HREF);
+		   present[i] = (BOOL) (i == HTML_A_HREF);
     }
 
     /*

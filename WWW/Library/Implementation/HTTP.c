@@ -7,7 +7,7 @@
 */
 
 #include <HTUtils.h>
-#if defined(__DJGPP__) && defined (WATT32) 
+#if defined(__DJGPP__) && defined (WATT32)
 #include <tcp.h>
 #endif /* __DJGPP__ */
 #include <HTTP.h>
@@ -94,7 +94,7 @@ PUBLIC char * str_speed(void)
     static char buff[32];
 
     if (ws_read_per_sec > 1000)
-	sprintf(buff, "%d.%03dkB", ws_read_per_sec / 1000, 
+	sprintf(buff, "%d.%03dkB", ws_read_per_sec / 1000,
 			(ws_read_per_sec % 1000) );
     else
 	sprintf(buff, "%3d", ws_read_per_sec);
@@ -227,7 +227,7 @@ PUBLIC int ws_netread(int fd, char *buf, int len)
 
 	    g_total_times += process_time;
 	    g_total_bytes += exitcode;
-	    
+
 	    if (g_total_bytes > 2000000) {
 		ws_read_per_sec = g_total_bytes / (g_total_times/1000);
 	    } else {
@@ -577,7 +577,7 @@ try_again:
 	char *colon;
 	int portnumber;
 	char *auth, *cookie = NULL;
-	BOOL secure = (strncmp(anAnchor->address, "https", 5) ?
+	BOOL secure = (BOOL) (strncmp(anAnchor->address, "https", 5) ?
 							FALSE : TRUE);
 
 	abspath = HTParse(arg, "", PARSE_PATH|PARSE_PUNCTUATION);
@@ -772,9 +772,9 @@ try_again:
 	if (!anAnchor->post_data)
 	  content_length = 0;
 	else
-/* 
- * Ack!  This assumes non-binary data!  Icky!  
- * 
+/*
+ * Ack!  This assumes non-binary data!  Icky!
+ *
  */
 	  content_length = strlen (anAnchor->post_data);
 	sprintf (line, "Content-length: %d%c%c",

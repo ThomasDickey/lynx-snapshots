@@ -30,6 +30,19 @@ PUBLIC int current_char_set = -1; /* will be intitialized later in LYMain.c */
 PUBLIC CONST char** p_entity_values = NULL; /* Pointer, for HTML_put_entity()*/
 			      /* obsolete and probably not used(???)        */
 			      /* will be initialized in HTMLUseCharacterSet */
+#ifdef EXP_CHARSET_CHOICE
+PUBLIC charset_subset_t charset_subsets[MAXCHARSETS];
+PUBLIC BOOL custom_display_charset = FALSE;
+PUBLIC BOOL custom_assumed_doc_charset = FALSE;
+#ifndef ALL_CHARSETS_IN_O_MENU_SCREEN
+PUBLIC int display_charset_map[MAXCHARSETS];
+PUBLIC int assumed_doc_charset_map[MAXCHARSETS];
+
+PUBLIC CONST char* display_charset_choices[MAXCHARSETS+1];
+PUBLIC CONST char* assumed_charset_choices[MAXCHARSETS+1];
+PUBLIC int displayed_display_charset_idx;
+#endif
+#endif /* EXP_CHARSET_CHOICE */
 
 /*
  *  New character sets now declared with UCInit() in UCdomap.c
@@ -406,19 +419,19 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 	if (i == chndl)
 	    LYRawMode = LYUseDefaultRawMode;
 	else
-	    LYRawMode = (!LYUseDefaultRawMode);
+	    LYRawMode = (BOOL) (!LYUseDefaultRawMode);
 
-	HTPassEightBitNum =
+	HTPassEightBitNum = (BOOL) (
 	    ((LYCharSet_UC[i].codepoints & UCT_CP_SUPERSETOF_LAT1) ||
-		(LYCharSet_UC[i].like8859 & UCT_R_HIGH8BIT));
+		(LYCharSet_UC[i].like8859 & UCT_R_HIGH8BIT)));
 
 	if (LYRawMode) {
-	    HTPassEightBitRaw = (LYlowest_eightbit[i] <= 160);
+	    HTPassEightBitRaw = (BOOL) (LYlowest_eightbit[i] <= 160);
 	} else {
 	    HTPassEightBitRaw = FALSE;
 	}
 	if (LYRawMode || i == chndl) {
-	    HTPassHighCtrlRaw = (LYlowest_eightbit[i] <= 130);
+	    HTPassHighCtrlRaw = (BOOL) (LYlowest_eightbit[i] <= 130);
 	} else {
 	    HTPassHighCtrlRaw = FALSE;
 	}
@@ -448,10 +461,10 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 	/* for any CJK: */
 	if (!LYUseDefaultRawMode)
 		HTCJK = NOCJK;
-	LYRawMode = (HTCJK != NOCJK) ? TRUE : FALSE;
+	LYRawMode = (BOOL) ((HTCJK != NOCJK) ? TRUE : FALSE);
 	HTPassEightBitRaw = FALSE;
 	HTPassEightBitNum = FALSE;
-	HTPassHighCtrlRaw = (HTCJK != NOCJK) ? TRUE : FALSE;
+	HTPassHighCtrlRaw = (BOOL) ((HTCJK != NOCJK) ? TRUE : FALSE);
 	HTPassHighCtrlNum = FALSE;
     }
 
@@ -542,7 +555,7 @@ PUBLIC void Set_HTCJK ARGS2(
  */
 PRIVATE void HTMLSetRawModeDefault ARGS1(int,i)
 {
-    LYDefaultRawMode = (LYCharSet_UC[i].enc == UCT_ENC_CJK);
+    LYDefaultRawMode = (BOOL) (LYCharSet_UC[i].enc == UCT_ENC_CJK);
     return;
 }
 
@@ -561,7 +574,7 @@ PUBLIC void HTMLSetUseDefaultRawMode ARGS2(
 	if (i == chndl)
 	    LYUseDefaultRawMode = modeflag;
 	else
-	    LYUseDefaultRawMode = (!modeflag);
+	    LYUseDefaultRawMode = (BOOL) (!modeflag);
     } else /* CJK encoding: */
 	    LYUseDefaultRawMode = modeflag;
 
@@ -574,7 +587,7 @@ PUBLIC void HTMLSetUseDefaultRawMode ARGS2(
  */
 PRIVATE void HTMLSetHaveCJKCharacterSet ARGS1(int,i)
 {
-    LYHaveCJKCharacterSet = (LYCharSet_UC[i].enc == UCT_ENC_CJK);
+    LYHaveCJKCharacterSet = (BOOL) (LYCharSet_UC[i].enc == UCT_ENC_CJK);
     return;
 }
 
@@ -904,9 +917,43 @@ PUBLIC void HTMLUseCharacterSet ARGS1(int, i)
  *  Initializer, calls initialization function for the
  *  CHARTRANS handling. - KW
  */
-PUBLIC int LYCharSetsDeclared NOPARAMS
+PUBLIC int LYCharSetsDeclared NOARGS
 {
     UCInit();
 
     return UCInitialized;
 }
+
+#ifdef EXP_CHARSET_CHOICE
+PUBLIC void init_charset_subsets NOARGS
+{
+    int i,n;
+    int cur_display = 0;
+    int cur_assumed = 0;
+
+    /* add them to displayed values */
+    charset_subsets[UCLYhndl_for_unspec].hide_assumed = FALSE;
+    charset_subsets[current_char_set].hide_display = FALSE;
+
+#ifndef ALL_CHARSETS_IN_O_MENU_SCREEN
+    /*all this stuff is for supporting old menu screen... */
+    for (i = 0; i < LYNumCharsets; ++i){
+	if (charset_subsets[i].hide_display == FALSE) {
+	    n = cur_display++;
+	    if (i == current_char_set)
+		displayed_display_charset_idx = n;
+	    display_charset_map[n] = i;
+	    display_charset_choices[n] = LYchar_set_names[i];
+	}
+	if (charset_subsets[i].hide_assumed == FALSE) {
+	    n = cur_assumed++;
+	    assumed_doc_charset_map[n] = i;
+	    assumed_charset_choices[n] = LYCharSet_UC[i].MIMEname;
+	    charset_subsets[i].assumed_idx = n;
+	}
+	display_charset_choices[cur_display] = NULL;
+	assumed_charset_choices[cur_assumed] = NULL;
+    }
+#endif
+}
+#endif /* EXP_CHARSET_CHOICE */

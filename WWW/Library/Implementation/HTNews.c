@@ -262,7 +262,7 @@ PRIVATE int response ARGS1(CONST char *,command)
 
     for (;;) {
 	ich = NEXT_CHAR;
-	if (((*p++ = ich) == LF) ||
+	if (((*p++ = (char) ich) == LF) ||
 	    (p == &response_text[LINE_LENGTH])) {
 	    *--p = '\0';			/* Terminate the string */
 	    CTRACE(tfp, "NNTP Response: %s\n", response_text);
@@ -653,7 +653,7 @@ PRIVATE void start_anchor ARGS1(CONST char *,  href)
     {
 	int i;
 	for(i=0; i < HTML_A_ATTRIBUTES; i++)
-	    present[i] = (i == HTML_A_HREF);
+	    present[i] = (BOOL) (i == HTML_A_HREF);
     }
     ((CONST char **)value)[HTML_A_HREF] = href;
     (*targetClass.start_element)(target, HTML_A , present,
@@ -671,7 +671,7 @@ PRIVATE void start_link ARGS2(CONST char *,  href, CONST char *, rev)
     {
 	int i;
 	for(i=0; i < HTML_LINK_ATTRIBUTES; i++)
-	    present[i] = (i == HTML_LINK_HREF || i == HTML_LINK_REV);
+	    present[i] = (BOOL) (i == HTML_LINK_HREF || i == HTML_LINK_REV);
     }
     ((CONST char **)value)[HTML_LINK_HREF] = href;
     ((CONST char **)value)[HTML_LINK_REV]  = rev;
@@ -690,7 +690,7 @@ PRIVATE void start_list ARGS1(int, seqnum)
     int i;
 
     for (i = 0; i < HTML_OL_ATTRIBUTES; i++)
-	present[i] = (i == HTML_OL_SEQNUM || i == HTML_OL_START);
+	present[i] = (BOOL) (i == HTML_OL_SEQNUM || i == HTML_OL_START);
     sprintf(SeqNum, "%d", seqnum);
     ((CONST char **)value)[HTML_OL_SEQNUM] = SeqNum;
     ((CONST char **)value)[HTML_OL_START]  = SeqNum;
@@ -958,7 +958,7 @@ void debug_print(unsigned char *p)
 	   printf("[ESC]");
 	else if (*p == '\n')
 	   printf("[NL]");
-	else if (*p < ' ' || *p >= 0x80) 
+	else if (*p < ' ' || *p >= 0x80)
 	   printf("(%02x)", *p);
 	else
 	   putchar(*p);
@@ -1061,7 +1061,7 @@ PRIVATE int read_article ARGS1(
     if (!diagnostic && !rawtext) {
 	while (!done) {
 	    int ich = NEXT_CHAR;
-	    *p++ = ich;
+	    *p++ = (char) ich;
 	    if (ich == EOF) {
 		if (interrupted_in_htgetcharacter) {
 		    interrupted_in_htgetcharacter = 0;
@@ -1391,7 +1391,7 @@ PRIVATE int read_article ARGS1(
     p = line;
     while (!done) {
 	int ich = NEXT_CHAR;
-	*p++ = ich;
+	*p++ = (char) ich;
 	if (ich == EOF) {
 	    if (interrupted_in_htgetcharacter) {
 		interrupted_in_htgetcharacter = 0;
@@ -1599,7 +1599,7 @@ PRIVATE int read_list ARGS1(char *, arg)
     PUTC('\n');
     while (!done) {
 	int ich = NEXT_CHAR;
-	char ch = ich;
+	char ch = (char) ich;
 	if (ich == EOF) {
 	    if (interrupted_in_htgetcharacter) {
 		interrupted_in_htgetcharacter = 0;
@@ -1929,7 +1929,7 @@ PRIVATE int read_group ARGS3(
 		done = NO;
 		while( !done ) {
 		    int ich = NEXT_CHAR;
-		    *p++ = ich;
+		    *p++ = (char) ich;
 		    if (ich == EOF) {
 			if (interrupted_in_htgetcharacter) {
 			    interrupted_in_htgetcharacter = 0;
@@ -1954,7 +1954,7 @@ PRIVATE int read_group ARGS3(
 			    /*
 			    **	End of article?
 			    */
-			    done = ((unsigned char)line[1] < ' ');
+			    done = (BOOL) ((unsigned char)line[1] < ' ');
 			    break;
 
 			case 'S':
@@ -2181,21 +2181,21 @@ PRIVATE int HTLoadNews ARGS4(
 	**	xxxxx			News group (no "@")
 	**	group/n1-n2		Articles n1 to n2 in group
 	*/
-	spost_wanted = (strstr(arg, "snewspost:") != NULL);
-	sreply_wanted = (!(spost_wanted) &&
+	spost_wanted = (BOOL) (strstr(arg, "snewspost:") != NULL);
+	sreply_wanted = (BOOL) (!(spost_wanted) &&
 			 strstr(arg, "snewsreply:") != NULL);
-	post_wanted = (!(spost_wanted || sreply_wanted) &&
+	post_wanted = (BOOL) (!(spost_wanted || sreply_wanted) &&
 			strstr(arg, "newspost:") != NULL);
-	reply_wanted = (!(spost_wanted || sreply_wanted ||
+	reply_wanted = (BOOL) (!(spost_wanted || sreply_wanted ||
 			  post_wanted) &&
 			strstr(arg, "newsreply:") != NULL);
-	group_wanted = (!(spost_wanted || sreply_wanted ||
+	group_wanted = (BOOL) ((!(spost_wanted || sreply_wanted ||
 			  post_wanted || reply_wanted) &&
-			strchr(arg, '@') == NULL) && (strchr(arg, '*') == NULL);
-	list_wanted  = (!(spost_wanted || sreply_wanted ||
+			strchr(arg, '@') == NULL) && (strchr(arg, '*') == NULL));
+	list_wanted  = (BOOL) ((!(spost_wanted || sreply_wanted ||
 			  post_wanted || reply_wanted ||
 			  group_wanted) &&
-			strchr(arg, '@') == NULL) && (strchr(arg, '*') != NULL);
+			strchr(arg, '@') == NULL) && (strchr(arg, '*') != NULL));
 
 	if (!strncasecomp(arg, "snewspost:", 10) ||
 	    !strncasecomp(arg, "snewsreply:", 11)) {
@@ -2457,7 +2457,7 @@ PRIVATE int HTLoadNews ARGS4(
 		if ((*cp = *(cp + 3)) == '\0')
 		    break;
 	}
-	rawtext = (head_wanted || keep_mime_headers);
+	rawtext = (BOOL) (head_wanted || keep_mime_headers);
     }
     if (rawtext) {
 	node_anchor = anAnchor;

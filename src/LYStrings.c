@@ -562,7 +562,11 @@ PUBLIC int LYmbcsstrlen ARGS2(
 #define GetChar SLkp_getkey
 #endif /* DJGPP_KEYHANDLER */
 #else
+#ifdef __CYGWIN__
+#define GetChar SLkp_getkey
+#else
 #define GetChar (int)SLang_getkey
+#endif /* __CYGWIN__ */
 #endif /* __DJGPP__ */
 #endif /* VMS */
 #endif /* USE_SLANG */
@@ -1249,11 +1253,11 @@ PRIVATE int LYmouse_menu ARGS4(int, x, int, y, int, atlink, int, code)
 
     /* Somehow the mouse is over the number instead of being over the
        name, so we decrease x. */
-    c = popup_choice((atlink ? 2 : 10) - 1, y, (x > 5 ? x-5 : 1),
+    c = LYChoosePopup((atlink ? 2 : 10) - 1, y, (x > 5 ? x-5 : 1),
 		     (atlink ? choices_link : choices),
 		     (atlink
-		      ? (sizeof(actions_link)/sizeof(int))
-		      : (sizeof(actions)/sizeof(int))), FALSE, TRUE);
+		      ? TABLESIZE(actions_link)
+		      : TABLESIZE(actions)), FALSE, TRUE);
 
     /*
      *  popup_choice() in LYOptions.c wasn't really meant to be used
@@ -1590,7 +1594,7 @@ re_read:
 		current_modifier = LKC_MOD2;
 		c = a;
 		/* We're not yet done if ESC + curses-keysym: */
-		done_esc = ((a & ~0xFF) == 0);
+		done_esc = (BOOL) ((a & ~0xFF) == 0);
 		break;
 	    }
 	    CTRACE(tfp,"Unknown key sequence: %d:%d:%d\n",c,b,a);
@@ -2070,7 +2074,7 @@ re_read:
 	}
     }
 #endif /* DGJPP_KEYHANDLER */
-#if defined(USE_SLANG) && defined(__DJGPP__) && !defined(DJGPP_KEYHANDLER)  && !defined(USE_KEYMAPS)
+#if defined(USE_SLANG) && (defined(__DJGPP__) || defined(__CYGWIN__)) && !defined(DJGPP_KEYHANDLER)  && !defined(USE_KEYMAPS)
     else {
 	switch(c) {
 	case SL_KEY_DOWN:	   /* The four arrow keys ... */
@@ -2152,7 +2156,7 @@ PUBLIC void LYLowerCase ARGS1(
 	    }
 	    i++;
 	} else {
-	    buffer[i] = TOLOWER(buffer[i]);
+	    buffer[i] = (unsigned char) TOLOWER(buffer[i]);
 	}
     }
 #else
@@ -2732,7 +2736,7 @@ PUBLIC int LYEdit1 ARGS4(
 	    Pos++;
 	    return(0);
 	}
-	i = Buf[Pos-1]; Buf[Pos-1] = Buf[Pos]; Buf[Pos++] = i;
+	i = Buf[Pos-1]; Buf[Pos-1] = Buf[Pos]; Buf[Pos++] = (char) i;
 	break;
 
     case LYE_SETMARK:
@@ -3143,7 +3147,8 @@ again:
 	     *	Terminate the string and return.
 	     */
 	    strcpy(inputline, MyEdit.buffer);
-	    LYAddToCloset(MyEdit.buffer);
+	    if (!hidden)
+		LYAddToCloset(MyEdit.buffer);
 	    return(ch);
 
 #if defined(WIN_EX)

@@ -435,15 +435,15 @@ PRIVATE void HTMIME_put_character ARGS2(
 				**  of match.
 				*/
 				BOOL given_is_8859
-				    = (!strncmp(cp4, "iso-8859-", 9) &&
+				    = (BOOL) (!strncmp(cp4, "iso-8859-", 9) &&
 				       isdigit((unsigned char)cp4[9]));
 				BOOL given_is_8859like
-				    = (given_is_8859 ||
+				    = (BOOL) (given_is_8859 ||
 				       !strncmp(cp4, "windows-", 8) ||
 				       !strncmp(cp4, "cp12", 4) ||
 				       !strncmp(cp4, "cp-12", 5));
 				BOOL given_and_display_8859like
-				    = (given_is_8859like &&
+				    = (BOOL) (given_is_8859like &&
 				       (strstr(LYchar_set_names[current_char_set],
 					       "ISO-8859") ||
 					strstr(LYchar_set_names[current_char_set],
@@ -1451,7 +1451,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 		*/
 		for (i = 0, j = 0; me->value[i]; i++) {
 		    if (me->value[i] != ' ' && me->value[i] != '\"') {
-			me->value[j++] = TOLOWER(me->value[i]);
+			me->value[j++] = (char) TOLOWER(me->value[i]);
 		    }
 		}
 		me->value[j] = '\0';
@@ -1918,7 +1918,7 @@ PUBLIC void HTmmdec_base64 ARGS2(
 		val += d;
 	}
 	for (j = 2; j >= 0; j--) {
-		nw[j] = val & 255;
+		nw[j] = (char) (val & 255);
 		val >>= 8;
 	}
 	if (count--)
@@ -1942,14 +1942,14 @@ PUBLIC void HTmmdec_quote ARGS2(
 	if (*s == '=') {
 	    cval = 0;
 	    if (s[1] && (p = strchr(HTmmquote, s[1]))) {
-		cval += (p - HTmmquote);
+		cval += (char) (p - HTmmquote);
 	    } else {
 		*bp++ = *s++;
 		continue;
 	    }
 	    if (s[2] && (p = strchr(HTmmquote, s[2]))) {
 		cval <<= 4;
-		cval += (p - HTmmquote);
+		cval += (char) (p - HTmmquote);
 		*bp++ = cval;
 		s += 3;
 	    } else {

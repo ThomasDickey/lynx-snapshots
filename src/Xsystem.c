@@ -1,12 +1,9 @@
-/* $Id: Xsystem.c,v 1.2 1999/07/30 16:06:54 tom Exp $
+/* @Id: Xsystem.c 1.3 Thu, 26 Aug 1999 05:31:19 -0600 dickey @
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
  *
- * $Log: Xsystem.c,v $
- * Revision 1.2  1999/07/30 16:06:54  tom
- * 2.8.3dev.3
- *
+ * @Log: Xsystem.c,v @
  * Revision 1.1  1999/07/14 16:44:55  tom
  * Initial revision
  *
@@ -109,7 +106,9 @@ xrealloc(void *p, size_t n)
 static int NEAR
 is_builtin_command(char *s)
 {
+#ifdef WIN_EX
     extern int system_is_NT;	/* 1997/11/05 (Wed) 22:10:35 */
+#endif
 
     static char *cmdtab[]=
     {
@@ -124,8 +123,11 @@ is_builtin_command(char *s)
 
     l = strlen(s);
     count = sizeof(cmdtab) / sizeof(cmdtab[0]);
-    if (!system_is_NT)
-	count--;
+    count--;
+#ifdef WIN_EX
+    if (system_is_NT)
+        count++;
+#endif
     for (i = 0; i < count; i++) {
 	if (stricmp(s, cmdtab[i]) == 0)
 	    return 1;
@@ -159,7 +161,7 @@ csystem(PRO * p, int flag)
 
     if ((cmp = getenv("COMSPEC")) == 0)
 	return -2;
-    SW[0] = getswchar();
+    SW[0] = (char) getswchar();
     SW[1] = 'c';
     SW[2] = 0;
     rc = spawnl(flag, cmp, cmp, SW, p->cmd, p->arg, (char *) 0);
@@ -273,7 +275,7 @@ pars(char *s)
 	if (li >= ls - 2)
 	    lb = xrealloc(lb, ls += STR_MAX);
 	if (isk1(c) && *s) {
-	    lb[li++] = c;
+	    lb[li++] = (char) c;
 	    lb[li++] = *s++;
 	} else if ((!q && c == '|') || c == 0 || (c == '\n' && *s == 0)) {
 	    lb[li++] = 0;
@@ -288,9 +290,9 @@ pars(char *s)
 		break;
 	} else if (c == '"') {
 	    q = !q;
-	    lb[li++] = c;
+	    lb[li++] = (char) c;
 	} else {
-	    lb[li++] = c;
+	    lb[li++] = (char) c;
 	}
     }
     free(lb);

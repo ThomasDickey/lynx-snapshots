@@ -37,6 +37,16 @@ packet driver.  I created four new defines to accomplish this.
 Added for 8+3 filesystems (DOS):
 	FNAMES_8_3  also defined in userdefs.h if __DJGPP__
 
+* incorporate changes for win32 by Hiroyuki Senshu <senshu@shonai-cit.ac.jp>
+  (SH) from
+    ftp://crab.it.osha.sut.ac.jp/pub/Win32/develope/senshu/Lynx/
+  Most changes are ifdef'd
+    #define _WIN_CC=    .... for Windows C Compiler
+    #define CJK_EX      .... CJK EXtension
+    #define SH_EX       .... Senshu Hiroyuki EXtension
+    #define WIN_EX      .... Windows EXtension
+
+
 B. Symbols to enable or disable specific features, mostly
 =========================================================
 Note that some of these may be only usable on some system types,
@@ -139,6 +149,5 @@ SOCKET_DEBUG_TRACE			HTTCP.c
 max_cookies_buffer			LYCookie.c
 max_cookies_domain			LYCookie.c
 max_cookies_global			LYCookie.c
-reverse_mailcap				HTInit.c
 reverse_mailcap				HTInit.c
 

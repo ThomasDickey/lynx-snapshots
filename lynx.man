@@ -323,6 +323,9 @@ disable SOCKS proxy usage by a SOCKSified Lynx.
 .B -nostatus
 disable the retrieval status messages.
 .TP
+.B -number_fields
+force numbering of links as well as form input fields
+.TP
 .B -number_links
 force numbering of links.
 .TP

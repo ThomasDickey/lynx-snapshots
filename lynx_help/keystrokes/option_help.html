@@ -55,16 +55,16 @@ compiled in or chosen in `lynx.cfg':<P>
 <H1><A NAME="CK">Cookies</A></H1>
 
 This can be set to accept or reject all cookies or to ask each time.
-See the Users Guide for details of <A HREF="../Lynx_users_guide.html#Cookies" 
->cookie usage</A>. 
+See the Users Guide for details of <A HREF="../Lynx_users_guide.html#Cookies"
+>cookie usage</A>.
 
 <H1><A NAME="ED">Editor</A></H1>
 
-This is the editor to be invoked when editing browsable files, 
-sending mail or comments, or filling form's textarea (multiline input field). 
-The full pathname of the editor command should be specified when possible. 
-It is assumed the text editor supports the same character set 
-you have for "display character set" in Lynx. 
+This is the editor to be invoked when editing browsable files,
+sending mail or comments, or filling form's textarea (multiline input field).
+The full pathname of the editor command should be specified when possible.
+It is assumed the text editor supports the same character set
+you have for "display character set" in Lynx.
 
 <H1><A NAME="EM">Emacs keys</A></H1>
 
@@ -251,21 +251,25 @@ from lynx.cfg or command line switch.
 
 <H1><A NAME="SI">Show Images</A></H1>
 
-Text-based browser cannot show images directly, so we have a choice:
-<em>ignore all</em> images without ALT= text string
-(this is also switched by <A HREF="../Lynx_users_guide.html#[-key">'[' key</A>),
-<em>show labels</em> (see also "verbose images" for choice between [IMAGE] and filename),
-<em>use links</em> for every image to make it possible to download them
-(also switched by <A HREF="../Lynx_users_guide.html#*-key">'*' key</A>).
-Changing these settings will not be saved but could be made permanent
-by changing the respective settings in lynx.cfg.
+This option combines the effects of the `*' & `[' keys as follows:
+<p><pre>
+     <em>ignore</em> all images which lack an ALT= text string,
+     <em>show labels</em>, e.g. [INLINE] -- see `Verbose Images' below -- ,
+     <em>use links</em> for every image, enabling downloading.
+</pre><p>
+This option setting cannot be saved between sessions.
+See <A HREF="../Lynx_users_guide.html#Images">Users Guide</A>
+& <em>lynx.cfg</em> for more details.
 
 <H1><A NAME="VB">Verbose Images</A></H1>
 
-Controls whether or not Lynx replaces the [LINK], [INLINE] and [IMAGE] comments
-(for images without ALT) with filenames of these images.  This is extremely
-useful because now we can determine immediately which images are decorations
-(button.gif, line.gif) and which are important.
+This allows you to replace [LINK], [INLINE] and [IMAGE]
+-- for images without ALT -- with filenames:
+this can be helpful by revealing which images are important
+& which are merely decoration, e.g. <em>button.gif</em>, <em>line.gif</em>.
+See <A HREF="../Lynx_users_guide.html#Images">Users Guide</A>
+& <em>lynx.cfg</em> for more details.
+
 
 <H1><A NAME="VI">VI keys</A></H1>
 
@@ -290,9 +294,9 @@ and windows-xxxx within native MS-Windows applications.
 
 <H1><A NAME="DV">X DISPLAY variable</A></H1>
 
-This option is only relevant to X Window users. It specifies 
-the DISPLAY (Unix) or DECW$DISPLAY (VMS) variable.  It is picked up 
-automatically from the environment if it has been previously set. 
+This option is only relevant to X Window users. It specifies
+the DISPLAY (Unix) or DECW$DISPLAY (VMS) variable.  It is picked up
+automatically from the environment if it has been previously set.
 
 <H1><A NAME="MB">Multi-bookmarks</A></H1>
 

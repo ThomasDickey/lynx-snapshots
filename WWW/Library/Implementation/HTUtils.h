@@ -102,6 +102,11 @@
 #define	GCC_UNUSED /* nothing */
 #endif
 
+/* FIXME: need a configure-test */
+#if defined(__STDC__) || defined(__DECC) || defined(_WINDOWS) || _WIN_CC
+#define ANSI_PREPRO 1
+#endif
+
 #if defined(__CYGWIN__)			/* 1998/12/31 (Thu) 16:13:46 */
 #include <windows.h>		/* #include "windef.h" */
 #define BOOLEAN_DEFINED
@@ -278,6 +283,18 @@ Macros for declarations
 #ifndef NULL
 #define NULL ((void *)0)
 #endif
+
+/* array/table size */
+#define	TABLESIZE(v)	(sizeof(v)/sizeof(v[0]))
+
+/* Quiet compiler warnings on places where we're being blamed incorrectly,
+ * e.g., for casting away const, or for alignment problems.  It's always
+ * legal to cast a pointer to long w/o loss of precision.
+ */
+#define TYPECAST(type,ptr) (type*)((long)(ptr))
+
+#define	typecalloc(cast)		(cast *)calloc(sizeof(cast),1)
+#define	typecallocn(cast,ntypes)	(cast *)calloc(sizeof(cast),ntypes)
 
 /*
 

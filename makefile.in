@@ -301,7 +301,7 @@ lynx.patch: $(top_srcdir) $(top_srcdir)/CHANGES
 		| grep -v '^Binary files ' \
 		| grep -v '^Only ' | tee $@ | grep '^--- $(lynxdir)'
 
-install: lynx$x install-bin install-man install-cfg @INSTALL_LSS@
+install: install-bin install-man install-cfg @INSTALL_LSS@
 	@echo
 	@echo "Use $(MAKE) install-help to install the help-files"
 	@echo "Use $(MAKE) install-doc to install extra documentation files"
@@ -310,7 +310,7 @@ install: lynx$x install-bin install-man install-cfg @INSTALL_LSS@
 install-full: install install-help install-doc
 	@echo Full installation complete.
 
-install-bin: $(BINDIR)
+install-bin: $(BINDIR) lynx$x
 @MSG_DIR_MAKE@	cd po && $(MAKE) CC="$(CC)" install
 	-mv -f $(BINDIR)/lynx$x $(BINDIR)/lynx.old
 	$(INSTALL_PROGRAM) lynx$x $(BINDIR)/lynx$x

@@ -574,6 +574,14 @@ CF_ARG_ENABLE(addrlist-page,
 AC_MSG_RESULT($use_addrlist_page)
 test $use_addrlist_page != no && AC_DEFINE(EXP_ADDRLIST_PAGE)
 
+AC_MSG_CHECKING(if experimental charset-selection logic should be used)
+CF_ARG_ENABLE(charset-choice,
+[  --enable-charset-choice use experimental charset-selection logic],
+	[use_charset_choice=$enableval],
+	[use_charset_choice=no])
+AC_MSG_RESULT($use_charset_choice)
+test $use_charset_choice != no && AC_DEFINE(EXP_CHARSET_CHOICE)
+
 AC_MSG_CHECKING(if experimental CJK logic should be used)
 CF_ARG_ENABLE(cjk,
 [  --enable-cjk            use experimental CJK logic],
@@ -679,6 +687,20 @@ CF_ARG_ENABLE(read-eta,
 AC_MSG_RESULT($use_read_eta)
 test $use_read_eta != no && AC_DEFINE(EXP_READPROGRESS)
 
+AC_MSG_CHECKING(if scrollbar code should be used)
+CF_ARG_ENABLE(scrollbar,
+[  --enable-scrollbar      use experimental scrollbar, with mouse],
+	[use_scrollbar=$enableval],
+	[use_scrollbar=no])
+
+if test $use_scrollbar != no ; then
+	if test .$cf_cv_fancy_curses != .yes ; then
+		AC_MSG_WARN(Configuration does not support ACS_xxx definitions)
+	else
+		AC_DEFINE(USE_SCROLLBAR)
+	fi
+fi
+
 AC_MSG_CHECKING(if source caching should be used)
 CF_ARG_ENABLE(source-cache,
 [  --enable-source-cache   cache HTML source for parse mode changes],
@@ -743,20 +765,28 @@ AC_MSG_RESULT($enableval)
 AC_MSG_CHECKING(if you want change-exec support)
 CF_ARG_ENABLE(change-exec,
 [  --enable-change-exec    allow users to change exec options],
-	[AC_DEFINE(ENABLE_OPTS_CHANGE_EXEC)])
-AC_MSG_RESULT($enableval)
+	[use_change_exec=yes],
+	[use_change_exec=no])
+AC_MSG_RESULT($use_change_exec)
+test $use_change_exec = yes && AC_DEFINE(ENABLE_OPTS_CHANGE_EXEC)
 
 AC_MSG_CHECKING(if you want exec-links support)
-CF_ARG_ENABLE(exec-links,
+CF_ARG_OPTION(exec-links,
 [  --enable-exec-links     allow lynx to execute programs accessed via a link],
-	[AC_DEFINE(EXEC_LINKS)])
-AC_MSG_RESULT($enableval)
+	[use_exec_links=$enableval],
+	[use_exec_links=$enableval],
+	[$use_change_exec])
+AC_MSG_RESULT($use_exec_links)
+test $use_exec_links = yes && AC_DEFINE(EXEC_LINKS)
 
 AC_MSG_CHECKING(if you want exec-scripts support)
-CF_ARG_ENABLE(exec-scripts,
+CF_ARG_OPTION(exec-scripts,
 [  --enable-exec-scripts   allow lynx to execute programs inferred from a link],
-	[AC_DEFINE(EXEC_SCRIPTS)])
-AC_MSG_RESULT($enableval)
+	[use_exec_scripts=$enableval],
+	[use_exec_scripts=$enableval],
+	[$use_change_exec])
+AC_MSG_RESULT($use_exec_scripts)
+test $use_exec_scripts = yes && AC_DEFINE(EXEC_SCRIPTS)
 
 AC_MSG_CHECKING(if you want internal-links feature)
 CF_ARG_ENABLE(internal-links,

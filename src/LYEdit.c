@@ -42,7 +42,10 @@ PUBLIC int edit_current_file ARGS3(
     char *format = "%s %s";
     char *command = NULL;
     char *filename = NULL;
-    char *colon, *number_sign;
+#if (!(defined(VMS) || defined(DOSPATH) || defined(__EMX__)) || defined(SH_EX))
+    char *colon;
+#endif
+    char *number_sign;
     char position[80];
     FILE *fp;
 #ifdef __CYGWIN__

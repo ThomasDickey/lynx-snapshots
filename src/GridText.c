@@ -647,7 +647,13 @@ PUBLIC HText *	HText_new ARGS1(
     else
 	self->source = NO;
 #else
-    self->source=( LYpsrc ? psrc_view : HTOutputFormat == WWW_SOURCE);
+    /*  mark_htext_as_source == TRUE if we are parsing html file (and psrc_view is
+     *	    set temporary to false at creation time)
+     *	psrc_view == TRUE if source of the text produced by some lynx module
+     *	    (like ftp browsers) is requested). - VH
+     */
+    self->source = (BOOL) (LYpsrc ? mark_htext_as_source || psrc_view : HTOutputFormat == WWW_SOURCE);
+    mark_htext_as_source = FALSE;
 #endif
     HTAnchor_setDocument(anchor, (HyperDoc *)self);
     HTFormNumber = 0;  /* no forms started yet */
@@ -1202,7 +1208,7 @@ PRIVATE void display_title ARGS1(
     }
     move(0, 0);
     clrtoeol();
-#ifdef CJK_EX
+#if defined(CJK_EX) && defined(SH_EX)
     addstr(str_kcode(last_kcode));
 #endif
     if (text->top_of_screen > 0 && HText_hasToolbar(text)) {
@@ -2249,6 +2255,11 @@ PRIVATE void split_line ARGS2(
 #else
 	   (previous->data[previous->size-1] == ' ') &&
 #endif
+#ifdef USE_PSRC
+	    !psrc_view && /*don't strip trailing whites - since next line can
+		start with LY_SOFT_NEWLINE - so we don't lose spaces when
+		'p'rinting this text to file -VH */
+#endif
 	   (ctrl_chars_on_this_line || HeadTrim || text->first_anchor ||
 	    underline_on || bold_on ||
 	    text->style->alignment != HT_LEFT ||
@@ -2856,10 +2867,9 @@ PRIVATE void split_line ARGS2(
 				     * be text->Lines-3
 				     */
 				    a2->extent += spare;
-				else {
+				else if (onp2sz < a2->extent)
 				    a2->extent += justified_text_map[onp1sz-1]
 					 - onp1sz + 1;
-				}
 			    }
 
 			}
@@ -2877,6 +2887,12 @@ PRIVATE void split_line ARGS2(
 	} else { /* (ht_num_runs==1) */
 	    /* keep maintaining 'last_anchor_of_previous_line' */
 	    TextAnchor* a2 = last_anchor_of_previous_line;
+	    if (justify_start_position) {
+		char* p = previous->data;
+		for( ; p < previous->data + justify_start_position; ++p)
+		    *p = (*p == HT_NON_BREAK_SPACE ? ' ' : *p);
+	    }
+
 	    if (!a2)
 		a2 = text->first_anchor;
 	    else if (a2 == text->last_anchor)
@@ -2920,20 +2936,6 @@ PRIVATE void split_line ARGS2(
 
 	/* else HT_NON_BREAK_SPACEs were substituted with spaces in
 	   HText_appendCharacter */
-	{
-	    /* keep maintaining 'last_anchor_of_previous_line' */
-	    TextAnchor* a2 = last_anchor_of_previous_line;
-	    if (!a2)
-		a2 = text->first_anchor;
-	    else if (a2 == text->last_anchor)
-		a2 = NULL;
-	    else
-		a2 = a2->next; /*1st anchor on line we justify */
-
-	    if (a2)
-		for (; a2 && a2->line_num <= text->Lines-1;
-		    last_anchor_of_previous_line = a2, a2 = a2->next);
-	}
     }
 	/* cleanup */
     can_justify_this_line = TRUE;
@@ -3501,7 +3503,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 	 * If we're displaying document source, wrap long lines to keep all of
 	 * the source visible.
 	 */
-	int target = (int)(line->offset + line->size);
+	int target = (int)(line->offset + line->size) - ctrl_chars_on_this_line;
 	if ((target >= (LYcols-1) - style->rightIndent) &&
 		HTisDocumentSource()) {
 	    new_line(text);
@@ -3592,7 +3594,7 @@ check_IgnoreExcess:
 	ch = ' ';
 #ifdef EXP_JUSTIFY_ELTS
     else
-        have_raw_nbsps = TRUE;
+	have_raw_nbsps = TRUE;
 #endif
 
     /* we leave raw HT_NON_BREAK_SPACE otherwise (we'll substitute it later) */
@@ -3710,13 +3712,14 @@ check_IgnoreExcess:
 	}
 #endif
 	else if (HTCJK != NOCJK) {
-	    line->data[line->size++] = (kanji_code != NOKANJI) ?
+	    line->data[line->size++] = (char) (
+				       (kanji_code != NOKANJI) ?
 							    ch :
 					  (font & HT_CAPITALS) ?
-						   TOUPPER(ch) : ch;
+						   TOUPPER(ch) : ch);
 	} else {
 	    line->data[line->size++] =	/* Put character into line */
-		font & HT_CAPITALS ? TOUPPER(ch) : ch;
+		(char) (font & HT_CAPITALS ? TOUPPER(ch) : ch);
 	}
 	line->data[line->size] = '\0';
 	if (font & HT_DOUBLE)		/* Do again if doubled */
@@ -3850,6 +3853,9 @@ PUBLIC int HText_beginAnchor ARGS3(
      *  If we are doing link_numbering add the link number.
      */
     if ((a->number > 0) &&
+#ifdef USE_PSRC
+	(text->source ? !psrcview_no_anchor_numbering : 1 ) &&
+#endif
 	(keypad_mode == LINKS_ARE_NUMBERED ||
 	 keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED)) {
 	char saved_lastchar = text->LastChar;
@@ -3917,14 +3923,14 @@ PUBLIC void HText_endAnchor ARGS2(
 	 *  If it goes somewhere...
 	 */
 	int i, j, k, l;
-	BOOL remove_numbers_on_empty =
+	BOOL remove_numbers_on_empty = (BOOL) (
 	    ((keypad_mode == LINKS_ARE_NUMBERED ||
 	      keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) &&
 	     (text->hiddenlinkflag != HIDDENLINKS_MERGE ||
 	      (LYNoISMAPifUSEMAP &&
 	       !(text->node_anchor && text->node_anchor->bookmark) &&
 	       HTAnchor_isISMAPScript(
-		   HTAnchor_followMainLink((HTAnchor *)a->anchor)))));
+		   HTAnchor_followMainLink((HTAnchor *)a->anchor))))));
 	HTLine *last = text->last_line;
 	HTLine *prev = text->last_line->prev;
 	HTLine *start = last;
@@ -4350,21 +4356,24 @@ PUBLIC void HText_appendText ARGS2(
 }
 
 
-PRIVATE void remove_special_attr_chars ARGS1(
+PRIVATE int remove_special_attr_chars ARGS1(
 	char *,		buf)
 {
     register char *cp;
+    register int soft_newline_count = 0;
 
     for (cp = buf; *cp != '\0' ; cp++) {
 	/*
 	 *  Don't print underline chars.
 	 */
+	soft_newline_count += (*cp == LY_SOFT_NEWLINE);
 	if (!IsSpecialAttrChar(*cp)) {
 	   *buf = *cp,
 	   buf++;
 	}
     }
     *buf = '\0';
+    return soft_newline_count;
 }
 
 
@@ -4486,6 +4495,7 @@ PUBLIC void HText_trimHightext ARGS2(
     for (anchor_ptr = text->first_anchor;
 	anchor_ptr;
 	prev_a = anchor_ptr, anchor_ptr=anchor_ptr->next) {
+	int have_soft_newline_in_1st_line=0;
 re_parse:
 	/*
 	 *  Find the right line.
@@ -4618,7 +4628,10 @@ re_parse:
 			      (anchor_ptr->extent -
 			       strlen(anchor_ptr->hightext)));
 		anchor_ptr->hightext2offset = line_ptr2->offset;
-		remove_special_attr_chars(anchor_ptr->hightext2);
+		/*handle LY_SOFT_NEWLINEs -VH */
+		anchor_ptr->hightext2offset +=
+			remove_special_attr_chars(anchor_ptr->hightext2);
+
 		if (anchor_ptr->link_type & HYPERTEXT_ANCHOR) {
 		    LYTrimTrailing(anchor_ptr->hightext2);
 		    if (anchor_ptr->hightext2[0] == '\0') {
@@ -4639,10 +4652,13 @@ re_parse:
 	 */
 	if (anchor_ptr->line_pos > 0) {
 	    register int offset = 0, i = 0;
-	    for (; i < anchor_ptr->line_pos; i++)
+	    for (; i < anchor_ptr->line_pos; i++) {
 		if (IS_UTF_EXTRA(line_ptr->data[i]) ||
-		    IsSpecialAttrChar(line_ptr->data[i]))
+		    IsSpecialAttrChar(line_ptr->data[i])) {
 		    offset++;
+		    have_soft_newline_in_1st_line += (line_ptr->data[i] == LY_SOFT_NEWLINE);
+		}
+	    }
 	    anchor_ptr->line_pos -= offset;
 	}
 
@@ -4651,6 +4667,9 @@ re_parse:
 	 */
 	anchor_ptr->line_pos += line_ptr->offset;
 	anchor_ptr->line_num  = cur_line;
+
+	/*handle LY_SOFT_NEWLINEs -VH */
+	anchor_ptr->line_pos += have_soft_newline_in_1st_line;
 
 	CTRACE(tfp, "GridText:     add link on line %d col %d [%d] %s\n",
 	       cur_line, anchor_ptr->line_pos,
@@ -5049,7 +5068,7 @@ PRIVATE BOOLEAN same_anchor_or_field ARGS5(
 	return(NO);
     if (!formA->name || !formB->name)
 	return(YES);
-    return(strcmp(formA->name, formB->name) == 0);
+    return (BOOL) (strcmp(formA->name, formB->name) == 0);
 }
 
 #define same_anchor_as_link(i,a) (i >= 0 && a &&\
@@ -5524,9 +5543,9 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
 		    *cp = '.';
 #endif /* VMS */
 		    cp++;
-		    *cp = TOLOWER(*cp);
+		    *cp = (char) TOLOWER(*cp);
 		    cp++;
-		    *cp = TOLOWER(*cp);
+		    *cp = (char) TOLOWER(*cp);
 		}
 		return;
 	    }
@@ -5554,7 +5573,7 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
 		    *cp = '.';
 #endif /* VMS */
 		    cp++;
-		    *cp = TOUPPER(*cp);
+		    *cp = (char) TOUPPER(*cp);
 		}
 		return;
 	    }
@@ -5730,15 +5749,15 @@ PUBLIC int HText_sourceAnchors ARGS1(
 PUBLIC BOOL HText_canScrollUp ARGS1(
 	HText *,	text)
 {
-    return (text->top_of_screen != 0);
+    return (BOOL) (text->top_of_screen != 0);
 }
 
 PUBLIC BOOL HText_canScrollDown NOARGS
 {
     HText * text = HTMainText;
 
-    return (text != 0)
-     && ((text->top_of_screen + display_lines) < text->Lines+1);
+    return (BOOL) ((text != 0)
+     && ((text->top_of_screen + display_lines) < text->Lines+1));
 }
 
 /*		Scroll actions
@@ -6321,7 +6340,7 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 #ifndef NO_DUMP_WITH_BACKSPACES
     HText* text = HTMainText;
     BOOL in_b=FALSE,in_u=FALSE,
-	bs=text && with_backspaces && HTCJK==NOCJK && !text->T.output_utf8;
+	bs=(BOOL)(text && with_backspaces && HTCJK==NOCJK && !text->T.output_utf8);
 #endif
 
     if (!HTMainText)
@@ -6439,7 +6458,7 @@ PUBLIC void print_crawl_to_fd ARGS3(
 #ifndef NO_DUMP_WITH_BACKSPACES
     HText* text = HTMainText;
     BOOL in_b=FALSE,in_u=FALSE,
-	bs=text && with_backspaces && HTCJK==NOCJK && !text->T.output_utf8;
+	bs=(BOOL)(text && with_backspaces && HTCJK==NOCJK && !text->T.output_utf8);
 #endif
 
 
@@ -6538,7 +6557,7 @@ PRIVATE void adjust_search_result ARGS3(
 	int nl_closest = -1;
 	int goal = SEARCH_GOAL_LINE;
 	int max_offset;
-	BOOL on_screen = (tentative_result > HTMainText->top_of_screen &&
+	BOOL on_screen = (BOOL) (tentative_result > HTMainText->top_of_screen &&
 	    tentative_result <= HTMainText->top_of_screen+display_lines);
 	if (goal < 1)
 	    goal = 1;
@@ -7017,7 +7036,7 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	ret = HTParseFile(format, HTOutputFormat, HTMainAnchor,
 			  fp, NULL);
 	fclose(fp);
-	ok = (ret == HT_LOADED);
+	ok = (BOOL) (ret == HT_LOADED);
     }
 
     if (LYCacheSource == SOURCE_CACHE_MEMORY &&
@@ -7060,7 +7079,7 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	}
 	ret = HTParseMem(format, HTOutputFormat, HTMainAnchor,
 			HTMainAnchor->source_cache_chunk, NULL);
-	ok = (ret == HT_LOADED);
+	ok = (BOOL) (ret == HT_LOADED);
     }
 
     CTRACE(tfp, "Reparse %s\n", (ok ? "succeeded" : "failed"));
@@ -9988,7 +10007,7 @@ PUBLIC void HText_setToolbar ARGS1(
 PUBLIC BOOL HText_hasToolbar ARGS1(
 	HText *,	text)
 {
-    return ((text && text->toolbar) ? TRUE : FALSE);
+    return (BOOL) ((text && text->toolbar) ? TRUE : FALSE);
 }
 
 PUBLIC void HText_setNoCache ARGS1(
@@ -10002,13 +10021,13 @@ PUBLIC void HText_setNoCache ARGS1(
 PUBLIC BOOL HText_hasNoCacheSet ARGS1(
 	HText *,	text)
 {
-    return ((text && text->no_cache) ? TRUE : FALSE);
+    return (BOOL) ((text && text->no_cache) ? TRUE : FALSE);
 }
 
 PUBLIC BOOL HText_hasUTF8OutputSet ARGS1(
 	HText *,	text)
 {
-    return ((text && text->T.output_utf8) ? TRUE : FALSE);
+    return (BOOL) ((text && text->T.output_utf8) ? TRUE : FALSE);
 }
 
 /*
@@ -10311,7 +10330,7 @@ PRIVATE void cleanup_line_for_textarea ARGS2(
 		  (((unsigned char)*s > (unsigned char)'\177') &&
 		   ((unsigned char)*s <
 		    (unsigned char)LYlowest_eightbit[current_char_set])))
-		 ? SPLAT : *s;
+		 ? (char) SPLAT : *s;
 #else
 	    *p = ((unsigned char)*s < (unsigned char)' ') ? SPLAT : *s;
 #endif
