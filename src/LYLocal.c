@@ -2228,7 +2228,16 @@ PUBLIC int LYExecv ARGS3(
 	    while (wait(&wstatus) != pid)
 		; /* do nothing */
 #else
-	    waitpid(pid, &wstatus, 0); /* wait for child */
+	    while (-1 == waitpid (pid, &wstatus, 0)) /* wait for child */
+	    {
+#ifdef EINTR
+		if (errno == EINTR) continue;
+#endif
+#ifdef ERESTARTSYS
+		if (errno == ERESTARTSYS) continue;
+#endif
+		break;
+	    }
 #endif
 	    if (WEXITSTATUS(wstatus) != 0 ||
 		WTERMSIG(wstatus) > 0)  { /* error return */

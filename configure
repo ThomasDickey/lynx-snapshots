@@ -5224,7 +5224,7 @@ fi
 
 echo "$ac_t""$cf_cv_type_unionwait" 1>&6
 test $cf_cv_type_unionwait = yes && cat >> confdefs.h <<\EOF
-#define HAVE_TYPE_UNIONWAIT 1
+#define HAVE_TYPE_UNION_WAIT 1
 EOF
 
 

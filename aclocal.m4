@@ -1024,7 +1024,7 @@ AC_CACHE_VAL(cf_cv_type_unionwait,[
 	[cf_cv_type_unionwait=yes],
 	[cf_cv_type_unionwait=no])])
 AC_MSG_RESULT($cf_cv_type_unionwait)
-test $cf_cv_type_unionwait = yes && AC_DEFINE(HAVE_TYPE_UNIONWAIT)
+test $cf_cv_type_unionwait = yes && AC_DEFINE(HAVE_TYPE_UNION_WAIT)
 ])dnl
 dnl ---------------------------------------------------------------------------
 AC_DEFUN([CF_UTMP],
